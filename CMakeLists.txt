@@ -42,7 +42,7 @@ if(NOT Eigen3_FOUND)
         message(WARNING "Eigen3 not found. Please install eigen3 or set EIGEN3_INCLUDE_DIRS.")
     endif()
 else()
-    set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIRS})
+    set(EIGEN3_INCLUDE_DIRS ${Eigen3_INCLUDE_DIRS})
 endif()
 
 # --- Includes ---
