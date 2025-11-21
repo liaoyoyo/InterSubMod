@@ -1,10 +1,3 @@
-## Phase 0: 專案初始化 (Project Initialization)
-
-**目標**：建立基礎建設，確認編譯環境與 I/O 庫運作正常。
-
-* [x] **P0-1**: 建立 Git Repository 與目錄結構 (`src`, `include`, `tests`, `docs`)。
-* [x] **P0-2**: 設定 `CMakeLists.txt`，成功連結 `htslib`, `OpenMP` (Eigen3 設為 header-only)。
-* [x] **P0-3**: 實作基礎建設：`Config` 類別與 `ArgParser`，並驗證 `htslib` I/O (BAM/VCF/FASTA 檢查)。
 * [x] **P0-4**: 設定基本 Unit Test 架構 (GoogleTest) 與 CI 整合 (VS Code Tasks)。
 
 ## Phase 1: 體細胞變異與區域定義 (S0, S1)
