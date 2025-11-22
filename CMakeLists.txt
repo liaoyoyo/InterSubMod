@@ -52,8 +52,8 @@ include_directories(${EIGEN3_INCLUDE_DIRS})
 # --- Library ---
 add_library(inter_sub_mod_core
     src/core/Config.cpp
-    # Add other source files here as they are implemented
-    # src/core/SomaticSnv.cpp
+    src/core/SomaticSnv.cpp
+    src/utils/Logger.cpp
 )
 
 target_link_libraries(inter_sub_mod_core PUBLIC
@@ -67,6 +67,10 @@ target_include_directories(inter_sub_mod_core PUBLIC
 # --- Main Executable ---
 add_executable(inter_sub_mod src/main.cpp)
 target_link_libraries(inter_sub_mod PRIVATE inter_sub_mod_core)
+
+# --- Dev Tools / Ad-hoc Tests ---
+add_executable(test_snv_loading src/test_snv_loading.cpp)
+target_link_libraries(test_snv_loading PRIVATE inter_sub_mod_core)
 
 # --- Tests ---
 enable_testing()
