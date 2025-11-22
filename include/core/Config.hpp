@@ -31,14 +31,14 @@ struct Config {
     double binary_methyl_high = 0.8;  ///< Threshold for methylated (1) call
     double binary_methyl_low = 0.2;   ///< Threshold for unmethylated (0) call
     
-    int min_site_coverage = 10;       ///< Minimum reads covering a CpG site to keep it
-    int min_common_coverage = 5;      ///< Minimum common CpG sites to calculate distance
+    int min_site_coverage = 5;       ///< Minimum reads covering a CpG site to keep it
+    int min_common_coverage = 3;      ///< Minimum common CpG sites to calculate distance
     
     NanDistanceStrategy nan_distance_strategy = NanDistanceStrategy::MAX_DIST; ///< Strategy for missing distances
     DistanceMetricType distance_metric = DistanceMetricType::NHD;              ///< Distance metric to use
     
     bool pmd_gating = true;           ///< Whether to exclude CpG sites in PMDs
-    int threads = 1;                  ///< Number of threads for parallel processing
+    int threads = 16;                  ///< Number of threads for parallel processing
 
     /**
      * @brief Validates configuration logic and file formats.
