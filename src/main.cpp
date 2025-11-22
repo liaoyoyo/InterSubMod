@@ -1,11 +1,14 @@
 #include <iostream>
 #include "core/Config.hpp"
 #include "utils/ArgParser.hpp"
+#include "utils/ResourceMonitor.hpp"
 
 // Placeholder for future core logic includes
 // #include "core/SomaticSnv.hpp"
 
 int main(int argc, char** argv) {
+    InterSubMod::Utils::ResourceMonitor monitor;
+
     InterSubMod::Config config;
     
     if (!InterSubMod::Utils::ArgParser::parse(argc, argv, config)) {
@@ -28,6 +31,7 @@ int main(int argc, char** argv) {
     // 3. For each region:
     //    Fetch Reads -> Parse MM -> Build Matrix -> Calculate Distance -> Cluster -> Assoc
     
+    monitor.print_stats("Total Execution");
+
     return 0;
 }
-

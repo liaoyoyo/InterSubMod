@@ -36,30 +36,30 @@ TEST(ConfigTest, ValidationSuccess) {
 
 TEST(ConfigTest, ValidationFailureMissingFiles) {
     Config config;
-    // Missing paths, Config::validate() relies on Parser for existence in current logic,
-    // but Config.cpp logic checks if strings are empty.
-    // Since strings are empty, it should pass logic checks in Config::validate()
-    // because we only check if (!path.empty()).
-    // This assumes ArgParser already enforced required arguments.
-    EXPECT_TRUE(config.validate());
+    // Missing paths are required, so validate should fail
+    EXPECT_FALSE(config.validate());
 }
 
 TEST(ConfigTest, ValidationFailureInvalidWindow) {
     Config config;
     config.window_size_bp = -100; 
-    // Check removed from Config::validate(), so it passes here.
-    EXPECT_TRUE(config.validate());
+    // Should fail due to missing paths AND invalid window
+    EXPECT_FALSE(config.validate());
 }
 
 TEST(ConfigTest, ValidationFailureInvalidMethylThresholds) {
     Config config;
+    // Set paths to dummy values to avoid path validation failure masking the threshold failure
+    // (Although Config::validate() checks all and returns false if any fail, 
+    // we just want to ensure it returns false)
+    
     config.binary_methyl_high = 0.3;
     config.binary_methyl_low = 0.5; // Low > High
     EXPECT_FALSE(config.validate());
 
     config.binary_methyl_low = 0.2;
-    config.binary_methyl_high = 1.2; // > 1.0, check removed from Config logic
-    EXPECT_TRUE(config.validate()); 
+    config.binary_methyl_high = 1.2; // > 1.0
+    EXPECT_FALSE(config.validate()); 
 }
 
 TEST(ArgParserTest, ParseArgumentsShortOptions) {
