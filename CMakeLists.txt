@@ -85,7 +85,14 @@ include_directories(${JEMALLOC_INCLUDE_DIR})
 add_library(inter_sub_mod_core
     src/core/Config.cpp
     src/core/SomaticSnv.cpp
+    src/core/BamReader.cpp
+    src/core/ReadParser.cpp
+    src/core/MethylationParser.cpp
+    src/core/MatrixBuilder.cpp
+    src/core/RegionProcessor.cpp
     src/utils/Logger.cpp
+    src/utils/FastaReader.cpp
+    src/io/RegionWriter.cpp
 )
 
 target_link_libraries(inter_sub_mod_core PUBLIC
@@ -105,8 +112,14 @@ add_executable(inter_sub_mod src/main.cpp)
 target_link_libraries(inter_sub_mod PRIVATE inter_sub_mod_core)
 
 # --- Dev Tools / Ad-hoc Tests ---
-add_executable(test_snv_loading src/test_snv_loading.cpp)
-target_link_libraries(test_snv_loading PRIVATE inter_sub_mod_core)
+add_executable(test_phase1_2 src/test_phase1_2.cpp)
+target_link_libraries(test_phase1_2 PRIVATE inter_sub_mod_core)
+
+add_executable(test_phase3 src/test_phase3.cpp)
+target_link_libraries(test_phase3 PRIVATE inter_sub_mod_core)
+
+add_executable(test_phase4_5 src/test_phase4_5.cpp)
+target_link_libraries(test_phase4_5 PRIVATE inter_sub_mod_core)
 
 # --- Tests ---
 enable_testing()
@@ -121,7 +134,11 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 # Run tests with custom main to track resources
-add_executable(run_tests tests/main_test.cpp tests/test_config.cpp)
+add_executable(run_tests 
+    tests/main_test.cpp 
+    tests/test_config.cpp
+    tests/test_bam_reader.cpp
+)
 target_link_libraries(run_tests PRIVATE inter_sub_mod_core GTest::gtest)
 
 include(GoogleTest)
