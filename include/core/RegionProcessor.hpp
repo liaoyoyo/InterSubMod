@@ -113,7 +113,7 @@ private:
     int32_t window_size_;
     
     std::vector<SomaticSnv> snvs_;
-    std::vector<std::string> chr_names_;  // Store chromosome names for each SNV
+    ChromIndex chrom_index_;  // Manage chromosome name to ID mapping
     
     // Thread-local 資源會在 process_single_region 中建立
 };

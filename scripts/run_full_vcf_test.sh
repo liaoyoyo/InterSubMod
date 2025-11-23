@@ -3,7 +3,7 @@
 
 # Defaults
 VCF_PATH="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
-OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output_full"
+OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output/full_vcf_test"
 THREADS=64
 LOG_FILE="${OUTPUT_DIR}/full_execution_analysis.log"
 
@@ -89,7 +89,7 @@ echo "    (This may take a few minutes...)"
 # Step 3: Basic Verification
 echo ""
 echo "[3] Verifying results..."
-REGION_COUNT=$(ls -d "${OUTPUT_DIR}/region_"* 2>/dev/null | wc -l)
+REGION_COUNT=$(ls -d "${OUTPUT_DIR}/chr_"* 2>/dev/null | wc -l)
 
 echo "    Expected regions: ${NUM_SNVS}"
 echo "    Found regions:    ${REGION_COUNT}"

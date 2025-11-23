@@ -5,6 +5,7 @@
 #include <iostream>
 #include <omp.h>
 #include <algorithm>
+#include <unordered_set>
 
 namespace InterSubMod {
 
@@ -61,14 +62,13 @@ int RegionProcessor::load_snvs(const std::string& snv_table_path) {
             
             SomaticSnv snv;
             snv.snv_id = 0;
-            snv.chr_id = 17;  // Extract from chr_str if needed
+            snv.chr_id = chrom_index_.get_or_create_id(chr_str);
             snv.pos = pos;
             snv.ref_base = ref;
             snv.alt_base = alt;
             snv.qual = qual;
             
             snvs_.push_back(snv);
-            chr_names_.push_back(chr_str);
         }
     }
     
@@ -88,14 +88,13 @@ int RegionProcessor::load_snvs(const std::string& snv_table_path) {
             
             SomaticSnv snv;
             snv.snv_id = snvs_.size();
-            snv.chr_id = 17;  // Extract from chr_str if needed
+            snv.chr_id = chrom_index_.get_or_create_id(chr_str);
             snv.pos = pos;
             snv.ref_base = ref;
             snv.alt_base = alt;
             snv.qual = qual;
             
             snvs_.push_back(snv);
-            chr_names_.push_back(chr_str);
         } else {
             std::cerr << "Failed to parse SNV at line " << line_num << ": " << line << std::endl;
         }
@@ -121,7 +120,7 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
     #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < num_to_process; i++) {
         const auto& snv = snvs_[i];
-        const auto& chr_name = chr_names_[i];
+        std::string chr_name = chrom_index_.get_name(snv.chr_id);
         
         #pragma omp critical
         {
@@ -176,7 +175,7 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
         if (region_start < 1) region_start = 1;
         
         // Get chromosome name
-        std::string chr_name = chr_names_[region_id];
+        std::string chr_name = chrom_index_.get_name(snv.chr_id);
         
         // Fetch reads
         auto reads = bam_reader.fetch_reads(chr_name, region_start, region_end);
@@ -190,9 +189,25 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
         
         // Process reads
         int read_count = 0;
+        std::unordered_set<std::string> processed_read_names;
+
         for (auto* b : reads) {
             if (read_parser.should_keep(b)) {
                 ReadInfo info = read_parser.parse(b, read_count, true, snv, ref_seq, region_start);
+                
+                // Skip reads that don't cover the SNV or have low quality at the SNV site
+                if (info.alt_support == AltSupport::UNKNOWN) {
+                    continue;
+                }
+                
+                // Skip duplicate read names (unless distinct alignment? strict unique name check)
+                // if (processed_read_names.find(info.read_name) != processed_read_names.end()) {
+                //     continue;
+                // }
+
+
+                processed_read_names.insert(info.read_name);
+
                 auto methyl_calls = methyl_parser.parse_read(b, ref_seq, region_start);
                 
                 matrix_builder.add_read(info, methyl_calls);
@@ -210,6 +225,7 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
         RegionWriter writer(output_dir_);
         writer.write_region(
             snv,
+            chr_name,
             region_id,
             region_start,
             region_end,

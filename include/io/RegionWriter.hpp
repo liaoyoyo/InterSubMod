@@ -46,6 +46,7 @@ public:
      */
     void write_region(
         const SomaticSnv& snv,
+        const std::string& chr_name,
         int region_id,
         int32_t region_start,
         int32_t region_end,
@@ -63,7 +64,7 @@ private:
      * @brief 建立 region 子目錄
      * @return region 子目錄的完整路徑
      */
-    std::string create_region_dir(int region_id);
+    std::string create_region_dir(const std::string& chr_name, int32_t snv_pos, int32_t region_start, int32_t region_end);
     
     /**
      * @brief 寫出 metadata.txt
@@ -88,7 +89,8 @@ private:
      */
     void write_reads(
         const std::string& region_dir,
-        const std::vector<ReadInfo>& reads
+        const std::vector<ReadInfo>& reads,
+        const std::string& chr_name
     );
     
     /**
@@ -99,7 +101,7 @@ private:
      */
     void write_cpg_sites(
         const std::string& region_dir,
-        int chr_id,
+        const std::string& chr_name,
         const std::vector<int32_t>& cpg_positions
     );
     

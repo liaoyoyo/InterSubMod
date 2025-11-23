@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <unordered_set>
 #include "core/BamReader.hpp"
 #include "core/ReadParser.hpp"
 #include "core/MethylationParser.hpp"
@@ -43,6 +44,7 @@ int main() {
         std::cout << "[4] Parsing reads and methylation..." << std::endl;
         ReadFilterConfig config;
         config.require_mm_ml = false;  // Don't require for filtering
+        config.min_base_quality = 5;   // Lower threshold for test data
         
         ReadParser read_parser(config);
         MethylationParser methyl_parser;
@@ -53,16 +55,28 @@ int main() {
         test_snv.snv_id = 0;
         test_snv.chr_id = 17;
         test_snv.pos = snv_pos;
-        test_snv.ref_base = 'C';
+        test_snv.ref_base = 'A'; // Adjusted based on BAM inspection
         test_snv.alt_base = 'T';
         test_snv.qual = 100.0f;
         
         int passed = 0;
         int with_methyl = 0;
+        std::unordered_set<std::string> processed_read_names;
         
         for (auto* b : reads) {
             if (read_parser.should_keep(b)) {
                 ReadInfo info = read_parser.parse(b, passed, true, test_snv, ref_seq, region_start);
+                
+                if (info.alt_support == AltSupport::UNKNOWN) {
+                    continue;
+                }
+                
+                // Skip duplicates
+                if (processed_read_names.find(info.read_name) != processed_read_names.end()) {
+                    continue;
+                }
+                processed_read_names.insert(info.read_name);
+                
                 auto methyl_calls = methyl_parser.parse_read(b, ref_seq, region_start);
                 
                 matrix_builder.add_read(info, methyl_calls);
@@ -84,7 +98,11 @@ int main() {
         const auto& cpg_pos = matrix_builder.get_cpg_positions();
         
         std::cout << "✓ Matrix dimensions: " << matrix.size() << " reads × " << (matrix.empty() ? 0 : matrix[0].size()) << " CpGs" << std::endl;
-        std::cout << "  - CpG range: " << cpg_pos.front() << " - " << cpg_pos.back() << std::endl << std::endl;
+        if (!cpg_pos.empty()) {
+            std::cout << "  - CpG range: " << cpg_pos.front() << " - " << cpg_pos.back() << std::endl << std::endl;
+        } else {
+             std::cout << "  - CpG range: None" << std::endl << std::endl;
+        }
         
         // Calculate stats
         int na_count = 0;    // -1.0 values (no coverage)
@@ -119,6 +137,7 @@ int main() {
         RegionWriter writer(output_dir);
         writer.write_region(
             test_snv,
+            test_chr,
             0,  // region_id
             region_start,
             region_end,

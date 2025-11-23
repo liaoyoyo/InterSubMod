@@ -51,6 +51,16 @@ ReadInfo ReadParser::parse(
     // Basic information
     info.read_id = read_id;
     info.read_name = bam_get_qname(b);
+    
+    // Handle paired-end suffixes
+    if (b->core.flag & BAM_FPAIRED) {
+        if (b->core.flag & BAM_FREAD1) {
+            info.read_name += "/1";
+        } else if (b->core.flag & BAM_FREAD2) {
+            info.read_name += "/2";
+        }
+    }
+    
     info.chr_id = anchor_snv.chr_id;
     info.align_start = b->core.pos;  // 0-based
     info.align_end = bam_endpos(b);  // 0-based, exclusive

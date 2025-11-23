@@ -1,6 +1,5 @@
 #include "core/Config.hpp"
 #include <iostream>
-#include <filesystem>
 #include <htslib/hts.h>
 #include <htslib/sam.h>
 #include <htslib/vcf.h>
