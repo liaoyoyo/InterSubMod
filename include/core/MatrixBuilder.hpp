@@ -83,7 +83,8 @@ private:
     
     // 暫存：read_id -> vector of (pos, prob)
     // Changed from map<int, map> to map<int, vector> for performance
-    std::map<int, std::vector<std::pair<int32_t, float>>> read_methyl_data_;
+    // Changed from map<int, map> to vector<vector> for performance (O(1) access)
+    std::vector<std::vector<std::pair<int32_t, float>>> read_methyl_data_;
     
     // 最終資料
     std::vector<int32_t> cpg_positions_;        ///< Sorted unique CpG positions (column indices)

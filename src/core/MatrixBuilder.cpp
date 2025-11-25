@@ -21,8 +21,12 @@ int MatrixBuilder::add_read(const ReadInfo& read_info, const std::vector<MethylC
     int read_id = static_cast<int>(reads_.size());
     reads_.push_back(read_info);
     
+    // Ensure vector is large enough
+    if (read_methyl_data_.size() <= static_cast<size_t>(read_id)) {
+        read_methyl_data_.resize(read_id + 1);
+    }
+
     // Store methylation calls in temporary vector
-    // Using vector is much faster than map for insertion
     std::vector<std::pair<int32_t, float>>& calls = read_methyl_data_[read_id];
     calls.reserve(methyl_calls.size());
     
@@ -40,15 +44,27 @@ void MatrixBuilder::finalize() {
     
     // 1. Collect all unique CpG positions
     // We iterate through all reads and collect positions
-    std::set<int32_t> unique_cpg_positions;
-    for (const auto& [read_id, calls] : read_methyl_data_) {
+    // 1. Collect all unique CpG positions
+    // We iterate through all reads and collect positions into a single vector
+    std::vector<int32_t> all_positions;
+    size_t total_calls = 0;
+    for (const auto& calls : read_methyl_data_) {
+        total_calls += calls.size();
+    }
+    all_positions.reserve(total_calls);
+
+    for (const auto& calls : read_methyl_data_) {
         for (const auto& p : calls) {
-            unique_cpg_positions.insert(p.first);
+            all_positions.push_back(p.first);
         }
     }
     
-    // 2. Build sorted vector of CpG positions
-    cpg_positions_.assign(unique_cpg_positions.begin(), unique_cpg_positions.end());
+    // 2. Sort and remove duplicates to get unique positions
+    std::sort(all_positions.begin(), all_positions.end());
+    auto last = std::unique(all_positions.begin(), all_positions.end());
+    all_positions.erase(last, all_positions.end());
+    
+    cpg_positions_ = std::move(all_positions);
     
     // 3. Map position to column index
     std::unordered_map<int32_t, int> pos_to_col;
@@ -68,7 +84,8 @@ void MatrixBuilder::finalize() {
     }
     
     // 5. Fill in methylation values
-    for (const auto& [read_id, calls] : read_methyl_data_) {
+    for (size_t read_id = 0; read_id < read_methyl_data_.size(); ++read_id) {
+        const auto& calls = read_methyl_data_[read_id];
         std::vector<double>& row = matrix_[read_id];
         for (const auto& p : calls) {
             int32_t pos = p.first;
