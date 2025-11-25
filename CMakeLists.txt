@@ -112,13 +112,13 @@ add_executable(inter_sub_mod src/main.cpp)
 target_link_libraries(inter_sub_mod PRIVATE inter_sub_mod_core)
 
 # --- Dev Tools / Ad-hoc Tests ---
-add_executable(test_phase1_2 src/test_phase1_2.cpp)
+add_executable(test_phase1_2 src/test/test_phase1_2.cpp)
 target_link_libraries(test_phase1_2 PRIVATE inter_sub_mod_core)
 
-add_executable(test_phase3 src/test_phase3.cpp)
+add_executable(test_phase3 src/test/test_phase3.cpp)
 target_link_libraries(test_phase3 PRIVATE inter_sub_mod_core)
 
-add_executable(test_phase4_5 src/test_phase4_5.cpp)
+add_executable(test_phase4_5 src/test/test_phase4_5.cpp)
 target_link_libraries(test_phase4_5 PRIVATE inter_sub_mod_core)
 
 # --- Tests ---

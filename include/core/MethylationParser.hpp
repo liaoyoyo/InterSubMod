@@ -11,11 +11,11 @@ namespace InterSubMod {
  * @brief Represents a single methylation call at a genomic position.
  */
 struct MethylCall {
-    int32_t ref_pos;      ///< 1-based genomic position (hg38 coordinates)
+    int32_t ref_pos;      // 1-based, hg38 座標enomic position (hg38 coordinates)
     float probability;    ///< Methylation probability [0.0, 1.0]
     
     MethylCall() : ref_pos(0), probability(0.0f) {}
-    MethylCall(int32_t pos, float prob) : ref_pos(pos), probability(prob) {}
+    MethylCall(uint32_t pos, float prob) : ref_pos(pos), probability(prob) {}
 };
 
 /**
@@ -55,7 +55,7 @@ public:
     std::vector<MethylCall> parse_read(
         const bam1_t* b,
         const std::string& ref_seq,
-        int32_t ref_start_pos
+        int32_t ref_start_pos        // ref_seq 的起始座標 (0-based):
     );
 
 private:

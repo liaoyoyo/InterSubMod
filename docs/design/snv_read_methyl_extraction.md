@@ -157,13 +157,14 @@ for (int i = 0; i < regions.size(); i++) {
     hts_itr_destroy(iter);
     ```
 
-* **最佳化**:
+- **最佳化**:
   - 使用 thread-local `samFile*` handle 避免互斥鎖競爭
   - 重複使用 `bam1_t*` 指標，減少記憶體配置次數
 
 #### 步驟 2: Read 解析與過濾 (Read Parsing & Filtering)
 
 **基本資訊擷取**:
+
 - QNAME: `bam_get_qname(b)`
 - FLAG: `b->core.flag`
 - MAPQ: `b->core.qual`
@@ -307,14 +308,14 @@ found:
 
 ```cpp
 struct MethylCall {
-    int32_t ref_pos;  // 1-based, hg38 座標
+    uint32_t ref_pos;  // 1-based, hg38 座標
     float probability;
 };
 
 std::vector<MethylCall> parse_methylation(
     const bam1_t* b,
     const std::string& ref_seq,
-    int ref_start_pos  // ref_seq 的起始座標（0-based）
+    uint32_t ref_start_pos  // ref_seq 的起始座標（0-based）
 ) {
     std::vector<MethylCall> calls;
     
@@ -386,7 +387,7 @@ std::vector<MethylCall> parse_methylation(
 **關鍵輔助函式**: `build_seq_to_ref_map`
 
 ```cpp
-std::vector<int32_t> build_seq_to_ref_map(const bam1_t* b, int ref_start_pos) {
+std::vector<int32_t> build_seq_to_ref_map(const bam1_t* b, uint32_t ref_start_pos) {
     std::vector<int32_t> seq_to_ref(b->core.l_qseq, -1);
     
     int ref_pos = b->core.pos;  // 0-based
@@ -448,7 +449,7 @@ void build_matrix_for_region(
     const std::vector<std::vector<MethylCall>>& methyl_calls  // per-read
 ) {
     // 1. 收集所有唯一的 CpG 位點
-    std::set<int32_t> unique_cpg_positions;
+    std::set<uint32_t> unique_cpg_positions;
     for (const auto& calls : methyl_calls) {
         for (const auto& call : calls) {
             unique_cpg_positions.insert(call.ref_pos);
@@ -458,12 +459,12 @@ void build_matrix_for_region(
     // 2. 建立 CpGSite 列表（排序）
     std::vector<CpGSite> sites;
     int cpg_id = 0;
-    for (int32_t pos : unique_cpg_positions) {
+    for (uint32_t pos : unique_cpg_positions) {
         sites.push_back({cpg_id++, region.chr_id, pos, false, false, false});
     }
     
     // 3. 建立位置 -> column index 的映射
-    std::unordered_map<int32_t, int> pos_to_col;
+    std::unordered_map<uint32_t, int> pos_to_col;
     for (int col = 0; col < sites.size(); col++) {
         pos_to_col[sites[col].pos] = col;
     }

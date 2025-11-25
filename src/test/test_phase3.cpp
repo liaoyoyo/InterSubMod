@@ -23,7 +23,7 @@ int main() {
         std::string output_dir = "/big8_disk/liaoyoyo2001/InterSubMod/output";
         
         std::string test_chr = "chr17";
-        int32_t snv_pos = 7578000;  // SNV position
+        uint32_t snv_pos = 7578000;  // SNV position
         int32_t window = 2000;       // ±2000 bp
         int32_t region_start = snv_pos - window;
         int32_t region_end = snv_pos + window;

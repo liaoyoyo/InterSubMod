@@ -12,7 +12,7 @@ namespace InterSubMod {
 struct CpGSite {
     int cpg_id;             ///< Unique internal ID
     int chr_id;             ///< Chromosome ID (mapped via ChromIndex)
-    int32_t pos;            ///< 1-based genomic position
+    uint32_t pos;            ///< 1-based genomic position
     bool in_pmd;            ///< True if site is within a Partially Methylated Domain
     bool in_repressive_state; ///< True if site is in a repressive chromatin state
     bool accessible;        ///< True if site is accessible (ATAC-seq peak)

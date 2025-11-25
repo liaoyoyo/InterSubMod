@@ -72,6 +72,7 @@ private:
     void write_metadata(
         const std::string& region_dir,
         const SomaticSnv& snv,
+        const std::string& chr_name,
         int region_id,
         int32_t region_start,
         int32_t region_end,

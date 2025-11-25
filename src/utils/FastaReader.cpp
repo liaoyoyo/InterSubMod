@@ -74,7 +74,7 @@ std::string FastaReader::fetch_sequence(
     return result;
 }
 
-int64_t FastaReader::get_chr_length(const std::string& chr) const {
+int32_t FastaReader::get_chr_length(const std::string& chr) const {
     if (!fai_) {
         return -1;
     }

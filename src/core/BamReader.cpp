@@ -73,7 +73,7 @@ BamReader& BamReader::operator=(BamReader&& other) noexcept {
     return *this;
 }
 
-std::vector<bam1_t*> BamReader::fetch_reads(
+    std::vector<bam1_t*> BamReader::fetch_reads(
     const std::string& chr, 
     int32_t start, 
     int32_t end

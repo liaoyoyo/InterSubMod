@@ -73,8 +73,8 @@ public:
     // 查詢指定區域的 reads
     std::vector<bam1_t*> fetch_reads(
         const std::string& chr, 
-        int32_t start,  // 0-based
-        int32_t end     // 0-based, exclusive
+        uint32_t start,  // 0-based
+        uint32_t end     // 0-based, exclusive
     );
     
     // 取得 header (用於染色體名稱轉換)
@@ -128,8 +128,8 @@ BamReader::~BamReader() {
 
 std::vector<bam1_t*> BamReader::fetch_reads(
     const std::string& chr, 
-    int32_t start, 
-    int32_t end
+    uint32_t start, 
+    uint32_t end
 ) {
     std::vector<bam1_t*> reads;
     
@@ -157,6 +157,7 @@ std::vector<bam1_t*> BamReader::fetch_reads(
 ```
 
 **注意事項**:
+
 * 使用 RAII 管理資源
 * 回傳的 `bam1_t*` 需由呼叫者負責釋放
 * 執行緒安全：每個執行緒需有自己的 `BamReader` 實例
@@ -191,7 +192,7 @@ public:
         bool is_tumor,
         const SomaticSnv& anchor_snv,
         const std::string& ref_seq,
-        int ref_start_pos
+        uint32_t ref_start_pos
     ) const;
     
 private:
@@ -201,7 +202,7 @@ private:
         const bam1_t* b,
         const SomaticSnv& snv,
         const std::string& ref_seq,
-        int ref_start_pos
+        uint32_t ref_start_pos
     ) const;
 };
 
@@ -244,7 +245,7 @@ ReadInfo ReadParser::parse(
     bool is_tumor,
     const SomaticSnv& anchor_snv,
     const std::string& ref_seq,
-    int ref_start_pos
+    uint32_t ref_start_pos
 ) const {
     ReadInfo info;
     info.read_id = read_id;
@@ -269,14 +270,14 @@ AltSupport ReadParser::determine_alt_support(
     const bam1_t* b,
     const SomaticSnv& snv,
     const std::string& ref_seq,
-    int ref_start_pos
+    uint32_t ref_start_pos
 ) const {
     // 詳細實作見設計文件 section 3.2.2
     // 此處為簡化版本
     
-    int32_t snv_pos_0based = snv.pos - 1;
-    int32_t read_start = b->core.pos;
-    int32_t read_end = bam_endpos(b);
+    uint32_t snv_pos_0based = snv.pos - 1;
+    uint32_t read_start = b->core.pos;
+    uint32_t read_end = bam_endpos(b);
     
     // 1. 檢查覆蓋
     if (snv_pos_0based < read_start || snv_pos_0based >= read_end) {
@@ -378,8 +379,8 @@ public:
     // 取得指定區域的序列
     std::string fetch_sequence(
         const std::string& chr,
-        int32_t start,  // 0-based
-        int32_t end     // 0-based, exclusive
+        uint32_t start,  // 0-based
+        uint32_t end     // 0-based, exclusive
     );
     
     // 檢查是否成功載入
@@ -408,8 +409,8 @@ FastaReader::~FastaReader() {
 
 std::string FastaReader::fetch_sequence(
     const std::string& chr,
-    int32_t start,
-    int32_t end
+    uint32_t start,
+    uint32_t end
 ) {
     int len;
     char* seq = faidx_fetch_seq(fai_, chr.c_str(), start, end - 1, &len);
@@ -435,7 +436,7 @@ std::string FastaReader::fetch_sequence(
 namespace InterSubMod {
 
 struct MethylCall {
-    int32_t ref_pos;      // 1-based, hg38 座標
+    uint32_t ref_pos;      // 1-based, hg38 座標
     float probability;    // 0.0 - 1.0
 };
 
@@ -445,7 +446,7 @@ public:
     std::vector<MethylCall> parse_read(
         const bam1_t* b,
         const std::string& ref_seq,  // 該 read 涵蓋範圍的參考序列
-        int32_t ref_start_pos        // ref_seq 的起始座標 (0-based)
+        uint32_t ref_start_pos        // ref_seq 的起始座標 (0-based)
     );
     
 private:
@@ -468,7 +469,7 @@ private:
 std::vector<MethylCall> MethylationParser::parse_read(
     const bam1_t* b,
     const std::string& ref_seq,
-    int32_t ref_start_pos
+    uint32_t ref_start_pos
 ) {
     std::vector<MethylCall> calls;
     
@@ -744,8 +745,8 @@ private:
     std::vector<CpGSite> extract_ref_cpgs(
         const std::string& chr,
         int chr_id,
-        int32_t start,
-        int32_t end,
+        uint32_t start,
+        uint32_t end,
         const std::string& ref_seq
     );
     
@@ -769,7 +770,7 @@ MethylationMatrix MatrixBuilder::build(
     matrix.region_id = region.region_id;
     
     // 1. 收集 CpG 位點
-    std::set<int32_t> cpg_positions;
+    std::set<uint32_t> cpg_positions;
     
     if (use_ref_cpgs) {
         // 從參考基因組提取（更完整）
@@ -794,7 +795,7 @@ MethylationMatrix MatrixBuilder::build(
     // 2. 建立 CpGSite 列表
     std::vector<CpGSite> sites;
     int cpg_id = 0;
-    for (int32_t pos : cpg_positions) {
+    for (uint32_t pos : cpg_positions) {
         sites.push_back({cpg_id++, region.chr_id, pos, false, false, false});
     }
     
@@ -1166,15 +1167,18 @@ int main(int argc, char** argv) {
 #### 4.3 關鍵設計考量
 
 **執行緒安全**:
+
 * 每個執行緒必須有自己的 `BamReader`, `FastaReader` 等實例
 * 使用 `thread_local` 關鍵字
 * 輸出檔案不會衝突（因為每個 region 有獨立的目錄）
 
 **記憶體管理**:
+
 * 在迴圈內明確釋放 `bam1_t*`
 * 避免在 parallel region 內建立大型全域資料結構
 
 **負載平衡**:
+
 * 使用 `schedule(dynamic)` 讓較快的執行緒處理更多 regions
 
 ### 第四階段：交付成果 (Deliverables)
@@ -1308,6 +1312,7 @@ samtools faidx hg38.fa chr17:7578000-7578002
 #### 5.4 性能分析
 
 **預期結果**:
+
 * 單個 region 處理時間: 1-5 秒（取決於 read 數量）
 * 總處理時間: 10-40 秒（32 regions, 4 threads）
 * Peak RSS: < 2 GB

@@ -166,7 +166,7 @@ bool SomaticSnvTable::load_from_vcf(const std::string& vcf_path, ChromIndex& chr
         const char* chrom_name = bcf_hdr_id2name(hdr, rec->rid);
         snv.chr_id = chrom_index.get_or_create_id(chrom_name);
         
-        snv.pos = rec->pos + 1; // 0-based to 1-based
+        snv.pos = static_cast<uint32_t>(rec->pos + 1); // 0-based to 1-based
         snv.ref_base = rec->d.allele[0][0];
         snv.alt_base = rec->d.allele[1][0];
         snv.qual = rec->qual;

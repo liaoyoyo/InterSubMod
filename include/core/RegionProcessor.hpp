@@ -76,6 +76,15 @@ public:
      * @return 成功載入的 SNV 數量
      */
     int load_snvs(const std::string& snv_table_path);
+
+    /**
+     * @brief Load SNVs from VCF file
+     * 
+     * @param vcf_path Path to VCF file
+     * @return Number of SNVs loaded
+     */
+    int load_snvs_from_vcf(const std::string& vcf_path);
+
     
     /**
      * @brief 處理所有 SNVs（平行化）
@@ -90,9 +99,16 @@ public:
      * 
      * @param snv SNV 資訊
      * @param region_id Region ID
+     * @param bam_reader Thread-local BAM reader
+     * @param fasta_reader Thread-local FASTA reader
      * @return RegionResult
      */
-    RegionResult process_single_region(const SomaticSnv& snv, int region_id);
+    RegionResult process_single_region(
+        const SomaticSnv& snv, 
+        int region_id,
+        BamReader& bam_reader,
+        FastaReader& fasta_reader
+    );
     
     /**
      * @brief 取得載入的 SNVs 列表

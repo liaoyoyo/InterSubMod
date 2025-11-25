@@ -44,7 +44,7 @@ void RegionWriter::write_region(
 ) {
     std::string region_dir = create_region_dir(chr_name, snv.pos, region_start, region_end);
     
-    write_metadata(region_dir, snv, region_id, region_start, region_end,
+    write_metadata(region_dir, snv, chr_name, region_id, region_start, region_end,
                    reads.size(), cpg_positions.size(), elapsed_ms, peak_memory_mb);
     
     write_reads(region_dir, reads, chr_name);
@@ -55,6 +55,7 @@ void RegionWriter::write_region(
 void RegionWriter::write_metadata(
     const std::string& region_dir,
     const SomaticSnv& snv,
+    const std::string& chr_name,
     int region_id,
     int32_t region_start,
     int32_t region_end,
@@ -66,11 +67,11 @@ void RegionWriter::write_metadata(
     std::ofstream ofs(region_dir + "/metadata.txt");
     
     ofs << "Region ID: " << region_id << "\n";
-    ofs << "Region: chr" << snv.chr_id << ":" << region_start << "-" << region_end << "\n";
+    ofs << "Region: " << chr_name << ":" << region_start << "-" << region_end << "\n";
     ofs << "Region Size: " << (region_end - region_start + 1) << " bp\n";
     ofs << "\n";
     ofs << "SNV ID: " << snv.snv_id << "\n";
-    ofs << "SNV Position: chr" << snv.chr_id << ":" << snv.pos << "\n";
+    ofs << "SNV Position: " << chr_name << ":" << snv.pos << "\n";
     ofs << "SNV: " << snv.ref_base << " -> " << snv.alt_base << "\n";
     ofs << "SNV Quality: " << snv.qual << "\n";
     ofs << "\n";

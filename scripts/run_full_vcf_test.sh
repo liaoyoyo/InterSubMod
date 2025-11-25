@@ -5,6 +5,9 @@
 VCF_PATH="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
 OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output/full_vcf_test"
 THREADS=64
+TUMOR_BAM="/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam"
+NORMAL_BAM="/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam"
+REF_FASTA="/big8_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa"
 LOG_FILE="${OUTPUT_DIR}/full_execution_analysis.log"
 
 # Parse arguments
@@ -34,6 +37,9 @@ LOG_FILE="${OUTPUT_DIR}/full_execution_analysis.log"
 
 echo "=== InterSubMod FULL VCF Test ==="
 echo "VCF: ${VCF_PATH}"
+echo "Tumor BAM: ${TUMOR_BAM}"
+echo "Normal BAM: ${NORMAL_BAM}"
+echo "Reference: ${REF_FASTA}"
 echo "Output Dir: ${OUTPUT_DIR}"
 echo "Threads: ${THREADS}"
 echo "Log File: ${LOG_FILE}"
@@ -42,36 +48,10 @@ echo "---------------------------------"
 # Create output directory
 mkdir -p "${OUTPUT_DIR}"
 
-# Step 1: Generate Full SNV Table
-echo "[1] Generating full SNV table from VCF..."
-TEMP_TSV="${OUTPUT_DIR}/full_snvs.tsv"
-
-# Write Header
-echo -e "chr\tpos\tref\talt\tqual" > "${TEMP_TSV}"
-
-# Extract ALL lines from VCF (excluding header)
-if [ -f "${VCF_PATH}" ]; then
-    if [[ "${VCF_PATH}" == *.gz ]]; then
-        CAT_CMD="zgrep"
-    else
-        CAT_CMD="grep"
-    fi
-    
-    # Extract all variants
-    ${CAT_CMD} -v "^#" "${VCF_PATH}" | awk '{print $1, $2, $4, $5, $6}' >> "${TEMP_TSV}"
-    
-    NUM_SNVS=$(($(wc -l < "${TEMP_TSV}") - 1))
-    echo "    Generated: ${TEMP_TSV}"
-    echo "    Total SNVs to process: ${NUM_SNVS}"
-else
-    echo "Error: VCF file not found at ${VCF_PATH}"
-    exit 1
-fi
-
-# Step 2: Run Execution
+# Step 1: Run Execution
 echo ""
-echo "[2] Running InterSubMod..."
-EXECUTABLE="/big8_disk/liaoyoyo2001/InterSubMod/build/bin/test_phase4_5"
+echo "[1] Running InterSubMod..."
+EXECUTABLE="/big8_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod"
 
 if [ ! -f "${EXECUTABLE}" ]; then
     echo "Error: Executable not found at ${EXECUTABLE}"
@@ -79,26 +59,25 @@ if [ ! -f "${EXECUTABLE}" ]; then
     exit 1
 fi
 
+# Construct Command
+CMD="${EXECUTABLE} \
+    --tumor-bam ${TUMOR_BAM} \
+    --normal-bam ${NORMAL_BAM} \
+    --reference ${REF_FASTA} \
+    --vcf ${VCF_PATH} \
+    --output-dir ${OUTPUT_DIR} \
+    --threads ${THREADS}"
+
+echo "Command to run (for IDE Debugging):"
+echo "${CMD}"
+echo ""
+
 # Use /usr/bin/time for resource monitoring
 echo "    Starting execution with ${THREADS} threads..."
 echo "    (This may take a few minutes...)"
 {
-    /usr/bin/time -v "${EXECUTABLE}" "${TEMP_TSV}" "${OUTPUT_DIR}" "${THREADS}"
+    /usr/bin/time -v ${CMD}
 } 2>&1 | tee "${LOG_FILE}"
-
-# Step 3: Basic Verification
-echo ""
-echo "[3] Verifying results..."
-REGION_COUNT=$(ls -d "${OUTPUT_DIR}/chr_"* 2>/dev/null | wc -l)
-
-echo "    Expected regions: ${NUM_SNVS}"
-echo "    Found regions:    ${REGION_COUNT}"
-
-if [ "${REGION_COUNT}" -eq "${NUM_SNVS}" ]; then
-    echo "    ✓ Region count matches."
-else
-    echo "    ⚠ Region count mismatch!"
-fi
 
 echo ""
 echo "=== Analysis Log Saved to: ${LOG_FILE} ==="

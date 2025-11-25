@@ -81,8 +81,9 @@ public:
 private:
     std::vector<ReadInfo> reads_;  ///< Read metadata (row indices)
     
-    // 暫存：read_id -> (cpg_pos -> probability)
-    std::map<int, std::map<int32_t, float>> read_methyl_map_;
+    // 暫存：read_id -> vector of (pos, prob)
+    // Changed from map<int, map> to map<int, vector> for performance
+    std::map<int, std::vector<std::pair<int32_t, float>>> read_methyl_data_;
     
     // 最終資料
     std::vector<int32_t> cpg_positions_;        ///< Sorted unique CpG positions (column indices)

@@ -56,7 +56,7 @@ public:
      * @param chr Chromosome name.
      * @return Length in bp, or -1 if chromosome not found.
      */
-    int64_t get_chr_length(const std::string& chr) const;
+    int32_t get_chr_length(const std::string& chr) const;
     
     /**
      * @brief Checks if the FASTA file was successfully loaded.

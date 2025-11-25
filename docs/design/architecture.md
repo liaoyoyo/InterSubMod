@@ -149,7 +149,7 @@ flowchart TD
 
   * `SnvId snv_id`          // 內部 SNV ID（0..N-1）
   * `int chr_id`            // 染色體 ID
-  * `int32_t pos`           // 1-based 座標
+  * `uint32_t pos`           // 1-based 座標
   * `char ref_base, alt_base` // 僅支援單一 ALT 的 SNV
   * `float qual`
   * `bool is_pass_filter`
@@ -191,8 +191,8 @@ flowchart TD
   * `int region_id`         // 區域 ID
   * `SnvId snv_id`          // anchor SNV
   * `int chr_id`
-  * `int32_t win_start_pos` // 視窗起始
-  * `int32_t win_end_pos`   // 視窗結束
+  * `uint32_t win_start_pos` // 視窗起始
+  * `uint32_t win_end_pos`   // 視窗結束
 
 #### 流程
 
@@ -220,8 +220,8 @@ flowchart TD
   * `int read_id`
   * `std::string read_name`
   * `int chr_id`
-  * `int32_t align_start`
-  * `int32_t align_end`
+  * `uint32_t align_start`
+  * `uint32_t align_end`
   * `int mapq`
   * `int hp_tag`             // 0/1/2 (Unknown/H1/H2)
   * `bool is_tumor`          // true: tumor BAM, false: normal BAM
@@ -260,7 +260,7 @@ flowchart TD
 
   * `int cpg_id`
   * `int chr_id`
-  * `int32_t pos`
+  * `uint32_t pos`
 
 * `CpGAnnotation`（可選）：
 

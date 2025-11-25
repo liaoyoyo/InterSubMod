@@ -87,7 +87,7 @@ AltSupport ReadParser::determine_alt_support(
     int32_t ref_start_pos [[maybe_unused]]
 ) const {
     // SNV position (convert 1-based to 0-based)
-    int32_t snv_pos_0based = snv.pos - 1;
+    int32_t snv_pos_0based = static_cast<int32_t>(snv.pos) - 1;
     
     // Check if read covers the SNV position
     int32_t read_start = b->core.pos;
@@ -112,7 +112,9 @@ AltSupport ReadParser::determine_alt_support(
             case BAM_CEQUAL:   // =
             case BAM_CDIFF:    // X
                 // Match/mismatch: consumes both ref and seq
+                // Check if the SNV position falls within this CIGAR operation
                 if (ref_pos <= snv_pos_0based && snv_pos_0based < ref_pos + len) {
+                    // Found it! Calculate the offset in the read sequence
                     read_offset = seq_pos + (snv_pos_0based - ref_pos);
                     goto found_offset;
                 }
@@ -123,21 +125,23 @@ AltSupport ReadParser::determine_alt_support(
             case BAM_CINS:     // I
             case BAM_CSOFT_CLIP: // S
                 // Insertion/soft clip: consumes only seq
+                // These bases are in the read but not in the reference
                 seq_pos += len;
                 break;
                 
             case BAM_CDEL:     // D
             case BAM_CREF_SKIP: // N
                 // Deletion/skip: consumes only ref
+                // These positions are in the reference but skipped in the read
                 if (ref_pos <= snv_pos_0based && snv_pos_0based < ref_pos + len) {
-                    // SNV falls within a deletion
+                    // SNV falls within a deletion - so the read does not support ALT or REF
                     return AltSupport::UNKNOWN;
                 }
                 ref_pos += len;
                 break;
                 
             case BAM_CHARD_CLIP: // H
-                // Hard clip: consumes nothing
+                // Hard clip: consumes nothing (removed from read sequence)
                 break;
                 
             default:

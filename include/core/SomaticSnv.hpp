@@ -41,7 +41,7 @@ private:
 struct SomaticSnv {
     int snv_id;             ///< Internal SNV ID
     int chr_id;             ///< Chromosome ID
-    int32_t pos;            ///< 1-based Position
+    uint32_t pos;            ///< 1-based Position
     char ref_base;          ///< Reference allele
     char alt_base;          ///< Alternate allele
     float qual;             ///< Variant Quality Score

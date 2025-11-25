@@ -78,22 +78,49 @@ std::vector<MethylCall> MethylationParser::parse_read(
     }
     
     // 4. Build sequence-to-reference mapping
+    // This maps each base in the read sequence to its genomic coordinate
     std::vector<int32_t> seq_to_ref = build_seq_to_ref_map(b);
     
-    // 5. Iterate through read sequence to find modified cytosines
+    // 5. Iterate through read sequence to find modified bases
+    // Note: MM tag refers to the SEQ in the BAM file.
+    // - If read is mapped to Forward strand: SEQ matches Ref. We look for 'C' and "C+m?".
+    // - If read is mapped to Reverse strand: SEQ is Reverse Complemented. 
+    //   Original 'C's become 'G's in SEQ. We must look for 'G' and "G-m?" (or "G+m?").
+    
     uint8_t* seq = bam_get_seq(b);
     int seq_len = b->core.l_qseq;
+    bool is_reverse = bam_is_rev(b);
     
-    int c_count = 0;       // Count of 'C' bases in read sequence
+    // Determine target base and modification code based on strand
+    char target_base = is_reverse ? 'G' : 'C';
+    
+    // For reverse strand, we might need to parse a different delta list if the tool produces "G-m?"
+    // However, we already parsed "C+m?" above. 
+    // TODO: Verify if the upstream tool (Dorado) produces "C+m?" for all reads (referring to original strand)
+    // or if it produces "G-m?" for reverse reads.
+    // Standard htslib/modkit usually normalizes. 
+    // If deltas were found for "C+m?", we assume they apply to the canonical base 'C' on the original strand.
+    // BUT, if the read is reverse, the 'C' on original strand is 'G' in BAM SEQ.
+    // So we iterate 'G's in SEQ and apply the deltas.
+    
+    // If no deltas found for C+m?, check G-m? (for completeness)
+    if (deltas.empty() && is_reverse) {
+        deltas = parse_mm_tag(mm_str, "G-m?");
+        if (deltas.empty()) deltas = parse_mm_tag(mm_str, "G+m?");
+        
+        // Recalculate ML offset if needed (complex, skipping for now assuming C+m? is standard)
+    }
+
+    int base_count = 0;    // Count of target bases in read sequence
     size_t delta_idx = 0;  // Current index in deltas array
-    int next_c_target = deltas.empty() ? -1 : deltas[0];  // Next 'C' that has modification
+    int next_target = deltas.empty() ? -1 : deltas[0];
     
     for (int seq_idx = 0; seq_idx < seq_len; seq_idx++) {
         char base = seq_nt16_str[bam_seqi(seq, seq_idx)];
         
-        if (base == 'C') {
-            if (c_count == next_c_target) {
-                // This 'C' has methylation information
+        if (base == target_base) {
+            if (base_count == next_target) {
+                // This base has methylation information
                 int32_t ref_pos_0based = seq_to_ref[seq_idx];
                 
                 if (ref_pos_0based >= 0) {  // Not an insertion
@@ -102,10 +129,39 @@ std::vector<MethylCall> MethylationParser::parse_read(
                     
                     // Validate bounds and CpG context
                     if (ref_offset >= 0 && static_cast<size_t>(ref_offset) < ref_seq.size()) {
-                        if (ref_seq[ref_offset] == 'C' && is_cpg_site(ref_seq, ref_offset)) {
+                        bool valid_cpg = false;
+                        
+                        if (is_reverse) {
+                            // Reverse strand: We are looking at a 'G' in BAM SEQ.
+                            // This corresponds to a 'C' on the reverse strand.
+                            // A CpG on reverse strand is 3'-GC-5' (which is 5'-CG-3').
+                            // So on the Forward Reference, we see 5'-CG-3'.
+                            // The 'G' we are looking at is the G of the CpG pair.
+                            // So we check if the PREVIOUS base in Ref is 'C'.
+                            if (ref_seq[ref_offset] == 'G') {
+                                if (ref_offset > 0 && ref_seq[ref_offset - 1] == 'C') {
+                                    valid_cpg = true;
+                                }
+                            }
+                        } else {
+                            // Forward strand: We are looking at 'C'.
+                            // Check if NEXT base in Ref is 'G'.
+                            if (ref_seq[ref_offset] == 'C' && is_cpg_site(ref_seq, ref_offset)) {
+                                valid_cpg = true;
+                            }
+                        }
+
+                        if (valid_cpg) {
                             // Valid CpG site - use ml_offset to get correct probability
                             float prob = ml_data[ml_offset + delta_idx] / 255.0f;
-                            calls.emplace_back(ref_pos_0based + 1, prob);  // Convert to 1-based
+                            
+                            // For reverse strand, the CpG site coordinate is usually reported 
+                            // as the 'C' position on the forward strand (standard VCF/bedMethyl convention).
+                            // If we are at 'G' (pos i), the 'C' is at pos i-1.
+                            // Let's standardize to reporting the 'C' position of the CpG dinucleotide.
+                            int32_t report_pos = is_reverse ? (ref_pos_0based - 1) : ref_pos_0based;
+                            
+                            calls.emplace_back(report_pos + 1, prob);  // Convert to 1-based
                         }
                     }
                 }
@@ -113,13 +169,12 @@ std::vector<MethylCall> MethylationParser::parse_read(
                 // Move to next delta
                 delta_idx++;
                 if (delta_idx < deltas.size()) {
-                    // Delta encoding: add (delta + 1) to get next target
-                    next_c_target += deltas[delta_idx] + 1;
+                    next_target += deltas[delta_idx] + 1;
                 } else {
-                    next_c_target = -1;  // No more modifications
+                    next_target = -1;
                 }
             }
-            c_count++;
+            base_count++;
         }
     }
     

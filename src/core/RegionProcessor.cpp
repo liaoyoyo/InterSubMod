@@ -53,7 +53,7 @@ int RegionProcessor::load_snvs(const std::string& snv_table_path) {
         // First line is data, parse it
         std::istringstream iss(line);
         std::string chr_str;
-        int32_t pos;
+        uint32_t pos;
         char ref, alt;
         float qual = 0.0f;
         
@@ -79,7 +79,7 @@ int RegionProcessor::load_snvs(const std::string& snv_table_path) {
         
         std::istringstream iss(line);
         std::string chr_str;
-        int32_t pos;
+        uint32_t pos;
         char ref, alt;
         float qual = 0.0f;
         
@@ -105,6 +105,18 @@ int RegionProcessor::load_snvs(const std::string& snv_table_path) {
     return snvs_.size();
 }
 
+int RegionProcessor::load_snvs_from_vcf(const std::string& vcf_path) {
+    SomaticSnvTable table;
+    if (table.load_from_vcf(vcf_path, chrom_index_)) {
+        snvs_ = table.all();
+        std::cout << "Loaded " << snvs_.size() << " SNVs from VCF: " << vcf_path << std::endl;
+        return snvs_.size();
+    }
+    
+    std::cerr << "Failed to load SNVs from VCF: " << vcf_path << std::endl;
+    return 0;
+}
+
 std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
     int num_to_process = (max_snvs > 0 && max_snvs < static_cast<int>(snvs_.size())) 
                          ? max_snvs : snvs_.size();
@@ -117,29 +129,47 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
     auto t_start = std::chrono::high_resolution_clock::now();
     
     // OpenMP parallel loop
-    #pragma omp parallel for schedule(dynamic)
-    for (int i = 0; i < num_to_process; i++) {
-        const auto& snv = snvs_[i];
-        std::string chr_name = chrom_index_.get_name(snv.chr_id);
+    // OpenMP parallel region to manage thread-local resources
+    #pragma omp parallel
+    {
+        // Initialize thread-local readers once per thread
+        // This avoids opening/closing the BAM file and loading the index for every region
+        BamReader tumor_reader(tumor_bam_path_);
+        FastaReader ref_reader(ref_fasta_path_);
         
-        #pragma omp critical
-        {
-            std::cout << "[Thread " << omp_get_thread_num() << "] Processing region " 
-                      << i << " (SNV " << chr_name << ":" << snv.pos << ")" << std::endl;
+        // Optional: Normal BAM reader if path is provided
+        std::unique_ptr<BamReader> normal_reader;
+        if (!normal_bam_path_.empty()) {
+            normal_reader = std::make_unique<BamReader>(normal_bam_path_);
         }
-        
-        results[i] = process_single_region(snv, i);
-        
-        #pragma omp critical
-        {
-            if (results[i].success) {
-                std::cout << "[Thread " << omp_get_thread_num() << "] ✓ Region " << i 
-                          << " completed: " << results[i].num_reads << " reads, " 
-                          << results[i].num_cpgs << " CpGs, " 
-                          << results[i].elapsed_ms << " ms" << std::endl;
-            } else {
-                std::cerr << "[Thread " << omp_get_thread_num() << "] ✗ Region " << i 
-                          << " failed: " << results[i].error_message << std::endl;
+
+        #pragma omp for schedule(dynamic)
+        for (int i = 0; i < num_to_process; i++) {
+            const auto& snv = snvs_[i];
+            std::string chr_name = chrom_index_.get_name(snv.chr_id);
+            
+            // Logging (protected by critical section)
+            #pragma omp critical
+            {
+                std::cout << "[Thread " << omp_get_thread_num() << "] Processing region " 
+                          << i << " (SNV " << chr_name << ":" << snv.pos << ")" << std::endl;
+            }
+            
+            // Process the region using the thread-local readers
+            // Note: We pass the readers by reference
+            results[i] = process_single_region(snv, i, tumor_reader, ref_reader);
+            
+            #pragma omp critical
+            {
+                if (results[i].success) {
+                    std::cout << "[Thread " << omp_get_thread_num() << "] ✓ Region " << i 
+                              << " completed: " << results[i].num_reads << " reads, " 
+                              << results[i].num_cpgs << " CpGs, " 
+                              << results[i].elapsed_ms << " ms" << std::endl;
+                } else {
+                    std::cerr << "[Thread " << omp_get_thread_num() << "] ✗ Region " << i 
+                              << " failed: " << results[i].error_message << std::endl;
+                }
             }
         }
     }
@@ -153,7 +183,12 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
     return results;
 }
 
-RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int region_id) {
+RegionResult RegionProcessor::process_single_region(
+    const SomaticSnv& snv, 
+    int region_id,
+    BamReader& bam_reader,
+    FastaReader& fasta_reader
+) {
     RegionResult result;
     result.region_id = region_id;
     result.snv_id = snv.snv_id;
@@ -161,37 +196,42 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
     auto t_start = std::chrono::high_resolution_clock::now();
     
     try {
-        // Thread-local resources
-        BamReader bam_reader(tumor_bam_path_);
-        FastaReader fasta_reader(ref_fasta_path_);
+        // Initialize parsers (lightweight, can be recreated or reused)
         ReadParser read_parser;
         MethylationParser methyl_parser;
         MatrixBuilder matrix_builder;
         
-        // Define region
-        int32_t region_start = snv.pos - window_size_;
-        int32_t region_end = snv.pos + window_size_;
+        // Define region window
+        // Ensure we don't go below 1 or beyond chromosome end (checked later)
+        int32_t region_start = static_cast<int32_t>(snv.pos) - static_cast<int32_t>(window_size_);
+        int32_t region_end = static_cast<int32_t>(snv.pos) + static_cast<int32_t>(window_size_);
         
-        if (region_start < 1) region_start = 1;
-        
-        // Get chromosome name
+        // Get chromosome name and length
         std::string chr_name = chrom_index_.get_name(snv.chr_id);
+        int32_t chr_length = fasta_reader.get_chr_length(chr_name);
+
+        // Clamp coordinates
+        if (region_start < 1) region_start = 1;
+        if (chr_length > 0 && region_end > chr_length) region_end = chr_length;
         
-        // Fetch reads
+        // Fetch reads from BAM
+        // This uses the thread-local reader, which is much faster than re-opening
         auto reads = bam_reader.fetch_reads(chr_name, region_start, region_end);
         
-        // Fetch reference sequence
+        // Fetch reference sequence for this window
+        // Needed for CIGAR parsing and CpG verification
         std::string ref_seq = fasta_reader.fetch_sequence(chr_name, region_start, region_end);
         
         if (ref_seq.empty()) {
             throw std::runtime_error("Failed to fetch reference sequence");
         }
         
-        // Process reads
+        // Process each read
         int read_count = 0;
         std::unordered_set<std::string> processed_read_names;
 
         for (auto* b : reads) {
+            // 1. Filter and Parse Read Info
             if (read_parser.should_keep(b)) {
                 ReadInfo info = read_parser.parse(b, read_count, true, snv, ref_seq, region_start);
                 
@@ -200,28 +240,28 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                     continue;
                 }
                 
-                // Skip duplicate read names (unless distinct alignment? strict unique name check)
+                // Optional: Duplicate read name check
                 // if (processed_read_names.find(info.read_name) != processed_read_names.end()) {
                 //     continue;
                 // }
-
-
                 processed_read_names.insert(info.read_name);
 
+                // 2. Parse Methylation (MM/ML tags)
                 auto methyl_calls = methyl_parser.parse_read(b, ref_seq, region_start);
                 
+                // 3. Add to Matrix Builder
                 matrix_builder.add_read(info, methyl_calls);
                 read_count++;
             }
         }
         
-        // Build matrix
+        // Finalize matrix construction (sort CpGs, fill NaNs)
         matrix_builder.finalize();
         
         result.num_reads = matrix_builder.num_reads();
         result.num_cpgs = matrix_builder.num_cpgs();
         
-        // Write output
+        // Write output to disk
         RegionWriter writer(output_dir_);
         writer.write_region(
             snv,
@@ -236,7 +276,7 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
             0.0   // peak_memory_mb not tracked yet
         );
         
-        // Cleanup
+        // Cleanup BAM records
         for (auto* r : reads) {
             bam_destroy1(r);
         }
