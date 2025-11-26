@@ -28,7 +28,7 @@ struct ReadInfo {
     int32_t align_start;    ///< Alignment start position (0-based)
     int32_t align_end;      ///< Alignment end position (0-based)
     int mapq;               ///< Mapping Quality
-    int hp_tag;             ///< Haplotype tag (HP): 0=Unknown, 1=H1, 2=H2
+    std::string hp_tag;     ///< Haplotype tag (HP): "1", "2", "1-1", "2-1", "unphase", etc.
     bool is_tumor;          ///< True if from Tumor BAM, False if from Normal BAM
     AltSupport alt_support; ///< Support for somatic variant (ALT, REF, or UNKNOWN)
 };

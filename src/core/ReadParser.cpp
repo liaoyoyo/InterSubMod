@@ -68,10 +68,15 @@ ReadInfo ReadParser::parse(
     info.is_tumor = is_tumor;
     
     // Extract HP tag (haplotype)
-    info.hp_tag = 0;  // Default: unknown
+    info.hp_tag = "0";  // Default: unknown
     uint8_t* hp_aux = bam_aux_get(b, "HP");
     if (hp_aux) {
-        info.hp_tag = bam_aux2i(hp_aux);
+        char type = hp_aux[0];
+        if (type == 'Z' || type == 'H') {
+            info.hp_tag = bam_aux2Z(hp_aux);
+        } else if (type == 'c' || type == 'C' || type == 's' || type == 'S' || type == 'i' || type == 'I') {
+            info.hp_tag = std::to_string(bam_aux2i(hp_aux));
+        }
     }
     
     // Determine ALT support
