@@ -19,7 +19,7 @@ std::vector<MethylCall> MethylationParser::parse_read(
 ) {
     std::vector<MethylCall> calls;
     
-    // 1. Retrieve MM and ML tags
+    // Retrieve MM and ML tags
     uint8_t* mm_aux = bam_aux_get(b, "MM");
     uint8_t* ml_aux = bam_aux_get(b, "ML");
     
@@ -29,7 +29,7 @@ std::vector<MethylCall> MethylationParser::parse_read(
     
     const char* mm_str = bam_aux2Z(mm_aux);
     
-    // 2. Parse ML array
+    // Parse ML array
     // Format: 'B' (array type), 'C' (uint8), [4 bytes length], [data...]
     if (ml_aux[0] != 'B' || ml_aux[1] != 'C') {
         return calls;  // Invalid ML format
@@ -38,7 +38,7 @@ std::vector<MethylCall> MethylationParser::parse_read(
     uint32_t ml_len = le_to_u32(ml_aux + 2);
     const uint8_t* ml_data = ml_aux + 6;
     
-    // 3. Parse MM tag to get delta-encoded positions and ML offset
+    // Parse MM tag to get delta-encoded positions and ML offset
     // MM format: "C+h?,<deltas>;C+m?,<deltas>;"
     // Each modification type has its own delta list
     // ML array contains all probabilities in order: [C+h? probs..., C+m? probs...]
@@ -77,11 +77,11 @@ std::vector<MethylCall> MethylationParser::parse_read(
         return calls;  // Not enough ML data
     }
     
-    // 4. Build sequence-to-reference mapping
+    // Build sequence-to-reference mapping
     // This maps each base in the read sequence to its genomic coordinate
     std::vector<int32_t> seq_to_ref = build_seq_to_ref_map(b);
     
-    // 5. Iterate through read sequence to find modified bases
+    // Iterate through read sequence to find modified bases
     // Note: MM tag refers to the SEQ in the BAM file.
     // - If read is mapped to Forward strand: SEQ matches Ref. We look for 'C' and "C+m?".
     // - If read is mapped to Reverse strand: SEQ is Reverse Complemented. 

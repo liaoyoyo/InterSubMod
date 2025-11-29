@@ -43,8 +43,6 @@ void MatrixBuilder::finalize() {
     }
     
     // 1. Collect all unique CpG positions
-    // We iterate through all reads and collect positions
-    // 1. Collect all unique CpG positions
     // We iterate through all reads and collect positions into a single vector
     std::vector<int32_t> all_positions;
     size_t total_calls = 0;

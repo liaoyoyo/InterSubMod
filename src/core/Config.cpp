@@ -74,7 +74,7 @@ bool Config::validate() const {
         std::cerr << "Error: Somatic VCF path is required." << std::endl;
         valid = false;
     } else {
-         // Verify VCF/BCF
+        // Verify VCF/BCF
         vcfFile* fp = vcf_open(somatic_vcf_path.c_str(), "r");
         if (fp == NULL) {
             std::cerr << "Error: Cannot open Somatic VCF file: " << somatic_vcf_path << std::endl;
