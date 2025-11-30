@@ -39,6 +39,13 @@ struct Config {
     
     bool pmd_gating = true;           ///< Whether to exclude CpG sites in PMDs
     int threads = 16;                  ///< Number of threads for parallel processing
+    
+    // Logging and Debug
+    LogLevel log_level = LogLevel::LOG_INFO;  ///< Logging verbosity level
+    std::string debug_output_dir = "";    ///< Directory for debug outputs (filtered reads, etc.)
+                                          ///< If empty, defaults to output_dir/debug
+    bool output_filtered_reads = false;   ///< Output filtered reads in debug mode
+    bool no_filter_output = false;        ///< If true, output all reads without filtering (for verification)
 
     /**
      * @brief Validates configuration logic and file formats.
@@ -55,6 +62,23 @@ struct Config {
      * @brief Prints the current configuration to stdout.
      */
     void print() const;
+    
+    /**
+     * @brief Returns the effective debug output directory.
+     */
+    std::string get_debug_output_dir() const {
+        if (!debug_output_dir.empty()) {
+            return debug_output_dir;
+        }
+        return output_dir + "/debug";
+    }
+    
+    /**
+     * @brief Check if debug mode is enabled.
+     */
+    bool is_debug() const {
+        return log_level >= LogLevel::LOG_DEBUG;
+    }
 };
 
 } // namespace InterSubMod

@@ -3,6 +3,7 @@
 #include <htslib/sam.h>
 #include "core/DataStructs.hpp"
 #include "core/SomaticSnv.hpp"
+#include <utility>
 
 namespace InterSubMod {
 
@@ -17,12 +18,24 @@ struct ReadFilterConfig {
 };
 
 /**
+ * @brief Result of alt support determination with filter reason.
+ */
+struct AltSupportResult {
+    AltSupport support;
+    FilterReason filter_reason;
+    
+    AltSupportResult(AltSupport s = AltSupport::UNKNOWN, FilterReason r = FilterReason::NONE)
+        : support(s), filter_reason(r) {}
+};
+
+/**
  * @brief Parser for extracting ReadInfo from BAM records.
  * 
  * This class handles:
  * - Filtering reads based on quality criteria
  * - Extracting basic information (QNAME, FLAG, MAPQ, positions)
  * - Parsing phasing tags (HP, PS)
+ * - Determining strand orientation (forward/reverse)
  * - Determining ALT/REF support at SNV positions (requires CIGAR parsing)
  * 
  * Thread-safe: This class is stateless and can be used from multiple threads.
@@ -49,6 +62,14 @@ public:
     bool should_keep(const bam1_t* b) const;
     
     /**
+     * @brief Checks if a read passes filtering and returns the reason if not.
+     * 
+     * @param b BAM record to check.
+     * @return pair of (should_keep, filter_reason). If should_keep is true, filter_reason is NONE.
+     */
+    std::pair<bool, FilterReason> should_keep_with_reason(const bam1_t* b) const;
+    
+    /**
      * @brief Parses a BAM record into a ReadInfo structure.
      * 
      * @param b BAM record to parse.
@@ -71,6 +92,28 @@ public:
     ) const;
     
     /**
+     * @brief Creates a FilteredReadInfo from a BAM record for debug logging.
+     * 
+     * @param b BAM record.
+     * @param is_tumor true if from tumor BAM.
+     * @param reasons Filter reasons that caused this read to be filtered.
+     * @return Populated FilteredReadInfo structure.
+     */
+    FilteredReadInfo create_filtered_info(
+        const bam1_t* b,
+        bool is_tumor,
+        FilterReason reasons
+    ) const;
+    
+    /**
+     * @brief Determines strand orientation from BAM FLAG.
+     * 
+     * @param b BAM record.
+     * @return Strand::FORWARD if on positive strand, Strand::REVERSE if on negative strand.
+     */
+    static Strand determine_strand(const bam1_t* b);
+    
+    /**
      * @brief Gets the filter configuration.
      */
     const ReadFilterConfig& get_config() const { return config_; }
@@ -89,6 +132,18 @@ private:
      * @return AltSupport::ALT, REF, or UNKNOWN.
      */
     AltSupport determine_alt_support(
+        const bam1_t* b,
+        const SomaticSnv& snv,
+        const std::string& ref_seq,
+        int32_t ref_start_pos
+    ) const;
+    
+    /**
+     * @brief Determines alt support with detailed filter reason for debug mode.
+     * 
+     * @return AltSupportResult containing both support status and filter reason.
+     */
+    AltSupportResult determine_alt_support_with_reason(
         const bam1_t* b,
         const SomaticSnv& snv,
         const std::string& ref_seq,

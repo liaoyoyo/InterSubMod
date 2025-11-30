@@ -1,14 +1,26 @@
 #!/bin/bash
 # Script to run ALL SNV tests from a real VCF file
+#
+# This script supports two modes:
+#   1. baseline: Normal filtering with debug logging
+#   2. all-with-window: All filters enabled, ±2000 window, no-filter output
+#
+# Usage:
+#   ./run_full_vcf_test.sh                          # Default baseline mode
+#   ./run_full_vcf_test.sh --mode baseline          # Baseline mode explicitly
+#   ./run_full_vcf_test.sh --mode all-with-window   # All filters, no-filter output
+#   ./run_full_vcf_test.sh -o /path/to/output       # Custom output directory
+
+set -e
 
 # Defaults
 VCF_PATH="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
-OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output/full_vcf_test"
 THREADS=64
 TUMOR_BAM="/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam"
 NORMAL_BAM="/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam"
 REF_FASTA="/big8_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa"
-LOG_FILE="${OUTPUT_DIR}/full_execution_analysis.log"
+MODE="baseline"
+OUTPUT_DIR=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -25,17 +37,60 @@ while [[ $# -gt 0 ]]; do
             OUTPUT_DIR="$2"
             shift 2
             ;;
+        -m|--mode)
+            MODE="$2"
+            shift 2
+            ;;
+        -h|--help)
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  -v, --vcf PATH       Path to VCF file"
+            echo "  -t, --threads N      Number of threads (default: 64)"
+            echo "  -o, --out DIR        Output directory"
+            echo "  -m, --mode MODE      Test mode: baseline or all-with-window"
+            echo "  -h, --help           Show this help message"
+            echo ""
+            echo "Modes:"
+            echo "  baseline:        Normal filtering with debug logging"
+            echo "                   Outputs to: output/vcf_baseline_1130"
+            echo ""
+            echo "  all-with-window: All filters enabled, ±2000bp window, no-filter output"
+            echo "                   Outputs to: output/vcf_all_w2000_1130"
+            exit 0
+            ;;
         *)
             echo "Unknown argument: $1"
+            echo "Use --help for usage information"
             exit 1
             ;;
     esac
 done
 
-# Update log file path if output dir changed
+# Set output directory based on mode if not specified
+if [[ -z "$OUTPUT_DIR" ]]; then
+    case $MODE in
+        baseline)
+            OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output/vcf_baseline_1130"
+            ;;
+        all-with-w1000)
+            OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output/vcf_all_w1000_1130"
+            ;;
+        all-with-w2000)
+            OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output/vcf_all_w2000_1130"
+            ;;
+        *)
+            echo "Unknown mode: $MODE"
+            echo "Valid modes: baseline, all-with-w1000, all-with-w2000"
+            exit 1
+            ;;
+    esac
+fi
+
 LOG_FILE="${OUTPUT_DIR}/full_execution_analysis.log"
 
 echo "=== InterSubMod FULL VCF Test ==="
+echo "Mode: ${MODE}"
 echo "VCF: ${VCF_PATH}"
 echo "Tumor BAM: ${TUMOR_BAM}"
 echo "Normal BAM: ${NORMAL_BAM}"
@@ -50,23 +105,72 @@ mkdir -p "${OUTPUT_DIR}"
 
 # Step 1: Run Execution
 echo ""
-echo "[1] Running InterSubMod..."
+echo "[1] Running InterSubMod in ${MODE} mode..."
 EXECUTABLE="/big8_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod"
 
 if [ ! -f "${EXECUTABLE}" ]; then
     echo "Error: Executable not found at ${EXECUTABLE}"
-    echo "Please build the project first."
+    echo "Please build the project first with:"
+    echo "  cd /big8_disk/liaoyoyo2001/InterSubMod/build && cmake .. && make -j"
     exit 1
 fi
 
-# Construct Command
-CMD="${EXECUTABLE} \
-    --tumor-bam ${TUMOR_BAM} \
-    --normal-bam ${NORMAL_BAM} \
-    --reference ${REF_FASTA} \
-    --vcf ${VCF_PATH} \
-    --output-dir ${OUTPUT_DIR} \
-    --threads ${THREADS}"
+# Construct Command based on mode
+case $MODE in
+    baseline)
+        # Baseline mode: Normal filtering with debug logging
+        # - Default window size (±1000bp)
+        # - Default filtering parameters
+        # - Debug mode enabled for logging filtered reads
+        CMD="${EXECUTABLE} \
+            --tumor-bam ${TUMOR_BAM} \
+            --normal-bam ${NORMAL_BAM} \
+            --reference ${REF_FASTA} \
+            --vcf ${VCF_PATH} \
+            --output-dir ${OUTPUT_DIR} \
+            --threads ${THREADS} \
+            --log-level debug \
+            --output-filtered-reads"
+        ;;
+    
+        all-with-w1000)
+        # All-with-window mode: All filters + larger window + no-filter output
+        # - Window size: ±1000bp
+        # - All filters enabled (default)
+        # - No-filter flag: output all reads without filtering
+        # - This is useful for verification and comparison
+        CMD="${EXECUTABLE} \
+            --tumor-bam ${TUMOR_BAM} \
+            --normal-bam ${NORMAL_BAM} \
+            --reference ${REF_FASTA} \
+            --vcf ${VCF_PATH} \
+            --output-dir ${OUTPUT_DIR} \
+            --threads ${THREADS} \
+            --window-size 1000 \
+            --log-level debug \
+            --output-filtered-reads \
+            --no-filter"
+        ;;
+
+    all-with-w2000)
+        # All-with-window mode: All filters + larger window + no-filter output
+        # - Window size: ±2000bp
+        # - All filters enabled (default)
+        # - No-filter flag: output all reads without filtering
+        # - This is useful for verification and comparison
+        CMD="${EXECUTABLE} \
+            --tumor-bam ${TUMOR_BAM} \
+            --normal-bam ${NORMAL_BAM} \
+            --reference ${REF_FASTA} \
+            --vcf ${VCF_PATH} \
+            --output-dir ${OUTPUT_DIR} \
+            --threads ${THREADS} \
+            --window-size 2000 \
+            --log-level debug \
+            --output-filtered-reads \
+            --no-filter"
+        ;;
+esac
 
 echo "Command to run (for IDE Debugging):"
 echo "${CMD}"
@@ -81,5 +185,32 @@ echo "    (This may take a few minutes...)"
 
 echo ""
 echo "=== Analysis Log Saved to: ${LOG_FILE} ==="
-echo "Done."
 
+# Step 2: Output summary
+echo ""
+echo "[2] Output Summary:"
+echo "    Output directory: ${OUTPUT_DIR}"
+
+# Count output files
+if [ -d "${OUTPUT_DIR}" ]; then
+    NUM_REGIONS=$(find "${OUTPUT_DIR}" -name "metadata.txt" 2>/dev/null | wc -l)
+    NUM_READS_FILES=$(find "${OUTPUT_DIR}" -name "reads.tsv" 2>/dev/null | wc -l)
+    NUM_METHYL_FILES=$(find "${OUTPUT_DIR}" -name "methylation.csv" 2>/dev/null | wc -l)
+    NUM_FILTERED=$(find "${OUTPUT_DIR}" -name "filtered_reads.tsv" 2>/dev/null | wc -l)
+    NUM_FORWARD=$(find "${OUTPUT_DIR}" -name "methylation_forward.csv" 2>/dev/null | wc -l)
+    NUM_REVERSE=$(find "${OUTPUT_DIR}" -name "methylation_reverse.csv" 2>/dev/null | wc -l)
+    
+    echo "    Regions processed: ${NUM_REGIONS}"
+    echo "    Reads files: ${NUM_READS_FILES}"
+    echo "    Methylation matrices: ${NUM_METHYL_FILES}"
+    echo "    Strand-specific matrices:"
+    echo "      - Forward (+): ${NUM_FORWARD}"
+    echo "      - Reverse (-): ${NUM_REVERSE}"
+    if [[ "$MODE" == "baseline" ]] || [[ "$MODE" == "all-with-window" ]]; then
+        echo "    Filtered reads logs: ${NUM_FILTERED}"
+    fi
+fi
+
+echo ""
+echo "=== Test Complete (Mode: ${MODE}) ==="
+echo "Done."

@@ -9,6 +9,7 @@
 #include "core/ReadParser.hpp"
 #include "core/MethylationParser.hpp"
 #include "core/MatrixBuilder.hpp"
+#include "core/Config.hpp"
 #include "io/RegionWriter.hpp"
 
 namespace InterSubMod {
@@ -21,12 +22,16 @@ struct RegionResult {
     int snv_id;
     int num_reads;
     int num_cpgs;
+    int num_forward_reads;   ///< Forward strand reads
+    int num_reverse_reads;   ///< Reverse strand reads
+    int num_filtered_reads;  ///< Reads filtered out (debug mode)
     double elapsed_ms;
     double peak_memory_mb;
     bool success;
     std::string error_message;
     
     RegionResult() : region_id(-1), snv_id(-1), num_reads(0), num_cpgs(0),
+                     num_forward_reads(0), num_reverse_reads(0), num_filtered_reads(0),
                      elapsed_ms(0.0), peak_memory_mb(0.0), success(false) {}
 };
 
@@ -39,6 +44,7 @@ struct RegionResult {
  * 3. 使用 OpenMP 平行處理多個 regions
  * 4. 管理 thread-local 資源（BamReader, FastaReader）
  * 5. 收集並報告每個 region 的處理結果
+ * 6. 在 debug 模式下記錄被過濾的 reads
  * 
  * Thread-safety:
  * - 每個 thread 維護自己的 BAM/FASTA readers
@@ -48,14 +54,7 @@ struct RegionResult {
 class RegionProcessor {
 public:
     /**
-     * @brief 建構 RegionProcessor
-     * 
-     * @param tumor_bam_path Tumor BAM 檔案路徑
-     * @param normal_bam_path Normal BAM 檔案路徑（可選）
-     * @param ref_fasta_path 參考基因組 FASTA 路徑
-     * @param output_dir 輸出根目錄
-     * @param num_threads OpenMP 執行緒數量
-     * @param window_size Region 窗口大小（以 SNV 為中心，±window_size）
+     * @brief 建構 RegionProcessor（簡化版，用於向後相容）
      */
     RegionProcessor(
         const std::string& tumor_bam_path,
@@ -65,6 +64,13 @@ public:
         int num_threads = 4,
         int32_t window_size = 2000
     );
+    
+    /**
+     * @brief 建構 RegionProcessor（完整版，使用 Config）
+     * 
+     * @param config Configuration object containing all parameters
+     */
+    explicit RegionProcessor(const Config& config);
     
     /**
      * @brief 載入 SNV table（TSV 格式）
@@ -125,8 +131,15 @@ private:
     std::string normal_bam_path_;
     std::string ref_fasta_path_;
     std::string output_dir_;
+    std::string debug_output_dir_;
     int num_threads_;
     int32_t window_size_;
+    
+    // Configuration
+    LogLevel log_level_;
+    bool output_filtered_reads_;
+    bool no_filter_output_;
+    ReadFilterConfig filter_config_;
     
     std::vector<SomaticSnv> snvs_;
     ChromIndex chrom_index_;  // Manage chromosome name to ID mapping

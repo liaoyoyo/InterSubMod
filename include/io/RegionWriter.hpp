@@ -4,6 +4,7 @@
 #include <vector>
 #include "core/DataStructs.hpp"
 #include "core/SomaticSnv.hpp"
+#include "core/Types.hpp"
 
 namespace InterSubMod {
 
@@ -14,13 +15,17 @@ namespace InterSubMod {
  * ```
  * output/
  *   region_0000/
- *     metadata.txt          # Region 與 SNV 資訊
- *     reads.tsv             # Read 列表與標籤資訊
- *     cpg_sites.tsv         # CpG 位點列表
- *     methylation.csv       # Read × CpG 甲基化矩陣（CSV格式）
- *     methylation.npz       # (可選) NumPy binary format
+ *     metadata.txt                  # Region 與 SNV 資訊
+ *     reads.tsv                     # Read 列表與標籤資訊（含 strand）
+ *     cpg_sites.tsv                 # CpG 位點列表
+ *     methylation.csv               # Read × CpG 甲基化矩陣（CSV格式）
+ *     methylation_forward.csv       # Forward strand 甲基化矩陣
+ *     methylation_reverse.csv       # Reverse strand 甲基化矩陣
+ *     methylation.npz               # (可選) NumPy binary format
  *   region_0001/
  *     ...
+ *   debug/                          # Debug 模式輸出
+ *     filtered_reads.tsv            # 被過濾的 reads 與原因
  * ```
  */
 class RegionWriter {
@@ -28,8 +33,14 @@ public:
     /**
      * @brief 建構 RegionWriter
      * @param output_dir 輸出根目錄（如 "output/"）
+     * @param debug_output_dir Debug 輸出目錄（如 "output/debug"）
+     * @param output_strand_matrices 是否輸出依 strand 分類的矩陣
      */
-    explicit RegionWriter(const std::string& output_dir);
+    explicit RegionWriter(
+        const std::string& output_dir,
+        const std::string& debug_output_dir = "",
+        bool output_strand_matrices = true
+    );
     
     /**
      * @brief 寫出一個 region 的完整資料
@@ -57,8 +68,28 @@ public:
         double peak_memory_mb = 0.0
     );
     
+    /**
+     * @brief 寫出被過濾的 reads（Debug 模式使用）
+     * 
+     * @param region_dir Region 目錄
+     * @param chr_name 染色體名稱
+     * @param filtered_reads 被過濾的 reads 列表
+     */
+    void write_filtered_reads(
+        const std::string& region_dir,
+        const std::string& chr_name,
+        const std::vector<FilteredReadInfo>& filtered_reads
+    );
+    
+    /**
+     * @brief 取得 region 目錄路徑（供外部使用）
+     */
+    std::string get_region_dir(const std::string& chr_name, int32_t snv_pos, int32_t region_start, int32_t region_end);
+    
 private:
     std::string output_dir_;
+    std::string debug_output_dir_;
+    bool output_strand_matrices_;
     
     /**
      * @brief 建立 region 子目錄
@@ -78,15 +109,17 @@ private:
         int32_t region_end,
         int num_reads,
         int num_cpgs,
+        int num_forward,
+        int num_reverse,
         double elapsed_ms,
         double peak_memory_mb
     );
     
     /**
-     * @brief 寫出 reads.tsv
+     * @brief 寫出 reads.tsv（含 strand 資訊）
      * 
      * 格式：
-     * read_id  read_name  chr  start  end  mapq  hp  ps  alt_support  tags_encoded
+     * read_id  read_name  chr  start  end  mapq  hp  alt_support  is_tumor  strand
      */
     void write_reads(
         const std::string& region_dir,
@@ -117,6 +150,26 @@ private:
         const std::vector<std::vector<double>>& matrix,
         const std::vector<int32_t>& cpg_positions
     );
+    
+    /**
+     * @brief 寫出依 strand 分類的甲基化矩陣
+     * 
+     * @param region_dir Region 目錄
+     * @param reads Read 列表（用於判定 strand）
+     * @param matrix 完整甲基化矩陣
+     * @param cpg_positions CpG 位點列表
+     */
+    void write_strand_matrices(
+        const std::string& region_dir,
+        const std::vector<ReadInfo>& reads,
+        const std::vector<std::vector<double>>& matrix,
+        const std::vector<int32_t>& cpg_positions
+    );
+    
+    /**
+     * @brief 輔助函式：將 Strand 轉換為字串
+     */
+    static std::string strand_to_string(Strand s);
 };
 
 } // namespace InterSubMod

@@ -23,17 +23,21 @@ int main(int argc, char** argv) {
 
     config.print();
 
+    // Print debug mode status
+    if (config.is_debug()) {
+        std::cout << "\n=== DEBUG MODE ENABLED ===" << std::endl;
+        std::cout << "Filtered reads will be logged to: " << config.get_debug_output_dir() << std::endl;
+        if (config.no_filter_output) {
+            std::cout << "No-filter mode: All reads will be output without filtering" << std::endl;
+        }
+        std::cout << "==========================\n" << std::endl;
+    }
+
     std::cout << "Configuration valid. Starting analysis..." << std::endl;
     
     try {
-        InterSubMod::RegionProcessor processor(
-            config.tumor_bam_path,
-            config.normal_bam_path,
-            config.reference_fasta_path,
-            config.output_dir,
-            config.threads,
-            config.window_size_bp
-        );
+        // Use the new Config-based constructor
+        InterSubMod::RegionProcessor processor(config);
 
         std::cout << "[1] Loading SNVs from VCF..." << std::endl;
         int num_snvs = processor.load_snvs_from_vcf(config.somatic_vcf_path);
@@ -55,6 +59,7 @@ int main(int argc, char** argv) {
         processor.print_summary(results);
         
         std::cout << "Total Wall-clock time: " << total_time << " ms" << std::endl;
+        std::cout << "Output directory: " << config.output_dir << std::endl;
 
     } catch (const std::exception& e) {
         std::cerr << "Fatal error: " << e.what() << std::endl;

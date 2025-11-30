@@ -6,6 +6,7 @@
 #include <omp.h>
 #include <algorithm>
 #include <unordered_set>
+#include <sys/stat.h>
 
 namespace InterSubMod {
 
@@ -20,14 +21,56 @@ RegionProcessor::RegionProcessor(
     normal_bam_path_(normal_bam_path),
     ref_fasta_path_(ref_fasta_path),
     output_dir_(output_dir),
+    debug_output_dir_(output_dir + "/debug"),
     num_threads_(num_threads),
-    window_size_(window_size) {
+    window_size_(window_size),
+    log_level_(LogLevel::LOG_INFO),
+    output_filtered_reads_(false),
+    no_filter_output_(false) {
     
     // Set OpenMP threads
     omp_set_num_threads(num_threads_);
     
     std::cout << "RegionProcessor initialized with " << num_threads_ 
               << " threads, window_size=±" << window_size_ << "bp" << std::endl;
+}
+
+RegionProcessor::RegionProcessor(const Config& config)
+    : tumor_bam_path_(config.tumor_bam_path),
+      normal_bam_path_(config.normal_bam_path),
+      ref_fasta_path_(config.reference_fasta_path),
+      output_dir_(config.output_dir),
+      debug_output_dir_(config.get_debug_output_dir()),
+      num_threads_(config.threads),
+      window_size_(config.window_size_bp),
+      log_level_(config.log_level),
+      output_filtered_reads_(config.output_filtered_reads),
+      no_filter_output_(config.no_filter_output) {
+    
+    // Set filter configuration
+    filter_config_.min_mapq = config.min_mapq;
+    filter_config_.min_read_length = config.min_read_length;
+    filter_config_.min_base_quality = config.min_base_quality;
+    filter_config_.require_mm_ml = true;
+    
+    // Set OpenMP threads
+    omp_set_num_threads(num_threads_);
+    
+    // Create debug directory if needed
+    if (output_filtered_reads_) {
+        mkdir(debug_output_dir_.c_str(), 0755);
+    }
+    
+    std::cout << "RegionProcessor initialized:" << std::endl;
+    std::cout << "  Threads: " << num_threads_ << std::endl;
+    std::cout << "  Window size: ±" << window_size_ << " bp" << std::endl;
+    std::cout << "  Log level: " << static_cast<int>(log_level_) << std::endl;
+    if (output_filtered_reads_) {
+        std::cout << "  Debug output: " << debug_output_dir_ << std::endl;
+    }
+    if (no_filter_output_) {
+        std::cout << "  Mode: No-filter (outputting all reads)" << std::endl;
+    }
 }
 
 int RegionProcessor::load_snvs(const std::string& snv_table_path) {
@@ -149,26 +192,35 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
             std::string chr_name = chrom_index_.get_name(snv.chr_id);
             
             // Logging (protected by critical section)
-            #pragma omp critical
-            {
-                std::cout << "[Thread " << omp_get_thread_num() << "] Processing region " 
-                          << i << " (SNV " << chr_name << ":" << snv.pos << ")" << std::endl;
+            if (log_level_ >= LogLevel::LOG_INFO) {
+                #pragma omp critical
+                {
+                    std::cout << "[Thread " << omp_get_thread_num() << "] Processing region " 
+                              << i << " (SNV " << chr_name << ":" << snv.pos << ")" << std::endl;
+                }
             }
             
             // Process the region using the thread-local readers
             // Note: We pass the readers by reference
             results[i] = process_single_region(snv, i, tumor_reader, ref_reader);
             
-            #pragma omp critical
-            {
-                if (results[i].success) {
-                    std::cout << "[Thread " << omp_get_thread_num() << "] ✓ Region " << i 
-                              << " completed: " << results[i].num_reads << " reads, " 
-                              << results[i].num_cpgs << " CpGs, " 
-                              << results[i].elapsed_ms << " ms" << std::endl;
-                } else {
-                    std::cerr << "[Thread " << omp_get_thread_num() << "] ✗ Region " << i 
-                              << " failed: " << results[i].error_message << std::endl;
+            if (log_level_ >= LogLevel::LOG_INFO) {
+                #pragma omp critical
+                {
+                    if (results[i].success) {
+                        std::cout << "[Thread " << omp_get_thread_num() << "] ✓ Region " << i 
+                                  << " completed: " << results[i].num_reads << " reads ("
+                                  << results[i].num_forward_reads << "+ / " 
+                                  << results[i].num_reverse_reads << "-), " 
+                                  << results[i].num_cpgs << " CpGs";
+                        if (output_filtered_reads_) {
+                            std::cout << ", " << results[i].num_filtered_reads << " filtered";
+                        }
+                        std::cout << ", " << results[i].elapsed_ms << " ms" << std::endl;
+                    } else {
+                        std::cerr << "[Thread " << omp_get_thread_num() << "] ✗ Region " << i 
+                                  << " failed: " << results[i].error_message << std::endl;
+                    }
                 }
             }
         }
@@ -196,8 +248,8 @@ RegionResult RegionProcessor::process_single_region(
     auto t_start = std::chrono::high_resolution_clock::now();
     
     try {
-        // Initialize parsers (lightweight, can be recreated or reused)
-        ReadParser read_parser;
+        // Initialize parsers with filter configuration
+        ReadParser read_parser(filter_config_);
         MethylationParser methyl_parser;
         MatrixBuilder matrix_builder;
         
@@ -226,32 +278,58 @@ RegionResult RegionProcessor::process_single_region(
             throw std::runtime_error("Failed to fetch reference sequence");
         }
         
+        // Collect filtered reads for debug output
+        std::vector<FilteredReadInfo> filtered_reads;
+        
         // Process each read
         int read_count = 0;
         std::unordered_set<std::string> processed_read_names;
 
         for (auto* b : reads) {
             // 1. Filter and Parse Read Info
-            if (read_parser.should_keep(b)) {
-                ReadInfo info = read_parser.parse(b, read_count, true, snv, ref_seq, region_start);
-                
-                // Skip reads that don't cover the SNV or have low quality at the SNV site
-                if (info.alt_support == AltSupport::UNKNOWN) {
-                    continue;
+            auto [keep, filter_reason] = read_parser.should_keep_with_reason(b);
+            
+            if (!keep && !no_filter_output_) {
+                // Record filtered read for debug output
+                if (output_filtered_reads_) {
+                    FilteredReadInfo filtered = read_parser.create_filtered_info(b, true, filter_reason);
+                    filtered_reads.push_back(filtered);
                 }
-                
-                // Optional: Duplicate read name check
-                // if (processed_read_names.find(info.read_name) != processed_read_names.end()) {
-                //     continue;
-                // }
-                processed_read_names.insert(info.read_name);
+                continue;
+            }
+            
+            ReadInfo info = read_parser.parse(b, read_count, true, snv, ref_seq, region_start);
+            
+            // Skip reads that don't cover the SNV or have low quality at the SNV site
+            // (unless no_filter_output_ is enabled)
+            if (info.alt_support == AltSupport::UNKNOWN && !no_filter_output_) {
+                if (output_filtered_reads_) {
+                    // Determine the reason for UNKNOWN support
+                    FilterReason reason = FilterReason::SNV_NOT_COVERED;
+                    FilteredReadInfo filtered = read_parser.create_filtered_info(b, true, reason);
+                    filtered_reads.push_back(filtered);
+                }
+                continue;
+            }
+            
+            // Duplicate read name check
+            if (processed_read_names.find(info.read_name) != processed_read_names.end()) {
+                continue;
+            }
+            processed_read_names.insert(info.read_name);
 
-                // 2. Parse Methylation (MM/ML tags)
-                auto methyl_calls = methyl_parser.parse_read(b, ref_seq, region_start);
-                
-                // 3. Add to Matrix Builder
-                matrix_builder.add_read(info, methyl_calls);
-                read_count++;
+            // 2. Parse Methylation (MM/ML tags)
+            auto methyl_calls = methyl_parser.parse_read(b, ref_seq, region_start);
+            
+            // 3. Add to Matrix Builder
+            matrix_builder.add_read(info, methyl_calls);
+            read_count++;
+            
+            // Count strand
+            if (info.strand == Strand::FORWARD) {
+                result.num_forward_reads++;
+            } else if (info.strand == Strand::REVERSE) {
+                result.num_reverse_reads++;
             }
         }
         
@@ -260,9 +338,10 @@ RegionResult RegionProcessor::process_single_region(
         
         result.num_reads = matrix_builder.num_reads();
         result.num_cpgs = matrix_builder.num_cpgs();
+        result.num_filtered_reads = filtered_reads.size();
         
         // Write output to disk
-        RegionWriter writer(output_dir_);
+        RegionWriter writer(output_dir_, debug_output_dir_, true);
         writer.write_region(
             snv,
             chr_name,
@@ -275,6 +354,12 @@ RegionResult RegionProcessor::process_single_region(
             0.0,  // elapsed_ms will be set below
             0.0   // peak_memory_mb not tracked yet
         );
+        
+        // Write filtered reads in debug mode
+        if (output_filtered_reads_ && !filtered_reads.empty()) {
+            std::string region_dir = writer.get_region_dir(chr_name, snv.pos, region_start, region_end);
+            writer.write_filtered_reads(region_dir, chr_name, filtered_reads);
+        }
         
         // Cleanup BAM records
         for (auto* r : reads) {
@@ -298,6 +383,9 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
     int success_count = 0;
     int total_reads = 0;
     int total_cpgs = 0;
+    int total_forward = 0;
+    int total_reverse = 0;
+    int total_filtered = 0;
     double total_time = 0.0;
     
     for (const auto& r : results) {
@@ -305,6 +393,9 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
             success_count++;
             total_reads += r.num_reads;
             total_cpgs += r.num_cpgs;
+            total_forward += r.num_forward_reads;
+            total_reverse += r.num_reverse_reads;
+            total_filtered += r.num_filtered_reads;
             total_time += r.elapsed_ms;
         }
     }
@@ -314,6 +405,11 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
     std::cout << "Successful: " << success_count << std::endl;
     std::cout << "Failed: " << (results.size() - success_count) << std::endl;
     std::cout << "Total reads processed: " << total_reads << std::endl;
+    std::cout << "  Forward strand (+): " << total_forward << std::endl;
+    std::cout << "  Reverse strand (-): " << total_reverse << std::endl;
+    if (output_filtered_reads_) {
+        std::cout << "  Filtered out: " << total_filtered << std::endl;
+    }
     std::cout << "Total CpG sites found: " << total_cpgs << std::endl;
     std::cout << "Total processing time: " << total_time << " ms" << std::endl;
     std::cout << "Average time per region: " << (total_time / results.size()) << " ms" << std::endl;
@@ -322,4 +418,3 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
 }
 
 } // namespace InterSubMod
-
