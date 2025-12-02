@@ -35,7 +35,7 @@ struct Config {
     int min_common_coverage = 3;      ///< Minimum common CpG sites to calculate distance (C_min)
     
     NanDistanceStrategy nan_distance_strategy = NanDistanceStrategy::MAX_DIST; ///< Strategy for missing distances
-    DistanceMetricType distance_metric = DistanceMetricType::NHD;              ///< Distance metric to use
+    std::vector<DistanceMetricType> distance_metrics = {DistanceMetricType::NHD}; ///< Distance metrics to use
     
     bool pmd_gating = true;           ///< Whether to exclude CpG sites in PMDs
     int threads = 16;                  ///< Number of threads for parallel processing

@@ -51,7 +51,8 @@ RegionProcessor::RegionProcessor(const Config& config)
       no_filter_output_(config.no_filter_output),
       compute_distance_matrix_(config.compute_distance_matrix),
       output_distance_matrix_(config.output_distance_matrix),
-      output_strand_distance_matrices_(config.output_strand_distance_matrices) {
+      output_strand_distance_matrices_(config.output_strand_distance_matrices),
+      distance_metrics_(config.distance_metrics) {
     
     // Set filter configuration
     filter_config_.min_mapq = config.min_mapq;
@@ -60,7 +61,12 @@ RegionProcessor::RegionProcessor(const Config& config)
     filter_config_.require_mm_ml = true;
     
     // Set distance matrix configuration
-    distance_config_.metric = config.distance_metric;
+    if (!distance_metrics_.empty()) {
+        distance_config_.metric = distance_metrics_[0]; // Default to first
+    } else {
+        distance_config_.metric = DistanceMetricType::NHD;
+        distance_metrics_.push_back(DistanceMetricType::NHD);
+    }
     distance_config_.min_common_coverage = config.min_common_coverage;
     distance_config_.nan_strategy = config.nan_distance_strategy;
     distance_config_.max_distance_value = config.max_distance_value;
@@ -81,7 +87,11 @@ RegionProcessor::RegionProcessor(const Config& config)
     std::cout << "  Threads: " << num_threads_ << std::endl;
     std::cout << "  Window size: ±" << window_size_ << " bp" << std::endl;
     std::cout << "  Log level: " << static_cast<int>(log_level_) << std::endl;
-    std::cout << "  Distance metric: " << DistanceCalculator::metric_to_string(distance_config_.metric) << std::endl;
+    std::cout << "  Distance metrics: ";
+    for (size_t i = 0; i < distance_metrics_.size(); ++i) {
+        std::cout << (i > 0 ? ", " : "") << DistanceCalculator::metric_to_string(distance_metrics_[i]);
+    }
+    std::cout << std::endl;
     std::cout << "  Min common coverage (C_min): " << distance_config_.min_common_coverage << std::endl;
     if (output_filtered_reads_) {
         std::cout << "  Debug output: " << debug_output_dir_ << std::endl;
@@ -437,39 +447,50 @@ RegionResult RegionProcessor::process_single_region(
             // Create distance calculator
             DistanceCalculator dist_calc(distance_config_);
             
-            // Compute all-reads distance matrix
-            DistanceMatrix all_dist = dist_calc.compute(meth_mat, read_list);
-            
-            // Update result statistics
-            result.num_valid_pairs = all_dist.num_valid_pairs;
-            result.num_invalid_pairs = all_dist.num_invalid_pairs;
-            result.avg_common_coverage = all_dist.avg_common_coverage;
-            
-            // Compute strand-specific matrices if enabled
-            DistanceMatrix forward_dist, reverse_dist;
-            if (output_strand_distance_matrices_) {
-                std::tie(forward_dist, reverse_dist) = dist_calc.compute_strand_specific(meth_mat, read_list);
-            }
-            
-            // Write distance matrices
-            if (output_distance_matrix_) {
-                std::string region_dir = writer.get_region_dir(chr_name, snv.pos, region_start, region_end);
-                writer.write_distance_matrices(
-                    region_dir,
-                    all_dist,
-                    forward_dist,
-                    reverse_dist,
-                    output_strand_distance_matrices_
-                );
-            }
-            
-            if (log_level_ >= LogLevel::LOG_DEBUG) {
-                #pragma omp critical
-                {
-                    std::cout << "  Distance matrix: " << all_dist.size() << "x" << all_dist.size()
-                              << ", valid pairs: " << all_dist.num_valid_pairs 
-                              << ", avg coverage: " << std::fixed << std::setprecision(1) 
-                              << all_dist.avg_common_coverage << std::endl;
+            // Loop over all requested metrics
+            for (auto metric : distance_metrics_) {
+                // Update config for this metric
+                distance_config_.metric = metric;
+                dist_calc = DistanceCalculator(distance_config_);
+                
+                // Compute all-reads distance matrix
+                DistanceMatrix all_dist = dist_calc.compute(meth_mat, read_list);
+                
+                // Update result statistics (only for the first metric to avoid overwriting/confusion in summary)
+                if (metric == distance_metrics_[0]) {
+                    result.num_valid_pairs = all_dist.num_valid_pairs;
+                    result.num_invalid_pairs = all_dist.num_invalid_pairs;
+                    result.avg_common_coverage = all_dist.avg_common_coverage;
+                }
+                
+                // Compute strand-specific matrices if enabled
+                DistanceMatrix forward_dist, reverse_dist;
+                if (output_strand_distance_matrices_) {
+                    std::tie(forward_dist, reverse_dist) = dist_calc.compute_strand_specific(meth_mat, read_list);
+                }
+                
+                // Write distance matrices
+                if (output_distance_matrix_) {
+                    std::string region_dir = writer.get_region_dir(chr_name, snv.pos, region_start, region_end);
+                    writer.write_distance_matrices(
+                        region_dir,
+                        all_dist,
+                        forward_dist,
+                        reverse_dist,
+                        metric,
+                        output_strand_distance_matrices_
+                    );
+                }
+                
+                if (log_level_ >= LogLevel::LOG_DEBUG) {
+                    #pragma omp critical
+                    {
+                        std::cout << "  Distance matrix (" << DistanceCalculator::metric_to_string(metric) 
+                                  << "): " << all_dist.size() << "x" << all_dist.size()
+                                  << ", valid pairs: " << all_dist.num_valid_pairs 
+                                  << ", avg coverage: " << std::fixed << std::setprecision(1) 
+                                  << all_dist.avg_common_coverage << std::endl;
+                    }
                 }
             }
         }
@@ -545,8 +566,8 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
     
     // Distance matrix summary
     if (compute_distance_matrix_ && regions_with_distance > 0) {
-        std::cout << "\n=== Distance Matrix Summary ===" << std::endl;
-        std::cout << "Metric: " << DistanceCalculator::metric_to_string(distance_config_.metric) << std::endl;
+        std::cout << "\n=== Distance Matrix Summary (First Metric) ===" << std::endl;
+        std::cout << "Metric: " << DistanceCalculator::metric_to_string(distance_metrics_[0]) << std::endl;
         std::cout << "Min common coverage (C_min): " << distance_config_.min_common_coverage << std::endl;
         std::cout << "Regions with distance matrices: " << regions_with_distance << std::endl;
         std::cout << "Total valid read pairs: " << total_valid_pairs << std::endl;

@@ -101,6 +101,7 @@ public:
         const DistanceMatrix& all_matrix,
         const DistanceMatrix& forward_matrix,
         const DistanceMatrix& reverse_matrix,
+        DistanceMetricType metric,
         bool output_strand_matrices = true
     );
     

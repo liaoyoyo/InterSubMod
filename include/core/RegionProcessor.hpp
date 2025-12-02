@@ -153,6 +153,7 @@ private:
     bool output_distance_matrix_;
     bool output_strand_distance_matrices_;
     DistanceConfig distance_config_;
+    std::vector<DistanceMetricType> distance_metrics_;
     
     std::vector<SomaticSnv> snvs_;
     ChromIndex chrom_index_;  // Manage chromosome name to ID mapping

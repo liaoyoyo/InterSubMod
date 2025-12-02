@@ -80,9 +80,9 @@ public:
         app.add_flag("--output-strand-distance-matrices", config.output_strand_distance_matrices,
             "Output separate distance matrices for forward/reverse strands (Default: enabled)");
             
-        std::string distance_metric_str = "NHD";
-        app.add_option("--distance-metric", distance_metric_str,
-            "Distance metric: NHD, L1, L2, CORR, JACCARD (Default: NHD)")
+        std::vector<std::string> distance_metric_strs = {"NHD"};
+        app.add_option("--distance-metric", distance_metric_strs,
+            "Distance metric(s): NHD, L1, L2, CORR, JACCARD (Default: NHD)")
             ->check(CLI::IsMember({"NHD", "L1", "L2", "CORR", "JACCARD", "nhd", "l1", "l2", "corr", "jaccard"}, CLI::ignore_case));
             
         app.add_option("--min-common-coverage", config.min_common_coverage,
@@ -136,7 +136,7 @@ public:
             config.log_level = it->second;
         }
         
-        // Convert distance metric string to enum
+        // Convert distance metric strings to enum
         static const std::map<std::string, DistanceMetricType> metric_map = {
             {"nhd", DistanceMetricType::NHD},
             {"l1", DistanceMetricType::L1},
@@ -145,11 +145,19 @@ public:
             {"jaccard", DistanceMetricType::JACCARD}
         };
         
-        std::string metric_lower = distance_metric_str;
-        std::transform(metric_lower.begin(), metric_lower.end(), metric_lower.begin(), ::tolower);
-        auto mit = metric_map.find(metric_lower);
-        if (mit != metric_map.end()) {
-            config.distance_metric = mit->second;
+        config.distance_metrics.clear();
+        for (const auto& s : distance_metric_strs) {
+            std::string metric_lower = s;
+            std::transform(metric_lower.begin(), metric_lower.end(), metric_lower.begin(), ::tolower);
+            auto mit = metric_map.find(metric_lower);
+            if (mit != metric_map.end()) {
+                config.distance_metrics.push_back(mit->second);
+            }
+        }
+        
+        if (config.distance_metrics.empty()) {
+            // Fallback if somehow empty
+            config.distance_metrics.push_back(DistanceMetricType::NHD);
         }
         
         // Convert NaN strategy string to enum

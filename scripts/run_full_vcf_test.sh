@@ -21,6 +21,7 @@ NORMAL_BAM="/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam"
 REF_FASTA="/big8_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa"
 MODE="baseline"
 OUTPUT_DIR=""
+METRICS="NHD"
 date_str=$(date +%Y%m%d)
 
 # Parse arguments
@@ -42,6 +43,10 @@ while [[ $# -gt 0 ]]; do
             MODE="$2"
             shift 2
             ;;
+        --metrics)
+            METRICS="$2"
+            shift 2
+            ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
             echo ""
@@ -50,6 +55,7 @@ while [[ $# -gt 0 ]]; do
             echo "  -t, --threads N      Number of threads (default: 64)"
             echo "  -o, --out DIR        Output directory"
             echo "  -m, --mode MODE      Test mode: baseline or all-with-window"
+            echo "  --metrics LIST       Space-separated list of metrics (e.g. 'NHD L1')"
             echo "  -h, --help           Show this help message"
             echo ""
             echo "Modes:"
@@ -98,6 +104,7 @@ echo "Normal BAM: ${NORMAL_BAM}"
 echo "Reference: ${REF_FASTA}"
 echo "Output Dir: ${OUTPUT_DIR}"
 echo "Threads: ${THREADS}"
+echo "Metrics: ${METRICS}"
 echo "Log File: ${LOG_FILE}"
 echo "---------------------------------"
 
@@ -116,6 +123,12 @@ if [ ! -f "${EXECUTABLE}" ]; then
     exit 1
 fi
 
+# Construct Metric Flags
+METRIC_FLAGS=""
+for m in ${METRICS}; do
+    METRIC_FLAGS="${METRIC_FLAGS} --distance-metric ${m}"
+done
+
 # Construct Command based on mode
 case $MODE in
     baseline)
@@ -131,7 +144,8 @@ case $MODE in
             --output-dir ${OUTPUT_DIR} \
             --threads ${THREADS} \
             --log-level debug \
-            --output-filtered-reads"
+            --output-filtered-reads \
+            ${METRIC_FLAGS}"
         ;;
     
         all-with-w1000)
@@ -150,7 +164,8 @@ case $MODE in
             --window-size 1000 \
             --log-level debug \
             --output-filtered-reads \
-            --no-filter"
+            --no-filter \
+            ${METRIC_FLAGS}"
         ;;
 
     all-with-w2000)
@@ -169,7 +184,8 @@ case $MODE in
             --window-size 2000 \
             --log-level debug \
             --output-filtered-reads \
-            --no-filter"
+            --no-filter \
+            ${METRIC_FLAGS}"
         ;;
 esac
 

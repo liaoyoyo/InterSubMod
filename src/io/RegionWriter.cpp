@@ -79,17 +79,23 @@ void RegionWriter::write_region(
         }
     }
     
+    // Create subdirectories
+    std::string reads_dir = region_dir + "/reads";
+    std::string meth_dir = region_dir + "/methylation";
+    mkdir(reads_dir.c_str(), 0755);
+    mkdir(meth_dir.c_str(), 0755);
+
     write_metadata(region_dir, snv, chr_name, region_id, region_start, region_end,
                    reads.size(), cpg_positions.size(), num_forward, num_reverse,
                    elapsed_ms, peak_memory_mb);
     
-    write_reads(region_dir, reads, chr_name);
-    write_cpg_sites(region_dir, chr_name, cpg_positions);
-    write_matrix_csv(region_dir, matrix, cpg_positions);
+    write_reads(reads_dir, reads, chr_name);
+    write_cpg_sites(meth_dir, chr_name, cpg_positions);
+    write_matrix_csv(meth_dir, matrix, cpg_positions);
     
     // Write strand-specific matrices if enabled
     if (output_strand_matrices_) {
-        write_strand_matrices(region_dir, reads, matrix, cpg_positions);
+        write_strand_matrices(meth_dir, reads, matrix, cpg_positions);
     }
 }
 
@@ -174,7 +180,11 @@ void RegionWriter::write_filtered_reads(
         return;
     }
     
-    std::ofstream ofs(region_dir + "/filtered_reads.tsv");
+    std::string reads_dir = region_dir + "/reads";
+    // Ensure reads dir exists (it should if write_region was called, but for safety)
+    mkdir(reads_dir.c_str(), 0755);
+    
+    std::ofstream ofs(reads_dir + "/filtered_reads.tsv");
     
     // Header
     ofs << "read_name\tchr\tstart\tend\tmapq\tstrand\tis_tumor\tfilter_reasons\n";
@@ -327,24 +337,34 @@ void RegionWriter::write_distance_matrices(
     const DistanceMatrix& all_matrix,
     const DistanceMatrix& forward_matrix,
     const DistanceMatrix& reverse_matrix,
+    DistanceMetricType metric,
     bool output_strand_matrices
 ) {
+    // Create distance directory
+    std::string dist_base_dir = region_dir + "/distance";
+    mkdir(dist_base_dir.c_str(), 0755);
+
+    // Create metric-specific directory
+    std::string metric_name = DistanceCalculator::metric_to_string(metric);
+    std::string metric_dir = dist_base_dir + "/" + metric_name;
+    mkdir(metric_dir.c_str(), 0755);
+    
     // Write all reads distance matrix
     if (!all_matrix.empty()) {
-        write_single_distance_matrix(region_dir + "/distance_matrix.csv", all_matrix);
-        all_matrix.write_stats(region_dir + "/distance_stats.txt");
+        write_single_distance_matrix(metric_dir + "/matrix.csv", all_matrix);
+        all_matrix.write_stats(metric_dir + "/stats.txt");
     }
     
     // Write strand-specific matrices
     if (output_strand_matrices) {
         if (!forward_matrix.empty()) {
-            write_single_distance_matrix(region_dir + "/distance_forward.csv", forward_matrix);
-            forward_matrix.write_stats(region_dir + "/distance_forward_stats.txt");
+            write_single_distance_matrix(metric_dir + "/matrix_forward.csv", forward_matrix);
+            forward_matrix.write_stats(metric_dir + "/stats_forward.txt");
         }
         
         if (!reverse_matrix.empty()) {
-            write_single_distance_matrix(region_dir + "/distance_reverse.csv", reverse_matrix);
-            reverse_matrix.write_stats(region_dir + "/distance_reverse_stats.txt");
+            write_single_distance_matrix(metric_dir + "/matrix_reverse.csv", reverse_matrix);
+            reverse_matrix.write_stats(metric_dir + "/stats_reverse.txt");
         }
     }
 }
