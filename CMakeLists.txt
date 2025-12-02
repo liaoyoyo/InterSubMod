@@ -62,18 +62,13 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(HTSlib REQUIRED htslib)
 
 # Eigen3
-find_package(Eigen3 3.3 QUIET)
-if(NOT Eigen3_FOUND)
-    message(STATUS "Eigen3 not found via find_package, trying to find header path...")
-    if(EXISTS "/usr/include/eigen3")
-        set(EIGEN3_INCLUDE_DIRS "/usr/include/eigen3")
-        message(STATUS "Found Eigen3 at /usr/include/eigen3")
-    else()
-        message(WARNING "Eigen3 not found. Please install eigen3 or set EIGEN3_INCLUDE_DIRS.")
-    endif()
-else()
-    set(EIGEN3_INCLUDE_DIRS ${Eigen3_INCLUDE_DIRS})
-endif()
+include(FetchContent)
+FetchContent_Declare(
+  eigen3
+  URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+)
+FetchContent_MakeAvailable(eigen3)
+include_directories(${eigen3_SOURCE_DIR})
 
 # --- Includes ---
 include_directories(include)
@@ -90,6 +85,7 @@ add_library(inter_sub_mod_core
     src/core/MethylationParser.cpp
     src/core/MatrixBuilder.cpp
     src/core/RegionProcessor.cpp
+    src/core/DistanceMatrix.cpp
     src/utils/Logger.cpp
     src/utils/FastaReader.cpp
     src/io/RegionWriter.cpp
@@ -138,6 +134,7 @@ add_executable(run_tests
     tests/main_test.cpp 
     tests/test_config.cpp
     tests/test_bam_reader.cpp
+    tests/test_distance_matrix.cpp
 )
 target_link_libraries(run_tests PRIVATE inter_sub_mod_core GTest::gtest)
 

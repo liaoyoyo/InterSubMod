@@ -70,6 +70,34 @@ public:
         app.add_option("--min-base-quality", config.min_base_quality, "Minimum base quality at SNV (Default: 20)")
             ->check(CLI::Range(0, 93));
 
+        // Distance Matrix Parameters
+        app.add_flag("--compute-distance-matrix,!--no-distance-matrix", config.compute_distance_matrix,
+            "Compute read-read distance matrix (Default: enabled)");
+            
+        app.add_flag("--output-distance-matrix,!--no-output-distance-matrix", config.output_distance_matrix,
+            "Output distance matrix to CSV (Default: enabled)");
+            
+        app.add_flag("--output-strand-distance-matrices", config.output_strand_distance_matrices,
+            "Output separate distance matrices for forward/reverse strands (Default: enabled)");
+            
+        std::string distance_metric_str = "NHD";
+        app.add_option("--distance-metric", distance_metric_str,
+            "Distance metric: NHD, L1, L2, CORR, JACCARD (Default: NHD)")
+            ->check(CLI::IsMember({"NHD", "L1", "L2", "CORR", "JACCARD", "nhd", "l1", "l2", "corr", "jaccard"}, CLI::ignore_case));
+            
+        app.add_option("--min-common-coverage", config.min_common_coverage,
+            "Minimum common CpG sites to compute distance (C_min) (Default: 3)")
+            ->check(CLI::PositiveNumber);
+            
+        std::string nan_strategy_str = "MAX_DIST";
+        app.add_option("--nan-distance-strategy", nan_strategy_str,
+            "Strategy for pairs with insufficient overlap: MAX_DIST, SKIP (Default: MAX_DIST)")
+            ->check(CLI::IsMember({"MAX_DIST", "SKIP", "max_dist", "skip"}, CLI::ignore_case));
+            
+        app.add_option("--max-distance-value", config.max_distance_value,
+            "Value for MAX_DIST strategy (Default: 1.0)")
+            ->check(CLI::Range(0.0, 1000.0));
+
         // Logging and Debug
         std::string log_level_str = "info";
         app.add_option("--log-level", log_level_str, 
@@ -106,6 +134,35 @@ public:
         auto it = log_level_map.find(log_lower);
         if (it != log_level_map.end()) {
             config.log_level = it->second;
+        }
+        
+        // Convert distance metric string to enum
+        static const std::map<std::string, DistanceMetricType> metric_map = {
+            {"nhd", DistanceMetricType::NHD},
+            {"l1", DistanceMetricType::L1},
+            {"l2", DistanceMetricType::L2},
+            {"corr", DistanceMetricType::CORR},
+            {"jaccard", DistanceMetricType::JACCARD}
+        };
+        
+        std::string metric_lower = distance_metric_str;
+        std::transform(metric_lower.begin(), metric_lower.end(), metric_lower.begin(), ::tolower);
+        auto mit = metric_map.find(metric_lower);
+        if (mit != metric_map.end()) {
+            config.distance_metric = mit->second;
+        }
+        
+        // Convert NaN strategy string to enum
+        static const std::map<std::string, NanDistanceStrategy> nan_map = {
+            {"max_dist", NanDistanceStrategy::MAX_DIST},
+            {"skip", NanDistanceStrategy::SKIP}
+        };
+        
+        std::string nan_lower = nan_strategy_str;
+        std::transform(nan_lower.begin(), nan_lower.end(), nan_lower.begin(), ::tolower);
+        auto nit = nan_map.find(nan_lower);
+        if (nit != nan_map.end()) {
+            config.nan_distance_strategy = nit->second;
         }
         
         // Auto-enable output_filtered_reads in debug mode

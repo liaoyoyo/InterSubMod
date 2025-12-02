@@ -21,6 +21,7 @@ NORMAL_BAM="/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam"
 REF_FASTA="/big8_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa"
 MODE="baseline"
 OUTPUT_DIR=""
+date_str=$(date +%Y%m%d)
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -53,10 +54,10 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "Modes:"
             echo "  baseline:        Normal filtering with debug logging"
-            echo "                   Outputs to: output/vcf_baseline_1130"
+            echo "                   Outputs to: output/${date_str}_vcf_baseline"
             echo ""
             echo "  all-with-window: All filters enabled, ±2000bp window, no-filter output"
-            echo "                   Outputs to: output/vcf_all_w2000_1130"
+            echo "                   Outputs to: output/${date_str}_vcf_all_w2000"
             exit 0
             ;;
         *)
@@ -71,13 +72,13 @@ done
 if [[ -z "$OUTPUT_DIR" ]]; then
     case $MODE in
         baseline)
-            OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output/vcf_baseline_1130"
+            OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output/${date_str}_vcf_baseline"
             ;;
         all-with-w1000)
-            OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output/vcf_all_w1000_1130"
+            OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output/${date_str}_vcf_all_w1000"
             ;;
         all-with-w2000)
-            OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output/vcf_all_w2000_1130"
+            OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output/${date_str}_vcf_all_w2000"
             ;;
         *)
             echo "Unknown mode: $MODE"

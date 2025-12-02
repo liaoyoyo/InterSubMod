@@ -32,13 +32,22 @@ struct Config {
     double binary_methyl_low = 0.2;   ///< Threshold for unmethylated (0) call
     
     int min_site_coverage = 5;       ///< Minimum reads covering a CpG site to keep it
-    int min_common_coverage = 3;      ///< Minimum common CpG sites to calculate distance
+    int min_common_coverage = 3;      ///< Minimum common CpG sites to calculate distance (C_min)
     
     NanDistanceStrategy nan_distance_strategy = NanDistanceStrategy::MAX_DIST; ///< Strategy for missing distances
     DistanceMetricType distance_metric = DistanceMetricType::NHD;              ///< Distance metric to use
     
     bool pmd_gating = true;           ///< Whether to exclude CpG sites in PMDs
     int threads = 16;                  ///< Number of threads for parallel processing
+    
+    // Distance Matrix Configuration
+    bool compute_distance_matrix = true;        ///< Whether to compute read-read distance matrix
+    bool output_distance_matrix = true;         ///< Whether to output distance matrix to CSV
+    bool output_strand_distance_matrices = true;///< Whether to output strand-specific distance matrices
+    double max_distance_value = 1.0;            ///< Value for MAX_DIST strategy (normalized metrics)
+    bool distance_use_binary = true;            ///< Use binary matrix (true) or raw matrix (false)
+    bool distance_pearson_center = true;        ///< Use mean-centered Pearson for CORR metric
+    bool distance_jaccard_include_unmeth = false; ///< Include unmethylated sites in Jaccard
     
     // Logging and Debug
     LogLevel log_level = LogLevel::LOG_INFO;  ///< Logging verbosity level

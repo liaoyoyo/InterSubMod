@@ -10,6 +10,7 @@
 #include "core/MethylationParser.hpp"
 #include "core/MatrixBuilder.hpp"
 #include "core/Config.hpp"
+#include "core/DistanceMatrix.hpp"
 #include "io/RegionWriter.hpp"
 
 namespace InterSubMod {
@@ -30,9 +31,15 @@ struct RegionResult {
     bool success;
     std::string error_message;
     
+    // Distance matrix statistics
+    int num_valid_pairs;     ///< Number of valid distance pairs
+    int num_invalid_pairs;   ///< Number of invalid pairs (insufficient overlap)
+    double avg_common_coverage; ///< Average common CpG coverage per pair
+    
     RegionResult() : region_id(-1), snv_id(-1), num_reads(0), num_cpgs(0),
                      num_forward_reads(0), num_reverse_reads(0), num_filtered_reads(0),
-                     elapsed_ms(0.0), peak_memory_mb(0.0), success(false) {}
+                     elapsed_ms(0.0), peak_memory_mb(0.0), success(false),
+                     num_valid_pairs(0), num_invalid_pairs(0), avg_common_coverage(0.0) {}
 };
 
 /**
@@ -140,6 +147,12 @@ private:
     bool output_filtered_reads_;
     bool no_filter_output_;
     ReadFilterConfig filter_config_;
+    
+    // Distance matrix configuration
+    bool compute_distance_matrix_;
+    bool output_distance_matrix_;
+    bool output_strand_distance_matrices_;
+    DistanceConfig distance_config_;
     
     std::vector<SomaticSnv> snvs_;
     ChromIndex chrom_index_;  // Manage chromosome name to ID mapping

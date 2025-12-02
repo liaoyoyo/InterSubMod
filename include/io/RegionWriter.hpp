@@ -5,6 +5,7 @@
 #include "core/DataStructs.hpp"
 #include "core/SomaticSnv.hpp"
 #include "core/Types.hpp"
+#include "core/DistanceMatrix.hpp"
 
 namespace InterSubMod {
 
@@ -85,6 +86,34 @@ public:
      * @brief 取得 region 目錄路徑（供外部使用）
      */
     std::string get_region_dir(const std::string& chr_name, int32_t snv_pos, int32_t region_start, int32_t region_end);
+    
+    /**
+     * @brief 寫出距離矩陣（含 strand-specific 矩陣）
+     * 
+     * @param region_dir Region 目錄
+     * @param all_matrix 所有 reads 的距離矩陣
+     * @param forward_matrix Forward strand reads 的距離矩陣
+     * @param reverse_matrix Reverse strand reads 的距離矩陣
+     * @param output_strand_matrices 是否輸出 strand-specific 矩陣
+     */
+    void write_distance_matrices(
+        const std::string& region_dir,
+        const DistanceMatrix& all_matrix,
+        const DistanceMatrix& forward_matrix,
+        const DistanceMatrix& reverse_matrix,
+        bool output_strand_matrices = true
+    );
+    
+    /**
+     * @brief 寫出單一距離矩陣
+     * 
+     * @param filepath 輸出檔案路徑
+     * @param matrix 距離矩陣
+     */
+    void write_single_distance_matrix(
+        const std::string& filepath,
+        const DistanceMatrix& matrix
+    );
     
 private:
     std::string output_dir_;

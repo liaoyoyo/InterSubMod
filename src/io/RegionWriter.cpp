@@ -322,4 +322,38 @@ void RegionWriter::write_strand_matrices(
     }
 }
 
+void RegionWriter::write_distance_matrices(
+    const std::string& region_dir,
+    const DistanceMatrix& all_matrix,
+    const DistanceMatrix& forward_matrix,
+    const DistanceMatrix& reverse_matrix,
+    bool output_strand_matrices
+) {
+    // Write all reads distance matrix
+    if (!all_matrix.empty()) {
+        write_single_distance_matrix(region_dir + "/distance_matrix.csv", all_matrix);
+        all_matrix.write_stats(region_dir + "/distance_stats.txt");
+    }
+    
+    // Write strand-specific matrices
+    if (output_strand_matrices) {
+        if (!forward_matrix.empty()) {
+            write_single_distance_matrix(region_dir + "/distance_forward.csv", forward_matrix);
+            forward_matrix.write_stats(region_dir + "/distance_forward_stats.txt");
+        }
+        
+        if (!reverse_matrix.empty()) {
+            write_single_distance_matrix(region_dir + "/distance_reverse.csv", reverse_matrix);
+            reverse_matrix.write_stats(region_dir + "/distance_reverse_stats.txt");
+        }
+    }
+}
+
+void RegionWriter::write_single_distance_matrix(
+    const std::string& filepath,
+    const DistanceMatrix& matrix
+) {
+    matrix.write_csv(filepath, true);
+}
+
 } // namespace InterSubMod

@@ -1,12 +1,15 @@
 #include "core/RegionProcessor.hpp"
+#include "core/MethylationMatrix.hpp"
 #include <fstream>
 #include <sstream>
 #include <chrono>
 #include <iostream>
+#include <iomanip>
 #include <omp.h>
 #include <algorithm>
 #include <unordered_set>
 #include <sys/stat.h>
+#include <cmath>
 
 namespace InterSubMod {
 
@@ -45,13 +48,26 @@ RegionProcessor::RegionProcessor(const Config& config)
       window_size_(config.window_size_bp),
       log_level_(config.log_level),
       output_filtered_reads_(config.output_filtered_reads),
-      no_filter_output_(config.no_filter_output) {
+      no_filter_output_(config.no_filter_output),
+      compute_distance_matrix_(config.compute_distance_matrix),
+      output_distance_matrix_(config.output_distance_matrix),
+      output_strand_distance_matrices_(config.output_strand_distance_matrices) {
     
     // Set filter configuration
     filter_config_.min_mapq = config.min_mapq;
     filter_config_.min_read_length = config.min_read_length;
     filter_config_.min_base_quality = config.min_base_quality;
     filter_config_.require_mm_ml = true;
+    
+    // Set distance matrix configuration
+    distance_config_.metric = config.distance_metric;
+    distance_config_.min_common_coverage = config.min_common_coverage;
+    distance_config_.nan_strategy = config.nan_distance_strategy;
+    distance_config_.max_distance_value = config.max_distance_value;
+    distance_config_.use_binary_matrix = config.distance_use_binary;
+    distance_config_.pearson_center = config.distance_pearson_center;
+    distance_config_.jaccard_include_unmeth = config.distance_jaccard_include_unmeth;
+    distance_config_.num_threads = 1;  // Single thread for per-region computation
     
     // Set OpenMP threads
     omp_set_num_threads(num_threads_);
@@ -65,11 +81,19 @@ RegionProcessor::RegionProcessor(const Config& config)
     std::cout << "  Threads: " << num_threads_ << std::endl;
     std::cout << "  Window size: ±" << window_size_ << " bp" << std::endl;
     std::cout << "  Log level: " << static_cast<int>(log_level_) << std::endl;
+    std::cout << "  Distance metric: " << DistanceCalculator::metric_to_string(distance_config_.metric) << std::endl;
+    std::cout << "  Min common coverage (C_min): " << distance_config_.min_common_coverage << std::endl;
     if (output_filtered_reads_) {
         std::cout << "  Debug output: " << debug_output_dir_ << std::endl;
     }
     if (no_filter_output_) {
         std::cout << "  Mode: No-filter (outputting all reads)" << std::endl;
+    }
+    if (compute_distance_matrix_) {
+        std::cout << "  Distance matrix: enabled" << std::endl;
+        if (output_strand_distance_matrices_) {
+            std::cout << "  Strand-specific matrices: enabled" << std::endl;
+        }
     }
 }
 
@@ -361,6 +385,95 @@ RegionResult RegionProcessor::process_single_region(
             writer.write_filtered_reads(region_dir, chr_name, filtered_reads);
         }
         
+        // Compute and write distance matrix if enabled
+        if (compute_distance_matrix_ && result.num_reads >= 2 && result.num_cpgs >= 1) {
+            // Build MethylationMatrix for distance calculation
+            MethylationMatrix meth_mat;
+            meth_mat.region_id = region_id;
+            
+            // Get reads and matrix data
+            const auto& read_list = matrix_builder.get_reads();
+            const auto& raw_matrix = matrix_builder.get_matrix();
+            const auto& cpg_positions = matrix_builder.get_cpg_positions();
+            
+            // Set up MethylationMatrix
+            meth_mat.read_ids.resize(read_list.size());
+            for (size_t i = 0; i < read_list.size(); ++i) {
+                meth_mat.read_ids[i] = read_list[i].read_id;
+            }
+            
+            meth_mat.cpg_ids.resize(cpg_positions.size());
+            for (size_t i = 0; i < cpg_positions.size(); ++i) {
+                meth_mat.cpg_ids[i] = static_cast<int>(i);
+            }
+            
+            // Convert matrix to Eigen format
+            int n_reads = static_cast<int>(raw_matrix.size());
+            int n_cpgs = n_reads > 0 ? static_cast<int>(raw_matrix[0].size()) : 0;
+            
+            meth_mat.raw_matrix = Eigen::MatrixXd(n_reads, n_cpgs);
+            meth_mat.binary_matrix = Eigen::MatrixXi(n_reads, n_cpgs);
+            
+            for (int i = 0; i < n_reads; ++i) {
+                for (int j = 0; j < n_cpgs; ++j) {
+                    double val = raw_matrix[i][j];
+                    if (val < 0) {  // -1.0 indicates no coverage
+                        meth_mat.raw_matrix(i, j) = NAN;
+                        meth_mat.binary_matrix(i, j) = -1;
+                    } else {
+                        meth_mat.raw_matrix(i, j) = val;
+                        // Binary threshold
+                        if (val >= 0.8) {
+                            meth_mat.binary_matrix(i, j) = 1;
+                        } else if (val <= 0.2) {
+                            meth_mat.binary_matrix(i, j) = 0;
+                        } else {
+                            meth_mat.binary_matrix(i, j) = -1;  // Ambiguous
+                        }
+                    }
+                }
+            }
+            
+            // Create distance calculator
+            DistanceCalculator dist_calc(distance_config_);
+            
+            // Compute all-reads distance matrix
+            DistanceMatrix all_dist = dist_calc.compute(meth_mat, read_list);
+            
+            // Update result statistics
+            result.num_valid_pairs = all_dist.num_valid_pairs;
+            result.num_invalid_pairs = all_dist.num_invalid_pairs;
+            result.avg_common_coverage = all_dist.avg_common_coverage;
+            
+            // Compute strand-specific matrices if enabled
+            DistanceMatrix forward_dist, reverse_dist;
+            if (output_strand_distance_matrices_) {
+                std::tie(forward_dist, reverse_dist) = dist_calc.compute_strand_specific(meth_mat, read_list);
+            }
+            
+            // Write distance matrices
+            if (output_distance_matrix_) {
+                std::string region_dir = writer.get_region_dir(chr_name, snv.pos, region_start, region_end);
+                writer.write_distance_matrices(
+                    region_dir,
+                    all_dist,
+                    forward_dist,
+                    reverse_dist,
+                    output_strand_distance_matrices_
+                );
+            }
+            
+            if (log_level_ >= LogLevel::LOG_DEBUG) {
+                #pragma omp critical
+                {
+                    std::cout << "  Distance matrix: " << all_dist.size() << "x" << all_dist.size()
+                              << ", valid pairs: " << all_dist.num_valid_pairs 
+                              << ", avg coverage: " << std::fixed << std::setprecision(1) 
+                              << all_dist.avg_common_coverage << std::endl;
+                }
+            }
+        }
+        
         // Cleanup BAM records
         for (auto* r : reads) {
             bam_destroy1(r);
@@ -388,6 +501,12 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
     int total_filtered = 0;
     double total_time = 0.0;
     
+    // Distance matrix statistics
+    int total_valid_pairs = 0;
+    int total_invalid_pairs = 0;
+    double total_avg_coverage = 0.0;
+    int regions_with_distance = 0;
+    
     for (const auto& r : results) {
         if (r.success) {
             success_count++;
@@ -397,6 +516,14 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
             total_reverse += r.num_reverse_reads;
             total_filtered += r.num_filtered_reads;
             total_time += r.elapsed_ms;
+            
+            // Distance matrix stats
+            if (r.num_valid_pairs > 0 || r.num_invalid_pairs > 0) {
+                total_valid_pairs += r.num_valid_pairs;
+                total_invalid_pairs += r.num_invalid_pairs;
+                total_avg_coverage += r.avg_common_coverage;
+                regions_with_distance++;
+            }
         }
     }
     
@@ -415,6 +542,22 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
     std::cout << "Average time per region: " << (total_time / results.size()) << " ms" << std::endl;
     std::cout << "Average reads per region: " << (total_reads / static_cast<double>(success_count)) << std::endl;
     std::cout << "Average CpGs per region: " << (total_cpgs / static_cast<double>(success_count)) << std::endl;
+    
+    // Distance matrix summary
+    if (compute_distance_matrix_ && regions_with_distance > 0) {
+        std::cout << "\n=== Distance Matrix Summary ===" << std::endl;
+        std::cout << "Metric: " << DistanceCalculator::metric_to_string(distance_config_.metric) << std::endl;
+        std::cout << "Min common coverage (C_min): " << distance_config_.min_common_coverage << std::endl;
+        std::cout << "Regions with distance matrices: " << regions_with_distance << std::endl;
+        std::cout << "Total valid read pairs: " << total_valid_pairs << std::endl;
+        std::cout << "Total invalid pairs (insufficient overlap): " << total_invalid_pairs << std::endl;
+        if (total_valid_pairs + total_invalid_pairs > 0) {
+            double valid_ratio = 100.0 * total_valid_pairs / (total_valid_pairs + total_invalid_pairs);
+            std::cout << "Valid pair ratio: " << std::fixed << std::setprecision(1) << valid_ratio << "%" << std::endl;
+        }
+        std::cout << "Average common CpG coverage: " << std::fixed << std::setprecision(2) 
+                  << (total_avg_coverage / regions_with_distance) << std::endl;
+    }
 }
 
 } // namespace InterSubMod
