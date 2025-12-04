@@ -49,6 +49,13 @@ struct Config {
     bool distance_pearson_center = true;        ///< Use mean-centered Pearson for CORR metric
     bool distance_jaccard_include_unmeth = false; ///< Include unmethylated sites in Jaccard
     
+    // Hierarchical Clustering Configuration
+    bool compute_clustering = true;              ///< Whether to perform hierarchical clustering
+    bool output_tree_files = true;               ///< Whether to output Newick tree files
+    std::string linkage_method = "UPGMA";        ///< Linkage method: UPGMA, WARD, SINGLE, COMPLETE
+    int clustering_min_reads = 10;               ///< Minimum reads required for clustering
+    bool output_linkage_matrix = true;           ///< Whether to output linkage matrix CSV
+    
     // Logging and Debug
     LogLevel log_level = LogLevel::LOG_INFO;  ///< Logging verbosity level
     std::string debug_output_dir = "";    ///< Directory for debug outputs (filtered reads, etc.)

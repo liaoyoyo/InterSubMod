@@ -86,9 +86,12 @@ add_library(inter_sub_mod_core
     src/core/MatrixBuilder.cpp
     src/core/RegionProcessor.cpp
     src/core/DistanceMatrix.cpp
+    src/core/TreeStructure.cpp
+    src/core/HierarchicalClustering.cpp
     src/utils/Logger.cpp
     src/utils/FastaReader.cpp
     src/io/RegionWriter.cpp
+    src/io/TreeWriter.cpp
 )
 
 target_link_libraries(inter_sub_mod_core PUBLIC
@@ -135,6 +138,7 @@ add_executable(run_tests
     tests/test_config.cpp
     tests/test_bam_reader.cpp
     tests/test_distance_matrix.cpp
+    tests/test_hierarchical_clustering.cpp
 )
 target_link_libraries(run_tests PRIVATE inter_sub_mod_core GTest::gtest)
 

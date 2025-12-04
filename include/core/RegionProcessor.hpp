@@ -11,7 +11,10 @@
 #include "core/MatrixBuilder.hpp"
 #include "core/Config.hpp"
 #include "core/DistanceMatrix.hpp"
+#include "core/HierarchicalClustering.hpp"
+#include "core/TreeStructure.hpp"
 #include "io/RegionWriter.hpp"
+#include "io/TreeWriter.hpp"
 
 namespace InterSubMod {
 
@@ -154,6 +157,13 @@ private:
     bool output_strand_distance_matrices_;
     DistanceConfig distance_config_;
     std::vector<DistanceMetricType> distance_metrics_;
+    
+    // Hierarchical clustering configuration
+    bool compute_clustering_;
+    bool output_tree_files_;
+    bool output_linkage_matrix_;
+    LinkageMethod linkage_method_;
+    int clustering_min_reads_;
     
     std::vector<SomaticSnv> snvs_;
     ChromIndex chrom_index_;  // Manage chromosome name to ID mapping

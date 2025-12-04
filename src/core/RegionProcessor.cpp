@@ -1,5 +1,7 @@
 #include "core/RegionProcessor.hpp"
 #include "core/MethylationMatrix.hpp"
+#include "core/HierarchicalClustering.hpp"
+#include "io/TreeWriter.hpp"
 #include <fstream>
 #include <sstream>
 #include <chrono>
@@ -10,6 +12,7 @@
 #include <unordered_set>
 #include <sys/stat.h>
 #include <cmath>
+#include <filesystem>
 
 namespace InterSubMod {
 
@@ -29,7 +32,12 @@ RegionProcessor::RegionProcessor(
     window_size_(window_size),
     log_level_(LogLevel::LOG_INFO),
     output_filtered_reads_(false),
-    no_filter_output_(false) {
+    no_filter_output_(false),
+    compute_clustering_(true),
+    output_tree_files_(true),
+    output_linkage_matrix_(true),
+    linkage_method_(LinkageMethod::UPGMA),
+    clustering_min_reads_(10) {
     
     // Set OpenMP threads
     omp_set_num_threads(num_threads_);
@@ -52,7 +60,14 @@ RegionProcessor::RegionProcessor(const Config& config)
       compute_distance_matrix_(config.compute_distance_matrix),
       output_distance_matrix_(config.output_distance_matrix),
       output_strand_distance_matrices_(config.output_strand_distance_matrices),
-      distance_metrics_(config.distance_metrics) {
+      distance_metrics_(config.distance_metrics),
+      compute_clustering_(config.compute_clustering),
+      output_tree_files_(config.output_tree_files),
+      output_linkage_matrix_(config.output_linkage_matrix),
+      clustering_min_reads_(config.clustering_min_reads) {
+    
+    // Parse linkage method from string
+    linkage_method_ = HierarchicalClustering::string_to_method(config.linkage_method);
     
     // Set filter configuration
     filter_config_.min_mapq = config.min_mapq;
@@ -104,6 +119,11 @@ RegionProcessor::RegionProcessor(const Config& config)
         if (output_strand_distance_matrices_) {
             std::cout << "  Strand-specific matrices: enabled" << std::endl;
         }
+    }
+    if (compute_clustering_) {
+        std::cout << "  Hierarchical clustering: enabled" << std::endl;
+        std::cout << "  Linkage method: " << HierarchicalClustering::method_to_string(linkage_method_) << std::endl;
+        std::cout << "  Clustering min reads: " << clustering_min_reads_ << std::endl;
     }
 }
 
@@ -490,6 +510,97 @@ RegionResult RegionProcessor::process_single_region(
                                   << ", valid pairs: " << all_dist.num_valid_pairs 
                                   << ", avg coverage: " << std::fixed << std::setprecision(1) 
                                   << all_dist.avg_common_coverage << std::endl;
+                    }
+                }
+                
+                // === Hierarchical Clustering and Tree Output ===
+                // Only run for the first metric (typically NHD) to avoid redundant trees
+                if (compute_clustering_ && metric == distance_metrics_[0] 
+                    && result.num_reads >= clustering_min_reads_) {
+                    
+                    std::string region_dir = writer.get_region_dir(chr_name, snv.pos, region_start, region_end);
+                    std::string clustering_dir = region_dir + "/clustering";
+                    std::filesystem::create_directories(clustering_dir);
+                    
+                    // Prepare read names (using read_name field for identification)
+                    std::vector<std::string> read_names;
+                    for (const auto& r : read_list) {
+                        read_names.push_back(r.read_name);
+                    }
+                    
+                    // Build hierarchical clustering tree
+                    HierarchicalClustering clusterer(linkage_method_);
+                    Tree tree = clusterer.build_tree(all_dist, read_names);
+                    
+                    if (!tree.empty() && output_tree_files_) {
+                        TreeWriter tree_writer;
+                        
+                        // Write Newick tree file
+                        std::string tree_path = clustering_dir + "/tree.nwk";
+                        tree_writer.write_newick(tree, tree_path);
+                        
+                        // Write linkage matrix (scipy-compatible format)
+                        if (output_linkage_matrix_) {
+                            std::string linkage_path = clustering_dir + "/linkage_matrix.csv";
+                            tree_writer.write_linkage_matrix(tree, linkage_path);
+                        }
+                        
+                        // Write leaf order for Python visualization
+                        std::string order_path = clustering_dir + "/leaf_order.txt";
+                        std::ofstream order_file(order_path);
+                        if (order_file.is_open()) {
+                            auto leaves = tree.get_leaves();
+                            for (const auto& leaf : leaves) {
+                                order_file << leaf->label << "\n";
+                            }
+                            order_file.close();
+                        }
+                        
+                        if (log_level_ >= LogLevel::LOG_DEBUG) {
+                            #pragma omp critical
+                            {
+                                std::cout << "  Clustering tree: " << tree.num_leaves() 
+                                          << " leaves, method=" << HierarchicalClustering::method_to_string(linkage_method_)
+                                          << std::endl;
+                            }
+                        }
+                    }
+                    
+                    // Strand-specific trees (if enabled)
+                    if (output_strand_distance_matrices_ && output_tree_files_) {
+                        // Forward strand tree
+                        if (forward_dist.size() >= 2) {
+                            std::vector<std::string> fwd_names;
+                            for (const auto& r : read_list) {
+                                if (r.strand == Strand::FORWARD) {
+                                    fwd_names.push_back(r.read_name);
+                                }
+                            }
+                            if (fwd_names.size() >= 2) {
+                                Tree fwd_tree = clusterer.build_tree(forward_dist, fwd_names);
+                                if (!fwd_tree.empty()) {
+                                    TreeWriter tree_writer;
+                                    tree_writer.write_newick(fwd_tree, clustering_dir + "/tree_forward.nwk");
+                                }
+                            }
+                        }
+                        
+                        // Reverse strand tree
+                        if (reverse_dist.size() >= 2) {
+                            std::vector<std::string> rev_names;
+                            for (const auto& r : read_list) {
+                                if (r.strand == Strand::REVERSE) {
+                                    rev_names.push_back(r.read_name);
+                                }
+                            }
+                            if (rev_names.size() >= 2) {
+                                Tree rev_tree = clusterer.build_tree(reverse_dist, rev_names);
+                                if (!rev_tree.empty()) {
+                                    TreeWriter tree_writer;
+                                    tree_writer.write_newick(rev_tree, clustering_dir + "/tree_reverse.nwk");
+                                }
+                            }
+                        }
                     }
                 }
             }
