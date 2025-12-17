@@ -471,7 +471,7 @@ def process_single_region(
     }.get(linkage_method, linkage_method.upper())
     
     # Create output directory
-    plot_dir = os.path.join(region_dir, "plots")
+    plot_dir = os.path.join(region_dir, "plots", distance_metric)
     os.makedirs(plot_dir, exist_ok=True)
     
     # Generate output filename

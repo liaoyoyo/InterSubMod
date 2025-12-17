@@ -3,14 +3,19 @@
 Cluster Heatmap Visualization for InterSubMod
 ==============================================
 
-This script generates cluster heatmaps from methylation matrices and read metadata
-produced by the InterSubMod C++ pipeline.
+This script generates methylation cluster heatmaps from methylation matrices
+with dendrogram visualization based on read-read distance clustering.
 
 Features:
-- Hierarchical clustering with UPGMA (default) or other methods
+- Methylation heatmap (Reads × CpGs) with Y-axis dendrogram
+- Reads are sorted by hierarchical clustering (using distance matrix)
+- CpG sites are ordered by genomic position
 - Annotation bars for biological labels (HP, Tumor/Normal, Strand, Alt-support)
 - Parallel processing for multiple regions
-- Customizable output formats and parameters
+
+Key difference from distance_heatmap:
+- distance_heatmap: Read × Read distance matrix
+- cluster_heatmap: Read × CpG methylation matrix with clustering-ordered Y axis
 
 Usage:
     # Single region
@@ -18,12 +23,9 @@ Usage:
     
     # All regions in output directory (parallel)
     python plot_cluster_heatmap.py --output-dir /path/to/output --threads 64
-    
-    # With custom parameters
-    python plot_cluster_heatmap.py --output-dir /path/to/output --linkage ward --metric euclidean
 
 Author: InterSubMod Development Team
-Date: 2025-12-02
+Date: 2025-12-18 (Updated with dendrogram support)
 """
 
 import os
@@ -56,6 +58,39 @@ except ImportError as e:
 
 
 # ============================================================================
+# Color Palettes
+# ============================================================================
+
+HP_COLORS = {
+    "0": "#CCCCCC",      # Unphased - gray
+    "1": "#E74C3C",      # HP1 - red
+    "2": "#3498DB",      # HP2 - blue
+    "1-1": "#E74C3C",    # HP1-1 - red
+    "1-2": "#9B59B6",    # HP1-2 - purple
+    "2-1": "#2ECC71",    # HP2-1 - green
+    "2-2": "#3498DB",    # HP2-2 - blue
+    "unphased": "#CCCCCC"
+}
+
+STRAND_COLORS = {
+    "+": "#FF6B6B",      # Forward - coral red
+    "-": "#4ECDC4",      # Reverse - teal
+    "?": "#95A5A6"       # Unknown - gray
+}
+
+SOURCE_COLORS = {
+    "Tumor": "#E74C3C",   # Red
+    "Normal": "#27AE60"   # Green
+}
+
+ALLELE_COLORS = {
+    "ALT": "#F39C12",     # Orange
+    "REF": "#8E44AD",     # Purple
+    "UNKNOWN": "#BDC3C7"  # Light gray
+}
+
+
+# ============================================================================
 # Data Loading Functions
 # ============================================================================
 
@@ -68,7 +103,7 @@ def load_methylation_matrix(region_dir: str, strand: str = "all") -> Tuple[Optio
         strand: "all", "forward", or "reverse"
     
     Returns:
-        Tuple of (DataFrame with read_id index, numpy array of CpG positions)
+        Tuple of (DataFrame with read_id as integer index, numpy array of CpG positions)
     """
     meth_dir = os.path.join(region_dir, "methylation")
     
@@ -84,6 +119,9 @@ def load_methylation_matrix(region_dir: str, strand: str = "all") -> Tuple[Optio
     
     try:
         df = pd.read_csv(filepath, index_col=0)
+        
+        # Ensure index is integer (read_id)
+        df.index = df.index.astype(int)
         
         # Handle strand-specific files which have original_read_id column
         if strand in ["forward", "reverse"] and "original_read_id" in df.columns:
@@ -106,7 +144,7 @@ def load_reads_metadata(region_dir: str) -> Optional[pd.DataFrame]:
     """
     Load read metadata from TSV file.
     
-    Returns DataFrame with columns: read_id, hp, alt_support, is_tumor, strand
+    Returns DataFrame with read_id (integer) as index and columns: hp, alt_support, is_tumor, strand
     """
     reads_file = os.path.join(region_dir, "reads", "reads.tsv")
     
@@ -115,14 +153,17 @@ def load_reads_metadata(region_dir: str) -> Optional[pd.DataFrame]:
     
     try:
         df = pd.read_csv(reads_file, sep="\t")
-        df = df.set_index("read_id")
+        # Set read_id as index (integer ID matching methylation/distance matrices)
+        if "read_id" in df.columns:
+            df = df.set_index("read_id")
+            df.index = df.index.astype(int)
         return df
     except Exception as e:
         print(f"Error loading reads metadata: {e}")
         return None
 
 
-def load_distance_matrix(region_dir: str, metric: str = "NHD", strand: str = "all") -> Optional[np.ndarray]:
+def load_distance_matrix(region_dir: str, metric: str = "NHD", strand: str = "all") -> Tuple[Optional[pd.DataFrame], Optional[List[int]]]:
     """
     Load precomputed distance matrix from CSV file.
     
@@ -132,7 +173,7 @@ def load_distance_matrix(region_dir: str, metric: str = "NHD", strand: str = "al
         strand: "all", "forward", or "reverse"
     
     Returns:
-        Square distance matrix as numpy array
+        Tuple of (DataFrame with distances, list of read IDs as integers)
     """
     dist_dir = os.path.join(region_dir, "distance", metric)
     
@@ -144,14 +185,18 @@ def load_distance_matrix(region_dir: str, metric: str = "NHD", strand: str = "al
         filepath = os.path.join(dist_dir, "matrix.csv")
     
     if not os.path.exists(filepath):
-        return None
+        return None, None
     
     try:
         df = pd.read_csv(filepath, index_col=0)
-        return df.values.astype(float)
+        # Ensure both index and columns are integers (read_id)
+        df.index = df.index.astype(int)
+        df.columns = df.columns.astype(int)
+        read_ids = list(df.index)
+        return df, read_ids
     except Exception as e:
         print(f"Error loading distance matrix: {e}")
-        return None
+        return None, None
 
 
 def load_region_info(region_dir: str) -> Dict:
@@ -181,19 +226,20 @@ def load_region_info(region_dir: str) -> Dict:
 # Clustering Functions
 # ============================================================================
 
-def compute_linkage(distance_matrix: np.ndarray, method: str = "average") -> np.ndarray:
+def compute_linkage_from_distance(dist_df: pd.DataFrame, method: str = "average") -> Optional[np.ndarray]:
     """
-    Compute hierarchical clustering linkage from distance matrix.
+    Compute hierarchical clustering linkage from distance matrix DataFrame.
     
     Args:
-        distance_matrix: Square distance matrix
+        dist_df: Square distance matrix as DataFrame
         method: Linkage method ("average" for UPGMA, "ward", "single", "complete")
     
     Returns:
         Linkage matrix (n-1 x 4)
     """
     # Handle NaN values
-    dist_clean = np.nan_to_num(distance_matrix, nan=1.0)
+    dist_clean = dist_df.values.copy()
+    dist_clean = np.nan_to_num(dist_clean, nan=1.0)
     
     # Ensure symmetry
     dist_clean = (dist_clean + dist_clean.T) / 2
@@ -218,145 +264,149 @@ def get_cluster_order(Z: np.ndarray) -> np.ndarray:
 # Visualization Functions
 # ============================================================================
 
-def create_annotation_colors(reads_df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict]:
+def create_annotation_colors(reads_df: pd.DataFrame, read_ids: List[int]) -> Tuple[pd.DataFrame, Dict]:
     """
     Create annotation DataFrame and color palette for seaborn clustermap.
     
     Returns:
-        Tuple of (annotation DataFrame, color dictionary)
+        Tuple of (annotation DataFrame aligned with read_ids, color dictionary)
     """
-    annotations = pd.DataFrame(index=reads_df.index)
+    # Filter to only include reads in our list
+    available_reads = [r for r in read_ids if r in reads_df.index]
+    if not available_reads:
+        return pd.DataFrame(), {}
+    
+    reads_filtered = reads_df.loc[available_reads]
+    annotations = pd.DataFrame(index=available_reads)
     colors = {}
     
     # Haplotype (HP) annotation
-    if "hp" in reads_df.columns:
-        hp_values = reads_df["hp"].astype(str)
+    if "hp" in reads_filtered.columns:
+        hp_values = reads_filtered["hp"].astype(str)
         annotations["HP"] = hp_values
-        # Color palette for HP
         unique_hp = hp_values.unique()
-        hp_palette = {
-            "0": "#CCCCCC",      # Unphased - gray
-            "1": "#E74C3C",      # HP1 - red
-            "2": "#3498DB",      # HP2 - blue
-            "1-1": "#E74C3C",    # HP1-1 - red
-            "1-2": "#9B59B6",    # HP1-2 - purple
-            "2-1": "#2ECC71",    # HP2-1 - green
-            "2-2": "#3498DB",    # HP2-2 - blue
-        }
-        colors["HP"] = {hp: hp_palette.get(hp, "#AAAAAA") for hp in unique_hp}
+        colors["HP"] = {hp: HP_COLORS.get(hp, "#AAAAAA") for hp in unique_hp}
     
     # Strand annotation
-    if "strand" in reads_df.columns:
-        annotations["Strand"] = reads_df["strand"]
-        colors["Strand"] = {
-            "+": "#FF6B6B",      # Forward - coral red
-            "-": "#4ECDC4",      # Reverse - teal
-            "?": "#95A5A6"       # Unknown - gray
-        }
+    if "strand" in reads_filtered.columns:
+        annotations["Strand"] = reads_filtered["strand"]
+        unique_strand = reads_filtered["strand"].unique()
+        colors["Strand"] = {s: STRAND_COLORS.get(s, "#95A5A6") for s in unique_strand}
     
     # Tumor/Normal annotation
-    if "is_tumor" in reads_df.columns:
-        annotations["Source"] = reads_df["is_tumor"].map({1: "Tumor", 0: "Normal", "1": "Tumor", "0": "Normal"})
-        colors["Source"] = {
-            "Tumor": "#E74C3C",   # Red
-            "Normal": "#27AE60"   # Green
-        }
+    if "is_tumor" in reads_filtered.columns:
+        annotations["Source"] = reads_filtered["is_tumor"].map(
+            {1: "Tumor", 0: "Normal", "1": "Tumor", "0": "Normal", True: "Tumor", False: "Normal"}
+        )
+        unique_source = annotations["Source"].unique()
+        colors["Source"] = {s: SOURCE_COLORS.get(s, "#95A5A6") for s in unique_source}
     
     # Alt/Ref support annotation
-    if "alt_support" in reads_df.columns:
-        annotations["Allele"] = reads_df["alt_support"]
-        colors["Allele"] = {
-            "ALT": "#F39C12",     # Orange
-            "REF": "#8E44AD",     # Purple
-            "UNKNOWN": "#BDC3C7" # Light gray
-        }
+    if "alt_support" in reads_filtered.columns:
+        annotations["Allele"] = reads_filtered["alt_support"]
+        unique_allele = reads_filtered["alt_support"].unique()
+        colors["Allele"] = {a: ALLELE_COLORS.get(a, "#BDC3C7") for a in unique_allele}
     
     return annotations, colors
 
 
 def plot_cluster_heatmap(
-    meth_matrix: pd.DataFrame,
+    meth_df: pd.DataFrame,
     reads_df: pd.DataFrame,
     linkage_matrix: np.ndarray,
     output_path: str,
     region_info: Dict,
+    cpg_positions: np.ndarray,
+    metric_name: str = "NHD",
+    linkage_method: str = "UPGMA",
     figsize: Tuple[int, int] = (14, 10),
     cmap: str = "RdYlBu_r",
-    show_dendrogram: bool = True,
     dpi: int = 150
 ) -> bool:
     """
-    Create and save cluster heatmap with annotations.
+    Create and save methylation cluster heatmap with Y-axis dendrogram.
+    
+    This heatmap shows:
+    - X axis: CpG sites (ordered by genomic position, no clustering)
+    - Y axis: Reads (clustered by distance matrix, with dendrogram)
+    - Color: Methylation level (0 = unmethylated, 1 = methylated)
     
     Args:
-        meth_matrix: Methylation matrix (reads x CpGs)
+        meth_df: Methylation matrix (reads × CpGs)
         reads_df: Read metadata DataFrame
-        linkage_matrix: Hierarchical clustering linkage
+        linkage_matrix: Hierarchical clustering linkage from distance matrix
         output_path: Path to save the figure
         region_info: Region metadata for title
+        cpg_positions: Array of CpG genomic positions
+        metric_name: Name of distance metric used for clustering
+        linkage_method: Name of linkage method
         figsize: Figure size (width, height)
         cmap: Colormap for heatmap
-        show_dendrogram: Whether to show row dendrogram
         dpi: Output resolution
     
     Returns:
         True if successful, False otherwise
     """
     try:
-        # Get cluster order
-        order = get_cluster_order(linkage_matrix)
-        
-        # Reorder data
-        meth_ordered = meth_matrix.iloc[order]
-        reads_ordered = reads_df.loc[meth_ordered.index]
+        n_reads = len(meth_df)
+        n_cpgs = len(cpg_positions)
+        read_ids = list(meth_df.index)
         
         # Create annotation colors
-        annotations, color_dict = create_annotation_colors(reads_ordered)
+        annotations, color_dict = create_annotation_colors(reads_df, read_ids)
         
         # Create row colors for clustermap
         row_colors = None
         if not annotations.empty:
             row_colors_list = []
             for col in annotations.columns:
-                row_colors_list.append(annotations[col].map(color_dict[col]))
+                color_series = annotations[col].map(color_dict[col])
+                row_colors_list.append(color_series)
             row_colors = pd.concat(row_colors_list, axis=1)
             row_colors.columns = annotations.columns
+            # Ensure index matches methylation matrix
+            row_colors = row_colors.reindex(meth_df.index)
         
-        # Create figure
-        fig = plt.figure(figsize=figsize)
+        # Prepare methylation data (handle NaN for visualization)
+        # NaN values will be shown as gray using mask
+        data_for_plot = meth_df.copy()
         
-        # Compute mask for NaN values
-        mask = meth_ordered.isna()
-        
-        # Fill NaN with 0.5 for visualization (will be masked)
-        data_filled = meth_ordered.fillna(0.5)
-        
-        # Create clustermap
+        # Create clustermap with row dendrogram only
+        # row_linkage: uses our pre-computed linkage from distance matrix
+        # col_cluster=False: keep CpG positions in genomic order
         g = sns.clustermap(
-            data_filled,
-            row_cluster=False,  # Already ordered by our linkage
-            col_cluster=False,  # Keep CpG order by position
+            data_for_plot,
+            row_linkage=linkage_matrix,  # Use distance-based linkage for Y-axis
+            col_cluster=False,            # Keep CpGs in position order
             row_colors=row_colors,
-            mask=mask,
             cmap=cmap,
             vmin=0, vmax=1,
             figsize=figsize,
-            xticklabels=True,
-            yticklabels=False,
+            mask=data_for_plot.isna(),    # Mask NaN values (show as gray)
             cbar_kws={'label': 'Methylation Level'},
-            dendrogram_ratio=(0.1, 0) if show_dendrogram else (0, 0)
+            dendrogram_ratio=(0.15, 0),   # Show row dendrogram, no column dendrogram
+            colors_ratio=0.03 if row_colors is not None else 0,
+            linewidths=0,
+            xticklabels=True if n_cpgs <= 50 else False,
+            yticklabels=False  # Too many reads to show labels
         )
         
-        # Add title
-        title = f"Cluster Heatmap: {region_info.get('snv', 'Unknown')}\n"
-        title += f"Reads: {region_info.get('num_reads', 0)}, CpGs: {region_info.get('num_cpgs', 0)}"
+        # Set title
+        title = f"Methylation Cluster Heatmap\n"
+        title += f"SNV: {region_info.get('snv', 'Unknown')} | "
+        title += f"Reads: {n_reads} | CpGs: {n_cpgs} | Cluster: {linkage_method}"
         g.fig.suptitle(title, y=1.02, fontsize=12, fontweight='bold')
         
-        # Rotate x-axis labels
-        plt.setp(g.ax_heatmap.get_xticklabels(), rotation=45, ha='right', fontsize=8)
+        # Axis labels
+        g.ax_heatmap.set_xlabel('CpG Sites (genomic position)', fontsize=10)
+        g.ax_heatmap.set_ylabel('Reads (clustered)', fontsize=10)
+        
+        # Rotate x-axis labels if shown
+        if n_cpgs <= 50:
+            plt.setp(g.ax_heatmap.get_xticklabels(), rotation=45, ha='right', fontsize=7)
         
         # Add legend for annotations
-        if row_colors is not None:
+        if row_colors is not None and not annotations.empty:
             handles = []
             labels = []
             for col in annotations.columns:
@@ -366,11 +416,13 @@ def plot_cluster_heatmap(
                         labels.append(f"{col}: {val}")
             
             if handles:
-                g.ax_heatmap.legend(
+                # Position legend outside the heatmap
+                g.fig.legend(
                     handles, labels,
                     loc='upper left',
-                    bbox_to_anchor=(1.02, 1),
+                    bbox_to_anchor=(0.02, 0.98),
                     fontsize=8,
+                    framealpha=0.9,
                     title='Annotations'
                 )
         
@@ -384,7 +436,9 @@ def plot_cluster_heatmap(
         return True
         
     except Exception as e:
-        print(f"Error creating heatmap: {e}")
+        print(f"Error creating cluster heatmap: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
@@ -404,11 +458,11 @@ def process_single_region(
     dpi: int = 150
 ) -> Tuple[str, bool, str]:
     """
-    Process a single region and generate cluster heatmap.
+    Process a single region and generate methylation cluster heatmap.
     
     Args:
         region_dir: Path to region directory
-        distance_metric: Distance metric to use
+        distance_metric: Distance metric to use for clustering
         linkage_method: Hierarchical clustering method
         strand: "all", "forward", or "reverse"
         output_format: Image format ("png", "pdf", "svg")
@@ -427,45 +481,54 @@ def process_single_region(
     if meth_df is None:
         return region_dir, False, "No methylation matrix found"
     
-    # Check minimum requirements
-    if len(meth_df) < min_reads:
-        return region_dir, False, f"Too few reads ({len(meth_df)} < {min_reads})"
+    n_reads = len(meth_df)
+    n_cpgs = len(cpg_positions) if cpg_positions is not None else 0
     
-    if len(cpg_positions) < min_cpgs:
-        return region_dir, False, f"Too few CpGs ({len(cpg_positions)} < {min_cpgs})"
+    # Check minimum requirements
+    if n_reads < min_reads:
+        return region_dir, False, f"Too few reads ({n_reads} < {min_reads})"
+    
+    if n_cpgs < min_cpgs:
+        return region_dir, False, f"Too few CpGs ({n_cpgs} < {min_cpgs})"
+    
+    # Load distance matrix (for clustering)
+    dist_df, dist_read_ids = load_distance_matrix(region_dir, distance_metric, strand)
+    if dist_df is None:
+        return region_dir, False, f"No distance matrix found for {distance_metric}"
     
     # Load reads metadata
     reads_df = load_reads_metadata(region_dir)
     if reads_df is None:
         return region_dir, False, "No reads metadata found"
     
-    # Load distance matrix
-    dist_matrix = load_distance_matrix(region_dir, distance_metric, strand)
-    if dist_matrix is None:
-        return region_dir, False, f"No distance matrix found for {distance_metric}"
+    # Align methylation matrix with distance matrix (use common reads)
+    common_reads = list(set(meth_df.index) & set(dist_df.index))
+    if len(common_reads) < min_reads:
+        return region_dir, False, f"Too few common reads ({len(common_reads)} < {min_reads})"
     
-    # Handle size mismatch (strand-specific may have different sizes)
-    if dist_matrix.shape[0] != len(meth_df):
-        return region_dir, False, f"Size mismatch: distance({dist_matrix.shape[0]}) vs methylation({len(meth_df)})"
+    # Reorder to match distance matrix order (important for linkage alignment)
+    ordered_reads = [r for r in dist_df.index if r in common_reads]
+    meth_df = meth_df.loc[ordered_reads]
+    dist_df = dist_df.loc[ordered_reads, ordered_reads]
     
-    # Compute linkage
-    Z = compute_linkage(dist_matrix, method=linkage_method)
+    # Compute linkage from distance matrix
+    Z = compute_linkage_from_distance(dist_df, method=linkage_method)
     if Z is None:
         return region_dir, False, "Linkage computation failed"
     
     # Load region info
     region_info = load_region_info(region_dir)
     
-    # Align reads_df with meth_df
-    common_idx = meth_df.index.intersection(reads_df.index)
-    if len(common_idx) < min_reads:
-        return region_dir, False, f"Index alignment failed"
-    
-    meth_df = meth_df.loc[common_idx]
-    reads_df = reads_df.loc[common_idx]
+    # Map linkage method to display name
+    linkage_display = {
+        "average": "UPGMA",
+        "ward": "Ward",
+        "single": "Single",
+        "complete": "Complete"
+    }.get(linkage_method, linkage_method.upper())
     
     # Create output directory
-    plot_dir = os.path.join(region_dir, "plots")
+    plot_dir = os.path.join(region_dir, "plots", distance_metric)
     os.makedirs(plot_dir, exist_ok=True)
     
     # Generate output filename
@@ -476,13 +539,15 @@ def process_single_region(
     # Create heatmap
     success = plot_cluster_heatmap(
         meth_df, reads_df, Z, output_path,
-        region_info, figsize=figsize, dpi=dpi
+        region_info, cpg_positions,
+        metric_name=distance_metric, linkage_method=linkage_display,
+        figsize=figsize, dpi=dpi
     )
     
     if success:
         return region_dir, True, output_path
     else:
-        return region_dir, False, "Heatmap generation failed"
+        return region_dir, False, "Cluster heatmap generation failed"
 
 
 def find_region_dirs(output_dir: str) -> List[str]:
@@ -493,8 +558,9 @@ def find_region_dirs(output_dir: str) -> List[str]:
     # Walk through the directory tree
     for root, dirs, files in os.walk(output_path):
         # Check if this directory is a region directory
-        # For cluster heatmap: needs methylation/methylation.csv
-        if (Path(root) / "methylation" / "methylation.csv").exists():
+        # Need both methylation and distance folder for cluster heatmap
+        if ((Path(root) / "methylation" / "methylation.csv").exists() and
+            (Path(root) / "distance").exists()):
             region_dirs.append(root)
             
     return sorted(region_dirs)
@@ -561,9 +627,17 @@ def process_all_regions(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate cluster heatmaps from InterSubMod output",
+        description="Generate methylation cluster heatmaps with dendrogram from InterSubMod output",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
+This script generates methylation cluster heatmaps:
+- X axis: CpG sites (ordered by genomic position)
+- Y axis: Reads (clustered by distance matrix, with dendrogram)
+- Color: Methylation level (0=unmethylated, 1=methylated)
+
+The Y-axis dendrogram shows read clustering based on the distance matrix,
+allowing visualization of how methylation patterns relate to read similarity.
+
 Examples:
   # Process single region
   %(prog)s --region-dir /path/to/chr1_12345/chr1_11345_13345
@@ -587,7 +661,7 @@ Examples:
     parser.add_argument("-t", "--threads", type=int, default=64,
                        help="Number of parallel threads (default: 64)")
     parser.add_argument("--metric", type=str, default="NHD",
-                       help="Distance metric to use (default: NHD)")
+                       help="Distance metric to use for clustering (default: NHD)")
     parser.add_argument("--linkage", type=str, default="average",
                        choices=["average", "single", "complete", "ward"],
                        help="Linkage method (default: average/UPGMA)")
@@ -664,4 +738,3 @@ Examples:
 
 if __name__ == "__main__":
     main()
-
