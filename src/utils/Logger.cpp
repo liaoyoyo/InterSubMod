@@ -1,4 +1,5 @@
 #include "utils/Logger.hpp"
+
 #include <chrono>
 #include <ctime>
 #include <iomanip>
@@ -32,17 +33,22 @@ void Logger::set_log_file(const std::string& filename) {
 
 std::string Logger::level_to_string(LogLevel level) {
     switch (level) {
-        case LogLevel::L_DEBUG:   return "DEBUG";
-        case LogLevel::L_INFO:    return "INFO";
-        case LogLevel::L_WARNING: return "WARNING";
-        case LogLevel::L_ERROR:   return "ERROR";
-        default:                  return "UNKNOWN";
+        case LogLevel::L_DEBUG:
+            return "DEBUG";
+        case LogLevel::L_INFO:
+            return "INFO";
+        case LogLevel::L_WARNING:
+            return "WARNING";
+        case LogLevel::L_ERROR:
+            return "ERROR";
+        default:
+            return "UNKNOWN";
     }
 }
 
 void Logger::log(LogLevel level, const std::string& message) {
     std::lock_guard<std::mutex> lock(mutex_);
-    
+
     if (level < current_level_) {
         return;
     }
@@ -56,15 +62,14 @@ void Logger::log(LogLevel level, const std::string& message) {
     // Note: std::put_time is not thread-safe on some old platforms but generally ok in modern C++.
     // Using localtime_r or localtime_s is better but std::put_time takes tm*.
     struct tm* time_info = std::localtime(&now_time);
-    
-    ss << "[" << std::put_time(time_info, "%Y-%m-%d %H:%M:%S") 
-       << "." << std::setfill('0') << std::setw(3) << ms.count() << "] "
-       << "[" << level_to_string(level) << "] "
-       << message << std::endl;
+
+    ss << "[" << std::put_time(time_info, "%Y-%m-%d %H:%M:%S") << "." << std::setfill('0') << std::setw(3) << ms.count()
+       << "] "
+       << "[" << level_to_string(level) << "] " << message << std::endl;
 
     // Output to console
     std::cout << ss.str();
-    
+
     // Output to file if open
     if (log_file_.is_open()) {
         log_file_ << ss.str();
@@ -75,12 +80,12 @@ void Logger::log(LogLevel level, const std::string& message) {
 void Logger::end_log(LogLevel level) {
     std::lock_guard<std::mutex> lock(mutex_);
     std::string msg = buffer_.str();
-    buffer_.str(""); // Clear buffer
+    buffer_.str("");  // Clear buffer
     buffer_.clear();
-    
+
     // Note: calling log() from here is tricky if we hold mutex, but log() also locks.
     // To avoid deadlock, we shouldn't call log() while holding mutex.
-    // But we just cleared buffer. 
+    // But we just cleared buffer.
     // The correct way would be:
 }
 
@@ -101,5 +106,5 @@ void Logger::error(const std::string& msg) {
     instance().log(LogLevel::L_ERROR, msg);
 }
 
-} // namespace Utils
-} // namespace InterSubMod
+}  // namespace Utils
+}  // namespace InterSubMod

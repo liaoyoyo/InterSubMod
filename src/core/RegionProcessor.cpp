@@ -1,49 +1,47 @@
 #include "core/RegionProcessor.hpp"
-#include "core/MethylationMatrix.hpp"
-#include "core/HierarchicalClustering.hpp"
-#include "io/TreeWriter.hpp"
-#include <fstream>
-#include <sstream>
-#include <chrono>
-#include <iostream>
-#include <iomanip>
+
 #include <omp.h>
-#include <algorithm>
-#include <unordered_set>
 #include <sys/stat.h>
+
+#include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <filesystem>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <unordered_set>
+
+#include "core/HierarchicalClustering.hpp"
+#include "core/MethylationMatrix.hpp"
+#include "io/TreeWriter.hpp"
 
 namespace InterSubMod {
 
-RegionProcessor::RegionProcessor(
-    const std::string& tumor_bam_path,
-    const std::string& normal_bam_path,
-    const std::string& ref_fasta_path,
-    const std::string& output_dir,
-    int num_threads,
-    int32_t window_size
-) : tumor_bam_path_(tumor_bam_path),
-    normal_bam_path_(normal_bam_path),
-    ref_fasta_path_(ref_fasta_path),
-    output_dir_(output_dir),
-    debug_output_dir_(output_dir + "/debug"),
-    num_threads_(num_threads),
-    window_size_(window_size),
-    log_level_(LogLevel::LOG_INFO),
-    output_filtered_reads_(false),
-    no_filter_output_(false),
-    compute_clustering_(true),
-    output_tree_files_(true),
-    output_linkage_matrix_(true),
-    linkage_method_(LinkageMethod::UPGMA),
-    clustering_min_reads_(10) {
-    
+RegionProcessor::RegionProcessor(const std::string& tumor_bam_path, const std::string& normal_bam_path,
+                                 const std::string& ref_fasta_path, const std::string& output_dir, int num_threads,
+                                 int32_t window_size)
+    : tumor_bam_path_(tumor_bam_path),
+      normal_bam_path_(normal_bam_path),
+      ref_fasta_path_(ref_fasta_path),
+      output_dir_(output_dir),
+      debug_output_dir_(output_dir + "/debug"),
+      num_threads_(num_threads),
+      window_size_(window_size),
+      log_level_(LogLevel::LOG_INFO),
+      output_filtered_reads_(false),
+      no_filter_output_(false),
+      compute_clustering_(true),
+      output_tree_files_(true),
+      output_linkage_matrix_(true),
+      linkage_method_(LinkageMethod::UPGMA),
+      clustering_min_reads_(10) {
     // Set OpenMP threads
     omp_set_num_threads(num_threads_);
-    
-    std::cout << "RegionProcessor initialized with " << num_threads_ 
-              << " threads, window_size=±" << window_size_ << "bp" << std::endl;
+
+    std::cout << "RegionProcessor initialized with " << num_threads_ << " threads, window_size=±" << window_size_
+              << "bp" << std::endl;
 }
 
 RegionProcessor::RegionProcessor(const Config& config)
@@ -65,7 +63,6 @@ RegionProcessor::RegionProcessor(const Config& config)
       output_tree_files_(config.output_tree_files),
       output_linkage_matrix_(config.output_linkage_matrix),
       clustering_min_reads_(config.clustering_min_reads) {
-    
     // Extract VCF filename from config (remove path and extension)
     std::filesystem::path vcf_path(config.somatic_vcf_path);
     std::string filename = vcf_path.stem().string();
@@ -74,19 +71,19 @@ RegionProcessor::RegionProcessor(const Config& config)
         filename = filename.substr(0, filename.size() - 4);
     }
     vcf_filename_ = filename;
-    
+
     // Parse linkage method from string
     linkage_method_ = HierarchicalClustering::string_to_method(config.linkage_method);
-    
+
     // Set filter configuration
     filter_config_.min_mapq = config.min_mapq;
     filter_config_.min_read_length = config.min_read_length;
     filter_config_.min_base_quality = config.min_base_quality;
     filter_config_.require_mm_ml = true;
-    
+
     // Set distance matrix configuration
     if (!distance_metrics_.empty()) {
-        distance_config_.metric = distance_metrics_[0]; // Default to first
+        distance_config_.metric = distance_metrics_[0];  // Default to first
     } else {
         distance_config_.metric = DistanceMetricType::NHD;
         distance_metrics_.push_back(DistanceMetricType::NHD);
@@ -98,15 +95,15 @@ RegionProcessor::RegionProcessor(const Config& config)
     distance_config_.pearson_center = config.distance_pearson_center;
     distance_config_.jaccard_include_unmeth = config.distance_jaccard_include_unmeth;
     distance_config_.num_threads = 1;  // Single thread for per-region computation
-    
+
     // Set OpenMP threads
     omp_set_num_threads(num_threads_);
-    
+
     // Create debug directory if needed
     if (output_filtered_reads_) {
         mkdir(debug_output_dir_.c_str(), 0755);
     }
-    
+
     std::cout << "RegionProcessor initialized:" << std::endl;
     std::cout << "  Threads: " << num_threads_ << std::endl;
     std::cout << "  Window size: ±" << window_size_ << " bp" << std::endl;
@@ -142,19 +139,18 @@ int RegionProcessor::load_snvs(const std::string& snv_table_path) {
         std::cerr << "Failed to open SNV table: " << snv_table_path << std::endl;
         return 0;
     }
-    
+
     snvs_.clear();
     std::string line;
     int line_num = 0;
-    
+
     // Skip header if present
     std::getline(ifs, line);
     line_num++;
-    
+
     // Check if first line is header
-    bool has_header = (line.find("chr") != std::string::npos || 
-                      line.find("pos") != std::string::npos);
-    
+    bool has_header = (line.find("chr") != std::string::npos || line.find("pos") != std::string::npos);
+
     if (!has_header) {
         // First line is data, parse it
         std::istringstream iss(line);
@@ -162,10 +158,10 @@ int RegionProcessor::load_snvs(const std::string& snv_table_path) {
         uint32_t pos;
         char ref, alt;
         float qual = 0.0f;
-        
+
         if (iss >> chr_str >> pos >> ref >> alt) {
             iss >> qual;  // Optional
-            
+
             SomaticSnv snv;
             snv.snv_id = 0;
             snv.chr_id = chrom_index_.get_or_create_id(chr_str);
@@ -173,25 +169,25 @@ int RegionProcessor::load_snvs(const std::string& snv_table_path) {
             snv.ref_base = ref;
             snv.alt_base = alt;
             snv.qual = qual;
-            
+
             snvs_.push_back(snv);
         }
     }
-    
+
     // Parse remaining lines
     while (std::getline(ifs, line)) {
         line_num++;
         if (line.empty() || line[0] == '#') continue;
-        
+
         std::istringstream iss(line);
         std::string chr_str;
         uint32_t pos;
         char ref, alt;
         float qual = 0.0f;
-        
+
         if (iss >> chr_str >> pos >> ref >> alt) {
             iss >> qual;  // Optional
-            
+
             SomaticSnv snv;
             snv.snv_id = snvs_.size();
             snv.chr_id = chrom_index_.get_or_create_id(chr_str);
@@ -199,13 +195,13 @@ int RegionProcessor::load_snvs(const std::string& snv_table_path) {
             snv.ref_base = ref;
             snv.alt_base = alt;
             snv.qual = qual;
-            
+
             snvs_.push_back(snv);
         } else {
             std::cerr << "Failed to parse SNV at line " << line_num << ": " << line << std::endl;
         }
     }
-    
+
     ifs.close();
     std::cout << "Loaded " << snvs_.size() << " SNVs from " << snv_table_path << std::endl;
     return snvs_.size();
@@ -218,109 +214,102 @@ int RegionProcessor::load_snvs_from_vcf(const std::string& vcf_path) {
         std::cout << "Loaded " << snvs_.size() << " SNVs from VCF: " << vcf_path << std::endl;
         return snvs_.size();
     }
-    
+
     std::cerr << "Failed to load SNVs from VCF: " << vcf_path << std::endl;
     return 0;
 }
 
 std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
-    int num_to_process = (max_snvs > 0 && max_snvs < static_cast<int>(snvs_.size())) 
-                         ? max_snvs : snvs_.size();
-    
-    std::cout << "Processing " << num_to_process << " regions with " 
-              << num_threads_ << " threads..." << std::endl;
-    
+    int num_to_process = (max_snvs > 0 && max_snvs < static_cast<int>(snvs_.size())) ? max_snvs : snvs_.size();
+
+    std::cout << "Processing " << num_to_process << " regions with " << num_threads_ << " threads..." << std::endl;
+
     std::vector<RegionResult> results(num_to_process);
-    
+
     auto t_start = std::chrono::high_resolution_clock::now();
-    
-    // OpenMP parallel loop
-    // OpenMP parallel region to manage thread-local resources
-    #pragma omp parallel
+
+// OpenMP parallel loop
+// OpenMP parallel region to manage thread-local resources
+#pragma omp parallel
     {
         // Initialize thread-local readers once per thread
         // This avoids opening/closing the BAM file and loading the index for every region
         BamReader tumor_reader(tumor_bam_path_);
         FastaReader ref_reader(ref_fasta_path_);
-        
+
         // Optional: Normal BAM reader if path is provided
         std::unique_ptr<BamReader> normal_reader;
         if (!normal_bam_path_.empty()) {
             normal_reader = std::make_unique<BamReader>(normal_bam_path_);
         }
 
-        #pragma omp for schedule(dynamic)
+#pragma omp for schedule(dynamic)
         for (int i = 0; i < num_to_process; i++) {
             const auto& snv = snvs_[i];
             std::string chr_name = chrom_index_.get_name(snv.chr_id);
-            
+
             // Logging (protected by critical section)
             if (log_level_ >= LogLevel::LOG_INFO) {
-                #pragma omp critical
+#pragma omp critical
                 {
-                    std::cout << "[Thread " << omp_get_thread_num() << "] Processing region " 
-                              << i << " (SNV " << chr_name << ":" << snv.pos << ")" << std::endl;
+                    std::cout << "[Thread " << omp_get_thread_num() << "] Processing region " << i << " (SNV "
+                              << chr_name << ":" << snv.pos << ")" << std::endl;
                 }
             }
-            
+
             // Process the region using the thread-local readers
             // Note: We pass the readers by reference
             results[i] = process_single_region(snv, i, tumor_reader, ref_reader);
-            
+
             if (log_level_ >= LogLevel::LOG_INFO) {
-                #pragma omp critical
+#pragma omp critical
                 {
                     if (results[i].success) {
-                        std::cout << "[Thread " << omp_get_thread_num() << "] ✓ Region " << i 
+                        std::cout << "[Thread " << omp_get_thread_num() << "] ✓ Region " << i
                                   << " completed: " << results[i].num_reads << " reads ("
-                                  << results[i].num_forward_reads << "+ / " 
-                                  << results[i].num_reverse_reads << "-), " 
+                                  << results[i].num_forward_reads << "+ / " << results[i].num_reverse_reads << "-), "
                                   << results[i].num_cpgs << " CpGs";
                         if (output_filtered_reads_) {
                             std::cout << ", " << results[i].num_filtered_reads << " filtered";
                         }
                         std::cout << ", " << results[i].elapsed_ms << " ms" << std::endl;
                     } else {
-                        std::cerr << "[Thread " << omp_get_thread_num() << "] ✗ Region " << i 
+                        std::cerr << "[Thread " << omp_get_thread_num() << "] ✗ Region " << i
                                   << " failed: " << results[i].error_message << std::endl;
                     }
                 }
             }
         }
     }
-    
+
     auto t_end = std::chrono::high_resolution_clock::now();
     double total_elapsed = std::chrono::duration<double, std::milli>(t_end - t_start).count();
-    
-    std::cout << "All regions processed in " << total_elapsed << " ms (" 
-              << (total_elapsed / num_to_process) << " ms/region)" << std::endl;
-    
+
+    std::cout << "All regions processed in " << total_elapsed << " ms (" << (total_elapsed / num_to_process)
+              << " ms/region)" << std::endl;
+
     return results;
 }
 
-RegionResult RegionProcessor::process_single_region(
-    const SomaticSnv& snv, 
-    int region_id,
-    BamReader& bam_reader,
-    FastaReader& fasta_reader
-) {
+RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int region_id, BamReader& bam_reader,
+                                                    FastaReader& fasta_reader) {
     RegionResult result;
     result.region_id = region_id;
     result.snv_id = snv.snv_id;
-    
+
     auto t_start = std::chrono::high_resolution_clock::now();
-    
+
     try {
         // Initialize parsers with filter configuration
         ReadParser read_parser(filter_config_);
         MethylationParser methyl_parser;
         MatrixBuilder matrix_builder;
-        
+
         // Define region window
         // Ensure we don't go below 1 or beyond chromosome end (checked later)
         int32_t region_start = static_cast<int32_t>(snv.pos) - static_cast<int32_t>(window_size_);
         int32_t region_end = static_cast<int32_t>(snv.pos) + static_cast<int32_t>(window_size_);
-        
+
         // Get chromosome name and length
         std::string chr_name = chrom_index_.get_name(snv.chr_id);
         int32_t chr_length = fasta_reader.get_chr_length(chr_name);
@@ -328,22 +317,22 @@ RegionResult RegionProcessor::process_single_region(
         // Clamp coordinates
         if (region_start < 1) region_start = 1;
         if (chr_length > 0 && region_end > chr_length) region_end = chr_length;
-        
+
         // Fetch reads from BAM
         // This uses the thread-local reader, which is much faster than re-opening
         auto reads = bam_reader.fetch_reads(chr_name, region_start, region_end);
-        
+
         // Fetch reference sequence for this window
         // Needed for CIGAR parsing and CpG verification
         std::string ref_seq = fasta_reader.fetch_sequence(chr_name, region_start, region_end);
-        
+
         if (ref_seq.empty()) {
             throw std::runtime_error("Failed to fetch reference sequence");
         }
-        
+
         // Collect filtered reads for debug output
         std::vector<FilteredReadInfo> filtered_reads;
-        
+
         // Process each read
         int read_count = 0;
         std::unordered_set<std::string> processed_read_names;
@@ -351,7 +340,7 @@ RegionResult RegionProcessor::process_single_region(
         for (auto* b : reads) {
             // 1. Filter and Parse Read Info
             auto [keep, filter_reason] = read_parser.should_keep_with_reason(b);
-            
+
             if (!keep && !no_filter_output_) {
                 // Record filtered read for debug output
                 if (output_filtered_reads_) {
@@ -360,9 +349,9 @@ RegionResult RegionProcessor::process_single_region(
                 }
                 continue;
             }
-            
+
             ReadInfo info = read_parser.parse(b, read_count, true, snv, ref_seq, region_start);
-            
+
             // Skip reads that don't cover the SNV or have low quality at the SNV site
             // (unless no_filter_output_ is enabled)
             if (info.alt_support == AltSupport::UNKNOWN && !no_filter_output_) {
@@ -374,7 +363,7 @@ RegionResult RegionProcessor::process_single_region(
                 }
                 continue;
             }
-            
+
             // Duplicate read name check
             if (processed_read_names.find(info.read_name) != processed_read_names.end()) {
                 continue;
@@ -383,11 +372,11 @@ RegionResult RegionProcessor::process_single_region(
 
             // 2. Parse Methylation (MM/ML tags)
             auto methyl_calls = methyl_parser.parse_read(b, ref_seq, region_start);
-            
+
             // 3. Add to Matrix Builder
             matrix_builder.add_read(info, methyl_calls);
             read_count++;
-            
+
             // Count strand
             if (info.strand == Strand::FORWARD) {
                 result.num_forward_reads++;
@@ -395,64 +384,57 @@ RegionResult RegionProcessor::process_single_region(
                 result.num_reverse_reads++;
             }
         }
-        
+
         // Finalize matrix construction (sort CpGs, fill NaNs)
         matrix_builder.finalize();
-        
+
         result.num_reads = matrix_builder.num_reads();
         result.num_cpgs = matrix_builder.num_cpgs();
         result.num_filtered_reads = filtered_reads.size();
-        
+
         // Write output to disk
         RegionWriter writer(output_dir_, debug_output_dir_, true, vcf_filename_);
-        writer.write_region(
-            snv,
-            chr_name,
-            region_id,
-            region_start,
-            region_end,
-            matrix_builder.get_reads(),
-            matrix_builder.get_cpg_positions(),
-            matrix_builder.get_matrix(),
-            0.0,  // elapsed_ms will be set below
-            0.0   // peak_memory_mb not tracked yet
+        writer.write_region(snv, chr_name, region_id, region_start, region_end, matrix_builder.get_reads(),
+                            matrix_builder.get_cpg_positions(), matrix_builder.get_matrix(),
+                            0.0,  // elapsed_ms will be set below
+                            0.0   // peak_memory_mb not tracked yet
         );
-        
+
         // Write filtered reads in debug mode
         if (output_filtered_reads_ && !filtered_reads.empty()) {
             std::string region_dir = writer.get_region_dir(chr_name, snv.pos, region_start, region_end);
             writer.write_filtered_reads(region_dir, chr_name, filtered_reads);
         }
-        
+
         // Compute and write distance matrix if enabled
         if (compute_distance_matrix_ && result.num_reads >= 2 && result.num_cpgs >= 1) {
             // Build MethylationMatrix for distance calculation
             MethylationMatrix meth_mat;
             meth_mat.region_id = region_id;
-            
+
             // Get reads and matrix data
             const auto& read_list = matrix_builder.get_reads();
             const auto& raw_matrix = matrix_builder.get_matrix();
             const auto& cpg_positions = matrix_builder.get_cpg_positions();
-            
+
             // Set up MethylationMatrix
             meth_mat.read_ids.resize(read_list.size());
             for (size_t i = 0; i < read_list.size(); ++i) {
                 meth_mat.read_ids[i] = read_list[i].read_id;
             }
-            
+
             meth_mat.cpg_ids.resize(cpg_positions.size());
             for (size_t i = 0; i < cpg_positions.size(); ++i) {
                 meth_mat.cpg_ids[i] = static_cast<int>(i);
             }
-            
+
             // Convert matrix to Eigen format
             int n_reads = static_cast<int>(raw_matrix.size());
             int n_cpgs = n_reads > 0 ? static_cast<int>(raw_matrix[0].size()) : 0;
-            
+
             meth_mat.raw_matrix = Eigen::MatrixXd(n_reads, n_cpgs);
             meth_mat.binary_matrix = Eigen::MatrixXi(n_reads, n_cpgs);
-            
+
             for (int i = 0; i < n_reads; ++i) {
                 for (int j = 0; j < n_cpgs; ++j) {
                     double val = raw_matrix[i][j];
@@ -472,88 +454,80 @@ RegionResult RegionProcessor::process_single_region(
                     }
                 }
             }
-            
+
             // Create distance calculator
             DistanceCalculator dist_calc(distance_config_);
-            
+
             // Loop over all requested metrics
             for (auto metric : distance_metrics_) {
                 // Update config for this metric
                 distance_config_.metric = metric;
                 dist_calc = DistanceCalculator(distance_config_);
-                
+
                 // Compute all-reads distance matrix
                 DistanceMatrix all_dist = dist_calc.compute(meth_mat, read_list);
-                
+
                 // Update result statistics (only for the first metric to avoid overwriting/confusion in summary)
                 if (metric == distance_metrics_[0]) {
                     result.num_valid_pairs = all_dist.num_valid_pairs;
                     result.num_invalid_pairs = all_dist.num_invalid_pairs;
                     result.avg_common_coverage = all_dist.avg_common_coverage;
                 }
-                
+
                 // Compute strand-specific matrices if enabled
                 DistanceMatrix forward_dist, reverse_dist;
                 if (output_strand_distance_matrices_) {
                     std::tie(forward_dist, reverse_dist) = dist_calc.compute_strand_specific(meth_mat, read_list);
                 }
-                
+
                 // Write distance matrices
                 if (output_distance_matrix_) {
                     std::string region_dir = writer.get_region_dir(chr_name, snv.pos, region_start, region_end);
-                    writer.write_distance_matrices(
-                        region_dir,
-                        all_dist,
-                        forward_dist,
-                        reverse_dist,
-                        metric,
-                        output_strand_distance_matrices_
-                    );
+                    writer.write_distance_matrices(region_dir, all_dist, forward_dist, reverse_dist, metric,
+                                                   output_strand_distance_matrices_);
                 }
-                
+
                 if (log_level_ >= LogLevel::LOG_DEBUG) {
-                    #pragma omp critical
+#pragma omp critical
                     {
-                        std::cout << "  Distance matrix (" << DistanceCalculator::metric_to_string(metric) 
+                        std::cout << "  Distance matrix (" << DistanceCalculator::metric_to_string(metric)
                                   << "): " << all_dist.size() << "x" << all_dist.size()
-                                  << ", valid pairs: " << all_dist.num_valid_pairs 
-                                  << ", avg coverage: " << std::fixed << std::setprecision(1) 
-                                  << all_dist.avg_common_coverage << std::endl;
+                                  << ", valid pairs: " << all_dist.num_valid_pairs << ", avg coverage: " << std::fixed
+                                  << std::setprecision(1) << all_dist.avg_common_coverage << std::endl;
                     }
                 }
-                
+
                 // === Hierarchical Clustering and Tree Output ===
                 // Only run for the first metric (typically NHD) to avoid redundant trees
-                if (compute_clustering_ && metric == distance_metrics_[0] 
-                    && result.num_reads >= clustering_min_reads_) {
-                    
+                if (compute_clustering_ && metric == distance_metrics_[0] &&
+                    result.num_reads >= clustering_min_reads_) {
                     std::string region_dir = writer.get_region_dir(chr_name, snv.pos, region_start, region_end);
                     std::string clustering_dir = region_dir + "/clustering";
                     std::filesystem::create_directories(clustering_dir);
-                    
+
                     // Prepare read names (using read_name field for identification)
                     std::vector<std::string> read_names;
                     for (const auto& r : read_list) {
                         read_names.push_back(r.read_name);
                     }
-                    
+
                     // Build hierarchical clustering tree
                     HierarchicalClustering clusterer(linkage_method_);
                     Tree tree = clusterer.build_tree(all_dist, read_names);
-                    
+
                     if (!tree.empty() && output_tree_files_) {
                         TreeWriter tree_writer;
-                        
+
                         // Write Newick tree file
                         std::string tree_path = clustering_dir + "/tree.nwk";
                         tree_writer.write_newick(tree, tree_path);
-                        
+
                         // Write linkage matrix (scipy-compatible format)
                         if (output_linkage_matrix_) {
                             std::string linkage_path = clustering_dir + "/linkage_matrix.csv";
                             tree_writer.write_linkage_matrix(tree, linkage_path);
                         }
-                        
+
                         // Write leaf order for Python visualization
                         std::string order_path = clustering_dir + "/leaf_order.txt";
                         std::ofstream order_file(order_path);
@@ -564,17 +538,16 @@ RegionResult RegionProcessor::process_single_region(
                             }
                             order_file.close();
                         }
-                        
+
                         if (log_level_ >= LogLevel::LOG_DEBUG) {
-                            #pragma omp critical
+#pragma omp critical
                             {
-                                std::cout << "  Clustering tree: " << tree.num_leaves() 
-                                          << " leaves, method=" << HierarchicalClustering::method_to_string(linkage_method_)
-                                          << std::endl;
+                                std::cout << "  Clustering tree: " << tree.num_leaves() << " leaves, method="
+                                          << HierarchicalClustering::method_to_string(linkage_method_) << std::endl;
                             }
                         }
                     }
-                    
+
                     // Strand-specific trees (if enabled)
                     if (output_strand_distance_matrices_ && output_tree_files_) {
                         // Forward strand tree
@@ -593,7 +566,7 @@ RegionResult RegionProcessor::process_single_region(
                                 }
                             }
                         }
-                        
+
                         // Reverse strand tree
                         if (reverse_dist.size() >= 2) {
                             std::vector<std::string> rev_names;
@@ -614,22 +587,21 @@ RegionResult RegionProcessor::process_single_region(
                 }
             }
         }
-        
+
         // Cleanup BAM records
         for (auto* r : reads) {
             bam_destroy1(r);
         }
-        
+
         result.success = true;
-        
     } catch (const std::exception& e) {
         result.success = false;
         result.error_message = e.what();
     }
-    
+
     auto t_end = std::chrono::high_resolution_clock::now();
     result.elapsed_ms = std::chrono::duration<double, std::milli>(t_end - t_start).count();
-    
+
     return result;
 }
 
@@ -641,13 +613,13 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
     int total_reverse = 0;
     int total_filtered = 0;
     double total_time = 0.0;
-    
+
     // Distance matrix statistics
     int total_valid_pairs = 0;
     int total_invalid_pairs = 0;
     double total_avg_coverage = 0.0;
     int regions_with_distance = 0;
-    
+
     for (const auto& r : results) {
         if (r.success) {
             success_count++;
@@ -657,7 +629,7 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
             total_reverse += r.num_reverse_reads;
             total_filtered += r.num_filtered_reads;
             total_time += r.elapsed_ms;
-            
+
             // Distance matrix stats
             if (r.num_valid_pairs > 0 || r.num_invalid_pairs > 0) {
                 total_valid_pairs += r.num_valid_pairs;
@@ -667,7 +639,7 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
             }
         }
     }
-    
+
     std::cout << "\n=== Processing Summary ===" << std::endl;
     std::cout << "Total regions: " << results.size() << std::endl;
     std::cout << "Successful: " << success_count << std::endl;
@@ -683,7 +655,7 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
     std::cout << "Average time per region: " << (total_time / results.size()) << " ms" << std::endl;
     std::cout << "Average reads per region: " << (total_reads / static_cast<double>(success_count)) << std::endl;
     std::cout << "Average CpGs per region: " << (total_cpgs / static_cast<double>(success_count)) << std::endl;
-    
+
     // Distance matrix summary
     if (compute_distance_matrix_ && regions_with_distance > 0) {
         std::cout << "\n=== Distance Matrix Summary (First Metric) ===" << std::endl;
@@ -696,9 +668,9 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
             double valid_ratio = 100.0 * total_valid_pairs / (total_valid_pairs + total_invalid_pairs);
             std::cout << "Valid pair ratio: " << std::fixed << std::setprecision(1) << valid_ratio << "%" << std::endl;
         }
-        std::cout << "Average common CpG coverage: " << std::fixed << std::setprecision(2) 
+        std::cout << "Average common CpG coverage: " << std::fixed << std::setprecision(2)
                   << (total_avg_coverage / regions_with_distance) << std::endl;
     }
 }
 
-} // namespace InterSubMod
+}  // namespace InterSubMod

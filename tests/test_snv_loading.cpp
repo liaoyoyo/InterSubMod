@@ -1,14 +1,15 @@
-#include "core/SomaticSnv.hpp"
-#include "utils/Logger.hpp"
 #include <iostream>
 #include <string>
+
+#include "core/SomaticSnv.hpp"
+#include "utils/Logger.hpp"
 
 using namespace InterSubMod;
 
 int main(int argc, char* argv[]) {
     // Set log level to DEBUG to see detailed info
     Utils::Logger::instance().set_log_level(Utils::LogLevel::L_DEBUG);
-    
+
     Utils::Logger::info("Starting SNV Loading Test...");
 
     if (argc < 2) {
@@ -40,23 +41,18 @@ int main(int argc, char* argv[]) {
 
     for (const auto& snv : snvs) {
         if (count >= limit) break;
-        std::cout << snv.snv_id << "\t" 
-                  << chrom_index.get_name(snv.chr_id) << "\t"
-                  << snv.pos << "\t"
-                  << snv.ref_base << "\t"
-                  << snv.alt_base << "\t"
-                  << snv.somatic_conf << "\n";
+        std::cout << snv.snv_id << "\t" << chrom_index.get_name(snv.chr_id) << "\t" << snv.pos << "\t" << snv.ref_base
+                  << "\t" << snv.alt_base << "\t" << snv.somatic_conf << "\n";
         count++;
     }
     std::cout << "--------------------------\n";
 
     std::string output_tsv = "test_snv_output.tsv";
     if (snv_table.save_to_tsv(output_tsv, chrom_index)) {
-         Utils::Logger::info("Saved SNV table to " + output_tsv);
+        Utils::Logger::info("Saved SNV table to " + output_tsv);
     } else {
         Utils::Logger::error("Failed to save SNV table to " + output_tsv);
     }
 
     return 0;
 }
-

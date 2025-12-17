@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
+
+#include <fstream>
+
 #include "core/Config.hpp"
 #include "utils/ArgParser.hpp"
-#include <fstream>
 
 using namespace InterSubMod;
 
@@ -26,7 +28,7 @@ TEST(ConfigTest, ValidationSuccess) {
     config.binary_methyl_low = 0.2;
 
     // Since these are not valid BAM/FASTA/VCF files, htslib should fail
-    EXPECT_FALSE(config.validate()); 
+    EXPECT_FALSE(config.validate());
 
     // Cleanup
     std::remove("tumor.bam");
@@ -42,7 +44,7 @@ TEST(ConfigTest, ValidationFailureMissingFiles) {
 
 TEST(ConfigTest, ValidationFailureInvalidWindow) {
     Config config;
-    config.window_size_bp = -100; 
+    config.window_size_bp = -100;
     // Should fail due to missing paths AND invalid window
     EXPECT_FALSE(config.validate());
 }
@@ -50,16 +52,16 @@ TEST(ConfigTest, ValidationFailureInvalidWindow) {
 TEST(ConfigTest, ValidationFailureInvalidMethylThresholds) {
     Config config;
     // Set paths to dummy values to avoid path validation failure masking the threshold failure
-    // (Although Config::validate() checks all and returns false if any fail, 
+    // (Although Config::validate() checks all and returns false if any fail,
     // we just want to ensure it returns false)
-    
+
     config.binary_methyl_high = 0.3;
-    config.binary_methyl_low = 0.5; // Low > High
+    config.binary_methyl_low = 0.5;  // Low > High
     EXPECT_FALSE(config.validate());
 
     config.binary_methyl_low = 0.2;
-    config.binary_methyl_high = 1.2; // > 1.0
-    EXPECT_FALSE(config.validate()); 
+    config.binary_methyl_high = 1.2;  // > 1.0
+    EXPECT_FALSE(config.validate());
 }
 
 TEST(ArgParserTest, ParseArgumentsShortOptions) {
@@ -69,18 +71,11 @@ TEST(ArgParserTest, ParseArgumentsShortOptions) {
     create_dummy_file("r.fa");
     create_dummy_file("s.vcf");
 
-    const char* argv[] = {
-        "program",
-        "-t", "t.bam",
-        "-r", "r.fa",
-        "-v", "s.vcf",
-        "-w", "200",
-        "-j", "4"
-    };
+    const char* argv[] = {"program", "-t", "t.bam", "-r", "r.fa", "-v", "s.vcf", "-w", "200", "-j", "4"};
     int argc = 11;
 
     bool result = Utils::ArgParser::parse(argc, const_cast<char**>(argv), config);
-    
+
     EXPECT_TRUE(result);
     EXPECT_EQ(config.tumor_bam_path, "t.bam");
     EXPECT_EQ(config.reference_fasta_path, "r.fa");

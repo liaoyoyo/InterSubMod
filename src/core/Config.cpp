@@ -1,10 +1,13 @@
 #include "core/Config.hpp"
-#include "core/DistanceMatrix.hpp"
-#include <iostream>
+
+#include <htslib/faidx.h>
 #include <htslib/hts.h>
 #include <htslib/sam.h>
 #include <htslib/vcf.h>
-#include <htslib/faidx.h>
+
+#include <iostream>
+
+#include "core/DistanceMatrix.hpp"
 
 namespace InterSubMod {
 
@@ -18,17 +21,17 @@ bool Config::validate() const {
         // Verify if it's a valid BAM/CRAM/SAM
         samFile* fp = sam_open(tumor_bam_path.c_str(), "r");
         if (fp == NULL) {
-             std::cerr << "Error: Cannot open Tumor BAM file: " << tumor_bam_path << std::endl;
-             valid = false;
+            std::cerr << "Error: Cannot open Tumor BAM file: " << tumor_bam_path << std::endl;
+            valid = false;
         } else {
             hts_idx_t* idx = sam_index_load(fp, tumor_bam_path.c_str());
             if (idx == NULL) {
-                 std::cerr << "Warning: Tumor BAM index not found. Random access may fail." << std::endl;
-                 // Not strictly invalid for basic opening, but good to warn
+                std::cerr << "Warning: Tumor BAM index not found. Random access may fail." << std::endl;
+                // Not strictly invalid for basic opening, but good to warn
             } else {
                 hts_idx_destroy(idx);
             }
-            
+
             sam_hdr_t* hdr = sam_hdr_read(fp);
             if (hdr == NULL) {
                 std::cerr << "Error: Cannot read header from Tumor BAM file." << std::endl;
@@ -39,21 +42,21 @@ bool Config::validate() const {
             sam_close(fp);
         }
     }
-    
+
     if (!normal_bam_path.empty()) {
         samFile* fp = sam_open(normal_bam_path.c_str(), "r");
         if (fp == NULL) {
-             std::cerr << "Error: Cannot open Normal BAM file: " << normal_bam_path << std::endl;
-             valid = false;
+            std::cerr << "Error: Cannot open Normal BAM file: " << normal_bam_path << std::endl;
+            valid = false;
         } else {
-             sam_hdr_t* hdr = sam_hdr_read(fp);
-             if (hdr == NULL) {
-                 std::cerr << "Error: Cannot read header from Normal BAM file." << std::endl;
-                 valid = false;
-             } else {
-                 sam_hdr_destroy(hdr);
-             }
-             sam_close(fp);
+            sam_hdr_t* hdr = sam_hdr_read(fp);
+            if (hdr == NULL) {
+                std::cerr << "Error: Cannot read header from Normal BAM file." << std::endl;
+                valid = false;
+            } else {
+                sam_hdr_destroy(hdr);
+            }
+            sam_close(fp);
         }
     }
 
@@ -64,7 +67,8 @@ bool Config::validate() const {
         // Verify FASTA index (.fai)
         faidx_t* fai = fai_load(reference_fasta_path.c_str());
         if (fai == NULL) {
-            std::cerr << "Error: Cannot load Reference FASTA (or .fai index missing): " << reference_fasta_path << std::endl;
+            std::cerr << "Error: Cannot load Reference FASTA (or .fai index missing): " << reference_fasta_path
+                      << std::endl;
             valid = false;
         } else {
             fai_destroy(fai);
@@ -102,8 +106,7 @@ bool Config::validate() const {
         valid = false;
     }
 
-    if (binary_methyl_high > 1.0 || binary_methyl_high < 0.0 || 
-        binary_methyl_low > 1.0 || binary_methyl_low < 0.0) {
+    if (binary_methyl_high > 1.0 || binary_methyl_high < 0.0 || binary_methyl_low > 1.0 || binary_methyl_low < 0.0) {
         std::cerr << "Error: Methylation thresholds must be between 0.0 and 1.0." << std::endl;
         valid = false;
     }
@@ -131,4 +134,4 @@ void Config::print() const {
     std::cout << "---------------------" << std::endl;
 }
 
-} // namespace InterSubMod
+}  // namespace InterSubMod
