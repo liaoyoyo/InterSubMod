@@ -12,12 +12,20 @@ namespace InterSubMod {
 RegionWriter::RegionWriter(
     const std::string& output_dir,
     const std::string& debug_output_dir,
-    bool output_strand_matrices
+    bool output_strand_matrices,
+    const std::string& vcf_filename
 ) : output_dir_(output_dir),
     debug_output_dir_(debug_output_dir),
-    output_strand_matrices_(output_strand_matrices) {
+    output_strand_matrices_(output_strand_matrices),
+    vcf_filename_(vcf_filename) {
     // Create output directory if it doesn't exist
     mkdir(output_dir_.c_str(), 0755);
+    
+    // Create VCF subdirectory if specified
+    if (!vcf_filename_.empty()) {
+        std::string vcf_dir = output_dir_ + "/" + vcf_filename_;
+        mkdir(vcf_dir.c_str(), 0755);
+    }
     
     // Create debug output directory if specified
     if (!debug_output_dir_.empty()) {
@@ -39,19 +47,32 @@ std::string RegionWriter::get_region_dir(const std::string& chr_name, int32_t sn
 }
 
 std::string RegionWriter::create_region_dir(const std::string& chr_name, int32_t snv_pos, int32_t region_start, int32_t region_end) {
-    // Level 1: output_dir/chrName_snvPos
+    // Base directory (with VCF filename if specified)
+    std::string base_dir = output_dir_;
+    if (!vcf_filename_.empty()) {
+        base_dir = output_dir_ + "/" + vcf_filename_;
+        mkdir(base_dir.c_str(), 0755);
+    }
+
+    // Level 1: base_dir/chrName
     std::ostringstream level1;
-    level1 << output_dir_ << "/" << chr_name << "_" << snv_pos;
+    level1 << base_dir << "/" << chr_name;
     std::string level1_dir = level1.str();
     mkdir(level1_dir.c_str(), 0755);
 
-    // Level 2: output_dir/chrName_snvPos/chrName_start_end
+    // Level 2: base_dir/chrName/chrName_snvPos
     std::ostringstream level2;
-    level2 << level1_dir << "/" << chr_name << "_" << region_start << "_" << region_end;
+    level2 << level1_dir << "/" << chr_name << "_" << snv_pos;
     std::string level2_dir = level2.str();
     mkdir(level2_dir.c_str(), 0755);
 
-    return level2_dir;
+    // Level 3: base_dir/chrName/chrName_snvPos/chrName_start_end
+    std::ostringstream level3;
+    level3 << level2_dir << "/" << chr_name << "_" << region_start << "_" << region_end;
+    std::string level3_dir = level3.str();
+    mkdir(level3_dir.c_str(), 0755);
+
+    return level3_dir;
 }
 
 void RegionWriter::write_region(

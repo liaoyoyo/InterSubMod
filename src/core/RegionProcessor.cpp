@@ -66,6 +66,15 @@ RegionProcessor::RegionProcessor(const Config& config)
       output_linkage_matrix_(config.output_linkage_matrix),
       clustering_min_reads_(config.clustering_min_reads) {
     
+    // Extract VCF filename from config (remove path and extension)
+    std::filesystem::path vcf_path(config.somatic_vcf_path);
+    std::string filename = vcf_path.stem().string();
+    // If extension is .vcf.gz, remove .vcf as well
+    if (filename.size() > 4 && filename.substr(filename.size() - 4) == ".vcf") {
+        filename = filename.substr(0, filename.size() - 4);
+    }
+    vcf_filename_ = filename;
+    
     // Parse linkage method from string
     linkage_method_ = HierarchicalClustering::string_to_method(config.linkage_method);
     
@@ -395,7 +404,7 @@ RegionResult RegionProcessor::process_single_region(
         result.num_filtered_reads = filtered_reads.size();
         
         // Write output to disk
-        RegionWriter writer(output_dir_, debug_output_dir_, true);
+        RegionWriter writer(output_dir_, debug_output_dir_, true, vcf_filename_);
         writer.write_region(
             snv,
             chr_name,

@@ -15,18 +15,20 @@ namespace InterSubMod {
  * 輸出目錄結構：
  * ```
  * output/
- *   region_0000/
- *     metadata.txt                  # Region 與 SNV 資訊
- *     reads.tsv                     # Read 列表與標籤資訊（含 strand）
- *     cpg_sites.tsv                 # CpG 位點列表
- *     methylation.csv               # Read × CpG 甲基化矩陣（CSV格式）
- *     methylation_forward.csv       # Forward strand 甲基化矩陣
- *     methylation_reverse.csv       # Reverse strand 甲基化矩陣
- *     methylation.npz               # (可選) NumPy binary format
- *   region_0001/
- *     ...
- *   debug/                          # Debug 模式輸出
- *     filtered_reads.tsv            # 被過濾的 reads 與原因
+ *   vcf_filename/                    # VCF 檔案名稱
+ *     chr1/                          # 染色體名稱
+ *       chr1_12345/                  # 染色體_SNV位點
+ *         chr1_11345_13345/          # 染色體_起始_結束
+ *           metadata.txt             # Region 與 SNV 資訊
+ *           reads/                   # Read 資料目錄
+ *             reads.tsv              # Read 列表與標籤資訊（含 strand）
+ *           methylation/             # 甲基化資料目錄
+ *             cpg_sites.tsv          # CpG 位點列表
+ *             methylation.csv        # Read × CpG 甲基化矩陣（CSV格式）
+ *             methylation_forward.csv# Forward strand 甲基化矩陣
+ *             methylation_reverse.csv# Reverse strand 甲基化矩陣
+ *   debug/                           # Debug 模式輸出
+ *     filtered_reads.tsv             # 被過濾的 reads 與原因
  * ```
  */
 class RegionWriter {
@@ -36,11 +38,13 @@ public:
      * @param output_dir 輸出根目錄（如 "output/"）
      * @param debug_output_dir Debug 輸出目錄（如 "output/debug"）
      * @param output_strand_matrices 是否輸出依 strand 分類的矩陣
+     * @param vcf_filename VCF 檔案名稱（用於建立子目錄）
      */
     explicit RegionWriter(
         const std::string& output_dir,
         const std::string& debug_output_dir = "",
-        bool output_strand_matrices = true
+        bool output_strand_matrices = true,
+        const std::string& vcf_filename = ""
     );
     
     /**
@@ -120,6 +124,7 @@ private:
     std::string output_dir_;
     std::string debug_output_dir_;
     bool output_strand_matrices_;
+    std::string vcf_filename_;
     
     /**
      * @brief 建立 region 子目錄

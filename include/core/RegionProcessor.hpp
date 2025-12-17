@@ -142,6 +142,7 @@ private:
     std::string ref_fasta_path_;
     std::string output_dir_;
     std::string debug_output_dir_;
+    std::string vcf_filename_;  ///< VCF filename (without path and extension)
     int num_threads_;
     int32_t window_size_;
     
