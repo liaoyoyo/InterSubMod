@@ -5,28 +5,15 @@
 
 namespace InterSubMod {
 
-enum class DistanceMetricType {
-    NHD,
-    L1,
-    L2,
-    CORR,
-    JACCARD
-};
+enum class DistanceMetricType { NHD, L1, L2, CORR, JACCARD };
 
-enum class NanDistanceStrategy {
-    MAX_DIST,
-    SKIP
-};
+enum class NanDistanceStrategy { MAX_DIST, SKIP };
 
-enum class AltSupport {
-    ALT,
-    REF,
-    UNKNOWN
-};
+enum class AltSupport { ALT, REF, UNKNOWN };
 
 /**
  * @brief Strand orientation of a read.
- * 
+ *
  * Determined by BAM FLAG bit 0x10 (BAM_FREVERSE):
  * - FORWARD: Read maps to the forward/positive strand
  * - REVERSE: Read maps to the reverse/negative strand
@@ -42,15 +29,15 @@ enum class Strand : uint8_t {
  * @brief Log level for controlling output verbosity.
  */
 enum class LogLevel {
-    LOG_ERROR = 0,    ///< Only errors
-    LOG_WARN = 1,     ///< Errors and warnings
-    LOG_INFO = 2,     ///< Normal operational messages
-    LOG_DEBUG = 3     ///< Detailed debug output including filtered reads
+    LOG_ERROR = 0,  ///< Only errors
+    LOG_WARN = 1,   ///< Errors and warnings
+    LOG_INFO = 2,   ///< Normal operational messages
+    LOG_DEBUG = 3   ///< Detailed debug output including filtered reads
 };
 
 /**
  * @brief Reasons why a read may be filtered out.
- * 
+ *
  * Used in debug mode to track and report why reads were excluded.
  */
 enum class FilterReason : uint16_t {
@@ -94,7 +81,7 @@ inline bool has_flag(FilterReason flags, FilterReason check) {
  */
 inline std::string filter_reason_to_string(FilterReason reason) {
     if (reason == FilterReason::NONE) return "NONE";
-    
+
     std::string result;
     if (has_flag(reason, FilterReason::FLAG_SECONDARY)) result += "SECONDARY,";
     if (has_flag(reason, FilterReason::FLAG_SUPPLEMENTARY)) result += "SUPPLEMENTARY,";
@@ -108,7 +95,7 @@ inline std::string filter_reason_to_string(FilterReason reason) {
     if (has_flag(reason, FilterReason::SNV_IN_DELETION)) result += "SNV_IN_DELETION,";
     if (has_flag(reason, FilterReason::LOW_BASE_QUALITY)) result += "LOW_BASE_QUALITY,";
     if (has_flag(reason, FilterReason::NOT_REF_OR_ALT)) result += "NOT_REF_OR_ALT,";
-    
+
     // Remove trailing comma
     if (!result.empty() && result.back() == ',') {
         result.pop_back();
@@ -116,4 +103,4 @@ inline std::string filter_reason_to_string(FilterReason reason) {
     return result;
 }
 
-} // namespace InterSubMod
+}  // namespace InterSubMod

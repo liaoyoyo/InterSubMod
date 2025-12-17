@@ -1,21 +1,16 @@
 #pragma once
 
-#include <string>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <mutex>
 #include <sstream>
+#include <string>
 #include <vector>
 
 namespace InterSubMod {
 namespace Utils {
 
-enum class LogLevel {
-    L_DEBUG,
-    L_INFO,
-    L_WARNING,
-    L_ERROR
-};
+enum class LogLevel { L_DEBUG, L_INFO, L_WARNING, L_ERROR };
 
 /**
  * @brief specific logger class that supports console and file output with different log levels.
@@ -26,13 +21,13 @@ public:
 
     void set_log_level(LogLevel level);
     void set_log_file(const std::string& filename);
-    
+
     void log(LogLevel level, const std::string& message);
-    
-    // Template for variadic arguments formatting if needed, 
+
+    // Template for variadic arguments formatting if needed,
     // but keeping it simple with string for now or use a helper.
-    
-    template<typename T>
+
+    template <typename T>
     Logger& operator<<(const T& msg) {
         std::lock_guard<std::mutex> lock(mutex_);
         buffer_ << msg;
@@ -51,7 +46,7 @@ public:
 private:
     Logger() = default;
     ~Logger();
-    
+
     Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
 
@@ -59,10 +54,9 @@ private:
     std::ofstream log_file_;
     std::mutex mutex_;
     std::stringstream buffer_;
-    
+
     std::string level_to_string(LogLevel level);
 };
 
-} // namespace Utils
-} // namespace InterSubMod
-
+}  // namespace Utils
+}  // namespace InterSubMod
