@@ -113,6 +113,9 @@ def load_distance_matrix(
 
     try:
         df = pd.read_csv(filepath, index_col=0)
+        # Ensure index and columns are integers (read_id) to match methylation matrix
+        df.index = df.index.astype(int)
+        df.columns = df.columns.astype(int)
         read_ids = list(df.index)
         return df, read_ids
     except Exception as e:
@@ -133,11 +136,14 @@ def load_reads_metadata(region_dir: str) -> Optional[pd.DataFrame]:
 
     try:
         df = pd.read_csv(reads_file, sep="\t")
-        # Set read_name as index (matches distance matrix)
-        if "read_name" in df.columns:
-            df = df.set_index("read_name")
-        elif "read_id" in df.columns:
+        # Set read_id as index (matches distance matrix and methylation matrix)
+        if "read_id" in df.columns:
             df = df.set_index("read_id")
+            df.index = df.index.astype(
+                int
+            )  # Ensure integer index to match other matrices
+        elif "read_name" in df.columns:
+            df = df.set_index("read_name")
         return df
     except Exception as e:
         print(f"Error loading reads metadata: {e}")
@@ -171,6 +177,49 @@ def load_linkage_matrix(region_dir: str, strand: str = "all") -> Optional[np.nda
     except Exception as e:
         print(f"Error loading linkage matrix: {e}")
         return None
+
+
+def load_methylation_matrix(
+    region_dir: str, strand: str = "all"
+) -> Tuple[Optional[pd.DataFrame], Optional[np.ndarray]]:
+    """
+    Load methylation matrix from CSV file (for filtering purposes).
+
+    Args:
+        region_dir: Path to region directory
+        strand: "all", "forward", or "reverse"
+
+    Returns:
+        Tuple of (DataFrame with read_id as index, numpy array of CpG positions)
+    """
+    meth_dir = os.path.join(region_dir, "methylation")
+
+    if strand == "forward":
+        filepath = os.path.join(meth_dir, "methylation_forward.csv")
+    elif strand == "reverse":
+        filepath = os.path.join(meth_dir, "methylation_reverse.csv")
+    else:
+        filepath = os.path.join(meth_dir, "methylation.csv")
+
+    if not os.path.exists(filepath):
+        return None, None
+
+    try:
+        df = pd.read_csv(filepath, index_col=0)
+        # Ensure index is integer (read_id)
+        df.index = df.index.astype(int)
+
+        # Handle strand-specific files which have original_read_id column
+        if strand in ["forward", "reverse"] and "original_read_id" in df.columns:
+            df = df.drop(columns=["original_read_id"])
+
+        # Get CpG positions from column names
+        cpg_positions = np.array([int(col) for col in df.columns])
+
+        return df, cpg_positions
+    except Exception as e:
+        print(f"Error loading methylation matrix: {e}")
+        return None, None
 
 
 def load_region_info(region_dir: str) -> Dict:
@@ -357,13 +406,17 @@ def plot_distance_heatmap(
             row_linkage=linkage_matrix,
             col_linkage=linkage_matrix,
             row_colors=row_colors,
-            col_colors=row_colors,
+            col_colors=None,  # Only show labels on left side, not top
             cmap="viridis_r",  # Reversed: dark = similar (low distance)
             vmin=0,
             vmax=1,
             figsize=figsize,
             cbar_kws={"label": f"Distance ({metric_name})"},
-            dendrogram_ratio=(0.15, 0.15),
+            dendrogram_ratio=(
+                0,
+                0.15,
+            ),  # Hide left dendrogram (redundant for symmetric matrix), keep top
+            cbar_pos=(0.01, 0.82, 0.02, 0.12),  # Position colorbar in upper-left corner
             colors_ratio=0.03 if row_colors is not None else 0,
             linewidths=0,
             xticklabels=False if n_reads > 50 else True,
@@ -391,12 +444,12 @@ def plot_distance_heatmap(
                         labels.append(f"{col}: {val}")
 
             if handles:
-                # Position legend outside the heatmap
+                # Position legend in upper area, left of the Distance colorbar
                 g.fig.legend(
                     handles,
                     labels,
                     loc="upper left",
-                    bbox_to_anchor=(0.02, 0.98),
+                    bbox_to_anchor=(0.08, 1),
                     fontsize=8,
                     framealpha=0.9,
                     title="Annotations",
@@ -468,12 +521,28 @@ def process_single_region(
     if reads_df is None:
         return region_dir, False, "No reads metadata found"
 
-    # Try to load pre-computed linkage from C++
-    Z = load_linkage_matrix(region_dir, strand)
+    # Filter: Ensure consistency with methylation data (intersection)
+    # This makes distance heatmap show the same reads as cluster heatmap
+    meth_df, _ = load_methylation_matrix(region_dir, strand)
+    if meth_df is not None:
+        # Intersect distance matrix with methylation matrix
+        common_reads = list(set(dist_df.index) & set(meth_df.index))
+        if len(common_reads) < min_reads:
+            return (
+                region_dir,
+                False,
+                f"Too few common reads ({len(common_reads)} < {min_reads})",
+            )
 
-    # If not available, compute from distance matrix
-    if Z is None:
-        Z = compute_linkage_from_distance(dist_df, method=linkage_method)
+        # Reorder to match distance matrix order (important for linkage alignment)
+        ordered_reads = [r for r in dist_df.index if r in common_reads]
+        dist_df = dist_df.loc[ordered_reads, ordered_reads]
+        read_ids = list(dist_df.index)
+        n_reads = len(read_ids)
+
+    # Re-compute linkage from the (potentially filtered) distance matrix
+    # Note: We cannot use pre-computed linkage if we filtered reads
+    Z = compute_linkage_from_distance(dist_df, method=linkage_method)
 
     if Z is None:
         return region_dir, False, "Linkage computation failed"

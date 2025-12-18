@@ -42,26 +42,42 @@ std::vector<MethylCall> MethylationParser::parse_read(const bam1_t* b, const std
     int ml_offset = 0;
     std::vector<int> deltas;
 
-    // First, count deltas for all modification types before "C+m?"
+    // Robust ML offset calculation:
+    // Parse each semicolon-delimited modification block and count its deltas
+    // until we find "C+m?". The ML array contains all probabilities in order.
     std::string mm_string(mm_str);
-    size_t cm_pos = mm_string.find("C+m?");
+    std::istringstream block_stream(mm_string);
+    std::string block;
+    bool found_target = false;
 
-    if (cm_pos != std::string::npos) {
-        // Count commas before "C+m?" to find ML offset
-        for (size_t i = 0; i < cm_pos; i++) {
-            if (mm_string[i] == ',') {
-                ml_offset++;
-            }
-        }
-        // Subtract semicolons (they don't count towards ML offset)
-        for (size_t i = 0; i < cm_pos; i++) {
-            if (mm_string[i] == ';') {
-                ml_offset--;
-            }
+    while (std::getline(block_stream, block, ';')) {
+        if (block.empty()) continue;
+
+        // Check if this block is our target modification
+        if (block.find("C+m?") == 0) {
+            // Found target! Parse its deltas
+            deltas = parse_mm_tag(mm_str, "C+m?");
+            found_target = true;
+            break;
         }
 
-        // Now parse the deltas for "C+m?"
-        deltas = parse_mm_tag(mm_str, "C+m?");
+        // Not our target, count deltas in this block to accumulate ml_offset
+        // Block format: "X+y?,d1,d2,d3,..." or "X+y,d1,d2,d3,..."
+        size_t comma_pos = block.find(',');
+        if (comma_pos != std::string::npos) {
+            // Count commas after the mod code = number of deltas
+            std::string delta_part = block.substr(comma_pos + 1);
+            int delta_count = 0;
+            for (char c : delta_part) {
+                if (c == ',') delta_count++;
+            }
+            delta_count++;  // +1 for the last number (no trailing comma)
+            ml_offset += delta_count;
+        }
+    }
+
+    if (!found_target) {
+        return calls;  // C+m? not found
     }
 
     if (deltas.empty()) {
