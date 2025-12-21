@@ -82,8 +82,8 @@ public:
 
         std::vector<std::string> distance_metric_strs = {"NHD"};
         app.add_option("--distance-metric", distance_metric_strs,
-                       "Distance metric(s): NHD, L1, L2, CORR, JACCARD (Default: NHD)")
-            ->check(CLI::IsMember({"NHD", "L1", "L2", "CORR", "JACCARD", "nhd", "l1", "l2", "corr", "jaccard"},
+                       "Distance metric(s): NHD, L1, L2, CORR, JACCARD, BERNOULLI (Default: NHD)")
+            ->check(CLI::IsMember({"NHD", "L1", "L2", "CORR", "JACCARD", "BERNOULLI", "nhd", "l1", "l2", "corr", "jaccard", "bernoulli"},
                                   CLI::ignore_case));
 
         app.add_option("--min-common-coverage", config.min_common_coverage,
@@ -138,7 +138,8 @@ public:
                                                                              {"l1", DistanceMetricType::L1},
                                                                              {"l2", DistanceMetricType::L2},
                                                                              {"corr", DistanceMetricType::CORR},
-                                                                             {"jaccard", DistanceMetricType::JACCARD}};
+                                                                             {"jaccard", DistanceMetricType::JACCARD},
+                                                                             {"bernoulli", DistanceMetricType::BERNOULLI}};
 
         config.distance_metrics.clear();
         for (const auto& s : distance_metric_strs) {

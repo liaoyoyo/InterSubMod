@@ -5,7 +5,7 @@
 
 namespace InterSubMod {
 
-enum class DistanceMetricType { NHD, L1, L2, CORR, JACCARD };
+enum class DistanceMetricType { NHD, L1, L2, CORR, JACCARD, BERNOULLI };
 
 enum class NanDistanceStrategy { MAX_DIST, SKIP };
 

@@ -234,6 +234,74 @@ static double calculate_jaccard(const Eigen::VectorXi& binary_row_i, const Eigen
 }
 
 /**
+ * @brief Calculate Bernoulli Distance (Expected Disagreement with Confidence Weighting).
+ *
+ * This method calculates distance using raw probability values and applies
+ * confidence weighting to reduce the impact of low-confidence sites (p ≈ 0.5).
+ *
+ * Formula:
+ *   delta(p, q) = p(1-q) + (1-p)q  (Expected disagreement rate)
+ *   weight(p) = 2 * |p - 0.5|      (Confidence weight)
+ *   w_k = weight(p_i) * weight(p_j)
+ *   Dist = sum(w_k * delta_k) / sum(w_k)
+ *
+ * @param raw_row_i Probability values for read i (NaN = missing)
+ * @param raw_row_j Probability values for read j (NaN = missing)
+ * @param min_cov Minimum number of common valid sites
+ * @param[out] common_count Number of common valid sites (non-NaN)
+ * @return Distance value [0, 1], or -1.0 if insufficient overlap or zero total weight
+ */
+static double calculate_bernoulli(const Eigen::VectorXd& raw_row_i, const Eigen::VectorXd& raw_row_j, int min_cov,
+                                  int& common_count) {
+    common_count = 0;
+    double sum_weighted_diff = 0.0;
+    double sum_weights = 0.0;
+    const int n = raw_row_i.size();
+
+    // Confidence weight function: high confidence at p=0 or p=1, zero at p=0.5
+    auto weight_func = [](double p) {
+        return 2.0 * std::abs(p - 0.5);
+    };
+
+    for (int k = 0; k < n; ++k) {
+        double p_i = raw_row_i(k);
+        double p_j = raw_row_j(k);
+
+        // Check for missing data (NaN)
+        if (!std::isnan(p_i) && !std::isnan(p_j)) {
+            common_count++;
+
+            // 1. Calculate Confidence Weights
+            double w_i = weight_func(p_i);
+            double w_j = weight_func(p_j);
+            double w_k = w_i * w_j;
+
+            // 2. Calculate Expected Disagreement (Bernoulli difference)
+            // delta = P(states differ) = p_i(1-p_j) + (1-p_i)p_j
+            double delta = p_i * (1.0 - p_j) + (1.0 - p_i) * p_j;
+
+            // 3. Accumulate weighted difference
+            sum_weighted_diff += w_k * delta;
+            sum_weights += w_k;
+        }
+    }
+
+    // Check minimum coverage requirement
+    if (common_count < min_cov) {
+        return -1.0;
+    }
+
+    // Edge case: If total weight is too small (all overlapping sites are p≈0.5)
+    // Treat as "insufficient information" -> Invalid distance
+    if (sum_weights < 1e-9) {
+        return -1.0;
+    }
+
+    // Normalize and return
+    return sum_weighted_diff / sum_weights;
+}
+
+/**
  * @brief Generic distance calculation dispatcher.
  */
 static double calculate_distance_impl(const MethylationMatrix& mat, int row_i, int row_j, const DistanceConfig& config,
@@ -268,6 +336,12 @@ static double calculate_distance_impl(const MethylationMatrix& mat, int row_i, i
             Eigen::VectorXi vec_j = mat.binary_matrix.row(row_j);
             return calculate_jaccard(vec_i, vec_j, config.min_common_coverage, common_count,
                                      config.jaccard_include_unmeth);
+        }
+
+        case DistanceMetricType::BERNOULLI: {
+            Eigen::VectorXd vec_i = mat.raw_matrix.row(row_i);
+            Eigen::VectorXd vec_j = mat.raw_matrix.row(row_j);
+            return calculate_bernoulli(vec_i, vec_j, config.min_common_coverage, common_count);
         }
 
         default:
@@ -529,6 +603,8 @@ std::string DistanceCalculator::metric_to_string(DistanceMetricType type) {
             return "CORR";
         case DistanceMetricType::JACCARD:
             return "JACCARD";
+        case DistanceMetricType::BERNOULLI:
+            return "BERNOULLI";
         default:
             return "UNKNOWN";
     }
@@ -543,6 +619,7 @@ DistanceMetricType DistanceCalculator::string_to_metric(const std::string& str) 
     if (upper == "L2" || upper == "EUCLIDEAN") return DistanceMetricType::L2;
     if (upper == "CORR" || upper == "CORRELATION" || upper == "PEARSON") return DistanceMetricType::CORR;
     if (upper == "JACCARD") return DistanceMetricType::JACCARD;
+    if (upper == "BERNOULLI") return DistanceMetricType::BERNOULLI;
 
     // Default
     return DistanceMetricType::NHD;
