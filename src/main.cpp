@@ -4,6 +4,7 @@
 #include "core/Config.hpp"
 #include "core/RegionProcessor.hpp"
 #include "utils/ArgParser.hpp"
+#include "utils/Logger.hpp"
 #include "utils/ResourceMonitor.hpp"
 // #include "core/SomaticSnv.hpp"
 
@@ -16,9 +17,16 @@ int main(int argc, char** argv) {
         return 1;  // Parse failed or help printed
     }
 
-    std::cout << "Validating configuration..." << std::endl;
+    // Configure Logger
+    auto& logger = InterSubMod::Utils::Logger::instance();
+    logger.set_log_level(config.log_level);
+    if (!config.debug_output_dir.empty()) {
+        // Optional: log to a file in debug dir
+        // logger.set_log_file(config.debug_output_dir + "/inter_sub_mod.log");
+    }
+
     if (!config.validate()) {
-        std::cerr << "Configuration validation failed." << std::endl;
+        LOG_ERROR("Configuration validation failed.");
         return 1;
     }
 
@@ -26,29 +34,31 @@ int main(int argc, char** argv) {
 
     // Print debug mode status
     if (config.is_debug()) {
-        std::cout << "\n=== DEBUG MODE ENABLED ===" << std::endl;
-        std::cout << "Filtered reads will be logged to: " << config.get_debug_output_dir() << std::endl;
+        LOG_INFO("\n=== DEBUG MODE ENABLED ===");
+        LOG_INFO("Filtered reads will be logged to: " + config.get_debug_output_dir());
         if (config.no_filter_output) {
-            std::cout << "No-filter mode: All reads will be output without filtering" << std::endl;
+            LOG_INFO("No-filter mode: All reads will be output without filtering");
         }
-        std::cout << "==========================\n" << std::endl;
+        LOG_INFO("==========================\n");
     }
 
-    std::cout << "Configuration valid. Starting analysis..." << std::endl;
+    LOG_INFO("Configuration valid. Starting analysis...");
 
     try {
         // Use the new Config-based constructor
         InterSubMod::RegionProcessor processor(config);
 
-        std::cout << "[1] Loading SNVs from VCF..." << std::endl;
+        InterSubMod::Utils::ScopedLogger main_scope("Main Execution");
+
+        LOG_INFO("[1] Loading SNVs from VCF...");
         int num_snvs = processor.load_snvs_from_vcf(config.somatic_vcf_path);
 
         if (num_snvs == 0) {
-            std::cerr << "No SNVs loaded. Exiting." << std::endl;
+            LOG_ERROR("No SNVs loaded. Exiting.");
             return 1;
         }
 
-        std::cout << "[2] Processing " << num_snvs << " regions..." << std::endl;
+        LOG_INFO("[2] Processing " + std::to_string(num_snvs) + " regions...");
         auto t_start = std::chrono::high_resolution_clock::now();
 
         auto results = processor.process_all_regions(0);  // Process all
@@ -59,11 +69,11 @@ int main(int argc, char** argv) {
         std::cout << "[3] Analysis Complete." << std::endl;
         processor.print_summary(results);
 
-        std::cout << "Total Wall-clock time: " << total_time << " ms" << std::endl;
-        std::cout << "Output directory: " << config.output_dir << std::endl;
+        LOG_INFO("Total Wall-clock time: " + std::to_string(total_time) + " ms");
+        LOG_INFO("Output directory: " + config.output_dir);
 
     } catch (const std::exception& e) {
-        std::cerr << "Fatal error: " << e.what() << std::endl;
+        LOG_ERROR("Fatal error: " + std::string(e.what()));
         return 1;
     }
 

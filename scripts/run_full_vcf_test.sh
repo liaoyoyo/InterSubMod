@@ -4,7 +4,7 @@
 # This script supports multiple modes and automatic cluster heatmap generation:
 #   1. baseline: Normal filtering with debug logging
 #   2. all-with-w1000: All filters enabled, ±1000bp window
-#   3. all-with-w2000: All filters enabled, ±2000bp window
+#   3. all-with-w5000: All filters enabled, ±5000bp window
 #
 # Heatmap generation:
 #   By default, both distance_heatmap and cluster_heatmap are generated.
@@ -28,11 +28,12 @@ set -e
 
 # 預設值
 VCF_PATH="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
+# VCF_PATH="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_fp.vcf.gz"
 THREADS=120
 TUMOR_BAM="/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam"
 NORMAL_BAM="/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam"
 REF_FASTA="/big8_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa"
-MODE="baseline"
+MODE="all-with-w1000"
 OUTPUT_DIR=""
 # METRICS="NHD"
 METRICS="L1"
@@ -92,7 +93,7 @@ while [[ $# -gt 0 ]]; do
             echo "  -v, --vcf PATH       Path to VCF file"
             echo "  -t, --threads N      Number of threads for C++ (default: 64)"
             echo "  -o, --out DIR        Output directory"
-            echo "  -m, --mode MODE      Test mode: baseline, all-with-w1000, all-with-w2000"
+            echo "  -m, --mode MODE      Test mode: baseline, all-with-w1000, all-with-w5000, chr19-verification"
             echo "  --metrics LIST       Space-separated list of metrics (e.g. 'NHD L1')"
             echo "  --no-plots           Skip all heatmap generation"
             echo "  --plot-type TYPE     Type of heatmap to generate:"
@@ -109,8 +110,11 @@ while [[ $# -gt 0 ]]; do
             echo "  all-with-w1000:  All filters enabled, ±1000bp window, no-filter output"
             echo "                   Outputs to: output/\${date}_vcf_all_w1000"
             echo ""
-            echo "  all-with-w2000:  All filters enabled, ±2000bp window, no-filter output"
-            echo "                   Outputs to: output/\${date}_vcf_all_w2000"
+            echo "  all-with-w5000:  All filters enabled, ±5000bp window, no-filter output"
+            echo "                   Outputs to: output/\${date}_vcf_all_w5000"
+            echo ""
+            echo "  chr19-verification: Only runs on chr19:29283968 for rapid verification"
+            echo "                      Outputs to: output/\${date}_vcf_chr19_verif"
             echo ""
             echo "Heatmap Types:"
             echo "  distance_heatmap: Read×Read distance matrix with dendrograms on both axes"
@@ -145,12 +149,15 @@ generate_output_dir_name() {
         all-with-w1000)
             base_name="${date_str}_vcf_all_w1000_t${threads}"
             ;;
-        all-with-w2000)
-            base_name="${date_str}_vcf_all_w2000_t${threads}"
+        all-with-w5000)
+            base_name="${date_str}_vcf_all_w5000_t${threads}"
+            ;;
+        chr19-verification)
+            base_name="${date_str}_vcf_chr19_verif_t${threads}"
             ;;
         *)
             echo "Unknown mode: $mode" >&2
-            echo "Valid modes: baseline, all-with-w1000, all-with-w2000" >&2
+            echo "Valid modes: baseline, all-with-w1000, all-with-w5000, chr19-verification" >&2
             exit 1
             ;;
     esac
@@ -209,6 +216,35 @@ echo "---------------------------------"
 
 # 創建輸出目錄
 mkdir -p "${OUTPUT_DIR}"
+
+# Special handling for chr19-verification mode
+if [[ "${MODE}" == "chr19-verification" ]]; then
+    SUBSET_VCF="${OUTPUT_DIR}/chr19_29283968.vcf"
+    echo "    Preparing subset VCF for chr19:29283968..."
+    
+    # Check if input is bgzipped or plain text
+    if [[ "${VCF_PATH}" == *.gz ]]; then
+        grep_cmd="zgrep"
+    else
+        grep_cmd="grep"
+    fi
+    
+    # Extract header
+    $grep_cmd "^#" "${VCF_PATH}" > "${SUBSET_VCF}"
+    
+    # Extract specific site (chr19	29283968)
+    # Note: Using tab as delimiter in regex to be precise
+    $grep_cmd -P "^chr19\t29283968\t" "${VCF_PATH}" >> "${SUBSET_VCF}"
+    
+    # Check if we found the site
+    if [ ! -s "${SUBSET_VCF}" ] || [ $(grep -c -v "^#" "${SUBSET_VCF}") -eq 0 ]; then
+        echo "Error: Site chr19:29283968 not found in ${VCF_PATH}" >&2
+        exit 1
+    fi
+    
+    echo "    Subset VCF created at: ${SUBSET_VCF}"
+    VCF_PATH="${SUBSET_VCF}"
+fi
 
 # 檢查可執行文件
 EXECUTABLE="/big8_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod"
@@ -274,13 +310,12 @@ build_command() {
                 --window-size 1000 \
                 --log-level debug \
                 --output-filtered-reads \
-                --no-filter \
                 ${metric_flags}"
             ;;
 
-        all-with-w2000)
+        all-with-w5000)
             # All-with-window mode: All filters + larger window + no-filter output
-            # - Window size: ±2000bp
+            # - Window size: ±5000bp
             # - All filters enabled (default)
             # - No-filter flag: output all reads without filtering
             # - This is useful for verification and comparison
@@ -291,10 +326,26 @@ build_command() {
                 --vcf ${VCF_PATH} \
                 --output-dir ${output_dir} \
                 --threads ${threads} \
-                --window-size 2000 \
+                --window-size 5000 \
                 --log-level debug \
                 --output-filtered-reads \
-                --no-filter \
+                ${metric_flags}"
+            ;;
+
+        chr19-verification)
+            # Single site verification mode
+            # - Window size: ±1000bp (standard)
+            # - All filters enabled
+            echo "${executable} \
+                --tumor-bam ${TUMOR_BAM} \
+                --normal-bam ${NORMAL_BAM} \
+                --reference ${REF_FASTA} \
+                --vcf ${VCF_PATH} \
+                --output-dir ${output_dir} \
+                --threads ${threads} \
+                --window-size 1000 \
+                --log-level debug \
+                --output-filtered-reads \
                 ${metric_flags}"
             ;;
         *)
@@ -344,7 +395,8 @@ print_output_summary() {
         echo "    Strand-specific matrices:"
         echo "      - Forward (+): ${NUM_FORWARD}"
         echo "      - Reverse (-): ${NUM_REVERSE}"
-        if [[ "$mode" == "baseline" ]] || [[ "$mode" == "all-with-w1000" ]] || [[ "$mode" == "all-with-w2000" ]]; then
+        echo "      - Reverse (-): ${NUM_REVERSE}"
+        if [[ "$mode" == "baseline" ]] || [[ "$mode" == "all-with-w1000" ]] || [[ "$mode" == "all-with-w5000" ]] || [[ "$mode" == "chr19-verification" ]]; then
             echo "    Filtered reads logs: ${NUM_FILTERED}"
         fi
     fi

@@ -12,6 +12,7 @@
 #include <iostream>
 #include <sstream>
 #include <unordered_set>
+#include "utils/Logger.hpp"
 
 #include "core/HierarchicalClustering.hpp"
 #include "core/MethylationMatrix.hpp"
@@ -40,8 +41,10 @@ RegionProcessor::RegionProcessor(const std::string& tumor_bam_path, const std::s
     // Set OpenMP threads
     omp_set_num_threads(num_threads_);
 
-    std::cout << "RegionProcessor initialized with " << num_threads_ << " threads, window_size=±" << window_size_
-              << "bp" << std::endl;
+    omp_set_num_threads(num_threads_);
+
+    LOG_INFO("RegionProcessor initialized with " + std::to_string(num_threads_) + " threads, window_size=±" +
+             std::to_string(window_size_) + "bp");
 }
 
 RegionProcessor::RegionProcessor(const Config& config)
@@ -104,33 +107,36 @@ RegionProcessor::RegionProcessor(const Config& config)
         mkdir(debug_output_dir_.c_str(), 0755);
     }
 
-    std::cout << "RegionProcessor initialized:" << std::endl;
-    std::cout << "  Threads: " << num_threads_ << std::endl;
-    std::cout << "  Window size: ±" << window_size_ << " bp" << std::endl;
-    std::cout << "  Log level: " << static_cast<int>(log_level_) << std::endl;
-    std::cout << "  Distance metrics: ";
+    std::stringstream ss;
+    ss << "RegionProcessor initialized:\n"
+       << "  Threads: " << num_threads_ << "\n"
+       << "  Window size: ±" << window_size_ << " bp\n"
+       << "  Log level: " << static_cast<int>(log_level_) << "\n"
+       << "  Distance metrics: ";
     for (size_t i = 0; i < distance_metrics_.size(); ++i) {
-        std::cout << (i > 0 ? ", " : "") << DistanceCalculator::metric_to_string(distance_metrics_[i]);
+        ss << (i > 0 ? ", " : "") << DistanceCalculator::metric_to_string(distance_metrics_[i]);
     }
-    std::cout << std::endl;
-    std::cout << "  Min common coverage (C_min): " << distance_config_.min_common_coverage << std::endl;
+    ss << "\n";
+    ss << "  Min common coverage (C_min): " << distance_config_.min_common_coverage << "\n";
     if (output_filtered_reads_) {
-        std::cout << "  Debug output: " << debug_output_dir_ << std::endl;
+        ss << "  Debug output: " << debug_output_dir_ << "\n";
     }
     if (no_filter_output_) {
-        std::cout << "  Mode: No-filter (outputting all reads)" << std::endl;
+        ss << "  Mode: No-filter (outputting all reads)\n";
     }
     if (compute_distance_matrix_) {
-        std::cout << "  Distance matrix: enabled" << std::endl;
+        ss << "  Distance matrix: enabled\n";
         if (output_strand_distance_matrices_) {
-            std::cout << "  Strand-specific matrices: enabled" << std::endl;
+            ss << "  Strand-specific matrices: enabled\n";
         }
     }
     if (compute_clustering_) {
-        std::cout << "  Hierarchical clustering: enabled" << std::endl;
-        std::cout << "  Linkage method: " << HierarchicalClustering::method_to_string(linkage_method_) << std::endl;
-        std::cout << "  Clustering min reads: " << clustering_min_reads_ << std::endl;
+        ss << "  Hierarchical clustering: enabled\n"
+           << "  Linkage method: " << HierarchicalClustering::method_to_string(linkage_method_) << "\n"
+           << "  Clustering min reads: " << clustering_min_reads_;
     }
+    
+    LOG_INFO(ss.str());
 }
 
 int RegionProcessor::load_snvs(const std::string& snv_table_path) {
@@ -203,7 +209,7 @@ int RegionProcessor::load_snvs(const std::string& snv_table_path) {
     }
 
     ifs.close();
-    std::cout << "Loaded " << snvs_.size() << " SNVs from " << snv_table_path << std::endl;
+    LOG_INFO("Loaded " + std::to_string(snvs_.size()) + " SNVs from " + snv_table_path);
     return snvs_.size();
 }
 
@@ -211,11 +217,11 @@ int RegionProcessor::load_snvs_from_vcf(const std::string& vcf_path) {
     SomaticSnvTable table;
     if (table.load_from_vcf(vcf_path, chrom_index_)) {
         snvs_ = table.all();
-        std::cout << "Loaded " << snvs_.size() << " SNVs from VCF: " << vcf_path << std::endl;
+        LOG_INFO("Loaded " + std::to_string(snvs_.size()) + " SNVs from VCF: " + vcf_path);
         return snvs_.size();
     }
 
-    std::cerr << "Failed to load SNVs from VCF: " << vcf_path << std::endl;
+    LOG_ERROR("Failed to load SNVs from VCF: " + vcf_path);
     return 0;
 }
 
@@ -227,6 +233,8 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
     std::vector<RegionResult> results(num_to_process);
 
     auto t_start = std::chrono::high_resolution_clock::now();
+    
+    LOG_INFO("Starting processing of " + std::to_string(num_to_process) + " regions...");
 
 // OpenMP parallel loop
 // OpenMP parallel region to manage thread-local resources
@@ -248,36 +256,23 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
             const auto& snv = snvs_[i];
             std::string chr_name = chrom_index_.get_name(snv.chr_id);
 
-            // Logging (protected by critical section)
-            if (log_level_ >= LogLevel::LOG_INFO) {
-#pragma omp critical
-                {
-                    std::cout << "[Thread " << omp_get_thread_num() << "] Processing region " << i << " (SNV "
-                              << chr_name << ":" << snv.pos << ")" << std::endl;
-                }
-            }
-
+            // Using ScopedLogger within process_single_region, but we can also log high level start here
+            // Note: Excessive locking might preserve order but slow down things. 
+            // The Logger handles locking.
+            
             // Process the region using the thread-local readers
-            // Note: We pass the readers by reference
             results[i] = process_single_region(snv, i, tumor_reader, ref_reader);
 
-            if (log_level_ >= LogLevel::LOG_INFO) {
-#pragma omp critical
-                {
-                    if (results[i].success) {
-                        std::cout << "[Thread " << omp_get_thread_num() << "] ✓ Region " << i
-                                  << " completed: " << results[i].num_reads << " reads ("
-                                  << results[i].num_forward_reads << "+ / " << results[i].num_reverse_reads << "-), "
-                                  << results[i].num_cpgs << " CpGs";
-                        if (output_filtered_reads_) {
-                            std::cout << ", " << results[i].num_filtered_reads << " filtered";
-                        }
-                        std::cout << ", " << results[i].elapsed_ms << " ms" << std::endl;
-                    } else {
-                        std::cerr << "[Thread " << omp_get_thread_num() << "] ✗ Region " << i
-                                  << " failed: " << results[i].error_message << std::endl;
-                    }
-                }
+            // Log completion status
+            if (results[i].success) {
+                std::stringstream ss;
+                ss << "Region " << i << " (" << chr_name << ":" << snv.pos << ") completed: " 
+                   << results[i].num_reads << " reads, " << results[i].elapsed_ms << " ms";
+                LOG_INFO(ss.str());
+            } else {
+                std::stringstream ss;
+                ss << "Region " << i << " (" << chr_name << ":" << snv.pos << ") failed: " << results[i].error_message;
+                LOG_ERROR(ss.str());
             }
         }
     }
@@ -285,8 +280,8 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
     auto t_end = std::chrono::high_resolution_clock::now();
     double total_elapsed = std::chrono::duration<double, std::milli>(t_end - t_start).count();
 
-    std::cout << "All regions processed in " << total_elapsed << " ms (" << (total_elapsed / num_to_process)
-              << " ms/region)" << std::endl;
+    LOG_INFO("All regions processed in " + std::to_string(total_elapsed) + " ms (" + 
+             std::to_string(total_elapsed / num_to_process) + " ms/region)");
 
     return results;
 }
@@ -296,7 +291,11 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
     RegionResult result;
     result.region_id = region_id;
     result.snv_id = snv.snv_id;
-
+    
+    // Get chromosome name for logging
+    // std::string chr_name = chrom_index_.get_name(snv.chr_id);
+    // Utils::ScopedLogger logger("Process Region " + std::to_string(region_id), LogLevel::LOG_DEBUG);
+    
     auto t_start = std::chrono::high_resolution_clock::now();
 
     try {
@@ -488,13 +487,12 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                 }
 
                 if (log_level_ >= LogLevel::LOG_DEBUG) {
-#pragma omp critical
-                    {
-                        std::cout << "  Distance matrix (" << DistanceCalculator::metric_to_string(metric)
-                                  << "): " << all_dist.size() << "x" << all_dist.size()
-                                  << ", valid pairs: " << all_dist.num_valid_pairs << ", avg coverage: " << std::fixed
-                                  << std::setprecision(1) << all_dist.avg_common_coverage << std::endl;
-                    }
+                    std::stringstream ss;
+                    ss << "  Distance matrix (" << DistanceCalculator::metric_to_string(metric)
+                       << "): " << all_dist.size() << "x" << all_dist.size()
+                       << ", valid pairs: " << all_dist.num_valid_pairs << ", avg coverage: " << std::fixed
+                       << std::setprecision(1) << all_dist.avg_common_coverage;
+                    LOG_DEBUG(ss.str());
                 }
 
                 // === Hierarchical Clustering and Tree Output ===
@@ -540,11 +538,8 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                         }
 
                         if (log_level_ >= LogLevel::LOG_DEBUG) {
-#pragma omp critical
-                            {
-                                std::cout << "  Clustering tree: " << tree.num_leaves() << " leaves, method="
-                                          << HierarchicalClustering::method_to_string(linkage_method_) << std::endl;
-                            }
+                            LOG_DEBUG("  Clustering tree: " + std::to_string(tree.num_leaves()) + " leaves, method=" +
+                                      HierarchicalClustering::method_to_string(linkage_method_));
                         }
                     }
 
@@ -640,37 +635,40 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
         }
     }
 
-    std::cout << "\n=== Processing Summary ===" << std::endl;
-    std::cout << "Total regions: " << results.size() << std::endl;
-    std::cout << "Successful: " << success_count << std::endl;
-    std::cout << "Failed: " << (results.size() - success_count) << std::endl;
-    std::cout << "Total reads processed: " << total_reads << std::endl;
-    std::cout << "  Forward strand (+): " << total_forward << std::endl;
-    std::cout << "  Reverse strand (-): " << total_reverse << std::endl;
+    std::stringstream ss;
+    ss << "\n=== Processing Summary ===\n"
+       << "Total regions: " << results.size() << "\n"
+       << "Successful: " << success_count << "\n"
+       << "Failed: " << (results.size() - success_count) << "\n"
+       << "Total reads processed: " << total_reads << "\n"
+       << "  Forward strand (+): " << total_forward << "\n"
+       << "  Reverse strand (-): " << total_reverse << "\n";
     if (output_filtered_reads_) {
-        std::cout << "  Filtered out: " << total_filtered << std::endl;
+        ss << "  Filtered out: " << total_filtered << "\n";
     }
-    std::cout << "Total CpG sites found: " << total_cpgs << std::endl;
-    std::cout << "Total processing time: " << total_time << " ms" << std::endl;
-    std::cout << "Average time per region: " << (total_time / results.size()) << " ms" << std::endl;
-    std::cout << "Average reads per region: " << (total_reads / static_cast<double>(success_count)) << std::endl;
-    std::cout << "Average CpGs per region: " << (total_cpgs / static_cast<double>(success_count)) << std::endl;
+    ss << "Total CpG sites found: " << total_cpgs << "\n"
+       << "Total processing time: " << total_time << " ms\n"
+       << "Average time per region: " << (results.size() > 0 ? (total_time / results.size()) : 0) << " ms\n"
+       << "Average reads per region: " << (success_count > 0 ? (total_reads / static_cast<double>(success_count)) : 0) << "\n"
+       << "Average CpGs per region: " << (success_count > 0 ? (total_cpgs / static_cast<double>(success_count)) : 0) << "\n";
 
     // Distance matrix summary
     if (compute_distance_matrix_ && regions_with_distance > 0) {
-        std::cout << "\n=== Distance Matrix Summary (First Metric) ===" << std::endl;
-        std::cout << "Metric: " << DistanceCalculator::metric_to_string(distance_metrics_[0]) << std::endl;
-        std::cout << "Min common coverage (C_min): " << distance_config_.min_common_coverage << std::endl;
-        std::cout << "Regions with distance matrices: " << regions_with_distance << std::endl;
-        std::cout << "Total valid read pairs: " << total_valid_pairs << std::endl;
-        std::cout << "Total invalid pairs (insufficient overlap): " << total_invalid_pairs << std::endl;
+        ss << "\n=== Distance Matrix Summary (First Metric) ===\n"
+           << "Metric: " << DistanceCalculator::metric_to_string(distance_metrics_[0]) << "\n"
+           << "Min common coverage (C_min): " << distance_config_.min_common_coverage << "\n"
+           << "Regions with distance matrices: " << regions_with_distance << "\n"
+           << "Total valid read pairs: " << total_valid_pairs << "\n"
+           << "Total invalid pairs (insufficient overlap): " << total_invalid_pairs << "\n";
         if (total_valid_pairs + total_invalid_pairs > 0) {
             double valid_ratio = 100.0 * total_valid_pairs / (total_valid_pairs + total_invalid_pairs);
-            std::cout << "Valid pair ratio: " << std::fixed << std::setprecision(1) << valid_ratio << "%" << std::endl;
+            ss << "Valid pair ratio: " << std::fixed << std::setprecision(1) << valid_ratio << "%\n";
         }
-        std::cout << "Average common CpG coverage: " << std::fixed << std::setprecision(2)
-                  << (total_avg_coverage / regions_with_distance) << std::endl;
+        ss << "Average common CpG coverage: " << std::fixed << std::setprecision(2)
+           << (total_avg_coverage / regions_with_distance) << "\n";
     }
+    
+    LOG_INFO(ss.str());
 }
 
 }  // namespace InterSubMod

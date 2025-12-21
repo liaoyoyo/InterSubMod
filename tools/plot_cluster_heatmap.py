@@ -36,6 +36,8 @@ from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Optional, Tuple, Dict, List
 import time
+import logging
+
 
 import numpy as np
 import pandas as pd
@@ -57,6 +59,43 @@ try:
 except ImportError as e:
     HAS_VIZ = False
     IMPORT_ERROR = str(e)
+
+
+# ============================================================================
+# Logging Setup
+# ============================================================================
+
+
+def setup_logging(log_file: Optional[str] = None, verbose: bool = False):
+    """
+    Configure logging to console and optional file.
+    """
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    
+    # Remove existing handlers to avoid duplicates
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+
+    # Formatter
+    formatter = logging.Formatter(
+        "%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+    )
+
+    # Console Handler
+    console_handler = logging.StreamHandler(sys.stderr)
+    console_handler.setFormatter(formatter)
+    root_logger.addHandler(console_handler)
+
+    # File Handler
+    if log_file:
+        try:
+            file_handler = logging.FileHandler(log_file, mode='w')
+            file_handler.setFormatter(formatter)
+            root_logger.addHandler(file_handler)
+            logging.info(f"Logging to file: {log_file}")
+        except Exception as e:
+            logging.error(f"Failed to setup file logging to {log_file}: {e}")
 
 
 # ============================================================================
@@ -138,7 +177,9 @@ def load_methylation_matrix(
 
         return df, cpg_positions
     except Exception as e:
-        print(f"Error loading methylation matrix: {e}")
+        # We rely on the caller to handle failures, but we can log debug info if needed
+        # logging.debug(f"Error loading methylation matrix: {e}") 
+        # (Commented out to avoid noise in subprocess if logging is not configured same way)
         return None, None
 
 
@@ -161,7 +202,6 @@ def load_reads_metadata(region_dir: str) -> Optional[pd.DataFrame]:
             df.index = df.index.astype(int)
         return df
     except Exception as e:
-        print(f"Error loading reads metadata: {e}")
         return None
 
 
@@ -199,7 +239,6 @@ def load_distance_matrix(
         read_ids = list(df.index)
         return df, read_ids
     except Exception as e:
-        print(f"Error loading distance matrix: {e}")
         return None, None
 
 
@@ -258,7 +297,7 @@ def compute_linkage_from_distance(
         Z = linkage(condensed, method=method)
         return Z
     except Exception as e:
-        print(f"Linkage computation failed: {e}")
+        # print(f"Linkage computation failed: {e}")
         return None
 
 
@@ -457,7 +496,8 @@ def plot_cluster_heatmap(
         return True
 
     except Exception as e:
-        print(f"Error creating cluster heatmap: {e}")
+        # Return False so the caller can log the error message
+        return False
         import traceback
 
         traceback.print_exc()
@@ -601,7 +641,7 @@ def find_region_dirs(output_dir: str) -> List[str]:
 
 
 def process_all_regions(
-    output_dir: str, num_threads: int = 64, **kwargs
+    output_dir: str, num_threads: int = 64, log_file: Optional[str] = None, **kwargs
 ) -> Tuple[int, int, float]:
     """
     Process all regions in parallel.
@@ -613,11 +653,11 @@ def process_all_regions(
     total = len(region_dirs)
 
     if total == 0:
-        print(f"No region directories found in {output_dir}")
+        logging.warning(f"No region directories found in {output_dir}")
         return 0, 0, 0.0
 
-    print(f"Found {total} regions to process")
-    print(f"Using {num_threads} threads")
+    logging.info(f"Found {total} regions to process")
+    logging.info(f"Using {num_threads} threads")
 
     start_time = time.time()
     success_count = 0
@@ -641,16 +681,20 @@ def process_all_regions(
             if i % 100 == 0 or i == total:
                 elapsed = time.time() - start_time
                 rate = i / elapsed if elapsed > 0 else 0
-                print(
+                logging.info(
                     f"Progress: {i}/{total} ({100*i/total:.1f}%) - "
                     f"Success: {success_count}, Failed: {fail_count} - "
                     f"Rate: {rate:.1f} regions/sec"
                 )
+            
+            # Log failures individually
+            if not success:
+               logging.warning(f"FAILED {region_dir}: {message}")
 
     elapsed_time = time.time() - start_time
-    print(f"\nCompleted in {elapsed_time:.1f} seconds")
-    print(f"Success: {success_count}/{total} ({100*success_count/total:.1f}%)")
-    print(f"Failed: {fail_count}/{total}")
+    logging.info(f"Completed in {elapsed_time:.1f} seconds")
+    logging.info(f"Success: {success_count}/{total} ({100*success_count/total:.1f}%)")
+    logging.info(f"Failed: {fail_count}/{total}")
 
     return success_count, fail_count, elapsed_time
 
@@ -751,13 +795,29 @@ Examples:
         default="14,10",
         help="Figure size as 'width,height' (default: 14,10)",
     )
+    parser.add_argument(
+        "--log-file",
+        type=str,
+        help="Path to log file (default: heatmap_generation.log in output dir)",
+    )
 
     args = parser.parse_args()
 
+    # Setup logging
+    log_file = args.log_file
+    if not log_file and args.output_dir:
+        # Default log file in output directory
+        log_file = os.path.join(args.output_dir, "heatmap_generation.log")
+    elif not log_file:
+         # Fallback default
+         log_file = "heatmap_generation.log"
+         
+    setup_logging(log_file)
+
     # Check dependencies
     if not HAS_VIZ:
-        print(f"ERROR: Required visualization libraries not available: {IMPORT_ERROR}")
-        print("Please install: pip install matplotlib seaborn scipy pandas numpy")
+        logging.error(f"Required visualization libraries not available: {IMPORT_ERROR}")
+        logging.error("Please install: pip install matplotlib seaborn scipy pandas numpy")
         sys.exit(1)
 
     # Parse figure size
@@ -780,20 +840,20 @@ Examples:
 
     if args.region_dir:
         # Single region mode
-        print(f"Processing single region: {args.region_dir}")
+        logging.info(f"Processing single region: {args.region_dir}")
         region_dir, success, message = process_single_region(args.region_dir, **kwargs)
 
         if success:
-            print(f"✓ Success: {message}")
+            logging.info(f"✓ Success: {message}")
             sys.exit(0)
         else:
-            print(f"✗ Failed: {message}")
+            logging.error(f"✗ Failed: {message}")
             sys.exit(1)
     else:
         # Batch mode
-        print(f"Processing all regions in: {args.output_dir}")
+        logging.info(f"Processing all regions in: {args.output_dir}")
         success, failed, elapsed = process_all_regions(
-            args.output_dir, num_threads=args.threads, **kwargs
+            args.output_dir, num_threads=args.threads, log_file=log_file, **kwargs
         )
 
         if failed == 0:
