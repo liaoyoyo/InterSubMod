@@ -1,0 +1,193 @@
+這份 **Significance_Implementation_Roadmap** 整體結構清楚、可落地，而且已經把多數高風險點（效能、NaN、多重檢定）寫進去；但確實還有一些**會導致結果不可靠/不一致**、或**實作上容易踩雷**的缺陷需要補強。下面我用「缺陷／需補強」條列列出（依嚴重度排序），每點都說明原因與建議修正。
+
+---
+
+## A. 統計正確性與可解釋性缺陷（高優先）
+
+### 1) RxC Fisher（Monte Carlo）的 stopping rule 設計可能讓 p-value 有偏誤
+
+* **問題**：你寫「抽樣 1000 次後若 p-value > 0.1 提早停止」。
+  但 Monte Carlo 的 p-value 本身是估計量，早停會讓估計精度不足且可能偏誤（尤其當真實 p 接近門檻時）。
+* **建議補強**：改成「基於信賴區間/誤差界」的 stopping rule，例如：
+
+  * 估計 (\hat p) 後用二項分布信賴區間（Wilson/Clopper–Pearson），若 **CI 全部大於門檻**才停；或反之若已明顯小於門檻也可停。
+  * 至少把 early stop 限制在「只用於快速篩選，不做正式報告 p-value」。
+
+### 2) two-sided Fisher 的定義要固定，否則跟 R/Wikipedia 會對不起來
+
+* **問題**：2×2 Fisher 的 two-sided 在不同實作有不同定義（以“同等或更極端”為準時的極端判定）。
+  你若用 R `fisher.test` 當真值，C++ 必須完全一致，不然 unit test 很容易對不上。
+* **建議補強**：在文件中明確寫 two-sided 定義（例如採 R 的 two-sided 定義），並把 unit test 例子固定（含幾個會造成差異的 borderline tables）。
+
+### 3) Cramér’s V 只有在 Chi-square 合理時才可解釋；稀疏 RxC 表格會失真
+
+* **問題**：你 Phase 1 同時做 Chi-square 與 RxC exact（MC），但仍打算一律輸出 Cramér’s V。
+  在稀疏情況（小讀數、多群）Chi-square 不成立，V 會非常不穩。
+* **建議補強**：
+
+  * 設計規則：若期望次數過小比例超過門檻（例如 >20% cells < 5），**不報 V** 或報「僅供參考」旗標。
+  * 或使用基於 exact/模擬的替代效應量（至少在報表中註明 V 的可解釋條件）。
+
+### 4) PERMANOVA 實作細節目前不完整：距離矩陣含 NaN/invalid 時，SS 計算會壞掉
+
+* **問題**：你寫「剔除 missing pair 或插補」，但 PERMANOVA 的 SS 計算通常需要完整距離矩陣或一致的 embedding。
+  “剔除 pair” 會破壞距離矩陣的結構；“插補”若無規範會引入偏差。
+* **建議補強（擇一，需寫成規格）**：
+
+  1. **先過濾 reads**：只保留在該 region 內 “有效共同覆蓋” 足夠的 reads，確保距離矩陣完整且有限。
+  2. 把 invalid 距離定義成固定值（不建議）並註明偏誤。
+  3. 改用更穩健的“距離排序”方法（例如 ANOSIM）作為距離檢定主體，PERMANOVA 作為 optional。
+
+### 5) Dispersion check 只用 `max_dist/min_dist` 太粗糙，容易誤判
+
+* **問題**：PERMANOVA 的主要風險是 dispersion 差異，但你只輸出 ratio，沒有檢定也沒有穩健統計。
+  極端值會讓 ratio 爆掉。
+* **建議補強**：
+
+  * 改成每群對 centroid 的平均距離 + 標準差/中位數（更穩）。
+  * 若要嚴謹，加一個 permutation 的 dispersion test（類 PERMDISP）。
+
+---
+
+## B. 多重檢定與流程一致性缺陷（高優先）
+
+### 6) FDR 校正策略「先暫時只做 Local BH」會讓報告難以對齊研究主張
+
+* **問題**：你策略裡其實想做 Global→Local 的層級控制，但 roadmap 寫「Global BH 留給 Python 後處理」。
+  這會導致 C++ 輸出的 p-value 與最終報告不一致，也容易在 debugging 時混亂。
+* **建議補強**：
+
+  * 至少在 C++ 端輸出 **未校正 p** + **可校正的統一 key（region_id,label_type,test_type）**，並在文件規格明確：「正式 q-value 以 Python 統一計算為主」。
+  * 或在 C++ 端先做簡單的全域 BH（對 ALT/REF 的 global test），把 pipeline 關鍵閉環做起來。
+
+### 7) Global→Local 的 gating 規則需要寫成硬規格（否則會被誤用）
+
+* **問題**：你在 Risks 寫「不看未經 Global 通過的 Local」，但 roadmap 沒寫清楚門檻與例外（例如只對 top10% 開啟完整驗證）。
+* **建議補強**：明確定義：
+
+  * 什麼條件算 “Global 通過”（p、q、或 effect size 門檻）
+  * Local tests 是否只對通過者做
+  * PERMANOVA/Bootstrap 是否只對通過者做
+    這要寫進程式邏輯與輸出欄位（例如 `passed_global_gate`）。
+
+---
+
+## C. 工程可行性與效能缺陷（中高優先）
+
+### 8) Bootstrap「重抽 CpG sites」會迫使你每次都重算距離矩陣，計算量可能爆炸
+
+* **問題**：對每個候選 region 做 B 次 bootstrap，每次要重建 read×CpG 或重算距離，成本非常高；你即便只對 top10% 也可能很重（候選位點仍可能上千）。
+* **建議補強**：
+
+  * 設定 bootstrap 次數預設較小（例如 50–200）並可調。
+  * 使用更便宜的 stability proxy：**co-clustering accumulation** 或 **subsample CpG 不重算全部距離（利用預先儲存每 CpG 的貢獻）**（需要你距離設計支援分解）。
+  * 加入 early stop：ARI 已穩定或已明顯低於門檻就停止。
+
+### 9) PERMANOVA permutation 次數與 MC Fisher 次數都未定義預設值與上限
+
+* **問題**：缺乏 default 會導致結果不一致或效能失控。
+* **建議補強**：在 roadmap 明確寫預設：
+
+  * RxC MC Fisher：例如 2,000～10,000（含 CI stopping）
+  * PERMANOVA permutations：例如 999 或 1,999
+  * 並允許 CLI 參數覆寫（例如 `--perms 999`）。
+
+---
+
+## D. 校準與評估目標缺陷（中高優先）
+
+### 10) 「AUC > 0.8」是危險的硬指標，可能不現實也不穩定
+
+* **問題**：AUC 會依資料挑選（callable region、FP 定義、深度、CNV/LOH）大幅波動，設硬門檻容易讓團隊誤判成敗。
+* **建議補強**：
+
+  * 把成功標準改成「相對 baseline 改善」：例如相對於不含甲基特徵/只用 VCF QUAL 的 baseline，AUPRC 提升多少。
+  * 同時報告 **AUPRC**（比 AUROC 更適合 TP 稀少問題）與 **Brier score / calibration**。
+
+### 11) Feature engineering 太少：缺少“資訊量/品質”特徵會讓模型學到樣本數偏差
+
+* **問題**：你 roadmap 沒列 feature 欄位，只有 p、V、perm、disp 等。若不加入 `n_reads, n_cpg, effective_overlap, HP0_rate, mapq` 等，模型常會把「reads 多→更顯著」當成訊號。
+* **建議補強**：在 Phase 4/5 明確定義 feature schema（固定欄位），包含：
+
+  * `n_reads_total, n_reads_valid, n_cpg, effective_overlap_median`
+  * `hp0_rate, strand_bias, mean_mapq`
+  * `n_clusters, silhouette_mean, silhouette_main_cluster`
+  * `-log10(p_global_alt)` 等
+
+### 12) TP/FP truth label 對齊規格未寫：region-level vs variant-level 容易錯配
+
+* **問題**：SEQC2 truth 常是 variant-level + high-confidence/callable regions。你們 unit 是 region（SNV anchor ±window）。若沒寫對齊規則，會導致標籤噪音。
+* **建議補強**：在 Phase 5 寫明：
+
+  * 若 anchor SNV 在 truth TP → region TP
+  * anchor 在 truth FP → region FP
+  * 不在 callable → ignore/unknown（不進訓練）
+
+---
+
+## E. 測試規劃缺陷（中優先但很實用）
+
+### 13) 「Permutation p-value 分布均勻約 0.5」這句不正確
+
+* **問題**：在 null 下，p-value 應該近似 **Uniform(0,1)**，不是「約 0.5」。平均值才是 0.5。
+* **建議補強**：改成：
+
+  * 檢查 p-value histogram 近似均勻
+  * 或做 KS test 對 Uniform(0,1)
+
+### 14) End-to-End 檢查「無 NaN/Inf」不夠，應該允許且標記 invalid case
+
+* **問題**：某些 region 真的會因 overlap 不足而無法計算（這是合理狀況）；強制無 NaN/Inf 反而會逼你用錯誤插補。
+* **建議補強**：輸出欄位加 `valid_flag`、`invalid_reason`（overlap不足、全NaN、cluster<2 等），並在 E2E test 只要求「格式正確 + valid_flag 合理」。
+
+---
+
+## F. 小的文字/邏輯瑕疵（低優先）
+
+### 15) Local 2×2 表格描述有點混亂
+
+* **問題**：你寫 `[Target, Rest] x [Cluster_k, Rest]`，但實際應是：
+
+  * rows：Label（Target vs Rest）
+  * cols：Cluster membership（Cluster_k vs Rest）
+    建議改成清楚的 n11,n12,n21,n22 定義，避免實作者誤填表格。
+
+---
+
+# 總結：是否有缺陷？
+
+有，但都屬於「補強規格與避免偏誤」類型，並不表示 roadmap 不可用。最需要立刻修的是：
+
+1. RxC MC Fisher 的 early stop 改成有統計保證（CI-based）
+2. PERMANOVA 對 NaN/invalid 距離的處理要定規則（建議先過濾 reads 讓矩陣完整）
+3. 多重檢定層級與 gating 規則要寫成硬規格
+4. 校準模型的 truth 對齊規則與 feature schema 要先定義
+5. 測試的 null 檢查要改成 p-value ~ Uniform(0,1)
+
+你現在的問題核心是：每個 Somatic region 都有一個 read×read 甲基距離矩陣 D（可能還有分群 labels），而你想檢驗 D 所呈現的結構是否與生物標籤（ALT/REF、HP、Tumor/Normal）有關，並且能在大量位點（數萬個 region）下 穩健、可解釋、可擴充 地做統計驗證。
+
+* **你們的資料型態**：每個 somatic region 都有 **read×read 距離矩陣 (D)**，要檢驗 (D) 是否與 **ALT/REF、HP、Tumor/Normal** 等標籤相關（大量 region、需穩健）。
+
+* **PERMANOVA**：最適合當**主力全域檢定**（直接用距離矩陣測群組差異、可報 pseudo-F / (R^2)）。
+  但一定要加 **dispersion 檢查（PERMDISP/類似）**，否則可能把「組內更分散」誤判成「中心不同」。
+
+* **ANOSIM**：很適合當 **PERMANOVA 的輔助驗證**（輸出 (R) 直覺：組間是否大於組內）。
+  同樣可能受 dispersion 影響，但解釋容易、成本低。
+
+* **群組距離統計（within/between 差值或比值）**：強烈建議納入當 **效應量 + 快速全量篩選**（便宜、好 debug）。
+  可用 **label permutation** 做 empirical p-value（比 Mantel 更貼近“群組差異”問題）。
+
+* **Mantel 檢驗**：較適合做 **矩陣—矩陣一致性/交叉驗證**（例如甲基距離 vs SNV/相位相似度矩陣、不同距離定義之間的一致性）。
+  不建議當 ALT/REF 的主要顯著性檢定（可當輔助指標）。
+
+* **Pairwise 檢定 / Pairwise PERMANOVA / Pairwise ANOSIM**：
+  不適合全量常規跑（檢定數暴增、FDR 困難、易誤判），建議只在 **global 通過的候選 region** 做 post-hoc。
+  優先用 **cluster vs rest（2×2）** 或「只比較少數關鍵群」而非全 pairwise。
+
+* **推薦最實務組合（每個 region）**：
+
+  1. 群組距離效應量（必做）
+  2. PERMANOVA + dispersion（主力）
+  3. ANOSIM（輔助）
+  4. 候選位點再做 permutation 強化 + post-hoc（避免全 pairwise）
+  5. Mantel 只用於矩陣一致性檢核

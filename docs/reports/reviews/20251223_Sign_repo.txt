@@ -1,0 +1,214 @@
+你這份 **Significance Analysis Plan** 的方向是正確的：它把「探索性分群」補上「可量化、可比較、可驗證的統計證據」，也對準你們 InterSubMod 的核心問題（分群是否真實、是否對應標籤、是否能支持 somatic 真偽）。
+
+不過若要讓它在你們的研究架構下 **更嚴謹、可擴展、且避免誤判**，我建議補強 3 個面向：
+
+1. **統計檢定設計（避免多重檢定與資訊洩漏）**
+2. **分群“是否真實”的驗證（不只看 silhouette）**
+3. **把結果變成可用於 TP/FP 的可校準分數（confidence score）**
+
+下面我逐段評估「是否正確」與「可用哪些算法驗證 / 改進」。
+
+---
+
+## 1) 整體流程是否正確？
+
+### ✅ 正確且合理的地方
+
+* **每個 region（以 SNV 為 anchor）做：分群 → 標籤關聯檢定 → 分群品質指標 → 彙整成支持度分數**
+  這個主架構是合理的，且非常符合你們「以 somatic 位點為任務單位」的工程設計。
+* **Fisher（小樣本）＋Chi-square（全域）＋BH（FDR）**
+  這是標準統計組合，且與你們每個 region 的 read 數量（常在數十～百級）相容。
+* **Silhouette 作為“分群邊界清晰度”**
+  很適合用來避免「P 值顯著但分群很糊」的情況（常見於低有效共同覆蓋、或距離不穩時）。
+
+### ⚠️ 需要修正/補足的地方（會影響“正確性”）
+
+#### (A) Fisher per-cluster vs rest：容易產生大量檢定，且缺少“全域”一次性結論
+
+你現在對每個 cluster 做 Fisher（Cluster A vs Rest），會造成：
+
+* 一個 region 若切出 (K) 群，就有 (K) 個 p-value（每個 label 又一組），**檢定數暴增**。
+* 讀者/下游也會問：**“這個 region 整體上是否與 HP/ALT 有關？”**（需要一個全域指標）
+
+✅ 建議做法（兩層輸出，最實用）
+
+* **全域關聯（每個 region、每個 label 一個 p-value）**
+  用 (K \times M) 的列聯表做：
+
+  * Chi-square（若期望次數足夠）
+  * 或 **Fisher 的 RxC exact（可用 Monte Carlo 模擬）**
+* **定位驅動群（哪一群造成顯著）**
+  再對“候選主群”做 Fisher（cluster vs rest）當作解釋性證據
+
+這樣會大幅降低多重檢定壓力，也更好解釋。
+
+#### (B) 只報 p-value 不夠：一定要有 **效應量（effect size）**
+
+對 somatic validation 來說，「顯著」不代表「有用」。你需要知道差異有多大，例如 ALT 是否高度集中在某群。
+
+✅ 建議每個檢定都同時輸出：
+
+* **Odds Ratio（勝算比, OR）**＋（可選）信賴區間
+* **Δ比例**（例如 cluster 內 ALT 比例 − cluster 外 ALT 比例）
+* 全域表格建議加 **Cramér’s V**（0–1）當作關聯強度摘要
+
+#### (C) 重要：避免“雙重使用資料”造成偏誤
+
+* 如果你用 silhouette 最大化來選 (K)，再用同一批 read 做顯著性，通常還算可接受（因為聚類未使用 label）。
+* **但若你任何一處用到 HP/ALT/tumor-normal 來影響分群或決定 (K)**，那後面的 p-value 就會偏樂觀（資訊洩漏）。
+
+✅ 規則：**分群階段不可用 label**；顯著性分析只能在分群後做。
+
+---
+
+## 2) 你現在的“分群是否真實？”只靠 silhouette 仍不足
+
+Silhouette 衡量的是「在既定 cluster labels 下」的緊密度/分離度，但你還需要能回答：
+
+* 這樣的分群結構是否可能是距離矩陣噪音造成的？
+* 分群對 CpG 子集合、對 read 子集合是否穩定？
+
+### ✅ 建議補 3 種驗證算法（很常用、而且很貼近你們的資料型態）
+
+#### (1) **Permutation test（置換檢定）**：建立“隨機情境”的分布
+
+做法：固定距離矩陣 (D) 與分群結果 labels，不改分群，只把 label（HP/ALT/tumor）隨機打散 (B) 次（例如 1000 次），每次算同一個統計量（例如 Cramér’s V 或 Fisher 的最小 p-value），得到 empirical p-value：
+
+[
+p_{\text{emp}}=\frac{1+#{T^{(b)}\ge T_{\text{obs}}}}{1+B}
+]
+
+優點：不依賴列聯表漸近假設、對小樣本特別穩健。
+建議：可只對「候選重要位點」做（例如初篩後 top N），避免計算太重。
+
+#### (2) **Cluster stability（穩定度）**：bootstrap / subsampling
+
+兩種最實用的穩定性測試：
+
+* **resample CpG sites**（從 window 內 CpG 抽樣）→ 重算距離→重聚類→比較 labels
+* **resample reads**（抽部分 reads）→ 重聚類→比較 labels
+
+比較方式可以用：
+
+* **ARI（Adjusted Rand Index）/ NMI**：衡量兩次分群的一致性
+  穩定度高（ARI 接近 1）才表示你不是被少數 CpG 或少數 reads 偶然推動。
+
+#### (3) Hierarchical clustering 的樹支持度
+
+如果你最後要畫 dendrogram / tree，建議加：
+
+* **bootstrap branch support**：對 CpG 或 reads 重抽樣產生多棵樹，看分支出現頻率
+  （這能直接回應“樹是不是偶然”）
+
+---
+
+## 3) 除了列聯表檢定，你也可以用“距離矩陣直接做”標籤差異檢定（更貼近你們資料）
+
+你現在的設計是：距離矩陣 → 分群 → 列聯表。
+但其實你可以跳過分群，直接用距離矩陣檢驗標籤差異，這在你的研究（read-level distance）非常自然，且能提供更強的佐證。
+
+### ✅ 建議加入（至少其中一種）：
+
+#### (A) **PERMANOVA（置換型多變量變異數分析）**
+
+以距離矩陣 (D) 檢驗不同 label 群體的“中心”是否不同，輸出 pseudo-F 與 p-value（靠 permutation）。
+很適合你的情境：你本來就有 (D)，而且它對任意距離定義都可用。
+
+> 注意：PERMANOVA 對「組內離散程度差異」敏感；建議同時檢查 dispersion（或用 ANOSIM 作輔助）。
+
+#### (B) **ANOSIM**
+
+同樣用距離矩陣，輸出 (R)（-1 到 1）代表組間距離是否大於組內距離，也用 permutation 給 p-value。
+優點：直覺、計算也不貴。
+
+#### (C) **Mantel test**
+
+適合你要回答「read-read 距離矩陣」與「標籤相似度矩陣（同標籤=1，不同=0）」是否相關。
+在“距離 vs 標籤一致性”的全域評估上很好用。
+
+> 建議定位：把它當作 region-level 的全域指標（每個 region 一個值），再與 TP/FP 做比較。
+
+---
+
+## 4) Confidence Score 的設計：你目前寫法方向對，但建議換成“可校準”的方式
+
+你現在打算“結合 p-value + silhouette”當分數，這可行，但會遇到兩個問題：
+
+* p-value 受樣本數強烈影響（reads 多就容易顯著）
+* silhouette 受距離尺度與 missing/無限距離處理影響
+
+✅ 我更建議把它做成 **feature → 機率模型（或規則分層）**：
+
+### (A) 建議的 feature（每個 region）
+
+* (q_{\text{ALT}})（全域或主群的 FDR）
+* (\text{OR}_{\text{ALT}})、ΔALT proportion
+* (q_{\text{HP}})、(\text{OR}_{\text{HP}})（避免其實只是 haplotype 結構）
+* avg silhouette、主群 silhouette
+* 有效共同覆蓋（effective overlap）、CpG 數、reads 數、HP=0 比例
+* strand balance、MAPQ 分布、是否位於 PMD/heterochromatin（若你有 annotation gating）
+
+### (B) 用 SEQC2 TP/FP 做校準（最強而且最像“真正驗證”）
+
+用 TP/FP 當標籤，訓練一個簡單模型（例如 logistic regression），輸出：
+[
+P(\text{TP}\mid \text{features})
+]
+這會比手刻權重更穩，也能產出 ROC/PR/AUC 做論文說服力。
+
+> 你不一定要一開始就上 ML；也可以先用規則版 score，後期再用 logistic 做校準。
+
+---
+
+## 5) 你文件中“驗證計畫”很對，但建議再補兩項（會讓結論更站得住腳）
+
+### (1) “TP vs FP 顯著比例”要升級成 **ROC / PR / calibration**
+
+你之前提到 TP 顯著比例高於 FP，這是好現象，但更完整的報告應該包含：
+
+* **PR curve（在 FP 多的情境特別重要）**
+* **ROC curve**
+* **校準曲線（predicted TP probability 是否可信）**
+
+### (2) Cross-validation 設計（避免過度擬合特定染色體/區段）
+
+最務實的做法：
+
+* 以染色體做 split（train chr1–19，test chr20–22+X…）
+  這能避免同一局部結構在訓練與測試重複出現。
+
+---
+
+## 6) 工程實作層面的小建議（避免踩雷）
+
+* Fisher exact 建議用 **log-gamma（(\log\Gamma)）** 或預先表格化 (\log(n!)) 避免溢位；並明確選擇 two-sided 定義（不同套件 two-sided 會有差異）。
+* 對於距離矩陣裡的 invalid（NaN/inf/-1），silhouette 必須有一致策略：
+
+  * 例如先過濾 read（有效 pair coverage 不足者不納入分群/評分）
+  * 或在計算 silhouette 時排除 invalid pair
+
+---
+
+# 總結：這份流程是否正確？還能用哪些算法驗證？
+
+### 你的流程 **正確且可落地**，但建議：
+
+1. 增加 **region-level 全域關聯檢定**（減少多重檢定）
+2. 每個檢定補上 **效應量（OR、Δ比例、Cramér’s V）**
+3. 加入至少一種 **距離矩陣直接檢定**（PERMANOVA/ANOSIM/Mantel）
+4. 加入 **置換檢定與分群穩定度**（bootstrap + ARI/NMI）
+5. Confidence score 最終用 **SEQC2 TP/FP 做校準**（logistic/規則→模型）
+
+---
+
+## 參考來源
+
+* Benjamini–Hochberg FDR（BH procedure）原始論文： ([JSTOR][1])
+* Silhouette 定義與用途（Rousseeuw, 1987）： ([ScienceDirect][2])
+* Fisher’s exact test 基本假設與超幾何分布（概述）： ([維基百科][3])
+* PERMANOVA（Anderson, 2001；distance matrix 的 permutation MANOVA）： ([ecoevol.ufg.br][4])
+
+[1]: https://www.jstor.org/stable/2346101?utm_source=chatgpt.com "Controlling the False Discovery Rate"
+[2]: https://www.sciencedirect.com/science/article/pii/0377042787901257?utm_source=chatgpt.com "Silhouettes: A graphical aid to the interpretation and ..."
+[3]: https://en.wikipedia.org/wiki/Fisher%27s_exact_test?utm_source=chatgpt.com "Fisher's exact test"
+[4]: https://ecoevol.ufg.br/adrimelo/div/Anderson-2001-AustEcol_non-parametric_manova.pdf?utm_source=chatgpt.com "A new method for non-parametric multivariate analysis of ..."

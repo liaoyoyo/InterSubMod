@@ -1,0 +1,166 @@
+下面列的是你這份 20251223_Significance_Analysis_Strategy 中「可能有錯誤／容易造成誤解」與「需要補強」的地方（依影響程度排序）。
+
+1) 核心假設表述過強，容易被質疑
+
+問題：寫成「真實 somatic 變異與特定 haplotype 或 subclone 結構具有強烈關聯」過於絕對。實務上很多真陽性 somatic 不一定造成可觀察的甲基化分群差異；反之也可能存在甲基差異但與該 SNV 無因果關係（區域狀態、CNV/LOH、purity 等混雜）。
+
+補強：改成「在部分位點/區域，真實 somatic 可能伴隨可重現的 read-level 甲基結構差異，可作為輔助證據」；並明確列出 失效情境（低覆蓋、PMD、CNV/LOH、強批次效應等）。
+
+2) Phase 1 的「全域檢定」缺少對 ALT/REF（somatic 核心標籤）的明確定位
+
+問題：全域關聯只提 HP、Tumor/Normal；但你們最終要支持的是 somatic 驗證，ALT/REF（或 tumor 中 ALT-support vs REF-support）應該是第一級的主要檢定對象。
+
+補強：在 Phase 1 明確列出三種 label 的優先順序與目的：
+
+ALT/REF（somatic 支持度）
+
+HP（解釋/檢核是否只是單倍型結構）
+
+Tumor/Normal（排除混合或來源差異）
+
+3) RxC 的 Chi-square / Cramér’s V 在稀疏表格時會失真
+
+問題：你已提 Fisher-Freeman-Halton（Monte Carlo）處理稀疏表格很好；但 Cramér’s V 通常依賴 Chi-square 統計量。若 Chi-square 不適用（很多格期望值太小），V 會不穩或解釋不清。
+
+補強：
+
+若使用 RxC exact（Monte Carlo）作為主要檢定，可改用更穩健的全域效應量（例如基於機率分布的關聯度），或至少註明「V 只在 Chi-square 合理時報告/解讀」。
+
+或設定規則：若任一格期望值 < 5 的比例過高，不報 V 或改報其他效應量。
+
+4) PERMANOVA 需要補「離散度差異」檢查，不然會誤判
+
+問題：PERMANOVA 很適合你們（距離矩陣為核心），但它對 群內離散度（dispersion）差異敏感：差異可能來自「某組較分散」而非「中心不同」。
+
+補強：
+
+同時做 PERMDISP / betadisper 類型檢查（或至少報告 group dispersion 指標）。
+
+或加一個替代/輔助：ANOSIM（直覺但也有局限）或 Mantel test（距離 vs 標籤相似度）。
+
+5) Phase 2 的 post-hoc Fisher 設計在「多類別 label」時需明確定義
+
+問題：你寫「Label L vs Rest」適用二元標籤（HP1/HP2、Tumor/Normal、ALT/REF）。但若未來 label 變成多類別（例如多群 subclone 標籤、或加入更多層級），2×2 的設計要定義清楚（one-vs-rest 還是 pairwise）。
+
+補強：在文件裡明確規格：
+
+目前僅支援二元 label（HP、T/N、ALT/REF）。
+
+若擴展多類別，採 one-vs-rest + BH，或採 pairwise + 更嚴格校正。
+
+6) Odds Ratio（OR）在 0 計數會爆掉，必須寫入規格
+
+問題：小樣本常出現某格為 0，OR 會變成 0 或無限大，導致特徵不穩、模型爆炸。
+
+補強：
+
+明確採用 Haldane–Anscombe correction（+0.5） 或其他平滑。
+
+同時輸出 OR 的可信區間或至少輸出 log(OR)（更穩）。
+
+7) Phase 3「Permutation（打散 label）」的敘述有概念誤用
+
+問題：你說 label permutation 能排除「剛好湊巧分出這群」的機率，但它只能驗證“分群與 label 的關聯是否可能是巧合”，不能驗證「分群結構本身是否來自真實訊號」。
+
+補強：把 Phase 3 分成兩種不同的「真實性」：
+
+Association realism：label permutation（你目前這個）
+
+Clustering structure realism：需要另外的 null，例如
+
+距離矩陣擾動/隨機化（保留 missing pattern 的 null）
+
+cluster tendency（例如 Hopkins statistic）
+
+或用 bootstrap stability 當主要證據（更實際）
+
+8) Bootstrap stability（ARI）需要說清楚「抽樣單位」與「可比性」
+
+問題：對 reads 重抽樣後，兩次分群的樣本集合不同，ARI 無法直接比較全量。
+
+補強：
+
+規格化：用 subsampling 後取交集 read 計算 ARI，或只做 CpG resampling（read 集合固定更好比）。
+
+補一個更工程化的方案：consensus clustering（輸出 co-clustering matrix）。
+
+9) 多重檢定（BH）層級需更精確，否則 FDR 可能失控
+
+問題：你只寫「每 region 做 K 次檢定所以 BH」，但你實際會做：
+
+多個 label（HP、ALT、T/N）
+
+多個 region（數萬）
+
+全域 + 局部 + permutation + permanova
+若沒有層級規則，FDR 的定義會混亂。
+
+補強（建議最簡單可落地版本）：
+
+全域檢定：跨所有 region 對每個 label 各做一次 BH（得到 q_global）。
+
+局部檢定：只在 q_global 過門檻的 region 做 post-hoc；post-hoc 的 BH 只在該 region 內或在「入選 region 集合內」做（明確寫一種）。
+
+10) Phase 4 校準模型：特徵向量不完整，且容易資料洩漏
+
+問題 A（特徵不完整）：目前 feature 沒包含「樣本量/資訊量」類特徵，logistic regression 會被 p-value 的樣本量效應綁架。
+
+問題 B（資料洩漏）：若你用同一批 region 同時用來設計門檻、再訓練、再評估，很容易高估效果。
+
+補強：
+
+加入關鍵 feature：n_reads, n_clusters, effective_overlap, n_cpg, HP0_rate, strand_bias, mean_mapq 等。
+
+p-value 類特徵建議轉成 -log10(p) 並設上限。
+
+評估採用 chromosome split 或 cohort split；輸出 AUROC/AUPRC、Brier score、calibration curve。
+
+11) SEQC2 TP/FP 的對齊規格需要寫清楚
+
+問題：TP/FP 真值通常是「variant-level in high-confidence regions」；你這裡的 unit 是「region_id」（以 SNV 為 anchor 的 window）。若沒有清楚對齊規則，標籤可能錯配。
+
+補強：
+
+定義 region 的 “truth label” 規則：anchor SNV 是否在 truth set；是否在 callable/高信心區；不在者標為 “unknown/ignore”。
+
+明確排除或降權：CNV/LOH 區、低 mappability、重複區、PMD 等（若你們已有 gating）。
+
+12) 輸出格式缺少關鍵欄位，會讓後續 debug/論文難自洽
+
+問題：significance_global.csv / local.csv 欄位不夠支撐可重現與解釋。
+
+補強：至少加上：
+
+n_reads_total, n_reads_valid, n_clusters, n_cpg_total, effective_overlap_mean/median
+
+label 分布摘要（例如 ALT count、HP1/HP2 count、tumor/normal count）
+
+q_global（全域 FDR）與 q_permanova（若做）
+
+13) 實作可行性：在 C++ 裡做 PERMANOVA / RxC exact 需明確界定範圍
+
+問題：PERMANOVA 與 RxC exact（Monte Carlo）都可做，但要注意計算量與數值穩定；而你們 per-region 數萬個，Monte Carlo 次數若過高會很重。
+
+補強：
+
+寫入策略：PERMANOVA/permutation 只對初篩通過的候選位點做（例如 silhouette 高或 global p 小的 top N）。
+
+Monte Carlo 次數（例如 1,000 或 10,000）與 stopping rule（p 值已遠小於門檻可提前停止）。
+
+總結
+
+你的策略整體是「正確且成熟」的四段式設計；但需要補強的重點是：
+
+把 ALT/REF 放到 Phase 1 的核心地位
+
+釐清 permutation 能驗證的是“關聯”而非“分群本身真實性”
+
+補上 PERMANOVA dispersion 檢查
+
+多重檢定層級與 OR=0 的數值規格
+
+校準模型加入資訊量特徵與防資料洩漏評估
+
+輸出欄位補足可重現/可解釋所需資訊
+
+如果你願意，我也可以把上述補強點直接改寫成「可貼回文件」的修訂版段落（每一段含明確規格與門檻建議）。
