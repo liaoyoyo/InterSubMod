@@ -11,6 +11,7 @@
 #include "core/MatrixBuilder.hpp"
 #include "core/MethylationParser.hpp"
 #include "core/ReadParser.hpp"
+#include "core/SignificanceAnalyzer.hpp"
 #include "core/SomaticSnv.hpp"
 #include "core/TreeStructure.hpp"
 #include "io/RegionWriter.hpp"
@@ -40,6 +41,15 @@ struct RegionResult {
     int num_invalid_pairs;       ///< Number of invalid pairs (insufficient overlap)
     double avg_common_coverage;  ///< Average common CpG coverage per pair
 
+    // Significance analysis results
+    bool significance_computed;  ///< Whether significance analysis was run
+    double global_p_value;       ///< Global association p-value (FFH)
+    double cramers_v;            ///< Effect size (Cramér's V)
+    double local_best_p_value;   ///< Best cluster's local p-value
+    int local_best_cluster;      ///< Best cluster ID
+    double heuristic_score;      ///< Combined heuristic score [0-1]
+    bool passed_gating;          ///< Whether passed gating (global_p <= 0.1)
+
     RegionResult()
         : region_id(-1),
           snv_id(-1),
@@ -53,7 +63,14 @@ struct RegionResult {
           success(false),
           num_valid_pairs(0),
           num_invalid_pairs(0),
-          avg_common_coverage(0.0) {
+          avg_common_coverage(0.0),
+          significance_computed(false),
+          global_p_value(1.0),
+          cramers_v(0.0),
+          local_best_p_value(1.0),
+          local_best_cluster(-1),
+          heuristic_score(0.0),
+          passed_gating(false) {
     }
 };
 
@@ -141,6 +158,11 @@ public:
     void print_summary(const std::vector<RegionResult>& results) const;
 
 private:
+    /**
+     * @brief Write significance summary CSV and statistics report
+     */
+    void write_significance_summary(const std::vector<RegionResult>& results) const;
+
     std::string tumor_bam_path_;
     std::string normal_bam_path_;
     std::string ref_fasta_path_;

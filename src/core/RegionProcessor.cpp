@@ -12,11 +12,12 @@
 #include <iostream>
 #include <sstream>
 #include <unordered_set>
-#include "utils/Logger.hpp"
 
 #include "core/HierarchicalClustering.hpp"
 #include "core/MethylationMatrix.hpp"
+#include "core/SignificanceAnalyzer.hpp"
 #include "io/TreeWriter.hpp"
+#include "utils/Logger.hpp"
 
 namespace InterSubMod {
 
@@ -135,7 +136,7 @@ RegionProcessor::RegionProcessor(const Config& config)
            << "  Linkage method: " << HierarchicalClustering::method_to_string(linkage_method_) << "\n"
            << "  Clustering min reads: " << clustering_min_reads_;
     }
-    
+
     LOG_INFO(ss.str());
 }
 
@@ -233,7 +234,7 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
     std::vector<RegionResult> results(num_to_process);
 
     auto t_start = std::chrono::high_resolution_clock::now();
-    
+
     LOG_INFO("Starting processing of " + std::to_string(num_to_process) + " regions...");
 
 // OpenMP parallel loop
@@ -257,17 +258,17 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
             std::string chr_name = chrom_index_.get_name(snv.chr_id);
 
             // Using ScopedLogger within process_single_region, but we can also log high level start here
-            // Note: Excessive locking might preserve order but slow down things. 
+            // Note: Excessive locking might preserve order but slow down things.
             // The Logger handles locking.
-            
+
             // Process the region using the thread-local readers
             results[i] = process_single_region(snv, i, tumor_reader, ref_reader);
 
             // Log completion status
             if (results[i].success) {
                 std::stringstream ss;
-                ss << "Region " << i << " (" << chr_name << ":" << snv.pos << ") completed: " 
-                   << results[i].num_reads << " reads, " << results[i].elapsed_ms << " ms";
+                ss << "Region " << i << " (" << chr_name << ":" << snv.pos << ") completed: " << results[i].num_reads
+                   << " reads, " << results[i].elapsed_ms << " ms";
                 LOG_INFO(ss.str());
             } else {
                 std::stringstream ss;
@@ -280,8 +281,12 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
     auto t_end = std::chrono::high_resolution_clock::now();
     double total_elapsed = std::chrono::duration<double, std::milli>(t_end - t_start).count();
 
-    LOG_INFO("All regions processed in " + std::to_string(total_elapsed) + " ms (" + 
+    LOG_INFO("All regions processed in " + std::to_string(total_elapsed) + " ms (" +
              std::to_string(total_elapsed / num_to_process) + " ms/region)");
+
+    // Write significance summary and print stats
+    write_significance_summary(results);
+    print_summary(results);
 
     return results;
 }
@@ -291,11 +296,11 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
     RegionResult result;
     result.region_id = region_id;
     result.snv_id = snv.snv_id;
-    
+
     // Get chromosome name for logging
     // std::string chr_name = chrom_index_.get_name(snv.chr_id);
     // Utils::ScopedLogger logger("Process Region " + std::to_string(region_id), LogLevel::LOG_DEBUG);
-    
+
     auto t_start = std::chrono::high_resolution_clock::now();
 
     try {
@@ -538,8 +543,223 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                         }
 
                         if (log_level_ >= LogLevel::LOG_DEBUG) {
-                            LOG_DEBUG("  Clustering tree: " + std::to_string(tree.num_leaves()) + " leaves, method=" +
-                                      HierarchicalClustering::method_to_string(linkage_method_));
+                            LOG_DEBUG("  Clustering tree: " + std::to_string(tree.num_leaves()) +
+                                      " leaves, method=" + HierarchicalClustering::method_to_string(linkage_method_));
+                        }
+
+                        // === Significance Analysis ===
+                        // Use TreeCutter to find optimal clusters then run significance tests
+                        try {
+                            // Find optimal k using silhouette score
+                            auto [best_k, cluster_labels] = TreeCutter::find_optimal_clusters(
+                                tree, all_dist.dist_matrix, 2, std::min(6, static_cast<int>(read_list.size()) / 2));
+
+                            if (best_k >= 2 && cluster_labels.size() == read_list.size()) {
+                                // Build FullLabel vector for significance analysis
+                                std::vector<FullLabel> full_labels;
+                                full_labels.reserve(read_list.size());
+
+                                for (size_t i = 0; i < read_list.size(); ++i) {
+                                    const auto& read = read_list[i];
+                                    FullLabel label;
+                                    label.allele = read.alt_support;
+                                    label.hp_tag = read.hp_tag;
+                                    label.strand = read.strand;
+                                    label.is_tumor = read.is_tumor;
+                                    full_labels.push_back(label);
+                                }
+
+                                // Configure and run significance analysis
+                                SignificanceConfig sig_config;
+                                sig_config.enable_global_test = true;
+                                sig_config.enable_local_test = true;
+                                sig_config.enable_permanova = false;  // Skip for now
+                                sig_config.enable_dispersion = false;
+                                sig_config.enable_bootstrap = false;  // Expensive
+                                sig_config.run_id = vcf_filename_;
+                                sig_config.vcf_id = vcf_filename_;
+
+                                // Count HP tags per cluster
+                                std::map<int, std::map<std::string, int>> cluster_hp_counts;
+                                std::map<int, std::vector<int>> cluster_read_indices;
+                                for (size_t i = 0; i < cluster_labels.size(); ++i) {
+                                    int cluster = cluster_labels[i];
+                                    std::string hp = full_labels[i].hp_tag;
+                                    if (hp.empty()) hp = "None";
+                                    cluster_hp_counts[cluster][hp]++;
+                                    cluster_read_indices[cluster].push_back(i);
+                                }
+
+                                // Check for potential outliers (highly unbalanced clusters)
+                                bool unbalanced = false;
+                                int min_cluster_size =
+                                    std::max(3, static_cast<int>(read_list.size()) / 20);  // 5% or 3 reads
+                                for (const auto& [cid, indices] : cluster_read_indices) {
+                                    if (static_cast<int>(indices.size()) < min_cluster_size) {
+                                        unbalanced = true;
+                                        break;
+                                    }
+                                }
+
+                                // If unbalanced and k is small, try increasing k to separating outliers from main
+                                // groups
+                                if (unbalanced && best_k < 5) {
+                                    int next_k = best_k + 1;
+                                    std::vector<int> next_labels = TreeCutter::cut_by_num_clusters(tree, next_k);
+
+                                    // Evaluate next_k
+                                    std::map<int, int> next_counts;
+                                    for (int cl : next_labels) next_counts[cl]++;
+
+                                    // Count how many "substantial" clusters we have
+                                    int substantial_clusters = 0;
+                                    for (const auto& [cl, count] : next_counts) {
+                                        if (count >= min_cluster_size) substantial_clusters++;
+                                    }
+
+                                    // If increasing k gives us at least 2 substantial clusters (splitting the blob),
+                                    // adopt it
+                                    if (substantial_clusters >= 2) {
+                                        {
+                                            std::stringstream ss_log;
+                                            ss_log << "Unbalanced clustering at k=" << best_k
+                                                   << ". Increasing to k=" << next_k;
+                                            LOG_DEBUG(ss_log.str());
+                                        }
+                                        best_k = next_k;
+                                        cluster_labels = next_labels;
+
+                                        // Re-populate maps for the new clustering
+                                        cluster_hp_counts.clear();
+                                        cluster_read_indices.clear();
+                                        for (size_t i = 0; i < cluster_labels.size(); ++i) {
+                                            int cluster = cluster_labels[i];
+                                            std::string hp = full_labels[i].hp_tag;
+                                            if (hp.empty()) hp = "None";
+                                            cluster_hp_counts[cluster][hp]++;
+                                            cluster_read_indices[cluster].push_back(i);
+                                        }
+                                    }
+                                }
+
+                                // Set additional significance config parameters
+                                // Note: These specific fields might not exist in SignificanceConfig, using defaults or
+                                // available config fields. sig_config.global_config.gating_p_threshold = 0.1; //
+                                // Example if needed
+
+                                if (log_level_ >= LogLevel::LOG_DEBUG) {
+                                    std::stringstream ss;
+                                    ss << "\nProcessing Region " << region_id << " (" << chr_name << ":" << snv.pos
+                                       << ")";
+                                    ss << "\n  Best k: " << best_k;
+                                    ss << "\n  Cluster vs HP distribution:";
+                                    for (const auto& [cluster, hp_counts] : cluster_hp_counts) {
+                                        ss << "\n    Cluster " << cluster
+                                           << " (n=" << cluster_read_indices[cluster].size() << "): ";
+                                        for (const auto& [hp, count] : hp_counts) {
+                                            ss << hp << "=" << count << " ";
+                                        }
+                                    }
+
+                                    // Diagnose small clusters properly iterating over the map
+                                    for (const auto& [cluster, indices] : cluster_read_indices) {
+                                        if (indices.size() < 5) {
+                                            ss << "\n    Small Cluster " << cluster << " reads:";
+                                            for (int idx : indices) {
+                                                const auto& read = read_list[idx];
+                                                ss << "\n      " << read.read_name << " (HP=" << read.hp_tag
+                                                   << ", Strand=" << (read.strand == Strand::FORWARD ? "+" : "-")
+                                                   << ")";
+                                            }
+                                        }
+                                    }
+                                    LOG_DEBUG(ss.str());
+                                }
+
+                                SignificanceAnalyzer analyzer(sig_config);
+
+                                // Create metadata
+                                std::string anchor_key = chr_name + "_" + std::to_string(snv.pos);
+                                SignificanceResult sig_result =
+                                    analyzer.analyze_simple(cluster_labels, full_labels, region_id, anchor_key);
+
+                                // Store results in RegionResult
+                                result.significance_computed = true;
+                                result.significance_computed = true;
+
+                                // Store best p-value (min of ALT and HP)
+                                double p_alt = sig_result.global_alt.fisher_ffh.p_value;
+                                if (!sig_result.global_alt.valid) p_alt = 1.0;
+
+                                double p_hp = sig_result.global_hp.fisher_ffh.p_value;
+                                if (!sig_result.global_hp.valid) p_hp = 1.0;
+
+                                result.global_p_value = std::min(p_alt, p_hp);
+
+                                // Store best Cramér's V
+                                double v_alt =
+                                    sig_result.global_alt.cramers_v_reliable ? sig_result.global_alt.cramers_v : 0.0;
+                                double v_hp =
+                                    sig_result.global_hp.cramers_v_reliable ? sig_result.global_hp.cramers_v : 0.0;
+                                result.cramers_v = std::max(v_alt, v_hp);
+                                result.local_best_p_value = sig_result.local_result.best_p_value;
+                                result.local_best_cluster = sig_result.local_result.best_cluster_id;
+                                result.heuristic_score = sig_result.heuristic_score;
+                                result.passed_gating = sig_result.passed_gate;
+
+                                // Write significance results to JSON
+                                std::string sig_path = clustering_dir + "/significance.json";
+                                std::ofstream sig_file(sig_path);
+                                if (sig_file.is_open()) {
+                                    sig_file << "{\n";
+                                    sig_file << "  \"anchor_key\": \"" << anchor_key << "\",\n";
+                                    sig_file << "  \"num_reads\": " << read_list.size() << ",\n";
+                                    sig_file << "  \"optimal_k\": " << best_k << ",\n";
+                                    sig_file << "  \"passed_gating\": " << (sig_result.passed_gate ? "true" : "false")
+                                             << ",\n";
+                                    sig_file << "  \"global_alt\": {\n";
+                                    sig_file << "    \"p_value\": " << std::scientific << std::setprecision(6)
+                                             << sig_result.global_alt.fisher_ffh.p_value << ",\n";
+                                    sig_file << "    \"cramers_v\": " << std::fixed << std::setprecision(4)
+                                             << sig_result.global_alt.cramers_v << ",\n";
+                                    sig_file << "    \"chi_square_reliable\": "
+                                             << (sig_result.global_alt.chi_square_reliable ? "true" : "false") << "\n";
+                                    sig_file << "  },\n";
+                                    sig_file << "  \"global_hp\": {\n";
+                                    sig_file << "    \"p_value\": " << std::scientific << std::setprecision(6)
+                                             << sig_result.global_hp.fisher_ffh.p_value << ",\n";
+                                    sig_file << "    \"cramers_v\": " << std::fixed << std::setprecision(4)
+                                             << sig_result.global_hp.cramers_v << "\n";
+                                    sig_file << "  },\n";
+                                    sig_file << "  \"local\": {\n";
+                                    sig_file << "    \"best_cluster\": " << sig_result.local_result.best_cluster_id
+                                             << ",\n";
+                                    sig_file << "    \"best_p_value\": " << std::scientific
+                                             << sig_result.local_result.best_p_value << ",\n";
+                                    sig_file << "    \"best_dimension\": \"" << sig_result.local_result.best_dimension
+                                             << "\"\n";
+                                    sig_file << "  },\n";
+                                    sig_file << "  \"heuristic_score\": " << std::fixed << std::setprecision(4)
+                                             << sig_result.heuristic_score << "\n";
+                                    sig_file << "}\n";
+                                    sig_file.close();
+                                }
+
+                                if (log_level_ >= LogLevel::LOG_DEBUG) {
+                                    std::stringstream ss;
+                                    ss << "  Significance: global_p_alt=" << std::scientific
+                                       << sig_result.global_alt.fisher_ffh.p_value
+                                       << ", global_p_hp=" << sig_result.global_hp.fisher_ffh.p_value
+                                       << ", V_alt=" << std::fixed << std::setprecision(3)
+                                       << sig_result.global_alt.cramers_v << ", score=" << sig_result.heuristic_score;
+                                    LOG_DEBUG(ss.str());
+                                }
+                            }
+                        } catch (const std::exception& e) {
+                            // Significance analysis failed, but don't fail the entire region
+                            if (log_level_ >= LogLevel::LOG_DEBUG) {
+                                LOG_DEBUG("  Significance analysis skipped: " + std::string(e.what()));
+                            }
                         }
                     }
 
@@ -597,7 +817,94 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
     auto t_end = std::chrono::high_resolution_clock::now();
     result.elapsed_ms = std::chrono::duration<double, std::milli>(t_end - t_start).count();
 
+    // Write significance summary
+    // write_significance_summary(results); // Removed incorrect call - results not available here
+
     return result;
+}
+
+void RegionProcessor::write_significance_summary(const std::vector<RegionResult>& results) const {
+    if (results.empty()) return;
+
+    // 1. Write CSV Summary
+    std::string csv_path = output_dir_ + "/significance_summary.csv";
+    std::ofstream csv_file(csv_path);
+    if (!csv_file.is_open()) {
+        LOG_ERROR("Failed to open significance summary CSV for writing: " + csv_path);
+        return;
+    }
+
+    // Header
+    csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,HeuristicScore,PassedGating,Significant,"
+                "LocalBestCluster,LocalBestP,LocalBestDim\n";
+
+    // Statistics conatiners
+    struct ChrStats {
+        int total = 0;
+        int significant = 0;
+    };
+    std::map<std::string, ChrStats> chr_stats;
+    int total_significant = 0;
+    int total_analyzed = 0;  // successfully processed and significance computed
+
+    for (const auto& r : results) {
+        if (!r.success || !r.significance_computed) continue;
+
+        total_analyzed++;
+        const auto& snv = snvs_[r.region_id];
+        std::string chr_name = chrom_index_.get_name(snv.chr_id);
+
+        // Determine significance (Binary classification)
+        // Definition: Passed gating AND (p-value <= 0.05 OR Score >= 3.0)
+        // Adjust threshold as needed. Using p<=0.05 as standard.
+        bool is_significant = r.passed_gating && (r.global_p_value <= 0.05);
+
+        if (is_significant) {
+            total_significant++;
+            chr_stats[chr_name].significant++;
+        }
+        chr_stats[chr_name].total++;
+
+        csv_file << r.region_id << "," << chr_name << "," << snv.pos << "," << snv.ref_base << "," << snv.alt_base
+                 << "," << r.num_reads << "," << r.num_cpgs << "," << std::scientific << std::setprecision(6)
+                 << r.global_p_value << "," << std::fixed << std::setprecision(4) << r.cramers_v << "," << std::fixed
+                 << std::setprecision(4) << r.heuristic_score << "," << (r.passed_gating ? "true" : "false") << ","
+                 << (is_significant ? "true" : "false") << "," << r.local_best_cluster << "," << std::scientific
+                 << std::setprecision(6) << r.local_best_p_value << ","
+                 << "N/A"  // Dimension not currently stored in RegionResult struct easily
+                 << "\n";
+    }
+    csv_file.close();
+    LOG_INFO("Significance summary written to: " + csv_path);
+
+    // 2. Write Statistics Report
+    std::string stats_path = output_dir_ + "/significance_statistics.txt";
+    std::ofstream stats_file(stats_path);
+    if (!stats_file.is_open()) {
+        LOG_ERROR("Failed to open significance statistics file: " + stats_path);
+        return;
+    }
+
+    stats_file << "=== Significance Analysis Statistics ===\n\n";
+    stats_file << "Total Regions Processed: " << results.size() << "\n";
+    stats_file << "Regions Analyzed (Success): " << total_analyzed << "\n";
+
+    double sig_rate = total_analyzed > 0 ? (100.0 * total_significant / total_analyzed) : 0.0;
+    stats_file << "Total Significant: " << total_significant << " (" << std::fixed << std::setprecision(2) << sig_rate
+               << "%)\n";
+    stats_file << "Significance Threshold: Passed Gating AND Global P-value <= 0.05\n\n";
+
+    stats_file << "--- Per-Chromosome Breakdown ---\n";
+    stats_file << std::left << std::setw(10) << "Chr" << std::setw(10) << "Total" << std::setw(15) << "Significant"
+               << std::setw(10) << "% Sig" << "\n";
+
+    for (const auto& [chr, stats] : chr_stats) {
+        double chr_rate = stats.total > 0 ? (100.0 * stats.significant / stats.total) : 0.0;
+        stats_file << std::left << std::setw(10) << chr << std::setw(10) << stats.total << std::setw(15)
+                   << stats.significant << std::setw(10) << std::fixed << std::setprecision(2) << chr_rate << "%\n";
+    }
+    stats_file.close();
+    LOG_INFO("Significance statistics summary written to: " + stats_path);
 }
 
 void RegionProcessor::print_summary(const std::vector<RegionResult>& results) const {
@@ -649,8 +956,10 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
     ss << "Total CpG sites found: " << total_cpgs << "\n"
        << "Total processing time: " << total_time << " ms\n"
        << "Average time per region: " << (results.size() > 0 ? (total_time / results.size()) : 0) << " ms\n"
-       << "Average reads per region: " << (success_count > 0 ? (total_reads / static_cast<double>(success_count)) : 0) << "\n"
-       << "Average CpGs per region: " << (success_count > 0 ? (total_cpgs / static_cast<double>(success_count)) : 0) << "\n";
+       << "Average reads per region: " << (success_count > 0 ? (total_reads / static_cast<double>(success_count)) : 0)
+       << "\n"
+       << "Average CpGs per region: " << (success_count > 0 ? (total_cpgs / static_cast<double>(success_count)) : 0)
+       << "\n";
 
     // Distance matrix summary
     if (compute_distance_matrix_ && regions_with_distance > 0) {
@@ -667,7 +976,7 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
         ss << "Average common CpG coverage: " << std::fixed << std::setprecision(2)
            << (total_avg_coverage / regions_with_distance) << "\n";
     }
-    
+
     LOG_INFO(ss.str());
 }
 

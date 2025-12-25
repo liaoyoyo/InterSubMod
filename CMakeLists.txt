@@ -88,6 +88,13 @@ add_library(inter_sub_mod_core
     src/core/DistanceMatrix.cpp
     src/core/TreeStructure.cpp
     src/core/HierarchicalClustering.cpp
+    src/core/MathUtils.cpp
+    src/core/FisherExact.cpp
+    src/core/GlobalTest.cpp
+    src/core/LocalTest.cpp
+    src/core/StructureTest.cpp
+    src/core/Bootstrap.cpp
+    src/core/SignificanceAnalyzer.cpp
     src/utils/Logger.cpp
     src/utils/FastaReader.cpp
     src/io/RegionWriter.cpp
@@ -139,6 +146,10 @@ add_executable(run_tests
     tests/test_bam_reader.cpp
     tests/test_distance_matrix.cpp
     tests/test_hierarchical_clustering.cpp
+    tests/test_significance_stats.cpp
+    tests/test_global_local.cpp
+    tests/test_structure_bootstrap.cpp
+    tests/test_significance_analyzer.cpp
 )
 target_link_libraries(run_tests PRIVATE inter_sub_mod_core GTest::gtest)
 
