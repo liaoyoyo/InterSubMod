@@ -42,7 +42,7 @@ RegionProcessor::RegionProcessor(const std::string& tumor_bam_path, const std::s
     // Set OpenMP threads
     omp_set_num_threads(num_threads_);
 
-    omp_set_num_threads(num_threads_);
+    use_full_read_span_ = false;
 
     LOG_INFO("RegionProcessor initialized with " + std::to_string(num_threads_) + " threads, window_size=±" +
              std::to_string(window_size_) + "bp");
@@ -78,6 +78,9 @@ RegionProcessor::RegionProcessor(const Config& config)
 
     // Parse linkage method from string
     linkage_method_ = HierarchicalClustering::string_to_method(config.linkage_method);
+
+    // Set full read span mode
+    use_full_read_span_ = config.use_full_read_span;
 
     // Set filter configuration
     filter_config_.min_mapq = config.min_mapq;
@@ -309,8 +312,7 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
         MethylationParser methyl_parser;
         MatrixBuilder matrix_builder;
 
-        // Define region window
-        // Ensure we don't go below 1 or beyond chromosome end (checked later)
+        // Define initial region window (centered on SNV)
         int32_t region_start = static_cast<int32_t>(snv.pos) - static_cast<int32_t>(window_size_);
         int32_t region_end = static_cast<int32_t>(snv.pos) + static_cast<int32_t>(window_size_);
 
@@ -324,7 +326,30 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
 
         // Fetch reads from BAM
         // This uses the thread-local reader, which is much faster than re-opening
+        // Initial fetch uses the defined window
         auto reads = bam_reader.fetch_reads(chr_name, region_start, region_end);
+
+        // If using full read span, we need to expand the reference window to cover all reads
+        if (use_full_read_span_ && !reads.empty()) {
+            int32_t min_start = region_start;
+            int32_t max_end = region_end;
+
+            for (auto* b : reads) {
+                int32_t r_start = b->core.pos;
+                int32_t r_end = bam_endpos(b);
+                if (r_start < min_start) min_start = r_start;
+                if (r_end > max_end) max_end = r_end;
+            }
+
+            // Update region to cover full span of all reads
+            // Add a small buffer to be safe (e.g. 10bp)
+            region_start = std::max(1, min_start - 10);
+            if (chr_length > 0) {
+                region_end = std::min(chr_length, max_end + 10);
+            } else {
+                region_end = max_end + 10;
+            }
+        }
 
         // Fetch reference sequence for this window
         // Needed for CIGAR parsing and CpG verification

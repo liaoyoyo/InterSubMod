@@ -17,11 +17,11 @@ InterSubMod 是一個專為長讀取 (Long-read) 測序設計的表觀遺傳變�
 
 ## ✨ 核心功能 (Key Features)
 
-*   **亞克隆解析 (Subclonal Resolution)**: 利用 Read-level 甲基化模式，區分不同的細胞群體。
-*   **多樣化距離度量**: 支援 L1、NHD 等多種距離算法，精確量化表觀遺傳異質性。
-*   **視覺化整合**: 自動生成距離熱圖 (Distance Heatmap) 與分群熱圖 (Cluster Heatmap)。
-*   **高效能運算**: 基於 C++17 與 OpenMP 平行化架構，快速處理大規模測序數據。
-*   **精準位點映射**: 修正了 Indel 對甲基化座標的影響，確保每個 CpG 位點的精確對齊。
+* **亞克隆解析 (Subclonal Resolution)**: 利用 Read-level 甲基化模式，區分不同的細胞群體。
+* **多樣化距離度量**: 支援 L1、NHD 等多種距離算法，精確量化表觀遺傳異質性。
+* **視覺化整合**: 自動生成距離熱圖 (Distance Heatmap) 與分群熱圖 (Cluster Heatmap)。
+* **高效能運算**: 基於 C++17 與 OpenMP 平行化架構，快速處理大規模測序數據。
+* **精準位點映射**: 修正了 Indel 對甲基化座標的影響，確保每個 CpG 位點的精確對齊。
 
 ---
 

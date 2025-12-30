@@ -27,8 +27,8 @@ set -e
 # ============================================================================
 
 # 預設值
-VCF_PATH="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
-# VCF_PATH="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_fp.vcf.gz"
+# VCF_PATH="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
+VCF_PATH="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_fp.vcf.gz"
 THREADS=120
 TUMOR_BAM="/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam"
 NORMAL_BAM="/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam"
@@ -36,8 +36,8 @@ REF_FASTA="/big8_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa"
 MODE="all-with-w1000"
 OUTPUT_DIR=""
 # METRICS="NHD"
-# METRICS="BERNOULLI"
-METRICS="L1"
+METRICS="BERNOULLI"
+# METRICS="L1"
 GENERATE_PLOTS=true
 PLOT_TYPE="all"
 PLOT_THREADS=120
@@ -117,6 +117,9 @@ while [[ $# -gt 0 ]]; do
             echo "  chr19-verification: Only runs on chr19:29283968 for rapid verification"
             echo "                      Outputs to: output/\${date}_vcf_chr19_verif"
             echo ""
+            echo "  full-read-mode:  Full read methylation spans, standard filtering"
+            echo "                   Outputs to: output/\${date}_vcf_full_read"
+            echo ""
             echo "Heatmap Types:"
             echo "  distance_heatmap: Read×Read distance matrix with dendrograms on both axes"
             echo "  cluster_heatmap:  Read×CpG methylation matrix with Y-axis dendrogram"
@@ -156,9 +159,12 @@ generate_output_dir_name() {
         chr19-verification)
             base_name="${date_str}_vcf_chr19_verif_t${threads}"
             ;;
+        full-read-mode)
+            base_name="${date_str}_vcf_full_read_t${threads}"
+            ;;
         *)
             echo "Unknown mode: $mode" >&2
-            echo "Valid modes: baseline, all-with-w1000, all-with-w5000, chr19-verification" >&2
+            echo "Valid modes: baseline, all-with-w1000, all-with-w5000, chr19-verification, full-read-mode" >&2
             exit 1
             ;;
     esac
@@ -347,6 +353,23 @@ build_command() {
                 --window-size 1000 \
                 --log-level debug \
                 --output-filtered-reads \
+                ${metric_flags}"
+            ;;
+
+        full-read-mode)
+            # Full read methylation mode
+            # - Window size: Ignored/Dynamic
+            # - Full read span enabled
+            echo "${executable} \
+                --tumor-bam ${TUMOR_BAM} \
+                --normal-bam ${NORMAL_BAM} \
+                --reference ${REF_FASTA} \
+                --vcf ${VCF_PATH} \
+                --output-dir ${output_dir} \
+                --threads ${threads} \
+                --log-level debug \
+                --output-filtered-reads \
+                --full-read \
                 ${metric_flags}"
             ;;
         *)

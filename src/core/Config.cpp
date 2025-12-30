@@ -131,6 +131,7 @@ void Config::print() const {
         std::cout << (i > 0 ? ", " : "") << DistanceCalculator::metric_to_string(distance_metrics[i]);
     }
     std::cout << std::endl;
+    std::cout << "Full Read Span: " << (use_full_read_span ? "Enabled" : "Disabled") << std::endl;
     std::cout << "---------------------" << std::endl;
 }
 

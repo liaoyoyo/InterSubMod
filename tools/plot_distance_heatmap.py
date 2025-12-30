@@ -96,27 +96,25 @@ def setup_logging(log_file: Optional[str] = None, verbose: bool = False):
 
 HP_COLORS = {
     "0": "#CCCCCC",  # Unphased - gray
-    "1": "#E74C3C",  # HP1 - red
-    "2": "#3498DB",  # HP2 - blue
-    "1-1": "#E74C3C",  # HP1-1 - red
-    "1-2": "#9B59B6",  # HP1-2 - purple
-    "2-1": "#2ECC71",  # HP2-1 - green
-    "2-2": "#3498DB",  # HP2-2 - blue
-    "unphased": "#CCCCCC",
+    "1": "#5773CC",  # HP1 - blue
+    "2": "#F0E685",  # HP2 - yellow
+    "1-1": "#0A47FF",  # HP1-1 - light blue
+    "2-1": "#FFB900",  # HP2-1 - orange
+    "unphased": "#A9A9A9",  # Unphased - gray
 }
 
 STRAND_COLORS = {
-    "+": "#FF6B6B",  # Forward - coral red
-    "-": "#4ECDC4",  # Reverse - teal
-    "?": "#95A5A6",  # Unknown - gray
+    "+": "#D1D1D1",  # Forward - light green
+    "-": "#D1DCD1",  # Reverse - light blue
+    "?": "#A9A9A9",  # Unknown - light gray
 }
 
-SOURCE_COLORS = {"Tumor": "#E74C3C", "Normal": "#27AE60"}  # Red  # Green
+SOURCE_COLORS = {"Tumor": "#FF6B6B", "Normal": "#27AE60"}  # Red  # Green
 
 ALLELE_COLORS = {
-    "ALT": "#F39C12",  # Orange
-    "REF": "#8E44AD",  # Purple
-    "UNKNOWN": "#BDC3C7",  # Light gray
+    "ALT": "#949494",  # dark gray
+    "REF": "#CCCCCC",  # light gray
+    "UNKNOWN": "#A9A9A9",  # Light gray
 }
 
 

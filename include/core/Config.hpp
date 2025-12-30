@@ -36,7 +36,7 @@ struct Config {
     int min_common_coverage = 3;  ///< Minimum common CpG sites to calculate distance (C_min)
 
     NanDistanceStrategy nan_distance_strategy = NanDistanceStrategy::MAX_DIST;     ///< Strategy for missing distances
-    std::vector<DistanceMetricType> distance_metrics = {DistanceMetricType::NHD};  ///< Distance metrics to use
+    std::vector<DistanceMetricType> distance_metrics = {DistanceMetricType::BERNOULLI};  ///< Distance metrics to use
 
     bool pmd_gating = true;  ///< Whether to exclude CpG sites in PMDs
     int threads = 16;        ///< Number of threads for parallel processing
@@ -49,6 +49,8 @@ struct Config {
     bool distance_use_binary = true;               ///< Use binary matrix (true) or raw matrix (false)
     bool distance_pearson_center = true;           ///< Use mean-centered Pearson for CORR metric
     bool distance_jaccard_include_unmeth = false;  ///< Include unmethylated sites in Jaccard
+
+    bool use_full_read_span = false;               ///< If true, dynamically expand window to cover full span of reads
 
     // Hierarchical Clustering Configuration
     bool compute_clustering = true;        ///< Whether to perform hierarchical clustering

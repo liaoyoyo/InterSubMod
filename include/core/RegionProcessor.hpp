@@ -177,6 +177,7 @@ private:
     bool output_filtered_reads_;
     bool no_filter_output_;
     ReadFilterConfig filter_config_;
+    bool use_full_read_span_;  ///< If true, dynamically expand window to cover full span of reads
 
     // Distance matrix configuration
     bool compute_distance_matrix_;

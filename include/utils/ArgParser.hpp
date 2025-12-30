@@ -111,6 +111,9 @@ public:
 
         app.add_flag("--no-filter", config.no_filter_output,
                      "Output all reads without filtering (for verification purposes)");
+        
+        // Full Read Span
+        app.add_flag("--full-read", config.use_full_read_span, "Enable full read span processing (dynamic window)");
 
         try {
             app.parse(argc, argv);
