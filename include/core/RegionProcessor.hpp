@@ -41,7 +41,7 @@ struct RegionResult {
     int num_invalid_pairs;       ///< Number of invalid pairs (insufficient overlap)
     double avg_common_coverage;  ///< Average common CpG coverage per pair
 
-    // Significance analysis results
+    // Significance analysis results (Cluster-First)
     bool significance_computed;  ///< Whether significance analysis was run
     double global_p_value;       ///< Global association p-value (FFH)
     double cramers_v;            ///< Effect size (Cramér's V)
@@ -49,6 +49,21 @@ struct RegionResult {
     int local_best_cluster;      ///< Best cluster ID
     double heuristic_score;      ///< Combined heuristic score [0-1]
     bool passed_gating;          ///< Whether passed gating (global_p <= 0.1)
+
+    // Label-First verification results (NEW)
+    bool label_test_computed;    ///< Whether label-first test was run
+    double label_delta;          ///< Delta = d_between - d_within
+    double label_p_value;        ///< Label permutation test p-value
+    bool label_significant;      ///< Whether label test is significant (p <= 0.05)
+    std::string dominant_label;  ///< Which label dimension is most significant ("hp", "allele", "none")
+
+    // Cluster stability results (NEW)
+    double cluster_stability;    ///< Stability score from subsampling [0-1]
+    bool has_outlier_cluster;    ///< True if any cluster has < 3 reads after retry
+    int n_clusters;              ///< Number of clusters found
+
+    // Bidirectional verification classification (NEW)
+    std::string verification_class;  ///< "Strong", "Subclone", "Weak", or "Noise"
 
     RegionResult()
         : region_id(-1),
@@ -70,7 +85,16 @@ struct RegionResult {
           local_best_p_value(1.0),
           local_best_cluster(-1),
           heuristic_score(0.0),
-          passed_gating(false) {
+          passed_gating(false),
+          label_test_computed(false),
+          label_delta(0.0),
+          label_p_value(1.0),
+          label_significant(false),
+          dominant_label("none"),
+          cluster_stability(0.0),
+          has_outlier_cluster(false),
+          n_clusters(0),
+          verification_class("Noise") {
     }
 };
 

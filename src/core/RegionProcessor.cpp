@@ -705,8 +705,11 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
 
                                 // Create metadata
                                 std::string anchor_key = chr_name + "_" + std::to_string(snv.pos);
+                                
+                                // Use full analyze() method which includes Label-First tests (Phase 4)
                                 SignificanceResult sig_result =
-                                    analyzer.analyze_simple(cluster_labels, full_labels, region_id, anchor_key);
+                                    analyzer.analyze(cluster_labels, full_labels, all_dist.dist_matrix, 
+                                                    meth_mat.raw_matrix, region_id, anchor_key);
 
                                 // Store results in RegionResult
                                 result.significance_computed = true;
@@ -731,6 +734,24 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                                 result.local_best_cluster = sig_result.local_result.best_cluster_id;
                                 result.heuristic_score = sig_result.heuristic_score;
                                 result.passed_gating = sig_result.passed_gate;
+
+                                // NEW: Store Label-First verification results
+                                result.label_test_computed = true;
+                                if (sig_result.label_hp.valid) {
+                                    result.label_delta = (sig_result.dominant_label_dimension == "hp")
+                                                           ? sig_result.label_hp.delta
+                                                           : sig_result.label_allele.delta;
+                                    result.label_p_value = (sig_result.dominant_label_dimension == "hp")
+                                                             ? sig_result.label_hp.p_value
+                                                             : sig_result.label_allele.p_value;
+                                } else if (sig_result.label_allele.valid) {
+                                    result.label_delta = sig_result.label_allele.delta;
+                                    result.label_p_value = sig_result.label_allele.p_value;
+                                }
+                                result.label_significant = sig_result.label_significant;
+                                result.dominant_label = sig_result.dominant_label_dimension;
+                                result.verification_class = sig_result.verification_class;
+                                result.n_clusters = best_k;
 
                                 // Write significance results to JSON
                                 std::string sig_path = clustering_dir + "/significance.json";
@@ -859,9 +880,10 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
         return;
     }
 
-    // Header
-    csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,HeuristicScore,PassedGating,Significant,"
-                "LocalBestCluster,LocalBestP,LocalBestDim\n";
+    // Header (updated with Label-First and bidirectional verification columns)
+    csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,HeuristicScore,PassedGating,"
+                "LabelDelta,LabelP,LabelSig,DominantLabel,Stability,VerificationClass,"
+                "LocalBestCluster,LocalBestP,Significant\n";
 
     // Statistics conatiners
     struct ChrStats {
@@ -894,9 +916,17 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << "," << r.num_reads << "," << r.num_cpgs << "," << std::scientific << std::setprecision(6)
                  << r.global_p_value << "," << std::fixed << std::setprecision(4) << r.cramers_v << "," << std::fixed
                  << std::setprecision(4) << r.heuristic_score << "," << (r.passed_gating ? "true" : "false") << ","
-                 << (is_significant ? "true" : "false") << "," << r.local_best_cluster << "," << std::scientific
+                 // Label-First columns (NEW)
+                 << std::fixed << std::setprecision(4) << r.label_delta << ","
+                 << std::scientific << std::setprecision(6) << r.label_p_value << ","
+                 << (r.label_significant ? "true" : "false") << ","
+                 << r.dominant_label << ","
+                 << std::fixed << std::setprecision(4) << r.cluster_stability << ","
+                 << r.verification_class << ","
+                 // Original local test columns
+                 << r.local_best_cluster << "," << std::scientific
                  << std::setprecision(6) << r.local_best_p_value << ","
-                 << "N/A"  // Dimension not currently stored in RegionResult struct easily
+                 << (is_significant ? "true" : "false")
                  << "\n";
     }
     csv_file.close();

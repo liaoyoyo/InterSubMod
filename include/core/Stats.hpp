@@ -259,6 +259,34 @@ struct BootstrapResult {
 };
 
 /**
+ * @brief Result of Label-First Delta test for one label dimension
+ *
+ * Measures the difference between between-group and within-group distances
+ * to assess if a label (HP/Allele) explains the distance structure.
+ */
+struct LabelDeltaResult {
+    // Distance statistics
+    double within_mean = 0.0;   // Mean pairwise distance within same label
+    double between_mean = 0.0;  // Mean pairwise distance between different labels
+    double delta = 0.0;         // between_mean - within_mean
+
+    // Permutation test results
+    double p_value = 1.0;       // Permutation p-value
+    int n_permutations = 0;     // Actual number of permutations completed
+    bool significant = false;   // delta > 0 and p_value <= alpha
+
+    // Group statistics
+    int n_group_a = 0;          // Size of group A (e.g., HP1 or ALT)
+    int n_group_b = 0;          // Size of group B (e.g., HP2 or REF)
+    int n_pairs_within = 0;     // Number of within-group pairs used
+    int n_pairs_between = 0;    // Number of between-group pairs used
+
+    // Validity
+    bool valid = true;
+    std::string invalid_reason;
+};
+
+/**
  * @brief Aggregated significance result for a region
  */
 struct SignificanceResult {
@@ -280,7 +308,7 @@ struct SignificanceResult {
     double effective_overlap_median = 0.0;
     double mapq_mean = 0.0;
 
-    // Global test results
+    // Global test results (Cluster-First)
     GlobalTestResult global_alt;
     GlobalTestResult global_hp;
     GlobalTestResult global_sample;
@@ -292,6 +320,15 @@ struct SignificanceResult {
     PermanovaResult permanova;
     DispersionResult dispersion;
     BootstrapResult bootstrap;
+
+    // Label-First verification results (NEW)
+    LabelDeltaResult label_hp;      // HP1 vs HP2 delta test
+    LabelDeltaResult label_allele;  // ALT vs REF delta test
+    std::string dominant_label_dimension;  // "hp", "allele", or "none"
+    bool label_significant = false;
+
+    // Bidirectional verification classification (NEW)
+    std::string verification_class = "Noise";  // "Strong", "Subclone", "Weak", or "Noise"
 
     // Final judgment
     bool passed_gate = true;

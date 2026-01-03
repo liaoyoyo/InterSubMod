@@ -20,12 +20,14 @@ void SignificanceAnalyzer::init_analyzers() {
         config_.local_config.fisher_config.seed = config_.seed + 1;
         config_.structure_config.seed = config_.seed + 2;
         config_.bootstrap_config.seed = config_.seed + 3;
+        config_.label_config.seed = config_.seed + 4;  // NEW: LabelTest seed
     }
 
     global_test_ = std::make_unique<GlobalTest>(config_.global_config);
     local_test_ = std::make_unique<LocalTest>(config_.local_config);
     structure_test_ = std::make_unique<StructureTest>(config_.structure_config);
     bootstrap_ = std::make_unique<Bootstrap>(config_.bootstrap_config);
+    label_test_ = std::make_unique<LabelTest>(config_.label_config);  // NEW: Initialize LabelTest
 }
 
 void SignificanceAnalyzer::set_seed(uint64_t seed) {
@@ -156,6 +158,34 @@ SignificanceResult SignificanceAnalyzer::analyze(const std::vector<int>& cluster
 
             result.bootstrap = bootstrap_->run(methylation_matrix, cluster_labels, cluster_func);
         }
+    }
+
+    // Phase 4: Label-First Verification (NEW)
+    // Run label-based delta tests to verify if HP/Allele labels explain distance structure
+    if (dist_matrix.rows() >= config_.label_config.min_total_reads) {
+        LabelTestResult label_result = label_test_->test_all(dist_matrix, full_labels);
+
+        result.label_hp = label_result.hp_result;
+        result.label_allele = label_result.allele_result;
+        result.dominant_label_dimension = label_result.dominant_dimension;
+        result.label_significant = label_result.any_significant;
+    }
+
+    // Phase 5: Classification (Bidirectional Verification)
+    // Determine verification_class based on Label-First and Cluster-First results
+    bool cluster_significant = result.passed_gate && 
+                               (result.global_alt.fisher_ffh.p_value <= 0.05 || 
+                                result.global_hp.fisher_ffh.p_value <= 0.05);
+    bool label_sig = result.label_significant;
+
+    if (label_sig && cluster_significant) {
+        result.verification_class = "Strong";  // 強關聯: Both paths agree
+    } else if (!label_sig && cluster_significant) {
+        result.verification_class = "Subclone";  // 存在亞群: Cluster structure without label correlation
+    } else if (label_sig && !cluster_significant) {
+        result.verification_class = "Weak";  // 弱關聯: Label signal but weak clustering
+    } else {
+        result.verification_class = "Noise";  // 無關聯/雜訊: No significant signal
     }
 
     // Compute heuristic score

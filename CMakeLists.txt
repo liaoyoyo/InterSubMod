@@ -95,6 +95,7 @@ add_library(inter_sub_mod_core
     src/core/StructureTest.cpp
     src/core/Bootstrap.cpp
     src/core/SignificanceAnalyzer.cpp
+    src/core/LabelTest.cpp
     src/utils/Logger.cpp
     src/utils/FastaReader.cpp
     src/io/RegionWriter.cpp

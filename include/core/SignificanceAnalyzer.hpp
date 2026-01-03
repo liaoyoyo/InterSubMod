@@ -18,6 +18,7 @@
 
 #include "Bootstrap.hpp"
 #include "GlobalTest.hpp"
+#include "LabelTest.hpp"
 #include "LocalTest.hpp"
 #include "Stats.hpp"
 #include "StructureTest.hpp"
@@ -40,6 +41,7 @@ struct SignificanceConfig {
     LocalTestConfig local_config;
     StructureTestConfig structure_config;
     BootstrapConfig bootstrap_config;
+    LabelTestConfig label_config;  // NEW: Label-First test config
 
     // Output options
     std::string run_id;
@@ -103,6 +105,7 @@ private:
     std::unique_ptr<LocalTest> local_test_;
     std::unique_ptr<StructureTest> structure_test_;
     std::unique_ptr<Bootstrap> bootstrap_;
+    std::unique_ptr<LabelTest> label_test_;  // NEW: Label-First test
 
     /**
      * @brief Initialize sub-analyzers with current config
