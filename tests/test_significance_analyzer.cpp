@@ -163,15 +163,16 @@ TEST_F(SignificanceAnalyzerTest, EmptyInput) {
 
 TEST_F(SignificanceAnalyzerTest, GatingBehavior) {
     // No association - should fail gate
+    // Both ALT/REF and HP labels are equally distributed across clusters
     std::vector<int> cluster_labels;
     std::vector<FullLabel> full_labels;
 
-    // Equal distribution in both clusters
+    // Equal distribution in both clusters for BOTH ALT/REF AND HP
     for (int i = 0; i < 10; ++i) {
         cluster_labels.push_back(0);
         FullLabel label;
         label.allele = (i % 2 == 0) ? AltSupport::ALT : AltSupport::REF;
-        label.hp_tag = "1";
+        label.hp_tag = (i % 2 == 0) ? "1" : "2";  // Mix HP tags in cluster 0
         label.is_tumor = true;
         full_labels.push_back(label);
     }
@@ -179,7 +180,7 @@ TEST_F(SignificanceAnalyzerTest, GatingBehavior) {
         cluster_labels.push_back(1);
         FullLabel label;
         label.allele = (i % 2 == 0) ? AltSupport::ALT : AltSupport::REF;
-        label.hp_tag = "2";
+        label.hp_tag = (i % 2 == 0) ? "1" : "2";  // Mix HP tags in cluster 1
         label.is_tumor = true;
         full_labels.push_back(label);
     }

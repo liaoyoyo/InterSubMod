@@ -1,0 +1,70 @@
+# =============================================================================
+# InterSubMod Docker Ignore File
+# =============================================================================
+
+# Build directories
+build/
+cmake-build-*/
+out/
+
+# Output data (large files)
+output/
+data/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.cproject
+.settings/
+
+# Git
+.git/
+.gitignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+*.egg
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Documentation build
+docs/_build/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Claude Code cache
+.claude/
+
+# Archive and garbage
+docs/archive/
+docs/garbage/

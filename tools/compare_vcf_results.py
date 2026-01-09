@@ -20,11 +20,22 @@ import sys
 import argparse
 import logging
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 from sklearn import metrics as sk_metrics
 from datetime import datetime
+
+# Add tools directory to path for font_config import
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+# Configure matplotlib with CJK font support (must be before importing pyplot)
+try:
+    from font_config import configure_matplotlib_fonts
+    configure_matplotlib_fonts()
+except ImportError:
+    pass  # Fallback: font_config not available
+
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Configure logging
 logging.basicConfig(

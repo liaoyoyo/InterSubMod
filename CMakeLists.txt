@@ -67,7 +67,13 @@ FetchContent_Declare(
   eigen3
   URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
 )
+# Disable Eigen3 tests and docs to avoid Fortran compiler requirement
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
+set(EIGEN_BUILD_PKGCONFIG OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(eigen3)
+# Re-enable testing for our project
+set(BUILD_TESTING ON CACHE BOOL "" FORCE)
 include_directories(${eigen3_SOURCE_DIR})
 
 # --- Includes ---

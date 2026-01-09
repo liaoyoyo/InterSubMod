@@ -45,11 +45,21 @@ import pandas as pd
 # Suppress warnings for cleaner output
 warnings.filterwarnings("ignore")
 
+# Add tools directory to path for font_config import
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 # Import visualization libraries with fallback
 try:
     import matplotlib
-
     matplotlib.use("Agg")  # Non-interactive backend for server
+
+    # Configure CJK font support (must be before importing pyplot)
+    try:
+        from font_config import configure_matplotlib_fonts
+        configure_matplotlib_fonts()
+    except ImportError:
+        pass  # Fallback: font_config not available
+
     import matplotlib.pyplot as plt
     import seaborn as sns
     from scipy.cluster.hierarchy import linkage, dendrogram, leaves_list

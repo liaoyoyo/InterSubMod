@@ -1,0 +1,54 @@
+# =============================================================================
+# InterSubMod Docker Compose Configuration
+# =============================================================================
+# Usage:
+#   docker-compose up -d          # Start development environment
+#   docker-compose exec dev bash  # Enter container shell
+#   docker-compose down           # Stop and remove container
+# =============================================================================
+
+version: "3.8"
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: intersubmod:dev
+    container_name: intersubmod-dev
+
+    # Keep container running
+    stdin_open: true
+    tty: true
+
+    # Mount volumes
+    volumes:
+      # Source code (read-write)
+      - .:/workspace:rw
+      # Data directory (read-only for safety, can be changed to rw if needed)
+      - ${DATA_PATH:-./data}:/workspace/data:ro
+      # Output directory (read-write)
+      - ${OUTPUT_PATH:-./output}:/workspace/output:rw
+      # Build directory (named volume for persistence)
+      - intersubmod-build:/workspace/build
+
+    # Working directory
+    working_dir: /workspace
+
+    # Environment variables
+    environment:
+      - MPLBACKEND=Agg
+      - PYTHONUNBUFFERED=1
+      - OMP_NUM_THREADS=${OMP_NUM_THREADS:-8}
+
+    # Resource limits (optional, adjust based on your system)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '8'
+    #       memory: 32G
+
+# Named volumes
+volumes:
+  intersubmod-build:
+    name: intersubmod-build

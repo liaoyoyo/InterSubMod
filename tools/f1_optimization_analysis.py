@@ -12,11 +12,23 @@ that maximize TP retention while removing FP to improve F1-score.
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import argparse
 import os
+import sys
 from itertools import product
+
+# Add tools directory to path for font_config import
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+# Configure CJK font support (must be before importing pyplot)
+try:
+    from font_config import configure_matplotlib_fonts
+    configure_matplotlib_fonts()
+except ImportError:
+    pass  # Fallback: font_config not available
+
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Set matplotlib for non-interactive backend
 plt.switch_backend('Agg')

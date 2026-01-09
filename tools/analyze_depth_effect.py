@@ -1,10 +1,27 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Depth Effect Analysis Tool for InterSubMod
+"""
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import argparse
 import os
+import sys
+
+# Add tools directory to path for font_config import
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+# Configure CJK font support (must be before importing pyplot)
+try:
+    from font_config import configure_matplotlib_fonts
+    configure_matplotlib_fonts()
+except ImportError:
+    pass  # Fallback: font_config not available
+
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Analyze relationship between Depth, Cramers V and TP/FP ratio.")
