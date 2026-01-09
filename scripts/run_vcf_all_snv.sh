@@ -7,18 +7,18 @@
 #   3. all-with-w5000: All filters enabled, ±5000bp window
 #
 # Heatmap generation:
-#   By default, both distance_heatmap and cluster_heatmap are generated.
+#   By default, no heatmaps are generated.
 #   Use --plot-type to specify which plot(s) to generate.
 #
 # Usage:
-#   ./run_full_vcf_test.sh                          # Default baseline mode
+#   ./run_full_vcf_test.sh                          # Default baseline mode (no plots)
 #   ./run_full_vcf_test.sh --mode baseline          # Baseline mode explicitly
 #   ./run_full_vcf_test.sh --mode all-with-w1000    # ±1000bp window mode
 #   ./run_full_vcf_test.sh -o /path/to/output       # Custom output directory
-#   ./run_full_vcf_test.sh --no-plots               # Skip all heatmap generation
+#   ./run_full_vcf_test.sh --plot-type all          # Generate both heatmaps
 #   ./run_full_vcf_test.sh --plot-type distance     # Only distance heatmap
 #   ./run_full_vcf_test.sh --plot-type cluster      # Only cluster heatmap
-#   ./run_full_vcf_test.sh --plot-type all          # Both heatmaps (default)
+#   ./run_full_vcf_test.sh --plot-type no           # Skip all heatmap generation (default)
 
 set -e
 
@@ -38,8 +38,7 @@ OUTPUT_DIR=""
 # METRICS="NHD"
 METRICS="BERNOULLI"
 # METRICS="L1"
-GENERATE_PLOTS=true
-PLOT_TYPE="all"
+PLOT_TYPE="no"
 PLOT_THREADS=120
 
 # 日期字串
@@ -76,7 +75,8 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --no-plots)
-            GENERATE_PLOTS=false
+            # Deprecated: use --plot-type no instead
+            PLOT_TYPE="no"
             shift
             ;;
         --plot-type)
@@ -96,9 +96,9 @@ while [[ $# -gt 0 ]]; do
             echo "  -o, --out DIR        Output directory"
             echo "  -m, --mode MODE      Test mode: baseline, all-with-w1000, all-with-w5000, chr19-verification"
             echo "  --metrics LIST       Space-separated list of metrics (e.g. 'NHD L1')"
-            echo "  --no-plots           Skip all heatmap generation"
             echo "  --plot-type TYPE     Type of heatmap to generate:"
-            echo "                         all      - Both distance and cluster heatmaps (default)"
+            echo "                         no       - Skip all heatmap generation (default)"
+            echo "                         all      - Both distance and cluster heatmaps"
             echo "                         distance - Distance-based Read×Read heatmap only"
             echo "                         cluster  - Methylation cluster heatmap only"
             echo "  --plot-threads N     Number of threads for Python plotting (default: 64)"
@@ -124,8 +124,7 @@ while [[ $# -gt 0 ]]; do
             echo "  distance_heatmap: Read×Read distance matrix with dendrograms on both axes"
             echo "  cluster_heatmap:  Read×CpG methylation matrix with Y-axis dendrogram"
             echo ""
-            echo "By default, both heatmaps are generated after C++ processing."
-            echo "Use --no-plots to skip or --plot-type to select specific types."
+            echo "By default, no heatmaps are generated. Use --plot-type all to enable."
             exit 0
             ;;
         *)
@@ -433,12 +432,11 @@ generate_heatmaps() {
     local output_dir=$1
     local metrics=$2
     local plot_threads=$3
-    local generate_plots=$4
-    local plot_type=$5
+    local plot_type=$4
     
-    if [[ "${generate_plots}" != "true" ]]; then
+    if [[ "${plot_type}" == "no" ]]; then
         echo ""
-        echo "[3] Heatmap generation skipped (use without --no-plots to enable)"
+        echo "[3] Heatmap generation skipped (use --plot-type all to enable)"
         return
     fi
     
@@ -511,7 +509,7 @@ generate_heatmaps() {
     echo "    Total plotting time: ${PLOT_ELAPSED} seconds"
 }
 
-generate_heatmaps "${OUTPUT_DIR}" "${METRICS}" "${PLOT_THREADS}" "${GENERATE_PLOTS}" "${PLOT_TYPE}"
+generate_heatmaps "${OUTPUT_DIR}" "${METRICS}" "${PLOT_THREADS}" "${PLOT_TYPE}"
 
 echo ""
 echo "=== Test Complete (Mode: ${MODE}) ==="

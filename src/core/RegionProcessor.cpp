@@ -883,7 +883,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
     // Header (updated with Label-First and bidirectional verification columns)
     csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,HeuristicScore,PassedGating,"
                 "LabelDelta,LabelP,LabelSig,DominantLabel,Stability,VerificationClass,"
-                "LocalBestCluster,LocalBestP,Significant\n";
+                "LocalBestCluster,LocalBestP,Significant,SuggestFilter\n";
 
     // Statistics conatiners
     struct ChrStats {
@@ -902,9 +902,15 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
         std::string chr_name = chrom_index_.get_name(snv.chr_id);
 
         // Determine significance (Binary classification)
-        // Definition: Passed gating AND (p-value <= 0.05 OR Score >= 3.0)
-        // Adjust threshold as needed. Using p<=0.05 as standard.
-        bool is_significant = r.passed_gating && (r.global_p_value <= 0.05);
+        // Definition: Passed gating AND p-value <= 0.05 AND V >= 0.1 AND depth >= 20 (Round 7)
+        // Optimized based on depth analysis: Depth 20-30 has high TP/FP ratio (2.31)
+        bool is_significant = r.passed_gating && 
+                              (r.global_p_value <= 0.05) && 
+                              (r.cramers_v >= 0.1) &&
+                              (r.num_reads >= 20);
+        
+        // Suggest filtering sites with LabelDelta > 0.3 (F1 optimization)
+        bool suggest_filter = (r.label_delta > 0.3);
 
         if (is_significant) {
             total_significant++;
@@ -926,7 +932,9 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  // Original local test columns
                  << r.local_best_cluster << "," << std::scientific
                  << std::setprecision(6) << r.local_best_p_value << ","
-                 << (is_significant ? "true" : "false")
+                 << (is_significant ? "true" : "false") << ","
+                 // NEW: SuggestFilter column for F1 optimization
+                 << (suggest_filter ? "true" : "false")
                  << "\n";
     }
     csv_file.close();

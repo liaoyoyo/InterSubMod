@@ -15,10 +15,11 @@ set -e
 # ============================================================================
 
 # Default settings
-THREADS=120
+THREADS=90
 MODE="all-with-w5000"
 METRICS="BERNOULLI"
-PLOT_TYPE="all"
+PLOT_TYPE="no"
+RUN_COMPARISON=true
 
 # Output Base Directory
 # Note: The script will create a subdirectory {YYYYMMDD}_MODE_{SEQ} inside this base
@@ -37,6 +38,33 @@ VCF_PATHS=(
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SINGLE_RUN_SCRIPT="${SCRIPT_DIR}/run_vcf_all_snv.sh"
 PYTHON_TOOL="${SCRIPT_DIR}/../tools/compare_vcf_results.py"
+PYTHON_EXEC="/usr/bin/python3"
+
+# Argument parsing
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --skip-comparison)
+            RUN_COMPARISON=false
+            shift
+            ;;
+        --plot-type)
+            PLOT_TYPE="$2"
+            shift 2
+            ;;
+        --mode)
+            MODE="$2"
+            shift 2
+            ;;
+        --threads)
+            THREADS="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown argument: $1"
+            shift
+            ;;
+    esac
+done
 
 # Date string
 DATE_STR=$(date +%Y%m%d)
@@ -124,41 +152,46 @@ echo "[Batch] All VCF analysis jobs completed."
 ANALYSIS_DIR="${OUTPUT_DIR}/analysis"
 mkdir -p "${ANALYSIS_DIR}"
 
-echo ""
-echo "[Batch] Running Python Comparison Analysis..."
-echo "        Tool: ${PYTHON_TOOL}"
+if [ "$RUN_COMPARISON" = true ]; then
+    echo ""
+    echo "[Batch] Running Python Comparison Analysis..."
+    echo "        Tool: ${PYTHON_TOOL}"
 
-# Check python dependencies
-if python3 -c "import pandas, seaborn" 2>/dev/null; then
-    # Construct arguments for python script
-    # --labels L1 L2 --paths P1 P2
-    
-    # Need to verify if the output directories were actually created (script might have failed)
-    VALID_LABELS=()
-    VALID_PATHS=()
-    
-    for i in "${!LABELS[@]}"; do
-        LABEL="${LABELS[$i]}"
-        PATH="${SUB_DIRS[$i]}"
+    # Check python dependencies
+    if "${PYTHON_EXEC}" -c "import pandas, seaborn" 2>/dev/null; then
+        # Construct arguments for python script
+        # --labels L1 L2 --paths P1 P2
         
-        if [ -d "${PATH}" ]; then
-            VALID_LABELS+=("${LABEL}")
-            VALID_PATHS+=("${PATH}")
+        # Need to verify if the output directories were actually created (script might have failed)
+        VALID_LABELS=()
+        VALID_PATHS=()
+        
+        for i in "${!LABELS[@]}"; do
+            LABEL="${LABELS[$i]}"
+            PATH="${SUB_DIRS[$i]}"
+            
+            if [ -d "${PATH}" ]; then
+                VALID_LABELS+=("${LABEL}")
+                VALID_PATHS+=("${PATH}")
+            else
+                echo "Warning: Output directory for ${LABEL} missing, skipping analysis for this one."
+            fi
+        done
+        
+        if [ ${#VALID_LABELS[@]} -gt 0 ]; then
+            "${PYTHON_EXEC}" "${PYTHON_TOOL}" \
+                --output-dir "${ANALYSIS_DIR}" \
+                --labels "${VALID_LABELS[@]}" \
+                --paths "${VALID_PATHS[@]}"
         else
-            echo "Warning: Output directory for ${LABEL} missing, skipping analysis for this one."
+            echo "Error: No valid output directories to analyze."
         fi
-    done
-    
-    if [ ${#VALID_LABELS[@]} -gt 0 ]; then
-        python3 "${PYTHON_TOOL}" \
-            --output-dir "${ANALYSIS_DIR}" \
-            --labels "${VALID_LABELS[@]}" \
-            --paths "${VALID_PATHS[@]}"
     else
-        echo "Error: No valid output directories to analyze."
+        echo "Warning: Python dependencies (pandas, seaborn) missing. Skipping comparison plotting."
     fi
 else
-    echo "Warning: Python dependencies (pandas, seaborn) missing. Skipping comparison plotting."
+    echo ""
+    echo "[Batch] Skipping Comparison Analysis (--skip-comparison used)."
 fi
 
 echo ""

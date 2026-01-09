@@ -28,6 +28,9 @@ struct GlobalTestConfig {
     // Gating: skip local/structure tests if global p > this threshold
     double gating_p_threshold = 0.1;
 
+    // Minimum Cramér's V effect size for gating (NEW)
+    double min_cramers_v = 0.1;
+
     // Chi-square validity: require this fraction of cells with expected >= 5
     double chi_square_min_valid_ratio = 0.8;
 };

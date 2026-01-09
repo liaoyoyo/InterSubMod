@@ -135,8 +135,10 @@ GlobalTestResult GlobalTest::compute_from_table(const ContingencyTableRxC& table
 // ============================================================================
 
 void GlobalTest::apply_gating(GlobalTestResult& result) {
-    // If p-value > threshold, mark as not passing gate
-    result.passed_gate = (result.fisher_ffh.p_value <= config_.gating_p_threshold);
+    // Dual gating: require BOTH p-value AND effect size (Cramér's V)
+    bool p_pass = (result.fisher_ffh.p_value <= config_.gating_p_threshold);
+    bool v_pass = (result.cramers_v >= config_.min_cramers_v);
+    result.passed_gate = p_pass && v_pass;
 }
 
 // ============================================================================
