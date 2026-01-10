@@ -41,10 +41,12 @@ void Logger::set_log_file(const std::string& filename) {
 
 std::string Logger::level_to_string(LogLevel level) {
     switch (level) {
+        case LogLevel::LOG_TRACE: return "TRACE";
         case LogLevel::LOG_DEBUG: return "DEBUG";
         case LogLevel::LOG_INFO:  return "INFO ";
         case LogLevel::LOG_WARN:  return "WARN ";
         case LogLevel::LOG_ERROR: return "ERROR";
+        case LogLevel::LOG_FATAL: return "FATAL";
         default: return "UNK  ";
     }
 }
@@ -52,10 +54,12 @@ std::string Logger::level_to_string(LogLevel level) {
 std::string Logger::get_color_code(LogLevel level) {
     // ANSI color codes
     switch (level) {
+        case LogLevel::LOG_TRACE: return "\033[90m"; // Gray
         case LogLevel::LOG_DEBUG: return "\033[36m"; // Cyan
         case LogLevel::LOG_INFO:  return "\033[32m"; // Green
         case LogLevel::LOG_WARN:  return "\033[33m"; // Yellow
         case LogLevel::LOG_ERROR: return "\033[31m"; // Red
+        case LogLevel::LOG_FATAL: return "\033[41;97m"; // White text on Red background
         default: return "";
     }
 }
@@ -95,7 +99,9 @@ void Logger::log(LogLevel level, const std::string& message, const char* file, i
 
     ss << "[" << level_to_string(level) << "] " << message;
 
-    if (file && (level == LogLevel::LOG_DEBUG || level == LogLevel::LOG_ERROR)) {
+    // Show file:line for TRACE, DEBUG, ERROR, and FATAL levels
+    if (file && (level == LogLevel::LOG_TRACE || level == LogLevel::LOG_DEBUG || 
+                 level == LogLevel::LOG_ERROR || level == LogLevel::LOG_FATAL)) {
         std::filesystem::path p(file);
         ss << " (" << p.filename().string() << ":" << line << ")";
     }
@@ -109,6 +115,10 @@ void Logger::log(LogLevel level, const std::string& message, const char* file, i
     if (log_file_.is_open()) {
         log_file_ << ss.str() << std::flush;
     }
+}
+
+void Logger::trace(const std::string& msg, const char* file, int line) {
+    instance().log(LogLevel::LOG_TRACE, msg, file, line);
 }
 
 void Logger::debug(const std::string& msg, const char* file, int line) {
@@ -125,6 +135,10 @@ void Logger::warning(const std::string& msg, const char* file, int line) {
 
 void Logger::error(const std::string& msg, const char* file, int line) {
     instance().log(LogLevel::LOG_ERROR, msg, file, line);
+}
+
+void Logger::fatal(const std::string& msg, const char* file, int line) {
+    instance().log(LogLevel::LOG_FATAL, msg, file, line);
 }
 
 // ScopedLogger Implementation

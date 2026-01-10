@@ -32,10 +32,12 @@ public:
     void log(LogLevel level, const std::string& message, const char* file = nullptr, int line = -1);
 
     // Static helpers for cleaner syntax
+    static void trace(const std::string& msg, const char* file = nullptr, int line = -1);
     static void debug(const std::string& msg, const char* file = nullptr, int line = -1);
     static void info(const std::string& msg, const char* file = nullptr, int line = -1);
     static void warning(const std::string& msg, const char* file = nullptr, int line = -1);
     static void error(const std::string& msg, const char* file = nullptr, int line = -1);
+    static void fatal(const std::string& msg, const char* file = nullptr, int line = -1);
 
 private:
     Logger() = default;
@@ -71,7 +73,10 @@ private:
 }  // namespace InterSubMod
 
 // Macros to automatically capture file and line number
+#define LOG_TRACE(msg) InterSubMod::Utils::Logger::trace(msg, __FILE__, __LINE__)
 #define LOG_DEBUG(msg) InterSubMod::Utils::Logger::debug(msg, __FILE__, __LINE__)
 #define LOG_INFO(msg) InterSubMod::Utils::Logger::info(msg, __FILE__, __LINE__)
 #define LOG_WARNING(msg) InterSubMod::Utils::Logger::warning(msg, __FILE__, __LINE__)
+#define LOG_WARN(msg) InterSubMod::Utils::Logger::warning(msg, __FILE__, __LINE__)
 #define LOG_ERROR(msg) InterSubMod::Utils::Logger::error(msg, __FILE__, __LINE__)
+#define LOG_FATAL(msg) InterSubMod::Utils::Logger::fatal(msg, __FILE__, __LINE__)

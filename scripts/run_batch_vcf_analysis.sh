@@ -20,6 +20,7 @@ MODE="all-with-w5000"
 METRICS="BERNOULLI"
 PLOT_TYPE="no"
 RUN_COMPARISON=true
+LOG_LEVEL="info"
 
 # Output Base Directory
 # Note: The script will create a subdirectory {YYYYMMDD}_MODE_{SEQ} inside this base
@@ -59,6 +60,10 @@ while [[ $# -gt 0 ]]; do
             THREADS="$2"
             shift 2
             ;;
+        --log-level)
+            LOG_LEVEL="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown argument: $1"
             shift
@@ -93,6 +98,7 @@ echo "Output Directory: ${OUTPUT_DIR}"
 echo "Mode: ${MODE}"
 echo "Threads: ${THREADS}"
 echo "Metrics: ${METRICS}"
+echo "Log Level: ${LOG_LEVEL}"
 echo "--------------------------"
 
 # ============================================================================
@@ -128,6 +134,7 @@ for i in "${!LABELS[@]}"; do
         --threads "${THREADS}" \
         --mode "${MODE}" \
         --metrics "${METRICS}" \
+        --log-level "${LOG_LEVEL}" \
         --plot-type "${PLOT_TYPE}" \
         > "${OUTPUT_DIR}/${LABEL}.log" 2>&1 &
         

@@ -4,12 +4,14 @@
 #include <sys/stat.h>
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <mutex>
 #include <sstream>
 #include <unordered_set>
 
@@ -238,7 +240,14 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
 
     auto t_start = std::chrono::high_resolution_clock::now();
 
-    LOG_INFO("Starting processing of " + std::to_string(num_to_process) + " regions...");
+    LOG_INFO("Processing " + std::to_string(num_to_process) + " regions with " + 
+             std::to_string(num_threads_) + " threads...");
+
+    // Progress tracking variables (atomic for thread safety)
+    std::atomic<int> processed_count{0};
+    std::string current_chr = "";
+    std::mutex chr_mutex;
+    int last_progress_pct = -1;
 
 // OpenMP parallel loop
 // OpenMP parallel region to manage thread-local resources
@@ -260,23 +269,63 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
             const auto& snv = snvs_[i];
             std::string chr_name = chrom_index_.get_name(snv.chr_id);
 
-            // Using ScopedLogger within process_single_region, but we can also log high level start here
-            // Note: Excessive locking might preserve order but slow down things.
-            // The Logger handles locking.
-
             // Process the region using the thread-local readers
             results[i] = process_single_region(snv, i, tumor_reader, ref_reader);
 
-            // Log completion status
+            // Update progress counter
+            int count = ++processed_count;
+
+            // Calculate progress percentage
+            int progress_pct = (count * 100) / num_to_process;
+
+            // Log per-region completion at DEBUG level
             if (results[i].success) {
                 std::stringstream ss;
                 ss << "Region " << i << " (" << chr_name << ":" << snv.pos << ") completed: " << results[i].num_reads
-                   << " reads, " << results[i].elapsed_ms << " ms";
-                LOG_INFO(ss.str());
+                   << " reads, " << std::fixed << std::setprecision(1) << results[i].elapsed_ms << " ms";
+                LOG_DEBUG(ss.str());
             } else {
                 std::stringstream ss;
                 ss << "Region " << i << " (" << chr_name << ":" << snv.pos << ") failed: " << results[i].error_message;
                 LOG_ERROR(ss.str());
+            }
+
+            // Progress reporting at INFO level (every 5% or chromosome change)
+            bool chr_changed = false;
+            {
+                std::lock_guard<std::mutex> lock(chr_mutex);
+                if (current_chr != chr_name) {
+                    current_chr = chr_name;
+                    chr_changed = true;
+                }
+            }
+
+            // Report progress at 5% intervals or when chromosome changes
+            if (chr_changed || (progress_pct >= last_progress_pct + 5 && progress_pct != last_progress_pct)) {
+                last_progress_pct = progress_pct;
+
+                // Calculate ETA
+                auto now = std::chrono::high_resolution_clock::now();
+                double wall_elapsed_ms = std::chrono::duration<double, std::milli>(now - t_start).count();
+                double avg_ms_per_region = wall_elapsed_ms / count;
+                int remaining = num_to_process - count;
+                double eta_seconds = (avg_ms_per_region * remaining) / 1000.0;
+
+                std::stringstream ss;
+                ss << "Progress: " << count << "/" << num_to_process 
+                   << " (" << progress_pct << "%) | " << chr_name
+                   << " | Avg: " << std::fixed << std::setprecision(0) << avg_ms_per_region << " ms/region"
+                   << " | ETA: ";
+                
+                if (eta_seconds < 60) {
+                    ss << std::fixed << std::setprecision(0) << eta_seconds << "s";
+                } else if (eta_seconds < 3600) {
+                    ss << std::fixed << std::setprecision(1) << (eta_seconds / 60.0) << " min";
+                } else {
+                    ss << std::fixed << std::setprecision(1) << (eta_seconds / 3600.0) << " hr";
+                }
+                
+                LOG_INFO(ss.str());
             }
         }
     }
@@ -284,8 +333,12 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
     auto t_end = std::chrono::high_resolution_clock::now();
     double total_elapsed = std::chrono::duration<double, std::milli>(t_end - t_start).count();
 
-    LOG_INFO("All regions processed in " + std::to_string(total_elapsed) + " ms (" +
-             std::to_string(total_elapsed / num_to_process) + " ms/region)");
+    // Final summary
+    std::stringstream final_ss;
+    final_ss << "Completed " << num_to_process << " regions in " 
+             << std::fixed << std::setprecision(1) << (total_elapsed / 1000.0) << "s"
+             << " (avg: " << std::setprecision(1) << (total_elapsed / num_to_process) << " ms/region)";
+    LOG_INFO(final_ss.str());
 
     // Write significance summary and print stats
     write_significance_summary(results);
@@ -516,13 +569,13 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                                                    output_strand_distance_matrices_);
                 }
 
-                if (log_level_ >= LogLevel::LOG_DEBUG) {
+                if (log_level_ >= LogLevel::LOG_TRACE) {
                     std::stringstream ss;
                     ss << "  Distance matrix (" << DistanceCalculator::metric_to_string(metric)
                        << "): " << all_dist.size() << "x" << all_dist.size()
                        << ", valid pairs: " << all_dist.num_valid_pairs << ", avg coverage: " << std::fixed
                        << std::setprecision(1) << all_dist.avg_common_coverage;
-                    LOG_DEBUG(ss.str());
+                    LOG_TRACE(ss.str());
                 }
 
                 // === Hierarchical Clustering and Tree Output ===
@@ -567,8 +620,8 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                             order_file.close();
                         }
 
-                        if (log_level_ >= LogLevel::LOG_DEBUG) {
-                            LOG_DEBUG("  Clustering tree: " + std::to_string(tree.num_leaves()) +
+                        if (log_level_ >= LogLevel::LOG_TRACE) {
+                            LOG_TRACE("  Clustering tree: " + std::to_string(tree.num_leaves()) +
                                       " leaves, method=" + HierarchicalClustering::method_to_string(linkage_method_));
                         }
 
@@ -649,7 +702,7 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                                             std::stringstream ss_log;
                                             ss_log << "Unbalanced clustering at k=" << best_k
                                                    << ". Increasing to k=" << next_k;
-                                            LOG_DEBUG(ss_log.str());
+                                            LOG_TRACE(ss_log.str());
                                         }
                                         best_k = next_k;
                                         cluster_labels = next_labels;
@@ -672,7 +725,7 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                                 // available config fields. sig_config.global_config.gating_p_threshold = 0.1; //
                                 // Example if needed
 
-                                if (log_level_ >= LogLevel::LOG_DEBUG) {
+                                if (log_level_ >= LogLevel::LOG_TRACE) {
                                     std::stringstream ss;
                                     ss << "\nProcessing Region " << region_id << " (" << chr_name << ":" << snv.pos
                                        << ")";
@@ -698,7 +751,7 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                                             }
                                         }
                                     }
-                                    LOG_DEBUG(ss.str());
+                                    LOG_TRACE(ss.str());
                                 }
 
                                 SignificanceAnalyzer analyzer(sig_config);
@@ -791,20 +844,20 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                                     sig_file.close();
                                 }
 
-                                if (log_level_ >= LogLevel::LOG_DEBUG) {
+                                if (log_level_ >= LogLevel::LOG_TRACE) {
                                     std::stringstream ss;
                                     ss << "  Significance: global_p_alt=" << std::scientific
                                        << sig_result.global_alt.fisher_ffh.p_value
                                        << ", global_p_hp=" << sig_result.global_hp.fisher_ffh.p_value
                                        << ", V_alt=" << std::fixed << std::setprecision(3)
                                        << sig_result.global_alt.cramers_v << ", score=" << sig_result.heuristic_score;
-                                    LOG_DEBUG(ss.str());
+                                    LOG_TRACE(ss.str());
                                 }
                             }
                         } catch (const std::exception& e) {
-                            // Significance analysis failed, but don't fail the entire region
+                            // Significance analysis failed - this is an expected condition in some cases
                             if (log_level_ >= LogLevel::LOG_DEBUG) {
-                                LOG_DEBUG("  Significance analysis skipped: " + std::string(e.what()));
+                                LOG_DEBUG("Significance analysis skipped for region " + std::to_string(region_id) + ": " + std::string(e.what()));
                             }
                         }
                     }

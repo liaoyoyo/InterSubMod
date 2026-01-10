@@ -27,12 +27,22 @@ enum class Strand : uint8_t {
 
 /**
  * @brief Log level for controlling output verbosity.
+ * 
+ * Levels are ordered by verbosity (higher = more verbose):
+ *   FATAL (-1): System-critical errors that require termination
+ *   ERROR (0):  Errors that may be recoverable
+ *   WARN  (1):  Potential issues requiring attention
+ *   INFO  (2):  Normal operational messages (production default)
+ *   DEBUG (3):  Bug tracking flow (developer use)
+ *   TRACE (4):  Detailed flow, variables, code positions (developer use)
  */
 enum class LogLevel {
-    LOG_ERROR = 0,  ///< Only errors
-    LOG_WARN = 1,   ///< Errors and warnings
-    LOG_INFO = 2,   ///< Normal operational messages
-    LOG_DEBUG = 3   ///< Detailed debug output including filtered reads
+    LOG_FATAL = -1, ///< System-critical fatal errors
+    LOG_ERROR = 0,  ///< Errors (recoverable)
+    LOG_WARN = 1,   ///< Warnings
+    LOG_INFO = 2,   ///< Normal operational messages (production default)
+    LOG_DEBUG = 3,  ///< Debug output for bug tracking
+    LOG_TRACE = 4   ///< Trace output with detailed flow and variables
 };
 
 /**

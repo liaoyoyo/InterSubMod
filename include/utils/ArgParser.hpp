@@ -100,8 +100,8 @@ public:
 
         // Logging and Debug
         std::string log_level_str = "info";
-        app.add_option("--log-level", log_level_str, "Logging level: error, warn, info, debug (Default: info)")
-            ->check(CLI::IsMember({"error", "warn", "info", "debug"}, CLI::ignore_case));
+        app.add_option("--log-level", log_level_str, "Logging level: fatal, error, warn, info, debug, trace (Default: info)")
+            ->check(CLI::IsMember({"fatal", "error", "warn", "info", "debug", "trace"}, CLI::ignore_case));
 
         app.add_option("--debug-output-dir", config.debug_output_dir,
                        "Directory for debug outputs (Default: <output-dir>/debug)");
@@ -124,10 +124,14 @@ public:
         }
 
         // Convert log level string to enum
-        static const std::map<std::string, LogLevel> log_level_map = {{"error", LogLevel::LOG_ERROR},
-                                                                      {"warn", LogLevel::LOG_WARN},
-                                                                      {"info", LogLevel::LOG_INFO},
-                                                                      {"debug", LogLevel::LOG_DEBUG}};
+        static const std::map<std::string, LogLevel> log_level_map = {
+            {"fatal", LogLevel::LOG_FATAL},
+            {"error", LogLevel::LOG_ERROR},
+            {"warn", LogLevel::LOG_WARN},
+            {"info", LogLevel::LOG_INFO},
+            {"debug", LogLevel::LOG_DEBUG},
+            {"trace", LogLevel::LOG_TRACE}
+        };
 
         std::string log_lower = log_level_str;
         std::transform(log_lower.begin(), log_lower.end(), log_lower.begin(), ::tolower);

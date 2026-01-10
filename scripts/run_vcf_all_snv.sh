@@ -40,6 +40,7 @@ METRICS="BERNOULLI"
 # METRICS="L1"
 PLOT_TYPE="no"
 PLOT_THREADS=120
+LOG_LEVEL="info"
 
 # 日期字串
 date_str=$(date +%Y%m%d)
@@ -87,6 +88,10 @@ while [[ $# -gt 0 ]]; do
             PLOT_THREADS="$2"
             shift 2
             ;;
+        --log-level)
+            LOG_LEVEL="$2"
+            shift 2
+            ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
             echo ""
@@ -102,6 +107,7 @@ while [[ $# -gt 0 ]]; do
             echo "                         distance - Distance-based Read×Read heatmap only"
             echo "                         cluster  - Methylation cluster heatmap only"
             echo "  --plot-threads N     Number of threads for Python plotting (default: 64)"
+            echo "  --log-level LEVEL    Logging level: fatal, error, warn, info, debug, trace (default: info)"
             echo "  -h, --help           Show this help message"
             echo ""
             echo "Modes:"
@@ -217,6 +223,7 @@ echo "Output Dir: ${OUTPUT_DIR}"
 echo "Threads: ${THREADS}"
 echo "Metrics: ${METRICS}"
 echo "Plot Type: ${PLOT_TYPE}"
+echo "Log Level: ${LOG_LEVEL}"
 echo "Log File: ${LOG_FILE}"
 echo "---------------------------------"
 
@@ -295,7 +302,7 @@ build_command() {
                 --vcf ${VCF_PATH} \
                 --output-dir ${output_dir} \
                 --threads ${threads} \
-                --log-level debug \
+                --log-level ${LOG_LEVEL} \
                 --output-filtered-reads \
                 ${metric_flags}"
             ;;
@@ -314,7 +321,7 @@ build_command() {
                 --output-dir ${output_dir} \
                 --threads ${threads} \
                 --window-size 1000 \
-                --log-level debug \
+                --log-level ${LOG_LEVEL} \
                 --output-filtered-reads \
                 ${metric_flags}"
             ;;
@@ -333,7 +340,7 @@ build_command() {
                 --output-dir ${output_dir} \
                 --threads ${threads} \
                 --window-size 5000 \
-                --log-level debug \
+                --log-level ${LOG_LEVEL} \
                 --output-filtered-reads \
                 ${metric_flags}"
             ;;
@@ -350,7 +357,7 @@ build_command() {
                 --output-dir ${output_dir} \
                 --threads ${threads} \
                 --window-size 1000 \
-                --log-level debug \
+                --log-level ${LOG_LEVEL} \
                 --output-filtered-reads \
                 ${metric_flags}"
             ;;
@@ -366,7 +373,7 @@ build_command() {
                 --vcf ${VCF_PATH} \
                 --output-dir ${output_dir} \
                 --threads ${threads} \
-                --log-level debug \
+                --log-level ${LOG_LEVEL} \
                 --output-filtered-reads \
                 --full-read \
                 ${metric_flags}"

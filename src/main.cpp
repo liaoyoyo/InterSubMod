@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
         LOG_INFO("Output directory: " + config.output_dir);
 
     } catch (const std::exception& e) {
-        LOG_ERROR("Fatal error: " + std::string(e.what()));
+        LOG_FATAL("Unrecoverable error: " + std::string(e.what()));
         return 1;
     }
 
