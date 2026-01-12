@@ -33,59 +33,6 @@ cd build && ctest --output-on-failure
 ./build/tests/test_<name>
 ```
 
----
-
-## 專案結構
-
-### C++ 核心模組 (`src/core/`)
-
-| 檔案 | 功能 |
-| :--- | :--- |
-| `BamReader.cpp` | 基於 HTSlib 的高效 BAM 讀取與索引查詢 |
-| `ReadParser.cpp` | 解析 BAM Record (CIGAR、Mapping Quality、HP Tag) |
-| `MethylationParser.cpp` | **關鍵模組**：解析 MM/ML 標籤，處理 Delta Encoding |
-| `MatrixBuilder.cpp` | 建構稀疏甲基化矩陣 |
-| `DistanceMatrix.cpp` | 多種距離度量計算 (NHD/L1/L2/Bernoulli/Jaccard) |
-| `HierarchicalClustering.cpp` | 階層分群 (UPGMA/Ward/Single/Complete) |
-| `RegionProcessor.cpp` | 多執行緒任務調度，平行處理 SNV 區域 |
-| `SignificanceAnalyzer.cpp` | 顯著性分析主控制器 |
-| `GlobalTest.cpp` | 卡方關聯測試與 Cramér's V |
-| `LabelTest.cpp` | HP/Allele 標籤 PERMANOVA 測試 |
-| `StructureTest.cpp` | PERMANOVA 與離散度檢驗 |
-
-### I/O 模組 (`src/io/`)
-
-| 檔案 | 功能 |
-| :--- | :--- |
-| `RegionWriter.cpp` | 輸出標準化 TSV/CSV 檔案 |
-| `TreeWriter.cpp` | 輸出階層樹結構 |
-
-### 工具程式 (`src/utils/`)
-
-| 檔案 | 功能 |
-| :--- | :--- |
-| `Logger.cpp` | 日誌系統 |
-| `FastaReader.cpp` | 參考基因組讀取 |
-
-### Python 視覺化工具 (`tools/`)
-
-| 檔案 | 功能 |
-| :--- | :--- |
-| `plot_cluster_heatmap.py` | Read-CpG 甲基化模式熱圖 |
-| `plot_distance_heatmap.py` | Read-Read 距離矩陣熱圖 |
-| `compare_vcf_results.py` | VCF 結果比較分析 |
-| `f1_optimization_analysis.py` | F1 分數優化分析 |
-
-### 自動化腳本 (`scripts/`)
-
-| 檔案 | 功能 |
-| :--- | :--- |
-| `run_vcf_all_snv.sh` | 單一 VCF 分析執行腳本 |
-| `run_batch_vcf_analysis.sh` | 批次 VCF 分析工作流程 |
-| `verify_output.sh` | 輸出驗證腳本 |
-
----
-
 ## 程式碼規範
 
 - **C++17** 標準
@@ -107,22 +54,10 @@ cd build && ctest --output-on-failure
 | jemalloc 5.3.0 | 記憶體分配 |
 | Python3 + Matplotlib/Seaborn/Scipy/Pandas | 視覺化 |
 
----
-
-## 測試
-
-使用 GoogleTest 框架，測試檔案位於 `tests/` 目錄。
 
 ```bash
 # 執行所有測試
 cd build && ctest
-
-# 執行特定測試
-./build/tests/test_global_test
-./build/tests/test_distance_matrix
-./build/tests/test_hierarchical_clustering
-```
-
 ---
 
 ## 常用工作流程
@@ -130,7 +65,7 @@ cd build && ctest
 ### 1. 完整 VCF 分析 (預設執行命令)
 
 ```bash
-./scripts/run_vcf_all_snv.sh --mode all-with-w1000
+./scripts/run_vcf_all_snv.sh --mode all-with-w5000
 ```
 
 ### 2. 批次分析 (TP/FP 比較)
@@ -182,3 +117,99 @@ cd build && ctest
 - `README_PROJECT_SUMMARY.md`: 專案完整技術總結
 - `QUICKSTART.md`: 快速入門指南
 - `docs/`: 完整技術文件 (API、架構、開發、報告)
+
+---
+
+## 文檔管理規範
+
+### 文檔目錄結構
+
+```
+docs/
+├── architecture/        # 專案主軸架構說明
+├── concepts/            # 構想紀錄（扁平結構）
+├── plans/               # 計劃文件（YYYY/MM 分層）
+├── solutions/           # 問題解決報告（任務目標/YYYY/MM 分層）
+├── experiments/         # 實驗紀錄
+│   ├── outputs/         # 測試輸出（任務目標/YYYY/MM 分層）
+│   └── parameters/      # 參數研究
+├── ai_sessions/         # AI 對話紀錄（YYYY/MM 分層）
+├── data_specs/          # 數據規格
+├── references/          # 參考資料
+├── archive/             # 歸檔
+│   └── deep/            # 深度歸檔（需查詢歷史）
+└── trash/               # 暫存待刪除
+```
+
+### 檔案命名格式
+
+```
+{YYYYMMDD}_{中文說明目標}_{流水號}.md
+```
+
+範例：`20260111_文檔庫重整計劃_01.md`
+
+### 檔案元數據
+
+每個 Markdown 檔案開頭需包含：
+
+```markdown
+<!--
+建立時間: YYYY-MM-DD HH:MM
+目標: [本檔案的目標或用途]
+處理範圍: [涵蓋的工作範圍]
+關聯檔案:
+  - [相關檔案路徑 1]
+  - [相關檔案路徑 2]
+-->
+```
+
+### AI 對話紀錄撰寫
+
+每次 AI 對話完成重要任務後，撰寫執行報告：
+
+1. **報告位置**：`docs/ai_sessions/YYYY/MM/`
+2. **檔案格式**：`{YYYYMMDD}_{對話主題}_{流水號}.md`
+3. **必要內容**：
+   - 對話目標
+   - 關鍵決策
+   - 修改的檔案清單
+   - 後續行動建議
+
+---
+
+## 程式碼改動檢查清單
+
+修改程式碼後，必須完成以下步驟：
+
+```bash
+# 1. 編譯程式碼
+cd build && make -j$(nproc)
+
+# 2. 執行測試
+./scripts/run_batch_vcf_analysis.sh
+
+# 3. 確認測試結果合理
+
+# 4. 更新 Docker 配置（如需要）
+```
+
+---
+
+## Hooks 配置
+
+專案使用 Claude Code Hooks 自動化檢查流程，配置於 `.claude/settings.local.json`。
+
+### 現有 Hooks
+
+| Hook 類型 | 觸發條件 | 動作 |
+|-----------|----------|------|
+| PostToolUse | 編輯 `.cpp`/`.hpp`/`.h` 檔案 | 提醒編譯和測試 |
+| PostToolUse | 執行 `git commit` | 提醒確認測試和文檔 |
+| Stop | 會話結束 | 提醒撰寫執行報告 |
+
+### 注意事項
+
+- Hooks 會在對應事件觸發時自動執行
+- 務必遵循 Hooks 提示完成必要步驟
+- 如需新增或修改 Hooks，編輯 `.claude/settings.local.json` 的 `hooks` 區段

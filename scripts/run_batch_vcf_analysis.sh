@@ -15,7 +15,7 @@ set -e
 # ============================================================================
 
 # Default settings
-THREADS=90
+THREADS=120
 MODE="all-with-w5000"
 METRICS="BERNOULLI"
 PLOT_TYPE="no"

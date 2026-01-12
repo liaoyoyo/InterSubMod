@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "pubmed": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["scripts/mcp/pubmed_server.py"],
+      "env": {
+        "NCBI_API_KEY": "${NCBI_API_KEY}"
+      }
+    },
+    "biorxiv": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["scripts/mcp/biorxiv_server.py"]
+    },
+    "ensembl": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["scripts/mcp/ensembl_server.py"]
+    },
+    "github": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["scripts/mcp/github_server.py"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}

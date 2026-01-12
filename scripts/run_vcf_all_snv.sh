@@ -292,7 +292,7 @@ build_command() {
     case $mode in
         baseline)
             # Baseline mode: Normal filtering with debug logging
-            # - Default window size (±1000bp)
+            # - Default window size (±5000bp)
             # - Default filtering parameters
             # - Debug mode enabled for logging filtered reads
             echo "${executable} \

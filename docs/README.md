@@ -1,49 +1,334 @@
-# InterSubMod Documentation
+<!--
+建立時間: 2026-01-11 10:00
+目標: 提供文檔庫的完整說明與使用指南
+處理範圍: docs/ 目錄整體
+關聯檔案:
+  - docs/CURRENT_FOCUS.md
+-->
 
-Welcome to the InterSubMod documentation hub. This directory contains all technical, architectural, and operational documents for the project.
+# InterSubMod 文檔庫
 
-## Directory Structure
+## 文檔庫概述
 
-We organize documentation by **purpose** and **lifecycle**:
+此文檔庫用於管理 InterSubMod 專案的所有技術文件、開發紀錄與參考資料。
+採用統一的命名規範與目錄結構，確保文件易於查找與維護。
 
-### Core
-*   **[`architecture/`](architecture/)**: High-level system design, module interactions, and trade-off analysis.
+## 快速導航
 
-### Development Process (`development/`)
-*   **[`plans/`](development/plans/)**: Concrete implementation plans, roadmaps, and strategies.
-*   **[`analysis/`](development/analysis/)**: Design evaluations, algorithm research, and feasibility studies.
-*   **[`guides/`](development/guides/)**: Implementation guides, "how-to" docs, and checklists.
-*   **[`notes/`](development/notes/)**: Implementation notes, specific algorithm details, and working drafts.
+- **[當前目標](CURRENT_FOCUS.md)** - 查看進行中的工作
+- **[架構設計](architecture/)** - 系統架構與模組設計
+- **[開發計劃](plans/)** - 各階段實作計劃
 
-### Reporting (`reports/`)
-*   **[`investigation/`](reports/investigation/)**: Deep dives into specific bugs, anomalies, or logic inquiries.
-*   **[`verification/`](reports/verification/)**: Validation reports ensuring features work as intended.
-*   **[`reviews/`](reports/reviews/)**: User feedback, code reviews, and design critiques.
-*   **[`progress/`](reports/progress/)**: General progress updates and organizational reports.
+---
 
-### Other
-*   **[`issues/`](issues/)**: Bug analyis, known issues, and fix logs.
-*   **[`manual/`](manual/)**: User manuals and operational guides.
-*   **[`api/`](api/)**: API specifications.
-*   **[`data/`](data/)**: Data format descriptions and dictionaries.
-*   **[`archive/`](archive/)**: Superseded or obsolete documents.
-*   **[`garbage/`](garbage/)**: Temporary holding area for files pending deletion.
+## 目錄結構
 
-## Naming Conventions
+| 目錄 | 用途 | 適用情境 |
+|------|------|----------|
+| `architecture/` | 專案主軸架構說明 | 長期穩定的設計文件 |
+| `concepts/` | 目標建構過程的構想 | 新功能的初期想法 |
+| `plans/` | 迭代計劃表 | 確定執行的計劃 |
+| `solutions/` | 問題解決報告 | Bug 修復、技術難題解決 |
+| `experiments/` | 測試輸出與參數研究 | 實驗結果與分析 |
+| `ai_sessions/` | AI 對話紀錄 | 重要的 AI 互動記錄 |
+| `data_specs/` | 輸入數據相關說明 | 格式規範與流程說明 |
+| `references/` | 參考文件彙整 | API、手冊、需求 |
+| `archive/` | 歷史歸檔 | 已完成需保留的文件 |
+| `trash/` | 待刪除暫存區 | 30天後可刪除的檔案 |
 
-To ensure chronologically sortable and searchable filenames, we enforce the following rules:
+---
 
-1.  **Date Prefix**: `YYYYMMDD_filename.md`
-    *   *Required* for: Reports, roadmaps, implementation plans, and time-sensitive analysis.
-    *   *Optional* for: Long-living architectural diagrams or strictly evergreen manuals (though versioning is preferred).
-2.  **Snake Case**: Use `lower_snake_case` for all filenames and directories.
-    *   Example: `20251223_significance_analysis_strategy.md`
-3.  **Format**: Markdown (`.md`) is the standard format.
+## 檔案命名規則
 
-## Guidelines
+### 標準格式
 
-*   **New Documents**: Place new design docs in `development/plans` or `development/analysis` initially.
-*   **Updates**: Do not overwrite old reports. Create a new report with a new date if the findings change significantly.
-*   **Deletion**: Do not delete files. Move them to `archive/` or `garbage/` if they are no longer needed.
+```
+{YYYYMMDD}_{中文說明目標}_{流水號}.md
+```
 
-For more details, see [Documentation Guide](documentation_guide.md).
+### 範例
+
+- `20260111_顯著性分析實作_01.md`
+- `20260111_距離矩陣優化_02.md`
+- `20260112_TP_FP驗證流程_01.md`
+
+### 規則
+
+| 規則 | 說明 | 範例 |
+|------|------|------|
+| 日期格式 | YYYYMMDD（8位數字，無分隔） | `20260111` |
+| 說明部分 | 中文或英文，使用底線連接 | `顯著性分析實作` |
+| 流水號 | 兩位數字，同日期同主題遞增 | `01`, `02`, `03` |
+| 副檔名 | 統一使用 `.md` | - |
+| 禁止 | 空格、特殊符號 | - |
+
+### 特殊檔案
+
+| 類型 | 命名規則 | 範例 |
+|------|----------|------|
+| 長期架構文件 | 無日期前綴，snake_case | `system_overview.md` |
+| 目錄說明 | 固定名稱 | `README.md` |
+| 當前目標 | 固定名稱 | `CURRENT_FOCUS.md` |
+
+---
+
+## 檔案內容格式
+
+每個 `.md` 檔案開頭必須包含元數據區塊：
+
+```markdown
+<!--
+建立時間: YYYY-MM-DD HH:MM
+目標: [簡述此檔案的目的]
+處理範圍: [此檔案涵蓋的範圍或模組]
+關聯檔案:
+  - path/to/related_file.md
+-->
+
+# 標題
+
+[內容開始...]
+```
+
+---
+
+## 工作流程指南
+
+### 新增文件
+
+1. 確定文件類型，選擇正確的目錄
+2. 使用標準命名格式建立檔案
+3. 填寫開頭元數據區塊
+4. 撰寫內容
+
+### 歸檔文件
+
+1. 確認文件已完成且不再更新
+2. 移至 `archive/YYYY/MM/` 目錄
+3. 保持原始檔名
+
+### 刪除文件
+
+1. 先移至 `trash/YYYYMMDD/` 目錄
+2. 等待 30 天確認無需使用
+3. 可安全刪除
+
+---
+
+## 各目錄詳細說明
+
+### architecture/
+
+存放專案核心架構文件，如系統設計、模組架構、核心流程圖。
+這些文件通常無日期前綴，內容需長期維護更新。
+
+**子目錄：**
+- `modules/` - 各模組的詳細設計文件
+
+### concepts/
+
+記錄開發新功能前的構想與思考過程。
+即使最終未採用，也保留作為決策參考。
+
+### plans/
+
+按年月分層存放正式的實作計劃。
+計劃確定後在此建立，完成後可移至 archive。
+
+**結構：**
+```
+plans/
+├── 2025/
+│   └── 12/
+└── 2026/
+    └── 01/
+```
+
+### solutions/
+
+記錄解決技術問題的過程與方案。
+包含問題描述、分析過程、解決方案、驗證結果。
+
+**結構（按任務目標 → 年 → 月分層）：**
+```
+solutions/
+├── debugging/           # 除錯相關
+│   └── 2025/12/
+├── investigation/       # 深入調查
+│   └── 2025/12/
+├── significance_analysis/  # 顯著性分析
+│   └── 2026/01/
+└── optimization/        # 效能優化
+    └── 2026/01/
+```
+
+### experiments/
+
+分為 outputs（測試結果）與 parameters（參數研究）。
+記錄各種實驗的設置、結果與分析。
+
+**子目錄：**
+- `outputs/` - 測試執行結果（按任務目標分層）
+- `parameters/` - 參數研究與比較
+
+**outputs/ 結構（按任務目標 → 年 → 月分層）：**
+```
+experiments/outputs/
+├── early_verification/     # 早期驗證
+│   └── 2025/11/
+├── distance_matrix/        # 距離矩陣測試
+│   └── 2025/12/
+├── clustering_validation/  # 分群驗證
+│   └── 2025/12/
+├── statistical_tests/      # 統計測試
+│   └── 2025/12/
+├── significance_analysis/  # 顯著性分析
+│   └── 2025/12/
+├── tp_fp_optimization/     # TP/FP 優化
+│   └── 2026/01/
+└── comprehensive_reports/  # 綜合報告
+    └── 2026/01/
+```
+
+### ai_sessions/
+
+記錄重要的 AI 對話，包含決策、修改內容、後續行動。
+使用標準模板確保資訊完整。
+
+**結構：**
+```
+ai_sessions/
+├── 2025/
+│   └── 12/
+└── 2026/
+    └── 01/
+```
+
+**使用時機：**
+- 實作新功能（必須記錄）
+- 修復複雜 Bug（必須記錄）
+- 架構討論（必須記錄）
+- 簡單問答、代碼格式化（不需記錄）
+
+### data_specs/
+
+說明輸入/輸出數據格式與處理流程。
+包含 BAM、VCF 等格式規範。
+
+**子目錄：**
+- `input_formats/` - 輸入格式說明
+- `output_formats/` - 輸出格式說明
+- `pipelines/` - 數據處理流程
+
+### references/
+
+整合 API 文件、使用手冊、需求規格等參考資料。
+
+**子目錄：**
+- `api/` - API 規格文件
+- `manual/` - 使用手冊
+- `requirements/` - 需求規格
+
+### archive/
+
+歷史歸檔區，按年月分層。
+用於保存已完成但需要保留的文件。
+
+**子目錄：**
+- `YYYY/MM/` - 按年月分層的一般歸檔
+- `deep/` - 深度歸檔（需查詢歷史紀錄時使用）
+
+**deep/ 說明：**
+存放較早期或大規模重整前的完整結構備份。
+每個備份目錄應包含 `INDEX.md` 索引檔案以便查詢。
+
+### trash/
+
+待刪除檔案暫存區，按日期分層。
+檔案在此保留 30 天後可安全刪除。
+
+---
+
+## AI 對話紀錄模板
+
+`ai_sessions/` 目錄下的檔案應使用以下模板：
+
+```markdown
+<!--
+建立時間: YYYY-MM-DD HH:MM
+目標: [此次對話要解決的問題或達成的目標]
+處理範圍: [涉及的模組、檔案或功能]
+關聯檔案:
+  - [相關計劃或文件路徑]
+-->
+
+# {對話主題}
+
+## 對話資訊
+
+| 項目 | 內容 |
+|------|------|
+| 日期 | YYYY-MM-DD |
+| 時長 | 約 XX 分鐘 |
+| AI 模型 | Claude Opus 4.5 / 其他 |
+| 主要目的 | [簡述] |
+
+## 對話背景
+
+[說明發起此對話的原因]
+
+## 關鍵決策
+
+| 決策項目 | 決定內容 | 理由 |
+|----------|----------|------|
+| [決策一] | [選擇] | [為什麼這樣選] |
+
+## 產出成果
+
+### 修改的檔案
+- `path/to/file.cpp` - [修改說明]
+
+### 新建的檔案
+- `path/to/new_file.md` - [用途說明]
+
+## 後續行動
+
+- [ ] [待辦事項]
+
+## 對話摘要
+
+[3-5 句話總結此次對話的核心內容與結論]
+```
+
+---
+
+## 常見問題
+
+### Q: 檔案應該放在哪個目錄？
+
+依據檔案類型：
+- 新想法 → `concepts/`
+- 確定計劃 → `plans/`
+- 解決問題 → `solutions/`
+- 測試結果 → `experiments/`
+- AI 對話 → `ai_sessions/`
+
+### Q: 如何處理舊格式的檔案？
+
+按照命名規則重新命名，並移至適當目錄。
+
+### Q: 流水號如何決定？
+
+同一天、同主題的檔案依建立順序編號：01, 02, 03...
+
+### Q: 長期架構文件需要日期前綴嗎？
+
+不需要。如 `system_overview.md`、`core_workflow.md` 等長期維護的文件使用 snake_case 即可。
+
+---
+
+## 版本歷史
+
+| 日期 | 變更說明 |
+|------|----------|
+| 2026-01-11 | 重新設計文檔庫架構，統一命名規範 |
