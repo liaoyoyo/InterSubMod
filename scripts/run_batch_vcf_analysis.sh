@@ -146,11 +146,23 @@ echo ""
 echo "[Batch] Waiting for ${#PIDS[@]} jobs to complete..."
 echo "        (Logs are being saved to ${OUTPUT_DIR}/<label>.log)"
 
-# Wait for all background jobs
-wait
+# Wait for all background jobs and track failures
+FAILED=0
+for i in "${!PIDS[@]}"; do
+    PID="${PIDS[$i]}"
+    LABEL="${LABELS[$i]}"
+    if ! wait "$PID"; then
+        FAILED=$((FAILED + 1))
+        echo "[Batch] WARNING: Job '${LABEL}' (PID ${PID}) failed"
+    fi
+done
 
 echo ""
-echo "[Batch] All VCF analysis jobs completed."
+if [ $FAILED -gt 0 ]; then
+    echo "[Batch] WARNING: ${FAILED}/${#PIDS[@]} job(s) failed. Check individual logs for details."
+else
+    echo "[Batch] All ${#PIDS[@]} VCF analysis jobs completed successfully."
+fi
 
 # ============================================================================
 # Run Comparison Analysis

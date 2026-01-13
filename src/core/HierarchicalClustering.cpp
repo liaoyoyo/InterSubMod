@@ -26,7 +26,7 @@ Tree HierarchicalClustering::build_tree(const DistanceMatrix& dist_matrix, const
 
 Tree HierarchicalClustering::build_tree(const Eigen::MatrixXd& dist_matrix,
                                         const std::vector<std::string>& read_names) {
-    // 驗證輸入
+    // Validate input
     int n = dist_matrix.rows();
     if (n != dist_matrix.cols()) {
         throw std::runtime_error("Distance matrix must be square");
@@ -35,7 +35,7 @@ Tree HierarchicalClustering::build_tree(const Eigen::MatrixXd& dist_matrix,
         throw std::runtime_error("Number of names must match matrix dimension");
     }
 
-    // 特殊情況處理
+    // Handle special cases
     if (n == 0) {
         return Tree();
     }
@@ -45,7 +45,7 @@ Tree HierarchicalClustering::build_tree(const Eigen::MatrixXd& dist_matrix,
         return tree;
     }
 
-    // 根據方法選擇演算法
+    // Select algorithm based on method
     switch (config_.method) {
         case LinkageMethod::UPGMA:
             return build_upgma(dist_matrix, read_names);
@@ -62,7 +62,7 @@ Tree HierarchicalClustering::build_tree(const Eigen::MatrixXd& dist_matrix,
 
 Tree HierarchicalClustering::build_upgma(const Eigen::MatrixXd& dist_matrix,
                                          const std::vector<std::string>& read_names) {
-    // UPGMA: 距離 = 兩群所有成員對的平均距離
+    // UPGMA: distance = average distance of all pairs between two clusters
     auto compute_distance = [](const Eigen::MatrixXd& D, const std::vector<int>& cluster_a,
                                const std::vector<int>& cluster_b, int /*size_a*/, int /*size_b*/
                                ) -> double {
@@ -75,7 +75,7 @@ Tree HierarchicalClustering::build_upgma(const Eigen::MatrixXd& dist_matrix,
         return sum / (cluster_a.size() * cluster_b.size());
     };
 
-    // UPGMA 高度 = 距離 / 2
+    // UPGMA height = distance / 2
     auto distance_to_height = [](double d) { return d / 2.0; };
 
     return build_generic(dist_matrix, read_names, compute_distance, distance_to_height);
@@ -83,7 +83,7 @@ Tree HierarchicalClustering::build_upgma(const Eigen::MatrixXd& dist_matrix,
 
 Tree HierarchicalClustering::build_single(const Eigen::MatrixXd& dist_matrix,
                                           const std::vector<std::string>& read_names) {
-    // Single linkage: 距離 = 最近點對距離
+    // Single linkage: distance = nearest pair distance
     auto compute_distance = [](const Eigen::MatrixXd& D, const std::vector<int>& cluster_a,
                                const std::vector<int>& cluster_b, int /*size_a*/, int /*size_b*/
                                ) -> double {
@@ -96,7 +96,7 @@ Tree HierarchicalClustering::build_single(const Eigen::MatrixXd& dist_matrix,
         return min_dist;
     };
 
-    // Single linkage 高度 = 距離 / 2
+    // Single linkage height = distance / 2
     auto distance_to_height = [](double d) { return d / 2.0; };
 
     return build_generic(dist_matrix, read_names, compute_distance, distance_to_height);
@@ -104,7 +104,7 @@ Tree HierarchicalClustering::build_single(const Eigen::MatrixXd& dist_matrix,
 
 Tree HierarchicalClustering::build_complete(const Eigen::MatrixXd& dist_matrix,
                                             const std::vector<std::string>& read_names) {
-    // Complete linkage: 距離 = 最遠點對距離
+    // Complete linkage: distance = farthest pair distance
     auto compute_distance = [](const Eigen::MatrixXd& D, const std::vector<int>& cluster_a,
                                const std::vector<int>& cluster_b, int /*size_a*/, int /*size_b*/
                                ) -> double {
@@ -117,7 +117,7 @@ Tree HierarchicalClustering::build_complete(const Eigen::MatrixXd& dist_matrix,
         return max_dist;
     };
 
-    // Complete linkage 高度 = 距離 / 2
+    // Complete linkage height = distance / 2
     auto distance_to_height = [](double d) { return d / 2.0; };
 
     return build_generic(dist_matrix, read_names, compute_distance, distance_to_height);
@@ -125,31 +125,31 @@ Tree HierarchicalClustering::build_complete(const Eigen::MatrixXd& dist_matrix,
 
 Tree HierarchicalClustering::build_ward(const Eigen::MatrixXd& dist_matrix,
                                         const std::vector<std::string>& read_names) {
-    // Ward's method: 最小化合併後的群內變異增量
-    // 使用 Lance-Williams 公式的特殊形式
-    // 注意：Ward 需要平方距離
+    // Ward's method: minimize within-cluster variance increase after merge
+    // Using special form of Lance-Williams formula
+    // Note: Ward requires squared distances
 
     auto compute_distance = [](const Eigen::MatrixXd& D, const std::vector<int>& cluster_a,
                                const std::vector<int>& cluster_b, int size_a, int size_b) -> double {
-        // 計算兩群中心之間的距離
-        // Ward 距離增量 = (n_a * n_b / (n_a + n_b)) * d(centroid_a, centroid_b)^2
-        // 這裡我們用群間平均距離來近似
+        // Calculate distance between two cluster centroids
+        // Ward distance increment = (n_a * n_b / (n_a + n_b)) * d(centroid_a, centroid_b)^2
+        // Here we approximate using average inter-cluster distance
         double sum = 0.0;
         for (int i : cluster_a) {
             for (int j : cluster_b) {
                 double d = D(i, j);
-                sum += d * d;  // Ward 使用平方距離
+                sum += d * d;  // Ward uses squared distances
             }
         }
         double avg_sq_dist = sum / (cluster_a.size() * cluster_b.size());
 
-        // Ward 增量公式
+        // Ward increment formula
         double n = static_cast<double>(size_a + size_b);
         double weight = (static_cast<double>(size_a) * static_cast<double>(size_b)) / n;
         return weight * avg_sq_dist;
     };
 
-    // Ward 高度 = sqrt(距離增量) / 2，但通常直接用增量作為高度
+    // Ward height = sqrt(distance_increment) / 2, but often increment is used directly as height
     auto distance_to_height = [](double d) { return std::sqrt(d) / 2.0; };
 
     return build_generic(dist_matrix, read_names, compute_distance, distance_to_height);
@@ -163,11 +163,11 @@ Tree HierarchicalClustering::build_generic(
     std::function<double(double distance)> distance_to_height) {
     int n = dist_matrix.rows();
 
-    // 初始化：每個 read 是一個獨立的 cluster
+    // Initialize: each read is a separate cluster
     std::vector<std::shared_ptr<TreeNode>> nodes;
-    std::vector<std::vector<int>> cluster_members;  // 每個 cluster 包含的原始元素索引
+    std::vector<std::vector<int>> cluster_members;  // Original element indices in each cluster
     std::vector<int> cluster_sizes;
-    std::vector<bool> active(n, true);  // 活躍的 cluster
+    std::vector<bool> active(n, true);  // Active clusters
 
     for (int i = 0; i < n; ++i) {
         auto leaf = TreeNode::create_leaf(i, read_names[i]);
@@ -176,15 +176,15 @@ Tree HierarchicalClustering::build_generic(
         cluster_sizes.push_back(1);
     }
 
-    // 合併記錄
+    // Merge records
     std::vector<MergeRecord> merge_records;
 
-    int next_node_id = n;  // 內部節點 ID 從 n 開始
+    int next_node_id = n;  // Internal node IDs start from n
     int active_count = n;
 
-    // 迭代合併，直到只剩一個 cluster
+    // Iteratively merge until only one cluster remains
     while (active_count > 1) {
-        // 找到距離最小的兩個活躍 cluster
+        // Find two active clusters with minimum distance
         double min_dist = std::numeric_limits<double>::max();
         int min_i = -1, min_j = -1;
 
@@ -205,23 +205,23 @@ Tree HierarchicalClustering::build_generic(
         }
 
         if (min_i < 0 || min_j < 0) {
-            // 所有剩餘的 cluster 之間距離為無窮大
+            // All remaining clusters have infinite distance between them
             break;
         }
 
-        // 計算合併高度
+        // Calculate merge height
         double merge_height = distance_to_height(min_dist);
 
-        // 確保高度單調遞增
+        // Ensure height is monotonically increasing
         double max_child_height = std::max(nodes[min_i]->height, nodes[min_j]->height);
         if (merge_height < max_child_height + config_.min_branch_length) {
             merge_height = max_child_height + config_.min_branch_length;
         }
 
-        // 建立新的內部節點
+        // Create new internal node
         auto new_node = TreeNode::create_internal(next_node_id, nodes[min_i], nodes[min_j], merge_height);
 
-        // 記錄合併
+        // Record merge
         MergeRecord record;
         record.cluster_i = min_i;
         record.cluster_j = min_j;
@@ -230,16 +230,16 @@ Tree HierarchicalClustering::build_generic(
         record.size = cluster_sizes[min_i] + cluster_sizes[min_j];
         merge_records.push_back(record);
 
-        // 更新 cluster 資訊
+        // Update cluster information
         std::vector<int> new_members = cluster_members[min_i];
         new_members.insert(new_members.end(), cluster_members[min_j].begin(), cluster_members[min_j].end());
         int new_size = cluster_sizes[min_i] + cluster_sizes[min_j];
 
-        // 標記舊的 cluster 為非活躍
+        // Mark old clusters as inactive
         active[min_i] = false;
         active[min_j] = false;
 
-        // 加入新 cluster
+        // Add new cluster
         nodes.push_back(new_node);
         cluster_members.push_back(new_members);
         cluster_sizes.push_back(new_size);
@@ -249,7 +249,7 @@ Tree HierarchicalClustering::build_generic(
         active_count--;
     }
 
-    // 找到最後一個活躍的 cluster 作為根節點
+    // Find last active cluster as root node
     std::shared_ptr<TreeNode> root = nullptr;
     for (int i = static_cast<int>(nodes.size()) - 1; i >= 0; --i) {
         if (active[i]) {
@@ -258,7 +258,7 @@ Tree HierarchicalClustering::build_generic(
         }
     }
 
-    // 建構 Tree 物件
+    // Construct Tree object
     Tree tree;
     tree.set_root(root);
     tree.set_merge_records(merge_records);
@@ -312,7 +312,7 @@ LinkageMethod HierarchicalClustering::string_to_method(const std::string& str) {
     if (upper == "SINGLE" || upper == "MIN") return LinkageMethod::SINGLE;
     if (upper == "COMPLETE" || upper == "MAX") return LinkageMethod::COMPLETE;
 
-    // 預設為 UPGMA
+    // Default to UPGMA
     return LinkageMethod::UPGMA;
 }
 
@@ -329,7 +329,7 @@ std::vector<int> TreeCutter::cut_by_distance(const Tree& tree, double distance_t
     int n_leaves = root->num_leaves();
     std::vector<int> labels(n_leaves, 0);
 
-    // BFS 遍歷樹，找到高度低於閾值的節點作為 cluster 根
+    // BFS traversal to find nodes below threshold as cluster roots
     int current_label = 0;
     std::queue<std::shared_ptr<TreeNode>> queue;
     queue.push(root);
@@ -338,17 +338,17 @@ std::vector<int> TreeCutter::cut_by_distance(const Tree& tree, double distance_t
         auto node = queue.front();
         queue.pop();
 
-        // 高度轉換為距離（height 是到葉節點的距離，合併距離是 height * 2）
+        // Convert height to distance (height is distance to leaves, merge distance is height * 2)
         double merge_distance = node->height * 2.0;
 
         if (node->is_leaf() || merge_distance <= distance_threshold) {
-            // 這個節點及其所有葉節點屬於同一 cluster
+            // This node and all its leaves belong to the same cluster
             for (int leaf_idx : node->leaf_indices) {
                 labels[leaf_idx] = current_label;
             }
             current_label++;
         } else {
-            // 繼續向下探索
+            // Continue exploring downward
             if (node->left) queue.push(node->left);
             if (node->right) queue.push(node->right);
         }
@@ -369,13 +369,13 @@ std::vector<int> TreeCutter::cut_by_num_clusters(const Tree& tree, int num_clust
         num_clusters = 1;
     }
     if (num_clusters >= n_leaves) {
-        // 每個葉節點是一個 cluster
+        // Each leaf is a separate cluster
         std::vector<int> labels(n_leaves);
         std::iota(labels.begin(), labels.end(), 0);
         return labels;
     }
 
-    // 收集所有合併高度，從高到低排序
+    // Collect all merge heights, sort from high to low
     std::vector<std::pair<double, std::shared_ptr<TreeNode>>> height_nodes;
     auto internal_nodes = tree.get_internal_nodes();
     for (auto& node : internal_nodes) {
@@ -383,15 +383,15 @@ std::vector<int> TreeCutter::cut_by_num_clusters(const Tree& tree, int num_clust
     }
     std::sort(height_nodes.begin(), height_nodes.end(), [](const auto& a, const auto& b) { return a.first > b.first; });
 
-    // 找到切割高度：使得產生恰好 num_clusters 個群
-    // 從最高處開始，逐漸降低切割高度
+    // Find cut height to produce exactly num_clusters groups
+    // Start from the highest point, gradually lower the cut height
     double cut_height = height_nodes.empty() ? 0.0 : height_nodes[0].first + 1.0;
 
-    // 二分搜尋找到正確的切割高度
+    // Binary search to find the correct cut height
     for (const auto& [h, node] : height_nodes) {
-        // 在高度 h 處切割會把這個節點分開
-        // 計算當前切割會產生多少個 cluster
-        auto test_labels = cut_by_distance(tree, h * 2.0 + 0.0001);  // 略高於 h
+        // Cutting at height h will split this node
+        // Calculate how many clusters the current cut will produce
+        auto test_labels = cut_by_distance(tree, h * 2.0 + 0.0001);  // slightly above h
         int n_clusters = *std::max_element(test_labels.begin(), test_labels.end()) + 1;
 
         if (n_clusters >= num_clusters) {
@@ -414,21 +414,21 @@ std::pair<int, std::vector<int>> TreeCutter::find_optimal_clusters(const Tree& t
     if (min_k < 2) min_k = 2;
     if (min_k > max_k) min_k = max_k;
 
-    double best_score = -2.0;  // Silhouette 範圍是 [-1, 1]
+    double best_score = -2.0;  // Silhouette range is [-1, 1]
     int best_k = min_k;
     std::vector<int> best_labels;
 
     for (int k = min_k; k <= max_k; ++k) {
         auto labels = cut_by_num_clusters(tree, k);
 
-        // 計算 Silhouette Score
+        // Calculate Silhouette Score
         double total_silhouette = 0.0;
         int valid_count = 0;
 
         for (int i = 0; i < n; ++i) {
             int cluster_i = labels[i];
 
-            // 計算 a(i): 同群內的平均距離
+            // Calculate a(i): average distance within same cluster
             double a_i = 0.0;
             int count_a = 0;
             for (int j = 0; j < n; ++j) {
@@ -439,7 +439,7 @@ std::pair<int, std::vector<int>> TreeCutter::find_optimal_clusters(const Tree& t
             }
             if (count_a > 0) a_i /= count_a;
 
-            // 計算 b(i): 最近其他群的平均距離
+            // Calculate b(i): average distance to nearest other cluster
             double b_i = std::numeric_limits<double>::max();
             for (int c = 0; c < k; ++c) {
                 if (c == cluster_i) continue;
@@ -458,7 +458,7 @@ std::pair<int, std::vector<int>> TreeCutter::find_optimal_clusters(const Tree& t
                 }
             }
 
-            // 計算 silhouette
+            // Calculate silhouette
             if (count_a > 0 && b_i < std::numeric_limits<double>::max()) {
                 double s_i = (b_i - a_i) / std::max(a_i, b_i);
                 total_silhouette += s_i;

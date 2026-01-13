@@ -15,7 +15,7 @@ std::string Tree::to_newick(bool include_bootstrap, bool include_branch_length, 
         return ";";
     }
 
-    // 特殊情況：單一葉節點
+    // Special case: single leaf node
     if (root_->is_leaf()) {
         std::ostringstream oss;
         oss << root_->label;
@@ -38,23 +38,23 @@ std::string Tree::newick_recursive(const std::shared_ptr<TreeNode>& node, bool i
     std::ostringstream oss;
 
     if (node->is_leaf()) {
-        // 葉節點：返回標籤
+        // Leaf node: return label
         oss << node->label;
     } else {
-        // 內部節點：遞迴處理左右子樹
+        // Internal node: recursively process left and right subtrees
         oss << "(";
         oss << newick_recursive(node->left, include_bootstrap, include_branch_length, precision);
         oss << ",";
         oss << newick_recursive(node->right, include_bootstrap, include_branch_length, precision);
         oss << ")";
 
-        // 加入 Bootstrap 支持度（若有）
+        // Add Bootstrap support (if available)
         if (include_bootstrap && node->bootstrap_support > 0.0) {
             oss << std::fixed << std::setprecision(0) << node->bootstrap_support;
         }
     }
 
-    // 加入分支長度
+    // Add branch length
     if (include_branch_length && node->branch_length > 0) {
         oss << ":" << std::fixed << std::setprecision(precision) << node->branch_length;
     }
@@ -76,10 +76,10 @@ void Tree::collect_internal_nodes(const std::shared_ptr<TreeNode>& node,
         return;
     }
 
-    // Pre-order: 先加入當前節點
+    // Pre-order: add current node first
     nodes.push_back(node);
 
-    // 遞迴處理子節點
+    // Recursively process child nodes
     if (node->left) {
         collect_internal_nodes(node->left, nodes);
     }
@@ -104,7 +104,7 @@ void Tree::collect_leaves(const std::shared_ptr<TreeNode>& node, std::vector<std
     if (node->is_leaf()) {
         leaves.push_back(node);
     } else {
-        // In-order: 先左後右
+        // In-order: left first, then right
         if (node->left) {
             collect_leaves(node->left, leaves);
         }
@@ -141,11 +141,11 @@ void Tree::collect_clades(const std::shared_ptr<TreeNode>& node, std::vector<std
         return;
     }
 
-    // 將此內部節點的 leaf_indices 轉為 set
+    // Convert this internal node's leaf_indices to set
     std::set<int> clade(node->leaf_indices.begin(), node->leaf_indices.end());
     clades.push_back(clade);
 
-    // 遞迴處理子節點
+    // Recursively process child nodes
     if (node->left) {
         collect_clades(node->left, clades);
     }

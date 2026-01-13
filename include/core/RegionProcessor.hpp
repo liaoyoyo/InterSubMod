@@ -21,7 +21,7 @@
 namespace InterSubMod {
 
 /**
- * @brief 處理單個 SNV region 的結果統計
+ * @brief Statistics result for processing a single SNV region
  */
 struct RegionResult {
     int region_id;
@@ -99,45 +99,45 @@ struct RegionResult {
 };
 
 /**
- * @brief 平行化處理多個 SNV regions 的核心類別
+ * @brief Core class for parallel processing of multiple SNV regions
  *
- * 此類別負責：
- * 1. 載入 SNV table
- * 2. 為每個 SNV 定義 region（如 ±2000bp）
- * 3. 使用 OpenMP 平行處理多個 regions
- * 4. 管理 thread-local 資源（BamReader, FastaReader）
- * 5. 收集並報告每個 region 的處理結果
- * 6. 在 debug 模式下記錄被過濾的 reads
+ * This class is responsible for:
+ * 1. Loading SNV table
+ * 2. Defining region for each SNV (e.g., +/-2000bp)
+ * 3. Parallel processing of multiple regions using OpenMP
+ * 4. Managing thread-local resources (BamReader, FastaReader)
+ * 5. Collecting and reporting processing results for each region
+ * 6. Recording filtered reads in debug mode
  *
  * Thread-safety:
- * - 每個 thread 維護自己的 BAM/FASTA readers
- * - MatrixBuilder 與 RegionWriter 在 critical section 中使用
- * - 結果收集使用 mutex 保護
+ * - Each thread maintains its own BAM/FASTA readers
+ * - MatrixBuilder and RegionWriter are used within critical sections
+ * - Result collection is mutex-protected
  */
 class RegionProcessor {
 public:
     /**
-     * @brief 建構 RegionProcessor（簡化版，用於向後相容）
+     * @brief Construct RegionProcessor (simplified version, for backward compatibility)
      */
     RegionProcessor(const std::string& tumor_bam_path, const std::string& normal_bam_path,
                     const std::string& ref_fasta_path, const std::string& output_dir, int num_threads = 4,
                     int32_t window_size = 2000);
 
     /**
-     * @brief 建構 RegionProcessor（完整版，使用 Config）
+     * @brief Construct RegionProcessor (full version, using Config)
      *
      * @param config Configuration object containing all parameters
      */
     explicit RegionProcessor(const Config& config);
 
     /**
-     * @brief 載入 SNV table（TSV 格式）
+     * @brief Load SNV table (TSV format)
      *
-     * 格式：chr  pos  ref  alt  qual
-     * 範例：chr17  7578000  C  T  100.0
+     * Format: chr  pos  ref  alt  qual
+     * Example: chr17  7578000  C  T  100.0
      *
-     * @param snv_table_path SNV table 檔案路徑
-     * @return 成功載入的 SNV 數量
+     * @param snv_table_path SNV table file path
+     * @return Number of SNVs successfully loaded
      */
     int load_snvs(const std::string& snv_table_path);
 
@@ -150,17 +150,17 @@ public:
     int load_snvs_from_vcf(const std::string& vcf_path);
 
     /**
-     * @brief 處理所有 SNVs（平行化）
+     * @brief Process all SNVs (parallelized)
      *
-     * @param max_snvs 最多處理幾個 SNVs（0 = 全部）
-     * @return 處理結果的 vector
+     * @param max_snvs Maximum number of SNVs to process (0 = all)
+     * @return Vector of processing results
      */
     std::vector<RegionResult> process_all_regions(int max_snvs = 0);
 
     /**
-     * @brief 處理單個 region（由 OpenMP worker thread 呼叫）
+     * @brief Process a single region (called by OpenMP worker thread)
      *
-     * @param snv SNV 資訊
+     * @param snv SNV information
      * @param region_id Region ID
      * @param bam_reader Thread-local BAM reader
      * @param fasta_reader Thread-local FASTA reader
@@ -170,14 +170,14 @@ public:
                                        FastaReader& fasta_reader);
 
     /**
-     * @brief 取得載入的 SNVs 列表
+     * @brief Get loaded SNVs list
      */
     const std::vector<SomaticSnv>& get_snvs() const {
         return snvs_;
     }
 
     /**
-     * @brief 輸出處理摘要報告
+     * @brief Output processing summary report
      */
     void print_summary(const std::vector<RegionResult>& results) const;
 
@@ -220,7 +220,7 @@ private:
     std::vector<SomaticSnv> snvs_;
     ChromIndex chrom_index_;  // Manage chromosome name to ID mapping
 
-    // Thread-local 資源會在 process_single_region 中建立
+    // Thread-local resources are created in process_single_region
 };
 
 }  // namespace InterSubMod

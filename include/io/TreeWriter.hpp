@@ -8,24 +8,24 @@
 namespace InterSubMod {
 
 /**
- * @brief 樹狀結構輸出選項
+ * @brief Tree structure output options
  */
 struct TreeOutputOptions {
-    bool include_bootstrap = true;       ///< 是否包含 Bootstrap 支持度
-    bool include_branch_length = true;   ///< 是否包含分支長度
-    int precision = 6;                   ///< 浮點數精度
-    double min_bootstrap_to_show = 0.0;  ///< 最小顯示的 Bootstrap 值 (低於此不顯示)
-    bool quote_labels = false;           ///< 是否用引號包圍標籤
-    bool replace_spaces = true;          ///< 是否替換標籤中的空格為底線
+    bool include_bootstrap = true;       ///< Whether to include Bootstrap support
+    bool include_branch_length = true;   ///< Whether to include branch lengths
+    int precision = 6;                   ///< Floating-point precision
+    double min_bootstrap_to_show = 0.0;  ///< Minimum Bootstrap value to show (below this not shown)
+    bool quote_labels = false;           ///< Whether to quote labels
+    bool replace_spaces = true;          ///< Whether to replace spaces in labels with underscores
 };
 
 /**
- * @brief 樹狀結構檔案輸出器
+ * @brief Tree structure file writer
  *
- * 支援多種輸出格式：
- * - Newick: 標準的演化樹交換格式
- * - Extended Newick: 包含額外註解的 Newick
- * - 未來可擴充 Nexus, PhyloXML 等格式
+ * Supports multiple output formats:
+ * - Newick: Standard phylogenetic tree exchange format
+ * - Extended Newick: Newick with additional annotations
+ * - Future extensible to Nexus, PhyloXML, etc.
  */
 class TreeWriter {
 public:
@@ -34,51 +34,51 @@ public:
     }
 
     /**
-     * @brief 將樹寫入 Newick 格式檔案
+     * @brief Write tree to Newick format file
      *
-     * @param tree 演化樹
-     * @param filepath 輸出檔案路徑
-     * @return 是否成功
+     * @param tree Phylogenetic tree
+     * @param filepath Output file path
+     * @return Whether successful
      */
     bool write_newick(const Tree& tree, const std::string& filepath) const;
 
     /**
-     * @brief 將樹轉為 Newick 字串
+     * @brief Convert tree to Newick string
      *
-     * @param tree 演化樹
-     * @return Newick 格式字串
+     * @param tree Phylogenetic tree
+     * @return Newick format string
      */
     std::string to_newick_string(const Tree& tree) const;
 
     /**
-     * @brief 寫入合併記錄 (類似 scipy linkage matrix)
+     * @brief Write merge records (similar to scipy linkage matrix)
      *
-     * 格式：cluster_i, cluster_j, distance, new_cluster_id, size
+     * Format: cluster_i, cluster_j, distance, new_cluster_id, size
      *
-     * @param tree 演化樹（需包含 merge_records）
-     * @param filepath 輸出檔案路徑
-     * @return 是否成功
+     * @param tree Phylogenetic tree (must contain merge_records)
+     * @param filepath Output file path
+     * @return Whether successful
      */
     bool write_linkage_matrix(const Tree& tree, const std::string& filepath) const;
 
     /**
-     * @brief 寫入樹的統計摘要
+     * @brief Write tree statistics summary
      *
-     * @param tree 演化樹
-     * @param filepath 輸出檔案路徑
-     * @return 是否成功
+     * @param tree Phylogenetic tree
+     * @param filepath Output file path
+     * @return Whether successful
      */
     bool write_tree_stats(const Tree& tree, const std::string& filepath) const;
 
     /**
-     * @brief 取得輸出選項
+     * @brief Get output options
      */
     const TreeOutputOptions& options() const {
         return options_;
     }
 
     /**
-     * @brief 設定輸出選項
+     * @brief Set output options
      */
     void set_options(const TreeOutputOptions& options) {
         options_ = options;
@@ -88,7 +88,7 @@ private:
     TreeOutputOptions options_;
 
     /**
-     * @brief 處理標籤（替換特殊字符）
+     * @brief Process label (replace special characters)
      */
     std::string process_label(const std::string& label) const;
 };

@@ -505,11 +505,7 @@ def plot_cluster_heatmap(
         return True
 
     except Exception as e:
-        # Return False so the caller can log the error message
-        return False
-        import traceback
-
-        traceback.print_exc()
+        logging.error(f"Failed to generate cluster heatmap: {e}")
         return False
 
 
