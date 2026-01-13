@@ -179,13 +179,13 @@ SignificanceResult SignificanceAnalyzer::analyze(const std::vector<int>& cluster
     bool label_sig = result.label_significant;
 
     if (label_sig && cluster_significant) {
-        result.verification_class = "Strong";  // 強關聯: Both paths agree
+        result.verification_class = "Strong";  // Strong association: Both paths agree
     } else if (!label_sig && cluster_significant) {
-        result.verification_class = "Subclone";  // 存在亞群: Cluster structure without label correlation
+        result.verification_class = "Subclone";  // Subclone exists: Cluster structure without label correlation
     } else if (label_sig && !cluster_significant) {
-        result.verification_class = "Weak";  // 弱關聯: Label signal but weak clustering
+        result.verification_class = "Weak";  // Weak association: Label signal but weak clustering
     } else {
-        result.verification_class = "Noise";  // 無關聯/雜訊: No significant signal
+        result.verification_class = "Noise";  // No association/noise: No significant signal
     }
 
     // Compute heuristic score

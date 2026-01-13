@@ -27,7 +27,7 @@ std::string TreeWriter::to_newick_string(const Tree& tree) const {
 
     auto root = tree.get_root();
 
-    // 使用遞迴生成 Newick 字串
+    // Generate Newick string recursively
     std::function<std::string(const std::shared_ptr<TreeNode>&)> build_newick;
     build_newick = [&](const std::shared_ptr<TreeNode>& node) -> std::string {
         if (!node) return "";
@@ -35,23 +35,23 @@ std::string TreeWriter::to_newick_string(const Tree& tree) const {
         std::ostringstream oss;
 
         if (node->is_leaf()) {
-            // 葉節點：輸出標籤
+            // Leaf node: output label
             oss << process_label(node->label);
         } else {
-            // 內部節點：遞迴處理子節點
+            // Internal node: recursively process child nodes
             oss << "(";
             oss << build_newick(node->left);
             oss << ",";
             oss << build_newick(node->right);
             oss << ")";
 
-            // Bootstrap 支持度
+            // Bootstrap support value
             if (options_.include_bootstrap && node->bootstrap_support >= options_.min_bootstrap_to_show) {
                 oss << std::fixed << std::setprecision(0) << node->bootstrap_support;
             }
         }
 
-        // 分支長度
+        // Branch length
         if (options_.include_branch_length && node->branch_length > 0) {
             oss << ":" << std::fixed << std::setprecision(options_.precision) << node->branch_length;
         }
@@ -181,19 +181,19 @@ bool TreeWriter::write_tree_stats(const Tree& tree, const std::string& filepath)
 std::string TreeWriter::process_label(const std::string& label) const {
     std::string result = label;
 
-    // 替換空格
+    // Replace spaces
     if (options_.replace_spaces) {
         std::replace(result.begin(), result.end(), ' ', '_');
     }
 
-    // 替換其他特殊字符（Newick 保留字符）
+    // Replace other special characters (Newick reserved characters)
     for (char& c : result) {
         if (c == '(' || c == ')' || c == ',' || c == ':' || c == ';' || c == '[' || c == ']') {
             c = '_';
         }
     }
 
-    // 加引號
+    // Add quotes
     if (options_.quote_labels && !result.empty()) {
         result = "'" + result + "'";
     }

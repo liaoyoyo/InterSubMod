@@ -353,10 +353,6 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
     result.region_id = region_id;
     result.snv_id = snv.snv_id;
 
-    // Get chromosome name for logging
-    // std::string chr_name = chrom_index_.get_name(snv.chr_id);
-    // Utils::ScopedLogger logger("Process Region " + std::to_string(region_id), LogLevel::LOG_DEBUG);
-
     auto t_start = std::chrono::high_resolution_clock::now();
 
     try {

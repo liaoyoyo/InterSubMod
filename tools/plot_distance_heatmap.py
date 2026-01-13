@@ -165,9 +165,7 @@ def load_distance_matrix(
         read_ids = list(df.index)
         return df, read_ids
     except Exception as e:
-        return df, read_ids
-    except Exception as e:
-        # logging.debug(f"Error loading distance matrix: {e}")
+        logging.debug(f"Error loading distance matrix: {e}")
         return None, None
 
 
@@ -194,8 +192,7 @@ def load_reads_metadata(region_dir: str) -> Optional[pd.DataFrame]:
             df = df.set_index("read_name")
         return df
     except Exception as e:
-        return df
-    except Exception as e:
+        logging.debug(f"Error loading reads metadata: {e}")
         return None
 
 
@@ -224,8 +221,7 @@ def load_linkage_matrix(region_dir: str, strand: str = "all") -> Optional[np.nda
         Z = df[["cluster_i", "cluster_j", "distance", "size"]].values
         return Z
     except Exception as e:
-        return Z
-    except Exception as e:
+        logging.debug(f"Error loading linkage matrix: {e}")
         return None
 
 
@@ -268,8 +264,7 @@ def load_methylation_matrix(
 
         return df, cpg_positions
     except Exception as e:
-        return df, cpg_positions
-    except Exception as e:
+        logging.debug(f"Error loading methylation matrix: {e}")
         return None, None
 
 
@@ -516,10 +511,7 @@ def plot_distance_heatmap(
         return True
 
     except Exception as e:
-        return True
-
-    except Exception as e:
-        # Return False so caller can log error
+        logging.error(f"Failed to generate distance heatmap: {e}")
         return False
 
 

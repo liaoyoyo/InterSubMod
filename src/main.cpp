@@ -6,7 +6,6 @@
 #include "utils/ArgParser.hpp"
 #include "utils/Logger.hpp"
 #include "utils/ResourceMonitor.hpp"
-// #include "core/SomaticSnv.hpp"
 
 int main(int argc, char** argv) {
     InterSubMod::Utils::ResourceMonitor monitor;
