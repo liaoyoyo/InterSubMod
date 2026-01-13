@@ -9,6 +9,7 @@
 #include "core/DistanceMatrix.hpp"
 #include "core/HierarchicalClustering.hpp"
 #include "core/MatrixBuilder.hpp"
+#include "core/MethylationMatrix.hpp"
 #include "core/MethylationParser.hpp"
 #include "core/ReadParser.hpp"
 #include "core/SignificanceAnalyzer.hpp"
@@ -186,6 +187,75 @@ private:
      * @brief Write significance summary CSV and statistics report
      */
     void write_significance_summary(const std::vector<RegionResult>& results) const;
+
+    // ========== Refactored Helper Methods ==========
+
+    /**
+     * @brief Process fetched reads and build methylation matrix
+     *
+     * @param reads Vector of BAM records (already fetched)
+     * @param snv SNV information
+     * @param ref_seq Reference sequence
+     * @param region_start Region start coordinate (for coordinate mapping)
+     * @param matrix_builder Matrix builder to populate
+     * @param filtered_reads Vector to collect filtered reads (debug mode)
+     * @param result RegionResult to update with strand counts
+     */
+    void process_reads(const std::vector<bam1_t*>& reads, const SomaticSnv& snv, const std::string& ref_seq,
+                       int32_t region_start, MatrixBuilder& matrix_builder,
+                       std::vector<FilteredReadInfo>& filtered_reads, RegionResult& result);
+
+    /**
+     * @brief Build MethylationMatrix from MatrixBuilder for distance calculation
+     *
+     * @param matrix_builder Source matrix builder
+     * @param region_id Region identifier
+     * @return Constructed MethylationMatrix
+     */
+    MethylationMatrix build_methylation_matrix(const MatrixBuilder& matrix_builder, int region_id);
+
+    /**
+     * @brief Compute distance matrices and optionally write to disk
+     *
+     * @param meth_mat MethylationMatrix input
+     * @param read_list Read information list
+     * @param region_dir Region output directory
+     * @param metric Distance metric to use
+     * @param result RegionResult to update with statistics
+     * @return Computed distance matrix
+     */
+    DistanceMatrix compute_and_write_distance_matrix(const MethylationMatrix& meth_mat,
+                                                      const std::vector<ReadInfo>& read_list,
+                                                      const std::string& region_dir, DistanceMetricType metric,
+                                                      RegionResult& result);
+
+    /**
+     * @brief Perform hierarchical clustering and significance analysis
+     *
+     * @param all_dist Distance matrix for all reads
+     * @param read_list Read information list
+     * @param meth_mat MethylationMatrix for analysis
+     * @param clustering_dir Directory for clustering output
+     * @param chr_name Chromosome name
+     * @param snv SNV information
+     * @param region_id Region identifier
+     * @param result RegionResult to update with analysis results
+     */
+    void perform_clustering_and_significance(const DistanceMatrix& all_dist, const std::vector<ReadInfo>& read_list,
+                                              const MethylationMatrix& meth_mat, const std::string& clustering_dir,
+                                              const std::string& chr_name, const SomaticSnv& snv, int region_id,
+                                              RegionResult& result);
+
+    /**
+     * @brief Write strand-specific clustering trees
+     *
+     * @param forward_dist Forward strand distance matrix
+     * @param reverse_dist Reverse strand distance matrix
+     * @param read_list Read information list
+     * @param clustering_dir Directory for clustering output
+     */
+    void write_strand_specific_trees(const DistanceMatrix& forward_dist, const DistanceMatrix& reverse_dist,
+                                      const std::vector<ReadInfo>& read_list, const std::string& clustering_dir);
 
     std::string tumor_bam_path_;
     std::string normal_bam_path_;
