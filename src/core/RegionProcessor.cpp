@@ -23,6 +23,152 @@
 
 namespace InterSubMod {
 
+// ============================================================================
+// Quality Assessment Helper Functions (Multi-Layer Validation)
+// ============================================================================
+
+namespace {
+
+/**
+ * @brief Compute HP ratio from HP family counts
+ */
+double compute_hp_ratio(int hp1_family_n, int hp2_family_n) {
+    // Add small epsilon to avoid division by zero
+    double total = static_cast<double>(hp1_family_n + hp2_family_n) + 0.002;
+    return (static_cast<double>(hp1_family_n) + 0.001) / total;
+}
+
+/**
+ * @brief Determine if HP ratio indicates potential LOH
+ */
+bool is_potential_loh(double hp_ratio) {
+    return (hp_ratio < 0.1) || (hp_ratio > 0.9);
+}
+
+/**
+ * @brief Compute coverage multiple relative to expected 75x
+ */
+double compute_coverage_multiple(int num_reads, double expected_coverage = 75.0) {
+    return static_cast<double>(num_reads) / expected_coverage;
+}
+
+/**
+ * @brief Determine coverage category based on coverage multiple
+ */
+std::string determine_coverage_category(double coverage_multiple) {
+    if (coverage_multiple < 0.5) {
+        return "CNV_Loss";
+    } else if (coverage_multiple < 0.8) {
+        return "Low";
+    } else if (coverage_multiple <= 1.2) {
+        return "Normal";
+    } else if (coverage_multiple <= 1.5) {
+        return "Elevated";
+    } else if (coverage_multiple <= 2.0) {
+        return "CNV_Gain";
+    } else {
+        return "High_Copy";
+    }
+}
+
+/**
+ * @brief Determine LOH subtype based on verification class and LOH status
+ */
+std::string determine_loh_subtype(bool potential_loh, const std::string& verification_class) {
+    if (!potential_loh) {
+        return "None";
+    }
+
+    if (verification_class == "Noise") {
+        return "LOH_Noise";
+    } else if (verification_class == "Weak") {
+        return "LOH_Weak";
+    } else if (verification_class == "Strong") {
+        return "LOH_Strong";
+    } else if (verification_class == "Subclone") {
+        return "LOH_Subclone";
+    }
+
+    return "None";
+}
+
+/**
+ * @brief Compute comprehensive quality score
+ *
+ * Scoring components:
+ * - Base score: 100
+ * - Read count penalty: -20 if < 30, -10 if < 50
+ * - CpG count penalty: -15 if < 20, -10 if < 30
+ * - Coverage penalty: -30 if CNV_Loss, -15 if Low, -20 if High_Copy
+ * - LOH penalty: -25 if potential LOH
+ * - Verification bonus: +10 if HP and Allele tests agree, +15 if V >= 0.3
+ */
+float compute_quality_score(int num_reads, int num_cpgs, double coverage_multiple,
+                            bool potential_loh, bool hp_sig, bool allele_sig, double cramers_v) {
+    float score = 100.0f;
+
+    // Read count penalty
+    if (num_reads < 30) {
+        score -= 20.0f;
+    } else if (num_reads < 50) {
+        score -= 10.0f;
+    }
+
+    // CpG count penalty
+    if (num_cpgs < 20) {
+        score -= 15.0f;
+    } else if (num_cpgs < 30) {
+        score -= 10.0f;
+    }
+
+    // Coverage anomaly penalty
+    if (coverage_multiple < 0.5) {
+        score -= 30.0f;  // Likely CNV loss
+    } else if (coverage_multiple < 0.8) {
+        score -= 15.0f;  // Low coverage
+    } else if (coverage_multiple > 2.0) {
+        score -= 20.0f;  // Very high coverage (potential artifact)
+    }
+
+    // LOH penalty
+    if (potential_loh) {
+        score -= 25.0f;
+    }
+
+    // Verification consistency bonus
+    if (hp_sig && allele_sig) {
+        score += 10.0f;  // Both tests significant
+    }
+
+    // Effect size bonus
+    if (cramers_v >= 0.3) {
+        score += 15.0f;  // Strong effect size
+    } else if (cramers_v >= 0.2) {
+        score += 5.0f;   // Moderate effect size
+    }
+
+    // Clamp to valid range
+    if (score < 0.0f) score = 0.0f;
+    if (score > 100.0f) score = 100.0f;
+
+    return score;
+}
+
+/**
+ * @brief Determine quality tier from quality score
+ */
+std::string determine_quality_tier(float quality_score) {
+    if (quality_score >= 70.0f) {
+        return "High";
+    } else if (quality_score >= 40.0f) {
+        return "Medium";
+    } else {
+        return "Low";
+    }
+}
+
+}  // anonymous namespace
+
 RegionProcessor::RegionProcessor(const std::string& tumor_bam_path, const std::string& normal_bam_path,
                                  const std::string& ref_fasta_path, const std::string& output_dir, int num_threads,
                                  int32_t window_size)
@@ -477,9 +623,22 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
         return;
     }
 
-    // Header (updated with Label-First and bidirectional verification columns)
+    // Header (updated with Multi-Stage HP verification and Quality Assessment columns)
     csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,HeuristicScore,PassedGating,"
-                "LabelDelta,LabelP,LabelSig,DominantLabel,Stability,VerificationClass,"
+                // Stage 1: HP Merged
+                "HPMergedDelta,HPMergedP,HPMergedSig,HP1FamilyN,HP2FamilyN,"
+                // Stage 2: HP Fine-Grained
+                "HPFineF,HPFineP,HPFineSig,HPFineNGroups,"
+                // Stage 3: Allele
+                "AlleleDelta,AlleleP,AlleleSig,"
+                // Stage 4: Unassigned Affinity
+                "UnassignedAffinity,UnassignedAffinityP,UnassignedDir,NHP3,NHP0,"
+                // Summary
+                "DominantLabel,Stability,VerificationClass,"
+                // Multi-Layer Validation Quality Assessment (NEW)
+                "HP_Ratio,Potential_LOH,Coverage_Multiple,Coverage_Category,LOH_Subtype,"
+                "Quality_Score,Quality_Tier,"
+                // Original columns
                 "LocalBestCluster,LocalBestP,Significant,SuggestFilter\n";
 
     // Statistics conatiners
@@ -519,18 +678,42 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << "," << r.num_reads << "," << r.num_cpgs << "," << std::scientific << std::setprecision(6)
                  << r.global_p_value << "," << std::fixed << std::setprecision(4) << r.cramers_v << "," << std::fixed
                  << std::setprecision(4) << r.heuristic_score << "," << (r.passed_gating ? "true" : "false") << ","
-                 // Label-First columns (NEW)
-                 << std::fixed << std::setprecision(4) << r.label_delta << ","
-                 << std::scientific << std::setprecision(6) << r.label_p_value << ","
-                 << (r.label_significant ? "true" : "false") << ","
+                 // Stage 1: HP Merged
+                 << std::fixed << std::setprecision(4) << r.hp_merged_delta << ","
+                 << std::scientific << std::setprecision(6) << r.hp_merged_p << ","
+                 << (r.hp_merged_sig ? "true" : "false") << ","
+                 << r.hp_merged_n_hp1 << "," << r.hp_merged_n_hp2 << ","
+                 // Stage 2: HP Fine-Grained
+                 << std::fixed << std::setprecision(4) << r.hp_fine_f << ","
+                 << std::scientific << std::setprecision(6) << r.hp_fine_p << ","
+                 << (r.hp_fine_sig ? "true" : "false") << ","
+                 << r.hp_fine_n_groups << ","
+                 // Stage 3: Allele
+                 << std::fixed << std::setprecision(4) << r.allele_delta << ","
+                 << std::scientific << std::setprecision(6) << r.allele_p << ","
+                 << (r.allele_sig ? "true" : "false") << ","
+                 // Stage 4: Unassigned Affinity
+                 << std::fixed << std::setprecision(4) << r.unassigned_affinity << ","
+                 << std::scientific << std::setprecision(6) << r.unassigned_affinity_p << ","
+                 << r.unassigned_dir << ","
+                 << r.unassigned_n_hp3 << "," << r.unassigned_n_hp0 << ","
+                 // Summary
                  << r.dominant_label << ","
                  << std::fixed << std::setprecision(4) << r.cluster_stability << ","
                  << r.verification_class << ","
+                 // Multi-Layer Validation Quality Assessment (NEW)
+                 << std::fixed << std::setprecision(4) << r.hp_ratio << ","
+                 << (r.potential_loh ? "true" : "false") << ","
+                 << std::fixed << std::setprecision(3) << r.coverage_multiple << ","
+                 << r.coverage_category << ","
+                 << r.loh_subtype << ","
+                 << std::fixed << std::setprecision(1) << r.quality_score << ","
+                 << r.quality_tier << ","
                  // Original local test columns
                  << r.local_best_cluster << "," << std::scientific
                  << std::setprecision(6) << r.local_best_p_value << ","
                  << (is_significant ? "true" : "false") << ","
-                 // NEW: SuggestFilter column for F1 optimization
+                 // SuggestFilter column for F1 optimization
                  << (suggest_filter ? "true" : "false")
                  << "\n";
     }
@@ -915,10 +1098,40 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
         result.passed_gating = sig_result.passed_gate;
 
         result.label_test_computed = true;
-        if (sig_result.label_hp.valid) {
-            result.label_delta = (sig_result.dominant_label_dimension == "hp") ? sig_result.label_hp.delta
+
+        // Multi-Stage HP Verification results (NEW)
+        const auto& hp_ms = sig_result.hp_multistage;
+
+        // Stage 1: HP Family Merged Test
+        result.hp_merged_delta = hp_ms.merged.delta;
+        result.hp_merged_p = hp_ms.merged.p_value;
+        result.hp_merged_sig = hp_ms.merged.significant;
+        result.hp_merged_n_hp1 = hp_ms.n_hp1_family;
+        result.hp_merged_n_hp2 = hp_ms.n_hp2_family;
+
+        // Stage 2: HP Fine-Grained Test
+        result.hp_fine_f = hp_ms.fine_f;
+        result.hp_fine_p = hp_ms.fine_p;
+        result.hp_fine_sig = hp_ms.fine_sig;
+        result.hp_fine_n_groups = hp_ms.fine_n_groups;
+
+        // Stage 3: Allele Test
+        result.allele_delta = sig_result.label_allele.delta;
+        result.allele_p = sig_result.label_allele.p_value;
+        result.allele_sig = sig_result.label_allele.significant;
+
+        // Stage 4: Unassigned Affinity Test
+        result.unassigned_affinity = hp_ms.unassigned.affinity_score;
+        result.unassigned_affinity_p = hp_ms.unassigned.affinity_p;
+        result.unassigned_dir = hp_ms.unassigned.affinity_direction;
+        result.unassigned_n_hp3 = hp_ms.unassigned.n_hp3;
+        result.unassigned_n_hp0 = hp_ms.unassigned.n_hp0;
+
+        // Backward compatibility: use Stage 1 result as primary label_delta
+        if (hp_ms.merged.valid) {
+            result.label_delta = (sig_result.dominant_label_dimension == "hp") ? hp_ms.merged.delta
                                                                                : sig_result.label_allele.delta;
-            result.label_p_value = (sig_result.dominant_label_dimension == "hp") ? sig_result.label_hp.p_value
+            result.label_p_value = (sig_result.dominant_label_dimension == "hp") ? hp_ms.merged.p_value
                                                                                   : sig_result.label_allele.p_value;
         } else if (sig_result.label_allele.valid) {
             result.label_delta = sig_result.label_allele.delta;
@@ -928,6 +1141,17 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
         result.dominant_label = sig_result.dominant_label_dimension;
         result.verification_class = sig_result.verification_class;
         result.n_clusters = best_k;
+
+        // Multi-Layer Validation: Compute quality metrics (NEW)
+        result.hp_ratio = compute_hp_ratio(result.hp_merged_n_hp1, result.hp_merged_n_hp2);
+        result.potential_loh = is_potential_loh(result.hp_ratio);
+        result.coverage_multiple = compute_coverage_multiple(result.num_reads);
+        result.coverage_category = determine_coverage_category(result.coverage_multiple);
+        result.loh_subtype = determine_loh_subtype(result.potential_loh, result.verification_class);
+        result.quality_score = compute_quality_score(
+            result.num_reads, result.num_cpgs, result.coverage_multiple,
+            result.potential_loh, result.hp_merged_sig, result.allele_sig, result.cramers_v);
+        result.quality_tier = determine_quality_tier(result.quality_score);
 
         // Write significance results to JSON
         std::ofstream sig_file(clustering_dir + "/significance.json");
