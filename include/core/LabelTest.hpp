@@ -41,21 +41,27 @@ struct LabelTestConfig {
     uint64_t seed = 0;
 };
 
-// LabelDeltaResult is defined in Stats.hpp
+// LabelDeltaResult, MultiStageHPResult are defined in Stats.hpp
 
 /**
  * @brief Aggregated result for all label dimensions
+ *
+ * Contains results from multi-stage HP verification (Stages 1, 2, 4)
+ * and Allele verification (Stage 3).
  */
 struct LabelTestResult {
-    // Per-dimension results
-    LabelDeltaResult hp_result;     // HP binary (now deprecated, kept for compatibility)
-    LabelDeltaResult allele_result; // ALT vs REF
+    // Multi-stage HP verification (NEW)
+    MultiStageHPResult hp_multistage;
 
-    // NEW: HP multi-group PERMANOVA result
-    double hp_permanova_f = 0.0;     // Pseudo-F statistic
-    double hp_permanova_p = 1.0;     // P-value from multi-group PERMANOVA
-    bool hp_permanova_sig = false;   // Significant at alpha
-    int hp_n_groups = 0;             // Number of HP groups with enough reads
+    // Stage 3: Allele test (ALT vs REF)
+    LabelDeltaResult allele_result;
+
+    // Deprecated fields (kept for backward compatibility)
+    LabelDeltaResult hp_result;      // Use hp_multistage.merged instead
+    double hp_permanova_f = 0.0;     // Use hp_multistage.fine_f instead
+    double hp_permanova_p = 1.0;     // Use hp_multistage.fine_p instead
+    bool hp_permanova_sig = false;   // Use hp_multistage.fine_sig instead
+    int hp_n_groups = 0;             // Use hp_multistage.fine_n_groups instead
 
     // Best (most significant) dimension
     std::string dominant_dimension;  // "hp", "allele", or "none"
@@ -128,10 +134,37 @@ private:
     LabelTestConfig config_;
     std::mt19937_64 rng_;
 
+    // ========================================================================
+    // Label Conversion Functions
+    // ========================================================================
+
+    /**
+     * @brief Convert HP tags to binary labels (deprecated)
+     *
+     * HP1/HP1-1 -> 0, HP2/HP2-1 -> 1, others -> -1 (excluded)
+     */
     std::vector<int> hp_to_binary_labels(const std::vector<FullLabel>& full_labels);
 
     /**
-     * @brief Convert HP tags to multi-group labels for PERMANOVA
+     * @brief Convert HP tags to merged family labels (Stage 1)
+     *
+     * HP1-family (HP1 + HP1-1) -> 0
+     * HP2-family (HP2 + HP2-1) -> 1
+     * HP3, HP0, empty -> -1 (excluded)
+     */
+    std::vector<int> hp_to_merged_labels(const std::vector<FullLabel>& full_labels);
+
+    /**
+     * @brief Convert HP tags to fine-grained labels (Stage 2)
+     *
+     * HP1 -> 0, HP1-1 -> 1, HP2 -> 2, HP2-1 -> 3
+     * HP3, HP0, empty -> -1 (excluded)
+     * Returns -1 for groups with < min_reads_per_group members
+     */
+    std::vector<int> hp_to_fine_labels(const std::vector<FullLabel>& full_labels);
+
+    /**
+     * @brief Convert HP tags to multi-group labels for PERMANOVA (deprecated)
      *
      * Mapping: HP1->0, HP2->1, HP1-1->2, HP2-1->3, HP3->4, HP0/empty->5
      * Returns -1 for reads in groups with < min_reads_per_group members (excluded)
@@ -144,6 +177,10 @@ private:
      * ALT -> 0, REF -> 1, UNKNOWN -> -1 (excluded)
      */
     std::vector<int> allele_to_binary_labels(const std::vector<FullLabel>& full_labels);
+
+    // ========================================================================
+    // Distance Computation
+    // ========================================================================
 
     /**
      * @brief Compute within-group and between-group mean distances
@@ -159,8 +196,43 @@ private:
                             const std::vector<int>& group_labels,
                             double observed_delta);
 
+    // ========================================================================
+    // Multi-Stage HP Tests (NEW)
+    // ========================================================================
+
     /**
-     * @brief Run multi-group PERMANOVA test for HP labels
+     * @brief Stage 1: HP Family Merged Test
+     *
+     * Tests binary grouping: (HP1 + HP1-1) vs (HP2 + HP2-1)
+     * Uses Delta test with permutation.
+     */
+    void test_hp_merged(const Eigen::MatrixXd& dist_matrix,
+                        const std::vector<FullLabel>& full_labels,
+                        MultiStageHPResult& result);
+
+    /**
+     * @brief Stage 2: HP Fine-Grained Test
+     *
+     * Tests 4-group structure: HP1, HP1-1, HP2, HP2-1
+     * Uses multi-group PERMANOVA and computes pairwise distances.
+     */
+    void test_hp_fine_grained(const Eigen::MatrixXd& dist_matrix,
+                              const std::vector<FullLabel>& full_labels,
+                              MultiStageHPResult& result);
+
+    /**
+     * @brief Stage 4: Unassigned Affinity Test
+     *
+     * Tests if HP3/HP0 reads are closer to HP1-family or HP2-family.
+     * Computes affinity score and permutation p-value.
+     */
+    void test_unassigned_affinity(const Eigen::MatrixXd& dist_matrix,
+                                  const std::vector<FullLabel>& full_labels,
+                                  const std::vector<int>& merged_labels,
+                                  MultiStageHPResult& result);
+
+    /**
+     * @brief Run multi-group PERMANOVA test for HP labels (deprecated)
      *
      * Tests if HP labels (HP1, HP2, HP1-1, HP2-1, HP3, HP0) explain distance structure.
      * Uses pseudo-F statistic with permutation test.

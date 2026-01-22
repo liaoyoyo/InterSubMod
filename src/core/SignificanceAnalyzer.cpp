@@ -160,26 +160,48 @@ SignificanceResult SignificanceAnalyzer::analyze(const std::vector<int>& cluster
         }
     }
 
-    // Phase 4: Label-First Verification (NEW)
-    // Run label-based delta tests to verify if HP/Allele labels explain distance structure
+    // Phase 4: Multi-Stage Label Verification (NEW)
+    // Run multi-stage HP verification and Allele tests
     if (dist_matrix.rows() >= config_.label_config.min_total_reads) {
         LabelTestResult label_result = label_test_->test_all(dist_matrix, full_labels);
 
+        // Copy multi-stage HP results
+        result.hp_multistage = label_result.hp_multistage;
+
+        // Backward compatibility: copy to deprecated fields
         result.label_hp = label_result.hp_result;
         result.label_allele = label_result.allele_result;
         result.dominant_label_dimension = label_result.dominant_dimension;
         result.label_significant = label_result.any_significant;
     }
 
-    // Phase 5: Classification (Bidirectional Verification)
+    // Phase 5: Classification (Bidirectional Verification with HP Balance Check)
     // Determine verification_class based on Label-First and Cluster-First results
-    bool cluster_significant = result.passed_gate && 
-                               (result.global_alt.fisher_ffh.p_value <= 0.05 || 
+    bool cluster_significant = result.passed_gate &&
+                               (result.global_alt.fisher_ffh.p_value <= 0.05 ||
                                 result.global_hp.fisher_ffh.p_value <= 0.05);
     bool label_sig = result.label_significant;
 
+    // HP balance check: Potential LOH if HP ratio is extreme
+    // HP ratio = HP1-family / (HP1-family + HP2-family)
+    double hp_ratio = 0.5;
+    bool potential_loh = false;
+    if (result.hp_multistage.n_hp1_family > 0 || result.hp_multistage.n_hp2_family > 0) {
+        int total_hp = result.hp_multistage.n_hp1_family + result.hp_multistage.n_hp2_family;
+        hp_ratio = static_cast<double>(result.hp_multistage.n_hp1_family + 1) /
+                   static_cast<double>(total_hp + 2);  // Laplace smoothing
+        potential_loh = (hp_ratio < 0.1) || (hp_ratio > 0.9);
+    }
+
+    // Adjusted classification with HP balance consideration
     if (label_sig && cluster_significant) {
-        result.verification_class = "Strong";  // Strong association: Both paths agree
+        // Check if HP is reasonably balanced for Strong classification
+        if (potential_loh) {
+            // LOH sites: downgrade to LOH_Strong (tracked separately)
+            result.verification_class = "Strong";  // Keep as Strong but LOH_Subtype will track this
+        } else {
+            result.verification_class = "Strong";  // Strong association: Both paths agree
+        }
     } else if (!label_sig && cluster_significant) {
         result.verification_class = "Subclone";  // Subclone exists: Cluster structure without label correlation
     } else if (label_sig && !cluster_significant) {

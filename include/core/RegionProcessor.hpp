@@ -51,12 +51,38 @@ struct RegionResult {
     double heuristic_score;      ///< Combined heuristic score [0-1]
     bool passed_gating;          ///< Whether passed gating (global_p <= 0.1)
 
-    // Label-First verification results (NEW)
+    // Label-First verification results
     bool label_test_computed;    ///< Whether label-first test was run
-    double label_delta;          ///< Delta = d_between - d_within
-    double label_p_value;        ///< Label permutation test p-value
+    double label_delta;          ///< Delta = d_between - d_within (deprecated, use Stage 1)
+    double label_p_value;        ///< Label permutation test p-value (deprecated, use Stage 1)
     bool label_significant;      ///< Whether label test is significant (p <= 0.05)
     std::string dominant_label;  ///< Which label dimension is most significant ("hp", "allele", "none")
+
+    // Multi-Stage HP Verification results (NEW)
+    // Stage 1: HP Family Merged Test
+    double hp_merged_delta;      ///< Delta for (HP1+HP1-1) vs (HP2+HP2-1)
+    double hp_merged_p;          ///< P-value for merged HP test
+    bool hp_merged_sig;          ///< Significant at alpha
+    int hp_merged_n_hp1;         ///< HP1-family count (HP1 + HP1-1)
+    int hp_merged_n_hp2;         ///< HP2-family count (HP2 + HP2-1)
+
+    // Stage 2: HP Fine-Grained Test
+    double hp_fine_f;            ///< Pseudo-F statistic
+    double hp_fine_p;            ///< P-value for fine-grained test
+    bool hp_fine_sig;            ///< Significant at alpha
+    int hp_fine_n_groups;        ///< Number of valid groups (max 4)
+
+    // Stage 3: Allele Test
+    double allele_delta;         ///< Delta for ALT vs REF
+    double allele_p;             ///< P-value for allele test
+    bool allele_sig;             ///< Significant at alpha
+
+    // Stage 4: Unassigned Affinity Test
+    double unassigned_affinity;  ///< Affinity score for HP3/HP0 reads
+    double unassigned_affinity_p;///< P-value for affinity test
+    std::string unassigned_dir;  ///< Affinity direction ("HP1", "HP2", "None")
+    int unassigned_n_hp3;        ///< Number of HP3 reads
+    int unassigned_n_hp0;        ///< Number of HP0/unphased reads
 
     // Cluster stability results (NEW)
     double cluster_stability;    ///< Stability score from subsampling [0-1]
@@ -65,6 +91,15 @@ struct RegionResult {
 
     // Bidirectional verification classification (NEW)
     std::string verification_class;  ///< "Strong", "Subclone", "Weak", or "Noise"
+
+    // Multi-Layer Validation Quality Metrics (NEW - Phase 5)
+    double hp_ratio;                 ///< HP1/(HP1+HP2), range [0,1]
+    bool potential_loh;              ///< True if HP ratio < 0.1 or > 0.9
+    double coverage_multiple;        ///< NumReads/75.0 (expected coverage)
+    std::string coverage_category;   ///< "Normal", "Low", "High", "CNV_Loss", "CNV_Gain", "High_Copy"
+    std::string loh_subtype;         ///< "None", "LOH_Noise", "LOH_Weak", "LOH_Strong", "LOH_Subclone"
+    float quality_score;             ///< Composite quality score [0-100]
+    std::string quality_tier;        ///< "High" (>=70), "Medium" (40-69), "Low" (<40)
 
     RegionResult()
         : region_id(-1),
@@ -92,10 +127,34 @@ struct RegionResult {
           label_p_value(1.0),
           label_significant(false),
           dominant_label("none"),
+          hp_merged_delta(0.0),
+          hp_merged_p(1.0),
+          hp_merged_sig(false),
+          hp_merged_n_hp1(0),
+          hp_merged_n_hp2(0),
+          hp_fine_f(0.0),
+          hp_fine_p(1.0),
+          hp_fine_sig(false),
+          hp_fine_n_groups(0),
+          allele_delta(0.0),
+          allele_p(1.0),
+          allele_sig(false),
+          unassigned_affinity(0.0),
+          unassigned_affinity_p(1.0),
+          unassigned_dir("None"),
+          unassigned_n_hp3(0),
+          unassigned_n_hp0(0),
           cluster_stability(0.0),
           has_outlier_cluster(false),
           n_clusters(0),
-          verification_class("Noise") {
+          verification_class("Noise"),
+          hp_ratio(0.5),
+          potential_loh(false),
+          coverage_multiple(1.0),
+          coverage_category("Normal"),
+          loh_subtype("None"),
+          quality_score(50.0f),
+          quality_tier("Medium") {
     }
 };
 
