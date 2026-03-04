@@ -1,3 +1,12 @@
+<!--
+建立時間: unknown (legacy)
+metadata補齊時間: 2026-03-01 03:02
+狀態: legacy
+資料來源: 歷史文件補齊（內容未改寫）
+驗證命令: python3 scripts/analysis/validate_docs_structure.py
+關聯文件: docs/standards/20260228_文件命名與狀態管理規範_01.md
+-->
+
 關於現在發現已知錯誤或問題列表，確認問題、分析問題、解決問題，並測試確認真實解決
 
 ## 2024-11-25 甲基化位點聚合邏輯確認與效能優化
