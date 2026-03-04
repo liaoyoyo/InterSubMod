@@ -1,3 +1,12 @@
+<!--
+建立時間: unknown (legacy)
+metadata補齊時間: 2026-03-01 03:02
+狀態: legacy
+資料來源: 歷史文件補齊（內容未改寫）
+驗證命令: python3 scripts/analysis/validate_docs_structure.py
+關聯文件: docs/standards/20260228_文件命名與狀態管理規範_01.md
+-->
+
 # Strand-Aware Processing Design
 
 ## 1. Overview
@@ -54,6 +63,6 @@ read_id read_name chr start end mapq hp alt_support is_tumor strand
 
 ## 5. Verification Plan
 
-1. Run `run_full_vcf_test.sh`.
+1. Run `run_vcf_all_snv.sh`.
 2. Check `reads.tsv` for the new `strand` column.
 3. Verify that the distribution of strands matches `samtools view` statistics.
