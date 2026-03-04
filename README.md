@@ -30,7 +30,7 @@ InterSubMod 是一個專為長讀取 (Long-read) 測序設計的表觀遺傳變�
 編譯完成後，即可使用以下指令進行標準全流程測試：
 
 ```bash
-./scripts/run_full_vcf_test.sh --mode all-with-w1000
+./scripts/run_vcf_all_snv.sh --mode all-with-w1000 --plot-type distance
 ```
 
 詳細參數與使用方式請參閱 [Quick Start](QUICKSTART.md)。
