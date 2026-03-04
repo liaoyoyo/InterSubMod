@@ -1,3 +1,12 @@
+<!--
+建立時間: unknown (legacy)
+metadata補齊時間: 2026-03-01 03:02
+狀態: legacy
+資料來源: 歷史文件補齊（內容未改寫）
+驗證命令: python3 scripts/analysis/validate_docs_structure.py
+關聯文件: docs/standards/20260228_文件命名與狀態管理規範_01.md
+-->
+
 Development Spec
 
 Scope: 目前不實作 calibration/ML；但需保留未來可用的輸出欄位與格式，確保後續能直接接 ML/校準流程。
@@ -38,6 +47,6 @@ Report Summary: 產出整體統計說明文件，包含每染色體與全域的�
 
 Validation: 每個主要功能完成即寫單元測試，編譯並通過自動測試；測試結果記錄於 YYYYMMDD_測試內容.md。
 
-Integration Test: 先跑單點驗證 run_full_vcf_test.sh --mode chr19-verification --no-plots，確認流程可完整執行並產生合理顯著結果。
+Integration Test: 先跑單點驗證 run_vcf_all_snv.sh --mode chr19-verification --no-plots，確認流程可完整執行並產生合理顯著結果。
 
 Performance Target: 30,000 點在 120 執行緒下約 10 分鐘完成；若未達標需紀錄瓶頸與調整策略（如 gating/減少 permutation 次數）。

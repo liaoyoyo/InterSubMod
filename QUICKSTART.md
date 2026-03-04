@@ -30,7 +30,7 @@ make -j$(nproc)
 
 ## 2. 執行分析 (Run Analysis)
 
-我們提供了一個整合腳本，能夠自動完成核心運算與圖表繪製。
+我們提供整合腳本 `scripts/run_vcf_all_snv.sh`，可自動完成核心運算與圖表繪製。
 
 ### 預設快速執行
 
@@ -41,12 +41,13 @@ make -j$(nproc)
 cd /big8_disk/liaoyoyo2001/InterSubMod
 
 # 執行全流程測試 (包含 reads 過濾、矩陣建構、視覺化)
-./scripts/run_full_vcf_test.sh --mode all-with-w1000
+./scripts/run_vcf_all_snv.sh --mode all-with-w1000 --plot-type distance
 ```
 
 ### 指令說明
 
 *   `--mode all-with-w1000`: 啟用標準過濾器，並設定分析窗口為 SNV 前後 ±1000bp。這是最推薦的標準分析模式。
+*   `--plot-type distance`: 只生成距離熱圖（可改為 `all` / `cluster` / `no`）。
 *   此腳本會自動執行以下步驟：
     1.  呼叫 C++ 核心程式 `inter_sub_mod` 處理數據。
     2.  產出甲基化矩陣與 reads 資訊。
@@ -58,35 +59,35 @@ cd /big8_disk/liaoyoyo2001/InterSubMod
 
 ```bash
 # 指定輸出目錄
-./scripts/run_full_vcf_test.sh --mode all-with-w1000 -o output/my_custom_run
+./scripts/run_vcf_all_snv.sh --mode all-with-w1000 -o output/my_custom_run
 
 # 僅生成距離熱圖 (Skip Cluster Heatmap)
-./scripts/run_full_vcf_test.sh --mode all-with-w1000 --plot-type distance
+./scripts/run_vcf_all_snv.sh --mode all-with-w1000 --plot-type distance
 
 # 使用更多執行緒 (C++ Core: 64, Python Plotting: 64)
-./scripts/run_full_vcf_test.sh --threads 64 --plot-threads 64
+./scripts/run_vcf_all_snv.sh --threads 64 --plot-threads 64
 ```
 
 ---
 
 ## 3. 輸出結果檢視 (Output)
 
-執行完成後，請前往輸出目錄（預設為 `output/yyyymmdd_vcf_all_w1000_t*`）。
-目錄結構如下：
+執行完成後，請前往輸出目錄（預設為 `output/YYYYMMDD_vcf_*`）。
+輸出包含根層摘要檔與依 VCF/染色體分層的結果目錄，示意如下：
 
 ```text
 output/
 ├── full_execution_analysis.log  # 完整執行日誌
-├── region_0000/                 # 第一個 SNV 區域
-│   ├── metadata.txt             # 統計資訊
-│   ├── reads.tsv                # Reads 詳細列表
-│   ├── methylation.csv          # 原始甲基化矩陣
-│   ├── distance_matrix_L1.csv   # L1 距離矩陣
-│   ├── distance_heatmap_L1.png  # [圖表] Read-Read 距離熱圖
-│   └── cluster_heatmap_L1.png   # [圖表] 甲基化分群熱圖
-├── region_0001/
-└── ...
+├── significance_summary.csv      # 各區域顯著性摘要
+├── significance_statistics.txt   # 全域統計
+└── filtered_snv_tp/
+    ├── chr1/
+    ├── chr2/
+    └── ...
 ```
+
+> [!NOTE]
+> `output/` 建議在 repo 內保留為入口目錄，實際儲存可放在其他硬碟並以軟連結對接；`output` 內容不納入 Git 版本控管。
 
 ---
 

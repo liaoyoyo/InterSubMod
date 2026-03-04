@@ -1,0 +1,78 @@
+{
+  "version": "1.0.0",
+  "name": "shared-planning",
+  "description": "Cross-platform task planning system for Claude Code and Antigravity",
+
+  "paths": {
+    "base_dir": "docs/shared_planning",
+    "templates_dir": ".claude/skills/shared-planning/templates",
+    "task_plan_file": "task_plan.md",
+    "findings_file": "findings.md",
+    "progress_file": "progress.md"
+  },
+
+  "platforms": {
+    "claude_code": {
+      "identifier": "Claude Code",
+      "env_var": "CLAUDE_CODE",
+      "color": "#D97706"
+    },
+    "antigravity": {
+      "identifier": "Antigravity",
+      "env_var": "ANTIGRAVITY_SESSION",
+      "color": "#2563EB"
+    }
+  },
+
+  "templates": {
+    "task_types": [
+      "research",
+      "feature",
+      "bugfix",
+      "refactor",
+      "experiment",
+      "documentation"
+    ],
+    "priorities": ["High", "Medium", "Low"],
+    "statuses": ["In Progress", "Completed", "Blocked", "On Hold"]
+  },
+
+  "file_headers": {
+    "task_plan": {
+      "required_fields": ["Created", "Updated", "Status"],
+      "sections": ["Objective", "Background", "Tasks", "Dependencies", "Resources"]
+    },
+    "findings": {
+      "required_fields": ["Created", "Last Updated"],
+      "sections": ["Key Discoveries", "Research Notes"]
+    },
+    "progress": {
+      "required_fields": ["Started", "Current Status", "Last Updated"],
+      "daily_sections": ["Completed Today", "In Progress", "Planned Next", "Notes"]
+    }
+  },
+
+  "sync": {
+    "auto_commit": false,
+    "conflict_resolution": "manual",
+    "lock_timeout_seconds": 300
+  },
+
+  "validation": {
+    "check_git_status": true,
+    "warn_uncommitted_changes": true,
+    "require_task_name": true,
+    "max_task_name_length": 50
+  },
+
+  "statistics": {
+    "enabled": true,
+    "metrics": [
+      "total_tasks",
+      "completed_tasks",
+      "completion_rate",
+      "avg_completion_time",
+      "platform_contribution"
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <filesystem>
+#include <vector>
 
 #include "core/BamReader.hpp"
 #include "core/ReadParser.hpp"
@@ -12,12 +13,20 @@ using namespace InterSubMod;
 class BamReaderTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        // These paths should be updated to actual test data
-        test_bam_path = "/big8_disk/liaoyoyo2001/InterSubMod/data/bam/test.bam";
+        // Prefer tiny fixture first; fallback to project sample BAM.
+        const std::vector<std::string> candidates = {
+            "/big8_disk/liaoyoyo2001/InterSubMod/data/bam/test.bam",
+            "/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam"};
 
-        // Check if test file exists
-        if (!std::filesystem::exists(test_bam_path)) {
-            GTEST_SKIP() << "Test BAM file not found: " << test_bam_path;
+        for (const auto& path : candidates) {
+            if (std::filesystem::exists(path)) {
+                test_bam_path = path;
+                break;
+            }
+        }
+
+        if (test_bam_path.empty()) {
+            GTEST_SKIP() << "No usable BAM fixture found under data/bam/";
         }
     }
 
@@ -89,12 +98,11 @@ TEST_F(ReadParserTest, FilterConfiguration) {
 
 // Integration test - requires actual BAM data
 TEST_F(BamReaderTest, ParseReadInfo) {
-    std::string bam_path = "/big8_disk/liaoyoyo2001/InterSubMod/data/bam/test.bam";
-    if (!std::filesystem::exists(bam_path)) {
+    if (!std::filesystem::exists(test_bam_path)) {
         GTEST_SKIP() << "Test BAM not found";
     }
 
-    BamReader reader(bam_path);
+    BamReader reader(test_bam_path);
     ReadParser parser;
 
     // Fetch some reads

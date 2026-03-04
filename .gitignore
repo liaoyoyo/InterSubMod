@@ -63,12 +63,13 @@ bin/
 *.log
 logs/*
 
-# Results and data
-results*/
-data/
+# Results and data (repo root only)
+/results*/
+/data/
 
-# Output directories
-*output*/
+# Output directory (repo root only)
+/output/
+/output
 
 # Temporary and backup files
 *~
@@ -92,6 +93,12 @@ _deps/
 # Build artifacts
 # docs/*
 
+# Analysis (repo root only)
+/analysis/
+
 # Other test files
 # tests*/
 # *test*/*.claude/skills/
+
+# Slides
+/slides/*

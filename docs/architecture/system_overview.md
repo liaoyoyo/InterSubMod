@@ -1,3 +1,12 @@
+<!--
+建立時間: unknown (legacy)
+metadata補齊時間: 2026-03-01 03:02
+狀態: legacy
+資料來源: 歷史文件補齊（內容未改寫）
+驗證命令: python3 scripts/analysis/validate_docs_structure.py
+關聯文件: docs/standards/20260228_文件命名與狀態管理規範_01.md
+-->
+
 # 單分子甲基化變異與體細胞讀序分群分析系統
 
 （HCC1395 ONT Tumor/Normal，Somatic VCF 驗證架構）
@@ -133,7 +142,7 @@ flowchart TD
 
 ## 3. 模組與步驟規格
 
-詳細演算法邏輯請參考 **[Implementation Details](../dev/implementation_details.md)**，開發進度請見 **[Development Plan](../dev/development_plan.md)**。
+詳細演算法邏輯請參考 **[Implementation Details](../concepts/2025/11/20251130_implementation_details_01.md)**，開發進度請見 **[Development Plan](../plans/2025/11/20251130_roadmap_01.md)**。
 
 ### 3.0 Somatic VCF → SNV 基礎表 (S0)
 
@@ -649,7 +658,7 @@ ClusteringResult "1" o-- "*" ClusterStats : per_cluster
 
 ## 5. 驗證與測試
 
-完整策略請見 **[Verification Strategy](../dev/verification_strategy.md)**。
+完整策略請見 **[Verification Strategy](../experiments/validated/2025/11/20251130_verification_analysis_01.md)**。
 
 1. **單元測試**
 

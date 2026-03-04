@@ -14,7 +14,7 @@
 
 ## 2. 完整分析流程 (Complete Workflow)
 
-本專案提供一鍵式自動化腳本 (`scripts/run_full_vcf_test.sh`)，串聯從原始 BAM 檔到最終視覺化圖表的完整流程。
+本專案提供一鍵式自動化腳本 (`scripts/run_vcf_all_snv.sh`)，串聯從原始 BAM 檔到最終視覺化圖表的完整流程。
 
 ### 流程步驟
 
@@ -67,14 +67,12 @@
 
 ## 4. 輸出檔案結構 (Output Structure)
 
-執行分析後，每個 Region 目錄下包含以下檔案：
+執行分析後，主要輸出在 `output/YYYYMMDD_vcf_*` 目錄，包含：
 
-* `metadata.txt`: 區域基本資訊、統計數據 (Read 數、CpG 數、處理時間)。
-* `reads.tsv`: Read 詳細資訊 (ID, Name, Mapping Quality, HP Tag, etc.)。
-* `methylation.csv`: 原始甲基化矩陣 (Rows: Reads, Cols: CpG Sites, Values: 0.0-1.0)。
-* `distance_matrix_[METRIC].csv`: Read-Read 距離矩陣。
-* `distance_heatmap_[METRIC].png`: 距離矩陣熱圖。
-* `cluster_heatmap_[METRIC].png`: 甲基化分群熱圖。
+* `significance_summary.csv`: 區域層級顯著性摘要（主分析表）。
+* `significance_statistics.txt`: 全域統計摘要。
+* `full_execution_analysis.log`: 完整執行日誌。
+* `filtered_snv_tp/chr*/...`: 依 VCF / 染色體分層的細部輸出與圖表。
 
 ---
 
