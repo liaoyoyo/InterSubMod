@@ -1,9 +1,9 @@
 #pragma once
 
 #include <chrono>
+#include <iomanip>
 #include <iostream>
 #include <string>
-#include <iomanip>
 
 #ifdef USE_JEMALLOC
 #include <jemalloc/jemalloc.h>
@@ -43,14 +43,14 @@ public:
 #endif
         return allocated;
     }
-    
+
     void print_stats(const std::string& label = "Execution") const {
         double time = get_elapsed_seconds();
         size_t mem = get_memory_usage();
-        
+
         std::cout << "[" << label << "] ";
         std::cout << "Time: " << std::fixed << std::setprecision(4) << time << " s";
-        
+
 #ifdef USE_JEMALLOC
         std::cout << ", Memory: " << std::fixed << std::setprecision(2) << (mem / 1024.0 / 1024.0) << " MB";
 #else
@@ -63,6 +63,5 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> start_time_;
 };
 
-} // namespace Utils
-} // namespace InterSubMod
-
+}  // namespace Utils
+}  // namespace InterSubMod

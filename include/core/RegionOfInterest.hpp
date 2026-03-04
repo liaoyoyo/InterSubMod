@@ -17,4 +17,4 @@ struct RegionOfInterest {
     int32_t win_end_pos;    ///< Window End (1-based, inclusive)
 };
 
-} // namespace InterSubMod
+}  // namespace InterSubMod

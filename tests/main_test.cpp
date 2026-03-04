@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+
 #include "utils/ResourceMonitor.hpp"
 
 using namespace InterSubMod::Utils;
@@ -26,4 +27,3 @@ int main(int argc, char** argv) {
 
     return RUN_ALL_TESTS();
 }
-

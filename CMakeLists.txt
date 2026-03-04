@@ -62,18 +62,19 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(HTSlib REQUIRED htslib)
 
 # Eigen3
-find_package(Eigen3 3.3 QUIET)
-if(NOT Eigen3_FOUND)
-    message(STATUS "Eigen3 not found via find_package, trying to find header path...")
-    if(EXISTS "/usr/include/eigen3")
-        set(EIGEN3_INCLUDE_DIRS "/usr/include/eigen3")
-        message(STATUS "Found Eigen3 at /usr/include/eigen3")
-    else()
-        message(WARNING "Eigen3 not found. Please install eigen3 or set EIGEN3_INCLUDE_DIRS.")
-    endif()
-else()
-    set(EIGEN3_INCLUDE_DIRS ${Eigen3_INCLUDE_DIRS})
-endif()
+include(FetchContent)
+FetchContent_Declare(
+  eigen3
+  URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+)
+# Disable Eigen3 tests and docs to avoid Fortran compiler requirement
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
+set(EIGEN_BUILD_PKGCONFIG OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(eigen3)
+# Re-enable testing for our project
+set(BUILD_TESTING ON CACHE BOOL "" FORCE)
+include_directories(${eigen3_SOURCE_DIR})
 
 # --- Includes ---
 include_directories(include)
@@ -90,9 +91,21 @@ add_library(inter_sub_mod_core
     src/core/MethylationParser.cpp
     src/core/MatrixBuilder.cpp
     src/core/RegionProcessor.cpp
+    src/core/DistanceMatrix.cpp
+    src/core/TreeStructure.cpp
+    src/core/HierarchicalClustering.cpp
+    src/core/MathUtils.cpp
+    src/core/FisherExact.cpp
+    src/core/GlobalTest.cpp
+    src/core/LocalTest.cpp
+    src/core/StructureTest.cpp
+    src/core/Bootstrap.cpp
+    src/core/SignificanceAnalyzer.cpp
+    src/core/LabelTest.cpp
     src/utils/Logger.cpp
     src/utils/FastaReader.cpp
     src/io/RegionWriter.cpp
+    src/io/TreeWriter.cpp
 )
 
 target_link_libraries(inter_sub_mod_core PUBLIC
@@ -112,13 +125,13 @@ add_executable(inter_sub_mod src/main.cpp)
 target_link_libraries(inter_sub_mod PRIVATE inter_sub_mod_core)
 
 # --- Dev Tools / Ad-hoc Tests ---
-add_executable(test_phase1_2 src/test_phase1_2.cpp)
+add_executable(test_phase1_2 src/test/test_phase1_2.cpp)
 target_link_libraries(test_phase1_2 PRIVATE inter_sub_mod_core)
 
-add_executable(test_phase3 src/test_phase3.cpp)
+add_executable(test_phase3 src/test/test_phase3.cpp)
 target_link_libraries(test_phase3 PRIVATE inter_sub_mod_core)
 
-add_executable(test_phase4_5 src/test_phase4_5.cpp)
+add_executable(test_phase4_5 src/test/test_phase4_5.cpp)
 target_link_libraries(test_phase4_5 PRIVATE inter_sub_mod_core)
 
 # --- Tests ---
@@ -138,6 +151,12 @@ add_executable(run_tests
     tests/main_test.cpp 
     tests/test_config.cpp
     tests/test_bam_reader.cpp
+    tests/test_distance_matrix.cpp
+    tests/test_hierarchical_clustering.cpp
+    tests/test_significance_stats.cpp
+    tests/test_global_local.cpp
+    tests/test_structure_bootstrap.cpp
+    tests/test_significance_analyzer.cpp
 )
 target_link_libraries(run_tests PRIVATE inter_sub_mod_core GTest::gtest)
 

@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "knowledge": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["/big8_disk/liaoyoyo2001/knowledge/scripts/mcp/knowledge_server.py"]
+    },
+    "biorxiv": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["scripts/mcp/biorxiv_server.py"]
+    },
+    "ensembl": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["scripts/mcp/ensembl_server.py"]
+    }
+  }
+}
