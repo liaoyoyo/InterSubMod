@@ -1,334 +1,155 @@
 <!--
 建立時間: 2026-01-11 10:00
-目標: 提供文檔庫的完整說明與使用指南
-處理範圍: docs/ 目錄整體
+更新時間: 2026-03-05 10:00
+目標: 提供 docs/ 目錄的最新結構、命名規範與工作流程，並提供 AI 漸進查閱指引
+處理範圍: docs/ 全目錄（archive/deep 歷史快照除外）
 關聯檔案:
   - docs/CURRENT_FOCUS.md
+  - docs/experiments/INDEX.md
+  - docs/standards/20260228_文件命名與狀態管理規範_01.md
+  - docs/standards/20260228_output軟連結與版本控管規範_01.md
+  - docs/standards/20260303_文件盤點分類與歸檔流程規範_01.md
 -->
 
 # InterSubMod 文檔庫
 
-## 文檔庫概述
-
-此文檔庫用於管理 InterSubMod 專案的所有技術文件、開發紀錄與參考資料。
-採用統一的命名規範與目錄結構，確保文件易於查找與維護。
-
 ## 快速導航
 
-- **[當前目標](CURRENT_FOCUS.md)** - 查看進行中的工作
-- **[架構設計](architecture/)** - 系統架構與模組設計
-- **[開發計劃](plans/)** - 各階段實作計劃
+- [當前目標](CURRENT_FOCUS.md)
+- [AI Agent 快速操作手冊](references/manual/20260301_AI_Agent_快速操作手冊_01.md)
+- [專案檔案清冊與查找流程手冊](references/manual/20260303_專案檔案清冊與查找流程手冊_01.md)
+- [2026-03-03 全量盤點報告](reports/finalized/2026/03/20260303_docs與專案檔案全量盤點報告_01.md)
+- [2026-03-04 scripts/tools/output 重整與遷移報告](reports/finalized/2026/03/20260304_scripts_tools_output流程重整與空間遷移報告_01.md)
+- `standards/`：規範與治理文件
+- `plans/`：計畫
+- `reports/`：報告（validated/finalized）
+- `experiments/`：實驗（in_progress/validated/finalized）
+- `archive/`：歸檔（含 `deep/` 歷史快照）
 
----
+## AI Agent 建議起手式
 
-## 目錄結構
+```bash
+scripts/analysis/check_ai_agent_readiness.sh
+```
 
-| 目錄 | 用途 | 適用情境 |
-|------|------|----------|
-| `architecture/` | 專案主軸架構說明 | 長期穩定的設計文件 |
-| `concepts/` | 目標建構過程的構想 | 新功能的初期想法 |
-| `plans/` | 迭代計劃表 | 確定執行的計劃 |
-| `solutions/` | 問題解決報告 | Bug 修復、技術難題解決 |
-| `experiments/` | 測試輸出與參數研究 | 實驗結果與分析 |
-| `ai_sessions/` | AI 對話紀錄 | 重要的 AI 互動記錄 |
-| `data_specs/` | 輸入數據相關說明 | 格式規範與流程說明 |
-| `references/` | 參考文件彙整 | API、手冊、需求 |
-| `archive/` | 歷史歸檔 | 已完成需保留的文件 |
-| `trash/` | 待刪除暫存區 | 30天後可刪除的檔案 |
+## AI 漸進查閱指引
 
----
+本文件庫採用 4 層漸進披露架構，避免 AI 直接陷入大量細節文件：
 
-## 檔案命名規則
+| 層 | 文件 | 目的 |
+|---|---|---|
+| Layer 0 (地圖) | `docs/README.md`（本頁）| 全局導航，方向感 |
+| Layer 1 (當下) | `docs/CURRENT_FOCUS.md` | 現在在做什麼、阻塞點 |
+| Layer 2 (歷史) | `docs/experiments/INDEX.md` | 已試驗方向，成功/失敗總覽 |
+| Layer 3 (細節) | 各 experiments/reports/solutions 文件 | 完整數據與推導 |
+
+### 建議查閱流程
+
+**新任務起手式：**
+1. 讀 `CURRENT_FOCUS.md` → 確認當前優先事項
+2. 讀 `experiments/INDEX.md` → 避免重複已失敗的方向
+3. 讀相關 `architecture/*.md` → 了解系統設計約束
+4. 執行 `scripts/analysis/check_ai_agent_readiness.sh` → 確認環境狀態
+
+**特定問題查閱：**
+- 找過去的解決方案 → `solutions/{topic}/`
+- 找已驗證的實驗結果 → `experiments/validated/` 或 `experiments/finalized/`
+- 找系統架構決策 → `architecture/` 或 `decisions/`
+- 找研究歷史與方向優先級 → `experiments/INDEX.md`
+
+## 目錄結構（現行）
+
+| 目錄 | 用途 |
+|---|---|
+| `architecture/` | 長期架構設計文件 |
+| `concepts/` | 構想與設計草稿 |
+| `plans/YYYY/MM/` | 執行計畫與里程碑 |
+| `reports/validated/YYYY/MM/` | 已驗證分析報告 |
+| `reports/finalized/YYYY/MM/` | 最終結論與決策報告 |
+| `experiments/in_progress/YYYY/MM/` | 實驗草稿 |
+| `experiments/validated/YYYY/MM/` | 可重現驗證結果 |
+| `experiments/finalized/YYYY/MM/` | 實驗最終結論 |
+| `solutions/{topic}/YYYY/MM/` | 問題解法與修復紀錄 |
+| `research/{topic}/YYYY/MM/` | 專題研究文件 |
+| `references/` | 參考文件與手冊 |
+| `decisions/YYYY/MM/` | 重整與治理決策紀錄 |
+| `archive/YYYY/MM/` | 一般歸檔 |
+| `archive/deep/` | 歷史快照（保留原貌，不回溯改名） |
+
+## 研究歷史與實驗索引
+
+→ **[實驗總索引](experiments/INDEX.md)**：所有已嘗試方向的成功/失敗/建議後續
+
+主要研究主題（依時間軸）：
+- 甲基化解析與 CIGAR 座標映射（2025-11）✅ 已完成
+- 距離計算、聚類分析、Bernoulli 度量（2025-11 ~ 2025-12）✅ 已完成
+- 統計顯著性分析（Fisher / PERMANOVA / Cramér's V）（2025-12 ~ 2026-01）✅ 已驗證
+- TP/FP 特徵富集分析與 F1 最佳化（2026-01）✅ F1=0.8481
+- Subsample 混樣甲基化偏差分析（2026-02 ~ 2026-03）⏳ 進行中
+- Purity-Aware 策略驗證（2026-02 ~ 2026-03）🔄 值得再探索
+
+## 命名規範
 
 ### 標準格式
 
-```
-{YYYYMMDD}_{中文說明目標}_{流水號}.md
-```
-
-### 範例
-
-- `20260111_顯著性分析實作_01.md`
-- `20260111_距離矩陣優化_02.md`
-- `20260112_TP_FP驗證流程_01.md`
-
-### 規則
-
-| 規則 | 說明 | 範例 |
-|------|------|------|
-| 日期格式 | YYYYMMDD（8位數字，無分隔） | `20260111` |
-| 說明部分 | 中文或英文，使用底線連接 | `顯著性分析實作` |
-| 流水號 | 兩位數字，同日期同主題遞增 | `01`, `02`, `03` |
-| 副檔名 | 統一使用 `.md` | - |
-| 禁止 | 空格、特殊符號 | - |
-
-### 特殊檔案
-
-| 類型 | 命名規則 | 範例 |
-|------|----------|------|
-| 長期架構文件 | 無日期前綴，snake_case | `system_overview.md` |
-| 目錄說明 | 固定名稱 | `README.md` |
-| 當前目標 | 固定名稱 | `CURRENT_FOCUS.md` |
-
----
-
-## 檔案內容格式
-
-每個 `.md` 檔案開頭必須包含元數據區塊：
-
-```markdown
-<!--
-建立時間: YYYY-MM-DD HH:MM
-目標: [簡述此檔案的目的]
-處理範圍: [此檔案涵蓋的範圍或模組]
-關聯檔案:
-  - path/to/related_file.md
--->
-
-# 標題
-
-[內容開始...]
+```text
+YYYYMMDD_主題_流水號.md
 ```
 
----
+### 例外
 
-## 工作流程指南
+1. 固定名稱：`README.md`、`CURRENT_FOCUS.md`、`INDEX.md`
+2. 長期架構文件：`snake_case.md`
+3. `archive/deep/` 歷史快照：維持原檔名
 
-### 新增文件
+## 文件狀態規範
 
-1. 確定文件類型，選擇正確的目錄
-2. 使用標準命名格式建立檔案
-3. 填寫開頭元數據區塊
-4. 撰寫內容
+### reports/
 
-### 歸檔文件
-
-1. 確認文件已完成且不再更新
-2. 移至 `archive/YYYY/MM/` 目錄
-3. 保持原始檔名
-
-### 刪除文件
-
-1. 先移至 `trash/YYYYMMDD/` 目錄
-2. 等待 30 天確認無需使用
-3. 可安全刪除
-
----
-
-## 各目錄詳細說明
-
-### architecture/
-
-存放專案核心架構文件，如系統設計、模組架構、核心流程圖。
-這些文件通常無日期前綴，內容需長期維護更新。
-
-**子目錄：**
-- `modules/` - 各模組的詳細設計文件
-
-### concepts/
-
-記錄開發新功能前的構想與思考過程。
-即使最終未採用，也保留作為決策參考。
-
-### plans/
-
-按年月分層存放正式的實作計劃。
-計劃確定後在此建立，完成後可移至 archive。
-
-**結構：**
-```
-plans/
-├── 2025/
-│   └── 12/
-└── 2026/
-    └── 01/
-```
-
-### solutions/
-
-記錄解決技術問題的過程與方案。
-包含問題描述、分析過程、解決方案、驗證結果。
-
-**結構（按任務目標 → 年 → 月分層）：**
-```
-solutions/
-├── debugging/           # 除錯相關
-│   └── 2025/12/
-├── investigation/       # 深入調查
-│   └── 2025/12/
-├── significance_analysis/  # 顯著性分析
-│   └── 2026/01/
-└── optimization/        # 效能優化
-    └── 2026/01/
-```
+1. `validated`：可重跑驗證，可供內部引用
+2. `finalized`：最終對外口徑
 
 ### experiments/
 
-分為 outputs（測試結果）與 parameters（參數研究）。
-記錄各種實驗的設置、結果與分析。
+1. `in_progress`：草稿/探索中
+2. `validated`：驗證完成
+3. `finalized`：整體結論定稿
 
-**子目錄：**
-- `outputs/` - 測試執行結果（按任務目標分層）
-- `parameters/` - 參數研究與比較
+## 建議工作流程
 
-**outputs/ 結構（按任務目標 → 年 → 月分層）：**
-```
-experiments/outputs/
-├── early_verification/     # 早期驗證
-│   └── 2025/11/
-├── distance_matrix/        # 距離矩陣測試
-│   └── 2025/12/
-├── clustering_validation/  # 分群驗證
-│   └── 2025/12/
-├── statistical_tests/      # 統計測試
-│   └── 2025/12/
-├── significance_analysis/  # 顯著性分析
-│   └── 2025/12/
-├── tp_fp_optimization/     # TP/FP 優化
-│   └── 2026/01/
-└── comprehensive_reports/  # 綜合報告
-    └── 2026/01/
-```
+1. 新增文件：先決定狀態層（in_progress/validated/finalized）
+2. 套用命名規範並填寫 metadata
+3. 更新關聯報告索引
+4. 需要歷史保留時移至 `archive/YYYY/MM/`
 
-### ai_sessions/
+## 如何新增文件
 
-記錄重要的 AI 對話，包含決策、修改內容、後續行動。
-使用標準模板確保資訊完整。
+1. 確定文件類型（實驗、報告、解決方案、計畫、AI 對話紀錄）
+2. 選擇狀態層（in_progress / validated / finalized）
+3. 套用命名：`YYYYMMDD_主題_流水號.md`
+4. 填寫 metadata 區塊（見下方範本）
+5. 若為實驗，同步更新 `experiments/INDEX.md`
+6. 若解決了重要問題，在 `solutions/` 下補充紀錄
 
-**結構：**
-```
-ai_sessions/
-├── 2025/
-│   └── 12/
-└── 2026/
-    └── 01/
-```
-
-**使用時機：**
-- 實作新功能（必須記錄）
-- 修復複雜 Bug（必須記錄）
-- 架構討論（必須記錄）
-- 簡單問答、代碼格式化（不需記錄）
-
-### data_specs/
-
-說明輸入/輸出數據格式與處理流程。
-包含 BAM、VCF 等格式規範。
-
-**子目錄：**
-- `input_formats/` - 輸入格式說明
-- `output_formats/` - 輸出格式說明
-- `pipelines/` - 數據處理流程
-
-### references/
-
-整合 API 文件、使用手冊、需求規格等參考資料。
-
-**子目錄：**
-- `api/` - API 規格文件
-- `manual/` - 使用手冊
-- `requirements/` - 需求規格
-
-### archive/
-
-歷史歸檔區，按年月分層。
-用於保存已完成但需要保留的文件。
-
-**子目錄：**
-- `YYYY/MM/` - 按年月分層的一般歸檔
-- `deep/` - 深度歸檔（需查詢歷史紀錄時使用）
-
-**deep/ 說明：**
-存放較早期或大規模重整前的完整結構備份。
-每個備份目錄應包含 `INDEX.md` 索引檔案以便查詢。
-
-### trash/
-
-待刪除檔案暫存區，按日期分層。
-檔案在此保留 30 天後可安全刪除。
-
----
-
-## AI 對話紀錄模板
-
-`ai_sessions/` 目錄下的檔案應使用以下模板：
-
+**Metadata 範本：**
 ```markdown
 <!--
 建立時間: YYYY-MM-DD HH:MM
-目標: [此次對話要解決的問題或達成的目標]
-處理範圍: [涉及的模組、檔案或功能]
+目標: [本檔案的目標或用途]
+處理範圍: [涵蓋的工作範圍]
 關聯檔案:
-  - [相關計劃或文件路徑]
+  - [相關檔案路徑]
 -->
-
-# {對話主題}
-
-## 對話資訊
-
-| 項目 | 內容 |
-|------|------|
-| 日期 | YYYY-MM-DD |
-| 時長 | 約 XX 分鐘 |
-| AI 模型 | Claude Opus 4.5 / 其他 |
-| 主要目的 | [簡述] |
-
-## 對話背景
-
-[說明發起此對話的原因]
-
-## 關鍵決策
-
-| 決策項目 | 決定內容 | 理由 |
-|----------|----------|------|
-| [決策一] | [選擇] | [為什麼這樣選] |
-
-## 產出成果
-
-### 修改的檔案
-- `path/to/file.cpp` - [修改說明]
-
-### 新建的檔案
-- `path/to/new_file.md` - [用途說明]
-
-## 後續行動
-
-- [ ] [待辦事項]
-
-## 對話摘要
-
-[3-5 句話總結此次對話的核心內容與結論]
 ```
 
----
+## 2026-03-03 盤點輸出
 
-## 常見問題
+1. 全專案檔案清冊：`reports/validated/2026/03/assets/20260303_repository_full_file_inventory_01.tsv`
+2. 全專案目錄清冊：`reports/validated/2026/03/assets/20260303_repository_directory_inventory_01.txt`
+3. docs 子樹清冊：`reports/validated/2026/03/assets/20260303_docs_file_inventory_01.tsv`
+4. 本次歸檔待審區：`archive/2026/03/20260303_ai_sessions_raw_artifacts_pending_review_01/`
 
-### Q: 檔案應該放在哪個目錄？
+## 相容性說明
 
-依據檔案類型：
-- 新想法 → `concepts/`
-- 確定計劃 → `plans/`
-- 解決問題 → `solutions/`
-- 測試結果 → `experiments/`
-- AI 對話 → `ai_sessions/`
-
-### Q: 如何處理舊格式的檔案？
-
-按照命名規則重新命名，並移至適當目錄。
-
-### Q: 流水號如何決定？
-
-同一天、同主題的檔案依建立順序編號：01, 02, 03...
-
-### Q: 長期架構文件需要日期前綴嗎？
-
-不需要。如 `system_overview.md`、`core_workflow.md` 等長期維護的文件使用 snake_case 即可。
-
----
-
-## 版本歷史
-
-| 日期 | 變更說明 |
-|------|----------|
-| 2026-01-11 | 重新設計文檔庫架構，統一命名規範 |
+- 2026-02-28 後已啟用新分層與命名規範。
+- 舊路徑可能已重整，請優先從 `reports/finalized` 與 `reports/validated` 查找。

@@ -1,75 +1,41 @@
 <!--
-最後更新: 2026-01-12 00:00
+建立時間: 2026-01-12 00:00
+更新時間: 2026-03-05 10:00
+狀態: validated
+資料來源:
+  - docs/standards/20260228_文件命名與狀態管理規範_01.md
+  - docs/standards/20260228_output軟連結與版本控管規範_01.md
+  - scripts/analysis/check_ai_agent_readiness.sh
 -->
 
 # 當前目標
 
-## 進行中
+## 1. 目前狀態
 
-（目前無進行中的主要目標）
+1. docs 重整已完成核心落地：
+   - 命名：`YYYYMMDD_主題_流水號.md`
+   - 報告分層：`reports/validated|finalized`
+   - 實驗分層：`experiments/in_progress|validated|finalized`
+2. `output/` 入口已固定為軟連結：
+   - `output -> /big8_disk/liaoyoyo2001/InterSubMod_runs/output`
+3. Knowledge MCP 已接入：
+   - `.mcp.json` 指向 `/big8_disk/liaoyoyo2001/knowledge/scripts/mcp/knowledge_server.py`
 
-## 已完成（本週）
+## 2. AI Agent 主要入口
 
-- 文檔庫架構重整（第二階段）- 2026-01-12
-  - 修復 trash 目錄：舊結構移至 `archive/deep/2025-12_old_structure/`
-  - 建立二級歸檔結構：`solutions/` 和 `experiments/outputs/` 按任務目標分層
-  - 新增 Claude Code Hooks 自動化提醒（程式碼修改、git commit、會話結束）
-  - 更新 CLAUDE.md 加入文檔管理規範與 Hooks 說明
-  - 建立深度歸檔索引 `archive/deep/2025-12_old_structure/INDEX.md`
+1. docs 導航：`docs/README.md`
+2. 研究歷史索引：`docs/experiments/INDEX.md`（已試驗方向、成功/失敗結論、建議後續）
+3. Agent 手冊：`docs/references/manual/20260301_AI_Agent_快速操作手冊_01.md`
+4. 健康檢查：`scripts/analysis/check_ai_agent_readiness.sh`
+5. 文件規範：`docs/standards/README.md`
 
-- 文檔庫架構重整（第一階段）- 2026-01-11
-  - 建立新目錄結構（10 個主要目錄）
-  - 遷移 94 個檔案到新架構
-  - 統一檔案命名規範（YYYYMMDD_說明_流水號.md）
-  - 建立 README.md 文檔庫說明
-  - 建立 CURRENT_FOCUS.md 當前目標檔案
+## 3. 當前進行中
 
-## 阻塞問題
+1. 降低舊語彙殘留（例如舊輸出路徑與舊文件分層名稱）。
+2. 收斂腳本路徑設定（優先使用可配置 `OUTPUT_ROOT` 或 `output/` 入口）。
+3. 清理不必要空目錄，降低 Agent 探索噪音。
 
-（目前無阻塞問題）
+## 4. 阻塞與風險
 
----
-
-## 新架構摘要
-
-| 目錄 | 結構 | 用途 |
-|------|------|------|
-| architecture/ | 扁平 | 專案主軸架構說明 |
-| concepts/ | 扁平 | 目標建構過程的構想 |
-| plans/ | 年/月 | 迭代計劃表 |
-| solutions/ | 任務/年/月 | 問題解決報告 |
-| experiments/outputs/ | 任務/年/月 | 測試輸出結果 |
-| experiments/parameters/ | 扁平 | 參數研究 |
-| ai_sessions/ | 年/月 | AI 對話紀錄 |
-| data_specs/ | 類別 | 數據規格 |
-| references/ | 類別 | 參考文件 |
-| archive/ | 年/月 + deep/ | 歷史歸檔 |
-
-### Hooks 自動化
-
-| 觸發條件 | 提醒內容 |
-|----------|----------|
-| 編輯 .cpp/.hpp/.h | 編譯 + 測試 |
-| git commit | 確認測試 + 文檔 |
-| 會話結束 | 撰寫執行報告 |
-
----
-
-## 快速參考
-
-### 檔案命名格式
-
-```
-{YYYYMMDD}_{中文說明目標}_{流水號}.md
-```
-
-### 目錄選擇指南
-
-| 我想要... | 放在... |
-|-----------|---------|
-| 記錄新想法/構想 | `concepts/` |
-| 建立正式計劃 | `plans/YYYY/MM/` |
-| 記錄問題解決過程 | `solutions/{任務目標}/YYYY/MM/` |
-| 保存測試結果 | `experiments/outputs/{任務目標}/YYYY/MM/` |
-| 記錄 AI 對話 | `ai_sessions/YYYY/MM/` |
-| 查詢歷史結構 | `archive/deep/` |
+1. `archive/deep/` 為 immutable 快照，保留歷史失效連結（不回寫）。
+2. 活躍腳本仍有部分硬編碼歷史路徑，可能影響跨專案重用。
