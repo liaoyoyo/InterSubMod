@@ -21,6 +21,11 @@ hooks:
 2. **分析現有架構**：
    - 閱讀相關標頭檔和實作檔
    - 確認依賴關係和介面設計
+2.5. **查閱知識庫確認規格**：
+   - 修改 BAM 解析相關程式碼 → 讀 `Knowledge/03_file_formats/bam_format.md`
+   - 修改 VCF 解析相關程式碼 → 讀 `Knowledge/03_file_formats/vcf_clairs_to.md`
+   - 修改甲基化解析 → 讀 `Knowledge/03_file_formats/modcall_vcf.md`
+   - 路徑：`/big8_disk/liaoyoyo2001/Knowledge/`
 3. **撰寫程式碼**：
    - 遵循 C++17 標準
    - 遵循專案 .clang-format 規範

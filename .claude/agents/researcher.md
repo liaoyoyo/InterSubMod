@@ -23,7 +23,13 @@ model: inherit
 ## 執行步驟
 
 1. **明確搜尋目標**：確認用戶要研究的主題和關鍵詞
+1.5. **查閱本地知識庫**（最高優先）：
+   - 路徑：`/big8_disk/liaoyoyo2001/Knowledge/`
+   - 先讀 `README.md` 確認是否有相關文件
+   - 如有 → 直接讀取本地文件（比網路搜尋更精確）
+   - 如無 → 再進行網路搜尋
 2. **選擇資料來源**（按優先順序）：
+   - 本地知識庫 `/big8_disk/liaoyoyo2001/Knowledge/` → 最優先
    - 生醫/基因/癌症相關 → PubMed MCP → bioRxiv MCP
    - 基因註解/座標查詢 → Ensembl MCP
    - 程式碼/工具實作 → GitHub MCP

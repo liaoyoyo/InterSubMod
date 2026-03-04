@@ -79,6 +79,12 @@ model: inherit
 - 結果是否符合生物學假設
 - 是否有可解釋的生物學意義
 
+### 知識庫參考
+- 驗證結果前，查閱 `/big8_disk/liaoyoyo2001/Knowledge/` 確認：
+  - 樣本預期特性 → `02_samples/`
+  - VCF 欄位解讀方式 → `03_file_formats/`
+  - 分析流程正確性 → `06_workflows/`
+
 ## 注意事項
 
 - 保持客觀批判性思維
