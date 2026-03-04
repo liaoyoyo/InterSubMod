@@ -1,5 +1,19 @@
 # CLAUDE.md - Claude Code 專案指南
 
+## 繼續研究前的必讀清單（每次對話開始時強制執行）
+
+**每次開始研究/分析任務前，必須依序閱讀以下文件，不得省略：**
+
+1. **`docs/CURRENT_FOCUS.md`** — 當前進行中的事項、阻塞點與風險
+2. **`docs/experiments/INDEX.md`** — 過去所有研究方向的成功/失敗結論與建議後續
+3. **`docs/README.md`** — 如需了解文件導航與查閱路徑
+
+**目的**：避免重複已失敗的方向、對齊當前最優先目標、了解哪些結論已驗證、哪些尚未解決。
+
+**觸發條件**：開始任何研究分析、實驗設計、程式改進、或延續前次工作時，此步驟為必要前置。
+
+---
+
 ## 專案概述
 
 **InterSubMod (Inter-Subclonal Methylation Analysis)** 是一個生物資訊工具，專門用於透過長讀取 (Long-read) 測序數據偵測腫瘤樣本中的亞克隆結構 (Subclonal Structure)。本專案整合甲基化模式 (Methylation Patterns)、體細胞變異 (Somatic SNVs) 以及單倍體型 (Haplotypes) 來分析表觀遺傳異質性 (Epigenetic Heterogeneity)。
@@ -58,6 +72,42 @@ cd build && ctest --output-on-failure
 ```bash
 # 執行所有測試
 cd build && ctest
+```
+
+---
+
+## 實驗室知識庫 (Knowledge Base)
+
+**路徑**：`/big8_disk/liaoyoyo2001/Knowledge/`
+
+當對話涉及以下主題時，**必須**先查閱知識庫對應文件確認細節，再進行回答或操作：
+
+| 主題 | 查閱路徑 | 觸發關鍵字 |
+|------|---------|-----------|
+| 資料總覽與路徑 | `01_data_overview/` | 資料位置、目錄結構、儲存空間 |
+| 癌症樣本資訊 | `02_samples/` | HCC1395, COLO829, H1437, H2009, HG002, purity, subsample |
+| 檔案格式規格 | `03_file_formats/` | VCF, BAM, MM/ML, FILTER, phased VCF, modcall, HP tag |
+| 資料庫與參考集 | `04_databases/` | PON, gnomAD, dbSNP, CoLoRSdb, SEQC2, truth set, reference genome |
+| 工具使用與參數 | `05_tools/` | LongPhase, ClairS, ClairS-TO, DeepSomatic, InterSubMod |
+| 分析流程 | `06_workflows/` | somatic calling, phasing, haplotagging, methylation analysis, benchmark |
+| 腳本操作說明 | `07_scripts/` | auto_run.sh, benchmark script, 自動化腳本 |
+| 論文與參考資料 | `08_references/` + `paper/` | paper, 論文, server paths |
+
+### 查閱深度指引
+
+| 情境 | 查閱深度 | 動作 |
+|------|---------|------|
+| 快速確認（路徑、名稱） | 淺層 | 讀 `README.md` 速查表 |
+| 格式或參數細節 | 中層 | 讀對應子目錄的特定文件 |
+| 完整流程或工具操作 | 深層 | 讀 workflow + tool 文件，交叉驗證 |
+| 工具原始碼邏輯 | 最深層 | 讀 `codebase/` 目錄下的原始碼 |
+
+### 查閱原則
+
+- **不要憑記憶回答可以查證的事實**：檔案路徑、工具參數、VCF 欄位定義等務必查閱確認
+- **引用來源**：回答時標註「根據 Knowledge/03_file_formats/vcf_clairs_to.md」
+- **發現過時資訊時主動提醒使用者**
+
 ---
 
 ## 常用工作流程
