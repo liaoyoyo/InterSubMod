@@ -246,6 +246,31 @@ cd build && make -j$(nproc)
 
 ---
 
+## GitHub 操作規範
+
+Claude Code 在非互動式 shell 中執行，**不會載入 `.bashrc`**，因此 `.bashrc` 內的 read/write token 切換 wrapper 不生效。直接呼叫 `gh` 會使用 `GH_TOKEN`（read-only token），導致寫入操作 403 錯誤。
+
+### 所有 GitHub 寫入操作，必須使用 wrapper 腳本
+
+```bash
+# ✅ 正確做法 — 使用 gh-write.sh
+./scripts/utils/gh-write.sh pr create --base main --head develop --title "..."
+./scripts/utils/gh-write.sh pr merge 4 --squash
+./scripts/utils/gh-write.sh release create v1.0.0
+./scripts/utils/gh-write.sh issue create --title "..."
+
+# ❌ 錯誤做法 — 直接呼叫 gh（write token 不生效）
+gh pr create ...
+```
+
+**Write 操作清單**（需用 `gh-write.sh`）：`pr create`, `pr merge`, `pr close`, `pr edit`, `release create`, `issue create`, `issue close`, `issue edit`
+
+**Read 操作**（可直接用 `gh`）：`pr list`, `pr view`, `issue list`, `release list`, `repo view`
+
+Token 設定檔：`~/.config/gh/tokens.env`（`GH_TOKEN_WRITE` 欄位）
+
+---
+
 ## Hooks 配置
 
 專案使用 Claude Code Hooks 自動化檢查流程，配置於 `.claude/settings.local.json`。
