@@ -370,4 +370,9 @@ for subdir in "${SUBDIRS[@]}"; do
     echo -e "${RUN_TAG}\t${subdir}\t${purity_pct}\t${tumor_bam}\t${somatic_vcf}\t${source_mm}\t${source_ml}\t${step01}\t${step02}\t${step03}\t${cleanup_status}\t${tp_regions}\t${fp_regions}\t${baseline_f1}\t${filtered_f1}\t${f1_delta}\t${notes}\t${output_dir}" >> "${STATUS_TSV}"
 done
 
+python3 "${SCRIPT_DIR}/build_purity_aware_tables.py" \
+    --status-tsv "${STATUS_TSV}" \
+    --sample "${SAMPLE}" \
+    --output-dir "${STATUS_DIR}"
+
 log "All tasks complete. Status table: ${STATUS_TSV}"

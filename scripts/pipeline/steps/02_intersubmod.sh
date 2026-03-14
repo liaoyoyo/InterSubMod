@@ -155,6 +155,9 @@ else
     fi
     if [[ -f "${TP_OUTPUT}/significance_summary.csv" ]]; then
         TP_REGIONS=$(tail -n +2 "${TP_OUTPUT}/significance_summary.csv" | wc -l)
+        python3 "${SCRIPT_DIR}/../../analysis/extract_label_first_metrics.py" \
+            --summary-csv "${TP_OUTPUT}/significance_summary.csv" \
+            --output-tsv "${TP_OUTPUT}/label_first_metrics.tsv"
         log_info "  TP analysis complete: ${TP_REGIONS} regions (${TP_ELAPSED}s)"
     else
         log_error "  TP significance_summary.csv not found!"
@@ -175,6 +178,9 @@ else
     fi
     if [[ -f "${FP_OUTPUT}/significance_summary.csv" ]]; then
         FP_REGIONS=$(tail -n +2 "${FP_OUTPUT}/significance_summary.csv" | wc -l)
+        python3 "${SCRIPT_DIR}/../../analysis/extract_label_first_metrics.py" \
+            --summary-csv "${FP_OUTPUT}/significance_summary.csv" \
+            --output-tsv "${FP_OUTPUT}/label_first_metrics.tsv"
         log_info "  FP analysis complete: ${FP_REGIONS} regions (${FP_ELAPSED}s)"
     else
         log_error "  FP significance_summary.csv not found!"
@@ -183,4 +189,3 @@ else
 fi
 
 log_info "[Step 02] InterSubMod analysis complete."
-
