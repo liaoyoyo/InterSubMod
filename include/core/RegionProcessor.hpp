@@ -41,6 +41,8 @@ struct RegionResult {
     int num_valid_pairs;         ///< Number of valid distance pairs
     int num_invalid_pairs;       ///< Number of invalid pairs (insufficient overlap)
     double avg_common_coverage;  ///< Average common CpG coverage per pair
+    double pairwise_mean_distance;    ///< Mean pairwise distance across valid pairs
+    double pairwise_median_distance;  ///< Median pairwise distance across valid pairs
 
     // Significance analysis results (Cluster-First)
     bool significance_computed;  ///< Whether significance analysis was run
@@ -50,6 +52,11 @@ struct RegionResult {
     int local_best_cluster;      ///< Best cluster ID
     double heuristic_score;      ///< Combined heuristic score [0-1]
     bool passed_gating;          ///< Whether passed gating (global_p <= 0.1)
+    double cluster_permanova_f;      ///< Cluster-based PERMANOVA pseudo-F
+    double cluster_permanova_p;      ///< Cluster-based PERMANOVA p-value
+    bool cluster_permanova_valid;    ///< Whether cluster-based PERMANOVA is valid
+    double cluster_dispersion_p;     ///< Cluster-based dispersion p-value
+    bool cluster_dispersion_warning; ///< Whether cluster-based dispersion warns
 
     // Label-First verification results
     bool label_test_computed;    ///< Whether label-first test was run
@@ -57,6 +64,16 @@ struct RegionResult {
     double label_p_value;        ///< Label permutation test p-value (deprecated, use Stage 1)
     bool label_significant;      ///< Whether label test is significant (p <= 0.05)
     std::string dominant_label;  ///< Which label dimension is most significant ("hp", "allele", "none")
+    double label_hp_permanova_f;      ///< Label-based HP PERMANOVA pseudo-F
+    double label_hp_permanova_p;      ///< Label-based HP PERMANOVA p-value
+    bool label_hp_permanova_valid;    ///< Whether label-based HP PERMANOVA is valid
+    double label_hp_dispersion_p;     ///< Label-based HP dispersion p-value
+    bool label_hp_dispersion_warning; ///< Whether label-based HP dispersion warns
+    double label_allele_permanova_f;      ///< Label-based allele PERMANOVA pseudo-F
+    double label_allele_permanova_p;      ///< Label-based allele PERMANOVA p-value
+    bool label_allele_permanova_valid;    ///< Whether label-based allele PERMANOVA is valid
+    double label_allele_dispersion_p;     ///< Label-based allele dispersion p-value
+    bool label_allele_dispersion_warning; ///< Whether label-based allele dispersion warns
 
     // Multi-Stage HP Verification results (NEW)
     // Stage 1: HP Family Merged Test
@@ -115,6 +132,8 @@ struct RegionResult {
           num_valid_pairs(0),
           num_invalid_pairs(0),
           avg_common_coverage(0.0),
+          pairwise_mean_distance(0.0),
+          pairwise_median_distance(0.0),
           significance_computed(false),
           global_p_value(1.0),
           cramers_v(0.0),
@@ -122,11 +141,26 @@ struct RegionResult {
           local_best_cluster(-1),
           heuristic_score(0.0),
           passed_gating(false),
+          cluster_permanova_f(0.0),
+          cluster_permanova_p(1.0),
+          cluster_permanova_valid(false),
+          cluster_dispersion_p(1.0),
+          cluster_dispersion_warning(false),
           label_test_computed(false),
           label_delta(0.0),
           label_p_value(1.0),
           label_significant(false),
           dominant_label("none"),
+          label_hp_permanova_f(0.0),
+          label_hp_permanova_p(1.0),
+          label_hp_permanova_valid(false),
+          label_hp_dispersion_p(1.0),
+          label_hp_dispersion_warning(false),
+          label_allele_permanova_f(0.0),
+          label_allele_permanova_p(1.0),
+          label_allele_permanova_valid(false),
+          label_allele_dispersion_p(1.0),
+          label_allele_dispersion_warning(false),
           hp_merged_delta(0.0),
           hp_merged_p(1.0),
           hp_merged_sig(false),
