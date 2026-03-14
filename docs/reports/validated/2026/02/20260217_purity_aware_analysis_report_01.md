@@ -4,7 +4,7 @@
 處理範圍: HCC1395_DORADO 5 級 purity (19.4%-100%)
 關聯檔案:
   - docs/reports/validated/2026/02/20260216_跨樣本跨純度TP_FP_F1綜合分析報告_01.md
-  - docs/ai_sessions/2026/02/2026-02-13_HCC1395_DORADO_subsample_purity_20260213_dorado_purity_full_完整分析報告.md
+  - docs/provenance/ai_sessions/2026/02/2026-02-13_HCC1395_DORADO_subsample_purity_20260213_dorado_purity_full_完整分析報告.md
 -->
 
 # Purity-Aware 分析報告：TP/FP 差異、FN 回收、門檻優化

@@ -93,7 +93,7 @@
 - 做出關鍵技術決策後
 - 會話結束前
 
-**輸出位置**：`docs/ai_sessions/{YYYY}/{MM}/`
+**輸出位置**：`docs/provenance/ai_sessions/{YYYY}/{MM}/`
 
 ---
 

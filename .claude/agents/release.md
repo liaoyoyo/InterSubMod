@@ -96,7 +96,7 @@ docker-compose down
 
 ## AI 對話報告撰寫
 
-任務完成後，撰寫執行報告到 `docs/ai_sessions/{YYYY}/{MM}/`
+任務完成後，撰寫執行報告到 `docs/provenance/ai_sessions/{YYYY}/{MM}/`
 
 檔案命名：`{YYYYMMDD}_{對話主題}_執行報告_01.md`
 

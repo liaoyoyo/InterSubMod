@@ -1,5 +1,6 @@
 <!--
 建立時間: 2026-01-13 18:50
+更新時間: 2026-03-12 00:40
 目標: 甲基化顯著性與 F1 最佳化研究總覽
 處理範圍: 探索甲基化特徵與 SNV TP/FP 分類的關係
 關聯檔案:
@@ -41,29 +42,46 @@ InterSubMod 透過甲基化異質性分析偵測體細胞變異 (SNV)，但目�
 
 ---
 
-## 資料夾結構
+## 現行目錄邊界
 
 ```
 methylation_f1_optimization/
-├── README.md                          # 本文件
-├── 01_data_exploration/               # 數據探索
-│   ├── vcf_field_analysis.md          # VCF 欄位分析
-│   ├── significance_distribution.md   # 顯著性分布分析
-│   └── raw_data_sampling/             # 原始數據抽樣
-│       ├── tp_samples/                # TP 位點抽樣
-│       └── fp_samples/                # FP 位點抽樣
-├── 02_feature_studies/                # 特徵研究
-│   ├── single_features/               # 單一特徵分析
-│   └── combined_features/             # 組合特徵分析
-├── 03_experiments/                    # 實驗記錄
-│   └── exp_001_xxx/                   # 實驗目錄 (含假說、方法、結果)
-├── 04_scripts/                        # 分析腳本
-│   ├── exploration/                   # 探索性腳本
-│   ├── analysis/                      # 分析腳本
-│   └── validation/                    # 驗證腳本
-├── 05_results/                        # 整合結果
-└── 06_code_patches/                   # 實驗性程式碼補丁
+├── README.md
+├── 2026/01/*.md                       # 正式研究文檔
+└── assets/2026/01/                    # 文檔直接引用的圖表資產
 ```
+
+### 邊界說明
+
+1. `docs/research/methylation_f1_optimization/`
+   - 只保留研究文檔與最小必要圖表資產
+2. `scripts/analysis/legacy/methylation_f1_optimization/`
+   - 承接歷史研究分析腳本
+3. `docs/archive/2026/03/20260312_docs_round2_pending_review_01/`
+   - 承接原本混在 `docs/research/` 內的空骨架與舊工作區結構，保留待審
+
+## 研究文件
+
+1. [docs/research/methylation_f1_optimization/2026/01/20260115_phase1_report_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/research/methylation_f1_optimization/2026/01/20260115_phase1_report_01.md)
+2. [docs/research/methylation_f1_optimization/2026/01/20260115_phase2_report_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/research/methylation_f1_optimization/2026/01/20260115_phase2_report_01.md)
+3. [docs/research/methylation_f1_optimization/2026/01/20260115_phase3_verification_report_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/research/methylation_f1_optimization/2026/01/20260115_phase3_verification_report_01.md)
+4. [docs/research/methylation_f1_optimization/2026/01/20260115_phase4_methylation_combination_report_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/research/methylation_f1_optimization/2026/01/20260115_phase4_methylation_combination_report_01.md)
+5. [docs/research/methylation_f1_optimization/2026/01/20260115_final_conclusion_report_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/research/methylation_f1_optimization/2026/01/20260115_final_conclusion_report_01.md)
+
+## 支援腳本
+
+1. [scripts/analysis/legacy/methylation_f1_optimization/phase1_analysis.py](/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/legacy/methylation_f1_optimization/phase1_analysis.py)
+2. [scripts/analysis/legacy/methylation_f1_optimization/phase2_analysis.py](/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/legacy/methylation_f1_optimization/phase2_analysis.py)
+3. [scripts/analysis/legacy/methylation_f1_optimization/phase3_verification.py](/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/legacy/methylation_f1_optimization/phase3_verification.py)
+4. [scripts/analysis/legacy/methylation_f1_optimization/phase4_methylation_combination.py](/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/legacy/methylation_f1_optimization/phase4_methylation_combination.py)
+
+## 圖表資產
+
+1. `docs/research/methylation_f1_optimization/assets/2026/01/phase1_plots/`
+2. `docs/research/methylation_f1_optimization/assets/2026/01/phase2_plots/`
+3. `docs/research/methylation_f1_optimization/assets/2026/01/phase3_plots/`
+4. `docs/research/methylation_f1_optimization/assets/2026/01/phase4_plots/`
+5. `docs/research/methylation_f1_optimization/assets/2026/01/longphase_s_qual_af_analysis.png`
 
 ---
 
@@ -194,4 +212,4 @@ print(f"CramersV AUC: {auc:.4f}")
 
 - 計劃文件：`docs/plans/2026/01/20260113_甲基化F1研究計劃_01.md`
 - 數據說明：`data/README.md`
-- AI 對話記錄：`docs/ai_sessions/2026/01/`
+- AI 對話記錄：`docs/provenance/ai_sessions/2026/01/`

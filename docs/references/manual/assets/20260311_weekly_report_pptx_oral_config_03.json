@@ -1,0 +1,491 @@
+{
+  "meta": {
+    "kicker": "InterSubMod 研究週報簡報",
+    "deck_title": "InterSubMod 研究主線整合週報",
+    "deck_subtitle": "2026-03-05 至 2026-03-11，含 phase 2 與 annotation layer",
+    "summary_line": "主結論已收斂為：caller-first、methylation-support、annotation / QC / artifact triage 三層分工。",
+    "generated_date": "2026-03-11",
+    "audience_mode": "研究口頭報告型",
+    "author": "廖子游",
+    "source_report": "/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_01.md",
+    "output_pptx": "/big8_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_oral_v03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_oral_v03.pptx",
+    "assets_dir": "/big8_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_oral_v03/assets/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_oral_v03_assets",
+    "footer": "InterSubMod weekly research review deck rebuilt for oral presentation."
+  },
+  "theme": {
+    "dark": "1E2A44",
+    "bg": "F7F3EC",
+    "bg_alt": "EEE6DB",
+    "accent": "C76B50",
+    "accent2": "6E9D8A",
+    "text": "17202A",
+    "muted": "5E6572",
+    "light_text": "F8F4EE",
+    "light_muted": "D6DCE5",
+    "line": "D6CCBF",
+    "font_title": "Georgia",
+    "font_body": "Calibri"
+  },
+  "deck": {
+    "key_findings": [
+      {
+        "title": "paired pure 已完成正式定稿級 rerun",
+        "body": "HCC1395 5kHz paired 上，InterSubMod F1 由 LongPhase-S 0.8522 小幅推到 0.8532；增益主要來自額外移除 83 個 FP，而不是大量救回 TP。DORADO paired 則幾乎持平略負，證明 5kHz 的確是較 noisy 的主實驗樣本。",
+        "accent": "C76B50"
+      },
+      {
+        "title": "TO candidate-specific rescue 已正式成立",
+        "body": "HCC1395 5kHz TO 與 HCC1395 DORADO TO 都支持相同高層結論：caller-first 穩定成立；甲基特徵不是全負效果，但在同一 caller gate 後仍只作 support。",
+        "accent": "6E9D8A"
+      },
+      {
+        "title": "phase 2 已排除 raw paired 直上最終輸出的方向",
+        "body": "paired raw pileup / full model 確實有更多召回，但 precision 成本太高。paired 場景目前仍應以 merged caller + LongPhase + InterSubMod 作為正式口徑。",
+        "accent": "7B5B9A"
+      },
+      {
+        "title": "annotation layer 已可制度化輸出",
+        "body": "Quality_Score 適合升級成 support annotation，PairwiseMedianDist 適合升級成 dataset-aware support annotation，hp_assign_rate 應降階為 phase/QC annotation。",
+        "accent": "54708C"
+      }
+    ],
+    "framework": {
+      "problem_statement": "核心問題：哪些 caller 邊緣位點值得救回、哪些位點更像 artifact 或 dataset-specific 偏差。",
+      "layers": [
+        {
+          "title": "第一層：caller-first",
+          "body": "先用 GQ / QUAL / candidate-eligible 定義可救回的邊緣集合。",
+          "fill": "1E2A44",
+          "title_color": "F8F4EE",
+          "body_color": "D6DCE5"
+        },
+        {
+          "title": "第二層：methylation-support",
+          "body": "用 Quality、Pairwise、agreement 等甲基與標籤訊號補強排序。",
+          "fill": "EAD8CF",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        },
+        {
+          "title": "第三層：annotation / QC / artifact",
+          "body": "把 dataset-aware support、phase completeness 與 artifact triage 制度化輸出。",
+          "fill": "D6E7DF",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        }
+      ],
+      "quadrants": [
+        {
+          "title": "HCC1395 5kHz paired",
+          "body": "第一主實驗。最 noisy，但 paired 條件最完整，適合做規則壓力測試。",
+          "fill": "F4DFD5",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        },
+        {
+          "title": "HCC1395 DORADO paired",
+          "body": "第一交叉驗證。用同樣本不同平台檢查規則可攜性。",
+          "fill": "DDEBE5",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        },
+        {
+          "title": "HCC1395 5kHz TO",
+          "body": "最能看見 methylation-support 的 TO 場景，目前 support 成立但仍低於最佳 caller-only。",
+          "fill": "F4DFD5",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        },
+        {
+          "title": "HCC1395 DORADO TO",
+          "body": "TO 跨平台驗證已補齊。高層結論與 5kHz TO 一致，但 Pairwise 方向不同。",
+          "fill": "DDEBE5",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        }
+      ],
+      "scope_note": "注意：5kHz TO 的 snapshot 來自 full tagged BAM；DORADO TO 目前是 candidate-window subset tagged BAM，因此 read-level 圖只能做方向比較，不能做跨 dataset 絕對值硬比。"
+    },
+    "goals": [
+      {
+        "goal": "paired pure 正式重跑",
+        "subgoal": "5kHz / DORADO 新版欄位 rerun",
+        "completion": "100%",
+        "conclusion": "5kHz 有正增益；DORADO 幾乎持平略負。"
+      },
+      {
+        "goal": "TO 主流程打通",
+        "subgoal": "ClairS-TO → LongPhase-TO → InterSubMod",
+        "completion": "100%",
+        "conclusion": "5kHz TO pilot 已可重跑，LongPhase-TO phase 不改變 call set，本輪增益主要來自後段甲基過濾。"
+      },
+      {
+        "goal": "candidate-specific rescue",
+        "subgoal": "5kHz TO、DORADO paired、DORADO TO",
+        "completion": "100%",
+        "conclusion": "TO 下甲基 support 成立，但沒有穩定超過最佳 caller-only。"
+      },
+      {
+        "goal": "phase 2 benchmark / feature",
+        "subgoal": "raw pileup/full、finer interval、orthogonality",
+        "completion": "90%",
+        "conclusion": "paired raw 不適合直接取代 merged caller；TO 的 pileup vs full model 尚未補齊，Pairwise 明顯 dataset-dependent。"
+      },
+      {
+        "goal": "annotation layer 回接",
+        "subgoal": "把 phase 2 結果制度化輸出",
+        "completion": "90%",
+        "conclusion": "Quality / Pairwise 可升級成 annotation；hp_assign 降為 QC，但尚未接入 dashboard / round summary。"
+      },
+      {
+        "goal": "文件與流程制度化",
+        "subgoal": "週報、Agent、Skills、PPTX 工作流",
+        "completion": "100%",
+        "conclusion": "週報與簡報已可重複生成。"
+      }
+    ],
+    "goal_summary_cards": [
+      {
+        "title": "研究方向已收斂",
+        "body": "從大量試規則，推進到明確分層與制度化輸出。",
+        "fill": "1E2A44",
+        "title_color": "F8F4EE",
+        "body_color": "D6DCE5"
+      },
+      {
+        "title": "跨平台驗證已具雛形",
+        "body": "5kHz 與 DORADO 已形成 paired / TO 對照矩陣。",
+        "fill": "C76B50",
+        "title_color": "F8F4EE",
+        "body_color": "F8F4EE"
+      },
+      {
+        "title": "下一步應先做 annotation 輸出",
+        "body": "現階段先接報告、排序與診斷層，不急著改核心 hard rule。",
+        "fill": "6E9D8A",
+        "title_color": "F8F4EE",
+        "body_color": "F8F4EE"
+      }
+    ],
+    "timeline": [
+      {
+        "date": "03-05",
+        "title": "三路對照與全樣本規則拆解",
+        "result": "確認 mixed purity 容易混入組織差異，主線改成純樣本優先。"
+      },
+      {
+        "date": "03-07",
+        "title": "paired rerun 與 TO pilot",
+        "result": "paired pure 與 TO 主流程正式跑通，確立 5kHz 主實驗樣本地位。"
+      },
+      {
+        "date": "03-08",
+        "title": "candidate-specific rescue",
+        "result": "甲基 support 在 TO 下成立，但不穩定跨樣本。"
+      },
+      {
+        "date": "03-11",
+        "title": "phase 2 + annotation",
+        "result": "paired raw 對照與 finer interval 已回接 annotation layer。"
+      }
+    ],
+    "to_rescue": {
+      "hcc1395_5khz_to": {
+        "label": "HCC1395 5kHz TO",
+        "caller_only": {
+          "rule": "caller-only | QUAL>=10 or GQ>=20",
+          "tp": "491",
+          "fp": "118",
+          "delta_f1": "+0.006824"
+        },
+        "methyl_support": {
+          "rule": "caller+甲基 | GQ>=10 + Pairwise>=0.20",
+          "tp": "300",
+          "fp": "68",
+          "delta_f1": "+0.004219"
+        },
+        "label_support": {
+          "rule": "caller+標籤 | GQ>=10 + agreement_positive",
+          "tp": "148",
+          "fp": "25",
+          "delta_f1": "+0.002163"
+        },
+        "interpretation": "甲基不是全負效果，而且確實救回一批 TP；但在同一 caller gate 後，仍未超過最佳 caller-only。",
+        "note": "定位：caller-first + methylation-support",
+        "note_fill": "1E2A44",
+        "note_color": "F8F4EE"
+      },
+      "hcc1395_dorado_to": {
+        "label": "HCC1395 DORADO TO",
+        "caller_only": {
+          "rule": "caller-only | GQ>=10",
+          "tp": "40",
+          "fp": "11",
+          "delta_f1": "+0.000540"
+        },
+        "methyl_support": {
+          "rule": "甲基-only | Quality>=60",
+          "tp": "208",
+          "fp": "77",
+          "delta_f1": "+0.002620"
+        },
+        "label_support": {
+          "rule": "甲基-only | Pairwise<=0.20",
+          "tp": "173",
+          "fp": "60",
+          "delta_f1": "+0.002217"
+        },
+        "interpretation": "DORADO TO 也證明甲基不是全負效果，但 Pairwise 方向與 5kHz TO 不同，顯示 support 具有 dataset-dependence。",
+        "note": "定位：support 成立，但仍不可升級成全域規則；本輪以 candidate-window subset BAM 完成",
+        "note_fill": "C76B50",
+        "note_color": "F8F4EE"
+      }
+    },
+    "phase2": {
+      "bullets": [
+        "5kHz paired：raw pileup/full 確實多召回，但 precision 成本太高，F1 明顯低於 merged output。",
+        "DORADO paired：raw full 比 raw pileup 更高，但仍低於 merged output，更低於 LongPhase-S / InterSubMod。",
+        "paired 問題下，raw caller 不適合直接取代 merged caller 當正式輸出。",
+        "phase 2 的價值在於辨識『召回空間在哪裡』，不是直接把 raw caller 當最終口徑。"
+      ],
+      "callout": "paired 的正式主線仍應維持 merged caller → LongPhase → InterSubMod"
+    },
+    "feature_roles": [
+      {
+        "feature": "GQ",
+        "role": "caller-first 主規則",
+        "meaning": "目前最穩定、跨 dataset 最一致的 rescue 訊號。",
+        "limit": "不能直接解讀成 ClairS / ClairS-TO 一開始就應全域放寬；它更像 caller-side threshold / ranking 訊號。"
+      },
+      {
+        "feature": "Quality_Score",
+        "role": "support annotation",
+        "meaning": "在兩個 TO dataset 都呈正向 support，適合排序與解讀。",
+        "limit": "高 Quality 的 FP 仍存在，不應直接 hard keep。"
+      },
+      {
+        "feature": "PairwiseMedianDist",
+        "role": "dataset-aware support annotation",
+        "meaning": "5kHz TO 偏高 pairwise；DORADO paired / TO 偏低 pairwise。",
+        "limit": "方向具樣本依賴，不能升級成全域規則；目前更像 dataset-specific 結構 / noise proxy。"
+      },
+      {
+        "feature": "agreement_positive",
+        "role": "label-support",
+        "meaning": "在 5kHz TO 比單純 Strong/Subclone 更乾淨。",
+        "limit": "尚未證明跨樣本穩定。"
+      },
+      {
+        "feature": "hp_assign_rate",
+        "role": "phase / QC annotation",
+        "meaning": "反映 HP 可分派性與 phase completeness。",
+        "limit": "TP 與 FP 都可能很高，不能當 truth-level keep 規則。"
+      },
+      {
+        "feature": "low VAF + high AD + low CV",
+        "role": "artifact triage",
+        "meaning": "對 5kHz 的後段刪 FP 有價值。",
+        "limit": "不適合作 TP rescue 主規則，也不能直接前置化。"
+      }
+    ],
+    "feature_roles_note": "高層分工：caller-first 決定主體、methylation-support 補強排序、annotation/QC/artifact 專門負責解讀與旁路診斷。",
+    "annotation_policy": {
+      "rows": [
+        {
+          "dataset": "HCC1395 5kHz TO",
+          "policy": "caller_primary_only (gq>=10)",
+          "delta": "+0.006754",
+          "interpretation": "annotation 有資訊，但沒有超過最佳 caller-first。"
+        },
+        {
+          "dataset": "HCC1395 5kHz paired",
+          "policy": "caller_primary_only (gq>=15)",
+          "delta": "+0.000873",
+          "interpretation": "paired 仍由 caller 主導。"
+        },
+        {
+          "dataset": "HCC1395 DORADO paired",
+          "policy": "caller_strict_only (gq>=20)",
+          "delta": "+0.000635",
+          "interpretation": "更嚴格的 caller gate 最穩。"
+        },
+        {
+          "dataset": "HCC1395 DORADO TO",
+          "policy": "caller_primary_only (gq>=10)",
+          "delta": "+0.000540",
+          "interpretation": "annotation 追得很近，但仍略低於 caller-only。"
+        }
+      ],
+      "cards": [
+        {
+          "title": "Quality_Score",
+          "body": "升級為 support annotation",
+          "fill": "1E2A44",
+          "title_color": "F8F4EE",
+          "body_color": "D6DCE5"
+        },
+        {
+          "title": "PairwiseMedianDist",
+          "body": "升級為 dataset-aware support annotation",
+          "fill": "E9D8D0",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        },
+        {
+          "title": "hp_assign_rate",
+          "body": "降階為 phase / QC annotation",
+          "fill": "D6E7DF",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        }
+      ],
+      "bottom_note": "目前最合理的下一步，是把 annotation 接到 round summary / dashboard / diagnostics 匯出，而不是先把它們改成新的 hard keep 或 hard filter。"
+    },
+    "next_steps": {
+      "gaps": [
+        "paired 的 candidate-specific methylation coverage ceiling 仍偏低：5kHz paired 11.41% / 10.20%，DORADO paired 8.29% / 19.66%；因此 paired 的甲基無效不能直接解釋成沒有價值。",
+        "TO 的 pileup vs full model 目前還沒有完整雙模型可比矩陣，因此 TO 模型差異結論仍以 pileup 路線為主。",
+        "5kHz TO 與 DORADO TO 的 snapshot scope 不同，read-level 圖只能做方向比較。",
+        "Pool B FN 已證明 caller non-PASS FN 中仍有研究空間，但目前仍以 caller-side rescue 主導。"
+      ],
+      "actions": [
+        "把 annotation 欄位接到 round summary、dashboard 與 diagnostics 匯出。",
+        "持續累積 finer interval 與 orthogonality 的 cross-dataset 證據。",
+        "若未來要升級規則，先升級成 annotation export，不直接改核心過濾。",
+        "保留 5kHz artifact triage 作 dataset-specific 診斷，而不是全域規則。"
+      ],
+      "not_yet": [
+        "不要把 Quality 或 Pairwise 直接變成新的 hard keep。",
+        "不要把 artifact-veto 直接拿去做 TP rescue 主規則。",
+        "不要把 5kHz 單一 dataset 的 Pairwise 方向寫成跨樣本結論。"
+      ]
+    },
+    "source_paths": [
+      {
+        "label": "主週報",
+        "path": "/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_01.md"
+      },
+      {
+        "label": "phase 2 報告",
+        "path": "/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260311_phase2_paired_raw與feature_interval_orthogonality分析_01.md"
+      },
+      {
+        "label": "annotation 報告",
+        "path": "/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260311_phase2_finer_interval回接annotation_layer驗證_01.md"
+      },
+      {
+        "label": "paired raw benchmark TSV",
+        "path": "/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_phase2_paired_model_feature_analysis/paired_raw_model_benchmark.tsv"
+      },
+      {
+        "label": "annotation best policy TSV",
+        "path": "/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_phase2_annotation_layer/annotation_best_policy.tsv"
+      }
+    ],
+    "rerun_command": "python /big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/build_weekly_report_pptx.py --config /big8_disk/liaoyoyo2001/InterSubMod/docs/references/manual/assets/20260311_weekly_report_pptx_config_01.json"
+  },
+  "charts": {
+    "paired_rerun": {
+      "categories": [
+        "HCC1395 5kHz paired",
+        "HCC1395 DORADO paired"
+      ],
+      "series": [
+        {
+          "name": "ClairS",
+          "values": [
+            0.8443,
+            0.8565
+          ],
+          "color": "8C9FB3"
+        },
+        {
+          "name": "LongPhase-S",
+          "values": [
+            0.8522,
+            0.8592
+          ],
+          "color": "6E9D8A"
+        },
+        {
+          "name": "InterSubMod",
+          "values": [
+            0.8532,
+            0.859
+          ],
+          "color": "C76B50"
+        }
+      ]
+    },
+    "phase2_raw": [
+      {
+        "title": "HCC1395 5kHz paired",
+        "xlim": [
+          0.72,
+          0.865
+        ],
+        "rows": [
+          {
+            "name": "raw pileup",
+            "f1": 0.78963,
+            "color": "8C9FB3"
+          },
+          {
+            "name": "raw full",
+            "f1": 0.742164,
+            "color": "B7846A"
+          },
+          {
+            "name": "merged output",
+            "f1": 0.844336,
+            "color": "A6B0BF"
+          },
+          {
+            "name": "LongPhase-S",
+            "f1": 0.8522,
+            "color": "6E9D8A"
+          },
+          {
+            "name": "InterSubMod",
+            "f1": 0.8532,
+            "color": "C76B50"
+          }
+        ]
+      },
+      {
+        "title": "HCC1395 DORADO paired",
+        "xlim": [
+          0.72,
+          0.865
+        ],
+        "rows": [
+          {
+            "name": "raw pileup",
+            "f1": 0.851043,
+            "color": "8C9FB3"
+          },
+          {
+            "name": "raw full",
+            "f1": 0.854455,
+            "color": "B7846A"
+          },
+          {
+            "name": "merged output",
+            "f1": 0.856486,
+            "color": "A6B0BF"
+          },
+          {
+            "name": "LongPhase-S",
+            "f1": 0.8592,
+            "color": "6E9D8A"
+          },
+          {
+            "name": "InterSubMod",
+            "f1": 0.859,
+            "color": "C76B50"
+          }
+        ]
+      }
+    ]
+  }
+}
