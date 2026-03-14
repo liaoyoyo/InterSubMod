@@ -7,12 +7,20 @@
   - docs/CURRENT_FOCUS.md
   - docs/experiments/validated/
   - docs/experiments/finalized/
-  - docs/ai_sessions/2026/02/20260209_InterSubMod專案完整分析報告_01.md
+  - docs/provenance/ai_sessions/2026/02/20260209_InterSubMod專案完整分析報告_01.md
 -->
 
 # InterSubMod 實驗研究索引
 
 > **AI 使用提示**：本索引為 Layer 2（歷史全貌）。從這裡了解哪些方向已探索、結論為何，再決定下一步。
+
+## 研究文件 Agent 與 Skills 入口
+
+若任務是整理研究週報、主題式證據鏈或收斂研究文件偏好，先看：
+
+1. [主 Agent：InterSubMod 研究文件代理](/big8_disk/liaoyoyo2001/InterSubMod/.claude/agents/intersubmod-weekly-research-agent.md)
+2. [研究文件使用手冊](/big8_disk/liaoyoyo2001/InterSubMod/docs/references/manual/20260310_研究報告Agent與Skills使用手冊_01.md)
+3. [個人化研究寫作偏好設定規格](/big8_disk/liaoyoyo2001/InterSubMod/docs/references/manual/20260310_個人化研究寫作偏好設定規格_01.md)
 
 ## 狀態圖例
 
@@ -108,10 +116,689 @@
 ### 11. Subsample 混樣甲基化偏差
 
 - **期間**: 2026-02 ~ 2026-03
-- **狀態**: ⏳ 進行中（見 Layer 2 深入摘要）
-- **關鍵結論**: HCC1395 ONT subsample 無 MM/ML，無法做甲基化分析；已在腳本加入 Methylation Guard；根本問題為 tumor/blood-normal 組織來源差異
-- **主要文件**: `docs/ai_sessions/2026/03/20260302_subsample混樣甲基化偏差_現況研究推論與驗證路線圖_01.md`
-- **建議後續**: 使用 HCC1395 DORADO（有 MM/ML）做 tumor-only / normal-only / mixed 三路對照
+- **狀態**: 🔄 初步驗證完成，待全基因組結果（見 Layer 2 深入摘要）
+- **關鍵結論**: HCC1395 ONT subsample 無 MM/ML；DORADO 三路對照（chr19，737 regions）顯示 Tumor < Normal < Mixed 距離梯度，初步支持 H3（組織差異假設）；差異效應量中等（0.04~0.09）
+- **主要文件**:
+  - `docs/provenance/ai_sessions/2026/03/20260302_subsample混樣甲基化偏差_現況研究推論與驗證路線圖_01.md`
+  - `docs/experiments/in_progress/2026/03/20260305_DORADO三路對照實驗_01.md`
+- **建議後續**: 等待全基因組三路完成 → 加入 HP haplotagging → 計算 Label-First 統計量
+
+### 13. 多樣本甲基化距離基準線（2026-03）
+
+- **期間**: 2026-03
+- **狀態**: ✅ chr19 完成，全基因組待排
+- **關鍵結論**: 6 個 ONT 癌症樣本均有 MM/ML；HCC1395 DORADO 距離明顯高於其他（0.316 vs 0.097~0.215）；H2009（肺腺癌）顯著性率最高（3.8%，109/2843）；HCC1937 距離最低（0.097）
+- **主要文件**: `docs/reports/validated/2026/03/20260305_多樣本自動化測試總覽_01.md`
+- **建議後續**: 加入 haplotagging 後比較各樣本的 HP-based 顯著性，建立跨樣本 F1 評估
+
+### 14. no-filter 模式 Segmentation Fault 修正（2026-03）
+
+- **期間**: 2026-03
+- **狀態**: ✅ 成功修正
+- **關鍵結論**: `--no-filter` 模式跳過 FLAG 過濾，使 secondary 讀段（SEQ="*"）進入 MethylationParser，觸發非確定性 Segfault；修正為即使在 no-filter 模式下仍過濾 BAM_FSECONDARY | BAM_FSUPPLEMENTARY | BAM_FUNMAP | BAM_FDUP
+- **影響**: H2009（含大量 secondary 讀段的 long-read BAM）現可穩定在 j=8 執行
+- **主要文件**: `src/core/RegionProcessor.cpp`（直接修正）；`docs/experiments/in_progress/2026/03/20260305_Phase1_2_3執行結論總結_01.md`
+- **建議後續**: 確認其他含 secondary reads 的 BAM（如混合樣本）是否有相同問題
+
+### 15. 全樣本放寬標準拆解與 F1 提升驗證（2026-03）
+
+- **期間**: 2026-03
+- **狀態**: ✅ 成功
+- **關鍵結論**: 全樣本單一標準最佳為 `AD>0.15 & CV<0.03 & VAF<0.08`（6/7 樣本提升或持平，mean F1 delta `+0.000061`）；單獨 `VAF` 或單獨 `AD` 無法穩定提升，需 `VAF + 甲基資訊(AD)` 組合才有正向增益（`AD+VAF` mean F1 delta `+0.000046`）
+- **主要文件**:
+  - `docs/experiments/validated/2026/03/20260305_全樣本放寬標準與拆解驗證_01.md`
+  - `docs/reports/validated/2026/03/20260305_全樣本放寬標準拆解與TPFPF1比較報告_01.md`
+  - `docs/reports/validated/2026/03/20260305_提升幅度偏小根因與LongPhaseTO驗證計畫_01.md`
+- **建議後續**: 將 `AD+VAF` 作為規則核心，`CV` 由硬門檻改為輔助訊號；對 HCC1954 採樣本化門檻減少 TP 誤刪
+
+### 16. 純樣本 round 自動化實際執行（2026-03-07）
+
+- **期間**: 2026-03-07
+- **狀態**: ⏳ 進行中
+- **關鍵結論**:
+  - 既有 `20260211` paired pure run 已成功接上新 round automation，並確認 `HCC1395 5kHz` 比 `DORADO` 更 noisy
+  - 新版完整欄位正式 rerun 已完成：
+    - `HCC1395 5kHz`：`ClairS F1=0.8443`、`LongPhase-S F1=0.8522`、`InterSubMod F1=0.8532`
+    - `HCC1395_DORADO`：`ClairS F1=0.8565`、`LongPhase-S F1=0.8592`、`InterSubMod F1=0.8590`
+  - `label-first` 在代表性 diagnostics 上有提供新訊息，不只是 cluster 包裝
+  - `低 VAF + 偏高 AlleleDelta + 不穩定全域結構` 是目前最重要的候選特徵，但只在 `5kHz` 顯示正增益，尚不具跨平台可攜性
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260307_純樣本round執行與進度報告_01.md`
+- **建議後續**:
+  - 對 `5kHz` 規則觸發子集補做更多 region diagnostics，確認是否為平台特異性 artifact 特徵
+  - 比較 `5kHz` 與 `DORADO` 的 `label_cluster_agreement.tsv`，找出只在 `5kHz` 大量出現的升級型 region
+  - 暫時不要把 `AD+VAF` 規則升級為全域預設，先視為 `5kHz` 特化診斷候選
+
+### 17. 低 VAF + 高 AlleleDelta 與升級型 shift 跨樣本分析（2026-03-07）
+
+- **期間**: 2026-03-07
+- **狀態**: ⏳ 進行中
+- **關鍵結論**:
+  - 跨 7 個 pure paired 樣本比較後，`低 VAF + 偏高 AlleleDelta` 類規則只有 `HCC1395 5kHz` 有明顯正增益（`+0.000990`）
+  - `HCC1395_DORADO` 與其他樣本多數為負增益或接近無效，因此不適合作全域規則
+  - `Weak->Strong` 雖然整體仍以 TP 為主，但 `HCC1395 5kHz` 的 FP rate 最高（`172/627 = 27.4%`）
+  - `Noise->Strong` 幾乎只出現在 `HCC1395` 系列，`5kHz` 高於 `DORADO`
+  - `label-first` 不是無效，但 `Strong` 類別可能需要再細分為較可信與較可疑的子類
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260307_低VAF高AlleleDelta與shift跨樣本分析_01.md`
+- **建議後續**:
+  - 將 `low VAF + high AlleleDelta` 暫時定位為 `5kHz` 特化候選規則或 `ArtifactSuspect` 訊號
+  - 對 `Noise->Strong / Weak->Strong` 的 FP top regions 補做更多 diagnostics 與 samtools snapshot
+  - 規劃 tumor-only benchmark bundle，驗證這組特徵是否也能抓 TO artifact
+
+### 18. Strong 細分類與 haplotagged samtools 驗證（2026-03-07）
+
+- **期間**: 2026-03-07
+- **狀態**: ⏳ 進行中
+- **關鍵結論**:
+  - `Strong` 類別應先做細分，再決定是否納入規則，不宜直接將 `low VAF + high AlleleDelta` 寫成全域過濾
+  - 在 `HCC1395 5kHz`，`Strong + low VAF + high AlleleDelta` 可移除 `68` 個 FP、僅誤傷 `1` 個 TP，`F1 +0.000806`
+  - 在 `HCC1395_DORADO` 與其他 pure paired 樣本，此規則沒有跨平台正增益，多為無效或誤傷 TP
+  - `Noise->Strong` 不能直接當刪除條件；在 `HCC1395 5kHz` 會移除 `1659` 個 TP、僅移除 `51` 個 FP
+  - haplotagged BAM 的 samtools snapshot 顯示 suspect Strong 至少包含兩型：
+    - 單側 HP 偏倚型
+    - 高未分派 HP 型
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260307_Strong細分類與samtools驗證分析_01.md`
+- **建議後續**:
+  - 先把 `Strong-SuspectLowVAF` / `ArtifactSuspect` 做成 annotation，而不是直接改核心規則
+  - 補上 `HP balance` 與 `NA HP ratio` 欄位，測試是否能減少 5kHz 唯一誤傷的 TP
+  - 以 `HCC1395 5kHz` 建立 tumor-only pilot bundle，驗證 refined label 是否仍富集 FP
+
+### 19. LongPhase 救回 TP 與甲基救援分析（2026-03-08）
+
+- **期間**: 2026-03-08
+- **狀態**: ⏳ 進行中
+- **關鍵結論**:
+  - `HCC1395 5kHz` 上，`LongPhase-S` 除了減少 FP，也誤刪了一批 caller TP
+  - 在精確 key 對齊集合中，最佳 TP rescue 規則目前是 caller `GQ >= 20`，可救回 `45` 個 TP、`0` 個 FP，`F1 +0.000739`
+  - 將 InterSubMod `VerificationClass / PairwiseDist / AlleleDelta` 納入 rescue 後，尚未超過 caller `GQ` 單獨使用
+  - 目前甲基訊號對 `LongPhase-S` 的價值更偏向 FP triage 與 Strong 細分類，而非 TP rescue 主規則
+  - `HCC1395 ONT ClairS-TO` 已有 benchmark tp/fp/fn，可作為後續 `LongPhase-TO + InterSubMod` 的 tumor-only pilot 起點
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260308_LongPhase救回TP與甲基救援分析_01.md`
+- **建議後續**:
+  - 回查 `LongPhase-S` 對高 GQ caller TP 的丟棄條件
+  - 對 `GQ >= 20` 但被丟掉的 TP 補做 read-level 與 haplotagging 驗證
+  - 先以 `HCC1395 ONT ClairS-TO` 建立 `LongPhase-TO + InterSubMod` tumor-only pilot
+
+### 20. LongPhase-TO 空間需求與中間產物確認（2026-03-07）
+
+- **期間**: 2026-03-07
+- **狀態**: ⏳ 進行中
+- **關鍵結論**:
+  - 真正的 `LongPhase-TO + InterSubMod` 驗證仍需要 `haplotagged BAM`；目前 repo 的 `02_intersubmod.sh` 直接要求 `--tagged-bam`
+  - 本次 `HCC1395 5kHz TO` 實跑後，`tagged BAM` 實測大小約 `260G`，`.bai` 約 `113M`
+  - 實際驗證後，當 `/bip8_disk` 只剩約 `208G` 時，已不足以安全承接 `5kHz TO haplotag`；需改寫到 `/big8_disk`
+  - `HCC1395 ONT` 雖已有 TO phased / benchmark 素材，但因原始 BAM 無 `MM/ML`，只適合作 caller/phasing 邏輯研究，不適合作 InterSubMod 主驗證
+  - `HCC1395_DORADO` 已補齊 TO baseline benchmark，`ClairS-TO F1=0.7226`，目前是最合理的 methylation-capable TO pilot 候選
+  - 既有 `tmp/phasing_output/merged.vcf.gz` 不是可直接拿來宣稱 LongPhase-TO 成效的最終 somatic callset；直接 benchmark 其 non-missing 子集會得到失真的極低 F1
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260307_LongPhaseTO_空間需求與中間產物確認_01.md`
+- **建議後續**:
+  - 使用者已改為先做 `HCC1395 5kHz tumor-only` 的 `LongPhase-TO + InterSubMod` pilot，`HCC1395_DORADO` 改為第二階段交叉驗證
+  - `5kHz TO` 的真實起點不是 `LongPhase-TO`，而是先補 `ClairS-TO` caller 輸出
+  - 啟動下一個 `200G+` 級 tagged BAM 任務前，先把既有 `5kHz TO tagged BAM` 移到 `Archive_pending_delete/`
+  - tagged BAM 產出後，再正式把 `低 VAF + 高 AlleleDelta`、`GQ rescue`、`Weak->Strong / Noise->Strong` 搬到 tumor-only 驗證
+  - `HCC1395 5kHz` 跑完並完成比較後，依實驗室規則將 tagged BAM 移至 `Archive_pending_delete/`，再切 `HCC1395_DORADO`
+
+### 21. HCC1395 5kHz tumor-only LongPhase-TO pilot 啟動（2026-03-07）
+
+- **期間**: 2026-03-07
+- **狀態**: ⏳ 主流程完成，後續觀察進行中
+- **關鍵結論**:
+  - 使用者已將 TO 主線優先順序改為：`HCC1395 5kHz` 先跑，`HCC1395_DORADO` 第二階段驗證
+  - 因 `5kHz` 沒有現成 `ClairS-TO` 輸出，真實起點是先補 caller，再接 `LongPhase-TO`
+  - 已新增可重用流程：
+    - `scripts/pipeline/utils/benchmark_split_snv_vcf.sh`
+    - `scripts/analysis/run_longphase_to_intersubmod_pilot.sh`
+  - 這輪新增的關鍵修正：
+    - benchmark split 可自動處理 plain `.vcf`
+    - pilot 腳本可用 `--tag-prefix` 將 `tagged BAM` 寫到 `/big8_disk`
+  - 新 benchmark split 工具已先用 `HCC1395_DORADO ClairS-TO` 測通，計數與既有報告一致
+  - 第一次正式 run 因 `docker` 未掛載 `/bip8_disk` 而在 `step01` 早期失敗；修正後第二次 run 已完整跑通 `ClairS-TO -> LongPhase-TO -> haplotag -> InterSubMod`
+  - `HCC1395 5kHz TO` 本輪結果：
+    - `ClairS-TO F1=0.7127`
+    - `LongPhase-TO F1=0.7127`
+    - `InterSubMod F1=0.7130`
+    - `FP removed=36`
+    - `TP removed=3`
+    - `F1 delta=+0.0003`
+  - `LongPhase-TO phase` 本身沒有改變 benchmark call set；這輪的正增益主要來自甲基過濾層
+  - `label-first` 在 TO 下仍有訊號：
+    - `label_upgrade=2756`
+    - `conflict=3227`
+    - `consistent_strong=1471`
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260307_HCC1395_5kHz_TO_pilot啟動與執行紀錄_01.md`
+- **建議後續**:
+  - 對 `5kHz TO` 的 `low VAF + high AlleleDelta`、`Weak->Strong / Noise->Strong` 做 TP/FP 細分與 diagnostics
+  - 跑完後直接與：
+    - `ClairS-TO baseline`
+    - `LongPhase-TO`
+    - `InterSubMod`
+    - 既有 paired pure `HCC1395 5kHz`
+    做同口徑比較
+  - 比較完成後將 5kHz tagged BAM 移至 `Archive_pending_delete/`，再切 `HCC1395_DORADO`
+
+### 22. TO 特徵回查與 label_upgrade / conflict 細分（2026-03-08）
+
+- **期間**: 2026-03-08
+- **狀態**: ⏳ 進行中
+- **關鍵結論**:
+  - `HCC1395 5kHz TO` 的 `label_upgrade=2756` 中，`TP=2526`、`FP=230`，`FP rate=8.35%`
+  - `conflict=3227` 中，`TP=2465`、`FP=762`，`FP rate=23.61%`
+  - `Weak->Strong`（`1849 TP / 176 FP`）與 `Noise->Strong`（`207 TP / 16 FP`）在 TO 下都以 `TP` 為主，**不能直接當刪除規則**
+  - TO 下真正持續有效的 artifact 特徵仍是 `low VAF + high AlleleDelta`：
+    - `TP=3`
+    - `FP=36`
+    - `FP rate=92.31%`
+  - 再加 `low CramersV` 後更乾淨：
+    - `TP=2`
+    - `FP=36`
+    - `F1 +0.000261`
+  - 這批 TO artifact 幾乎**不落在** `label_upgrade/conflict`，而是主要落在：
+    - `cluster_only`
+    - `Strong->Weak`
+    - `低 GQ / 低 QUAL`
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260308_TO特徵回查與label_upgrade_conflict分析_01.md`
+- **建議後續**:
+  - 下一輪 TO diagnostics 應優先看 `cluster_only + Strong->Weak + low VAF + high AlleleDelta`
+  - 不要把 `label_upgrade`、`conflict`、`Weak->Strong`、`Noise->Strong` 整包升級成 artifact 規則
+  - 直接用同一支 TO 回查腳本套到 `HCC1395_DORADO TO`，確認這個模式是否可跨平台重現
+
+### 23. TO `cluster_only + Strong->Weak` diagnostics 與 verification scheme 調整（2026-03-08）
+
+- **期間**: 2026-03-08
+- **狀態**: ⏳ 進行中
+- **關鍵結論**:
+  - 本輪 `HCC1395 5kHz TO` diagnostics 使用的是 `ClairS-TO pileup` 路線，不是 full model；結論不能直接與其他 full-model run 混比
+  - 原先鎖定的 TO top FP 中，`4/5` 聚集在 `chr11` 的 `1402 bp` 區段，顯示更像局部 artifact block，而不是彼此獨立的隨機 FP
+  - `HP skew` 在 TO 下不夠區分 FP/TP，因為 TP 對照也可呈現極端單一 HP；不能單靠 `HP balance` 做刪除
+  - 比較有辨識力的是：
+    - `高 AlleleDelta`
+    - `低 PairwiseMedianDist`
+    - `很低 alt fraction`
+    - `低 QUAL / GQ`
+  - 現行 core 的 `Strong` 會混入「只有 allele sig、沒有 HP sig」的位點；這批 `current_strong_allele_only` 為 `5104 TP / 2042 FP`，不能整包視為 artifact
+  - 新增 `cluster_plus_weak_label` 後，原先的 TO 可疑子集更精確地落在：
+    - `cluster_plus_weak_label + Strong->Weak + lowVAF/highAD`
+    - 其中 `lowVAF/highAD + low CramersV` 為 `25 FP / 1 TP`
+  - verification scheme 的語意調整目前主要提升可解釋性；F1 仍未超過既有 `low VAF + high AlleleDelta + low CramersV`（`36 FP / 2 TP`, `F1 +0.000290`）
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260308_TO_cluster_only_StrongWeak_diagnostics與scheme調整分析_01.md`
+- **建議後續**:
+  - 後續 TO diagnostics 應將舊語意 `cluster_only + Strong->Weak` 修正為 `cluster_plus_weak_label + Strong->Weak`
+  - 先把同一套 diagnostics 與 scheme evaluator 套到 `HCC1395_DORADO TO`
+  - 若未來要改 core C++ 分類，優先考慮新增 annotation（例如 `Strong_AlleleOnly`），不要直接把整包 `Strong` 當過濾目標
+
+### 24. ClairS 邊緣 TP rescue 與甲基輔助評估（2026-03-08）
+
+- **期間**: 2026-03-08
+- **狀態**: ⏳ 進行中
+- **關鍵結論**:
+  - 本輪固定只使用 **final VCF**，不使用 pileup 中間 candidate / tensor
+  - `HCC1395 5kHz paired` 與 `HCC1395_DORADO paired` 都可用 caller-only 規則穩定救回一批 TP
+  - 依計劃排序的最佳 safe rule 在 paired 兩條線都是 `candidate_gq_ge_15`：
+    - `HCC1395 5kHz`: `106 TP / 75 FP`, `F1 +0.000825`
+    - `HCC1395_DORADO`: `97 TP / 88 FP`, `F1 +0.000502`
+  - 若單看最佳 `delta F1`，paired 兩條線都是 `gq>=20` 類規則更好：
+    - `HCC1395 5kHz`: `59 TP / 8 FP`, `F1 +0.000871`
+    - `HCC1395_DORADO`: `53 TP / 7 FP`, `F1 +0.000782`
+  - `HCC1395 5kHz TO` 的 caller-only rescue 空間更大：
+    - `candidate_qual_ge_10_or_gq_ge_20`: `491 TP / 118 FP`, `F1 +0.006824`
+    - `candidate_gq_ge_15`: `365 TP / 71 FP`, `F1 +0.005233`
+  - 目前甲基 rescue **尚未超過 caller-only**
+  - `HCC1395 5kHz paired` 雖已有部分 candidate-specific InterSubMod coverage，但只覆蓋 `111/1052` lost TP、`802/12974` removed FP
+  - `HCC1395_DORADO paired` 尚缺 candidate-specific InterSubMod summary，因此本輪不能把甲基 rescue 解讀成有效 negative result
+  - `HCC1395 5kHz TO` 的 downstream lost/removed 與現有 baseline InterSubMod summary overlap 為 `0/0`；若要判斷 TO 下甲基是否能幫助 borderline TP rescue，必須先對這批 TO candidates 單獨跑 InterSubMod
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260308_ClairS邊緣TP_rescue與甲基輔助評估_01.md`
+- **建議後續**:
+  - 先跑 `HCC1395 5kHz TO` 的 candidate-specific `lost_tp / removed_fp` InterSubMod
+  - 再補 `HCC1395 5kHz paired` 的 final VCF 全候選池 coverage，不只沿用舊的 PASS 子集
+  - 對 `HCC1395_DORADO paired` 跑同型 candidate-specific InterSubMod，確認甲基 rescue 是否真為平台不適用
+  - 若要進 pipeline，先加 `RescueCandidate` annotation，不先直接加 hard keep / hard filter
+
+### 25. HCC1395 5kHz TO candidate-specific 甲基 rescue 驗證（2026-03-08）
+
+- **期間**: 2026-03-08
+- **狀態**: ✅ 第一輪結論完整
+- **關鍵結論**:
+  - `HCC1395 5kHz TO` 的 candidate-specific InterSubMod 已正式補跑完成，不再是舊版 `0/0 overlap`
+  - candidate export 完整成功：
+    - `caller_lost_tp=773`，missing `0`
+    - `caller_removed_fp=298`，missing `0`
+  - candidate-specific InterSubMod 可分析率：
+    - `lost_tp=675/773 (87.32%)`
+    - `removed_fp=213/298 (71.48%)`
+  - **最佳整體 rescue 仍是 caller-only**：
+    - `qual>=10 or gq>=20`：`491 TP / 118 FP`，`F1 +0.006824`
+  - **甲基資料不是全無效**：
+    - `PairwiseMedianDist >= 0.20`：`300 TP / 68 FP`，`F1 +0.004219`
+    - 表示 TO 下甲基資料可以幫 borderline TP rescue，但尚未超過最佳 caller-only
+  - **label-first / cluster-first 的交叉訊號有實際價值**：
+    - `agreement_positive`：`148 TP / 25 FP`，`F1 +0.002163`
+    - 比單純 `Strong/Subclone`（`149 TP / 30 FP`）更乾淨，顯示 agreement 可改善 support precision
+  - **artifact veto 不適合直接拿來救 TP**：
+    - `lowVAF/highAlleleDelta/lowCramersV` 對 `gq>=15` pool 沒有額外效果
+    - `combined_artifact_veto` 雖少 `6 FP`，但同時少 `57 TP`
+  - **總結**：TO 下甲基訊號最合理的定位是 `support / ranking / annotation`，不是取代 caller 的主 rescue 規則
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260308_HCC1395_5kHz_TO_candidate_specific甲基rescue驗證_01.md`
+  - `docs/reports/validated/2026/03/20260308_HCC1395_5kHz_TO_borderline_rescue特徵證據鏈整理_01.md`
+  - `scripts/analysis/export_candidate_pool_vcfs.py`
+  - `scripts/analysis/evaluate_rescue_with_methylation.py`
+  - `scripts/analysis/validate_method_design.py`
+- **建議後續**:
+  - `HCC1395_DORADO TO` 的同型 candidate-specific InterSubMod 已於 `2026-03-11` 完成，確認 TO 下跨 `5kHz` 與 `DORADO` 都支持 `caller-first + methylation-support`
+  - 對 `agreement_positive` 與 `PairwiseMedianDist>=0.20` rescue 到的 TP/FP 補做 diagnostics
+  - 若要進 pipeline，先做 `RescueSupport` annotation，不先做 hard keep
+
+### 26. ClairS 邊緣 FN 探勘與甲基化救援（2026-03-08）
+
+- **期間**: 2026-03-08
+- **狀態**: ✅ 結論完整，不推薦升為正式規則
+- **關鍵結論**:
+  - `Pool B FN`（ClairS non-PASS 但 truth set 包含）：**840 個**，遠超預期（計劃估 30~500）
+  - 策略 B 補跑 InterSubMod 後甲基覆蓋率達 **99.9%**（839/840）
+  - **甲基唯一規則全數為負效益**：`pairwise_ge_020`（F1 delta=-0.006968），`class_strong_or_subclone`（-0.006265）
+    - 根本原因：Pool B non-FN 含大量 germline 變異，Strong rate 反而比 FN 更高（44.7% vs 30.8%）
+  - **最佳 Caller-only 規則**：`no_varcluster`（F1 delta=+0.003391）、`no_varcluster_and_gq15`（precision=71.9%, F1 delta=+0.001452）
+  - **最佳 Combined 規則**：`gq15_and_allele_delta_low`（F1 delta=+0.002702），僅比最佳 Caller-only 好 +0.000386
+  - **AlleleDelta 的 somatic 特異性**：Pool B FN 中位 AD=0.010（90% < 0.10），non-FN 中位 AD=0.065（40% ≥ 0.10）——可作為輔助訊號，但 precision 仍只 ~32%
+  - **結論與實驗 19 一致**：甲基訊號對 TP rescue 貢獻受限，主要價值在 FP triage
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260308_ClairS邊緣FN探勘與甲基救援_01.md`
+  - `scripts/analysis/analyze_clairs_borderline_fn.py`
+  - `scripts/analysis/run_clairs_borderline_fn_analysis.sh`
+- **建議後續**:
+  - `no_varcluster_and_gq15` 在 `HCC1395_DORADO TO` 交叉驗證（precision=71.9%，值得確認是否跨平台）
+  - 研究重點維持 FP triage（`low VAF + high AlleleDelta` 已有明確正效益）
+
+### 27. HCC1395_DORADO paired candidate-specific 甲基 rescue 驗證（2026-03-09）
+
+- **期間**: 2026-03-09
+- **狀態**: ✅ 第一輪結論完整
+- **關鍵結論**:
+  - `HCC1395_DORADO paired` 的 candidate-specific InterSubMod 已正式補齊，不再是舊版「缺 summary、無法判讀」的狀態
+  - 本輪沿用與實驗 24 相同的 caller / truth / baseline 定義：
+    - caller final VCF: `ClairS v0.4.0 output.vcf.gz`
+    - baseline TP/FP: `s-pure/HCC1395_DORADO/20260211`
+  - candidate export 完整成功：
+    - `caller_lost_tp = 1489`，`candidate_eligible = 1122`
+    - `caller_removed_fp = 2533`，`candidate_eligible = 1658`
+    - export missing 全部為 `0`
+  - 因本機大磁碟空間不足，本輪將 `LongPhase-S` 重建寫到 root filesystem 的 scratch：
+    - 重建 `HCC1395_DORADO_tagged.bam` 成功，大小 `223G`
+    - `bam.bai` 已完成
+    - LongPhase-S tagging fraction 約 `0.469462`
+  - candidate-specific 可分析 coverage 明顯偏低：
+    - `lost_tp = 93 / 1122 (8.29%)`
+    - `removed_fp = 326 / 1658 (19.66%)`
+  - **caller-only 仍穩定成立**：
+    - `candidate_gq_ge_15`：`97 TP / 88 FP`，`F1 +0.000502`
+    - `candidate_gq_ge_20`：`51 TP / 7 FP`，`F1 +0.000749`
+    - `caller_any_gq_ge_20`：`53 TP / 7 FP`，`F1 +0.000782`
+  - **甲基 support 規則在 DORADO paired 全部不成立**：
+    - `gq>=10 + PairwiseMedianDist>=0.20`：`10 TP / 36 FP`，`F1 -0.000280`
+    - `gq>=10 + agreement_positive`：`36 TP / 72 FP`，`F1 -0.000298`
+    - `gq>=10 + Strong/Subclone`：`25 TP / 38 FP`，`F1 -0.000059`
+  - 可分析子集的分布也支持這個負結果：
+    - `lost_tp` 中 `Strong/Subclone = 29`
+    - `removed_fp` 中 `Strong/Subclone = 56`
+    - `agreement_positive` 在 `lost_tp` 為 `37`，在 `removed_fp` 為 `99`
+    - `Pairwise>=0.20` 在 `lost_tp` 為 `13`，在 `removed_fp` 為 `58`
+  - **總結**：
+    - `5kHz TO` 的甲基 rescue 是真實存在的
+    - 但目前**不能升級成跨樣本 / 跨模式穩定規則**
+    - `DORADO paired` 新證據支持：真正穩定的是 `caller-first`，不是 `methylation-support`
+- **主要文件**:
+  - [/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260309_HCC1395_DORADO_paired_candidate_specific甲基rescue驗證_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260309_HCC1395_DORADO_paired_candidate_specific甲基rescue驗證_01.md)
+  - [/home/liaoyoyo2001/InterSubMod_runs/output/research_rounds/20260309_hcc1395_dorado_paired_candidate_rescue/eval/rescue_rule_comparison.tsv](/home/liaoyoyo2001/InterSubMod_runs/output/research_rounds/20260309_hcc1395_dorado_paired_candidate_rescue/eval/rescue_rule_comparison.tsv)
+  - [/home/liaoyoyo2001/InterSubMod_runs/output/research_rounds/20260309_hcc1395_dorado_paired_candidate_rescue/design_validation/label_cluster_agreement.tsv](/home/liaoyoyo2001/InterSubMod_runs/output/research_rounds/20260309_hcc1395_dorado_paired_candidate_rescue/design_validation/label_cluster_agreement.tsv)
+- **建議後續**:
+  - `HCC1395_DORADO TO candidate-specific InterSubMod` 已於 `2026-03-11` 完成；對外口徑可更新為：
+    - `5kHz TO` 與 `DORADO TO` 都支持 `caller-first` 穩定成立
+    - 甲基單特徵可正向 rescue，但在同一 caller gate 下仍只作 support
+    - `PairwiseMedianDist` 方向仍具樣本依賴，尚未證明可跨樣本直接共用
+  - Pool A-light 不需再探索
+
+### 28. 5kHz TO 與 DORADO paired 的甲基 rescue 特徵空間分析（2026-03-09）
+
+- **期間**: 2026-03-09
+- **狀態**: ✅ 第一輪完成
+- **關鍵結論**:
+  - 已用新腳本對兩個 candidate-specific `rescue_joined_features.tsv` 做同一套 feature-space 分析：
+    - 單特徵分佈
+    - 單特徵 rescue sweep
+    - 雙特徵組合 sweep
+    - `delta_f1_vs_baseline`
+    - `delta_f1_vs_gate`
+  - `HCC1395 5kHz TO`：
+    - candidate-specific coverage 高（`lost_tp=87.32%`, `removed_fp=71.48%`）
+    - `Quality_Score>=60`、`PairwiseMedianDist>=0.15/0.20`、`agreement_positive` 都能從 baseline 救回 TP
+    - 但在 `gq>=10` gate 下，**沒有任何甲基或 label 特徵能進一步提高 F1**
+    - `agreement_positive` 仍是較乾淨的窄 support，但屬 ranking / annotation，不是加成規則
+    - `allele_assign_rate>=0.99` 與 `CramersV<=0.05` 看似數值高，但實際更像技術 proxy，不應升級為正式甲基 rescue 特徵
+  - `HCC1395_DORADO paired`：
+    - candidate-specific coverage 低（`lost_tp=8.29%`, `removed_fp=19.66%`）
+    - 正向 support 方向與 `5kHz TO` 不同：不是看高 `Pairwise`，而是偏向 `高 hp_assign_rate + 低 Pairwise + 較高 Quality_Score`
+    - 單特徵最佳增量為 `gq>=15 + hp_assign_rate>=0.99`：`50 TP / 15 FP`，相對 gate `F1 +0.000132`
+    - 雙特徵最佳增量為 `gq>=15 + Pairwise<=0.20 + hp_assign>=0.99`：`46 TP / 12 FP`，相對 gate `F1 +0.000103`
+    - 即使如此，整體仍沒有超過 `gq>=20` caller-only
+  - **總結**：
+    - `5kHz TO` 與 `DORADO paired` 的甲基 support 方向不一致
+    - 目前仍找不到可跨樣本共用的單一 rescue 規則
+    - 最合理定位仍是 `caller-first + mode-specific methylation support`
+- **主要文件**:
+  - [/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260309_5kHz_TO與DORADO_paired_甲基rescue特徵空間分析_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260309_5kHz_TO與DORADO_paired_甲基rescue特徵空間分析_01.md)
+  - [/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/analyze_methylation_rescue_feature_space.py](/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/analyze_methylation_rescue_feature_space.py)
+  - [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260309_methylation_rescue_feature_space/top_rules_by_gate.tsv](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260309_methylation_rescue_feature_space/top_rules_by_gate.tsv)
+  - [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260309_methylation_rescue_feature_space/numeric_feature_distribution.tsv](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260309_methylation_rescue_feature_space/numeric_feature_distribution.tsv)
+- **建議後續**:
+  - `5kHz TO`：針對 `Quality>=60`、`Pairwise>=0.15/0.20`、`agreement_positive` rescue 到的 top TP/FP 補 diagnostics
+  - `DORADO TO`：優先驗證 `hp_assign>=0.99` 與 `低 Pairwise + 高 hp_assign` 是否在 TO 重現
+  - 暫時不要再把 `Pairwise>=0.20` 當作全域規則
+  - 也不要把 `allele_assign_rate` 或 `CramersV<=0.05` 升級成正式甲基 rescue 規則
+
+### 29. GQ 與甲基 rescue 的系統性驗證（2026-03-11）
+
+- **期間**: 2026-03-11
+- **狀態**: ✅ 第一輪完成
+- **關鍵結論**:
+  - 已新增同一套系統性分析，直接比較：
+    - `GQ only`
+    - `甲基 only`
+    - `GQ + 甲基`
+    - `artifact role`
+    - 區間性與正交特徵
+  - 新腳本：
+    - [/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/analyze_gq_methylation_rescue_matrix.py](/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/analyze_gq_methylation_rescue_matrix.py)
+  - `HCC1395 5kHz TO`：
+    - `GQ` 仍是最穩定的 caller-first 訊號
+    - `gq>=10`：`499 TP / 119 FP`，`F1 +0.006943`
+    - `gq>=15`：`365 TP / 71 FP`，`F1 +0.005233`
+    - `gq>=20`：`143 TP / 38 FP`，`F1 +0.001966`
+    - `Pairwise>=0.20`、`Quality>=60`、`agreement_positive` 都能單獨從 baseline 救回 TP，但全部 **沒有超過 `gq>=10`**
+    - `gq>=10 + Pairwise>=0.20`：`300 TP / 68 FP`，相對 gate `delta F1=-0.002724`
+    - `gq>=10 + agreement_positive`：`148 TP / 25 FP`，相對 gate `delta F1=-0.004780`
+    - `low VAF + high AlleleDelta (+ low CramersV)` 仍較適合後段 artifact triage，不適合提前升級為 TP rescue 主規則
+  - `HCC1395 5kHz paired`：
+    - `gq>=10` 為負增益（`183 TP / 616 FP`, `F1 -0.004459`）
+    - paired 最穩定仍是 `gq>=15`（`+0.000825`）與 `gq>=20`（`+0.000871`）
+    - 甲基單獨與 `gq>=10 + 甲基` 目前都沒有形成正向 rescue
+  - `HCC1395_DORADO paired`：
+    - `gq>=15`（`97 TP / 88 FP`, `F1 +0.000502`）與 `gq>=20`（`51 TP / 7 FP`, `F1 +0.000749`）仍是主軸
+    - 甲基單獨最佳僅 `hp_assign_rate>=0.99`：`68 TP / 87 FP`, `F1 +0.000041`
+    - `gq>=10 + quality>=60 + hp_assign>=0.99` 雖然相對 `gq>=10` gate 有正增量（`delta F1 vs gate=+0.001961`），但整體仍低於 `gq>=20`
+  - `ClairS-TO` 不一開始就全域放寬 `GQ` 是合理的：
+    - `HCC1395 5kHz TO` 的 `caller_removed_fp` 共有 `2,720,008` 筆
+    - 真正 `candidate_eligible` 只有 `298`
+    - 被排除的 FP 中，`98.85%` 的主因是 `NonSomatic`
+    - 這說明 `gq>=10` 只能在 candidate-eligible pool 中討論，不能直接全域放寬
+  - `PairwiseMedianDist` 呈現區間性與樣本依賴：
+    - `5kHz TO` 在 `[0.15,0.25)` 為正向 support，但 `>=0.25` 不再更好
+    - `DORADO paired` 方向相反，較低 pairwise 才較合理
+  - `HCC1395_DORADO TO candidate-specific InterSubMod` 已補齊，且已納入同一套四資料集矩陣：
+    - candidate-specific coverage：`247/247 lost_tp`、`94/94 removed_fp`
+    - `gq>=10`：`40 TP / 11 FP`，`F1 +0.000540`
+    - `Quality_Score>=60 only`：`208 TP / 77 FP`，`F1 +0.002620`
+    - `gq>=10 + Quality>=60`：相對 gate `delta F1=-0.000064`
+    - `gq>=10 + Pairwise<=0.20`：`30 TP / 9 FP`，相對 gate `delta F1=-0.000142`
+    - `gq>=10 + Strong/Subclone`：`12 TP / 2 FP`，相對 gate `delta F1=-0.000366`
+    - 結論：TO 下跨 `5kHz` 與 `DORADO` 都支持 `caller-first + methylation-support`
+    - 甲基不是全負效果，但目前仍未超過同一 caller gate 的 `GQ only`
+    - `PairwiseMedianDist` 方向未跨樣本穩定：
+      - `5kHz TO` 偏高 pairwise 為正向 support
+      - `DORADO TO` 偏低 pairwise（`<=0.20`）較合理
+      - 因此不可升級成所有 TO 樣本的全域規則
+  - **總結**：
+    - 第一層：`caller-first`
+    - 第二層：`methylation-support`
+    - 獨立旁路：`artifact triage`
+    - 目前仍**不支持**把 `Pairwise>=0.20` 或 `gq>=10 + 高 pairwise` 升級為跨樣本規則
+- **主要文件**:
+  - [/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260311_GQ與甲基rescue系統性驗證_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260311_GQ與甲基rescue系統性驗證_01.md)
+  - [/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260311_HCC1395_DORADO_TO_candidate_specific甲基rescue驗證_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260311_HCC1395_DORADO_TO_candidate_specific甲基rescue驗證_01.md)
+  - [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_gq_methylation_rescue_matrix/analysis_summary.md](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_gq_methylation_rescue_matrix/analysis_summary.md)
+  - [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_gq_methylation_rescue_matrix/gq_threshold_sweep.tsv](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_gq_methylation_rescue_matrix/gq_threshold_sweep.tsv)
+  - [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_gq_methylation_rescue_matrix/gq_plus_methylation_rule_sweep.tsv](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_gq_methylation_rescue_matrix/gq_plus_methylation_rule_sweep.tsv)
+  - [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_gq_methylation_rescue_matrix_with_dorado_to/analysis_summary.md](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_gq_methylation_rescue_matrix_with_dorado_to/analysis_summary.md)
+- **建議後續**:
+  - 在 `5kHz TO` 上對 `Quality>=60 / Pairwise>=0.15 / agreement_positive` 的 top TP/FP 補做 diagnostics，確認是否對應不同 read-level 現象
+  - 在 `DORADO TO` 上對 `Quality>=60 / Pairwise<=0.20 / hp_assign>=0.99` 的 top TP/FP 補做 diagnostics，確認 support 規則是否對應不同 read-level 現象
+  - 若要進流程層，優先新增 annotation，而不是直接改成 hard filter / hard keep
+
+### 30. TO support 特徵的 read-level diagnostics（2026-03-11）
+
+- **期間**: 2026-03-11
+- **狀態**: ✅ 第一輪完成
+- **關鍵結論**:
+  - 已新增批次 diagnostics 腳本：
+    - [/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/run_to_support_feature_diagnostics.py](/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/run_to_support_feature_diagnostics.py)
+  - 本輪直接對 `HCC1395 5kHz TO` 與 `HCC1395_DORADO TO` 的代表性 `TP/FP` 補做：
+    - matrix heatmap
+    - distance heatmap
+    - `samtools depth/mpileup/HP tag` snapshot
+  - 代表性位點數：
+    - `5kHz TO`: `18`（`caller_lost_tp=9`, `caller_removed_fp=9`）
+    - `DORADO TO`: `16`（`caller_lost_tp=8`, `caller_removed_fp=8`）
+  - `Quality_Score`：
+    - 在兩個 TO 資料集中都不是負訊號
+    - 但高 `Quality_Score` 的 `FP` 也很常見
+    - `DORADO TO` 中，高 `Quality_Score` 的 `TP` 通常 alt fraction 中等、HP balance 較正常；高 `Quality_Score` 的 `FP` 則常有極高 alt fraction 與極端 haplotype skew
+    - **定位**：`soft support / ranking / annotation`
+  - `PairwiseMedianDist`：
+    - `5kHz TO` 的代表性 support 偏向高 pairwise
+    - `DORADO TO` 的代表性 support 偏向低 pairwise
+    - 這種方向差異在 read-level diagnostics 中仍存在，因此不能升級成全域固定閾值
+    - **定位**：`dataset-aware annotation`，不是跨樣本硬規則
+  - `hp_assign_rate`：
+    - 高 `hp_assign_rate` 的 `TP` 與 `FP` 都很多
+    - 多個 `FP` 同時呈現 `hp_assign_rate=1.0 + 極端 alt fraction + 極端 haplotype skew`
+    - **定位**：`phase/QC annotation`，不應作為 truth-level support 主規則
+  - 綜合結論：
+    - 第一層：`caller-first`
+    - 第二層：`Quality_Score` 等甲基 support
+    - annotation / QC：`PairwiseMedianDist`、`hp_assign_rate`、`NA HP fraction`、`haplotype skew`
+- **主要文件**:
+  - [/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260311_TO_support特徵_readlevel_diagnostics_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260311_TO_support特徵_readlevel_diagnostics_01.md)
+  - [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/selected_regions.tsv](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/selected_regions.tsv)
+  - [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/diagnostic_summary.tsv](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/diagnostic_summary.tsv)
+- **建議後續**:
+  - 對 `Quality_Score` 做更細的區間分析，確認是否存在比 `>=60` 更穩的 support 帶
+  - 將 `hp_assign_rate` 從 support 候選正式降階為 `phase/QC annotation`
+  - 若要進流程層，優先新增 annotation，不先加 hard keep / hard filter
+
+### 31. HCC1395 四象限甲基 rescue 整合矩陣（2026-03-11）
+
+- **期間**: 2026-03-11
+- **狀態**: ✅ 第一輪完成
+- **關鍵結論**:
+  - 已新增整合腳本：
+    - [/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/build_hcc1395_cross_quadrant_matrix.py](/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/build_hcc1395_cross_quadrant_matrix.py)
+  - 已將 `HCC1395 5kHz / HCC1395_DORADO × paired / TO` 的 benchmark、candidate-specific coverage、特徵單獨/組合、交集/正交性與 TO snapshot scope 差異放進同一個整合框架
+  - 新整合輸出目錄：
+    - [/bip8_disk/liaoyoyo2001/InterSubMod_out/output/research_rounds/20260311_hcc1395_cross_quadrant_matrix](/bip8_disk/liaoyoyo2001/InterSubMod_out/output/research_rounds/20260311_hcc1395_cross_quadrant_matrix)
+  - 已新增的核心表：
+    - `model_availability_matrix.tsv`
+    - `comparability_matrix.tsv`
+    - `layered_performance_matrix.tsv`
+    - `candidate_pool_layer_matrix.tsv`
+    - `feature_distribution_focus.tsv`
+    - `selected_rule_matrix.tsv`
+    - `feature_overlap_focus.tsv`
+    - `snapshot_scope_bias_assessment.tsv`
+    - `phase2_gap_tracker.tsv`
+  - 目前最重要的高層結論：
+    - `caller-first` 仍是四象限最穩定主規則
+    - 甲基特徵不是全部負效果，但多半沒有超過同一 caller gate
+    - `PairwiseMedianDist` 方向具有明顯 dataset-dependence，不可升級成全域規則
+    - `5kHz TO full tagged BAM` 與 `DORADO TO subset tagged BAM` 的 read-level snapshot 不可做跨 dataset 絕對值硬比較
+    - paired raw caller 已有 `pileup_filter.vcf` 與 `full_alignment_filter.vcf` 可供 phase 2 直接 benchmark；TO 目前仍只有 pileup-only availability
+- **主要文件**:
+  - [/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260311_HCC1395_四象限甲基rescue整合報告_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260311_HCC1395_四象限甲基rescue整合報告_01.md)
+  - [/bip8_disk/liaoyoyo2001/InterSubMod_out/output/research_rounds/20260311_hcc1395_cross_quadrant_matrix/final_integrated_report.md](/bip8_disk/liaoyoyo2001/InterSubMod_out/output/research_rounds/20260311_hcc1395_cross_quadrant_matrix/final_integrated_report.md)
+- **建議後續**:
+  - 在 paired 補同規格 support-feature read-level diagnostics
+  - 做 paired `pileup_filter / full_alignment_filter / final output` 的 direct benchmark
+  - 若空間允許，再評估是否補 `DORADO TO full baseline InterSubMod`
+
+### 32. Phase 2：paired raw pileup/full 與 finer feature interval / orthogonality（2026-03-11）
+
+- **期間**: 2026-03-11
+- **狀態**: ✅ 第一輪完成
+- **關鍵結論**:
+  - 已新增 phase 2 腳本：
+    - [/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/run_phase2_paired_model_feature_analysis.py](/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/run_phase2_paired_model_feature_analysis.py)
+  - paired raw `pileup_filter / full_alignment_filter / merged_output` 的 direct benchmark 已完成：
+    - `HCC1395 5kHz paired`
+      - raw `pileup_filter`：`TP=30595 / FP=7450 / FN=8852 / F1=0.7896`
+      - raw `full_alignment_filter`：`TP=30759 / FP=12684 / FN=8688 / F1=0.7422`
+      - merged output：`TP=29865 / FP=1430 / FN=9582 / F1=0.8443`
+      - **結論**：raw full 雖多 `894 TP`，但多 `11254 FP`；raw recall 空間真實存在，但不值得直接放寬成最終輸出
+    - `HCC1395_DORADO paired`
+      - raw `pileup_filter`：`TP=30872 / FP=2232 / FN=8575 / F1=0.8510`
+      - raw `full_alignment_filter`：`TP=31332 / FP=2559 / FN=8115 / F1=0.8545`
+      - merged output：`TP=29986 / FP=588 / FN=9461 / F1=0.8565`
+      - **結論**：raw full 優於 raw pileup，但仍低於 merged output；paired 最終仍需 merge + downstream precision control
+  - finer feature interval 已確認：
+    - `5kHz TO`
+      - `GQ` 最佳 support 帶集中在 `[18,20)`
+      - `Quality_Score` 最佳帶集中在 `[55,60)`
+      - `PairwiseMedianDist` 正向帶集中在 `[0.18,0.20)`
+    - `DORADO TO`
+      - `GQ` 最佳帶集中在 `[20,25)`
+      - `Quality_Score` 同樣偏 `[55,60)`
+      - `PairwiseMedianDist` 最佳帶改為 `[0.12,0.15)`
+    - **結論**：`Quality_Score` 較像穩定 support，`PairwiseMedianDist` 仍有強烈 dataset-dependence
+  - orthogonality 已確認：
+    - paired 目前沒有清楚的甲基正交補強，仍由 `GQ` 主導
+    - `5kHz TO` 中 `GQ / Pairwise / hp_assign / agreement / Strong` 間有小幅正交增益
+    - `DORADO TO` 也有弱正交增益，但幅度更小
+    - **結論**：甲基特徵在 TO 下仍屬第二層 support，不足以取代 caller-first
+- **主要文件**:
+  - [/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260311_phase2_paired_raw與feature_interval_orthogonality分析_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260311_phase2_paired_raw與feature_interval_orthogonality分析_01.md)
+  - [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_phase2_paired_model_feature_analysis/phase2_summary.md](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_phase2_paired_model_feature_analysis/phase2_summary.md)
+- **建議後續**:
+  - 若要進一步擴 paired phase 2，優先補 paired support-feature 的 read-level diagnostics，而不是直接擴 hard rule
+  - 若要把 TO support 再往前推，下一步應該做 annotation / ranking layer，而不是直接把區間規則寫成全域 filter
+  - 若要再深化正交性，應先排除 coverage ceiling，再測 `GQ + Pairwise + Quality + Strong` 的 constrained union
+
+### 33. Phase 2 finer interval 回接 annotation layer（2026-03-11）
+
+- **期間**: 2026-03-11
+- **狀態**: ✅ 第一輪完成
+- **關鍵結論**:
+  - 已新增 annotation builder：
+    - [/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/build_phase2_annotation_layer.py](/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/build_phase2_annotation_layer.py)
+  - 已將 phase 2 的 top-bin interval 正式回接到四個 dataset 的 analysis-layer annotation：
+    - `HCC1395 5kHz TO`
+    - `HCC1395 5kHz paired`
+    - `HCC1395_DORADO TO`
+    - `HCC1395_DORADO paired`
+  - annotation layer 已明確區分三類訊號：
+    - `support`
+    - `qc`
+    - `artifact`
+  - `Quality_Score` 已可穩定升級為 `support annotation`
+  - `PairwiseMedianDist` 已可升級為 `dataset-aware support annotation`
+  - `hp_assign_rate` 已明確降階為 `phase/QC annotation`
+  - policy evaluation 已確認：
+    - `HCC1395 5kHz TO`：最佳仍是 `caller_primary_only (gq>=10)`，annotation policy 全數略低於 caller-primary
+    - `HCC1395 5kHz paired`：最佳仍是 `caller_primary_only (gq>=15)`，paired 目前沒有可升級的甲基 support
+    - `HCC1395_DORADO TO`：最佳仍是 `caller_primary_only (gq>=10)`，annotation 幾乎追平但未超過
+    - `HCC1395_DORADO paired`：最佳反而是更嚴格的 `caller_strict_only (gq>=20)`
+  - **總結**：annotation layer 有價值，但現階段最合理的用途是排序、註記與解讀，不是直接改 hard keep / hard filter
+- **主要文件**:
+  - [/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260311_phase2_finer_interval回接annotation_layer驗證_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260311_phase2_finer_interval回接annotation_layer驗證_01.md)
+  - [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_phase2_annotation_layer/annotation_layer_summary.md](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_phase2_annotation_layer/annotation_layer_summary.md)
+  - [/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_01.md)
+- **建議後續**:
+  - 先把 annotation 欄位接到整合矩陣、round summary 與 diagnostics dashboard
+  - 若要再深化，優先做 annotation score / ranking，而不是直接改 pipeline 預設規則
+  - paired 若要再往前走，先補 candidate-specific coverage ceiling，再決定是否要提升 paired support annotation 的權重
+
+### 34. TO 雙模型可得性、snapshot scope 與 Pool B FN 收尾盤點（2026-03-12）
+
+- **期間**: 2026-03-12
+- **狀態**: ⏳ 進行中
+- **關鍵結論**:
+  - `TO pileup vs full model` 目前不是單純少一張 benchmark 表，而是現有 source tree 中尚未確認有 `full model` 產物
+  - `v0_3_0` 與 `ss_v0_3_0` 目前較像不同 `pileup model family`，不應直接寫成 `pileup vs full model`
+  - `5kHz TO` 的 read-level diagnostics 來自 `full tagged BAM`，`DORADO TO` 來自 `candidate-window subset tagged BAM`，因此只能做方向比較，不能做跨 dataset 絕對值硬比
+  - `Pool B FN = 840` 與 caller-side rescue 空間已成立，但尚未接回四象限整合、phase 2 annotation 與主線週報 closing summary
+- **主要文件**:
+  - `docs/plans/2026/03/20260312_未完項closing_plan_01.md`
+  - `docs/experiments/in_progress/2026/03/20260312_TO雙模型與snapshot_scope盤點_01.md`
+- **建議後續**:
+  - 先完成 `TO dual-model availability closeout`
+  - 再對 `5kHz TO` 做 `same-scope subset snapshot`
+  - 最後將 `Pool B FN` 正式接回四象限整合與 annotation 層
+
+### 35. TO 雙模型可得性 closeout（2026-03-12）
+
+- **期間**: 2026-03-12
+- **狀態**: ✅ 已完成
+- **關鍵結論**:
+  - `HCC1395 5kHz TO` 與 `HCC1395_DORADO TO` 在目前 source tree 中尚未確認存在可直接做 benchmark 的 TO full-model 產物
+  - 現有 `v0_3_0` 與 `ss_v0_3_0` 應視為不同 `pileup model family`，不應再描述成 `pileup vs full model`
+  - 目前 TO caller 模型結論應統一標示為：`pileup-route only`
+  - paired raw caller 的 `pileup/full` 對照已存在，但不能直接外推到 TO
+- **主要文件**:
+  - `docs/reports/validated/2026/03/20260312_TO雙模型可得性closeout_01.md`
+  - `docs/experiments/in_progress/2026/03/20260312_TO雙模型與snapshot_scope盤點_01.md`
+- **建議後續**:
+  - 下一步直接進入 `snapshot scope same-scope control`
+  - 若未來需要 TO 雙模型 benchmark，先補 full-model source 或重跑，不要直接假設資料已存在
+
+### 36. TO snapshot scope same-scope control（2026-03-12）
+
+- **期間**: 2026-03-12
+- **狀態**: ✅ 已完成
+- **關鍵結論**:
+  - 已對 `HCC1395 5kHz TO` 的相同 18 個代表性 region，完成 `full tagged BAM` vs `candidate-window subset tagged BAM` 的 same-scope control
+  - `18/18` 個 region 在 region-level comparison 中都完全一致
+  - `read_count`、`target_depth`、`target_alt_fraction`、`na_hp_fraction`、`collapsed_hp_balance_delta`、`top_hp_tag` 等所有主要 snapshot 指標都為 `max_abs_delta = 0.0`
+  - 這代表 `subset snapshot` 在同 dataset / 同 region 控制下，不會扭曲目前使用的 read-level diagnostics 指標
+  - 先前 `5kHz TO full` vs `DORADO TO subset` 的限制，現在應更精確改寫為：
+    - `subset` 技術本身未觀察到偏移
+    - 仍不可做跨 dataset 絕對值硬比的主因是 dataset/platform 差異與 coverage ceiling，不是 subset 萃取本身
+- **主要文件**:
+  - `docs/reports/validated/2026/03/20260312_TO_snapshot_scope_same_scope_control_01.md`
+  - `docs/experiments/in_progress/2026/03/20260311_TO_support特徵_readlevel_diagnostics_01.md`
+  - `InterSubMod_runs/output/big8_disk_output/research_rounds/20260312_snapshot_scope_same_control_hcc1395_5khz/same_scope_snapshot_bias_summary.md`
+  - `InterSubMod_runs/output/big8_disk_output/research_rounds/20260312_snapshot_scope_same_control_hcc1395_5khz/same_scope_metric_summary.tsv`
+- **建議後續**:
+  - 可將 `subset snapshot` 正式升級為 `safe_for_within_dataset_ranking`
+  - 保留 `unsafe_for_cross_dataset_absolute_comparison` 的限制，但理由改成 dataset/platform 差異，而不是 subset 技術本身
+  - 這條主線的下一步已在 **實驗 37** 完成 `Pool B FN integration closeout`
+
+### 37. Pool B FN integration closeout（2026-03-12）
+
+- **期間**: 2026-03-12
+- **狀態**: ✅ 已完成
+- **關鍵結論**:
+  - `Pool B FN = 840` 再次證明 `ClairS-TO` 在 `HCC1395 5kHz tumor-only` 的 non-PASS 區存在明確 caller-side rescue 空間
+  - 原始 caller-only 的 authoritative 最佳規則是 `no_varcluster`：`428 TP / 390 FP`, `F1 +0.003391`
+  - 若追求較乾淨、較可實務採用的規則，則是 `no_varcluster_and_gq15`：`115 TP / 45 FP`, `precision=71.9%`, `F1 +0.001452`
+  - 補跑甲基後的最佳 combined 規則是 `gq15_and_allele_delta_low`：`431 TP / 473 FP`, `F1 +0.002702`
+  - 這個最佳 combined 只比相近 caller gate `gq15_and_af015` 多 `+0.000386`，但仍低於原始 caller-only 最佳 `no_varcluster`
+  - `class_strong_or_subclone` 與 `pairwise_ge_020` 在 Pool B 中都為負效益，表示甲基訊號不適合作為獨立主 rescue 規則
+  - `AlleleDelta` 在 Pool B 與 TO kept-set / artifact triage 的方向不同：Pool B 中 `AlleleDelta < 0.15` 較像 somatic-rich 訊號；不能直接把 `low VAF + high AlleleDelta` 的 kept-set 規則全域套用到 Pool B
+  - 本次也正式釐清證據層級：
+    - caller-side FILTER/GQ 規則必須使用原始 `pool_b_caller_rescue_rules.tsv`
+    - `with_methyl` 目錄的 `passified VCF` 只適合拿來看 coverage、joined features 與 combined rescue，不能再當作原始 FILTER 語意的 caller-only 對照
+- **主要文件**:
+  - `docs/reports/validated/2026/03/20260312_PoolB_FN_integration_closeout_01.md`
+  - `docs/experiments/in_progress/2026/03/20260308_ClairS邊緣FN探勘與甲基救援_01.md`
+  - `docs/reports/validated/2026/03/assets/20260312_pool_b_fn_integration_summary_01.tsv`
+- **建議後續**:
+  - Pool B 主線已可關閉，不需再當成未解 blocker
+  - 若未來重跑腳本，應將原始 `filter_tags` 額外保存在 sidecar TSV 或 INFO，避免 passified 後失去 FILTER 語意
+  - 研究重心維持在 `caller-first + methylation-support + artifact triage` 的主線整合，而不是再把 Pool B 當獨立探索方向
 
 ### 12. Purity-Aware 過濾策略
 
@@ -199,7 +886,7 @@
 
 **相關文件**:
 - `docs/plans/2026/02/20260228_InterSubMod再驗證與再實驗執行計畫_01.md`
-- `docs/ai_sessions/2026/02/20260209_InterSubMod專案完整分析報告_01.md`
+- `docs/provenance/ai_sessions/2026/02/20260209_InterSubMod專案完整分析報告_01.md`
 
 ---
 
@@ -235,8 +922,8 @@
 3. 對每個 purity 產出固定 `purity_qc.tsv`
 
 **相關文件**:
-- `docs/ai_sessions/2026/03/20260302_subsample混樣甲基化偏差_現況研究推論與驗證路線圖_01.md`
-- `docs/ai_sessions/2026/02/20260213_HCC1395_subsample_purity_完整驗證報告_01.md`（Knowledge 路徑）
+- `docs/provenance/ai_sessions/2026/03/20260302_subsample混樣甲基化偏差_現況研究推論與驗證路線圖_01.md`
+- `docs/provenance/ai_sessions/2026/02/20260213_HCC1395_subsample_purity_完整驗證報告_01.md`（Knowledge 路徑）
 
 ---
 
@@ -300,7 +987,7 @@
 3. 在 LabelTest 加入 per-HP PERMANOVA（Label-First 框架）
 
 **相關文件**:
-- `docs/ai_sessions/2026/02/20260209_InterSubMod專案完整分析報告_01.md`（§4.2, §7.1）
+- `docs/provenance/ai_sessions/2026/02/20260209_InterSubMod專案完整分析報告_01.md`（§4.2, §7.1）
 - `docs/experiments/validated/2026/01/20260107_F1_and_Data_Optimization_Report_01.md`
 
 ---

@@ -1,6 +1,6 @@
 ---
 name: report
-description: AI 對話執行報告撰寫技能。用於記錄重要對話的決策、修改內容和後續行動。輸出到 docs/ai_sessions/
+description: AI 對話執行報告撰寫技能。用於記錄重要對話的決策、修改內容和後續行動。輸出到 docs/provenance/ai_sessions/
 allowed-tools: Read, Write, Glob, Grep
 user-invocable: true
 ---
@@ -27,7 +27,7 @@ user-invocable: true
 
 ## 輸出位置
 
-`docs/ai_sessions/{YYYY}/{MM}/`
+`docs/provenance/ai_sessions/{YYYY}/{MM}/`
 
 ## 檔案命名
 

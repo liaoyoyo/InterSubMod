@@ -188,6 +188,15 @@ else
         log_info "  Indexing tagged BAM..."
         "${SAMTOOLS}" index -@ "${LOCAL_THREADS}" "${TAGGED_BAM}"
         log_info "  Tagged BAM indexed: ${TAGGED_BAM}.bai"
+
+        HAPLOTAG_QC_TSV="${LONGPHASE_OUTPUT_DIR}/haplotag_qc.tsv"
+        log_info "  Summarizing HP tags..."
+        python3 "${SCRIPT_DIR}/../../analysis/haplotag_qc.py" \
+            --bam "${TAGGED_BAM}" \
+            --sample "${SAMPLE}" \
+            --output-tsv "${HAPLOTAG_QC_TSV}" \
+            --samtools "${SAMTOOLS}"
+        log_info "  Haplotag QC: ${HAPLOTAG_QC_TSV}"
     else
         log_error "Tagged BAM not found: ${TAGGED_BAM}"
         exit 1

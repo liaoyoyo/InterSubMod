@@ -401,6 +401,12 @@ struct SignificanceResult {
     // Note: label_hp is deprecated, use hp_multistage.merged instead
     LabelDeltaResult label_hp;      // HP1 vs HP2 delta test (deprecated)
     LabelDeltaResult label_allele;  // ALT vs REF delta test (Stage 3)
+    PermanovaResult label_hp_permanova;       // HP merged labels on distance matrix
+    DispersionResult label_hp_dispersion;
+    bool label_hp_dispersion_warning = false;
+    PermanovaResult label_allele_permanova;   // ALT/REF labels on distance matrix
+    DispersionResult label_allele_dispersion;
+    bool label_allele_dispersion_warning = false;
     std::string dominant_label_dimension;  // "hp", "allele", or "none"
     bool label_significant = false;
 

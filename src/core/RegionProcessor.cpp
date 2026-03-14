@@ -11,8 +11,11 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <mutex>
+#include <numeric>
 #include <sstream>
+#include <tuple>
 #include <unordered_set>
 
 #include "core/HierarchicalClustering.hpp"
@@ -165,6 +168,41 @@ std::string determine_quality_tier(float quality_score) {
     } else {
         return "Low";
     }
+}
+
+/**
+ * @brief Summarize valid off-diagonal distances from a distance matrix.
+ */
+std::pair<double, double> summarize_pairwise_distances(const Eigen::MatrixXd& dist_matrix) {
+    std::vector<double> valid_distances;
+    valid_distances.reserve(static_cast<size_t>(dist_matrix.rows()) * static_cast<size_t>(dist_matrix.rows()) / 2);
+
+    for (int i = 0; i < dist_matrix.rows(); ++i) {
+        for (int j = i + 1; j < dist_matrix.cols(); ++j) {
+            double dist = dist_matrix(i, j);
+            if (!std::isnan(dist)) {
+                valid_distances.push_back(dist);
+            }
+        }
+    }
+
+    if (valid_distances.empty()) {
+        return {0.0, 0.0};
+    }
+
+    double mean = std::accumulate(valid_distances.begin(), valid_distances.end(), 0.0) /
+                  static_cast<double>(valid_distances.size());
+
+    std::sort(valid_distances.begin(), valid_distances.end());
+    size_t mid = valid_distances.size() / 2;
+    double median = 0.0;
+    if (valid_distances.size() % 2 == 0) {
+        median = (valid_distances[mid - 1] + valid_distances[mid]) / 2.0;
+    } else {
+        median = valid_distances[mid];
+    }
+
+    return {mean, median};
 }
 
 }  // anonymous namespace
@@ -625,12 +663,16 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
 
     // Header (updated with Multi-Stage HP verification and Quality Assessment columns)
     csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,HeuristicScore,PassedGating,"
+                "PairwiseMeanDist,PairwiseMedianDist,"
+                "ClusterPermanovaF,ClusterPermanovaP,ClusterPermanovaValid,ClusterDispersionP,ClusterDispersionWarn,"
                 // Stage 1: HP Merged
                 "HPMergedDelta,HPMergedP,HPMergedSig,HP1FamilyN,HP2FamilyN,"
                 // Stage 2: HP Fine-Grained
                 "HPFineF,HPFineP,HPFineSig,HPFineNGroups,"
                 // Stage 3: Allele
                 "AlleleDelta,AlleleP,AlleleSig,"
+                "LabelHPPermanovaF,LabelHPPermanovaP,LabelHPPermanovaValid,LabelHPDispersionP,LabelHPDispersionWarn,"
+                "LabelAllelePermanovaF,LabelAllelePermanovaP,LabelAllelePermanovaValid,LabelAlleleDispersionP,LabelAlleleDispersionWarn,"
                 // Stage 4: Unassigned Affinity
                 "UnassignedAffinity,UnassignedAffinityP,UnassignedDir,NHP3,NHP0,"
                 // Summary
@@ -678,6 +720,13 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << "," << r.num_reads << "," << r.num_cpgs << "," << std::scientific << std::setprecision(6)
                  << r.global_p_value << "," << std::fixed << std::setprecision(4) << r.cramers_v << "," << std::fixed
                  << std::setprecision(4) << r.heuristic_score << "," << (r.passed_gating ? "true" : "false") << ","
+                 << std::fixed << std::setprecision(4) << r.pairwise_mean_distance << ","
+                 << std::fixed << std::setprecision(4) << r.pairwise_median_distance << ","
+                 << std::fixed << std::setprecision(4) << r.cluster_permanova_f << ","
+                 << std::scientific << std::setprecision(6) << r.cluster_permanova_p << ","
+                 << (r.cluster_permanova_valid ? "true" : "false") << ","
+                 << std::scientific << std::setprecision(6) << r.cluster_dispersion_p << ","
+                 << (r.cluster_dispersion_warning ? "true" : "false") << ","
                  // Stage 1: HP Merged
                  << std::fixed << std::setprecision(4) << r.hp_merged_delta << ","
                  << std::scientific << std::setprecision(6) << r.hp_merged_p << ","
@@ -692,6 +741,16 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << std::fixed << std::setprecision(4) << r.allele_delta << ","
                  << std::scientific << std::setprecision(6) << r.allele_p << ","
                  << (r.allele_sig ? "true" : "false") << ","
+                 << std::fixed << std::setprecision(4) << r.label_hp_permanova_f << ","
+                 << std::scientific << std::setprecision(6) << r.label_hp_permanova_p << ","
+                 << (r.label_hp_permanova_valid ? "true" : "false") << ","
+                 << std::scientific << std::setprecision(6) << r.label_hp_dispersion_p << ","
+                 << (r.label_hp_dispersion_warning ? "true" : "false") << ","
+                 << std::fixed << std::setprecision(4) << r.label_allele_permanova_f << ","
+                 << std::scientific << std::setprecision(6) << r.label_allele_permanova_p << ","
+                 << (r.label_allele_permanova_valid ? "true" : "false") << ","
+                 << std::scientific << std::setprecision(6) << r.label_allele_dispersion_p << ","
+                 << (r.label_allele_dispersion_warning ? "true" : "false") << ","
                  // Stage 4: Unassigned Affinity
                  << std::fixed << std::setprecision(4) << r.unassigned_affinity << ","
                  << std::scientific << std::setprecision(6) << r.unassigned_affinity_p << ","
@@ -849,6 +908,16 @@ void RegionProcessor::process_reads(const std::vector<bam1_t*>& reads, const Som
             continue;
         }
 
+        // Even in no-filter mode, always skip structurally invalid reads (secondary,
+        // supplementary, unmapped, duplicate) because they have no valid sequence
+        // for methylation parsing and cause undefined behavior in MethylationParser.
+        if (no_filter_output_) {
+            uint16_t flag = b->core.flag;
+            if (flag & (BAM_FSECONDARY | BAM_FSUPPLEMENTARY | BAM_FUNMAP | BAM_FDUP)) {
+                continue;
+            }
+        }
+
         ReadInfo info = read_parser.parse(b, read_count, true, snv, ref_seq, region_start);
 
         // Skip reads that don't cover the SNV
@@ -947,6 +1016,8 @@ DistanceMatrix RegionProcessor::compute_and_write_distance_matrix(const Methylat
     result.num_valid_pairs = all_dist.num_valid_pairs;
     result.num_invalid_pairs = all_dist.num_invalid_pairs;
     result.avg_common_coverage = all_dist.avg_common_coverage;
+    std::tie(result.pairwise_mean_distance, result.pairwise_median_distance) =
+        summarize_pairwise_distances(all_dist.dist_matrix);
 
     // Write distance matrix if enabled
     if (output_distance_matrix_) {
@@ -1096,6 +1167,11 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
         result.local_best_cluster = sig_result.local_result.best_cluster_id;
         result.heuristic_score = sig_result.heuristic_score;
         result.passed_gating = sig_result.passed_gate;
+        result.cluster_permanova_f = sig_result.permanova.pseudo_f;
+        result.cluster_permanova_p = sig_result.permanova.p_value;
+        result.cluster_permanova_valid = sig_result.permanova.valid;
+        result.cluster_dispersion_p = sig_result.dispersion.anova_p;
+        result.cluster_dispersion_warning = sig_result.dispersion_warning;
 
         result.label_test_computed = true;
 
@@ -1119,6 +1195,16 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
         result.allele_delta = sig_result.label_allele.delta;
         result.allele_p = sig_result.label_allele.p_value;
         result.allele_sig = sig_result.label_allele.significant;
+        result.label_hp_permanova_f = sig_result.label_hp_permanova.pseudo_f;
+        result.label_hp_permanova_p = sig_result.label_hp_permanova.p_value;
+        result.label_hp_permanova_valid = sig_result.label_hp_permanova.valid;
+        result.label_hp_dispersion_p = sig_result.label_hp_dispersion.anova_p;
+        result.label_hp_dispersion_warning = sig_result.label_hp_dispersion_warning;
+        result.label_allele_permanova_f = sig_result.label_allele_permanova.pseudo_f;
+        result.label_allele_permanova_p = sig_result.label_allele_permanova.p_value;
+        result.label_allele_permanova_valid = sig_result.label_allele_permanova.valid;
+        result.label_allele_dispersion_p = sig_result.label_allele_dispersion.anova_p;
+        result.label_allele_dispersion_warning = sig_result.label_allele_dispersion_warning;
 
         // Stage 4: Unassigned Affinity Test
         result.unassigned_affinity = hp_ms.unassigned.affinity_score;
@@ -1161,6 +1247,12 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
             sig_file << "  \"num_reads\": " << read_list.size() << ",\n";
             sig_file << "  \"optimal_k\": " << best_k << ",\n";
             sig_file << "  \"passed_gating\": " << (sig_result.passed_gate ? "true" : "false") << ",\n";
+            sig_file << "  \"pairwise_distance\": {\n";
+            sig_file << "    \"mean\": " << std::fixed << std::setprecision(4) << result.pairwise_mean_distance
+                     << ",\n";
+            sig_file << "    \"median\": " << std::fixed << std::setprecision(4) << result.pairwise_median_distance
+                     << "\n";
+            sig_file << "  },\n";
             sig_file << "  \"global_alt\": {\n";
             sig_file << "    \"p_value\": " << std::scientific << std::setprecision(6)
                      << sig_result.global_alt.fisher_ffh.p_value << ",\n";
@@ -1172,6 +1264,39 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
                      << sig_result.global_hp.fisher_ffh.p_value << ",\n";
             sig_file << "    \"cramers_v\": " << std::fixed << std::setprecision(4) << sig_result.global_hp.cramers_v
                      << "\n";
+            sig_file << "  },\n";
+            sig_file << "  \"cluster_structure\": {\n";
+            sig_file << "    \"permanova_valid\": " << (sig_result.permanova.valid ? "true" : "false") << ",\n";
+            sig_file << "    \"permanova_f\": " << std::fixed << std::setprecision(4) << sig_result.permanova.pseudo_f
+                     << ",\n";
+            sig_file << "    \"permanova_p\": " << std::scientific << std::setprecision(6)
+                     << sig_result.permanova.p_value << ",\n";
+            sig_file << "    \"dispersion_p\": " << std::scientific << std::setprecision(6)
+                     << sig_result.dispersion.anova_p << ",\n";
+            sig_file << "    \"dispersion_warning\": "
+                     << (sig_result.dispersion_warning ? "true" : "false") << "\n";
+            sig_file << "  },\n";
+            sig_file << "  \"label_structure\": {\n";
+            sig_file << "    \"hp_permanova_valid\": "
+                     << (sig_result.label_hp_permanova.valid ? "true" : "false") << ",\n";
+            sig_file << "    \"hp_permanova_f\": " << std::fixed << std::setprecision(4)
+                     << sig_result.label_hp_permanova.pseudo_f << ",\n";
+            sig_file << "    \"hp_permanova_p\": " << std::scientific << std::setprecision(6)
+                     << sig_result.label_hp_permanova.p_value << ",\n";
+            sig_file << "    \"hp_dispersion_p\": " << std::scientific << std::setprecision(6)
+                     << sig_result.label_hp_dispersion.anova_p << ",\n";
+            sig_file << "    \"hp_dispersion_warning\": "
+                     << (sig_result.label_hp_dispersion_warning ? "true" : "false") << ",\n";
+            sig_file << "    \"allele_permanova_valid\": "
+                     << (sig_result.label_allele_permanova.valid ? "true" : "false") << ",\n";
+            sig_file << "    \"allele_permanova_f\": " << std::fixed << std::setprecision(4)
+                     << sig_result.label_allele_permanova.pseudo_f << ",\n";
+            sig_file << "    \"allele_permanova_p\": " << std::scientific << std::setprecision(6)
+                     << sig_result.label_allele_permanova.p_value << ",\n";
+            sig_file << "    \"allele_dispersion_p\": " << std::scientific << std::setprecision(6)
+                     << sig_result.label_allele_dispersion.anova_p << ",\n";
+            sig_file << "    \"allele_dispersion_warning\": "
+                     << (sig_result.label_allele_dispersion_warning ? "true" : "false") << "\n";
             sig_file << "  },\n";
             sig_file << "  \"heuristic_score\": " << std::fixed << std::setprecision(4) << sig_result.heuristic_score
                      << "\n";

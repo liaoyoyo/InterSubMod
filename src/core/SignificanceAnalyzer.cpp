@@ -6,6 +6,7 @@
 #include "core/SignificanceAnalyzer.hpp"
 
 #include <cmath>
+#include <map>
 #include <numeric>
 
 namespace InterSubMod {
@@ -53,6 +54,12 @@ SignificanceResult SignificanceAnalyzer::analyze(const std::vector<int>& cluster
     // Basic info
     result.n_reads = static_cast<int>(cluster_labels.size());
     result.n_cpg = methylation_matrix.cols();
+    result.permanova.valid = false;
+    result.permanova.invalid_reason = "not_run";
+    result.label_hp_permanova.valid = false;
+    result.label_hp_permanova.invalid_reason = "not_run";
+    result.label_allele_permanova.valid = false;
+    result.label_allele_permanova.invalid_reason = "not_run";
 
     if (result.n_reads < 2) {
         result.valid_flag = false;
@@ -160,6 +167,103 @@ SignificanceResult SignificanceAnalyzer::analyze(const std::vector<int>& cluster
         }
     }
 
+    auto run_grouped_structure = [&](const std::vector<int>& raw_group_labels, PermanovaResult& permanova_result,
+                                     DispersionResult& dispersion_result, bool& dispersion_warning) {
+        permanova_result = PermanovaResult();
+        dispersion_result = DispersionResult();
+        dispersion_warning = false;
+
+        if (dist_matrix.rows() == 0 || static_cast<int>(raw_group_labels.size()) != dist_matrix.rows()) {
+            permanova_result.valid = false;
+            permanova_result.invalid_reason = "matrix_label_size_mismatch";
+            return;
+        }
+
+        std::vector<int> included_indices;
+        included_indices.reserve(raw_group_labels.size());
+        std::vector<int> included_labels;
+        included_labels.reserve(raw_group_labels.size());
+
+        for (int i = 0; i < static_cast<int>(raw_group_labels.size()); ++i) {
+            if (raw_group_labels[i] >= 0) {
+                included_indices.push_back(i);
+                included_labels.push_back(raw_group_labels[i]);
+            }
+        }
+
+        if (static_cast<int>(included_indices.size()) < config_.structure_config.min_reads_for_permanova) {
+            permanova_result.valid = false;
+            permanova_result.invalid_reason = "insufficient_reads";
+            return;
+        }
+
+        std::map<int, int> group_counts;
+        for (int label : included_labels) {
+            group_counts[label]++;
+        }
+
+        if (static_cast<int>(group_counts.size()) < 2) {
+            permanova_result.valid = false;
+            permanova_result.invalid_reason = "insufficient_groups";
+            return;
+        }
+
+        for (const auto& [label, count] : group_counts) {
+            if (count < config_.label_config.min_reads_per_group) {
+                permanova_result.valid = false;
+                permanova_result.invalid_reason = "insufficient_reads_per_group";
+                return;
+            }
+        }
+
+        Eigen::MatrixXd included_dist(included_indices.size(), included_indices.size());
+        for (int i = 0; i < static_cast<int>(included_indices.size()); ++i) {
+            for (int j = 0; j < static_cast<int>(included_indices.size()); ++j) {
+                included_dist(i, j) = dist_matrix(included_indices[i], included_indices[j]);
+            }
+        }
+
+        std::vector<int> valid_subset_indices;
+        if (!structure_test_->filter_reads_for_complete_matrix(included_dist, valid_subset_indices)) {
+            permanova_result.valid = false;
+            permanova_result.invalid_reason = "insufficient_overlap";
+            return;
+        }
+
+        Eigen::MatrixXd filtered_dist(valid_subset_indices.size(), valid_subset_indices.size());
+        std::vector<int> filtered_labels(valid_subset_indices.size());
+        for (int i = 0; i < static_cast<int>(valid_subset_indices.size()); ++i) {
+            filtered_labels[i] = included_labels[valid_subset_indices[i]];
+            for (int j = 0; j < static_cast<int>(valid_subset_indices.size()); ++j) {
+                filtered_dist(i, j) = included_dist(valid_subset_indices[i], valid_subset_indices[j]);
+            }
+        }
+
+        group_counts.clear();
+        for (int label : filtered_labels) {
+            group_counts[label]++;
+        }
+        if (static_cast<int>(group_counts.size()) < 2) {
+            permanova_result.valid = false;
+            permanova_result.invalid_reason = "insufficient_groups_after_filter";
+            return;
+        }
+
+        for (const auto& [label, count] : group_counts) {
+            if (count < config_.label_config.min_reads_per_group) {
+                permanova_result.valid = false;
+                permanova_result.invalid_reason = "insufficient_reads_per_group_after_filter";
+                return;
+            }
+        }
+
+        permanova_result = structure_test_->run_permanova(filtered_dist, filtered_labels);
+        if (config_.enable_dispersion && permanova_result.valid) {
+            dispersion_result = structure_test_->check_dispersion(filtered_dist, filtered_labels);
+            dispersion_warning = dispersion_result.warning;
+        }
+    };
+
     // Phase 4: Multi-Stage Label Verification (NEW)
     // Run multi-stage HP verification and Allele tests
     if (dist_matrix.rows() >= config_.label_config.min_total_reads) {
@@ -173,6 +277,28 @@ SignificanceResult SignificanceAnalyzer::analyze(const std::vector<int>& cluster
         result.label_allele = label_result.allele_result;
         result.dominant_label_dimension = label_result.dominant_dimension;
         result.label_significant = label_result.any_significant;
+
+        std::vector<int> hp_merged_labels(full_labels.size(), -1);
+        std::vector<int> allele_labels(full_labels.size(), -1);
+        for (size_t i = 0; i < full_labels.size(); ++i) {
+            const std::string& hp = full_labels[i].hp_tag;
+            if (hp == "1" || hp == "HP1" || hp == "1-1") {
+                hp_merged_labels[i] = 0;
+            } else if (hp == "2" || hp == "HP2" || hp == "2-1") {
+                hp_merged_labels[i] = 1;
+            }
+
+            if (full_labels[i].allele == AltSupport::ALT) {
+                allele_labels[i] = 0;
+            } else if (full_labels[i].allele == AltSupport::REF) {
+                allele_labels[i] = 1;
+            }
+        }
+
+        run_grouped_structure(hp_merged_labels, result.label_hp_permanova, result.label_hp_dispersion,
+                              result.label_hp_dispersion_warning);
+        run_grouped_structure(allele_labels, result.label_allele_permanova, result.label_allele_dispersion,
+                              result.label_allele_dispersion_warning);
     }
 
     // Phase 5: Classification (Bidirectional Verification with HP Balance Check)

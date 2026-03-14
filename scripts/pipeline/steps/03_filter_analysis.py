@@ -22,7 +22,6 @@ import gzip
 import json
 import os
 import sys
-from collections import defaultdict
 
 
 def parse_args():
@@ -40,6 +39,60 @@ def parse_args():
     parser.add_argument("--mode", default="s-pure", help="Verification mode")
     parser.add_argument("--purity", default="pure", help="Purity level")
     return parser.parse_args()
+
+
+def parse_purity_value(raw_value):
+    try:
+        return float(raw_value)
+    except (TypeError, ValueError):
+        return None
+
+
+def purity_bin_from_value(purity_value):
+    if purity_value is None:
+        return "unknown"
+    if purity_value < 40.0:
+        return "lt40"
+    if purity_value < 60.0:
+        return "40to60"
+    return "ge60"
+
+
+def determine_rule_config(raw_purity):
+    purity_value = parse_purity_value(raw_purity)
+    purity_bin = purity_bin_from_value(purity_value)
+
+    if purity_bin == "lt40":
+        return {
+            "rule_id": "purity_lt40_annotation_only_v1",
+            "purity_bin": purity_bin,
+            "apply_filter": False,
+            "allele_delta_min": None,
+            "vaf_max": None,
+            "require_cv_support": False,
+            "cv_support_max": 0.03,
+        }
+
+    if purity_bin == "40to60":
+        return {
+            "rule_id": "purity_40to60_conservative_ad_vaf_cv_v1",
+            "purity_bin": purity_bin,
+            "apply_filter": True,
+            "allele_delta_min": 0.20,
+            "vaf_max": 0.10,
+            "require_cv_support": True,
+            "cv_support_max": 0.03,
+        }
+
+    return {
+        "rule_id": "purity_ge60_ad_vaf_core_v1" if purity_bin == "ge60" else "purity_unknown_ad_vaf_core_v1",
+        "purity_bin": purity_bin,
+        "apply_filter": True,
+        "allele_delta_min": 0.15,
+        "vaf_max": 0.15,
+        "require_cv_support": False,
+        "cv_support_max": 0.03,
+    }
 
 
 def read_summary_csv(filepath):
@@ -71,7 +124,7 @@ def parse_vcf_features(vcf_path):
             qual = float(fields[5]) if fields[5] != "." else 0.0
 
             # Try to extract VAF from FORMAT/SAMPLE fields
-            vaf = 0.0
+            vaf = None
             fmt_fields = fields[8].split(":")
             sample_fields = fields[9].split(":")
             fmt_dict = dict(zip(fmt_fields, sample_fields))
@@ -93,7 +146,7 @@ def parse_vcf_features(vcf_path):
                         ref_count = int(ad_values[0])
                         alt_count = int(ad_values[1])
                         total = ref_count + alt_count
-                        vaf = alt_count / total if total > 0 else 0.0
+                        vaf = alt_count / total if total > 0 else None
                 except (ValueError, TypeError):
                     pass
 
@@ -102,21 +155,26 @@ def parse_vcf_features(vcf_path):
     return features
 
 
-def should_filter_variant(row, vcf_features=None):
+def should_filter_variant(row, vcf_features=None, rule_config=None):
     """Apply methylation-based filter conditions.
 
-    Filter condition (remove if TRUE):
-        (QUAL < 0.75) OR (AlleleDelta > 0.25 AND CramersV < 0.05 AND VAF < 0.24)
-
-    If VCF features are not available, only the methylation-only condition is used:
-        AlleleDelta > 0.25 AND CramersV < 0.05
+    Purity-aware default:
+        <40% purity   -> annotation only, do not hard filter
+        40-60% purity -> conservative AD+VAF core with CV support
+        >=60% purity  -> AD+VAF core, CV as auxiliary signal
 
     Returns True if the variant should be REMOVED (filtered out).
     """
+    if rule_config is None:
+        rule_config = determine_rule_config(None)
+
     try:
         allele_delta = abs(float(row.get("AlleleDelta", 0)))
         cramers_v = float(row.get("CramersV", 0))
     except (ValueError, TypeError):
+        return False
+
+    if not rule_config["apply_filter"]:
         return False
 
     chrom = row.get("Chr", "")
@@ -130,21 +188,20 @@ def should_filter_variant(row, vcf_features=None):
         qual = feat.get("qual")
         vaf = feat.get("vaf")
 
-    # Condition 1: Low QUAL (Disabled for Pileup Mode)
-    # if qual is not None and qual < 0.75:
-    #     return True
+    if vaf is None:
+        return False
 
-    # Condition 2: High allele delta + low Cramer's V + low VAF (Optimized 2026-02-12)
-    # Optimized: AD > 0.15, CV < 0.03, VAF < 0.15
-    if allele_delta > 0.15 and cramers_v < 0.03:
-        if vaf is not None:
-            if vaf < 0.15:
-                return True
-        else:
-            # Without VAF, apply a more conservative filter (skip VAF check)
-            return True
+    core_trigger = (
+        allele_delta > rule_config["allele_delta_min"]
+        and vaf < rule_config["vaf_max"]
+    )
+    if not core_trigger:
+        return False
 
-    return False
+    if rule_config["require_cv_support"] and cramers_v >= rule_config["cv_support_max"]:
+        return False
+
+    return True
 
 
 def compute_metrics(tp, fp, truth_total):
@@ -157,6 +214,7 @@ def compute_metrics(tp, fp, truth_total):
 
 def main():
     args = parse_args()
+    rule_config = determine_rule_config(args.purity)
 
     # Read significance summaries
     print(f"[Filter Analysis] Reading TP summary: {args.tp_summary}")
@@ -165,6 +223,7 @@ def main():
     fp_rows = read_summary_csv(args.fp_summary)
 
     print(f"[Filter Analysis] TP regions: {len(tp_rows)}, FP regions: {len(fp_rows)}")
+    print(f"[Filter Analysis] Rule: {rule_config['rule_id']} | purity_bin={rule_config['purity_bin']}")
 
     # Load VCF features
     # Prefer separate TP/FP VCF files (which have LongPhase-S probability-scale QUAL)
@@ -194,13 +253,13 @@ def main():
     # Apply filter to TP variants (count how many would be incorrectly removed)
     tp_filtered_count = 0
     for row in tp_rows:
-        if should_filter_variant(row, tp_vcf_features):
+        if should_filter_variant(row, tp_vcf_features, rule_config):
             tp_filtered_count += 1
 
     # Apply filter to FP variants (count how many would be correctly removed)
     fp_filtered_count = 0
     for row in fp_rows:
-        if should_filter_variant(row, fp_vcf_features):
+        if should_filter_variant(row, fp_vcf_features, rule_config):
             fp_filtered_count += 1
 
     # Filtered metrics
@@ -216,15 +275,25 @@ def main():
         "sample": args.sample,
         "mode": args.mode,
         "purity": args.purity,
+        "purity_bin": rule_config["purity_bin"],
         "truth_total": args.truth_total,
         "tp_regions_analyzed": len(tp_rows),
         "fp_regions_analyzed": len(fp_rows),
+        "rule": rule_config,
         "baseline": baseline,
         "filtered": filtered,
         "improvement": {
             "f1_delta": round(filtered["f1"] - baseline["f1"], 4),
             "fp_removed": fp_filtered_count,
             "tp_removed": tp_filtered_count,
+            "fp_removed_rate": round(fp_filtered_count / args.fp_count, 6) if args.fp_count else 0.0,
+            "tp_removed_rate": round(tp_filtered_count / args.tp_count, 6) if args.tp_count else 0.0,
+            "trigger_count": fp_filtered_count + tp_filtered_count,
+            "trigger_precision_fp": (
+                round(fp_filtered_count / (fp_filtered_count + tp_filtered_count), 6)
+                if (fp_filtered_count + tp_filtered_count) > 0
+                else 0.0
+            ),
         },
     }
 

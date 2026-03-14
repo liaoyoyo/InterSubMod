@@ -218,7 +218,7 @@ docs/
 
 每次 AI 對話完成重要任務後，撰寫執行報告：
 
-1. **報告位置**：`docs/ai_sessions/YYYY/MM/`
+1. **報告位置**：`docs/provenance/ai_sessions/YYYY/MM/`
 2. **檔案格式**：`{YYYYMMDD}_{對話主題}_{流水號}.md`
 3. **必要內容**：
    - 對話目標

@@ -85,7 +85,7 @@ metadata補齊時間: 2026-03-01 03:02
 2. 高聚集區域 (>20) 的 FP 比例顯著高於 TP
 3. **chr8 佔 FP 高聚集區域的 66.3%**，是需特別注意的區域
 
-![Regional Clustering Analysis](../../05_results/phase3_plots/regional_clustering_analysis.png)
+![Regional Clustering Analysis](../../assets/2026/01/phase3_plots/regional_clustering_analysis.png)
 
 ---
 

@@ -122,6 +122,10 @@ TEST_F(SignificanceAnalyzerTest, FullAnalysis_StrongAssociation) {
     // Check PERMANOVA
     EXPECT_TRUE(result.permanova.valid);
     EXPECT_LT(result.permanova.p_value, 0.05);
+    EXPECT_TRUE(result.label_hp_permanova.valid);
+    EXPECT_LT(result.label_hp_permanova.p_value, 0.05);
+    EXPECT_TRUE(result.label_allele_permanova.valid);
+    EXPECT_LT(result.label_allele_permanova.p_value, 0.05);
 
     // Heuristic score should be positive
     EXPECT_GT(result.heuristic_score, 0.0);
@@ -223,4 +227,35 @@ TEST_F(SignificanceAnalyzerTest, HeuristicScore) {
 
     // Should be penalized
     EXPECT_LT(score_with_warning, score);
+}
+
+TEST_F(SignificanceAnalyzerTest, LabelPermanova_InvalidWithoutTwoGroups) {
+    std::vector<int> cluster_labels;
+    std::vector<FullLabel> full_labels;
+
+    for (int i = 0; i < 12; ++i) {
+        cluster_labels.push_back(i < 6 ? 0 : 1);
+        FullLabel label;
+        label.allele = AltSupport::ALT;
+        label.hp_tag = "1";
+        label.is_tumor = true;
+        full_labels.push_back(label);
+    }
+
+    Eigen::MatrixXd dist_matrix(12, 12);
+    dist_matrix.setConstant(0.4);
+    for (int i = 0; i < 12; ++i) {
+        dist_matrix(i, i) = 0.0;
+    }
+
+    Eigen::MatrixXd meth_matrix(12, 4);
+    meth_matrix.setConstant(0.5);
+
+    SignificanceResult result = analyzer_->analyze(
+        cluster_labels, full_labels, dist_matrix, meth_matrix, 2, "chr3:700:T:C");
+
+    EXPECT_FALSE(result.label_hp_permanova.valid);
+    EXPECT_EQ(result.label_hp_permanova.invalid_reason, "insufficient_groups");
+    EXPECT_FALSE(result.label_allele_permanova.valid);
+    EXPECT_EQ(result.label_allele_permanova.invalid_reason, "insufficient_groups");
 }

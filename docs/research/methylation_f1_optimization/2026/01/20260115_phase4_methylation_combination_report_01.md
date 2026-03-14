@@ -74,13 +74,13 @@ metadata補齊時間: 2026-03-01 03:02
 
 ## 5. 視覺化
 
-![Significant vs Non-significant](../../05_results/phase4_plots/significant_vs_nonsig_analysis.png)
+![Significant vs Non-significant](../../assets/2026/01/phase4_plots/significant_vs_nonsig_analysis.png)
 
-![Interaction Effects](../../05_results/phase4_plots/interaction_effects_analysis.png)
+![Interaction Effects](../../assets/2026/01/phase4_plots/interaction_effects_analysis.png)
 
-![Conditional Value](../../05_results/phase4_plots/conditional_methylation_value.png)
+![Conditional Value](../../assets/2026/01/phase4_plots/conditional_methylation_value.png)
 
-![Hybrid Strategies](../../05_results/phase4_plots/hybrid_strategy_comparison.png)
+![Hybrid Strategies](../../assets/2026/01/phase4_plots/hybrid_strategy_comparison.png)
 
 ---
 

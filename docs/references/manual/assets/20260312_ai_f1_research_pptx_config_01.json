@@ -1,0 +1,268 @@
+{
+  "meta": {
+    "kicker": "InterSubMod AI 自動化 F1 研究主線",
+    "deck_title": "用 AI / Agent 自動化推進 InterSubMod F1-score 驗證",
+    "deck_subtitle": "AI-assisted InterSubMod F1-score Optimization and Validation",
+    "summary_line": "最穩定結論：caller-first 主規則 → 甲基 support/annotation → haplotype 共分析三層分工。",
+    "generated_date": "2026-03-12",
+    "audience_mode": "研究內部技術深度驗證版",
+    "author": "廖子游",
+    "source_report": "/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260312_AI自動化F1研究主線與PPT藍圖整合報告_01.md",
+    "output_pptx": "/big8_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/03/20260312_AI自動化F1研究主線與PPT藍圖整合報告_01/20260312_AI自動化F1研究主線與PPT藍圖整合報告_01.pptx",
+    "assets_dir": "/big8_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/03/20260312_AI自動化F1研究主線與PPT藍圖整合報告_01/assets",
+    "footer": "InterSubMod AI F1 Validation · 2026-03-12 · 廖子游"
+  },
+  "theme": {
+    "dark": "1E2761",
+    "bg": "F0F4FB",
+    "bg_alt": "E3EAF6",
+    "accent": "2D5EA8",
+    "accent2": "6DAEE0",
+    "text": "17202A",
+    "muted": "5E6572",
+    "light_text": "F0F4FB",
+    "light_muted": "C5D5E8",
+    "line": "C5D5E8",
+    "font_title": "Arial Bold",
+    "font_body": "Arial"
+  },
+  "slides": {
+    "overview": {
+      "items": [
+        "AI 自動化研究循環的動機與轉型（第 4 頁）",
+        "純樣本 paired / TO 主結果與 benchmark 數據（第 8–9 頁）",
+        "caller-first 確立 + 甲基 support 有訊號但尚未穩定超越（第 8–11 頁）",
+        "5kHz 與 DORADO 差異分析：dataset-dependence 推論（第 10 頁）",
+        "mixed sample 初步假說 + 下一步研究方向（第 14–15 頁）"
+      ]
+    },
+    "framework": {
+      "layers": [
+        {
+          "title": "第一層：caller-first",
+          "title_en": "Layer 1: Caller-first",
+          "body": "GQ / QUAL / FILTER 為主規則，穩定成立、跨 dataset 最一致",
+          "fill": "1E2761",
+          "title_color": "F0F4FB",
+          "body_color": "C5D5E8"
+        },
+        {
+          "title": "第二層：methylation-support",
+          "title_en": "Layer 2: Methylation Support",
+          "body": "Quality_Score / PairwiseMedianDist / agreement_positive 補強排序",
+          "fill": "2D5EA8",
+          "title_color": "F0F4FB",
+          "body_color": "C5D5E8"
+        },
+        {
+          "title": "第三層：haplotype / SNV / 甲基共分析",
+          "title_en": "Layer 3: Multi-omics Co-analysis",
+          "body": "驗證 label 合理性、subclone 研究、annotation / QC / diagnostics",
+          "fill": "6DAEE0",
+          "title_color": "17202A",
+          "body_color": "17202A"
+        }
+      ],
+      "conclusions": [
+        "caller-first 是目前最穩定的主規則（GQ、QUAL、FILTER）",
+        "甲基特徵有用，但多數應定位為 support / annotation，尚未穩定超過最佳 caller-only",
+        "5kHz 上成立的規則，不能直接假設在 DORADO 同樣成立"
+      ]
+    },
+    "ai_automation": {
+      "before_after": [
+        {
+          "before": "手動觀察少數位點",
+          "after": "AI 自動讀 docs/knowledge，對齊主線與已驗證結論"
+        },
+        {
+          "before": "手動試少量規則",
+          "after": "AI 自動跑 feature sweep / candidate rescue / 參數組合"
+        },
+        {
+          "before": "手動記錄零散結論",
+          "after": "每輪實驗產生結構化 .md 報告，自動寫入索引"
+        },
+        {
+          "before": "每次重開對話從頭理解",
+          "after": "AI 沿著已驗證主軸繼續推進，不重複踩舊方向"
+        }
+      ],
+      "value": [
+        "每個方向都留下可複查的數據與結論",
+        "快速識別哪些規則只在單一樣本成立",
+        "不穩定特徵先降階為 annotation，不過早硬接主規則"
+      ]
+    },
+    "two_problems": {
+      "problem_a": {
+        "title": "問題 A：後段刪 FP",
+        "title_en": "FP Triage (Post-caller)",
+        "description": "caller / LongPhase / InterSubMod 最終輸出後，能否再刪 FP 而不刪太多 TP",
+        "targets": ["5kHz paired", "5kHz TO", "DORADO paired", "DORADO TO"],
+        "note": "母體：caller 已保留的 call set"
+      },
+      "problem_b": {
+        "title": "問題 B：前段救 TP",
+        "title_en": "TP Rescue (Pre-caller)",
+        "description": "一開始被 caller 移掉的 truth-like 位點，能否透過放寬條件配合甲基結果救回",
+        "targets": ["caller_lost_tp", "Pool B FN", "candidate-specific rescue"],
+        "note": "母體：caller 已刷掉的 non-PASS 或 lost TP 候選"
+      },
+      "key_difference": "兩類問題母體不同，不能混成同一套規則。AlleleDelta 在兩種母體中方向可能相反。"
+    },
+    "workflow_steps": [
+      "讀 docs/knowledge\n對齊主線與已驗證結論",
+      "找 caller output\nbenchmark 結果與 truth set",
+      "執行 LongPhase-S\n或 LongPhase-TO",
+      "產生 tagged BAM\nInterSubMod 必要輸入",
+      "跑 candidate rescue\nfeature sweep 分析",
+      "寫成研究報告\n每輪實驗結構化輸出",
+      "回寫 CURRENT_FOCUS\nINDEX 與主線整合報告"
+    ],
+    "sample_strategy": {
+      "primary": {
+        "label": "HCC1395_HKU_5kHz（主）",
+        "label_en": "Primary: 5kHz",
+        "points": [
+          "較 noisy，FP 較多，適合找刪 FP / 救 TP 規則",
+          "big8_disk 已有完整 paired / TO tagged BAM",
+          "主實驗壓力測試場景"
+        ]
+      },
+      "secondary": {
+        "label": "HCC1395_DORADO（輔）",
+        "label_en": "Cross-validation: DORADO",
+        "points": [
+          "同樣本、不同定序流程，乾淨基準",
+          "用來檢查規則是否只是平台特異性",
+          "candidate-window subset tagged BAM"
+        ]
+      },
+      "disk_note": "big8_disk 空間有限，其他樣本後續移至 big7_disk。5kHz paired / TO 完整 tagged BAM 已驗證；DORADO TO 為 candidate-window subset。"
+    },
+    "paired_results": {
+      "table": [
+        ["Dataset", "Method", "TP", "FP", "FN", "F1"],
+        ["5kHz paired", "ClairS", "29,865", "1,430", "9,582", "0.8443"],
+        ["5kHz paired", "LongPhase-S", "29,754", "627", "9,693", "0.8522"],
+        ["5kHz paired", "InterSubMod", "29,752", "544", "9,695", "0.8532"],
+        ["DORADO paired", "ClairS", "29,986", "588", "9,461", "0.8565"],
+        ["DORADO paired", "LongPhase-S", "29,889", "240", "9,558", "0.8592"],
+        ["DORADO paired", "InterSubMod", "29,877", "238", "9,570", "0.8590"]
+      ],
+      "interpretation": [
+        "5kHz 增益主要來自少掉 83 個 FP（627 → 544），TP 反而少 2 個",
+        "DORADO paired 幾乎持平略負，代表規則不具穩定跨平台性",
+        "甲基與 phase 整合在最 noisy 主樣本上能再小幅改善 precision"
+      ],
+      "chart_series": [
+        {"name": "ClairS", "values": [0.8443, 0.8565], "color": "8CA5C4"},
+        {"name": "LongPhase-S", "values": [0.8522, 0.8592], "color": "6DAEE0"},
+        {"name": "InterSubMod", "values": [0.8532, 0.8590], "color": "2D5EA8"}
+      ],
+      "chart_categories": ["HCC1395 5kHz paired", "HCC1395 DORADO paired"]
+    },
+    "to_results": {
+      "5khz": {
+        "label": "HCC1395 5kHz TO",
+        "rules": [
+          {"rule": "gq>=10", "tp_rescued": "499", "fp_reintro": "119", "delta_f1": "+0.006943", "type": "caller-first"},
+          {"rule": "PairwiseMedianDist>=0.20", "tp_rescued": "300", "fp_reintro": "68", "delta_f1": "+0.004219", "type": "methyl-support"},
+          {"rule": "agreement_positive", "tp_rescued": "148", "fp_reintro": "25", "delta_f1": "+0.002163", "type": "label-support"}
+        ],
+        "note": "caller-first 與甲基 support 都有單獨正效果，但甲基仍未超過最佳 caller-only"
+      },
+      "dorado": {
+        "label": "HCC1395 DORADO TO",
+        "rules": [
+          {"rule": "gq>=10", "tp_rescued": "40", "fp_reintro": "11", "delta_f1": "+0.000540", "type": "caller-first"},
+          {"rule": "Quality_Score>=60", "tp_rescued": "208", "fp_reintro": "77", "delta_f1": "+0.002620", "type": "methyl-support"},
+          {"rule": "PairwiseMedianDist<=0.20", "tp_rescued": "173", "fp_reintro": "60", "delta_f1": "+0.002217", "type": "methyl-support"}
+        ],
+        "note": "DORADO 的 Pairwise 方向與 5kHz 相反（<=0.20），支持 dataset-dependence"
+      }
+    },
+    "divergence": {
+      "bullets": [
+        "5kHz 初始 FP 較多（ClairS FP=1,430），甲基特徵更有機會顯現正增益",
+        "DORADO baseline 已較乾淨（ClairS FP=588），規則帶來的增益縮小",
+        "PairwiseMedianDist 在兩個 dataset 方向相反，顯示 dataset-dependence",
+        "可能的解釋：定序流程特異性 + noisy sample 對甲基特徵更敏感"
+      ],
+      "caution": "以上為合理推論，不是已證明因果關係。正確口徑：目前規則在 5kHz 有效，尚未跨平台穩定成立。"
+    },
+    "pool_b": {
+      "fn_count": 840,
+      "results": [
+        {"rule": "no_varcluster（caller-only）", "tp": "428", "fp": "390", "delta_f1": "+0.003391", "note": "caller rescue 空間存在"},
+        {"rule": "no_varcluster_and_gq15（最乾淨）", "tp": "115", "fp": "45", "precision": "71.9%", "delta_f1": "較小", "note": "最高 precision"},
+        {"rule": "gq15_and_allele_delta_low（combined）", "tp": "431", "fp": "473", "delta_f1": "+0.002702", "note": "甲基只提供弱補強"}
+      ],
+      "conclusions": [
+        "Pool B 再次證明 caller-side rescue 空間存在",
+        "甲基只提供弱補強，沒有超過 caller-only 最佳規則",
+        "AlleleDelta 在 Pool B 與 TO kept-set 方向不同，不可混成全域規則"
+      ]
+    },
+    "feature_table": [
+      {"feature": "GQ", "promotion": "✓ 已是主規則", "position": "caller-first", "constraint": "不可直接解讀成 caller 應全面放寬"},
+      {"feature": "QUAL>=10 or GQ>=20", "promotion": "○ dataset-specific", "position": "5kHz TO caller gate", "constraint": "不可寫成所有 TO 的通則"},
+      {"feature": "Quality_Score", "promotion": "↑ 可升 annotation", "position": "兩個 TO 都有正訊號", "constraint": "不可直接 hard keep"},
+      {"feature": "PairwiseMedianDist", "promotion": "↑ 可升 dataset-aware annotation", "position": "5kHz 偏高；DORADO 偏低", "constraint": "不可全域固定方向"},
+      {"feature": "agreement_positive", "promotion": "○ 保留為 support", "position": "5kHz TO 較有價值", "constraint": "不可當所有 dataset 主 rescue"},
+      {"feature": "Strong / Subclone label", "promotion": "✗ 不可升級", "position": "部分情境可解讀", "constraint": "FP 也可能很高"},
+      {"feature": "low VAF + high AD + low CV", "promotion": "○ 保留 artifact 旁路", "position": "5kHz 刪 FP 有用", "constraint": "不可當 TP rescue 主規則"}
+    ],
+    "mixed_sample": {
+      "observation": "tumor < normal < mixed（PairwiseMedianDist 中位數）",
+      "hypothesis_bullets": [
+        "tumor 可能因癌症趨同而甲基更相似（距離較小）",
+        "normal 原本有 haplotype 差異（距離中等）",
+        "mixed 的差異更大：組織來源（癌組織 vs 血液）差異可能超過 haplotype 效應"
+      ],
+      "caution": "這條線目前只到初步觀察，尚未完成全基因組與純樣本校正驗證。",
+      "next": "策略：先完成純樣本分析，再回來分析 mixed 並加入適當校正與去噪。"
+    },
+    "next_steps": {
+      "actions": [
+        "繼續 brute-force caller + 甲基組合，累積 cross-dataset 比較矩陣",
+        "完成更多純樣本驗證（COLO829、H1437 等），補齊 big7_disk 路徑",
+        "把 Quality_Score、PairwiseMedianDist 接回 annotation / dashboard 輸出",
+        "混合樣本校正在純樣本驗證穩定後再做，不提前成為主線"
+      ],
+      "not_yet": [
+        "不把 Quality 或 Pairwise 直接改成 hard keep 規則",
+        "不把 5kHz 單一 dataset 的特徵方向寫成跨樣本結論",
+        "不把 mixed sample 觀察提前成主要論點",
+        "不混用 gq>=10 與 qual>=10 or gq>=20 兩條不同規則"
+      ]
+    },
+    "source_paths": [
+      {
+        "label": "主整合報告",
+        "path": "/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260312_AI自動化F1研究主線與PPT藍圖整合報告_01.md"
+      },
+      {
+        "label": "研究主線週報",
+        "path": "/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_01.md"
+      },
+      {
+        "label": "Pool B FN closeout",
+        "path": "/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260312_PoolB_FN_integration_closeout_01.md"
+      },
+      {
+        "label": "四象限甲基 rescue 整合",
+        "path": "/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260311_HCC1395_四象限甲基rescue整合報告_01.md"
+      },
+      {
+        "label": "PPT profile JSON",
+        "path": "/big8_disk/liaoyoyo2001/InterSubMod/docs/references/manual/assets/20260311_liao_research_ppt_profile_01.json"
+      },
+      {
+        "label": "PPTX config JSON",
+        "path": "/big8_disk/liaoyoyo2001/InterSubMod/docs/references/manual/assets/20260312_ai_f1_research_pptx_config_01.json"
+      }
+    ]
+  }
+}
