@@ -47,9 +47,9 @@
     "scale": "pilot",
     "track": "deep",
     "tier": 3,
-    "status": "pending",
+    "status": "rejected",
     "added_at": "2026-03-22",
-    "notes": "Tier 3：需先在 Tier 1（Python 後處理）驗證 HPP 閾值有效（H001），再考慮整合進 C++ 核心；等待 H001 結果"
+    "notes": "Tier 3：需先在 Tier 1（Python 後處理）驗證 HPP 閾值有效（H001），再考慮整合進 C++ 核心；等待 H001 結果 [REJECTED: premise was HPP as discriminator (H001 failed); C++ HPP threshold logic has no valid basis in TO track; re-evaluate if paired track shows different HPP behavior]"
   },
   {
     "id": "H004",
@@ -168,9 +168,9 @@
     "scale": "pilot",
     "track": "fast",
     "tier": 1,
-    "status": "pending",
+    "status": "rejected",
     "added_at": "2026-03-22",
-    "notes": "W1 的直接實作：先在 5kHz TO 測試 HPP threshold，預期移除 Type-B FP 同時保留 Strong Subclone TP [OBSERVE 2026-03-22: TO HPP 無判別力（TP/FP 各約52% HPP<0.05），預測失敗]"
+    "notes": "W1 的直接實作：先在 5kHz TO 測試 HPP threshold，預期移除 Type-B FP 同時保留 Strong Subclone TP [OBSERVE 2026-03-22: TO HPP 無判別力（TP/FP 各約52% HPP<0.05），預測失敗] [REJECTED: OBSERVE confirmed HPP not discriminative in TO (TP 52.9% vs FP 52.1% HPP<0.05); TO haplotagging makes HPP near 0 universally]"
   },
   {
     "id": "H002",
@@ -185,8 +185,8 @@
     "scale": "pilot",
     "track": "fast",
     "tier": 1,
-    "status": "pending",
+    "status": "rejected",
     "added_at": "2026-03-22",
-    "notes": "若 H001 HPP 單一條件過激，嘗試此雙重條件版本 [OBSERVE 2026-03-22: TO HPP 無判別力（TP/FP 各約52% HPP<0.05），預測失敗]"
+    "notes": "若 H001 HPP 單一條件過激，嘗試此雙重條件版本 [OBSERVE 2026-03-22: TO HPP 無判別力（TP/FP 各約52% HPP<0.05），預測失敗] [REJECTED: depends on H001 (failed) + AlleleDelta>0.05 (AlleleDelta≈0 in TO confirmed by H005); both premises fail in TO]"
   }
 ]
