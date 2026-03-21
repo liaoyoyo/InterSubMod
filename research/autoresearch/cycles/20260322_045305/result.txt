@@ -1,0 +1,18 @@
+H003: AlleleMethDelta = |HP1MethMean - HP2MethMean| analysis
+=============================================================
+Computed from raw methylation.csv + reads.tsv (675 TP regions, 213 FP regions)
+Sample: 250 TP, 92 FP (min 2 reads per HP required)
+
+Results:
+  TP AlleleMethDelta: median=0.0311, mean=0.0578
+  FP AlleleMethDelta: median=0.0396, mean=0.0594  ← FP HIGHER than TP!
+  Ratio (TP/FP): 0.78x
+  TP >0.05: 35.6%, FP >0.05: 39.1%
+  Mann-Whitney p=0.778, AUROC=0.473 (random)
+
+Verdict: NEGATIVE
+Root cause: TO haplotagging assigns most reads to HP1, making HP2 severely undersampled.
+HP-based methylation differences in TO reflect haplotagging noise, not allelic methylation.
+W2 weakness (AlleleDelta artificially high) does not apply to TO: problem is more fundamental.
+All HP-based features (AlleleDelta, AlleleMethDelta, HPMergedDelta) fail in TO for same reason.
+Status: rejected; research_potential=exhausted (for TO track)
