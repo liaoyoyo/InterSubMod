@@ -188,5 +188,22 @@
     "status": "rejected",
     "added_at": "2026-03-22",
     "notes": "若 H001 HPP 單一條件過激，嘗試此雙重條件版本 [OBSERVE 2026-03-22: TO HPP 無判別力（TP/FP 各約52% HPP<0.05），預測失敗] [REJECTED: depends on H001 (failed) + AlleleDelta>0.05 (AlleleDelta≈0 in TO confirmed by H005); both premises fail in TO]"
+  },
+  {
+    "id": "H012",
+    "type": "rule_change",
+    "priority": 90,
+    "hypothesis": "GQ>=3 作為 TO rescue 規則：系統性掃描發現 GQ>=3 的 delta_F1=+0.009365 超越 H011(+0.008556)。特點：更積極（728 TP），precision 較低（74.1%）但 F1 增益更大",
+    "source": "系統性 GQ sweep 在 OBSERVE 分析中發現（cycle 20260322_045801）",
+    "target_track": "TO",
+    "target_datasets": [
+      "HCC1395_5kHz_TO"
+    ],
+    "scale": "pilot",
+    "track": "fast",
+    "tier": 1,
+    "status": "adopted",
+    "added_at": "2026-03-22",
+    "notes": "[AUTO-DISCOVERED 2026-03-22]: GQ sweep from GQ=0 to GQ=24. GQ>=3=+0.009365>H011. QS>=50⊂GQ>=3. Extra 86TP/62FP have 58.1% precision. Adopted as alternate rescue rule with higher F1 but lower precision."
   }
 ]
