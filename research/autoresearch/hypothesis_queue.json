@@ -1,0 +1,192 @@
+[
+  {
+    "id": "H011",
+    "type": "rule_change",
+    "priority": 95,
+    "hypothesis": "QS>=50 alone (無 GQ gate) 作為 TO rescue 規則：OBSERVE 資料顯示此規則預計達到 delta_F1=+0.008556（5kHz TO），優於已知最佳 GQ+QS>=60 的 +0.005551",
+    "source": "OBSERVE 分析 2026-03-22（rescue_joined_features.tsv）",
+    "target_track": "TO",
+    "target_datasets": [
+      "HCC1395_5kHz_TO"
+    ],
+    "scale": "pilot",
+    "track": "fast",
+    "tier": 1,
+    "status": "pending_verdict",
+    "added_at": "2026-03-22",
+    "notes": "已在 cycle 20260322_041120 計算，結果為 delta_F1=+0.008556。待正式評估確認"
+  },
+  {
+    "id": "H003",
+    "type": "feature_hypothesis",
+    "priority": 85,
+    "hypothesis": "AlleleMethDelta 新特徵：計算 HP1 甲基化平均值 vs HP2 甲基化平均值的差值（AlleleMethDelta = |HP1MethMean - HP2MethMean|）。W2 弱點：AlleleDelta 在 HP 不均時虛高，AlleleMethDelta 可提供更準確的等位基因甲基化差異訊號",
+    "source": "設計弱點 W2：AlleleDelta 在 HP 不均衡時人工虛高（2026-03-17 報告）",
+    "target_track": "TO",
+    "target_datasets": [
+      "HCC1395_5kHz_TO"
+    ],
+    "scale": "pilot",
+    "track": "deep",
+    "tier": 2,
+    "status": "pending",
+    "added_at": "2026-03-22",
+    "notes": "需要修改 Python 特徵提取腳本，從 per_region_features 中計算 HP1MethMean 和 HP2MethMean"
+  },
+  {
+    "id": "H007",
+    "type": "cpp_improvement",
+    "priority": 85,
+    "hypothesis": "在 C++ 核心中加入 HPP threshold 邏輯：ISM 輸出的 VerificationClass 判斷時，若 HPP < 0.05（haplotagging 高度不均衡），自動標記為 'HP_Biased'，防止 HP 不均衡造成的誤判",
+    "source": "設計弱點 W1：HPP 分數未在 InterSubMod C++ 核心中被利用（只輸出不判斷）",
+    "target_track": "all",
+    "target_datasets": [
+      "HCC1395_5kHz_TO",
+      "HCC1395_DORADO_TO"
+    ],
+    "scale": "pilot",
+    "track": "deep",
+    "tier": 3,
+    "status": "pending",
+    "added_at": "2026-03-22",
+    "notes": "Tier 3：需先在 Tier 1（Python 後處理）驗證 HPP 閾值有效（H001），再考慮整合進 C++ 核心；等待 H001 結果"
+  },
+  {
+    "id": "H004",
+    "type": "rule_change",
+    "priority": 82,
+    "hypothesis": "Quality_Score >= 50 AND CramersV > 0.15 組合 rescue：在 TO track 中，Quality_Score 中等（50-75）但 CramersV > 0.15 的 call 具有甲基分化訊號，可作為弱 TP 救援條件",
+    "source": "Phase 2 結論：Quality_Score 在 TO 有正向信號（5kHz TO: Quality>=60 → +0.002620）但門檻過高",
+    "target_track": "TO",
+    "target_datasets": [
+      "HCC1395_5kHz_TO",
+      "HCC1395_DORADO_TO"
+    ],
+    "scale": "pilot",
+    "track": "fast",
+    "tier": 1,
+    "status": "pending",
+    "added_at": "2026-03-22",
+    "notes": "測試降低 Quality_Score 門檻是否結合 CramersV 條件後能維持 precision"
+  },
+  {
+    "id": "H005",
+    "type": "rule_change",
+    "priority": 78,
+    "hypothesis": "VAF < 0.08 AND AlleleDelta > 0.05 作為 FP-B2 精確過濾：針對 HCC1395 5kHz 特有的 Type-B2 FP（低VAF+高AlleleDelta，非 DORADO 通用），在 TO 下驗證此規則的效果",
+    "source": "Phase 2 結論：Low VAF + High AlleleDelta 在 5kHz paired 有效（FP rate 92.31%），TO 尚未驗證",
+    "target_track": "TO",
+    "target_datasets": [
+      "HCC1395_5kHz_TO"
+    ],
+    "scale": "pilot",
+    "track": "fast",
+    "tier": 1,
+    "status": "pending",
+    "added_at": "2026-03-22",
+    "notes": "只在 5kHz TO 測試；DORADO TO 已知此規則無效，不做 medium scale"
+  },
+  {
+    "id": "H006",
+    "type": "param_combo",
+    "priority": 72,
+    "hypothesis": "ISM window_bp 調整：在 TO track 中，較小的 window（如 1000bp vs 預設 5000bp）可能對 SNV 密集區域有更精確的甲基化分析，減少因 window 過大混入無關 reads 導致的訊號稀釋",
+    "source": "參數空間探索：window_bp 在 TO 下的效果尚未系統性驗證",
+    "target_track": "TO",
+    "target_datasets": [
+      "HCC1395_5kHz_TO"
+    ],
+    "scale": "pilot",
+    "track": "fast",
+    "tier": 1,
+    "status": "pending",
+    "added_at": "2026-03-22",
+    "notes": "快速測試 window_bp=1000 vs 5000；若無效則降低優先度"
+  },
+  {
+    "id": "H008",
+    "type": "rule_change",
+    "priority": 68,
+    "hypothesis": "PairwiseMedianDist > 0.20 在 TO 中的重新評估：先前分析 5kHz TO PairwiseMedianDist >= 0.20 可帶來 +0.004219 F1，但未在 GQ gate 後測試。嘗試在 GQ≥20 gate 之後，附加 PairwiseMedianDist 條件是否有額外貢獻",
+    "source": "Phase 2 H25/H30 結論：TO 甲基 support 有正向信號但不超越最佳 caller-only；待在 gate 後重測",
+    "target_track": "TO",
+    "target_datasets": [
+      "HCC1395_5kHz_TO"
+    ],
+    "scale": "pilot",
+    "track": "fast",
+    "tier": 1,
+    "status": "pending",
+    "added_at": "2026-03-22",
+    "notes": "在 GQ≥20 基線上附加 PairwiseMedianDist 條件；測試 0.15/0.20/0.25 三個閾值"
+  },
+  {
+    "id": "H009",
+    "type": "rule_change",
+    "priority": 65,
+    "hypothesis": "CramersV > 0.3 在 TO 中作為 strong subclone annotation：確認 TO 下 Strong 類別（CramersV > 0.3）的 TP precision 是否也接近 99%，若是則確認此 annotation 跨 track 穩定",
+    "source": "Phase 4 結論：CramersV > 0.3 在 paired 下 precision=99.72%，TO 下尚未系統驗證",
+    "target_track": "TO",
+    "target_datasets": [
+      "HCC1395_5kHz_TO",
+      "HCC1395_DORADO_TO"
+    ],
+    "scale": "pilot",
+    "track": "fast",
+    "tier": 1,
+    "status": "pending",
+    "added_at": "2026-03-22",
+    "notes": "觀察性假設：不改規則，只驗證 CramersV > 0.3 在 TO 的 TP precision"
+  },
+  {
+    "id": "H010",
+    "type": "rule_change",
+    "priority": 60,
+    "hypothesis": "hp_assign_rate < 0.5 作為 QC 標記：hp_assign_rate 過低代表大部分 reads 無法 haplotag，此類 region 的甲基訊號可靠性低。測試是否標記這些 region 的 call 為 'Low_Phase_Quality' 可提高 annotation 品質",
+    "source": "Phase 2 annotation layer 結論：hp_assign_rate 已確認為 phase/QC annotation 依據",
+    "target_track": "TO",
+    "target_datasets": [
+      "HCC1395_5kHz_TO"
+    ],
+    "scale": "pilot",
+    "track": "fast",
+    "tier": 1,
+    "status": "pending",
+    "added_at": "2026-03-22",
+    "notes": "annotation only 假設，不改 F1；驗證在 TO 中 hp_assign_rate 低的 region 是否 FP 率確實更高"
+  },
+  {
+    "id": "H001",
+    "type": "rule_change",
+    "priority": 52,
+    "hypothesis": "HPP < 0.05 作為 FP-B 專屬過濾規則：在 TO track 中，HPP < 0.05（HP 高度不均衡）的 call 幾乎確定為 Type-B FP（低VAF+高AlleleDelta型），以此規則移除可減少 FP 而不誤傷 TP",
+    "source": "設計弱點 W1：HPP 未整合進分類邏輯（2026-03-17 甲基分類方法有效性觀察報告）",
+    "target_track": "TO",
+    "target_datasets": [
+      "HCC1395_5kHz_TO"
+    ],
+    "scale": "pilot",
+    "track": "fast",
+    "tier": 1,
+    "status": "pending",
+    "added_at": "2026-03-22",
+    "notes": "W1 的直接實作：先在 5kHz TO 測試 HPP threshold，預期移除 Type-B FP 同時保留 Strong Subclone TP [OBSERVE 2026-03-22: TO HPP 無判別力（TP/FP 各約52% HPP<0.05），預測失敗]"
+  },
+  {
+    "id": "H002",
+    "type": "rule_change",
+    "priority": 48,
+    "hypothesis": "HPP < 0.05 AND AlleleDelta > 0.05 組合規則：雙重條件鎖定 FP-B，比單一 HPP 條件更精確，預期降低誤傷 TP 的機率",
+    "source": "設計弱點 W1/W2 組合（HPP 與 AlleleDelta 相關性 r=0.71 的假設）",
+    "target_track": "TO",
+    "target_datasets": [
+      "HCC1395_5kHz_TO"
+    ],
+    "scale": "pilot",
+    "track": "fast",
+    "tier": 1,
+    "status": "pending",
+    "added_at": "2026-03-22",
+    "notes": "若 H001 HPP 單一條件過激，嘗試此雙重條件版本 [OBSERVE 2026-03-22: TO HPP 無判別力（TP/FP 各約52% HPP<0.05），預測失敗]"
+  }
+]

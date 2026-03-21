@@ -1,0 +1,133 @@
+{
+  "profile_name": "liao_research_ppt",
+  "version": "v01",
+  "language": {
+    "primary": "zh-TW",
+    "english_support_level": "section_level",
+    "notes_language": "zh-TW"
+  },
+  "fonts": {
+    "zh_title": "Noto Sans TC Bold",
+    "zh_body": "Noto Sans TC",
+    "en_title": "Arial Bold",
+    "en_body": "Arial"
+  },
+  "font_sizes": {
+    "cover_title": 44,
+    "title_levels": [24, 28, 32, 36],
+    "title_min": 16,
+    "cover_title_max": 64,
+    "body_default": 24,
+    "body_soft_min": 18,
+    "english_min": 10,
+    "caption": 18,
+    "notes": 16
+  },
+  "theme": {
+    "mode": "single_default_plus_backups",
+    "default_theme": "research_sand",
+    "backup_palettes": [
+      "research_navy",
+      "research_sage",
+      "research_charcoal"
+    ],
+    "contrast_rule": {
+      "normal_text_min": "4.5:1",
+      "large_text_min": "3:1"
+    }
+  },
+  "layout_rules": {
+    "ratio": "16:9",
+    "one_core_message_per_slide": true,
+    "preferred_points_per_slide": "3-5",
+    "max_bullets": 4,
+    "max_figures_per_slide": 1,
+    "split_if": [
+      "more_than_one_chart",
+      "background_method_result_conclusion_mixed",
+      "body_text_below_18pt",
+      "audience_cannot_find_key_message_quickly",
+      "requires_pointer_for_many_zones_to_explain"
+    ]
+  },
+  "notes_template": [
+    "slide_goal",
+    "spoken_explanation",
+    "full_chinese_reasoning",
+    "evidence",
+    "source_paths",
+    "background_notes"
+  ],
+  "templates": {
+    "weekly_report": {
+      "slides": [
+        "cover",
+        "agenda",
+        "opening_thesis",
+        "background",
+        "weekly_goals",
+        "method_or_framework",
+        "main_results",
+        "evidence_and_validation",
+        "limitations",
+        "next_steps",
+        "appendix_paths"
+      ]
+    },
+    "validation_report": {
+      "slides": [
+        "cover",
+        "problem_definition",
+        "hypothesis_and_success_criteria",
+        "data_and_method",
+        "comparison_design",
+        "core_results",
+        "validation_and_failure_modes",
+        "interpretation",
+        "risks_and_limits",
+        "next_steps_and_appendix"
+      ]
+    }
+  },
+  "output_convention": {
+    "report_md_root": "/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated",
+    "presentation_root": "/big8_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated",
+    "one_output_per_folder": true,
+    "folder_pattern": "/big8_disk/liaoyoyo2001/InterSubMod/docs/presentations/{status}/YYYY/MM/<deck_name>/",
+    "folder_required_children": [
+      "<deck_name>.pptx",
+      "<deck_name>.version.json",
+      "pdf/",
+      "assets/"
+    ],
+    "required_version_metadata": [
+      "source_report",
+      "generation_script",
+      "profile_path",
+      "version",
+      "generated_at",
+      "qa_status"
+    ]
+  },
+  "qa_rules": {
+    "must_check": [
+      "consistency",
+      "title_clarity",
+      "readability",
+      "text_overlap_or_cutoff",
+      "chart_units_period_source",
+      "english_not_overpowering_chinese",
+      "notes_complete"
+    ],
+    "required_exports": [
+      "pptx",
+      "pdf"
+    ],
+    "required_visual_flow": [
+      "markitdown",
+      "pdf_export",
+      "jpg_render",
+      "fix_and_verify_cycle"
+    ]
+  }
+}
