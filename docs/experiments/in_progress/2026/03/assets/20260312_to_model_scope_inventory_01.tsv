@@ -1,0 +1,7 @@
+dataset	source_dir	model_family	log_pileup	log_full_alignment	benchmark_test	snapshot_scope	snapshot_bam_scope	is_directly_comparable	notes
+HCC1395_ONT_TO_v0_3_0	/big8_disk/data/HCC1395/ONT/ClairS_TO_v0_3_0	pileup_only	yes	no	yes	not_applicable	not_applicable	no	Only pileup affirmative model paths observed
+HCC1395_ONT_TO_ss_v0_3_0	/big8_disk/data/HCC1395/ONT/ClairS_TO_ss_v0_3_0	pileup_only	yes	no	no	not_applicable	not_applicable	no	ss family differs from v0_3_0 but still pileup-only
+HCC1395_DORADO_TO_v0_3_0	/big8_disk/data/HCC1395/ONT_Dorado/ClairS_TO_v0_3_0	pileup_only	yes	no	no	subset_snapshot	candidate_window_subset	no	No benchmark-test; candidate-specific diagnostics use subset tagged BAM
+HCC1395_DORADO_TO_ss_v0_3_0	/big8_disk/data/HCC1395/ONT_Dorado/ClairS_TO_ss_v0_3_0	pileup_only	yes	no	no	not_applicable	not_applicable	no	ss family differs from v0_3_0 but still pileup-only
+HCC1395_5kHz_TO_pilot	/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260307_hcc1395_to_pilot_1	pileup_only	yes	no	yes	full_snapshot	full_tagged_bam	directional_only	Read-level diagnostics use full tagged BAM
+HCC1395_DORADO_TO_candidate_rescue	/home/liaoyoyo2001/InterSubMod_runs/output/research_rounds/20260311_hcc1395_dorado_to_candidate_rescue	pileup_only	yes	no	yes	subset_snapshot	candidate_window_subset	directional_only	Candidate-specific rescue completed with 100% coverage but snapshot scope differs from 5kHz TO

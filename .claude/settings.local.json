@@ -1,0 +1,201 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./bin/run_tests:*)",
+      "Bash(chmod:*)",
+      "Bash(docker --version:*)",
+      "Bash(docker build:*)",
+      "Bash(sudo rm:*)",
+      "Bash(docker run --rm -v /big8_disk/liaoyoyo2001/InterSubMod:/workspace intersubmod:dev rm -rf /workspace/build)",
+      "Bash(docker-compose down:*)",
+      "Bash(DATA_PATH=/big8_disk/liaoyoyo2001/InterSubMod/data OUTPUT_PATH=/big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output OMP_NUM_THREADS=90 docker-compose up:*)",
+      "Bash(docker compose:*)",
+      "Bash(DATA_PATH=/big8_disk/liaoyoyo2001/InterSubMod/data OUTPUT_PATH=/big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output OMP_NUM_THREADS=90 docker compose:*)",
+      "Bash(docker exec:*)",
+      "Bash(ls:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker rm:*)",
+      "Bash(docker run:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(tree:*)",
+      "Bash(xargs ls:*)",
+      "Bash(xargs basename:*)",
+      "Bash(wc:*)",
+      "Bash(du:*)",
+      "Bash(python3:*)",
+      "WebSearch",
+      "Skill(test-quick)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "WebFetch(domain:gnomad.broadinstitute.org)",
+      "WebFetch(domain:myvariant.info)",
+      "WebFetch(domain:mygene.info)",
+      "WebFetch(domain:www.cbioportal.org)",
+      "WebFetch(domain:docs.myvariant.info)",
+      "WebFetch(domain:docs.cbioportal.org)",
+      "Bash(./scripts/run_batch_vcf_analysis.sh:*)",
+      "Bash(clang-format:*)",
+      "Bash(samtools view:*)",
+      "Bash(bcftools view:*)",
+      "Bash(./.claude/skills/shared-planning/bridge.py:*)",
+      "Skill(notebooklm)",
+      "Bash(dpkg:*)",
+      "Bash(bash:*)",
+      "Bash(~/miniconda3/bin/conda init bash)",
+      "Bash(~/miniconda3/bin/conda create:*)",
+      "Bash(~/miniconda3/bin/conda tos accept:*)",
+      "Bash(source ~/.bashrc)",
+      "Bash(source:*)",
+      "Bash(conda activate py310)",
+      "Bash(python scripts/run.py:*)",
+      "Bash(python -m venv:*)",
+      "Bash(.venv/bin/python:*)",
+      "Bash(dpkg-deb:*)",
+      "Bash(~/chrome/chrome-extracted/opt/google/chrome/google-chrome:*)",
+      "Bash(echo:*)",
+      "Bash(export PATH=\"$HOME/bin:$PATH\")",
+      "Bash(google-chrome:*)",
+      "Bash(node create_presentation.js:*)",
+      "Bash(done)",
+      "Bash(npx @realmikekelly/claude-sneakpeek quick:*)",
+      "mcp__knowledge__knowledge_get_doc",
+      "mcp__knowledge__knowledge_list",
+      "WebFetch(domain:pmc.ncbi.nlm.nih.gov)",
+      "WebFetch(domain:genomebiology.biomedcentral.com)",
+      "WebFetch(domain:link.springer.com)",
+      "WebFetch(domain:www.nature.com)",
+      "mcp__knowledge__knowledge_search"
+    ],
+    "deny": [
+      "Bash(rm -rf /:*)",
+      "Bash(rm -rf /*:*)",
+      "Bash(mkfs:*)",
+      "Bash(fdisk:*)",
+      "Bash(parted:*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/*secret*)",
+      "Read(**/*secrets*)",
+      "Read(**/*token*)",
+      "Read(**/*apikey*)",
+      "Read(**/*api_key*)",
+      "Read(**/*.pem)",
+      "Read(**/id_rsa*)",
+      "Read(**/id_ed25519*)",
+      "Read(**/.ssh/**)",
+      "Read(/etc/shadow)"
+    ],
+    "ask": [
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(cp:*)",
+      "Bash(chmod:*)",
+      "Bash(chown:*)",
+      "Bash(ln:*)",
+      "Bash(truncate:*)",
+      "Bash(dd:*)",
+      "Bash(git reset:*)",
+      "Bash(git clean:*)",
+      "Bash(git checkout:*)",
+      "Bash(git restore:*)",
+      "Bash(git rebase:*)",
+      "Bash(git push:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(rsync:*)",
+      "Bash(sudo:*)",
+      "Bash(docker:*)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/hooks/knowledge_check.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c \"if echo '$TOOL_INPUT' | grep -qE '(rm -rf|git reset --hard|git push --force)'; then echo '[PreHook] 危險操作警告！請確認操作正確性'; fi\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | { read file_path; if echo \"$file_path\" | grep -qE '\\.(cpp|hpp|h)$'; then echo '[Hook] C++ 程式碼已修改，請記得：1. 編譯 (cd build && make) 2. 測試'; fi; }"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command // empty' | { read cmd; if echo \"$cmd\" | grep -q 'git commit'; then echo '[Hook] 提交完成，請確認：1. 測試已通過 2. 文檔已更新'; fi; }"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[SubagentStop] 子代理任務完成，請檢查輸出結果並確認是否符合預期'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[Hook] 會話即將結束，請確認：\\n1. 是否已撰寫執行報告到 docs/ai_sessions/\\n2. 是否有未完成的任務需要記錄\\n3. 使用 /report 技能撰寫報告'"
+          }
+        ]
+      }
+    ]
+  },
+  "outputStyle": "default",
+  "sandbox": {
+    "enabled": true,
+    "mode": "docker",
+    "containerImage": "debian:bookworm"
+  },
+  "remote": {
+    "defaultEnvironmentId": "env_01PzQvyh42s16EdwAsEyV5Ei"
+  },
+  "autoUpdater": {
+    "enabled": true
+  },
+  "preferences": {
+    "language": "zh-TW",
+    "response_language": "繁體中文",
+    "code_comment_language": "zh-TW"
+  },
+  "enabledMcpjsonServers": [
+    "knowledge",
+    "biorxiv",
+    "ensembl"
+  ]
+}

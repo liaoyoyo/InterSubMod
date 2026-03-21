@@ -1,0 +1,57 @@
+======================================================================
+Cycle 20260322_041120: QS Rescue Rule Analysis
+Dataset: HCC1395 5kHz TO (pilot)
+Baseline: F1=0.712697, TP=28396, FP=11843
+======================================================================
+
+Candidate pool: TP=773, FP=298 (ISM-analyzed rescue candidates)
+Note: These are currently FN (TP) or filtered-out FP in the baseline
+
+--- QS-based Rescue Rules (Pilot: 5kHz TO) ---
+  QS>=40 alone                            : TP=642, FP=193, delta=+0.008556, F1=0.721253 <<<
+  QS>=50 alone [H004]                     : TP=642, FP=193, delta=+0.008556, F1=0.721253 <<<
+  QS>=60 alone                            : TP=556, FP=162, delta=+0.007466, F1=0.720163 <<<
+  QS>=70 alone                            : TP=493, FP=140, delta=+0.006660, F1=0.719357
+  QS>=75 alone                            : TP=491, FP=139, delta=+0.006637, F1=0.719334
+  GQ>=10 alone                            : TP=499, FP=119, delta=+0.006943, F1=0.719640
+  GQ>=10+QS>=60 [prev best]               : TP=395, FP= 89, delta=+0.005552, F1=0.718249
+  QS>=50+PMD>=0.15                        : TP=515, FP=154, delta=+0.006885, F1=0.719582
+  QS>=50+PMD>=0.20                        : TP=392, FP=127, delta=+0.005163, F1=0.717860
+  hp_assign<0.5+QS>=60 EXCLUDE            : TP=529, FP=154, delta=+0.007108, F1=0.719805 <<<
+
+[BEST] QS>=40 alone: delta_F1=+0.008556, F1=0.721253
+
+--- Fine-grained QS sweep (no GQ gate) ---
+  QS>=40: rescued TP=642, FP=193, delta=+0.008556, F1=0.721253
+  QS>=45: rescued TP=642, FP=193, delta=+0.008556, F1=0.721253
+  QS>=50: rescued TP=642, FP=193, delta=+0.008556, F1=0.721253
+  QS>=55: rescued TP=589, FP=167, delta=+0.007946, F1=0.720643
+  QS>=60: rescued TP=556, FP=162, delta=+0.007466, F1=0.720163
+  QS>=65: rescued TP=501, FP=142, delta=+0.006769, F1=0.719466
+  QS>=70: rescued TP=493, FP=140, delta=+0.006660, F1=0.719357
+  QS>=75: rescued TP=491, FP=139, delta=+0.006637, F1=0.719334
+  QS>=80: rescued TP=259, FP=79, delta=+0.003463, F1=0.716160
+
+--- H009 Observational: CramersV thresholds in TO candidates ---
+  CramersV>=0.1: N=55, TP=46, FP=9, precision=83.6%
+  CramersV>=0.2: N=54, TP=45, FP=9, precision=83.3%
+  CramersV>=0.3: N=48, TP=41, FP=7, precision=85.4%
+  CramersV>=0.4: N=46, TP=39, FP=7, precision=84.8%
+  CramersV>=0.5: N=45, TP=38, FP=7, precision=84.4%
+
+--- DORADO TO comparison (from existing sweep) ---
+  DORADO TO best rule: gq_ge_10__quality_ge_60
+  delta_F1 vs baseline: +0.000476
+  TP rescued: 36, FP reintroduced: 11
+  DORADO TO baseline F1: 0.722573
+
+======================================================================
+SUMMARY
+======================================================================
+  Best rule for 5kHz TO: QS>=40 alone
+  Predicted delta_F1: +0.008556
+  Predicted F1: 0.721253
+  TP rescued: 642, FP reintroduced: 193
+  Precision after rescue: 0.7070
+
+Results saved to: /big7_disk/liaoyoyo2001/InterSubMod/research/autoresearch/cycles/20260322_041120/result_summary.json

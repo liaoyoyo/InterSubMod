@@ -1,0 +1,88 @@
+=== Batch VCF Analysis ===
+Output Directory: /big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/20260113_all-with-w5000_1
+Mode: all-with-w5000
+Threads: 120
+Metrics: BERNOULLI
+Log Level: info
+--------------------------
+
+[Batch] Starting analysis for: filtered_snv_tp
+        VCF: /big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz
+        Dir: /big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/20260113_all-with-w5000_1/filtered_snv_tp
+        Job launched with PID: 1508577
+
+[Batch] Starting analysis for: filtered_snv_fp
+        VCF: /big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_fp.vcf.gz
+        Dir: /big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/20260113_all-with-w5000_1/filtered_snv_fp
+        Job launched with PID: 1508578
+
+[Batch] Waiting for 2 jobs to complete...
+        (Logs are being saved to /big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/20260113_all-with-w5000_1/<label>.log)
+
+[Batch] All VCF analysis jobs completed.
+
+[Batch] Running Python Comparison Analysis...
+        Tool: /big8_disk/liaoyoyo2001/InterSubMod/scripts/../tools/compare_vcf_results.py
+2026-01-13 14:29:34,981 - INFO - Starting analysis...
+2026-01-13 14:29:34,981 - INFO - Loading data from /big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/20260113_all-with-w5000_1/filtered_snv_tp/significance_summary.csv (filtered_snv_tp)...
+2026-01-13 14:29:35,029 - INFO -   Loaded 30476 records for filtered_snv_tp
+2026-01-13 14:29:35,029 - INFO - Loading data from /big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/20260113_all-with-w5000_1/filtered_snv_fp/significance_summary.csv (filtered_snv_fp)...
+2026-01-13 14:29:35,036 - INFO -   Loaded 4822 records for filtered_snv_fp
+2026-01-13 14:29:35,038 - INFO - Total records loaded: 35298
+2026-01-13 14:29:35,038 - INFO - Generating summary statistics...
+2026-01-13 14:29:35,051 - INFO - Summary stats saved to /big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/20260113_all-with-w5000_1/analysis/tables/summary_stats.csv
+
+=== Summary Stats ===
+
+             Label  Count  Reads_Mean  Reads_Median  Reads_Std  CpGs_Mean  CpGs_Median    P_Mean  P_Median    V_Mean  V_Median  V_Max  Delta_Mean  Delta_Median  Sig_Count  Sig_Rate_%
+0  filtered_snv_fp   4822   59.830361          53.0  31.448899  98.034218         77.0  0.429330    0.1565  0.017379       0.0    1.0    0.077130       0.04045        101    2.094567
+1  filtered_snv_tp  30476   71.404154          66.0  30.613830  97.414785         76.0  0.527219    0.4650  0.052281       0.0    1.0    0.038732       0.01950       1860    6.103163
+
+
+2026-01-13 14:29:35,054 - INFO - Generating VerificationClass breakdown...
+2026-01-13 14:29:35,093 - INFO - VerificationClass breakdown saved to /big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/20260113_all-with-w5000_1/analysis/tables/verification_class_breakdown.csv
+
+=== VerificationClass Breakdown (%) ===
+
+VerificationClass      Noise     Strong  Subclone       Weak
+Label                                                       
+filtered_snv_fp    27.581916  37.100788  3.712153  31.605143
+filtered_snv_tp    27.956425  24.507809  3.999869  43.535897
+
+
+2026-01-13 14:29:35,095 - INFO - Generating DominantLabel breakdown...
+2026-01-13 14:29:35,122 - INFO - DominantLabel breakdown saved to /big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/20260113_all-with-w5000_1/analysis/tables/dominant_label_breakdown.csv
+
+=== DominantLabel Breakdown (%) ===
+
+DominantLabel       allele         hp       none
+Label                                           
+filtered_snv_fp  25.839900  69.597677   4.562422
+filtered_snv_tp  17.006825  68.493241  14.499934
+
+
+2026-01-13 14:29:35,123 - INFO - Plotting distributions...
+2026-01-13 14:29:36,647 - INFO - Plotting VerificationClass distribution...
+2026-01-13 14:29:36,873 - INFO - Plotting DominantLabel distribution...
+2026-01-13 14:29:37,119 - INFO - Plotting correlations...
+2026-01-13 14:29:40,011 - INFO - Plotting cross-analysis heatmap...
+2026-01-13 14:29:40,414 - INFO - Generating ROC curves...
+2026-01-13 14:29:40,416 - INFO - ROC Analysis: Positive Class = 'filtered_snv_tp', Negative Class = 'filtered_snv_fp'
+2026-01-13 14:29:40,616 - INFO - Discrimination metrics saved to /big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/20260113_all-with-w5000_1/analysis/tables/discrimination_metrics.csv
+
+=== Discrimination Metrics ===
+
+            Metric       AUC  BestThreshold  Sensitivity  Specificity
+0       Cramér's V  0.519386         0.2572     0.060769     0.979676
+1  Heuristic Score  0.443542        20.4710     0.058833     0.979884
+2  -log10(P-value)  0.438300            inf     0.000000     1.000000
+3      Label Delta  0.408668        -0.0079     0.965678     0.061178
+
+
+2026-01-13 14:29:40,619 - INFO - Generating Precision-Recall curves...
+2026-01-13 14:29:40,798 - INFO - Generating analysis report...
+2026-01-13 14:29:40,819 - INFO - Report saved to /big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/20260113_all-with-w5000_1/analysis/report.md
+2026-01-13 14:29:40,819 - INFO - Analysis complete.
+
+=== Batch Analysis Workflow Complete ===
+Results located at: /big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/20260113_all-with-w5000_1

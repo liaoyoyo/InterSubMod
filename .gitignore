@@ -1,0 +1,34 @@
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+*.d
+
+# Large data files (analyze only, don't track)
+*.bam
+*.bai
+*.vcf.gz
+*.vcf.gz.tbi
+*.tsv.gz
+*.fastq
+*.fastq.gz
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Large output directories (reference only)
+output/
+/big8_disk/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Cycle result large files (keep summary only)
+research/autoresearch/cycles/*/feature_obs.txt
