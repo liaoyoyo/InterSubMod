@@ -7,7 +7,7 @@ user-invocable: true
 
 <!--
 InterSubMod AutoResearch Loop Skill
-版本: 1.0.0 (2026-03-22)
+版本: 1.1.0 (2026-03-22)
 設計原則:
   - 跨模型可用：所有步驟使用具體命令，不依賴特定模型推理
   - 觀察優先：數據分析在假設生成之前
@@ -15,6 +15,9 @@ InterSubMod AutoResearch Loop Skill
   - TO 優先：paired 空間過小時自動建議切換
   - Python 先於 C++：修改層級明確
   - 全記錄：每輪建立 cycle artifact
+  - Git 紀律：改前 commit baseline，改後 commit result，確保可回溯
+  - 單獨測試優先：每次只改一個變數，驗證後才組合
+  - 組合分析：單獨效果驗證後，測試 2-3 個方向的協同/正交效果
 -->
 
 # InterSubMod 研究迴圈 (Research Loop)
@@ -46,6 +49,149 @@ research/autoresearch/research_direction.md   ← 必須存在
 ```
 
 若 `hypothesis_queue.json` 不存在，提示用戶執行 `/inject-hypothesis` 先注入初始假設。
+
+---
+
+## 核心測試紀律（每輪必遵守）
+
+### 原則 A：Git Commit 保護每一個測試點
+
+**為什麼重要**：每次修改都可能影響 F1，沒有版本控制就無法回溯驗證或重現結果。
+
+```bash
+# 1. 每輪開始前：確認當前狀態是乾淨的 baseline
+git status
+git stash list  # 確認沒有未處理的暫存
+
+# 2. 執行測試前：建立「pre-change baseline」commit
+git add research/autoresearch/ scripts/analysis/ docs/
+git commit -m "research: [CYCLE_ID] pre-change baseline — [H_ID] 測試前快照"
+
+# 3. 執行修改與測試（見步驟 3-5）
+
+# 4. 記錄結果後：建立「result」commit
+git add research/autoresearch/ scripts/analysis/ docs/
+git commit -m "research: [CYCLE_ID] result — [H_ID] delta_F1=[+/-X.XXXX] ([verdict])"
+```
+
+**Commit 命名規範**：
+- `research: [CYCLE_ID] pre-change — [H_ID] [假設摘要]` — 測試前
+- `research: [CYCLE_ID] result — [H_ID] delta=[X] ([verdict])` — 測試後
+- `research: [CYCLE_ID] combination — [H_A]+[H_B] delta=[X]` — 組合測試後
+
+**回溯節點**：若結果為 negative 或 destructive，回到 pre-change baseline：
+```bash
+git log --oneline -10  # 找到 pre-change commit hash
+git checkout [HASH] -- scripts/analysis/[修改的檔案]  # 還原特定檔案
+# 或完整回溯：
+git reset --soft HEAD~1  # 回到上一個 commit（保留工作目錄）
+```
+
+---
+
+### 原則 B：單獨測試優先（Isolated Testing）
+
+**核心規則**：每次只改動一個變數（一個 threshold、一個特徵、一個規則）。
+
+```
+❌ 錯誤：同時修改 QS threshold 和 hp_assign_rate filter → 無法判斷哪個有效
+✓ 正確：先測試 QS>=50 alone → 記錄結果 → 再獨立測試 hp_assign_rate filter
+```
+
+**單獨測試流程**：
+
+```
+Step A: 選取單一假設 H_X
+Step B: git commit 當前 baseline（pre-change）
+Step C: 修改單一變數（腳本 / threshold / 參數）
+Step D: 執行 benchmark，取得 F1 delta
+Step E: git commit 結果（result）
+Step F: 記錄結論：H_X 的獨立貢獻 = delta_F1_X
+Step G: 還原到 baseline（若 negative），或保留（若 positive）
+```
+
+**OBSERVE 訊號強度分類**（決定測試優先順序）：
+- `STRONG SIGNAL`：FP/TP 比值 > 2x 或 < 0.5x → 優先測試
+- `mild signal`：比值 1.5-2x 或 0.5-0.67x → 次要測試
+- `noise`：比值接近 1.0 → 跳過或降優先
+
+---
+
+### 原則 C：組合分析（Combination Testing）
+
+**觸發條件**：至少有 2 個「單獨測試 positive」的假設（delta_F1 > 0）。
+
+**組合類型**：
+
+| 類型 | 說明 | 測試方式 |
+|------|------|---------|
+| 協同（Synergistic）| 組合效果 > 各自之和 → 特徵互補 | A AND B → delta > deltaA + deltaB? |
+| 加法（Additive）| 組合效果 ≈ 各自之和 → 特徵獨立 | A AND B → delta ≈ deltaA + deltaB |
+| 正交（Orthogonal）| 組合不影響各自 → 作用不同候選集 | A AND B 的候選集無重疊 |
+| 干涉（Interfering）| 組合效果 < 較好者單獨效果 → 特徵衝突 | 避免組合，選一個使用 |
+
+**組合測試流程**：
+
+```bash
+# 1. 確認兩個已驗證的單獨假設
+echo "H_A: [delta_F1_A], H_B: [delta_F1_B]"
+
+# 2. git checkout baseline（兩個假設的共同 pre-change 狀態）
+git checkout [BASELINE_HASH] -- scripts/analysis/[target_file]
+
+# 3. 同時應用 H_A + H_B 的改動
+
+# 4. 執行 benchmark
+# → delta_combo
+
+# 5. 分析結果
+python3 -c "
+deltaA, deltaB, delta_combo = [H_A_DELTA], [H_B_DELTA], [COMBO_DELTA]
+print('deltaA + deltaB =', deltaA + deltaB)
+print('delta_combo     =', delta_combo)
+synergy = delta_combo - (deltaA + deltaB)
+print('synergy         =', synergy, '（> 0 協同, < 0 干涉）')
+# 候選集重疊程度
+# 若重疊低 → 正交，組合有效
+# 若重疊高且 delta_combo < max(deltaA, deltaB) → 干涉，選最佳單一規則
+"
+
+# 6. git commit 組合結果
+git commit -m "research: [CYCLE_ID] combination — H_A+H_B delta=[COMBO_DELTA]"
+```
+
+**組合結論記錄**（寫入 evidence_ledger）：
+
+```json
+{
+  "cycle_id": "[COMBO_CYCLE_ID]",
+  "hypothesis_id": "[H_A]+[H_B]",
+  "combination_type": "additive|synergistic|orthogonal|interfering",
+  "delta_a_alone": [deltaA],
+  "delta_b_alone": [deltaB],
+  "delta_combined": [delta_combo],
+  "recommendation": "use_combo | use_a_only | use_b_only | skip_both"
+}
+```
+
+---
+
+### 原則 D：結果分類與研究潛力標記
+
+每個假設測試後，在 evidence_ledger 中標記以下維度：
+
+| 維度 | 可選值 | 說明 |
+|------|--------|------|
+| `verdict` | positive_pilot / negative / dataset_specific / annotation_only | 測試結論 |
+| `orthogonality` | tested / untested | 是否與其他 positive 假設測試過組合 |
+| `research_potential` | high / medium / low / exhausted | 後續研究潛力 |
+| `mechanism_clarity` | clear / partial / unclear | 是否理解為什麼有效/無效 |
+
+**Research Potential 定義**：
+- `high`：單獨 positive 且機制合理，有明確擴展空間（可升 scale、可測更多樣本）
+- `medium`：單獨 positive 但 delta 小，或 dataset-specific
+- `low`：單獨 negative 但有邊際訊號，可嘗試不同 threshold
+- `exhausted`：完全 negative 且機制上排除（如 OBSERVE 預測失敗）
 
 ---
 
@@ -221,6 +367,11 @@ ID: H[XXX]
 1. 讀取目標腳本的相關片段（使用 Read 工具）
 2. 確認修改不會破壞其他功能
 3. 先在沙盒中測試語法正確性
+4. **Git commit 當前 baseline（Pre-Change 快照）**：
+```bash
+git add research/autoresearch/ scripts/analysis/
+git commit -m "research: [CYCLE_ID] pre-change — [H_ID] 測試前 baseline 快照"
+```
 
 #### Tier 2：Python 特徵提取腳本
 
@@ -368,7 +519,12 @@ record = {
     'human_notes': '',
     'timestamp': datetime.now().isoformat(),
     'tier_used': [1/2/3],
-    'artifacts_path': 'research/autoresearch/cycles/${CYCLE_ID}/'
+    'artifacts_path': 'research/autoresearch/cycles/${CYCLE_ID}/',
+    'git_commit_result': '[git rev-parse --short HEAD 取得]',
+    'research_potential': '[high/medium/low/exhausted]',
+    'orthogonality': 'untested',
+    'mechanism_clarity': '[clear/partial/unclear]',
+    'combination_ready': True   # positive_pilot 且 research_potential=high 時設為 True
 }
 
 with open('research/autoresearch/evidence_ledger.jsonl', 'a') as f:
@@ -377,7 +533,7 @@ print('Recorded:', record['cycle_id'])
 "
 ```
 
-**更新 hypothesis_queue.json 狀態**（將 H_ID 的 status 改為 running→pending_verdict）：
+**更新 hypothesis_queue.json 狀態**（將 H_ID 的 status 改為 pending_verdict）：
 
 ```bash
 python3 -c "
@@ -392,6 +548,14 @@ with open('research/autoresearch/hypothesis_queue.json', 'w') as f:
     json.dump(queue, f, ensure_ascii=False, indent=2)
 print('Updated H_ID status')
 "
+```
+
+**Git commit 測試結果快照**：
+```bash
+git add research/autoresearch/ scripts/analysis/
+git commit -m "research: [CYCLE_ID] result — [H_ID] delta=[+/-X.XXXX] ([verdict])"
+# 若為 negative 且需要回溯：
+# git checkout [PRE_CHANGE_HASH] -- scripts/analysis/[modified_file]
 ```
 
 ---
@@ -497,22 +661,62 @@ with open('research/autoresearch/hypothesis_queue.json', 'w') as f:
 ```bash
 python3 -c "
 import json
+import subprocess
 
-# 讀取並更新最後一條記錄
 records = []
 with open('research/autoresearch/evidence_ledger.jsonl') as f:
     for line in f:
         records.append(json.loads(line.strip()))
 
-# 更新最後一條
 records[-1]['human_decision'] = '[keep/reject/annotation_only/escalate_medium/escalate_cpp]'
 records[-1]['human_notes'] = '[用戶的補充說明]'
+records[-1]['research_potential'] = '[high/medium/low/exhausted]'
+records[-1]['mechanism_clarity'] = '[clear/partial/unclear]'
 
-# 寫回
+# 取得當前 git commit hash
+try:
+    commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode().strip()
+    records[-1]['git_commit_result'] = commit_hash
+except Exception:
+    pass
+
 with open('research/autoresearch/evidence_ledger.jsonl', 'w') as f:
     for r in records:
         f.write(json.dumps(r, ensure_ascii=False) + '\n')
-print('Updated human_decision')
+print('Updated human_decision and research metadata')
+"
+```
+
+**FEEDBACK 後 git commit**：
+```bash
+git add research/autoresearch/ scripts/analysis/
+git commit -m "research: [CYCLE_ID] feedback — [H_ID] decision=[DECISION] potential=[POTENTIAL]"
+```
+
+**組合測試觸發判斷**（FEEDBACK 後自動執行）：
+
+```bash
+python3 -c "
+import json
+
+with open('research/autoresearch/evidence_ledger.jsonl') as f:
+    records = [json.loads(l) for l in f if l.strip()]
+
+# 找出所有 combination_ready 的 positive 假設
+combo_candidates = [r for r in records
+                    if r.get('verdict') == 'positive_pilot'
+                    and r.get('combination_ready', False)
+                    and r.get('orthogonality', 'untested') == 'untested']
+
+if len(combo_candidates) >= 2:
+    print('[COMBINATION TRIGGER] 發現', len(combo_candidates), '個可組合的 positive pilot 假設:')
+    for r in combo_candidates:
+        print(f'  {r[\"hypothesis_id\"]}: delta_f1={r[\"delta_f1\"]}')
+    print()
+    print('建議執行組合測試（參見「原則 C：組合分析」）')
+    print('組合建議：先取最大 delta 的兩個，測試 AND 組合')
+else:
+    print(f'[組合未觸發] 目前 {len(combo_candidates)} 個 combination_ready 假設（需 >= 2）')
 "
 ```
 
