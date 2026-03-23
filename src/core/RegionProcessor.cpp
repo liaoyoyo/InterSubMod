@@ -252,7 +252,9 @@ RegionProcessor::RegionProcessor(const Config& config)
       compute_clustering_(config.compute_clustering),
       output_tree_files_(config.output_tree_files),
       output_linkage_matrix_(config.output_linkage_matrix),
-      clustering_min_reads_(config.clustering_min_reads) {
+      clustering_min_reads_(config.clustering_min_reads),
+      binary_methyl_high_(config.binary_methyl_high),
+      binary_methyl_low_(config.binary_methyl_low) {
     // Extract VCF filename from config (remove path and extension)
     std::filesystem::path vcf_path(config.somatic_vcf_path);
     std::string filename = vcf_path.stem().string();
@@ -987,10 +989,10 @@ MethylationMatrix RegionProcessor::build_methylation_matrix(const MatrixBuilder&
                 meth_mat.binary_matrix(i, j) = -1;
             } else {
                 meth_mat.raw_matrix(i, j) = val;
-                // Binary threshold
-                if (val >= 0.8) {
+                // Binary threshold (configurable via --methyl-high/--methyl-low)
+                if (val >= binary_methyl_high_) {
                     meth_mat.binary_matrix(i, j) = 1;
-                } else if (val <= 0.2) {
+                } else if (val <= binary_methyl_low_) {
                     meth_mat.binary_matrix(i, j) = 0;
                 } else {
                     meth_mat.binary_matrix(i, j) = -1;  // Ambiguous
