@@ -220,7 +220,7 @@ void LocalTest::test_sample_local(const std::vector<int>& cluster_labels, const 
 // Run All Local Tests
 // ============================================================================
 
-LocalTestResult LocalTest::run(const std::vector<int>& cluster_labels, const std::vector<FullLabel>& full_labels) {
+LocalTestResult LocalTest::test_all(const std::vector<int>& cluster_labels, const std::vector<FullLabel>& full_labels) {
     LocalTestResult result;
 
     if (cluster_labels.empty()) {

@@ -41,15 +41,21 @@ public:
     explicit Bootstrap(const BootstrapConfig& config = BootstrapConfig());
 
     /**
-     * @brief Run bootstrap stability test
+     * @brief Compute bootstrap stability test
      *
      * @param methylation_matrix N x M matrix (reads x CpG sites), NaN for missing
      * @param original_labels Original cluster assignments
      * @param cluster_func Function to re-cluster given a distance matrix
      * @return BootstrapResult
      */
+    BootstrapResult compute(const Eigen::MatrixXd& methylation_matrix, const std::vector<int>& original_labels,
+                            std::function<std::vector<int>(const Eigen::MatrixXd&)> cluster_func);
+
+    [[deprecated("Use compute() instead")]]
     BootstrapResult run(const Eigen::MatrixXd& methylation_matrix, const std::vector<int>& original_labels,
-                        std::function<std::vector<int>(const Eigen::MatrixXd&)> cluster_func);
+                        std::function<std::vector<int>(const Eigen::MatrixXd&)> cluster_func) {
+        return compute(methylation_matrix, original_labels, cluster_func);
+    }
 
     /**
      * @brief Compute Adjusted Rand Index between two clusterings
