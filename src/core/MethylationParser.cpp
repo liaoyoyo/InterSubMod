@@ -1,7 +1,8 @@
 #include "core/MethylationParser.hpp"
 
 #include <algorithm>
-#include <sstream>
+#include <charconv>
+#include <cstring>
 
 namespace InterSubMod {
 
@@ -42,36 +43,41 @@ std::vector<MethylCall> MethylationParser::parse_read(const bam1_t* b, const std
     int ml_offset = 0;
     std::vector<int> deltas;
 
-    // Robust ML offset calculation:
-    // Parse each semicolon-delimited modification block and count its deltas
-    // until we find "C+m?". The ML array contains all probabilities in order.
-    std::string mm_string(mm_str);
-    std::istringstream block_stream(mm_string);
-    std::string block;
+    // Pointer-based block scan: avoids std::string copy and istringstream.
+    // Each ';'-delimited block is processed as a [block_start, block_end) range.
     bool found_target = false;
+    const char* p     = mm_str;
 
-    while (std::getline(block_stream, block, ';')) {
-        if (block.empty()) continue;
+    while (*p) {
+        const char* block_start = p;
+        while (*p && *p != ';') ++p;
+        const char* block_end = p;
+        if (*p == ';') ++p;
 
-        // Check if this block is our target modification
-        if (block.find("C+m?") == 0) {
-            // Found target! Parse its deltas
-            deltas = parse_mm_tag(mm_str, "C+m?");
+        if (block_start == block_end) continue;
+
+        // Check if this block is "C+m?" (target modification)
+        const char* target = "C+m?";
+        const size_t tlen  = 4;
+        bool is_target = (static_cast<size_t>(block_end - block_start) >= tlen) &&
+                         std::memcmp(block_start, target, tlen) == 0;
+
+        if (is_target) {
+            deltas      = parse_mm_tag(mm_str, "C+m?");
             found_target = true;
             break;
         }
 
-        // Not our target, count deltas in this block to accumulate ml_offset
-        // Block format: "X+y?,d1,d2,d3,..." or "X+y,d1,d2,d3,..."
-        size_t comma_pos = block.find(',');
-        if (comma_pos != std::string::npos) {
-            // Count commas after the mod code = number of deltas
-            std::string delta_part = block.substr(comma_pos + 1);
+        // Not our target: count deltas (commas after the first ',') to advance ml_offset.
+        // Block format: "X+y?,d1,d2,...", so delta_count = comma_count_in_delta_part + 1.
+        const char* comma =
+            static_cast<const char*>(std::memchr(block_start, ',', static_cast<size_t>(block_end - block_start)));
+        if (comma) {
             int delta_count = 0;
-            for (char c : delta_part) {
-                if (c == ',') delta_count++;
+            for (const char* q = comma + 1; q < block_end; ++q) {
+                if (*q == ',') ++delta_count;
             }
-            delta_count++;  // +1 for the last number (no trailing comma)
+            delta_count++;  // +1 for last value (no trailing comma)
             ml_offset += delta_count;
         }
     }
@@ -195,53 +201,29 @@ std::vector<MethylCall> MethylationParser::parse_read(const bam1_t* b, const std
 std::vector<int> MethylationParser::parse_mm_tag(const char* mm_str, const std::string& mod_code) {
     std::vector<int> deltas;
 
-    if (!mm_str) {
-        return deltas;
-    }
+    if (!mm_str) return deltas;
 
-    std::string mm(mm_str);
+    // Locate modification code without creating std::string — avoids copy allocation
+    const char* found = std::strstr(mm_str, mod_code.c_str());
+    if (!found) return deltas;
 
-    // Find the modification code (e.g., "C+m?")
-    size_t pos = mm.find(mod_code);
-    if (pos == std::string::npos) {
-        return deltas;  // Modification type not found
-    }
+    // Skip past modification code and mandatory leading comma
+    const char* p = found + mod_code.length();
+    if (*p != ',') return deltas;
+    ++p;
 
-    // Skip past the modification code and comma
-    pos += mod_code.length();
-    if (pos >= mm.length() || mm[pos] != ',') {
-        return deltas;  // No deltas following (shouldn't happen for valid MM)
-    }
-    pos++;  // Skip comma
+    // Parse comma-separated integers until ';' or end of string.
+    // std::from_chars (C++17): no allocation, no exceptions, stops at first non-digit.
+    deltas.reserve(64);
+    const char* str_end = mm_str + std::strlen(mm_str);
 
-    // Parse comma-separated integers until ';' or end of string
-    std::string remaining = mm.substr(pos);
-    std::istringstream ss(remaining);
-    std::string token;
-
-    while (std::getline(ss, token, ',')) {
-        // Stop if we hit a semicolon (start of next modification type)
-        size_t semi_pos = token.find(';');
-        if (semi_pos != std::string::npos) {
-            token = token.substr(0, semi_pos);
-            if (!token.empty()) {
-                try {
-                    deltas.push_back(std::stoi(token));
-                } catch (...) {
-                    // Invalid number, skip
-                }
-            }
-            break;
-        }
-
-        if (!token.empty()) {
-            try {
-                deltas.push_back(std::stoi(token));
-            } catch (...) {
-                // Invalid number, stop parsing
-                break;
-            }
-        }
+    while (p < str_end && *p != ';') {
+        int val;
+        auto [next, ec] = std::from_chars(p, str_end, val);
+        if (ec != std::errc{}) break;
+        deltas.push_back(val);
+        p = next;
+        if (p < str_end && *p == ',') ++p;
     }
 
     return deltas;
