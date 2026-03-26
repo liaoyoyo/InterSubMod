@@ -1,0 +1,95 @@
+# =============================================================================
+# InterSubMod Development Dockerfile
+# =============================================================================
+# Build: docker build -f Dockerfile.dev -t intersubmod:dev .
+# Run:   docker run -it --rm -v $(pwd):/workspace intersubmod:dev
+# =============================================================================
+
+FROM ubuntu:22.04
+
+LABEL maintainer="InterSubMod Team"
+LABEL description="Development environment for InterSubMod bioinformatics tool"
+LABEL version="1.0.0"
+
+# Avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Taipei
+
+# =============================================================================
+# System Dependencies
+# =============================================================================
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Build essentials
+    build-essential \
+    cmake \
+    pkg-config \
+    git \
+    wget \
+    curl \
+    ca-certificates \
+    # HTSlib dependencies (using gnutls for compatibility)
+    libhts-dev \
+    libz-dev \
+    libbz2-dev \
+    liblzma-dev \
+    libcurl4-gnutls-dev \
+    libssl-dev \
+    # OpenMP support
+    libomp-dev \
+    # Jemalloc build dependencies
+    autoconf \
+    # Python 3.10
+    python3.10 \
+    python3.10-dev \
+    python3-pip \
+    # CJK fonts for matplotlib Chinese support
+    fonts-noto-cjk \
+    fonts-noto-cjk-extra \
+    fontconfig \
+    # Debugging tools
+    gdb \
+    valgrind \
+    # Editor (optional, useful for debugging)
+    vim \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# =============================================================================
+# Python Dependencies
+# =============================================================================
+# Pin versions for reproducibility
+RUN pip3 install --no-cache-dir \
+    numpy==1.24.3 \
+    pandas==2.0.3 \
+    matplotlib==3.7.2 \
+    seaborn==0.12.2 \
+    scipy==1.11.2 \
+    scikit-learn==1.3.0
+
+# =============================================================================
+# Matplotlib Font Configuration
+# =============================================================================
+# Clear matplotlib font cache and configure to use Noto CJK font
+RUN fc-cache -fv && \
+    mkdir -p /root/.config/matplotlib && \
+    echo "font.family: Noto Sans CJK TC" > /root/.config/matplotlib/matplotlibrc && \
+    echo "axes.unicode_minus: False" >> /root/.config/matplotlib/matplotlibrc && \
+    rm -rf /root/.cache/matplotlib
+
+# Set matplotlib backend to Agg for headless rendering
+ENV MPLBACKEND=Agg
+
+# =============================================================================
+# Environment Setup
+# =============================================================================
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV PYTHONUNBUFFERED=1
+
+# Working directory
+WORKDIR /workspace
+
+# =============================================================================
+# Default Command
+# =============================================================================
+CMD ["/bin/bash"]
