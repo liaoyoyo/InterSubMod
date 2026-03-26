@@ -79,11 +79,12 @@ FisherResult FisherExact::test_2x2(const ContingencyTable2x2& table) {
     double log_p_obs = log_table_prob_2x2(table);
 
     // Two-sided p-value: sum of P(table) for all tables with P <= P(observed)
-    // We enumerate all possible values of k and sum probabilities that are <= p_obs
-    double p_value = 0.0;
+    // Collect log-probabilities for the tail, then use log-sum-exp for numerical stability.
+    // Direct exp() accumulation risks underflow for extreme tables (e.g., all diagonal).
+    std::vector<double> tail_log_probs;
+    tail_log_probs.reserve(k_max - k_min + 1);
 
     for (int k = k_min; k <= k_max; ++k) {
-        // Construct table with k in cell (0,0)
         ContingencyTable2x2 test_table;
         test_table.a = k;
         test_table.b = n - k;
@@ -93,13 +94,15 @@ FisherResult FisherExact::test_2x2(const ContingencyTable2x2& table) {
         double log_p_k = log_table_prob_2x2(test_table);
 
         // Two-sided: include if P(k) <= P(observed)
-        // Using log scale: log_p_k <= log_p_obs + epsilon (for numerical stability)
         if (log_p_k <= log_p_obs + 1e-10) {
-            p_value += std::exp(log_p_k);
+            tail_log_probs.push_back(log_p_k);
         }
     }
 
-    // Clamp to [0, 1]
+    // Numerically stable summation via log-sum-exp, then exponentiate once
+    double p_value = tail_log_probs.empty() ? 0.0 : std::exp(MathUtils::log_sum_exp(tail_log_probs));
+
+    // Clamp to [0, 1] (floating-point rounding may push slightly above 1)
     result.p_value = std::clamp(p_value, 0.0, 1.0);
 
     return result;
