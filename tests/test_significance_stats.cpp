@@ -398,3 +398,72 @@ TEST(StatsTest, FullLabel_TestLabels) {
     label.hp_tag = "unphase";
     EXPECT_EQ(label.get_hp_label(), TestLabel::HP_OTHER);
 }
+
+// ============================================================================
+// MathUtils::log_sum_exp Tests (log-sum-exp numerical stability)
+// ============================================================================
+
+TEST_F(MathUtilsTest, LogSumExp_SingleValue) {
+    // log_sum_exp({x}) == x
+    EXPECT_DOUBLE_EQ(MathUtils::log_sum_exp({-5.0}), -5.0);
+    EXPECT_DOUBLE_EQ(MathUtils::log_sum_exp({0.0}), 0.0);
+    EXPECT_DOUBLE_EQ(MathUtils::log_sum_exp({100.0}), 100.0);
+}
+
+TEST_F(MathUtilsTest, LogSumExp_TwoEqualValues) {
+    // log_sum_exp({x, x}) == x + log(2)
+    double x = -10.0;
+    EXPECT_NEAR(MathUtils::log_sum_exp({x, x}), x + std::log(2.0), 1e-12);
+}
+
+TEST_F(MathUtilsTest, LogSumExp_NumericallyStable_LargeValues) {
+    // Must NOT overflow: direct exp(800) = inf, but log_sum_exp is stable
+    std::vector<double> large = {800.0, 800.0, 800.0};
+    double result = MathUtils::log_sum_exp(large);
+    EXPECT_TRUE(std::isfinite(result));
+    EXPECT_NEAR(result, 800.0 + std::log(3.0), 1e-10);
+}
+
+TEST_F(MathUtilsTest, LogSumExp_NumericallyStable_VeryNegativeValues) {
+    // All very negative: result should be finite and near the largest
+    std::vector<double> small = {-1000.0, -1001.0, -1002.0};
+    double result = MathUtils::log_sum_exp(small);
+    EXPECT_TRUE(std::isfinite(result));
+    EXPECT_NEAR(result, -1000.0 + std::log(1 + std::exp(-1) + std::exp(-2)), 1e-10);
+}
+
+TEST_F(MathUtilsTest, LogSumExp_Empty) {
+    // Empty input returns -inf
+    EXPECT_TRUE(std::isinf(MathUtils::log_sum_exp({})));
+    EXPECT_LT(MathUtils::log_sum_exp({}), 0.0);
+}
+
+// ============================================================================
+// FisherExact numerical stability: log-sum-exp vs direct exp
+// ============================================================================
+
+TEST_F(FisherExactTest, Fisher2x2_ExtremeSeparation_PValueNotZero) {
+    // Extremely skewed table: should return very small but non-zero p-value
+    // R: fisher.test(matrix(c(100,0,0,100),2,2))$p.value ≈ 5.7e-61
+    ContingencyTable2x2 table;
+    table.a = 100; table.b = 0;
+    table.c = 0;   table.d = 100;
+
+    FisherResult result = fisher_->test_2x2(table);
+    EXPECT_GT(result.p_value, 0.0) << "p-value must be > 0 (not underflow to 0)";
+    EXPECT_LT(result.p_value, 1e-10);
+    EXPECT_LE(result.p_value, 1.0);
+}
+
+TEST_F(FisherExactTest, Fisher2x2_StrongAssociation_PValuePrecision) {
+    // table a=50,b=0,c=0,d=50: p-value should be computable without precision loss
+    // R: fisher.test(matrix(c(50,0,0,50),2,2))$p.value ≈ 5.6e-31
+    ContingencyTable2x2 table;
+    table.a = 50; table.b = 0;
+    table.c = 0;  table.d = 50;
+
+    FisherResult result = fisher_->test_2x2(table);
+    EXPECT_GT(result.p_value, 0.0);
+    EXPECT_LT(result.p_value, 1e-10);
+    EXPECT_GE(result.p_value, 0.0);
+}

@@ -236,4 +236,26 @@ double MathUtils::hypergeom_pmf(int k, int N, int K, int n) {
 // Static member definition (not used with the function-based approach, but kept for compatibility)
 const double MathUtils::log_factorial_table_[LOG_FACTORIAL_TABLE_SIZE] = {};
 
+double MathUtils::log_sum_exp(const std::vector<double>& log_values) {
+    if (log_values.empty()) {
+        return -std::numeric_limits<double>::infinity();
+    }
+
+    // Find the maximum to use as shift (prevents overflow/underflow)
+    double max_val = *std::max_element(log_values.begin(), log_values.end());
+
+    // Guard: if max is -inf, all values are -inf
+    if (!std::isfinite(max_val)) {
+        return max_val;
+    }
+
+    // Stable summation: sum(exp(x_i - max)) then shift back
+    double sum = 0.0;
+    for (double v : log_values) {
+        sum += std::exp(v - max_val);
+    }
+
+    return max_val + std::log(sum);
+}
+
 }  // namespace InterSubMod
