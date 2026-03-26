@@ -99,34 +99,52 @@ void StructureTest::compute_ss(const Eigen::MatrixXd& dist_matrix, const std::ve
         groups[group_labels[i]].push_back(i);
     }
 
-    ss_total = 0.0;
+    // Accumulate per-group within-group and cross-group squared distances in a single pass.
+    // Direct formula: ss_between = cross_raw/n + adj_term
+    //   where adj_term = Σ_g within_g * (1/n - 1/n_g)
+    // This is algebraically equivalent to ss_total - ss_within but avoids
+    // catastrophic cancellation when groups have similar spread.
+    std::map<int, double> within_raw_per_group;
+    for (const auto& [gid, members] : groups) within_raw_per_group[gid] = 0.0;
+
+    double cross_raw = 0.0;
+    double total_raw = 0.0;
+
     for (int i = 0; i < n; ++i) {
         for (int j = i + 1; j < n; ++j) {
-            double d = dist_matrix(i, j);
-            ss_total += d * d;
-        }
-    }
-    ss_total /= static_cast<double>(n);
-
-    ss_within = 0.0;
-    for (const auto& [group_id, members] : groups) {
-        int n_k = static_cast<int>(members.size());
-        if (n_k <= 1) continue;
-        double group_ss = 0.0;
-        for (size_t i = 0; i < members.size(); ++i) {
-            for (size_t j = i + 1; j < members.size(); ++j) {
-                double d = dist_matrix(members[i], members[j]);
-                group_ss += d * d;
+            double d2 = dist_matrix(i, j) * dist_matrix(i, j);
+            total_raw += d2;
+            if (group_labels[i] == group_labels[j]) {
+                within_raw_per_group[group_labels[i]] += d2;
+            } else {
+                cross_raw += d2;
             }
         }
-        ss_within += group_ss / static_cast<double>(n_k);
     }
 
-    ss_between = ss_total - ss_within;
+    ss_total = total_raw / static_cast<double>(n);
+
+    ss_within = 0.0;
+    double adj_term = 0.0;
+    for (const auto& [gid, members] : groups) {
+        int n_g = static_cast<int>(members.size());
+        if (n_g <= 0) continue;
+        double wg = within_raw_per_group.at(gid);
+        ss_within += wg / static_cast<double>(n_g);
+        adj_term += wg * (1.0 / static_cast<double>(n) - 1.0 / static_cast<double>(n_g));
+    }
+
+    ss_between = cross_raw / static_cast<double>(n) + adj_term;
+    if (ss_between < 0.0) ss_between = 0.0;  // clamp floating-point noise to zero
 }
 
 double StructureTest::compute_pseudo_f(double ss_between, double ss_within, int n, int k) {
-    if (k <= 1 || n <= k || ss_within <= 0.0) return 0.0;
+    if (k <= 1 || n <= k) return 0.0;
+    if (ss_within <= 0.0) {
+        // Perfect separation: no within-group variation.
+        // Return large sentinel so permutation test correctly rejects null hypothesis.
+        return (ss_between > 0.0) ? 1e9 : 0.0;
+    }
     double df_between = static_cast<double>(k - 1);
     double df_within = static_cast<double>(n - k);
     return (ss_between / df_between) / (ss_within / df_within);

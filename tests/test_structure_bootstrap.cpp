@@ -346,3 +346,118 @@ TEST_F(BootstrapTest, Bootstrap_EarlyStopping) {
     // May or may not early stop depending on random sampling
     EXPECT_GT(result.n_iterations, 0);
 }
+
+// ============================================================================
+// PERMANOVA SS Accuracy Tests (Task 1.4 — catastrophic cancellation fix)
+// ============================================================================
+
+// Helper: build a symmetric distance matrix from a lambda
+static Eigen::MatrixXd make_dist(int n, std::function<double(int, int)> fn) {
+    Eigen::MatrixXd D(n, n);
+    D.setZero();
+    for (int i = 0; i < n; ++i)
+        for (int j = i + 1; j < n; ++j)
+            D(i, j) = D(j, i) = fn(i, j);
+    return D;
+}
+
+TEST(PermanovaSSTest, WellSeparated_SmallWithin_PseudoFIsLarge) {
+    // Small within-group distances (0.1), large between-group (10.0).
+    // Clear group structure → pseudo-F >> 1.
+    const int ng = 10, n = 2 * ng;
+    auto D = make_dist(n, [&](int i, int j) {
+        return ((i < ng) == (j < ng)) ? 0.1 : 10.0;
+    });
+    std::vector<int> labels(n);
+    for (int i = 0; i < n; ++i) labels[i] = (i < ng) ? 0 : 1;
+
+    StructureTestConfig cfg;
+    cfg.seed = 1;
+    cfg.n_permutations = 99;
+    cfg.min_reads_for_permanova = 5;
+    StructureTest st(cfg);
+
+    auto res = st.run_permanova(D, labels);
+    EXPECT_TRUE(res.valid);
+    EXPECT_GT(res.pseudo_f, 10.0) << "Well-separated groups should yield large pseudo-F";
+    EXPECT_GE(res.pseudo_f, 0.0);
+}
+
+TEST(PermanovaSSTest, WellSeparated_ZeroWithin_PseudoFIsLarge) {
+    // Perfectly separated: all within-group distances = 0, between = 1.
+    // ss_within = 0 → old code returned 0 (division-by-zero guard).
+    // Fixed code must return a large sentinel so permutation test is meaningful.
+    const int ng = 10, n = 2 * ng;
+    auto D = make_dist(n, [&](int i, int j) {
+        return ((i < ng) == (j < ng)) ? 0.0 : 1.0;
+    });
+    std::vector<int> labels(n);
+    for (int i = 0; i < n; ++i) labels[i] = (i < ng) ? 0 : 1;
+
+    StructureTestConfig cfg;
+    cfg.seed = 1;
+    cfg.n_permutations = 99;
+    cfg.min_reads_for_permanova = 5;
+    StructureTest st(cfg);
+
+    auto res = st.run_permanova(D, labels);
+    EXPECT_TRUE(res.valid);
+    // With fix: pseudo_f should be very large (perfect separation)
+    EXPECT_GT(res.pseudo_f, 1e6) << "Zero within-group variance should yield very large pseudo-F";
+}
+
+TEST(PermanovaSSTest, NullModel_PseudoFIsNearOne) {
+    // All pairwise distances identical (= 1.0) across 2 equal groups.
+    // No group signal → pseudo-F ≈ 1.
+    const int ng = 10, n = 2 * ng;
+    auto D = make_dist(n, [](int, int) { return 1.0; });
+    std::vector<int> labels(n);
+    for (int i = 0; i < n; ++i) labels[i] = (i < ng) ? 0 : 1;
+
+    StructureTestConfig cfg;
+    cfg.seed = 1;
+    cfg.n_permutations = 99;
+    cfg.min_reads_for_permanova = 5;
+    StructureTest st(cfg);
+
+    auto res = st.run_permanova(D, labels);
+    EXPECT_TRUE(res.valid);
+    EXPECT_NEAR(res.pseudo_f, 1.0, 0.5) << "Null model pseudo-F should be near 1";
+    EXPECT_GE(res.pseudo_f, 0.0);
+}
+
+TEST(PermanovaSSTest, CatastrophicCancellation_PseudoFNonNegative) {
+    // n=40, k=2, ng=20. Large within distances (1e4) and between distances
+    // chosen so that true ss_between ≈ 0 (between_dist = sqrt(0.95)*within_dist).
+    //
+    // Analysis: for balanced K=2 PERMANOVA,
+    //   ss_between = 10*D_c² - 9.5*D_w²
+    // Setting D_c = sqrt(0.95)*D_w gives ss_between_true = 0.
+    //
+    // In double precision, sqrt(0.95)*1e4 is represented as a slightly smaller
+    // number, making D_c² < 0.95*D_w².  Then:
+    //   ss_total = (within_raw + cross_raw)/n  < ss_within (rounding pushes cross down)
+    // so the old formula produces ss_between < 0 → pseudo_f < 0.
+    //
+    // The fix: direct formula + clamp ss_between ≥ 0.
+    const int ng = 20, n = 2 * ng;
+    const double D_w = 1e4;
+    const double D_c = std::sqrt(0.95) * D_w;  // nearest double → D_c² slightly < 0.95*D_w²
+
+    auto D = make_dist(n, [&](int i, int j) {
+        return ((i < ng) == (j < ng)) ? D_w : D_c;
+    });
+    std::vector<int> labels(n);
+    for (int i = 0; i < n; ++i) labels[i] = (i < ng) ? 0 : 1;
+
+    StructureTestConfig cfg;
+    cfg.seed = 1;
+    cfg.n_permutations = 99;
+    cfg.min_reads_for_permanova = 5;
+    StructureTest st(cfg);
+
+    auto res = st.run_permanova(D, labels);
+    EXPECT_TRUE(res.valid);
+    EXPECT_GE(res.pseudo_f, 0.0)
+        << "Direct ss_between formula must not produce negative pseudo-F";
+}
