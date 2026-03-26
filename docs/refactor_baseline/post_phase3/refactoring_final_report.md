@@ -112,9 +112,10 @@
 
 | 任務 | 狀態 | 說明 |
 |------|------|------|
-| Task 1.4 PERMANOVA ss_between | ⏸ 暫緩 | 等 Phase 1 ML 結論確定後再評估 |
-| Task 2.4 LabelTest 內部分解 | 可選 | 有 18 tests 保護，低優先級 |
-| Phase 3 合併至 main | 待 PR | 需 chr19 完整驗證後 merge |
+| Task 1.4 PERMANOVA ss_between | ✅ 完成 | commit `7d4f425`（2026-03-26）|
+| chr19 功能驗證 | ✅ 完成 | chr19:29283968 正常，ClusterPermanovaF=166.23，VerificationClass=Strong |
+| Task 2.4 LabelTest 內部分解 | 可選 | 有 18 tests 保護，低優先級，暫不執行 |
+| Phase 3 合併至 main | ✅ 待 PR | chr19 驗證通過，可提 PR |
 
 ---
 
@@ -122,12 +123,13 @@
 
 ```
 Branch: refactor/phase1-safety
-Commits since baseline: 13 commits
-Tests: 159/159 PASS
+Commits since baseline: 15 commits
+Tests: 163/163 PASS
 ```
 
-最終合併前應執行：
-```bash
-./scripts/run_vcf_all_snv.sh --mode chr19-verification
-diff baseline_chr19_metrics.txt new_chr19_metrics.txt  # 應為空
-```
+**chr19 驗證結果（2026-03-26）：**
+- Site: chr19:29283968（HCC1395 TP）
+- Reads: 85，CpGs: 11
+- ClusterPermanovaF: 166.23，P: 0.01
+- VerificationClass: Strong
+- 詳見：`docs/refactor_baseline/post_phase3/chr19_verification.md`
