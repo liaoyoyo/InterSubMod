@@ -22,7 +22,11 @@
 
 ## 主文檔
 
-1. 方法學藍圖：
+1. 五目標研究願景與 LOH 先導觀察策略：
+   [docs/research/methylation_methodology/2026/03/20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/research/methylation_methodology/2026/03/20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md)
+2. LOH 盤點執行規格：
+   [docs/plans/2026/03/20260326_LOH盤點執行規格_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/plans/2026/03/20260326_LOH盤點執行規格_01.md)
+3. 方法學藍圖：
    [docs/research/methylation_methodology/2026/03/20260307_5kHz主實驗與方法學驗證藍圖_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/research/methylation_methodology/2026/03/20260307_5kHz主實驗與方法學驗證藍圖_01.md)
 
 ## 與其他文件的關係
@@ -35,14 +39,18 @@
    - 每一輪實驗如何執行、結果如何
 4. `docs/reports/`
    - 已整合的正式週報與 validated 結論
+5. `docs/plans/2026/03/20260326_LOH盤點執行規格_01.md`
+   - LOH 盤點 round 的固定欄位、圖表、decision ledger 與 case panel 規格
 
 ## 建議閱讀順序
 
 1. [docs/CURRENT_FOCUS.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/CURRENT_FOCUS.md)
 2. [docs/experiments/INDEX.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/INDEX.md)
-3. [docs/research/methylation_methodology/2026/03/20260307_5kHz主實驗與方法學驗證藍圖_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/research/methylation_methodology/2026/03/20260307_5kHz主實驗與方法學驗證藍圖_01.md)
-4. [docs/plans/2026/03/20260307_純樣本甲基研究執行計畫_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/plans/2026/03/20260307_純樣本甲基研究執行計畫_01.md)
-5. [docs/reports/validated/2026/03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_01.md)
+3. [docs/research/methylation_methodology/2026/03/20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/research/methylation_methodology/2026/03/20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md)
+4. [docs/plans/2026/03/20260326_LOH盤點執行規格_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/plans/2026/03/20260326_LOH盤點執行規格_01.md)
+5. [docs/research/methylation_methodology/2026/03/20260307_5kHz主實驗與方法學驗證藍圖_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/research/methylation_methodology/2026/03/20260307_5kHz主實驗與方法學驗證藍圖_01.md)
+6. [docs/plans/2026/03/20260307_純樣本甲基研究執行計畫_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/plans/2026/03/20260307_純樣本甲基研究執行計畫_01.md)
+7. [docs/reports/validated/2026/03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_01.md)
 
 ## 目前邊界
 
@@ -50,6 +58,7 @@
 docs/research/methylation_methodology/
 ├── README.md
 └── 2026/03/
+    ├── 20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md
     └── 20260307_5kHz主實驗與方法學驗證藍圖_01.md
 ```
 

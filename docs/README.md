@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-01-11 10:00
-更新時間: 2026-03-12 11:05
+更新時間: 2026-03-26 19:45
 目標: 提供 docs/ 目錄的最新結構、命名規範與工作流程，並提供 AI 漸進查閱指引
 處理範圍: docs/ 全目錄（archive/deep 歷史快照除外）
 關聯檔案:
@@ -19,6 +19,10 @@
 
 - [當前目標](CURRENT_FOCUS.md)
 - [研究歷史索引](experiments/INDEX.md)
+- [研究方法與突破方向全域分析](references/20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md)
+- [五目標研究願景與 LOH 先導觀察策略](research/methylation_methodology/2026/03/20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md)
+- [LOH 盤點執行規格](plans/2026/03/20260326_LOH盤點執行規格_01.md)
+- [方法學審查 closeout](methodology/20260324_方法學審查全域結論報告_01.md)
 - [研究主線整合週報（含 phase 2 與 annotation）](reports/validated/2026/03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_01.md)
 - [簡報專用入口](/big8_disk/liaoyoyo2001/InterSubMod/docs/presentations/README.md)
 - [AI provenance 專用入口](/big8_disk/liaoyoyo2001/InterSubMod/docs/provenance/README.md)
@@ -27,8 +31,12 @@
 
 - [研究主題入口](/big8_disk/liaoyoyo2001/InterSubMod/docs/research/README.md)
 - [甲基方法學入口](/big8_disk/liaoyoyo2001/InterSubMod/docs/research/methylation_methodology/README.md)
-- [5kHz 主實驗與方法學驗證藍圖](research/methylation_methodology/2026/03/20260307_5kHz主實驗與方法學驗證藍圖_01.md)
-- [純樣本甲基研究執行計畫](plans/2026/03/20260307_純樣本甲基研究執行計畫_01.md)
+- [五目標研究願景與 LOH 先導觀察策略](research/methylation_methodology/2026/03/20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md)
+- [LOH 盤點執行規格](plans/2026/03/20260326_LOH盤點執行規格_01.md)
+- [突破方向全域分析](references/20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md)
+- [方法學審查 closeout](methodology/20260324_方法學審查全域結論報告_01.md)
+- [5kHz 主實驗後主線藍圖](research/methylation_methodology/2026/03/20260307_5kHz主實驗與方法學驗證藍圖_01.md)
+- [突破方向版執行計畫](plans/2026/03/20260307_純樣本甲基研究執行計畫_01.md)
 - [2026-03-05 至 2026-03-10 研究主線週報](reports/validated/2026/03/20260310_研究主線週報_20260305_20260310_01.md)
 
 ### 手冊入口
@@ -67,15 +75,21 @@ scripts/analysis/check_ai_agent_readiness.sh
 | Layer 2 (歷史) | `docs/experiments/INDEX.md` | 已試驗方向，成功/失敗總覽 |
 | Layer 3 (細節) | 各 experiments/reports/solutions 文件 | 完整數據與推導 |
 
+> **2026-03-24 後的使用方式**：`CURRENT_FOCUS.md` 與突破方向全域分析負責 live 主線；`experiments/INDEX.md` 只負責歷史索引與避免重踩失敗方向，不再直接充當近期任務清單。
+
 ### 建議查閱流程
 
 **新任務起手式：**
 1. 讀 `CURRENT_FOCUS.md` → 確認當前優先事項
 2. 讀 `experiments/INDEX.md` → 避免重複已失敗的方向
-3. 讀 `research/methylation_methodology/.../20260307_5kHz主實驗與方法學驗證藍圖_01.md` → 確認主樣本、主線與驗證邏輯
-4. 讀 `references/manual/20260307_研究推進與實驗觀察手冊_01.md` → 對齊研究與紀錄流程
-5. 讀相關 `architecture/*.md` → 了解系統設計約束
-6. 執行 `scripts/analysis/check_ai_agent_readiness.sh` → 確認環境狀態
+3. 讀 `references/20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md` → 確認突破方向優先序
+4. 讀 `research/methylation_methodology/2026/03/20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md` → 確認最終研究願景、paired/TO 分線與 LOH 先導觀察定位
+5. 讀 `plans/2026/03/20260326_LOH盤點執行規格_01.md` → 確認 LOH summary、decision ledger、figure 與 case panel 的固定輸出
+6. 讀 `methodology/20260324_方法學審查全域結論報告_01.md` → 確認哪些方向已 closeout
+7. 讀 `research/methylation_methodology/.../20260307_5kHz主實驗與方法學驗證藍圖_01.md` → 確認新的研究藍圖與樣本角色
+8. 讀 `plans/2026/03/20260307_純樣本甲基研究執行計畫_01.md` → 確認當前執行階段與交付物
+9. 讀 `references/manual/20260307_研究推進與實驗觀察手冊_01.md` → 對齊研究與紀錄流程
+10. 執行 `scripts/analysis/check_ai_agent_readiness.sh` → 確認環境狀態
 
 **特定問題查閱：**
 - 找過去的解決方案 → `solutions/{topic}/`
@@ -121,6 +135,7 @@ scripts/analysis/check_ai_agent_readiness.sh
 - TP/FP 特徵富集分析與 F1 最佳化（2026-01）✅ F1=0.8481
 - Subsample 混樣甲基化偏差分析（2026-02 ~ 2026-03）⏳ 進行中
 - Purity-Aware 策略驗證（2026-02 ~ 2026-03）🔄 值得再探索
+- 方法學審查 closeout 與突破方向 roadmap（2026-03-24）✅ 已收斂
 
 ## 研究啟動入口
 
@@ -128,11 +143,15 @@ scripts/analysis/check_ai_agent_readiness.sh
 
 1. [當前目標](CURRENT_FOCUS.md)
 2. [研究歷史索引](experiments/INDEX.md)
-3. [5kHz 主實驗與方法學驗證藍圖](research/methylation_methodology/2026/03/20260307_5kHz主實驗與方法學驗證藍圖_01.md)
-4. [純樣本甲基研究執行計畫](plans/2026/03/20260307_純樣本甲基研究執行計畫_01.md)
-5. [研究推進與實驗觀察手冊](references/manual/20260307_研究推進與實驗觀察手冊_01.md)
-6. [研究主題入口](research/README.md)
-7. [參考資料入口](references/README.md)
+3. [研究方法與突破方向全域分析](references/20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md)
+4. [五目標研究願景與 LOH 先導觀察策略](research/methylation_methodology/2026/03/20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md)
+5. [LOH 盤點執行規格](plans/2026/03/20260326_LOH盤點執行規格_01.md)
+6. [方法學審查 closeout](methodology/20260324_方法學審查全域結論報告_01.md)
+7. [5kHz 主實驗後主線藍圖](research/methylation_methodology/2026/03/20260307_5kHz主實驗與方法學驗證藍圖_01.md)
+8. [突破方向版執行計畫](plans/2026/03/20260307_純樣本甲基研究執行計畫_01.md)
+9. [研究推進與實驗觀察手冊](references/manual/20260307_研究推進與實驗觀察手冊_01.md)
+10. [研究主題入口](research/README.md)
+11. [參考資料入口](references/README.md)
 
 ### 研究文件 Agent 與 Skills 入口
 

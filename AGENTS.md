@@ -25,7 +25,7 @@
 - `src/` holds the C++ core (split into `core/`, `io/`, `utils/`); headers live in `include/`.
 - `tests/` contains GoogleTest unit tests; `src/test/` contains phase-specific test drivers.
 - `tools/` houses Python analysis/plotting utilities; `scripts/` contains shell workflows.
-- `data/` stores example inputs; `output/` is generated analysis output; `docs/` and `images/` support documentation.
+- `data/` stores example inputs; `output/` is the repo-local symlink entry to `/big7_disk/liaoyoyo2001/big7_disk_output/`; `docs/` and `images/` support documentation.
 - `build/` is the out-of-tree build output created by CMake.
 
 ## Build, Test, and Development Commands
@@ -51,7 +51,11 @@
 - PRs should include a concise summary, commands run, and sample outputs/logs or plots when analysis or visualization changes.
 
 ## Data, Outputs, and Configuration Tips
-- Many scripts default to absolute `/big8_disk/...` paths; prefer overriding via flags like `--vcf`, `--out`, `--threads`, and `--plot-type`.
+- `output/` is the repo entry point to the current big7 output root: `/big7_disk/liaoyoyo2001/big7_disk_output/`.
+- New formal sample/mode/run outputs belong under `output/canonical/{sample}/{canonical_mode}/{run_id}/`.
+- New pure / tumor-only / exploratory rounds belong under `output/synthesis/research_rounds/`; cross-sample diagnostics and observation workspaces belong under `output/synthesis/observation_workspaces/`.
+- `output/big8_output_archive/` and `output/bip8_output_archive/` are historical archive roots, not the default destination for new outputs.
+- Some older scripts or docs still mention absolute `/big8_disk/...` output paths; treat those as legacy or archive-era references unless the task explicitly targets historical runs.
 - Keep generated artifacts in `output/` and avoid committing large datasets unless explicitly requested.
 
 ## 繼續研究前的必讀清單（每次對話開始時強制執行）
@@ -73,9 +77,11 @@
 
 ## AI Agent 預設操作政策（2026-03-01）
 - `check_ai_agent_readiness.sh` 採「異常觸發」：僅在環境重建、路徑變更、腳本異常、或結果不一致時執行，不要求每次任務都先跑。
-- `output/` 保持 repo 內入口；實體輸出放在 repo 外硬碟（以軟連結對接）屬預設建議策略。
+- `output/` 保持 repo 內入口；目前實體輸出根目錄固定為 `/big7_disk/liaoyoyo2001/big7_disk_output/`。
+- 正式 sample/mode/run bundle 放在 `output/canonical/`；研究 round、觀察工作區與彙整產物放在 `output/synthesis/`。
+- 除非任務明確指定歷史 archive，否則不要再把新的正式輸出寫到舊的 `/big8_disk/.../InterSubMod_runs/output` 類路徑。
 - Agent 不可直接刪除檔案（包含 `rm`, `find -delete`, 覆寫式清空）。
-- 若需移除內容，先搬移到 Archive 暫存區：`/big8_disk/liaoyoyo2001/InterSubMod_runs/Archive_pending_delete/`，並回報清單，待使用者手動最終刪除。
+- 若需移除內容，先搬移到與目前 `output/` 同卷、由 root 規範或使用者指定的 Archive 暫存區；若暫存區尚未建立，先回報並確認，不可直接刪除。
 - 除非使用者明確要求，否則不做任何實際清除動作；若清理行為必須存在，需寫在可審核的執行腳本中。
 
 
