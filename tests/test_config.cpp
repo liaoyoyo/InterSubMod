@@ -64,6 +64,24 @@ TEST(ConfigTest, ValidationFailureInvalidMethylThresholds) {
     EXPECT_FALSE(config.validate());
 }
 
+// Verify that validate() doesn't leak HTSlib file handles when called
+// repeatedly (guards against raw-pointer path issues).
+TEST(ConfigTest, ValidationRepeatedCallsDoNotLeak) {
+    Config config;
+    config.tumor_bam_path = "/nonexistent/path/tumor.bam";
+    config.reference_fasta_path = "/nonexistent/path/ref.fa";
+    config.somatic_vcf_path = "/nonexistent/path/somatic.vcf";
+    config.window_size_bp = 500;
+    config.binary_methyl_high = 0.8;
+    config.binary_methyl_low = 0.2;
+
+    // Calling validate() many times with invalid paths should never crash,
+    // hang, or exhaust file descriptors - this guards against resource leaks.
+    for (int i = 0; i < 50; ++i) {
+        EXPECT_FALSE(config.validate()) << "Iteration " << i;
+    }
+}
+
 TEST(ArgParserTest, ParseArgumentsShortOptions) {
     Config config;
     // Create dummy files BEFORE parsing because CLI11::ExistingFile checks for them!
