@@ -57,6 +57,75 @@ TEST_F(BamReaderTest, FetchReadsFromValidRegion) {
     }
 }
 
+// ---- Task 1.5: SNV position type-safety tests ----
+// Verify that ReadParser::parse() returns AltSupport::UNKNOWN for invalid SNV
+// positions (pos==0, pos>INT32_MAX) instead of invoking undefined int32_t overflow.
+// These tests do not need a real BAM file; bam_init1() provides a minimal record.
+
+class ReadParserPositionSafetyTest : public ::testing::Test {
+protected:
+    ReadParser parser;  // default config
+
+    // Build a minimal bam1_t with a read name and a single M CIGAR.
+    // Data layout: [l_qname_padded bytes of qname] [n_cigar*4 bytes of CIGAR]
+    static bam1_t* make_bam(int32_t ref_start, int32_t ref_end) {
+        bam1_t* b = bam_init1();
+        b->core.pos = ref_start;
+        b->core.qual = 60;
+        b->core.flag = 0;
+
+        // Read name: "r\0" padded to 4 bytes
+        const char qname[] = "r";
+        int l_qname = 2;          // strlen("r") + null
+        int l_qname_pad = 4;      // round up to multiple of 4
+        b->core.l_qname = l_qname_pad;
+
+        // CIGAR: one M operation spanning [ref_start, ref_end)
+        int cigar_len = ref_end - ref_start;
+        b->core.n_cigar = 1;
+        uint32_t cigar_op = (static_cast<uint32_t>(cigar_len) << BAM_CIGAR_SHIFT) | BAM_CMATCH;
+
+        int data_sz = l_qname_pad + 4;
+        b->l_data = data_sz;
+        b->m_data = data_sz;
+        b->data = static_cast<uint8_t*>(malloc(static_cast<size_t>(data_sz)));
+        memset(b->data, 0, static_cast<size_t>(data_sz));
+        memcpy(b->data, qname, static_cast<size_t>(l_qname));
+        memcpy(b->data + l_qname_pad, &cigar_op, 4);
+        return b;
+    }
+};
+
+// pos == 0 is invalid for 1-based coordinates; parse() must return UNKNOWN
+TEST_F(ReadParserPositionSafetyTest, ZeroPosition_ReturnsUnknown) {
+    bam1_t* b = make_bam(0, 1000);
+    SomaticSnv snv;
+    snv.pos = 0;  // invalid 1-based position
+    snv.chr_id = 0;
+    snv.ref_base = 'A';
+    snv.alt_base = 'T';
+
+    ReadInfo info = parser.parse(b, 0, true, snv, "", 0);
+    EXPECT_EQ(info.alt_support, AltSupport::UNKNOWN);
+
+    bam_destroy1(b);
+}
+
+// pos > INT32_MAX would overflow int32_t without the guard; must return UNKNOWN
+TEST_F(ReadParserPositionSafetyTest, OverflowPosition_ReturnsUnknown) {
+    bam1_t* b = make_bam(0, 1000);
+    SomaticSnv snv;
+    snv.pos = static_cast<uint32_t>(std::numeric_limits<int32_t>::max()) + 1u;
+    snv.chr_id = 0;
+    snv.ref_base = 'A';
+    snv.alt_base = 'T';
+
+    ReadInfo info = parser.parse(b, 0, true, snv, "", 0);
+    EXPECT_EQ(info.alt_support, AltSupport::UNKNOWN);
+
+    bam_destroy1(b);
+}
+// ---- END position safety tests ----
 TEST_F(BamReaderTest, FetchReadsFromInvalidChromosome) {
     BamReader reader(test_bam_path);
 

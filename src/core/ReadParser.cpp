@@ -2,6 +2,8 @@
 
 #include <htslib/sam.h>
 
+#include <limits>
+
 namespace InterSubMod {
 
 ReadParser::ReadParser(const ReadFilterConfig& config) : config_(config) {
@@ -142,7 +144,11 @@ AltSupport ReadParser::determine_alt_support(const bam1_t* b, const SomaticSnv& 
 AltSupportResult ReadParser::determine_alt_support_with_reason(const bam1_t* b, const SomaticSnv& snv,
                                                                const std::string& ref_seq [[maybe_unused]],
                                                                int32_t ref_start_pos [[maybe_unused]]) const {
-    // SNV position (convert 1-based to 0-based)
+    // SNV position (convert 1-based to 0-based).
+    // Guard against pos==0 (invalid 1-based) and values that would overflow int32_t.
+    if (snv.pos == 0 || snv.pos > static_cast<uint32_t>(std::numeric_limits<int32_t>::max())) {
+        return AltSupportResult(AltSupport::UNKNOWN, FilterReason::SNV_NOT_COVERED);
+    }
     int32_t snv_pos_0based = static_cast<int32_t>(snv.pos) - 1;
 
     // Check if read covers the SNV position
