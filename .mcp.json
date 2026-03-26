@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "knowledge": {
+      "type": "stdio",
+      "command": "/big7_disk/liaoyoyo2001/InterSubMod/.venv/bin/python",
+      "args": [
+        "/big8_disk/liaoyoyo2001/knowledge/scripts/mcp/knowledge_server.py"
+      ]
+    },
+    "biorxiv": {
+      "type": "stdio",
+      "command": "/big7_disk/liaoyoyo2001/InterSubMod/.venv/bin/python",
+      "args": [
+        "scripts/mcp/biorxiv_server.py"
+      ]
+    },
+    "ensembl": {
+      "type": "stdio",
+      "command": "/big7_disk/liaoyoyo2001/InterSubMod/.venv/bin/python",
+      "args": [
+        "scripts/mcp/ensembl_server.py"
+      ]
+    }
+  }
+}
