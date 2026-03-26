@@ -1,0 +1,19 @@
+H009: CramersV>0.3 annotation in TO (observational)
+=====================================================
+Key finding: CramersV>0.3 precision in TO = 85.4% (vs paired = 99.72%)
+Cross-track instability confirmed: 14.3% precision gap.
+
+In rescue candidates:
+  CramersV>0.3: N=48, TP=41, FP=7, precision=85.4%
+  CramersV>0.3 is 100% subset of QS>=50 (48/48 overlap)
+  Only 4.5% of TO candidates have CramersV>0.3
+
+In-baseline calls (significance_summary):
+  TP CramersV: median=0.000, >0.3: 41/675 (6.1%)
+  FP CramersV: median=0.000, >0.3: 7/213 (3.3%)
+  CramersV>0.3 precision in baseline calls: 85.4%
+
+Verdict: annotation_only
+CramersV>0.3 = valid as "high methylation signal" annotation in TO.
+NOT a high-confidence filter (not 99% as in paired).
+Hypothesis H009 confirmed cross-track instability.

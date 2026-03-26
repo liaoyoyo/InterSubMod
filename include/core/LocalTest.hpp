@@ -39,7 +39,12 @@ public:
      * @param full_labels Full label information
      * @return LocalTestResult with per-cluster statistics
      */
-    LocalTestResult run(const std::vector<int>& cluster_labels, const std::vector<FullLabel>& full_labels);
+    LocalTestResult test_all(const std::vector<int>& cluster_labels, const std::vector<FullLabel>& full_labels);
+
+    [[deprecated("Use test_all() instead")]]
+    LocalTestResult run(const std::vector<int>& cluster_labels, const std::vector<FullLabel>& full_labels) {
+        return test_all(cluster_labels, full_labels);
+    }
 
     /**
      * @brief Test one-vs-rest for allele dimension

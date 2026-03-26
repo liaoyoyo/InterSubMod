@@ -98,13 +98,21 @@ def write_failure_diagnosis(sample_dir: Path, context: Dict, metrics: Dict, agre
     diagnosis_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def load_context(sample_dir: Path) -> Dict:
+    for name in ("round_context.json", "run_context.json"):
+        path = sample_dir / name
+        if path.exists():
+            return read_json(path)
+    return {}
+
+
 def main() -> None:
     args = parse_args()
     sample_dir = Path(args.sample_dir).resolve()
     plots_dir = sample_dir / "plots"
     plots_dir.mkdir(parents=True, exist_ok=True)
 
-    context = read_json(sample_dir / "round_context.json")
+    context = load_context(sample_dir)
     metrics = read_json(sample_dir / "metrics.json")
 
     benchmark_path = sample_dir / "benchmark_comparison.tsv"

@@ -6,6 +6,7 @@
 #include <htslib/vcf.h>
 
 #include <iostream>
+#include <memory>
 
 #include "core/DistanceMatrix.hpp"
 
@@ -14,50 +15,51 @@ namespace InterSubMod {
 bool Config::validate() const {
     bool valid = true;
 
+    // HTSlib RAII helpers (lambdas required because HTSlib uses macros/function pointers)
+    auto close_sam = [](samFile* f) { if (f) sam_close(f); };
+    auto close_idx = [](hts_idx_t* i) { if (i) hts_idx_destroy(i); };
+    auto close_hdr = [](sam_hdr_t* h) { if (h) sam_hdr_destroy(h); };
+
     if (tumor_bam_path.empty()) {
         std::cerr << "Error: Tumor BAM path is required." << std::endl;
         valid = false;
     } else {
-        // Verify if it's a valid BAM/CRAM/SAM
-        samFile* fp = sam_open(tumor_bam_path.c_str(), "r");
-        if (fp == NULL) {
+        // RAII guard: all HTSlib resources released automatically on scope exit
+        std::unique_ptr<samFile, decltype(close_sam)> fp(
+            sam_open(tumor_bam_path.c_str(), "r"), close_sam);
+        if (!fp) {
             std::cerr << "Error: Cannot open Tumor BAM file: " << tumor_bam_path << std::endl;
             valid = false;
         } else {
-            hts_idx_t* idx = sam_index_load(fp, tumor_bam_path.c_str());
-            if (idx == NULL) {
+            std::unique_ptr<hts_idx_t, decltype(close_idx)> idx(
+                sam_index_load(fp.get(), tumor_bam_path.c_str()), close_idx);
+            if (!idx) {
                 std::cerr << "Warning: Tumor BAM index not found. Random access may fail." << std::endl;
-                // Not strictly invalid for basic opening, but good to warn
-            } else {
-                hts_idx_destroy(idx);
             }
 
-            sam_hdr_t* hdr = sam_hdr_read(fp);
-            if (hdr == NULL) {
+            std::unique_ptr<sam_hdr_t, decltype(close_hdr)> hdr(
+                sam_hdr_read(fp.get()), close_hdr);
+            if (!hdr) {
                 std::cerr << "Error: Cannot read header from Tumor BAM file." << std::endl;
                 valid = false;
-            } else {
-                sam_hdr_destroy(hdr);
             }
-            sam_close(fp);
-        }
+        }  // fp, idx, hdr automatically released here
     }
 
     if (!normal_bam_path.empty()) {
-        samFile* fp = sam_open(normal_bam_path.c_str(), "r");
-        if (fp == NULL) {
+        std::unique_ptr<samFile, decltype(close_sam)> fp(
+            sam_open(normal_bam_path.c_str(), "r"), close_sam);
+        if (!fp) {
             std::cerr << "Error: Cannot open Normal BAM file: " << normal_bam_path << std::endl;
             valid = false;
         } else {
-            sam_hdr_t* hdr = sam_hdr_read(fp);
-            if (hdr == NULL) {
+            std::unique_ptr<sam_hdr_t, decltype(close_hdr)> hdr(
+                sam_hdr_read(fp.get()), close_hdr);
+            if (!hdr) {
                 std::cerr << "Error: Cannot read header from Normal BAM file." << std::endl;
                 valid = false;
-            } else {
-                sam_hdr_destroy(hdr);
             }
-            sam_close(fp);
-        }
+        }  // fp, hdr automatically released here
     }
 
     if (reference_fasta_path.empty()) {
@@ -79,21 +81,23 @@ bool Config::validate() const {
         std::cerr << "Error: Somatic VCF path is required." << std::endl;
         valid = false;
     } else {
-        // Verify VCF/BCF
-        vcfFile* fp = vcf_open(somatic_vcf_path.c_str(), "r");
-        if (fp == NULL) {
+        auto close_vcf = [](vcfFile* f) { if (f) vcf_close(f); };
+        auto close_bcf_hdr = [](bcf_hdr_t* h) { if (h) bcf_hdr_destroy(h); };
+
+        // Verify VCF/BCF - RAII guards ensure cleanup on all exit paths
+        std::unique_ptr<vcfFile, decltype(close_vcf)> fp(
+            vcf_open(somatic_vcf_path.c_str(), "r"), close_vcf);
+        if (!fp) {
             std::cerr << "Error: Cannot open Somatic VCF file: " << somatic_vcf_path << std::endl;
             valid = false;
         } else {
-            bcf_hdr_t* hdr = bcf_hdr_read(fp);
-            if (hdr == NULL) {
+            std::unique_ptr<bcf_hdr_t, decltype(close_bcf_hdr)> hdr(
+                bcf_hdr_read(fp.get()), close_bcf_hdr);
+            if (!hdr) {
                 std::cerr << "Error: Cannot read header from Somatic VCF file." << std::endl;
                 valid = false;
-            } else {
-                bcf_hdr_destroy(hdr);
             }
-            vcf_close(fp);
-        }
+        }  // fp, hdr automatically released here
     }
 
     if (window_size_bp <= 0) {

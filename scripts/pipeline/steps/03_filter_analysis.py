@@ -68,6 +68,9 @@ def determine_rule_config(raw_purity):
             "purity_bin": purity_bin,
             "apply_filter": False,
             "allele_delta_min": None,
+            # allele_delta_only_min disabled: cross-sample AUROC inconsistent
+            # (HCC1395-5kHz=0.763, HCC1395-DORADO=0.412, H2009=0.379)
+            "allele_delta_only_min": None,
             "vaf_max": None,
             "require_cv_support": False,
             "cv_support_max": 0.03,
@@ -79,16 +82,24 @@ def determine_rule_config(raw_purity):
             "purity_bin": purity_bin,
             "apply_filter": True,
             "allele_delta_min": 0.20,
+            # allele_delta_only_min disabled: cross-sample AUROC inconsistent
+            "allele_delta_only_min": None,
             "vaf_max": 0.10,
             "require_cv_support": True,
             "cv_support_max": 0.03,
         }
 
+    # ge60 / unknown: VCF-based AD+VAF rule retained; standalone AlleleDelta
+    # filter disabled pending cross-sample validation.
+    # Evidence: AUROC=0.763 (HCC1395-5kHz) but 0.412 (HCC1395-DORADO),
+    # 0.545 (COLO829), 0.379 (H2009) — not cross-sample consistent.
     return {
         "rule_id": "purity_ge60_ad_vaf_core_v1" if purity_bin == "ge60" else "purity_unknown_ad_vaf_core_v1",
         "purity_bin": purity_bin,
         "apply_filter": True,
         "allele_delta_min": 0.15,
+        "allele_delta_only_min": None,  # disabled — see evidence above
+        "experimental_hcc1395_5khz_only": True,  # annotation flag
         "vaf_max": 0.15,
         "require_cv_support": False,
         "cv_support_max": 0.03,
@@ -163,14 +174,18 @@ def should_filter_variant(row, vcf_features=None, rule_config=None):
         40-60% purity -> conservative AD+VAF core with CV support
         >=60% purity  -> AD+VAF core, CV as auxiliary signal
 
+    Additional methylation-only rule (no VCF required):
+        AlleleDelta > 0.25 indicates strong haplotype-specific methylation
+        asymmetry consistent with germline ASM — applied after VCF core rule.
+
     Returns True if the variant should be REMOVED (filtered out).
     """
     if rule_config is None:
         rule_config = determine_rule_config(None)
 
     try:
-        allele_delta = abs(float(row.get("AlleleDelta", 0)))
-        cramers_v = float(row.get("CramersV", 0))
+        allele_delta = abs(float(row.get("AlleleDelta", 0) or 0))
+        cramers_v = float(row.get("CramersV", 0) or 0)
     except (ValueError, TypeError):
         return False
 
@@ -188,20 +203,27 @@ def should_filter_variant(row, vcf_features=None, rule_config=None):
         qual = feat.get("qual")
         vaf = feat.get("vaf")
 
-    if vaf is None:
-        return False
+    # Primary rule: AlleleDelta + VAF (requires VCF)
+    if vaf is not None:
+        core_trigger = (
+            allele_delta > rule_config["allele_delta_min"]
+            and vaf < rule_config["vaf_max"]
+        )
+        if core_trigger:
+            if rule_config["require_cv_support"] and cramers_v >= rule_config["cv_support_max"]:
+                return False
+            return True
 
-    core_trigger = (
-        allele_delta > rule_config["allele_delta_min"]
-        and vaf < rule_config["vaf_max"]
-    )
-    if not core_trigger:
-        return False
+    # Methylation-only fallback: disabled — cross-sample AUROC inconsistent.
+    # AlleleDelta AUROC(FP-discriminating): HCC1395-5kHz=0.763 but
+    # HCC1395-DORADO=0.412, COLO829=0.545, H2009=0.379.
+    # Not safe to apply as a cross-sample hard filter.
+    # Feature retained in output (AlleleDelta column) for future analysis.
+    allele_delta_only_threshold = rule_config.get("allele_delta_only_min", None)
+    if allele_delta_only_threshold is not None and allele_delta > allele_delta_only_threshold:
+        return True
 
-    if rule_config["require_cv_support"] and cramers_v >= rule_config["cv_support_max"]:
-        return False
-
-    return True
+    return False
 
 
 def compute_metrics(tp, fp, truth_total):

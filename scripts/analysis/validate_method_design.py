@@ -145,6 +145,21 @@ def compute_region_read_stats(region_dir: Path) -> Dict[str, float]:
     return stats
 
 
+def infer_summary_read_stats(row: Dict[str, str]) -> Dict[str, float]:
+    num_reads = to_int(row.get("NumReads"))
+    hp1 = to_int(row.get("HP1FamilyN"))
+    hp2 = to_int(row.get("HP2FamilyN"))
+    stats = {
+        "reads_total": num_reads,
+        "hp_assign_rate": math.nan,
+        "allele_assign_rate": math.nan,
+    }
+    if num_reads > 0 and (hp1 > 0 or hp2 > 0):
+        assigned = min(max(hp1 + hp2, 0), num_reads)
+        stats["hp_assign_rate"] = assigned / num_reads
+    return stats
+
+
 def read_sample_hp_rate(path: Optional[Path]) -> float:
     if path is None or not path.exists():
         return math.nan
@@ -236,7 +251,8 @@ def main() -> None:
     output_dir = Path(args.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    region_index = build_region_index([Path(root) for root in args.region_root])
+    region_roots = [Path(root) for root in args.region_root]
+    region_index: Optional[Dict[str, Dict[str, str]]] = None
     region_stats_cache: Dict[str, Dict[str, float]] = {}
     sample_hp_rate = read_sample_hp_rate(Path(args.haplotag_qc) if args.haplotag_qc else None)
 
@@ -248,11 +264,21 @@ def main() -> None:
         scope = summary_path.parent.name.replace("intersubmod_", "")
         for row in load_rows(summary_path):
             region_key = f"{row['Chr']}:{row['Pos']}:{row['Ref']}:{row['Alt']}"
-            region_info = region_index.get(region_key, {})
-            region_dir = Path(region_info["region_dir"]) if "region_dir" in region_info else None
-            if region_dir and region_key not in region_stats_cache:
-                region_stats_cache[region_key] = compute_region_read_stats(region_dir)
+            if region_key not in region_stats_cache:
+                region_stats_cache[region_key] = infer_summary_read_stats(row)
             region_stats = region_stats_cache.get(region_key, {})
+            region_dir = None
+            if region_dir and math.isnan(region_stats.get("hp_assign_rate", math.nan)) and math.isnan(region_stats.get("allele_assign_rate", math.nan)):
+                region_stats_cache[region_key] = compute_region_read_stats(region_dir)
+                region_stats = region_stats_cache.get(region_key, {})
+            elif math.isnan(region_stats.get("hp_assign_rate", math.nan)) and math.isnan(region_stats.get("allele_assign_rate", math.nan)):
+                if region_index is None:
+                    region_index = build_region_index(region_roots)
+                region_info = region_index.get(region_key, {})
+                region_dir = Path(region_info["region_dir"]) if "region_dir" in region_info else None
+                if region_dir:
+                    region_stats_cache[region_key] = compute_region_read_stats(region_dir)
+                    region_stats = region_stats_cache.get(region_key, {})
 
             hp_assign_rate = region_stats.get("hp_assign_rate", sample_hp_rate)
             allele_assign_rate = region_stats.get("allele_assign_rate", math.nan)

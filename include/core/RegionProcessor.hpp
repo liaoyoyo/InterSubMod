@@ -11,7 +11,9 @@
 #include "core/MatrixBuilder.hpp"
 #include "core/MethylationMatrix.hpp"
 #include "core/MethylationParser.hpp"
+#include "core/ReadAggregator.hpp"
 #include "core/ReadParser.hpp"
+#include "core/RegionBounds.hpp"
 #include "core/SignificanceAnalyzer.hpp"
 #include "core/SomaticSnv.hpp"
 #include "core/TreeStructure.hpp"
@@ -284,21 +286,6 @@ private:
     // ========== Refactored Helper Methods ==========
 
     /**
-     * @brief Process fetched reads and build methylation matrix
-     *
-     * @param reads Vector of BAM records (already fetched)
-     * @param snv SNV information
-     * @param ref_seq Reference sequence
-     * @param region_start Region start coordinate (for coordinate mapping)
-     * @param matrix_builder Matrix builder to populate
-     * @param filtered_reads Vector to collect filtered reads (debug mode)
-     * @param result RegionResult to update with strand counts
-     */
-    void process_reads(const std::vector<bam1_t*>& reads, const SomaticSnv& snv, const std::string& ref_seq,
-                       int32_t region_start, MatrixBuilder& matrix_builder,
-                       std::vector<FilteredReadInfo>& filtered_reads, RegionResult& result);
-
-    /**
      * @brief Build MethylationMatrix from MatrixBuilder for distance calculation
      *
      * @param matrix_builder Source matrix builder
@@ -379,6 +366,8 @@ private:
     bool output_linkage_matrix_;
     LinkageMethod linkage_method_;
     int clustering_min_reads_;
+    double binary_methyl_high_;  ///< Threshold for methylated (1) call in binary matrix
+    double binary_methyl_low_;   ///< Threshold for unmethylated (0) call in binary matrix
 
     std::vector<SomaticSnv> snvs_;
     ChromIndex chrom_index_;  // Manage chromosome name to ID mapping

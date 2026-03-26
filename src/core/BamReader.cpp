@@ -114,4 +114,13 @@ std::vector<bam1_t *> BamReader::fetch_reads(const std::string &chr, int32_t sta
     return reads;
 }
 
+std::vector<BamRecordPtr> BamReader::fetch_reads_safe(const std::string& chr, int32_t start,
+                                                       int32_t end) {
+    std::vector<BamRecordPtr> safe_reads;
+    for (bam1_t* raw : fetch_reads(chr, start, end)) {
+        safe_reads.emplace_back(raw, BamRecordDeleter{});
+    }
+    return safe_reads;
+}
+
 }  // namespace InterSubMod

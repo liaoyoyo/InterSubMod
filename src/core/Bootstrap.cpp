@@ -125,8 +125,8 @@ Eigen::MatrixXd Bootstrap::compute_l1_distance(const Eigen::MatrixXd& matrix) {
     return dist_matrix;
 }
 
-BootstrapResult Bootstrap::run(const Eigen::MatrixXd& methylation_matrix, const std::vector<int>& original_labels,
-                               std::function<std::vector<int>(const Eigen::MatrixXd&)> cluster_func) {
+BootstrapResult Bootstrap::compute(const Eigen::MatrixXd& methylation_matrix, const std::vector<int>& original_labels,
+                                   std::function<std::vector<int>(const Eigen::MatrixXd&)> cluster_func) {
     BootstrapResult result;
     result.n_iterations = 0;
     result.early_stopped = false;

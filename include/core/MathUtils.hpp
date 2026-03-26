@@ -129,6 +129,20 @@ public:
     static double hypergeom_pmf(int k, int N, int K, int n);
 
     /**
+     * @brief Numerically stable log-sum-exp: log(sum(exp(x_i)))
+     *
+     * Uses the max-shift trick to avoid overflow/underflow:
+     *   log(sum(exp(x_i))) = max_x + log(sum(exp(x_i - max_x)))
+     *
+     * This is critical when accumulating probabilities in log-space
+     * (e.g., Fisher's exact p-value tail summation).
+     *
+     * @param log_values Log-probabilities to sum
+     * @return log(sum(exp(log_values[i]))), or -inf if empty
+     */
+    static double log_sum_exp(const std::vector<double>& log_values);
+
+    /**
      * @brief Size of precomputed log-factorial table
      */
     static constexpr int LOG_FACTORIAL_TABLE_SIZE = 1025;

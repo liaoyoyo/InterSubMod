@@ -1,0 +1,17 @@
+COMBO Test: H011+H012 annotation integration
+=============================================
+Final ranking (all rescue rules on HCC1395_5kHz_TO):
+  GQ>=3  [H012 BEST F1]    : delta=+0.009365, rprec=74.1%
+  GQ>=4                    : delta=+0.009146, rprec=75.9%
+  H012+QS>=20              : delta=+0.008885, rprec=76.0%
+  H012+hp>=0.2             : delta=+0.008841, rprec=76.2%
+  GQ>=5                    : delta=+0.008840, rprec=77.2%
+  QS>=50 [H011 BEST PREC]  : delta=+0.008556, rprec=76.9%
+  H012+VC!=Noise           : delta=+0.005990, rprec=74.7%
+  GQ>=10+QS>=60 [prev best]: delta=+0.005551 (from Phase 2)
+
+Combination synergy: NONE (H011 ⊂ H012, no orthogonal combination)
+All annotation filters reduce F1 compared to GQ>=3 alone.
+
+Key insight: ISM analysis itself serves as quality filter.
+For pre-screened ISM candidates, GQ>=3 maximizes rescue performance.

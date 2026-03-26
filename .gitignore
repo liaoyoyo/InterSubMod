@@ -90,6 +90,32 @@ cmake_install.cmake
 # Dependencies
 _deps/
 
+# Python virtual environment
+.venv/
+
+# Large data directories
+data/
+
+# Logs (specific)
+heatmap_generation.log
+
+# Large sequencing data files
+*.bam
+*.bai
+*.vcf.gz
+*.vcf.gz.tbi
+*.tsv.gz
+*.fastq
+*.fastq.gz
+
+# Python cache
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Cycle result large files (keep summary only)
+research/autoresearch/cycles/*/feature_obs.txt
+
 # Build artifacts
 # docs/*
 

@@ -32,7 +32,10 @@ SKIP_FILTER_ANALYSIS=false
 SKIP_CLEANUP=false
 COMPRESS_REGIONS=false
 LOCAL_THREADS="${THREADS}"
+LOCAL_INDEX_THREADS=""
+MIN_FREE_GB="${MIN_FREE_GB_DEFAULT}"
 VCF_SOURCE="output"
+RUN_TAG=""
 FORCE_RUN_METHYLATION=false
 AUTO_SKIPPED_METHYLATION=false
 METH_MM_TAGS="NA"
@@ -51,6 +54,10 @@ Options:
   --mode MODE           Verification mode (default: s-pure)
   --sample SAMPLE       Sample name (default: HCC1395)
   --threads N           Override thread count
+  --index-threads N     Threads used for BAM indexing / sort-heavy I/O
+  --min-free-gb N       Minimum free space required on output volume before run
+  --output-root DIR     Override canonical output root
+  --run-tag TEXT        Optional suffix appended to canonical run id
   --dry-run             Print commands without executing
   --skip-longphase      Skip LongPhase-S (use existing tagged BAM + TP/FP VCFs)
   --skip-intersubmod    Skip InterSubMod (use existing significance_summary.csv)
@@ -70,6 +77,10 @@ while [[ $# -gt 0 ]]; do
         --mode)             MODE="$2"; shift 2 ;;
         --sample)           SAMPLE="$2"; shift 2 ;;
         --threads)          LOCAL_THREADS="$2"; shift 2 ;;
+        --index-threads)    LOCAL_INDEX_THREADS="$2"; shift 2 ;;
+        --min-free-gb)      MIN_FREE_GB="$2"; shift 2 ;;
+        --output-root)      OUTPUT_ROOT="$2"; shift 2 ;;
+        --run-tag)          RUN_TAG="$2"; shift 2 ;;
         --dry-run)          DRY_RUN=true; shift ;;
         --skip-longphase)   SKIP_LONGPHASE=true; shift ;;
         --skip-intersubmod) SKIP_INTERSUBMOD=true; shift ;;
@@ -92,9 +103,15 @@ done
 # Load sample configuration
 eval "$(get_sample_config "${SAMPLE}")"
 
+if [[ -z "${LOCAL_INDEX_THREADS}" ]]; then
+    LOCAL_INDEX_THREADS="$(recommended_index_threads "${LOCAL_THREADS}")"
+fi
+
 # Create output directory
 DATE_STR=$(date +%Y%m%d)
-SAMPLE_OUTPUT_DIR="${OUTPUT_ROOT}/${MODE}/${SAMPLE}/${DATE_STR}"
+CANONICAL_MODE="$(canonical_mode_name "${MODE}")"
+CALLER_MODEL="$(caller_model_name "${VCF_SOURCE}")"
+SAMPLE_OUTPUT_DIR="$(build_canonical_run_base "${SAMPLE}" "${CANONICAL_MODE}" "${CALLER_MODEL}" "${DATE_STR}" "${RUN_TAG}")"
 
 # Avoid overwriting existing output
 SEQ=1
@@ -120,7 +137,11 @@ echo "  Benchmark Pipeline - Methylation Filter Validation" >&2
 echo "=================================================================" >&2
 log_info "Sample:      ${SAMPLE}"
 log_info "Mode:        ${MODE}"
+log_info "Canonical:   ${CANONICAL_MODE}"
+log_info "Caller mdl:  ${CALLER_MODEL}"
 log_info "Threads:     ${LOCAL_THREADS}"
+log_info "Index thr:   ${LOCAL_INDEX_THREADS}"
+log_info "Min free GB: ${MIN_FREE_GB}"
 log_info "Output dir:  ${SAMPLE_OUTPUT_DIR}"
 log_info "Dry-run:     ${DRY_RUN}"
 log_info "Skip LongPhase-S:  ${SKIP_LONGPHASE}"
@@ -129,6 +150,9 @@ log_info "Force methylation: ${FORCE_RUN_METHYLATION}"
 log_info "Skip cleanup:      ${SKIP_CLEANUP}"
 echo "-----------------------------------------------------------------" >&2
 print_disk_space
+if [[ "${DRY_RUN}" != true ]]; then
+    require_min_free_gb "${SAMPLE_OUTPUT_DIR}" "${MIN_FREE_GB}" "run_benchmark:${SAMPLE}:${CANONICAL_MODE}"
+fi
 
 PIPELINE_START=$(date +%s)
 
@@ -145,20 +169,28 @@ if [[ "${SKIP_LONGPHASE}" == true ]]; then
     if [[ -n "${EXISTING_TAGGED_BAM}" ]]; then
         TAGGED_BAM="${EXISTING_TAGGED_BAM}"
     else
-        # Default: look for the existing tagged BAM in data
-        TAGGED_BAM="/big8_disk/liaoyoyo2001/data/bam/HCC1395_Tmode_tagged_ClairS_pileup_v040_woFilter.bam"
+        TAGGED_BAM="$(find_canonical_artifact "${SAMPLE}" "${CANONICAL_MODE}" "longphase_s/${SAMPLE}_tagged.bam" || true)"
+        if [[ -z "${TAGGED_BAM}" ]] && [[ "${SAMPLE}" == "HCC1395" ]]; then
+            TAGGED_BAM="/big8_disk/liaoyoyo2001/data/bam/HCC1395_Tmode_tagged_ClairS_pileup_v040_woFilter.bam"
+        fi
     fi
 
     if [[ -n "${EXISTING_TP_VCF}" ]]; then
         TP_VCF="${EXISTING_TP_VCF}"
     else
-        TP_VCF="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
+        TP_VCF="$(find_canonical_artifact "${SAMPLE}" "${CANONICAL_MODE}" "longphase_s/filtered_snv_tp.vcf.gz" || true)"
+        if [[ -z "${TP_VCF}" ]] && [[ "${SAMPLE}" == "HCC1395" ]]; then
+            TP_VCF="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
+        fi
     fi
 
     if [[ -n "${EXISTING_FP_VCF}" ]]; then
         FP_VCF="${EXISTING_FP_VCF}"
     else
-        FP_VCF="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_fp.vcf.gz"
+        FP_VCF="$(find_canonical_artifact "${SAMPLE}" "${CANONICAL_MODE}" "longphase_s/filtered_snv_fp.vcf.gz" || true)"
+        if [[ -z "${FP_VCF}" ]] && [[ "${SAMPLE}" == "HCC1395" ]]; then
+            FP_VCF="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_fp.vcf.gz"
+        fi
     fi
 
     validate_file "${TAGGED_BAM}" "Existing tagged BAM"
@@ -174,6 +206,7 @@ else
         --sample "${SAMPLE}"
         --output-dir "${SAMPLE_OUTPUT_DIR}"
         --threads "${LOCAL_THREADS}"
+        --index-threads "${LOCAL_INDEX_THREADS}"
     )
     if [[ "${DRY_RUN}" == true ]]; then
         LONGPHASE_ARGS+=(--dry-run)

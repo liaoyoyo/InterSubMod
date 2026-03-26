@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import gzip
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -73,6 +75,54 @@ def run_cmd(cmd: List[str]) -> None:
     subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
 
+def run_shell(cmd: str) -> None:
+    subprocess.run(
+        cmd,
+        check=True,
+        shell=True,
+        executable="/bin/bash",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+
+def header_needs_gq_patch(path: Path) -> bool:
+    opener = gzip.open if path.suffix == ".gz" else open
+    with opener(path, "rt", encoding="utf-8", errors="replace") as handle:
+        for idx, line in enumerate(handle):
+            if idx >= 256:
+                break
+            if line.startswith("#CHROM"):
+                break
+            if "ID=GQ,Number=1,Type=Integer" in line:
+                return True
+    return False
+
+
+def has_tabix_index(path: Path) -> bool:
+    return path.with_suffix(path.suffix + ".tbi").exists() or path.with_suffix(path.suffix + ".csi").exists()
+
+
+def normalize_vcf_for_bcftools(vcf_path: Path, output_path: Path, bcftools: str) -> Path:
+    needs_patch = header_needs_gq_patch(vcf_path)
+    is_bgzipped = vcf_path.suffix == ".gz"
+    if is_bgzipped and has_tabix_index(vcf_path) and not needs_patch:
+        return vcf_path
+
+    reader = "gzip -dc" if is_bgzipped else "cat"
+    quoted_input = shlex.quote(str(vcf_path))
+    quoted_output = shlex.quote(str(output_path))
+    quoted_bcftools = shlex.quote(str(bcftools))
+    pipeline = f"{reader} {quoted_input}"
+    if needs_patch:
+        pipeline += " | sed 's/ID=GQ,Number=1,Type=Integer/ID=GQ,Number=1,Type=Float/'"
+    pipeline += f" | {quoted_bcftools} view -Oz -o {quoted_output}"
+    run_shell(pipeline)
+    run_cmd([bcftools, "index", "-f", str(output_path)])
+    return output_path
+
+
 def count_vcf_records(path: Path, bcftools: str) -> int:
     proc = subprocess.run(
         [bcftools, "view", "-H", str(path)],
@@ -93,13 +143,14 @@ def compute_caller_counts(
 ) -> Dict[str, float]:
     with tempfile.TemporaryDirectory(prefix="compare_benchmark_") as tmpdir:
         tmp = Path(tmpdir)
+        caller_normalized = normalize_vcf_for_bcftools(caller_vcf, tmp / "caller.normalized.vcf.gz", bcftools)
         caller_scoped = tmp / "caller.in_scope.vcf.gz"
         truth_scoped = tmp / "truth.in_scope.vcf.gz"
 
         caller_cmd = [bcftools, "view", "-f", "PASS"]
         if truth_bed:
             caller_cmd.extend(["-R", str(truth_bed)])
-        caller_cmd.extend([str(caller_vcf), "-Oz", "-o", str(caller_scoped)])
+        caller_cmd.extend([str(caller_normalized), "-Oz", "-o", str(caller_scoped)])
         run_cmd(caller_cmd)
         run_cmd([bcftools, "index", "-f", str(caller_scoped)])
 
@@ -138,7 +189,12 @@ def main() -> None:
         raise SystemExit(f"metrics.json not found under {run_dir}")
     metrics = read_json(metrics_path)
 
-    context_path = Path(args.context_json).resolve() if args.context_json else run_dir / "round_context.json"
+    if args.context_json:
+        context_path = Path(args.context_json).resolve()
+    else:
+        context_path = run_dir / "round_context.json"
+        if not context_path.exists():
+            context_path = run_dir / "run_context.json"
     context = read_json(context_path) if context_path.exists() else {}
 
     sample = context.get("sample") or metrics.get("sample") or run_dir.name

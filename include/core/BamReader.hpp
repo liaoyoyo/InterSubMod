@@ -9,6 +9,22 @@
 namespace InterSubMod {
 
 /**
+ * @brief Custom deleter for bam1_t RAII management.
+ * Used with BamRecordPtr to automatically call bam_destroy1() on scope exit.
+ */
+struct BamRecordDeleter {
+    void operator()(bam1_t* b) const noexcept {
+        if (b) bam_destroy1(b);
+    }
+};
+
+/**
+ * @brief RAII-managed BAM record. Automatically freed when out of scope.
+ * Use fetch_reads_safe() to obtain these instead of raw fetch_reads().
+ */
+using BamRecordPtr = std::unique_ptr<bam1_t, BamRecordDeleter>;
+
+/**
  * @brief RAII wrapper for BAM file reading with HTSlib.
  *
  * This class provides thread-safe access to BAM files for querying reads
@@ -52,8 +68,23 @@ public:
      *
      * @note Returns empty vector if chromosome not found or region invalid.
      * @note Reads are allocated with bam_dup1(), caller owns the memory.
+     * @deprecated Prefer fetch_reads_safe() to avoid manual memory management.
      */
     std::vector<bam1_t*> fetch_reads(const std::string& chr, int32_t start, int32_t end);
+
+    /**
+     * @brief Fetches all reads overlapping the specified region (RAII version).
+     *
+     * Returns RAII-managed BamRecordPtr objects that automatically call
+     * bam_destroy1() when the vector or individual elements go out of scope.
+     * Prefer this over fetch_reads() to avoid manual memory management.
+     *
+     * @param chr Chromosome name (must match BAM header).
+     * @param start 0-based inclusive start position.
+     * @param end 0-based exclusive end position.
+     * @return Vector of BamRecordPtr (unique_ptr<bam1_t, BamRecordDeleter>).
+     */
+    std::vector<BamRecordPtr> fetch_reads_safe(const std::string& chr, int32_t start, int32_t end);
 
     /**
      * @brief Gets the BAM header for chromosome name lookups.
