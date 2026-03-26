@@ -157,6 +157,7 @@ add_executable(run_tests
     tests/test_global_local.cpp
     tests/test_structure_bootstrap.cpp
     tests/test_significance_analyzer.cpp
+    tests/test_label_test.cpp
 )
 target_link_libraries(run_tests PRIVATE inter_sub_mod_core GTest::gtest)
 
