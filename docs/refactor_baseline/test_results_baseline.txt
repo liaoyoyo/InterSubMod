@@ -1,0 +1,219 @@
+Test project /big7_disk/liaoyoyo2001/InterSubMod/build
+        Start   1: ConfigTest.ValidationSuccess
+  1/107 Test   #1: ConfigTest.ValidationSuccess ......................................   Passed    0.01 sec
+        Start   2: ConfigTest.ValidationFailureMissingFiles
+  2/107 Test   #2: ConfigTest.ValidationFailureMissingFiles ..........................   Passed    0.01 sec
+        Start   3: ConfigTest.ValidationFailureInvalidWindow
+  3/107 Test   #3: ConfigTest.ValidationFailureInvalidWindow .........................   Passed    0.01 sec
+        Start   4: ConfigTest.ValidationFailureInvalidMethylThresholds
+  4/107 Test   #4: ConfigTest.ValidationFailureInvalidMethylThresholds ...............   Passed    0.01 sec
+        Start   5: ArgParserTest.ParseArgumentsShortOptions
+  5/107 Test   #5: ArgParserTest.ParseArgumentsShortOptions ..........................   Passed    0.01 sec
+        Start   6: BamReaderTest.ConstructorOpensFile
+  6/107 Test   #6: BamReaderTest.ConstructorOpensFile ................................   Passed    0.24 sec
+        Start   7: BamReaderTest.FetchReadsFromValidRegion
+  7/107 Test   #7: BamReaderTest.FetchReadsFromValidRegion ...........................   Passed    0.34 sec
+        Start   8: BamReaderTest.FetchReadsFromInvalidChromosome
+  8/107 Test   #8: BamReaderTest.FetchReadsFromInvalidChromosome .....................   Passed    0.24 sec
+        Start   9: BamReaderTest.MoveConstructor
+  9/107 Test   #9: BamReaderTest.MoveConstructor .....................................   Passed    0.24 sec
+        Start  10: BamReaderTest.ParseReadInfo
+ 10/107 Test  #10: BamReaderTest.ParseReadInfo .......................................   Passed    0.34 sec
+        Start  11: ReadParserTest.FilterConfiguration
+ 11/107 Test  #11: ReadParserTest.FilterConfiguration ................................   Passed    0.01 sec
+        Start  12: DistanceMatrixTest.NHD_BasicComputation
+ 12/107 Test  #12: DistanceMatrixTest.NHD_BasicComputation ...........................   Passed    0.01 sec
+        Start  13: DistanceMatrixTest.NHD_MinCommonCoverage
+ 13/107 Test  #13: DistanceMatrixTest.NHD_MinCommonCoverage ..........................   Passed    0.01 sec
+        Start  14: DistanceMatrixTest.L1_BasicComputation
+ 14/107 Test  #14: DistanceMatrixTest.L1_BasicComputation ............................   Passed    0.01 sec
+        Start  15: DistanceMatrixTest.L2_BasicComputation
+ 15/107 Test  #15: DistanceMatrixTest.L2_BasicComputation ............................   Passed    0.01 sec
+        Start  16: DistanceMatrixTest.CORR_BasicComputation
+ 16/107 Test  #16: DistanceMatrixTest.CORR_BasicComputation ..........................   Passed    0.01 sec
+        Start  17: DistanceMatrixTest.JACCARD_BasicComputation
+ 17/107 Test  #17: DistanceMatrixTest.JACCARD_BasicComputation .......................   Passed    0.01 sec
+        Start  18: DistanceMatrixTest.StrandSpecific_BasicComputation
+ 18/107 Test  #18: DistanceMatrixTest.StrandSpecific_BasicComputation ................   Passed    0.01 sec
+        Start  19: DistanceMatrixTest.DistanceConfig_AllOptions
+ 19/107 Test  #19: DistanceMatrixTest.DistanceConfig_AllOptions ......................   Passed    0.01 sec
+        Start  20: DistanceMatrixTest.EmptyMatrix
+ 20/107 Test  #20: DistanceMatrixTest.EmptyMatrix ....................................   Passed    0.01 sec
+        Start  21: DistanceMatrixTest.SingleRead
+ 21/107 Test  #21: DistanceMatrixTest.SingleRead .....................................   Passed    0.01 sec
+        Start  22: DistanceMatrixTest.AllMissing
+ 22/107 Test  #22: DistanceMatrixTest.AllMissing .....................................   Passed    0.01 sec
+        Start  23: DistanceMatrixTest.Statistics
+ 23/107 Test  #23: DistanceMatrixTest.Statistics .....................................   Passed    0.01 sec
+        Start  24: DistanceMatrixTest.WriteCSV
+ 24/107 Test  #24: DistanceMatrixTest.WriteCSV .......................................   Passed    0.01 sec
+        Start  25: DistanceCalculatorTest.MetricToString
+ 25/107 Test  #25: DistanceCalculatorTest.MetricToString .............................   Passed    0.01 sec
+        Start  26: DistanceCalculatorTest.StringToMetric
+ 26/107 Test  #26: DistanceCalculatorTest.StringToMetric .............................   Passed    0.01 sec
+        Start  27: HierarchicalClusteringTest.UPGMA_BasicCorrectness
+ 27/107 Test  #27: HierarchicalClusteringTest.UPGMA_BasicCorrectness .................   Passed    0.01 sec
+        Start  28: HierarchicalClusteringTest.UPGMA_TreeTopology
+ 28/107 Test  #28: HierarchicalClusteringTest.UPGMA_TreeTopology .....................   Passed    0.01 sec
+        Start  29: HierarchicalClusteringTest.UPGMA_BranchLengths
+ 29/107 Test  #29: HierarchicalClusteringTest.UPGMA_BranchLengths ....................   Passed    0.01 sec
+        Start  30: HierarchicalClusteringTest.UPGMA_NewickOutput
+ 30/107 Test  #30: HierarchicalClusteringTest.UPGMA_NewickOutput .....................   Passed    0.01 sec
+        Start  31: HierarchicalClusteringTest.SingleLinkage_ChainEffect
+ 31/107 Test  #31: HierarchicalClusteringTest.SingleLinkage_ChainEffect ..............   Passed    0.01 sec
+        Start  32: HierarchicalClusteringTest.CompleteLinkage
+ 32/107 Test  #32: HierarchicalClusteringTest.CompleteLinkage ........................   Passed    0.01 sec
+        Start  33: HierarchicalClusteringTest.WardMethod
+ 33/107 Test  #33: HierarchicalClusteringTest.WardMethod .............................   Passed    0.01 sec
+        Start  34: HierarchicalClusteringTest.AllMethodsProduceTrees
+ 34/107 Test  #34: HierarchicalClusteringTest.AllMethodsProduceTrees .................   Passed    0.01 sec
+        Start  35: HierarchicalClusteringTest.TreeNode_CreateLeaf
+ 35/107 Test  #35: HierarchicalClusteringTest.TreeNode_CreateLeaf ....................   Passed    0.01 sec
+        Start  36: HierarchicalClusteringTest.TreeNode_CreateInternal
+ 36/107 Test  #36: HierarchicalClusteringTest.TreeNode_CreateInternal ................   Passed    0.01 sec
+        Start  37: HierarchicalClusteringTest.Tree_DeepCopy
+ 37/107 Test  #37: HierarchicalClusteringTest.Tree_DeepCopy ..........................   Passed    0.01 sec
+        Start  38: HierarchicalClusteringTest.TreeCutter_ByDistance
+ 38/107 Test  #38: HierarchicalClusteringTest.TreeCutter_ByDistance ..................   Passed    0.01 sec
+        Start  39: HierarchicalClusteringTest.TreeCutter_ByNumClusters
+ 39/107 Test  #39: HierarchicalClusteringTest.TreeCutter_ByNumClusters ...............   Passed    0.01 sec
+        Start  40: HierarchicalClusteringTest.EdgeCase_SingleNode
+ 40/107 Test  #40: HierarchicalClusteringTest.EdgeCase_SingleNode ....................   Passed    0.01 sec
+        Start  41: HierarchicalClusteringTest.EdgeCase_TwoNodes
+ 41/107 Test  #41: HierarchicalClusteringTest.EdgeCase_TwoNodes ......................   Passed    0.01 sec
+        Start  42: HierarchicalClusteringTest.EdgeCase_EmptyMatrix
+ 42/107 Test  #42: HierarchicalClusteringTest.EdgeCase_EmptyMatrix ...................   Passed    0.01 sec
+        Start  43: HierarchicalClusteringTest.EdgeCase_IdenticalDistances
+ 43/107 Test  #43: HierarchicalClusteringTest.EdgeCase_IdenticalDistances ............   Passed    0.01 sec
+        Start  44: HierarchicalClusteringTest.BootstrapAnnotation
+ 44/107 Test  #44: HierarchicalClusteringTest.BootstrapAnnotation ....................   Passed    0.01 sec
+        Start  45: HierarchicalClusteringTest.TreeWriter_WriteNewick
+ 45/107 Test  #45: HierarchicalClusteringTest.TreeWriter_WriteNewick .................   Passed    0.01 sec
+        Start  46: HierarchicalClusteringTest.TreeWriter_WriteLinkageMatrix
+ 46/107 Test  #46: HierarchicalClusteringTest.TreeWriter_WriteLinkageMatrix ..........   Passed    0.01 sec
+        Start  47: HierarchicalClusteringTest.TreeWriter_WriteStats
+ 47/107 Test  #47: HierarchicalClusteringTest.TreeWriter_WriteStats ..................   Passed    0.01 sec
+        Start  48: HierarchicalClusteringTest.IntegrationWithDistanceMatrix
+ 48/107 Test  #48: HierarchicalClusteringTest.IntegrationWithDistanceMatrix ..........   Passed    0.01 sec
+        Start  49: LinkageMethodTest.MethodToString
+ 49/107 Test  #49: LinkageMethodTest.MethodToString ..................................   Passed    0.01 sec
+        Start  50: LinkageMethodTest.StringToMethod
+ 50/107 Test  #50: LinkageMethodTest.StringToMethod ..................................   Passed    0.01 sec
+        Start  51: HierarchicalClusteringPerformance.MediumSizeMatrix
+ 51/107 Test  #51: HierarchicalClusteringPerformance.MediumSizeMatrix ................   Passed    0.02 sec
+        Start  52: MathUtilsTest.LogFactorial_SmallValues
+ 52/107 Test  #52: MathUtilsTest.LogFactorial_SmallValues ............................   Passed    0.01 sec
+        Start  53: MathUtilsTest.LogFactorial_LargeValues
+ 53/107 Test  #53: MathUtilsTest.LogFactorial_LargeValues ............................   Passed    0.01 sec
+        Start  54: MathUtilsTest.LogFactorial_EdgeCases
+ 54/107 Test  #54: MathUtilsTest.LogFactorial_EdgeCases ..............................   Passed    0.01 sec
+        Start  55: MathUtilsTest.LogBinomial_BasicCases
+ 55/107 Test  #55: MathUtilsTest.LogBinomial_BasicCases ..............................   Passed    0.01 sec
+        Start  56: MathUtilsTest.LogBinomial_EdgeCases
+ 56/107 Test  #56: MathUtilsTest.LogBinomial_EdgeCases ...............................   Passed    0.01 sec
+        Start  57: MathUtilsTest.OddsRatio_BasicCases
+ 57/107 Test  #57: MathUtilsTest.OddsRatio_BasicCases ................................   Passed    0.01 sec
+        Start  58: MathUtilsTest.OddsRatio_WithZeros
+ 58/107 Test  #58: MathUtilsTest.OddsRatio_WithZeros .................................   Passed    0.01 sec
+        Start  59: MathUtilsTest.LogOddsRatio_Symmetry
+ 59/107 Test  #59: MathUtilsTest.LogOddsRatio_Symmetry ...............................   Passed    0.01 sec
+        Start  60: MathUtilsTest.ChiSquare_IndependentData
+ 60/107 Test  #60: MathUtilsTest.ChiSquare_IndependentData ...........................   Passed    0.01 sec
+        Start  61: MathUtilsTest.ChiSquare_DependentData
+ 61/107 Test  #61: MathUtilsTest.ChiSquare_DependentData .............................   Passed    0.01 sec
+        Start  62: MathUtilsTest.CramersV_Range
+ 62/107 Test  #62: MathUtilsTest.CramersV_Range ......................................   Passed    0.01 sec
+        Start  63: MathUtilsTest.CramersV_Reliability
+ 63/107 Test  #63: MathUtilsTest.CramersV_Reliability ................................   Passed    0.01 sec
+        Start  64: MathUtilsTest.HypergeomPMF_BasicCases
+ 64/107 Test  #64: MathUtilsTest.HypergeomPMF_BasicCases .............................   Passed    0.01 sec
+        Start  65: FisherExactTest.Fisher2x2_LadyTastingTea
+ 65/107 Test  #65: FisherExactTest.Fisher2x2_LadyTastingTea ..........................   Passed    0.01 sec
+        Start  66: FisherExactTest.Fisher2x2_SignificantAssociation
+ 66/107 Test  #66: FisherExactTest.Fisher2x2_SignificantAssociation ..................   Passed    0.01 sec
+        Start  67: FisherExactTest.Fisher2x2_NoAssociation
+ 67/107 Test  #67: FisherExactTest.Fisher2x2_NoAssociation ...........................   Passed    0.01 sec
+        Start  68: FisherExactTest.Fisher2x2_OddsRatio
+ 68/107 Test  #68: FisherExactTest.Fisher2x2_OddsRatio ...............................   Passed    0.01 sec
+        Start  69: FisherExactTest.Fisher2x2_EmptyTable
+ 69/107 Test  #69: FisherExactTest.Fisher2x2_EmptyTable ..............................   Passed    0.01 sec
+        Start  70: FisherExactTest.FisherRxC_BasicTest
+ 70/107 Test  #70: FisherExactTest.FisherRxC_BasicTest ...............................   Passed    0.02 sec
+        Start  71: FisherExactTest.FisherRxC_StrongAssociation
+ 71/107 Test  #71: FisherExactTest.FisherRxC_StrongAssociation .......................   Passed    0.01 sec
+        Start  72: FisherExactTest.FisherRxC_EarlyStopping
+ 72/107 Test  #72: FisherExactTest.FisherRxC_EarlyStopping ...........................   Passed    0.01 sec
+        Start  73: StatsTest.ContingencyTable2x2_Totals
+ 73/107 Test  #73: StatsTest.ContingencyTable2x2_Totals ..............................   Passed    0.01 sec
+        Start  74: StatsTest.ContingencyTableRxC_Operations
+ 74/107 Test  #74: StatsTest.ContingencyTableRxC_Operations ..........................   Passed    0.01 sec
+        Start  75: StatsTest.FullLabel_ComboCode
+ 75/107 Test  #75: StatsTest.FullLabel_ComboCode .....................................   Passed    0.01 sec
+        Start  76: StatsTest.FullLabel_TestLabels
+ 76/107 Test  #76: StatsTest.FullLabel_TestLabels ....................................   Passed    0.01 sec
+        Start  77: GlobalTestTest.AlleleTest_StrongAssociation
+ 77/107 Test  #77: GlobalTestTest.AlleleTest_StrongAssociation .......................   Passed    0.01 sec
+        Start  78: GlobalTestTest.AlleleTest_NoAssociation
+ 78/107 Test  #78: GlobalTestTest.AlleleTest_NoAssociation ...........................   Passed    0.01 sec
+        Start  79: GlobalTestTest.HPTest_Works
+ 79/107 Test  #79: GlobalTestTest.HPTest_Works .......................................   Passed    0.01 sec
+        Start  80: GlobalTestTest.GatingLogic
+ 80/107 Test  #80: GlobalTestTest.GatingLogic ........................................   Passed    0.01 sec
+        Start  81: GlobalTestTest.EmptyInput
+ 81/107 Test  #81: GlobalTestTest.EmptyInput .........................................   Passed    0.01 sec
+        Start  82: GlobalTestTest.TestAll
+ 82/107 Test  #82: GlobalTestTest.TestAll ............................................   Passed    0.01 sec
+        Start  83: LocalTestTest.BasicLocalTest
+ 83/107 Test  #83: LocalTestTest.BasicLocalTest ......................................   Passed    0.01 sec
+        Start  84: LocalTestTest.ClusterCounts
+ 84/107 Test  #84: LocalTestTest.ClusterCounts .......................................   Passed    0.01 sec
+        Start  85: LocalTestTest.DeltaProportion
+ 85/107 Test  #85: LocalTestTest.DeltaProportion .....................................   Passed    0.01 sec
+        Start  86: LocalTestTest.BestDimensionIdentified
+ 86/107 Test  #86: LocalTestTest.BestDimensionIdentified .............................   Passed    0.01 sec
+        Start  87: StructureTestTest.FilterReads_CompleteMatrix
+ 87/107 Test  #87: StructureTestTest.FilterReads_CompleteMatrix ......................   Passed    0.01 sec
+        Start  88: StructureTestTest.FilterReads_WithNans
+ 88/107 Test  #88: StructureTestTest.FilterReads_WithNans ............................   Passed    0.01 sec
+        Start  89: StructureTestTest.FilterReads_TooManyNans
+ 89/107 Test  #89: StructureTestTest.FilterReads_TooManyNans .........................   Passed    0.01 sec
+        Start  90: StructureTestTest.Permanova_SignificantDifference
+ 90/107 Test  #90: StructureTestTest.Permanova_SignificantDifference .................   Passed    0.01 sec
+        Start  91: StructureTestTest.Permanova_NoDifference
+ 91/107 Test  #91: StructureTestTest.Permanova_NoDifference ..........................   Passed    0.01 sec
+        Start  92: StructureTestTest.Permanova_InvalidInput
+ 92/107 Test  #92: StructureTestTest.Permanova_InvalidInput ..........................   Passed    0.01 sec
+        Start  93: StructureTestTest.Dispersion_Homogeneous
+ 93/107 Test  #93: StructureTestTest.Dispersion_Homogeneous ..........................   Passed    0.01 sec
+        Start  94: StructureTestTest.Dispersion_Heterogeneous
+ 94/107 Test  #94: StructureTestTest.Dispersion_Heterogeneous ........................   Passed    0.01 sec
+        Start  95: BootstrapTest.ARI_PerfectAgreement
+ 95/107 Test  #95: BootstrapTest.ARI_PerfectAgreement ................................   Passed    0.01 sec
+        Start  96: BootstrapTest.ARI_RelabeledClusters
+ 96/107 Test  #96: BootstrapTest.ARI_RelabeledClusters ...............................   Passed    0.01 sec
+        Start  97: BootstrapTest.ARI_DifferentClustering
+ 97/107 Test  #97: BootstrapTest.ARI_DifferentClustering .............................   Passed    0.01 sec
+        Start  98: BootstrapTest.ARI_AllSameCluster
+ 98/107 Test  #98: BootstrapTest.ARI_AllSameCluster ..................................   Passed    0.01 sec
+        Start  99: BootstrapTest.Bootstrap_StableCluster
+ 99/107 Test  #99: BootstrapTest.Bootstrap_StableCluster .............................   Passed    0.01 sec
+        Start 100: BootstrapTest.Bootstrap_EarlyStopping
+100/107 Test #100: BootstrapTest.Bootstrap_EarlyStopping .............................   Passed    0.01 sec
+        Start 101: SignificanceAnalyzerTest.FullAnalysis_StrongAssociation
+101/107 Test #101: SignificanceAnalyzerTest.FullAnalysis_StrongAssociation ...........   Passed    0.03 sec
+        Start 102: SignificanceAnalyzerTest.SimpleAnalysis
+102/107 Test #102: SignificanceAnalyzerTest.SimpleAnalysis ...........................   Passed    0.01 sec
+        Start 103: SignificanceAnalyzerTest.EmptyInput
+103/107 Test #103: SignificanceAnalyzerTest.EmptyInput ...............................   Passed    0.01 sec
+        Start 104: SignificanceAnalyzerTest.GatingBehavior
+104/107 Test #104: SignificanceAnalyzerTest.GatingBehavior ...........................   Passed    0.01 sec
+        Start 105: SignificanceAnalyzerTest.HeuristicScore
+105/107 Test #105: SignificanceAnalyzerTest.HeuristicScore ...........................   Passed    0.01 sec
+        Start 106: SignificanceAnalyzerTest.Determinism_SameSeedProducesSameResult
+106/107 Test #106: SignificanceAnalyzerTest.Determinism_SameSeedProducesSameResult ...   Passed    0.05 sec
+        Start 107: SignificanceAnalyzerTest.LabelPermanova_InvalidWithoutTwoGroups
+107/107 Test #107: SignificanceAnalyzerTest.LabelPermanova_InvalidWithoutTwoGroups ...   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 107
+
+Total Test time (real) =   2.83 sec
