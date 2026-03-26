@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-01-12 00:00
-更新時間: 2026-03-08 23:00
+更新時間: 2026-03-25 11:20
 狀態: validated
 資料來源:
   - docs/standards/20260228_文件命名與狀態管理規範_01.md
@@ -17,7 +17,7 @@
    - 報告分層：`reports/validated|finalized`
    - 實驗分層：`experiments/in_progress|validated|finalized`
 2. `output/` 入口已固定為軟連結：
-   - `output -> /big8_disk/liaoyoyo2001/InterSubMod_runs/output`
+   - `output -> /big7_disk/liaoyoyo2001/big7_disk_output`
 3. Knowledge MCP 已接入：
    - `.mcp.json` 指向 `/big8_disk/liaoyoyo2001/knowledge/scripts/mcp/knowledge_server.py`
 
@@ -33,14 +33,185 @@
 
 ## 3. 當前進行中
 
-1. 研究主線已重排為「純樣本優先」：
-   - 第一主實驗：`HCC1395 5kHz` paired tumor/normal
-   - 第一交叉驗證：`HCC1395 ONT_Dorado + HCC1395BL`
-   - 後續順序：其他 pure samples → pure tumor-only → mixed purity/subsample
-2. 當前最重要的研究問題：
-   - `label-first` 與 `cluster-first` 的設計本身是否合理、可用、可解釋
-   - 加入 HP/Allele 後，哪些 region 會從 `Weak` 升級為 `Strong` 或 `Subclone`
-   - 哪些流程節點是真正影響結果的因子，哪些只是暫時工程預設
+### 主線切換摘要（2026-03-24 確認）
+
+1. 方法學審查已完成，`label-first / cluster-first` 的合理性、TO rescue 邊界、`paired_persistent_final_fp` 機制都已有 closeout。
+2. 當前最穩定的高層流程分工已定調為：
+   - 第一層：`caller-first`
+   - 第二層：`methylation-support`
+   - 第三層：`annotation / QC / artifact triage`
+3. 下一階段突破方向優先序已正式收斂為：
+   - `Phase 1`：方向 E，`ML read classification`
+   - `Phase 2`：方向 A+D，`normal methylation reference + CN/Purity-aware`
+   - `Phase 3`：方向 B，`gene-level / mechanism-level evidence integration`
+   - `Phase 4`：方向 C，`CpG 功能分層與智慧選點`
+4. 樣本角色同步調整為：
+   - `HCC1395 5kHz paired/TO`：discovery 與 stress-test
+   - `HCC1395_DORADO paired/TO`：同 biological sample 的 cross-platform validation
+   - 其他 pure paired 樣本：穩定性與可攜性檢查
+5. 近期不再作為主線重複驗證的項目：
+   - 單純重做 `paired pure` 合理性驗證
+   - `H006 window_bp=1000`
+   - `AlleleDelta standalone filter`
+   - 以 gate 微調直接解決 germline ASM FP
+
+### Phase 1 目前啟動點（2026-03-25）
+
+1. `Phase 1` 已正式進入研究啟動，不再停留在 roadmap 標題層。
+2. 目前最優先任務不是直接訓練模型，而是先建立 `per-read training/export layer`。
+3. 已確認既有資產已足夠支撐第一版資料層：
+   - `rescue_joined_features.tsv`
+   - `reads.tsv`
+   - `methylation.csv`
+   - `distance/.../matrix.csv`
+   - 既有 `TO support` 與 `paired old output` diagnostics
+4. 目前最主要缺口：
+   - 統一的 exporter
+   - 清楚的 label schema
+   - `5kHz / DORADO` harmonization 與 split 規則
+5. 本輪啟動文件：
+   - [20260325_Phase1_ML_read_classification研究啟動與資料缺口盤點_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260325_Phase1_ML_read_classification研究啟動與資料缺口盤點_01.md)
+   - [20260325_Phase1_label_schema與harmonization規格_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260325_Phase1_label_schema與harmonization規格_01.md)
+6. 本輪已落地的 Phase 1 腳本與 pilot：
+   - 腳本：[export_phase1_read_training_table.py](/big7_disk/liaoyoyo2001/InterSubMod/scripts/analysis/export_phase1_read_training_table.py)
+   - pilot 輸出：[/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_read_training_exporter_pilot](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_read_training_exporter_pilot)
+   - 目前最小驗證結果：`HCC1395 5kHz TO`、`2 regions`、`77 read rows`、`0 missing regions`
+7. 本輪新增的 Phase 1 baseline manifest：
+   - 腳本：[build_phase1_training_manifest.py](/big7_disk/liaoyoyo2001/InterSubMod/scripts/analysis/build_phase1_training_manifest.py)
+   - 完整 manifest：[/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_training_manifest_v1](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_training_manifest_v1)
+   - 四象限 smoke：[/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_training_manifest_smoke4](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_training_manifest_smoke4)
+   - 目前結果：
+     - 四個 baseline dataset 共 `141,014` 個 regions 已納入 manifest
+     - smoke resolve `8/8` 成功、`missing=0`
+     - smoke read export 共 `1,701` 筆 `read × region` rows
+8. 本輪新增的 manifest-driven shard export：
+   - 腳本：[export_phase1_manifest_shard.py](/big7_disk/liaoyoyo2001/InterSubMod/scripts/analysis/export_phase1_manifest_shard.py)
+   - smoke4：[/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_manifest_shard_export_smoke4](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_manifest_shard_export_smoke4)
+   - sample80：[/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_manifest_shard_export_sample80](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_manifest_shard_export_sample80)
+   - 目前結果：
+     - smoke4：`8/8` resolve、`1,701` read rows
+     - sample80：`80/80` resolve、`14,165` read rows
+9. 本輪已收斂的任務定義：
+   - `Phase 1A` 已正式定義為 `within-tumor alt-support read classification`
+   - exporter schema 已內建：
+     - `dataset_role`
+     - `harmonization_group`
+     - `phase1a_task`
+     - `phase1a_region_label`
+     - `phase1a_read_label`
+     - `phase1b_ready`
+     - `phase1b_blocker`
+   - `Phase 1B` 目前不可直接開始：
+     - sample80 的 `14,165` 筆 reads 中 `is_tumor` 全為 `1`
+     - 這代表現在的 read export 仍是 tumor-only universe
+     - code-level 檢查已定位到：
+       - [RegionProcessor.cpp](/big7_disk/liaoyoyo2001/InterSubMod/src/core/RegionProcessor.cpp) 會初始化 `normal_reader`
+       - 但 `process_single_region(...)` 目前只接收 `tumor_reader`
+       - `normal_reader` 在目前程式內沒有後續使用點
+10. `Phase 1A split manifest` 已完成：
+   - 腳本：[build_phase1a_split_manifest.py](/big7_disk/liaoyoyo2001/InterSubMod/scripts/analysis/build_phase1a_split_manifest.py)
+   - 輸出：[/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_split_manifest_v1](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_split_manifest_v1)
+   - 目前結果：
+     - discovery regions：`70,463`
+     - external validation regions：`70,551`
+11. `Phase 1A` 的第一版 benchmark 已完成：
+   - baseline table：
+     [/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_head_to_head_baseline_v1](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_head_to_head_baseline_v1)
+   - round 1 文件：
+     [20260325_Phase1A_read_classifier_benchmark_round1_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260325_Phase1A_read_classifier_benchmark_round1_01.md)
+   - sample80 benchmark：
+     [/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_read_classifier_benchmark_sample80_v1](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_read_classifier_benchmark_sample80_v1)
+   - sample200 benchmark：
+     [/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_read_classifier_benchmark_sample200_v1](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_read_classifier_benchmark_sample200_v1)
+   - 關鍵結論：
+     - `context-rich` 模型已可穩定完成 `Phase 1A`
+     - `pure methyl baseline` 明顯不足
+     - `paired-pure` 顯著較容易，`to-pure` 是主要困難子任務
+     - `to-pure` 初版 failure diagnosis 已完成：
+       [/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_to_pure_failure_diagnosis_v1](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_to_pure_failure_diagnosis_v1)
+12. `Phase 1A` 的更嚴格 incremental test 與 multi-bio validation 已完成：
+   - round 2 文件：
+     [20260325_Phase1A_incremental_test與multi_bio_validation_round2_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/experiments/in_progress/2026/03/20260325_Phase1A_incremental_test與multi_bio_validation_round2_01.md)
+   - mode-mixed sample400：
+     [/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_manifest_shard_export_sample400](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_manifest_shard_export_sample400)
+     [/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_read_classifier_benchmark_sample400_v1](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_read_classifier_benchmark_sample400_v1)
+     [/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_incremental_test_sample400_v1](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_incremental_test_sample400_v1)
+   - paired-only multi-bio sample637：
+     [/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_training_manifest_paired_multibio_v1](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_training_manifest_paired_multibio_v1)
+     [/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_manifest_shard_export_paired_multibio_sample637](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1_manifest_shard_export_paired_multibio_sample637)
+     [/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_read_classifier_benchmark_paired_multibio_sample637_v1](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_read_classifier_benchmark_paired_multibio_sample637_v1)
+     [/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_incremental_test_paired_multibio_sample637_v1](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260325_phase1a_incremental_test_paired_multibio_sample637_v1)
+   - 目前最重要結果：
+     - `methyl + context` 不是全域有效
+     - `sample400` mode-mixed 測試中：
+       - discovery holdout `delta F1=-0.0088`
+       - external validation `delta F1=-0.0206`
+       - 負增益主要由 `to-pure` 驅動
+     - `paired-only multi-bio external validation` 中：
+       - `context-only F1=0.8611`
+       - `methyl+context F1=0.8722`
+       - `delta F1=+0.0112`
+       - bootstrap `95% CI=[+0.0044, +0.0188]`
+     - sample-level 目前已明確支持增益的 paired samples：
+       - `HCC1954`
+       - `COLO829`
+       - `HCC1395_DORADO paired`
+     - `H1437 / HCC1937 / H2009` 仍存在異質性，不能直接宣稱所有樣本都提升
+     - bucket-level diagnostics 顯示：
+       - `sample400 to-pure` 的退步主要集中在 `TP REF` 誤判與 `FP Subclone / Strong`
+       - `H2009` 的負向表現主要集中在 `FP + Weak`
+       - `HCC1954 / COLO829` 的正增益來自明確的 `Subclone / Weak / Strong` buckets
+13. 目前已確認的下一批擴充任務：
+   - 將 `paired-pure multi-bio` 升級成 `Phase 1A` 的主要驗證軸
+   - `to-pure` 與 `paired-pure` 分開建模，不再共用同一個 `methyl 是否有效` 結論
+   - 針對 `H2009 / HCC1937 / H1437` 做 dataset-specific diagnostics
+   - 補 `5kHz / DORADO / PAO / Google` 的 group-aware normalization 策略
+   - 規劃 normal-read export layer，作為 `Phase 1B` 前置
+   - 視需要回收 `DORADO candidate-specific` 路徑 provenance，但這已不是 blocking issue
+
+> `2026-03-24` 新確認（方法學審查 + 研究收尾 + 全域分析報告）：
+> - **研究方法與相關文獻突破方向全域分析報告完成**
+>   - 整合 12 篇外部核心研究 + ISM 全實驗歷程，確認突破方向優先序：E（ML read classification）→ A+D（Normal ref + CN/Purity-aware）→ B（Gene-level integration）→ C（CpG 功能分層）
+>   - 確認 ISM 獨特定位：「以 somatic SNV 為錨點 + read-level methylation clustering + 雙向顯著性驗證」尚無完整對標
+>   - 詳見：[20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/references/20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md)
+> - **方法學審查全部完成**（16份觀察文件，Steps 1-8 + 補充分析）
+>   - 詳見：[20260324_方法學審查全域結論報告_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/20260324_方法學審查全域結論報告_01.md)
+> - **H006 window_bp=1000 TO 調整分析完成（理論 Rejected）**
+>   - window=1000 → NumCpGs 降至 ~15（5x 減少）；ISM FN 覆蓋率從 7% 降至 ~1.4%
+>   - PassedGating TP/FP 比值在低 CpG 條件下 = 0.98（無改善）；Tagged BAM 不可用
+>   - 詳見：[20260324_H006_窗口大小TO調整分析_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/20260324_H006_窗口大小TO調整分析_01.md)
+> - **paired_persistent_final_fp 深度追蹤完成（研究方向關閉）**
+>   - 45個跨平台共享 FP：suggest_filter=False（所有 rule sweep 零觸發）
+>   - 機制：(A) Strong/Weak FP(43%)=germline ASM，ISM 正確偵測但無法區分胚系/體細胞；(B) Noise FP(49%)=caller FP，無特徵可過濾
+>   - 改善需要 normal sample 甲基化參考，ISM 架構下不可改善
+>   - 詳見：[20260324_paired_persistent_final_fp_深度追蹤_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260324_paired_persistent_final_fp_深度追蹤_01.md)
+> - **binary_methyl_high/low 死碼修正完成**（RegionProcessor.cpp/hpp，F1 delta=0，107/107 tests pass）
+
+> `2026-03-23` 新確認：
+> - 已完成 residual FP deep-dive workspace：[20260323_to_residual_fp_deep_dive](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260323_to_residual_fp_deep_dive)
+> - `raw_absent` 可以再細分，但主切法不是 methylation hard filter，而是 `shared exact hotspot` vs `platform-specific tail`
+> - `HCC1395` 與 `HCC1395_DORADO` 的 `raw_absent` 各自有 `11430 / 11424` 個，其中 `11220` 個為 cross-platform exact shared hotspot，兩邊 shared 比例都超過 `98.16%`
+> - 針對整個 `raw_absent`、`shared raw_absent` 與 `persistent` 的同層級 rule sweep 皆無正向規則；只有 `HCC1395 raw_absent_platform_specific` 出現極小正訊號：`ad_alt<=3`，`11 FP / 7 TP`，`delta F1=+0.000032`
+> - `paired_persistent_final_fp` 已完成深度追蹤（見 2026-03-24 條目），確認為 irreducible FP，研究方向關閉
+> - 詳細報告：[20260323_TO_residual_FP_deep_dive_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260323_TO_residual_FP_deep_dive_01.md)
+
+> `2026-03-22` 新確認：
+> - 已完成 TO FP provenance 與 paired 對照 observation workspace：[20260322_to_fp_provenance_analysis](/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260322_to_fp_provenance_analysis)
+> - `HCC1395` 與 `HCC1395_DORADO` 的 TO raw FP universe 中，`PON / NonSomatic` caller veto 佔比都超過 `99.48%`，且本次檢查顯示 `caller_pon_filtered` 100% 帶顯式 `PoN_1..PoN_4` tag
+> - `LongPhase-TO` 在這兩個 big7 TO pilot 上對 truth-scoped raw FP 的額外移除為 `0`；目前 TO final rule 只額外移除 `HCC1395 8 FP / 4 TP`、`DORADO 6 FP / 15 TP`
+> - TO final residual FP 中，`paired` 可解比例仍超過 `99%`，主因幾乎全是 `paired_raw_absent`，不是 `normal_alt_support`；真正 hard blind spots 收斂為 `HCC1395 87` 與 `DORADO 77` 個 `paired_persistent_final_fp`
+> - 詳細報告：[20260322_TO_FP來源分解與paired對照分析_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260322_TO_FP來源分解與paired對照分析_01.md)
+> - 摘要：[20260322_TO_FP來源分解摘要_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260322_TO_FP來源分解摘要_01.md)
+
+
+1. `2026-03-07 ~ 2026-03-24` 的純樣本與 TO 基線已完成，可作為後續新方法的固定對照：
+   - 第一主 paired benchmark：`HCC1395 5kHz`
+   - 第一 cross-platform benchmark：`HCC1395 ONT_Dorado + HCC1395BL`
+   - TO discovery / validation：`HCC1395 5kHz TO` 與 `HCC1395_DORADO TO`
+2. 這輪基線研究已明確回答的核心問題：
+   - 甲基訊號目前無法取代 caller，較適合作為 `support / annotation / triage`
+   - `label-first` 與 `cluster-first` 可保留為解釋框架，但不是下一階段唯一主研究目標
+   - 真正需要突破的是 `read-level modeling`、`normal baseline`、`CN/purity-aware correction` 與更高層證據整合
 3. `2026-03-07` 新版完整欄位 paired pure 正式 rerun 已完成：
    - `HCC1395 5kHz`：`LongPhase-S F1=0.8522` → `InterSubMod F1=0.8532`（`+0.0010`）
    - `HCC1395_DORADO`：`LongPhase-S F1=0.8592` → `InterSubMod F1=0.8590`（`-0.0002`）

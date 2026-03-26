@@ -99,9 +99,9 @@
     "scale": "pilot",
     "track": "fast",
     "tier": 1,
-    "status": "pending",
+    "status": "rejected",
     "added_at": "2026-03-22",
-    "notes": "快速測試 window_bp=1000 vs 5000；若無效則降低優先度"
+    "notes": "快速測試 window_bp=1000 vs 5000；若無效則降低優先度 [REJECTED (theoretical): window=1000 reduces CpGs 5x to ~15 median, cutting ISM FN coverage from 7% to ~1.4%; TP/FP discrimination does not improve with fewer CpGs; tagged BAM not available; doc: docs/methodology/20260324_H006_窗口大小TO調整分析_01.md]"
   },
   {
     "id": "H008",

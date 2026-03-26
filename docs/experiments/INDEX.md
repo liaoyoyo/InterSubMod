@@ -13,6 +13,8 @@
 # InterSubMod 實驗研究索引
 
 > **AI 使用提示**：本索引為 Layer 2（歷史全貌）。從這裡了解哪些方向已探索、結論為何，再決定下一步。
+>
+> **2026-03-24 後的使用方式**：live 主線與近期任務請先看 [CURRENT_FOCUS.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/CURRENT_FOCUS.md) 與 [20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md](/big7_disk/liaoyoyo2001/InterSubMod/docs/references/20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md)。本索引負責歷史收斂、失敗方向盤點與證據入口，不再直接充當近期任務清單。
 
 ## 研究文件 Agent 與 Skills 入口
 
@@ -800,6 +802,46 @@
   - 若未來重跑腳本，應將原始 `filter_tags` 額外保存在 sidecar TSV 或 INFO，避免 passified 後失去 FILTER 語意
   - 研究重心維持在 `caller-first + methylation-support + artifact triage` 的主線整合，而不是再把 Pool B 當獨立探索方向
 
+### 38. TO FP 來源分解與 paired 對照分析（2026-03-22）
+
+- **期間**: 2026-03-22
+- **狀態**: ✅ 成功
+- **關鍵結論**:
+  - big7 observation workspace 已完成，確認 `HCC1395` 與 `HCC1395_DORADO` 的 TO raw FP universe 中，`PON / NonSomatic` caller veto 佔比都超過 `99.48%`
+  - `caller_pon_filtered` 在本次 workspace 中 100% 帶顯式 `PoN_1..PoN_4` tag，可直接視為 PON layer
+  - `LongPhase-TO` 在這兩個 TO pilot 上對 truth-scoped raw FP 的額外移除為 `0`；真正進入 TO final residual 的 FP 約占 raw universe 的 `0.4246%`
+  - TO final residual FP 中，paired 可解比例都超過 `99%`，且主因幾乎全是 `paired_raw_absent`，不是 `normal_alt_support`
+  - 目前沒有任何新的 TO-only 規則可超過 current big7 TO final F1；`HCC1395` discovery 與 `DORADO` validation 都是 `0 trigger`
+- **主要文件**:
+  - `docs/reports/validated/2026/03/20260322_TO_FP來源分解與paired對照分析_01.md`
+  - `docs/reports/validated/2026/03/20260322_TO_FP來源分解摘要_01.md`
+  - `/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260322_to_fp_provenance_analysis/analysis_report.md`
+- **建議後續**:
+  - 後續 hard-case 診斷應直接聚焦 `paired_persistent_final_fp`：`HCC1395=87`、`HCC1395_DORADO=77`
+  - `paired_raw_absent` 應視為 missing-normal candidate universe expansion，不宜直接簡化成 germline
+  - `PairwiseMedianDist / hp_assign_rate / agreement_type` 目前較適合留在 annotation / ranking，而不是升級成 TO hard filter
+
+### 39. TO residual FP 深入分析：raw_absent 細分、recurrence 與 persistent diagnostics（2026-03-23）
+
+- **期間**: 2026-03-23
+- **狀態**: ✅ 成功
+- **關鍵結論**:
+  - `raw_absent` 可以再細分，但最有辨識力的切法不是 methylation hard filter，而是 `shared exact hotspot` vs `platform-specific tail`
+  - `HCC1395` 與 `HCC1395_DORADO` 的 `raw_absent` 各自有 `11430 / 11424` 個，其中 `11220` 個為 cross-platform exact shared hotspot，兩邊 shared 比例都超過 `98.16%`
+  - shared `raw_absent` 的中位 `AF/GQ/QUAL` 都偏高，不像低品質尾巴；這批更像 strict blacklist / PON candidate inventory，而不是可用 `Quality_Score / PairwiseMedianDist / VerificationClass` 直接硬切的群體
+  - 針對整個 `raw_absent`、`shared raw_absent` 與 `persistent` 的同層級 rule sweep 全部沒有正向規則
+  - 只有 `HCC1395 raw_absent_platform_specific` 出現一條極小正訊號：`ad_alt<=3`，可移除 `11 FP / 7 TP`，`delta F1=+0.000032`；`DORADO` 不支持，不能升級為穩定規則
+  - `paired_persistent_final_fp` 的 cross-platform shared hard set 為 `45` 個，而且不只是 `Noise`，仍混有 `Strong / Weak / Subclone`；比較適合進一步做 read-level / IGV / local-context 診斷
+- **主要文件**:
+  - `docs/reports/validated/2026/03/20260323_TO_residual_FP_deep_dive_01.md`
+  - `/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260323_to_residual_fp_deep_dive/analysis_report.md`
+  - `/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260323_to_residual_fp_deep_dive/stage_best_rules.tsv`
+  - `/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260323_to_residual_fp_deep_dive/cross_platform_shared_hotspots.tsv`
+- **建議後續**:
+  - 把 `11220` 個 shared `raw_absent` 當成 strict blacklist / PON candidate inventory，到獨立樣本驗證 recurrence，而不是直接當 deployable 規則
+  - `paired_persistent_final_fp` 後續直接聚焦 `45` 個 cross-platform shared 位點做 read-level 與 local-context 深查
+  - 目前 `VerificationClass / agreement_type / PairwiseMedianDist / Quality_Score` 仍應維持 annotation / ranking 角色，不宜升級成 TO hard filter
+
 ### 12. Purity-Aware 過濾策略
 
 - **期間**: 2026-02 ~ 2026-03
@@ -992,6 +1034,203 @@
 
 ---
 
+### 40. 研究方法與相關文獻突破方向全域分析（2026-03-24）
+
+- **期間**: 2026-03-24
+- **狀態**: ✅ 成功
+- **關鍵結論**:
+  - 系統性對照 12 篇核心外部研究（Long-Read POG、TRACERx、EVOFLUx、DeepSomatic、LongPhase-S、t-nanoEM、NanoMethPhase、MethSig、MethPhaser、MethylBERT、PRISM、MHB pan-cancer）
+  - 確認 ISM 的「以 somatic SNV 為錨點 + read-level methylation clustering + 雙向顯著性驗證」組合在文獻中具新穎性，尚無完整對標
+  - ISM 最強學術定位：不是 variant filter，而是「以長讀序 somatic variant 為錨點，整合甲基化 pattern、haplotype、copy-number 資訊，提供 read-level epigenetic context for variant interpretation」
+  - 突破方向優先序（研究者確認）：E（ML read classification）→ A+D（Normal ref + CN/Purity-aware）→ B（Gene-level integration）→ C（CpG 功能分層）
+  - 學界共識：(1) Purity/CNV 校正必要；(2) 長讀序多模態價值；(3) LOH-SNV 天然分離標籤；(4) Promoter methylation + LOH = second hit；(5) ONT 甲基化/錯誤耦合
+  - 學界分歧/未驗證：(1) 局部甲基化 cluster 生物意義；(2) 甲基化驅動定義多樣；(3) clustering vs ML-based 比較缺乏；(4) 跨平台穩定性；(5) germline vs somatic ASM 區分
+- **主要文件**:
+  - `docs/references/20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md`
+- **建議後續**:
+  - 依 E → A+D → B → C 順序逐步推進突破方向
+  - Phase 1：ML read classification，在現有框架內改進 read-level pattern recognition
+  - Phase 2：引入 normal 甲基化基線 + purity/LOH/CNV 校正
+  - Phase 3：Gene-level evidence integration，多點關聯 → biallelic event narrative
+  - Phase 4：CpG 功能分層，篩選重要甲基位點
+
+---
+
+### 41. Phase 1 ML read classification 研究啟動與資料缺口盤點（2026-03-25）
+
+- **期間**: 2026-03-25
+- **狀態**: ⏳ 進行中
+- **關鍵結論**:
+  - `Phase 1` 的第一個實際阻塞點不是模型架構，而是缺少統一的 `per-read training/export layer`
+  - 現有資產已足夠支撐第一版資料層：
+    - `rescue_joined_features.tsv`
+    - `reads.tsv`
+    - `methylation.csv`
+    - `distance/.../matrix.csv`
+  - discovery / validation dataset 已明確收斂為：
+    - `HCC1395 5kHz paired/TO`
+    - `HCC1395_DORADO paired/TO`
+  - 第一版最合理做法不是直接宣稱 tumor/normal deconvolution，而是先做 `read × region` 單位的 feature export 與 baseline-aligned supervision
+  - 已新增兩條已驗證可行的資料底座：
+    - candidate-specific pilot exporter（`77` read rows）
+    - baseline full manifest v1（四象限共 `141,014` regions）
+  - 四象限 smoke test 已確認：
+    - `8/8` selected regions 可成功 resolve 回 `reads.tsv + methylation.csv`
+    - 共匯出 `1,701` 筆 read rows
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260325_Phase1_ML_read_classification研究啟動與資料缺口盤點_01.md`
+- **建議後續**:
+  - 新增 Phase 1 專用 exporter，把 region outputs 展平成 `read × region` 訓練表
+  - 依 `phase1_training_manifest.tsv` 做 sharded read export，而不是一次全量展開
+  - 補 `5kHz / DORADO` harmonization 與 split 規則，避免 cross-platform 誤比
+  - 視需要補 `DORADO candidate-specific` 路徑 provenance 回收，但它已不是 Phase 1 baseline 的 blocking issue
+
+### 42. Phase 1 label schema 與 harmonization 規格（2026-03-25）
+
+- **期間**: 2026-03-25
+- **狀態**: ⏳ 進行中
+- **關鍵結論**:
+  - `Phase 1A` 已正式收斂為 `within-tumor alt-support read classification`
+  - `Phase 1B tumor-vs-normal` 目前不能直接開始，因為 sampled shard `14,165` 筆 reads 的 `is_tumor` 全為 `1`
+  - code-level 檢查已補強這個結論：
+    - `normal_reader` 會初始化
+    - 但 `process_single_region(...)` 目前只吃 `tumor_reader`
+  - manifest-driven shard export 已打通：
+    - smoke4：`8/8` resolve、`1,701` reads
+    - sample80：`80/80` resolve、`14,165` reads
+  - exporter schema 已加入：
+    - `dataset_role`
+    - `harmonization_group`
+    - `phase1a_task`
+    - `phase1a_region_label`
+    - `phase1a_read_label`
+    - `phase1b_ready`
+    - `phase1b_blocker`
+  - `5kHz` 與 `DORADO` 不應先當同分布 joint pool；第一版應保留 `platform|mode` 的 harmonization 邊界
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260325_Phase1_label_schema與harmonization規格_01.md`
+- **建議後續**:
+  - 建立 `Phase 1A` 的 head-to-head baseline table
+  - 規劃 normal-read export layer，作為 `Phase 1B` 的資料前置
+  - 補 `5kHz / DORADO` group-aware normalization
+  - 視需要補 `DORADO candidate-specific` provenance 回收
+
+### 43. Phase 1A split manifest 建立（2026-03-25）
+
+- **期間**: 2026-03-25
+- **狀態**: ⏳ 進行中
+- **關鍵結論**:
+  - `Phase 1A` 的 region-level split pool 已固定成可重跑輸出
+  - discovery pool：
+    - `HCC1395 5kHz paired`
+    - `HCC1395 5kHz TO`
+    - 共 `70,463` regions
+  - external validation pool：
+    - `HCC1395_DORADO paired`
+    - `HCC1395_DORADO TO`
+    - 共 `70,551` regions
+  - split manifest 已保留：
+    - `dataset_role`
+    - `harmonization_group`
+    - `phase1a_task`
+    - `split_role`
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260325_Phase1_label_schema與harmonization規格_01.md`
+- **主要輸出**:
+  - `output/synthesis/research_rounds/20260325_phase1a_split_manifest_v1`
+- **建議後續**:
+  - 依 split manifest 建立 `Phase 1A` 的 head-to-head baseline table
+  - 將 sampled shard 與 split manifest 串接成訓練/驗證 protocol
+
+### 44. Phase 1A read classifier benchmark round 1（2026-03-25）
+
+- **期間**: 2026-03-25
+- **狀態**: ⏳ 進行中
+- **關鍵結論**:
+  - `Phase 1A` 已從資料層準備推進到第一版可重跑 benchmark
+  - sample80 與 sample200 的結論方向一致：
+    - `majority_ref` 無效
+    - `methyl_mean_threshold` 與 `logistic_methyl_only` 只有弱訊號
+    - `context-rich` 模型明顯最佳
+  - sample200 最穩定結果：
+    - `logistic_context_only`
+      - discovery holdout：`F1=0.7816`
+      - external validation：`F1=0.9010`
+    - `logistic_methyl_context`
+      - discovery holdout：`F1=0.7882`
+      - external validation：`F1=0.8908`
+  - `methyl + context` 相對於 `context-only` 的增益尚未被穩定證明
+  - 真正的困難點不是 cross-platform 崩潰，而是 `to-pure`
+    - `ONT_5kHz|to-pure` discovery holdout：`F1=0.6962`
+    - `ONT_Dorado|to-pure` external validation：`F1=0.8311`
+    - 初版 failure diagnosis 顯示錯誤主要集中在：
+      - `FP + Subclone`
+      - `FP + Weak`
+      - 一部分 `FP + Strong`
+  - `paired-pure` 顯著較容易：
+    - `ONT_5kHz|paired-pure` discovery holdout：`F1=0.9157`
+    - `ONT_Dorado|paired-pure` external validation：`F1=0.9848`
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260325_Phase1A_read_classifier_benchmark_round1_01.md`
+- **主要輸出**:
+  - `output/synthesis/research_rounds/20260325_phase1a_read_classifier_benchmark_sample80_v1`
+  - `output/synthesis/research_rounds/20260325_phase1a_read_classifier_benchmark_sample200_v1`
+- **建議後續**:
+  - 做更嚴格的 methyl incremental test
+  - 對 `to-pure` 做更大 shard 的 failure diagnosis 穩定性檢查
+  - 擴到更大的 shard 或分批全量 read export
+
+### 45. Phase 1A incremental test 與 multi-bio validation round 2（2026-03-25）
+
+- **期間**: 2026-03-25
+- **狀態**: ✅ 已完成
+- **關鍵結論**:
+  - 已完成更大 shard 的 paired comparison：
+    - mode-mixed `sample400`
+    - paired-only multi-bio `sample637`
+  - `sample400` 顯示 `methyl + context` **不是全域更好**：
+    - discovery holdout：`delta F1=-0.0088`
+    - external validation：`delta F1=-0.0206`
+    - bootstrap `95% CI` 皆小於 `0`
+    - 負增益主要由 `HCC1395_DORADO TO` 驅動：`delta F1=-0.0328`
+  - paired-only multi-bio external validation 顯示 `methyl + context` 有小幅但穩定整體增益：
+    - `context-only F1=0.8611`
+    - `methyl+context F1=0.8722`
+    - `delta F1=+0.0112`
+    - bootstrap `95% CI=[+0.0044, +0.0188]`
+  - 這個增益不是只在單一 sample 出現：
+    - `HCC1954`: `delta F1=+0.0496`
+    - `COLO829`: `delta F1=+0.0491`
+    - `HCC1395_DORADO paired`: `delta F1=+0.0055`
+  - 但仍存在 sample heterogeneity：
+    - `H1437` 正向但未收斂
+    - `HCC1937` 幾乎無差異
+    - `H2009` 輕微負向且未收斂
+  - bucket-level diagnostics 已指出異質性來源：
+    - `sample400 to-pure` 退步集中在 `TP REF` 誤判與 `FP Subclone / Strong`
+    - `H2009` 退步主要集中在 `FP + Weak`
+    - `HCC1954 / COLO829` 增益集中在 `Subclone / Weak / Strong` buckets
+  - 正確結論應改為：
+    - `methyl + context` 在 `paired-pure multi-bio` 有穩定小幅增益
+    - `methyl + context` 在 `to-pure` 目前沒有增益，甚至會退步
+- **主要文件**:
+  - `docs/experiments/in_progress/2026/03/20260325_Phase1A_incremental_test與multi_bio_validation_round2_01.md`
+- **主要輸出**:
+  - `output/synthesis/research_rounds/20260325_phase1_manifest_shard_export_sample400`
+  - `output/synthesis/research_rounds/20260325_phase1a_read_classifier_benchmark_sample400_v1`
+  - `output/synthesis/research_rounds/20260325_phase1a_incremental_test_sample400_v1`
+  - `output/synthesis/research_rounds/20260325_phase1_training_manifest_paired_multibio_v1`
+  - `output/synthesis/research_rounds/20260325_phase1_manifest_shard_export_paired_multibio_sample637`
+  - `output/synthesis/research_rounds/20260325_phase1a_read_classifier_benchmark_paired_multibio_sample637_v1`
+  - `output/synthesis/research_rounds/20260325_phase1a_incremental_test_paired_multibio_sample637_v1`
+- **建議後續**:
+  - 將 `paired-pure multi-bio` 升級成 `Phase 1A` 的主要驗證軸
+  - `to-pure` 與 `paired-pure` 分開建模與評估
+  - 對 `H2009 / HCC1937 / H1437` 做 dataset-specific diagnostics
+  - 補 `platform/modcall-aware normalization`
+
+---
+
 ## 附錄：待驗證方向（尚未正式啟動）
 
 | 方向 | 期望收益 | 難度 | 依據 |
@@ -1000,4 +1239,4 @@
 | 跨 Region 亞克隆一致性 | 真正的亞克隆應跨多 SNV 一致 | 高 | 目前 per-SNV 獨立分析 |
 | 機器學習組合特徵分類器 | 整合 15 個特徵的 ensemble | 中 | F1 研究發現特徵互補性 |
 | PMD/ChromHMM Gating 啟用 | 降低甲基化背景噪聲 | 中 | 架構已有 `is_pmd` 欄位但未生效 |
-| 多樣本交叉驗證（COLO829 等）| 泛化能力評估 | 中 | 目前僅 HCC1395 |
+| paired-only multi-bio 全量擴充與 sample-specific diagnostics | 確認 `+0.0112 F1` 是否在更大 region universe 仍穩定，並釐清 H2009/H1437/HCC1937 異質性 | 中 | round 2 已完成 sample637 驗證，但仍是 sampled shard |
