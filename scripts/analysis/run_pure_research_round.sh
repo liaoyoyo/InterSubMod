@@ -120,7 +120,9 @@ infer_platform() {
 
 latest_run_dir() {
     local sample="$1"
-    local sample_root="${OUTPUT_ROOT}/${MODE}/${sample}"
+    local canonical_mode
+    canonical_mode="$(canonical_mode_name "${MODE}")"
+    local sample_root="${OUTPUT_ROOT}/${sample}/${canonical_mode}"
     if [[ ! -d "${sample_root}" ]]; then
         return 0
     fi
@@ -135,9 +137,29 @@ copy_if_exists() {
     fi
 }
 
+resolve_source_run_dir() {
+    local candidate="$1"
+    if [[ -f "${candidate}/metrics.json" ]]; then
+        echo "${candidate}"
+        return 0
+    fi
+    if [[ -f "${candidate}/manifest/run_context.json" ]]; then
+        python3 - "${candidate}/manifest/run_context.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    payload = json.load(handle)
+print(payload.get("archive_run_path", payload.get("source_run_dir", "")))
+PY
+        return 0
+    fi
+    echo "${candidate}"
+}
+
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 if [[ -z "${OUTPUT_DIR}" ]]; then
-    OUTPUT_DIR="${OUTPUT_ROOT}/research_rounds/${TIMESTAMP}_${SAMPLE_SET}"
+    OUTPUT_DIR="${SYNTHESIS_OUTPUT_ROOT}/research_rounds/${TIMESTAMP}_${SAMPLE_SET}"
 fi
 mkdir -p "${OUTPUT_DIR}"
 
@@ -189,8 +211,19 @@ for run_dir in "${RUN_DIRS[@]}"; do
         echo "[WARN] Skip missing run dir: ${run_dir}" >&2
         continue
     fi
+    source_run_dir="$(resolve_source_run_dir "${run_dir}")"
+    if [[ -z "${source_run_dir}" ]] || [[ ! -d "${source_run_dir}" ]]; then
+        echo "[WARN] Skip unresolved source run dir: ${run_dir}" >&2
+        continue
+    fi
 
-    sample="$(basename "$(dirname "${run_dir}")")"
+    parent1="$(basename "$(dirname "${run_dir}")")"
+    parent2="$(basename "$(dirname "$(dirname "${run_dir}")")")"
+    if [[ "${parent1}" =~ ^(paired_full|paired_pileup|to_full|to_pileup)$ ]]; then
+        sample="${parent2}"
+    else
+        sample="${parent1}"
+    fi
     platform="$(infer_platform "${sample}")"
     sample_bundle="${OUTPUT_DIR}/${sample}"
     mkdir -p "${sample_bundle}"
@@ -207,8 +240,8 @@ payload = {
     "sample_set": "${SAMPLE_SET}",
     "sample": "${sample}",
     "platform": "${platform}",
-    "analysis_mode": "${MODE}",
-    "region_scope": "${MODE}",
+    "analysis_mode": "$(canonical_mode_name "${MODE}")",
+    "region_scope": "$(canonical_mode_name "${MODE}")",
     "metric_family": "paired_pure_research",
     "distance_metric": "${DISTANCE_METHOD}",
     "window_bp": "${WINDOW_BP}",
@@ -217,25 +250,25 @@ payload = {
     "cluster_method": "${CLUSTER_METHOD}",
     "label_mode": "${LABEL_MODE}",
     "min_reads": "${MIN_READS}",
-    "test_focus": "${TEST_FOCUS}",
-    "changes": "${CHANGES}",
-    "conclusion": "${CONCLUSION}",
-    "next_step": "${NEXT_STEP}",
-    "source_run_dir": "${run_dir}",
-    "somatic_vcf": "${SOMATIC_VCF}",
-    "truth_vcf": "${TRUTH_VCF}",
-    "truth_bed": "${TRUTH_BED}",
+        "test_focus": "${TEST_FOCUS}",
+        "changes": "${CHANGES}",
+        "conclusion": "${CONCLUSION}",
+        "next_step": "${NEXT_STEP}",
+        "source_run_dir": "${source_run_dir}",
+        "somatic_vcf": "${SOMATIC_VCF}",
+        "truth_vcf": "${TRUTH_VCF}",
+        "truth_bed": "${TRUTH_BED}",
     "caller_name": "",
 }
 Path("${sample_bundle}/round_context.json").write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\\n", encoding="utf-8")
 PY
 
-    copy_if_exists "${run_dir}/metrics.json" "${sample_bundle}/metrics.json"
-    copy_if_exists "${run_dir}/longphase_s/haplotag_qc.tsv" "${sample_bundle}/haplotag_qc.tsv"
+    copy_if_exists "${source_run_dir}/metrics.json" "${sample_bundle}/metrics.json"
+    copy_if_exists "${source_run_dir}/longphase_s/haplotag_qc.tsv" "${sample_bundle}/haplotag_qc.tsv"
 
     COMPARE_CMD=(
         python3 "${SCRIPT_DIR}/compare_benchmark_f1.py"
-        --run-dir "${run_dir}"
+        --run-dir "${source_run_dir}"
         --context-json "${sample_bundle}/round_context.json"
         --output-tsv "${sample_bundle}/benchmark_comparison.tsv"
         --output-md "${sample_bundle}/benchmark_comparison.md"
@@ -243,22 +276,37 @@ PY
     if [[ "${SKIP_CALLER_INPUT}" == true ]]; then
         COMPARE_CMD+=(--no-caller-input)
     fi
-    "${COMPARE_CMD[@]}"
+    if [[ "${DRY_RUN}" == true ]]; then
+        echo "[DRY-RUN] ${COMPARE_CMD[*]}" >&2
+    else
+        "${COMPARE_CMD[@]}"
+    fi
 
-    python3 "${SCRIPT_DIR}/validate_method_design.py" \
-        --summary-csv "${run_dir}/intersubmod_tp/significance_summary.csv" \
-        --summary-csv "${run_dir}/intersubmod_fp/significance_summary.csv" \
-        --region-root "${run_dir}/intersubmod_tp" \
-        --region-root "${run_dir}/intersubmod_fp" \
-        --haplotag-qc "${run_dir}/longphase_s/haplotag_qc.tsv" \
-        --sample "${sample}" \
-        --min-reads "${MIN_READS}" \
+    VALIDATE_CMD=(
+        python3 "${SCRIPT_DIR}/validate_method_design.py"
+        --summary-csv "${source_run_dir}/intersubmod_tp/significance_summary.csv"
+        --summary-csv "${source_run_dir}/intersubmod_fp/significance_summary.csv"
+        --region-root "${source_run_dir}/intersubmod_tp"
+        --region-root "${source_run_dir}/intersubmod_fp"
+        --haplotag-qc "${source_run_dir}/longphase_s/haplotag_qc.tsv"
+        --sample "${sample}"
+        --min-reads "${MIN_READS}"
         --output-dir "${sample_bundle}"
+    )
+    if [[ "${DRY_RUN}" == true ]]; then
+        echo "[DRY-RUN] ${VALIDATE_CMD[*]}" >&2
+    else
+        "${VALIDATE_CMD[@]}"
+    fi
 
-    python3 "${SCRIPT_DIR}/build_round_dashboard.py" \
-        --sample-dir "${sample_bundle}"
+    DASHBOARD_CMD=(python3 "${SCRIPT_DIR}/build_round_dashboard.py" --sample-dir "${sample_bundle}")
+    if [[ "${DRY_RUN}" == true ]]; then
+        echo "[DRY-RUN] ${DASHBOARD_CMD[*]}" >&2
+    else
+        "${DASHBOARD_CMD[@]}"
+    fi
 
-    printf "%s\t%s\t%s\t%s\n" "${sample}" "${platform}" "${run_dir}" "${sample_bundle}" >> "${MANIFEST}"
+    printf "%s\t%s\t%s\t%s\n" "${sample}" "${platform}" "${source_run_dir}" "${sample_bundle}" >> "${MANIFEST}"
 done
 
 if [[ ${#SAMPLE_BUNDLES[@]} -gt 0 ]]; then
@@ -267,7 +315,11 @@ if [[ ${#SAMPLE_BUNDLES[@]} -gt 0 ]]; then
         MATRIX_CMD+=(--run-dir "${bundle}")
     done
     MATRIX_CMD+=(--output-tsv "${OUTPUT_DIR}/methodology_sensitivity.tsv")
-    "${MATRIX_CMD[@]}"
+    if [[ "${DRY_RUN}" == true ]]; then
+        echo "[DRY-RUN] ${MATRIX_CMD[*]}" >&2
+    else
+        "${MATRIX_CMD[@]}"
+    fi
 fi
 
 python3 - "${OUTPUT_DIR}" <<'PY'

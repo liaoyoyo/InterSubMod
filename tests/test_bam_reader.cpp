@@ -57,6 +57,75 @@ TEST_F(BamReaderTest, FetchReadsFromValidRegion) {
     }
 }
 
+// ---- Task 1.5: SNV position type-safety tests ----
+// Verify that ReadParser::parse() returns AltSupport::UNKNOWN for invalid SNV
+// positions (pos==0, pos>INT32_MAX) instead of invoking undefined int32_t overflow.
+// These tests do not need a real BAM file; bam_init1() provides a minimal record.
+
+class ReadParserPositionSafetyTest : public ::testing::Test {
+protected:
+    ReadParser parser;  // default config
+
+    // Build a minimal bam1_t with a read name and a single M CIGAR.
+    // Data layout: [l_qname_padded bytes of qname] [n_cigar*4 bytes of CIGAR]
+    static bam1_t* make_bam(int32_t ref_start, int32_t ref_end) {
+        bam1_t* b = bam_init1();
+        b->core.pos = ref_start;
+        b->core.qual = 60;
+        b->core.flag = 0;
+
+        // Read name: "r\0" padded to 4 bytes
+        const char qname[] = "r";
+        int l_qname = 2;          // strlen("r") + null
+        int l_qname_pad = 4;      // round up to multiple of 4
+        b->core.l_qname = l_qname_pad;
+
+        // CIGAR: one M operation spanning [ref_start, ref_end)
+        int cigar_len = ref_end - ref_start;
+        b->core.n_cigar = 1;
+        uint32_t cigar_op = (static_cast<uint32_t>(cigar_len) << BAM_CIGAR_SHIFT) | BAM_CMATCH;
+
+        int data_sz = l_qname_pad + 4;
+        b->l_data = data_sz;
+        b->m_data = data_sz;
+        b->data = static_cast<uint8_t*>(malloc(static_cast<size_t>(data_sz)));
+        memset(b->data, 0, static_cast<size_t>(data_sz));
+        memcpy(b->data, qname, static_cast<size_t>(l_qname));
+        memcpy(b->data + l_qname_pad, &cigar_op, 4);
+        return b;
+    }
+};
+
+// pos == 0 is invalid for 1-based coordinates; parse() must return UNKNOWN
+TEST_F(ReadParserPositionSafetyTest, ZeroPosition_ReturnsUnknown) {
+    bam1_t* b = make_bam(0, 1000);
+    SomaticSnv snv;
+    snv.pos = 0;  // invalid 1-based position
+    snv.chr_id = 0;
+    snv.ref_base = 'A';
+    snv.alt_base = 'T';
+
+    ReadInfo info = parser.parse(b, 0, true, snv, "", 0);
+    EXPECT_EQ(info.alt_support, AltSupport::UNKNOWN);
+
+    bam_destroy1(b);
+}
+
+// pos > INT32_MAX would overflow int32_t without the guard; must return UNKNOWN
+TEST_F(ReadParserPositionSafetyTest, OverflowPosition_ReturnsUnknown) {
+    bam1_t* b = make_bam(0, 1000);
+    SomaticSnv snv;
+    snv.pos = static_cast<uint32_t>(std::numeric_limits<int32_t>::max()) + 1u;
+    snv.chr_id = 0;
+    snv.ref_base = 'A';
+    snv.alt_base = 'T';
+
+    ReadInfo info = parser.parse(b, 0, true, snv, "", 0);
+    EXPECT_EQ(info.alt_support, AltSupport::UNKNOWN);
+
+    bam_destroy1(b);
+}
+// ---- END position safety tests ----
 TEST_F(BamReaderTest, FetchReadsFromInvalidChromosome) {
     BamReader reader(test_bam_path);
 
@@ -95,6 +164,58 @@ TEST_F(ReadParserTest, FilterConfiguration) {
     EXPECT_EQ(parser.get_config().min_mapq, 20);
     EXPECT_EQ(parser.get_config().min_read_length, 1000);
 }
+
+// ---- RAII fetch_reads_safe() tests ----
+
+// Compile-time check: BamRecordPtr type must exist and be a unique_ptr
+TEST(BamRecordPtrTest, TypeExists) {
+    // Verify BamRecordPtr is defined and wraps bam1_t
+    static_assert(
+        std::is_same_v<
+            InterSubMod::BamRecordPtr,
+            std::unique_ptr<bam1_t, InterSubMod::BamRecordDeleter>>,
+        "BamRecordPtr must be unique_ptr<bam1_t, BamRecordDeleter>");
+    SUCCEED();
+}
+
+// Verify BamRecordDeleter correctly calls bam_destroy1
+TEST(BamRecordPtrTest, DeleterReleasesMemory) {
+    bam1_t* raw = bam_init1();
+    ASSERT_NE(raw, nullptr);
+    {
+        // Place raw ptr into RAII wrapper - should be destroyed at end of scope
+        InterSubMod::BamRecordPtr ptr(raw, InterSubMod::BamRecordDeleter{});
+        EXPECT_EQ(ptr.get(), raw);
+    }
+    // ptr destroyed here; raw pointer is now invalid (bam_destroy1 was called)
+    // We can't dereference raw, but we can verify no crash occurred
+    SUCCEED();
+}
+
+// fetch_reads_safe() returns RAII-managed records (no manual cleanup needed)
+TEST_F(BamReaderTest, FetchReadsSafe_ReturnsUniquePtr) {
+    BamReader reader(test_bam_path);
+    auto reads = reader.fetch_reads_safe("chr17", 7577000, 7578000);
+
+    // Type must be vector<BamRecordPtr>
+    static_assert(
+        std::is_same_v<decltype(reads),
+                       std::vector<InterSubMod::BamRecordPtr>>,
+        "fetch_reads_safe must return vector<BamRecordPtr>");
+
+    // Should succeed (exact count depends on data)
+    EXPECT_GE(reads.size(), 0u);
+    // No manual cleanup needed - unique_ptr handles it
+}
+
+// fetch_reads_safe() handles invalid chromosome gracefully
+TEST_F(BamReaderTest, FetchReadsSafe_InvalidChromosome) {
+    BamReader reader(test_bam_path);
+    auto reads = reader.fetch_reads_safe("chrNonExistent999", 0, 1000);
+    EXPECT_TRUE(reads.empty());
+}
+
+// ---- END RAII tests ----
 
 // Integration test - requires actual BAM data
 TEST_F(BamReaderTest, ParseReadInfo) {

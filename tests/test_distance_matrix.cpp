@@ -462,3 +462,141 @@ TEST_F(DistanceMatrixTest, WriteCSV) {
     ifs.close();
     std::remove(temp_path.c_str());
 }
+
+// ============================================================================
+// BERNOULLI Distance Tests (Task 2.1 — previously untested metric)
+//
+// BERNOULLI measures expected-disagreement: delta(p,q) = p(1-q)+(1-p)q,
+// weighted by confidence w_k = 2|p-0.5| * 2|q-0.5|.
+// NOTE: d(x,x) != 0 for BERNOULLI — this is by design (expected disagreement
+// of a Bernoulli r.v. with itself is 2*p*(1-p), not 0).
+// ============================================================================
+
+TEST_F(DistanceMatrixTest, BERNOULLI_BasicComputation) {
+    DistanceMatrix dist_mat;
+    dist_mat.compute_from_methylation(meth_mat, DistanceMetricType::BERNOULLI, 2,
+                                      NanDistanceStrategy::MAX_DIST);
+    ASSERT_EQ(dist_mat.size(), 4);
+
+    // Read 0 vs Read 1 (3 common sites): python oracle = 0.365328
+    EXPECT_NEAR(dist_mat.get_distance(0, 1), 0.365328, 1e-4);
+
+    // Read 2 vs Read 3 (3 common sites, both high-methyl → low distance): oracle = 0.168595
+    EXPECT_NEAR(dist_mat.get_distance(2, 3), 0.168595, 1e-4);
+
+    // Read 0 vs Read 2 (4 common sites, opposite methylation → high distance): oracle = 0.863754
+    EXPECT_NEAR(dist_mat.get_distance(0, 2), 0.863754, 1e-4);
+}
+
+TEST_F(DistanceMatrixTest, BERNOULLI_Symmetry) {
+    DistanceMatrix dist_mat;
+    dist_mat.compute_from_methylation(meth_mat, DistanceMetricType::BERNOULLI, 2,
+                                      NanDistanceStrategy::MAX_DIST);
+    // d(i,j) must equal d(j,i) for all pairs
+    for (int i = 0; i < 4; ++i) {
+        for (int j = i + 1; j < 4; ++j) {
+            EXPECT_NEAR(dist_mat.get_distance(i, j), dist_mat.get_distance(j, i), 1e-12)
+                << "Asymmetry at (" << i << "," << j << ")";
+        }
+    }
+}
+
+TEST_F(DistanceMatrixTest, BERNOULLI_InRange) {
+    DistanceMatrix dist_mat;
+    dist_mat.compute_from_methylation(meth_mat, DistanceMetricType::BERNOULLI, 2,
+                                      NanDistanceStrategy::MAX_DIST);
+    // All distances must be in [0, 1]
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            double d = dist_mat.get_distance(i, j);
+            if (!std::isnan(d)) {
+                EXPECT_GE(d, 0.0) << "Negative distance at (" << i << "," << j << ")";
+                EXPECT_LE(d, 1.0) << "Distance > 1 at (" << i << "," << j << ")";
+            }
+        }
+    }
+}
+
+TEST_F(DistanceMatrixTest, BERNOULLI_InsufficientCoverage) {
+    // min_cov=4: Read 0 and Read 1 share only 3 sites → should get MAX_DIST (1.0)
+    DistanceMatrix dist_mat;
+    dist_mat.compute_from_methylation(meth_mat, DistanceMetricType::BERNOULLI, 4,
+                                      NanDistanceStrategy::MAX_DIST);
+    ASSERT_EQ(dist_mat.size(), 4);
+
+    // Read 0 has NaN at k=4, Read 1 has NaN at k=3,4 → only 3 common → invalid
+    double d01 = dist_mat.get_distance(0, 1);
+    EXPECT_NEAR(d01, 1.0, 0.001);  // MAX_DIST fallback
+}
+
+TEST_F(DistanceMatrixTest, BERNOULLI_MetricToString) {
+    EXPECT_EQ(DistanceCalculator::metric_to_string(DistanceMetricType::BERNOULLI), "BERNOULLI");
+    EXPECT_EQ(DistanceCalculator::string_to_metric("BERNOULLI"), DistanceMetricType::BERNOULLI);
+    EXPECT_EQ(DistanceCalculator::string_to_metric("bernoulli"), DistanceMetricType::BERNOULLI);
+}
+
+// ============================================================================
+// Mathematical Property Tests — all metrics
+// ============================================================================
+
+TEST_F(DistanceMatrixTest, AllMetrics_Symmetry) {
+    // Every metric must produce a symmetric distance matrix: d(i,j) == d(j,i)
+    for (auto metric : {DistanceMetricType::NHD, DistanceMetricType::L1, DistanceMetricType::L2,
+                        DistanceMetricType::CORR, DistanceMetricType::JACCARD,
+                        DistanceMetricType::BERNOULLI}) {
+        DistanceMatrix dist_mat;
+        dist_mat.compute_from_methylation(meth_mat, metric, 2, NanDistanceStrategy::MAX_DIST);
+
+        for (int i = 0; i < 4; ++i) {
+            for (int j = i + 1; j < 4; ++j) {
+                double d_ij = dist_mat.get_distance(i, j);
+                double d_ji = dist_mat.get_distance(j, i);
+                EXPECT_NEAR(d_ij, d_ji, 1e-12)
+                    << "Asymmetry for metric "
+                    << DistanceCalculator::metric_to_string(metric)
+                    << " at (" << i << "," << j << ")";
+            }
+        }
+    }
+}
+
+TEST_F(DistanceMatrixTest, AllMetrics_DiagonalIsZero) {
+    // For NHD, L1, L2, CORR, JACCARD: d(i,i) == 0.
+    // BERNOULLI d(i,i) != 0 by design — excluded from this test.
+    for (auto metric : {DistanceMetricType::NHD, DistanceMetricType::L1, DistanceMetricType::L2,
+                        DistanceMetricType::CORR, DistanceMetricType::JACCARD}) {
+        DistanceMatrix dist_mat;
+        dist_mat.compute_from_methylation(meth_mat, metric, 1, NanDistanceStrategy::MAX_DIST);
+
+        for (int i = 0; i < 4; ++i) {
+            double d = dist_mat.get_distance(i, i);
+            EXPECT_NEAR(d, 0.0, 1e-10)
+                << "Non-zero diagonal for metric "
+                << DistanceCalculator::metric_to_string(metric)
+                << " at (" << i << "," << i << ")";
+        }
+    }
+}
+
+TEST_F(DistanceMatrixTest, AllMetrics_NonNegative) {
+    // All valid distances must be non-negative
+    for (auto metric : {DistanceMetricType::NHD, DistanceMetricType::L1, DistanceMetricType::L2,
+                        DistanceMetricType::CORR, DistanceMetricType::JACCARD,
+                        DistanceMetricType::BERNOULLI}) {
+        DistanceMatrix dist_mat;
+        dist_mat.compute_from_methylation(meth_mat, metric, 2, NanDistanceStrategy::MAX_DIST);
+
+        for (int i = 0; i < 4; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                double d = dist_mat.get_distance(i, j);
+                if (!std::isnan(d)) {
+                    EXPECT_GE(d, 0.0)
+                        << "Negative distance for metric "
+                        << DistanceCalculator::metric_to_string(metric)
+                        << " at (" << i << "," << j << ")";
+                }
+            }
+        }
+    }
+}
+// ---- END Task 2.1 additions ----

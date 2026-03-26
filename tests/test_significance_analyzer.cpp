@@ -229,6 +229,70 @@ TEST_F(SignificanceAnalyzerTest, HeuristicScore) {
     EXPECT_LT(score_with_warning, score);
 }
 
+TEST_F(SignificanceAnalyzerTest, Determinism_SameSeedProducesSameResult) {
+    // Verify that two analyzers with the same top-level seed produce identical
+    // ClusterPermanovaF values. This validates that sig_config.seed (top-level)
+    // correctly propagates to all components via init_analyzers().
+    auto make_analyzer = [](uint64_t seed) {
+        SignificanceConfig cfg;
+        cfg.seed = seed;  // Top-level seed — must propagate to structure_config
+        cfg.enable_global_test = true;
+        cfg.enable_local_test = true;
+        cfg.enable_permanova = true;
+        cfg.enable_dispersion = false;
+        cfg.enable_bootstrap = false;
+        cfg.structure_config.n_permutations = 99;
+        cfg.run_id = "det_test";
+        cfg.vcf_id = "test.vcf";
+        cfg.bam_id = "test.bam";
+        return std::make_unique<SignificanceAnalyzer>(cfg);
+    };
+
+    auto a1 = make_analyzer(42);
+    auto a2 = make_analyzer(42);
+    auto a3 = make_analyzer(99);  // Different seed
+
+    // Build a simple 2-cluster dataset
+    std::vector<int> cluster_labels(20);
+    std::vector<FullLabel> full_labels(20);
+    Eigen::MatrixXd dist(20, 20);
+    Eigen::MatrixXd meth(20, 5);
+
+    for (int i = 0; i < 20; ++i) {
+        cluster_labels[i] = i < 10 ? 0 : 1;
+        FullLabel lbl;
+        lbl.allele = i < 10 ? AltSupport::ALT : AltSupport::REF;
+        lbl.hp_tag = i < 10 ? "1" : "2";
+        lbl.is_tumor = true;
+        full_labels[i] = lbl;
+        for (int j = 0; j < 20; ++j)
+            dist(i, j) = (i < 10) == (j < 10) ? 0.1 : 0.8;
+        dist(i, i) = 0.0;
+        for (int k = 0; k < 5; ++k)
+            meth(i, k) = i < 10 ? 0.9 : 0.1;
+    }
+
+    auto r1 = a1->analyze(cluster_labels, full_labels, dist, meth, 0, "chr1:1000:A:T");
+    auto r2 = a2->analyze(cluster_labels, full_labels, dist, meth, 0, "chr1:1000:A:T");
+    auto r3 = a3->analyze(cluster_labels, full_labels, dist, meth, 0, "chr1:1000:A:T");
+
+    // pseudo_f is computed from data → always identical regardless of seed
+    EXPECT_TRUE(r1.permanova.valid);
+    EXPECT_TRUE(r2.permanova.valid);
+    EXPECT_DOUBLE_EQ(r1.permanova.pseudo_f, r2.permanova.pseudo_f);
+    EXPECT_DOUBLE_EQ(r1.label_hp_permanova.pseudo_f, r2.label_hp_permanova.pseudo_f);
+
+    // Same seed → p_value is also identical (permutation order is deterministic)
+    EXPECT_DOUBLE_EQ(r1.permanova.p_value, r2.permanova.p_value);
+    EXPECT_DOUBLE_EQ(r1.label_hp_permanova.p_value, r2.label_hp_permanova.p_value);
+
+    // Different seed → p_value may differ (permutation order changes)
+    // For borderline regions, different seeds give different p-values.
+    // Here we just verify r1 and r2 match (same seed determinism is the key guarantee).
+    // r3 uses seed=99; we don't assert its p differs since perfectly separated
+    // data produces p=1/(n+1) regardless of seed.
+}
+
 TEST_F(SignificanceAnalyzerTest, LabelPermanova_InvalidWithoutTwoGroups) {
     std::vector<int> cluster_labels;
     std::vector<FullLabel> full_labels;

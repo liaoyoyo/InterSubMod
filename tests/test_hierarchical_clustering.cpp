@@ -534,3 +534,38 @@ TEST(HierarchicalClusteringPerformance, MediumSizeMatrix) {
 
     std::cout << "  UPGMA 100x100: " << duration.count() << " ms" << std::endl;
 }
+
+TEST(HierarchicalClusteringPerformance, LargerSizeMatrix_LanceWilliams) {
+    // 500 x 500 matrix — verifies Lance-Williams O(N³) upgrade is fast enough for real data
+    // (N=500 would be ~62.5× slower with the old O(N⁴) implementation)
+    int n = 500;
+    Eigen::MatrixXd dist(n, n);
+    for (int i = 0; i < n; ++i) {
+        dist(i, i) = 0.0;
+        for (int j = i + 1; j < n; ++j) {
+            double v = 0.1 + 0.9 * ((i * 31 + j * 7) % 1000) / 1000.0;
+            dist(i, j) = dist(j, i) = v;
+        }
+    }
+
+    std::vector<std::string> names;
+    names.reserve(n);
+    for (int i = 0; i < n; ++i)
+        names.push_back("Read_" + std::to_string(i));
+
+    HierarchicalClustering clusterer(LinkageMethod::UPGMA);
+    auto start = std::chrono::high_resolution_clock::now();
+    Tree tree = clusterer.build_tree(dist, names);
+    auto end   = std::chrono::high_resolution_clock::now();
+
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+    EXPECT_FALSE(tree.empty());
+    EXPECT_EQ(tree.num_leaves(), n);
+    EXPECT_EQ(tree.num_internal_nodes(), n - 1);
+
+    // Lance-Williams O(N³) for N=500 should complete well under 10 s
+    EXPECT_LT(ms, 10000) << "UPGMA 500x500 should complete in <10s with Lance-Williams";
+
+    std::cout << "  UPGMA 500x500 (Lance-Williams): " << ms << " ms\n";
+}

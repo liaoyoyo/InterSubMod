@@ -20,18 +20,21 @@ source "${SCRIPT_DIR}/../config.sh"
 SAMPLE=""
 SAMPLE_OUTPUT_DIR=""
 LOCAL_THREADS="${THREADS}"
-SAMPLE=""
-SAMPLE_OUTPUT_DIR=""
-LOCAL_THREADS="${THREADS}"
+LOCAL_INDEX_THREADS=""
 OVERRIDE_SOMATIC_VCF=""
 OVERRIDE_TUMOR_BAM=""
 DRY_RUN=false
+
+bcftools_sort_supports_threads() {
+    "${BCFTOOLS}" sort --help 2>&1 | grep -q -- "--threads"
+}
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         --sample)     SAMPLE="$2"; shift 2 ;;
         --output-dir) SAMPLE_OUTPUT_DIR="$2"; shift 2 ;;
         --threads)    LOCAL_THREADS="$2"; shift 2 ;;
+        --index-threads) LOCAL_INDEX_THREADS="$2"; shift 2 ;;
         --somatic-vcf) OVERRIDE_SOMATIC_VCF="$2"; shift 2 ;;
         --tumor-bam)   OVERRIDE_TUMOR_BAM="$2"; shift 2 ;;
         --dry-run)    DRY_RUN=true; shift ;;
@@ -46,6 +49,10 @@ done
 if [[ -z "${SAMPLE}" ]] || [[ -z "${SAMPLE_OUTPUT_DIR}" ]]; then
     log_error "Both --sample and --output-dir are required."
     exit 1
+fi
+
+if [[ -z "${LOCAL_INDEX_THREADS}" ]]; then
+    LOCAL_INDEX_THREADS="$(recommended_index_threads "${LOCAL_THREADS}")"
 fi
 
 # ============================================================================
@@ -78,6 +85,7 @@ log_info "  Somatic VCF:  ${SOMATIC_VCF}"
 log_info "  Truth VCF:    ${TRUTH_VCF}"
 log_info "  Truth BED:    ${TRUTH_BED:-"(none - whole genome)"}"
 log_info "  Threads:      ${LOCAL_THREADS}"
+log_info "  Index thr:    ${LOCAL_INDEX_THREADS}"
 log_info "  Output dir:   ${LONGPHASE_OUTPUT_DIR}"
 
 validate_file "${TUMOR_BAM}" "Tumor BAM"
@@ -103,7 +111,9 @@ fi
 GERMLINE_PHASED_VCF=$("${SCRIPT_DIR}/00_prepare_germline.sh" "${GERMLINE_ARGS[@]}")
 log_info "  Germline VCF: ${GERMLINE_PHASED_VCF}"
 
-validate_file "${GERMLINE_PHASED_VCF}" "Germline phased VCF"
+if [[ "${DRY_RUN}" != true ]]; then
+    validate_file "${GERMLINE_PHASED_VCF}" "Germline phased VCF"
+fi
 
 # ============================================================================
 # Step 2: Run LongPhase-S
@@ -186,7 +196,7 @@ if [[ "${DRY_RUN}" == true ]]; then
 else
     if [[ -f "${TAGGED_BAM}" ]]; then
         log_info "  Indexing tagged BAM..."
-        "${SAMTOOLS}" index -@ "${LOCAL_THREADS}" "${TAGGED_BAM}"
+        "${SAMTOOLS}" index -@ "${LOCAL_INDEX_THREADS}" "${TAGGED_BAM}"
         log_info "  Tagged BAM indexed: ${TAGGED_BAM}.bai"
 
         HAPLOTAG_QC_TSV="${LONGPHASE_OUTPUT_DIR}/haplotag_qc.tsv"
@@ -223,10 +233,16 @@ else
 
     ISEC_DIR="${LONGPHASE_OUTPUT_DIR}/isec_tmp"
     PASS_VCF="${LONGPHASE_OUTPUT_DIR}/somatic_pass.vcf.gz"
+    SORT_ARGS=()
+    if bcftools_sort_supports_threads; then
+        SORT_ARGS+=(--threads "${LOCAL_INDEX_THREADS}")
+    else
+        log_warn "  bcftools sort does not support --threads; falling back to single-process sort."
+    fi
 
     # Extract PASS variants from somatic calling VCF
     "${BCFTOOLS}" view -f PASS "${SOMATIC_SC_VCF}" | \
-        "${BCFTOOLS}" sort -Oz -o "${PASS_VCF}"
+        "${BCFTOOLS}" sort "${SORT_ARGS[@]}" -Oz -o "${PASS_VCF}"
     "${BCFTOOLS}" index "${PASS_VCF}"
 
     # Intersect with truth VCF (within HC regions if BED provided)

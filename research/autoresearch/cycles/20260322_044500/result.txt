@@ -1,0 +1,18 @@
+H005: VAF<0.08+AlleleDelta>0.05 FP filter in TO
+==================================================
+Verdict: NEGATIVE (as predicted by OBSERVE)
+
+VAF<0.08 in TO candidates: 7/773 TP (0.9%), 12/298 FP (4.0%)
+→ VAF threshold almost never triggered in TO
+
+AlleleDelta distribution:
+  TP: median=0.0097, >0.05: 165/773 (21.3%)
+  FP: median=0.0000, >0.05: 56/298 (18.8%)
+  → Minimal discriminative power (TP:FP ratio ≈ 1.1x at >0.05 threshold)
+
+H005 as rescue filter: blocks 0 TP, 1 FP from rescue → negligible
+H005 as baseline filter (AlleleDelta>0.05): delta=-0.002170 (harmful)
+
+Root cause: TO haplotagging assigns reads to single HP, eliminating HP imbalance signal.
+AlleleDelta is only useful in paired track (5.29x TP:FP ratio in paired).
+Status: rejected; research_potential=exhausted (wrong track for this hypothesis)

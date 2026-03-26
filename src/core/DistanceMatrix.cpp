@@ -413,28 +413,31 @@ void DistanceMatrix::compute_subset(const MethylationMatrix& methyl_mat, const s
         nan_val = NAN;
     }
 
-    // Statistics accumulators (thread-safe)
-    std::atomic<int> valid_pairs{0};
-    std::atomic<int> invalid_pairs{0};
-    std::atomic<long long> total_common_coverage{0};
+    // Statistics accumulators: use OpenMP reduction instead of atomics to
+    // eliminate per-pair atomic contention on the hot path.
+    long long tl_valid_pairs    = 0;
+    long long tl_invalid_pairs  = 0;
+    long long tl_common_coverage = 0;
 
-    // Set number of threads
     int num_threads = config.num_threads > 0 ? config.num_threads : omp_get_max_threads();
 
-// Parallel computation of upper triangle
-#pragma omp parallel for schedule(dynamic) num_threads(num_threads)
+// Parallel computation of upper triangle.
+// schedule(guided, 4): dynamically sized chunks (large→small) handle the
+// triangle load imbalance better than schedule(dynamic, 1).
+// reduction eliminates per-pair atomic writes on the stats accumulators.
+#pragma omp parallel for schedule(guided, 4) num_threads(num_threads) \
+    reduction(+ : tl_valid_pairs, tl_invalid_pairs, tl_common_coverage)
     for (int i = 0; i < n; ++i) {
         for (int j = i + 1; j < n; ++j) {
             int common_count = 0;
             double dist = calculate_distance_impl(methyl_mat, row_indices[i], row_indices[j], config, common_count);
 
             if (dist < 0) {
-                // Invalid pair
                 dist = nan_val;
-                invalid_pairs++;
+                tl_invalid_pairs++;
             } else {
-                valid_pairs++;
-                total_common_coverage += common_count;
+                tl_valid_pairs++;
+                tl_common_coverage += common_count;
             }
 
             this->dist_matrix(i, j) = dist;
@@ -443,11 +446,11 @@ void DistanceMatrix::compute_subset(const MethylationMatrix& methyl_mat, const s
     }
 
     // Store statistics
-    this->num_valid_pairs = valid_pairs.load();
-    this->num_invalid_pairs = invalid_pairs.load();
+    this->num_valid_pairs   = static_cast<int>(tl_valid_pairs);
+    this->num_invalid_pairs = static_cast<int>(tl_invalid_pairs);
 
-    if (this->num_valid_pairs > 0) {
-        this->avg_common_coverage = static_cast<double>(total_common_coverage.load()) / this->num_valid_pairs;
+    if (tl_valid_pairs > 0) {
+        this->avg_common_coverage = static_cast<double>(tl_common_coverage) / tl_valid_pairs;
     }
 }
 

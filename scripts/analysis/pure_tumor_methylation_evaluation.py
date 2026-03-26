@@ -40,8 +40,8 @@ DEFAULT_SAMPLES = [
     "HCC1954",
 ]
 
-DEFAULT_DATA_ROOT = "/bip8_disk/liaoyoyo2001/InterSubMod_out/output/s-pure-pileup"
-DEFAULT_OUTPUT_ROOT = "/big8_disk/liaoyoyo2001/InterSubMod_runs/output/pure_tumor_evaluation"
+DEFAULT_DATA_ROOT = "/big7_disk/liaoyoyo2001/big7_disk_output"
+DEFAULT_OUTPUT_ROOT = "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/pure_tumor_evaluation"
 RANDOM_STATE = 42
 
 
@@ -187,6 +187,24 @@ def looks_like_candidate_run(run_name: str) -> bool:
     return True
 
 
+def candidate_sample_roots(data_root: Path, sample: str) -> List[Path]:
+    candidates = [
+        data_root / sample,
+        data_root / "s-pure-pileup" / sample,
+        data_root / "bip8_output_archive" / "s-pure-pileup" / sample,
+        data_root / "canonical" / sample / "paired_pileup",
+        data_root / sample / "paired_pileup",
+    ]
+    deduped: List[Path] = []
+    seen = set()
+    for path in candidates:
+        if path in seen:
+            continue
+        deduped.append(path)
+        seen.add(path)
+    return deduped
+
+
 def required_files_for_run(run_dir: Path) -> Tuple[bool, Dict[str, Path]]:
     paths = {
         "metrics": run_dir / "metrics.json",
@@ -200,38 +218,38 @@ def required_files_for_run(run_dir: Path) -> Tuple[bool, Dict[str, Path]]:
     return ok, paths
 
 
-def find_best_run_for_sample(sample_root: Path, sample: str) -> Optional[RunRecord]:
-    if not sample_root.exists():
-        return None
-
+def find_best_run_for_sample(data_root: Path, sample: str) -> Optional[RunRecord]:
     candidates: List[RunRecord] = []
-    for child in sorted(sample_root.iterdir()):
-        if not child.is_dir():
+    for sample_root in candidate_sample_roots(data_root, sample):
+        if not sample_root.exists():
             continue
-        run_name = child.name
-        if not looks_like_candidate_run(run_name):
-            continue
+        for child in sorted(sample_root.iterdir()):
+            if not child.is_dir():
+                continue
+            run_name = child.name
+            if not looks_like_candidate_run(run_name):
+                continue
 
-        ok, p = required_files_for_run(child)
-        if not ok:
-            continue
+            ok, p = required_files_for_run(child)
+            if not ok:
+                continue
 
-        metric = load_metrics(p["metrics"])
-        candidates.append(
-            RunRecord(
-                sample=sample,
-                run_dir=child,
-                run_name=run_name,
-                metrics_path=p["metrics"],
-                tp_summary=p["tp_summary"],
-                fp_summary=p["fp_summary"],
-                tp_vcf=p["tp_vcf"],
-                fp_vcf=p["fp_vcf"],
-                variant_counts=p["variant_counts"],
-                baseline_f1=metric["baseline_f1"],
-                filtered_f1=metric["filtered_f1"],
+            metric = load_metrics(p["metrics"])
+            candidates.append(
+                RunRecord(
+                    sample=sample,
+                    run_dir=child,
+                    run_name=run_name,
+                    metrics_path=p["metrics"],
+                    tp_summary=p["tp_summary"],
+                    fp_summary=p["fp_summary"],
+                    tp_vcf=p["tp_vcf"],
+                    fp_vcf=p["fp_vcf"],
+                    variant_counts=p["variant_counts"],
+                    baseline_f1=metric["baseline_f1"],
+                    filtered_f1=metric["filtered_f1"],
+                )
             )
-        )
 
     if not candidates:
         return None
@@ -786,7 +804,7 @@ def main() -> None:
     missing_samples: List[str] = []
 
     for sample in samples:
-        rec = find_best_run_for_sample(data_root / sample, sample)
+        rec = find_best_run_for_sample(data_root, sample)
         if rec is None:
             missing_samples.append(sample)
         else:
