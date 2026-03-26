@@ -163,7 +163,7 @@ SignificanceResult SignificanceAnalyzer::analyze(const std::vector<int>& cluster
                 return labels;
             };
 
-            result.bootstrap = bootstrap_->run(methylation_matrix, cluster_labels, cluster_func);
+            result.bootstrap = bootstrap_->compute(methylation_matrix, cluster_labels, cluster_func);
         }
     }
 

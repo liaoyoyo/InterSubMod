@@ -263,7 +263,7 @@ TEST_F(LocalTestTest, BasicLocalTest) {
         full_labels.push_back(label);
     }
 
-    LocalTestResult result = local_test_->run(cluster_labels, full_labels);
+    LocalTestResult result = local_test_->test_all(cluster_labels, full_labels);
 
     // Should have 2 clusters
     EXPECT_EQ(result.cluster_stats.size(), 2);
@@ -288,7 +288,7 @@ TEST_F(LocalTestTest, ClusterCounts) {
         full_labels[i].is_tumor = false;
     }
 
-    LocalTestResult result = local_test_->run(cluster_labels, full_labels);
+    LocalTestResult result = local_test_->test_all(cluster_labels, full_labels);
 
     // Cluster 0 should have 3 reads
     bool found_cluster_0 = false;
@@ -327,7 +327,7 @@ TEST_F(LocalTestTest, DeltaProportion) {
         full_labels.push_back(label);
     }
 
-    LocalTestResult result = local_test_->run(cluster_labels, full_labels);
+    LocalTestResult result = local_test_->test_all(cluster_labels, full_labels);
 
     // Cluster 0 should have delta_proportion_alt = 1.0 - 0.0 = 1.0
     for (const auto& cs : result.cluster_stats) {
@@ -359,7 +359,7 @@ TEST_F(LocalTestTest, BestDimensionIdentified) {
         full_labels.push_back(label);
     }
 
-    LocalTestResult result = local_test_->run(cluster_labels, full_labels);
+    LocalTestResult result = local_test_->test_all(cluster_labels, full_labels);
 
     // HP should be the best dimension since allele is balanced
     EXPECT_EQ(result.best_dimension, "hp");

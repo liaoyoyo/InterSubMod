@@ -300,7 +300,7 @@ TEST_F(BootstrapTest, Bootstrap_StableCluster) {
         return labels;
     };
 
-    BootstrapResult result = bootstrap_->run(meth, original_labels, cluster_func);
+    BootstrapResult result = bootstrap_->compute(meth, original_labels, cluster_func);
 
     // Check that bootstrap ran
     EXPECT_GT(result.n_iterations, 0);
