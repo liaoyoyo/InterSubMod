@@ -1,0 +1,2513 @@
+UpdateCTestConfiguration  from :/big7_disk/liaoyoyo2001/InterSubMod/build/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/big7_disk/liaoyoyo2001/InterSubMod/build/DartConfiguration.tcl
+Test project /big7_disk/liaoyoyo2001/InterSubMod/build
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+        Start   1: ConfigTest.ValidationSuccess
+
+1: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=ConfigTest.ValidationSuccess" "--gtest_also_run_disabled_tests"
+1: Test timeout computed to be: 10000000
+1: Note: Google Test filter = ConfigTest.ValidationSuccess
+1: [==========] Running 1 test from 1 test suite.
+1: [----------] Global test environment set-up.
+1: [----------] 1 test from ConfigTest
+1: [ RUN      ] ConfigTest.ValidationSuccess
+1: Warning: Tumor BAM index not found. Random access may fail.
+1: Error: Cannot read header from Tumor BAM file.
+1: [E::fai_build_core] Format error, unexpected "d" at line 1
+1: Error: Cannot load Reference FASTA (or .fai index missing): ref.fa
+1: [E::bcf_hdr_read] Input is not detected as bcf or vcf format
+1: Error: Cannot read header from Somatic VCF file.
+1: [ConfigTest.ValidationSuccess] Time: 0.0006 s, Memory: 0.55 MB
+1: [       OK ] ConfigTest.ValidationSuccess (0 ms)
+1: [----------] 1 test from ConfigTest (1 ms total)
+1: 
+1: [----------] Global test environment tear-down
+1: [==========] 1 test from 1 test suite ran. (1 ms total)
+1: [  PASSED  ] 1 test.
+  1/121 Test   #1: ConfigTest.ValidationSuccess ......................................   Passed    0.01 sec
+test 2
+        Start   2: ConfigTest.ValidationFailureMissingFiles
+
+2: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=ConfigTest.ValidationFailureMissingFiles" "--gtest_also_run_disabled_tests"
+2: Test timeout computed to be: 10000000
+2: Note: Google Test filter = ConfigTest.ValidationFailureMissingFiles
+2: [==========] Running 1 test from 1 test suite.
+2: [----------] Global test environment set-up.
+2: [----------] 1 test from ConfigTest
+2: [ RUN      ] ConfigTest.ValidationFailureMissingFiles
+2: Error: Tumor BAM path is required.
+2: Error: Reference FASTA path is required.
+2: Error: Somatic VCF path is required.
+2: [ConfigTest.ValidationFailureMissingFiles] Time: 0.0000 s, Memory: 0.46 MB
+2: [       OK ] ConfigTest.ValidationFailureMissingFiles (0 ms)
+2: [----------] 1 test from ConfigTest (0 ms total)
+2: 
+2: [----------] Global test environment tear-down
+2: [==========] 1 test from 1 test suite ran. (0 ms total)
+2: [  PASSED  ] 1 test.
+  2/121 Test   #2: ConfigTest.ValidationFailureMissingFiles ..........................   Passed    0.01 sec
+test 3
+        Start   3: ConfigTest.ValidationFailureInvalidWindow
+
+3: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=ConfigTest.ValidationFailureInvalidWindow" "--gtest_also_run_disabled_tests"
+3: Test timeout computed to be: 10000000
+3: Note: Google Test filter = ConfigTest.ValidationFailureInvalidWindow
+3: [==========] Running 1 test from 1 test suite.
+3: [----------] Global test environment set-up.
+3: [----------] 1 test from ConfigTest
+3: [ RUN      ] ConfigTest.ValidationFailureInvalidWindow
+3: Error: Tumor BAM path is required.
+3: Error: Reference FASTA path is required.
+3: Error: Somatic VCF path is required.
+3: Error: window_size_bp must be positive.
+3: [ConfigTest.ValidationFailureInvalidWindow] Time: 0.0000 s, Memory: 0.46 MB
+3: [       OK ] ConfigTest.ValidationFailureInvalidWindow (0 ms)
+3: [----------] 1 test from ConfigTest (0 ms total)
+3: 
+3: [----------] Global test environment tear-down
+3: [==========] 1 test from 1 test suite ran. (0 ms total)
+3: [  PASSED  ] 1 test.
+  3/121 Test   #3: ConfigTest.ValidationFailureInvalidWindow .........................   Passed    0.01 sec
+test 4
+        Start   4: ConfigTest.ValidationFailureInvalidMethylThresholds
+
+4: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=ConfigTest.ValidationFailureInvalidMethylThresholds" "--gtest_also_run_disabled_tests"
+4: Test timeout computed to be: 10000000
+4: Note: Google Test filter = ConfigTest.ValidationFailureInvalidMethylThresholds
+4: [==========] Running 1 test from 1 test suite.
+4: [----------] Global test environment set-up.
+4: [----------] 1 test from ConfigTest
+4: [ RUN      ] ConfigTest.ValidationFailureInvalidMethylThresholds
+4: Error: Tumor BAM path is required.
+4: Error: Reference FASTA path is required.
+4: Error: Somatic VCF path is required.
+4: Error: binary_methyl_high must be greater than binary_methyl_low.
+4: Error: Tumor BAM path is required.
+4: Error: Reference FASTA path is required.
+4: Error: Somatic VCF path is required.
+4: Error: Methylation thresholds must be between 0.0 and 1.0.
+4: [ConfigTest.ValidationFailureInvalidMethylThresholds] Time: 0.0000 s, Memory: 0.47 MB
+4: [       OK ] ConfigTest.ValidationFailureInvalidMethylThresholds (0 ms)
+4: [----------] 1 test from ConfigTest (0 ms total)
+4: 
+4: [----------] Global test environment tear-down
+4: [==========] 1 test from 1 test suite ran. (0 ms total)
+4: [  PASSED  ] 1 test.
+  4/121 Test   #4: ConfigTest.ValidationFailureInvalidMethylThresholds ...............   Passed    0.01 sec
+test 5
+        Start   5: ConfigTest.ValidationRepeatedCallsDoNotLeak
+
+5: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=ConfigTest.ValidationRepeatedCallsDoNotLeak" "--gtest_also_run_disabled_tests"
+5: Test timeout computed to be: 10000000
+5: Note: Google Test filter = ConfigTest.ValidationRepeatedCallsDoNotLeak
+5: [==========] Running 1 test from 1 test suite.
+5: [----------] Global test environment set-up.
+5: [----------] 1 test from ConfigTest
+5: [ RUN      ] ConfigTest.ValidationRepeatedCallsDoNotLeak
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/tumor.bam" : No such file or directory
+5: Error: Cannot open Tumor BAM file: /nonexistent/path/tumor.bam
+5: [E::fai_build3_core] Failed to open the file /nonexistent/path/ref.fa
+5: Error: Cannot load Reference FASTA (or .fai index missing): /nonexistent/path/ref.fa
+5: [E::hts_open_format] Failed to open file "/nonexistent/path/somatic.vcf" : No such file or directory
+5: Error: Cannot open Somatic VCF file: /nonexistent/path/somatic.vcf
+5: [ConfigTest.ValidationRepeatedCallsDoNotLeak] Time: 0.0021 s, Memory: 0.46 MB
+5: [       OK ] ConfigTest.ValidationRepeatedCallsDoNotLeak (2 ms)
+5: [----------] 1 test from ConfigTest (2 ms total)
+5: 
+5: [----------] Global test environment tear-down
+5: [==========] 1 test from 1 test suite ran. (2 ms total)
+5: [  PASSED  ] 1 test.
+  5/121 Test   #5: ConfigTest.ValidationRepeatedCallsDoNotLeak .......................   Passed    0.02 sec
+test 6
+        Start   6: ArgParserTest.ParseArgumentsShortOptions
+
+6: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=ArgParserTest.ParseArgumentsShortOptions" "--gtest_also_run_disabled_tests"
+6: Test timeout computed to be: 10000000
+6: Note: Google Test filter = ArgParserTest.ParseArgumentsShortOptions
+6: [==========] Running 1 test from 1 test suite.
+6: [----------] Global test environment set-up.
+6: [----------] 1 test from ArgParserTest
+6: [ RUN      ] ArgParserTest.ParseArgumentsShortOptions
+6: [ArgParserTest.ParseArgumentsShortOptions] Time: 0.0006 s, Memory: 0.55 MB
+6: [       OK ] ArgParserTest.ParseArgumentsShortOptions (0 ms)
+6: [----------] 1 test from ArgParserTest (1 ms total)
+6: 
+6: [----------] Global test environment tear-down
+6: [==========] 1 test from 1 test suite ran. (1 ms total)
+6: [  PASSED  ] 1 test.
+  6/121 Test   #6: ArgParserTest.ParseArgumentsShortOptions ..........................   Passed    0.01 sec
+test 7
+        Start   7: BamReaderTest.ConstructorOpensFile
+
+7: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BamReaderTest.ConstructorOpensFile" "--gtest_also_run_disabled_tests"
+7: Test timeout computed to be: 10000000
+7: Note: Google Test filter = BamReaderTest.ConstructorOpensFile
+7: [==========] Running 1 test from 1 test suite.
+7: [----------] Global test environment set-up.
+7: [----------] 1 test from BamReaderTest
+7: [ RUN      ] BamReaderTest.ConstructorOpensFile
+7: [BamReaderTest.ConstructorOpensFile] Time: 0.2155 s, Memory: 1.71 MB
+7: [       OK ] BamReaderTest.ConstructorOpensFile (215 ms)
+7: [----------] 1 test from BamReaderTest (216 ms total)
+7: 
+7: [----------] Global test environment tear-down
+7: [==========] 1 test from 1 test suite ran. (216 ms total)
+7: [  PASSED  ] 1 test.
+  7/121 Test   #7: BamReaderTest.ConstructorOpensFile ................................   Passed    0.24 sec
+test 8
+        Start   8: BamReaderTest.FetchReadsFromValidRegion
+
+8: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BamReaderTest.FetchReadsFromValidRegion" "--gtest_also_run_disabled_tests"
+8: Test timeout computed to be: 10000000
+8: Note: Google Test filter = BamReaderTest.FetchReadsFromValidRegion
+8: [==========] Running 1 test from 1 test suite.
+8: [----------] Global test environment set-up.
+8: [----------] 1 test from BamReaderTest
+8: [ RUN      ] BamReaderTest.FetchReadsFromValidRegion
+8: [BamReaderTest.FetchReadsFromValidRegion] Time: 0.2957 s, Memory: 1.74 MB
+8: [       OK ] BamReaderTest.FetchReadsFromValidRegion (295 ms)
+8: [----------] 1 test from BamReaderTest (296 ms total)
+8: 
+8: [----------] Global test environment tear-down
+8: [==========] 1 test from 1 test suite ran. (296 ms total)
+8: [  PASSED  ] 1 test.
+  8/121 Test   #8: BamReaderTest.FetchReadsFromValidRegion ...........................   Passed    0.32 sec
+test 9
+        Start   9: BamReaderTest.FetchReadsFromInvalidChromosome
+
+9: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BamReaderTest.FetchReadsFromInvalidChromosome" "--gtest_also_run_disabled_tests"
+9: Test timeout computed to be: 10000000
+9: Note: Google Test filter = BamReaderTest.FetchReadsFromInvalidChromosome
+9: [==========] Running 1 test from 1 test suite.
+9: [----------] Global test environment set-up.
+9: [----------] 1 test from BamReaderTest
+9: [ RUN      ] BamReaderTest.FetchReadsFromInvalidChromosome
+9: [BamReaderTest.FetchReadsFromInvalidChromosome] Time: 0.2221 s, Memory: 1.74 MB
+9: [       OK ] BamReaderTest.FetchReadsFromInvalidChromosome (222 ms)
+9: [----------] 1 test from BamReaderTest (222 ms total)
+9: 
+9: [----------] Global test environment tear-down
+9: [==========] 1 test from 1 test suite ran. (223 ms total)
+9: [  PASSED  ] 1 test.
+  9/121 Test   #9: BamReaderTest.FetchReadsFromInvalidChromosome .....................   Passed    0.24 sec
+test 10
+        Start  10: BamReaderTest.MoveConstructor
+
+10: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BamReaderTest.MoveConstructor" "--gtest_also_run_disabled_tests"
+10: Test timeout computed to be: 10000000
+10: Note: Google Test filter = BamReaderTest.MoveConstructor
+10: [==========] Running 1 test from 1 test suite.
+10: [----------] Global test environment set-up.
+10: [----------] 1 test from BamReaderTest
+10: [ RUN      ] BamReaderTest.MoveConstructor
+10: [BamReaderTest.MoveConstructor] Time: 0.2276 s, Memory: 1.71 MB
+10: [       OK ] BamReaderTest.MoveConstructor (227 ms)
+10: [----------] 1 test from BamReaderTest (228 ms total)
+10: 
+10: [----------] Global test environment tear-down
+10: [==========] 1 test from 1 test suite ran. (228 ms total)
+10: [  PASSED  ] 1 test.
+ 10/121 Test  #10: BamReaderTest.MoveConstructor .....................................   Passed    0.25 sec
+test 11
+        Start  11: BamReaderTest.FetchReadsSafe_ReturnsUniquePtr
+
+11: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BamReaderTest.FetchReadsSafe_ReturnsUniquePtr" "--gtest_also_run_disabled_tests"
+11: Test timeout computed to be: 10000000
+11: Note: Google Test filter = BamReaderTest.FetchReadsSafe_ReturnsUniquePtr
+11: [==========] Running 1 test from 1 test suite.
+11: [----------] Global test environment set-up.
+11: [----------] 1 test from BamReaderTest
+11: [ RUN      ] BamReaderTest.FetchReadsSafe_ReturnsUniquePtr
+11: [BamReaderTest.FetchReadsSafe_ReturnsUniquePtr] Time: 0.3108 s, Memory: 1.74 MB
+11: [       OK ] BamReaderTest.FetchReadsSafe_ReturnsUniquePtr (310 ms)
+11: [----------] 1 test from BamReaderTest (311 ms total)
+11: 
+11: [----------] Global test environment tear-down
+11: [==========] 1 test from 1 test suite ran. (311 ms total)
+11: [  PASSED  ] 1 test.
+ 11/121 Test  #11: BamReaderTest.FetchReadsSafe_ReturnsUniquePtr .....................   Passed    0.34 sec
+test 12
+        Start  12: BamReaderTest.FetchReadsSafe_InvalidChromosome
+
+12: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BamReaderTest.FetchReadsSafe_InvalidChromosome" "--gtest_also_run_disabled_tests"
+12: Test timeout computed to be: 10000000
+12: Note: Google Test filter = BamReaderTest.FetchReadsSafe_InvalidChromosome
+12: [==========] Running 1 test from 1 test suite.
+12: [----------] Global test environment set-up.
+12: [----------] 1 test from BamReaderTest
+12: [ RUN      ] BamReaderTest.FetchReadsSafe_InvalidChromosome
+12: [BamReaderTest.FetchReadsSafe_InvalidChromosome] Time: 0.2276 s, Memory: 1.74 MB
+12: [       OK ] BamReaderTest.FetchReadsSafe_InvalidChromosome (227 ms)
+12: [----------] 1 test from BamReaderTest (228 ms total)
+12: 
+12: [----------] Global test environment tear-down
+12: [==========] 1 test from 1 test suite ran. (228 ms total)
+12: [  PASSED  ] 1 test.
+ 12/121 Test  #12: BamReaderTest.FetchReadsSafe_InvalidChromosome ....................   Passed    0.25 sec
+test 13
+        Start  13: BamReaderTest.ParseReadInfo
+
+13: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BamReaderTest.ParseReadInfo" "--gtest_also_run_disabled_tests"
+13: Test timeout computed to be: 10000000
+13: Note: Google Test filter = BamReaderTest.ParseReadInfo
+13: [==========] Running 1 test from 1 test suite.
+13: [----------] Global test environment set-up.
+13: [----------] 1 test from BamReaderTest
+13: [ RUN      ] BamReaderTest.ParseReadInfo
+13: [BamReaderTest.ParseReadInfo] Time: 0.3066 s, Memory: 1.74 MB
+13: [       OK ] BamReaderTest.ParseReadInfo (306 ms)
+13: [----------] 1 test from BamReaderTest (307 ms total)
+13: 
+13: [----------] Global test environment tear-down
+13: [==========] 1 test from 1 test suite ran. (307 ms total)
+13: [  PASSED  ] 1 test.
+ 13/121 Test  #13: BamReaderTest.ParseReadInfo .......................................   Passed    0.33 sec
+test 14
+        Start  14: ReadParserPositionSafetyTest.ZeroPosition_ReturnsUnknown
+
+14: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=ReadParserPositionSafetyTest.ZeroPosition_ReturnsUnknown" "--gtest_also_run_disabled_tests"
+14: Test timeout computed to be: 10000000
+14: Note: Google Test filter = ReadParserPositionSafetyTest.ZeroPosition_ReturnsUnknown
+14: [==========] Running 1 test from 1 test suite.
+14: [----------] Global test environment set-up.
+14: [----------] 1 test from ReadParserPositionSafetyTest
+14: [ RUN      ] ReadParserPositionSafetyTest.ZeroPosition_ReturnsUnknown
+14: [ReadParserPositionSafetyTest.ZeroPosition_ReturnsUnknown] Time: 0.0000 s, Memory: 0.47 MB
+14: [       OK ] ReadParserPositionSafetyTest.ZeroPosition_ReturnsUnknown (0 ms)
+14: [----------] 1 test from ReadParserPositionSafetyTest (0 ms total)
+14: 
+14: [----------] Global test environment tear-down
+14: [==========] 1 test from 1 test suite ran. (0 ms total)
+14: [  PASSED  ] 1 test.
+ 14/121 Test  #14: ReadParserPositionSafetyTest.ZeroPosition_ReturnsUnknown ..........   Passed    0.01 sec
+test 15
+        Start  15: ReadParserPositionSafetyTest.OverflowPosition_ReturnsUnknown
+
+15: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=ReadParserPositionSafetyTest.OverflowPosition_ReturnsUnknown" "--gtest_also_run_disabled_tests"
+15: Test timeout computed to be: 10000000
+15: Note: Google Test filter = ReadParserPositionSafetyTest.OverflowPosition_ReturnsUnknown
+15: [==========] Running 1 test from 1 test suite.
+15: [----------] Global test environment set-up.
+15: [----------] 1 test from ReadParserPositionSafetyTest
+15: [ RUN      ] ReadParserPositionSafetyTest.OverflowPosition_ReturnsUnknown
+15: [ReadParserPositionSafetyTest.OverflowPosition_ReturnsUnknown] Time: 0.0000 s, Memory: 0.47 MB
+15: [       OK ] ReadParserPositionSafetyTest.OverflowPosition_ReturnsUnknown (0 ms)
+15: [----------] 1 test from ReadParserPositionSafetyTest (0 ms total)
+15: 
+15: [----------] Global test environment tear-down
+15: [==========] 1 test from 1 test suite ran. (0 ms total)
+15: [  PASSED  ] 1 test.
+ 15/121 Test  #15: ReadParserPositionSafetyTest.OverflowPosition_ReturnsUnknown ......   Passed    0.01 sec
+test 16
+        Start  16: ReadParserTest.FilterConfiguration
+
+16: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=ReadParserTest.FilterConfiguration" "--gtest_also_run_disabled_tests"
+16: Test timeout computed to be: 10000000
+16: Note: Google Test filter = ReadParserTest.FilterConfiguration
+16: [==========] Running 1 test from 1 test suite.
+16: [----------] Global test environment set-up.
+16: [----------] 1 test from ReadParserTest
+16: [ RUN      ] ReadParserTest.FilterConfiguration
+16: [ReadParserTest.FilterConfiguration] Time: 0.0000 s, Memory: 0.46 MB
+16: [       OK ] ReadParserTest.FilterConfiguration (0 ms)
+16: [----------] 1 test from ReadParserTest (0 ms total)
+16: 
+16: [----------] Global test environment tear-down
+16: [==========] 1 test from 1 test suite ran. (0 ms total)
+16: [  PASSED  ] 1 test.
+ 16/121 Test  #16: ReadParserTest.FilterConfiguration ................................   Passed    0.01 sec
+test 17
+        Start  17: BamRecordPtrTest.TypeExists
+
+17: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BamRecordPtrTest.TypeExists" "--gtest_also_run_disabled_tests"
+17: Test timeout computed to be: 10000000
+17: Note: Google Test filter = BamRecordPtrTest.TypeExists
+17: [==========] Running 1 test from 1 test suite.
+17: [----------] Global test environment set-up.
+17: [----------] 1 test from BamRecordPtrTest
+17: [ RUN      ] BamRecordPtrTest.TypeExists
+17: [BamRecordPtrTest.TypeExists] Time: 0.0000 s, Memory: 0.46 MB
+17: [       OK ] BamRecordPtrTest.TypeExists (0 ms)
+17: [----------] 1 test from BamRecordPtrTest (0 ms total)
+17: 
+17: [----------] Global test environment tear-down
+17: [==========] 1 test from 1 test suite ran. (0 ms total)
+17: [  PASSED  ] 1 test.
+ 17/121 Test  #17: BamRecordPtrTest.TypeExists .......................................   Passed    0.01 sec
+test 18
+        Start  18: BamRecordPtrTest.DeleterReleasesMemory
+
+18: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BamRecordPtrTest.DeleterReleasesMemory" "--gtest_also_run_disabled_tests"
+18: Test timeout computed to be: 10000000
+18: Note: Google Test filter = BamRecordPtrTest.DeleterReleasesMemory
+18: [==========] Running 1 test from 1 test suite.
+18: [----------] Global test environment set-up.
+18: [----------] 1 test from BamRecordPtrTest
+18: [ RUN      ] BamRecordPtrTest.DeleterReleasesMemory
+18: [BamRecordPtrTest.DeleterReleasesMemory] Time: 0.0000 s, Memory: 0.46 MB
+18: [       OK ] BamRecordPtrTest.DeleterReleasesMemory (0 ms)
+18: [----------] 1 test from BamRecordPtrTest (0 ms total)
+18: 
+18: [----------] Global test environment tear-down
+18: [==========] 1 test from 1 test suite ran. (0 ms total)
+18: [  PASSED  ] 1 test.
+ 18/121 Test  #18: BamRecordPtrTest.DeleterReleasesMemory ............................   Passed    0.01 sec
+test 19
+        Start  19: DistanceMatrixTest.NHD_BasicComputation
+
+19: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceMatrixTest.NHD_BasicComputation" "--gtest_also_run_disabled_tests"
+19: Test timeout computed to be: 10000000
+19: Note: Google Test filter = DistanceMatrixTest.NHD_BasicComputation
+19: [==========] Running 1 test from 1 test suite.
+19: [----------] Global test environment set-up.
+19: [----------] 1 test from DistanceMatrixTest
+19: [ RUN      ] DistanceMatrixTest.NHD_BasicComputation
+19: [DistanceMatrixTest.NHD_BasicComputation] Time: 0.0000 s, Memory: 0.50 MB
+19: [       OK ] DistanceMatrixTest.NHD_BasicComputation (0 ms)
+19: [----------] 1 test from DistanceMatrixTest (0 ms total)
+19: 
+19: [----------] Global test environment tear-down
+19: [==========] 1 test from 1 test suite ran. (0 ms total)
+19: [  PASSED  ] 1 test.
+ 19/121 Test  #19: DistanceMatrixTest.NHD_BasicComputation ...........................   Passed    0.01 sec
+test 20
+        Start  20: DistanceMatrixTest.NHD_MinCommonCoverage
+
+20: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceMatrixTest.NHD_MinCommonCoverage" "--gtest_also_run_disabled_tests"
+20: Test timeout computed to be: 10000000
+20: Note: Google Test filter = DistanceMatrixTest.NHD_MinCommonCoverage
+20: [==========] Running 1 test from 1 test suite.
+20: [----------] Global test environment set-up.
+20: [----------] 1 test from DistanceMatrixTest
+20: [ RUN      ] DistanceMatrixTest.NHD_MinCommonCoverage
+20: [DistanceMatrixTest.NHD_MinCommonCoverage] Time: 0.0000 s, Memory: 0.50 MB
+20: [       OK ] DistanceMatrixTest.NHD_MinCommonCoverage (0 ms)
+20: [----------] 1 test from DistanceMatrixTest (0 ms total)
+20: 
+20: [----------] Global test environment tear-down
+20: [==========] 1 test from 1 test suite ran. (0 ms total)
+20: [  PASSED  ] 1 test.
+ 20/121 Test  #20: DistanceMatrixTest.NHD_MinCommonCoverage ..........................   Passed    0.01 sec
+test 21
+        Start  21: DistanceMatrixTest.L1_BasicComputation
+
+21: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceMatrixTest.L1_BasicComputation" "--gtest_also_run_disabled_tests"
+21: Test timeout computed to be: 10000000
+21: Note: Google Test filter = DistanceMatrixTest.L1_BasicComputation
+21: [==========] Running 1 test from 1 test suite.
+21: [----------] Global test environment set-up.
+21: [----------] 1 test from DistanceMatrixTest
+21: [ RUN      ] DistanceMatrixTest.L1_BasicComputation
+21: [DistanceMatrixTest.L1_BasicComputation] Time: 0.0000 s, Memory: 0.50 MB
+21: [       OK ] DistanceMatrixTest.L1_BasicComputation (0 ms)
+21: [----------] 1 test from DistanceMatrixTest (0 ms total)
+21: 
+21: [----------] Global test environment tear-down
+21: [==========] 1 test from 1 test suite ran. (0 ms total)
+21: [  PASSED  ] 1 test.
+ 21/121 Test  #21: DistanceMatrixTest.L1_BasicComputation ............................   Passed    0.01 sec
+test 22
+        Start  22: DistanceMatrixTest.L2_BasicComputation
+
+22: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceMatrixTest.L2_BasicComputation" "--gtest_also_run_disabled_tests"
+22: Test timeout computed to be: 10000000
+22: Note: Google Test filter = DistanceMatrixTest.L2_BasicComputation
+22: [==========] Running 1 test from 1 test suite.
+22: [----------] Global test environment set-up.
+22: [----------] 1 test from DistanceMatrixTest
+22: [ RUN      ] DistanceMatrixTest.L2_BasicComputation
+22: [DistanceMatrixTest.L2_BasicComputation] Time: 0.0000 s, Memory: 0.50 MB
+22: [       OK ] DistanceMatrixTest.L2_BasicComputation (0 ms)
+22: [----------] 1 test from DistanceMatrixTest (0 ms total)
+22: 
+22: [----------] Global test environment tear-down
+22: [==========] 1 test from 1 test suite ran. (0 ms total)
+22: [  PASSED  ] 1 test.
+ 22/121 Test  #22: DistanceMatrixTest.L2_BasicComputation ............................   Passed    0.01 sec
+test 23
+        Start  23: DistanceMatrixTest.CORR_BasicComputation
+
+23: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceMatrixTest.CORR_BasicComputation" "--gtest_also_run_disabled_tests"
+23: Test timeout computed to be: 10000000
+23: Note: Google Test filter = DistanceMatrixTest.CORR_BasicComputation
+23: [==========] Running 1 test from 1 test suite.
+23: [----------] Global test environment set-up.
+23: [----------] 1 test from DistanceMatrixTest
+23: [ RUN      ] DistanceMatrixTest.CORR_BasicComputation
+23: [DistanceMatrixTest.CORR_BasicComputation] Time: 0.0001 s, Memory: 0.50 MB
+23: [       OK ] DistanceMatrixTest.CORR_BasicComputation (0 ms)
+23: [----------] 1 test from DistanceMatrixTest (0 ms total)
+23: 
+23: [----------] Global test environment tear-down
+23: [==========] 1 test from 1 test suite ran. (0 ms total)
+23: [  PASSED  ] 1 test.
+ 23/121 Test  #23: DistanceMatrixTest.CORR_BasicComputation ..........................   Passed    0.01 sec
+test 24
+        Start  24: DistanceMatrixTest.JACCARD_BasicComputation
+
+24: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceMatrixTest.JACCARD_BasicComputation" "--gtest_also_run_disabled_tests"
+24: Test timeout computed to be: 10000000
+24: Note: Google Test filter = DistanceMatrixTest.JACCARD_BasicComputation
+24: [==========] Running 1 test from 1 test suite.
+24: [----------] Global test environment set-up.
+24: [----------] 1 test from DistanceMatrixTest
+24: [ RUN      ] DistanceMatrixTest.JACCARD_BasicComputation
+24: [DistanceMatrixTest.JACCARD_BasicComputation] Time: 0.0000 s, Memory: 0.50 MB
+24: [       OK ] DistanceMatrixTest.JACCARD_BasicComputation (0 ms)
+24: [----------] 1 test from DistanceMatrixTest (0 ms total)
+24: 
+24: [----------] Global test environment tear-down
+24: [==========] 1 test from 1 test suite ran. (0 ms total)
+24: [  PASSED  ] 1 test.
+ 24/121 Test  #24: DistanceMatrixTest.JACCARD_BasicComputation .......................   Passed    0.01 sec
+test 25
+        Start  25: DistanceMatrixTest.StrandSpecific_BasicComputation
+
+25: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceMatrixTest.StrandSpecific_BasicComputation" "--gtest_also_run_disabled_tests"
+25: Test timeout computed to be: 10000000
+25: Note: Google Test filter = DistanceMatrixTest.StrandSpecific_BasicComputation
+25: [==========] Running 1 test from 1 test suite.
+25: [----------] Global test environment set-up.
+25: [----------] 1 test from DistanceMatrixTest
+25: [ RUN      ] DistanceMatrixTest.StrandSpecific_BasicComputation
+25: [DistanceMatrixTest.StrandSpecific_BasicComputation] Time: 0.0000 s, Memory: 0.50 MB
+25: [       OK ] DistanceMatrixTest.StrandSpecific_BasicComputation (0 ms)
+25: [----------] 1 test from DistanceMatrixTest (0 ms total)
+25: 
+25: [----------] Global test environment tear-down
+25: [==========] 1 test from 1 test suite ran. (0 ms total)
+25: [  PASSED  ] 1 test.
+ 25/121 Test  #25: DistanceMatrixTest.StrandSpecific_BasicComputation ................   Passed    0.01 sec
+test 26
+        Start  26: DistanceMatrixTest.DistanceConfig_AllOptions
+
+26: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceMatrixTest.DistanceConfig_AllOptions" "--gtest_also_run_disabled_tests"
+26: Test timeout computed to be: 10000000
+26: Note: Google Test filter = DistanceMatrixTest.DistanceConfig_AllOptions
+26: [==========] Running 1 test from 1 test suite.
+26: [----------] Global test environment set-up.
+26: [----------] 1 test from DistanceMatrixTest
+26: [ RUN      ] DistanceMatrixTest.DistanceConfig_AllOptions
+26: [DistanceMatrixTest.DistanceConfig_AllOptions] Time: 0.0002 s, Memory: 0.51 MB
+26: [       OK ] DistanceMatrixTest.DistanceConfig_AllOptions (0 ms)
+26: [----------] 1 test from DistanceMatrixTest (0 ms total)
+26: 
+26: [----------] Global test environment tear-down
+26: [==========] 1 test from 1 test suite ran. (1 ms total)
+26: [  PASSED  ] 1 test.
+ 26/121 Test  #26: DistanceMatrixTest.DistanceConfig_AllOptions ......................   Passed    0.01 sec
+test 27
+        Start  27: DistanceMatrixTest.EmptyMatrix
+
+27: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceMatrixTest.EmptyMatrix" "--gtest_also_run_disabled_tests"
+27: Test timeout computed to be: 10000000
+27: Note: Google Test filter = DistanceMatrixTest.EmptyMatrix
+27: [==========] Running 1 test from 1 test suite.
+27: [----------] Global test environment set-up.
+27: [----------] 1 test from DistanceMatrixTest
+27: [ RUN      ] DistanceMatrixTest.EmptyMatrix
+27: [DistanceMatrixTest.EmptyMatrix] Time: 0.0001 s, Memory: 0.50 MB
+27: [       OK ] DistanceMatrixTest.EmptyMatrix (0 ms)
+27: [----------] 1 test from DistanceMatrixTest (0 ms total)
+27: 
+27: [----------] Global test environment tear-down
+27: [==========] 1 test from 1 test suite ran. (0 ms total)
+27: [  PASSED  ] 1 test.
+ 27/121 Test  #27: DistanceMatrixTest.EmptyMatrix ....................................   Passed    0.01 sec
+test 28
+        Start  28: DistanceMatrixTest.SingleRead
+
+28: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceMatrixTest.SingleRead" "--gtest_also_run_disabled_tests"
+28: Test timeout computed to be: 10000000
+28: Note: Google Test filter = DistanceMatrixTest.SingleRead
+28: [==========] Running 1 test from 1 test suite.
+28: [----------] Global test environment set-up.
+28: [----------] 1 test from DistanceMatrixTest
+28: [ RUN      ] DistanceMatrixTest.SingleRead
+28: [DistanceMatrixTest.SingleRead] Time: 0.0000 s, Memory: 0.50 MB
+28: [       OK ] DistanceMatrixTest.SingleRead (0 ms)
+28: [----------] 1 test from DistanceMatrixTest (0 ms total)
+28: 
+28: [----------] Global test environment tear-down
+28: [==========] 1 test from 1 test suite ran. (0 ms total)
+28: [  PASSED  ] 1 test.
+ 28/121 Test  #28: DistanceMatrixTest.SingleRead .....................................   Passed    0.01 sec
+test 29
+        Start  29: DistanceMatrixTest.AllMissing
+
+29: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceMatrixTest.AllMissing" "--gtest_also_run_disabled_tests"
+29: Test timeout computed to be: 10000000
+29: Note: Google Test filter = DistanceMatrixTest.AllMissing
+29: [==========] Running 1 test from 1 test suite.
+29: [----------] Global test environment set-up.
+29: [----------] 1 test from DistanceMatrixTest
+29: [ RUN      ] DistanceMatrixTest.AllMissing
+29: [DistanceMatrixTest.AllMissing] Time: 0.0000 s, Memory: 0.50 MB
+29: [       OK ] DistanceMatrixTest.AllMissing (0 ms)
+29: [----------] 1 test from DistanceMatrixTest (0 ms total)
+29: 
+29: [----------] Global test environment tear-down
+29: [==========] 1 test from 1 test suite ran. (0 ms total)
+29: [  PASSED  ] 1 test.
+ 29/121 Test  #29: DistanceMatrixTest.AllMissing .....................................   Passed    0.01 sec
+test 30
+        Start  30: DistanceMatrixTest.Statistics
+
+30: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceMatrixTest.Statistics" "--gtest_also_run_disabled_tests"
+30: Test timeout computed to be: 10000000
+30: Note: Google Test filter = DistanceMatrixTest.Statistics
+30: [==========] Running 1 test from 1 test suite.
+30: [----------] Global test environment set-up.
+30: [----------] 1 test from DistanceMatrixTest
+30: [ RUN      ] DistanceMatrixTest.Statistics
+30: [DistanceMatrixTest.Statistics] Time: 0.0000 s, Memory: 0.50 MB
+30: [       OK ] DistanceMatrixTest.Statistics (0 ms)
+30: [----------] 1 test from DistanceMatrixTest (0 ms total)
+30: 
+30: [----------] Global test environment tear-down
+30: [==========] 1 test from 1 test suite ran. (0 ms total)
+30: [  PASSED  ] 1 test.
+ 30/121 Test  #30: DistanceMatrixTest.Statistics .....................................   Passed    0.01 sec
+test 31
+        Start  31: DistanceMatrixTest.WriteCSV
+
+31: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceMatrixTest.WriteCSV" "--gtest_also_run_disabled_tests"
+31: Test timeout computed to be: 10000000
+31: Note: Google Test filter = DistanceMatrixTest.WriteCSV
+31: [==========] Running 1 test from 1 test suite.
+31: [----------] Global test environment set-up.
+31: [----------] 1 test from DistanceMatrixTest
+31: [ RUN      ] DistanceMatrixTest.WriteCSV
+31: [DistanceMatrixTest.WriteCSV] Time: 0.0003 s, Memory: 0.58 MB
+31: [       OK ] DistanceMatrixTest.WriteCSV (0 ms)
+31: [----------] 1 test from DistanceMatrixTest (1 ms total)
+31: 
+31: [----------] Global test environment tear-down
+31: [==========] 1 test from 1 test suite ran. (1 ms total)
+31: [  PASSED  ] 1 test.
+ 31/121 Test  #31: DistanceMatrixTest.WriteCSV .......................................   Passed    0.01 sec
+test 32
+        Start  32: DistanceCalculatorTest.MetricToString
+
+32: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceCalculatorTest.MetricToString" "--gtest_also_run_disabled_tests"
+32: Test timeout computed to be: 10000000
+32: Note: Google Test filter = DistanceCalculatorTest.MetricToString
+32: [==========] Running 1 test from 1 test suite.
+32: [----------] Global test environment set-up.
+32: [----------] 1 test from DistanceCalculatorTest
+32: [ RUN      ] DistanceCalculatorTest.MetricToString
+32: [DistanceCalculatorTest.MetricToString] Time: 0.0000 s, Memory: 0.46 MB
+32: [       OK ] DistanceCalculatorTest.MetricToString (0 ms)
+32: [----------] 1 test from DistanceCalculatorTest (0 ms total)
+32: 
+32: [----------] Global test environment tear-down
+32: [==========] 1 test from 1 test suite ran. (0 ms total)
+32: [  PASSED  ] 1 test.
+ 32/121 Test  #32: DistanceCalculatorTest.MetricToString .............................   Passed    0.01 sec
+test 33
+        Start  33: DistanceCalculatorTest.StringToMetric
+
+33: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=DistanceCalculatorTest.StringToMetric" "--gtest_also_run_disabled_tests"
+33: Test timeout computed to be: 10000000
+33: Note: Google Test filter = DistanceCalculatorTest.StringToMetric
+33: [==========] Running 1 test from 1 test suite.
+33: [----------] Global test environment set-up.
+33: [----------] 1 test from DistanceCalculatorTest
+33: [ RUN      ] DistanceCalculatorTest.StringToMetric
+33: [DistanceCalculatorTest.StringToMetric] Time: 0.0000 s, Memory: 0.46 MB
+33: [       OK ] DistanceCalculatorTest.StringToMetric (0 ms)
+33: [----------] 1 test from DistanceCalculatorTest (0 ms total)
+33: 
+33: [----------] Global test environment tear-down
+33: [==========] 1 test from 1 test suite ran. (0 ms total)
+33: [  PASSED  ] 1 test.
+ 33/121 Test  #33: DistanceCalculatorTest.StringToMetric .............................   Passed    0.01 sec
+test 34
+        Start  34: HierarchicalClusteringTest.UPGMA_BasicCorrectness
+
+34: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.UPGMA_BasicCorrectness" "--gtest_also_run_disabled_tests"
+34: Test timeout computed to be: 10000000
+34: Note: Google Test filter = HierarchicalClusteringTest.UPGMA_BasicCorrectness
+34: [==========] Running 1 test from 1 test suite.
+34: [----------] Global test environment set-up.
+34: [----------] 1 test from HierarchicalClusteringTest
+34: [ RUN      ] HierarchicalClusteringTest.UPGMA_BasicCorrectness
+34: [HierarchicalClusteringTest.UPGMA_BasicCorrectness] Time: 0.0000 s, Memory: 0.47 MB
+34: [       OK ] HierarchicalClusteringTest.UPGMA_BasicCorrectness (0 ms)
+34: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+34: 
+34: [----------] Global test environment tear-down
+34: [==========] 1 test from 1 test suite ran. (0 ms total)
+34: [  PASSED  ] 1 test.
+ 34/121 Test  #34: HierarchicalClusteringTest.UPGMA_BasicCorrectness .................   Passed    0.01 sec
+test 35
+        Start  35: HierarchicalClusteringTest.UPGMA_TreeTopology
+
+35: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.UPGMA_TreeTopology" "--gtest_also_run_disabled_tests"
+35: Test timeout computed to be: 10000000
+35: Note: Google Test filter = HierarchicalClusteringTest.UPGMA_TreeTopology
+35: [==========] Running 1 test from 1 test suite.
+35: [----------] Global test environment set-up.
+35: [----------] 1 test from HierarchicalClusteringTest
+35: [ RUN      ] HierarchicalClusteringTest.UPGMA_TreeTopology
+35: [HierarchicalClusteringTest.UPGMA_TreeTopology] Time: 0.0000 s, Memory: 0.47 MB
+35: [       OK ] HierarchicalClusteringTest.UPGMA_TreeTopology (0 ms)
+35: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+35: 
+35: [----------] Global test environment tear-down
+35: [==========] 1 test from 1 test suite ran. (0 ms total)
+35: [  PASSED  ] 1 test.
+ 35/121 Test  #35: HierarchicalClusteringTest.UPGMA_TreeTopology .....................   Passed    0.01 sec
+test 36
+        Start  36: HierarchicalClusteringTest.UPGMA_BranchLengths
+
+36: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.UPGMA_BranchLengths" "--gtest_also_run_disabled_tests"
+36: Test timeout computed to be: 10000000
+36: Note: Google Test filter = HierarchicalClusteringTest.UPGMA_BranchLengths
+36: [==========] Running 1 test from 1 test suite.
+36: [----------] Global test environment set-up.
+36: [----------] 1 test from HierarchicalClusteringTest
+36: [ RUN      ] HierarchicalClusteringTest.UPGMA_BranchLengths
+36: [HierarchicalClusteringTest.UPGMA_BranchLengths] Time: 0.0000 s, Memory: 0.47 MB
+36: [       OK ] HierarchicalClusteringTest.UPGMA_BranchLengths (0 ms)
+36: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+36: 
+36: [----------] Global test environment tear-down
+36: [==========] 1 test from 1 test suite ran. (0 ms total)
+36: [  PASSED  ] 1 test.
+ 36/121 Test  #36: HierarchicalClusteringTest.UPGMA_BranchLengths ....................   Passed    0.01 sec
+test 37
+        Start  37: HierarchicalClusteringTest.UPGMA_NewickOutput
+
+37: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.UPGMA_NewickOutput" "--gtest_also_run_disabled_tests"
+37: Test timeout computed to be: 10000000
+37: Note: Google Test filter = HierarchicalClusteringTest.UPGMA_NewickOutput
+37: [==========] Running 1 test from 1 test suite.
+37: [----------] Global test environment set-up.
+37: [----------] 1 test from HierarchicalClusteringTest
+37: [ RUN      ] HierarchicalClusteringTest.UPGMA_NewickOutput
+37: [HierarchicalClusteringTest.UPGMA_NewickOutput] Time: 0.0001 s, Memory: 0.47 MB
+37: [       OK ] HierarchicalClusteringTest.UPGMA_NewickOutput (0 ms)
+37: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+37: 
+37: [----------] Global test environment tear-down
+37: [==========] 1 test from 1 test suite ran. (0 ms total)
+37: [  PASSED  ] 1 test.
+ 37/121 Test  #37: HierarchicalClusteringTest.UPGMA_NewickOutput .....................   Passed    0.01 sec
+test 38
+        Start  38: HierarchicalClusteringTest.SingleLinkage_ChainEffect
+
+38: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.SingleLinkage_ChainEffect" "--gtest_also_run_disabled_tests"
+38: Test timeout computed to be: 10000000
+38: Note: Google Test filter = HierarchicalClusteringTest.SingleLinkage_ChainEffect
+38: [==========] Running 1 test from 1 test suite.
+38: [----------] Global test environment set-up.
+38: [----------] 1 test from HierarchicalClusteringTest
+38: [ RUN      ] HierarchicalClusteringTest.SingleLinkage_ChainEffect
+38: [HierarchicalClusteringTest.SingleLinkage_ChainEffect] Time: 0.0001 s, Memory: 0.49 MB
+38: [       OK ] HierarchicalClusteringTest.SingleLinkage_ChainEffect (0 ms)
+38: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+38: 
+38: [----------] Global test environment tear-down
+38: [==========] 1 test from 1 test suite ran. (0 ms total)
+38: [  PASSED  ] 1 test.
+ 38/121 Test  #38: HierarchicalClusteringTest.SingleLinkage_ChainEffect ..............   Passed    0.01 sec
+test 39
+        Start  39: HierarchicalClusteringTest.CompleteLinkage
+
+39: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.CompleteLinkage" "--gtest_also_run_disabled_tests"
+39: Test timeout computed to be: 10000000
+39: Note: Google Test filter = HierarchicalClusteringTest.CompleteLinkage
+39: [==========] Running 1 test from 1 test suite.
+39: [----------] Global test environment set-up.
+39: [----------] 1 test from HierarchicalClusteringTest
+39: [ RUN      ] HierarchicalClusteringTest.CompleteLinkage
+39: [HierarchicalClusteringTest.CompleteLinkage] Time: 0.0001 s, Memory: 0.49 MB
+39: [       OK ] HierarchicalClusteringTest.CompleteLinkage (0 ms)
+39: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+39: 
+39: [----------] Global test environment tear-down
+39: [==========] 1 test from 1 test suite ran. (0 ms total)
+39: [  PASSED  ] 1 test.
+ 39/121 Test  #39: HierarchicalClusteringTest.CompleteLinkage ........................   Passed    0.01 sec
+test 40
+        Start  40: HierarchicalClusteringTest.WardMethod
+
+40: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.WardMethod" "--gtest_also_run_disabled_tests"
+40: Test timeout computed to be: 10000000
+40: Note: Google Test filter = HierarchicalClusteringTest.WardMethod
+40: [==========] Running 1 test from 1 test suite.
+40: [----------] Global test environment set-up.
+40: [----------] 1 test from HierarchicalClusteringTest
+40: [ RUN      ] HierarchicalClusteringTest.WardMethod
+40: [HierarchicalClusteringTest.WardMethod] Time: 0.0000 s, Memory: 0.49 MB
+40: [       OK ] HierarchicalClusteringTest.WardMethod (0 ms)
+40: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+40: 
+40: [----------] Global test environment tear-down
+40: [==========] 1 test from 1 test suite ran. (0 ms total)
+40: [  PASSED  ] 1 test.
+ 40/121 Test  #40: HierarchicalClusteringTest.WardMethod .............................   Passed    0.01 sec
+test 41
+        Start  41: HierarchicalClusteringTest.AllMethodsProduceTrees
+
+41: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.AllMethodsProduceTrees" "--gtest_also_run_disabled_tests"
+41: Test timeout computed to be: 10000000
+41: Note: Google Test filter = HierarchicalClusteringTest.AllMethodsProduceTrees
+41: [==========] Running 1 test from 1 test suite.
+41: [----------] Global test environment set-up.
+41: [----------] 1 test from HierarchicalClusteringTest
+41: [ RUN      ] HierarchicalClusteringTest.AllMethodsProduceTrees
+41: [HierarchicalClusteringTest.AllMethodsProduceTrees] Time: 0.0000 s, Memory: 0.47 MB
+41: [       OK ] HierarchicalClusteringTest.AllMethodsProduceTrees (0 ms)
+41: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+41: 
+41: [----------] Global test environment tear-down
+41: [==========] 1 test from 1 test suite ran. (0 ms total)
+41: [  PASSED  ] 1 test.
+ 41/121 Test  #41: HierarchicalClusteringTest.AllMethodsProduceTrees .................   Passed    0.01 sec
+test 42
+        Start  42: HierarchicalClusteringTest.TreeNode_CreateLeaf
+
+42: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.TreeNode_CreateLeaf" "--gtest_also_run_disabled_tests"
+42: Test timeout computed to be: 10000000
+42: Note: Google Test filter = HierarchicalClusteringTest.TreeNode_CreateLeaf
+42: [==========] Running 1 test from 1 test suite.
+42: [----------] Global test environment set-up.
+42: [----------] 1 test from HierarchicalClusteringTest
+42: [ RUN      ] HierarchicalClusteringTest.TreeNode_CreateLeaf
+42: [HierarchicalClusteringTest.TreeNode_CreateLeaf] Time: 0.0000 s, Memory: 0.47 MB
+42: [       OK ] HierarchicalClusteringTest.TreeNode_CreateLeaf (0 ms)
+42: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+42: 
+42: [----------] Global test environment tear-down
+42: [==========] 1 test from 1 test suite ran. (0 ms total)
+42: [  PASSED  ] 1 test.
+ 42/121 Test  #42: HierarchicalClusteringTest.TreeNode_CreateLeaf ....................   Passed    0.01 sec
+test 43
+        Start  43: HierarchicalClusteringTest.TreeNode_CreateInternal
+
+43: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.TreeNode_CreateInternal" "--gtest_also_run_disabled_tests"
+43: Test timeout computed to be: 10000000
+43: Note: Google Test filter = HierarchicalClusteringTest.TreeNode_CreateInternal
+43: [==========] Running 1 test from 1 test suite.
+43: [----------] Global test environment set-up.
+43: [----------] 1 test from HierarchicalClusteringTest
+43: [ RUN      ] HierarchicalClusteringTest.TreeNode_CreateInternal
+43: [HierarchicalClusteringTest.TreeNode_CreateInternal] Time: 0.0000 s, Memory: 0.47 MB
+43: [       OK ] HierarchicalClusteringTest.TreeNode_CreateInternal (0 ms)
+43: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+43: 
+43: [----------] Global test environment tear-down
+43: [==========] 1 test from 1 test suite ran. (0 ms total)
+43: [  PASSED  ] 1 test.
+ 43/121 Test  #43: HierarchicalClusteringTest.TreeNode_CreateInternal ................   Passed    0.01 sec
+test 44
+        Start  44: HierarchicalClusteringTest.Tree_DeepCopy
+
+44: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.Tree_DeepCopy" "--gtest_also_run_disabled_tests"
+44: Test timeout computed to be: 10000000
+44: Note: Google Test filter = HierarchicalClusteringTest.Tree_DeepCopy
+44: [==========] Running 1 test from 1 test suite.
+44: [----------] Global test environment set-up.
+44: [----------] 1 test from HierarchicalClusteringTest
+44: [ RUN      ] HierarchicalClusteringTest.Tree_DeepCopy
+44: [HierarchicalClusteringTest.Tree_DeepCopy] Time: 0.0000 s, Memory: 0.47 MB
+44: [       OK ] HierarchicalClusteringTest.Tree_DeepCopy (0 ms)
+44: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+44: 
+44: [----------] Global test environment tear-down
+44: [==========] 1 test from 1 test suite ran. (0 ms total)
+44: [  PASSED  ] 1 test.
+ 44/121 Test  #44: HierarchicalClusteringTest.Tree_DeepCopy ..........................   Passed    0.01 sec
+test 45
+        Start  45: HierarchicalClusteringTest.TreeCutter_ByDistance
+
+45: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.TreeCutter_ByDistance" "--gtest_also_run_disabled_tests"
+45: Test timeout computed to be: 10000000
+45: Note: Google Test filter = HierarchicalClusteringTest.TreeCutter_ByDistance
+45: [==========] Running 1 test from 1 test suite.
+45: [----------] Global test environment set-up.
+45: [----------] 1 test from HierarchicalClusteringTest
+45: [ RUN      ] HierarchicalClusteringTest.TreeCutter_ByDistance
+45: [HierarchicalClusteringTest.TreeCutter_ByDistance] Time: 0.0000 s, Memory: 0.47 MB
+45: [       OK ] HierarchicalClusteringTest.TreeCutter_ByDistance (0 ms)
+45: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+45: 
+45: [----------] Global test environment tear-down
+45: [==========] 1 test from 1 test suite ran. (0 ms total)
+45: [  PASSED  ] 1 test.
+ 45/121 Test  #45: HierarchicalClusteringTest.TreeCutter_ByDistance ..................   Passed    0.01 sec
+test 46
+        Start  46: HierarchicalClusteringTest.TreeCutter_ByNumClusters
+
+46: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.TreeCutter_ByNumClusters" "--gtest_also_run_disabled_tests"
+46: Test timeout computed to be: 10000000
+46: Note: Google Test filter = HierarchicalClusteringTest.TreeCutter_ByNumClusters
+46: [==========] Running 1 test from 1 test suite.
+46: [----------] Global test environment set-up.
+46: [----------] 1 test from HierarchicalClusteringTest
+46: [ RUN      ] HierarchicalClusteringTest.TreeCutter_ByNumClusters
+46: [HierarchicalClusteringTest.TreeCutter_ByNumClusters] Time: 0.0000 s, Memory: 0.47 MB
+46: [       OK ] HierarchicalClusteringTest.TreeCutter_ByNumClusters (0 ms)
+46: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+46: 
+46: [----------] Global test environment tear-down
+46: [==========] 1 test from 1 test suite ran. (0 ms total)
+46: [  PASSED  ] 1 test.
+ 46/121 Test  #46: HierarchicalClusteringTest.TreeCutter_ByNumClusters ...............   Passed    0.01 sec
+test 47
+        Start  47: HierarchicalClusteringTest.EdgeCase_SingleNode
+
+47: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.EdgeCase_SingleNode" "--gtest_also_run_disabled_tests"
+47: Test timeout computed to be: 10000000
+47: Note: Google Test filter = HierarchicalClusteringTest.EdgeCase_SingleNode
+47: [==========] Running 1 test from 1 test suite.
+47: [----------] Global test environment set-up.
+47: [----------] 1 test from HierarchicalClusteringTest
+47: [ RUN      ] HierarchicalClusteringTest.EdgeCase_SingleNode
+47: [HierarchicalClusteringTest.EdgeCase_SingleNode] Time: 0.0000 s, Memory: 0.47 MB
+47: [       OK ] HierarchicalClusteringTest.EdgeCase_SingleNode (0 ms)
+47: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+47: 
+47: [----------] Global test environment tear-down
+47: [==========] 1 test from 1 test suite ran. (0 ms total)
+47: [  PASSED  ] 1 test.
+ 47/121 Test  #47: HierarchicalClusteringTest.EdgeCase_SingleNode ....................   Passed    0.01 sec
+test 48
+        Start  48: HierarchicalClusteringTest.EdgeCase_TwoNodes
+
+48: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.EdgeCase_TwoNodes" "--gtest_also_run_disabled_tests"
+48: Test timeout computed to be: 10000000
+48: Note: Google Test filter = HierarchicalClusteringTest.EdgeCase_TwoNodes
+48: [==========] Running 1 test from 1 test suite.
+48: [----------] Global test environment set-up.
+48: [----------] 1 test from HierarchicalClusteringTest
+48: [ RUN      ] HierarchicalClusteringTest.EdgeCase_TwoNodes
+48: [HierarchicalClusteringTest.EdgeCase_TwoNodes] Time: 0.0000 s, Memory: 0.47 MB
+48: [       OK ] HierarchicalClusteringTest.EdgeCase_TwoNodes (0 ms)
+48: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+48: 
+48: [----------] Global test environment tear-down
+48: [==========] 1 test from 1 test suite ran. (0 ms total)
+48: [  PASSED  ] 1 test.
+ 48/121 Test  #48: HierarchicalClusteringTest.EdgeCase_TwoNodes ......................   Passed    0.01 sec
+test 49
+        Start  49: HierarchicalClusteringTest.EdgeCase_EmptyMatrix
+
+49: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.EdgeCase_EmptyMatrix" "--gtest_also_run_disabled_tests"
+49: Test timeout computed to be: 10000000
+49: Note: Google Test filter = HierarchicalClusteringTest.EdgeCase_EmptyMatrix
+49: [==========] Running 1 test from 1 test suite.
+49: [----------] Global test environment set-up.
+49: [----------] 1 test from HierarchicalClusteringTest
+49: [ RUN      ] HierarchicalClusteringTest.EdgeCase_EmptyMatrix
+49: [HierarchicalClusteringTest.EdgeCase_EmptyMatrix] Time: 0.0000 s, Memory: 0.47 MB
+49: [       OK ] HierarchicalClusteringTest.EdgeCase_EmptyMatrix (0 ms)
+49: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+49: 
+49: [----------] Global test environment tear-down
+49: [==========] 1 test from 1 test suite ran. (0 ms total)
+49: [  PASSED  ] 1 test.
+ 49/121 Test  #49: HierarchicalClusteringTest.EdgeCase_EmptyMatrix ...................   Passed    0.01 sec
+test 50
+        Start  50: HierarchicalClusteringTest.EdgeCase_IdenticalDistances
+
+50: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.EdgeCase_IdenticalDistances" "--gtest_also_run_disabled_tests"
+50: Test timeout computed to be: 10000000
+50: Note: Google Test filter = HierarchicalClusteringTest.EdgeCase_IdenticalDistances
+50: [==========] Running 1 test from 1 test suite.
+50: [----------] Global test environment set-up.
+50: [----------] 1 test from HierarchicalClusteringTest
+50: [ RUN      ] HierarchicalClusteringTest.EdgeCase_IdenticalDistances
+50: [HierarchicalClusteringTest.EdgeCase_IdenticalDistances] Time: 0.0000 s, Memory: 0.47 MB
+50: [       OK ] HierarchicalClusteringTest.EdgeCase_IdenticalDistances (0 ms)
+50: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+50: 
+50: [----------] Global test environment tear-down
+50: [==========] 1 test from 1 test suite ran. (0 ms total)
+50: [  PASSED  ] 1 test.
+ 50/121 Test  #50: HierarchicalClusteringTest.EdgeCase_IdenticalDistances ............   Passed    0.01 sec
+test 51
+        Start  51: HierarchicalClusteringTest.BootstrapAnnotation
+
+51: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.BootstrapAnnotation" "--gtest_also_run_disabled_tests"
+51: Test timeout computed to be: 10000000
+51: Note: Google Test filter = HierarchicalClusteringTest.BootstrapAnnotation
+51: [==========] Running 1 test from 1 test suite.
+51: [----------] Global test environment set-up.
+51: [----------] 1 test from HierarchicalClusteringTest
+51: [ RUN      ] HierarchicalClusteringTest.BootstrapAnnotation
+51: [HierarchicalClusteringTest.BootstrapAnnotation] Time: 0.0001 s, Memory: 0.47 MB
+51: [       OK ] HierarchicalClusteringTest.BootstrapAnnotation (0 ms)
+51: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+51: 
+51: [----------] Global test environment tear-down
+51: [==========] 1 test from 1 test suite ran. (0 ms total)
+51: [  PASSED  ] 1 test.
+ 51/121 Test  #51: HierarchicalClusteringTest.BootstrapAnnotation ....................   Passed    0.01 sec
+test 52
+        Start  52: HierarchicalClusteringTest.TreeWriter_WriteNewick
+
+52: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.TreeWriter_WriteNewick" "--gtest_also_run_disabled_tests"
+52: Test timeout computed to be: 10000000
+52: Note: Google Test filter = HierarchicalClusteringTest.TreeWriter_WriteNewick
+52: [==========] Running 1 test from 1 test suite.
+52: [----------] Global test environment set-up.
+52: [----------] 1 test from HierarchicalClusteringTest
+52: [ RUN      ] HierarchicalClusteringTest.TreeWriter_WriteNewick
+52: [HierarchicalClusteringTest.TreeWriter_WriteNewick] Time: 0.0003 s, Memory: 0.55 MB
+52: [       OK ] HierarchicalClusteringTest.TreeWriter_WriteNewick (0 ms)
+52: [----------] 1 test from HierarchicalClusteringTest (1 ms total)
+52: 
+52: [----------] Global test environment tear-down
+52: [==========] 1 test from 1 test suite ran. (1 ms total)
+52: [  PASSED  ] 1 test.
+ 52/121 Test  #52: HierarchicalClusteringTest.TreeWriter_WriteNewick .................   Passed    0.01 sec
+test 53
+        Start  53: HierarchicalClusteringTest.TreeWriter_WriteLinkageMatrix
+
+53: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.TreeWriter_WriteLinkageMatrix" "--gtest_also_run_disabled_tests"
+53: Test timeout computed to be: 10000000
+53: Note: Google Test filter = HierarchicalClusteringTest.TreeWriter_WriteLinkageMatrix
+53: [==========] Running 1 test from 1 test suite.
+53: [----------] Global test environment set-up.
+53: [----------] 1 test from HierarchicalClusteringTest
+53: [ RUN      ] HierarchicalClusteringTest.TreeWriter_WriteLinkageMatrix
+53: [HierarchicalClusteringTest.TreeWriter_WriteLinkageMatrix] Time: 0.0003 s, Memory: 0.55 MB
+53: [       OK ] HierarchicalClusteringTest.TreeWriter_WriteLinkageMatrix (0 ms)
+53: [----------] 1 test from HierarchicalClusteringTest (1 ms total)
+53: 
+53: [----------] Global test environment tear-down
+53: [==========] 1 test from 1 test suite ran. (1 ms total)
+53: [  PASSED  ] 1 test.
+ 53/121 Test  #53: HierarchicalClusteringTest.TreeWriter_WriteLinkageMatrix ..........   Passed    0.01 sec
+test 54
+        Start  54: HierarchicalClusteringTest.TreeWriter_WriteStats
+
+54: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.TreeWriter_WriteStats" "--gtest_also_run_disabled_tests"
+54: Test timeout computed to be: 10000000
+54: Note: Google Test filter = HierarchicalClusteringTest.TreeWriter_WriteStats
+54: [==========] Running 1 test from 1 test suite.
+54: [----------] Global test environment set-up.
+54: [----------] 1 test from HierarchicalClusteringTest
+54: [ RUN      ] HierarchicalClusteringTest.TreeWriter_WriteStats
+54: [HierarchicalClusteringTest.TreeWriter_WriteStats] Time: 0.0003 s, Memory: 0.55 MB
+54: [       OK ] HierarchicalClusteringTest.TreeWriter_WriteStats (0 ms)
+54: [----------] 1 test from HierarchicalClusteringTest (1 ms total)
+54: 
+54: [----------] Global test environment tear-down
+54: [==========] 1 test from 1 test suite ran. (1 ms total)
+54: [  PASSED  ] 1 test.
+ 54/121 Test  #54: HierarchicalClusteringTest.TreeWriter_WriteStats ..................   Passed    0.01 sec
+test 55
+        Start  55: HierarchicalClusteringTest.IntegrationWithDistanceMatrix
+
+55: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringTest.IntegrationWithDistanceMatrix" "--gtest_also_run_disabled_tests"
+55: Test timeout computed to be: 10000000
+55: Note: Google Test filter = HierarchicalClusteringTest.IntegrationWithDistanceMatrix
+55: [==========] Running 1 test from 1 test suite.
+55: [----------] Global test environment set-up.
+55: [----------] 1 test from HierarchicalClusteringTest
+55: [ RUN      ] HierarchicalClusteringTest.IntegrationWithDistanceMatrix
+55: [HierarchicalClusteringTest.IntegrationWithDistanceMatrix] Time: 0.0000 s, Memory: 0.47 MB
+55: [       OK ] HierarchicalClusteringTest.IntegrationWithDistanceMatrix (0 ms)
+55: [----------] 1 test from HierarchicalClusteringTest (0 ms total)
+55: 
+55: [----------] Global test environment tear-down
+55: [==========] 1 test from 1 test suite ran. (0 ms total)
+55: [  PASSED  ] 1 test.
+ 55/121 Test  #55: HierarchicalClusteringTest.IntegrationWithDistanceMatrix ..........   Passed    0.01 sec
+test 56
+        Start  56: LinkageMethodTest.MethodToString
+
+56: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=LinkageMethodTest.MethodToString" "--gtest_also_run_disabled_tests"
+56: Test timeout computed to be: 10000000
+56: Note: Google Test filter = LinkageMethodTest.MethodToString
+56: [==========] Running 1 test from 1 test suite.
+56: [----------] Global test environment set-up.
+56: [----------] 1 test from LinkageMethodTest
+56: [ RUN      ] LinkageMethodTest.MethodToString
+56: [LinkageMethodTest.MethodToString] Time: 0.0000 s, Memory: 0.46 MB
+56: [       OK ] LinkageMethodTest.MethodToString (0 ms)
+56: [----------] 1 test from LinkageMethodTest (0 ms total)
+56: 
+56: [----------] Global test environment tear-down
+56: [==========] 1 test from 1 test suite ran. (0 ms total)
+56: [  PASSED  ] 1 test.
+ 56/121 Test  #56: LinkageMethodTest.MethodToString ..................................   Passed    0.01 sec
+test 57
+        Start  57: LinkageMethodTest.StringToMethod
+
+57: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=LinkageMethodTest.StringToMethod" "--gtest_also_run_disabled_tests"
+57: Test timeout computed to be: 10000000
+57: Note: Google Test filter = LinkageMethodTest.StringToMethod
+57: [==========] Running 1 test from 1 test suite.
+57: [----------] Global test environment set-up.
+57: [----------] 1 test from LinkageMethodTest
+57: [ RUN      ] LinkageMethodTest.StringToMethod
+57: [LinkageMethodTest.StringToMethod] Time: 0.0000 s, Memory: 0.46 MB
+57: [       OK ] LinkageMethodTest.StringToMethod (0 ms)
+57: [----------] 1 test from LinkageMethodTest (0 ms total)
+57: 
+57: [----------] Global test environment tear-down
+57: [==========] 1 test from 1 test suite ran. (0 ms total)
+57: [  PASSED  ] 1 test.
+ 57/121 Test  #57: LinkageMethodTest.StringToMethod ..................................   Passed    0.01 sec
+test 58
+        Start  58: HierarchicalClusteringPerformance.MediumSizeMatrix
+
+58: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=HierarchicalClusteringPerformance.MediumSizeMatrix" "--gtest_also_run_disabled_tests"
+58: Test timeout computed to be: 10000000
+58: Note: Google Test filter = HierarchicalClusteringPerformance.MediumSizeMatrix
+58: [==========] Running 1 test from 1 test suite.
+58: [----------] Global test environment set-up.
+58: [----------] 1 test from HierarchicalClusteringPerformance
+58: [ RUN      ] HierarchicalClusteringPerformance.MediumSizeMatrix
+58:   UPGMA 100x100: 5 ms
+58: [HierarchicalClusteringPerformance.MediumSizeMatrix] Time: 0.0059 s, Memory: 0.66 MB
+58: [       OK ] HierarchicalClusteringPerformance.MediumSizeMatrix (5 ms)
+58: [----------] 1 test from HierarchicalClusteringPerformance (6 ms total)
+58: 
+58: [----------] Global test environment tear-down
+58: [==========] 1 test from 1 test suite ran. (6 ms total)
+58: [  PASSED  ] 1 test.
+ 58/121 Test  #58: HierarchicalClusteringPerformance.MediumSizeMatrix ................   Passed    0.02 sec
+test 59
+        Start  59: MathUtilsTest.LogFactorial_SmallValues
+
+59: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.LogFactorial_SmallValues" "--gtest_also_run_disabled_tests"
+59: Test timeout computed to be: 10000000
+59: Note: Google Test filter = MathUtilsTest.LogFactorial_SmallValues
+59: [==========] Running 1 test from 1 test suite.
+59: [----------] Global test environment set-up.
+59: [----------] 1 test from MathUtilsTest
+59: [ RUN      ] MathUtilsTest.LogFactorial_SmallValues
+59: [MathUtilsTest.LogFactorial_SmallValues] Time: 0.0001 s, Memory: 0.56 MB
+59: [       OK ] MathUtilsTest.LogFactorial_SmallValues (0 ms)
+59: [----------] 1 test from MathUtilsTest (0 ms total)
+59: 
+59: [----------] Global test environment tear-down
+59: [==========] 1 test from 1 test suite ran. (0 ms total)
+59: [  PASSED  ] 1 test.
+ 59/121 Test  #59: MathUtilsTest.LogFactorial_SmallValues ............................   Passed    0.01 sec
+test 60
+        Start  60: MathUtilsTest.LogFactorial_LargeValues
+
+60: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.LogFactorial_LargeValues" "--gtest_also_run_disabled_tests"
+60: Test timeout computed to be: 10000000
+60: Note: Google Test filter = MathUtilsTest.LogFactorial_LargeValues
+60: [==========] Running 1 test from 1 test suite.
+60: [----------] Global test environment set-up.
+60: [----------] 1 test from MathUtilsTest
+60: [ RUN      ] MathUtilsTest.LogFactorial_LargeValues
+60: [MathUtilsTest.LogFactorial_LargeValues] Time: 0.0001 s, Memory: 0.56 MB
+60: [       OK ] MathUtilsTest.LogFactorial_LargeValues (0 ms)
+60: [----------] 1 test from MathUtilsTest (0 ms total)
+60: 
+60: [----------] Global test environment tear-down
+60: [==========] 1 test from 1 test suite ran. (0 ms total)
+60: [  PASSED  ] 1 test.
+ 60/121 Test  #60: MathUtilsTest.LogFactorial_LargeValues ............................   Passed    0.01 sec
+test 61
+        Start  61: MathUtilsTest.LogFactorial_EdgeCases
+
+61: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.LogFactorial_EdgeCases" "--gtest_also_run_disabled_tests"
+61: Test timeout computed to be: 10000000
+61: Note: Google Test filter = MathUtilsTest.LogFactorial_EdgeCases
+61: [==========] Running 1 test from 1 test suite.
+61: [----------] Global test environment set-up.
+61: [----------] 1 test from MathUtilsTest
+61: [ RUN      ] MathUtilsTest.LogFactorial_EdgeCases
+61: [MathUtilsTest.LogFactorial_EdgeCases] Time: 0.0001 s, Memory: 0.56 MB
+61: [       OK ] MathUtilsTest.LogFactorial_EdgeCases (0 ms)
+61: [----------] 1 test from MathUtilsTest (0 ms total)
+61: 
+61: [----------] Global test environment tear-down
+61: [==========] 1 test from 1 test suite ran. (0 ms total)
+61: [  PASSED  ] 1 test.
+ 61/121 Test  #61: MathUtilsTest.LogFactorial_EdgeCases ..............................   Passed    0.01 sec
+test 62
+        Start  62: MathUtilsTest.LogBinomial_BasicCases
+
+62: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.LogBinomial_BasicCases" "--gtest_also_run_disabled_tests"
+62: Test timeout computed to be: 10000000
+62: Note: Google Test filter = MathUtilsTest.LogBinomial_BasicCases
+62: [==========] Running 1 test from 1 test suite.
+62: [----------] Global test environment set-up.
+62: [----------] 1 test from MathUtilsTest
+62: [ RUN      ] MathUtilsTest.LogBinomial_BasicCases
+62: [MathUtilsTest.LogBinomial_BasicCases] Time: 0.0001 s, Memory: 0.56 MB
+62: [       OK ] MathUtilsTest.LogBinomial_BasicCases (0 ms)
+62: [----------] 1 test from MathUtilsTest (0 ms total)
+62: 
+62: [----------] Global test environment tear-down
+62: [==========] 1 test from 1 test suite ran. (0 ms total)
+62: [  PASSED  ] 1 test.
+ 62/121 Test  #62: MathUtilsTest.LogBinomial_BasicCases ..............................   Passed    0.01 sec
+test 63
+        Start  63: MathUtilsTest.LogBinomial_EdgeCases
+
+63: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.LogBinomial_EdgeCases" "--gtest_also_run_disabled_tests"
+63: Test timeout computed to be: 10000000
+63: Note: Google Test filter = MathUtilsTest.LogBinomial_EdgeCases
+63: [==========] Running 1 test from 1 test suite.
+63: [----------] Global test environment set-up.
+63: [----------] 1 test from MathUtilsTest
+63: [ RUN      ] MathUtilsTest.LogBinomial_EdgeCases
+63: [MathUtilsTest.LogBinomial_EdgeCases] Time: 0.0000 s, Memory: 0.46 MB
+63: [       OK ] MathUtilsTest.LogBinomial_EdgeCases (0 ms)
+63: [----------] 1 test from MathUtilsTest (0 ms total)
+63: 
+63: [----------] Global test environment tear-down
+63: [==========] 1 test from 1 test suite ran. (0 ms total)
+63: [  PASSED  ] 1 test.
+ 63/121 Test  #63: MathUtilsTest.LogBinomial_EdgeCases ...............................   Passed    0.01 sec
+test 64
+        Start  64: MathUtilsTest.OddsRatio_BasicCases
+
+64: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.OddsRatio_BasicCases" "--gtest_also_run_disabled_tests"
+64: Test timeout computed to be: 10000000
+64: Note: Google Test filter = MathUtilsTest.OddsRatio_BasicCases
+64: [==========] Running 1 test from 1 test suite.
+64: [----------] Global test environment set-up.
+64: [----------] 1 test from MathUtilsTest
+64: [ RUN      ] MathUtilsTest.OddsRatio_BasicCases
+64: [MathUtilsTest.OddsRatio_BasicCases] Time: 0.0000 s, Memory: 0.46 MB
+64: [       OK ] MathUtilsTest.OddsRatio_BasicCases (0 ms)
+64: [----------] 1 test from MathUtilsTest (0 ms total)
+64: 
+64: [----------] Global test environment tear-down
+64: [==========] 1 test from 1 test suite ran. (0 ms total)
+64: [  PASSED  ] 1 test.
+ 64/121 Test  #64: MathUtilsTest.OddsRatio_BasicCases ................................   Passed    0.01 sec
+test 65
+        Start  65: MathUtilsTest.OddsRatio_WithZeros
+
+65: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.OddsRatio_WithZeros" "--gtest_also_run_disabled_tests"
+65: Test timeout computed to be: 10000000
+65: Note: Google Test filter = MathUtilsTest.OddsRatio_WithZeros
+65: [==========] Running 1 test from 1 test suite.
+65: [----------] Global test environment set-up.
+65: [----------] 1 test from MathUtilsTest
+65: [ RUN      ] MathUtilsTest.OddsRatio_WithZeros
+65: [MathUtilsTest.OddsRatio_WithZeros] Time: 0.0000 s, Memory: 0.46 MB
+65: [       OK ] MathUtilsTest.OddsRatio_WithZeros (0 ms)
+65: [----------] 1 test from MathUtilsTest (0 ms total)
+65: 
+65: [----------] Global test environment tear-down
+65: [==========] 1 test from 1 test suite ran. (0 ms total)
+65: [  PASSED  ] 1 test.
+ 65/121 Test  #65: MathUtilsTest.OddsRatio_WithZeros .................................   Passed    0.01 sec
+test 66
+        Start  66: MathUtilsTest.LogOddsRatio_Symmetry
+
+66: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.LogOddsRatio_Symmetry" "--gtest_also_run_disabled_tests"
+66: Test timeout computed to be: 10000000
+66: Note: Google Test filter = MathUtilsTest.LogOddsRatio_Symmetry
+66: [==========] Running 1 test from 1 test suite.
+66: [----------] Global test environment set-up.
+66: [----------] 1 test from MathUtilsTest
+66: [ RUN      ] MathUtilsTest.LogOddsRatio_Symmetry
+66: [MathUtilsTest.LogOddsRatio_Symmetry] Time: 0.0000 s, Memory: 0.46 MB
+66: [       OK ] MathUtilsTest.LogOddsRatio_Symmetry (0 ms)
+66: [----------] 1 test from MathUtilsTest (0 ms total)
+66: 
+66: [----------] Global test environment tear-down
+66: [==========] 1 test from 1 test suite ran. (0 ms total)
+66: [  PASSED  ] 1 test.
+ 66/121 Test  #66: MathUtilsTest.LogOddsRatio_Symmetry ...............................   Passed    0.01 sec
+test 67
+        Start  67: MathUtilsTest.ChiSquare_IndependentData
+
+67: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.ChiSquare_IndependentData" "--gtest_also_run_disabled_tests"
+67: Test timeout computed to be: 10000000
+67: Note: Google Test filter = MathUtilsTest.ChiSquare_IndependentData
+67: [==========] Running 1 test from 1 test suite.
+67: [----------] Global test environment set-up.
+67: [----------] 1 test from MathUtilsTest
+67: [ RUN      ] MathUtilsTest.ChiSquare_IndependentData
+67: [MathUtilsTest.ChiSquare_IndependentData] Time: 0.0000 s, Memory: 0.46 MB
+67: [       OK ] MathUtilsTest.ChiSquare_IndependentData (0 ms)
+67: [----------] 1 test from MathUtilsTest (0 ms total)
+67: 
+67: [----------] Global test environment tear-down
+67: [==========] 1 test from 1 test suite ran. (0 ms total)
+67: [  PASSED  ] 1 test.
+ 67/121 Test  #67: MathUtilsTest.ChiSquare_IndependentData ...........................   Passed    0.01 sec
+test 68
+        Start  68: MathUtilsTest.ChiSquare_DependentData
+
+68: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.ChiSquare_DependentData" "--gtest_also_run_disabled_tests"
+68: Test timeout computed to be: 10000000
+68: Note: Google Test filter = MathUtilsTest.ChiSquare_DependentData
+68: [==========] Running 1 test from 1 test suite.
+68: [----------] Global test environment set-up.
+68: [----------] 1 test from MathUtilsTest
+68: [ RUN      ] MathUtilsTest.ChiSquare_DependentData
+68: [MathUtilsTest.ChiSquare_DependentData] Time: 0.0000 s, Memory: 0.46 MB
+68: [       OK ] MathUtilsTest.ChiSquare_DependentData (0 ms)
+68: [----------] 1 test from MathUtilsTest (0 ms total)
+68: 
+68: [----------] Global test environment tear-down
+68: [==========] 1 test from 1 test suite ran. (0 ms total)
+68: [  PASSED  ] 1 test.
+ 68/121 Test  #68: MathUtilsTest.ChiSquare_DependentData .............................   Passed    0.01 sec
+test 69
+        Start  69: MathUtilsTest.CramersV_Range
+
+69: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.CramersV_Range" "--gtest_also_run_disabled_tests"
+69: Test timeout computed to be: 10000000
+69: Note: Google Test filter = MathUtilsTest.CramersV_Range
+69: [==========] Running 1 test from 1 test suite.
+69: [----------] Global test environment set-up.
+69: [----------] 1 test from MathUtilsTest
+69: [ RUN      ] MathUtilsTest.CramersV_Range
+69: [MathUtilsTest.CramersV_Range] Time: 0.0000 s, Memory: 0.46 MB
+69: [       OK ] MathUtilsTest.CramersV_Range (0 ms)
+69: [----------] 1 test from MathUtilsTest (0 ms total)
+69: 
+69: [----------] Global test environment tear-down
+69: [==========] 1 test from 1 test suite ran. (0 ms total)
+69: [  PASSED  ] 1 test.
+ 69/121 Test  #69: MathUtilsTest.CramersV_Range ......................................   Passed    0.01 sec
+test 70
+        Start  70: MathUtilsTest.CramersV_Reliability
+
+70: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.CramersV_Reliability" "--gtest_also_run_disabled_tests"
+70: Test timeout computed to be: 10000000
+70: Note: Google Test filter = MathUtilsTest.CramersV_Reliability
+70: [==========] Running 1 test from 1 test suite.
+70: [----------] Global test environment set-up.
+70: [----------] 1 test from MathUtilsTest
+70: [ RUN      ] MathUtilsTest.CramersV_Reliability
+70: [MathUtilsTest.CramersV_Reliability] Time: 0.0000 s, Memory: 0.46 MB
+70: [       OK ] MathUtilsTest.CramersV_Reliability (0 ms)
+70: [----------] 1 test from MathUtilsTest (0 ms total)
+70: 
+70: [----------] Global test environment tear-down
+70: [==========] 1 test from 1 test suite ran. (0 ms total)
+70: [  PASSED  ] 1 test.
+ 70/121 Test  #70: MathUtilsTest.CramersV_Reliability ................................   Passed    0.01 sec
+test 71
+        Start  71: MathUtilsTest.HypergeomPMF_BasicCases
+
+71: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.HypergeomPMF_BasicCases" "--gtest_also_run_disabled_tests"
+71: Test timeout computed to be: 10000000
+71: Note: Google Test filter = MathUtilsTest.HypergeomPMF_BasicCases
+71: [==========] Running 1 test from 1 test suite.
+71: [----------] Global test environment set-up.
+71: [----------] 1 test from MathUtilsTest
+71: [ RUN      ] MathUtilsTest.HypergeomPMF_BasicCases
+71: [MathUtilsTest.HypergeomPMF_BasicCases] Time: 0.0001 s, Memory: 0.56 MB
+71: [       OK ] MathUtilsTest.HypergeomPMF_BasicCases (0 ms)
+71: [----------] 1 test from MathUtilsTest (0 ms total)
+71: 
+71: [----------] Global test environment tear-down
+71: [==========] 1 test from 1 test suite ran. (0 ms total)
+71: [  PASSED  ] 1 test.
+ 71/121 Test  #71: MathUtilsTest.HypergeomPMF_BasicCases .............................   Passed    0.01 sec
+test 72
+        Start  72: MathUtilsTest.LogSumExp_SingleValue
+
+72: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.LogSumExp_SingleValue" "--gtest_also_run_disabled_tests"
+72: Test timeout computed to be: 10000000
+72: Note: Google Test filter = MathUtilsTest.LogSumExp_SingleValue
+72: [==========] Running 1 test from 1 test suite.
+72: [----------] Global test environment set-up.
+72: [----------] 1 test from MathUtilsTest
+72: [ RUN      ] MathUtilsTest.LogSumExp_SingleValue
+72: [MathUtilsTest.LogSumExp_SingleValue] Time: 0.0000 s, Memory: 0.46 MB
+72: [       OK ] MathUtilsTest.LogSumExp_SingleValue (0 ms)
+72: [----------] 1 test from MathUtilsTest (0 ms total)
+72: 
+72: [----------] Global test environment tear-down
+72: [==========] 1 test from 1 test suite ran. (0 ms total)
+72: [  PASSED  ] 1 test.
+ 72/121 Test  #72: MathUtilsTest.LogSumExp_SingleValue ...............................   Passed    0.01 sec
+test 73
+        Start  73: MathUtilsTest.LogSumExp_TwoEqualValues
+
+73: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.LogSumExp_TwoEqualValues" "--gtest_also_run_disabled_tests"
+73: Test timeout computed to be: 10000000
+73: Note: Google Test filter = MathUtilsTest.LogSumExp_TwoEqualValues
+73: [==========] Running 1 test from 1 test suite.
+73: [----------] Global test environment set-up.
+73: [----------] 1 test from MathUtilsTest
+73: [ RUN      ] MathUtilsTest.LogSumExp_TwoEqualValues
+73: [MathUtilsTest.LogSumExp_TwoEqualValues] Time: 0.0000 s, Memory: 0.46 MB
+73: [       OK ] MathUtilsTest.LogSumExp_TwoEqualValues (0 ms)
+73: [----------] 1 test from MathUtilsTest (0 ms total)
+73: 
+73: [----------] Global test environment tear-down
+73: [==========] 1 test from 1 test suite ran. (0 ms total)
+73: [  PASSED  ] 1 test.
+ 73/121 Test  #73: MathUtilsTest.LogSumExp_TwoEqualValues ............................   Passed    0.01 sec
+test 74
+        Start  74: MathUtilsTest.LogSumExp_NumericallyStable_LargeValues
+
+74: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.LogSumExp_NumericallyStable_LargeValues" "--gtest_also_run_disabled_tests"
+74: Test timeout computed to be: 10000000
+74: Note: Google Test filter = MathUtilsTest.LogSumExp_NumericallyStable_LargeValues
+74: [==========] Running 1 test from 1 test suite.
+74: [----------] Global test environment set-up.
+74: [----------] 1 test from MathUtilsTest
+74: [ RUN      ] MathUtilsTest.LogSumExp_NumericallyStable_LargeValues
+74: [MathUtilsTest.LogSumExp_NumericallyStable_LargeValues] Time: 0.0000 s, Memory: 0.47 MB
+74: [       OK ] MathUtilsTest.LogSumExp_NumericallyStable_LargeValues (0 ms)
+74: [----------] 1 test from MathUtilsTest (0 ms total)
+74: 
+74: [----------] Global test environment tear-down
+74: [==========] 1 test from 1 test suite ran. (0 ms total)
+74: [  PASSED  ] 1 test.
+ 74/121 Test  #74: MathUtilsTest.LogSumExp_NumericallyStable_LargeValues .............   Passed    0.01 sec
+test 75
+        Start  75: MathUtilsTest.LogSumExp_NumericallyStable_VeryNegativeValues
+
+75: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.LogSumExp_NumericallyStable_VeryNegativeValues" "--gtest_also_run_disabled_tests"
+75: Test timeout computed to be: 10000000
+75: Note: Google Test filter = MathUtilsTest.LogSumExp_NumericallyStable_VeryNegativeValues
+75: [==========] Running 1 test from 1 test suite.
+75: [----------] Global test environment set-up.
+75: [----------] 1 test from MathUtilsTest
+75: [ RUN      ] MathUtilsTest.LogSumExp_NumericallyStable_VeryNegativeValues
+75: [MathUtilsTest.LogSumExp_NumericallyStable_VeryNegativeValues] Time: 0.0000 s, Memory: 0.47 MB
+75: [       OK ] MathUtilsTest.LogSumExp_NumericallyStable_VeryNegativeValues (0 ms)
+75: [----------] 1 test from MathUtilsTest (0 ms total)
+75: 
+75: [----------] Global test environment tear-down
+75: [==========] 1 test from 1 test suite ran. (0 ms total)
+75: [  PASSED  ] 1 test.
+ 75/121 Test  #75: MathUtilsTest.LogSumExp_NumericallyStable_VeryNegativeValues ......   Passed    0.01 sec
+test 76
+        Start  76: MathUtilsTest.LogSumExp_Empty
+
+76: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=MathUtilsTest.LogSumExp_Empty" "--gtest_also_run_disabled_tests"
+76: Test timeout computed to be: 10000000
+76: Note: Google Test filter = MathUtilsTest.LogSumExp_Empty
+76: [==========] Running 1 test from 1 test suite.
+76: [----------] Global test environment set-up.
+76: [----------] 1 test from MathUtilsTest
+76: [ RUN      ] MathUtilsTest.LogSumExp_Empty
+76: [MathUtilsTest.LogSumExp_Empty] Time: 0.0000 s, Memory: 0.46 MB
+76: [       OK ] MathUtilsTest.LogSumExp_Empty (0 ms)
+76: [----------] 1 test from MathUtilsTest (0 ms total)
+76: 
+76: [----------] Global test environment tear-down
+76: [==========] 1 test from 1 test suite ran. (0 ms total)
+76: [  PASSED  ] 1 test.
+ 76/121 Test  #76: MathUtilsTest.LogSumExp_Empty .....................................   Passed    0.01 sec
+test 77
+        Start  77: FisherExactTest.Fisher2x2_LadyTastingTea
+
+77: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=FisherExactTest.Fisher2x2_LadyTastingTea" "--gtest_also_run_disabled_tests"
+77: Test timeout computed to be: 10000000
+77: Note: Google Test filter = FisherExactTest.Fisher2x2_LadyTastingTea
+77: [==========] Running 1 test from 1 test suite.
+77: [----------] Global test environment set-up.
+77: [----------] 1 test from FisherExactTest
+77: [ RUN      ] FisherExactTest.Fisher2x2_LadyTastingTea
+77: [FisherExactTest.Fisher2x2_LadyTastingTea] Time: 0.0001 s, Memory: 0.58 MB
+77: [       OK ] FisherExactTest.Fisher2x2_LadyTastingTea (0 ms)
+77: [----------] 1 test from FisherExactTest (0 ms total)
+77: 
+77: [----------] Global test environment tear-down
+77: [==========] 1 test from 1 test suite ran. (0 ms total)
+77: [  PASSED  ] 1 test.
+ 77/121 Test  #77: FisherExactTest.Fisher2x2_LadyTastingTea ..........................   Passed    0.01 sec
+test 78
+        Start  78: FisherExactTest.Fisher2x2_SignificantAssociation
+
+78: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=FisherExactTest.Fisher2x2_SignificantAssociation" "--gtest_also_run_disabled_tests"
+78: Test timeout computed to be: 10000000
+78: Note: Google Test filter = FisherExactTest.Fisher2x2_SignificantAssociation
+78: [==========] Running 1 test from 1 test suite.
+78: [----------] Global test environment set-up.
+78: [----------] 1 test from FisherExactTest
+78: [ RUN      ] FisherExactTest.Fisher2x2_SignificantAssociation
+78: [FisherExactTest.Fisher2x2_SignificantAssociation] Time: 0.0001 s, Memory: 0.58 MB
+78: [       OK ] FisherExactTest.Fisher2x2_SignificantAssociation (0 ms)
+78: [----------] 1 test from FisherExactTest (0 ms total)
+78: 
+78: [----------] Global test environment tear-down
+78: [==========] 1 test from 1 test suite ran. (0 ms total)
+78: [  PASSED  ] 1 test.
+ 78/121 Test  #78: FisherExactTest.Fisher2x2_SignificantAssociation ..................   Passed    0.01 sec
+test 79
+        Start  79: FisherExactTest.Fisher2x2_NoAssociation
+
+79: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=FisherExactTest.Fisher2x2_NoAssociation" "--gtest_also_run_disabled_tests"
+79: Test timeout computed to be: 10000000
+79: Note: Google Test filter = FisherExactTest.Fisher2x2_NoAssociation
+79: [==========] Running 1 test from 1 test suite.
+79: [----------] Global test environment set-up.
+79: [----------] 1 test from FisherExactTest
+79: [ RUN      ] FisherExactTest.Fisher2x2_NoAssociation
+79: [FisherExactTest.Fisher2x2_NoAssociation] Time: 0.0001 s, Memory: 0.58 MB
+79: [       OK ] FisherExactTest.Fisher2x2_NoAssociation (0 ms)
+79: [----------] 1 test from FisherExactTest (0 ms total)
+79: 
+79: [----------] Global test environment tear-down
+79: [==========] 1 test from 1 test suite ran. (0 ms total)
+79: [  PASSED  ] 1 test.
+ 79/121 Test  #79: FisherExactTest.Fisher2x2_NoAssociation ...........................   Passed    0.01 sec
+test 80
+        Start  80: FisherExactTest.Fisher2x2_OddsRatio
+
+80: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=FisherExactTest.Fisher2x2_OddsRatio" "--gtest_also_run_disabled_tests"
+80: Test timeout computed to be: 10000000
+80: Note: Google Test filter = FisherExactTest.Fisher2x2_OddsRatio
+80: [==========] Running 1 test from 1 test suite.
+80: [----------] Global test environment set-up.
+80: [----------] 1 test from FisherExactTest
+80: [ RUN      ] FisherExactTest.Fisher2x2_OddsRatio
+80: [FisherExactTest.Fisher2x2_OddsRatio] Time: 0.0001 s, Memory: 0.58 MB
+80: [       OK ] FisherExactTest.Fisher2x2_OddsRatio (0 ms)
+80: [----------] 1 test from FisherExactTest (0 ms total)
+80: 
+80: [----------] Global test environment tear-down
+80: [==========] 1 test from 1 test suite ran. (0 ms total)
+80: [  PASSED  ] 1 test.
+ 80/121 Test  #80: FisherExactTest.Fisher2x2_OddsRatio ...............................   Passed    0.01 sec
+test 81
+        Start  81: FisherExactTest.Fisher2x2_EmptyTable
+
+81: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=FisherExactTest.Fisher2x2_EmptyTable" "--gtest_also_run_disabled_tests"
+81: Test timeout computed to be: 10000000
+81: Note: Google Test filter = FisherExactTest.Fisher2x2_EmptyTable
+81: [==========] Running 1 test from 1 test suite.
+81: [----------] Global test environment set-up.
+81: [----------] 1 test from FisherExactTest
+81: [ RUN      ] FisherExactTest.Fisher2x2_EmptyTable
+81: [FisherExactTest.Fisher2x2_EmptyTable] Time: 0.0000 s, Memory: 0.48 MB
+81: [       OK ] FisherExactTest.Fisher2x2_EmptyTable (0 ms)
+81: [----------] 1 test from FisherExactTest (0 ms total)
+81: 
+81: [----------] Global test environment tear-down
+81: [==========] 1 test from 1 test suite ran. (0 ms total)
+81: [  PASSED  ] 1 test.
+ 81/121 Test  #81: FisherExactTest.Fisher2x2_EmptyTable ..............................   Passed    0.01 sec
+test 82
+        Start  82: FisherExactTest.FisherRxC_BasicTest
+
+82: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=FisherExactTest.FisherRxC_BasicTest" "--gtest_also_run_disabled_tests"
+82: Test timeout computed to be: 10000000
+82: Note: Google Test filter = FisherExactTest.FisherRxC_BasicTest
+82: [==========] Running 1 test from 1 test suite.
+82: [----------] Global test environment set-up.
+82: [----------] 1 test from FisherExactTest
+82: [ RUN      ] FisherExactTest.FisherRxC_BasicTest
+82: [FisherExactTest.FisherRxC_BasicTest] Time: 0.0033 s, Memory: 0.58 MB
+82: [       OK ] FisherExactTest.FisherRxC_BasicTest (3 ms)
+82: [----------] 1 test from FisherExactTest (3 ms total)
+82: 
+82: [----------] Global test environment tear-down
+82: [==========] 1 test from 1 test suite ran. (4 ms total)
+82: [  PASSED  ] 1 test.
+ 82/121 Test  #82: FisherExactTest.FisherRxC_BasicTest ...............................   Passed    0.02 sec
+test 83
+        Start  83: FisherExactTest.FisherRxC_StrongAssociation
+
+83: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=FisherExactTest.FisherRxC_StrongAssociation" "--gtest_also_run_disabled_tests"
+83: Test timeout computed to be: 10000000
+83: Note: Google Test filter = FisherExactTest.FisherRxC_StrongAssociation
+83: [==========] Running 1 test from 1 test suite.
+83: [----------] Global test environment set-up.
+83: [----------] 1 test from FisherExactTest
+83: [ RUN      ] FisherExactTest.FisherRxC_StrongAssociation
+83: [FisherExactTest.FisherRxC_StrongAssociation] Time: 0.0023 s, Memory: 0.58 MB
+83: [       OK ] FisherExactTest.FisherRxC_StrongAssociation (2 ms)
+83: [----------] 1 test from FisherExactTest (3 ms total)
+83: 
+83: [----------] Global test environment tear-down
+83: [==========] 1 test from 1 test suite ran. (3 ms total)
+83: [  PASSED  ] 1 test.
+ 83/121 Test  #83: FisherExactTest.FisherRxC_StrongAssociation .......................   Passed    0.01 sec
+test 84
+        Start  84: FisherExactTest.FisherRxC_EarlyStopping
+
+84: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=FisherExactTest.FisherRxC_EarlyStopping" "--gtest_also_run_disabled_tests"
+84: Test timeout computed to be: 10000000
+84: Note: Google Test filter = FisherExactTest.FisherRxC_EarlyStopping
+84: [==========] Running 1 test from 1 test suite.
+84: [----------] Global test environment set-up.
+84: [----------] 1 test from FisherExactTest
+84: [ RUN      ] FisherExactTest.FisherRxC_EarlyStopping
+84: [FisherExactTest.FisherRxC_EarlyStopping] Time: 0.0024 s, Memory: 0.58 MB
+84: [       OK ] FisherExactTest.FisherRxC_EarlyStopping (2 ms)
+84: [----------] 1 test from FisherExactTest (3 ms total)
+84: 
+84: [----------] Global test environment tear-down
+84: [==========] 1 test from 1 test suite ran. (3 ms total)
+84: [  PASSED  ] 1 test.
+ 84/121 Test  #84: FisherExactTest.FisherRxC_EarlyStopping ...........................   Passed    0.01 sec
+test 85
+        Start  85: FisherExactTest.Fisher2x2_ExtremeSeparation_PValueNotZero
+
+85: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=FisherExactTest.Fisher2x2_ExtremeSeparation_PValueNotZero" "--gtest_also_run_disabled_tests"
+85: Test timeout computed to be: 10000000
+85: Note: Google Test filter = FisherExactTest.Fisher2x2_ExtremeSeparation_PValueNotZero
+85: [==========] Running 1 test from 1 test suite.
+85: [----------] Global test environment set-up.
+85: [----------] 1 test from FisherExactTest
+85: [ RUN      ] FisherExactTest.Fisher2x2_ExtremeSeparation_PValueNotZero
+85: [FisherExactTest.Fisher2x2_ExtremeSeparation_PValueNotZero] Time: 0.0001 s, Memory: 0.62 MB
+85: [       OK ] FisherExactTest.Fisher2x2_ExtremeSeparation_PValueNotZero (0 ms)
+85: [----------] 1 test from FisherExactTest (0 ms total)
+85: 
+85: [----------] Global test environment tear-down
+85: [==========] 1 test from 1 test suite ran. (0 ms total)
+85: [  PASSED  ] 1 test.
+ 85/121 Test  #85: FisherExactTest.Fisher2x2_ExtremeSeparation_PValueNotZero .........   Passed    0.01 sec
+test 86
+        Start  86: FisherExactTest.Fisher2x2_StrongAssociation_PValuePrecision
+
+86: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=FisherExactTest.Fisher2x2_StrongAssociation_PValuePrecision" "--gtest_also_run_disabled_tests"
+86: Test timeout computed to be: 10000000
+86: Note: Google Test filter = FisherExactTest.Fisher2x2_StrongAssociation_PValuePrecision
+86: [==========] Running 1 test from 1 test suite.
+86: [----------] Global test environment set-up.
+86: [----------] 1 test from FisherExactTest
+86: [ RUN      ] FisherExactTest.Fisher2x2_StrongAssociation_PValuePrecision
+86: [FisherExactTest.Fisher2x2_StrongAssociation_PValuePrecision] Time: 0.0001 s, Memory: 0.60 MB
+86: [       OK ] FisherExactTest.Fisher2x2_StrongAssociation_PValuePrecision (0 ms)
+86: [----------] 1 test from FisherExactTest (0 ms total)
+86: 
+86: [----------] Global test environment tear-down
+86: [==========] 1 test from 1 test suite ran. (0 ms total)
+86: [  PASSED  ] 1 test.
+ 86/121 Test  #86: FisherExactTest.Fisher2x2_StrongAssociation_PValuePrecision .......   Passed    0.01 sec
+test 87
+        Start  87: StatsTest.ContingencyTable2x2_Totals
+
+87: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=StatsTest.ContingencyTable2x2_Totals" "--gtest_also_run_disabled_tests"
+87: Test timeout computed to be: 10000000
+87: Note: Google Test filter = StatsTest.ContingencyTable2x2_Totals
+87: [==========] Running 1 test from 1 test suite.
+87: [----------] Global test environment set-up.
+87: [----------] 1 test from StatsTest
+87: [ RUN      ] StatsTest.ContingencyTable2x2_Totals
+87: [StatsTest.ContingencyTable2x2_Totals] Time: 0.0000 s, Memory: 0.46 MB
+87: [       OK ] StatsTest.ContingencyTable2x2_Totals (0 ms)
+87: [----------] 1 test from StatsTest (0 ms total)
+87: 
+87: [----------] Global test environment tear-down
+87: [==========] 1 test from 1 test suite ran. (0 ms total)
+87: [  PASSED  ] 1 test.
+ 87/121 Test  #87: StatsTest.ContingencyTable2x2_Totals ..............................   Passed    0.01 sec
+test 88
+        Start  88: StatsTest.ContingencyTableRxC_Operations
+
+88: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=StatsTest.ContingencyTableRxC_Operations" "--gtest_also_run_disabled_tests"
+88: Test timeout computed to be: 10000000
+88: Note: Google Test filter = StatsTest.ContingencyTableRxC_Operations
+88: [==========] Running 1 test from 1 test suite.
+88: [----------] Global test environment set-up.
+88: [----------] 1 test from StatsTest
+88: [ RUN      ] StatsTest.ContingencyTableRxC_Operations
+88: [StatsTest.ContingencyTableRxC_Operations] Time: 0.0000 s, Memory: 0.46 MB
+88: [       OK ] StatsTest.ContingencyTableRxC_Operations (0 ms)
+88: [----------] 1 test from StatsTest (0 ms total)
+88: 
+88: [----------] Global test environment tear-down
+88: [==========] 1 test from 1 test suite ran. (0 ms total)
+88: [  PASSED  ] 1 test.
+ 88/121 Test  #88: StatsTest.ContingencyTableRxC_Operations ..........................   Passed    0.01 sec
+test 89
+        Start  89: StatsTest.FullLabel_ComboCode
+
+89: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=StatsTest.FullLabel_ComboCode" "--gtest_also_run_disabled_tests"
+89: Test timeout computed to be: 10000000
+89: Note: Google Test filter = StatsTest.FullLabel_ComboCode
+89: [==========] Running 1 test from 1 test suite.
+89: [----------] Global test environment set-up.
+89: [----------] 1 test from StatsTest
+89: [ RUN      ] StatsTest.FullLabel_ComboCode
+89: [StatsTest.FullLabel_ComboCode] Time: 0.0000 s, Memory: 0.46 MB
+89: [       OK ] StatsTest.FullLabel_ComboCode (0 ms)
+89: [----------] 1 test from StatsTest (0 ms total)
+89: 
+89: [----------] Global test environment tear-down
+89: [==========] 1 test from 1 test suite ran. (0 ms total)
+89: [  PASSED  ] 1 test.
+ 89/121 Test  #89: StatsTest.FullLabel_ComboCode .....................................   Passed    0.01 sec
+test 90
+        Start  90: StatsTest.FullLabel_TestLabels
+
+90: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=StatsTest.FullLabel_TestLabels" "--gtest_also_run_disabled_tests"
+90: Test timeout computed to be: 10000000
+90: Note: Google Test filter = StatsTest.FullLabel_TestLabels
+90: [==========] Running 1 test from 1 test suite.
+90: [----------] Global test environment set-up.
+90: [----------] 1 test from StatsTest
+90: [ RUN      ] StatsTest.FullLabel_TestLabels
+90: [StatsTest.FullLabel_TestLabels] Time: 0.0000 s, Memory: 0.46 MB
+90: [       OK ] StatsTest.FullLabel_TestLabels (0 ms)
+90: [----------] 1 test from StatsTest (0 ms total)
+90: 
+90: [----------] Global test environment tear-down
+90: [==========] 1 test from 1 test suite ran. (0 ms total)
+90: [  PASSED  ] 1 test.
+ 90/121 Test  #90: StatsTest.FullLabel_TestLabels ....................................   Passed    0.01 sec
+test 91
+        Start  91: GlobalTestTest.AlleleTest_StrongAssociation
+
+91: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=GlobalTestTest.AlleleTest_StrongAssociation" "--gtest_also_run_disabled_tests"
+91: Test timeout computed to be: 10000000
+91: Note: Google Test filter = GlobalTestTest.AlleleTest_StrongAssociation
+91: [==========] Running 1 test from 1 test suite.
+91: [----------] Global test environment set-up.
+91: [----------] 1 test from GlobalTestTest
+91: [ RUN      ] GlobalTestTest.AlleleTest_StrongAssociation
+91: [GlobalTestTest.AlleleTest_StrongAssociation] Time: 0.0010 s, Memory: 0.64 MB
+91: [       OK ] GlobalTestTest.AlleleTest_StrongAssociation (1 ms)
+91: [----------] 1 test from GlobalTestTest (1 ms total)
+91: 
+91: [----------] Global test environment tear-down
+91: [==========] 1 test from 1 test suite ran. (1 ms total)
+91: [  PASSED  ] 1 test.
+ 91/121 Test  #91: GlobalTestTest.AlleleTest_StrongAssociation .......................   Passed    0.01 sec
+test 92
+        Start  92: GlobalTestTest.AlleleTest_NoAssociation
+
+92: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=GlobalTestTest.AlleleTest_NoAssociation" "--gtest_also_run_disabled_tests"
+92: Test timeout computed to be: 10000000
+92: Note: Google Test filter = GlobalTestTest.AlleleTest_NoAssociation
+92: [==========] Running 1 test from 1 test suite.
+92: [----------] Global test environment set-up.
+92: [----------] 1 test from GlobalTestTest
+92: [ RUN      ] GlobalTestTest.AlleleTest_NoAssociation
+92: [GlobalTestTest.AlleleTest_NoAssociation] Time: 0.0012 s, Memory: 0.64 MB
+92: [       OK ] GlobalTestTest.AlleleTest_NoAssociation (1 ms)
+92: [----------] 1 test from GlobalTestTest (1 ms total)
+92: 
+92: [----------] Global test environment tear-down
+92: [==========] 1 test from 1 test suite ran. (1 ms total)
+92: [  PASSED  ] 1 test.
+ 92/121 Test  #92: GlobalTestTest.AlleleTest_NoAssociation ...........................   Passed    0.01 sec
+test 93
+        Start  93: GlobalTestTest.HPTest_Works
+
+93: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=GlobalTestTest.HPTest_Works" "--gtest_also_run_disabled_tests"
+93: Test timeout computed to be: 10000000
+93: Note: Google Test filter = GlobalTestTest.HPTest_Works
+93: [==========] Running 1 test from 1 test suite.
+93: [----------] Global test environment set-up.
+93: [----------] 1 test from GlobalTestTest
+93: [ RUN      ] GlobalTestTest.HPTest_Works
+93: [GlobalTestTest.HPTest_Works] Time: 0.0011 s, Memory: 0.64 MB
+93: [       OK ] GlobalTestTest.HPTest_Works (1 ms)
+93: [----------] 1 test from GlobalTestTest (1 ms total)
+93: 
+93: [----------] Global test environment tear-down
+93: [==========] 1 test from 1 test suite ran. (1 ms total)
+93: [  PASSED  ] 1 test.
+ 93/121 Test  #93: GlobalTestTest.HPTest_Works .......................................   Passed    0.01 sec
+test 94
+        Start  94: GlobalTestTest.GatingLogic
+
+94: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=GlobalTestTest.GatingLogic" "--gtest_also_run_disabled_tests"
+94: Test timeout computed to be: 10000000
+94: Note: Google Test filter = GlobalTestTest.GatingLogic
+94: [==========] Running 1 test from 1 test suite.
+94: [----------] Global test environment set-up.
+94: [----------] 1 test from GlobalTestTest
+94: [ RUN      ] GlobalTestTest.GatingLogic
+94: [GlobalTestTest.GatingLogic] Time: 0.0012 s, Memory: 0.64 MB
+94: [       OK ] GlobalTestTest.GatingLogic (1 ms)
+94: [----------] 1 test from GlobalTestTest (1 ms total)
+94: 
+94: [----------] Global test environment tear-down
+94: [==========] 1 test from 1 test suite ran. (1 ms total)
+94: [  PASSED  ] 1 test.
+ 94/121 Test  #94: GlobalTestTest.GatingLogic ........................................   Passed    0.01 sec
+test 95
+        Start  95: GlobalTestTest.EmptyInput
+
+95: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=GlobalTestTest.EmptyInput" "--gtest_also_run_disabled_tests"
+95: Test timeout computed to be: 10000000
+95: Note: Google Test filter = GlobalTestTest.EmptyInput
+95: [==========] Running 1 test from 1 test suite.
+95: [----------] Global test environment set-up.
+95: [----------] 1 test from GlobalTestTest
+95: [ RUN      ] GlobalTestTest.EmptyInput
+95: [GlobalTestTest.EmptyInput] Time: 0.0000 s, Memory: 0.49 MB
+95: [       OK ] GlobalTestTest.EmptyInput (0 ms)
+95: [----------] 1 test from GlobalTestTest (0 ms total)
+95: 
+95: [----------] Global test environment tear-down
+95: [==========] 1 test from 1 test suite ran. (0 ms total)
+95: [  PASSED  ] 1 test.
+ 95/121 Test  #95: GlobalTestTest.EmptyInput .........................................   Passed    0.01 sec
+test 96
+        Start  96: GlobalTestTest.TestAll
+
+96: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=GlobalTestTest.TestAll" "--gtest_also_run_disabled_tests"
+96: Test timeout computed to be: 10000000
+96: Note: Google Test filter = GlobalTestTest.TestAll
+96: [==========] Running 1 test from 1 test suite.
+96: [----------] Global test environment set-up.
+96: [----------] 1 test from GlobalTestTest
+96: [ RUN      ] GlobalTestTest.TestAll
+96: [GlobalTestTest.TestAll] Time: 0.0022 s, Memory: 0.64 MB
+96: [       OK ] GlobalTestTest.TestAll (2 ms)
+96: [----------] 1 test from GlobalTestTest (2 ms total)
+96: 
+96: [----------] Global test environment tear-down
+96: [==========] 1 test from 1 test suite ran. (2 ms total)
+96: [  PASSED  ] 1 test.
+ 96/121 Test  #96: GlobalTestTest.TestAll ............................................   Passed    0.01 sec
+test 97
+        Start  97: LocalTestTest.BasicLocalTest
+
+97: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=LocalTestTest.BasicLocalTest" "--gtest_also_run_disabled_tests"
+97: Test timeout computed to be: 10000000
+97: Note: Google Test filter = LocalTestTest.BasicLocalTest
+97: [==========] Running 1 test from 1 test suite.
+97: [----------] Global test environment set-up.
+97: [----------] 1 test from LocalTestTest
+97: [ RUN      ] LocalTestTest.BasicLocalTest
+97: [LocalTestTest.BasicLocalTest] Time: 0.0001 s, Memory: 0.66 MB
+97: [       OK ] LocalTestTest.BasicLocalTest (0 ms)
+97: [----------] 1 test from LocalTestTest (0 ms total)
+97: 
+97: [----------] Global test environment tear-down
+97: [==========] 1 test from 1 test suite ran. (0 ms total)
+97: [  PASSED  ] 1 test.
+ 97/121 Test  #97: LocalTestTest.BasicLocalTest ......................................   Passed    0.01 sec
+test 98
+        Start  98: LocalTestTest.ClusterCounts
+
+98: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=LocalTestTest.ClusterCounts" "--gtest_also_run_disabled_tests"
+98: Test timeout computed to be: 10000000
+98: Note: Google Test filter = LocalTestTest.ClusterCounts
+98: [==========] Running 1 test from 1 test suite.
+98: [----------] Global test environment set-up.
+98: [----------] 1 test from LocalTestTest
+98: [ RUN      ] LocalTestTest.ClusterCounts
+98: [LocalTestTest.ClusterCounts] Time: 0.0001 s, Memory: 0.61 MB
+98: [       OK ] LocalTestTest.ClusterCounts (0 ms)
+98: [----------] 1 test from LocalTestTest (0 ms total)
+98: 
+98: [----------] Global test environment tear-down
+98: [==========] 1 test from 1 test suite ran. (0 ms total)
+98: [  PASSED  ] 1 test.
+ 98/121 Test  #98: LocalTestTest.ClusterCounts .......................................   Passed    0.01 sec
+test 99
+        Start  99: LocalTestTest.DeltaProportion
+
+99: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=LocalTestTest.DeltaProportion" "--gtest_also_run_disabled_tests"
+99: Test timeout computed to be: 10000000
+99: Note: Google Test filter = LocalTestTest.DeltaProportion
+99: [==========] Running 1 test from 1 test suite.
+99: [----------] Global test environment set-up.
+99: [----------] 1 test from LocalTestTest
+99: [ RUN      ] LocalTestTest.DeltaProportion
+99: [LocalTestTest.DeltaProportion] Time: 0.0001 s, Memory: 0.65 MB
+99: [       OK ] LocalTestTest.DeltaProportion (0 ms)
+99: [----------] 1 test from LocalTestTest (0 ms total)
+99: 
+99: [----------] Global test environment tear-down
+99: [==========] 1 test from 1 test suite ran. (0 ms total)
+99: [  PASSED  ] 1 test.
+ 99/121 Test  #99: LocalTestTest.DeltaProportion .....................................   Passed    0.01 sec
+test 100
+        Start 100: LocalTestTest.BestDimensionIdentified
+
+100: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=LocalTestTest.BestDimensionIdentified" "--gtest_also_run_disabled_tests"
+100: Test timeout computed to be: 10000000
+100: Note: Google Test filter = LocalTestTest.BestDimensionIdentified
+100: [==========] Running 1 test from 1 test suite.
+100: [----------] Global test environment set-up.
+100: [----------] 1 test from LocalTestTest
+100: [ RUN      ] LocalTestTest.BestDimensionIdentified
+100: [LocalTestTest.BestDimensionIdentified] Time: 0.0001 s, Memory: 0.66 MB
+100: [       OK ] LocalTestTest.BestDimensionIdentified (0 ms)
+100: [----------] 1 test from LocalTestTest (0 ms total)
+100: 
+100: [----------] Global test environment tear-down
+100: [==========] 1 test from 1 test suite ran. (0 ms total)
+100: [  PASSED  ] 1 test.
+100/121 Test #100: LocalTestTest.BestDimensionIdentified .............................   Passed    0.01 sec
+test 101
+        Start 101: StructureTestTest.FilterReads_CompleteMatrix
+
+101: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=StructureTestTest.FilterReads_CompleteMatrix" "--gtest_also_run_disabled_tests"
+101: Test timeout computed to be: 10000000
+101: Note: Google Test filter = StructureTestTest.FilterReads_CompleteMatrix
+101: [==========] Running 1 test from 1 test suite.
+101: [----------] Global test environment set-up.
+101: [----------] 1 test from StructureTestTest
+101: [ RUN      ] StructureTestTest.FilterReads_CompleteMatrix
+101: [StructureTestTest.FilterReads_CompleteMatrix] Time: 0.0000 s, Memory: 0.48 MB
+101: [       OK ] StructureTestTest.FilterReads_CompleteMatrix (0 ms)
+101: [----------] 1 test from StructureTestTest (0 ms total)
+101: 
+101: [----------] Global test environment tear-down
+101: [==========] 1 test from 1 test suite ran. (0 ms total)
+101: [  PASSED  ] 1 test.
+101/121 Test #101: StructureTestTest.FilterReads_CompleteMatrix ......................   Passed    0.01 sec
+test 102
+        Start 102: StructureTestTest.FilterReads_WithNans
+
+102: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=StructureTestTest.FilterReads_WithNans" "--gtest_also_run_disabled_tests"
+102: Test timeout computed to be: 10000000
+102: Note: Google Test filter = StructureTestTest.FilterReads_WithNans
+102: [==========] Running 1 test from 1 test suite.
+102: [----------] Global test environment set-up.
+102: [----------] 1 test from StructureTestTest
+102: [ RUN      ] StructureTestTest.FilterReads_WithNans
+102: [StructureTestTest.FilterReads_WithNans] Time: 0.0000 s, Memory: 0.48 MB
+102: [       OK ] StructureTestTest.FilterReads_WithNans (0 ms)
+102: [----------] 1 test from StructureTestTest (0 ms total)
+102: 
+102: [----------] Global test environment tear-down
+102: [==========] 1 test from 1 test suite ran. (0 ms total)
+102: [  PASSED  ] 1 test.
+102/121 Test #102: StructureTestTest.FilterReads_WithNans ............................   Passed    0.01 sec
+test 103
+        Start 103: StructureTestTest.FilterReads_TooManyNans
+
+103: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=StructureTestTest.FilterReads_TooManyNans" "--gtest_also_run_disabled_tests"
+103: Test timeout computed to be: 10000000
+103: Note: Google Test filter = StructureTestTest.FilterReads_TooManyNans
+103: [==========] Running 1 test from 1 test suite.
+103: [----------] Global test environment set-up.
+103: [----------] 1 test from StructureTestTest
+103: [ RUN      ] StructureTestTest.FilterReads_TooManyNans
+103: [StructureTestTest.FilterReads_TooManyNans] Time: 0.0000 s, Memory: 0.48 MB
+103: [       OK ] StructureTestTest.FilterReads_TooManyNans (0 ms)
+103: [----------] 1 test from StructureTestTest (0 ms total)
+103: 
+103: [----------] Global test environment tear-down
+103: [==========] 1 test from 1 test suite ran. (0 ms total)
+103: [  PASSED  ] 1 test.
+103/121 Test #103: StructureTestTest.FilterReads_TooManyNans .........................   Passed    0.01 sec
+test 104
+        Start 104: StructureTestTest.Permanova_SignificantDifference
+
+104: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=StructureTestTest.Permanova_SignificantDifference" "--gtest_also_run_disabled_tests"
+104: Test timeout computed to be: 10000000
+104: Note: Google Test filter = StructureTestTest.Permanova_SignificantDifference
+104: [==========] Running 1 test from 1 test suite.
+104: [----------] Global test environment set-up.
+104: [----------] 1 test from StructureTestTest
+104: [ RUN      ] StructureTestTest.Permanova_SignificantDifference
+104: [StructureTestTest.Permanova_SignificantDifference] Time: 0.0001 s, Memory: 0.53 MB
+104: [       OK ] StructureTestTest.Permanova_SignificantDifference (0 ms)
+104: [----------] 1 test from StructureTestTest (0 ms total)
+104: 
+104: [----------] Global test environment tear-down
+104: [==========] 1 test from 1 test suite ran. (0 ms total)
+104: [  PASSED  ] 1 test.
+104/121 Test #104: StructureTestTest.Permanova_SignificantDifference .................   Passed    0.01 sec
+test 105
+        Start 105: StructureTestTest.Permanova_NoDifference
+
+105: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=StructureTestTest.Permanova_NoDifference" "--gtest_also_run_disabled_tests"
+105: Test timeout computed to be: 10000000
+105: Note: Google Test filter = StructureTestTest.Permanova_NoDifference
+105: [==========] Running 1 test from 1 test suite.
+105: [----------] Global test environment set-up.
+105: [----------] 1 test from StructureTestTest
+105: [ RUN      ] StructureTestTest.Permanova_NoDifference
+105: [StructureTestTest.Permanova_NoDifference] Time: 0.0001 s, Memory: 0.51 MB
+105: [       OK ] StructureTestTest.Permanova_NoDifference (0 ms)
+105: [----------] 1 test from StructureTestTest (0 ms total)
+105: 
+105: [----------] Global test environment tear-down
+105: [==========] 1 test from 1 test suite ran. (0 ms total)
+105: [  PASSED  ] 1 test.
+105/121 Test #105: StructureTestTest.Permanova_NoDifference ..........................   Passed    0.01 sec
+test 106
+        Start 106: StructureTestTest.Permanova_InvalidInput
+
+106: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=StructureTestTest.Permanova_InvalidInput" "--gtest_also_run_disabled_tests"
+106: Test timeout computed to be: 10000000
+106: Note: Google Test filter = StructureTestTest.Permanova_InvalidInput
+106: [==========] Running 1 test from 1 test suite.
+106: [----------] Global test environment set-up.
+106: [----------] 1 test from StructureTestTest
+106: [ RUN      ] StructureTestTest.Permanova_InvalidInput
+106: [StructureTestTest.Permanova_InvalidInput] Time: 0.0000 s, Memory: 0.48 MB
+106: [       OK ] StructureTestTest.Permanova_InvalidInput (0 ms)
+106: [----------] 1 test from StructureTestTest (0 ms total)
+106: 
+106: [----------] Global test environment tear-down
+106: [==========] 1 test from 1 test suite ran. (0 ms total)
+106: [  PASSED  ] 1 test.
+106/121 Test #106: StructureTestTest.Permanova_InvalidInput ..........................   Passed    0.01 sec
+test 107
+        Start 107: StructureTestTest.Dispersion_Homogeneous
+
+107: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=StructureTestTest.Dispersion_Homogeneous" "--gtest_also_run_disabled_tests"
+107: Test timeout computed to be: 10000000
+107: Note: Google Test filter = StructureTestTest.Dispersion_Homogeneous
+107: [==========] Running 1 test from 1 test suite.
+107: [----------] Global test environment set-up.
+107: [----------] 1 test from StructureTestTest
+107: [ RUN      ] StructureTestTest.Dispersion_Homogeneous
+107: [StructureTestTest.Dispersion_Homogeneous] Time: 0.0000 s, Memory: 0.51 MB
+107: [       OK ] StructureTestTest.Dispersion_Homogeneous (0 ms)
+107: [----------] 1 test from StructureTestTest (0 ms total)
+107: 
+107: [----------] Global test environment tear-down
+107: [==========] 1 test from 1 test suite ran. (0 ms total)
+107: [  PASSED  ] 1 test.
+107/121 Test #107: StructureTestTest.Dispersion_Homogeneous ..........................   Passed    0.01 sec
+test 108
+        Start 108: StructureTestTest.Dispersion_Heterogeneous
+
+108: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=StructureTestTest.Dispersion_Heterogeneous" "--gtest_also_run_disabled_tests"
+108: Test timeout computed to be: 10000000
+108: Note: Google Test filter = StructureTestTest.Dispersion_Heterogeneous
+108: [==========] Running 1 test from 1 test suite.
+108: [----------] Global test environment set-up.
+108: [----------] 1 test from StructureTestTest
+108: [ RUN      ] StructureTestTest.Dispersion_Heterogeneous
+108: [StructureTestTest.Dispersion_Heterogeneous] Time: 0.0000 s, Memory: 0.51 MB
+108: [       OK ] StructureTestTest.Dispersion_Heterogeneous (0 ms)
+108: [----------] 1 test from StructureTestTest (0 ms total)
+108: 
+108: [----------] Global test environment tear-down
+108: [==========] 1 test from 1 test suite ran. (0 ms total)
+108: [  PASSED  ] 1 test.
+108/121 Test #108: StructureTestTest.Dispersion_Heterogeneous ........................   Passed    0.01 sec
+test 109
+        Start 109: BootstrapTest.ARI_PerfectAgreement
+
+109: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BootstrapTest.ARI_PerfectAgreement" "--gtest_also_run_disabled_tests"
+109: Test timeout computed to be: 10000000
+109: Note: Google Test filter = BootstrapTest.ARI_PerfectAgreement
+109: [==========] Running 1 test from 1 test suite.
+109: [----------] Global test environment set-up.
+109: [----------] 1 test from BootstrapTest
+109: [ RUN      ] BootstrapTest.ARI_PerfectAgreement
+109: [BootstrapTest.ARI_PerfectAgreement] Time: 0.0000 s, Memory: 0.48 MB
+109: [       OK ] BootstrapTest.ARI_PerfectAgreement (0 ms)
+109: [----------] 1 test from BootstrapTest (0 ms total)
+109: 
+109: [----------] Global test environment tear-down
+109: [==========] 1 test from 1 test suite ran. (0 ms total)
+109: [  PASSED  ] 1 test.
+109/121 Test #109: BootstrapTest.ARI_PerfectAgreement ................................   Passed    0.01 sec
+test 110
+        Start 110: BootstrapTest.ARI_RelabeledClusters
+
+110: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BootstrapTest.ARI_RelabeledClusters" "--gtest_also_run_disabled_tests"
+110: Test timeout computed to be: 10000000
+110: Note: Google Test filter = BootstrapTest.ARI_RelabeledClusters
+110: [==========] Running 1 test from 1 test suite.
+110: [----------] Global test environment set-up.
+110: [----------] 1 test from BootstrapTest
+110: [ RUN      ] BootstrapTest.ARI_RelabeledClusters
+110: [BootstrapTest.ARI_RelabeledClusters] Time: 0.0000 s, Memory: 0.48 MB
+110: [       OK ] BootstrapTest.ARI_RelabeledClusters (0 ms)
+110: [----------] 1 test from BootstrapTest (0 ms total)
+110: 
+110: [----------] Global test environment tear-down
+110: [==========] 1 test from 1 test suite ran. (0 ms total)
+110: [  PASSED  ] 1 test.
+110/121 Test #110: BootstrapTest.ARI_RelabeledClusters ...............................   Passed    0.01 sec
+test 111
+        Start 111: BootstrapTest.ARI_DifferentClustering
+
+111: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BootstrapTest.ARI_DifferentClustering" "--gtest_also_run_disabled_tests"
+111: Test timeout computed to be: 10000000
+111: Note: Google Test filter = BootstrapTest.ARI_DifferentClustering
+111: [==========] Running 1 test from 1 test suite.
+111: [----------] Global test environment set-up.
+111: [----------] 1 test from BootstrapTest
+111: [ RUN      ] BootstrapTest.ARI_DifferentClustering
+111: [BootstrapTest.ARI_DifferentClustering] Time: 0.0000 s, Memory: 0.48 MB
+111: [       OK ] BootstrapTest.ARI_DifferentClustering (0 ms)
+111: [----------] 1 test from BootstrapTest (0 ms total)
+111: 
+111: [----------] Global test environment tear-down
+111: [==========] 1 test from 1 test suite ran. (0 ms total)
+111: [  PASSED  ] 1 test.
+111/121 Test #111: BootstrapTest.ARI_DifferentClustering .............................   Passed    0.01 sec
+test 112
+        Start 112: BootstrapTest.ARI_AllSameCluster
+
+112: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BootstrapTest.ARI_AllSameCluster" "--gtest_also_run_disabled_tests"
+112: Test timeout computed to be: 10000000
+112: Note: Google Test filter = BootstrapTest.ARI_AllSameCluster
+112: [==========] Running 1 test from 1 test suite.
+112: [----------] Global test environment set-up.
+112: [----------] 1 test from BootstrapTest
+112: [ RUN      ] BootstrapTest.ARI_AllSameCluster
+112: [BootstrapTest.ARI_AllSameCluster] Time: 0.0000 s, Memory: 0.48 MB
+112: [       OK ] BootstrapTest.ARI_AllSameCluster (0 ms)
+112: [----------] 1 test from BootstrapTest (0 ms total)
+112: 
+112: [----------] Global test environment tear-down
+112: [==========] 1 test from 1 test suite ran. (0 ms total)
+112: [  PASSED  ] 1 test.
+112/121 Test #112: BootstrapTest.ARI_AllSameCluster ..................................   Passed    0.01 sec
+test 113
+        Start 113: BootstrapTest.Bootstrap_StableCluster
+
+113: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BootstrapTest.Bootstrap_StableCluster" "--gtest_also_run_disabled_tests"
+113: Test timeout computed to be: 10000000
+113: Note: Google Test filter = BootstrapTest.Bootstrap_StableCluster
+113: [==========] Running 1 test from 1 test suite.
+113: [----------] Global test environment set-up.
+113: [----------] 1 test from BootstrapTest
+113: [ RUN      ] BootstrapTest.Bootstrap_StableCluster
+113: [BootstrapTest.Bootstrap_StableCluster] Time: 0.0001 s, Memory: 0.54 MB
+113: [       OK ] BootstrapTest.Bootstrap_StableCluster (0 ms)
+113: [----------] 1 test from BootstrapTest (0 ms total)
+113: 
+113: [----------] Global test environment tear-down
+113: [==========] 1 test from 1 test suite ran. (0 ms total)
+113: [  PASSED  ] 1 test.
+113/121 Test #113: BootstrapTest.Bootstrap_StableCluster .............................   Passed    0.01 sec
+test 114
+        Start 114: BootstrapTest.Bootstrap_EarlyStopping
+
+114: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=BootstrapTest.Bootstrap_EarlyStopping" "--gtest_also_run_disabled_tests"
+114: Test timeout computed to be: 10000000
+114: Note: Google Test filter = BootstrapTest.Bootstrap_EarlyStopping
+114: [==========] Running 1 test from 1 test suite.
+114: [----------] Global test environment set-up.
+114: [----------] 1 test from BootstrapTest
+114: [ RUN      ] BootstrapTest.Bootstrap_EarlyStopping
+114: [BootstrapTest.Bootstrap_EarlyStopping] Time: 0.0001 s, Memory: 0.49 MB
+114: [       OK ] BootstrapTest.Bootstrap_EarlyStopping (0 ms)
+114: [----------] 1 test from BootstrapTest (0 ms total)
+114: 
+114: [----------] Global test environment tear-down
+114: [==========] 1 test from 1 test suite ran. (0 ms total)
+114: [  PASSED  ] 1 test.
+114/121 Test #114: BootstrapTest.Bootstrap_EarlyStopping .............................   Passed    0.01 sec
+test 115
+        Start 115: SignificanceAnalyzerTest.FullAnalysis_StrongAssociation
+
+115: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=SignificanceAnalyzerTest.FullAnalysis_StrongAssociation" "--gtest_also_run_disabled_tests"
+115: Test timeout computed to be: 10000000
+115: Note: Google Test filter = SignificanceAnalyzerTest.FullAnalysis_StrongAssociation
+115: [==========] Running 1 test from 1 test suite.
+115: [----------] Global test environment set-up.
+115: [----------] 1 test from SignificanceAnalyzerTest
+115: [ RUN      ] SignificanceAnalyzerTest.FullAnalysis_StrongAssociation
+115: [SignificanceAnalyzerTest.FullAnalysis_StrongAssociation] Time: 0.0138 s, Memory: 0.80 MB
+115: [       OK ] SignificanceAnalyzerTest.FullAnalysis_StrongAssociation (13 ms)
+115: [----------] 1 test from SignificanceAnalyzerTest (14 ms total)
+115: 
+115: [----------] Global test environment tear-down
+115: [==========] 1 test from 1 test suite ran. (14 ms total)
+115: [  PASSED  ] 1 test.
+115/121 Test #115: SignificanceAnalyzerTest.FullAnalysis_StrongAssociation ...........   Passed    0.03 sec
+test 116
+        Start 116: SignificanceAnalyzerTest.SimpleAnalysis
+
+116: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=SignificanceAnalyzerTest.SimpleAnalysis" "--gtest_also_run_disabled_tests"
+116: Test timeout computed to be: 10000000
+116: Note: Google Test filter = SignificanceAnalyzerTest.SimpleAnalysis
+116: [==========] Running 1 test from 1 test suite.
+116: [----------] Global test environment set-up.
+116: [----------] 1 test from SignificanceAnalyzerTest
+116: [ RUN      ] SignificanceAnalyzerTest.SimpleAnalysis
+116: [SignificanceAnalyzerTest.SimpleAnalysis] Time: 0.0004 s, Memory: 0.67 MB
+116: [       OK ] SignificanceAnalyzerTest.SimpleAnalysis (0 ms)
+116: [----------] 1 test from SignificanceAnalyzerTest (1 ms total)
+116: 
+116: [----------] Global test environment tear-down
+116: [==========] 1 test from 1 test suite ran. (1 ms total)
+116: [  PASSED  ] 1 test.
+116/121 Test #116: SignificanceAnalyzerTest.SimpleAnalysis ...........................   Passed    0.01 sec
+test 117
+        Start 117: SignificanceAnalyzerTest.EmptyInput
+
+117: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=SignificanceAnalyzerTest.EmptyInput" "--gtest_also_run_disabled_tests"
+117: Test timeout computed to be: 10000000
+117: Note: Google Test filter = SignificanceAnalyzerTest.EmptyInput
+117: [==========] Running 1 test from 1 test suite.
+117: [----------] Global test environment set-up.
+117: [----------] 1 test from SignificanceAnalyzerTest
+117: [ RUN      ] SignificanceAnalyzerTest.EmptyInput
+117: [SignificanceAnalyzerTest.EmptyInput] Time: 0.0001 s, Memory: 0.52 MB
+117: [       OK ] SignificanceAnalyzerTest.EmptyInput (0 ms)
+117: [----------] 1 test from SignificanceAnalyzerTest (0 ms total)
+117: 
+117: [----------] Global test environment tear-down
+117: [==========] 1 test from 1 test suite ran. (0 ms total)
+117: [  PASSED  ] 1 test.
+117/121 Test #117: SignificanceAnalyzerTest.EmptyInput ...............................   Passed    0.01 sec
+test 118
+        Start 118: SignificanceAnalyzerTest.GatingBehavior
+
+118: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=SignificanceAnalyzerTest.GatingBehavior" "--gtest_also_run_disabled_tests"
+118: Test timeout computed to be: 10000000
+118: Note: Google Test filter = SignificanceAnalyzerTest.GatingBehavior
+118: [==========] Running 1 test from 1 test suite.
+118: [----------] Global test environment set-up.
+118: [----------] 1 test from SignificanceAnalyzerTest
+118: [ RUN      ] SignificanceAnalyzerTest.GatingBehavior
+118: [SignificanceAnalyzerTest.GatingBehavior] Time: 0.0025 s, Memory: 0.71 MB
+118: [       OK ] SignificanceAnalyzerTest.GatingBehavior (2 ms)
+118: [----------] 1 test from SignificanceAnalyzerTest (3 ms total)
+118: 
+118: [----------] Global test environment tear-down
+118: [==========] 1 test from 1 test suite ran. (3 ms total)
+118: [  PASSED  ] 1 test.
+118/121 Test #118: SignificanceAnalyzerTest.GatingBehavior ...........................   Passed    0.01 sec
+test 119
+        Start 119: SignificanceAnalyzerTest.HeuristicScore
+
+119: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=SignificanceAnalyzerTest.HeuristicScore" "--gtest_also_run_disabled_tests"
+119: Test timeout computed to be: 10000000
+119: Note: Google Test filter = SignificanceAnalyzerTest.HeuristicScore
+119: [==========] Running 1 test from 1 test suite.
+119: [----------] Global test environment set-up.
+119: [----------] 1 test from SignificanceAnalyzerTest
+119: [ RUN      ] SignificanceAnalyzerTest.HeuristicScore
+119: [SignificanceAnalyzerTest.HeuristicScore] Time: 0.0001 s, Memory: 0.52 MB
+119: [       OK ] SignificanceAnalyzerTest.HeuristicScore (0 ms)
+119: [----------] 1 test from SignificanceAnalyzerTest (0 ms total)
+119: 
+119: [----------] Global test environment tear-down
+119: [==========] 1 test from 1 test suite ran. (0 ms total)
+119: [  PASSED  ] 1 test.
+119/121 Test #119: SignificanceAnalyzerTest.HeuristicScore ...........................   Passed    0.01 sec
+test 120
+        Start 120: SignificanceAnalyzerTest.Determinism_SameSeedProducesSameResult
+
+120: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=SignificanceAnalyzerTest.Determinism_SameSeedProducesSameResult" "--gtest_also_run_disabled_tests"
+120: Test timeout computed to be: 10000000
+120: Note: Google Test filter = SignificanceAnalyzerTest.Determinism_SameSeedProducesSameResult
+120: [==========] Running 1 test from 1 test suite.
+120: [----------] Global test environment set-up.
+120: [----------] 1 test from SignificanceAnalyzerTest
+120: [ RUN      ] SignificanceAnalyzerTest.Determinism_SameSeedProducesSameResult
+120: [SignificanceAnalyzerTest.Determinism_SameSeedProducesSameResult] Time: 0.0335 s, Memory: 0.38 MB
+120: [       OK ] SignificanceAnalyzerTest.Determinism_SameSeedProducesSameResult (33 ms)
+120: [----------] 1 test from SignificanceAnalyzerTest (34 ms total)
+120: 
+120: [----------] Global test environment tear-down
+120: [==========] 1 test from 1 test suite ran. (34 ms total)
+120: [  PASSED  ] 1 test.
+120/121 Test #120: SignificanceAnalyzerTest.Determinism_SameSeedProducesSameResult ...   Passed    0.05 sec
+test 121
+        Start 121: SignificanceAnalyzerTest.LabelPermanova_InvalidWithoutTwoGroups
+
+121: Test command: /big7_disk/liaoyoyo2001/InterSubMod/build/bin/run_tests "--gtest_filter=SignificanceAnalyzerTest.LabelPermanova_InvalidWithoutTwoGroups" "--gtest_also_run_disabled_tests"
+121: Test timeout computed to be: 10000000
+121: Note: Google Test filter = SignificanceAnalyzerTest.LabelPermanova_InvalidWithoutTwoGroups
+121: [==========] Running 1 test from 1 test suite.
+121: [----------] Global test environment set-up.
+121: [----------] 1 test from SignificanceAnalyzerTest
+121: [ RUN      ] SignificanceAnalyzerTest.LabelPermanova_InvalidWithoutTwoGroups
+121: [SignificanceAnalyzerTest.LabelPermanova_InvalidWithoutTwoGroups] Time: 0.0002 s, Memory: 0.65 MB
+121: [       OK ] SignificanceAnalyzerTest.LabelPermanova_InvalidWithoutTwoGroups (0 ms)
+121: [----------] 1 test from SignificanceAnalyzerTest (0 ms total)
+121: 
+121: [----------] Global test environment tear-down
+121: [==========] 1 test from 1 test suite ran. (1 ms total)
+121: [  PASSED  ] 1 test.
+121/121 Test #121: SignificanceAnalyzerTest.LabelPermanova_InvalidWithoutTwoGroups ...   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 121
+
+Total Test time (real) =   3.62 sec
