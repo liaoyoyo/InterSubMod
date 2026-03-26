@@ -90,7 +90,7 @@ SignificanceResult SignificanceAnalyzer::analyze(const std::vector<int>& cluster
 
     // Phase 2: Local Tests (only if passed gate)
     if (config_.enable_local_test && result.passed_gate) {
-        result.local_result = local_test_->run(cluster_labels, full_labels);
+        result.local_result = local_test_->test_all(cluster_labels, full_labels);
     }
 
     // Phase 3: Structure Tests (only if passed gate)

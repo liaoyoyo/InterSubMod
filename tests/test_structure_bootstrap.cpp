@@ -341,7 +341,7 @@ TEST_F(BootstrapTest, Bootstrap_EarlyStopping) {
         return labels;
     };
 
-    BootstrapResult result = bootstrap.run(meth, labels, cluster_func);
+    BootstrapResult result = bootstrap.compute(meth, labels, cluster_func);
 
     // May or may not early stop depending on random sampling
     EXPECT_GT(result.n_iterations, 0);
