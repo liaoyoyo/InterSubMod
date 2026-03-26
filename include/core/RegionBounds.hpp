@@ -24,8 +24,10 @@ struct RegionBounds {
     int32_t start = 0;  ///< 1-based, inclusive
     int32_t end   = 0;  ///< 1-based, inclusive
 
-    bool is_valid() const noexcept { return start >= 1 && end > start; }
-    int32_t width() const noexcept { return end - start; }
+    /** True if both endpoints are positive and end >= start (allows single-base regions). */
+    bool is_valid() const noexcept { return start >= 1 && end >= start; }
+    /** Number of bases covered (inclusive both ends: [start, end]). */
+    int32_t width() const noexcept { return end - start + 1; }
 };
 
 /**

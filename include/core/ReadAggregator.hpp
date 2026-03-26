@@ -54,7 +54,9 @@ public:
      * @param reads         Raw bam1_t pointers (ownership retained by caller)
      * @param snv           Anchor somatic SNV for alt-support detection
      * @param ref_seq       Reference sequence covering the region
-     * @param region_start  1-based start coordinate of ref_seq window
+     * @param region_start  Genomic start coordinate of ref_seq; interpreted as
+     *                      0-based by ReadParser and MethylationParser (same
+     *                      convention as FastaReader::fetch_sequence start param)
      * @return Aggregated result (matrix builder, filtered reads, strand counts)
      */
     ReadAggregateResult aggregate(const std::vector<bam1_t*>& reads,

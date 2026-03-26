@@ -28,7 +28,7 @@ TEST(RegionBoundsTest, ComputeRegionBounds_Normal) {
     EXPECT_EQ(b.start, 7572000);
     EXPECT_EQ(b.end, 7582000);
     EXPECT_TRUE(b.is_valid());
-    EXPECT_EQ(b.width(), 10000);
+    EXPECT_EQ(b.width(), 10001);  // inclusive both ends: end - start + 1
 }
 
 TEST(RegionBoundsTest, ComputeRegionBounds_ClampStart) {

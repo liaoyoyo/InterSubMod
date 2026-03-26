@@ -54,7 +54,7 @@ public:
     [[deprecated("Use compute() instead")]]
     BootstrapResult run(const Eigen::MatrixXd& methylation_matrix, const std::vector<int>& original_labels,
                         std::function<std::vector<int>(const Eigen::MatrixXd&)> cluster_func) {
-        return compute(methylation_matrix, original_labels, cluster_func);
+        return compute(methylation_matrix, original_labels, std::move(cluster_func));
     }
 
     /**
