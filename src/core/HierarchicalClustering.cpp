@@ -62,23 +62,94 @@ Tree HierarchicalClustering::build_tree(const Eigen::MatrixXd& dist_matrix,
 
 Tree HierarchicalClustering::build_upgma(const Eigen::MatrixXd& dist_matrix,
                                          const std::vector<std::string>& read_names) {
-    // UPGMA: distance = average distance of all pairs between two clusters
-    auto compute_distance = [](const Eigen::MatrixXd& D, const std::vector<int>& cluster_a,
-                               const std::vector<int>& cluster_b, int /*size_a*/, int /*size_b*/
-                               ) -> double {
-        double sum = 0.0;
-        for (int i : cluster_a) {
-            for (int j : cluster_b) {
-                sum += D(i, j);
+    // UPGMA via Lance-Williams formula: O(N³) vs naive O(N⁴).
+    //
+    // On each merge of clusters i and j, the distance from the new cluster
+    // to any other cluster m is:
+    //   D[i][m] = (sz[i]*D[i][m] + sz[j]*D[j][m]) / (sz[i]+sz[j])
+    //
+    // This replaces the per-member-pair recomputation in build_generic,
+    // reducing the per-merge cost from O(sz_i * sz_j) to O(N).
+
+    int n = dist_matrix.rows();
+
+    // Working distance matrix updated in-place
+    Eigen::MatrixXd D = dist_matrix;
+
+    std::vector<int>  sz(n, 1);
+    std::vector<bool> active(n, true);
+    int active_count = n;
+
+    // Leaf nodes (slots reused for merged nodes)
+    std::vector<std::shared_ptr<TreeNode>> nodes(n);
+    for (int i = 0; i < n; ++i)
+        nodes[i] = TreeNode::create_leaf(i, read_names[i]);
+
+    std::vector<MergeRecord> merge_records;
+    int next_node_id = n;
+
+    while (active_count > 1) {
+        // Find minimum-distance pair — O(N²) per step
+        double min_dist = std::numeric_limits<double>::max();
+        int min_i = -1, min_j = -1;
+
+        for (int i = 0; i < n; ++i) {
+            if (!active[i]) continue;
+            for (int j = i + 1; j < n; ++j) {
+                if (!active[j]) continue;
+                if (D(i, j) < min_dist) {
+                    min_dist = D(i, j);
+                    min_i = i;
+                    min_j = j;
+                }
             }
         }
-        return sum / (cluster_a.size() * cluster_b.size());
-    };
 
-    // UPGMA height = distance / 2
-    auto distance_to_height = [](double d) { return d / 2.0; };
+        if (min_i < 0) break;
 
-    return build_generic(dist_matrix, read_names, compute_distance, distance_to_height);
+        // UPGMA height = distance / 2, monotonically enforced
+        double merge_height  = min_dist / 2.0;
+        double max_child_h   = std::max(nodes[min_i]->height, nodes[min_j]->height);
+        if (merge_height < max_child_h + config_.min_branch_length)
+            merge_height = max_child_h + config_.min_branch_length;
+
+        auto merged = TreeNode::create_internal(next_node_id, nodes[min_i], nodes[min_j], merge_height);
+
+        // Record merge
+        MergeRecord record;
+        record.cluster_i      = min_i;
+        record.cluster_j      = min_j;
+        record.distance       = min_dist;
+        record.new_cluster_id = next_node_id;
+        record.size           = sz[min_i] + sz[min_j];
+        merge_records.push_back(record);
+
+        // Lance-Williams distance update — O(N) per merge
+        int new_sz = sz[min_i] + sz[min_j];
+        for (int m = 0; m < n; ++m) {
+            if (!active[m] || m == min_i || m == min_j) continue;
+            double d = (sz[min_i] * D(min_i, m) + sz[min_j] * D(min_j, m)) / new_sz;
+            D(min_i, m) = d;
+            D(m, min_i) = d;
+        }
+
+        nodes[min_i] = merged;
+        sz[min_i]    = new_sz;
+        active[min_j] = false;
+        next_node_id++;
+        active_count--;
+    }
+
+    // Last active slot is root
+    std::shared_ptr<TreeNode> root;
+    for (int i = 0; i < n; ++i) {
+        if (active[i]) { root = nodes[i]; break; }
+    }
+
+    Tree tree;
+    tree.set_root(root);
+    tree.set_merge_records(merge_records);
+    return tree;
 }
 
 Tree HierarchicalClustering::build_single(const Eigen::MatrixXd& dist_matrix,
