@@ -1,5 +1,8 @@
 #include "core/RegionProcessor.hpp"
 
+#include "core/ReadAggregator.hpp"
+#include "core/RegionBounds.hpp"
+
 #include <omp.h>
 #include <sys/stat.h>
 
@@ -542,19 +545,16 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
     auto t_start = std::chrono::high_resolution_clock::now();
 
     try {
-        MatrixBuilder matrix_builder;
-
-        // Define initial region window (centered on SNV)
-        int32_t region_start = static_cast<int32_t>(snv.pos) - static_cast<int32_t>(window_size_);
-        int32_t region_end = static_cast<int32_t>(snv.pos) + static_cast<int32_t>(window_size_);
-
-        // Get chromosome name and length
+        // Compute initial region window using RegionBounds helper
         std::string chr_name = chrom_index_.get_name(snv.chr_id);
         int32_t chr_length = fasta_reader.get_chr_length(chr_name);
 
-        // Clamp coordinates
-        if (region_start < 1) region_start = 1;
-        if (chr_length > 0 && region_end > chr_length) region_end = chr_length;
+        RegionBounds bounds = compute_region_bounds(chr_name,
+                                                    static_cast<int32_t>(snv.pos),
+                                                    static_cast<int32_t>(window_size_),
+                                                    chr_length);
+        int32_t region_start = bounds.start;
+        int32_t region_end   = bounds.end;
 
         // Fetch reads from BAM
         auto reads = bam_reader.fetch_reads(chr_name, region_start, region_end);
@@ -581,9 +581,18 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
             throw std::runtime_error("Failed to fetch reference sequence");
         }
 
-        // Process reads using helper method
-        std::vector<FilteredReadInfo> filtered_reads;
-        process_reads(reads, snv, ref_seq, region_start, matrix_builder, filtered_reads, result);
+        // Aggregate reads using ReadAggregator (filter → parse → matrix)
+        ReadAggregateConfig agg_config;
+        agg_config.filter_config         = filter_config_;
+        agg_config.no_filter_output      = no_filter_output_;
+        agg_config.collect_filtered_reads = output_filtered_reads_;
+
+        auto agg = ReadAggregator(agg_config).aggregate(reads, snv, ref_seq, region_start);
+
+        MatrixBuilder& matrix_builder         = agg.matrix_builder;
+        const auto&    filtered_reads         = agg.filtered_reads;
+        result.num_forward_reads              = agg.num_forward_reads;
+        result.num_reverse_reads              = agg.num_reverse_reads;
 
         // Finalize matrix construction
         matrix_builder.finalize();
@@ -882,76 +891,6 @@ void RegionProcessor::print_summary(const std::vector<RegionResult>& results) co
     }
 
     LOG_INFO(ss.str());
-}
-
-// ============================================================================
-// Refactored Helper Methods
-// ============================================================================
-
-void RegionProcessor::process_reads(const std::vector<bam1_t*>& reads, const SomaticSnv& snv,
-                                    const std::string& ref_seq, int32_t region_start,
-                                    MatrixBuilder& matrix_builder, std::vector<FilteredReadInfo>& filtered_reads,
-                                    RegionResult& result) {
-    ReadParser read_parser(filter_config_);
-    MethylationParser methyl_parser;
-
-    int read_count = 0;
-    std::unordered_set<std::string> processed_read_names;
-
-    for (auto* b : reads) {
-        // Filter and Parse Read Info
-        auto [keep, filter_reason] = read_parser.should_keep_with_reason(b);
-
-        if (!keep && !no_filter_output_) {
-            if (output_filtered_reads_) {
-                FilteredReadInfo filtered = read_parser.create_filtered_info(b, true, filter_reason);
-                filtered_reads.push_back(filtered);
-            }
-            continue;
-        }
-
-        // Even in no-filter mode, always skip structurally invalid reads (secondary,
-        // supplementary, unmapped, duplicate) because they have no valid sequence
-        // for methylation parsing and cause undefined behavior in MethylationParser.
-        if (no_filter_output_) {
-            uint16_t flag = b->core.flag;
-            if (flag & (BAM_FSECONDARY | BAM_FSUPPLEMENTARY | BAM_FUNMAP | BAM_FDUP)) {
-                continue;
-            }
-        }
-
-        ReadInfo info = read_parser.parse(b, read_count, true, snv, ref_seq, region_start);
-
-        // Skip reads that don't cover the SNV
-        if (info.alt_support == AltSupport::UNKNOWN && !no_filter_output_) {
-            if (output_filtered_reads_) {
-                FilterReason reason = FilterReason::SNV_NOT_COVERED;
-                FilteredReadInfo filtered = read_parser.create_filtered_info(b, true, reason);
-                filtered_reads.push_back(filtered);
-            }
-            continue;
-        }
-
-        // Duplicate read name check
-        if (processed_read_names.find(info.read_name) != processed_read_names.end()) {
-            continue;
-        }
-        processed_read_names.insert(info.read_name);
-
-        // Parse Methylation
-        auto methyl_calls = methyl_parser.parse_read(b, ref_seq, region_start);
-
-        // Add to Matrix Builder
-        matrix_builder.add_read(info, methyl_calls);
-        read_count++;
-
-        // Count strand
-        if (info.strand == Strand::FORWARD) {
-            result.num_forward_reads++;
-        } else if (info.strand == Strand::REVERSE) {
-            result.num_reverse_reads++;
-        }
-    }
 }
 
 MethylationMatrix RegionProcessor::build_methylation_matrix(const MatrixBuilder& matrix_builder, int region_id) {

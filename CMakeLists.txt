@@ -102,6 +102,7 @@ add_library(inter_sub_mod_core
     src/core/Bootstrap.cpp
     src/core/SignificanceAnalyzer.cpp
     src/core/LabelTest.cpp
+    src/core/ReadAggregator.cpp
     src/utils/Logger.cpp
     src/utils/FastaReader.cpp
     src/io/RegionWriter.cpp
@@ -158,6 +159,7 @@ add_executable(run_tests
     tests/test_structure_bootstrap.cpp
     tests/test_significance_analyzer.cpp
     tests/test_label_test.cpp
+    tests/test_read_aggregator.cpp
 )
 target_link_libraries(run_tests PRIVATE inter_sub_mod_core GTest::gtest)
 
