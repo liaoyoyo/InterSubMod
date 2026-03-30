@@ -96,58 +96,83 @@ std::string determine_loh_subtype(bool potential_loh, const std::string& verific
 }
 
 /**
- * @brief Compute comprehensive quality score
+ * @brief Mode-aware quality score weights.
  *
- * Scoring components:
- * - Base score: 100
- * - Read count penalty: -20 if < 30, -10 if < 50
- * - CpG count penalty: -15 if < 20, -10 if < 30
- * - Coverage penalty: -30 if CNV_Loss, -15 if Low, -20 if High_Copy
- * - LOH penalty: -25 if potential LOH
- * - Verification bonus: +10 if HP and Allele tests agree, +15 if V >= 0.3
+ * Paired and tumor-only modes use different weights because TO phasing artifacts
+ * inflate LOH-like rates and the verification bonus rewards FP > TP in TO mode
+ * (validated by AUC analysis 2026-03-31).
+ */
+struct QualityScoreWeights {
+    float read_penalty_severe = 20.0f;   // num_reads < 30
+    float read_penalty_moderate = 10.0f; // num_reads < 50
+    float cpg_penalty_severe = 15.0f;    // num_cpgs < 20
+    float cpg_penalty_moderate = 10.0f;  // num_cpgs < 30
+    float cov_penalty_cnv_loss = 30.0f;  // coverage_multiple < 0.5
+    float cov_penalty_low = 15.0f;       // coverage_multiple < 0.8
+    float cov_penalty_high_copy = 20.0f; // coverage_multiple > 2.0
+    float loh_penalty = 25.0f;           // potential LOH
+    float verify_bonus = 10.0f;          // HP and Allele tests both significant
+    float effect_bonus_strong = 15.0f;   // cramers_v >= 0.3
+    float effect_bonus_moderate = 5.0f;  // cramers_v >= 0.2
+};
+
+QualityScoreWeights get_paired_weights() {
+    return QualityScoreWeights{};  // all defaults
+}
+
+QualityScoreWeights get_tumor_only_weights() {
+    QualityScoreWeights w{};
+    w.loh_penalty = 0.0f;    // TO LOH-like is dominated by phasing artifacts
+    w.verify_bonus = 0.0f;   // TO verify bonus rewards FP more than TP
+    return w;
+}
+
+/**
+ * @brief Compute comprehensive quality score using mode-aware weights.
  */
 float compute_quality_score(int num_reads, int num_cpgs, double coverage_multiple,
-                            bool potential_loh, bool hp_sig, bool allele_sig, double cramers_v) {
+                            bool potential_loh, bool hp_sig, bool allele_sig, double cramers_v,
+                            const QualityScoreWeights& weights) {
     float score = 100.0f;
 
     // Read count penalty
     if (num_reads < 30) {
-        score -= 20.0f;
+        score -= weights.read_penalty_severe;
     } else if (num_reads < 50) {
-        score -= 10.0f;
+        score -= weights.read_penalty_moderate;
     }
 
     // CpG count penalty
     if (num_cpgs < 20) {
-        score -= 15.0f;
+        score -= weights.cpg_penalty_severe;
     } else if (num_cpgs < 30) {
-        score -= 10.0f;
+        score -= weights.cpg_penalty_moderate;
     }
 
     // Coverage anomaly penalty
     if (coverage_multiple < 0.5) {
-        score -= 30.0f;  // Likely CNV loss
+        score -= weights.cov_penalty_cnv_loss;
     } else if (coverage_multiple < 0.8) {
-        score -= 15.0f;  // Low coverage
+        score -= weights.cov_penalty_low;
     } else if (coverage_multiple > 2.0) {
-        score -= 20.0f;  // Very high coverage (potential artifact)
+        score -= weights.cov_penalty_high_copy;
     }
 
     // LOH penalty
     if (potential_loh) {
-        score -= 25.0f;
+        score -= weights.loh_penalty;
     }
 
     // Verification consistency bonus
     if (hp_sig && allele_sig) {
-        score += 10.0f;  // Both tests significant
+        score += weights.verify_bonus;
     }
 
     // Effect size bonus
     if (cramers_v >= 0.3) {
-        score += 15.0f;  // Strong effect size
+        score += weights.effect_bonus_strong;
     } else if (cramers_v >= 0.2) {
-        score += 5.0f;   // Moderate effect size
+        score += weights.effect_bonus_moderate;
     }
 
     // Clamp to valid range
@@ -1174,9 +1199,11 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
         result.coverage_multiple = compute_coverage_multiple(result.num_reads);
         result.coverage_category = determine_coverage_category(result.coverage_multiple);
         result.loh_subtype = determine_loh_subtype(result.potential_loh, result.verification_class);
+        auto qs_weights = normal_bam_path_.empty() ? get_tumor_only_weights() : get_paired_weights();
         result.quality_score = compute_quality_score(
             result.num_reads, result.num_cpgs, result.coverage_multiple,
-            result.potential_loh, result.hp_merged_sig, result.allele_sig, result.cramers_v);
+            result.potential_loh, result.hp_merged_sig, result.allele_sig, result.cramers_v,
+            qs_weights);
         result.quality_tier = determine_quality_tier(result.quality_score);
 
         // Write significance results to JSON
