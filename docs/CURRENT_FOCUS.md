@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-01-12 00:00
-更新時間: 2026-04-07 01:00
+更新時間: 2026-04-10 12:00
 狀態: validated
 資料來源:
   - docs/standards/20260228_文件命名與狀態管理規範_01.md
@@ -36,11 +36,13 @@
 ### Phase 2 研究方向（優先序）
 
 1. **Phase 2 方向 A+D**：Normal Methylation Reference + CN/Purity-aware correction
-   - 目前狀態：規劃中，待 Self-phasing 修正後的重跑數據
-   - 關鍵前置：PON-only phasing 驗證已完成（LOH.bed Jaccard=1.0, somatic bias 消除）
+   - **Phase A-D 程式碼已完成（2026-04-13）**：Normal BAM integration, Sample ASM, Somatic HP ASM, LOH BED annotation, Cross-region subclone analysis
+   - HCC1395 全基因體驗證通過：Sample ASM 97.3% sig, Normal Baseline 100% valid, LOH concordance 94.1%, 4-group subclone
+   - [驗證報告](experiments/validated/2026/04/20260413_Phase_BCD_Dual_BAM_Validation_01.md)
+   - 待執行：7 samples 全量驗證、haplotag 重跑後的 Phase 2A 正式分析
 
 2. **Phase 2 方向 B**：Gene-level / mechanism-level evidence integration
-   - 目前狀態：待 Phase 2A 完成後啟動
+   - 目前狀態：待 Phase 2A 全量分析完成後啟動
 
 3. **Phase 2 方向 C**：CpG 功能分層與智慧選點
    - 目前狀態：待規劃
@@ -48,6 +50,7 @@
 ### Self-Phasing 修正後重跑
 
 - PON-only phasing 已驗證：LOH.bed 不變、somatic bias 消除、N50 +99.7%、phased rate +23.6pp
+- **P0-3 LOH.bed 生成機制已確認（2026-04-11）**：LOH.bed 使用 VCF AF/VAF（`PhasingGraph.cpp:1817`，VAF >= 0.8 → HOM），ISM hp_ratio 使用 BAM HP tags（`ReadParser.cpp:123`）。兩套系統使用不同數據源，解釋 Jaccard=1.0 與 62% ISM LOH 消失的矛盾。
 - 待執行：haplotag + ISM 全量重跑（7 samples × paired + TO）
 - 重跑後可啟動：Phase 2A normal methylation reference baseline
 
@@ -67,6 +70,29 @@
 - QS mode-aware 已實作：TO 模式停用 LOH penalty 與 verify bonus
 - **結論：ISM 價值在 read-level epigenetic characterization，非 variant filter**
 
+### Coverage_Multiple GC 校正與甲基化-CN 驗證 — 全 NO-GO（2026-04-11 確定性結論）
+
+- **TO Pipeline 數據**：ClairS-TO → LongPhase-TO → ISM（TP=28,383, FP=11,830, F1=0.7127）
+- **GC-Content 校正**：delta-r = -0.0002（Go/No-Go 門檻 ≥0.03）；ONT 5kHz GC bias 極小（98.7% regions 變化<5%）
+- **甲基化-CN 相關**：所有 HP-free 特徵 residualized |r| < 0.07（甲基化對 CN 完全無感）
+- **HPFineNGroups-CN**：raw r=0.495 → residualized r=0.160（68% 是 NumReads confound）
+- **KDE auto-estimation 確認正確**：CN 分類準確度 6.2%→43.8%（已實作，`--expected-coverage` CLI 可用）
+- **Coverage_Multiple 作為 CN proxy 已足夠**：TO r=0.827，Paired r=0.831
+- 腳本：`scripts/analysis/gc_correction_to_validation.py`, `scripts/analysis/methylation_cn_validation.py`
+- 圖表：Figures 28-33（`research/seqc2_cnv_stratification/figures/`）
+- **結論：GC 校正不需實作；甲基化無法驗證 CN；Coverage_Multiple 現有精度已足夠**
+
+### SEQC2 CNV 分層觀察 — CNV zone-aware filter 關閉（2026-04-10 確定性結論）
+
+- **SEQC2 正交驗證 CNV truth set**（6 callers × 21 replicates × 3 technologies）用於 HCC1395 分層
+- **Coverage_Multiple 驗證**：與 SEQC2 真實 CN Pearson r=0.831，ISM read-depth 代理可信
+- **HCC1395 單樣本假象**：Gain+LOH zone AUC=0.782（AlleleDelta），但跨 7 樣本驗證 mean AUC ≤ 0.641
+- **Simpson's Paradox 排除**：CNV 非 Quality_Score pooling 問題根源（分層後 QS diff=-0.042，pooling 反而有利）
+- **Zone 排除策略全不可行**：所有排除策略 trade-off 低於 break-even（如排除 CN_Loss 移除 45% FP 但損失 11% TP）
+- **Gain+LOH 根因**：CN=3+LOH 環境造成最高 FP rate 12.9%（allele imbalance 誤導 caller），FP rate 隨 CN 增加反而下降
+- **15 張圖表 + 5 TSV 數據檔**：報告見 `docs/experiments/in_progress/2026/04/20260409_SEQC2_CNV分層觀察_01.md`
+- **結論：CNV 不是特徵空間耗盡的根因；zone-aware filter 無可行策略，正式關閉**
+
 ### R1-R5 特徵設計研究（2026-04-07 確認）
 
 - **R1**: CramersV 93% 為零 = 2×2 框架缺陷；HPMergedDelta 多群時反向；HPFineNGroups 已克服（AUC +0.125）
@@ -76,13 +102,41 @@
 - **R5**: PairwiseMeanDist 與 HPFineN 正交（Spearman=0.07），微弱獨立增量
 - **HPFineNGroups 確認為 somatic heterogeneity 標記** — 7/7 一致，residualized AUC=0.617，不能用於 filter 但有明確生物學價值
 
+### Option C 雙路測試 NEGATIVE（2026-04-07 確定性結論）
+
+- **架構確認**：cluster_labels 已是 HP-free（甲基化 hierarchical clustering），ClusterPermanova 被 passed_gate 擋住（TO 22% 有效）
+- ClusterPermanovaF AUC=0.512（n=90,572）— 純甲基化 cluster 品質完全隨機
+- HP-free 5 features combo AUC=0.564 vs HP-dependent combo AUC=0.598 vs 全部 AUC=0.607
+- HP-free 特徵僅增加 +0.009 AUC — 無實用價值
+- **結論：所有區分力來自 HP tags，純甲基化 clustering 無法突破 identifiability problem**
+- C++ 代碼修改取消，確認正確策略為 PON-only phasing 上游修正
+
+### O9 FN 特徵觀察 NO-GO（2026-04-08 確定性結論）
+
+- 7 samples × 2 modes (Paired+TO)，122,790 FN regions 完整 ISM 執行
+- **HP-free 甲基化特徵全 AUC < 0.53** — 純甲基化空間 FN 與 TP 不可區分
+- 最強信號 LabelAllelePermanovaF=0.664（Paired）/ 0.636（TO）是 AF 代理非甲基化
+- **TO Quality_Score AUC=0.338（嚴重反轉）** — FN 的 QS 比 TP 高，Cohen's d=-0.671
+- FN VerificationClass: 55% Noise, 23% Weak, 18% Strong — 與 TP 分布相似
+- **NO-GO：ISM 無法 rescue FN，甲基化空間 FN≡TP**
+
+### TO-pure 獨立建模 NEGATIVE（2026-04-08 確定性結論）
+
+- LOSO 7-fold：HP-free AUC=0.53、All-ISM=0.60-0.64、Caller-only=0.63、ISM+Caller=0.66
+- caller_af (AUC=0.654) 單獨超越全部 ISM 特徵組合
+- ISM 在 Caller 之上僅增加 +0.003（LR）~ +0.030（RF）
+- HP-free ISM 完全隨機（AUC~0.53），HP-dependent +0.07~0.10 但可能循環
+- **TO 模式 ISM 近乎無效，caller_af 是唯一有效判別器**
+
+### 獨立分析完成（2026-04-11）
+
+- **PON 跨樣本移除率驗證 ✓**：7 樣本 raw PON rate 95.16-98.81%（mean 97.77%），refined FP-level 全 > 98%。結論穩定度 3→4。H2009 最低（95.16%）因高突變負荷非 PON 失效。
+- **H2009 負向根因 ✓**：Paired FP rate 僅 0.06%（86/132,994），改進天花板 +0.0004 F1。76.7% FP 在 LOH、89.5% Noise class。根因=caller 已近乎完美，ISM 只能誤傷 TP。甲基化特徵區分力反而優於平均。
+
 ### 待完成項目
 
 - haplotag + ISM 全量重跑（7 samples × paired + TO）— PON-only phasing 後
 - Phase 2A Normal Methylation Reference baseline — 依賴重跑數據
-- O9 FN 特徵觀察（需先跑 FN ISM 數據）
-- TO-pure 獨立建模（與 paired-pure 分離）
-- H2009 異質性深度診斷
 - Platform normalization（5kHz / DORADO / PAO / Google）
 
 ## 4. 阻塞與風險
@@ -97,7 +151,8 @@
 1. `docs/CURRENT_FOCUS.md`（本檔案）
 2. `docs/experiments/INDEX.md`
 3. `docs/README.md`
-4. `docs/reports/research_landscape/00_INDEX.md`（需深度理解時）
+4. `docs/concepts/2026/04/20260409_研究構想總索引_01.md`（研究大圖景、發展樹、理論基礎）
+5. `docs/reports/research_landscape/00_INDEX.md`（需深度理解時）
 
 ## 6. 已完成研究概覽
 
@@ -112,3 +167,4 @@
 - **ASM 定量**：POSITIVE — 32-66% SNV 位點有 ASM；ISM PERMANOVA 唯一捕捉 entropy imbalance
 - **Phase 1A**：paired-pure delta F1=+0.0112 已鎖定；TO 模式負增益
 - **Self-phasing 因果鏈**：CONFIRMED — 62% LOH 消失、somatic bias 17.3:1
+- **SEQC2 CNV 分層觀察**（15 圖表 + 5 TSV）：Coverage_Multiple r=0.831 驗證可信；跨樣本 AUC ≤ 0.641；zone 排除全不可行；CNV 非特徵耗盡根因

@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-03-05 10:00
-更新時間: 2026-04-07 01:00
+更新時間: 2026-04-11 18:00
 目標: 實驗研究歷史主索引（精簡版），供 AI 快速掌握研究脈絡
 處理範圍: InterSubMod 專案 2025-11 至今的所有研究方向
 關聯檔案:
@@ -150,25 +150,61 @@ LOSO AUC=0.721（首次>0.70）但安全約束 FP removal=0%；根因=高純度�
 ## 因果鏈驗證與修正（2026-04-02 ~ 2026-04-06）
 
 ### Self-Phasing 循環依賴因果鏈 — ✅ CONFIRMED
-完整五步因果鏈驗證：62% LOH 消失（d=-1.20）、somatic bias 17.3:1→消除、31.2% self-phasing LOH。23 TSV + 7 PNG。[詳情](../reports/validated/2026/04/)
+完整五步因果鏈驗證：62% LOH 消失（d=-1.20）、somatic bias 17.3:1→消除、31.2% self-phasing LOH。23 TSV + 7 PNG。[詳情](../reports/validated/2026/04/) [肉眼觀察](in_progress/2026/04/20260403_multilayer_HP_before_after_肉眼觀察.md)
+
+### VCF 來源錯誤矯正與 V3-Fixed 重分析 — ✅ 2026-04-04
+pileup symlink 指向 ClairS paired(ssrs) 非 ClairS-TO；TP=30490/FP=4842 全為 paired 結果；正確 TO=28509/11606；V3F ISM F1=0.0124 非 0.0945。多層 HP 驗證 + ClairS-TO VCF 矯正完成。[VCF 矯正](in_progress/2026/04/20260404_VCF來源錯誤矯正報告_01.md) [ClairSTO 重分析](in_progress/2026/04/20260404_ClairSTO_VCF矯正全面重分析報告_01.md) [LongPhase v2b 驗證](in_progress/2026/04/20260404_LongPhase_TO_v2b_多層HP_ISM驗證完整報告_01.md)
 
 ### PON-Only Phasing 驗證 — ✅
 LOH.bed Jaccard=1.0（不變）；somatic bias 消除；N50 +99.7%；phased rate +23.6pp。待 haplotag+ISM 全量重跑。
 
-### TO Feature Deep Study Q1-Q6 — ✅
-HP2FamilyN AUC 0.72 是循環 artifact（校正後 0.54）；RF ceiling 0.69-0.77；baseline>v2b in LOH；甲基化特徵全無效。
+### TO Feature Deep Study Q1-Q6 — ✅ 2026-04-04~05
+HP2FamilyN AUC 0.72 是循環 artifact（校正後 0.54）；RF ceiling 0.69-0.77；baseline>v2b in LOH；甲基化特徵全無效。[Q1-Q6 深度研究](in_progress/2026/04/20260405_TO_ClairSTO特徵區分力深度研究_01.md) [LOH 內外觀察](in_progress/2026/04/20260405_TO_LOH內外特徵觀察報告_01.md) [HPFineP+QS](in_progress/2026/04/20260404_HPFineP_QS整合完整研究報告_01.md)
 
 ### QS Mode-Aware 修正 — ✅
 TO 模式下停用 LOH penalty 與 verify bonus；C++ 已實作並部署。
 
 ### LOH 雙定義交叉分析 Wave 1+2+3 — ✅ 確定性結論
-W1+2: HP Imbalance 是 LOH.bed 超集 (Sens 99.7%); LOH.bed vs SEQC2 Jaccard=0.928; HP PERMANOVA LOH 內不可用 (valid 5%); **LOH 不可作為 variant filter** (10/10 FAIL); AlleleDelta AUC=0.556 真實但微弱。W3: **Non-LOH 區分力同樣有限** (max AUC=0.643 read count proxy); **多特徵組合不可行** (Voting AUC=0.577<0.58); **cnLOH PairwiseMeanDist 0.587 是 Simpson's Paradox** (per-sample mean=0.50); **CramersV 被 NumReads confound** (0.511→0.464); AlleleDelta 是 LOH 唯一 confound-free 信號但不足。40 位點肉眼檢視文件+120 圖表已生成。[完整報告](../reports/validated/2026/04/20260406_LOH雙定義交叉分析報告/00_INDEX.md)
+W1+2: HP Imbalance 是 LOH.bed 超集 (Sens 99.7%); LOH.bed vs SEQC2 Jaccard=0.928; HP PERMANOVA LOH 內不可用 (valid 5%); **LOH 不可作為 variant filter** (10/10 FAIL); AlleleDelta AUC=0.556 真實但微弱。W3: **Non-LOH 區分力同樣有限** (max AUC=0.643 read count proxy); **多特徵組合不可行** (Voting AUC=0.577<0.58); **cnLOH PairwiseMeanDist 0.587 是 Simpson's Paradox** (per-sample mean=0.50); **CramersV 被 NumReads confound** (0.511→0.464); AlleleDelta 是 LOH 唯一 confound-free 信號但不足。40 位點肉眼檢視文件+120 圖表已生成。[完整報告](../reports/validated/2026/04/20260406_LOH雙定義交叉分析報告/00_INDEX.md) [AlleleDelta 深度](in_progress/2026/04/20260404_LOH_AlleleDelta_深度驗證報告_01.md) [Strong/Weak AUC](in_progress/2026/04/20260404_LOH_Strong_Weak_7feature_AUC驗證報告_01.md)
 
 ### R1-R5. 特徵設計局限與改進方向研究 — ✅ 2026-04-07
 CramersV 93% 為零 = 2×2 缺陷（R1）；Excess groups 無新信號（R2）；結構清楚子集 AUC 下降 = identifiability 非設計問題（R3）；N≥4+NR≥80 TP 89.1%（R4）；PwDist 正交但太弱（R5）。**HPFineNGroups 確認為 somatic heterogeneity 標記**。正負效果+驗證標記已寫入報告。
 
 ### 肉眼檢視推理鏈與 TP/FP 可區分性 — ✅ 2026-04-06~07
 40 站點（4 類 × TP/FP × 5）系統性肉眼比對 + 全量 7 樣本定量分析。LOH 結構反向確認；Non-LOH ALT-HP alignment 群體不可分；F1 影響分析。完整報告含 R1-R5。[完整報告](../reports/validated/2026/04/20260406_肉眼檢視推理鏈與TP_FP可區分性分析_01.md)
+
+### Option C: LabelTest 雙路測試（HP-free vs HP-dependent）— ❌ 2026-04-07
+架構調查確認 cluster_labels 已是 HP-free。ClusterPermanovaF AUC=0.512（隨機）；HP-free 5 features combo AUC=0.564 vs HP-dependent 0.598 vs 全部 0.607。HP-free 僅增加 +0.009。**純甲基化 clustering 無區分力，identifiability problem 再次確認。C++ 修改取消。**
+
+### O9: FN 特徵觀察 — ❌ 2026-04-08
+7 samples × 2 modes (Paired+TO)，122,790 FN regions 完整 ISM 執行。HP-free 甲基化特徵全 AUC<0.53（random）；最強信號 LabelAllelePermanovaF=0.664 是 AF 代理非甲基化；TO QS AUC=0.338（FN>TP 反轉，Cohen's d=-0.671）。**NO-GO: ISM 無法 rescue FN，甲基化空間 FN≡TP。**
+
+### TO-pure 獨立建模 — ❌ 2026-04-08
+7 samples LOSO 四組模型：HP-free AUC=0.53（random）、All-ISM AUC=0.60-0.64、Caller-only AUC=0.63、ISM+Caller AUC=0.66。ISM 僅在 Caller 基礎上增加 +0.003~+0.030。**Caller_af (0.654) 獨自超越全部 ISM 特徵，TO 模式 ISM 近乎無效。**
+
+### Fine-Pairwise Distance 分析 — ❌ 2026-04-08
+HP 四群組（HP1/HP1-1/HP2/HP2-1）6 組 pairwise 距離，748,391 regions。**Paired 全 AUC<0.50（反轉 — germline ASM > somatic ASM）**；TO 最高 0.579（<0.58 門檻）。LOH 層 Paired 極端反轉（0.132）。Group count 確認 self-phasing 指紋。多 agent 驗證通過。**ISM 甲基化特徵空間已耗盡。**[報告](finalized/2026/04/20260408_fine_pairwise_distance_analysis_01.md)
+
+### Beyond-AUC 7 方法綜合驗證 — ❌ EXHAUSTED CONFIRMED 2026-04-09
+7 種互補統計方法（PR-AUC, Residualization, Subgroup Discovery, Calibration, Bootstrap, GradientBoosting, Distribution/Tail）× 多層分層（LOH×AF×Sample）× 25 特徵 × 748K regions 全面驗證。**Pure methylation 特徵全部 AUC ≤ 0.58**（within-group residualized 後更低）；pooled OLS residualization 被揭露為 data snooping（confounder-only AUC 0.66-0.85 完全解釋 residualized 提升）；PR-AUC 與 ROC-AUC 排序一致（Richardson 2024 確認 AUC 穩健）；BSS 全為負值。唯一正面：HPFineNGroups TO non-LOH low AF AUC=0.72（7/7 samples consistent）確認為 somatic heterogeneity marker。45+ 篇論文支持：germline ASM >> somatic passenger SNV 效應（3-6×）。**ISM 甲基化特徵空間正式關閉。**[報告](finalized/2026/04/20260409_beyond_auc_comprehensive_validation_01.md)
+
+### SEQC2 CNV 分層觀察 — ❌ CNV zone-aware filter 關閉 2026-04-10
+SEQC2 正交驗證 CNV truth set（6 callers × 21 replicates × 3 technologies）分層分析。**Phase 1 (HCC1395)**：Gain+LOH 集中 57.5% FP（FP rate=10.2%, 全域 2.6×）；zone-specific AUC 達 0.782（AlleleDelta）；Coverage_Multiple vs SEQC2 CN r=0.831 代理可信。**Phase 2 (7 樣本跨樣本驗證)**：FP rate 模式跨樣本不一致（CN_HighGain > CN_Normal 僅 4/7）；per-sample zone-specific mean AUC ≤ 0.641 未突破上限；Simpson's Paradox 否定（Quality_Score 反向 -0.042）。**Phase 3 (根因)**：Gain+LOH 內 CN=3 FP rate 12.9% 最高（FP rate 隨 CN 增加下降）— 中等 CN gain + LOH 的 allele 不平衡環境是樣本特異性根因。**結論：CNV 不是特徵空間耗盡的根因；zone 排除策略 trade-off 全不可行；CNV zone-aware filter 正式關閉。**15 張圖 + 5 TSV。[報告](in_progress/2026/04/20260409_SEQC2_CNV分層觀察_01.md)
+
+### Coverage_Multiple GC 校正與甲基化-CN 驗證 — ❌ 全 NO-GO 2026-04-11
+TO Pipeline（ClairS-TO → LongPhase-TO → ISM, TP=28,383, FP=11,830）三方向驗證。**GC-Content 校正**：delta-r=-0.0002（門檻 ≥0.03）；ONT 5kHz GC bias 極小（98.7% regions 變化<5%）；TP/FP AUC 不變（0.5095→0.5097）。**甲基化-CN 相關**：所有 HP-free 特徵 residualized |r|<0.07（CN-blind）；HPFineNGroups 68% 是 NumReads confound（raw 0.495→resid 0.160）；CramersV resid r=-0.726 是零值 artifact。**KDE 已實作確認正確**：CN 分類準確度 6.2%→43.8%（`--expected-coverage` CLI 可用）。**結論：GC 校正不需實作；甲基化無法驗證 CN；Coverage_Multiple 現有精度已足夠。**6 張圖 + 1 TSV。[腳本](../../scripts/analysis/gc_correction_to_validation.py)
+
+### PON 跨樣本 FP 移除率驗證 — ✅ 穩定度升級 2026-04-11
+7 樣本 raw VCF-level PON rate 95.16%-98.81%（mean 97.77%, SD 1.12%）。Refined FP-level 全 > 98%。H2009 最低（95.16%）因高突變負荷（168K TP）非 PON 失效。HCC1954 refined 98.44% 最低但仍遠超門檻。**結論穩定度 3→4：「PON 是最強 filter」跨樣本確認。**[報告](in_progress/2026/04/20260411_PON跨樣本移除率驗證_01.md)
+
+### H2009 Phase 1A 負向根因診斷 — ✅ 根因確認 2026-04-11
+H2009 paired FP rate 僅 0.06%（86/132,994）— 7 樣本中最低之一。改進天花板 +0.0004 F1。76.7% FP 在 LOH 區域、89.5% Noise class。ISM 特徵區分力反而優於平均（QS gap +25 vs others +2.9）。**根因=caller 已近乎完美，ISM 只能誤傷 TP，非甲基化方法學問題。** H2009 可在論文中定位為「caller 已極佳時 ISM 無增量價值」的示範。[報告](in_progress/2026/04/20260411_H2009負向根因診斷_01.md)
+
+### 文獻假說交叉驗證（L1-L4）— ❌ 大部分 NEGATIVE 2026-04-12
+60+ 篇文獻 4 大假說 vs 340K 區域 × 7 樣本實證驗證。**L1 方向性 ASM (epiTRACERx)**: TP signed_delta=-0.0003（p=0.854, 完全隨機），FP 有方向性 (p=1.16e-14)。**L2 PMD 分層**: CpG variance PMD>Non-PMD confirmed (p<1e-100) 但 TP/FP 判別 AUC 不超過 0.622。**L3 Normal baseline**: 7 Normal BAM 均含 MM/ML 標籤，**Phase 2A 可行**。**L4 fCpG (EVOFLUx)**: TP/FP CpG variance 完全相同 (p=0.77)。文獻正面結果源於任務差異（tumor vs normal 細胞區分 ≠ TP vs FP variant 判別）。[綜合報告](../../research/literature_validation/reports/20260412_文獻驗證綜合報告_01.md) [L1 詳細](../../research/literature_validation/reports/20260412_L1_directional_ASM_report.md)
+
+### Phase B/C/D Dual-BAM 架構驗證 — ✅ PASS 2026-04-13
+HCC1395 paired (31K TP + 1.3K FP) 全基因體驗證。Phase B: Sample ASM 97.3% 顯著、Normal Baseline 100% 有效。Phase C: LOH BED 94.1% concordance with ISM hp_ratio。Phase D: 4-group subclone 分層（Normal Diploid 17.5%/Epi. Heterogeneity 12.9%/LOH 2.6%/Tumor-Specific 67.0%）。173/173 unit tests pass。[報告](validated/2026/04/20260413_Phase_BCD_Dual_BAM_Validation_01.md)
 
 ---
 
@@ -178,6 +214,8 @@ CramersV 93% 為零 = 2×2 缺陷（R1）；Excess groups 無新信號（R2）�
 |---|---|---|---|
 | 5hmC 雙通道距離矩陣 | 可能更有亞克隆特異性 | 高 | ONT 5kHz 同時提供 C+h |
 | ~~跨 Region 亞克隆一致性~~ | ~~已驗證 NEGATIVE~~ | — | O13/O13v2: shared read count confound |
-| ~~機器學習組合特徵分類器~~ | ~~整合 15 個特徵的 ensemble~~ | — | Wave 3 J13: 多特徵組合 AUC=0.577<0.58, LOH/non-LOH 均無突破 |
-| PMD/ChromHMM Gating 啟用 | 降低甲基化背景噪聲 | 中 | 架構已有 `is_pmd` 欄位 |
+| ~~機器學習組合特徵分類器~~ | ~~整合 15 個特徵的 ensemble~~ | — | Wave 3 J13: AUC=0.577<0.58; Beyond-AUC 2026-04-09 確認特徵空間耗盡 |
+| ~~CNV zone-aware filter~~ | ~~利用 SEQC2 CNV 分層過濾~~ | — | 2026-04-10: 跨樣本不一致；zone-specific mean AUC≤0.641；trade-off 全不可行 |
+| ~~GC 校正與甲基化-CN 驗證~~ | ~~GC bias 校正 + CN 驗證~~ | — | 2026-04-11: delta-r=-0.0002（門檻≥0.03）；甲基化 CN-blind；不需實作 |
+| ~~PMD/ChromHMM Gating 啟用~~ | ~~降低甲基化背景噪聲~~ | — | 2026-04-12: PMD CpG variance TP=FP; AUC≤0.622; fCpG p=0.77 |
 | paired-only multi-bio 全量擴充 | 確認 +0.0112 F1 穩定性 | 中 | round 2 sample637 驗證完成 |
