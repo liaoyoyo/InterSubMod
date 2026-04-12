@@ -37,6 +37,9 @@ public:
         app.add_option("-n,--normal-bam", config.normal_bam_path, "Path to Normal BAM (Optional)")
             ->check(CLI::ExistingFile);
 
+        app.add_option("--loh-bed", config.loh_bed_path, "LOH BED file from LongPhase (Optional)")
+            ->check(CLI::ExistingFile);
+
         app.add_option("-r,--reference", config.reference_fasta_path, "Path to Reference FASTA (Required)")
             ->required()
             ->check(CLI::ExistingFile);
@@ -114,6 +117,11 @@ public:
         
         // Full Read Span
         app.add_flag("--full-read", config.use_full_read_span, "Enable full read span processing (dynamic window)");
+
+        // Coverage normalization
+        app.add_option("--expected-coverage", config.expected_coverage,
+                       "Expected diploid coverage (reads per region). 0 = auto-estimate via KDE mode (Default: 0)")
+            ->check(CLI::Range(0.0, 1000.0));
 
         try {
             app.parse(argc, argv);

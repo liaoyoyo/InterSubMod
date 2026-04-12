@@ -22,6 +22,7 @@ struct Config {
     std::string somatic_vcf_path;       ///< Path to Somatic VCF (Required)
     std::string output_dir = "output";  ///< Output directory for results
     std::string pmd_bed_path;           ///< Path to PMD annotation BED (Optional)
+    std::string loh_bed_path;           ///< Path to LOH BED file from LongPhase (Optional)
 
     // Global Parameters
     int window_size_bp = 1000;   ///< Analysis window size around somatic SNV (±bp)
@@ -51,6 +52,8 @@ struct Config {
     bool distance_jaccard_include_unmeth = false;  ///< Include unmethylated sites in Jaccard
 
     bool use_full_read_span = false;               ///< If true, dynamically expand window to cover full span of reads
+
+    double expected_coverage = 0.0;  ///< User-specified diploid coverage; 0 = auto-estimate via KDE mode
 
     // Hierarchical Clustering Configuration
     bool compute_clustering = true;        ///< Whether to perform hierarchical clustering

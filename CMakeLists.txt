@@ -102,6 +102,9 @@ add_library(inter_sub_mod_core
     src/core/Bootstrap.cpp
     src/core/SignificanceAnalyzer.cpp
     src/core/LabelTest.cpp
+    src/core/NormalBaseline.cpp
+    src/core/LohBedAnnotator.cpp
+    src/core/SubcloneAnalyzer.cpp
     src/core/ReadAggregator.cpp
     src/utils/Logger.cpp
     src/utils/FastaReader.cpp

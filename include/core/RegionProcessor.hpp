@@ -1,11 +1,14 @@
 #pragma once
 
+#include <limits>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "core/BamReader.hpp"
 #include "core/Config.hpp"
+#include "core/LohBedAnnotator.hpp"
+#include "core/SubcloneAnalyzer.hpp"
 #include "core/DistanceMatrix.hpp"
 #include "core/HierarchicalClustering.hpp"
 #include "core/MatrixBuilder.hpp"
@@ -34,6 +37,8 @@ struct RegionResult {
     int num_forward_reads;   ///< Forward strand reads
     int num_reverse_reads;   ///< Reverse strand reads
     int num_filtered_reads;  ///< Reads filtered out (debug mode)
+    int num_tumor_reads;     ///< Tumor reads in region (= num_reads when no normal BAM)
+    int num_normal_reads;    ///< Normal reads in region (0 when no normal BAM)
     double elapsed_ms;
     double peak_memory_mb;
     bool success;
@@ -50,6 +55,11 @@ struct RegionResult {
     bool significance_computed;  ///< Whether significance analysis was run
     double global_p_value;       ///< Global association p-value (FFH)
     double cramers_v;            ///< Effect size (Cramér's V)
+    double global_hp_family_p;   ///< Layer 1: HP family p-value
+    double global_hp_family_v;   ///< Layer 1: HP family Cramér's V
+    double global_hp_fine_p;     ///< Layer 3: HP fine-grained p-value
+    double global_hp_fine_v;     ///< Layer 3: HP fine-grained Cramér's V
+    int global_hp_fine_n_groups; ///< Number of valid HP fine-grained groups
     double local_best_p_value;   ///< Best cluster's local p-value
     int local_best_cluster;      ///< Best cluster ID
     double heuristic_score;      ///< Combined heuristic score [0-1]
@@ -90,6 +100,17 @@ struct RegionResult {
     double hp_fine_p;            ///< P-value for fine-grained test
     bool hp_fine_sig;            ///< Significant at alpha
     int hp_fine_n_groups;        ///< Number of valid groups (max 4)
+    int hp_fine_n_hp1;           ///< HP1 (germline) read count in fine test
+    int hp_fine_n_hp1s;          ///< HP1-1 (somatic from HP1) read count
+    int hp_fine_n_hp2;           ///< HP2 (germline) read count in fine test
+    int hp_fine_n_hp2s;          ///< HP2-1 (somatic from HP2) read count
+    // Fine-grained pairwise mean distances (6 pairs from 4 groups)
+    double hp_fine_d_hp1_hp1s;   ///< d(HP1, HP1-1): same haplotype, germline vs somatic
+    double hp_fine_d_hp1_hp2;    ///< d(HP1, HP2): different haplotype, both germline
+    double hp_fine_d_hp1_hp2s;   ///< d(HP1, HP2-1): cross haplotype, germline vs somatic
+    double hp_fine_d_hp1s_hp2;   ///< d(HP1-1, HP2): cross haplotype, somatic vs germline
+    double hp_fine_d_hp1s_hp2s;  ///< d(HP1-1, HP2-1): different haplotype, both somatic
+    double hp_fine_d_hp2_hp2s;   ///< d(HP2, HP2-1): same haplotype, germline vs somatic
 
     // Stage 3: Allele Test
     double allele_delta;         ///< Delta for ALT vs REF
@@ -103,6 +124,39 @@ struct RegionResult {
     int unassigned_n_hp3;        ///< Number of HP3 reads
     int unassigned_n_hp0;        ///< Number of HP0/unphased reads
 
+    // Sample ASM (Tumor vs Normal) - Label-First distance test
+    double sample_asm_delta;     ///< Delta = d_between - d_within for Tumor vs Normal
+    double sample_asm_p;         ///< Permutation p-value for Sample ASM
+    bool sample_asm_sig;         ///< Significant at alpha
+    int sample_asm_n_tumor;      ///< Tumor reads in Sample ASM test
+    int sample_asm_n_normal;     ///< Normal reads in Sample ASM test
+
+    // Normal baseline statistics (Phase B)
+    double normal_baseline_mean;      ///< Overall mean normal methylation
+    double normal_baseline_coverage;  ///< Mean per-CpG normal read coverage
+
+    // Somatic HP ASM (tumor-only vs normal-only HP comparison)
+    double hp_residual_delta;    ///< Somatic HP ASM = tumor_hp_delta - normal_hp_delta
+    double hp_residual_p;        ///< P-value for somatic HP ASM (tumor HP test)
+    bool hp_residual_sig;        ///< Significant at alpha
+    // Diagnostic fields for HP subset analysis
+    double tumor_hp_delta;       ///< HP delta on tumor-only subset (NaN if invalid)
+    bool tumor_hp_valid;         ///< Whether tumor-only HP test had sufficient groups
+    double normal_hp_delta;      ///< HP delta on normal-only subset (NaN if invalid)
+    bool normal_hp_valid;        ///< Whether normal-only HP test had sufficient groups
+    int tumor_hp1_count;         ///< Tumor reads in HP1
+    int tumor_hp2_count;         ///< Tumor reads in HP2
+    int normal_hp1_count;        ///< Normal reads in HP1
+    int normal_hp2_count;        ///< Normal reads in HP2
+
+    // LOH BED annotation (Phase C)
+    bool loh_bed_overlap;        ///< Whether SNV position overlaps a LOH BED region
+    std::string loh_source;      ///< LOH source classification: "none", "bed_only", "ratio_only", "both"
+    std::string loh_bed_annotation; ///< Annotation from BED file (4th column)
+
+    // Cross-region subclone assignment (Phase D)
+    int subclone_id;             ///< Subclone group assignment (-1 = unassigned)
+
     // Cluster stability results (NEW)
     double cluster_stability;    ///< Stability score from subsampling [0-1]
     bool has_outlier_cluster;    ///< True if any cluster has < 3 reads after retry
@@ -114,7 +168,7 @@ struct RegionResult {
     // Multi-Layer Validation Quality Metrics (NEW - Phase 5)
     double hp_ratio;                 ///< HP1/(HP1+HP2), range [0,1]
     bool potential_loh;              ///< True if HP ratio < 0.1 or > 0.9
-    double coverage_multiple;        ///< NumReads/75.0 (expected coverage)
+    double coverage_multiple;        ///< NumReads / diploid_coverage (auto-estimated per sample)
     std::string coverage_category;   ///< "Normal", "Low", "High", "CNV_Loss", "CNV_Gain", "High_Copy"
     std::string loh_subtype;         ///< "None", "LOH_Noise", "LOH_Weak", "LOH_Strong", "LOH_Subclone"
     float quality_score;             ///< Composite quality score [0-100]
@@ -128,6 +182,8 @@ struct RegionResult {
           num_forward_reads(0),
           num_reverse_reads(0),
           num_filtered_reads(0),
+          num_tumor_reads(0),
+          num_normal_reads(0),
           elapsed_ms(0.0),
           peak_memory_mb(0.0),
           success(false),
@@ -139,6 +195,11 @@ struct RegionResult {
           significance_computed(false),
           global_p_value(1.0),
           cramers_v(0.0),
+          global_hp_family_p(1.0),
+          global_hp_family_v(0.0),
+          global_hp_fine_p(1.0),
+          global_hp_fine_v(0.0),
+          global_hp_fine_n_groups(0),
           local_best_p_value(1.0),
           local_best_cluster(-1),
           heuristic_score(0.0),
@@ -172,6 +233,16 @@ struct RegionResult {
           hp_fine_p(1.0),
           hp_fine_sig(false),
           hp_fine_n_groups(0),
+          hp_fine_n_hp1(0),
+          hp_fine_n_hp1s(0),
+          hp_fine_n_hp2(0),
+          hp_fine_n_hp2s(0),
+          hp_fine_d_hp1_hp1s(NAN),
+          hp_fine_d_hp1_hp2(NAN),
+          hp_fine_d_hp1_hp2s(NAN),
+          hp_fine_d_hp1s_hp2(NAN),
+          hp_fine_d_hp1s_hp2s(NAN),
+          hp_fine_d_hp2_hp2s(NAN),
           allele_delta(0.0),
           allele_p(1.0),
           allele_sig(false),
@@ -180,6 +251,27 @@ struct RegionResult {
           unassigned_dir("None"),
           unassigned_n_hp3(0),
           unassigned_n_hp0(0),
+          sample_asm_delta(0.0),
+          sample_asm_p(1.0),
+          sample_asm_sig(false),
+          sample_asm_n_tumor(0),
+          sample_asm_n_normal(0),
+          normal_baseline_mean(0.0),
+          normal_baseline_coverage(0.0),
+          hp_residual_delta(0.0),
+          hp_residual_p(1.0),
+          hp_residual_sig(false),
+          tumor_hp_delta(std::numeric_limits<double>::quiet_NaN()),
+          tumor_hp_valid(false),
+          normal_hp_delta(std::numeric_limits<double>::quiet_NaN()),
+          normal_hp_valid(false),
+          tumor_hp1_count(0),
+          tumor_hp2_count(0),
+          normal_hp1_count(0),
+          normal_hp2_count(0),
+          loh_bed_overlap(false),
+          loh_source("none"),
+          subclone_id(-1),
           cluster_stability(0.0),
           has_outlier_cluster(false),
           n_clusters(0),
@@ -263,7 +355,7 @@ public:
      * @return RegionResult
      */
     RegionResult process_single_region(const SomaticSnv& snv, int region_id, BamReader& bam_reader,
-                                       FastaReader& fasta_reader);
+                                       FastaReader& fasta_reader, BamReader* normal_reader = nullptr);
 
     /**
      * @brief Get loaded SNVs list
@@ -352,6 +444,7 @@ private:
     bool no_filter_output_;
     ReadFilterConfig filter_config_;
     bool use_full_read_span_;  ///< If true, dynamically expand window to cover full span of reads
+    double expected_coverage_;  ///< User-specified diploid coverage; 0 = auto-estimate
 
     // Distance matrix configuration
     bool compute_distance_matrix_;
@@ -371,6 +464,9 @@ private:
 
     std::vector<SomaticSnv> snvs_;
     ChromIndex chrom_index_;  // Manage chromosome name to ID mapping
+
+    // LOH BED annotation (Phase C)
+    LohBedAnnotator loh_annotator_;  ///< LOH BED file annotator
 
     // Thread-local resources are created in process_single_region
 };
