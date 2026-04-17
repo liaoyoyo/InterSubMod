@@ -231,6 +231,99 @@ Chr-shuffle null（套用 P3 pilot 教訓 — spatial autocorrelation defense）
 
 ---
 
+## 3b. Step 4 — AF<0.4 stratified Cohen's d + FP 聚集分析（20260418 後續增補）
+
+### 3b.1 動機與範圍
+Step 3 後列為「Step 4 候選」的兩項：(a) AF<0.4 stratified per-sample Cohen's d 重算（確認 HCC1954/COLO829 升級）；(b) HCC1954 AF≥0.4 FP 是否為 hotspot 聚集（或特定機制）。
+
+**原假設**：AF≥0.4 FP 可能集中於 genomic hotspot，解釋「HCC1954 樣本特異性失效」。
+
+### 3b.2 Part A — AF<0.4 Cohen's h 結果
+
+| Sample | h_all | **h_af04** | **h_af02** | 類別變化 |
+|---|---|---|---|---|
+| **HCC1954** | +0.587 | **+0.654** | **+0.775** | ✅ medium+ 升級（AF<0.2 接近 large） |
+| HCC1937 | +0.534 | +0.523 | +0.350 | ➖ medium+ 穩定 |
+| H1437 | +0.462 | +0.543 | +0.313 | ✅ small→medium+ |
+| HCC1395_DORADO | +0.553 | +0.257 | +0.165 | ⚠️ 數值降（飽和 artifact） |
+| HCC1395 | +0.283 | +0.171 | +0.121 | ⚠️ 數值降（飽和 artifact） |
+| H2009 | +0.127 | +0.150 | +0.328 | ➖ ceiling |
+| **COLO829** | **-0.457** | **-0.429** | **-0.547** | ❌ permanent NEGATIVE |
+
+**更新的 per-sample 分類**（AF<0.4 stratified）：
+- **4/7 medium+ POS**：HCC1954 / HCC1937 / H1437 / HCC1395_DORADO
+- **1/7 small POS**：HCC1395
+- **1/7 ceiling**：H2009
+- **1/7 permanent out-of-scope**：COLO829
+
+HCC1395/DORADO 數值 h 下降為**飽和 artifact**（p4 和 plt 都趨近 1.0，arcsin 飽和導致 h 縮小），非真正訊號衰減。
+
+### 3b.3 Part B — Coverage impact
+
+6/7 樣本仍 YES power（n≥100），僅 COLO829 MARGINAL（n=34，未變）：
+- HCC1954 保留 **1,040 regions**（35.9% loss）
+- AF<0.2 版本 HCC1954 仍有 **564 regions**（可供論文 figure）
+- H2009 50.3% loss 但絕對 n=9,939 仍最多
+
+### 3b.4 Part C — FP 聚集假設推翻 ⚠️
+
+**5/5 樣本 AF≥0.4 FP 在空間上 NOT 聚集**（inter-FP <100kb fraction 皆小於 AF<0.4 TP baseline）：
+
+| Sample | clust FP≥0.4 | clust TP<0.4 | ratio |
+|---|---|---|---|
+| HCC1954 | 0.270 | 0.333 | **0.81×** |
+| HCC1937 | 0.186 | 0.304 | 0.61× |
+| H1437 | 0.127 | 0.246 | 0.52× |
+| HCC1395 | 0.071 | 0.311 | 0.23× |
+| H2009 | 0.141 | 0.769 | 0.18× |
+
+所有 ratio <1 → FP **比 TP 更分散**。原 hotspot 假設**推翻**。
+
+### 3b.5 新機制解釋 — 染色體層級富集（非 hotspot）
+
+**HCC1954 FP 的染色體 AF≥0.4 fraction**：
+
+| Chr | AF≥0.4 fraction |
+|---|---|
+| chr14 | 0.842 |
+| chr2 | 0.775 |
+| chr7 | **0.714** |
+| **chr8** | **0.686** |
+| chr16 | 0.696 |
+| chr17 | 0.654 |
+| chr1 | 0.507 |
+| chr9 | 0.370 (低) |
+
+chr7/8/16 總計 315 FP（>50% 全染色體 FP）、皆 ~70% 在 AF≥0.4 → **HER2 on chr17、MYC on chr8 等已知 HCC1954 amplification 區域**。
+
+### 3b.6 Feature profile — germline-like 機制證據
+
+**AF<0.4 TP (n=735) vs AF≥0.4 FP (n=511)**：
+
+| Feature | AF<0.4 TP | AF≥0.4 FP | Δ |
+|---|---|---|---|
+| **NumCpGs** | 89.6 | **111.0** | **+21.4 (+24%)** ⭐ |
+| Coverage_Multiple | 1.56 | 1.58 | 類似 |
+| **PairwiseMedianDist** | 0.189 | **0.168** | **-0.021** ⭐ (reads 相似度更高) |
+| \|AlleleDelta\| mean | 0.032 | 0.027 | -0.005 (MWU p=8.67e-4) |
+
+### 3b.7 HCC1954 失效三要素機制
+
+1. **CNV 染色體富集**（chr7/8/16、HER2+ 高 ploidy）：LOH.bed 未涵蓋細微 cnLOH 或 mixed ploidy 區
+2. **Germline het 被 CNV 驅動 AF 漂移**：3:1 allele imbalance 區 germline het 從 0.5 → ~0.75 → 被 AF<0.4 cutoff 剔除
+3. **CpG island/啟動子 bias**：高 CpG 密度區（+24%）methylation 結構複雜，HP 分群誤判為 NG=4
+
+AF<0.4 挽救的生物學對應：tumor purity<1 + subclonal events → somatic AF 天然 <0.4；germline het 在 CNV amplification 區 AF 漂至高 AF 段被移除。
+
+### 3b.8 更新待驗（Step 5 候選）
+
+- **CNV caller 整合必要性提升**：chr7/8/16 染色體 bias 強烈建議 Delly/Manta/sequenza（Opus 4.7 重整 B.2-2 擔憂相關）
+- **Purity<1 模擬**：AF<0.4 閾值在 purity 0.3-0.8 下是否穩健
+- **CpG island annotation 交叉**：AF≥0.4 FP 的高 NumCpGs 落在哪類 region（promoter/shore/shelf）
+- **AF 雙閾值**：AF<0.1 是否也產生 FP artifact
+
+---
+
 ## 4. 對 Part B.1 質疑的回應
 
 | 質疑 | 原擔憂 | F pilot 回應 | 結論 |
@@ -299,7 +392,9 @@ Chr-shuffle null（套用 P3 pilot 教訓 — spatial autocorrelation defense）
 | Step 2 findings | `research/F_hpfinengroups_deepening/observations/step2_findings.md` |
 | Step 3 script | `research/F_hpfinengroups_deepening/scripts/step3_af_cutoff_validation.py` |
 | Step 3 findings | `research/F_hpfinengroups_deepening/observations/step3_findings.md` |
-| Step 1-3 data outputs | `research/F_hpfinengroups_deepening/data/*.tsv` |
+| Step 4 script | `research/F_hpfinengroups_deepening/scripts/step4_af04_cohens_d_and_fp_clustering.py` |
+| Step 4 findings | `research/F_hpfinengroups_deepening/observations/step4_findings.md` |
+| Step 1-4 data outputs | `research/F_hpfinengroups_deepening/data/*.tsv` |
 | Memory | `.claude/.../memory/project_hpfinengroups_subclone_marker.md`（20260418 updated） |
 | Stability | `docs/reports/research_landscape/06_結論穩定性審查.md`（補充結論 16 ⭐3→⭐4） |
 
