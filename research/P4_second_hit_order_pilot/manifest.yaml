@@ -1,0 +1,55 @@
+pilot_id: P4_second_hit_order
+date: 2026-04-17
+purpose: |
+  驗證 ISM 目標 3（二次打擊順序）是否在 region-level AF × methylation
+  聯合分佈上可區分。
+scope:
+  samples: [HCC1395, COLO829, H1437, H2009, HCC1937, HCC1954]
+  mode: to (僅 TO 有 LOH annotation)
+  af_bins: ["0.1-0.3", "0.3-0.5", "0.5-0.7"]
+  nr_min: 40
+  metrics: [AlleleDelta bimodality coefficient, HPFineNGroups mean/high_frac]
+scripts:
+  - scripts/01_af_methylation_joint_distribution.py
+data:
+  - data/af_loh_methylation_joint_stats.tsv
+  - data/loh_vs_nonloh_delta.tsv
+figures:
+  - figures/01_af_loh_joint_distribution.png
+verdict: CONDITIONAL_NEGATIVE
+verdict_reason: |
+  Bimodality 差異微小（目標訊號）:
+    - Intermediate AF (0.3-0.5) LOH vs NonLOH mean |Δ BC| = 0.043
+    - 遠低於 POSITIVE 門檻 0.15
+    - AlleleDelta 分佈在 LOH/NonLOH 都偏 unimodal，不顯現預期的 biallelic/monoallelic 分離
+
+  HPFineNGroups 差異大但非 order marker:
+    - 7/6 樣本 LOH HPFineNGroups 系統性低於 NonLOH（Δ = -0.448 ~ -0.952）
+    - 機制：LOH region 單 haplotype → 可能的 NGroups 值域本身較小
+    - 這是 B.2 LOH POSITIVE 結論的**不同面向** — B.2 比較 intermediate vs extreme AF
+      within LOH，P4 比較 LOH vs NonLOH within same AF bin
+    - 此差異無法回答「methylation 先 vs LOH 先」，僅反映 LOH 後的 haplotype 減少
+
+  關鍵洞察:
+    - 單 region 特徵的 summary statistics 無法區分二次打擊順序
+    - 區分 order 需要 per-read epigenotype（e.g., phased methylation patterns
+      在 variant 附近的 cis/trans 關係），對應 ISM 目標 1 (per-CpG 多標籤)
+    - 目標 3 與目標 1 有依賴關係：目標 3 pilot 應等目標 1 進度後再做
+
+ism_goal_mapping:
+  - 目標 3（二次打擊順序）— 單 region AF × methylation 聯合分佈無訊號
+  - 目標 1（per-CpG 多標籤）— 目標 3 的前置條件；尚未完成
+
+implications:
+  - Phase 2 路線圖應調整：目標 3 工作延後至目標 1 後
+  - 現有 HPFineNGroups + AlleleDelta 特徵集合對 order 推斷無力
+  - 需新設計：phased haplotype × methylation sub-pattern（需完整 read-level data）
+
+next_steps:
+  - 記錄於 pitfall / design memory
+  - 於 INDEX.md 登錄 P4 NEGATIVE
+  - 下一 pilot 建議: 回到目標 1 / 目標 4 方向（需待 P0 完成或改 mode）
+
+related:
+  - B.2 LOH Subclone AF×Methylation POSITIVE (不同比較，不矛盾)
+  - ISM 目標 1 (per-CpG 多標籤) — 目標 3 前置

@@ -221,6 +221,9 @@ LOH 區域 intermediate AF (0.1-0.4/0.6-0.9) 的 variants 具有顯著更高的�
 ### P3 Window Aggregation Pilot — ❌ NEGATIVE 2026-04-17
 1 Mb window aggregation pilot 驗證 gene-level 方向。Naive 結果 4/7 樣本看似突破（H2009 ΔAUC=+0.342），但 mid-TP-rate window confound check 後反轉：H2009 Δ=-0.346，8 個 TO 測試中僅 1 個（H1437 AlleleDelta, Δ_mid=+0.097）保留明確 gain。**結論：window aggregation AUC 幾乎完全由 TP/FP 基因組空間 auto-correlation 驅動。** Phase 2B gene-level 若要推進必須以 shuffle-within-chr null model + mid-TP-rate Δ>+0.03 雙門檻驗收。新增 pitfall 規則於 memory。[報告](in_progress/2026/04/20260417_P3_window_aggregation_pilot_NEGATIVE_01.md) [Pilot 數據](../../research/P3_window_aggregation_pilot/)
 
+### P4 Second-Hit Order Pilot — ⚠️ CONDITIONAL NEGATIVE 2026-04-17
+ISM 目標 3（二次打擊順序）在 region-level AF × methylation 聯合分佈是否可區分。Intermediate AF (0.3-0.5) LOH vs NonLOH：**Bimodality Coefficient mean |Δ|=0.043**（遠低於 0.15 門檻），AlleleDelta 分佈不顯現 biallelic/monoallelic 分離。HPFineNGroups Δ=-0.637 (7/6 樣本一致) 但為 LOH 機制副作用（單 haplotype）非 order 訊號。**結論：單 region 特徵 summary 無法推斷 two-hit order；需 per-read epigenotype（ISM 目標 1）。目標 3 依賴目標 1，應暫緩等目標 1 進度。** [報告](in_progress/2026/04/20260417_P4_second_hit_order_pilot_CONDITIONAL_NEG_01.md) [Pilot 數據](../../research/P4_second_hit_order_pilot/)
+
 ---
 
 ## 附錄：待驗證方向（尚未正式啟動）
