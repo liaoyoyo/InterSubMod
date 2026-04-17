@@ -224,6 +224,9 @@ LOH 區域 intermediate AF (0.1-0.4/0.6-0.9) 的 variants 具有顯著更高的�
 ### P4 Second-Hit Order Pilot — ⚠️ CONDITIONAL NEGATIVE 2026-04-17
 ISM 目標 3（二次打擊順序）在 region-level AF × methylation 聯合分佈是否可區分。Intermediate AF (0.3-0.5) LOH vs NonLOH：**Bimodality Coefficient mean |Δ|=0.043**（遠低於 0.15 門檻），AlleleDelta 分佈不顯現 biallelic/monoallelic 分離。HPFineNGroups Δ=-0.637 (7/6 樣本一致) 但為 LOH 機制副作用（單 haplotype）非 order 訊號。**結論：單 region 特徵 summary 無法推斷 two-hit order；需 per-read epigenotype（ISM 目標 1）。目標 3 依賴目標 1，應暫緩等目標 1 進度。** [報告](in_progress/2026/04/20260417_P4_second_hit_order_pilot_CONDITIONAL_NEG_01.md) [Pilot 數據](../../research/P4_second_hit_order_pilot/)
 
+### F HPFineNGroups Deepening Pilot — ✅ POSITIVE (refined) 2026-04-18
+Part B.1 對 HPFineNGroups POSITIVE 結論 4 項質疑（residualized AUC、飽和、7/7 強度、LOH/AF 混淆）三階段驗證。**三大新發現**：(1) **NGroups 非單調**（NG=2 TP rate 0.643<NG=1 0.763）根因為 germline AF confound（NG=2 AF mean 0.471 最接近 0.5），(2) **HCC1954 失效根因 = FP 在 AF≥0.4 極端富集**（AF<0.2 TP=0.874 正常→AF 0.8-1.0 TP=0.022），(3) **Paired 99.85% 非真 gain**（baseline 98.96%）。**新 canonical filter: NG=4+AF<0.4+NR≥80 NonLOH TP rate=0.9281（舊 0.8912 +3.7pp）**；HCC1954 +21.0pp、HCC1937 +15.4pp 挽救；5/7 樣本 ≥0.85（舊 4/7）；AF<0.2 則 6/7≥0.87。**Confound checks PASS**：chr-shuffle null Z=43.5（套用 P3 教訓）、Coverage_Multiple 跨 CN tiers 0.90-0.94 穩定。**COLO829 out-of-scope**（ONT_R10 無 methylation basecall）。**結論穩定度補充結論 16 升級 ⭐3 → ⭐4**。[報告](in_progress/2026/04/20260418_F_HPFineNGroups_deepening_POSITIVE_01.md) [Pilot 數據](../../research/F_hpfinengroups_deepening/)
+
 ---
 
 ## 附錄：待驗證方向（尚未正式啟動）

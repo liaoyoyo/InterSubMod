@@ -1,0 +1,86 @@
+pilot_id: F_hpfinengroups_deepening
+title: HPFineNGroups 深度質疑驗證與新 canonical filter 建立
+date_start: 2026-04-17
+date_end: 2026-04-18
+verdict: POSITIVE_REFINED
+status: COMPLETE
+session_origin: 9622dd78-d236-4388-90bb-6dfab0849e6d
+
+trigger:
+  source: Part B.1 質疑清單（Opus 4.7 研究重整 plan）
+  question: HPFineNGroups POSITIVE 結論是否經得起 AF / NR-bin / spatial / CN confound 多維度驗證？
+  prior_state: ⭐3 穩定度；residualized AUC 0.617；7/7 方向一致但 per-sample effect size 僅 3/7 medium
+
+scope:
+  data: output/synthesis/observation_workspaces/20260327_loh_round1_cross_sample_audit/all_region_rows.tsv.gz (748K rows, 116 cols)
+  samples: HCC1395, HCC1395_DORADO, HCC1937, HCC1954, COLO829, H2009, H1437
+  modes: [to, paired]
+  feature: HPFineNGroups (int, 0-4), caller_af, NumReads, Coverage_Multiple, to_loh_bed_hit, truth_label
+  exclusions:
+    - Paired mode baseline saturation（98.96% 基線，filter gain 僅 +0.89pp → out-of-scope）
+    - LOH 區域（NGroups 被壓縮到 1-2，NG=4 僅 n=11）
+    - COLO829（ONT_R10 無 methylation basecall，HPFineNGroups 本身 artifact）
+
+steps:
+  - id: step1
+    script: scripts/step1_baseline_and_param_sanity.py
+    observation: observations/step1_findings.md
+    key_findings:
+      - 舊 filter 89.1% TP rate 已重現（0.8912 match）
+      - NGroups 單維非單調：NG=1 TP=0.763 / NG=2 TP=0.643 / NG=3 TP=0.774 / NG=4 TP=0.891
+      - NG=2 反常低於 NG=1，需根因調查
+      - out-of-scope：LOH region NG=4 n=11、Paired baseline 已極高
+  - id: step2
+    script: scripts/step2_root_cause_investigation.py
+    observation: observations/step2_findings.md
+    key_findings:
+      - Q1 NG=2 非單調根因 = germline AF confound（NG=2 AF 平均 0.471、AF∈[0.45,0.55] fraction 0.212 最高、NG=2+AF 0.8-1.0 TP rate 0.339 最差）
+      - Q1 NG=4+AF<0.2 TP rate=0.937；NG=4+AF 0.2-0.4=0.926；提出新 filter NG=4+AF<0.4+NR≥80 NonLOH
+      - Q2 HCC1954 失效根因 = FP 在 AF≥0.4 極端富集（AF<0.2 TP=0.874 正常、AF 0.8-1.0 TP=0.022）
+      - Q3 Paired 99.85% 非真 gain（baseline 已 98.96%，filter +0.89pp）
+  - id: step3
+    script: scripts/step3_af_cutoff_validation.py
+    observation: observations/step3_findings.md
+    key_findings:
+      - 新 filter TP rate 0.9281（n=14,197, CI [0.924, 0.932]，舊 0.8912 → +3.7pp）
+      - HCC1954 +21.0pp 挽救（0.497→0.707）、HCC1937 +15.4pp（0.714→0.867）
+      - 5/7 樣本達 TP rate ≥0.85（舊 4/7）
+      - AF cutoff sensitivity：AF<0.2 = 6/7≥0.87 high-precision、AF<0.4 = balanced、AF<0.5 = 5/7≥0.85
+      - chr-shuffle null Z=43.5 → PASS，非 spatial artifact（套用 P3 pilot 教訓）
+      - Coverage_Multiple 跨 CN tiers 0.90-0.94 穩定 → 非 CN confound
+      - COLO829 (n=34) 全部 AF<0.4，新 filter 無 gain → out-of-scope 確認
+
+verdict_details:
+  canonical_filter_new: "NG=4 + AF<0.4 + NR≥80 NonLOH"
+  canonical_filter_old: "NG≥4 + NR≥80 NonLOH"  # deprecated
+  high_precision_alt: "NG=4 + AF<0.2 + NR≥80 NonLOH (6/7 ≥0.87, n≈3,000)"
+  stability_upgrade: "⭐3 → ⭐4 (結論穩定度補充結論 16)"
+  confound_checks:
+    spatial: PASS (chr-shuffle Z=43.5)
+    cn: PASS (Coverage_Multiple bins 0.90-0.94)
+    af: EXPLAINED (NG=2 germline confound 解釋非單調)
+    nr: EXPLAINED (NR-bin weighted 7/7 POS)
+    sample_specific: EXPLAINED (HCC1954 AF≥0.4 FP 富集；COLO829 ONT_R10 basecall artifact)
+
+impact_on_other_tasks:
+  - target: "B.1-1 residualized AUC 0.617"
+    effect: "結論仍成立但低估 AF-stratified 潛力；若重算以 AF<0.4 區間，ΔAUC 預期更高"
+  - target: "B.1-3 per-sample Cohen's d"
+    effect: "若 with AF<0.4 重算，HCC1954/COLO829 可能從「特殊」→「POS」"
+  - target: "結論穩定度補充結論 16"
+    effect: "升級 ⭐3 → ⭐4"
+  - target: "Phase 2 biology characterization"
+    effect: "HPFineNGroups 作為 biology-level subclone marker 強化；HCC1954 樣本特異性失效有明確機制解釋"
+  - target: "memory project_hpfinengroups_subclone_marker.md"
+    effect: "已更新（20260418）"
+
+unresolved:
+  - "AF<0.4 為何有效的生物學機制：subclonal SNV 天然低 AF、germline het 在 AF≈0.5 被移除"
+  - "COLO829 應增 sample-level gating（需 ONT_5mCG 或 5mCG+5hmCG basecall 樣本）"
+  - "AF<0.4 stratified per-sample Cohen's d 重算（Step 4 候選）"
+
+references:
+  - docs/experiments/in_progress/2026/04/20260418_F_HPFineNGroups_deepening_POSITIVE_01.md
+  - docs/reports/research_landscape/06_結論穩定性審查.md
+  - docs/experiments/in_progress/2026/04/20260417_HPFineNGroups_saturation_check_01.md
+  - docs/experiments/in_progress/2026/04/20260417_PartB_effect_size_cn_strat_01.md
