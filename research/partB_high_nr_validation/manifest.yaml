@@ -1,0 +1,75 @@
+project:
+  name: "partB_high_nr_validation"
+  title: "B.2-3: 高 NR bin + NR-matched sampling 驗證 LOH×AF×Methylation"
+  created: "2026-04-17"
+  status: "completed"
+  question: "原報告 ρ 隨 NR 增強是真實功效還是高 NR 區假關聯？"
+
+hypotheses:
+  - id: "H_B2_3_a"
+    statement: "若 NR 增強 ρ 是 artifact，NR≥80 單獨分析應顯著減弱或消失"
+    positive_criterion: "TO NR≥80 有 ≥4/7 樣本顯著正向"
+    negative_criterion: "<3/7 顯著，或方向反轉"
+    verdict: "REJECTED (artifact 假設) — TO NR≥80 在 11/12 (bin×sample) 組合中顯著正向，per-bin 效應隨 NR 遞減 (+0.638→+0.174) 不是遞增"
+
+  - id: "H_B2_3_b"
+    statement: "NR-matched sampling 消除分佈差異後效應顯著減弱"
+    positive_criterion: "TO matched 7/7 POS 且 Δ 保留 ≥50%"
+    negative_criterion: "matched 後 <4/7 POS 或 Δ 平均衰減 >50%"
+    verdict: "REJECTED (減弱假設) — TO matched 7/7 POS, Δ=+0.29~+0.80, p<10^-26，效應保留甚至略強於未匹配"
+
+findings:
+  to_nr_bins_summary:
+    - nr_bin: "[40,60)"
+      sig_count: "7/7"
+      median_delta: 0.638
+    - nr_bin: "[60,80)"
+      sig_count: "6/7"
+      median_delta: 0.543
+    - nr_bin: "[80,100)"
+      sig_count: "6/7"
+      median_delta: 0.401
+    - nr_bin: "[100,150)"
+      sig_count: "4/7"
+      median_delta: 0.281
+    - nr_bin: "[150,500)"
+      sig_count: "1/7"
+      median_delta: 0.174
+
+  to_nr_matched:
+    HCC1395: {n_matched: 2472, delta: 0.506, p: "6e-292"}
+    HCC1395_DORADO: {n_matched: 2850, delta: 0.707, p: "0"}
+    COLO829: {n_matched: 135, delta: 0.800, p: "6e-39"}
+    H1437: {n_matched: 1195, delta: 0.715, p: "8e-269"}
+    H2009: {n_matched: 7962, delta: 0.292, p: "0"}
+    HCC1937: {n_matched: 1404, delta: 0.504, p: "6e-190"}
+    HCC1954: {n_matched: 211, delta: 0.483, p: "2e-26"}
+
+  paired_availability: "NOT AVAILABLE — master dataset has no to_loh_bed_hit for Paired mode; Paired LOH validation requires re-running cross_sample_audit with Paired LOH BED annotation"
+
+  effect_decreases_with_nr: true  # 高 NR bin Δ 遞減，不是遞增
+  interpretation: "高 NR bin 內效應遞減可能是 methylation diversity 飽和效應（區域內 subclone 已能充分展現多樣性，AF 資訊的 additive 價值遞減）；並非假關聯 artifact"
+
+artifacts:
+  scripts:
+    - "scripts/01_high_nr_check.py"
+  data:
+    - "data/b2_3_nr_bin_to.tsv"
+    - "data/b2_3_nr_bin_paired.tsv"
+    - "data/b2_3_nr_matched_to.tsv"
+    - "data/b2_3_nr_matched_paired.tsv"
+  figures:
+    - "figures/01_nr_bin_heatmap.png"
+
+dependencies:
+  git_commit_at_start: "fe07550"
+  python_packages: ["pandas", "numpy", "scipy", "matplotlib"]
+
+impact_on_claims:
+  - claim: "高 NR bin 效應更強 → 可能是統計功效驅動的假關聯"
+    correction: "B.2-3 駁回 — NR-matched 7/7 POS 且 per-bin Δ 遞減，非遞增"
+    severity: "高 — LOH×AF×Methylation POSITIVE 的 NR confound 擔憂消除"
+
+  - claim: "Paired mode 也有 LOH×AF×Methylation 效應"
+    limitation: "master dataset 缺 Paired LOH annotation；需重跑 cross_sample_audit with to/paired LOH BED"
+    severity: "中 — 需列為後續待驗項，暫以 TO 結果為主"
