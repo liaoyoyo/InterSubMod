@@ -1,0 +1,80 @@
+project:
+  name: "partB_effect_size_cn_stratification"
+  title: "Part B 合併驗證：B.1-3 + B.2-5 + B.2-2"
+  created: "2026-04-17"
+  status: "completed"
+  questions:
+    - "B.1-3: HPFineNGroups 7/7 一致的 effect size 強度是否足夠？"
+    - "B.2-5: cnLOH 與 deletion-LOH 的 methylation 動態是否不同？"
+    - "B.2-2: Coverage_Multiple 作為 CN proxy 是否可靠（bimodality / CN 分佈）？"
+
+hypotheses:
+  - id: "H_B1_3"
+    statement: "HPFineNGroups 7/7 樣本都有 medium+ 效應（|d|≥0.5）"
+    positive_criterion: ">=5/7 samples 達 |d|>=0.5 (medium)"
+    negative_criterion: "<3/7 達 medium，或有 >=1 負向樣本"
+    verdict: "MIXED — 3/7 medium (HCC1395_DORADO d=+0.60, HCC1937 d=+0.56, HCC1954 d=+0.57)；2/7 small (HCC1395 d=+0.32, H1437 d=+0.48)；2/7 negligible/negative (COLO829 d=-0.17, H2009 d=+0.12)"
+
+  - id: "H_B2_5"
+    statement: "cnLOH 與 deletion-LOH methylation 動態顯著不同（方向或強度）"
+    positive_criterion: "CN1 vs CN3 Δ_NG 差異 >0.3，或方向相反"
+    negative_criterion: "兩者方向一致且強度差 <0.3"
+    verdict: "REJECTED — CN1 median Δ=+0.505, CN3 median Δ=+0.238；方向完全一致（7/7 vs 6/6 POS），CN1 稍強（差 0.27，邊緣未達門檻）"
+
+  - id: "H_B2_2"
+    statement: "Coverage_Multiple 呈 bimodal → CN tier 有 natural cluster → proxy 可靠"
+    positive_criterion: ">=4/7 樣本顯示 bimodal 分佈"
+    negative_criterion: "<=2/7 bimodal 或 CN 分佈嚴重扭曲"
+    verdict: "REJECTED — 僅 COLO829 (1/7) 呈 bimodal（因 99.7% CN1）；其他樣本為單峰但 CN 分佈差異極大（HCC1937 hyper-diploid CN4+=13.5%、H2009 diploid-dominant CN2=78.7%）；proxy 僅能區分 CN tier 順序，不宜當精確 CN 估計"
+
+findings:
+  b1_3:
+    medium_plus_count: 3  # HCC1395_DORADO, HCC1937, HCC1954
+    small_count: 2
+    negligible_negative_count: 2  # COLO829, H2009
+    colo829_d: -0.166  # **重大：負向**
+    revised_claim: "7/7 方向一致聲稱需精確化為 '5/7 正向效應 (small-medium) + 2/7 negligible/negative (COLO829, H2009)'"
+
+  b2_5:
+    cn1_median_delta: 0.505
+    cn2_median_delta: 0.343
+    cn3_median_delta: 0.238
+    cn4_median_delta: 0.337
+    samples_positive_cn1: "7/7"
+    samples_positive_cn3: "6/6"
+    conclusion: "cnLOH 與 deletion-LOH 均 POS，deletion-LOH 效應稍強但並未掩蓋 cnLOH signal"
+
+  b2_2:
+    colo829_bimodal: true
+    others_single_peak: true
+    cn_distribution_diversity: "高度差異（COLO829 99.7% CN1 vs HCC1937 CN4+=13.5%）"
+    recommendation: "未來應整合 CNV caller (Delly/Manta/sequenza) 取代 Coverage_Multiple"
+
+artifacts:
+  scripts:
+    - "scripts/01_effect_size_and_cn_strat.py"
+  data:
+    - "data/b1_3_effect_size_per_sample.tsv"
+    - "data/b2_5_cn_stratified_effects.tsv"
+    - "data/b2_2_coverage_multiple_distribution.tsv"
+  figures:
+    - "figures/01_b1_3_effect_size_forest.png"
+    - "figures/02_b2_5_cn_stratified_forest.png"
+    - "figures/03_b2_2_cov_multiple_dist.png"
+
+dependencies:
+  git_commit_at_start: "4916cf4"
+  python_packages: ["pandas", "numpy", "scipy", "matplotlib", "sklearn"]
+
+impact_on_claims:
+  - claim: "HPFineNGroups 7/7 一致"
+    correction: "應改為 '5/7 正向 + 2/7 negligible/negative'（COLO829 d=-0.17, H2009 d=+0.12）"
+    severity: "中 — 方向性論述需要修正，不影響 pooled POSITIVE 結論"
+
+  - claim: "混合 cnLOH 與 deletion-LOH 可能掩蓋真實機制"
+    correction: "B.2-5 否定此擔憂；兩者方向一致且都 POS，deletion-LOH 稍強但無方向衝突"
+    severity: "低 — 原擔憂為假 alarm"
+
+  - claim: "Coverage_Multiple ≈ CN（代理）"
+    correction: "僅能區分 CN tier 排序；樣本間 CN 分佈差異極大，不宜用於精確 CN 估計或 hyper-diploid 分析"
+    severity: "中 — 需要在論文 Limitation 段落明說"
