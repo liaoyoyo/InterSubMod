@@ -24,6 +24,9 @@
 | 暫停判定與修正後預期 | `docs/reports/research_landscape/04_暫停判定與重評估.md` |
 | 完整證據鏈推論 | `docs/reports/research_landscape/05_證據鏈總覽.md` |
 | 結論穩定性評分 | `docs/reports/research_landscape/06_結論穩定性審查.md` |
+| LOH/CN/AF 三維度統合 | `docs/reports/research_landscape/07_LOH_CN_AF_研究總整理.md` |
+| Zone-Aware Framework 驗證歷程 | `docs/reports/research_landscape/08_Zone_Aware.md` |
+| Part B 質疑驗證（HPFineNGroups 升級） | `docs/reports/research_landscape/09_Part_B.md` |
 
 ---
 
