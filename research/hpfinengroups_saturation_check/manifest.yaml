@@ -1,0 +1,67 @@
+project:
+  name: "hpfinengroups_saturation_check"
+  title: "HPFineNGroups 飽和效應質疑驗證 (B.1-2)"
+  created: "2026-04-17"
+  status: "in_progress"
+  question: "N≥4+NR≥80 TP rate 89.1% 是 NGroups 訊號還是 NR 驅動的飽和？"
+
+hypotheses:
+  - id: "H_B1_2"
+    statement: "NGroups=4 vs NGroups=3 在 NR≥80 bin 內無顯著 TP rate 差異（飽和）"
+    preconditions: ["NumReads ≥ 80 limits NGroups upper bound probability"]
+    confounds: ["NumReads", "AF", "LOH"]
+    positive_criterion: "Δ TP rate (N4 - N3) in NR≥80 NonLOH < +5pp → saturation confirmed"
+    negative_criterion: "Δ ≥ +10pp → true subclone marker"
+    verdict: "pending"
+
+datasets:
+  - path: "output/synthesis/observation_workspaces/20260327_loh_round1_cross_sample_audit/all_region_rows.tsv.gz"
+    description: "748K rows master dataset, 7 samples × 2 modes"
+    git_commit_at_source: "c022918"
+    columns_used:
+      - RegionID
+      - sample
+      - mode
+      - truth_label
+      - NumReads
+      - HPFineNGroups
+      - to_loh_bed_hit
+      - caller_af
+      - HP_Ratio
+      - Potential_LOH
+      - Coverage_Multiple
+
+filter_conditions_original:
+  description: "20260406 報告中定義的 89.1% 篩選條件"
+  rules:
+    - "mode = to"
+    - "to_loh_bed_hit = False  (NonLOH)"
+    - "NumReads ≥ 80"
+    - "HPFineNGroups ≥ 4"
+  expected_n: 25514
+  expected_tp_rate: 0.891
+
+artifacts:
+  scripts:
+    - "scripts/01_saturation_check.py"
+  data:
+    - "data/nr_ngroups_crosstab.tsv"
+    - "data/nr_matched_test.tsv"
+    - "data/per_sample_nr80_ngroups.tsv"
+  figures:
+    - "figures/01_nr_ngroups_tp_rate_heatmap.png"
+    - "figures/02_nr_matched_delta_forest.png"
+  reports:
+    - "reports/20260417_HPFineNGroups_saturation_check_01.md"
+
+dependencies:
+  git_commit_at_start: "c022918"
+  python_packages: ["pandas", "numpy", "scipy", "matplotlib"]
+
+reproducibility:
+  python_version: "3.10"
+  key_parameters:
+    nr_bins: [[0,20], [20,40], [40,60], [60,80], [80,100], [100,150], [150,500]]
+    ngroups_values: [1, 2, 3, 4]
+    min_sample_size: 30
+    alpha: 0.05

@@ -1,0 +1,46 @@
+=== B.1-4 LOH × NGroups TP rate (TO mode, all NR) ===
+LOH=False NGroups=1: n=  15097  TPrate=0.6844
+LOH=False NGroups=2: n= 134203  TPrate=0.5726
+LOH=False NGroups=3: n= 121336  TPrate=0.7195
+LOH=False NGroups=4: n=  34508  TPrate=0.8677
+LOH=True NGroups=1: n=  56709  TPrate=0.6287
+LOH=True NGroups=2: n=  54983  TPrate=0.8960
+LOH=True NGroups=3: n=    257  TPrate=0.8482
+LOH=True NGroups=4: n=     11  TPrate=0.8182
+
+=== COLO829 TO NonLOH NumReads & AF distribution ===
+Total: 40035
+NR>=80: 143
+NR histogram: {'count': 40035.0, 'mean': 32.0, 'std': 10.3, 'min': 10.0, '25%': 25.0, '50%': 31.0, '75%': 38.0, 'max': 234.0}
+
+COLO829 NonLOH TP/FP × NGroups:
+truth_label       FP     TP    All
+HPFineNGroups                     
+0                428    958   1386
+1               1581   3341   4922
+2               8314  14443  22757
+3               3519   7077  10596
+4                129    245    374
+All            13971  26064  40035
+
+=== H2009 TO NonLOH TP/FP × NGroups ===
+Total: 103554, TP rate overall: 0.9109
+truth_label      FP     TP     All
+HPFineNGroups                     
+0                 5    122     127
+1               319   4094    4413
+2              3267  27309   30576
+3              4063  40177   44240
+4              1569  22629   24198
+All            9223  94331  103554
+
+H2009 NR≥80 NonLOH baseline TP rate: 0.9087223217672217
+
+=== residualized (NR 20pp bin) per-sample delta N4-N3 (TO NonLOH) ===
+COLO829: weighted delta = +3.56pp (across 3 bins)
+H1437: weighted delta = +15.58pp (across 5 bins)
+H2009: weighted delta = +2.84pp (across 5 bins)
+HCC1395: weighted delta = +8.72pp (across 5 bins)
+HCC1395_DORADO: weighted delta = +11.88pp (across 5 bins)
+HCC1937: weighted delta = +13.96pp (across 4 bins)
+HCC1954: weighted delta = +14.11pp (across 6 bins)
