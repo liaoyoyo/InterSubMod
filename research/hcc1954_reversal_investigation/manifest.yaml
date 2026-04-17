@@ -1,0 +1,55 @@
+project:
+  name: "hcc1954_reversal_investigation"
+  title: "HCC1954 反向排除標準調查 (B.2-1)"
+  created: "2026-04-17"
+  status: "completed"
+  question: "HCC1954 step3 ρ=-0.30 是真反向還是小樣本雜訊？原 post-hoc 解釋是否可 pre-register？"
+
+hypotheses:
+  - id: "H_B2_1"
+    statement: "HCC1954 反向是真實 signal reversal，不是小樣本雜訊"
+    preconditions: ["原 step3 CN1 only + af_sd vs mean_ngroups 設定"]
+    confounds: ["n_cn1_segments 小 (34 vs 其他 105-435)", "HER2+ hyper-diploid 複雜 CN"]
+    positive_criterion: "Bootstrap 95% CI 不含 0 → true reversal → 需 biology-based exclusion"
+    negative_criterion: "Bootstrap 95% CI 含 0 → noise → 精確化為 'N/7 明確 + M/7 功效不足'"
+    verdict: "REJECTED (noise confirmed) — HCC1954 TO CI=[-0.604, +0.044]、Paired CI=[-0.621, +0.219] 皆含 0"
+
+findings:
+  hcc1954_to_ci_contains_zero: true
+  hcc1954_paired_ci_contains_zero: true
+  h2009_to_ci_contains_zero: true  # 新發現：H2009 (n=25) 也不穩定
+  meta_rho_full_7: 0.367
+  meta_rho_exclude_hcc1954: 0.383
+  meta_rho_delta: 0.016  # 排除 HCC1954 反而升高，非拖累
+  revised_claim: "5/7 CI 明確正向、2/7 功效不足（HCC1954 n=34、H2009 n=25）"
+
+datasets:
+  - path: "research/loh_subclone_af/data/step3_segment_statistics.tsv"
+    description: "TO segment-level stats (from 既有 step3 腳本)"
+  - path: "research/loh_subclone_af_paired/data/step3_paired_segment_statistics.tsv"
+    description: "Paired segment-level stats"
+  - path: "output/synthesis/observation_workspaces/20260327_loh_round1_cross_sample_audit/all_region_rows.tsv.gz"
+    description: "Master 748K rows for region-level reconciliation"
+
+methods_reproduction:
+  original_step3_formula: "scipy_stats.spearmanr(df[dominant_cn=='CN1'].af_sd, df.mean_ngroups)"
+  original_script: "research/loh_subclone_af/scripts/step3_spatial_analysis.py:373-384"
+  bootstrap: "B=2000, seed=42, scipy.stats.spearmanr"
+
+artifacts:
+  scripts:
+    - "scripts/01_reversal_check.py"
+  data:
+    - "data/rho_bootstrap_ci.tsv"
+    - "data/rho_af_mean_all_cn.tsv"
+    - "data/sensitivity_leave_one_out.tsv"
+    - "data/hcc1954_region_level_rho.tsv"
+  figures:
+    - "figures/01_bootstrap_ci_forest.png"
+    - "figures/02_hcc1954_vs_others_segment_dist.png"
+  reports:
+    - "docs/experiments/in_progress/2026/04/20260417_HCC1954_reversal_investigation_01.md"
+
+dependencies:
+  git_commit_at_start: "ab61ad1"
+  python_packages: ["pandas", "numpy", "scipy", "matplotlib"]
