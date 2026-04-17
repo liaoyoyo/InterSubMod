@@ -1,9 +1,9 @@
 <!--
 建立時間: 2026-04-17
-更新時間: 2026-04-17
-目標: 驗證 HPFineNGroups N≥4+NR≥80 TP rate 89.1% 是否為 NR 飽和 artifact
-範圍: 748K regions × 7 samples × 2 modes, NR-matched + per-sample + LOH cross-strat
-關聯: docs/plans/opus-4-7-big8-disk-liaoyoyo2001-knowled-cryptic-moore.md (Part B.1-2)
+更新時間: 2026-04-17 (加入 B.1-1 residualized AUC 多變數驗證)
+目標: 驗證 HPFineNGroups N≥4+NR≥80 TP rate 89.1% 是否為 NR 飽和 artifact + 多變數 confound
+範圍: 748K regions × 7 samples × 2 modes, NR-matched + per-sample + LOH cross-strat + LR residualized AUC
+關聯: docs/plans/opus-4-7-big8-disk-liaoyoyo2001-knowled-cryptic-moore.md (Part B.1-2 + B.1-1)
       docs/reports/research_landscape/06_結論穩定性審查.md (結論 10)
       docs/reports/validated/2026/04/20260406_肉眼檢視推理鏈與TP_FP可區分性分析_01.md
 研究子專案: research/hpfinengroups_saturation_check/
@@ -128,6 +128,51 @@ TO NonLOH 每個 NR bin 內 NGroups=3 vs 4 的 Δ TP rate：
 
 ---
 
+## 3.5 B.1-1 — Residualized AUC 多變數控制（新增）
+
+**質疑**：residualized AUC=0.617 是否足以支撐 POSITIVE？原報告僅控制 n_reads，未控制 AF/Coverage_Multiple/LOH。
+
+**方法**：
+- 模型：sklearn `LogisticRegression`（L2，max_iter=2000）
+- M1 Raw = HPFineNGroups 單變數 AUC
+- M3 NR+AF control：full 模型 = [NR, AF, HPFineNGroups]，control 模型 = [NR, AF]；Δ = AUC(full) − AUC(control)
+- M4 NR+AF+Cov+LOH（最嚴格）：full = [NR, AF, Cov_Multiple, to_loh_bed_hit, HPFineNGroups]，control 移除 HPFineNGroups
+- 判定：Δ<0.005 可忽略 / Δ<0.02 弱 / Δ≥0.02 ROBUST
+
+**Scenario 結果（pooled）**：
+
+| Scenario | n | tp_rate | M1 Raw AUC | M3 NR+AF Δ | M4 NR+AF+Cov+LOH Δ | 判定 |
+|----------|---|---------|-----------|------------|--------------------|-----|
+| **TO NonLOH all** | 307,474 | 0.670 | 0.6032 | **+0.0251** | **+0.0251** | ✅ ROBUST |
+| TO NonLOH NR≥80 | 145,803 | 0.748 | 0.6188 | **+0.0507** | **+0.0507** | ✅ ROBUST（更強） |
+| TO LOH all | 112,218 | 0.761 | 0.6822 | +0.0285 | +0.0284 | 強但 NR-only Δ=+0.13 說明 LOH NGroups 與 NR 強糾纏 |
+| TO all | 419,692 | 0.694 | 0.5640 | +0.0046 | **+0.0286** | M3 弱、M4 被 LOH 分層拉回 ROBUST |
+| **Paired NonLOH all** | 328,699 | 0.9896 | 0.5322 | **+0.0018** | **+0.0018** | ❌ ceiling — control alone AUC=0.80，訊號無空間 |
+
+**→ TO NonLOH 核心場景 ROBUST：** 控制 NR+AF+Cov+LOH 後 HPFineNGroups 仍增益 +0.025 AUC。原聲稱 0.617 介於 M1=0.603 與 M3=0.641 之間，吻合。
+
+**Paired mode 驗證失敗（ceiling）**：TP rate=98.96%，NR+AF control 本身就達 AUC=0.80，HPFineNGroups 無空間貢獻。
+
+**Per-sample TO NonLOH（7 樣本）**：
+
+| Sample | n | tp_rate | M1 Raw | M3 NR+AF Δ | M4 Δ | 判定 |
+|--------|---|---------|--------|-----------|------|------|
+| HCC1954 | 63,081 | 0.248 | 0.665 | **+0.0219** | **+0.0219** | ✅ ROBUST（baseline 最低） |
+| HCC1395_DORADO | 22,643 | 0.691 | 0.598 | +0.0101 | +0.0101 | 弱 |
+| HCC1937 | 12,236 | 0.467 | 0.624 | +0.0084 | +0.0084 | 弱 |
+| H2009 | 103,554 | 0.911 | 0.541 | +0.0086 | +0.0086 | 弱（ceiling） |
+| H1437 | 43,384 | 0.762 | 0.548 | +0.0083 | +0.0083 | 弱 |
+| HCC1395 | 22,541 | 0.688 | 0.569 | +0.0051 | +0.0051 | 微弱 |
+| COLO829 | 40,035 | 0.651 | 0.500 | +0.0007 | +0.0007 | 可忽略 |
+
+**推論**：
+1. **Pooled TO NonLOH ROBUST** → 結論 10 主張**保留**。
+2. **Per-sample 7 樣本僅 1 個 ROBUST（HCC1954）**，6 樣本 Δ<0.02；ΔAUC 層級效應比 Δ TP rate 更保守。
+3. **方向一致性**：7/7 樣本 Δ>0，但強度差異大；「7/7 一致」聲稱應精確化為「7/7 方向一致、1/7 效應 ROBUST」。
+4. **TO all（不分 LOH）M3 Δ=+0.005**：代表 LOH 分層是關鍵——混 LOH/NonLOH 會稀釋訊號；這與 B.1-4 的 LOH 不適用結論一致。
+
+---
+
 ## 4. 原結論審查表（逐條對應）
 
 | 原聲稱 | 驗證結果 | 維持/修正 |
@@ -136,7 +181,8 @@ TO NonLOH 每個 NR bin 內 NGroups=3 vs 4 的 Δ TP rate：
 | 89.1% 是 N=4 訊號而非 NR 驅動 | NR-matched Fisher 6/6 bins 顯著 +5~+14pp | ✅ **維持**（飽和否定） |
 | 7/7 樣本方向一致 | NR-bin weighted 後 7/7 POS | ⚠ **精確化**：6/7 效應 ≥+5pp；COLO829/H2009 弱（<5pp） |
 | HPFineNGroups 是 somatic heterogeneity 標記 | NonLOH 內適用 | ⚠ **範圍限定**：僅 NonLOH，LOH 不適用 |
-| 用於 filter（AUC 不足）| 本次未重新評估 AUC | — |
+| 用於 filter（AUC 不足）| M3 full AUC=0.641 < 0.65 filter 門檻 | ✅ **維持不可用於 filter** |
+| residualized AUC=0.617 支撐 POSITIVE | M3 Δ=+0.025 ROBUST；M4 (含 LOH+Cov) 不衰退 | ✅ **通過 B.1-1 驗證** |
 
 ---
 
@@ -161,10 +207,10 @@ TO NonLOH 每個 NR bin 內 NGroups=3 vs 4 的 Δ TP rate：
 
 - **飽和否定**：S4 NR-matched 6/6 bins 顯著 Δ≥+5pp、多數≥+10pp ✅
 - **適用範圍**：TO mode NonLOH region, NumReads≥40, NGroups=4 ✅
-- **剩餘風險**（未消除）：
-  - (a) Paired mode TP baseline=99.3%，訊號在 ceiling（Paired NR≥80 Δ=+0.11pp，無法獨立驗證）
-  - (b) 7 樣本中 2 個效應弱（COLO829, H2009），未來跨樣本外推需在 baseline<0.85 樣本複驗
-  - (c) Coverage_Multiple / AF 殘差尚未納入（本次僅 NR 殘差）；可能仍有 AF × NGroups confound
+- **剩餘風險**（B.1-1 後更新）：
+  - (a) Paired mode TP baseline=99.3%，訊號在 ceiling（Paired NR≥80 Δ=+0.11pp、B.1-1 M3 Δ=+0.002 無法獨立驗證）
+  - (b) **Per-sample AUC 層級效應 6/7 <0.02**（B.1-1 新發現）：僅 HCC1954 Δ=+0.022，其餘 6 樣本微弱；「7/7 一致」應精確化為「方向一致、強度僅 HCC1954 ROBUST」
+  - (c) Coverage_Multiple 代理 CN 的準確度尚未驗證（Plan B.2-2）；M4 結果與 M3 幾乎相同可能反映 Coverage_Multiple 訊號已被 NR/AF 線性吸收，而非真實 CN 無關
 
 ---
 
@@ -183,12 +229,16 @@ TO NonLOH 每個 NR bin 內 NGroups=3 vs 4 的 Δ TP rate：
 | S7 weighted | `data/s7_anomaly_and_weighted.txt` | NR-bin weighted Δ |
 | Heatmap | `figures/01_nr_ngroups_tp_rate_heatmap.png` | TO NonLOH/LOH + Paired NonLOH |
 | Forest | `figures/02_nr_matched_delta_forest.png` | 7 樣本 NR≥80 Δ |
+| **B.1-1 Script** | `scripts/03_residualized_auc.py` | Residualized AUC (sklearn LR) |
+| **B.1-1 Panels** | `data/residualized_auc_panels.tsv` | 6 scenarios × 5 模型 |
+| **B.1-1 Per-sample** | `data/residualized_auc_per_sample.tsv` | 7 樣本 TO NonLOH |
+| **B.1-1 Bar chart** | `figures/03_residualized_auc_bar.png` | M1/M3/M4 對比 |
 
 ---
 
 ## 8. 下一步建議
 
-1. **B.1-1（residualized AUC）複驗**：本次已做 NR residual，需加入 AF + Coverage_Multiple 多變數 residualization 看 AUC 是否仍 >0.60。
-2. **B.2-2（Coverage_Multiple 非精確 CN）**：影響 LOH×AF×Methylation 結論 11；應與真實 CN caller（Delly/Manta）交叉驗證。
-3. **更新結論穩定度文件**：在 `docs/reports/research_landscape/06_結論穩定性審查.md` 結論 10 加註本報告限制。
-4. **記憶更新**：`project_hpfinengroups_subclone_marker.md` 加入 `LOH 不適用` 與 `H2009/COLO829 弱訊號`。
+1. ~~**B.1-1（residualized AUC）複驗**~~ → **已完成（2026-04-17）**：M3/M4 Δ≥+0.025 ROBUST，結論 10 通過。
+2. **B.2-1（HCC1954 反向問題，LOH×AF 結論 11）**：本次 B.1-1 發現 HCC1954 在 HPFineNGroups 卻是 7 樣本中唯一 ROBUST（Δ=+0.022）；與 LOH×AF 結論 11 的 HCC1954 反向方向**不一致**——兩個結論的 HCC1954 行為需對照調查。
+3. **B.2-2（Coverage_Multiple 非精確 CN）**：B.1-1 M4 加入 Cov 後 Δ 未衰減（+0.025→+0.025），可能表示 Cov 與 NR/AF 已線性共線。需以 Delly/Manta 等獨立 CN caller 驗證結論 11。
+4. **已更新**：`06_結論穩定性審查.md` 結論 10 + memory `project_hpfinengroups_subclone_marker.md`。

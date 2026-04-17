@@ -1,9 +1,10 @@
 project:
   name: "hpfinengroups_saturation_check"
-  title: "HPFineNGroups 飽和效應質疑驗證 (B.1-2)"
+  title: "HPFineNGroups 質疑驗證 (B.1-1 + B.1-2 + B.1-4)"
   created: "2026-04-17"
+  updated: "2026-04-17 (+B.1-1 residualized AUC)"
   status: "in_progress"
-  question: "N≥4+NR≥80 TP rate 89.1% 是 NGroups 訊號還是 NR 驅動的飽和？"
+  question: "89.1% TP rate 是 NGroups 訊號、NR 飽和、還是 AF/Cov/LOH confound？"
 
 hypotheses:
   - id: "H_B1_2"
@@ -12,7 +13,14 @@ hypotheses:
     confounds: ["NumReads", "AF", "LOH"]
     positive_criterion: "Δ TP rate (N4 - N3) in NR≥80 NonLOH < +5pp → saturation confirmed"
     negative_criterion: "Δ ≥ +10pp → true subclone marker"
-    verdict: "pending"
+    verdict: "REJECTED (saturation disproved) — NR-matched Fisher 6/6 bins Δ=+5~+14pp"
+  - id: "H_B1_1"
+    statement: "residualized AUC ≥0.617 在多變數 (NR+AF+Cov+LOH) 控制後是否仍成立"
+    preconditions: ["multivariate LR with control vs full comparison"]
+    confounds: ["NR", "AF", "Coverage_Multiple", "to_loh_bed_hit"]
+    positive_criterion: "Δ AUC (full - control) ≥ +0.02 → robust"
+    negative_criterion: "Δ AUC < +0.005 → negligible"
+    verdict: "ROBUST (pooled TO NonLOH Δ=+0.025); per-sample 1/7 robust"
 
 datasets:
   - path: "output/synthesis/observation_workspaces/20260327_loh_round1_cross_sample_audit/all_region_rows.tsv.gz"
@@ -44,19 +52,27 @@ filter_conditions_original:
 artifacts:
   scripts:
     - "scripts/01_saturation_check.py"
+    - "scripts/02_anomaly_investigation.py"
+    - "scripts/03_residualized_auc.py"
   data:
     - "data/nr_ngroups_crosstab.tsv"
     - "data/nr_matched_test.tsv"
     - "data/per_sample_nr80_ngroups.tsv"
+    - "data/s3_nr80_saturation.tsv"
+    - "data/s7_anomaly_and_weighted.txt"
+    - "data/residualized_auc_panels.tsv"
+    - "data/residualized_auc_per_sample.tsv"
   figures:
     - "figures/01_nr_ngroups_tp_rate_heatmap.png"
     - "figures/02_nr_matched_delta_forest.png"
+    - "figures/03_residualized_auc_bar.png"
   reports:
-    - "reports/20260417_HPFineNGroups_saturation_check_01.md"
+    - "docs/experiments/in_progress/2026/04/20260417_HPFineNGroups_saturation_check_01.md"
 
 dependencies:
   git_commit_at_start: "c022918"
-  python_packages: ["pandas", "numpy", "scipy", "matplotlib"]
+  git_commit_at_b1_2: "5358842"
+  python_packages: ["pandas", "numpy", "scipy", "matplotlib", "scikit-learn"]
 
 reproducibility:
   python_version: "3.10"
