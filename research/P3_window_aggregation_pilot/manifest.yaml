@@ -1,0 +1,39 @@
+pilot_id: P3_window_aggregation
+date: 2026-04-17
+purpose: |
+  驗證 gene-level / window-level aggregation 是否能突破 region-level AUC ≤0.58
+  的 pure methylation 上限，作為 Phase 2B 放行與否的 gating pilot。
+scope:
+  samples: [HCC1395, HCC1395_DORADO, COLO829, H1437, H2009, HCC1937, HCC1954]
+  metrics: [HPFineNGroups, HPFineF, AlleleDelta, HPMergedDelta, PairwiseMedianDist]
+  window_size: 1_000_000
+  modes: [to, paired]
+  loh_filter: [NonLOH, LOH]
+scripts:
+  - scripts/01_window_aggregation.py
+  - scripts/02_hotspot_confound_check.py
+data:
+  - data/window_auc_vs_region_auc.tsv
+  - data/hotspot_confound.tsv
+figures:
+  - figures/01_window_vs_region_auc.png
+verdict: NEGATIVE
+verdict_reason: |
+  H1 (window aggregation 本身有訊息增益) 被 confound check 否定：
+  - 原始 naive 比較顯示 4/7 樣本「突破」，H2009 TO NonLOH ΔAUC=+0.342
+  - 排除 TP_rate ∈ [0.1, 0.9] 之外的極端 window 後 H2009 Δ 反轉為 -0.305
+  - TO mode 8 個測試中只有 1 個 (H1437 AlleleDelta, mid-TP-rate AUC 0.640 vs region 0.543) 保留明確 gain
+  - Paired 模式 window 極度稀少（n_windows_mid < 40），無法穩健檢驗
+  → 結論: 所謂 "window aggregation AUC 提升" 幾乎完全來自 TP/FP 在基因組上的空間
+     auto-correlation artifact（某些 window 幾乎全 TP 或全 FP），非真實訊息增益。
+ism_goal_mapping:
+  - 目標 5 (F1 提升) — 原本盼 gene-level aggregation 可提供新特徵；否定
+  - 目標 1 (per-CpG 多標籤) — 無直接影響
+next_steps:
+  - Phase 2B gene-level 若仍想推進：必須以 shuffle-within-chr null model 驗證，
+    並要求 mid-TP-rate window ΔAUC > +0.03 才算真實 gain
+  - 可改試 non-genomic aggregation（例如：按甲基化 pattern 分群的 aggregation）
+  - 記錄至 pitfall memory `feedback_spatial_autocorrelation_confound.md`
+related:
+  - research/P3_window_aggregation_pilot/scripts/02_hotspot_confound_check.py
+  - .claude memory: feedback_spatial_autocorrelation_confound.md

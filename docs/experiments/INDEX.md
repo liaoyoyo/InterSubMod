@@ -206,6 +206,21 @@ H2009 paired FP rate 僅 0.06%（86/132,994）— 7 樣本中最低之一。改�
 ### Phase B/C/D Dual-BAM 架構驗證 — ✅ PASS 2026-04-13
 HCC1395 paired (31K TP + 1.3K FP) 全基因體驗證。Phase B: Sample ASM 97.3% 顯著、Normal Baseline 100% 有效。Phase C: LOH BED 94.1% concordance with ISM hp_ratio。Phase D: 4-group subclone 分層（Normal Diploid 17.5%/Epi. Heterogeneity 12.9%/LOH 2.6%/Tumor-Specific 67.0%）。173/173 unit tests pass。[報告](validated/2026/04/20260413_Phase_BCD_Dual_BAM_Validation_01.md)
 
+### LOH Subclone AF × Methylation 雙重證據鏈 — ✅ POSITIVE 2026-04-14 + Paired Extension 2026-04-15
+LOH 區域 intermediate AF (0.1-0.4/0.6-0.9) 的 variants 具有顯著更高的甲基化多樣性。**TO mode**: Intermediate vs Extreme NGroups: 1.796 vs 1.091（+0.705, **7/7 p<10^-39**），NR 控制後持續（r=0.48-0.71）；Segment ρ=0.270（6/7 positive）。**Paired mode 延伸驗證**: ΔNG=+0.787（7/7 p<10^-65），效應量更強（median |r|=**0.755** vs TO 0.630），segment rho=0.382；**4/4 假說全部 POSITIVE，7/7 效應方向跨模式一致**。構成跨模式確認的 subclonal LOH 雙重證據鏈（genetic AF + epigenetic ASM）。[報告](validated/2026/04/20260414_LOH_Subclone_AF_Methylation_Evidence_01.md)
+
+### Per-CpG ASM + Epiallele 異質性指標 — ⚠️ CONDITIONAL POSITIVE 2026-04-15
+30+ 方法文獻調查 → 6 指標家族 24 metrics Python PoC（Fisher, NME, Epipolymorphism, PDR, Shannon, VEF）。**Filter value=0**（全 AUC 0.38-0.54，與 Beyond-AUC 一致）。**Characterization value 確認**：PERMANOVA concordance 84%；LOH 降 fisher_frac_sig 12.5pp；NGroups=1→0.001/NGroups=3→0.270。PDR/VEF 飽和（0.917/0.918）。推薦精簡 C++ 整合 10 欄位（Fisher 4 + NME 3 + Epipoly 3）。[報告](in_progress/2026/04/20260415_PerCpG_ASM_Epiallele_Metrics_01.md) [文獻](../../references/20260415_ASM_subclone_methods_literature_survey.md)
+
+### LOH/CN/AF 結論驗證 — ✅ 5/6 confirmed, 1 needs correction 2026-04-17
+6 個關鍵結論系統化驗證：Q1 cnLOH Simpson's Paradox（確認），Q2 HPFineNGroups CN confound 68%（確認），Q3 Coverage_Multiple CN proxy r=0.997（確認），Q4 LOH Subclone DNGroups 7/7 positive（確認），Q5 Zone exclusion abs ratio 0.082（確認），**Q6 LOH Tier direction reversal（需更正：post-HP-fix ALL tiers TP-enriched，0.43×/2.018× 為 artifact）**。[報告](../../research/loh_cn_af_verification/20260417_LOH_CN_AF_結論驗證報告_01.md) [總整理](../reports/research_landscape/07_LOH_CN_AF_研究總整理.md)
+
+### Zone-Aware Confidence Framework — ⚠️ Characterization POSITIVE, F1 NEGATIVE 2026-04-17
+**H1/H3 驗證**：5 zone（Z1-Z5）全量驗證。H1 Z1 方向確認但覆蓋率不足 → Z1b（NGroups≥2）放寬後 TO 4.6% 覆蓋率、TP rate 0.965。H3 Paired 7/7 ≥ 89.1% 確認；TO 不成立（mean 0.716）但 6/7 significant。**Z1 放寬分析**：7 變體 Pareto 最佳為 Z1b。**QS 模擬 ❌ NEGATIVE**：5 delta configs × 21 thresholds × 7 samples，max delta F1=+0.001。根因：TO QS AUC=0.497 隨機，zone 調整無法修正。**結論：Zone-Aware 價值僅在 characterization annotation，不在 F1 改進。** [H1/H3 報告](../../research/zone_aware_validation/20260417_H1_H3_Zone_Validation_Report_01.md) [QS 模擬](../../research/zone_aware_validation/20260417_QS_Simulation_Report_01.md) [Framework](../concepts/2026/04/20260417_Zone_Aware_Confidence_Framework_01.md)
+
+### P3 Window Aggregation Pilot — ❌ NEGATIVE 2026-04-17
+1 Mb window aggregation pilot 驗證 gene-level 方向。Naive 結果 4/7 樣本看似突破（H2009 ΔAUC=+0.342），但 mid-TP-rate window confound check 後反轉：H2009 Δ=-0.346，8 個 TO 測試中僅 1 個（H1437 AlleleDelta, Δ_mid=+0.097）保留明確 gain。**結論：window aggregation AUC 幾乎完全由 TP/FP 基因組空間 auto-correlation 驅動。** Phase 2B gene-level 若要推進必須以 shuffle-within-chr null model + mid-TP-rate Δ>+0.03 雙門檻驗收。新增 pitfall 規則於 memory。[報告](in_progress/2026/04/20260417_P3_window_aggregation_pilot_NEGATIVE_01.md) [Pilot 數據](../../research/P3_window_aggregation_pilot/)
+
 ---
 
 ## 附錄：待驗證方向（尚未正式啟動）
