@@ -1,0 +1,178 @@
+---
+name: multi-sample-consistency
+description: 7 樣本跨樣本 parallel benchmark + 一致性檢查模板。任何結論需跨 4+ 樣本驗證時觸發。產生 canonical 排序表、方向一致性統計、confidence uplift 計算。觸發：「cross-sample」「multi-sample」「7 樣本驗證」「跨樣本一致」「consistency check」。
+allowed-tools: Read, Write, Bash, Grep, Glob
+user-invocable: true
+---
+
+# Multi-Sample Consistency Check（跨樣本一致性驗證）
+
+定義 InterSubMod 跨樣本結論的一致性驗證模板，配合 `parallel-benchmark` 與 `parallel-analysis` agent 使用。
+
+## 為何需要
+
+Agent 3 統計：7 樣本平行 benchmark pattern 出現 9 次，但每次重寫腳本。本 skill 提供定式。
+
+跨樣本一致性是 tier 4 evidence 的必要條件（見 `evidence_tier_rubric.md` 的 `multi_sample_consistent` flag）。
+
+## Canonical 7 樣本順序
+
+```python
+SAMPLE_ORDER = [
+    "HCC1395_5kHz",      # 0: 主 validation
+    "HCC1395_DORADO",    # 1: basecaller variant
+    "HCC1395_GUPPY",     # 2: basecaller variant
+    "COLO829_5kHz",      # 3: 跨樣本
+    "COLO829_DORADO",    # 4: basecaller variant
+    "H2009_5kHz",        # 5: 第三樣本
+    "H2009_DORADO",      # 6: basecaller variant
+]
+
+# 模式展開（選擇一或多）
+PIPELINE_TRACKS = ["paired", "paired_pure", "TO"]
+```
+
+**圖表排版**：7×1 或 2×4 網格，固定此順序。不可按字母/隨機順序排列。
+
+## 五步驟流程
+
+### Step 1: 觸發 parallel-benchmark / parallel-analysis
+
+```
+Agent: parallel-benchmark
+prompt: 平行驗證 [feature/hypothesis] 於 HCC1395_5kHz / HCC1395_DORADO / HCC1395_GUPPY /
+COLO829_5kHz / COLO829_DORADO / H2009_5kHz / H2009_DORADO，
+模式: [paired | paired_pure | TO]
+輸出至: output/synthesis/research_rounds/<round_name>/
+```
+
+### Step 2: 彙整 per-sample metrics
+
+彙總表必填欄位：
+
+| 欄位 | 型別 | 說明 |
+|------|------|------|
+| `sample` | string | canonical 名稱 |
+| `track` | string | pipeline_track canonical 值 |
+| `n_regions` | int | 分析區域數 |
+| `metric_value` | float | 主 metric（AUC / delta_F1 / effect_size） |
+| `metric_ci` | tuple | 95% CI（bootstrap） |
+| `direction` | {+, -, 0} | 符號（相對於 null） |
+| `significance` | bool | p<0.05 |
+
+### Step 3: 方向一致性統計
+
+```python
+def direction_consistency(per_sample_metrics):
+    positive = sum(1 for m in per_sample_metrics if m.direction == "+")
+    negative = sum(1 for m in per_sample_metrics if m.direction == "-")
+    zero = sum(1 for m in per_sample_metrics if m.direction == "0")
+
+    majority_count = max(positive, negative)
+    consistency = majority_count / len(per_sample_metrics)
+
+    return {
+        "consistency_score": consistency,  # 0-1
+        "dominant_direction": "+" if positive > negative else "-",
+        "breakdown": f"{positive}+ / {negative}- / {zero}0",
+    }
+```
+
+**判定標準**：
+
+| Consistency | Tier flag | 結論強度 |
+|-------------|-----------|---------|
+| 7/7 一致 | `multi_sample_consistent` ✓ | tier ≥ 4 准入 |
+| 5-6/7 一致 | `multi_sample_consistent` ✓（需註記 outlier） | tier ≥ 4 准入 |
+| 3-4/7 一致 | `multi_sample_mixed` | tier ≤ 3，結論標 "dataset_specific" |
+| ≤2/7 一致 | `multi_sample_inconsistent` | verdict=dataset_specific 或 negative |
+
+### Step 4: Outlier 分析（當 consistency < 1.0）
+
+每個偏離方向的樣本寫一段「為何不一致」：
+- 是否樣本純度差異（HCC1395 vs COLO829）？
+- 是否 basecaller 差異（5kHz vs DORADO vs GUPPY）？
+- 是否 coverage 差異？
+- 是否 n_regions 不足（< 50）？
+
+**輸出範本**：
+```markdown
+## Outlier Analysis
+
+- **H2009_DORADO (direction=-)**: n_regions=32 （< 50 門檻），統計功效不足；
+  與其他 6 樣本 direction=+ 不衝突，歸類為 insufficient_power。
+
+- **COLO829_5kHz (direction=0)**: purity=0.31（低於其他樣本），低純度使 AF 分佈偏移，
+  可能稀釋信號。建議於高純度子集重跑。
+```
+
+### Step 5: 結論寫入 evidence_ledger.jsonl
+
+```json
+{
+  "cycle_id": "YYYYMMDD_HHMMSS",
+  "hypothesis_id": "HXXX",
+  "pipeline_track": "paired_pure",
+  "datasets_tested": ["HCC1395_5kHz", "HCC1395_DORADO", ...],
+  "per_sample_metrics": { "HCC1395_5kHz": {...}, ... },
+  "consistency_score": 0.857,
+  "dominant_direction": "+",
+  "outliers": ["H2009_DORADO"],
+  "tier": 4,
+  "tier_flags": ["multi_sample_consistent", "within_group_ols", ...],
+  "verdict": "positive_validated"
+}
+```
+
+## 子集選擇規則
+
+若無法跑完 7 樣本，按以下優先序：
+
+1. **最小集合**（tier 2）：HCC1395_5kHz + COLO829_5kHz（跨 donor）
+2. **標準集合**（tier 3）：HCC1395_5kHz + HCC1395_DORADO + COLO829_5kHz（跨 basecaller + 跨 donor）
+3. **完整集合**（tier 4）：全 7 樣本
+
+**不准**：只跑單一樣本後宣告 cross-sample 結論。
+
+## Parallel 執行範本
+
+```
+Agent: parallel-benchmark
+prompt: |
+  平行驗證假說 HXXX 於 7 canonical samples（paired_pure 模式）：
+
+  SAMPLES:
+  1. HCC1395_5kHz: /big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_pure/...
+  2. HCC1395_DORADO: ...
+  3. HCC1395_GUPPY: ...
+  4. COLO829_5kHz: ...
+  5. COLO829_DORADO: ...
+  6. H2009_5kHz: ...
+  7. H2009_DORADO: ...
+
+  SCRIPT: scripts/analysis/benchmark_HXXX.py
+  OUTPUT: output/synthesis/research_rounds/HXXX_multisample/
+
+  OUTPUT_FORMAT:
+  - per_sample_metrics.tsv (7 rows, canonical order)
+  - consistency_summary.json
+  - direction_figure.png (7-panel, canonical order)
+```
+
+## 常見錯誤
+
+| 錯誤 | 正確 |
+|------|------|
+| 5kHz 結論直接 generalize | 需至少 3 basecaller + 2 donor |
+| 隨機順序列表 | 必用 SAMPLE_ORDER canonical |
+| n<50 regions 仍宣告顯著 | 標記 insufficient_power，不計 consistency |
+| 只報 average AUC | 必報 per-sample + direction |
+| 忽略 outlier | 必寫 outlier analysis 段落 |
+
+## 相關資源
+
+- `parallel-benchmark` / `parallel-analysis` agent
+- `/auc-confound-guard` skill（confound 控制）
+- `docs/standards/evidence_tier_rubric.md`
+- `docs/standards/research_terminology.json`
+- MEMORY: `feedback_figure_layout_standard.md`

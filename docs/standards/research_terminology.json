@@ -1,0 +1,138 @@
+{
+  "$schema_version": "1.0",
+  "last_updated": "2026-04-17",
+  "purpose": "統一 InterSubMod 專案中 verdict / phase / track / confidence 等術語，避免跨 artifact 命名分歧。",
+  "sources_of_truth": {
+    "evidence_ledger": "research/autoresearch/evidence_ledger.jsonl",
+    "memory_index": "/bip7_disk/liaoyoyo2001/.claude/projects/-big7-disk-liaoyoyo2001-InterSubMod/memory/MEMORY.md",
+    "experiments_index": "docs/experiments/INDEX.md",
+    "current_focus": "docs/CURRENT_FOCUS.md"
+  },
+
+  "verdict": {
+    "description": "研究方向/假說的最終判定結果；evidence_ledger 與 MEMORY.md 必須使用 canonical 值",
+    "canonical_values": [
+      "positive_pilot",
+      "positive_validated",
+      "negative",
+      "no_go",
+      "conditional_no_go",
+      "annotation_only",
+      "dataset_specific",
+      "pending"
+    ],
+    "aliases": {
+      "POSITIVE": "positive_validated",
+      "POSITIVE_PILOT": "positive_pilot",
+      "NEGATIVE": "negative",
+      "NO-GO": "no_go",
+      "NOGO": "no_go",
+      "CONDITIONAL NO-GO": "conditional_no_go",
+      "CONDITIONAL_NO_GO": "conditional_no_go",
+      "concluded": "negative",
+      "null": "pending"
+    },
+    "human_readable_in_md": {
+      "comment": "MEMORY.md 等 markdown 可使用大寫版本便於視覺辨識，但須對應到 canonical",
+      "positive_pilot": "POSITIVE (pilot)",
+      "positive_validated": "POSITIVE",
+      "negative": "NEGATIVE",
+      "no_go": "NO-GO",
+      "conditional_no_go": "CONDITIONAL NO-GO",
+      "annotation_only": "ANNOTATION ONLY",
+      "dataset_specific": "DATASET SPECIFIC",
+      "pending": "PENDING"
+    }
+  },
+
+  "pipeline_track": {
+    "description": "資料處理管線分支；影響 F1 baseline 與 feature 可用性",
+    "canonical_values": [
+      "TO",
+      "paired",
+      "paired_pure",
+      "normal_reference"
+    ],
+    "aliases": {
+      "tumor-only": "TO",
+      "tumor_only": "TO",
+      "Tumor-Only": "TO",
+      "paired-pure": "paired_pure",
+      "paired-tumor": "paired",
+      "normal": "normal_reference",
+      "normal-ref": "normal_reference"
+    }
+  },
+
+  "phase": {
+    "description": "研究推進的階段標記；Phase 1A/1B 為 F1 優化，Phase 2 為特徵化",
+    "canonical_values": [
+      "Phase_1A",
+      "Phase_1B",
+      "Phase_2",
+      "Phase_A",
+      "Phase_B",
+      "Phase_C",
+      "Phase_D"
+    ],
+    "aliases": {
+      "Phase1A": "Phase_1A",
+      "Phase 1A": "Phase_1A",
+      "phase1a": "Phase_1A",
+      "Phase1B": "Phase_1B",
+      "Phase2": "Phase_2",
+      "Phase 2": "Phase_2"
+    },
+    "semantic": {
+      "Phase_1A": "ML Read Classification — F1 optimization (paired-pure delta F1 +0.0112 locked)",
+      "Phase_1B": "Normal read integration for F1 (pending)",
+      "Phase_2": "Read-level epigenetic characterization (current focus, covers A-D)",
+      "Phase_A": "Normal BAM integration (Phase 2 sub-phase)",
+      "Phase_B": "Sample-level ASM (Phase 2 sub-phase)",
+      "Phase_C": "LOH BED annotation (Phase 2 sub-phase)",
+      "Phase_D": "Cross-region subclone analysis (Phase 2 sub-phase)"
+    }
+  },
+
+  "confidence_tier": {
+    "description": "結論可信度分級；配合 evidence_tier rubric 使用",
+    "canonical_values": [1, 2, 3, 4, 5],
+    "semantic": {
+      "1": "pilot_single_sample",
+      "2": "multi_sample_no_confound_control",
+      "3": "confound_controlled_single_method",
+      "4": "multi_method_cross_validated",
+      "5": "independent_reproduction_or_literature_aligned"
+    }
+  },
+
+  "status_label": {
+    "description": "實驗/報告的生命週期狀態；對應 docs/ 目錄結構",
+    "canonical_values": [
+      "in_progress",
+      "validated",
+      "finalized",
+      "concluded",
+      "archived"
+    ],
+    "aliases": {
+      "draft": "in_progress",
+      "WIP": "in_progress",
+      "final": "finalized",
+      "complete": "finalized"
+    }
+  },
+
+  "validation_keywords": {
+    "description": "觸發詞→用於 hook 掃描文件時判斷是否違規命名",
+    "require_canonical_in": [
+      "research/autoresearch/evidence_ledger.jsonl",
+      "research/autoresearch/hypothesis_queue.json",
+      "research/autoresearch/cycles/**/cycle.json"
+    ],
+    "allow_human_readable_in": [
+      "docs/**/*.md",
+      "**/MEMORY.md"
+    ]
+  }
+}

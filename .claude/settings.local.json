@@ -67,7 +67,32 @@
       "WebFetch(domain:genomebiology.biomedcentral.com)",
       "WebFetch(domain:link.springer.com)",
       "WebFetch(domain:www.nature.com)",
-      "mcp__knowledge__knowledge_search"
+      "mcp__knowledge__knowledge_search",
+      "Bash(gh repo:*)",
+      "Bash(xargs -I {} basename {})",
+      "Bash(gh api:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Read(//big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260406_loh_concordance/**)",
+      "Read(//big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260408_permanova_loh_audit/**)",
+      "Read(//big7_disk/liaoyoyo2001/longphase-to-mod/**)",
+      "Bash(tee output/v3_fixed_pipeline.log)",
+      "Bash(zcat /big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_pileup/20260314_HCC1395_paired_pileup_pileup_complete_matrix/longphase_s/filtered_snv_tp.vcf.gz)",
+      "Read(//tmp/ism_diploid_test/**)",
+      "Bash(zcat /tmp/ism_diploid_test/test1k.vcf.gz)",
+      "Bash(tabix -p vcf /tmp/ism_diploid_test/test1k.vcf.gz echo \"Created test VCF with $\\(zcat /tmp/ism_diploid_test/test1k.vcf.gz)",
+      "Bash(/big7_disk/liaoyoyo2001/longphase-to-mod/longphase-to haplotag:*)",
+      "Bash(tee /big7_disk/liaoyoyo2001/longphase-to-mod/output/pononly_v4_alt_guard/haplotag.log)",
+      "Bash(/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod -t /big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam -n /big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam -r /big8_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa -v /tmp/ism_phase_b_test/chr19_20snv.vcf -o /tmp/ism_phase_b_test/output -j 4 -w 2000)",
+      "Bash(awk:*)",
+      "Bash(zcat /big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260327_loh_round1_cross_sample_audit/all_region_rows.tsv.gz)",
+      "Bash(/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod -t /big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_pileup/20260314_HCC1395_paired_pileup_pileup_complete_matrix/longphase_s/HCC1395_tagged.bam -n /big7_disk/liaoyoyo2001/data/HCC1395_5kHz/HCC1395BL_5kHz.tagged.bam -v /tmp/ism_phase_b_test/hcc1395_all_pass.vcf -r /big7_disk/liaoyoyo2001/data/ref/GRCh38_no_alt_analysis_set.fasta --loh-bed /tmp/ism_phase_b_test/ism_loh_regions.bed -o /tmp/ism_phase_b_test/output_full_signed_delta --distance-metric NHD -w 2000 -j 16)",
+      "Bash(/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod -t /big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_pileup/20260314_HCC1395_paired_pileup_pileup_complete_matrix/longphase_s/HCC1395_tagged.bam -n /big7_disk/liaoyoyo2001/data/HCC1395_5kHz/HCC1395BL_5kHz.tagged.bam -v /tmp/ism_phase_b_test/hcc1395_chr19_full.vcf -r /big7_disk/liaoyoyo2001/data/ref/GRCh38_no_alt_analysis_set.fasta --loh-bed /tmp/ism_phase_b_test/ism_loh_regions.bed -o /tmp/ism_phase_b_test/output_chr19_signed_delta --distance-metric NHD -w 2000 -j 16)",
+      "Read(//big7_disk/liaoyoyo2001/big7_disk_output/**)",
+      "Bash(mkdir -p /big7_disk/liaoyoyo2001/InterSubMod/docs/experiments/validated/2026/04/figures/loh_subclone_af)",
+      "Bash(mkdir -p /big7_disk/liaoyoyo2001/InterSubMod/docs/experiments/validated/2026/04/figures/loh_subclone_af_paired)",
+      "Bash(head -n 261 /bip7_disk/liaoyoyo2001/.claude/plans/immutable-crafting-haven.md)",
+      "Bash(python3 research/hpfinengroups_saturation_check/scripts/02_anomaly_investigation.py)"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
@@ -113,13 +138,26 @@
     ],
     "defaultMode": "acceptEdits"
   },
+  "enabledMcpjsonServers": [
+    "knowledge",
+    "biorxiv",
+    "ensembl"
+  ],
   "hooks": {
     "UserPromptSubmit": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "bash scripts/hooks/knowledge_check.sh"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/knowledge_check.sh 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/research_direction_guard.sh 2>/dev/null || true"
           }
         ]
       }
@@ -130,7 +168,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c \"if echo '$TOOL_INPUT' | grep -qE '(rm -rf|git reset --hard|git push --force)'; then echo '[PreHook] 危險操作警告！請確認操作正確性'; fi\""
+            "command": "jq -r '.tool_input.command // empty' | grep -qE '(rm -rf|git reset --hard|git push --force)' && echo '[PreHook] 危險操作警告！請確認操作正確性' || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/pre_commit_compile_check.sh 2>/dev/null || exit 0"
           }
         ]
       }
@@ -141,7 +188,34 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path // empty' | { read file_path; if echo \"$file_path\" | grep -qE '\\.(cpp|hpp|h)$'; then echo '[Hook] C++ 程式碼已修改，請記得：1. 編譯 (cd build && make) 2. 測試'; fi; }"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/cpp_edit_guard.sh 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/trigger_routing.sh 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/evidence_ledger_sync.sh 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/terminology_guard.sh 2>/dev/null || true"
           }
         ]
       },
@@ -150,7 +224,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.command // empty' | { read cmd; if echo \"$cmd\" | grep -q 'git commit'; then echo '[Hook] 提交完成，請確認：1. 測試已通過 2. 文檔已更新'; fi; }"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/compile_success_clear.sh 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command // empty' | { read -r cmd; [ -n \"$cmd\" ] && echo \"$cmd\" | grep -q 'git commit' && echo '[Hook] 提交完成，請確認：1. 測試已通過 2. 文檔已更新'; } 2>/dev/null || true"
           }
         ]
       }
@@ -160,7 +243,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '[SubagentStop] 子代理任務完成，請檢查輸出結果並確認是否符合預期'"
+            "command": "echo '[SubagentStop] 子代理任務完成，請檢查輸出結果並確認是否符合預期' || true"
           }
         ]
       }
@@ -170,7 +253,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '[Hook] 會話即將結束，請確認：\\n1. 是否已撰寫執行報告到 docs/ai_sessions/\\n2. 是否有未完成的任務需要記錄\\n3. 使用 /report 技能撰寫報告'"
+            "command": "printf '[Hook] 會話即將結束，請確認：\\n1. 是否已撰寫執行報告到 docs/ai_sessions/\\n2. 是否有未完成的任務需要記錄\\n3. 使用 /report 技能撰寫報告\\n' || true"
           }
         ]
       }
@@ -192,10 +275,5 @@
     "language": "zh-TW",
     "response_language": "繁體中文",
     "code_comment_language": "zh-TW"
-  },
-  "enabledMcpjsonServers": [
-    "knowledge",
-    "biorxiv",
-    "ensembl"
-  ]
+  }
 }
