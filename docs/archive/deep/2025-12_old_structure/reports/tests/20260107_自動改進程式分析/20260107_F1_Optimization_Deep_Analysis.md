@@ -20,7 +20,7 @@
 ![V Distribution](images/v_distribution_comparison.png)
 
 **V 值 × Significant 交叉分析表**已輸出至:  
-`/big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/f1_optimization_analysis/v_sig_ratio_table.csv`
+`../../../../../../../output/bip8_output_archive/f1_optimization_analysis/v_sig_ratio_table.csv`
 
 ---
 
@@ -56,9 +56,9 @@
 
 ### 2.4 策略效果視覺化
 
-![F1 Improvement Strategies](/big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/f1_optimization_analysis/f1_improvement_strategies.png)
+![F1 Improvement Strategies](../../../../../../../output/bip8_output_archive/f1_optimization_analysis/f1_improvement_strategies.png)
 
-![Removal Ratio vs F1](/big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/f1_optimization_analysis/removal_ratio_vs_f1.png)
+![Removal Ratio vs F1](../../../../../../../output/bip8_output_archive/f1_optimization_analysis/removal_ratio_vs_f1.png)
 
 ---
 
@@ -92,8 +92,8 @@
 
 | 檔案 | 路徑 |
 |:---|:---|
-| 完整策略結果 | `/big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/f1_optimization_analysis/f1_optimization_results.csv` |
-| V×Sig 比例表 | `/big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/f1_optimization_analysis/v_sig_ratio_table.csv` |
-| V 分佈圖 | `/big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/f1_optimization_analysis/v_distribution_comparison.png` |
-| F1 策略圖 | `/big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/f1_optimization_analysis/f1_improvement_strategies.png` |
-| 移除比與F1圖 | `/big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output/f1_optimization_analysis/removal_ratio_vs_f1.png` |
+| 完整策略結果 | `../../../../../../../output/bip8_output_archive/f1_optimization_analysis/f1_optimization_results.csv` |
+| V×Sig 比例表 | `../../../../../../../output/bip8_output_archive/f1_optimization_analysis/v_sig_ratio_table.csv` |
+| V 分佈圖 | `../../../../../../../output/bip8_output_archive/f1_optimization_analysis/v_distribution_comparison.png` |
+| F1 策略圖 | `../../../../../../../output/bip8_output_archive/f1_optimization_analysis/f1_improvement_strategies.png` |
+| 移除比與F1圖 | `../../../../../../../output/bip8_output_archive/f1_optimization_analysis/removal_ratio_vs_f1.png` |
