@@ -1,0 +1,43 @@
+# InterSubMod Research Project Manifest
+# Copy this file to your project directory and fill in the values.
+# Machine-readable metadata for tracking research artifacts and reproducibility.
+
+project:
+  name: ""                          # Directory name under research/
+  title: ""                         # Human-readable title
+  created: ""                       # YYYY-MM-DD
+  status: "initiated"               # initiated | executing | completed | abandoned
+  conclusion: null                  # POSITIVE | NEGATIVE | CONDITIONAL | null
+
+hypotheses:
+  - id: "H1"
+    statement: ""
+    preconditions: []               # What must be true for this hypothesis to be testable
+    confounds: []                   # Known confounding variables to control
+    positive_criterion: ""          # What result counts as support
+    negative_criterion: ""          # What result counts as rejection
+    verdict: null                   # supported | rejected | partial | null
+
+datasets:
+  - path: ""
+    description: ""
+    rows: null                      # Approximate row count
+    columns_used: []                # List of column names actually used
+
+artifacts:
+  scripts: []                       # e.g. ["scripts/step1_analysis.py"]
+  figures: []                       # e.g. ["figures/01_distribution.png"]
+  data: []                          # e.g. ["data/step1_results.tsv"]
+
+dependencies:
+  git_commit: ""                    # Commit hash at execution time
+  python_packages: []               # e.g. ["pandas", "scipy", "matplotlib"]
+
+reproducibility:
+  python_version: ""
+  key_parameters: {}                # Parameter name → value mapping
+
+report:
+  path: ""                          # Path to formal report in docs/experiments/
+  index_entry: false                # Whether INDEX.md has been updated
+  memory_entry: ""                  # Memory file name (if created)
