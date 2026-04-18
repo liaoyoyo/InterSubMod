@@ -158,6 +158,12 @@
   - 其他 6 樣本 mean ΔF1=−0.0044（5/6 hurt）→ 非 global canonical filter
   - Circularity guard（S3 CovM 95%ile non-Z3 baseline）信號過弱 Δ≈+0.0002
   - **結論**：HCC1954-local CONDITIONAL；不納入預設 filter；Zone-Aware Framework 定位不變
+- **CovM Baseline 準確度驗證（2026-04-20 MIXED）**：[報告](experiments/in_progress/2026/04/20260420_CovM_Baseline_Accuracy_Validation_01.md)
+  - **H-CN1 POSITIVE**：全 7 樣本 × 2 mode 共用 `expected_coverage = 75.0`（default fallback），per-sample bias −28% 到 +150%，KDE 未在 master dataset 生成時啟用
+  - **H-CN2 POSITIVE**：HCC1395 SEQC2 benchmark — Gain recall 14.6%（CN=3 僅 0.15% 標為 Gain）vs Loss recall 86.9%
+  - **H-CN3 NEGATIVE**：HCC1395 oracle truth_cn≥3.5 ∩ Z3 ΔF1=+0.0011；Variant A 數學證明 percentile filter 對 per-sample re-centering 免疫
+  - **結論**：「cov 需要修正」為真（infrastructure bug），但**修正後不會救 Z3 pilot 跨樣本失敗**；後者是真實生物學 CNV 異質性
+  - **後續動作**：另立 `/cpp-change` 修 KDE baseline；所有 cross-sample CovM 分析需加註「2026-04-20 後 master dataset 應重跑」風險
   - H1 CONDITIONAL → Z1b 放寬後 TO 4.6% 覆蓋率、TP rate 0.965（7 變體 Pareto 最佳）
   - H3 PARTIAL：Paired 7/7 ≥ 89.1% 確認；TO 6/7 significant 但絕對值 ~72%
   - TO zone TP rate 範圍 0.61-0.94
