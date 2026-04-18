@@ -24,7 +24,7 @@ related:
 
 ### 2.1 跨 strategy 匯總
 
-![Blacklist ΔF1 per-sample × strategy](../../../../research/z3_internal_feature_exploration/figures/step5_blacklist_delta_f1.png)
+![Blacklist ΔF1 per-sample × strategy](../../../../../research/z3_internal_feature_exploration/figures/step5_blacklist_delta_f1.png)
 
 | Strategy | HCC1954 ΔF1 | HCC1954 FP− | HCC1954 TP− | 其他 6 mean ΔF1 | 其他 improved | 其他 hurt |
 |---------|------------|------------|-----------|---------------|-------------|---------|
@@ -67,7 +67,7 @@ Step 4 校核顯示狹窄 focal amplicon coord 捕獲率極低：
 
 **→ 實際 FP 富集是 arm-level（8p loss / 17p TP53 LOH / chr5 整段重排）而非 focal amplicon**。這就是為什麼 S1 設計採 arm-level 而非文獻狹窄座標。
 
-![HCC1954 Z3 FP Pos 分佈](../../../../research/z3_internal_feature_exploration/figures/step4_hcc1954_fp_pos_hist.png)
+![HCC1954 Z3 FP Pos 分佈](../../../../../research/z3_internal_feature_exploration/figures/step4_hcc1954_fp_pos_hist.png)
 
 ### 3.2 Z3-conditional gating 的必要性
 

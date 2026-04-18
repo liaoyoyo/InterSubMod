@@ -39,7 +39,7 @@ HCC1954 Z3 FP **93% 集中於 chr5 (43%) / chr8 (29%) / chr17 (13%)**，配合�
 - FP NumReads=55 vs TP=37（Mann-Whitney p=4.7e-9）
 - FP Coverage_Multiple=0.73 vs TP=0.49（CN proxy ≈ 1.5×）
 
-![Z3 chr 分佈對比（HCC1954 vs HCC1395）](../../../../research/z3_internal_feature_exploration/figures/z3_chr_distribution_contrast.png)
+![Z3 chr 分佈對比（HCC1954 vs HCC1395）](../../../../../research/z3_internal_feature_exploration/figures/z3_chr_distribution_contrast.png)
 
 這對應 HCC1954 已知的 HER2+/pseudo-tetraploid breast cancer 架構（ERBB2 focal amp + arm-level 8p loss + 17p TP53 LOH）。
 
@@ -79,7 +79,7 @@ HCC1954 Z3 FP **93% 集中於 chr5 (43%) / chr8 (29%) / chr17 (13%)**，配合�
 
 → **實際 FP 是 arm-level 架構問題，非單純 focal amplicon**。因此 S1 blacklist 改為 arm-level（TP53 LOH、8p loss、MYC arm、HER2 arm、整段 chr5）而非文獻狹窄焦點。
 
-![HCC1954 Z3 FP Pos 分佈 vs 文獻 amplicon](../../../../research/z3_internal_feature_exploration/figures/step4_hcc1954_fp_pos_hist.png)
+![HCC1954 Z3 FP Pos 分佈 vs 文獻 amplicon](../../../../../research/z3_internal_feature_exploration/figures/step4_hcc1954_fp_pos_hist.png)
 
 #### (c) Circularity Guard（S3 only）
 
