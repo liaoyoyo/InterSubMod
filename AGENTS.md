@@ -25,7 +25,7 @@
 - `src/` holds the C++ core (split into `core/`, `io/`, `utils/`); headers live in `include/`.
 - `tests/` contains GoogleTest unit tests; `src/test/` contains phase-specific test drivers.
 - `tools/` houses Python analysis/plotting utilities; `scripts/` contains shell workflows.
-- `data/` stores example inputs; `output/` is the repo-local symlink entry to `/big7_disk/liaoyoyo2001/big7_disk_output/`; `docs/` and `images/` support documentation.
+- `data/` stores example inputs; `output/` is the repo-local symlink entry to `/big7_disk/liaoyoyo2001/big7_disk_output/`; `docs/` supports documentation; `research/` holds research workspaces with figures/data/scripts.
 - `build/` is the out-of-tree build output created by CMake.
 
 ## Build, Test, and Development Commands
@@ -58,20 +58,9 @@
 - Some older scripts or docs still mention absolute `/big8_disk/...` output paths; treat those as legacy or archive-era references unless the task explicitly targets historical runs.
 - Keep generated artifacts in `output/` and avoid committing large datasets unless explicitly requested.
 
-## 繼續研究前的必讀清單（每次對話開始時強制執行）
+## 繼續研究前的必讀清單
 
-**每次開始研究/分析任務前，必須依序閱讀以下文件，不得省略：**
-
-1. **`docs/CURRENT_FOCUS.md`** — 當前進行中的事項、阻塞點與風險
-2. **`docs/experiments/INDEX.md`** — 過去所有研究方向的成功/失敗結論與建議後續
-3. **`docs/README.md`** — 如需了解文件導航與查閱路徑
-
-**目的**：
-- 避免重複已失敗的方向
-- 對齊當前最優先目標
-- 了解哪些結論已驗證、哪些尚未解決
-
-**觸發條件**：開始任何研究分析、實驗設計、程式改進、或延續前次工作時，此步驟為必要前置。
+見 `.claude/CLAUDE.md`「繼續研究前的必讀清單」區段（含速查表）。
 
 ---
 
@@ -87,7 +76,7 @@
 
 ## 實驗室知識庫 (Knowledge Base)
 
-**路徑**：`/big8_disk/liaoyoyo2001/knowledge/`
+**路徑**：`/big8_disk/liaoyoyo2001/knowledge/`（`Knowledge` 為 symlink，兩者等價）
 
 當對話涉及以下主題時，**必須**先查閱知識庫對應文件確認細節，再進行回答或操作：
 
@@ -116,3 +105,128 @@
 - **不要憑記憶回答可以查證的事實**：檔案路徑、工具參數、VCF 欄位定義等務必查閱確認
 - **引用來源**：回答時標註「根據 Knowledge/03_file_formats/vcf_clairs_to.md」
 - **發現過時資訊時主動提醒使用者**
+
+---
+
+## 研究輸出組織規範（2026-04-05）
+
+### 目錄結構
+
+| 目錄 | 用途 | 索引檔 |
+|------|------|--------|
+| `research/{study_name}/` | 單一研究主題的完整工作區 | `README.md` |
+| `research/{study_name}/figures/` | 該研究的所有圖表（PNG/SVG） | — |
+| `research/{study_name}/data/` | 中間數據（TSV/CSV） | — |
+| `research/{study_name}/scripts/` | 分析腳本 | — |
+| `research/{study_name}/reports/` | 研究報告 | — |
+| `docs/reports/{topic}/` | 多檔案正式說明文件 | `00_INDEX.md` |
+| `docs/reports/{topic}/figures/` | 說明文件圖表 | — |
+| `docs/experiments/` | 實驗紀錄索引 | `INDEX.md` |
+
+### 圖片存放規則
+
+1. **統一命名**：純圖片子目錄一律叫 `figures/`（不用 `images/`、`plots/`）
+   - **例外**：當子目錄包含混合類型資源（圖片 + JSON/TSV/PDF 等非圖片檔案）時，可使用 `assets/` 命名
+2. **相對路徑**：.md 引用圖片必須用相對路徑 `figures/xxx.png`，禁止絕對路徑
+3. **最大深度**：圖片相對路徑最多 2 層（`../figures/` 可，`../../../figures/` 禁止）
+   - **例外**：引用 `output/` 或 `research/` 下的實驗圖片時，因目錄結構深度差異，允許超過 2 層（需確保目標檔案存在）
+4. **命名格式**：`{NN}_{英文描述}.png`（如 `01_stability_overview.png`）
+
+### 檔案命名格式
+
+- Markdown：`{YYYYMMDD}_{中文說明目標}_{流水號}.md`
+  - **例外**：`architecture/`（半永久結構文件）、`refactor_baseline/`（歷史基線快照）、`research_landscape/`（序號索引系列 `NN_名稱.md`）及特殊用途檔案（`INDEX_DETAIL_ARCHIVE.md`、`*_ARCHIVED.md`）不受此限
+- 圖片：`{NN}_{英文描述}.png`
+- 數據：`{YYYYMMDD}_{描述}.tsv`
+
+### 多步驟研究專案目錄
+
+多 Step 研究在 `plans/` 和 `architecture/` 下建專案子資料夾：
+```
+docs/plans/YYYY/MM/{YYYYMMDD}_{專案主題}/
+  ├── 00_總覽與執行順序.md    # 索引
+  ├── Step1_xxx.md            # Step 計劃
+  └── Step2_xxx.md
+docs/architecture/{YYYYMMDD}_{專案主題}/
+  ├── 架構文件.md
+  └── 資料追蹤表.md
+```
+
+### Git 追蹤規則
+
+| 類型 | 追蹤 | 說明 |
+|------|------|------|
+| `docs/reports/*/figures/*.png` | 追蹤 | 正式說明文件的關鍵圖 |
+| `docs/reports/*/*.md` | 追蹤 | 正式說明文件 |
+| `research/*/figures/*.png` | gitignore | 研究中間圖表 |
+| `research/*/data/` | gitignore | 中間數據 |
+| `research/*/scripts/*.py` | 追蹤 | 可重現腳本 |
+| `*.pdf`（根目錄） | gitignore | 簡報 PDF |
+
+### 資訊分層與封存規則（2026-04-05）
+
+| 層級 | 條件 | 位置 | 說明 |
+|------|------|------|------|
+| Active | 當月 + 進行中 | 原始目錄 | 完整內容 |
+| Recent | 1-3 月內已完成 | 原始目錄 | 保留但可精簡 |
+| Archive | >3 月 或 已被取代 | `docs/archive/YYYY/MM/` | 只搬移不刪除 |
+| Deep Archive | 歷史快照/重複 | `docs/archive/deep/` | immutable |
+
+**封存原則**：
+1. **不刪除任何檔案**，一律搬移到 `docs/archive/YYYY/MM/`
+2. 封存時建立 `SUMMARY.md` 提取重點結論
+3. 原位置留 redirect notice（`ARCHIVED.md`）
+4. 更新所有引用該檔案的索引連結
+5. 大型檔案（>500 行）封存前提取精簡版保留在活躍目錄
+
+### 元數據要求
+
+每個 .md 檔案開頭必須有 HTML 註解元數據：
+
+```markdown
+<!--
+建立時間: YYYY-MM-DD HH:MM
+目標: [本檔案的目標或用途]
+處理範圍: [涵蓋的工作範圍]
+關聯檔案:
+  - [相關檔案路徑 1]
+  - [相關檔案路徑 2]
+-->
+```
+
+---
+
+## 主要查詢路徑與重點資訊（2026-04-05）
+
+### 四層導航架構
+
+| 層級 | 檔案 | 回答的問題 | 何時查閱 |
+|------|------|-----------|---------|
+| L1 入口 | `docs/README.md` | 文件在哪裡？怎麼導航？ | 首次接觸專案 |
+| L2 焦點 | `docs/CURRENT_FOCUS.md` | 現在在做什麼？什麼阻塞？ | 每次對話開始 |
+| L3 歷史 | `docs/experiments/INDEX.md` | 過去試過什麼？成功/失敗？ | 計劃新實驗前 |
+| L4 深度 | `docs/reports/research_landscape/00_INDEX.md` | 完整研究推論鏈、證據與穩定性 | 需要完整理解 |
+
+### 重點資訊速查表
+
+| 我想知道... | 去哪裡找 |
+|-------------|---------|
+| TO FP 為什麼過濾不掉 | `docs/reports/research_landscape/01_TO_FP問題全貌.md` |
+| Self-phasing 是什麼、影響多大 | `docs/reports/research_landscape/02_Self_Phasing根因.md` |
+| ISM 哪些特徵可信、哪些不可信 | `docs/reports/research_landscape/03_ISM分析價值界定.md` |
+| 哪些結論需要修正後重測 | `docs/reports/research_landscape/04_暫停判定與重評估.md` |
+| 8 條證據鏈的完整推論 | `docs/reports/research_landscape/05_證據鏈總覽.md` |
+| 14 個結論各自的穩定度評分 | `docs/reports/research_landscape/06_結論穩定性審查.md` |
+| 當前研究策略與優先級 | `docs/CURRENT_FOCUS.md` |
+| 過去實驗的成功/失敗記錄 | `docs/experiments/INDEX.md` |
+| 樣本資訊、VCF 格式、工具參數 | Knowledge Base（見上方知識庫區段） |
+| LOH 深度調查數據 | `research/loh_investigation/` |
+| FP 來源追蹤分析 | `research/fp_provenance/` |
+
+### Agent 查詢義務
+
+- **開始研究前**：必讀 L2（CURRENT_FOCUS）+ L3（INDEX）
+- **計劃新實驗前**：必讀 L3 確認未重複失敗方向
+- **涉及 HP tag / LOH**：必讀 L4 的 02（Self-Phasing）和 04（暫停判定）
+- **涉及 TO FP 過濾**：必讀 L4 的 01（FP 全貌）和 03（ISM 價值界定）
+- **樣本/格式/工具問題**：必查 Knowledge Base

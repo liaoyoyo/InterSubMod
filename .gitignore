@@ -46,3 +46,14 @@ output/
 
 # Cycle result large files (keep summary only)
 research/autoresearch/cycles/*/feature_obs.txt
+
+# Research intermediate outputs (keep scripts, gitignore data/figures)
+research/*/figures/
+research/*/data/
+
+# Root-level PDFs (presentations)
+/*.pdf
+
+# Stale directories
+Testing/
+slides/
