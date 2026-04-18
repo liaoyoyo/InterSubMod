@@ -1,0 +1,62 @@
+{
+  "analysis_date": "2026-01-23",
+  "description": "CramersV 明確位點 (V > 0) 的 TP 和 FP 分析",
+  "overview": {
+    "tp_total": 30476,
+    "fp_total": 4822,
+    "tp_v_positive": 1874,
+    "fp_v_positive": 111,
+    "tp_v_positive_pct": 6.15,
+    "fp_v_positive_pct": 2.3
+  },
+  "cramersv_stats": {
+    "tp": {
+      "n": 1874,
+      "mean": 0.8502228388473851,
+      "std": 0.2016009496913216,
+      "median": 0.9416,
+      "q25": 0.8209,
+      "q75": 1.0,
+      "min": 0.0188,
+      "max": 1.0
+    },
+    "fp": {
+      "n": 111,
+      "mean": 0.7549531531531531,
+      "std": 0.28329938414714045,
+      "median": 0.8874,
+      "q25": 0.5622499999999999,
+      "q75": 0.9594,
+      "min": 0.0249,
+      "max": 1.0
+    }
+  },
+  "high_v_sites": {
+    "threshold": 0.5,
+    "tp_count": 1691,
+    "fp_count": 92
+  },
+  "special_cases": {
+    "strong_asm": {
+      "description": "V >= 0.5 AND AD > 0.25",
+      "tp": 28,
+      "fp": 3
+    },
+    "paradox": {
+      "description": "V >= 0.5 AND AD <= 0.1",
+      "tp": 844,
+      "fp": 71
+    },
+    "low_vaf_high_v": {
+      "description": "VAF < 0.24 AND V >= 0.5",
+      "tp": 196,
+      "fp": 61
+    }
+  },
+  "output_files": {
+    "tp_all_v_positive": "cramersv_sites/tp_cramersv_definitive.csv",
+    "fp_all_v_positive": "cramersv_sites/fp_cramersv_definitive.csv",
+    "tp_high_v": "cramersv_sites/tp_high_cramersv.csv",
+    "fp_high_v": "cramersv_sites/fp_high_cramersv.csv"
+  }
+}

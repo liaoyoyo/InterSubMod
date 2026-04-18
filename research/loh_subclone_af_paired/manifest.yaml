@@ -1,0 +1,60 @@
+project:
+  name: "loh_subclone_af_paired"
+  title: "LOH Subclone AF × Methylation — Paired Mode 延伸驗證"
+  created: "2026-04-15"
+  status: "completed"
+  conclusion: "POSITIVE — 四項假說全部通過，Paired median |r|=0.755 > TO 0.630"
+  predecessor: "loh_subclone_af"
+
+hypotheses:
+  - id: "H1p"
+    statement: "Paired LOH intermediate AF → 更高 NGroups"
+    positive_criterion: ">=5/7 samples MW p<0.05, Intermediate > Extreme"
+    verdict: "POSITIVE — 7/7 p<10^-65, ΔNG=+0.787"
+  - id: "H2p"
+    statement: "Paired 效應量 >= TO"
+    positive_criterion: "median |r| >= TO median (~0.630)"
+    verdict: "POSITIVE — median |r|=0.755 > TO 0.630"
+  - id: "H3p"
+    statement: "Paired segment AF-SD ∝ NGroups"
+    positive_criterion: ">=5/7 samples Spearman rho > 0"
+    verdict: "POSITIVE — 6/7 positive, 6/7 significant, rho=0.382"
+  - id: "H4p"
+    statement: "跨模式一致性"
+    positive_criterion: ">=5/7 samples effect direction matches"
+    verdict: "POSITIVE — 7/7 effect directions match"
+
+datasets:
+  - path: "big7_disk_output/synthesis/observation_workspaces/20260327_loh_round1_cross_sample_audit/all_region_rows.tsv.gz"
+    description: "748K rows master dataset, paired = 328,699 rows"
+  - path: "LOH.bed files (7 samples from TO pipeline)"
+    description: "LongPhase-TO generated LOH segments"
+
+artifacts:
+  scripts:
+    - "scripts/utils.py"
+    - "scripts/step1_paired_loh_af_distribution.py"
+    - "scripts/step2_paired_intermediate_af_methylation_cross.py"
+    - "scripts/step3_paired_spatial_analysis.py"
+    - "scripts/step4_paired_vs_to_comparison.py"
+  figures:
+    - "figures/p01-p17_*.png (17 figures)"
+  data:
+    - "data/step1-4_*.tsv (11 files)"
+
+dependencies:
+  git_commit: null
+  python_packages: ["pandas", "numpy", "scipy", "matplotlib", "seaborn"]
+
+reproducibility:
+  python_version: "3.10"
+  key_parameters:
+    af_extreme_threshold: [0.0, 0.1, 0.9, 1.0]
+    af_intermediate_range: [0.1, 0.4, 0.6, 0.9]
+    cn1_coverage_multiple_max: 0.75
+    nr_bins: [[10,30], [30,50], [50,80], [80,150], [150,500]]
+    min_variants_per_segment: 2
+
+report:
+  path: null
+  index_entry: false

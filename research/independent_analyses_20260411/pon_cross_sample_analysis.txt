@@ -1,0 +1,60 @@
+================================================================================
+Task 2: PON Cross-Sample FP Removal Rate Analysis
+================================================================================
+
+## Part A: Raw VCF-Level PON Removal Rate
+
+Sample                    Total   NonSomatic     PASS  LQ_only   PON_Rate PASS/Total
+------------------------------------------------------------------------------------------
+HCC1395               3,187,275    3,133,474   47,798    6,003     98.31%      1.50%
+HCC1395_DORADO        3,167,467    3,114,957   48,072    4,438     98.34%      1.52%
+COLO829               3,444,386    3,383,636   50,991    9,759     98.24%      1.48%
+H1437                 3,415,364    3,339,874   65,448   10,042     97.79%      1.92%
+H2009                 3,447,798    3,280,872  153,854   13,072     95.16%      4.46%
+HCC1937               3,124,945    3,087,734   29,503    7,708     98.81%      0.94%
+HCC1954               3,775,749    3,690,623   74,996   10,130     97.75%      1.99%
+
+PON Rate Range: 95.16% - 98.81%
+PON Rate Mean: 97.77% (SD: 1.12%)
+PON Rate Median: 98.24%
+
+## Part B: ISM-Level TP/FP Distribution (Master Dataset)
+
+Dataset                                   TP       FP    Total  FP_Rate
+----------------------------------------------------------------------
+COLO829_paired                        34,971    2,244   37,215     6.0%
+COLO829_to                            33,089   17,528   50,617    34.6%
+H1437_paired                          67,467        8   67,475     0.0%
+H1437_to                              45,473   13,442   58,915    22.8%
+H2009_paired                         132,908       86  132,994     0.1%
+H2009_to                             125,706   11,989  137,695     8.7%
+HCC1395_DORADO_paired                 29,883      240   30,123     0.8%
+HCC1395_DORADO_to                     28,856   11,572   40,428    28.6%
+HCC1395_paired                        29,740      627   30,367     2.1%
+HCC1395_to                            28,495   11,601   40,096    28.9%
+HCC1937_paired                        12,392      195   12,587     1.5%
+HCC1937_to                            12,623   12,032   24,655    48.8%
+HCC1954_paired                        17,909       29   17,938     0.2%
+HCC1954_to                            17,068   50,218   67,286    74.6%
+
+## Part C: PON Removal Rate of FP (Refined)
+
+  PON_FP_Rate = NonSomatic / (Total - truth_total)
+  Note: upper bound estimate (not all truth TP are in raw VCF)
+
+Sample                    Total  Truth_Total     Est_FP   NonSomatic  PON_FP_Rate
+--------------------------------------------------------------------------------
+HCC1395               3,187,275       39,447  3,147,828    3,133,474       99.54%
+HCC1395_DORADO        3,167,467       39,447  3,128,020    3,114,957       99.58%
+COLO829               3,444,386       41,427  3,402,959    3,383,636       99.43%
+H1437                 3,415,364       90,129  3,325,235    3,339,874      100.44%
+H2009                 3,447,798      168,529  3,279,269    3,280,872      100.05%
+HCC1937               3,124,945       60,691  3,064,254    3,087,734      100.77%
+HCC1954               3,775,749       26,567  3,749,182    3,690,623       98.44%
+
+## Part D: Key Observations
+
+1. H2009 has significantly lower PON rate (95.16%) vs others (97.75-98.81%)
+2. H2009 PASS count (153,854) is 2-5x higher than other samples
+3. H2009 truth_total (168,529) is highest — more somatic mutations to detect
+4. All samples PON rate > 95% — qualitative conclusion stable

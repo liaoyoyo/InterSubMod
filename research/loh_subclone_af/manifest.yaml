@@ -1,0 +1,101 @@
+project:
+  name: "loh_subclone_af"
+  title: "LOH Subclone AF × Methylation 雙重證據鏈"
+  created: "2026-04-14"
+  status: "completed"
+  conclusion: "POSITIVE"
+
+hypotheses:
+  - id: "H1"
+    statement: "Deletion LOH (CN=1) 的 intermediate AF = subclonal LOH"
+    preconditions: ["Cell line purity = 1.0", "Coverage_Multiple < 0.75 as CN≈1 proxy"]
+    confounds: ["NumReads", "Coverage_Multiple"]
+    positive_criterion: "Intermediate AF > Extreme AF in NGroups (MW p<0.05, ≥5/7 samples)"
+    negative_criterion: "NGroups 無差異 or Extreme ≥ Intermediate"
+    verdict: "supported"
+  - id: "H2"
+    statement: "cnLOH (CN=2) 的 AF ≠ {0, 0.5, 1} = subclonal event"
+    preconditions: ["Coverage_Multiple 0.75-1.25 as CN≈2 proxy"]
+    confounds: ["NumReads"]
+    positive_criterion: "Same direction as H1"
+    negative_criterion: "No intermediate AF enrichment"
+    verdict: "supported"
+  - id: "H3"
+    statement: "多位點連鎖 + 甲基化 = 更強的 subclone 證據"
+    preconditions: ["LOH.bed segments available"]
+    confounds: ["Segment size", "Variant count per segment"]
+    positive_criterion: "Segment AF-SD vs NGroups positive correlation (ρ>0, p<0.05, ≥5/7)"
+    negative_criterion: "No correlation or negative"
+    verdict: "supported"
+  - id: "H4"
+    statement: "HPFineNGroups 反映亞克隆複雜度"
+    preconditions: ["HPFineNGroups 已驗證為 somatic heterogeneity marker"]
+    confounds: ["NumReads confound with NGroups"]
+    positive_criterion: "NR-controlled analysis shows stronger effect"
+    negative_criterion: "Effect disappears after NR control"
+    verdict: "supported"
+
+datasets:
+  - path: "big7_disk_output/synthesis/observation_workspaces/20260327_loh_round1_cross_sample_audit/all_region_rows.tsv.gz"
+    description: "748K rows master dataset, 7 samples × 2 modes"
+    rows: 748000
+    columns_used: ["sample", "mode", "truth_label", "caller_af", "to_loh_bed_hit",
+                    "HPFineNGroups", "HPFineF", "Coverage_Multiple", "NumReads",
+                    "HP_Ratio", "AlleleDelta", "Quality_Score", "CramersV",
+                    "PairwiseMeanDist", "PairwiseMedianDist", "Chr", "Pos",
+                    "HP1FamilyN", "HP2FamilyN", "ClusterPermanovaF"]
+  - path: "LOH.bed files (7 samples, see LOH_BEDS in step3 script)"
+    description: "LongPhase-TO generated LOH segments"
+    rows: null
+    columns_used: ["chr", "start", "end"]
+
+artifacts:
+  scripts:
+    - "scripts/step1_loh_af_distribution.py"
+    - "scripts/step2_intermediate_af_methylation_cross.py"
+    - "scripts/step3_spatial_analysis.py"
+  figures:
+    - "figures/01_af_distribution_loh_vs_nonloh.png"
+    - "figures/02_intermediate_af_proportion.png"
+    - "figures/03_loh_af_fine_grain.png"
+    - "figures/04_loh_af_vs_coverage_multiple.png"
+    - "figures/05_loh_af_by_cn_tier.png"
+    - "figures/06_ngroups_by_af_class_cn_tier.png"
+    - "figures/07_ngroups_per_sample_cn1.png"
+    - "figures/08_ngroups_numreads_controlled.png"
+    - "figures/09_methylation_features_by_af_class.png"
+    - "figures/10_ngroups_per_sample_consistency.png"
+    - "figures/11_segment_af_sd_vs_ngroups.png"
+    - "figures/12_segment_uniform_vs_mixed.png"
+    - "figures/13_per_sample_segment_consistency.png"
+  data:
+    - "data/step1_af_class_statistics.tsv"
+    - "data/step1_loh_af_by_cn_tier.tsv"
+    - "data/step2_ngroups_by_af_class.tsv"
+    - "data/step2_ngroups_mw_test_cn1.tsv"
+    - "data/step2_ngroups_numreads_controlled.tsv"
+    - "data/step2_methylation_features_comparison.tsv"
+    - "data/step2_per_sample_consistency.tsv"
+    - "data/step3_segment_statistics.tsv"
+    - "data/step3_per_sample_segment_correlation.tsv"
+
+dependencies:
+  git_commit: "c022918"
+  python_packages: ["pandas", "numpy", "scipy", "matplotlib", "seaborn"]
+
+reproducibility:
+  python_version: "3.10"
+  key_parameters:
+    af_extreme_threshold: [0.0, 0.1, 0.9, 1.0]
+    af_intermediate_range: [0.1, 0.4, 0.6, 0.9]
+    af_near_half_range: [0.4, 0.6]
+    cn1_coverage_multiple_max: 0.75
+    cn2_coverage_multiple_range: [0.75, 1.25]
+    min_variants_per_segment: 2
+    min_sample_size_for_test: 5
+    nr_bins: [[10,30], [30,50], [50,80], [80,150], [150,500]]
+
+report:
+  path: "docs/experiments/validated/2026/04/20260414_LOH_Subclone_AF_Methylation_Evidence_01.md"
+  index_entry: true
+  memory_entry: "project_loh_subclone_af_methylation_positive.md"
