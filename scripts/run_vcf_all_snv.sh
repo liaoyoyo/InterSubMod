@@ -27,10 +27,32 @@ set -e
 # ============================================================================
 
 # 預設值
-VCF_PATH="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
-# VCF_PATH="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_fp.vcf.gz"
+# Caller mode: "to" (ClairS-TO, tumor-only) or "paired" (ClairS paired, tumor+normal)
+# IMPORTANT: TO mode 使用 ClairS-TO VCF + V3-Fixed haplotag BAM
+#            Paired mode 使用 ClairS paired pileup VCF + paired haplotag BAM
+#            兩者 VCF 不可混用（TO 無 pileup 模型，TP/FP 數量與性質不同）
+CALLER_MODE="to"
+
+# --- ClairS-TO (tumor-only) paths ---
+TO_VCF_TP="/big7_disk/liaoyoyo2001/longphase-to-mod/output/clairsto_v3fixed_work/clairsto_tp.vcf.gz"
+TO_VCF_FP="/big7_disk/liaoyoyo2001/longphase-to-mod/output/clairsto_v3fixed_work/clairsto_fp.vcf.gz"
+TO_TUMOR_BAM="/big7_disk/liaoyoyo2001/longphase-to-mod/output/pononly_v3_fixed/tumor_tagged.bam"
+
+# --- ClairS paired paths ---
+PAIRED_VCF_TP="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
+PAIRED_VCF_FP="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_fp.vcf.gz"
+PAIRED_TUMOR_BAM="/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam"
+
+# Set paths based on caller mode (default: TP VCF)
+if [[ "$CALLER_MODE" == "to" ]]; then
+    VCF_PATH="$TO_VCF_TP"
+    TUMOR_BAM="$TO_TUMOR_BAM"
+else
+    VCF_PATH="$PAIRED_VCF_TP"
+    TUMOR_BAM="$PAIRED_TUMOR_BAM"
+fi
+
 THREADS=120
-TUMOR_BAM="/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam"
 NORMAL_BAM="/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam"
 REF_FASTA="/big8_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa"
 MODE="all-with-w5000"
@@ -55,6 +77,20 @@ BASE_OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output"
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --caller-mode)
+            CALLER_MODE="$2"
+            if [[ "$CALLER_MODE" == "to" ]]; then
+                VCF_PATH="$TO_VCF_TP"
+                TUMOR_BAM="$TO_TUMOR_BAM"
+            elif [[ "$CALLER_MODE" == "paired" ]]; then
+                VCF_PATH="$PAIRED_VCF_TP"
+                TUMOR_BAM="$PAIRED_TUMOR_BAM"
+            else
+                echo "Error: Unknown caller mode '$CALLER_MODE'. Use 'to' or 'paired'." >&2
+                exit 1
+            fi
+            shift 2
+            ;;
         -v|--vcf)
             VCF_PATH="$2"
             shift 2
@@ -96,7 +132,8 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  -v, --vcf PATH       Path to VCF file"
+            echo "  --caller-mode MODE   Caller mode: 'to' (ClairS-TO) or 'paired' (ClairS paired) (default: to)"
+            echo "  -v, --vcf PATH       Path to VCF file (overrides caller-mode default)"
             echo "  -t, --threads N      Number of threads for C++ (default: 64)"
             echo "  -o, --out DIR        Output directory"
             echo "  -m, --mode MODE      Test mode: baseline, all-with-w1000, all-with-w5000, chr19-verification"
@@ -214,6 +251,7 @@ fi
 LOG_FILE="${OUTPUT_DIR}/full_execution_analysis.log"
 
 echo "=== InterSubMod FULL VCF Test ==="
+echo "Caller Mode: ${CALLER_MODE}"
 echo "Mode: ${MODE}"
 echo "VCF: ${VCF_PATH}"
 echo "Tumor BAM: ${TUMOR_BAM}"

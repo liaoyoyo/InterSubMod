@@ -22,15 +22,26 @@ PLOT_TYPE="no"
 RUN_COMPARISON=true
 LOG_LEVEL="info"
 
+# Caller mode: "to" (ClairS-TO, tumor-only) or "paired" (ClairS paired, tumor+normal)
+# IMPORTANT: TO mode 使用 ClairS-TO VCF + V3-Fixed haplotag BAM
+#            Paired mode 使用 ClairS paired pileup VCF + paired haplotag BAM
+#            兩者 VCF 不可混用（TO 無 pileup 模型，TP/FP 數量與性質不同）
+CALLER_MODE="to"
+
 # Output Base Directory
 # Note: The script will create a subdirectory {YYYYMMDD}_MODE_{SEQ} inside this base
 BASE_OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output/bip8_disk_output"
 
-# Input VCFs (Label VCF_Path)
-# defined as associative array or just parallel arrays. 
-# Using parallel arrays for simplicity in bash.
-LABELS=("filtered_snv_tp" "filtered_snv_fp")
-VCF_PATHS=(
+# --- ClairS-TO (tumor-only) VCFs ---
+TO_LABELS=("clairsto_tp" "clairsto_fp")
+TO_VCF_PATHS=(
+    "/big7_disk/liaoyoyo2001/longphase-to-mod/output/clairsto_v3fixed_work/clairsto_tp.vcf.gz"
+    "/big7_disk/liaoyoyo2001/longphase-to-mod/output/clairsto_v3fixed_work/clairsto_fp.vcf.gz"
+)
+
+# --- ClairS paired VCFs ---
+PAIRED_LABELS=("filtered_snv_tp" "filtered_snv_fp")
+PAIRED_VCF_PATHS=(
     "/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
     "/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_fp.vcf.gz"
 )
@@ -44,6 +55,10 @@ PYTHON_EXEC="/usr/bin/python3"
 # Argument parsing
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --caller-mode)
+            CALLER_MODE="$2"
+            shift 2
+            ;;
         --skip-comparison)
             RUN_COMPARISON=false
             shift
@@ -71,6 +86,18 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Set VCF paths based on caller mode
+if [[ "$CALLER_MODE" == "to" ]]; then
+    LABELS=("${TO_LABELS[@]}")
+    VCF_PATHS=("${TO_VCF_PATHS[@]}")
+elif [[ "$CALLER_MODE" == "paired" ]]; then
+    LABELS=("${PAIRED_LABELS[@]}")
+    VCF_PATHS=("${PAIRED_VCF_PATHS[@]}")
+else
+    echo "Error: Unknown caller mode '$CALLER_MODE'. Use 'to' or 'paired'." >&2
+    exit 1
+fi
+
 # Date string
 DATE_STR=$(date +%Y%m%d)
 
@@ -94,6 +121,7 @@ done
 
 mkdir -p "${OUTPUT_DIR}"
 echo "=== Batch VCF Analysis ==="
+echo "Caller Mode: ${CALLER_MODE}"
 echo "Output Directory: ${OUTPUT_DIR}"
 echo "Mode: ${MODE}"
 echo "Threads: ${THREADS}"
@@ -129,6 +157,7 @@ for i in "${!LABELS[@]}"; do
     # Run the single analysis script in background
     # We pass the calculated sub-directory as the output dir for this run
     "${SINGLE_RUN_SCRIPT}" \
+        --caller-mode "${CALLER_MODE}" \
         --vcf "${VCF}" \
         --out "${SUB_OUTPUT_DIR}" \
         --threads "${THREADS}" \
