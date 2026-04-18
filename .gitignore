@@ -47,9 +47,29 @@ output/
 # Cycle result large files (keep summary only)
 research/autoresearch/cycles/*/feature_obs.txt
 
-# Research intermediate outputs (keep scripts, gitignore data/figures)
-research/*/figures/
-research/*/data/
+# Research intermediate outputs — only reports (*.md), scripts (*.py), manifests
+# (*.yaml/*.yml/*.json) and conclusion texts (*.txt) belong in git. Generated
+# data tables, figures, and logs are never committed regardless of subdir layout.
+research/**/data/
+research/**/figures/
+research/**/assets/
+research/**/*.png
+research/**/*.jpg
+research/**/*.jpeg
+research/**/*.pdf
+research/**/*.svg
+research/**/*.csv
+research/**/*.tsv
+research/**/*.bed
+research/**/*.vcf
+research/**/*.vcf.gz
+research/**/*.bam
+research/**/*.bai
+research/**/*.gz
+research/**/*.log
+
+# Agent worktree isolation — temporary workspaces, not source of truth
+.claude/worktrees/
 
 # Root-level PDFs (presentations)
 /*.pdf
