@@ -3,7 +3,9 @@
 # 用於 Claude Code UserPromptSubmit hook
 # 僅在偵測到相關關鍵字時輸出提醒，避免無關提問受干擾
 
-PROMPT=$(cat)
+INPUT=$(cat)
+PROMPT=$(echo "$INPUT" | jq -r '.user_prompt // empty' 2>/dev/null)
+[ -z "$PROMPT" ] && PROMPT="$INPUT"
 KB="/big8_disk/liaoyoyo2001/Knowledge"
 MATCHED=()
 

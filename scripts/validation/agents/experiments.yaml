@@ -1,0 +1,60 @@
+# experiments.yaml - Parallel experiment definitions for orchestrator.py
+#
+# Each experiment defines:
+#   name:          Unique identifier (used for worktree directory)
+#   branch:        Git branch name (created from HEAD if not exists)
+#   hypothesis:    What we're testing
+#   hypothesis_id: Links to hypothesis_queue.json (optional)
+#   mode:          quick | full
+#   track:         paired | to
+#   priority:      Lower = run first (optional, default 99)
+#   samples:       Comma-separated override (optional)
+#   pipeline_mode: Override track default (optional)
+#   skip_build:    true to reuse existing binary (optional)
+#   timeout:       Seconds before abort (optional, default 7200)
+#
+# Usage:
+#   python3 scripts/validation/agents/orchestrator.py \
+#     --experiments scripts/validation/agents/experiments.yaml
+#
+#   python3 scripts/validation/agents/orchestrator.py \
+#     --experiments scripts/validation/agents/experiments.yaml \
+#     --only normal_methyl_ref
+
+experiments:
+  # --- Phase 2A: Normal Methylation Reference ---
+  - name: "normal_methyl_ref"
+    branch: "experiment/normal-methyl-ref"
+    hypothesis: "Normal BAM methylation baseline subtraction reduces germline ASM confound"
+    hypothesis_id: "2A-1"
+    mode: full
+    track: paired
+    priority: 1
+
+  # --- Phase 2C: CpG Functional Stratification ---
+  - name: "cpg_stratification"
+    branch: "experiment/cpg-stratify"
+    hypothesis: "EVOFLUx fCpG-aware distance weighting improves subclone detection"
+    hypothesis_id: "2C-1"
+    mode: quick
+    track: paired
+    priority: 2
+
+  # --- TO Mode: Quality Score Redesign ---
+  - name: "to_qs_redesign"
+    branch: "experiment/to-qs-redesign"
+    hypothesis: "Redesigned TO quality score using non-LOH features"
+    hypothesis_id: "TO-QS-1"
+    mode: full
+    track: to
+    priority: 3
+
+  # --- Phase 2A: CAMDAC Purity Correction ---
+  - name: "camdac_purity"
+    branch: "experiment/camdac-purity"
+    hypothesis: "CAMDAC-style purity correction improves low-purity sample performance"
+    hypothesis_id: "2A-2"
+    mode: quick
+    track: paired
+    priority: 4
+    samples: "HCC1937,HCC1954"
