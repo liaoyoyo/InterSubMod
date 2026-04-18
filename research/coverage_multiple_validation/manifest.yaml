@@ -1,0 +1,71 @@
+# InterSubMod Research Project Manifest
+
+project:
+  name: "coverage_multiple_validation"
+  title: "Coverage_Multiple 作為 CN proxy 的可靠性驗證"
+  created: "2026-04-19"
+  status: "executing"
+  conclusion: null                  # Pending step4 oracle CN pilot
+
+hypotheses:
+  - id: "H1"
+    statement: "Coverage_Multiple（KDE 估計 diploid baseline）可作為跨樣本可靠的 CN proxy"
+    preconditions:
+      - "HCC1395 具備 SEQC2 gold standard CNV truth"
+      - "其他 6 樣本可用 pan-cancer proxy-neutral 區間近似"
+    confounds:
+      - "expected_coverage baseline 的 KDE 估計偏誤"
+      - "樣本間測序深度差異"
+      - "高 ploidy 區域對 KDE 估計的污染"
+    positive_criterion: "HCC1395 Gain recall ≥ 0.80 且跨樣本 baseline bias |Δ| < 10%"
+    negative_criterion: "Gain recall < 0.60 或 baseline bias > 20% 或 baseline 硬編碼"
+    verdict: null                    # Step 1: 14.6% Gain recall → leaning rejected
+
+  - id: "H2"
+    statement: "使用 per-sample re-centered baseline 或 oracle CN 替代 CovM，可消除 Z3 amplicon blacklist 跨樣本 collateral damage"
+    preconditions:
+      - "H1 確認 CovM 有偏誤"
+      - "Step 2 已量化各樣本 baseline shift"
+    confounds:
+      - "Re-center 所用 proxy-neutral 區間本身可能含 CNV"
+      - "Oracle CN 僅 HCC1395 可得（非 generalizable）"
+    positive_criterion: "Variant A 或 B 在 HCC1954 ΔF1 ≥ +0.005 且其他 6 樣本無 hurt (ΔF1 ≥ 0)"
+    negative_criterion: "HCC1954 改善消失或其他樣本 mean ΔF1 < 0"
+    verdict: null
+
+datasets:
+  - path: "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260330_loh_round1_cross_sample_audit_post_to_hp_fix/all_region_rows.tsv.gz"
+    description: "Master region-level 數據（7 樣本 × paired/to）含 NumReads, Coverage_Multiple, caller_af 等"
+    rows: null
+    columns_used: ["Chr", "Pos", "NumReads", "Coverage_Multiple", "Coverage_Category", "sample", "mode", "truth_label", "core_loh_like", "to_loh_bed_hit", "caller_af", "HPFineNGroups"]
+  - path: "/big8_disk/data/HCC1395/SEQC2/CNV/"
+    description: "SEQC2 HCC1395 CNV gold standard（gain/loss/LOH BED + CN 值 + exclusion）"
+    rows: null
+    columns_used: ["chr", "start", "end", "val (label or CN)"]
+
+artifacts:
+  scripts:
+    - "scripts/step1_hcc1395_covm_vs_seqc2_truth.py"
+    - "scripts/step2_expected_coverage_audit.py"
+    - "scripts/step4_oracle_cn_pilot.py"
+  figures: []                        # Generated files gitignored; 列表僅供參考
+  data: []                           # Generated files gitignored
+
+dependencies:
+  git_commit: "fb614c8"              # As of 2026-04-19
+  python_packages: ["pandas", "numpy", "scipy", "matplotlib"]
+
+reproducibility:
+  python_version: "3.x"
+  key_parameters:
+    proxy_neutral_regions:
+      - "chr1:1-120M (1p)"
+      - "chr2:120-240M (2q)"
+      - "chr3:1-90M (3p)"
+      - "chr9:70-140M (9q)"
+    s2_whole_chr_blacklist: ["chr5", "chr8", "chr17"]
+
+report:
+  path: "reports/20260419_covm_vs_seqc2_truth_step1_02_01.md"
+  index_entry: false
+  memory_entry: ""
