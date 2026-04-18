@@ -33,7 +33,7 @@ metadata補齊時間: 2026-03-01 03:02
 - **Depth 20-30 是安全區間**: 統計顯示此區間的 TP/FP 比高達 **2.31** (見下圖)。
 - **無損擴增**: 我們在不犧牲準確率的前提下，擴大了有效數據集。
 
-![Depth Ratio Heatmap](images/heatmap_ratio.png)
+![Depth Ratio Heatmap](figures/heatmap_ratio.png)
 *(圖表顯示 Depth 20-30 區間的 TP/FP 比率為綠色，表示 TP 佔優)*
 
 ---

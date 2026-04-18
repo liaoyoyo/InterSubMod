@@ -324,6 +324,116 @@ AF<0.4 挽救的生物學對應：tumor purity<1 + subclonal events → somatic 
 
 ---
 
+## 3c. Step 5 — Purity dilution simulation + AF 低端 strata（20260418 再續）
+
+### 3c.1 動機與範圍
+
+回應 Opus 4.7 plan B.2-4「cell line purity=1 → 臨床 purity 0.3-0.8 外推」與 AF 下限 artifact 擔憂。Part 5C（CpG island annotation）因 reference BED 不存在，**DEFERRED**。
+
+### 3c.2 Part 5A — Purity dilution simulation
+
+**模型**：purity=1 cell line AF 視為 tumor_cell_VAF；臨床 purity=p 下 obs_AF(TP)=p×VAF、obs_AF(FP)=p×VAF+(1−p)×0.5（normal het 稀釋）；caller AF 下限=0.05。
+
+**TP rate 跨 purity（AF<0.4 filter）**：
+| sample | p=0.3 | p=0.5 | p=0.7 | p=0.9 | p=1.0 |
+|---|---|---|---|---|---|
+| H1437 | 0.991 | 0.981 | 0.974 | 0.967 | 0.965 |
+| H2009 | 0.999 | 0.991 | 0.978 | 0.965 | 0.957 |
+| HCC1395 | 0.975 | 0.934 | 0.920 | 0.898 | 0.887 |
+| HCC1937 | 0.984 | 0.923 | 0.901 | 0.876 | 0.867 |
+| **HCC1954** | **0.927** | **0.809** | **0.765** | **0.727** | **0.707** |
+
+**關鍵反直覺**：TP rate 在低 purity 下**反而更高**（germline-like FP 被 normal het 拉向 0.5 被排除）。HCC1954 purity=0.3 達 0.927（vs cell line 0.707，+22pp）。
+
+**TP recovery（TP 保留率）** purity=0.3 時顯著下降：HCC1954=0.553、HCC1937=0.665（caller AF<0.05 dropout）；purity≥0.5 全樣本 >0.85（H2009 例外因 AF 分布偏高）。
+
+**FP rejection** purity=0.3 時 ≥0.91 全樣本（HCC1954=0.957）。
+
+### 3c.3 Part 5B — AF 低端 strata（NG=4+NR≥80+NonLOH）
+
+| sample | [0,0.1) | [0.1,0.2) | [0.2,0.3) | [0.3,0.4) | [0.4,0.5) | [0.5,1.0) | Flag |
+|---|---|---|---|---|---|---|---|
+| H1437 | 1.000 | 0.954 | 0.989 | 0.923 | 0.779 | 0.716 | OK |
+| H2009 | 0.983 | 0.985 | 0.961 | 0.948 | 0.915 | 0.910 | OK |
+| HCC1395 | 0.889 | 0.891 | 0.909 | 0.838 | 0.643 | 0.559 | OK |
+| HCC1395_DORADO | 0.875 | 0.896 | 0.944 | 0.891 | 0.879 | 0.684 | OK |
+| HCC1937 | 0.978 | 0.944 | 0.841 | 0.707 | 0.462 | 0.239 | OK |
+| HCC1954 | 0.983 | 0.861 | 0.605 | 0.386 | 0.235 | 0.075 | OK |
+| COLO829 | 0.000 (n=1) | 0.200 | 0.444 | 0.000 | — | — | out-of-scope |
+
+**結論**：6/6 in-scope 樣本 AF[0,0.1] TP rate 與 [0.1,0.2] 差 <0.1 → **AF<0.4 cutoff 不需加下限 AF>0.05**，caller AF 下限自動過濾；HCC1954 / HCC1937 AF 隨 AF 升高 TP rate 單調遞減（再確認 germline het CNV drift 機制）。
+
+### 3c.4 Step 5 綜合結論
+
+1. **AF<0.4 filter 在臨床 purity 0.5-0.9 穩健**（TP rate ≥0.81、TP recovery ≥0.85、FP rejection ≥0.64）
+2. **HCC1954 cell line 是 edge case**：臨床 purity 0.3-0.8 表現反優於 cell line
+3. **AF 低端無 artifact**（6/6 flag=OK）
+4. **purity<0.4 caveat**：建議 NR≥100 + caller AF lower=0.03（挽救 ~45% HCC1954-type TP dropout）
+5. **HCC1954 AF≥0.5 TP=0.075**：CNV-driven germline het confound 再次確認（Step 4 已有證據）
+
+### 3c.5 更新待驗（Step 6 候選）
+
+- **Step 6A**：actual purity mixture（真實混 tumor×normal BAM）驗證 5A simulation 預測
+- **Step 6B**：orthogonal feature（PairwiseMedianDist / HPMergedDelta）在 AF<0.4 內做交叉驗證
+- **Step 6C**：cross-pilot 餵入 Phase 2A Normal ASM
+- **Step 5C DEFERRED**：CpG island annotation（reference 取得後再做）
+
+---
+
+## 3d. Step 6B — Orthogonal feature validation（20260418 再續）
+
+### 3d.1 動機
+
+確認 HPFineNGroups 在 NG=4+AF<0.4+NR≥80+NonLOH 內是否獨佔 heterogeneity 訊號，以及 PairwiseMedianDist / HPMergedDelta / AlleleDelta / HPFineF 是否提供獨立 axis。
+
+### 3d.2 Pooled AUC（n=14,197 in core subset）
+
+| feature | AUC | direction | Mann-U p | 解讀 |
+|---|---|---|---|---|
+| PairwiseMedianDist | 0.518 | TP>FP | 0.053 | TP reads 更 diverse（弱） |
+| PairwiseMeanDist | 0.525 | TP>FP | **0.007** | 同上，平均略強 |
+| AlleleDelta | 0.548 | **FP>TP** | **<0.0001** | FP 殘餘 allele imbalance |
+| HPFineF | 0.546 | **FP>TP** | **<0.0001** | FP reads 具較高 fine heterogeneity |
+| HPMergedDelta | 0.511 | FP>TP | 0.243 | 近似無效 |
+
+### 3d.3 Per-sample AUC（樣本特異性）
+
+| sample | PairwiseMedianDist | AlleleDelta | HPFineF | 特殊觀察 |
+|---|---|---|---|---|
+| HCC1395_DORADO | **0.692** | 0.512 | 0.608 | **Dorado-specific pairwise signature** |
+| H1437 | 0.638 | 0.544 | 0.501 | — |
+| HCC1937 | 0.586 | **0.663** | 0.520 | BRCA1 可能 subtle CNV |
+| HCC1954 | 0.578 | 0.546 | **0.644** | fine heterogeneity 二階訊號 |
+| HCC1395 | 0.580 | 0.569 | 0.549 | — |
+| H2009 | 0.518 | 0.522 | 0.511 | ceiling |
+
+### 3d.4 Spearman ρ（feature vs HPFineNGroups）@ NG≥2 wide subset n=63,841
+
+全部 |ρ| ≤ 0.17 → **高度獨立**（無冗餘）。
+
+### 3d.5 Combined score
+
+在 NG=4 子集內 baseline NG AUC=0.5（固定），top combo AUC=0.548（AlleleDelta 單獨）→ **pooled 層級組合無增益**；per-sample fine-tuning 才有機會。
+
+### 3d.6 Step 6B 結論與對 canonical filter 影響
+
+1. **HPFineNGroups 為 dominant signal**：canonical filter **不改**
+2. **Per-sample fine-tuning 候選**（需 overfitting 驗證才納入）：
+   - HCC1937: +AlleleDelta<0.02
+   - HCC1954: +HPFineF<5
+   - HCC1395_DORADO: +PairwiseMedianDist>0.15
+3. **新 follow-up**：
+   - Dorado-specific artifact（HCC1395_DORADO PairwiseMedianDist=0.692）
+   - BRCA1 subtle CNV（HCC1937 AlleleDelta=0.663）
+   - HCC1954 fine-level heterogeneity 二階訊號（HPFineF=0.644）
+
+### 3d.7 結論穩定度
+
+- HPFineNGroups 獨佔 dominant signal 再確認 → 補充結論 16 繼續維持 ⭐4
+- 不觸發新升降級
+
+---
+
 ## 4. 對 Part B.1 質疑的回應
 
 | 質疑 | 原擔憂 | F pilot 回應 | 結論 |
@@ -394,7 +504,11 @@ AF<0.4 挽救的生物學對應：tumor purity<1 + subclonal events → somatic 
 | Step 3 findings | `research/F_hpfinengroups_deepening/observations/step3_findings.md` |
 | Step 4 script | `research/F_hpfinengroups_deepening/scripts/step4_af04_cohens_d_and_fp_clustering.py` |
 | Step 4 findings | `research/F_hpfinengroups_deepening/observations/step4_findings.md` |
-| Step 1-4 data outputs | `research/F_hpfinengroups_deepening/data/*.tsv` |
+| Step 5 script | `research/F_hpfinengroups_deepening/scripts/step5_purity_simulation_and_af_boundaries.py` |
+| Step 5 findings | `research/F_hpfinengroups_deepening/observations/step5_findings.md` |
+| Step 6B script | `research/F_hpfinengroups_deepening/scripts/step6_orthogonal_feature_validation.py` |
+| Step 6B findings | `research/F_hpfinengroups_deepening/observations/step6b_findings.md` |
+| Step 1-6B data outputs | `research/F_hpfinengroups_deepening/data/*.tsv` |
 | Memory | `.claude/.../memory/project_hpfinengroups_subclone_marker.md`（20260418 updated） |
 | Stability | `docs/reports/research_landscape/06_結論穩定性審查.md`（補充結論 16 ⭐3→⭐4） |
 

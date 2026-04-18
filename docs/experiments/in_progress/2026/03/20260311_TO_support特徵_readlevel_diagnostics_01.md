@@ -56,9 +56,9 @@
 
 1. `HCC1395 5kHz TO`
    - candidate feature 表：
-     [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260308_hcc1395_to_candidate_rescue_methylation/eval/rescue_joined_features.tsv](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260308_hcc1395_to_candidate_rescue_methylation/eval/rescue_joined_features.tsv)
+     [../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260308_hcc1395_to_candidate_rescue_methylation/eval/rescue_joined_features.tsv](../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260308_hcc1395_to_candidate_rescue_methylation/eval/rescue_joined_features.tsv)
    - snapshot 用 BAM：
-     [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260307_hcc1395_to_pilot_1/step03_longphase_to/tumor_tagged.bam](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260307_hcc1395_to_pilot_1/step03_longphase_to/tumor_tagged.bam)
+     [../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260307_hcc1395_to_pilot_1/step03_longphase_to/tumor_tagged.bam](../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260307_hcc1395_to_pilot_1/step03_longphase_to/tumor_tagged.bam)
    - 注意：這顆 BAM 來自 `ClairS-TO pileup` 主 pilot 的 full tagged BAM。
 
 2. `HCC1395_DORADO TO`
@@ -73,13 +73,13 @@
 - 執行腳本：
   [/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/run_to_support_feature_diagnostics.py](/big8_disk/liaoyoyo2001/InterSubMod/scripts/analysis/run_to_support_feature_diagnostics.py)
 - 本輪輸出根目錄：
-  [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics)
+  [../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics](../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics)
 - 候選清單：
-  [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/candidate_manifest.tsv](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/candidate_manifest.tsv)
+  [../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/candidate_manifest.tsv](../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/candidate_manifest.tsv)
 - 去重後代表性位點：
-  [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/selected_regions.tsv](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/selected_regions.tsv)
+  [../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/selected_regions.tsv](../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/selected_regions.tsv)
 - read-level 彙整：
-  [/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/diagnostic_summary.tsv](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/diagnostic_summary.tsv)
+  [../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/diagnostic_summary.tsv](../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/diagnostic_summary.tsv)
 
 ### 3.3 候選選取方式
 
@@ -209,11 +209,11 @@
 ### 6.1 `5kHz TO`：高 pairwise 的 TP 代表例
 
 代表位點：
-- [chr20:28587067:G:A matrix notes](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/hcc1395_5khz_to/diagnostics/caller_lost_tp/chr20_28587067_G_A/matrix_diagnostics/region_notes.md)
+- [chr20:28587067:G:A matrix notes](../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/hcc1395_5khz_to/diagnostics/caller_lost_tp/chr20_28587067_G_A/matrix_diagnostics/region_notes.md)
 
-![5kHz TO 高 pairwise TP 的甲基矩陣](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/hcc1395_5khz_to/diagnostics/caller_lost_tp/chr20_28587067_G_A/matrix_diagnostics/heatmap_methylation.png)
+![5kHz TO 高 pairwise TP 的甲基矩陣](../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/hcc1395_5khz_to/diagnostics/caller_lost_tp/chr20_28587067_G_A/matrix_diagnostics/heatmap_methylation.png)
 
-![5kHz TO 高 pairwise TP 的距離矩陣](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/hcc1395_5khz_to/diagnostics/caller_lost_tp/chr20_28587067_G_A/matrix_diagnostics/heatmap_distance.png)
+![5kHz TO 高 pairwise TP 的距離矩陣](../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/hcc1395_5khz_to/diagnostics/caller_lost_tp/chr20_28587067_G_A/matrix_diagnostics/heatmap_distance.png)
 
 圖像解釋：
 - 上圖甲基矩陣：
@@ -232,11 +232,11 @@
 ### 6.2 `DORADO TO`：低 pairwise 的 FP 代表例
 
 代表位點：
-- [chr5:78245602:A:T matrix notes](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/hcc1395_dorado_to/diagnostics/caller_removed_fp/chr5_78245602_A_T/matrix_diagnostics/region_notes.md)
+- [chr5:78245602:A:T matrix notes](../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/hcc1395_dorado_to/diagnostics/caller_removed_fp/chr5_78245602_A_T/matrix_diagnostics/region_notes.md)
 
-![DORADO TO 低 pairwise FP 的甲基矩陣](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/hcc1395_dorado_to/diagnostics/caller_removed_fp/chr5_78245602_A_T/matrix_diagnostics/heatmap_methylation.png)
+![DORADO TO 低 pairwise FP 的甲基矩陣](../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/hcc1395_dorado_to/diagnostics/caller_removed_fp/chr5_78245602_A_T/matrix_diagnostics/heatmap_methylation.png)
 
-![DORADO TO 低 pairwise FP 的距離矩陣](/big8_disk/liaoyoyo2001/InterSubMod_runs/output/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/hcc1395_dorado_to/diagnostics/caller_removed_fp/chr5_78245602_A_T/matrix_diagnostics/heatmap_distance.png)
+![DORADO TO 低 pairwise FP 的距離矩陣](../../../../../output/big8_output_archive/big8_disk_output/research_rounds/20260311_to_support_feature_diagnostics/hcc1395_dorado_to/diagnostics/caller_removed_fp/chr5_78245602_A_T/matrix_diagnostics/heatmap_distance.png)
 
 圖像解釋：
 - 上圖甲基矩陣：
