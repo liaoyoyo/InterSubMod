@@ -1,0 +1,339 @@
+{
+  "meta": {
+    "title": "TO 模式 LOH 系統性偏差調查：從發現到機制剖析",
+    "author": "InterSubMod Research",
+    "date": "2026-04-01",
+    "period": "2026-03-25 ~ 2026-03-31"
+  },
+  "theme": {
+    "bg": "#1a1a2e",
+    "title_color": "#FFFFFF",
+    "subtitle_color": "#8888AA",
+    "body_color": "#E0E0E0",
+    "accent": "#00d4ff",
+    "accent_red": "#ff6b6b",
+    "accent_teal": "#4ecdc4",
+    "footer_color": "#666688",
+    "table_header": "#2a2a4e",
+    "table_body": "#22223a",
+    "table_alt": "#1e1e36",
+    "font_title": "Microsoft JhengHei",
+    "font_body": "Calibri"
+  },
+  "deck": [
+    {
+      "type": "cover",
+      "title": "TO 模式 LOH 系統性偏差調查：\n從發現到機制剖析",
+      "subtitle": "InterSubMod LOH 研究週報 — 偵探故事線",
+      "info": "報告期間：2026-03-25 ~ 2026-03-31\n資料規模：748,391 regions × 116 features × 7 cancer cell lines × 2 modes",
+      "summary": "發現 TO 模式的 LOH 判定存在系統性偏差，完整驗證機制並確認是 LongPhase-TO self-phasing 造成，提出修正方向",
+      "notes": "各位好，這是本週 InterSubMod 的研究週報。本週的主題是一個偵探故事——我們在擴展 Tumor-Only 模式的分析時，發現了一個看起來不對勁的現象，花了整整一週追查它的來源。最後確認這是 LongPhase-TO 在做 phasing 時引入的系統性偏差。我會用 15 張投影片帶大家走過這個調查過程。\n\n[過渡] 首先，讓我說明為什麼我們要把分析擴展到 Tumor-Only 模式。"
+    },
+    {
+      "type": "text_image",
+      "title": "從 Paired 延伸到 Tumor-Only — 為了統計檢定力",
+      "bullets": [
+        "Paired FP = 3,429 / 328,699（~1%）→ TP:FP ≈ 95:1，統計力不足",
+        "TO FP = 128,382 / 419,692（~31%）→ TP:FP ≈ 2.3:1，統計力充足",
+        "FP 來源差異：Paired FP = calling 殘留錯誤（~1%）；TO FP = germline variants 被誤判為 somatic（~31%，因無 normal 對照過濾）",
+        "本週核心問題：ISM 在 TO 模式下能否區分 TP/FP？LOH 扮演什麼角色？"
+      ],
+      "image": "O01_fig04_truth_label_composition.png",
+      "notes": "先說背景。上週我們建立了 Paired 模式的基線，但遇到一個根本的問題——Paired 的 False Positive 只有百分之一，大約三千四百個，TP 對 FP 是 95 比 1。這麼懸殊的比例讓我們沒辦法可靠地評估特徵的區分能力。\n\n相比之下，Tumor-Only 模式因為沒有正常樣本對照，大量 germline variants 被錯誤判定為 somatic，False Positive 率高達百分之三十一。[停頓] 這提供了十二萬八千多個 FP，統計力完全充足。\n\n所以本週的策略很清楚：借 TO 的大量 FP 來深度驗證 ISM 的區分能力，特別是 LOH 這個組件在裡面扮演什麼角色。\n\n[過渡] 在進入結果之前，先讓我快速說明 ISM 的分析框架和一個重要的技術細節——HP tag 的差異。"
+    },
+    {
+      "type": "text_image",
+      "title": "InterSubMod 分析架構與 Paired/TO Haplotype 差異",
+      "bullets": [
+        "ISM 分析每個 somatic variant 位點周邊 ±5000bp 區域內的 CpG 甲基化模式",
+        "HP tag 來自 LongPhase haplotagged BAM（非 ISM 自行判定）",
+        "Paired (LongPhase-s)：HP:Z:1-1（字串，haplotype-block 格式）",
+        "TO (LongPhase-TO)：HP:i:11（整數編碼，joint phasing）",
+        "關鍵差異：TO phasing anchor 包含 somatic variant → 潛在 circular dependency",
+        "LOH-like 定義：HP_Ratio < 0.1 or > 0.9（effective_hp_reads ≥ 30）",
+        "先前嘗試：Quality Score 加分表（Penalties + Bonuses），Paired AUC = 0.754"
+      ],
+      "image": null,
+      "comparison": {
+        "left_title": "Paired Mode",
+        "right_title": "Tumor-Only Mode",
+        "rows": [
+          {"left": "Normal + Tumor BAM\nLongPhase joint phasing", "right": "Tumor BAM only\nLongPhase-TO self phasing"},
+          {"left": "HP tag: 字串格式\nHP:Z:\"1-1\" / HP:Z:\"2-1\"", "right": "HP tag: 整數格式\nHP:i:11 / HP:i:21"},
+          {"left": "Phasing anchor:\ngermline het SNPs only", "right": "Phasing anchor:\ngermline + somatic variants", "right_color": "#ff6b6b"},
+          {"left": "FP rate ~1%\nCalling residual errors", "right": "FP rate ~31%\nGermline misclassified as somatic", "right_color": "#ff6b6b"},
+          {"left": "QS AUC = 0.754\nLOH penalty works correctly", "right": "QS AUC = 0.497\nLOH penalty direction reversed", "right_color": "#ff6b6b"}
+        ]
+      },
+      "notes": "快速過一下技術框架。ISM 針對每個 somatic variant，擷取周邊正負五千個 base pair 範圍的 reads，依照 haplotype 分群後比較甲基化模式。\n\n這裡有一個重要的細節：reads 的 haplotype 歸屬不是 ISM 自己判定的，而是來自 LongPhase 做 haplotagging 之後 BAM 檔案裡的 HP tag。[停頓] 但 Paired 和 TO 的 HP tag 格式完全不同。Paired 用的是 LongPhase-s，HP tag 是字串格式，像是 HP:Z:1-1；TO 用的是 LongPhase-TO，HP tag 是整數格式，像是 HP:i:11。\n\n另一個關鍵差異是：TO 的 phasing anchor 不只用 germline variants，還包含 somatic variant 本身——這造成一個潛在的循環依賴，我們待會會深入討論。\n\n最後，我們先前已經嘗試過用 Quality Score 加分表做整合評分，在 Paired 模式拿到 AUC 0.754。\n\n[過渡] 有了這個背景，接下來就是偵探故事的開始——我們拿到了第一批 TO 結果，但發現事情不太對。"
+    },
+    {
+      "type": "text_image",
+      "title": "結果看起來不對 — 追查到 HP 輸入格式問題",
+      "bullets": [
+        "1. 現象：AI 執行 ISM pipeline 無報錯，但檢視結果圖片時發現 TO HP 數據異常 — 大量 reads 缺少 haplotype 歸屬",
+        "2. 診斷：ReadParser.cpp 只處理字串格式（HP:Z:1-1），TO BAM 的整數格式（HP:i:11/21/33）被靜默忽略",
+        "3. 修正：HP:i:11→\"1-1\", HP:i:21→\"2-1\", HP:i:33→\"3\"",
+        "4. 驗證：修正後 TO Tier A/A+ 從 ~50% 升至 ~88%（接近 Paired ~90%），7 樣本全量重跑"
+      ],
+      "image": "O07_fig06_to_tier_distribution_post_fix.png",
+      "notes": "接下來是第一個轉折。[語氣轉為敘事] 我們讓 AI 自動執行整個 ISM pipeline，程式跑完了，沒有任何錯誤訊息。但當我們打開結果圖片來看的時候，發現 TO 的 HP 數據明顯不對——大量 reads 缺少 haplotype 歸屬。\n\n[停頓] 追查之後發現，ISM 的 ReadParser 只處理字串格式的 HP tag，也就是 Paired 用的 HP:Z。TO 的整數格式 HP:i 被靜默忽略了，完全沒有報錯。\n\n修正之後效果很明顯：TO 的 Tier A 加 A+ 比例從大約百分之五十升到百分之八十八，接近 Paired 的百分之九十。修正前的 TO 數據全部作廢，七個樣本全量重跑。\n\n[重點強調] 這個 bug 的教訓是——程式不報錯不代表結果是對的。是看圖片的時候才發現的。\n\n[過渡] 修正之後我們拿到了乾淨的數據，但真正的異常才剛剛開始浮現。"
+    },
+    {
+      "type": "text_image",
+      "title": "Paired 和 TO 的 LOH 含義完全相反 — 7/7 樣本一致",
+      "bullets": [
+        "Paired LOH Enrichment = 1.194x → FP 更多 LOH-like（隨機波動產生假 LOH）",
+        "TO LOH Enrichment = 0.805x → TP 更多 LOH-like（self-phasing HP 偏移）",
+        "7/7 樣本全部一致：Paired FP-enriched (1.02-3.18x)，TO TP-enriched (0.852-0.956x)",
+        "COLO829 低深度（~30x）→ enrichment ≈ 1，但方向仍為 TP-enriched"
+      ],
+      "image": "O03_fig04_loh_enrichment_heatmap.png",
+      "alert": "直接後果：QS 的 LOH penalty 假設「LOH = FP」→ TO 下此假設不成立 → QS 失效",
+      "notes": "[語氣提升] 這一頁是整個調查的起點。當我們用修正後的數據計算 LOH enrichment——也就是 FP 的 LOH 比例除以 TP 的 LOH 比例——我們發現了一個令人意外的結果。\n\n在 Paired 模式下，enrichment 是 1.194 倍，意思是 FP 比 TP 更容易被判為 LOH-like。這符合直覺，因為 FP 的 haplotype 支持度低，隨機波動容易產生假的 LOH 信號。\n\n[停頓] 但在 TO 模式下，enrichment 是 0.805 倍——方向完全翻轉了。這代表 TP 反而比 FP 更容易被判為 LOH-like。[重點強調] 而且這不是某個樣本的特例，七個樣本全部一致。\n\n這直接導致一個嚴重的後果：我們的 Quality Score 裡有一個 LOH penalty，假設「LOH 代表可疑」。在 TO 下，這個懲罰反而在懲罰 TP。\n\n[過渡] 方向翻轉聽起來嚇人，但到底有多嚴重？讓我們用同位點配對分析來量化。"
+    },
+    {
+      "type": "text_image_wide",
+      "title": "同一基因組位點，TO 單獨判 LOH 是 Paired 的 16-52 倍",
+      "table": [
+        ["類別", "數量", "比例"],
+        ["共識：非 LOH", "157,774", "55.0%"],
+        ["共識：LOH", "81,738", "30.6%"],
+        ["TO-only LOH", "39,724", "13.8%"],
+        ["Paired-only LOH", "1,856", "0.6%"]
+      ],
+      "col_widths": [2, 1, 1],
+      "key_numbers": [
+        {"label": "一致率", "value": "85.5%"},
+        {"label": "不一致中 TO 單獨判 LOH", "value": "95.5%"},
+        {"label": "Per-sample TO excess ratio", "value": "16-52x"}
+      ],
+      "image": "concordance_summary_5panel.png",
+      "image_y": 3.5,
+      "image_h": 3.2,
+      "footnote": "(A) 全域 2×2 concordance matrix；(B) per-sample 四分類比例；(C) TO excess ratio；(D) LOH rate 翻轉；(E) 7 樣本 Enrichment 全部一致",
+      "notes": "我們有二十八萬八千多個同時存在於 Paired 和 TO 的 TP 位點。用這些同位點配對來看 LOH 判定的一致性。\n\n結果分成四類：百分之五十五雙方都說不是 LOH，百分之三十點六雙方都說是 LOH——這兩類是共識，加起來一致率百分之八十五點五。\n\n[停頓] 重點在不一致的部分。四萬一千多個不一致位點中，[重點強調] 百分之九十五點五是 TO 單獨判為 LOH，而 Paired 認為不是。反過來，Paired 單獨判 LOH 的只有百分之零點六。\n\n看子圖 C，每個樣本的 TO excess ratio 在 16 到 52 倍之間。這不是小數目——三萬九千多個位點在 Paired 看起來完全正常，但 TO 把它們判成了 LOH。\n\n[過渡] 那現在問題來了：這三萬九千多個 TO-only LOH 是怎麼回事？是因為 reads 太少，還是有更深層的原因？"
+    },
+    {
+      "type": "text_image",
+      "title": "9 項系統性觀察 → TO 模式全面 Negative（AUC < 0.58）",
+      "bullets": [
+        "9 項觀察（O1-O8 + O10）+ 4 項假說驗證，產出 82 張圖表",
+        "TO 全面 Negative：全部 AUC < 0.58，5/9 甲基化特徵方向反轉",
+        "QS 完全失效：Paired AUC = 0.754 → TO AUC = 0.497（等於隨機）",
+        "LOH penalty 觸發率：TO TP 44.5% vs FP 35.8% → 反向懲罰 TP",
+        "GQ: Paired 0.811 (TO 無) | AF: 0.665→0.418⚠ | QS: 0.754→0.497⚠"
+      ],
+      "image": "O02_fig02_qs_component_waterfall_to.png",
+      "notes": "問題不只是 LOH。我們做了九項系統性觀察加上四項假說驗證，總共產出八十二張圖表。結論是——TO 模式下所有特徵的 AUC 都低於 0.58，接近隨機。\n\n看這張表：Paired 的 GQ 有 0.811，是最強的特徵，但 TO 根本沒有 GQ。AF 在 Paired 是 0.665，到了 TO 變成 0.418，方向翻轉了。最嚴重的是 QS 綜合評分：Paired 0.754，[重點強調] TO 只有 0.497，比丟銅板還不如。\n\n看右邊的 waterfall 圖，TO 的 QS 各組件貢獻幾乎都是反向的。特別是 LOH penalty 的觸發率——TO 的 TP 觸發百分之四十四點五，FP 只有百分之三十五點八，等於在懲罰好的位點。\n\n[過渡] 我們開始懷疑 TO 有系統性偏差。但第一個要排除的假說是：會不會只是 reads 太少造成的？"
+    },
+    {
+      "type": "key_numbers",
+      "title": "✓ 排除 — TO-only LOH 的讀取深度反而更高",
+      "numbers": [
+        {
+          "label": "TO-only LOH effective_hp_reads 中位數",
+          "value": "68",
+          "detail": "高於 both_LOH 的 60，Cohen's d = +0.29（反向）",
+          "color": "#00d4ff"
+        },
+        {
+          "label": "同位點 Paired HP_Ratio 中位數",
+          "value": "0.509（完全平衡）",
+          "detail": "TO HP_Ratio 中位數 = 0.026（極端 LOH）",
+          "color": "#4ecdc4"
+        },
+        {
+          "label": "HP_Ratio Cohen's d",
+          "value": "-1.20（巨大效應量）",
+          "detail": "86.5% 的 TO-only LOH 在 Paired 下 HP_Ratio 0.2-0.8（完全平衡）",
+          "color": "#ff6b6b"
+        }
+      ],
+      "image": "concordance_quadrant_depth.png",
+      "bottom_text": "如果是 depth 不足造成 → TO-only LOH 的 reads 應低於 both_LOH → 不成立。問題在 reads 被分配到哪邊，不是數量不夠。",
+      "notes": "第一個要排除的假說：TO-only LOH 是不是因為 reads 太少，HP ratio 因為隨機波動跑到極端值？\n\n[停頓] 答案是否定的。TO-only LOH 的 effective HP reads 中位數是 68，反而高於雙方都判 LOH 的 60。看右邊的箱型圖，橘色（TO-only）和綠色（both LOH）的讀取深度相當，甚至更高。\n\n[重點強調] 決定性的證據是同位點比較：同一個基因組位置，Paired 看到的 HP ratio 中位數是 0.509——幾乎完全平衡；但 TO 看到的是 0.026——極端的 LOH。Cohen's d 是負 1.20，這是巨大的效應量。\n\n更具體地說，百分之八十六點五的 TO-only LOH 位點，在 Paired 模式下 HP ratio 都在 0.2 到 0.8 之間，完全平衡。Reads 的數量夠，問題在於 reads 被分配到哪邊。\n\n[過渡] 如果不是 depth 的問題，那讓我們直接看 HP ratio 的分佈——一張散點圖就能看出答案。"
+    },
+    {
+      "type": "two_image",
+      "title": "同一基因組位點，Paired 看到平衡，TO 被推到極端",
+      "images": [
+        "concordance_hp_ratio_scatter.png",
+        "concordance_depth_vs_hpratio.png"
+      ],
+      "captions": [
+        "HP Ratio: Paired (X) vs TO (Y) — 橘色水平帶 = self-phasing 證據",
+        "Read Depth vs HP Ratio — 高 depth 區域 TO 仍被推到極端"
+      ],
+      "image_h": 4.2,
+      "bullets": [
+        "綠=both LOH（四角） | 藍=neither（中央） | 橘=TO-only LOH（水平帶 → self-phasing 最直觀證據）"
+      ],
+      "notes": "[語氣強調] 這張圖是整個調查裡最有說服力的一張。X 軸是 Paired 的 HP ratio，Y 軸是 TO 的 HP ratio。每個點是一個同位點配對。\n\n先看顏色。綠色是雙方都判 LOH，集中在四個角落——雙方一致認為不平衡。藍色是雙方都不判 LOH，聚集在中央——雙方一致認為平衡。\n\n[停頓] 現在看橘色——TO-only LOH。它們形成兩條水平帶。[重點強調] X 軸在 0.3 到 0.7，表示 Paired 看到的是平衡的；但 Y 軸在小於 0.1 或大於 0.9，表示 TO 把它們推到了極端值。同一批 reads，同一個基因組位置，因為 phasing 方式不同，haplotype 的分配完全不一樣。\n\n右邊的 hexbin 圖進一步確認：即使在 depth 超過一百的區域，TO 的 HP ratio 仍然被推到極端。這徹底排除了低深度假說。\n\n[過渡] 散點圖是視覺化證據，接下來我們從 copy number 的角度做補充驗證。"
+    },
+    {
+      "type": "two_image",
+      "title": "LOH ≈ 0.73x Read Depth，60% Copy-Neutral — 不是 Allelic Deletion",
+      "images": [
+        "loh_read_depth_ratio_per_sample.png",
+        "cn_loh_composition_per_sample.png"
+      ],
+      "captions": [
+        "Per-Sample LOH Read Depth Ratio（紅線 0.5=copy-loss, 1.0=neutral）",
+        "CN LOH Composition Per Sample（灰=neutral 60%, 紅=loss, 藍=gain）"
+      ],
+      "image_h": 4.0,
+      "bullets": [
+        "LOH 區域 read depth ≈ non-LOH 的 0.73x（非理論 0.5x）",
+        "60% copy-neutral → UPD 或 phasing artifact | TO copy-gain LOH = Paired 的 2 倍（15.8% vs 8.4%）"
+      ],
+      "notes": "這一頁從 copy number 的角度做補充。如果 LOH 是真正的一個 allele 被刪除——也就是 copy-loss LOH——read depth 應該只有正常的一半，也就是 0.5 倍。但實際上，LOH 區域的 depth 是 non-LOH 的 0.73 倍，遠高於 0.5。\n\n右邊的圖更清楚：大約百分之六十的 LOH 是 copy-neutral，也就是讀取深度正常但 haplotype 不平衡。這可能是 uniparental disomy，也可能是 phasing artifact。只有百分之二十四到三十是真正的 copy-loss。\n\n[停頓] 值得注意的是，TO 的 copy-gain LOH 比例是 Paired 的兩倍——百分之十五點八對百分之八點四——表示 TO 在 copy-gain 區域有額外的系統性偏差。\n\n[過渡] 所有的線索都指向同一個方向。現在讓我們把機制完整拼出來。"
+    },
+    {
+      "type": "text_two_image",
+      "title": "LongPhase-TO 的 Somatic Variant 參與自身 Phasing — 造成循環依賴",
+      "subtitle": "Self-Phasing Circular Dependency 四步機制",
+      "steps": [
+        "TO joint phasing：germline + somatic 共建 phasing graph（PhasingGraph.cpp addEdge() 確認）",
+        "Self-phasing：TP somatic ALT reads 偏向一個 haplotype → HP tagging 繼承偏斜",
+        "Low-read 區域被串入長 block：品質差，不如 Paired phasing",
+        "TP 更容易判 LOH-like：觸發率 44.5% vs 35.8% → Enrichment 0.805（7/7 一致）"
+      ],
+      "images": [
+        "O02_fig03_qs_loh_penalty_trigger_rate.png",
+        "O03_fig01_hp_ratio_distribution_by_sample_mode.png"
+      ],
+      "bottom_text": "量化：39,724 位點中 71.6% TO min(HP)=0（完全單側），同位點 Paired HP1:HP2 = 8:8 | Shapley 分解：TP rate 貢獻 105.6%，FP rate 僅 -5.4%",
+      "notes": "[語氣嚴肅] 現在把機制完整串起來。這是一個四步的邏輯鏈。\n\n第一步：LongPhase-TO 在做 phasing 的時候，把 germline 和 somatic variant 一起丟進 phasing graph。我們從 LongPhase 的原始碼 PhasingGraph.cpp 確認了這件事。\n\n第二步：因為 TP 的 somatic variant 有真實的 ALT allele reads，這些 reads 天然偏向一個 haplotype。[停頓] 也就是說，variant 自己的 reads 在影響自己被歸到哪個 haplotype——這是一個循環依賴。\n\n第三步：在 read 數量少的區域，TO 仍然嘗試把它串接到 phasing block 裡面，但品質遠不如 Paired。\n\n第四步：結果就是 TP 更容易被判成 LOH-like——觸發率百分之四十四點五，比 FP 的百分之三十五點八還高。\n\n[重點強調] 定量上：三萬九千多個 TO-only LOH 位點中，百分之七十一點六在 TO 下某一側 HP 的 read 數是零——完全單側。但同一個位點，Paired 看到的 HP1 比 HP2 是 8 比 8，完美平衡。\n\n[過渡] 在確認機制之前，我們也嘗試過用甲基化特徵來解決這個問題——但全部被否決了。"
+    },
+    {
+      "type": "cards",
+      "title": "O11/O12/O13 + N4 — 四項替代方案全部否決",
+      "subtitle": "問題在 Phasing 不在 Methylation",
+      "cards": [
+        {
+          "title": "O11: Within-group Heterogeneity",
+          "body": "epipolymorphism AUC 0.845 → n_reads 校正後 0.530\n→ read count confound",
+          "marker": "✗",
+          "status_color": "#ff6b6b"
+        },
+        {
+          "title": "O12: LOH 甲基化場景分類",
+          "body": "AlleleDelta = AF confound\n+ L2 collider bias\n全 corrected AUC < 0.58",
+          "marker": "✗",
+          "status_color": "#ff6b6b"
+        },
+        {
+          "title": "O13: 跨區域 Correlation",
+          "body": "shared read count confound\n控制後差異完全消失",
+          "marker": "✗",
+          "status_color": "#ff6b6b"
+        },
+        {
+          "title": "N4: HP0 Filter",
+          "body": "TP loss ≤2% 下\nFP removal = 0%",
+          "marker": "✗",
+          "status_color": "#ff6b6b"
+        }
+      ],
+      "lesson": "驗證架構定義 — L1: 全量統計（PERMANOVA / t-test）| L2: 效應量 AUC 評估 | L3: AF-bin 分層交叉驗證。教訓：任何 L2 有效的特徵必須通過 L3 驗證，表面顯著的特徵可能只是 confound（如 O12 的 L2 collider bias）。",
+      "notes": "在確認機制之前，我們其實花了不少時間試圖用甲基化特徵來解決 TO 的問題。結果四項替代方案全部被否決。\n\nO11 嘗試用 within-group methylation heterogeneity 來區分，表面上 epipolymorphism 的 AUC 有 0.845，看起來很強。但控制 read count 之後掉到 0.530——原來是 read 數量的 confound。\n\nO12 嘗試用 LOH 區域的甲基化場景分類，結果 AlleleDelta 本身就等同於 AF，加上我們發現了 L2 collider bias。[停頓] 什麼是 L2 collider bias？就是當一個近常數的特徵被 residualize on AF 時，殘差變成 AF 的鏡像，產生虛假的判別能力。我們在 O12 撞上了這個問題，校正後全部 AUC 低於 0.58。\n\nO13 嘗試跨區域的甲基化 correlation，看起來 FP 比 TP 的 correlation 高，但控制 shared read count 之後差異完全消失。\n\n[停頓] 還有 N4 — HP0 filter，在容許 TP loss 百分之二以下的條件，FP removal 是零。\n\n結論很明確：問題在 phasing 層面，不在 methylation。\n\n[過渡] 既然原因確認了，我們已經做了第一步修正。"
+    },
+    {
+      "type": "table_text",
+      "title": "第一步修正 — 消除 TO LOH Penalty 的反效果",
+      "table": [
+        ["QS 組件", "Paired", "TO（修改後）", "理由"],
+        ["LOH penalty", "-25", "0", "方向反轉，懲罰 TP"],
+        ["Verify bonus", "+15", "0", "依賴 LOH 判定"],
+        ["其他", "不變", "不變", "方向一致"]
+      ],
+      "col_widths": [2, 1, 1.5, 2],
+      "table_h": 1.8,
+      "explanation": [
+        "先前做法：Quality Score 加分表整合多組件 → Paired AUC = 0.754",
+        "TO AUC = 0.497（隨機）→ 修正後 ~0.546（中性）",
+        "意義：消除反效果，不是讓 QS 變有效",
+        "已提交：commit b9eaba7"
+      ],
+      "explanation_y": 3.5,
+      "bottom_text": "注意：0.546 仍接近隨機。此修正意義是「不再傷害」，不是「變好」。TO 需要的是全新的策略，不是修修補補。",
+      "notes": "基於以上所有證據，我們做了第一步修正：在 TO 模式下停用 LOH penalty 和 verify bonus。\n\n原本的做法是用一張 Quality Score 加分表，整合多個組件的懲罰和加分。在 Paired 模式效果不錯，AUC 0.754。但在 TO，LOH penalty 的方向完全反了，所以 TO QS 降到 0.497——比隨機還差。\n\n停用之後，TO QS 理論上回到 0.546 左右。[停頓] 但我要強調，這個修正的意義是「不再傷害」，而不是「變好」。0.546 還是接近隨機。TO 需要的是全新的策略，不是修修補補。\n\n[過渡] 那接下來怎麼辦？讓我分享一下修正方向的思考。"
+    },
+    {
+      "type": "numbered_list",
+      "title": "如何改正 TO 的 Phasing 品質 — 分析與修正方向",
+      "items": [
+        {
+          "title": "Phasing Anchor 策略",
+          "desc": "排除或降權 somatic variant 在 LongPhase-TO phasing graph 中的角色"
+        },
+        {
+          "title": "Phasing Block 品質過濾",
+          "desc": "TO 在低 read 區域串出的長 block 品質差 → 加 block quality threshold"
+        },
+        {
+          "title": "HP Tagging 後處理",
+          "desc": "在 ISM 層面，根據 phasing block 大小/read support 動態調整 LOH 判定門檻"
+        },
+        {
+          "title": "Paired Phasing 作為 Benchmark",
+          "desc": "288,609 matched loci 數據做 TO phasing quality calibration"
+        }
+      ],
+      "bottom_section": {
+        "title": "已有的改善基礎",
+        "bullets": [
+          "288,609 matched loci → TO phasing quality calibration 數據",
+          "86.5% TO-only LOH 在 Paired 下平衡 → 這些是可校正的 false LOH",
+          "Copy-gain 區域 2x 偏差 → 需要 depth-aware 校正"
+        ]
+      },
+      "notes": "根因在 LongPhase-TO 的 phasing 策略，所以修正方向也要從 phasing 著手。我們列出四個分析方向。\n\n第一，分析能不能把 somatic variant 從 phasing anchor 中排除或降權。第二，TO 在低 read 區域串出的長 phasing block 品質很差，能不能加一個品質門檻。第三，在 ISM 這一層，能不能根據 phasing block 的資訊動態調整 LOH 判定的門檻。第四，利用二十八萬八千個同位點數據，用 Paired phasing 作為 benchmark 來校正 TO。\n\n[停頓] 好消息是，我們已經有很好的基礎。百分之八十六點五的 TO-only LOH 在 Paired 下是平衡的，這代表這些是理論上可以被校正的 false LOH。Copy-gain 區域有額外的偏差，需要結合 depth 資訊做校正。\n\n[過渡] 最後讓我把本週的結論做一個完整的整理。"
+    },
+    {
+      "type": "summary",
+      "title": "本週結論 — Paired/TO 是根本不同的問題空間",
+      "table": [
+        ["維度", "Paired", "TO"],
+        ["FP rate", "1%", "31%"],
+        ["LOH enrichment", "1.194x (FP)", "0.805x (TP)"],
+        ["特徵方向反轉", "—", "5/9 反轉"],
+        ["QS AUC", "0.754", "0.497 (隨機)"],
+        ["TO-only LOH excess", "—", "16-52x"],
+        ["HP_Ratio Cohen's d", "—", "-1.20"]
+      ],
+      "col_widths": [2, 1.2, 1.5],
+      "conclusions": [
+        {"icon": "✅", "text": "Paired/TO 分離建模不是選項，是必要條件", "color": "#4ecdc4", "bold": true},
+        {"icon": "✅", "text": "TO LOH 偏差源自 self-phasing circular dependency，非 read depth 或 copy number", "color": "#4ecdc4"},
+        {"icon": "✅", "text": "60% LOH 是 copy-neutral → 部分可能是 phasing artifact", "color": "#00d4ff"},
+        {"icon": "⚠️", "text": "甲基化特徵無法解決 TO 問題（O11-O13 全否決）→ 問題在 phasing 層", "color": "#ff6b6b"},
+        {"icon": "📋", "text": "下一步：TO phasing 程式碼分析與修正方案設計", "color": "#E0E0E0"}
+      ],
+      "limitations": "所有結論基於 7 個高 purity 細胞系（purity ≈ 100%），臨床低 purity 需額外驗證。LOH-like 閾值 (0.1/0.9) 為操作定義，需 sensitivity analysis。Truth set 來自 SEQC2 consortium，本身可能有 caller-specific bias，需留意驗證結論的 generalizability。",
+      "notes": "[語氣總結] 最後做一個完整的整理。這張表列出 Paired 和 TO 在六個維度的對比——每一項都指向同一個結論：這兩個模式是根本不同的問題空間。\n\n五個層次的結論。第一，[重點強調] Paired 和 TO 分離建模不是選項，是必要條件。第二，TO LOH 偏差的根因是 self-phasing circular dependency——LongPhase-TO 讓 somatic variant 參與自己的 phasing，而不是 read depth 或 copy number 的問題。第三，百分之六十的 LOH 是 copy-neutral，其中一部分可能是 phasing artifact，這對 Paired 模式也值得關注。\n\n[停頓] 第四，甲基化特徵無法解決 TO 的問題——O11、O12、O13 三項假說全部被否決。問題在 phasing 層面。第五，下一步是分析 TO 的 phasing 程式碼，設計修正方案。\n\n底下列了兩個 limitations：所有結論基於七個高 purity 細胞系，臨床低 purity 需要額外驗證；LOH 的閾值 0.1 和 0.9 是操作定義，需要做 sensitivity analysis。\n\n[過渡] 最後一頁，下週的行動計畫和想跟大家討論的問題。"
+    },
+    {
+      "type": "two_column",
+      "title": "討論與下週方向",
+      "left_title": "下週行動計畫",
+      "left_table": [
+        ["優先級", "行動", "依據"],
+        ["P0", "TO phasing block 品質分析", "根因在 phasing"],
+        ["P0", "Paired/TO 分離策略框架", "方向完全相反"],
+        ["P1", "Paired ML 特徵集 (GQ+AF+LOH)", "GQ AUC=0.811"],
+        ["P2", "TO phasing anchor 修正方案", "排除 somatic variant"]
+      ],
+      "left_col_widths": [0.8, 2.5, 1.5],
+      "right_title": "開放討論問題",
+      "right_items": [
+        "LongPhase-TO 排除 somatic variant 後，phasing 品質是否足夠？",
+        "TO 獨立 QS 框架應以什麼為 anchor？",
+        "Paired phasing 可以做 TO 的 calibration reference 嗎？"
+      ],
+      "footer_text": "謝謝！歡迎提問。",
+      "notes": "下週的行動按優先級排。P0 有兩件：第一是分析 TO 的 phasing block 品質，比較 block 長度和 haplotag 一致性，因為根因在 phasing。第二是開始設計 Paired 和 TO 的分離策略框架，因為方向完全相反，不能用同一套規則。\n\nP1 是 Paired 的 ML 特徵集，GQ 的 AUC 有 0.811 是最強特徵，加上 AF 和 LOH subtype 應該能建出不錯的 Paired 模型。P2 是評估能否從 LongPhase-TO 排除 somatic variant 做 phasing anchor，這需要深入分析原始碼。\n\n最後三個問題想跟大家討論。第一，排除 somatic variant 之後 TO 的 phasing 品質還夠不夠？第二，TO 獨立的評分框架應該以什麼為基準？第三，Paired 的 phasing 結果能不能作為 TO 的校正參考？\n\n[語氣斷言] 本週最重要的結論：Paired 和 TO 是根本不同的問題空間。Self-phasing circular dependency 是已確認的機制，不是假說。下週我們會從根源——phasing 演算法層——著手修正。以上是本週報告，謝謝，歡迎提問。"
+    }
+  ]
+}

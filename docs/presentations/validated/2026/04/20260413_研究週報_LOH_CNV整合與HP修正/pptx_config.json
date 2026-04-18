@@ -1,0 +1,605 @@
+{
+  "meta": {
+    "kicker": "InterSubMod 研究週報",
+    "kicker_en": "InterSubMod Weekly Report",
+    "deck_title": "LOH×CNV 整合觀察與 HP Tag 修正",
+    "deck_title_en": "LOH×CNV Integration & HP Tag Correction",
+    "deck_subtitle": "2026-04-07 至 2026-04-13",
+    "deck_subtitle_en": "2026-04-07 to 2026-04-13",
+    "reporter": "廖子游",
+    "cover_image": "",
+    "summary_line": "5 路線關閉 × 3 正面成果 × Dual-BAM 全基因體驗證通過 × V5 接近 Paired",
+    "summary_line_en": "5 paths closed × 3 positive results × Dual-BAM WGS validated × V5 approaching Paired quality",
+    "generated_date": "2026-04-13",
+    "audience_mode": "研究內部混合版",
+    "author": "廖子游",
+    "source_report": "",
+    "output_pptx": "/big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260413_研究週報_LOH_CNV整合與HP修正/20260413_研究週報v5.pptx",
+    "assets_dir": "/big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260413_研究週報_LOH_CNV整合與HP修正/images",
+    "footer": "InterSubMod Weekly Report 2026-04-13 v5 | LOH×CNV Integration & HP Tag Correction",
+    "guide_bullets": [
+      "🔬 LOH×CNV 雙面觀察：TP 富集 + FP 熱點 → 分割參數必要",
+      "🔧 V5 HP Tag 修正：AMB% 8.0%, concordance 85.4%≈germline",
+      "📊 7 統計方法確認甲基化特徵空間耗盡",
+      "🧬 Phase 2 Dual-BAM 全基因體驗證通過 + 4-group subclone"
+    ],
+    "guide_bullets_en": [
+      "🔬 LOH×CNV dual observation: TP enrichment + FP hotspot → stratification necessary",
+      "🔧 V5 HP Tag fix: AMB% 8.0%, concordance 85.4%≈germline",
+      "📊 7 statistical methods confirm methylation feature exhaustion",
+      "🧬 Phase 2 Dual-BAM WGS validated + 4-group subclone discovery"
+    ]
+  },
+  "theme": {
+    "dark": "1E2A44",
+    "bg": "F7F3EC",
+    "bg_alt": "EEE6DB",
+    "accent": "A85540",
+    "accent2": "6E9D8A",
+    "text": "17202A",
+    "muted": "5E6572",
+    "light_text": "F8F4EE",
+    "light_muted": "D6DCE5",
+    "line": "D6CCBF",
+    "font_title": "Arial Bold",
+    "font_body": "Arial",
+    "en_color": "5E6572",
+    "en_font_ratio": 0.7
+  },
+  "deck": {
+    "layout_version": "v5",
+    "key_findings_title": "本週重點",
+    "key_findings_title_en": "This Week's Key Findings",
+    "key_findings_subtitle": "5 關閉 × 3 正面 × 2 診斷 收斂",
+    "key_findings_subtitle_en": "5 closed × 3 positive × 2 diagnostics converged",
+    "key_findings": [
+      {
+        "title": "🔬 LOH×CNV 整合觀察",
+        "body": "TP 富集（LOH FP=0.239）+\nFP 熱點（CN=3 rate 12.9%）\n→ 分割參數必要",
+        "accent": "0072B2",
+        "title_en": "🔬 LOH×CNV Integration",
+        "body_en": "TP enrichment + FP hotspot\n→ stratification parameters necessary"
+      },
+      {
+        "title": "🔧 V5 接近 Paired",
+        "body": "Self-Phasing 修正 + somatic fallback\nconcordance 85.4% ≈ germline 84.8%\nAMB% 17.5→8.0%",
+        "accent": "009E73",
+        "title_en": "🔧 V5 Approaching Paired",
+        "body_en": "Self-phasing fix + somatic fallback\nconcordance 85.4% ≈ germline 84.8%"
+      },
+      {
+        "title": "📊 甲基化特徵耗盡確認",
+        "body": "7 統計方法 × 748K regions\npure methylation 全 ≤ 0.58\n文獻 L1/L2/L4 全 NEGATIVE",
+        "accent": "D55E00",
+        "title_en": "📊 Methylation Feature Exhaustion",
+        "body_en": "7 methods × 748K regions\npure methylation all ≤0.58"
+      },
+      {
+        "title": "🧬 Phase 2 Dual-BAM 驗證",
+        "body": "ASM 97.3% sig | Normal 100%\nLOH 98.4% | 4-group subclone\nHCC1395 全基因體通過",
+        "accent": "6E9D8A",
+        "title_en": "🧬 Phase 2 Dual-BAM Validated",
+        "body_en": "ASM 97.3% sig | Normal 100%\nLOH 98.4% | 4-group subclone"
+      }
+    ],
+
+    "section_dividers": [
+      {
+        "section_num": "A",
+        "title": "LOH × CNV 交叉觀察",
+        "title_en": "LOH × CNV Cross-Stratification",
+        "subtitle": "從 LOH 單維度到 LOH+CNV 雙維度",
+        "subtitle_en": "From LOH alone to LOH+CNV dual-dimension analysis"
+      },
+      {
+        "section_num": "B",
+        "title": "HP Tag 可靠性：修正與驗證",
+        "title_en": "HP Tag Reliability: Fix & Validation",
+        "subtitle": "ISM 的信號來源是否受到上游汙染？",
+        "subtitle_en": "Is ISM's signal source contaminated upstream?"
+      },
+      {
+        "section_num": "C",
+        "title": "ISM 甲基化特徵最終驗證",
+        "title_en": "ISM Methylation Feature Final Verification",
+        "subtitle": "除了 AUC，還有其他方法能找到信號嗎？",
+        "subtitle_en": "Beyond AUC, can any other method find a signal?"
+      },
+      {
+        "section_num": "D",
+        "title": "Phase 2：Dual-BAM 架構驗證",
+        "title_en": "Phase 2: Dual-BAM Architecture Validation",
+        "subtitle": "Tumor + Normal 聯合分析的首次驗證",
+        "subtitle_en": "First validation of Tumor + Normal joint analysis"
+      }
+    ],
+
+    "investigation_pipeline": {
+      "title": "上週推論地圖",
+      "title_en": "Last Week's Reasoning Map",
+      "subtitle": "七步推論鏈：信任建立 → 全面驗證 → 收斂轉向",
+      "subtitle_en": "7-step chain: trust → validation → pivot",
+      "steps": [
+        {"label": "LOH 定義\n可信嗎？", "color": "009E73", "detail": "✅ J=0.928"},
+        {"label": "ISM 在 LOH\n內如何？", "color": "D55E00", "detail": "❌ AUC≈0.50"},
+        {"label": "Filter\n可行嗎？", "color": "D55E00", "detail": "❌ 10/10 FAIL"},
+        {"label": "Non-LOH\n有解嗎？", "color": "D55E00", "detail": "❌ AUC<0.58"},
+        {"label": "特徵設計\n問題？", "color": "E69F00", "detail": "❌ HP-free=0.51"},
+        {"label": "獨立建模\n確認？", "color": "D55E00", "detail": "❌ ISM<+0.03"},
+        {"label": "根因\n+轉向", "color": "009E73", "detail": "💡 Characterize"}
+      ],
+      "concept_blocks": [
+        {
+          "title": "LOH 定義可信嗎？",
+          "title_en": "Is LOH Definition Reliable?",
+          "color": "0072B2",
+          "items": ["✅ SEQC2 J=0.928", "✅ 四象限驗證", "✅ HP ⊃ LOH.bed"],
+          "slide_range": "Slide 4-9"
+        },
+        {
+          "title": "ISM 區分力測試",
+          "title_en": "ISM Discriminability Test",
+          "color": "D55E00",
+          "items": ["❌ Filter 10/10 FAIL", "❌ 甲基化 NEGATIVE", "❌ TO 60+ NO-GO"],
+          "slide_range": "Slide 10-16"
+        },
+        {
+          "title": "結論與轉向",
+          "title_en": "Conclusions & Pivot",
+          "color": "009E73",
+          "items": ["📊 caller_af 唯一有效", "💡 ASM 亮點", "→ Phase 2A"],
+          "slide_range": "Slide 17-23"
+        }
+      ],
+      "transitions": [
+        "定義確認後進入測試",
+        "結果收斂後進入確認"
+      ]
+    },
+
+    "recap_seqc2_quadrant": {
+      "title": "SEQC2 驗證 + 四象限分佈",
+      "title_en": "SEQC2 Validation + Quadrant Distribution",
+      "subtitle": "LOH.bed 金標準認證 + 四象限建立分層基礎",
+      "subtitle_en": "LOH.bed gold-standard certified + quadrant establishes stratification basis",
+      "figure": "images/seqc2_loh_ideogram.png",
+      "left_items": [
+        "SEQC2 Jaccard=0.928, Sens=0.961, Prec=0.964",
+        "方法學完全獨立（WGS+SNP array vs ONT long-read）",
+        "HCC1395 5kHz + Dorado 雙驗證"
+      ],
+      "left_items_en": [
+        "SEQC2 Jaccard=0.928, Sens=0.961, Prec=0.964",
+        "Methods fully independent",
+        "HCC1395 5kHz + Dorado dual-validated"
+      ],
+      "right_items": [
+        "Q1 Both LOH: 26.7% — 兩者一致",
+        "Q2 HP-only: 15.2% — phasing 偏差非弱 LOH",
+        "Q3 LOH.bed-only: 0.07% — 近乎為零",
+        "Q4 Neither: 58.1% — 正常二倍體"
+      ],
+      "right_items_en": [
+        "Q1 Both: 26.7%", "Q2 HP-only: 15.2%", "Q3 Bed-only: 0.07%", "Q4 Neither: 58.1%"
+      ],
+      "conclusion": "LOH.bed 是可靠的分層基礎",
+      "conclusion_en": "LOH.bed is a reliable stratification basis"
+    },
+
+    "recap_loh_filter": {
+      "title": "LOH 影響與 Filter 策略",
+      "title_en": "LOH Impact & Filter Strategies",
+      "subtitle": "LOH 內甲基化失效 + 10/10 Filter 全 FAIL",
+      "subtitle_en": "Methylation invalid in LOH + all 10 filter strategies FAIL",
+      "left_title": "LOH 內甲基化",
+      "left_items": [
+        "PERMANOVA valid rate 僅 5-6%",
+        "94% 位點 min(HP) < 3",
+        "7/7 樣本 AUC ≈ 0.50（隨機）",
+        "已修正: QS mode-aware 停用 LOH penalty"
+      ],
+      "right_title": "Filter FAIL",
+      "right_items": [
+        "LOH FP rate = 0.239",
+        "Non-LOH FP rate = 0.338",
+        "→ LOH 區域反而是 TP 富集區",
+        "10/10 策略 TP loss > 2% 安全線"
+      ],
+      "figure": "images/filter_strategy_barchart.png"
+    },
+
+    "recap_nonloh_caller": {
+      "title": "Non-LOH 與 Caller 特徵",
+      "title_en": "Non-LOH & Caller Features",
+      "subtitle": "Non-LOH AUC<0.58 | caller_af=0.654 唯一超過門檻",
+      "subtitle_en": "Non-LOH AUC<0.58 | caller_af=0.654 only above threshold",
+      "items": [
+        {"label": "Non-LOH 最高 AUC", "value": "< 0.58", "color": "D55E00"},
+        {"label": "多特徵 Voting AUC", "value": "0.577", "color": "D55E00"},
+        {"label": "cnLOH", "value": "0.587 (Simpson's Paradox)", "color": "E69F00"},
+        {"label": "caller_af AUC", "value": "0.654 ← 唯一有效", "color": "009E73"},
+        {"label": "ISM 增量", "value": "+0.003~+0.030", "color": "808080"}
+      ]
+    },
+
+    "recap_bridge": {
+      "title": "上週結論與本週問題",
+      "title_en": "Last Week's Conclusions → This Week's Questions",
+      "subtitle": "三個確定性結論帶出三個延伸問題",
+      "subtitle_en": "Three definitive conclusions raise three extension questions",
+      "conclusions": [
+        "✅ LOH.bed 可信（J=0.928）但不能 filter（TP 富集）",
+        "✅ Non-LOH 也無突破（AUC<0.58）",
+        "✅ ISM 對 TO FP 過濾無效 → 轉向 characterization"
+      ],
+      "questions": [
+        "Q1: LOH + CNV 一起看會怎樣？",
+        "Q2: HP Tag 本身可靠嗎？",
+        "Q3: 特徵真的全部耗盡？"
+      ],
+      "questions_en": [
+        "Q1: What if LOH + CNV analyzed together?",
+        "Q2: Are HP Tags themselves reliable?",
+        "Q3: Are features truly exhausted?"
+      ]
+    },
+
+    "competitor_paper": {
+      "title": "競爭者佐證: TumorLens",
+      "title_en": "Competitor Validation: TumorLens",
+      "subtitle": "第一個統一 long-read 分析框架佐證我們的方向",
+      "subtitle_en": "First unified long-read framework validates our direction",
+      "paper_title": "TumorLens (medrxiv 2026.03)",
+      "features": [
+        "單一 assay 同時偵測: SNVs + CNVs + LOH + CpG methylation",
+        "使用 Tumor + Normal paired 模式",
+        "Purity-aware CNV/LOH modeling",
+        "整合 LOH、CNV、甲基化三種資訊做聯合判斷"
+      ],
+      "features_en": [
+        "Single assay: SNVs + CNVs + LOH + CpG methylation",
+        "Tumor + Normal paired mode",
+        "Purity-aware CNV/LOH modeling",
+        "Joint LOH + CNV + methylation analysis"
+      ],
+      "implication": "LOH+CNV+甲基化整合是領域發展方向，非我們獨行\nPhase 2 Dual-BAM 架構與此高度一致",
+      "implication_en": "LOH+CNV+methylation integration is the field's direction\nPhase 2 Dual-BAM architecture aligns"
+    },
+
+    "loh_cnv_dual": {
+      "title": "雙面觀察: TP 富集與 FP 熱點",
+      "title_en": "Dual Observation: TP Enrichment & FP Hotspot",
+      "subtitle": "LOH-only TP rate=96.1% | Gain+LOH FP rate=10.2%",
+      "subtitle_en": "LOH-only TP=96.1% | Gain+LOH FP=10.2%",
+      "figure": "images/07_fp_rate_summary.png",
+      "obs_left": {
+        "title": "觀察一: LOH-only TP 富集",
+        "items": [
+          "LOH-only TP rate = 96.1%（最高）",
+          "LOH FP rate = 0.239 vs Non-LOH 0.338",
+          "生物學: 腫瘤抑制基因失活機制"
+        ]
+      },
+      "obs_right": {
+        "title": "觀察二: Gain+LOH FP 熱點",
+        "items": [
+          "Gain+LOH FP rate = 10.2%（最高）",
+          "CN=3 FP rate 達 12.9%",
+          "根因: allele imbalance 誤導 caller"
+        ]
+      },
+      "conclusion": "LOH+CNV 分割判斷/加入參數 = 必要",
+      "conclusion_en": "LOH+CNV stratification/parameters = necessary"
+    },
+
+    "cn_rootcause": {
+      "title": "CN=3 根因與跨樣本驗證",
+      "title_en": "CN=3 Root Cause & Cross-Sample Validation",
+      "subtitle": "CN=3 FP 12.9% 最高 | 跨 7 樣本 mean AUC ≤ 0.641",
+      "subtitle_en": "CN=3 FP 12.9% highest | cross-7-sample mean AUC ≤ 0.641",
+      "figure_left": "images/13_gain_loh_cn_stratification.png",
+      "figure_right": "images/08_cross_sample_cn_zone_fp.png",
+      "items": [
+        "CN=3 FP rate = 12.9%（所有 CN 值最高）",
+        "FP rate 隨 CN 增加反而下降",
+        "根因: CN=3+LOH → allele imbalance 誤導 caller",
+        "HCC1395 AUC=0.782 但跨樣本 ≤ 0.641",
+        "Coverage_Multiple vs 真實 CN: r=0.831"
+      ],
+      "items_en": [
+        "CN=3 FP=12.9% (highest)",
+        "FP decreases with higher CN",
+        "Root cause: CN=3+LOH allele imbalance",
+        "HCC1395 AUC=0.782 but cross-sample ≤0.641",
+        "Coverage_Multiple r=0.831 validated"
+      ]
+    },
+
+    "cnv_conclusion": {
+      "title": "CNV Zone 結論",
+      "title_en": "CNV Zone Conclusion",
+      "subtitle": "Zone filter 關閉 | LOH+CNV 作為分析參數必要",
+      "subtitle_en": "Zone filter closed | LOH+CNV as analysis parameters necessary",
+      "verdicts": [
+        {"icon": "❌", "text": "Zone-aware filter 不可行 — 排除 CN_Loss: 移除 45% FP 但損失 11% TP", "color": "D55E00"},
+        {"icon": "❌", "text": "Simpson's Paradox 排除 — CNV 非 QS pooling 根源", "color": "D55E00"},
+        {"icon": "✅", "text": "揭示 FP 分佈生物學根因 — 不同 zone TP/FP 比例截然不同", "color": "009E73"},
+        {"icon": "→", "text": "LOH+CNV 作為分析參數（非 filter）= Phase 2 設計核心", "color": "0072B2"}
+      ]
+    },
+
+    "self_phasing": {
+      "title": "Self-Phasing 問題",
+      "title_en": "Self-Phasing Circular Dependency",
+      "subtitle": "Somatic variant 同時是 phasing anchor + 被評估對象",
+      "subtitle_en": "Somatic variant as both phasing anchor and evaluation target",
+      "steps": [
+        {"label": "Somatic 加入\nphasing", "color": "D55E00", "detail": "circular"},
+        {"label": "ALT 偏向\n一個 HP", "color": "D55E00", "detail": "17.3:1"},
+        {"label": "62% LOH\n是 artifact", "color": "D55E00", "detail": "AF 0.1-0.8"},
+        {"label": "跨模式\nr ≈ 0", "color": "E69F00", "detail": "完全不相關"},
+        {"label": "31.2% TO\nLOH artifact", "color": "D55E00", "detail": "Phase blocks 67.6% 汙染"}
+      ],
+      "figure_left": "images/s0_2_hp_imbalance_to_vs_paired.png",
+      "figure_right": "images/s0_5_loh_disappearance_by_af.png"
+    },
+
+    "pon_only_fix": {
+      "title": "PON-only Phasing 修正",
+      "title_en": "PON-only Phasing Fix",
+      "subtitle": "僅用 germline 位點作 phasing → bias 消除 + N50 翻倍",
+      "subtitle_en": "Using only germline sites for phasing → bias eliminated + N50 doubled",
+      "figure": "images/s2_1_phase_block_size_comparison.png",
+      "metrics": [
+        {"label": "HP bias", "before": "17.3:1", "after": "消除", "color": "009E73"},
+        {"label": "Phase block N50", "before": "—", "after": "+99.7%（翻倍）", "color": "009E73"},
+        {"label": "Phased rate", "before": "—", "after": "+23.6 pp", "color": "009E73"},
+        {"label": "LOH.bed", "before": "—", "after": "不變（使用 VCF AF）", "color": "0072B2"}
+      ],
+      "note": "LOH.bed 使用 VCF AF (PhasingGraph.cpp:1817)\nISM hp_ratio 使用 BAM HP tags (ReadParser.cpp:123)\n兩套獨立系統 → Jaccard=1.0 與 62% ISM LOH 消失不矛盾",
+      "note_en": "LOH.bed uses VCF AF | ISM hp_ratio uses BAM HP tags\nTwo independent systems → no contradiction"
+    },
+
+    "v5_evolution": {
+      "title": "getVote() 版本演進",
+      "title_en": "getVote() Version Evolution",
+      "subtitle": "Baseline → V5：從 circular dependency 到方法學合理",
+      "subtitle_en": "Baseline → V5: from circular dependency to methodologically sound",
+      "versions": [
+        {"name": "Baseline", "fix": "Self-phasing (circular)", "f1": "0.7157", "amb": "N/A", "status": "已淘汰"},
+        {"name": "V2b", "fix": "PON-only, 移除 somatic bias", "f1": "0.7115", "amb": "~0%", "status": "已淘汰"},
+        {"name": "V3-Fixed", "fix": "getVote 兩層分離", "f1": "0.7153", "amb": "17.5%", "status": "前最佳"},
+        {"name": "V4", "fix": "altHP UNDEFINED guard", "f1": "0.7153", "amb": "17.5%", "status": "=V3F"},
+        {"name": "V5", "fix": "Layer 1.5 somatic fallback", "f1": "0.7154", "amb": "8.0%", "status": "當前最佳 ←"}
+      ],
+      "explanation": "V3-Fixed 矯枉過正: germline=0 時忽略 somatic evidence → AMB% 過高\nV5 加入 Layer 1.5: 用 somatic HP1_1/HP2_1 作 fallback (threshold 0.6 保護)",
+      "explanation_en": "V3-Fixed over-corrected: ignored somatic evidence when germline=0\nV5 Layer 1.5: somatic HP1_1/HP2_1 as fallback (0.6 threshold)"
+    },
+
+    "v5_validation": {
+      "title": "V5 驗證: 接近 Paired 品質",
+      "title_en": "V5 Validation: Approaching Paired Quality",
+      "subtitle": "concordance 85.4% ≈ germline 84.8% → 方法學合理",
+      "subtitle_en": "concordance 85.4% ≈ germline 84.8% → methodologically sound",
+      "hp_changes": [
+        {"tag": "HP:i:33 (未分配)", "v3f": "239,679", "v5": "110,197", "delta": "-129,482 (-54%)"},
+        {"tag": "HP:i:11", "v3f": "584,117", "v5": "666,997", "delta": "+82,880"},
+        {"tag": "HP:i:21", "v3f": "547,118", "v5": "593,720", "delta": "+46,602"},
+        {"tag": "Germline (1+2)", "v3f": "17,435,063", "v5": "17,435,063", "delta": "0（不變）"}
+      ],
+      "concordance": [
+        {"metric": "V5 somatic FB concordance", "value": "85.4%"},
+        {"metric": "Germline concordance", "value": "84.8%"},
+        {"metric": "Somatic directional", "value": "84.8%"},
+        {"metric": "New assignment accuracy", "value": "95.0% (267/281)"}
+      ],
+      "bottom_line": "三者相等 → V5 somatic fallback 準確度等同 germline phasing | F1=0.7154 不犧牲判別力",
+      "bottom_line_en": "All three equal → V5 somatic fallback accuracy equals germline phasing | F1=0.7154 no sacrifice"
+    },
+
+    "beyond_auc": {
+      "title": "七方法綜合驗證",
+      "title_en": "Seven-Method Comprehensive Validation",
+      "subtitle": "7 統計方法 × 25 features × 748K regions → 全部一致",
+      "subtitle_en": "7 methods × 25 features × 748K regions → all consistent",
+      "methods": [
+        {"name": "AUC-ROC", "result": "pure methyl ≤ 0.58", "icon": "📊"},
+        {"name": "Cohen's d", "result": "|d| < 0.20（小效應量）", "icon": "📊"},
+        {"name": "Mutual Information", "result": "MI < 0.005 bits", "icon": "📊"},
+        {"name": "Calibration", "result": "pred prob 不隨 feature 變化", "icon": "📊"},
+        {"name": "Partial Dependence", "result": "RF marginal effect 平坦", "icon": "📊"},
+        {"name": "SHAP", "result": "methyl importance 被壓倒", "icon": "📊"},
+        {"name": "Permutation", "result": "shuffle 後 performance 不降", "icon": "📊"}
+      ],
+      "conclusion": "7/7 一致: 純甲基化特徵對 TP/FP 判別沒有信號",
+      "conclusion_en": "7/7 consistent: pure methylation features have zero TP/FP signal"
+    },
+
+    "literature_validation": {
+      "title": "文獻假說交叉驗證",
+      "title_en": "Literature Hypothesis Cross-Validation",
+      "subtitle": "L1-L4 四假說: 三負一正",
+      "subtitle_en": "L1-L4 four hypotheses: three negative, one positive",
+      "figure": "images/02_directional_asm_detail.png",
+      "hypotheses": [
+        {"id": "L1", "name": "Directional ASM", "result": "TP ratio=49.4% (隨機) | FP 反有方向性 p=1.16e-14", "verdict": "NEGATIVE", "color": "D55E00"},
+        {"id": "L2", "name": "PMD Proxy", "result": "確認現象但 AUC≤0.622, 排除 AF 後 ≤0.58", "verdict": "NEGATIVE", "color": "D55E00"},
+        {"id": "L4", "name": "fCpG Density", "result": "TP vs FP p=0.77 完全無差異", "verdict": "NEGATIVE", "color": "D55E00"},
+        {"id": "L3", "name": "Normal Baseline", "result": "7 Normal BAM 全有 MM/ML tags", "verdict": "POSITIVE", "color": "009E73"}
+      ]
+    },
+
+    "exhaustion_rootcause": {
+      "title": "特徵耗盡的生物學根因",
+      "title_en": "Biological Root Cause of Feature Exhaustion",
+      "subtitle": "Germline ASM >> Somatic passenger → 生物學限制",
+      "subtitle_en": "Germline ASM >> Somatic passenger → biological limitation",
+      "core_reason": "Germline ASM 效應量 = Somatic passenger × 3-6 倍\nISM 觀察的甲基化差異被 germline ASM 完全主導\nTP 的甲基化 context ≡ FP 的甲基化 context",
+      "core_reason_en": "Germline ASM effect size = 3-6× somatic passenger\nMethylation differences dominated by germline ASM\nTP methylation context ≡ FP methylation context",
+      "not_items": [
+        "不是特徵設計問題",
+        "不是統計方法問題",
+        "不是 confound 問題"
+      ],
+      "is_item": "是生物學限制 → 需要 Normal baseline 分離 germline/somatic 貢獻",
+      "is_item_en": "Biological limitation → need Normal baseline to separate germline/somatic contributions"
+    },
+
+    "exclusion_diagnosis": {
+      "title": "四項獨立排除",
+      "title_en": "Four Independent Exclusions",
+      "subtitle": "GC + CN + PON + H2009 全排除",
+      "subtitle_en": "GC + CN + PON + H2009 all excluded",
+      "exclusions": [
+        {"name": "GC 校正", "result": "delta-r=-0.0002 (門檻≥0.03)", "detail": "ONT 5kHz GC bias 極小", "color": "D55E00"},
+        {"name": "甲基化-CN", "result": "HP-free |r|<0.07", "detail": "甲基化對 CN 無感", "color": "D55E00"},
+        {"name": "PON 穩定", "result": "7 samples mean=97.77%", "detail": "refined >98%, 穩定度 3→4", "color": "009E73"},
+        {"name": "H2009", "result": "FP rate=0.06%, ceiling +0.0004", "detail": "caller 已近完美", "color": "E69F00"}
+      ],
+      "conclusion": "甲基化特徵耗盡是全域性、根本性的",
+      "conclusion_en": "Methylation feature exhaustion is global and fundamental"
+    },
+
+    "positive_observations": {
+      "title": "正面觀察",
+      "title_en": "Positive Observations",
+      "subtitle": "耗盡中的正面發現 — ISM 在 characterization 有獨特價值",
+      "subtitle_en": "Positive findings amid exhaustion — ISM has unique characterization value",
+      "findings": [
+        {
+          "title": "HPFineNGroups = somatic heterogeneity marker",
+          "detail": "N≥4 + NR≥80 → TP rate 89.1%\n7/7 一致, residualized AUC=0.617",
+          "color": "009E73"
+        },
+        {
+          "title": "ASM 32-66% SNV 位點有等位基因特異甲基化",
+          "detail": "ISM PERMANOVA 是唯一量化 haplotype 間\nentropy imbalance 的工具",
+          "color": "0072B2"
+        },
+        {
+          "title": "FP ASM 有方向性 (p=1.16e-14)",
+          "detail": "FP directional ratio 偏離 50%\n提示 FP 有系統性 methylation context",
+          "color": "6E9D8A"
+        }
+      ],
+      "bottom_line": "ISM 價值 = epigenetic characterization (非 filtering)",
+      "bottom_line_en": "ISM value = epigenetic characterization (not filtering)"
+    },
+
+    "phase_bcd": {
+      "title": "Phase B/C/D Dual-BAM 驗證",
+      "title_en": "Phase B/C/D Dual-BAM Validation",
+      "subtitle": "HCC1395 全基因體 — 四模組全部通過",
+      "subtitle_en": "HCC1395 whole-genome — all four modules passed",
+      "modules": [
+        {"name": "B: Sample ASM", "result": "97.3% 位點顯著", "verdict": "✓ PASS", "color": "009E73"},
+        {"name": "C: Normal Baseline", "result": "100% valid entries", "verdict": "✓ PASS", "color": "009E73"},
+        {"name": "D: LOH Concordance", "result": "98.4% 一致", "verdict": "✓ PASS", "color": "009E73"},
+        {"name": "D: Subclone Analysis", "result": "4 groups detected", "verdict": "✓ PASS", "color": "009E73"}
+      ],
+      "note": "Phase A-D 程式碼已完成（2026-04-13）",
+      "note_en": "Phase A-D code completed (2026-04-13)"
+    },
+
+    "subclone_groups": {
+      "title": "Subclone 四群組發現",
+      "title_en": "Subclone 4-Group Discovery",
+      "subtitle": "ISM 首次全基因體尺度自動偵測亞克隆分群",
+      "subtitle_en": "ISM's first WGS-scale automatic subclone detection",
+      "groups": [
+        {"name": "Normal Diploid", "pct": "9.2%", "detail": "LOH=0%, Normal baseline 一致", "color": "0072B2"},
+        {"name": "Epi Heterogeneous", "pct": "8.3%", "detail": "高 entropy, 多等位 ASM", "color": "E69F00"},
+        {"name": "LOH Influenced", "pct": "5.4%", "detail": "LOH region, 單 haplotype", "color": "D55E00"},
+        {"name": "Tumor-Specific", "pct": "77.1%", "detail": "somatic 驅動的甲基化變化", "color": "009E73"}
+      ],
+      "significance": "首次在全基因體尺度上自動偵測到有生物學意義的亞克隆分群",
+      "significance_en": "First WGS-scale automatic detection of biologically meaningful subclone groups"
+    },
+
+    "normal_baseline": {
+      "title": "Normal Baseline 可行性",
+      "title_en": "Normal Baseline Feasibility",
+      "subtitle": "7 Normal BAM 全可用 → Phase 2A 路徑確認",
+      "subtitle_en": "All 7 Normal BAMs available → Phase 2A path confirmed",
+      "items": [
+        "✅ 7 Normal BAM 全有 MM/ML tags — 甲基化數據可用",
+        "✅ FP ASM directional 1.7× > TP — Normal baseline 可望放大差異",
+        "✅ Phase BCD 驗證 Dual-BAM 架構可行",
+        "→ Phase 2A: Normal methyl → Tumor-Normal diff → 新特徵"
+      ],
+      "items_en": [
+        "✅ All 7 Normal BAMs have MM/ML tags",
+        "✅ FP ASM directional 1.7× > TP",
+        "✅ Phase BCD validated Dual-BAM",
+        "→ Phase 2A: Normal → Tumor-Normal diff → new features"
+      ]
+    },
+
+    "conclusion_table": {
+      "title": "本週判定總表",
+      "title_en": "This Week's Verdicts Summary",
+      "subtitle": "5 關閉 + 3 正面 + 2 診斷",
+      "subtitle_en": "5 closed + 3 positive + 2 diagnostics",
+      "categories": [
+        {
+          "category": "關閉 (5)",
+          "color": "D55E00",
+          "items": [
+            "Beyond-AUC 七方法 → EXHAUSTED",
+            "CNV zone-aware → filter 關閉",
+            "GC+甲基化-CN → NO-GO",
+            "文獻 L1/L2/L4 → NEGATIVE",
+            "Multi-path → identifiability"
+          ]
+        },
+        {
+          "category": "正面 (3)",
+          "color": "009E73",
+          "items": [
+            "Phase BCD Dual-BAM → ✓",
+            "L3 Normal baseline → ✓",
+            "PON 穩定度 → 3→4"
+          ]
+        },
+        {
+          "category": "診斷 (2)",
+          "color": "0072B2",
+          "items": [
+            "H2009 → caller 完美",
+            "LOH.bed → 雙系統確認"
+          ]
+        }
+      ]
+    },
+
+    "next_steps": {
+      "title": "下一步",
+      "title_en": "Next Steps",
+      "subtitle": "V5 重跑 → Phase 2A → 全量驗證 → 論文",
+      "subtitle_en": "V5 rerun → Phase 2A → full validation → publication",
+      "timeline": [
+        {"phase": "短期", "items": ["V5 + PON-only haplotag 全量重跑", "7 samples × 2 modes ISM 重跑"], "color": "0072B2"},
+        {"phase": "中期", "items": ["Phase 2A Normal Methylation Baseline", "利用 Tumor-Normal 差異作為新特徵"], "color": "009E73"},
+        {"phase": "長期", "items": ["7 samples 全量驗證", "Platform normalization", "論文撰寫"], "color": "A85540"}
+      ]
+    },
+
+    "paths": {
+      "title": "附錄: 報告與數據路徑",
+      "title_en": "Appendix: Report & Data Paths",
+      "subtitle": "所有報告路徑索引",
+      "subtitle_en": "All report path index",
+      "entries": [
+        {"label": "Beyond-AUC", "path": "experiments/finalized/2026/04/20260409_beyond_auc..."},
+        {"label": "SEQC2 CNV", "path": "experiments/in_progress/2026/04/20260409_SEQC2_CNV..."},
+        {"label": "GC+CN", "path": "experiments/validated/2026/04/20260411_GC校正..."},
+        {"label": "文獻驗證", "path": "research/literature_validation/reports/20260412..."},
+        {"label": "Phase BCD", "path": "experiments/validated/2026/04/20260413_Phase_BCD..."},
+        {"label": "PON 穩定", "path": "experiments/in_progress/2026/04/20260411_PON跨..."},
+        {"label": "V5 BAM", "path": "longphase-to-mod/output/pononly_v5_somatic_fallback/"},
+        {"label": "CNV figures", "path": "research/seqc2_cnv_stratification/figures/"},
+        {"label": "Phasing data", "path": "big7_disk_output/synthesis/observation_workspaces/"}
+      ]
+    }
+  }
+}

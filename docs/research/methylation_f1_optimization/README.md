@@ -48,7 +48,7 @@ InterSubMod 透過甲基化異質性分析偵測體細胞變異 (SNV)，但目�
 methylation_f1_optimization/
 ├── README.md
 ├── 2026/01/*.md                       # 正式研究文檔
-└── assets/2026/01/                    # 文檔直接引用的圖表資產
+└── figures/2026/01/                    # 文檔直接引用的圖表資產
 ```
 
 ### 邊界說明
@@ -77,11 +77,11 @@ methylation_f1_optimization/
 
 ## 圖表資產
 
-1. `docs/research/methylation_f1_optimization/assets/2026/01/phase1_plots/`
-2. `docs/research/methylation_f1_optimization/assets/2026/01/phase2_plots/`
-3. `docs/research/methylation_f1_optimization/assets/2026/01/phase3_plots/`
-4. `docs/research/methylation_f1_optimization/assets/2026/01/phase4_plots/`
-5. `docs/research/methylation_f1_optimization/assets/2026/01/longphase_s_qual_af_analysis.png`
+1. `docs/research/methylation_f1_optimization/figures/2026/01/phase1_plots/`
+2. `docs/research/methylation_f1_optimization/figures/2026/01/phase2_plots/`
+3. `docs/research/methylation_f1_optimization/figures/2026/01/phase3_plots/`
+4. `docs/research/methylation_f1_optimization/figures/2026/01/phase4_plots/`
+5. `docs/research/methylation_f1_optimization/figures/2026/01/longphase_s_qual_af_analysis.png`
 
 ---
 

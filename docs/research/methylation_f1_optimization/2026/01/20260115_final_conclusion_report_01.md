@@ -135,7 +135,7 @@ metadata補齊時間: 2026-03-01 03:02
 
 ### Figure 1: QUAL Distribution (TP vs FP)
 
-![QUAL Distribution](../../assets/2026/01/phase1_plots/exp1_1_qual_distribution.png)
+![QUAL Distribution](../../figures/2026/01/phase1_plots/exp1_1_qual_distribution.png)
 
 **說明**: 此圖顯示 VCF QUAL 分數在 TP 和 FP 之間的分布差異。
 - 左圖為密度分布：TP（綠色）集中在高 QUAL 區域 (0.9-1.0)，FP（紅色）分布較廣
@@ -146,7 +146,7 @@ metadata補齊時間: 2026-03-01 03:02
 
 ### Figure 2: AF Distribution Analysis
 
-![AF Distribution](../../assets/2026/01/phase1_plots/exp1_2_af_distribution.png)
+![AF Distribution](../../figures/2026/01/phase1_plots/exp1_2_af_distribution.png)
 
 **說明**: 此圖分析 Allele Frequency (AF) 的分布特性。
 - 左圖：TP 的 AF 集中在 0.4-0.6（雜合子特徵），FP 集中在低 AF 區域
@@ -158,7 +158,7 @@ metadata補齊時間: 2026-03-01 03:02
 
 ### Figure 3: Grid Search Results (QUAL and AF Thresholds)
 
-![Grid Search](../../assets/2026/01/phase2_plots/exp2_1_2_grid_search.png)
+![Grid Search](../../figures/2026/01/phase2_plots/exp2_1_2_grid_search.png)
 
 **說明**: 此圖顯示不同過濾閾值對 F1 的影響。
 - 左圖 (QUAL)：閾值 0.8 達到最佳 F1，再高則召回率下降過多
@@ -170,7 +170,7 @@ metadata補齊時間: 2026-03-01 03:02
 
 ### Figure 4: Regional Clustering Analysis
 
-![Regional Clustering](../../assets/2026/01/phase3_plots/regional_clustering_analysis.png)
+![Regional Clustering](../../figures/2026/01/phase3_plots/regional_clustering_analysis.png)
 
 **說明**: 此圖分析位點的區域聚集特性。
 - 左上：FP 的聚集度明顯高於 TP
@@ -183,7 +183,7 @@ metadata補齊時間: 2026-03-01 03:02
 
 ### Figure 5: Methylation Feature Interaction Effects
 
-![Interaction Effects](../../assets/2026/01/phase4_plots/interaction_effects_analysis.png)
+![Interaction Effects](../../figures/2026/01/phase4_plots/interaction_effects_analysis.png)
 
 **說明**: 此圖探索甲基化特徵與 VCF 特徵的交互效應。
 - 左上：QUAL × CramersV 熱圖，顏色表示 TP 比例
@@ -196,7 +196,7 @@ metadata補齊時間: 2026-03-01 03:02
 
 ### Figure 6: Conditional Methylation Value
 
-![Conditional Value](../../assets/2026/01/phase4_plots/conditional_methylation_value.png)
+![Conditional Value](../../figures/2026/01/phase4_plots/conditional_methylation_value.png)
 
 **說明**: 此圖分析甲基化特徵在不同 VCF 品質區間的價值。
 - 左圖熱圖：NumReads 在低 AF 區域 AUC 高達 0.84
@@ -207,7 +207,7 @@ metadata補齊時間: 2026-03-01 03:02
 
 ### Figure 7: Hybrid Strategy Comparison
 
-![Hybrid Strategy](../../assets/2026/01/phase4_plots/hybrid_strategy_comparison.png)
+![Hybrid Strategy](../../figures/2026/01/phase4_plots/hybrid_strategy_comparison.png)
 
 **說明**: 此圖比較混合過濾策略的效果。
 - 各策略相對於 baseline 的 F1 改變百分比
@@ -254,5 +254,5 @@ metadata補齊時間: 2026-03-01 03:02
 ### 檔案位置
 
 - 報告: `docs/research/methylation_f1_optimization/2026/01/`
-- 圖表: `docs/research/methylation_f1_optimization/assets/2026/01/phase*_plots/`
+- 圖表: `docs/research/methylation_f1_optimization/figures/2026/01/phase*_plots/`
 - 腳本: `scripts/analysis/legacy/methylation_f1_optimization/`

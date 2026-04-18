@@ -1,0 +1,568 @@
+{
+  "meta": {
+    "kicker": "InterSubMod 研究週報簡報",
+    "deck_title": "InterSubMod 研究週報：LOH 雙定義與特徵探索全面關閉",
+    "deck_title_en": "InterSubMod Weekly Report: LOH Dual-Definition & Feature Exploration Closure",
+    "deck_subtitle": "2026-03-31 至 2026-04-06",
+    "reporter": "廖子游",
+    "cover_image": "",
+    "summary_line": "SEQC2 Jaccard=0.928 確認 LOH.bed 可信；10/10 filter FAIL + Non-LOH AUC<0.58 + Voting 0.577 → TO 特徵探索全面關閉，轉向 read-level epigenetic characterization。",
+    "generated_date": "2026-04-06",
+    "audience_mode": "研究內部混合版",
+    "author": "廖子游",
+    "source_report": "/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/04/20260406_研究週報_20260331_20260406_LOH雙定義與特徵探索全面關閉_01.md",
+    "output_pptx": "/big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260406_研究週報_LOH雙定義與特徵探索全面關閉/20260406_研究週報_LOH雙定義與特徵探索全面關閉.pptx",
+    "assets_dir": "/big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260406_研究週報_LOH雙定義與特徵探索全面關閉/assets",
+    "footer": "Generated from the validated weekly report: LOH dual-definition analysis & feature exploration closure.",
+    "guide_bullets": [
+      "LOH 雙定義：SEQC2 Jaccard=0.928 確認可信",
+      "特徵探索全面關閉：166 圖表 × 16 判定",
+      "戰略轉向：read-level epigenetic characterization"
+    ],
+    "kicker_en": "InterSubMod Weekly Report Briefing",
+    "deck_subtitle_en": "2026-03-31 to 2026-04-06",
+    "summary_line_en": "SEQC2 Jaccard=0.928 confirms LOH.bed reliability; 10/10 filter FAIL + Non-LOH AUC<0.58 + Voting 0.577 → TO feature exploration fully closed, pivoting to read-level epigenetic characterization.",
+    "guide_bullets_en": [
+      "LOH Dual-Definition: SEQC2 Jaccard=0.928 confirmed reliable",
+      "Feature Exploration Fully Closed: 166 charts × 16 verdicts",
+      "Strategic Pivot: read-level epigenetic characterization"
+    ]
+  },
+  "theme": {
+    "dark": "1E2A44",
+    "bg": "F7F3EC",
+    "bg_alt": "EEE6DB",
+    "accent": "A85540",
+    "accent2": "6E9D8A",
+    "text": "17202A",
+    "muted": "5E6572",
+    "light_text": "F8F4EE",
+    "light_muted": "D6DCE5",
+    "line": "D6CCBF",
+    "font_title": "Arial Bold",
+    "font_body": "Arial",
+    "en_color": "5E6572",
+    "en_font_ratio": 0.7
+  },
+  "deck": {
+    "key_findings": [
+      {
+        "title": "SEQC2 Jaccard=0.928：LOH.bed 與金標準吻合",
+        "body": "LongPhase-TO LOH.bed 與 SEQC2（FDA 多平台共識）在 HCC1395 上 Jaccard=0.928。兩種完全獨立的方法（ONT phasing vs NGS+array 多中心）高度一致，確認 LOH.bed 作為分層分析基礎可靠。Sensitivity=0.961, F1=0.963。",
+        "accent": "6E9D8A",
+        "title_en": "SEQC2 Jaccard=0.928: LOH.bed Matches Gold Standard",
+        "body_en": "LongPhase-TO LOH.bed shows Jaccard=0.928 vs SEQC2 (FDA multi-platform consensus) on HCC1395. Two independent methods highly concordant. Sensitivity=0.961, F1=0.963."
+      },
+      {
+        "title": "TO 特徵探索全面關閉：10/10 FAIL + AUC<0.58",
+        "body": "LOH 內甲基化 AUC~0.50（PERMANOVA valid 5-6%）。10 種 filter 策略全超 TP loss 安全線。Non-LOH max corrected AUC<0.58。多特徵 Voting AUC=0.577<0.58 門檻。166 圖表 × 16 判定全面否決。",
+        "accent": "C76B50",
+        "title_en": "TO Feature Exploration Fully Closed: 10/10 FAIL + AUC<0.58",
+        "body_en": "LOH methylation AUC≈0.50 (PERMANOVA valid 5-6%). All 10 filter strategies exceed TP loss safety line. Non-LOH max corrected AUC<0.58. Voting AUC=0.577<0.58."
+      },
+      {
+        "title": "甲基化三維度 NEGATIVE + TO 60+ 特徵 NO-GO",
+        "body": "O11 heterogeneity 0.845→0.530（n_reads confound）。O12 AlleleDelta=AF confound。O13 shared read confound。G1-G7 共 60+ 特徵全 AUC<0.64。安全約束下 FP removal=0%。所有 post-hoc 方向正式關閉。",
+        "accent": "7B5B9A",
+        "title_en": "Methylation 3-Dimension NEGATIVE + TO 60+ Features NO-GO",
+        "body_en": "O11 0.845→0.530 (n_reads confound). O12 AlleleDelta=AF confound. O13 shared read confound. G1-G7 all AUC<0.64. FP removal=0% under safety constraint."
+      },
+      {
+        "title": "戰略轉向：characterization, not filtering",
+        "body": "ASM 32-66% 由 5 種方法獨立驗證。ISM PERMANOVA 是唯一量化 haplotype entropy imbalance 的工具。ISM 不是無用——價值在 read-level epigenetic characterization。Phase 2A 方向：PON-only phasing + normal reference。",
+        "accent": "54708C",
+        "title_en": "Strategic Pivot: Characterization, Not Filtering",
+        "body_en": "ASM 32-66% verified by 5 independent methods. ISM PERMANOVA uniquely quantifies haplotype entropy imbalance. Phase 2A: PON-only phasing + normal reference."
+      }
+    ],
+    "framework": {
+      "problem_statement": "LOH 定義可信嗎 → ISM 在 LOH 內如何 → Filter 可行嗎 → Non-LOH 有解嗎 → 全面結論",
+      "layers": [
+        {
+          "title": "Layer 1：LOH 定義驗證",
+          "body": "LOH.bed vs HP_Ratio 四象限分佈。SEQC2 Jaccard=0.928 確認 LOH.bed 可信。HP Imbalance 是 LOH.bed 超集。",
+          "fill": "1E2A44",
+          "title_color": "F8F4EE",
+          "body_color": "D6DCE5"
+        },
+        {
+          "title": "Layer 2：ISM LOH 影響",
+          "body": "PERMANOVA valid rate 5-6%。甲基化 AUC~0.50。10/10 filter FAIL。QS mode-aware 已修正。",
+          "fill": "EAD8CF",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        },
+        {
+          "title": "Layer 3：全面關閉與轉向",
+          "body": "Non-LOH max AUC<0.58。Voting 0.577。甲基化三維度 NEGATIVE。戰略轉向 characterization。",
+          "fill": "D6E7DF",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        }
+      ],
+      "quadrants": [
+        {
+          "title": "Q1: Both LOH (26.7%)",
+          "body": "兩種定義一致判 LOH。PERMANOVA 失效區域。TP-enriched（FP rate 低）。",
+          "fill": "F4DFD5",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        },
+        {
+          "title": "Q2: HP-only (15.2%)",
+          "body": "ISM 判 LOH 但 LOH.bed 不判。AF median=0.47（正常）。d=-1.04 vs Q1。phasing 偏差非真 LOH。",
+          "fill": "DDEBE5",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        },
+        {
+          "title": "Q3: LOH.bed-only (0.07%)",
+          "body": "僅 286 筆。LOH.bed 判但 HP 不判。近乎為零——HP Imbalance 完全覆蓋 LOH.bed。",
+          "fill": "F4DFD5",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        },
+        {
+          "title": "Q4: Neither (58.1%)",
+          "body": "兩種定義均不判 LOH。PERMANOVA 可正常計算。但 max corrected AUC<0.58——仍無突破。",
+          "fill": "DDEBE5",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        }
+      ],
+      "scope_note": "注意：所有數據為 2026-03-30 HP fix 後新版。166 圖表 × 16 判定（J1-J16）跨 7 樣本 3 波次交叉驗證。",
+      "title": "背景、問題與四象限",
+      "title_en": "Background, Questions & Four-Quadrant Framework",
+      "subtitle": "這一週的所有結果都用同一套三層框架與四象限資料集解讀",
+      "subtitle_en": "All results this week interpreted through the same three-layer framework & four-quadrant dataset"
+    },
+    "goals": [
+      {
+        "goal": "LOH 雙定義 Wave 1+2+3",
+        "subgoal": "四象限 + SEQC2 + ISM 影響 + Filter + Non-LOH + 多特徵",
+        "completion": "100%",
+        "conclusion": "16 判定完成。LOH.bed 可信，不可作 filter，Non-LOH 同無突破。"
+      },
+      {
+        "goal": "甲基化三維度 O11-O13",
+        "subgoal": "Heterogeneity + LOH 場景 + 跨區域 Correlation",
+        "completion": "100%",
+        "conclusion": "全 NEGATIVE：n_reads confound, AF confound, shared read confound。"
+      },
+      {
+        "goal": "TO VCF 特徵 G1-G7",
+        "subgoal": "AF/GQ/strand bias 等 60+ 特徵 × 7 樣本",
+        "completion": "100%",
+        "conclusion": "全 AUC<0.64。安全約束 FP removal=0%。正式 NO-GO。"
+      },
+      {
+        "goal": "Self-phasing 因果鏈",
+        "subgoal": "五步因果鏈 + 23 TSV + 7 PNG",
+        "completion": "100%",
+        "conclusion": "CONFIRMED：62% LOH 消失，d=-1.20，31.2% self-phasing LOH。"
+      },
+      {
+        "goal": "QS Mode-Aware 修正",
+        "subgoal": "TO 模式 LOH penalty + verify bonus 停用",
+        "completion": "100%",
+        "conclusion": "已實作並部署（commit b9eaba7）。"
+      },
+      {
+        "goal": "ASM 定量驗證",
+        "subgoal": "5 種方法獨立驗證 SNV 位點 ASM",
+        "completion": "100%",
+        "conclusion": "32-66% 有 ASM。ISM 是唯一量化 haplotype entropy imbalance 的工具。"
+      }
+    ],
+    "goal_summary_cards": [
+      {
+        "title": "LOH.bed 定義可信",
+        "body": "SEQC2 Jaccard=0.928，可作分層分析基礎。",
+        "fill": "1E2A44",
+        "title_color": "F8F4EE",
+        "body_color": "D6DCE5"
+      },
+      {
+        "title": "TO 特徵全面關閉",
+        "body": "166 圖表 × 16 判定，所有 filter/特徵方向否決。",
+        "fill": "C76B50",
+        "title_color": "F8F4EE",
+        "body_color": "F8F4EE"
+      },
+      {
+        "title": "轉向 characterization",
+        "body": "ISM 價值在 epigenetic context，非 variant filtering。",
+        "fill": "6E9D8A",
+        "title_color": "F8F4EE",
+        "body_color": "F8F4EE"
+      }
+    ],
+    "timeline": [
+      {
+        "date": "03-31",
+        "title": "甲基化假說 NEGATIVE + 系統觀察總結",
+        "result": "O11 heterogeneity 0.845→0.530。O12 LOH 場景 NEGATIVE。O13 跨區域 shared read confound。O1-O10 系統觀察彙整完成（82 圖表）。"
+      },
+      {
+        "date": "04-01~02",
+        "title": "TO NO-GO + Self-phasing CONFIRMED",
+        "result": "G1-G7 共 60+ 特徵全 AUC<0.64。五步因果鏈：bias 17.3:1, 62% LOH 消失。PON-only phasing 驗證完成。"
+      },
+      {
+        "date": "04-03~05",
+        "title": "LOH 雙定義 Wave 1+2 + Deep Study",
+        "result": "四象限建立。SEQC2 Jaccard=0.928。PERMANOVA 5-6%。TO Deep Q1-Q6：RF ceiling 0.69-0.77。"
+      },
+      {
+        "date": "04-06",
+        "title": "Wave 3 Non-LOH + 全面關閉",
+        "result": "Non-LOH max AUC<0.58。Voting 0.577。cnLOH Simpson's Paradox。TO 特徵探索正式全面關閉。"
+      }
+    ],
+    "seqc2_validation": {
+      "title": "SEQC2 LOH 外部驗證：Jaccard=0.928",
+      "subtitle": "完全獨立的 FDA 金標準驗證 LOH.bed 高度可信",
+      "seqc2_description": "SEQC2（FDA 多平台共識）：\n• 320 autosomal LOH entries\n• 覆蓋 1,490.5 Mb（~53% autosomal）\n• WGS short-read + SNP array\n• 多中心、多平台共識",
+      "longphase_description": "LongPhase-TO（本研究）：\n• ONT long-read phased genotype\n• 方法學與 SEQC2 零重疊\n• HCC1395 5kHz + Dorado 雙驗證",
+      "metrics": [
+        {
+          "name": "Jaccard",
+          "value": "0.928",
+          "note": "5kHz: 0.9277, Dorado: 0.9290"
+        },
+        {
+          "name": "Sensitivity",
+          "value": "0.961",
+          "note": "LOH.bed 覆蓋 SEQC2 96%"
+        },
+        {
+          "name": "Precision",
+          "value": "0.964",
+          "note": "LOH.bed 判定 96% 在 SEQC2 中"
+        },
+        {
+          "name": "F1",
+          "value": "0.963",
+          "note": "region-level 最佳一致性"
+        },
+        {
+          "name": "HP_Ratio AUC",
+          "value": "0.898",
+          "note": "per-variant 預測 SEQC2 LOH"
+        }
+      ],
+      "conclusion_callout": "兩種完全獨立的方法（ONT phasing vs NGS+array 多中心）對同一細胞株的 LOH 判定幾乎完全吻合 — LOH.bed 可作為後續所有分層分析的可靠基礎",
+      "conclusion_fill": "1E2A44",
+      "conclusion_color": "F8F4EE",
+      "title_en": "SEQC2 LOH External Validation: Jaccard=0.928",
+      "subtitle_en": "Fully independent FDA gold standard validates LOH.bed high reliability"
+    },
+    "ism_loh_impact": {
+      "title": "LOH 區域：PERMANOVA 失效 + 甲基化 AUC~0.50",
+      "subtitle": "LOH 區域只有一條 haplotype，ISM HP 比較無統計意義",
+      "stats": [
+        {
+          "label": "PERMANOVA Valid Rate",
+          "value": "5-6%",
+          "meaning": "94% 位點 min(HP)<3"
+        },
+        {
+          "label": "LOH 內甲基化 AUC",
+          "value": "~0.50",
+          "meaning": "7/7 樣本與隨機無異"
+        },
+        {
+          "label": "Filter 策略",
+          "value": "10/10 FAIL",
+          "meaning": "全超 TP loss 2% 安全線"
+        },
+        {
+          "label": "LOH FP rate",
+          "value": "0.239",
+          "meaning": "< Non-LOH 0.338（TP-enriched）"
+        }
+      ],
+      "root_cause": "LOH 區域只有一條 haplotype 上有 reads（HP_Ratio > 0.9），另一條幾乎無 reads。ISM PERMANOVA 需兩群各 ≥3 reads → 94% 不滿足。",
+      "fix_applied": "QS mode-aware（commit b9eaba7）：TO 模式停用 LOH penalty + verify bonus",
+      "fix_fill": "6E9D8A",
+      "fix_color": "F8F4EE",
+      "title_en": "LOH Region: PERMANOVA Failure + Methylation AUC≈0.50",
+      "subtitle_en": "Only one haplotype in LOH regions — ISM HP comparison statistically meaningless"
+    },
+    "non_loh_closure": {
+      "title": "Non-LOH + 多特徵組合：全面否決",
+      "subtitle": "問題是全域性的——不是 LOH 特異的",
+      "non_loh_results": [
+        {
+          "feature": "HPFineNGroups",
+          "auc": "0.643",
+          "status": "read count proxy"
+        },
+        {
+          "feature": "CramersV",
+          "auc": "0.511→0.464",
+          "status": "NumReads confound"
+        },
+        {
+          "feature": "PairwiseMeanDist",
+          "auc": "0.584→0.502",
+          "status": "不穩定"
+        },
+        {
+          "feature": "AlleleDelta",
+          "auc": "0.556",
+          "status": "confound-free 但不足"
+        }
+      ],
+      "voting_result": "三特徵 Voting AUC = 0.577 < 0.58 門檻",
+      "simpsons_paradox": {
+        "title": "cnLOH Simpson's Paradox",
+        "overall_auc": "0.5865",
+        "per_sample_mean": "0.4987",
+        "dominant_sample": "H2009 佔 48.6%",
+        "direction_inconsistency": "COLO829=0.26, H1437=0.49 為 FP-favored"
+      },
+      "conclusion_callout": "LOH vs Non-LOH 的 AUC 差距 < 0.06 — 問題是全域性的。TO post-hoc 特徵探索正式全面關閉。",
+      "conclusion_fill": "C76B50",
+      "conclusion_color": "F8F4EE",
+      "title_en": "Non-LOH + Multi-Feature Combination: Comprehensive Rejection",
+      "subtitle_en": "The problem is global — not LOH-specific"
+    },
+    "negative_results": {
+      "title": "甲基化 NEGATIVE × TO NO-GO × ASM 唯一亮點",
+      "subtitle": "所有方向窮盡後，ISM 價值在 characterization 非 filtering",
+      "methylation_negatives": [
+        {
+          "id": "O11",
+          "name": "Heterogeneity",
+          "before": "AUC 0.845",
+          "after": "0.530",
+          "cause": "n_reads confound"
+        },
+        {
+          "id": "O12",
+          "name": "LOH 甲基化場景",
+          "before": "AlleleDelta 表面",
+          "after": "<0.58",
+          "cause": "AF confound + L2 collider"
+        },
+        {
+          "id": "O13",
+          "name": "跨區域 Correlation",
+          "before": "FP>TP",
+          "after": "差異消失",
+          "cause": "shared read count"
+        }
+      ],
+      "to_nogo": {
+        "scope": "G1-G7：48 圖 60+ 特徵",
+        "max_auc": "< 0.64",
+        "safe_removal": "0%",
+        "read_level_auc": "0.721（LOSO）但 removal=0%"
+      },
+      "asm_highlight": {
+        "finding": "32-66% SNV 位點有 ASM（5 方法驗證）",
+        "ism_role": "ISM PERMANOVA 是唯一量化 haplotype entropy imbalance 的工具",
+        "implication": "ISM 不是無用——用途在 characterization 而非 filtering"
+      },
+      "title_en": "Methylation NEGATIVE × TO NO-GO × ASM: The Only Bright Spot",
+      "subtitle_en": "After exhausting all directions, ISM value lies in characterization not filtering"
+    },
+    "conclusion_table": {
+      "title": "結論總表：14 項結論穩定性追蹤",
+      "subtitle": "本週 +2 CONFIRMED +3 NEGATIVE +2 新增",
+      "conclusions": [
+        {
+          "id": "C1",
+          "name": "TO FP 99.48% 由 PON 移除",
+          "verdict": "CONFIRMED",
+          "stability": 5,
+          "change": "—"
+        },
+        {
+          "id": "C2",
+          "name": "ISM methyl+ctx paired +0.0112",
+          "verdict": "CONFIRMED",
+          "stability": 5,
+          "change": "—"
+        },
+        {
+          "id": "C3",
+          "name": "Self-phasing 循環依賴",
+          "verdict": "CONFIRMED",
+          "stability": 5,
+          "change": "因果鏈驗證"
+        },
+        {
+          "id": "C4",
+          "name": "TO 甲基化增益為負",
+          "verdict": "CONFIRMED",
+          "stability": 4,
+          "change": "—"
+        },
+        {
+          "id": "C5",
+          "name": "LOH.bed 可信 (SEQC2 0.928)",
+          "verdict": "CONFIRMED",
+          "stability": 5,
+          "change": "NEW"
+        },
+        {
+          "id": "C6",
+          "name": "LOH 不可作 filter",
+          "verdict": "CONFIRMED",
+          "stability": 5,
+          "change": "NEW"
+        },
+        {
+          "id": "C7",
+          "name": "甲基化三維度 NEGATIVE",
+          "verdict": "NEGATIVE",
+          "stability": 4,
+          "change": "NEW"
+        },
+        {
+          "id": "C8",
+          "name": "TO VCF 60+ 特徵 NO-GO",
+          "verdict": "NEGATIVE",
+          "stability": 5,
+          "change": "NEW"
+        },
+        {
+          "id": "C9",
+          "name": "Non-LOH 同無突破",
+          "verdict": "NEGATIVE",
+          "stability": 4,
+          "change": "NEW"
+        },
+        {
+          "id": "C10",
+          "name": "ASM 32-66%",
+          "verdict": "POSITIVE",
+          "stability": 4,
+          "change": "5 方法驗證"
+        },
+        {
+          "id": "C11",
+          "name": "Read-level AUC=0.721 但 0%",
+          "verdict": "CONDITIONAL",
+          "stability": 3,
+          "change": "NEW"
+        },
+        {
+          "id": "C12",
+          "name": "多特徵組合不可行",
+          "verdict": "NEGATIVE",
+          "stability": 5,
+          "change": "NEW"
+        },
+        {
+          "id": "C13",
+          "name": "PON-only 消除 somatic bias",
+          "verdict": "CONFIRMED",
+          "stability": 4,
+          "change": "驗證"
+        },
+        {
+          "id": "C14",
+          "name": "LOH=stratification 非 filter",
+          "verdict": "CONFIRMED",
+          "stability": 5,
+          "change": "NEW"
+        }
+      ],
+      "title_en": "Conclusion Summary: 14-Item Stability Tracking",
+      "subtitle_en": "This week: +2 CONFIRMED +3 NEGATIVE +2 new additions"
+    },
+    "next_steps": {
+      "gaps": [
+        "PON-only phasing 後 ISM 特徵的真實分佈",
+        "低純度臨床樣本的 read-level 鑑別力",
+        "Normal methylation reference baseline",
+        "Self-phasing 修正後 Non-LOH 是否改善"
+      ],
+      "actions": [
+        "Phase 2A：PON-only phasing 全量重跑 + ISM 重跑",
+        "Phase 2A：Normal methylation reference baseline",
+        "研究全景 v2.0：整合本週 166 圖表結論",
+        "TO 獨立建模 + 論文定位更新"
+      ],
+      "not_yet": [
+        "以 LOH 特徵作 filter（10/10 FAIL）",
+        "以甲基化特徵過濾 TO FP（三維度 NEGATIVE）",
+        "共用 paired/TO 甲基結論（TO delta F1 負）",
+        "VCF/多特徵識別 FP（60+ AUC<0.64, Voting 0.577）"
+      ],
+      "title": "待補齊事項與下一步",
+      "title_en": "Remaining Gaps & Next Steps",
+      "subtitle": "現在最合理的做法是先把 annotation 接到輸出層，再決定是否改核心規則",
+      "subtitle_en": "Most reasonable next step: connect annotation to output layer before modifying core rules",
+      "gaps_en": [
+        "True feature distribution after PON-only phasing ISM",
+        "Read-level discriminability on low-purity clinical samples",
+        "Normal methylation reference baseline",
+        "Whether Non-LOH improves after self-phasing correction"
+      ],
+      "actions_en": [
+        "Phase 2A: PON-only phasing full rerun + ISM rerun",
+        "Phase 2A: Normal methylation reference baseline",
+        "Research Landscape v2.0: integrate 166 chart conclusions",
+        "TO independent modeling + paper positioning update"
+      ],
+      "not_yet_en": [
+        "Using LOH features as filter (10/10 FAIL)",
+        "Filtering TO FP with methylation features (3-dimension NEGATIVE)",
+        "Sharing paired/TO methylation conclusions (TO delta F1 negative)",
+        "VCF/multi-feature FP identification (60+ AUC<0.64, Voting 0.577)"
+      ]
+    },
+    "source_paths": [
+      {
+        "label": "來源週報",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/04/20260406_研究週報_20260331_20260406_LOH雙定義與特徵探索全面關閉_01.md"
+      },
+      {
+        "label": "PPTX 設定檔",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260406_研究週報_LOH雙定義與特徵探索全面關閉/pptx_config.json"
+      },
+      {
+        "label": "LOH 雙定義分析報告",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/04/20260406_LOH雙定義交叉分析報告/00_INDEX.md"
+      },
+      {
+        "label": "Self-phasing 因果鏈報告",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/04/20260402_longphase_to_vs_s_causal_chain_report_01.md"
+      },
+      {
+        "label": "研究全景索引",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/research_landscape/00_INDEX.md"
+      }
+    ],
+    "notes": [
+      "封面：本週核心是 LOH 雙定義交叉分析全面收官\nSEQC2 金標準：FDA 多平台共識 vs 我們的 ONT phasing LOH\n166 圖表：歷來最大規模系統性驗證\n→ 讓我們先看四個關鍵結論...",
+      "四結論卡：左上 SEQC2 驗證 LOH.bed 可信；右上 10/10 filter 全失敗\n甲基化三維度 NEGATIVE：heterogeneity、scenario、correlation 全否決\nASM 是唯一亮點：read-level epigenetic characterization\n→ 接下來看框架...",
+      "三層框架：LOH 定義 → ISM 影響 → 全面關閉\n四象限：5kHz/DORADO × paired/TO 四組資料\n本週所有結果都在此框架下解讀\n→ 看看具體完成進度...",
+      "目標完成度：7 個主目標中 6 個已有確定性結論\nSEQC2 驗證：新增本週，Jaccard=0.928\nQS mode-aware：C++ 已實作並部署\n→ 時間軸...",
+      "時間軸：3/31 啟動系統性觀察 → 4/01 ASM 定量 → 4/02 因果鏈 → 4/06 全面關閉\n密集驗證週：一週完成 166 圖表\n→ 看 SEQC2 驗證細節...",
+      "SEQC2 驗證：FDA 金標準使用多平台（Illumina+PacBio+10X）多中心共識\nJaccard=0.928：兩種完全獨立方法高度一致\nSensitivity=0.961：LOH.bed 幾乎不遺漏真實 LOH\n→ LOH 可信，但 ISM 在 LOH 內表現如何...",
+      "ISM LOH 影響：7/7 樣本甲基化 AUC≈0.50（等於隨機）\nPERMANOVA valid rate 僅 5-6%（正常>80%）\n10/10 filter 策略全超 TP loss 安全線\nQS mode-aware 已修正：TO 停用 LOH penalty\n→ Non-LOH 有救嗎...",
+      "Non-LOH 探索：max corrected AUC<0.58\nVoting 多特徵組合：AUC=0.577 < 0.58 門檻\nSimpson's Paradox：cnLOH 0.587 其實是 per-sample 0.50\n結論：Non-LOH 同樣無法突破\n→ 其他 NEGATIVE 結果...",
+      "甲基化三維度：O11（heterogeneity）O12（scenario）O13（correlation）全 NEGATIVE\nTO 60+ 特徵 NO-GO：max AUC<0.64，safe removal=0%\nASM 唯一亮點：32-66% SNV 有 allele-specific methylation\n→ 結論總表...",
+      "結論總表：14 項結論的判決與穩定度\n本週新增 4 項確定性結論\n穩定度 ⭐4-5 為可直接引用的研究結論\n→ 下一步行動...",
+      "下一步：PON-only phasing 全量重跑 → Phase 2A normal reference\n待辦：haplotag + ISM 全量重跑（7 samples × paired + TO）\n不建議：繼續探索 TO post-hoc filtering\n→ 附錄路徑...",
+      "附錄：完整來源路徑可回查\n版本檔可追溯所有生成參數\n重生指令一鍵重建整份簡報\n感謝聆聽，歡迎提問。"
+    ],
+    "key_findings_title": "本週重點結論",
+    "key_findings_title_en": "Key Findings This Week",
+    "key_findings_subtitle": "先看四條證據鏈，快速掌握可直接沿用的研究口徑",
+    "key_findings_subtitle_en": "Four evidence chains for immediately actionable research conclusions",
+    "goals_title": "主要目標與完成度",
+    "goals_title_en": "Key Objectives & Completion Status",
+    "goals_subtitle": "這一週的主線任務已從實驗探索推進到制度化與 annotation 層落地",
+    "goals_subtitle_en": "Main tasks progressed from exploration to institutionalization & annotation layer deployment",
+    "paths_title": "複查路徑與再生成方式",
+    "paths_title_en": "Audit Paths & Regeneration",
+    "paths_subtitle": "本簡報對應的來源、數據與客製化設定檔都可直接回查與重生",
+    "paths_subtitle_en": "All source reports, data, and config files are traceable and reproducible"
+  }
+}

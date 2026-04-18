@@ -1,0 +1,15 @@
+test	group_A	group_B	metric	n_A	n_B	median_A	median_B	mean_A	mean_B	U_statistic	p_value	cohens_d
+TO_only vs both_LOH | eff_hp_reads_TO	TO_only_LOH	both_LOH	effective_hp_reads_to	39978	88109	68	60	73.8546	61.4558	1.97011e+09	2.02444e-254	0.292694
+TO_only vs neither | eff_hp_reads_TO	TO_only_LOH	neither_LOH	effective_hp_reads_to	39978	158648	68	79	73.8546	83.8649	2.63564e+09	0	-0.220681
+TO_only vs both_LOH | eff_hp_reads_Paired	TO_only_LOH	both_LOH	effective_hp_reads_paired	39978	88109	61	60	63.3292	61.5352	1.71889e+09	5.07353e-12	0.0434639
+TO_only vs neither | eff_hp_reads_Paired	TO_only_LOH	neither_LOH	effective_hp_reads_paired	39978	158648	61	79	63.3292	83.3736	2.28997e+09	0	-0.442821
+TO_only vs both_LOH | hp_ratio_TO	TO_only_LOH	both_LOH	hp_ratio_core_to	39978	88109	0.0258621	1	0.397736	0.862835	8.09736e+08	0	-1.19754
+TO_only vs both_LOH | hp_ratio_Paired	TO_only_LOH	both_LOH	hp_ratio_core_paired	33366	88109	0.508772	0.914286	0.507623	0.50529	1.45479e+09	0.00455908	0.00540463
+low_depth_pct | both_LOH | paired	both_LOH	-	effective_hp_reads_paired <= 30	10557	88109	11.9817						
+low_depth_pct | both_LOH | to	both_LOH	-	effective_hp_reads_to <= 30	11339	88109	12.8693						
+low_depth_pct | TO_only_LOH | paired	TO_only_LOH	-	effective_hp_reads_paired <= 30	11430	39978	28.5907						
+low_depth_pct | TO_only_LOH | to	TO_only_LOH	-	effective_hp_reads_to <= 30	8155	39978	20.3987						
+low_depth_pct | Paired_only_LOH | paired	Paired_only_LOH	-	effective_hp_reads_paired <= 30	639	1874	34.0982						
+low_depth_pct | Paired_only_LOH | to	Paired_only_LOH	-	effective_hp_reads_to <= 30	624	1874	33.2978						
+low_depth_pct | neither_LOH | paired	neither_LOH	-	effective_hp_reads_paired <= 30	14029	158648	8.84285						
+low_depth_pct | neither_LOH | to	neither_LOH	-	effective_hp_reads_to <= 30	14432	158648	9.09687						
