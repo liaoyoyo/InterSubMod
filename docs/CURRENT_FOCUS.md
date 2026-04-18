@@ -153,6 +153,11 @@
   - Step 2.5 AF∈[0.4,0.6] × CN × NGroups 分層：僅 HCC1954 (1/7) 符合 germline pattern（TP rate=0.146）
   - Step 3 HCC1954 vs HCC1395 機制對比：HCC1954 Z3 FP 集中 chr5/8/17（HER2/MYC amplicon），FP NumReads=55 vs TP=37（p=4.7e-9）→ CNV amplicon artifact 驅動；HCC1395 均勻分佈
   - **結論**：Z3 內無跨樣本二階區分特徵；HCC1954 例外已由 F pilot canonical filter 覆蓋
+- **Z3 × HCC1954 Amplicon Blacklist Pilot（2026-04-19 CONDITIONAL）**：[設計](experiments/in_progress/2026/04/20260419_Z3_amplicon_blacklist_pilot_design_01.md) · [結果](experiments/in_progress/2026/04/20260419_Z3_amplicon_blacklist_pilot_result_01.md)
+  - S2 whole-chr5/8/17 ∩ Z3：HCC1954 ΔF1=+0.0065（ceiling +0.0075 的 87%）
+  - 其他 6 樣本 mean ΔF1=−0.0044（5/6 hurt）→ 非 global canonical filter
+  - Circularity guard（S3 CovM 95%ile non-Z3 baseline）信號過弱 Δ≈+0.0002
+  - **結論**：HCC1954-local CONDITIONAL；不納入預設 filter；Zone-Aware Framework 定位不變
   - H1 CONDITIONAL → Z1b 放寬後 TO 4.6% 覆蓋率、TP rate 0.965（7 變體 Pareto 最佳）
   - H3 PARTIAL：Paired 7/7 ≥ 89.1% 確認；TO 6/7 significant 但絕對值 ~72%
   - TO zone TP rate 範圍 0.61-0.94
