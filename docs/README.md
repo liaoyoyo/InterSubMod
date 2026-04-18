@@ -18,6 +18,7 @@
 ### 常用入口
 
 - [當前目標](CURRENT_FOCUS.md)
+- [**研究構想總索引**](concepts/2026/04/20260409_研究構想總索引_01.md) ← 研究大圖景、發展樹、理論基礎、論文大綱
 - [研究歷史索引](experiments/INDEX.md)
 - [研究方法與突破方向全域分析](references/20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md)
 - [五目標研究願景與 LOH 先導觀察策略](research/methylation_methodology/2026/03/20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md)
@@ -26,6 +27,14 @@
 - [研究主線整合週報（含 phase 2 與 annotation）](reports/validated/2026/03/20260311_研究主線週報_20260305_20260311_phase2_annotation整合_01.md)
 - [簡報專用入口](/big8_disk/liaoyoyo2001/InterSubMod/docs/presentations/README.md)
 - [AI provenance 專用入口](/big8_disk/liaoyoyo2001/InterSubMod/docs/provenance/README.md)
+
+### 研究構想入口（Layer 0.5）
+
+- [研究構想總索引](concepts/2026/04/20260409_研究構想總索引_01.md) — 8 份構想文件的導覽入口
+- [研究構想與理論基礎](concepts/2026/04/20260409_研究構想與理論基礎_01.md) — 生物學+技術+假設鏈
+- [研究項目發展樹](concepts/2026/04/20260409_研究項目發展樹_01.md) — 6 分支 + 13 死路
+- [待確認重要事項](concepts/2026/04/20260409_待確認重要事項_01.md) — P0 阻塞 + 隱含假設
+- [論文寫作大綱](concepts/2026/04/20260409_論文寫作大綱_01.md) — 投稿策略+故事線
 
 ### 研究入口
 
@@ -71,6 +80,7 @@ scripts/analysis/check_ai_agent_readiness.sh
 | 層 | 文件 | 目的 |
 |---|---|---|
 | Layer 0 (地圖) | `docs/README.md`（本頁）| 全局導航，方向感 |
+| Layer 0.5 (構想) | `docs/concepts/2026/04/` | 研究大圖景、發展樹、理論基礎、論文規劃 |
 | Layer 1 (當下) | `docs/CURRENT_FOCUS.md` | 現在在做什麼、阻塞點 |
 | Layer 2 (歷史) | `docs/experiments/INDEX.md` | 已試驗方向，成功/失敗總覽 |
 | Layer 3 (細節) | 各 experiments/reports/solutions 文件 | 完整數據與推導 |
@@ -133,9 +143,14 @@ scripts/analysis/check_ai_agent_readiness.sh
 - 距離計算、聚類分析、Bernoulli 度量（2025-11 ~ 2025-12）✅ 已完成
 - 統計顯著性分析（Fisher / PERMANOVA / Cramér's V）（2025-12 ~ 2026-01）✅ 已驗證
 - TP/FP 特徵富集分析與 F1 最佳化（2026-01）✅ F1=0.8481
-- Subsample 混樣甲基化偏差分析（2026-02 ~ 2026-03）⏳ 進行中
-- Purity-Aware 策略驗證（2026-02 ~ 2026-03）🔄 值得再探索
+- Subsample 混樣甲基化偏差分析（2026-02 ~ 2026-03）❌ NEGATIVE — tumor-normal 組織差異混淆
+- Purity-Aware 策略驗證（2026-02 ~ 2026-03）❌ NEGATIVE — subsample 無法模擬純度效應
 - 方法學審查 closeout 與突破方向 roadmap（2026-03-24）✅ 已收斂
+- Phase 1A ML Read Classification（2026-03-25 ~ 2026-03-28）✅ paired-pure delta F1=+0.0112 已鎖定
+- 系統性觀察 O1-O15 + 因果鏈驗證（2026-03-31 ~ 2026-04-06）✅ ISM 定位轉向 characterization
+- Self-Phasing 循環依賴確認與 PON-Only 修正（2026-04-02 ~ 2026-04-06）✅ 62% LOH 消失確認
+- Phase 2 A-D 程式碼實作（2026-04-12 ~ 2026-04-13）✅ Normal BAM + LOH + Subclone 架構完成
+- Phase 2 全量驗證與分析（2026-04 ~）⏳ 進行中
 
 ## 研究啟動入口
 

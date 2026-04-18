@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-01-12 00:00
-更新時間: 2026-04-10 12:00
+更新時間: 2026-04-17 22:30
 狀態: validated
 資料來源:
   - docs/standards/20260228_文件命名與狀態管理規範_01.md
@@ -133,10 +133,43 @@
 - **PON 跨樣本移除率驗證 ✓**：7 樣本 raw PON rate 95.16-98.81%（mean 97.77%），refined FP-level 全 > 98%。結論穩定度 3→4。H2009 最低（95.16%）因高突變負荷非 PON 失效。
 - **H2009 負向根因 ✓**：Paired FP rate 僅 0.06%（86/132,994），改進天花板 +0.0004 F1。76.7% FP 在 LOH、89.5% Noise class。根因=caller 已近乎完美，ISM 只能誤傷 TP。甲基化特徵區分力反而優於平均。
 
+### LOH / CN / AF 結論速查
+
+完整三維度統合見 [07_LOH_CN_AF_研究總整理](reports/research_landscape/07_LOH_CN_AF_研究總整理.md)。
+
+| 維度 | Filter 方向 | Characterization 方向 |
+|------|-----------|---------------------|
+| **LOH** | ❌ 全面關閉（10/10 策略失敗） | ✅ Subclone AF×Methylation 雙模式確認 |
+| **CN** | ❌ Zone 排除全不可行 | ✅ Coverage_Multiple r=0.831 代理可信 |
+| **AF** | ⚠️ 唯一有效信號但來自 caller | ✅ AF gradient 預測 NGroups |
+
+### Zone-Aware Confidence Framework（2026-04-17 完整驗證）
+
+- **構想文件**：[Zone-Aware Confidence Framework](concepts/2026/04/20260417_Zone_Aware_Confidence_Framework_01.md)
+- **5 Zone 定義**：Z1 LOH Subclonal Active, Z2 High Somatic Hetero, Z3 Complete LOH, Z4 Normal Diploid, Z5 CN Gain Low Diversity
+- **H1/H3 驗證**：[報告](../research/zone_aware_validation/20260417_H1_H3_Zone_Validation_Report_01.md)
+- **Z3 內部特徵探索（2026-04-18 NEGATIVE）**：[報告](experiments/in_progress/2026/04/20260418_Z3_Internal_Feature_Exploration_01.md)
+  - Step 1 Z3 內 12 特徵 × 7 樣本 AUC：無特徵在 ≥3 樣本達 |AUC|≥0.60
+  - Step 2.5 AF∈[0.4,0.6] × CN × NGroups 分層：僅 HCC1954 (1/7) 符合 germline pattern（TP rate=0.146）
+  - Step 3 HCC1954 vs HCC1395 機制對比：HCC1954 Z3 FP 集中 chr5/8/17（HER2/MYC amplicon），FP NumReads=55 vs TP=37（p=4.7e-9）→ CNV amplicon artifact 驅動；HCC1395 均勻分佈
+  - **結論**：Z3 內無跨樣本二階區分特徵；HCC1954 例外已由 F pilot canonical filter 覆蓋
+  - H1 CONDITIONAL → Z1b 放寬後 TO 4.6% 覆蓋率、TP rate 0.965（7 變體 Pareto 最佳）
+  - H3 PARTIAL：Paired 7/7 ≥ 89.1% 確認；TO 6/7 significant 但絕對值 ~72%
+  - TO zone TP rate 範圍 0.61-0.94
+- **QS 模擬 ❌ NEGATIVE**：[報告](../research/zone_aware_validation/20260417_QS_Simulation_Report_01.md)
+  - 5 configs × 21 thresholds × 7 samples，max delta F1=+0.001
+  - **根因：TO QS AUC=0.497 隨機，zone delta 無法修正**
+  - QS 調整路線和 C++ 整合**暫停**
+- **結論：Zone-Aware 價值確認僅在 characterization annotation，不在 F1 改進**
+
 ### 待完成項目
 
+- ~~Zone Z1 定義放寬~~ — ✅ 完成，Z1b 為最佳（TO 4.6%, TP rate 0.965）
+- ~~Zone-Aware QS 調整模擬~~ — ❌ NEGATIVE，max delta F1=+0.001
 - haplotag + ISM 全量重跑（7 samples × paired + TO）— PON-only phasing 後
 - Phase 2A Normal Methylation Reference baseline — 依賴重跑數據
+- LOH Subclone 更精細 AF-bin 分析 — 現有數據即可
+- 7 樣本全量 Phase 2A 驗證 — 依賴重跑數據
 - Platform normalization（5kHz / DORADO / PAO / Google）
 
 ## 4. 阻塞與風險
