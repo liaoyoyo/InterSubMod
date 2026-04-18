@@ -111,7 +111,9 @@
 | **中**（多檔案/需重跑/10min-1h） | 🟡 列假設後繼續 | 🟠 節點暫停報告 | 🔴 立即暫停 |
 | **高**（跨模組/影響結論/>1h） | 🟠 節點暫停報告 | 🔴 立即暫停 | 🔴 立即暫停 |
 
-**可逆性 override**：任何不可逆操作（刪檔／C++ commit／研究方向 NO-GO／覆寫 evidence_ledger／啟動 >10min 計算）永遠 🔴 立即暫停，不論矩陣落點。對應現有 `/confirmation-protocol` 的 Hard Gate。
+**可逆性 override**：任何不可逆操作（刪檔／C++ commit／研究方向 NO-GO／覆寫 evidence_ledger）永遠 🔴 立即暫停，不論矩陣落點。對應現有 `/confirmation-protocol` 的 Hard Gate。
+
+**長時間計算（>10 min）例外**：用戶在**當輪對話明示**啟動長計算（例：「跑全量 benchmark」「平行 7 樣本」）時，**不再二次確認**，直接執行並一行告知。若用戶未明示而模型自行判斷需長計算 → 仍 🔴 暫停。
 
 **一行告知格式**：`[決策]（影響: 低/中/高, 信心: 低/中/高, 理由: 一句）`
 **範例**：`以 within-group OLS 殘差化（影響: 低, 信心: 高, 理由: O12 已驗證 pooled OLS 的 collider bias）`

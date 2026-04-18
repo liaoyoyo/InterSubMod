@@ -65,8 +65,12 @@ user-invocable: true
 - C++ 原始碼 commit（對應既有 Hard Gate hook）
 - 研究方向 NO-GO 判定（寫入 evidence_ledger verdict=NO-GO）
 - 覆寫 evidence_ledger / MEMORY.md 的既有記錄（append 不在此列）
-- 長時間計算（>10 min）的啟動（benchmark / 全量重跑）
 - 推送至遠端（git push / PR 建立）
+
+**長時間計算（>10 min）有條件例外**：
+- 用戶**當輪明示**啟動（「跑全量」「平行 7 樣本」「benchmark 這個」）→ 🟢 一行告知直接執行
+- 用戶未明示、模型自判需長計算 → 🔴 仍需暫停確認
+- 判斷依據：當輪 user message 是否出現明確的「啟動」或「跑」動詞指向該計算
 
 ### 完整暫停判斷矩陣
 
@@ -144,6 +148,8 @@ user-invocable: true
 | 判定研究方向 NO-GO | 高 | — | 🔴（不可逆） |
 | 刪除 output/ 下任何檔案 | — | — | 🔴（不可逆） |
 | C++ 原始碼 commit | — | — | 🔴（不可逆） |
+| 啟動 >10min 計算（用戶明示） | — | — | 🟢（當輪明示例外） |
+| 啟動 >10min 計算（模型自判） | — | — | 🔴（未明示） |
 
 ### 與既有權限邊界的關係
 
