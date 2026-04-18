@@ -1,6 +1,7 @@
 ---
 name: cpp-change
 description: PDD C++ 修改協議（6步驟）。在 methodology-audit 完成且用戶選定方案後啟動。確保每步驟有對應 commit，修改可追溯、可回退。觸發條件：「開始實作 [審查文件名]」、「執行方案 B」。
+user-invocable: true
 ---
 
 # CPP-Change Skill — PDD C++ 修改協議
@@ -49,10 +50,32 @@ chore: snapshot baseline before [問題名稱] change
 ```bash
 # 格式化修改的檔案
 clang-format -i src/core/XX.cpp
-
-# 確認編譯
-cd build && make -j$(nproc) 2>&1 | tail -10
 ```
+
+#### 背景編譯 + 前台繼續
+
+修改完成並格式化後，使用背景編譯以節省等待時間：
+
+```
+# 背景編譯（不阻塞前台）
+Bash("cd /big7_disk/liaoyoyo2001/InterSubMod/build && make -j$(nproc) 2>&1 | tail -20",
+     run_in_background=True)
+
+# 前台同時可進行：
+#   - 撰寫 unit test（Step 3 的測試碼）
+#   - 準備 commit message
+#   - 閱讀相關程式碼確認修改完整性
+#   - 更新 methodology audit 文件
+```
+
+**編譯完成通知到達後**：
+- 若成功 → 直接進入 Step 3 執行測試
+- 若失敗 → 查看錯誤，修復後重新背景編譯
+
+**不使用背景編譯的情況**（串行更安全）：
+- 修改了 CMakeLists.txt（需確認 build 結構正確）
+- 修改了 header 檔（影響範圍大，需先確認編譯）
+- 第一次修改本檔案（需確認語法正確）
 
 ---
 
@@ -92,7 +115,43 @@ commit 格式（依修改類型選擇）：
 
 ---
 
+### Step 4.5：CODE REVIEW（自動程式碼審查）
+
+在功能提交後、驗證前，啟動自動審查以攔截邏輯錯誤：
+
+```
+# 使用 pr-review-toolkit 的 code-reviewer agent
+Agent(prompt="Review the C++ changes in the latest commit against project conventions:
+  - Check: OWASP top-10, thread safety (OpenMP), memory leaks (HTSlib)
+  - Check: clang-format compliance, naming conventions
+  - Focus on: src/core/ changes only
+  - Report: HIGH confidence issues only",
+  subagent_type="pr-review-toolkit:code-reviewer")
+```
+
+**審查通過標準**：
+- 無 HIGH confidence issue → 直接進 Step 5
+- 有 HIGH issue → 修復後重新 commit（回到 Step 4）
+
+**可選追加審查**（大型修改時）：
+
+```
+# Silent failure 檢查（錯誤處理品質）
+Agent(prompt="Hunt for silent failures in latest C++ changes",
+  subagent_type="pr-review-toolkit:silent-failure-hunter",
+  run_in_background=True)
+
+# 型別設計檢查（新增 struct/class 時）
+Agent(prompt="Analyze type design of new types in latest changes",
+  subagent_type="pr-review-toolkit:type-design-analyzer",
+  run_in_background=True)
+```
+
+---
+
 ### Step 5：VALIDATE COMMIT（驗證結果）
+
+#### 串行驗證（預設，小改動）
 
 ```bash
 # 快速驗證（< 30 秒）
@@ -105,7 +164,21 @@ commit 格式（依修改類型選擇）：
 # /test-full
 ```
 
-執行後計算 F1 delta：
+#### 平行驗證（大改動或跨樣本確認）
+
+當修改影響多個樣本時，使用 parallel-benchmark agent 同時驗證：
+
+```
+Agent(prompt="驗證 C++ 修改對多樣本的影響:
+  TASKS:
+  1. scripts/run_batch_vcf_analysis.sh --mode HCC1395_5kHz   # 主要 discovery
+  2. scripts/run_batch_vcf_analysis.sh --mode HCC1395_DORADO  # cross-platform
+  3. scripts/run_batch_vcf_analysis.sh --mode COLO829          # cross-sample
+  OUTPUT_DIR: research/autoresearch/cycles/cpp_change_validation/
+  ", subagent_type="parallel-benchmark")
+```
+
+#### F1 delta 計算
 
 ```python
 # 使用 collect_baseline_metrics.py 對比修改前後
@@ -188,3 +261,6 @@ chore: evidence_ledger record [H_ID] cpp_improvement [問題名稱]
 - `/test-full` — 完整測試
 - `methodology-audit` skill — 審查入口
 - `collect_baseline_metrics.py` — 跨樣本基線對比
+- `pr-review-toolkit:code-reviewer` — Step 4.5 自動程式碼審查
+- `pr-review-toolkit:silent-failure-hunter` — 錯誤處理審查（可選）
+- `pr-review-toolkit:type-design-analyzer` — 型別設計審查（可選）

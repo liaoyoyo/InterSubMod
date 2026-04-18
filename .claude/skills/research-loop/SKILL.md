@@ -1,809 +1,321 @@
 ---
 name: research-loop
-description: InterSubMod 半自動研究迴圈。每輪執行「觀察→定向→假設→設計→執行→記錄→呈現→回饋」八步驟，驅動甲基化特徵探索與 F1 提升。適用 paired_full / paired_pileup / TO 三條 pipeline track。
+description: InterSubMod 半自動研究迴圈。八步驟（觀察→定向→假設→設計→執行→記錄→呈現→回饋），驅動甲基化特徵探索與 F1 提升。USE WHEN：「開始研究迴圈」「research loop」「測試新假設」「下一輪假設」。涉及 research/autoresearch/ 下的 hypothesis_queue.json、evidence_ledger.jsonl、research_direction.md。適用 paired_full / paired_pileup / TO 三條 pipeline track。
 allowed-tools: Read, Write, Bash, Glob, Grep
 user-invocable: true
 ---
 
-<!--
-InterSubMod AutoResearch Loop Skill
-版本: 1.1.0 (2026-03-22)
-設計原則:
-  - 跨模型可用：所有步驟使用具體命令，不依賴特定模型推理
-  - 觀察優先：數據分析在假設生成之前
-  - 小步升規模：pilot → medium → full
-  - TO 優先：paired 空間過小時自動建議切換
-  - Python 先於 C++：修改層級明確
-  - 全記錄：每輪建立 cycle artifact
-  - Git 紀律：改前 commit baseline，改後 commit result，確保可回溯
-  - 單獨測試優先：每次只改一個變數，驗證後才組合
-  - 組合分析：單獨效果驗證後，測試 2-3 個方向的協同/正交效果
--->
-
 # InterSubMod 研究迴圈 (Research Loop)
 
-## 此技能的目的
-
-本技能實作 autoresearch 風格的半自動研究迴圈，協助 AI 模型與人類研究者共同：
-1. 觀察甲基化特徵中的 TP/FP/FN 模式差異
-2. 生成可測試的假設（filter 規則、新特徵、C++ 改進）
-3. 執行 benchmark 並記錄 delta F1 與 TP/FP/FN 變化
-4. 根據人類回饋調整探索方向
-5. 追蹤 InterSubMod 核心使命：發現高關連甲基位點與 subclone 結構
+協助 AI 與人類研究者共同：觀察 TP/FP/FN 模式差異 → 生成可測試假設 → benchmark 驗證 → 記錄推進。
 
 ## 觸發時機
 
-當用戶說以下任何一種：
-- 「開始研究迴圈」/ 「執行研究」/ 「下一輪假設」
-- 「research loop」/ 「autoresearch」
-- 「測試新假設」/ 「探索特徵」
+「開始研究迴圈」「research loop」「測試新假設」「下一輪假設」
 
-## 前置檢查（每輪必做）
-
-在開始八步驟之前，確認以下檔案存在：
+## 前置檢查
 
 ```
-research/autoresearch/hypothesis_queue.json   ← 必須存在，可為空陣列 []
+research/autoresearch/hypothesis_queue.json   ← 必存在（可為空 []）
 research/autoresearch/evidence_ledger.jsonl   ← 可為空
-research/autoresearch/research_direction.md   ← 必須存在
+research/autoresearch/research_direction.md   ← 必存在
 ```
 
-若 `hypothesis_queue.json` 不存在，提示用戶執行 `/inject-hypothesis` 先注入初始假設。
+佇列不存在 → 提示 `/inject-hypothesis`。
 
 ---
 
-## 核心測試紀律（每輪必遵守）
+## 執行模式感知
 
-### 原則 A：Git Commit 保護每一個測試點
-
-**為什麼重要**：每次修改都可能影響 F1，沒有版本控制就無法回溯驗證或重現結果。
-
-```bash
-# 1. 每輪開始前：確認當前狀態是乾淨的 baseline
-git status
-git stash list  # 確認沒有未處理的暫存
-
-# 2. 執行測試前：建立「pre-change baseline」commit
-git add research/autoresearch/ scripts/analysis/ docs/
-git commit -m "research: [CYCLE_ID] pre-change baseline — [H_ID] 測試前快照"
-
-# 3. 執行修改與測試（見步驟 3-5）
-
-# 4. 記錄結果後：建立「result」commit
-git add research/autoresearch/ scripts/analysis/ docs/
-git commit -m "research: [CYCLE_ID] result — [H_ID] delta_F1=[+/-X.XXXX] ([verdict])"
-```
-
-**Commit 命名規範**：
-- `research: [CYCLE_ID] pre-change — [H_ID] [假設摘要]` — 測試前
-- `research: [CYCLE_ID] result — [H_ID] delta=[X] ([verdict])` — 測試後
-- `research: [CYCLE_ID] combination — [H_A]+[H_B] delta=[X]` — 組合測試後
-
-**回溯節點**：若結果為 negative 或 destructive，回到 pre-change baseline：
-```bash
-git log --oneline -10  # 找到 pre-change commit hash
-git checkout [HASH] -- scripts/analysis/[修改的檔案]  # 還原特定檔案
-# 或完整回溯：
-git reset --soft HEAD~1  # 回到上一個 commit（保留工作目錄）
-```
+本 skill 遵循「確認時機協議」（詳見 `/confirmation-protocol` skill）的模式切換。確認當前是**互動模式**（預設）或**全自動模式**。
 
 ---
 
-### 原則 B：單獨測試優先（Isolated Testing）
+## 核心紀律（摘要）
 
-**核心規則**：每次只改動一個變數（一個 threshold、一個特徵、一個規則）。
+詳見 `references/TEST_DISCIPLINE.md`，每輪必遵守：
 
-```
-❌ 錯誤：同時修改 QS threshold 和 hp_assign_rate filter → 無法判斷哪個有效
-✓ 正確：先測試 QS>=50 alone → 記錄結果 → 再獨立測試 hp_assign_rate filter
-```
-
-**單獨測試流程**：
-
-```
-Step A: 選取單一假設 H_X
-Step B: git commit 當前 baseline（pre-change）
-Step C: 修改單一變數（腳本 / threshold / 參數）
-Step D: 執行 benchmark，取得 F1 delta
-Step E: git commit 結果（result）
-Step F: 記錄結論：H_X 的獨立貢獻 = delta_F1_X
-Step G: 還原到 baseline（若 negative），或保留（若 positive）
-```
-
-**OBSERVE 訊號強度分類**（決定測試優先順序）：
-- `STRONG SIGNAL`：FP/TP 比值 > 2x 或 < 0.5x → 優先測試
-- `mild signal`：比值 1.5-2x 或 0.5-0.67x → 次要測試
-- `noise`：比值接近 1.0 → 跳過或降優先
-
----
-
-### 原則 C：組合分析（Combination Testing）
-
-**觸發條件**：至少有 2 個「單獨測試 positive」的假設（delta_F1 > 0）。
-
-**組合類型**：
-
-| 類型 | 說明 | 測試方式 |
-|------|------|---------|
-| 協同（Synergistic）| 組合效果 > 各自之和 → 特徵互補 | A AND B → delta > deltaA + deltaB? |
-| 加法（Additive）| 組合效果 ≈ 各自之和 → 特徵獨立 | A AND B → delta ≈ deltaA + deltaB |
-| 正交（Orthogonal）| 組合不影響各自 → 作用不同候選集 | A AND B 的候選集無重疊 |
-| 干涉（Interfering）| 組合效果 < 較好者單獨效果 → 特徵衝突 | 避免組合，選一個使用 |
-
-**組合測試流程**：
-
-```bash
-# 1. 確認兩個已驗證的單獨假設
-echo "H_A: [delta_F1_A], H_B: [delta_F1_B]"
-
-# 2. git checkout baseline（兩個假設的共同 pre-change 狀態）
-git checkout [BASELINE_HASH] -- scripts/analysis/[target_file]
-
-# 3. 同時應用 H_A + H_B 的改動
-
-# 4. 執行 benchmark
-# → delta_combo
-
-# 5. 分析結果
-python3 -c "
-deltaA, deltaB, delta_combo = [H_A_DELTA], [H_B_DELTA], [COMBO_DELTA]
-print('deltaA + deltaB =', deltaA + deltaB)
-print('delta_combo     =', delta_combo)
-synergy = delta_combo - (deltaA + deltaB)
-print('synergy         =', synergy, '（> 0 協同, < 0 干涉）')
-# 候選集重疊程度
-# 若重疊低 → 正交，組合有效
-# 若重疊高且 delta_combo < max(deltaA, deltaB) → 干涉，選最佳單一規則
-"
-
-# 6. git commit 組合結果
-git commit -m "research: [CYCLE_ID] combination — H_A+H_B delta=[COMBO_DELTA]"
-```
-
-**組合結論記錄**（寫入 evidence_ledger）：
-
-```json
-{
-  "cycle_id": "[COMBO_CYCLE_ID]",
-  "hypothesis_id": "[H_A]+[H_B]",
-  "combination_type": "additive|synergistic|orthogonal|interfering",
-  "delta_a_alone": [deltaA],
-  "delta_b_alone": [deltaB],
-  "delta_combined": [delta_combo],
-  "recommendation": "use_combo | use_a_only | use_b_only | skip_both"
-}
-```
-
----
-
-### 原則 D：結果分類與研究潛力標記
-
-每個假設測試後，在 evidence_ledger 中標記以下維度：
-
-| 維度 | 可選值 | 說明 |
-|------|--------|------|
-| `verdict` | positive_pilot / negative / dataset_specific / annotation_only | 測試結論 |
-| `orthogonality` | tested / untested | 是否與其他 positive 假設測試過組合 |
-| `research_potential` | high / medium / low / exhausted | 後續研究潛力 |
-| `mechanism_clarity` | clear / partial / unclear | 是否理解為什麼有效/無效 |
-
-**Research Potential 定義**：
-- `high`：單獨 positive 且機制合理，有明確擴展空間（可升 scale、可測更多樣本）
-- `medium`：單獨 positive 但 delta 小，或 dataset-specific
-- `low`：單獨 negative 但有邊際訊號，可嘗試不同 threshold
-- `exhausted`：完全 negative 且機制上排除（如 OBSERVE 預測失敗）
+- **A. Git Commit**：改前 commit baseline、改後 commit result
+- **B. 單獨測試**：每次只改一個變數
+- **C. 組合測試**：≥2 個 positive 後測試協同/正交
+- **D. 結果分類**：verdict + research_potential + mechanism_clarity
 
 ---
 
 ## 八步驟執行流程
 
-### 步驟 0：OBSERVE — 觀察數據（每輪必做）
+### 步驟 0：OBSERVE — 觀察數據 `[FYI]`
 
-**目的**：先從真實數據中發現現象，避免盲目測試假設。
+詳見 `references/OBSERVE_PROTOCOL.md`。
 
-**確認當前研究 track 與資料集**：
-先讀 `research/autoresearch/research_direction.md` 取得當前 track 與目標資料集。
+從真實數據發現現象。確認 track → 讀特徵檔 → 產出 TP/FP/FN 特徵側寫 → 識別 SIGNAL。
 
-**執行觀察指令**：
-
-```bash
-# 1. 確認最新的 per_region_features 位置
-# 通常在 experiments/outputs/ 或 scripts/ 執行後的輸出目錄
-ls scripts/outputs/features/ 2>/dev/null || ls /big8_disk/liaoyoyo2001/InterSubMod/experiments/outputs/ 2>/dev/null | head -20
-```
-
-若有 `per_region_features.tsv.gz` 或等效特徵檔：
-
-```bash
-# 2. 基礎 TP/FP/FN 特徵分佈統計（使用現有分析腳本）
-# 先找可用的分析腳本
-ls scripts/analyze_*.py 2>/dev/null
-
-# 若有 research_common.py，嘗試：
-python3 scripts/research_common.py --observe --dataset HCC1395_5kHz_TO \
-  --output research/autoresearch/cycles/CYCLE_ID/feature_obs.txt 2>/dev/null \
-  || echo "[OBSERVE] 需要手動分析或腳本尚未支援自動觀察"
-```
-
-**觀察記錄格式**（手動撰寫或腳本輸出）：
-
-```
-=== OBSERVE 結果 ===
-資料集: [DATASET_NAME]  Track: [TO/paired_full/paired_pileup]
----
-TP 特徵側寫（N=[TP_COUNT]）:
-  CramersV:     中位數=[X]  Q1=[X]  Q3=[X]
-  HPP:          中位數=[X]  Q1=[X]  Q3=[X]
-  VAF:          中位數=[X]  Q1=[X]  Q3=[X]
-  AlleleDelta:  中位數=[X]  Q1=[X]  Q3=[X]
-  Quality_Score:中位數=[X]  Q1=[X]  Q3=[X]
-
-FP 特徵側寫（N=[FP_COUNT]）:
-  CramersV:     中位數=[X]  Q1=[X]  Q3=[X]
-  HPP:          中位數=[X]  Q1=[X]  Q3=[X]  ← 若 >2x TP，標記 [SIGNAL]
-  VAF:          中位數=[X]
-  AlleleDelta:  中位數=[X]
-  Quality_Score:中位數=[X]
-
-FN 特徵側寫（N=[FN_COUNT]）:
-  CramersV:     中位數=[X]
-  HPP:          中位數=[X]
-  VAF:          中位數=[X]
-
-特殊關聯觀察:
-  [若 HPP 與 AlleleDelta 相關性 > 0.5] → 標記「HPP-AlleleDelta 協同」
-  [若 FP_median/TP_median > 2.0 for 某特徵] → 標記「[特徵] 具判別力」
-  [若 FN_median 接近 FP_median] → 標記「FN/FP 混淆風險」
-
-自動生成假設（若發現 SIGNAL）:
-  → 將「[特徵] threshold 篩選 FP」加入 hypothesis_queue.json（priority=75，status=pending）
-```
-
-**若沒有現成特徵檔**：
-記錄「本輪無 OBSERVE 數據，直接使用 evidence_ledger 的歷史觀察」並繼續。
+全自動模式：靜默執行，結果記入 cycle artifact。
 
 ---
 
-### 步驟 1：ORIENT — 定向
+### 步驟 1：ORIENT — 定向 `[FYI]`
 
-**讀取以下三個檔案**（依序，不可省略）：
+詳見 `references/OBSERVE_PROTOCOL.md` 步驟 1 區段。
 
-```bash
-# 1. 研究方向（當前焦點）
-cat research/autoresearch/research_direction.md
+讀 research_direction.md + evidence_ledger 最近 10 筆 + CURRENT_FOCUS.md → 產出 ORIENT 摘要。
 
-# 2. 最近 10 條歷史記錄
-tail -10 research/autoresearch/evidence_ledger.jsonl 2>/dev/null | \
-  python3 -c "import sys,json; [print(json.dumps(json.loads(l), ensure_ascii=False, indent=2)) for l in sys.stdin]" 2>/dev/null \
-  || tail -10 research/autoresearch/evidence_ledger.jsonl
-
-# 3. 當前焦點（快速瀏覽前 80 行）
-head -80 docs/CURRENT_FOCUS.md 2>/dev/null
-```
-
-**產出 ORIENT 摘要**：
-
-```
-=== ORIENT 摘要 ===
-當前研究 track: [TO / paired_full / paired_pileup]
-當前焦點: [來自 research_direction.md]
-最近 3 輪結果:
-  輪次 [N-2]: H[ID] [假設摘要] → delta=[+/-X.XXXX] ([verdict])
-  輪次 [N-1]: H[ID] [假設摘要] → delta=[+/-X.XXXX] ([verdict])
-  輪次 [N]:   H[ID] [假設摘要] → delta=[+/-X.XXXX] ([verdict])
-
-連續無效輪數（|delta| < 0.001）: [N] 輪
-⚠ 若 N >= 3 且 track 為 paired_*: 建議切換到 TO track（FP 空間更大）
-```
+全自動模式：靜默執行。
 
 ---
 
-### 步驟 2：HYPOTHESIZE — 選取假設
+### 步驟 2：HYPOTHESIZE — 選取假設 `[Review]`
 
-**從 hypothesis_queue.json 選取**：
+**步驟 2.0：Tombstone 檢查（自動）**
+
+選取假設前，先掃描 evidence_ledger 中所有 NEGATIVE/NO-GO 記錄，阻擋與已失敗假說重複的新假設：
+
+```bash
+python3 -c "
+import json
+tombstones = []
+try:
+    with open('research/autoresearch/evidence_ledger.jsonl') as f:
+        for line in f:
+            if not line.strip(): continue
+            rec = json.loads(line.strip())
+            if rec.get('verdict','').upper() in ('NEGATIVE','NO-GO'):
+                tombstones.append({
+                    'id': rec.get('hypothesis_id','?'),
+                    'hyp': rec.get('hypothesis','')[:60],
+                    'track': rec.get('pipeline_track',''),
+                    'conditions': rec.get('conditions',{})
+                })
+except FileNotFoundError:
+    pass
+if tombstones:
+    print(f'[TOMBSTONE] {len(tombstones)} failed hypotheses:')
+    for t in tombstones[-10:]:
+        print(f'  x {t[\"id\"]}: {t[\"hyp\"]} ({t[\"track\"]})')
+    print('New hypothesis must differ in premise, conditions, or method.')
+else:
+    print('[TOMBSTONE] No failed hypotheses on record.')
+"
+```
+
+若候選假設與 tombstone 的**方向相同且前提條件未改變** → 標記 `BLOCKED_BY_TOMBSTONE` 並跳過。
+復活條件：新數據、新方法、或前提條件明確改變（須標註差異）。
+
+**步驟 2.1：選取假設**
+
+從 `hypothesis_queue.json` 選 status=pending 且 priority 最高者。
 
 ```bash
 python3 -c "
 import json
 with open('research/autoresearch/hypothesis_queue.json') as f:
     queue = json.load(f)
-# 選 status=pending 且 priority 最高者
 pending = [h for h in queue if h['status'] == 'pending']
 if not pending:
-    print('[QUEUE EMPTY] 佇列為空，需注入新假設')
+    print('[QUEUE EMPTY] 需注入新假設')
 else:
     top = sorted(pending, key=lambda x: -x['priority'])[0]
     print(json.dumps(top, ensure_ascii=False, indent=2))
 "
 ```
 
-**呈現選取的假設**：
+**互動模式**：展示假設 + tombstone 比對結果，等用戶確認或選擇其他。
+**全自動模式**：自動選最高優先級（排除 BLOCKED_BY_TOMBSTONE），記錄選擇原因後繼續。
 
-```
-=== 選取假設 ===
-ID: H[XXX]
-類型: [rule_change / param_combo / feature_hypothesis / literature_feature / cpp_improvement]
-優先分數: [N]
-假設: [假設內容]
-來源: [來源]
-目標 track: [track]
-目標資料集: [datasets]
-預計 scale: [pilot / medium / full]
-修改層級: Tier [1/2/3]（[Python 腳本 / Python 特徵腳本 / C++ 核心]）
-```
-
-**若佇列為空**：
-依 evidence_ledger 的空白區域自動生成 3 個候選假設，呈現給用戶選擇：
-
-```
-[佇列為空] 根據歷史紀錄，建議以下 3 個新方向：
-1. [假設A] — 依據: [evidence_ledger 中的觀察]
-2. [假設B] — 依據: [尚未測試的特徵組合]
-3. [假設C] — 依據: [設計弱點 W1/W2/W3]
-請確認後注入佇列（使用 /inject-hypothesis）
-```
+佇列為空 → 依 evidence_ledger 自動生成 3 候選，互動模式下等用戶選擇，全自動模式下選第一個。
 
 ---
 
-### 步驟 3：DESIGN TEST — 設計測試
+### 步驟 3：DESIGN TEST — 設計測試 `[Gate(ML3) / Review(ML1-2)]`
 
-依假設的 `tier` 欄位決定修改方式：
+詳見 `references/SCALE_LADDER.md`。
+驗證閾值與路徑建議：參考 `/validation-protocol` skill（L1→L2→L3→L4 漸進驗證）。
 
-#### Tier 1：Python 篩選腳本（優先）
+依假設修改層級決定方式（ML1 Python 篩選 / ML2 Python 特徵 / ML3 C++）。
 
-修改目標：`scripts/evaluate_rescue_with_methylation.py` 或對應的分析腳本
+**互動模式**：展示修改計劃。ML3 必須等用戶「確認修改 C++」。
+**全自動模式**：ML1-2 自動執行。**ML3 仍為 Hard Gate** — 必須暫停等確認。
 
-```
-具體修改說明：
-  [描述要修改的規則/參數/閾值]
-  [說明修改的位置（函數名/行號）]
-  [說明修改前後的邏輯差異]
-
-執行命令：
-  [具體的 bash 命令，可直接複製貼上執行]
-```
-
-**修改前必須**：
-1. 讀取目標腳本的相關片段（使用 Read 工具）
-2. 確認修改不會破壞其他功能
-3. 先在沙盒中測試語法正確性
-4. **Git commit 當前 baseline（Pre-Change 快照）**：
-```bash
-git add research/autoresearch/ scripts/analysis/
-git commit -m "research: [CYCLE_ID] pre-change — [H_ID] 測試前 baseline 快照"
-```
-
-#### Tier 2：Python 特徵提取腳本
-
-修改目標：`scripts/research_common.py` 或新建分析腳本
-
-**規則**：必須先有 Tier 1 確認有效的特徵，才能升到 Tier 2 提取新欄位。
-
-#### Tier 3：C++ 核心（最後手段）
-
-**升級條件（全部滿足才執行）**：
-- (a) Tier 1/2 在 S2 Medium scale 驗證 delta_f1 > 0.002
-- (b) 需要全基因組或多樣本高效能執行
-- (c) 人類明確確認：「請修改 C++」
-
-若條件未全部滿足，呈現修改建議但等待人類確認後才動手：
-```
-[Tier 3 建議] 建議修改 src/core/[file].cpp:
-  位置: [函數名:行號區間]
-  改動: [說明]
-  預期效益: [說明]
-⚠ 需要您確認後才會執行修改（輸入「確認修改 C++」）
-```
-
-**Scale Ladder 選擇**：
-
-| scale | 條件 | 資料集 | 預期時間 |
-|---|---|---|---|
-| S1 pilot | 任何新假設預設 | HCC1395 only（5kHz 或 DORADO） | ~2-5 min |
-| S2 medium | pilot 通過（delta > 0，方向明確）| HCC1395 + 1-2 個不同 FP 類型的樣本 | ~10 min |
-| S3 full | medium 一致（全樣本同方向）| HCC1395_5kHz + HCC1395_DORADO + COLO829 + H1437 + H2009 + HCC1937 | ~30-60 min |
+修改前必須 Git commit baseline。
 
 ---
 
-### 步驟 4：EXECUTE — 執行測試
-
-**生成 CYCLE_ID**（格式：YYYYMMDD_HHMMSS）：
+### 步驟 4：EXECUTE — 執行測試 `[FYI]`
 
 ```bash
 CYCLE_ID=$(date +%Y%m%d_%H%M%S)
 mkdir -p research/autoresearch/cycles/${CYCLE_ID}
-echo "CYCLE_ID: ${CYCLE_ID}"
 ```
 
-**建立 cycle 紀錄**：
+依 track 執行 benchmark（S2/S3 自動啟用平行模式，詳見 `references/SCALE_LADDER.md`）。
 
+ML3 → 先 `cd build && make -j$(nproc)` 再 benchmark。
+
+全自動模式：靜默執行，完成後直接進 RECORD。
+
+**Manifest 追蹤**：若 `research/{project}/manifest.yaml` 存在，每步完成後更新 artifacts 區段：
 ```bash
-# 儲存本輪假設說明
-cat > research/autoresearch/cycles/${CYCLE_ID}/hypothesis.md << 'EOF'
-假設 ID: [H_ID]
-假設內容: [假設文字]
-來源: [來源]
-Pipeline Track: [track]
-Scale: [S1/S2/S3]
-修改層級: Tier [N]
-預期方向: [正增益 / 移除 FP / 增加 TP]
-EOF
-```
-
-**執行 benchmark**：
-
-依 track 選擇對應命令：
-
-```bash
-# TO track（5kHz）
-./scripts/run_batch_vcf_analysis.sh --mode HCC1395_5kHz_TO 2>&1 | \
-  tee research/autoresearch/cycles/${CYCLE_ID}/result.txt
-
-# TO track（DORADO）
-./scripts/run_batch_vcf_analysis.sh --mode HCC1395_DORADO_TO 2>&1 | \
-  tee research/autoresearch/cycles/${CYCLE_ID}/result.txt
-
-# Paired track
-./scripts/run_pure_research_round.sh 2>&1 | \
-  tee research/autoresearch/cycles/${CYCLE_ID}/result.txt
-
-# 快速單點驗證（chr19 only）
-./scripts/run_vcf_all_snv.sh --mode chr19-verification 2>&1 | \
-  tee research/autoresearch/cycles/${CYCLE_ID}/result.txt
-```
-
-若 Tier 3 C++ 修改：先編譯再執行：
-
-```bash
-cd build && make -j$(nproc) 2>&1 | tee research/autoresearch/cycles/${CYCLE_ID}/build.txt
-cd .. && ./scripts/run_batch_vcf_analysis.sh ... 2>&1 | tee research/autoresearch/cycles/${CYCLE_ID}/result.txt
+# 將新產出的 scripts/figures/data 路徑追加到 manifest.yaml artifacts
+# 同時更新 project.status = "executing"
 ```
 
 ---
 
-### 步驟 5：RECORD — 記錄結果
+### 步驟 5：RECORD — 記錄結果 `[FYI]`
 
-**從 result.txt 提取 F1/TP/FP/FN**：
-
-```bash
-# 嘗試自動提取（依輸出格式調整 grep 樣式）
-grep -E "F1|precision|recall|TP:|FP:|FN:" research/autoresearch/cycles/${CYCLE_ID}/result.txt | head -30
-```
-
-**從 evidence_ledger.jsonl 取得 baseline**（同 dataset 最近一筆）：
-
-```bash
-python3 -c "
-import json
-dataset = 'HCC1395_5kHz_TO'  # 替換為本輪 dataset
-results = []
-with open('research/autoresearch/evidence_ledger.jsonl') as f:
-    for line in f:
-        r = json.loads(line)
-        if dataset in r.get('datasets_tested', []):
-            results.append(r)
-if results:
-    latest = results[-1]
-    print('Baseline F1:', latest['result_f1'].get(dataset))
-    print('Baseline TP/FP/FN from:', latest['cycle_id'])
-else:
-    print('No baseline found for', dataset)
-    print('Use initial baseline from Pipeline Track table')
-"
-```
-
-**寫入 evidence_ledger.jsonl**（append，不覆蓋）：
+1. 從 result.txt 提取 F1/TP/FP/FN
+2. 從 evidence_ledger 取 baseline
+3. **自動追加** evidence_ledger.jsonl（不再需要手動）：
 
 ```bash
 python3 -c "
 import json
 from datetime import datetime
-
 record = {
     'cycle_id': '${CYCLE_ID}',
     'hypothesis_id': '[H_ID]',
-    'hypothesis': '[假設摘要，60字以內]',
-    'pipeline_track': '[TO/paired_full/paired_pileup]',
+    'hypothesis': '[假設摘要]',
+    'pipeline_track': '[track]',
     'datasets_tested': ['[DATASET]'],
-    'scale': '[pilot/medium/full]',
-    'baseline_f1': {'[DATASET]': [BASELINE_F1]},
-    'result_f1': {'[DATASET]': [RESULT_F1]},
-    'delta_f1': {'[DATASET]': [DELTA_F1]},
-    'delta_tp': {'[DATASET]': [DELTA_TP]},
-    'delta_fp': {'[DATASET]': [DELTA_FP]},
-    'delta_fn': {'[DATASET]': [DELTA_FN]},
-    'key_observations': '[本輪重要觀察，來自 result.txt 分析]',
-    'feature_correlations_noted': '[特徵間特殊關聯，若本輪有發現]',
-    'verdict': '[positive_pilot/negative/dataset_specific/annotation_only]',
-    'human_decision': '',
-    'human_notes': '',
+    'scale': '[scale]',
+    'baseline_f1': {'[DATASET]': 0.0},
+    'result_f1': {'[DATASET]': 0.0},
+    'delta_f1': {'[DATASET]': 0.0},
+    'delta_tp': {'[DATASET]': 0},
+    'delta_fp': {'[DATASET]': 0},
+    'delta_fn': {'[DATASET]': 0},
+    'verdict': '[verdict]',
+    'research_potential': '[potential]',
+    'mechanism_clarity': '[clarity]',
+    'conditions': {
+        'mode': '[paired/TO]',
+        'samples': 0,
+        'metric': '[AUC/F1/effect_size]',
+        'method': '[method_description]'
+    },
+    'conclusion_stability': 0.0,
+    'superseded_by': None,
+    'valid_until': None,
     'timestamp': datetime.now().isoformat(),
-    'tier_used': [1/2/3],
-    'artifacts_path': 'research/autoresearch/cycles/${CYCLE_ID}/',
-    'git_commit_result': '[git rev-parse --short HEAD 取得]',
-    'research_potential': '[high/medium/low/exhausted]',
-    'orthogonality': 'untested',
-    'mechanism_clarity': '[clear/partial/unclear]',
-    'combination_ready': True   # positive_pilot 且 research_potential=high 時設為 True
+    'artifacts_path': 'research/autoresearch/cycles/${CYCLE_ID}/'
 }
-
 with open('research/autoresearch/evidence_ledger.jsonl', 'a') as f:
     f.write(json.dumps(record, ensure_ascii=False) + '\n')
-print('Recorded:', record['cycle_id'])
 "
 ```
 
-**更新 hypothesis_queue.json 狀態**（將 H_ID 的 status 改為 pending_verdict）：
+4. 更新 hypothesis_queue.json 狀態 → pending_verdict
+5. Git commit result
+
+**Phase 2 Characterization Record（非 F1 型研究）**：
+
+若研究不涉及 F1 delta（如 subclone characterization），使用以下格式：
 
 ```bash
 python3 -c "
 import json
-with open('research/autoresearch/hypothesis_queue.json') as f:
-    queue = json.load(f)
-for h in queue:
-    if h['id'] == '[H_ID]':
-        h['status'] = 'pending_verdict'
-        break
-with open('research/autoresearch/hypothesis_queue.json', 'w') as f:
-    json.dump(queue, f, ensure_ascii=False, indent=2)
-print('Updated H_ID status')
-"
-```
-
-**Git commit 測試結果快照**：
-```bash
-git add research/autoresearch/ scripts/analysis/
-git commit -m "research: [CYCLE_ID] result — [H_ID] delta=[+/-X.XXXX] ([verdict])"
-# 若為 negative 且需要回溯：
-# git checkout [PRE_CHANGE_HASH] -- scripts/analysis/[modified_file]
-```
-
----
-
-### 步驟 6：PRESENT — 呈現給人類
-
-**標準呈現格式**（每輪固定輸出此格式）：
-
-```
-╔══════════════════════════════════════════════════════════════╗
-║ 研究迴圈結果  CYCLE: [YYYYMMDD_HHMMSS]                       ║
-║ 假設 [H_ID]: [假設摘要]                                       ║
-╠══════════════════════════════════════════════════════════════╣
-║ 資料集           基線 F1    本輪 F1    delta F1  TP  FP  FN ║
-║ [DATASET_1]      [0.XXXX]  [0.XXXX]  [+/-0.XXXX] [N] [N] [N] ║
-║ [DATASET_2]      [0.XXXX]  [0.XXXX]  [+/-0.XXXX] [N] [N] [N] ║
-╠══════════════════════════════════════════════════════════════╣
-║ 分析:                                                         ║
-║   [說明為什麼結果是正/負/混合]                                 ║
-║   [說明受影響的主要是哪類 TP/FP/FN]                           ║
-║   [若結果跨樣本不一致，說明可能原因]                           ║
-╠══════════════════════════════════════════════════════════════╣
-║ 特徵關聯觀察:                                                  ║
-║   [若本輪發現特徵間的特殊關聯，在此記錄]                       ║
-║   [例如：HPP 與 AlleleDelta 協同出現在 FP-B 中]               ║
-╠══════════════════════════════════════════════════════════════╣
-║ InterSubMod 使命指標:                                          ║
-║   高關連甲基位點（CramersV > 0.3）: [N] regions               ║
-║   Subclone 位點（Strong/Subclone class）: [M] variants        ║
-║   ISM 獨有貢獻（非 GQ/QUAL 可解釋）: [K] variants            ║
-╠══════════════════════════════════════════════════════════════╣
-║ 建議決策:                                                      ║
-║   [keep / reject / annotation_only / escalate_medium]          ║
-║   [理由]                                                       ║
-╠══════════════════════════════════════════════════════════════╣
-║ 等待您的指令:                                                  ║
-║   keep         → 採納此規則，下輪升 scale 或繼續下一假設      ║
-║   reject       → 放棄此假設，標記失敗方向                      ║
-║   annotation   → 降階為 annotation only（不入核心規則）        ║
-║   escalate     → 升 scale（pilot→medium 或 medium→full）      ║
-║   pivot [說明] → 放棄當前方向，注入新假設                      ║
-╚══════════════════════════════════════════════════════════════╝
-```
-
----
-
-### 步驟 7：FEEDBACK — 處理人類回饋
-
-依用戶輸入執行對應動作：
-
-**`keep`（採納）**：
-
-```bash
-python3 -c "
-import json
-with open('research/autoresearch/hypothesis_queue.json') as f:
-    queue = json.load(f)
-for h in queue:
-    if h['id'] == '[H_ID]':
-        h['status'] = 'adopted'
-# 同類假設優先分數 +15
-for h in queue:
-    if h['status'] == 'pending' and h['type'] == '[ADOPTED_TYPE]':
-        h['priority'] = min(100, h['priority'] + 15)
-with open('research/autoresearch/hypothesis_queue.json', 'w') as f:
-    json.dump(queue, f, ensure_ascii=False, indent=2)
-"
-# 更新 evidence_ledger 的 human_decision = 'keep'
-```
-
-**`reject`（拒絕）**：
-
-```bash
-# H_ID status = 'rejected'
-# 同方向假設 priority -= 30（最低 10）
-```
-
-**`annotation`（降階 annotation）**：
-
-```bash
-# H_ID status = 'adopted_annotation'
-# 在 research_direction.md 加入：[特徵] 已驗證為 dataset-specific annotation
-```
-
-**`escalate`（升 scale）**：
-
-```bash
-# H_ID scale 從 pilot → medium 或 medium → full
-# 更新 status = 'pending'（重新測試）
-# 自動補充 target_datasets（依 FP 類型選新樣本）
-```
-
-**`pivot [新方向說明]`**：
-
-```bash
-# 自動呼叫 inject-hypothesis 流程
-# 將新方向設定 priority = 90（最高優先）
-# 更新 research_direction.md 加入注記
-```
-
-**同步更新 evidence_ledger 的 human_decision 和 human_notes**：
-
-```bash
-python3 -c "
-import json
-import subprocess
-
-records = []
-with open('research/autoresearch/evidence_ledger.jsonl') as f:
-    for line in f:
-        records.append(json.loads(line.strip()))
-
-records[-1]['human_decision'] = '[keep/reject/annotation_only/escalate_medium/escalate_cpp]'
-records[-1]['human_notes'] = '[用戶的補充說明]'
-records[-1]['research_potential'] = '[high/medium/low/exhausted]'
-records[-1]['mechanism_clarity'] = '[clear/partial/unclear]'
-
-# 取得當前 git commit hash
-try:
-    commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode().strip()
-    records[-1]['git_commit_result'] = commit_hash
-except Exception:
-    pass
-
-with open('research/autoresearch/evidence_ledger.jsonl', 'w') as f:
-    for r in records:
-        f.write(json.dumps(r, ensure_ascii=False) + '\n')
-print('Updated human_decision and research metadata')
-"
-```
-
-**FEEDBACK 後 git commit**：
-```bash
-git add research/autoresearch/ scripts/analysis/
-git commit -m "research: [CYCLE_ID] feedback — [H_ID] decision=[DECISION] potential=[POTENTIAL]"
-```
-
-**組合測試觸發判斷**（FEEDBACK 後自動執行）：
-
-```bash
-python3 -c "
-import json
-
-with open('research/autoresearch/evidence_ledger.jsonl') as f:
-    records = [json.loads(l) for l in f if l.strip()]
-
-# 找出所有 combination_ready 的 positive 假設
-combo_candidates = [r for r in records
-                    if r.get('verdict') == 'positive_pilot'
-                    and r.get('combination_ready', False)
-                    and r.get('orthogonality', 'untested') == 'untested']
-
-if len(combo_candidates) >= 2:
-    print('[COMBINATION TRIGGER] 發現', len(combo_candidates), '個可組合的 positive pilot 假設:')
-    for r in combo_candidates:
-        print(f'  {r[\"hypothesis_id\"]}: delta_f1={r[\"delta_f1\"]}')
-    print()
-    print('建議執行組合測試（參見「原則 C：組合分析」）')
-    print('組合建議：先取最大 delta 的兩個，測試 AND 組合')
-else:
-    print(f'[組合未觸發] 目前 {len(combo_candidates)} 個 combination_ready 假設（需 >= 2）')
+from datetime import datetime
+record = {
+    'cycle_id': '${CYCLE_ID}',
+    'type': 'characterization',
+    'hypothesis': '[假說陳述]',
+    'method': '[統計方法]',
+    'result': {
+        'effect_size': '[效應量]',
+        'p_value': '[p值]',
+        'cross_sample': '[N/7]',
+        'confound_control': '[控制方法]'
+    },
+    'verdict': '[positive/negative/conditional]',
+    'project': '[project_name]',
+    'timestamp': datetime.now().isoformat(),
+    'artifacts_path': 'research/${PROJECT}/'
+}
+with open('research/autoresearch/evidence_ledger.jsonl', 'a') as f:
+    f.write(json.dumps(record, ensure_ascii=False) + '\n')
 "
 ```
 
 ---
 
-## Pipeline Track 基線表
+### 步驟 6：PRESENT — 呈現結果 `[Review]`
 
-| Track | 資料集 | 基線 F1 | FP 數量 | FN 數量 | 測試命令關鍵字 |
-|---|---|---|---|---|---|
-| paired_full | HCC1395_5kHz_paired | 0.8532 | 少 | 少 | `--mode HCC1395_5kHz_paired` |
-| paired_pileup | HCC1395_DORADO_paired | 0.8590 | 少 | 少 | `--mode HCC1395_DORADO_paired` |
-| TO | HCC1395_5kHz_TO | 0.7127 | 多 | 多 | `--mode HCC1395_5kHz_TO` |
-| TO | HCC1395_DORADO_TO | 0.7226 | 多 | 多 | `--mode HCC1395_DORADO_TO` |
+標準呈現格式：
 
-**TO 優先規則**：若 paired track 連續 3 輪 `abs(delta_f1) < 0.001`，呈現建議：
 ```
-⚠ 建議切換 TO Track
-  - paired 連續 3 輪無效（|delta| < 0.001）
-  - TO 有更多 FP 可觀察（paired FP ~數十個 vs TO FP ~數百個）
-  - 輸入「切換 TO」或繼續輸入 keep/reject 維持當前 track
+╔═══════════════════════════════════════════════════════╗
+║ 研究迴圈結果  CYCLE: [CYCLE_ID]                       ║
+║ 假設 [H_ID]: [假設摘要]                               ║
+╠═══════════════════════════════════════════════════════╣
+║ 資料集        基線F1   本輪F1   delta   TP  FP  FN   ║
+║ [DATASET]     [X.XX]  [X.XX]  [±X.XX] [N] [N] [N]   ║
+╠═══════════════════════════════════════════════════════╣
+║ 分析: [why positive/negative/mixed]                   ║
+║ 建議: [keep/reject/annotation/escalate/pivot]         ║
+╚═══════════════════════════════════════════════════════╝
 ```
+
+**步驟 6.1：視覺化驗證**（若涉及 TP/FP 區分）：
+- 前 5 個 AUC 最高 region 的 ISM 甲基化熱圖
+- 前 3 個誤分類 case 的特徵分布圖
+- 若可用，提供 IGV 截圖路徑
+
+**互動模式**：展示後暫停，等用戶確認結論。
+**全自動模式**：自動判定 verdict（delta > 0 → keep，delta ≤ 0 → reject），記錄後繼續。
 
 ---
 
-## 假設類型定義與優先分數算法
+### 步驟 7：FEEDBACK — 處理回饋 `[Gate]`
 
-| 類型 | 說明 | 基礎優先分 | 加分條件 |
-|---|---|---|---|
-| `rule_change` | 修改 VCF 篩選規則或閾值 | 70 | FP 類型明確匹配 +20；OBSERVE 中有 SIGNAL +15 |
-| `param_combo` | 修改 ISM 參數（distance_method, window_bp 等）| 60 | 前輪同方向 delta > +0.001 +15 |
-| `feature_hypothesis` | 提取新特徵欄位（需 Tier 2 腳本修改）| 65 | W1/W2/W3 設計弱點直接對應 +25 |
-| `literature_feature` | 文獻引導的特徵（附 source 標記）| 75 | 文獻 IF > 10 +10 |
-| `cpp_improvement` | C++ 核心算法改進 | 80 | 連續 3 輪 rule_change 無效觸發 +5；W1/W2/W3 +25 |
+**互動模式**：等用戶輸入 `keep` / `reject` / `annotation` / `escalate` / `pivot [方向]`。
 
-**設計弱點分（來自 2026-03-17 分析）**：
-- W1：HPP 未整合進分類邏輯 → cpp_improvement 假設 +25
-- W2：HP 不均時 AlleleDelta 虛高 → feature_hypothesis（AlleleMethDelta 新欄位）+25
-- W3：Phase block 邊界未標記 → cpp_improvement +20
+**全自動模式**：自動執行以下規則：
+- delta > 0 → `keep`，同類假設 priority +15
+- delta ≤ 0 → `reject`，同方向假設 priority -30
+- delta > 0.002 且 scale=pilot → 自動 `escalate` 到 medium
 
----
+動作執行後 Git commit。
 
-## 程式碼修改層級規則
+### 自動推進觸發（步驟 7 後自動判斷）
 
-```
-Tier 1：Python 篩選腳本（每次迭代的預設層）
-  目標腳本: scripts/evaluate_rescue_with_methylation.py
-           scripts/analyze_gq_methylation_rescue_matrix.py
-           scripts/analyze_methylation_rescue_feature_space.py
-           scripts/run_batch_vcf_analysis.sh（規則參數部分）
-  升級不需條件：直接迭代
-
-Tier 2：Python 特徵提取腳本
-  目標腳本: scripts/research_common.py
-           新建 scripts/analyze_feature_distributions.py
-  升級條件: Tier 1 確認有效特徵，需從原始輸出提取新欄位
-
-Tier 3：C++ 核心
-  目標: src/core/*.cpp, include/core/*.hpp
-  升級條件（全部需滿足）:
-    (a) Tier 1/2 在 S2 Medium 驗證 delta_f1 > 0.002
-    (b) 需全基因組或多樣本高效能執行
-    (c) 人類輸入「確認修改 C++」
-  注意: Tier 3 修改後必須執行 cd build && make -j$(nproc)
-```
+| 條件 | 動作 |
+|------|------|
+| 連續 3 輪 negative 同 track | 建議 `/pivot-direction` |
+| hypothesis_queue 為空 | 提示 `/inject-hypothesis` 或 `/research-ideation` |
+| positive + scale=pilot | 建議升級 medium |
+| verdict=concluded | 自動更新 MEMORY.md |
+| ≥2 個 combination_ready 假設 | 觸發組合測試（原則 C） |
 
 ---
 
-## InterSubMod 使命追蹤
+## 假說類型與優先分數
 
-每輪 PRESENT 必須包含以下使命指標（從 result.txt 或輸出統計提取）：
+| 類型 | 基礎分 | 加分 |
+|------|--------|------|
+| `rule_change` | 70 | FP 匹配 +20；OBSERVE SIGNAL +15 |
+| `param_combo` | 60 | 前輪同方向 delta > +0.001 +15 |
+| `feature_hypothesis` | 65 | W1/W2/W3 設計弱點 +25 |
+| `literature_feature` | 75 | IF > 10 +10 |
+| `cpp_improvement` | 80 | 連 3 輪 rule_change 無效 +5；W1/W2/W3 +25 |
 
-| 指標 | 計算方式 | 說明 |
-|---|---|---|
-| 高關連甲基位點 | `CramersV > 0.3` 的 region 數 | ISM 發現的強甲基訊號位點 |
-| Subclone 位點 | `VerificationClass = Strong 或 Subclone` 的 variant 數 | ISM 主張有 subclone 結構的位點 |
-| ISM 獨有貢獻 | `ISM_call = keep` 且 `GQ < threshold 但 Quality_Score > 60` | 非純 caller-quality 的貢獻 |
-| Subclone class precision | `Subclone class 中 TP 數 / 全 Subclone class 數` | ISM subclone 判斷的精確度 |
+**新增假說類型**：在上表新增行（類型名 + 基礎分 + 加分條件），並同步在 `.claude/skills/validation-protocol/SKILL.md`「假說類型 → 驗證路徑建議」表新增對應的 L1-L4 路徑。
 
-**目標**：追蹤 ISM 是否真正在「發現 subclone 結構」，而非僅過濾 caller noise。
+---
+
+## ISM 使命追蹤（PRESENT 必含）
+
+| 指標 | 計算 |
+|------|------|
+| 高關連甲基位點 | CramersV > 0.3 的 region 數 |
+| Subclone 位點 | VerificationClass = Strong/Subclone 的 variant 數 |
+| ISM 獨有貢獻 | ISM_call=keep 且 GQ < threshold 但 QS > 60 |
 
 ---
 
 ## 注意事項
 
-1. **每輪必須建立 cycle artifact 目錄**，即使最後結果為 negative
-2. **保留所有觀察與推論**，即使是「無效結果」也記錄原因
-3. **TP/FP/FN 絕對數字必須記錄**，不得只記 F1 差值
-4. **特徵間關聯若有發現，立即記錄**（可能比 F1 更有價值）
-5. **用戶回饋優先於自動判斷**：若用戶說「換方向」，立即更新佇列
-6. **Tier 3 修改之前**，必須等待用戶確認，不得自動執行 C++ 修改後編譯
+1. 每輪必建 cycle artifact 目錄
+2. 保留所有觀察與推論（含 negative）
+3. TP/FP/FN 絕對數字必須記錄
+4. 用戶回饋優先於自動判斷
+5. ML3 修改之前，互動/全自動模式均必須等用戶確認
