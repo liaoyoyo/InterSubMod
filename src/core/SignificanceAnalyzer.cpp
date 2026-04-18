@@ -76,16 +76,18 @@ SignificanceResult SignificanceAnalyzer::analyze(const std::vector<int>& cluster
             ++n_ref;
     }
 
-    // Phase 1: Global Tests
+    // Phase 1: Global Tests (Multi-Layer HP)
     if (config_.enable_global_test) {
-        auto [alt_result, hp_result, sample_result] = global_test_->test_all(cluster_labels, full_labels);
+        auto expanded = global_test_->test_all_expanded(cluster_labels, full_labels);
 
-        result.global_alt = alt_result;
-        result.global_hp = hp_result;
-        result.global_sample = sample_result;
+        result.global_alt = expanded.alt;
+        result.global_hp = expanded.hp;
+        result.global_hp_family = expanded.hp_family;
+        result.global_hp_fine = expanded.hp_fine;
+        result.global_sample = expanded.sample;
 
-        // Determine passed_gate based on ALT/REF or HP (any significant signal)
-        result.passed_gate = alt_result.passed_gate || hp_result.passed_gate;
+        // Gating: use hp_family (more reads = better power) as primary HP gate
+        result.passed_gate = expanded.alt.passed_gate || expanded.hp_family.passed_gate;
     }
 
     // Phase 2: Local Tests (only if passed gate)
@@ -275,6 +277,7 @@ SignificanceResult SignificanceAnalyzer::analyze(const std::vector<int>& cluster
         // Backward compatibility: copy to deprecated fields
         result.label_hp = label_result.hp_result;
         result.label_allele = label_result.allele_result;
+        result.label_sample = label_result.sample_result;
         result.dominant_label_dimension = label_result.dominant_dimension;
         result.label_significant = label_result.any_significant;
 
@@ -305,7 +308,7 @@ SignificanceResult SignificanceAnalyzer::analyze(const std::vector<int>& cluster
     // Determine verification_class based on Label-First and Cluster-First results
     bool cluster_significant = result.passed_gate &&
                                (result.global_alt.fisher_ffh.p_value <= 0.05 ||
-                                result.global_hp.fisher_ffh.p_value <= 0.05);
+                                result.global_hp_family.fisher_ffh.p_value <= 0.05);
     bool label_sig = result.label_significant;
 
     // HP balance check: Potential LOH if HP ratio is extreme
@@ -376,9 +379,10 @@ double SignificanceAnalyzer::compute_heuristic_score(const SignificanceResult& r
     double score = 0.0;
     double p_val_alt = (result.global_alt.valid) ? result.global_alt.fisher_ffh.p_value : 1.0;
     double p_val_hp = (result.global_hp.valid) ? result.global_hp.fisher_ffh.p_value : 1.0;
+    double p_val_hp_family = (result.global_hp_family.valid) ? result.global_hp_family.fisher_ffh.p_value : 1.0;
 
-    // Take the best (lowest) p-value from ALT or HP
-    double best_p = std::min(p_val_alt, p_val_hp);
+    // Take the best (lowest) p-value from ALT, HP, or HP-family
+    double best_p = std::min({p_val_alt, p_val_hp, p_val_hp_family});
 
     // Primary: -log10(best_p)
     if (best_p > 0) {
@@ -387,10 +391,11 @@ double SignificanceAnalyzer::compute_heuristic_score(const SignificanceResult& r
         score = 20.0;  // Cap for p=0
     }
 
-    // Bonus for Cramér's V (best of ALT or HP)
+    // Bonus for Cramér's V (best of ALT, HP, or HP-family)
     double best_v = 0.0;
     if (result.global_alt.cramers_v_reliable) best_v = std::max(best_v, result.global_alt.cramers_v);
     if (result.global_hp.cramers_v_reliable) best_v = std::max(best_v, result.global_hp.cramers_v);
+    if (result.global_hp_family.cramers_v_reliable) best_v = std::max(best_v, result.global_hp_family.cramers_v);
 
     score += best_v * 2.0;
 

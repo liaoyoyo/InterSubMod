@@ -13,7 +13,8 @@ ReadAggregator::ReadAggregator(const ReadAggregateConfig& config) : config_(conf
 ReadAggregateResult ReadAggregator::aggregate(const std::vector<bam1_t*>& reads,
                                                const SomaticSnv&            snv,
                                                const std::string&           ref_seq,
-                                               int32_t                      region_start) {
+                                               int32_t                      region_start,
+                                               bool                         is_tumor) {
     ReadAggregateResult out;
     ReadParser read_parser(config_.filter_config);
     MethylationParser methyl_parser;
@@ -40,12 +41,15 @@ ReadAggregateResult ReadAggregator::aggregate(const std::vector<bam1_t*>& reads,
             }
         }
 
-        ReadInfo info = read_parser.parse(b, read_count, true, snv, ref_seq, region_start);
+        ReadInfo info = read_parser.parse(b, read_count, is_tumor, snv, ref_seq, region_start);
 
-        if (info.alt_support == AltSupport::UNKNOWN && !config_.no_filter_output) {
+        // Normal reads: skip alt-support filter. They are REF at somatic SNV
+        // sites by definition; UNKNOWN simply means the read doesn't cover
+        // the SNV position, but its methylation data is still valuable.
+        if (is_tumor && info.alt_support == AltSupport::UNKNOWN && !config_.no_filter_output) {
             if (config_.collect_filtered_reads) {
                 out.filtered_reads.push_back(
-                    read_parser.create_filtered_info(b, true, FilterReason::SNV_NOT_COVERED));
+                    read_parser.create_filtered_info(b, is_tumor, FilterReason::SNV_NOT_COVERED));
             }
             continue;
         }

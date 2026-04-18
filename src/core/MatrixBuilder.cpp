@@ -103,6 +103,27 @@ void MatrixBuilder::finalize() {
     finalized_ = true;
 }
 
+void MatrixBuilder::merge(MatrixBuilder& other) {
+    if (finalized_ || other.finalized_) {
+        throw std::runtime_error("MatrixBuilder::merge: Cannot merge finalized MatrixBuilders");
+    }
+
+    // Append reads from other
+    reads_.insert(reads_.end(), other.reads_.begin(), other.reads_.end());
+
+    // Append methylation data from other
+    read_methyl_data_.insert(read_methyl_data_.end(), other.read_methyl_data_.begin(),
+                             other.read_methyl_data_.end());
+
+    // Re-number all read_ids to be sequential (0 to total_reads - 1)
+    for (size_t i = 0; i < reads_.size(); ++i) {
+        reads_[i].read_id = static_cast<int>(i);
+    }
+
+    // Clear the source builder
+    other.clear();
+}
+
 void MatrixBuilder::clear() {
     reads_.clear();
     read_methyl_data_.clear();

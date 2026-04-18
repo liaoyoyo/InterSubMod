@@ -56,6 +56,9 @@ struct LabelTestResult {
     // Stage 3: Allele test (ALT vs REF)
     LabelDeltaResult allele_result;
 
+    // Sample ASM test (Tumor vs Normal)
+    LabelDeltaResult sample_result;
+
     // Deprecated fields (kept for backward compatibility)
     LabelDeltaResult hp_result;      // Use hp_multistage.merged instead
     double hp_permanova_f = 0.0;     // Use hp_multistage.fine_f instead
@@ -177,6 +180,14 @@ private:
      * ALT -> 0, REF -> 1, UNKNOWN -> -1 (excluded)
      */
     std::vector<int> allele_to_binary_labels(const std::vector<FullLabel>& full_labels);
+
+    /**
+     * @brief Convert Sample type to binary group labels
+     *
+     * Tumor -> 0, Normal -> 1
+     * All reads get a valid label (no exclusions).
+     */
+    std::vector<int> sample_to_binary_labels(const std::vector<FullLabel>& full_labels);
 
     // ========================================================================
     // Distance Computation

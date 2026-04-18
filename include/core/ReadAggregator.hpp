@@ -57,12 +57,16 @@ public:
      * @param region_start  Genomic start coordinate of ref_seq; interpreted as
      *                      0-based by ReadParser and MethylationParser (same
      *                      convention as FastaReader::fetch_sequence start param)
+     * @param is_tumor      True for tumor reads, false for normal reads.
+     *                      Normal reads skip alt-support filtering (they are REF
+     *                      at somatic SNV sites by definition).
      * @return Aggregated result (matrix builder, filtered reads, strand counts)
      */
     ReadAggregateResult aggregate(const std::vector<bam1_t*>& reads,
                                    const SomaticSnv&            snv,
                                    const std::string&           ref_seq,
-                                   int32_t                      region_start);
+                                   int32_t                      region_start,
+                                   bool                         is_tumor = true);
 
 private:
     ReadAggregateConfig config_;

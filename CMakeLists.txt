@@ -103,6 +103,7 @@ add_library(inter_sub_mod_core
     src/core/SignificanceAnalyzer.cpp
     src/core/LabelTest.cpp
     src/core/NormalBaseline.cpp
+    src/core/PerCpgAsm.cpp
     src/core/LohBedAnnotator.cpp
     src/core/SubcloneAnalyzer.cpp
     src/core/ReadAggregator.cpp
@@ -163,6 +164,7 @@ add_executable(run_tests
     tests/test_significance_analyzer.cpp
     tests/test_label_test.cpp
     tests/test_read_aggregator.cpp
+    tests/test_per_cpg_asm.cpp
 )
 target_link_libraries(run_tests PRIVATE inter_sub_mod_core GTest::gtest)
 

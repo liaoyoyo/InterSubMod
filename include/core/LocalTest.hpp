@@ -53,10 +53,16 @@ public:
                            std::vector<ClusterStats>& stats);
 
     /**
-     * @brief Test one-vs-rest for HP dimension
+     * @brief Test one-vs-rest for HP dimension (pure germline)
      */
     void test_hp_local(const std::vector<int>& cluster_labels, const std::vector<FullLabel>& full_labels,
                        std::vector<ClusterStats>& stats);
+
+    /**
+     * @brief Test one-vs-rest for HP family dimension (germline + somatic merged)
+     */
+    void test_hp_family_local(const std::vector<int>& cluster_labels, const std::vector<FullLabel>& full_labels,
+                              std::vector<ClusterStats>& stats);
 
     /**
      * @brief Test one-vs-rest for sample dimension

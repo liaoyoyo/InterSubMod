@@ -293,6 +293,71 @@ TEST_F(SignificanceAnalyzerTest, Determinism_SameSeedProducesSameResult) {
     // data produces p=1/(n+1) regardless of seed.
 }
 
+TEST_F(SignificanceAnalyzerTest, HPFamily_GatingPassesWhenPureFails) {
+    // Scenario: all reads use somatic HP tags "1-1" and "2-1".
+    // Pure HP test (HP1 vs HP2) has zero valid reads → cannot pass gating.
+    // HP Family test (HP1-fam vs HP2-fam) includes all reads → should pass gating.
+    std::vector<int> cluster_labels;
+    std::vector<FullLabel> full_labels;
+
+    // Cluster 0: 15 HP1-1 (ALT)
+    for (int i = 0; i < 15; ++i) {
+        cluster_labels.push_back(0);
+        FullLabel label;
+        label.allele = AltSupport::ALT;
+        label.hp_tag = "1-1";
+        label.is_tumor = true;
+        full_labels.push_back(label);
+    }
+
+    // Cluster 1: 15 HP2-1 (REF)
+    for (int i = 0; i < 15; ++i) {
+        cluster_labels.push_back(1);
+        FullLabel label;
+        label.allele = AltSupport::REF;
+        label.hp_tag = "2-1";
+        label.is_tumor = true;
+        full_labels.push_back(label);
+    }
+
+    int n = static_cast<int>(cluster_labels.size());
+
+    // Distance matrix: low within-cluster, high between-cluster
+    Eigen::MatrixXd dist_matrix(n, n);
+    dist_matrix.setZero();
+    for (int i = 0; i < n; ++i) {
+        for (int j = i + 1; j < n; ++j) {
+            bool same_cluster = (cluster_labels[i] == cluster_labels[j]);
+            double d = same_cluster ? 0.1 : 0.9;
+            dist_matrix(i, j) = d;
+            dist_matrix(j, i) = d;
+        }
+    }
+
+    Eigen::MatrixXd meth_matrix(n, 10);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < 10; ++j) {
+            meth_matrix(i, j) = (cluster_labels[i] == 0) ? 0.9 : 0.1;
+        }
+    }
+
+    SignificanceResult result = analyzer_->analyze(
+        cluster_labels, full_labels, dist_matrix, meth_matrix, 0, "chr1:5000:C:T");
+
+    // Pure HP test should be invalid (no HP1/HP2 reads)
+    EXPECT_FALSE(result.global_hp.valid);
+
+    // HP Family test should be valid and significant
+    EXPECT_TRUE(result.global_hp_family.valid);
+    EXPECT_LT(result.global_hp_family.fisher_ffh.p_value, 0.05);
+
+    // Gating should pass (via allele and/or hp_family)
+    EXPECT_TRUE(result.passed_gate);
+
+    // Heuristic score should be positive
+    EXPECT_GT(result.heuristic_score, 0.0);
+}
+
 TEST_F(SignificanceAnalyzerTest, LabelPermanova_InvalidWithoutTwoGroups) {
     std::vector<int> cluster_labels;
     std::vector<FullLabel> full_labels;

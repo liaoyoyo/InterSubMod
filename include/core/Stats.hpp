@@ -37,10 +37,20 @@ enum class TestLabel : uint8_t {
     ALLELE_REF = 1,
     ALLELE_UNKNOWN = 2,
 
-    // HP dimension (collapsed)
+    // HP dimension (collapsed — pure germline only)
     HP_1 = 10,
     HP_2 = 11,
     HP_OTHER = 12,  // HP1-1, HP2-1, HP3, unphase
+
+    // HP dimension (family-level — germline + somatic merged)
+    HP_FAMILY_1 = 13,  // HP1 + HP1-1
+    HP_FAMILY_2 = 14,  // HP2 + HP2-1
+
+    // HP dimension (fine-grained — 4-group)
+    HP_FINE_1 = 15,    // Pure germline HP1
+    HP_FINE_1_1 = 16,  // Somatic on HP1
+    HP_FINE_2 = 17,    // Pure germline HP2
+    HP_FINE_2_1 = 18,  // Somatic on HP2
 
     // Sample dimension
     SAMPLE_TUMOR = 20,
@@ -74,6 +84,8 @@ struct FullLabel {
      */
     TestLabel get_allele_label() const;
     TestLabel get_hp_label() const;
+    TestLabel get_hp_family_label() const;
+    TestLabel get_hp_fine_label() const;
     TestLabel get_sample_label() const;
 };
 
@@ -183,6 +195,9 @@ struct GlobalTestResult {
     // Gating
     bool passed_gate = true;
 
+    // Multi-group info (for HP fine-grained test)
+    int n_valid_groups = 0;  ///< Number of valid groups (after sparse exclusion)
+
     // Validity
     bool valid = true;
     std::string invalid_reason;
@@ -201,14 +216,21 @@ struct ClusterStats {
     int count_unknown = 0;
     int count_hp1 = 0;
     int count_hp2 = 0;
-    int count_hp_other = 0;
+    int count_hp_other = 0;  // Backward-compatible: HP1-1 + HP2-1 + HP3 + HP0
+    int count_hp1_1 = 0;     // Somatic on haplotype 1
+    int count_hp2_1 = 0;     // Somatic on haplotype 2
+    int count_hp3 = 0;       // Unresolvable ALT haplotype
+    int count_hp0 = 0;       // Unphased
+    int count_hp_family_1 = 0;  // HP1 + HP1-1
+    int count_hp_family_2 = 0;  // HP2 + HP2-1
     int count_tumor = 0;
     int count_normal = 0;
 
     // One-vs-Rest test results
-    FisherResult fisher_allele;  // ALT vs REF
-    FisherResult fisher_hp;      // HP1 vs HP2
-    FisherResult fisher_sample;  // Tumor vs Normal
+    FisherResult fisher_allele;      // ALT vs REF
+    FisherResult fisher_hp;          // HP1 vs HP2 (pure germline)
+    FisherResult fisher_hp_family;   // HP1-family vs HP2-family
+    FisherResult fisher_sample;      // Tumor vs Normal
 
     double delta_proportion_alt = 0.0;  // P(ALT|this) - P(ALT|rest)
 };
@@ -383,7 +405,9 @@ struct SignificanceResult {
 
     // Global test results (Cluster-First)
     GlobalTestResult global_alt;
-    GlobalTestResult global_hp;
+    GlobalTestResult global_hp;          // Layer 2: Pure germline HP1 vs HP2
+    GlobalTestResult global_hp_family;   // Layer 1: HP1-family vs HP2-family
+    GlobalTestResult global_hp_fine;     // Layer 3: Fine-grained 4-group
     GlobalTestResult global_sample;
 
     // Local test results
@@ -401,6 +425,7 @@ struct SignificanceResult {
     // Note: label_hp is deprecated, use hp_multistage.merged instead
     LabelDeltaResult label_hp;      // HP1 vs HP2 delta test (deprecated)
     LabelDeltaResult label_allele;  // ALT vs REF delta test (Stage 3)
+    LabelDeltaResult label_sample;  // Tumor vs Normal delta test (Sample ASM)
     PermanovaResult label_hp_permanova;       // HP merged labels on distance matrix
     DispersionResult label_hp_dispersion;
     bool label_hp_dispersion_warning = false;

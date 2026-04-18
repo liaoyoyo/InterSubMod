@@ -8,6 +8,7 @@
 #include "core/BamReader.hpp"
 #include "core/Config.hpp"
 #include "core/LohBedAnnotator.hpp"
+#include "core/PerCpgAsm.hpp"
 #include "core/SubcloneAnalyzer.hpp"
 #include "core/DistanceMatrix.hpp"
 #include "core/HierarchicalClustering.hpp"
@@ -149,10 +150,30 @@ struct RegionResult {
     int normal_hp1_count;        ///< Normal reads in HP1
     int normal_hp2_count;        ///< Normal reads in HP2
 
+    // Signed HP methylation delta (mean per-CpG methylation difference)
+    // Unlike distance-based delta, these capture DIRECTION: HP1 meth > HP2 → positive
+    double tumor_hp_signed_delta;    ///< mean(tumor_HP1_meth) - mean(tumor_HP2_meth), NaN if invalid
+    double normal_hp_signed_delta;   ///< mean(normal_HP1_meth) - mean(normal_HP2_meth), NaN if invalid
+    double hp_signed_residual;       ///< tumor_signed - normal_signed (somatic directional ASM change)
+    double combined_hp_signed_delta; ///< mean(all_HP1_meth) - mean(all_HP2_meth) (full matrix)
+
     // LOH BED annotation (Phase C)
     bool loh_bed_overlap;        ///< Whether SNV position overlaps a LOH BED region
     std::string loh_source;      ///< LOH source classification: "none", "bed_only", "ratio_only", "both"
     std::string loh_bed_annotation; ///< Annotation from BED file (4th column)
+
+    // Per-CpG ASM and epiallele metrics (Phase E)
+    bool per_cpg_asm_valid;          ///< Whether per-CpG ASM computation succeeded
+    int per_cpg_fisher_n_sig;        ///< Number of CpGs with FDR < 0.05
+    double per_cpg_fisher_frac_sig;  ///< Fraction of tested CpGs significant
+    int per_cpg_fisher_n_tested;     ///< Number of CpGs tested
+    double per_cpg_fisher_max_neg_log_fdr;  ///< max(-log10(FDR))
+    double per_cpg_nme_hp1;          ///< NME for HP1-family
+    double per_cpg_nme_hp2;          ///< NME for HP2-family
+    double per_cpg_entropy_imbalance; ///< |NME_HP1 - NME_HP2|
+    double per_cpg_epipoly_hp1;      ///< Epipolymorphism for HP1-family
+    double per_cpg_epipoly_hp2;      ///< Epipolymorphism for HP2-family
+    double per_cpg_epipoly_delta;    ///< |epipoly_hp1 - epipoly_hp2|
 
     // Cross-region subclone assignment (Phase D)
     int subclone_id;             ///< Subclone group assignment (-1 = unassigned)
@@ -269,8 +290,23 @@ struct RegionResult {
           tumor_hp2_count(0),
           normal_hp1_count(0),
           normal_hp2_count(0),
+          tumor_hp_signed_delta(std::numeric_limits<double>::quiet_NaN()),
+          normal_hp_signed_delta(std::numeric_limits<double>::quiet_NaN()),
+          hp_signed_residual(std::numeric_limits<double>::quiet_NaN()),
+          combined_hp_signed_delta(std::numeric_limits<double>::quiet_NaN()),
           loh_bed_overlap(false),
           loh_source("none"),
+          per_cpg_asm_valid(false),
+          per_cpg_fisher_n_sig(0),
+          per_cpg_fisher_frac_sig(0.0),
+          per_cpg_fisher_n_tested(0),
+          per_cpg_fisher_max_neg_log_fdr(0.0),
+          per_cpg_nme_hp1(std::numeric_limits<double>::quiet_NaN()),
+          per_cpg_nme_hp2(std::numeric_limits<double>::quiet_NaN()),
+          per_cpg_entropy_imbalance(std::numeric_limits<double>::quiet_NaN()),
+          per_cpg_epipoly_hp1(std::numeric_limits<double>::quiet_NaN()),
+          per_cpg_epipoly_hp2(std::numeric_limits<double>::quiet_NaN()),
+          per_cpg_epipoly_delta(std::numeric_limits<double>::quiet_NaN()),
           subclone_id(-1),
           cluster_stability(0.0),
           has_outlier_cluster(false),

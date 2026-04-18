@@ -90,6 +90,13 @@ LabelTestResult LabelTest::test_all(const Eigen::MatrixXd& dist_matrix,
     result.allele_result = test_binary_groups(dist_matrix, allele_labels);
 
     // ========================================================================
+    // Sample ASM Test (Tumor vs Normal)
+    // ========================================================================
+
+    std::vector<int> sample_labels = sample_to_binary_labels(full_labels);
+    result.sample_result = test_binary_groups(dist_matrix, sample_labels);
+
+    // ========================================================================
     // Determine Dominant Dimension
     // ========================================================================
 
@@ -316,6 +323,14 @@ std::vector<int> LabelTest::allele_to_binary_labels(const std::vector<FullLabel>
     }
 
     return binary_labels;
+}
+
+std::vector<int> LabelTest::sample_to_binary_labels(const std::vector<FullLabel>& full_labels) {
+    std::vector<int> labels(full_labels.size());
+    for (size_t i = 0; i < full_labels.size(); ++i) {
+        labels[i] = full_labels[i].is_tumor ? 0 : 1;  // Tumor=0, Normal=1
+    }
+    return labels;
 }
 
 // ============================================================================

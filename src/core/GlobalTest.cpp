@@ -6,6 +6,7 @@
 #include "core/GlobalTest.hpp"
 
 #include <algorithm>
+#include <array>
 #include <map>
 #include <set>
 
@@ -205,6 +206,153 @@ GlobalTestResult GlobalTest::test_hp(const std::vector<int>& cluster_labels,
 }
 
 // ============================================================================
+// Build Multi-Category Contingency Table
+// ============================================================================
+
+ContingencyTableRxC GlobalTest::build_contingency_table_multi(const std::vector<int>& cluster_labels,
+                                                              const std::vector<int>& category_labels,
+                                                              int n_categories,
+                                                              const std::vector<bool>& valid_mask) {
+    std::set<int> unique_clusters;
+    for (size_t i = 0; i < cluster_labels.size(); ++i) {
+        if (valid_mask[i]) {
+            unique_clusters.insert(cluster_labels[i]);
+        }
+    }
+
+    std::map<int, int> cluster_to_idx;
+    int idx = 0;
+    for (int c : unique_clusters) {
+        cluster_to_idx[c] = idx++;
+    }
+
+    int n_clusters = static_cast<int>(unique_clusters.size());
+
+    ContingencyTableRxC table;
+    table.n_rows = n_clusters;
+    table.n_cols = n_categories;
+    table.cells.resize(n_clusters * n_categories, 0);
+
+    for (size_t i = 0; i < cluster_labels.size(); ++i) {
+        if (!valid_mask[i]) continue;
+        int row = cluster_to_idx[cluster_labels[i]];
+        int col = category_labels[i];
+        if (col >= 0 && col < n_categories) {
+            table.cells[row * n_categories + col]++;
+        }
+    }
+
+    return table;
+}
+
+// ============================================================================
+// Test HP Family Association
+// ============================================================================
+
+GlobalTestResult GlobalTest::test_hp_family(const std::vector<int>& cluster_labels,
+                                            const std::vector<FullLabel>& full_labels) {
+    size_t n = cluster_labels.size();
+    std::vector<int> binary_labels(n);
+    std::vector<bool> valid_mask(n);
+
+    for (size_t i = 0; i < n; ++i) {
+        TestLabel label = full_labels[i].get_hp_family_label();
+        if (label == TestLabel::HP_FAMILY_1) {
+            binary_labels[i] = 0;
+            valid_mask[i] = true;
+        } else if (label == TestLabel::HP_FAMILY_2) {
+            binary_labels[i] = 1;
+            valid_mask[i] = true;
+        } else {
+            binary_labels[i] = -1;
+            valid_mask[i] = false;
+        }
+    }
+
+    ContingencyTableRxC table = build_contingency_table(cluster_labels, binary_labels, valid_mask);
+    GlobalTestResult result = compute_from_table(table);
+    apply_gating(result);
+
+    return result;
+}
+
+// ============================================================================
+// Test HP Fine-Grained Association (4-group RxC)
+// ============================================================================
+
+GlobalTestResult GlobalTest::test_hp_fine(const std::vector<int>& cluster_labels,
+                                          const std::vector<FullLabel>& full_labels, int min_reads_per_group) {
+    size_t n = cluster_labels.size();
+    std::vector<int> category_labels(n, -1);
+    std::vector<bool> valid_mask(n, false);
+
+    // First pass: assign raw categories and count
+    std::array<int, 4> group_counts = {0, 0, 0, 0};
+    for (size_t i = 0; i < n; ++i) {
+        TestLabel label = full_labels[i].get_hp_fine_label();
+        int cat = -1;
+        switch (label) {
+            case TestLabel::HP_FINE_1:
+                cat = 0;
+                break;
+            case TestLabel::HP_FINE_1_1:
+                cat = 1;
+                break;
+            case TestLabel::HP_FINE_2:
+                cat = 2;
+                break;
+            case TestLabel::HP_FINE_2_1:
+                cat = 3;
+                break;
+            default:
+                break;
+        }
+        if (cat >= 0) {
+            category_labels[i] = cat;
+            valid_mask[i] = true;
+            group_counts[cat]++;
+        }
+    }
+
+    // Build remap: exclude groups with < min_reads_per_group
+    std::array<int, 4> remap = {-1, -1, -1, -1};
+    int new_idx = 0;
+    for (int g = 0; g < 4; ++g) {
+        if (group_counts[g] >= min_reads_per_group) {
+            remap[g] = new_idx++;
+        }
+    }
+
+    int n_valid_groups = new_idx;
+    if (n_valid_groups < 2) {
+        GlobalTestResult result;
+        result.valid = false;
+        result.invalid_reason = "fewer_than_2_hp_fine_groups";
+        return result;
+    }
+
+    // Apply remapping
+    for (size_t i = 0; i < n; ++i) {
+        if (valid_mask[i]) {
+            int new_cat = remap[category_labels[i]];
+            if (new_cat < 0) {
+                valid_mask[i] = false;
+                category_labels[i] = -1;
+            } else {
+                category_labels[i] = new_cat;
+            }
+        }
+    }
+
+    ContingencyTableRxC table = build_contingency_table_multi(cluster_labels, category_labels, n_valid_groups, valid_mask);
+    GlobalTestResult result = compute_from_table(table);
+    result.n_valid_groups = n_valid_groups;
+    apply_gating(result);
+
+    return result;
+}
+
+// ============================================================================
 // Test Sample Association
 // ============================================================================
 
@@ -234,6 +382,21 @@ std::tuple<GlobalTestResult, GlobalTestResult, GlobalTestResult> GlobalTest::tes
     const std::vector<int>& cluster_labels, const std::vector<FullLabel>& full_labels) {
     return {test_allele(cluster_labels, full_labels), test_hp(cluster_labels, full_labels),
             test_sample(cluster_labels, full_labels)};
+}
+
+// ============================================================================
+// Test All Expanded (Multi-Layer HP)
+// ============================================================================
+
+GlobalTest::AllTestResults GlobalTest::test_all_expanded(const std::vector<int>& cluster_labels,
+                                                         const std::vector<FullLabel>& full_labels) {
+    AllTestResults results;
+    results.alt = test_allele(cluster_labels, full_labels);
+    results.hp_family = test_hp_family(cluster_labels, full_labels);
+    results.hp = test_hp(cluster_labels, full_labels);
+    results.hp_fine = test_hp_fine(cluster_labels, full_labels);
+    results.sample = test_sample(cluster_labels, full_labels);
+    return results;
 }
 
 }  // namespace InterSubMod

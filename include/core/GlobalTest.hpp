@@ -55,9 +55,27 @@ public:
     GlobalTestResult test_allele(const std::vector<int>& cluster_labels, const std::vector<FullLabel>& full_labels);
 
     /**
-     * @brief Test association between clusters and HP labels (HP1 vs HP2)
+     * @brief Test association between clusters and HP labels (HP1 vs HP2, pure germline)
      */
     GlobalTestResult test_hp(const std::vector<int>& cluster_labels, const std::vector<FullLabel>& full_labels);
+
+    /**
+     * @brief Test association between clusters and HP family labels
+     *
+     * HP1-family (HP1 + HP1-1) vs HP2-family (HP2 + HP2-1).
+     * Includes somatic carrier reads for better statistical power.
+     */
+    GlobalTestResult test_hp_family(const std::vector<int>& cluster_labels,
+                                    const std::vector<FullLabel>& full_labels);
+
+    /**
+     * @brief Test association between clusters and fine-grained HP labels (4-group RxC)
+     *
+     * HP1, HP1-1, HP2, HP2-1 as separate columns.
+     * Groups with fewer than min_reads_per_group are excluded.
+     */
+    GlobalTestResult test_hp_fine(const std::vector<int>& cluster_labels,
+                                  const std::vector<FullLabel>& full_labels, int min_reads_per_group = 3);
 
     /**
      * @brief Test association between clusters and Tumor/Normal labels
@@ -65,14 +83,29 @@ public:
     GlobalTestResult test_sample(const std::vector<int>& cluster_labels, const std::vector<FullLabel>& full_labels);
 
     /**
-     * @brief Run all global tests with priority ordering
+     * @brief Run all global tests with priority ordering (legacy 3-result)
      *
-     * @param cluster_labels Cluster ID for each read
-     * @param full_labels Full label information
      * @return Tuple of (alt_result, hp_result, sample_result)
      */
     std::tuple<GlobalTestResult, GlobalTestResult, GlobalTestResult> test_all(
         const std::vector<int>& cluster_labels, const std::vector<FullLabel>& full_labels);
+
+    /**
+     * @brief Expanded results from all global tests
+     */
+    struct AllTestResults {
+        GlobalTestResult alt;
+        GlobalTestResult hp;         // Layer 2: Pure germline
+        GlobalTestResult hp_family;  // Layer 1: Family-level
+        GlobalTestResult hp_fine;    // Layer 3: Fine-grained 4-group
+        GlobalTestResult sample;
+    };
+
+    /**
+     * @brief Run all global tests including multi-layer HP
+     */
+    AllTestResults test_all_expanded(const std::vector<int>& cluster_labels,
+                                     const std::vector<FullLabel>& full_labels);
 
     /**
      * @brief Get configuration
@@ -96,6 +129,14 @@ private:
     ContingencyTableRxC build_contingency_table(const std::vector<int>& cluster_labels,
                                                 const std::vector<int>& binary_labels,
                                                 const std::vector<bool>& valid_mask);
+
+    /**
+     * @brief Build contingency table with arbitrary number of label categories
+     */
+    ContingencyTableRxC build_contingency_table_multi(const std::vector<int>& cluster_labels,
+                                                      const std::vector<int>& category_labels,
+                                                      int n_categories,
+                                                      const std::vector<bool>& valid_mask);
 
     /**
      * @brief Compute global test result from contingency table

@@ -411,6 +411,23 @@ TestLabel FullLabel::get_hp_label() const {
     return TestLabel::HP_OTHER;
 }
 
+TestLabel FullLabel::get_hp_family_label() const {
+    if (hp_tag == "1" || hp_tag == "1-1") {
+        return TestLabel::HP_FAMILY_1;
+    } else if (hp_tag == "2" || hp_tag == "2-1") {
+        return TestLabel::HP_FAMILY_2;
+    }
+    return TestLabel::HP_OTHER;
+}
+
+TestLabel FullLabel::get_hp_fine_label() const {
+    if (hp_tag == "1") return TestLabel::HP_FINE_1;
+    if (hp_tag == "1-1") return TestLabel::HP_FINE_1_1;
+    if (hp_tag == "2") return TestLabel::HP_FINE_2;
+    if (hp_tag == "2-1") return TestLabel::HP_FINE_2_1;
+    return TestLabel::HP_OTHER;
+}
+
 TestLabel FullLabel::get_sample_label() const {
     return is_tumor ? TestLabel::SAMPLE_TUMOR : TestLabel::SAMPLE_NORMAL;
 }

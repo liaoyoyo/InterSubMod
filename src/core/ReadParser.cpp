@@ -119,14 +119,25 @@ ReadInfo ReadParser::parse(const bam1_t* b, int read_id, bool is_tumor, const So
     info.strand = determine_strand(b);
 
     // Extract HP tag (haplotype)
-    info.hp_tag = "0";  // Default: unknown
+    info.hp_tag = "0";  // Default: unknown/unphased
     uint8_t* hp_aux = bam_aux_get(b, "HP");
     if (hp_aux) {
         char type = hp_aux[0];
         if (type == 'Z' || type == 'H') {
+            // String format (longphase-s): HP:Z:1, HP:Z:2, HP:Z:1-1, HP:Z:2-1, HP:Z:3
             info.hp_tag = bam_aux2Z(hp_aux);
         } else if (type == 'c' || type == 'C' || type == 's' || type == 'S' || type == 'i' || type == 'I') {
-            info.hp_tag = std::to_string(bam_aux2i(hp_aux));
+            // Integer format (longphase-to): 1=HP1, 2=HP2, 11=HP1-1, 21=HP2-1, 33=HP3
+            // Map to canonical string format used throughout LabelTest
+            int hp_int = bam_aux2i(hp_aux);
+            switch (hp_int) {
+                case 1:  info.hp_tag = "1";   break;
+                case 2:  info.hp_tag = "2";   break;
+                case 11: info.hp_tag = "1-1"; break;
+                case 21: info.hp_tag = "2-1"; break;
+                case 33: info.hp_tag = "3";   break;
+                default: info.hp_tag = std::to_string(hp_int); break;
+            }
         }
     }
 

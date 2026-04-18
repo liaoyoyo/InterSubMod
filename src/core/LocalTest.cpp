@@ -54,13 +54,27 @@ std::vector<ClusterStats> LocalTest::initialize_cluster_stats(const std::vector<
                         break;
                 }
 
-                // Count by HP
-                TestLabel hp_label = label.get_hp_label();
-                if (hp_label == TestLabel::HP_1) {
+                // Count by HP (fine-grained + backward-compatible collapsed)
+                const std::string& hp = label.hp_tag;
+                if (hp == "1") {
                     cs.count_hp1++;
-                } else if (hp_label == TestLabel::HP_2) {
+                    cs.count_hp_family_1++;
+                } else if (hp == "2") {
                     cs.count_hp2++;
+                    cs.count_hp_family_2++;
+                } else if (hp == "1-1") {
+                    cs.count_hp1_1++;
+                    cs.count_hp_family_1++;
+                    cs.count_hp_other++;
+                } else if (hp == "2-1") {
+                    cs.count_hp2_1++;
+                    cs.count_hp_family_2++;
+                    cs.count_hp_other++;
+                } else if (hp == "3") {
+                    cs.count_hp3++;
+                    cs.count_hp_other++;
                 } else {
+                    cs.count_hp0++;
                     cs.count_hp_other++;
                 }
 
@@ -195,6 +209,38 @@ void LocalTest::test_hp_local(const std::vector<int>& cluster_labels, const std:
 }
 
 // ============================================================================
+// Test HP Family Local
+// ============================================================================
+
+void LocalTest::test_hp_family_local(const std::vector<int>& cluster_labels, const std::vector<FullLabel>& full_labels,
+                                     std::vector<ClusterStats>& stats) {
+    size_t n = cluster_labels.size();
+    std::vector<int> binary_labels(n);
+    std::vector<bool> valid_mask(n);
+
+    for (size_t i = 0; i < n; ++i) {
+        TestLabel label = full_labels[i].get_hp_family_label();
+        if (label == TestLabel::HP_FAMILY_1) {
+            binary_labels[i] = 1;  // Target = HP-family-1
+            valid_mask[i] = true;
+        } else if (label == TestLabel::HP_FAMILY_2) {
+            binary_labels[i] = 0;
+            valid_mask[i] = true;
+        } else {
+            binary_labels[i] = -1;
+            valid_mask[i] = false;
+        }
+    }
+
+    for (auto& cs : stats) {
+        ContingencyTable2x2 table =
+            build_one_vs_rest_table(cs.cluster_id, cluster_labels, 1, binary_labels, valid_mask);
+
+        cs.fisher_hp_family = fisher_.test_2x2(table);
+    }
+}
+
+// ============================================================================
 // Test Sample Local
 // ============================================================================
 
@@ -233,6 +279,7 @@ LocalTestResult LocalTest::test_all(const std::vector<int>& cluster_labels, cons
     // Run tests for each dimension
     test_allele_local(cluster_labels, full_labels, result.cluster_stats);
     test_hp_local(cluster_labels, full_labels, result.cluster_stats);
+    test_hp_family_local(cluster_labels, full_labels, result.cluster_stats);
     test_sample_local(cluster_labels, full_labels, result.cluster_stats);
 
     // Find best cluster (lowest p-value across all dimensions)
@@ -248,12 +295,20 @@ LocalTestResult LocalTest::test_all(const std::vector<int>& cluster_labels, cons
             result.best_dimension = "allele";
         }
 
-        // Check HP Fisher
+        // Check HP Fisher (pure germline)
         if (cs.fisher_hp.p_value < result.best_p_value) {
             result.best_p_value = cs.fisher_hp.p_value;
             result.best_log_odds_ratio = cs.fisher_hp.log_odds_ratio;
             result.best_cluster_id = cs.cluster_id;
             result.best_dimension = "hp";
+        }
+
+        // Check HP Family Fisher
+        if (cs.fisher_hp_family.p_value < result.best_p_value) {
+            result.best_p_value = cs.fisher_hp_family.p_value;
+            result.best_log_odds_ratio = cs.fisher_hp_family.log_odds_ratio;
+            result.best_cluster_id = cs.cluster_id;
+            result.best_dimension = "hp_family";
         }
 
         // Check Sample Fisher

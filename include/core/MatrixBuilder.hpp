@@ -85,6 +85,19 @@ public:
     }
 
     /**
+     * @brief Merge reads from another pre-finalized MatrixBuilder.
+     *
+     * Appends all reads and methylation data from @p other into this builder.
+     * Both builders must be in pre-finalization state (finalize() not yet called).
+     * After merge, @p other is cleared. Read IDs are re-numbered sequentially.
+     *
+     * Typical use: merge normal reads into tumor reads before finalization.
+     *
+     * @param other Source MatrixBuilder to merge from (will be cleared)
+     */
+    void merge(MatrixBuilder& other);
+
+    /**
      * @brief Clear all data (for processing next region)
      */
     void clear();

@@ -946,6 +946,65 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                     result.hp_residual_p = normal_hp.p_value;
                     result.hp_residual_sig = false;  // not a somatic signal
                 }
+
+                // Signed HP mean methylation delta: mean(HP1_meth) - mean(HP2_meth)
+                // Captures direction of ASM unlike distance-based delta
+                auto compute_signed_hp_delta = [&](const std::vector<int>& indices) -> double {
+                    double hp1_sum = 0.0, hp2_sum = 0.0;
+                    int hp1_count = 0, hp2_count = 0;
+                    for (int idx : indices) {
+                        int hp = hp_merged_labels[idx];
+                        if (hp != 0 && hp != 1) continue;
+                        for (int j = 0; j < meth_mat.raw_matrix.cols(); ++j) {
+                            double val = meth_mat.raw_matrix(idx, j);
+                            if (std::isnan(val)) continue;
+                            if (hp == 0) {
+                                hp1_sum += val;
+                                ++hp1_count;
+                            } else {
+                                hp2_sum += val;
+                                ++hp2_count;
+                            }
+                        }
+                    }
+                    if (hp1_count < 1 || hp2_count < 1) return NAN;
+                    return (hp1_sum / hp1_count) - (hp2_sum / hp2_count);
+                };
+
+                result.tumor_hp_signed_delta = compute_signed_hp_delta(tumor_indices);
+                result.normal_hp_signed_delta = compute_signed_hp_delta(normal_indices);
+
+                // Combined: all reads (tumor + normal)
+                std::vector<int> all_indices;
+                all_indices.reserve(tumor_indices.size() + normal_indices.size());
+                all_indices.insert(all_indices.end(), tumor_indices.begin(), tumor_indices.end());
+                all_indices.insert(all_indices.end(), normal_indices.begin(), normal_indices.end());
+                result.combined_hp_signed_delta = compute_signed_hp_delta(all_indices);
+
+                // Signed residual: somatic directional ASM change
+                if (!std::isnan(result.tumor_hp_signed_delta) && !std::isnan(result.normal_hp_signed_delta)) {
+                    result.hp_signed_residual = result.tumor_hp_signed_delta - result.normal_hp_signed_delta;
+                }
+            }
+
+            // Per-CpG ASM and epiallele metrics (Phase E)
+            // Compute after distance matrix and HP analysis are done.
+            // Uses raw_matrix + binary_matrix + HP labels from read_list.
+            {
+                PerCpgAsmResult pcr = compute_per_cpg_asm(meth_mat, read_list, 5);
+                result.per_cpg_asm_valid = pcr.valid;
+                if (pcr.valid) {
+                    result.per_cpg_fisher_n_sig = pcr.fisher_n_sig;
+                    result.per_cpg_fisher_frac_sig = pcr.fisher_frac_sig;
+                    result.per_cpg_fisher_n_tested = pcr.fisher_n_tested;
+                    result.per_cpg_fisher_max_neg_log_fdr = pcr.fisher_max_neg_log_fdr;
+                    result.per_cpg_nme_hp1 = pcr.nme_hp1;
+                    result.per_cpg_nme_hp2 = pcr.nme_hp2;
+                    result.per_cpg_entropy_imbalance = pcr.entropy_imbalance;
+                    result.per_cpg_epipoly_hp1 = pcr.epipoly_hp1;
+                    result.per_cpg_epipoly_hp2 = pcr.epipoly_hp2;
+                    result.per_cpg_epipoly_delta = pcr.epipoly_delta;
+                }
             }
         }
 
@@ -1011,10 +1070,17 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 "HP_Residual_Delta,HP_Residual_P,HP_Residual_Sig,"
                 "Tumor_HP_Delta,Tumor_HP_Valid,Normal_HP_Delta,Normal_HP_Valid,"
                 "Tumor_HP1,Tumor_HP2,Normal_HP1,Normal_HP2,"
+                // Signed HP methylation delta (direction-aware)
+                "Tumor_HP_Signed_Delta,Normal_HP_Signed_Delta,HP_Signed_Residual,Combined_HP_Signed_Delta,"
                 // Phase C: LOH BED Annotation
                 "LOH_Bed_Overlap,LOH_Source,LOH_Bed_Annotation,"
                 // Phase D: Subclone Assignment
                 "Subclone_ID,"
+                // Phase E: Per-CpG ASM + Epiallele Metrics
+                "PerCpgASM_Valid,"
+                "Fisher_N_Sig,Fisher_Frac_Sig,Fisher_N_Tested,Fisher_MaxNegLogFDR,"
+                "NME_HP1,NME_HP2,Entropy_Imbalance,"
+                "Epipoly_HP1,Epipoly_HP2,Epipoly_Delta,"
                 // Original columns
                 "LocalBestCluster,LocalBestP,Significant,SuggestFilter\n";
 
@@ -1135,12 +1201,29 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << (r.normal_hp_valid ? "true" : "false") << ","
                  << r.tumor_hp1_count << "," << r.tumor_hp2_count << ","
                  << r.normal_hp1_count << "," << r.normal_hp2_count << ","
+                 // Signed HP methylation delta (direction-aware)
+                 << (std::isnan(r.tumor_hp_signed_delta) ? "NA" : std::to_string(r.tumor_hp_signed_delta)) << ","
+                 << (std::isnan(r.normal_hp_signed_delta) ? "NA" : std::to_string(r.normal_hp_signed_delta)) << ","
+                 << (std::isnan(r.hp_signed_residual) ? "NA" : std::to_string(r.hp_signed_residual)) << ","
+                 << (std::isnan(r.combined_hp_signed_delta) ? "NA" : std::to_string(r.combined_hp_signed_delta)) << ","
                  // Phase C: LOH BED Annotation
                  << (r.loh_bed_overlap ? "true" : "false") << ","
                  << r.loh_source << ","
                  << "\"" << r.loh_bed_annotation << "\","
                  // Phase D: Subclone Assignment
                  << r.subclone_id << ","
+                 // Phase E: Per-CpG ASM + Epiallele Metrics
+                 << (r.per_cpg_asm_valid ? "true" : "false") << ","
+                 << r.per_cpg_fisher_n_sig << ","
+                 << std::fixed << std::setprecision(4) << r.per_cpg_fisher_frac_sig << ","
+                 << r.per_cpg_fisher_n_tested << ","
+                 << std::fixed << std::setprecision(4) << r.per_cpg_fisher_max_neg_log_fdr << ","
+                 << (std::isnan(r.per_cpg_nme_hp1) ? "NA" : std::to_string(r.per_cpg_nme_hp1)) << ","
+                 << (std::isnan(r.per_cpg_nme_hp2) ? "NA" : std::to_string(r.per_cpg_nme_hp2)) << ","
+                 << (std::isnan(r.per_cpg_entropy_imbalance) ? "NA" : std::to_string(r.per_cpg_entropy_imbalance)) << ","
+                 << (std::isnan(r.per_cpg_epipoly_hp1) ? "NA" : std::to_string(r.per_cpg_epipoly_hp1)) << ","
+                 << (std::isnan(r.per_cpg_epipoly_hp2) ? "NA" : std::to_string(r.per_cpg_epipoly_hp2)) << ","
+                 << (std::isnan(r.per_cpg_epipoly_delta) ? "NA" : std::to_string(r.per_cpg_epipoly_delta)) << ","
                  // Original local test columns
                  << r.local_best_cluster << "," << std::scientific
                  << std::setprecision(6) << r.local_best_p_value << ","
