@@ -1,6 +1,6 @@
 ---
 name: review-evidence
-description: 查閱 InterSubMod 研究歷史紀錄（evidence_ledger.jsonl）。列出過去假設的測試結果、成功/失敗率、待測佇列狀態，協助研究方向決策。
+description: 查閱 InterSubMod 研究歷史紀錄。列出過去假設的測試結果、成功/失敗率、待測佇列狀態。USE WHEN：「查閱證據」「review evidence」「過去測試結果」、研究方向決策前回顧歷史。涉及 research/autoresearch/evidence_ledger.jsonl、hypothesis_queue.json。
 allowed-tools: Read, Bash
 user-invocable: true
 ---

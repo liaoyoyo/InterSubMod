@@ -1,6 +1,6 @@
 ---
 name: report
-description: AI 對話執行報告撰寫技能。用於記錄重要對話的決策、修改內容和後續行動。輸出到 docs/provenance/ai_sessions/
+description: AI 對話執行報告撰寫。記錄重要對話的決策、程式碼修改、後續行動。USE WHEN：會話結束前撰寫執行報告、「寫報告」「session report」、Stop hook 提醒時。輸出到 docs/provenance/ai_sessions/*.md。
 allowed-tools: Read, Write, Glob, Grep
 user-invocable: true
 ---

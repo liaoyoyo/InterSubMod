@@ -1,6 +1,7 @@
 ---
 name: methodology-audit
 description: 修改任何 C++ 方法前的方法學審查協議。審查現有方法的合理性、量化問題影響、產出決策文件供用戶選擇。觸發條件：「審查 XX 方法」、「評估是否要改 XX」、修改 .cpp/.hpp 前。
+user-invocable: true
 ---
 
 # Methodology Audit Skill — PDD C++ 審查協議
