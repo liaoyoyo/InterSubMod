@@ -1,0 +1,412 @@
+{
+  "meta": {
+    "kicker": "InterSubMod 研究週報簡報",
+    "deck_title": "InterSubMod 研究週報：HP Bug Fix、LOH Evidence Panel 與 Phase 1A 定向",
+    "deck_subtitle": "2026-03-25 至 2026-03-30",
+    "summary_line": "核心 HP integer tag bug 已修正，LOH evidence panel 四輪收斂為「region-level only, read-level incompatible」，Phase 1A 確定為 methyl+context paired-only。",
+    "generated_date": "2026-03-30",
+    "audience_mode": "研究內部混合版",
+    "author": "廖子游",
+    "source_report": "/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260330_研究週報_20260325_20260330_HP_bug_fix與LOH_evidence_panel_01.md",
+    "output_pptx": "/big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/03/20260330_研究週報_20260325_20260330_HP_bug_fix與LOH_evidence_panel_01/20260330_研究週報_20260325_20260330_HP_bug_fix與LOH_evidence_panel_01.pptx",
+    "assets_dir": "/big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/03/20260330_研究週報_20260325_20260330_HP_bug_fix與LOH_evidence_panel_01/assets",
+    "footer": "Generated from the validated weekly report: HP Bug Fix, LOH Evidence Panel, Phase 1A direction.",
+    "guide_bullets": [
+      "HP Bug Fix：ReadParser.cpp 修正 + 7 樣本重建",
+      "LOH Evidence Panel：四輪研究收斂，方向關閉",
+      "Phase 1A：methyl+context 確認為最佳方案"
+    ]
+  },
+  "theme": {
+    "dark": "1E2A44",
+    "bg": "F7F3EC",
+    "bg_alt": "EEE6DB",
+    "accent": "C76B50",
+    "accent2": "6E9D8A",
+    "text": "17202A",
+    "muted": "5E6572",
+    "light_text": "F8F4EE",
+    "light_muted": "D6DCE5",
+    "line": "D6CCBF",
+    "font_title": "Georgia",
+    "font_body": "Calibri"
+  },
+  "deck": {
+    "key_findings": [
+      {
+        "title": "HP Integer Tag Bug Fix：30-69% TO reads 已恢復",
+        "body": "ReadParser.cpp HP:i:11/21/33 mapping 修正完成。修正前 H1437 有 69% 的 TO reads 不可見。7 個 TO 樣本全部重跑，master dataset 重建，所有 Round 1-4 LOH workspace 全量重跑。修正後 88% TO regions 在 Tier A/A+（修正前 51%）。",
+        "accent": "C76B50"
+      },
+      {
+        "title": "LOH Evidence Panel：region-level only，方向關閉",
+        "body": "四輪研究完整收斂：LOH features 是 region-level 特徵（同一 region 所有 reads 共享同一 LOH flag），Phase 1A 是 read-level 分類任務。兩者根本不相容。LOH 對 read-level ML 無用（delta F1=-0.0005）。",
+        "accent": "6E9D8A"
+      },
+      {
+        "title": "Phase 1A 方向鎖定：methyl+context, delta F1=+0.0112",
+        "body": "paired-only multi-bio external validation 確認 methyl+context 為最佳方案（F1=0.8722, delta F1=+0.0112, 95% CI=[+0.0044, +0.0188]，全正）。to-pure 子任務仍退步，建議 TO 與 paired 分開建模。",
+        "accent": "7B5B9A"
+      },
+      {
+        "title": "研究願景定錨：五目標，E→A+D→B→C",
+        "body": "五個研究目標正式定義並優先排序。Phase 1 方向 E（ML read classification）確認為最高優先。論文定位為 read-level epigenetic context 而非 variant filter。成功標準拆分為可解釋性 vs F1。",
+        "accent": "54708C"
+      }
+    ],
+    "framework": {
+      "problem_statement": "TO HP tag 格式不相容→數據失效→修正重建→LOH 重新定位→Phase 1A ML 方向收斂",
+      "layers": [
+        {
+          "title": "Layer 1：HP Bug Root Cause",
+          "body": "ReadParser.cpp 無法解析 LongPhase-TO 的 HP:i:11/21/33 整數格式。30-69% TO reads 被歸為 untracked。",
+          "fill": "1E2A44",
+          "title_color": "F8F4EE",
+          "body_color": "D6DCE5"
+        },
+        {
+          "title": "Layer 2：LOH Evidence Panel（四輪研究）",
+          "body": "Round 1 cross-sample → Round 2 tier 分層 → Round 3 methyl joint → Round 4 baseline F1 修正。最終結論：region-level only。",
+          "fill": "EAD8CF",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        },
+        {
+          "title": "Layer 3：Phase 1A ML 方向確認",
+          "body": "LOH features 無增益（-0.0005）。methyl+context 確認為最佳（+0.0112, CI 全正）。TO 與 paired 需分開建模。",
+          "fill": "D6E7DF",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        }
+      ],
+      "quadrants": [
+        {
+          "title": "HP Bug Fix & Rebuild",
+          "body": "ReadParser 修正 + 7 TO 樣本重跑 + master dataset 重建。修正後 88% Tier A/A+。",
+          "fill": "F4DFD5",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        },
+        {
+          "title": "LOH Evidence Panel (Rounds 1-4)",
+          "body": "14 datasets cross-sample audit + tier 分層 + methyl joint + final validation。結論：region-level only。",
+          "fill": "DDEBE5",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        },
+        {
+          "title": "Phase 1A ML Read Classification",
+          "body": "4-way feature comparison: context / methyl+ctx / loh+ctx / methyl+loh+ctx。methyl+context 勝出。",
+          "fill": "F4DFD5",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        },
+        {
+          "title": "Research Vision Anchoring",
+          "body": "五個研究目標正式定義。優先序 E→A+D→B→C。TO 獨立主線策略確立。",
+          "fill": "DDEBE5",
+          "title_color": "17202A",
+          "body_color": "5E6572"
+        }
+      ],
+      "scope_note": "注意：本週所有 TO LOH 統計為 2026-03-30 HP fix 後新版數據。2026-03-30 前的 TO HP/LOH 統計均無效。"
+    },
+    "goals": [
+      {
+        "goal": "HP Bug Fix & Rebuild",
+        "subgoal": "ReadParser 修正 + 7 TO 樣本重跑 + master dataset",
+        "completion": "100%",
+        "conclusion": "所有 TO LOH 數據已修正，所有 Round 1-4 workspace 已全量重跑。"
+      },
+      {
+        "goal": "LOH Evidence Panel",
+        "subgoal": "Round 1-4 cross-sample audit + tier + methyl + final",
+        "completion": "100%",
+        "conclusion": "LOH 是 region-level 特徵，不適用 read-level Phase 1A。方向關閉。"
+      },
+      {
+        "goal": "Phase 1A Round 3",
+        "subgoal": "LOH feature test on paired-only multi-bio sample637",
+        "completion": "100%",
+        "conclusion": "LOH delta F1=-0.0005（CI 跨零）。methyl+context 確認為最佳。"
+      },
+      {
+        "goal": "Post-HP-Fix TO LOH Investigation",
+        "subgoal": "enrichment 反轉分析 + rescue potential + tier 重構",
+        "completion": "100%",
+        "conclusion": "TO LOH enrichment=0.805×（TP marker），與 paired 1.194× 方向相反。"
+      },
+      {
+        "goal": "Research Vision Anchoring",
+        "subgoal": "五個目標定義 + 優先排序 + 成功標準",
+        "completion": "100%",
+        "conclusion": "E→A+D→B→C 確認。論文定位為 epigenetic context。"
+      },
+      {
+        "goal": "C++ Safety Refactoring",
+        "subgoal": "BamReader RAII + FisherExact log-sum-exp + overflow guard",
+        "completion": "100%",
+        "conclusion": "4 個安全性 commits 已合併，163 tests 全過。"
+      }
+    ],
+    "goal_summary_cards": [
+      {
+        "title": "重大 bug 修正完成且驗證",
+        "body": "HP integer tag 修正後所有 TO 數據可信度恢復。",
+        "fill": "1E2A44",
+        "title_color": "F8F4EE",
+        "body_color": "D6DCE5"
+      },
+      {
+        "title": "LOH 方向關閉，資源可重分配",
+        "body": "四輪研究明確收斂，不再投入 LOH as read-level feature。",
+        "fill": "C76B50",
+        "title_color": "F8F4EE",
+        "body_color": "F8F4EE"
+      },
+      {
+        "title": "Phase 1A 方向已鎖定",
+        "body": "methyl+context paired-only 為確認最佳方案，CI 全正。",
+        "fill": "6E9D8A",
+        "title_color": "F8F4EE",
+        "body_color": "F8F4EE"
+      }
+    ],
+    "timeline": [
+      {
+        "date": "03-25",
+        "title": "Phase 1A ML 啟動 + multi-bio 驗證",
+        "result": "141K regions manifest 完成。methyl+context delta F1=+0.0112（paired-only multi-bio，CI 全正）。"
+      },
+      {
+        "date": "03-27",
+        "title": "LOH Round 1-3 + Research Vision Anchoring",
+        "result": "14 datasets cross-sample audit 完成。五個研究目標正式定義，E→A+D→B→C 確認。"
+      },
+      {
+        "date": "03-28",
+        "title": "LOH 最終報告 + Phase 1A Round 3",
+        "result": "LOH features 對 read-level ML 無用（delta F1=-0.0005）。Baseline F1 表完成修正。"
+      },
+      {
+        "date": "03-30",
+        "title": "HP Bug Fix + 7 樣本全量重建",
+        "result": "HP:i:11/21/33 修正。88% TO Tier A/A+。TO LOH enrichment=0.805×（TP marker）。"
+      }
+    ],
+    "hp_bug_fix": {
+      "title": "HP Integer Tag Bug Fix：影響與修復",
+      "subtitle": "ReadParser.cpp HP:i:11/21/33 修正，30-69% TO reads 已恢復",
+      "before_label": "修正前",
+      "before_stat": "51% TO regions 在 Tier A/A+",
+      "after_label": "修正後",
+      "after_stat": "88% TO regions 在 Tier A/A+",
+      "enrichment_callout": "TO enrichment = 0.805× (TP marker)\nvs paired = 1.194× (FP enrichment)\n方向完全相反",
+      "enrichment_fill": "1E2A44",
+      "enrichment_color": "F8F4EE",
+      "chart_note": "圖意：X 軸為 TO 樣本，Y 軸為 LOH eligible %（eff_hp ≥ 30 的 TP region 比例）。灰色柱為修正前，綠色柱為修正後。修正幅度最大的是 H1437（+71 百分點）。",
+      "samples": [
+        {"name": "H1437", "before": 24.5, "after": 95.5, "delta": "+71.0pp"},
+        {"name": "COLO829", "before": 0.7, "after": 34.7, "delta": "+34.0pp"},
+        {"name": "HCC1395_D", "before": 46.9, "after": 93.1, "delta": "+46.2pp"},
+        {"name": "H2009", "before": 64.5, "after": 97.7, "delta": "+33.2pp"},
+        {"name": "HCC1395", "before": 58.5, "after": 92.2, "delta": "+33.7pp"},
+        {"name": "HCC1954", "before": 70.0, "after": 93.0, "delta": "+23.0pp"},
+        {"name": "HCC1937", "before": 86.7, "after": 97.4, "delta": "+10.7pp"}
+      ]
+    },
+    "loh_evidence_panel": {
+      "title": "LOH Evidence Panel：四輪研究收斂",
+      "subtitle": "LOH 特徵是 region-level，Phase 1A 是 read-level，根本不相容",
+      "rounds": [
+        {
+          "label": "Round 1",
+          "title": "Cross-Sample Audit",
+          "body": "14 datasets（7 paired + 7 TO）\nPaired: 1.194× FP enrichment\nTO: 0.805× TP marker",
+          "status": "已證明成立",
+          "accent": "C76B50"
+        },
+        {
+          "label": "Round 2",
+          "title": "Support + HP0 分析",
+          "body": "Tier A (eff_hp ≥30) enrichment: 1.169×\nHP0 filter: REJECTED\n(HP0 TP% 73.5% > low HP0 71.0%)",
+          "status": "已證明成立",
+          "accent": "6E9D8A"
+        },
+        {
+          "label": "Round 3",
+          "title": "Methyl-LOH Joint",
+          "body": "Methylation + LOH 增益 marginal\n所有 filter 變體 F1 delta < 0\nLOH 不能作為 binary filter",
+          "status": "不建議升級規則",
+          "accent": "7B5B9A"
+        },
+        {
+          "label": "Round 4",
+          "title": "Final Validation",
+          "body": "真實 Baseline F1 確認\nH2009=0.9662, HCC1954=0.8731\nCOLO829=0.8725, H1437=0.9087\nHCC1395=0.8532, HCC1937=0.8414",
+          "status": "已完成修正",
+          "accent": "54708C"
+        }
+      ],
+      "conclusion_callout": "決定性結論：LOH features 是 region-level 特徵，Phase 1A 是 read-level 分類任務 → LOH 對 read-level 分類器本質上無用（delta F1 = -0.0005, CI crossing zero）",
+      "conclusion_fill": "1E2A44",
+      "conclusion_color": "F8F4EE"
+    },
+    "phase1a_round3": {
+      "title": "Phase 1A：LOH Feature 測試（負面結果）與方向確認",
+      "subtitle": "LOH features 對 read-level ML 無用；methyl+context 已鎖定",
+      "figure_path": "/big7_disk/liaoyoyo2001/InterSubMod/images/phase1a_round3/fig01_overall_f1.png",
+      "chart_note": "圖意：Y 軸為 4 種 feature 組合，X 軸為 F1。paired-only multi-bio external validation 結果。loh+context 與 context-only 幾乎相同，代表 LOH 無附加值。",
+      "results": [
+        {"model": "context-only", "f1": 0.8611, "delta": "0.0000", "ci": "", "supported": "baseline"},
+        {"model": "methyl+context", "f1": 0.8722, "delta": "+0.0112", "ci": "[+0.0044, +0.0188]", "supported": "✓"},
+        {"model": "loh+context", "f1": 0.8606, "delta": "-0.0005", "ci": "[-0.0022, +0.0007]", "supported": "✗"},
+        {"model": "methyl+loh+ctx", "f1": 0.8723, "delta": "+0.0112", "ci": "[+0.0045, +0.0189]", "supported": "✓"}
+      ],
+      "direction_callout": "方向鎖定：Phase 1A 最優方案確認為 methyl+context（paired-only multi-bio delta F1=+0.0112, 95% CI 全正）",
+      "direction_fill": "6E9D8A",
+      "direction_color": "F8F4EE"
+    },
+    "feature_roles": [
+      {
+        "feature": "LOH (Potential_LOH)",
+        "role": "region-level TP marker (TO) / FP indicator (paired)",
+        "meaning": "TO enrichment 0.805×（TP 富集），paired 1.194×（FP 富集）。方向相反，需分開解讀。",
+        "limit": "不可作為 read-level feature。Phase 1A 無增益。LOH Evidence Panel 可作為獨立 region-level 評分。"
+      },
+      {
+        "feature": "HP_Ratio",
+        "role": "region-level phasing quality indicator",
+        "meaning": "HP fix 後 88% TO regions 在 Tier A/A+（vs 修正前 51%）。eff_hp ≥ 30 為有效閾值。",
+        "limit": "不含 read-level info。Tier C0/C 無鑑別力。"
+      },
+      {
+        "feature": "Methyl Features (8 個)",
+        "role": "read-level ML 有效特徵",
+        "meaning": "paired-only multi-bio delta F1=+0.0112（CI 全正）。HCC1954、COLO829、HCC1395_DORADO 有明確正增益。",
+        "limit": "TO mode-mixed 退步。H2009/HCC1937/H1437 有異質性，未全面成立。"
+      },
+      {
+        "feature": "Context Features (mapq, Pairwise, AD, CramersV)",
+        "role": "baseline read-level features",
+        "meaning": "context-only F1=0.8611。Phase 1A 的穩定基線，所有實驗的共同底線。",
+        "limit": "單獨不夠，需 methyl 補充才達最佳。"
+      },
+      {
+        "feature": "GQ / QUAL (Caller Score)",
+        "role": "caller-first primary rule",
+        "meaning": "caller-first 仍是第一層穩定分工。ISM 定位為 caller 後的 evidence support。",
+        "limit": "recall ceiling 受限於 caller sensitivity。"
+      },
+      {
+        "feature": "LOH-ML Bridge（架構層）",
+        "role": "互補不混用",
+        "meaning": "LOH → region-level risk scoring。Phase 1A → read-level ALT/REF classification。兩者互補但不應混入同一模型。",
+        "limit": "需分開建模。H2009 問題由 LOH Evidence Panel 解決，非 Phase 1A 責任。"
+      }
+    ],
+    "vision": {
+      "title": "研究願景定錨：五個研究目標與優先序",
+      "subtitle": "從探索性試錯正式轉向結構化五軸推進",
+      "goals": [
+        {
+          "label": "目標 E",
+          "title": "ML Read Classification",
+          "body": "read-level ALT/REF 分類\nmethyl+context 已確認",
+          "priority": "優先：1",
+          "fill": "1E2A44"
+        },
+        {
+          "label": "目標 A+D",
+          "title": "Normal Ref + CN/Purity",
+          "body": "normal methylation reference\nCN/Purity-aware correction",
+          "priority": "優先：2",
+          "fill": "2C4A6E"
+        },
+        {
+          "label": "目標 B",
+          "title": "Gene-level Integration",
+          "body": "gene/mechanism-level\nevidence integration",
+          "priority": "優先：3",
+          "fill": "3D6B8E"
+        },
+        {
+          "label": "目標 C",
+          "title": "CpG 功能分層",
+          "body": "CpG functional stratification\n智慧選點",
+          "priority": "優先：4",
+          "fill": "5E8AAE"
+        }
+      ],
+      "goal5": {
+        "title": "第五目標：TO 獨立主線",
+        "body": "TO 問題空間與 paired 根本不同（HP imbalance、LOH 方向相反），需獨立策略而非共用規則。",
+        "fill": "C76B50",
+        "color": "F8F4EE"
+      },
+      "bottom_note": "論文定位：read-level epigenetic context 而非 variant filter。成功標準拆分：可解釋性（biological insight）vs 數值表現（F1 improvement）。"
+    },
+    "next_steps": {
+      "gaps": [
+        "FN regions LOH 數據（驗證 LOH rescue 可行性）",
+        "真實 LOH vs phasing HP imbalance 區分機制",
+        "Phase 1B normal read export layer",
+        "H2009 異常的 root cause 深入分析",
+        "Group-aware normalization（5kHz / DORADO / PAO）"
+      ],
+      "actions": [
+        "Phase 1A methyl+context 擴大驗證（更多 paired samples）",
+        "LOH rescue prototype for 低 AF TP（< 0.1, 51.1% LOH-like）",
+        "Annotation output → dashboard / diagnostics 接回",
+        "TO 獨立建模，不與 paired 共用甲基結論",
+        "C++ safety refactoring 持續：Phase 1-3 overhaul 剩餘項"
+      ],
+      "not_yet": [
+        "LOH 作為 read-level hard rule（已證明無效）",
+        "共用 paired/TO 甲基結論（TO mode-mixed 退步）",
+        "未確認 H2009 異常前擴大部署",
+        "直接以 ISM gate 微調解決 germline ASM FP（已關閉）"
+      ]
+    },
+    "source_paths": [
+      {
+        "label": "來源週報",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260330_研究週報_20260325_20260330_HP_bug_fix與LOH_evidence_panel_01.md"
+      },
+      {
+        "label": "PPTX 設定檔",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/references/manual/assets/20260330_weekly_report_pptx_config_01.json"
+      },
+      {
+        "label": "CURRENT_FOCUS",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/CURRENT_FOCUS.md"
+      },
+      {
+        "label": "LOH 最終報告",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260328_LOH_evidence_panel_final_report_01.md"
+      },
+      {
+        "label": "HP Fix 報告",
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260330_TO_LOH_enrichment_post_hp_fix_01.md"
+      }
+    ]
+  },
+  "charts": {
+    "hp_fix_eligibility": {
+      "title": "HP Fix: LOH Eligible % (eff_hp ≥ 30) — Before vs After",
+      "categories": ["H1437", "COLO829", "HCC1395_D", "H2009", "HCC1395", "HCC1954", "HCC1937"],
+      "series": [
+        {
+          "name": "修正前",
+          "values": [24.5, 0.7, 46.9, 64.5, 58.5, 70.0, 86.7],
+          "color": "A5A5A5"
+        },
+        {
+          "name": "修正後",
+          "values": [95.5, 34.7, 93.1, 97.7, 92.2, 93.0, 97.4],
+          "color": "6E9D8A"
+        }
+      ]
+    }
+  }
+}
