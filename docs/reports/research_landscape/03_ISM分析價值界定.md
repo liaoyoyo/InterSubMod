@@ -244,4 +244,7 @@ graph TB
 | CramersV 為何 93% 為零？ | 2×2 框架缺陷，HPFineNGroups 已克服 (AUC +0.125) |
 | 多少特徵不受 self-phasing 影響？ | 55%（~42 個），結論全部穩固 |
 | 修正 HP 後能突破嗎？ | Paired HP1FamilyN AUC=0.834 暗示正確 HP 下有真實信號 |
+| 純甲基化 clustering 能區分嗎？ | ❌ 不能。Option C 雙路測試：HP-free combo AUC=0.564，ClusterPermanovaF=0.512（隨機），所有區分力來自 HP tags |
+| ISM 能 rescue Caller 遺漏的 FN 嗎？ | ❌ 不能。O9: 122,790 FN regions，HP-free AUC 全<0.53（random），最強信號是 AF 代理（LabelAllelePermanovaF=0.664）非甲基化。甲基化空間 FN≡TP |
+| TO 模式 ISM 對分類有用嗎？ | ❌ 極弱。TO-pure LOSO: ISM+Caller AUC=0.66，但 ISM 僅增 +0.003-0.030 over Caller-only (0.63)。caller_af 單獨 AUC=0.654 超越全部 ISM |
 | 研究方向的正確轉向？ | Variant filter → epigenetic characterization (somatic heterogeneity + ASM) |

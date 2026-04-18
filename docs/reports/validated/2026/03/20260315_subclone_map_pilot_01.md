@@ -1,3 +1,12 @@
+<!--
+建立時間: 2026-03-15 00:00
+目標: 亞克隆 (Subclone) 位點的染色體分布、密度與強度分析 Pilot 報告
+處理範圍: 1,412 個 Subclone 位點（TP 1,402 / FP 10）的各染色體分布與 Strong Count 統計
+關聯檔案:
+  - docs/reports/validated/2026/03/20260315_甲基化辨識位點分析_pilot_01.md
+  - docs/reports/validated/2026/03/assets/20260316_subclone_phase4_igv_sessions/README.md
+-->
+
 # 亞克隆地圖 Pilot 報告 (20260315)
 
 ## 1. Subclone 位點概況

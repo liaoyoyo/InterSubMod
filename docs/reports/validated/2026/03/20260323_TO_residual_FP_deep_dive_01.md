@@ -7,6 +7,13 @@
   - /big7_disk/liaoyoyo2001/InterSubMod/scripts/analysis/build_to_residual_fp_deep_dive.py
 -->
 
+
+<!-- PATH WARNING (2026-04-11 驗證):
+本報告中部分絕對路徑已失效。類別: workspace 已重命名: 20260322_to_fp_provenance_analysis → _before_hp_fix
+詳細路徑清單見 docs/data_specs/20260411_path_inventory.tsv
+報告結論仍有效，但引用的外部路徑可能需要更新。
+-->
+
 # TO residual FP 深入分析：`raw_absent` 細分、cross-platform recurrence 與 `paired_persistent` diagnostics
 
 > 研究範圍：`HCC1395 5kHz TO` 與 `HCC1395_DORADO TO` 的 final residual FP  

@@ -15,6 +15,13 @@
   - /big8_disk/liaoyoyo2001/Knowledge/02_samples/other_cell_lines.md
 -->
 
+
+<!-- PATH WARNING (2026-04-11 驗證):
+本報告中部分絕對路徑已失效。類別: 舊 big8_disk BAM 路徑、Knowledge 檔名大小寫差異
+詳細路徑清單見 docs/data_specs/20260411_path_inventory.tsv
+報告結論仍有效，但引用的外部路徑可能需要更新。
+-->
+
 # Subsample 甲基化分析混淆效應診斷與研究方向報告
 
 ---

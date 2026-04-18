@@ -12,6 +12,13 @@
   - /big8_disk/liaoyoyo2001/InterSubMod_runs/output/pure_tumor_evaluation/pure_tumor_eval_20260305_143418/data/paired_vs_to_caller_partial_benchmark.tsv
 -->
 
+
+<!-- PATH WARNING (2026-04-11 驗證):
+本報告中部分絕對路徑已失效。類別: 舊 InterSubMod_runs 輸出路徑
+詳細路徑清單見 docs/data_specs/20260411_path_inventory.tsv
+報告結論仍有效，但引用的外部路徑可能需要更新。
+-->
+
 # 提升幅度偏小根因與 LongPhase-TO 驗證計畫
 
 ## 1. 問題定義

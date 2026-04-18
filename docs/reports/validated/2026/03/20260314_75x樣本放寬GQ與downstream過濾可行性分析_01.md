@@ -14,6 +14,13 @@
   - /big8_disk/liaoyoyo2001/knowledge/06_workflows/benchmark_workflow.md
 -->
 
+
+<!-- PATH WARNING (2026-04-11 驗證):
+本報告中部分絕對路徑已失效。類別: Knowledge 路徑大小寫差異
+詳細路徑清單見 docs/data_specs/20260411_path_inventory.tsv
+報告結論仍有效，但引用的外部路徑可能需要更新。
+-->
+
 # 75x 級 paired 樣本放寬 GQ 與 downstream 過濾可行性分析
 
 ## 一句結論

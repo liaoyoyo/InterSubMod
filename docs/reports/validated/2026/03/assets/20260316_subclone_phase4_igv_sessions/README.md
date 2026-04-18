@@ -1,3 +1,11 @@
+<!--
+建立時間: 2026-03-16 00:00
+目標: Subclone Phase4 案例研究的 9 個代表性 TP/FP 位點 IGV session 與 PNG 截圖索引
+處理範圍: 9 個位點的 IGV batch 截圖（SNV ±1000 bp 視窗），含 session/snapshot 檔案管理
+關聯檔案:
+  - docs/reports/validated/2026/03/20260315_subclone_map_pilot_01.md
+-->
+
 # 20260316 Subclone Phase4 IGV 截圖索引
 
 本資料夾整理 `20260315_subclone_phase4_casestudy_01.md` 的 9 個代表性 TP/FP 位點之 IGV session 與 PNG 截圖。
