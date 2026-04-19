@@ -49,14 +49,18 @@ bool is_potential_loh(double hp_ratio) {
     return (hp_ratio < 0.1) || (hp_ratio > 0.9);
 }
 
+}  // anonymous namespace
+
 /**
  * @brief Compute coverage multiple relative to expected diploid coverage.
  *
  * The expected_coverage defaults to 75.0 for initial per-region computation.
  * After all regions are processed, this is recalculated with the sample-specific
  * diploid coverage estimated via KDE mode of the NumReads distribution.
+ *
+ * Exposed at namespace scope (not anonymous) to allow unit testing.
  */
-double compute_coverage_multiple(int num_reads, double expected_coverage = 75.0) {
+double compute_coverage_multiple(int num_reads, double expected_coverage) {
     return static_cast<double>(num_reads) / expected_coverage;
 }
 
@@ -82,6 +86,8 @@ double estimate_diploid_coverage(const std::vector<RegionResult>& results) {
     }
 
     if (nr_values.size() < 100) {
+        LOG_WARN("KDE diploid estimate falling back to 75.0x: insufficient valid regions (" +
+                 std::to_string(nr_values.size()) + " < 100). CovM values will NOT be per-sample calibrated.");
         return 75.0;  // Fallback: insufficient data
     }
 
@@ -95,7 +101,12 @@ double estimate_diploid_coverage(const std::vector<RegionResult>& results) {
     // Histogram-based mode with Gaussian smoothing (bin_size=2, sigma=3 bins)
     int bin_size = 2;
     int n_bins = static_cast<int>((upper - lower) / bin_size) + 1;
-    if (n_bins < 10) return 75.0;
+    if (n_bins < 10) {
+        LOG_WARN("KDE diploid estimate falling back to 75.0x: histogram range too narrow (n_bins=" +
+                 std::to_string(n_bins) + " < 10, lower=" + std::to_string(static_cast<int>(lower)) +
+                 ", upper=" + std::to_string(static_cast<int>(upper)) + ").");
+        return 75.0;
+    }
 
     std::vector<double> hist(n_bins, 0.0);
     for (double v : nr_values) {
@@ -142,11 +153,15 @@ double estimate_diploid_coverage(const std::vector<RegionResult>& results) {
 
     // Sanity check: diploid estimate should be reasonable (10-300)
     if (diploid_est < 10.0 || diploid_est > 300.0) {
+        LOG_WARN("KDE diploid estimate falling back to 75.0x: mode estimate " +
+                 std::to_string(static_cast<int>(diploid_est)) + "x out of sanity range [10, 300].");
         return 75.0;  // Fallback
     }
 
     return diploid_est;
 }
+
+namespace {
 
 /**
  * @brief Determine coverage category based on coverage multiple
@@ -661,20 +676,24 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
 
     // Determine diploid coverage: user-specified or auto-estimated
     double diploid_coverage;
+    std::string diploid_source;
     if (expected_coverage_ > 0.0) {
         diploid_coverage = expected_coverage_;
-        LOG_INFO("Using user-specified diploid coverage: " + std::to_string(static_cast<int>(diploid_coverage)) +
-                 "x (--expected-coverage)");
+        diploid_source = "user_specified";
+        LOG_INFO("[CovM] Pass 2 diploid_coverage=" + std::to_string(diploid_coverage) +
+                 "x source=user_specified (--expected-coverage)");
     } else {
         diploid_coverage = estimate_diploid_coverage(results);
-        LOG_INFO("Auto-estimated diploid coverage: " + std::to_string(static_cast<int>(diploid_coverage)) +
-                 "x (KDE mode of NumReads distribution)");
+        diploid_source = (diploid_coverage == 75.0) ? "auto_kde_fallback_default" : "auto_kde";
+        LOG_INFO("[CovM] Pass 2 diploid_coverage=" + std::to_string(diploid_coverage) +
+                 "x source=" + diploid_source + " (KDE mode of NumReads distribution)");
     }
 
     auto qs_weights = normal_bam_path_.empty() ? get_tumor_only_weights() : get_paired_weights();
     for (auto& r : results) {
         if (r.success) {
             r.coverage_multiple = compute_coverage_multiple(r.num_reads, diploid_coverage);
+            r.diploid_coverage_used = diploid_coverage;
             r.coverage_category = determine_coverage_category(r.coverage_multiple);
             r.quality_score = compute_quality_score(r.num_reads, r.num_cpgs, r.coverage_multiple,
                                                     r.potential_loh, r.hp_merged_sig, r.allele_sig,
@@ -1061,7 +1080,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 // Summary
                 "DominantLabel,Stability,VerificationClass,"
                 // Multi-Layer Validation Quality Assessment (NEW)
-                "HP_Ratio,Potential_LOH,Coverage_Multiple,Coverage_Category,LOH_Subtype,"
+                "HP_Ratio,Potential_LOH,Coverage_Multiple,Diploid_Coverage_Used,Coverage_Category,LOH_Subtype,"
                 "Quality_Score,Quality_Tier,"
                 // Phase B: Normal Baseline + Sample ASM + Residual HP
                 "NTumorReads,NNormalReads,"
@@ -1179,6 +1198,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << std::fixed << std::setprecision(4) << r.hp_ratio << ","
                  << (r.potential_loh ? "true" : "false") << ","
                  << std::fixed << std::setprecision(3) << r.coverage_multiple << ","
+                 << std::fixed << std::setprecision(2) << r.diploid_coverage_used << ","
                  << r.coverage_category << ","
                  << r.loh_subtype << ","
                  << std::fixed << std::setprecision(1) << r.quality_score << ","
@@ -1652,6 +1672,7 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
         result.hp_ratio = compute_hp_ratio(result.hp_merged_n_hp1, result.hp_merged_n_hp2);
         result.potential_loh = is_potential_loh(result.hp_ratio);
         result.coverage_multiple = compute_coverage_multiple(result.num_reads);
+        result.diploid_coverage_used = 75.0;  // Pass 1 default; overwritten by Pass 2
         result.coverage_category = determine_coverage_category(result.coverage_multiple);
         result.loh_subtype = determine_loh_subtype(result.potential_loh, result.verification_class);
         auto qs_weights = normal_bam_path_.empty() ? get_tumor_only_weights() : get_paired_weights();

@@ -190,6 +190,7 @@ struct RegionResult {
     double hp_ratio;                 ///< HP1/(HP1+HP2), range [0,1]
     bool potential_loh;              ///< True if HP ratio < 0.1 or > 0.9
     double coverage_multiple;        ///< NumReads / diploid_coverage (auto-estimated per sample)
+    double diploid_coverage_used;    ///< Actual diploid coverage baseline used for CovM (audit column)
     std::string coverage_category;   ///< "Normal", "Low", "High", "CNV_Loss", "CNV_Gain", "High_Copy"
     std::string loh_subtype;         ///< "None", "LOH_Noise", "LOH_Weak", "LOH_Strong", "LOH_Subclone"
     float quality_score;             ///< Composite quality score [0-100]
@@ -315,6 +316,7 @@ struct RegionResult {
           hp_ratio(0.5),
           potential_loh(false),
           coverage_multiple(1.0),
+          diploid_coverage_used(75.0),
           coverage_category("Normal"),
           loh_subtype("None"),
           quality_score(50.0f),
@@ -506,5 +508,9 @@ private:
 
     // Thread-local resources are created in process_single_region
 };
+
+// Free functions exposed for testing
+double compute_coverage_multiple(int num_reads, double expected_coverage = 75.0);
+double estimate_diploid_coverage(const std::vector<RegionResult>& results);
 
 }  // namespace InterSubMod
