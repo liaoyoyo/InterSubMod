@@ -511,6 +511,11 @@ private:
 
 // Free functions exposed for testing
 double compute_coverage_multiple(int num_reads, double expected_coverage = 75.0);
-double estimate_diploid_coverage(const std::vector<RegionResult>& results);
+
+struct DiploidEstimate {
+    double value;          ///< Estimated diploid coverage (or 75.0 fallback)
+    bool used_fallback;    ///< True if any of the three fallback conditions fired
+};
+DiploidEstimate estimate_diploid_coverage(const std::vector<RegionResult>& results);
 
 }  // namespace InterSubMod

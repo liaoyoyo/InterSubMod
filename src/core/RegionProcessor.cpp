@@ -75,7 +75,7 @@ double compute_coverage_multiple(int num_reads, double expected_coverage) {
  *
  * Falls back to 75.0 if insufficient data (< 100 regions).
  */
-double estimate_diploid_coverage(const std::vector<RegionResult>& results) {
+DiploidEstimate estimate_diploid_coverage(const std::vector<RegionResult>& results) {
     // Collect valid num_reads
     std::vector<double> nr_values;
     nr_values.reserve(results.size());
@@ -88,7 +88,7 @@ double estimate_diploid_coverage(const std::vector<RegionResult>& results) {
     if (nr_values.size() < 100) {
         LOG_WARN("KDE diploid estimate falling back to 75.0x: insufficient valid regions (" +
                  std::to_string(nr_values.size()) + " < 100). CovM values will NOT be per-sample calibrated.");
-        return 75.0;  // Fallback: insufficient data
+        return {75.0, true};  // Fallback: insufficient data
     }
 
     // Find 80th percentile as upper search bound (exclude extreme gains)
@@ -105,7 +105,7 @@ double estimate_diploid_coverage(const std::vector<RegionResult>& results) {
         LOG_WARN("KDE diploid estimate falling back to 75.0x: histogram range too narrow (n_bins=" +
                  std::to_string(n_bins) + " < 10, lower=" + std::to_string(static_cast<int>(lower)) +
                  ", upper=" + std::to_string(static_cast<int>(upper)) + ").");
-        return 75.0;
+        return {75.0, true};
     }
 
     std::vector<double> hist(n_bins, 0.0);
@@ -155,10 +155,10 @@ double estimate_diploid_coverage(const std::vector<RegionResult>& results) {
     if (diploid_est < 10.0 || diploid_est > 300.0) {
         LOG_WARN("KDE diploid estimate falling back to 75.0x: mode estimate " +
                  std::to_string(static_cast<int>(diploid_est)) + "x out of sanity range [10, 300].");
-        return 75.0;  // Fallback
+        return {75.0, true};  // Fallback
     }
 
-    return diploid_est;
+    return {diploid_est, false};
 }
 
 namespace {
@@ -683,8 +683,9 @@ std::vector<RegionResult> RegionProcessor::process_all_regions(int max_snvs) {
         LOG_INFO("[CovM] Pass 2 diploid_coverage=" + std::to_string(diploid_coverage) +
                  "x source=user_specified (--expected-coverage)");
     } else {
-        diploid_coverage = estimate_diploid_coverage(results);
-        diploid_source = (diploid_coverage == 75.0) ? "auto_kde_fallback_default" : "auto_kde";
+        DiploidEstimate est = estimate_diploid_coverage(results);
+        diploid_coverage = est.value;
+        diploid_source = est.used_fallback ? "auto_kde_fallback_default" : "auto_kde";
         LOG_INFO("[CovM] Pass 2 diploid_coverage=" + std::to_string(diploid_coverage) +
                  "x source=" + diploid_source + " (KDE mode of NumReads distribution)");
     }

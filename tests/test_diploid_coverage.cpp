@@ -34,12 +34,16 @@ TEST(EstimateDiploidCoverageTest, FallbackOnInsufficientData) {
     for (int i = 0; i < 50; ++i) {
         results.push_back(make_region(60));
     }
-    EXPECT_DOUBLE_EQ(estimate_diploid_coverage(results), 75.0);
+    auto est = estimate_diploid_coverage(results);
+    EXPECT_DOUBLE_EQ(est.value, 75.0);
+    EXPECT_TRUE(est.used_fallback);
 }
 
 TEST(EstimateDiploidCoverageTest, FallbackOnEmptyInput) {
     std::vector<RegionResult> empty_results;
-    EXPECT_DOUBLE_EQ(estimate_diploid_coverage(empty_results), 75.0);
+    auto est = estimate_diploid_coverage(empty_results);
+    EXPECT_DOUBLE_EQ(est.value, 75.0);
+    EXPECT_TRUE(est.used_fallback);
 }
 
 TEST(EstimateDiploidCoverageTest, FallbackOnLowReadCounts) {
@@ -48,7 +52,9 @@ TEST(EstimateDiploidCoverageTest, FallbackOnLowReadCounts) {
     for (int i = 0; i < 200; ++i) {
         results.push_back(make_region(3));
     }
-    EXPECT_DOUBLE_EQ(estimate_diploid_coverage(results), 75.0);
+    auto est = estimate_diploid_coverage(results);
+    EXPECT_DOUBLE_EQ(est.value, 75.0);
+    EXPECT_TRUE(est.used_fallback);
 }
 
 TEST(EstimateDiploidCoverageTest, ModeNear60) {
@@ -60,10 +66,10 @@ TEST(EstimateDiploidCoverageTest, ModeNear60) {
         int nr = static_cast<int>(std::max(10.0, dist(rng)));
         results.push_back(make_region(nr));
     }
-    double est = estimate_diploid_coverage(results);
-    // KDE should land close to mode of 60; allow wide tolerance due to p80 truncation + histogram binning
-    EXPECT_GT(est, 45.0);
-    EXPECT_LT(est, 80.0);
+    auto est = estimate_diploid_coverage(results);
+    EXPECT_GT(est.value, 45.0);
+    EXPECT_LT(est.value, 80.0);
+    EXPECT_FALSE(est.used_fallback);
 }
 
 TEST(EstimateDiploidCoverageTest, ModeNear90) {
@@ -75,13 +81,13 @@ TEST(EstimateDiploidCoverageTest, ModeNear90) {
         int nr = static_cast<int>(std::max(15.0, dist(rng)));
         results.push_back(make_region(nr));
     }
-    double est = estimate_diploid_coverage(results);
-    EXPECT_GT(est, 70.0);
-    EXPECT_LT(est, 110.0);
+    auto est = estimate_diploid_coverage(results);
+    EXPECT_GT(est.value, 70.0);
+    EXPECT_LT(est.value, 110.0);
+    EXPECT_FALSE(est.used_fallback);
 }
 
 TEST(EstimateDiploidCoverageTest, FailedRegionsSkipped) {
-    // Mix of successful regions at mode 60 + many failed regions with extreme values
     std::vector<RegionResult> results;
     std::mt19937 rng(7);
     std::normal_distribution<double> dist(60.0, 8.0);
@@ -89,13 +95,28 @@ TEST(EstimateDiploidCoverageTest, FailedRegionsSkipped) {
         int nr = static_cast<int>(std::max(10.0, dist(rng)));
         results.push_back(make_region(nr, true));
     }
-    // Add failed regions with extreme values that should be ignored
     for (int i = 0; i < 500; ++i) {
         results.push_back(make_region(200, false));
     }
-    double est = estimate_diploid_coverage(results);
-    EXPECT_GT(est, 45.0);
-    EXPECT_LT(est, 80.0);
+    auto est = estimate_diploid_coverage(results);
+    EXPECT_GT(est.value, 45.0);
+    EXPECT_LT(est.value, 80.0);
+    EXPECT_FALSE(est.used_fallback);
+}
+
+TEST(EstimateDiploidCoverageTest, ModeAt75NotMisclassifiedAsFallback) {
+    // Regression for [C1]: genuine ~75x diploid sample must NOT be flagged as fallback
+    std::vector<RegionResult> results;
+    std::mt19937 rng(2026);
+    std::normal_distribution<double> dist(75.0, 6.0);
+    for (int i = 0; i < 1000; ++i) {
+        int nr = static_cast<int>(std::max(15.0, dist(rng)));
+        results.push_back(make_region(nr));
+    }
+    auto est = estimate_diploid_coverage(results);
+    EXPECT_FALSE(est.used_fallback) << "75x sample should be classified as auto_kde, not fallback";
+    EXPECT_GT(est.value, 65.0);
+    EXPECT_LT(est.value, 85.0);
 }
 
 TEST(RegionResultTest, DiploidCoverageUsedDefault) {
