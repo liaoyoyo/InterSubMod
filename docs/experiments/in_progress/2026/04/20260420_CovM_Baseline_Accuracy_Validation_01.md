@@ -1,17 +1,20 @@
 ---
 title: Coverage_Multiple / Ploidy Baseline 準確度驗證 — 是否為 Z3 跨樣本失敗根因？
 date: 2026-04-20
-status: MIXED（H-CN1/H-CN2 POSITIVE，H-CN3 NEGATIVE — 「cov 需修正」為真，但修正不解 Z3 pilot 跨樣本失敗）
+status: MIXED（H-CN1 CONDITIONAL（需用現行 binary 重跑 master）、H-CN2 POSITIVE、H-CN3 NEGATIVE）
 owner: InterSubMod Research
 scope: TO mode · 7 samples × 2 modes · HCC1395 SEQC2 CNV truth benchmark
 related:
   - 20260419_Z3_amplicon_blacklist_pilot_result_01.md
+  - ../../../../methodology/20260419_KDE_expected_coverage_audit_01.md
   - ../../../validated/2026/04/20260411_GC校正與甲基化CN驗證_01.md
   - ../../../validated/2026/04/20260409_SEQC2_CNV分層觀察_01.md
 hypotheses:
   - H-CN1: HCC1954 KDE expected_coverage 偏高 → baseline 失準
   - H-CN2: Coverage_Multiple 對 Gain 的 recall 遠低於 Loss
   - H-CN3: segment-level / oracle CN 可跨樣本救援 Z3 blacklist
+updates:
+  - 2026-04-19: H-CN1 根因重新定性為 stale-binary artifact（非 KDE 邏輯缺陷）；C++ 加入 WARN + Diploid_Coverage_Used audit column（commit 374fad4, 12d9b3e）；H-CN1 結論降為 CONDITIONAL，需以現行 binary 重跑 master dataset 才能確立 per-sample KDE baseline
 ---
 
 # Coverage_Multiple Baseline 準確度驗證 — Z3 跨樣本失敗根因釐清
@@ -134,20 +137,34 @@ hypotheses:
 | HCC1954 | to | **75.0** | 65 | +15.4% |
 | HCC1954 | paired | **75.0** | 65 | +15.4% |
 
-### 4.3 判定：**H-CN1 POSITIVE（以 infrastructure bug 形式）**
+### 4.3 判定：**H-CN1 CONDITIONAL（原定性為 infrastructure bug；2026-04-19 重新定性為 stale-binary artifact）**
 
 發現極端驚人：**14/14 rows 的 expected_coverage 精準等於 75.0**，**7 個樣本共用同一常數**。
 
-這**不是 KDE 估計偏誤**，而是：
-- Pipeline 執行時 `--expected-coverage` 走了 CLI default 的 **75.0 fallback**
-- `src/core/RegionProcessor.cpp:59-136` 的 KDE auto-estimation **在本 master dataset 產出時未被啟用**
-- 對 COLO829（真實 neutral=30）→ baseline 高估 150%，CovM 被整體壓縮 2.5×
-- 對 H2009（真實 neutral=104）→ baseline 低估 28%，CovM 被整體放大 1.4×
+**2026-04-19 根因重審**（見 `docs/methodology/20260419_KDE_expected_coverage_audit_01.md`）：
 
-**結論**：
-- H-CN1 原假設（HCC1954 特有偏誤）**被更嚴重的事實取代**：全 7 樣本都用錯 baseline
-- 之前研究（`20260411_GC校正與甲基化CN驗證_01.md`）引用的「KDE 實作正確，CN 準確度 6.2%→43.8%」**僅驗證 KDE 邏輯本身**，**並未驗證 master dataset 生成時 KDE 是否被啟用**
-- **這解釋了 Step 1 的 Gain recall 14.6%**：HCC1395 真實 neutral NumReads=54，而 baseline=75.0 → diploid 樣本（CN=2）的 NumReads≈54 除以 75 會得到 0.72，落入「Low」而非「Normal」；CN=3 的 NumReads≈81 除以 75 = 1.08，落入「Normal」而非「Elevated」
+- KDE 二次 pass 於 commit `8d0a0c8` (2026-04-13) 已正確實作；但 master dataset 於 **2026-03-30 產出**，早於 KDE commit 14 天
+- Master dataset 由**舊版 binary**（無 KDE pass 2）生成 → 全部 default 75.0 落地
+- `src/core/RegionProcessor.cpp` 現行邏輯：parallel Pass 1 以 75.0 計算 → serial Pass 2 以 KDE 估得的 per-sample mode 覆寫
+- 結論：**這不是「KDE 估計偏誤」也不是「KDE 未啟用」，而是過期的輸出檔**；H-CN1 的 mis-calibration 觀察**屬實但根因已變**
+
+**2026-04-19 C++ 改動（commits `374fad4` + `12d9b3e`）**：
+
+- 三處 KDE fallback 由 `LOG_INFO` 升為 `LOG_WARN`，明示失效條件（n<100 / n_bins<10 / 估值出 [10, 300]）
+- Pass 2 印出 `[CovM] Pass 2 diploid_coverage=X source={user_specified|auto_kde|auto_kde_fallback_default}` banner
+- TSV 新增 `Diploid_Coverage_Used` 欄位（66→67 欄）供後續 validation 直接讀取，不再需從 NumReads/CovM 反推
+- 回傳型別由 `double` 改 `DiploidEstimate{value, used_fallback}` struct，避免「value==75.0」誤判真 75× diploid 樣本為 fallback（code reviewer confidence 95 flagged；加入 regression test `ModeAt75NotMisclassifiedAsFallback`）
+
+**對 H-CN1/H-CN2 下游影響**：
+
+- H-CN1：「baseline 失準」觀察仍成立，但需**以現行 binary 重跑 master dataset** 取得 per-sample KDE mode 才能確立最終 bias 量化
+- H-CN2：per-CN-bin CovM 分佈量化**將在 master 重跑後更新**；目前的 Gain recall 14.6% 是 baseline=75.0 下的觀察，更換至 per-sample KDE 後預期 HCC1395 neutral baseline 會降至 ~54 → CN=3 的 CovM 由 0.85 升至 ~1.5（落入 Elevated 門檻）
+- H-CN3（NEGATIVE）不受影響：即便 baseline 正確，Z3 blacklist 對除 HCC1954 外的樣本 ΔF1 仍為近零
+
+**追蹤項**：
+- [Blocker] Master dataset 需以現行 binary 重跑（7 樣本 × 2 modes，預計 ~4-6 hr）
+- [Doc] 重跑後：更新 Step 1 per-CN-bin 表、Step 2 expected_coverage 表（預期 7/14 rows 會變動）、Step 1 confusion matrix 圖
+- [Scope] 重跑結果**不影響**任何五研究目標判定；僅影響「CovM 作為 feature 的可信度」
 
 ---
 

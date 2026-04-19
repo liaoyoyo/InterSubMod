@@ -4,8 +4,14 @@ project:
   name: "coverage_multiple_validation"
   title: "Coverage_Multiple 作為 CN proxy 的可靠性驗證"
   created: "2026-04-19"
-  status: "executing"
-  conclusion: null                  # Pending step4 oracle CN pilot
+  status: "blocked"                # Master dataset stale; rerun with current binary required
+  conclusion: null                  # Pending step4 oracle CN pilot AND master dataset rerun
+  blockers:
+    - id: "B1"
+      description: "Step 1/2 data source (20260330 master dataset) was produced by binary pre-dating KDE commit 8d0a0c8 (2026-04-13); all rows have expected_coverage=75.0 (stale-binary artifact, not KDE logic failure)"
+      remediation: "Rerun 7 samples × 2 modes with current /big7_disk/.../build/bin/inter_sub_mod (~4-6 hr)"
+      cpp_commits_relevant: ["374fad4", "12d9b3e"]
+      methodology_doc: "docs/methodology/20260419_KDE_expected_coverage_audit_01.md"
 
 hypotheses:
   - id: "H1"

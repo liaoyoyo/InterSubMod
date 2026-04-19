@@ -1,18 +1,37 @@
 ---
 title: Coverage_Multiple vs SEQC2 Truth 階段性觀察（Step 1+2）
 date: 2026-04-19
-status: in_progress
+status: blocked
 hypothesis_id: H1
-verdict: leaning_rejected
+verdict: leaning_rejected（基於過期 master dataset；需以現行 binary 重跑後重量化）
 related:
   - research/coverage_multiple_validation/00_PLAN.md
   - docs/experiments/in_progress/2026/04/20260419_Z3_amplicon_blacklist_pilot_result_01.md
+  - docs/methodology/20260419_KDE_expected_coverage_audit_01.md
 ---
 
 # Coverage_Multiple vs SEQC2 Truth 階段性觀察（Step 1+2）
 
-> **狀態**：in_progress — Step 4 oracle CN pilot 尚未完成
+> **狀態**：blocked — master dataset 需以現行 binary 重跑
 > **當前 verdict**：H1 leaning rejected；H2 待 Step 4 決定
+
+## 2026-04-19 根因重審
+
+本報告 Step 1/2 所用 master dataset（`20260330_loh_round1_cross_sample_audit_post_to_hp_fix`）
+由 2026-03-30 時的 binary 產出，早於 KDE per-sample diploid commit `8d0a0c8` (2026-04-13)
+14 天 → 全 14 rows（7 樣本 × 2 modes）的 expected_coverage 常數 75.0 是 **stale-binary artifact**，
+非 KDE 邏輯缺陷，也非「KDE 在執行時未被啟用」。
+
+2026-04-19 C++ 強化（commits `374fad4` + `12d9b3e`）：KDE fallback 升 WARN；TSV 新增
+`Diploid_Coverage_Used` 欄位；回傳改 `DiploidEstimate` struct。
+
+**本報告數值後續處理**：
+- Step 1 per-CN-bin recall（Gain 14.6% / Loss 86.9%）是 baseline=75.0 下的觀察；重跑後預期
+  HCC1395 neutral baseline 會降至 ~54 → CN=3 的 CovM 由 0.85 升至 ~1.5，Gain recall 大幅改善
+- Step 2 per-sample bias 表（COLO829 +150% / H2009 −28% 等）是**舊 binary 下** 的 bias；新 binary
+  下各 bias 理應收斂至單位數百分比（KDE 即是為此設計）
+- 研究價值仍保留：確證「以 default 75.0 baseline 評估跨樣本會產生嚴重誤判」，這是
+  infrastructure lesson；但不構成 H1 的最終判定依據
 
 ## Step 1 — HCC1395 × SEQC2 truth 對齊
 

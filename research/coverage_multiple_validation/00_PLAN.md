@@ -1,8 +1,23 @@
 # Coverage_Multiple 作為 CN proxy 的可靠性驗證
 
-> **狀態**：executing
+> **狀態**：blocked — 等待以現行 binary 重跑 master dataset（2026-04-19 更新）
 > **建立日期**：2026-04-19
 > **專案目錄**：`research/coverage_multiple_validation/`
+
+## 2026-04-19 狀態更新
+
+Step 1/2 以 `/big7_disk/.../20260330_.../all_region_rows.tsv.gz` 為資料來源，該 master dataset
+由 2026-03-30 時的 binary 產出；但 C++ KDE per-sample diploid 估計於 **2026-04-13** 才經 commit
+`8d0a0c8` 啟用，master dataset 因此全部 rows 的 expected_coverage=75.0（stale-binary artifact）。
+
+2026-04-19 C++ 再次強化（commits `374fad4` + `12d9b3e`）：
+- KDE fallback 失效時升為 WARN 並帶失效原因
+- TSV 新增 `Diploid_Coverage_Used` 欄位供後續直接讀取
+- 回傳型別改為 `DiploidEstimate{value, used_fallback}` 避免 value==75.0 sentinel 誤判
+
+→ Step 1/2 的 per-CN-bin recall 與 per-sample bias 量化**需以現行 binary 重跑 master dataset**
+才能確立最終結果；目前報告的數值仍具研究價值（證實 baseline 失準確實發生），但 root cause
+已從「CLI fallback 未啟用 KDE」更正為「stale binary」。
 
 ## 背景與動機
 
