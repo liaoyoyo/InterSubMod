@@ -29,6 +29,8 @@
 | **P0-A C++ 修正**（C1 logging + C2 audit column） | commits `ec0608b→5abc659` + config.sh typo fix `cdcd8a6` | **2026-04-19 ~ 2026-04-20** |
 | **P0-C 方法論審查** | `docs/methodology/20260420_ReadParser_HP_PS_integration_01.md`（推薦 B 平行欄位） | **2026-04-20** |
 | **P0-B C16 Within-Group Validation** | `scripts/analysis/methylation_cn_within_group_validation.py` + C16 card 補註；**REAL_SIGNAL 確認**（10/10 bin CI 排除 0, median \|r\|=0.178） | **2026-04-21** |
+| **P0-B C15 Script Audit** | C15 card 補註：O15 scripts 已為 stratified (mode × loh_group × truth_label) 設計，無 Pooled OLS trap | **2026-04-21** |
+| **P0-B C17 Script Audit** | C17 card 補註：step2 per-sample Mann-Whitney + step3 per-sample Spearman，無 LinearRegression/residualize 呼叫 | **2026-04-21** |
 
 ### 🟡 進行中
 
@@ -41,7 +43,6 @@
 | 項目 | 代價 | 阻塞 | 備註 |
 |------|------|------|------|
 | **P0-C /cpp-change 執行**（選 B 實作） | +0.5 天 | 29 HP-dependent 特徵 opt-in | 方法論已審查完成，等 P0-A rerun 結束避免 binary 版本混淆 |
-| **P0-B C15/C17 後續** | 1-2 天 | — | C17 已是 within-group（safe）；C15 O15 scripts 待檢視 |
 
 ### 🟡 P0 完成後可並行（3-7 天）
 

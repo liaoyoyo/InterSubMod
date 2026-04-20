@@ -46,14 +46,33 @@
 - **挑戰文獻**: epiTRACERx 用不同 subclone marker；需比較 Δ_NG AF×Methylation 是否文獻空白
 - **缺口**: 文獻空白（user memory 標為「文獻空白」）；Phase 2 A+D 補齊
 
+## P0-B 補註（2026-04-21）— 現有分析已為 Per-Sample 設計
+
+**Script inventory**：
+- `research/loh_subclone_af/scripts/step2_intermediate_af_methylation_cross.py`（585 行）
+- `research/loh_subclone_af/scripts/step3_spatial_analysis.py`（489 行）
+- `research/loh_subclone_af_paired/scripts/step[1-4]_*.py`
+
+**驗證結果**：
+- step2 Δ_NG Inter−Ext：**per-sample Mann-Whitney + per-sample delta_ng**（line 208, 217, 391, 431, 481-506），非 pooled 跨樣本聚合
+- step3 meta-ρ：**per-sample Spearman after groupby("sample", "segment_type")**（line 259, 384, 434），CN==1 only stratified by design
+- **無 LinearRegression / sm.OLS / residualize 呼叫**
+
+**結論**：**C17 現有分析無 Pooled OLS residualization trap**，無需 within-group OLS 重算。原「P0-B Δ_NG 重算」已不適用。
+
+**仍需處理**：
+- CovM bug 影響 CN1 identification（P0-A rerun 後驗證一致性）
+- P1-C per-sample bootstrap CI（step2/step3 仍缺）
+- P1-A r=0.997 誤標（已完成 2026-04-20）
+
 ## 修正建議
-- **P0-A**: CovM bug 修 + 重跑（R-01 已決定）
-- **P0-B**: within-group OLS 重算 Δ_NG
-- **P1-A**: 修正 20260417_Zone_Aware_Confidence_Framework_01.md:49,73 r=0.997 數值錯標
+- **P0-A**: CovM bug 修 + 重跑（R-01 已決定，rerun 進行中）
+- ~~**P0-B**: within-group OLS 重算 Δ_NG~~ → ✅ **N/A 已驗證為 per-sample design**（2026-04-21）
+- ~~**P1-A**: 修正 r=0.997 數值錯標~~ → ✅ 已完成 2026-04-20
 - **P1-C**: step2/step3 per-sample bootstrap CI
 - **P3**: HCC1954 underpowered 傳遞至 CURRENT_FOCUS / INDEX
 - **對應 R-id**: R-01, R-02, R-05
 - **對應 Q-id**: Q-10（臨床 downstream cohort）
 
 ## 整體評分
-**✅ POSITIVE 雙證據鏈穩固，但 CovM bug 影響下游 CN1 分層 → R-01 修復後需 within-group OLS 重算 → 主軸 characterization 核心 Subclone Marker 功能。**
+**✅ POSITIVE 雙證據鏈穩固，per-sample design 已規避 Pooled OLS trap，CovM bug 影響下游 CN1 分層 → R-01 修復後僅需驗證一致性，無需 within-group OLS 重算 → 主軸 characterization 核心 Subclone Marker 功能。**

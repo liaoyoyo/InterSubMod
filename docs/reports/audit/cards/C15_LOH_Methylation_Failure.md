@@ -51,5 +51,19 @@
 ## R-04 補註（2026-04-19）
 **Within-group OLS not re-run**: HP-independent 驗證空白已註記；Pooled OLS 疑慮由 R-05 全面盤點處理；NEGATIVE 結論（AlleleDelta=AF confound）不動搖。採用 CHECKLIST R-04 選項 A：接受現有 NEGATIVE 結論；within-group OLS 不再重跑。
 
+## P0-B 補註（2026-04-21）— O15 Scripts 已為 Stratified 設計
+
+**Script inventory**：
+- `scripts/analysis/build_observation_O15_loh_zone_metrics_hcc1395.py`（1245 行）
+- `scripts/analysis/build_observation_O15b_loh_zone_metrics_cross_sample.py`（1478 行）
+
+**驗證結果**：
+- AUC / Cohen's d 計算：**per mode × loh_group × truth_label stratified**（line 960-1001），效果量與 CI 均 within-stratum 計算
+- pearsonr 呼叫：**per-zone（LOH-inside / LOH-outside）**（line 468），非 pooled
+- `pooled = np.mean(ds)` in O15b（line 807）：僅為 forest plot 視覺化的「各 metric 平均 Cohen's d」，非 OLS residualization
+- **無 LinearRegression / sm.OLS / residualize 呼叫**
+
+**結論**：C15 現有 NEGATIVE 結論基於 by-design HP 退化，分析腳本本身已為 stratified，無 Pooled OLS trap。R-04 補註 2026-04-19 的 within-group 不重跑決定維持有效。
+
 ## 整體評分
-**⚠️ 措辭需精確化 + HP-independent 驗證空白 — 對應 C17 LOH Subclone 雙證據鏈是正向的鏡像案例。**
+**⚠️ 措辭需精確化 + HP-independent 驗證空白 — 對應 C17 LOH Subclone 雙證據鏈是正向的鏡像案例；P0-B 已確認分析設計已為 stratified 無需重算。**
