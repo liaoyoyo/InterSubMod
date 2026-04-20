@@ -8,7 +8,7 @@
 # Tool Paths
 # ============================================================================
 
-PROJECT_ROOT_DEFAULT="/bip7_disk/liaoyoyo2001/InterSubMod"
+PROJECT_ROOT_DEFAULT="/big7_disk/liaoyoyo2001/InterSubMod"
 LONGPHASE_S_BIN="${LONGPHASE_S_BIN:-/big8_disk/liaoyoyo2001/Knowledge/codebase/longphase-s/longphase-s}"
 INTERSUBMOD_BIN="${INTERSUBMOD_BIN:-${PROJECT_ROOT_DEFAULT}/build/bin/inter_sub_mod}"
 INTERSUBMOD_BIN_FALLBACK="/big8_disk/liaoyoyo2001/Knowledge/codebase/InterSubMod/build/bin/inter_sub_mod"
