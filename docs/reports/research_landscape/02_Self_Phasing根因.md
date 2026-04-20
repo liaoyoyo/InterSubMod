@@ -105,8 +105,10 @@ graph LR
 | 證據項 | 數值 | 解讀 |
 |--------|------|------|
 | Somatic HP1:HP2 bias | **17.3:1** (614K vs 35K) | 94.6% somatic reads 偏向 HP1 |
-| TO TP LOH 中 self-phasing 造成的比例 | **62%** 移除 self-phasing 後消失 | AF 0.1-0.8 近 100% |
-| 全 TO LOH 中 self-phasing artifact | **31.2%** | 其餘 68.8% 為 structural LOH |
+| TO TP **ISM HP_Ratio LOH** 中 self-phasing 造成的比例 ⁽¹⁾ | **62%** 移除 self-phasing 後消失 | AF 0.1-0.8 近 100% |
+| 全 TO **ISM HP_Ratio LOH** 中 self-phasing artifact ⁽¹⁾ | **31.2%** | 其餘 68.8% 為 structural ISM LOH |
+
+> ⁽¹⁾ **LOH 層次說明（2026-04-19 P2-A 補註）**：此處 62%/31.2% 指 **ISM HP_Ratio LOH**（BAM HP tag 路徑），非 **LOH.bed region-level LOH**（VCF AF/VAF 路徑）。LOH.bed 在 PON-only 實驗中 Jaccard=1.0 完全不受 self-phasing 影響。
 | 同位點 HP_Ratio 跨模式相關 | **r = 0.001**（288K pairs） | 完全不相關 |
 | TO-only LOH 在 paired 下完全平衡 | **86.5%** | HP_Ratio 0.4-0.6 |
 | Cohen's d (HP_Ratio 差異) | **-1.20** | 巨大效應量 |

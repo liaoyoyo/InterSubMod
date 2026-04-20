@@ -14,6 +14,8 @@
 > **狀態**: 構想階段（待 H1/H3 驗證）
 > **動機**: 將 14 個月 LOH/CN/AF 研究觀察從「已關閉的 filter 方向」轉化為「可行動的分區差異化策略」
 > **核心轉換**: Zone Exclusion (failed) → Zone-Aware Confidence Adjustment
+>
+> ¹ **數值修訂（2026-04-20 P1-A）**：line 49 與 line 73 原標 `r=0.997` 為誤值，實際 CovM vs SEQC2 CN Pearson r=**0.831（Paired）/ 0.827（TO）**，來源 `scripts/analysis/methylation_cn_validation.py`。相關 LOH.bed SEQC2 Jaccard=**0.928**（HCC1395，見 `research/seqc2_cnv_stratification/`）。原誤值已分別引用於 C13/C17/C20/C22 四個 audit cards。
 
 ---
 
@@ -46,7 +48,7 @@
 | LOH ALL tiers TP-enriched (0.766-0.903) | - | - | - | - | **核心** |
 | Subclone AF x NGroups +0.642 (7/7) | 間接 | **核心** | **核心** | - | 間接 |
 | HPFineNGroups N>=4 TP=89.1% | - | **核心** | 間接 | - | **核心** |
-| CovM CN proxy r=0.997 | - | 間接 | 間接 | **核心** | 間接 |
+| CovM CN proxy r=0.831 (Paired) / 0.827 (TO) ¹ | - | 間接 | 間接 | **核心** | 間接 |
 | Methylation CN-blind (|r|<0.07) | - | - | - | 排除項 | 排除項 |
 | NGroups x LOH inverse (NGroups=1 LOH=76.7%) | **核心** | **核心** | **核心** | - | 間接 |
 | Phase D 4-group subclone | **核心** | **核心** | 間接 | **核心** | 間接 |
@@ -70,7 +72,7 @@
 - Non-LOH + high NGroups + high HP ASM = allele-specific methylation（無 LOH 的表觀遺傳事件）
 
 **目標 4 (TO)**：Coverage_Multiple 和 LOH.bed 是 TO 模式的可靠資訊源
-- CovM r=0.997 as CN proxy → 不需外部 CNV truth set
+- CovM r=0.831 (Paired) / 0.827 (TO) as CN proxy ¹ → 不需外部 CNV truth set
 - LOH.bed (VCF AF/VAF) 不受 self-phasing 影響 → TO 模式可用
 - Normal methylation reference 提供期望基線
 

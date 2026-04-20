@@ -98,7 +98,7 @@
 - **R1**: CramersV 93% 為零 = 2×2 框架缺陷；HPMergedDelta 多群時反向；HPFineNGroups 已克服（AUC +0.125）
 - **R2**: Excess groups 概念有效（跨子集統一 +0.059）但子集內無新信號，不需修改 C++
 - **R3**: 結構清楚子集 AUC 反而下降 → **確認是 identifiability 問題而非特徵設計問題**
-- **R4**: HPFineNGroups N≥4 + NR≥80 → TP rate 89.1%；低 AF (0.1-0.2) 信號最強（+50pp）
+- **R4**: HPFineNGroups 新 canonical filter **NG=4 + AF<0.4 + NR≥80** → TP rate **92.81%**（舊 filter N≥4+NR≥80 為 89.12%，ΔTP +3.7pp；HCC1954 +21pp 挽救），F pilot 2026-04-18 驗證；低 AF (0.1-0.2) 信號最強（+50pp）
 - **R5**: PairwiseMeanDist 與 HPFineN 正交（Spearman=0.07），微弱獨立增量
 - **HPFineNGroups 確認為 somatic heterogeneity 標記** — 7/7 一致，residualized AUC=0.617，不能用於 filter 但有明確生物學價值
 
@@ -172,6 +172,14 @@
   - 5 configs × 21 thresholds × 7 samples，max delta F1=+0.001
   - **根因：TO QS AUC=0.497 隨機，zone delta 無法修正**
   - QS 調整路線和 C++ 整合**暫停**
+- **ClairS-TO Verdict Characterization Pilot（2026-04-20 NEGATIVE on F1 / POSITIVE on calibration）**：[報告](experiments/in_progress/2026/04/20260420_ClairS_TO_Verdict_Characterization_Pilot_01.md) · [外部 CN 工具 survey](references/2026/04/20260420_external_CN_tools_survey_01.md)
+  - scope：HCC1395 subsample t20_n30（purity ≈ 0.40），因其他 6 樣本缺 CNA loci 無 Verdict 標籤
+  - H-V1 POSITIVE：Verdict_Germline FP rate = 96.1%（3,463/3,602, Wilson 95% CI 0.955–0.967）
+  - H-V2 POSITIVE：Verdict_Somatic TP rate on PASS = 91.8%；Verdict_SubclonalSomatic TP rate = 94.9%
+  - **F1 直接增益 = 0**：Verdict_Germline 100% 落在 LowQual（從未出現在 PASS）→ S1 「remove Verdict_Germline from PASS」ΔF1 = +0.0000
+  - 最激進 S2「只保留 PASS ∩ Verdict_Somatic∪Subclonal」 ΔF1 = −0.2007（recall 崩塌）
+  - 根因：Verdict 與 LowQual 共用同一套 ASCAT / 二項式資訊；PASS 95.4% FP 落在 no_Verdict 子集，Verdict 無決策權
+  - **結論**：不升級 ClairS-TO 內建 Verdict 為 production filter；Verdict 標籤保留作 per-variant annotation；主升級路徑改為 **Wakhan（haplotype-specific CN）+ SAVANA（SV/CNA）external CN pilot**
 - **結論：Zone-Aware 價值確認僅在 characterization annotation，不在 F1 改進**
 
 ### 待完成項目
@@ -211,5 +219,5 @@
 - **Read-level 鑑別**：LOSO AUC=0.721（首次>0.70）但安全約束 FP removal=0%
 - **ASM 定量**：POSITIVE — 32-66% SNV 位點有 ASM；ISM PERMANOVA 唯一捕捉 entropy imbalance
 - **Phase 1A**：paired-pure delta F1=+0.0112 已鎖定；TO 模式負增益
-- **Self-phasing 因果鏈**：CONFIRMED — 62% LOH 消失、somatic bias 17.3:1
+- **Self-phasing 因果鏈**：CONFIRMED — 62% ISM HP_Ratio LOH 消失（非 LOH.bed；LOH.bed Jaccard=1.0 不變）、somatic bias 17.3:1
 - **SEQC2 CNV 分層觀察**（15 圖表 + 5 TSV）：Coverage_Multiple r=0.831 驗證可信；跨樣本 AUC ≤ 0.641；zone 排除全不可行；CNV 非特徵耗盡根因
