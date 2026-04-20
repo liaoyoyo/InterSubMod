@@ -10,7 +10,7 @@
 
 ---
 
-## 執行進度（2026-04-19 更新）
+## 執行進度（2026-04-21 更新）
 
 ### ✅ 已完成（免 Hard Gate）
 
@@ -26,14 +26,22 @@
 | R-04 13 NO-GO 卡補註 | 9 cards 加 R-04 補註 | 2026-04-19 |
 | R-05 Pooled OLS 全面盤點 | `cross_cutting/Pooled_OLS_Global_Inventory.md` | 2026-04-19 |
 | P2-B AUC 0.58 門檻統一 | `docs/standards/auc_threshold_definition.md` | 2026-04-19 |
+| **P0-A C++ 修正**（C1 logging + C2 audit column） | commits `ec0608b→5abc659` + config.sh typo fix `cdcd8a6` | **2026-04-19 ~ 2026-04-20** |
+| **P0-C 方法論審查** | `docs/methodology/20260420_ReadParser_HP_PS_integration_01.md`（推薦 B 平行欄位） | **2026-04-20** |
+| **P0-B C16 Within-Group Validation** | `scripts/analysis/methylation_cn_within_group_validation.py` + C16 card 補註；**REAL_SIGNAL 確認**（10/10 bin CI 排除 0, median \|r\|=0.178） | **2026-04-21** |
+
+### 🟡 進行中
+
+| 項目 | 狀態 | 預估 |
+|------|------|------|
+| **P0-A 7 樣本 rerun** | HCC1395 ✅ / HCC1395_DORADO 進行中（InterSubMod 階段）/ 餘 5 樣本 | 剩 ~1 天 |
 
 ### 🔴 待 Hard Gate 確認（需用戶明示）
 
-| 項目 | 代價 | 阻塞 |
-|------|------|------|
-| **P0-A** /cpp-change 修 KDE + 7 樣本重跑 | 3-5 天 | C17/C20/C22/C16 重算 |
-| **P0-C** Haplotag ReadParser 修正（P0-A 同窗口） | +1 天 | 29 HP-dependent 特徵重測 |
-| **P0-B** C15/C16/C17 三者並行 within-group OLS | 3-5 天 | Phase 2 A+D 啟動 |
+| 項目 | 代價 | 阻塞 | 備註 |
+|------|------|------|------|
+| **P0-C /cpp-change 執行**（選 B 實作） | +0.5 天 | 29 HP-dependent 特徵 opt-in | 方法論已審查完成，等 P0-A rerun 結束避免 binary 版本混淆 |
+| **P0-B C15/C17 後續** | 1-2 天 | — | C17 已是 within-group（safe）；C15 O15 scripts 待檢視 |
 
 ### 🟡 P0 完成後可並行（3-7 天）
 
