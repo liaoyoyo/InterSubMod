@@ -164,6 +164,7 @@ add_executable(run_tests
     tests/test_significance_analyzer.cpp
     tests/test_label_test.cpp
     tests/test_read_aggregator.cpp
+    tests/test_read_parser.cpp
     tests/test_per_cpg_asm.cpp
     tests/test_diploid_coverage.cpp
 )

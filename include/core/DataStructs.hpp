@@ -30,6 +30,8 @@ struct ReadInfo {
     int32_t align_end;       ///< Alignment end position (0-based)
     int mapq;                ///< Mapping Quality
     std::string hp_tag;      ///< Haplotype tag (HP): "1", "2", "1-1", "2-1", "unphase", etc.
+                             ///< May be demoted to "0" when Config::germline_hp_only is set.
+    std::string hp_tag_raw;  ///< Raw HP tag before any germline-only demotion (audit). Mirrors hp_tag when flag is off.
     bool is_tumor;           ///< True if from Tumor BAM, False if from Normal BAM
     AltSupport alt_support;  ///< Support for somatic variant (ALT, REF, or UNKNOWN)
     Strand strand;           ///< Strand orientation (FORWARD/+ or REVERSE/-)

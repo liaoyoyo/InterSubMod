@@ -17,6 +17,9 @@ struct ReadFilterConfig {
     int min_read_length = 1000;  ///< Minimum read length in bp
     int min_base_quality = 20;   ///< Minimum base quality for SNV support
     bool require_mm_ml = true;   ///< Require MM and ML tags
+    // Self-phasing fallback: when true, HP:i:11/21/33 are demoted to "0" (unphased).
+    // The raw value is always preserved in ReadInfo::hp_tag_raw regardless of this flag.
+    bool germline_hp_only = false;
 };
 
 /**

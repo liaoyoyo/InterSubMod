@@ -149,6 +149,12 @@ struct RegionResult {
     int tumor_hp2_count;         ///< Tumor reads in HP2
     int normal_hp1_count;        ///< Normal reads in HP1
     int normal_hp2_count;        ///< Normal reads in HP2
+    // Audit counters for somatic HP tags (HP:i:11/21/33 in raw BAM).
+    // Always populated from hp_tag_raw regardless of the germline_hp_only flag,
+    // so users can diagnose self-phasing extent independently of the downstream remapping.
+    int n_hp_somatic_11;         ///< Reads with raw HP tag == "1-1" (integer 11)
+    int n_hp_somatic_21;         ///< Reads with raw HP tag == "2-1" (integer 21)
+    int n_hp_somatic_33;         ///< Reads with raw HP tag == "3"   (integer 33)
 
     // Signed HP methylation delta (mean per-CpG methylation difference)
     // Unlike distance-based delta, these capture DIRECTION: HP1 meth > HP2 → positive
@@ -291,6 +297,9 @@ struct RegionResult {
           tumor_hp2_count(0),
           normal_hp1_count(0),
           normal_hp2_count(0),
+          n_hp_somatic_11(0),
+          n_hp_somatic_21(0),
+          n_hp_somatic_33(0),
           tumor_hp_signed_delta(std::numeric_limits<double>::quiet_NaN()),
           normal_hp_signed_delta(std::numeric_limits<double>::quiet_NaN()),
           hp_signed_residual(std::numeric_limits<double>::quiet_NaN()),

@@ -123,6 +123,10 @@ public:
                        "Expected diploid coverage (reads per region). 0 = auto-estimate via KDE mode (Default: 0)")
             ->check(CLI::Range(0.0, 1000.0));
 
+        // Self-phasing fallback: ignore somatic HP:i:11/21/33 and use only germline HP:i:1/2
+        app.add_flag("--germline-hp-only", config.germline_hp_only,
+                     "Ignore somatic HP tags (HP:i:11/21/33); use only germline HP:i:1/2 (Default: off)");
+
         try {
             app.parse(argc, argv);
         } catch (const CLI::ParseError& e) {

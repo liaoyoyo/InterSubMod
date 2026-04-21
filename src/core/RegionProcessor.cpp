@@ -412,6 +412,7 @@ RegionProcessor::RegionProcessor(const Config& config)
     filter_config_.min_read_length = config.min_read_length;
     filter_config_.min_base_quality = config.min_base_quality;
     filter_config_.require_mm_ml = true;
+    filter_config_.germline_hp_only = config.germline_hp_only;
 
     // Set distance matrix configuration
     if (!distance_metrics_.empty()) {
@@ -834,6 +835,20 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
             const auto& read_list = agg.matrix_builder.get_reads();
             std::string region_dir = writer.get_region_dir(chr_name, snv.pos, region_start, region_end);
 
+            // Audit: count somatic HP tags (HP:i:11/21/33) from the raw pre-demotion value.
+            // Always runs regardless of the germline_hp_only flag so users can diagnose
+            // self-phasing prevalence even when the downstream HP features already treat
+            // these reads as unphased.
+            for (const auto& r : read_list) {
+                if (r.hp_tag_raw == "1-1") {
+                    ++result.n_hp_somatic_11;
+                } else if (r.hp_tag_raw == "2-1") {
+                    ++result.n_hp_somatic_21;
+                } else if (r.hp_tag_raw == "3") {
+                    ++result.n_hp_somatic_33;
+                }
+            }
+
             // Compute distance matrix (using first metric for main analysis)
             DistanceMatrix all_dist =
                 compute_and_write_distance_matrix(meth_mat, read_list, region_dir, distance_metrics_[0], result);
@@ -1102,7 +1117,9 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 "NME_HP1,NME_HP2,Entropy_Imbalance,"
                 "Epipoly_HP1,Epipoly_HP2,Epipoly_Delta,"
                 // Original columns
-                "LocalBestCluster,LocalBestP,Significant,SuggestFilter\n";
+                "LocalBestCluster,LocalBestP,Significant,SuggestFilter,"
+                // Self-phasing audit (NEW): raw somatic HP tag counts (independent of --germline-hp-only flag)
+                "NHP_Somatic11,NHP_Somatic21,NHP_Somatic33\n";
 
     // Statistics conatiners
     struct ChrStats {
@@ -1250,7 +1267,9 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << std::setprecision(6) << r.local_best_p_value << ","
                  << (is_significant ? "true" : "false") << ","
                  // SuggestFilter column for F1 optimization
-                 << (suggest_filter ? "true" : "false")
+                 << (suggest_filter ? "true" : "false") << ","
+                 // Self-phasing audit: raw somatic HP tag counts (independent of --germline-hp-only flag)
+                 << r.n_hp_somatic_11 << "," << r.n_hp_somatic_21 << "," << r.n_hp_somatic_33
                  << "\n";
     }
     csv_file.close();

@@ -55,6 +55,11 @@ struct Config {
 
     double expected_coverage = 0.0;  ///< User-specified diploid coverage; 0 = auto-estimate via KDE mode
 
+    // Self-phasing fallback: ignore somatic HP tags (HP:i:11/21/33) and use only germline HP:i:1/2.
+    // Default false preserves existing behavior. When true, ReadParser maps 11/21/33 to "0" (unphased).
+    // hp_tag_raw always preserves the original value for audit purposes.
+    bool germline_hp_only = false;
+
     // Hierarchical Clustering Configuration
     bool compute_clustering = true;        ///< Whether to perform hierarchical clustering
     bool output_tree_files = true;         ///< Whether to output Newick tree files
