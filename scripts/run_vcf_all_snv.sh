@@ -298,11 +298,11 @@ if [[ "${MODE}" == "chr19-verification" ]]; then
 fi
 
 # 檢查可執行文件
-EXECUTABLE="/big8_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod"
+EXECUTABLE="${INTERSUBMOD_EXECUTABLE:-/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod}"
 if [ ! -f "${EXECUTABLE}" ]; then
     echo "Error: Executable not found at ${EXECUTABLE}" >&2
     echo "Please build the project first with:" >&2
-    echo "  cd /big8_disk/liaoyoyo2001/InterSubMod/build && cmake .. && make -j" >&2
+    echo "  cd /big7_disk/liaoyoyo2001/InterSubMod/build && cmake .. && make -j" >&2
     exit 1
 fi
 
