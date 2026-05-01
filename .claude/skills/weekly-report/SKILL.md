@@ -1,235 +1,222 @@
 ---
 name: weekly-report
-description: InterSubMod 每週研究週報完整流程。自動收集進展 → 結構化草稿供用戶確認 → Markdown 週報 → PPTX 簡報 → 索引更新。觸發：「週報」「weekly report」「整理本週」「報告」
+description: InterSubMod 每週研究週報完整流程（v2 升級）。引導 raw data 收集 → 4 主線類型識別（進展/問題/求協助/探索）→ 內容 4 層分類 [F]/[O]/[I]/[U] → 重點 4 桶分流（PPT/講稿/備註/暫存）→ 邏輯紅旗檢查（過度宣稱/流水帳）→ 教授問答預測 5-7 個 → 17 段母稿（Layer 0-4 結構）。產出 master_draft.md 後 4 選 handoff（A 立即接 pptx-build / B 留檔 / C 終點 / D 加寫下週計畫）。觸發：「週報」「weekly report」「整理本週」「向教授報告」「PI 週彙報」「研究進度報告」「本週進展」「lab meeting」
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent, AskUserQuestion
 user-invocable: true
 ---
 
-# InterSubMod 每週研究週報 Skill
+# weekly-report Skill (v2)
 
-你是一位專業的研究報告撰寫者，協助廖子游每週整理 InterSubMod 研究進展並產出週報與 PPTX 簡報。
+> **2026-05-02 v1 → v2 升級說明**：本版本相對 v1 主要差異：
+> - 新增 W2 主線類型識別（進展/問題/求協助/探索 4 選 1）
+> - 新增 W3 內容 4 層分類 [F]/[O]/[I]/[U]（與舊 Tier 1/2/3 並用，不同維度）
+> - 新增 W6 教授問答預測（5-7 個追問 + 預備回答）
+> - 移除直接產 PPTX（改 handoff 給 pptx-build sub-skill）
+> - 5 個 checkpoint C0-C4（合併 v1 部分階段，減少互動次數）
+> - 舊版備份於 `SKILL.md.v1.bak`
+> - 母稿主骨架 = Layer 0-4（保留 v1 強項）；17 段為 Layer 內部標籤
 
-**核心設計原則**：你負責「整理+建議」，用戶負責「決策+修正」。不問空泛問題——主動收集資訊、整理結構化草稿、標記重要性，讓用戶確認/調整/補充。
+你是研究週報整理助理 + 簡報規劃教練。協助廖子游每週把研究進展轉換成「經過確認、排序、驗證、結構化」的母稿（master_draft.md），供後續銜接 pptx-build 產 PPTX 或留檔。
 
----
-
-## 執行模式感知
-
-本 skill 遵循 CLAUDE.md「確認時機協議」的模式切換。確認當前是**互動模式**（預設）或**全自動模式**。
-
-- 互動模式：每個 Phase 結束後展示結果等用戶確認
-- 全自動模式：Phase 0-2 自動執行，Phase 3 展示草稿（Review），Phase 4-5 自動執行，Phase 6 展示最終產出（Review）
-
----
-
-## 受眾與定位
-
-- **主要受眾**：指導教授/PI（熟悉 ONT、cancer genomics、somatic calling 領域）
-- **自包含原則**：每份週報必須獨立可讀，PI 不需翻閱前期報告
-- **PPTX**：每週固定產出
+**核心原則**：先有母稿，才有簡報。AI 整理 + 追問 + 驗證；用戶判斷 + 修正。
 
 ---
 
-## 執行流程（7 個 Phase）
+## 執行模式（與 confirmation-protocol 對齊）
 
-### Phase 0：自動收集本週進展 `[FYI]`
-
-> 詳見 `references/COLLECTION_PROTOCOL.md` Phase 0
-
-**AI 獨立完成，不需用戶介入。**
-
-1. 讀取研究狀態文件（CURRENT_FOCUS, INDEX, research_landscape）
-2. 掃描本週 git log + 新增檔案
-3. 掃描 Memory 中近期 project/feedback 記錄
-4. Knowledge Base 查閱（為 Layer 0.2 準備背景知識）
-5. 讀取上週週報 Layer 3 + Layer 4
-
-**輸出**：結構化進展清單（日期/主題/類型/狀態/關鍵數字/來源檔案）
+- **互動模式**（預設）：每個 checkpoint 暫停等用戶確認
+- **全自動模式**（「全自動」「auto」）：保 **C1 主線** + **C4 母稿**兩個必停；C0 / C2 / C3 用 AI 預設標籤後快速通過
 
 ---
 
-### Phase 1：協作規劃 `[Review]`
-
-> 詳見 `references/COLLECTION_PROTOCOL.md` Phase 1
-
-**AI 整理草稿，用戶決策。**
-
-1. **優先排序草稿**：依價值排序規則（方向性翻轉 > 跨樣本共識 > 方法學修正 > ... > 流程改進）
-2. **敘事主軸建議**：偵探故事/里程碑收斂/系統性掃描/方向定錨
-3. **背景知識與前情提要計畫**：Layer 0.2 概念群組 + Layer 0.3 前情提要
-4. **遺漏檢查**：上週待辦追蹤、未記錄決策、數據完整性
-5. **PPTX 規劃**：預估頁數、圖表來源、腳本選擇
-
-**互動模式**：展示 5 項規劃，等用戶確認排序、主軸、取捨。
-**全自動模式**：使用價值排序預設，選最匹配的敘事主軸，自動決定取捨。
-
----
-
-### Phase 2：Layer 0 基礎層撰寫 `[FYI]`
-
-依 Phase 1 確認的方向撰寫：
-
-- **Layer 0.1**：宏觀問題定位（Mermaid 脈絡圖 + 核心數字表 + 一段話摘要）
-- **Layer 0.2**：本週相關背景知識（最多 3 概念群組，引用 KB）
-- **Layer 0.3**：上週前情提要（敘事橋樑）
-
----
-
-### Phase 3：Layer 1-4 週報主體 `[Review]`
-
-> 結構定義見 `references/LAYER_STRUCTURE.md`
-
-#### Layer 1：已建立知識參考（薄參考層）
-- 僅列與本週觸及的已關閉假說/開放問題
-
-#### Layer 2：本週調查（核心，~4-8 頁）
-
-每個 Thread 使用統一結構：
-```
-### Thread [A/B/C]: [名稱]
-#### 問題陳述
-#### 定義區塊（最多 5 術語，必含範例值）
-#### 假說與可否證條件
-#### 方法
-#### 證據卡（Tier 1/2/3）
-#### 因果鏈圖（Mermaid）
-#### 結論：判決 + 穩定度 + 影響 + 已排除替代解釋 + 重新開啟條件
-```
-
-**證據卡三層制度**：
-- Tier 1（Priority 1-3）：7 欄位必填
-- Tier 2（Priority 4-5）：4 必填 + 3 選填
-- Tier 3（Priority 6-7）：行內標注
-
-#### Layer 3：整合更新（~1-2 頁）
-- 結論總表更新（本週變動粗體）
-- 本週新增認知（3-5 點）
-- 仍然未知的（優先序+問題+依賴+預計回答時間）
-
-#### Layer 4：未來方向（~1 頁）
-- 下週優先行動、里程碑收斂圖、風險評估
-
-**互動模式**：展示完整草稿，等用戶審閱修正。
-**全自動模式**：自動產出，標記為草稿。
-
----
-
-### Phase 3.5：導演 Storyboard 審查 `[Review]`
-
-> 詳見 `references/PPTX_PROTOCOL.md` Phase 3.5
-
-產出 `00_director_storyboard.md`：
-1. Three-Act 故事弧：定錨 → 信任 → 核心 → 根因+轉向 → 行動
-2. 每頁 Storyboard：核心訊息 + 觀眾心理 + 佈局草稿 + 偏離檢查
-3. 順序邏輯：先建立信任 → 再深入分析 → 最後揭示根因
-
-**互動模式**：用戶確認後才進入 Phase 4。
-**全自動模式**：自動產出 storyboard，使用價值排序預設的故事弧結構，直接進入 Phase 4。
-
----
-
-### Phase 4：PPTX 三件套 + 生成 `[FYI]`
-
-> 詳見 `references/PPTX_PROTOCOL.md` Phase 3-4
-
-輸出目錄：`docs/presentations/validated/YYYY/MM/YYYYMMDD_研究週報_{主題}/`
-
-1. 撰寫三件套：`01_full_narrative_report.md`, `02_ppt_slide_outline.md`, `03_slide_layout_and_script.md`
-2. 複製 config JSON 範本
-3. 執行生成腳本
-4. **截圖驗證（mandatory）**：渲染每張 slide 為 PNG，檢查 aspect ratio、文字溢出、顏色
-
-**設計常數速查**（完整規範見 `references/PPTX_PROTOCOL.md`）：
-- 色彩：dark=#1E2A44, bg=#F7F3EC, accent=#A85540, 綠=#009E73, 紅=#D55E00
-- 字體：標題 Arial Bold ≥32pt, 內文 Arial ≥14pt, 下限 9pt
-- 版面：視覺 55-65%, 留白 20-30%, 文字 ≤15%, 每頁 ≤4 bullet
-- 雙語：中文主 + 英文副（60% 字號 + 縮排 0.25"）
-
----
-
-### Phase 5：多 Agent 驗證 `[FYI → Review]`
-
-> 詳見 `references/PPTX_PROTOCOL.md` Phase 5.5 + Phase 4.5
-
-#### 5A. 內容驗證（12 Agent × 4 波次）
+## 7 階段流程（W1-W7）+ 5 個 Checkpoint（C0-C4）
 
 ```
-Wave 1 (內容)    Wave 2 (易讀)    Wave 3 (學術)    Wave 4 (PPTX)
- A1:邏輯         A4:敘事          A7:教授          A9:導演
- A2:質疑         A5:認知          A8:翻譯          A10:美術
- A3:佐證         A6:學生                           A11:審稿
-                                                   A12:蒐集
+[U: 我要做週報]
+    ↓
+W1 Raw Data 收集（git log + Memory + KB + 上週 Layer 3-4 + 用戶補充）
+    ↓ C0 確認
+W2 主線類型識別（4 選 1 + main statement ≤ 30 字）
+    ↓ C1 確認 ★ fast-track 必停
+W3 內容 4 層分類（每筆素材標 [F]/[O]/[I]/[U]）
+W4 重點排序 + 4 桶分流（PPT/講稿/備註/暫存）
+    ↓ C2 確認（W3+W4 合併）
+W5 邏輯紅旗檢查（過度宣稱/流水帳/教授視角缺）
+W6 教授問答預測（5-7 個追問 + 預備回答）
+    ↓ C3 確認（W5+W6 合併）
+W7 母稿產出（Layer 0-4 + 17 段內部標籤）
+    ↓ C4 確認 ★ fast-track 必停
+[Output: master_draft.md @ docs/reports/validated/YYYY/MM/]
+    ↓
+AskUserQuestion 4 選 handoff
 ```
 
-每波次內平行執行（`feature-dev:code-reviewer` subagent_type），波次間依序修正。
+---
 
-#### 5B. PPTX 驗證（6 Agent × 2 波次）
+## 4 主線類型識別（W2 → C1）
 
-- Wave 1（結構+視覺）：Agent-T(字體), Agent-C(色彩), Agent-L(佈局), Agent-B(雙語)
-- Wave 2（內容+整合）：Agent-S(Speaker Notes), Agent-D(數據準確性)
+| 觸發語境 | 主線類型 | 推薦敘事弧 |
+|---------|---------|---------|
+| 「進展、突破、完成、達成」 | **進展型** | 背景 → 處理 → 結果 → 初步分析 → 下週 |
+| 「問題、卡住、blocker、bug、anomaly」 | **問題型** | 方法 → 問題發現 → 目前判斷 → 求建議 |
+| 「不確定、需要 advisor、方向選擇」 | **求協助型** | 情境 → 多選項 → 各選項利弊 → 待決策點 |
+| 「新方向、pilot、初步觀察、探索」 | **探索型** | 動機 → 假設 → pilot 結果 → 是否值得投入 |
 
-**互動模式**：每波次展示驗證結果，等用戶確認修正。
-**全自動模式**：自動修正可自動處理的問題，僅對需判斷的問題暫停。
+混合用例：以「教授最關心的點」為主軸，其他降為 sub-thread。
+詳細 narrative skeleton + 範例 → `templates/{progress|problem|advisor|new_direction}_focus.md`
 
 ---
 
-### Phase 6：最終檢核與索引更新 `[Review]`
+## 內容 4 層分類規則（W3 → C2）
 
-> 詳見 `references/PPTX_PROTOCOL.md` Phase 6
+| 標籤 | 名稱 | 標記條件 | 描述語氣 |
+|:-:|------|---------|---------|
+| **[F]** | Fact 確定事實 | 有具體 source（檔案 path / commit hash / output csv）+ N≥validation threshold | 「已驗證」「確認為」 |
+| **[O]** | Observation 初步觀察 | 有結果但 N 不足或未獨立驗證 | 「初步觀察到」「需 N 樣本驗證」 |
+| **[I]** | Inference 合理推論 | 根據資料推測 | 「推測」「可能」「值得進一步觀察」 |
+| **[U]** | Unconfirmed 待確認 | 有疑問或不確定 | 「待釐清」「需要 X 才能確認」 |
 
-#### 雙層檢核清單
+**關鍵原則**：4 層分類（真實性）與 v1 的 Tier 1/2/3（重要性）**並用**，不同維度。
+範例：一筆素材可同時是 Tier 1（最重要）+ [O]（初步觀察 N=3 未達 7）。
+→ Layer 2 用 Tier 1 完整呈現，但描述用 [O] 語氣。
 
-**Must-Pass（不通過不可發送）**：
-- L1-L12：邏輯嚴謹度（結論附 evidence、因果鏈無跳步、結論/狀態表無矛盾、confound 控制、跨樣本標明、術語一致、圖表解釋性標題、Tier 分配一致）
-
-**Should-Pass（品質）**：
-- Q1-Q13：Layer 0 存在、Metadata 完整、絕對路徑、Paired/TO 分開、PPTX 驗證、索引更新
-
-#### 索引更新
-
-1. 更新 `docs/experiments/INDEX.md`
-2. 更新 `docs/reports/` 下相關索引
-3. 更新 `docs/CURRENT_FOCUS.md`（如有方向變更）
-4. 建議更新 Memory（如有新結論/NEGATIVE/NO-GO）
+詳細規則 + 決策樹 → `references/LAYER_STRUCTURE.md`
 
 ---
 
-## 圖表規範
+## 4 桶分流評分（W4 → C2）
 
-- 初步觀察：分 Paired / TO 兩組
-- 細緻觀察：2×2 per sample
-- 固定順序：HCC1395, HCC1395_DORADO, HCC1937, HCC1954, H2009, H1437, COLO829
-- PPTX 圖片：fit-within + centered
-- 寬圖/直式圖：自適應佈局
+5 維度評分（每維 1-5）：研究重要性 / 證據強度（F=5/O=3/I=2/U=1）/ 教授關心 / 影響下週 / 適合簡報。
 
----
-
-## 注意事項
-
-1. **全自動模式下的報告**：完成後輸出「自動執行報告」，列出所有自動做的決策
-2. **每個 Phase 產出的暫存文件**：存放在輸出目錄下，命名清楚
-3. **用戶回饋優先**：任何自動判斷均可被用戶覆蓋
-4. **不問空泛問題**：提供選項讓用戶選擇，而非開放式提問
-5. **Layer 2 最重要**：花最多時間在證據卡和因果鏈上
-6. **PPTX 截圖驗證不可跳過**：每次佈局修改後必須重新渲染驗證
+| 加總分數 | 桶 | 上限 |
+|--------|---|------|
+| 18-25 | PPT (Tier 1 slide) | ≤ 8 筆 |
+| 13-17 | 講稿 (Tier 2 speaker note) | ≤ 15 筆 |
+| 8-12 | 備註 (Tier 3 oral-optional) | 不限 |
+| <8 | 暫存（不放本次報告） | 不限 |
 
 ---
 
-## 過去週報範本
+## 紅旗清單（W5 → C3）
 
-| 週報 | 特色 | 路徑 |
-|------|------|------|
-| 0310 | 三層方法分工 | `docs/reports/validated/2026/03/20260310_研究主線週報_20260305_20260310_01.md` |
-| 0330 | HP Bug Fix + LOH | `docs/reports/validated/2026/03/20260330_研究週報_20260325_20260330_HP_bug_fix與LOH_evidence_panel_01.md` |
-| LOH 簡報 | 偵探故事線 PPTX | `docs/presentations/validated/2026/04/20260401_LOH_weekly_report_draft/` |
+**過度宣稱紅旗**：
+- 「證實」「確認」「解決」用於 [O] 或 [I] → 改「初步觀察、需 N 樣本驗證」
+- 「全部」「完全」用於部分樣本 → 改具體 sample 範圍
+- 「顯著」未含 p-value 或 CI → 補統計或改「具方向性」
+- 主動斷言而無 evidence → 補來源或降為 [I]
 
-## 研究脈絡速查
+**流水帳紅旗**：
+- 「本週做了 ABCDEFG」（>5 件平列）→ 重排優先序，>3 個降到備註
+- 無因果連接詞 → 改寫成因果鏈
+- 每件事獨立段落無串接 → ≥ 2 件合併為 narrative
+
+**教授視角缺紅旗**：
+- 母稿無「教授可能問」段（§17）→ 強制補
+- 母稿無「下週計畫銜接本週發現」（§16）→ 強制補
+- 求協助型缺「需要教授判斷的點」→ 強制補
+
+---
+
+## 教授問答預測（W6 → C3）
+
+預測 5-7 個追問，依主線類型：
+- **進展型**：「為什麼是這個方法？」「跟既有 baseline 比？」「下一步邊界？」
+- **問題型**：「根因確認了嗎？」「短期 workaround？」「影響範圍？」
+- **求協助型**：「你傾向哪個？」「不選的代價？」「怎麼決定？」
+- **探索型**：「pilot 結果可信嗎？」「scale up 風險？」「資源？」
+
+每個追問必須有「預備回答 1 段」（含 evidence 引用）。
+
+---
+
+## 母稿格式：Layer 0-4 + 17 段（W7 → C4）
+
+母稿主骨架沿用 v1 Layer 0-4，17 段為 Layer 內部標籤：
+
+| 段 | 對應 Layer | 內容 |
+|---|-----------|------|
+| §1 | Layer 0.1 | 主線（≤ 30 字） |
+| §2 | Layer 0.1 | 一句話重點 |
+| §3 | Layer 2 證據卡 [F] | 已確認內容 |
+| §4 | Layer 2 證據卡 [O][I] | 初步觀察與推論 |
+| §5 | Layer 2 證據卡 [U] | 待確認內容 |
+| §6 | Layer 0.2 / 暫存 | 不建議放 PPT |
+| §7-§8 | Layer 2 整合 | 重點優先順序 + 報告順序 |
+| §9 | Layer 4 / handoff | 建議 PPT 模板（指向 pptx-build 6 模板） |
+| §10 | Layer 4 / handoff | 建議投影片架構 |
+| §11-§14 | Layer 3 | 補資料 / 補圖表 / 補定義 / 講稿例子 |
+| §15 | 暫存 | 暫存紀錄 |
+| §16 | Layer 4 | 下一步行動 |
+| §17 | Layer 4 | 教授可能提問 + 回答準備 |
+
+詳細 mapping + 17 段填寫指引 → `references/LAYER_STRUCTURE.md`
+
+---
+
+## handoff 4 選（C4 後）
+
+```
+AskUserQuestion: 母稿已完成。下一步？
+├─ A. 立即觸發 pptx-build (--from-draft <path>)
+├─ B. 母稿留檔，下次手動 /pptx-build --from-draft
+├─ C. 母稿即終點（不產 PPT，週報任務結束）
+└─ D. 母稿留檔 + 加寫下週計畫 (next_week_plan.md)
+```
+
+母稿輸出路徑：`InterSubMod/docs/reports/validated/YYYY/MM/YYYYMMDD_週報_主題/master_draft.md`
+完整 handoff 規範 → `references/HANDOFF_TO_PPTX_BUILD.md`
+
+---
+
+## 詳細規則 → playbook 引導
+
+| 概念 | playbook anchor |
+|------|----------------|
+| W1 raw data 收集細則 | `references/COLLECTION_PROTOCOL.md` |
+| Layer 0-4 + 17 段 mapping | `references/LAYER_STRUCTURE.md` §1-§3 |
+| 4 層分類決策樹 | `references/LAYER_STRUCTURE.md` §4 |
+| 4 主線類型詳述 | `templates/*_focus.md` |
+| 5 個 checkpoint 互動模板 | `prompts/*.md` |
+| 教授問答預測模板 | `prompts/check_and_predict.md` |
+| 母稿 → pptx-build handoff | `references/HANDOFF_TO_PPTX_BUILD.md` |
+
+---
+
+## 與其他 skill 的關聯
+
+- **pptx-build**：下游接棒。C4 後 4 選 A/D 觸發。母稿 frontmatter 提供 main thesis / report_type，pptx-build 跳過 P1 main thesis 鎖定
+- **myPPT（總入口）**：用戶說「做週報」時 myPPT 場景識別後委派本 skill
+- **structured-tech-report**：平行（單一工程改動 deep dive，不在週期 cadence）
+- **review-evidence / provenance-tier-audit**：W1 上游工具
+- **confirmation-protocol**：規範來源，C0-C4 對應 Hard Gate / Gate / Review 級別
+- **doc-standards**：母稿 .md 命名規範來源
+
+---
+
+## 過去週報範本（v1 留存）
+
+| 週報 | 路徑 |
+|------|------|
+| 0310 三層方法分工 | `InterSubMod/docs/reports/validated/2026/03/20260310_研究主線週報_20260305_20260310_01.md` |
+| 0330 HP Bug Fix + LOH | `InterSubMod/docs/reports/validated/2026/03/20260330_研究週報_20260325_20260330_HP_bug_fix與LOH_evidence_panel_01.md` |
+| 0401 LOH 簡報 | `InterSubMod/docs/presentations/validated/2026/04/20260401_LOH_weekly_report_draft/` |
+
+## 研究脈絡速查（v1 留存）
 
 | 資訊 | 來源 |
 |------|------|
 | 當前狀態 + 阻塞 | `docs/CURRENT_FOCUS.md` |
 | 實驗歷史索引 | `docs/experiments/INDEX.md` |
 | 完整推論鏈 | `docs/reports/research_landscape/00_INDEX.md` |
-| TO FP 問題全貌 | `docs/reports/research_landscape/01_TO_FP問題全貌.md` |
-| ISM 分析價值界定 | `docs/reports/research_landscape/03_ISM分析價值界定.md` |
-| 結論穩定性 | `docs/reports/research_landscape/06_結論穩定性審查.md` |
+| 啟動壓縮上下文 | `docs/references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md` |
+
+---
+
+## 注意事項
+
+1. **每輪 ≤ 5 個問題**（不一次轟炸用戶）
+2. **不問空泛問題**（提供選項，不要「你覺得呢」）
+3. **Layer 2 最重要**（花最多時間在證據卡 + 4 層分類 + 因果鏈）
+4. **不可把 [I] 寫成 [F]**（過度宣稱紅旗）
+5. **fast-track 全自動下，C0/C2/C3 由 AI 預設後快速通過**；C1/C4 必停
+6. **母稿即輸出**，不直接產 PPTX（PPTX 由 pptx-build skill 接手）

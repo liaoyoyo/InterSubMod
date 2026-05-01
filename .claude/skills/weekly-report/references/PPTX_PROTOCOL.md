@@ -1,3 +1,20 @@
+> ⚠️ **2026-05-02 DEPRECATED**：本檔內容已遷移到 `pptx-build` skill。
+>
+> weekly-report v2 不直接產 PPTX，PPTX 製作改由 pptx-build sub-skill 接手。
+> 母稿產出後（W7 → C4），透過 handoff 4 選機制進入 pptx-build。
+>
+> 對應遷移位置：
+> - 設計常數（色彩/字體/版面/雙語）→ `pptx-build/style_library/colors/palette.yaml` + `pptx-build/playbook.md` §6
+> - PPTX 三件套流程 → `pptx-build/playbook.md` §5（outline → section → slide）
+> - 多 Agent 驗證（PPTX 6 Agent）→ `pptx-build/playbook.md` §7
+> - 截圖驗證 + Vision review → `pptx-build/prompts/visual_review.md`
+> - Storyboard 三幕 → `pptx-build/playbook.md` §3.5
+>
+> 本檔保留為 v1 歷史參考，**不應在 v2 流程中讀取**。
+> Phase 2 落地完成後本檔將刪除。
+
+---
+
 # PPTX 生成、驗證與設計規範
 
 ## Phase 3：撰寫 PPTX 三件套
