@@ -129,6 +129,29 @@ AskUserQuestion 4 選 handoff
 
 ---
 
+## 母稿頂部 Highlights / TL;DR（v2.1 強制）★
+
+母稿在 §1 之前強制插入 **§0 Highlights**：
+- ⭐⭐⭐ **This Week's Verdict**（≤ 50 字一句決定性結論）
+- **Top Findings**（3-5 條，⭐ 標重要度）
+- **Top Asks**（教授必判斷決策點 ≤ 3 條，標 [U]）
+- **Decisive Next Step**（決定性 priority 1 條）
+
+理由：教授前 30 秒翻閱應能抓到最關鍵內容；Layer 0-4 是「深度結構」，§0 是「快速入口」。
+詳細規則 → `references/LAYER_STRUCTURE.md` §E
+
+## 重要度標註與分級（v2.1 強制）★
+
+- 每段前綴 ⭐⭐⭐ / ⭐⭐ / ⭐ 或 (無)
+- §17 教授追問分「⭐⭐⭐ 必問 (Must-Answer，≤ 3)」+ 「⭐⭐ 可能問 (May-Ask)」
+- §16 下週 priority 分「⭐⭐⭐ Decisive (1-2 條)」+ 「⭐⭐ Operational」+ 「⭐ Maintenance」
+- Layer 2 每個 Thread 結論首行為 **black bold One-line Verdict**
+
+## 混合主線規則（v2.1 強制）★
+
+C1 主線可寫 `主線:子線`（如 `problem:progress`）。母稿 §1 後加 Sub-thread 段，Layer 2 用 Thread A（主）+ Thread B（sub）。
+詳細規則 → `references/LAYER_STRUCTURE.md` §F
+
 ## 母稿格式：Layer 0-4 + 17 段（W7 → C4）
 
 母稿主骨架沿用 v1 Layer 0-4，17 段為 Layer 內部標籤：

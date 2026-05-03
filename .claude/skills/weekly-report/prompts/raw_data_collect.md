@@ -83,3 +83,27 @@ C0 為非必停 checkpoint。fast-track 下：
 - AI 掃描後直接列「以此清單推進，30 秒內無回覆視為確認」
 - 不暫停 AskUserQuestion
 - 結果存於 W1 lab notebook 風格清單，後續 C2/C3 用戶仍可調整
+
+---
+
+## v2.1 升級：raw output expand option（修正點 5）
+
+C0 AskUserQuestion 加第 5 option：
+
+```yaml
+- label: "顯示原始 grep output (expand mode)"
+  description: "看每個 source 的 raw lines（不只摘要），確認 AI 沒漏抓。觸發 scan_weekly.sh --raw 模式。"
+```
+
+整合 `scripts/analysis/scan_weekly.sh --raw` 自動產出 raw output（修正點 1 整合）。
+
+## 整合 scan_weekly.sh（修正點 1）
+
+W1 自動掃描改用統一 script：
+
+```bash
+./scripts/analysis/scan_weekly.sh --days 7 --keyword "self-phasing|methylation"
+# --raw 加 expand mode
+```
+
+8+ grep/find 命令整合在一處，避免散落多 Bash 呼叫。

@@ -250,3 +250,160 @@ Q3: 是否屬「根據已知資料推測」（而非「待釐清的疑問」）�
 - 講稿桶 > 15 筆：降級到備註桶
 - 若用戶堅持保留，標 [ESCALATION] 並 W7 母稿提示
 
+---
+
+# §E Highlights / Verdict 強調機制（v2.1 新增 2026-05-03）
+
+> **解決問題**：v2.0 母稿 Layer 0-4 結構完整但「重點/結論」未突出。教授快速翻閱時，前 30 秒應能抓到本週最關鍵 3-5 件事 + 1 個 verdict。
+
+## §E.1 母稿頂部強制 TL;DR 區段（§0）
+
+母稿在 §1 主線之前**強制**插入 `§0 Highlights / TL;DR`：
+
+```markdown
+## §0 Highlights (TL;DR — 教授前 30 秒能抓到的本週關鍵)
+
+⭐⭐⭐ **This Week's Verdict** (≤ 50 字)：[本週一句決定性結論]
+
+### Top Findings（3-5 條）
+1. ⭐⭐⭐ [F] <最重要的事實，必含具體 evidence>
+2. ⭐⭐⭐ [F]/[O] <第 2 重要>
+3. ⭐⭐ [O]/[I] <第 3 重要>
+4. ⭐⭐ <第 4 重要，可選>
+5. ⭐ <第 5 重要，可選>
+
+### Top Asks（教授必須判斷的決策點）
+1. **[U]** <必問教授的問題 1>
+2. **[U]** <必問教授的問題 2>（≤ 3 條，多了壓縮或合併）
+
+### Decisive Next Step（≤ 1 條）
+> **Priority 1**：<下週決定性 priority，含工時估算>
+```
+
+**規則**：
+- §0 在 §1 之前
+- Top Findings ≤ 5 條（多了表示重點過散，須再壓縮）
+- Top Asks ≤ 3 條（多了表示教授決策負擔過重）
+- Decisive Next Step 只能 1 條（決定性 priority）
+
+## §E.2 重要度標註規則（每段加 ⭐）
+
+每段內容前綴加標：
+
+| 標記 | 含義 | 適用 |
+|:-:|------|------|
+| ⭐⭐⭐ | 教授必看必記 | §0 Highlights、Layer 2 Thread 結論、§16 Decisive priority |
+| ⭐⭐ | 重要支持證據 | Layer 2 證據卡 Tier 1、§17 必問追問 |
+| ⭐ | 細節支持 | Layer 2 證據卡 Tier 2、§17 可能追問 |
+| (無) | 背景 / 過程 | Layer 0.2 背景知識、§13 定義、附錄 |
+
+## §E.3 Layer 2 Thread 結論段強制 One-line Verdict
+
+每個 Thread 的「結論」段第一行強制為 **black bold one-line verdict**：
+
+```markdown
+#### 結論
+**⭐⭐⭐ One-line Verdict**: <一句決定性判決，≤ 30 字>
+
+- 判決細節：...
+- 穩定度：...
+- 影響：...
+- 已排除替代解釋：...
+- 重新開啟條件：...
+```
+
+## §E.4 §17 教授追問分級
+
+7 個追問分兩級：
+
+```markdown
+## §17 教授可能提問 + 回答準備
+
+### ⭐⭐⭐ 必問 (Must-Answer，3 個)
+1. **「<追問>」** → <預備回答骨架>
+2. ...
+3. ...
+
+### ⭐⭐ 可能問 (May-Ask，4 個)
+4. ...
+...
+7. ...
+```
+
+**規則**：必問 ≤ 3 個，多了表示優先序不夠收斂。
+
+## §E.5 §16 下週 priority 標決定性
+
+```markdown
+## §16 下一步行動清單
+
+### ⭐⭐⭐ Decisive（決定性，影響後續路徑）
+- **Priority 1 (必做，4 hr)**: <最重要，下週若沒做後續無法推進>
+
+### ⭐⭐ Operational（執行性，預計推進）
+- **Priority 2 (4 hr)**: ...
+- **Priority 3 (2 hr)**: ...
+
+### ⭐ Maintenance（維護性，可延後）
+- **Priority 4 (1 hr)**: ...
+```
+
+**規則**：Decisive 必須有 1 條（不能 0），≤ 2 條（多了表示優先序混亂）。
+
+---
+
+# §F 混合主線規則（v2.1 新增 2026-05-03）
+
+> **解決問題**：實務上單純 progress / problem / advisor / explore 主線少見，多為混合（如 problem 主 + progress sub）。
+
+## §F.1 混合主線標註語法
+
+C1 確認主線時，可寫 `主線:子線`：
+
+```yaml
+report_type: "problem:progress"   # 主線 problem，sub-thread 為本週進展
+# 或
+report_type: "advisor_consult:exploration"  # 主線求協助，sub-thread 為新方向 pilot
+```
+
+## §F.2 母稿 Sub-thread 標註
+
+§1 main statement 後**強制**加「Sub-thread」段：
+
+```markdown
+# §1 主線（≤ 30 字）
+[main statement]
+
+### Sub-thread（如為混合主線必填）
+- **主線**: problem — V5 變 no-op，audit chain 需重評
+- **Sub-thread**: progress — 4/28-29 V5 audit + 4/29 技術報告 + 4/30 V3F ablation 已完成（未受 5/01 發現否定，仍計入週進度）
+- **教授視角優先序**: 主線追問 > Sub-thread 進度
+```
+
+## §F.3 Layer 2 Thread A/B 對應
+
+混合主線時：
+- **Thread A** = 主線（依 main statement）
+- **Thread B** = Sub-thread
+
+範例：
+```
+Layer 2
+├── Thread A: V5 變 no-op + audit chain 重評（problem 主線）
+└── Thread B: V5 audit 系列工作完成歷程（progress sub-thread）
+```
+
+## §F.4 templates/ 對應
+
+混合主線時優先載入「主線」對應 template，並在 W7 組裝時參考 sub template 的 §X 重點段建議：
+
+| 主線:Sub | 主 template | Sub template 影響 |
+|---------|------------|----------------|
+| problem:progress | problem_focus.md | progress_focus.md §3 [F] 寫法（多用「已完成」語氣）|
+| advisor_consult:exploration | advisor_consult.md | new_direction_explore.md §4 pilot 結果格式 |
+| progress:problem | progress_focus.md | problem_focus.md §5 [U] 紅旗區塊 |
+
+## §F.5 一份母稿至多 1 個 sub-thread
+
+避免「3 主線混合」造成失焦。若用戶堅持 3 主線 → C1 強制要求拆兩份週報。
+

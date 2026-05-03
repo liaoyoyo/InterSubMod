@@ -131,6 +131,45 @@ professor_qa_count: 6
 ### §10 建議投影片架構：18 張，含 4 張 before-after
 ```
 
+## §0 Highlights 強制檢查（v2.1 新增）★
+
+組裝母稿時，**強制**在 §1 之前插入 §0：
+
+```markdown
+## §0 Highlights (TL;DR)
+
+⭐⭐⭐ **This Week's Verdict**: [≤ 50 字一句決定性結論]
+
+### Top Findings (3-5 條)
+1. ⭐⭐⭐ [F] ...
+2. ⭐⭐⭐ [F]/[O] ...
+...
+
+### Top Asks (≤ 3 條 [U])
+1. ⭐⭐⭐ [U] ...
+...
+
+### ⭐⭐⭐ Decisive Next Step (1 條)
+> Priority 1: ...
+```
+
+C4 確認時 AI 自動檢查：
+- ✅ §0 存在 + Verdict ≤ 50 字
+- ✅ Top Findings 3-5 條（多了壓縮）
+- ✅ Top Asks ≤ 3 條
+- ✅ Decisive Next Step 1 條
+- ✅ §17 教授追問已分「⭐⭐⭐ 必問 ≤ 3」+「⭐⭐ 可能問」
+- ✅ §16 priority 已分「Decisive / Operational / Maintenance」
+- ✅ 每 Thread 結論首行為 black bold One-line Verdict
+
+**任一未通過 → 強制回 W7 重組。**
+
+詳見 `references/LAYER_STRUCTURE.md` §E。
+
+## 混合主線 §1 後 Sub-thread 段檢查（v2.1 新增）★
+
+若 frontmatter `report_type` 含冒號（如 `problem:progress`），§1 後**強制**加 Sub-thread 段（含主線/Sub-thread/教授視角優先序 3 列）。詳見 `references/LAYER_STRUCTURE.md` §F。
+
 ## fast-track 模式
 
 C4 為**必停** checkpoint（依 Q9 用戶決策）。即使 fast-track，仍須暫停 AskUserQuestion。

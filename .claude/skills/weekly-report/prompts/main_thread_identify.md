@@ -78,3 +78,36 @@ AI 草稿 (進展型範例):
 
 C1 為**必停** checkpoint（依 Q9 用戶決策）。即使 fast-track，仍須暫停 AskUserQuestion。
 理由：主線類型決定整份母稿走向，AI 推斷可能誤判（如進展+問題混合場景），用戶必須確認。
+
+---
+
+## v2.1 升級：混合主線 + main statement follow-up（修正點 2 + 4）
+
+### 混合主線 (修正點 4)
+
+C1 主線可寫複合 `主線:子線`（如 `problem:progress`）。AskUserQuestion 加第 5 option（用「其他混合」option 觸發 free-text）：
+
+```yaml
+- label: "混合主線（注：主:sub）"
+  description: "如 problem:progress（主線問題、sub 進展）。母稿 §1 後強制加 Sub-thread 段。詳見 references/LAYER_STRUCTURE.md §F"
+```
+
+混合主線時，AI 在 §1 後組「Sub-thread」段：
+- 主線（依 main statement）
+- Sub-thread（次要 thread）
+- 教授視角優先序
+
+### main statement follow-up (修正點 2)
+
+C1 確認主線後，AI **加問第 2 個 AskUserQuestion**：
+
+```yaml
+question: "main statement '<AI 草稿 30 字>' 是否要修改？"
+options:
+  - 接受草稿
+  - 微調（用戶提供改寫）
+  - 完全重寫
+  - 改主線類型（退回上一步）
+```
+
+防止用戶選對主線但希望調 statement 的場景。

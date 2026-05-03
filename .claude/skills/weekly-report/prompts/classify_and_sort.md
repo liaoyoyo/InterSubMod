@@ -85,3 +85,26 @@ C2 完成時，AI 同時掃描分類結果，標出潛在錯誤：
 - 若 PPT 桶 > 8 → 標 ⚠ 須降級
 
 紅旗在 W5 階段正式處理（→ check_and_predict.md）。
+
+---
+
+## v2.1 升級：csv export option（修正點 3）
+
+C2 表格大時，「個別調整」option 提供 csv 匯出：
+
+```bash
+# AI 在 internal state 寫出 csv
+cat > /tmp/classify_sort.csv << CSV
+id,summary,tag,score,bucket,tier
+1,"Phase 1A 7 樣本 ΔF1=+0.0112",F,24,PPT,1
+2,"HPFineNGroups N=5",O,19,PPT,1
+...
+CSV
+
+# 用戶可用 sed/awk/csvkit 編輯
+sed -i 's/^2,.*,O,/2,...,F,/' /tmp/classify_sort.csv
+
+# AI ingest 編輯後 csv 重組分類
+```
+
+csv 比 free-text 結構化，避免「個別調整」需手寫 N 條指令。
