@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intersubmod.local/schemas/reflection.schema.json",
+  "title": "Reflection Log Entry",
+  "description": "Single entry in state/cycles/{id}/reflection.log (JSON Lines). Captures the *why* behind each phase transition for post-hoc audit.",
+  "type": "object",
+  "required": ["timestamp", "cycle_id", "from_phase", "to_phase", "actor", "rationale"],
+  "additionalProperties": false,
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "cycle_id": { "type": "string" },
+    "from_phase": { "type": ["string", "null"] },
+    "to_phase": { "type": "string" },
+    "actor": { "enum": ["user", "claude_code", "langgraph_cli", "hook"] },
+    "rationale": {
+      "type": "string",
+      "description": "Why advance now, what was learned. ≤500 chars recommended."
+    },
+    "surprises": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Findings that contradicted expectation. Used by /run-evaluator for risk scoring."
+    },
+    "open_questions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "pre_registered_match": {
+      "enum": ["match", "partial", "miss", "n/a"],
+      "description": "Did P3/P4 results match the P1 expected_effect threshold?"
+    }
+  }
+}

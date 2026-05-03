@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intersubmod.local/schemas/precheck.schema.json",
+  "title": "Precheck Artifact (P2)",
+  "description": "Output of Phase 2 PRECHECK. Verifies binary_version + dataset_id + upstream_reports freshness. If any check fails, cycle is blocked (Hard Gate).",
+  "type": "object",
+  "required": ["schema_version", "cycle_id", "checked_at", "checks", "verdict"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "cycle_id": { "type": "string" },
+    "checked_at": { "type": "string", "format": "date-time" },
+    "checks": {
+      "type": "object",
+      "required": ["binary", "dataset", "upstream_reports"],
+      "additionalProperties": false,
+      "properties": {
+        "binary": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": { "enum": ["fresh", "stale", "missing", "skipped"] },
+            "expected": { "type": ["string", "null"], "description": "Plan-stated binary commit SHA." },
+            "actual_head": { "type": ["string", "null"], "description": "Current HEAD commit SHA." },
+            "stale_distance": { "type": ["integer", "null"], "description": "Number of commits between expected and HEAD." },
+            "note": { "type": "string" }
+          }
+        },
+        "dataset": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": { "enum": ["fresh", "stale", "schema_mismatch", "missing", "skipped"] },
+            "expected_id": { "type": ["string", "null"] },
+            "schema_violations": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "e.g. ['caller_af column missing', 'LOH coverage 5.7%, expected >50%']"
+            },
+            "note": { "type": "string" }
+          }
+        },
+        "upstream_reports": {
+          "type": "array",
+          "description": "One entry per upstream report cited in plan.",
+          "items": {
+            "type": "object",
+            "required": ["report_path", "status"],
+            "properties": {
+              "report_path": { "type": "string", "description": "InterSubMod/-prefixed." },
+              "status": { "enum": ["fresh", "stale_marked", "retracted", "missing", "skipped"] },
+              "stale_reason": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "verdict": {
+      "enum": ["PASS", "BLOCKED", "WARN"],
+      "description": "BLOCKED → Hard Gate, cycle cannot advance to P3 without user override."
+    },
+    "blocking_reasons": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "user_override": {
+      "type": "object",
+      "description": "Populated only if user overrides BLOCKED verdict.",
+      "properties": {
+        "overridden_at": { "type": "string", "format": "date-time" },
+        "reason": { "type": "string" }
+      }
+    }
+  }
+}

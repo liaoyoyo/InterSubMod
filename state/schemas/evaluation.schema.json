@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intersubmod.local/schemas/evaluation.schema.json",
+  "title": "Evaluation Artifact (P5)",
+  "description": "Output of Phase 5 EVALUATE. Retraction risk audit. Mandatory for tier ⭐4-5 upgrade. Hook pre_tier_upgrade_check.sh blocks tier change without this file.",
+  "type": "object",
+  "required": ["schema_version", "cycle_id", "ran_at", "retraction_risk", "tier_recommendation", "pitfall_hits", "verdict"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "cycle_id": { "type": "string" },
+    "ran_at": { "type": "string", "format": "date-time" },
+    "retraction_risk": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Composite score: <0.4 safe, 0.4-0.7 downgrade tier, >0.7 enter pending-review."
+    },
+    "risk_components": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "multi_sample_consistency": { "type": "number", "minimum": 0, "maximum": 1 },
+        "effect_size_stability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "precondition_freshness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "subgroup_homogeneity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "precedent_similarity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Path B only: LlamaIndex retrieval similarity to past retracted reports."
+        }
+      }
+    },
+    "pitfall_hits": {
+      "type": "array",
+      "description": "Hits from known-pitfalls skill sweep.",
+      "items": {
+        "type": "object",
+        "required": ["pitfall", "severity"],
+        "properties": {
+          "pitfall": {
+            "type": "string",
+            "description": "e.g. 'L2_collider_bias', 'pooled_OLS_residualization', 'AUC_ceiling_0.58', 'spatial_autocorr_window'"
+          },
+          "severity": { "enum": ["info", "warn", "block"] },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "precedent_warnings": {
+      "type": "array",
+      "description": "Path B only: similar past retractions found via LlamaIndex.",
+      "items": {
+        "type": "object",
+        "required": ["report_path", "similarity", "outcome"],
+        "properties": {
+          "report_path": { "type": "string" },
+          "similarity": { "type": "number", "minimum": 0, "maximum": 1 },
+          "outcome": { "enum": ["retracted", "downgraded", "validated"] },
+          "lesson": { "type": "string" }
+        }
+      }
+    },
+    "tier_recommendation": {
+      "enum": ["1", "2", "3", "4", "5", "NEGATIVE"]
+    },
+    "required_followups": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Conditions required to upgrade to recommended tier (e.g. 'Re-run with KDE-corrected master')."
+    },
+    "verdict": {
+      "enum": ["approve_tier", "downgrade_tier", "pending_review", "exit_negative"]
+    },
+    "human_reviewer": {
+      "type": "object",
+      "description": "Records who made the final tier decision. Required when tier_recommendation differs from verdict's implicit tier (override). Optional when AI recommendation accepted as-is.",
+      "additionalProperties": false,
+      "properties": {
+        "reviewer": {
+          "type": "string",
+          "description": "Identifier, e.g. 'liaotzuyu000' or 'auto_evaluator_v1'."
+        },
+        "reviewed_at": { "type": "string", "format": "date-time" },
+        "decision_mode": {
+          "enum": ["accept_ai", "override_higher", "override_lower", "defer"],
+          "description": "accept_ai = took evaluator output as-is; override_* = changed tier; defer = sent to pending_review."
+        },
+        "override_reason": {
+          "type": "string",
+          "description": "Required when decision_mode is override_* or defer. ≤300 chars."
+        },
+        "override_tier": {
+          "type": ["string", "null"],
+          "enum": ["1", "2", "3", "4", "5", "NEGATIVE", null],
+          "description": "Final tier when overridden. Null when accept_ai."
+        }
+      },
+      "if": {
+        "properties": { "decision_mode": { "enum": ["override_higher", "override_lower", "defer"] } }
+      },
+      "then": {
+        "required": ["override_reason"]
+      }
+    }
+  }
+}

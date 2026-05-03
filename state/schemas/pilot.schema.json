@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intersubmod.local/schemas/pilot.schema.json",
+  "title": "Pilot Artifact (P3)",
+  "description": "Output of Phase 3 PILOT. Single-sample quick verification with confound guard. Can early-exit NEGATIVE.",
+  "type": "object",
+  "required": ["schema_version", "cycle_id", "ran_at", "sample", "metric_results", "confound_guard", "verdict"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "cycle_id": { "type": "string" },
+    "ran_at": { "type": "string", "format": "date-time" },
+    "sample": {
+      "type": "string",
+      "description": "Single sample used for pilot, e.g. 'HCC1395_5kHz_TO'."
+    },
+    "metric_results": {
+      "type": "object",
+      "required": ["metric", "value"],
+      "properties": {
+        "metric": { "type": "string" },
+        "value": { "type": "number" },
+        "ci_lower": { "type": ["number", "null"] },
+        "ci_upper": { "type": ["number", "null"] },
+        "p_value": { "type": ["number", "null"] },
+        "n_samples": { "type": "integer" },
+        "threshold_met": { "type": "boolean" }
+      }
+    },
+    "confound_guard": {
+      "type": "object",
+      "description": "Output of auc-confound-guard skill or equivalent.",
+      "properties": {
+        "within_group_ols": { "enum": ["pass", "fail", "skipped"] },
+        "af_bin_check": { "enum": ["pass", "fail", "skipped"] },
+        "permutation_test": { "enum": ["pass", "fail", "skipped"] },
+        "n_reads_confound": { "enum": ["pass", "fail", "skipped"] },
+        "spatial_autocorr": { "enum": ["pass", "fail", "skipped"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "verdict": {
+      "enum": ["proceed_to_P4", "exit_negative", "needs_redesign"],
+      "description": "exit_negative ends cycle here; needs_redesign loops back to P1."
+    },
+    "raw_outputs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Paths to raw TSV/CSV outputs (InterSubMod/-prefixed)."
+    },
+    "figures": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

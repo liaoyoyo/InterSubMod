@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intersubmod.local/schemas/plan.schema.json",
+  "title": "Plan Artifact (P1)",
+  "description": "Output of Phase 1 PLAN. Pre-registers what success looks like; locks preconditions for P2 to verify.",
+  "type": "object",
+  "required": ["schema_version", "cycle_id", "validation_layers", "expected_effect", "preconditions", "samples"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "cycle_id": { "type": "string" },
+    "hypothesis": {
+      "type": "string",
+      "description": "Falsifiable statement, ≤200 chars."
+    },
+    "validation_layers": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "enum": ["L1_AUC_screening", "L2_pilot", "L3_cross_sample", "L4_production"] },
+      "description": "Maps to validation-protocol skill L1-L4."
+    },
+    "expected_effect": {
+      "type": "object",
+      "required": ["metric", "min_threshold", "stop_criteria"],
+      "additionalProperties": false,
+      "properties": {
+        "metric": {
+          "type": "string",
+          "description": "e.g. 'delta_F1', 'AUC', 'TP_rate_difference'"
+        },
+        "min_threshold": {
+          "type": "number",
+          "description": "Pre-registered threshold. P3 PILOT exits NEGATIVE if not met."
+        },
+        "direction": {
+          "enum": ["greater_than", "less_than", "abs_greater_than"],
+          "default": "greater_than"
+        },
+        "stop_criteria": {
+          "type": "string",
+          "description": "Plain-text rule for early exit, e.g. 'P3 effect <0.001 AND p>0.1 → NEGATIVE'."
+        }
+      }
+    },
+    "preconditions": {
+      "type": "object",
+      "required": ["binary_version", "dataset_id", "upstream_reports"],
+      "properties": {
+        "binary_version": { "type": ["string", "null"] },
+        "dataset_id": { "type": ["string", "null"] },
+        "upstream_reports": { "type": "array", "items": { "type": "string" } },
+        "feature_flags": { "type": "object", "additionalProperties": { "type": "boolean" } }
+      }
+    },
+    "samples": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Sample IDs to use, e.g. ['HCC1395_5kHz_TO', 'COLO829', 'H2009']"
+    },
+    "skills_invoked": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of skill names planned for use in P3-P5."
+    },
+    "estimated_duration_hours": {
+      "type": "number",
+      "minimum": 0
+    }
+  }
+}

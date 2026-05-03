@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intersubmod.local/schemas/state.schema.json",
+  "title": "Cycle State",
+  "description": "Core state for one research cycle. Lives at state/cycles/{cycle_id}/state.json. This is a *current snapshot*; evidence_ledger.jsonl is the historical SoT.",
+  "type": "object",
+  "required": ["schema_version", "cycle_id", "phase", "tier", "verdict", "started_at", "preconditions", "open_gates", "artifacts", "history"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "cycle_id": { "type": "string", "pattern": "^[0-9]{8}-[0-9]{4}-[a-z0-9_-]+$" },
+    "title": { "type": "string" },
+    "hypothesis_id": { "type": ["string", "null"] },
+    "phase": {
+      "enum": ["P0_REGISTER", "P1_PLAN", "P2_PRECHECK", "P3_PILOT", "P4_GENERALIZE", "P5_EVALUATE", "P6_COMMIT"]
+    },
+    "tier": {
+      "enum": ["pending", "1", "2", "3", "4", "5", "NEGATIVE", "RETRACTED"],
+      "description": "Pending until P5 EVALUATE assigns. Hook pre_tier_upgrade_check.sh blocks 4/5 without evaluation.json."
+    },
+    "verdict": {
+      "enum": ["pending", "active", "exit_negative", "completed", "blocked"]
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 50,
+      "description": "Cycle priority for /cycle-state dashboard sorting. 0=lowest, 100=highest. Higher priority cycles surface first when ≥3 active. Suggested anchors: 80+=user-flagged urgent, 60-79=current main thread, 40-59=routine, 20-39=exploratory, <20=parking."
+    },
+    "started_at": { "type": "string", "format": "date-time" },
+    "last_advanced_at": { "type": "string", "format": "date-time" },
+    "preconditions": {
+      "type": "object",
+      "description": "Captured at P1 PLAN; verified at P2 PRECHECK; locked unless explicitly re-PLAN.",
+      "required": ["binary_version", "dataset_id", "upstream_reports"],
+      "additionalProperties": false,
+      "properties": {
+        "binary_version": {
+          "type": ["string", "null"],
+          "description": "Git commit SHA (40 chars) of the C++ binary used. Null if cycle is pure-analysis."
+        },
+        "dataset_id": {
+          "type": ["string", "null"],
+          "description": "Identifier for the dataset, e.g. 'master_2026-04-22_KDE-corrected'."
+        },
+        "upstream_reports": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "InterSubMod/-prefixed paths of reports whose conclusions this cycle depends on."
+        },
+        "feature_flags": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" },
+          "description": "e.g. {germline_hp_only: true, hp_fine_n_groups: true}"
+        }
+      }
+    },
+    "open_gates": {
+      "type": "array",
+      "description": "Gates that must close before cycle can advance. Empty when current phase has no pending gates.",
+      "items": {
+        "type": "object",
+        "required": ["gate", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "gate": {
+            "enum": ["P2_PRECHECK", "P3_PILOT_CONFOUND", "P4_CONSISTENCY", "P5_EVALUATOR", "P6_KB_FRESHNESS", "P6_PROVENANCE_AUDIT"]
+          },
+          "status": {
+            "enum": ["open", "passed", "blocked", "skipped"]
+          },
+          "reason": { "type": "string" },
+          "checked_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Relative paths (within cycle dir) to phase artifacts. Null until written.",
+      "properties": {
+        "plan": { "type": ["string", "null"] },
+        "precheck": { "type": ["string", "null"] },
+        "pilot": { "type": ["string", "null"] },
+        "generalize": { "type": ["string", "null"] },
+        "evaluation": { "type": ["string", "null"] }
+      }
+    },
+    "history": {
+      "type": "array",
+      "description": "Append-only log of phase transitions. Mirrored to reflection.log with reflection text.",
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "from_phase", "to_phase", "actor"],
+        "additionalProperties": false,
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "from_phase": { "type": ["string", "null"] },
+          "to_phase": { "type": "string" },
+          "actor": { "enum": ["user", "claude_code", "langgraph_cli", "hook"] },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "description": "Cross-references for downstream tools.",
+      "additionalProperties": false,
+      "properties": {
+        "ledger_entries": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Entry IDs in evidence_ledger.jsonl associated with this cycle."
+        },
+        "report_path": {
+          "type": ["string", "null"],
+          "description": "InterSubMod/-prefixed path to the final report once written."
+        }
+      }
+    }
+  }
+}

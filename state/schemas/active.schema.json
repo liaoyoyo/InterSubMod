@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intersubmod.local/schemas/active.schema.json",
+  "title": "Active Cycles Index",
+  "description": "Index of all currently-active research cycles. Updated by every cycle phase transition.",
+  "type": "object",
+  "required": ["schema_version", "updated_at", "cycles"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp of last write."
+    },
+    "max_concurrent": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "default": 5,
+      "description": "Hard cap on parallel active cycles to prevent cognitive overload."
+    },
+    "cycles": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["cycle_id", "phase", "tier", "verdict", "started_at"],
+        "additionalProperties": false,
+        "properties": {
+          "cycle_id": {
+            "type": "string",
+            "pattern": "^[0-9]{8}-[0-9]{4}-[a-z0-9_-]+$",
+            "description": "Format: YYYYMMDD-HHMM-{slug}, e.g. 20260503-2330-loh-kde-quantify"
+          },
+          "title": {
+            "type": "string",
+            "description": "Short human-readable cycle name (≤80 chars)."
+          },
+          "hypothesis_id": {
+            "type": ["string", "null"],
+            "description": "Link to evidence_ledger hypothesis_id if applicable."
+          },
+          "phase": {
+            "enum": ["P0_REGISTER", "P1_PLAN", "P2_PRECHECK", "P3_PILOT", "P4_GENERALIZE", "P5_EVALUATE", "P6_COMMIT"]
+          },
+          "tier": {
+            "enum": ["pending", "1", "2", "3", "4", "5", "NEGATIVE", "RETRACTED"],
+            "description": "Tier 1-5 mapped to ⭐1-⭐5 in user-facing reports. 'pending' = pre-P5; 'NEGATIVE' = exit at P3 early-exit; 'RETRACTED' = post-publish reversal."
+          },
+          "verdict": {
+            "enum": ["pending", "active", "exit_negative", "completed", "blocked"]
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_advanced_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "blocked_reason": {
+            "type": ["string", "null"],
+            "description": "Populated when verdict='blocked' (e.g. P2 stale upstream)."
+          }
+        }
+      }
+    }
+  }
+}
