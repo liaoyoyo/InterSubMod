@@ -15,6 +15,8 @@ Exit codes:
     2 = error (plan.json missing, etc.)
 """
 
+from __future__ import annotations
+
 import json
 import os
 import re
@@ -84,6 +86,20 @@ def git_sha_exists(sha: str) -> bool:
         return False
 
 
+def git_working_tree_clean() -> bool | None:
+    """Returns True if `git status --porcelain` is empty under src/ or include/.
+    None on git error.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "status", "--porcelain", "--", "src/", "include/"],
+            cwd=REPO_ROOT, capture_output=True, text=True, check=True
+        )
+        return out.stdout.strip() == ""
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return None
+
+
 def check_binary(plan: dict) -> dict:
     expected = plan.get("preconditions", {}).get("binary_version")
     if expected is None:
@@ -99,14 +115,116 @@ def check_binary(plan: dict) -> dict:
         return {"status": "missing", "expected": expected, "actual_head": head,
                 "stale_distance": None, "note": "Expected SHA not found in git history."}
 
+    # Working tree dirty under src/ or include/ → binary may not match commit
+    wt_clean = git_working_tree_clean()
+    dirty_warning = ""
+    if wt_clean is False:
+        dirty_warning = " WARNING: working tree has uncommitted C++ changes under src/ or include/ — built binary may not match this commit (longphase-04-29 class)."
+
     if expected == head:
+        if wt_clean is False:
+            return {"status": "stale", "expected": expected, "actual_head": head,
+                    "stale_distance": 0,
+                    "note": "Binary SHA matches HEAD but working tree dirty." + dirty_warning}
         return {"status": "fresh", "expected": expected, "actual_head": head,
-                "stale_distance": 0, "note": "Binary at HEAD."}
+                "stale_distance": 0, "note": "Binary at HEAD; working tree clean."}
 
     distance = git_commit_distance(expected, head)
     return {"status": "stale", "expected": expected, "actual_head": head,
             "stale_distance": distance,
-            "note": f"HEAD is {distance} commits ahead of plan-stated binary."}
+            "note": f"HEAD is {distance} commits ahead of plan-stated binary." + dirty_warning}
+
+
+def _probe_vcf_header(dataset_id: str, plan: dict) -> list[str]:
+    """
+    For Drill 1 vcf_source_error_04-04 class events.
+
+    If dataset_id (or plan.preconditions.vcf_path if present) looks like a
+    VCF path, read its ##source= header and check it matches any caller name
+    hint embedded in dataset_id (e.g. 'ClairS-TO').
+
+    Returns list of violation strings; empty if not applicable or consistent.
+    """
+    violations = []
+
+    # Resolve candidate VCF path from dataset_id or plan.preconditions.vcf_path
+    candidates = []
+    pc = plan.get("preconditions", {})
+    if pc.get("vcf_path"):
+        candidates.append(pc["vcf_path"])
+    if any(s in dataset_id for s in (".vcf.gz", ".vcf", "/snv")):
+        candidates.append(dataset_id)
+
+    if not candidates:
+        return []  # No VCF path to probe
+
+    # Caller hint extraction (which caller does dataset_id claim to be?)
+    expected_caller = None
+    for hint in ("ClairS-TO", "ClairS_TO", "clairs-to", "clairs_to"):
+        if hint in dataset_id:
+            expected_caller = "ClairS-TO"
+            break
+    if expected_caller is None:
+        for hint in ("ClairS", "clairs"):
+            if hint in dataset_id and "-TO" not in dataset_id and "_TO" not in dataset_id:
+                expected_caller = "ClairS"
+                break
+
+    for vcf_path in candidates:
+        # Resolve relative paths from REPO_ROOT
+        rel = vcf_path.removeprefix("InterSubMod/")
+        abs_path = REPO_ROOT / rel if not Path(vcf_path).is_absolute() else Path(vcf_path)
+        if not abs_path.is_file() and not abs_path.exists():
+            continue  # silently skip; missing file is reported elsewhere
+
+        # Resolve symlinks (P-04 trap detection)
+        resolved = abs_path.resolve()
+        if resolved != abs_path:
+            violations.append(
+                f"VCF path {vcf_path} is a symlink to {resolved} — verify caller pipeline (known pitfall: P-04 pileup symlink)"
+            )
+
+        # Read VCF header (handle .gz transparently via subprocess zcat fallback)
+        header_lines = _read_vcf_header_lines(abs_path)
+        if not header_lines:
+            continue
+
+        source_lines = [ln for ln in header_lines if ln.startswith("##source=")]
+        if not source_lines:
+            continue
+        actual_source = source_lines[0].split("=", 1)[1].strip()
+
+        if expected_caller and expected_caller.lower() not in actual_source.lower():
+            violations.append(
+                f"VCF header source='{actual_source}' but dataset_id claims '{expected_caller}' "
+                f"(known pitfall: P-03 VCF source mis-attribution)"
+            )
+
+    return violations
+
+
+def _read_vcf_header_lines(vcf_path: Path, max_lines: int = 200) -> list[str]:
+    """Read up to max_lines header lines (starting with #) from .vcf or .vcf.gz."""
+    try:
+        if str(vcf_path).endswith(".gz"):
+            out = subprocess.run(
+                ["zcat", str(vcf_path)], capture_output=True, text=True,
+                check=False, errors="replace"
+            )
+            text = out.stdout
+        else:
+            text = vcf_path.read_text(errors="replace")
+    except Exception:
+        return []
+
+    headers = []
+    for line in text.splitlines():
+        if not line.startswith("#"):
+            break
+        headers.append(line)
+        if len(headers) >= max_lines:
+            break
+    return headers
 
 
 def check_dataset(plan: dict) -> dict:
@@ -133,6 +251,12 @@ def check_dataset(plan: dict) -> dict:
             "verify 'caller_af' column exists (known pitfall: merged AF trap, see "
             "knowledge/05_data_formats/06_merged_dataset_pitfalls.md)"
         )
+
+    # VCF header probe (Drill 1 vcf_source_error_04-04 class)
+    # If dataset_id looks like a VCF path or carries an explicit caller hint,
+    # try to read the VCF ##source= header and check consistency.
+    vcf_violations = _probe_vcf_header(dataset_id, plan)
+    violations.extend(vcf_violations)
 
     if violations:
         return {"status": "schema_mismatch", "expected_id": dataset_id,

@@ -1,0 +1,109 @@
+{
+  "$schema_version": "1.0",
+  "description": "Structured representation of InterSubMod/.claude/skills/known-pitfalls/SKILL.md (P-01..P-06). Used by /run-evaluator (P5 EVALUATE) to auto-sweep cycle artifacts. When known-pitfalls SKILL.md gains a new entry, append here too. Keep both in sync.",
+  "last_synced_with_skill": "2026-05-04",
+  "pitfalls": [
+    {
+      "id": "P-01",
+      "category": "statistical_method",
+      "name": "L2 Collider Bias",
+      "summary": "Near-constant features (e.g. AlleleDelta in LOH regions) residualized on AF can produce spurious AUC jumps from 0.50 to 0.59.",
+      "trigger_keywords": ["L2 residualization", "residualize on AF", "AlleleDelta", "collider bias", "OLS residualization", "near-constant feature"],
+      "detect_via": ["plan.hypothesis", "plan.preconditions.feature_flags", "pilot.confound_guard.within_group_ols", "pilot.confound_guard.af_bin_check"],
+      "severity": "block",
+      "correct_action": "L2 residualized AUC must be cross-validated with L3 AF-bin stratification. If L2-vs-L3 gap > 0.10 → declare CONFOUND.",
+      "source_ref": "O12 LOH 甲基化場景分析",
+      "memory_ref": "feedback_L2_collider_bias.md",
+      "auto_check_rule": {
+        "if_keyword_match": "L2 residualization OR residualize on AF",
+        "and_artifact_missing": "pilot.confound_guard.af_bin_check != pass",
+        "then_severity": "block"
+      }
+    },
+    {
+      "id": "P-02",
+      "category": "statistical_method",
+      "name": "Pooled OLS Residualization Trap",
+      "summary": "Pooled OLS (TP+FP combined) residuals retain group information because TP/FP occupy different feature-space regions; residual = between-group + within-group.",
+      "trigger_keywords": ["pooled OLS", "TP+FP combined regression", "residualization", "OLS fit on pooled"],
+      "detect_via": ["plan.hypothesis", "pilot.confound_guard.within_group_ols"],
+      "severity": "block",
+      "correct_action": "Use within-group OLS (TP and FP fit separately). Memory: feedback_pooled_ols_residualization_trap.md.",
+      "source_ref": "Beyond-AUC M2 驗證",
+      "memory_ref": "feedback_pooled_ols_residualization_trap.md",
+      "auto_check_rule": {
+        "if_keyword_match": "pooled OLS",
+        "and_artifact_status": "pilot.confound_guard.within_group_ols != pass",
+        "then_severity": "block"
+      }
+    },
+    {
+      "id": "P-03",
+      "category": "data_provenance",
+      "name": "VCF 來源錯誤歸因",
+      "summary": "Mis-attributing canonical VCF to wrong pipeline (e.g. chenhan112 vs liaoyoyo2001 ClairS-TO with ONT_5kHz MM/ML BAM).",
+      "trigger_keywords": ["canonical VCF", "chenhan112 pipeline", "VCF 來源", "VCF source", "caller attribution"],
+      "detect_via": ["plan.preconditions.dataset_id", "plan.preconditions.upstream_reports"],
+      "severity": "warn",
+      "correct_action": "Trace (1) who ran the caller, (2) which BAM, (3) MM/ML tag presence. Cross-check Knowledge/02_samples/ and Knowledge/03_file_formats/.",
+      "source_ref": "2026-04-14 TO pipeline staging v2 修正",
+      "memory_ref": null,
+      "auto_check_rule": {
+        "if_keyword_match": "canonical VCF OR VCF 來源",
+        "and_artifact_missing": "plan.preconditions.dataset_id !contains caller_name",
+        "then_severity": "warn"
+      }
+    },
+    {
+      "id": "P-04",
+      "category": "data_provenance",
+      "name": "pileup Symlink 指向錯誤 Caller",
+      "summary": "pileup-mode output symlink can point to ClairS paired (not TO), making TO analysis silently consume paired caller output.",
+      "trigger_keywords": ["pileup", "symlink", "ClairS-TO", "ClairS paired", "TO analysis", "paired caller"],
+      "detect_via": ["plan.preconditions.dataset_id", "precheck.checks.dataset.schema_violations"],
+      "severity": "block",
+      "correct_action": "Use `readlink -f` on pileup symlinks before analysis. TO analysis requires ClairS-TO VCF; paired analysis requires ClairS paired VCF.",
+      "source_ref": "20260404_VCF來源錯誤矯正報告",
+      "memory_ref": "project_vcf_source_error_correction.md",
+      "auto_check_rule": {
+        "if_keyword_match": "pileup symlink OR pileup mode TO",
+        "and_artifact_status": "precheck.verdict == BLOCKED",
+        "then_severity": "block"
+      }
+    },
+    {
+      "id": "P-05",
+      "category": "feature_design",
+      "name": "CramersV 93% Zero Artifact",
+      "summary": "CramersV in 2×2 contingency tables only takes {0, 1} values; using it as a continuous feature is wrong (93% of regions are exactly 0).",
+      "trigger_keywords": ["CramersV", "Cramer's V", "continuous feature", "2x2 contingency"],
+      "detect_via": ["plan.hypothesis", "plan.preconditions.feature_flags"],
+      "severity": "warn",
+      "correct_action": "Replace CramersV with HPFineNGroups (AUC +0.125). Do not use CramersV as continuous discriminator.",
+      "source_ref": "R1-R5 特徵設計研究",
+      "memory_ref": "project_feature_design_limitations_r1r5.md",
+      "auto_check_rule": {
+        "if_keyword_match": "CramersV OR Cramer's V",
+        "and_keyword_absent": "HPFineNGroups",
+        "then_severity": "warn"
+      }
+    },
+    {
+      "id": "P-06",
+      "category": "feature_design",
+      "name": "n_reads / NumReads Confound",
+      "summary": "Read count systematically inflates statistical power: more reads → tighter PERMANOVA p-value and larger HPFineNGroups; reflects detection power not biological effect.",
+      "trigger_keywords": ["n_reads", "NumReads", "read count", "PERMANOVA", "HPFineNGroups", "AUC 0.58"],
+      "detect_via": ["plan.hypothesis", "pilot.confound_guard.n_reads_confound"],
+      "severity": "warn",
+      "correct_action": "Control for n_reads (residualize or stratify). Any AUC > 0.58 must clear n_reads confound check.",
+      "source_ref": "O11 heterogeneity 分析",
+      "memory_ref": "project_O11_heterogeneity_negative.md",
+      "auto_check_rule": {
+        "if_metric_value_above": {"field": "pilot.metric_results.value", "threshold": 0.58},
+        "and_artifact_status": "pilot.confound_guard.n_reads_confound != pass",
+        "then_severity": "warn"
+      }
+    }
+  ]
+}

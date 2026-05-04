@@ -20,15 +20,47 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "multi_sample_consistency": { "type": "number", "minimum": 0, "maximum": 1 },
-        "effect_size_stability": { "type": "number", "minimum": 0, "maximum": 1 },
-        "precondition_freshness": { "type": "number", "minimum": 0, "maximum": 1 },
-        "subgroup_homogeneity": { "type": "number", "minimum": 0, "maximum": 1 },
-        "precedent_similarity": {
-          "type": "number",
+        "multi_sample_consistency": {
+          "type": ["number", "null"],
           "minimum": 0,
           "maximum": 1,
-          "description": "Path B only: LlamaIndex retrieval similarity to past retracted reports."
+          "description": "n_samples_passed / n_samples_total from generalize.json"
+        },
+        "effect_size_stability": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "min(|metric|) / max(|metric|) across samples"
+        },
+        "precondition_freshness": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "From precheck.verdict: PASS=1.0 / WARN=0.7 / BLOCKED=0.3 / missing=0.5"
+        },
+        "subgroup_homogeneity": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "1 - stddev/mean across samples or sub-groups"
+        },
+        "pitfall_coverage_score": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Added v1.2: pitfalls sweep coverage. 1 - n_unchecked_relevant / n_relevant. 1.0 if no relevant pitfalls trigger."
+        },
+        "tier_support_alignment": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Added v1.2: ledger stability vs tier_used. min(stability, tier) / tier."
+        },
+        "precedent_similarity": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Path B only: LlamaIndex retrieval similarity to past retracted reports. Null in Path A."
         }
       }
     },
