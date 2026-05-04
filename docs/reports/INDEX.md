@@ -221,6 +221,8 @@
 | 04-02 | 📊 [LongPhase-TO vs S 因果鏈報告](validated/2026/04/20260402_longphase_to_vs_s_causal_chain_report_01.md) | 異質性變異保留策略差異 → Phasing/HP/LOH 不一致性的完整因果鏈 |
 | 04-02 | 📊 [Purity-Dependent Self-Phasing Validation](validated/2026/04/20260402_purity_dependent_self_phasing_validation_01.md) | HCC1395 purity 梯度驗證 self-phasing circular dependency |
 | 04-02 | 📊 [Read-Level Germline FP Research Report](validated/2026/04/20260402_read_level_germline_fp_research_report_01.md) | Site→Read-level 系統性探索 + 文獻 + pilot + 全量實驗 |
+| 04-29 | 📊 [longphase-to-mod V5 Somatic Fallback PI 審核](validated/2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md) | V5 4-commits 漸進修補；6 大判決齊備；Pass 1 only 條件下測得 |
+| **05-05** | **🚨📊 [V5 Data Provenance Audit](validated/2026/05/20260505_self_phasing_V5_data_provenance_audit_01.md)** | **CRITICAL — V5 是 5-commits 不是 4；PI 報告數據為 Pass 1 only；4-30/5-01 已產 Pass 2 觸發數據待對比** |
 
 ---
 

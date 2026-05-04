@@ -1,14 +1,18 @@
 <!--
 建立時間: 2026-01-12 00:00
-更新時間: 2026-04-17 22:30
+更新時間: 2026-04-27 (Agent context governance / readiness 校準)
 狀態: validated
 資料來源:
   - docs/standards/20260228_文件命名與狀態管理規範_01.md
   - docs/standards/20260228_output軟連結與版本控管規範_01.md
   - scripts/analysis/check_ai_agent_readiness.sh
+  - docs/reports/validated/2026/04/20260423_研究週報_20260416_20260423_NG2_LOH_constrained_phasing與TO_pivot_01.md (latest)
+  - docs/references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md
 -->
 
 # 當前目標
+
+> **主軸（2026-04-26 切換）**：**Thread D LOH-constrained phasing signatures**（TO 層論文主軸）。主軸報告：[InterSubMod/docs/reports/validated/2026/04/20260426_Thread_D_LOH_constrained_phasing_main_axis_01.md](reports/validated/2026/04/20260426_Thread_D_LOH_constrained_phasing_main_axis_01.md)。Thread B（LOH × AF × CN 跨樣本 whitelist filter）已於 2026-04-26 正式撤回 filter 用途宣稱，HCC1395 single-sample case study 與 per-sample characterization 保留。撤回宣告：[InterSubMod/docs/reports/validated/2026/04/20260426_Thread_B_Retraction_Whitelist_Cross_Sample_01.md](reports/validated/2026/04/20260426_Thread_B_Retraction_Whitelist_Cross_Sample_01.md)。
 
 ## 1. 目前狀態
 
@@ -24,14 +28,35 @@
 
 ## 2. AI Agent 主要入口
 
-1. docs 導航：`docs/README.md`
-2. 研究歷史索引：`docs/experiments/INDEX.md`
-3. 研究全景：`docs/reports/research_landscape/00_INDEX.md`
-4. Agent 手冊：`docs/references/manual/20260301_AI_Agent_快速操作手冊_01.md`
-5. 健康檢查：`scripts/analysis/check_ai_agent_readiness.sh`
-6. 文件規範：`docs/standards/README.md`
+1. 啟動壓縮上下文：`docs/references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md`
+2. docs 導航：`docs/README.md`
+3. 研究歷史索引：`docs/experiments/INDEX.md`
+4. 研究全景：`docs/reports/research_landscape/00_INDEX.md`
+5. Agent 手冊：`docs/references/manual/20260301_AI_Agent_快速操作手冊_01.md`
+6. 健康檢查：`scripts/analysis/check_ai_agent_readiness.sh`
+7. 文件規範：`docs/standards/README.md`
+
+### Agent 上下文控制面分工（2026-04-27）
+
+| 入口 | 角色 | 不應承擔 |
+|------|------|----------|
+| `AGENTS.md` | repo 內硬規則、資料/輸出位置、Knowledge Base 查閱義務 | 每週研究結論細節 |
+| `.claude/CLAUDE.md` | Claude Code 執行策略、hooks、確認矩陣、壓縮保留規則 | 正式研究結論來源 |
+| `docs/references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md` | 啟動壓縮上下文、重要數據、任務順序、待決策矩陣 | 取代 validated report 或 Knowledge Base |
+| `docs/CURRENT_FOCUS.md` | live 主軸、阻塞、入口索引 | 長期歷史總覽 |
+| `research/autoresearch/research_direction.md` | 候選 queue 與 research-loop 定向 | 自動執行觸發 |
 
 ## 3. 當前進行中
+
+### 2026-04-23 週報後 P0/P1 行動（最新，本週定案）
+
+| 優先 | 行動 | 預期產出 | 估時 | 依據 |
+|:---:|------|---------|:---:|------|
+| **P0** | **Paired normal-pilot obs18 對照**：HCC1395 paired mode 做 NG=2 same-hap vs cross-het 拆分，驗證 H-D4 gap 是否在 germline-排除條件下消失 | `step7_hcc1395_normal_paired_obs18.md` + Wilcoxon signed-rank 初步統計 | 1-2 天 | 本週 Wave 1 review 指出 Thread C 僅驗證 H-D1；H-D4 gap-disappearance test 待 paired 對照 |
+| **P0** | **Archive TO 6 樣本重跑 ISM**（含新 KDE + LOH.bed + germline-hp-only default=off）| 擴充 `master.tsv.gz`；跨樣本 S1-S7 scheme 驗證；HPFineN marker master × 兩 flag 對照 | ~10 hr parallel | 本週 Archive 文件 `20260422_Archive_TO_Rerun_ISM_Requirement_01.md` |
+| **P1** | **HCC1954 outlier 專項分析**：Outer cross-het TP 0.08 根因（Potential_LOH 可靠性 / AF / CovM / IGV） | HCC1954 focused report | 1 天 | obs18 6 樣本中唯一 outlier |
+| **P1** | **Formal stats on NG=2 gap**：Wilcoxon signed-rank on 6/6 samples + bootstrap CI | Thread D 證據卡 tier 升級 | 0.5 天 | Wave 1 指出目前僅有 descriptive stats |
+| **P2** | ~~**S4 內部二級判別 pilot**：HCC1395 TO S4 subset (n=30,432, 8,780 FP) 加入 ReadParser 特徵跑 logistic regression~~ `[RETRACTED 2026-04-26]` Thread B 跨樣本 whitelist filter 已撤回 → 詳見 [撤回宣告](reports/validated/2026/04/20260426_Thread_B_Retraction_Whitelist_Cross_Sample_01.md) | ~~S4 子 filter scheme~~ characterization-only 保留 | 1-2 天 | 本週 Thread B 伏筆 |
 
 ### Phase 2 研究方向（優先序）
 
@@ -53,6 +78,16 @@
 - **P0-3 LOH.bed 生成機制已確認（2026-04-11）**：LOH.bed 使用 VCF AF/VAF（`PhasingGraph.cpp:1817`，VAF >= 0.8 → HOM），ISM hp_ratio 使用 BAM HP tags（`ReadParser.cpp:123`）。兩套系統使用不同數據源，解釋 Jaccard=1.0 與 62% ISM LOH 消失的矛盾。
 - 待執行：haplotag + ISM 全量重跑（7 samples × paired + TO）
 - 重跑後可啟動：Phase 2A normal methylation reference baseline
+
+### 🚨 Self-Phasing V5 Provenance Audit（2026-05-05 新發現，**P0**）
+
+**CRITICAL**：[V5 Data Provenance Audit](reports/validated/2026/05/20260505_self_phasing_V5_data_provenance_audit_01.md)
+
+- PI 報告（4-29）所有 V5 數值（sanity 15/15、+13.3pp、AMB 17.5→8%）= **Pass 1 only**（ploidy bug 讓 Pass 2 從未觸發）
+- d0bcd8c (4-30) 已修 ploidy bug；938f0df (4-30 cherry-pick) threshold 0.95 → 0.9
+- 4-30/5-01 已重跑：threshold_compare/{baseline_09 (purity=0.977), v5_flag (purity=0.984)} + v5_flag_force_path2only (purity=0.984)
+- **P0 待辦 T1**：對 4-30 BAM 跑 ISM benchmark + sanity check 對齊 PI §6.4/§6.5 數字 → 三種情境（A 結論強化 / B Pass 2 冗餘 / C 需修訂）
+- **P1 待辦 T2-T6**：trace 4-12 BAM 重產判定、7 樣本擴展、PI 報告 errata、manifest 加 binary_commit_hash、0.6 purity simulation 重做
 
 ### Phase 1A 已鎖定
 
@@ -126,7 +161,7 @@
 - caller_af (AUC=0.654) 單獨超越全部 ISM 特徵組合
 - ISM 在 Caller 之上僅增加 +0.003（LR）~ +0.030（RF）
 - HP-free ISM 完全隨機（AUC~0.53），HP-dependent +0.07~0.10 但可能循環
-- **TO 模式 ISM 近乎無效，caller_af 是唯一有效判別器**
+- **TO 模式 ISM 在 HCC1395 LOSO 上 caller_af 為主要判別器**（2026-04-22 修正：此結論限 HCC1395 TO 單樣本；跨樣本 TO 泛化性尚未驗證 — archive 5 樣本 TO 於 `research/tpfp_loh_af_kde_discrimination/08_archive_to_crosssample.md` 彙整觀察，HPFineNGroups≥4 於 5/6 樣本 TP%≥69%，但 LOH/CN 欄位缺失，需重跑 ISM 才能完整驗證 filter 跨樣本）
 
 ### 獨立分析完成（2026-04-11）
 
@@ -165,6 +200,10 @@
   - **結論**：「cov 需要修正」仍為真（stale-binary 導致），但**修正後不會救 Z3 pilot 跨樣本失敗**；後者是真實生物學 CNV 異質性
   - **2026-04-19 C++ 改動**（commits `374fad4` + `12d9b3e`）：KDE fallback WARN + `Diploid_Coverage_Used` TSV column + DiploidEstimate struct（避免 value==75.0 sentinel 誤判）；evidence ledger H_KDE_001
   - **後續動作（Blocker）**：以現行 binary 重跑 master dataset（7 樣本 × 2 modes，~4-6 hr），取得 per-sample KDE baseline 後重量化 H-CN1/H-CN2；所有 2026-04-19 前的 cross-sample CovM 分析需標註此前提
+  - **KDE 新算法覆蓋狀態（2026-04-23 澄清更新）**：
+    - **paired_full 7/7 全部用新 KDE binary 直接重跑完成**（含 HCC1954：`kde_rerun_B_14combos/HCC1954_paired_full_tp/` 2026-04-21 產出，Diploid_Coverage_Used=61× 全 17,909 rows 一致；更正先前「post-hoc 除法」誤記）
+    - **TO 1/7**（僅 HCC1395 Phase 1）；其他 6 TO 樣本需等 Archive TO rerun（P0 項 ~10 hr parallel）與 COLO829 TO 背景 pipeline 完成
+    - 詳見 `docs/experiments/in_progress/2026/04/20260420_KDE_Fix_Acceptance_Validation_01.md` §5.0.1
   - H1 CONDITIONAL → Z1b 放寬後 TO 4.6% 覆蓋率、TP rate 0.965（7 變體 Pareto 最佳）
   - H3 PARTIAL：Paired 7/7 ≥ 89.1% 確認；TO 6/7 significant 但絕對值 ~72%
   - TO zone TP rate 範圍 0.61-0.94
@@ -204,8 +243,9 @@
 1. `docs/CURRENT_FOCUS.md`（本檔案）
 2. `docs/experiments/INDEX.md`
 3. `docs/README.md`
-4. `docs/concepts/2026/04/20260409_研究構想總索引_01.md`（研究大圖景、發展樹、理論基礎）
-5. `docs/reports/research_landscape/00_INDEX.md`（需深度理解時）
+4. `docs/references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md`（高密度壓縮上下文、重要數據、任務順序、待決策矩陣）
+5. `docs/concepts/2026/04/20260409_研究構想總索引_01.md`（研究大圖景、發展樹、理論基礎）
+6. `docs/reports/research_landscape/00_INDEX.md`（需深度理解時）
 
 ## 6. 已完成研究概覽
 
