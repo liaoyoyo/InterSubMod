@@ -1,0 +1,93 @@
+# Layout: data_main_with_caveat
+# Source: playbook §15 (Data Showcase / Academic Defense common page), v3 S15
+
+name: data-main-with-caveat
+template_type: [data_showcase, academic_defense]
+purpose: |
+  主圖 + 數據 caveat 版型。
+  大圖占 slide 主要面積，下方或側邊配 1-2 個 caveat / insight 物件，
+  右下角 citation footnote。是 academic / data slide 的標準版型。
+
+canvas:
+  width_in: 13.33
+  height_in: 7.5
+  aspect_ratio: "16:9"
+
+zones:
+  title_bar:
+    x_in: 0.5
+    y_in: 0.4
+    width_in: 12.3
+    height_in: 0.8
+    sub_objects:
+      - thesis_title_bar
+
+  main_panel:
+    x_in: 0.5
+    y_in: 1.5
+    width_in: 8.5
+    height_in: 5.2
+    sub_objects:
+      - data_main_panel
+    notes: "主視覺（大圖）。fit_image_within 等比縮放"
+
+  side_annotation:
+    x_in: 9.3
+    y_in: 1.5
+    width_in: 3.7
+    height_in: 5.2
+    sub_objects:
+      - insight_green_card (top, focal interpretation)
+      - method_blue_box (middle, brief method note)
+      - neutral_grey_caveat (bottom, scope/limitation)
+    notes: "右側註解區，最多 3 個物件"
+
+  bottom_caveat_strip:
+    x_in: 0.5
+    y_in: 6.8
+    width_in: 8.5
+    height_in: 0.4
+    sub_objects:
+      - caveat_red_strip (if reviewer correction)
+      - or neutral_grey_caveat
+    notes: "對應主圖的限制 / 校準聲明"
+
+  footer_strip:
+    x_in: 9.3
+    y_in: 6.8
+    width_in: 3.7
+    height_in: 0.4
+    sub_objects:
+      - citation_footnote
+    notes: "來源 / 引文"
+
+alignment_rules:
+  - 主視覺左上對齊（x=0.5, y=1.5）
+  - 側註解區與主視覺頂部對齊
+  - bottom caveat 與主視覺左邊緣對齊
+  - footer 與側註解右邊緣對齊
+  - 標題距上 0.4 inch
+
+example_use:
+  - v3 S15 主圖 + 數據 caveat（reviewer 校準口徑）
+  - Result slide（academic defense）
+  - F1 distribution chart with sample-level breakdown
+
+counter_example:
+  - 多圖並列（用 4quadrant_matrix 或 side_by_side_compare）
+  - 純文字結論（用 3card_tldr）
+  - 流程圖（用 pipeline_flowchart）
+
+focal_point_zone:
+  position: "main_panel center"
+  x_in: 0.5
+  y_in: 1.5
+  width_in: 8.5
+  height_in: 5.2
+  description: |
+    主視覺中央為 focal point（資料 slide 的核心）。
+    Caveat / annotation 為 supporting evidence。
+    main_panel 占 slide 主要視覺權重。
+  rule: |
+    若主視覺含多個焦點區（如多 panel chart），
+    應拆 slide 或改用 data_main_panel + 多個 highlight_region。

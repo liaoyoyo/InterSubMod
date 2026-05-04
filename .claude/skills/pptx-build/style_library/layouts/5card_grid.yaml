@@ -1,0 +1,87 @@
+# Layout: 5card_grid
+# Source: playbook §19 (v3 S22 五大目標卡片原型)
+
+name: 5card-grid
+template_type: [concept_walkthrough, executive_summary]
+purpose: |
+  5 張卡片並列網格。常用於 5 大目標、5 階段 audit、5 維度比較。
+  與 3card_tldr 區別：5card_grid 容納更多項目，視覺權重更分散。
+
+canvas:
+  width_in: 13.33
+  height_in: 7.5
+  aspect_ratio: "16:9"
+
+zones:
+  title_bar:
+    x_in: 0.5
+    y_in: 0.4
+    width_in: 12.3
+    height_in: 0.8
+    sub_objects:
+      - thesis_title_bar
+    notes: "如『InterSubMod 五大研究目標』"
+
+  card_grid:
+    type: "horizontal_array"
+    x_in: 0.5
+    y_in: 1.6
+    width_in: 12.3
+    height_in: 4.5
+    card_count: 5
+    card_width_in: 2.4
+    card_height_in: 4.5
+    card_gap_in: 0.10
+    card_object: side_card_5cell
+    notes: "5 cell 等寬並列"
+    focus_card_index: null  # 預設無強調，可指定 0-4
+
+  bottom_summary_strip:
+    x_in: 0.5
+    y_in: 6.3
+    width_in: 12.3
+    height_in: 0.7
+    sub_objects:
+      - tldr_big_number (mini)
+      - or insight_green_card (主軸結論)
+    notes: "如『主軸：目標 1 + 目標 4』"
+
+  footer_strip:
+    x_in: 9.0
+    y_in: 7.1
+    width_in: 4.0
+    height_in: 0.3
+    sub_objects:
+      - citation_footnote
+
+alignment_rules:
+  - 5 cell 水平等距
+  - 整體寬度 12.3 inch（含 4 個 0.10 inch gap）
+  - cell 頂部與底部統一對齊
+  - 卡內 icon 居中、title 居中、body 左對齊
+
+example_use:
+  - v3 S22 InterSubMod 五大研究目標
+  - 5 階段 audit overview
+  - 5 樣本 cross-sample summary
+
+counter_example:
+  - 2-3 項目（用 3card_tldr）
+  - 4 項目（用 4quadrant_matrix）
+  - 6+ 項目（拆 slide）
+  - 帶階層（用 decision_tree_layout）
+
+focal_point_zone:
+  position: "center card (target #1 or focus_card_index)"
+  x_in: 5.55
+  y_in: 1.6
+  width_in: 2.4
+  height_in: 4.5
+  description: |
+    中央 cell（第 3 個）為視覺焦點，依據西方視線從中心發散。
+    若有 focus_card_index 指定其他 cell，該 cell 應放大或 highlight border。
+    其他 cell 為 supporting context。
+  rule: |
+    若 5 個 cell 沒有明顯主從關係（純並列），
+    應重新評估是否需要 5card_grid（or 改用 KPI dashboard）。
+    若每個 cell 都同等重要 → 主訊息應在標題層級而非 cell 內。

@@ -1,0 +1,80 @@
+# Object: thesis_title_bar
+# Source: playbook §13, mandatory on every slide (assertion-evidence headline)
+
+name: thesis-title-bar
+category: title
+purpose: |
+  Assertion-evidence 標題列。每張 slide 必有此物件。
+  標題必須是「完整 assertion sentence」而非 generic label。
+  PLOS Rule: "Heading = thesis"。
+
+visual:
+  background: "transparent"
+  border_bottom: "1px solid #757575"
+  text_color: "#212121"
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+  font_size_pt: 28
+  font_weight: bold
+  padding: "0.10in 0.00in 0.15in 0.00in"
+  max_lines: 2
+  line_height: 1.2
+
+content_template: |
+  {thesis_assertion}
+
+required_fields:
+  - name: thesis_assertion
+    type: string
+    max_chars: 80
+    description: |
+      完整 assertion sentence（含主詞 + 動詞 + 結論）。
+      必須能 derive from section thesis（playbook §20 階段 B）。
+
+optional_fields:
+  - name: section_label
+    type: string
+    description: "如『Section 3 / 7 — Root cause』顯示於右上角"
+    font_size_pt: 11
+    text_color: "#757575"
+  - name: slide_number
+    type: integer
+    description: "如『5 / 24』"
+
+position_rules:
+  - 必置於 slide 頂部
+  - 距上 0.4 inch、距左 0.5 inch
+  - 寬度建議 12.3 inch（左右各留 0.5 inch margin）
+  - 高度動態（單行 0.8 inch；雙行 1.4 inch）
+  - 不可超過 2 行（>2 行表示 thesis 太複雜，應拆 slide）
+
+alignment:
+  - 左對齊（不置中，避免居中標題顯得「裝飾」）
+  - 與下方主視覺左邊緣對齊
+
+example_good:
+  - "V5 三層投票將 SEQC2 ambiguous block 從 17.5% 降至 8.0%"
+  - "Self-Phasing artifact 由 4-commit 漸進修補完全消除"
+  - "Phase 1A paired-pure 模式 delta F1=+0.0112 通過 7 樣本一致性驗證"
+
+example_bad:
+  - "Results"  # generic label，違反 assertion-evidence
+  - "Method"  # 非 thesis
+  - "Self-Phasing"  # 缺動詞 + 結論
+  - "我們發現了一些有趣的現象"  # 太空泛無 evidence
+
+related_objects:
+  - tldr_big_number       # 標題下方的支撐數字
+  - insight_green_card    # 標題的視覺輔證
+  - citation_footnote     # 標題引用來源
+
+when_to_use:
+  - 每張 slide 必有（強制）
+  - Cover slide 例外可改用更大字 main_thesis 變體
+
+when_not_to_use:
+  - generic label（如「Results」「Method」「Discussion」）— 違反規範
+  - 缺動詞的名詞片語
+
+tier_recommendation: S  # ESSENTIAL — 每 slide focal point 入口
+when_to_promote_to_S: 預設即 S；強制每 slide 必有。
+when_to_demote_to_A: 不可降級；若降級則 slide 違反 assertion-evidence 規範。

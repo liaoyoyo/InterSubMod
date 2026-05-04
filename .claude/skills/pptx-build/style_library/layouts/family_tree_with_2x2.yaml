@@ -1,0 +1,96 @@
+# Layout: family_tree_with_2x2
+# Source: playbook §19 (v3 S20 業界家族樹原型)
+
+name: family-tree-with-2x2
+template_type: [concept_walkthrough, academic_defense]
+purpose: |
+  業界 / 領域家族樹 + 2×2 定位矩陣。
+  上半部展示家族樹（領域分類），下半部展示本研究在 2×2 維度中的定位。
+  常用於 Background / Related Work slide。
+
+canvas:
+  width_in: 13.33
+  height_in: 7.5
+  aspect_ratio: "16:9"
+
+zones:
+  title_bar:
+    x_in: 0.5
+    y_in: 0.4
+    width_in: 12.3
+    height_in: 0.8
+    sub_objects:
+      - thesis_title_bar
+    notes: "如『InterSubMod 在 long-read 表觀遺傳工具家族中的定位』"
+
+  family_tree_top:
+    x_in: 0.5
+    y_in: 1.5
+    width_in: 12.3
+    height_in: 2.5
+    sub_objects:
+      - root_node (e.g., "Long-read epigenomics tools")
+      - 2-3 branch_nodes (e.g., "Methylation / Phasing / Variant")
+      - 4-6 leaf_nodes (e.g., 各工具名稱)
+    notes: "頂部家族樹；leaf 為具體工具 / 方法"
+
+  matrix_2x2_bottom:
+    x_in: 1.0
+    y_in: 4.3
+    width_in: 8.0
+    height_in: 2.7
+    sub_objects:
+      - 4 quadrants (mini 4quadrant_matrix)
+    notes: "2×2 矩陣定位本研究"
+    axis:
+      x_axis_label: "Methylation depth (low → high)"
+      y_axis_label: "Variant integration (low → high)"
+
+  positioning_callout:
+    x_in: 9.3
+    y_in: 4.3
+    width_in: 3.7
+    height_in: 2.7
+    sub_objects:
+      - insight_green_card (本研究定位 highlight)
+      - method_blue_box (簡述差異化)
+    notes: "右側強調本研究在矩陣中的位置"
+
+  footer_strip:
+    x_in: 0.5
+    y_in: 7.1
+    width_in: 12.3
+    height_in: 0.3
+    sub_objects:
+      - citation_footnote
+    notes: "工具引文 / paper references"
+
+alignment_rules:
+  - 家族樹 root 居中頂部
+  - 2×2 矩陣與右側 callout 頂部對齊
+  - 矩陣象限等寬等高
+  - 整體上下分層（頂家族樹 / 底定位矩陣）
+
+example_use:
+  - v3 S20 業界家族樹（Methylation tools landscape）
+  - Related work slide
+  - Tool ecosystem positioning
+
+counter_example:
+  - 純樹結構（用 decision_tree_layout）
+  - 純 2×2（用 4quadrant_matrix）
+  - 線性比較（用 side_by_side_compare）
+
+focal_point_zone:
+  position: "2×2 quadrant intersection where this work locates"
+  x_in: 4.5
+  y_in: 5.4
+  width_in: 1.5
+  height_in: 0.8
+  description: |
+    2×2 矩陣中本研究所在象限的中心為 focal point。
+    通常是某個特殊象限（如「高甲基化深度 + 高變異整合」），
+    家族樹是 context，矩陣是 differentiation。
+  rule: |
+    若 focal point 是家族樹本身（純展示生態），
+    應改用 decision_tree_layout 或 5card_grid。

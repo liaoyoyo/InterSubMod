@@ -1,0 +1,111 @@
+# Object: decision_tree_node
+# Source: playbook §19, v3 S11 紅色根框 + 3 葉樹原型
+
+name: decision-tree-node
+category: structure
+purpose: |
+  決策樹節點（root / branch / leaf）。
+  Root 用紅色強調（觸發點 / 主問題）；branch 用藍色（分類維度）；
+  leaf 用綠色（結論）或灰色（中間節點）。
+
+visual:
+  root_node:
+    background: "#FFEBEE"
+    border: "2px solid #D32F2F"
+    text_color: "#B71C1C"
+    font_size_pt: 14
+    font_weight: bold
+  branch_node:
+    background: "#E3F2FD"
+    border: "1px solid #1976D2"
+    text_color: "#0D47A1"
+    font_size_pt: 13
+    font_weight: regular
+  leaf_node:
+    background: "#E8F5E9"
+    border: "1px solid #2E7D32"
+    text_color: "#1B5E20"
+    font_size_pt: 12
+    font_weight: regular
+  intermediate_node:
+    background: "#F5F5F5"
+    border: "1px solid #757575"
+    text_color: "#424242"
+    font_size_pt: 12
+    font_weight: regular
+  border_radius_pt: 4
+  padding: "0.10in 0.15in"
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+  connector:
+    line_style: "1px solid #757575"
+    arrow_head: true
+    color: "#757575"
+
+content_template: |
+  [{node_type}] {node_label}
+  {node_metric_optional}
+
+required_fields:
+  - name: node_type
+    type: enum
+    values: [root, branch, leaf, intermediate]
+  - name: node_label
+    type: string
+    max_chars: 30
+    description: "節點主訊息"
+
+optional_fields:
+  - name: node_metric
+    type: string
+    description: "如『n=14』『p=0.003』『Δ F1=+0.0112』"
+  - name: parent_id
+    type: string
+    description: "父節點 id（建構連線用）"
+  - name: children_ids
+    type: list
+    description: "子節點 id 列表"
+  - name: condition_label
+    type: string
+    description: "如『if NG=2』『else』作為連線標籤"
+
+position_rules:
+  - 樹狀排列，root 在頂部或左側
+  - 同層節點水平 / 垂直等距
+  - 寬度建議 2.0-3.5 inch（單節點）
+  - 高度 0.6-1.2 inch
+  - 連線不可交叉（若交叉表示樹結構錯誤）
+
+alignment:
+  - root 居中於頂部
+  - branch / leaf 對齊到父節點下方
+  - 連線從父節點底部中心 → 子節點頂部中心
+
+example_good:
+  - "[root] Self-Phasing 17.3:1 artifact / 觸發點"
+  - "[branch] PON-only phasing / 移除 somatic bias"
+  - "[leaf] V5 Layer 1.5 / AMB 17.5%→8.0% (validated)"
+  - "[intermediate] V3-Fixed Haplotag / 已被 V5 取代"
+
+example_bad:
+  - "Decision Tree"  # 只是 label
+  - "Yes/No"  # 缺實質訊息
+  - 連線交叉 / 跨層跳躍  # 結構錯誤
+
+related_objects:
+  - method_blue_box      # 單節點不需樹結構時
+  - pipeline_stage_box   # 線性版本
+  - root_cause_tree_with_trigger (layout)
+
+when_to_use:
+  - Root cause analysis（improvement report S11 樣例）
+  - Decision flowchart（concept walkthrough）
+  - Algorithmic branching 解釋
+
+when_not_to_use:
+  - 線性流程（用 pipeline_stage_box）
+  - 並列卡片（用 5card_grid）
+  - 矩陣關係（用 4quadrant_matrix）
+
+tier_recommendation: S  # ESSENTIAL — 整 slide 的結構主體
+when_to_promote_to_S: 預設即 S；樹狀結構通常為 slide 主視覺。
+when_to_demote_to_A: 若 slide 主訊息在 leaf 結論而非樹結構，可降為 supporting。

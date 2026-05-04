@@ -1,0 +1,89 @@
+# Layout: before_after_split
+# Source: playbook §13 (canonical layout schema example), §19 (v3 S13)
+
+name: before-after-split
+template_type: [improvement, comparison]
+purpose: |
+  雙欄並列展示修改前後的差異。
+  左欄為「Before / Baseline」，右欄為「After / Improved」，
+  下方 delta strip 顯示主要量化差異。
+
+canvas:
+  width_in: 13.33
+  height_in: 7.5
+  aspect_ratio: "16:9"
+
+zones:
+  title_bar:
+    position: "top, 0.4in offset, full width"
+    x_in: 0.5
+    y_in: 0.4
+    width_in: 12.3
+    height_in: 0.8
+    sub_objects:
+      - thesis_title_bar
+    notes: "Assertion-evidence 標題；如『V5 三層投票將 AMB% 從 17.5 降至 8.0』"
+
+  left_column:
+    label: "Before / Baseline"
+    x_in: 0.5
+    y_in: 1.4
+    width_in: 5.8
+    height_in: 5.0
+    sub_objects:
+      - heading (red/grey tone, font 16pt)
+      - main_visual (chart or schematic, fit_image_within)
+      - 1-2 caveat lines (caveat_red_strip)
+    notes: "色調偏紅或灰，表達『問題狀態』"
+
+  right_column:
+    label: "After / Improved"
+    x_in: 7.0
+    y_in: 1.4
+    width_in: 5.8
+    height_in: 5.0
+    sub_objects:
+      - heading (green tone, font 16pt)
+      - main_visual (chart or schematic)
+      - 1-2 insight lines (insight_green_card)
+    notes: "色調偏綠，表達『改善後狀態』"
+
+  delta_strip:
+    x_in: 3.0
+    y_in: 6.5
+    width_in: 7.3
+    height_in: 0.8
+    sub_objects:
+      - tldr_big_number
+    content_template: "Δ {metric_name}: {before_value} → {after_value}"
+    notes: "視覺與認知焦點，吸引第一眼注意"
+
+alignment_rules:
+  - 兩欄寬度等比（5.8 inch each）
+  - 同欄 sub_object 左邊緣對齊
+  - 兩欄 main_visual 垂直中心對齊
+  - delta_strip 水平置中於兩欄之間
+  - 標題距上 0.4 inch，距左 0.5 inch（playbook §16）
+
+example_use:
+  - v3 S13 baseline vs V5 程式碼 diff
+  - Self-Phasing 17.3:1 (paired 1.0:1) 對照
+  - Phase 1A paired delta F1 baseline vs ISM-augmented
+
+counter_example:
+  - 三方比較（應改用 4quadrant_matrix 或 5card_grid）
+  - 不對稱長度（一邊很長一邊很短，應改用 data_main_with_caveat）
+  - 純文字對照（應改用 side_by_side_compare）
+
+focal_point_zone:
+  position: "delta_strip (bottom center)"
+  x_in: 3.0
+  y_in: 6.5
+  width_in: 7.3
+  height_in: 0.8
+  description: |
+    Δ metric 作為視覺與認知焦點，吸引第一眼注意。
+    左右欄為支撐 evidence，delta_strip 為 assertion 量化主體。
+  rule: |
+    若 delta 不是 focal point（如純粹結構並列、無量化差異），
+    請改用 side_by_side_compare 或 4quadrant_matrix。

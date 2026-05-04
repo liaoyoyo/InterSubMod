@@ -1,0 +1,94 @@
+# Layout: kpi_dashboard
+# Source: playbook §15 (Executive Summary / Data Showcase common page)
+
+name: kpi-dashboard
+template_type: [executive_summary, data_showcase]
+purpose: |
+  KPI 儀表板。3-4 個 KPI card 並列展示主要指標，
+  下方可選擇性配時序趨勢小圖或 sample-level breakdown。
+
+canvas:
+  width_in: 13.33
+  height_in: 7.5
+  aspect_ratio: "16:9"
+
+zones:
+  title_bar:
+    x_in: 0.5
+    y_in: 0.4
+    width_in: 12.3
+    height_in: 0.8
+    sub_objects:
+      - thesis_title_bar
+    notes: "如『V5 三層投票 7 樣本一致提升』"
+
+  kpi_row:
+    type: "horizontal_array"
+    x_in: 0.5
+    y_in: 1.5
+    width_in: 12.3
+    height_in: 2.2
+    kpi_count: 4
+    kpi_object: kpi_card
+    kpi_width_per_count:
+      "3": 4.0
+      "4": 3.0
+    notes: "支援 3-4 個 KPI"
+    primary_kpi_index: 0  # 第一個 KPI 視覺權重最大
+
+  trend_chart_or_breakdown:
+    x_in: 0.5
+    y_in: 4.0
+    width_in: 8.0
+    height_in: 3.0
+    sub_objects:
+      - data_main_panel (mini chart, fit_image_within)
+    notes: "可選；時序趨勢或樣本分布"
+
+  side_caveat_or_legend:
+    x_in: 8.8
+    y_in: 4.0
+    width_in: 4.3
+    height_in: 3.0
+    sub_objects:
+      - neutral_grey_caveat
+      - or legend / interpretation note
+    notes: "輔助 trend chart 解讀"
+
+  footer_strip:
+    x_in: 0.5
+    y_in: 7.0
+    width_in: 12.3
+    height_in: 0.4
+    sub_objects:
+      - citation_footnote
+
+alignment_rules:
+  - KPI cards 等寬等高
+  - KPI row 與 trend chart 左邊緣對齊
+  - 整體上下分層：上 KPI / 下 trend
+  - 標題距上 0.4 inch
+
+example_use:
+  - Verification dashboard（V5 7 樣本一致性）
+  - Quarterly metric review
+  - Multi-sample F1 comparison overview
+
+counter_example:
+  - 單一 hero KPI（用 tldr_big_number）
+  - 過程數據（用 data_main_with_caveat）
+  - 5+ KPI（拆 slide 或用 5card_grid）
+
+focal_point_zone:
+  position: "top-left primary KPI (kpi_row[0])"
+  x_in: 0.5
+  y_in: 1.5
+  width_in: 3.0
+  height_in: 2.2
+  description: |
+    儀表板的第一個（左上）KPI 為 focal point。
+    依西方閱讀習慣，視線先落於左上角。
+    最重要的指標（main thesis 對應）應放此位置。
+  rule: |
+    若 focal point 不是某單一 KPI 而是「整體一致性」（如 7 樣本同向），
+    應改用 5card_grid 或 data_main_with_caveat（單主圖呈現一致性）。

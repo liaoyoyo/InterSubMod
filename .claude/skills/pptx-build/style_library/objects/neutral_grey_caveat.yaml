@@ -1,0 +1,80 @@
+# Object: neutral_grey_caveat
+# Source: playbook §13, used for non-warning limitation statements
+
+name: neutral-grey-caveat
+category: caveat_neutral
+purpose: |
+  中性語氣的限制聲明。與 caveat_red_strip 區別：
+  紅色 = 錯誤校準 / 過度推論警示（強）；
+  灰色 = 範圍邊界 / 未驗證提示 / 通用 limitation（中性）。
+
+visual:
+  background: "#F5F5F5"
+  border_left: "3px solid #757575"
+  border_radius_pt: 2
+  text_color: "#424242"
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+  font_size_pt: 13
+  font_weight: regular
+  padding: "0.10in 0.15in"
+  icon_prefix: "ⓘ"
+
+content_template: |
+  ⓘ {note_text}
+
+required_fields:
+  - name: note_text
+    type: string
+    max_chars: 70
+    description: "中性提示，避免用『錯誤』『誤導』等強烈詞彙"
+
+optional_fields:
+  - name: scope_label
+    type: string
+    description: "適用範圍（如『僅 paired mode』『n=7 樣本』）"
+  - name: see_also_ref
+    type: string
+    description: "相關文件 / appendix slide 編號"
+
+position_rules:
+  - 通常置於 slide 底部右側或主視覺正下方
+  - 寬度建議 4.0-7.0 inch
+  - 高度 0.5-0.8 inch
+  - 同 slide 至多 1 個（>1 表示限制太多應分 slide）
+
+alignment:
+  - 右下角優先；若主視覺於下半部，改置於主視覺左側
+  - 文字垂直置中
+  - icon ⓘ 與文字間距 0.05 inch
+
+example_good:
+  - "ⓘ 結果僅適用於 ONT R10.4.1 + Dorado v0.5+"
+  - "ⓘ 5 樣本 archive 缺 LOH/CN，需重跑補齊"
+  - "ⓘ 此 AUC 估計含 60% LOH region，未做分層"
+
+example_bad:
+  - "本研究有限制"  # 空泛
+  - "Limitation 1"  # 只是 label
+  - "請見 appendix"  # 應給核心限制本身
+
+related_objects:
+  - caveat_red_strip   # 強警示版本
+  - citation_footnote  # 引用來源版本
+  - motivation_amber_strip  # 反向：限制升級為動機
+
+when_to_use:
+  - 範圍邊界聲明（適用 / 不適用情境）
+  - 樣本量 / 統計檢力 限制
+  - 未驗證假設提示
+  - 跨平台 / 跨資料集 generalization 限制
+
+when_not_to_use:
+  - 強警示（用 caveat_red_strip）
+  - 結論否定（用標題層級重寫）
+  - 與 focal point 無關的限制（進 backup slide）
+
+tier_recommendation: B  # CONTEXTUAL — 提供背景；非當前 focal point 必需
+when_to_promote_to_S: |
+  限制本身就是論證關鍵時（如「LOH-constrained phasing 僅在 NG=2 看到，
+  NG=3 反向」此限制是 thesis 一部分）。
+when_to_demote_to_B: 預設即 B。

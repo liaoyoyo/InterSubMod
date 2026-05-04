@@ -1,0 +1,80 @@
+# Object: motivation_amber_strip
+# Source: playbook §19, v3 S1 amber 動機 strip 原型
+
+name: motivation-amber-strip
+category: motivation
+purpose: |
+  標示研究動機、為何在意（why care）、call-to-action。
+  琥珀色語氣為「中等強度的提醒」，比紅色溫和、比綠色更積極。
+
+visual:
+  background: "#FFF3E0"
+  border_left: "4px solid #F57C00"
+  border_radius_pt: 2
+  text_color: "#E65100"
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+  font_size_pt: 15
+  font_weight: regular
+  padding: "0.12in 0.18in"
+  icon_prefix: "▶"
+
+content_template: |
+  ▶ {motivation_text}
+
+required_fields:
+  - name: motivation_text
+    type: string
+    max_chars: 80
+    description: "動機句，回答『為何要解這個問題』"
+
+optional_fields:
+  - name: stakes
+    type: string
+    description: "風險 / 影響（如『若不解決，下游 ISM 結論不可信』）"
+  - name: link_to_thesis
+    type: string
+    description: "對應 main thesis 的哪個維度"
+
+position_rules:
+  - 通常置於 slide 頂部（標題下方）或底部
+  - 寬度與 slide 內容區等寬（11-12 inch）
+  - 高度 0.6-0.8 inch（單行）或 1.0-1.2 inch（兩行）
+  - 不超過 2 行文字
+
+alignment:
+  - 左邊緣與內容區左邊緣對齊
+  - 文字垂直置中
+  - icon ▶ 與文字間距 0.05 inch
+
+example_good:
+  - "▶ Self-Phasing 17.3:1 artifact 讓所有下游 ISM 統計失效"
+  - "▶ TO 模式 F1 增益為負 → 必須先解決 phasing 才能談 ISM"
+  - "▶ 教授希望 30 min 講完，現在 speaker note 60 min → 必拆"
+
+example_bad:
+  - "本研究很重要"  # 空泛
+  - "see introduction"  # 沒給內容
+  - "Introduction"  # 只是 label 非動機
+
+related_objects:
+  - thesis_title_bar     # 動機可升級為 thesis
+  - caveat_red_strip     # 若動機帶警告性質
+  - insight_green_card   # 反向：動機已解決變成 insight
+
+when_to_use:
+  - 簡報開場 hook slide（cover 後第一張內容 slide）
+  - Section 開場 transition slide
+  - Why care slide（concept walkthrough）
+  - 提醒聽眾為何要繼續聽
+
+when_not_to_use:
+  - 結論句（用 insight_green_card）
+  - 警示（用 caveat_red_strip）
+  - 中性事實陳述（用 method_blue_box）
+
+tier_recommendation: A  # SUPPORTING — 強化 focal point 但非結論本身
+when_to_promote_to_S: |
+  Why-care slide 的主訊息即 motivation 時（如 v3 S1）。
+  此時 motivation strip 與 thesis_title_bar 並列為 focal point。
+when_to_demote_to_B: |
+  若 motivation 為通用背景（如「癌症研究很重要」），降為 speaker note 開場句。

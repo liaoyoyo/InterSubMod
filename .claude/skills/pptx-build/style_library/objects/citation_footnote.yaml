@@ -1,0 +1,77 @@
+# Object: citation_footnote
+# Source: playbook §13, used for data source / paper reference at slide bottom
+
+name: citation-footnote
+category: reference
+purpose: |
+  右下角引文 / 數據來源。
+  字級小、灰色、不搶主視覺注意力，但提供 traceability。
+
+visual:
+  background: "transparent"
+  border: "none"
+  text_color: "#757575"
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+  font_size_pt: 9
+  font_weight: regular
+  font_style: italic_optional
+  padding: "0.05in 0.10in"
+
+content_template: |
+  {citation_text}
+
+required_fields:
+  - name: citation_text
+    type: string
+    max_chars: 100
+    description: "引用句（如『Source: SEQC2 truth set v1.2』『Naegle 2021, PMC8638955』）"
+
+optional_fields:
+  - name: source_type
+    type: enum
+    values: [paper, dataset, internal_doc, commit, evidence_ledger]
+  - name: hyperlink
+    type: string
+    description: "DOI / 內部路徑（不必顯示，但 PDF 可點）"
+  - name: revision_date
+    type: string
+    description: "如『last verified 2026-04-23』"
+
+position_rules:
+  - 永遠置於 slide 右下角
+  - 距右 0.3 inch、距下 0.3 inch
+  - 寬度建議 4.0-7.0 inch（不超過 slide 寬一半）
+  - 高度 0.3-0.5 inch
+  - 同 slide 至多 2 個（多於 2 改進 backup slide 列詳細 reference）
+
+alignment:
+  - 右對齊
+  - 文字垂直置中
+
+example_good:
+  - "Source: PLOS Comp Biol 17(12): e1009554 (Naegle 2021)"
+  - "Data: SEQC2 HCC1395 truth set v1.2; commit 4dc2d73"
+  - "Evidence ledger: 2026-04-22 NG=2 LOH gap +0.37"
+
+example_bad:
+  - "see paper"  # 太籠統
+  - "[1]"  # 編號需配 reference list
+  - "我自己估的"  # 不專業
+
+related_objects:
+  - thesis_title_bar  # 標題層的引文補充
+  - neutral_grey_caveat  # 中性提示版本
+
+when_to_use:
+  - 數據 slide 的來源標註（必要）
+  - 引用外部論文 / dataset
+  - Commit / version 標註（為 traceability）
+
+when_not_to_use:
+  - 結論 slide（焦點應在結論，不在來源）
+  - 概念 slide（除非引述特定理論）
+
+tier_recommendation: B  # CONTEXTUAL — 提供來源；非當前 focal point
+when_to_promote_to_S: |
+  Reviewer 指明需引文時（如 academic defense），可升級為主視覺旁明顯標註。
+when_to_demote_to_B: 預設即 B。

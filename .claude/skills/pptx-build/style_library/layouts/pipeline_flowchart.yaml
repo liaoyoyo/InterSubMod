@@ -1,0 +1,101 @@
+# Layout: pipeline_flowchart
+# Source: playbook §15 (Improvement / Concept Walkthrough common page), v3 S2 Pipeline 4 階段
+
+name: pipeline-flowchart
+template_type: [improvement, concept_walkthrough]
+purpose: |
+  水平 pipeline 流程圖。顯示 3-5 階段的線性流程，
+  每階段為 pipeline_stage_box，階段間以箭頭連接。
+
+canvas:
+  width_in: 13.33
+  height_in: 7.5
+  aspect_ratio: "16:9"
+
+zones:
+  title_bar:
+    x_in: 0.5
+    y_in: 0.4
+    width_in: 12.3
+    height_in: 0.8
+    sub_objects:
+      - thesis_title_bar
+
+  stages:
+    type: "horizontal_array"
+    x_in: 0.5
+    y_in: 2.5
+    width_in: 12.3
+    height_in: 2.5
+    stage_count: 4
+    stage_object: pipeline_stage_box
+    stage_width_per_count:
+      "3": 3.8
+      "4": 2.8
+      "5": 2.2
+    arrow_color: "#757575"
+    arrow_thickness_pt: 2
+    notes: "支援 3-5 階段；每階段為 pipeline_stage_box 物件"
+
+  optional_inputs_outputs:
+    inputs_label:
+      x_in: 0.0
+      y_in: 3.5
+      width_in: 0.5
+      height_in: 0.5
+      content: "📥"
+      notes: "起始輸入指示"
+    outputs_label:
+      x_in: 12.85
+      y_in: 3.5
+      width_in: 0.5
+      height_in: 0.5
+      content: "📤"
+
+  bottom_explanation:
+    x_in: 0.5
+    y_in: 5.5
+    width_in: 12.3
+    height_in: 1.5
+    sub_objects:
+      - method_blue_box (full-width, brief overall summary)
+      - or 1-2 caveat / insight strips
+    notes: "可選；如『Pipeline 平均處理 ~30s / 樣本』"
+
+  footer_strip:
+    x_in: 9.0
+    y_in: 7.0
+    width_in: 4.0
+    height_in: 0.4
+    sub_objects:
+      - citation_footnote
+
+alignment_rules:
+  - 階段水平等距，頂部與底部對齊
+  - 箭頭從前一階段右邊中心 → 下一階段左邊中心
+  - 階段間距與階段寬度比例固定（gap = 0.30 inch）
+  - 標題距上 0.4 inch
+
+example_use:
+  - v3 S2 Pipeline 4 階段（BAM → ReadParser → Dist → Stats）
+  - Methodology overview slide
+  - Workflow demonstration
+
+counter_example:
+  - 帶分支（用 decision_tree_layout）
+  - 並列功能無順序（用 5card_grid）
+  - 階段過多 >5（拆 slide 或用 timeline_horizontal）
+
+focal_point_zone:
+  position: "flow center horizontal axis (middle stage)"
+  x_in: 5.5
+  y_in: 2.5
+  width_in: 2.8
+  height_in: 2.5
+  description: |
+    水平流程的中央階段為 focal point（聽眾視線中心）。
+    若某階段是改進核心（如 V5 的 Layer 1.5 三層投票），
+    應放在中央位置並可加 highlight border。
+  rule: |
+    若 focal point 在第一階段或最末階段（非中央），
+    應重新排序或拆出 zoom-in slide 單獨展示。

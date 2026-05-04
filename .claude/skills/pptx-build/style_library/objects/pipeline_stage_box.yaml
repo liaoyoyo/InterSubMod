@@ -1,0 +1,99 @@
+# Object: pipeline_stage_box
+# Source: playbook §15, used in v3 S2 Pipeline 4 階段原型
+
+name: pipeline-stage-box
+category: structure
+purpose: |
+  Pipeline 階段方塊。含階段名 + 輸入 / 輸出 + 關鍵參數。
+  與 method_blue_box 區別：pipeline_stage_box 強調流程位置（前後關係）。
+
+visual:
+  background: "#E3F2FD"
+  border: "1px solid #1976D2"
+  border_radius_pt: 4
+  text_color: "#0D47A1"
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+  header_bar:
+    height_pt: 22
+    background: "#1976D2"
+    text_color: "#FFFFFF"
+    font_size_pt: 12
+    font_weight: bold
+  body_font_size_pt: 11
+  body_font_weight: regular
+  padding: "0.10in 0.12in"
+  io_label_color: "#424242"
+  io_label_font_size_pt: 9
+  arrow_color: "#757575"
+
+content_template: |
+  [Stage {stage_number}] {stage_name}
+  Input: {input_label}
+  Output: {output_label}
+  Key: {key_param_optional}
+
+required_fields:
+  - name: stage_number
+    type: integer
+    description: "階段編號（1, 2, 3...）"
+  - name: stage_name
+    type: string
+    max_chars: 25
+    description: "階段名稱（如『ReadParser』『Distance Matrix』）"
+
+optional_fields:
+  - name: input_label
+    type: string
+    description: "輸入資料類型（如『BAM file』『CpG matrix』）"
+  - name: output_label
+    type: string
+    description: "輸出資料類型"
+  - name: key_param
+    type: string
+    description: "關鍵參數（如『MM/ML threshold=0.5』）"
+  - name: tool_used
+    type: string
+    description: "如『htslib』『PERMANOVA (vegan)』"
+
+position_rules:
+  - 多階段水平排列（4 階段：各 2.8 inch；3 階段：各 3.8 inch）
+  - 高度 1.0-1.5 inch
+  - 階段間距 0.3 inch，含箭頭
+  - 不可垂直堆疊超過 4 階段（>4 改用 timeline_horizontal）
+
+alignment:
+  - 水平排列時，頂部與底部對齊
+  - 箭頭從前一階段右邊中心 → 下一階段左邊中心
+  - 內部文字左對齊
+
+example_good:
+  - "[Stage 1] ReadParser / Input: BAM / Output: CpG matrix / Key: MM/ML"
+  - "[Stage 2] Distance Matrix / Input: CpG matrix / Output: Read×Read dist"
+  - "[Stage 3] Cluster / Input: dist matrix / Output: clusters"
+  - "[Stage 4] Stats / Input: clusters / Output: PERMANOVA p-value"
+
+example_bad:
+  - "Pipeline step 1"  # 缺實質名稱
+  - "Black box"  # 缺輸入輸出
+  - "..."  # 空白或省略符號
+
+related_objects:
+  - method_blue_box       # 不強調流程位置時
+  - decision_tree_node    # 帶分支版本
+  - pipeline_flowchart (layout)
+
+when_to_use:
+  - Pipeline overview slide（improvement / concept walkthrough）
+  - Method definition slide
+  - Setup section（comparison report）
+
+when_not_to_use:
+  - 單一方法（用 method_blue_box）
+  - 結論（用 insight_green_card）
+  - 並列功能（用 5card_grid）
+
+tier_recommendation: S  # ESSENTIAL — pipeline slide 主體
+when_to_promote_to_S: 預設即 S。
+when_to_demote_to_A: |
+  若 pipeline 為背景知識，可簡化為一行 method_blue_box，
+  詳細階段進 backup slide。

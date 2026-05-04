@@ -1,0 +1,91 @@
+# Object: tldr_big_number
+# Source: playbook §13, used in v3 TL;DR slide / before-after delta strip
+
+name: tldr-big-number
+category: summary
+purpose: |
+  大字 delta 數字 / KPI 主訊息。
+  用於 TL;DR slide 或 before-after split 的中央 delta strip。
+  視覺權重最重，吸引第一眼注意。
+
+visual:
+  background: "transparent"
+  border: "none"
+  number_text_color: "#2E7D32"  # green for positive; #D32F2F for negative
+  number_font_size_pt: 60
+  number_font_weight: bold
+  label_text_color: "#424242"
+  label_font_size_pt: 18
+  label_font_weight: regular
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+  alignment: center
+  padding: "0.20in 0.30in"
+
+content_template: |
+  {number_value}
+  {number_label}
+
+required_fields:
+  - name: number_value
+    type: string
+    max_chars: 20
+    description: "大字數字主體（如『17.3:1』『+0.0112』『Δ AMB 17.5→8.0%』）"
+  - name: number_label
+    type: string
+    max_chars: 50
+    description: "數字解釋句（如『Self-Phasing artifact ratio』）"
+
+optional_fields:
+  - name: trend_arrow
+    type: enum
+    values: [up, down, flat]
+    description: "輔助視覺；up=綠↑、down=紅↓、flat=灰→"
+  - name: comparison_baseline
+    type: string
+    description: "對照值（如『vs. paired 1.0:1』）"
+  - name: significance
+    type: string
+    description: "p-value / CI（如『p<0.001, n=7』）"
+
+position_rules:
+  - 通常置於 slide 中央或 before-after split 的下方 delta strip
+  - 寬度建議 4.0-6.0 inch（單個）
+  - 高度建議 1.5-2.0 inch
+  - 同 slide 至多 3 個（多於 3 改用 kpi_dashboard layout）
+
+alignment:
+  - 完全置中（水平 + 垂直）
+  - 數字與 label 上下對齊（中軸）
+  - 多個並列時，等距分布
+
+example_good:
+  - "17.3:1\nSelf-Phasing artifact (vs paired 1.0:1)"
+  - "+0.0112\nF1 delta (paired-pure, n=7 samples)"
+  - "Δ AMB 17.5%→8.0%\nV5 三層投票 vs Baseline"
+
+example_bad:
+  - "Many improvements"  # 不是數字
+  - "0.927"  # 缺 label
+  - "結果很好"  # 非量化
+
+related_objects:
+  - kpi_card             # 三層卡片版本（含 delta + label + sub）
+  - insight_green_card   # 文字結論版本
+  - thesis_title_bar     # 標題層級
+
+when_to_use:
+  - TL;DR slide 主訊息
+  - Before-after split 的 delta strip
+  - Cover slide 的 hook 數字
+  - Take-home slide 的關鍵數字
+
+when_not_to_use:
+  - 多個指標並列（用 kpi_dashboard）
+  - 文字結論（用 insight_green_card）
+  - 過程數據展示（用 data_main_panel）
+
+tier_recommendation: S  # ESSENTIAL — TL;DR slide 的 focal point 本身
+when_to_promote_to_S: 預設即 S。
+when_to_demote_to_A: |
+  若 slide 已有更主要的 thesis（如方法論 slide），
+  big number 可降為 supporting context strip。

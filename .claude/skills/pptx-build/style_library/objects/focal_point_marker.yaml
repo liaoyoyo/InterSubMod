@@ -1,0 +1,84 @@
+# Object: focal_point_marker
+# Source: playbook §20 階段 B (Focal Point 鎖定)
+
+name: focal-point-marker
+category: meta
+purpose: |
+  視覺焦點標記。Storyboard 階段標 ≤ 20 字 focal point，
+  在 wireframe 與最終 slide 上以淡色虛線框 + 角落標籤呈現。
+  最終投影片可隱藏，但 storyboard / audit 階段必顯。
+
+visual:
+  storyboard_mode:
+    border: "2px dashed #F57C00"
+    label_position: "top-left"
+    label_background: "#F57C00"
+    label_text_color: "#FFFFFF"
+    label_font_size_pt: 10
+    label_padding: "0.04in 0.08in"
+    label_text: "FOCAL"
+  final_mode:
+    border: "none"
+    label: "hidden"
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+
+content_template: |
+  [FOCAL] {focal_point_text}
+
+required_fields:
+  - name: focal_point_text
+    type: string
+    max_chars: 20
+    description: |
+      此 slide 的 focal point 一句話（≤ 20 字）。
+      必須能 derive from section thesis。
+      playbook §20 階段 B 強制每 slide 必填。
+
+optional_fields:
+  - name: section_thesis_ref
+    type: string
+    description: "對應 section thesis 編號（如『Section 3 thesis: 根因為...』）"
+  - name: derived_from_main_thesis
+    type: string
+    description: "對應 main thesis 的哪個維度"
+  - name: tier_distribution
+    type: dict
+    description: "如 {S: 3, A: 2, B: 1}（slide 上各 Tier 元素數量）"
+
+position_rules:
+  - storyboard 模式：覆蓋於 slide 中央焦點區，半透明
+  - final 模式：完全隱藏（仍存於 metadata）
+  - storyboard 顯示時，外框與 layout 的 focal_point_zone 對齊
+
+alignment:
+  - 與 layout 的 focal_point_zone 完全重疊
+  - 標籤永遠左上角
+
+example_good:
+  - "[FOCAL] V5 三層投票降 AMB% 至 8.0"
+  - "[FOCAL] Self-Phasing 由 4 commit 解決"
+  - "[FOCAL] Phase 1A delta F1=+0.0112"
+
+example_bad:
+  - "[FOCAL] 結果"  # 不是 assertion
+  - "[FOCAL] 改善很多"  # 太空泛
+  - "[FOCAL] 這部分有很多細節..."  # 超字數
+
+related_objects:
+  - thesis_title_bar    # focal point 必反映於標題
+  - tldr_big_number     # focal point 視覺呈現
+
+when_to_use:
+  - Storyboard 階段（每 slide 強制標）
+  - Audit / review 階段（檢視 focal point 是否清楚）
+  - 跨 slide 一致性檢查
+
+when_not_to_use:
+  - 最終 PPTX（自動隱藏為 metadata）
+  - 不需要 focal point 的 cover / appendix slide
+
+tier_recommendation: A  # SUPPORTING — meta 元素，不直接展示給聽眾
+when_to_promote_to_S: |
+  Audit slide 中 focal point 本身即為討論對象時。
+when_to_demote_to_B: |
+  若用戶選擇 fast-track 流程跳過 focal point 標註（非建議做法）。

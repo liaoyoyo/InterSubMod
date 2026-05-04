@@ -1,0 +1,84 @@
+# Object: insight_green_card
+# Source: playbook §13, used in v3 S22 五大目標卡片正向陳述、S24 take-home insight
+
+name: insight-green-card
+category: conclusion
+purpose: |
+  標示核心發現 / 改進結論 / 正向 delta。
+  綠色語氣為「肯定」，與紅色 caveat 形成視覺對立。
+
+visual:
+  background: "#E8F5E9"
+  border_left: "4px solid #2E7D32"
+  border_radius_pt: 4
+  text_color: "#1B5E20"
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+  font_size_pt: 16
+  font_weight: bold
+  padding: "0.15in 0.20in"
+  icon_prefix: "✓"
+
+content_template: |
+  ✓ {insight_headline}
+  {supporting_metric}
+
+required_fields:
+  - name: insight_headline
+    type: string
+    max_chars: 40
+    description: "一句肯定句（assertion form），如『V5 將 AMB% 從 17.5 降至 8.0』"
+
+optional_fields:
+  - name: supporting_metric
+    type: string
+    description: "支撐數據（如 F1+0.0112、p<0.001、n=7/7）"
+  - name: confidence_level
+    type: enum
+    values: [pilot, validated, replicated]
+    default: validated
+  - name: source_link
+    type: string
+
+position_rules:
+  - 通常置於 slide 主視覺右側或下方
+  - 同 slide 至多 1 個 insight green card（避免多個結論競爭注意力）
+  - 寬度建議 4.0-6.0 inch
+  - 高度動態，依文字長度
+
+alignment:
+  - 與主視覺垂直中心對齊或頂部對齊
+  - 內部文字左對齊
+  - icon ✓ 與標題間距 0.05 inch
+
+example_good:
+  - "✓ V5 三層投票 AMB% 17.5→8.0%（n=7 樣本一致）"
+  - "✓ Phase 1A paired-pure delta F1=+0.0112"
+  - "✓ Self-Phasing 17.3:1 artifact 在 4-commit 後消除"
+
+example_bad:
+  - "結果顯示有改善"  # 無數據、非 assertion
+  - "綠色代表通過"  # 非結論、僅描述顏色
+  - "請看右圖"  # 應改為標題引導
+
+related_objects:
+  - caveat_red_strip       # 反向警示
+  - tldr_big_number        # 大字數字版本
+  - kpi_card               # 三層卡片版本
+  - thesis_title_bar       # 標題層級的 assertion
+
+when_to_use:
+  - 結論 slide 的主訊息
+  - Pipeline 終點的成功標記
+  - 跨樣本一致性正向陳述
+  - Take-home 句
+
+when_not_to_use:
+  - 中性數據陳述（用 data_main_panel）
+  - 仍在驗證中的 pilot 結論（標 pilot 級別或用 amber motivation strip）
+  - 多重結論競爭時（拆 slide）
+
+tier_recommendation: S  # ESSENTIAL — 通常為 slide focal point 主體
+when_to_promote_to_S: 預設即 S；無需升級。
+when_to_demote_to_A: |
+  若 slide 已有 thesis_title_bar 充當主 assertion，
+  insight green card 改為 supporting role（如多卡片之一）。

@@ -1,0 +1,160 @@
+# myPPT Style Library — Color Palette
+# Corresponds to playbook §14
+# All hex tokens MUST be read by ppt_toolkit.style_library_loader; no inline hardcode.
+
+palette_version: "1.0"
+last_updated: "2026-04-30"
+description: |
+  6-token primary palette for myPPT. Each token has semantic use_for / do_not_use_for
+  rules. WCAG AA compliance and colorblind safety enforced.
+
+primary_palette:
+  red:
+    hex: "#D32F2F"
+    light_bg_hex: "#FFEBEE"
+    dark_text_hex: "#B71C1C"
+    use_for:
+      - caveat
+      - error
+      - baseline_problem
+      - deletion
+      - reviewer_correction_warning
+      - regression_alert
+    do_not_use_for:
+      - conclusion
+      - neutral_data
+      - method_definition
+      - decoration
+    notes: "搭配淺色背景 #FFEBEE + 4px 左邊框；caveat strip 永遠用此組合。"
+
+  green:
+    hex: "#2E7D32"
+    light_bg_hex: "#E8F5E9"
+    dark_text_hex: "#1B5E20"
+    use_for:
+      - insight
+      - improvement
+      - conclusion
+      - addition
+      - positive_delta
+      - validation_pass
+    do_not_use_for:
+      - warning
+      - raw_data
+      - neutral_method
+    notes: "Insight green card 主色；改善方向 / 結論句使用。"
+
+  blue:
+    hex: "#1976D2"
+    light_bg_hex: "#E3F2FD"
+    dark_text_hex: "#0D47A1"
+    use_for:
+      - method
+      - neutral_definition
+      - link
+      - hyperlink
+      - pipeline_stage
+      - dataset_label
+    do_not_use_for:
+      - conclusion
+      - warning
+      - sensitive_metric
+    notes: "Method box / pipeline 階段 / 引文連結。避免用於結論。"
+
+  amber:
+    hex: "#F57C00"
+    light_bg_hex: "#FFF3E0"
+    dark_text_hex: "#E65100"
+    use_for:
+      - motivation
+      - attention_strip
+      - mid_priority
+      - call_to_action
+      - hypothesis_box
+    do_not_use_for:
+      - error
+      - conclusion
+      - neutral_axis
+    notes: "Motivation strip / 為何在意 / 中等強度提醒。較紅色溫和。"
+
+  grey:
+    hex: "#757575"
+    light_bg_hex: "#F5F5F5"
+    dark_text_hex: "#424242"
+    use_for:
+      - caveat_neutral
+      - secondary_text
+      - axis
+      - axis_label
+      - footnote
+      - citation
+      - disabled_state
+    do_not_use_for:
+      - primary_message
+      - thesis_title
+      - delta_value
+    notes: "中性語氣警示 / 軸標 / 引文。不用於主訊息。"
+
+  black:
+    hex: "#212121"
+    light_bg_hex: "#FFFFFF"
+    dark_text_hex: "#000000"
+    use_for:
+      - primary_text
+      - axis_label
+      - title
+      - body_text
+    do_not_use_for:
+      - decoration
+      - background_fill
+      - delta_strip_fill
+    notes: "預設文字色。標題與本文均用此。"
+
+# ---------------------------------------------------------------------------
+# Contrast & accessibility rules
+# ---------------------------------------------------------------------------
+
+contrast_rules:
+  text_on_white_minimum_hex: "#424242"  # WCAG AA
+  text_on_red_bg: "white"               # only white text on #D32F2F
+  text_on_green_bg: "white"             # only white text on #2E7D32
+  text_on_blue_bg: "white"              # only white text on #1976D2
+  text_on_amber_bg: "white"             # only white text on #F57C00
+  text_on_grey_bg: "white"              # only white on #757575
+  red_green_adjacency: "forbidden"      # colorblind safety
+  max_colors_per_slide: 3               # excluding black/white background/text
+  rationale: "PLOS Ten Simple Rules + WCAG 2.1 AA + colorblind-safe (Wong palette)"
+
+accessibility:
+  WCAG_AA_body_text_contrast: "4.5:1"
+  WCAG_AAA_body_text_contrast: "7:1 (preferred)"
+  colorblind_safe_strategy:
+    - "use shape + color dual-encoding (e.g., circle + red, triangle + green)"
+    - "never rely on color alone for category distinction"
+    - "test simulators: deuteranopia, protanopia, tritanopia"
+  font_size_minimum_pt: 12
+  on_screen_minimum_pt: 14
+
+# ---------------------------------------------------------------------------
+# Token-to-object mapping (cross-reference for objects/*.yaml)
+# ---------------------------------------------------------------------------
+
+token_to_object:
+  red:
+    - caveat_red_strip
+    - root_cause_tree_with_trigger (root box only)
+  green:
+    - insight_green_card
+    - kpi_card (positive delta variant)
+  blue:
+    - method_blue_box
+    - pipeline_stage_box
+  amber:
+    - motivation_amber_strip
+    - focal_point_marker
+  grey:
+    - neutral_grey_caveat
+    - citation_footnote
+  black:
+    - thesis_title_bar (text)
+    - data_main_panel (axis labels)

@@ -1,0 +1,99 @@
+# Object: code_diff_box
+# Source: playbook §19, v3 S13 雙欄程式碼 diff 原型
+
+name: code-diff-box
+category: data
+purpose: |
+  雙欄程式碼 diff（baseline vs fixed）或單欄程式碼片段。
+  monospace 字型；- / + 行用紅綠標示；行號可選。
+
+visual:
+  background: "#FAFAFA"
+  border: "1px solid #BDBDBD"
+  border_radius_pt: 4
+  text_color: "#212121"
+  font_family: "monospace: Consolas / Cascadia Code; CJK: Droid Sans Fallback"
+  font_size_pt: 11
+  font_weight: regular
+  padding: "0.10in 0.15in"
+  diff_added_bg: "#E8F5E9"
+  diff_added_text: "#1B5E20"
+  diff_removed_bg: "#FFEBEE"
+  diff_removed_text: "#B71C1C"
+  line_number_color: "#9E9E9E"
+  line_number_font_size_pt: 9
+
+content_template: |
+  {code_lines}  # list of {prefix: str (- / + / blank), text: str}
+
+required_fields:
+  - name: code_lines
+    type: list
+    description: |
+      List of dicts: [{prefix: '-', text: 'old code'}, {prefix: '+', text: 'new code'}]
+      prefix='-' → 紅色刪除行；prefix='+' → 綠色新增行；prefix='' → 中性
+
+optional_fields:
+  - name: language
+    type: string
+    description: "語法高亮提示（cpp / python / yaml）"
+  - name: file_path
+    type: string
+    description: "檔案路徑作為 header"
+  - name: line_numbers
+    type: boolean
+    default: false
+  - name: diff_caption
+    type: string
+    description: "如『Layer 1.5 三層投票 patch』"
+
+position_rules:
+  - 雙欄 diff 時，左右欄等寬（5.5-6.0 inch each）
+  - 單欄時建議寬度 7.0-11.0 inch
+  - 高度依行數動態（建議單 box 不超過 15 行；超過拆 slide）
+  - 不可超出 slide 邊界 0.3 inch margin
+
+alignment:
+  - 左對齊（程式碼）
+  - header file_path 左對齊頂部
+  - diff_caption 居中於 box 上方 0.05 inch
+
+example_good:
+  - |
+      file: src/core/getvote.cpp (Baseline)
+      - if (somatic_count >= 1) return "somatic";
+      - else if (germline_count >= 2) return "germline";
+      file: src/core/getvote.cpp (V5)
+      + if (germline_count >= 2) return "germline";
+      + else if (somatic_count >= 2) return "somatic";
+      + else if (germline_count + somatic_count >= 1) return "AMB";
+  - |
+      Pipeline 4-stage diff:
+      - call_germline_first()
+      + call_somatic_with_fallback()
+
+example_bad:
+  - "see github"  # 沒給內容
+  - "code is improved"  # 非 diff
+  - "整段 200 行貼上"  # 超出 slide 容量
+
+related_objects:
+  - method_blue_box      # 方法層級描述
+  - data_main_panel      # 主視覺版本
+  - thesis_title_bar     # diff 結論為標題
+
+when_to_use:
+  - Improvement report 的 root cause / fix slide
+  - Comparison report 的演算法對照
+  - Concept walkthrough 的 worked example
+
+when_not_to_use:
+  - 結論 slide（用 insight_green_card）
+  - 高層次架構（用 pipeline_flowchart layout）
+  - 過多行（>15 行；拆 slide 或進 appendix）
+
+tier_recommendation: A  # SUPPORTING — diff 為 evidence，標題才是 assertion
+when_to_promote_to_S: |
+  diff 本身即為 focal point 時（如「修這 3 行就解決」slide）。
+when_to_demote_to_B: |
+  若 diff 太複雜，改為 speaker note Tier 2 描述 + slide 上只放 method_blue_box 概述。

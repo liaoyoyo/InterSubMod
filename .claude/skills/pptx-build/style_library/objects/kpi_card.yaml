@@ -1,0 +1,95 @@
+# Object: kpi_card
+# Source: playbook §13, used in executive summary / dashboard layouts
+
+name: kpi-card
+category: summary
+purpose: |
+  單一 KPI 三層卡片：大數字 + label + delta（含趨勢箭頭）。
+  視覺結構比 tldr_big_number 完整，適合 dashboard 並列。
+
+visual:
+  background: "#FFFFFF"
+  border: "1px solid #BDBDBD"
+  border_radius_pt: 6
+  shadow: "subtle (0 1px 3px rgba(0,0,0,0.08))"
+  padding: "0.20in 0.25in"
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+  number_color_positive: "#2E7D32"
+  number_color_negative: "#D32F2F"
+  number_color_neutral: "#212121"
+  number_font_size_pt: 36
+  number_font_weight: bold
+  label_color: "#424242"
+  label_font_size_pt: 14
+  delta_color_positive: "#2E7D32"
+  delta_color_negative: "#D32F2F"
+  delta_font_size_pt: 12
+
+content_template: |
+  {kpi_value}
+  {kpi_label}
+  {trend_arrow} {delta_value}
+
+required_fields:
+  - name: kpi_value
+    type: string
+    max_chars: 15
+    description: "主數字（如『0.7154』『8.0%』）"
+  - name: kpi_label
+    type: string
+    max_chars: 25
+    description: "指標名（如『SEQC2 F1』『AMB%』）"
+
+optional_fields:
+  - name: delta_value
+    type: string
+    description: "如『+0.0001』『−9.5pp』"
+  - name: trend_arrow
+    type: enum
+    values: [up, down, flat]
+  - name: tier
+    type: enum
+    values: [primary, secondary, tertiary]
+    description: "primary 用更大字型；secondary 標準；tertiary 縮小"
+  - name: significance_note
+    type: string
+    description: "如『p<0.001』『n=7』"
+
+position_rules:
+  - 通常在 kpi_dashboard layout 中並列 3-4 個
+  - 寬度建議 2.8-3.5 inch（單卡）；3 卡並列時各 4.0 inch
+  - 高度 1.8-2.2 inch
+  - 不可單獨置中於 slide（單獨用 tldr_big_number）
+
+alignment:
+  - 並列卡片頂部與底部對齊
+  - 卡內：kpi_value 居中、kpi_label 居中、delta 居中於底部
+
+example_good:
+  - "0.7154 / SEQC2 F1 / ↑ +0.0001 / vs V3"
+  - "8.0% / AMB% / ↓ −9.5pp / Δ baseline"
+  - "17.3:1 / Self-Phasing artifact / ↓ → 1.0:1 (paired)"
+
+example_bad:
+  - "Good / Performance / Improved"  # 全部非量化
+  - "0.7154 (no label)"  # 缺指標名
+  - "Many KPIs combined"  # 應拆多張卡
+
+related_objects:
+  - tldr_big_number      # 單一大數字版本
+  - insight_green_card   # 文字結論版本
+  - data_main_panel      # 主圖表版本
+
+when_to_use:
+  - Executive summary KPI dashboard
+  - Verification dashboard（improvement report）
+  - Top 3 metrics overview slide
+
+when_not_to_use:
+  - 過程數據（用 data_main_panel）
+  - 單一 hero 數字（用 tldr_big_number）
+  - 文字結論（用 insight_green_card）
+
+tier_recommendation: S  # ESSENTIAL — KPI dashboard 的核心元件
+when_to_promote_to_S: 預設即 S。
+when_to_demote_to_A: 若 KPI 為 secondary metric，可降為 supporting card。

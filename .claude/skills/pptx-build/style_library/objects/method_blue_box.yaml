@@ -1,0 +1,90 @@
+# Object: method_blue_box
+# Source: playbook §13, used in v3 S2 (Pipeline 4 階段), S3 (HP tag 定義)
+
+name: method-blue-box
+category: method
+purpose: |
+  標示方法論 / 演算法定義 / pipeline 階段。
+  藍色語氣中性，用於描述「如何做」而非「結果如何」。
+
+visual:
+  background: "#E3F2FD"
+  border: "1px solid #1976D2"
+  border_radius_pt: 4
+  text_color: "#0D47A1"
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+  font_size_pt: 14
+  font_weight: regular
+  padding: "0.15in 0.20in"
+  header_bar:
+    height_pt: 24
+    background: "#1976D2"
+    text_color: "#FFFFFF"
+    font_size_pt: 13
+    font_weight: bold
+
+content_template: |
+  [{method_name}]
+  {method_body}
+
+required_fields:
+  - name: method_name
+    type: string
+    max_chars: 30
+    description: "方法 / 階段名稱（如『Layer 1.5 三層投票』）"
+  - name: method_body
+    type: string
+    max_chars: 200
+    description: "方法描述，可含 bullet 列表"
+
+optional_fields:
+  - name: input_label
+    type: string
+  - name: output_label
+    type: string
+  - name: complexity_note
+    type: string
+    description: "如『O(n log n)』或『單樣本 ~30s』"
+
+position_rules:
+  - 多個 method box 並列時，採水平等寬排列
+  - 寬度建議 2.5-4.5 inch（單個）；3-4 個並列時各 2.8-3.5 inch
+  - 高度動態，建議 1.5-2.5 inch
+  - 不可置於 slide 中心焦點區（中心保留給結論）
+
+alignment:
+  - 多 box 並列時，頂部與底部均對齊
+  - 內部文字左對齊
+  - header_bar 與 box 等寬
+
+example_good:
+  - "[Layer 1.5 三層投票] germline-first → somatic fallback → AMB"
+  - "[ReadParser] BAM → MM/ML 解析 → CpG 位點甲基化矩陣"
+  - "[PERMANOVA] 距離矩陣 → 9999 permutations → p-value"
+
+example_bad:
+  - "本方法很有效"  # 非方法描述、是結論
+  - "詳見論文"  # 沒給內容
+  - "Algorithm 1"  # 缺實質描述
+
+related_objects:
+  - pipeline_stage_box  # 帶輸入/輸出箭頭的版本
+  - decision_tree_node  # 帶分支的版本
+  - thesis_title_bar    # 若整 slide 主題是方法
+
+when_to_use:
+  - Pipeline 4 階段並列展示
+  - 方法論 slide（concept walkthrough）
+  - Algorithm 解釋（assertion-evidence 中的 evidence 部分）
+  - Setup definition（comparison report）
+
+when_not_to_use:
+  - 結果 / 結論陳述（用 insight_green_card）
+  - 警示（用 caveat_red_strip）
+  - 需要強調 delta 的數據（用 tldr_big_number）
+
+tier_recommendation: S  # ESSENTIAL — 方法 slide 的主體
+when_to_promote_to_S: 預設即 S；方法定義為 slide focal point 時。
+when_to_demote_to_A: |
+  若方法為背景知識（聽眾已知），可降為 speaker note Tier 2 描述，
+  slide 上以一句話 method blue box 帶過。

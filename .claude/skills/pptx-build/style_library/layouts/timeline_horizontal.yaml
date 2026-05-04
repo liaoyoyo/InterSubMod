@@ -1,0 +1,105 @@
+# Layout: timeline_horizontal
+# Source: playbook §15 (Improvement / Concept Walkthrough common page)
+
+name: timeline-horizontal
+template_type: [improvement, concept_walkthrough]
+purpose: |
+  水平時間軸。展示研究歷程、commit 歷史、迭代版本（v1 → v2 → v3 → v5）。
+  每事件為時間點 marker + 說明卡片。
+
+canvas:
+  width_in: 13.33
+  height_in: 7.5
+  aspect_ratio: "16:9"
+
+zones:
+  title_bar:
+    x_in: 0.5
+    y_in: 0.4
+    width_in: 12.3
+    height_in: 0.8
+    sub_objects:
+      - thesis_title_bar
+
+  timeline_axis:
+    x_in: 0.5
+    y_in: 4.2
+    width_in: 12.3
+    height_in: 0.05
+    style: "1px solid #757575"
+    notes: "水平時間軸主線"
+
+  time_markers:
+    type: "horizontal_array"
+    x_in: 0.5
+    y_in: 4.0
+    width_in: 12.3
+    height_in: 0.4
+    marker_count: "3-6"
+    marker_size_pt: 12
+    marker_color: "#1976D2"
+    marker_label_font_size_pt: 10
+    notes: "時間點圓圈 marker，下方標日期"
+
+  event_cards_above:
+    type: "alternating array (above timeline)"
+    y_in: 1.5
+    card_width_in: 2.5
+    card_height_in: 2.3
+    sub_objects:
+      - event_title (14pt bold)
+      - event_summary (11pt, max 80 chars)
+      - status_badge
+    notes: "奇數編號事件卡片置於時間軸上方"
+
+  event_cards_below:
+    type: "alternating array (below timeline)"
+    y_in: 4.5
+    card_width_in: 2.5
+    card_height_in: 2.3
+    sub_objects:
+      - event_title
+      - event_summary
+      - status_badge
+    notes: "偶數編號事件卡片置於時間軸下方"
+
+  end_state_callout:
+    position: "right end of timeline"
+    x_in: 10.5
+    y_in: 1.5
+    width_in: 2.5
+    height_in: 5.5
+    sub_objects:
+      - insight_green_card (current state summary)
+    notes: "終點狀態強調"
+
+alignment_rules:
+  - 時間軸水平居中（y=4.2 inch）
+  - 事件卡片以時間 marker 為中心對齊
+  - 上下交錯排列（避免重疊）
+  - 事件卡片寬度等比
+
+example_use:
+  - Self-Phasing 4-commit 漸進修補時間軸
+  - v1 → v2 → v3 → v5 迭代版本
+  - 研究專案里程碑（Phase 1 → Phase 2 → Phase 3）
+
+counter_example:
+  - 並列功能無時序（用 5card_grid）
+  - 線性 pipeline（用 pipeline_flowchart）
+  - 分支歷史（用 decision_tree_layout）
+
+focal_point_zone:
+  position: "end-of-timeline state (right side)"
+  x_in: 10.5
+  y_in: 1.5
+  width_in: 2.5
+  height_in: 5.5
+  description: |
+    時間軸終點（right side）為 focal point。
+    聽眾自然從左讀到右，終點是「現在的狀態 / 結論」。
+    end_state_callout 用 insight_green_card 強調。
+  rule: |
+    若 focal point 在中段事件（如「關鍵突破點」），
+    可改用 highlight border 標該 marker，但仍建議拆 slide
+    把該事件作為獨立 zoom-in。

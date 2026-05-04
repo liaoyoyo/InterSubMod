@@ -1,0 +1,103 @@
+# Object: side_card_5cell
+# Source: playbook §19, v3 S22 五大目標卡片原型
+
+name: side-card-5cell
+category: structure
+purpose: |
+  5-cell 並列卡片。常用於 5 大目標、5 階段 audit、5 維度比較。
+  每 cell 含 icon + 標題 + 1-2 行說明 + 狀態標記。
+
+visual:
+  background: "#FFFFFF"
+  border: "1px solid #BDBDBD"
+  border_radius_pt: 6
+  padding: "0.15in 0.15in"
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+  cell_width: 2.4    # inch (5 並列於 12.3 inch 寬度)
+  cell_height: 3.0   # inch
+  cell_gap: 0.10     # inch
+  icon_size_pt: 32
+  icon_color: "#1976D2"
+  title_color: "#212121"
+  title_font_size_pt: 14
+  title_font_weight: bold
+  body_color: "#424242"
+  body_font_size_pt: 11
+  status_badge:
+    achieved_color: "#2E7D32"
+    in_progress_color: "#F57C00"
+    blocked_color: "#D32F2F"
+    not_started_color: "#757575"
+    font_size_pt: 9
+    padding: "0.04in 0.08in"
+
+content_template: |
+  [icon] {cell_title}
+  {cell_body}
+  ({status_badge_text})
+
+required_fields:
+  - name: cells
+    type: list
+    length: 5
+    item_schema:
+      - name: cell_title
+        type: string
+        max_chars: 20
+      - name: cell_body
+        type: string
+        max_chars: 80
+      - name: status
+        type: enum
+        values: [achieved, in_progress, blocked, not_started]
+      - name: icon_name
+        type: string
+
+optional_fields:
+  - name: focus_cell_index
+    type: integer
+    description: "0-4，標記目前 focal point（其他 cell 灰階變淡）"
+  - name: connector_lines
+    type: boolean
+    description: "是否在 cell 之間畫連線（線性順序時 true）"
+
+position_rules:
+  - 5 cell 水平等距排列
+  - 整體寬度 12.3 inch；單 cell 2.4 inch + gap 0.10 inch
+  - 高度 3.0 inch
+  - 不超過 5 cell（>5 改用其他 layout）
+
+alignment:
+  - cell 頂部與底部統一對齊
+  - 內部：icon 居中頂部、title 居中、body 左對齊、status 居中底部
+
+example_good:
+  - "5 Goals: 1.特徵化 / 2.亞克隆偵測 / 3.甲基化-變異關聯 / 4.LOH 整合 / 5.跨樣本"
+  - "5 Phase audit: 主軸 / 焦點 / Tier / 定義占比 / 紅旗"
+  - "Pipeline 5-stage: BAM → ReadParser → Dist → Cluster → Stats"
+
+example_bad:
+  - "Many goals listed"  # 非具體 cell
+  - "1-2 cell"  # 應改用其他物件
+  - "more than 5 cell"  # 違反 PLOS Rule 3 (≤6 elements)
+
+related_objects:
+  - kpi_card            # KPI 版本
+  - method_blue_box     # 方法版本
+  - 5card_grid (layout)
+
+when_to_use:
+  - 5 大目標展示
+  - 5 階段 audit
+  - 5 維度 dashboard
+
+when_not_to_use:
+  - 2-3 項目（用 3card_tldr）
+  - 4 項目（用 4quadrant_matrix）
+  - 6+ 項目（拆 slide 或 KPI dashboard）
+
+tier_recommendation: S  # ESSENTIAL — 整 slide 結構主體
+when_to_promote_to_S: 預設即 S。
+when_to_demote_to_A: |
+  若 5-cell 為 backup overview，主 focal point 在某一 cell，
+  可降為 supporting role + 突顯 focus_cell_index。

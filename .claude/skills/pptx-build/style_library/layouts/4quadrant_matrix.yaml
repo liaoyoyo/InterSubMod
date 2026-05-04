@@ -1,0 +1,110 @@
+# Layout: 4quadrant_matrix
+# Source: playbook §15 (Comparison Report common page)
+
+name: 4quadrant-matrix
+template_type: [comparison, data_showcase]
+purpose: |
+  2×2 矩陣展示。常用於：高/低 × 兩維度交叉分類、
+  TP/FP/TN/FN 混淆矩陣、SWOT 分析、樣本分群結果。
+
+canvas:
+  width_in: 13.33
+  height_in: 7.5
+  aspect_ratio: "16:9"
+
+zones:
+  title_bar:
+    x_in: 0.5
+    y_in: 0.4
+    width_in: 12.3
+    height_in: 0.8
+    sub_objects:
+      - thesis_title_bar
+
+  axis_labels:
+    x_axis_label:
+      position: "bottom of grid"
+      x_in: 4.0
+      y_in: 6.7
+      width_in: 5.0
+      height_in: 0.4
+      content_field: "x_axis_dimension"
+    y_axis_label:
+      position: "left of grid, rotated 90deg"
+      x_in: 0.5
+      y_in: 3.5
+      width_in: 0.4
+      height_in: 2.5
+      content_field: "y_axis_dimension"
+
+  quadrant_top_left:
+    x_in: 1.5
+    y_in: 1.5
+    width_in: 5.0
+    height_in: 2.4
+    label_corner: "top-left"
+    sub_objects:
+      - heading (assertion)
+      - body_text or mini_chart
+    color_hint: "neutral or context-dependent"
+
+  quadrant_top_right:
+    x_in: 6.7
+    y_in: 1.5
+    width_in: 5.0
+    height_in: 2.4
+    label_corner: "top-right"
+    sub_objects:
+      - heading
+      - body_text or mini_chart
+
+  quadrant_bottom_left:
+    x_in: 1.5
+    y_in: 4.0
+    width_in: 5.0
+    height_in: 2.4
+    label_corner: "bottom-left"
+    sub_objects:
+      - heading
+      - body_text or mini_chart
+
+  quadrant_bottom_right:
+    x_in: 6.7
+    y_in: 4.0
+    width_in: 5.0
+    height_in: 2.4
+    label_corner: "bottom-right"
+    sub_objects:
+      - heading
+      - body_text or mini_chart
+
+alignment_rules:
+  - 四象限等寬等高（5.0 × 2.4 inch）
+  - 軸線置中（vertical x=6.65、horizontal y=4.0）
+  - 標題距上 0.4 inch
+  - 軸標與象限邊界 0.2 inch 間距
+
+example_use:
+  - High/Low × Sensitivity/Specificity 樣本分類
+  - Confusion matrix（TP/FP/FN/TN）
+  - 風險 × 影響 矩陣（risk heatmap 簡化版）
+  - 兩維度模型對比（precision × recall）
+
+counter_example:
+  - 不對稱維度（三方對照用 5card_grid）
+  - 純結構並列（用 side_card_5cell）
+  - 連續軸（用 data_main_panel）
+
+focal_point_zone:
+  position: "center cross-axis (intersection of 4 quadrants)"
+  x_in: 6.0
+  y_in: 3.6
+  width_in: 1.3
+  height_in: 0.8
+  description: |
+    四象限交叉中心是視覺焦點。聽眾自然先看交叉點，
+    再依序掃描四個象限。focal point 應為「交叉軸的故事」
+    （如「兩維度都高」「兩維度都低」的對角象限對比）。
+  rule: |
+    若 focal point 在某單一象限（非交叉故事），
+    應改用 data_main_with_caveat（單主圖 + caveat）。

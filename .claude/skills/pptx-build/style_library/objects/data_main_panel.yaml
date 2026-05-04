@@ -1,0 +1,99 @@
+# Object: data_main_panel
+# Source: playbook §15 (Data Showcase common page), v3 S15 主圖原型
+
+name: data-main-panel
+category: data
+purpose: |
+  主數據面板：大圖 + 軸標 + 圖例 + 標題。
+  資料 slide 的核心物件，視覺權重最大。
+
+visual:
+  background: "#FFFFFF"
+  border: "1px solid #E0E0E0"
+  border_radius_pt: 4
+  padding: "0.10in 0.10in"
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+  panel_title_color: "#212121"
+  panel_title_font_size_pt: 16
+  panel_title_font_weight: bold
+  axis_label_color: "#424242"
+  axis_label_font_size_pt: 12
+  axis_tick_color: "#757575"
+  axis_tick_font_size_pt: 10
+  legend_color: "#424242"
+  legend_font_size_pt: 11
+  legend_position: "top-right"
+  grid_color: "#EEEEEE"
+
+content_template: |
+  [Title]
+  [main_image]
+  [legend]
+  [axis_labels]
+
+required_fields:
+  - name: image_path
+    type: string
+    description: "圖片相對路徑（須通過 fit_image_within helper 等比縮放）"
+  - name: panel_title
+    type: string
+    max_chars: 60
+    description: "圖表標題（assertion form 為佳）"
+
+optional_fields:
+  - name: x_axis_label
+    type: string
+  - name: y_axis_label
+    type: string
+  - name: legend_items
+    type: list
+  - name: caveat_text
+    type: string
+    description: "若有限制，配 neutral_grey_caveat 物件"
+  - name: source_citation
+    type: string
+    description: "對應 citation_footnote"
+  - name: highlight_region
+    type: dict
+    description: "如 {x_range: [0.5, 0.7], color: amber}（強調區域）"
+
+position_rules:
+  - 通常占 slide 中央 60-75% 面積
+  - 寬度建議 7.0-10.0 inch
+  - 高度建議 4.0-5.5 inch
+  - 等比縮放（fit_image_within）；不可強制變形
+
+alignment:
+  - 整 panel 居中於 slide
+  - 標題與圖頂部對齊
+  - axis 標籤對齊各自軸
+
+example_good:
+  - "Title: 'AMB% 從 17.5 降至 8.0（n=7 樣本）' / image: figures/v5_amb_distribution.png"
+  - "Title: 'F1 vs threshold（paired vs TO）' / x: 'AF threshold' / y: 'F1' / legend: paired/TO"
+  - "Title: 'NG=2 LOH gap +0.37（6/6 樣本）' / image: figures/loh_constrained_phasing.png"
+
+example_bad:
+  - "圖一"  # 缺 assertion title
+  - "see figure"  # 沒 image_path
+  - "強制 width=10 height=2"  # 變形
+
+related_objects:
+  - thesis_title_bar       # 標題層
+  - neutral_grey_caveat    # 限制聲明
+  - citation_footnote      # 來源
+  - tldr_big_number        # delta 數字輔證
+
+when_to_use:
+  - Data showcase slide
+  - Result slide（academic defense）
+  - Verification dashboard
+
+when_not_to_use:
+  - 概念圖（用 method_blue_box 或 pipeline_stage_box）
+  - 文字結論（用 insight_green_card）
+
+tier_recommendation: S  # ESSENTIAL — 資料 slide 的視覺核心
+when_to_promote_to_S: 預設即 S。
+when_to_demote_to_A: |
+  若資料圖為輔證、結論已在標題充分表達，可降為 supporting evidence。

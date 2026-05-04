@@ -1,0 +1,102 @@
+# Layout: decision_tree_layout
+# Source: playbook §15 (Concept Walkthrough / Academic Defense common page)
+
+name: decision-tree-layout
+template_type: [concept_walkthrough, academic_defense]
+purpose: |
+  決策樹 / 分類樹版型。Root 在頂部，分支向下展開至 leaf。
+  與 root_cause_tree_with_trigger 區別：
+  decision_tree_layout 用於演算法分類 / 決策邏輯；
+  root_cause_tree_with_trigger 用於問題根因分析。
+
+canvas:
+  width_in: 13.33
+  height_in: 7.5
+  aspect_ratio: "16:9"
+
+zones:
+  title_bar:
+    x_in: 0.5
+    y_in: 0.4
+    width_in: 12.3
+    height_in: 0.8
+    sub_objects:
+      - thesis_title_bar
+
+  root_node:
+    x_in: 5.5
+    y_in: 1.5
+    width_in: 2.3
+    height_in: 0.8
+    sub_objects:
+      - decision_tree_node (type: root, blue or grey tone)
+    notes: "起始決策點，居中頂部"
+
+  branch_layer_1:
+    type: "horizontal_array"
+    x_in: 1.0
+    y_in: 3.0
+    width_in: 11.3
+    height_in: 1.0
+    branch_count: "2-4"
+    branch_object: "decision_tree_node (type: branch)"
+    notes: "第 1 層分支（如 if/else 條件）"
+
+  leaf_layer:
+    type: "horizontal_array"
+    x_in: 0.5
+    y_in: 4.5
+    width_in: 12.3
+    height_in: 1.5
+    leaf_count: "2-6"
+    leaf_object: "decision_tree_node (type: leaf, green or red tone)"
+    notes: "葉節點為決策結果（綠=accept、紅=reject）"
+
+  legend_or_metric:
+    x_in: 0.5
+    y_in: 6.5
+    width_in: 12.3
+    height_in: 0.8
+    sub_objects:
+      - method_blue_box (small, decision criterion summary)
+      - or condition_label legend
+    notes: "決策準則摘要"
+
+  footer_strip:
+    x_in: 9.0
+    y_in: 7.1
+    width_in: 4.0
+    height_in: 0.3
+    sub_objects:
+      - citation_footnote
+
+alignment_rules:
+  - root 居中於頂部
+  - 同層分支水平等距
+  - 連線從父節點底部中心 → 子節點頂部中心
+  - 連線不可交叉
+  - 樹深最多 3 層（root + branch + leaf）；>3 層拆 slide
+
+example_use:
+  - V5 三層投票決策樹（germline → somatic → AMB）
+  - VCF caller 篩選邏輯
+  - 樣本分類 algorithm
+
+counter_example:
+  - 線性流程（用 pipeline_flowchart）
+  - 並列無階層（用 5card_grid）
+  - 雙向關係（用 4quadrant_matrix）
+
+focal_point_zone:
+  position: "leaf node decision (winning branch)"
+  x_in: 0.5
+  y_in: 4.5
+  width_in: 12.3
+  height_in: 1.5
+  description: |
+    Leaf 層的決策結果為 focal point（決策樹的「結論」）。
+    重要的 leaf 應 highlight（綠色強調 accept、紅色強調 reject）。
+    若有多個 leaf，主要結論 leaf 應放置中央或最大尺寸。
+  rule: |
+    若 focal point 是 root（觸發點 / 主問題），
+    應改用 root_cause_tree_with_trigger（root 強調紅色）。

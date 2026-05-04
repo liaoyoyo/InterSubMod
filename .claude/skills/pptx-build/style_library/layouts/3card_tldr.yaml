@@ -1,0 +1,100 @@
+# Layout: 3card_tldr
+# Source: playbook §15 (Executive Summary common page)
+
+name: 3card-tldr
+template_type: [executive_summary]
+purpose: |
+  TL;DR 三卡片展示。Executive summary slide 的標準版型。
+  3 張卡片並列展示：Top Insight / Risk / Ask（或自訂三維度）。
+
+canvas:
+  width_in: 13.33
+  height_in: 7.5
+  aspect_ratio: "16:9"
+
+zones:
+  title_bar:
+    x_in: 0.5
+    y_in: 0.4
+    width_in: 12.3
+    height_in: 0.8
+    sub_objects:
+      - thesis_title_bar
+    notes: "如『TL;DR: V5 三層投票完成；下一步 Phase 2 Normal BAM』"
+
+  card_left:
+    label: "Insight (or Top Finding)"
+    x_in: 0.6
+    y_in: 1.6
+    width_in: 4.0
+    height_in: 4.8
+    color_hint: "green tone"
+    sub_objects:
+      - card_header (16pt bold, color #2E7D32)
+      - kpi_value (36pt bold)
+      - body_text (12pt, max 60 chars × 4 lines)
+      - status_badge
+
+  card_center:
+    label: "Risk (or Caveat)"
+    x_in: 4.85
+    y_in: 1.6
+    width_in: 4.0
+    height_in: 4.8
+    color_hint: "amber tone"
+    sub_objects:
+      - card_header (color #F57C00)
+      - risk_summary
+      - body_text
+      - mitigation_note
+
+  card_right:
+    label: "Ask (or Next Step)"
+    x_in: 9.1
+    y_in: 1.6
+    width_in: 4.0
+    height_in: 4.8
+    color_hint: "blue tone"
+    sub_objects:
+      - card_header (color #1976D2)
+      - action_label
+      - body_text
+      - timeline_estimate
+
+  footer_strip:
+    x_in: 0.5
+    y_in: 6.7
+    width_in: 12.3
+    height_in: 0.5
+    sub_objects:
+      - citation_footnote
+    notes: "如『Source: 2026-04-30 audit; n=24 slides reviewed』"
+
+alignment_rules:
+  - 三卡片等寬等高（4.0 × 4.8 inch）
+  - 卡片間距 0.25 inch
+  - 卡片頂部與底部統一對齊
+  - 內部：header 居中或左對齊（一致），body 左對齊
+
+example_use:
+  - PI 月會 TL;DR
+  - Stakeholder briefing 開場
+  - 週報 cover slide
+
+counter_example:
+  - 4+ 維度（用 4quadrant_matrix 或 5card_grid）
+  - 單一 hero 訊息（用 tldr_big_number 全 slide）
+  - 線性流程（用 pipeline_flowchart）
+
+focal_point_zone:
+  position: "center 3-card row (entire middle band)"
+  x_in: 0.6
+  y_in: 1.6
+  width_in: 12.5
+  height_in: 4.8
+  description: |
+    三卡片整行為 focal point。聽眾自然從左讀到右（Insight → Risk → Ask）。
+    這是 executive 三段式敘事：「我發現了什麼 / 風險 / 我要什麼」。
+  rule: |
+    若三卡片無清楚對齊故事（如三個無關項目），
+    應改用 5card_grid（更鬆散）或拆 3 個獨立 slide。

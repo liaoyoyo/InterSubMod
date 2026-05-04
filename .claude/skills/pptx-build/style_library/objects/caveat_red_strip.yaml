@@ -1,0 +1,86 @@
+# Object: caveat_red_strip
+# Source: playbook §13 (canonical schema example)
+# Used by v3 S15 (數據口徑 reviewer 校準), S11 (root cause warning bottom strip)
+
+name: caveat-red-strip
+category: warning
+purpose: |
+  標示「來源報告錯誤」、「過度解讀警示」、「reviewer 校準口徑」。
+  紅色語氣最強，僅用於需要立即吸引目光的修正或警告。
+
+visual:
+  background: "#FFEBEE"
+  border_left: "4px solid #D32F2F"
+  border_radius_pt: 2
+  text_color: "#B71C1C"
+  font_family: "Latin: Arial; CJK: Droid Sans Fallback"
+  font_size_pt: 14
+  font_weight: regular
+  padding: "0.10in 0.15in"
+  icon_prefix: "⚠"
+
+content_template: |
+  ⚠ {caveat_text}
+
+required_fields:
+  - name: caveat_text
+    type: string
+    max_chars: 60
+    description: "主訊息，必須具體可行動（不是『請注意』空話）"
+
+optional_fields:
+  - name: source_link
+    type: string
+    description: "對應原始報告 / commit / issue"
+  - name: severity
+    type: enum
+    values: [low, medium, high]
+    default: medium
+  - name: corrected_value
+    type: string
+    description: "若是口徑校準，填正確值"
+
+position_rules:
+  - 必置於有問題的元素正下方 0.10 inch
+  - 不可疊加於主視覺
+  - 同 slide 至多 2 個 caveat strip（>2 表示 slide 主軸偏離 → 應拆 slide）
+  - 寬度與被警示元素等寬，最小 4.0 inch、最大 12.3 inch
+
+alignment:
+  - 左邊緣與被警示元素左邊緣對齊
+  - 文字垂直置中於 strip
+  - icon ⚠ 與文字間距 0.05 inch
+
+example_good:
+  - "⚠ 來源報告寫 38%, 實為 14/85=16.5%（已修正口徑）"
+  - "⚠ Baseline 估 0.927 為正確估計，非誤判"
+  - "⚠ 此 AUC 0.78 排除 LOH region 後降至 0.61"
+
+example_bad:
+  - "本研究的限制如下..."  # 過長、非具體警示、應寫進 speaker note
+  - "請注意"  # 無實質內容
+  - "Caveats: see appendix"  # 沒給訊息，等於沒講
+
+related_objects:
+  - neutral_grey_caveat  # 中性語氣版本（非錯誤、僅限制聲明）
+  - insight_green_card   # 反向：肯定發現
+  - citation_footnote    # 若 caveat 來自 reviewer，可加引文
+
+when_to_use:
+  - 標 reviewer 第二輪採納校準
+  - 標源報告口徑誤寫
+  - 標過度推論的範圍邊界（如「僅適用於 HCC1395，不外推 H2009」）
+  - 標 baseline 數據與重跑數據的差異
+
+when_not_to_use:
+  - 整段論述應寫進 speaker note 而非 slide caveat
+  - 中性語氣的限制聲明（用 neutral_grey_caveat）
+  - 結論否定（用 insight_green_card 反向陳述）
+
+tier_recommendation: A  # SUPPORTING — 強化 focal point 但非必現
+when_to_promote_to_S: |
+  caveat 直接構成 main thesis 一部分時（如「reviewer 校準口徑」是論證前提）。
+  範例：v3 S15「來源報告 38% vs 實際 16.5%」是整份簡報 reviewer 校準故事的核心節點。
+when_to_demote_to_B: |
+  caveat 屬背景補充而非當前 focal point 必需，可進 speaker note Tier 2/3。
+  範例：「本資料集樣本量小僅 n=7」屬於通用 caveat，可放 oral-optional。
