@@ -97,7 +97,7 @@ C1 主線可寫複合 `主線:子線`（如 `problem:progress`）。AskUserQuest
 - Sub-thread（次要 thread）
 - 教授視角優先序
 
-### main statement follow-up (修正點 2)
+### main statement follow-up (修正點 2 + v2.2 free-text 修正)
 
 C1 確認主線後，AI **加問第 2 個 AskUserQuestion**：
 
@@ -106,8 +106,14 @@ question: "main statement '<AI 草稿 30 字>' 是否要修改？"
 options:
   - 接受草稿
   - 微調（用戶提供改寫）
-  - 完全重寫
+  - 完全重寫（AI 提供 4 候選 + 自訂）
   - 改主線類型（退回上一步）
 ```
 
-防止用戶選對主線但希望調 statement 的場景。
+**v2.2 修正（2026-05-05）**：選「完全重寫」時，AI **改用 plain text** 流程：
+1. plain text 列 4 個 AI 重新草擬的候選（不同強調點）
+2. 提示「請選 A/B/C/D，或提供您自己的版本（≤ 30 字）」
+3. 用戶用普通對話文字回覆（含自訂版本）
+4. AI 用 plain text 確認最終版
+
+**理由**：AskUserQuestion 4 options 上限無法處理 free-text 自訂；plain text 流程比強塞「自訂」進 option 更自然。

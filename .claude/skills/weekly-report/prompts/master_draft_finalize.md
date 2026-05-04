@@ -161,8 +161,28 @@ C4 確認時 AI 自動檢查：
 - ✅ §17 教授追問已分「⭐⭐⭐ 必問 ≤ 3」+「⭐⭐ 可能問」
 - ✅ §16 priority 已分「Decisive / Operational / Maintenance」
 - ✅ 每 Thread 結論首行為 black bold One-line Verdict
+- ✅ Verdict Detail 段（optional，> 50 字場景必有）
 
 **任一未通過 → 強制回 W7 重組。**
+
+### v2.2 robust 驗證腳本（修正點 3 — regex 切割 bug fix）
+
+舊版用單一 regex match `### Thread .*?(?=###)` 在 Thread B 後接 §7（不是 ###）時失敗。
+新版用 multiline split：
+
+```python
+# robust 切割：以 H3/H2 之一作為終止
+def find_threads(content):
+    sections = re.split(r'^(?=##+ )', content, flags=re.MULTILINE)
+    return [s for s in sections if s.startswith('### Thread ')]
+
+# 對每個 Thread 檢查 One-line Verdict
+for t in find_threads(content):
+    has_verdict = '⭐⭐⭐ One-line Verdict' in t
+    # ...
+```
+
+或更簡單的 grep 替代驗證：`grep -c "One-line Verdict" master_draft.md ≥ 2 * Thread_count`。
 
 詳見 `references/LAYER_STRUCTURE.md` §E。
 

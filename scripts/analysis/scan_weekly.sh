@@ -32,15 +32,17 @@ echo "Raw output: $([ $RAW_OUTPUT -eq 1 ] && echo 'YES' || echo 'NO (摘要)')"
 echo "=========================================="
 
 echo -e "\n=== 1. Git log (last $DAYS days) ==="
+# v2.2 fix: 加 --extended-regexp (-E) 支援 OR pattern (e.g. "self.phasing|V5")
+# git log --grep 預設用 BRE，| 不被當 OR；需 --extended-regexp 才能正確處理
 if [ -n "$KEYWORD" ]; then
-  git log --since="$DAYS days ago" --grep="$KEYWORD" -i --pretty=format:"%h %ad %s" --date=short
+  git log --since="$DAYS days ago" --grep="$KEYWORD" -i --extended-regexp --pretty=format:"%h %ad %s" --date=short
 else
   git log --since="$DAYS days ago" --pretty=format:"%h %ad %s" --date=short
 fi
 
 if [ -n "$KEYWORD" ]; then
   echo -e "\n\n=== 2. Git log (keyword '$KEYWORD' all-time, last 30) ==="
-  git log --all --grep="$KEYWORD" -i --pretty=format:"%h %ad %s" --date=short | head -30
+  git log --all --grep="$KEYWORD" -i --extended-regexp --pretty=format:"%h %ad %s" --date=short | head -30
 fi
 
 echo -e "\n\n=== 3. experiments/in_progress 最近修改 (top 15) ==="

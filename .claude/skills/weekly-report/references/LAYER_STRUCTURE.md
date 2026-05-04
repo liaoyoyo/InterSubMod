@@ -265,20 +265,28 @@ Q3: 是否屬「根據已知資料推測」（而非「待釐清的疑問」）�
 
 ⭐⭐⭐ **This Week's Verdict** (≤ 50 字)：[本週一句決定性結論]
 
+### Verdict Detail（v2.2 新增，optional ≤ 100 字）
+
+[若 Verdict 50 字無法涵蓋三事實以上的複雜情況，補一段 ≤ 100 字 detail。
+ 此段為 optional — 簡單週報可省略；複雜 multi-finding 週報建議寫。]
+
 ### Top Findings（3-5 條）
 1. ⭐⭐⭐ [F] <最重要的事實，必含具體 evidence>
-2. ⭐⭐⭐ [F]/[O] <第 2 重要>
-3. ⭐⭐ [O]/[I] <第 3 重要>
-4. ⭐⭐ <第 4 重要，可選>
-5. ⭐ <第 5 重要，可選>
+...
 
 ### Top Asks（教授必須判斷的決策點）
 1. **[U]** <必問教授的問題 1>
-2. **[U]** <必問教授的問題 2>（≤ 3 條，多了壓縮或合併）
+... (≤ 3 條)
 
 ### Decisive Next Step（≤ 1 條）
 > **Priority 1**：<下週決定性 priority，含工時估算>
 ```
+
+**v2.2 修正（2026-05-05）— Verdict 50 字限制檢討**：
+- Verdict ≤ 50 字硬上限保留（一句話原則，教授第一眼焦點）
+- 若需涵蓋 3 事實以上（如「commit 鏈完整化 + Pass 1 only caveat + P0 行動」），加 **Verdict Detail** ≤ 100 字補充段
+- Verdict Detail 為 optional：簡單 progress 週報可省略；problem 主線 + 多 finding 場景建議寫
+- 經驗法則：Verdict 想超過 50 字 = 訊號「需要拆 Verdict + Verdict Detail」
 
 **規則**：
 - §0 在 §1 之前
