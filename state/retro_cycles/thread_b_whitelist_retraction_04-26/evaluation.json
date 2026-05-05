@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "thread_b_whitelist_retraction_04-26",
+  "ran_at": "2026-05-05T21:13:41Z",
+  "retraction_risk": 0.4983,
+  "risk_components": {
+    "multi_sample_consistency": 0.16666666666666666,
+    "effect_size_stability": 0.14285714285714285,
+    "precondition_freshness": 1.0,
+    "subgroup_homogeneity": 0.5017236906578582,
+    "pitfall_coverage_score": 1.0,
+    "tier_support_alignment": null,
+    "precedent_similarity": null
+  },
+  "pitfall_hits": [],
+  "tier_recommendation": "RETRACTED",
+  "required_followups": [
+    "Human review required: examine low/critical components and pitfall_hits before tier change.",
+    "Components below 0.4 (need attention): multi_sample_consistency, effect_size_stability"
+  ],
+  "verdict": "pending_review"
+}

@@ -44,8 +44,23 @@ def utcnow_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def cycle_dir(cycle_id: str) -> Path:
+    """Resolve cycle directory: prefer state/cycles/, fallback to state/retro_cycles/.
+
+    Allows /check-staleness to operate on retrospective fixtures (Day 6 Drill 1)
+    without polluting active.json or live cycles/.
+    """
+    primary = STATE_ROOT / "cycles" / cycle_id
+    if primary.is_dir():
+        return primary
+    retro = STATE_ROOT / "retro_cycles" / cycle_id
+    if retro.is_dir():
+        return retro
+    return primary  # caller will hit the load-error path
+
+
 def load_plan(cycle_id: str) -> dict:
-    plan_path = STATE_ROOT / "cycles" / cycle_id / "plan.json"
+    plan_path = cycle_dir(cycle_id) / "plan.json"
     if not plan_path.is_file():
         sys.stderr.write(f"ERROR: plan.json not found at {plan_path}\n")
         sys.exit(2)
@@ -252,6 +267,18 @@ def check_dataset(plan: dict) -> dict:
             "knowledge/05_data_formats/06_merged_dataset_pitfalls.md)"
         )
 
+    # P-04 pileup symlink trap: dataset_id mentions both "pileup" + ("symlink" or "ClairS_paired")
+    # while claiming to be for TO mode. Original event 2026-04-04: pileup symlink resolved to
+    # ClairS paired (not ClairS-TO), silently consumed paired caller output for TO analysis.
+    dlow = dataset_id.lower()
+    if "pileup" in dlow and ("symlink" in dlow or "clairs_paired" in dlow or "clairs paired" in dlow):
+        if "clairs-to" in dlow or "clairs_to" in dlow or "_to_" in dlow or "for_to" in dlow:
+            violations.append(
+                "Dataset name signals pileup symlink + ClairS-paired-for-TO mismatch "
+                "(known pitfall P-04: pileup symlink should resolve to ClairS-TO not paired). "
+                "Run `readlink -f` on the actual VCF symlink before proceeding."
+            )
+
     # VCF header probe (Drill 1 vcf_source_error_04-04 class)
     # If dataset_id looks like a VCF path or carries an explicit caller hint,
     # try to read the VCF ##source= header and check consistency.
@@ -348,7 +375,7 @@ def determine_verdict(binary: dict, dataset: dict, reports: list[dict]) -> tuple
 
 
 def write_precheck(cycle_id: str, payload: dict) -> Path:
-    out_path = STATE_ROOT / "cycles" / cycle_id / "precheck.json"
+    out_path = cycle_dir(cycle_id) / "precheck.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
     return out_path

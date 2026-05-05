@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "hpfinengroups_flag_reverse_04-22",
+  "ran_at": "2026-05-05T21:13:40Z",
+  "retraction_risk": 0.4694,
+  "risk_components": {
+    "multi_sample_consistency": 0.7142857142857143,
+    "effect_size_stability": 0.24352331606217617,
+    "precondition_freshness": 1.0,
+    "subgroup_homogeneity": 0.6713831990748942,
+    "pitfall_coverage_score": 0.0,
+    "tier_support_alignment": null,
+    "precedent_similarity": null
+  },
+  "pitfall_hits": [
+    {
+      "pitfall": "P-06",
+      "severity": "warn",
+      "evidence": "trigger_keyword matched in hypothesis; guard '['plan.hypothesis', 'pilot.confound_guard.n_reads_confound']' not pass"
+    }
+  ],
+  "tier_recommendation": "3",
+  "required_followups": [
+    "Human review required: examine low/critical components and pitfall_hits before tier change.",
+    "Components below 0.4 (need attention): effect_size_stability, pitfall_coverage_score"
+  ],
+  "verdict": "pending_review"
+}
