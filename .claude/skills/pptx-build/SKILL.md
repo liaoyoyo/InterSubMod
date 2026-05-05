@@ -213,3 +213,17 @@ API 索引 → `tools/README.md`
 2. **Vision 10-check 不可跳過**（每張 slide 強制）
 3. **每張 slide 進 build 前必填 focal point ≤ 20 字**
 4. **C1 / C5 fast-track 必停**（main thesis / speaker script timing）
+
+---
+
+## 用戶修正分類 + 個人風格累積（v2.4 強制機制）★
+
+任何用戶提出修正/改善建議時，**強制 AskUserQuestion 分類**：
+- 通用必要 → 寫入 `style_library/personal_style_log.md`，後續所有 PPT 自動套用
+- 本次特定 → 只本次修，不污染通用規則
+- 不確定 → AI 用 5 維度評估後建議
+- 兩者皆是 → 標 [PROVISIONAL]，≥3 次升級通用
+
+詳見 `prompts/feedback_classification.md` + `style_library/personal_style_log.md`。
+
+每張 slide build 前 **自動讀取 personal_style_log active 規則**，加進 §20.E / visual_review / multi_agent_review 各層檢核。

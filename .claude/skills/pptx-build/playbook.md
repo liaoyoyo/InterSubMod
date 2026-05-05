@@ -389,3 +389,40 @@ final_results = parallel_spawn([
 - FAIL → 主 conversation 修正後 re-spawn 該 Agent re-review
 
 詳見 `prompts/multi_agent_review.md` §「修正循環」表。
+
+
+---
+
+## §24.2 用戶修正分類 + 個人風格累積（v2.4 新增）
+
+> 用戶要求：修正建議要分「通用必要」vs「本次特定」，逐步累積個人風格作為後續檢核標準。
+
+### 三類修正
+
+| 類型 | 處置 | 例子 |
+|:-:|------|------|
+| **通用必要** | 寫入 `style_library/personal_style_log.md`，後續自動套用 | 「中文標題禁用問號」「caveat 統一加 ⚠ 圖示」|
+| **本次特定** | 只本次修，inline 註解，不寫 log | 「此張 caveat 字體加大為 14pt（audit 主題特殊）」|
+| **不確定** | AI 用 5 維度評估後建議 | 觸發頻率 / 普適性 / 與既有規則關係 / 修正成本 / 用戶語氣 |
+
+### [PROVISIONAL] 升級規則
+
+同類修正在不同 PPT 累積 ≥ 3 次 → AI 主動建議升級為通用。
+
+### 自動套用流程
+
+```python
+# 每張 slide build 前
+def pre_build():
+    rules = load_active_rules('style_library/personal_style_log.md')
+    extend_audit_questions(rules)         # §20.E 6 問補充
+    extend_visual_review_checks(rules)    # 10-check 擴充
+    extend_multi_agent_prompts(rules)     # Wave 1 各 Agent specific
+```
+
+### 與 InterSubMod Memory 分工
+
+- **Memory `feedback_*.md`** — 高層哲學偏好（為什麼）
+- **personal_style_log.md** — 細粒度可檢查規則（具體怎麼做）
+
+詳見 `prompts/feedback_classification.md`（互動流程）+ `style_library/personal_style_log.md`（紀錄格式）。
