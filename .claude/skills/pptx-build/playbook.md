@@ -333,3 +333,59 @@ Wave 2（內容+整合）：
 | Style library 完整 | 14 objects + 12 layouts，每個有 good/bad + when_to_use |
 | ppt_toolkit 可用 | `from ppt_toolkit import load_object` 可運作 |
 | --from-draft 介面 | 自動讀 frontmatter，跳過 P1 main thesis 鎖定 |
+
+
+---
+
+## §24.1 6 Agent 多代理驗證詳細規範（v2.3 補強）
+
+playbook §24 列了 6 Agent 名稱，**詳細 context + 步驟 + Vision 整合 → `prompts/multi_agent_review.md`**。
+
+### 三層保險機制（每張 slide）
+
+| 層 | 工具 | 何時跑 | 通過標準 |
+|:-:|------|--------|---------|
+| 1 | §20.E 6 問 self-audit | build 前 | 6 問全有答 + focal point ≤ 20 字 |
+| 2 | visual_review 10-check（單 Agent + Vision PNG）| build 後 | ≥ 8/10 PASS |
+| 3 | multi_agent_review Wave 1（4 Agent 並行）| build + 截圖後 | ≥ 16/20 PASS |
+| 4 | multi_agent_review Wave 2（2 Agent 並行）| 整份完成後 | 數據錯誤=0 + caveat 缺=0 + 雜訊=0 |
+
+### 6 Agent 並行調度
+
+```python
+# Wave 1: 每張 slide 4 Agent 並行（feature-dev:code-reviewer subagent_type）
+for slide_n in range(N):
+    parallel_results = parallel_spawn([
+        Agent(type='feature-dev:code-reviewer', ctx='Agent-T 字體', png=f'slide_{slide_n}.png'),
+        Agent(type='feature-dev:code-reviewer', ctx='Agent-C 色彩', png=f'slide_{slide_n}.png'),
+        Agent(type='feature-dev:code-reviewer', ctx='Agent-L 佈局', png=f'slide_{slide_n}.png'),
+        Agent(type='feature-dev:code-reviewer', ctx='Agent-B 雙語', png=f'slide_{slide_n}.png'),
+    ])
+
+# Wave 2: 整份完成後 2 Agent 並行
+final_results = parallel_spawn([
+    Agent(type='feature-dev:code-reviewer', ctx='Agent-S Speaker Notes', files=['03_slide_layout_script.md']),
+    Agent(type='feature-dev:code-reviewer', ctx='Agent-D Data Accuracy', files=['01_*', '02_*', '03_*', master_draft]),
+])
+```
+
+每個 Agent 獨立 context，避免污染（關鍵設計）。
+
+### Agent 觸發語（在 multi_agent_review.md 詳列）
+
+| Agent | 必看 | 重點檢查 |
+|-------|------|--------|
+| T 字體 | PNG + thesis_title_bar.yaml | 字級、Latin/CJK fallback、雙語縮排 |
+| C 色彩 | PNG + palette.yaml | 6 色 token、WCAG AA、colorblind |
+| L 佈局 | PNG + {used_layout}.yaml | 對齊、邊距、focal_point_zone、≤6 element |
+| B 雙語 | PNG | 中文 ≤ 60 字、英文 ≤ 30 word、60% 字級 |
+| S 講稿 | speaker_script.md + master_draft | 75-90 sec/slide、[ORAL-OPTIONAL] |
+| D 數據 | 全 PPTX 檔案 + source_artifacts | 數字一致、caveat 完整、無過度宣稱 |
+
+### 修正循環
+
+每 Wave 後：
+- PASS → 進下階段
+- FAIL → 主 conversation 修正後 re-spawn 該 Agent re-review
+
+詳見 `prompts/multi_agent_review.md` §「修正循環」表。
