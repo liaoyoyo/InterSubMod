@@ -1,0 +1,21 @@
+feature_id	group	source_file	source_line	computation	upstream_deps	filter_condition	data_type	range	prior_conclusion
+# ---	---	---	---	---	---	---	---	---	---
+# 欄位定義（每個特徵一 row）:
+# feature_id         : 特徵欄位名（與 master TSV 欄名一致；CamelCase 或 snake_case 保持原樣）
+# group              : G1-G10 現有；新增 G11+ 需在 00_main_observation.md 註記
+# source_file        : C++ 原始碼檔案相對路徑（自專案根；include/ 或 src/）
+# source_line        : 主要計算行號 (int) 或 "func_name()"（若為大函數）
+# computation        : 一句話計算邏輯（用英文，≤120 chars）
+# upstream_deps      : 依賴的 feature/變數 list，以 "," 分隔；無 → "-"
+# filter_condition   : 生效條件（如 "passed_gate", "valid HP1_family AND HP2_family", "success"）；無 → "-"
+# data_type          : {continuous, ordinal, categorical, binary}
+# range              : 例 [0,1]、{A,C,G,T}、[0, NumReads]
+# prior_conclusion   : 已知陷阱或結論；例 "Thread B coverage confound"、"L2 collider bias"、"Known: 93% zeros due to 2x2"
+#
+# 新增特徵流程：
+# 1. 在 src/ 或 include/ 中確認 C++ 實際 emit 欄位（必查，不可憑名稱推測）
+# 2. 填入本表；status 欄若加入可標 "pending / smoke / verified / concluded"
+# 3. 跑 feature-layered-observation skill
+# 4. 完成後 prior_conclusion 改寫為 verdict（POSITIVE/CONFOUND_COLLAPSED/etc）
+#
+# 參考：memory feedback_feature_name_vs_definition_rule — 必讀 C++ 原始碼

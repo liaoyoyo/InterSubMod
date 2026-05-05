@@ -1,7 +1,7 @@
 ---
-name: research-ideation
-description: 研究構想與 5W1H 框架引導。從點子生成到計畫撰寫的完整研究啟動流程。USE WHEN：「腦力激盪」「brainstorm」「研究構想」「gap analysis」「5W1H」「開始新研究方向」。涉及 research/autoresearch/ 下的假說與方向文件。
-version: 0.1.0
+name: problem-framing-ideation
+description: **P0 REGISTER 前置 — 問題框架化（problem framing）**：用 5W1H + gap analysis 把模糊想法收斂成 1-3 個可被 inject-hypothesis 接收的具體假說候選。**限投入 <2hr**（個人風格 anchor #5：避免無限迭代；超時則先選最好的進 inject-hypothesis）。觸發：「腦力激盪」「brainstorm」「研究構想」「gap analysis」「5W1H」「開始新方向」「框架化想法」「research-ideation」（前身）。**職責邊界**：本 skill 輸出 `候選假說清單 + 5W1H 表`；不註冊（→ inject-hypothesis）、不執行（→ research-loop Step 4+）、不建專案目錄（→ init-research）。
+version: 0.2.0
 ---
 
 # Research Ideation
@@ -196,3 +196,55 @@ Complete working examples:
 - **`examples/example-research-proposal.md`** - Research Proposal Example
   - Demonstrates complete research proposal structure
   - Includes complete examples of question, method, and plan
+
+---
+
+## Phase & Chain Position
+
+- **Phase**: **P0 REGISTER 前置**（pre-Phase 0；尚未進入 cycle state machine）
+- **Chain**: forward-link chain #1 第 1 環
+  ```
+  problem-framing-ideation （5W1H 框架化）
+      ↓
+  inject-hypothesis （選定假說註冊到 hypothesis_queue.json）
+      ↓
+  /cycle-init （建 state/cycles/{id}/state.json）
+      ↓
+  research-loop / validation-protocol （P1 PLAN）
+      ↓
+  /check-staleness （P2 PRECHECK gate）
+      ↓
+  ... (P3 → P4 → P5 → P6)
+  ```
+- **上游觸發**: 用戶口述新想法 / pivot-direction 後重新定向 / review-evidence 發現未驗證 gap
+- **下游 skill**: `inject-hypothesis`（必走）；專案級長期方向則接 `init-research`
+
+## Dependencies
+
+| 類別 | 項目 |
+|---|---|
+| **Uses** (本 skill 內部呼叫) | WebSearch / WebFetch（查文獻 gap）、Read（讀 docs/concepts/）、Grep（在 evidence_ledger 搜相似假說） |
+| **Used by** (誰會觸發本 skill) | 用戶手動 / `pivot-direction`（定向後）/ `review-evidence`（發現 gap 後） |
+| **Reads** | `docs/concepts/2026/04/20260409_研究構想總索引_01.md`、`docs/CURRENT_FOCUS.md`、`research/autoresearch/research_direction.md`、外部文獻 |
+| **Writes** | `research/autoresearch/research_direction.md`（append candidate slot）。**不直接寫** hypothesis_queue.json（交由 inject-hypothesis） |
+
+## Failure Mode & Diagnostics
+
+| 失敗症狀 | 先看哪 | 排查步驟 |
+|---|---|---|
+| 用戶輸入太模糊無法收斂 | 對話歷史前 5 turn + `docs/CURRENT_FOCUS.md` | 用 `grill-me` skill 補充缺項；若仍無法 → 升級到 confirmation-protocol Hard Gate |
+| 5W1H 表填不出來（缺 What/Why） | `docs/concepts/2026/04/20260409_研究構想總索引_01.md` | 查既有相似研究方向，借用其 Why 框架 |
+| 候選假說 > 5 個（太發散） | 用戶優先序 + 個人風格 anchor #5（限 <2hr） | 限投入時間；超時則選 top 3 進 inject-hypothesis，其餘 archive 到 research_direction.md backlog |
+| 與已 NEGATIVE 方向重複 | `docs/experiments/INDEX.md` 的 ❌ NO-GO 區、`MEMORY.md` Concluded 區 | 搜「相似 keywords」，找到歷史結論並引用；若重複 → 警告用戶並回到框架化 |
+| 與當前 Active Cycle 衝突 | `state/active.json`（≤5 個 active）+ `docs/CURRENT_FOCUS.md` | 若 active 已滿 5 個 → 不註冊新假說，先收尾舊 cycle |
+
+**何時升級到別的 skill / agent / 人工審查**：
+- 連續 3 次無法收斂候選假說 → 跳到 `grill-me` skill（深度互審）
+- 涉及 NO-GO 判定（推翻已驗證結論） → Hard Gate，必停問用戶
+- 候選假說涉及 C++ 修改 → 預先呼叫 `methodology-audit` 評估方法學可行性
+
+**個人風格適配**（依 `feedback_*` memory）：
+- Anchor #5 「One-turn mechanism freeze」 → **限 <2hr 投入**；超時就把現有最好的 push 到 inject-hypothesis 而非繼續 ideate
+- Anchor #3 「報告骨架」 → 5W1H 表輸出格式須能直接餵給 structured-tech-report 的 §Background+Mechanism 段
+- Anchor #7 「pivot 容忍」 → 對與已撤回方向相似的提案，警告但不禁止（用戶有權重啟）
+

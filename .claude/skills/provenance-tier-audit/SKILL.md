@@ -1,8 +1,9 @@
 ---
 name: provenance-tier-audit
-description: 研究證據鏈審計與 tier 分佈報告。跨 hypothesis_queue / evidence_ledger / cycles / MEMORY.md 四處檢查一致性。產出週報素材、偵測 orphan cycles / over-claimed tiers / stale entries。觸發：「週報 evidence」「tier 分佈」「audit ledger」「證據鏈檢查」「結論盤點」。
+description: **跨 cycle 證據鏈一致性審計（system-level，非單 cycle 升級判定）**。掃描 hypothesis_queue / evidence_ledger / state/cycles / docs/experiments/INDEX / MEMORY.md 五處 artifact，偵測：(1) orphan cycle (無 ledger 對應)、(2) over-claimed tier (ledger stability < tier_used)、(3) stale entry (>365 天 active)、(4) 跨 artifact 不一致（如 INDEX 標 ⭐4 但 ledger verdict=NEGATIVE）、(5) tier 分佈異常（⭐4-5 過多）。**與 /run-evaluator 分工**：本 skill = 全域審計（週級別跑），/run-evaluator = 單 cycle P5 升 tier 前 retraction risk（cycle 級別跑）；兩者互補不重疊。觸發：「週報 evidence」「tier 分佈」「audit ledger」「證據鏈檢查」「結論盤點」「provenance 審計」「跨 cycle 一致性」。
 allowed-tools: Read, Write, Bash, Grep
 user-invocable: true
+version: 0.2.0
 ---
 
 # Provenance Tier Audit（研究證據鏈審計）
@@ -140,3 +141,57 @@ None
   MEMORY.md markers: {'POSITIVE': 3, 'NEGATIVE': 7, ...}
   Ledger verdicts: {'positive_pilot': 3, 'negative': 8, ...}
 ```
+
+---
+
+## Phase & Chain Position
+
+- **Phase**: **Governance / Cross-phase**（非單一 phase；定期或事件驅動跨 cycle 審計）
+- **Chain**: 服務 chain #9 (週報路徑) — `weekly-report` 觸發前先 `provenance-tier-audit` 提供素材
+  ```
+  weekly-report (cron weekly OR 「週報」觸發)
+      ↓ (Layer 1 raw data 收集前)
+  provenance-tier-audit ← (本 skill: 跨 5 處 artifact 一致性審計)
+      ↓
+  weekly-report 整合素材 → 17 段母稿
+      ↓
+  [選 A] pptx-build / [選 B] conclude-research
+  ```
+- **與 /run-evaluator 互補（非重疊）**：
+  - `/run-evaluator`: **per-cycle** P5 升 tier 前 retraction risk（cycle scope, forward-looking）
+  - `provenance-tier-audit`: **全域** 跨 cycle 一致性（system scope, backward-looking）
+  - 兩者結合：cycle 內 evaluator 把關升級；全域 audit 把關歷史紀錄一致性
+- **上游觸發**: weekly-report 流程開始 / 用戶手動「週報 evidence」「跨 cycle 審計」 / cron 週級別自動 / pivot-direction 後（檢查歷史是否誤判）
+- **下游 skill**: `weekly-report`（消費素材）/ `memory-consolidation`（清理 stale entry）/ `pivot-direction`（基於 stale 標記決定是否轉向）
+
+## Dependencies
+
+| 類別 | 項目 |
+|---|---|
+| **Uses** (本 skill 內部呼叫) | Bash（python3 inline scripts: jsonl 解析 / glob 統計 / 跨 artifact diff）、Read（5 處 artifact 全讀）、Grep（搜 ⭐4-5 markers in INDEX.md） |
+| **Used by** (誰會觸發本 skill) | `weekly-report` Layer 1 / 用戶手動「結論盤點」 / cron weekly hook / `pivot-direction` 換方向前的歷史檢查 |
+| **Reads** | `research/autoresearch/hypothesis_queue.json`、`research/autoresearch/evidence_ledger.jsonl`（全 jsonl）、`state/cycles/*/state.json`（每 cycle）、`state/cycles_archived/*/state.json`、`docs/experiments/INDEX.md`（grep ⭐ markers）、`~/.claude/projects/*/memory/MEMORY.md` 索引 |
+| **Writes** | **不直接寫永久檔案**；輸出文字報告（5 段：orphan / over-claim / stale / 跨 artifact 不一致 / tier 分佈異常）給呼叫者（weekly-report 或 stdout）。**例外**：偵測到嚴重 over-claim 時可 append 警告到 `state/invalidation/audit_warnings.jsonl`（新建，與 stale_marks.jsonl / tier_overrides.jsonl 並列） |
+
+## Failure Mode & Diagnostics
+
+| # | 失敗症狀 | 先看哪 | 排查步驟 |
+|---|---|---|---|
+| 1 | Orphan cycle (state/cycles/X/ 存在但 ledger 無 hypothesis_id 對應) | state/cycles/{id}/state.json `hypothesis_id` 欄位 vs ledger `hypothesis_id` jq 比對 | 補 ledger 條目（用 cycle artifacts 回推填寫）OR 移到 cycles_archived 並標 incomplete |
+| 2 | Over-claimed tier（INDEX.md ⭐4 但 ledger stability="2"） | `evidence_ledger.jsonl` `stability` 字串解析 vs INDEX.md ⭐ markers | 個人風格 anchor #1「L4 多層必驗」要求；強制降級 INDEX 標記 OR 補跑 multi-sample-consistency 升 stability |
+| 3 | Stale entry（last_relevant > 365 天，狀態仍 active） | MEMORY.md / state/active.json / hypothesis_queue.json `status: in_progress` + timestamp | 移到 cycles_archived；MEMORY 改成 Concluded；個人風格 anchor #7「pivot 容忍」允許但需明確 archive |
+| 4 | 跨 artifact 不一致（INDEX 標 ⭐4 但 MEMORY.md 標 NEGATIVE） | grep ⭐ in INDEX.md vs MEMORY.md `## Concluded` 段 | 用戶決定 ground truth；通常 ledger > MEMORY > INDEX 優先順序 |
+| 5 | Tier 分佈異常（⭐4-5 佔 >40% 全部 cycle） | jq count by tier in cycles + cycles_archived | 警告可能 over-claim 系統性；建議跑 evaluator 復驗 top-tier cycles |
+| 6 | Cycle 缺 evaluation.json 但已標 ⭐4-5 | state/cycles/{id}/ ls + state.json `tier` | pre_tier_upgrade_check.sh hook 應已擋；歷史 cycle 補跑 /run-evaluator OR 加 tier-upgrade-override 注解 |
+| 7 | Schema mismatch（state.json 用舊 schema_version） | state.json `schema_version` vs `state/schemas/state.schema.json` const | 寫遷移腳本；不直接改既有 cycle 的 state.json（plan §10 #1 規則） |
+
+**何時升級到別的 skill / agent / 人工審查**：
+- Over-claim ≥3 cycles 同時觸發 → 升級 `/run-evaluator` 對每個 cycle 重新評估
+- Stale entry >10 個 → 升級 `memory-consolidation` skill 清理
+- 跨 artifact 不一致涉及論文層級結論 → Hard Gate 暫停問用戶
+- Tier 分佈異常（>40% ⭐4-5）→ 系統性問題；建議降低 evaluator 閾值或加 negative control（Drill 1 §6 改進建議）
+
+**個人風格適配**（依 `feedback_*` memory）：
+- **Anchor #1 「L4 多層驗證必建」** → over-claim 偵測必須交叉檢查 ledger.stability + multi-sample passed_count + 跨 artifact 一致性，不單看 INDEX 標籤
+- **Anchor #7 「Pivot 容忍 + ⭐4-5 lock**」 → ⭐1-3 stale 寬容（reopen 容易），⭐4-5 stale 嚴查（lock 後撤回成本高）
+- **Anchor #3 「報告 5 段骨架」** → 輸出格式對應 weekly-report Layer 1，便於直接餵入週報 §1 證據盤點段

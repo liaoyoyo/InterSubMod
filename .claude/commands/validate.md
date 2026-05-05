@@ -1,6 +1,6 @@
 ---
 allowed-tools: Bash(./scripts/validation/*), Bash(python3:*), Read, Glob, Grep
-description: 執行自動化驗證框架 — 建置、跑樣本、比較 baseline、產出報告
+description: **研究假說 benchmark 自動化框架**（quick/full/TO/parallel 模式）— 跑 validate.sh + 比較 baseline + 產 experiment_report。**職責邊界**：本 command = 研究結論層級驗證；程式碼語法/build/test 級驗證請用 /verification-loop skill。
 ---
 
 # 驗證框架 (validate.sh)

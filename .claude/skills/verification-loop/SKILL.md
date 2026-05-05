@@ -1,7 +1,7 @@
 ---
 name: verification-loop
-description: 綜合驗證迴圈 — build、type check、lint、測試、安全掃描、diff review。USE WHEN：「驗證程式碼」「verify」「check quality」「validate changes」、建立 PR 前。涉及 .cpp/.hpp/.py 原始碼、build/ 產出。
-version: 1.0.0
+description: **程式碼級綜合驗證迴圈**（不同於 /validate command 的研究假說 benchmark）— build、type check、lint、測試、安全掃描、diff review。USE WHEN：「驗證程式碼」「verify」「check quality」「PR 前 review」「程式碼品質」、建立 PR 前。涉及 .cpp/.hpp/.py 原始碼、build/ 產出。**職責邊界**：本 skill = 程式碼語法/build/test 級驗證；`/validate` command = 研究假說 benchmark + experiment_report；兩者互補不重疊。
+version: 1.1.0
 user-invocable: true
 ---
 
@@ -147,3 +147,54 @@ Load only what is needed:
 - `references/STACK-DETECTION.md` - how to choose the right verification command set for the current repo
 - `references/REPORT-TEMPLATE.md` - report structure for final verification output
 - `examples/example-verification-report.md` - example final report
+
+---
+
+## Phase & Chain Position
+
+- **Phase**: **Governance / Cross-phase**（程式碼變更後通用，非單 phase）
+- **Chain**: forward-link chain #6 (P5 失敗回溯) 的最後一環
+  ```
+  /run-evaluator (P5 失敗，risk>0.7) → pivot-direction → review-evidence
+      ↓
+  methodology-audit (C++ 修改前審查)
+      ↓
+  cpp-change (PDD 6 步驟)
+      ↓
+  verification-loop ← (本 skill: build/lint/test/security/diff)
+      ↓
+  返回 P3 PILOT 重跑
+  ```
+- **與 /validate command 互補**：本 skill = 程式碼語法層；`/validate` = 研究假說 benchmark 層
+- **上游觸發**: cpp-change 完成 / PR 前 / 用戶手動「verify」「check quality」
+- **下游 skill**: 通過後 → 回到 P3 PILOT or 進 PR；失敗 → methodology-audit 再評估
+
+## Dependencies
+
+| 類別 | 項目 |
+|---|---|
+| **Uses** | Bash(make / cmake / ctest / clang-format / clang-tidy / pylint / mypy)、Read（git diff stat 與原始碼）、Grep（搜 TODO/FIXME） |
+| **Used by** | cpp-change Step 6（PDD 最後驗證）/ /run-evaluator P5 失敗後的 fallback / PR pre-flight / 用戶手動「verify」 |
+| **Reads** | `src/**/*.cpp` `include/**/*.hpp` `tests/**/*.cpp` `scripts/**/*.py`、build/ 產出、`.clang-format`、git diff |
+| **Writes** | 不寫永久檔案；輸出 verification report 到 stdout（依 `references/REPORT-TEMPLATE.md` 格式） |
+
+## Failure Mode & Diagnostics
+
+| # | 失敗症狀 | 先看哪 | 排查步驟 |
+|---|---|---|---|
+| 1 | build fail (compile error) | `cd build && make 2>&1 \| head -50` | 修 syntax → 重 build；若 CMake config 錯，刪 build/ 重 cmake |
+| 2 | unit test fail | `ctest --output-on-failure` 輸出 | 找對應 `tests/test_*.cpp`；個人風格 anchor #1 強驗證 — 不允許 skip 失敗 test |
+| 3 | clang-format diff | `clang-format -i <files>` | 直接套用；commit 前 hook 已強制 |
+| 4 | lint warning | clang-tidy 或 pylint 輸出 | 個別評估；嚴重 (security / undefined behavior) 必修，stylistic 可暫忽略 |
+| 5 | diff review 看到無關改動 | `git diff --stat` | 個人風格 anchor #5「One-turn freeze」— 拆 commit 不混 scope |
+| 6 | security scan 警告（如 hardcoded credential） | scan output | 立即 Hard Gate；不可 commit 含敏感資料 |
+
+**何時升級到別的 skill / agent / 人工審查**：
+- build fail 連續 3 次 → 升級 `methodology-audit` 重新評估改動方向
+- test fail 涉及 statistics 邏輯（非 syntax）→ 跳到 `auc-confound-guard` / `known-pitfalls` 確認方法學
+- diff 跨 ≥3 modules → 拆 commit 並走 PR review
+
+**個人風格適配**（依 `feedback_*` memory）：
+- **Anchor #1 「L4 多層驗證必建」** → test fail 不允許 skip；必須查根因
+- **Anchor #5 「One-turn mechanism freeze」** → 一次完整 verify，不在迴圈中逐步 fix（先收集所有 issue 再批次解）
+- **/cpp-change Step 6 PDD 規範** → 本 skill 是 PDD 最後一步，必過才能 commit C++ 修改

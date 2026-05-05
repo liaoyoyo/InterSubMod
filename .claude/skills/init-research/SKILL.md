@@ -1,6 +1,6 @@
 ---
 name: init-research
-description: 初始化新研究專案。建立標準目錄結構、manifest.yaml、00_PLAN.md 骨架。觸發詞：init-research、開始新研究、新研究專案。
+description: 初始化**多週級長期研究專案**（含多假說 + 多 cycle）。建立 research/{project_name}/ 標準目錄 + manifest.yaml + 00_PLAN.md 骨架。專案內每個假說驗證再用 /cycle-init 啟動短週期 cycle（state/cycles/{id}/）。觸發：「init-research」「新專案」「新研究方向」「多週研究」「長期研究」。**不要與 /cycle-init 混用**：init-research = 專案級長期 scaffolding（research/）；cycle-init = 假說級短驗證 scaffolding（state/cycles/）。
 allowed-tools: Read, Write, Bash, Glob, Grep
 user-invocable: true
 ---
@@ -113,3 +113,32 @@ research/{project_name}/
 2. **不修改 INDEX.md**：INDEX 在 `/conclude-research` 時才更新
 3. **project_name 命名規則**：小寫英文 + 底線，不含日期（日期在 manifest 中）
 4. **模板位置**：`research/_template/`（不要修改模板本身）
+
+---
+
+## Phase Chain Forward-Link（Resilient Waterfall harness）
+
+`init-research` 屬於**專案級 P0 REGISTER**（多週長期 scaffolding）。完成後進入：
+
+```
+init-research（建專案 research/{name}/）
+    ↓
+inject-hypothesis（注入第 1 個假說到 hypothesis_queue.json）
+    ↓
+/cycle-init（為該假說啟動短 cycle，建 state/cycles/{id}/）
+    ↓
+research-loop / research-ideation（P1 PLAN）
+    ↓
+/check-staleness（P2 PRECHECK gate）
+    ↓
+... (P3 → P4 → P5 → P6)
+    ↓
+/conclude-research（cycle 完成 → 回到專案層）
+```
+
+**關鍵分工**：
+- `init-research`：建專案目錄，**只做一次**（per multi-week project）
+- `/cycle-init`：建 cycle 狀態，**每個假說一次**（per hypothesis verification）
+- 一個 init-research 專案內可能有 5-20 個 cycles
+
+詳細 7-phase 設計見 `~/.claude/plans/agent-harness-langgraph-resilient-waterfall.md` §3.1。

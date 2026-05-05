@@ -1,13 +1,16 @@
 ---
 name: research-loop
-description: InterSubMod 半自動研究迴圈。八步驟（觀察→定向→假設→設計→執行→記錄→呈現→回饋），驅動甲基化特徵探索與 F1 提升。USE WHEN：「開始研究迴圈」「research loop」「測試新假設」「下一輪假設」。涉及 research/autoresearch/ 下的 hypothesis_queue.json、evidence_ledger.jsonl、research_direction.md。適用 paired_full / paired_pileup / TO 三條 pipeline track。
+description: **P1 PLAN 階段：研究迴圈設計**（前 4 步 觀察→定向→假設→驗證設計）。為 1 個假說 cycle 產生 plan.json（含 binary_version / dataset_id / upstream_reports / 預期 effect_size / stop criteria）— **不負責執行 / 記錄 / 呈現 / 回饋**（這些由下游 skill 接手：/check-staleness P2 → /test-quick or feature-layered-observation P3 → /run-evaluator P5 → results-report / weekly-report P5-P6 → pivot-direction or conclude-research P6）。USE WHEN：「開始研究迴圈」「research loop」「測試新假設」「下一輪假設」「設計驗證計畫」「P1 PLAN」。適用 paired_full / paired_pileup / TO 三條 pipeline track。
 allowed-tools: Read, Write, Bash, Glob, Grep
 user-invocable: true
+version: 0.2.0
 ---
 
-# InterSubMod 研究迴圈 (Research Loop)
+# InterSubMod 研究迴圈 (Research Loop) — P1 PLAN 限縮版（v0.2 起）
 
-協助 AI 與人類研究者共同：觀察 TP/FP/FN 模式差異 → 生成可測試假設 → benchmark 驗證 → 記錄推進。
+協助 AI 與人類研究者共同：**觀察 → 定向 → 假設 → 驗證設計**（即 P1 PLAN 前 4 步）。產出 `state/cycles/{id}/plan.json` 後，**Step 5+ 交給下游 skill 接手**。
+
+> ⚠ **v0.2 變動（2026-05-05）**：原 8 步驟橫跨 P1-P6，與 7-phase Resilient Waterfall harness 衝突。本 skill 限縮為 P1 PLAN（Step 0-3）；Step 4-7 在下方保留**作為流程文件參考**，但實際執行由各 phase 對應 skill 負責。詳見末段「Phase & Chain Position」。
 
 ## 觸發時機
 
@@ -319,3 +322,79 @@ with open('research/autoresearch/evidence_ledger.jsonl', 'a') as f:
 3. TP/FP/FN 絕對數字必須記錄
 4. 用戶回饋優先於自動判斷
 5. ML3 修改之前，互動/全自動模式均必須等用戶確認
+
+---
+
+## Phase & Chain Position（v0.2 P1 限縮版）
+
+- **Phase**: **P1 PLAN**（Resilient Waterfall harness 第 2 phase）
+- **Chain**: forward-link chain #2 第 1 環
+  ```
+  inject-hypothesis（P0 假說註冊）
+      ↓
+  /cycle-init（建 state/cycles/{id}/state.json）
+      ↓
+  research-loop ← (本 skill: Step 0-3 P1 PLAN，產出 plan.json)
+      ↓
+  validation-protocol（P1 設計層級 L1-L4 選擇）
+      ↓
+  /check-staleness（P2 PRECHECK gate，驗 plan.preconditions freshness）
+      ↓
+  /test-quick or feature-layered-observation（P3 PILOT 執行）
+      ↓
+  multi-sample-consistency（P4 GENERALIZE 跨樣本）
+      ↓
+  /run-evaluator（P5 EVALUATE retraction risk）
+      ↓
+  results-report / structured-tech-report / weekly-report（P5-P6 撰寫）
+      ↓
+  conclude-research / pivot-direction（P6 收尾或轉向）
+  ```
+- **Step 5-7 forward-link 對應**（v0.2 起 research-loop 不直接做這些，只指向）：
+  - 原 Step 4「EXECUTE」 → P3 PILOT skills（test-quick / feature-layered-observation）
+  - 原 Step 5「RECORD」 → P5 EVALUATE skill（/run-evaluator 寫 evaluation.json）
+  - 原 Step 6「PRESENT」 → P5-P6 reporting skills（results-report / structured-tech-report / weekly-report）
+  - 原 Step 7「FEEDBACK」 → P6 COMMIT skills（conclude-research / pivot-direction）
+- **上游觸發**: `/cycle-init` 完成後 + 用戶確認進 P1 / 直接「開始研究迴圈」
+- **下游 skill**: `validation-protocol`（必走）→ `/check-staleness`（P2 必走）
+
+## Dependencies
+
+| 類別 | 項目 |
+|---|---|
+| **Uses** (本 skill 內部呼叫) | Bash（python3 inline scripts: tombstone check / queue selection / ledger record）、Read（讀 hypothesis_queue.json / evidence_ledger.jsonl / research_direction.md）、Write（寫 plan.json）、Grep（搜 tombstone keywords） |
+| **Used by** (誰會觸發本 skill) | `/cycle-init` 完成 P0 後 / 用戶手動「開始研究迴圈」/ `pivot-direction` 後重啟 cycle / `research-orchestrator` 路由 |
+| **Reads** | `research/autoresearch/hypothesis_queue.json`、`research/autoresearch/evidence_ledger.jsonl`、`research/autoresearch/research_direction.md`、`docs/CURRENT_FOCUS.md`、`state/cycles/{id}/state.json`（讀當前 phase） |
+| **Writes** | **`state/cycles/{id}/plan.json`** (核心輸出，schema 對齊 `state/schemas/plan.schema.json`)、`research/autoresearch/cycles/{CYCLE_ID}/`（artifact dir，legacy 保留）、`hypothesis_queue.json` 中該假說 status → `in_progress` |
+
+## Failure Mode & Diagnostics
+
+| # | 失敗症狀 | 先看哪 | 排查步驟 |
+|---|---|---|---|
+| 1 | hypothesis_queue 為空 | `research/autoresearch/hypothesis_queue.json` | 跳到 `/inject-hypothesis` 注入新假說；或 `problem-framing-ideation` 先框架化 |
+| 2 | 候選假說與 tombstone 重複（已 NEGATIVE） | `evidence_ledger.jsonl` 過去 NEGATIVE 條目 + Step 2.0 tombstone 掃描輸出 | 確認 1) 新數據？ 2) 新方法？ 3) 前提條件改變？三者皆無 → 阻擋；任一有 → 在 plan.json 標 `revival_reason` |
+| 3 | plan.preconditions.binary_version 缺值 | git log 找最近 master 重跑時的 binary commit；查 `state/invalidation/binary_versions.jsonl` | 寫入當前 HEAD 或 master dataset 對應 commit；空白會導致 P2 PRECHECK skipped 但 evaluator precondition_freshness=0.5（neutral） |
+| 4 | expected_effect.min_threshold 沒 pre-register | plan.json schema 要求 metric/min_threshold/direction/stop_criteria | 強制用戶填；個人風格 anchor #1「L4 多層驗證必建」要求預先 register effect size，否則 P3 PILOT 後 evaluator 無法判 effect_size_stability |
+| 5 | stop_criteria 模糊（「effect 看起來小」） | plan.json `expected_effect.stop_criteria` 字串 | 改寫為「P3 effect <0.001 AND p>0.1 → NEGATIVE」之類**可外部驗證**的條件；個人風格 anchor #1 強驗證偏好 |
+| 6 | active.json 已 5 個 cycle（max_concurrent） | `state/active.json` cycles[] 長度 | 不能再新增 cycle；先用 `/conclude-research` 收尾舊 cycle 或降低 priority；個人風格 anchor #2「multi-track 並行」上限 |
+| 7 | ML3（C++ 修改）未經 methodology-audit | hypothesis 內含 「修改 src/」「改 C++」 keywords | Hard Gate 暫停 → 升級到 `methodology-audit` skill 走完 6 步審查再回來 |
+
+**何時升級到別的 skill / agent / 人工審查**：
+- Step 2 連續 3 次假說都被 tombstone 阻擋 → `pivot-direction` 換方向
+- Step 3 設計涉及 C++ 改動 → `methodology-audit`（Hard Gate）→ `cpp-change`
+- Step 3 完成但用戶對 effect_size threshold 沒信心 → `grill-me` 互審
+- 涉及論文層級結論（⭐4-5）→ Step 3 結束後**先**過 `validation-protocol` L4 設計，再進 P3
+
+**個人風格適配**（依 `feedback_*` memory）：
+- **Anchor #1 「L4 多層驗證必建」** → Step 3 設計時必跨 ≥4 軌證據鏈（cross-sample / 機制 / negative-control / paired 對照）；單軌不過
+- **Anchor #2 「Multi-track 並行 + per-track 串聯」** → 同 cycle 內 Step 0-3 不切換假說（per-track 串聯）；多 cycle 平行交給 active.json
+- **Anchor #5 「One-turn mechanism freeze」** → Step 0 OBSERVE 看到機制問題（如 NG=2 phasing） → 一次完成 C++ 溯源不在迴圈中逐步試
+- **Anchor #7 「Pivot 容忍」** → Step 2 tombstone 比對允許 revival（前提條件改變即可），不硬擋
+
+## 棄用提示（Legacy 8 步驟區段）
+
+上方 Step 4-7（EXECUTE / RECORD / PRESENT / FEEDBACK）保留作為**舊流程文件參考**，但 v0.2 起本 skill 不直接執行這些步驟。若你看到「執行模式感知」「八步驟執行流程」標題，請理解：
+- Step 0-3：本 skill 主責（P1 PLAN）
+- Step 4-7：見上方「Phase & Chain Position」chain，由對應下游 skill 接手
+
+未來版本會把 Step 4-7 內容遷移到 `references/legacy_8step.md` 並從主 SKILL.md 移除。
