@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "N2_zone_aware_characterization",
+  "ran_at": "2026-04-18T14:00:00Z",
+  "sample": "HCC1395",
+  "metric_results": {
+    "metric": "Zone_TP_rate_difference",
+    "value": 0.142,
+    "ci_lower": 0.11,
+    "ci_upper": 0.17,
+    "p_value": 1e-6,
+    "n_samples": 9876,
+    "threshold_met": true
+  },
+  "confound_guard": {
+    "within_group_ols": "pass",
+    "af_bin_check": "pass",
+    "permutation_test": "pass",
+    "n_reads_confound": "pass",
+    "spatial_autocorr": "pass",
+    "notes": "characterization-only verdict; not used for tier upgrade beyond ⭐3. All confound guards clear."
+  },
+  "verdict": "proceed_to_P4",
+  "raw_outputs": [],
+  "figures": []
+}

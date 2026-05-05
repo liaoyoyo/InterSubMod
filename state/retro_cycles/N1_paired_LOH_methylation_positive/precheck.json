@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "N1_paired_LOH_methylation_positive",
+  "checked_at": "2026-05-05T21:19:17Z",
+  "checks": {
+    "binary": {
+      "status": "skipped",
+      "expected": null,
+      "actual_head": null,
+      "stale_distance": null,
+      "note": "Pure-analysis cycle, no binary dependency."
+    },
+    "dataset": {
+      "status": "fresh",
+      "expected_id": "paired_master_post_KDE_corrected_2026-04-22_with_caller_af",
+      "schema_violations": [],
+      "note": "No stale marks or known-pitfall name patterns."
+    },
+    "upstream_reports": [
+      {
+        "report_path": "InterSubMod/docs/CURRENT_FOCUS.md",
+        "status": "fresh",
+        "stale_reason": null
+      },
+      {
+        "report_path": "InterSubMod/docs/experiments/INDEX.md",
+        "status": "fresh",
+        "stale_reason": null
+      }
+    ]
+  },
+  "verdict": "PASS",
+  "blocking_reasons": []
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "N1_paired_LOH_methylation_positive",
+  "ran_at": "2026-04-23T16:00:00Z",
+  "samples": [
+    {"sample_id": "HCC1395", "metric_value": 0.787, "ci_lower": 0.74, "ci_upper": 0.83, "p_value": 1e-15, "passed_threshold": true},
+    {"sample_id": "HCC1395_DORADO", "metric_value": 0.762, "ci_lower": 0.72, "ci_upper": 0.81, "p_value": 1e-13, "passed_threshold": true},
+    {"sample_id": "H1437", "metric_value": 0.745, "ci_lower": 0.70, "ci_upper": 0.79, "p_value": 1e-12, "passed_threshold": true},
+    {"sample_id": "H2009", "metric_value": 0.723, "ci_lower": 0.68, "ci_upper": 0.77, "p_value": 1e-11, "passed_threshold": true},
+    {"sample_id": "HCC1937", "metric_value": 0.741, "ci_lower": 0.69, "ci_upper": 0.79, "p_value": 1e-12, "passed_threshold": true},
+    {"sample_id": "HCC1954", "metric_value": 0.705, "ci_lower": 0.66, "ci_upper": 0.75, "p_value": 1e-10, "passed_threshold": true},
+    {"sample_id": "COLO829", "metric_value": 0.735, "ci_lower": 0.69, "ci_upper": 0.78, "p_value": 1e-11, "passed_threshold": true}
+  ],
+  "consistency": {
+    "n_samples_passed": 7,
+    "n_samples_total": 7,
+    "direction_consistency": "7/7 positive (range 0.705 to 0.787, all p<1e-10); paired mode consistent",
+    "wilcoxon_p": 0.0078,
+    "fisher_combined_p": 1e-50,
+    "confidence_uplift": 0.95
+  },
+  "fan_out_mode": "sequential",
+  "verdict": "consistent"
+}
