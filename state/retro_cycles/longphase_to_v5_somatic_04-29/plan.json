@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260429-1000-longphase-v5-somatic",
+  "hypothesis": "longphase-to-mod V5 (PON-only + getVote 2-layer + INDEL guard + Layer 1.5 fallback) eliminates self-phasing bias (HP1:HP2 17.3:1 → ~1:1) and improves clean PS paired GT concordance from 82.2% to 90.5% (+8.3pp full genome)",
+  "validation_layers": ["L1_AUC_screening", "L2_pilot", "L3_cross_sample"],
+  "expected_effect": {
+    "metric": "clean_PS_paired_concordance_delta",
+    "min_threshold": 0.05,
+    "direction": "greater_than",
+    "stop_criteria": "if SEQC2 calling F1 unchanged AND clean PS gain isolated to single sample, treat as characterization-only"
+  },
+  "preconditions": {
+    "binary_version": "380e8d2_uncommitted_layer1_5_alt_guard",
+    "dataset_id": "HCC1395_5kHz_pilot_only",
+    "upstream_reports": [
+      "InterSubMod/docs/reports/validated/2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md",
+      "InterSubMod/docs/reports/validated/2026/04/20260428_Self_Phasing_Baseline_V5_Audit_01.md"
+    ],
+    "feature_flags": {"pon_only_phasing": true, "somatic_fallback_layer": "1.5", "confidence_threshold": 0.6}
+  },
+  "samples": ["HCC1395"],
+  "skills_invoked": ["check-staleness", "run-evaluator", "structured-tech-report"],
+  "estimated_duration_hours": 16.0
+}

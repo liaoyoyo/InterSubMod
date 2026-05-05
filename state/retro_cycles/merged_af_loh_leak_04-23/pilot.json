@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260423-1200-merged-af-loh-leak",
+  "ran_at": "2026-04-23T10:00:00Z",
+  "sample": "HCC1395",
+  "metric_results": {
+    "metric": "S3_Diploid_Het_TP_rate_stale_binary",
+    "value": 0.955,
+    "ci_lower": 0.94,
+    "ci_upper": 0.97,
+    "p_value": 1e-10,
+    "n_samples": 380,
+    "threshold_met": true
+  },
+  "confound_guard": {
+    "within_group_ols": "skipped",
+    "af_bin_check": "skipped",
+    "permutation_test": "skipped",
+    "n_reads_confound": "skipped",
+    "spatial_autocorr": "skipped",
+    "notes": "Original pilot used STALE binary 75.0 hardcoded → CovM systematic bias → CN_tier classification artifact → S3 cell artificially shrunk → TP artificially inflated to 95.5%. Post-KDE-fix re-run shows 58.3% (n=2200, 5.8× larger). Original pilot did NOT cross-check with KDE-corrected dataset."
+  },
+  "verdict": "needs_redesign",
+  "raw_outputs": [],
+  "figures": []
+}

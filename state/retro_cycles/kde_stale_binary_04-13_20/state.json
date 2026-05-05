@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260420-1000-kde-stale-binary",
+  "title": "[RETRO] KDE expected_coverage hardcoded 75.0 → master dataset stale-binary artifact",
+  "hypothesis_id": "RETRO_KDE_STALE_04-20",
+  "phase": "P2_PRECHECK",
+  "tier": "RETRACTED",
+  "verdict": "blocked",
+  "priority": 70,
+  "started_at": "2026-04-13T08:00:00Z",
+  "last_advanced_at": "2026-04-20T16:00:00Z",
+  "preconditions": {
+    "binary_version": "4dc2d732c7230d71f7147692de3fd1dafcf88a7a",
+    "dataset_id": "master_2026-03-30_stale_binary_pre_KDE_fix",
+    "upstream_reports": [
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260420_CovM_Baseline_Accuracy_Validation_01.md",
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260420_KDE_Fix_Acceptance_Validation_01.md"
+    ]
+  },
+  "open_gates": [
+    {"gate": "P2_PRECHECK", "status": "open", "reason": "expected: binary stale (HEAD has KDE fix 8d0a0c8 but plan-stated SHA predates fix)"}
+  ],
+  "artifacts": {"plan": "plan.json", "precheck": null, "pilot": "pilot.json", "generalize": "generalize.json", "evaluation": null},
+  "history": [
+    {"timestamp": "2026-04-13T08:00:00Z", "from_phase": null, "to_phase": "P0_REGISTER", "actor": "user", "note": "retro fixture for Drill 1; stale binary detection class"}
+  ]
+}

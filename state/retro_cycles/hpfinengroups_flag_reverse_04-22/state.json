@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260422-1500-hpfinengroups-flag-reverse",
+  "title": "[RETRO] HPFineNGroups NG=4+NR≥80 marker; tier ⭐4→⭐3 after AF confound discovery",
+  "hypothesis_id": "RETRO_HPFG_04-22",
+  "phase": "P5_EVALUATE",
+  "tier": "3",
+  "verdict": "active",
+  "priority": 60,
+  "started_at": "2026-04-18T09:00:00Z",
+  "last_advanced_at": "2026-04-22T20:40:00Z",
+  "preconditions": {
+    "binary_version": null,
+    "dataset_id": "master_2026-03-30_loh_round1_cross_sample_audit",
+    "upstream_reports": [
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260418_F_HPFineNGroups_deepening_POSITIVE_01.md",
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260423_B1_Wilcoxon_NG2_gap_01.md"
+    ]
+  },
+  "open_gates": [
+    {"gate": "P5_EVALUATOR", "status": "open", "reason": "Cross-sample heterogeneity HCC1954 +21pp vs H2009 +2.3pp; expected: effect_size_stability low → downgrade or pending_review"}
+  ],
+  "artifacts": {"plan": "plan.json", "precheck": null, "pilot": "pilot.json", "generalize": "generalize.json", "evaluation": null},
+  "history": [
+    {"timestamp": "2026-04-18T09:00:00Z", "from_phase": null, "to_phase": "P0_REGISTER", "actor": "user"},
+    {"timestamp": "2026-04-22T20:40:00Z", "from_phase": "P4_GENERALIZE", "to_phase": "P5_EVALUATE", "actor": "user", "note": "user query 'NG=2 與甲基有關係嗎' triggered C++ source review and tier downgrade"}
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260420-1000-kde-stale-binary",
+  "ran_at": "2026-04-20T14:00:00Z",
+  "sample": "HCC1395",
+  "metric_results": {
+    "metric": "Diploid_Coverage_Used_KDE_estimate_bias_pct",
+    "value": -0.019,
+    "ci_lower": -0.04,
+    "ci_upper": 0.0,
+    "p_value": null,
+    "n_samples": 28495,
+    "threshold_met": true
+  },
+  "confound_guard": {
+    "within_group_ols": "skipped",
+    "af_bin_check": "skipped",
+    "permutation_test": "skipped",
+    "n_reads_confound": "pass",
+    "spatial_autocorr": "pass",
+    "notes": "post-KDE-fix pilot: bias = -1.9% (vs SEQC2 truth 54x); pre-fix bias was +39% with stale binary. Coverage_Multiple distribution median 0.880 → 1.245 (×1.415 uniform rescaling)."
+  },
+  "verdict": "proceed_to_P4",
+  "raw_outputs": [
+    "InterSubMod/output/synthesis/kde_rerun_pilot/HCC1395_to_tp/all_region_rows.tsv.gz"
+  ],
+  "figures": []
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260423-1200-merged-af-loh-leak",
+  "title": "[RETRO] merged dataset AF column trap + HCC1395 LOH 5.7% leak; CL-S3-001 ⭐4→⭐2",
+  "hypothesis_id": "RETRO_MERGED_AF_04-23",
+  "phase": "P2_PRECHECK",
+  "tier": "2",
+  "verdict": "blocked",
+  "priority": 60,
+  "started_at": "2026-04-22T10:00:00Z",
+  "last_advanced_at": "2026-04-23T18:00:00Z",
+  "preconditions": {
+    "binary_version": "4dc2d732c7230d71f7147692de3fd1dafcf88a7a",
+    "dataset_id": "merged_master_2026-04-15_x6_caller_AF_S3S5",
+    "upstream_reports": [
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260424_X6_Caller_AF_S3S5_CrossSample_01.md",
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260422_LOH_AF_KDE_TPFP_Discrimination_02.md"
+    ]
+  },
+  "open_gates": [
+    {"gate": "P2_PRECHECK", "status": "open", "reason": "dataset_id contains 'merged' keyword → expected to BLOCK on caller_af probe"}
+  ],
+  "artifacts": {"plan": "plan.json", "precheck": null, "pilot": "pilot.json", "generalize": "generalize.json", "evaluation": null},
+  "history": [
+    {"timestamp": "2026-04-22T10:00:00Z", "from_phase": null, "to_phase": "P0_REGISTER", "actor": "user"},
+    {"timestamp": "2026-04-23T18:00:00Z", "from_phase": "P3_PILOT", "to_phase": "P2_PRECHECK", "actor": "user", "note": "X6 cross-sample 重 merge 揭露 caller_af 欄位陷阱 + LOH 殘缺"}
+  ]
+}

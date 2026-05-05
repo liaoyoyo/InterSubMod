@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260422-1500-hpfinengroups-flag-reverse",
+  "hypothesis": "HPFineNGroups (NG≥4+NR≥80) marker for subclone phasing; new filter NG=4+caller_AF<0.4+NR≥80 saves HCC1954 (+21pp TP rate) and lifts stability ⭐3→⭐4. Includes n_reads confound check (N reads systematically inflate NGroups statistics)",
+  "validation_layers": ["L1_AUC_screening", "L3_cross_sample"],
+  "expected_effect": {
+    "metric": "TP_rate_AF_stratified",
+    "min_threshold": 0.85,
+    "direction": "greater_than",
+    "stop_criteria": "if <5/7 samples reach TP rate ≥0.85 in AF<0.4 stratification, treat as characterization-only (do NOT upgrade to ⭐4)"
+  },
+  "preconditions": {
+    "binary_version": null,
+    "dataset_id": "master_2026-03-30_loh_round1_cross_sample_audit",
+    "upstream_reports": [
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260418_F_HPFineNGroups_deepening_POSITIVE_01.md",
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260417_HPFineNGroups_saturation_check_01.md"
+    ],
+    "feature_flags": {"hpfinengroups_ng": 4, "caller_af_max": 0.4, "numreads_min": 80, "exclude_loh": true}
+  },
+  "samples": ["HCC1395", "HCC1395_DORADO", "H1437", "H2009", "HCC1937", "HCC1954", "COLO829"],
+  "skills_invoked": ["feature-layered-observation", "auc-confound-guard", "multi-sample-consistency", "run-evaluator"],
+  "estimated_duration_hours": 8.0
+}

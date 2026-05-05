@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260404-1500-vcf-source-error",
+  "hypothesis": "ISM TO mode analysis fails because pileup symlink points to ClairS paired (not ClairS-TO); remap to correct ClairS-TO VCF restores TO FP landscape",
+  "validation_layers": ["L1_AUC_screening"],
+  "expected_effect": {
+    "metric": "TO_specific_FP_coverage",
+    "min_threshold": 0.001,
+    "direction": "greater_than",
+    "stop_criteria": "if pileup symlink not corrected, all downstream HPFineP / LOH×AF analyses based on wrong VCF source — must BLOCK"
+  },
+  "preconditions": {
+    "binary_version": null,
+    "dataset_id": "pileup_symlink_ClairS_paired_for_TO_analysis",
+    "upstream_reports": [
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260404_HPFineP納入QS研究分析_01.md",
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260404_HPFineP_QS整合完整研究報告_01.md",
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260404_LOH_Strong_Weak_7feature_AUC驗證報告_01.md"
+    ],
+    "feature_flags": {}
+  },
+  "samples": ["HCC1395"],
+  "skills_invoked": ["check-staleness"],
+  "estimated_duration_hours": 0.5
+}

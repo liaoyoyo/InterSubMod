@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260423-1200-merged-af-loh-leak",
+  "hypothesis": "Thread B v2 S3 Diploid Het filter (LOH=None ∩ Near-half AF ∩ CN∈T1/T2) reproduces 95.5% TP rate on HCC1395 across 6 TO samples",
+  "validation_layers": ["L1_AUC_screening", "L3_cross_sample"],
+  "expected_effect": {
+    "metric": "S3_TP_rate_cross_sample",
+    "min_threshold": 0.85,
+    "direction": "greater_than",
+    "stop_criteria": "if <4/6 samples reach S3 TP≥0.85 + n≥20, retract whitelist generalization"
+  },
+  "preconditions": {
+    "binary_version": "4dc2d732c7230d71f7147692de3fd1dafcf88a7a",
+    "dataset_id": "merged_master_2026-04-15_x6_caller_AF_S3S5",
+    "upstream_reports": [
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260424_X6_Caller_AF_S3S5_CrossSample_01.md",
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260422_LOH_AF_KDE_TPFP_Discrimination_02.md"
+    ],
+    "feature_flags": {"thread_b_scheme": "S3_Diploid_Het", "cn_tier_definition": "[0.65,0.99,1.33,1.82]"}
+  },
+  "samples": ["HCC1395", "HCC1395_DORADO", "H1437", "H2009", "HCC1937", "HCC1954"],
+  "skills_invoked": ["check-staleness", "feature-layered-observation", "multi-sample-consistency"],
+  "estimated_duration_hours": 6.0
+}

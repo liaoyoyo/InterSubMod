@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260426-1500-thread-b-retraction",
+  "ran_at": "2026-04-26T10:00:00Z",
+  "sample": "HCC1395",
+  "metric_results": {
+    "metric": "S3_Diploid_Het_TP_rate_post_KDE",
+    "value": 0.583,
+    "ci_lower": 0.56,
+    "ci_upper": 0.61,
+    "p_value": 0.001,
+    "n_samples": 2200,
+    "threshold_met": false
+  },
+  "confound_guard": {
+    "within_group_ols": "skipped",
+    "af_bin_check": "pass",
+    "permutation_test": "pass",
+    "n_reads_confound": "skipped",
+    "spatial_autocorr": "pass",
+    "notes": "post-KDE-fix re-run on same HCC1395 sample reveals stale-binary CN_tier artifact: original v2 95.5% (n=380) → corrected 58.3% (n=2200, 5.8× more regions). Confirmed time-sequence: KDE commit predates X6 re-merge."
+  },
+  "verdict": "exit_negative",
+  "raw_outputs": [],
+  "figures": []
+}

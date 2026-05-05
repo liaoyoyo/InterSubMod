@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260429-1000-longphase-v5-somatic",
+  "ran_at": "2026-04-29T17:00:00Z",
+  "samples": [
+    {"sample_id": "HCC1395", "metric_value": 0.083, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": true},
+    {"sample_id": "HCC1395_DORADO", "metric_value": 0.0, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": false},
+    {"sample_id": "HCC1937", "metric_value": 0.0, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": false},
+    {"sample_id": "HCC1954", "metric_value": 0.0, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": false},
+    {"sample_id": "H1437", "metric_value": 0.0, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": false},
+    {"sample_id": "H2009", "metric_value": 0.0, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": false},
+    {"sample_id": "COLO829", "metric_value": 0.0, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": false}
+  ],
+  "consistency": {
+    "n_samples_passed": 1,
+    "n_samples_total": 7,
+    "direction_consistency": "1/7 validated (HCC1395 only); 6/7 not run (V5 BAM not regenerated for other samples)",
+    "wilcoxon_p": null,
+    "fisher_combined_p": null,
+    "confidence_uplift": null
+  },
+  "fan_out_mode": "sequential",
+  "verdict": "mixed"
+}

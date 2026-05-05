@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260422-1500-hpfinengroups-flag-reverse",
+  "ran_at": "2026-04-22T19:00:00Z",
+  "samples": [
+    {"sample_id": "HCC1954", "metric_value": 0.707, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": false},
+    {"sample_id": "HCC1937", "metric_value": 0.867, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": true},
+    {"sample_id": "HCC1395", "metric_value": 0.887, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": true},
+    {"sample_id": "H1437", "metric_value": 0.965, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": true},
+    {"sample_id": "H2009", "metric_value": 0.957, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": true},
+    {"sample_id": "HCC1395_DORADO", "metric_value": 0.919, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": true},
+    {"sample_id": "COLO829", "metric_value": 0.235, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": false}
+  ],
+  "consistency": {
+    "n_samples_passed": 5,
+    "n_samples_total": 7,
+    "direction_consistency": "5/7 ≥0.85 (HCC1954 0.707 + COLO829 0.235 below threshold; HCC1954 +21pp gain via flag rescue but still <0.85)",
+    "wilcoxon_p": null,
+    "fisher_combined_p": null,
+    "confidence_uplift": null
+  },
+  "fan_out_mode": "sequential",
+  "verdict": "mixed"
+}

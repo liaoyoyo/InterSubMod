@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260426-1500-thread-b-retraction",
+  "hypothesis": "Thread B LOH×AF×CN whitelist filter (S3 Diploid Het scheme) generalizes across 6 TO samples to provide cross-sample biology-informed FP filter",
+  "validation_layers": ["L1_AUC_screening", "L3_cross_sample"],
+  "expected_effect": {
+    "metric": "S3_TP_rate_cross_sample_post_KDE",
+    "min_threshold": 0.85,
+    "direction": "greater_than",
+    "stop_criteria": "if cross-sample passing < 4/6 samples (excluding saturation artifacts), retract"
+  },
+  "preconditions": {
+    "binary_version": "8d0a0c8feedba7c80c2a4e9b1d7f3a5e6c8b2d4f",
+    "dataset_id": "X6_caller_AF_post_KDE_corrected_2026-04-24",
+    "upstream_reports": [
+      "InterSubMod/docs/reports/validated/2026/04/20260426_Thread_B_Retraction_Whitelist_Cross_Sample_01.md"
+    ],
+    "feature_flags": {"thread_b_scheme": "S3_Diploid_Het", "kde_corrected": true}
+  },
+  "samples": ["HCC1395", "HCC1395_DORADO", "H1437", "H2009", "HCC1937", "HCC1954"],
+  "skills_invoked": ["multi-sample-consistency", "run-evaluator"],
+  "estimated_duration_hours": 8.0
+}

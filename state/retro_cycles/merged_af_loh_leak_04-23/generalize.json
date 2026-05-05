@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260423-1200-merged-af-loh-leak",
+  "ran_at": "2026-04-23T16:00:00Z",
+  "samples": [
+    {"sample_id": "HCC1395", "metric_value": 0.583, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": false},
+    {"sample_id": "HCC1395_DORADO", "metric_value": 0.597, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": false},
+    {"sample_id": "H1437", "metric_value": 0.738, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": false},
+    {"sample_id": "H2009", "metric_value": 0.903, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": true},
+    {"sample_id": "HCC1937", "metric_value": 0.358, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": false},
+    {"sample_id": "HCC1954", "metric_value": 0.129, "ci_lower": null, "ci_upper": null, "p_value": null, "passed_threshold": false}
+  ],
+  "consistency": {
+    "n_samples_passed": 1,
+    "n_samples_total": 6,
+    "direction_consistency": "1/6 ≥0.85 (only H2009 saturated; HCC1395 stale 95.5% → KDE-corrected 58.3% (-37pp); 5/6 below 0.85 with HCC1954 worst at 0.129)",
+    "wilcoxon_p": 1.0,
+    "fisher_combined_p": null,
+    "confidence_uplift": null
+  },
+  "fan_out_mode": "sequential",
+  "verdict": "inconsistent"
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260429-1000-longphase-v5-somatic",
+  "title": "[RETRO] longphase-TO V5 Somatic Fallback (working tree dirty + 1/7 cross-sample)",
+  "hypothesis_id": "RETRO_V5_04-29",
+  "phase": "P5_EVALUATE",
+  "tier": "4",
+  "verdict": "active",
+  "priority": 75,
+  "started_at": "2026-04-28T08:00:00Z",
+  "last_advanced_at": "2026-04-29T18:00:00Z",
+  "preconditions": {
+    "binary_version": "380e8d2_uncommitted_layer1_5_alt_guard",
+    "dataset_id": "HCC1395_5kHz_pilot_only",
+    "upstream_reports": [
+      "InterSubMod/docs/reports/validated/2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md",
+      "InterSubMod/docs/reports/validated/2026/04/20260428_Self_Phasing_Baseline_V5_Audit_01.md"
+    ]
+  },
+  "open_gates": [
+    {"gate": "P2_PRECHECK", "status": "open", "reason": "expected: working tree dirty (Layer 1.5 + alt guard uncommitted) → stale warning"},
+    {"gate": "P5_EVALUATOR", "status": "open", "reason": "expected: effect_size_stability low (-0.0003 noise) + multi_sample_consistency=1/7=0.143 critical"}
+  ],
+  "artifacts": {"plan": "plan.json", "precheck": null, "pilot": "pilot.json", "generalize": "generalize.json", "evaluation": null},
+  "history": [
+    {"timestamp": "2026-04-28T08:00:00Z", "from_phase": null, "to_phase": "P0_REGISTER", "actor": "user"},
+    {"timestamp": "2026-04-29T18:00:00Z", "from_phase": "P4_GENERALIZE", "to_phase": "P5_EVALUATE", "actor": "user", "note": "技術報告整理；caveat: V5 working tree uncommitted + 7 樣本擴展未做"}
+  ]
+}

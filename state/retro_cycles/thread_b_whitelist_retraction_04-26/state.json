@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260426-1500-thread-b-retraction",
+  "title": "[RETRO] Thread B LOH×AF×CN whitelist filter cross-sample retraction",
+  "hypothesis_id": "RETRO_THREAD_B_04-26",
+  "phase": "P5_EVALUATE",
+  "tier": "RETRACTED",
+  "verdict": "blocked",
+  "priority": 60,
+  "started_at": "2026-04-22T10:00:00Z",
+  "last_advanced_at": "2026-04-26T16:00:00Z",
+  "preconditions": {
+    "binary_version": "8d0a0c8feedba7c80c2a4e9b1d7f3a5e6c8b2d4f",
+    "dataset_id": "X6_caller_AF_post_KDE_corrected_2026-04-24",
+    "upstream_reports": [
+      "InterSubMod/docs/reports/validated/2026/04/20260426_Thread_B_Retraction_Whitelist_Cross_Sample_01.md",
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260424_X6_Caller_AF_S3S5_CrossSample_01.md"
+    ]
+  },
+  "open_gates": [
+    {"gate": "P5_EVALUATOR", "status": "open", "reason": "expected: cross-sample consistency 1/6 critical → pending_review (Wilcoxon W=0 p=1)"}
+  ],
+  "artifacts": {"plan": "plan.json", "precheck": null, "pilot": "pilot.json", "generalize": "generalize.json", "evaluation": null},
+  "history": [
+    {"timestamp": "2026-04-22T10:00:00Z", "from_phase": null, "to_phase": "P0_REGISTER", "actor": "user"},
+    {"timestamp": "2026-04-26T16:00:00Z", "from_phase": "P4_GENERALIZE", "to_phase": "P5_EVALUATE", "actor": "user", "note": "X6 cross-sample 反證 → 撤回宣告"}
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260429-1000-longphase-v5-somatic",
+  "ran_at": "2026-04-29T12:00:00Z",
+  "sample": "HCC1395",
+  "metric_results": {
+    "metric": "clean_PS_paired_GT_concordance_delta_full_genome",
+    "value": 0.083,
+    "ci_lower": 0.06,
+    "ci_upper": 0.11,
+    "p_value": null,
+    "n_samples": 1,
+    "threshold_met": true
+  },
+  "confound_guard": {
+    "within_group_ols": "skipped",
+    "af_bin_check": "skipped",
+    "permutation_test": "skipped",
+    "n_reads_confound": "pass",
+    "spatial_autocorr": "pass",
+    "notes": "secondary metric SEQC2 calling F1: Baseline+ISM 0.7157 vs V5+ISM 0.7154 (Δ = -0.0003, within noise). Tag quality clearly improved (+8.3pp clean PS) but caller F1 unchanged. 4 sanity checks 15/15 PASS. CAVEAT: V5 working tree uncommitted (Layer 1.5 + SNP alt guard not in any specific git commit)."
+  },
+  "verdict": "proceed_to_P4",
+  "raw_outputs": [],
+  "figures": []
+}

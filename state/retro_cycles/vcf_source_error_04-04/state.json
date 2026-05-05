@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260404-1500-vcf-source-error",
+  "title": "[RETRO] VCF source error: pileup symlink → ClairS paired (should be ClairS-TO)",
+  "hypothesis_id": "RETRO_VCF_SRC_04-04",
+  "phase": "P2_PRECHECK",
+  "tier": "RETRACTED",
+  "verdict": "blocked",
+  "priority": 50,
+  "started_at": "2026-04-04T10:00:00Z",
+  "last_advanced_at": "2026-04-04T15:00:00Z",
+  "preconditions": {
+    "binary_version": null,
+    "dataset_id": "pileup_symlink_ClairS_paired_for_TO_analysis",
+    "upstream_reports": [
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260404_HPFineP納入QS研究分析_01.md",
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260404_HPFineP_QS整合完整研究報告_01.md",
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260404_LOH_Strong_Weak_7feature_AUC驗證報告_01.md"
+    ]
+  },
+  "open_gates": [
+    {"gate": "P2_PRECHECK", "status": "open", "reason": "P2-only fixture; expected to BLOCK on dataset symlink mismatch"}
+  ],
+  "artifacts": {
+    "plan": "plan.json",
+    "precheck": null,
+    "pilot": null,
+    "generalize": null,
+    "evaluation": null
+  },
+  "history": [
+    {"timestamp": "2026-04-04T10:00:00Z", "from_phase": null, "to_phase": "P0_REGISTER", "actor": "user", "note": "retro fixture for Drill 1"},
+    {"timestamp": "2026-04-04T15:00:00Z", "from_phase": "P1_PLAN", "to_phase": "P2_PRECHECK", "actor": "user", "note": "ready for /check-staleness"}
+  ]
+}

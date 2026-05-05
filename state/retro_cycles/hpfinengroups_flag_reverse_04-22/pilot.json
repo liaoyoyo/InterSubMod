@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260422-1500-hpfinengroups-flag-reverse",
+  "ran_at": "2026-04-22T16:00:00Z",
+  "sample": "HCC1954",
+  "metric_results": {
+    "metric": "TP_rate_AF_stratified",
+    "value": 0.707,
+    "ci_lower": 0.68,
+    "ci_upper": 0.74,
+    "p_value": 0.0035,
+    "n_samples": 1040,
+    "threshold_met": false
+  },
+  "confound_guard": {
+    "within_group_ols": "skipped",
+    "af_bin_check": "fail",
+    "permutation_test": "pass",
+    "n_reads_confound": "fail",
+    "spatial_autocorr": "pass",
+    "notes": "AF stratification fail: AF<0.2 TP=0.937 vs AF≥0.4 TP=0.022 (8.3pp cliff); n_reads confound NOT checked in original analysis (root cause for tier downgrade ⭐4→⭐3)"
+  },
+  "verdict": "needs_redesign",
+  "raw_outputs": [],
+  "figures": []
+}
