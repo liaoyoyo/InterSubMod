@@ -109,6 +109,40 @@ user-invocable: true
 
 ---
 
+### L4 升 ⭐4/⭐5 的硬性條件（2026-05-07 個人風格 anchor #1 硬化）
+
+**規則**：cycle 升至 ⭐4 (validated) 或 ⭐5 (canonical) 之**前**，必須提交「4 軌獨立證據鏈」覆蓋表，且每軌至少 1 件 artifact 引用：
+
+| # | 軌 | 定義 | artifact 範例 |
+|---|---|---|---|
+| (i) | **Statistical 統計** | AUC + p-value + CI（含 within-group residualization 後的數值） | pilot.json `metric_results` + auc-confound-guard report |
+| (ii) | **Cross-sample 跨樣本** | ≥5/7 樣本方向一致 + 最差樣本 AUC > 0.55 | generalize.json `consistency` |
+| (iii) | **Mechanism 機制/文獻** | 生物學解釋 + 至少 1 篇文獻支持（or 推理鏈到既有結論） | structured-tech-report §Background+Mechanism |
+| (iv) | **Orthogonal 正交資料** | 來自不同 pipeline / archive / caller 的相同方向證據（避免 self-phasing 與 single-track artifact） | archive 對比 / replicate 跑 / 替代 caller |
+
+**升 ⭐4/⭐5 PR 必附覆蓋表**（範本見下）；缺軌 → 降至 ⭐3 (described, single-track)，**不寫 evaluation.json 即觸 `pre_tier_upgrade_check.sh` hook 阻擋**。
+
+**4-Track Coverage Table 範本**（直接複製到報告 §Evidence Layers 結尾）：
+
+| Track | Status | Artifact Reference | Notes |
+|---|---|---|---|
+| (i) Statistical | ✅/❌ | `<path/to/auc-table.csv>` | AUC=...; residualized AUC=...; p=... |
+| (ii) Cross-sample | ✅/❌ | `<path/to/generalize.json>` | n_passed/total = .../7; worst-sample AUC=... |
+| (iii) Mechanism | ✅/❌ | `<path/to/report.md>` §X | 1 篇文獻 + 推理鏈 |
+| (iv) Orthogonal | ✅/❌ | `<path/to/replicate>` | 替代 pipeline / archive / caller 結果 |
+
+**為什麼是 4 軌而非 3 軌或 5 軌**：
+- 3 軌缺 orthogonal → 易被 single-pipeline self-phasing 誤導（如 V3-Fixed haplotag 若沒 archive 對比就升 ⭐4 會犯 04-26 thread B 撤回）
+- 5 軌會把「文獻」與「推理鏈」拆開，但本專案實務上常合一，5 軌反而拖延升級
+- 4 軌是「最少獨立證據維度」+「經 04 月 6 個撤回事件回溯驗證」（plan v1.6 §4.5.4-A anchor #1）
+
+**Connection to Harness P5 EVALUATE**：
+- `/run-evaluator` 計算 6 components 中 `multi_sample_consistency` 是 (ii) cross-sample 的 surrogate
+- `pitfall_coverage_score` 命中 P-07「single-track validated」時直接降為 0（即 (iv) 缺軌）
+- 其餘 (i) (iii) 仍由人工填 4-track table 確認；Path B 將加 component 7 `multi_track_corroboration` 自動算覆蓋率
+
+---
+
 ## 假說類型 → 驗證路徑建議
 
 | 假說類型 | 建議路徑 | 說明 |

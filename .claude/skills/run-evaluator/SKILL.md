@@ -128,8 +128,15 @@ Written to: state/cycles/20260504-1430-loh-kde/evaluation.json
 
 - 不接 LlamaIndex precedent retrieval（component 7 為 null）
 - `tier_support_alignment` 仰賴 evidence_ledger stability 欄位是字串（如「4 (HCC1395 pilot, awaits cross-sample)」）需做 grade extraction
-- pitfalls_table.json 6 條規則與 known-pitfalls SKILL.md 同步維護（**新增 pitfall 時需手動同步兩處**）
+- pitfalls_table.json 7 條規則（P-01..P-07）與 known-pitfalls SKILL.md 同步維護（**新增 pitfall 時需手動同步兩處**）
 - 不重跑 statistics — 只消化 cycle 已寫入的 artifacts
+- **4 軌證據鏈僅部分自動化**（個人風格 anchor #1 — 詳見 validation-protocol L4 mandatory 區段）：
+  - (i) Statistical：人工填 4-track table
+  - (ii) Cross-sample：`multi_sample_consistency` 是此軌 surrogate（自動）
+  - (iii) Mechanism：人工填
+  - (iv) Orthogonal：`pitfall_coverage_score` + P-07 偵測 single-track artifact（自動）
+  - **Path B 將新增 component 7 `multi_track_corroboration`** 自動掃 4 軌 artifact reference 覆蓋率
+- ⭐4/⭐5 升級的 hook gate (`pre_tier_upgrade_check.sh`) 目前**只檢查 evaluation.json 存在**，不驗 4-track table 完整度；validation-protocol L4 要求 PR 附表，缺軌 reviewer 應拒升
 
 ## 維護規則
 
@@ -139,3 +146,8 @@ Written to: state/cycles/20260504-1430-loh-kde/evaluation.json
 3. 不可只更新 SKILL.md 不更新 JSON（否則 evaluator 看不到新 pitfall）
 
 維護備忘：`pitfalls_table.json` 是給機器讀；`known-pitfalls/SKILL.md` 是給人讀。內容語意必須一致。
+
+**Path B 候選增強清單**（v1.6 plan §4.5.4-G 5b 候選；未實作）：
+- Component 7 `multi_track_corroboration`：掃 cycle 的 plan/pilot/generalize/structured-tech-report 中 4 軌引用，回 0-1 覆蓋率（4/4 → 1.0；3/4 → 0.75 等）
+- Component 7 觸發條件：cycle 申請升 ⭐4/⭐5 時必算；⭐3 cycle 可選
+- 接入 LlamaIndex precedent retrieval 後，`precedent_similarity` 與 `multi_track_corroboration` 都取代部分人工 reviewer 工作
