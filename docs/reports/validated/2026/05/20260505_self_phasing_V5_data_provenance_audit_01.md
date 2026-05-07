@@ -21,13 +21,18 @@ related_memory:
   - memory/project_v5_somatic_fallback_verification.md (caveat 更新)
   - memory/project_self_phasing_causal_chain_confirmed.md
   - memory/project_pon_only_phasing_verification.md
-verdict: CRITICAL FINDING — PI 報告 V5 數據為 Pass 1 only；4-30/5-01 已產出 Pass 2 觸發數據；T1.2 (2026-05-07) 補上 read-level priority bug 機制鐵證 (chr19 752 victims, V3F/V5 100% 修正率)；ISM benchmark 不再必要 (下游自動受惠)
-last_verified: 2026-05-07
+verdict: CRITICAL FINDING — PI 報告 V5 數據為 Pass 1 only；4-30/5-01 已產出 Pass 2 觸發數據；T1.2 (2026-05-07) chr19 priority bug 機制鐵證 (752 victims, V3F/V5 100% 修正率)；T1.2-F1 (2026-05-08) 全基因組擴展顛覆三項 chr19 結論 — 34,855 victims (46×), chr8 NOT hotspot, Layer 1.5 +560K 觸發；ISM benchmark 不再必要 (下游自動受惠)
+last_verified: 2026-05-08
 update_2026_05_07:
   - "T1.2 read-level vote audit 完成 (commit 8491f14)"
   - "新增 §5.6 機制驗證鐵證段"
   - "§6 行動表更新：原 T1 ISM benchmark CANCELLED；新 P0 = T1.2-F1 全基因組擴展"
   - "詳見 InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/T1_2_priority_bug_mechanism_report.md"
+update_2026_05_08:
+  - "T1.2-F1 全基因組擴展完成（cycle 20260508_T1_2_F1_genome_wide_audit）"
+  - "新增 §5.7 — 顛覆 §5.6 三項 chr19 結論：chr19 占比僅 2.16%、chr8 是 priority bug 冷區（rank 21，0.34× avg）、Layer 1.5 在全基因組確實觸發 +560,881 reads"
+  - "§6 行動表更新：T1.2-F1 標記 DONE；下游 PI errata（§5.7.4）的訊息變更已陳列"
+  - "詳見 InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/T1_2_F1_genome_wide_audit.md"
 report_template: structured-tech-report v1.0 (provenance audit 變體)
 -->
 
@@ -38,6 +43,8 @@ report_template: structured-tech-report v1.0 (provenance audit 變體)
 > **PI 報告（2026-04-29）的全部 V5 數值（sanity 15/15 PASS、+13.3pp clean PS、AMB 17.5→8.0%、HP:i:33 −54%）都是「PON-only Pass 1 + tag layer fix」的結果。`d0bcd8c` (2026-04-30) 修了一個讓 ploidy 估值崩成 0 的關鍵 bug，使 Pass 2 second-round phasing 從未真正觸發。修補後（4-30 16:22 起）已重跑 baseline_09 / v5_flag / force_path2only 三組數據，purity 估值正常為 0.97-0.98，Pass 2 真實觸發。**
 
 > **🟢 Update 2026-05-07：T1.2 read-level vote audit 完成（commit `8491f14`）— chr19 上 752 priority bug victims、V3F/V5 100% 修正率、4 路徑 3.5/4 PASS → V3F priority bug 修補機制鐵證確立**。詳見 §5.6。**ISM benchmark 不再必要**（ISM 是下游消費者，longphase-to 端修對後自動受惠）；新 P0 = T1.2-F1 全基因組擴展 + T4 PI 報告 errata 整合。
+
+> **🔥 Update 2026-05-08：T1.2-F1 全基因組擴展完成 — 34,855 victims (46× chr19)、V3F/V5 100% 修正率、顛覆三項 §5.6 chr19 結論**：(1) chr19 僅占 2.16%（不是主要 hotspot）；(2) chr8 是 priority bug 冷區 rank 21（與 LOH+HPSig hotspot 是不同 layer）；(3) Layer 1.5 在 germline 缺席的 21.7M reads 中**確實觸發 +560,881**（chr19 局部未觸發是因 germline 不缺席）。詳見 §5.7。priority bug 機制因果**進一步強化**至 event-level 34,855 個案。
 
 四個必須立刻記住的事實：
 
@@ -390,6 +397,81 @@ PI 報告 §5.2 「V3F getVote 兩層投票」原本只有 commit message + IGV 
 
 ---
 
+## 5.7 T1.2-F1 全基因組擴展（2026-05-08 補上）— 顛覆三項 chr19 結論
+
+> **Update 2026-05-08**：對全基因組（chr1-22 + chrX/Y，HCC1395 5kHz）跑同一 vote audit。**結果與 §5.6 chr19 pilot 在 victim 量級、hotspot 分佈、Layer 1.5 觸發三項均產生顛覆性差異**。完整 audit：[`InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/T1_2_F1_genome_wide_audit.md`](../../../../research/v5_provenance_followup/T1_2_read_level_audit/T1_2_F1_genome_wide_audit.md)
+
+### 5.7.1 設計與執行
+
+對同三版 binary（baseline / V3F / V5）跑全基因組 vote dump（每版 ~40 min，總 tagged ~18.9M reads × 3）。dump 大小：744 / 687 / 687 MB（gzipped）。
+
+| 規模 | chr19 pilot | Genome F1 | 倍數 |
+|---|---:|---:|---:|
+| Dump rows | 549,206 | **29,973,253** | 54.6× |
+| Tagged reads (per binary) | ~330K | **18,895,432** | 57× |
+| **Priority bug confirmed victims** | **752** | **34,855** | **46.4×** |
+
+### 5.7.2 三項 chr19 結論被推翻
+
+#### 推翻 1：chr19 不是主要 hotspot（占比僅 2.16%）
+
+§5.6.3 第 1 點寫「chr19 752 條 = 17.3:1 微觀證據」是**真的**，但 §5.6 推論「chr19 是主要 hotspot」**不成立**。實際 priority bug 影響全基因組廣泛分佈：
+
+| chr | victims | enrichment ‰ | rank | 備註 |
+|---|---:|---:|---:|---|
+| chr7 | **3,508** | 0.723 | 1 | victim N 最高 |
+| chr2 | 2,792 | 0.617 | 2 | |
+| chr1 | 2,674 | 0.541 | 3 | |
+| chr16 | 2,584 | **1.140** | 4 | enrichment 排第 5 |
+| chr20 | 2,101 | **1.306** | 7 | enrichment 排第 2 |
+| chr21 | 792 | **1.279** | 17 | enrichment 排第 3 |
+| chr19 | 752 | 0.703 | **19** | **占 2.16%** |
+| **chr8** | **666** | **0.200** | **21** | **0.34× genome avg（冷區）** |
+| chrY | 67 | **1.484** | 24 | enrichment 最高（small N） |
+| genome avg | 34,855 | 0.590 | — | |
+
+#### 推翻 2：chr8 不是 priority bug hotspot（與 LOH+HPSig hotspot 是不同 layer）
+
+MEMORY 的 [`project_hcc1395_chr8_hotspot.md`](../../../../research/autoresearch/memory/project_hcc1395_chr8_hotspot.md) 寫 chr8「LOH+HPSig 7.4× FP enrichment」。本 audit 顯示 chr8 在 **priority bug 層** 反而是 0.34× genome avg 的**冷區**。
+
+→ **這兩個 hotspot 是不同 layer**：chr8 LOH+HPSig 集中是 ISM 下游 false-positive 富集（HP_Ratio + LOH 特徵交互），不是 V3F 修對的 priority bug 範疇。chr8 priority bug 在 V3F/V5 修補後仍存在的 ISM FP enrichment 必須另尋機制。
+
+#### 推翻 3：Layer 1.5 確實觸發 560,881 reads（不是「未觸發」）
+
+§5.6.3 第 3 點寫「V5 Layer 1.5 chr19 未觸發」是**chr19 局部對的**，但**全基因組看 V5 確實在 germline 缺席區大量觸發**：
+
+| 指標 | 值 |
+|---|---:|
+| germline_vote=0 reads | **21,765,669**（占 merged 36.8%） |
+| V3F tagged 數（germline=0 子集）| 0 |
+| V5 tagged 數（germline=0 子集）| **560,881** |
+| **Layer 1.5 額外觸發** | **+560,881** |
+
+但 V5 全基因組 tag count = V3F tag count（兩者都是 18,895,432）→ V5 在 germline_vote=0 區多 tag 的 560,881，**必然在 germline_vote>0 區少 tag 同數**。這是新 finding，待釐清 mechanism（候選：V5 ploidy fix + threshold 0.9 對 germline 充足區的某種 trade-off）。**這不影響 priority bug 修正的 100% verdict**，但屬另一條 follow-up。
+
+### 5.7.3 V3F vs V5 全基因組行為再校準
+
+| 比較 | chr19 結論（§5.6） | Genome 結論（§5.7） |
+|---|---|---|
+| Priority bug 修正率 | V3F 100% / V5 100% | V3F 100% / V5 100% ✅ 一致 |
+| Layer 1.5 觸發 | 未觸發 | **+560,881 額外 tag**（germline=0 區）|
+| V5 vs V3F net effect | 行為相同 | germline=0 多 tag 560K，germline>0 少 tag 560K（**zero-sum 重分配**）|
+
+### 5.7.4 對 PI 報告的後續訊息更新
+
+- **PI §5.2 機制證據**：read-level victim N 從 752 升至 **34,855**（同源證據量級提升 46×）
+- **PI §3.3.3 chr19 hotspot 解讀**：chr19 SP1/2/3 是 **可重現案例**，但**不再代表 priority bug 主要分佈**；正確說法是「chr19 是被研究最多但非最熱的 priority bug 區，全基因組廣泛分佈，chr7/chr2/chr1/chr16/chr20 是 N 量大宗」
+- **PI R11 chr8 hotspot**：chr8 priority bug rank 21（0.34× genome avg）→ chr8 ISM FP 富集**不是** priority bug 直接造成；應改寫為「chr8 LOH+HPSig 富集機制獨立於 priority bug，需另案探討」
+- **新 caveat**：V5 vs V3F 整體 tag count 相同但分佈不同（germline=0 +560K / germline>0 -560K）→ 任何「V5 對 V3F 整體效應」分析需分層
+
+### 5.7.5 數據完整性 caveat
+
+- **3-way merged 59M rows vs dump 30M**：inner join 在 (read_name, chr, pos) 是 cross product（同 read+pos 多投票記錄，例如 supplementary alignments）。**34,855 是 event-level victims**，非 unique-read 計數
+- **chrY victim 67 / total 45,137 ‰=1.484** rank 1 但 N 太小，**不應**過度詮釋
+- **此 audit 僅 HCC1395 5kHz**：跨樣本 priority bug 分佈差異待 T3（7 樣本擴展）補上
+
+---
+
 ## 6. 後續行動
 
 > **2026-05-07 行動表更新**：用戶決策 — **ISM benchmark 不再必要**（ISM 是下游消費者，longphase-to 端 V3F 修補已被 T1.2 證實 100% 修對 priority bug victims，下游 ISM 自動受惠）。原 T1 (ISM benchmark) 從 P0 降級。新 P0 重心是 longphase-to 端的全基因組擴展 + 整合至 PI 報告。
@@ -398,7 +480,7 @@ PI 報告 §5.2 「V3F getVote 兩層投票」原本只有 commit message + IGV 
 |----|------|-----|------|--------------|
 | **T1.2** ✅ | Read-level vote countMap audit (chr19) — priority bug 機制鐵證 | — | **DONE 2026-05-07** | PI §5.2 機制證據 |
 | ~~T1 (原)~~ | ~~4-30 新 BAM 跑 ISM benchmark~~ | ~~P0~~ | **CANCELLED** — ISM 是下游消費者，不需獨立驗證 | — |
-| **T1.2-F1** | 全基因組擴展 dump（chr8 / chr1-22）— 看 chr8 hotspot + Layer 1.5 觸發 | **P0** | pending | PI R11 / chr8 hotspot |
+| **T1.2-F1** ✅ | 全基因組擴展 dump — 34,855 victims (46× chr19) / chr8 NOT hotspot / Layer 1.5 +560K 觸發 | — | **DONE 2026-05-08**（§5.7）| PI R11 / chr8 hotspot |
 | **T2** | trace `pononly_v5_somatic_fallback/` (4-12) 是否要重產 | **P1** | pending | PI §6 全部 |
 | **T3** | 7 樣本 V5 BAM 全量重跑（HCC1395_DORADO / HCC1937 / HCC1954 / H1437 / H2009 / COLO829）| **P1** | pending | PI R3 |
 | **T4** | PI 報告依本文件 §2 修訂建議 patch（保留 4-29 為歷史快照，本文件作為 errata）| **P1** | pending | PI 全文 |
