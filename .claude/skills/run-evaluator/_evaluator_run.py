@@ -322,6 +322,100 @@ def write_evaluation(cycle_id: str, payload: dict) -> Path:
     return out
 
 
+# -------------------- M2 failure attribution -------------------- #
+
+# Component → primary category mapping for M2 attribution
+_COMPONENT_CATEGORY = {
+    "multi_sample_consistency": "consistency_violation",
+    "effect_size_stability":    "consistency_violation",
+    "precondition_freshness":   "precondition_violation",
+    "subgroup_homogeneity":     "confound_bias",
+    "pitfall_coverage_score":   "confound_bias",
+}
+
+# Pitfall id → category mapping
+_PITFALL_CATEGORY = {
+    "P-01": "confound_bias",
+    "P-02": "confound_bias",
+    "P-03": "dataset_schema",
+    "P-04": "dataset_schema",
+    "P-05": "confound_bias",
+    "P-06": "confound_bias",
+    "P-07": "precedent_pattern",
+}
+
+
+def build_failure_attribution(
+    state: dict | None,
+    components: dict,
+    pitfall_hits: list[dict],
+    final_verdict: str,
+) -> dict | None:
+    """M2 structured failure attribution; only set when verdict ≠ approve_tier."""
+    if final_verdict == "approve_tier":
+        return None
+
+    categories: list[str] = []
+    components_below: list[str] = []
+    for k, v in components.items():
+        if v is None or k not in WEIGHTS:
+            continue
+        if v < 0.4:
+            components_below.append(f"{k}={v:.2f}")
+            cat = _COMPONENT_CATEGORY.get(k)
+            if cat:
+                categories.append(cat)
+
+    pitfall_ids = [h["pitfall"] for h in pitfall_hits]
+    for pid in pitfall_ids:
+        cat = _PITFALL_CATEGORY.get(pid)
+        if cat:
+            categories.append(cat)
+
+    # Dedupe preserving order
+    categories = list(dict.fromkeys(categories)) or ["unknown"]
+    primary = categories[0]
+
+    # Confidence: rule match (pitfall) > multi-component > single
+    if pitfall_hits:
+        confidence = "high"
+    elif len(components_below) >= 2:
+        confidence = "medium"
+    else:
+        confidence = "low"
+
+    return {
+        "categories": categories,
+        "primary_category": primary,
+        "phase_at_failure": (state or {}).get("phase", "P5_EVALUATE"),
+        "skill_at_failure": "run-evaluator",
+        "gate_at_failure": "P5_EVALUATOR",
+        "components_below_threshold": components_below,
+        "pitfalls_hit": pitfall_ids,
+        "confidence": confidence,
+        "diagnosed_at": utcnow_iso(),
+        "auto_recovery_attempted": False,
+        "auto_recovery_succeeded": None,
+        "user_intervention_required": final_verdict in ("pending_review", "exit_negative"),
+    }
+
+
+def update_state_failure_attribution(cycle_id: str, attribution: dict | None) -> None:
+    """Write/clear failure_attribution in state.json (denormalized snapshot)."""
+    state_path = cycle_dir(cycle_id) / "state.json"
+    if not state_path.exists():
+        return
+    try:
+        state = json.loads(state_path.read_text())
+    except json.JSONDecodeError:
+        return
+    if attribution is None:
+        state.pop("failure_attribution", None)
+    else:
+        state["failure_attribution"] = attribution
+    state_path.write_text(json.dumps(state, indent=2, ensure_ascii=False) + "\n")
+
+
 # -------------------- Main -------------------- #
 
 def main():
@@ -355,6 +449,9 @@ def main():
         offenders = [k for k, c in components.items() if c is not None and c < 0.4 and k in WEIGHTS]
         required_followups.append(f"Components below 0.4 (need attention): {', '.join(offenders)}")
 
+    # M2 failure attribution (only when verdict ≠ approve_tier)
+    attribution = build_failure_attribution(art["state"], components, pitfall_hits, final_verdict)
+
     payload = {
         "schema_version": "1.0",
         "cycle_id": cycle_id,
@@ -366,11 +463,16 @@ def main():
         "required_followups": required_followups,
         "verdict": final_verdict,
     }
+    if attribution is not None:
+        payload["failure_attribution"] = attribution
 
     out_path = write_evaluation(cycle_id, payload)
+    update_state_failure_attribution(cycle_id, attribution)  # mirror to state.json
     print(render_summary(cycle_id, payload, debug))
     print(f"\nWritten to: {out_path.relative_to(REPO_ROOT)}")
     print(f"Base verdict: {base_verdict} → Final verdict: {final_verdict} (override: {base_verdict != final_verdict})")
+    if attribution:
+        print(f"Failure attribution: {attribution['primary_category']} (confidence={attribution['confidence']}); state.json updated.")
 
     sys.exit(1 if final_verdict in ("pending_review", "exit_negative") else 0)
 

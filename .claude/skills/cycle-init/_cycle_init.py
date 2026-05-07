@@ -123,9 +123,10 @@ def build_state(
     binary_version: str | None,
     dataset_id: str | None,
     upstream_reports: list[str],
+    main_axis: dict | None = None,
 ) -> dict:
     now = utc_now_iso()
-    return {
+    state = {
         "schema_version": "1.0",
         "cycle_id": cycle_id,
         "title": title,
@@ -158,7 +159,19 @@ def build_state(
                 "note": "/cycle-init",
             }
         ],
+        "interaction_metrics": {
+            "user_interventions": 0,
+            "auto_advancements": 0,
+            "user_corrections": 0,
+            "auto_recovery_attempts": 0,
+            "auto_recovery_successes": 0,
+            "drift_warnings_emitted": 0,
+            "drift_warnings_acknowledged": 0,
+        },
     }
+    if main_axis is not None:
+        state["main_axis"] = main_axis
+    return state
 
 
 def update_active(active: dict, cycle_id: str, title: str, hypothesis_id: str | None) -> tuple[dict, list[str]]:
@@ -201,6 +214,11 @@ def main() -> int:
     ap.add_argument("--dataset-id", default=None, help="Dataset identifier")
     ap.add_argument("--upstream-report", action="append", default=[], help="Repeatable; upstream report paths")
     ap.add_argument("--hypothesis-id", default=None, help="Override hypothesis_id (default = positional arg if it looks like H-...)")
+    ap.add_argument("--main-axis-anchor", default=None, help="M1: InterSubMod/-prefixed path to anchor doc (e.g. CURRENT_FOCUS.md)")
+    ap.add_argument("--main-axis-section", default=None, help="M1: section heading within anchor doc")
+    ap.add_argument("--main-axis-goal", default=None, help="M1: one-line goal restatement (required if --main-axis-anchor set)")
+    ap.add_argument("--main-axis-required", action="append", default=[], help="M1: repeatable; required keywords")
+    ap.add_argument("--main-axis-forbidden", action="append", default=[], help="M1: repeatable; forbidden keywords")
     args = ap.parse_args()
 
     # Validate priority
@@ -238,6 +256,20 @@ def main() -> int:
     # Pitfall warnings on dataset_id
     warnings.extend(dataset_id_pitfall_warn(args.dataset_id))
 
+    # Build main_axis dict (M1 主軸鎖) if user provided
+    main_axis = None
+    if args.main_axis_anchor:
+        if not args.main_axis_goal:
+            print("ERROR: --main-axis-goal is required when --main-axis-anchor is set", file=sys.stderr)
+            return 1
+        main_axis = {
+            "anchor_doc": args.main_axis_anchor,
+            "anchor_section": args.main_axis_section,
+            "one_line_goal": args.main_axis_goal,
+            "drift_keywords_required": args.main_axis_required,
+            "drift_keywords_forbidden": args.main_axis_forbidden,
+        }
+
     # Build state.json
     state = build_state(
         cycle_id=cycle_id,
@@ -247,6 +279,7 @@ def main() -> int:
         binary_version=args.binary_version,
         dataset_id=args.dataset_id,
         upstream_reports=args.upstream_report,
+        main_axis=main_axis,
     )
 
     # Update active.json
@@ -267,6 +300,12 @@ def main() -> int:
     print(f'  title: "{args.title}"')
     print(f"  phase: P0_REGISTER")
     print(f"  priority: {args.priority}")
+    if main_axis:
+        print(f"  main_axis: {main_axis['anchor_doc']} → {main_axis['one_line_goal']}")
+        if main_axis["drift_keywords_required"]:
+            print(f"    required keywords: {main_axis['drift_keywords_required']}")
+    else:
+        print(f"  main_axis: (not set; M1 drift detection disabled for this cycle)")
     print(f"  state.json: state/cycles/{cycle_id}/state.json")
     print(f"  active.json updated ({len(active['cycles'])} active cycles total)")
     for w in warnings:
