@@ -21,8 +21,13 @@ related_memory:
   - memory/project_v5_somatic_fallback_verification.md (caveat 更新)
   - memory/project_self_phasing_causal_chain_confirmed.md
   - memory/project_pon_only_phasing_verification.md
-verdict: CRITICAL FINDING — PI 報告 V5 數據為 Pass 1 only；4-30/5-01 已產出 Pass 2 觸發數據但未做對比分析；ploidy bug 已修但結論待重驗
-last_verified: 2026-05-05
+verdict: CRITICAL FINDING — PI 報告 V5 數據為 Pass 1 only；4-30/5-01 已產出 Pass 2 觸發數據；T1.2 (2026-05-07) 補上 read-level priority bug 機制鐵證 (chr19 752 victims, V3F/V5 100% 修正率)；ISM benchmark 不再必要 (下游自動受惠)
+last_verified: 2026-05-07
+update_2026_05_07:
+  - "T1.2 read-level vote audit 完成 (commit 8491f14)"
+  - "新增 §5.6 機制驗證鐵證段"
+  - "§6 行動表更新：原 T1 ISM benchmark CANCELLED；新 P0 = T1.2-F1 全基因組擴展"
+  - "詳見 InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/T1_2_priority_bug_mechanism_report.md"
 report_template: structured-tech-report v1.0 (provenance audit 變體)
 -->
 
@@ -30,7 +35,9 @@ report_template: structured-tech-report v1.0 (provenance audit 變體)
 
 ## 0. TL;DR
 
-> **PI 報告（2026-04-29）的全部 V5 數值（sanity 15/15 PASS、+13.3pp clean PS、AMB 17.5→8.0%、HP:i:33 −54%）都是「PON-only Pass 1 + tag layer fix」的結果。`d0bcd8c` (2026-04-30) 修了一個讓 ploidy 估值崩成 0 的關鍵 bug，使 Pass 2 second-round phasing 從未真正觸發。修補後（4-30 16:22 起）已重跑 baseline_09 / v5_flag / force_path2only 三組數據，purity 估值正常為 0.97-0.98，Pass 2 真實觸發 — 但這三組新 BAM 尚未做 sanity / concordance / ISM 對比分析。在新對比完成前，PI 報告 V5 結論需暫停為「Pass 1 only 條件下之觀察」，不能外推到完整 V5 (Pass 1 + Pass 2 + tag fix) 設計。**
+> **PI 報告（2026-04-29）的全部 V5 數值（sanity 15/15 PASS、+13.3pp clean PS、AMB 17.5→8.0%、HP:i:33 −54%）都是「PON-only Pass 1 + tag layer fix」的結果。`d0bcd8c` (2026-04-30) 修了一個讓 ploidy 估值崩成 0 的關鍵 bug，使 Pass 2 second-round phasing 從未真正觸發。修補後（4-30 16:22 起）已重跑 baseline_09 / v5_flag / force_path2only 三組數據，purity 估值正常為 0.97-0.98，Pass 2 真實觸發。**
+
+> **🟢 Update 2026-05-07：T1.2 read-level vote audit 完成（commit `8491f14`）— chr19 上 752 priority bug victims、V3F/V5 100% 修正率、4 路徑 3.5/4 PASS → V3F priority bug 修補機制鐵證確立**。詳見 §5.6。**ISM benchmark 不再必要**（ISM 是下游消費者，longphase-to 端修對後自動受惠）；新 P0 = T1.2-F1 全基因組擴展 + T4 PI 報告 errata 整合。
 
 四個必須立刻記住的事實：
 
@@ -334,24 +341,76 @@ second round phasing, export phasing result
 
 ---
 
+## 5.6 T1.2 Priority Bug 機制驗證鐵證（2026-05-07 補上）
+
+> **Update 2026-05-07**：依用戶決策，**ISM 不再需要驗證**（ISM 是下游消費者，longphase-to 端 tag 改善後 ISM 自動受惠）。重點轉為**驗證 longphase-to 端 V3F 修補本身有效**，這由 T1.2 read-level vote audit 完成。完整 mechanism report：[`InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/T1_2_priority_bug_mechanism_report.md`](../../../../research/v5_provenance_followup/T1_2_read_level_audit/T1_2_priority_bug_mechanism_report.md)（commit `8491f14`）
+
+### 5.6.1 設計與執行
+
+**對 baseline / V3F / V5 三版 testing-only binary patch 加 `--debug-vote-dump` flag** dump 每條 read 經 `getVote()` 後的 5-vote countMap + hpResult。三版分別跑 chr19（HCC1395 5kHz，~60 秒/版），共產出 549,206 rows × 3 版 vote dump TSV。
+
+| Binary | Git ref | 修補狀態 |
+|--------|---------|---------|
+| baseline-debug | `8b8c1fd` | V2b PON-only flag（priority bug 仍在）|
+| v3f-debug | `380e8d2` | V3F two-layer + INDEL guard |
+| v5-debug | HEAD `938f0df` | + Layer 1.5 + ploidy fix + threshold 0.9 |
+
+### 5.6.2 4 路徑驗證結果（3.5/4 PASS → 機制因果確立）
+
+| 路徑 | 結果 | 判定 |
+|------|------|------|
+| ① 個案 trace ≥10 條 | **752 條** priority bug confirmed victims | ✅ PASS |
+| ② chr19 1Mb 區域聚集 | chr19:30M (215 victims) + 27M (133) 集中 46% | ⚠️ PARTIAL |
+| ③ Somatic density 共變 | high somatic vote ≥5 = **0 受害**；低票就觸發 | 🔄 反向但有意義 |
+| ④ 修正後消失（V3F/V5 修正率）| **V3F 100% / V5 100%** | ✅ PASS |
+
+### 5.6.3 三大新發現
+
+1. **Priority bug 單向性**：chr19 上全 752 條 victims 都是 `baseline=11 → v3f=21 → v5=21`（無一條反方向）→ 完美對應 PI 報告 §3 全基因組 17.3:1 整體偏移單向性（94.6% somatic→HP1）。**chr19 752 條 = 17.3:1 微觀證據**。
+
+2. **觸發條件比理論寬鬆**：1-2 票 somatic vote 即觸發 priority bug（high somatic vote ≥5 群體 = 0 受害者；全 752 都是 low 1-4 票）。原因：baseline `getVote()` 用 vector 順序檢查，第一個有票的 pair 就 break。
+
+3. **V5 Layer 1.5 chr19 未觸發**：V5 vs V3F 在 chr19 結果 100% 相同（germline 不缺席 → Layer 1.5 分支不執行）。Layer 1.5 真實價值要在 **germline het 稀疏區（cnLOH / amplicon hotspot）** 才看得到。
+
+### 5.6.4 對 PI 報告的機制證據強化
+
+PI 報告 §5.2 「V3F getVote 兩層投票」原本只有 commit message + IGV 3 個截圖支持；**T1.2 補上 752 read-level 個案 + 100% 修正率的鐵證**。priority bug 從「理論 + 截圖」升級為「個案 + 統計 + 機制」三重佐證。
+
+### 5.6.5 樣本個案（前 5 條）
+
+| read_name (前 12) | chr19:pos | HP1/HP2 | HP1_1/HP2_1 | germline_maj | somatic_maj | baseline → v3f → v5 |
+|---|---:|:---:|:---:|:---:|:---:|:---:|
+| 1c50034a-f0f | 201,417 | 1/3 | 1/0 | HP2 | HP1 | **11 → 21 → 21** |
+| afb8e89b-893 | 585,252 | 1/2 | 1/0 | HP2 | HP1 | **11 → 21 → 21** |
+| 35c7e166-ec3 | 824,360 | 0/1 | 1/0 | HP2 | HP1 | **11 → 21 → 21** |
+| 096ab9a7-030 | 1,574,442 | 0/3 | 1/0 | HP2 | HP1 | **11 → 21 → 21** |
+| ccc8185d-f9b | 2,558,240 | 0/1 | 2/0 | HP2 | HP1 | **11 → 21 → 21** |
+
+**統一指紋**：germline 票 → HP2（read 真實方向）；somatic 票 → HP1（self-phasing 污染）；baseline 跟 somatic（priority bug）；V3F/V5 修向 germline majority。
+
+---
+
 ## 6. 後續行動
 
-| ID | 動作 | 優先 | 對應 PI caveat |
-|----|------|-----|--------------|
-| **T1** (NEW) | 4-30 新 BAM 跑 ISM benchmark + sanity check 15 點對齊 PI 報告 §6.4 / §6.5 數字 | **P0 高** | PI R11 (新增) |
-| **T2** | trace `pononly_v5_somatic_fallback/` (4-12) 是否要重產（現在有 d0bcd8c 應重跑取代）| **P1 中** | PI §6 全部 |
-| **T3** | 7 樣本 V5 BAM 全量重跑（HCC1395_DORADO / HCC1937 / HCC1954 / H1437 / H2009 / COLO829）| **P1 中** | PI R3 |
-| **T4** | PI 報告依本文件 §2 修訂建議 patch（或保留 4-29 為歷史快照，本文件作為 errata）| **P2 中** | PI 全文 |
-| **T5** | manifest.yaml 加 `haplotag_version` + `binary_commit_hash` 欄位 | **P2 中** | PI R3 / F4 |
-| **T6** | 0.6 purity simulation 用 d0bcd8c 後 binary 重做（已有 v3f_ablation_ism_06，待對齊）| **P2 中** | PI R7 |
+> **2026-05-07 行動表更新**：用戶決策 — **ISM benchmark 不再必要**（ISM 是下游消費者，longphase-to 端 V3F 修補已被 T1.2 證實 100% 修對 priority bug victims，下游 ISM 自動受惠）。原 T1 (ISM benchmark) 從 P0 降級。新 P0 重心是 longphase-to 端的全基因組擴展 + 整合至 PI 報告。
 
-**T1 詳細子步驟**（建議下一個 cycle 執行）：
-1. 用 `compare_haplotag_ism.py` 對 `threshold_compare/v5_flag/tumor_tagged.bam` 跑 ISM
-2. 對 `threshold_compare/baseline_09/tumor_tagged.bam` 跑 ISM 作 baseline
-3. 對 4-12 的 `pononly_v5_somatic_fallback/tumor_tagged.bam` 跑 ISM 作對照（驗證舊 PI 數字）
-4. 比對：HP_Ratio median / Potential_LOH% / HP_Ratio AUC / sanity 15 點 / clean PS pp
-5. 產出 `output/threshold_compare/comparison_summary.json` + `comparison_report.md`
-6. 依結果決定是否更新 PI 報告 / 是否觸發 T3 7 樣本擴展
+| ID | 動作 | 優先 | 狀態 | 對應 PI caveat |
+|----|------|-----|------|--------------|
+| **T1.2** ✅ | Read-level vote countMap audit (chr19) — priority bug 機制鐵證 | — | **DONE 2026-05-07** | PI §5.2 機制證據 |
+| ~~T1 (原)~~ | ~~4-30 新 BAM 跑 ISM benchmark~~ | ~~P0~~ | **CANCELLED** — ISM 是下游消費者，不需獨立驗證 | — |
+| **T1.2-F1** | 全基因組擴展 dump（chr8 / chr1-22）— 看 chr8 hotspot + Layer 1.5 觸發 | **P0** | pending | PI R11 / chr8 hotspot |
+| **T2** | trace `pononly_v5_somatic_fallback/` (4-12) 是否要重產 | **P1** | pending | PI §6 全部 |
+| **T3** | 7 樣本 V5 BAM 全量重跑（HCC1395_DORADO / HCC1937 / HCC1954 / H1437 / H2009 / COLO829）| **P1** | pending | PI R3 |
+| **T4** | PI 報告依本文件 §2 修訂建議 patch（保留 4-29 為歷史快照，本文件作為 errata）| **P1** | pending | PI 全文 |
+| **T5** | manifest.yaml 加 `haplotag_version` + `binary_commit_hash` 欄位 | **P2** | pending | PI R3 / F4 |
+| **T6** | 0.6 purity simulation 用 d0bcd8c 後 binary 重做 | **P2** | pending | PI R7 |
+
+**T1.2-F1 詳細子步驟**（下一個 cycle 執行）：
+1. 用既有 `longphase-to-{baseline,v3f,v5}-debug` binary 跑全基因組（chr1-22）dump，每版 ~30 min
+2. JOIN 三版 dump 找全染色體 priority bug victims
+3. 區域聚集分析：sliding window per-chr enrichment；驗證 chr8 hotspot（MEMORY: `project_hcc1395_chr8_hotspot.md`）+ V5 Layer 1.5 在 germline 稀疏區是否觸發
+4. 產出 `T1_2_F1_genome_wide_audit.md` + 圖表
+5. 跨樣本擴展前提：T1.2-F1 結論在 HCC1395 全基因組仍成立 → 進 T3 7 樣本
 
 ---
 
