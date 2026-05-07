@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "kde_stale_binary_04-13_20",
+  "checked_at": "2026-05-05T21:13:14Z",
+  "checks": {
+    "binary": {
+      "status": "stale",
+      "expected": "4dc2d732c7230d71f7147692de3fd1dafcf88a7a",
+      "actual_head": "a637c1877541a7510694c63766927139d17116d6",
+      "stale_distance": 17,
+      "note": "HEAD is 17 commits ahead of plan-stated binary."
+    },
+    "dataset": {
+      "status": "fresh",
+      "expected_id": "master_2026-03-30_stale_binary_pre_KDE_fix",
+      "schema_violations": [],
+      "note": "No stale marks or known-pitfall name patterns."
+    },
+    "upstream_reports": [
+      {
+        "report_path": "InterSubMod/docs/experiments/in_progress/2026/04/20260420_CovM_Baseline_Accuracy_Validation_01.md",
+        "status": "fresh",
+        "stale_reason": null
+      },
+      {
+        "report_path": "InterSubMod/docs/experiments/in_progress/2026/04/20260420_KDE_Fix_Acceptance_Validation_01.md",
+        "status": "fresh",
+        "stale_reason": null
+      }
+    ]
+  },
+  "verdict": "BLOCKED",
+  "blocking_reasons": [
+    "binary stale: HEAD is 17 commits ahead of plan-stated binary."
+  ]
+}

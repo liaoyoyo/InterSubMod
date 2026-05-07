@@ -1,7 +1,8 @@
 {
   "$schema_version": "1.0",
-  "description": "Structured representation of InterSubMod/.claude/skills/known-pitfalls/SKILL.md (P-01..P-06). Used by /run-evaluator (P5 EVALUATE) to auto-sweep cycle artifacts. When known-pitfalls SKILL.md gains a new entry, append here too. Keep both in sync.",
-  "last_synced_with_skill": "2026-05-04",
+  "description": "Structured representation of InterSubMod/.claude/skills/known-pitfalls/SKILL.md (P-01..P-07). Used by /run-evaluator (P5 EVALUATE) to auto-sweep cycle artifacts. When known-pitfalls SKILL.md gains a new entry, append here too. Keep both in sync.",
+  "last_synced_with_skill": "2026-05-07",
+  "last_modified_reason": "added P-07 (single-track validated) per plan v1.6 §4.5.4-G batch 5a anchor #1",
   "pitfalls": [
     {
       "id": "P-01",
@@ -103,6 +104,25 @@
         "if_metric_value_above": {"field": "pilot.metric_results.value", "threshold": 0.58},
         "and_artifact_status": "pilot.confound_guard.n_reads_confound != pass",
         "then_severity": "warn"
+      }
+    },
+    {
+      "id": "P-07",
+      "category": "evidence_chain",
+      "name": "single-track validated cycle (missing orthogonal evidence)",
+      "summary": "Tier ⭐4/⭐5 cycle without orthogonal-track evidence (archive/replicate/alt-caller). 4-track L4 mandatory: (i) Statistical (ii) Cross-sample (iii) Mechanism (iv) Orthogonal — missing (iv) is the most common cause of retraction (e.g. 04-26 thread B whitelist).",
+      "trigger_keywords": ["⭐4", "⭐5", "validated", "tier=4", "tier=5", "tier_used: 4", "tier_used: 5"],
+      "detect_via": ["plan.tier_used", "plan.preconditions.upstream_reports"],
+      "severity": "block",
+      "correct_action": "Before claiming ⭐4/⭐5, add 1 orthogonal-track artifact (archive comparison / replicate run / alternate caller) and reference it in plan.preconditions.upstream_reports. Otherwise downgrade to ⭐3 (described, single-track).",
+      "source_ref": "plan v1.6 §4.5.4-G batch 5a anchor #1; validation-protocol L4 mandatory",
+      "memory_ref": null,
+      "added_by_anchor": "anchor #1 L4 mandatory hardening (plan v1.6 §4.5.4-G batch 5a)",
+      "validation_protocol_link": "InterSubMod/.claude/skills/validation-protocol/SKILL.md §L4-Mandatory",
+      "auto_check_rule": {
+        "if_tier_used_above": {"field": "plan.tier_used", "threshold": 4},
+        "and_no_orthogonal_reference": "len([r for r in plan.preconditions.upstream_reports if any(kw in r.lower() for kw in ['archive','replicate','alt-caller','orthogonal','cross-pipeline'])]) == 0",
+        "then_severity": "block"
       }
     }
   ]

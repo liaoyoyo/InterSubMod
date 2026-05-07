@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "N2_zone_aware_characterization",
+  "title": "[NEG-CTRL] Zone-Aware Framework — characterization-only verdict (validated, retained)",
+  "hypothesis_id": "NEG_N2_ZONE_AWARE",
+  "phase": "P5_EVALUATE",
+  "tier": "3",
+  "verdict": "active",
+  "priority": 50,
+  "started_at": "2026-04-10T10:00:00Z",
+  "last_advanced_at": "2026-04-20T17:00:00Z",
+  "preconditions": {
+    "binary_version": null,
+    "dataset_id": "zone_aware_master_post_KDE_corrected_caller_af_separate",
+    "upstream_reports": [
+      "InterSubMod/docs/CURRENT_FOCUS.md"
+    ]
+  },
+  "open_gates": [],
+  "artifacts": {"plan": "plan.json", "precheck": null, "pilot": "pilot.json", "generalize": "generalize.json", "evaluation": null},
+  "history": [
+    {"timestamp": "2026-04-10T10:00:00Z", "from_phase": null, "to_phase": "P0_REGISTER", "actor": "user"},
+    {"timestamp": "2026-04-20T17:00:00Z", "from_phase": "P4_GENERALIZE", "to_phase": "P5_EVALUATE", "actor": "user", "note": "validated as characterization-only; tier ⭐3 保留不撤回"}
+  ]
+}

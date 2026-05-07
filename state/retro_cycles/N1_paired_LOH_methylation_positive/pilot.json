@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "N1_paired_LOH_methylation_positive",
+  "ran_at": "2026-04-22T14:00:00Z",
+  "sample": "HCC1395",
+  "metric_results": {
+    "metric": "Inter_AF_to_NGroups_correlation",
+    "value": 0.787,
+    "ci_lower": 0.74,
+    "ci_upper": 0.83,
+    "p_value": 1e-15,
+    "n_samples": 12450,
+    "threshold_met": true
+  },
+  "confound_guard": {
+    "within_group_ols": "pass",
+    "af_bin_check": "pass",
+    "permutation_test": "pass",
+    "n_reads_confound": "pass",
+    "spatial_autocorr": "pass",
+    "notes": "All confound checks pass. Paired mode with KDE-corrected binary + caller_af separate column. No stale binary, no merged trap."
+  },
+  "verdict": "proceed_to_P4",
+  "raw_outputs": [],
+  "figures": []
+}

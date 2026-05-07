@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "N1_paired_LOH_methylation_positive",
+  "title": "[NEG-CTRL] Paired LOH × AF × Methylation POSITIVE (7/7 paired, NOT retracted)",
+  "hypothesis_id": "NEG_N1_PAIRED_LOH",
+  "phase": "P5_EVALUATE",
+  "tier": "4",
+  "verdict": "active",
+  "priority": 60,
+  "started_at": "2026-04-15T10:00:00Z",
+  "last_advanced_at": "2026-04-23T18:00:00Z",
+  "preconditions": {
+    "binary_version": null,
+    "dataset_id": "paired_master_post_KDE_corrected_2026-04-22_with_caller_af",
+    "upstream_reports": [
+      "InterSubMod/docs/CURRENT_FOCUS.md",
+      "InterSubMod/docs/experiments/INDEX.md"
+    ]
+  },
+  "open_gates": [],
+  "artifacts": {"plan": "plan.json", "precheck": null, "pilot": "pilot.json", "generalize": "generalize.json", "evaluation": null},
+  "history": [
+    {"timestamp": "2026-04-15T10:00:00Z", "from_phase": null, "to_phase": "P0_REGISTER", "actor": "user"},
+    {"timestamp": "2026-04-23T18:00:00Z", "from_phase": "P4_GENERALIZE", "to_phase": "P5_EVALUATE", "actor": "user", "note": "weekly report 確認 paired 層 POSITIVE 保留不撤回"}
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "N2_zone_aware_characterization",
+  "ran_at": "2026-04-20T15:00:00Z",
+  "samples": [
+    {"sample_id": "HCC1395", "metric_value": 0.142, "ci_lower": 0.11, "ci_upper": 0.17, "p_value": 1e-6, "passed_threshold": true},
+    {"sample_id": "HCC1395_DORADO", "metric_value": 0.135, "ci_lower": 0.10, "ci_upper": 0.16, "p_value": 1e-5, "passed_threshold": true},
+    {"sample_id": "H1437", "metric_value": 0.128, "ci_lower": 0.10, "ci_upper": 0.15, "p_value": 1e-5, "passed_threshold": true},
+    {"sample_id": "H2009", "metric_value": 0.151, "ci_lower": 0.12, "ci_upper": 0.18, "p_value": 1e-7, "passed_threshold": true},
+    {"sample_id": "HCC1937", "metric_value": 0.117, "ci_lower": 0.09, "ci_upper": 0.14, "p_value": 1e-4, "passed_threshold": true},
+    {"sample_id": "HCC1954", "metric_value": 0.123, "ci_lower": 0.09, "ci_upper": 0.15, "p_value": 1e-4, "passed_threshold": true},
+    {"sample_id": "COLO829", "metric_value": 0.139, "ci_lower": 0.11, "ci_upper": 0.17, "p_value": 1e-6, "passed_threshold": true}
+  ],
+  "consistency": {
+    "n_samples_passed": 7,
+    "n_samples_total": 7,
+    "direction_consistency": "7/7 positive (range 0.117 to 0.151, all p<1e-4); zone effect consistent",
+    "wilcoxon_p": 0.0078,
+    "fisher_combined_p": 1e-30,
+    "confidence_uplift": 0.85
+  },
+  "fan_out_mode": "sequential",
+  "verdict": "consistent"
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "thread_b_whitelist_retraction_04-26",
+  "checked_at": "2026-05-05T21:13:15Z",
+  "checks": {
+    "binary": {
+      "status": "skipped",
+      "expected": null,
+      "actual_head": null,
+      "stale_distance": null,
+      "note": "Pure-analysis cycle, no binary dependency."
+    },
+    "dataset": {
+      "status": "fresh",
+      "expected_id": "X6_caller_AF_post_KDE_corrected_2026-04-24",
+      "schema_violations": [],
+      "note": "No stale marks or known-pitfall name patterns."
+    },
+    "upstream_reports": [
+      {
+        "report_path": "InterSubMod/docs/reports/validated/2026/04/20260426_Thread_B_Retraction_Whitelist_Cross_Sample_01.md",
+        "status": "fresh",
+        "stale_reason": null
+      }
+    ]
+  },
+  "verdict": "PASS",
+  "blocking_reasons": []
+}

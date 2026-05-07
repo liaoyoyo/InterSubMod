@@ -59,7 +59,18 @@ def load_json(path: Path) -> dict | None:
 
 
 def cycle_dir(cycle_id: str) -> Path:
-    return STATE_ROOT / "cycles" / cycle_id
+    """Resolve cycle directory: prefer state/cycles/, fallback to state/retro_cycles/.
+
+    Allows /run-evaluator to operate on retrospective fixtures (Day 6 Drill 1)
+    without polluting active.json or live cycles/.
+    """
+    primary = STATE_ROOT / "cycles" / cycle_id
+    if primary.is_dir():
+        return primary
+    retro = STATE_ROOT / "retro_cycles" / cycle_id
+    if retro.is_dir():
+        return retro
+    return primary  # caller will hit the load-error path
 
 
 def load_cycle_artifacts(cycle_id: str) -> dict[str, Any]:

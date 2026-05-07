@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "longphase_to_v5_somatic_04-29",
+  "checked_at": "2026-05-05T21:13:15Z",
+  "checks": {
+    "binary": {
+      "status": "missing",
+      "expected": "380e8d2_uncommitted_layer1_5_alt_guard",
+      "actual_head": "a637c1877541a7510694c63766927139d17116d6",
+      "stale_distance": null,
+      "note": "Expected SHA not found in git history."
+    },
+    "dataset": {
+      "status": "fresh",
+      "expected_id": "HCC1395_5kHz_pilot_only",
+      "schema_violations": [],
+      "note": "No stale marks or known-pitfall name patterns."
+    },
+    "upstream_reports": [
+      {
+        "report_path": "InterSubMod/docs/reports/validated/2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md",
+        "status": "fresh",
+        "stale_reason": null
+      },
+      {
+        "report_path": "InterSubMod/docs/reports/validated/2026/04/20260428_Self_Phasing_Baseline_V5_Audit_01.md",
+        "status": "fresh",
+        "stale_reason": null
+      }
+    ]
+  },
+  "verdict": "BLOCKED",
+  "blocking_reasons": [
+    "binary missing: Expected SHA not found in git history."
+  ]
+}

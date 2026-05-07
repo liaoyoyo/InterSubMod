@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "N1_paired_LOH_methylation_positive",
+  "hypothesis": "Paired-mode subclone marker: Inter-region AF gradient correlates with HPFineNGroups across 7 samples — biology-consistent positive signal NOT confounded by stale binary or merged AF trap",
+  "validation_layers": ["L1_AUC_screening", "L2_pilot", "L3_cross_sample"],
+  "expected_effect": {
+    "metric": "Inter_AF_to_NGroups_correlation",
+    "min_threshold": 0.5,
+    "direction": "greater_than",
+    "stop_criteria": "if cross-sample direction inconsistent (<5/7), do not upgrade beyond ⭐3"
+  },
+  "preconditions": {
+    "binary_version": null,
+    "dataset_id": "paired_master_post_KDE_corrected_2026-04-22_with_caller_af",
+    "upstream_reports": [
+      "InterSubMod/docs/CURRENT_FOCUS.md",
+      "InterSubMod/docs/experiments/INDEX.md"
+    ],
+    "feature_flags": {"paired_mode": true, "kde_corrected": true, "caller_af_separate": true}
+  },
+  "samples": ["HCC1395", "HCC1395_DORADO", "H1437", "H2009", "HCC1937", "HCC1954", "COLO829"],
+  "skills_invoked": ["feature-layered-observation", "auc-confound-guard", "multi-sample-consistency", "run-evaluator"],
+  "estimated_duration_hours": 8.0
+}

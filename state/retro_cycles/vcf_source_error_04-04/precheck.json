@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "vcf_source_error_04-04",
+  "checked_at": "2026-05-05T21:13:14Z",
+  "checks": {
+    "binary": {
+      "status": "skipped",
+      "expected": null,
+      "actual_head": null,
+      "stale_distance": null,
+      "note": "Pure-analysis cycle, no binary dependency."
+    },
+    "dataset": {
+      "status": "schema_mismatch",
+      "expected_id": "pileup_symlink_ClairS_paired_for_TO_analysis",
+      "schema_violations": [
+        "Dataset name signals pileup symlink + ClairS-paired-for-TO mismatch (known pitfall P-04: pileup symlink should resolve to ClairS-TO not paired). Run `readlink -f` on the actual VCF symlink before proceeding."
+      ],
+      "note": "1 violation(s) detected."
+    },
+    "upstream_reports": [
+      {
+        "report_path": "InterSubMod/docs/experiments/in_progress/2026/04/20260404_HPFineP納入QS研究分析_01.md",
+        "status": "fresh",
+        "stale_reason": null
+      },
+      {
+        "report_path": "InterSubMod/docs/experiments/in_progress/2026/04/20260404_HPFineP_QS整合完整研究報告_01.md",
+        "status": "fresh",
+        "stale_reason": null
+      },
+      {
+        "report_path": "InterSubMod/docs/experiments/in_progress/2026/04/20260404_LOH_Strong_Weak_7feature_AUC驗證報告_01.md",
+        "status": "fresh",
+        "stale_reason": null
+      }
+    ]
+  },
+  "verdict": "BLOCKED",
+  "blocking_reasons": [
+    "dataset: Dataset name signals pileup symlink + ClairS-paired-for-TO mismatch (known pitfall P-04: pileup symlink should resolve to ClairS-TO not paired). Run `readlink -f` on the actual VCF symlink before proceeding."
+  ]
+}
