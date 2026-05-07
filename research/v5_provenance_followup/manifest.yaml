@@ -1,0 +1,94 @@
+project_name: v5_provenance_followup
+parent_audit: InterSubMod/docs/reports/validated/2026/05/20260505_self_phasing_V5_data_provenance_audit_01.md
+parent_pi_report: InterSubMod/docs/reports/validated/2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md
+plan_source: ~/.claude/plans/nifty-enchanting-turtle.md
+created: 2026-05-06
+status: planned
+priority: P0
+
+datasets:
+  primary:
+    sample: HCC1395_5kHz
+    seq_platform: ONT_5kHz_simplex_5mCG_5hmCG
+    bam_size: ~268GB
+    paths:
+      bam_a_baseline_09: /big7_disk/liaoyoyo2001/longphase-to-mod/output/threshold_compare/baseline_09/tumor_tagged.bam
+      bam_b_v5_flag: /big7_disk/liaoyoyo2001/longphase-to-mod/output/threshold_compare/v5_flag/tumor_tagged.bam
+      bam_c_v5_pass1only_4_12: /big7_disk/liaoyoyo2001/longphase-to-mod/output/pononly_v5_somatic_fallback/tumor_tagged.bam
+      snv_vcf: /big7_disk/liaoyoyo2001/data/HCC1395_5kHz/snv.vcf.gz
+      ref: /big7_disk/liaoyoyo2001/data/ref/GRCh38_no_alt_analysis_set.fasta
+
+binary_versions:
+  ism:
+    binary: InterSubMod/build/bin/inter_sub_mod
+    mtime: 2026-04-21
+    branch: KDE-fixed (production)
+  longphase_to_mod:
+    head_commit: 938f0df
+    commit_chain:
+      - 8b8c1fd: V2b PON-only flag
+      - 41ff147: V3F getVote two-layer
+      - 380e8d2: INDEL guard
+      - d0bcd8c: ploidy collection timing fix (4-30 commit)
+      - 938f0df: highPurity threshold 0.95→0.9 (4-30 cherry-pick)
+
+cycles:
+  T1_1:
+    name: Three-BAM ISM Benchmark + Sanity Comparison
+    priority: P0
+    status: planned
+    estimated_duration: ~1 day
+    deliverables:
+      - InterSubMod/research/v5_provenance_followup/T1_1_3bam_compare/comparison_summary.tsv
+      - InterSubMod/research/v5_provenance_followup/T1_1_3bam_compare/comparison_report.md
+    decisions_to_make:
+      - 三情境 A/B/C 判定
+
+  T1_2:
+    name: Read-level Vote countMap Audit + Regional Clustering
+    priority: P0
+    status: planned
+    path: alpha (binary patch dump)
+    estimated_duration: 1.5-3 days
+    deliverables:
+      - InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/read_level_vote_audit.md
+      - vote_dump_{baseline,v3f,v5}_chr19.tsv.gz
+    evidence_paths:
+      - 個案 trace (≥10 reads)
+      - 區域聚集 (chr × somatic density)
+      - AF/density 共變
+      - 修正後消失驗證
+    decisions_to_make:
+      - 4 路徑 pass/fail 判定 (need ≥3 pass)
+
+  T1_3:
+    name: 4-cell Ablation
+    priority: P2 (conditional on T1.1+T1.2 results)
+    status: deferred
+    estimated_duration: ~3 days
+    trigger_conditions:
+      A: optional (補完整性)
+      B: strongly recommended (量化獨立貢獻)
+      C: mandatory (PI errata 證據)
+
+verification:
+  end_to_end_questions:
+    - V5 (Pass 2 觸發) F1 vs baseline_09?
+    - V5 (Pass 2 觸發) HP_Ratio median?
+    - V5 (Pass 2 觸發) sanity 15/15 PASS?
+    - V5 (Pass 2 觸發) HP:i:33 比例?
+    - Pass 2 second round 對 ISM 獨立貢獻?
+    - 三情境 A/B/C 哪個成立?
+
+risks:
+  R1: 三 BAM 268GB I/O 爭用 → 順序跑不並行
+  R2: KDE-fixed binary 與 4-30 BAM 相容性 → chr19 pilot 30 秒驗
+  R3: sanity_paired_check.py 參數化引入回歸 → 對既有 BAM 重現舊結果
+  R4: T1.2 binary patch 編譯失敗 → 用 v5_audit_suite 編譯腳本對齊
+  R5: 情境 C 引發 PI 報告大改 → T1.1 完成後立即與用戶討論
+
+related_memory:
+  - memory/project_v5_somatic_fallback_verification.md
+  - memory/project_self_phasing_causal_chain_confirmed.md
+  - memory/project_pon_only_phasing_verification.md
+  - memory/project_hcc1395_chr8_hotspot.md (區域聚集對齊參考)

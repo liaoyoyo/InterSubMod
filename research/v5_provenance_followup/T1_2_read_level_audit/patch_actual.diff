@@ -1,0 +1,131 @@
+diff --git a/Haplotag.cpp b/Haplotag.cpp
+index 5a3277c..542040e 100644
+--- a/Haplotag.cpp
++++ b/Haplotag.cpp
+@@ -32,7 +32,7 @@ static const char *CORRECT_USAGE_MESSAGE =
+ 
+ static const char* shortopts = "s:b:o:t:q:p:r:";
+ 
+-enum { OPT_HELP = 1, TAG_SUP, SV_FILE, REGION, LOG, MOD_FILE, CRAM};
++enum { OPT_HELP = 1, TAG_SUP, SV_FILE, REGION, LOG, MOD_FILE, CRAM, DEBUG_VOTE_DUMP};
+ 
+ static const struct option longopts[] = { 
+     { "help",                 no_argument,        NULL, OPT_HELP },
+@@ -49,6 +49,7 @@ static const struct option longopts[] = {
+     { "percentageThreshold",  required_argument,  NULL, 'p' },
+     { "region",               required_argument,  NULL, REGION },
+     { "log",                  no_argument,        NULL, LOG },
++    { "debug-vote-dump",      required_argument,  NULL, DEBUG_VOTE_DUMP },  // T1.2
+     { NULL, 0, NULL, 0 }
+ };
+ 
+@@ -67,6 +68,7 @@ namespace opt
+     static std::string outputFormat="bam";
+     static bool tagSupplementary = false;
+     static bool writeReadLog = false;
++    static std::string debugVoteDumpPath = "";  // T1.2
+     static std::string command="longphase-to ";
+ }
+ 
+@@ -93,6 +95,7 @@ void HaplotagOptions(int argc, char** argv)
+             case TAG_SUP:  opt::tagSupplementary = true; break;
+             case CRAM:     opt::outputFormat = "cram"; break;
+             case LOG:      opt::writeReadLog = true; break;
++            case DEBUG_VOTE_DUMP: arg >> opt::debugVoteDumpPath; break;  // T1.2
+             case OPT_HELP:
+                 std::cout << CORRECT_USAGE_MESSAGE;
+                 exit(EXIT_SUCCESS);
+@@ -216,6 +219,7 @@ int HaplotagMain(int argc, char** argv, std::string in_version)
+     ecParams.version=in_version;
+     ecParams.command=opt::command;
+     ecParams.outputFormat=opt::outputFormat;
++    ecParams.debugVoteDumpPath=opt::debugVoteDumpPath;  // T1.2
+ 
+     HaplotagProcess processor(ecParams);
+ 
+diff --git a/HaplotagProcess.cpp b/HaplotagProcess.cpp
+index 9c56afc..4700121 100755
+--- a/HaplotagProcess.cpp
++++ b/HaplotagProcess.cpp
+@@ -1,5 +1,17 @@
+ #include "HaplotagProcess.h"
+-
++#include <mutex>
++#include <fstream>
++
++// ──────────── T1.2 DEBUG VOTE DUMP (file-scope state) ────────────
++// Provenance audit: per-read getVote() countMap + hpResult dumped to TSV.
++// Activated by HaplotagParameters::debugVoteDumpPath (set via --debug-vote-dump CLI).
++// Thread-safe via mutex; lazy init.
++namespace {
++    std::mutex t12_dump_mutex;
++    std::ofstream t12_dump_stream;
++    std::string t12_dump_path = "";
++    bool t12_dump_initialized = false;
++}
+ 
+ void HaplotagProcess::variantParser(std::string variantFile){
+ 
+@@ -262,6 +274,13 @@ void HaplotagProcess::parserProcess(std::string &input){
+ 
+ void HaplotagProcess::tagRead(HaplotagParameters &params){
+ 
++    // T1.2: capture debug dump path (single-threaded init before tag threads spawn)
++    {
++        std::lock_guard<std::mutex> lk(t12_dump_mutex);
++        t12_dump_path = params.debugVoteDumpPath;
++        t12_dump_initialized = false;  // reset for fresh run
++    }
++
+     // update chromosome processing based on region
+     if (!params.region.empty()) {
+         auto colonPos = params.region.find(":");
+@@ -724,6 +743,36 @@ int HaplotagProcess::judgeHaplotype(const  bam_hdr_t &bamHdr,const bam1_t &aln,
+     int hpResult = 0;
+     getVote(countMap, min, max, hpResult);
+     std::string readName = bam_get_qname(&aln);
++
++    // ──────────── T1.2 DEBUG VOTE DUMP ────────────
++    // Captures priority bug: in baseline, somatic votes (HP1_1/HP2_1) override
++    // germline votes (HP1/HP2). V3F two-layer fixes; V5 Layer 1.5 adds fallback.
++    if (!t12_dump_path.empty()) {
++        std::lock_guard<std::mutex> lk(t12_dump_mutex);
++        if (!t12_dump_initialized) {
++            t12_dump_stream.open(t12_dump_path);
++            if (!t12_dump_stream.is_open()) {
++                std::cerr << "[T1.2 DUMP] WARN: cannot open " << t12_dump_path << "\n";
++                t12_dump_path = "";  // disable further attempts
++            } else {
++                t12_dump_stream << "read_name\tchr\tpos\thpResult\t"
++                                << "cnt_HP1\tcnt_HP2\tcnt_HP1_1\tcnt_HP2_1\tcnt_HP3\t"
++                                << "vote_min\tvote_max\n";
++                t12_dump_initialized = true;
++            }
++        }
++        if (t12_dump_initialized) {
++            t12_dump_stream
++                << readName << "\t" << chrName << "\t"
++                << aln.core.pos << "\t" << hpResult << "\t"
++                << countMap[HAPLOTYPE1]   << "\t" << countMap[HAPLOTYPE2]   << "\t"
++                << countMap[HAPLOTYPE1_1] << "\t" << countMap[HAPLOTYPE2_1] << "\t"
++                << countMap[HAPLOTYPE3]   << "\t"
++                << min << "\t" << max << "\n";
++        }
++    }
++    // ──────────── END T1.2 DUMP ────────────
++
+     if( max == 0 || max/(max+min) < percentageThreshold){
+         // low germline confidence
+         pqValue = 0;
+diff --git a/HaplotagProcess.h b/HaplotagProcess.h
+index 8974203..10c1865 100755
+--- a/HaplotagProcess.h
++++ b/HaplotagProcess.h
+@@ -27,6 +27,7 @@ struct HaplotagParameters
+     
+     bool tagSupplementary;
+     bool writeReadLog;
++    std::string debugVoteDumpPath;  // T1.2: empty = disabled, else TSV output path
+ };
+ 
+ struct AlleleHaplotype

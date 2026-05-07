@@ -1,0 +1,199 @@
+## T1.2 — Vote countMap dump patch
+##
+## 目的: 在 longphase-to haplotag 執行時，把每條 read 經 getVote() 後的
+##       countMap (HP1/HP2/HP1_1/HP2_1/HP3 票數) + hpResult + min/max
+##       dump 到 TSV，供 baseline / V3F / V5 三版 binary 跨版對比 priority bug。
+##
+## 設計原則:
+##   1. CLI flag 預設關閉 (--debug-vote-dump <path>)
+##   2. Thread-safe (file-scope static mutex + ofstream)
+##   3. 不改函數簽章 (HaplotagProcess.h:65/68 介面契約零變動)
+##   4. Lazy init: 第一次寫 read 時才開檔
+##   5. 範圍限定 testing-only binary，不進 production
+##
+## Apply:
+##   cd /big7_disk/liaoyoyo2001/longphase-to-mod
+##   git apply InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/patch.diff
+##   make -j8
+##
+## 三版 binary 編譯計畫:
+##   1. baseline-debug: git checkout 8b8c1fd^ + apply patch + make
+##   2. v3f-debug:      git checkout 380e8d2  + apply patch + make
+##   3. v5-debug:       git checkout HEAD     + apply patch + make
+##
+## 每版編譯 ~2-3 min (jemalloc/htslib 已 build 過)。
+
+diff --git a/HaplotagProcess.h b/HaplotagProcess.h
+index abcdef0..1234567 100644
+--- a/HaplotagProcess.h
++++ b/HaplotagProcess.h
+@@ -27,6 +27,7 @@ struct HaplotagParameters
+     bool tagSupplementary;
+     bool writeReadLog;
+     std::string outputFormat;
++    std::string debugVoteDumpPath;  // T1.2: empty = disabled, else TSV output path
+ };
+
+ #ifdef ENABLE_HAPLOTAG_SVS
+
+diff --git a/Haplotag.cpp b/Haplotag.cpp
+index abcdef0..1234567 100644
+--- a/Haplotag.cpp
++++ b/Haplotag.cpp
+@@ -32,7 +32,7 @@
+ "      --tagSupplementary              tag supplementary alignment. default:False\n"
+ "      --log                           Output additional information for each read.\n";
+
+-enum { OPT_HELP = 1, TAG_SUP, SV_FILE, REGION, LOG, MOD_FILE, CRAM};
++enum { OPT_HELP = 1, TAG_SUP, SV_FILE, REGION, LOG, MOD_FILE, CRAM, DEBUG_VOTE_DUMP};
+
+ static const struct option longopts[] = {
+     { "help",                 no_argument,        NULL, OPT_HELP },
+@@ -50,6 +50,7 @@ static const struct option longopts[] = {
+     { "region",               required_argument,  NULL, REGION },
+     { "log",                  no_argument,        NULL, LOG },
++    { "debug-vote-dump",      required_argument,  NULL, DEBUG_VOTE_DUMP },  // T1.2
+     { NULL, 0, NULL, 0 }
+ };
+
+@@ -69,6 +70,7 @@ namespace opt
+     static bool tagSupplementary = false;
+     static bool writeReadLog = false;
++    static std::string debugVoteDumpPath = "";  // T1.2
+     static std::string command="longphase-to ";
+ }
+
+@@ -95,6 +97,7 @@ void HaplotagOptions(int argc, char** argv)
+             case CRAM:     opt::outputFormat = "cram"; break;
+             case LOG:      opt::writeReadLog = true; break;
++            case DEBUG_VOTE_DUMP: arg >> opt::debugVoteDumpPath; break;  // T1.2
+             case OPT_HELP:
+                 std::cout << CORRECT_USAGE_MESSAGE;
+                 exit(EXIT_SUCCESS);
+@@ -218,6 +221,7 @@ int HaplotagMain(int argc, char** argv, std::string in_version)
+     ecParams.command=opt::command;
+     ecParams.outputFormat=opt::outputFormat;
++    ecParams.debugVoteDumpPath=opt::debugVoteDumpPath;  // T1.2
+
+     time_t begin = time(NULL);
+
+diff --git a/HaplotagProcess.cpp b/HaplotagProcess.cpp
+index abcdef0..1234567 100644
+--- a/HaplotagProcess.cpp
++++ b/HaplotagProcess.cpp
+@@ -1,7 +1,21 @@
+ #include "HaplotagProcess.h"
+ #include "Util.h"
+ #include "ParsingBam.h"
++#include <mutex>
++#include <fstream>
++
++// ──────────── T1.2 DEBUG VOTE DUMP (file-scope state) ────────────
++// Provenance audit: dump per-read getVote() countMap + hpResult to TSV.
++// Thread-safe via static mutex + static ofstream.
++// Activated by HaplotagParameters::debugVoteDumpPath (set via --debug-vote-dump CLI).
++namespace {
++    std::mutex t12_dump_mutex;
++    std::ofstream t12_dump_stream;
++    std::string t12_dump_path = "";
++    bool t12_dump_initialized = false;
++}
++// ──────────── END T1.2 file-scope state ────────────
+
+ void HaplotagProcess::variantParser(std::string variantFile){
+@@ -XX,6 +XX,12 @@ HaplotagProcess::HaplotagProcess(HaplotagParameters params){
+     ...
++
++    // T1.2: capture debug dump path (file-scope, since judgeHaplotype is non-static)
++    {
++        std::lock_guard<std::mutex> lk(t12_dump_mutex);
++        t12_dump_path = params.debugVoteDumpPath;
++    }
+ }
+
+@@ -728,6 +742,33 @@ int HaplotagProcess::judgeHaplotype(const bam_hdr_t &bamHdr,const bam1_t &aln, s
+     getVote(countMap, min, max, hpResult);
+     std::string readName = bam_get_qname(&aln);
++
++    // ──────────── T1.2 DEBUG VOTE DUMP ────────────
++    // Dump countMap + hpResult per read for cross-version (baseline/V3F/V5) comparison.
++    // Captures the priority bug: in baseline, somatic votes (HP1_1/HP2_1) override
++    // germline votes (HP1/HP2). V3F two-layer fixes this. V5 Layer 1.5 adds fallback.
++    if (!t12_dump_path.empty()) {
++        std::lock_guard<std::mutex> lk(t12_dump_mutex);
++        if (!t12_dump_initialized) {
++            t12_dump_stream.open(t12_dump_path);
++            if (!t12_dump_stream.is_open()) {
++                std::cerr << "[T1.2 DUMP] WARN: cannot open " << t12_dump_path << "\n";
++                t12_dump_path = "";  // disable further attempts
++            } else {
++                t12_dump_stream << "read_name\tchr\tpos\thpResult\t"
++                                << "cnt_HP1\tcnt_HP2\tcnt_HP1_1\tcnt_HP2_1\tcnt_HP3\t"
++                                << "vote_min\tvote_max\n";
++                t12_dump_initialized = true;
++            }
++        }
++        if (t12_dump_initialized) {
++            t12_dump_stream
++                << readName << "\t" << chrName << "\t"
++                << aln.core.pos << "\t" << hpResult << "\t"
++                << countMap[HAPLOTYPE1]   << "\t" << countMap[HAPLOTYPE2]   << "\t"
++                << countMap[HAPLOTYPE1_1] << "\t" << countMap[HAPLOTYPE2_1] << "\t"
++                << countMap[HAPLOTYPE3]   << "\t"
++                << min << "\t" << max << "\n";
++        }
++    }
++    // ──────────── END T1.2 DUMP ────────────
++
+     if( max == 0 || max/(max+min) < percentageThreshold){
+         // low germline confidence
+         pqValue = 0;
+
+## ────────────────────────────────────────────────────────────
+## 編譯與執行步驟（user 確認後執行）
+## ────────────────────────────────────────────────────────────
+##
+## STEP 1: 在 v5 (HEAD) 確認 patch apply 不衝突
+##   cd /big7_disk/liaoyoyo2001/longphase-to-mod
+##   git stash  # 暫存 working tree（如有）
+##   git apply --check InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/patch.diff
+##
+## STEP 2: 編 v5-debug binary（使用 HEAD = 938f0df，含全 5 commits）
+##   git apply InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/patch.diff
+##   make -j8
+##   cp longphase-to longphase-to-v5-debug
+##   git checkout HaplotagProcess.h Haplotag.cpp HaplotagProcess.cpp  # revert patch
+##
+## STEP 3: 編 v3f-debug binary（checkout 380e8d2）
+##   git checkout 380e8d2
+##   git apply InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/patch.diff
+##   make -j8
+##   cp longphase-to longphase-to-v3f-debug
+##   git checkout HaplotagProcess.h Haplotag.cpp HaplotagProcess.cpp
+##
+## STEP 4: 編 baseline-debug binary（checkout 8b8c1fd^ = 9d74f8b）
+##   git checkout 9d74f8b
+##   git apply InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/patch.diff
+##   make -j8
+##   cp longphase-to longphase-to-baseline-debug
+##   git checkout HaplotagProcess.h Haplotag.cpp HaplotagProcess.cpp
+##   git checkout fix/pon-only-phasing  # 回到原分支
+##
+## STEP 5: 跑 chr19 dump 三版（每版 3-5 min，使用 region flag 限定 chr19）
+##   for VER in baseline v3f v5; do
+##     ./longphase-to-${VER}-debug haplotag \
+##       -s output/threshold_compare/v5_flag/tumor_phased.vcf \
+##       -b /big7_disk/liaoyoyo2001/data/HCC1395_5kHz/HCC1395.bam \
+##       -r /big7_disk/liaoyoyo2001/data/ref/GRCh38_no_alt_analysis_set.fasta \
+##       -o /tmp/t12_dump_${VER}/tumor_tagged \
+##       --region chr19 \
+##       --debug-vote-dump InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/vote_dump_${VER}_chr19.tsv \
+##       -t 24
+##     gzip InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/vote_dump_${VER}_chr19.tsv
+##   done
+##
+## STEP 6: 分析（Python）— 詳見後續 v5_provenance_vote_audit.py
+##   - JOIN 三版 TSV by (read_name, chr, pos)
+##   - 找 priority bug 受害 reads (cnt_HP_majority ≠ cnt_HP_X_majority AND hpResult 翻轉)
+##   - 區域聚集統計 (sliding window)
+##   - 修正後消失驗證 (baseline 受害 reads 在 v3f/v5 是否被修正)
