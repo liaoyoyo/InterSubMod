@@ -118,6 +118,108 @@
           "description": "InterSubMod/-prefixed path to the final report once written."
         }
       }
+    },
+    "main_axis": {
+      "type": ["object", "null"],
+      "description": "M1 Trust Score 目標鎖。Cycle 啟動時 user 指定主軸；cycle-state drift detection 對照此欄位。",
+      "additionalProperties": false,
+      "required": ["anchor_doc", "one_line_goal"],
+      "properties": {
+        "anchor_doc": {
+          "type": "string",
+          "description": "InterSubMod/-prefixed path to the anchor document (e.g. CURRENT_FOCUS.md)"
+        },
+        "anchor_section": {
+          "type": ["string", "null"],
+          "description": "Specific section heading within anchor_doc"
+        },
+        "one_line_goal": {
+          "type": "string",
+          "description": "Single-line restatement of the cycle goal"
+        },
+        "drift_keywords_required": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Keywords that should appear in cycle artifacts; absence triggers drift WARN"
+        },
+        "drift_keywords_forbidden": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Keywords that should NOT appear; presence triggers drift WARN"
+        }
+      }
+    },
+    "trust_score": {
+      "type": ["object", "null"],
+      "description": "M1 Trust Score 動態信任分數，由 cycle-state 在每次 dashboard 觸發時計算。score < 0.4 → 暫停建議；0.4-0.7 → 列假設；>0.7 → auto-advance.",
+      "additionalProperties": false,
+      "properties": {
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "computed_at": { "type": "string", "format": "date-time" },
+        "components": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "automation_authority": { "type": "number", "minimum": 0, "maximum": 1, "description": "互動模式=0.5 / auto=1.0" },
+            "time_budget_remaining": { "type": "number", "minimum": 0, "maximum": 1, "description": "estimated_duration_hours 剩餘比例" },
+            "reversibility": { "type": "number", "minimum": 0, "maximum": 1, "description": "純分析=1.0 / C++ commit=0.3 / 升 ⭐4-5=0.2" },
+            "test_coverage": { "type": "number", "minimum": 0, "maximum": 1, "description": "Drill 1 retro 或過往 cycle 跑過此路徑的次數權重" },
+            "invocation_count": { "type": "number", "minimum": 0, "maximum": 1, "description": "skill 調用次數成功率" }
+          }
+        }
+      }
+    },
+    "failure_attribution": {
+      "type": ["object", "null"],
+      "description": "M2 結構化失敗定位。當 verdict ≠ active/completed 時自動填；由 evaluator 或 check-staleness 寫入。",
+      "additionalProperties": false,
+      "properties": {
+        "categories": {
+          "type": "array",
+          "items": { "enum": ["precondition_violation", "confound_bias", "consistency_violation", "upstream_retracted", "dataset_schema", "stale_binary", "precedent_pattern", "drift", "unknown"] },
+          "description": "Multi-cause possible; primary_category 標記主要"
+        },
+        "primary_category": {
+          "enum": ["precondition_violation", "confound_bias", "consistency_violation", "upstream_retracted", "dataset_schema", "stale_binary", "precedent_pattern", "drift", "unknown"]
+        },
+        "phase_at_failure": {
+          "enum": ["P0_REGISTER", "P1_PLAN", "P2_PRECHECK", "P3_PILOT", "P4_GENERALIZE", "P5_EVALUATE", "P6_COMMIT"]
+        },
+        "skill_at_failure": { "type": ["string", "null"] },
+        "gate_at_failure": { "type": ["string", "null"] },
+        "components_below_threshold": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "e.g. ['effect_size_stability=0.18', 'multi_sample_consistency=0.35']"
+        },
+        "pitfalls_hit": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "P-XX ids that fired"
+        },
+        "confidence": {
+          "enum": ["high", "medium", "low"],
+          "description": "high = rule match; medium = inferred from components; low = multi-hypothesis"
+        },
+        "diagnosed_at": { "type": "string", "format": "date-time" },
+        "auto_recovery_attempted": { "type": "boolean" },
+        "auto_recovery_succeeded": { "type": ["boolean", "null"] },
+        "user_intervention_required": { "type": "boolean" }
+      }
+    },
+    "interaction_metrics": {
+      "type": "object",
+      "description": "M4 介入計數器；append-only interaction_log.jsonl 為 SoT，這裡是 cycle 結束時的聚合快照。",
+      "additionalProperties": false,
+      "properties": {
+        "user_interventions": { "type": "integer", "minimum": 0 },
+        "auto_advancements": { "type": "integer", "minimum": 0 },
+        "user_corrections": { "type": "integer", "minimum": 0 },
+        "auto_recovery_attempts": { "type": "integer", "minimum": 0 },
+        "auto_recovery_successes": { "type": "integer", "minimum": 0 },
+        "drift_warnings_emitted": { "type": "integer", "minimum": 0 },
+        "drift_warnings_acknowledged": { "type": "integer", "minimum": 0 }
+      }
     }
   }
 }
