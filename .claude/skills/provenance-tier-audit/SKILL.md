@@ -195,3 +195,22 @@ None
 - **Anchor #1 「L4 多層驗證必建」** → over-claim 偵測必須交叉檢查 ledger.stability + multi-sample passed_count + 跨 artifact 一致性，不單看 INDEX 標籤
 - **Anchor #7 「Pivot 容忍 + ⭐4-5 lock**」 → ⭐1-3 stale 寬容（reopen 容易），⭐4-5 stale 嚴查（lock 後撤回成本高）
 - **Anchor #3 「報告 5 段骨架」** → 輸出格式對應 weekly-report Layer 1，便於直接餵入週報 §1 證據盤點段
+
+## DO NOT USE WHEN（v1.7 batch A）
+
+- **單 cycle 升 tier 判定** — 用 `/run-evaluator`（per-cycle retraction risk）；本 skill 是**全域**而非單 cycle
+- **想跑 pilot 分析** — 用 `/feature-layered-observation`
+- **寫週報** — 用 `/weekly-report`（本 skill 可作 Layer 1 input 但不取代）
+- **修復某 cycle artifact** — 用該 cycle 對應 phase skill；本 skill 純 read-only audit
+- **mass tier downgrade** — 必須逐 cycle 過 run-evaluator + reviewer override，不可批次改 INDEX
+
+## Quality Checklist — 交付 audit 報告前自我檢查（v1.7 batch B）
+
+- [ ] **5 處 artifact 全掃**：hypothesis_queue / evidence_ledger / state/cycles / experiments INDEX / MEMORY.md
+- [ ] **5 種異常分類偵測**：(1) orphan cycle (2) over-claimed tier (3) stale entry (4) cross-artifact 不一致 (5) tier 分佈異常
+- [ ] over-claim 交叉檢查 stability + passed_count + 跨 artifact 一致（anchor #1）
+- [ ] **⭐4-5 stale 嚴查**（>30 天即警示），⭐1-3 寬容（>365 天）
+- [ ] 輸出格式對應 weekly-report Layer 1（§1 證據盤點直接套）
+- [ ] 每異常含：cycle_id + 證據 file path + 建議 action + severity
+- [ ] **不修狀態，只報告**（read-only audit；任何 write 都是 bug）
+- [ ] tier 分佈異常閾值：⭐4-5 占比 > 40% 提 systematic alarm

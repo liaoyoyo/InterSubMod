@@ -1,8 +1,9 @@
 ---
 name: doc-standards
-description: InterSubMod 文檔管理規範。檔案命名格式、元數據模板、圖片規則、多步驟目錄結構、AI session 報告規則。觸發：建立新 .md 檔案或重組文件目錄時。
+description: InterSubMod 文檔管理規範。檔案命名格式、元數據模板、圖片規則、多步驟目錄結構、AI session 報告規則。觸發：建立新 .md 檔案或重組文件目錄時。DO NOT USE WHEN：寫 SKILL.md（用 plugin-dev:skill-development）、寫 13 段技術報告（用 structured-tech-report）、寫週報（用 weekly-report）。
 allowed-tools: Read, Write, Glob, Grep
 user-invocable: true
+paths: ["docs/**/*.md", "research/**/*.md", "**/*.md"]
 ---
 
 # InterSubMod 文檔管理規範

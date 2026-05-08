@@ -1,7 +1,8 @@
 ---
 name: cpp-change
-description: PDD C++ 修改協議（6步驟）。在 methodology-audit 完成且用戶選定方案後啟動。確保每步驟有對應 commit，修改可追溯、可回退。觸發條件：「開始實作 [審查文件名]」、「執行方案 B」。
+description: PDD C++ 修改協議（6步驟）。在 methodology-audit 完成且用戶選定方案後啟動。確保每步驟有對應 commit，修改可追溯、可回退。觸發條件：「開始實作 [審查文件名]」、「執行方案 B」。DO NOT USE WHEN：純 Python/R 分析、文檔修改、無對應 methodology-audit 報告、改 .md 或 schema 檔。
 user-invocable: true
+paths: ["src/**/*.cpp", "src/**/*.hpp", "src/**/*.h", "include/**/*.hpp", "include/**/*.h", "tests/**/*.cpp", "CMakeLists.txt"]
 ---
 
 # CPP-Change Skill — PDD C++ 修改協議
