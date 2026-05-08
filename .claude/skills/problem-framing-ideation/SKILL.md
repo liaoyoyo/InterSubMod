@@ -248,3 +248,22 @@ Complete working examples:
 - Anchor #3 「報告骨架」 → 5W1H 表輸出格式須能直接餵給 structured-tech-report 的 §Background+Mechanism 段
 - Anchor #7 「pivot 容忍」 → 對與已撤回方向相似的提案，警告但不禁止（用戶有權重啟）
 
+## DO NOT USE WHEN（v1.7 batch A）
+
+- **已有具體假說** — 用 `/inject-hypothesis` 直接註冊到 hypothesis_queue.json
+- **想啟動 cycle** — 用 `/cycle-init`（P0 REGISTER）
+- **想跑分析** — 用 `/feature-layered-observation`（P3 PILOT）
+- **已超 2hr brainstorm** — anchor #5 強制收斂；推現有最好的進 inject-hypothesis
+- **想擴大研究 scope** — 用 `/init-research` 建多週專案
+
+## Quality Checklist — 交付候選假說清單前自我檢查（v1.7 batch B）
+
+- [ ] 候選假說 **1-3 個**（嚴格不超過 3，避免決策疲勞）
+- [ ] 每個假說有完整 5W1H 表（What / Why / Who / When / Where / How）
+- [ ] 與 MEMORY.md `## Concluded` 段已 NEGATIVE 假說對照（避免重蹈覆轍）
+- [ ] 投入時間 < 2 hr（anchor #5）；超時不再 ideate
+- [ ] 輸出 markdown 表格可直接餵 inject-hypothesis（含 priority / dataset / expected_effect 欄）
+- [ ] gap analysis 含「為何這方向值得試」+ 「最壞情況 NEGATIVE 也學到什麼」
+- [ ] 預期 effect size 範圍給上下界
+- [ ] 不註冊（→ inject-hypothesis）、不執行（→ research-loop）、不建專案（→ init-research）
+

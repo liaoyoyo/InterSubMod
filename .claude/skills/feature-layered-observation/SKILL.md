@@ -303,3 +303,24 @@ G1-G10 十個功能群組驗證了同一條流程穩定可行（見 `research/fe
 - **Anchor #5 「One-turn mechanism freeze」** → Step 0 prior_conclusion 已標 NEGATIVE 的特徵，**不在迴圈中試「換 filter 重做」**；要重驗必須在新 plan.json 寫 `revival_reason` 並過 inject-hypothesis
 - **Anchor #6 「5 層圖表細節」** → 6 類圖 caption 須含 4 元素：發現 / 樣本 n + 統計量 / 對應表格 / 下一步預期；avoid 紅綠單色（色盲無關）
 - **Anchor #7 「Pivot 容忍」** → Step 3 一致性 0/7 時，建議 `pivot-direction` 而非 `keep retrying`
+
+## DO NOT USE WHEN（v1.7 batch A）
+
+- **cycle 在 P0/P1 PHASE** — 沒 plan.json 不該跑 pilot；先 `research-loop`
+- **沒 verdict=PASS 的 precheck.json** — 先 `/check-staleness`；P2 BLOCKED 跑 pilot 是浪費
+- **想做 7 樣本跨樣本驗證** — 用 `/multi-sample-consistency`（P4 GENERALIZE）
+- **想跨 cycle 全域審計** — 用 `/provenance-tier-audit`
+- **想生成觀察分析腳本** — 用 `/observation-analysis`（O-系列腳本生成器）
+- **prior_conclusion 已標 NEGATIVE 且未 revival_reason** — anchor #5 禁止「換 filter 重做」
+
+## Quality Checklist — 交付 pilot.json 前自我檢查（v1.7 batch B）
+
+- [ ] Step 0 prior_conclusion check：已查 MEMORY.md `## Concluded` 段
+- [ ] Step 1 global AUC + 95% CI（bootstrap N≥1000）
+- [ ] Step 5 **confound guard 4 種全跑**：within-group OLS / AF-bin stratification / permutation test / n_reads check（anchor #1 L4 必經）
+- [ ] Step 6 spatial autocorr 在中-TP-rate window 驗（避免 chr+pos 純 artifact）
+- [ ] 6 類圖 caption 含 4 元素：發現 / 樣本 n + 統計量 / 對應表格 / 下一步預期
+- [ ] verdict 寫入 pilot.json：`positive_pilot` / `negative` / `dataset_specific` / `annotation_only`
+- [ ] confound flags 全 PASS 或文字明確標記為何 fail
+- [ ] schema 符合 `state/schemas/pilot.schema.json`
+- [ ] 圖表非紅綠單色（色盲友好）；CJK 字型已注入（feedback_matplotlib_cjk_font_rule）

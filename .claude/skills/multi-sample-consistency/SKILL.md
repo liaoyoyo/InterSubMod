@@ -176,3 +176,23 @@ prompt: |
 - `docs/standards/evidence_tier_rubric.md`
 - `docs/standards/research_terminology.json`
 - MEMORY: `feedback_figure_layout_standard.md`
+
+## DO NOT USE WHEN（v1.7 batch A）
+
+- **單樣本 cycle** — 不需要 cross-sample validation
+- **沒 pilot.json** — 應先 `/feature-layered-observation`（P3 PILOT）
+- **7 樣本 raw data 沒備齊** — 先取 archive 或 master TSV；本 skill 不抓資料
+- **想做樣本內部觀察** — 用 `/feature-layered-observation`（per-sample stratification）
+- **想跑單 cycle P5 evaluator** — 用 `/run-evaluator`
+
+## Quality Checklist — 交付 generalize.json 前自我檢查（v1.7 batch B）
+
+- [ ] 7 樣本 canonical 順序：HCC1395, HCC1395_DORADO, HCC1937, HCC1954, H2009, H1437, COLO829
+- [ ] direction_consistency 算 N/7 + 文字註明（`5/7 positive, 1/7 negative, 1/7 zero`）
+- [ ] **wilcoxon_p 與 fisher_combined_p 兩種顯著性都跑**（不可只挑一種）
+- [ ] confidence_uplift 計算 + 對應 stability tier (1-5)
+- [ ] worst sample 標記 + 解釋（為何此樣本反向 / 弱）
+- [ ] generalize.json 符合 `state/schemas/generalize.schema.json`
+- [ ] 跨樣本平行不超過 5 並行（避免 IO contention）
+- [ ] verdict 寫入：`consistent` / `mostly_consistent` / `inconsistent` 對應 stop_criteria
+- [ ] outlier analysis 段（即使 0 outlier 也標記）

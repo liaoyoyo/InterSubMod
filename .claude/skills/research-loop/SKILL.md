@@ -398,3 +398,22 @@ with open('research/autoresearch/evidence_ledger.jsonl', 'a') as f:
 - Step 4-7：見上方「Phase & Chain Position」chain，由對應下游 skill 接手
 
 未來版本會把 Step 4-7 內容遷移到 `references/legacy_8step.md` 並從主 SKILL.md 移除。
+
+## DO NOT USE WHEN（v1.7 batch A）
+
+- **cycle 已 P2/P3+ 且有 plan.json** — 不應重新 plan，除非用 `/pivot-direction` 明確 pivot
+- **想跑 pilot 分析** — 用 `/feature-layered-observation`（P3 PILOT）
+- **想 brainstorm 假說** — 用 `/problem-framing-ideation`（P0 pre）
+- **想寫結論** — 用 `/conclude-research`（P6 COMMIT）
+- **想跨 cycle 審計** — 用 `/provenance-tier-audit`
+
+## Quality Checklist — 交付 plan.json 前自我檢查（v1.7 batch B）
+
+- [ ] hypothesis 1 句話可講清；含**前提**（如 dataset 條件）+ **預期**（effect direction）
+- [ ] expected_effect 有具體 metric + min_threshold + direction（greater_than / less_than）
+- [ ] stop_criteria 同時定義 POSITIVE / CONDITIONAL / NEGATIVE 三類
+- [ ] preconditions 三欄齊：binary_version / dataset_id / upstream_reports（後者至少 1 篇）
+- [ ] validation_layers 至少含 L1_AUC_screening + L3_cross_sample
+- [ ] samples 明確（不能 ["all"]）；非單樣本 cycle 至少 3 樣本
+- [ ] estimated_duration_hours 合理（純分析 ≤8hr / 含 C++ ≤2 day）
+- [ ] skills_invoked 是真實 chain；不含尚未實作的 skill

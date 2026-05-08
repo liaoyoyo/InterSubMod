@@ -1,8 +1,9 @@
 ---
 name: weekly-report
-description: InterSubMod 每週研究週報完整流程（v2 升級）。引導 raw data 收集 → 4 主線類型識別（進展/問題/求協助/探索）→ 內容 4 層分類 [F]/[O]/[I]/[U] → 重點 4 桶分流（PPT/講稿/備註/暫存）→ 邏輯紅旗檢查（過度宣稱/流水帳）→ 教授問答預測 5-7 個 → 17 段母稿（Layer 0-4 結構）。產出 master_draft.md 後 4 選 handoff（A 立即接 pptx-build / B 留檔 / C 終點 / D 加寫下週計畫）。觸發：「週報」「weekly report」「整理本週」「向教授報告」「PI 週彙報」「研究進度報告」「本週進展」「lab meeting」
+description: InterSubMod 每週研究週報完整流程（v2 升級）。引導 raw data 收集 → 4 主線類型識別（進展/問題/求協助/探索）→ 內容 4 層分類 [F]/[O]/[I]/[U] → 重點 4 桶分流（PPT/講稿/備註/暫存）→ 邏輯紅旗檢查（過度宣稱/流水帳）→ 教授問答預測 5-7 個 → 17 段母稿（Layer 0-4 結構）。產出 master_draft.md 後 4 選 handoff（A 立即接 pptx-build / B 留檔 / C 終點 / D 加寫下週計畫）。觸發：「週報」「weekly report」「整理本週」「向教授報告」「PI 週彙報」「研究進度報告」「本週進展」「lab meeting」。DO NOT USE WHEN：單實驗報告（用 results-report）、單工程修改技術報告（用 structured-tech-report）、研究結論收尾（用 conclude-research）、AI session 紀錄（用 report）。
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent, AskUserQuestion
 user-invocable: true
+paths: ["docs/reports/**/*.md", "docs/presentations/**/*.md"]
 ---
 
 # weekly-report Skill (v2)
