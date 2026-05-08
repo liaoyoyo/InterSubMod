@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260507-2112-d2a-colo829-kde-rerun",
+  "ran_at": "2026-05-08T09:11:00Z",
+  "_synthetic": true,
+  "_synthetic_note": "Drill 2 placeholder; 9 'samples' entries are the 9 COLO829 regions (re-treated as cross-region for evaluator multi_sample_consistency component compatibility)",
+  "samples": [
+    {"sample_id": "COLO829_region_1", "metric_value": 0.121, "ci_lower": 0.095, "ci_upper": 0.148, "p_value": 5e-5, "passed_threshold": true},
+    {"sample_id": "COLO829_region_2", "metric_value": 0.098, "ci_lower": 0.072, "ci_upper": 0.124, "p_value": 8e-5, "passed_threshold": true},
+    {"sample_id": "COLO829_region_3", "metric_value": 0.115, "ci_lower": 0.088, "ci_upper": 0.142, "p_value": 4e-5, "passed_threshold": true},
+    {"sample_id": "COLO829_region_4", "metric_value": 0.087, "ci_lower": 0.061, "ci_upper": 0.113, "p_value": 1.5e-4, "passed_threshold": true},
+    {"sample_id": "COLO829_region_5", "metric_value": 0.103, "ci_lower": 0.077, "ci_upper": 0.129, "p_value": 7e-5, "passed_threshold": true},
+    {"sample_id": "COLO829_region_6", "metric_value": 0.130, "ci_lower": 0.103, "ci_upper": 0.157, "p_value": 2e-5, "passed_threshold": true},
+    {"sample_id": "COLO829_region_7", "metric_value": 0.045, "ci_lower": 0.022, "ci_upper": 0.068, "p_value": 8e-3, "passed_threshold": false},
+    {"sample_id": "COLO829_region_8", "metric_value": 0.094, "ci_lower": 0.068, "ci_upper": 0.120, "p_value": 1.2e-4, "passed_threshold": true},
+    {"sample_id": "COLO829_region_9", "metric_value": 0.116, "ci_lower": 0.089, "ci_upper": 0.143, "p_value": 4e-5, "passed_threshold": true}
+  ],
+  "consistency": {
+    "n_samples_passed": 8,
+    "n_samples_total": 9,
+    "direction_consistency": "8/9 positive (range 0.045 to 0.130, region_7 below 0.05 threshold but same direction)",
+    "wilcoxon_p": 0.0039,
+    "fisher_combined_p": 1.4e-25,
+    "confidence_uplift": 0.78
+  },
+  "fan_out_mode": "sequential",
+  "verdict": "consistent"
+}

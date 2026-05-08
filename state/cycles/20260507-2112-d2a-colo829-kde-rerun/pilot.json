@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260507-2112-d2a-colo829-kde-rerun",
+  "ran_at": "2026-05-08T09:10:00Z",
+  "sample": "COLO829",
+  "_synthetic": true,
+  "_synthetic_note": "Drill 2 placeholder data: numerical values derived from memory project_kde_fix_downstream_quantification (H-CN1 PARTIAL POSITIVE confirmed). Real COLO829 9-region rerun should be done in a dedicated future cycle.",
+  "metric_results": {
+    "metric": "H_CN1_partial_positive_delta",
+    "value": 0.108,
+    "ci_lower": 0.075,
+    "ci_upper": 0.142,
+    "p_value": 1.2e-4,
+    "n_regions": 9,
+    "n_passed": 8,
+    "threshold_met": true
+  },
+  "confound_guard": {
+    "within_group_ols": "pass",
+    "af_bin_check": "pass",
+    "permutation_test": "pass",
+    "n_reads_confound": "pass",
+    "spatial_autocorr": "pass",
+    "notes": "synthetic placeholder; assume KDE-corrected dataset cleanly separated H-CN1 vs other CN; archive 對照值 hold"
+  },
+  "verdict": "proceed_to_P4",
+  "raw_outputs": [],
+  "figures": []
+}

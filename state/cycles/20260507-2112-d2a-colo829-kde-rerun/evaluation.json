@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260507-2112-d2a-colo829-kde-rerun",
+  "ran_at": "2026-05-08T09:21:01Z",
+  "retraction_risk": 0.2162,
+  "risk_components": {
+    "multi_sample_consistency": 0.8888888888888888,
+    "effect_size_stability": 0.34615384615384615,
+    "precondition_freshness": 1.0,
+    "subgroup_homogeneity": 0.7510929685153162,
+    "pitfall_coverage_score": 1.0,
+    "tier_support_alignment": null,
+    "precedent_similarity": null
+  },
+  "pitfall_hits": [],
+  "tier_recommendation": "pending",
+  "required_followups": [
+    "Tier reduced by 1 from current. Re-run /run-evaluator after addressing the lowest component.",
+    "Components below 0.4 (need attention): effect_size_stability"
+  ],
+  "verdict": "downgrade_tier",
+  "failure_attribution": {
+    "categories": [
+      "consistency_violation"
+    ],
+    "primary_category": "consistency_violation",
+    "phase_at_failure": "P4_GENERALIZE",
+    "skill_at_failure": "run-evaluator",
+    "gate_at_failure": "P5_EVALUATOR",
+    "components_below_threshold": [
+      "effect_size_stability=0.35"
+    ],
+    "pitfalls_hit": [],
+    "confidence": "low",
+    "diagnosed_at": "2026-05-08T09:21:01Z",
+    "auto_recovery_attempted": false,
+    "auto_recovery_succeeded": null,
+    "user_intervention_required": false
+  }
+}

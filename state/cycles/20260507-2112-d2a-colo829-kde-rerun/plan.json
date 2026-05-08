@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260507-2112-d2a-colo829-kde-rerun",
+  "hypothesis": "KDE-fix 後 COLO829 9 region 中 H-CN1 細胞群的 PARTIAL POSITIVE 信號（H-CN1 partial-positive delta >= 0.05）仍 hold；Z3 scale-invariant 不變",
+  "validation_layers": ["L1_AUC_screening", "L3_cross_sample"],
+  "expected_effect": {
+    "metric": "H_CN1_partial_positive_delta",
+    "min_threshold": 0.05,
+    "direction": "greater_than",
+    "stop_criteria": "若 9 region 中 >=5 region 通過 (delta >= 0.05) -> POSITIVE; 3-4 region 通過 -> CONDITIONAL; <=2 region 通過 -> exit_negative"
+  },
+  "preconditions": {
+    "binary_version": null,
+    "dataset_id": "master_2026-04-20_KDE-corrected_caller_af_separate",
+    "upstream_reports": [
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260420_KDE_Fix_Acceptance_Validation_01.md",
+      "InterSubMod/docs/CURRENT_FOCUS.md"
+    ],
+    "feature_flags": {
+      "kde_corrected": true,
+      "caller_af_separate": true
+    }
+  },
+  "samples": ["COLO829"],
+  "skills_invoked": ["check-staleness", "feature-layered-observation", "run-evaluator"],
+  "estimated_duration_hours": 6.0
+}

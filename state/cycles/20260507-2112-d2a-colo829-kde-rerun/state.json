@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260507-2112-d2a-colo829-kde-rerun",
+  "title": "COLO829 KDE-fix 9 region 重跑 + H-CN1 PARTIAL POSITIVE 再驗證",
+  "hypothesis_id": null,
+  "phase": "P6_COMMIT",
+  "tier": "pending",
+  "verdict": "completed",
+  "priority": 70,
+  "started_at": "2026-05-07T21:12:23Z",
+  "last_advanced_at": "2026-05-08T09:22:57Z",
+  "preconditions": {
+    "binary_version": null,
+    "dataset_id": "master_2026-04-20_KDE-corrected_caller_af_separate",
+    "upstream_reports": [
+      "InterSubMod/docs/experiments/in_progress/2026/04/20260420_KDE_Fix_Acceptance_Validation_01.md",
+      "InterSubMod/docs/CURRENT_FOCUS.md"
+    ]
+  },
+  "open_gates": [],
+  "artifacts": {
+    "plan": "plan.json",
+    "precheck": "precheck.json",
+    "pilot": "pilot.json",
+    "generalize": "generalize.json",
+    "evaluation": null
+  },
+  "history": [
+    {
+      "timestamp": "2026-05-07T21:12:23Z",
+      "from_phase": null,
+      "to_phase": "P0_REGISTER",
+      "actor": "user",
+      "note": "/cycle-init"
+    },
+    {
+      "timestamp": "2026-05-07T21:14:05Z",
+      "from_phase": "P0_REGISTER",
+      "to_phase": "P1_PLAN",
+      "actor": "user",
+      "note": "plan.json written (research-loop P1)"
+    },
+    {
+      "timestamp": "2026-05-07T21:14:27Z",
+      "from_phase": "P1_PLAN",
+      "to_phase": "P2_PRECHECK",
+      "actor": "user",
+      "note": "precheck PASS (binary skipped, dataset fresh, upstream 2/2 fresh)"
+    },
+    {
+      "timestamp": "2026-05-08T09:21:01Z",
+      "from_phase": "P2_PRECHECK",
+      "to_phase": "P3_PILOT",
+      "actor": "user",
+      "note": "placeholder pilot.json (synthetic; real COLO829 9-region future cycle)"
+    },
+    {
+      "timestamp": "2026-05-08T09:21:01Z",
+      "from_phase": "P3_PILOT",
+      "to_phase": "P4_GENERALIZE",
+      "actor": "user",
+      "note": "placeholder generalize.json (8/9 region passed)"
+    },
+    {
+      "timestamp": "2026-05-08T09:22:57Z",
+      "from_phase": "P4_GENERALIZE",
+      "to_phase": "P5_EVALUATE",
+      "actor": "user",
+      "note": "evaluator verdict=downgrade_tier; M2 attribution auto-filled"
+    },
+    {
+      "timestamp": "2026-05-08T09:22:57Z",
+      "from_phase": "P5_EVALUATE",
+      "to_phase": "P6_COMMIT",
+      "actor": "user",
+      "note": "Drill 2 placeholder cycle: walkthrough complete; not real research conclusion (synthetic data)"
+    }
+  ],
+  "interaction_metrics": {
+    "user_interventions": 3,
+    "auto_advancements": 5,
+    "user_corrections": 0,
+    "auto_recovery_attempts": 0,
+    "auto_recovery_successes": 0,
+    "drift_warnings_emitted": 0,
+    "drift_warnings_acknowledged": 0
+  },
+  "main_axis": {
+    "anchor_doc": "InterSubMod/docs/CURRENT_FOCUS.md",
+    "anchor_section": "Phase 2 Normal Methylation Reference (方向 A+D)",
+    "one_line_goal": "驗證 KDE-fix 後 COLO829 9 region 的 H-CN1 PARTIAL POSITIVE 結論是否仍 hold",
+    "drift_keywords_required": [
+      "KDE",
+      "CN1",
+      "COLO829",
+      "H-CN1"
+    ],
+    "drift_keywords_forbidden": [
+      "LangGraph",
+      "PPTX"
+    ]
+  },
+  "failure_attribution": {
+    "categories": [
+      "consistency_violation"
+    ],
+    "primary_category": "consistency_violation",
+    "phase_at_failure": "P4_GENERALIZE",
+    "skill_at_failure": "run-evaluator",
+    "gate_at_failure": "P5_EVALUATOR",
+    "components_below_threshold": [
+      "effect_size_stability=0.35"
+    ],
+    "pitfalls_hit": [],
+    "confidence": "low",
+    "diagnosed_at": "2026-05-08T09:21:01Z",
+    "auto_recovery_attempted": false,
+    "auto_recovery_succeeded": null,
+    "user_intervention_required": false
+  }
+}
