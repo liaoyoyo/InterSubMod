@@ -151,3 +151,34 @@ Written to: state/cycles/20260504-1430-loh-kde/evaluation.json
 - Component 7 `multi_track_corroboration`：掃 cycle 的 plan/pilot/generalize/structured-tech-report 中 4 軌引用，回 0-1 覆蓋率（4/4 → 1.0；3/4 → 0.75 等）
 - Component 7 觸發條件：cycle 申請升 ⭐4/⭐5 時必算；⭐3 cycle 可選
 - 接入 LlamaIndex precedent retrieval 後，`precedent_similarity` 與 `multi_track_corroboration` 都取代部分人工 reviewer 工作
+
+## DO NOT USE WHEN（v1.7 batch A 採納）
+
+- **cycle 還在 P3 PILOT 或 P4 GENERALIZE** — 等 generalize.json 寫入 P5 phase 後才用；過早跑 evaluator → 多 component 為 None → risk_base 偏低不可信
+- **cycle 沒 plan.json 或沒 pilot.json** — 必要 artifact 缺；evaluator 會 silent skip components → 結果無意義
+- **想計算 retraction risk 給「未啟動 cycle」評分** — evaluator 不是 a priori 風險評分工具，是 P5 gate
+- **想做跨 cycle 全域審計** — 用 `/provenance-tier-audit` 而非本 skill；evaluator 只看單 cycle
+- **想要 user-friendly tier upgrade ceremony** — 本 skill 純 mechanical risk score；tier 升級流程交給 conclude-research / weekly-report
+- **plan.json 是手寫 mock** — schema 校驗不嚴格，但 risk 計算依賴實際 metric_value 數字；mock 數會誤導
+
+## Quality Checklist — 交付 evaluation.json 前自我檢查（v1.7 batch B）
+
+執行 main() 結束、給用戶結果之前，跑過這 8 條：
+
+- [ ] 5 個 risk_components 都有非 null 值（precedent_similarity 預期 null 為 Path A 正常）
+- [ ] composite risk_base 與 verdict 對齊：< 0.4 → approve / 0.4-0.7 → downgrade / > 0.7 → pending_review
+- [ ] per-component override 邏輯生效：若任一 component < 0.2 critical → 強制 pending_review；若 ≥3 component < 0.4 → 強制 pending_review
+- [ ] tier_recommendation 與 verdict 一致：approve → 不變 / downgrade → tier-1 / pending → null
+- [ ] failure_attribution 寫入規則：verdict ≠ approve_tier → 必填；verdict = approve_tier → 不應有此欄位
+- [ ] state.json 同步更新（denormalized snapshot mirror）
+- [ ] evaluation.json 寫入路徑正確（`state/cycles/{id}/` 或 `state/retro_cycles/{id}/`）
+- [ ] pitfall_hits 中每個 entry 含 pitfall + severity + evidence 三欄
+
+## Failure Mode 排查（既有，整理）
+
+| 症狀 | 可能原因 | 排查 |
+|---|---|---|
+| risk_base 永遠 < 0.05 | 所有 component 全 1.0 → cycle 太完美？或 generalize.consistency 沒讀對 | 印 components dict 看是否有 None / 1.0 |
+| pending_review 但 components 都 ≥ 0.4 | per-component override n_low ≥ 3 觸發 | 確認 override 規則照 plan §4.5.1 |
+| failure_attribution 永遠 unknown | components 全 null（pilot/generalize 缺）| 先確保 P3-P4 完成 |
+| state.json 未鏡寫 | update_state_failure_attribution 例外吞掉 | 加 logging
