@@ -1,0 +1,98 @@
+====================================================================================================
+Step D: paired (HP:Z:) x T1.2 (hpResult) cross-tab per event (chr19)
+Q: paired germline-absent + HP1-1/HP2-1 reads, baseline 是否錯標到 HP1 系列?
+====================================================================================================
+
+--- BASELINE (全 events) ---
+paired_HP    | hp=0 untag   |  hp=1   |  hp=2   |  hp=11   |  hp=21   |  hp=33   |   total
+  1         |       21,644 |  69,822 |  40,313 |    4,732 |    1,754 |       37 |   138,302
+  2         |       25,223 |  86,317 |  57,862 |    4,400 |    2,704 |      157 |   176,663
+  1-1       |           99 |     186 |     229 |    7,684 |    3,611 |      287 |    12,096
+  2-1       |           96 |     341 |     480 |    8,764 |    4,363 |      134 |    14,178
+  3         |            0 |       0 |      43 |      614 |      413 |       27 |     1,097
+
+--- V3F (全 events) ---
+paired_HP    | hp=0 untag   |  hp=1   |  hp=2   |  hp=11   |  hp=21   |  hp=33   |   total
+  1         |       21,644 |  70,767 |  39,368 |    4,236 |    1,645 |      642 |   138,302
+  2         |       25,223 |  87,222 |  56,957 |    3,735 |    2,537 |      989 |   176,663
+  1-1       |           99 |     196 |     219 |    6,116 |    3,426 |    2,040 |    12,096
+  2-1       |           96 |     358 |     463 |    7,555 |    4,118 |    1,588 |    14,178
+  3         |            0 |       0 |      43 |      290 |      234 |      530 |     1,097
+
+--- V5 (全 events) ---
+paired_HP    | hp=0 untag   |  hp=1   |  hp=2   |  hp=11   |  hp=21   |  hp=33   |   total
+  1         |       21,644 |  70,767 |  39,368 |    4,773 |    1,749 |        1 |   138,302
+  2         |       25,223 |  87,222 |  56,957 |    4,436 |    2,759 |       66 |   176,663
+  1-1       |           99 |     196 |     219 |    7,795 |    3,744 |       43 |    12,096
+  2-1       |           96 |     358 |     463 |    8,846 |    4,413 |        2 |    14,178
+  3         |            0 |       0 |      43 |      633 |      411 |       10 |     1,097
+
+====================================================================================================
+KEY: germline_vote=0 events (用戶 Q 核心)
+====================================================================================================
+
+--- BASELINE germline-absent events (cnt_HP1+cnt_HP2=0, somatic>0) ---
+germline-absent events 總數: 5,789
+  paired HP:Z:1-1   events:      2,040 ( 35.2%)
+  paired HP:Z:2-1   events:      1,588 ( 27.4%)
+  paired HP:Z:3     events:        530 (  9.2%)
+  paired HP:Z:1     events:        642 ( 11.1%)
+  paired HP:Z:2     events:        989 ( 17.1%)
+
+  cross-tab (paired x baseline hpResult):
+  paired_HP   | hp=0 untag |  hp=11   |  hp=21   |  hp=33   |  total
+    1-1      |         0|     1,679|       318|        43|   2,040
+    2-1      |         0|     1,291|       295|         2|   1,588
+    3        |         0|       342|       178|        10|     530
+
+  ★ paired HP:Z:2-1 但 baseline 標 hp=11 (錯標 HP1 系列): 1,291
+  ★ paired HP:Z:1-1 但 baseline 標 hp=21 (錯標 HP2 系列): 318
+  ✓ paired HP:Z:1-1 對應 baseline hp=11: 1,679
+  ✓ paired HP:Z:2-1 對應 baseline hp=21: 295
+  · paired HP:Z:1-1 但 baseline untag (hp=0): 0
+  · paired HP:Z:2-1 但 baseline untag (hp=0): 0
+  · paired HP:Z:3 但 baseline hp=33 (純 somatic): 10
+
+--- V3F germline-absent events (cnt_HP1+cnt_HP2=0, somatic>0) ---
+germline-absent events 總數: 5,789
+  paired HP:Z:1-1   events:      2,040 ( 35.2%)
+  paired HP:Z:2-1   events:      1,588 ( 27.4%)
+  paired HP:Z:3     events:        530 (  9.2%)
+  paired HP:Z:1     events:        642 ( 11.1%)
+  paired HP:Z:2     events:        989 ( 17.1%)
+
+  cross-tab (paired x v3f hpResult):
+  paired_HP   | hp=0 untag |  hp=11   |  hp=21   |  hp=33   |  total
+    1-1      |         0|         0|         0|     2,040|   2,040
+    2-1      |         0|         0|         0|     1,588|   1,588
+    3        |         0|         0|         0|       530|     530
+
+  ★ paired HP:Z:2-1 但 v3f 標 hp=11 (錯標 HP1 系列): 0
+  ★ paired HP:Z:1-1 但 v3f 標 hp=21 (錯標 HP2 系列): 0
+  ✓ paired HP:Z:1-1 對應 v3f hp=11: 0
+  ✓ paired HP:Z:2-1 對應 v3f hp=21: 0
+  · paired HP:Z:1-1 但 v3f untag (hp=0): 0
+  · paired HP:Z:2-1 但 v3f untag (hp=0): 0
+  · paired HP:Z:3 但 v3f hp=33 (純 somatic): 530
+
+--- V5 germline-absent events (cnt_HP1+cnt_HP2=0, somatic>0) ---
+germline-absent events 總數: 5,789
+  paired HP:Z:1-1   events:      2,040 ( 35.2%)
+  paired HP:Z:2-1   events:      1,588 ( 27.4%)
+  paired HP:Z:3     events:        530 (  9.2%)
+  paired HP:Z:1     events:        642 ( 11.1%)
+  paired HP:Z:2     events:        989 ( 17.1%)
+
+  cross-tab (paired x v5 hpResult):
+  paired_HP   | hp=0 untag |  hp=11   |  hp=21   |  hp=33   |  total
+    1-1      |         0|     1,679|       318|        43|   2,040
+    2-1      |         0|     1,291|       295|         2|   1,588
+    3        |         0|       343|       177|        10|     530
+
+  ★ paired HP:Z:2-1 但 v5 標 hp=11 (錯標 HP1 系列): 1,291
+  ★ paired HP:Z:1-1 但 v5 標 hp=21 (錯標 HP2 系列): 318
+  ✓ paired HP:Z:1-1 對應 v5 hp=11: 1,679
+  ✓ paired HP:Z:2-1 對應 v5 hp=21: 295
+  · paired HP:Z:1-1 但 v5 untag (hp=0): 0
+  · paired HP:Z:2-1 但 v5 untag (hp=0): 0
+  · paired HP:Z:3 但 v5 hp=33 (純 somatic): 10
