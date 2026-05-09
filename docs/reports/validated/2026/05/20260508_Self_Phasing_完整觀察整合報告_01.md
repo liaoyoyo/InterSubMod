@@ -1089,6 +1089,7 @@ else if (somaticHP1 > 0 || somaticHP2 > 0) {
 完整 audit 詳見：
 - [`InterSubMod/research/paired_priority_bug_audit/00_audit_report.md`](../../../research/paired_priority_bug_audit/00_audit_report.md)（Step A+C 整體 audit）
 - [`InterSubMod/research/paired_priority_bug_audit/01_step_D_germline_absent_finding.md`](../../../research/paired_priority_bug_audit/01_step_D_germline_absent_finding.md)（Step D V5 Layer 1.5 設計缺陷）
+- [`InterSubMod/research/paired_priority_bug_audit/02_V6_proposal_evaluation.md`](../../../research/paired_priority_bug_audit/02_V6_proposal_evaluation.md)（V6 提案評估 — 5/10 加，**結論：不需 V6 binary，ISM `germline_hp_only` flag 已等效**；Phase 1 audit 已驗證 filter 方向 NEGATIVE；HPFineNGroups subclone marker 需 flag=on 重評估）
 
 ---
 
@@ -1139,7 +1140,8 @@ E1-E4 已 patch 至 [`InterSubMod/docs/reports/validated/2026/05/20260509_PI_Rep
 | **T1.3** | 4-cell ablation（conditional）| Pass 2 vs V3F 各自獨立貢獻量化 — 量化 §7.3 Pass 2 二次效益 | 3 天 |
 | **F-paired-D1（5/9 新）** | germline-absent xref 全基因組擴展 | Step D chr19 → 全 chr，估 ~150K events，確認 4.19:1 偏移是否跨 chr 一致 | 0.5 天 |
 | **F-paired-D2（5/9 新）** | Phase block 內 axis-aligned 分析 | 用 PS tag 對齊 paired vs TO 軸 → 計算「真正錯標」率（去除 cross-binary axis swap caveat） | 1 天 |
-| **F-paired-D3（5/9 新）** | V5 Layer 1.5 改回 V3F 的 ISM 影響評估 | germline 缺席改標 hp=33 而非用 somatic 投票決方向 — 量化 ISM 下游影響 | 1-2 天（需 binary patch）|
+| ~~F-paired-D3~~ ⚠️ | ~~V5 Layer 1.5 改回 V3F 的 ISM 影響評估（V6 binary patch）~~ | **取消（不需 V6 binary）**：5/10 V6 evaluation 揭露 ISM 端 `germline_hp_only` flag 已等效；Phase 1 audit (2026-04-21) 已驗證該 flag 對 filter F1 無 ≥+0.02 改善（CONDITIONAL NEGATIVE）。改為 V6-C：HPFineNGroups subclone marker 用 flag=on 重評估 | DONE eval 2026-05-10 ([V6 eval](../../../research/paired_priority_bug_audit/02_V6_proposal_evaluation.md))|
+| **V6-C（5/10 新加）** | HPFineNGroups subclone marker flag=on 重評估 | Phase 1 audit 顯示 NGroups ≥3 在 flag=on 全部消失 → 暗示原 ⭐4 marker 是 priority bug artifact；需確認後降級 | **HIGH**（影響 LOH-constrained phasing 主軸論文 thesis），1-2 day |
 | ~~F-paired-D4~~ ✅ | ~~E5 PI errata 補強~~ | **DONE 2026-05-10**（commit 2553e96 + 71d21bd）：errata companion 加 §5 E5 + 修訂後 §1 一句結論加 E5 caveat + PI 4-29 banner 從 4 條 → 5 條 errata + 修訂歷程加 5/10 amend 行 | DONE 2026-05-10 |
 
 → 本報告完成：(1) V5 audit synthesis（§2-§9），(2) zero-sum 機制釐清（§8.4），(3) no-regression 量化驗證（§8.5），(4) **paired cross-ref 揭露 V5 Layer 1.5 設計缺陷**（§8.6, 5/9 新發現）。F1 已完成；F-paired-D1/2/3 是 5/9 新發現的後續延伸；T3 跨樣本擴展與 T1.3 ablation 仍是後續主軸 cycle。
