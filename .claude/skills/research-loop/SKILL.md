@@ -134,6 +134,28 @@ else:
 詳見 `references/SCALE_LADDER.md`。
 驗證閾值與路徑建議：參考 `/validation-protocol` skill（L1→L2→L3→L4 漸進驗證）。
 
+#### 3.x — OSF-style 4-Section Pre-Registration（v1.8 T2-1）
+
+> 設計來源：OSF Preregistration（cos.io/initiatives/prereg）+ Devin plan-as-checkpoint（"reviewed plan catches drift in 1 min"）
+
+plan.json **必須含 4 段**（schema additive：見 `state/schemas/plan.schema.json`）：
+
+| § | plan.json 欄位 | 內容範例 |
+|---|---|---|
+| **1. Hypothesis + Sensitivity Threshold** | `hypothesis` + `expected_effect.{metric, min_threshold, direction, stop_criteria}` | "ISM HPFineNGroups 5kHz TO TP rate 95%；threshold delta ≥0.10；POSITIVE if 5/7 samples exceed" |
+| **2. Confound Sweep List** | `confound_sweep_plan: [...]` | `["n_reads", "AF", "LOH", "spatial_autocorr", "within-group OLS"]` |
+| **3. Conditional Analysis Branches** | `conditional_branches: [{if, then}, ...]` | `[{if: "pilot AUC < 0.55 in 2/3 samples", then: "switch to L4 multi-track + alt-caller verification"}]` |
+| **4. Expected Fail Mode + Fallback** | `expected_fail_mode_fallback` (string) | "若 cross-sample n_passed ≤2/7，視為 P-11 saturation artifact，pivot 到 per-sample characterization 而非 pooled aggregation" |
+
+**為何 4 段**：
+- §1 鎖定成功定義（避免 post-hoc moving threshold）
+- §2 預先列 confound（強制 sweep 而非事後補）
+- §3 把替代分析路徑前期登錄（防止 selective reporting）
+- §4 預想失敗劇本與 pivot 路徑（減少撤回時的雙分支認知負擔）
+
+**全自動模式**：4 段全填齊後才允許 transition 到 P2 PRECHECK；缺任一段 → 用一行告知用戶並建議補。
+**互動模式**：在 plan.json 寫入前列出 4 段內容，用戶 ack 後寫入。
+
 依假設修改層級決定方式（ML1 Python 篩選 / ML2 Python 特徵 / ML3 C++）。
 
 **互動模式**：展示修改計劃。ML3 必須等用戶「確認修改 C++」。
@@ -417,3 +439,4 @@ with open('research/autoresearch/evidence_ledger.jsonl', 'a') as f:
 - [ ] samples 明確（不能 ["all"]）；非單樣本 cycle 至少 3 樣本
 - [ ] estimated_duration_hours 合理（純分析 ≤8hr / 含 C++ ≤2 day）
 - [ ] skills_invoked 是真實 chain；不含尚未實作的 skill
+- [ ] **OSF 4 段齊全**（v1.8 T2-1）：confound_sweep_plan ≥3 項 + conditional_branches ≥1 條 + expected_fail_mode_fallback 已寫

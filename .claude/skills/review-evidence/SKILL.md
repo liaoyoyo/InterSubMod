@@ -176,6 +176,20 @@ for i, res in enumerate(all_results[:10]):
 "
 ```
 
+## DECLARE 7-letter cognitive forcing — pivot decision 前必跑（v1.8 T2-5）
+
+> 設計來源：DECLARE / Croskerry cognitive forcing strategies。**review-evidence 用於 pivot 或繼續決策的場景時必跑**；單純歷史查詢可跳過。
+
+| 字母 | 提問 | 對 InterSubMod 怎麼答 |
+|---|---|---|
+| **D** ifferential | 「我接下來想驗證的假說，至少還有哪 2 種競爭解釋？」 | 列 ≥2 個 alternative；確認 review 結果不是 cherry-pick |
+| **E** vidence | 「review 的 evidence_ledger 紀錄涵蓋 L1-L4 哪幾層？」 | 若只有 L1-L2 → 不足以 pivot；要拉到 L3/L4 |
+| **C** onfounders | 「過去失敗結論的 root cause 與目前 pivot 計畫有重疊嗎？」 | 若有 → 修正 confound design 才 pivot；否則重蹈覆轍 |
+| **L** ikelihood | 「最佳 delta 是真信號還是 noise？樣本數夠嗎？」 | 對照 cross-sample n / 雙 p-value；< 3 樣本不可作 tier 升級依據 |
+| **A** lternatives | 「過去 NEGATIVE 結論裡，有沒有與我 pivot 方向衝突的？」 | 若有 → 必須在 plan.json 寫明為何此次能 escape 過去失敗模式 |
+| **R** eassess | 「review 跨 cycle 結論彼此一致嗎？」 | 不一致 → 啟動 provenance-tier-audit 而非 pivot |
+| **E** ngage | 「pivot 決策會更新 hypothesis_queue 與 CURRENT_FOCUS 嗎？」 | 必須同步更新；否則新方向無法被 dashboard 看見 |
+
 ## 輸出後的建議
 
 顯示完歷史後，根據結果給出建議：

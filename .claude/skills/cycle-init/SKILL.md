@@ -134,6 +134,8 @@ tags: ["harness", "register", "cycle-init", "p0"]
   active.json updated (3 active cycles total)
 
 Next: invoke /research-loop or research-loop skill to draft plan.json (P1 PLAN)
+       — research-loop will require OSF-style 4-section plan (v1.8 T2-1):
+         §1 hypothesis+threshold / §2 confound_sweep / §3 conditional_branches / §4 fail_mode_fallback
 ```
 
 ## Failure Mode & Diagnostics

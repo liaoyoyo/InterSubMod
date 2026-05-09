@@ -205,9 +205,27 @@ last_relevant: {today}
 {✓|—} CURRENT_FOCUS.md {已更新|未需更新}
 ```
 
+## DECLARE 7-letter checklist — 收尾前最後一道 cognitive forcing（v1.8 T2-5）
+
+> 設計來源：DECLARE / Croskerry cognitive forcing strategies（PMC10149772 / PMC3786644）；改寫為 InterSubMod 研究結論語境。**Phase A Step 4「撰寫正式報告」之後、Phase B Step 6「更新 INDEX.md」之前必跑**。
+
+| 字母 | 提問 | 對 InterSubMod 怎麼答 |
+|---|---|---|
+| **D** ifferential | 「除了我提的這個結論，至少還有哪 2 種競爭假說可以解釋同樣數據？」 | 列 ≥2 個 alternative explanations，且明確說明本 cycle 為何排除（非「沒想過」）|
+| **E** vidence | 「L1-L4 4 軌證據齊全嗎？」 | Statistical / Cross-sample / Mechanism / Orthogonal — ⭐4-5 cycle 必須四軌齊（anchor #1 L4 mandatory）|
+| **C** onfounders | 「n_reads / AF / LOH / spatial / OLS bias 5 大 confound 都已 sweep 過？」 | plan.confound_sweep_plan + pilot.confound_guard.* 對照；任一缺 → 補做或降 tier |
+| **L** ikelihood | 「tier_used 與 evidence stability_grade 對齊？」 | 不可 over-claim（ledger stability=B 但 tier_used=⭐4 → over-claim） |
+| **A** lternatives | 「失敗 / NEGATIVE 結論已對照嗎？」 | 至少引用 1 個歷史 NEGATIVE case（從 review-evidence 拉）做為對比；不可只列正面 |
+| **R** eassess | 「跨 cycle 結論與本 cycle 矛盾嗎？」 | 與 INDEX.md / MEMORY.md 既有 ⭐4-5 結論 cross-check；衝突 → 暫停升 tier，啟動 provenance-tier-audit |
+| **E** ngage | 「結論已主動 propagate 進 INDEX/MEMORY/CURRENT_FOCUS？」 | Phase B Step 6-9 完成；不留結論孤兒（orphan cycle）|
+
+**全自動模式**：DECLARE 7 字逐項 self-check；任一不過 → 暫停回報用戶；7 字全過 → 進 Phase B propagate。
+**互動模式**：列 7 字答覆給用戶，用戶 ack 後進 propagate。
+
 ## 注意事項
 
 1. **不重寫報告**：若報告已存在，只更新 manifest 和 propagate；不覆蓋已有報告
 2. **結論不可逆**：一旦標記 completed，不應改回 executing（如需重開，建新專案）
 3. **NEGATIVE 同樣重要**：失敗結論也必須完整記錄，防止未來重複
 4. **手動已完成的也可用**：即使研究是手動完成的（如 LOH-AF），也可用此 skill 補做 PROPAGATE
+5. **DECLARE 不取代 evidence**：checklist 是 cognitive forcing；不能替代 L4 多軌證據鏈本身（PMID 24423999 有警示 CFS 對新手 randomized trial 不顯效）

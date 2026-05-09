@@ -74,7 +74,7 @@ else:
 ```
 
 ### Step 4 — Pitfalls sweep
-讀 `.claude/skills/run-evaluator/pitfalls_table.json`（6 條 P-01..P-06）。對每條：
+讀 `.claude/skills/run-evaluator/pitfalls_table.json`（v1.8 起 13 條 P-01..P-13；v1.8 T1-5 加 P-08..P-13）。對每條：
 - 比對 `trigger_keywords` 與 plan.hypothesis（substring match, case-insensitive）
 - 若命中：套用 `auto_check_rule` 評估 severity
 - 收集為 `pitfall_hits[]`，每項 {pitfall_id, severity, evidence}
@@ -128,7 +128,7 @@ Written to: state/cycles/20260504-1430-loh-kde/evaluation.json
 
 - 不接 LlamaIndex precedent retrieval（component 7 為 null）
 - `tier_support_alignment` 仰賴 evidence_ledger stability 欄位是字串（如「4 (HCC1395 pilot, awaits cross-sample)」）需做 grade extraction
-- pitfalls_table.json 7 條規則（P-01..P-07）與 known-pitfalls SKILL.md 同步維護（**新增 pitfall 時需手動同步兩處**）
+- pitfalls_table.json **13 條規則（P-01..P-13；v1.8 T1-5 加 P-08..P-13）** 與 known-pitfalls SKILL.md 同步維護（**新增 pitfall 時需手動同步兩處 + 跑 retro_cycles regression 確認 N1/N2 specificity 不破**）
 - 不重跑 statistics — 只消化 cycle 已寫入的 artifacts
 - **4 軌證據鏈僅部分自動化**（個人風格 anchor #1 — 詳見 validation-protocol L4 mandatory 區段）：
   - (i) Statistical：人工填 4-track table

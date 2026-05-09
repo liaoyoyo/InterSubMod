@@ -66,6 +66,28 @@
     "estimated_duration_hours": {
       "type": "number",
       "minimum": 0
+    },
+    "confound_sweep_plan": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "v1.8 OSF section #2: confounds to actively sweep. e.g. ['n_reads', 'AF', 'LOH', 'spatial_autocorr', 'within-group OLS']."
+    },
+    "conditional_branches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["if", "then"],
+        "additionalProperties": false,
+        "properties": {
+          "if":   { "type": "string", "description": "Condition, e.g. 'pilot AUC < 0.55 in 2/3 samples'" },
+          "then": { "type": "string", "description": "Branch action, e.g. 'switch to L4 multi-track validation'" }
+        }
+      },
+      "description": "v1.8 OSF section #3: pre-registered conditional analysis branches. Lock alternative analysis paths up-front to prevent post-hoc rationalization."
+    },
+    "expected_fail_mode_fallback": {
+      "type": "string",
+      "description": "v1.8 OSF section #4: anticipated failure mode + fallback plan. e.g. 'if cross-sample n_passed<=2/7, treat as saturation artifact (P-11) and pivot to per-sample characterization rather than pooled aggregation'."
     }
   }
 }
