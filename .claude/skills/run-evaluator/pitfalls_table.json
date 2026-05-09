@@ -1,8 +1,8 @@
 {
   "$schema_version": "1.0",
-  "description": "Structured representation of InterSubMod/.claude/skills/known-pitfalls/SKILL.md (P-01..P-07). Used by /run-evaluator (P5 EVALUATE) to auto-sweep cycle artifacts. When known-pitfalls SKILL.md gains a new entry, append here too. Keep both in sync.",
-  "last_synced_with_skill": "2026-05-07",
-  "last_modified_reason": "added P-07 (single-track validated) per plan v1.6 §4.5.4-G batch 5a anchor #1",
+  "description": "Structured representation of InterSubMod/.claude/skills/known-pitfalls/SKILL.md (P-01..P-13). Used by /run-evaluator (P5 EVALUATE) to auto-sweep cycle artifacts. When known-pitfalls SKILL.md gains a new entry, append here too. Keep both in sync.",
+  "last_synced_with_skill": "2026-05-10",
+  "last_modified_reason": "v1.8 T1-5: added P-08..P-13 from 2026-04 retract events + memory feedback (KDE stale / spatial autocorr / feature name literal / saturation artifact / merged AF drift / working tree dirty)",
   "pitfalls": [
     {
       "id": "P-01",
@@ -122,6 +122,107 @@
       "auto_check_rule": {
         "if_tier_used_above": {"field": "plan.tier_used", "threshold": 4},
         "and_no_orthogonal_reference": "len([r for r in plan.preconditions.upstream_reports if any(kw in r.lower() for kw in ['archive','replicate','alt-caller','orthogonal','cross-pipeline'])]) == 0",
+        "then_severity": "block"
+      }
+    },
+    {
+      "id": "P-08",
+      "category": "data_provenance",
+      "name": "KDE-fix Stale Binary Downstream",
+      "summary": "After a KDE/binary fix commit, downstream master_*.tsv.gz datasets may still be regenerated with the old binary version, leading to bias (e.g. HCC1395 S3 TP 95.5%→58.3% post-fix).",
+      "trigger_keywords": ["binary stale_distance", "post-KDE master regenerate", "downstream stale binary detected", "binary version lag", "KDE fix not propagated"],
+      "detect_via": ["plan.preconditions.binary_version", "precheck.checks.binary.stale_distance"],
+      "severity": "block",
+      "correct_action": "Confirm dataset regeneration timestamp postdates binary fix commit. If precheck.checks.binary.stale_distance >= 1 → BLOCK and require dataset re-build with current binary.",
+      "source_ref": "20260420_KDE_Fix_Acceptance_Validation",
+      "memory_ref": "project_kde_fix_downstream_quantification.md",
+      "auto_check_rule": {
+        "if_keyword_match": "KDE fix OR master_phase1",
+        "and_artifact_status": "precheck.checks.binary.stale_distance >= 1",
+        "then_severity": "block"
+      }
+    },
+    {
+      "id": "P-09",
+      "category": "statistical_method",
+      "name": "Spatial Autocorrelation Confound (chr+pos aggregation)",
+      "summary": "Features aggregated by chr+pos windows pick up spatial autocorrelation (linkage / hotspot density / replication timing) and produce inflated AUC that disappears after mid-TP-rate window stratification.",
+      "trigger_keywords": ["chr+pos", "spatial aggregation", "window aggregation", "chromosomal position", "neighborhood feature", "regional feature"],
+      "detect_via": ["plan.hypothesis", "plan.preconditions.feature_flags", "pilot.confound_guard.spatial_autocorr_check"],
+      "severity": "warn",
+      "correct_action": "Run mid-TP-rate window stratification; if AUC drops by >0.05 between unstratified and stratified → declare spatial autocorr confound and require within-window controls.",
+      "source_ref": "feedback_spatial_autocorrelation_confound.md",
+      "memory_ref": "feedback_spatial_autocorrelation_confound.md",
+      "auto_check_rule": {
+        "if_keyword_match": "chr+pos OR spatial aggregation OR window-level feature",
+        "and_artifact_status": "pilot.confound_guard.spatial_autocorr_check != pass",
+        "then_severity": "warn"
+      }
+    },
+    {
+      "id": "P-10",
+      "category": "feature_design",
+      "name": "Feature Name Literal Interpretation",
+      "summary": "Feature names suggesting biological semantics (e.g. HPFineNGroups → 'methylation subclone marker') often have implementation that does not match. Reading the C++ source is required before claiming biological interpretation. (HPFineNGroups 04-22 retract event)",
+      "trigger_keywords": ["feature name literal interpretation", "biological semantic claim without source", "biology-informed claim unverified", "HPFineNGroups biological semantic", "methylation marker semantic claim"],
+      "detect_via": ["plan.hypothesis", "plan.preconditions.feature_flags", "plan.preconditions.source_code_refs"],
+      "severity": "warn",
+      "correct_action": "Before plan.hypothesis claims biological semantic, require plan.preconditions.source_code_refs containing src/include/ paths confirming feature definition matches claimed semantic.",
+      "source_ref": "20260418_F_HPFineNGroups + 04-22 retract event",
+      "memory_ref": "feedback_feature_name_vs_definition_rule.md",
+      "auto_check_rule": {
+        "if_keyword_match": "HPFineNGroups OR methylation marker OR biology-informed",
+        "and_artifact_missing": "plan.preconditions.source_code_refs == [] OR not_present",
+        "then_severity": "warn"
+      }
+    },
+    {
+      "id": "P-11",
+      "category": "evidence_chain",
+      "name": "Saturation Artifact (single sample drives all)",
+      "summary": "Cross-sample n_passed=1/N where the 1 sample is at saturation (e.g. H2009 飽和 in thread-B 04-26 retract event); the remaining N-1 samples all fail. Mean / pooled aggregation hides this.",
+      "trigger_keywords": ["n_passed=1", "1/6", "1/7", "saturation", "single sample", "飽和", "thread B", "biology-informed filter"],
+      "detect_via": ["generalize.consistency.n_samples_passed", "generalize.samples"],
+      "severity": "block",
+      "correct_action": "If generalize.consistency.n_samples_passed / n_samples_total <= 0.2 (i.e. only 1-2 of 6-7 samples) → BLOCK regardless of pooled metric. Investigate which sample drove the signal.",
+      "source_ref": "20260426_Thread_B_Whitelist_Retraction",
+      "memory_ref": null,
+      "auto_check_rule": {
+        "if_metric_ratio_below": {"field": "generalize.consistency.n_samples_passed", "denominator": "generalize.consistency.n_samples_total", "threshold": 0.2},
+        "then_severity": "block"
+      }
+    },
+    {
+      "id": "P-12",
+      "category": "data_provenance",
+      "name": "Merged Dataset AF Schema Drift",
+      "summary": "merged_*.tsv.gz dataset may have an `AF` column whose values do not equal caller_af (5/7 samples in archive: p75 < 0.06). Always verify via plan.preconditions.dataset_id schema check + caller_af cross-reference.",
+      "trigger_keywords": ["merged dataset AF", "merged_phase1_new", "merged_extended", "phase1_new_AF", "AF schema drift", "caller_af not preserved"],
+      "detect_via": ["plan.preconditions.dataset_id", "precheck.checks.dataset.schema_violations"],
+      "severity": "block",
+      "correct_action": "Replace `AF` column reads with caller_af joined from canonical/. If merged dataset is required, validate AF.p75 > 0.10 before downstream use.",
+      "source_ref": "20260424_X6_Caller_AF_S3S5_CrossSample",
+      "memory_ref": "feedback_merged_dataset_af_and_loh_pitfalls.md",
+      "auto_check_rule": {
+        "if_keyword_match": "merged dataset OR merged_phase1 OR phase1_new",
+        "and_artifact_missing": "plan.preconditions.dataset_id !contains caller_af_separate OR precheck.checks.dataset.schema.AF_p75 < 0.10",
+        "then_severity": "block"
+      }
+    },
+    {
+      "id": "P-13",
+      "category": "data_provenance",
+      "name": "Working Tree Dirty / Uncommitted Binary",
+      "summary": "Pipeline ran with uncommitted local changes: results not reproducible; effect size also typically near-noise (e.g. longphase 04-29 ΔF1=-0.0003).",
+      "trigger_keywords": ["working tree dirty", "uncommitted", "local changes", "modified files", "git status dirty"],
+      "detect_via": ["plan.preconditions.binary_version", "precheck.checks.git.working_tree_clean"],
+      "severity": "block",
+      "correct_action": "BLOCK cycle until git working tree is clean OR plan.preconditions.binary_version is explicit SHA + diff snapshot is archived.",
+      "source_ref": "20260429_longphase_TO_vs_V5_Somatic_Fallback",
+      "memory_ref": null,
+      "auto_check_rule": {
+        "if_artifact_status": "precheck.checks.git.working_tree_clean == false",
+        "and_keyword_absent": "binary_version explicit SHA",
         "then_severity": "block"
       }
     }

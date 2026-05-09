@@ -18,11 +18,55 @@
     ]
   },
   "open_gates": [
-    {"gate": "P5_EVALUATOR", "status": "open", "reason": "expected: cross-sample consistency 1/6 critical → pending_review (Wilcoxon W=0 p=1)"}
+    {
+      "gate": "P5_EVALUATOR",
+      "status": "open",
+      "reason": "expected: cross-sample consistency 1/6 critical → pending_review (Wilcoxon W=0 p=1)"
+    }
   ],
-  "artifacts": {"plan": "plan.json", "precheck": null, "pilot": "pilot.json", "generalize": "generalize.json", "evaluation": null},
+  "artifacts": {
+    "plan": "plan.json",
+    "precheck": null,
+    "pilot": "pilot.json",
+    "generalize": "generalize.json",
+    "evaluation": null
+  },
   "history": [
-    {"timestamp": "2026-04-22T10:00:00Z", "from_phase": null, "to_phase": "P0_REGISTER", "actor": "user"},
-    {"timestamp": "2026-04-26T16:00:00Z", "from_phase": "P4_GENERALIZE", "to_phase": "P5_EVALUATE", "actor": "user", "note": "X6 cross-sample 反證 → 撤回宣告"}
-  ]
+    {
+      "timestamp": "2026-04-22T10:00:00Z",
+      "from_phase": null,
+      "to_phase": "P0_REGISTER",
+      "actor": "user"
+    },
+    {
+      "timestamp": "2026-04-26T16:00:00Z",
+      "from_phase": "P4_GENERALIZE",
+      "to_phase": "P5_EVALUATE",
+      "actor": "user",
+      "note": "X6 cross-sample 反證 → 撤回宣告"
+    }
+  ],
+  "failure_attribution": {
+    "categories": [
+      "consistency_violation",
+      "confound_bias"
+    ],
+    "primary_category": "consistency_violation",
+    "phase_at_failure": "P5_EVALUATE",
+    "skill_at_failure": "run-evaluator",
+    "gate_at_failure": "P5_EVALUATOR",
+    "components_below_threshold": [
+      "multi_sample_consistency=0.17",
+      "effect_size_stability=0.14",
+      "pitfall_coverage_score=0.00"
+    ],
+    "pitfalls_hit": [
+      "P-11"
+    ],
+    "confidence": "high",
+    "diagnosed_at": "2026-05-09T17:34:45Z",
+    "auto_recovery_attempted": false,
+    "auto_recovery_succeeded": null,
+    "user_intervention_required": true
+  }
 }

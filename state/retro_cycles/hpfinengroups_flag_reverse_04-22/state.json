@@ -18,11 +18,56 @@
     ]
   },
   "open_gates": [
-    {"gate": "P5_EVALUATOR", "status": "open", "reason": "Cross-sample heterogeneity HCC1954 +21pp vs H2009 +2.3pp; expected: effect_size_stability low → downgrade or pending_review"}
+    {
+      "gate": "P5_EVALUATOR",
+      "status": "open",
+      "reason": "Cross-sample heterogeneity HCC1954 +21pp vs H2009 +2.3pp; expected: effect_size_stability low → downgrade or pending_review"
+    }
   ],
-  "artifacts": {"plan": "plan.json", "precheck": null, "pilot": "pilot.json", "generalize": "generalize.json", "evaluation": null},
+  "artifacts": {
+    "plan": "plan.json",
+    "precheck": null,
+    "pilot": "pilot.json",
+    "generalize": "generalize.json",
+    "evaluation": null
+  },
   "history": [
-    {"timestamp": "2026-04-18T09:00:00Z", "from_phase": null, "to_phase": "P0_REGISTER", "actor": "user"},
-    {"timestamp": "2026-04-22T20:40:00Z", "from_phase": "P4_GENERALIZE", "to_phase": "P5_EVALUATE", "actor": "user", "note": "user query 'NG=2 與甲基有關係嗎' triggered C++ source review and tier downgrade"}
-  ]
+    {
+      "timestamp": "2026-04-18T09:00:00Z",
+      "from_phase": null,
+      "to_phase": "P0_REGISTER",
+      "actor": "user"
+    },
+    {
+      "timestamp": "2026-04-22T20:40:00Z",
+      "from_phase": "P4_GENERALIZE",
+      "to_phase": "P5_EVALUATE",
+      "actor": "user",
+      "note": "user query 'NG=2 與甲基有關係嗎' triggered C++ source review and tier downgrade"
+    }
+  ],
+  "failure_attribution": {
+    "categories": [
+      "consistency_violation",
+      "confound_bias",
+      "precedent_pattern"
+    ],
+    "primary_category": "consistency_violation",
+    "phase_at_failure": "P5_EVALUATE",
+    "skill_at_failure": "run-evaluator",
+    "gate_at_failure": "P5_EVALUATOR",
+    "components_below_threshold": [
+      "effect_size_stability=0.24",
+      "pitfall_coverage_score=0.00"
+    ],
+    "pitfalls_hit": [
+      "P-06",
+      "P-07"
+    ],
+    "confidence": "high",
+    "diagnosed_at": "2026-05-09T17:34:45Z",
+    "auto_recovery_attempted": false,
+    "auto_recovery_succeeded": null,
+    "user_intervention_required": true
+  }
 }

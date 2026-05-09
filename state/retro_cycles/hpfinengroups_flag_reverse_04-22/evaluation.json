@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "cycle_id": "hpfinengroups_flag_reverse_04-22",
-  "ran_at": "2026-05-05T21:13:40Z",
+  "ran_at": "2026-05-09T17:34:45Z",
   "retraction_risk": 0.4694,
   "risk_components": {
     "multi_sample_consistency": 0.7142857142857143,
@@ -17,6 +17,11 @@
       "pitfall": "P-06",
       "severity": "warn",
       "evidence": "trigger_keyword matched in hypothesis; guard '['plan.hypothesis', 'pilot.confound_guard.n_reads_confound']' not pass"
+    },
+    {
+      "pitfall": "P-07",
+      "severity": "block",
+      "evidence": "trigger_keyword matched in hypothesis; guard '['plan.tier_used', 'plan.preconditions.upstream_reports']' not pass"
     }
   ],
   "tier_recommendation": "3",
@@ -24,5 +29,29 @@
     "Human review required: examine low/critical components and pitfall_hits before tier change.",
     "Components below 0.4 (need attention): effect_size_stability, pitfall_coverage_score"
   ],
-  "verdict": "pending_review"
+  "verdict": "pending_review",
+  "failure_attribution": {
+    "categories": [
+      "consistency_violation",
+      "confound_bias",
+      "precedent_pattern"
+    ],
+    "primary_category": "consistency_violation",
+    "phase_at_failure": "P5_EVALUATE",
+    "skill_at_failure": "run-evaluator",
+    "gate_at_failure": "P5_EVALUATOR",
+    "components_below_threshold": [
+      "effect_size_stability=0.24",
+      "pitfall_coverage_score=0.00"
+    ],
+    "pitfalls_hit": [
+      "P-06",
+      "P-07"
+    ],
+    "confidence": "high",
+    "diagnosed_at": "2026-05-09T17:34:45Z",
+    "auto_recovery_attempted": false,
+    "auto_recovery_succeeded": null,
+    "user_intervention_required": true
+  }
 }

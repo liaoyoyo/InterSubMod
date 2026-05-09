@@ -18,12 +18,60 @@
     ]
   },
   "open_gates": [
-    {"gate": "P2_PRECHECK", "status": "open", "reason": "expected: working tree dirty (Layer 1.5 + alt guard uncommitted) → stale warning"},
-    {"gate": "P5_EVALUATOR", "status": "open", "reason": "expected: effect_size_stability low (-0.0003 noise) + multi_sample_consistency=1/7=0.143 critical"}
+    {
+      "gate": "P2_PRECHECK",
+      "status": "open",
+      "reason": "expected: working tree dirty (Layer 1.5 + alt guard uncommitted) → stale warning"
+    },
+    {
+      "gate": "P5_EVALUATOR",
+      "status": "open",
+      "reason": "expected: effect_size_stability low (-0.0003 noise) + multi_sample_consistency=1/7=0.143 critical"
+    }
   ],
-  "artifacts": {"plan": "plan.json", "precheck": null, "pilot": "pilot.json", "generalize": "generalize.json", "evaluation": null},
+  "artifacts": {
+    "plan": "plan.json",
+    "precheck": null,
+    "pilot": "pilot.json",
+    "generalize": "generalize.json",
+    "evaluation": null
+  },
   "history": [
-    {"timestamp": "2026-04-28T08:00:00Z", "from_phase": null, "to_phase": "P0_REGISTER", "actor": "user"},
-    {"timestamp": "2026-04-29T18:00:00Z", "from_phase": "P4_GENERALIZE", "to_phase": "P5_EVALUATE", "actor": "user", "note": "技術報告整理；caveat: V5 working tree uncommitted + 7 樣本擴展未做"}
-  ]
+    {
+      "timestamp": "2026-04-28T08:00:00Z",
+      "from_phase": null,
+      "to_phase": "P0_REGISTER",
+      "actor": "user"
+    },
+    {
+      "timestamp": "2026-04-29T18:00:00Z",
+      "from_phase": "P4_GENERALIZE",
+      "to_phase": "P5_EVALUATE",
+      "actor": "user",
+      "note": "技術報告整理；caveat: V5 working tree uncommitted + 7 樣本擴展未做"
+    }
+  ],
+  "failure_attribution": {
+    "categories": [
+      "consistency_violation",
+      "precondition_violation",
+      "confound_bias"
+    ],
+    "primary_category": "consistency_violation",
+    "phase_at_failure": "P5_EVALUATE",
+    "skill_at_failure": "run-evaluator",
+    "gate_at_failure": "P5_EVALUATOR",
+    "components_below_threshold": [
+      "multi_sample_consistency=0.14",
+      "effect_size_stability=0.00",
+      "precondition_freshness=0.30",
+      "subgroup_homogeneity=0.00"
+    ],
+    "pitfalls_hit": [],
+    "confidence": "medium",
+    "diagnosed_at": "2026-05-09T17:34:45Z",
+    "auto_recovery_attempted": false,
+    "auto_recovery_succeeded": null,
+    "user_intervention_required": true
+  }
 }

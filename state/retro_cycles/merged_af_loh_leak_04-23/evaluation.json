@@ -1,22 +1,53 @@
 {
   "schema_version": "1.0",
   "cycle_id": "merged_af_loh_leak_04-23",
-  "ran_at": "2026-05-05T21:13:40Z",
-  "retraction_risk": 0.6173,
+  "ran_at": "2026-05-09T17:34:45Z",
+  "retraction_risk": 0.7873,
   "risk_components": {
     "multi_sample_consistency": 0.16666666666666666,
     "effect_size_stability": 0.14285714285714285,
     "precondition_freshness": 0.3,
     "subgroup_homogeneity": 0.5017236906578582,
-    "pitfall_coverage_score": 1.0,
+    "pitfall_coverage_score": 0.0,
     "tier_support_alignment": null,
     "precedent_similarity": null
   },
-  "pitfall_hits": [],
+  "pitfall_hits": [
+    {
+      "pitfall": "P-11",
+      "severity": "block",
+      "evidence": "trigger_keyword matched in hypothesis; guard '['generalize.consistency.n_samples_passed', 'generalize.samples']' not pass"
+    }
+  ],
   "tier_recommendation": "2",
   "required_followups": [
     "Human review required: examine low/critical components and pitfall_hits before tier change.",
-    "Components below 0.4 (need attention): multi_sample_consistency, effect_size_stability, precondition_freshness"
+    "Components below 0.4 (need attention): multi_sample_consistency, effect_size_stability, precondition_freshness, pitfall_coverage_score"
   ],
-  "verdict": "pending_review"
+  "verdict": "pending_review",
+  "failure_attribution": {
+    "categories": [
+      "consistency_violation",
+      "precondition_violation",
+      "confound_bias"
+    ],
+    "primary_category": "consistency_violation",
+    "phase_at_failure": "P2_PRECHECK",
+    "skill_at_failure": "run-evaluator",
+    "gate_at_failure": "P5_EVALUATOR",
+    "components_below_threshold": [
+      "multi_sample_consistency=0.17",
+      "effect_size_stability=0.14",
+      "precondition_freshness=0.30",
+      "pitfall_coverage_score=0.00"
+    ],
+    "pitfalls_hit": [
+      "P-11"
+    ],
+    "confidence": "high",
+    "diagnosed_at": "2026-05-09T17:34:45Z",
+    "auto_recovery_attempted": false,
+    "auto_recovery_succeeded": null,
+    "user_intervention_required": true
+  }
 }

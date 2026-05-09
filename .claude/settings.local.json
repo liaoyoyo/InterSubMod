@@ -92,7 +92,47 @@
       "Bash(mkdir -p /big7_disk/liaoyoyo2001/InterSubMod/docs/experiments/validated/2026/04/figures/loh_subclone_af)",
       "Bash(mkdir -p /big7_disk/liaoyoyo2001/InterSubMod/docs/experiments/validated/2026/04/figures/loh_subclone_af_paired)",
       "Bash(head -n 261 /bip7_disk/liaoyoyo2001/.claude/plans/immutable-crafting-haven.md)",
-      "Bash(python3 research/hpfinengroups_saturation_check/scripts/02_anomaly_investigation.py)"
+      "Bash(python3 research/hpfinengroups_saturation_check/scripts/02_anomaly_investigation.py)",
+      "Bash(/big7_disk/liaoyoyo2001/InterSubMod/scripts/pipeline/run_benchmark.sh --mode s-pure --sample HCC1395 --vcf-source pileup --skip-longphase --output-root /tmp/test_dryrun --dry-run)",
+      "Bash(nohup /big7_disk/liaoyoyo2001/big7_disk_output/synthesis/kde_rerun_B_14combos/run_batch.sh)",
+      "Bash(/big7_disk/liaoyoyo2001/InterSubMod/research/F_hpfinengroups_deepening/scripts/r1_build_global_vcf.sh)",
+      "Bash(mkdir -p figures)",
+      "Bash(/big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/md_path_format_rule.sh)",
+      "Bash(zcat /big8_disk/data/HCC1395/ONT/subsample/t30_n20/ClairS_TO_v0_3_0/snv.vcf.gz)",
+      "Bash(zcat /big8_disk/data/HCC1395/ONT/subsample/t30_n20/ClairS_TO_ss_v0_3_0/snv.vcf.gz)",
+      "Bash(/big7_disk/liaoyoyo2001/longphase-to-mod/longphase-to phase *)",
+      "Read(//big8_disk/data/HCC1395/ONT/subsample/t30_n20/**)",
+      "Bash(apt list *)",
+      "Bash(sed -n '80,250p' /big8_disk/liaoyoyo2001/Knowledge/05_tools/longphase.md)",
+      "Read(//big8_disk/liaoyoyo2001/knowledge/03_file_formats/**)",
+      "Bash(sed -n '15,30p' /big7_disk/liaoyoyo2001/longphase-to-mod/Util.h)",
+      "Bash(sed -n '560,575p' /big7_disk/liaoyoyo2001/longphase-to-mod/HaplotagProcess.cpp)",
+      "Bash(sed -n '545,565p' /big7_disk/liaoyoyo2001/longphase-to-mod/HaplotagProcess.cpp)",
+      "Bash(mkdir -p /big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260429_Self_Phasing_完整教授報告/v2/scripts /big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260429_Self_Phasing_完整教授報告/v2/output /big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260429_Self_Phasing_完整教授報告/v2/notes)",
+      "Bash(mkdir -p /big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260429_Self_Phasing_完整教授報告/v2/source_materials)",
+      "Bash(cp '/big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260429_Self_Phasing_完整教授報告/source_materials/*.md' /big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260429_Self_Phasing_完整教授報告/v2/source_materials/)",
+      "Bash(mkdir -p /big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260429_Self_Phasing_完整教授報告/v2/figures)",
+      "Bash(cp '/big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260429_Self_Phasing_完整教授報告/figures/*.png' /big7_disk/liaoyoyo2001/InterSubMod/docs/presentations/validated/2026/04/20260429_Self_Phasing_完整教授報告/v2/figures/)",
+      "Bash(mkdir -p v3/scripts v3/notes v3/output/wireframes)",
+      "Bash(cp v2/scripts/PPT_RENDERING_RULES.md v3/scripts/)",
+      "Bash(cp v2/scripts/screenshot_all.py v3/scripts/)",
+      "Bash(cat)",
+      "Read(//tmp/**)",
+      "Bash(cp -p .claude/settings.local.json /tmp/settings.local.json.backup_day3)",
+      "Bash(cp -p .claude/settings.local.json /tmp/settings.local.json.backup_day5)",
+      "Bash(rmdir .claude/skills/myPPT)",
+      "Bash(cp -rp /big7_disk/liaoyoyo2001/InterSubMod/.claude/skills/research-ideation /big7_disk/liaoyoyo2001/InterSubMod/.claude/skills/problem-framing-ideation)",
+      "Bash(/bin/ls /tmp/)",
+      "Read(//bip7_disk/liaoyoyo2001/tmp_claude/**)",
+      "Bash(touch /tmp/claude-1067/_probe)",
+      "Bash(touch /tmp/claude-1067/_probe2)",
+      "Bash(git stash *)",
+      "Bash(mkdir -p /tmp/claude_plugins_disabled_20260508)",
+      "Read(//bip7_disk/liaoyoyo2001/.claude/plugins/cache/claude-plugins-official/superpowers/**)",
+      "Read(//bip7_disk/liaoyoyo2001/.claude/plugins/cache/claude-plugins-official/**)",
+      "Bash(/big7_disk/liaoyoyo2001/InterSubMod/scripts/infra/disk_guard.sh)",
+      "Read(//bip7_disk/liaoyoyo2001/**)",
+      "Read(//var/log/**)"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
@@ -116,7 +156,6 @@
     "ask": [
       "Bash(rm:*)",
       "Bash(mv:*)",
-      "Bash(cp:*)",
       "Bash(chmod:*)",
       "Bash(chown:*)",
       "Bash(ln:*)",
@@ -133,8 +172,7 @@
       "Bash(ssh:*)",
       "Bash(scp:*)",
       "Bash(rsync:*)",
-      "Bash(sudo:*)",
-      "Bash(docker:*)"
+      "Bash(sudo:*)"
     ],
     "defaultMode": "acceptEdits"
   },
@@ -160,6 +198,22 @@
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/research_direction_guard.sh 2>/dev/null || true"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/kb_freshness_warn.sh 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/md_path_format_rule.sh 2>/dev/null || true"
+          }
+        ]
       }
     ],
     "PreToolUse": [
@@ -182,11 +236,20 @@
         ]
       },
       {
-        "matcher": "Edit|Write",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/pre_tier_upgrade_check.sh"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/kb_schema_check.sh 2>/dev/null || exit 0"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/pipeline_block_check.sh"
           }
         ]
       }
@@ -229,6 +292,15 @@
         ]
       },
       {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/md_link_check.sh 2>/dev/null || true"
+          }
+        ]
+      },
+      {
         "matcher": "Bash",
         "hooks": [
           {
@@ -254,6 +326,15 @@
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/post_cpp_commit_invalidate.sh 2>/dev/null || true"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/kb_sot_guard.sh 2>/dev/null || true"
+          }
+        ]
       }
     ],
     "SubagentStop": [
@@ -277,6 +358,14 @@
       }
     ]
   },
+  "enabledPlugins": {
+    "github@claude-plugins-official": false,
+    "sourcegraph@claude-plugins-official": false,
+    "anthropic-skills@claude-plugins-official": false,
+    "example-skills@anthropic-agent-skills": false,
+    "stripe@claude-plugins-official": false,
+    "document-skills@anthropic-agent-skills": false
+  },
   "outputStyle": "default",
   "sandbox": {
     "enabled": true,
@@ -287,7 +376,7 @@
     "defaultEnvironmentId": "env_01PzQvyh42s16EdwAsEyV5Ei"
   },
   "autoUpdater": {
-    "enabled": true
+    "enabled": false
   },
   "preferences": {
     "language": "zh-TW",

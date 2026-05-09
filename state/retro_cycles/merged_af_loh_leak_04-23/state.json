@@ -18,11 +18,57 @@
     ]
   },
   "open_gates": [
-    {"gate": "P2_PRECHECK", "status": "open", "reason": "dataset_id contains 'merged' keyword → expected to BLOCK on caller_af probe"}
+    {
+      "gate": "P2_PRECHECK",
+      "status": "open",
+      "reason": "dataset_id contains 'merged' keyword → expected to BLOCK on caller_af probe"
+    }
   ],
-  "artifacts": {"plan": "plan.json", "precheck": null, "pilot": "pilot.json", "generalize": "generalize.json", "evaluation": null},
+  "artifacts": {
+    "plan": "plan.json",
+    "precheck": null,
+    "pilot": "pilot.json",
+    "generalize": "generalize.json",
+    "evaluation": null
+  },
   "history": [
-    {"timestamp": "2026-04-22T10:00:00Z", "from_phase": null, "to_phase": "P0_REGISTER", "actor": "user"},
-    {"timestamp": "2026-04-23T18:00:00Z", "from_phase": "P3_PILOT", "to_phase": "P2_PRECHECK", "actor": "user", "note": "X6 cross-sample 重 merge 揭露 caller_af 欄位陷阱 + LOH 殘缺"}
-  ]
+    {
+      "timestamp": "2026-04-22T10:00:00Z",
+      "from_phase": null,
+      "to_phase": "P0_REGISTER",
+      "actor": "user"
+    },
+    {
+      "timestamp": "2026-04-23T18:00:00Z",
+      "from_phase": "P3_PILOT",
+      "to_phase": "P2_PRECHECK",
+      "actor": "user",
+      "note": "X6 cross-sample 重 merge 揭露 caller_af 欄位陷阱 + LOH 殘缺"
+    }
+  ],
+  "failure_attribution": {
+    "categories": [
+      "consistency_violation",
+      "precondition_violation",
+      "confound_bias"
+    ],
+    "primary_category": "consistency_violation",
+    "phase_at_failure": "P2_PRECHECK",
+    "skill_at_failure": "run-evaluator",
+    "gate_at_failure": "P5_EVALUATOR",
+    "components_below_threshold": [
+      "multi_sample_consistency=0.17",
+      "effect_size_stability=0.14",
+      "precondition_freshness=0.30",
+      "pitfall_coverage_score=0.00"
+    ],
+    "pitfalls_hit": [
+      "P-11"
+    ],
+    "confidence": "high",
+    "diagnosed_at": "2026-05-09T17:34:45Z",
+    "auto_recovery_attempted": false,
+    "auto_recovery_succeeded": null,
+    "user_intervention_required": true
+  }
 }

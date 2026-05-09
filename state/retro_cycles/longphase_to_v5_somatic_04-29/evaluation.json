@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "cycle_id": "longphase_to_v5_somatic_04-29",
-  "ran_at": "2026-05-05T21:13:41Z",
+  "ran_at": "2026-05-09T17:34:45Z",
   "retraction_risk": 0.7404,
   "risk_components": {
     "multi_sample_consistency": 0.14285714285714285,
@@ -18,5 +18,28 @@
     "Human review required: examine low/critical components and pitfall_hits before tier change.",
     "Components below 0.4 (need attention): multi_sample_consistency, effect_size_stability, precondition_freshness, subgroup_homogeneity"
   ],
-  "verdict": "pending_review"
+  "verdict": "pending_review",
+  "failure_attribution": {
+    "categories": [
+      "consistency_violation",
+      "precondition_violation",
+      "confound_bias"
+    ],
+    "primary_category": "consistency_violation",
+    "phase_at_failure": "P5_EVALUATE",
+    "skill_at_failure": "run-evaluator",
+    "gate_at_failure": "P5_EVALUATOR",
+    "components_below_threshold": [
+      "multi_sample_consistency=0.14",
+      "effect_size_stability=0.00",
+      "precondition_freshness=0.30",
+      "subgroup_homogeneity=0.00"
+    ],
+    "pitfalls_hit": [],
+    "confidence": "medium",
+    "diagnosed_at": "2026-05-09T17:34:45Z",
+    "auto_recovery_attempted": false,
+    "auto_recovery_succeeded": null,
+    "user_intervention_required": true
+  }
 }
