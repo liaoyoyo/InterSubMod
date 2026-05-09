@@ -988,6 +988,10 @@ origin/main HEAD 後續 commits 只動 `docs/`、`images/`、`README.md`、註�
 
 → **paired mode 整體沒 priority bug 偏移**。
 
+![Figure F6 — paired vs TO HP distribution chr19](../../../research/paired_priority_bug_audit/figures/F6_paired_vs_TO_HP_distribution.png)
+
+*Figure F6 — paired (longphase-s, 左) vs TO baseline (longphase-to, 右) chr19 HP tag distribution。paired germline HP1:HP2 ≈ 1:1, somatic HP1-1:HP2-1 ≈ 1:1（無偏移）；TO baseline 在 chr19 整體分布中 hp=11 (HP1 系列) > hp=21 (HP2 系列)，與全基因組 17.3:1 偏移一致。*
+
 ### 8.6.3 Step C — chr19 1Mb window som_ratio = HP1-1 / (HP1-1 + HP2-1)
 
 | 統計 | 值 |
@@ -1017,6 +1021,10 @@ origin/main HEAD 後續 commits 只動 `docs/`、`images/`、`README.md`、註�
 | HP:Z:2-1 | 1,588 | **1,291** | 295 | 全 hp=33 | 1,291 | 295 |
 | HP:Z:3 | 530 | 342 | 178 | 全 hp=33 | 343 | 177 |
 | **加總** | — | **3,312** | **791** | 5,789（全 hp=33）| 3,313 | 790 |
+
+![Figure F7 — Germline-absent events V3F vs V5 vs baseline 對比](../../../research/paired_priority_bug_audit/figures/F7_germline_absent_crosstab.png)
+
+*Figure F7 — Germline-absent events (5,789 chr19 events) 三版處理對比。**左 panel**：V3F 全標 hp=33 保守不選邊（綠色 evaluation）；baseline 與 V5 都 4.19:1 偏 HP1（紅色 priority bug 警示）。**右 panel**：對 paired HP:Z:1-1/2-1/3 reads，baseline 與 V5 cross-tab 完全相同（hatch pattern 重疊）— V5 Layer 1.5 在該區域 = priority bug 的 feature 化非修補。*
 
 **核心數字（binary-internal 量化，不依賴跨 binary 軸對齊）**：
 

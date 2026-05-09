@@ -1,8 +1,9 @@
 <!--
 build_date: 2026-05-09
-agent: errata patch (從 5/8 整合報告 §9.2 + 5/9 V5 commit 狀態更新)
+revised: 2026-05-10 (加 E5 V5 Layer 1.5 設計缺陷 — paired germline-absent xref 5/9 Step D 新發現)
+agent: errata patch (從 5/8 整合報告 §9.2 + 5/9 V5 commit 狀態更新 + 5/10 Step D 補強)
 status: validated
-report_class: errata-companion (修訂 4-29 PI 報告 4 處表述)
+report_class: errata-companion (修訂 4-29 PI 報告 5 處表述)
 audience: PI / lab member / 自己未來
 parent_report: InterSubMod/docs/reports/validated/2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md
 parent_synthesis: InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md
@@ -14,8 +15,8 @@ inputs:
 outputs:
   - 本檔（獨立 erratum companion）
   - PI 報告頂部加一行 erratum banner 引用本檔
-verdict: 4 條 errata，主要 PI 結論不撤回；補強為「機制 + 案例 + 統計」三重佐證；歸因從「V5 整體」精確化為「V3F + Layer 1.5 為主，Pass 2 二次效益尚未獨立量化」
-last_verified: 2026-05-09
+verdict: 5 條 errata，主要 PI 結論不撤回；補強為「機制 + 案例 + 統計」三重佐證；歸因從「V5 整體」精確化為「V3F + Layer 1.5 為主，Pass 2 二次效益尚未獨立量化」；E5 (5/10 加) — V5 Layer 1.5 在 germline-absent 區域與 baseline 4.19:1 偏 HP1 完全相同，是 priority bug 的 feature 化非修補，V3F 標 hp=33 反而更穩健
+last_verified: 2026-05-10
 report_template: errata-companion v1.0
 -->
 
@@ -23,14 +24,15 @@ report_template: errata-companion v1.0
 
 ## 0. TL;DR
 
-PI 報告 [`InterSubMod/docs/reports/validated/2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md`](../2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md)（2026-04-29）**主要結論不撤回**（self-phasing 真實存在、V3F + V5 修正確立、V5 可作 production tag baseline）。本 erratum 修訂 4 處表述：
+PI 報告 [`InterSubMod/docs/reports/validated/2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md`](../2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md)（2026-04-29）**主要結論不撤回**（self-phasing 真實存在、V3F + V5 修正確立、V5 可作 production tag baseline）。本 erratum 修訂 5 處表述：
 
 1. **E1** §3.3.3 chr19 SP1/2/3 解讀：從「主要 hotspot」→「可重現案例（chr19 占全基因組 priority bug 僅 2.16%）」
 2. **E2** §5.2 V5 commit 狀態：「V5 working tree uncommitted」→ 已 commit (`d0bcd8c` 4-30 含 ploidy fix + bundled Layer 1.5 + countSNP guard；`938f0df` 4-30 含 threshold 0.95→0.9)
 3. **E3** §5.2 priority bug 機制證據強度：升級「commit message + 3 IGV 截圖」→「+ 34,855 read-level victims 全基因組鐵證、V3F+V5 修正率 100%」
 4. **E4** §6.4/§6.5 V5 數值歸因：精確化「V5 four-commit chain 整體效益」→「**主要 V3F + Layer 1.5（tagging layer）；Pass 2 second round 二次效益尚未獨立量化**」（PI 報告引用之 4-12 V5 BAM 實為 Pass 1 only，因 ploidy bug 未修正前 purity=0 → highPurity=false → Pass 2 從未觸發）
+5. **E5（5/10 加）** §5.2 V5 Layer 1.5 設計描述：「Layer 1.5 = germline 缺席區域的 fallback（隱含「修補」）」→ **在 germline-absent 區域 V5 Layer 1.5 與 baseline 4.19:1 偏 HP1 完全相同**，是 priority bug 的 feature 化非修補；V3F 標 hp=33（純 somatic ambiguous）保守處理反而更穩健（5/9 Step D paired cross-ref 5,789 chr19 events 量化證明）
 
-證據來源：5/8 整合報告 §7（V5 Provenance bonus）、§8（顛覆性發現）、§5（修補設計演進）。
+證據來源：5/8 整合報告 §7（V5 Provenance bonus）、§8（顛覆性發現）、§5（修補設計演進）；5/10 加 §8.6 + paired audit Step D。
 
 ---
 
@@ -181,15 +183,57 @@ PI 報告引用之 V5 BAM 是 `output/pononly_v5_somatic_fallback/tumor_tagged.b
 
 ---
 
-## 5. 修訂後 §1 一句結論建議全文
+## 5. E5（5/10 新加） — §5.2 V5 Layer 1.5 設計描述精確化
 
-（**修訂後完整版**，可整段替換 PI 報告 line 47）：
+### 5.1 PI 報告 4-29 原文（§5.2 V5 working tree row + §3.3 三層證據鏈描述）
 
-> **Self-phasing 在 baseline LongPhase-TO 是真實 tag-level artifact（94.6% somatic ALT reads 集中於 HP1，HP1:HP2 = 17.3:1）；修補在 longphase-to-mod fork 內以 5 commits 漸進完成（`8b8c1fd` PON-only flag → `41ff147` getVote 兩層 → `380e8d2` INDEL guard → `d0bcd8c` ploidy fix + bundled Layer 1.5 → `938f0df` threshold 0.95→0.9，全部 commit 完成於 2026-04-30），總修補集中於 3 函式、`HaplotagProcess.h:66-68` 介面契約零變動；V5 通過 4 項硬性 sanity check 15/15 PASS、clean PS paired GT concordance +13.3 pp（全基因組 PI 報告 4 +8.3 pp），可作為新 haplotag baseline。Read-level audit (T1.2 + T1.2-F1) 補強 priority bug 機制因果至 chr19 752 + 全基因組 34,855 victims 鐵證、V3F+V5 修正率 100%。但 PI 報告 §6 V5 數值為 4-12 BAM = Pass 1 only（ploidy bug 讓 purity=0 從未觸發 Pass 2），主要功勞來自 V3F + Layer 1.5（tagging layer），Pass 2 second round 二次效益尚未獨立量化（用戶 5/7 決策 cancel ISM benchmark — ISM 為下游消費者）；caller F1 vs SEQC2 truth 三版完全相同（HCC1395 0.93 = 0.7166 / 0.6 = 0.6273，V5 不改 caller）；7 樣本擴展未做、cnLOH 雙親同源區仍 open。InterSubMod 在這條修補鏈是下游消費者而非實作者，本 repo 無 C++ 改動。**
+> **V5（uncommitted working tree）**：getVote() Layer 1.5 somatic fallback + countSNPHaplotype() 對稱 alt guard ｜ AMB% 17.5→8.0%；HP:i:33 −54%（239,679 → 110,197）
+
+§5.2 對 Layer 1.5 的描述隱含「germline 缺席區域 Layer 1.5 提供修補」的敘事，但**未量化「修補」是否真存在於該區域**。
+
+### 5.2 5/9 paired germline-absent xref 揭露（5/8 §8.6 + paired audit Step D）
+
+對 paired chr19 read_name × T1.2 baseline / V3F / V5 vote dump JOIN，篩 `cnt_HP1+cnt_HP2=0` 且 `somatic>0` 的 events（5,789 events）：
+
+| 版本 | hp=11 (HP1 系列) | hp=21 (HP2 系列) | hp=33 (somatic ambiguous) | 比例 / 評語 |
+|---|---:|---:|---:|---|
+| **baseline** | **3,312** | 791 | 80 | **4.19:1 偏 HP1**（priority bug 次峰）|
+| **V3F** | 0 | 0 | **5,789** | 全標 hp=33（保守不選邊）✅ |
+| **V5** | **3,313** | 790 | 53 | **4.19:1 偏 HP1（與 baseline 完全相同！）** ⚠️ |
+
+→ **V5 Layer 1.5 在 germline-absent 區域行為與 baseline 完全相同**：
+
+- baseline 4.19:1 偏 HP1 是 priority bug 在 somatic-only 投票場景的次峰偏移
+- V5 Layer 1.5 設計（germline 缺席時用 `somaticHP1` vs `somaticHP2` 票數決方向）在 self-phasing 機制下 — sub-clone somatic 100% 共現 → graph 偏向同一 haplotype → 投票偏向同邊
+- → **V5 Layer 1.5 = priority bug 的 feature 化**：把「baseline 用 somatic vote 蓋過 germline」buggy 行為，改成「germline 缺席時才用 somatic vote」designed 行為，但**該區域偏移本質沒變**
+
+V3F 在該區域標 hp=33（純 somatic ambiguous，方向不選邊）— **保守正確**避免錯標方向。
+
+### 5.3 修訂建議
+
+- §5.2 表「**V5（uncommitted working tree）**」row 加註：「**caveat (5/10 補)**：在 germline-absent 區域 Layer 1.5 與 baseline 4.19:1 偏 HP1 完全相同（5/9 Step D paired cross-ref 量化），是 priority bug 的 feature 化而非修補；V3F 在該區域標 hp=33 反而更穩健。完整量化見 [Self-Phasing 完整觀察整合報告 §8.6](20260508_Self_Phasing_完整觀察整合報告_01.md)。」
+- §5.2 V5 修補敘事改寫：把「V5 含 Layer 1.5 補 germline 缺席區域 fallback」精確化為「V5 Layer 1.5 嘗試在 germline 缺席時用 somatic phased votes 補方向，但該設計在 self-phasing 機制下繼承 priority bug 偏移；germline-absent 區域真正穩健的選擇是 V3F 標 hp=33」
+- §1 caveat 加：「V5 Layer 1.5 設計選擇待 ISM 影響量化（F-paired-D3）— 改回 V3F「germline 缺席標 hp=33」可能是更安全 default」
+
+### 5.4 不影響的 PI 結論
+
+- 17.3:1 全基因組偏移確立 ✅（priority bug 主要由 germline_vote>0 區域貢獻，整體 ratio 由該區域主導）
+- V3F + V5 修正 chr19 752 / 全基因組 34,855 victims 100% 修正率 ✅（這是 germline_vote>0 區域的修正）
+- sanity 15/15 PASS ✅
+- caller F1 三版相同 ✅
+- E5 僅影響 V5 vs V3F 在 **germline-absent 區域** 的設計選擇，**不撤回任何主結論**
 
 ---
 
-## 6. 修訂歷程
+## 6. 修訂後 §1 一句結論建議全文
+
+（**修訂後完整版**，可整段替換 PI 報告 line 47）：
+
+> **Self-phasing 在 baseline LongPhase-TO 是真實 tag-level artifact（94.6% somatic ALT reads 集中於 HP1，HP1:HP2 = 17.3:1）；修補在 longphase-to-mod fork 內以 5 commits 漸進完成（`8b8c1fd` PON-only flag → `41ff147` getVote 兩層 → `380e8d2` INDEL guard → `d0bcd8c` ploidy fix + bundled Layer 1.5 → `938f0df` threshold 0.95→0.9，全部 commit 完成於 2026-04-30），總修補集中於 3 函式、`HaplotagProcess.h:66-68` 介面契約零變動；V5 通過 4 項硬性 sanity check 15/15 PASS、clean PS paired GT concordance +13.3 pp（全基因組 PI 報告 4 +8.3 pp），可作為新 haplotag baseline。Read-level audit (T1.2 + T1.2-F1) 補強 priority bug 機制因果至 chr19 752 + 全基因組 34,855 victims 鐵證、V3F+V5 修正率 100%。但 PI 報告 §6 V5 數值為 4-12 BAM = Pass 1 only（ploidy bug 讓 purity=0 從未觸發 Pass 2），主要功勞來自 V3F + Layer 1.5（tagging layer），Pass 2 second round 二次效益尚未獨立量化（用戶 5/7 決策 cancel ISM benchmark — ISM 為下游消費者）；caller F1 vs SEQC2 truth 三版完全相同（HCC1395 0.93 = 0.7166 / 0.6 = 0.6273，V5 不改 caller）。**5/9 paired cross-ref 揭露 V5 Layer 1.5 在 germline-absent 區域與 baseline 4.19:1 偏 HP1 完全相同（priority bug 的 feature 化而非修補），V3F 標 hp=33 反而更穩健 — 該區域 V5 設計選擇待 ISM 影響量化（F-paired-D3）；但 germline-absent 區域佔比小，不阻擋 V5 作為整體 production baseline**。7 樣本擴展未做、cnLOH 雙親同源區仍 open。InterSubMod 在這條修補鏈是下游消費者而非實作者，本 repo 無 C++ 改動。**
+
+---
+
+## 7. 修訂歷程
 
 | 時間 | 修訂事件 | 來源 |
 |---|---|---|
@@ -199,14 +243,20 @@ PI 報告引用之 V5 BAM 是 `output/pononly_v5_somatic_fallback/tumor_tagged.b
 | 2026-05-07 | T1.2 chr19 752 victims read-level 鐵證 | [`InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/T1_2_priority_bug_mechanism_report.md`](../../../research/v5_provenance_followup/T1_2_read_level_audit/T1_2_priority_bug_mechanism_report.md) |
 | 2026-05-08 | T1.2-F1 全基因組 34,855 + 顛覆三項 chr19 結論 | [`InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/T1_2_F1_genome_wide_audit.md`](../../../research/v5_provenance_followup/T1_2_read_level_audit/T1_2_F1_genome_wide_audit.md) |
 | 2026-05-08 | 5/8 Self-Phasing 整合報告（4 條 errata 列出於 §9.2） | [`InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md`](20260508_Self_Phasing_完整觀察整合報告_01.md) |
-| **2026-05-09** | **本 erratum companion + PI 報告頂部 banner** | 本檔 |
+| **2026-05-09** | **本 erratum companion + PI 報告頂部 banner（E1-E4）** | 本檔 |
+| 2026-05-09 | Paired audit Step A+C cycle 36 — paired 沒 priority bug | [`InterSubMod/research/paired_priority_bug_audit/00_audit_report.md`](../../../research/paired_priority_bug_audit/00_audit_report.md) (commit 6ed8a0d) |
+| 2026-05-09 | Paired audit Step D cycle 37 — V5 Layer 1.5 設計缺陷 | [`InterSubMod/research/paired_priority_bug_audit/01_step_D_germline_absent_finding.md`](../../../research/paired_priority_bug_audit/01_step_D_germline_absent_finding.md) (commit 766ec5f) |
+| 2026-05-10 | 5/8 整合報告補 §8.6 Paired Mode Cross-Reference Audit | [§8.6](20260508_Self_Phasing_完整觀察整合報告_01.md) (commit df5137e) |
+| **2026-05-10** | **本檔加 E5 + renumber §5/§6/§7 → §6/§7/§8** | 本檔 |
 
 ---
 
-## 7. 引用文件
+## 8. 引用文件
 
 - [PI 報告原文 (4-29)](../2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md)
 - [V5 Audit (5-05)](20260505_self_phasing_V5_data_provenance_audit_01.md)
-- [Self-Phasing 完整觀察整合報告 (5-8)](20260508_Self_Phasing_完整觀察整合報告_01.md)
+- [Self-Phasing 完整觀察整合報告 (5-8)](20260508_Self_Phasing_完整觀察整合報告_01.md) — 含 §8.6 Paired Cross-Ref Audit
 - [T1.2 chr19 priority bug mechanism (5-7)](../../../research/v5_provenance_followup/T1_2_read_level_audit/T1_2_priority_bug_mechanism_report.md)
 - [T1.2-F1 全基因組 audit (5-8)](../../../research/v5_provenance_followup/T1_2_read_level_audit/T1_2_F1_genome_wide_audit.md)
+- [Paired audit Step A+C (5-9)](../../../research/paired_priority_bug_audit/00_audit_report.md)
+- [Paired audit Step D germline-absent (5-9)](../../../research/paired_priority_bug_audit/01_step_D_germline_absent_finding.md)

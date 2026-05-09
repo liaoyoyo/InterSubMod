@@ -42,11 +42,12 @@ report_template: structured-tech-report v1.0 → 對齊 20260428 PI audit 11 節
 
 # longphase-to-mod V5 Somatic Fallback Haplotag — Self-Phasing 審核報告（PI）
 
-> ⚠️ **ERRATUM 2026-05-09**：本報告 4 處表述已修訂，**主結論不撤回**。完整 4 條 patch + before/after 對照詳見 [`InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md`](../../05/20260509_PI_Report_4_29_Errata_01.md)：
+> ⚠️ **ERRATUM 2026-05-09 / 修訂 2026-05-10**：本報告 5 處表述已修訂，**主結論不撤回**。完整 5 條 patch + before/after 對照詳見 [`InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md`](../../05/20260509_PI_Report_4_29_Errata_01.md)：
 > - **E1** §3.3.3 chr19 SP1/2/3 為「可重現案例」（占 priority bug 全基因組 **2.16%**，rank 19，非主要 hotspot 分佈）
 > - **E2** §5.2 V5 working tree **已 commit**（`d0bcd8c` + `938f0df` 4-30 完成；V5 chain 為 **5 commits** 不是 4）
 > - **E3** §5.2 priority bug 機制證據升級至「個案 + 統計 + 機制」三重佐證（read-level 全基因組 **34,855 victims** 鐵證，V3F+V5 修正率 **100%**）
 > - **E4** §6.4/§6.5 V5 數值為 **Pass 1 only** 結果（4-12 BAM ploidy bug → purity=0 → Pass 2 從未觸發），主要功勞 **V3F + Layer 1.5**；Pass 2 second round 二次效益尚未獨立量化
+> - **E5（5/10 加）** §5.2 V5 Layer 1.5 在 **germline-absent 區域與 baseline 4.19:1 偏 HP1 完全相同**（priority bug 的 feature 化而非修補）；V3F 標 hp=33 保守處理反而更穩健（5/9 paired cross-ref Step D 量化證明）
 
 ## 一句結論
 
