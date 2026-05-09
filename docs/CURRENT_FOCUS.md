@@ -48,7 +48,31 @@
 
 ## 3. 當前進行中
 
-### 2026-04-23 週報後 P0/P1 行動（最新，本週定案）
+### 2026-05-10 Self-Phasing 整合主軸（5 個 commit 鏈完成）
+
+**主軸 commit 鏈（5/8 → 5/10）**：
+- `951e7c9` 5/8 Self-Phasing 完整觀察整合報告（10 段 + 5 figures + 1202 行）
+- `f17754f` 5/9 PI 報告 4-29 errata companion + 原報告 banner（4 條 errata）
+- `6ed8a0d` 5/9 paired audit Step A+C — paired 沒 priority bug
+- `766ec5f` 5/9 paired audit Step D — V5 Layer 1.5 設計缺陷揭露
+- `df5137e` 5/10 整合 5/9 paired 發現至 5/8 主報告 §8.6
+- `2553e96` + `71d21bd` 5/10 補強 E5 errata + F6+F7 figures
+
+**主結論**：
+- self-phasing 機制因果確立（17.3:1 + 34,855 read-level victims + 100% V3F/V5 修正）
+- V5 整體可作 production tag baseline
+- **5/9 新發現 V5 Layer 1.5 在 germline-absent 區域繼承 priority bug 偏移（4.19:1 偏 HP1，與 baseline 完全相同）；V3F 標 hp=33 反而更穩健** — 設計缺陷待 F-paired-D3 ISM 影響量化
+- PI 報告 4-29 5 處 errata 已 patch（companion + banner）
+
+**待 follow-up（5/9 新加 4 條）**：
+- F-paired-D1：全基因組 germline-absent 擴展（chr19 → 全 chr，~150K events）
+- F-paired-D2：phase block 內 axis-aligned 分析
+- F-paired-D3：V5 Layer 1.5 改回 V3F 的 ISM 影響量化
+- F-paired-D4：E5 PI errata 補強 ✅ DONE 5/10 (commit 2553e96)
+
+主入口：[InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md](reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md)
+
+### 2026-04-23 週報後 P0/P1 行動（之前主軸，部分仍 active）
 
 | 優先 | 行動 | 預期產出 | 估時 | 依據 |
 |:---:|------|---------|:---:|------|
