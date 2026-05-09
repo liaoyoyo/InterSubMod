@@ -10,6 +10,10 @@
 
 set -e
 
+# v1.8 T1-2: enforce per-process TMPDIR + free-space pre-flight (prevent /tmp disasters).
+# See InterSubMod/scripts/lib/tmpdir_guard.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib/tmpdir_guard.sh"
+
 # ============================================================================
 # Configuration
 # ============================================================================

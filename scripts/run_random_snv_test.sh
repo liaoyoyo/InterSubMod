@@ -1,6 +1,10 @@
 #!/bin/bash
 # Script to run random SNV tests from a real VCF file
 
+# v1.8 T1-2: enforce per-process TMPDIR + free-space pre-flight (prevent /tmp disasters).
+# See InterSubMod/scripts/lib/tmpdir_guard.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib/tmpdir_guard.sh"
+
 # Defaults
 VCF_PATH="/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_tp.vcf.gz"
 OUTPUT_DIR="/big8_disk/liaoyoyo2001/InterSubMod/output"

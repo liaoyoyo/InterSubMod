@@ -1,0 +1,9 @@
+[Unit]
+Description=InterSubMod disk usage guard (warn 90%% / block 95%%)
+After=multi-user.target
+
+[Service]
+Type=oneshot
+User=liaoyoyo2001
+ExecStart=/big7_disk/liaoyoyo2001/InterSubMod/scripts/infra/disk_guard.sh
+Nice=10

@@ -1,0 +1,12 @@
+[Unit]
+Description=Run disk_guard.sh every 10 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=10min
+RandomizedDelaySec=30s
+Persistent=true
+Unit=disk_guard.service
+
+[Install]
+WantedBy=timers.target
