@@ -1126,7 +1126,7 @@ else if (somaticHP1 > 0 || somaticHP2 > 0) {
 | **E4** | §6.4 / §6.5 V5 數值歸因 | V5 four-commit chain 整體效益 | 主要 V3F + Layer 1.5；Pass 2 二次效益尚未獨立量化（PI 報告 V5 數據實為 Pass 1 only）|
 | **E5（5/9 新）** | §5.2 V5 Layer 1.5 設計描述 | Layer 1.5 = germline 缺席區域的 fallback（隱含「修補」）| 在 germline-absent 區域 V5 與 baseline 4.19:1 偏 HP1 完全相同（§8.6 Step D）— 是 priority bug 的 feature 化非修補；V3F 標 hp=33 保守處理反而更穩健 |
 
-E1-E4 已 patch 至 [`InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md`](20260509_PI_Report_4_29_Errata_01.md)（commit f17754f）；E5 為 5/9 Step D 新發現，待後續 errata 補強或 V5 設計選擇 follow-up。
+E1-E4 已 patch 至 [`InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md`](20260509_PI_Report_4_29_Errata_01.md)（commit f17754f）；**E5 已 5/10 amend 進 errata companion + PI banner**（commit 2553e96 + 71d21bd）— 4 條 → 5 條完整 patch；V5 Layer 1.5 設計選擇待 F-paired-D3 ISM 影響量化決定是否回歸 V3F。
 
 ### 9.3 待解問題與後續行動
 
@@ -1140,7 +1140,7 @@ E1-E4 已 patch 至 [`InterSubMod/docs/reports/validated/2026/05/20260509_PI_Rep
 | **F-paired-D1（5/9 新）** | germline-absent xref 全基因組擴展 | Step D chr19 → 全 chr，估 ~150K events，確認 4.19:1 偏移是否跨 chr 一致 | 0.5 天 |
 | **F-paired-D2（5/9 新）** | Phase block 內 axis-aligned 分析 | 用 PS tag 對齊 paired vs TO 軸 → 計算「真正錯標」率（去除 cross-binary axis swap caveat） | 1 天 |
 | **F-paired-D3（5/9 新）** | V5 Layer 1.5 改回 V3F 的 ISM 影響評估 | germline 缺席改標 hp=33 而非用 somatic 投票決方向 — 量化 ISM 下游影響 | 1-2 天（需 binary patch）|
-| **F-paired-D4（5/9 新）** | E5 PI errata 補強 | Step D 結論加進 PI 4-29 errata 列表（接 E1-E4 後）| 30 min |
+| ~~F-paired-D4~~ ✅ | ~~E5 PI errata 補強~~ | **DONE 2026-05-10**（commit 2553e96 + 71d21bd）：errata companion 加 §5 E5 + 修訂後 §1 一句結論加 E5 caveat + PI 4-29 banner 從 4 條 → 5 條 errata + 修訂歷程加 5/10 amend 行 | DONE 2026-05-10 |
 
 → 本報告完成：(1) V5 audit synthesis（§2-§9），(2) zero-sum 機制釐清（§8.4），(3) no-regression 量化驗證（§8.5），(4) **paired cross-ref 揭露 V5 Layer 1.5 設計缺陷**（§8.6, 5/9 新發現）。F1 已完成；F-paired-D1/2/3 是 5/9 新發現的後續延伸；T3 跨樣本擴展與 T1.3 ablation 仍是後續主軸 cycle。
 
@@ -1197,6 +1197,7 @@ E1-E4 已 patch 至 [`InterSubMod/docs/reports/validated/2026/05/20260509_PI_Rep
 - `20260509_PI_report_4_29_errata` (PROV-V5-ERRATA-001, verdict=positive, stability=5, commit f17754f)
 - `20260509_paired_priority_bug_audit` (PROV-V5-PAIRED-001, verdict=negative, stability=5, commit 6ed8a0d) — §8.6.2-3
 - `20260509_paired_germline_absent_xref` (PROV-V5-PAIRED-002, verdict=positive_with_caveat, stability=4, commit 766ec5f) — §8.6.4-7
+- `20260510_self_phasing_synthesis_amend` (PROV-V5-SYNTH-AMEND-001, verdict=positive, stability=5, commit df5137e + 2553e96 + 71d21bd + 42d13a4) — §8.6 整合 + E5 errata + F6+F7 figures + CURRENT_FOCUS sync
 
 ---
 
