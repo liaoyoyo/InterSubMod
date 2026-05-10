@@ -24,6 +24,8 @@ from PIL import Image as PILImage
 
 HERE = Path(__file__).parent
 FIGURES = HERE / "figures"
+MASTER  = FIGURES / "master"        # F1-F7 from 5/8 整合報告 + paired audit
+IGV     = FIGURES / "igv"           # D_SP1/2/3 from PI 報告 by_HP_4ver
 OUT = HERE / "output.pptx"
 
 # ─── Color palette (對齊 R-G4 / preview.html) ──────────────────────────────
@@ -457,21 +459,20 @@ def slide_04a_sp1():
         [["SP1 chr19:17,565,944", "113 : 0", "翻轉至 HP2 主導", "HP2", "✅"]],
         highlight_rows={0: LIGHT_RED})
 
-    # IGV placeholder (real IGV image not embedded; ref to existing path)
-    add_textbox(s, Inches(0.4), Inches(2.6), Inches(12.5), Inches(2.5),
-        "[IGV 6-BAM 並列截圖]\n"
-        "InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/by_HP_4ver/D_SP1_chr19_17565944.png\n\n"
-        "baseline / V2b / V3F / V5 / paired_T / paired_N — 6 軌\n"
-        "baseline panel 113 reads 全集中 HP1; V5 翻 HP2 與 paired 一致",
-        size=12, color=GRAY, fill=OFF_WHITE, border=GRAY,
-        align=PP_ALIGN.CENTER, italic=True)
+    # IGV image (D_SP1 by_HP_4ver: baseline / V2b / V3F / V5 / paired_T / paired_N)
+    add_image_fit(s, IGV / "D_SP1_chr19_17565944.png",
+                  Inches(0.4), Inches(2.5), Inches(8.5), Inches(4.0))
 
-    add_textbox(s, Inches(0.4), Inches(5.3), Inches(12.5), Inches(1.5),
-        "為何能排除是噪音 / caller / alignment?\n"
-        "•  baseline 與 paired 方向相反 (不是衰減而是翻轉)\n"
-        "•  V5 修正後與 paired ground truth 重合\n"
-        "→  read assignment 強制集中的鐵證",
-        size=12, color=DARK_GRAY, fill=LIGHT_BLUE, border=NAVY)
+    add_textbox(s, Inches(9.2), Inches(2.5), Inches(3.7), Inches(4.0),
+        "為何能排除\n是噪音/caller/alignment?\n\n"
+        "•  baseline 與 paired\n"
+        "    方向相反\n"
+        "    (不是衰減而是翻轉)\n\n"
+        "•  V5 修正後與 paired\n"
+        "    ground truth 重合\n\n"
+        "→  read assignment\n"
+        "    強制集中的鐵證",
+        size=11, color=DARK_GRAY, fill=LIGHT_BLUE, border=NAVY)
 
     add_glossary_footer(s, [
         "📖 haplotype: 父系/母系兩條染色體之一; germline het 的方向標"])
@@ -500,15 +501,11 @@ def slide_04b_sp2_sp3():
         [["SP3 chr19:12,467,180", "108 : 0", "HP2 主導"]],
         highlight_rows={0: LIGHT_RED})
 
-    # IGV placeholders
-    add_textbox(s, Inches(0.4), Inches(2.6), Inches(6.0), Inches(2.0),
-        "[IGV: D_SP2_chr19_12452332.png]\nbaseline 109:1 → V5 HP2",
-        size=11, color=GRAY, fill=OFF_WHITE, border=GRAY,
-        align=PP_ALIGN.CENTER, italic=True)
-    add_textbox(s, Inches(6.9), Inches(2.6), Inches(6.0), Inches(2.0),
-        "[IGV: D_SP3_chr19_12467180.png]\nbaseline 108:0 → V5 HP2",
-        size=11, color=GRAY, fill=OFF_WHITE, border=GRAY,
-        align=PP_ALIGN.CENTER, italic=True)
+    # IGV images side-by-side
+    add_image_fit(s, IGV / "D_SP2_chr19_12452332.png",
+                  Inches(0.4), Inches(2.6), Inches(6.0), Inches(2.0))
+    add_image_fit(s, IGV / "D_SP3_chr19_12467180.png",
+                  Inches(6.9), Inches(2.6), Inches(6.0), Inches(2.0))
 
     add_textbox(s, Inches(0.4), Inches(4.9), Inches(12.5), Inches(0.5),
         "→ 三 SP 都在 chr19:12-17M 區段 → 對齊 slide 09 chr19 752 victims hotspot 區",
@@ -578,35 +575,24 @@ def slide_06_priority_bug():
         "tagging 層 getVote priority bug — 1 票 somatic 觸發誤標",
         "tagging layer getVote priority bug — 1 somatic vote triggers mislabel")
 
-    # Left: real read example
-    add_textbox(s, Inches(0.4), Inches(1.5), Inches(7.0), Inches(0.4),
-        "Real read 範例 (chr19 baseline=11 → V3F=21 全 752 條同模式)",
-        size=12, bold=True, color=NAVY)
-    add_textbox(s, Inches(0.4), Inches(2.0), Inches(7.0), Inches(2.6),
-        "germline HP1 = 0           somatic HP1_1 = 1\n"
-        "germline HP2 = 5  ←主導    somatic HP2_1 = 0\n"
-        "germline HP3 = 0\n"
-        "─────────────────────────────────────\n"
-        "baseline: 檢 (HP1_1, HP2_1) → HP1_1=1>0\n"
-        "          → hp=11 ❌ break (germline 5 票被忽略)\n\n"
-        "正確答案: hp=21\n"
-        "(germline HP2=5 主導 + somatic HP1_1=1 標 21)",
-        size=11, font=FONT_LATIN, color=DARK_GRAY, fill=OFF_WHITE, border=GRAY)
+    # F1 mechanism figure (top-left)
+    add_image_fit(s, MASTER / "F1_priority_bug_mechanism.png",
+                  Inches(0.4), Inches(1.5), Inches(7.0), Inches(3.2))
 
-    # Right: vector logic
+    # Right: 5-vote real read example
     add_textbox(s, Inches(7.7), Inches(1.5), Inches(5.4), Inches(0.4),
-        "baseline vector 順序:", size=12, bold=True, color=DARK_RED)
-    add_textbox(s, Inches(7.7), Inches(2.0), Inches(5.4), Inches(2.6),
-        "vector keys = [\n"
-        "  ① somatic FIRST,    ← 先檢查\n"
-        "  ② mixed,\n"
-        "  ③ germline LAST     ← 永遠輪不到\n"
-        "]\n"
-        "for (k:keys) {\n"
-        "  if (>0) { hp=...; break; ❌\n"
-        "  }\n"
-        "}",
-        size=11, font=FONT_LATIN, color=DARK_GRAY, fill=LIGHT_RED, border=RED)
+        "Real read 範例 (752 同模式):", size=11, bold=True, color=DARK_RED)
+    add_textbox(s, Inches(7.7), Inches(2.0), Inches(5.4), Inches(2.7),
+        "germline HP1 = 0\n"
+        "germline HP2 = 5  ← 主導\n"
+        "somatic HP1_1 = 1  ← 1 票觸發\n"
+        "somatic HP2_1 = 0\n"
+        "──────────────────────\n"
+        "baseline: → hp=11 ❌ break\n"
+        "          (germline 5 票被忽略)\n"
+        "正確答案: hp=21\n"
+        "(germline HP2=5 主導 + 標 21)",
+        size=10, font=FONT_LATIN, color=DARK_GRAY, fill=OFF_WHITE, border=GRAY)
 
     add_textbox(s, Inches(0.4), Inches(4.9), Inches(12.5), Inches(1.3),
         "→ tumor sub-clone somatic 100% 同方向 → priority bug 把所有受影響 reads 標 HP:i:11 系列\n"
@@ -696,16 +682,20 @@ def slide_08_chr19_752():
         "全 752 條無一條反向",
         size=12, font=FONT_LATIN, color=DARK_GREEN, fill=LIGHT_GREEN, border=GREEN)
 
-    # 4-path verification
-    add_table_box(s, Inches(0.4), Inches(3.6), Inches(12.5), Inches(2.4),
+    # 4-path verification (compressed to make room for F4)
+    add_table_box(s, Inches(0.4), Inches(3.6), Inches(7.0), Inches(2.4),
         ["路徑", "結果", "判定"],
         [
-            ["①  個案 trace ≥10 條", "752 條",  "✅ PASS"],
-            ["②  1Mb 區域聚集",      "30M (215) + 27M (133) 46%", "⚠ PARTIAL"],
-            ["③  Somatic density 共變", "high vote ≥5 = 0 受害; 低票觸發",  "🔄 反向有意義"],
-            ["④  修正後消失",        "V3F/V5 100%", "✅ PASS"],
+            ["①  個案 trace ≥10",     "752 條",                     "✅"],
+            ["②  1Mb 區域聚集",        "30M(215)+27M(133) 46%",      "⚠ PARTIAL"],
+            ["③  Somatic density",    "high≥5=0 受害, 低票觸發",     "🔄 反向"],
+            ["④  修正後消失",          "V3F/V5 100%",                "✅"],
         ],
         highlight_rows={0: LIGHT_GREEN, 3: LIGHT_GREEN, 1: LIGHT_YEL})
+
+    # F4 hotspot scatter (right side)
+    add_image_fit(s, MASTER / "F4_chr19_752_victims_scatter.png",
+                  Inches(7.7), Inches(3.4), Inches(5.4), Inches(2.7))
 
     add_textbox(s, Inches(0.4), Inches(6.2), Inches(12.5), Inches(0.6),
         "→ 3 PASS + 1 PARTIAL = priority bug 機制因果確立 (chr19 only scope)",
@@ -751,16 +741,9 @@ def slide_09_genome_34855():
         ],
         highlight_rows={4: LIGHT_RED, 5: LIGHT_BLUE})
 
-    add_textbox(s, Inches(8.7), Inches(3.2), Inches(4.4), Inches(2.4),
-        "顛覆原 chr19 pilot 結論:\n\n"
-        "•  chr19 SP1/2/3 是\n"
-        "    可重現案例\n"
-        "•  非主要分佈位置\n\n"
-        "•  chr8 LOH+HPSig hotspot\n"
-        "    與 priority bug 是\n"
-        "    不同 layer 機制\n"
-        "    (跨層獨立)",
-        size=11, color=DARK_GRAY, fill=OFF_WHITE, border=GRAY)
+    # F2 per-chr enrichment (right side)
+    add_image_fit(s, MASTER / "F2_priority_bug_per_chr_enrichment.png",
+                  Inches(8.7), Inches(3.2), Inches(4.4), Inches(2.4))
 
     add_glossary_footer(s, [
         "ⓘ scope: 全基因組 (T1.2-F1)",
@@ -781,24 +764,9 @@ def slide_10_5_commits():
         "5 commits 兩層三版 stacking — baseline → V3F → V5",
         "5 commits two-layer three-version stacking")
 
-    # Timeline
-    add_textbox(s, Inches(0.4), Inches(1.5), Inches(12.5), Inches(0.5),
-        "5 commits 時間軸 (phasing 藍 / tagging 綠 / 跨層紫):",
-        size=12, bold=True, color=NAVY)
-
-    commits = [
-        ("8b8c1fd", "PON-only flag", "phasing", LIGHT_BLUE, NAVY),
-        ("41ff147", "two-layer ★",   "tagging", LIGHT_GREEN, GREEN),
-        ("380e8d2", "INDEL guard",   "tagging", LIGHT_GREEN, GREEN),
-        ("d0bcd8c", "Layer 1.5 + ploidy fix", "跨層", RGBColor(0xE9,0xD5,0xFF), PURPLE),
-        ("938f0df", "threshold 0.95→0.9", "phasing", LIGHT_BLUE, NAVY),
-    ]
-    for i, (h, desc, layer, fill, border) in enumerate(commits):
-        x = Inches(0.4 + i * 2.5)
-        add_textbox(s, x, Inches(2.1), Inches(2.4), Inches(1.5),
-            f"{h}\n{desc}\n— {layer} —",
-            size=10, font=FONT_LATIN, color=DARK_GRAY,
-            fill=fill, border=border, align=PP_ALIGN.CENTER)
+    # F3 timeline figure
+    add_image_fit(s, MASTER / "F3_binary_commit_timeline.png",
+                  Inches(0.4), Inches(1.5), Inches(12.5), Inches(2.3))
 
     # Stacking
     add_textbox(s, Inches(0.4), Inches(4.0), Inches(12.5), Inches(0.5),
@@ -888,10 +856,15 @@ def slide_12_sp_fixed():
         ],
         highlight_rows={0: LIGHT_GREEN, 1: LIGHT_GREEN, 2: LIGHT_GREEN})
 
-    add_textbox(s, Inches(0.4), Inches(5.8), Inches(12.5), Inches(0.7),
-        "→ 個案 + 統計兩層共驗 V5 修對\n"
-        "(F5 zero-sum 重分配: germline=0 +560,881 / germline>0 -560,881 / 總和 = 0)",
-        size=12, color=DARK_GREEN, fill=LIGHT_GREEN, border=GREEN)
+    # F5 zero-sum 4-quadrant figure (compact at bottom)
+    add_image_fit(s, MASTER / "F5_layer15_zero_sum_4quadrant.png",
+                  Inches(0.4), Inches(5.7), Inches(8.5), Inches(1.3))
+    add_textbox(s, Inches(9.0), Inches(5.7), Inches(4.0), Inches(1.3),
+        "F5 zero-sum:\n"
+        "germline=0  +560,881\n"
+        "germline>0  -560,881\n"
+        "總和         =0",
+        size=11, color=DARK_GREEN, fill=LIGHT_GREEN, border=GREEN)
 
     add_glossary_footer(s, [
         "📖 haplotype: 父系/母系兩條染色體之一",
@@ -1040,14 +1013,20 @@ def slide_15_paired_mode():
         "som_ratio mean 0.462 / median 0.494 / stdev 0.332",
         size=11, color=DARK_GRAY, fill=LIGHT_BLUE, border=NAVY)
 
-    # Real signal cases
-    add_textbox(s, Inches(0.4), Inches(4.3), Inches(12.5), Inches(0.4),
+    # F6 paired vs TO HP distribution (bottom-left)
+    add_image_fit(s, MASTER / "F6_paired_vs_TO_HP_distribution.png",
+                  Inches(0.4), Inches(4.3), Inches(7.0), Inches(1.9))
+
+    # Real signal cases (bottom-right)
+    add_textbox(s, Inches(7.7), Inches(4.3), Inches(5.4), Inches(0.3),
         "真實 sub-clone signal cases:", size=11, bold=True, color=NAVY)
-    add_textbox(s, Inches(0.4), Inches(4.7), Inches(12.5), Inches(1.4),
-        "•  chr19:3M  全 HP2-1 (755/0)   → LOH 方向特定\n"
-        "•  chr19:0M  全 HP1-1 (330/1)   → 反向區域\n"
-        "•  chr19:17M 對稱 0.500 (265/265) → SP1 附近 paired 認雙 sub-clone (vs TO 113:0 失衡)",
-        size=11, color=DARK_GRAY, fill=OFF_WHITE, border=GRAY)
+    add_textbox(s, Inches(7.7), Inches(4.6), Inches(5.4), Inches(1.6),
+        "•  3M 全 HP2-1 (755/0) LOH\n"
+        "•  0M 全 HP1-1 (330/1) 反向\n"
+        "•  17M 對稱 0.500 (265/265)\n"
+        "    → SP1 附近 paired 認雙\n"
+        "    sub-clone (vs TO 113:0)",
+        size=10, color=DARK_GRAY, fill=OFF_WHITE, border=GRAY)
 
     # paired uses different binary
     add_textbox(s, Inches(0.4), Inches(6.3), Inches(12.5), Inches(0.5),
