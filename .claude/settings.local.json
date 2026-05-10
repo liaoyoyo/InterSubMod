@@ -132,7 +132,14 @@
       "Read(//bip7_disk/liaoyoyo2001/.claude/plugins/cache/claude-plugins-official/**)",
       "Bash(/big7_disk/liaoyoyo2001/InterSubMod/scripts/infra/disk_guard.sh)",
       "Read(//bip7_disk/liaoyoyo2001/**)",
-      "Read(//var/log/**)"
+      "Read(//var/log/**)",
+      "Bash(bash /big7_disk/liaoyoyo2001/longphase-to-mod/run_v6_haplotag.sh)",
+      "Bash(nohup bash *)",
+      "Bash(disown)",
+      "Read(//big8_disk/Google_somatic_data/bams/H1437/**)",
+      "Read(//big8_disk/liaoyoyo2001/Somatic_methylation_analysis_output/H1437/VCF/**)",
+      "Bash(node --check /tmp/__pg_check.js)",
+      "Bash(node --check /tmp/__pg_check2.js)"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
@@ -250,6 +257,15 @@
           {
             "type": "command",
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/pipeline_block_check.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/skill_usage_logger.sh"
           }
         ]
       }
