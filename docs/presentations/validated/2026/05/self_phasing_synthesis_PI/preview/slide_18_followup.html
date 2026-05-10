@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 18 — 整體成熟度 + 5 follow-up — V5 仍可作 production baseline</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">18 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S7 結論</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">90 sec / 中 ~340 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">1</span></div>
+    <div><span class="label">N grep:</span><span class="value">—</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">整體成熟度 + 5 follow-up — V5 仍可作 production baseline</h2>
+    <p class="en-subtitle">Maturity status + 5 follow-up cycles</p>
+    
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0;">整體成熟度: 10 ✅ / 1 ⚠️ / 2 ⏸ (12 維度)</p>
+    <div class="grid-3col" style="font-size:10px;gap:6px;">
+      <div class="green-box" style="padding:4px 8px;">✅ 機制因果</div>
+      <div class="green-box" style="padding:4px 8px;">✅ 修補設計</div>
+      <div class="green-box" style="padding:4px 8px;">✅ chr19 SP 對齊</div>
+      <div class="green-box" style="padding:4px 8px;">✅ 全基因組擴展</div>
+      <div class="green-box" style="padding:4px 8px;">✅ V5/V3F zero-sum</div>
+      <div class="green-box" style="padding:4px 8px;">✅ 20 指標 0 regression</div>
+      <div class="green-box" style="padding:4px 8px;">✅ Caller F1 三版相同</div>
+      <div class="green-box" style="padding:4px 8px;">✅ purity 0.6 對照</div>
+      <div class="green-box" style="padding:4px 8px;">✅ 三路徑算法</div>
+      <div class="green-box" style="padding:4px 8px;">✅ Pass 2 +3.51%</div>
+      <div class="green-box" style="padding:4px 8px;">✅ 版本對齊 938f0df</div>
+      <div class="green-box" style="padding:4px 8px;">✅ Paired Step A+C</div>
+      <div class="caveat-box" style="padding:4px 8px;margin:0;">⚠ V5 Layer 1.5 (E5)</div>
+      <div style="background:#F3F4F6;padding:4px 8px;border:1px solid #D1D5DB;border-radius:4px;">⏸ Pass 2 (T1.3)</div>
+      <div style="background:#F3F4F6;padding:4px 8px;border:1px solid #D1D5DB;border-radius:4px;">⏸ 跨樣本 (T3)</div>
+    </div>
+    <table class="metric-table" style="font-size:10px;margin-top:8px;">
+      <thead><tr><th>ID</th><th>內容</th><th>預估</th></tr></thead>
+      <tbody>
+        <tr class="row-yellow"><td>★ F-paired-D3</td><td>Layer 1.5 改 V3F ISM 影響 (決定 V5 vs V3F default)</td><td>1-2 day</td></tr>
+        <tr><td>F-paired-D1</td><td>germline-absent 全基因組擴展</td><td>0.5 day</td></tr>
+        <tr><td>F-paired-D2</td><td>phase block 內 axis-aligned 分析</td><td>1 day</td></tr>
+        <tr><td>T3</td><td>7 樣本跨樣本擴展</td><td>1-2 day</td></tr>
+        <tr><td>T1.3</td><td>4-cell ablation</td><td>3 day</td></tr>
+      </tbody>
+    </table>
+    <div class="conclusion-arrow">→ V5 仍可作 production baseline; F-paired-D3 量化後決定是否回 V3F default</div>
+    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">LOH/cnLOH:</span> 雜合性丟失/拷貝中性</div></div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (90 sec / 中 ~340 字)</summary>
+      <div class="speak-text">整體成熟度 12 維度: 10 ✅ + 1 ⚠️ V5 Layer 1.5 + 2 ⏸ 待跑。5 follow-up 排序按 ROI: ★ F-paired-D3 1-2 day 最重要 (V5 vs V3F default); F-paired-D1 0.5 day; F-paired-D2 1 day; T3 1-2 day; T1.3 3 day。V5 仍可作 production baseline; germline-absent ~5% 不阻擋整體; F-paired-D3 量化後決定是否回 V3F default — 待 PI 決策。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> T1.3 4-cell / 7 樣本 / cnLOH 雙親同源</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_17_errata.html">← Prev</a>
+  <span class="counter">Slide 18 (19/22)</span>
+  <a href="slide_b1_pass2.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_17_errata.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_b1_pass2.html';
+  });
+</script>
+
+</body>
+</html>

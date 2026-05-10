@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 09 — 全基因組 34,855 victims (46×) — chr19 占 2.16% rank 19</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">09 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S3 量化鐵證</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">—</span></div>
+    <div><span class="label">N grep:</span><span class="value">14</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">全基因組 34,855 victims (46×) — chr19 占 2.16% rank 19</h2>
+    <p class="en-subtitle">Genome-wide 34,855; main hotspots chr7/chr2/chr1</p>
+    
+    <table class="metric-table" style="font-size:11px;">
+      <thead><tr><th></th><th>chr19 pilot</th><th>Genome F1</th><th>倍數</th></tr></thead>
+      <tbody>
+        <tr><td>Dump rows</td><td class="num">549,206</td><td class="num">29,973,253</td><td class="num">54.6×</td></tr>
+        <tr class="row-yellow"><td><strong>Priority bug victims</strong></td><td class="num">752</td><td class="num">34,855</td><td class="num">46.4×</td></tr>
+        <tr class="row-green"><td>V3F / V5 修正率</td><td class="num">100% / 100%</td><td class="num">100% / 100%</td><td>一致 ✅</td></tr>
+      </tbody>
+    </table>
+    <div class="grid-2col" style="grid-template-columns: 7fr 5fr;">
+      <table class="metric-table" style="font-size:11px;">
+        <thead><tr><th>chr</th><th>victims</th><th>占比</th><th>rank</th></tr></thead>
+        <tbody>
+          <tr><td>chr7</td><td class="num">3,508</td><td class="num">10.1%</td><td class="num">1</td></tr>
+          <tr><td>chr2</td><td class="num">2,792</td><td class="num">8.0%</td><td class="num">2</td></tr>
+          <tr><td>chr1</td><td class="num">2,674</td><td class="num">7.7%</td><td class="num">3</td></tr>
+          <tr class="row-red"><td><strong>chr19</strong></td><td class="num">752</td><td class="num">2.16%</td><td class="num">19 ★</td></tr>
+          <tr style="background:#DBEAFE;"><td>chr8</td><td class="num">666</td><td class="num">1.9%</td><td class="num">21 冷區</td></tr>
+        </tbody>
+      </table>
+      <img class="fig-thumb" src="../figures/master/F2_priority_bug_per_chr_enrichment.png" alt="F2" style="max-height:240px;">
+    </div>
+    <div class="footer-glossary">
+      <div class="gloss-item">ⓘ scope: 全基因組 (T1.2-F1)</div>
+      <div class="gloss-item">ⓘ chr8 LOH+HPSig 是 ISM 下游 hotspot</div>
+    </div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
+      <div class="speak-text">全基因組擴展 34,855 victims (46.4×)。V3F/V5 修正率仍 100%。per-chr 分佈推翻原 chr19 結論: 主要 hotspot chr7/chr2/chr1/chr16/chr20, chr19 占 2.16% rank 19。chr8 priority bug 0.34× (rank 21 冷區), 與 chr8 LOH+HPSig hotspot 是不同 layer。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 全 chr enrichment ‰ 表 / chrY 小 N 高 ‰ / chr8 layer 區分</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_08_chr19_752.html">← Prev</a>
+  <span class="counter">Slide 09 (10/22)</span>
+  <a href="slide_10_5_commits.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_08_chr19_752.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_10_5_commits.html';
+  });
+</script>
+
+</body>
+</html>

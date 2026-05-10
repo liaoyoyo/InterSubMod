@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 12 — 個案層 V5 修正 3/3 + 全基因組 HP1:HP2 17.3:1 → ~1:1</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">12 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S5 驗證</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">90 sec / 中 ~340 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">1</span></div>
+    <div><span class="label">N grep:</span><span class="value">11</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">個案層 V5 修正 3/3 + 全基因組 HP1:HP2 17.3:1 → ~1:1</h2>
+    <p class="en-subtitle">Site-level V5 fixes 3/3 + genome 17.3:1 → ~1:1</p>
+    
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0;">個案層: SP1/2/3 修正後對齊 paired</p>
+    <table class="metric-table" style="font-size:11px;">
+      <thead><tr><th>位點</th><th>baseline</th><th>V5</th><th>paired</th><th>對齊?</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td>SP1 chr19:17,565,944</td><td class="num">113:0</td><td>HP2 主導</td><td>HP2</td><td>✅</td></tr>
+        <tr class="row-green"><td>SP2 chr19:12,452,332</td><td class="num">109:1</td><td>HP2 主導</td><td>HP2</td><td>✅</td></tr>
+        <tr class="row-green"><td>SP3 chr19:12,467,180</td><td class="num">108:0</td><td>HP2 主導</td><td>HP2</td><td>✅</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">全基因組層:</p>
+    <table class="metric-table" style="font-size:11px;">
+      <thead><tr><th>指標</th><th>baseline</th><th>V5</th><th>Δ</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td>HP1:HP2 ratio</td><td>17.3:1</td><td>~1:1</td><td>消除偏移</td></tr>
+        <tr class="row-green"><td>94.6% somatic→HP1</td><td>是</td><td>~50%</td><td>balanced</td></tr>
+        <tr class="row-green"><td>15-site Problem PS</td><td class="num">48.5%</td><td class="num">52.0%</td><td class="num">+3.5 pp</td></tr>
+      </tbody>
+    </table>
+    <div class="grid-2col" style="grid-template-columns: 7fr 5fr;">
+      <img class="fig-thumb" src="../figures/master/F5_layer15_zero_sum_4quadrant.png" alt="F5" style="max-height:140px;">
+      <div class="green-box" style="font-size:11px;">
+        F5 zero-sum:<br>
+        germline=0  +560,881<br>
+        germline>0  −560,881<br>
+        總和         =0
+      </div>
+    </div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (90 sec / 中 ~340 字)</summary>
+      <div class="speak-text">個案層: SP1/2/3 V5 翻 HP2 對齊 paired 3/3。全基因組: 17.3:1 → ~1:1; 94.6% → ~50%; 15-site Problem PS 48.5%→52.0% +3.5 pp。F5 zero-sum: germline=0 +560K / germline>0 -560K / 總和 0。Pass 2 reclassify 104K germline het 為 somatic/未 phase。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> V2b/V3F 中間版本 / Layer 1.5 zero-sum</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_11_getvote.html">← Prev</a>
+  <span class="counter">Slide 12 (13/22)</span>
+  <a href="slide_13_20_metrics.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_11_getvote.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_13_20_metrics.html';
+  });
+</script>
+
+</body>
+</html>

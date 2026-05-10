@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 11 — getVote 三版差異 — baseline 順序錯 → V3F 兩層 → V5 +Layer 1.5 fallback</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">11 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S4 修補設計</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">4 (核心 forced)</span></div>
+    <div><span class="label">N grep:</span><span class="value">—</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">getVote 三版差異 — baseline 順序錯 → V3F 兩層 → V5 +Layer 1.5 fallback</h2>
+    <p class="en-subtitle">getVote 3-version diff</p>
+    
+    <img class="fig-thumb" src="../figures/G3_getVote_three_layer.png" alt="G3" style="max-height:380px;">
+    <div class="caveat-box">
+      <span class="label">⚠ Layer 1.5 caveat:</span>
+      V5 Layer 1.5 在 germline-absent 區會繼承 priority bug 偏移 → <strong>(slide 16 詳述)</strong>
+    </div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
+      <div class="speak-text">三版 code: baseline 紅底 vector 順序錯 break early。V3F 綠底 explicit Layer 1 (germline only) + Layer 2 (somatic annotation), Layer 1 永不被 somatic overrule。V5 綠底加黃 highlight: 保留 Layer 1, 新增 Layer 1.5 fallback (germline 缺席用 somatic phased votes), Layer 2 同 V3F。Layer 1.5 是 caveat 預告 (slide 16 詳述)。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> enum / V3F bonus 修</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_10_5_commits.html">← Prev</a>
+  <span class="counter">Slide 11 (12/22)</span>
+  <a href="slide_12_sp_fixed.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_10_5_commits.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_12_sp_fixed.html';
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 05 — phasing 層球員兼裁判 — somatic 100% 共現蓋過 germline 50/50</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">05 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S2 機制</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">4 (核心 forced)</span></div>
+    <div><span class="label">N grep:</span><span class="value">3 + 1 commit</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">phasing 層球員兼裁判 — somatic 100% 共現蓋過 germline 50/50</h2>
+    <p class="en-subtitle">Phasing layer player-as-referee — somatic overrules germline</p>
+    
+    <div class="grid-2col" style="grid-template-columns: 7fr 5fr;">
+      <img class="fig-thumb" src="../figures/G1_player_as_referee.png" alt="G1">
+      <div>
+        <p style="font-size:12px;font-weight:700;color:#7F1D1D;margin:0 0 4px;">TO 模式致命:</p>
+        <ul style="margin:4px 0 0 16px;font-size:11px;line-height:1.5;color:#374151;background:#FEE2E2;border:1px solid #FCA5A5;padding:8px 12px 8px 24px;border-radius:4px;">
+          <li>TO 沒 paired normal → 用 PoN (somatic 不在 PoN → 當 germline)</li>
+          <li>somatic 進 graph 後 edge weight 暴漲 (100% > 50%)</li>
+          <li>自我增強: 3 somatic 共現 → 強度 ×3</li>
+          <li>germline 真實訊號被 overrule</li>
+        </ul>
+        <div class="conclusion-arrow green" style="margin-top:8px;font-size:12px;">
+          解法: PON-only flag<br>(commit <code>8b8c1fd</code>)
+        </div>
+      </div>
+    </div>
+    <div class="footer-glossary">
+      <div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals — 多正常樣本建構的 germline reference</div>
+      <div class="gloss-item">📖 <span class="term">phasing graph:</span> het 位點當 node, read 共現當 edge</div>
+    </div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
+      <div class="speak-text">機制兩層 bug, 先 phasing 層球員兼裁判隱喻。phasing graph 物理基礎: germline het 在 HP1/HP2 50/50 隨機分佈。TO 沒 paired normal 區分 germline/somatic, 只能用 PoN; 未在 PoN 內的位點被當 germline → somatic 進 graph 後 edge weight 暴漲, graph 自我增強。球員兼裁判: somatic 應被 phase 反過來主導 graph。修法 PON-only flag (8b8c1fd)。但只解 phasing 層, tag 還壞。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> TO vs paired PoN 對照 / 自我增強迴圈 / Pass 1 vs Pass 2 預告</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_04b_sp2_sp3.html">← Prev</a>
+  <span class="counter">Slide 05 (6/22)</span>
+  <a href="slide_06_priority_bug.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_04b_sp2_sp3.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_06_priority_bug.html';
+  });
+</script>
+
+</body>
+</html>

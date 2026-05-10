@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide B1 — Pass 2 = 只重跑 2-point edgeConnectResult; 高 purity 才觸發</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">B1 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">Q&A Backup</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">4 (backup 例外)</span></div>
+    <div><span class="label">N grep:</span><span class="value">—</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">Pass 2 = 只重跑 2-point edgeConnectResult; 高 purity 才觸發</h2>
+    <p class="en-subtitle">Pass 2 = re-run 2-point only; high purity gate</p>
+    
+    <img class="fig-thumb" src="../figures/G2_pass_two_flow.png" alt="G2" style="max-height:380px;">
+    <p class="fig-caption">Pass 1 always runs 2-point + 3-point; Pass 2 only re-runs 2-point</p>
+    <div class="footer-glossary">
+      <div class="gloss-item">📖 <span class="term">somaticCalling vs edgeConnectResult:</span> 兩 phasing graph 演算法</div>
+      <div class="gloss-item">📖 <span class="term">purity:</span> 樣本中腫瘤細胞占比</div>
+    </div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
+      <div class="speak-text">Q: Pass 2 為什麼只跑 2-point? somaticCalling 用 3-point patternMining (與 purity 無關); edgeConnectResult 用 2-point 永遠跑。低 purity ≤0.9 Pass 2 跳過; 高 purity >0.9 Pass 2 只重跑 2-point (Pass 1 已產出穩定 origin 分類)。Pass 2 incremental: phased var -2.90 pp / blocks -9.79% / N50 +3.51%。常見誤解: 低 purity 用 3-point 倒過來; 高 purity 才多做事。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> patternMining first/second/third path / Pass 2 不重跑 somaticCalling</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_18_followup.html">← Prev</a>
+  <span class="counter">Slide B1 (20/22)</span>
+  <a href="slide_b2_purity06.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_18_followup.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_b2_purity06.html';
+  });
+</script>
+
+</body>
+</html>

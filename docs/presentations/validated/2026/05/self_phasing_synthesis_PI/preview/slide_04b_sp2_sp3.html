@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 04b — SP2 + SP3 並列 — 同模式: baseline 全 HP1 / V5 翻 HP2 / 3/3 對齊 paired</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">04b / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S1 觀察起點</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">60 sec / 中 ~260 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">0</span></div>
+    <div><span class="label">N grep:</span><span class="value">6</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">SP2 + SP3 並列 — 同模式: baseline 全 HP1 / V5 翻 HP2 / 3/3 對齊 paired</h2>
+    <p class="en-subtitle">SP2 + SP3 same pattern; 3/3 aligned with paired</p>
+    
+    <div class="grid-2col">
+      <div>
+        <table class="metric-table"><thead><tr><th>位點</th><th>baseline</th><th>V5</th></tr></thead>
+        <tbody><tr class="row-red"><td><strong>SP2</strong><br>chr19:12,452,332</td><td class="num">109 : 1</td><td>HP2 主導</td></tr></tbody></table>
+        <img class="igv-thumb" src="../figures/igv/D_SP2_chr19_12452332.png" alt="IGV SP2" style="max-height:200px;">
+      </div>
+      <div>
+        <table class="metric-table"><thead><tr><th>位點</th><th>baseline</th><th>V5</th></tr></thead>
+        <tbody><tr class="row-red"><td><strong>SP3</strong><br>chr19:12,467,180</td><td class="num">108 : 0</td><td>HP2 主導</td></tr></tbody></table>
+        <img class="igv-thumb" src="../figures/igv/D_SP3_chr19_12467180.png" alt="IGV SP3" style="max-height:200px;">
+      </div>
+    </div>
+    <div class="conclusion-arrow green">→ 三 SP 都在 chr19:12-17M 區段 → 對齊 slide 09 chr19 752 victims hotspot 區</div>
+    <p style="font-size:12px;color:#6B7280;">引出四問: ① 為何全集中一邊? (S2 機制) ② read 層級? (S3 量化) ③ 三版各修? (S4 修補) ④ 是否都修對? (S5 驗證)</p>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (60 sec / 中 ~260 字)</summary>
+      <div class="speak-text">SP2 chr19:12,452,332 baseline 109:1; SP3 chr19:12,467,180 baseline 108:0; 與 SP1 同模式: baseline 全 HP1, V5 翻 HP2 對齊 paired 3/3。三 SP 都在 chr19:12-17M, 對齊 chr19 752 victims hotspot 區段 — read-level 個案與 IGV 屬同機制不同層級。引出四問機制/量化/修補/驗證。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> paired_T 與 paired_N 對照細節</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_04a_sp1.html">← Prev</a>
+  <span class="counter">Slide 04b (5/22)</span>
+  <a href="slide_05_player_referee.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_04a_sp1.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_05_player_referee.html';
+  });
+</script>
+
+</body>
+</html>

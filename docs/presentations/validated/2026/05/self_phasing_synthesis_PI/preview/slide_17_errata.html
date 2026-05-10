@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 17 — PI 報告 4-29 5 條 errata 已 patch; 主結論不撤回</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">17 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S7 結論</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">90 sec / 中 ~330 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">—</span></div>
+    <div><span class="label">N grep:</span><span class="value">commit chain</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">PI 報告 4-29 5 條 errata 已 patch; 主結論不撤回</h2>
+    <p class="en-subtitle">5 errata patched; main conclusions retained</p>
+    
+    <table class="metric-table" style="font-size:11px;">
+      <thead><tr><th></th><th>段落</th><th>原 → 新</th></tr></thead>
+      <tbody>
+        <tr><td><strong>E1</strong></td><td>§3.3.3 chr19 SP1/2/3</td><td>主要 hotspot → 可重現案例 (chr19 占 2.16% rank 19)</td></tr>
+        <tr><td><strong>E2</strong></td><td>§5.2 V5 commit 狀態</td><td>未 commit → ✅ 已 commit (d0bcd8c + 938f0df)</td></tr>
+        <tr><td><strong>E3</strong></td><td>§5.2 priority bug 證據</td><td>commit msg + 3 IGV → + 34,855 read-level 鐵證 100%</td></tr>
+        <tr class="row-yellow"><td><strong>★ E4</strong></td><td>§6.4/§6.5 V5 數值歸因</td><td>V5 整體 → V5 = Pass 1 only; 主要 V3F + Layer 1.5; Pass 2 二次效益尚未量化</td></tr>
+        <tr class="row-yellow"><td><strong>★ E5</strong></td><td>§5.2 Layer 1.5 設計 (5/10 加)</td><td>fallback 隱含修補 → germline-absent 區與 baseline 4.19:1 相同, priority bug feature 化非修補</td></tr>
+      </tbody>
+    </table>
+    <div class="conclusion-arrow">→ E1-E3 表述精確化; E4 + E5 為核心 errata; 主結論不撤回</div>
+    <div class="footer-glossary"><div class="gloss-item">ⓘ commit chain: f17754f → 2553e96 → 71d21bd</div></div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (90 sec / 中 ~330 字)</summary>
+      <div class="speak-text">PI 報告 4-29 5 條 errata: E1 chr19 SP1/2/3 hotspot 降級為可重現案例; E2 V5 已 commit 4-30; E3 證據鏈升級含 34,855 read-level; ★ E4 V5 數值 = Pass 1 only, 主要 V3F + Layer 1.5; ★ E5 5/10 加 — V5 Layer 1.5 germline-absent 與 baseline 4.19:1 同。E1-E3 表述精確化, E4+E5 核心。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> errata commit hash / patch 工作量</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_16_v5_caveat.html">← Prev</a>
+  <span class="counter">Slide 17 (18/22)</span>
+  <a href="slide_18_followup.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_16_v5_caveat.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_18_followup.html';
+  });
+</script>
+
+</body>
+</html>

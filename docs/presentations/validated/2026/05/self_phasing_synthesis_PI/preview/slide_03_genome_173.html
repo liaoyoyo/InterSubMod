@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 03 — 全基因組 HP1:HP2 = 17.3:1 是 systematic bias，非樣本性質</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">03 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S1 觀察起點</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">90 sec / 中 ~340 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">3</span></div>
+    <div><span class="label">N grep:</span><span class="value">8</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">全基因組 HP1:HP2 = 17.3:1 是 systematic bias，非樣本性質</h2>
+    <p class="en-subtitle">Genome-wide 17.3:1 = systematic engineering artifact, not sample variation</p>
+    
+    <div class="grid-2col">
+      <table class="metric-table">
+        <thead><tr><th>指標</th><th>baseline</th><th>隨機</th><th>偏離</th></tr></thead>
+        <tbody>
+          <tr><td>HP1 reads</td><td class="num">614,000</td><td class="num">~325K</td><td class="num">1.89×</td></tr>
+          <tr><td>HP2 reads</td><td class="num">35,500</td><td class="num">~325K</td><td class="num">0.11×</td></tr>
+          <tr><td>HP1:HP2 ratio</td><td class="num">17.3:1</td><td class="num">1:1</td><td class="num">17.3×</td></tr>
+          <tr class="row-yellow"><td>HP1 占比</td><td class="num">94.6%</td><td class="num">~50%</td><td class="num">+44.6 pp</td></tr>
+        </tbody>
+      </table>
+      <div style="text-align:center;align-self:center;">
+        <p style="font-size:24px;color:#FFA500;font-weight:700;margin:0;">HP1 占比 94.6%</p>
+        <p style="font-size:14px;color:#9A3412;margin:4px 0;">↓↓↓↓↓↓↓↓↓</p>
+        <p style="font-size:14px;color:#6B7280;">隨機預期 50%</p>
+      </div>
+    </div>
+    <div class="arg-list">
+      <strong>三條獨立論證:</strong><br>
+      ①  生物學: tumor sub-clone 跨 23 染色體不該系統偏 HP1<br>
+      ②  跨 chr 一致: cnLOH artifact 只影響單一 chr; 94.6% 跨 chr 一致<br>
+      ③  paired 對照: paired tumor-normal 同 reads HP1:HP2 ≈ 1:1
+    </div>
+    <div class="conclusion-arrow">→ 17.3:1 是 LongPhase-TO 的 systematic engineering artifact</div>
+    <div class="footer-glossary">
+      <div class="gloss-item">📖 <span class="term">germline het:</span> 雜合位點</div>
+      <div class="gloss-item">📖 <span class="term">sub-clone:</span> 基因型同細胞群</div>
+      <div class="gloss-item">📖 <span class="term">haplotype:</span> 父系/母系染色體</div>
+    </div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (90 sec / 中 ~340 字)</summary>
+      <div class="speak-text">baseline LongPhase-TO 全基因組: HP1 reads 614K vs HP2 35.5K, 比例 17.3:1 vs 隨機 1:1。94.6% 占比是 systematic bias 的硬證據, 三條獨立論證: 生物學 (tumor sub-clone 不該跨 23 chr 系統偏 HP1)、跨 chr 一致 (cnLOH 只影響單 chr 但這偏移跨 23 chr 一致)、paired 對照 (paired pipeline HP1:HP2 ≈ 1:1)。三條互相獨立 → engineering artifact。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> cnLOH 機制細節 / 23 chr 一致性表 / paired pipeline 程式碼差異</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_02_tldr.html">← Prev</a>
+  <span class="counter">Slide 03 (3/22)</span>
+  <a href="slide_04a_sp1.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_02_tldr.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_04a_sp1.html';
+  });
+</script>
+
+</body>
+</html>

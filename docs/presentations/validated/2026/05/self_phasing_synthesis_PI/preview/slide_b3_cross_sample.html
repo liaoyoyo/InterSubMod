@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide B3 — 跨樣本擴展 (T3) + cnLOH 雙親同源待開放</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">B3 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">Q&A Backup</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">60 sec / 中 ~250 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">1</span></div>
+    <div><span class="label">N grep:</span><span class="value">—</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">跨樣本擴展 (T3) + cnLOH 雙親同源待開放</h2>
+    <p class="en-subtitle">Cross-sample expansion + cnLOH bi-parental</p>
+    
+    <div class="grid-2col">
+      <div>
+        <p style="font-size:12px;font-weight:700;color:#1E3A8A;">T3 跨樣本擴展:</p>
+        <table class="metric-table" style="font-size:10px;">
+          <thead><tr><th>樣本</th><th>狀態</th><th>預估</th></tr></thead>
+          <tbody>
+            <tr class="row-green"><td>HCC1395 5kHz</td><td>✅ 已驗證</td><td>—</td></tr>
+            <tr><td>HCC1395_DORADO</td><td>⏸ 待跑</td><td>~3 hr</td></tr>
+            <tr><td>HCC1937</td><td>⏸ 待跑</td><td>~3 hr</td></tr>
+            <tr><td>HCC1954</td><td>⏸ 待跑</td><td>~3 hr</td></tr>
+            <tr><td>H1437</td><td>⏸ 待跑</td><td>~3 hr</td></tr>
+            <tr><td>H2009</td><td>⏸ 待跑</td><td>~3 hr</td></tr>
+            <tr><td>COLO829</td><td>⏸ 待跑</td><td>~3 hr</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <p style="font-size:12px;font-weight:700;color:#1E3A8A;">cnLOH 雙親同源待開放:</p>
+        <div class="caveat-box" style="font-size:11px;">
+          <strong>情境:</strong> parent 1 vs parent 2 染色體在 LOH 區難 phase<br><br>
+          <strong>影響:</strong> Layer 1.5 在 cnLOH 區的設計選擇待量化<br><br>
+          <strong>關係:</strong> 與 V5 Layer 1.5 設計缺陷 (E5) 連動
+        </div>
+      </div>
+    </div>
+    <div class="conclusion-arrow">Follow-up 排序: F-paired-D3 (1-2 d, actionable) > T3 (1-2 d, generalizability) > T1.3 (3 d, ablation)</div>
+    <div class="footer-glossary">
+      <div class="gloss-item">📖 <span class="term">LOH:</span> 雜合性丟失</div>
+      <div class="gloss-item">📖 <span class="term">cnLOH:</span> 拷貝中性 LOH</div>
+    </div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (60 sec / 中 ~250 字)</summary>
+      <div class="speak-text">Q: 跨樣本一致性? cnLOH 區? T3 跨樣本: HCC1395 5kHz 已驗證; 6 樣本待跑 (DORADO/1937/1954/H1437/H2009/COLO829) 每樣本 ~3 hr, 共 1-2 day。cnLOH 雙親同源: parent 1 vs parent 2 在 LOH 區同源難 phase; Layer 1.5 對 cnLOH 影響待量化, 與 E5 連動。Follow-up: F-paired-D3 actionable > T3 generalizability > T1.3 ablation。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 7 樣本特性 / cnLOH 機制 / F-paired-D3 詳細</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_b2_purity06.html">← Prev</a>
+  <span class="counter">Slide B3 (22/22)</span>
+  <a class="disabled">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_b2_purity06.html';
+    if (e.key === 'ArrowRight' && False) location.href = 'slide_None.html';
+  });
+</script>
+
+</body>
+</html>

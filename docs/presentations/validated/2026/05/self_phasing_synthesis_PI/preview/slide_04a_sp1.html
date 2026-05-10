@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 04a — SP1 chr19:17,565,944 — baseline 113:0 → V5 翻轉至 HP2 ✅ paired</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">04a / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S1 觀察起點</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">60 sec / 中 ~250 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">1</span></div>
+    <div><span class="label">N grep:</span><span class="value">3</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">SP1 chr19:17,565,944 — baseline 113:0 → V5 翻轉至 HP2 ✅ paired</h2>
+    <p class="en-subtitle">SP1 — baseline 113:0 → V5 flips to HP2, aligned with paired</p>
+    
+    <table class="metric-table">
+      <thead><tr><th>位點</th><th>baseline HP1:HP2</th><th>V5</th><th>paired GT</th><th>對齊?</th></tr></thead>
+      <tbody><tr class="row-red"><td><strong>SP1 chr19:17,565,944</strong></td><td class="num">113 : 0</td><td>翻轉至 HP2 主導</td><td>HP2</td><td><strong>✅</strong></td></tr></tbody>
+    </table>
+    <img class="igv-thumb" src="../figures/igv/D_SP1_chr19_17565944.png" alt="IGV SP1">
+    <p class="fig-caption">6-BAM 並列: baseline / V2b / V3F / V5 / paired_T / paired_N</p>
+    <div class="arg-list">
+      <strong>為何能排除是噪音 / caller / alignment?</strong><br>
+      • baseline 與 paired 方向相反 (不是衰減而是翻轉)<br>
+      • V5 修正後與 paired ground truth 重合<br>
+      → read assignment 強制集中的鐵證
+    </div>
+    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">haplotype:</span> 父系/母系染色體</div></div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (60 sec / 中 ~250 字)</summary>
+      <div class="speak-text">全基因組 17.3:1 是平均值; IGV 6-BAM 並列篩到 chr19 三個近 100% 失衡位點。SP1 chr19:17,565,944: baseline 113 reads 全 HP1, HP2=0; V5 翻 HP2 與 paired tumor 一致。排除噪音/caller/alignment: baseline 與 paired 完全反向 (翻轉而非衰減), V5 與 paired 重合 → read assignment 強制集中的鐵證。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 6-BAM 並列順序 / V2b 中間階段意義</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_03_genome_173.html">← Prev</a>
+  <span class="counter">Slide 04a (4/22)</span>
+  <a href="slide_04b_sp2_sp3.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_03_genome_173.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_04b_sp2_sp3.html';
+  });
+</script>
+
+</body>
+</html>

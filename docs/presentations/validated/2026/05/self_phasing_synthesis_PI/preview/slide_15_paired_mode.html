@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 15 — paired mode 整體無偏移 — HP1:HP2 = 1:1.275; som_ratio mean 0.462</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">15 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S6 5/9 新發現</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">1 + 1 footnote</span></div>
+    <div><span class="label">N grep:</span><span class="value">11</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">paired mode 整體無偏移 — HP1:HP2 = 1:1.275; som_ratio mean 0.462</h2>
+    <p class="en-subtitle">paired mode no systematic bias</p>
+    
+    <div class="grid-2col">
+      <div>
+        <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:0;">paired chr19 HP:Z: 分布 (354,919 tagged):</p>
+        <table class="metric-table" style="font-size:10px;">
+          <thead><tr><th>HP:Z:</th><th>reads</th><th>%</th></tr></thead>
+          <tbody>
+            <tr><td>HP:Z:2</td><td class="num">183,309</td><td class="num">51.6%</td></tr>
+            <tr><td>HP:Z:1</td><td class="num">143,760</td><td class="num">40.5%</td></tr>
+            <tr><td>HP:Z:2-1</td><td class="num">14,504</td><td class="num">4.1%</td></tr>
+            <tr><td>HP:Z:1-1</td><td class="num">12,401</td><td class="num">3.5%</td></tr>
+            <tr><td>HP:Z:3</td><td class="num">1,145</td><td class="num">0.3%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:0;">paired vs TO ratio:</p>
+        <table class="metric-table" style="font-size:10px;">
+          <thead><tr><th></th><th>paired</th><th>TO baseline</th></tr></thead>
+          <tbody>
+            <tr class="row-green"><td>germline</td><td>1:1.275 ✅</td><td>17.3:1 ❌</td></tr>
+            <tr class="row-green"><td>somatic</td><td>1:1.169 ✅</td><td>全偏 HP1</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:10px;color:#6B7280;margin-top:6px;">57 chr19 1Mb windows: som_ratio mean 0.462 / median 0.494 / stdev 0.332</p>
+      </div>
+    </div>
+    <img class="fig-thumb" src="../figures/master/F6_paired_vs_TO_HP_distribution.png" alt="F6" style="max-height:180px;">
+    <p style="font-size:10px;color:#9CA3AF;text-align:center;font-style:italic;">paired = longphase-s (獨立 codebase); HP tag 用字串 HP:Z:</p>
+    <div class="footer-glossary">
+      <div class="gloss-item">📖 <span class="term">HP:i: vs HP:Z::</span> longphase-to=整數, longphase-s=字串</div>
+      <div class="gloss-item">ⓘ som_ratio: HP1-1/(HP1-1+HP2-1)</div>
+    </div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
+      <div class="speak-text">paired mode 用 longphase-s (獨立 codebase), HP:Z: 字串。chr19 paired 分布 germline 1:1.275 接近隨機, somatic 1:1.169。對比 TO baseline 17.3:1 — paired 整體無 systematic bias。57 windows som_ratio mean 0.462 跨 0-1 全範圍 = 真實 sub-clone signal。chr19:17M 對稱 0.500 = SP1 附近 paired 認雙 sub-clone (vs TO 113:0 失衡)。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> longphase-s codebase / SomaticHaplotagProcess.cpp:533 / paired 軸對齊</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_14_caller_f1.html">← Prev</a>
+  <span class="counter">Slide 15 (16/22)</span>
+  <a href="slide_16_v5_caveat.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_14_caller_f1.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_16_v5_caveat.html';
+  });
+</script>
+
+</body>
+</html>

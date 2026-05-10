@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 08 — chr19 752 read-level victims — 100% 單向 baseline=11 → V3F/V5=21</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">08 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S3 量化鐵證</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">—</span></div>
+    <div><span class="label">N grep:</span><span class="value">6</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">chr19 752 read-level victims — 100% 單向 baseline=11 → V3F/V5=21</h2>
+    <p class="en-subtitle">chr19 752 victims — 100% unidirectional fix</p>
+    
+    <div class="grid-2col">
+      <div>
+        <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">規模:</p>
+        <pre class="code-panel" style="background:#F9FAFB;border:1px solid #E5E7EB;font-size:11px;">Dump rows:        549,206
+3-way merged:     1,069,832
+Priority bug:        752</pre>
+      </div>
+      <div>
+        <p style="font-size:12px;font-weight:700;color:#16A34A;margin:0 0 4px;">修正率:</p>
+        <pre class="code-panel" style="background:#DCFCE7;border:1px solid #16A34A;font-size:11px;color:#166534;">V3F 修正率: 100.00% ✅
+V5  修正率: 100.00% ✅
+全 752 條無一條反向</pre>
+      </div>
+    </div>
+    <div class="grid-2col" style="grid-template-columns: 7fr 5fr;">
+      <table class="metric-table" style="font-size:11px;">
+        <thead><tr><th>路徑</th><th>結果</th><th>判定</th></tr></thead>
+        <tbody>
+          <tr class="row-green"><td>① 個案 trace</td><td>752 條</td><td>✅</td></tr>
+          <tr class="row-yellow"><td>② 1Mb 區域聚集</td><td>30M+27M 46%</td><td>⚠ PARTIAL</td></tr>
+          <tr><td>③ Density 共變</td><td>high≥5=0; low 觸發</td><td>🔄 反向有意義</td></tr>
+          <tr class="row-green"><td>④ 修正後消失</td><td>V3F/V5 100%</td><td>✅</td></tr>
+        </tbody>
+      </table>
+      <img class="fig-thumb" src="../figures/master/F4_chr19_752_victims_scatter.png" alt="F4" style="max-height:200px;">
+    </div>
+    <div class="conclusion-arrow">→ 3 PASS + 1 PARTIAL = priority bug 機制因果確立 (chr19 only scope)</div>
+    <div class="footer-glossary"><div class="gloss-item">ⓘ scope: chr19 only</div></div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
+      <div class="speak-text">chr19 read-level audit: dump 549,206 rows × 3 binary versions JOIN merged 1.07M events, 篩 germline_majority ≠ somatic_majority = 752 victims。V3F+V5 修正率 100%, 全 752 條 baseline=11 → V3F=21 單向。4-path 驗證 3 PASS + 1 PARTIAL: 個案 PASS、1Mb hotspot PARTIAL、density 反向有意義 (high vote sub-clone 一致已對齊, low 觸發)、修正後消失 PASS。機制因果確立。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 4-path detail / read_name 真實 case / SP1/2/3 對應 hotspot</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_07_two_layer_table.html">← Prev</a>
+  <span class="counter">Slide 08 (9/22)</span>
+  <a href="slide_09_genome_34855.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_07_two_layer_table.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_09_genome_34855.html';
+  });
+</script>
+
+</body>
+</html>

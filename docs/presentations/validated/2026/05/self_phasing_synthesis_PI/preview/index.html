@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Phasing PPT Preview — 22 slide multi-page</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <h1>📊 Self-Phasing PPT Preview — 22 slides multi-page</h1>
+  <div class="meta">
+    <code>InterSubMod/docs/presentations/validated/2026/05/self_phasing_synthesis_PI/</code>
+    &nbsp;|&nbsp; Build: 2026-05-11
+  </div>
+</header>
+
+<nav class="slidetabs" id="tabs">
+  <button data-slide="01_cover" class=" active">01 S0 Cov</button>
+  <button data-slide="02_tldr" class="">02 S0 Cov</button>
+  <button data-slide="03_genome_173" class="">03 S1 觀察起</button>
+  <button data-slide="04a_sp1" class="">04a S1 觀察起</button>
+  <button data-slide="04b_sp2_sp3" class="">04b S1 觀察起</button>
+  <button data-slide="05_player_referee" class="">05 S2 機制</button>
+  <button data-slide="06_priority_bug" class="">06 S2 機制</button>
+  <button data-slide="07_two_layer_table" class="">07 S2 機制</button>
+  <button data-slide="08_chr19_752" class="">08 S3 量化鐵</button>
+  <button data-slide="09_genome_34855" class="">09 S3 量化鐵</button>
+  <button data-slide="10_5_commits" class="">10 S4 修補設</button>
+  <button data-slide="11_getvote" class="">11 S4 修補設</button>
+  <button data-slide="12_sp_fixed" class="">12 S5 驗證</button>
+  <button data-slide="13_20_metrics" class="">13 S5 驗證</button>
+  <button data-slide="14_caller_f1" class="nav-arrow">14 S5 驗證 </button>
+  <button data-slide="15_paired_mode" class="">15 S6 5/9</button>
+  <button data-slide="16_v5_caveat" class="nav-star">16 S6 5/9</button>
+  <button data-slide="17_errata" class="">17 S7 結論</button>
+  <button data-slide="18_followup" class="">18 S7 結論</button>
+  <button data-slide="b1_pass2" class="nav-backup">B1 Q&A Ba</button>
+  <button data-slide="b2_purity06" class="nav-backup">B2 Q&A Ba</button>
+  <button data-slide="b3_cross_sample" class="nav-backup">B3 Q&A Ba</button>
+</nav>
+
+<div class="iframe-wrap">
+  <iframe id="slide-frame" src="slide_01_cover.html"></iframe>
+</div>
+
+<div class="kbd-hint">點 nav 切換 slide; 子頁亦可直接雙擊獨立開啟</div>
+
+<script>
+  document.querySelectorAll('nav.slidetabs button').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const id = btn.dataset.slide;
+      document.getElementById('slide-frame').src = 'slide_' + id + '.html';
+      document.querySelectorAll('nav.slidetabs button').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>

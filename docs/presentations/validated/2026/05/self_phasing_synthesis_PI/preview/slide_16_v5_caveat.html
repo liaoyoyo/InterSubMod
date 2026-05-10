@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 16 — V5 Layer 1.5 設計缺陷: germline-absent 區與 baseline 4.19:1 完全相同</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta critical">
+    <div><span class="label">Slide:</span><span class="value">16 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S6 5/9 新發現 ★</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">150 sec / 中 ~420 字 ★ 最長 slide</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">4 (核心 caveat forced)</span></div>
+    <div><span class="label">N grep:</span><span class="value">15+</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title critical">V5 Layer 1.5 設計缺陷: germline-absent 區與 baseline 4.19:1 完全相同</h2>
+    <p class="en-subtitle">V5 Layer 1.5 design caveat — identical to baseline in germline-absent</p>
+    
+    <img class="fig-thumb" src="../figures/G4_germline_absent_three_versions.png" alt="G4" style="max-height:340px;">
+    <div class="red-frame">
+      <span class="label">★ 結論:</span>
+      <strong>V5 Layer 1.5 = priority bug 的 feature 化非修補</strong> — 把 baseline buggy 行為改成 designed 行為，但<strong>該區域偏移本質沒變</strong>。V3F 標 hp=33 反而更穩健。
+      <span style="display:block;font-size:10px;font-style:italic;margin-top:4px;">V5 Layer 1.5 makes priority bug a feature, not a fix.</span>
+    </div>
+    <div class="footer-glossary">
+      <div class="gloss-item">📖 <span class="term">sub-clone:</span> 基因型同細胞群</div>
+      <div class="gloss-item">ⓘ Layer 1.5 fallback / phased votes</div>
+      <div class="gloss-item">ⓘ scope: paired chr19 germline-absent (5,789 events ≈ 5%)</div>
+    </div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (150 sec / 中 ~420 字 ★ 最長 slide)</summary>
+      <div class="speak-text">整份報告最重要的一張 slide。對 paired chr19 × baseline/V3F/V5 vote dump JOIN, 篩 cnt_HP1+HP2=0 且 somatic>0 = 5,789 events。cross-tab: baseline hp=11=3,312 / hp=21=791 → 4.19:1 priority bug 次峰。V3F 全標 hp=33 保守 ✅。V5 hp=11=3,313 / hp=21=790 → 4.19:1 與 baseline 完全相同！機制詮釋: V5 Layer 1.5 用 sHP1 vs sHP2 票數決方向; sub-clone somatic 100% 共現 → graph 偏向同一 haplotype → 投票偏向同邊 → 繼承 priority bug 偏移。V5 Layer 1.5 = priority bug feature 化非修補; V3F hp=33 是更穩健選擇。V5 設計時未對 paired ground truth 做 germline-absent cross-ref, 5/9 paired audit Step D 才補上發現。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> cross-binary axis alignment / phasing graph §3.2 / Layer 1.5 改回 V3F default / F-paired-D3 工作量</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_15_paired_mode.html">← Prev</a>
+  <span class="counter">Slide 16 (17/22)</span>
+  <a href="slide_17_errata.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_15_paired_mode.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_17_errata.html';
+  });
+</script>
+
+</body>
+</html>

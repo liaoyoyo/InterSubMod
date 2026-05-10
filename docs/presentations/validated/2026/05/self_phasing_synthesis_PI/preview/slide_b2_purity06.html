@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide B2 — purity 0.6 樣本 baseline vs V5 完整對照 — 0 critical regression</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">B2 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">Q&A Backup</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">90 sec / 中 ~320 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">1</span></div>
+    <div><span class="label">N grep:</span><span class="value">20+</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">purity 0.6 樣本 baseline vs V5 完整對照 — 0 critical regression</h2>
+    <p class="en-subtitle">purity 0.6 sample fully verified</p>
+    
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;">6 Caller F1 (vs SEQC2 v1.2.1) — 三版完全相同:</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th>指標</th><th>baseline 0.6</th><th>V5 0.6</th><th>Δ</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td>TP / FP / FN</td><td>24,190 / 13,487 / 15,257</td><td>同</td><td>0 ✅</td></tr>
+        <tr class="row-green"><td>F1 (Precision/Recall)</td><td>0.6273 (0.6420 / 0.6132)</td><td>同</td><td>0 ✅</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin-top:8px;">9 結構指標 — 4 改善 + 1 微差 + 1 持平:</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th>指標</th><th>baseline</th><th>V5</th><th>Δ</th><th>eval</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td>phased%</td><td>61.82</td><td>65.83</td><td>+4.01 pp</td><td>✅</td></tr>
+        <tr class="row-green"><td>n_blocks</td><td>9,748</td><td>11,514</td><td>+18.1%</td><td>✅</td></tr>
+        <tr class="row-yellow"><td>N50 (bp)</td><td>798,903</td><td>683,296</td><td>-14.5%</td><td>微差 (≥600K)</td></tr>
+        <tr class="row-green"><td>HP:i:33</td><td>0</td><td>20</td><td>+20</td><td>✅ conservative</td></tr>
+        <tr class="row-green"><td>purity 計算</td><td>0.607</td><td>0.634</td><td>+0.027</td><td>✅ closer to 0.6</td></tr>
+      </tbody>
+    </table>
+    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">purity:</span> 樣本中腫瘤細胞占比</div></div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (90 sec / 中 ~320 字)</summary>
+      <div class="speak-text">Q: 低純度樣本是否變差? purity 0.6 樣本 baseline vs V5: 6 caller F1 全相同 (V5 不改 caller); 9 結構: phased% +4.01 pp / n_blocks +18.1% / HP:i:33 +20 conservative / AMB% +3.12 pp / purity 0.607→0.634 / Pass 2 兩者都不觸發 / LOH 完全相同; 唯一 N50 -14.5% 但仍 ≥600K。0 critical regression; ploidy bug 在低 purity 自我治癒。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> V3F vs V5 0.6 對比 / N50 為何接受</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_b1_pass2.html">← Prev</a>
+  <span class="counter">Slide B2 (21/22)</span>
+  <a href="slide_b3_cross_sample.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_b1_pass2.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_b3_cross_sample.html';
+  });
+</script>
+
+</body>
+</html>

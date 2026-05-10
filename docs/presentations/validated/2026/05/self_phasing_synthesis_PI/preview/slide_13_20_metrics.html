@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 13 — 20 指標 no regression — 6 項 ⭐ 顯著改善 +8.3 ~ +99.7%</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">13 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S5 驗證</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">1</span></div>
+    <div><span class="label">N grep:</span><span class="value">20+</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">20 指標 no regression — 6 項 ⭐ 顯著改善 +8.3 ~ +99.7%</h2>
+    <p class="en-subtitle">20 metrics no regression; 6 significant improvements</p>
+    
+    <table class="metric-table" style="font-size:11px;">
+      <thead><tr><th>類別</th><th>內容</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td><strong>① ISM aggregate (3)</strong></td><td>TP_rate +0.005 / HP_Ratio 0.788→0.574 / Potential_LOH +3.5 pp</td></tr>
+        <tr class="row-green"><td><strong>② HP_Ratio AUC (2)</strong></td><td>All -0.005 (隨機區間) / Inner +0.002</td></tr>
+        <tr class="row-green"><td><strong>③ Methylation 6 feat</strong></td><td>全 ±0.01 內持平</td></tr>
+        <tr class="row-yellow"><td><strong>④ Paired GT concord. ⭐ (4)</strong></td><td>clean PS +8.3 pp / 15-Aggr +6.65 pp / 15-Clean PS +13.3 pp</td></tr>
+        <tr class="row-yellow"><td><strong>⑤ HP / LOH 結構 ⭐ (5)</strong></td><td>N50 +99.7% / Phased +23.6 pp / 1.36× 快 / LOH 完全相同</td></tr>
+      </tbody>
+    </table>
+    <div class="green-box" style="text-align:center;font-weight:700;">6 顯著改善 ⭐: N50 +99.7% / Phased +23.6 pp / 1.36× / 15-Clean PS +13.3 pp / clean PS +8.3 pp / 15-Aggr +6.65 pp</div>
+    <div class="conclusion-arrow">→ 20/0 指標 no regression — V5 全面 production-ready</div>
+    <p style="font-size:10px;color:#6B7280;font-style:italic;text-align:center;">(HP_Ratio 0.788→0.574 是 tag bias 修正非變差 — pre-registered metrics)</p>
+    <div class="footer-glossary">
+      <div class="gloss-item">📖 <span class="term">LOH:</span> 雜合性丟失</div>
+      <div class="gloss-item">ⓘ scope: HCC1395 5kHz @ 0.93 (PI 報告 V5 = Pass 1 only)</div>
+    </div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
+      <div class="speak-text">5 大類 20 指標全綠: ① ISM 3 項 (HP_Ratio 0.788→0.574 是 tag bias 修正非變差); ② HP_Ratio AUC 隨機區間; ③ methylation 6 持平; ④ Paired GT 4 ⭐ +6.65~+13.3 pp; ⑤ HP/LOH 5 ⭐ N50 +99.7% / Phased +23.6 pp / 1.36× / LOH Jaccard=1.0。20/0 no regression production-ready。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> methylation 6 列表 / HP_Ratio 詳解 / LOH Jaccard=1.0</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_12_sp_fixed.html">← Prev</a>
+  <span class="counter">Slide 13 (14/22)</span>
+  <a href="slide_14_caller_f1.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_12_sp_fixed.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_14_caller_f1.html';
+  });
+</script>
+
+</body>
+</html>

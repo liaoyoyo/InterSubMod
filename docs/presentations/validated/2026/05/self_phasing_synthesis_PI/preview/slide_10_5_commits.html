@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 10 — 5 commits 兩層三版 stacking — baseline → V3F → V5</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">10 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S4 修補設計</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~340 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">0 + 2 footnote</span></div>
+    <div><span class="label">N grep:</span><span class="value">5 hash</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">5 commits 兩層三版 stacking — baseline → V3F → V5</h2>
+    <p class="en-subtitle">5 commits two-layer three-version stacking</p>
+    
+    <img class="fig-thumb" src="../figures/master/F3_binary_commit_timeline.png" alt="F3" style="max-height:280px;">
+    <p class="fig-caption">F3: phasing 藍 / tagging 綠 / 跨層紫</p>
+    <div class="grid-2col">
+      <div class="green-box">
+        <strong>V3-Fixed = baseline + 41ff147 + 380e8d2</strong><br>
+        ★ 41ff147 是修偏移的關鍵 commit
+      </div>
+      <div class="green-box">
+        <strong>V5 = V3F + d0bcd8c + 938f0df</strong><br>
+        d0bcd8c 是唯一跨兩層 commit
+      </div>
+    </div>
+    <p style="font-size:11px;color:#6B7280;text-align:center;">累計 ~155 lines tagging + ~40 lines phasing; <code>HaplotagProcess.h:66-68</code> 介面契約零變動</p>
+    <div class="footer-glossary">
+      <div class="gloss-item">ⓘ INDEL guard: HAPLOTYPE_UNDEFINED 檢查</div>
+      <div class="gloss-item">ⓘ threshold 0.95→0.9: Pass 2 觸發</div>
+    </div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (120 sec / 中 ~340 字)</summary>
+      <div class="speak-text">5 commits 漸進完成 self-phasing 修補。8b8c1fd PON-only (藍); 41ff147 two-layer getVote (綠) ★ 修偏移關鍵; 380e8d2 INDEL guard (綠); d0bcd8c Pass 2 ploidy fix + bundled Layer 1.5 (紫 跨兩層); 938f0df threshold 0.95→0.9 (藍)。V3F = baseline + 41ff147 + 380e8d2; V5 = V3F + d0bcd8c + 938f0df。累計 155+40 行; 介面契約零變動。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 各 commit layer / 為何不合併 / cherry-pick 自 zhenyu</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_09_genome_34855.html">← Prev</a>
+  <span class="counter">Slide 10 (11/22)</span>
+  <a href="slide_11_getvote.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_09_genome_34855.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_11_getvote.html';
+  });
+</script>
+
+</body>
+</html>

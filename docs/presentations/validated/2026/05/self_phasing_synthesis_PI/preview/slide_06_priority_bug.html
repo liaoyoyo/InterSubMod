@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 06 — tagging 層 getVote priority bug — 1 票 somatic 觸發誤標</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">06 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S2 機制</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">1 + 2 footnote</span></div>
+    <div><span class="label">N grep:</span><span class="value">5</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">tagging 層 getVote priority bug — 1 票 somatic 觸發誤標</h2>
+    <p class="en-subtitle">getVote priority bug — 1 somatic vote triggers mislabel</p>
+    
+    <div class="grid-2col" style="grid-template-columns: 7fr 5fr;">
+      <img class="fig-thumb" src="../figures/master/F1_priority_bug_mechanism.png" alt="F1" style="max-height:300px;">
+      <div>
+        <p style="font-size:11px;font-weight:700;color:#7F1D1D;margin:0 0 4px;">Real read 範例 (752 同模式):</p>
+        <pre class="code-panel baseline" style="font-size:10px;">germline HP1 = 0
+germline HP2 = 5  ← 主導
+somatic HP1_1 = 1 ← 1 票觸發
+somatic HP2_1 = 0
+─────────────────
+baseline: → hp=11 ❌ break
+        (germline 5 票被忽略)
+正確答案: hp=21
+(germline HP2=5 主導 + 標 21)</pre>
+      </div>
+    </div>
+    <div class="conclusion-arrow">→ tumor sub-clone somatic 100% 同方向 → priority bug 把所有受影響 reads 標 HP:i:11 系列 → 17.3:1 偏移在 tag layer 形成</div>
+    <p style="font-size:11px;color:#6B7280;font-style:italic;margin:4px 0;">注意: tag layer 與 §slide 05 phasing layer 是不同層 bug, 必須分別修補</p>
+    <div class="footer-glossary">
+      <div class="gloss-item">📖 <span class="term">sub-clone:</span> 基因型同細胞群</div>
+      <div class="gloss-item">ⓘ priority bug / break early</div>
+    </div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
+      <div class="speak-text">tagging 層 priority bug: baseline getVote() vector 順序 ① somatic ② mixed ③ germline; for 迴圈第一個非空 break early, germline 永遠看不到。範例 read: germline HP2=5 主導, somatic HP1_1=1 觸發, baseline 標 hp=11 錯, 應 hp=21。全 752 chr19 victims 同模式。tumor sub-clone somatic 100% 同方向 → 17.3:1 形成。tag layer 與 phasing layer 不同層, 不能合併修。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> enum HAPLOTYPE1_1=2 vs HP tag int=11 / 5-vote countMap</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_05_player_referee.html">← Prev</a>
+  <span class="counter">Slide 06 (7/22)</span>
+  <a href="slide_07_two_layer_table.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_05_player_referee.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_07_two_layer_table.html';
+  });
+</script>
+
+</body>
+</html>

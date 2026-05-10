@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 14 — Caller F1 vs SEQC2 三版完全相同; purity 0.6 完整對照 0 critical regression</title>
+  <link rel="stylesheet" href="shared/style.css">
+</head>
+<body>
+<main class="slide-page">
+  <div class="slide-meta ">
+    <div><span class="label">Slide:</span><span class="value">14 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S5 驗證 + ⚡ Cliffhanger</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">2</span></div>
+    <div><span class="label">N grep:</span><span class="value">15+</span></div>
+  </div>
+
+  <div class="slide-canvas">
+    <h2 class="slide-title ">Caller F1 vs SEQC2 三版完全相同; purity 0.6 完整對照 0 critical regression</h2>
+    <p class="en-subtitle">Caller F1 identical; purity 0.6 fully verified</p>
+    
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0;">HCC1395 5kHz @ 0.93 purity:</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th>版本</th><th>TP</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td>A1 baseline</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
+        <tr class="row-green"><td>A3 V3F</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
+        <tr class="row-green"><td>A5 V5</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:6px 0 0;">HCC1395 t30_n20 @ 0.6 purity:</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th>版本</th><th>TP</th><th>FP</th><th>FN</th><th>F1</th></tr></thead>
+      <tbody><tr class="row-green"><td>B1/B3/B5 三版</td><td class="num">24,190</td><td class="num">13,487</td><td class="num">15,257</td><td class="num"><strong>0.6273</strong></td></tr></tbody>
+    </table>
+    <div class="arg-list" style="font-size:11px;">
+      <strong>因果鏈:</strong> ClairS-TO PASS set 由 caller 決定 → V5 改 GT/PS 不改 FILTER → PASS set 不變 → TP/FP/FN 不變 → F1 不變
+    </div>
+    <div class="cliffhanger-box">
+      → V5 不改 caller; ΔF1 (0.93→0.6) = -0.0893 為 ClairS-TO 性質<br>
+      <strong>→ 但 5/9 paired cross-ref 揭露另一面...</strong> 〔next: slide 15-16〕
+    </div>
+    <div class="footer-glossary">
+      <div class="gloss-item">📖 <span class="term">purity:</span> 樣本中腫瘤細胞占比</div>
+      <div class="gloss-item">ⓘ <span class="term">PASS set:</span> ClairS-TO snv.vcf FILTER=PASS 集合</div>
+    </div>
+  </div>
+
+  <div class="note-section">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
+      <div class="speak-text">Caller F1 vs SEQC2: 0.93 三版 F1=0.7166 完全相同; 0.6 三版 F1=0.6273 完全相同。因果鏈: ClairS-TO PASS set 由 caller 決定, V5 改 GT/PS/GT2/GT3 不改 FILTER → PASS set 不變 → F1 不變。V5 不改 caller, ΔF1 -0.0893 是 ClairS-TO 在低 purity 性質。turning point — 但 5/9 paired cross-ref 揭露另一面。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> PASS set / FILTER 機制 / purity 0.6 N50 微差</div>
+    </details>
+  </div>
+
+  <div class="cross-link">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </div>
+</main>
+
+<div class="nav-bottom">
+  <a href="slide_13_20_metrics.html">← Prev</a>
+  <span class="counter">Slide 14 (15/22)</span>
+  <a href="slide_15_paired_mode.html">Next →</a>
+</div>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_13_20_metrics.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_15_paired_mode.html';
+  });
+</script>
+
+</body>
+</html>
