@@ -77,3 +77,11 @@ research/**/*.log
 # Stale directories
 Testing/
 slides/
+
+# === image-gen / html-preview (added 2026-05-10, design doc D7) ===
+# Generated PNGs not committed; prompts/ retained for reproducibility
+**/figures/*.png
+!**/figures/.gitkeep
+
+# Codex CLI working dir (image gen output staging)
+.codex_staging/
