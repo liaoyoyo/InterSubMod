@@ -1,11 +1,17 @@
 /* design_tokens.css — Anthropic palette + 8-point spacing (D16, per SOP §5.1)
- * To be inlined inside <style> blocks by base_lN templates. */
+ * To be inlined inside <style> blocks by base_lN templates.
+ *
+ * Light tokens live in :root.
+ * Dark tokens override via [data-theme="dark"] OR @media prefers-color-scheme.
+ * Font scaling via --font-scale (overridden via data-font-scale attribute on <html>).
+ */
 
 :root {
-  /* === Color palette (from thariqs design-system 05) === */
+  /* === Color palette (light, from thariqs design-system 05) === */
   --color-accent: #D97757;
   --color-text: #141413;
   --color-bg: #FAF9F5;
+  --color-bg-elev: #FFFFFF;
   --color-border: #E3DACC;
   --color-muted: #87867F;
   --color-success: #788C5D;
@@ -33,9 +39,45 @@
   --fs-body: 16px;
   --fs-small: 14px;
   --fs-caption: 12px;
+  --font-scale: 1;
 
   /* === Layout === */
   --max-content: 900px;
   --radius-sm: 3px;
   --radius-md: 6px;
 }
+
+/* === Dark mode — auto via system preference === */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-accent: #E89479;
+    --color-text: #FAF9F5;
+    --color-bg: #1F1E1A;
+    --color-bg-elev: #2A2925;
+    --color-border: #3A3833;
+    --color-muted: #8C8B83;
+    --color-success: #9CB37A;
+    --color-warning: #DBA862;
+    --color-danger: #D07474;
+    --color-link: #8FA9CC;
+  }
+}
+
+/* === Dark mode — explicit user override === */
+:root[data-theme="dark"] {
+  --color-accent: #E89479;
+  --color-text: #FAF9F5;
+  --color-bg: #1F1E1A;
+  --color-bg-elev: #2A2925;
+  --color-border: #3A3833;
+  --color-muted: #8C8B83;
+  --color-success: #9CB37A;
+  --color-warning: #DBA862;
+  --color-danger: #D07474;
+  --color-link: #8FA9CC;
+}
+
+/* === Font scale levels (3 steps) === */
+:root[data-font-scale="small"]  { --font-scale: 0.875; }
+:root[data-font-scale="medium"] { --font-scale: 1; }
+:root[data-font-scale="large"]  { --font-scale: 1.125; }
