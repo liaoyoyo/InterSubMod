@@ -1,0 +1,41 @@
+/* design_tokens.css — Anthropic palette + 8-point spacing (D16, per SOP §5.1)
+ * To be inlined inside <style> blocks by base_lN templates. */
+
+:root {
+  /* === Color palette (from thariqs design-system 05) === */
+  --color-accent: #D97757;
+  --color-text: #141413;
+  --color-bg: #FAF9F5;
+  --color-border: #E3DACC;
+  --color-muted: #87867F;
+  --color-success: #788C5D;
+  --color-warning: #C78E3F;
+  --color-danger: #B04A4A;
+  --color-link: #5C7CA3;
+
+  /* === Spacing (8-point) === */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 16px;
+  --sp-4: 24px;
+  --sp-5: 32px;
+  --sp-6: 48px;
+  --sp-7: 64px;
+  --sp-8: 96px;
+
+  /* === Typography === */
+  --font-sans: system-ui, -apple-system, "Noto Sans CJK TC", sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", "Cascadia Mono", monospace;
+  --fs-display: 48px;
+  --fs-h1: 32px;
+  --fs-h2: 24px;
+  --fs-h3: 20px;
+  --fs-body: 16px;
+  --fs-small: 14px;
+  --fs-caption: 12px;
+
+  /* === Layout === */
+  --max-content: 900px;
+  --radius-sm: 3px;
+  --radius-md: 6px;
+}
