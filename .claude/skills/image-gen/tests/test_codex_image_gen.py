@@ -20,11 +20,12 @@ def test_build_command():
     cmd = build_command(yaml_path, out_dir)
     assert cmd[0] == "codex", f"First token must be 'codex', got {cmd[0]}"
     assert "exec" in cmd, "Must use 'exec' subcommand"
-    assert "--image-dir" in cmd, "Must specify --image-dir"
-    idx = cmd.index("--image-dir")
-    assert cmd[idx+1] == str(out_dir), f"--image-dir value wrong: {cmd[idx+1]}"
+    # codex v0.125 has no --image-dir; we use --full-auto and embed target path in prompt
+    assert "--full-auto" in cmd, "Must use --full-auto for non-interactive run"
     last = cmd[-1]
     assert "$imagegen" in last, f"Prompt argument must end with $imagegen: {last!r}"
+    expected_path = str(out_dir / (yaml_path.stem + ".png"))
+    assert expected_path in last, f"Prompt must embed target save path {expected_path}: {last!r}"
 
 def main():
     tests = [test_extract_concept_prompt, test_build_command]
