@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "image-vision-check quality.json entry",
+  "type": "object",
+  "required": ["image", "version", "checks", "score", "verdict"],
+  "properties": {
+    "image": { "type": "string", "description": "filename relative to figures dir" },
+    "version": { "type": "integer", "minimum": 1, "description": "1 = original, 2 = first retry, etc." },
+    "type": {
+      "type": "string",
+      "enum": ["concept_diagram", "flow_diagram", "data_mockup", "icon"]
+    },
+    "backend": {
+      "type": "string",
+      "enum": ["ai", "cairo"]
+    },
+    "checks": {
+      "type": "object",
+      "required": [
+        "prompt_fidelity",
+        "readability",
+        "focal_clarity",
+        "design_taboos_avoided",
+        "print_friendly",
+        "cross_figure_consistency"
+      ],
+      "properties": {
+        "prompt_fidelity": { "type": "boolean" },
+        "readability": { "type": "boolean" },
+        "focal_clarity": { "type": "boolean" },
+        "design_taboos_avoided": { "type": "boolean" },
+        "print_friendly": { "type": "boolean" },
+        "cross_figure_consistency": { "type": "boolean" }
+      }
+    },
+    "score": { "type": "string", "pattern": "^[0-6]/6$" },
+    "verdict": {
+      "type": "string",
+      "enum": ["pass", "partial", "fail", "needs_human"]
+    },
+    "suggestions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "retry_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["version", "score"],
+        "properties": {
+          "version": { "type": "integer" },
+          "score": { "type": "string" }
+        }
+      }
+    },
+    "checked_at": { "type": "string", "format": "date-time" }
+  }
+}
