@@ -12,6 +12,18 @@
 
 # 當前目標
 
+## 2026-05-11 — html-preview skill shipped (Phase 2)
+
+✅ `InterSubMod/.claude/skills/html-preview/` shipped. End-to-end demo at
+`InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01/index.html`
+(topic-folder mode, 281-line source).
+
+Spec: `InterSubMod/docs/references/manual/20260510_HTML預覽_圖示生成_3skill_設計_01.md` (D1-D20)
+SOP: `InterSubMod/docs/references/manual/20260511_HTML_MD_PPTX輸出格式SOP_01.md`
+Phase 2 plan: `InterSubMod/docs/plans/2026/05/20260511_Phase2_html_preview_implementation_01.md`
+
+Ready to plan Phase 3 (Tier A 6 skill 接入 html-preview as companion).
+
 > **主軸（2026-04-26 切換）**：**Thread D LOH-constrained phasing signatures**（TO 層論文主軸）。主軸報告：[InterSubMod/docs/reports/validated/2026/04/20260426_Thread_D_LOH_constrained_phasing_main_axis_01.md](reports/validated/2026/04/20260426_Thread_D_LOH_constrained_phasing_main_axis_01.md)。Thread B（LOH × AF × CN 跨樣本 whitelist filter）已於 2026-04-26 正式撤回 filter 用途宣稱，HCC1395 single-sample case study 與 per-sample characterization 保留。撤回宣告：[InterSubMod/docs/reports/validated/2026/04/20260426_Thread_B_Retraction_Whitelist_Cross_Sample_01.md](reports/validated/2026/04/20260426_Thread_B_Retraction_Whitelist_Cross_Sample_01.md)。
 
 ## 1. 目前狀態
