@@ -1,0 +1,23 @@
+type: concept_diagram
+subject: "LOH region triggers haplotype phasing degradation in tumor sample"
+key_elements:
+  - "chromosome 8 ideogram with shaded LOH band at q24"
+  - "paired short reads aligned above and below the chromosome"
+  - "an arrow showing phasing failure within the LOH region"
+labels:
+  top: "Tumor sample with LOH"
+  bottom: "Phasing degrades inside LOH (shaded)"
+style:
+  palette: ["#1f2937", "#ef4444"]
+  background: "white"
+  composition: "centered"
+constraints:
+  - "no gradient overuse"
+  - "no glass morphism"
+  - "colorblind-friendly"
+  - "print-friendly contrast >= 4.5:1"
+  - "system-ui font feel"
+output:
+  size: "1024x1024"
+  quality: "high"
+backend: ai

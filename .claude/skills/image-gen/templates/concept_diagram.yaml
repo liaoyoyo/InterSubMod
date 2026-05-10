@@ -1,0 +1,26 @@
+# Template: concept_diagram (AI track via codex $imagegen)
+# Use for: Inter-Subclonal / LOH / phasing 概念示意圖
+type: concept_diagram
+subject: "<one-sentence main subject, e.g., LOH region triggers haplotype phasing degradation>"
+key_elements:
+  - "<element 1, e.g., chromosome ideogram with shaded LOH region>"
+  - "<element 2, e.g., paired reads above and below>"
+  - "<element 3>"
+labels:
+  top: "<top-of-image label>"
+  bottom: "<bottom label>"
+style:
+  palette: ["#1f2937", "#ef4444"]   # 2-3 colors, no gradient overuse
+  background: "white"
+  composition: "centered"
+constraints:
+  - "no gradient overuse"
+  - "no glass morphism"
+  - "no multi-indigo stacking"
+  - "colorblind-friendly (no red/green pair)"
+  - "print-friendly contrast >= 4.5:1"
+  - "system-ui font feel"
+output:
+  size: "1024x1024"
+  quality: "high"
+backend: ai      # always 'ai' for concept_diagram

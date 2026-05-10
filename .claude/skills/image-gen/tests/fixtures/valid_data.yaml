@@ -1,0 +1,18 @@
+type: data_mockup
+subject: "Bar chart mock-up showing 7 samples' baseline AUC distribution"
+chart_type: "bar"
+axes:
+  x_label: "Sample"
+  y_label: "AUC"
+data_hint: "HCC1395 ~0.78 (highest), COLO829 ~0.55 (lowest), other 5 samples between 0.60-0.72"
+style:
+  palette: ["#1f2937", "#10b981"]
+  background: "white"
+constraints:
+  - "axes clearly labeled"
+  - "no gradient overuse"
+  - "data is conceptual mock, not real"
+output:
+  size: "1024x1024"
+  quality: "high"
+backend: ai

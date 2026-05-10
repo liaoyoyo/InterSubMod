@@ -1,0 +1,20 @@
+# Template: data_mockup (AI track) — 概念型 bar/line 示意，非真實數據
+# Real data plots → use scripts/lib/plot_setup.py (matplotlib)
+type: data_mockup
+subject: "<chart concept, e.g., bar chart showing 7 samples' AUC distribution mock-up>"
+chart_type: "bar"             # bar | line | scatter
+axes:
+  x_label: "<x label>"
+  y_label: "<y label>"
+data_hint: "<verbal description of trend, e.g., HCC1395 highest, COLO829 lowest, gradient between>"
+style:
+  palette: ["#1f2937", "#10b981"]
+  background: "white"
+constraints:
+  - "axes clearly labeled"
+  - "no gradient overuse"
+  - "data is conceptual mock, not real"
+output:
+  size: "1024x1024"
+  quality: "high"
+backend: ai

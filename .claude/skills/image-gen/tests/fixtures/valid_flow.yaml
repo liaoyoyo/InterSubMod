@@ -1,0 +1,34 @@
+type: flow_diagram
+subject: "Self-Phasing V5 minimal 3-step demo"
+nodes:
+  - id: "n1"
+    label: "ReadParser"
+    x: 80
+    y: 200
+  - id: "n2"
+    label: "Phasing"
+    x: 360
+    y: 200
+  - id: "n3"
+    label: "Output VCF"
+    x: 640
+    y: 200
+edges:
+  - from: "n1"
+    to: "n2"
+    label: ""
+  - from: "n2"
+    to: "n3"
+    label: ""
+style:
+  palette: ["#1f2937", "#3b82f6"]
+  background: "white"
+  font_family: "DejaVu Sans"
+  font_size: 14
+constraints:
+  - "deterministic layout"
+  - "exact text rendering"
+output:
+  size: "1024x400"
+  quality: "high"
+backend: cairo

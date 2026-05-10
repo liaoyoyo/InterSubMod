@@ -1,0 +1,19 @@
+# Template: icon (program track via pycairo)
+# Use for: 條目訂點、序號標記、status 標籤
+type: icon
+subject: "<icon meaning, e.g., status_pass>"
+shape: "circle"               # circle | square | rounded_square | hexagon
+glyph: "✓"                    # single CJK / symbol / digit
+glyph_color: "#ffffff"
+fill_color: "#10b981"
+style:
+  size_px: 256                # 256 / 512
+  padding_px: 24
+  background: "transparent"
+constraints:
+  - "single symbol / digit only"
+  - "high contrast glyph vs fill"
+output:
+  size: "256x256"
+  quality: "n/a"
+backend: cairo

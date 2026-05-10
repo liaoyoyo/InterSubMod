@@ -1,0 +1,29 @@
+# Template: flow_diagram (program track via pycairo)
+# Use for: G1→G7 pipeline、step 順序、條件分支
+type: flow_diagram
+subject: "<flow name, e.g., Self-Phasing V5 Pipeline G1-G7>"
+nodes:
+  - id: "g1"
+    label: "G1: ReadParser"
+    x: 100
+    y: 100
+  - id: "g2"
+    label: "G2: VCF Loader"
+    x: 350
+    y: 100
+edges:
+  - from: "g1"
+    to: "g2"
+    label: ""           # optional edge label
+style:
+  palette: ["#1f2937", "#3b82f6"]
+  background: "white"
+  font_family: "DejaVu Sans"
+  font_size: 14
+constraints:
+  - "deterministic layout (no AI randomness)"
+  - "exact text rendering"
+output:
+  size: "1024x768"
+  quality: "high"       # cairo always renders sharp; quality field for consistency
+backend: cairo          # always 'cairo' for flow_diagram
