@@ -1,0 +1,24 @@
+type: concept_diagram
+subject: "Schematic showing how a Loss-of-Heterozygosity (LOH) region in a tumor sample causes haplotype phasing degradation: paired short reads above an ideogram of chromosome 8, with a shaded LOH band where read pairs lose haplotype consistency."
+key_elements:
+  - "ideogram of chromosome 8 with q-arm shaded gray for LOH region"
+  - "paired short reads (red and blue) aligned above and below the chromosome"
+  - "an arrow inside the LOH region showing haplotype assignment becoming ambiguous"
+labels:
+  top: "Tumor sample with LOH (chr8q)"
+  bottom: "Phasing degrades inside the LOH band"
+style:
+  palette: ["#1f2937", "#ef4444"]
+  background: "white"
+  composition: "centered, ideogram horizontal across the middle"
+constraints:
+  - "no gradient overuse"
+  - "no glass morphism"
+  - "no multi-indigo stacking"
+  - "colorblind-friendly (no red/green pair)"
+  - "print-friendly contrast >= 4.5:1"
+  - "system-ui font feel"
+output:
+  size: "1024x1024"
+  quality: "high"
+backend: ai

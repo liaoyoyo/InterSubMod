@@ -1,0 +1,20 @@
+type: data_mockup
+subject: "Mock-up bar chart showing 7 cancer sample baseline AUC distribution (illustrative only, not real data)"
+chart_type: "bar"
+axes:
+  x_label: "Sample"
+  y_label: "Baseline AUC"
+data_hint: "HCC1395 ~0.78 (highest), COLO829 ~0.55 (lowest), other 5 samples (DORADO, H2009, HCC1954, HCC1937, HCC2218) between 0.60-0.72; bars in dark teal flat fill, no gradient"
+style:
+  palette: ["#1f2937", "#10b981"]
+  background: "white"
+constraints:
+  - "axes clearly labeled"
+  - "x-axis sample names readable, no overlap"
+  - "no gradient overuse"
+  - "no 3D effect"
+  - "data is conceptual mock, not real"
+output:
+  size: "1024x1024"
+  quality: "high"
+backend: ai
