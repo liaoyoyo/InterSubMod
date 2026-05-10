@@ -1,0 +1,59 @@
+Generate a clean code-flow diagram in editorial technical illustration style.
+
+Topic: V5 getVote() three-layer voting logic (Layer 1 + Layer 1.5 + Layer 2).
+
+Layout (16:9 aspect ratio, 1024 x 576 px):
+
+Top: Title bar
+  "V5 getVote() three-layer voting logic"
+  Subtitle: "germline first, somatic fallback, then annotation"
+
+Top input row (small, monospace):
+  "Read votes: countMap[germline_HP1, germline_HP2, somatic_HP1_1, somatic_HP2_1, HP3]"
+
+Three sequential horizontal layers (top to bottom), each as a colored panel:
+
+Panel A — Layer 1 (green #16A34A border, light green #DCFCE7 fill):
+  Header: "Layer 1 — germline only"
+  Code snippet (monospace, smaller):
+    if (germlineHP1 > 0 || germlineHP2 > 0)
+        gR = (HP1 >= HP2) ? 1 : 2;
+  Note: "germline never overruled by somatic"
+  Output: "if voted → skip Layer 1.5"
+
+Arrow connecting → next panel
+
+Panel B — Layer 1.5 (yellow #FBBF24 border, light yellow #FEF3C7 fill):
+  Header: "Layer 1.5 — fallback (NEW in V5)"
+  Code snippet:
+    else if (somaticHP1 > 0 || somaticHP2 > 0)
+        gR = (sHP1 >= sHP2) ? 1 : 2;
+  Caveat label (red #DC2626, small): "⚠ inherits priority bug bias in germline-absent regions"
+
+Arrow connecting → next panel
+
+Panel C — Layer 2 (navy #1E3A8A border, light blue #DBEAFE fill):
+  Header: "Layer 2 — somatic annotation"
+  Code snippet:
+    if (somaticTotal > 0)
+        hp = (gR == 1) ? 11
+           : (gR == 2) ? 21
+           : 33;
+  Output: "Final HP tag: 1 / 2 / 11 / 21 / 33"
+
+Bottom right: Output legend with colored squares:
+  hp=1 / 2  (germline only)
+  hp=11 / 21 (germline + somatic)
+  hp=33 (pure somatic ambiguous)
+
+Style requirements:
+- Off-white background (#FAFAFA)
+- Boxed flow with thin 1-2 px borders
+- Color-coded panels: green / yellow / navy
+- Monospace for code snippets and tag values
+- Sans-serif for headers and notes
+- Right-angle arrows between panels
+- Editorial scientific document aesthetics, similar to Nature Methods / Bioinformatics journal figures
+- English text only, no CJK characters
+
+Output: PNG, 1024 x 576 px (or proportional 16:9), 8-bit RGB.

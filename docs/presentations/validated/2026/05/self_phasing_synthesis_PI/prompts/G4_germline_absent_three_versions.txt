@@ -1,0 +1,51 @@
+Generate a three-panel comparison illustration in editorial scientific style.
+
+Topic: baseline vs V3F vs V5 behavior in germline-absent regions (paired chr19 cross-ref data).
+
+Layout (16:9 aspect ratio, 1024 x 576 px, three vertical panels side-by-side):
+
+Top: Title bar
+  "germline-absent regions: V5 inherits baseline 4.19:1 bias; V3F is more robust"
+  Subtitle: "5,789 paired chr19 events, cnt_HP1+HP2=0, somatic>0"
+
+Three vertical panels (each ~330 px wide, equal width):
+
+Panel 1 — LEFT (red #DC2626 border, light red #FEE2E2 fill):
+  Header bar: "baseline ❌"
+  Visual: Stack of vote tags, large cluster on top labeled hp=11 (3,312, navy color), small cluster below labeled hp=21 (791, orange color)
+  Bottom statistic (bold, centered): "4.19 : 1 bias"
+  Caption: "priority bug peak"
+
+Panel 2 — CENTER (green #16A34A border, light green #DCFCE7 fill):
+  Header bar: "V3F ✅"
+  Visual: Single uniform large cluster, all gray (somatic ambiguous), labeled hp=33 (5,789)
+  Bottom statistic (bold, centered): "all hp=33"
+  Caption: "conservative — no direction picked"
+  Small green checkmark icon: "robust"
+
+Panel 3 — RIGHT (red #DC2626 border, light red #FEE2E2 fill, identical to Panel 1):
+  Header bar: "V5 ❌ (same as baseline!)"
+  Visual: Stack identical to Panel 1, large hp=11 cluster (3,313, navy) + small hp=21 cluster (790, orange)
+  Bottom statistic (bold, centered): "4.19 : 1 bias"
+  Caption: "Layer 1.5 inherits priority bug"
+  Annotation arrow back to Panel 1: "= baseline behavior"
+
+Bottom banner — Conclusion box (red #DC2626 background, white text):
+  "★ V5 Layer 1.5 = priority bug feature, not fix"
+  Subtitle (smaller, italic): "V3F's hp=33 conservative tagging is more robust in this region"
+
+Bottom right corner data citation (small gray text):
+  "Source: paired audit Step D, 2026-05-09"
+
+Style requirements:
+- Off-white background (#FAFAFA)
+- Three equal-width vertical panels separated by thin 1 px gray dividers
+- Bold colored borders to emphasize panel verdict (red for buggy, green for fix)
+- Large cluster visualization using filled circles or vertical-stack rectangles
+- Sans-serif typography for headers and captions
+- Monospace for numerical statistics (3,312 / 791 / 4.19 : 1)
+- Color palette strict: navy #1E3A8A, burnt orange #9A3412, red #DC2626, green #16A34A, gray #6B7280, off-white #FAFAFA
+- English text only, no CJK characters
+- Editorial scientific journal figure aesthetics
+
+Output: PNG, 1024 x 576 px (or proportional 16:9), 8-bit RGB.

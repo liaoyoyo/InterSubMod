@@ -1,0 +1,40 @@
+Generate a clean technical flowchart in editorial scientific illustration style.
+
+Topic: longphase-to two-pass phasing algorithm decision flow.
+
+Layout (16:9 aspect ratio, 1024 x 576 px):
+
+Top section — "Pass 1 — always runs" header bar (green #16A34A background, white text):
+  Two boxes side-by-side:
+    [edgeConnectResult] — 2-point pairwise edge
+    [somaticCalling]    — 3-point patternMining (first/second/third path)
+
+Middle section — Decision diamond (yellow #FBBF24 background):
+  "purity > 0.9 ?"
+  with two outgoing arrows: NO going down-left, YES going down-right.
+
+Bottom-left branch — "purity ≤ 0.9 — Pass 2 SKIPPED" (gray #9CA3AF):
+  Single dashed-border empty box with strikethrough.
+
+Bottom-right branch — "purity > 0.9 — Pass 2 re-runs" (navy #1E3A8A border):
+  One filled box: [edgeConnectResult ONLY] — 2-point re-phase.
+  Annotation: "NOT somaticCalling (3-point Pass 1 result kept)"
+
+Bottom caption box (off-white background, 1px gray border):
+  "Pass 2 incremental effect (HCC1395 5kHz @ 0.93 purity):"
+  Three statistics in monospace:
+    N50         +3.51%   (11,388,114 → 11,788,053 bp)
+    blocks      -9.79%   (1,808 → 1,631)
+    phased var  -2.90 pp (58.00% → 55.10%)
+
+Style requirements:
+- Off-white background (hex #FAFAFA)
+- Sans-serif typography for descriptions
+- Monospace typography for numbers and code-like elements
+- Right-angle bend arrows connecting boxes (not curves)
+- 1-2 px borders, no shadows, no 3D effects
+- Color palette strict: navy #1E3A8A, green #16A34A, yellow #FBBF24, gray #9CA3AF, off-white #FAFAFA
+- English text only, no CJK characters
+- Editorial / professional scientific document aesthetics
+
+Output: PNG, 1024 x 576 px (or proportional 16:9), 8-bit RGB.
