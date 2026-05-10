@@ -271,6 +271,17 @@
 5. `docs/concepts/2026/04/20260409_研究構想總索引_01.md`（研究大圖景、發展樹、理論基礎）
 6. `docs/reports/research_landscape/00_INDEX.md`（需深度理解時）
 
+## 2026-05-10 — image-gen + image-vision-check skills shipped (Phase 1)
+
+Two new skills shipped:
+- `InterSubMod/.claude/skills/image-gen/` — dual-track image generation (AI via codex `$imagegen` + cairo program rendering)
+- `InterSubMod/.claude/skills/image-vision-check/` — 6-dim vision audit via Claude Read
+
+End-to-end demo validated at `InterSubMod/examples/phase1_demo/demo_topic/`. Ready to plan Phase 2 (html-preview skill).
+
+Spec: `InterSubMod/docs/references/manual/20260510_HTML預覽_圖示生成_3skill_設計_01.md`
+Phase 1 plan: `InterSubMod/docs/plans/2026/05/20260510_Phase1_image_gen_vision_check_implementation_01.md`
+
 ## 6. 已完成研究概覽
 
 所有已完成研究的詳細記錄已封存至 `docs/archive/2026/03/20260405_current_focus_completed_items.md`。
