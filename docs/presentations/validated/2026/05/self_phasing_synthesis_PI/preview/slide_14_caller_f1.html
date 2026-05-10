@@ -4,11 +4,231 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Slide 14 — Caller F1 vs SEQC2 三版完全相同; purity 0.6 完整對照 0 critical regression</title>
-  <link rel="stylesheet" href="shared/style.css">
+  <style>/* Self-Phasing PPT Preview — shared style.css
+ * Used by index.html (主頁) + slide_XX.html (子頁)
+ * Color palette aligned with output.pptx + 03_slide_layout_script.md
+ */
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0; font-family: "Noto Sans CJK TC", "Source Han Sans TW", "Droid Sans Fallback", "DejaVu Sans", sans-serif;
+  background: #F5F5F7; color: #1F2937; line-height: 1.5;
+}
+h1, h2, h3, h4 { margin: 0 0 0.5em; color: #1E3A8A; }
+code { font-family: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, Consolas, monospace; font-size: 0.92em; }
+
+/* ─── Top bar (used in index.html only) ─── */
+header.topbar {
+  position: sticky; top: 0; z-index: 100; background: #1E3A8A; color: white;
+  padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+header.topbar h1 { color: white; font-size: 18px; margin: 0; font-weight: 600; }
+header.topbar .meta { font-size: 13px; opacity: 0.85; }
+
+/* ─── Nav tabs (index.html) ─── */
+nav.slidetabs {
+  position: sticky; top: 60px; z-index: 99; background: #FFFFFF; padding: 8px 16px;
+  border-bottom: 1px solid #E5E7EB; display: flex; gap: 6px; overflow-x: auto; flex-wrap: wrap;
+}
+nav.slidetabs button {
+  background: #F3F4F6; border: 1px solid #D1D5DB; color: #374151; padding: 6px 12px;
+  border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; white-space: nowrap;
+  transition: all 0.15s;
+}
+nav.slidetabs button:hover { background: #E5E7EB; border-color: #9CA3AF; }
+nav.slidetabs button.active { background: #1E3A8A; color: white; border-color: #1E3A8A; }
+nav.slidetabs .nav-arrow { background: #FBBF24; color: #78350F; font-weight: 600; padding: 6px 14px; border: 1px solid #F59E0B; }
+nav.slidetabs .nav-star { background: #FEE2E2; color: #DC2626; font-weight: 600; border: 1px solid #DC2626; }
+nav.slidetabs .nav-backup { background: #F3E8FF; color: #6D28D9; font-style: italic; }
+
+/* ─── Iframe wrapper ─── */
+.iframe-wrap {
+  max-width: 1280px; margin: 16px auto; padding: 0 16px;
+}
+.iframe-wrap iframe {
+  width: 100%; height: calc(100vh - 200px); min-height: 720px;
+  border: 1px solid #D1D5DB; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  background: white;
+}
+
+/* ─── Slide page (slide_XX.html) ─── */
+main.slide-page { max-width: 1280px; margin: 0 auto; padding: 24px; }
+.slide-meta {
+  background: #FFFFFF; padding: 12px 16px; margin-bottom: 14px; border-radius: 8px;
+  border-left: 4px solid #1E3A8A; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  font-size: 12px;
+}
+.slide-meta .label { color: #6B7280; font-weight: 500; }
+.slide-meta .value { color: #111827; margin-left: 4px; font-weight: 600; }
+.slide-meta.critical { border-left-color: #DC2626; }
+
+/* ─── 16:9 canvas ─── */
+.slide-canvas {
+  background: white; border: 1px solid #D1D5DB; border-radius: 8px; aspect-ratio: 16 / 9;
+  padding: 28px 40px; position: relative; box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  overflow: hidden; color: #1F2937;
+}
+.slide-canvas h2.slide-title {
+  font-size: 22px; color: #1E3A8A; margin: 0 0 4px;
+  border-bottom: 2px solid #1E3A8A; padding-bottom: 6px;
+}
+.slide-canvas h2.slide-title.critical { color: #DC2626; border-bottom-color: #DC2626; }
+.slide-canvas .en-subtitle {
+  font-size: 13px; color: #6B7280; font-style: italic; margin: 0 0 12px; padding-left: 1em;
+}
+.slide-canvas .footer-glossary {
+  position: absolute; bottom: 10px; left: 28px; right: 28px;
+  font-size: 11px; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 6px;
+  display: flex; flex-wrap: wrap; gap: 12px;
+}
+.slide-canvas .footer-glossary .gloss-item {
+  background: #FAFAFA; padding: 2px 8px; border-radius: 4px;
+}
+.slide-canvas .footer-glossary .gloss-item .term { font-weight: 600; color: #374151; }
+
+/* ─── Layout helpers ─── */
+.grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 10px 0; }
+.grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 10px 0; }
+
+.stat-box {
+  background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; text-align: center;
+}
+.stat-box .number { font-size: 26px; font-weight: 700; color: #1E3A8A; line-height: 1.1; }
+.stat-box .number.green { color: #16A34A; }
+.stat-box .number.orange { color: #9A3412; }
+.stat-box .label { font-size: 11px; color: #6B7280; margin-top: 4px; }
+
+.caveat-box {
+  background: #FFF3CD; border: 1px solid #F59E0B; border-radius: 6px; padding: 10px 14px;
+  margin: 10px 0; color: #78350F; font-size: 13px;
+}
+.caveat-box .label { font-weight: 700; color: #92400E; margin-right: 6px; }
+.caveat-box .en-note {
+  display: block; margin-top: 4px; padding-left: 1em; font-size: 11px;
+  font-style: italic; color: #92400E; opacity: 0.8;
+}
+
+.red-frame {
+  background: #FEE2E2; border: 2px solid #DC2626; border-radius: 6px; padding: 12px 16px;
+  margin: 10px 0; color: #7F1D1D; font-size: 13px; font-weight: 500;
+}
+.red-frame .label { color: #DC2626; font-weight: 700; }
+
+.green-box {
+  background: #DCFCE7; border: 1px solid #16A34A; border-radius: 6px; padding: 10px 14px;
+  margin: 10px 0; color: #166534; font-size: 13px;
+}
+
+table.metric-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 6px 0; }
+table.metric-table th, table.metric-table td {
+  padding: 4px 8px; border: 1px solid #E5E7EB; text-align: left;
+}
+table.metric-table th { background: #F3F4F6; font-weight: 600; color: #374151; }
+table.metric-table td.num { text-align: right; font-family: monospace; }
+table.metric-table tr.row-red td { background: #FEE2E2; color: #7F1D1D; }
+table.metric-table tr.row-green td { background: #DCFCE7; color: #166534; }
+table.metric-table tr.row-yellow td { background: #FEF3C7; }
+
+.arg-list {
+  background: #F0F9FF; border-left: 3px solid #0EA5E9; border-radius: 4px;
+  padding: 8px 14px; margin: 10px 0; font-size: 13px;
+}
+.conclusion-arrow {
+  background: linear-gradient(90deg, #1E3A8A, #3B82F6); color: white;
+  padding: 10px 16px; margin: 10px 0; border-radius: 6px; font-weight: 600; font-size: 14px;
+}
+.conclusion-arrow.green { background: linear-gradient(90deg, #16A34A, #22C55E); }
+.cliffhanger-box {
+  background: #FEF3C7; border: 1.5px dashed #F59E0B; padding: 10px 16px;
+  margin: 10px 0; border-radius: 6px; color: #78350F; font-style: italic; font-size: 14px;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
+
+.code-panel {
+  font-family: monospace; font-size: 11px; padding: 8px 10px; border-radius: 4px;
+  white-space: pre-wrap; line-height: 1.4; margin: 4px 0;
+}
+.code-panel.baseline { background: #FEE2E2; border: 1px solid #FCA5A5; }
+.code-panel.v3f      { background: #DCFCE7; border: 1px solid #86EFAC; }
+.code-panel.v5       { background: #DCFCE7; border: 1px solid #86EFAC; position: relative; }
+.code-panel.v5::after {
+  content: "⚠ Layer 1.5"; position: absolute; top: 4px; right: 6px;
+  background: #FEF3C7; color: #78350F; padding: 1px 6px; border-radius: 3px; font-size: 10px;
+}
+.code-label { font-size: 11px; font-weight: 700; margin-bottom: 2px; }
+.code-label.baseline { color: #DC2626; }
+.code-label.v3f      { color: #16A34A; }
+.code-label.v5       { color: #16A34A; }
+
+.fig-thumb {
+  width: 100%; max-height: 380px; object-fit: contain;
+  border: 1px solid #D1D5DB; border-radius: 4px; background: #FAFAFA;
+}
+.igv-thumb {
+  width: 100%; max-height: 320px; object-fit: contain;
+  border: 1px solid #374151; border-radius: 4px; background: #1F2937;
+}
+.fig-caption {
+  font-size: 10px; color: #6B7280; font-style: italic; text-align: center; margin-top: 2px;
+}
+
+/* ─── Speaker note collapsible (slide_XX.html) ─── */
+.note-section {
+  margin-top: 20px; background: #FAFBFE; border: 1px solid #C7D2FE;
+  border-left: 4px solid #8B5CF6; border-radius: 8px; padding: 14px 18px;
+}
+.note-section h3 { color: #6D28D9; margin: 0 0 8px; font-size: 14px; }
+.note-section .timing {
+  background: #EDE9FE; padding: 4px 10px; border-radius: 4px; font-size: 11px;
+  color: #6D28D9; display: inline-block; margin-bottom: 10px; font-weight: 600;
+}
+.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; }
+.note-section .tier3 {
+  margin-top: 12px; padding: 8px 12px; border-radius: 4px;
+  background: #F9FAFB; border: 1px dashed #9CA3AF;
+  font-size: 11px; color: #6B7280;
+}
+.note-section .tier3 .label { font-weight: 700; color: #374151; margin-right: 4px; }
+
+details.collapsible summary {
+  cursor: pointer; padding: 6px 0; font-size: 13px; font-weight: 600; color: #1E3A8A;
+}
+details.collapsible summary:hover { color: #1D4ED8; }
+
+/* ─── Cross-link card to 03_slide_layout_script.md ─── */
+.cross-link {
+  margin-top: 12px; padding: 8px 14px; background: #FFFBEB;
+  border: 1px solid #FBBF24; border-radius: 4px; font-size: 12px; color: #78350F;
+}
+.cross-link a { color: #92400E; text-decoration: underline; }
+
+/* ─── Bottom nav (slide_XX.html prev/next) ─── */
+.nav-bottom {
+  display: flex; justify-content: space-between; margin: 20px 0;
+  max-width: 1280px; margin-left: auto; margin-right: auto; padding: 0 16px;
+}
+.nav-bottom a {
+  background: #1E3A8A; color: white; text-decoration: none;
+  padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500;
+}
+.nav-bottom a.disabled { opacity: 0.4; pointer-events: none; }
+.nav-bottom a:hover { background: #1E40AF; }
+.nav-bottom .counter { align-self: center; color: #6B7280; font-size: 12px; }
+
+.kbd-hint {
+  position: fixed; bottom: 12px; left: 12px; background: rgba(0,0,0,0.7); color: white;
+  padding: 6px 12px; border-radius: 4px; font-size: 11px; pointer-events: none;
+}
+.kbd-hint kbd {
+  background: white; color: #1F2937; padding: 1px 6px; border-radius: 3px; font-size: 10px; margin: 0 2px;
+}
+</style>
 </head>
 <body>
-<main class="slide-page">
-  <div class="slide-meta ">
+<main class="slide-page" role="main" aria-label="Slide 14 content">
+  <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
     <div><span class="label">Slide:</span><span class="value">14 / 22</span></div>
     <div><span class="label">Section:</span><span class="value">S5 驗證 + ⚡ Cliffhanger</span></div>
     <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
@@ -16,8 +236,8 @@
     <div><span class="label">N grep:</span><span class="value">15+</span></div>
   </div>
 
-  <div class="slide-canvas">
-    <h2 class="slide-title ">Caller F1 vs SEQC2 三版完全相同; purity 0.6 完整對照 0 critical regression</h2>
+  <article class="slide-canvas" aria-label="Main slide canvas">
+    <h1 class="slide-title ">Caller F1 vs SEQC2 三版完全相同; purity 0.6 完整對照 0 critical regression</h1>
     <p class="en-subtitle">Caller F1 identical; purity 0.6 fully verified</p>
     
     <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0;">HCC1395 5kHz @ 0.93 purity:</p>
@@ -45,27 +265,27 @@
       <div class="gloss-item">📖 <span class="term">purity:</span> 樣本中腫瘤細胞占比</div>
       <div class="gloss-item">ⓘ <span class="term">PASS set:</span> ClairS-TO snv.vcf FILTER=PASS 集合</div>
     </div>
-  </div>
+  </article>
 
-  <div class="note-section">
+  <aside class="note-section" aria-label="Speaker notes for slide 14">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
       <div class="speak-text">Caller F1 vs SEQC2: 0.93 三版 F1=0.7166 完全相同; 0.6 三版 F1=0.6273 完全相同。因果鏈: ClairS-TO PASS set 由 caller 決定, V5 改 GT/PS/GT2/GT3 不改 FILTER → PASS set 不變 → F1 不變。V5 不改 caller, ΔF1 -0.0893 是 ClairS-TO 在低 purity 性質。turning point — 但 5/9 paired cross-ref 揭露另一面。</div>
       <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> PASS set / FILTER 機制 / purity 0.6 N50 微差</div>
     </details>
-  </div>
+  </aside>
 
-  <div class="cross-link">
+  <aside class="cross-link" aria-label="Cross-reference to markdown spec">
     📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
     <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
-  </div>
+  </aside>
 </main>
 
-<div class="nav-bottom">
+<nav class="nav-bottom" aria-label="Slide navigation">
   <a href="slide_13_20_metrics.html">← Prev</a>
   <span class="counter">Slide 14 (15/22)</span>
   <a href="slide_15_paired_mode.html">Next →</a>
-</div>
+</nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
 

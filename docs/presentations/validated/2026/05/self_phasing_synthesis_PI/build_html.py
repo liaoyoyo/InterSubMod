@@ -14,6 +14,12 @@ HERE = Path(__file__).parent
 OUT = HERE / "preview"
 OUT.mkdir(exist_ok=True)
 
+# Inline CSS (thariqs html-effectiveness: each .html should be self-contained).
+# shared/style.css is kept as source of truth for editing; build_html.py inlines
+# it into every slide_XX.html + index.html so each file works standalone
+# (single-file portability — can be emailed / uploaded / opened without external deps).
+STYLE_CSS = (OUT / "shared" / "style.css").read_text(encoding="utf-8")
+
 # ─── 22 slide specs ────────────────────────────────────────────────────────
 # Each: id, num, section, title, en, timing, rg2, ngrep, canvas_html, speaker, tier3
 # canvas_html = raw HTML body for the 16:9 .slide-canvas container
@@ -661,11 +667,11 @@ def render_slide_page(s, prev_id, next_id, idx, total):
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Slide {s['num']} — {s['title']}</title>
-  <link rel="stylesheet" href="shared/style.css">
+  <style>{STYLE_CSS}</style>
 </head>
 <body>
-<main class="slide-page">
-  <div class="slide-meta {meta_class}">
+<main class="slide-page" role="main" aria-label="Slide {s['num']} content">
+  <div class="slide-meta {meta_class}" role="contentinfo" aria-label="Slide metadata">
     <div><span class="label">Slide:</span><span class="value">{s['num']} / 22</span></div>
     <div><span class="label">Section:</span><span class="value">{s['section']}</span></div>
     <div><span class="label">Tier 2:</span><span class="value">{s['timing']}</span></div>
@@ -673,31 +679,31 @@ def render_slide_page(s, prev_id, next_id, idx, total):
     <div><span class="label">N grep:</span><span class="value">{s['ngrep']}</span></div>
   </div>
 
-  <div class="slide-canvas">
-    <h2 class="slide-title {title_class}">{s['title']}</h2>
+  <article class="slide-canvas" aria-label="Main slide canvas">
+    <h1 class="slide-title {title_class}">{s['title']}</h1>
     <p class="en-subtitle">{s['en']}</p>
     {s['canvas_html']}
-  </div>
+  </article>
 
-  <div class="note-section">
+  <aside class="note-section" aria-label="Speaker notes for slide {s['num']}">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note ({s['timing']})</summary>
       <div class="speak-text">{s['speaker']}</div>
       {f'<div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> {s["tier3"]}</div>' if s["tier3"] else ''}
     </details>
-  </div>
+  </aside>
 
-  <div class="cross-link">
+  <aside class="cross-link" aria-label="Cross-reference to markdown spec">
     📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
     <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
-  </div>
+  </aside>
 </main>
 
-<div class="nav-bottom">
+<nav class="nav-bottom" aria-label="Slide navigation">
   {prev_link}
   <span class="counter">Slide {s['num']} ({idx + 1}/{total})</span>
   {next_link}
-</div>
+</nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
 
@@ -735,11 +741,11 @@ def render_index():
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Self-Phasing PPT Preview — 22 slide multi-page</title>
-  <link rel="stylesheet" href="shared/style.css">
+  <style>{STYLE_CSS}</style>
 </head>
 <body>
 
-<header class="topbar">
+<header class="topbar" role="banner">
   <h1>📊 Self-Phasing PPT Preview — 22 slides multi-page</h1>
   <div class="meta">
     <code>InterSubMod/docs/presentations/validated/2026/05/self_phasing_synthesis_PI/</code>
@@ -747,13 +753,13 @@ def render_index():
   </div>
 </header>
 
-<nav class="slidetabs" id="tabs">
+<nav class="slidetabs" id="tabs" role="navigation" aria-label="Slide selector">
   {nav_html}
 </nav>
 
-<div class="iframe-wrap">
-  <iframe id="slide-frame" src="slide_{SLIDES[0]['id']}.html"></iframe>
-</div>
+<main class="iframe-wrap" role="main">
+  <iframe id="slide-frame" src="slide_{SLIDES[0]['id']}.html" title="Active slide preview"></iframe>
+</main>
 
 <div class="kbd-hint">點 nav 切換 slide; 子頁亦可直接雙擊獨立開啟</div>
 
