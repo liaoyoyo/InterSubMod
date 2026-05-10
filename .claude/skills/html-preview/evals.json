@@ -1,0 +1,66 @@
+{
+  "skill": "html-preview",
+  "version": "2.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "幫我把這份報告轉成 HTML 給 PI 看 preview",
+      "context": {
+        "files_in_scope": ["InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'preview', '給 PI 看')",
+        "dispatch.py invoked with the .md path",
+        "Output is companion HTML (single-file or topic-folder per D17)",
+        "Result printed includes mode + level + taste_check verdict"
+      ],
+      "must_not": [
+        "Replace the source .md (companion only, D11)",
+        "Use Tailwind by default (D15 says MVP.css)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "幫我整理 CLAUDE.md",
+      "context": {
+        "files_in_scope": ["InterSubMod/.claude/CLAUDE.md"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (CLAUDE.md is for LLM consumption per SKIP WHEN)",
+        "Either no skill triggers, or doc-standards / claude-md-management:claude-md-improver activates instead"
+      ],
+      "must_not": [
+        "Generate a CLAUDE.md.preview.html",
+        "Auto-create a CLAUDE.md/ topic folder"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_large_report_topic_folder",
+      "category": "edge_case",
+      "query": "convert this 250-line report to HTML",
+      "context": {
+        "files_in_scope": ["any .md with >=200 lines OR >=5 figures"]
+      },
+      "expected_behavior": [
+        "topic_folder_decider returns True",
+        "build_folder creates {basename}/ next to source",
+        "README.md auto-generated with source link + chapter list + figure table",
+        "index.html created inside folder",
+        "figures/ and prompts/ subdirs created with .gitkeep"
+      ],
+      "must_not": [
+        "Create single .preview.html for large report (D17 violation)",
+        "Forget to create the README.md (D12 explicit requirement)"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}
