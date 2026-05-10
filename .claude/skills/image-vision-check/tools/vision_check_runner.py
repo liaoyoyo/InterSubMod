@@ -142,6 +142,29 @@ def aggregate_pending(figures_dir: Path) -> Path:
     return out
 
 
+def apply_suggestions_to_yaml(yaml_path: Path, suggestions: list[str]) -> None:
+    """Apply textual suggestions from quality.json to a prompt YAML.
+
+    Currently supports the 'constraints: add ...' suggestion form.
+    Other suggestion forms are logged but not auto-applied (D8 max 1 retry,
+    keep simple).
+    """
+    import yaml as _yaml
+    data = _yaml.safe_load(Path(yaml_path).read_text())
+    if not isinstance(data, dict):
+        return
+    constraints = list(data.get("constraints") or [])
+    for s in suggestions:
+        prefix = "constraints: add"
+        if s.startswith(prefix):
+            tail = s[len(prefix):].strip()
+            tail = tail.strip("'\"`")
+            if tail and tail not in constraints:
+                constraints.append(tail)
+    data["constraints"] = constraints
+    Path(yaml_path).write_text(_yaml.safe_dump(data, allow_unicode=True, sort_keys=False))
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(prog="vision_check_runner")
     parser.add_argument("figures_dir", type=Path)
