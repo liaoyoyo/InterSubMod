@@ -1,0 +1,94 @@
+{
+  "checked_at": "2026-05-10T17:19:33.369165+00:00",
+  "figures_dir": "/big7_disk/liaoyoyo2001/InterSubMod/examples/phase1_demo/demo_topic/figures",
+  "summary": {
+    "n_pass": 3,
+    "n_partial": 1,
+    "n_fail": 0,
+    "n_needs_human": 0,
+    "overall": "mixed"
+  },
+  "entries": [
+    {
+      "image": "fig1_concept_loh.png",
+      "version": 1,
+      "type": "concept_diagram",
+      "backend": "ai",
+      "checks": {
+        "prompt_fidelity": false,
+        "readability": true,
+        "focal_clarity": true,
+        "design_taboos_avoided": true,
+        "print_friendly": true,
+        "cross_figure_consistency": true
+      },
+      "score": "5/6",
+      "verdict": "partial",
+      "suggestions": [
+        "Missing paired short reads (red and blue strands) — only chromosome ideogram rendered",
+        "Missing top label 'Tumor sample with LOH (chr8q)' and bottom label 'Phasing degrades inside the LOH band'",
+        "Missing arrow inside LOH region showing haplotype assignment becoming ambiguous",
+        "Suggestion: add 'Show two rows of short read pairs (red HP1 / blue HP2) above and below the chromosome, with reads in the orange LOH band merged into a single grey ambiguous block, annotated with an arrow and the word Ambiguous'"
+      ],
+      "checked_at": "2026-05-10T01:25:00Z"
+    },
+    {
+      "image": "fig2_flow_pipeline.png",
+      "version": 1,
+      "type": "flow_diagram",
+      "backend": "cairo",
+      "checks": {
+        "prompt_fidelity": true,
+        "readability": true,
+        "focal_clarity": true,
+        "design_taboos_avoided": true,
+        "print_friendly": true,
+        "cross_figure_consistency": true
+      },
+      "score": "6/6",
+      "verdict": "pass",
+      "suggestions": [
+        "Arrowheads are drawn in code but may be partially obscured by destination node box — consider offsetting edge endpoint to node boundary rather than center"
+      ],
+      "checked_at": "2026-05-10T01:20:00Z"
+    },
+    {
+      "image": "fig3_data_mockup.png",
+      "version": 1,
+      "type": "data_mockup",
+      "backend": "ai",
+      "checks": {
+        "prompt_fidelity": true,
+        "readability": true,
+        "focal_clarity": true,
+        "design_taboos_avoided": true,
+        "print_friendly": false,
+        "cross_figure_consistency": true
+      },
+      "score": "5/6",
+      "verdict": "pass",
+      "suggestions": [
+        "Add distinct marker shapes (e.g. circle vs triangle) or hatching to distinguish LOH vs non-LOH groups for colorblind / B&W print friendliness"
+      ],
+      "checked_at": "2026-05-10T01:25:00Z"
+    },
+    {
+      "image": "fig4_icon_status.png",
+      "version": 1,
+      "type": "icon",
+      "backend": "cairo",
+      "checks": {
+        "prompt_fidelity": true,
+        "readability": true,
+        "focal_clarity": true,
+        "design_taboos_avoided": true,
+        "print_friendly": true,
+        "cross_figure_consistency": true
+      },
+      "score": "6/6",
+      "verdict": "pass",
+      "suggestions": [],
+      "checked_at": "2026-05-10T01:20:00Z"
+    }
+  ]
+}
