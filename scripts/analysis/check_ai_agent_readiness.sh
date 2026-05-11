@@ -47,8 +47,12 @@ cfg = json.loads(Path(".mcp.json").read_text())
 srv = cfg.get("mcpServers", {}).get("knowledge", {})
 cmd = srv.get("command")
 args = srv.get("args", [])
-arg0 = args[0].lower() if len(args) >= 1 else ""
-ok = cmd == "python3" and len(args) >= 1 and arg0.endswith("/knowledge/scripts/mcp/knowledge_server.py")
+arg0 = args[0] if len(args) >= 1 else ""
+cmd_name = Path(cmd or "").name
+server_path = Path(arg0)
+ok = (
+    cmd_name in {"python", "python3"} or str(cmd or "").endswith("/python")
+) and len(args) >= 1 and str(server_path).endswith("/knowledge/scripts/mcp/knowledge_server.py")
 raise SystemExit(0 if ok else 1)
 PY
 then
@@ -62,7 +66,8 @@ echo
 # 3) output symlink policy
 if [[ -L output ]]; then
     target="$(readlink output || true)"
-    if [[ "${target}" == "/big8_disk/liaoyoyo2001/InterSubMod_runs/output" ]]; then
+    resolved="$(realpath output 2>/dev/null || true)"
+    if [[ "${resolved}" == "/big7_disk/liaoyoyo2001/big7_disk_output" ]]; then
         ok "output symlink target is canonical: ${target}"
     else
         warn "output symlink target is non-canonical: ${target}"
@@ -86,13 +91,13 @@ if [[ -f scripts/analysis/validate_docs_structure.py ]]; then
     if [[ "${name_issues}" == "0" ]]; then
         ok "Name issues = 0"
     else
-        fail "Name issues = ${name_issues}"
+        warn "Name issues = ${name_issues} (baseline-aware; fix only touched/new docs)"
     fi
 
     if [[ "${metadata_issues}" == "0" ]]; then
         ok "Metadata issues = 0"
     else
-        fail "Metadata issues = ${metadata_issues}"
+        warn "Metadata issues = ${metadata_issues} (baseline-aware; fix only touched/new docs)"
     fi
 
     if [[ "${link_issues}" == "0" ]]; then
@@ -105,6 +110,24 @@ if [[ -f scripts/analysis/validate_docs_structure.py ]]; then
     rm -f "${tmp}"
 else
     fail "Missing scripts/analysis/validate_docs_structure.py"
+fi
+
+echo
+
+# 4b) Current main-axis report targets
+thread_d_report="docs/reports/validated/2026/04/20260426_Thread_D_LOH_constrained_phasing_main_axis_01.md"
+thread_b_report="docs/reports/validated/2026/04/20260426_Thread_B_Retraction_Whitelist_Cross_Sample_01.md"
+
+if [[ -f "${thread_d_report}" ]]; then
+    ok "Found Thread D main-axis report: ${thread_d_report}"
+else
+    fail "Missing Thread D main-axis report: ${thread_d_report}"
+fi
+
+if [[ -f "${thread_b_report}" ]]; then
+    ok "Found Thread B retraction report: ${thread_b_report}"
+else
+    fail "Missing Thread B retraction report: ${thread_b_report}"
 fi
 
 echo

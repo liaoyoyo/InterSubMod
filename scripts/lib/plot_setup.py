@@ -31,6 +31,7 @@ DEFAULT_FONT_CHAIN = (
     "DejaVu Sans",
     "Noto Sans CJK TC",
     "Noto Sans CJK SC",
+    "Noto Sans CJK JP",  # unified Noto Sans CJK on Debian/Ubuntu often registers as JP family but contains all glyphs
     "Source Han Sans TW",
     "Source Han Sans CN",
     "WenQuanYi Zen Hei",
@@ -104,7 +105,12 @@ def setup_plot_style(
             "or via conda: `conda install -c conda-forge font-ttf-noto-sans-cjk-jp` (and -tc/-sc variants)."
         )
 
-    matplotlib.rcParams["font.family"] = ["sans-serif"]
+    # NOTE on matplotlib 3.6.2 fallback caveat: `font.family = ['sans-serif']` +
+    # `font.sans-serif = chain` can fail to traverse the full chain in some Agg
+    # configurations (silent glyph-box on missing CJK). Setting `font.family`
+    # directly to the resolved actual-family list bypasses this and triggers
+    # per-glyph fallback reliably.
+    matplotlib.rcParams["font.family"] = applied
     matplotlib.rcParams["font.sans-serif"] = applied
     matplotlib.rcParams["font.size"] = base_size
     matplotlib.rcParams["figure.dpi"] = dpi
