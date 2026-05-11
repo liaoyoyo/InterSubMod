@@ -1,0 +1,79 @@
+{
+  "skill": "weekly-report",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "整理本週週報給教授 — 涵蓋 self-phasing V5 audit、LOH cross-ref、HPFineNGroups 降級三條主軸",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/CURRENT_FOCUS.md",
+          "InterSubMod/docs/experiments/INDEX.md",
+          "InterSubMod/.claude/skills/weekly-report/references/LAYER_STRUCTURE.md",
+          "InterSubMod/.claude/skills/weekly-report/references/HANDOFF_TO_PPTX_BUILD.md"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '週報' / '整理本週')",
+        "W1 Raw Data 收集 (git log + Memory + KB + last week Layer 3-4)",
+        "C1 ★ pause for 主線類型 confirmation (進展/問題/求協助/探索, default mixed)",
+        "W3 [F]/[O]/[I]/[U] 4-layer tagging + W4 4-bucket scoring (PPT/講稿/備註/暫存)",
+        "W5 紅旗 check (過度宣稱/流水帳/教授視角缺) + W6 5-7 教授追問預測",
+        "C4 ★ pause + outputs master_draft.md to docs/reports/validated/YYYY/MM/<topic>/ + 4-choice handoff (A pptx-build / B 留檔 / C 終點 / D 加下週計畫)"
+      ],
+      "must_not": [
+        "Directly produce PPTX (must handoff to pptx-build via 4-choice)",
+        "Tag [O] or [I] as [F] (over-claim red flag)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "整理 SelfPhasing.cpp V5 修改的單一工程修改紀錄",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/src/core/SelfPhasing.cpp"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (DO NOT USE WHEN: 單一工程修改紀錄 → use structured-tech-report)",
+        "Either suggest /structured-tech-report, or that skill activates instead",
+        "Boundary clarified: weekly-report = multi-topic weekly cadence; structured-tech-report = single engineering change deep dive"
+      ],
+      "must_not": [
+        "Run W1-W7 for a single engineering change (scope mismatch)",
+        "Output master_draft.md for one topic"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_single_topic_week",
+      "category": "edge_case",
+      "query": "本週只有一個主題：self-phasing V5 audit。整理週報給教授",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/CURRENT_FOCUS.md",
+          "InterSubMod/docs/reports/validated/2026/05/20260505_self_phasing_V5_data_provenance_audit_01.md"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (still weekly cadence, single topic is valid)",
+        "C1 主線型 = 進展型 (single thread, no sub-thread)",
+        "Layer 2 has only 1 Thread A (no Thread B sub-thread split)",
+        "Master draft is shorter but still includes §0 Highlights / §16 下週 / §17 教授追問",
+        "Handoff still offers 4 choices; A (pptx-build) defaults to focused-template (single-thesis)"
+      ],
+      "must_not": [
+        "Pad the report with unrelated topics to fill 17 sections",
+        "Skip §17 教授追問 just because there's only one thread"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "C1 + C4 are fast-track-mandatory pauses even in 全自動 mode."
+  ]
+}

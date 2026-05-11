@@ -1,0 +1,80 @@
+{
+  "skill": "verification-loop",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "PR 前 verify 程式碼 — 我剛改了 SelfPhasing.cpp + ReadParser.cpp",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/src/core/SelfPhasing.cpp",
+          "InterSubMod/src/core/ReadParser.cpp",
+          "InterSubMod/build/",
+          "InterSubMod/tests/"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'PR 前 review' / 'verify')",
+        "Phase 1 Build: cd build && make -j$(nproc) 2>&1 | tail -20",
+        "Phase 2 Type/lint: clang-tidy on modified files",
+        "Phase 3 Test: ctest --output-on-failure",
+        "Phase 4 Security: grep for hardcoded secrets / debug print statements",
+        "Phase 5-6: git diff --stat review + final REPORT (PASS/FAIL grid + READY/NOT READY verdict)"
+      ],
+      "must_not": [
+        "Skip build phase even if user claims 'build already passed'",
+        "Allow PR-ready verdict when any unit test fails"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "幫我跑研究假說 benchmark — H-LOH-007 vs baseline pipeline",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/scripts/run_batch_vcf_analysis.sh",
+          "InterSubMod/output/canonical/"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (SKIP WHEN: 研究假說 benchmark → use /validate command)",
+        "Either suggest /validate, or that command runs instead",
+        "Boundary clarified: verification-loop = code syntax/build/test; /validate = research hypothesis benchmark"
+      ],
+      "must_not": [
+        "Run validate.sh from inside this skill",
+        "Mix code-level and hypothesis-level verification in one report"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_lint_fail_test_pass",
+      "category": "edge_case",
+      "query": "verify 完了 — clang-tidy 報 8 warning 但 unit test 全過，可以 PR 嗎",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/src/core/",
+          "InterSubMod/.clang-format"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates and runs full verification report",
+        "Final REPORT shows Lint: FAIL (8 warnings) but Tests: PASS",
+        "Verdict: NOT READY for PR — lint must be addressed first",
+        "Distinguishes severe (security / undefined behavior) → must fix; vs stylistic → may defer with explicit note",
+        "Recommends running clang-format -i + re-evaluating remaining clang-tidy warnings"
+      ],
+      "must_not": [
+        "Mark verdict READY when lint has unaddressed warnings",
+        "Auto-suppress warnings to make verdict pass"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "This skill is the final step of /cpp-change PDD 6-step protocol — must pass before C++ commit."
+  ]
+}

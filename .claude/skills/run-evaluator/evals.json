@@ -1,0 +1,85 @@
+{
+  "skill": "run-evaluator",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "cycle 20260504-1430-loh-kde 已完成 P4 generalize，要升 ⭐4 前先 run evaluator",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/state/cycles/20260504-1430-loh-kde/state.json",
+          "InterSubMod/state/cycles/20260504-1430-loh-kde/plan.json",
+          "InterSubMod/state/cycles/20260504-1430-loh-kde/precheck.json",
+          "InterSubMod/state/cycles/20260504-1430-loh-kde/pilot.json",
+          "InterSubMod/state/cycles/20260504-1430-loh-kde/generalize.json",
+          "InterSubMod/.claude/skills/run-evaluator/pitfalls_table.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'P5 evaluate' / 'tier 升級前')",
+        "Reads all 5 cycle artifacts + pitfalls_table.json",
+        "Computes 6 risk components + composite risk_base + per-component override",
+        "Sweeps 13 pitfalls (P-01..P-13) and writes pitfall_hits[]",
+        "Writes evaluation.json to state/cycles/{id}/ with verdict + tier_recommendation"
+      ],
+      "must_not": [
+        "Skip per-component override (must escalate when any component < 0.2 critical)",
+        "Skip pitfalls_table.json sweep (mandatory step 4)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "cycle 20260510-0900-asm 還在 P3 PILOT，幫我 run evaluator",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/state/cycles/20260510-0900-asm/state.json",
+          "InterSubMod/state/cycles/20260510-0900-asm/plan.json",
+          "InterSubMod/state/cycles/20260510-0900-asm/pilot.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill detects missing generalize.json → SKIP (artifact 不全)",
+        "Reports clearly: cycle phase is P3, evaluator requires P4 complete",
+        "Suggests completing P4 GENERALIZE first (via multi-sample-consistency)",
+        "Does NOT write a partial evaluation.json with null components"
+      ],
+      "must_not": [
+        "Force-run with components=null (would silently bias risk_base low)",
+        "Modify state.json phase field"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_pitfall_hit_within_threshold",
+      "category": "edge_case",
+      "query": "cycle 20260508-1100-hp-tag 跑 evaluator，已知 hypothesis 含 'pileup' 關鍵詞但實際資料源已換",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/state/cycles/20260508-1100-hp-tag/plan.json",
+          "InterSubMod/state/cycles/20260508-1100-hp-tag/pilot.json",
+          "InterSubMod/state/cycles/20260508-1100-hp-tag/generalize.json",
+          "InterSubMod/.claude/skills/run-evaluator/pitfalls_table.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates and runs full evaluator",
+        "Pitfall sweep hits P-04 (pileup symlink) on keyword match",
+        "Records hit in pitfall_hits[] with severity=warn (not block) since composite risk_base remains < 0.4",
+        "Final verdict still allows tier upgrade BUT flags warn in required_followups[]",
+        "Suggests user manually verify dataset source via /known-pitfalls before merge"
+      ],
+      "must_not": [
+        "Auto-block tier upgrade purely on keyword hit when risk threshold not crossed",
+        "Silently drop the pitfall hit just because verdict is approve_tier"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Path A: precedent_similarity component is null by design (Path B will fill via LlamaIndex)."
+  ]
+}

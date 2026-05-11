@@ -1,0 +1,79 @@
+{
+  "skill": "structured-tech-report",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "幫我整理 self-phasing V5 修改的 13 段技術報告，受眾是不熟此專案的工程同事",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/src/core/SelfPhasing.cpp",
+          "InterSubMod/docs/reports/validated/2026/05/20260505_self_phasing_V5_data_provenance_audit_01.md",
+          "InterSubMod/.claude/skills/structured-tech-report/references/13_section_template.md",
+          "InterSubMod/.claude/skills/structured-tech-report/references/checklist.md"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '13段報告' / 'self-phasing 報告')",
+        "Step 1: asks 4 positioning questions (受眾 / 類別 / 範圍 / 含 .cpp?)",
+        "Step 2: greps file inventory + writes HTML comment metadata header",
+        "Step 3: fills 13-section skeleton with §7.1 非工程版 + §7.2 工程版 (file:line + commit hash)",
+        "Step 4: runs 25-item checklist self-check, requires ≥22 ✅ to proceed",
+        "Step 5: lands report at docs/reports/validated/YYYY/MM/ + appends INDEX line"
+      ],
+      "must_not": [
+        "Skip §7 bilingual split (engineering vs non-engineering versions are mandatory)",
+        "Land report path without InterSubMod/ prefix (path rule violation)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "整理本週多主題進度給教授看",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/reports/validated/2026/05/"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (SKIP WHEN: 多主題週進度 → use weekly-report)",
+        "Either suggest /weekly-report, or that skill activates instead",
+        "Boundary clarified: structured-tech-report = single engineering change deep dive"
+      ],
+      "must_not": [
+        "Generate a 13-section report covering >1 unrelated topic",
+        "Land output in docs/experiments/in_progress/ when topic is multi-thread weekly"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_negative_verdict",
+      "category": "edge_case",
+      "query": "整理 ReadParser germline-hp-only flag 嘗試的 13 段報告（已驗為 NEGATIVE）",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/src/core/ReadParser.cpp",
+          "InterSubMod/.claude/skills/structured-tech-report/references/13_section_template.md"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (still a single engineering change with deep narrative)",
+        "Fills all 13 sections including §13 結論 with explicit NO-GO / NEGATIVE verdict",
+        "§11 Risk & Limitations enumerates failure modes that led to NEGATIVE",
+        "§9 Verification documents the L1-L4 failures with specific AUC numbers",
+        "Lands at docs/experiments/in_progress/ (not validated/) since methodology pivot"
+      ],
+      "must_not": [
+        "Omit sections just because the verdict is negative (must keep all 13, mark N/A with reason if truly inapplicable)",
+        "Hide the NEGATIVE verdict in TL;DR (must be visible at §0 + §13)"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "13-section framework is a hard default — do not negotiate length with user."
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "skill": "review-evidence",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "之前測過 LOH × AF 相關假說嗎？列出過去結果",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/autoresearch/evidence_ledger.jsonl",
+          "InterSubMod/research/autoresearch/hypothesis_queue.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '查閱證據' / '過去測試結果')",
+        "Reads evidence_ledger.jsonl + hypothesis_queue.json",
+        "Outputs 5-section report: total stats / recent N / rejected directions / queue / top delta",
+        "Filters or highlights LOH/AF related hypothesis IDs",
+        "Suggests next action (pivot / inject-hypothesis / continue)"
+      ],
+      "must_not": [
+        "Modify evidence_ledger.jsonl or hypothesis_queue.json (read-only skill)",
+        "Trigger system-level audit (that is provenance-tier-audit's job)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "幫我做全域跨 cycle 一致性審計，檢查 tier 過度宣稱",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/autoresearch/evidence_ledger.jsonl",
+          "InterSubMod/state/cycles/",
+          "InterSubMod/docs/experiments/INDEX.md"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (SKIP WHEN: 全域系統審計 → use provenance-tier-audit)",
+        "Either suggest /provenance-tier-audit, or that skill activates instead",
+        "If user insists, point to scope difference: review-evidence is single-query, audit is system-wide"
+      ],
+      "must_not": [
+        "Run a 5-section history dump pretending to be audit (scope mismatch)",
+        "Modify any state/cycles/ artifact"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_never_tested",
+      "category": "edge_case",
+      "query": "查一下『normal-BAM 跨 patient phasing』這假說過去測過沒？",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/autoresearch/evidence_ledger.jsonl",
+          "InterSubMod/research/autoresearch/hypothesis_queue.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (still a history-query intent)",
+        "Searches ledger + queue with substring/keyword match",
+        "Returns empty result with clear '無紀錄' statement",
+        "Reports queue status (pending/active for related keywords)",
+        "Suggests /inject-hypothesis to register if user wants to start it"
+      ],
+      "must_not": [
+        "Fabricate prior test results when none exist",
+        "Auto-inject the hypothesis without user confirmation"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "DECLARE 7-letter cognitive forcing only required when used for pivot decision (per SKILL.md)."
+  ]
+}
