@@ -70,13 +70,13 @@ main.slide-page { max-width: 1280px; margin: 0 auto; padding: 24px; }
   overflow: hidden; color: #1F2937;
 }
 .slide-canvas h2.slide-title {
-  font-size: 30px; color: #1E3A8A; margin: 0 0 2px;
-  border-bottom: 2px solid #1E3A8A; padding-bottom: 4px;
+  font-size: 30px; color: #1E3A8A; margin: 0;
+  border-bottom: 2px solid #1E3A8A; padding-bottom: 2px;
 }
 .slide-canvas h2.slide-title.critical { color: #DC2626; border-bottom-color: #DC2626; }
 .slide-canvas .en-subtitle {
-  font-size: 15px; color: #6B7280; font-style: italic;
-  margin: 2px 0 8px; padding-left: 1em;
+  font-size: 14px; color: #6B7280; font-style: italic;
+  margin: 0 0 6px; padding: 0 0 0 1em;
 }
 .slide-canvas .footer-glossary {
   position: absolute; bottom: 10px; left: 28px; right: 28px;
@@ -267,20 +267,22 @@ details.collapsible summary:hover { color: #1D4ED8; }
     <h1 class="slide-title ">SP1 個案 — baseline 113:0 → V5 翻轉對齊 paired</h1>
     <p class="en-subtitle">SP1 chr19:17,565,944 — baseline 113:0 → V5 flips to HP2</p>
     
-    <div class="grid-3col" style="margin-bottom:10px;">
-      <div class="stat-box"><div class="number orange">113 : 0</div><div class="label">baseline HP1 : HP2 (reads)</div></div>
-      <div class="stat-box"><div class="number">≈0~5 : ~108</div><div class="label">V5 HP1 : HP2 (reads, qual.)¹</div></div>
-      <div class="stat-box"><div class="number green">HP2 ✅</div><div class="label">paired direction</div></div>
+    <div class="grid-2col" style="grid-template-columns: 3fr 2fr;gap:14px;margin:6px 0;">
+      <div class="igv-zoom-wrap">
+        <span class="igv-zoom-hint">💡 hover / 點擊全尺寸</span>
+        <a href="../figures/igv/D_SP1_chr19_17565944.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/D_SP1_chr19_17565944.png" alt="IGV SP1" style="max-height:340px;">
+        </a>
+        <p class="fig-caption" style="font-size:12px;margin:2px 0;">chr19:17,565,944 · 上→下 baseline / V6 / paired_T / paired_N²</p>
+      </div>
+      <div>
+        <div class="stat-box" style="margin-bottom:6px;padding:8px;"><div class="number orange" style="font-size:24px;">113 : 0</div><div class="label">baseline HP1:HP2 (reads)</div></div>
+        <div class="stat-box" style="margin-bottom:6px;padding:8px;"><div class="number" style="font-size:22px;">V6 翻 HP2</div><div class="label">V6 HP1:HP2 (待量化)¹</div></div>
+        <div class="stat-box" style="padding:8px;"><div class="number green" style="font-size:24px;">HP2 ✅</div><div class="label">paired direction · 對齊</div></div>
+      </div>
     </div>
-    <div class="igv-zoom-wrap">
-      <span class="igv-zoom-hint">💡 hover 放大 / 點擊開全尺寸</span>
-      <a href="../figures/igv/D_SP1_chr19_17565944.png" target="_blank">
-        <img class="igv-thumb" src="../figures/igv/D_SP1_chr19_17565944.png" alt="IGV SP1" style="max-height:380px;">
-      </a>
-    </div>
-    <p class="fig-caption" style="font-size:13px;">chr19:17,565,944 · 6-BAM 並列：上→下 baseline / V2b / V3F / V5 / paired_T / paired_N</p>
-    <div class="igv-focus-callout"><span class="label">👁 看圖重點：</span>baseline (最上) 紅+綠 reads 全集中左欄 (HP1 + HP1-1)；V5/V3F (中段) 紅綠搬到右欄 (HP2 + HP2-1)；paired_T (倒數第二) 同樣集中右欄 — V5 修正方向與 paired 一致</div>
-    <p style="font-size:12px;color:#6B7280;margin:4px 0 0;">¹ V5 數值為 IGV 視覺估算 range，精確 count 待 vote_dump.tsv.gz 量化（同 §2.2 註 1）</p>
+    <div class="igv-focus-callout" style="font-size:14px;padding:6px 12px;margin-top:4px;"><span class="label">👁 看圖重點：</span>baseline (最上) 紅+綠 reads 集中左欄 = HP1；V6 / paired_T (下) 紅+綠搬右欄 = HP2 → 三方向一致</div>
+    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 精確 count 待 vote_dump 量化  ²V6 取代 V2b/V3F/V5 簡化並列</p>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide 04a">

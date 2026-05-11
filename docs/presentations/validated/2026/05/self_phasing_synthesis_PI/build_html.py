@@ -149,20 +149,22 @@ add(id="04a_sp1", num="04a", section="S1 觀察起點", rg2="1", ngrep="3",
     en="SP1 chr19:17,565,944 — baseline 113:0 → V5 flips to HP2",
     timing="60 sec / 中 ~250 字",
     canvas_html="""
-    <div class="grid-3col" style="margin-bottom:10px;">
-      <div class="stat-box"><div class="number orange">113 : 0</div><div class="label">baseline HP1 : HP2 (reads)</div></div>
-      <div class="stat-box"><div class="number">≈0~5 : ~108</div><div class="label">V5 HP1 : HP2 (reads, qual.)¹</div></div>
-      <div class="stat-box"><div class="number green">HP2 ✅</div><div class="label">paired direction</div></div>
+    <div class="grid-2col" style="grid-template-columns: 3fr 2fr;gap:14px;margin:6px 0;">
+      <div class="igv-zoom-wrap">
+        <span class="igv-zoom-hint">💡 hover / 點擊全尺寸</span>
+        <a href="../figures/igv/D_SP1_chr19_17565944.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/D_SP1_chr19_17565944.png" alt="IGV SP1" style="max-height:340px;">
+        </a>
+        <p class="fig-caption" style="font-size:12px;margin:2px 0;">chr19:17,565,944 · 上→下 baseline / V6 / paired_T / paired_N²</p>
+      </div>
+      <div>
+        <div class="stat-box" style="margin-bottom:6px;padding:8px;"><div class="number orange" style="font-size:24px;">113 : 0</div><div class="label">baseline HP1:HP2 (reads)</div></div>
+        <div class="stat-box" style="margin-bottom:6px;padding:8px;"><div class="number" style="font-size:22px;">V6 翻 HP2</div><div class="label">V6 HP1:HP2 (待量化)¹</div></div>
+        <div class="stat-box" style="padding:8px;"><div class="number green" style="font-size:24px;">HP2 ✅</div><div class="label">paired direction · 對齊</div></div>
+      </div>
     </div>
-    <div class="igv-zoom-wrap">
-      <span class="igv-zoom-hint">💡 hover 放大 / 點擊開全尺寸</span>
-      <a href="../figures/igv/D_SP1_chr19_17565944.png" target="_blank">
-        <img class="igv-thumb" src="../figures/igv/D_SP1_chr19_17565944.png" alt="IGV SP1" style="max-height:380px;">
-      </a>
-    </div>
-    <p class="fig-caption" style="font-size:13px;">chr19:17,565,944 · 6-BAM 並列：上→下 baseline / V2b / V3F / V5 / paired_T / paired_N</p>
-    <div class="igv-focus-callout"><span class="label">👁 看圖重點：</span>baseline (最上) 紅+綠 reads 全集中左欄 (HP1 + HP1-1)；V5/V3F (中段) 紅綠搬到右欄 (HP2 + HP2-1)；paired_T (倒數第二) 同樣集中右欄 — V5 修正方向與 paired 一致</div>
-    <p style="font-size:12px;color:#6B7280;margin:4px 0 0;">¹ V5 數值為 IGV 視覺估算 range，精確 count 待 vote_dump.tsv.gz 量化（同 §2.2 註 1）</p>""",
+    <div class="igv-focus-callout" style="font-size:14px;padding:6px 12px;margin-top:4px;"><span class="label">👁 看圖重點：</span>baseline (最上) 紅+綠 reads 集中左欄 = HP1；V6 / paired_T (下) 紅+綠搬右欄 = HP2 → 三方向一致</div>
+    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 精確 count 待 vote_dump 量化  ²V6 取代 V2b/V3F/V5 簡化並列</p>""",
     speaker="全基因組 17.3:1 是平均值; IGV 6-BAM 並列篩到 chr19 三個近 100% 失衡位點。SP1 chr19:17,565,944: baseline 113 reads 全 HP1 (HP2=0); V5 修正後翻到約 0~5:108 reads, 對齊 paired tumor 的 HP2 方向。排除噪音/caller/alignment 三個 alternative explanation: baseline 與 paired 方向完全相反 (翻轉而非衰減), V5 修正後與 paired ground truth 重合 → read assignment 強制集中的鐵證。",
     tier3="6-BAM 並列順序細節 / V2b 中間階段意義 / HP1-1 sub-tag 與 HP1 合併原則")
 
@@ -171,39 +173,39 @@ add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
     en="SP2 + SP3 follow SP1 pattern, 3/3 aligned with paired",
     timing="60 sec / 中 ~260 字",
     canvas_html="""
-    <div class="grid-2col">
+    <div class="grid-2col" style="gap:14px;">
       <div>
-        <table class="metric-table">
+        <table class="metric-table" style="font-size:14px;">
           <thead><tr><th colspan="2">SP2 · chr19:12,452,332</th></tr>
-                 <tr><th>baseline HP1:HP2</th><th>V5 HP1:HP2 (qual.)¹</th></tr></thead>
-          <tbody><tr class="row-red"><td class="num">109 : 1</td><td class="num">≈1~3 : ~107</td></tr></tbody>
+                 <tr><th>baseline HP1:HP2</th><th>V6 (待量化)¹</th></tr></thead>
+          <tbody><tr class="row-red"><td class="num">109 : 1</td><td class="num">翻 HP2</td></tr></tbody>
         </table>
-        <div class="igv-zoom-wrap" style="margin-top:4px;">
-          <span class="igv-zoom-hint">💡 hover / 點擊</span>
+        <div class="igv-zoom-wrap" style="margin-top:2px;">
+          <span class="igv-zoom-hint">💡 hover/點擊</span>
           <a href="../figures/igv/D_SP2_chr19_12452332.png" target="_blank">
-            <img class="igv-thumb" src="../figures/igv/D_SP2_chr19_12452332.png" alt="IGV SP2" style="max-height:260px;">
+            <img class="igv-thumb" src="../figures/igv/D_SP2_chr19_12452332.png" alt="IGV SP2" style="max-height:240px;">
           </a>
         </div>
       </div>
       <div>
-        <table class="metric-table">
+        <table class="metric-table" style="font-size:14px;">
           <thead><tr><th colspan="2">SP3 · chr19:12,467,180</th></tr>
-                 <tr><th>baseline HP1:HP2</th><th>V5 HP1:HP2 (qual.)¹</th></tr></thead>
-          <tbody><tr class="row-red"><td class="num">108 : 0</td><td class="num">≈0~2 : ~106</td></tr></tbody>
+                 <tr><th>baseline HP1:HP2</th><th>V6 (待量化)¹</th></tr></thead>
+          <tbody><tr class="row-red"><td class="num">108 : 0</td><td class="num">翻 HP2</td></tr></tbody>
         </table>
-        <div class="igv-zoom-wrap" style="margin-top:4px;">
-          <span class="igv-zoom-hint">💡 hover / 點擊</span>
+        <div class="igv-zoom-wrap" style="margin-top:2px;">
+          <span class="igv-zoom-hint">💡 hover/點擊</span>
           <a href="../figures/igv/D_SP3_chr19_12467180.png" target="_blank">
-            <img class="igv-thumb" src="../figures/igv/D_SP3_chr19_12467180.png" alt="IGV SP3" style="max-height:260px;">
+            <img class="igv-thumb" src="../figures/igv/D_SP3_chr19_12467180.png" alt="IGV SP3" style="max-height:240px;">
           </a>
         </div>
       </div>
     </div>
-    <div class="igv-focus-callout"><span class="label">👁 看圖重點：</span>兩圖同 SP1 模式 — baseline (最上) 紅+綠 reads 集中左欄；V5 (中) 紅+綠翻到右欄；paired_T (倒數第二) 同樣右欄 → 3/3 對齊 paired 方向。HP1 group = (HP1 + HP1-1) 紅綠合計；HP2 group = (HP2 + HP2-1) 藍橙合計</div>
-    <div class="conclusion-arrow green">→ 三 SP 都在 chr19:12-17M 區段 → 對齊 slide 09 chr19 752 victims hotspot</div>
-    <p style="font-size:12px;color:#6B7280;margin:4px 0 0;">¹ V5 數值為 IGV 視覺估算 range（同 §2.2 註 1）</p>""",
-    speaker="SP2 chr19:12,452,332 baseline 109:1, V5 翻到約 1~3:107; SP3 chr19:12,467,180 baseline 108:0, V5 翻到約 0~2:106 — 與 SP1 同模式 3/3。三 SP 都在 chr19:12-17M 區段, 對齊後續 slide 09 chr19 752 victims hotspot — read-level 個案與全基因組分佈屬同機制不同層級。 [口述過渡] 接下來四個章節將分別回答: ① 為何全集中一邊? (S2 機制) ② read 層級? (S3 量化) ③ 三版各修? (S4 修補) ④ 是否都修對? (S5 驗證)。",
-    tier3="paired_T 與 paired_N 對照細節 / 三 SP 完整座標表 / HP sub-tag 分組原則")
+    <div class="igv-focus-callout" style="font-size:13px;padding:5px 10px;margin-top:4px;"><span class="label">👁 看圖重點：</span>兩圖同 SP1 模式 — baseline 紅+綠 reads 集中左欄；V6/paired_T 紅+綠搬右欄 → 3/3 對齊。HP1=(HP1+HP1-1) 紅綠；HP2=(HP2+HP2-1) 藍橙</div>
+    <div class="conclusion-arrow green" style="font-size:15px;padding:8px 14px;">→ 三 SP 都在 chr19:12-17M → 對齊 slide 09 chr19 752 victims hotspot</div>
+    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 精確 count 待 vote_dump 量化；圖檔待 V6 重擷取後替換</p>""",
+    speaker="SP2 chr19:12,452,332 baseline 109:1; SP3 chr19:12,467,180 baseline 108:0; 與 SP1 同模式 3/3 — V6 修正後三位點都翻 HP2 對齊 paired 方向。三 SP 都在 chr19:12-17M 區段, 對齊後續 slide 09 chr19 752 victims hotspot — read-level 個案與全基因組分佈屬同機制不同層級。 [口述過渡] 接下來四個章節將分別回答: ① 為何全集中一邊? (S2 機制) ② read 層級? (S3 量化) ③ 三版各修? (S4 修補) ④ 是否都修對? (S5 驗證)。",
+    tier3="paired_T 與 paired_N 對照細節 / 三 SP 完整座標表 / V6 vs V5 差異 / HP sub-tag 分組原則")
 
 # ─── S2 機制 ──────────────────────────────────────────────────────────────
 add(id="05_player_referee", num="05", section="S2 機制", rg2="4 (核心 forced)", ngrep="3 + 1 commit",
