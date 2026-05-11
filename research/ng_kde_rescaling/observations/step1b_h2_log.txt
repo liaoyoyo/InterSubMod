@@ -1,0 +1,53 @@
+[step1b] loading merged_7samples_paired_full_plus_hcc1395_to.tsv.gz
+[step1b] paired_full n=328,965
+[step1b] loading LOH.bed for 7 samples
+  HCC1395: 1094 LOH segments (median size 739,167 bp)
+  HCC1395_DORADO: 1208 LOH segments (median size 435,463 bp)
+  COLO829: 191 LOH segments (median size 455,744 bp)
+  H1437: 349 LOH segments (median size 812,050 bp)
+  H2009: 950 LOH segments (median size 472,155 bp)
+  HCC1937: 4531 LOH segments (median size 143,851 bp)
+  HCC1954: 384 LOH segments (median size 147,146 bp)
+[step1b] annotating loh_bed_hit (vectorized)...
+  coverage: 27.3% regions hit LOH.bed
+[step1b] per-sample LOH.bed hit rate:
+  HCC1395: LOH.bed=44.6%  Potential_LOH=47.5%  n=30,381
+  HCC1395_DORADO: LOH.bed=45.3%  Potential_LOH=44.8%  n=30,129
+  HCC1937: LOH.bed=54.9%  Potential_LOH=56.0%  n=12,588
+  HCC1954: LOH.bed=8.3%  Potential_LOH=10.9%  n=17,938
+  H2009: LOH.bed=25.0%  Potential_LOH=28.6%  n=132,995
+  H1437: LOH.bed=19.3%  Potential_LOH=20.9%  n=67,476
+  COLO829: LOH.bed=21.6%  Potential_LOH=20.6%  n=37,458
+
+[step1b] 20260414 EXACT replication (LOH.bed + TP only + CN1<0.75):
+  subset n=10,215
+
+  sample | ΔNG | Inter mean | Ext mean | n_i/n_e | MW p (Inter>Ext) | Cohen_h_NG2
+  -----------------------------------------------------------------------------------------------
+  HCC1395        -0.534 | 1.082 | 1.616 |   595/  547 | 1.00e+00 | -1.210 [NEG]
+  HCC1395_DORADO -0.454 | 0.973 | 1.427 |   484/  335 | 1.00e+00 | -1.138 [NEG]
+  HCC1937        -0.629 | 1.086 | 1.715 |   327/  648 | 1.00e+00 | -1.385 [NEG]
+  HCC1954        +0.311 | 2.000 | 1.689 |    13/  286 | 1.22e-02 | +1.199 [POS]
+  H2009          -0.060 | 1.166 | 1.227 |   847/ 1353 | 1.00e+00 | -0.158 [NEG]
+  H1437          -0.259 | 1.022 | 1.281 |  1126/ 1321 | 1.00e+00 | -0.795 [NEG]
+  COLO829        -0.118 | 0.155 | 0.272 |   821/  995 | 1.00e+00 | -0.149 [NEG]
+
+[step1b] Potential_LOH + TP only + CN1<0.75 (isolate TP filter effect):
+  subset n=10,385
+
+[step1b] LOH.bed vs Potential_LOH Jaccard per sample (paired_full, all rows):
+  sample | LOH.bed only | Potential only | Both | Jaccard
+  HCC1395        |    581 |   1445 |  12973 | 0.865
+  HCC1395_DORADO |   1880 |   1713 |  11773 | 0.766
+  HCC1937        |    253 |    385 |   6662 | 0.913
+  HCC1954        |    101 |    570 |   1379 | 0.673
+  H2009          |   1245 |   6074 |  31983 | 0.814
+  H1437          |    231 |   1292 |  12810 | 0.894
+  COLO829        |   1812 |   1424 |   6283 | 0.660
+
+[step1b] wrote ng_h2_verification_lohbed_vs_potential.tsv (14 rows)
+
+[step1b] VERDICT (LOH.bed + TP-only, new KDE):
+  ΔNG > +0.1 (POSITIVE, matches 20260414 direction): 1/7
+  ΔNG < -0.1 (NEGATIVE, reversal): 6/7
+  → 20260414 POSITIVE direction REVERSED under new KDE (CONFIRMED)

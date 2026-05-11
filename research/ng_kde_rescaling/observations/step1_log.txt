@@ -1,0 +1,65 @@
+[step1] loaded master n=369080
+[step1] paired_full n=328965, to_pileup sidebar n=40115
+[step1] wrote cn_tier_coverage_matrix (209 rows)
+[step1] wrote ng_dist_stratified (1822) and ng_tprate_stratified (1296)
+[step1] wrote af_bin10_ng_crosstab (560)
+[step1] wrote 20260414 replication (21)
+[step1] wrote LOH inner vs outer extension (162)
+
+[step1] 20260414 REPLICATION: ΔNG mean (Intermediate AF vs Extreme AF) within CN1 LOH:
+  === A_Legacy (CN1 = lowest bin) ===
+    HCC1395: ΔNG=-0.561 (Inter=1.089 vs Extreme=1.650), h_NG2=-1.268, n_i=594/n_e=574, p=1.00e+00
+    HCC1395_DORADO: ΔNG=-0.571 (Inter=1.079 vs Extreme=1.649), h_NG2=-1.318, n_i=458/n_e=291, p=1.00e+00
+    HCC1937: ΔNG=-0.635 (Inter=1.064 vs Extreme=1.699), h_NG2=-1.467, n_i=358/n_e=674, p=1.00e+00
+    HCC1954: ΔNG=+0.247 (Inter=1.867 vs Extreme=1.620), h_NG2=+0.768, n_i=15/n_e=329, p=2.08e-02
+    H2009: ΔNG=-0.073 (Inter=1.171 vs Extreme=1.244), h_NG2=-0.173, n_i=1515/n_e=1887, p=1.00e+00
+    H1437: ΔNG=-0.267 (Inter=1.023 vs Extreme=1.289), h_NG2=-0.824, n_i=1186/n_e=1417, p=1.00e+00
+    COLO829: ΔNG=-0.095 (Inter=1.006 vs Extreme=1.101), h_NG2=-0.448, n_i=170/n_e=356, p=1.00e+00
+  === B_ClinicalStrict (CN1 = lowest bin) ===
+    HCC1395: SKIP (n_inter=7, n_extreme=2)
+    HCC1395_DORADO: SKIP (n_inter=2, n_extreme=0)
+    HCC1937: ΔNG=-0.377 (Inter=1.044 vs Extreme=1.421), h_NG2=-0.989, n_i=68/n_e=76, p=1.00e+00
+    HCC1954: SKIP (n_inter=4, n_extreme=103)
+    H2009: ΔNG=+0.045 (Inter=1.083 vs Extreme=1.038), h_NG2=+0.191, n_i=24/n_e=52, p=2.13e-01
+    H1437: SKIP (n_inter=6, n_extreme=2)
+    COLO829: ΔNG=-0.296 (Inter=1.000 vs Extreme=1.296), h_NG2=-1.151, n_i=15/n_e=27, p=9.90e-01
+  === F_SEQC2_grounded (CN1 = lowest bin) ===
+    HCC1395: ΔNG=-0.420 (Inter=1.052 vs Extreme=1.472), h_NG2=-1.079, n_i=155/n_e=89, p=1.00e+00
+    HCC1395_DORADO: ΔNG=-0.493 (Inter=1.038 vs Extreme=1.531), h_NG2=-1.193, n_i=105/n_e=32, p=1.00e+00
+    HCC1937: ΔNG=-0.548 (Inter=1.054 vs Extreme=1.602), h_NG2=-1.308, n_i=223/n_e=289, p=1.00e+00
+    HCC1954: ΔNG=+0.432 (Inter=2.000 vs Extreme=1.568), h_NG2=+1.416, n_i=10/n_e=227, p=4.02e-03
+    H2009: ΔNG=+0.002 (Inter=1.156 vs Extreme=1.154), h_NG2=+0.000, n_i=583/n_e=734, p=4.92e-01
+    H1437: ΔNG=-0.263 (Inter=1.005 vs Extreme=1.268), h_NG2=-0.942, n_i=212/n_e=269, p=1.00e+00
+    COLO829: ΔNG=-0.157 (Inter=0.976 vs Extreme=1.133), h_NG2=-0.780, n_i=41/n_e=83, p=9.94e-01
+
+[step1] EXTENSION: LOH Inner vs Outer ΔNG per sample × tier × AF class (summary):
+  === A_Legacy ===
+af_class             Extreme  Intermediate  Near-half
+sample         tier                                  
+COLO829        T0      0.475         0.924        NaN
+               T1     -1.141        -1.050        NaN
+               T2     -1.017        -1.213        NaN
+H1437          T0     -0.381        -0.668        NaN
+               T1     -0.069        -1.031     -0.580
+               T2     -0.898        -0.994        NaN
+               T3     -1.075           NaN        NaN
+H2009          T0     -1.180        -0.836     -0.479
+               T1     -1.073        -1.271     -0.854
+               T2     -1.334        -1.476     -1.826
+               T3     -0.919           NaN        NaN
+HCC1395        T0     -0.323        -0.258        NaN
+               T1     -0.749        -0.949        NaN
+               T2     -0.810        -0.981        NaN
+               T3     -0.505           NaN        NaN
+HCC1395_DORADO T0      0.733         0.810        NaN
+               T1     -0.202        -0.158      0.832
+               T2     -0.517        -0.624        NaN
+               T3     -0.505           NaN        NaN
+HCC1937        T0     -0.700           NaN        NaN
+               T1     -0.714        -1.080        NaN
+               T2     -0.888        -1.191        NaN
+               T3     -1.040           NaN        NaN
+HCC1954        T0     -1.063           NaN        NaN
+               T1     -0.990           NaN        NaN
+               T2     -0.996           NaN        NaN
+               T3     -1.064           NaN        NaN
