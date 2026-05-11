@@ -119,6 +119,21 @@ screenshot_all.py 跑 wireframe + 結構驗證。
 
 詳見 `templates/{improvement_report,comparison_report,executive_summary,data_showcase,concept_walkthrough,academic_defense}.md`。觸發 keyword 對應 SKILL.md 表。
 
+### §11.1 業界框架對應（2026-05-08 補強）
+
+| 我們的模板 | narrative skeleton | 業界框架對應 |
+|------------|-------------------|--------------|
+| improvement_report | Before → Problem → Cause → Solution → Verify → Impact | **Toyota A3 Report** + **McKinsey SCQA** |
+| comparison_report | Setup → A → B → Side-by-side → Verdict | **think-cell vs-table** + **SCQA** |
+| executive_summary | TL;DR → Top 3 → Risks → Asks | **Minto Pyramid Principle**（直接對應）|
+| data_showcase | Hypothesis → Data → Stats → Caveats → Implications | **IMRAD**（學術論文標準）|
+| concept_walkthrough | Why → Define → Mechanism → Examples → Boundary | **iBiology guide** + **Cognitive Load Theory** |
+| academic_defense | Background → Question → Method → Result → Discussion → Future | **IMRAD + Reveal.js academic theme** |
+
+詳細對應表與 reference 在各 templates/*.md「業界框架對應」段落。
+
+
+
 ## §12 Style Library 架構
 
 `style_library/`（已落地 30 檔）：
@@ -426,3 +441,94 @@ def pre_build():
 - **personal_style_log.md** — 細粒度可檢查規則（具體怎麼做）
 
 詳見 `prompts/feedback_classification.md`（互動流程）+ `style_library/personal_style_log.md`（紀錄格式）。
+
+---
+
+## §25 業界框架對照與借鑑（2026-05-08 Stage 1 補強）
+
+> 把我們的 6 模板與業界 PPT/敘事框架明示對應，避免「自家方法論看似獨特但其實有更廣為接受的標準」的孤立感。
+
+### §25.1 我們的 6 模板 ↔ 業界框架（總對照表）
+
+| 我們 | narrative skeleton | 業界對應 | 主要 reference |
+|---|---|---|---|
+| improvement_report | Before→Problem→Cause→Solution→Verify→Impact | Toyota A3 + McKinsey SCQA | A3 lean.org / Analyst Academy SCQA |
+| comparison_report | Setup→A→B→Side-by-side→Verdict | think-cell vs-table + SCQA | think-cell content-hub |
+| executive_summary | TL;DR→Top 3→Risks→Asks | **Minto Pyramid Principle**（直接對應）| Winning Presentations Pyramid |
+| data_showcase | Hypothesis→Data→Stats→Caveats→Implications | IMRAD（學術論文標準）| Wikipedia IMRAD / Quarto |
+| concept_walkthrough | Why→Define→Mechanism→Examples→Boundary | iBiology guide + Cognitive Load Theory | iBiology 影片教學 |
+| academic_defense | Background→Question→Method→Result→Discussion→Future | IMRAD + Reveal.js academic theme | Penn State AE / xkiwilabs |
+
+### §25.2 4 個業界框架核心概念（PI/PI 報告層級可引用）
+
+**McKinsey SCQA Framework**（Barbara Minto, 1960s）
+- Situation：受眾已知的 baseline 事實
+- Complication：觸發改動的具體 issue
+- Question：隱含的「為什麼/怎麼辦」問題
+- Answer：具體解法 + 證據 + 下一步
+
+**Minto Pyramid Principle**（同源 Minto）
+- 答案先行（top of pyramid）
+- 中層 3 supporting points（MECE）
+- 底層 evidence + data
+- 與 SCQA 互補：SCQA = framing，Pyramid = structuring answer
+
+**Assertion-Evidence**（Penn State Alley 2013, Garner 等）
+- 標題 = 完整 assertion 句（≤ 30 字）
+- Body = 1 主視覺支撐 assertion（不用 bullet list）
+- 已被工程教育研究驗證降低 cognitive load
+
+**PLOS Ten Simple Rules**（Naegle 2021, PMC8638955）
+- 1 idea/slide / 1 min/slide / heading = thesis / ≤ 6 elements / distracted takeaway / iterative practice
+
+我們的 6 模板 + Tier 1/2/3 + §20 主軸聚焦已涵蓋上述核心。
+
+### §25.3 工具路線對照（為何不採用 Quarto/Slidev/Claude Design）
+
+| 工具 | 業界用途 | 我們不採用主因 |
+|------|---------|------------|
+| Reveal.js + Quarto | Markdown source-of-truth → HTML/PPTX/PDF | 主要受眾 PI 用 PPTX；HTML 為 nice-to-have，Stage 3 才考慮 |
+| Slidev | 程式設計師導向，Markdown + Vue.js | 學習曲線高，研究員不必上 Vue.js |
+| Marp | Markdown + 多 theme | 簡單但 layout 控制弱於 python-pptx |
+| Claude Design | 對話式 + design system + 多輸出 | SaaS 訂閱依賴；evidence verification 弱於我們現有 Wave 1+2 |
+| think-cell / Beautiful.ai | 商業 layout 工具 | 與 open-source git 工作流不合 |
+
+我們的策略：
+- **核心** = python-pptx + ppt_toolkit + Wave 1+2 multi-agent review（**evidence-first**）
+- **設計探索層**（未來）= Claude Design 開放後做 export bundle（Stage 4 預備）
+
+### §25.4 借鑑點（已採納、可採納、暫不採納）
+
+**已採納**：
+- Assertion-Evidence 標題格式（§5）
+- PLOS Ten Simple Rules（§5/§20）
+- Pyramid Principle 隱含結構（executive_summary）
+- IMRAD 對應（data_showcase / academic_defense）
+- A3 Report 雙欄結構（improvement_report Before-after split）
+
+**可採納**（規劃中）：
+- Markdown source-of-truth（Stage 2 deck.yaml + Markdown body 混用）
+- Claude Design export bundle（Stage 4）
+
+**暫不採納**：
+- Quarto / Slidev pivot — Stage 3 暫不排
+- think-cell / Beautiful.ai SaaS — 本地工作流偏好
+- Claude Design 直接整合 — 等開放 + 訂閱再評估
+
+### §25.5 References
+
+學術研究：
+- [PLOS Ten Simple Rules — Naegle 2021](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8638955/)
+- [Penn State Assertion-Evidence — Alley](https://writing.engr.psu.edu/ae_comprehension.pdf)
+- [Alzayed 2025 — AE vs Traditional cognitive load](https://www.sciencedirect.com/science/article/pii/S2307187725001701)
+
+業界框架：
+- [Winning Presentations — Pyramid Principle](https://winningpresentations.com/pyramid-principle-presentations/)
+- [Analyst Academy — McKinsey/Bain/BCG SCQA](https://www.theanalystacademy.com/powerpoint-storytelling/)
+- [think-cell — Pyramid PowerPoint](https://www.think-cell.com/en/resources/content-hub/using-the-pyramid-principle-to-build-better-powerpoint-presentations)
+
+工具：
+- [Quarto Presentations](https://quarto.org/docs/presentations/revealjs/)
+- [Anthropic Claude Design](https://www.anthropic.com/news/claude-design-anthropic-labs)
+- [iBiology Scientific Presentations](https://www.ibiology.org/professional-development/power-point-slide-design/)
+

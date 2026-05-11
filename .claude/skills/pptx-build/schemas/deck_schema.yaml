@@ -1,0 +1,226 @@
+# deck_schema.yaml — pptx-build deck.yaml source-of-truth 規格範例
+#
+# 此檔案是 deck.yaml 的「規格示範」與「填寫範本」。
+# 真實 deck.yaml 放在每份簡報的 pptx_build/ 目錄下，由 deck_renderer.py 讀取產生 PPTX。
+#
+# 設計準則（2026-05-08 Stage 2.1）：
+#   1. YAML frontmatter（meta + structure）+ Markdown body（slide content）混用 — Q1=(c)
+#   2. SCQA/Pyramid 在 deck-level + slide-level 雙層出現 — Q3=(c)
+#   3. Tier S/A/B/C/D + scope label + evidence path 強制標註（R-G1 active）
+#   4. 預留 schema_version 欄位允許未來迭代不破壞舊 deck
+
+schema_version: "1.0.0"          # 規格版本，每次 break-change 升 minor
+
+# ============================================================
+# Section 1: Deck-level metadata
+# ============================================================
+deck:
+  title: "Self-phasing V5 provenance 校正與 Pass 2 重驗 P0"
+  subtitle: ""                    # optional
+  audience: "PI"                  # PI / advisor / committee / lab / public
+  audience_familiarity:           # 對於受眾不熟悉的領域標明，影響術語密度限制 (R-G2)
+    - "癌症長讀長測序基本概念"     # 受眾已熟
+    - "longphase-to 程式碼細節"    # 受眾不熟（需 footnote）
+  target_minutes: 25
+  total_slides_estimate: 18       # 預估數，實際以 slides 列為準
+  date: "2026-05-05"              # 報告日期
+  period: "2026-04-26 ~ 2026-05-05"
+  main_thesis: "V5 為 5 commits，PI 數據為 Pass 1 only，Pass 2 重驗 P0"  # ≤ 30 字
+  report_type: improvement_report # 對應 templates/{type}.md
+  # Mini-glossary：受眾首次看會碰到的術語（≤ 5 條，每條 ≤ 30 字）
+  glossary:
+    - term: "Pass 2"
+      definition: "phasing 的 second-round 計算（4/30 才能觸發）"
+    - term: "P0"
+      definition: "最高優先級"
+    - term: "self-phasing"
+      definition: "tumor-only phasing 中 somatic variant 自己決定自己 haplotype 的循環依賴"
+
+# ============================================================
+# Section 2: Narrative framework (deck-level SCQA/Pyramid)
+# ============================================================
+narrative_framework:
+  type: SCQA                      # SCQA / Pyramid / IMRAD / Custom
+  # SCQA: Situation / Complication / Question / Answer
+  situation: "V5 已完成 self-phasing audit + 4 commits 修補（4/28-29 PI 報告）"
+  complication: "5/05 發現 PI 報告數據基於 Pass 1 only 條件（ploidy bug 讓 Pass 2 從未觸發）"
+  question: "V5 為當前最佳 phasing baseline 是否仍成立？"
+  answer: "Pass 2 重驗 P0（25 hr 平行）+ commit 鏈完整化（5 commits）"
+  # Pyramid 並用（可選，executive_summary 模板必填）
+  pyramid_top: "V5 結論需暫停為 Pass 1 only 觀察，Pass 2 重驗為 P0"
+  pyramid_supporting:
+    - "Commit 鏈完整化 (5 commits ✓)"
+    - "PI 數據 Pass 1 only Caveat (確認)"
+    - "Pass 2 重驗 P0 (25 hr 平行待跑)"
+
+# ============================================================
+# Section 3: Source artifacts (R-G1 single-source verification)
+# ============================================================
+source_artifacts:
+  - path: "InterSubMod/docs/reports/validated/2026/05/20260505_self_phasing_V5_data_provenance_audit_01.md"
+    role: critical                # critical / supporting / context
+  - path: "InterSubMod/docs/experiments/in_progress/2026/04/20260501_latest_longphase_to_3paths_audit_01.md"
+    role: critical
+  - path: "InterSubMod/docs/experiments/in_progress/2026/04/20260501_v5_force_path2only_ablation_01.md"
+    role: critical
+  - path: "InterSubMod/docs/reports/research_landscape/02_Self_Phasing根因.md"
+    role: context
+
+# ============================================================
+# Section 4: Slides (內容主體)
+# ============================================================
+slides:
+  # ---- 範例 Slide 04（Critical Finding，Tier S）----
+  - id: S04
+    section: "Critical Finding"
+    layout: data_main_with_caveat  # 對應 style_library/layouts/{layout}.yaml
+    focal_point: "PI 數據限 Pass 1 only 條件"  # ≤ 20 字（§20.B）
+    tier: S                        # S/A/B/C/D（§20.C）
+    title: "5/05 Critical Finding: PI 報告 V5 數據限 Pass 1 only 條件"  # assertion-evidence headline
+    title_color: accent            # title_bg / accent / amber / etc.
+    title_bg_color: accent         # 用於 critical slide 標題列底色
+
+    # Tier 1 body — slide 上的內容（中 ≤ 60 字 / 英 ≤ 30 word）
+    # Markdown 格式，支援 caveat strip / insight card / kpi 等 region 標註
+    body: |
+      ## Caveat
+      [!] 4/29 PI 報告引用的所有 V5 數值都是 Pass 1 only 條件（Pass 2 從未觸發）
+
+      ## 為何 Pass 1 only
+      因果一句話：4/12 BAM 因 ploidy bug 算出 purity=0 → V5 跳過 second-round → 數值來自單輪修補（非完整版）
+
+      ## Evidence
+      - BAM = pononly_v2b/tumor_tagged.bam（4/12 產）
+      - log: purity=0 + 無 'second round phasing' 字串
+      - → Pass 2 second round 跳過 → 數值 = Pass 1 + tag layer fix
+
+      ## PI 報告關鍵數字（皆 Pass 1 only）
+      - clean PS V5=88.2% / BL=74.9% (+13.3pp)  ·  AMB% 17.5→8.0% (-54.3%)
+      - HP:i:33 read 計數 239,679 → 110,197 (-54%, whole genome, PI 口徑)
+      - → 結論「V5 為當前最佳 phasing baseline」需重驗於 Pass 2 真實觸發版
+
+    # Tier 2 speaker note — 必講細節（300-360 字 / 75-90 sec）
+    tier2_note: |
+      這張是本週最重要的 slide。5/05 做 provenance audit 時發現一個被忽視的盲點：
+      4/29 PI 報告所有 V5 數值都引用 4/12 產的那份 BAM，但那份 BAM 因為 ploidy bug
+      讓 purity 算出 0，整個 highPurity 條件 false，Pass 2 second round 從未觸發。
+
+      Evidence 兩條：A 是 BAM provenance，log 顯示 purity:0、無 second round 字串；
+      B 是機制因果，purity=0 → highPurity=false → Pass 2 跳過。
+
+      [ORAL-OPTIONAL]
+      highPurity 三次多項式公式在 PhasingProcess.cpp:142-220，purity 從 read coverage
+      算出來，ploidy bug 讓計算 chain 在 ploidy=0 時短路。
+
+    # Tier 3 — 純 oral，可選（亦可放在 tier2_note 內 [ORAL-OPTIONAL] 標）
+    tier3_oral: ""
+
+    # Evidence — R-G1 強制：每個數字都有 source 標註
+    evidence:
+      - claim: "HP:i:33 read 計數 239,679 → 110,197 (-54%, whole genome)"
+        source_path: "InterSubMod/docs/reports/validated/2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md"
+        source_section: "line 267"
+        scope: "whole genome read count"
+        verified_date: "2026-05-07"
+        confidence: high
+      - claim: "ploidy bug → purity=0 → Pass 2 從未觸發"
+        source_path: "InterSubMod/docs/reports/validated/2026/05/20260505_self_phasing_V5_data_provenance_audit_01.md"
+        source_section: "§1.2"
+        scope: "HCC1395 5kHz only"
+        verified_date: "2026-05-05"
+        confidence: high
+
+    # Figure（optional，預生成 PNG 路徑）
+    figure: null  # 或 "figures/fig_s04_pi_pass1_caveat.png"
+
+    # Footer citation
+    footer: "Source: master_draft.md Top Findings #2, audit_01.md §1.2"
+
+  # ---- 範例 Slide 07（5 版本對比表，含 scope label）----
+  - id: S07
+    section: "5 版本對比"
+    layout: data_main_with_caveat
+    focal_point: "等價性證明：NEW noPath3 ≈ OLD V5"
+    tier: S
+    title: "5 版本 HP1:HP2 對比 (Ground truth ≈ 1:1)：NEW noPath3 復現 OLD V5 反轉"
+
+    body: |
+      ## Table（含 scope label，R-G1 必標）
+      | 版本 | 走的路 + 結果 | HP1:HP2 | HP_33 |
+      |------|---------------|---------|-------|
+      | OLD baseline | 路 1：基準 | 1.328 | 2,640 |
+      | OLD V5 flag | 路 2 (bug)：[OK] 反轉 | 0.735 | 14,524 |
+      | NEW baseline | 路 1+3：[X] 更糟 | 1.400 | 3,468 |
+      | NEW V5 flag | 路 2+3：[X] 抵消 | 1.400 | 3,468 |
+      | NEW V5 noPath3 | 路 2 only (forced)：[OK] 反轉* | 1.127* | 28* |
+
+      ## Insight
+      OLD V5 (路 2 only, ploidy bug 副作用) HP1:HP2 = 0.735，反轉成功
+      NEW noPath3 (強制跳過路 3) HP1:HP2 = 1.127*，反轉成功（* 15-site cherry-pick）
+      → 兩者都反轉，方向一致 → 路 3 抵消假說 PASS（noPath3 全 BAM 預期 ≈ 0.735，待 monitor [U]）
+
+    tier2_note: |
+      這張表是本週最重要的數值對照。5 個版本：OLD/NEW × baseline/V5 + NEW noPath3。
+      綠色行：成功反轉。OLD V5 (0.735, 全 BAM) + NEW noPath3 (1.127*, 15-site cherry) 都成功。
+
+      關鍵 caveat — noPath3 表格中的 1.127 / HP_33=28 是 15-site cherry-picked sample
+      的數字（force_path2only §3.4），不是全 BAM 觀測值。全 BAM monitor 還在跑。
+
+    evidence:
+      - claim: "OLD baseline HP_33 = 2,640"
+        source_path: "InterSubMod/docs/experiments/in_progress/2026/04/20260501_latest_longphase_to_3paths_audit_01.md"
+        source_section: "§3.1 line 53"
+        scope: "threshold_compare 全 BAM"
+        verified_date: "2026-05-07"
+        confidence: high
+      - claim: "noPath3 HP_33 = 28*, HP1:HP2 = 1.127*"
+        source_path: "InterSubMod/docs/experiments/in_progress/2026/04/20260501_v5_force_path2only_ablation_01.md"
+        source_section: "§3.4"
+        scope: "15-site cherry-picked sample"  # 必標 scope！
+        verified_date: "2026-05-07"
+        confidence: high
+        note: "全 BAM 預期 ≈ 0.735 [U]"
+
+    figure: null
+    footer: "* noPath3 數字來自 force_path2only_ablation §3.4 的 15-site cherry-picked sample；其他 4 列為 threshold_compare 全 BAM。"
+
+# ============================================================
+# Section 5: Output configuration
+# ============================================================
+output:
+  pptx: "output.pptx"             # PPTX 主輸出檔名
+  speaker_script: "speaker_script.md"
+  audit: "audit.md"
+  figures_dir: "figures/"         # 圖片放置目錄（從 deck.yaml 同目錄相對）
+  wireframes_dir: "wireframes/"   # PIL 渲染輸出目錄
+
+# ============================================================
+# Section 6: Validation rules（R-G1/G2/G3 active 規則內嵌）
+# ============================================================
+validation_rules:
+  # R-G1: metric source verification
+  metric_source_required: true    # 所有 evidence 必須有 source_path
+  scope_label_required: true      # 跨 scope 比較必須有 scope 欄
+
+  # R-G2: PI 不熟術語限制
+  unfamiliar_terms_per_slide: 3   # 每張 slide 上 ≤ 3 個 PI 不熟術語
+  glossary_required_for_excess: true  # 超過則 glossary 或 footnote 必補
+
+  # R-G3: Wave 1 加 Agent-N
+  wave1_agent_n_enabled: true     # Wave 1 review 啟用 Agent-N（Number verification）
+
+  # 內文密度限制
+  body_chinese_max_per_slide: 60
+  body_english_max_per_slide: 30
+  speaker_note_chinese_min: 300
+  speaker_note_chinese_max: 360
+  speaker_note_chinese_max_total: 10000  # 25 min × 400 字/min
+
+# ============================================================
+# Section 7: Handoff metadata（給 weekly-report 與 myPPT 用）
+# ============================================================
+handoff:
+  source_master_draft: "InterSubMod/docs/reports/validated/2026/05/20260505_週報_self_phasing_v2.1試用第2次/master_draft.md"
+  weekly_report_handoff: A         # A=立即 / B=留檔 / C=終點 / D=加下週計畫
+  next_week_plan_path: ""          # D 時填路徑
+  claude_design_export_target: "20260505_self_phasing_bundle.zip"  # Stage 4 export 目標
