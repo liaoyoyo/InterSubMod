@@ -64,16 +64,16 @@ main.slide-page { max-width: 1280px; margin: 0 auto; padding: 24px; }
   overflow: hidden; color: #1F2937;
 }
 .slide-canvas h2.slide-title {
-  font-size: 22px; color: #1E3A8A; margin: 0 0 4px;
-  border-bottom: 2px solid #1E3A8A; padding-bottom: 6px;
+  font-size: 30px; color: #1E3A8A; margin: 0 0 6px;
+  border-bottom: 2px solid #1E3A8A; padding-bottom: 8px;
 }
 .slide-canvas h2.slide-title.critical { color: #DC2626; border-bottom-color: #DC2626; }
 .slide-canvas .en-subtitle {
-  font-size: 13px; color: #6B7280; font-style: italic; margin: 0 0 12px; padding-left: 1em;
+  font-size: 15px; color: #6B7280; font-style: italic; margin: 0 0 14px; padding-left: 1em;
 }
 .slide-canvas .footer-glossary {
   position: absolute; bottom: 10px; left: 28px; right: 28px;
-  font-size: 11px; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 6px;
+  font-size: 14px; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 6px;
   display: flex; flex-wrap: wrap; gap: 12px;
 }
 .slide-canvas .footer-glossary .gloss-item {
@@ -86,16 +86,16 @@ main.slide-page { max-width: 1280px; margin: 0 auto; padding: 24px; }
 .grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 10px 0; }
 
 .stat-box {
-  background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; text-align: center;
+  background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px; text-align: center;
 }
-.stat-box .number { font-size: 26px; font-weight: 700; color: #1E3A8A; line-height: 1.1; }
+.stat-box .number { font-size: 32px; font-weight: 700; color: #1E3A8A; line-height: 1.1; }
 .stat-box .number.green { color: #16A34A; }
 .stat-box .number.orange { color: #9A3412; }
-.stat-box .label { font-size: 11px; color: #6B7280; margin-top: 4px; }
+.stat-box .label { font-size: 15px; color: #6B7280; margin-top: 6px; }
 
 .caveat-box {
   background: #FFF3CD; border: 1px solid #F59E0B; border-radius: 6px; padding: 10px 14px;
-  margin: 10px 0; color: #78350F; font-size: 13px;
+  margin: 10px 0; color: #78350F; font-size: 16px;
 }
 .caveat-box .label { font-weight: 700; color: #92400E; margin-right: 6px; }
 .caveat-box .en-note {
@@ -105,18 +105,18 @@ main.slide-page { max-width: 1280px; margin: 0 auto; padding: 24px; }
 
 .red-frame {
   background: #FEE2E2; border: 2px solid #DC2626; border-radius: 6px; padding: 12px 16px;
-  margin: 10px 0; color: #7F1D1D; font-size: 13px; font-weight: 500;
+  margin: 10px 0; color: #7F1D1D; font-size: 16px; font-weight: 500;
 }
 .red-frame .label { color: #DC2626; font-weight: 700; }
 
 .green-box {
   background: #DCFCE7; border: 1px solid #16A34A; border-radius: 6px; padding: 10px 14px;
-  margin: 10px 0; color: #166534; font-size: 13px;
+  margin: 10px 0; color: #166534; font-size: 16px;
 }
 
-table.metric-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 6px 0; }
+table.metric-table { width: 100%; border-collapse: collapse; font-size: 16px; margin: 8px 0; }
 table.metric-table th, table.metric-table td {
-  padding: 4px 8px; border: 1px solid #E5E7EB; text-align: left;
+  padding: 6px 10px; border: 1px solid #E5E7EB; text-align: left;
 }
 table.metric-table th { background: #F3F4F6; font-weight: 600; color: #374151; }
 table.metric-table td.num { text-align: right; font-family: monospace; }
@@ -126,16 +126,16 @@ table.metric-table tr.row-yellow td { background: #FEF3C7; }
 
 .arg-list {
   background: #F0F9FF; border-left: 3px solid #0EA5E9; border-radius: 4px;
-  padding: 8px 14px; margin: 10px 0; font-size: 13px;
+  padding: 10px 16px; margin: 12px 0; font-size: 17px; line-height: 1.55;
 }
 .conclusion-arrow {
   background: linear-gradient(90deg, #1E3A8A, #3B82F6); color: white;
-  padding: 10px 16px; margin: 10px 0; border-radius: 6px; font-weight: 600; font-size: 14px;
+  padding: 12px 18px; margin: 12px 0; border-radius: 6px; font-weight: 600; font-size: 17px;
 }
 .conclusion-arrow.green { background: linear-gradient(90deg, #16A34A, #22C55E); }
 .cliffhanger-box {
   background: #FEF3C7; border: 1.5px dashed #F59E0B; padding: 10px 16px;
-  margin: 10px 0; border-radius: 6px; color: #78350F; font-style: italic; font-size: 14px;
+  margin: 10px 0; border-radius: 6px; color: #78350F; font-style: italic; font-size: 17px;
   animation: pulse 2.5s ease-in-out infinite;
 }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }

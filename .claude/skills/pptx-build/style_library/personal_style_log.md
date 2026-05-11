@@ -24,6 +24,35 @@
 
 ## Active 規則
 
+### 2026-05-11 — R-G14：HTML preview = PPT 等比模擬，字級用 PPT pt 標準
+
+- **觸發來源**：Self-Phasing PPT 5/11 slide 02 review「文字與圖示不夠大不夠清楚」回饋
+- **背景理論**：
+  - `build_html.py` 的 `.slide-canvas` 用 `aspect-ratio: 16/9 + max-width: 1280px` → **PPT 16:9 slide 等比模擬**（非自由排版網頁）
+  - 1280px 容器 ≈ PPT 標準 25.4cm 寬，1px ≈ 0.75pt
+  - 投影距離 3-5m 時可讀字級 = 24pt+ (Title) / 18pt+ (Body) / 14pt+ (Caption)
+- **規則細節**：
+  - **不要用網頁排版直覺挑字級**（12px / 14px 在 PPT preview 容器內 = 9pt / 10.5pt → 投影看不清）
+  - **Title**: 28-36px（≈ 21-27pt）— shared style.css `.slide-title` 預設 22px 偏小，需 case-by-case 拉到 28-32
+  - **章節 / 大標籤**: 22-26px（≈ 16.5-19.5pt）— 三段大框架 / box header
+  - **Body / 編號項目**: 20-22px（≈ 15-16.5pt）— 條列主文
+  - **Description / 副說明**: 16-18px（≈ 12-13.5pt）— 章節下方一行描述（**最小不低於 16px**）
+  - **Footer / glossary**: 14-15px（≈ 10.5-11pt）— shared `.footer-glossary` 11px 偏小
+  - **Code panel**: 12-13px（≈ 9-9.75pt）— 已是 mono 字型，比例放寬
+- **不該用的字級**:
+  - ❌ Body < 16px（PPT 投影看不清）
+  - ❌ Title < 24px（不夠 anchor 視覺）
+  - ❌ 段落內三種以上字級（破壞階層）
+- **與 R-G12 字級階層補強**：
+  - R-G12 定義 Title/Body/Caption 階層比例（1.5-2x），R-G14 補**絕對 px 下限**（適用 PPT 模擬容器）
+- **檢核方式**：每張 slide build 後 grep `font-size:1[0-5]px` 章節主文 — 應為 0
+- **與業界對齊**：
+  - Mayer 多媒體學習 — 視覺感知極限（投影時 < 18pt 進入認知 noise floor）
+  - PowerPoint Best Practices — Body 24-32pt（投影 6m 內可讀）
+- **狀態**：active
+
+---
+
 ### 2026-05-11 — R-G13：slide 02 = Agenda 目錄（非 TL;DR）
 
 - **觸發來源**：Self-Phasing PPT 5/11 slide 02 用戶定位「應該用目錄重點指出有哪些區塊流程」
@@ -299,7 +328,7 @@
 
 | 指標 | 數值 |
 |------|------|
-| Active 規則數 | 13 |
+| Active 規則數 | 14 |
 | [PROVISIONAL] 規則數 | 0 |
 | Archived 規則數 | 0 |
 | 最近更新 | 2026-05-11 |

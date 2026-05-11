@@ -59,51 +59,51 @@ add(id="02_tldr", num="02", section="S0 報告流程", rg2="—", ngrep="—",
     en="",
     timing="60 sec / 中 ~240 字",
     canvas_html="""
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin:12px 0;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin:20px 0;">
       <!-- 階段 1: 問題發現 -->
       <div>
-        <div style="background:#FEE2E2;color:#7F1D1D;padding:8px 14px;border-radius:6px;font-weight:700;font-size:15px;margin-bottom:14px;text-align:center;">問題發現</div>
-        <div style="margin-bottom:14px;">
-          <p style="font-size:16px;font-weight:600;color:#1E3A8A;margin:0;">① 觀察起點</p>
-          <p style="font-size:12px;color:#6B7280;margin:4px 0 0;line-height:1.4;">全基因組偏移與 chr19 三個失衡位點觀察</p>
+        <div style="background:#FEE2E2;color:#7F1D1D;padding:12px 18px;border-radius:8px;font-weight:700;font-size:22px;margin-bottom:20px;text-align:center;">問題發現</div>
+        <div style="margin-bottom:20px;">
+          <p style="font-size:22px;font-weight:700;color:#1E3A8A;margin:0;">① 觀察起點</p>
+          <p style="font-size:17px;color:#374151;margin:6px 0 0;line-height:1.5;">全基因組偏移與 chr19 三個失衡位點觀察</p>
         </div>
         <div>
-          <p style="font-size:16px;font-weight:600;color:#1E3A8A;margin:0;">② 機制</p>
-          <p style="font-size:12px;color:#6B7280;margin:4px 0 0;line-height:1.4;">phasing 與 tagging 兩層 bug 解析</p>
+          <p style="font-size:22px;font-weight:700;color:#1E3A8A;margin:0;">② 機制</p>
+          <p style="font-size:17px;color:#374151;margin:6px 0 0;line-height:1.5;">phasing 與 tagging 兩層 bug 解析</p>
         </div>
       </div>
 
       <!-- 階段 2: 修正過程 -->
       <div>
-        <div style="background:#FEF3C7;color:#92400E;padding:8px 14px;border-radius:6px;font-weight:700;font-size:15px;margin-bottom:14px;text-align:center;">修正過程</div>
-        <div style="margin-bottom:14px;">
-          <p style="font-size:16px;font-weight:600;color:#1E3A8A;margin:0;">③ 量化鐵證</p>
-          <p style="font-size:12px;color:#6B7280;margin:4px 0 0;line-height:1.4;">read-level 個案到全基因組驗證</p>
+        <div style="background:#FEF3C7;color:#92400E;padding:12px 18px;border-radius:8px;font-weight:700;font-size:22px;margin-bottom:20px;text-align:center;">修正過程</div>
+        <div style="margin-bottom:20px;">
+          <p style="font-size:22px;font-weight:700;color:#1E3A8A;margin:0;">③ 量化鐵證</p>
+          <p style="font-size:17px;color:#374151;margin:6px 0 0;line-height:1.5;">read-level 個案到全基因組驗證</p>
         </div>
         <div>
-          <p style="font-size:16px;font-weight:600;color:#1E3A8A;margin:0;">④ 修補設計</p>
-          <p style="font-size:12px;color:#6B7280;margin:4px 0 0;line-height:1.4;">兩層三版漸進改進歷程</p>
+          <p style="font-size:22px;font-weight:700;color:#1E3A8A;margin:0;">④ 修補設計</p>
+          <p style="font-size:17px;color:#374151;margin:6px 0 0;line-height:1.5;">兩層三版漸進改進歷程</p>
         </div>
       </div>
 
       <!-- 階段 3: 驗證結果 -->
       <div>
-        <div style="background:#DCFCE7;color:#166534;padding:8px 14px;border-radius:6px;font-weight:700;font-size:15px;margin-bottom:14px;text-align:center;">驗證結果</div>
-        <div style="margin-bottom:14px;">
-          <p style="font-size:16px;font-weight:600;color:#1E3A8A;margin:0;">⑤ 驗證</p>
-          <p style="font-size:12px;color:#6B7280;margin:4px 0 0;line-height:1.4;">指標對照與跨樣本一致性</p>
+        <div style="background:#DCFCE7;color:#166534;padding:12px 18px;border-radius:8px;font-weight:700;font-size:22px;margin-bottom:20px;text-align:center;">驗證結果</div>
+        <div style="margin-bottom:20px;">
+          <p style="font-size:22px;font-weight:700;color:#1E3A8A;margin:0;">⑤ 驗證</p>
+          <p style="font-size:17px;color:#374151;margin:6px 0 0;line-height:1.5;">指標對照與跨樣本一致性</p>
         </div>
         <div>
-          <p style="font-size:16px;font-weight:600;color:#1E3A8A;margin:0;">⑥ 結論</p>
-          <p style="font-size:12px;color:#6B7280;margin:4px 0 0;line-height:1.4;">修正方案總結與後續方向</p>
+          <p style="font-size:22px;font-weight:700;color:#1E3A8A;margin:0;">⑥ 結論</p>
+          <p style="font-size:17px;color:#374151;margin:6px 0 0;line-height:1.5;">修正方案總結與後續方向</p>
         </div>
       </div>
     </div>
 
-    <div style="margin-top:24px;padding:10px 16px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:6px;color:#0C4A6E;font-size:13px;text-align:center;">
-      18 章節 slide + 3 backup（Q&A）  ·  預計 25 分鐘含問答
+    <div style="margin-top:32px;padding:14px 20px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;color:#0C4A6E;font-size:18px;font-weight:600;text-align:center;">
+      18 章節 slide + 3 backup（Q&A）  ·  預計 20 分鐘 + 5 分鐘問答
     </div>""",
-    speaker="今天報告分三個階段六個章節。問題發現階段：先看觀察起點的偏移現象，再解析兩層機制。修正過程階段：用 read-level 量化鐵證驗證，並設計三版漸進修補。驗證結果階段：跨指標跨樣本一致性驗證，最後給結論與後續方向。預計 25 分鐘含問答。",
+    speaker="今天報告分三個階段六個章節。問題發現階段：先看觀察起點的偏移現象，再解析兩層機制。修正過程階段：用 read-level 量化鐵證驗證，並設計三版漸進修補。驗證結果階段：跨指標跨樣本一致性驗證，最後給結論與後續方向。預計 20 分鐘 + 5 分鐘問答。",
     tier3="(目錄 speaker note 精簡至 60 sec，純預告章節，不透露具體結論)")
 
 # ─── S1 觀察起點 ───────────────────────────────────────────────────────────
@@ -122,10 +122,11 @@ add(id="03_genome_173", num="03", section="S1 觀察起點", rg2="3", ngrep="8",
           <tr class="row-yellow"><td>HP1 占比</td><td class="num">94.6%</td><td class="num">~50%</td><td class="num">+44.6 pp</td></tr>
         </tbody>
       </table>
-      <div style="text-align:center;align-self:center;">
-        <p style="font-size:24px;color:#FFA500;font-weight:700;margin:0;">HP1 占比 94.6%</p>
-        <p style="font-size:14px;color:#9A3412;margin:4px 0;">↓↓↓↓↓↓↓↓↓</p>
-        <p style="font-size:14px;color:#6B7280;">隨機預期 50%</p>
+      <div style="text-align:center;align-self:center;background:#FFF7ED;border:2px solid #EA580C;border-radius:10px;padding:18px 14px;">
+        <p style="font-size:38px;color:#C2410C;font-weight:800;margin:0;line-height:1.1;">HP1 占比 94.6%</p>
+        <p style="font-size:24px;color:#9A3412;margin:8px 0 4px;font-weight:700;">↓↓↓↓</p>
+        <p style="font-size:18px;color:#374151;margin:0;">隨機預期 <strong>50%</strong></p>
+        <p style="font-size:15px;color:#6B7280;margin:4px 0 0;font-style:italic;">→ 偏離 +44.6 pp</p>
       </div>
     </div>
     <div class="arg-list">
@@ -144,47 +145,46 @@ add(id="03_genome_173", num="03", section="S1 觀察起點", rg2="3", ngrep="8",
     tier3="cnLOH 機制細節 / 23 chr 一致性表 / paired pipeline 程式碼差異")
 
 add(id="04a_sp1", num="04a", section="S1 觀察起點", rg2="1", ngrep="3",
-    title="SP1 chr19:17,565,944 — baseline 113:0 → V5 翻轉至 HP2 ✅ paired",
-    en="SP1 — baseline 113:0 → V5 flips to HP2, aligned with paired",
+    title="SP1 個案 — baseline 113:0 → V5 翻轉對齊 paired",
+    en="SP1 chr19:17,565,944 — baseline 113:0 → V5 flips to HP2",
     timing="60 sec / 中 ~250 字",
     canvas_html="""
-    <table class="metric-table">
-      <thead><tr><th>位點</th><th>baseline HP1:HP2</th><th>V5</th><th>paired GT</th><th>對齊?</th></tr></thead>
-      <tbody><tr class="row-red"><td><strong>SP1 chr19:17,565,944</strong></td><td class="num">113 : 0</td><td>翻轉至 HP2 主導</td><td>HP2</td><td><strong>✅</strong></td></tr></tbody>
-    </table>
-    <img class="igv-thumb" src="../figures/igv/D_SP1_chr19_17565944.png" alt="IGV SP1">
-    <p class="fig-caption">6-BAM 並列: baseline / V2b / V3F / V5 / paired_T / paired_N</p>
-    <div class="arg-list">
-      <strong>為何能排除是噪音 / caller / alignment?</strong><br>
-      • baseline 與 paired 方向相反 (不是衰減而是翻轉)<br>
-      • V5 修正後與 paired ground truth 重合<br>
-      → read assignment 強制集中的鐵證
+    <div class="grid-3col" style="margin-bottom:12px;">
+      <div class="stat-box"><div class="number orange">113 : 0</div><div class="label">baseline HP1:HP2</div></div>
+      <div class="stat-box"><div class="number">HP2 主導</div><div class="label">V5 修正後</div></div>
+      <div class="stat-box"><div class="number green">✅ 對齊</div><div class="label">paired ground truth</div></div>
     </div>
-    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">haplotype:</span> 父系/母系染色體</div></div>""",
+    <img class="igv-thumb" src="../figures/igv/D_SP1_chr19_17565944.png" alt="IGV SP1" style="max-height:400px;">
+    <p class="fig-caption" style="font-size:13px;">chr19:17,565,944 · 6-BAM 並列: baseline / V2b / V3F / V5 / paired_T / paired_N</p>
+    <div class="arg-list">
+      <strong>為何能排除噪音 / caller / alignment?</strong><br>
+      ① baseline 與 paired 方向相反 — 翻轉而非衰減<br>
+      ② V5 修正後與 paired ground truth 重合<br>
+      → read assignment 強制集中的鐵證
+    </div>""",
     speaker="全基因組 17.3:1 是平均值; IGV 6-BAM 並列篩到 chr19 三個近 100% 失衡位點。SP1 chr19:17,565,944: baseline 113 reads 全 HP1, HP2=0; V5 翻 HP2 與 paired tumor 一致。排除噪音/caller/alignment: baseline 與 paired 完全反向 (翻轉而非衰減), V5 與 paired 重合 → read assignment 強制集中的鐵證。",
     tier3="6-BAM 並列順序 / V2b 中間階段意義")
 
 add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
-    title="SP2 + SP3 並列 — 同模式: baseline 全 HP1 / V5 翻 HP2 / 3/3 對齊 paired",
-    en="SP2 + SP3 same pattern; 3/3 aligned with paired",
+    title="SP2 + SP3 同模式 — 3/3 對齊 paired",
+    en="SP2 + SP3 follow SP1 pattern, 3/3 aligned with paired",
     timing="60 sec / 中 ~260 字",
     canvas_html="""
     <div class="grid-2col">
       <div>
-        <table class="metric-table"><thead><tr><th>位點</th><th>baseline</th><th>V5</th></tr></thead>
-        <tbody><tr class="row-red"><td><strong>SP2</strong><br>chr19:12,452,332</td><td class="num">109 : 1</td><td>HP2 主導</td></tr></tbody></table>
-        <img class="igv-thumb" src="../figures/igv/D_SP2_chr19_12452332.png" alt="IGV SP2" style="max-height:200px;">
+        <table class="metric-table"><thead><tr><th>SP2 · chr19:12,452,332</th><th>baseline</th><th>V5</th></tr></thead>
+        <tbody><tr class="row-red"><td><strong>HP1 : HP2</strong></td><td class="num">109 : 1</td><td>HP2 主導</td></tr></tbody></table>
+        <img class="igv-thumb" src="../figures/igv/D_SP2_chr19_12452332.png" alt="IGV SP2" style="max-height:280px;">
       </div>
       <div>
-        <table class="metric-table"><thead><tr><th>位點</th><th>baseline</th><th>V5</th></tr></thead>
-        <tbody><tr class="row-red"><td><strong>SP3</strong><br>chr19:12,467,180</td><td class="num">108 : 0</td><td>HP2 主導</td></tr></tbody></table>
-        <img class="igv-thumb" src="../figures/igv/D_SP3_chr19_12467180.png" alt="IGV SP3" style="max-height:200px;">
+        <table class="metric-table"><thead><tr><th>SP3 · chr19:12,467,180</th><th>baseline</th><th>V5</th></tr></thead>
+        <tbody><tr class="row-red"><td><strong>HP1 : HP2</strong></td><td class="num">108 : 0</td><td>HP2 主導</td></tr></tbody></table>
+        <img class="igv-thumb" src="../figures/igv/D_SP3_chr19_12467180.png" alt="IGV SP3" style="max-height:280px;">
       </div>
     </div>
-    <div class="conclusion-arrow green">→ 三 SP 都在 chr19:12-17M 區段 → 對齊 slide 09 chr19 752 victims hotspot 區</div>
-    <p style="font-size:12px;color:#6B7280;">引出四問: ① 為何全集中一邊? (S2 機制) ② read 層級? (S3 量化) ③ 三版各修? (S4 修補) ④ 是否都修對? (S5 驗證)</p>""",
-    speaker="SP2 chr19:12,452,332 baseline 109:1; SP3 chr19:12,467,180 baseline 108:0; 與 SP1 同模式: baseline 全 HP1, V5 翻 HP2 對齊 paired 3/3。三 SP 都在 chr19:12-17M, 對齊 chr19 752 victims hotspot 區段 — read-level 個案與 IGV 屬同機制不同層級。引出四問機制/量化/修補/驗證。",
-    tier3="paired_T 與 paired_N 對照細節")
+    <div class="conclusion-arrow green">→ 三 SP 都在 chr19:12-17M 區段 → 對齊 slide 09 chr19 752 victims hotspot</div>""",
+    speaker="SP2 chr19:12,452,332 baseline 109:1; SP3 chr19:12,467,180 baseline 108:0; 與 SP1 同模式: baseline 全 HP1, V5 翻 HP2 對齊 paired 3/3。三 SP 都在 chr19:12-17M, 對齊 chr19 752 victims hotspot — read-level 個案與 IGV 屬同機制不同層級。 [口述過渡] 接下來四個章節將分別回答: ① 為何全集中一邊? (S2 機制) ② read 層級? (S3 量化) ③ 三版各修? (S4 修補) ④ 是否都修對? (S5 驗證)。",
+    tier3="paired_T 與 paired_N 對照細節 / 三 SP 完整座標表")
 
 # ─── S2 機制 ──────────────────────────────────────────────────────────────
 add(id="05_player_referee", num="05", section="S2 機制", rg2="4 (核心 forced)", ngrep="3 + 1 commit",
