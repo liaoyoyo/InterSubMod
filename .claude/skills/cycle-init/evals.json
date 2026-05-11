@@ -1,0 +1,74 @@
+{
+  "skill": "cycle-init",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_new_hypothesis_cycle",
+      "category": "activation",
+      "query": "啟動新的 LOH 假說 cycle，hypothesis_id=H-2026-039",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/autoresearch/hypothesis_queue.json",
+          "InterSubMod/state/active.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '啟動新假說 cycle', 'cycle init', 'P0 REGISTER')",
+        "Allocates `cycle_id` in format YYYYMMDD-HHMM-{slug} (e.g. 20260511-1430-loh-h039)",
+        "Creates `state/cycles/{cycle_id}/state.json` skeleton with phase=P0_REGISTER, hypothesis_id linkage",
+        "Updates `state/active.json` index to include new cycle",
+        "Hands off with explicit pointer: 'Next: invoke research-loop for P1 PLAN'"
+      ],
+      "must_not": [
+        "Scaffold a multi-week project tree under research/ (that is /init-research)",
+        "Re-allocate cycle_id if one already exists for the same hypothesis_id (check first)",
+        "Skip writing state.json — skeleton is mandatory output"
+      ]
+    },
+    {
+      "id": "eval_02_skip_multi_week_project_scaffolding",
+      "category": "skip",
+      "query": "啟動為期 6 週的 normal BAM 整合專案，含多個假說與 cycle",
+      "context": {
+        "files_in_scope": ["InterSubMod/research/"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (SKIP WHEN: 多週級長期專案 scaffolding，用 init-research)",
+        "Suggests /init-research to scaffold research/{project_name}/ tree with manifest.yaml + 00_PLAN.md",
+        "After project scaffold, individual hypotheses use /cycle-init for short-validation cycles"
+      ],
+      "must_not": [
+        "Allocate single cycle_id for a multi-hypothesis 6-week project",
+        "Bypass /init-research and create incomplete state for long-term work"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_resume_existing_cycle",
+      "category": "edge_case",
+      "query": "resume 上週中斷的 cycle 20260504-1100-hpfine-rerun，繼續往下跑",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/state/cycles/20260504-1100-hpfine-rerun/state.json",
+          "InterSubMod/state/active.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill detects existing cycle in state/active.json — does NOT re-allocate cycle_id",
+        "Suggests /cycle-state to query current phase and recommended next skill (e.g. check-staleness if at P2)",
+        "Either no skill triggers (cycle already exists) or cycle-state activates instead"
+      ],
+      "must_not": [
+        "Overwrite existing state.json with a fresh skeleton (would lose progress)",
+        "Allocate a duplicate cycle_id for the same hypothesis"
+      ]
+    }
+  ],
+  "notes": [
+    "Per Anthropic K9 + SOP §10 evals format.",
+    "Run manually via Claude Code with skill loaded; observe behavior matches expected_behavior.",
+    "Design source: ~/.claude/plans/agent-harness-langgraph-resilient-waterfall.md §3.7, §4.5.5",
+    "Distinct from /init-research (project-level multi-week) vs /cycle-init (hypothesis-level short cycle)."
+  ]
+}

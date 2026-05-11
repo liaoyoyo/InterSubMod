@@ -1,0 +1,65 @@
+{
+  "skill": "auc-confound-guard",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_auc_significance_claim",
+      "category": "activation",
+      "query": "我發現 NG=2 在 Inner 區域的 AUC=0.65 能區分 TP/FP，這算顯著嗎？要不要寫進結論？",
+      "context": {
+        "files_in_scope": ["InterSubMod/output/synthesis/observations/O14_NG_inner_outer/"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'AUC', 'TP vs FP 區分', '能區分 TP/FP')",
+        "Triggers 3-gate protocol: Gate 1 within-group OLS residualization, Gate 2 AF-bin cross-validation, Gate 3 permutation test",
+        "Quotes historical confound failures (O11/O12/O13/G1-G7) as cautionary precedents",
+        "Outputs verdict — 'discriminative' / 'annotation_only' / 'confound_suspected' — and decides whether MEMORY.md Concluded entry is allowed"
+      ],
+      "must_not": [
+        "Declare significance without running the 3 gates",
+        "Use pooled OLS for residualization (per /known-pitfalls — collider bias)",
+        "Skip AF-bin cross-validation when AF correlation suspected"
+      ]
+    },
+    {
+      "id": "eval_02_skip_build_task",
+      "category": "skip",
+      "query": "幫我跑 /build 編譯一下",
+      "context": {
+        "files_in_scope": ["InterSubMod/build/"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (SKIP WHEN: bug fix / build / commit, 無 AUC 結論宣告)",
+        "/build command handles compilation directly"
+      ],
+      "must_not": [
+        "Trigger 3-gate confound protocol on a build task",
+        "Insist on residualization for unrelated code work"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_low_auc_below_threshold",
+      "category": "edge_case",
+      "query": "這個特徵 AUC=0.55 要不要過 confound guard？",
+      "context": {
+        "files_in_scope": ["InterSubMod/docs/experiments/in_progress/"]
+      },
+      "expected_behavior": [
+        "Skill recognises AUC<0.58 — flow exits early at the threshold check",
+        "Returns verdict 'not discriminative (tier 1, allowed)' without running Gates 1-3",
+        "Reminds user no significance claim is needed at this AUC level"
+      ],
+      "must_not": [
+        "Run full 3-gate protocol on AUC<0.58 (wasted effort)",
+        "Block the user from describing the feature as non-discriminative"
+      ]
+    }
+  ],
+  "notes": [
+    "Per Anthropic K9 + SOP §10 evals format.",
+    "Run manually via Claude Code with skill loaded; observe behavior matches expected_behavior.",
+    "Threshold AUC=0.58 is project-specific (see SKILL.md history of 11 confound flips)."
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "skill": "memory-consolidation",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "MEMORY.md 已 250 行，整理一下",
+      "context": {
+        "files_in_scope": ["/bip7_disk/liaoyoyo2001/.claude/projects/-big7-disk-liaoyoyo2001-InterSubMod/memory/MEMORY.md"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '整理記憶', 'MEMORY.md 太長', >200 lines threshold)",
+        "Scans status / last_relevant fields in linked memory files",
+        "Merges same-topic concluded entries (dedupe)",
+        "Demotes stale active entries (>365 days untouched) to concluded",
+        "Updates MEMORY.md index keeping <200 lines target",
+        "Reports diff summary (X merged, Y demoted, Z removed)"
+      ],
+      "must_not": [
+        "Delete memory files entirely (only demote / merge in-place)",
+        "Silently overwrite without diff summary"
+      ]
+    },
+    {
+      "id": "eval_02_skip_small_memory",
+      "category": "skip",
+      "query": "MEMORY.md 才 80 行，整理嗎",
+      "context": {
+        "files_in_scope": ["/bip7_disk/liaoyoyo2001/.claude/projects/-big7-disk-liaoyoyo2001-InterSubMod/memory/MEMORY.md"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (<100 lines per SKIP WHEN)",
+        "Reports current line count + threshold",
+        "Suggests revisiting when MEMORY.md exceeds 200 lines"
+      ],
+      "must_not": [
+        "Run consolidation on small memory (waste of cycles)",
+        "Force-merge entries below threshold"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_single_new_memory",
+      "category": "edge_case",
+      "query": "把這個新發現加進 memory：phasing signature 已驗證",
+      "context": {
+        "files_in_scope": ["/bip7_disk/liaoyoyo2001/.claude/projects/-big7-disk-liaoyoyo2001-InterSubMod/memory/"]
+      },
+      "expected_behavior": [
+        "Skill recognizes single-add scenario per SKIP WHEN (not consolidation)",
+        "Defers to direct Write of new memory file with proper schema (id, status, last_relevant, summary)",
+        "Updates MEMORY.md index with one-line link entry",
+        "No merge / demote / re-shuffle of unrelated entries"
+      ],
+      "must_not": [
+        "Trigger full consolidation sweep for one new entry",
+        "Touch unrelated memory files when only adding one"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

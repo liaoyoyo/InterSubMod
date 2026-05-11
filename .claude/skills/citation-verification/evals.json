@@ -1,0 +1,72 @@
+{
+  "skill": "citation-verification",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_paper_to_bib",
+      "category": "activation",
+      "query": "PI 報告要引用 ClairS-TO 那篇 paper，幫我加進 references.bib",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/papers/references.bib",
+          "InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '撰寫論文', '產出 bibliography', '加進 .bib')",
+        "Runs WebSearch with title + first author + year before writing entry",
+        "Cross-checks site:scholar.google.com for the paper's existence",
+        "Validates 4 fields (title / first author / year ±1 / journal-or-venue) against original source",
+        "Copies BibTeX from Google Scholar 'Cite' button — does not hand-craft entry from memory",
+        "If a specific claim is being cited → WebFetch the PDF and confirm the claim text appears"
+      ],
+      "must_not": [
+        "Write the .bib entry without verification (per the 40% memory-error principle)",
+        "Fabricate DOIs or page numbers when source is unclear",
+        "Silently substitute a similar-titled paper if exact match not found — must mark `[CITATION NEEDED]`"
+      ]
+    },
+    {
+      "id": "eval_02_skip_pure_comment_edit",
+      "category": "skip",
+      "query": "幫我在 SKILL.md 第 30 行加個註解說明 Gate 2 的觸發條件",
+      "context": {
+        "files_in_scope": ["InterSubMod/.claude/skills/auc-confound-guard/SKILL.md"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (SKIP WHEN: 純註解編輯，無 .bib 變更，無學術引用需求)",
+        "Edit tool handles the comment directly"
+      ],
+      "must_not": [
+        "Trigger WebSearch for an internal annotation",
+        "Add a fake citation to a comment"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_existing_bib_add_doi_field",
+      "category": "edge_case",
+      "query": "references.bib 已有 ClairS-TO 那條 entry，但要補上 DOI 欄位",
+      "context": {
+        "files_in_scope": ["InterSubMod/docs/papers/references.bib"]
+      },
+      "expected_behavior": [
+        "Skill recognises existing entry — no new citation introduced, only field augmentation",
+        "Optionally runs lightweight WebSearch to confirm DOI matches the existing title+author (sanity check)",
+        "Edits the entry to add DOI field; does not re-verify the rest of the entry from scratch",
+        "Does not require full 6-step protocol since identity already validated"
+      ],
+      "must_not": [
+        "Block on full re-verification when only adding a single field to a known entry",
+        "Replace existing fields without explicit user request",
+        "Add DOI from memory without any web confirmation"
+      ]
+    }
+  ],
+  "notes": [
+    "Per Anthropic K9 + SOP §10 evals format.",
+    "Run manually via Claude Code with skill loaded; observe behavior matches expected_behavior.",
+    "Core principle (SKILL.md): AI memory citation error rate ~40% — verify each citation at write-time."
+  ]
+}

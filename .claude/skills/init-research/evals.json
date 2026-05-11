@@ -1,0 +1,67 @@
+{
+  "skill": "init-research",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "啟動 normal BAM 整合長期專案，預計 6 週多假說",
+      "context": {
+        "files_in_scope": ["InterSubMod/research/"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'init-research', '長期研究', '多週')",
+        "Creates research/{project_name}/ standard directory tree",
+        "Generates manifest.yaml with project metadata (start_date, owner, est_weeks, hypotheses[])",
+        "Generates 00_PLAN.md skeleton with phases / milestones / risks",
+        "Reminds user to run /cycle-init for per-hypothesis short cycles inside the project"
+      ],
+      "must_not": [
+        "Create state/cycles/ entry (that's cycle-init's job)",
+        "Skip manifest.yaml creation (required for project-level scaffolding)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_short_cycle",
+      "category": "skip",
+      "query": "啟動單一假說 cycle 驗證 1 週",
+      "context": {
+        "files_in_scope": ["InterSubMod/state/cycles/"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (short cycle = use cycle-init per SKIP WHEN)",
+        "Hand off to cycle-init for state/cycles/{cycle_id}/ scaffolding",
+        "No research/{project_name}/ directory created"
+      ],
+      "must_not": [
+        "Create research/{name}/ tree for a single 1-week hypothesis",
+        "Generate manifest.yaml for short cycle (cycle has state.json instead)"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_existing_project_new_hypothesis",
+      "category": "edge_case",
+      "query": "在既有 normal_bam_integration 專案下加新假設 NG_normal_split AUC>0.7",
+      "context": {
+        "files_in_scope": ["InterSubMod/research/normal_bam_integration/"]
+      },
+      "expected_behavior": [
+        "Skill detects existing project (research/normal_bam_integration/ already exists)",
+        "Does NOT re-init project tree (would overwrite manifest.yaml + 00_PLAN.md)",
+        "Routes to inject-hypothesis to register new hypothesis",
+        "Then routes to cycle-init to start short verification cycle linked to project"
+      ],
+      "must_not": [
+        "Overwrite existing manifest.yaml or 00_PLAN.md",
+        "Create duplicate project directory with suffix (e.g., _v2)"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

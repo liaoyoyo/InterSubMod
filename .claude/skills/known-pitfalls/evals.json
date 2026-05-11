@@ -1,0 +1,67 @@
+{
+  "skill": "known-pitfalls",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "為什麼之前 OLS residualize 失敗，要怎麼避免",
+      "context": {
+        "files_in_scope": ["InterSubMod/.claude/skills/known-pitfalls/SKILL.md"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'residualize', '之前怎麼錯的', 'OLS')",
+        "Looks up pitfall category (pooled OLS residualization trap)",
+        "Returns specific past error (pooled OLS preserves group info), correct method (within-group OLS), trigger scenario",
+        "Cites memory anchor (e.g., O12 collider bias verification)",
+        "Recommends auc-confound-guard skill for full 3-gate validation"
+      ],
+      "must_not": [
+        "Invent a pitfall not in the skill's table (must look up, not fabricate)",
+        "Skip citing the historical evidence anchor"
+      ]
+    },
+    {
+      "id": "eval_02_skip_pure_build",
+      "category": "skip",
+      "query": "幫我跑 build",
+      "context": {
+        "files_in_scope": ["InterSubMod/build/"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (pure build per SKIP WHEN)",
+        "Either no skill triggers, or /build command runs directly",
+        "No pitfall lookup performed"
+      ],
+      "must_not": [
+        "Inject pitfall warnings into build output",
+        "Block build with unrelated pitfall reminders"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_new_feature_exploration",
+      "category": "edge_case",
+      "query": "我想探索一個全新 normal-tumor methylation delta feature",
+      "context": {
+        "files_in_scope": ["InterSubMod/include/core/", "InterSubMod/src/core/"]
+      },
+      "expected_behavior": [
+        "Skill recognizes 'new feature exploration initial phase' per SKIP WHEN",
+        "Defers pitfall lookup until after design (avoid premature constraint)",
+        "Suggests problem-framing-ideation for design first",
+        "Reminds user to invoke known-pitfalls AFTER feature design has TP/FP discrimination claim"
+      ],
+      "must_not": [
+        "Block exploration with full pitfall list dump up-front",
+        "Force AUC-confound checks before feature is even defined"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "skill": "methodology-audit",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "審查 self-phasing V5 fallback 是否合理，要不要改",
+      "context": {
+        "files_in_scope": ["InterSubMod/src/core/self_phasing.cpp", "InterSubMod/include/core/self_phasing.hpp"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '審查', 'XX 是否合理', pre-.cpp/.hpp modification)",
+        "Reviews existing method rationale (current fallback logic + design intent)",
+        "Quantifies problem impact (failure rate / classification boundary ambiguity / feature design issues)",
+        "Produces decision document with 2-3 options + tradeoffs",
+        "Awaits user choice before any code change (does NOT auto-edit .cpp)"
+      ],
+      "must_not": [
+        "Auto-modify .cpp / .hpp files (audit only, decision-deferred)",
+        "Skip quantitative impact analysis (must give numbers, not vibes)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_typo_fix",
+      "category": "skip",
+      "query": "修 read_parser.cpp 內一個 comment typo",
+      "context": {
+        "files_in_scope": ["InterSubMod/src/core/read_parser.cpp"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (pure typo per SKIP WHEN)",
+        "Direct Edit applied without methodology audit overhead",
+        "No decision document generated"
+      ],
+      "must_not": [
+        "Block typo fix with full audit protocol",
+        "Generate decision document for cosmetic edit"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_audit_passed_to_implementation",
+      "category": "edge_case",
+      "query": "審查通過了，現在進入實作 within-group OLS 取代 pooled",
+      "context": {
+        "files_in_scope": ["InterSubMod/src/core/feature_calculator.cpp"]
+      },
+      "expected_behavior": [
+        "Skill recognizes audit-already-passed state per SKIP WHEN",
+        "Hands off to cpp-change skill for 6-step PDD implementation protocol",
+        "Carries forward audit decision document as design rationale",
+        "No re-audit (would block forward progress)"
+      ],
+      "must_not": [
+        "Re-run audit on already-approved methodology",
+        "Skip cpp-change protocol (C++ commits need PDD + Hard Gate)"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

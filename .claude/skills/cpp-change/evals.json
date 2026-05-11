@@ -1,0 +1,71 @@
+{
+  "skill": "cpp-change",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_normal_bam_implementation",
+      "category": "activation",
+      "query": "methodology-audit 已選定方案 B，開始實作 src/core/ReadParser.cpp 加 normal BAM 支援",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/src/core/ReadParser.cpp",
+          "InterSubMod/include/core/ReadParser.hpp",
+          "InterSubMod/docs/methodology/20260510_normal_bam_integration_01.md"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '開始實作 [審查文件名]', '執行方案 B', .cpp/.hpp paths)",
+        "Verifies prerequisites: methodology-audit doc exists, user selected non-A option, current build passes",
+        "Executes 6-step PDD protocol: Step 1 BASELINE COMMIT → Step 2 methodology-audit reference → Step 3 IMPL → Step 4 BUILD → Step 5 TEST → Step 6 FINAL COMMIT",
+        "Each step produces a commit (traceable, revertable)",
+        "Step 4 BUILD must pass before Step 6 FINAL COMMIT (PreToolUse hook will block otherwise)"
+      ],
+      "must_not": [
+        "Skip BASELINE COMMIT (Step 1 — needed for revert path)",
+        "Commit final changes without successful make -j$(nproc) (Hard Gate hook will exit 2)",
+        "Proceed without methodology-audit document or with option A"
+      ]
+    },
+    {
+      "id": "eval_02_skip_pure_docs_edit",
+      "category": "skip",
+      "query": "修一下 README.md 加個 build 說明",
+      "context": {
+        "files_in_scope": ["InterSubMod/README.md"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (SKIP WHEN: 純 .md 編輯，無 .cpp/.hpp/.h 觸及)",
+        "Edit tool handles README directly; doc-standards may activate"
+      ],
+      "must_not": [
+        "Trigger 6-step PDD on a markdown edit",
+        "Demand methodology-audit doc for README change"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_comment_only_cpp_edit",
+      "category": "edge_case",
+      "query": "只改 src/core/Distance.cpp 裡的 comment，加說明 L2 公式來源",
+      "context": {
+        "files_in_scope": ["InterSubMod/src/core/Distance.cpp"]
+      },
+      "expected_behavior": [
+        "Skill recognises pure-comment edit on .cpp — no methodology-audit needed",
+        "Skips Step 1 BASELINE COMMIT and Step 3 IMPL methodology gate",
+        "Still runs Step 4 BUILD to verify comment did not break compilation (PostToolUse hook flags pending build)",
+        "Single commit acceptable; full 6-step PDD waived for non-semantic change"
+      ],
+      "must_not": [
+        "Force full 6-step PDD on comment-only change (overhead without benefit)",
+        "Skip the build verification entirely (hook will still flag pending compile until make succeeds)"
+      ]
+    }
+  ],
+  "notes": [
+    "Per Anthropic K9 + SOP §10 evals format.",
+    "Run manually via Claude Code with skill loaded; observe behavior matches expected_behavior.",
+    "Hard Gate: PreToolUse hook on `git commit` blocks if .cpp edited but build pending."
+  ]
+}

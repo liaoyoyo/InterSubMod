@@ -1,0 +1,75 @@
+{
+  "skill": "conclude-research",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_positive_verdict_wrapup",
+      "category": "activation",
+      "query": "LOH-constrained phasing 主軸已經驗證到 ⭐4，幫我收尾這個方向",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/loh_constrained_phasing/manifest.yaml",
+          "InterSubMod/research/autoresearch/evidence_ledger.jsonl",
+          "InterSubMod/docs/experiments/INDEX.md",
+          "InterSubMod/docs/CURRENT_FOCUS.md"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '結束研究', '撰寫結論', 'cycle 達到 ⭐4-5 verdict 收尾')",
+        "Phase A CONCLUDE: reads manifest.yaml, validates required artifacts exist, generates report skeleton",
+        "Phase B PROPAGATE: appends evidence_ledger.jsonl entry, updates docs/experiments/INDEX.md, refreshes CURRENT_FOCUS.md, adds MEMORY.md entry",
+        "Asks user to fill report body before final commit (skeleton ≠ final report)"
+      ],
+      "must_not": [
+        "Auto-commit a skeleton report without user review of body content",
+        "Skip evidence_ledger.jsonl append (per CLAUDE.md: every cycle MUST log)",
+        "Forget to update CURRENT_FOCUS.md when main thesis pivots"
+      ]
+    },
+    {
+      "id": "eval_02_skip_cycle_still_in_pilot",
+      "category": "skip",
+      "query": "幫我把 P3 PILOT 階段這個 cycle 收尾",
+      "context": {
+        "files_in_scope": ["InterSubMod/state/cycles/20260510-1100-test-feature/state.json"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (SKIP WHEN: cycle 仍在 P1-P4 探索階段，未到 verdict)",
+        "Suggests completing P4 generalize + P5 evaluate first (run-evaluator)",
+        "Either no skill triggers, or run-evaluator / multi-sample-consistency activates instead"
+      ],
+      "must_not": [
+        "Generate conclusion report for unfinished cycle",
+        "Append premature evidence_ledger entry"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_negative_verdict_wrapup",
+      "category": "edge_case",
+      "query": "Read-Level Germline FP 方向已經 NO-GO 了，要不要也走 conclude-research？",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/read_level_germline_fp/manifest.yaml",
+          "InterSubMod/research/autoresearch/evidence_ledger.jsonl"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates with conclusion=NEGATIVE (NO-GO verdicts also count as research conclusion)",
+        "Generates report skeleton documenting WHY the direction failed (mechanism, evidence, future contingencies)",
+        "Updates MEMORY.md Concluded section to prevent re-investigation",
+        "Sets CURRENT_FOCUS.md to remove this thread; appends evidence_ledger with NEGATIVE stability tier"
+      ],
+      "must_not": [
+        "Treat NEGATIVE as 'not done yet' — NO-GO is a valid terminal verdict",
+        "Skip CONDITIONAL annotation when partial positive context exists (e.g. low-purity samples may still benefit)"
+      ]
+    }
+  ],
+  "notes": [
+    "Per Anthropic K9 + SOP §10 evals format.",
+    "Run manually via Claude Code with skill loaded; observe behavior matches expected_behavior.",
+    "Phase A CONCLUDE + Phase B PROPAGATE structure per SKILL.md."
+  ]
+}

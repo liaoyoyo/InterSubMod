@@ -1,0 +1,68 @@
+{
+  "skill": "image-vision-check",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "review 這張 LOH 概念圖夠不夠好",
+      "context": {
+        "files_in_scope": ["InterSubMod/docs/concepts/2026/04/figures/loh_concept_diagram.png"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'review 圖', '夠不夠好')",
+        "Runs 6-dimension checklist (prompt fidelity / readability / focus / taboo avoidance / print friendliness / cross-figure consistency)",
+        "Writes quality.json next to image with per-dimension scores",
+        "Outputs verdict (pass / partial / fail) with 4/6 threshold",
+        "Lists actionable suggestions per failed dimension"
+      ],
+      "must_not": [
+        "Activate on real-data matplotlib/seaborn plots (those need eyeball + statistical check)",
+        "Skip writing quality.json (must persist audit trail)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_real_data_plot",
+      "category": "skip",
+      "query": "幫我看這張 matplotlib AUC 折線圖達標了嗎",
+      "context": {
+        "files_in_scope": ["InterSubMod/docs/experiments/in_progress/2026/04/figures/auc_curve.png"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (real-data plot per SKIP WHEN)",
+        "Suggest using human eye review + statistical test (e.g., bootstrap CI, permutation test)",
+        "Defer to results-analysis skill if statistical check is the actual need"
+      ],
+      "must_not": [
+        "Generate quality.json for a real-data plot",
+        "Run 6-dimension checklist on data figures (not its scope)"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_partial_score_auto_regen",
+      "category": "edge_case",
+      "query": "這張圖剛 score 5/6 (partial)，可以再試一次嗎",
+      "context": {
+        "files_in_scope": ["InterSubMod/docs/reports/validated/2026/05/figures/concept_partial.png"]
+      },
+      "expected_behavior": [
+        "Skill activates and recognizes 5/6 = partial verdict",
+        "Auto-triggers image-gen with refined prompt (1 retry only)",
+        "Re-runs 6-dimension checklist on regenerated image",
+        "If still partial after 1 retry: escalates to user with diff between attempts",
+        "Updates quality.json with both attempts' scores"
+      ],
+      "must_not": [
+        "Loop infinite regen attempts (cap at 1 retry)",
+        "Silently overwrite original PNG without keeping prior attempt for diff"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

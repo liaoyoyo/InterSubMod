@@ -1,0 +1,74 @@
+{
+  "skill": "check-staleness",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_p2_precheck_transition",
+      "category": "activation",
+      "query": "cycle 20260420-1530-loh-pivot 從 P1 進入 P2 之前要 precheck",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/state/cycles/20260420-1530-loh-pivot/plan.json",
+          "InterSubMod/state/invalidation/binary.jsonl",
+          "InterSubMod/state/invalidation/dataset.jsonl"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'P2 precheck', 'P1 → P2 transition')",
+        "Reads `state/cycles/{cycle_id}/plan.json` to extract binary_version + dataset_id + upstream_reports",
+        "Compares each precondition against `state/invalidation/*.jsonl`",
+        "Writes `state/cycles/{cycle_id}/precheck.json` with PASS / BLOCKED verdict per precondition",
+        "Updates `state.json.phase` from `P1_PLAN` → `P2_PRECHECK` on PASS"
+      ],
+      "must_not": [
+        "Modify plan.json (read-only input)",
+        "Run actual pilot benchmark (P3 responsibility, not P2)",
+        "Declare PASS without checking all 3 freshness sources"
+      ]
+    },
+    {
+      "id": "eval_02_skip_cycle_in_p0_p1",
+      "category": "skip",
+      "query": "我剛 inject 了一個新假說，幫我 check-staleness",
+      "context": {
+        "files_in_scope": ["InterSubMod/research/autoresearch/hypothesis_queue.json"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (SKIP WHEN: cycle 仍在 P0/P1 PLAN，plan.json 未 ready)",
+        "Suggests user run /cycle-init then research-loop (P1 PLAN) first to produce plan.json",
+        "Either no skill triggers, or cycle-init / research-loop activates instead"
+      ],
+      "must_not": [
+        "Attempt to read non-existent plan.json",
+        "Write a stub precheck.json without real preconditions"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_already_passed_p2",
+      "category": "edge_case",
+      "query": "上週通過 P2 的 cycle 20260505-0900-hpfine-rerun 今天還要重 check 嗎？",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/state/cycles/20260505-0900-hpfine-rerun/state.json",
+          "InterSubMod/state/cycles/20260505-0900-hpfine-rerun/precheck.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill reads state.json — detects `phase=P3_PILOT` or later, precheck.json already exists",
+        "Returns 'no action needed; cycle already past P2' unless invalidation entry newer than precheck timestamp",
+        "If new invalidation entry (binary rebuild / dataset refresh) detected → re-run and overwrite precheck.json with note"
+      ],
+      "must_not": [
+        "Re-run precheck unconditionally on a cycle past P2",
+        "Overwrite a fresh precheck.json without invalidation evidence"
+      ]
+    }
+  ],
+  "notes": [
+    "Per Anthropic K9 + SOP §10 evals format.",
+    "Run manually via Claude Code with skill loaded; observe behavior matches expected_behavior.",
+    "Design source: ~/.claude/plans/agent-harness-langgraph-resilient-waterfall.md §3.4"
+  ]
+}
