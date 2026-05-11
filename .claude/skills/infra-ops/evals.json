@@ -1,0 +1,64 @@
+{
+  "skill": "infra-ops",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_pipeline_preflight",
+      "category": "activation",
+      "query": "我準備跑全量 7 樣本 ISM benchmark，每個 region 大概產生幾 MB",
+      "context": {
+        "files_in_scope": []
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: pipeline preflight)",
+        "Runs tools/tmp_check.sh first to verify TMPDIR + /tmp safety",
+        "Surfaces 5-prevention-rule from references/tmp_disaster_2026_05_08.md if /tmp risk detected",
+        "Suggests TMPDIR=/big7_disk/... before user kicks off the run"
+      ],
+      "must_not": [
+        "Auto-set TMPDIR (skill is advisory, user runs the export)",
+        "Skip tmp_check if /tmp is a known root-volume directory"
+      ]
+    },
+    {
+      "id": "eval_02_skip_code_edit",
+      "category": "skip",
+      "query": "幫我把 src/core/ReadParser.cpp 加一個 normal BAM read 過濾",
+      "context": {
+        "files_in_scope": ["InterSubMod/src/core/ReadParser.cpp"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (pure code edit per SKIP WHEN)",
+        "cpp-change skill activates instead"
+      ],
+      "must_not": [
+        "Run tools/tmp_check.sh on a non-pipeline task",
+        "Suggest disk audit when no disk-pressure signal exists"
+      ]
+    },
+    {
+      "id": "eval_03_disk_full_emergency",
+      "category": "edge_case",
+      "query": "Bash 工具一直回 exit 1 沒輸出，我在跑 longphase",
+      "context": {
+        "files_in_scope": []
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: post-OOM / silent-fail)",
+        "Immediately runs `df -h /` to check root partition",
+        "If 100% full: surfaces tmp_disaster case study + 5 prevention rules",
+        "Proposes 3-option AskUserQuestion: kill longphase / wait+migrate output / manual /tmp cleanup"
+      ],
+      "must_not": [
+        "Auto-kill the longphase process",
+        "Auto-rm anything from /tmp"
+      ]
+    }
+  ],
+  "notes": [
+    "Per Anthropic K9 + SOP §10. Run manually with the skill loaded.",
+    "Future: scripts/run_evals.py automated harness."
+  ]
+}
