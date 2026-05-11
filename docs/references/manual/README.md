@@ -26,7 +26,8 @@
 
 1. [docs/CURRENT_FOCUS.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/CURRENT_FOCUS.md)
 2. [docs/experiments/INDEX.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/experiments/INDEX.md)
-3. [docs/references/manual/20260307_研究推進與實驗觀察手冊_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/references/manual/20260307_研究推進與實驗觀察手冊_01.md)
+3. [docs/references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md](20260424_AI啟動壓縮上下文與研究索引_01.md)
+4. [docs/references/manual/20260307_研究推進與實驗觀察手冊_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/references/manual/20260307_研究推進與實驗觀察手冊_01.md)
 
 ### B. 文件 / Agent / Skills
 
@@ -35,6 +36,16 @@
 3. [docs/references/manual/20260310_研究脈絡整理Skill規格_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/references/manual/20260310_研究脈絡整理Skill規格_01.md)
 4. [docs/references/manual/20260310_週報生成Skill規格_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/references/manual/20260310_週報生成Skill規格_01.md)
 5. [docs/references/manual/20260310_指令修正與偏好收斂Skill規格_01.md](/big8_disk/liaoyoyo2001/InterSubMod/docs/references/manual/20260310_指令修正與偏好收斂Skill規格_01.md)
+
+### B.1 Agent / Skills 分層索引（2026-04-27）
+
+| 類型 | 代表 skill / agent | 觸發原則 |
+|------|--------------------|----------|
+| 知識與背景 | `intersubmod-context-synthesizer`, `review-evidence`, `research-dashboard` | 純讀取、用於快速定向與避免重踩 |
+| 任務流程 | `intersubmod-research-cycle`, `weekly-report`, `results-report`, `doc-standards` | 需要產出研究文件、報告或小規模實驗計畫時使用 |
+| 高風險 / 需明確觸發 | `cpp-change`, `memory-consolidation`, `conclude-research`, full `research-loop` | 涉及 C++、memory 合併、NO-GO、長計算、搬移或正式結論時，必須先確認 gate |
+
+原則：優先載入小而專注的 skill；不要因為任務含「研究」就直接啟動 full research-loop。若只需要查狀態，先用 dashboard / evidence；若要改方向，先用 prompt/refinement 或 plan，再執行。
 
 ### C. PPT 與個人風格
 

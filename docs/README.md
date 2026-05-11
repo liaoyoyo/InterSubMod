@@ -18,6 +18,7 @@
 ### 常用入口
 
 - [當前目標](CURRENT_FOCUS.md)
+- [**AI 啟動壓縮上下文與研究索引**](references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md) ← 每次研究前快速掌握專案邏輯、重要數據、任務順序與待決策問題
 - [**研究構想總索引**](concepts/2026/04/20260409_研究構想總索引_01.md) ← 研究大圖景、發展樹、理論基礎、論文大綱
 - [研究歷史索引](experiments/INDEX.md)
 - [研究方法與突破方向全域分析](references/20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md)
@@ -92,14 +93,15 @@ scripts/analysis/check_ai_agent_readiness.sh
 **新任務起手式：**
 1. 讀 `CURRENT_FOCUS.md` → 確認當前優先事項
 2. 讀 `experiments/INDEX.md` → 避免重複已失敗的方向
-3. 讀 `references/20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md` → 確認突破方向優先序
-4. 讀 `research/methylation_methodology/2026/03/20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md` → 確認最終研究願景、paired/TO 分線與 LOH 先導觀察定位
-5. 讀 `plans/2026/03/20260326_LOH盤點執行規格_01.md` → 確認 LOH summary、decision ledger、figure 與 case panel 的固定輸出
-6. 讀 `methodology/20260324_方法學審查全域結論報告_01.md` → 確認哪些方向已 closeout
-7. 讀 `research/methylation_methodology/.../20260307_5kHz主實驗與方法學驗證藍圖_01.md` → 確認新的研究藍圖與樣本角色
-8. 讀 `plans/2026/03/20260307_純樣本甲基研究執行計畫_01.md` → 確認當前執行階段與交付物
-9. 讀 `references/manual/20260307_研究推進與實驗觀察手冊_01.md` → 對齊研究與紀錄流程
-10. 執行 `scripts/analysis/check_ai_agent_readiness.sh` → 確認環境狀態
+3. 讀 `references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md` → 快速取得整體邏輯、重要數據、任務順序、待確認決策矩陣
+4. 讀 `references/20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md` → 確認突破方向優先序
+5. 讀 `research/methylation_methodology/2026/03/20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md` → 確認最終研究願景、paired/TO 分線與 LOH 先導觀察定位
+6. 讀 `plans/2026/03/20260326_LOH盤點執行規格_01.md` → 確認 LOH summary、decision ledger、figure 與 case panel 的固定輸出
+7. 讀 `methodology/20260324_方法學審查全域結論報告_01.md` → 確認哪些方向已 closeout
+8. 讀 `research/methylation_methodology/.../20260307_5kHz主實驗與方法學驗證藍圖_01.md` → 確認新的研究藍圖與樣本角色
+9. 讀 `plans/2026/03/20260307_純樣本甲基研究執行計畫_01.md` → 確認當前執行階段與交付物
+10. 讀 `references/manual/20260307_研究推進與實驗觀察手冊_01.md` → 對齊研究與紀錄流程
+11. 執行 `scripts/analysis/check_ai_agent_readiness.sh` → 確認環境狀態
 
 **特定問題查閱：**
 - 找過去的解決方案 → `solutions/{topic}/`
@@ -157,23 +159,24 @@ scripts/analysis/check_ai_agent_readiness.sh
 ### 現在該先看什麼
 
 1. [當前目標](CURRENT_FOCUS.md)
-2. [研究歷史索引](experiments/INDEX.md)
-3. [研究方法與突破方向全域分析](references/20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md)
-4. [五目標研究願景與 LOH 先導觀察策略](research/methylation_methodology/2026/03/20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md)
-5. [LOH 盤點執行規格](plans/2026/03/20260326_LOH盤點執行規格_01.md)
-6. [方法學審查 closeout](methodology/20260324_方法學審查全域結論報告_01.md)
-7. [5kHz 主實驗後主線藍圖](research/methylation_methodology/2026/03/20260307_5kHz主實驗與方法學驗證藍圖_01.md)
-8. [突破方向版執行計畫](plans/2026/03/20260307_純樣本甲基研究執行計畫_01.md)
-9. [研究推進與實驗觀察手冊](references/manual/20260307_研究推進與實驗觀察手冊_01.md)
-10. [研究主題入口](research/README.md)
-11. [參考資料入口](references/README.md)
+2. [AI 啟動壓縮上下文與研究索引](references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md)
+3. [研究歷史索引](experiments/INDEX.md)
+4. [研究方法與突破方向全域分析](references/20260324_InterSubMod研究方法與相關文獻突破方向全域分析_01.md)
+5. [五目標研究願景與 LOH 先導觀察策略](research/methylation_methodology/2026/03/20260326_InterSubMod五目標研究願景與LOH先導觀察策略_01.md)
+6. [LOH 盤點執行規格](plans/2026/03/20260326_LOH盤點執行規格_01.md)
+7. [方法學審查 closeout](methodology/20260324_方法學審查全域結論報告_01.md)
+8. [5kHz 主實驗後主線藍圖](research/methylation_methodology/2026/03/20260307_5kHz主實驗與方法學驗證藍圖_01.md)
+9. [突破方向版執行計畫](plans/2026/03/20260307_純樣本甲基研究執行計畫_01.md)
+10. [研究推進與實驗觀察手冊](references/manual/20260307_研究推進與實驗觀察手冊_01.md)
+11. [研究主題入口](research/README.md)
+12. [參考資料入口](references/README.md)
 
 ### 研究文件 Agent 與 Skills 入口
 
 1. [主 Agent：InterSubMod 研究文件代理](/big8_disk/liaoyoyo2001/InterSubMod/.claude/agents/intersubmod-weekly-research-agent.md)
-2. [Skill：研究脈絡整理](/home/liaoyoyo2001/.codex/skills/intersubmod-context-synthesizer/SKILL.md)
-3. [Skill：週報生成](/home/liaoyoyo2001/.codex/skills/intersubmod-weekly-report-writer/SKILL.md)
-4. [Skill：指令修正與偏好收斂](/home/liaoyoyo2001/.codex/skills/intersubmod-report-prompt-refiner/SKILL.md)
+2. [Skill：研究脈絡整理](/bip7_disk/liaoyoyo2001/.codex/skills/intersubmod-context-synthesizer/SKILL.md)
+3. [Skill：週報生成](/bip7_disk/liaoyoyo2001/.codex/skills/intersubmod-weekly-report-writer/SKILL.md)
+4. [Skill：指令修正與偏好收斂](/bip7_disk/liaoyoyo2001/.codex/skills/intersubmod-report-prompt-refiner/SKILL.md)
 5. [使用手冊](/big8_disk/liaoyoyo2001/InterSubMod/docs/references/manual/20260310_研究報告Agent與Skills使用手冊_01.md)
 6. [週報專用指令手冊](/big8_disk/liaoyoyo2001/InterSubMod/docs/references/manual/20260310_研究週報撰寫指令與skill草案_01.md)
 7. [本週研究主線週報](/big8_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/20260310_研究主線週報_20260305_20260310_01.md)
