@@ -1,6 +1,6 @@
 ---
 name: observation-analysis
-description: 標準化觀察分析腳本生成 — 產生符合 O1-O15 系列模式的 Python 分析腳本。USE WHEN：建立新觀察分析（O-系列）、產生 .py 分析腳本含數據載入/圖表/統計。涉及 scripts/analysis/*.py、docs/experiments/ 輸出。
+description: 標準化觀察分析腳本生成 — 產生符合 O1-O15 系列模式的 Python 分析腳本。USE WHEN：建立新觀察分析（O-系列）、產生 .py 分析腳本含數據載入/圖表/統計。涉及 scripts/analysis/*.py、docs/experiments/ 輸出。SKIP WHEN 既有 O-script 微調（直接 Edit）、純圖表參數調整、純 .md 寫作、純 build / commit、程式碼級驗證（用 verification-loop）。
 allowed-tools: ["Read", "Write", "Bash", "Glob", "Grep"]
 user-invocable: false
 tags: ["analysis", "observation", "research"]

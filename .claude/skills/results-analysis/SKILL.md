@@ -1,6 +1,6 @@
 ---
 name: results-analysis
-description: 嚴格統計分析與科學圖表生成。分析實驗結果、比較模型效能、顯著性檢定、ablation 分析。USE WHEN：「分析結果」「統計分析」「比較效能」「check significance」「generate figures」。涉及 .csv/.tsv 結果檔、.py 分析腳本、.png 圖表。
+description: 嚴格統計分析與科學圖表生成。分析實驗結果、比較模型效能、顯著性檢定、ablation 分析。USE WHEN：「分析結果」「統計分析」「比較效能」「check significance」「generate figures」。涉及 .csv/.tsv 結果檔、.py 分析腳本、.png 圖表。SKIP WHEN 純圖表格式調整、已完成分析的 figure 重產、程式碼層級驗證（用 verification-loop）、純 build / commit / docs。
 tags: [Research, Analysis, Statistics, Visualization, Scientific Reporting]
 version: 0.2.0
 user-invocable: true

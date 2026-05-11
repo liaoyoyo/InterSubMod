@@ -1,6 +1,6 @@
 ---
 name: research-dashboard
-description: InterSubMod 一頁式研究看板。顯示當前方向、假說佇列、最近結果、阻塞點、記憶統計。USE WHEN：「研究看板」「dashboard」「研究狀態」「現在在哪」「給我 status」。
+description: InterSubMod 一頁式研究看板。顯示當前方向、假說佇列、最近結果、阻塞點、記憶統計。USE WHEN：「研究看板」「dashboard」「研究狀態」「現在在哪」「給我 status」。SKIP WHEN cycle-level dashboard（用 cycle-state）、純 build / commit / docs、單一假說查詢（用 review-evidence）、tier 分佈審計（用 provenance-tier-audit）。
 allowed-tools: Read, Glob, Grep, Bash
 user-invocable: true
 ---

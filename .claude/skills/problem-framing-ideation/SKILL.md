@@ -1,6 +1,6 @@
 ---
 name: problem-framing-ideation
-description: **P0 REGISTER 前置 — 問題框架化（problem framing）**：用 5W1H + gap analysis 把模糊想法收斂成 1-3 個可被 inject-hypothesis 接收的具體假說候選。**限投入 <2hr**（個人風格 anchor #5：避免無限迭代；超時則先選最好的進 inject-hypothesis）。觸發：「腦力激盪」「brainstorm」「研究構想」「gap analysis」「5W1H」「開始新方向」「框架化想法」「research-ideation」（前身）。**職責邊界**：本 skill 輸出 `候選假說清單 + 5W1H 表`；不註冊（→ inject-hypothesis）、不執行（→ research-loop Step 4+）、不建專案目錄（→ init-research）。
+description: **P0 REGISTER 前置 — 問題框架化（problem framing）**：用 5W1H + gap analysis 把模糊想法收斂成 1-3 個可被 inject-hypothesis 接收的具體假說候選。**限投入 <2hr**（個人風格 anchor #5：避免無限迭代；超時則先選最好的進 inject-hypothesis）。觸發：「腦力激盪」「brainstorm」「研究構想」「gap analysis」「5W1H」「開始新方向」「框架化想法」「research-ideation」（前身）。**職責邊界**：本 skill 輸出 `候選假說清單 + 5W1H 表`；不註冊（→ inject-hypothesis）、不執行（→ research-loop Step 4+）、不建專案目錄（→ init-research）。SKIP WHEN 假說已具體化可直接 inject-hypothesis、已有完整 plan.json（用 research-loop）、純 docs / build / commit、跨 cycle 系統審計（用 provenance-tier-audit）。
 version: 0.2.0
 ---
 
