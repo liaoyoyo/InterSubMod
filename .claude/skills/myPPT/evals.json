@@ -1,0 +1,70 @@
+{
+  "skill": "myPPT",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "我要做這週的週報投影片給 PI",
+      "context": {
+        "files_in_scope": []
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '週報', '投影片', 'PI')",
+        "Recognizes weekly-report scenario via lightweight scenario identifier",
+        "AskUserQuestion presents 4 routing options (weekly-report / pptx-build / direct-edit / cancel)",
+        "Delegates to weekly-report skill (W1-W7 master draft pipeline)",
+        "Does NOT itself produce master_draft or PPTX (routing only)"
+      ],
+      "must_not": [
+        "Generate master_draft.md or .pptx directly (routing-only responsibility)",
+        "Skip the routing question and assume weekly-report or pptx-build"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "我已經有 master_draft.md，直接幫我做 PPTX",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/reports/validated/2026/05/20260505_週報_self_phasing_v2.1試用第2次/master_draft.md"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (master draft exists per SKIP WHEN)",
+        "pptx-build skill activates directly with --from-draft master_draft.md",
+        "User informed: skipping myPPT routing because master draft is ready"
+      ],
+      "must_not": [
+        "Re-run W1-W7 weekly-report when master is ready",
+        "Add unnecessary scenario-identification overhead"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_no_pptx_needed",
+      "category": "edge_case",
+      "query": "幫我整理本週進度，純 .md report 即可，不需要 PPTX",
+      "context": {
+        "files_in_scope": []
+      },
+      "expected_behavior": [
+        "Skill activates but recognizes no-PPTX scenario in routing",
+        "Suggests weekly-report (W1-W7 master draft only, stop at W7)",
+        "Suggests html-preview to generate companion HTML viewer for PI",
+        "Does NOT delegate to pptx-build (PPTX explicitly not needed)"
+      ],
+      "must_not": [
+        "Force PPTX path when user explicitly opted out",
+        "Silently delegate to pptx-build without confirming user intent"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "myPPT is routing-only — never produces master draft or PPTX itself.",
+    "Sub-skills: weekly-report (W1-W7 master), pptx-build (P1-P5 PPTX), html-preview (companion HTML)."
+  ]
+}

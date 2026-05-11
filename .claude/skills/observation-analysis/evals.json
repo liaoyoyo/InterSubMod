@@ -1,0 +1,75 @@
+{
+  "skill": "observation-analysis",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "建立 O15 觀察分析腳本：NG=2 vs paired F1 gain 跨樣本",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/scripts/analysis/",
+          "InterSubMod/docs/experiments/in_progress/"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'O15', '觀察分析')",
+        "Generates new .py script in scripts/analysis/ following O1-O15 standard pattern",
+        "Script includes data loading (pandas read_csv with canonical paths), figure generation (matplotlib with plot_setup.py), statistical tests (scipy)",
+        "Uses canonical 7-sample order constants and deterministic random_state",
+        "Output paths follow docs/experiments/in_progress/YYYY/MM/ convention"
+      ],
+      "must_not": [
+        "Modify an existing O-series script (use Edit instead per SKIP WHEN)",
+        "Omit plot_setup.py / CJK font injection (well-known pitfall from feedback memory)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "幫我把 O14 的 figure 標題字號改大一點",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/scripts/analysis/O14_*.py"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (existing-script tweak per SKIP WHEN)",
+        "Edit tool used directly on the existing O14 .py file",
+        "No new script scaffolding generated"
+      ],
+      "must_not": [
+        "Re-generate full O14 script when only a parameter changes",
+        "Create O14_v2.py for a cosmetic tweak"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_multi_dataset",
+      "category": "edge_case",
+      "query": "建 O16 觀察分析跨 paired_full / paired_pileup / TO 三條 pipeline 的 NGroups 分布",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/output/canonical/"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates and explicitly requests dataset_id list confirmation before scaffolding",
+        "Generated script loops over the 3 specified dataset_ids with explicit path constants",
+        "Per-dataset subplots + cross-dataset aggregate figure both produced",
+        "Statistical test stratified by dataset_id (avoids cross-pipeline confounding)"
+      ],
+      "must_not": [
+        "Silently merge 3 pipelines without stratification (Simpson's paradox risk)",
+        "Use a single hardcoded dataset path when multi-dataset was requested"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "O-series convention: O1-O15 currently exist; new scripts continue numbering.",
+    "All matplotlib output must inject Droid Sans Fallback font (CJK rule from feedback memory)."
+  ]
+}

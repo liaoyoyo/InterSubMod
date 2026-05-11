@@ -1,0 +1,74 @@
+{
+  "skill": "problem-framing-ideation",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "腦力激盪一下 normal BAM 整合進來之後可以怎麼用",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/concepts/2026/04/20260409_研究構想總索引_01.md"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '腦力激盪', 'normal BAM 怎麼用')",
+        "Runs 5W1H framework (What / Why / Who / When / Where / How) on normal BAM scenarios",
+        "Performs gap analysis vs existing capability (which directions are unaddressed)",
+        "Converges to 1-3 candidate hypotheses ready for inject-hypothesis handoff",
+        "Outputs candidate list + 5W1H table; does NOT register, execute, or scaffold project"
+      ],
+      "must_not": [
+        "Register hypothesis directly in hypothesis_queue.json (use inject-hypothesis)",
+        "Create research/{project_name}/ directory (use init-research)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "我要把假設『normal-vs-tumor ASM delta predicts somatic TP』加進佇列",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/autoresearch/hypothesis_queue.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (hypothesis already concrete per SKIP WHEN)",
+        "inject-hypothesis skill activates instead to register the hypothesis",
+        "User informed: problem-framing-ideation is for pre-injection ideation only"
+      ],
+      "must_not": [
+        "Re-frame an already-concrete hypothesis through 5W1H (waste of cycle)",
+        "Block direct injection by requiring a framing pass"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_timeout",
+      "category": "edge_case",
+      "query": "繼續腦力激盪 cross-region subclonal heterogeneity 這個方向（已經第 3 小時還沒收斂）",
+      "context": {
+        "files_in_scope": []
+      },
+      "expected_behavior": [
+        "Skill activates but enforces <2hr time-box (anchor #5: avoid infinite iteration)",
+        "Detects 3hr session exceeds budget and forces convergence stop",
+        "Selects best 1 candidate from accumulated ideas and recommends inject-hypothesis handoff",
+        "Records timeout reason and accumulated 5W1H table in session log",
+        "Suggests pivot-direction or conclude-research if no candidate is viable"
+      ],
+      "must_not": [
+        "Continue brainstorming past 2hr without forced convergence",
+        "Discard all accumulated ideas — must pick the best 1 even on timeout"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "P0 REGISTER pre-stage skill — sits before inject-hypothesis in research lifecycle.",
+    "Strict 2hr time-box (anchor #5); on timeout, hand best candidate to inject-hypothesis.",
+    "Output contract: candidate hypothesis list + 5W1H table; never registers or executes."
+  ]
+}

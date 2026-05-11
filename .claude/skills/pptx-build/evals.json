@@ -1,0 +1,73 @@
+{
+  "skill": "pptx-build",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "從這份 master_draft 幫我做 PPTX 給教授",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/reports/validated/2026/05/20260505_週報_self_phasing_v2.1試用第2次/master_draft.md"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'PPTX', '教授', 'master_draft')",
+        "Invoked with --from-draft to auto-extract main thesis / report_type / audience from frontmatter",
+        "Runs P1 (outline lock) → P2 (section) → P3 (slide) → P4 (vision review) → P5 (speaker script) with 3-layer confirmation",
+        "Identifies one of 6 templates (academic_defense / weekly_report / etc.) and applies its structure",
+        "Claude Vision 10-checkpoint review at P4 (CJK font, fit-within scaling, 6 design taboos)"
+      ],
+      "must_not": [
+        "Skip P1 main-thesis lock (Hard checkpoint per playbook)",
+        "Output .pptx without P5 speaker script (Tier 1/2/3 三層分流 required)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "幫我整理本週週報，還沒有 master_draft",
+      "context": {
+        "files_in_scope": []
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (no master draft per SKIP WHEN)",
+        "weekly-report skill activates instead to produce W1-W7 master draft",
+        "User informed: pptx-build runs after weekly-report W7 is complete"
+      ],
+      "must_not": [
+        "Generate PPTX from raw notes without master_draft.md as input",
+        "Skip weekly-report W1-W7 pipeline and fabricate a draft"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_minor_text_tweak",
+      "category": "edge_case",
+      "query": "P3 那張投影片標題太長了，改成 'NG=2 LOH-Constrained Phasing'",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/reports/validated/2026/05/20260505_週報_self_phasing_v2.1試用第2次/output.pptx"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate full P1-P5 pipeline (existing PPTX micro-edit per SKIP WHEN)",
+        "Edit tool used directly on the slide via python-pptx or playbook quick-edit path",
+        "P4 vision review re-run only on the modified slide (not full deck)",
+        "Confirms file path + 1-line告知 before mutation (low impact, high confidence, reversible)"
+      ],
+      "must_not": [
+        "Re-run full P1-P5 pipeline for a single text edit",
+        "Re-render every slide when only one needs the title change"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "P1 main-thesis lock + P5 speaker script are Hard checkpoints (always pause).",
+    "P2/P3/P4 fast-track allowed in 全自動 mode (30s countdown).",
+    "Vision check covers CJK font (Droid Sans Fallback), fit-within scaling, 6 design taboos."
+  ]
+}

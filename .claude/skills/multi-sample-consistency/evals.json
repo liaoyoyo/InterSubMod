@@ -1,0 +1,75 @@
+{
+  "skill": "multi-sample-consistency",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "幫我跨 7 樣本驗證 NG=2 LOH-constrained phasing 結論",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/output/canonical/",
+          "InterSubMod/research/autoresearch/evidence_ledger.jsonl"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '7 樣本驗證', 'cross-sample')",
+        "Spawns parallel-benchmark agent across canonical 7-sample order",
+        "Outputs canonical sort table + direction-consistency stats (k/N samples agreeing)",
+        "Computes confidence uplift (single → multi-sample) per evidence_tier_rubric",
+        "Sets multi_sample_consistent flag for tier 4 evidence promotion"
+      ],
+      "must_not": [
+        "Run on single sample only (defeats consistency check purpose)",
+        "Skip canonical 7-sample order (HCC1395, COLO829, H2009, etc.)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "做 HCC1395 單樣本 pilot 觀察 NGroups vs F1",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/output/canonical/HCC1395_paired_full/"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (single-sample pilot per SKIP WHEN)",
+        "feature-layered-observation skill activates instead for P3 PILOT phase",
+        "User informed: multi-sample-consistency runs at P4 GENERALIZE, after pilot"
+      ],
+      "must_not": [
+        "Run 7-sample parallel benchmark before pilot evidence is established",
+        "Promote single-sample finding to ⭐3+ tier without consistency check"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_partial_sample_coverage",
+      "category": "edge_case",
+      "query": "結論只在 3 樣本可驗證（COLO829, H2009, HCC1395），跑 consistency check",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/output/canonical/"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates but explicitly warns coverage = 3/7 < 4-sample minimum",
+        "Runs consistency check on available 3 samples and reports k/N",
+        "Computes confidence uplift but caps tier recommendation at ⭐3 (insufficient for ⭐4+)",
+        "Outputs reason: 'multi_sample_consistent flag NOT set; need 4+ samples for tier 4'"
+      ],
+      "must_not": [
+        "Silently treat 3 samples as full multi-sample evidence",
+        "Recommend ⭐4 tier upgrade with <4 sample coverage"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "P4 GENERALIZE phase skill — sits between feature-layered-observation (P3) and run-evaluator (P5).",
+    "Multi-sample threshold: 4+ samples required for multi_sample_consistent=true."
+  ]
+}

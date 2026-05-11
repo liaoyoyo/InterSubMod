@@ -1,0 +1,77 @@
+{
+  "skill": "pivot-direction",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "TO mode FP 過濾這方向不行，換方向試試 LOH-constrained phasing",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/autoresearch/hypothesis_queue.json",
+          "InterSubMod/research/autoresearch/research_direction.md"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '這方向不行', '換方向')",
+        "Reads current state from hypothesis_queue.json + research_direction.md",
+        "Injects new direction (LOH-constrained phasing) as high-priority candidate",
+        "Demotes failing direction (TO mode FP filter) with recorded reason",
+        "Records pivot rationale in evidence_ledger.jsonl with source provenance"
+      ],
+      "must_not": [
+        "Add a new hypothesis without changing failing-direction priority (use inject-hypothesis instead)",
+        "Pivot without recording reason in evidence_ledger (audit trail required)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "加一個新假設：normal BAM 整合到 ReadParser 觀察 ASM",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/autoresearch/hypothesis_queue.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (no pivot intent per SKIP WHEN)",
+        "inject-hypothesis skill activates instead",
+        "User informed: pivot-direction is for direction switching, not new hypothesis injection"
+      ],
+      "must_not": [
+        "Demote any existing direction when only injecting a new hypothesis",
+        "Record a pivot rationale when no pivot is happening"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_n_consecutive_negative",
+      "category": "edge_case",
+      "query": "Z3 internal exploration 連續 3 個 cycle 都 NEGATIVE 了，怎麼辦",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/autoresearch/evidence_ledger.jsonl",
+          "InterSubMod/state/active.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates and auto-suggests pivot based on N consecutive NEGATIVE cycles",
+        "Pauses for Hard Gate confirmation (NO-GO judgment per CLAUDE.md confirmation matrix)",
+        "Lists 2-3 alternative directions ranked by expected ROI",
+        "After user confirms, demotes Z3 direction and injects chosen alternative",
+        "Updates research_direction.md with pivot rationale and N-cycle history"
+      ],
+      "must_not": [
+        "Auto-execute NO-GO without Hard Gate confirmation (CLAUDE.md irreversible-action rule)",
+        "Demote direction based on <2 cycles of NEGATIVE evidence"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "NO-GO judgments are Hard Gate per CLAUDE.md — always require user confirmation.",
+    "Pivot trigger: explicit user signal OR research-loop 'suggest pivot' return OR N consecutive NEGATIVE cycles."
+  ]
+}
