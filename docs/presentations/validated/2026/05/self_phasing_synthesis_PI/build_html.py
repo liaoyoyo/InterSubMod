@@ -724,6 +724,8 @@ def render_slide_page(s, prev_id, next_id, idx, total):
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Slide {s['num']} — {s['title']}</title>
   <style>{STYLE_CSS}</style>
+  <!-- PanZoom.js CDN — fail-soft：載入失敗時 fallback 到 CSS hover scale + new-tab full size -->
+  <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
 </head>
 <body>
 <main class="slide-page" role="main" aria-label="Slide {s['num']} content">
@@ -767,6 +769,38 @@ def render_slide_page(s, prev_id, next_id, idx, total):
   document.addEventListener('keydown', function(e) {{
     if (e.key === 'ArrowLeft' && {bool(prev_id)}) location.href = 'slide_{prev_id}.html';
     if (e.key === 'ArrowRight' && {bool(next_id)}) location.href = 'slide_{next_id}.html';
+  }});
+
+  // PanZoom.js progressive enhancement — fail-soft if CDN blocked
+  window.addEventListener('load', function() {{
+    if (typeof panzoom === 'undefined') {{
+      console.warn('[PanZoom] CDN unavailable; falling back to CSS hover + new-tab zoom');
+      return;
+    }}
+    document.querySelectorAll('.igv-zoom-wrap img.igv-thumb').forEach(function(img) {{
+      var wrap = img.closest('.igv-zoom-wrap');
+      wrap.classList.add('has-panzoom');  // disable CSS hover scale via this class
+      // Disable target=_blank click for panzoom-enabled image (pan/zoom handled inline)
+      var anchor = img.closest('a');
+      if (anchor) anchor.addEventListener('click', function(e) {{ if (!e.shiftKey) e.preventDefault(); }});
+      // Init panzoom with wheel zoom + drag pan
+      var pz = panzoom(img, {{
+        minZoom: 0.5, maxZoom: 8, bounds: false, beforeWheel: function() {{ return false; }},
+        zoomDoubleClickSpeed: 1.5, smoothScroll: false
+      }});
+      img.style.cursor = 'grab';
+      img.addEventListener('mousedown', function() {{ img.style.cursor = 'grabbing'; }});
+      img.addEventListener('mouseup', function() {{ img.style.cursor = 'grab'; }});
+      // Add reset button
+      var resetBtn = document.createElement('button');
+      resetBtn.textContent = '↺ 重置';
+      resetBtn.className = 'igv-pz-reset';
+      resetBtn.onclick = function() {{ pz.zoomAbs(0, 0, 1); pz.moveTo(0, 0); }};
+      wrap.appendChild(resetBtn);
+      // Update hint
+      var hint = wrap.querySelector('.igv-zoom-hint');
+      if (hint) hint.textContent = '🖱 滾輪 zoom / 拖曳 pan / Shift+點擊新分頁';
+    }});
   }});
 </script>
 

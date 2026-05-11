@@ -145,6 +145,18 @@ table.metric-table tr.row-yellow td { background: #FEF3C7; }
   transform: scale(1.8); transform-origin: center center; z-index: 50;
   position: relative; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
+/* PanZoom enhancement loaded → disable CSS hover scale (panzoom handles wheel/drag) */
+.igv-zoom-wrap.has-panzoom { overflow: hidden; cursor: grab; }
+.igv-zoom-wrap.has-panzoom:hover img.igv-thumb {
+  transform: none; box-shadow: none; z-index: auto; position: static;
+}
+.igv-pz-reset {
+  position: absolute; bottom: 8px; right: 8px; z-index: 52;
+  background: rgba(30, 58, 138, 0.9); color: white; border: none;
+  padding: 4px 10px; border-radius: 4px; font-size: 11px;
+  cursor: pointer; font-weight: 600;
+}
+.igv-pz-reset:hover { background: rgba(30, 58, 138, 1); }
 .igv-zoom-hint {
   position: absolute; top: 6px; right: 8px; z-index: 51;
   background: rgba(30, 58, 138, 0.85); color: white;
@@ -252,6 +264,8 @@ details.collapsible summary:hover { color: #1D4ED8; }
   background: white; color: #1F2937; padding: 1px 6px; border-radius: 3px; font-size: 10px; margin: 0 2px;
 }
 </style>
+  <!-- PanZoom.js CDN — fail-soft：載入失敗時 fallback 到 CSS hover scale + new-tab full size -->
+  <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
 </head>
 <body>
 <main class="slide-page" role="main" aria-label="Slide 04b content">
@@ -326,6 +340,38 @@ details.collapsible summary:hover { color: #1D4ED8; }
   document.addEventListener('keydown', function(e) {
     if (e.key === 'ArrowLeft' && True) location.href = 'slide_04a_sp1.html';
     if (e.key === 'ArrowRight' && True) location.href = 'slide_05_player_referee.html';
+  });
+
+  // PanZoom.js progressive enhancement — fail-soft if CDN blocked
+  window.addEventListener('load', function() {
+    if (typeof panzoom === 'undefined') {
+      console.warn('[PanZoom] CDN unavailable; falling back to CSS hover + new-tab zoom');
+      return;
+    }
+    document.querySelectorAll('.igv-zoom-wrap img.igv-thumb').forEach(function(img) {
+      var wrap = img.closest('.igv-zoom-wrap');
+      wrap.classList.add('has-panzoom');  // disable CSS hover scale via this class
+      // Disable target=_blank click for panzoom-enabled image (pan/zoom handled inline)
+      var anchor = img.closest('a');
+      if (anchor) anchor.addEventListener('click', function(e) { if (!e.shiftKey) e.preventDefault(); });
+      // Init panzoom with wheel zoom + drag pan
+      var pz = panzoom(img, {
+        minZoom: 0.5, maxZoom: 8, bounds: false, beforeWheel: function() { return false; },
+        zoomDoubleClickSpeed: 1.5, smoothScroll: false
+      });
+      img.style.cursor = 'grab';
+      img.addEventListener('mousedown', function() { img.style.cursor = 'grabbing'; });
+      img.addEventListener('mouseup', function() { img.style.cursor = 'grab'; });
+      // Add reset button
+      var resetBtn = document.createElement('button');
+      resetBtn.textContent = '↺ 重置';
+      resetBtn.className = 'igv-pz-reset';
+      resetBtn.onclick = function() { pz.zoomAbs(0, 0, 1); pz.moveTo(0, 0); };
+      wrap.appendChild(resetBtn);
+      // Update hint
+      var hint = wrap.querySelector('.igv-zoom-hint');
+      if (hint) hint.textContent = '🖱 滾輪 zoom / 拖曳 pan / Shift+點擊新分頁';
+    });
   });
 </script>
 
