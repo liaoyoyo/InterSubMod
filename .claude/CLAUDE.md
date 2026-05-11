@@ -1,32 +1,33 @@
 # CLAUDE.md - Claude Code 專案指南
 
-## 繼續研究前的必讀清單（每次對話開始時強制執行）
+## 研究上下文載入策略（觸發式 on-demand）
 
-**每次開始研究/分析任務前，必須依序閱讀以下文件，不得省略：**
+每次對話開始時，CLAUDE.md 自身 + `docs/CURRENT_FOCUS.md` 為**唯一 always-loaded** 上下文（~3k tokens）。
 
-1. **`docs/CURRENT_FOCUS.md`** — 當前進行中的事項、阻塞點與風險
-2. **`docs/experiments/INDEX.md`** — 過去所有研究方向的成功/失敗結論與建議後續
-3. **`docs/README.md`** — 如需了解文件導航與查閱路徑
-4. **`docs/concepts/2026/04/20260409_研究構想總索引_01.md`** — 研究大圖景、發展樹、理論基礎、論文規劃
-5. **`docs/reports/research_landscape/00_INDEX.md`** — 完整研究推論鏈、14 結論穩定性、8 證據鏈（需深度理解時）
+**研究分析啟動時**：呼叫 `/research-context-loader` skill，依問題深度分 3 tier 載入：
+- Tier 1（always）：CURRENT_FOCUS.md
+- Tier 2（light, ~3-5k tokens）：experiments INDEX + landscape 00_INDEX + concepts 索引
+- Tier 3（deep, ~5-15k tokens）：依問題主題載入特定 landscape 檔案
 
-**目的**：避免重複已失敗的方向、對齊當前最優先目標、了解哪些結論已驗證、哪些尚未解決。
+完整 landscape 速查表移到 skill 內 — 詳見 `.claude/skills/research-context-loader/SKILL.md`。
 
-**觸發條件**：開始任何研究分析、實驗設計、程式改進、或延續前次工作時，此步驟為必要前置。
+**何時不需要 loader**：純 code edits（make/test/commit）、單檔 doc 寫作、簡單問答 — 預設不載入 landscape。
 
-### 重點資訊速查
+---
 
-| 我想知道... | 去哪裡找 |
-|-------------|---------|
-| TO FP 問題全貌 | `docs/reports/research_landscape/01_TO_FP問題全貌.md` |
-| Self-phasing 根因與影響 | `docs/reports/research_landscape/02_Self_Phasing根因.md` |
-| 哪些 ISM 特徵可信 | `docs/reports/research_landscape/03_ISM分析價值界定.md` |
-| 暫停判定與修正後預期 | `docs/reports/research_landscape/04_暫停判定與重評估.md` |
-| 完整證據鏈推論 | `docs/reports/research_landscape/05_證據鏈總覽.md` |
-| 結論穩定性評分 | `docs/reports/research_landscape/06_結論穩定性審查.md` |
-| LOH/CN/AF 三維度統合 | `docs/reports/research_landscape/07_LOH_CN_AF_研究總整理.md` |
-| Zone-Aware Framework 驗證歷程 | `docs/reports/research_landscape/08_Zone_Aware.md` |
-| Part B 質疑驗證（HPFineNGroups 升級） | `docs/reports/research_landscape/09_Part_B.md` |
+## Agent 上下文控制面（2026-04-27）
+
+本專案同時有 repo 規範、Claude 執行規則、研究壓縮上下文、memory 與 AutoResearch queue。為避免 agent 啟動時混用過時來源，分工如下：
+
+| 入口 | 權威範圍 | 使用時機 |
+|------|----------|----------|
+| `AGENTS.md` | repo 內硬規則、Knowledge Base 查閱義務、output/runbook/meeting 分流 | 判斷可讀寫範圍、新檔落點、不可刪檔規則 |
+| `.claude/CLAUDE.md` | Claude Code 行為、確認矩陣、hooks、壓縮保留、C++ gate | 約束 agent 怎麼做事 |
+| `docs/references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md` | 研究壓縮上下文、重要數據、任務順序、待決策矩陣 | 每次研究/分析的快速定向 |
+| `docs/CURRENT_FOCUS.md` | live 主軸、阻塞、最新撤回或主軸切換 | 每次對話開始確認現況 |
+| `research/autoresearch/research_direction.md` | AutoResearch 候選 queue | 只作候選，不作自動執行觸發 |
+
+啟動研究任務時先回答 5 問：是否涉及 Thread D、是否碰到 Thread B 撤回範圍、資料是否 KDE-corrected、是否需要 VCF caller AF、是否觸及長計算/C++/搬移/NO-GO gate。
 
 ---
 
@@ -34,54 +35,15 @@
 
 壓縮（compact）時**必須保留**：架構決策及理由、未解決 blockers、涉及檔案路徑清單、用戶限制條件、假說 ID 與驗證層級、未完成步驟清單、所有 CLAUDE.md 規則。
 
+若要跨 session 交接，先以 `docs/references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md` 作為壓縮上下文骨架，再補充本輪新增的 artifacts、verdict 與未完成 gate。
+
 **可安全壓縮**：中間計算過程、已通過的測試完整輸出、冗長程式碼輸出、重複的工具呼叫結果。
 
 ---
 
-## 模型執行特性與 Prompt 策略（Opus 4.7，2026-04-17 起適用）
+## 模型執行特性與 Prompt 策略
 
-**Opus 4.7 的關鍵行為差異直接影響本專案流程**。所有 skills 與 hooks 設計均假設以下特性：
-
-### 執行行為（無法以 prompt 反轉）
-
-| 特性 | 實際行為 | 對本專案的意涵 |
-|------|---------|---------------|
-| **Literal 指令遵循** | 不會悄悄泛化指令、不推斷未明講需求 | 模糊指令 = 模型直接按字面做，責任在 prompt 完整度 |
-| **預設少 tool calls** | 優先用 reasoning 解決，而非反覆讀檔/搜尋 | 需要廣泛掃描時，明確寫「讀遍 src/core/*.cpp」 |
-| **預設少 subagent** | 單回合完成優先，除非明確 fan-out | 跨檔案/跨樣本平行任務須明寫「spawn N agents」 |
-| **回應長度動態化** | 隨任務複雜度調整（不再固定冗長） | 簡單問題不會得到過度解釋；複雜分析仍詳盡 |
-| **主動 progress update** | 長 trace 中會自發回報進度 | 不需再加「每 5 步報告一次」類 scaffolding |
-| **Tokenizer 改版** | token 用量為 4.6 的 1.0–1.35× | 長任務 `max_tokens` 與 compaction 閾值需給足 headroom |
-| **Thinking 預設不輸出** | 需設 `display: "summarized"` 才回傳推理內容 | Hooks 若依賴 thinking 內容需調整 |
-
-### Prompt 策略（本專案要求）
-
-1. **First-turn completeness**：首 turn 給完整規格（意圖、約束、檔案路徑含行號、驗收標準、specialist 分派），避免多 turn 迭代補資訊
-2. **正向範例優於否定列表**：寫「用 within-group OLS 這樣做：...」優於「不要用 pooled OLS」
-3. **Subagent 明確觸發**：需要平行時寫「spawn parallel-benchmark for HCC1395_5kHz, COLO829, H2009」；否則預期模型單回合完成
-4. **Effort 建議**：
-   - `xhigh`（預設）— 大多數 agentic 研究任務
-   - `high` — 已有詳細 plan 的執行階段
-   - `max` — 僅真正困難的問題（會 overthink）
-5. **Task budgets（beta，可選）**：長迴圈（如 HPFineNGroups 全樣本）可設 `task_budget` 讓模型自我節流
-
-### 可移除的過度 scaffolding（4.6 遺留）
-
-以下語句在 4.7 下多為冗餘，審查既有文件/prompt 時可刪除：
-- 「double-check 結果合理性」「確認看起來正確」
-- 「每 N 步給 interim status」「持續回報進度」
-- 「預設 fan-out 給多個 subagent」（除非真需要）
-- 「先渲染 PPTX 再自我檢查 layout」（4.7 slide/chart 能力已內建自檢）
-- 「每個決策都 FYI 告知」→ 改為**僅低影響+高信心時用一行告知**，其他情境依暫停判斷矩陣
-
-### 不可放寬的硬性規則（與模型無關）
-
-以下為本專案結構性要求，不因模型升級而鬆動：
-- C++ 修改的 6 步驟 PDD 協議（`/cpp-change`）
-- C++ commit 前必編譯（Hard Gate hook）
-- 研究方向 NO-GO 判定需用戶確認（Hard Gate）
-- 刪除/搬移檔案需用戶確認（Hard Gate）
-- Evidence ledger 每輪必記錄
+詳見 `.claude/rules/opus47-behavior.md`（編輯 SKILL.md / *.json 時自動觸發載入）。
 
 ---
 

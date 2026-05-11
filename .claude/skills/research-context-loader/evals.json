@@ -1,0 +1,59 @@
+{
+  "skill": "research-context-loader",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_research_continuation",
+      "category": "activation",
+      "query": "延續上次 LOH-constrained phasing 的研究，下一步要做什麼",
+      "context": {"files_in_scope": []},
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 「延續研究」)",
+        "Loads Tier 2 first (experiments INDEX + landscape 00_INDEX + concepts index)",
+        "Identifies LOH-related landscape files (07 LOH_CN_AF + 02 Self_Phasing)",
+        "Loads only those Tier 3 files, not all 10"
+      ],
+      "must_not": [
+        "Load all 10 landscape files preemptively",
+        "Skip the Tier 2 INDEX step"
+      ]
+    },
+    {
+      "id": "eval_02_skip_simple_build",
+      "category": "skip",
+      "query": "幫我跑 make -j8 然後 commit",
+      "context": {"files_in_scope": ["InterSubMod/src/core/foo.cpp"]},
+      "expected_behavior": [
+        "Skill does NOT activate (SKIP WHEN: code-only edits)",
+        "cpp-change skill activates instead"
+      ],
+      "must_not": [
+        "Load any landscape file",
+        "Activate this skill for build/commit operations"
+      ]
+    },
+    {
+      "id": "eval_03_deep_dive_specific_conclusion",
+      "category": "edge_case",
+      "query": "HPFineNGroups marker 為何降到 ⭐3，重評估的根本原因是什麼",
+      "context": {"files_in_scope": []},
+      "expected_behavior": [
+        "Skill activates",
+        "Loads Tier 2 first to find relevant landscape file",
+        "Loads Tier 3 file 09_Part_B.md (HPFineNGroups upgrade questions)",
+        "Loads Tier 3 file 06_結論穩定性審查.md (tier downgrades)",
+        "Does NOT load 01/03/04/05/07/08/10 (irrelevant)"
+      ],
+      "must_not": [
+        "Load all 10 landscape files",
+        "Answer from memory without loading the relevant landscape file"
+      ]
+    }
+  ],
+  "notes": [
+    "Per Anthropic K9 + SOP §10. Run manually with skill loaded.",
+    "Token budget impact verified via context_size_audit.sh."
+  ]
+}
