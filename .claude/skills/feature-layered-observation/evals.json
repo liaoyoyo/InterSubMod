@@ -1,0 +1,68 @@
+{
+  "skill": "feature-layered-observation",
+  "version": "0.2.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "對 NG=2 跑 Step 1-6 觀察 LOH×AF×CN",
+      "context": {
+        "files_in_scope": ["InterSubMod/research/feature_layered_observation/", "InterSubMod/state/schemas/pilot.schema.json"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'Step 1-6', 'LOH×AF×CN', 'P3 PILOT')",
+        "Executes Step 1-6 protocol: global AUC → 32-cell stratification → 7-sample consistency → stratified AUC → confound guard → spatial autocorr",
+        "Produces 10-section .md report + 6 figure types under research/feature_layered_observation/",
+        "Writes pilot.json conforming to state/schemas/pilot.schema.json",
+        "Outputs verdict ready for P4 multi-sample-consistency handoff"
+      ],
+      "must_not": [
+        "Skip confound guard step (G1-G10 methodology requires within-group OLS check)",
+        "Activate for pure build / commit / docs writing"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "跨 7 樣本驗證 NG=2 的方向一致性",
+      "context": {
+        "files_in_scope": ["InterSubMod/state/cycles/{id}/pilot.json"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (P4 cross-sample scope per SKIP WHEN)",
+        "multi-sample-consistency activates instead (P4 generalize phase)",
+        "pilot.json from this skill becomes input to multi-sample-consistency"
+      ],
+      "must_not": [
+        "Re-run Step 1-6 PILOT when caller wants P4 generalize",
+        "Overwrite existing pilot.json during P4 multi-sample audit"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_single_region",
+      "category": "edge_case",
+      "query": "對 chr8:127000000-128000000 1 個 region (非全 sample) 觀察 HPFineN",
+      "context": {
+        "files_in_scope": ["InterSubMod/output/canonical/HCC1395_paired_full/"]
+      },
+      "expected_behavior": [
+        "Skill activates with single-region scope",
+        "Step 3 (7-sample cross-sample consistency) marked N/A in pilot.json",
+        "Other steps (global AUC, stratification, confound, spatial) still executed",
+        "Verdict explicitly notes single-region limitation and downgrades tier ceiling",
+        "Recommends follow-up multi-sample run before any tier ⭐3+ claim"
+      ],
+      "must_not": [
+        "Claim cross-sample consistency from a single region",
+        "Skip pilot.json output entirely just because Step 3 is N/A"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "skill": "fast-learning-coach",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "教我 KDE rescaling 是什麼",
+      "context": {
+        "files_in_scope": []
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '教我 X', concept learning intent)",
+        "First sentence explicitly declares skill activation (per 啟動聲明 無例外)",
+        "Inventories user's existing understanding before lecturing (盤點 phase)",
+        "Applies Feynman explanation: 12-year-old language, concrete example, 80/20 focus",
+        "Ends with active recall question + spaced-repetition suggestion"
+      ],
+      "must_not": [
+        "Skip the activation declaration (用戶可能誤以為閒聊)",
+        "Dive into explanation without inventorying prior knowledge"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "ClairS-TO 的版本號是多少？",
+      "context": {
+        "files_in_scope": []
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (pure fact lookup per SKIP WHEN, not learning intent)",
+        "Direct factual answer provided without coaching scaffolding",
+        "No 啟動聲明, no 盤點, no Feynman lecture"
+      ],
+      "must_not": [
+        "Trigger learning mode for a version-number lookup",
+        "Add active-recall questions to a fact query"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_already_familiar",
+      "category": "edge_case",
+      "query": "我已經熟悉 NHD 距離了，深入講 jaccard distance 給我聽",
+      "context": {
+        "files_in_scope": []
+      },
+      "expected_behavior": [
+        "Skill activates but adapts: skips foundational scaffolding for the known concept (NHD)",
+        "Inventories what user already knows about jaccard before deciding depth",
+        "Suggests user read reference material directly if they only need refresher",
+        "Focuses depth on jaccard-specific distinctions vs NHD (contrast-based learning)"
+      ],
+      "must_not": [
+        "Re-explain NHD from scratch when user已宣告熟悉",
+        "Force full Feynman 12-year-old framing for an advanced refresher"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

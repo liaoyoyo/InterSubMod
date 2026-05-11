@@ -1,0 +1,67 @@
+{
+  "skill": "cycle-state",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "現在哪些 cycle 在跑？給我 status",
+      "context": {
+        "files_in_scope": ["InterSubMod/state/active.json", "InterSubMod/state/cycles/*/state.json"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'cycle state', 'status', '現在哪些 cycle 在跑')",
+        "Reads state/active.json + each cycle's state/cycles/{id}/state.json",
+        "Outputs priority-sorted dashboard with phase, tier, open gates, stale warnings",
+        "Provides routing recommendations (which skill to invoke next per cycle)",
+        "Operates strictly read-only — no state files modified"
+      ],
+      "must_not": [
+        "Modify any state file (state/active.json, state/cycles/**)",
+        "Trigger when query is project-level dashboard (research-dashboard scope)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "給我 research dashboard",
+      "context": {
+        "files_in_scope": ["InterSubMod/research/autoresearch/hypothesis_queue.json", "InterSubMod/docs/experiments/INDEX.md"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (project-level scope per SKIP WHEN)",
+        "research-dashboard skill activates instead (hypothesis queue + memory + experiment INDEX)",
+        "Caller routed to project-level surface, not cycle-level snapshot"
+      ],
+      "must_not": [
+        "Activate cycle-state for project-level dashboard request",
+        "Read state/cycles/** when caller wants research-dashboard scope"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_empty_state",
+      "category": "edge_case",
+      "query": "cycle state",
+      "context": {
+        "files_in_scope": ["InterSubMod/state/active.json (empty array)", "InterSubMod/state/cycles/ (empty dir)"]
+      },
+      "expected_behavior": [
+        "Skill still activates and prints empty dashboard table cleanly",
+        "Suggests cycle-init skill to register a new cycle",
+        "Does not error out on missing state/cycles/{id}/ entries",
+        "Output explicitly states 'no active cycles' rather than silent exit"
+      ],
+      "must_not": [
+        "Crash or print stack trace when state/cycles is empty",
+        "Auto-invoke cycle-init without user confirmation"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

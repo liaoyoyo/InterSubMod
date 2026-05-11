@@ -1,0 +1,67 @@
+{
+  "skill": "image-gen",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "幫我畫個 LOH 概念示意圖放到報告 figures/",
+      "context": {
+        "files_in_scope": ["InterSubMod/docs/reports/validated/2026/05/figures/"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '概念圖', '示意圖', figure-needed marker)",
+        "Routes concept_diagram to AI track (codex CLI $imagegen via ChatGPT OAuth)",
+        "Loads or generates prompts/{slug}.yaml conforming to templates/concept_diagram.yaml",
+        "Outputs PNG to specified figures/ directory",
+        "Emits figure-needed completion marker for downstream image-vision-check"
+      ],
+      "must_not": [
+        "Use cairo track for a concept_diagram (cairo is for flow_diagram / icon)",
+        "Activate for matplotlib / seaborn real-data plots (route to scripts/lib/plot_setup.py)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "我要畫一個真實 AUC 數據圖比較 7 樣本",
+      "context": {
+        "files_in_scope": ["InterSubMod/scripts/analysis/", "InterSubMod/scripts/lib/plot_setup.py"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (real-data plot per SKIP WHEN)",
+        "Caller routed to InterSubMod/scripts/lib/plot_setup.py (matplotlib + CJK font preset)",
+        "results-analysis or observation-analysis skill handles statistical figure generation"
+      ],
+      "must_not": [
+        "Generate AI-rendered chart that fabricates data values",
+        "Use codex $imagegen for quantitative AUC comparison plot"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_chinese_flowchart",
+      "category": "edge_case",
+      "query": "我需要一張流程圖，含中文節點標籤（pipeline 步驟）",
+      "context": {
+        "files_in_scope": ["InterSubMod/docs/reports/validated/2026/05/figures/"]
+      },
+      "expected_behavior": [
+        "Skill activates and routes to cairo track (deterministic, 不錯字)",
+        "AI track explicitly avoided for CJK text (avoids 字形錯誤 / hallucinated glyphs)",
+        "Uses pycairo with Droid Sans Fallback or equivalent CJK font (per matplotlib CJK rule)",
+        "Outputs PNG with crisp Chinese node labels, no glyph corruption"
+      ],
+      "must_not": [
+        "Send CJK label flow_diagram through codex $imagegen (high risk of garbled glyphs)",
+        "Render Chinese labels with a Latin-only font (causes tofu boxes per S20/S23 lesson)"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

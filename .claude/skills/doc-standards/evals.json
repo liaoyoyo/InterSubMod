@@ -1,0 +1,68 @@
+{
+  "skill": "doc-standards",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "我要建新 .md 報告，命名規則是什麼？",
+      "context": {
+        "files_in_scope": ["InterSubMod/docs/reports/validated/2026/05/"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: new .md creation)",
+        "Provides naming format (YYYYMMDD_title_NN.md convention)",
+        "Provides metadata header template (frontmatter / heading metadata block)",
+        "Lists image rules (relative path, depth ≤2, figures/ subdir)",
+        "Recommends correct directory under docs/ tree per content type"
+      ],
+      "must_not": [
+        "Activate when user is writing SKILL.md (route to plugin-dev:skill-development)",
+        "Provide structured-tech-report 13-段 template (out of scope)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "幫我寫一個新 SKILL.md",
+      "context": {
+        "files_in_scope": ["InterSubMod/.claude/skills/foo/SKILL.md"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (SKILL.md is plugin authoring, not project doc)",
+        "plugin-dev:skill-development activates instead",
+        "Caller routed to skill authoring guidance, not project naming convention"
+      ],
+      "must_not": [
+        "Apply YYYYMMDD_ prefix to a SKILL.md filename",
+        "Force docs/ directory routing for plugin .claude/skills/ files"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_multistep_reorg",
+      "category": "edge_case",
+      "query": "我想重組多週 LOH 研究的目錄結構，有什麼規範？",
+      "context": {
+        "files_in_scope": ["InterSubMod/research/", "InterSubMod/docs/experiments/in_progress/2026/04/"]
+      },
+      "expected_behavior": [
+        "Skill activates and provides multi-step research subdirectory convention",
+        "Recommends 00_INDEX.md + StepN_ prefix pattern (per memory: project subfolder structure)",
+        "Lists in_progress / validated / finalized lifecycle for docs/experiments/",
+        "Distinguishes research/{project}/ (multi-week scaffolding) vs docs/experiments/ (per-experiment record)",
+        "Suggests AGENTS.md and standards/ as authoritative references"
+      ],
+      "must_not": [
+        "Auto-create directories without user confirmation (Hard Gate on file system mutation)",
+        "Recommend deleting existing files during reorg planning"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

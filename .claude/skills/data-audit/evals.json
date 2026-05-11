@@ -1,0 +1,67 @@
+{
+  "skill": "data-audit",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "LOH 研究完成，幫我 audit docs/experiments/2026/04/",
+      "context": {
+        "files_in_scope": ["InterSubMod/docs/experiments/2026/04/**/*.md", "InterSubMod/docs/experiments/INDEX.md"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'audit', research output organization)",
+        "Reads AGENTS.md for current 研究輸出組織規範 before checks",
+        "Runs 6 organization checks: image links, INDEX coverage, naming compliance, metadata, gitignore, scattered files",
+        "Reports broken image refs (relative path violations, depth >2)",
+        "Outputs structured report listing each issue with file path + line number"
+      ],
+      "must_not": [
+        "Modify .md content during audit (read-only check)",
+        "Activate for pure .py / build / single-file edit with no docs structure change"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "修一個 scripts/analysis/foo.py 的 bug",
+      "context": {
+        "files_in_scope": ["InterSubMod/scripts/analysis/foo.py"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (pure .py development per SKIP WHEN)",
+        "No docs/experiments/ or docs/reports/ structure change involved",
+        "Caller routed to direct Edit / verification-loop instead"
+      ],
+      "must_not": [
+        "Activate data-audit for .py-only bug fix",
+        "Run image-link / INDEX coverage checks on a code-only change"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_report_only",
+      "category": "edge_case",
+      "query": "audit docs/experiments/2026/05/ 但只列 issue 不要修",
+      "context": {
+        "files_in_scope": ["InterSubMod/docs/experiments/2026/05/**/*.md"]
+      },
+      "expected_behavior": [
+        "Skill activates and runs all 6 checks",
+        "Outputs structured issue list (path + issue type + severity) without auto-fix",
+        "Explicitly defers fix decisions to user (per Hard Gate on file mutations)",
+        "Suggests follow-up actions per issue but does not execute them"
+      ],
+      "must_not": [
+        "Auto-rename / auto-move files during read-only audit",
+        "Edit .md content to fix broken image refs without user confirmation"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}
