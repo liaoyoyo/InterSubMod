@@ -1,7 +1,7 @@
 ---
 title: Coverage_Multiple / Ploidy Baseline 準確度驗證 — 是否為 Z3 跨樣本失敗根因？
 date: 2026-04-20
-status: MIXED（H-CN1 CONDITIONAL（需用現行 binary 重跑 master）、H-CN2 POSITIVE、H-CN3 NEGATIVE）
+status: MIXED（H-CN1 → PARTIAL POSITIVE（KDE fix 驗證完成）、H-CN2 PARTIAL POSITIVE（recall 14.6%→45.8%）、H-CN3 NEGATIVE）
 owner: InterSubMod Research
 scope: TO mode · 7 samples × 2 modes · HCC1395 SEQC2 CNV truth benchmark
 related:
@@ -165,6 +165,43 @@ updates:
 - [Blocker] Master dataset 需以現行 binary 重跑（7 樣本 × 2 modes，預計 ~4-6 hr）
 - [Doc] 重跑後：更新 Step 1 per-CN-bin 表、Step 2 expected_coverage 表（預期 7/14 rows 會變動）、Step 1 confusion matrix 圖
 - [Scope] 重跑結果**不影響**任何五研究目標判定；僅影響「CovM 作為 feature 的可信度」
+
+### 4.4 2026-04-20 更新：H-CN1 最終 verdict → **PARTIAL POSITIVE**
+
+KDE expected_coverage 修復後 14 combos 重跑完成 + 下游量化 cycle（`research/kde_fix_validation/`）結果：
+
+**跨樣本 bias 收斂**（vs stale 75× 固定 baseline）：
+
+| Sample | KDE baseline | Stale bias | 修正後 bias |
+|--------|-------------:|-----------:|------------:|
+| COLO829 | 29× | +158.6% | ~0% |
+| HCC1395 | 53-55× | +36-42% | ±3% |
+| HCC1395_DORADO | 53-55× | +36-42% | ±3% |
+| HCC1954 | 61× | +23.0% | ~0% |
+| H1437 | 69× | +8.7% | ~0% |
+| H2009 | 79× | -5.1% | ~0% |
+| HCC1937 | 91× | -17.6% | ~0% |
+
+→ 全 7 樣本 bias 全部收斂至 < 3%（原 −28% 到 +158% 跨度）。
+
+**Gain/Loss recall + Spearman 重測**（HCC1395 vs SEQC2 CNV truth）：
+
+| 指標 | Stale (75×) | Fixed (53-55×) | 提升 |
+|------|------------:|---------------:|-----:|
+| Gain recall（CN≥3, paired_pileup） | 14.6% | **41.87%** | ×2.87 |
+| Gain recall（CN≥3, paired_full） | — | **45.78%** | ×3.14 |
+| Loss recall（CN=0-1） | — | 65-68% | — |
+| Spearman(CovM, SEQC2 CN) | — | **0.845** | — |
+| Pearson(CovM, SEQC2 CN) | — | 0.838-0.842 | — |
+| Neutral NumReads median bias | +38.9% | **−1.9%** | — |
+
+→ **H-CN1 verdict = 🟢 PARTIAL POSITIVE**（2026-04-20 定論）：
+- ✅ baseline 修復成功，bias 跨度 ±158% → ±3%
+- ✅ Spearman 0.845 證明 CovM 作為**定性 CN proxy** 方向可靠
+- ⚠️ Gain recall 45.8%（非 >80% FULL POSITIVE）— CovM 分類閾值（Normal 0.8-1.2）相對 SEQC2 Gain 區（CN=3 期望 CovM ≈ 1.5）邊界模糊
+- 📌 **CovM 可作為 cross-sample 定性 CN proxy**（方向正確），但**定量 CN 判定仍需 coverage 外的特徵輔助**（AF/VAF/segment-level）
+
+**詳細報告**：`docs/experiments/in_progress/2026/04/20260420_KDE_Fix_Acceptance_Validation_01.md` §5.0-5.3
 
 ---
 
