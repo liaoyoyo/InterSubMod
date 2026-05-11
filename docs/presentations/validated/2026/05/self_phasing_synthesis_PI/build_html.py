@@ -131,15 +131,15 @@ add(id="03_genome_173", num="03", section="S1 觀察起點", rg2="3", ngrep="8",
     </div>
     <div class="arg-list">
       <strong>三條獨立論證:</strong><br>
-      ①  生物學: tumor sub-clone 跨 23 染色體不該系統偏 HP1<br>
-      ②  跨 chr 一致: cnLOH artifact 只影響單一 chr; 94.6% 跨 chr 一致<br>
-      ③  paired 對照: paired tumor-normal 同 reads HP1:HP2 ≈ 1:1
+      ①  <strong>生物學:</strong> 跨 23 染色體不該有系統偏單一 haplotype<br>
+      ②  <strong>跨 chr 一致偏 HP1:</strong> cnLOH 最多只影響單一 chr；但 94.6% HP1 偏移在 23 chr 全部一致<br>
+      ③  <strong>拿 paired 對照:</strong> 同樣 reads 在 paired (tumor + normal) 流程 HP1:HP2 ≈ 1:1 — 有 normal 資料時就能正確分到 1:1
     </div>
     <div class="conclusion-arrow">→ 17.3:1 是 LongPhase-TO 的 systematic engineering artifact</div>
     <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">germline het:</span> 雜合位點</div>
-      <div class="gloss-item">📖 <span class="term">sub-clone:</span> 基因型同細胞群</div>
-      <div class="gloss-item">📖 <span class="term">haplotype:</span> 父系/母系染色體</div>
+      <div class="gloss-item">📖 <span class="term">haplotype:</span> 來自父或母的染色體版本</div>
+      <div class="gloss-item">📖 <span class="term">sub-clone:</span> 腫瘤中帶相同突變的某群癌細胞</div>
+      <div class="gloss-item">📖 <span class="term">cnLOH:</span> 染色體數對但失去其中一個 haplotype</div>
     </div>""",
     speaker="baseline LongPhase-TO 全基因組: HP1 reads 614K vs HP2 35.5K, 比例 17.3:1 vs 隨機 1:1。94.6% 占比是 systematic bias 的硬證據, 三條獨立論證: 生物學 (tumor sub-clone 不該跨 23 chr 系統偏 HP1)、跨 chr 一致 (cnLOH 只影響單 chr 但這偏移跨 23 chr 一致)、paired 對照 (paired pipeline HP1:HP2 ≈ 1:1)。三條互相獨立 → engineering artifact。",
     tier3="cnLOH 機制細節 / 23 chr 一致性表 / paired pipeline 程式碼差異")
@@ -149,21 +149,22 @@ add(id="04a_sp1", num="04a", section="S1 觀察起點", rg2="1", ngrep="3",
     en="SP1 chr19:17,565,944 — baseline 113:0 → V5 flips to HP2",
     timing="60 sec / 中 ~250 字",
     canvas_html="""
-    <div class="grid-3col" style="margin-bottom:12px;">
-      <div class="stat-box"><div class="number orange">113 : 0</div><div class="label">baseline HP1:HP2</div></div>
-      <div class="stat-box"><div class="number">HP2 主導</div><div class="label">V5 修正後</div></div>
-      <div class="stat-box"><div class="number green">✅ 對齊</div><div class="label">paired ground truth</div></div>
+    <div class="grid-3col" style="margin-bottom:10px;">
+      <div class="stat-box"><div class="number orange">113 : 0</div><div class="label">baseline HP1 : HP2 (reads)</div></div>
+      <div class="stat-box"><div class="number">≈0~5 : ~108</div><div class="label">V5 HP1 : HP2 (reads, qual.)¹</div></div>
+      <div class="stat-box"><div class="number green">HP2 ✅</div><div class="label">paired direction</div></div>
     </div>
-    <img class="igv-thumb" src="../figures/igv/D_SP1_chr19_17565944.png" alt="IGV SP1" style="max-height:400px;">
-    <p class="fig-caption" style="font-size:13px;">chr19:17,565,944 · 6-BAM 並列: baseline / V2b / V3F / V5 / paired_T / paired_N</p>
-    <div class="arg-list">
-      <strong>為何能排除噪音 / caller / alignment?</strong><br>
-      ① baseline 與 paired 方向相反 — 翻轉而非衰減<br>
-      ② V5 修正後與 paired ground truth 重合<br>
-      → read assignment 強制集中的鐵證
-    </div>""",
-    speaker="全基因組 17.3:1 是平均值; IGV 6-BAM 並列篩到 chr19 三個近 100% 失衡位點。SP1 chr19:17,565,944: baseline 113 reads 全 HP1, HP2=0; V5 翻 HP2 與 paired tumor 一致。排除噪音/caller/alignment: baseline 與 paired 完全反向 (翻轉而非衰減), V5 與 paired 重合 → read assignment 強制集中的鐵證。",
-    tier3="6-BAM 並列順序 / V2b 中間階段意義")
+    <div class="igv-zoom-wrap">
+      <span class="igv-zoom-hint">💡 hover 放大 / 點擊開全尺寸</span>
+      <a href="../figures/igv/D_SP1_chr19_17565944.png" target="_blank">
+        <img class="igv-thumb" src="../figures/igv/D_SP1_chr19_17565944.png" alt="IGV SP1" style="max-height:380px;">
+      </a>
+    </div>
+    <p class="fig-caption" style="font-size:13px;">chr19:17,565,944 · 6-BAM 並列：上→下 baseline / V2b / V3F / V5 / paired_T / paired_N</p>
+    <div class="igv-focus-callout"><span class="label">👁 看圖重點：</span>baseline (最上) 紅+綠 reads 全集中左欄 (HP1 + HP1-1)；V5/V3F (中段) 紅綠搬到右欄 (HP2 + HP2-1)；paired_T (倒數第二) 同樣集中右欄 — V5 修正方向與 paired 一致</div>
+    <p style="font-size:12px;color:#6B7280;margin:4px 0 0;">¹ V5 數值為 IGV 視覺估算 range，精確 count 待 vote_dump.tsv.gz 量化（同 §2.2 註 1）</p>""",
+    speaker="全基因組 17.3:1 是平均值; IGV 6-BAM 並列篩到 chr19 三個近 100% 失衡位點。SP1 chr19:17,565,944: baseline 113 reads 全 HP1 (HP2=0); V5 修正後翻到約 0~5:108 reads, 對齊 paired tumor 的 HP2 方向。排除噪音/caller/alignment 三個 alternative explanation: baseline 與 paired 方向完全相反 (翻轉而非衰減), V5 修正後與 paired ground truth 重合 → read assignment 強制集中的鐵證。",
+    tier3="6-BAM 並列順序細節 / V2b 中間階段意義 / HP1-1 sub-tag 與 HP1 合併原則")
 
 add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
     title="SP2 + SP3 同模式 — 3/3 對齊 paired",
@@ -172,19 +173,37 @@ add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
     canvas_html="""
     <div class="grid-2col">
       <div>
-        <table class="metric-table"><thead><tr><th>SP2 · chr19:12,452,332</th><th>baseline</th><th>V5</th></tr></thead>
-        <tbody><tr class="row-red"><td><strong>HP1 : HP2</strong></td><td class="num">109 : 1</td><td>HP2 主導</td></tr></tbody></table>
-        <img class="igv-thumb" src="../figures/igv/D_SP2_chr19_12452332.png" alt="IGV SP2" style="max-height:280px;">
+        <table class="metric-table">
+          <thead><tr><th colspan="2">SP2 · chr19:12,452,332</th></tr>
+                 <tr><th>baseline HP1:HP2</th><th>V5 HP1:HP2 (qual.)¹</th></tr></thead>
+          <tbody><tr class="row-red"><td class="num">109 : 1</td><td class="num">≈1~3 : ~107</td></tr></tbody>
+        </table>
+        <div class="igv-zoom-wrap" style="margin-top:4px;">
+          <span class="igv-zoom-hint">💡 hover / 點擊</span>
+          <a href="../figures/igv/D_SP2_chr19_12452332.png" target="_blank">
+            <img class="igv-thumb" src="../figures/igv/D_SP2_chr19_12452332.png" alt="IGV SP2" style="max-height:260px;">
+          </a>
+        </div>
       </div>
       <div>
-        <table class="metric-table"><thead><tr><th>SP3 · chr19:12,467,180</th><th>baseline</th><th>V5</th></tr></thead>
-        <tbody><tr class="row-red"><td><strong>HP1 : HP2</strong></td><td class="num">108 : 0</td><td>HP2 主導</td></tr></tbody></table>
-        <img class="igv-thumb" src="../figures/igv/D_SP3_chr19_12467180.png" alt="IGV SP3" style="max-height:280px;">
+        <table class="metric-table">
+          <thead><tr><th colspan="2">SP3 · chr19:12,467,180</th></tr>
+                 <tr><th>baseline HP1:HP2</th><th>V5 HP1:HP2 (qual.)¹</th></tr></thead>
+          <tbody><tr class="row-red"><td class="num">108 : 0</td><td class="num">≈0~2 : ~106</td></tr></tbody>
+        </table>
+        <div class="igv-zoom-wrap" style="margin-top:4px;">
+          <span class="igv-zoom-hint">💡 hover / 點擊</span>
+          <a href="../figures/igv/D_SP3_chr19_12467180.png" target="_blank">
+            <img class="igv-thumb" src="../figures/igv/D_SP3_chr19_12467180.png" alt="IGV SP3" style="max-height:260px;">
+          </a>
+        </div>
       </div>
     </div>
-    <div class="conclusion-arrow green">→ 三 SP 都在 chr19:12-17M 區段 → 對齊 slide 09 chr19 752 victims hotspot</div>""",
-    speaker="SP2 chr19:12,452,332 baseline 109:1; SP3 chr19:12,467,180 baseline 108:0; 與 SP1 同模式: baseline 全 HP1, V5 翻 HP2 對齊 paired 3/3。三 SP 都在 chr19:12-17M, 對齊 chr19 752 victims hotspot — read-level 個案與 IGV 屬同機制不同層級。 [口述過渡] 接下來四個章節將分別回答: ① 為何全集中一邊? (S2 機制) ② read 層級? (S3 量化) ③ 三版各修? (S4 修補) ④ 是否都修對? (S5 驗證)。",
-    tier3="paired_T 與 paired_N 對照細節 / 三 SP 完整座標表")
+    <div class="igv-focus-callout"><span class="label">👁 看圖重點：</span>兩圖同 SP1 模式 — baseline (最上) 紅+綠 reads 集中左欄；V5 (中) 紅+綠翻到右欄；paired_T (倒數第二) 同樣右欄 → 3/3 對齊 paired 方向。HP1 group = (HP1 + HP1-1) 紅綠合計；HP2 group = (HP2 + HP2-1) 藍橙合計</div>
+    <div class="conclusion-arrow green">→ 三 SP 都在 chr19:12-17M 區段 → 對齊 slide 09 chr19 752 victims hotspot</div>
+    <p style="font-size:12px;color:#6B7280;margin:4px 0 0;">¹ V5 數值為 IGV 視覺估算 range（同 §2.2 註 1）</p>""",
+    speaker="SP2 chr19:12,452,332 baseline 109:1, V5 翻到約 1~3:107; SP3 chr19:12,467,180 baseline 108:0, V5 翻到約 0~2:106 — 與 SP1 同模式 3/3。三 SP 都在 chr19:12-17M 區段, 對齊後續 slide 09 chr19 752 victims hotspot — read-level 個案與全基因組分佈屬同機制不同層級。 [口述過渡] 接下來四個章節將分別回答: ① 為何全集中一邊? (S2 機制) ② read 層級? (S3 量化) ③ 三版各修? (S4 修補) ④ 是否都修對? (S5 驗證)。",
+    tier3="paired_T 與 paired_N 對照細節 / 三 SP 完整座標表 / HP sub-tag 分組原則")
 
 # ─── S2 機制 ──────────────────────────────────────────────────────────────
 add(id="05_player_referee", num="05", section="S2 機制", rg2="4 (核心 forced)", ngrep="3 + 1 commit",

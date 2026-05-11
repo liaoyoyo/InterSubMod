@@ -24,6 +24,38 @@
 
 ## Active 規則
 
+### 2026-05-12 — R-G15：數據比較必須同單位/意義（核心觀念）★
+
+- **觸發來源**：Self-Phasing PPT 5/12 slide 04a/04b review — 用戶觀察「數據說明比較應該要相同比較單位或意義，不改用不一致的做比較，不太合理」
+- **規則細節**（在 slide 表格 / stat-box / 對照組設計時強制檢核）：
+  - **同一張 slide 比較多個 metric 時**，必須符合以下任一：
+    1. **同單位**（all read count, or all percentage, or all p-value）
+    2. **同類型維度**（all haplotype label, or all direction descriptor）
+  - **不可混用**：read count + 定性描述 + haplotype label 三種混在一列
+  - 表格 column header 必須**明示單位**：「HP1 : HP2 (reads)」「方向 (haplotype)」「對齊 (✅/❌)」
+  - 若無法統一單位 → 拆兩個 sub-table 或 group 分區（左：定量；右：定性）
+- **反例**（slide 04a 原版）：
+  ```
+  | baseline HP1:HP2 | V5     | paired GT | 對齊? |
+  | 113 : 0          | HP2 主導 | HP2       | ✅    |
+                     ↑ read count vs 定性描述 vs haplotype label 混用
+  ```
+- **正例**（修正後）：
+  ```
+  | baseline (reads) | V5 (reads, qual range) | paired direction | 對齊? |
+  | 113 : 0          | ≈0~5 : ~108            | HP2              | ✅    |
+                     ↑ 同 read count 單位     ↑ 改為方向欄分區
+  ```
+- **與相鄰規則關係**：
+  - 補強 R-G2（每張 ≤ 3 PI 不熟術語）— 單位混用增加認知負擔
+  - 補強 R-G10（Mayer Coherence）— 不一致 = 認知 noise
+- **檢核方式**：
+  - 每張 slide build 後 grep table column header — 是否含單位標示
+  - 同 row 內 cell 若同時有「N : M 數字」+「定性詞（主導/翻轉）」+「label（HP1/HP2）」→ 強制分組
+- **狀態**：active
+
+---
+
 ### 2026-05-11 — R-G14：HTML preview = PPT 等比模擬，字級用 PPT pt 標準
 
 - **觸發來源**：Self-Phasing PPT 5/11 slide 02 review「文字與圖示不夠大不夠清楚」回饋
@@ -328,7 +360,7 @@
 
 | 指標 | 數值 |
 |------|------|
-| Active 規則數 | 14 |
+| Active 規則數 | 15 |
 | [PROVISIONAL] 規則數 | 0 |
 | Archived 規則數 | 0 |
 | 最近更新 | 2026-05-11 |
