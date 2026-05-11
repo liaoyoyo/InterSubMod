@@ -1,6 +1,6 @@
 ---
 name: inject-hypothesis
-description: 注入新假設到 InterSubMod 研究佇列（hypothesis_queue.json）。支援：用戶口述假設、從觀察自動生成、從文獻引導輸入。
+description: Injects a new hypothesis into InterSubMod 研究佇列 (hypothesis_queue.json) with priority + tier + source provenance, supporting verbal description / observation-derived / literature-derived input modes. USE WHEN「加入新假設」「inject hypothesis」「新方向」「注入假設」「新假設」「加入待測佇列」「from observation」「from paper」、用戶描述想測試的新想法、research-loop 返回「佇列為空」、文獻閱讀後有新特徵要驗證。SKIP WHEN 假說已在 hypothesis_queue.json 註冊或已在 active cycle、僅是腦力激盪未收斂（用 problem-framing-ideation 先收斂 1-3 候選）、僅是換方向降權現有假說（用 pivot-direction）。
 allowed-tools: Read, Write, Bash
 user-invocable: true
 ---

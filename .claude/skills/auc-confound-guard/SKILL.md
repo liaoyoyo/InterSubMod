@@ -1,6 +1,6 @@
 ---
 name: auc-confound-guard
-description: AUC 結論三關 confound 驗證協議 — within-group OLS + AF-bin 交叉 + permutation test。宣告任何 AUC>0.58 的特徵顯著性前必經此流程。觸發：「feature AUC」「discriminative」「predictive power」「TP vs FP 區分」「residualize」。
+description: AUC 結論三關 confound 驗證協議 — within-group OLS + AF-bin 交叉 + permutation test。宣告任何 AUC>0.58 的特徵顯著性前必經此流程。觸發：「feature AUC」「discriminative」「predictive power」「TP vs FP 區分」「residualize」「confound」「特徵能否區分 TP/FP」。SKIP WHEN AUC<0.58 不需宣告顯著性、純描述性統計（無 TP/FP 分類目標）、未提及 AUC 的特徵觀察、bug fix / build / commit、純 docs 編輯。
 allowed-tools: Read, Write, Bash, Grep
 user-invocable: true
 ---

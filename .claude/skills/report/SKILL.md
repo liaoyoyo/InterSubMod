@@ -1,6 +1,6 @@
 ---
 name: report
-description: AI 對話執行報告撰寫。記錄重要對話的決策、程式碼修改、後續行動。USE WHEN：會話結束前撰寫執行報告、「寫報告」「session report」、Stop hook 提醒時。輸出到 docs/provenance/ai_sessions/*.md。
+description: AI 對話執行報告撰寫。記錄重要對話的決策、程式碼修改、後續行動。USE WHEN：會話結束前撰寫執行報告、「寫報告」「session report」「conversation log」、Stop hook 提醒時。輸出到 docs/provenance/ai_sessions/*.md。SKIP WHEN 寫週報（用 weekly-report）、寫實驗結果報告（用 results-report）、寫 13 段技術報告（用 structured-tech-report）、寫研究收尾結論（用 conclude-research）、純 build / commit / docs 寫作。
 allowed-tools: Read, Write, Glob, Grep
 user-invocable: true
 ---

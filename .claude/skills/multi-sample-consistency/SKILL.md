@@ -1,6 +1,6 @@
 ---
 name: multi-sample-consistency
-description: 7 樣本跨樣本 parallel benchmark + 一致性檢查模板。任何結論需跨 4+ 樣本驗證時觸發。產生 canonical 排序表、方向一致性統計、confidence uplift 計算。觸發：「cross-sample」「multi-sample」「7 樣本驗證」「跨樣本一致」「consistency check」。
+description: 7 樣本跨樣本 parallel benchmark + 一致性檢查模板。任何結論需跨 4+ 樣本驗證時觸發。產生 canonical 排序表、方向一致性統計、confidence uplift 計算。觸發：「cross-sample」「multi-sample」「7 樣本驗證」「跨樣本一致」「consistency check」「P4 generalize」、tier 升級到 ⭐3+ 前。SKIP WHEN 單樣本 pilot 階段（用 feature-layered-observation）、結論僅需 1-3 樣本驗證、純 binary build / commit、純 docs 寫作、未涉及跨樣本比較。
 allowed-tools: Read, Write, Bash, Grep, Glob
 user-invocable: true
 ---

@@ -1,6 +1,6 @@
 ---
 name: known-pitfalls
-description: InterSubMod 已知 AI 陷阱清單。每條記錄具體錯誤、正確做法、觸發場景。避免重複犯錯。觸發：涉及 OLS/residualization、VCF 來源、特徵設計、AUC 分析時。
+description: InterSubMod 已知 AI 陷阱清單。每條記錄具體錯誤、正確做法、觸發場景。避免重複犯錯。USE WHEN「known pitfalls」「踩雷」「avoid mistake」「common bug」「之前怎麼錯的」「歷史教訓」、涉及 OLS/residualization、VCF 來源、特徵設計、AUC 分析、binary commit / KDE fix / working tree、證據鏈 / single-track / ⭐4-5 升級。SKIP WHEN 純 build / commit / docs 寫作、無對應陷阱類別的場景（先查表，無命中即略）、新 feature 探索初期（先設計再查陷阱）、純 UI / 視覺 / PPTX 製作。
 allowed-tools: Read, Write, Edit
 user-invocable: true
 ---

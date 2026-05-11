@@ -1,6 +1,6 @@
 ---
 name: validation-protocol
-description: 假說驗證協議。根據假說類型自動建議 L1→L2→L3→L4 漸進驗證層級，每層含通過/失敗閾值與決策規則。觸發：「驗證假說」「validation protocol」「怎麼驗證」
+description: 假說驗證協議。根據假說類型自動建議 L1→L2→L3→L4 漸進驗證層級，每層含通過/失敗閾值與決策規則。觸發：「驗證假說」「validation protocol」「怎麼驗證」「validation level」「L1 L2 L3 L4」「設計驗證流程」、新假說註冊後規劃驗證路徑時。SKIP WHEN 程式碼語法／build／test 級驗證（用 verification-loop）、研究結論 P5 tier 升級判定（用 run-evaluator）、研究假說 benchmark 自動化執行（用 /validate command）、單純查詢已完成驗證的歷史（用 review-evidence）、純 docs / build / commit。
 allowed-tools: Read, Write, Glob, Grep
 user-invocable: true
 ---

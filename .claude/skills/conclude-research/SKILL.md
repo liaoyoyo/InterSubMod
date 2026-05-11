@@ -1,6 +1,6 @@
 ---
 name: conclude-research
-description: 研究專案收尾與知識傳播。驗證 artifacts 完整性 → 生成報告骨架 → 自動更新 INDEX/MEMORY/evidence_ledger/CURRENT_FOCUS。觸發詞：conclude-research、結束研究、撰寫結論。
+description: 研究專案收尾與知識傳播。驗證 artifacts 完整性 → 生成報告骨架 → 自動更新 INDEX/MEMORY/evidence_ledger/CURRENT_FOCUS。觸發詞：conclude-research、結束研究、撰寫結論、P5→P6 transition、cycle 達到 ⭐4-5 verdict 收尾。SKIP WHEN cycle 仍在 P1-P4 探索階段（未到 verdict）、單實驗結果報告（用 results-report）、單一工程修改紀錄（用 structured-tech-report）、週進度多主題彙整（用 weekly-report）、AI 對話 session 紀錄（用 report）。
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 user-invocable: true
 ---

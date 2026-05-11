@@ -1,6 +1,6 @@
 ---
 name: pptx-build
-description: InterSubMod PPT 製作 sub-skill — 從母稿（weekly-report 產出）或從零開始產 PPTX。3 層確認 outline → section → slide + 6 報告模板識別 + §20 主軸聚焦 6 階段過濾 + Tier 1/2/3 三層分流（slide / speaker note / oral-optional）+ Claude Vision 10-checkpoint review。支援 --from-draft 介面從 weekly-report master_draft.md 自動讀取 main thesis / report_type / audience，跳過 P1 部分項目。觸發：「簡報」「PPT」「PPTX」「deck」「教授報告」「教授級簡報」「投影片」「presentation」「製作簡報」
+description: InterSubMod PPT 製作 sub-skill — 從母稿（weekly-report 產出）或從零開始產 PPTX。3 層確認 outline → section → slide + 6 報告模板識別 + §20 主軸聚焦 6 階段過濾 + Tier 1/2/3 三層分流（slide / speaker note / oral-optional）+ Claude Vision 10-checkpoint review。支援 --from-draft 介面從 weekly-report master_draft.md 自動讀取 main thesis / report_type / audience，跳過 P1 部分項目。觸發：「簡報」「PPT」「PPTX」「deck」「教授報告」「教授級簡報」「投影片」「presentation」「製作簡報」。SKIP WHEN 週報母稿尚未產出（先用 weekly-report W1-W7）、僅是場景識別／路徑分流（用 myPPT 入口）、PDF/markdown report 即可不需 PPTX、純 figure 重做（用 image-gen + image-vision-check）、PPTX 已存在僅微調文字（直接 Edit 即可）。
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent
 user-invocable: true
 ---

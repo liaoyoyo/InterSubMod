@@ -1,6 +1,6 @@
 ---
 name: methodology-audit
-description: 修改任何 C++ 方法前的方法學審查協議。審查現有方法的合理性、量化問題影響、產出決策文件供用戶選擇。觸發條件：「審查 XX 方法」、「評估是否要改 XX」、修改 .cpp/.hpp 前。
+description: 修改任何 C++ 方法前的方法學審查協議。審查現有方法的合理性、量化問題影響、產出決策文件供用戶選擇。觸發條件：「審查 XX 方法」、「評估是否要改 XX」、「XX 是否合理」、修改 .cpp/.hpp 前、發現統計失效率過高/分類邊界模糊/特徵設計可疑時。SKIP WHEN 純 comment / format / typo edits、純 docs 寫作、無 .cpp/.hpp/.h 觸及、已通過審查的方案進入實作階段（用 cpp-change）、純 build 驗證（用 verification-loop）。
 user-invocable: true
 ---
 

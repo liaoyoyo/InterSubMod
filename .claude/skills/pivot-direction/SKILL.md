@@ -1,6 +1,6 @@
 ---
 name: pivot-direction
-description: 快速切換 InterSubMod 研究方向。注入用戶新觀察為高優先假設、降權連續失敗的方向、記錄轉向理由。USE WHEN：「換方向」「pivot」「我注意到 X 現象」「這方向不行」。
+description: 快速切換 InterSubMod 研究方向。注入用戶新觀察為高優先假設、降權連續失敗的方向、記錄轉向理由。USE WHEN：「換方向」「pivot」「我注意到 X 現象」「這方向不行」、research-loop 返回「建議切換」訊號、連續 N 個 cycle NEGATIVE。SKIP WHEN 純新假設注入無方向切換意圖（用 inject-hypothesis）、cycle 仍在進行中無 abandon 意圖、單純 priority 重排（直接修 hypothesis_queue.json）、純 docs / build / commit。
 allowed-tools: Read, Write, Bash
 user-invocable: true
 ---
