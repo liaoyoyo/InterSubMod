@@ -1,11 +1,12 @@
 <!--
 建立時間: 2026-05-01 00:00
-最新更新: 2026-05-12（加 V6 session + 命名規範）
+最新更新: 2026-05-12（v6_germline_absent_audit.xml 因 sed-replace bug archive；改用 v5_v6_compare_with_paired.xml 並列）
 目標: 說明 research/igv_sessions/ 目錄內所有 IGV session（XML）用途與管理規範
 處理範圍: IGV session、phase-context VCF、TP/FP VCF、audit marker BED 與 site-level manifest
 關聯檔案:
   - research/igv_sessions/v5_purity_compare_with_paired.xml
-  - research/igv_sessions/v6_germline_absent_audit.xml
+  - research/igv_sessions/v5_v6_compare_with_paired.xml
+  - research/igv_sessions/_archive/v6_germline_absent_audit_BROKEN_replaced_v5.xml
   - research/igv_sessions/annotations/site_layer_manifest.tsv
 -->
 
@@ -26,7 +27,8 @@
 - `v5_all_4versions.xml` — V5 baseline/V2b/V3F/V5 四版並列
 - `v5_color_HP.xml` — V5 HP tag 著色版
 - `v5_purity_compare_with_paired.xml` — V5 + purity sim + paired ground truth
-- `v6_germline_absent_audit.xml` — **新增** V6 germline-absent 區域 audit
+- `v5_v6_compare_with_paired.xml` — **新增** V5 + V6 並列 + purity sim + paired（V6 germline-absent revert vs V5 audit）
+- `_archive/v6_germline_absent_audit_BROKEN_replaced_v5.xml` — **已棄用**：前一個 agent 用 `sed s|V5|V6|g` 整檔取代 V5 路徑為 V6，導致 V5 track 消失、V6 BAM 重複 load；改由 `v5_v6_compare_with_paired.xml` 取代
 
 ## Session 清單（依時序）
 
@@ -39,7 +41,8 @@
 | `v5_color_HP.xml` | V5 HP tag 著色 | 2 | — | — |
 | `v5_purity_compare.xml` | V5 + purity simulation | 4 | — | — |
 | `v5_purity_compare_with_paired.xml` | 上加 paired ground truth + 全 audit context | 6 | 7 | 6 |
-| **`v6_germline_absent_audit.xml`** | **V6 vs paired，germline-absent 區域 audit** | 6 | 7 | 6 |
+| **`v5_v6_compare_with_paired.xml`** | **V5 + V6 並列 + purity sim + paired，audit germline-absent revert 對 V5 的差異** | 7 | 7 | 6 |
+| `_archive/v6_germline_absent_audit_BROKEN_replaced_v5.xml` | **棄用**（sed-replace bug，V5 path 被整檔覆寫成 V6） | 6 | 7 | 6 |
 
 ## 全 session 共同 audit layer（已建好的 annotation 資源）
 
@@ -52,13 +55,16 @@
 - `site_layer_manifest.tsv` — 每位點 TP/FP VCF 命中 + phase anchor 摘要
 - `lp_s_normal_phase_context_15sites.vcf` / `lp_to_*_phase_context_15sites.vcf` — paired/TO 各版 phase backbone
 
-## V6 Session 啟用流程
+## V6 (V5+V6 並列) Session 啟用流程
 
-1. **建立**：複製最近 V5 session（推薦 `v5_purity_compare_with_paired.xml`）→ `v6_germline_absent_audit.xml`，path swap V5 BAM → V6 BAM（`/v6_germline_absent_revert/tumor_tagged.bam`）
-2. **載入**：開 IGV → File → Open Session → 選 V6 XML
+> **⚠ 教訓（2026-05-12）**：第一版 `v6_germline_absent_audit.xml` 用 `sed s|V5|V6|g` 整檔替換，導致 V5 path 完全消失、V6 BAM 重複 load；該檔已 archive 到 `_archive/`。新版改為**加入** V6 panel 而非取代 V5（V5 與 V6 並列）。**未來建立 V7+ session 時，必須複製整個 V5 panel block 並只修改新 panel 內的 path/attributeKey/name；不可用全檔 sed-replace**。
+
+1. **建立**：複製最近並列 audit session（推薦 `v5_v6_compare_with_paired.xml`）→ `v{N-1}_v{N}_compare_with_paired.xml`；在 `<Resources>` 與 BAM Panel section **加入** V{N} entry（不替換現有）
+2. **載入**：開 IGV → File → Open Session → 選新 XML
 3. **batch snapshot**（headless）：IGV 用 `--batch` 模式 + script 指定位點 + snapshot
-4. **產出**：PNG 入 `by_HP_v6/` 或新建 `by_HP_v{N}/` 目錄
+4. **產出**：PNG 入 `by_HP_v{N-1}v{N}/` 目錄（區分純 V{N-1} 與並列）
 5. **記錄**：在本 README 加 entry + 在產出目錄加 `_session_note.md` 連結回此 session
+6. **驗證**：`xmllint --noout` + `grep -c <V{N-1}_path>` 與 `grep -c <V{N}_path>` 各應 ≥3（Resource + Coverage + reads）
 
 ## 後續 version 規範（V7 / V8 ...）
 
