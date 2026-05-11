@@ -30,24 +30,29 @@ def add(**kw):
     kw.setdefault("rg2", "—")
     kw.setdefault("ngrep", "—")
     kw.setdefault("tier3", "")
+    kw.setdefault("is_cover", False)  # cover slide skips default h1+en-subtitle render
     SLIDES.append(kw)
 
 # ─── S0 Cover + TL;DR ─────────────────────────────────────────────────────
 add(id="01_cover", num="01", section="S0 Cover",
-    title="Self-Phasing 整合觀察與 V5 Layer 1.5 設計缺陷",
-    en="Self-Phasing Integration Synthesis — V5 Layer 1.5 design caveat",
-    timing="30 sec / 中 ~120 字",
+    is_cover=True,
+    title="Self-Phasing 問題修正與驗證",
+    en="",  # cover 自定 layout，不用 default en-subtitle render
+    timing="30 sec / 中 ~90 字",
     canvas_html="""
-    <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:75%;text-align:center;">
-      <h1 style="font-size:42px;color:#1E3A8A;margin:0;">Self-Phasing 整合觀察</h1>
-      <p style="font-size:22px;color:#6B7280;font-style:italic;margin:8px 0 18px;">Self-Phasing Integration Synthesis</p>
-      <p style="font-size:18px;color:#1E3A8A;">── V5 Layer 1.5 設計缺陷揭露 ──</p>
-      <p style="font-size:14px;color:#6B7280;margin-top:8px;">longphase-to-mod 5 commits → V6 patch (5/10) → Phase D 跨 4 樣本驗證 (5/11)</p>
-      <p style="font-size:13px;color:#6B7280;margin-top:24px;">2026-05-10  ·  PI / lab meeting</p>
-      <p style="font-size:11px;color:#9CA3AF;">Source: 5/8 整合報告 + 5/9 errata + paired Step D</p>
+    <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;padding:32px 0;">
+      <h1 style="font-size:44px;color:#1E3A8A;margin:0 0 14px;font-weight:bold;line-height:1.2;">Self-Phasing 問題修正與驗證</h1>
+      <p style="font-size:20px;color:#374151;margin:0 0 40px;font-weight:normal;">longphase-to tag layer 設計缺陷揭露與三版修正</p>
+
+      <div style="border-top:1px solid #9CA3AF;padding-top:20px;width:55%;margin-top:24px;">
+        <p style="font-size:15px;color:#1F2937;margin:8px 0;">日期：2026-05-01 ~ 2026-05-11</p>
+        <p style="font-size:15px;color:#1F2937;margin:8px 0;">場合：實驗室週報</p>
+        <p style="font-size:15px;color:#1F2937;margin:8px 0;">報告人：廖子游</p>
+        <p style="font-size:13px;color:#6B7280;margin:14px 0 0;">中正大學 資工系 ・ 黃耀廷 教授 Lab405 實驗室</p>
+      </div>
     </div>""",
-    speaker="今天 20 分鐘的報告主題是 self-phasing 整合觀察與 V5 Layer 1.5 設計缺陷揭露。整合 longphase-to-mod 5 commits 修補成熟度，以及 5/9 paired cross-ref 新發現。目的：協助 PI 決策 V5 是否作 production tag baseline，以及是否啟動 F-paired-D3 follow-up cycle。",
-    tier3="5/8 主報告 1,211 行 + 7 figures commit hash")
+    speaker="謝謝各位。今天的報告主題是 self-phasing 問題的修正與驗證 — 在 longphase-to 工具的 tag 層發現一個設計缺陷，整理修正過程與跨樣本驗證的結果。報告人廖子游，這是 5/1 至 5/11 的階段性整理。",
+    tier3="(封面 speaker note 精簡至 30 sec，不透露後續 slide 結論)")
 
 add(id="02_tldr", num="02", section="S0 Cover", rg2="1", ngrep="9",
     title="TL;DR — Self-Phasing 修補三版演進完整：V3F → V5 → V6 (production candidate)",
@@ -698,9 +703,9 @@ def render_slide_page(s, prev_id, next_id, idx, total):
     <div><span class="label">N grep:</span><span class="value">{s['ngrep']}</span></div>
   </div>
 
-  <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title {title_class}">{s['title']}</h1>
-    <p class="en-subtitle">{s['en']}</p>
+  <article class="slide-canvas{' cover-slide' if s.get('is_cover') else ''}" aria-label="Main slide canvas">
+    {'' if s.get('is_cover') else f'<h1 class="slide-title {title_class}">{s["title"]}</h1>'}
+    {'' if (s.get('is_cover') or not s.get('en')) else f'<p class="en-subtitle">{s["en"]}</p>'}
     {s['canvas_html']}
   </article>
 

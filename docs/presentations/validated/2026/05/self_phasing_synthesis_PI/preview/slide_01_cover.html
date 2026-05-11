@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 01 — Self-Phasing 整合觀察與 V5 Layer 1.5 設計缺陷</title>
+  <title>Slide 01 — Self-Phasing 問題修正與驗證</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -231,30 +231,33 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
     <div><span class="label">Slide:</span><span class="value">01 / 22</span></div>
     <div><span class="label">Section:</span><span class="value">S0 Cover</span></div>
-    <div><span class="label">Tier 2:</span><span class="value">30 sec / 中 ~120 字</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">30 sec / 中 ~90 字</span></div>
     <div><span class="label">R-G2 術語:</span><span class="value">—</span></div>
     <div><span class="label">N grep:</span><span class="value">—</span></div>
   </div>
 
-  <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">Self-Phasing 整合觀察與 V5 Layer 1.5 設計缺陷</h1>
-    <p class="en-subtitle">Self-Phasing Integration Synthesis — V5 Layer 1.5 design caveat</p>
+  <article class="slide-canvas cover-slide" aria-label="Main slide canvas">
     
-    <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:75%;text-align:center;">
-      <h1 style="font-size:42px;color:#1E3A8A;margin:0;">Self-Phasing 整合觀察</h1>
-      <p style="font-size:22px;color:#6B7280;font-style:italic;margin:8px 0 18px;">Self-Phasing Integration Synthesis</p>
-      <p style="font-size:18px;color:#1E3A8A;">── V5 Layer 1.5 設計缺陷揭露 ──</p>
-      <p style="font-size:14px;color:#6B7280;margin-top:8px;">longphase-to-mod 5 commits → V6 patch (5/10) → Phase D 跨 4 樣本驗證 (5/11)</p>
-      <p style="font-size:13px;color:#6B7280;margin-top:24px;">2026-05-10  ·  PI / lab meeting</p>
-      <p style="font-size:11px;color:#9CA3AF;">Source: 5/8 整合報告 + 5/9 errata + paired Step D</p>
+    
+    
+    <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;padding:32px 0;">
+      <h1 style="font-size:44px;color:#1E3A8A;margin:0 0 14px;font-weight:bold;line-height:1.2;">Self-Phasing 問題修正與驗證</h1>
+      <p style="font-size:20px;color:#374151;margin:0 0 40px;font-weight:normal;">longphase-to tag layer 設計缺陷揭露與三版修正</p>
+
+      <div style="border-top:1px solid #9CA3AF;padding-top:20px;width:55%;margin-top:24px;">
+        <p style="font-size:15px;color:#1F2937;margin:8px 0;">日期：2026-05-01 ~ 2026-05-11</p>
+        <p style="font-size:15px;color:#1F2937;margin:8px 0;">場合：實驗室週報</p>
+        <p style="font-size:15px;color:#1F2937;margin:8px 0;">報告人：廖子游</p>
+        <p style="font-size:13px;color:#6B7280;margin:14px 0 0;">中正大學 資工系 ・ 黃耀廷 教授 Lab405 實驗室</p>
+      </div>
     </div>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide 01">
     <details class="collapsible" open>
-      <summary>🎤 Speaker Note (30 sec / 中 ~120 字)</summary>
-      <div class="speak-text">今天 20 分鐘的報告主題是 self-phasing 整合觀察與 V5 Layer 1.5 設計缺陷揭露。整合 longphase-to-mod 5 commits 修補成熟度，以及 5/9 paired cross-ref 新發現。目的：協助 PI 決策 V5 是否作 production tag baseline，以及是否啟動 F-paired-D3 follow-up cycle。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 5/8 主報告 1,211 行 + 7 figures commit hash</div>
+      <summary>🎤 Speaker Note (30 sec / 中 ~90 字)</summary>
+      <div class="speak-text">謝謝各位。今天的報告主題是 self-phasing 問題的修正與驗證 — 在 longphase-to 工具的 tag 層發現一個設計缺陷，整理修正過程與跨樣本驗證的結果。報告人廖子游，這是 5/1 至 5/11 的階段性整理。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> (封面 speaker note 精簡至 30 sec，不透露後續 slide 結論)</div>
     </details>
   </aside>
 

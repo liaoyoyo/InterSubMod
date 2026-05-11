@@ -24,6 +24,143 @@
 
 ## Active 規則
 
+### 2026-05-11 — R-G12：字級規範（sans-serif 階層）
+
+- **觸發來源**：Self-Phasing PPT 5/11 封面審查 + WCAG / Texas Tech / Section508 / Six Minutes
+- **規則細節**（業界 + 投影規範）：
+  - 主標題：36-42pt sans-serif bold
+  - 副標題：18-24pt sans-serif regular（非 bold 非斜體）
+  - 內文：≥ 18pt（projected presentation ≥ 30pt）
+  - footer / glossary：10-12pt（最小限）
+  - 不混用多 font family；用 weight (regular/semi-bold/bold) 建 hierarchy
+- **檢核方式**：每張 slide build 時 grep font size ≥18pt（除小灰字 footer）
+- **狀態**：active
+- **Source**: [Section508.gov fonts-typography](https://www.section508.gov/develop/fonts-typography/), [Texas Tech accessibility guide](https://www.ttu.edu/accessibility/digital-accessibility/docs/accessible-powerpoint-guide.html)
+
+---
+
+### 2026-05-11 — R-G11：WCAG 2.1 AA 對比度（2026-04 強制）
+
+- **觸發來源**：Self-Phasing PPT 5/11 web research + WCAG 2.1 AA / WebAIM
+- **規則細節**：
+  - 一般文字：對比度 ≥ 4.5:1（前後景）
+  - 大文字（≥18pt 或 ≥14pt bold）：≥ 3:1
+  - 非文字 UI (icons / table borders)：≥ 3:1
+  - 不依賴單色傳達（color blindness safe）：用 text label / pattern / shape / icon 雙重編碼
+  - Gradient 背景：測試低對比區（PowerPoint 內建 template 多 fail）
+- **檢核方式**：WebAIM Contrast Checker / Colour Contrast Analyser；對 slide build 後抽 3-5 處 colour 配對驗證
+- **狀態**：active
+- **Source**: [WebAIM contrast](https://webaim.org/articles/contrast/), [W3C WCAG 1.4.3](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html), [DOJ Title II 2024](https://www.ada.gov/) (compliance deadline 2026-04-24)
+
+---
+
+### 2026-05-11 — R-G10：Mayer 多媒體學習 — Coherence + Signaling
+
+- **觸發來源**：Self-Phasing PPT 5/11 + Mayer 12 principles
+- **規則細節**：
+  - **Coherence**: 排除 extraneous words / pictures / sounds — 封面只放與報告主題直接相關內容（不放裝飾、不放後續細節）
+  - **Signaling**: 用 cues 高亮關鍵 — 顏色/粗體/標籤雙重編碼（不單依顏色）
+  - **Redundancy**: 圖 + 口述 > 圖 + 口述 + 文字；slide 上不重複 speaker 會講的話
+  - **Split-attention**: 文字標籤緊鄰對應 figure（不要圖在左、標籤在右底）
+- **檢核方式**：每張 slide build 後 6 問 audit 加「extraneous element 數量」
+- **狀態**：active
+- **Source**: [Mayer's 12 Principles — DLI](https://www.digitallearninginstitute.com/blog/mayers-principles-multimedia-learning), [PLOS Ten Simple Rules](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009554)
+
+---
+
+### 2026-05-11 — R-G9：受眾語境化（accessible to non-domain）
+
+- **觸發來源**：Self-Phasing PPT 5/11 cover 用戶回饋「V5 / Layer 1.5 不熟者不懂」
+- **規則細節**：
+  - 主標題對「新生 / 不熟領域 lab member」必須可懂
+  - 內部術語（V5 / Layer 1.5 / ClairS-TO / longphase-to / paired audit 等）**不可作主標題**
+  - 用「**[topic] 問題修正與驗證**」/「**[topic] 機制與改善**」格式
+  - 內部術語可放副標題（但須加 footnote 或 glossary）
+- **反例**：「Self-Phasing 整合觀察與 V5 Layer 1.5 設計缺陷」
+- **正例**：「Self-Phasing 問題修正與驗證」+ 副「longphase-to tag layer 設計缺陷揭露與三版修正」
+- **檢核方式**：每張 slide title 跑 jargon check（內部術語列表 vs title）
+- **狀態**：active
+- **Source**: [MIT BUMP Talk Tips](https://web.mit.edu/biology/www/undergrad/bump/pdfs/Talk_Tips_BUMP.pdf), [PMC PLOS Lab Meeting Rules](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008953)
+
+---
+
+### 2026-05-11 — R-G8：Speaker Note 不搶後續內容
+
+- **觸發來源**：Self-Phasing PPT 5/11 cover 用戶回饋
+- **規則細節**：
+  - 封面 speaker note ≤ 中 100 字（30 sec）
+  - 內容：報告主題（一句）+ 報告場合 + 報告人簡介
+  - **禁止透露**：後續 slide 的具體數字、結論、cliffhanger
+  - 各 slide note 不應提前透露「後面 X slide」的內容（漸進揭露 principle）
+  - 例外：明確 transition / cliffhanger slide 可在 note 末加「next: ...」提示
+- **檢核方式**：speaker note 寫完後 grep 後續 slide 關鍵字（如封面不應含「Phase D」「V6 patch」具體數字）
+- **狀態**：active
+
+---
+
+### 2026-05-11 — R-G7：標題非斜體（sans-serif accessibility）
+
+- **觸發來源**：Self-Phasing PPT 5/11 cover 用戶觀察「英文標題斜體不符業界規範」
+- **規則細節**：
+  - 標題（中文 + EN）統一 sans-serif，**無斜體**
+  - 斜體只保留給：figure caption / 引文 / 視覺強調的「emphasized」短語（非標題）
+  - Italic 在 sans-serif 字體下 render 不佳（業界共識）
+  - a11y 考量：dyslexia / 視覺障礙者對斜體解析困難
+- **反例**：cover 內 EN subtitle 用 italic
+- **正例**：EN subtitle 用 regular weight，非斜體
+- **檢核方式**：grep 「italic」「`<em>`」「`<i>`」於 title / subtitle 區域
+- **狀態**：active
+- **Source**: [Harvard Catalyst slides](https://catalyst.harvard.edu/writing-communication-center/visualize-science/slides/), [Six Minutes Slide Fonts](https://sixminutes.dlugan.com/slide-fonts/)
+
+---
+
+### 2026-05-11 — R-G6：標題語境化（topic + 動作）
+
+- **觸發來源**：Self-Phasing PPT 5/11 cover 用戶建議「Self-Phasing 問題修正與驗證」
+- **規則細節**：
+  - 主標題格式：「**[topic] [動作]**」（如「問題修正與驗證」「機制與改善」「驗證與應用」）
+  - 不用問句、不用 jargon、不用版本號（V5/V6）作主標題
+  - ≤ 18 字（中文）
+- **範例庫**：
+  - ✅ 「Self-Phasing 問題修正與驗證」
+  - ✅ 「LOH × AF × CN 三維特徵分層」
+  - ✅ 「ISM 跨樣本一致性驗證」
+  - ❌ 「Self-Phasing 整合觀察與 V5 Layer 1.5 設計缺陷」（含版本 jargon）
+  - ❌ 「為什麼 self-phasing 重要？」（問句）
+- **狀態**：active
+
+---
+
+### 2026-05-11 — R-G5：封面內容規範（必/可選/禁止三類）
+
+- **觸發來源**：Self-Phasing PPT 5/11 cover 用戶回饋 + PMC PLOS / MIT / Harvard 業界規範
+- **規則細節**：
+
+**必要元素**：
+1. 主標題（單一中文，無中英並列，sentence-style，≤ 18 字）
+2. 副標題（中文短句，無斜體，解釋語境）
+3. 日期（YYYY-MM-DD 或日期區間）
+4. 場合（「實驗室週報」/「lab meeting」/「PI 報告」/「Defense」）
+5. 報告人姓名
+
+**可選元素**：
+- 機構 / 研究室 / 系所 logo（如有）
+- 共同貢獻者（如有）
+- 短 footer source 引用（10-12pt 灰字）
+
+**禁止元素**：
+- ❌ 中英並列大標題（破壞 visual hierarchy）
+- ❌ 技術細節字串（commit hash / version dates 序列）— 放後面目錄
+- ❌ 過長副標題（> 30 字）
+- ❌ 斜體標題（特別 sans-serif 字體）
+- ❌ 內部術語 jargon 作主標題
+
+- **檢核方式**：每次 cover slide build 時跑「5 必要 + 0 禁止」checklist
+- **狀態**：active
+- **Source**: [PLOS Ten Simple Rules effective slides](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009554), [MIT Comm Lab slideshow](https://mitcommlab.mit.edu/eecs/commkit/slideshow/), [InkPPT title slide examples 2026](https://www.inkppt.com/post/powerpoint-title-slide-examples)
+
+---
+
 ### 2026-05-10 — R-G4：未解釋術語三層分流（footnote / glossary box / 獨立補充頁）
 
 - **觸發來源**：Self-Phasing 整合 PPT C3 確認，用戶提出「不好了解或第一次出現的名詞，理論上都需要解釋；如果不在知識庫裡，必須解釋；困難概念需補充空間或頁面、盡量以圖示或理解性說明；小段名詞敘述或概念定義，可在頁面小區塊加類似書本名詞定義框 + 文字解釋」
@@ -134,10 +271,27 @@
 
 | 指標 | 數值 |
 |------|------|
-| Active 規則數 | 4 |
+| Active 規則數 | 12 |
 | [PROVISIONAL] 規則數 | 0 |
 | Archived 規則數 | 0 |
-| 最近更新 | 2026-05-10 |
+| 最近更新 | 2026-05-11 |
+
+## 規則索引
+
+| 規則 | 主題 | Source |
+|------|------|--------|
+| Metric scope | 數字 single-source verification | 內部 v2.1 試用 |
+| R-G2 | PI 不熟術語 ≤ 3 / slide | 內部 v2.1 試用 |
+| R-G3 | Wave 1 加 Agent-N 並行 | 內部 v2.1 試用 |
+| R-G4 | 未解釋術語三層分流 | 自反饋 |
+| R-G5 | 封面內容規範（必/可選/禁止三類）| PLOS / MIT / Harvard |
+| R-G6 | 標題語境化（topic + 動作）| 自反饋 + PLOS |
+| R-G7 | 標題非斜體（sans-serif a11y）| Harvard / Six Minutes |
+| R-G8 | Speaker Note 不搶後續內容 | 自反饋 |
+| R-G9 | 受眾語境化（non-domain accessible）| MIT BUMP / PLOS |
+| R-G10 | Mayer 多媒體（Coherence + Signaling）| Mayer 12 principles |
+| R-G11 | WCAG 2.1 AA 對比度 | W3C / WebAIM / DOJ Title II 2024 |
+| R-G12 | 字級規範（sans-serif 階層）| Section508 / Texas Tech |
 
 ## 與既有規則關係（衝突 / 覆蓋 / 補強）
 
