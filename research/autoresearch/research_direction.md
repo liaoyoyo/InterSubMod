@@ -6,12 +6,48 @@
 
 # 研究方向文件 (Research Direction)
 
-> 最後更新：2026-03-22
+> 最後更新：2026-04-26
 > 此文件由 AI 與人類共同維護。AI 在每輪 research-loop 中讀取此文件定向。
+
+> 📅 **重大更新 2026-04-26**：研究主軸從 TO rescue/filter 切換到 Thread D LOH-constrained phasing。
+> 詳見 [Thread D 主軸報告](../../docs/reports/validated/2026/04/20260426_Thread_D_LOH_constrained_phasing_main_axis_01.md)
+> 與 [Thread B 撤回宣告](../../docs/reports/validated/2026/04/20260426_Thread_B_Retraction_Whitelist_Cross_Sample_01.md)。
 
 ---
 
-## 當前研究焦點
+## 研究主軸（更新 2026-04-26）
+
+**Thread D：LOH-constrained phasing signatures**
+- 證據鏈：X3 / X5 / X6 / B1 / B3（4 層）
+- Wilcoxon p=0.0156（n=6 exact）
+- Evidence grade：B
+- 主軸報告：`InterSubMod/docs/reports/validated/2026/04/20260426_Thread_D_LOH_constrained_phasing_main_axis_01.md`
+
+---
+
+## Candidate Queue（status=pending，不自動執行）
+
+| # | 候選方向 | 動機 | 預估時程 | status |
+|---|---------|------|---------|--------|
+| 1 | Phase 2B HPFineN marker re-verify (master + flag=on) | R-SELFREF 解除 | 2-4 hr | pending |
+| 2 | External CN/SV pilot (Wakhan + SAVANA on HCC1395) | Thread D §3 補強 | 6-8 hr | pending |
+| 3 | Caller-level benchmark (DeepVariant / Strelka2 vs ClairS-TO) | HCC1954 caller ceiling 驗證 | 1-2 day | pending |
+| 4 | TO archive rerun（HCC1937 / HCC1954 / H2009 / H1437 / DORADO） | KDE-corrected n>6 樣本 | 6-8 hr 背景 | pending |
+| 5 | NormalBaseline.cpp writer bug 修復（R-DATA-GAP） | /cpp-change 流程 | 2-4 hr | pending |
+
+## 啟動規則
+- **所有 queue 項目需用戶手動批准才啟動**
+- 本檔案僅作為候選列表，不寫 execution trigger
+- 自動執行 hook 已停用（如有）；下次研究循環需明確指令
+
+---
+
+## 舊研究方向（deprecated 2026-04-26）
+
+> ⚠ **deprecated 2026-04-26 — see Thread B retraction**
+> 連結：`InterSubMod/docs/reports/validated/2026/04/20260426_Thread_B_Retraction_Whitelist_Cross_Sample_01.md`
+
+### 原 TO main track（已停用）
 
 **主要 Track**：TO（Tumor-Only）
 **理由**：TO 有更多 FP（~300-800），三層架構改善空間比 paired 大，甲基訊號在 TO 下尚有未探索空間。
@@ -23,9 +59,7 @@
 - HCC1395_5kHz_TO: 0.7127（ClairS-TO baseline）
 - HCC1395_DORADO_TO: 0.7226（ClairS-TO baseline）
 
----
-
-## 當前研究優先項目
+### 原 TO rescue / TO filter / S3-S5 whitelist 優先項目（已停用）
 
 1. **W1 設計弱點探索**：HPP 未整合進分類邏輯 → 測試 HPP threshold 作為 FP-B 過濾
 2. **W2 設計弱點探索**：AlleleDelta 在 HP 不均時虛高 → 測試 HPP-corrected AlleleDelta
