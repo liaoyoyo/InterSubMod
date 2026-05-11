@@ -1,0 +1,78 @@
+{
+  "skill": "results-report",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "實驗結果出爐了，幫我寫 results-report",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/experiments/in_progress/2026/05/{exp}/analysis-report.md",
+          "InterSubMod/docs/experiments/in_progress/2026/05/{exp}/stats-appendix.md",
+          "InterSubMod/docs/experiments/in_progress/2026/05/{exp}/figures/"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '寫實驗報告', 'results report', '實驗複盤')",
+        "Produces decision-oriented narrative report (not raw stats dump)",
+        "Figure-by-figure interpretation inside coherent structure",
+        "Includes limitations, failure cases, next actions sections",
+        "Writes to docs/experiments/*.md following doc-standards naming"
+      ],
+      "must_not": [
+        "Replace strict statistics with confident prose (must defer to results-analysis bundle)",
+        "Skip limitations / failure-case sections (decision-oriented requires honest scope)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "我還沒做統計分析，直接幫我寫實驗報告",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/output/synthesis/{run}/results.csv (no analysis-report.md yet)"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate fully (analysis bundle prerequisite missing per SKIP WHEN)",
+        "Identifies blocker: missing analysis-report.md / stats-appendix.md / figure-catalog.md",
+        "Redirects to /results-analysis first",
+        "Optionally surfaces report skeleton structure but does not fabricate stats"
+      ],
+      "must_not": [
+        "Fabricate p-values / effect sizes without analysis bundle (scientific integrity)",
+        "Bypass results-analysis prerequisite by guessing stats from raw .csv"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_negative_verdict",
+      "category": "edge_case",
+      "query": "結果是 negative，假說沒成立，還是要寫 report 嗎？幫我寫",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/experiments/in_progress/2026/05/{exp}/analysis-report.md (verdict: NEGATIVE)"
+        ]
+      },
+      "expected_behavior": [
+        "Activates and writes full report despite negative verdict",
+        "Explicitly states NEGATIVE verdict in conclusion section (not buried)",
+        "Includes 'What we learned' section: confound identified / scope limit / pivot signal",
+        "Recommends pivot or stop-criterion in next-actions section",
+        "Updates evidence_ledger if applicable (or notes need to)"
+      ],
+      "must_not": [
+        "Frame negative result as 'inconclusive' to avoid hard verdict (anti-pattern)",
+        "Skip writing report just because result is negative (negatives are evidence too)"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Post-experiment narrative scope — strict stats live in /results-analysis, multi-topic weekly in /weekly-report.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

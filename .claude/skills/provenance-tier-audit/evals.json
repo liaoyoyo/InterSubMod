@@ -1,0 +1,81 @@
+{
+  "skill": "provenance-tier-audit",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "幫我跑週報 evidence 一致性審計，看 tier 分佈有沒有問題",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/autoresearch/evidence_ledger.jsonl",
+          "InterSubMod/research/autoresearch/hypothesis_queue.json",
+          "InterSubMod/state/cycles/",
+          "InterSubMod/docs/experiments/INDEX.md",
+          "InterSubMod/.claude/projects/-big7-disk-liaoyoyo2001-InterSubMod/memory/MEMORY.md"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '週報 evidence', 'tier 分佈', 'audit ledger')",
+        "Scans all 5 artifact sources (hypothesis_queue, evidence_ledger, state/cycles, INDEX, MEMORY.md)",
+        "Detects 5 categories: orphan cycle / over-claimed tier / stale entry / cross-artifact inconsistency / tier distribution anomaly",
+        "Outputs system-level audit report (not single-cycle judgment)",
+        "Recommends weekly cadence and lists actionable fixes per finding"
+      ],
+      "must_not": [
+        "Modify hypothesis_queue.json or evidence_ledger.jsonl (read-only audit)",
+        "Replace /run-evaluator's per-cycle P5 retraction risk role"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "幫我跑單一 cycle P5 tier 升級判定，看能不能升到 ⭐4",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/state/cycles/20260510-1430-ng2-loh-phasing/state.json",
+          "InterSubMod/state/cycles/20260510-1430-ng2-loh-phasing/pilot.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (single-cycle P5 upgrade is /run-evaluator's domain per SKIP WHEN)",
+        "Either no skill triggers, or run-evaluator activates instead",
+        "If user insists, redirect to /run-evaluator with explanation of scope difference"
+      ],
+      "must_not": [
+        "Run system-wide audit on a single cycle (scope mismatch)",
+        "Compute retraction risk score (that is run-evaluator's job)"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_cross_artifact_inconsistency",
+      "category": "edge_case",
+      "query": "ledger 看起來都健康，但 INDEX 有條目標 ⭐4 我記得 ledger verdict 是 NEGATIVE，幫我交叉檢查",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/experiments/INDEX.md",
+          "InterSubMod/research/autoresearch/evidence_ledger.jsonl"
+        ]
+      },
+      "expected_behavior": [
+        "Activates and runs cross-artifact consistency check (category 4)",
+        "Identifies INDEX ⭐4 entries whose ledger verdict is NEGATIVE/CONDITIONAL_NEGATIVE",
+        "Reports as 'cross-artifact inconsistency' with specific line/entry references",
+        "Recommends downgrading INDEX entry OR amending ledger verdict (decision left to user)",
+        "Does not auto-modify either file (audit-only)"
+      ],
+      "must_not": [
+        "Silently auto-correct INDEX or ledger without user confirmation",
+        "Treat as orphan cycle (different category — orphan = no ledger entry at all)"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "System-level audit (weekly cadence). For per-cycle P5 upgrade use /run-evaluator instead.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

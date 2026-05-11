@@ -1,0 +1,76 @@
+{
+  "skill": "results-analysis",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "幫我做 NG=2 vs F1 ablation 的統計分析，產圖跟顯著性檢定",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/output/synthesis/{run}/results.csv",
+          "InterSubMod/scripts/analysis/",
+          "InterSubMod/docs/experiments/in_progress/2026/05/"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '統計分析', 'check significance', 'ablation')",
+        "Generates analysis bundle: analysis-report.md + stats-appendix.md + figure-catalog.md + figures/",
+        "Produces .py analysis script using InterSubMod/scripts/lib/plot_setup.py with CJK font injection",
+        "Runs descriptive + inferential statistics (CI / p-values / effect sizes)",
+        "Surfaces limits, blockers, missing evidence explicitly"
+      ],
+      "must_not": [
+        "Draft a paper Results section (that is ml-paper-writing or results-report)",
+        "Skip confound check when AUC > 0.58 (must invoke /auc-confound-guard protocol)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "幫我把這張圖的 y 軸字型調大一點",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/experiments/in_progress/2026/05/figures/ng2_ablation.png"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (pure figure formatting is direct matplotlib edit per SKIP WHEN)",
+        "Either no skill triggers, or user is directed to edit the .py figure script directly",
+        "Does not regenerate full analysis bundle for cosmetic change"
+      ],
+      "must_not": [
+        "Re-run statistical analysis for a font-size change",
+        "Regenerate analysis-report.md / stats-appendix.md unnecessarily"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_too_many_figures",
+      "category": "edge_case",
+      "query": "分析完了但我有 12 個比較組，圖塞不下一張",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/output/synthesis/{run}/results.csv (12 comparison groups)"
+        ]
+      },
+      "expected_behavior": [
+        "Activates and splits output into multiple .png files (e.g., 3 figures × 4 groups each)",
+        "Each .png remains within readable density (CJK + axis labels visible)",
+        "figure-catalog.md indexes all split figures with caption purpose",
+        "Avoids cramming 12 panels into single figure (violates readability)"
+      ],
+      "must_not": [
+        "Force all 12 groups into one figure (unreadable)",
+        "Drop comparison groups silently to fit single figure"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Strict-statistics scope only — narrative report writing is /results-report, paper Results is /ml-paper-writing.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

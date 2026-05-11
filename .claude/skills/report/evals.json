@@ -1,0 +1,74 @@
+{
+  "skill": "report",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "會話結束前幫我寫一份執行報告，記錄今天的決策和修改",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/provenance/ai_sessions/2026/05/"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '寫報告', 'session report', 'Stop hook 提醒')",
+        "Records 5 sections: 對話目標 / 關鍵決策 / 修改清單 / 觀念更新 / 後續行動",
+        "Writes to InterSubMod/docs/provenance/ai_sessions/{YYYY}/{MM}/ with date-prefixed filename",
+        "Lists all files modified in the session with brief rationale per file",
+        "Tags trivial vs substantive sessions appropriately"
+      ],
+      "must_not": [
+        "Write to docs/reports/ or docs/experiments/ (wrong destination)",
+        "Replace results-report or weekly-report scope (single-session log only)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "幫我寫本週的研究進度週報",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/reports/validated/2026/05/"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (multi-topic weekly progress is weekly-report's domain per SKIP WHEN)",
+        "Either no skill triggers, or weekly-report activates instead",
+        "If misfired, redirect to /weekly-report with explanation"
+      ],
+      "must_not": [
+        "Write a single-session ai_sessions log when user explicitly asked for 週報",
+        "Place output under docs/provenance/ai_sessions/ (wrong destination for weekly report)"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_trivial_session",
+      "category": "edge_case",
+      "query": "Stop hook 提醒我寫報告但這次 session 只改了一個 typo",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/provenance/ai_sessions/2026/05/"
+        ]
+      },
+      "expected_behavior": [
+        "Skill still activates (Stop hook trigger honored)",
+        "Produces minimal report (objective + 1-line modification list + no follow-ups)",
+        "Marks frontmatter or section header as 'trivial-session' so future audits can skip",
+        "Does not pad with fabricated decisions or follow-ups"
+      ],
+      "must_not": [
+        "Refuse to write any report (hook expectation = always log)",
+        "Inflate trivial change with speculative concept updates / decisions"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "AI session log scope only — weekly progress / experiment results / engineering changes / research conclusions go to other skills.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

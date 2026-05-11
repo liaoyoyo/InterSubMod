@@ -1,0 +1,79 @@
+{
+  "skill": "research-dashboard",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "給我研究現狀 dashboard，我想看現在在哪",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/docs/CURRENT_FOCUS.md",
+          "InterSubMod/docs/reports/research_landscape/00_INDEX.md",
+          "InterSubMod/research/autoresearch/research_direction.md",
+          "InterSubMod/research/autoresearch/hypothesis_queue.json",
+          "InterSubMod/research/autoresearch/evidence_ledger.jsonl"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '研究看板', 'dashboard', '現在在哪')",
+        "Outputs single-page summary: 當前方向 / 假說佇列 / 最近結果 / 阻塞 / 記憶統計",
+        "Read-only — no file modifications",
+        "Project-level scope (hypothesis queue + memory + landscape index)",
+        "Pulls all 5 sources listed in SKILL.md Step 1"
+      ],
+      "must_not": [
+        "Modify any state file (read-only contract)",
+        "Drill into single-cycle state.json (that is cycle-state's domain)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "現在哪些 cycle 在跑？P5 EVALUATE 卡住了嗎",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/state/active.json",
+          "InterSubMod/state/cycles/"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (cycle-level dashboard is /cycle-state's domain per SKIP WHEN)",
+        "Either no skill triggers, or cycle-state activates instead",
+        "If misfired, redirect to /cycle-state with explanation of scope difference (project vs cycle)"
+      ],
+      "must_not": [
+        "Output project-level dashboard when user asked cycle-level question",
+        "Read state/cycles/*/state.json files (out of scope)"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_empty_hypothesis_queue",
+      "category": "edge_case",
+      "query": "給我研究 status",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/autoresearch/hypothesis_queue.json (status: empty [])"
+        ]
+      },
+      "expected_behavior": [
+        "Activates and renders dashboard normally",
+        "Hypothesis queue section explicitly notes '空 — 建議呼叫 /inject-hypothesis'",
+        "Other sections (CURRENT_FOCUS, recent results, blockers) still populated",
+        "Does not error out or skip render due to empty queue"
+      ],
+      "must_not": [
+        "Auto-invoke inject-hypothesis without user request (just hint)",
+        "Crash or refuse to render due to empty hypothesis_queue.json"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Project-level scope — distinct from /cycle-state (cycle-level) and /provenance-tier-audit (system-level audit).",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}

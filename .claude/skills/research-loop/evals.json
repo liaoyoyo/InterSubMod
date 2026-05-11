@@ -1,0 +1,78 @@
+{
+  "skill": "research-loop",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_trigger",
+      "category": "activation",
+      "query": "幫我設計 NG=2 LOH-constrained phasing 假說的 P1 PLAN 驗證計畫",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/autoresearch/hypothesis_queue.json",
+          "InterSubMod/research/autoresearch/evidence_ledger.jsonl",
+          "InterSubMod/research/autoresearch/research_direction.md",
+          "InterSubMod/state/cycles/{cycle_id}/state.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '設計驗證計畫', 'P1 PLAN', '研究迴圈')",
+        "Executes Step 0-3 (觀察 → 定向 → 假設 → 驗證設計) only — does not run experiments",
+        "Produces state/cycles/{id}/plan.json with binary_version / dataset_id / upstream_reports / expected effect_size / stop criteria",
+        "Identifies pipeline track (paired_full / paired_pileup / TO)",
+        "Hands off to /check-staleness P2 at end (does not execute Step 4+)"
+      ],
+      "must_not": [
+        "Execute pilot experiments (Step 4+ is feature-layered-observation / test-quick domain)",
+        "Modify evidence_ledger.jsonl (P5+ skill responsibility)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_scenario",
+      "category": "skip",
+      "query": "幫我設計新假說的驗證流程，這個假說我還沒寫進 queue",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/research/autoresearch/hypothesis_queue.json"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate fully (hypothesis must be registered first per SKIP WHEN)",
+        "Redirect to /inject-hypothesis with explanation",
+        "Optionally surface plan.json template structure as a preview but do not write it"
+      ],
+      "must_not": [
+        "Write plan.json for an unregistered hypothesis (orphan cycle risk)",
+        "Auto-create state/cycles/{id}/ directory before P0 REGISTER (cycle-init's job)"
+      ]
+    },
+    {
+      "id": "eval_03_edge_case_cycle_past_p1",
+      "category": "edge_case",
+      "query": "我這個 cycle 已經跑完 pilot 了，幫我繼續 P3",
+      "context": {
+        "files_in_scope": [
+          "InterSubMod/state/cycles/{cycle_id}/state.json (phase: P3)",
+          "InterSubMod/state/cycles/{cycle_id}/plan.json (exists)"
+        ]
+      },
+      "expected_behavior": [
+        "Skill does NOT continue (research-loop is P1 PLAN only per v0.2 scope)",
+        "Detects cycle phase >= P2 from state.json and redirects",
+        "Suggests correct phase skill: P2 → check-staleness, P3 → feature-layered-observation, P4 → multi-sample-consistency, P5 → run-evaluator",
+        "Does not overwrite existing plan.json"
+      ],
+      "must_not": [
+        "Re-do P1 PLAN when cycle already past P1 (would corrupt state)",
+        "Execute pilot/generalize/evaluate steps (out of scope per v0.2 limit)"
+      ]
+    }
+  ],
+  "notes": [
+    "Evals are per Anthropic best-practices (SOP §10).",
+    "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
+    "Scope strictly limited to P1 PLAN (Step 0-3) since v0.2 (2026-05-05). Step 4+ delegated to phase-specific skills.",
+    "Future: add scripts/run_evals.py for automated harness once eval framework standardized."
+  ]
+}
