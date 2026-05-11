@@ -114,3 +114,37 @@ research/paired_priority_bug_audit/v6c_phaseB_v6bam_runs/
 # Original `**/figures/*.png` only matched direct children, missed nested figures/*/foo.png
 # Recursive pattern now catches all figure PNGs regardless of depth
 **/figures/**/*.png
+
+# === Comprehensive binary policy (added 2026-05-11, post history-rewrite) ===
+# Per industry standard: deliverables/binaries belong in Drive/LFS/CDN, not git.
+# History rewrite reduced .git from 1.3GB to 25MB by removing these patterns.
+# Pre-commit hook scripts/hooks/no_binary_commit.sh enforces this going forward.
+#
+# Office documents (use Google Drive / SharePoint instead)
+*.pptx
+*.ppt
+*.pdf
+*.docx
+*.doc
+*.xlsx
+*.xls
+# Image binaries (use figure-generation scripts; if needed, store in Drive)
+*.png
+*.PNG
+*.jpg
+*.JPG
+*.jpeg
+*.JPEG
+*.gif
+*.bmp
+*.tiff
+# Allow small static logos/icons in specific dirs (negation)
+!docs/assets/logo/*.png
+!docs/assets/icon/*.svg
+# Generated state snapshots (regenerable from source)
+**/_snapshot.json
+**/snapshot.json
+# HTML previews (regenerable via html-preview skill)
+preview/
+**/preview/*.html
+examples/phase1_demo/**/index.html
