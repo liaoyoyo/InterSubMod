@@ -1,6 +1,6 @@
 ---
 name: review-evidence
-description: 查閱 InterSubMod 研究歷史紀錄。列出過去假設的測試結果、成功/失敗率、待測佇列狀態。USE WHEN：「查閱證據」「review evidence」「過去測試結果」、研究方向決策前回顧歷史。涉及 research/autoresearch/evidence_ledger.jsonl、hypothesis_queue.json。
+description: 查閱 InterSubMod 研究歷史紀錄。列出過去假設的測試結果、成功/失敗率、待測佇列狀態。USE WHEN：「查閱證據」「review evidence」「過去測試結果」、研究方向決策前回顧歷史。涉及 research/autoresearch/evidence_ledger.jsonl、hypothesis_queue.json。SKIP WHEN 全域系統審計（用 provenance-tier-audit）、cycle-level dashboard（用 cycle-state）、純 build / commit / docs、新假說注入（用 inject-hypothesis）。
 allowed-tools: Read, Bash
 user-invocable: true
 ---

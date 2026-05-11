@@ -1,6 +1,6 @@
 ---
 name: results-report
-description: 實驗結果報告撰寫。將完成的實驗 artifact 轉為結構化決策導向研究報告。USE WHEN：「寫實驗報告」「summarize results」「實驗複盤」「results report」。前置：先用 /results-analysis 完成統計分析。輸出到 docs/experiments/*.md。
+description: 實驗結果報告撰寫。將完成的實驗 artifact 轉為結構化決策導向研究報告。USE WHEN：「寫實驗報告」「summarize results」「實驗複盤」「results report」。前置：先用 /results-analysis 完成統計分析。輸出到 docs/experiments/*.md。SKIP WHEN 統計分析未完成（先用 results-analysis）、多主題週進度（用 weekly-report）、工程修改報告（用 structured-tech-report）、研究收尾（用 conclude-research）、AI session log（用 report）。
 version: 0.1.0
 tags: [Research, Reporting, Experiments, Obsidian]
 user-invocable: true

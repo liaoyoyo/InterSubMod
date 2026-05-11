@@ -1,6 +1,6 @@
 ---
 name: run-evaluator
-description: Phase 5 EVALUATE gate of the Resilient Waterfall harness — compute retraction risk score and tier recommendation from a cycle's complete artifacts. Reads `state/cycles/{cycle_id}/{state,plan,precheck,pilot,generalize}.json`, sweeps known-pitfalls, computes 6-component risk + composite + per-component override, writes `evaluation.json`. MANDATORY before tier ⭐4 / ⭐5 upgrade. USE WHEN：「run evaluator」「P5 evaluate」「retraction risk」「tier 升級前」「evaluator」、cycle 從 P4 → P5 transition 時。
+description: Phase 5 EVALUATE gate of the Resilient Waterfall harness — compute retraction risk score and tier recommendation from a cycle's complete artifacts. Reads `state/cycles/{cycle_id}/{state,plan,precheck,pilot,generalize}.json`, sweeps known-pitfalls, computes 6-component risk + composite + per-component override, writes `evaluation.json`. MANDATORY before tier ⭐4 / ⭐5 upgrade. USE WHEN：「run evaluator」「P5 evaluate」「retraction risk」「tier 升級前」「evaluator」、cycle 從 P4 → P5 transition 時。SKIP WHEN cycle 未到 P4 完成（artifact 不全）、系統級審計（用 provenance-tier-audit）、純 build / commit / docs、tier 已固定不需重評。
 allowed-tools: ["Bash", "Read", "Glob", "Grep"]
 user-invocable: true
 tags: ["harness", "evaluate", "retraction-risk", "tier-gate"]

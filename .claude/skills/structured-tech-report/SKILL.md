@@ -1,6 +1,6 @@
 ---
 name: structured-tech-report
-description: 工程／研究修改的結構化技術報告 skill — 把「問題→根因→修改→驗證→影響」流程整理為 13 段式報告，給「具備基本背景但不熟此專案」的讀者讀。整合 Toyota A3 + ADR + Google SRE Postmortem + Diátaxis 多受眾分層；繼承 InterSubMod doc-standards／v5_audit_suite 範本。USE WHEN：「寫技術報告」「整理修改」「13段報告」「self-phasing 報告」「pipeline 變更說明」「PR/commit 整理」「整理 bug fix」「整理工程改動」。與 results-report（實驗結果分析）／weekly-report（週進度多主題）／conclude-research（研究收尾假說驗證）／report（AI 對話紀錄）責任不同：本 skill 專責**單一工程／流程修改的深度敘事**。
+description: 工程／研究修改的結構化技術報告 skill — 把「問題→根因→修改→驗證→影響」流程整理為 13 段式報告，給「具備基本背景但不熟此專案」的讀者讀。整合 Toyota A3 + ADR + Google SRE Postmortem + Diátaxis 多受眾分層；繼承 InterSubMod doc-standards／v5_audit_suite 範本。USE WHEN：「寫技術報告」「整理修改」「13段報告」「self-phasing 報告」「pipeline 變更說明」「PR/commit 整理」「整理 bug fix」「整理工程改動」。與 results-report（實驗結果分析）／weekly-report（週進度多主題）／conclude-research（研究收尾假說驗證）／report（AI 對話紀錄）責任不同：本 skill 專責**單一工程／流程修改的深度敘事**。SKIP WHEN 多主題週進度（用 weekly-report）、實驗結果報告（用 results-report）、研究收尾（用 conclude-research）、AI session log（用 report）、單行修改不需深度敘事、純 build / commit。
 allowed-tools: Read, Write, Edit, Glob, Grep
 user-invocable: true
 tags: ["report", "documentation", "engineering", "rca", "adr", "postmortem", "13-section"]
