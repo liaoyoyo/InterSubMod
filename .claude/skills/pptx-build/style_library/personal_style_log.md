@@ -24,6 +24,34 @@
 
 ## Active 規則
 
+### 2026-05-11 — R-G13：slide 02 = Agenda 目錄（非 TL;DR）
+
+- **觸發來源**：Self-Phasing PPT 5/11 slide 02 用戶定位「應該用目錄重點指出有哪些區塊流程」
+- **規則細節**（與業界 Executive Summary vs Agenda 劃分對齊）：
+  - **slide 02 角色 = Agenda 目錄**（結構性）
+  - **不寫 substance**（具體結論 / 數字 / V6 verdict 等留給後續章節）
+  - **三段大框架** 分組 6 章節（依本案範本）：
+    - 問題發現 ① 觀察起點 ② 機制
+    - 修正過程 ③ 量化鐵證 ④ 修補設計
+    - 驗證結果 ⑤ 驗證 ⑥ 結論
+  - **每章一行說明**（≤ 20 字）描述章節內容，淡化具體數字
+  - **視覺**：3 grid（顏色分組）+ 編號 ① ② ③ 圓圈符號 + 章節標題 + 副說明
+  - **底部 footer**: slide 數 + 預計時長
+  - **Speaker note**: ≤ 60 sec / 中 ~240 字，純預告，不透露具體結論
+- **與業界規範對齊**：
+  - PowerPoint Agenda Slide best practices: 1-7 items, 編號清單, 居中對齊
+  - Storytelling with Data: ES 與 TOC 不該混為一張（slide 02 = TOC 純結構）
+  - PLOS Rule 3: ≤6 elements per slide
+- **何時用 TL;DR 而非 Agenda**：
+  - data-driven status update / 高層大會 / PI 不在場仍需決策 → TL;DR
+  - 教學 / Defense / 長 talk / 一般 lab meeting → Agenda
+  - 兩者都要時：slide 02 = TL;DR + slide 03 = Agenda（兩張並存）
+- **檢核方式**：slide 02 build 後 grep 「★」「+X%」「verdict」「production candidate」等 substance keyword — 應為 0
+- **狀態**：active
+- **Source**: [Storytelling with Data ES](https://www.storytellingwithdata.com/blog/2022/1/14/executive-summary-slides), [think-cell Agenda](https://www.think-cell.com/en/resources/manual/agenda), [PPT Productivity Agenda](https://pptproductivity.com/blog/how-to-create-powerpoint-agenda-table-of-contents)
+
+---
+
 ### 2026-05-11 — R-G12：字級規範（sans-serif 階層）
 
 - **觸發來源**：Self-Phasing PPT 5/11 封面審查 + WCAG / Texas Tech / Section508 / Six Minutes
@@ -271,7 +299,7 @@
 
 | 指標 | 數值 |
 |------|------|
-| Active 規則數 | 12 |
+| Active 規則數 | 13 |
 | [PROVISIONAL] 規則數 | 0 |
 | Archived 規則數 | 0 |
 | 最近更新 | 2026-05-11 |

@@ -54,46 +54,57 @@ add(id="01_cover", num="01", section="S0 Cover",
     speaker="謝謝各位。今天的報告主題是 self-phasing 問題的修正與驗證 — 在 longphase-to 工具的 tag 層發現一個設計缺陷，整理修正過程與跨樣本驗證的結果。報告人廖子游，這是 5/1 至 5/11 的階段性整理。",
     tier3="(封面 speaker note 精簡至 30 sec，不透露後續 slide 結論)")
 
-add(id="02_tldr", num="02", section="S0 Cover", rg2="1", ngrep="9",
-    title="TL;DR — Self-Phasing 修補三版演進完整：V3F → V5 → V6 (production candidate)",
-    en="Self-Phasing fix complete: V3F → V5 → V6, V6 patch + 4-sample validation",
-    timing="100 sec / 中 ~400 字",
+add(id="02_tldr", num="02", section="S0 報告流程", rg2="—", ngrep="—",
+    title="報告流程",
+    en="",
+    timing="60 sec / 中 ~240 字",
     canvas_html="""
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin:12px 0;">
+      <!-- 階段 1: 問題發現 -->
       <div>
-        <h4 style="font-size:12px;color:#6B7280;margin:0 0 4px;">原問題 + 修補主線</h4>
-        <div class="grid-2col" style="gap:6px;margin:0;">
-          <div class="stat-box"><div class="number">17.3:1</div><div class="label">HP1 偏 baseline</div></div>
-          <div class="stat-box"><div class="number">34,855</div><div class="label">priority bug victims</div></div>
+        <div style="background:#FEE2E2;color:#7F1D1D;padding:8px 14px;border-radius:6px;font-weight:700;font-size:15px;margin-bottom:14px;text-align:center;">問題發現</div>
+        <div style="margin-bottom:14px;">
+          <p style="font-size:16px;font-weight:600;color:#1E3A8A;margin:0;">① 觀察起點</p>
+          <p style="font-size:12px;color:#6B7280;margin:4px 0 0;line-height:1.4;">全基因組偏移與 chr19 三個失衡位點觀察</p>
+        </div>
+        <div>
+          <p style="font-size:16px;font-weight:600;color:#1E3A8A;margin:0;">② 機制</p>
+          <p style="font-size:12px;color:#6B7280;margin:4px 0 0;line-height:1.4;">phasing 與 tagging 兩層 bug 解析</p>
         </div>
       </div>
+
+      <!-- 階段 2: 修正過程 -->
       <div>
-        <h4 style="font-size:12px;color:#6B7280;margin:0 0 4px;">V6 patch (5/10) 三向 head-to-head</h4>
-        <div class="grid-2col" style="gap:6px;margin:0;">
-          <div class="stat-box"><div class="number green">+9.0%</div><div class="label">marker vs V3F</div></div>
-          <div class="stat-box"><div class="number green">+30.5%</div><div class="label">marker vs V5</div></div>
+        <div style="background:#FEF3C7;color:#92400E;padding:8px 14px;border-radius:6px;font-weight:700;font-size:15px;margin-bottom:14px;text-align:center;">修正過程</div>
+        <div style="margin-bottom:14px;">
+          <p style="font-size:16px;font-weight:600;color:#1E3A8A;margin:0;">③ 量化鐵證</p>
+          <p style="font-size:12px;color:#6B7280;margin:4px 0 0;line-height:1.4;">read-level 個案到全基因組驗證</p>
+        </div>
+        <div>
+          <p style="font-size:16px;font-weight:600;color:#1E3A8A;margin:0;">④ 修補設計</p>
+          <p style="font-size:12px;color:#6B7280;margin:4px 0 0;line-height:1.4;">兩層三版漸進改進歷程</p>
+        </div>
+      </div>
+
+      <!-- 階段 3: 驗證結果 -->
+      <div>
+        <div style="background:#DCFCE7;color:#166534;padding:8px 14px;border-radius:6px;font-weight:700;font-size:15px;margin-bottom:14px;text-align:center;">驗證結果</div>
+        <div style="margin-bottom:14px;">
+          <p style="font-size:16px;font-weight:600;color:#1E3A8A;margin:0;">⑤ 驗證</p>
+          <p style="font-size:12px;color:#6B7280;margin:4px 0 0;line-height:1.4;">指標對照與跨樣本一致性</p>
+        </div>
+        <div>
+          <p style="font-size:16px;font-weight:600;color:#1E3A8A;margin:0;">⑥ 結論</p>
+          <p style="font-size:12px;color:#6B7280;margin:4px 0 0;line-height:1.4;">修正方案總結與後續方向</p>
         </div>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:6px 0;">
-      <div class="stat-box"><div class="number" style="font-size:22px;">+13.3 pp</div><div class="label">paired GT (V5/V6)</div></div>
-      <div class="stat-box"><div class="number green" style="font-size:22px;">100%</div><div class="label">V3F+V5+V6 修正率</div></div>
-      <div class="stat-box"><div class="number green" style="font-size:22px;">4/4</div><div class="label">Phase D 跨樣本 ratio 中性</div></div>
-    </div>
-    <div style="background:#DCFCE7;border:1px solid #16A34A;padding:8px 14px;border-radius:6px;text-align:center;font-weight:600;color:#166534;font-size:13px;">
-      ★ V6 = V5 設計目標保留 + V3F 保守 hp=33 + marker engineering 改善 → production candidate
-    </div>
-    <div class="caveat-box" style="background:#FEF3C7;">
-      <span class="label">⚠ Open items:</span>
-      HCC1937 marker rate 0.817（BRCA1 mutant 樣本特性 edge case，3/4 sample 通過）; COLO829 truth set 0600 權限阻塞（1/7 樣本待補）
-      <span class="en-note">HCC1937 edge case + COLO829 access blocked; 4/5 V6 cross-sample validation passes</span>
-    </div>
-    <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">V6:</span> V5 + Layer 1.5 移除 (5/10 binary patch)</div>
-      <div class="gloss-item">📖 <span class="term">Phase D:</span> 跨 4 樣本驗證 (5/11)</div>
+
+    <div style="margin-top:24px;padding:10px 16px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:6px;color:#0C4A6E;font-size:13px;text-align:center;">
+      18 章節 slide + 3 backup（Q&A）  ·  預計 25 分鐘含問答
     </div>""",
-    speaker="今天 thesis: Self-Phasing 修補三版演進完整。原問題 baseline 17.3:1 偏 HP1; V3F+V5 兩層修補對 read-level 34,855 victims 100% 修正; 5/9 paired audit 揭露 V5 Layer 1.5 germline-absent 設計缺陷; 5/10 V6 binary patch (移除 Layer 1.5) 已實作; 5/11 Phase D 跨 4 樣本驗證 (H1437/H2009/HCC1954/HCC1937)。V6 全基因組 hp=33 ambiguous 138K > V3F 132K (+4.7%, V5=13K -89.9%); marker coverage V6 23,980 > V3F 21,997 (+9.0%) > V5 18,382 (+30.5%); marker rate V6 0.909 介於 V3F 0.918 與 V5 0.894 之間; caller F1 三版完全相同。跨 4 樣本 hp=1-1:hp=2-1 ratio 0.61-1.24 (V5 baseline 1.86, 全部接近中性); marker rate 3/4 通過, HCC1937 0.817 為 BRCA1 mutant 樣本特性 edge case; COLO829 truth set 權限阻塞。V6 = V5 設計目標保留 + V3F 保守 hp=33 + marker engineering 改善, 為 production candidate。",
-    tier3="V3F = 41ff147 / V5 = d0bcd8c + 938f0df / V6 patch (5/10) / Phase D 5/11")
+    speaker="今天報告分三個階段六個章節。問題發現階段：先看觀察起點的偏移現象，再解析兩層機制。修正過程階段：用 read-level 量化鐵證驗證，並設計三版漸進修補。驗證結果階段：跨指標跨樣本一致性驗證，最後給結論與後續方向。預計 25 分鐘含問答。",
+    tier3="(目錄 speaker note 精簡至 60 sec，純預告章節，不透露具體結論)")
 
 # ─── S1 觀察起點 ───────────────────────────────────────────────────────────
 add(id="03_genome_173", num="03", section="S1 觀察起點", rg2="3", ngrep="8",
