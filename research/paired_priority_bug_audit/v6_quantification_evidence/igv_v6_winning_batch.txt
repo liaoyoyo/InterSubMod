@@ -1,0 +1,22 @@
+new
+load /big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/v5_v6_compare_with_paired.xml
+genome /big8_disk/liaoyoyo2001/InterSubMod/data/ref/GRCh38_no_alt_analysis_set.fasta
+snapshotDirectory /big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/by_HP_v6_winning
+maxPanelHeight 800
+
+goto chr19:52081084-52082084
+sort BASE
+collapse
+snapshot V6win_chr19_52081584_priority_bug_HP21_to_HP33.png
+
+goto chr19:8349097-8350097
+sort BASE
+collapse
+snapshot V6win_chr19_8349597_germline_absent_partial_revert.png
+
+goto chr19:55347452-55348452
+sort BASE
+collapse
+snapshot V6win_chr19_55347952_HP2_to_HP33_revert.png
+
+exit
