@@ -1,6 +1,6 @@
 ---
 name: memory-consolidation
-description: 記憶檔案生命週期管理。掃描 status/last_relevant 標記、合併同主題 concluded、降級過時 active、更新 MEMORY.md 索引（保持 <200 行）。USE WHEN：「整理記憶」「memory consolidation」「記憶太多」「MEMORY.md 太長」。
+description: 記憶檔案生命週期管理。掃描 status/last_relevant 標記、合併同主題 concluded、降級過時 active、更新 MEMORY.md 索引（保持 <200 行）。USE WHEN：「整理記憶」「memory consolidation」「記憶太多」「MEMORY.md 太長」。SKIP WHEN MEMORY.md <100 行不需整理、純 code edit、單一 memory 新增（直接 Write）、純 build / commit。
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 user-invocable: true
 ---

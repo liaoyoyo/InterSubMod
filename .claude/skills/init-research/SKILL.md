@@ -1,6 +1,6 @@
 ---
 name: init-research
-description: 初始化**多週級長期研究專案**（含多假說 + 多 cycle）。建立 research/{project_name}/ 標準目錄 + manifest.yaml + 00_PLAN.md 骨架。專案內每個假說驗證再用 /cycle-init 啟動短週期 cycle（state/cycles/{id}/）。觸發：「init-research」「新專案」「新研究方向」「多週研究」「長期研究」。**不要與 /cycle-init 混用**：init-research = 專案級長期 scaffolding（research/）；cycle-init = 假說級短驗證 scaffolding（state/cycles/）。
+description: 初始化**多週級長期研究專案**（含多假說 + 多 cycle）。建立 research/{project_name}/ 標準目錄 + manifest.yaml + 00_PLAN.md 骨架。專案內每個假說驗證再用 /cycle-init 啟動短週期 cycle（state/cycles/{id}/）。觸發：「init-research」「新專案」「新研究方向」「多週研究」「長期研究」。**不要與 /cycle-init 混用**：init-research = 專案級長期 scaffolding（research/）；cycle-init = 假說級短驗證 scaffolding（state/cycles/）。SKIP WHEN 短週期假說 cycle（用 cycle-init）、既有專案下新假說、純 build / commit、單實驗報告（用 results-report）。
 allowed-tools: Read, Write, Bash, Glob, Grep
 user-invocable: true
 ---

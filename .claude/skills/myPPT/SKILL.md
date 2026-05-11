@@ -1,6 +1,6 @@
 ---
 name: myPPT
-description: InterSubMod 整體 PPT 工作流總入口（從資料搜集問答到產出可顯示 PPT）。輕量場景識別 → 委派 sub-skill：週報情境委派 weekly-report (W1-W7 母稿)，已有母稿/從零開始委派 pptx-build (P1-P5 PPTX 製作)。本 skill 不直接做母稿/PPTX，只做場景判斷與路徑分流。觸發：「我要做簡報」「教授報告」「週報」「PPT」「向教授彙報」「PPTX」「報告」「整理本週」「投影片」
+description: InterSubMod 整體 PPT 工作流總入口（從資料搜集問答到產出可顯示 PPT）。輕量場景識別 → 委派 sub-skill：週報情境委派 weekly-report (W1-W7 母稿)，已有母稿/從零開始委派 pptx-build (P1-P5 PPTX 製作)。本 skill 不直接做母稿/PPTX，只做場景判斷與路徑分流。觸發：「我要做簡報」「教授報告」「週報」「PPT」「向教授彙報」「PPTX」「報告」「整理本週」「投影片」。SKIP WHEN 已有 master 母稿（直接用 pptx-build）、純 figure 重做（用 image-gen）、純 build / commit / docs、不需 PPTX 的場景。
 allowed-tools: Read, AskUserQuestion
 user-invocable: true
 ---
