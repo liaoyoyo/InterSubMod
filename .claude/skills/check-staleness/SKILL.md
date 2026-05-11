@@ -1,6 +1,6 @@
 ---
 name: check-staleness
-description: Phase 2 PRECHECK gate of the Resilient Waterfall harness — verify that a cycle's preconditions (C++ binary, dataset, upstream reports) are still fresh before pilot. Reads `state/cycles/{cycle_id}/plan.json`, compares against `state/invalidation/*.jsonl`, and writes `precheck.json`. USE WHEN：「check staleness」「P2 precheck」「驗 precondition」「驗證前置條件」「跑 pilot 前」、cycle 從 P1 → P2 transition 時。涉及 InterSubMod/state/ 內 plan.json 與 invalidation 紀錄。
+description: Phase 2 PRECHECK gate of the Resilient Waterfall harness — verify that a cycle's preconditions (C++ binary, dataset, upstream reports) are still fresh before pilot. Reads `state/cycles/{cycle_id}/plan.json`, compares against `state/invalidation/*.jsonl`, and writes `precheck.json`. USE WHEN：「check staleness」「P2 precheck」「驗 precondition」「驗證前置條件」「跑 pilot 前」、cycle 從 P1 → P2 transition 時。涉及 InterSubMod/state/ 內 plan.json 與 invalidation 紀錄。 SKIP WHEN cycle 仍在 P0/P1 PLAN 階段（plan.json 未 ready）、純 build / commit、已通過 P2 進入 P3 PILOT、不涉及 cycle state 變更、純 docs 寫作。
 allowed-tools: ["Bash", "Read", "Glob", "Grep"]
 user-invocable: true
 tags: ["harness", "precheck", "validation", "freshness"]

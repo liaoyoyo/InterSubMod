@@ -1,6 +1,6 @@
 ---
 name: data-audit
-description: 研究輸出的組織完整性檢核 — 檢查圖片連結、索引覆蓋、命名合規、元數據、gitignore、散落檔案。USE WHEN：研究完成後整理 docs/experiments/ 或 docs/reports/ 輸出、「檢查檔案組織」「audit」。涉及 .md/.png/.csv 檔案。
+description: 研究輸出的組織完整性檢核 — 檢查圖片連結、索引覆蓋、命名合規、元數據、gitignore、散落檔案。USE WHEN：研究完成後整理 docs/experiments/ 或 docs/reports/ 輸出、「檢查檔案組織」「audit」。涉及 .md/.png/.csv 檔案。 SKIP WHEN 單檔案編輯無組織變動、程式碼級驗證（用 verification-loop）、純 build、純 .py 開發、不涉及 docs/experiments 或 docs/reports 結構變更。
 allowed-tools: ["Bash", "Glob", "Grep", "Read"]
 user-invocable: true
 tags: ["audit", "organization", "research"]

@@ -1,6 +1,6 @@
 ---
 name: cycle-init
-description: Phase 0 REGISTER gate of the Resilient Waterfall harness — initialize a new short-validation research cycle. Allocates `cycle_id` (YYYYMMDD-HHMM-{slug}), creates `state/cycles/{cycle_id}/state.json` skeleton + updates `state/active.json` index. Hands off to research-loop for P1 PLAN. **Distinct from /init-research** which scaffolds multi-week project trees in `research/`. USE WHEN：「cycle init」「new cycle」「P0 REGISTER」「啟動新假說 cycle」「state/cycles 建立」、收到 hypothesis_id 後啟動驗證流程時。
+description: Phase 0 REGISTER gate of the Resilient Waterfall harness — initialize a new short-validation research cycle. Allocates `cycle_id` (YYYYMMDD-HHMM-{slug}), creates `state/cycles/{cycle_id}/state.json` skeleton + updates `state/active.json` index. Hands off to research-loop for P1 PLAN. **Distinct from /init-research** which scaffolds multi-week project trees in `research/`. USE WHEN：「cycle init」「new cycle」「P0 REGISTER」「啟動新假說 cycle」「state/cycles 建立」、收到 hypothesis_id 後啟動驗證流程時。 SKIP WHEN 多週級長期專案 scaffolding（用 init-research）、cycle 已存在於 state/active.json、純 build / commit、純 docs 寫作、重啟既有 cycle 而非新建（用 cycle-state 查詢後 resume）。
 allowed-tools: ["Bash", "Read", "Glob", "Grep", "Write"]
 user-invocable: true
 tags: ["harness", "register", "cycle-init", "p0"]

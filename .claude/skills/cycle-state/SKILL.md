@@ -1,6 +1,6 @@
 ---
 name: cycle-state
-description: Master dashboard for the Resilient Waterfall harness — read-only snapshot of all active cycles. Reads `state/active.json` + each cycle's `state/cycles/{id}/state.json` and outputs a priority-sorted dashboard with phase, tier, open gates, stale warnings, and routing recommendations (which skill to invoke next per cycle). **Read-only** — does not modify state. **Distinct from /research-dashboard** which surveys hypothesis queue + memory + experiment INDEX (project-level scope), while this skill is cycle-level. USE WHEN：「cycle state」「dashboard」「研究狀態」「現在哪些 cycle 在跑」「給我 status」「active cycles」「P5 EVALUATE 卡住嗎」、SessionStart 自動建議時。
+description: Master dashboard for the Resilient Waterfall harness — read-only snapshot of all active cycles. Reads `state/active.json` + each cycle's `state/cycles/{id}/state.json` and outputs a priority-sorted dashboard with phase, tier, open gates, stale warnings, and routing recommendations (which skill to invoke next per cycle). **Read-only** — does not modify state. **Distinct from /research-dashboard** which surveys hypothesis queue + memory + experiment INDEX (project-level scope), while this skill is cycle-level. USE WHEN：「cycle state」「dashboard」「研究狀態」「現在哪些 cycle 在跑」「給我 status」「active cycles」「P5 EVALUATE 卡住嗎」、SessionStart 自動建議時。 SKIP WHEN 專案級 dashboard（用 research-dashboard）、需要修改 state（本 skill read-only only）、純 build / commit、純 docs 寫作、無 active cycles 存在時。
 allowed-tools: ["Bash", "Read", "Glob", "Grep"]
 user-invocable: true
 tags: ["harness", "dashboard", "cycle-state", "master"]

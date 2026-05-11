@@ -1,6 +1,6 @@
 ---
 name: citation-verification
-description: 學術引用驗證：每個 citation 必須 WebSearch + Google Scholar 驗證後才寫入 .bib。USE WHEN：撰寫論文、檢查既有引用、產出 bibliography。
+description: 學術引用驗證：每個 citation 必須 WebSearch + Google Scholar 驗證後才寫入 .bib。USE WHEN：撰寫論文、檢查既有引用、產出 bibliography。 SKIP WHEN 內部 docs（無學術引用需求）、非 .bib 引用格式、純註解編輯、純 .py 程式碼開發、既有 .bib 已驗證過且無新增條目。
 allowed-tools: Read, Write, WebSearch, WebFetch, Grep
 user-invocable: true
 ---
