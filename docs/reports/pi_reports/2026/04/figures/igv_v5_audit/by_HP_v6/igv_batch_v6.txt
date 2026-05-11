@@ -1,0 +1,21 @@
+new
+genome /big8_disk/liaoyoyo2001/InterSubMod/data/ref/GRCh38_no_alt_analysis_set.fasta
+snapshotDirectory /big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/by_HP_v6
+load /big7_disk/liaoyoyo2001/longphase-to-mod/output/baseline/tumor_tagged.bam
+load /big7_disk/liaoyoyo2001/longphase-to-mod/output/v6_germline_absent_revert/tumor_tagged.bam
+load /big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_full/20260314_HCC1395_paired_full_full_complete_matrix/longphase_s/HCC1395_tagged.bam
+load /big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam
+maxPanelHeight 400
+colorBy TAG HP
+group TAG HP
+preference SAM.SHADE_ALIGNMENTS_BY HAPLOTYPE
+goto chr19:17565894-17565994
+sort base
+snapshot D_SP1_chr19_17565944_v6.png
+goto chr19:12452282-12452382
+sort base
+snapshot D_SP2_chr19_12452332_v6.png
+goto chr19:12467130-12467230
+sort base
+snapshot D_SP3_chr19_12467180_v6.png
+exit

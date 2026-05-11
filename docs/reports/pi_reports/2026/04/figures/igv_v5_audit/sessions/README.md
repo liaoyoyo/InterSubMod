@@ -1,11 +1,74 @@
 <!--
 建立時間: 2026-05-01 00:00
-目標: 說明 v5_purity_compare_with_paired IGV session 的 phase、tag 與 TP/FP 多層級審查用途
+最新更新: 2026-05-12（加 V6 session + 命名規範）
+目標: 說明 igv_v5_audit/sessions/ 目錄內所有 IGV session（XML）用途與管理規範
 處理範圍: IGV session、phase-context VCF、TP/FP VCF、audit marker BED 與 site-level manifest
 關聯檔案:
   - docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/v5_purity_compare_with_paired.xml
+  - docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/v6_germline_absent_audit.xml
   - docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/site_layer_manifest.tsv
 -->
+
+# IGV Sessions 管理規範
+
+## 目錄定位
+
+**固定路徑**：`InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/`
+
+所有跨 baseline / V3F / V5 / V6 / paired 的 IGV audit session XML 都收在此目錄。**不要分散到其他位置** — 統一管理 audit infrastructure（phase VCF / TP/FP marker / LOH/GE BED / colored audit sites）。
+
+## 命名規範
+
+`{version}_{purpose}_{scope}.xml`
+
+範例：
+- `v5_all.xml` — V5 全 sample 基礎 session
+- `v5_all_4versions.xml` — V5 baseline/V2b/V3F/V5 四版並列
+- `v5_color_HP.xml` — V5 HP tag 著色版
+- `v5_purity_compare_with_paired.xml` — V5 + purity sim + paired ground truth
+- `v6_germline_absent_audit.xml` — **新增** V6 germline-absent 區域 audit
+
+## Session 清單（依時序）
+
+| Session XML | 用途 | BAM tracks | VCF context | BED markers |
+|---|---|---|---|---|
+| `v5_all.xml` | 基礎 V5 + baseline | 2 | — | — |
+| `v5_all_4versions.xml` | 四版（baseline/V2b/V3F/V5）並列 | 4 | — | — |
+| `v5_all_4versions_color_MOD.xml` | 上加 MOD 著色 | 4 | — | — |
+| `v5_all_color_MOD.xml` | V5 + MOD 著色 | 2 | — | — |
+| `v5_color_HP.xml` | V5 HP tag 著色 | 2 | — | — |
+| `v5_purity_compare.xml` | V5 + purity simulation | 4 | — | — |
+| `v5_purity_compare_with_paired.xml` | 上加 paired ground truth + 全 audit context | 6 | 7 | 6 |
+| **`v6_germline_absent_audit.xml`** | **V6 vs paired，germline-absent 區域 audit** | 6 | 7 | 6 |
+
+## 全 session 共同 audit layer（已建好的 annotation 資源）
+
+詳見 `annotations/` 子目錄：
+
+- `audit_sites_all_colored.bed` — 全特殊位點合併（含 TP/FP/V5max/SelfPhasing 顏色）
+- `audit_sites_TP.bed` / `audit_sites_FP.bed` — paired 層級 TP/FP 分類
+- `audit_sites_V5max.bed` — V5 改變最大位點
+- `audit_sites_SelfPhasing.bed` — self-phasing 觀察位點（含 SP1/SP2/SP3）
+- `site_layer_manifest.tsv` — 每位點 TP/FP VCF 命中 + phase anchor 摘要
+- `lp_s_normal_phase_context_15sites.vcf` / `lp_to_*_phase_context_15sites.vcf` — paired/TO 各版 phase backbone
+
+## V6 Session 啟用流程
+
+1. **建立**：複製最近 V5 session（推薦 `v5_purity_compare_with_paired.xml`）→ `v6_germline_absent_audit.xml`，path swap V5 BAM → V6 BAM（`/v6_germline_absent_revert/tumor_tagged.bam`）
+2. **載入**：開 IGV → File → Open Session → 選 V6 XML
+3. **batch snapshot**（headless）：IGV 用 `--batch` 模式 + script 指定位點 + snapshot
+4. **產出**：PNG 入 `by_HP_v6/` 或新建 `by_HP_v{N}/` 目錄
+5. **記錄**：在本 README 加 entry + 在產出目錄加 `_session_note.md` 連結回此 session
+
+## 後續 version 規範（V7 / V8 ...）
+
+未來新版本：
+- 複製最近 audit-complete session 為基礎
+- 命名 `v{N}_{purpose}_audit.xml`
+- 在本 README 加 entry
+- 不刪除舊 V{N-1} session（保留 reproducibility）
+
+---
 
 # IGV V5 Purity Compare With Paired Session
 
