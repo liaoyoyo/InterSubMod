@@ -44,7 +44,7 @@ handoff_choice: pending
 1. ⭐⭐⭐ **[F]** 5/05 audit：V5 是 **5 commits**（8b8c1fd → 41ff147 → 380e8d2 → **d0bcd8c (4/30 ploidy fix)** → **938f0df (4/30 threshold 0.95→0.9 cherry-pick)**），working tree caveat R1 已解決
 2. ⭐⭐⭐ **[F]** 4/29 PI 報告引用 BAM (4/12 產) = `pononly_v2b/tumor_tagged.bam`，因 ploidy bug 讓 `purity=0` → highPurity=false → **Pass 2 從未觸發** → 全部 V5 數值是「PON-only Pass 1 + tag layer fix」結果
 3. ⭐⭐⭐ **[F]** 5/01 三條路 audit：commit `938f0df` 自動觸發 Pass 2 路 3 second round，**抵消** Pass 2 路 2 的反轉效果（OLD V5 路 2 only HP1:HP2=0.735 ✅ 反轉；NEW V5 路 2+3 = 1.400 ❌ 與新 baseline 等價）
-4. ⭐⭐ **[F]** 5/01 v5_force_path2only_ablation 實證：強制 `highPurity=false` 跳過路 3 → ratio 1.127、HP_33=28（與舊 V5 work tree 1.129、28 完全等價），假設 PASS
+4. ⭐⭐ **[F]** 5/01 v5_force_path2only_ablation 實證：強制 `highPurity=false` 跳過路 3 → 15-site cherry-picked sample 觀測 ratio 1.127、HP_33=28（與舊 V5 work tree 15-site 觀測 1.129、28 完全等價）→ 假設 PASS（方向）；全 BAM 等價量化待 monitor 完成 [U]
 5. ⭐⭐ **[F]** Caller F1 在所有 6 版本（OLD/NEW × baseline/V5/noPath3）完全相同：0.93 = **0.7166**、0.6 = **0.6273**（4/30 V3F ablation 首次發布）；longphase-to phase 不改 FILTER，F1 不衡量 phasing 品質
 
 ### Top Asks（教授必判斷的決策點，3 條）
@@ -95,7 +95,7 @@ graph TB
 **核心數字**：
 - Self-phasing baseline: **17.3:1**（94.6% somatic ALT → HP1，跨 23 染色體）
 - V5 修補鏈: **5 commits**（含 4/30 ploidy fix + threshold cherry-pick）
-- 4/29 PI 報告 V5 (Pass 1 only): clean PS V5=88.2% / BL=74.9% (+13.3pp), AMB% 17.5→8.0%, HP:i:33 −54%
+- 4/29 PI 報告 V5 (Pass 1 only): clean PS V5=88.2% / BL=74.9% (+13.3pp), AMB% 17.5→8.0%, HP:i:33 read 計數 239,679 → 110,197（−54%, whole genome）
 - 5/01 三條路 audit: NEW V5 (路 2+3) HP1:HP2=1.400 = NEW baseline，OLD V5 (路 2 only) = 0.735, NEW noPath3 = 1.127
 - Caller F1: 0.93 全 6 版本 = **0.7166**, 0.6 全 3 版本 = **0.6273**（首次發布）
 - 兩層 LOH: ISM HP_Ratio LOH 62% artifact；LOH.bed Jaccard=1.0 不受影響
@@ -169,13 +169,13 @@ graph TB
 
 - §3 [F] 5 版本完整對比矩陣：
 
-| 版本 | 走的路 | HP1:HP2 | HP_33 | 反轉? | F1 |
-|------|-------|---------|-------|-------|------|
-| OLD baseline | 路 1 | 1.328 | 0 | ❌ | 0.7166 |
-| **OLD V5 flag** | 路 2 only (bug) | **0.735** | 14,524 | ✅ | 0.7166 |
-| NEW baseline | 路 1+3 | 1.400 | 3,468 | ❌ 更糟 | 0.7166 |
-| NEW V5 flag | 路 2+3 | 1.400 | 3,468 | ❌ 抵消 | 0.7166 |
-| **NEW V5 noPath3** | 路 2 only (forced) | 1.127 | 14,524 | ✅ ≈ OLD V5 | 0.7166 |
+| 版本 | 走的路 | HP1:HP2 | HP_33 | scope | 反轉? | F1 |
+|------|-------|---------|-------|-------|-------|------|
+| OLD baseline | 路 1 | 1.328 | 2,640 | threshold_compare 全 BAM | ❌ | 0.7166 |
+| **OLD V5 flag** | 路 2 only (bug) | **0.735** | 14,524 | threshold_compare 全 BAM | ✅ 反轉 | 0.7166 |
+| NEW baseline | 路 1+3 | 1.400 | 3,468 | threshold_compare 全 BAM | ❌ 更糟 | 0.7166 |
+| NEW V5 flag | 路 2+3 | 1.400 | 3,468 | threshold_compare 全 BAM | ❌ 抵消 | 0.7166 |
+| **NEW V5 noPath3** | 路 2 only (forced) | **1.127** | 28 | **15-site cherry-picked**（全 BAM 預期 ≈ 0.735，待 monitor [U]） | ✅ 反轉（方向）| 0.7166 |
 
 - §3 [F] force_path2only ablation 假設 PASS：強制 `bool highPurity = false` 跳過路 3 → 復現舊 V5 反轉效果
 - §3 [F] 路 2 vs 路 3 關鍵差別：路 2 含 `somaticCalling` 重跑（`HaplotagProcess.cpp:484-563`）；路 3 只重 phase 不重 call → self-phasing 偏移殘留

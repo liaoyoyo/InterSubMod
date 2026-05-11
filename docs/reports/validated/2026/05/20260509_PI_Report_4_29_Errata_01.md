@@ -223,6 +223,24 @@ V3F 在該區域標 hp=33（純 somatic ambiguous，方向不選邊）— **保�
 - caller F1 三版相同 ✅
 - E5 僅影響 V5 vs V3F 在 **germline-absent 區域** 的設計選擇，**不撤回任何主結論**
 
+### 5.5 對 region-level downstream 的影響評估（V6-C Phase B 補強，5/10）
+
+V5 Layer 1.5 的 read-level 4.19:1 偏移**在 region-level 後續特徵化（如 HPFineNGroups marker）影響有限**：
+
+| 量化 | 結果 | 說明 |
+|---|---|---|
+| chr19 marker filter (NG≥3) flag=off TP rate | 94.7% (463/489) | germline-existent 區為主，priority bug 已被 V3F/V5 修正 |
+| 對應 flag=on (NG_on=2) cell TP rate | 91.5% (367/401) | bucket schema collapse 後仍保留 ≥0.85 |
+| 最強 cell (NG_off=5 → NG_on=2) | 99.2% (122/123) | schema 訊號塌陷後物理屬性仍區辨 |
+
+→ **V5 Layer 1.5 設計缺陷在 read-level 確實存在（germline-absent 區），但 region-level marker 在 flag=on/off 下都通過 0.85 gate**：
+- read-level audit（如全基因組 priority bug 統計）仍受 4.19:1 偏移污染
+- region-level downstream feature（如 HPFineNGroups subclone marker）對該區的 reads 共現不敏感（germline-absent 區 events 占比小，且 marker filter 多落在 germline-existent 區）
+
+完整量化 → [`InterSubMod/research/paired_priority_bug_audit/05_V6C_phaseB_findings.md`](../../../research/paired_priority_bug_audit/05_V6C_phaseB_findings.md)。
+
+→ E5 對 V5 production usage 的結論：**Layer 1.5 設計缺陷在 read-level 真實，但 region-level 影響輕微**；不阻擋 V5 作為 production tag baseline；germline-absent 區改回 V3F 的 ISM 影響待 Phase C 7 樣本量化（F-paired-D3 follow-up）。
+
 ---
 
 ## 6. 修訂後 §1 一句結論建議全文
@@ -248,6 +266,7 @@ V3F 在該區域標 hp=33（純 somatic ambiguous，方向不選邊）— **保�
 | 2026-05-09 | Paired audit Step D cycle 37 — V5 Layer 1.5 設計缺陷 | [`InterSubMod/research/paired_priority_bug_audit/01_step_D_germline_absent_finding.md`](../../../research/paired_priority_bug_audit/01_step_D_germline_absent_finding.md) (commit 766ec5f) |
 | 2026-05-10 | 5/8 整合報告補 §8.6 Paired Mode Cross-Reference Audit | [§8.6](20260508_Self_Phasing_完整觀察整合報告_01.md) (commit df5137e) |
 | **2026-05-10** | **本檔加 E5 + renumber §5/§6/§7 → §6/§7/§8** | 本檔 |
+| **2026-05-10** | **本檔 §5.5 V6-C Phase B chr19 region-level marker robustness 補強** | [V6-C Phase B](../../../research/paired_priority_bug_audit/05_V6C_phaseB_findings.md) |
 
 ---
 

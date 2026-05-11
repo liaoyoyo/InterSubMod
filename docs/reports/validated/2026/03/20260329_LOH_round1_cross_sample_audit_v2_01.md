@@ -15,6 +15,10 @@
   - /big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/2026/03/assets/20260329_loh_round1_cross_sample_audit_v2_figures
 -->
 
+> ⚠ **[RETRACTED 2026-04-26]** 跨樣本 LOH×AF×CN whitelist filter 宣稱已撤回。
+> 詳見 [InterSubMod/docs/reports/validated/2026/04/20260426_Thread_B_Retraction_Whitelist_Cross_Sample_01.md](../../2026/04/20260426_Thread_B_Retraction_Whitelist_Cross_Sample_01.md)。
+> 本檔案結論僅作為 HCC1395 single-sample case study 保留。
+
 # LOH Round 1 Cross-Sample Audit v2 補充報告
 
 > 日期：2026-03-29

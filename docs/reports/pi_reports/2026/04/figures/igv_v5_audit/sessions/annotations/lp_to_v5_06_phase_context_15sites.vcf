@@ -1,0 +1,134 @@
+##fileformat=VCFv4.2
+##source=ClairS-TO
+##clairs_to_version=0.3.0
+##cmdline=/opt/bin/run_clairs_to --tumor_bam_fn /big8_disk/zhenyu112//HCC1395/ONT/sample/bam/merged_t30_n20.bam --ref_fn /big8_disk/zhenyu112/GRCh38_no_alt_analysis_set.fasta --threads 50 --platform ont_r10_dorado_sup_5khz_ssrs --output_dir /big8_disk/zhenyu112/HCC1395/ONT/sample/bam/merged_t30_n20
+##FILTER=<ID=PASS,Description="All filters passed">
+##FILTER=<ID=NonSomatic,Description="Non-somatic variant tagged by panel of normals">
+##FILTER=<ID=LowQual,Description="Low-quality variant">
+##FILTER=<ID=LowAltBQ,Description="Average alt allele base quality <20">
+##FILTER=<ID=LowAltMQ,Description="Average alt allele read mapping quality <20">
+##FILTER=<ID=ReadStartEnd,Description=">30% of the supporting alt alleles are within 100bp of the start or end of a read">
+##FILTER=<ID=VariantCluster,Description="Three or more variants clustered within 200bp">
+##FILTER=<ID=NoAncestry,Description="Variant without an ancestral haplotype support">
+##FILTER=<ID=MultiHap,Description="Alt alleles existed in multiple haplotypes">
+##FILTER=<ID=StrandBias,Description="Strand bias p-value <0.001">
+##FILTER=<ID=LowSeqEntropy,Description="Sequence entropy <0.9">
+##FILTER=<ID=Realignment,Description="For short-read, both the count of supporting alt alleles and AF decreased after realignment">
+##FILTER=<ID=RefCall,Description="Reference call">
+##INFO=<ID=PoN_1,Number=0,Type=Flag,Description="file=/opt/micromamba/envs/clairs-to/bin/clairs-to_databases/gnomad.r2.1.af-ge-0.001.sites.vcf.gz,md5=601746b83d7a5e9a6433e3d199a725d5,allele_matching=True,non-somatic variant tagged by panel of normals">
+##INFO=<ID=PoN_2,Number=0,Type=Flag,Description="file=/opt/micromamba/envs/clairs-to/bin/clairs-to_databases/dbsnp.b138.non-somatic.sites.vcf.gz,md5=310a02da7ca6691e6ca460a1d09e8351,allele_matching=True,non-somatic variant tagged by panel of normals">
+##INFO=<ID=PoN_3,Number=0,Type=Flag,Description="file=/opt/micromamba/envs/clairs-to/bin/clairs-to_databases/1000g-pon.sites.vcf.gz,md5=4a89bb0d8b2d4013dbd3a08d01843a9f,allele_matching=False,non-somatic variant tagged by panel of normals">
+##INFO=<ID=PoN_4,Number=0,Type=Flag,Description="file=/opt/micromamba/envs/clairs-to/bin/clairs-to_databases/CoLoRSdb.GRCh38.v1.1.0.deepvariant.glnexus.af-ge-0.001.vcf.gz,md5=84ecde7c2e186963648967fc0380c599,allele_matching=False,non-somatic variant tagged by panel of normals">
+##INFO=<ID=Verdict_Germline,Number=0,Type=Flag,Description="Variant tagged by verdict as Germline">
+##INFO=<ID=Verdict_Somatic,Number=0,Type=Flag,Description="Variant tagged by verdict as Somatic">
+##INFO=<ID=Verdict_SubclonalSomatic,Number=0,Type=Flag,Description="Variant tagged by verdict as Subclonal Somatic">
+##INFO=<ID=H,Number=0,Type=Flag,Description="Variant found only in one haplotype in the phased reads">
+##INFO=<ID=FAU,Number=1,Type=Integer,Description="Count of A in forward strand in the tumor BAM">
+##INFO=<ID=FCU,Number=1,Type=Integer,Description="Count of C in forward strand in the tumor BAM">
+##INFO=<ID=FGU,Number=1,Type=Integer,Description="Count of G in forward strand in the tumor BAM">
+##INFO=<ID=FTU,Number=1,Type=Integer,Description="Count of T in forward strand in the tumor BAM">
+##INFO=<ID=RAU,Number=1,Type=Integer,Description="Count of A in reverse strand in the tumor BAM">
+##INFO=<ID=RCU,Number=1,Type=Integer,Description="Count of C in reverse strand in the tumor BAM">
+##INFO=<ID=RGU,Number=1,Type=Integer,Description="Count of G in reverse strand in the tumor BAM">
+##INFO=<ID=RTU,Number=1,Type=Integer,Description="Count of T in reverse strand in the tumor BAM">
+##INFO=<ID=SB,Number=1,Type=Float,Description="The p-value of Fisher’s exact test on strand bias">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype quality">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth">
+##FORMAT=<ID=AF,Number=1,Type=Float,Description="Estimated allele frequency">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Allelic depths for the ref and alt alleles in the order listed in the ALT column">
+##FORMAT=<ID=AU,Number=1,Type=Integer,Description="Count of A in the tumor BAM">
+##FORMAT=<ID=CU,Number=1,Type=Integer,Description="Count of C in the tumor BAM">
+##FORMAT=<ID=GU,Number=1,Type=Integer,Description="Count of G in the tumor BAM">
+##FORMAT=<ID=TU,Number=1,Type=Integer,Description="Count of T in the tumor BAM">
+##contig=<ID=chr1,length=248956422>
+##contig=<ID=chr2,length=242193529>
+##contig=<ID=chr3,length=198295559>
+##contig=<ID=chr4,length=190214555>
+##contig=<ID=chr5,length=181538259>
+##contig=<ID=chr6,length=170805979>
+##contig=<ID=chr7,length=159345973>
+##contig=<ID=chr8,length=145138636>
+##contig=<ID=chr9,length=138394717>
+##contig=<ID=chr10,length=133797422>
+##contig=<ID=chr11,length=135086622>
+##contig=<ID=chr12,length=133275309>
+##contig=<ID=chr13,length=114364328>
+##contig=<ID=chr14,length=107043718>
+##contig=<ID=chr15,length=101991189>
+##contig=<ID=chr16,length=90338345>
+##contig=<ID=chr17,length=83257441>
+##contig=<ID=chr18,length=80373285>
+##contig=<ID=chr19,length=58617616>
+##contig=<ID=chr20,length=64444167>
+##contig=<ID=chr21,length=46709983>
+##contig=<ID=chr22,length=50818468>
+##contig=<ID=chrX,length=156040895>
+##contig=<ID=chrY,length=57227415>
+##FORMAT=<ID=PS,Number=1,Type=Integer,Description="Phase set identifier">
+##FORMAT=<ID=GT2,Number=1,Type=String,Description="Sub genotype">
+##FORMAT=<ID=PS2,Number=1,Type=Integer,Description="Sub phase set identifier">
+##FORMAT=<ID=GT3,Number=1,Type=String,Description="Sub genotype">
+##FORMAT=<ID=PS3,Number=1,Type=Integer,Description="Sub phase set identifier">
+##longphaseVersion=1.0.0
+##commandline="phase -s /big8_disk/data/HCC1395/ONT/subsample/t30_n20/ClairS_TO_v0_3_0/snv.vcf.gz -b /big8_disk/data/HCC1395/ONT/subsample/t30_n20/HCC1395_t30_n20.bam -r /big7_disk/liaoyoyo2001/data/ref/GRCh38_no_alt_analysis_set.fasta --ont --caller clairs_to_ssrs --pon-file /big7_disk/liaoyoyo2001/data/PON/1000g-pon.sites.vcf.gz,/big7_disk/liaoyoyo2001/data/PON/CoLoRSdb.GRCh38.v1.1.0.deepvariant.glnexus.af-ge-0.001.vcf.gz --strict-pon-file /big7_disk/liaoyoyo2001/data/PON/dbsnp.b138.non-somatic.sites.vcf.gz,/big7_disk/liaoyoyo2001/data/PON/gnomad.r2.1.af-ge-0.001.sites.vcf.gz --pon-only-phasing --loh --out-ge -t 24 -o /big7_disk/liaoyoyo2001/longphase-to-mod/output/purity_06_simulation/v5_06/tumor_phased "
+##tumor_purity=0
+##IGV_SESSION_SUBSET=15 audit sites +/- 1000 bp; source=/big7_disk/liaoyoyo2001/longphase-to-mod/output/purity_06_simulation/v5_06/tumor_phased.vcf
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE
+chr4	70548355	.	G	A	0.0000	LowQual;NoAncestry	H;FAU=4;FCU=0;FGU=14;FTU=0;RAU=4;RCU=0;RGU=25;RTU=0;SB=0.22947	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|0:17:47:0.1702:39,8:8:0:39:0:70397591:.|1:.:./.:.
+chr4	70548419	.	G	A	20.9301	NonSomatic	FAU=21;FCU=0;FGU=0;FTU=0;RAU=21;RCU=0;RGU=0;RTU=0;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:20:44:0.9545:0,42:42:0:0:0:70397591:./.:.:./.:.
+chr4	70548713	.	T	G	25.5082	NonSomatic	FAU=0;FCU=0;FGU=16;FTU=0;RAU=0;RCU=0;RGU=27;RTU=1;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:25:44:0.9773:1,43:0:0:43:1:70397591:./.:.:./.:.
+chr4	70548954	.	C	T	25.0586	NonSomatic	FAU=0;FCU=0;FGU=0;FTU=15;RAU=0;RCU=0;RGU=0;RTU=20;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:25:37:0.9459:0,35:0:0:0:35:70397591:./.:.:./.:.
+chr4	70549106	.	C	T	15.8823	NonSomatic	FAU=0;FCU=0;FGU=1;FTU=18;RAU=0;RCU=0;RGU=0;RTU=23;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:15:42:0.9762:0,41:0:0:1:41:70397591:./.:.:./.:.
+chr4	70549188	.	G	C	21.1599	NonSomatic	FAU=0;FCU=18;FGU=0;FTU=0;RAU=0;RCU=26;RGU=0;RTU=0;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:21:44:1.0000:0,44:0:44:0:0:.:./.:.:./.:.
+chr5	153209125	.	C	T	20.0277	NonSomatic	FAU=0;FCU=22;FGU=0;FTU=7;RAU=0;RCU=18;RGU=0;RTU=5;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:20:52:0.2308:40,12:0:40:0:12:152940003:./.:.:./.:.
+chr5	153209145	.	T	C	14.4769	NonSomatic	FAU=0;FCU=7;FGU=0;FTU=14;RAU=0;RCU=5;RGU=0;RTU=16;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:14:42:0.2857:30,12:0:12:0:30:152940003:./.:.:./.:.
+chr5	153209365	.	G	A	26.9248	NonSomatic	FAU=6;FCU=0;FGU=17;FTU=0;RAU=5;RCU=0;RGU=14;RTU=0;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:26:42:0.2619:31,11:11:0:31:0:152940003:./.:.:./.:.
+chr5	153209631	.	C	A	6.8432	NonSomatic	FAU=4;FCU=15;FGU=0;FTU=0;RAU=3;RCU=14;RGU=0;RTU=0;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:6:38:0.1842:29,7:7:29:0:0:152940003:./.:.:./.:.
+chr5	153209660	.	A	G	26.9369	NonSomatic	FAU=4;FCU=0;FGU=22;FTU=0;RAU=5;RCU=0;RGU=12;RTU=0;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:26:43:0.7907:9,34:9:0:34:0:152940003:./.:.:./.:.
+chr5	153209680	.	A	T	23.6500	NonSomatic	FAU=12;FCU=0;FGU=0;FTU=6;RAU=10;RCU=0;RGU=0;RTU=5;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:23:33:0.3333:22,11:22:0:0:11:152940003:./.:.:./.:.
+chr5	153209786	.	G	C	20.9789	NonSomatic	FAU=0;FCU=3;FGU=13;FTU=0;RAU=0;RCU=4;RGU=13;RTU=0;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:20:33:0.2121:26,7:0:7:26:0:152940003:./.:.:./.:.
+chr5	153209947	.	C	A	16.3147	PASS	H;FAU=3;FCU=23;FGU=0;FTU=0;RAU=3;RCU=14;RGU=0;RTU=0;SB=0.71765	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|0:16:43:0.1395:37,6:6:37:0:0:152940003:.|1:.:./.:.
+chr5	153210036	.	A	G	11.6953	NonSomatic	FAU=18;FCU=0;FGU=3;FTU=0;RAU=15;RCU=0;RGU=3;RTU=0;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:11:39:0.1538:33,6:33:0:6:0:152940003:./.:.:./.:.
+chr5	153210482	.	T	C	16.1075	NonSomatic	FAU=0;FCU=5;FGU=0;FTU=20;RAU=0;RCU=5;RGU=0;RTU=15;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:16:45:0.2222:35,10:0:10:0:35:152940003:./.:.:./.:.
+chr5	153210764	.	C	G	23.1742	NonSomatic	FAU=0;FCU=17;FGU=7;FTU=0;RAU=0;RCU=13;RGU=5;RTU=0;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:23:42:0.2857:30,12:0:30:12:0:152940003:./.:.:./.:.
+chr5	153210784	.	C	T	19.4100	NonSomatic	FAU=0;FCU=9;FGU=0;FTU=6;RAU=0;RCU=15;RGU=0;RTU=6;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:19:38:0.3158:24,12:0:24:0:12:152940003:./.:.:./.:.
+chr5	153210910	.	T	C	19.5450	NonSomatic	FAU=0;FCU=7;FGU=0;FTU=22;RAU=0;RCU=5;RGU=0;RTU=19;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:19:53:0.2264:41,12:0:12:0:41:152940003:./.:.:./.:.
+chr6	145444118	.	C	T	17.4827	NonSomatic	FAU=0;FCU=0;FGU=0;FTU=16;RAU=0;RCU=0;RGU=0;RTU=21;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:17:37:1.0000:0,37:0:0:0:37:.:./.:.:./.:.
+chr6	145444314	.	C	T	26.0644	NonSomatic	FAU=0;FCU=0;FGU=0;FTU=18;RAU=0;RCU=0;RGU=0;RTU=21;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:26:40:0.9750:0,39:0:0:0:39:144863464:./.:.:./.:.
+chr6	145444430	.	A	C	32.6779	NonSomatic	FAU=0;FCU=16;FGU=0;FTU=0;RAU=0;RCU=16;RGU=0;RTU=0;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:32:32:1.0000:0,32:0:32:0:0:.:./.:.:./.:.
+chr6	145444796	.	C	T	28.1580	NonSomatic	FAU=0;FCU=0;FGU=0;FTU=14;RAU=0;RCU=0;RGU=0;RTU=20;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:28:34:1.0000:0,34:0:0:0:34:.:./.:.:./.:.
+chr6	145445052	.	T	C	20.0305	NonSomatic	FAU=0;FCU=13;FGU=0;FTU=0;RAU=0;RCU=17;RGU=0;RTU=1;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:20:33:0.9091:1,30:0:30:0:1:144863464:./.:.:./.:.
+chr6	145445631	.	A	C	31.4917	NonSomatic	FAU=0;FCU=12;FGU=0;FTU=0;RAU=0;RCU=18;RGU=0;RTU=0;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:31:30:1.0000:0,30:0:30:0:0:.:./.:.:./.:.
+chr7	52087743	.	G	T	12.7047	NonSomatic	FAU=0;FCU=0;FGU=8;FTU=12;RAU=0;RCU=0;RGU=13;RTU=15;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:12:49:0.5510:21,27:0:0:21:27:51939796:./.:.:./.:.
+chr7	52087745	.	C	T	10.2203	NonSomatic	FAU=0;FCU=7;FGU=0;FTU=13;RAU=0;RCU=13;RGU=0;RTU=15;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:10:48:0.5833:20,28:0:20:0:28:51939796:./.:.:./.:.
+chr7	109185781	.	G	T	4.4189	PASS	H;FAU=0;FCU=0;FGU=40;FTU=4;RAU=0;RCU=0;RGU=22;RTU=2;SB=1.0;Verdict_Somatic	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|0:4:69:0.0870:62,6:0:0:62:6:108845246:.|1:.:./.:.
+chr8	93564929	.	G	A	34.3251	NonSomatic	FAU=34;FCU=0;FGU=0;FTU=0;RAU=31;RCU=0;RGU=0;RTU=0;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:34:65:1.0000:0,65:65:0:0:0:.:./.:.:./.:.
+chr8	93565270	.	T	C	17.7761	NonSomatic	FAU=0;FCU=22;FGU=0;FTU=0;RAU=0;RCU=19;RGU=0;RTU=0;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:17:41:1.0000:0,41:0:41:0:0:.:./.:.:./.:.
+chr8	93565677	.	G	C	20.4950	NonSomatic	FAU=0;FCU=24;FGU=0;FTU=0;RAU=0;RCU=18;RGU=0;RTU=0;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:20:42:1.0000:0,42:0:42:0:0:.:./.:.:./.:.
+chr9	75383880	.	T	A	3.9398	LowQual	H;FAU=5;FCU=0;FGU=0;FTU=12;RAU=3;RCU=0;RGU=0;RTU=18;SB=0.29135	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|0:3:38:0.2105:30,8:8:0:0:30:74248016:.|1:.:./.:.
+chr16	35118902	.	G	A	19.5143	PASS	H;FAU=5;FCU=0;FGU=14;FTU=0;RAU=7;RCU=0;RGU=14;RTU=0;SB=0.50979	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|0:19:41:0.2927:28,12:12:0:28:0:35070863:.|1:.:./.:.
+chr19	2235521	.	G	A	14.5077	PASS	H;FAU=5;FCU=0;FGU=8;FTU=0;RAU=8;RCU=0;RGU=2;RTU=0;SB=0.16487	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|0:14:23:0.5652:10,13:13:0:10:0:639385:.|1:.:./.:.
+chr19	4639528	.	G	C	18.4215	PASS	H;FAU=0;FCU=12;FGU=8;FTU=0;RAU=0;RCU=10;RGU=12;RTU=0;SB=1.0	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|0:18:42:0.5238:20,22:0:22:20:0:4191961:.|1:.:./.:.
+chr19	4640283	.	T	G	17.9942	NonSomatic	FAU=0;FCU=0;FGU=5;FTU=13;RAU=0;RCU=0;RGU=2;RTU=18;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:17:39:0.1795:31,7:0:0:7:31:4191961:./.:.:./.:.
+chr19	7405500	.	A	G	18.9279	PASS	H;FAU=8;FCU=0;FGU=6;FTU=0;RAU=13;RCU=0;RGU=5;RTU=0;SB=0.56461	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|0:18:33:0.3333:21,11:21:0:11:0:7290842:.|1:.:./.:.
+chr19	7406490	.	G	A	21.0222	NonSomatic	FAU=14;FCU=0;FGU=5;FTU=0;RAU=14;RCU=0;RGU=10;RTU=0;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:21:43:0.6512:15,28:28:0:15:0:7290842:./.:.:./.:.
+chr19	12451480	.	A	G	18.4391	NonSomatic	FAU=0;FCU=0;FGU=28;FTU=0;RAU=0;RCU=0;RGU=18;RTU=0;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:18:46:1.0000:0,46:0:0:46:0:.:./.:.:./.:.
+chr19	12451505	.	G	A	21.3576	NonSomatic	FAU=28;FCU=0;FGU=0;FTU=0;RAU=18;RCU=0;RGU=0;RTU=0;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:21:46:1.0000:0,46:46:0:0:0:.:./.:.:./.:.
+chr19	12451856	.	C	T	16.4705	NonSomatic	FAU=0;FCU=1;FGU=0;FTU=24;RAU=0;RCU=0;RGU=0;RTU=21;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:16:46:0.9783:1,45:0:1:0:45:12429011:./.:.:./.:.
+chr19	12452153	.	G	A	23.1032	NonSomatic	FAU=21;FCU=0;FGU=0;FTU=0;RAU=23;RCU=0;RGU=0;RTU=0;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:23:44:1.0000:0,44:44:0:0:0:.:./.:.:./.:.
+chr19	12452332	.	T	C	22.8219	PASS	H;FAU=0;FCU=9;FGU=0;FTU=13;RAU=0;RCU=7;RGU=0;RTU=17;SB=0.55867	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|0:22:46:0.3478:30,16:0:16:0:30:12429011:.|1:.:./.:.
+chr19	12452666	.	C	T	17.4351	NonSomatic	FAU=0;FCU=0;FGU=0;FTU=24;RAU=0;RCU=0;RGU=0;RTU=19;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:17:43:1.0000:0,43:0:0:0:43:.:./.:.:./.:.
+chr19	12452991	.	G	A	33.9034	NonSomatic	FAU=22;FCU=0;FGU=0;FTU=0;RAU=15;RCU=0;RGU=0;RTU=0;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:33:37:1.0000:0,37:37:0:0:0:.:./.:.:./.:.
+chr19	12466909	.	A	T	24.6557	NonSomatic	FAU=0;FCU=0;FGU=1;FTU=23;RAU=0;RCU=0;RGU=0;RTU=27;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:24:51:0.9804:0,50:0:0:1:50:12429011:./.:.:./.:.
+chr19	12467051	.	G	C	24.3319	NonSomatic	FAU=0;FCU=29;FGU=0;FTU=0;RAU=0;RCU=26;RGU=0;RTU=0;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:24:56:0.9821:0,55:0:55:0:0:12429011:./.:.:./.:.
+chr19	12467180	.	G	A	19.5193	PASS	FAU=11;FCU=0;FGU=15;FTU=0;RAU=11;RCU=0;RGU=12;RTU=0;SB=1.0;Verdict_Somatic	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|0:19:50:0.4400:27,22:22:0:27:0:12429011:.|1:.:./.:.
+chr19	12467292	.	G	A	20.7686	NonSomatic	FAU=29;FCU=0;FGU=0;FTU=0;RAU=29;RCU=0;RGU=0;RTU=0;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:20:58:1.0000:0,58:58:0:0:0:.:./.:.:./.:.
+chr19	12467474	.	G	A	19.5663	NonSomatic	FAU=12;FCU=0;FGU=16;FTU=0;RAU=20;RCU=0;RGU=12;RTU=0;PoN_1;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:19:60:0.5333:28,32:32:0:28:0:12429011:./.:.:./.:.
+chr19	12467688	.	G	A	18.3518	NonSomatic	FAU=19;FCU=0;FGU=0;FTU=0;RAU=28;RCU=0;RGU=1;RTU=0;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:18:48:0.9792:1,47:47:0:1:0:12429011:./.:.:./.:.
+chr19	12467832	.	A	G	17.9330	NonSomatic	FAU=0;FCU=0;FGU=24;FTU=0;RAU=0;RCU=0;RGU=30;RTU=0;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:17:54:1.0000:0,54:0:0:54:0:.:./.:.:./.:.
+chr19	12468122	.	G	A	15.4101	NonSomatic	FAU=11;FCU=0;FGU=14;FTU=0;RAU=19;RCU=0;RGU=7;RTU=0;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|1:15:51:0.5882:21,30:30:0:21:0:12429011:./.:.:./.:.
+chr19	17564947	.	C	T	17.3872	NonSomatic	FAU=0;FCU=0;FGU=0;FTU=34;RAU=0;RCU=0;RGU=0;RTU=29;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:17:63:1.0000:0,63:0:0:0:63:.:./.:.:./.:.
+chr19	17565944	.	G	C	17.7259	PASS	H;FAU=0;FCU=12;FGU=19;FTU=0;RAU=0;RCU=11;RGU=11;RTU=0;SB=0.34284	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	0|0:17:53:0.4340:30,23:0:23:30:0:17002011:.|1:.:./.:.
+chr19	17565995	.	C	T	26.4806	NonSomatic	FAU=0;FCU=0;FGU=0;FTU=32;RAU=0;RCU=0;RGU=0;RTU=29;PoN_1;PoN_2;PoN_3;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:26:61:1.0000:0,61:0:0:0:61:.:./.:.:./.:.
+chr19	17566320	.	G	A	20.8495	NonSomatic	FAU=33;FCU=0;FGU=0;FTU=0;RAU=34;RCU=0;RGU=0;RTU=0;PoN_1;PoN_2;PoN_4	GT:GQ:DP:AF:AD:AU:CU:GU:TU:PS:GT2:PS2:GT3:PS3	1/1:20:67:1.0000:0,67:67:0:0:0:.:./.:.:./.:.
