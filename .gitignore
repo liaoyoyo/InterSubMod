@@ -89,3 +89,13 @@ slides/
 # === skill_usage_logger (added 2026-05-11, improvement #4) ===
 # Per-machine telemetry log; not source of truth, no need to share
 .claude/state/
+
+# === Transient session/tooling artifacts (added 2026-05-11) ===
+# HTML preview playground (per-session experiment output)
+preview/
+# Codex CLI 0-byte staging marker
+.codex
+# Claude Code scheduled task lock (transient runtime state)
+.claude/scheduled_tasks.lock
+# image-vision-check intermediate JSON (per-run instruction file)
+examples/phase1_demo/demo_topic/figures/_check_instructions.json
