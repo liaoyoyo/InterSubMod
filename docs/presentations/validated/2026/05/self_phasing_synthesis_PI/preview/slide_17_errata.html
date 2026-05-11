@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 17 — PI 報告 4-29 5 條 errata 已 patch; 主結論不撤回</title>
+  <title>Slide 17 — PI 報告 4-29 6 條 errata 已 patch; V6 patch 完成主結論升級</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -231,14 +231,14 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
     <div><span class="label">Slide:</span><span class="value">17 / 22</span></div>
     <div><span class="label">Section:</span><span class="value">S7 結論</span></div>
-    <div><span class="label">Tier 2:</span><span class="value">90 sec / 中 ~330 字</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">100 sec / 中 ~370 字</span></div>
     <div><span class="label">R-G2 術語:</span><span class="value">—</span></div>
     <div><span class="label">N grep:</span><span class="value">commit chain</span></div>
   </div>
 
   <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">PI 報告 4-29 5 條 errata 已 patch; 主結論不撤回</h1>
-    <p class="en-subtitle">5 errata patched; main conclusions retained</p>
+    <h1 class="slide-title ">PI 報告 4-29 6 條 errata 已 patch; V6 patch 完成主結論升級</h1>
+    <p class="en-subtitle">6 errata patched; V6 patch completes the main conclusion arc</p>
     
     <table class="metric-table" style="font-size:11px;">
       <thead><tr><th></th><th>段落</th><th>原 → 新</th></tr></thead>
@@ -247,18 +247,19 @@ details.collapsible summary:hover { color: #1D4ED8; }
         <tr><td><strong>E2</strong></td><td>§5.2 V5 commit 狀態</td><td>未 commit → ✅ 已 commit (d0bcd8c + 938f0df)</td></tr>
         <tr><td><strong>E3</strong></td><td>§5.2 priority bug 證據</td><td>commit msg + 3 IGV → + 34,855 read-level 鐵證 100%</td></tr>
         <tr class="row-yellow"><td><strong>★ E4</strong></td><td>§6.4/§6.5 V5 數值歸因</td><td>V5 整體 → V5 = Pass 1 only; 主要 V3F + Layer 1.5; Pass 2 二次效益尚未量化</td></tr>
-        <tr class="row-yellow"><td><strong>★ E5</strong></td><td>§5.2 Layer 1.5 設計 (5/10 加)</td><td>fallback 隱含修補 → germline-absent 區與 baseline 4.19:1 相同, priority bug feature 化非修補</td></tr>
+        <tr class="row-yellow"><td><strong>★ E5</strong></td><td>§5.2 Layer 1.5 設計 (5/10 加)</td><td>fallback 隱含修補 → germline-absent 區與 baseline 4.19:1 同, priority bug feature 化</td></tr>
+        <tr class="row-green"><td><strong>★ E6 NEW</strong></td><td>§9.3 follow-up (5/11 加)</td><td>F-paired-D3 ⏸ 待跑 → ✅ V6 binary patch DONE (5/10) + Phase D 跨 4 樣本驗證 4/5 通過 (5/11)</td></tr>
       </tbody>
     </table>
-    <div class="conclusion-arrow">→ E1-E3 表述精確化; E4 + E5 為核心 errata; 主結論不撤回</div>
-    <div class="footer-glossary"><div class="gloss-item">ⓘ commit chain: f17754f → 2553e96 → 71d21bd</div></div>
+    <div class="conclusion-arrow green">→ E1-E3 表述精確化; E4-E5 核心 errata; ★ E6 = V6 修補敘事閉環 (主結論升級為 V6 production candidate)</div>
+    <div class="footer-glossary"><div class="gloss-item">ⓘ commit chain: f17754f → 2553e96 → 71d21bd → V6 patch (待 commit)</div></div>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide 17">
     <details class="collapsible" open>
-      <summary>🎤 Speaker Note (90 sec / 中 ~330 字)</summary>
-      <div class="speak-text">PI 報告 4-29 5 條 errata: E1 chr19 SP1/2/3 hotspot 降級為可重現案例; E2 V5 已 commit 4-30; E3 證據鏈升級含 34,855 read-level; ★ E4 V5 數值 = Pass 1 only, 主要 V3F + Layer 1.5; ★ E5 5/10 加 — V5 Layer 1.5 germline-absent 與 baseline 4.19:1 同。E1-E3 表述精確化, E4+E5 核心。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> errata commit hash / patch 工作量</div>
+      <summary>🎤 Speaker Note (100 sec / 中 ~370 字)</summary>
+      <div class="speak-text">PI 報告 4-29 6 條 errata (5/11 新加 E6): E1 chr19 hotspot 降級; E2 V5 已 commit 4-30; E3 證據鏈升級; ★ E4 V5 = Pass 1 only; ★ E5 V5 Layer 1.5 germline-absent 缺陷; ★ E6 (5/11 新加) = F-paired-D3 follow-up 已實作為 V6 binary patch (5/10) + Phase D 跨 4 樣本驗證 (5/11) 4/5 通過 — V6 = production candidate。E1-E3 為表述精確化, E4-E5 為核心 caveat, E6 為敘事閉環 (從 V5 caveat 升級為 V6 修補)。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> errata commit chain / V6 patch 待 commit / Phase D 5 樣本 evaluation matrix</div>
     </details>
   </aside>
 

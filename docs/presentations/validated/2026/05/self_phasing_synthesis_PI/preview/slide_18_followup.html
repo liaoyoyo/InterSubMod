@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 18 — 整體成熟度 + 5 follow-up — V5 仍可作 production baseline</title>
+  <title>Slide 18 — 整體成熟度升級 + Phase D 跨 4 樣本驗證 — V6 = production candidate</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -231,52 +231,56 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
     <div><span class="label">Slide:</span><span class="value">18 / 22</span></div>
     <div><span class="label">Section:</span><span class="value">S7 結論</span></div>
-    <div><span class="label">Tier 2:</span><span class="value">90 sec / 中 ~340 字</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">100 sec / 中 ~360 字</span></div>
     <div><span class="label">R-G2 術語:</span><span class="value">1</span></div>
     <div><span class="label">N grep:</span><span class="value">—</span></div>
   </div>
 
   <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">整體成熟度 + 5 follow-up — V5 仍可作 production baseline</h1>
-    <p class="en-subtitle">Maturity status + 5 follow-up cycles</p>
+    <h1 class="slide-title ">整體成熟度升級 + Phase D 跨 4 樣本驗證 — V6 = production candidate</h1>
+    <p class="en-subtitle">Maturity upgrade + Phase D 4-sample validation; V6 production candidate</p>
     
-    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0;">整體成熟度: 10 ✅ / 1 ⚠️ / 2 ⏸ (12 維度)</p>
-    <div class="grid-3col" style="font-size:10px;gap:6px;">
-      <div class="green-box" style="padding:4px 8px;">✅ 機制因果</div>
-      <div class="green-box" style="padding:4px 8px;">✅ 修補設計</div>
-      <div class="green-box" style="padding:4px 8px;">✅ chr19 SP 對齊</div>
-      <div class="green-box" style="padding:4px 8px;">✅ 全基因組擴展</div>
-      <div class="green-box" style="padding:4px 8px;">✅ V5/V3F zero-sum</div>
-      <div class="green-box" style="padding:4px 8px;">✅ 20 指標 0 regression</div>
-      <div class="green-box" style="padding:4px 8px;">✅ Caller F1 三版相同</div>
-      <div class="green-box" style="padding:4px 8px;">✅ purity 0.6 對照</div>
-      <div class="green-box" style="padding:4px 8px;">✅ 三路徑算法</div>
-      <div class="green-box" style="padding:4px 8px;">✅ Pass 2 +3.51%</div>
-      <div class="green-box" style="padding:4px 8px;">✅ 版本對齊 938f0df</div>
-      <div class="green-box" style="padding:4px 8px;">✅ Paired Step A+C</div>
-      <div class="caveat-box" style="padding:4px 8px;margin:0;">⚠ V5 Layer 1.5 (E5)</div>
-      <div style="background:#F3F4F6;padding:4px 8px;border:1px solid #D1D5DB;border-radius:4px;">⏸ Pass 2 (T1.3)</div>
-      <div style="background:#F3F4F6;padding:4px 8px;border:1px solid #D1D5DB;border-radius:4px;">⏸ 跨樣本 (T3)</div>
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0;">整體成熟度升級: 13 ✅ / 0 ⚠️ / 2 ⏸ (15 維度)</p>
+    <div class="grid-3col" style="font-size:9.5px;gap:5px;">
+      <div class="green-box" style="padding:3px 6px;">✅ 機制因果</div>
+      <div class="green-box" style="padding:3px 6px;">✅ 修補設計</div>
+      <div class="green-box" style="padding:3px 6px;">✅ chr19 SP 對齊</div>
+      <div class="green-box" style="padding:3px 6px;">✅ 全基因組 34,855</div>
+      <div class="green-box" style="padding:3px 6px;">✅ 20 指標 0 regression</div>
+      <div class="green-box" style="padding:3px 6px;">✅ Caller F1 三版相同</div>
+      <div class="green-box" style="padding:3px 6px;">✅ purity 0.6 對照</div>
+      <div class="green-box" style="padding:3px 6px;">✅ Pass 2 +3.51%</div>
+      <div class="green-box" style="padding:3px 6px;">✅ Paired Step A+C+D</div>
+      <div class="green-box" style="padding:3px 6px;"><strong>★ V6 patch (5/10)</strong></div>
+      <div class="green-box" style="padding:3px 6px;"><strong>★ marker +9.0% vs V3F</strong></div>
+      <div class="green-box" style="padding:3px 6px;"><strong>★ hp=33 恢復 +4.7%</strong></div>
+      <div class="green-box" style="padding:3px 6px;"><strong>★ Phase D 4 樣本 4/5</strong></div>
+      <div style="background:#F3F4F6;padding:3px 6px;border:1px solid #D1D5DB;border-radius:4px;">⏸ COLO829 (truth 權限)</div>
+      <div style="background:#F3F4F6;padding:3px 6px;border:1px solid #D1D5DB;border-radius:4px;">⏸ T1.3 4-cell ablation</div>
     </div>
-    <table class="metric-table" style="font-size:10px;margin-top:8px;">
-      <thead><tr><th>ID</th><th>內容</th><th>預估</th></tr></thead>
+    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:8px 0 0;">Phase D 跨 4 樣本 V6 evaluation (HCC1395 ref + 4 cancer cell lines):</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th>Sample</th><th>hp ratio</th><th>marker rate</th><th>NG_on=2</th><th>caller F1</th></tr></thead>
       <tbody>
-        <tr class="row-yellow"><td>★ F-paired-D3</td><td>Layer 1.5 改 V3F ISM 影響 (決定 V5 vs V3F default)</td><td>1-2 day</td></tr>
-        <tr><td>F-paired-D1</td><td>germline-absent 全基因組擴展</td><td>0.5 day</td></tr>
-        <tr><td>F-paired-D2</td><td>phase block 內 axis-aligned 分析</td><td>1 day</td></tr>
-        <tr><td>T3</td><td>7 樣本跨樣本擴展</td><td>1-2 day</td></tr>
-        <tr><td>T1.3</td><td>4-cell ablation</td><td>3 day</td></tr>
+        <tr class="row-green"><td>H1437</td><td class="num">1.243 ✅</td><td class="num">0.992 ✅</td><td class="num">0.991 ✅</td><td>n/a</td></tr>
+        <tr class="row-green"><td>H2009</td><td class="num">0.901 ✅</td><td class="num">0.993 ✅</td><td class="num">0.992 ✅</td><td>n/a</td></tr>
+        <tr class="row-green"><td>HCC1954</td><td class="num">0.958 ✅</td><td class="num">0.954 ✅</td><td class="num">0.967 ✅</td><td>n/a</td></tr>
+        <tr class="row-yellow"><td>HCC1937</td><td class="num">0.611 ✅</td><td class="num">0.817 ⚠</td><td class="num">0.904 ✅</td><td>BRCA1 edge</td></tr>
+        <tr style="background:#F3F4F6;"><td>COLO829</td><td colspan="4">⏸ truth set 0600 權限阻塞</td></tr>
       </tbody>
     </table>
-    <div class="conclusion-arrow">→ V5 仍可作 production baseline; F-paired-D3 量化後決定是否回 V3F default</div>
-    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">LOH/cnLOH:</span> 雜合性丟失/拷貝中性</div></div>
+    <div class="conclusion-arrow green">→ V6 = production candidate; ratio 4/4 中性 / marker 3/4 (HCC1937 edge); 剩 COLO829 + T1.3</div>
+    <div class="footer-glossary">
+      <div class="gloss-item">ⓘ HCC1937 0.817 = BRCA1 mutant FP/TP=0.194 樣本特性</div>
+      <div class="gloss-item">📖 <span class="term">V6:</span> V5 + Layer 1.5 移除 (5/10 patch)</div>
+    </div>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide 18">
     <details class="collapsible" open>
-      <summary>🎤 Speaker Note (90 sec / 中 ~340 字)</summary>
-      <div class="speak-text">整體成熟度 12 維度: 10 ✅ + 1 ⚠️ V5 Layer 1.5 + 2 ⏸ 待跑。5 follow-up 排序按 ROI: ★ F-paired-D3 1-2 day 最重要 (V5 vs V3F default); F-paired-D1 0.5 day; F-paired-D2 1 day; T3 1-2 day; T1.3 3 day。V5 仍可作 production baseline; germline-absent ~5% 不阻擋整體; F-paired-D3 量化後決定是否回 V3F default — 待 PI 決策。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> T1.3 4-cell / 7 樣本 / cnLOH 雙親同源</div>
+      <summary>🎤 Speaker Note (100 sec / 中 ~360 字)</summary>
+      <div class="speak-text">整體成熟度從 12 維度升級至 15 維度: 13 ✅ + 0 ⚠️ + 2 ⏸。新加 4 維度全綠: ★ V6 patch (5/10) / ★ marker +9.0% vs V3F / ★ hp=33 恢復 +4.7% / ★ Phase D 4 樣本驗證 4/5 通過; V5 Layer 1.5 從 ⚠ 升級為 ✅ (V6 已修補)。Phase D 跨 4 樣本 (H1437/H2009/HCC1954/HCC1937, COLO829 truth set 0600 權限阻塞): hp=1-1:hp=2-1 ratio 4/4 全部接近中性 0.61-1.24 (vs V5 baseline 1.86, 原 baseline 17.3:1); marker rate 3/4 通過 ≥0.85 (HCC1937 0.817 為 BRCA1 mutant FP/TP=0.194 樣本特性 edge case, 與 HPFineNGroups canonical filter AF<0.4 一致); NG_on=2 rate 4/4 通過 ≥0.85; caller F1 V6 重用 V5 phased VCF 故不變。V6 = production candidate; 剩 2 follow-up: COLO829 待 truth set 權限解除, T1.3 4-cell ablation 量化 Pass 2 second round 獨立貢獻 — 兩者均非阻塞。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> HCC1937 BRCA1 mutant detail / COLO829 truth set 權限 / T1.3 4-cell ablation 設計</div>
     </details>
   </aside>
 

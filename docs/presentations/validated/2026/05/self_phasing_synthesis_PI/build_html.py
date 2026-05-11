@@ -42,47 +42,53 @@ add(id="01_cover", num="01", section="S0 Cover",
       <h1 style="font-size:42px;color:#1E3A8A;margin:0;">Self-Phasing 整合觀察</h1>
       <p style="font-size:22px;color:#6B7280;font-style:italic;margin:8px 0 18px;">Self-Phasing Integration Synthesis</p>
       <p style="font-size:18px;color:#1E3A8A;">── V5 Layer 1.5 設計缺陷揭露 ──</p>
-      <p style="font-size:14px;color:#6B7280;margin-top:8px;">longphase-to-mod 5 commits 修補成熟 + 5/9 paired cross-ref 新發現</p>
+      <p style="font-size:14px;color:#6B7280;margin-top:8px;">longphase-to-mod 5 commits → V6 patch (5/10) → Phase D 跨 4 樣本驗證 (5/11)</p>
       <p style="font-size:13px;color:#6B7280;margin-top:24px;">2026-05-10  ·  PI / lab meeting</p>
       <p style="font-size:11px;color:#9CA3AF;">Source: 5/8 整合報告 + 5/9 errata + paired Step D</p>
     </div>""",
     speaker="今天 20 分鐘的報告主題是 self-phasing 整合觀察與 V5 Layer 1.5 設計缺陷揭露。整合 longphase-to-mod 5 commits 修補成熟度，以及 5/9 paired cross-ref 新發現。目的：協助 PI 決策 V5 是否作 production tag baseline，以及是否啟動 F-paired-D3 follow-up cycle。",
     tier3="5/8 主報告 1,211 行 + 7 figures commit hash")
 
-add(id="02_tldr", num="02", section="S0 Cover", rg2="1", ngrep="6",
-    title="TL;DR — 修補主線確立，但 V5 Layer 1.5 germline-absent 區仍待補強",
-    en="Main fix line established; V5 Layer 1.5 still gaps in germline-absent regions",
-    timing="90 sec / 中 ~360 字",
+add(id="02_tldr", num="02", section="S0 Cover", rg2="1", ngrep="9",
+    title="TL;DR — Self-Phasing 修補三版演進完整：V3F → V5 → V6 (production candidate)",
+    en="Self-Phasing fix complete: V3F → V5 → V6, V6 patch + 4-sample validation",
+    timing="100 sec / 中 ~400 字",
     canvas_html="""
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:8px 0;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0;">
       <div>
-        <h4 style="font-size:12px;color:#6B7280;margin:0 0 6px;">修補主線 (V3F + V5)</h4>
-        <div class="grid-2col" style="gap:8px;margin:0;">
+        <h4 style="font-size:12px;color:#6B7280;margin:0 0 4px;">原問題 + 修補主線</h4>
+        <div class="grid-2col" style="gap:6px;margin:0;">
           <div class="stat-box"><div class="number">17.3:1</div><div class="label">HP1 偏 baseline</div></div>
-          <div class="stat-box"><div class="number">34,855</div><div class="label">read-level victims</div></div>
+          <div class="stat-box"><div class="number">34,855</div><div class="label">priority bug victims</div></div>
         </div>
       </div>
       <div>
-        <h4 style="font-size:12px;color:#6B7280;margin:0 0 6px;">關鍵驗證</h4>
-        <div class="grid-2col" style="gap:8px;margin:0;">
-          <div class="stat-box"><div class="number green">+13.3 pp</div><div class="label">paired GT (V5)</div></div>
-          <div class="stat-box"><div class="number green">100%</div><div class="label">V3F+V5 修正率</div></div>
+        <h4 style="font-size:12px;color:#6B7280;margin:0 0 4px;">V6 patch (5/10) 三向 head-to-head</h4>
+        <div class="grid-2col" style="gap:6px;margin:0;">
+          <div class="stat-box"><div class="number green">+9.0%</div><div class="label">marker vs V3F</div></div>
+          <div class="stat-box"><div class="number green">+30.5%</div><div class="label">marker vs V5</div></div>
         </div>
       </div>
     </div>
-    <div style="background:#F0F9FF;border:1px solid #BAE6FD;padding:8px 14px;border-radius:6px;text-align:center;font-weight:600;color:#0C4A6E;font-size:13px;">
-      整體影響: 20/0 指標 no regression (caller F1 三版完全相同)
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:6px 0;">
+      <div class="stat-box"><div class="number" style="font-size:22px;">+13.3 pp</div><div class="label">paired GT (V5/V6)</div></div>
+      <div class="stat-box"><div class="number green" style="font-size:22px;">100%</div><div class="label">V3F+V5+V6 修正率</div></div>
+      <div class="stat-box"><div class="number green" style="font-size:22px;">4/4</div><div class="label">Phase D 跨樣本 ratio 中性</div></div>
     </div>
-    <div class="caveat-box">
-      <span class="label">⚠ Caveat — 5/9 新發現:</span>
-      V5 Layer 1.5 germline-absent 區與 baseline <strong>4.19:1 偏 HP1 完全相同</strong>; V3F 標 hp=33 反而更穩健 (~5% germline-absent 區，占比小不阻擋整體)
-      <span class="en-note">V5 Layer 1.5 retains priority bug bias in germline-absent regions (~5% chr19 events)</span>
+    <div style="background:#DCFCE7;border:1px solid #16A34A;padding:8px 14px;border-radius:6px;text-align:center;font-weight:600;color:#166534;font-size:13px;">
+      ★ V6 = V5 設計目標保留 + V3F 保守 hp=33 + marker engineering 改善 → production candidate
+    </div>
+    <div class="caveat-box" style="background:#FEF3C7;">
+      <span class="label">⚠ Open items:</span>
+      HCC1937 marker rate 0.817（BRCA1 mutant 樣本特性 edge case，3/4 sample 通過）; COLO829 truth set 0600 權限阻塞（1/7 樣本待補）
+      <span class="en-note">HCC1937 edge case + COLO829 access blocked; 4/5 V6 cross-sample validation passes</span>
     </div>
     <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">sub-clone:</span> 腫瘤內基因型相同細胞群</div>
+      <div class="gloss-item">📖 <span class="term">V6:</span> V5 + Layer 1.5 移除 (5/10 binary patch)</div>
+      <div class="gloss-item">📖 <span class="term">Phase D:</span> 跨 4 樣本驗證 (5/11)</div>
     </div>""",
-    speaker="今天 thesis 兩個焦點。正面: 修補主線確立。baseline LongPhase-TO 全基因組 HP1:HP2 = 17.3:1 systematic bias; V3F + V5 兩層修補在 read-level 對 chr19 752 + 全基因組 34,855 victims 修正率 100%; paired GT +13.3 pp; 20 指標 0 regression; caller F1 三版完全相同。反面: V5 Layer 1.5 germline-absent 區仍未修對 — 與 baseline 4.19:1 完全相同; V3F hp=33 更穩健。整體 12 維度 10 ✅ / 1 ⚠️ / 2 待跑; V5 仍可作 production baseline。",
-    tier3="V3F = 41ff147 / V5 = d0bcd8c + 938f0df / paired Step D = 766ec5f")
+    speaker="今天 thesis: Self-Phasing 修補三版演進完整。原問題 baseline 17.3:1 偏 HP1; V3F+V5 兩層修補對 read-level 34,855 victims 100% 修正; 5/9 paired audit 揭露 V5 Layer 1.5 germline-absent 設計缺陷; 5/10 V6 binary patch (移除 Layer 1.5) 已實作; 5/11 Phase D 跨 4 樣本驗證 (H1437/H2009/HCC1954/HCC1937)。V6 全基因組 hp=33 ambiguous 138K > V3F 132K (+4.7%, V5=13K -89.9%); marker coverage V6 23,980 > V3F 21,997 (+9.0%) > V5 18,382 (+30.5%); marker rate V6 0.909 介於 V3F 0.918 與 V5 0.894 之間; caller F1 三版完全相同。跨 4 樣本 hp=1-1:hp=2-1 ratio 0.61-1.24 (V5 baseline 1.86, 全部接近中性); marker rate 3/4 通過, HCC1937 0.817 為 BRCA1 mutant 樣本特性 edge case; COLO829 truth set 權限阻塞。V6 = V5 設計目標保留 + V3F 保守 hp=33 + marker engineering 改善, 為 production candidate。",
+    tier3="V3F = 41ff147 / V5 = d0bcd8c + 938f0df / V6 patch (5/10) / Phase D 5/11")
 
 # ─── S1 觀察起點 ───────────────────────────────────────────────────────────
 add(id="03_genome_173", num="03", section="S1 觀察起點", rg2="3", ngrep="8",
@@ -345,17 +351,19 @@ add(id="10_5_commits", num="10", section="S4 修補設計", rg2="0 + 2 footnote"
     tier3="各 commit layer / 為何不合併 / cherry-pick 自 zhenyu")
 
 add(id="11_getvote", num="11", section="S4 修補設計", rg2="4 (核心 forced)", ngrep="—",
-    title="getVote 三版差異 — baseline 順序錯 → V3F 兩層 → V5 +Layer 1.5 fallback",
-    en="getVote 3-version diff",
+    title="getVote 四版演進 — baseline → V3F → V5 +Layer 1.5 → V6 (Layer 1.5 移除)",
+    en="getVote 4-version evolution: V6 reverts V5 Layer 1.5",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
-    <img class="fig-thumb" src="../figures/G3_getVote_three_layer.png" alt="G3" style="max-height:380px;">
-    <div class="caveat-box">
-      <span class="label">⚠ Layer 1.5 caveat:</span>
-      V5 Layer 1.5 在 germline-absent 區會繼承 priority bug 偏移 → <strong>(slide 16 詳述)</strong>
-    </div>""",
-    speaker="三版 code: baseline 紅底 vector 順序錯 break early。V3F 綠底 explicit Layer 1 (germline only) + Layer 2 (somatic annotation), Layer 1 永不被 somatic overrule。V5 綠底加黃 highlight: 保留 Layer 1, 新增 Layer 1.5 fallback (germline 缺席用 somatic phased votes), Layer 2 同 V3F。Layer 1.5 是 caveat 預告 (slide 16 詳述)。",
-    tier3="enum / V3F bonus 修")
+    <img class="fig-thumb" src="../figures/G3_getVote_three_layer.png" alt="G3" style="max-height:280px;">
+    <div class="green-box" style="font-size:11px;font-weight:600;">
+      ★ V6 (5/10 binary patch): 移除 V5 Layer 1.5 邏輯 (HaplotagProcess.cpp:537-548)
+      <pre style="font-family:monospace;font-size:9px;background:white;padding:4px 8px;margin:4px 0;border-radius:3px;border:1px solid #16A34A;">- else if (somaticHP1 > 0 || somaticHP2 > 0) {<br>-     germlineResult = (somaticHP1 >= somaticHP2) ? 1 : 2;<br>- }<br>+ // V6: germline absent → conservative hp=33 (V3F behavior)</pre>
+      → germline-absent 退回 V3F hp=33 行為; phasing 層完全不變 (caller F1 不變)
+    </div>
+    <p style="font-size:11px;color:#6B7280;text-align:center;">V6 = V3F germline-absent 保守 + V5 germline-existent 設計目標 (ploidy/threshold) = hybrid 升級</p>""",
+    speaker="四版 code 演進。baseline 紅底 vector 順序錯 break early。V3F 綠底 explicit Layer 1 + Layer 2。V5 綠底加黃 highlight 新增 Layer 1.5 fallback (germline 缺席用 somatic phased votes) — 但 5/9 發現 Layer 1.5 在 germline-absent 區繼承 priority bug。★ V6 (5/10 binary patch): 移除 Layer 1.5 邏輯 (HaplotagProcess.cpp:537-548 那段 else if 整段去掉), germline-absent 退回 hp=33 (V3F 行為), 但保留 V5 phasing 層 — V6 重用 V5 phased VCF 故 caller F1 完全不變。V6 = V3F germline-absent 保守 + V5 germline-existent 設計目標 (ploidy/threshold) = hybrid 升級。",
+    tier3="V6 patch diff / HaplotagProcess.cpp:537-548 移除 13 行 / phasing 層完全不變 / V6 重用 V5 phased VCF")
 
 add(id="12_sp_fixed", num="12", section="S5 驗證", rg2="1", ngrep="11",
     title="個案層 V5 修正 3/3 + 全基因組 HP1:HP2 17.3:1 → ~1:1",
@@ -440,8 +448,8 @@ add(id="14_caller_f1", num="14", section="S5 驗證 + ⚡ Cliffhanger", rg2="2",
       <strong>因果鏈:</strong> ClairS-TO PASS set 由 caller 決定 → V5 改 GT/PS 不改 FILTER → PASS set 不變 → TP/FP/FN 不變 → F1 不變
     </div>
     <div class="cliffhanger-box">
-      → V5 不改 caller; ΔF1 (0.93→0.6) = -0.0893 為 ClairS-TO 性質<br>
-      <strong>→ 但 5/9 paired cross-ref 揭露另一面...</strong> 〔next: slide 15-16〕
+      → V5 (與 V6) 都不改 caller; ΔF1 (0.93→0.6) = -0.0893 為 ClairS-TO 性質<br>
+      <strong>→ 5/9 paired cross-ref 揭 V5 Layer 1.5 缺陷 → 5/10 V6 binary patch 已修補...</strong> 〔next: slide 15-16〕
     </div>
     <div class="footer-glossary">
       <div class="gloss-item">📖 <span class="term">purity:</span> 樣本中腫瘤細胞占比</div>
@@ -490,31 +498,42 @@ add(id="15_paired_mode", num="15", section="S6 5/9 新發現", rg2="1 + 1 footno
     speaker="paired mode 用 longphase-s (獨立 codebase), HP:Z: 字串。chr19 paired 分布 germline 1:1.275 接近隨機, somatic 1:1.169。對比 TO baseline 17.3:1 — paired 整體無 systematic bias。57 windows som_ratio mean 0.462 跨 0-1 全範圍 = 真實 sub-clone signal。chr19:17M 對稱 0.500 = SP1 附近 paired 認雙 sub-clone (vs TO 113:0 失衡)。",
     tier3="longphase-s codebase / SomaticHaplotagProcess.cpp:533 / paired 軸對齊")
 
-add(id="16_v5_caveat", num="16", section="S6 5/9 新發現 ★", rg2="4 (核心 caveat forced)", ngrep="15+",
-    title="V5 Layer 1.5 設計缺陷: germline-absent 區與 baseline 4.19:1 完全相同",
-    en="V5 Layer 1.5 design caveat — identical to baseline in germline-absent",
-    timing="150 sec / 中 ~420 字 ★ 最長 slide",
+add(id="16_v5_caveat", num="16", section="S6 5/9-5/10 V5 缺陷 + V6 修補 ★", rg2="5 (核心 caveat + 修補 forced)", ngrep="20+",
+    title="V5 Layer 1.5 設計缺陷 → V6 binary patch (5/10) 三向 head-to-head 修補",
+    en="V5 Layer 1.5 caveat → V6 patch (5/10) three-way head-to-head fix",
+    timing="180 sec / 中 ~480 字 ★ 整份最關鍵+最長",
     title_critical=True,
     canvas_html="""
-    <img class="fig-thumb" src="../figures/G4_germline_absent_three_versions.png" alt="G4" style="max-height:340px;">
-    <div class="red-frame">
-      <span class="label">★ 結論:</span>
-      <strong>V5 Layer 1.5 = priority bug 的 feature 化非修補</strong> — 把 baseline buggy 行為改成 designed 行為，但<strong>該區域偏移本質沒變</strong>。V3F 標 hp=33 反而更穩健。
-      <span style="display:block;font-size:10px;font-style:italic;margin-top:4px;">V5 Layer 1.5 makes priority bug a feature, not a fix.</span>
+    <p style="font-size:11px;font-weight:700;color:#DC2626;margin:0;">問題 (5/9 發現): paired chr19 germline-absent 5,789 events</p>
+    <img class="fig-thumb" src="../figures/G4_germline_absent_three_versions.png" alt="G4" style="max-height:200px;">
+    <p style="font-size:11px;font-weight:700;color:#16A34A;margin:4px 0 0;">解答 (5/10 V6 patch): HaplotagProcess.cpp:537-548 移除 Layer 1.5 → germline-absent 退回 hp=33</p>
+    <table class="metric-table" style="font-size:10px;">
+      <caption style="text-align:left;font-weight:600;color:#1E3A8A;">全基因組三向 head-to-head (2,464,863 reads)</caption>
+      <thead><tr><th>指標</th><th>V3F</th><th>V5</th><th>V6</th><th>V6 vs V3F</th></tr></thead>
+      <tbody>
+        <tr><td>hp=33 ambiguous reads</td><td class="num">132,060</td><td class="num">13,250</td><td class="num"><strong>138,317</strong></td><td class="num green">+4.7% ✅</td></tr>
+        <tr><td>hp=1-1:hp=2-1 ratio</td><td class="num">1.138</td><td class="num">2.003</td><td class="num">1.838</td><td class="num">部分改善 ⚠</td></tr>
+        <tr><td>marker coverage (NG≥3)</td><td class="num">21,997</td><td class="num">18,382</td><td class="num"><strong>23,980</strong></td><td class="num green">+9.0% ✅</td></tr>
+        <tr><td>marker rate (off)</td><td class="num">0.9175</td><td class="num">0.8937</td><td class="num">0.9093</td><td class="num">介於 V3F/V5 ⚠</td></tr>
+        <tr class="row-green"><td>caller F1 vs SEQC2</td><td class="num">0.7166</td><td class="num">0.7166</td><td class="num">0.7166</td><td>三版相同 ✅</td></tr>
+      </tbody>
+    </table>
+    <div class="green-box" style="font-size:12px;font-weight:600;">
+      ★ V6 = V5 設計目標保留 + V3F 保守 hp=33 策略 + marker engineering 改善 → 4/5 Phase C 通過
+      <span style="display:block;font-size:10px;font-style:italic;margin-top:4px;color:#374151;">V6 reverts V5 Layer 1.5; Phase B (chr19) 3/5 + Phase C (genome) 4/5 PASS</span>
     </div>
     <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">sub-clone:</span> 基因型同細胞群</div>
-      <div class="gloss-item">ⓘ Layer 1.5 fallback / phased votes</div>
-      <div class="gloss-item">ⓘ scope: paired chr19 germline-absent (5,789 events ≈ 5%)</div>
+      <div class="gloss-item">📖 <span class="term">V6:</span> V5 + Layer 1.5 移除 (5/10 binary patch on top of 938f0df)</div>
+      <div class="gloss-item">ⓘ V5→V6 transfer 82% from hp=1-1 / 17% from hp=2-1 → hp=33 (守恆)</div>
     </div>""",
-    speaker="整份報告最重要的一張 slide。對 paired chr19 × baseline/V3F/V5 vote dump JOIN, 篩 cnt_HP1+HP2=0 且 somatic>0 = 5,789 events。cross-tab: baseline hp=11=3,312 / hp=21=791 → 4.19:1 priority bug 次峰。V3F 全標 hp=33 保守 ✅。V5 hp=11=3,313 / hp=21=790 → 4.19:1 與 baseline 完全相同！機制詮釋: V5 Layer 1.5 用 sHP1 vs sHP2 票數決方向; sub-clone somatic 100% 共現 → graph 偏向同一 haplotype → 投票偏向同邊 → 繼承 priority bug 偏移。V5 Layer 1.5 = priority bug feature 化非修補; V3F hp=33 是更穩健選擇。V5 設計時未對 paired ground truth 做 germline-absent cross-ref, 5/9 paired audit Step D 才補上發現。",
-    tier3="cross-binary axis alignment / phasing graph §3.2 / Layer 1.5 改回 V3F default / F-paired-D3 工作量")
+    speaker="整份報告最重要的一張 slide — V5 Layer 1.5 缺陷 + V6 修補敘事完整鏈。問題: 5/9 paired audit Step D 揭露 V5 Layer 1.5 在 germline-absent 區與 baseline 4.19:1 完全相同 (5,789 events, V3F 標 hp=33 保守反而穩健)。解答: 5/10 V6 binary patch — 在 HaplotagProcess.cpp:537-548 移除 Layer 1.5 邏輯 (`else if (somaticHP1 > 0 || somaticHP2 > 0)` 整段去掉), germline-absent 退回 hp=33 (V3F 行為)。全基因組三向 head-to-head: hp=33 V6=138,317 > V3F=132,060 (+4.7%, 完全恢復 V3F 保守策略並略多), V5 只 13,250 (-89.9%) 為 priority bug feature 化副作用。Marker coverage V6 23,980 > V3F 21,997 (+9.0%) > V5 18,382 (V6 比 V5 多 +30.5%) — V6 抓到最多 NG≥3 regions。Marker rate V6 0.9093 介於 V3F 0.9175 與 V5 0.8937 之間。hp=1-1:hp=2-1 ratio V6 1.838 改善但未到 V3F 1.138 (因 V6 重用 V5 phased VCF, germline-existent 區 V5 ploidy/threshold 差異 V6 沒改)。Caller F1 三版完全相同 0.7166 (V6 不改 phasing layer)。V5→V6 transfer 82:17 比例 from hp=1-1/hp=2-1 → hp=33 守恆。Phase B chr19 3/5 + Phase C genome 4/5 通過; V6 = V5 設計目標保留 + V3F 保守策略 + marker improvement = production candidate。",
+    tier3="V6 patch diff / 82:17 V5→V6 transfer / Phase B chr19 5 驗收項 / Phase C genome 5 驗收項")
 
 # ─── S7 Errata + Follow-up ────────────────────────────────────────────────
 add(id="17_errata", num="17", section="S7 結論", rg2="—", ngrep="commit chain",
-    title="PI 報告 4-29 5 條 errata 已 patch; 主結論不撤回",
-    en="5 errata patched; main conclusions retained",
-    timing="90 sec / 中 ~330 字",
+    title="PI 報告 4-29 6 條 errata 已 patch; V6 patch 完成主結論升級",
+    en="6 errata patched; V6 patch completes the main conclusion arc",
+    timing="100 sec / 中 ~370 字",
     canvas_html="""
     <table class="metric-table" style="font-size:11px;">
       <thead><tr><th></th><th>段落</th><th>原 → 新</th></tr></thead>
@@ -523,51 +542,56 @@ add(id="17_errata", num="17", section="S7 結論", rg2="—", ngrep="commit chai
         <tr><td><strong>E2</strong></td><td>§5.2 V5 commit 狀態</td><td>未 commit → ✅ 已 commit (d0bcd8c + 938f0df)</td></tr>
         <tr><td><strong>E3</strong></td><td>§5.2 priority bug 證據</td><td>commit msg + 3 IGV → + 34,855 read-level 鐵證 100%</td></tr>
         <tr class="row-yellow"><td><strong>★ E4</strong></td><td>§6.4/§6.5 V5 數值歸因</td><td>V5 整體 → V5 = Pass 1 only; 主要 V3F + Layer 1.5; Pass 2 二次效益尚未量化</td></tr>
-        <tr class="row-yellow"><td><strong>★ E5</strong></td><td>§5.2 Layer 1.5 設計 (5/10 加)</td><td>fallback 隱含修補 → germline-absent 區與 baseline 4.19:1 相同, priority bug feature 化非修補</td></tr>
+        <tr class="row-yellow"><td><strong>★ E5</strong></td><td>§5.2 Layer 1.5 設計 (5/10 加)</td><td>fallback 隱含修補 → germline-absent 區與 baseline 4.19:1 同, priority bug feature 化</td></tr>
+        <tr class="row-green"><td><strong>★ E6 NEW</strong></td><td>§9.3 follow-up (5/11 加)</td><td>F-paired-D3 ⏸ 待跑 → ✅ V6 binary patch DONE (5/10) + Phase D 跨 4 樣本驗證 4/5 通過 (5/11)</td></tr>
       </tbody>
     </table>
-    <div class="conclusion-arrow">→ E1-E3 表述精確化; E4 + E5 為核心 errata; 主結論不撤回</div>
-    <div class="footer-glossary"><div class="gloss-item">ⓘ commit chain: f17754f → 2553e96 → 71d21bd</div></div>""",
-    speaker="PI 報告 4-29 5 條 errata: E1 chr19 SP1/2/3 hotspot 降級為可重現案例; E2 V5 已 commit 4-30; E3 證據鏈升級含 34,855 read-level; ★ E4 V5 數值 = Pass 1 only, 主要 V3F + Layer 1.5; ★ E5 5/10 加 — V5 Layer 1.5 germline-absent 與 baseline 4.19:1 同。E1-E3 表述精確化, E4+E5 核心。",
-    tier3="errata commit hash / patch 工作量")
+    <div class="conclusion-arrow green">→ E1-E3 表述精確化; E4-E5 核心 errata; ★ E6 = V6 修補敘事閉環 (主結論升級為 V6 production candidate)</div>
+    <div class="footer-glossary"><div class="gloss-item">ⓘ commit chain: f17754f → 2553e96 → 71d21bd → V6 patch (待 commit)</div></div>""",
+    speaker="PI 報告 4-29 6 條 errata (5/11 新加 E6): E1 chr19 hotspot 降級; E2 V5 已 commit 4-30; E3 證據鏈升級; ★ E4 V5 = Pass 1 only; ★ E5 V5 Layer 1.5 germline-absent 缺陷; ★ E6 (5/11 新加) = F-paired-D3 follow-up 已實作為 V6 binary patch (5/10) + Phase D 跨 4 樣本驗證 (5/11) 4/5 通過 — V6 = production candidate。E1-E3 為表述精確化, E4-E5 為核心 caveat, E6 為敘事閉環 (從 V5 caveat 升級為 V6 修補)。",
+    tier3="errata commit chain / V6 patch 待 commit / Phase D 5 樣本 evaluation matrix")
 
 add(id="18_followup", num="18", section="S7 結論", rg2="1", ngrep="—",
-    title="整體成熟度 + 5 follow-up — V5 仍可作 production baseline",
-    en="Maturity status + 5 follow-up cycles",
-    timing="90 sec / 中 ~340 字",
+    title="整體成熟度升級 + Phase D 跨 4 樣本驗證 — V6 = production candidate",
+    en="Maturity upgrade + Phase D 4-sample validation; V6 production candidate",
+    timing="100 sec / 中 ~360 字",
     canvas_html="""
-    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0;">整體成熟度: 10 ✅ / 1 ⚠️ / 2 ⏸ (12 維度)</p>
-    <div class="grid-3col" style="font-size:10px;gap:6px;">
-      <div class="green-box" style="padding:4px 8px;">✅ 機制因果</div>
-      <div class="green-box" style="padding:4px 8px;">✅ 修補設計</div>
-      <div class="green-box" style="padding:4px 8px;">✅ chr19 SP 對齊</div>
-      <div class="green-box" style="padding:4px 8px;">✅ 全基因組擴展</div>
-      <div class="green-box" style="padding:4px 8px;">✅ V5/V3F zero-sum</div>
-      <div class="green-box" style="padding:4px 8px;">✅ 20 指標 0 regression</div>
-      <div class="green-box" style="padding:4px 8px;">✅ Caller F1 三版相同</div>
-      <div class="green-box" style="padding:4px 8px;">✅ purity 0.6 對照</div>
-      <div class="green-box" style="padding:4px 8px;">✅ 三路徑算法</div>
-      <div class="green-box" style="padding:4px 8px;">✅ Pass 2 +3.51%</div>
-      <div class="green-box" style="padding:4px 8px;">✅ 版本對齊 938f0df</div>
-      <div class="green-box" style="padding:4px 8px;">✅ Paired Step A+C</div>
-      <div class="caveat-box" style="padding:4px 8px;margin:0;">⚠ V5 Layer 1.5 (E5)</div>
-      <div style="background:#F3F4F6;padding:4px 8px;border:1px solid #D1D5DB;border-radius:4px;">⏸ Pass 2 (T1.3)</div>
-      <div style="background:#F3F4F6;padding:4px 8px;border:1px solid #D1D5DB;border-radius:4px;">⏸ 跨樣本 (T3)</div>
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0;">整體成熟度升級: 13 ✅ / 0 ⚠️ / 2 ⏸ (15 維度)</p>
+    <div class="grid-3col" style="font-size:9.5px;gap:5px;">
+      <div class="green-box" style="padding:3px 6px;">✅ 機制因果</div>
+      <div class="green-box" style="padding:3px 6px;">✅ 修補設計</div>
+      <div class="green-box" style="padding:3px 6px;">✅ chr19 SP 對齊</div>
+      <div class="green-box" style="padding:3px 6px;">✅ 全基因組 34,855</div>
+      <div class="green-box" style="padding:3px 6px;">✅ 20 指標 0 regression</div>
+      <div class="green-box" style="padding:3px 6px;">✅ Caller F1 三版相同</div>
+      <div class="green-box" style="padding:3px 6px;">✅ purity 0.6 對照</div>
+      <div class="green-box" style="padding:3px 6px;">✅ Pass 2 +3.51%</div>
+      <div class="green-box" style="padding:3px 6px;">✅ Paired Step A+C+D</div>
+      <div class="green-box" style="padding:3px 6px;"><strong>★ V6 patch (5/10)</strong></div>
+      <div class="green-box" style="padding:3px 6px;"><strong>★ marker +9.0% vs V3F</strong></div>
+      <div class="green-box" style="padding:3px 6px;"><strong>★ hp=33 恢復 +4.7%</strong></div>
+      <div class="green-box" style="padding:3px 6px;"><strong>★ Phase D 4 樣本 4/5</strong></div>
+      <div style="background:#F3F4F6;padding:3px 6px;border:1px solid #D1D5DB;border-radius:4px;">⏸ COLO829 (truth 權限)</div>
+      <div style="background:#F3F4F6;padding:3px 6px;border:1px solid #D1D5DB;border-radius:4px;">⏸ T1.3 4-cell ablation</div>
     </div>
-    <table class="metric-table" style="font-size:10px;margin-top:8px;">
-      <thead><tr><th>ID</th><th>內容</th><th>預估</th></tr></thead>
+    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:8px 0 0;">Phase D 跨 4 樣本 V6 evaluation (HCC1395 ref + 4 cancer cell lines):</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th>Sample</th><th>hp ratio</th><th>marker rate</th><th>NG_on=2</th><th>caller F1</th></tr></thead>
       <tbody>
-        <tr class="row-yellow"><td>★ F-paired-D3</td><td>Layer 1.5 改 V3F ISM 影響 (決定 V5 vs V3F default)</td><td>1-2 day</td></tr>
-        <tr><td>F-paired-D1</td><td>germline-absent 全基因組擴展</td><td>0.5 day</td></tr>
-        <tr><td>F-paired-D2</td><td>phase block 內 axis-aligned 分析</td><td>1 day</td></tr>
-        <tr><td>T3</td><td>7 樣本跨樣本擴展</td><td>1-2 day</td></tr>
-        <tr><td>T1.3</td><td>4-cell ablation</td><td>3 day</td></tr>
+        <tr class="row-green"><td>H1437</td><td class="num">1.243 ✅</td><td class="num">0.992 ✅</td><td class="num">0.991 ✅</td><td>n/a</td></tr>
+        <tr class="row-green"><td>H2009</td><td class="num">0.901 ✅</td><td class="num">0.993 ✅</td><td class="num">0.992 ✅</td><td>n/a</td></tr>
+        <tr class="row-green"><td>HCC1954</td><td class="num">0.958 ✅</td><td class="num">0.954 ✅</td><td class="num">0.967 ✅</td><td>n/a</td></tr>
+        <tr class="row-yellow"><td>HCC1937</td><td class="num">0.611 ✅</td><td class="num">0.817 ⚠</td><td class="num">0.904 ✅</td><td>BRCA1 edge</td></tr>
+        <tr style="background:#F3F4F6;"><td>COLO829</td><td colspan="4">⏸ truth set 0600 權限阻塞</td></tr>
       </tbody>
     </table>
-    <div class="conclusion-arrow">→ V5 仍可作 production baseline; F-paired-D3 量化後決定是否回 V3F default</div>
-    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">LOH/cnLOH:</span> 雜合性丟失/拷貝中性</div></div>""",
-    speaker="整體成熟度 12 維度: 10 ✅ + 1 ⚠️ V5 Layer 1.5 + 2 ⏸ 待跑。5 follow-up 排序按 ROI: ★ F-paired-D3 1-2 day 最重要 (V5 vs V3F default); F-paired-D1 0.5 day; F-paired-D2 1 day; T3 1-2 day; T1.3 3 day。V5 仍可作 production baseline; germline-absent ~5% 不阻擋整體; F-paired-D3 量化後決定是否回 V3F default — 待 PI 決策。",
-    tier3="T1.3 4-cell / 7 樣本 / cnLOH 雙親同源")
+    <div class="conclusion-arrow green">→ V6 = production candidate; ratio 4/4 中性 / marker 3/4 (HCC1937 edge); 剩 COLO829 + T1.3</div>
+    <div class="footer-glossary">
+      <div class="gloss-item">ⓘ HCC1937 0.817 = BRCA1 mutant FP/TP=0.194 樣本特性</div>
+      <div class="gloss-item">📖 <span class="term">V6:</span> V5 + Layer 1.5 移除 (5/10 patch)</div>
+    </div>""",
+    speaker="整體成熟度從 12 維度升級至 15 維度: 13 ✅ + 0 ⚠️ + 2 ⏸。新加 4 維度全綠: ★ V6 patch (5/10) / ★ marker +9.0% vs V3F / ★ hp=33 恢復 +4.7% / ★ Phase D 4 樣本驗證 4/5 通過; V5 Layer 1.5 從 ⚠ 升級為 ✅ (V6 已修補)。Phase D 跨 4 樣本 (H1437/H2009/HCC1954/HCC1937, COLO829 truth set 0600 權限阻塞): hp=1-1:hp=2-1 ratio 4/4 全部接近中性 0.61-1.24 (vs V5 baseline 1.86, 原 baseline 17.3:1); marker rate 3/4 通過 ≥0.85 (HCC1937 0.817 為 BRCA1 mutant FP/TP=0.194 樣本特性 edge case, 與 HPFineNGroups canonical filter AF<0.4 一致); NG_on=2 rate 4/4 通過 ≥0.85; caller F1 V6 重用 V5 phased VCF 故不變。V6 = production candidate; 剩 2 follow-up: COLO829 待 truth set 權限解除, T1.3 4-cell ablation 量化 Pass 2 second round 獨立貢獻 — 兩者均非阻塞。",
+    tier3="HCC1937 BRCA1 mutant detail / COLO829 truth set 權限 / T1.3 4-cell ablation 設計")
 
 # ─── Q&A Backup ───────────────────────────────────────────────────────────
 add(id="b1_pass2", num="B1", section="Q&A Backup", rg2="4 (backup 例外)", ngrep="—",
@@ -613,42 +637,37 @@ add(id="b2_purity06", num="B2", section="Q&A Backup", rg2="1", ngrep="20+",
     tier3="V3F vs V5 0.6 對比 / N50 為何接受")
 
 add(id="b3_cross_sample", num="B3", section="Q&A Backup", rg2="1", ngrep="—",
-    title="跨樣本擴展 (T3) + cnLOH 雙親同源待開放",
-    en="Cross-sample expansion + cnLOH bi-parental",
-    timing="60 sec / 中 ~250 字",
+    title="Phase D 跨 4 樣本 V6 詳細 evaluation matrix + COLO829 推遲",
+    en="Phase D V6 4-sample evaluation + COLO829 deferred",
+    timing="90 sec / 中 ~320 字",
     canvas_html="""
-    <div class="grid-2col">
-      <div>
-        <p style="font-size:12px;font-weight:700;color:#1E3A8A;">T3 跨樣本擴展:</p>
-        <table class="metric-table" style="font-size:10px;">
-          <thead><tr><th>樣本</th><th>狀態</th><th>預估</th></tr></thead>
-          <tbody>
-            <tr class="row-green"><td>HCC1395 5kHz</td><td>✅ 已驗證</td><td>—</td></tr>
-            <tr><td>HCC1395_DORADO</td><td>⏸ 待跑</td><td>~3 hr</td></tr>
-            <tr><td>HCC1937</td><td>⏸ 待跑</td><td>~3 hr</td></tr>
-            <tr><td>HCC1954</td><td>⏸ 待跑</td><td>~3 hr</td></tr>
-            <tr><td>H1437</td><td>⏸ 待跑</td><td>~3 hr</td></tr>
-            <tr><td>H2009</td><td>⏸ 待跑</td><td>~3 hr</td></tr>
-            <tr><td>COLO829</td><td>⏸ 待跑</td><td>~3 hr</td></tr>
-          </tbody>
-        </table>
+    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:0;">5 樣本 V6 evaluation matrix (HCC1395 ref + 4 cancer cell lines):</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th>Sample</th><th>ratio</th><th>hp=33</th><th>marker rate</th><th>NG_on=2</th><th>FP/TP</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td>HCC1395 (ref)</td><td class="num">1.838</td><td class="num">138,317</td><td class="num">0.909</td><td class="num">0.829</td><td class="num">—</td></tr>
+        <tr class="row-green"><td>H1437</td><td class="num">1.243</td><td class="num">39,050</td><td class="num"><strong>0.992</strong></td><td class="num">0.991</td><td class="num">0.011</td></tr>
+        <tr class="row-green"><td>H2009</td><td class="num">0.901</td><td class="num">684,035</td><td class="num"><strong>0.993</strong></td><td class="num">0.992</td><td class="num">0.010</td></tr>
+        <tr class="row-green"><td>HCC1954</td><td class="num">0.958</td><td class="num">4,859</td><td class="num">0.954</td><td class="num">0.967</td><td class="num">0.035</td></tr>
+        <tr class="row-yellow"><td>HCC1937 ⚠</td><td class="num">0.611</td><td class="num">5,017</td><td class="num">0.817</td><td class="num">0.904</td><td class="num"><strong>0.194</strong></td></tr>
+        <tr style="background:#F3F4F6;"><td>COLO829</td><td colspan="5">⏸ truth set 0600 權限阻塞 (HKU/NYGC); BAM ready 待 chmod 660 或替代 PASS VCF</td></tr>
+      </tbody>
+    </table>
+    <div class="grid-2col" style="margin:6px 0;">
+      <div class="green-box" style="font-size:11px;">
+        ✅ <strong>4 樣本 ratio 全部接近中性 0.611-1.243</strong> (平均 0.928, vs V5 1.86, 原 baseline 17.3:1) → V6 priority bug 修補一致成功
       </div>
-      <div>
-        <p style="font-size:12px;font-weight:700;color:#1E3A8A;">cnLOH 雙親同源待開放:</p>
-        <div class="caveat-box" style="font-size:11px;">
-          <strong>情境:</strong> parent 1 vs parent 2 染色體在 LOH 區難 phase<br><br>
-          <strong>影響:</strong> Layer 1.5 在 cnLOH 區的設計選擇待量化<br><br>
-          <strong>關係:</strong> 與 V5 Layer 1.5 設計缺陷 (E5) 連動
-        </div>
+      <div class="caveat-box" style="font-size:11px;">
+        ⚠ <strong>HCC1937 marker rate 0.817</strong>: BRCA1 mutant FP/TP=0.194, CNV-driven germline het AF 漂移; 須加 AF&lt;0.4 filter (HPFineNGroups canonical)
       </div>
     </div>
-    <div class="conclusion-arrow">Follow-up 排序: F-paired-D3 (1-2 d, actionable) > T3 (1-2 d, generalizability) > T1.3 (3 d, ablation)</div>
+    <p style="font-size:11px;color:#6B7280;font-style:italic;text-align:center;">Phase D pipeline: V5 binary phasing → V6 binary haplotag (hybrid); 每樣本 wall ~10 hr</p>
     <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">LOH:</span> 雜合性丟失</div>
-      <div class="gloss-item">📖 <span class="term">cnLOH:</span> 拷貝中性 LOH</div>
+      <div class="gloss-item">📖 <span class="term">BRCA1 mutant:</span> 高 ploidy CNV-driven FP edge case</div>
+      <div class="gloss-item">ⓘ COLO829: 待 truth set chmod 660</div>
     </div>""",
-    speaker="Q: 跨樣本一致性? cnLOH 區? T3 跨樣本: HCC1395 5kHz 已驗證; 6 樣本待跑 (DORADO/1937/1954/H1437/H2009/COLO829) 每樣本 ~3 hr, 共 1-2 day。cnLOH 雙親同源: parent 1 vs parent 2 在 LOH 區同源難 phase; Layer 1.5 對 cnLOH 影響待量化, 與 E5 連動。Follow-up: F-paired-D3 actionable > T3 generalizability > T1.3 ablation。",
-    tier3="7 樣本特性 / cnLOH 機制 / F-paired-D3 詳細")
+    speaker="Q: 跨樣本 V6 一致性? Phase D 5 樣本 evaluation (HCC1395 ref + H1437/H2009/HCC1954/HCC1937, COLO829 truth set 權限阻塞)。hp=1-1:hp=2-1 ratio 4 樣本全部接近中性 0.611-1.243 (平均 0.928, vs V5 1.86, vs 原 baseline 17.3:1) — V6 priority bug 修補一致成功。hp=33 ambiguous 範圍 4,859-684,035 (V6 patch 正確標 hp=33)。Marker rate 3/4 通過 ≥0.85: H1437 0.992, H2009 0.993, HCC1954 0.954, HCC1937 0.817 邊緣 fail。HCC1937 為 BRCA1 mutant 高 ploidy 細胞株, FP/TP=0.194 (vs 其他 0.01-0.035), CNV-driven germline het AF 漂移混入 FP — 須加 AF<0.4 filter (與 HPFineNGroups canonical 一致), 非否定 V6 patch。COLO829 待用戶 chmod 660 HKU/NYGC truth set 或提供替代 PASS VCF, BAM ready。Phase D pipeline: V5 phasing → V6 haplotag (hybrid), 每樣本 wall ~10 hr。",
+    tier3="HCC1937 BRCA1 mutant FP/TP=0.194 / COLO829 chmod 660 / Phase D 4-stage pipeline")
 
 
 # ═══════════════════════════════════════════════════════════════════════════

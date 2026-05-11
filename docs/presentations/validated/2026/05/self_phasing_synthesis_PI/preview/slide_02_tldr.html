@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 02 — TL;DR — 修補主線確立，但 V5 Layer 1.5 germline-absent 區仍待補強</title>
+  <title>Slide 02 — TL;DR — Self-Phasing 修補三版演進完整：V3F → V5 → V6 (production candidate)</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -231,49 +231,55 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
     <div><span class="label">Slide:</span><span class="value">02 / 22</span></div>
     <div><span class="label">Section:</span><span class="value">S0 Cover</span></div>
-    <div><span class="label">Tier 2:</span><span class="value">90 sec / 中 ~360 字</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">100 sec / 中 ~400 字</span></div>
     <div><span class="label">R-G2 術語:</span><span class="value">1</span></div>
-    <div><span class="label">N grep:</span><span class="value">6</span></div>
+    <div><span class="label">N grep:</span><span class="value">9</span></div>
   </div>
 
   <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">TL;DR — 修補主線確立，但 V5 Layer 1.5 germline-absent 區仍待補強</h1>
-    <p class="en-subtitle">Main fix line established; V5 Layer 1.5 still gaps in germline-absent regions</p>
+    <h1 class="slide-title ">TL;DR — Self-Phasing 修補三版演進完整：V3F → V5 → V6 (production candidate)</h1>
+    <p class="en-subtitle">Self-Phasing fix complete: V3F → V5 → V6, V6 patch + 4-sample validation</p>
     
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:8px 0;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0;">
       <div>
-        <h4 style="font-size:12px;color:#6B7280;margin:0 0 6px;">修補主線 (V3F + V5)</h4>
-        <div class="grid-2col" style="gap:8px;margin:0;">
+        <h4 style="font-size:12px;color:#6B7280;margin:0 0 4px;">原問題 + 修補主線</h4>
+        <div class="grid-2col" style="gap:6px;margin:0;">
           <div class="stat-box"><div class="number">17.3:1</div><div class="label">HP1 偏 baseline</div></div>
-          <div class="stat-box"><div class="number">34,855</div><div class="label">read-level victims</div></div>
+          <div class="stat-box"><div class="number">34,855</div><div class="label">priority bug victims</div></div>
         </div>
       </div>
       <div>
-        <h4 style="font-size:12px;color:#6B7280;margin:0 0 6px;">關鍵驗證</h4>
-        <div class="grid-2col" style="gap:8px;margin:0;">
-          <div class="stat-box"><div class="number green">+13.3 pp</div><div class="label">paired GT (V5)</div></div>
-          <div class="stat-box"><div class="number green">100%</div><div class="label">V3F+V5 修正率</div></div>
+        <h4 style="font-size:12px;color:#6B7280;margin:0 0 4px;">V6 patch (5/10) 三向 head-to-head</h4>
+        <div class="grid-2col" style="gap:6px;margin:0;">
+          <div class="stat-box"><div class="number green">+9.0%</div><div class="label">marker vs V3F</div></div>
+          <div class="stat-box"><div class="number green">+30.5%</div><div class="label">marker vs V5</div></div>
         </div>
       </div>
     </div>
-    <div style="background:#F0F9FF;border:1px solid #BAE6FD;padding:8px 14px;border-radius:6px;text-align:center;font-weight:600;color:#0C4A6E;font-size:13px;">
-      整體影響: 20/0 指標 no regression (caller F1 三版完全相同)
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:6px 0;">
+      <div class="stat-box"><div class="number" style="font-size:22px;">+13.3 pp</div><div class="label">paired GT (V5/V6)</div></div>
+      <div class="stat-box"><div class="number green" style="font-size:22px;">100%</div><div class="label">V3F+V5+V6 修正率</div></div>
+      <div class="stat-box"><div class="number green" style="font-size:22px;">4/4</div><div class="label">Phase D 跨樣本 ratio 中性</div></div>
     </div>
-    <div class="caveat-box">
-      <span class="label">⚠ Caveat — 5/9 新發現:</span>
-      V5 Layer 1.5 germline-absent 區與 baseline <strong>4.19:1 偏 HP1 完全相同</strong>; V3F 標 hp=33 反而更穩健 (~5% germline-absent 區，占比小不阻擋整體)
-      <span class="en-note">V5 Layer 1.5 retains priority bug bias in germline-absent regions (~5% chr19 events)</span>
+    <div style="background:#DCFCE7;border:1px solid #16A34A;padding:8px 14px;border-radius:6px;text-align:center;font-weight:600;color:#166534;font-size:13px;">
+      ★ V6 = V5 設計目標保留 + V3F 保守 hp=33 + marker engineering 改善 → production candidate
+    </div>
+    <div class="caveat-box" style="background:#FEF3C7;">
+      <span class="label">⚠ Open items:</span>
+      HCC1937 marker rate 0.817（BRCA1 mutant 樣本特性 edge case，3/4 sample 通過）; COLO829 truth set 0600 權限阻塞（1/7 樣本待補）
+      <span class="en-note">HCC1937 edge case + COLO829 access blocked; 4/5 V6 cross-sample validation passes</span>
     </div>
     <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">sub-clone:</span> 腫瘤內基因型相同細胞群</div>
+      <div class="gloss-item">📖 <span class="term">V6:</span> V5 + Layer 1.5 移除 (5/10 binary patch)</div>
+      <div class="gloss-item">📖 <span class="term">Phase D:</span> 跨 4 樣本驗證 (5/11)</div>
     </div>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide 02">
     <details class="collapsible" open>
-      <summary>🎤 Speaker Note (90 sec / 中 ~360 字)</summary>
-      <div class="speak-text">今天 thesis 兩個焦點。正面: 修補主線確立。baseline LongPhase-TO 全基因組 HP1:HP2 = 17.3:1 systematic bias; V3F + V5 兩層修補在 read-level 對 chr19 752 + 全基因組 34,855 victims 修正率 100%; paired GT +13.3 pp; 20 指標 0 regression; caller F1 三版完全相同。反面: V5 Layer 1.5 germline-absent 區仍未修對 — 與 baseline 4.19:1 完全相同; V3F hp=33 更穩健。整體 12 維度 10 ✅ / 1 ⚠️ / 2 待跑; V5 仍可作 production baseline。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> V3F = 41ff147 / V5 = d0bcd8c + 938f0df / paired Step D = 766ec5f</div>
+      <summary>🎤 Speaker Note (100 sec / 中 ~400 字)</summary>
+      <div class="speak-text">今天 thesis: Self-Phasing 修補三版演進完整。原問題 baseline 17.3:1 偏 HP1; V3F+V5 兩層修補對 read-level 34,855 victims 100% 修正; 5/9 paired audit 揭露 V5 Layer 1.5 germline-absent 設計缺陷; 5/10 V6 binary patch (移除 Layer 1.5) 已實作; 5/11 Phase D 跨 4 樣本驗證 (H1437/H2009/HCC1954/HCC1937)。V6 全基因組 hp=33 ambiguous 138K > V3F 132K (+4.7%, V5=13K -89.9%); marker coverage V6 23,980 > V3F 21,997 (+9.0%) > V5 18,382 (+30.5%); marker rate V6 0.909 介於 V3F 0.918 與 V5 0.894 之間; caller F1 三版完全相同。跨 4 樣本 hp=1-1:hp=2-1 ratio 0.61-1.24 (V5 baseline 1.86, 全部接近中性); marker rate 3/4 通過, HCC1937 0.817 為 BRCA1 mutant 樣本特性 edge case; COLO829 truth set 權限阻塞。V6 = V5 設計目標保留 + V3F 保守 hp=33 + marker engineering 改善, 為 production candidate。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> V3F = 41ff147 / V5 = d0bcd8c + 938f0df / V6 patch (5/10) / Phase D 5/11</div>
     </details>
   </aside>
 

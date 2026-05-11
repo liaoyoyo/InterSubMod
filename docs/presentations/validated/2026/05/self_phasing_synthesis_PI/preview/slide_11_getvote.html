@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 11 — getVote 三版差異 — baseline 順序錯 → V3F 兩層 → V5 +Layer 1.5 fallback</title>
+  <title>Slide 11 — getVote 四版演進 — baseline → V3F → V5 +Layer 1.5 → V6 (Layer 1.5 移除)</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -237,21 +237,23 @@ details.collapsible summary:hover { color: #1D4ED8; }
   </div>
 
   <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">getVote 三版差異 — baseline 順序錯 → V3F 兩層 → V5 +Layer 1.5 fallback</h1>
-    <p class="en-subtitle">getVote 3-version diff</p>
+    <h1 class="slide-title ">getVote 四版演進 — baseline → V3F → V5 +Layer 1.5 → V6 (Layer 1.5 移除)</h1>
+    <p class="en-subtitle">getVote 4-version evolution: V6 reverts V5 Layer 1.5</p>
     
-    <img class="fig-thumb" src="../figures/G3_getVote_three_layer.png" alt="G3" style="max-height:380px;">
-    <div class="caveat-box">
-      <span class="label">⚠ Layer 1.5 caveat:</span>
-      V5 Layer 1.5 在 germline-absent 區會繼承 priority bug 偏移 → <strong>(slide 16 詳述)</strong>
+    <img class="fig-thumb" src="../figures/G3_getVote_three_layer.png" alt="G3" style="max-height:280px;">
+    <div class="green-box" style="font-size:11px;font-weight:600;">
+      ★ V6 (5/10 binary patch): 移除 V5 Layer 1.5 邏輯 (HaplotagProcess.cpp:537-548)
+      <pre style="font-family:monospace;font-size:9px;background:white;padding:4px 8px;margin:4px 0;border-radius:3px;border:1px solid #16A34A;">- else if (somaticHP1 > 0 || somaticHP2 > 0) {<br>-     germlineResult = (somaticHP1 >= somaticHP2) ? 1 : 2;<br>- }<br>+ // V6: germline absent → conservative hp=33 (V3F behavior)</pre>
+      → germline-absent 退回 V3F hp=33 行為; phasing 層完全不變 (caller F1 不變)
     </div>
+    <p style="font-size:11px;color:#6B7280;text-align:center;">V6 = V3F germline-absent 保守 + V5 germline-existent 設計目標 (ploidy/threshold) = hybrid 升級</p>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide 11">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
-      <div class="speak-text">三版 code: baseline 紅底 vector 順序錯 break early。V3F 綠底 explicit Layer 1 (germline only) + Layer 2 (somatic annotation), Layer 1 永不被 somatic overrule。V5 綠底加黃 highlight: 保留 Layer 1, 新增 Layer 1.5 fallback (germline 缺席用 somatic phased votes), Layer 2 同 V3F。Layer 1.5 是 caveat 預告 (slide 16 詳述)。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> enum / V3F bonus 修</div>
+      <div class="speak-text">四版 code 演進。baseline 紅底 vector 順序錯 break early。V3F 綠底 explicit Layer 1 + Layer 2。V5 綠底加黃 highlight 新增 Layer 1.5 fallback (germline 缺席用 somatic phased votes) — 但 5/9 發現 Layer 1.5 在 germline-absent 區繼承 priority bug。★ V6 (5/10 binary patch): 移除 Layer 1.5 邏輯 (HaplotagProcess.cpp:537-548 那段 else if 整段去掉), germline-absent 退回 hp=33 (V3F 行為), 但保留 V5 phasing 層 — V6 重用 V5 phased VCF 故 caller F1 完全不變。V6 = V3F germline-absent 保守 + V5 germline-existent 設計目標 (ploidy/threshold) = hybrid 升級。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> V6 patch diff / HaplotagProcess.cpp:537-548 移除 13 行 / phasing 層完全不變 / V6 重用 V5 phased VCF</div>
     </details>
   </aside>
 

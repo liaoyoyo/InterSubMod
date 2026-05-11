@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 16 — V5 Layer 1.5 設計缺陷: germline-absent 區與 baseline 4.19:1 完全相同</title>
+  <title>Slide 16 — V5 Layer 1.5 設計缺陷 → V6 binary patch (5/10) 三向 head-to-head 修補</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -230,34 +230,45 @@ details.collapsible summary:hover { color: #1D4ED8; }
 <main class="slide-page" role="main" aria-label="Slide 16 content">
   <div class="slide-meta critical" role="contentinfo" aria-label="Slide metadata">
     <div><span class="label">Slide:</span><span class="value">16 / 22</span></div>
-    <div><span class="label">Section:</span><span class="value">S6 5/9 新發現 ★</span></div>
-    <div><span class="label">Tier 2:</span><span class="value">150 sec / 中 ~420 字 ★ 最長 slide</span></div>
-    <div><span class="label">R-G2 術語:</span><span class="value">4 (核心 caveat forced)</span></div>
-    <div><span class="label">N grep:</span><span class="value">15+</span></div>
+    <div><span class="label">Section:</span><span class="value">S6 5/9-5/10 V5 缺陷 + V6 修補 ★</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">180 sec / 中 ~480 字 ★ 整份最關鍵+最長</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">5 (核心 caveat + 修補 forced)</span></div>
+    <div><span class="label">N grep:</span><span class="value">20+</span></div>
   </div>
 
   <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title critical">V5 Layer 1.5 設計缺陷: germline-absent 區與 baseline 4.19:1 完全相同</h1>
-    <p class="en-subtitle">V5 Layer 1.5 design caveat — identical to baseline in germline-absent</p>
+    <h1 class="slide-title critical">V5 Layer 1.5 設計缺陷 → V6 binary patch (5/10) 三向 head-to-head 修補</h1>
+    <p class="en-subtitle">V5 Layer 1.5 caveat → V6 patch (5/10) three-way head-to-head fix</p>
     
-    <img class="fig-thumb" src="../figures/G4_germline_absent_three_versions.png" alt="G4" style="max-height:340px;">
-    <div class="red-frame">
-      <span class="label">★ 結論:</span>
-      <strong>V5 Layer 1.5 = priority bug 的 feature 化非修補</strong> — 把 baseline buggy 行為改成 designed 行為，但<strong>該區域偏移本質沒變</strong>。V3F 標 hp=33 反而更穩健。
-      <span style="display:block;font-size:10px;font-style:italic;margin-top:4px;">V5 Layer 1.5 makes priority bug a feature, not a fix.</span>
+    <p style="font-size:11px;font-weight:700;color:#DC2626;margin:0;">問題 (5/9 發現): paired chr19 germline-absent 5,789 events</p>
+    <img class="fig-thumb" src="../figures/G4_germline_absent_three_versions.png" alt="G4" style="max-height:200px;">
+    <p style="font-size:11px;font-weight:700;color:#16A34A;margin:4px 0 0;">解答 (5/10 V6 patch): HaplotagProcess.cpp:537-548 移除 Layer 1.5 → germline-absent 退回 hp=33</p>
+    <table class="metric-table" style="font-size:10px;">
+      <caption style="text-align:left;font-weight:600;color:#1E3A8A;">全基因組三向 head-to-head (2,464,863 reads)</caption>
+      <thead><tr><th>指標</th><th>V3F</th><th>V5</th><th>V6</th><th>V6 vs V3F</th></tr></thead>
+      <tbody>
+        <tr><td>hp=33 ambiguous reads</td><td class="num">132,060</td><td class="num">13,250</td><td class="num"><strong>138,317</strong></td><td class="num green">+4.7% ✅</td></tr>
+        <tr><td>hp=1-1:hp=2-1 ratio</td><td class="num">1.138</td><td class="num">2.003</td><td class="num">1.838</td><td class="num">部分改善 ⚠</td></tr>
+        <tr><td>marker coverage (NG≥3)</td><td class="num">21,997</td><td class="num">18,382</td><td class="num"><strong>23,980</strong></td><td class="num green">+9.0% ✅</td></tr>
+        <tr><td>marker rate (off)</td><td class="num">0.9175</td><td class="num">0.8937</td><td class="num">0.9093</td><td class="num">介於 V3F/V5 ⚠</td></tr>
+        <tr class="row-green"><td>caller F1 vs SEQC2</td><td class="num">0.7166</td><td class="num">0.7166</td><td class="num">0.7166</td><td>三版相同 ✅</td></tr>
+      </tbody>
+    </table>
+    <div class="green-box" style="font-size:12px;font-weight:600;">
+      ★ V6 = V5 設計目標保留 + V3F 保守 hp=33 策略 + marker engineering 改善 → 4/5 Phase C 通過
+      <span style="display:block;font-size:10px;font-style:italic;margin-top:4px;color:#374151;">V6 reverts V5 Layer 1.5; Phase B (chr19) 3/5 + Phase C (genome) 4/5 PASS</span>
     </div>
     <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">sub-clone:</span> 基因型同細胞群</div>
-      <div class="gloss-item">ⓘ Layer 1.5 fallback / phased votes</div>
-      <div class="gloss-item">ⓘ scope: paired chr19 germline-absent (5,789 events ≈ 5%)</div>
+      <div class="gloss-item">📖 <span class="term">V6:</span> V5 + Layer 1.5 移除 (5/10 binary patch on top of 938f0df)</div>
+      <div class="gloss-item">ⓘ V5→V6 transfer 82% from hp=1-1 / 17% from hp=2-1 → hp=33 (守恆)</div>
     </div>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide 16">
     <details class="collapsible" open>
-      <summary>🎤 Speaker Note (150 sec / 中 ~420 字 ★ 最長 slide)</summary>
-      <div class="speak-text">整份報告最重要的一張 slide。對 paired chr19 × baseline/V3F/V5 vote dump JOIN, 篩 cnt_HP1+HP2=0 且 somatic>0 = 5,789 events。cross-tab: baseline hp=11=3,312 / hp=21=791 → 4.19:1 priority bug 次峰。V3F 全標 hp=33 保守 ✅。V5 hp=11=3,313 / hp=21=790 → 4.19:1 與 baseline 完全相同！機制詮釋: V5 Layer 1.5 用 sHP1 vs sHP2 票數決方向; sub-clone somatic 100% 共現 → graph 偏向同一 haplotype → 投票偏向同邊 → 繼承 priority bug 偏移。V5 Layer 1.5 = priority bug feature 化非修補; V3F hp=33 是更穩健選擇。V5 設計時未對 paired ground truth 做 germline-absent cross-ref, 5/9 paired audit Step D 才補上發現。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> cross-binary axis alignment / phasing graph §3.2 / Layer 1.5 改回 V3F default / F-paired-D3 工作量</div>
+      <summary>🎤 Speaker Note (180 sec / 中 ~480 字 ★ 整份最關鍵+最長)</summary>
+      <div class="speak-text">整份報告最重要的一張 slide — V5 Layer 1.5 缺陷 + V6 修補敘事完整鏈。問題: 5/9 paired audit Step D 揭露 V5 Layer 1.5 在 germline-absent 區與 baseline 4.19:1 完全相同 (5,789 events, V3F 標 hp=33 保守反而穩健)。解答: 5/10 V6 binary patch — 在 HaplotagProcess.cpp:537-548 移除 Layer 1.5 邏輯 (`else if (somaticHP1 > 0 || somaticHP2 > 0)` 整段去掉), germline-absent 退回 hp=33 (V3F 行為)。全基因組三向 head-to-head: hp=33 V6=138,317 > V3F=132,060 (+4.7%, 完全恢復 V3F 保守策略並略多), V5 只 13,250 (-89.9%) 為 priority bug feature 化副作用。Marker coverage V6 23,980 > V3F 21,997 (+9.0%) > V5 18,382 (V6 比 V5 多 +30.5%) — V6 抓到最多 NG≥3 regions。Marker rate V6 0.9093 介於 V3F 0.9175 與 V5 0.8937 之間。hp=1-1:hp=2-1 ratio V6 1.838 改善但未到 V3F 1.138 (因 V6 重用 V5 phased VCF, germline-existent 區 V5 ploidy/threshold 差異 V6 沒改)。Caller F1 三版完全相同 0.7166 (V6 不改 phasing layer)。V5→V6 transfer 82:17 比例 from hp=1-1/hp=2-1 → hp=33 守恆。Phase B chr19 3/5 + Phase C genome 4/5 通過; V6 = V5 設計目標保留 + V3F 保守策略 + marker improvement = production candidate。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> V6 patch diff / 82:17 V5→V6 transfer / Phase B chr19 5 驗收項 / Phase C genome 5 驗收項</div>
     </details>
   </aside>
 
