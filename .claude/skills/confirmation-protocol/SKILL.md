@@ -1,7 +1,7 @@
 ---
 name: confirmation-protocol
-description: 確認時機協議與執行模式切換。Hard Gate/Gate/Review/FYI 四級分類、各場景暫停類型、AI 自主權限邊界。觸發：模式切換、需確認操作前、不確定是否需暫停時。
-allowed-tools: Read
+description: Runs Hard Gate / Gate / Review / FYI 4-tier confirmation protocol when user about to do irreversible action OR when ambiguous instruction needs structured choice. USE WHEN file delete/move, C++ commit, research NO-GO, evidence_ledger overwrite, git push, mode switching (互動模式/全自動). SKIP WHEN simple read-only ops, low-impact reversible edits with high confidence.
+allowed-tools: Read, AskUserQuestion
 user-invocable: true
 ---
 
@@ -32,6 +32,27 @@ user-invocable: true
 | **Gate** | 暫停 | 自動通過 | 重要決策點，全自動下使用預設 |
 | **Review** | 暫停 | 自動通過 | 中間產出展示 |
 | **FYI** | 顯示 | 靜默 | 低風險通知 |
+
+---
+
+## Hard Gate 結構化確認（AskUserQuestion）
+
+5 個 Hard Gate 場景**必須**用 AskUserQuestion 工具呈現 2-3 個選項，禁用散文「請確認」格式。
+
+| Hard Gate 場景 | 對應 question template |
+|---------------|----------------------|
+| 刪除/搬移檔案 | references/askuserquestion_patterns.md §1 |
+| C++ commit | references/askuserquestion_patterns.md §2 |
+| 研究方向 NO-GO 判定 | references/askuserquestion_patterns.md §3 |
+| 覆寫 evidence_ledger / MEMORY.md | references/askuserquestion_patterns.md §4 |
+| 遠端 push | references/askuserquestion_patterns.md §5 |
+
+**為什麼用 AskUserQuestion 而非散文**（per Anthropic best-practice 文章 3）：
+- 結構化選項用戶 1-click 選擇，不必打字
+- 模型解析回應更可靠（"yes" vs "確認" vs "go" 統一處理）
+- 包含「替代方案」選項（archive / rollback / batch test 等）幫助用戶避免二元 yes/no 陷阱
+
+**Gate / Review 級暫停**：保留散文格式（暫不改，未來評估）。
 
 ---
 

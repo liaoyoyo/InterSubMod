@@ -1,0 +1,64 @@
+{
+  "skill": "confirmation-protocol",
+  "version": "2.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-11",
+  "evals": [
+    {
+      "id": "eval_01_typical_cpp_commit_hard_gate",
+      "category": "activation",
+      "query": "我把 src/core/ReadParser.cpp 編譯通過了，commit 吧",
+      "context": {
+        "files_in_scope": ["InterSubMod/src/core/ReadParser.cpp"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: C++ commit)",
+        "Identifies §2 C++ commit Hard Gate template from references/askuserquestion_patterns.md",
+        "Calls AskUserQuestion with 3 options: ✅ commit / 🔄 先跑 batch test / ❌ rollback",
+        "Does NOT use prose 「請確認是否 commit」"
+      ],
+      "must_not": [
+        "Use prose-based confirmation question",
+        "Skip the batch test option (must offer escape hatch)"
+      ]
+    },
+    {
+      "id": "eval_02_skip_low_impact_edit",
+      "category": "skip",
+      "query": "幫我把 README.md 標題改成 InterSubMod v2.0",
+      "context": {
+        "files_in_scope": ["InterSubMod/README.md"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (SKIP WHEN: low-impact reversible edits)",
+        "Edit proceeds without confirmation prompt"
+      ],
+      "must_not": [
+        "Trigger AskUserQuestion for trivial doc edits",
+        "Run Hard Gate flow"
+      ]
+    },
+    {
+      "id": "eval_03_edge_overwrite_evidence_ledger",
+      "category": "edge_case",
+      "query": "把 ledger 裡 hypothesis-2026-04-21-loh-phasing 的 verdict 從 POSITIVE 改成 NEGATIVE",
+      "context": {
+        "files_in_scope": ["InterSubMod/research/autoresearch/evidence_ledger.jsonl"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: evidence_ledger overwrite)",
+        "Identifies §4 overwrite Hard Gate template",
+        "Calls AskUserQuestion with 3 options: ✅ append+retract / 🔄 amend new fields / ❌ cancel",
+        "Does NOT directly modify ledger entry"
+      ],
+      "must_not": [
+        "Direct file edit on existing ledger entry",
+        "Append without retracting old entry (creates inconsistency)"
+      ]
+    }
+  ],
+  "notes": [
+    "Per Anthropic best-practice article 3 (Seeing Like Agent / AskUserQuestion).",
+    "Run manually via Claude Code with skill loaded; observe AskUserQuestion modal appears."
+  ]
+}
