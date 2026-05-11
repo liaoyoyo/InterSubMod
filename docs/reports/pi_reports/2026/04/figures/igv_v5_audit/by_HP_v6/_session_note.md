@@ -3,7 +3,7 @@
 最新更新: 2026-05-12
 目標: 說明 by_HP_v6/ PNG 來源 session 與重生流程
 關聯檔案:
-  - docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/v6_germline_absent_audit.xml
+  - research/igv_sessions/v6_germline_absent_audit.xml
   - docs/reports/pi_reports/2026/04/figures/igv_v5_audit/by_HP_v6/igv_batch_v6.txt
 -->
 
@@ -14,7 +14,7 @@
 ⚠ **本目錄內三張 PNG 為 fast-batch 產出**（用 `igv_batch_v6.txt` 4-BAM only），**未啟用完整 audit session**（缺 phase VCF / TP-FP marker / LOH BED）。
 
 正式 V6 audit session 為：
-`InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/v6_germline_absent_audit.xml`
+`InterSubMod/research/igv_sessions/v6_germline_absent_audit.xml`
 
 該 session 從 `v5_purity_compare_with_paired.xml` 複製改 path 而來，含完整 audit infrastructure：
 - 6 BAM (normal + tumor untagged + baseline + V6 + V6 purity sim)
@@ -26,7 +26,7 @@
 ```bash
 # Step 1: 從 audit session 重跑 IGV headless
 IGV=/big7_disk/liaoyoyo2001/IGV_Linux_2.19.3/igv.sh
-SESSION=/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/v6_germline_absent_audit.xml
+SESSION=/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/v6_germline_absent_audit.xml
 
 # 寫 batch script 載 session + goto 三位點 + snapshot
 cat > /tmp/v6_audit_batch.txt <<EOF

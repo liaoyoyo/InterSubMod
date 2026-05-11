@@ -1,19 +1,19 @@
 <!--
 建立時間: 2026-05-01 00:00
 最新更新: 2026-05-12（加 V6 session + 命名規範）
-目標: 說明 igv_v5_audit/sessions/ 目錄內所有 IGV session（XML）用途與管理規範
+目標: 說明 research/igv_sessions/ 目錄內所有 IGV session（XML）用途與管理規範
 處理範圍: IGV session、phase-context VCF、TP/FP VCF、audit marker BED 與 site-level manifest
 關聯檔案:
-  - docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/v5_purity_compare_with_paired.xml
-  - docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/v6_germline_absent_audit.xml
-  - docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/site_layer_manifest.tsv
+  - research/igv_sessions/v5_purity_compare_with_paired.xml
+  - research/igv_sessions/v6_germline_absent_audit.xml
+  - research/igv_sessions/annotations/site_layer_manifest.tsv
 -->
 
 # IGV Sessions 管理規範
 
 ## 目錄定位
 
-**固定路徑**：`InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/`
+**固定路徑**：`InterSubMod/research/igv_sessions/`
 
 所有跨 baseline / V3F / V5 / V6 / paired 的 IGV audit session XML 都收在此目錄。**不要分散到其他位置** — 統一管理 audit infrastructure（phase VCF / TP/FP marker / LOH/GE BED / colored audit sites）。
 

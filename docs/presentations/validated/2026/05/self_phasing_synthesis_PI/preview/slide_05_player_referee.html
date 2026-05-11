@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 05 — phasing 層球員兼裁判 — somatic 100% 共現蓋過 germline 50/50</title>
+  <title>Slide 05 — phasing 層球員兼裁判</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -278,21 +278,21 @@ details.collapsible summary:hover { color: #1D4ED8; }
   </div>
 
   <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">phasing 層球員兼裁判 — somatic 100% 共現蓋過 germline 50/50</h1>
-    <p class="en-subtitle">Phasing layer player-as-referee — somatic overrules germline</p>
+    <h1 class="slide-title ">phasing 層球員兼裁判</h1>
+    <p class="en-subtitle">Phasing layer player-as-referee — somatic 100% co-occurrence overrules germline 50/50</p>
     
     <div class="grid-2col" style="grid-template-columns: 7fr 5fr;">
       <img class="fig-thumb" src="../figures/G1_player_as_referee.png" alt="G1">
       <div>
-        <p style="font-size:12px;font-weight:700;color:#7F1D1D;margin:0 0 4px;">TO 模式致命:</p>
-        <ul style="margin:4px 0 0 16px;font-size:11px;line-height:1.5;color:#374151;background:#FEE2E2;border:1px solid #FCA5A5;padding:8px 12px 8px 24px;border-radius:4px;">
-          <li>TO 沒 paired normal → 用 PoN (somatic 不在 PoN → 當 germline)</li>
-          <li>somatic 進 graph 後 edge weight 暴漲 (100% > 50%)</li>
-          <li>自我增強: 3 somatic 共現 → 強度 ×3</li>
+        <p style="font-size:18px;font-weight:700;color:#7F1D1D;margin:0 0 8px;">TO 模式致命連鎖：</p>
+        <ul style="margin:4px 0 0 20px;font-size:17px;line-height:1.55;color:#374151;background:#FEE2E2;border:1px solid #FCA5A5;padding:12px 14px 12px 28px;border-radius:6px;">
+          <li>TO 沒 paired normal → 用 PoN 區分；somatic 不在 PoN 內被當 germline</li>
+          <li>somatic 進 graph → edge weight 暴漲（100% &gt; germline 50%）</li>
+          <li>自我增強：3 個 somatic 共現 → 強度 ×3</li>
           <li>germline 真實訊號被 overrule</li>
         </ul>
-        <div class="conclusion-arrow green" style="margin-top:8px;font-size:12px;">
-          解法: PON-only flag<br>(commit <code>8b8c1fd</code>)
+        <div class="conclusion-arrow green" style="margin-top:12px;">
+          解法：PON-only flag &nbsp;<code>8b8c1fd</code>
         </div>
       </div>
     </div>

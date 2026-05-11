@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 07 — 兩層 bug 兩層修補對應 — phasing PON-only + tagging V3F+V5 缺一不可</title>
+  <title>Slide 07 — 兩層 bug 兩層修補 — 缺一不可</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -278,35 +278,35 @@ details.collapsible summary:hover { color: #1D4ED8; }
   </div>
 
   <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">兩層 bug 兩層修補對應 — phasing PON-only + tagging V3F+V5 缺一不可</h1>
-    <p class="en-subtitle">Two-layer bugs: PON-only + V3F+V5 both required</p>
+    <h1 class="slide-title ">兩層 bug 兩層修補 — 缺一不可</h1>
+    <p class="en-subtitle">Two layers two fixes — PON-only (phasing) + V3F/V5 (tagging) both required</p>
     
-    <table class="metric-table" style="font-size:13px;">
+    <table class="metric-table">
       <thead><tr><th>Layer</th><th>Bug</th><th>修補 commit</th><th>章節</th></tr></thead>
       <tbody>
         <tr style="background:#DBEAFE;"><td><strong>phasing 層</strong></td><td>球員兼裁判</td><td><code>8b8c1fd</code> PON-only</td><td>§5.2</td></tr>
-        <tr style="background:#DCFCE7;"><td><strong>tagging 層</strong></td><td>priority bug</td><td>V3F: <code>41ff147</code> + <code>380e8d2</code></td><td>§5.3</td></tr>
-        <tr style="background:#DCFCE7;"><td></td><td></td><td>V5: + <code>d0bcd8c</code> + <code>938f0df</code></td><td>§5.4</td></tr>
+        <tr style="background:#DCFCE7;"><td rowspan="2"><strong>tagging 層</strong></td><td rowspan="2">priority bug</td><td>V3F: <code>41ff147</code> + <code>380e8d2</code></td><td>§5.3</td></tr>
+        <tr style="background:#DCFCE7;"><td>V5: <code>d0bcd8c</code> + <code>938f0df</code></td><td>§5.4</td></tr>
       </tbody>
     </table>
     <div class="grid-2col">
       <div class="caveat-box">
-        <span class="label">為何不能只用 PON-only?</span><br>
+        <span class="label">為何不能只用 PON-only？</span><br>
         解 phasing 但 tag 仍壞 → 99.9% reads 仍標 HP:i:11
       </div>
       <div class="caveat-box">
-        <span class="label">為何 V3F 不夠還要 V5?</span><br>
-        V3F Layer 1 only → germline 缺席區 reads 全 untagged; V5 Layer 1.5 補 fallback (slide 16 詳述 caveat)
+        <span class="label">為何 V3F 不夠還要 V5？</span><br>
+        V3F Layer 1 only → germline 缺席區 reads 全 untagged；V5 Layer 1.5 補 fallback（slide 16 詳述 caveat）
       </div>
     </div>
-    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals</div></div>
+    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals — 多正常樣本建構的 germline reference</div></div>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide 07">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (90 sec / 中 ~310 字)</summary>
       <div class="speak-text">兩層 bug 獨立: phasing 層 → 8b8c1fd PON-only; tagging 層 → V3F two-layer (41ff147 + 380e8d2 INDEL guard) → V5 (+ d0bcd8c + 938f0df)。任一單修不夠必須 stacking。PON-only 不夠: tag 仍偏 99.9% 標 11; V3F 不夠: germline 缺席區 untagged; V5 補 Layer 1.5 但 germline-absent 有 caveat (slide 16)。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 5 commit 順序 / V3F 命名 / 跨層交互</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 5 commit 順序 / V3F 命名 / 跨層交互 / 為何不能合併修</div>
     </details>
   </aside>
 

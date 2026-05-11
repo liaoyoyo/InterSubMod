@@ -9,20 +9,20 @@
         <Resource path="/big7_disk/liaoyoyo2001/longphase-to-mod/output/purity_06_simulation/v5_06/tumor_tagged.bam" type="bam"/>
         <Resource path="/big7_disk/liaoyoyo2001/data/HCC1395_5kHz/snv.vcf.gz" type="vcf"/>
         <Resource path="/big8_disk/data/HCC1395/ONT/subsample/t30_n20/ClairS_TO_v0_3_0/snv.vcf.gz" type="vcf"/>
-        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/lp_s_normal_phase_context_15sites.vcf" type="vcf"/>
-        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/lp_to_bl93_phase_context_15sites.vcf" type="vcf"/>
-        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/lp_to_v5_93_phase_context_15sites.vcf" type="vcf"/>
-        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/lp_to_bl06_phase_context_15sites.vcf" type="vcf"/>
-        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/lp_to_v5_06_phase_context_15sites.vcf" type="vcf"/>
+        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/lp_s_normal_phase_context_15sites.vcf" type="vcf"/>
+        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/lp_to_bl93_phase_context_15sites.vcf" type="vcf"/>
+        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/lp_to_v5_93_phase_context_15sites.vcf" type="vcf"/>
+        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/lp_to_bl06_phase_context_15sites.vcf" type="vcf"/>
+        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/lp_to_v5_06_phase_context_15sites.vcf" type="vcf"/>
         <Resource path="/big8_disk/liaoyoyo2001/HCC1395_methylation_analysis/VCF/longphase_somatic_PASS_snv_tp_fixed.vcf.gz" type="vcf"/>
         <Resource path="/big8_disk/liaoyoyo2001/HCC1395_methylation_analysis/VCF/longphase_somatic_PASS_snv_fp_fixed.vcf.gz" type="vcf"/>
         <Resource path="/big7_disk/liaoyoyo2001/longphase-to-mod/output/longphase_to_pass_tp.vcf.gz" type="vcf"/>
         <Resource path="/big7_disk/liaoyoyo2001/longphase-to-mod/output/longphase_to_pass_fp.vcf.gz" type="vcf"/>
-        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/audit_sites_all_colored.bed" type="bed"/>
-        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/audit_sites_TP.bed" type="bed"/>
-        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/audit_sites_FP.bed" type="bed"/>
-        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/audit_sites_V5max.bed" type="bed"/>
-        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/audit_sites_SelfPhasing.bed" type="bed"/>
+        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/audit_sites_all_colored.bed" type="bed"/>
+        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/audit_sites_TP.bed" type="bed"/>
+        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/audit_sites_FP.bed" type="bed"/>
+        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/audit_sites_V5max.bed" type="bed"/>
+        <Resource path="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/audit_sites_SelfPhasing.bed" type="bed"/>
         <Resource path="/big7_disk/liaoyoyo2001/longphase-to-mod/output/baseline/tumor_phased_LOH.bed" type="bed"/>
         <Resource path="/big7_disk/liaoyoyo2001/longphase-to-mod/output/baseline/tumor_phased_GE.bed" type="bed"/>
         <Resource path="/big7_disk/liaoyoyo2001/longphase-to-mod/output/pononly_v2b/tumor_phased_LOH.bed" type="bed"/>
@@ -39,11 +39,11 @@
     </Panel>
 
     <Panel height="160" name="PhaseContextPanel" width="1688">
-        <Track attributeKey="LP_S_normal_phase_context" clazz="org.broad.igv.variant.VariantTrack" color="20,184,166" displayMode="EXPANDED" featureVisibilityWindow="100000" fontSize="10" groupByStrand="false" id="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/lp_s_normal_phase_context_15sites.vcf" name="LP-S normal phase context (15 sites +/-1kb)" siteColorMode="ALLELE_FREQUENCY" visible="true"/>
-        <Track attributeKey="LP_TO_BL93_phase_context" clazz="org.broad.igv.variant.VariantTrack" color="200,40,40" displayMode="EXPANDED" featureVisibilityWindow="100000" fontSize="10" groupByStrand="false" id="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/lp_to_bl93_phase_context_15sites.vcf" name="LP-TO BL@0.93 phase context (15 sites +/-1kb)" siteColorMode="ALLELE_FREQUENCY" visible="true"/>
-        <Track attributeKey="LP_TO_V5_93_phase_context" clazz="org.broad.igv.variant.VariantTrack" color="40,80,200" displayMode="EXPANDED" featureVisibilityWindow="100000" fontSize="10" groupByStrand="false" id="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/lp_to_v5_93_phase_context_15sites.vcf" name="LP-TO V5@0.93 phase context (v2b backbone, 15 sites +/-1kb)" siteColorMode="ALLELE_FREQUENCY" visible="true"/>
-        <Track attributeKey="LP_TO_BL06_phase_context" clazz="org.broad.igv.variant.VariantTrack" color="200,120,40" displayMode="EXPANDED" featureVisibilityWindow="100000" fontSize="10" groupByStrand="false" id="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/lp_to_bl06_phase_context_15sites.vcf" name="LP-TO BL@0.6 phase context (15 sites +/-1kb)" siteColorMode="ALLELE_FREQUENCY" visible="true"/>
-        <Track attributeKey="LP_TO_V5_06_phase_context" clazz="org.broad.igv.variant.VariantTrack" color="40,160,80" displayMode="EXPANDED" featureVisibilityWindow="100000" fontSize="10" groupByStrand="false" id="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/lp_to_v5_06_phase_context_15sites.vcf" name="LP-TO V5@0.6 phase context (15 sites +/-1kb)" siteColorMode="ALLELE_FREQUENCY" visible="true"/>
+        <Track attributeKey="LP_S_normal_phase_context" clazz="org.broad.igv.variant.VariantTrack" color="20,184,166" displayMode="EXPANDED" featureVisibilityWindow="100000" fontSize="10" groupByStrand="false" id="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/lp_s_normal_phase_context_15sites.vcf" name="LP-S normal phase context (15 sites +/-1kb)" siteColorMode="ALLELE_FREQUENCY" visible="true"/>
+        <Track attributeKey="LP_TO_BL93_phase_context" clazz="org.broad.igv.variant.VariantTrack" color="200,40,40" displayMode="EXPANDED" featureVisibilityWindow="100000" fontSize="10" groupByStrand="false" id="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/lp_to_bl93_phase_context_15sites.vcf" name="LP-TO BL@0.93 phase context (15 sites +/-1kb)" siteColorMode="ALLELE_FREQUENCY" visible="true"/>
+        <Track attributeKey="LP_TO_V5_93_phase_context" clazz="org.broad.igv.variant.VariantTrack" color="40,80,200" displayMode="EXPANDED" featureVisibilityWindow="100000" fontSize="10" groupByStrand="false" id="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/lp_to_v5_93_phase_context_15sites.vcf" name="LP-TO V5@0.93 phase context (v2b backbone, 15 sites +/-1kb)" siteColorMode="ALLELE_FREQUENCY" visible="true"/>
+        <Track attributeKey="LP_TO_BL06_phase_context" clazz="org.broad.igv.variant.VariantTrack" color="200,120,40" displayMode="EXPANDED" featureVisibilityWindow="100000" fontSize="10" groupByStrand="false" id="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/lp_to_bl06_phase_context_15sites.vcf" name="LP-TO BL@0.6 phase context (15 sites +/-1kb)" siteColorMode="ALLELE_FREQUENCY" visible="true"/>
+        <Track attributeKey="LP_TO_V5_06_phase_context" clazz="org.broad.igv.variant.VariantTrack" color="40,160,80" displayMode="EXPANDED" featureVisibilityWindow="100000" fontSize="10" groupByStrand="false" id="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/lp_to_v5_06_phase_context_15sites.vcf" name="LP-TO V5@0.6 phase context (15 sites +/-1kb)" siteColorMode="ALLELE_FREQUENCY" visible="true"/>
     </Panel>
 
     <Panel height="130" name="TPFPVariantPanel" width="1688">
@@ -54,11 +54,11 @@
     </Panel>
 
     <Panel height="120" name="AuditSiteMarkerPanel" width="1688">
-        <Track attributeKey="audit_sites_all_colored" clazz="org.broad.igv.track.FeatureTrack" color="80,80,80" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/audit_sites_all_colored.bed" name="Audit markers: all colored sites" visible="true"/>
-        <Track attributeKey="audit_sites_TP" clazz="org.broad.igv.track.FeatureTrack" color="37,99,235" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/audit_sites_TP.bed" name="Audit markers: TP sites" visible="true"/>
-        <Track attributeKey="audit_sites_FP" clazz="org.broad.igv.track.FeatureTrack" color="220,38,38" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/audit_sites_FP.bed" name="Audit markers: FP sites" visible="true"/>
-        <Track attributeKey="audit_sites_V5max" clazz="org.broad.igv.track.FeatureTrack" color="124,58,237" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/audit_sites_V5max.bed" name="Audit markers: V5max sites" visible="true"/>
-        <Track attributeKey="audit_sites_SelfPhasing" clazz="org.broad.igv.track.FeatureTrack" color="234,88,12" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/big7_disk/liaoyoyo2001/InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/sessions/annotations/audit_sites_SelfPhasing.bed" name="Audit markers: self-phasing sites" visible="true"/>
+        <Track attributeKey="audit_sites_all_colored" clazz="org.broad.igv.track.FeatureTrack" color="80,80,80" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/audit_sites_all_colored.bed" name="Audit markers: all colored sites" visible="true"/>
+        <Track attributeKey="audit_sites_TP" clazz="org.broad.igv.track.FeatureTrack" color="37,99,235" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/audit_sites_TP.bed" name="Audit markers: TP sites" visible="true"/>
+        <Track attributeKey="audit_sites_FP" clazz="org.broad.igv.track.FeatureTrack" color="220,38,38" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/audit_sites_FP.bed" name="Audit markers: FP sites" visible="true"/>
+        <Track attributeKey="audit_sites_V5max" clazz="org.broad.igv.track.FeatureTrack" color="124,58,237" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/audit_sites_V5max.bed" name="Audit markers: V5max sites" visible="true"/>
+        <Track attributeKey="audit_sites_SelfPhasing" clazz="org.broad.igv.track.FeatureTrack" color="234,88,12" displayMode="EXPANDED" featureVisibilityWindow="-1" fontSize="10" id="/big7_disk/liaoyoyo2001/InterSubMod/research/igv_sessions/annotations/audit_sites_SelfPhasing.bed" name="Audit markers: self-phasing sites" visible="true"/>
     </Panel>
 
     <Panel height="200" name="BedPanel" width="1688">
