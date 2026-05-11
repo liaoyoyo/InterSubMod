@@ -139,7 +139,8 @@
       "Read(//big8_disk/Google_somatic_data/bams/H1437/**)",
       "Read(//big8_disk/liaoyoyo2001/Somatic_methylation_analysis_output/H1437/VCF/**)",
       "Bash(node --check /tmp/__pg_check.js)",
-      "Bash(node --check /tmp/__pg_check2.js)"
+      "Bash(node --check /tmp/__pg_check2.js)",
+      "Bash(tee /tmp/skill_lint_run.log)"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
