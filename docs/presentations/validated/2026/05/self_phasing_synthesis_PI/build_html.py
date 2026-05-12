@@ -778,84 +778,6 @@ add(id="14_caller_f1", num="14", section="S5 驗證 + ⚡ Cliffhanger", rg2="2",
     speaker="Caller F1 vs SEQC2 truth set 四版完全相同 — V6 不退步鐵證。0.93 purity (HCC1395 5kHz) 四版 TP=28,509 / FP=11,606 / FN=10,938 / Precision=0.7107 / Recall=0.7227 / F1=0.7166 完全相同 (到小數第 4 位 0 差異); 0.6 purity (HCC1395 t30_n20) 四版 TP=24,190 / FP=13,487 / FN=15,257 / F1=0.6273 完全相同。因果鏈: ClairS-TO PASS set 由 caller 決定 (FILTER 欄), V3F/V5/V6 三版改 GT/PS/GT2/GT3 phasing tag 不改 FILTER → PASS set 不變 → TP/FP/FN 集合不變 → F1 不變。V6 重用 V5 phased VCF + V6 只改 tagging 層 (HaplotagProcess.cpp:537-548 Layer 1.5 revert) 完全不改 phasing 層, 故 caller-side 零影響。ΔF1 (0.93→0.6) = -0.0893 是 ClairS-TO 在低 purity 樣本的性質 (recall 下降), 與 self-phasing 修補無關。turning point: 此 slide 結束 caller-level 驗證 (沒退步), 但下一節 slide 15-16 揭露 5/9 paired audit 找到 V5 Layer 1.5 在 germline-absent 區的設計缺陷, 5/10 V6 binary patch 已修對 — 帶出 V6 為何不只是 incremental 而是有具體 trade-off motivation。",
     tier3="PASS set / FILTER 機制 / purity 0.6 N50 微差 / V6 patch 不改 phasing 層 detail")
 
-add(id="15_paired_mode", num="15", section="S6 5/9 新發現", rg2="1 + 1 footnote", ngrep="11",
-    title="paired mode = control: TO 限定 bug",
-    en="paired mode = control group; TO-only priority bug",
-    timing="120 sec / 中 ~360 字",
-    canvas_html="""
-    <div class="green-box" style="padding:6px 12px;font-size:11px;margin-bottom:6px;">
-      <strong>為什麼看 paired mode?</strong> paired mode (tumor-normal) 用獨立 codebase longphase-s，<strong>是 priority bug 的 control group</strong>。
-      若 paired 也有 17.3:1 偏移 → bug 在演算法層；若 paired 無偏移 → bug 是 TO mode (球員兼裁判 + getVote) 限定 → 為 slide 16 V5 Layer 1.5 caveat 鋪陳。
-    </div>
-    <div class="grid-2col">
-      <div>
-        <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:0;">paired chr19 HP:Z: 分布 (354,919 tagged):</p>
-        <table class="metric-table" style="font-size:10px;">
-          <thead><tr><th>HP:Z:</th><th>reads</th><th>%</th></tr></thead>
-          <tbody>
-            <tr><td>HP:Z:2</td><td class="num">183,309</td><td class="num">51.6%</td></tr>
-            <tr><td>HP:Z:1</td><td class="num">143,760</td><td class="num">40.5%</td></tr>
-            <tr><td>HP:Z:2-1</td><td class="num">14,504</td><td class="num">4.1%</td></tr>
-            <tr><td>HP:Z:1-1</td><td class="num">12,401</td><td class="num">3.5%</td></tr>
-            <tr><td>HP:Z:3</td><td class="num">1,145</td><td class="num">0.3%</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div>
-        <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:0;">paired vs TO ratio:</p>
-        <table class="metric-table" style="font-size:10px;">
-          <thead><tr><th></th><th>paired</th><th>TO baseline</th></tr></thead>
-          <tbody>
-            <tr class="row-green"><td>germline</td><td>1:1.275 ✅</td><td>17.3:1 ❌</td></tr>
-            <tr class="row-green"><td>somatic</td><td>1:1.169 ✅</td><td>全偏 HP1</td></tr>
-          </tbody>
-        </table>
-        <p style="font-size:10px;color:#6B7280;margin-top:6px;">57 chr19 1Mb windows: som_ratio mean 0.462 / median 0.494 / stdev 0.332</p>
-      </div>
-    </div>
-    <img class="fig-thumb" src="../figures/master/F6_paired_vs_TO_HP_distribution.png" alt="F6" style="max-height:180px;">
-    <p style="font-size:10px;color:#9CA3AF;text-align:center;font-style:italic;">paired = longphase-s (獨立 codebase); HP tag 用字串 HP:Z:</p>
-    <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">HP:i: vs HP:Z::</span> longphase-to=整數, longphase-s=字串</div>
-      <div class="gloss-item">ⓘ som_ratio: HP1-1/(HP1-1+HP2-1)</div>
-    </div>""",
-    speaker="paired mode 用 longphase-s (獨立 codebase), HP:Z: 字串。chr19 paired 分布 germline 1:1.275 接近隨機, somatic 1:1.169。對比 TO baseline 17.3:1 — paired 整體無 systematic bias。57 windows som_ratio mean 0.462 跨 0-1 全範圍 = 真實 sub-clone signal。chr19:17M 對稱 0.500 = SP1 附近 paired 認雙 sub-clone (vs TO 113:0 失衡)。",
-    tier3="longphase-s codebase / SomaticHaplotagProcess.cpp:533 / paired 軸對齊")
-
-add(id="16_v5_caveat", num="16", section="S6 5/9-5/10 V5 缺陷 + V6 修補 ★", rg2="5 (核心 caveat + 修補 forced)", ngrep="20+",
-    title="V5 Layer 1.5 缺陷 → V6 修對 ★",
-    en="V5 Layer 1.5 caveat → V6 patch (5/10) three-way head-to-head fix",
-    timing="180 sec / 中 ~480 字 ★ 整份最關鍵+最長",
-    title_critical=True,
-    canvas_html="""
-    <p style="font-size:11px;font-weight:700;color:#DC2626;margin:0;">問題 (5/9 發現): paired chr19 germline-absent 5,789 events</p>
-    <img class="fig-thumb" src="../figures/G4_germline_absent_three_versions.png" alt="G4" style="max-height:200px;">
-    <p style="font-size:11px;font-weight:700;color:#16A34A;margin:4px 0 0;">解答 (5/10 V6 patch): HaplotagProcess.cpp:537-548 移除 Layer 1.5 → germline-absent 退回 hp=33</p>
-    <table class="metric-table" style="font-size:10px;">
-      <caption style="text-align:left;font-weight:600;color:#1E3A8A;">全基因組三向 head-to-head (2,464,863 reads)</caption>
-      <thead><tr><th>指標</th><th>V3F</th><th>V5</th><th>V6</th><th>V6 vs V3F</th></tr></thead>
-      <tbody>
-        <tr><td>hp=33 ambiguous reads</td><td class="num">132,060</td><td class="num">13,250</td><td class="num"><strong>138,317</strong></td><td class="num green">+4.7% ✅</td></tr>
-        <tr><td>hp=1-1:hp=2-1 ratio</td><td class="num">1.138</td><td class="num">2.003</td><td class="num">1.838</td><td class="num">部分改善 ⚠</td></tr>
-        <tr><td>marker coverage (NG≥3)</td><td class="num">21,997</td><td class="num">18,382</td><td class="num"><strong>23,980</strong></td><td class="num green">+9.0% ✅</td></tr>
-        <tr><td>marker rate (off)</td><td class="num">0.9175</td><td class="num">0.8937</td><td class="num">0.9093</td><td class="num">介於 V3F/V5 ⚠</td></tr>
-        <tr class="row-green"><td>caller F1 vs SEQC2</td><td class="num">0.7166</td><td class="num">0.7166</td><td class="num">0.7166</td><td>三版相同 ✅</td></tr>
-      </tbody>
-    </table>
-    <div class="green-box" style="font-size:12px;font-weight:600;">
-      ★ V6 = V5 設計目標保留 + V3F 保守 hp=33 策略 + marker engineering 改善 → 4/5 Phase C 通過
-      <span style="display:block;font-size:10px;font-style:italic;margin-top:4px;color:#374151;">V6 reverts V5 Layer 1.5; Phase B (chr19) 3/5 + Phase C (genome) 4/5 PASS</span>
-    </div>
-    <div class="green-box" style="font-size:11px;font-weight:600;background:#DCFCE7;border:1px solid #16A34A;color:#166534;margin-top:4px;">
-      ★ V6 真實價值: hp=33 mixed-sub-tag 訊號還原 + marker coverage +9.0% → ISM 下游 marker engineering 受惠；不在 caller F1 (caller F1 三版不變)
-    </div>
-    <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">V6:</span> V5 + Layer 1.5 移除 (5/10 binary patch on top of 938f0df)</div>
-      <div class="gloss-item">ⓘ V5→V6 transfer 82% from hp=1-1 / 17% from hp=2-1 → hp=33 (守恆)</div>
-    </div>""",
-    speaker="整份報告最關鍵 slide — V5 Layer 1.5 缺陷 + V6 修補鏈。問題 (5/9 paired audit Step D): V5 Layer 1.5 在 germline-absent 區 (5,789 chr19 events) 與 baseline 4.19:1 完全相同，V3F 標 hp=33 保守反而穩健。解答 (5/10 V6 binary patch): HaplotagProcess.cpp:537-548 移除 Layer 1.5 else if 分支，germline-absent 退回 hp=33。三向 head-to-head: hp=33 V6=138,317 (+4.7% vs V3F / +944% vs V5 13,250 priority bug feature 化副作用); marker coverage V6 23,980 (+9% vs V3F / +30.5% vs V5); marker rate V6 0.9093 介於 V3F/V5; caller F1 三版相同 0.7166 (V6 重用 V5 phased VCF)。V5→V6 transfer 82:17 守恆。Phase B chr19 3/5 + Phase C genome 4/5 通過。V6 = V3F 保守 + V5 ploidy/threshold/phased + marker improvement = production candidate。★ V6 真實價值在 hp=33 還原 + marker coverage 改善 (對 ISM 下游 marker engineering)，不在 caller F1。",
-    tier3="V6 patch diff / 82:17 V5→V6 transfer / Phase B chr19 5 驗收項 / Phase C genome 5 驗收項")
-
 # ─── S7 Errata + Follow-up ────────────────────────────────────────────────
 add(id="17_main_verdict", num="17", section="S7 結論", rg2="3 (main verdict)", ngrep="6 errata",
     title="3 條主結論 + 6 條 errata patch",
@@ -941,18 +863,150 @@ add(id="18_impact_future", num="18", section="S7 結論", rg2="1", ngrep="—",
       <text x="632" y="130" font-size="9" fill="#374151" text-anchor="middle" font-style="italic">可升級替代 V5</text>
       <path d="M540,100 L555,100" stroke="#CA8A04" stroke-width="2" marker-end="url(#arr18)"/>
     </svg>
-    <p style="font-size:11px;font-weight:700;color:#DC2626;margin:8px 0 4px;">🔬 未來研究方向 (3 條 follow-up pending，均非阻塞):</p>
-    <table class="metric-table" style="font-size:10.5px;">
-      <thead><tr><th>#</th><th>任務</th><th>意義</th><th>工作量</th></tr></thead>
+    <p style="font-size:11px;font-weight:700;color:#DC2626;margin:8px 0 4px;">🔬 未來研究方向 — 回到 ISM 五大目標主線 (V6 = 下游驗證基礎):</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th>#</th><th>主軸任務</th><th>對應 ISM 五大目標</th><th>具體驗證重點</th></tr></thead>
       <tbody>
-        <tr><td><strong>F1</strong></td><td>COLO829 truth set 解鎖</td><td>Phase D 第 5 樣本完整化 (chmod 0600→660)</td><td>1 day</td></tr>
-        <tr><td><strong>F2</strong></td><td>T1.3 4-cell ablation</td><td>Pass 2 second round 獨立貢獻量化</td><td>3 days</td></tr>
-        <tr><td><strong>F3</strong></td><td>7-sample expansion + ISM downstream rebenchmark</td><td>跨樣本 V6 + 量化 V6 對 ISM marker rate / FP-TP / NGroups 影響</td><td>1-2 weeks</td></tr>
+        <tr class="row-green"><td><strong>F1 ★</strong></td><td><strong>LOH 內外 TP/FP 差異特徵</strong>（用 V6 tag）</td><td>目標 1 (per-CpG 甲基關聯) + 目標 4 (TO normal 補強) + 目標 5 (F1 提升)</td><td>LOH 內 vs LOH 外 × TP/FP × 甲基化率 / read 特徵 / HP_Ratio / NG 分布；驗證 ISM 是否能用 V6 tag 正確識別不同區域差異</td></tr>
+        <tr class="row-green"><td><strong>F2 ★</strong></td><td><strong>subclone 結構 + 二次打擊事件順序</strong></td><td>目標 2 (clone 結構) + 目標 3 (二次打擊事件順序)</td><td>用 V6 hp=33 + NG≥3 marker 識別 sub-clone；結合 LOH/CNV/HP 推論 two-hit order；驗證 V6 marker 訊號是否能區分 first-hit vs second-hit</td></tr>
+        <tr><td><strong>F3</strong></td><td>7-sample expansion + COLO829 解鎖 + Pass 2 ablation</td><td>F1/F2 cross-sample 一致性驗證基礎</td><td>HCC1395_DORADO/HCC1937/HCC1954/H1437/H2009/COLO829 完整 V6 驗證 + 量化 V6 對 ISM marker rate / FP-TP / NGroups 影響</td></tr>
       </tbody>
     </table>
-    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ V6 = production candidate 可升級替代 V5；3 follow-up 可平行推進</div>""",
-    speaker="改正後影響: upstream (longphase-to) — priority bug 修對 17.3:1 → ~1:1 + hp=33 mixed-sub-tag 訊號還原 138,317 + marker coverage +9% vs V3F + Phase D 4 樣本 ratio 全中性。downstream (ISM) — HP_Ratio tag bias 修正 0.788→0.574 (tag bias 修正非變差) + HP1/HP2 read 集合更乾淨 methylation delta 更精確 + marker engineering 訊號完整 (hp=33 + NG≥3) + paired GT concordance +13.3 pp @ 0.93。整體成熟度 16 維度: 13 ✅ + 3 ⏸ (V5 Layer 1.5 已從 ⚠ 升 ✅)。未來研究方向 3 條 follow-up (均非阻塞): F1 COLO829 truth set 解鎖 — chmod 0600 → 660 後跑 Phase D 第 5 樣本完整化 (1 day, BAM ready); F2 T1.3 4-cell ablation — Pass 2 second round 獨立貢獻量化 (baseline × Pass 2 / V5 × Pass 2 ablation matrix, 3 days); F3 7-sample expansion + ISM downstream rebenchmark — 跨 HCC1395_DORADO/HCC1937/HCC1954/H1437/H2009/COLO829 完整 V6 驗證 + 量化 V6 對 ISM marker rate / FP-TP / NGroups 影響 (1-2 weeks)。V6 = production candidate 可升級替代 V5; 3 follow-up 可平行推進。",
-    tier3="HCC1937 BRCA1 mutant detail / COLO829 chmod 步驟 / T1.3 ablation 設計細節 / 7-sample expansion plan")
+    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ V6 = production candidate；F1/F2 是 ISM 核心主線回歸 (從 longphase-to bug 修補 → 重新驗證 ISM 五大目標)</div>""",
+    speaker="改正後影響: upstream V6 priority bug 修對 17.3:1 → ~1:1 + hp=33 還原 138,317 + marker coverage +9% + Phase D 4 樣本 ratio 全中性。downstream ISM 受惠: HP_Ratio bias 修正 + read 集合乾淨 + marker engineering 訊號完整 + paired GT +13.3 pp。未來研究方向 — 回到 ISM 五大目標主線 (V6 是下游驗證基礎): F1 ★ LOH 內外 TP/FP 差異特徵驗證 — 用 V6 tag 在 LOH 內 vs LOH 外 區域對 TP/FP 比較甲基化率、read 特徵、HP_Ratio、NGroups 分布; 對應五大目標 1 (per-CpG 甲基關聯) + 4 (TO normal 補強) + 5 (F1 提升); 驗證 ISM 是否能正確識別不同區域差異特徵。F2 ★ subclone 結構 + 二次打擊事件順序 — 用 V6 hp=33 + NG≥3 marker 識別 sub-clone 結構; 結合 LOH/CNV/HP 推論 two-hit order; 驗證 V6 marker 訊號是否能區分 first-hit vs second-hit 事件順序; 對應五大目標 2 (clone 結構) + 3 (二次打擊事件順序)。F3 7-sample expansion + COLO829 解鎖 + Pass 2 ablation — 跨樣本 V6 一致性驗證基礎 (F1/F2 都需要)。整體研究定位 — InterSubMod 是可解釋 epigenetic evidence 整合框架, 不是另一個 somatic caller; F1/F2 是從 longphase-to bug 修補完成後, 回歸 ISM 核心主線的研究重啟; V6 是 production candidate 的同時也是下游 ISM 驗證的乾淨基礎。",
+    tier3="ISM 五大目標完整列表 (目標 1-5) / LOH 內外 TP/FP 差異分層方案 / two-hit order 推論方法 / HCC1937 BRCA1 mutant / COLO829 chmod / T1.3 4-cell ablation 設計")
+
+# ─── Q&A Backup (對話釐清點補佐證) ────────────────────────────────────────
+add(id="b1_pass2", num="B1", section="Q&A Backup", rg2="1", ngrep="—",
+    title="Pass 2: 重跑 2-point only (高 purity >0.9)",
+    en="Pass 2 = re-run 2-point only; high purity gate",
+    timing="90 sec / 中 ~300 字",
+    canvas_html="""
+    <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">❓ Q: Pass 2 為什麼只跑 2-point? 為什麼高 purity 才觸發?</p>
+    <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
+      <defs><marker id="arrB1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9CA3AF"/></marker></defs>
+      <rect x="20" y="20" width="220" height="160" rx="6" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+      <text x="130" y="40" font-size="11" fill="#1E3A8A" text-anchor="middle" font-weight="700">Pass 1 (always runs)</text>
+      <rect x="35" y="55" width="190" height="30" rx="4" fill="white" stroke="#1E3A8A"/>
+      <text x="130" y="74" font-size="10" fill="#374151" text-anchor="middle">3-point patternMining</text>
+      <text x="130" y="88" font-size="8" fill="#6B7280" text-anchor="middle">somaticCalling (V_H/V_L/V_N 分類)</text>
+      <rect x="35" y="105" width="190" height="30" rx="4" fill="white" stroke="#1E3A8A"/>
+      <text x="130" y="124" font-size="10" fill="#374151" text-anchor="middle">2-point edgeConnectResult</text>
+      <text x="130" y="138" font-size="8" fill="#6B7280" text-anchor="middle">phasing graph 建構</text>
+      <text x="130" y="160" font-size="9" fill="#1E3A8A" text-anchor="middle" font-weight="600">→ 產出 origin 分類 + phased VCF</text>
+      <text x="130" y="173" font-size="8" fill="#6B7280" text-anchor="middle" font-style="italic">三路徑算法不依賴 purity</text>
+      <path d="M245,100 L290,100" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arrB1)"/>
+      <rect x="295" y="40" width="125" height="60" rx="6" fill="#FEF3C7" stroke="#CA8A04" stroke-width="2"/>
+      <text x="357" y="60" font-size="11" fill="#7C2D12" text-anchor="middle" font-weight="700">purity 判定</text>
+      <text x="357" y="78" font-size="10" fill="#7C2D12" text-anchor="middle" font-weight="700">purity &gt; 0.9 ?</text>
+      <text x="357" y="92" font-size="8" fill="#6B7280" text-anchor="middle">(原 0.95 → 938f0df 改 0.9)</text>
+      <path d="M357,100 L357,130" stroke="#DC2626" stroke-width="2" marker-end="url(#arrB1)"/>
+      <text x="380" y="118" font-size="9" fill="#DC2626" font-weight="700">No (≤0.9)</text>
+      <path d="M420,70 L455,70" stroke="#16A34A" stroke-width="2" marker-end="url(#arrB1)"/>
+      <text x="437" y="60" font-size="9" fill="#16A34A" font-weight="700">Yes (&gt;0.9)</text>
+      <rect x="460" y="40" width="240" height="60" rx="6" fill="#DCFCE7" stroke="#16A34A" stroke-width="2"/>
+      <text x="580" y="60" font-size="11" fill="#166534" text-anchor="middle" font-weight="700">Pass 2 second round (only 2-point)</text>
+      <text x="580" y="76" font-size="9" fill="#374151" text-anchor="middle">重跑 edgeConnectResult 用 Pass 1 origin</text>
+      <text x="580" y="90" font-size="9" fill="#16A34A" text-anchor="middle" font-weight="600">N50 +3.51% / blocks -9.79% / phased -2.9 pp</text>
+      <rect x="295" y="135" width="240" height="45" rx="6" fill="#FEE2E2" stroke="#DC2626" stroke-width="2"/>
+      <text x="415" y="155" font-size="10" fill="#7F1D1D" text-anchor="middle" font-weight="700">Pass 2 跳過 (低 purity, Pass 1 已穩定)</text>
+      <text x="415" y="170" font-size="8.5" fill="#6B7280" text-anchor="middle">HCC1395 0.6 purity 樣本不觸發</text>
+    </svg>
+    <p style="font-size:10.5px;font-weight:600;color:#16A34A;margin:6px 0 0;">★ 關鍵釐清: Pass 2 只重跑 2-point edgeConnectResult，不重跑 3-point somaticCalling — 後者 patternMining 與 purity 無關 (V_H/V_L 分類基於 read linkage 拓樸)</p>
+    <p style="font-size:9.5px;color:#6B7280;font-style:italic;margin:3px 0 0;">常見誤解: 「低 purity 用 3-point 倒過來; 高 purity 才多做事」實情相反 — 高 purity 時 Pass 1 origin 穩定，Pass 2 用其產出精修 graph</p>""",
+    speaker="Q: Pass 2 為什麼只跑 2-point? somaticCalling 3-point patternMining 用 read linkage 拓樸 (V_H 12 patterns / V_L 3 patterns) 與 purity 無關; edgeConnectResult 2-point 永遠跑。低 purity ≤0.9 Pass 2 跳過 (Pass 1 已穩定); 高 purity >0.9 才觸發 Pass 2 second round 只重跑 2-point edgeConnectResult 用 Pass 1 已分類 origin 精修 phasing graph。threshold 0.95→0.9 由 V5 938f0df commit cherry-pick from zhenyu。Pass 2 incremental: phased var -2.90 pp / blocks -9.79% / N50 +3.51% (HCC1395 0.93 樣本)。常見誤解: 低 purity 用 3-point 倒過來; 實情相反 — 高 purity 才多做事 (因為 Pass 1 origin 穩定可重用)。HCC1395 0.6 purity 樣本兩版都不觸發 Pass 2 → V5 改 GT 在低 purity 自我治癒。",
+    tier3="patternMining first/second/third path / Pass 2 不重跑 somaticCalling / threshold 0.95→0.9 cherry-pick")
+
+add(id="b2_f1_dual_metric", num="B2", section="Q&A Backup", rg2="3", ngrep="—",
+    title="F1 雙口徑釐清 + Verdict tag 實證",
+    en="F1 dual metric + Verdict tag empirical N/A",
+    timing="120 sec / 中 ~360 字",
+    canvas_html="""
+    <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">❓ Q: longphase-to 論文 §4.3 寫 F1 改善 — 為何我們 slide 14 寫 F1 不變?</p>
+    <p style="font-size:10.5px;color:#166534;font-weight:600;margin:2px 0 6px;">→ 雙口徑差異, 不衝突: 不同 metric 定義 + 我們 pipeline 沒啟用 Verdict tagging</p>
+    <table class="metric-table" style="font-size:10.5px;">
+      <thead><tr><th>F1 評估口徑</th><th>somatic call set</th><th>本 pipeline?</th><th>結果</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td><strong>caller-level F1</strong><br>(業界 bcftools isec)</td><td>phased_VCF.FILTER=PASS<br>vs SEQC2 truth</td><td>✅ 採用</td><td>四版 F1=0.7166 完全相同</td></tr>
+        <tr style="background:#F3F4F6;"><td>論文 §4.3 V_H/V_L<br>refined F1</td><td>Verdict_Somatic INFO tag<br>(Step 4 Graph-Based Calling)</td><td>⚠ N/A</td><td>三版 Verdict tag 全 0 records<br>(ClairS-TO 預設未啟用)</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:10.5px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">🔬 longphase-to 真實修改範圍 (V3F/V5/V6 都不動 FILTER):</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th>階段</th><th>改什麼欄位</th><th>影響 caller F1?</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td>phase</td><td>GT / PS / GT2 / GT3 / PON tag (FORMAT/INFO)</td><td>❌ 不影響</td></tr>
+        <tr class="row-green"><td>haplotag</td><td>BAM HP:i tag (僅 BAM 不碰 VCF)</td><td>❌ 不影響</td></tr>
+        <tr class="row-yellow"><td>V5 Pass 2 reclassify</td><td>104,457 germline het GT 0/1→0/0 (FORMAT)</td><td>❌ 不改 FILTER, F1 不變</td></tr>
+        <tr style="background:#FEE2E2;"><td><strong>FILTER 欄位</strong></td><td><strong>由 ClairS-TO 一次性決定，longphase 純消費</strong></td><td>FILTER 不動 → F1 數學保證 invariant</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:10px;font-weight:600;color:#7C2D12;margin:6px 0 0;background:#FEF3C7;padding:4px 8px;border-radius:4px;">★ 實證鐵證: 三版 phased VCF PASS=47,798 / nonPASS=3,139,477 / Verdict tag 全 0 — V3F/V5/V6 對兩種 F1 口徑都 invariant</p>""",
+    speaker="Q: longphase-to 論文 §4.3 寫 F1 改善, 為何我們寫 F1 不變? 答: 雙口徑差異不衝突。論文口徑用 Step 4 Graph-Based Somatic Calling V_H/V_L set 作 caller post-filter (Verdict_Somatic INFO tag); 我們業界口徑用 bcftools isec FILTER=PASS vs SEQC2 truth。實證鐵證 — 三版 phased VCF PASS=47,798 / nonPASS=3,139,477 完全相同; Verdict_Somatic / Verdict_Germline / Verdict_SubclonalSomatic INFO tag 全 0 records (INFO header 有定義但 ClairS-TO 預設未啟用 Verdict tagging)。所以論文 refined F1 在本 pipeline 不可量化 (需重跑 ClairS-TO 啟用 Verdict tagging flag)。longphase-to 真實修改範圍: phase 階段改 GT/PS/GT2/GT3/PON tag (FORMAT/INFO 欄位); haplotag 階段改 BAM HP:i tag (不碰 VCF); V5 Pass 2 reclassify 104,457 germline het GT 0/1→0/0 (改 FORMAT 不改 FILTER); 全部都不改 FILTER 欄位 (caller 一次性決定)。FILTER 不動 → PASS set 不變 → TP/FP/FN 不變 → F1 數學保證 invariant。",
+    tier3="bcftools isec 機制 / V_H/V_L 12+3 patterns / longphase phase vs haplotag 階段分工 / FILTER 第 7 欄定義")
+
+add(id="b3_hp33_paired", num="B3", section="Q&A Backup", rg2="2", ngrep="—",
+    title="HP33 四版 trade-off + paired mode control",
+    en="HP33 4-version trade-off + paired mode control group",
+    timing="120 sec / 中 ~360 字",
+    canvas_html="""
+    <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">❓ Q1: hp=33 (mixed-sub-tag) 為何重要 — baseline 沒有 / V3F 首現 / V5 壓掉 / V6 還原?</p>
+    <table class="metric-table" style="font-size:10.5px;">
+      <thead><tr><th>版本</th><th>hp=33 reads (全基因組)</th><th>機制</th><th>對下游影響</th></tr></thead>
+      <tbody>
+        <tr class="row-red"><td><strong>baseline</strong></td><td class="num">少 (≈0 結構化)</td><td>vector ① somatic break early → ② mixed pair 罕走到; hp=33 為「順序副作用」</td><td>HP_Ratio 失衡 / 無 mixed 訊號</td></tr>
+        <tr class="row-green"><td><strong>V3F</strong></td><td class="num">132,060</td><td>Layer 2 結構化: <code>if(somTot>0 && germ==0) hp=33</code></td><td>首次正確標 hp=33 ✅</td></tr>
+        <tr class="row-yellow"><td><strong>V5 (+L1.5)</strong></td><td class="num">13,250 (-89.9%)</td><td>Layer 1.5 用 somatic vote 改派 hp=11/21; 過度修正</td><td>下游 mixed-sub-tag 訊號遺失 ⚠</td></tr>
+        <tr class="row-green" style="border-top:2px solid #DC2626;"><td><strong>V6 ★</strong></td><td class="num"><strong>138,317 (+4.7%)</strong></td><td>revert L1.5 → 還原 V3F 結構化保證</td><td>ISM 下游 marker engineering 受惠 ✅</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:10px;color:#16A34A;margin:6px 0 0;font-weight:600;">→ V5→V6 transfer 守恆: 82% from hp=1-1 + 17% from hp=2-1 → hp=33 (mirror priority bug feature 化方向)</p>
+
+    <p style="font-size:11px;font-weight:700;color:#374151;margin:10px 0 4px;">❓ Q2: 為何看 paired mode? — 它是 priority bug 的 control group</p>
+    <table class="metric-table" style="font-size:10.5px;">
+      <thead><tr><th>Mode</th><th>HP1:HP2 ratio (chr19)</th><th>som_ratio (mean)</th><th>codebase</th><th>有無 priority bug?</th></tr></thead>
+      <tbody>
+        <tr class="row-red"><td>TO baseline</td><td class="num">17.3:1 (94.6% HP1)</td><td class="num">0.946 偏 HP1</td><td>longphase-to (球員兼裁判 + getVote)</td><td>✗ 有 bug</td></tr>
+        <tr class="row-green"><td><strong>paired</strong></td><td class="num"><strong>1:1.275 (接近隨機)</strong></td><td class="num"><strong>0.462 (跨 0-1 全範圍)</strong></td><td>longphase-s (獨立 codebase)</td><td>✓ 無 bug</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:10px;color:#1E3A8A;margin:6px 0 0;font-weight:600;">→ paired 整體無 systematic bias 證 priority bug 是 TO mode 限定 (球員兼裁判 + getVote 順序錯); 不是 longphase 演算法整體缺陷</p>""",
+    speaker="Q1 hp=33 trade-off: baseline 因 vector 順序 ① somatic pair break early, hp=33 走 ② mixed pair 路徑機率被嚴重壓縮 (順序副作用); V3F 加 Layer 2 結構化 if (somaticTotal>0 && germlineResult==0) hpResult=33, 首次保證 germline-absent 區正確標 hp=33 (132,060 全基因組); V5 Layer 1.5 用 somatic vote 改派 hp=11/21 把 hp=33 壓掉 (-89.9% to 13,250) 為過度修正; V6 revert Layer 1.5 還原 V3F 結構化保證 (138,317 +4.7% vs V3F)。V5→V6 transfer 守恆 82:17 from hp=1-1/hp=2-1 → hp=33 完美 mirror priority bug feature 化方向。Q2 paired mode = control group: paired 用 longphase-s 獨立 codebase (vs TO 用 longphase-to), HP1:HP2 = 1:1.275 接近隨機 / som_ratio mean 0.462 跨 0-1 全範圍 → 整體無 systematic bias, 證 priority bug 是 TO mode 限定 (球員兼裁判 + getVote 順序錯 + Layer 1.5 4.19:1 偏 HP1); 不是 longphase 演算法整體缺陷; 為 V5 Layer 1.5 caveat 提供 control 對比基礎。",
+    tier3="V5→V6 transfer 82:17 守恆細節 / paired chr19 354,919 tagged reads / longphase-s SomaticHaplotagProcess.cpp:533 / V5 Layer 1.5 germline-absent 4.19:1 量化 (5,789 events)")
+
+add(id="b4_phase_d_outliers", num="B4", section="Q&A Backup", rg2="1", ngrep="—",
+    title="Phase D 5 樣本 V6 + HCC1937 邊緣 + COLO829 阻塞",
+    en="Phase D 5-sample V6 + HCC1937 edge + COLO829 pending",
+    timing="100 sec / 中 ~340 字",
+    canvas_html="""
+    <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">❓ Q: V6 跨樣本一致性? 為何 HCC1937 marker rate 0.817 邊緣 fail?</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th>Sample</th><th>ratio (target≈1)</th><th>hp=33</th><th>marker rate (≥0.85)</th><th>NG_on=2 (≥0.85)</th><th>FP/TP</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td>HCC1395 (ref)</td><td class="num">1.838</td><td class="num">138,317</td><td class="num">0.909 ✅</td><td class="num">0.829</td><td class="num">—</td></tr>
+        <tr class="row-green"><td>H1437</td><td class="num">1.243 ✅</td><td class="num">39,050</td><td class="num"><strong>0.992 ✅</strong></td><td class="num">0.991 ✅</td><td class="num">0.011</td></tr>
+        <tr class="row-green"><td>H2009</td><td class="num">0.901 ✅</td><td class="num">684,035</td><td class="num"><strong>0.993 ✅</strong></td><td class="num">0.992 ✅</td><td class="num">0.010</td></tr>
+        <tr class="row-green"><td>HCC1954</td><td class="num">0.958 ✅</td><td class="num">4,859</td><td class="num">0.954 ✅</td><td class="num">0.967 ✅</td><td class="num">0.035</td></tr>
+        <tr class="row-yellow"><td><strong>HCC1937 ⚠</strong></td><td class="num">0.611 ✅</td><td class="num">5,017</td><td class="num"><strong>0.817 ⚠</strong></td><td class="num">0.904 ✅</td><td class="num"><strong>0.194</strong></td></tr>
+        <tr style="background:#F3F4F6;"><td>COLO829 ⏸</td><td colspan="5">truth set 0600 權限阻塞 (HKU/NYGC); BAM ready 待 chmod 660 或替代 PASS VCF</td></tr>
+      </tbody>
+    </table>
+    <div class="grid-2col" style="margin:8px 0;">
+      <div class="green-box" style="font-size:10.5px;padding:6px;">
+        <strong>✅ V6 priority bug 修補一致成功 (4/4)</strong><br>
+        ratio 跨 0.611-1.243 全部接近中性 (平均 0.928)<br>
+        vs V5 baseline 1.86 / 原 baseline 17.3:1
+      </div>
+      <div class="caveat-box" style="font-size:10.5px;padding:6px;background:#FEF3C7;border:1px solid #CA8A04;border-radius:4px;">
+        <strong>⚠ HCC1937 marker rate 0.817 邊緣 — 樣本特性非 V6 失敗</strong><br>
+        BRCA1 mutant 高 ploidy + CNV-driven germline het<br>
+        FP/TP=0.194 (vs 其他樣本 0.01-0.035 高 20×)<br>
+        → 須加 AF&lt;0.4 filter (HPFineNGroups canonical)
+      </div>
+    </div>
+    <p style="font-size:10px;color:#6B7280;font-style:italic;text-align:center;">Phase D pipeline: V5 binary phasing → V6 binary haplotag (hybrid); 每樣本 wall ~10 hr</p>""",
+    speaker="Q V6 跨樣本一致性: Phase D 5 樣本 evaluation (HCC1395 ref + H1437/H2009/HCC1954/HCC1937, COLO829 阻塞)。hp=1-1:hp=2-1 ratio 4 樣本全部接近中性 0.611-1.243 (平均 0.928, vs V5 baseline 1.86, vs 原 baseline 17.3:1) → V6 priority bug 修補一致成功。marker rate 3/4 通過 ≥0.85: H1437 0.992, H2009 0.993, HCC1954 0.954, HCC1937 0.817 邊緣 fail。HCC1937 為 BRCA1 mutant 高 ploidy 細胞株, FP/TP=0.194 (vs 其他樣本 0.01-0.035 高 20×), CNV-driven germline het AF 漂移混入 FP — 須加 AF<0.4 filter (與 HPFineNGroups canonical 一致), 非否定 V6 patch 是樣本特性。COLO829 待 chmod 660 HKU/NYGC truth set 或提供替代 PASS VCF, BAM ready; F1 follow-up 一條。Phase D pipeline V5 phasing → V6 haplotag (hybrid), 每樣本 wall ~10 hr; 4 樣本約 40 hr 平行跑完。",
+    tier3="HCC1937 BRCA1 mutant 高 ploidy CNV 細節 / COLO829 truth set 0600 chmod 步驟 / HPFineNGroups AF<0.4 filter 文獻 / Phase D 4-stage pipeline")
 
 # ═══════════════════════════════════════════════════════════════════════════
 # Render templates
