@@ -28,6 +28,7 @@
 - `v5_color_HP.xml` — V5 HP tag 著色版
 - `v5_purity_compare_with_paired.xml` — V5 + purity sim + paired ground truth
 - `v5_v6_compare_with_paired.xml` — **新增** V5 + V6 並列 + purity sim + paired（V6 germline-absent revert vs V5 audit）
+- `v6_all_5versions.xml` — **新增（2026-05-12）** 以 `v5_all_4versions.xml` 為基底**加入** V6 panel；baseline/V2b/V3F/V5/V6 五版並列（乾淨版，無 purity sim BAM 雜訊）
 - `_archive/v6_germline_absent_audit_BROKEN_replaced_v5.xml` — **已棄用**：前一個 agent 用 `sed s|V5|V6|g` 整檔取代 V5 路徑為 V6，導致 V5 track 消失、V6 BAM 重複 load；改由 `v5_v6_compare_with_paired.xml` 取代
 
 ## Session 清單（依時序）
@@ -42,6 +43,7 @@
 | `v5_purity_compare.xml` | V5 + purity simulation | 4 | — | — |
 | `v5_purity_compare_with_paired.xml` | 上加 paired ground truth + 全 audit context | 6 | 7 | 6 |
 | **`v5_v6_compare_with_paired.xml`** | **V5 + V6 並列 + purity sim + paired，audit germline-absent revert 對 V5 的差異** | 7 | 7 | 6 |
+| **`v6_all_5versions.xml`** | **5 版並列乾淨版（baseline/V2b/V3F/V5/V6 + tumor untagged + normal），給 PPT slide 04a/04b/16 使用** | 7 | 3 | 2 |
 | `_archive/v6_germline_absent_audit_BROKEN_replaced_v5.xml` | **棄用**（sed-replace bug，V5 path 被整檔覆寫成 V6） | 6 | 7 | 6 |
 
 ## 全 session 共同 audit layer（已建好的 annotation 資源）
