@@ -674,18 +674,17 @@ add(id="12_no_regression", num="12", section="S5 驗證", rg2="1", ngrep="20+",
     en="baseline → V6: SP 3/3 aligned + 20 metrics no regression + 6 improvements",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
-    <p style="font-size:11.5px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">🎯 baseline → V6 五大類 + 個案層 = 23 指標全綠 (0 regression):</p>
+    <p style="font-size:11.5px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">🎯 baseline → V6 同層驗證 (longphase-to + 結果 tag + paired 對比 + 個案層):</p>
     <table class="metric-table" style="font-size:10.5px;">
-      <thead><tr><th>類別</th><th>內容（baseline → V6, V6 重用 V5 phased VCF 故 metric 繼承 V5）</th></tr></thead>
+      <thead><tr><th>類別</th><th>驗證層級</th><th>指標（baseline → V6）</th></tr></thead>
       <tbody>
-        <tr class="row-green"><td><strong>① ISM aggregate (3)</strong></td><td>TP_rate +0.005 / HP_Ratio 0.788→0.574 (tag bias 修正) / Potential_LOH +3.5 pp</td></tr>
-        <tr class="row-green"><td><strong>② HP_Ratio AUC (2)</strong></td><td>All -0.005 (隨機區間) / Inner +0.002</td></tr>
-        <tr class="row-green"><td><strong>③ Methylation 6 feat</strong></td><td>全 ±0.01 內持平</td></tr>
-        <tr class="row-yellow"><td><strong>④ Paired GT concord. ⭐ (4)</strong></td><td>clean PS +8.3 pp / 15-Aggr +6.65 pp / 15-Clean PS +13.3 pp</td></tr>
-        <tr class="row-yellow"><td><strong>⑤ HP / LOH 結構 ⭐ (5)</strong></td><td>N50 +99.7% / Phased +23.6 pp / 1.36× 快 / LOH Jaccard=1.0</td></tr>
-        <tr class="row-green" style="border-top:2px solid #DC2626;"><td><strong>⑥ 個案層驗證 (3) 🆕</strong></td><td>SP1 113:0 / SP2 109:1 / SP3 108:0 → V6 全翻 HP2 對齊 paired 3/3 ✅</td></tr>
+        <tr class="row-green"><td><strong>① 同層 phasing 結構 ⭐</strong></td><td>longphase-to 同層</td><td>phase block N50 +99.7% / Phased% +23.6 pp / speed 1.36× / LOH Jaccard=1.0</td></tr>
+        <tr class="row-green"><td><strong>② 結果 tag 分布修正</strong></td><td>BAM HP tag (同層)</td><td>HP1:HP2 17.3:1 → ~1:1 / hp=33 還原 138,317 (+4.7%) / chr19 hp=1-1:2-1 ratio 修正</td></tr>
+        <tr class="row-yellow"><td><strong>③ paired GT 比對 ⭐</strong></td><td>vs paired ground truth</td><td>clean PS +8.3 pp / 15-Aggr +6.65 pp / 15-Clean PS +13.3 pp</td></tr>
+        <tr class="row-green" style="border-top:2px solid #DC2626;"><td><strong>④ 個案 SP1/2/3 (IGV)</strong></td><td>已知偏移位點修正</td><td>baseline 113:0 / 109:1 / 108:0 → V6 全翻 HP2 對齊 paired 3/3 ✅</td></tr>
       </tbody>
     </table>
+    <p style="font-size:10px;color:#7C2D12;margin:4px 0 0;font-weight:600;background:#FEF3C7;padding:3px 8px;border-radius:4px;">⚠ 本 slide 驗證僅用 longphase-to 同層 + 結果 tag + paired 對比 + 個案層 — 不用 ISM 下游 metric (下游本就會因修正而改變，循環論證)</p>
     <p style="font-size:11px;font-weight:700;color:#374151;margin:6px 0 2px;">📊 6 顯著改善 ⭐ 視覺化:</p>
     <svg viewBox="0 0 720 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
       <line x1="200" y1="100" x2="710" y2="100" stroke="#9CA3AF" stroke-width="0.8"/>
@@ -713,11 +712,10 @@ add(id="12_no_regression", num="12", section="S5 驗證", rg2="1", ngrep="20+",
       <text x="239" y="93" font-size="10" fill="#1E3A8A" font-weight="700">+6.65 pp</text>
       <text x="500" y="115" font-size="9" fill="#16A34A" text-anchor="middle" font-weight="600">綠=HP/LOH 結構 / 藍=Paired GT concordance (read-level tag 品質)</text>
     </svg>
-    <div class="conclusion-arrow green" style="font-size:12.5px;">→ 23/0 指標 no regression + 個案層 3/3 對齊 paired → V6 全面 production-ready</div>
+    <div class="conclusion-arrow green" style="font-size:12.5px;">→ 4 類同層驗證全綠 + 個案層 3/3 對齊 paired → V6 修補在 longphase-to 端鐵證確立</div>
     <div class="footer-glossary" style="font-size:9.5px;">
-      <div class="gloss-item">ⓘ HP_Ratio 0.788→0.574 是 tag bias 修正非變差 (pre-registered metrics)</div>
-      <div class="gloss-item">ⓘ scope: HCC1395 5kHz @ 0.93 purity; V6 metric = V5 (重用 phased VCF)；caller F1 不變 (slide 14)</div>
-      <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance — 15-Clean PS Paired GT +13.3 pp / clean PS +8.3 pp (④ Paired GT)，不在 caller F1 (slide 14 caller F1 invariant)</div>
+      <div class="gloss-item">ⓘ scope: HCC1395 5kHz @ 0.93 purity; V6 同層 metric = V5 (重用 phased VCF)；caller F1 不變 (slide 14)</div>
+      <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance — paired GT +13.3 pp 為 PI 鐵證；ISM 下游影響量化留 slide 18 future direction</div>
     </div>""",
     speaker="S5 驗證 — baseline → V6 五大類 + 個案層 = 23 指標全綠 0 regression。① ISM aggregate 3 項 (HP_Ratio 0.788→0.574 是 tag bias 修正非變差); ② HP_Ratio AUC 2 項隨機區間內; ③ methylation 6 全 ±0.01 持平; ④ Paired GT concord 4 項 ⭐ clean PS +8.3 pp / 15-Aggr +6.65 pp / 15-Clean PS +13.3 pp; ⑤ HP/LOH 結構 5 項 ⭐ phase block N50 +99.7% / Phased +23.6 pp / 1.36× 快 / LOH Jaccard=1.0; ⑥ 個案層驗證 3 項 (slide 04 SP1/2/3 IGV 已詳) baseline 113:0/109:1/108:0 全 V6 翻 HP2 對齊 paired 3/3。重要: V6 重用 V5 phased VCF 故所有 phasing/structure metric 直接繼承 V5 結果; V6 唯一改動是 tagging 層 Layer 1.5 revert (germline-absent 區 hp=33 還原 — slide 10/16) 不影響本 slide 23 指標 (個案 + ISM + structural metric 都在 germline-existent 區或 caller 層); caller F1 三版完全相同 (slide 14) 將進一步證 V6 不退步。Layer 1.5 zero-sum F5 細節 (germline=0 +560K / germline>0 -560K 總和 0) 留 slide 16 V5 caveat 主軸。HP_Ratio 0.788→0.574 是 tag bias 修正 (baseline 因 priority bug 偏 HP1 拉高 HP_Ratio, V6 修對自然回降) 非 metric 變差 — 此為 pre-registered 量化目標。",
     tier3="methylation 6 feat 列表 / Layer 1.5 zero-sum 細節 (留 slide 16) / V2b/V3F 中間版本 / HP_Ratio 詳解 / LOH Jaccard=1.0 細節")
@@ -727,21 +725,15 @@ add(id="14_caller_f1", num="14", section="S5 驗證 + ⚡ Cliffhanger", rg2="2",
     en="Caller F1 identical across 4 versions; V6 no regression",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
-    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">📊 HCC1395 5kHz @ 0.93 purity (caller F1 vs SEQC2 truth set):</p>
-    <table class="metric-table" style="font-size:10px;">
-      <thead><tr><th>版本</th><th>TP</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">📊 兩 purity 對照 — 四版 F1 都相同, 但 0.93 與 0.6 不同 (caller 性質):</p>
+    <table class="metric-table" style="font-size:10.5px;">
+      <thead><tr><th>樣本</th><th>四版本</th><th>TP</th><th>FP</th><th>FN</th><th>F1</th><th>Δ vs 純</th></tr></thead>
       <tbody>
-        <tr class="row-green"><td>A1 baseline</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
-        <tr class="row-green"><td>A3 V3F</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
-        <tr class="row-green"><td>A5 V5</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
-        <tr class="row-green" style="border-top:2px solid #DC2626;"><td><strong>A6 V6 ★</strong></td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
+        <tr class="row-green"><td><strong>HCC1395 5kHz @ 0.93 (純)</strong></td><td class="num">baseline/V3F/V5/V6</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num"><strong>0.7166</strong></td><td>—</td></tr>
+        <tr class="row-yellow"><td><strong>HCC1395 t30_n20 @ 0.6 (低)</strong></td><td class="num">baseline/V3F/V5/V6</td><td class="num">24,190</td><td class="num">13,487</td><td class="num">15,257</td><td class="num"><strong>0.6273</strong></td><td class="num">−0.0893</td></tr>
       </tbody>
     </table>
-    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:6px 0 4px;">📊 HCC1395 t30_n20 @ 0.6 purity (低純度對照):</p>
-    <table class="metric-table" style="font-size:10px;">
-      <thead><tr><th>版本</th><th>TP</th><th>FP</th><th>FN</th><th>F1</th></tr></thead>
-      <tbody><tr class="row-green"><td><strong>B1/B3/B5/B6 四版完全相同</strong></td><td class="num">24,190</td><td class="num">13,487</td><td class="num">15,257</td><td class="num"><strong>0.6273</strong></td></tr></tbody>
-    </table>
+    <p style="font-size:10.5px;color:#16A34A;margin:3px 0 0;font-weight:600;">→ 兩 purity 都驗證: 四版 F1 完全相同 (0 差異); 0.93→0.6 ΔF1=−0.0893 為 ClairS-TO 低 purity 性質，與 self-phasing 修補無關</p>
     <p style="font-size:11px;font-weight:700;color:#374151;margin:8px 0 4px;">🔬 為何 F1 invariant — 因果機制圖示:</p>
     <svg viewBox="0 0 720 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
       <defs><marker id="arr14" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9CA3AF"/></marker></defs>
@@ -769,11 +761,15 @@ add(id="14_caller_f1", num="14", section="S5 驗證 + ⚡ Cliffhanger", rg2="2",
       <text x="692" y="85" font-size="8.5" fill="#166534" text-anchor="middle" font-weight="600">四版相同</text>
       <text x="370" y="128" font-size="9.5" fill="#16A34A" text-anchor="middle" font-weight="600">→ FILTER 不動 → PASS set 不變 → TP/FP/FN 不變 → F1 數學保證 invariant</text>
     </svg>
-    <div class="cliffhanger-box" style="font-size:11px;padding:6px 10px;margin-top:4px;">
-      → ΔF1 (0.93→0.6)=-0.0893 為 ClairS-TO 低 purity 性質；<strong>5/9 paired audit 揭 V5 Layer 1.5 缺陷 → 5/10 V6 修對</strong> 〔next: slide 15-16〕
-    </div>
-    <div class="footer-glossary" style="font-size:9.5px;">
-      <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance (+13.3 pp paired GT @ 0.93)，不在 caller F1</div>
+    <table class="metric-table" style="font-size:10px;margin-top:6px;">
+      <thead><tr><th>F1 評估口徑</th><th>結果</th><th>對 V3F/V5/V6 修補?</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td><strong>caller-level F1</strong> (bcftools isec, 業界標準)</td><td>四版 0.7166 / 0.6273 完全相同</td><td>invariant ✓ (FILTER 不動)</td></tr>
+        <tr class="row-green"><td>論文 §4.3 V_H/V_L refined F1</td><td>Verdict_Somatic INFO tag 三版實證 0 records (本 pipeline N/A)</td><td>invariant ✓ (Step 4 不改)</td></tr>
+      </tbody>
+    </table>
+    <div class="footer-glossary" style="font-size:9.5px;margin-top:4px;">
+      <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance (+13.3 pp paired GT @ 0.93)，不在 caller F1 〔next: slide 17 主結論 + slide 18 未來方向〕</div>
     </div>""",
     speaker="Caller F1 vs SEQC2 truth set 四版完全相同 — V6 不退步鐵證。0.93 purity (HCC1395 5kHz) 四版 TP=28,509 / FP=11,606 / FN=10,938 / Precision=0.7107 / Recall=0.7227 / F1=0.7166 完全相同 (到小數第 4 位 0 差異); 0.6 purity (HCC1395 t30_n20) 四版 TP=24,190 / FP=13,487 / FN=15,257 / F1=0.6273 完全相同。因果鏈: ClairS-TO PASS set 由 caller 決定 (FILTER 欄), V3F/V5/V6 三版改 GT/PS/GT2/GT3 phasing tag 不改 FILTER → PASS set 不變 → TP/FP/FN 集合不變 → F1 不變。V6 重用 V5 phased VCF + V6 只改 tagging 層 (HaplotagProcess.cpp:537-548 Layer 1.5 revert) 完全不改 phasing 層, 故 caller-side 零影響。ΔF1 (0.93→0.6) = -0.0893 是 ClairS-TO 在低 purity 樣本的性質 (recall 下降), 與 self-phasing 修補無關。turning point: 此 slide 結束 caller-level 驗證 (沒退步), 但下一節 slide 15-16 揭露 5/9 paired audit 找到 V5 Layer 1.5 在 germline-absent 區的設計缺陷, 5/10 V6 binary patch 已修對 — 帶出 V6 為何不只是 incremental 而是有具體 trade-off motivation。",
     tier3="PASS set / FILTER 機制 / purity 0.6 N50 微差 / V6 patch 不改 phasing 層 detail")
@@ -786,30 +782,29 @@ add(id="17_main_verdict", num="17", section="S7 結論", rg2="3 (main verdict)",
     title_critical=True,
     canvas_html="""
     <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">🎯 整份報告 3 條 main verdict (PI 必記):</p>
-    <svg viewBox="0 0 720 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
-      <g transform="translate(10,10)">
-        <circle cx="35" cy="35" r="28" fill="#DCFCE7" stroke="#16A34A" stroke-width="2.5"/>
-        <text x="35" y="42" font-size="22" fill="#166534" text-anchor="middle" font-weight="700">①</text>
-        <text x="80" y="22" font-size="11" fill="#166534" font-weight="700">priority bug 修補機制確立</text>
-        <text x="80" y="38" font-size="9.5" fill="#374151">17.3:1 → ~1:1 全基因組</text>
-        <text x="80" y="51" font-size="9.5" fill="#374151">34,855 read-level victims baseline → V6 100% 修正, 0 反向</text>
-        <text x="80" y="64" font-size="9.5" fill="#374151">SP1/2/3 IGV 對齊 paired 3/3 ✅</text>
-      </g>
-      <g transform="translate(10,70)">
-        <circle cx="35" cy="20" r="28" fill="#DCFCE7" stroke="#16A34A" stroke-width="2.5"/>
-        <text x="35" y="27" font-size="22" fill="#166534" text-anchor="middle" font-weight="700">②</text>
-        <text x="80" y="8" font-size="11" fill="#166534" font-weight="700">V6 = production candidate (5/10 binary patch)</text>
-        <text x="80" y="24" font-size="9.5" fill="#374151">= V3F 保守策略 + V5 設計目標 + marker engineering 改善</text>
-        <text x="80" y="37" font-size="9.5" fill="#374151">hp=33 +4.7% / marker coverage +9.0% / Phase D 4 樣本 ratio 0.61-1.24 中性 / F1 0.7166</text>
-      </g>
-      <g transform="translate(10,120)">
-        <circle cx="35" cy="-5" r="28" fill="#FBBF24" stroke="#CA8A04" stroke-width="2.5"/>
-        <text x="35" y="3" font-size="20" fill="#7C2D12" text-anchor="middle" font-weight="700">★</text>
-        <text x="80" y="-17" font-size="11" fill="#7C2D12" font-weight="700">真實價值在 read-level tag concordance — 非 caller F1</text>
-        <text x="80" y="-2" font-size="9.5" fill="#374151">+13.3 pp paired GT @ 0.93 / hp=33 還原 / marker coverage +9.0%</text>
-        <text x="80" y="11" font-size="9.5" fill="#374151">→ ISM 下游 marker engineering 受惠；caller F1 對 V3F/V5/V6 數學保證 invariant</text>
-      </g>
-    </svg>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#F0FDF4;border:2px solid #16A34A;border-radius:8px;">
+        <div style="flex:none;width:50px;height:50px;border-radius:50%;background:#DCFCE7;border:2px solid #16A34A;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#166534;">①</div>
+        <div style="flex:1;">
+          <p style="font-size:11.5px;font-weight:700;color:#166534;margin:0 0 2px;">priority bug 修補機制確立</p>
+          <p style="font-size:10px;color:#374151;margin:0;line-height:1.4;">17.3:1 → ~1:1 全基因組 · 34,855 read-level victims baseline → V6 100% 修正 0 反向 · SP1/2/3 IGV 對齊 paired 3/3 ✅</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#F0FDF4;border:2px solid #16A34A;border-radius:8px;">
+        <div style="flex:none;width:50px;height:50px;border-radius:50%;background:#DCFCE7;border:2px solid #16A34A;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#166534;">②</div>
+        <div style="flex:1;">
+          <p style="font-size:11.5px;font-weight:700;color:#166534;margin:0 0 2px;">V6 = production candidate (5/10 binary patch)</p>
+          <p style="font-size:10px;color:#374151;margin:0;line-height:1.4;">= V3F 保守 + V5 設計目標 + marker engineering 改善 · hp=33 +4.7% · marker coverage +9.0% · Phase D 4 樣本 ratio 0.61-1.24 中性 · F1 0.7166</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#FEF3C7;border:2px solid #CA8A04;border-radius:8px;">
+        <div style="flex:none;width:50px;height:50px;border-radius:50%;background:#FBBF24;border:2px solid #CA8A04;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#7C2D12;">★</div>
+        <div style="flex:1;">
+          <p style="font-size:11.5px;font-weight:700;color:#7C2D12;margin:0 0 2px;">真實價值在 read-level tag concordance — 非 caller F1</p>
+          <p style="font-size:10px;color:#374151;margin:0;line-height:1.4;">+13.3 pp paired GT @ 0.93 · hp=33 還原 · marker coverage +9.0% → ISM 下游 marker engineering 受惠 · caller F1 對 V3F/V5/V6 數學保證 invariant</p>
+        </div>
+      </div>
+    </div>
     <p style="font-size:11px;font-weight:700;color:#374151;margin:8px 0 4px;">📝 PI 報告 4-29 核心 errata (3 條，完整 6 條詳見報告):</p>
     <table class="metric-table" style="font-size:10.5px;">
       <thead><tr><th></th><th>段落</th><th>原 → 新</th></tr></thead>
@@ -883,37 +878,38 @@ add(id="b1_pass2", num="B1", section="Q&A Backup", rg2="1", ngrep="—",
     timing="90 sec / 中 ~300 字",
     canvas_html="""
     <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">❓ Q: Pass 2 為什麼只跑 2-point? 為什麼高 purity 才觸發?</p>
-    <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
+    <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
       <defs><marker id="arrB1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9CA3AF"/></marker></defs>
-      <rect x="20" y="20" width="220" height="160" rx="6" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
-      <text x="130" y="40" font-size="11" fill="#1E3A8A" text-anchor="middle" font-weight="700">Pass 1 (always runs)</text>
-      <rect x="35" y="55" width="190" height="30" rx="4" fill="white" stroke="#1E3A8A"/>
-      <text x="130" y="74" font-size="10" fill="#374151" text-anchor="middle">3-point patternMining</text>
-      <text x="130" y="88" font-size="8" fill="#6B7280" text-anchor="middle">somaticCalling (V_H/V_L/V_N 分類)</text>
-      <rect x="35" y="105" width="190" height="30" rx="4" fill="white" stroke="#1E3A8A"/>
-      <text x="130" y="124" font-size="10" fill="#374151" text-anchor="middle">2-point edgeConnectResult</text>
-      <text x="130" y="138" font-size="8" fill="#6B7280" text-anchor="middle">phasing graph 建構</text>
-      <text x="130" y="160" font-size="9" fill="#1E3A8A" text-anchor="middle" font-weight="600">→ 產出 origin 分類 + phased VCF</text>
-      <text x="130" y="173" font-size="8" fill="#6B7280" text-anchor="middle" font-style="italic">三路徑算法不依賴 purity</text>
-      <path d="M245,100 L290,100" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arrB1)"/>
-      <rect x="295" y="40" width="125" height="60" rx="6" fill="#FEF3C7" stroke="#CA8A04" stroke-width="2"/>
-      <text x="357" y="60" font-size="11" fill="#7C2D12" text-anchor="middle" font-weight="700">purity 判定</text>
-      <text x="357" y="78" font-size="10" fill="#7C2D12" text-anchor="middle" font-weight="700">purity &gt; 0.9 ?</text>
-      <text x="357" y="92" font-size="8" fill="#6B7280" text-anchor="middle">(原 0.95 → 938f0df 改 0.9)</text>
-      <path d="M357,100 L357,130" stroke="#DC2626" stroke-width="2" marker-end="url(#arrB1)"/>
-      <text x="380" y="118" font-size="9" fill="#DC2626" font-weight="700">No (≤0.9)</text>
-      <path d="M420,70 L455,70" stroke="#16A34A" stroke-width="2" marker-end="url(#arrB1)"/>
-      <text x="437" y="60" font-size="9" fill="#16A34A" font-weight="700">Yes (&gt;0.9)</text>
-      <rect x="460" y="40" width="240" height="60" rx="6" fill="#DCFCE7" stroke="#16A34A" stroke-width="2"/>
-      <text x="580" y="60" font-size="11" fill="#166534" text-anchor="middle" font-weight="700">Pass 2 second round (only 2-point)</text>
-      <text x="580" y="76" font-size="9" fill="#374151" text-anchor="middle">重跑 edgeConnectResult 用 Pass 1 origin</text>
-      <text x="580" y="90" font-size="9" fill="#16A34A" text-anchor="middle" font-weight="600">N50 +3.51% / blocks -9.79% / phased -2.9 pp</text>
-      <rect x="295" y="135" width="240" height="45" rx="6" fill="#FEE2E2" stroke="#DC2626" stroke-width="2"/>
-      <text x="415" y="155" font-size="10" fill="#7F1D1D" text-anchor="middle" font-weight="700">Pass 2 跳過 (低 purity, Pass 1 已穩定)</text>
-      <text x="415" y="170" font-size="8.5" fill="#6B7280" text-anchor="middle">HCC1395 0.6 purity 樣本不觸發</text>
+      <rect x="15" y="15" width="230" height="190" rx="6" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+      <text x="130" y="35" font-size="11" fill="#1E3A8A" text-anchor="middle" font-weight="700">Pass 1 (always runs)</text>
+      <rect x="30" y="50" width="200" height="42" rx="4" fill="white" stroke="#1E3A8A"/>
+      <text x="130" y="68" font-size="10" fill="#374151" text-anchor="middle" font-weight="600">3-point patternMining</text>
+      <text x="130" y="83" font-size="8.5" fill="#6B7280" text-anchor="middle">somaticCalling V_H/V_L/V_N 分類</text>
+      <rect x="30" y="100" width="200" height="42" rx="4" fill="white" stroke="#1E3A8A"/>
+      <text x="130" y="118" font-size="10" fill="#374151" text-anchor="middle" font-weight="600">2-point edgeConnectResult</text>
+      <text x="130" y="133" font-size="8.5" fill="#6B7280" text-anchor="middle">phasing graph 建構</text>
+      <text x="130" y="165" font-size="9" fill="#1E3A8A" text-anchor="middle" font-weight="700">→ 產出 origin + phased VCF</text>
+      <text x="130" y="186" font-size="8" fill="#6B7280" text-anchor="middle" font-style="italic">三路徑算法不依賴 purity</text>
+      <path d="M245,110 L290,110" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arrB1)"/>
+      <rect x="295" y="80" width="125" height="60" rx="6" fill="#FEF3C7" stroke="#CA8A04" stroke-width="2"/>
+      <text x="357" y="100" font-size="11" fill="#7C2D12" text-anchor="middle" font-weight="700">purity 判定</text>
+      <text x="357" y="118" font-size="11" fill="#7C2D12" text-anchor="middle" font-weight="700">purity &gt; 0.9 ?</text>
+      <text x="357" y="132" font-size="8" fill="#6B7280" text-anchor="middle">(原 0.95 → 938f0df 改 0.9)</text>
+      <path d="M357,140 L357,165" stroke="#DC2626" stroke-width="2" marker-end="url(#arrB1)"/>
+      <text x="395" y="155" font-size="9" fill="#DC2626" font-weight="700">No (≤0.9)</text>
+      <path d="M420,110 L455,110" stroke="#16A34A" stroke-width="2" marker-end="url(#arrB1)"/>
+      <text x="437" y="100" font-size="9" fill="#16A34A" font-weight="700">Yes (&gt;0.9)</text>
+      <rect x="460" y="55" width="245" height="100" rx="6" fill="#DCFCE7" stroke="#16A34A" stroke-width="2"/>
+      <text x="582" y="78" font-size="11" fill="#166534" text-anchor="middle" font-weight="700">Pass 2 second round</text>
+      <text x="582" y="93" font-size="10" fill="#166534" text-anchor="middle">(only 2-point edgeConnectResult)</text>
+      <text x="582" y="115" font-size="9" fill="#374151" text-anchor="middle">重跑 edgeConnectResult</text>
+      <text x="582" y="128" font-size="9" fill="#374151" text-anchor="middle">用 Pass 1 origin 精修 graph</text>
+      <text x="582" y="146" font-size="9.5" fill="#16A34A" text-anchor="middle" font-weight="700">N50 +3.51% · blocks −9.79% · phased −2.9 pp</text>
+      <rect x="295" y="170" width="245" height="35" rx="6" fill="#FEE2E2" stroke="#DC2626" stroke-width="2"/>
+      <text x="418" y="190" font-size="10" fill="#7F1D1D" text-anchor="middle" font-weight="700">Pass 2 跳過 (低 purity)</text>
+      <text x="418" y="202" font-size="8.5" fill="#6B7280" text-anchor="middle">HCC1395 0.6 樣本不觸發 / Pass 1 已穩定</text>
     </svg>
-    <p style="font-size:10.5px;font-weight:600;color:#16A34A;margin:6px 0 0;">★ 關鍵釐清: Pass 2 只重跑 2-point edgeConnectResult，不重跑 3-point somaticCalling — 後者 patternMining 與 purity 無關 (V_H/V_L 分類基於 read linkage 拓樸)</p>
-    <p style="font-size:9.5px;color:#6B7280;font-style:italic;margin:3px 0 0;">常見誤解: 「低 purity 用 3-point 倒過來; 高 purity 才多做事」實情相反 — 高 purity 時 Pass 1 origin 穩定，Pass 2 用其產出精修 graph</p>""",
+    <p style="font-size:10.5px;font-weight:600;color:#16A34A;margin:6px 0 0;">★ 關鍵: Pass 2 只重跑 2-point edgeConnectResult，不重跑 3-point somaticCalling — 後者 patternMining 基於 read linkage 拓樸 (V_H 12 + V_L 3 patterns)，與 purity 無關</p>""",
     speaker="Q: Pass 2 為什麼只跑 2-point? somaticCalling 3-point patternMining 用 read linkage 拓樸 (V_H 12 patterns / V_L 3 patterns) 與 purity 無關; edgeConnectResult 2-point 永遠跑。低 purity ≤0.9 Pass 2 跳過 (Pass 1 已穩定); 高 purity >0.9 才觸發 Pass 2 second round 只重跑 2-point edgeConnectResult 用 Pass 1 已分類 origin 精修 phasing graph。threshold 0.95→0.9 由 V5 938f0df commit cherry-pick from zhenyu。Pass 2 incremental: phased var -2.90 pp / blocks -9.79% / N50 +3.51% (HCC1395 0.93 樣本)。常見誤解: 低 purity 用 3-point 倒過來; 實情相反 — 高 purity 才多做事 (因為 Pass 1 origin 穩定可重用)。HCC1395 0.6 purity 樣本兩版都不觸發 Pass 2 → V5 改 GT 在低 purity 自我治癒。",
     tier3="patternMining first/second/third path / Pass 2 不重跑 somaticCalling / threshold 0.95→0.9 cherry-pick")
 
