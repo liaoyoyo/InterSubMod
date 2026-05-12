@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 06 — tagging 層 priority bug — 1 票 somatic 誤標</title>
+  <title>Slide 06 — tagging 層 priority bug — getVote 順序錯 + break early</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -278,36 +278,61 @@ details.collapsible summary:hover { color: #1D4ED8; }
   </div>
 
   <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">tagging 層 priority bug — 1 票 somatic 誤標</h1>
-    <p class="en-subtitle">getVote priority bug — single somatic vote triggers mislabel</p>
+    <h1 class="slide-title ">tagging 層 priority bug — getVote 順序錯 + break early</h1>
+    <p class="en-subtitle">getVote priority bug — single somatic vote triggers mislabel (break-early on wrong order)</p>
     
-    <div class="grid-2col" style="grid-template-columns: 5fr 4fr;">
-      <img class="fig-thumb" src="../figures/master/F1_priority_bug_mechanism.png" alt="F1" style="max-height:340px;">
+    <div class="grid-3col" style="grid-template-columns: 4fr 3fr 5fr;gap:10px;">
+      <!-- 左欄: 圖 -->
       <div>
-        <p style="font-size:17px;font-weight:700;color:#7F1D1D;margin:0 0 6px;">真實 read 範例（752 同模式）：</p>
-        <pre class="code-panel baseline" style="font-size:14px;line-height:1.45;">germline HP1 = 0
-germline HP2 = 5  ← 主導
-somatic HP1_1 = 1 ← 1 票觸發
-somatic HP2_1 = 0
-─────────────────
-baseline: → hp=11 ❌
-   (germline 5 票被忽略)
-正確答案: hp=21
-   (germline HP2 主導)</pre>
+        <img class="fig-thumb" src="../figures/G3_getVote_three_layer.png" alt="G3" style="max-height:280px;">
+        <p class="fig-caption">G3: getVote() 三層 vote vector + break-early 邏輯</p>
+      </div>
+      <!-- 中欄: vote 順序流程 -->
+      <div>
+        <p style="font-size:14px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">getVote 順序 (baseline)</p>
+        <div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:6px;padding:8px 10px;font-size:13px;line-height:1.55;color:#7F1D1D;">
+          <p style="margin:0 0 4px;">① somatic 票 ≥1 → <strong>break</strong> ❌</p>
+          <p style="margin:0 0 4px;">② mixed 票 → break</p>
+          <p style="margin:0;">③ germline 票 <strong>永遠看不到</strong></p>
+        </div>
+        <p style="font-size:14px;font-weight:700;color:#16A34A;margin:8px 0 4px;">V3F 修法 <code>41ff147</code></p>
+        <div style="background:#DCFCE7;border:1px solid #86EFAC;border-radius:6px;padding:8px 10px;font-size:13px;line-height:1.55;color:#166534;">
+          <p style="margin:0 0 4px;">① <strong>germline</strong> 票 ≥1 → break ✅</p>
+          <p style="margin:0 0 4px;">② mixed</p>
+          <p style="margin:0;">③ somatic</p>
+        </div>
+      </div>
+      <!-- 右欄: 例子對照 -->
+      <div>
+        <p style="font-size:14px;font-weight:700;color:#374151;margin:0 0 4px;">真實 read 範例（chr19 752 同模式）</p>
+        <pre class="code-panel" style="background:#F9FAFB;border:1px solid #D1D5DB;font-size:13px;line-height:1.5;color:#1F2937;padding:8px 10px;">germline HP1 = 0
+germline HP2 = 5  ← <span style="color:#16A34A;font-weight:700;">主導</span>
+somatic  HP1_1 = 1 ← 1 票觸發
+somatic  HP2_1 = 0</pre>
+        <div class="grid-2col" style="gap:6px;margin-top:4px;">
+          <div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:4px;padding:6px 8px;font-size:13px;color:#7F1D1D;">
+            <strong>baseline → hp=11 ❌</strong><br>
+            <span style="font-size:11px;">(germline 5 票被忽略)</span>
+          </div>
+          <div style="background:#DCFCE7;border:1px solid #86EFAC;border-radius:4px;padding:6px 8px;font-size:13px;color:#166534;">
+            <strong>V3F → hp=21 ✅</strong><br>
+            <span style="font-size:11px;">(germline HP2 主導)</span>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="conclusion-arrow">→ tumor sub-clone somatic 100% 同方向 → 全受影響 reads 標 HP:i:11 → 17.3:1 偏移在 tag layer 形成</div>
+    <div class="conclusion-arrow" style="font-size:15px;padding:10px 14px;">→ tumor sub-clone somatic 100% 同方向 → 全受影響 reads 標 HP:i:11 → tag layer 17.3:1 偏移（詳 slide 03 / 08）</div>
     <div class="footer-glossary">
       <div class="gloss-item">📖 <span class="term">sub-clone:</span> 腫瘤中帶相同突變的某群癌細胞</div>
-      <div class="gloss-item">ⓘ priority bug / break early</div>
+      <div class="gloss-item">ⓘ break-early: for-loop 第一個非空就 return</div>
     </div>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide 06">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
-      <div class="speak-text">tagging 層 priority bug: baseline getVote() vector 順序 ① somatic ② mixed ③ germline; for 迴圈第一個非空就 break early, germline 永遠看不到。範例 read: germline HP2=5 主導, somatic HP1_1=1 觸發, baseline 錯標 hp=11, 正確應 hp=21。全 752 chr19 victims 同模式。tumor sub-clone somatic 100% 同方向 → 17.3:1 形成。重要備註: tag layer 與 slide 05 phasing layer 是不同層 bug, 必須分別修補, 不能合併修。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> enum HAPLOTYPE1_1=2 vs HP tag int=11 / 5-vote countMap / tag layer vs phasing layer 為何不能合併修</div>
+      <div class="speak-text">tagging 層 priority bug 機制三件套: ① getVote vector 順序錯 baseline ① somatic ② mixed ③ germline, for 迴圈第一個非空就 break early, germline 5 票永遠看不到; ② 真實 read 例子 chr19 752 同模式, germline HP2=5 主導, somatic HP1_1 只 1 票就觸發, baseline 錯標 hp=11 正確應 hp=21; ③ V3F 修法 41ff147 反轉順序, germline 第一順位 break, 5 票主導勝出。tumor sub-clone somatic 100% 同方向 → 全受影響 reads 標 HP:i:11 → tag layer 17.3:1 偏移 (slide 03 / 08)。重要: tag layer 與 slide 05 phasing layer 是不同層 bug, 必須分別修補, 不能合併修。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> enum HAPLOTYPE1_1=2 vs HP tag int=11 / 5-vote countMap / tag layer vs phasing layer 為何不能合併修 / 41ff147 與 380e8d2 INDEL guard 分工</div>
     </details>
   </aside>
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 07 — 兩層 bug 兩層修補 — 缺一不可</title>
+  <title>Slide 07 — 兩層 bug 兩層修補 — 修了什麼 + 為何缺一不可</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -278,35 +278,51 @@ details.collapsible summary:hover { color: #1D4ED8; }
   </div>
 
   <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">兩層 bug 兩層修補 — 缺一不可</h1>
-    <p class="en-subtitle">Two layers two fixes — PON-only (phasing) + V3F/V5 (tagging) both required</p>
+    <h1 class="slide-title ">兩層 bug 兩層修補 — 修了什麼 + 為何缺一不可</h1>
+    <p class="en-subtitle">Two layers two fixes — what each fix actually does, and why both required</p>
     
-    <table class="metric-table">
-      <thead><tr><th>Layer</th><th>Bug</th><th>修補 commit</th><th>章節</th></tr></thead>
-      <tbody>
-        <tr style="background:#DBEAFE;"><td><strong>phasing 層</strong></td><td>球員兼裁判</td><td><code>8b8c1fd</code> PON-only</td><td>§5.2</td></tr>
-        <tr style="background:#DCFCE7;"><td rowspan="2"><strong>tagging 層</strong></td><td rowspan="2">priority bug</td><td>V3F: <code>41ff147</code> + <code>380e8d2</code></td><td>§5.3</td></tr>
-        <tr style="background:#DCFCE7;"><td>V5: <code>d0bcd8c</code> + <code>938f0df</code></td><td>§5.4</td></tr>
-      </tbody>
-    </table>
-    <div class="grid-2col">
-      <div class="caveat-box">
-        <span class="label">為何不能只用 PON-only？</span><br>
-        解 phasing 但 tag 仍壞 → 99.9% reads 仍標 HP:i:11
-      </div>
-      <div class="caveat-box">
-        <span class="label">為何 V3F 不夠還要 V5？</span><br>
-        V3F Layer 1 only → germline 缺席區 reads 全 untagged；V5 Layer 1.5 補 fallback（slide 16 詳述 caveat）
+    <!-- Timeline -->
+    <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:6px;padding:8px 12px;margin:2px 0 8px;">
+      <p style="font-size:12px;color:#6B7280;margin:0 0 4px;font-weight:600;">commit 時序鏈：</p>
+      <div style="display:flex;align-items:center;gap:4px;font-size:12px;flex-wrap:wrap;">
+        <span style="background:#DBEAFE;color:#1E3A8A;padding:3px 8px;border-radius:4px;font-weight:600;">2026-04 phasing 層</span>
+        <code style="font-size:11px;">8b8c1fd</code>
+        <span style="color:#6B7280;">→</span>
+        <span style="background:#DCFCE7;color:#166534;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05 tagging Layer 1 (V3F)</span>
+        <code style="font-size:11px;">41ff147 + 380e8d2</code>
+        <span style="color:#6B7280;">→</span>
+        <span style="background:#FEF3C7;color:#92400E;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05 Layer 1.5 (V5)</span>
+        <code style="font-size:11px;">d0bcd8c + 938f0df</code>
       </div>
     </div>
-    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals — 多正常樣本建構的 germline reference</div></div>
+    <!-- "修了什麼" 表 -->
+    <table class="metric-table" style="font-size:14px;">
+      <thead><tr><th style="width:18%;">Layer</th><th style="width:18%;">Bug</th><th>修法做了什麼</th><th style="width:10%;">Slide</th></tr></thead>
+      <tbody>
+        <tr style="background:#DBEAFE;"><td><strong>phasing 層</strong></td><td>球員兼裁判</td><td>phasing 階段<strong>排除非 PoN 變異</strong>，只用 germline het 建 graph（somatic 不再當 node）</td><td>05</td></tr>
+        <tr style="background:#DCFCE7;"><td><strong>tagging Layer 1</strong></td><td>priority bug</td><td><strong>getVote 順序反轉</strong>：germline 第一順位 → break；somatic 1 票無法蓋過 germline 主導</td><td>06</td></tr>
+        <tr style="background:#FEF3C7;"><td><strong>tagging Layer 1.5</strong></td><td>germline-absent</td><td><strong>somatic fallback</strong>：純 somatic vote 區補 hp tag（V3F 此處 untagged）<span style="color:#92400E;font-style:italic;">⚠ 有 caveat</span></td><td>16</td></tr>
+      </tbody>
+    </table>
+    <!-- 為何缺一不可（左 phasing / 右 tagging - 與表 row 順序對齊） -->
+    <div class="grid-2col" style="gap:10px;margin-top:6px;">
+      <div class="caveat-box" style="padding:8px 12px;font-size:14px;">
+        <span class="label">只 PON-only？</span>
+        解 phasing 但 tag 仍壞 → <strong>99.9% reads 仍標 HP:i:11</strong>
+      </div>
+      <div class="caveat-box" style="padding:8px 12px;font-size:14px;">
+        <span class="label">只 V3F？</span>
+        Layer 1 only → <strong>germline 缺席區 reads 全 untagged</strong>；V5 Layer 1.5 補 fallback（slide 16 詳述 caveat）
+      </div>
+    </div>
+    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals</div><div class="gloss-item">ⓘ Layer 1.5 = V3F 之上補丁，非獨立層</div></div>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide 07">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (90 sec / 中 ~310 字)</summary>
-      <div class="speak-text">兩層 bug 獨立: phasing 層 → 8b8c1fd PON-only; tagging 層 → V3F two-layer (41ff147 + 380e8d2 INDEL guard) → V5 (+ d0bcd8c + 938f0df)。任一單修不夠必須 stacking。PON-only 不夠: tag 仍偏 99.9% 標 11; V3F 不夠: germline 缺席區 untagged; V5 補 Layer 1.5 但 germline-absent 有 caveat (slide 16)。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 5 commit 順序 / V3F 命名 / 跨層交互 / 為何不能合併修</div>
+      <div class="speak-text">兩層 bug 三 fix stacking 時序: 2026-04 phasing 層 8b8c1fd PON-only → 2026-05 tagging Layer 1 V3F (41ff147 順序反轉 + 380e8d2 INDEL guard) → 2026-05 Layer 1.5 V5 (d0bcd8c Pass 2 ploidy + 938f0df threshold 0.95→0.9, bundle Layer 1.5 fallback)。修法做了什麼: phasing 層排除非 PoN 變異只用 germline het 建 graph; tagging Layer 1 getVote 順序反轉 germline 第一順位; Layer 1.5 純 somatic vote 區補 hp tag。為何缺一不可: 只 PON-only tag 仍偏 99.9%; 只 V3F germline 缺席區 untagged; V5 Layer 1.5 補 fallback 但 germline-absent 區有 caveat (slide 16)。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 5 commit 順序細節 / V3F 命名歷史 / 跨層交互 / 為何不能合併修 / d0bcd8c 為何跨兩層</div>
     </details>
   </aside>
 

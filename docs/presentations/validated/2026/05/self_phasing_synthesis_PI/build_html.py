@@ -218,22 +218,43 @@ add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
 
 # ─── S2 機制 ──────────────────────────────────────────────────────────────
 add(id="05_player_referee", num="05", section="S2 機制", rg2="4 (核心 forced)", ngrep="3 + 1 commit",
-    title="phasing 層球員兼裁判",
+    title="phasing 層「球員兼裁判」— somatic 反過來主導 graph",
     en="Phasing layer player-as-referee — somatic 100% co-occurrence overrules germline 50/50",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
-    <div class="grid-2col" style="grid-template-columns: 7fr 5fr;">
-      <img class="fig-thumb" src="../figures/G1_player_as_referee.png" alt="G1">
+    <div class="grid-2col" style="grid-template-columns: 6fr 6fr;">
       <div>
-        <p style="font-size:18px;font-weight:700;color:#7F1D1D;margin:0 0 8px;">TO 模式致命連鎖：</p>
-        <ul style="margin:4px 0 0 20px;font-size:17px;line-height:1.55;color:#374151;background:#FEE2E2;border:1px solid #FCA5A5;padding:12px 14px 12px 28px;border-radius:6px;">
-          <li>TO 沒 paired normal → 用 PoN 區分；somatic 不在 PoN 內被當 germline</li>
-          <li>somatic 進 graph → edge weight 暴漲（100% &gt; germline 50%）</li>
-          <li>自我增強：3 個 somatic 共現 → 強度 ×3</li>
-          <li>germline 真實訊號被 overrule</li>
-        </ul>
-        <div class="conclusion-arrow green" style="margin-top:12px;">
-          解法：PON-only flag &nbsp;<code>8b8c1fd</code>
+        <img class="fig-thumb" src="../figures/G1_player_as_referee.png" alt="G1" style="max-height:280px;">
+        <p class="fig-caption">G1: phasing graph 中 somatic edge (100%) 主導，germline (50/50) 被 overrule</p>
+      </div>
+      <div>
+        <!-- Step 1: 物理基礎 -->
+        <div style="background:#F3F4F6;border:1px solid #9CA3AF;border-radius:6px;padding:8px 12px;margin-bottom:6px;">
+          <p style="font-size:13px;font-weight:700;color:#374151;margin:0 0 4px;">① 物理基礎</p>
+          <p style="font-size:14px;color:#1F2937;margin:0;line-height:1.45;">
+            <strong>germline het</strong>: HP1 50% / HP2 50%（隨機分佈）<br>
+            <strong>somatic mut</strong>: 100% 同一條染色體（clonal）
+          </p>
+        </div>
+        <p style="text-align:center;color:#6B7280;margin:0;font-size:14px;">↓</p>
+        <!-- Step 2: TO 缺 normal -->
+        <div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:6px;padding:8px 12px;margin:2px 0;">
+          <p style="font-size:13px;font-weight:700;color:#92400E;margin:0 0 4px;">② TO 模式無 paired normal → 用 PoN 區分</p>
+          <p style="font-size:14px;color:#78350F;margin:0;line-height:1.45;">somatic 不在 PoN 內 → <strong>被當 germline 進 phasing graph</strong></p>
+        </div>
+        <p style="text-align:center;color:#6B7280;margin:0;font-size:14px;">↓</p>
+        <!-- Step 3: 致命連鎖 + 隱喻 -->
+        <div style="background:#FEE2E2;border:2px solid #DC2626;border-radius:6px;padding:8px 12px;margin:2px 0;">
+          <p style="font-size:13px;font-weight:700;color:#7F1D1D;margin:0 0 4px;">③ 致命連鎖 — somatic 「球員兼裁判」</p>
+          <p style="font-size:14px;color:#7F1D1D;margin:0;line-height:1.45;">
+            edge weight 100% &gt; germline 50% → <strong>somatic 主導 phasing decision</strong><br>
+            <span style="font-style:italic;">應被 phase 的 somatic，反過來決定 phase 結果</span>
+          </p>
+        </div>
+        <!-- 修法 -->
+        <div class="conclusion-arrow green" style="margin-top:6px;padding:8px 12px;font-size:14px;">
+          <strong>解法 <code>8b8c1fd</code> PON-only flag</strong>：phasing 階段排除非 PoN 變異<br>
+          <span style="font-weight:400;font-size:13px;">→ 只用 germline het 建 graph，somatic 不再當 node</span>
         </div>
       </div>
     </div>
@@ -241,63 +262,104 @@ add(id="05_player_referee", num="05", section="S2 機制", rg2="4 (核心 forced
       <div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals — 多正常樣本建構的 germline reference</div>
       <div class="gloss-item">📖 <span class="term">phasing graph:</span> het 位點當 node, read 共現當 edge</div>
     </div>""",
-    speaker="機制兩層 bug, 先 phasing 層球員兼裁判隱喻。phasing graph 物理基礎: germline het 在 HP1/HP2 50/50 隨機分佈。TO 沒 paired normal 區分 germline/somatic, 只能用 PoN; 未在 PoN 內的位點被當 germline → somatic 進 graph 後 edge weight 暴漲, graph 自我增強。球員兼裁判: somatic 應被 phase 反過來主導 graph。修法 PON-only flag (8b8c1fd)。但只解 phasing 層, tag 還壞。",
-    tier3="TO vs paired PoN 對照 / 自我增強迴圈 / Pass 1 vs Pass 2 預告")
+    speaker="phasing 層球員兼裁判機制三步: ① 物理基礎 germline het 50/50 隨機 vs somatic mut 100% 同染色體; ② TO 模式缺 paired normal 只能用 PoN, 非 PoN 變異被當 germline 進 graph; ③ somatic edge weight 100% 暴漲主導 graph - 本應被 phase 的 somatic 反過來決定 phasing - 即球員兼裁判。修法 8b8c1fd PON-only flag, phasing 階段排除非 PoN 變異, 只用 germline het 建 graph, somatic 不再當 node。但只解 phasing 層, tag 還壞 (slide 06)。",
+    tier3="TO vs paired PoN 對照 / 自我增強迴圈 / Pass 1 vs Pass 2 預告 / edge weight 計算細節")
 
 add(id="06_priority_bug", num="06", section="S2 機制", rg2="1 + 2 footnote", ngrep="5",
-    title="tagging 層 priority bug — 1 票 somatic 誤標",
-    en="getVote priority bug — single somatic vote triggers mislabel",
+    title="tagging 層 priority bug — getVote 順序錯 + break early",
+    en="getVote priority bug — single somatic vote triggers mislabel (break-early on wrong order)",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
-    <div class="grid-2col" style="grid-template-columns: 5fr 4fr;">
-      <img class="fig-thumb" src="../figures/master/F1_priority_bug_mechanism.png" alt="F1" style="max-height:340px;">
+    <div class="grid-3col" style="grid-template-columns: 4fr 3fr 5fr;gap:10px;">
+      <!-- 左欄: 圖 -->
       <div>
-        <p style="font-size:17px;font-weight:700;color:#7F1D1D;margin:0 0 6px;">真實 read 範例（752 同模式）：</p>
-        <pre class="code-panel baseline" style="font-size:14px;line-height:1.45;">germline HP1 = 0
-germline HP2 = 5  ← 主導
-somatic HP1_1 = 1 ← 1 票觸發
-somatic HP2_1 = 0
-─────────────────
-baseline: → hp=11 ❌
-   (germline 5 票被忽略)
-正確答案: hp=21
-   (germline HP2 主導)</pre>
+        <img class="fig-thumb" src="../figures/G3_getVote_three_layer.png" alt="G3" style="max-height:280px;">
+        <p class="fig-caption">G3: getVote() 三層 vote vector + break-early 邏輯</p>
+      </div>
+      <!-- 中欄: vote 順序流程 -->
+      <div>
+        <p style="font-size:14px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">getVote 順序 (baseline)</p>
+        <div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:6px;padding:8px 10px;font-size:13px;line-height:1.55;color:#7F1D1D;">
+          <p style="margin:0 0 4px;">① somatic 票 ≥1 → <strong>break</strong> ❌</p>
+          <p style="margin:0 0 4px;">② mixed 票 → break</p>
+          <p style="margin:0;">③ germline 票 <strong>永遠看不到</strong></p>
+        </div>
+        <p style="font-size:14px;font-weight:700;color:#16A34A;margin:8px 0 4px;">V3F 修法 <code>41ff147</code></p>
+        <div style="background:#DCFCE7;border:1px solid #86EFAC;border-radius:6px;padding:8px 10px;font-size:13px;line-height:1.55;color:#166534;">
+          <p style="margin:0 0 4px;">① <strong>germline</strong> 票 ≥1 → break ✅</p>
+          <p style="margin:0 0 4px;">② mixed</p>
+          <p style="margin:0;">③ somatic</p>
+        </div>
+      </div>
+      <!-- 右欄: 例子對照 -->
+      <div>
+        <p style="font-size:14px;font-weight:700;color:#374151;margin:0 0 4px;">真實 read 範例（chr19 752 同模式）</p>
+        <pre class="code-panel" style="background:#F9FAFB;border:1px solid #D1D5DB;font-size:13px;line-height:1.5;color:#1F2937;padding:8px 10px;">germline HP1 = 0
+germline HP2 = 5  ← <span style="color:#16A34A;font-weight:700;">主導</span>
+somatic  HP1_1 = 1 ← 1 票觸發
+somatic  HP2_1 = 0</pre>
+        <div class="grid-2col" style="gap:6px;margin-top:4px;">
+          <div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:4px;padding:6px 8px;font-size:13px;color:#7F1D1D;">
+            <strong>baseline → hp=11 ❌</strong><br>
+            <span style="font-size:11px;">(germline 5 票被忽略)</span>
+          </div>
+          <div style="background:#DCFCE7;border:1px solid #86EFAC;border-radius:4px;padding:6px 8px;font-size:13px;color:#166534;">
+            <strong>V3F → hp=21 ✅</strong><br>
+            <span style="font-size:11px;">(germline HP2 主導)</span>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="conclusion-arrow">→ tumor sub-clone somatic 100% 同方向 → 全受影響 reads 標 HP:i:11 → 17.3:1 偏移在 tag layer 形成</div>
+    <div class="conclusion-arrow" style="font-size:15px;padding:10px 14px;">→ tumor sub-clone somatic 100% 同方向 → 全受影響 reads 標 HP:i:11 → tag layer 17.3:1 偏移（詳 slide 03 / 08）</div>
     <div class="footer-glossary">
       <div class="gloss-item">📖 <span class="term">sub-clone:</span> 腫瘤中帶相同突變的某群癌細胞</div>
-      <div class="gloss-item">ⓘ priority bug / break early</div>
+      <div class="gloss-item">ⓘ break-early: for-loop 第一個非空就 return</div>
     </div>""",
-    speaker="tagging 層 priority bug: baseline getVote() vector 順序 ① somatic ② mixed ③ germline; for 迴圈第一個非空就 break early, germline 永遠看不到。範例 read: germline HP2=5 主導, somatic HP1_1=1 觸發, baseline 錯標 hp=11, 正確應 hp=21。全 752 chr19 victims 同模式。tumor sub-clone somatic 100% 同方向 → 17.3:1 形成。重要備註: tag layer 與 slide 05 phasing layer 是不同層 bug, 必須分別修補, 不能合併修。",
-    tier3="enum HAPLOTYPE1_1=2 vs HP tag int=11 / 5-vote countMap / tag layer vs phasing layer 為何不能合併修")
+    speaker="tagging 層 priority bug 機制三件套: ① getVote vector 順序錯 baseline ① somatic ② mixed ③ germline, for 迴圈第一個非空就 break early, germline 5 票永遠看不到; ② 真實 read 例子 chr19 752 同模式, germline HP2=5 主導, somatic HP1_1 只 1 票就觸發, baseline 錯標 hp=11 正確應 hp=21; ③ V3F 修法 41ff147 反轉順序, germline 第一順位 break, 5 票主導勝出。tumor sub-clone somatic 100% 同方向 → 全受影響 reads 標 HP:i:11 → tag layer 17.3:1 偏移 (slide 03 / 08)。重要: tag layer 與 slide 05 phasing layer 是不同層 bug, 必須分別修補, 不能合併修。",
+    tier3="enum HAPLOTYPE1_1=2 vs HP tag int=11 / 5-vote countMap / tag layer vs phasing layer 為何不能合併修 / 41ff147 與 380e8d2 INDEL guard 分工")
 
 add(id="07_two_layer_table", num="07", section="S2 機制", rg2="1", ngrep="5 commits + 1",
-    title="兩層 bug 兩層修補 — 缺一不可",
-    en="Two layers two fixes — PON-only (phasing) + V3F/V5 (tagging) both required",
+    title="兩層 bug 兩層修補 — 修了什麼 + 為何缺一不可",
+    en="Two layers two fixes — what each fix actually does, and why both required",
     timing="90 sec / 中 ~310 字",
     canvas_html="""
-    <table class="metric-table">
-      <thead><tr><th>Layer</th><th>Bug</th><th>修補 commit</th><th>章節</th></tr></thead>
-      <tbody>
-        <tr style="background:#DBEAFE;"><td><strong>phasing 層</strong></td><td>球員兼裁判</td><td><code>8b8c1fd</code> PON-only</td><td>§5.2</td></tr>
-        <tr style="background:#DCFCE7;"><td rowspan="2"><strong>tagging 層</strong></td><td rowspan="2">priority bug</td><td>V3F: <code>41ff147</code> + <code>380e8d2</code></td><td>§5.3</td></tr>
-        <tr style="background:#DCFCE7;"><td>V5: <code>d0bcd8c</code> + <code>938f0df</code></td><td>§5.4</td></tr>
-      </tbody>
-    </table>
-    <div class="grid-2col">
-      <div class="caveat-box">
-        <span class="label">為何不能只用 PON-only？</span><br>
-        解 phasing 但 tag 仍壞 → 99.9% reads 仍標 HP:i:11
-      </div>
-      <div class="caveat-box">
-        <span class="label">為何 V3F 不夠還要 V5？</span><br>
-        V3F Layer 1 only → germline 缺席區 reads 全 untagged；V5 Layer 1.5 補 fallback（slide 16 詳述 caveat）
+    <!-- Timeline -->
+    <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:6px;padding:8px 12px;margin:2px 0 8px;">
+      <p style="font-size:12px;color:#6B7280;margin:0 0 4px;font-weight:600;">commit 時序鏈：</p>
+      <div style="display:flex;align-items:center;gap:4px;font-size:12px;flex-wrap:wrap;">
+        <span style="background:#DBEAFE;color:#1E3A8A;padding:3px 8px;border-radius:4px;font-weight:600;">2026-04 phasing 層</span>
+        <code style="font-size:11px;">8b8c1fd</code>
+        <span style="color:#6B7280;">→</span>
+        <span style="background:#DCFCE7;color:#166534;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05 tagging Layer 1 (V3F)</span>
+        <code style="font-size:11px;">41ff147 + 380e8d2</code>
+        <span style="color:#6B7280;">→</span>
+        <span style="background:#FEF3C7;color:#92400E;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05 Layer 1.5 (V5)</span>
+        <code style="font-size:11px;">d0bcd8c + 938f0df</code>
       </div>
     </div>
-    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals — 多正常樣本建構的 germline reference</div></div>""",
-    speaker="兩層 bug 獨立: phasing 層 → 8b8c1fd PON-only; tagging 層 → V3F two-layer (41ff147 + 380e8d2 INDEL guard) → V5 (+ d0bcd8c + 938f0df)。任一單修不夠必須 stacking。PON-only 不夠: tag 仍偏 99.9% 標 11; V3F 不夠: germline 缺席區 untagged; V5 補 Layer 1.5 但 germline-absent 有 caveat (slide 16)。",
-    tier3="5 commit 順序 / V3F 命名 / 跨層交互 / 為何不能合併修")
+    <!-- "修了什麼" 表 -->
+    <table class="metric-table" style="font-size:14px;">
+      <thead><tr><th style="width:18%;">Layer</th><th style="width:18%;">Bug</th><th>修法做了什麼</th><th style="width:10%;">Slide</th></tr></thead>
+      <tbody>
+        <tr style="background:#DBEAFE;"><td><strong>phasing 層</strong></td><td>球員兼裁判</td><td>phasing 階段<strong>排除非 PoN 變異</strong>，只用 germline het 建 graph（somatic 不再當 node）</td><td>05</td></tr>
+        <tr style="background:#DCFCE7;"><td><strong>tagging Layer 1</strong></td><td>priority bug</td><td><strong>getVote 順序反轉</strong>：germline 第一順位 → break；somatic 1 票無法蓋過 germline 主導</td><td>06</td></tr>
+        <tr style="background:#FEF3C7;"><td><strong>tagging Layer 1.5</strong></td><td>germline-absent</td><td><strong>somatic fallback</strong>：純 somatic vote 區補 hp tag（V3F 此處 untagged）<span style="color:#92400E;font-style:italic;">⚠ 有 caveat</span></td><td>16</td></tr>
+      </tbody>
+    </table>
+    <!-- 為何缺一不可（左 phasing / 右 tagging - 與表 row 順序對齊） -->
+    <div class="grid-2col" style="gap:10px;margin-top:6px;">
+      <div class="caveat-box" style="padding:8px 12px;font-size:14px;">
+        <span class="label">只 PON-only？</span>
+        解 phasing 但 tag 仍壞 → <strong>99.9% reads 仍標 HP:i:11</strong>
+      </div>
+      <div class="caveat-box" style="padding:8px 12px;font-size:14px;">
+        <span class="label">只 V3F？</span>
+        Layer 1 only → <strong>germline 缺席區 reads 全 untagged</strong>；V5 Layer 1.5 補 fallback（slide 16 詳述 caveat）
+      </div>
+    </div>
+    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals</div><div class="gloss-item">ⓘ Layer 1.5 = V3F 之上補丁，非獨立層</div></div>""",
+    speaker="兩層 bug 三 fix stacking 時序: 2026-04 phasing 層 8b8c1fd PON-only → 2026-05 tagging Layer 1 V3F (41ff147 順序反轉 + 380e8d2 INDEL guard) → 2026-05 Layer 1.5 V5 (d0bcd8c Pass 2 ploidy + 938f0df threshold 0.95→0.9, bundle Layer 1.5 fallback)。修法做了什麼: phasing 層排除非 PoN 變異只用 germline het 建 graph; tagging Layer 1 getVote 順序反轉 germline 第一順位; Layer 1.5 純 somatic vote 區補 hp tag。為何缺一不可: 只 PON-only tag 仍偏 99.9%; 只 V3F germline 缺席區 untagged; V5 Layer 1.5 補 fallback 但 germline-absent 區有 caveat (slide 16)。",
+    tier3="5 commit 順序細節 / V3F 命名歷史 / 跨層交互 / 為何不能合併修 / d0bcd8c 為何跨兩層")
 
 # ─── S3 量化鐵證 ───────────────────────────────────────────────────────────
 add(id="08_chr19_752", num="08", section="S3 量化鐵證", rg2="—", ngrep="6",

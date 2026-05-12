@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 05 — phasing 層球員兼裁判</title>
+  <title>Slide 05 — phasing 層「球員兼裁判」— somatic 反過來主導 graph</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -278,21 +278,42 @@ details.collapsible summary:hover { color: #1D4ED8; }
   </div>
 
   <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">phasing 層球員兼裁判</h1>
+    <h1 class="slide-title ">phasing 層「球員兼裁判」— somatic 反過來主導 graph</h1>
     <p class="en-subtitle">Phasing layer player-as-referee — somatic 100% co-occurrence overrules germline 50/50</p>
     
-    <div class="grid-2col" style="grid-template-columns: 7fr 5fr;">
-      <img class="fig-thumb" src="../figures/G1_player_as_referee.png" alt="G1">
+    <div class="grid-2col" style="grid-template-columns: 6fr 6fr;">
       <div>
-        <p style="font-size:18px;font-weight:700;color:#7F1D1D;margin:0 0 8px;">TO 模式致命連鎖：</p>
-        <ul style="margin:4px 0 0 20px;font-size:17px;line-height:1.55;color:#374151;background:#FEE2E2;border:1px solid #FCA5A5;padding:12px 14px 12px 28px;border-radius:6px;">
-          <li>TO 沒 paired normal → 用 PoN 區分；somatic 不在 PoN 內被當 germline</li>
-          <li>somatic 進 graph → edge weight 暴漲（100% &gt; germline 50%）</li>
-          <li>自我增強：3 個 somatic 共現 → 強度 ×3</li>
-          <li>germline 真實訊號被 overrule</li>
-        </ul>
-        <div class="conclusion-arrow green" style="margin-top:12px;">
-          解法：PON-only flag &nbsp;<code>8b8c1fd</code>
+        <img class="fig-thumb" src="../figures/G1_player_as_referee.png" alt="G1" style="max-height:280px;">
+        <p class="fig-caption">G1: phasing graph 中 somatic edge (100%) 主導，germline (50/50) 被 overrule</p>
+      </div>
+      <div>
+        <!-- Step 1: 物理基礎 -->
+        <div style="background:#F3F4F6;border:1px solid #9CA3AF;border-radius:6px;padding:8px 12px;margin-bottom:6px;">
+          <p style="font-size:13px;font-weight:700;color:#374151;margin:0 0 4px;">① 物理基礎</p>
+          <p style="font-size:14px;color:#1F2937;margin:0;line-height:1.45;">
+            <strong>germline het</strong>: HP1 50% / HP2 50%（隨機分佈）<br>
+            <strong>somatic mut</strong>: 100% 同一條染色體（clonal）
+          </p>
+        </div>
+        <p style="text-align:center;color:#6B7280;margin:0;font-size:14px;">↓</p>
+        <!-- Step 2: TO 缺 normal -->
+        <div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:6px;padding:8px 12px;margin:2px 0;">
+          <p style="font-size:13px;font-weight:700;color:#92400E;margin:0 0 4px;">② TO 模式無 paired normal → 用 PoN 區分</p>
+          <p style="font-size:14px;color:#78350F;margin:0;line-height:1.45;">somatic 不在 PoN 內 → <strong>被當 germline 進 phasing graph</strong></p>
+        </div>
+        <p style="text-align:center;color:#6B7280;margin:0;font-size:14px;">↓</p>
+        <!-- Step 3: 致命連鎖 + 隱喻 -->
+        <div style="background:#FEE2E2;border:2px solid #DC2626;border-radius:6px;padding:8px 12px;margin:2px 0;">
+          <p style="font-size:13px;font-weight:700;color:#7F1D1D;margin:0 0 4px;">③ 致命連鎖 — somatic 「球員兼裁判」</p>
+          <p style="font-size:14px;color:#7F1D1D;margin:0;line-height:1.45;">
+            edge weight 100% &gt; germline 50% → <strong>somatic 主導 phasing decision</strong><br>
+            <span style="font-style:italic;">應被 phase 的 somatic，反過來決定 phase 結果</span>
+          </p>
+        </div>
+        <!-- 修法 -->
+        <div class="conclusion-arrow green" style="margin-top:6px;padding:8px 12px;font-size:14px;">
+          <strong>解法 <code>8b8c1fd</code> PON-only flag</strong>：phasing 階段排除非 PoN 變異<br>
+          <span style="font-weight:400;font-size:13px;">→ 只用 germline het 建 graph，somatic 不再當 node</span>
         </div>
       </div>
     </div>
@@ -305,8 +326,8 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <aside class="note-section" aria-label="Speaker notes for slide 05">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
-      <div class="speak-text">機制兩層 bug, 先 phasing 層球員兼裁判隱喻。phasing graph 物理基礎: germline het 在 HP1/HP2 50/50 隨機分佈。TO 沒 paired normal 區分 germline/somatic, 只能用 PoN; 未在 PoN 內的位點被當 germline → somatic 進 graph 後 edge weight 暴漲, graph 自我增強。球員兼裁判: somatic 應被 phase 反過來主導 graph。修法 PON-only flag (8b8c1fd)。但只解 phasing 層, tag 還壞。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> TO vs paired PoN 對照 / 自我增強迴圈 / Pass 1 vs Pass 2 預告</div>
+      <div class="speak-text">phasing 層球員兼裁判機制三步: ① 物理基礎 germline het 50/50 隨機 vs somatic mut 100% 同染色體; ② TO 模式缺 paired normal 只能用 PoN, 非 PoN 變異被當 germline 進 graph; ③ somatic edge weight 100% 暴漲主導 graph - 本應被 phase 的 somatic 反過來決定 phasing - 即球員兼裁判。修法 8b8c1fd PON-only flag, phasing 階段排除非 PoN 變異, 只用 germline het 建 graph, somatic 不再當 node。但只解 phasing 層, tag 還壞 (slide 06)。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> TO vs paired PoN 對照 / 自我增強迴圈 / Pass 1 vs Pass 2 預告 / edge weight 計算細節</div>
     </details>
   </aside>
 
