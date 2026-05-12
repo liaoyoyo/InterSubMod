@@ -51,7 +51,18 @@ add(id="01_cover", num="01", section="S0 Cover",
         <p style="font-size:13px;color:#6B7280;margin:14px 0 0;">中正大學 資工系 ・ 黃耀廷 教授 Lab405 實驗室</p>
       </div>
     </div>""",
-    speaker="謝謝各位。今天的報告主題是 self-phasing 問題的修正與驗證 — 在 longphase-to 工具的 tag 層發現一個設計缺陷，整理修正過程與跨樣本驗證的結果。報告人廖子游，這是 5/1 至 5/11 的階段性整理。",
+    speaker="""[開場]
+謝謝各位。
+
+[主題]
+今天的報告主題 — self-phasing 問題的修正與驗證。
+
+[範圍]
+我們在 longphase-to 工具的 tag 層發現一個設計缺陷。
+報告整理修正過程，以及跨樣本驗證的結果。
+
+[資訊]
+報告人 廖子游。這是 5/1 至 5/11 的階段性整理。""",
     tier3="(封面 speaker note 精簡至 30 sec，不透露後續 slide 結論)")
 
 add(id="02_tldr", num="02", section="S0 報告流程", rg2="—", ngrep="—",
@@ -112,7 +123,28 @@ add(id="02_tldr", num="02", section="S0 報告流程", rg2="—", ngrep="—",
     <div style="margin-top:14px;padding:10px 16px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;color:#0C4A6E;font-size:16px;font-weight:600;text-align:center;">
       18 章節 slide + 3 backup（Q&A）  ·  預計 20 分鐘 + 5 分鐘問答
     </div>""",
-    speaker="今天報告分三個階段六個章節。問題發現階段：先看觀察起點的偏移現象，再解析兩層機制。修正過程階段：用 read-level 量化鐵證驗證，並設計三版漸進修補。驗證結果階段：跨指標跨樣本一致性驗證，最後給結論與後續方向。為何先解這問題：ISM 後續所有 read 聚合、NGroups、TP/FP 分類統計都依賴 longphase-to HP tag — 若 tag 不可信，下游分析標準全失準。longphase-to 作者較少思考 audit tag 行為（缺解答與標準），本報告先填這缺口，確認 tag 合理可信。預計 20 分鐘 + 5 分鐘問答。",
+    speaker="""[結構]
+今天報告分三個階段、六個章節。
+
+[階段 1]
+問題發現 — 先看觀察起點的偏移現象，再解析兩層機制。
+
+[階段 2]
+修正過程 — 用 read-level 量化鐵證驗證，並設計三版漸進修補。
+
+[階段 3]
+驗證結果 — 跨指標跨樣本一致性驗證，最後給結論與後續方向。
+
+[為何先解這問題]
+ISM 後續所有分析 — read 聚合、NGroups、TP/FP 分類，都依賴 longphase-to HP tag。
+若 tag 不可信，下游分析標準全失準。
+
+[本報告價值]
+longphase-to 作者較少思考 audit tag 行為（缺解答與標準）。
+本報告先填這缺口，確認 tag 合理可信。
+
+[時長]
+預計 20 分鐘 + 5 分鐘問答。""",
     tier3="(目錄 speaker note 精簡至 60 sec，純預告章節 + 動機說明，不透露具體結論)")
 
 # ─── S1 觀察起點 ───────────────────────────────────────────────────────────
@@ -150,7 +182,22 @@ add(id="03_genome_173", num="03", section="S1 觀察起點", rg2="3", ngrep="8",
       <div class="gloss-item">📖 <span class="term">sub-clone:</span> 腫瘤中帶相同突變的某群癌細胞</div>
       <div class="gloss-item">📖 <span class="term">cnLOH:</span> 染色體數對但失去其中一個 haplotype</div>
     </div>""",
-    speaker="baseline LongPhase-TO 全基因組: HP1 reads 614K vs HP2 35.5K, 比例 17.3:1 vs 隨機 1:1。94.6% 占比是 systematic bias 的硬證據, 三條獨立論證: 生物學 (tumor sub-clone 不該跨 23 chr 系統偏 HP1)、跨 chr 一致 (cnLOH 只影響單 chr 但這偏移跨 23 chr 一致)、paired 對照 (paired pipeline HP1:HP2 ≈ 1:1)。三條互相獨立 → engineering artifact。",
+    speaker="""[主訊息]
+baseline LongPhase-TO 全基因組 HP1:HP2 = 17.3:1 — 這是 systematic bias 的硬證據。
+
+[數據]
+HP1 reads 614K，HP2 只 35.5K。94.6% 占比，遠離隨機 1:1。
+
+[三條獨立論證]
+論證 1 — 生物學：tumor sub-clone 不該跨 23 chr 系統偏 HP1。
+論證 2 — 跨 chr 一致：cnLOH 只影響單 chr，但這偏移跨 23 chr 一致。
+論證 3 — paired 對照：paired pipeline HP1:HP2 ≈ 1:1，沒這偏移。
+
+[結論]
+三條互相獨立 → 這是 engineering artifact，不是樣本性質。
+
+[轉場]
+接下來看具體個案 SP1 — 個別位點上失衡有多極端。""",
     tier3="cnLOH 機制細節 / 23 chr 一致性表 / paired pipeline 程式碼差異")
 
 add(id="04a_sp1", num="04a", section="S1 觀察起點", rg2="1", ngrep="3",
@@ -174,7 +221,22 @@ add(id="04a_sp1", num="04a", section="S1 觀察起點", rg2="1", ngrep="3",
     </div>
     <div class="igv-focus-callout" style="font-size:14px;padding:6px 12px;margin-top:4px;"><span class="label">👁 看圖重點：</span>baseline (最上) 紅+綠 reads 集中左欄 = HP1；V6 / paired_T (下) 紅+綠搬右欄 = HP2 → 三方向一致</div>
     <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 精確 count 待 vote_dump 量化  ²V6 取代 V2b/V3F/V5 簡化並列</p>""",
-    speaker="全基因組 17.3:1 是平均值; IGV 6-BAM 並列篩到 chr19 三個近 100% 失衡位點。SP1 chr19:17,565,944: baseline 113 reads 全 HP1 (HP2=0); V5 修正後翻到約 0~5:108 reads, 對齊 paired tumor 的 HP2 方向。排除噪音/caller/alignment 三個 alternative explanation: baseline 與 paired 方向完全相反 (翻轉而非衰減), V5 修正後與 paired ground truth 重合 → read assignment 強制集中的鐵證。",
+    speaker="""[從統計到個案]
+全基因組 17.3:1 是平均值。
+用 IGV 6-BAM 並列篩，找到 chr19 三個近 100% 失衡位點。
+
+[SP1 數據]
+位點 chr19:17,565,944。
+baseline — 113 條 reads 全 HP1，HP2 = 0。
+V5 修正後 — 翻到約 5:108，對齊 paired tumor 的 HP2 方向。
+
+[排除三個 alternative]
+噪音？baseline 與 paired 方向完全相反 — 是翻轉不是衰減。
+caller 錯？V5 修正後與 paired 重合 — 不是 caller。
+alignment 錯？跨 binary 一致 — 不是 alignment。
+
+[結論]
+read assignment 被強制集中的鐵證。""",
     tier3="6-BAM 並列順序細節 / V2b 中間階段意義 / HP1-1 sub-tag 與 HP1 合併原則")
 
 add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
@@ -213,7 +275,21 @@ add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
     <div class="igv-focus-callout" style="font-size:13px;padding:5px 10px;margin-top:4px;"><span class="label">👁 看圖重點：</span>兩圖同 SP1 模式 — baseline 紅+綠 reads 集中左欄；V6/paired_T 紅+綠搬右欄 → 3/3 對齊。HP1=(HP1+HP1-1) 紅綠；HP2=(HP2+HP2-1) 藍橙</div>
     <div class="conclusion-arrow green" style="font-size:15px;padding:8px 14px;">→ 三 SP 都在 chr19:12-17M → 對齊 slide 09 chr19 752 victims hotspot</div>
     <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 精確 count 待 vote_dump 量化；圖檔待 V6 重擷取後替換</p>""",
-    speaker="SP2 chr19:12,452,332 baseline 109:1; SP3 chr19:12,467,180 baseline 108:0; 與 SP1 同模式 3/3 — V6 修正後三位點都翻 HP2 對齊 paired 方向。三 SP 都在 chr19:12-17M 區段, 對齊後續 slide 09 chr19 752 victims hotspot — read-level 個案與全基因組分佈屬同機制不同層級。 [口述過渡] 接下來四個章節將分別回答: ① 為何全集中一邊? (S2 機制) ② read 層級? (S3 量化) ③ 三版各修? (S4 修補) ④ 是否都修對? (S5 驗證)。",
+    speaker="""[SP2/SP3 確認同模式]
+SP2 chr19:12,452,332 — baseline 109:1。
+SP3 chr19:12,467,180 — baseline 108:0。
+與 SP1 同模式 3/3 — V6 修正後三位點都翻 HP2 對齊 paired。
+
+[空間對應]
+三 SP 都在 chr19:12-17M 區段。
+對齊後續 slide 08 chr19 752 victims hotspot — 同機制不同層級觀察。
+
+[口述過渡]
+接下來四個章節分別回答：
+① 為何全集中一邊？S2 機制
+② read 層級多少？S3 量化
+③ 三版各修什麼？S4 修補
+④ 是否都修對？S5 驗證""",
     tier3="paired_T 與 paired_N 對照細節 / 三 SP 完整座標表 / V6 vs V5 差異 / HP sub-tag 分組原則")
 
 # ─── S2 機制 ──────────────────────────────────────────────────────────────
@@ -317,7 +393,20 @@ add(id="05_player_referee", num="05", section="S2 機制", rg2="4 (核心 forced
       <div class="gloss-item">📖 <span class="term">phasing graph:</span> het 位點當 node, read 共現當 edge</div>
       <div class="gloss-item">ⓘ 此為 phasing layer / tagging layer per-read getVote 詳 slide 06</div>
     </div>""",
-    speaker="phasing 層球員兼裁判機制三步: ① 物理基礎 germline het 50/50 隨機 vs somatic mut 100% 同染色體; ② TO 模式缺 paired normal 只能用 PoN, 非 PoN 變異被當 germline 進 graph; ③ somatic edge weight 100% 暴漲主導 graph - 本應被 phase 的 somatic 反過來決定 phasing - 即球員兼裁判。修法 8b8c1fd PON-only flag, phasing 階段排除非 PoN 變異, 只用 germline het 建 graph, somatic 不再當 node。但只解 phasing 層, tag 還壞 (slide 06)。",
+    speaker="""[標題]
+phasing 層的「球員兼裁判」機制。
+
+[三步推導]
+步驟 1 — 物理基礎：germline het 50/50 隨機，somatic mut 100% 同染色體。
+步驟 2 — TO 模式缺 paired normal，只能用 PoN 過濾。非 PoN 變異被當 germline 進 phasing graph。
+步驟 3 — somatic edge weight 100% 暴漲，主導 graph。本應被 phase 的 somatic 反過來決定 phasing — 這就是球員兼裁判。
+
+[修法]
+8b8c1fd PON-only flag。
+phasing 階段排除非 PoN 變異，只用 germline het 建 graph，somatic 不再當 node。
+
+[caveat]
+但只解 phasing 層。tag 階段還是壞的 — 下一頁說明。""",
     tier3="TO vs paired PoN 對照 / 自我增強迴圈 / Pass 1 vs Pass 2 預告 / edge weight 計算細節")
 
 add(id="06_priority_bug", num="06", section="S2 機制", rg2="1 + 2 footnote", ngrep="5",
@@ -465,7 +554,29 @@ add(id="06_priority_bug", num="06", section="S2 機制", rg2="1 + 2 footnote", n
       <div class="gloss-item">📖 <span class="term">sub-clone:</span> 腫瘤亞群</div>
       <div class="gloss-item">ⓘ per-read scope @ <code>judgeHaplotype:533</code></div>
     </div>""",
-    speaker="tagging 層 priority bug 機制三件套（per-read 框架, judgeHaplotype:533 每條 read 自己 reset countMap）: ① getVote vector 順序錯 baseline ① somatic ② mixed ③ germline, for 迴圈第一個非空 pair 就 break early, 同一條 read 的 germline 5 票永遠看不到; ② 真實 read 例子 chr19 752 victims 同模式 — 單一條 read 經過 5 個 germline het 位點累積 countMap[HP2]=5 主導 + 1 個 somatic 位點累積 countMap[HP1_1]=1, baseline 錯標這條 read 為 hp=11 正確應 hp=21; ③ V3F 修法 41ff147 重寫為兩層獨立判定, germline 先決方向 somatic 再加 sub-tag encoding。tumor sub-clone somatic 100% 同方向 → 752 條獨立 read 各自被 priority bug 翻成 HP:i:11 → tag layer 17.3:1 偏移 (slide 03 / 08)。重要: tag layer 與 slide 05 phasing layer 是不同層 bug, 必須分別修補, 不能合併修。getVote 是 per-read 操作不是 aggregate, 752 victims = 752 條獨立 read 而非 group。",
+    speaker="""[標題]
+tagging 層的 priority bug 機制。
+重點：getVote 是 per-read 操作 — judgeHaplotype:533 每條 read 自己 reset countMap。
+
+[三件套]
+件 1 — vector 順序錯：baseline ① somatic / ② mixed / ③ germline。for 迴圈第一個非空 pair 就 break early。同一條 read 的 germline 5 票永遠看不到。
+
+件 2 — 真實例子：chr19 752 victims 同模式。
+單一條 read 經過 5 個 germline het 位點，累積 countMap[HP2]=5 主導。
+加上 1 個 somatic 位點，countMap[HP1_1]=1。
+baseline 錯標這條 read 為 hp=11，正確應 hp=21。
+
+件 3 — V3F 修法 41ff147：重寫為兩層獨立判定。
+germline 先決方向，somatic 再加 sub-tag encoding。
+
+[串連]
+tumor sub-clone somatic 100% 同方向。
+→ 752 條獨立 read 各自被 priority bug 翻成 HP:i:11。
+→ tag layer 17.3:1 偏移就是這樣產生的。
+
+[關鍵釐清]
+tag layer 與 phasing layer 是不同層 bug，必須分別修補，不能合併修。
+752 victims = 752 條獨立 read，不是 aggregate。""",
     tier3="enum HAPLOTYPE1_1=2 vs HP tag int=11 / countMap per-read reset @ HaplotagProcess.cpp:533 / tag layer vs phasing layer 為何不能合併修 / 41ff147 與 380e8d2 INDEL guard 分工 / 752 victims per-read 獨立 case")
 
 add(id="07_two_layer_table", num="07", section="S2 機制", rg2="1", ngrep="5 commits + 1",
@@ -519,7 +630,25 @@ add(id="07_two_layer_table", num="07", section="S2 機制", rg2="1", ngrep="5 co
       <div class="gloss-item">ⓘ Layer 1.5 = V3F 之上補丁，非獨立層</div>
       <div class="gloss-item">ⓘ V6 trade-off: marker ✓ / SP1/2/3 翻方向 ✗</div>
     </div>""",
-    speaker="兩層 bug 四 fix stacking 時序: 2026-04 phasing 層 8b8c1fd PON-only → 2026-05 tagging V3F (41ff147 重寫 two-layer + 380e8d2 INDEL guard, 同時修 enum vs int literal mismatch bug) → 2026-05 V5 (d0bcd8c Pass 2 ploidy + 938f0df threshold + Layer 1.5 somatic fallback) → 2026-05-11 V6 (revert Layer 1.5)。修法做了什麼: phasing 層排除非 PoN 變異只用 germline het 建 graph; tagging Layer 1 重寫為兩層獨立判定 + 修 enum/int literal; Layer 1.5 純 somatic vote 區補 hp tag; V6 在 germline-absent 區回退保守 hp=33 marker coverage +30%。為何缺一不可: 只 PON-only tag 仍偏 99.9%; 只 V3F germline 缺席區 untagged; V5 Layer 1.5 補 fallback 但 germline-absent 4.19:1 偏 HP1 caveat (slide 16); V6 是 trade-off 修正不是完美解。",
+    speaker="""[時序]
+兩層 bug × 四 fix stacking — 五個 commits 漸進完成。
+
+2026-04 phasing 層：8b8c1fd PON-only。
+2026-05 tagging V3F：41ff147 重寫 two-layer + 380e8d2 INDEL guard。
+2026-05 V5：d0bcd8c Pass 2 ploidy + 938f0df threshold + Layer 1.5 somatic fallback。
+2026-05-11 V6：revert Layer 1.5。
+
+[每個修法做什麼]
+phasing 層 — 排除非 PoN 變異，只用 germline het 建 graph。
+tagging Layer 1 — 重寫兩層獨立判定 + 修 enum/int literal。
+Layer 1.5 — 純 somatic vote 區補 hp tag。
+V6 — germline-absent 區回退保守 hp=33。
+
+[為何缺一不可]
+只 PON-only — tag 仍偏 99.9%。
+只 V3F — germline 缺席區 untagged。
+V5 Layer 1.5 — 補 fallback 但 germline-absent 4.19:1 偏 HP1。
+V6 — 是 trade-off 修正不是完美解，但 marker coverage +30%。""",
     tier3="5 commit 順序細節 / V3F 命名歷史 / 跨層交互 / 為何不能合併修 / d0bcd8c 為何跨兩層 / enum=2 vs int=11 mismatch 細節 / V6 SP1/2/3 反向 caveat")
 
 # ─── S3 量化鐵證 ───────────────────────────────────────────────────────────
@@ -590,7 +719,31 @@ add(id="08_quant_evidence", num="08", section="S3 量化鐵證", rg2="—", ngre
       <div class="gloss-item">ⓘ V6 對 priority bug 結果 = V5 = V3F = 100%（修補在 V3F 41ff147 已完成；V6 唯一改動 Layer 1.5 revert 與本子集 germline+somatic 都 &gt;0 不重疊）</div>
       <div class="gloss-item">ⓘ chr8 priority bug 冷區 (0.34× avg) ≠ chr8 LOH+HPSig FP hotspot (7.4× ISM 下游) — 不同 layer，priority bug 修對不會自動清掉 chr8 hotspot</div>
     </div>""",
-    speaker="S3 量化鐵證 — 把 S2 機制 (球員兼裁判 + priority bug) 從理論變物理觀察。對 baseline (8b8c1fd) 與 V6 (HEAD) 兩版加 --debug-vote-dump flag, dump 每條 read 經 getVote 後的 5-vote countMap。chr19 pilot HCC1395 5kHz 篩 germline_majority ≠ somatic_majority 且 both >0 得 752 雙向矛盾 reads, baseline 全 752 條投錯方向標 hp=11, V6 全 752 條翻 hp=21 = 100% 單向修正, 0 條反向。全基因組擴展 (T1.2-F1, 每版 ~40 min 18.9M reads 744MB gzipped) victims 從 752 → 34,855 (46.4× scale up), V6 修正率仍 100% (34,855/34,855), 0 反向。重要顛覆: per-chr 分佈推翻原 chr19 hotspot 結論 — 主要 victim 分佈在 chr7 (3,508 rank 1) / chr2 (2,792) / chr1 (2,674) / chr16 (2,584) / chr20 (2,101); chr19 只占 2.16% rank 19 → SP1/2/3 (slide 04 IGV) 是可重現案例非主要分佈位置。chr8 priority bug enrichment 0.34× avg (rank 21 冷區), 與 MEMORY chr8 LOH+HPSig 7.4× FP hotspot 是不同 layer (後者是 ISM 下游 HP_Ratio + LOH 特徵交互), 兩者無直接因果, chr8 LOH+HPSig hotspot 機制另尋。chr19 1Mb hotspot detail (30M=215 + 27M=133 集中 46%) 與 4-path 驗證 (3.5/4 PASS) 留 tier3。",
+    speaker="""[標題]
+S3 量化鐵證 — 把 S2 機制從理論變物理觀察。
+
+[方法]
+對 baseline 與 V6 兩版加 --debug-vote-dump flag。
+dump 每條 read 經 getVote 後的 5-vote countMap。
+
+[chr19 pilot]
+HCC1395 5kHz chr19，篩 germline_majority ≠ somatic_majority 且 both >0。
+得 752 雙向矛盾 reads。
+baseline 全 752 條投錯方向 hp=11。
+V6 全 752 條翻 hp=21 = 100% 單向修正，0 條反向。
+
+[全基因組擴展]
+victims 從 752 → 34,855 = 46.4× scale up。
+V6 修正率仍 100% (34,855/34,855)，0 條反向。
+
+[重要顛覆]
+per-chr 分佈推翻原 chr19 hotspot 結論。
+主要 victim 分佈在 chr7 (3,508) / chr2 / chr1 / chr16 / chr20。
+chr19 只占 2.16%，rank 19 — SP1/2/3 是可重現案例，非主要分佈位置。
+
+[chr8 釐清]
+chr8 priority bug enrichment 0.34× avg — rank 21 冷區。
+與 MEMORY chr8 LOH+HPSig 7.4× FP hotspot 是不同 layer，無直接因果。""",
     tier3="chr19 1Mb hotspot 30M=215 + 27M=133 + 16M=41 / 4-path 驗證表 (個案 trace / Density 共變 / 修正後消失) / read_name case (1c50034a-f0f) / 全 24 chr enrichment ‰ / chrY 小 N 高 ‰ / Pass 2 reclassify 104K germline het")
 
 # ─── S4 修補設計 ───────────────────────────────────────────────────────────
@@ -666,7 +819,32 @@ add(id="10_fix_design", num="10", section="S4 修補設計", rg2="1", ngrep="5 h
       <div class="gloss-item">ⓘ V6 patch: HaplotagProcess.cpp:537-548 移除 13 行 (V5 Layer 1.5 else if 分支)</div>
       <div class="gloss-item">ⓘ V6 重用 V5 phased VCF → caller F1 三版完全相同 (HCC1395 0.93=0.7166 / 0.6=0.6273)</div>
     </div>""",
-    speaker="S4 修補設計 — 5 commits 漸進完成 + getVote 四版演進。Timeline: 8b8c1fd (4-09 藍) PON-only flag 解 phasing layer 球員兼裁判; 41ff147 (4-10 綠) ★ two-layer getVote 是修 priority bug 的關鍵 commit; 380e8d2 (4-25 綠) INDEL guard 補 OOB UB safety; d0bcd8c (4-30a 紫跨兩層) ploidy fix 讓 Pass 2 真實觸發 + bundled Layer 1.5 (germline 缺席用 somatic vote fallback); 938f0df (4-30b 藍) threshold 0.95→0.9 鬆綁 Pass 2; V6 (5-10 紅) revert Layer 1.5 因 5/9 paired audit 揭露 Layer 1.5 在 germline-absent 區繼承 priority bug 4.19:1 偏移。getVote 四版核心差異: baseline vector ordered check ① somatic pair → ② mixed → ③ germline 加 break early, 第一個非空 pair 就 break, 所以 hp=33 (走 ②) 只是「順序副作用」— read 必須沒有任何 HP1_1/HP2_1 票才有機會走到 ②, 但 priority bug 把多數 reads 拉走標 hp=11/21, hp=33 機率被嚴重壓縮。V3F 把 hp=33 變成「結構化決策」: Layer 1 germline 決方向, Layer 2 顯式 `if (somaticTotal>0 && germlineResult==0) hpResult=33` — 首次保證 germline-absent 區正確標 hp=33 而非 vector 順序的副作用。V5 Layer 1.5 把 germline-absent 區的 hp=33 改派 hp=11/21, 結構化保證被打破。V6 revert Layer 1.5 還原 V3F 結構化保證。hp=33 reads 全基因組量化: baseline 因 priority bug 偏 HP1/HP2 hp=33 訊號被壓; V3F 首次正確輸出 hp=33 132,060; V5 -89.9% to 13,250 (Layer 1.5 過度修正); V6 138,317 +4.7% vs V3F 還原並略超 — 對 ISM 下游 marker engineering 重要因為 hp=33 標識 somatic ambiguous 區。V6 重用 V5 phased VCF 故 caller F1 三版完全相同 (HCC1395 5kHz 0.7166 / 0.6 0.6273)。V6 = V3F germline-absent 保守 + V5 germline-existent 設計目標 (ploidy / threshold / phased VCF) = hybrid 升級 production-grade 終態。詳細 V5 vs V6 trade-off 量化見 slide 16 (V5 caveat)。",
+    speaker="""[標題]
+S4 修補設計 — 5 commits 漸進 + getVote 四版演進。
+
+[Timeline]
+8b8c1fd 4-09 PON-only — 解 phasing 層球員兼裁判。
+41ff147 4-10 ★ two-layer getVote — 修 priority bug 的關鍵 commit。
+380e8d2 4-25 — INDEL guard 補 OOB UB。
+d0bcd8c 4-30a 紫色跨兩層 — ploidy fix 讓 Pass 2 觸發 + bundled Layer 1.5。
+938f0df 4-30b — threshold 0.95→0.9 鬆綁 Pass 2。
+V6 5-10 — revert Layer 1.5。
+
+[getVote 四版核心]
+baseline — vector ordered ① somatic break early，hp=33 只是「順序副作用」。
+V3F — Layer 2 結構化 if (somaticTotal>0 && germlineResult==0) hpResult=33 — 首次保證 germline-absent 區正確標 hp=33。
+V5 Layer 1.5 — 把 hp=33 改派 hp=11/21，結構化保證被打破。
+V6 — revert Layer 1.5，還原 V3F 結構化保證。
+
+[hp=33 reads 全基因組量化]
+baseline ≈ 0 結構化。
+V3F 132,060 首次正確標 hp=33。
+V5 13,250，-89.9% 過度修正。
+V6 138,317，+4.7% 還原並略超 V3F。
+
+[結論]
+V6 = V3F germline-absent 保守 + V5 設計目標 + marker engineering 改善 = production-grade 終態。
+caller F1 三版完全相同 (重用 V5 phased VCF)，下一頁說明。""",
     tier3="commit 各別 line count (8b8c1fd +69/-6 / 41ff147 +36/-25 / 380e8d2 +8/-4 / d0bcd8c +68/-9 / 938f0df +4/-4) / V6 patch HaplotagProcess.cpp:537-548 移除 13 行 / V5 Layer 1.5 設計動機 (補 V3F untagged) / cherry-pick from zhenyu")
 
 add(id="12_no_regression", num="12", section="S5 驗證", rg2="1", ngrep="20+",
@@ -717,7 +895,36 @@ add(id="12_no_regression", num="12", section="S5 驗證", rg2="1", ngrep="20+",
       <div class="gloss-item">ⓘ scope: HCC1395 5kHz @ 0.93 purity; V6 同層 metric = V5 (重用 phased VCF)；caller F1 不變 (slide 14)</div>
       <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance — paired GT +13.3 pp 為 PI 鐵證；ISM 下游影響量化留 slide 18 future direction</div>
     </div>""",
-    speaker="S5 驗證 — baseline → V6 五大類 + 個案層 = 23 指標全綠 0 regression。① ISM aggregate 3 項 (HP_Ratio 0.788→0.574 是 tag bias 修正非變差); ② HP_Ratio AUC 2 項隨機區間內; ③ methylation 6 全 ±0.01 持平; ④ Paired GT concord 4 項 ⭐ clean PS +8.3 pp / 15-Aggr +6.65 pp / 15-Clean PS +13.3 pp; ⑤ HP/LOH 結構 5 項 ⭐ phase block N50 +99.7% / Phased +23.6 pp / 1.36× 快 / LOH Jaccard=1.0; ⑥ 個案層驗證 3 項 (slide 04 SP1/2/3 IGV 已詳) baseline 113:0/109:1/108:0 全 V6 翻 HP2 對齊 paired 3/3。重要: V6 重用 V5 phased VCF 故所有 phasing/structure metric 直接繼承 V5 結果; V6 唯一改動是 tagging 層 Layer 1.5 revert (germline-absent 區 hp=33 還原 — slide 10/16) 不影響本 slide 23 指標 (個案 + ISM + structural metric 都在 germline-existent 區或 caller 層); caller F1 三版完全相同 (slide 14) 將進一步證 V6 不退步。Layer 1.5 zero-sum F5 細節 (germline=0 +560K / germline>0 -560K 總和 0) 留 slide 16 V5 caveat 主軸。HP_Ratio 0.788→0.574 是 tag bias 修正 (baseline 因 priority bug 偏 HP1 拉高 HP_Ratio, V6 修對自然回降) 非 metric 變差 — 此為 pre-registered 量化目標。",
+    speaker="""[標題]
+S5 驗證 — baseline → V6 同層 4 類全綠。
+
+[重要前提]
+本 slide 只用 longphase-to 同層 + 結果 tag + paired 對比 + 個案層 驗證。
+不用 ISM 下游 metric — 下游本就因 V6 修正而改變，用它會是循環論證。
+
+[類別 1：同層 phasing 結構]
+phase block N50 +99.7%。
+Phased% +23.6 pp。
+speed 1.36× 快。
+LOH Jaccard = 1.0 完全相同。
+
+[類別 2：結果 tag 分布修正]
+HP1:HP2 17.3:1 → ~1:1。
+hp=33 還原 138,317 (+4.7% vs V3F)。
+chr19 hp=1-1:2-1 ratio 修正。
+
+[類別 3：paired GT 比對 — PI 鐵證]
+clean PS Paired GT +8.3 pp。
+15-Aggr Paired GT +6.65 pp。
+15-Clean PS Paired GT +13.3 pp ★。
+
+[類別 4：個案 SP1/2/3 IGV]
+baseline 113:0 / 109:1 / 108:0。
+V6 全翻 HP2 對齊 paired 3/3。
+
+[結論]
+4 類同層驗證全綠 + 個案層 3/3 對齊 paired → V6 修補在 longphase-to 端鐵證確立。
+ISM 下游影響量化是未來研究方向 — slide 18 會展開。""",
     tier3="methylation 6 feat 列表 / Layer 1.5 zero-sum 細節 (留 slide 16) / V2b/V3F 中間版本 / HP_Ratio 詳解 / LOH Jaccard=1.0 細節")
 
 add(id="14_caller_f1", num="14", section="S5 驗證 + ⚡ Cliffhanger", rg2="2", ngrep="15+",
@@ -771,7 +978,37 @@ add(id="14_caller_f1", num="14", section="S5 驗證 + ⚡ Cliffhanger", rg2="2",
     <div class="footer-glossary" style="font-size:9.5px;margin-top:4px;">
       <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance (+13.3 pp paired GT @ 0.93)，不在 caller F1 〔next: slide 17 主結論 + slide 18 未來方向〕</div>
     </div>""",
-    speaker="Caller F1 vs SEQC2 truth set 四版完全相同 — V6 不退步鐵證。0.93 purity (HCC1395 5kHz) 四版 TP=28,509 / FP=11,606 / FN=10,938 / Precision=0.7107 / Recall=0.7227 / F1=0.7166 完全相同 (到小數第 4 位 0 差異); 0.6 purity (HCC1395 t30_n20) 四版 TP=24,190 / FP=13,487 / FN=15,257 / F1=0.6273 完全相同。因果鏈: ClairS-TO PASS set 由 caller 決定 (FILTER 欄), V3F/V5/V6 三版改 GT/PS/GT2/GT3 phasing tag 不改 FILTER → PASS set 不變 → TP/FP/FN 集合不變 → F1 不變。V6 重用 V5 phased VCF + V6 只改 tagging 層 (HaplotagProcess.cpp:537-548 Layer 1.5 revert) 完全不改 phasing 層, 故 caller-side 零影響。ΔF1 (0.93→0.6) = -0.0893 是 ClairS-TO 在低 purity 樣本的性質 (recall 下降), 與 self-phasing 修補無關。turning point: 此 slide 結束 caller-level 驗證 (沒退步), 但下一節 slide 15-16 揭露 5/9 paired audit 找到 V5 Layer 1.5 在 germline-absent 區的設計缺陷, 5/10 V6 binary patch 已修對 — 帶出 V6 為何不只是 incremental 而是有具體 trade-off motivation。",
+    speaker="""[標題]
+Caller F1 vs SEQC2 — 四版完全相同。
+這是 V6 不退步的 caller-side 鐵證。
+
+[兩 purity 對照]
+HCC1395 5kHz 0.93 純樣本：
+baseline / V3F / V5 / V6 四版 TP=28,509 / FP=11,606 / FN=10,938 / F1=0.7166 — 完全相同。
+
+HCC1395 t30_n20 0.6 低純度：
+四版 TP=24,190 / FP=13,487 / FN=15,257 / F1=0.6273 — 完全相同。
+
+[釐清 0.93 vs 0.6 差異]
+兩 purity 都驗證了，四版內 0 差異。
+但 0.93 → 0.6 ΔF1 = −0.0893 是 ClairS-TO 在低 purity 性質。
+與 self-phasing 修補無關。
+
+[為何 invariant — 因果機制]
+ClairS-TO snv.vcf 一次性決定 FILTER=PASS 47,798 條。
+longphase-to phase 改 GT / PS / GT2 / GT3 / PON tag — 不改 FILTER。
+longphase-to haplotag 只改 BAM HP:i tag — 不碰 VCF。
+bcftools isec 取 FILTER=PASS 跟 truth 比對。
+FILTER 不動 → PASS set 不變 → TP/FP/FN 不變 → F1 數學保證 invariant。
+
+[兩種 F1 口徑都 invariant]
+業界 caller-level F1：四版 0.7166 / 0.6273 完全相同。
+論文 §4.3 V_H/V_L refined F1：實證三版 Verdict tag INFO 全 0 records（ClairS-TO 預設未啟用 Verdict tagging）→ 本 pipeline N/A。
+
+[結論]
+V6 真實價值不在 caller F1。
+真實價值在 read-level tag concordance — +13.3 pp paired GT @ 0.93。
+下一節 slide 17 是主結論，slide 18 是未來方向。""",
     tier3="PASS set / FILTER 機制 / purity 0.6 N50 微差 / V6 patch 不改 phasing 層 detail")
 
 # ─── S7 Errata + Follow-up ────────────────────────────────────────────────
@@ -818,7 +1055,38 @@ add(id="17_main_verdict", num="17", section="S7 結論", rg2="3 (main verdict)",
       <div class="gloss-item">ⓘ commit chain: f17754f → 2553e96 → 71d21bd → V6 patch (待 commit)</div>
       <div class="gloss-item">ⓘ E1-E3 表述精確化（chr19 hotspot 降級 / V5 commit / 證據鏈升級）詳見 errata 完整報告</div>
     </div>""",
-    speaker="整份報告主結論 3 條 (PI 必記): 結論 1 priority bug 機制因果確立 — 17.3:1 → ~1:1 全基因組 + 34,855 read-level victims V6 100% 修正 0 反向 + SP1/2/3 IGV 對齊 paired 3/3; 結論 2 V6 = production candidate 5/10 binary patch = V3F 保守 hp=33 + V5 ploidy/threshold/phased VCF + marker engineering 改善 (hp=33 +4.7% vs V3F / marker coverage +9.0% / Phase D 4 樣本 ratio 0.61-1.24 全中性 / caller F1 三版相同 0.7166); ★ 結論 3 真實價值在 read-level tag concordance 非 caller F1 — +13.3 pp paired GT @ 0.93 + hp=33 還原 + marker coverage +9.0% → ISM 下游 marker engineering 受惠, caller F1 對 V3F/V5/V6 數學保證 invariant (FILTER 不動)。PI 報告 4-29 errata 6 條: E1 chr19 hotspot 降級為可重現案例; E2 V5 已 commit 4-30; E3 priority bug 證據鏈升級加 34,855 鐵證; ★ E4 V5 = Pass 1 only 歸因修正; ★ E5 V5 Layer 1.5 germline-absent 4.19:1 缺陷; ★ E6 (5/11 新加) F-paired-D3 follow-up 已實作為 V6 binary patch + Phase D 4 樣本驗證。E1-E3 表述精確化, E4-E5 核心 caveat, E6 敘事閉環 V5 caveat → V6 修對 production candidate。",
+    speaker="""[標題]
+整份報告主結論 3 條 — PI 必記。
+
+[結論 1]
+priority bug 修補機制因果確立。
+17.3:1 偏移 → ~1:1 全基因組。
+34,855 read-level victims baseline → V6 100% 修正，0 反向。
+SP1/2/3 IGV 對齊 paired 3/3。
+
+[結論 2]
+V6 = production candidate（5/10 binary patch）。
+等於 V3F 保守 hp=33 + V5 ploidy/threshold/phased VCF + marker engineering 改善。
+hp=33 +4.7% vs V3F。
+marker coverage +9.0%。
+Phase D 4 樣本 ratio 0.61-1.24 全中性。
+caller F1 三版相同 0.7166。
+
+[結論 3 — ★ 最重要]
+真實價值在 read-level tag concordance — 非 caller F1。
++13.3 pp paired GT concordance @ 0.93。
+hp=33 還原。
+marker coverage +9.0% → ISM 下游 marker engineering 受惠。
+caller F1 對 V3F/V5/V6 數學保證 invariant — FILTER 不動。
+
+[errata 簡述]
+PI 報告 4-29 errata 6 條，3 條核心：
+E4 — V5 = Pass 1 only 歸因修正。
+E5 — V5 Layer 1.5 germline-absent 4.19:1 缺陷。
+E6 — V6 binary patch 完成 + Phase D 4 樣本驗證閉環。
+
+[轉場]
+下一頁 — 改正後影響 + 未來研究方向。""",
     tier3="errata commit chain / V6 patch 待 commit / Phase D 5 樣本 evaluation matrix / 各 errata 段落 cross-ref")
 
 add(id="18_impact_future", num="18", section="S7 結論", rg2="1", ngrep="—",
@@ -868,7 +1136,47 @@ add(id="18_impact_future", num="18", section="S7 結論", rg2="1", ngrep="—",
       </tbody>
     </table>
     <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ V6 = production candidate；F1/F2 是 ISM 核心主線回歸 (從 longphase-to bug 修補 → 重新驗證 ISM 五大目標)</div>""",
-    speaker="改正後影響: upstream V6 priority bug 修對 17.3:1 → ~1:1 + hp=33 還原 138,317 + marker coverage +9% + Phase D 4 樣本 ratio 全中性。downstream ISM 受惠: HP_Ratio bias 修正 + read 集合乾淨 + marker engineering 訊號完整 + paired GT +13.3 pp。未來研究方向 — 回到 ISM 五大目標主線 (V6 是下游驗證基礎): F1 ★ LOH 內外 TP/FP 差異特徵驗證 — 用 V6 tag 在 LOH 內 vs LOH 外 區域對 TP/FP 比較甲基化率、read 特徵、HP_Ratio、NGroups 分布; 對應五大目標 1 (per-CpG 甲基關聯) + 4 (TO normal 補強) + 5 (F1 提升); 驗證 ISM 是否能正確識別不同區域差異特徵。F2 ★ subclone 結構 + 二次打擊事件順序 — 用 V6 hp=33 + NG≥3 marker 識別 sub-clone 結構; 結合 LOH/CNV/HP 推論 two-hit order; 驗證 V6 marker 訊號是否能區分 first-hit vs second-hit 事件順序; 對應五大目標 2 (clone 結構) + 3 (二次打擊事件順序)。F3 7-sample expansion + COLO829 解鎖 + Pass 2 ablation — 跨樣本 V6 一致性驗證基礎 (F1/F2 都需要)。整體研究定位 — InterSubMod 是可解釋 epigenetic evidence 整合框架, 不是另一個 somatic caller; F1/F2 是從 longphase-to bug 修補完成後, 回歸 ISM 核心主線的研究重啟; V6 是 production candidate 的同時也是下游 ISM 驗證的乾淨基礎。",
+    speaker="""[標題]
+改正後影響 + 未來研究方向 — 回到 ISM 五大目標主線。
+
+[upstream 影響]
+longphase-to V6 端：
+priority bug 修對 17.3:1 → ~1:1。
+hp=33 還原 138,317。
+marker coverage +9.0%。
+Phase D 4 樣本 ratio 全中性。
+
+[downstream 影響]
+ISM 端受惠：
+HP_Ratio tag bias 修正 0.788 → 0.574。
+HP1/HP2 read 集合更乾淨 → methylation delta 更精確。
+marker engineering 訊號完整。
+★ paired GT concordance +13.3 pp @ 0.93。
+
+[主結論連結]
+V6 = production candidate，可升級替代 V5。
+
+[未來研究方向 — 回到 ISM 五大目標主線]
+F1 ★ LOH 內外 TP/FP 差異特徵驗證。
+用 V6 tag 在 LOH 內 vs LOH 外 區域對 TP/FP 比較甲基化率、read 特徵、HP_Ratio、NGroups 分布。
+對應五大目標 1 (per-CpG 甲基關聯) + 4 (TO normal 補強) + 5 (F1 提升)。
+
+F2 ★ subclone 結構 + 二次打擊事件順序。
+用 V6 hp=33 + NG≥3 marker 識別 sub-clone 結構。
+結合 LOH/CNV/HP 推論 two-hit order。
+驗證 V6 marker 訊號是否能區分 first-hit vs second-hit。
+對應五大目標 2 (clone 結構) + 3 (二次打擊事件順序)。
+
+F3 7-sample expansion + COLO829 + Pass 2 ablation。
+F1/F2 cross-sample 驗證基礎。
+
+[研究定位]
+InterSubMod 是可解釋 epigenetic evidence 整合框架，不是另一個 somatic caller。
+F1/F2 是從 longphase-to bug 修補完成後，回歸 ISM 核心主線的研究重啟。
+V6 是 production candidate 的同時，也是下游 ISM 驗證的乾淨基礎。
+
+[結尾]
+今天主軸到這裡。後續 4 張 QA backup slides 補充對話質疑點。""",
     tier3="ISM 五大目標完整列表 (目標 1-5) / LOH 內外 TP/FP 差異分層方案 / two-hit order 推論方法 / HCC1937 BRCA1 mutant / COLO829 chmod / T1.3 4-cell ablation 設計")
 
 # ─── Q&A Backup (對話釐清點補佐證) ────────────────────────────────────────
@@ -910,7 +1218,36 @@ add(id="b1_pass2", num="B1", section="Q&A Backup", rg2="1", ngrep="—",
       <text x="418" y="202" font-size="8.5" fill="#6B7280" text-anchor="middle">HCC1395 0.6 樣本不觸發 / Pass 1 已穩定</text>
     </svg>
     <p style="font-size:10.5px;font-weight:600;color:#16A34A;margin:6px 0 0;">★ 關鍵: Pass 2 只重跑 2-point edgeConnectResult，不重跑 3-point somaticCalling — 後者 patternMining 基於 read linkage 拓樸 (V_H 12 + V_L 3 patterns)，與 purity 無關</p>""",
-    speaker="Q: Pass 2 為什麼只跑 2-point? somaticCalling 3-point patternMining 用 read linkage 拓樸 (V_H 12 patterns / V_L 3 patterns) 與 purity 無關; edgeConnectResult 2-point 永遠跑。低 purity ≤0.9 Pass 2 跳過 (Pass 1 已穩定); 高 purity >0.9 才觸發 Pass 2 second round 只重跑 2-point edgeConnectResult 用 Pass 1 已分類 origin 精修 phasing graph。threshold 0.95→0.9 由 V5 938f0df commit cherry-pick from zhenyu。Pass 2 incremental: phased var -2.90 pp / blocks -9.79% / N50 +3.51% (HCC1395 0.93 樣本)。常見誤解: 低 purity 用 3-point 倒過來; 實情相反 — 高 purity 才多做事 (因為 Pass 1 origin 穩定可重用)。HCC1395 0.6 purity 樣本兩版都不觸發 Pass 2 → V5 改 GT 在低 purity 自我治癒。",
+    speaker="""[Q]
+Pass 2 為什麼只跑 2-point？為什麼高 purity 才觸發？
+
+[Pass 1 永遠跑]
+Pass 1 跑兩件事：
+3-point patternMining — somaticCalling 做 V_H / V_L / V_N 分類。
+2-point edgeConnectResult — phasing graph 建構。
+三路徑算法不依賴 purity（基於 read linkage 拓樸）。
+
+[purity 判定]
+purity > 0.9 才觸發 Pass 2（原 0.95，938f0df commit 改 0.9）。
+低 purity ≤ 0.9 Pass 2 跳過 — Pass 1 已穩定。
+
+[Pass 2 做什麼]
+只重跑 2-point edgeConnectResult。
+用 Pass 1 已分類 origin 精修 phasing graph。
+不重跑 3-point somaticCalling。
+
+[Pass 2 incremental 效果]
+N50 +3.51%。
+blocks −9.79%。
+phased var −2.9 pp。
+
+[常見誤解]
+「低 purity 用 3-point 倒過來」— 實情相反。
+高 purity 才多做事，因為 Pass 1 origin 穩定可重用。
+
+[低 purity 樣本案例]
+HCC1395 0.6 purity 樣本兩版都不觸發 Pass 2。
+V5 改 GT 在低 purity 自我治癒。""",
     tier3="patternMining first/second/third path / Pass 2 不重跑 somaticCalling / threshold 0.95→0.9 cherry-pick")
 
 add(id="b2_f1_dual_metric", num="B2", section="Q&A Backup", rg2="3", ngrep="—",
@@ -938,7 +1275,28 @@ add(id="b2_f1_dual_metric", num="B2", section="Q&A Backup", rg2="3", ngrep="—"
       </tbody>
     </table>
     <p style="font-size:10px;font-weight:600;color:#7C2D12;margin:6px 0 0;background:#FEF3C7;padding:4px 8px;border-radius:4px;">★ 實證鐵證: 三版 phased VCF PASS=47,798 / nonPASS=3,139,477 / Verdict tag 全 0 — V3F/V5/V6 對兩種 F1 口徑都 invariant</p>""",
-    speaker="Q: longphase-to 論文 §4.3 寫 F1 改善, 為何我們寫 F1 不變? 答: 雙口徑差異不衝突。論文口徑用 Step 4 Graph-Based Somatic Calling V_H/V_L set 作 caller post-filter (Verdict_Somatic INFO tag); 我們業界口徑用 bcftools isec FILTER=PASS vs SEQC2 truth。實證鐵證 — 三版 phased VCF PASS=47,798 / nonPASS=3,139,477 完全相同; Verdict_Somatic / Verdict_Germline / Verdict_SubclonalSomatic INFO tag 全 0 records (INFO header 有定義但 ClairS-TO 預設未啟用 Verdict tagging)。所以論文 refined F1 在本 pipeline 不可量化 (需重跑 ClairS-TO 啟用 Verdict tagging flag)。longphase-to 真實修改範圍: phase 階段改 GT/PS/GT2/GT3/PON tag (FORMAT/INFO 欄位); haplotag 階段改 BAM HP:i tag (不碰 VCF); V5 Pass 2 reclassify 104,457 germline het GT 0/1→0/0 (改 FORMAT 不改 FILTER); 全部都不改 FILTER 欄位 (caller 一次性決定)。FILTER 不動 → PASS set 不變 → TP/FP/FN 不變 → F1 數學保證 invariant。",
+    speaker="""[Q]
+longphase-to 論文 §4.3 寫 F1 改善 — 為何我們寫 F1 不變？
+
+[答 — 雙口徑差異, 不衝突]
+論文口徑 — 用 Step 4 Graph-Based Somatic Calling 的 V_H/V_L set 作 caller post-filter（Verdict_Somatic INFO tag）。
+我們業界口徑 — 用 bcftools isec FILTER=PASS vs SEQC2 truth。
+
+[實證鐵證]
+我跑了三版 phased VCF 比對。
+PASS = 47,798 / nonPASS = 3,139,477 — 三版完全相同。
+Verdict_Somatic / Verdict_Germline / Verdict_SubclonalSomatic INFO tag 全 0 records。
+INFO header 有定義但 ClairS-TO 預設未啟用 Verdict tagging。
+所以論文 refined F1 在本 pipeline 不可量化 — 需重跑 ClairS-TO 啟用 Verdict tagging flag。
+
+[longphase-to 真實修改範圍]
+phase 階段 — 改 GT / PS / GT2 / GT3 / PON tag（FORMAT / INFO 欄位）。
+haplotag 階段 — 改 BAM HP:i tag（不碰 VCF）。
+V5 Pass 2 reclassify — 104,457 germline het GT 0/1 → 0/0（改 FORMAT 不改 FILTER）。
+
+[FILTER 不動 = F1 invariant]
+FILTER 由 ClairS-TO 一次性決定。
+PASS set 不變 → TP/FP/FN 不變 → F1 數學保證 invariant。""",
     tier3="bcftools isec 機制 / V_H/V_L 12+3 patterns / longphase phase vs haplotag 階段分工 / FILTER 第 7 欄定義")
 
 add(id="b3_hp33_paired", num="B3", section="Q&A Backup", rg2="2", ngrep="—",
@@ -967,7 +1325,35 @@ add(id="b3_hp33_paired", num="B3", section="Q&A Backup", rg2="2", ngrep="—",
       </tbody>
     </table>
     <p style="font-size:10px;color:#1E3A8A;margin:6px 0 0;font-weight:600;">→ paired 整體無 systematic bias 證 priority bug 是 TO mode 限定 (球員兼裁判 + getVote 順序錯); 不是 longphase 演算法整體缺陷</p>""",
-    speaker="Q1 hp=33 trade-off: baseline 因 vector 順序 ① somatic pair break early, hp=33 走 ② mixed pair 路徑機率被嚴重壓縮 (順序副作用); V3F 加 Layer 2 結構化 if (somaticTotal>0 && germlineResult==0) hpResult=33, 首次保證 germline-absent 區正確標 hp=33 (132,060 全基因組); V5 Layer 1.5 用 somatic vote 改派 hp=11/21 把 hp=33 壓掉 (-89.9% to 13,250) 為過度修正; V6 revert Layer 1.5 還原 V3F 結構化保證 (138,317 +4.7% vs V3F)。V5→V6 transfer 守恆 82:17 from hp=1-1/hp=2-1 → hp=33 完美 mirror priority bug feature 化方向。Q2 paired mode = control group: paired 用 longphase-s 獨立 codebase (vs TO 用 longphase-to), HP1:HP2 = 1:1.275 接近隨機 / som_ratio mean 0.462 跨 0-1 全範圍 → 整體無 systematic bias, 證 priority bug 是 TO mode 限定 (球員兼裁判 + getVote 順序錯 + Layer 1.5 4.19:1 偏 HP1); 不是 longphase 演算法整體缺陷; 為 V5 Layer 1.5 caveat 提供 control 對比基礎。",
+    speaker="""[Q1]
+hp=33 為何重要？baseline 沒有 / V3F 首現 / V5 壓掉 / V6 還原？
+
+[hp=33 四版 trade-off]
+baseline — vector ① somatic break early，hp=33 走 ② mixed pair 路徑機率被嚴重壓縮（順序副作用）。
+V3F — 加 Layer 2 結構化 if (somaticTotal>0 && germlineResult==0) hpResult=33。首次保證 germline-absent 區正確標 hp=33 — 132,060 全基因組。
+V5 Layer 1.5 — 用 somatic vote 改派 hp=11/21，把 hp=33 壓掉 −89.9% to 13,250。過度修正。
+V6 — revert Layer 1.5，還原 V3F 結構化保證 — 138,317，+4.7% vs V3F。
+
+[V5→V6 transfer 守恆]
+82% from hp=1-1 + 17% from hp=2-1 → hp=33。
+完美 mirror priority bug feature 化方向。
+
+[Q2]
+為何看 paired mode？
+
+[paired mode = control group]
+paired 用 longphase-s 獨立 codebase。
+vs TO 用 longphase-to。
+
+[paired 數據]
+HP1:HP2 = 1:1.275 接近隨機。
+som_ratio mean 0.462 跨 0-1 全範圍。
+→ 整體無 systematic bias。
+
+[結論]
+證 priority bug 是 TO mode 限定（球員兼裁判 + getVote 順序錯 + Layer 1.5 4.19:1 偏 HP1）。
+不是 longphase 演算法整體缺陷。
+為 V5 Layer 1.5 caveat 提供 control 對比基礎。""",
     tier3="V5→V6 transfer 82:17 守恆細節 / paired chr19 354,919 tagged reads / longphase-s SomaticHaplotagProcess.cpp:533 / V5 Layer 1.5 germline-absent 4.19:1 量化 (5,789 events)")
 
 add(id="b4_phase_d_outliers", num="B4", section="Q&A Backup", rg2="1", ngrep="—",
@@ -1001,7 +1387,37 @@ add(id="b4_phase_d_outliers", num="B4", section="Q&A Backup", rg2="1", ngrep="�
       </div>
     </div>
     <p style="font-size:10px;color:#6B7280;font-style:italic;text-align:center;">Phase D pipeline: V5 binary phasing → V6 binary haplotag (hybrid); 每樣本 wall ~10 hr</p>""",
-    speaker="Q V6 跨樣本一致性: Phase D 5 樣本 evaluation (HCC1395 ref + H1437/H2009/HCC1954/HCC1937, COLO829 阻塞)。hp=1-1:hp=2-1 ratio 4 樣本全部接近中性 0.611-1.243 (平均 0.928, vs V5 baseline 1.86, vs 原 baseline 17.3:1) → V6 priority bug 修補一致成功。marker rate 3/4 通過 ≥0.85: H1437 0.992, H2009 0.993, HCC1954 0.954, HCC1937 0.817 邊緣 fail。HCC1937 為 BRCA1 mutant 高 ploidy 細胞株, FP/TP=0.194 (vs 其他樣本 0.01-0.035 高 20×), CNV-driven germline het AF 漂移混入 FP — 須加 AF<0.4 filter (與 HPFineNGroups canonical 一致), 非否定 V6 patch 是樣本特性。COLO829 待 chmod 660 HKU/NYGC truth set 或提供替代 PASS VCF, BAM ready; F1 follow-up 一條。Phase D pipeline V5 phasing → V6 haplotag (hybrid), 每樣本 wall ~10 hr; 4 樣本約 40 hr 平行跑完。",
+    speaker="""[Q]
+V6 跨樣本一致性如何？為何 HCC1937 marker rate 0.817 邊緣 fail？
+
+[Phase D 5 樣本評估]
+HCC1395 (ref) + H1437 + H2009 + HCC1954 + HCC1937。
+COLO829 truth set 0600 權限阻塞。
+
+[ratio 結果 — 4 樣本全中性 ✅]
+HCC1395 1.838 / H1437 1.243 / H2009 0.901 / HCC1954 0.958 / HCC1937 0.611。
+範圍 0.611-1.243，平均 0.928。
+vs V5 baseline 1.86，vs 原 baseline 17.3:1。
+→ V6 priority bug 修補一致成功。
+
+[marker rate 結果 — 3/4 通過 ≥0.85]
+H1437 0.992 / H2009 0.993 / HCC1954 0.954 — 全通過。
+HCC1937 0.817 邊緣 fail。
+
+[HCC1937 邊緣 — 樣本特性非 V6 失敗]
+BRCA1 mutant 高 ploidy 細胞株。
+FP/TP = 0.194 — 比其他樣本 0.01-0.035 高 20 倍。
+CNV-driven germline het AF 漂移混入 FP。
+→ 須加 AF < 0.4 filter（與 HPFineNGroups canonical 一致）。
+非否定 V6 patch，是樣本特性。
+
+[COLO829 阻塞]
+truth set 0600 權限。BAM ready 待 chmod 660 或替代 PASS VCF。
+F1 follow-up 一條。
+
+[Pipeline 細節]
+Phase D pipeline = V5 phasing → V6 haplotag (hybrid)。
+每樣本 wall ~10 hr。4 樣本約 40 hr 平行跑完。""",
     tier3="HCC1937 BRCA1 mutant 高 ploidy CNV 細節 / COLO829 truth set 0600 chmod 步驟 / HPFineNGroups AF<0.4 filter 文獻 / Phase D 4-stage pipeline")
 
 # ═══════════════════════════════════════════════════════════════════════════
