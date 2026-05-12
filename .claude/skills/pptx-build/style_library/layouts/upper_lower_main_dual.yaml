@@ -1,0 +1,49 @@
+name: upper_lower_main_dual
+category: 16_9_slide_layout
+purpose: 上半主視覺 + 下半左右並列雙輔助（slide 06 priority bug 機制用）
+created: 2026-05-12
+
+when_to_use:
+  - 主視覺 (igv_read_block A1) + 下半同時呈現「程式碼依據」(code_diff_pane B2) 與「流程圖」(flow_diagram_box C2)
+  - 任何「機制圖 + 程式碼 + 流程」三合一講解
+
+grid_definition:
+  slide_canvas: { aspect_ratio: "16 / 9", max_width_px: 1280, padding_px: "28px 40px" }
+  regions:
+    upper:
+      y_start: 0
+      y_end_pct: 50
+      content: igv_read_block (A1 multi-read)
+      object_count_budget: 30  # 合併計為 1 邏輯元素
+    lower_left:
+      x_start: 0
+      x_end_pct: 50
+      y_start_pct: 50
+      content: code_diff_pane (B2 compact) + code_source_header
+      object_count_budget: 10
+    lower_right:
+      x_start_pct: 50
+      x_end: 100
+      y_start_pct: 50
+      content: flow_diagram_box (C2 single mermaid)
+      object_count_budget: 8
+
+logical_element_count: 3  # 符合 ≤ 6 element 紅旗
+total_visual_object_count: ~48  # 合併後 3 邏輯區塊
+
+required_components:
+  - { region: upper, ref: objects/igv_read_block.yaml#A1 }
+  - { region: lower_left, ref: objects/code_diff_pane.yaml#B2 }
+  - { region: lower_right, ref: objects/flow_diagram_box.yaml#C2 }
+
+optional_components:
+  - footer_caveat_note
+  - cross_link_to_backup_slide  # B1/C1 詳版
+
+inherits_from: null
+related_layouts: []
+
+failure_modes:
+  - upper_overflow: "A1 SVG 太大壓到下半 — 限 height ≤ 50% canvas"
+  - lower_visual_clash: "B2 + C2 顏色衝突 — B2 紅綠 / C2 綠系，需確保 baseline 用紅 / V5 用綠一致"
+  - exceeds_element_count: "若 upper 拆 multi-read 又無合併，總邏輯元素 >3 違反紅旗 — 合併計為 1 IGV view"

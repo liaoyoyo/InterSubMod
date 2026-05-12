@@ -1,0 +1,45 @@
+name: code_source_header
+category: code_visualization_accessory
+tier_recommendation: B
+purpose: 程式碼來源 path/lineno 標題框（搭 code_diff_pane 用）
+created: 2026-05-12
+
+when_to_use:
+  - 任何程式碼 diff 或 code block 顯示 — 必須標明來源檔案
+  - 多檔案對照（baseline vs V5 各自 path）
+
+style_specs:
+  background: "#F3F4F6"
+  border: "1px solid #D1D5DB"
+  border_bottom: "none"  # 與下方 diff_block 連續
+  border_radius: "6px 6px 0 0"
+  padding: "8px 14px"
+  font_family: "JetBrains Mono, DejaVu Sans Mono, monospace"
+  font_size_px: 13
+  color: "#1F2937"
+  layout:
+    display: flex
+    justify_content: space_between
+    align_items: center
+
+elements:
+  path:
+    font_weight: 600
+    color: "#1E3A8A"
+    format: "project-folder / file.cpp"
+  lineno:
+    color: "#6B7280"
+    font_size_px: 12
+    format: "{version} · {start}–{end} 行（{function_name}）"
+
+dual_header_pattern:
+  description: "B1 Full 變體用：上方一個 baseline header / 下方一個 V5 header"
+  separator_top: "none"
+  separator_bottom: "1px dashed #9CA3AF"  # 視覺分隔
+
+related_objects: [code_diff_pane]
+example_application: examples/slide_06_priority_bug.md
+
+failure_modes:
+  - missing_path: "缺 path 時觀眾無法 verify — 必填"
+  - wrong_lineno_format: "若用絕對路徑而非 repo-relative 則 PR 內無法直接點擊跳轉 — 用 repo-relative path"

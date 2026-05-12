@@ -1,0 +1,81 @@
+name: igv_read_block
+category: read_visualization
+tier_recommendation: A
+purpose: IGV-style read 視覺化，呈現單條 read 經過多個 variant 位點的 per-read vote 結果
+created: 2026-05-12
+validated_by: /big8_disk/liaoyoyo2001/longphase-to/HaplotagProcess.cpp:506-530 (baseline) + :512-560 (V5/V6)
+
+when_to_use:
+  - 解釋 per-read getVote 機制（priority bug, V3F/V5 修法效果）
+  - 反駁 aggregate vote 誤解（強調 countMap per-read scope）
+  - chr19 752 / genome 34855 victims 個案視覺化
+  - 任何「一條 read 經過 N 個 variant 位點」的 read-level 概念展示
+
+variants:
+  A1_multi_read:
+    use_case: 單張 slide / 主視覺 / 多 case 對照
+    required_elements:
+      - position_headers: { count_min: 3, count_max: 6 }
+      - reads: { count: 3, shape: pentagon, with_panel: true }
+      - tag_panel_per_read: { fields: [countMap, baseline_hp, V5_hp] }
+      - observation_footer: { lines: 3, includes_summary: true }
+    optional_elements:
+      - basic_concept_4grid: { terms: [read, position, countMap, HP tag] }
+      - guide_lines: { from: position_header, to: read_y, style: dashed }
+    object_count_estimate: 30
+    svg_dimensions: { width: 1100, height: 460 }
+    emphasize_target: "受 priority bug 影響的 read panel 加 stroke-width:2 + red border"
+
+  A2_single_read:
+    use_case: 半張 slide / per-read scope 證明
+    required_elements:
+      - position_headers: { count_min: 3, count_max: 5 }
+      - reads: { count: 1, shape: pentagon }
+      - markers_per_position: { vote_label: "+1 to countMap[HP?]" }
+      - countMap_footer: { full_5keys: true, monospace: true }
+    optional_elements:
+      - somatic_dashed_separator
+      - per_read_reset_note: { ref: "C++ judgeHaplotype:533" }
+    object_count_estimate: 12
+    svg_dimensions: { width: 880, height: 320 }
+    emphasize_target: "somatic marker 邊框 2.5px"
+
+  A3_minimal:
+    use_case: 內嵌引用 / 只示意 read 上有 germline+somatic mix
+    required_elements:
+      - position_headers: { count: 2 }
+      - reads: { count: 1, shape: pentagon }
+      - markers: { count: 2, one_germline + one_somatic: true }
+      - result_one_liner: { format: "countMap[HP2]=?, HP1_1=? → baseline hp=? V5 hp=?" }
+    optional_elements: []
+    object_count_estimate: 6
+    svg_dimensions: { width: 600, height: 130 }
+    emphasize_target: none
+
+shape_specs:
+  read_pentagon:
+    description: IGV alignment 箭頭形（+ strand 右指）
+    svg_path_template: "M {x_left},{y_top} L {x_arrow_start},{y_top} L {x_right},{y_mid} L {x_arrow_start},{y_bottom} L {x_left},{y_bottom} Z"
+    height_px: 30
+    arrow_extension_px: 20
+    fill_token: read_bg
+    stroke_token: read_border
+  variant_marker:
+    width_px: 26
+    height_px: 36
+    border_width_px: { default: 1.5, somatic_strong: 2 }
+    variants:
+      - { tag: HP1, fill_token: hp1_germline, border_token: hp1_border }
+      - { tag: HP2, fill_token: hp2_germline, border_token: hp2_border }
+      - { tag: HP1_1, fill_token: somatic_alt, border_token: somatic_border, border_width_px: 2 }
+      - { tag: HP2_1, fill_token: somatic_alt, border_token: somatic_border, border_width_px: 2 }
+      - { tag: HP3, fill_token: somatic_alt, border_token: somatic_border }
+
+inherits_from: null
+related_objects: [position_header, code_diff_pane, flow_diagram_box]
+example_application: examples/slide_06_priority_bug.md
+
+failure_modes:
+  - aggregate_misinterpretation: "若多 reads 並列但未說明 per-read scope 易被誤解為 aggregate vote — 必加 footer note 強調"
+  - wrong_marker_alignment: "marker x 座標必對齊 position_header x 座標 — 否則視覺斷裂"
+  - exceeding_6_element_redflag: "A1 30 物件須合併計為 1 邏輯元素（IGV view）才符合 ≤6 紅旗"

@@ -1,0 +1,54 @@
+name: position_header
+category: read_visualization_accessory
+tier_recommendation: B
+purpose: IGV-style read 視覺中的位點 header（germline het PoN ✓ / somatic mut PoN ✗）
+created: 2026-05-12
+
+when_to_use:
+  - 搭 igv_read_block.yaml 使用，標示 variant 位點性質
+  - 必標 PoN 狀態（✓ germline het / ✗ somatic non-PoN）
+
+style_specs:
+  width_px: { default: 120, compact: 100, minimal: 80 }
+  height_px: { default: 40, compact: 38, minimal: 26 }
+  border_width_px: 1.5
+  border_radius_px: 4
+  text_anchor: middle
+
+variants:
+  germline_het:
+    fill: "#DBEAFE"
+    stroke: "#1E40AF"
+    label_top: "germ het"   # 或 "pos N" + 下方 PoN 狀態
+    label_bottom: "PoN ✓"
+    label_bottom_color: "#166534"
+    semantic: "已知 germline het / 在 PoN 內"
+
+  somatic_mut:
+    fill: "#FEF3C7"
+    stroke: "#B45309"
+    label_top: "somatic"
+    label_bottom: "PoN ✗"
+    label_bottom_color: "#B45309"
+    semantic: "非 PoN somatic 變異 / 被當 HP1_1"
+
+  mixed_or_unknown:  # HP3 等 mixed pair
+    fill: "#F3F4F6"
+    stroke: "#6B7280"
+    label_top: "mixed"
+    label_bottom: "—"
+
+alignment_with_marker:
+  x_anchor: "header_x_center == marker_x_center"
+  guide_line:
+    style: "stroke-dasharray: 2,3"
+    opacity: 0.4
+    from_y: header_bottom
+    to_y: read_y_or_below
+
+related_objects: [igv_read_block]
+example_application: examples/slide_06_priority_bug.md
+
+failure_modes:
+  - missing_pon_status: "缺 PoN ✓/✗ 標示則無法區分 germline het vs somatic mut — 必標"
+  - misaligned_with_marker: "header x 必與下方 read 上 marker x 對齊，否則視覺斷裂"

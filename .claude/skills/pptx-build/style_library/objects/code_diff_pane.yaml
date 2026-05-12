@@ -1,0 +1,86 @@
+name: code_diff_pane
+category: code_visualization
+tier_recommendation: A
+purpose: GitHub +/- diff 風格程式碼差異展示
+created: 2026-05-12
+
+when_to_use:
+  - baseline vs V5 / V3F vs V5 / V5 vs V6 程式碼差異
+  - 任何 before/after 程式邏輯對照
+  - 必搭 code_source_header.yaml 顯示檔案路徑/行號
+
+variants:
+  B1_full:
+    use_case: 單張 slide / 完整 diff
+    required_elements:
+      - source_header_top: { ref: code_source_header.yaml }
+      - hunk_header: { format: "@@ -L,N +L,N @@ context" }
+      - full_minus_lines: { fg: "#86181D", bg: "#FFEEF0", prefix: "−" }
+      - full_plus_lines: { fg: "#22863A", bg: "#E6FFED", prefix: "+" }
+      - source_header_bottom: { ref: code_source_header.yaml }
+    optional_elements:
+      - context_lines: { fg: "#24292E", bg: "#FFFFFF" }
+      - caveat_note: { color: blue }
+      - inline_comment: { italic: false }
+    line_count_target: { min: 20, max: 50 }
+    use_inline_style_attr: false
+
+  B2_compact:
+    use_case: 半張 slide / 與圖文並排
+    required_elements:
+      - path_inline: { format: "old/path:L1-L2 → new/path:L3-L4", font_size_px: 12 }
+      - key_minus_lines: { count: 2-4 }
+      - key_plus_lines: { count: 3-6 }
+    optional_elements:
+      - hunk_header
+      - context_lines
+    line_count_target: { min: 6, max: 12 }
+
+  B3_inline:
+    use_case: 內嵌引用
+    required_elements:
+      - one_line_path_annotation: { font_size_px: 10 }
+      - highlight_changes: { count: 1-2, span_style: true }
+    optional_elements: []
+    line_count_target: { min: 2, max: 5 }
+
+style_specs:
+  base:
+    background: "#FFFFFF"
+    border: "1px solid #D1D5DB"
+    border_radius: "0 0 6px 6px"  # 配 source header 上方
+    font_family: "JetBrains Mono, DejaVu Sans Mono, monospace"
+    font_size_px: 12
+    line_height: 1.5
+  diff_line:
+    padding_px: "1px 12px 1px 28px"
+    white_space: pre
+    position: relative
+  diff_line_del:
+    background: "#FFEEF0"
+    color: "#86181D"
+    before_content: "−"  # 注意：minus sign not hyphen
+    before_position: "absolute left 10px"
+    before_color: "#86181D"
+    before_weight: 700
+  diff_line_add:
+    background: "#E6FFED"
+    color: "#22863A"
+    before_content: "+"
+    before_position: "absolute left 10px"
+    before_color: "#22863A"
+    before_weight: 700
+  diff_line_hunk:
+    background: "#F1F8FF"
+    color: "#005CC5"
+    font_weight: 600
+    padding_left_px: 12
+
+inherits_from: null
+related_objects: [code_source_header, flow_diagram_box]
+example_application: examples/slide_06_priority_bug.md
+
+failure_modes:
+  - hash_dash_confusion: "若用 ASCII '-' / '+' 而非 CSS ::before content 易與程式碼內 minus 混淆 — 必用 ::before 標"
+  - line_break_in_diff_line: "diff-line 內 white-space:pre 但 inline span 換行會破版 — 長行需手動換行或設 max-width"
+  - missing_path_header: "缺檔案 path 標題易誤解為憑空 diff — B1/B2 都需 path 標註"

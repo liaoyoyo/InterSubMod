@@ -248,7 +248,7 @@ add(id="05_player_referee", num="05", section="S2 機制", rg2="4 (核心 forced
           <p style="font-size:13px;font-weight:700;color:#7F1D1D;margin:0 0 4px;">③ 致命連鎖 — somatic 「球員兼裁判」</p>
           <p style="font-size:14px;color:#7F1D1D;margin:0;line-height:1.45;">
             edge weight 100% &gt; germline 50% → <strong>somatic 主導 phasing decision</strong><br>
-            <span style="font-style:italic;">應被 phase 的 somatic，反過來決定 phase 結果</span>
+            <span style="font-weight:600;">應被 phase 的 somatic，反過來決定 phase 結果</span>
           </p>
         </div>
         <!-- 修法 -->
@@ -261,6 +261,7 @@ add(id="05_player_referee", num="05", section="S2 機制", rg2="4 (核心 forced
     <div class="footer-glossary">
       <div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals — 多正常樣本建構的 germline reference</div>
       <div class="gloss-item">📖 <span class="term">phasing graph:</span> het 位點當 node, read 共現當 edge</div>
+      <div class="gloss-item">ⓘ 此為 phasing layer / tagging layer per-read getVote 詳 slide 06</div>
     </div>""",
     speaker="phasing 層球員兼裁判機制三步: ① 物理基礎 germline het 50/50 隨機 vs somatic mut 100% 同染色體; ② TO 模式缺 paired normal 只能用 PoN, 非 PoN 變異被當 germline 進 graph; ③ somatic edge weight 100% 暴漲主導 graph - 本應被 phase 的 somatic 反過來決定 phasing - 即球員兼裁判。修法 8b8c1fd PON-only flag, phasing 階段排除非 PoN 變異, 只用 germline het 建 graph, somatic 不再當 node。但只解 phasing 層, tag 還壞 (slide 06)。",
     tier3="TO vs paired PoN 對照 / 自我增強迴圈 / Pass 1 vs Pass 2 預告 / edge weight 計算細節")
@@ -270,50 +271,122 @@ add(id="06_priority_bug", num="06", section="S2 機制", rg2="1 + 2 footnote", n
     en="getVote priority bug — single somatic vote triggers mislabel (break-early on wrong order)",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
-    <div class="grid-3col" style="grid-template-columns: 4fr 3fr 5fr;gap:10px;">
-      <!-- 左欄: 圖 -->
+    <!-- 上半：A1 Multi-read IGV view (per-read 框架) -->
+    <svg viewBox="0 0 1200 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:Arial,sans-serif;display:block;">
+      <!-- reference axis -->
+      <text x="20" y="14" font-size="11" fill="#6B7280" font-weight="600">chr19 reference</text>
+      <line x1="20" y1="22" x2="860" y2="22" stroke="#9CA3AF" stroke-width="1"/>
+      <!-- 4 position headers (germ / germ / somatic / germ) -->
+      <rect x="160" y="28" width="100" height="32" fill="#DBEAFE" stroke="#1E40AF" stroke-width="1.5" rx="3"/>
+      <text x="210" y="42" font-size="10" fill="#1E3A8A" text-anchor="middle" font-weight="700">pos 1</text>
+      <text x="210" y="55" font-size="9" fill="#166534" text-anchor="middle" font-weight="600">germ / PoN ✓</text>
+      <rect x="320" y="28" width="100" height="32" fill="#DBEAFE" stroke="#1E40AF" stroke-width="1.5" rx="3"/>
+      <text x="370" y="42" font-size="10" fill="#1E3A8A" text-anchor="middle" font-weight="700">pos 2</text>
+      <text x="370" y="55" font-size="9" fill="#166534" text-anchor="middle" font-weight="600">germ / PoN ✓</text>
+      <rect x="480" y="28" width="100" height="32" fill="#FEF3C7" stroke="#B45309" stroke-width="1.5" rx="3"/>
+      <text x="530" y="42" font-size="10" fill="#92400E" text-anchor="middle" font-weight="700">pos 3</text>
+      <text x="530" y="55" font-size="9" fill="#B45309" text-anchor="middle" font-weight="600">somatic / PoN ✗</text>
+      <rect x="640" y="28" width="100" height="32" fill="#DBEAFE" stroke="#1E40AF" stroke-width="1.5" rx="3"/>
+      <text x="690" y="42" font-size="10" fill="#1E3A8A" text-anchor="middle" font-weight="700">pos 4</text>
+      <text x="690" y="55" font-size="9" fill="#166534" text-anchor="middle" font-weight="600">germ / PoN ✓</text>
+      <!-- guide lines -->
+      <line x1="210" y1="60" x2="210" y2="220" stroke="#1E40AF" stroke-width="0.5" stroke-dasharray="2,3" opacity="0.4"/>
+      <line x1="370" y1="60" x2="370" y2="220" stroke="#1E40AF" stroke-width="0.5" stroke-dasharray="2,3" opacity="0.4"/>
+      <line x1="530" y1="60" x2="530" y2="220" stroke="#B45309" stroke-width="0.5" stroke-dasharray="2,3" opacity="0.4"/>
+      <line x1="690" y1="60" x2="690" y2="220" stroke="#1E40AF" stroke-width="0.5" stroke-dasharray="2,3" opacity="0.4"/>
+      <!-- right panel header -->
+      <rect x="800" y="28" width="380" height="32" fill="#F3F4F6" stroke="#6B7280" rx="3"/>
+      <text x="990" y="42" font-size="11" fill="#1F2937" text-anchor="middle" font-weight="700">該 read 的 countMap → HP tag</text>
+      <text x="990" y="55" font-size="9" fill="#6B7280" text-anchor="middle">baseline vs V5/V6 對照</text>
+      <!-- read 1: pos 1/2/3, HP2=2, HP1_1=1 -->
+      <text x="14" y="92" font-size="11" fill="#374151" text-anchor="end" font-weight="700">read 1</text>
+      <path d="M 30,76 L 590,76 L 610,92 L 590,108 L 30,108 Z" fill="#D1D5DB" stroke="#6B7280" stroke-width="1"/>
+      <rect x="200" y="76" width="22" height="32" fill="#3B82F6" stroke="#1E40AF" stroke-width="1.5"/>
+      <text x="211" y="95" font-size="10" fill="white" text-anchor="middle" font-weight="700">A</text>
+      <rect x="360" y="76" width="22" height="32" fill="#3B82F6" stroke="#1E40AF" stroke-width="1.5"/>
+      <text x="371" y="95" font-size="10" fill="white" text-anchor="middle" font-weight="700">A</text>
+      <rect x="520" y="74" width="22" height="36" fill="#FBBF24" stroke="#B45309" stroke-width="2"/>
+      <text x="531" y="95" font-size="10" fill="#7C2D12" text-anchor="middle" font-weight="700">T</text>
+      <rect x="800" y="70" width="380" height="44" fill="#FEE2E2" stroke="#DC2626" stroke-width="1.5" rx="3"/>
+      <text x="810" y="85" font-size="11" fill="#1F2937" font-family="monospace">HP2=2, HP1_1=1</text>
+      <text x="810" y="100" font-size="11" fill="#7F1D1D" font-weight="700">baseline → hp=11 ❌</text>
+      <text x="970" y="100" font-size="11" fill="#166534" font-weight="700">V5/V6 → hp=21 ✅</text>
+      <!-- read 2: pos 1/2/4, HP2=3 (no somatic) -->
+      <text x="14" y="138" font-size="11" fill="#374151" text-anchor="end" font-weight="700">read 2</text>
+      <path d="M 30,122 L 720,122 L 740,138 L 720,154 L 30,154 Z" fill="#D1D5DB" stroke="#6B7280" stroke-width="1"/>
+      <rect x="200" y="122" width="22" height="32" fill="#3B82F6" stroke="#1E40AF" stroke-width="1.5"/>
+      <text x="211" y="141" font-size="10" fill="white" text-anchor="middle" font-weight="700">A</text>
+      <rect x="360" y="122" width="22" height="32" fill="#3B82F6" stroke="#1E40AF" stroke-width="1.5"/>
+      <text x="371" y="141" font-size="10" fill="white" text-anchor="middle" font-weight="700">A</text>
+      <rect x="680" y="122" width="22" height="32" fill="#3B82F6" stroke="#1E40AF" stroke-width="1.5"/>
+      <text x="691" y="141" font-size="10" fill="white" text-anchor="middle" font-weight="700">A</text>
+      <rect x="800" y="116" width="380" height="44" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.5" rx="3"/>
+      <text x="810" y="131" font-size="11" fill="#1F2937" font-family="monospace">HP2=3 (no somatic)</text>
+      <text x="810" y="146" font-size="11" fill="#166534" font-weight="700">baseline → hp=2 ✓</text>
+      <text x="970" y="146" font-size="11" fill="#166534" font-weight="700">V5/V6 → hp=2 ✓ (同)</text>
+      <!-- read 3: pos 3/4, HP2=1, HP1_1=1 -->
+      <text x="14" y="184" font-size="11" fill="#374151" text-anchor="end" font-weight="700">read 3</text>
+      <path d="M 400,168 L 720,168 L 740,184 L 720,200 L 400,200 Z" fill="#D1D5DB" stroke="#6B7280" stroke-width="1"/>
+      <rect x="520" y="166" width="22" height="36" fill="#FBBF24" stroke="#B45309" stroke-width="2"/>
+      <text x="531" y="187" font-size="10" fill="#7C2D12" text-anchor="middle" font-weight="700">T</text>
+      <rect x="680" y="168" width="22" height="32" fill="#3B82F6" stroke="#1E40AF" stroke-width="1.5"/>
+      <text x="691" y="187" font-size="10" fill="white" text-anchor="middle" font-weight="700">A</text>
+      <rect x="800" y="162" width="380" height="44" fill="#FEE2E2" stroke="#DC2626" stroke-width="1.5" rx="3"/>
+      <text x="810" y="177" font-size="11" fill="#1F2937" font-family="monospace">HP2=1, HP1_1=1</text>
+      <text x="810" y="192" font-size="11" fill="#7F1D1D" font-weight="700">baseline → hp=11 ❌</text>
+      <text x="970" y="192" font-size="11" fill="#166534" font-weight="700">V5/V6 → hp=21 ✅</text>
+      <!-- footer note: per-read scope -->
+      <line x1="20" y1="218" x2="1180" y2="218" stroke="#9CA3AF" stroke-dasharray="3,3"/>
+      <text x="20" y="234" font-size="11" fill="#374151" font-weight="700">per-read getVote（C++ HaplotagProcess.cpp:533 每條 read 自己 reset countMap）</text>
+      <text x="20" y="250" font-size="10" fill="#6B7280">read 1/3 受 priority bug 影響（有 somatic + germline mix）；read 2 純 germline 不受影響；752 victims = 752 條獨立 read</text>
+    </svg>
+
+    <!-- 下半：左 B2 compact diff / 右 C2 single flow -->
+    <div class="grid-2col" style="grid-template-columns: 6fr 5fr;gap:12px;margin-top:8px;">
+      <!-- B2 Compact code diff -->
       <div>
-        <img class="fig-thumb" src="../figures/G3_getVote_three_layer.png" alt="G3" style="max-height:280px;">
-        <p class="fig-caption">G3: getVote() 三層 vote vector + break-early 邏輯</p>
+        <p style="font-size:11px;color:#6B7280;margin:0 0 4px;font-family:monospace;"><code>longphase-to/HaplotagProcess.cpp:506-530</code> <span style="color:#9CA3AF;">→</span> <code>longphase-to-mod/HaplotagProcess.cpp:512-560</code></p>
+        <div style="background:#FFFFFF;border:1px solid #D1D5DB;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.5;">
+          <div style="background:#FFEEF0;color:#86181D;padding:1px 8px 1px 22px;position:relative;white-space:pre;"><span style="position:absolute;left:8px;color:#86181D;font-weight:700;">−</span>for (auto&amp; pair : variantKeys) { // ① som ② mix ③ germ</div>
+          <div style="background:#FFEEF0;color:#86181D;padding:1px 8px 1px 22px;position:relative;white-space:pre;"><span style="position:absolute;left:8px;color:#86181D;font-weight:700;">−</span>  if (countMap[k1]&gt;0 || countMap[k2]&gt;0) {</div>
+          <div style="background:#FFEEF0;color:#86181D;padding:1px 8px 1px 22px;position:relative;white-space:pre;"><span style="position:absolute;left:8px;color:#86181D;font-weight:700;">−</span>    hpResult=...; break; }}  // 第一個非空就 break</div>
+          <div style="background:#E6FFED;color:#22863A;padding:1px 8px 1px 22px;position:relative;white-space:pre;"><span style="position:absolute;left:8px;color:#22863A;font-weight:700;">+</span>// Layer 1: germline 決方向</div>
+          <div style="background:#E6FFED;color:#22863A;padding:1px 8px 1px 22px;position:relative;white-space:pre;"><span style="position:absolute;left:8px;color:#22863A;font-weight:700;">+</span>germlineResult = (HP1&gt;0||HP2&gt;0) ? (HP1&gt;=HP2?1:2) : 0;</div>
+          <div style="background:#E6FFED;color:#22863A;padding:1px 8px 1px 22px;position:relative;white-space:pre;"><span style="position:absolute;left:8px;color:#22863A;font-weight:700;">+</span>// Layer 2: somatic 加 sub-tag encoding</div>
+          <div style="background:#E6FFED;color:#22863A;padding:1px 8px 1px 22px;position:relative;white-space:pre;"><span style="position:absolute;left:8px;color:#22863A;font-weight:700;">+</span>hpResult = (somatic&gt;0) ? (germ==1?11:germ==2?21:33) : germ;</div>
+        </div>
       </div>
-      <!-- 中欄: vote 順序流程 -->
+      <!-- C2 Single flow (純 SVG，無 mermaid 依賴) -->
       <div>
-        <p style="font-size:14px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">getVote 順序 (baseline)</p>
-        <div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:6px;padding:8px 10px;font-size:13px;line-height:1.55;color:#7F1D1D;">
-          <p style="margin:0 0 4px;">① somatic 票 ≥1 → <strong>break</strong> ❌</p>
-          <p style="margin:0 0 4px;">② mixed 票 → break</p>
-          <p style="margin:0;">③ germline 票 <strong>永遠看不到</strong></p>
-        </div>
-        <p style="font-size:14px;font-weight:700;color:#16A34A;margin:8px 0 4px;">V3F 修法 <code>41ff147</code></p>
-        <div style="background:#DCFCE7;border:1px solid #86EFAC;border-radius:6px;padding:8px 10px;font-size:13px;line-height:1.55;color:#166534;">
-          <p style="margin:0 0 4px;">① <strong>germline</strong> 票 ≥1 → break ✅</p>
-          <p style="margin:0 0 4px;">② mixed</p>
-          <p style="margin:0;">③ somatic</p>
-        </div>
-      </div>
-      <!-- 右欄: 例子對照 -->
-      <div>
-        <p style="font-size:14px;font-weight:700;color:#374151;margin:0 0 4px;">真實 read 範例（chr19 752 同模式）</p>
-        <pre class="code-panel" style="background:#F9FAFB;border:1px solid #D1D5DB;font-size:13px;line-height:1.5;color:#1F2937;padding:8px 10px;">germline HP1 = 0
-germline HP2 = 5  ← <span style="color:#16A34A;font-weight:700;">主導</span>
-somatic  HP1_1 = 1 ← 1 票觸發
-somatic  HP2_1 = 0</pre>
-        <div class="grid-2col" style="gap:6px;margin-top:4px;">
-          <div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:4px;padding:6px 8px;font-size:13px;color:#7F1D1D;">
-            <strong>baseline → hp=11 ❌</strong><br>
-            <span style="font-size:11px;">(germline 5 票被忽略)</span>
-          </div>
-          <div style="background:#DCFCE7;border:1px solid #86EFAC;border-radius:4px;padding:6px 8px;font-size:13px;color:#166534;">
-            <strong>V3F → hp=21 ✅</strong><br>
-            <span style="font-size:11px;">(germline HP2 主導)</span>
-          </div>
-        </div>
+        <svg viewBox="0 0 460 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:Arial,sans-serif;">
+          <!-- start node -->
+          <rect x="100" y="6" width="260" height="32" rx="16" fill="#F3F4F6" stroke="#6B7280" stroke-width="1"/>
+          <text x="230" y="27" font-size="11" fill="#1F2937" text-anchor="middle" font-family="monospace">this read's countMap</text>
+          <line x1="230" y1="38" x2="230" y2="50" stroke="#6B7280" stroke-width="1.5"/>
+          <polygon points="225,49 230,58 235,49" fill="#6B7280"/>
+          <!-- Layer 1 box -->
+          <rect x="40" y="60" width="380" height="44" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.5" rx="4"/>
+          <text x="230" y="78" font-size="12" fill="#166534" text-anchor="middle" font-weight="700">Layer 1: Germline 決方向</text>
+          <text x="230" y="94" font-size="10" fill="#166534" text-anchor="middle" font-family="monospace">germlineResult = (HP1≥HP2) ? 1 : 2</text>
+          <line x1="230" y1="104" x2="230" y2="116" stroke="#6B7280" stroke-width="1.5"/>
+          <polygon points="225,115 230,124 235,115" fill="#6B7280"/>
+          <!-- Layer 2 box -->
+          <rect x="40" y="126" width="380" height="44" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5" rx="4"/>
+          <text x="230" y="144" font-size="12" fill="#1E3A8A" text-anchor="middle" font-weight="700">Layer 2: Somatic 加 sub-tag encoding</text>
+          <text x="230" y="160" font-size="10" fill="#1E3A8A" text-anchor="middle" font-family="monospace">if somatic&gt;0: hp = 11/21/33 by germRes</text>
+          <line x1="230" y1="170" x2="230" y2="182" stroke="#6B7280" stroke-width="1.5"/>
+          <polygon points="225,181 230,190 235,181" fill="#6B7280"/>
+          <!-- result box -->
+          <rect x="100" y="190" width="260" height="28" rx="14" fill="#DCFCE7" stroke="#166534" stroke-width="2"/>
+          <text x="230" y="209" font-size="13" fill="#166534" text-anchor="middle" font-weight="700">範例 → hp = 21 ✅</text>
+        </svg>
       </div>
     </div>
-    <div class="conclusion-arrow" style="font-size:15px;padding:10px 14px;">→ tumor sub-clone somatic 100% 同方向 → 全受影響 reads 標 HP:i:11 → tag layer 17.3:1 偏移（詳 slide 03 / 08）</div>
+
     <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">sub-clone:</span> 腫瘤中帶相同突變的某群癌細胞</div>
+      <div class="gloss-item">📖 <span class="term">sub-clone:</span> 帶相同 somatic 突變的腫瘤亞群</div>
       <div class="gloss-item">ⓘ break-early: for-loop 第一個非空就 return</div>
+      <div class="gloss-item">ⓘ per-read scope: countMap @ <code>judgeHaplotype:533</code> reset</div>
     </div>""",
     speaker="tagging 層 priority bug 機制三件套（per-read 框架, judgeHaplotype:533 每條 read 自己 reset countMap）: ① getVote vector 順序錯 baseline ① somatic ② mixed ③ germline, for 迴圈第一個非空 pair 就 break early, 同一條 read 的 germline 5 票永遠看不到; ② 真實 read 例子 chr19 752 victims 同模式 — 單一條 read 經過 5 個 germline het 位點累積 countMap[HP2]=5 主導 + 1 個 somatic 位點累積 countMap[HP1_1]=1, baseline 錯標這條 read 為 hp=11 正確應 hp=21; ③ V3F 修法 41ff147 重寫為兩層獨立判定, germline 先決方向 somatic 再加 sub-tag encoding。tumor sub-clone somatic 100% 同方向 → 752 條獨立 read 各自被 priority bug 翻成 HP:i:11 → tag layer 17.3:1 偏移 (slide 03 / 08)。重要: tag layer 與 slide 05 phasing layer 是不同層 bug, 必須分別修補, 不能合併修。getVote 是 per-read 操作不是 aggregate, 752 victims = 752 條獨立 read 而非 group。",
     tier3="enum HAPLOTYPE1_1=2 vs HP tag int=11 / countMap per-read reset @ HaplotagProcess.cpp:533 / tag layer vs phasing layer 為何不能合併修 / 41ff147 與 380e8d2 INDEL guard 分工 / 752 victims per-read 獨立 case")
@@ -325,25 +398,30 @@ add(id="07_two_layer_table", num="07", section="S2 機制", rg2="1", ngrep="5 co
     canvas_html="""
     <!-- Timeline -->
     <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:6px;padding:8px 12px;margin:2px 0 8px;">
-      <p style="font-size:12px;color:#6B7280;margin:0 0 4px;font-weight:600;">commit 時序鏈：</p>
-      <div style="display:flex;align-items:center;gap:4px;font-size:12px;flex-wrap:wrap;">
-        <span style="background:#DBEAFE;color:#1E3A8A;padding:3px 8px;border-radius:4px;font-weight:600;">2026-04 phasing 層</span>
+      <p style="font-size:12px;color:#6B7280;margin:0 0 4px;font-weight:600;">commit 時序鏈（baseline → V3F → V5 → V6）：</p>
+      <div style="display:flex;align-items:center;gap:4px;font-size:11px;flex-wrap:wrap;">
+        <span style="background:#DBEAFE;color:#1E3A8A;padding:3px 8px;border-radius:4px;font-weight:600;">2026-04 phasing</span>
         <code style="font-size:11px;">8b8c1fd</code>
         <span style="color:#6B7280;">→</span>
-        <span style="background:#DCFCE7;color:#166534;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05 tagging Layer 1 (V3F)</span>
+        <span style="background:#DCFCE7;color:#166534;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05 V3F</span>
         <code style="font-size:11px;">41ff147 + 380e8d2</code>
         <span style="color:#6B7280;">→</span>
-        <span style="background:#FEF3C7;color:#92400E;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05 Layer 1.5 (V5)</span>
+        <span style="background:#FEF3C7;color:#92400E;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05 V5</span>
         <code style="font-size:11px;">d0bcd8c + 938f0df</code>
+        <span style="color:#6B7280;">→</span>
+        <span style="background:#F3E8FF;color:#6D28D9;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05-11 V6</span>
+        <code style="font-size:11px;">revert Layer 1.5</code>
       </div>
     </div>
     <!-- "修了什麼" 表 -->
-    <table class="metric-table" style="font-size:14px;">
-      <thead><tr><th style="width:18%;">Layer</th><th style="width:18%;">Bug</th><th>修法做了什麼</th><th style="width:10%;">Slide</th></tr></thead>
+    <table class="metric-table" style="font-size:13px;">
+      <thead><tr><th style="width:18%;">Layer / Bug</th><th>修法做了什麼</th><th style="width:10%;">Slide</th></tr></thead>
       <tbody>
-        <tr style="background:#DBEAFE;"><td><strong>phasing 層</strong></td><td>球員兼裁判</td><td>phasing 階段<strong>排除非 PoN 變異</strong>，只用 germline het 建 graph（somatic 不再當 node）</td><td>05</td></tr>
-        <tr style="background:#DCFCE7;"><td><strong>tagging Layer 1</strong></td><td>priority bug</td><td><strong>getVote 順序反轉</strong>：germline 第一順位 → break；somatic 1 票無法蓋過 germline 主導</td><td>06</td></tr>
-        <tr style="background:#FEF3C7;"><td><strong>tagging Layer 1.5</strong></td><td>germline-absent</td><td><strong>somatic fallback</strong>：純 somatic vote 區補 hp tag（V3F 此處 untagged）<span style="color:#92400E;font-style:italic;">⚠ 有 caveat</span></td><td>16</td></tr>
+        <tr style="background:#DBEAFE;"><td><strong>phasing 層</strong><br>球員兼裁判</td><td>phasing 階段<strong>排除非 PoN 變異</strong>，只用 germline het 建 graph（somatic 不再當 node）</td><td>05</td></tr>
+        <tr style="background:#DCFCE7;"><td><strong>tagging Layer 1</strong><br>priority bug (vote 順序)</td><td><strong>重寫 two-layer</strong>：Layer 1 germline 決方向 / Layer 2 somatic 加 sub-tag（不再 iterate variantKeys break-early）</td><td>06</td></tr>
+        <tr style="background:#DCFCE7;"><td><strong>tagging Layer 1</strong><br>enum vs int literal mismatch</td><td><code>HAPLOTYPE1_1=2</code> enum 與 HP tag int <code>11</code> 不一致，V3F 改用 int literal 11/21/33 直接賦值（搭 380e8d2 INDEL guard）</td><td>backup</td></tr>
+        <tr style="background:#FEF3C7;"><td><strong>tagging Layer 1.5</strong><br>germline-absent</td><td><strong>V5 somatic fallback</strong>：純 somatic vote 區補 hp tag（V3F 此處 untagged）<span style="color:#92400E;font-weight:600;"> ⚠ 4.19:1 偏 HP1 caveat</span></td><td>16</td></tr>
+        <tr style="background:#F3E8FF;"><td><strong>V6 revert</strong><br>Layer 1.5 移除</td><td>germline-absent 區回退 V3F 保守行為（hp=33），marker coverage +30% / 4 樣本 ratio 中性化；但 SP1/2/3 失去 Layer 1.5 翻方向能力</td><td>16</td></tr>
       </tbody>
     </table>
     <!-- 為何缺一不可（左 phasing / 右 tagging - 與表 row 順序對齊） -->
@@ -357,9 +435,13 @@ add(id="07_two_layer_table", num="07", section="S2 機制", rg2="1", ngrep="5 co
         Layer 1 only → <strong>germline 缺席區 reads 全 untagged</strong>；V5 Layer 1.5 補 fallback（slide 16 詳述 caveat）
       </div>
     </div>
-    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals</div><div class="gloss-item">ⓘ Layer 1.5 = V3F 之上補丁，非獨立層</div></div>""",
-    speaker="兩層 bug 三 fix stacking 時序: 2026-04 phasing 層 8b8c1fd PON-only → 2026-05 tagging Layer 1 V3F (41ff147 順序反轉 + 380e8d2 INDEL guard) → 2026-05 Layer 1.5 V5 (d0bcd8c Pass 2 ploidy + 938f0df threshold 0.95→0.9, bundle Layer 1.5 fallback)。修法做了什麼: phasing 層排除非 PoN 變異只用 germline het 建 graph; tagging Layer 1 getVote 順序反轉 germline 第一順位; Layer 1.5 純 somatic vote 區補 hp tag。為何缺一不可: 只 PON-only tag 仍偏 99.9%; 只 V3F germline 缺席區 untagged; V5 Layer 1.5 補 fallback 但 germline-absent 區有 caveat (slide 16)。",
-    tier3="5 commit 順序細節 / V3F 命名歷史 / 跨層交互 / 為何不能合併修 / d0bcd8c 為何跨兩層")
+    <div class="footer-glossary">
+      <div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals</div>
+      <div class="gloss-item">ⓘ Layer 1.5 = V3F 之上補丁，非獨立層</div>
+      <div class="gloss-item">ⓘ V6 trade-off: marker ✓ / SP1/2/3 翻方向 ✗</div>
+    </div>""",
+    speaker="兩層 bug 四 fix stacking 時序: 2026-04 phasing 層 8b8c1fd PON-only → 2026-05 tagging V3F (41ff147 重寫 two-layer + 380e8d2 INDEL guard, 同時修 enum vs int literal mismatch bug) → 2026-05 V5 (d0bcd8c Pass 2 ploidy + 938f0df threshold + Layer 1.5 somatic fallback) → 2026-05-11 V6 (revert Layer 1.5)。修法做了什麼: phasing 層排除非 PoN 變異只用 germline het 建 graph; tagging Layer 1 重寫為兩層獨立判定 + 修 enum/int literal; Layer 1.5 純 somatic vote 區補 hp tag; V6 在 germline-absent 區回退保守 hp=33 marker coverage +30%。為何缺一不可: 只 PON-only tag 仍偏 99.9%; 只 V3F germline 缺席區 untagged; V5 Layer 1.5 補 fallback 但 germline-absent 4.19:1 偏 HP1 caveat (slide 16); V6 是 trade-off 修正不是完美解。",
+    tier3="5 commit 順序細節 / V3F 命名歷史 / 跨層交互 / 為何不能合併修 / d0bcd8c 為何跨兩層 / enum=2 vs int=11 mismatch 細節 / V6 SP1/2/3 反向 caveat")
 
 # ─── S3 量化鐵證 ───────────────────────────────────────────────────────────
 add(id="08_chr19_752", num="08", section="S3 量化鐵證", rg2="—", ngrep="6",

@@ -1,0 +1,74 @@
+name: flow_diagram_box
+category: flow_visualization
+tier_recommendation: A
+purpose: 流程圖視覺化（mermaid 或 純 HTML linear）
+created: 2026-05-12
+
+when_to_use:
+  - 程式邏輯流程（baseline iteration / V5 two-layer）
+  - 決策樹（root-cause tree）
+  - 階段性轉變（5-commit timeline）
+  - 任何「step 1 → step 2 → result」結構
+
+variants:
+  C1_dual_mermaid:
+    use_case: 單張 slide / baseline ↔ V5 對照
+    required_elements:
+      - two_mermaid_blocks: { layout: side_by_side, grid: "1fr 1fr" }
+      - title_per_block: { left: baseline_red, right: V5_green }
+      - start_node: { format: "this read's countMap | values" }
+      - end_node: { format: "範例 → hp = ?", style: emphasized }
+      - color_theme: { baseline: red_series, V5: green_series }
+    optional_elements:
+      - dashed_unreachable_nodes: { for: baseline_germline_branch }
+      - hover_tooltip
+    object_count_estimate: { mermaid_nodes: 8-12 }
+    rendering: mermaid_js_cdn
+
+  C2_single_mermaid:
+    use_case: 半張 slide / 只強調一側
+    required_elements:
+      - one_mermaid_block
+      - start_node
+      - 2_3_decision_nodes
+      - end_node
+    optional_elements:
+      - title
+      - sub_tag_detail_notes
+    rendering: mermaid_js_cdn
+
+  C3_linear_html:
+    use_case: 內嵌引用 / 流程是輔助說明
+    required_elements:
+      - div_boxes_with_arrows: { layout: flex, gap_px: 8 }
+      - color_tokens: { uses palette }
+    optional_elements:
+      - step_numbers
+      - hover_detail
+    rendering: pure_html_flexbox
+
+mermaid_style_overrides:
+  baseline_branch:
+    node_fill: "#FEE2E2"
+    node_stroke: "#DC2626"
+    unreachable_dasharray: "5 5"
+  V5_branch:
+    layer1_fill: "#DCFCE7"
+    layer1_stroke: "#16A34A"
+    layer2_fill: "#DBEAFE"
+    layer2_stroke: "#1E3A8A"
+  result_box:
+    baseline_fill: "#FEE2E2"
+    baseline_stroke: "#7F1D1D"
+    V5_fill: "#DCFCE7"
+    V5_stroke: "#166534"
+    stroke_width: 2
+
+inherits_from: null
+related_objects: [code_diff_pane]
+example_application: examples/slide_06_priority_bug.md
+
+failure_modes:
+  - mermaid_cdn_unavailable: "CDN failed 時 mermaid 不渲染 — 建議 inline fallback 圖片或 C3 linear 替代"
+  - too_many_nodes: "C1 dual 每側 >8 個 node 會難讀 — 建議簡化 step 或拆 C2 多張"
+  - color_clash_baseline_V5: "若 baseline 用綠 / V5 用紅會違反語意 — 必遵守 baseline_red / V5_green 規則"
