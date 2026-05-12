@@ -171,6 +171,25 @@
 - **不要憑記憶回答可查證的事實** — 查閱後引用來源
 - **涉及 OLS/VCF 來源/特徵設計時** — 先查 `/known-pitfalls` skill
 
+### 外部工具 / 論文 claim 查詢順序（2026-05-13 新增）★
+
+> 觸發：討論外部工具 (longphase / clairs-to / claude code) F1/AUC/metric claim、論文 claim 對照、業界標準口徑（bcftools isec / hap.py / som.py）、tool README/論文行為敘述時 — **不可從本專案 report 推論外部行為**
+
+**強制查詢順序**：
+1. **先查 KB**：`mcp__knowledge__knowledge_search "<tool> F1"` 或 `Read /big8_disk/liaoyoyo2001/Knowledge/05_tools/<tool>.md`
+2. **引用 paper §N 或 KB 段落**（明示出處）
+3. **才下結論** — 並對照本專案 report 是否口徑一致
+4. 若 KB + 論文與本專案 report **看似衝突** → 通常是**不同口徑**（如 caller-level F1 vs post-filter F1），KB + 論文優先；除非本專案 report 明寫「我們的修補 vs 論文此處」
+
+**反例（不該做）**：
+- ❌ 「§8.6.2 寫 F1 三版相同 → 結論 F1 不變」（沒查論文 §4.3 的不同 metric 口徑）
+- ❌ 「我記得 longphase 不改 FILTER」（憑記憶未引用）
+
+**正例（該做）**：
+- ✅ 「先 Read `Knowledge/05_tools/longphase-to.md` 確認論文 §4.3 F1 口徑為 V_H/V_L post-filter」→ 引用後再對照本專案 §8.6.2 caller-level F1
+
+**對應**：`/known-pitfalls` P-14 + memory `feedback_outside_claim_must_query_kb.md` + UserPromptSubmit hook `[Knowledge Base]` 提示
+
 ---
 
 ## 常用工作流程

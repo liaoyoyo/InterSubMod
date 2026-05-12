@@ -718,14 +718,23 @@ add(id="14_caller_f1", num="14", section="S5 驗證 + ⚡ Cliffhanger", rg2="2",
     <div class="arg-list" style="font-size:11px;">
       <strong>因果鏈:</strong> ClairS-TO PASS set 由 caller 決定 → V3F/V5/V6 改 GT/PS 不改 FILTER → PASS set 不變 → TP/FP/FN 不變 → F1 不變
     </div>
+    <table class="metric-table" style="font-size:9.5px;margin-top:6px;">
+      <thead><tr><th>F1 評估口徑</th><th>somatic call set 定義</th><th>本 pipeline 適用?</th><th>三版結果 (實證)</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td><strong>caller-level F1</strong> (業界標準, bcftools isec)</td><td>phased_VCF.FILTER=PASS vs SEQC2 truth</td><td>✅ 採用</td><td>四版 F1=0.7166 完全相同 ✓</td></tr>
+        <tr style="background:#F3F4F6;"><td>論文 §4.3 V_H/V_L refined F1</td><td>Step 4 Graph-Based Somatic Calling 輸出 (Verdict_Somatic / Verdict_SubclonalSomatic INFO tag)</td><td>⚠ <strong>N/A</strong></td><td>三版 phased VCF 中 <strong>Verdict tag 全 0 records</strong>（ClairS-TO 預設未啟用 Verdict tagging — INFO header 有定義但實際無標記）</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:10px;color:#16A34A;margin:3px 0 0;font-weight:600;">→ 實證: 三版 phased VCF PASS 集合相同 (47,798) + Verdict_Somatic/Germline/SubclonalSomatic 計數三版都 = 0 → V3F/V5/V6 對兩種口徑都 invariant; 論文 refined F1 在本 pipeline 不可量化（需重跑 ClairS-TO 啟用 Verdict tagging）</p>
     <div class="cliffhanger-box">
       → 四版 F1 完全相同; V6 重用 V5 phased VCF + 不改 phasing 層 → 零 caller-side 影響<br>
       → ΔF1 (0.93→0.6) = -0.0893 為 ClairS-TO 低 purity 性質, 與 self-phasing 無關<br>
       <strong>→ 但 5/9 paired audit 揭 V5 Layer 1.5 缺陷 → 5/10 V6 binary patch 修對...</strong> 〔next: slide 15-16〕
     </div>
-    <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">purity:</span> 樣本中腫瘤細胞占比</div>
-      <div class="gloss-item">ⓘ <span class="term">PASS set:</span> ClairS-TO snv.vcf FILTER=PASS 集合</div>
+    <div class="footer-glossary" style="font-size:9.5px;">
+      <div class="gloss-item">📖 <span class="term">purity:</span> 樣本中腫瘤細胞占比 / <span class="term">PASS set:</span> ClairS-TO snv.vcf FILTER=PASS 集合</div>
+      <div class="gloss-item">ⓘ V3F/V5/V6 修補全在 Haplotag stage (改 BAM HP:i tag) + V5 在 Step 5 phasing (Pass 2 reclassify GT)；都不動 Step 4 V_H/V_L 也不動 FILTER → 對兩種 F1 invariant</div>
+      <div class="gloss-item">ⓘ 真實價值在 read-level tag concordance (+13.3 pp paired GT @ 0.93) — 不在 caller F1</div>
     </div>""",
     speaker="Caller F1 vs SEQC2 truth set 四版完全相同 — V6 不退步鐵證。0.93 purity (HCC1395 5kHz) 四版 TP=28,509 / FP=11,606 / FN=10,938 / Precision=0.7107 / Recall=0.7227 / F1=0.7166 完全相同 (到小數第 4 位 0 差異); 0.6 purity (HCC1395 t30_n20) 四版 TP=24,190 / FP=13,487 / FN=15,257 / F1=0.6273 完全相同。因果鏈: ClairS-TO PASS set 由 caller 決定 (FILTER 欄), V3F/V5/V6 三版改 GT/PS/GT2/GT3 phasing tag 不改 FILTER → PASS set 不變 → TP/FP/FN 集合不變 → F1 不變。V6 重用 V5 phased VCF + V6 只改 tagging 層 (HaplotagProcess.cpp:537-548 Layer 1.5 revert) 完全不改 phasing 層, 故 caller-side 零影響。ΔF1 (0.93→0.6) = -0.0893 是 ClairS-TO 在低 purity 樣本的性質 (recall 下降), 與 self-phasing 修補無關。turning point: 此 slide 結束 caller-level 驗證 (沒退步), 但下一節 slide 15-16 揭露 5/9 paired audit 找到 V5 Layer 1.5 在 germline-absent 區的設計缺陷, 5/10 V6 binary patch 已修對 — 帶出 V6 為何不只是 incremental 而是有具體 trade-off motivation。",
     tier3="PASS set / FILTER 機制 / purity 0.6 N50 微差 / V6 patch 不改 phasing 層 detail")

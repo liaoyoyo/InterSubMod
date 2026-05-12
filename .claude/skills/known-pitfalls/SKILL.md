@@ -1,6 +1,6 @@
 ---
 name: known-pitfalls
-description: InterSubMod 已知 AI 陷阱清單。每條記錄具體錯誤、正確做法、觸發場景。避免重複犯錯。USE WHEN「known pitfalls」「踩雷」「avoid mistake」「common bug」「之前怎麼錯的」「歷史教訓」、涉及 OLS/residualization、VCF 來源、特徵設計、AUC 分析、binary commit / KDE fix / working tree、證據鏈 / single-track / ⭐4-5 升級。SKIP WHEN 純 build / commit / docs 寫作、無對應陷阱類別的場景（先查表，無命中即略）、新 feature 探索初期（先設計再查陷阱）、純 UI / 視覺 / PPTX 製作。
+description: InterSubMod 已知 AI 陷阱清單。每條記錄具體錯誤、正確做法、觸發場景。避免重複犯錯。USE WHEN「known pitfalls」「踩雷」「avoid mistake」「common bug」「之前怎麼錯的」「歷史教訓」、涉及 OLS/residualization、VCF 來源、特徵設計、AUC 分析、binary commit / KDE fix / working tree、證據鏈 / single-track / ⭐4-5 升級、**外部工具 F1/AUC/metric claim、論文 claim 對照、業界標準口徑（bcftools isec / hap.py / som.py）、tool README 行為敘述（longphase / clairs-to / claude code 內部演算法）— 對應 P-14 outside-claim 必查 KB**。SKIP WHEN 純 build / commit / docs 寫作、無對應陷阱類別的場景（先查表，無命中即略）、新 feature 探索初期（先設計再查陷阱）、純 UI / 視覺 / PPTX 製作（但 PPTX 涉及外部工具 metric 敘述時仍需查）。
 allowed-tools: Read, Write, Edit
 user-invocable: true
 ---
@@ -19,6 +19,7 @@ user-invocable: true
 | 涉及證據鏈 / single-track / ⭐4-5 升級 | P-07 (anchor #1) |
 | 涉及 binary commit / KDE fix / working tree | P-08, P-13 |
 | 涉及跨樣本 n_passed / saturation | P-11 |
+| **涉及外部工具 F1/AUC/metric claim、論文 claim 對照、業界口徑** | **P-14** ★ |
 
 ---
 
@@ -143,3 +144,26 @@ user-invocable: true
 **正確做法**：`/check-staleness` 已加 `precheck.checks.git.working_tree_clean` 檢查。dirty → BLOCK 直到 commit OR `binary_version` 寫成顯式 SHA + diff snapshot 歸檔。
 
 **來源**：20260429_longphase_TO_vs_V5_Somatic_Fallback
+
+---
+
+## 外部工具 / 論文 claim 陷阱
+
+### P-14: outside-claim 必先查 KB（不可從本專案 report 推論外部行為）
+
+**錯誤**：討論外部工具 (longphase / clairs-to / claude code) F1/AUC/metric claim 時，直接從本專案內部 report (§8.6.x 等) 推論外部行為，未先查 KB 對應 `Knowledge/05_tools/<tool>.md` 或論文 §N。
+
+**症狀**：本專案 report 與外部工具 README/論文 claim 看似衝突（如「longphase-to 論文 §4.3 寫 F1 改善」vs「本專案 §8.6.2 寫 F1 三版相同」），實則**口徑不同**（V_H/V_L post-filter F1 vs caller-level FILTER=PASS F1），但因未查 KB → 浪費 3-4 輪來回才釐清。
+
+**正確做法**：
+1. 用戶問題或我即將回答時，若觸發關鍵字「longphase / clairs-to / claude code / 論文 / README / paper §N / 改善 F1 / metric claim / 業界標準」→ **先查**：
+   - `mcp__knowledge__knowledge_search "<tool> F1"`
+   - `Read /big8_disk/liaoyoyo2001/Knowledge/05_tools/<tool>.md`
+2. 引用 KB 段落或 paper §N 再下結論
+3. 若 KB 與本專案 report 衝突 → KB + 論文優先（除非本專案 report 明寫「我們的修補 vs 論文此處」）
+
+**反例**：「§8.6.2 證據 ② 寫 F1 三版相同 → 結論 F1 不變」（沒查論文，沒釐清「哪個 F1 口徑」）
+
+**正例**：「先 Read `Knowledge/05_tools/longphase-to.md` 確認論文 §4.3 F1 口徑為 V_H/V_L post-filter；本專案 §8.6.2 是 caller-level F1。兩者不衝突，是不同 metric。」
+
+**來源**：2026-05-13 slide 14 F1 雙口徑事件。Memory: `feedback_outside_claim_must_query_kb.md`
