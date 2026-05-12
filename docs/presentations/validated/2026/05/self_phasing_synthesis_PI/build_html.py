@@ -524,73 +524,155 @@ add(id="07_two_layer_table", num="07", section="S2 機制", rg2="1", ngrep="5 co
 
 # ─── S3 量化鐵證 ───────────────────────────────────────────────────────────
 add(id="08_chr19_752", num="08", section="S3 量化鐵證", rg2="—", ngrep="6",
-    title="chr19 752 read-level victims — 100% 單向 baseline=11 → V3F/V5=21",
-    en="chr19 752 victims — 100% unidirectional fix",
+    title="chr19 752 read-level victims — baseline=11 全 752 條 → V6=21 100% 修正",
+    en="chr19 752 victims — baseline → V6 unidirectional 100% fix",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
-    <div class="grid-2col">
+    <div class="grid-2col" style="grid-template-columns: 5fr 5fr; gap:14px;">
       <div>
-        <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">規模:</p>
-        <pre class="code-panel" style="background:#F9FAFB;border:1px solid #E5E7EB;font-size:11px;">Dump rows:        549,206
-3-way merged:     1,069,832
-Priority bug:        752</pre>
+        <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">📊 規模 (HCC1395 5kHz chr19):</p>
+        <pre class="code-panel" style="background:#F9FAFB;border:1px solid #E5E7EB;font-size:11px;padding:6px;">Dump rows / version:  549,206
+3-way merged events: 1,069,832
+雙向矛盾 reads:           752
+  └─ germline_maj ≠ somatic_maj
+     且 both >0</pre>
       </div>
       <div>
-        <p style="font-size:12px;font-weight:700;color:#16A34A;margin:0 0 4px;">修正率:</p>
-        <pre class="code-panel" style="background:#DCFCE7;border:1px solid #16A34A;font-size:11px;color:#166534;">V3F 修正率: 100.00% ✅
-V5  修正率: 100.00% ✅
+        <p style="font-size:12px;font-weight:700;color:#16A34A;margin:0 0 4px;">✅ 修正率 (baseline → V6):</p>
+        <pre class="code-panel" style="background:#DCFCE7;border:1px solid #16A34A;font-size:11px;color:#166534;padding:6px;">baseline:  752 條 → hp=11 ❌
+V6:        752 條 → hp=21 ✅
+修正率:    100.00% (752/752)
 全 752 條無一條反向</pre>
       </div>
     </div>
-    <div class="grid-2col" style="grid-template-columns: 7fr 5fr;">
-      <table class="metric-table" style="font-size:11px;">
-        <thead><tr><th>路徑</th><th>結果</th><th>判定</th></tr></thead>
-        <tbody>
-          <tr class="row-green"><td>① 個案 trace</td><td>752 條</td><td>✅</td></tr>
-          <tr class="row-yellow"><td>② 1Mb 區域聚集</td><td>30M+27M 46%</td><td>⚠ PARTIAL</td></tr>
-          <tr><td>③ Density 共變</td><td>high≥5=0; low 觸發</td><td>🔄 反向有意義</td></tr>
-          <tr class="row-green"><td>④ 修正後消失</td><td>V3F/V5 100%</td><td>✅</td></tr>
-        </tbody>
-      </table>
-      <img class="fig-thumb" src="../figures/master/F4_chr19_752_victims_scatter.png" alt="F4" style="max-height:200px;">
+    <div class="grid-2col" style="grid-template-columns: 6fr 6fr; gap:14px; margin-top:8px;">
+      <div>
+        <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">🔬 4-path 驗證 (T1.2 chr19 audit):</p>
+        <table class="metric-table" style="font-size:10.5px;">
+          <thead><tr><th>路徑</th><th>結果</th><th>判定</th></tr></thead>
+          <tbody>
+            <tr class="row-green"><td>① 個案 trace</td><td>752 條同模式</td><td>✅ PASS</td></tr>
+            <tr class="row-yellow"><td>② 1Mb 區域聚集</td><td>30M+27M 占 46%</td><td>⚠ PARTIAL</td></tr>
+            <tr><td>③ Density 共變</td><td>high≥5=0; low 才觸發</td><td>🔄 反向有意義</td></tr>
+            <tr class="row-green"><td>④ 修正後消失</td><td>V6 100%</td><td>✅ PASS</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">📍 chr19 1Mb hotspot (top-3 windows):</p>
+        <svg viewBox="0 0 280 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
+          <text x="140" y="14" font-size="9" fill="#374151" text-anchor="middle" font-weight="600">chr19 victims by 1Mb window (T1.2)</text>
+          <line x1="40" y1="120" x2="270" y2="120" stroke="#9CA3AF" stroke-width="0.8"/>
+          <line x1="40" y1="30"  x2="40"  y2="120" stroke="#9CA3AF" stroke-width="0.8"/>
+          <text x="35" y="33" font-size="8" fill="#6B7280" text-anchor="end">215</text>
+          <text x="35" y="76" font-size="8" fill="#6B7280" text-anchor="end">100</text>
+          <text x="35" y="123" font-size="8" fill="#6B7280" text-anchor="end">0</text>
+          <rect x="55"  y="30"  width="34" height="90"  fill="#DC2626"/>
+          <text x="72" y="26" font-size="9" fill="#7F1D1D" text-anchor="middle" font-weight="700">215</text>
+          <text x="72" y="135" font-size="8" fill="#374151" text-anchor="middle">30M</text>
+          <text x="72" y="146" font-size="7" fill="#9CA3AF" text-anchor="middle">0.87%</text>
+          <rect x="100" y="64"  width="34" height="56" fill="#F59E0B"/>
+          <text x="117" y="60" font-size="9" fill="#7F1D1D" text-anchor="middle" font-weight="700">133</text>
+          <text x="117" y="135" font-size="8" fill="#374151" text-anchor="middle">27M</text>
+          <text x="117" y="146" font-size="7" fill="#9CA3AF" text-anchor="middle">0.56%</text>
+          <rect x="145" y="103" width="34" height="17" fill="#FCD34D"/>
+          <text x="162" y="100" font-size="9" fill="#7F1D1D" text-anchor="middle" font-weight="700">41</text>
+          <text x="162" y="135" font-size="8" fill="#374151" text-anchor="middle">16M</text>
+          <text x="162" y="146" font-size="7" fill="#9CA3AF" text-anchor="middle">0.19%</text>
+          <rect x="195" y="113" width="65" height="7" fill="#D1D5DB"/>
+          <text x="227" y="111" font-size="8" fill="#6B7280" text-anchor="middle">其他 14 win 共 363</text>
+          <text x="227" y="135" font-size="7.5" fill="#6B7280" text-anchor="middle">SP1/2/3 落 12-17M</text>
+        </svg>
+      </div>
     </div>
-    <div class="conclusion-arrow">→ 3 PASS + 1 PARTIAL = priority bug 機制因果確立 (chr19 only scope)</div>
-    <div class="footer-glossary"><div class="gloss-item">ⓘ scope: chr19 only</div></div>""",
-    speaker="chr19 read-level audit: dump 549,206 rows × 3 binary versions JOIN merged 1.07M events, 篩 germline_majority ≠ somatic_majority = 752 victims。V3F+V5 修正率 100%, 全 752 條 baseline=11 → V3F=21 單向。4-path 驗證 3 PASS + 1 PARTIAL: 個案 PASS、1Mb hotspot PARTIAL、density 反向有意義 (high vote sub-clone 一致已對齊, low 觸發)、修正後消失 PASS。機制因果確立。",
-    tier3="4-path detail / read_name 真實 case / SP1/2/3 對應 hotspot")
+    <div class="conclusion-arrow green" style="margin-top:6px;font-size:13px;padding:6px 12px;">→ 4 path 3.5/4 PASS → priority bug 機制因果確立 (chr19 scope)；§4.2 全基因組 34,855 驗 generalize</div>
+    <div class="footer-glossary" style="font-size:9.5px;">
+      <div class="gloss-item">ⓘ V6 對 priority bug 修補繼承 V3F two-layer getVote (41ff147)；本子集 germline+somatic 都 &gt;0 → V6 = V5 = V3F = 100%</div>
+      <div class="gloss-item">ⓘ baseline binary 8b8c1fd / V6 binary HEAD (post-5/10 Layer 1.5 revert)</div>
+    </div>""",
+    speaker="chr19 read-level audit (T1.2): 對 baseline (8b8c1fd) 與 V6 (HEAD) 兩版加 --debug-vote-dump flag, dump HCC1395 5kHz chr19 每條 read 經 getVote 後的 5-vote countMap, 各 549,206 rows × 3-way merged 1,069,832 events。篩 germline_majority ≠ somatic_majority 且 both >0 = 752 雙向矛盾 reads, baseline 全 752 條投錯方向 hp=11, V6 全 752 條翻 hp=21 = 100.00% 單向修正, 無一條反向。4-path 驗證 3.5/4 PASS: ① 個案 trace 752 條同模式 PASS、② 1Mb hotspot chr19:30M (215) + 27M (133) 占 46% PARTIAL (集中但非絕對 hotspot)、③ density 共變 high vote ≥5 受害=0 反向有意義 (high vote sub-clone 一致已對齊, low 票才觸發 priority bug)、④ 修正後消失 V6 100% PASS。chr19:12-17M 與 §S2 slide 04 SP1/2/3 案例對齊。重要: V6 對 priority bug 修補 (getVote two-layer) 繼承 V3F 邏輯, 本 slide 雙向矛盾子集 germline+somatic 都 >0 不觸及 V6 唯一改動 (Layer 1.5 revert 限 germline-absent 區) → V6 = V5 = V3F = 100%。下張 slide 09 把 752 victims generalize 到全基因組 34,855。",
+    tier3="4-path detail / read_name 真實 case (1c50034a-f0f / afb8e89b-893) / SP1/2/3 對應 hotspot")
 
 add(id="09_genome_34855", num="09", section="S3 量化鐵證", rg2="—", ngrep="14",
-    title="全基因組 34,855 victims (46×) — chr19 占 2.16% rank 19",
-    en="Genome-wide 34,855; main hotspots chr7/chr2/chr1",
+    title="全基因組 34,855 victims (46×) — baseline → V6 仍 100%；chr19 占 2.16% rank 19",
+    en="Genome-wide 34,855; baseline → V6 100%; chr19 only rank 19",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
+    <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">📈 chr19 pilot → 全基因組 generalize (T1.2-F1):</p>
     <table class="metric-table" style="font-size:11px;">
       <thead><tr><th></th><th>chr19 pilot</th><th>Genome F1</th><th>倍數</th></tr></thead>
       <tbody>
-        <tr><td>Dump rows</td><td class="num">549,206</td><td class="num">29,973,253</td><td class="num">54.6×</td></tr>
-        <tr class="row-yellow"><td><strong>Priority bug victims</strong></td><td class="num">752</td><td class="num">34,855</td><td class="num">46.4×</td></tr>
-        <tr class="row-green"><td>V3F / V5 修正率</td><td class="num">100% / 100%</td><td class="num">100% / 100%</td><td>一致 ✅</td></tr>
+        <tr><td>Dump rows / version</td><td class="num">549,206</td><td class="num">29,973,253</td><td class="num">54.6×</td></tr>
+        <tr><td>Tagged reads / version</td><td class="num">~330K</td><td class="num">18,895,432</td><td class="num">57×</td></tr>
+        <tr class="row-yellow"><td><strong>Priority bug victims</strong></td><td class="num">752</td><td class="num"><strong>34,855</strong></td><td class="num"><strong>46.4×</strong></td></tr>
+        <tr class="row-green"><td><strong>baseline → V6 修正率</strong></td><td class="num">100% (752/752)</td><td class="num"><strong>100% (34,855/34,855)</strong></td><td>一致 ✅</td></tr>
       </tbody>
     </table>
-    <div class="grid-2col" style="grid-template-columns: 7fr 5fr;">
-      <table class="metric-table" style="font-size:11px;">
-        <thead><tr><th>chr</th><th>victims</th><th>占比</th><th>rank</th></tr></thead>
-        <tbody>
-          <tr><td>chr7</td><td class="num">3,508</td><td class="num">10.1%</td><td class="num">1</td></tr>
-          <tr><td>chr2</td><td class="num">2,792</td><td class="num">8.0%</td><td class="num">2</td></tr>
-          <tr><td>chr1</td><td class="num">2,674</td><td class="num">7.7%</td><td class="num">3</td></tr>
-          <tr class="row-red"><td><strong>chr19</strong></td><td class="num">752</td><td class="num">2.16%</td><td class="num">19 ★</td></tr>
-          <tr style="background:#DBEAFE;"><td>chr8</td><td class="num">666</td><td class="num">1.9%</td><td class="num">21 冷區</td></tr>
-        </tbody>
-      </table>
-      <img class="fig-thumb" src="../figures/master/F2_priority_bug_per_chr_enrichment.png" alt="F2" style="max-height:240px;">
+    <div class="grid-2col" style="grid-template-columns: 5fr 7fr; gap:12px; margin-top:6px;">
+      <div>
+        <p style="font-size:10.5px;font-weight:700;color:#374151;margin:0 0 4px;">📋 per-chr top + 顛覆對照:</p>
+        <table class="metric-table" style="font-size:10.5px;">
+          <thead><tr><th>chr</th><th>victims</th><th>占比</th><th>rank</th></tr></thead>
+          <tbody>
+            <tr><td>chr7</td><td class="num">3,508</td><td class="num">10.1%</td><td class="num">1</td></tr>
+            <tr><td>chr2</td><td class="num">2,792</td><td class="num">8.0%</td><td class="num">2</td></tr>
+            <tr><td>chr1</td><td class="num">2,674</td><td class="num">7.7%</td><td class="num">3</td></tr>
+            <tr><td>chr16</td><td class="num">2,584</td><td class="num">7.4%</td><td class="num">4</td></tr>
+            <tr><td>chr20</td><td class="num">2,101</td><td class="num">6.0%</td><td class="num">7</td></tr>
+            <tr class="row-red"><td><strong>chr19</strong></td><td class="num">752</td><td class="num">2.16%</td><td class="num">19 ★</td></tr>
+            <tr style="background:#DBEAFE;"><td>chr8</td><td class="num">666</td><td class="num">1.9%</td><td class="num">21 ❄</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <p style="font-size:10.5px;font-weight:700;color:#374151;margin:0 0 4px;">📊 per-chr victims 分佈 (top-10):</p>
+        <svg viewBox="0 0 340 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
+          <text x="170" y="13" font-size="9" fill="#374151" text-anchor="middle" font-weight="600">priority bug victims by chromosome (genome-wide 34,855)</text>
+          <line x1="48" y1="170" x2="335" y2="170" stroke="#9CA3AF" stroke-width="0.8"/>
+          <line x1="48" y1="28"  x2="48"  y2="170" stroke="#9CA3AF" stroke-width="0.8"/>
+          <text x="44" y="31" font-size="8" fill="#6B7280" text-anchor="end">3,508</text>
+          <text x="44" y="100" font-size="8" fill="#6B7280" text-anchor="end">1,700</text>
+          <text x="44" y="173" font-size="8" fill="#6B7280" text-anchor="end">0</text>
+          <rect x="55"  y="28"  width="20" height="142" fill="#1E3A8A"/>
+          <text x="65" y="183" font-size="7.5" fill="#374151" text-anchor="middle">chr7</text>
+          <text x="65" y="25"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">3508</text>
+          <rect x="80"  y="56"  width="20" height="114" fill="#1E3A8A"/>
+          <text x="90" y="183" font-size="7.5" fill="#374151" text-anchor="middle">chr2</text>
+          <text x="90" y="53"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2792</text>
+          <rect x="105" y="62"  width="20" height="108" fill="#1E3A8A"/>
+          <text x="115" y="183" font-size="7.5" fill="#374151" text-anchor="middle">chr1</text>
+          <text x="115" y="59"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2674</text>
+          <rect x="130" y="66"  width="20" height="104" fill="#3B82F6"/>
+          <text x="140" y="183" font-size="7.5" fill="#374151" text-anchor="middle">chr16</text>
+          <text x="140" y="63"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2584</text>
+          <rect x="155" y="85"  width="20" height="85"  fill="#3B82F6"/>
+          <text x="165" y="183" font-size="7.5" fill="#374151" text-anchor="middle">chr20</text>
+          <text x="165" y="82"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2101</text>
+          <rect x="180" y="95"  width="20" height="75"  fill="#60A5FA"/>
+          <text x="190" y="183" font-size="7.5" fill="#374151" text-anchor="middle">chr3</text>
+          <rect x="205" y="105" width="20" height="65"  fill="#60A5FA"/>
+          <text x="215" y="183" font-size="7.5" fill="#374151" text-anchor="middle">chr5</text>
+          <rect x="230" y="112" width="20" height="58"  fill="#93C5FD"/>
+          <text x="240" y="183" font-size="7.5" fill="#374151" text-anchor="middle">chr6</text>
+          <text x="240" y="195" font-size="6.5" fill="#9CA3AF" text-anchor="middle">…rank 4-10</text>
+          <rect x="262" y="140" width="20" height="30"  fill="#DC2626"/>
+          <text x="272" y="183" font-size="7.5" fill="#7F1D1D" text-anchor="middle" font-weight="700">chr19</text>
+          <text x="272" y="137" font-size="8" fill="#7F1D1D" text-anchor="middle" font-weight="700">752</text>
+          <text x="272" y="195" font-size="6.5" fill="#7F1D1D" text-anchor="middle">★ rank 19</text>
+          <rect x="287" y="143" width="20" height="27"  fill="#0EA5E9"/>
+          <text x="297" y="183" font-size="7.5" fill="#0369A1" text-anchor="middle" font-weight="700">chr8</text>
+          <text x="297" y="140" font-size="8" fill="#0369A1" text-anchor="middle" font-weight="700">666</text>
+          <text x="297" y="195" font-size="6.5" fill="#0369A1" text-anchor="middle">❄ 0.34×</text>
+        </svg>
+      </div>
     </div>
-    <div class="footer-glossary">
-      <div class="gloss-item">ⓘ scope: 全基因組 (T1.2-F1)</div>
-      <div class="gloss-item">ⓘ chr8 LOH+HPSig 是 ISM 下游 hotspot</div>
+    <div class="conclusion-arrow green" style="margin-top:4px;font-size:12.5px;padding:6px 12px;">→ 17.3:1 偏移廣泛分佈 (chr7/chr2/chr1/chr16/chr20)；chr19 SP1/2/3 是「可重現案例」而非「主要 hotspot」</div>
+    <div class="footer-glossary" style="font-size:9.5px;">
+      <div class="gloss-item">ⓘ V6 修正率 = V5 = V3F = 100% (priority bug 修補繼承 41ff147 two-layer getVote)</div>
+      <div class="gloss-item">ⓘ chr8 priority bug 冷區 (0.34× avg) ≠ chr8 LOH+HPSig FP hotspot (7.4× ISM 下游, 不同 layer)</div>
     </div>""",
-    speaker="全基因組擴展 34,855 victims (46.4×)。V3F/V5 修正率仍 100%。per-chr 分佈推翻原 chr19 結論: 主要 hotspot chr7/chr2/chr1/chr16/chr20, chr19 占 2.16% rank 19。chr8 priority bug 0.34× (rank 21 冷區), 與 chr8 LOH+HPSig hotspot 是不同 layer。",
-    tier3="全 chr enrichment ‰ 表 / chrY 小 N 高 ‰ / chr8 layer 區分")
+    speaker="從 chr19 pilot generalize 全基因組 (T1.2-F1)。對 baseline 與 V6 兩版跑全基因組 vote dump (每版 ~40 min, 總 18.9M tagged reads, dump 744+687 MB gzipped) 比 chr19 規模 54.6× 大。priority bug victims 從 chr19 752 擴到全基因組 34,855 (46.4×), V6 修正率仍 100% (34,855/34,855 全 baseline=11 → V6=21 單向)。重要顛覆: per-chr 分佈推翻原 chr19 pilot 結論, 主要 hotspot 是 chr7 (3,508 rank 1) / chr2 (2,792) / chr1 (2,674) / chr16 (2,584) / chr20 (2,101); chr19 只占 2.16% rank 19, chr19 SP1/2/3 是可重現案例而非主要分佈位置。chr8 priority bug enrichment 0.34× genome avg (rank 21 冷區), 與 MEMORY chr8 LOH+HPSig 7.4× FP hotspot 是不同 layer (後者是 ISM 下游 HP_Ratio + LOH 特徵交互, 兩者無直接因果)。重要釐清: V6 對 priority bug 結果繼承 V5 = V3F = 100% (修補在 V3F 41ff147 已完成); V6 唯一不同是 5/10 Layer 1.5 revert (germline-absent 區), 與本 slide 雙向矛盾子集 germline+somatic 都 >0 不重疊。chr8 LOH+HPSig hotspot 機制另尋, 不會因 priority bug 修對自動消失。",
+    tier3="全 24 chr enrichment ‰ 表 / chrY 小 N 高 ‰ (1.484, 67 victims) / chr8 LOH+HPSig 為何屬不同 layer / Pass 2 reclassify 104K germline het 細節")
 
 # ─── S4 修補設計 ───────────────────────────────────────────────────────────
 add(id="10_5_commits", num="10", section="S4 修補設計", rg2="0 + 2 footnote", ngrep="5 hash",
