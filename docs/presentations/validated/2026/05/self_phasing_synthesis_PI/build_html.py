@@ -640,10 +640,10 @@ add(id="10_fix_design", num="10", section="S4 修補設計", rg2="1", ngrep="5 h
         <table class="metric-table" style="font-size:10px;">
           <thead><tr><th>版</th><th>germline 有 vote</th><th>germline 缺席</th></tr></thead>
           <tbody>
-            <tr class="row-red"><td><strong>baseline</strong></td><td>somatic break early → hp=11 ❌</td><td>同左</td></tr>
-            <tr class="row-green"><td><strong>V3F</strong></td><td>Layer 1 germ 決方向 → hp=21 ✅</td><td>Layer 2 預設 → hp=33 ✅</td></tr>
+            <tr class="row-red"><td><strong>baseline</strong></td><td>vector ① somatic pair break early → hp=11 ❌</td><td>vector ② mixed pair：罕走到，hp=33 為「順序副作用」</td></tr>
+            <tr class="row-green"><td><strong>V3F</strong></td><td>Layer 1 germ 決方向 → hp=21 ✅</td><td><code style="font-size:9px;background:#F0FDF4;padding:1px 3px;">if(somTot>0 && germ==0) hp=33</code> 結構化保證 ✅</td></tr>
             <tr class="row-yellow"><td><strong>V5</strong></td><td>同 V3F → hp=21 ✅</td><td>Layer 1.5 somatic vote → hp=11/21 ⚠ 繼承 4.19:1 偏移</td></tr>
-            <tr class="row-green" style="border-top:2px solid #DC2626;"><td><strong>V6 ★</strong></td><td>同 V3F → hp=21 ✅</td><td>revert Layer 1.5 → hp=33 ✅ 還原</td></tr>
+            <tr class="row-green" style="border-top:2px solid #DC2626;"><td><strong>V6 ★</strong></td><td>同 V3F → hp=21 ✅</td><td>revert Layer 1.5 → hp=33 ✅ 還原 V3F 結構化保證</td></tr>
           </tbody>
         </table>
       </div>
@@ -666,101 +666,69 @@ add(id="10_fix_design", num="10", section="S4 修補設計", rg2="1", ngrep="5 h
       <div class="gloss-item">ⓘ V6 patch: HaplotagProcess.cpp:537-548 移除 13 行 (V5 Layer 1.5 else if 分支)</div>
       <div class="gloss-item">ⓘ V6 重用 V5 phased VCF → caller F1 三版完全相同 (HCC1395 0.93=0.7166 / 0.6=0.6273)</div>
     </div>""",
-    speaker="S4 修補設計 — 5 commits 漸進完成 + getVote 四版演進。Timeline: 8b8c1fd (4-09 藍) PON-only flag 解 phasing layer 球員兼裁判; 41ff147 (4-10 綠) ★ two-layer getVote 是修 priority bug 的關鍵 commit; 380e8d2 (4-25 綠) INDEL guard 補 OOB UB safety; d0bcd8c (4-30a 紫跨兩層) ploidy fix 讓 Pass 2 真實觸發 + bundled Layer 1.5 (germline 缺席用 somatic vote fallback); 938f0df (4-30b 藍) threshold 0.95→0.9 鬆綁 Pass 2; V6 (5-10 紅) revert Layer 1.5 因 5/9 paired audit 揭露 Layer 1.5 在 germline-absent 區繼承 priority bug 4.19:1 偏移。getVote 四版: baseline somatic break early; V3F Layer 1+2 修對 + germline 缺席 hp=33 保守; V5 加 Layer 1.5 過度修正; V6 revert L1.5 還原 V3F 保守策略。hp=33 reads 量化是核心鐵證: baseline 因 priority bug 偏 HP1/HP2 hp=33 mixed-sub-tag 訊號被壓; V3F 首次正確輸出 hp=33 (132,060 全基因組); V5 Layer 1.5 把 hp=33 改派 hp=11/21 (-89.9% to 13,250); V6 revert 還原並略超 V3F (138,317 +4.7%) — 對 ISM 下游 marker engineering 重要因為 hp=33 標識 somatic ambiguous 區。V6 重用 V5 phased VCF 故 caller F1 完全不變 (HCC1395 5kHz 0.7166 / 0.6 0.6273 三版相同)。V6 = V3F germline-absent 保守 + V5 germline-existent 設計目標 (ploidy / threshold / phased VCF) = hybrid 升級 production-grade 終態。詳細 V5 vs V6 trade-off 量化見 slide 16 (V5 caveat)。",
+    speaker="S4 修補設計 — 5 commits 漸進完成 + getVote 四版演進。Timeline: 8b8c1fd (4-09 藍) PON-only flag 解 phasing layer 球員兼裁判; 41ff147 (4-10 綠) ★ two-layer getVote 是修 priority bug 的關鍵 commit; 380e8d2 (4-25 綠) INDEL guard 補 OOB UB safety; d0bcd8c (4-30a 紫跨兩層) ploidy fix 讓 Pass 2 真實觸發 + bundled Layer 1.5 (germline 缺席用 somatic vote fallback); 938f0df (4-30b 藍) threshold 0.95→0.9 鬆綁 Pass 2; V6 (5-10 紅) revert Layer 1.5 因 5/9 paired audit 揭露 Layer 1.5 在 germline-absent 區繼承 priority bug 4.19:1 偏移。getVote 四版核心差異: baseline vector ordered check ① somatic pair → ② mixed → ③ germline 加 break early, 第一個非空 pair 就 break, 所以 hp=33 (走 ②) 只是「順序副作用」— read 必須沒有任何 HP1_1/HP2_1 票才有機會走到 ②, 但 priority bug 把多數 reads 拉走標 hp=11/21, hp=33 機率被嚴重壓縮。V3F 把 hp=33 變成「結構化決策」: Layer 1 germline 決方向, Layer 2 顯式 `if (somaticTotal>0 && germlineResult==0) hpResult=33` — 首次保證 germline-absent 區正確標 hp=33 而非 vector 順序的副作用。V5 Layer 1.5 把 germline-absent 區的 hp=33 改派 hp=11/21, 結構化保證被打破。V6 revert Layer 1.5 還原 V3F 結構化保證。hp=33 reads 全基因組量化: baseline 因 priority bug 偏 HP1/HP2 hp=33 訊號被壓; V3F 首次正確輸出 hp=33 132,060; V5 -89.9% to 13,250 (Layer 1.5 過度修正); V6 138,317 +4.7% vs V3F 還原並略超 — 對 ISM 下游 marker engineering 重要因為 hp=33 標識 somatic ambiguous 區。V6 重用 V5 phased VCF 故 caller F1 三版完全相同 (HCC1395 5kHz 0.7166 / 0.6 0.6273)。V6 = V3F germline-absent 保守 + V5 germline-existent 設計目標 (ploidy / threshold / phased VCF) = hybrid 升級 production-grade 終態。詳細 V5 vs V6 trade-off 量化見 slide 16 (V5 caveat)。",
     tier3="commit 各別 line count (8b8c1fd +69/-6 / 41ff147 +36/-25 / 380e8d2 +8/-4 / d0bcd8c +68/-9 / 938f0df +4/-4) / V6 patch HaplotagProcess.cpp:537-548 移除 13 行 / V5 Layer 1.5 設計動機 (補 V3F untagged) / cherry-pick from zhenyu")
 
-add(id="12_sp_fixed", num="12", section="S5 驗證", rg2="1", ngrep="11",
-    title="個案層 V5 修正 3/3 + 全基因組 HP1:HP2 17.3:1 → ~1:1",
-    en="Site-level V5 fixes 3/3 + genome 17.3:1 → ~1:1",
-    timing="90 sec / 中 ~340 字",
-    canvas_html="""
-    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0;">個案層: SP1/2/3 修正後對齊 paired</p>
-    <table class="metric-table" style="font-size:11px;">
-      <thead><tr><th>位點</th><th>baseline</th><th>V5</th><th>paired</th><th>對齊?</th></tr></thead>
-      <tbody>
-        <tr class="row-green"><td>SP1 chr19:17,565,944</td><td class="num">113:0</td><td>HP2 主導</td><td>HP2</td><td>✅</td></tr>
-        <tr class="row-green"><td>SP2 chr19:12,452,332</td><td class="num">109:1</td><td>HP2 主導</td><td>HP2</td><td>✅</td></tr>
-        <tr class="row-green"><td>SP3 chr19:12,467,180</td><td class="num">108:0</td><td>HP2 主導</td><td>HP2</td><td>✅</td></tr>
-      </tbody>
-    </table>
-    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">全基因組層:</p>
-    <table class="metric-table" style="font-size:11px;">
-      <thead><tr><th>指標</th><th>baseline</th><th>V5</th><th>Δ</th></tr></thead>
-      <tbody>
-        <tr class="row-green"><td>HP1:HP2 ratio</td><td>17.3:1</td><td>~1:1</td><td>消除偏移</td></tr>
-        <tr class="row-green"><td>94.6% somatic→HP1</td><td>是</td><td>~50%</td><td>balanced</td></tr>
-        <tr class="row-green"><td>15-site Problem PS</td><td class="num">48.5%</td><td class="num">52.0%</td><td class="num">+3.5 pp</td></tr>
-      </tbody>
-    </table>
-    <div class="grid-2col" style="grid-template-columns: 7fr 5fr;">
-      <img class="fig-thumb" src="../figures/master/F5_layer15_zero_sum_4quadrant.png" alt="F5" style="max-height:140px;">
-      <div class="green-box" style="font-size:11px;">
-        F5 zero-sum:<br>
-        germline=0  +560,881<br>
-        germline>0  −560,881<br>
-        總和         =0
-      </div>
-    </div>""",
-    speaker="個案層: SP1/2/3 V5 翻 HP2 對齊 paired 3/3。全基因組: 17.3:1 → ~1:1; 94.6% → ~50%; 15-site Problem PS 48.5%→52.0% +3.5 pp。F5 zero-sum: germline=0 +560K / germline>0 -560K / 總和 0。Pass 2 reclassify 104K germline het 為 somatic/未 phase。",
-    tier3="V2b/V3F 中間版本 / Layer 1.5 zero-sum")
-
-add(id="13_20_metrics", num="13", section="S5 驗證", rg2="1", ngrep="20+",
-    title="20 指標 no regression — 6 項 ⭐ 顯著改善 +8.3 ~ +99.7%",
-    en="20 metrics no regression; 6 significant improvements",
+add(id="12_no_regression", num="12", section="S5 驗證", rg2="1", ngrep="20+",
+    title="baseline → V6 個案 3/3 對齊 + 20 指標 no regression + 6 ⭐ 顯著改善",
+    en="baseline → V6: SP 3/3 aligned + 20 metrics no regression + 6 improvements",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
-    <table class="metric-table" style="font-size:11px;">
-      <thead><tr><th>類別</th><th>內容</th></tr></thead>
+    <p style="font-size:11.5px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">🎯 baseline → V6 五大類 + 個案層 = 23 指標全綠 (0 regression):</p>
+    <table class="metric-table" style="font-size:10.5px;">
+      <thead><tr><th>類別</th><th>內容（baseline → V6, V6 重用 V5 phased VCF 故 metric 繼承 V5）</th></tr></thead>
       <tbody>
-        <tr class="row-green"><td><strong>① ISM aggregate (3)</strong></td><td>TP_rate +0.005 / HP_Ratio 0.788→0.574 / Potential_LOH +3.5 pp</td></tr>
+        <tr class="row-green"><td><strong>① ISM aggregate (3)</strong></td><td>TP_rate +0.005 / HP_Ratio 0.788→0.574 (tag bias 修正) / Potential_LOH +3.5 pp</td></tr>
         <tr class="row-green"><td><strong>② HP_Ratio AUC (2)</strong></td><td>All -0.005 (隨機區間) / Inner +0.002</td></tr>
         <tr class="row-green"><td><strong>③ Methylation 6 feat</strong></td><td>全 ±0.01 內持平</td></tr>
         <tr class="row-yellow"><td><strong>④ Paired GT concord. ⭐ (4)</strong></td><td>clean PS +8.3 pp / 15-Aggr +6.65 pp / 15-Clean PS +13.3 pp</td></tr>
-        <tr class="row-yellow"><td><strong>⑤ HP / LOH 結構 ⭐ (5)</strong></td><td>N50 +99.7% / Phased +23.6 pp / 1.36× 快 / LOH 完全相同</td></tr>
+        <tr class="row-yellow"><td><strong>⑤ HP / LOH 結構 ⭐ (5)</strong></td><td>N50 +99.7% / Phased +23.6 pp / 1.36× 快 / LOH Jaccard=1.0</td></tr>
+        <tr class="row-green" style="border-top:2px solid #DC2626;"><td><strong>⑥ 個案層驗證 (3) 🆕</strong></td><td>SP1 113:0 / SP2 109:1 / SP3 108:0 → V6 全翻 HP2 對齊 paired 3/3 ✅</td></tr>
       </tbody>
     </table>
-    <div class="green-box" style="text-align:center;font-weight:700;">6 顯著改善 ⭐: N50 +99.7% / Phased +23.6 pp / 1.36× / 15-Clean PS +13.3 pp / clean PS +8.3 pp / 15-Aggr +6.65 pp</div>
-    <div class="conclusion-arrow">→ 20/0 指標 no regression — V5 全面 production-ready</div>
-    <p style="font-size:10px;color:#6B7280;font-style:italic;text-align:center;">(HP_Ratio 0.788→0.574 是 tag bias 修正非變差 — pre-registered metrics)</p>
-    <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">LOH:</span> 雜合性丟失</div>
-      <div class="gloss-item">ⓘ scope: HCC1395 5kHz @ 0.93 (PI 報告 V5 = Pass 1 only)</div>
+    <div class="green-box" style="text-align:center;font-weight:700;font-size:11.5px;padding:6px;">6 顯著改善 ⭐: N50 +99.7% / Phased +23.6 pp / 1.36× speed / 15-Clean PS +13.3 pp / clean PS +8.3 pp / 15-Aggr +6.65 pp</div>
+    <div class="conclusion-arrow green" style="font-size:12.5px;">→ 23/0 指標 no regression + 個案層 3/3 對齊 paired → V6 全面 production-ready</div>
+    <div class="footer-glossary" style="font-size:9.5px;">
+      <div class="gloss-item">ⓘ HP_Ratio 0.788→0.574 是 tag bias 修正非變差 (pre-registered metrics)</div>
+      <div class="gloss-item">ⓘ scope: HCC1395 5kHz @ 0.93 purity; V6 metric = V5 (重用 phased VCF)；caller F1 不變 (slide 14)</div>
     </div>""",
-    speaker="5 大類 20 指標全綠: ① ISM 3 項 (HP_Ratio 0.788→0.574 是 tag bias 修正非變差); ② HP_Ratio AUC 隨機區間; ③ methylation 6 持平; ④ Paired GT 4 ⭐ +6.65~+13.3 pp; ⑤ HP/LOH 5 ⭐ N50 +99.7% / Phased +23.6 pp / 1.36× / LOH Jaccard=1.0。20/0 no regression production-ready。",
-    tier3="methylation 6 列表 / HP_Ratio 詳解 / LOH Jaccard=1.0")
+    speaker="S5 驗證 — baseline → V6 五大類 + 個案層 = 23 指標全綠 0 regression。① ISM aggregate 3 項 (HP_Ratio 0.788→0.574 是 tag bias 修正非變差); ② HP_Ratio AUC 2 項隨機區間內; ③ methylation 6 全 ±0.01 持平; ④ Paired GT concord 4 項 ⭐ clean PS +8.3 pp / 15-Aggr +6.65 pp / 15-Clean PS +13.3 pp; ⑤ HP/LOH 結構 5 項 ⭐ phase block N50 +99.7% / Phased +23.6 pp / 1.36× 快 / LOH Jaccard=1.0; ⑥ 個案層驗證 3 項 (slide 04 SP1/2/3 IGV 已詳) baseline 113:0/109:1/108:0 全 V6 翻 HP2 對齊 paired 3/3。重要: V6 重用 V5 phased VCF 故所有 phasing/structure metric 直接繼承 V5 結果; V6 唯一改動是 tagging 層 Layer 1.5 revert (germline-absent 區 hp=33 還原 — slide 10/16) 不影響本 slide 23 指標 (個案 + ISM + structural metric 都在 germline-existent 區或 caller 層); caller F1 三版完全相同 (slide 14) 將進一步證 V6 不退步。Layer 1.5 zero-sum F5 細節 (germline=0 +560K / germline>0 -560K 總和 0) 留 slide 16 V5 caveat 主軸。HP_Ratio 0.788→0.574 是 tag bias 修正 (baseline 因 priority bug 偏 HP1 拉高 HP_Ratio, V6 修對自然回降) 非 metric 變差 — 此為 pre-registered 量化目標。",
+    tier3="methylation 6 feat 列表 / Layer 1.5 zero-sum 細節 (留 slide 16) / V2b/V3F 中間版本 / HP_Ratio 詳解 / LOH Jaccard=1.0 細節")
 
 add(id="14_caller_f1", num="14", section="S5 驗證 + ⚡ Cliffhanger", rg2="2", ngrep="15+",
-    title="Caller F1 vs SEQC2 三版完全相同; purity 0.6 完整對照 0 critical regression",
-    en="Caller F1 identical; purity 0.6 fully verified",
+    title="Caller F1 vs SEQC2 四版完全相同 — V6 不退步 + Cliffhanger 接 V5 caveat",
+    en="Caller F1 identical across 4 versions; V6 no regression",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
-    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0;">HCC1395 5kHz @ 0.93 purity:</p>
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">📊 HCC1395 5kHz @ 0.93 purity (caller F1 vs SEQC2 truth set):</p>
     <table class="metric-table" style="font-size:10px;">
       <thead><tr><th>版本</th><th>TP</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
       <tbody>
         <tr class="row-green"><td>A1 baseline</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
         <tr class="row-green"><td>A3 V3F</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
         <tr class="row-green"><td>A5 V5</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
+        <tr class="row-green" style="border-top:2px solid #DC2626;"><td><strong>A6 V6 ★</strong></td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
       </tbody>
     </table>
-    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:6px 0 0;">HCC1395 t30_n20 @ 0.6 purity:</p>
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:6px 0 4px;">📊 HCC1395 t30_n20 @ 0.6 purity (低純度對照):</p>
     <table class="metric-table" style="font-size:10px;">
       <thead><tr><th>版本</th><th>TP</th><th>FP</th><th>FN</th><th>F1</th></tr></thead>
-      <tbody><tr class="row-green"><td>B1/B3/B5 三版</td><td class="num">24,190</td><td class="num">13,487</td><td class="num">15,257</td><td class="num"><strong>0.6273</strong></td></tr></tbody>
+      <tbody><tr class="row-green"><td><strong>B1/B3/B5/B6 四版完全相同</strong></td><td class="num">24,190</td><td class="num">13,487</td><td class="num">15,257</td><td class="num"><strong>0.6273</strong></td></tr></tbody>
     </table>
     <div class="arg-list" style="font-size:11px;">
-      <strong>因果鏈:</strong> ClairS-TO PASS set 由 caller 決定 → V5 改 GT/PS 不改 FILTER → PASS set 不變 → TP/FP/FN 不變 → F1 不變
+      <strong>因果鏈:</strong> ClairS-TO PASS set 由 caller 決定 → V3F/V5/V6 改 GT/PS 不改 FILTER → PASS set 不變 → TP/FP/FN 不變 → F1 不變
     </div>
     <div class="cliffhanger-box">
-      → V5 (與 V6) 都不改 caller; ΔF1 (0.93→0.6) = -0.0893 為 ClairS-TO 性質<br>
-      <strong>→ 5/9 paired cross-ref 揭 V5 Layer 1.5 缺陷 → 5/10 V6 binary patch 已修補...</strong> 〔next: slide 15-16〕
+      → 四版 F1 完全相同; V6 重用 V5 phased VCF + 不改 phasing 層 → 零 caller-side 影響<br>
+      → ΔF1 (0.93→0.6) = -0.0893 為 ClairS-TO 低 purity 性質, 與 self-phasing 無關<br>
+      <strong>→ 但 5/9 paired audit 揭 V5 Layer 1.5 缺陷 → 5/10 V6 binary patch 修對...</strong> 〔next: slide 15-16〕
     </div>
     <div class="footer-glossary">
       <div class="gloss-item">📖 <span class="term">purity:</span> 樣本中腫瘤細胞占比</div>
       <div class="gloss-item">ⓘ <span class="term">PASS set:</span> ClairS-TO snv.vcf FILTER=PASS 集合</div>
     </div>""",
-    speaker="Caller F1 vs SEQC2: 0.93 三版 F1=0.7166 完全相同; 0.6 三版 F1=0.6273 完全相同。因果鏈: ClairS-TO PASS set 由 caller 決定, V5 改 GT/PS/GT2/GT3 不改 FILTER → PASS set 不變 → F1 不變。V5 不改 caller, ΔF1 -0.0893 是 ClairS-TO 在低 purity 性質。turning point — 但 5/9 paired cross-ref 揭露另一面。",
-    tier3="PASS set / FILTER 機制 / purity 0.6 N50 微差")
+    speaker="Caller F1 vs SEQC2 truth set 四版完全相同 — V6 不退步鐵證。0.93 purity (HCC1395 5kHz) 四版 TP=28,509 / FP=11,606 / FN=10,938 / Precision=0.7107 / Recall=0.7227 / F1=0.7166 完全相同 (到小數第 4 位 0 差異); 0.6 purity (HCC1395 t30_n20) 四版 TP=24,190 / FP=13,487 / FN=15,257 / F1=0.6273 完全相同。因果鏈: ClairS-TO PASS set 由 caller 決定 (FILTER 欄), V3F/V5/V6 三版改 GT/PS/GT2/GT3 phasing tag 不改 FILTER → PASS set 不變 → TP/FP/FN 集合不變 → F1 不變。V6 重用 V5 phased VCF + V6 只改 tagging 層 (HaplotagProcess.cpp:537-548 Layer 1.5 revert) 完全不改 phasing 層, 故 caller-side 零影響。ΔF1 (0.93→0.6) = -0.0893 是 ClairS-TO 在低 purity 樣本的性質 (recall 下降), 與 self-phasing 修補無關。turning point: 此 slide 結束 caller-level 驗證 (沒退步), 但下一節 slide 15-16 揭露 5/9 paired audit 找到 V5 Layer 1.5 在 germline-absent 區的設計缺陷, 5/10 V6 binary patch 已修對 — 帶出 V6 為何不只是 incremental 而是有具體 trade-off motivation。",
+    tier3="PASS set / FILTER 機制 / purity 0.6 N50 微差 / V6 patch 不改 phasing 層 detail")
 
 add(id="15_paired_mode", num="15", section="S6 5/9 新發現", rg2="1 + 1 footnote", ngrep="11",
     title="paired mode 整體無偏移 — HP1:HP2 = 1:1.275; som_ratio mean 0.462",
