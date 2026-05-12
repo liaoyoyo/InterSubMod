@@ -315,8 +315,8 @@ somatic  HP2_1 = 0</pre>
       <div class="gloss-item">📖 <span class="term">sub-clone:</span> 腫瘤中帶相同突變的某群癌細胞</div>
       <div class="gloss-item">ⓘ break-early: for-loop 第一個非空就 return</div>
     </div>""",
-    speaker="tagging 層 priority bug 機制三件套: ① getVote vector 順序錯 baseline ① somatic ② mixed ③ germline, for 迴圈第一個非空就 break early, germline 5 票永遠看不到; ② 真實 read 例子 chr19 752 同模式, germline HP2=5 主導, somatic HP1_1 只 1 票就觸發, baseline 錯標 hp=11 正確應 hp=21; ③ V3F 修法 41ff147 反轉順序, germline 第一順位 break, 5 票主導勝出。tumor sub-clone somatic 100% 同方向 → 全受影響 reads 標 HP:i:11 → tag layer 17.3:1 偏移 (slide 03 / 08)。重要: tag layer 與 slide 05 phasing layer 是不同層 bug, 必須分別修補, 不能合併修。",
-    tier3="enum HAPLOTYPE1_1=2 vs HP tag int=11 / 5-vote countMap / tag layer vs phasing layer 為何不能合併修 / 41ff147 與 380e8d2 INDEL guard 分工")
+    speaker="tagging 層 priority bug 機制三件套（per-read 框架, judgeHaplotype:533 每條 read 自己 reset countMap）: ① getVote vector 順序錯 baseline ① somatic ② mixed ③ germline, for 迴圈第一個非空 pair 就 break early, 同一條 read 的 germline 5 票永遠看不到; ② 真實 read 例子 chr19 752 victims 同模式 — 單一條 read 經過 5 個 germline het 位點累積 countMap[HP2]=5 主導 + 1 個 somatic 位點累積 countMap[HP1_1]=1, baseline 錯標這條 read 為 hp=11 正確應 hp=21; ③ V3F 修法 41ff147 重寫為兩層獨立判定, germline 先決方向 somatic 再加 sub-tag encoding。tumor sub-clone somatic 100% 同方向 → 752 條獨立 read 各自被 priority bug 翻成 HP:i:11 → tag layer 17.3:1 偏移 (slide 03 / 08)。重要: tag layer 與 slide 05 phasing layer 是不同層 bug, 必須分別修補, 不能合併修。getVote 是 per-read 操作不是 aggregate, 752 victims = 752 條獨立 read 而非 group。",
+    tier3="enum HAPLOTYPE1_1=2 vs HP tag int=11 / countMap per-read reset @ HaplotagProcess.cpp:533 / tag layer vs phasing layer 為何不能合併修 / 41ff147 與 380e8d2 INDEL guard 分工 / 752 victims per-read 獨立 case")
 
 add(id="07_two_layer_table", num="07", section="S2 機制", rg2="1", ngrep="5 commits + 1",
     title="兩層 bug 兩層修補 — 修了什麼 + 為何缺一不可",
