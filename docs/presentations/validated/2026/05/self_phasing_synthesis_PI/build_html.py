@@ -117,7 +117,7 @@ add(id="02_tldr", num="02", section="S0 報告流程", rg2="—", ngrep="—",
 
 # ─── S1 觀察起點 ───────────────────────────────────────────────────────────
 add(id="03_genome_173", num="03", section="S1 觀察起點", rg2="3", ngrep="8",
-    title="全基因組 HP1:HP2 = 17.3:1 是 systematic bias，非樣本性質",
+    title="全基因組 17.3:1 偏移 = systematic bias",
     en="Genome-wide 17.3:1 = systematic engineering artifact, not sample variation",
     timing="90 sec / 中 ~340 字",
     canvas_html="""
@@ -154,7 +154,7 @@ add(id="03_genome_173", num="03", section="S1 觀察起點", rg2="3", ngrep="8",
     tier3="cnLOH 機制細節 / 23 chr 一致性表 / paired pipeline 程式碼差異")
 
 add(id="04a_sp1", num="04a", section="S1 觀察起點", rg2="1", ngrep="3",
-    title="SP1 個案 — baseline 113:0 → V5 翻轉對齊 paired",
+    title="SP1: baseline 113:0 → V5 翻 HP2 對齊",
     en="SP1 chr19:17,565,944 — baseline 113:0 → V5 flips to HP2",
     timing="60 sec / 中 ~250 字",
     canvas_html="""
@@ -178,7 +178,7 @@ add(id="04a_sp1", num="04a", section="S1 觀察起點", rg2="1", ngrep="3",
     tier3="6-BAM 並列順序細節 / V2b 中間階段意義 / HP1-1 sub-tag 與 HP1 合併原則")
 
 add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
-    title="SP2 + SP3 同模式 — 3/3 對齊 paired",
+    title="SP2/SP3 同模式 3/3 對齊 paired",
     en="SP2 + SP3 follow SP1 pattern, 3/3 aligned with paired",
     timing="60 sec / 中 ~260 字",
     canvas_html="""
@@ -218,7 +218,7 @@ add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
 
 # ─── S2 機制 ──────────────────────────────────────────────────────────────
 add(id="05_player_referee", num="05", section="S2 機制", rg2="4 (核心 forced)", ngrep="3 + 1 commit",
-    title="phasing 層「球員兼裁判」— somatic 反過來主導 graph",
+    title="phasing 層球員兼裁判機制",
     en="Phasing layer player-as-referee — somatic 100% co-occurrence overrules germline 50/50",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
@@ -321,7 +321,7 @@ add(id="05_player_referee", num="05", section="S2 機制", rg2="4 (核心 forced
     tier3="TO vs paired PoN 對照 / 自我增強迴圈 / Pass 1 vs Pass 2 預告 / edge weight 計算細節")
 
 add(id="06_priority_bug", num="06", section="S2 機制", rg2="1 + 2 footnote", ngrep="5",
-    title="tagging 層 priority bug — getVote 順序錯 + break early",
+    title="tagging 層 priority bug 機制",
     en="getVote priority bug — single somatic vote triggers mislabel (break-early on wrong order)",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
@@ -469,7 +469,7 @@ add(id="06_priority_bug", num="06", section="S2 機制", rg2="1 + 2 footnote", n
     tier3="enum HAPLOTYPE1_1=2 vs HP tag int=11 / countMap per-read reset @ HaplotagProcess.cpp:533 / tag layer vs phasing layer 為何不能合併修 / 41ff147 與 380e8d2 INDEL guard 分工 / 752 victims per-read 獨立 case")
 
 add(id="07_two_layer_table", num="07", section="S2 機制", rg2="1", ngrep="5 commits + 1",
-    title="兩層 bug 兩層修補 — 修了什麼 + 為何缺一不可",
+    title="兩層 bug 對應兩層修補",
     en="Two layers two fixes — what each fix actually does, and why both required",
     timing="90 sec / 中 ~310 字",
     canvas_html="""
@@ -524,7 +524,7 @@ add(id="07_two_layer_table", num="07", section="S2 機制", rg2="1", ngrep="5 co
 
 # ─── S3 量化鐵證 ───────────────────────────────────────────────────────────
 add(id="08_quant_evidence", num="08", section="S3 量化鐵證", rg2="—", ngrep="14",
-    title="baseline → V6 read-level 鐵證 — chr19 752 + 全基因組 34,855 全 100% 單向修正",
+    title="read-level 鐵證: 34,855 V6 100% 修正",
     en="baseline → V6 read-level 100% fix: 752 chr19 + 34,855 genome",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
@@ -595,7 +595,7 @@ add(id="08_quant_evidence", num="08", section="S3 量化鐵證", rg2="—", ngre
 
 # ─── S4 修補設計 ───────────────────────────────────────────────────────────
 add(id="10_fix_design", num="10", section="S4 修補設計", rg2="1", ngrep="5 hash",
-    title="5 commits 修補 + getVote 四版演進 — V6 為 production-grade 終態",
+    title="5 commits + getVote 四版 → V6 終態",
     en="5 commits fix + getVote 4-version: V6 production-grade",
     timing="150 sec / 中 ~420 字",
     canvas_html="""
@@ -670,7 +670,7 @@ add(id="10_fix_design", num="10", section="S4 修補設計", rg2="1", ngrep="5 h
     tier3="commit 各別 line count (8b8c1fd +69/-6 / 41ff147 +36/-25 / 380e8d2 +8/-4 / d0bcd8c +68/-9 / 938f0df +4/-4) / V6 patch HaplotagProcess.cpp:537-548 移除 13 行 / V5 Layer 1.5 設計動機 (補 V3F untagged) / cherry-pick from zhenyu")
 
 add(id="12_no_regression", num="12", section="S5 驗證", rg2="1", ngrep="20+",
-    title="baseline → V6 個案 3/3 對齊 + 20 指標 no regression + 6 ⭐ 顯著改善",
+    title="23 指標 0 regression + 個案 3/3 對齊",
     en="baseline → V6: SP 3/3 aligned + 20 metrics no regression + 6 improvements",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
@@ -697,7 +697,7 @@ add(id="12_no_regression", num="12", section="S5 驗證", rg2="1", ngrep="20+",
     tier3="methylation 6 feat 列表 / Layer 1.5 zero-sum 細節 (留 slide 16) / V2b/V3F 中間版本 / HP_Ratio 詳解 / LOH Jaccard=1.0 細節")
 
 add(id="14_caller_f1", num="14", section="S5 驗證 + ⚡ Cliffhanger", rg2="2", ngrep="15+",
-    title="Caller F1 vs SEQC2 四版完全相同 — V6 不退步 + Cliffhanger 接 V5 caveat",
+    title="Caller F1 四版完全相同 = 0.7166",
     en="Caller F1 identical across 4 versions; V6 no regression",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
@@ -735,7 +735,7 @@ add(id="14_caller_f1", num="14", section="S5 驗證 + ⚡ Cliffhanger", rg2="2",
     tier3="PASS set / FILTER 機制 / purity 0.6 N50 微差 / V6 patch 不改 phasing 層 detail")
 
 add(id="15_paired_mode", num="15", section="S6 5/9 新發現", rg2="1 + 1 footnote", ngrep="11",
-    title="paired mode = control group — 證 priority bug 是 TO mode 限定",
+    title="paired mode = control: TO 限定 bug",
     en="paired mode = control group; TO-only priority bug",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
@@ -779,7 +779,7 @@ add(id="15_paired_mode", num="15", section="S6 5/9 新發現", rg2="1 + 1 footno
     tier3="longphase-s codebase / SomaticHaplotagProcess.cpp:533 / paired 軸對齊")
 
 add(id="16_v5_caveat", num="16", section="S6 5/9-5/10 V5 缺陷 + V6 修補 ★", rg2="5 (核心 caveat + 修補 forced)", ngrep="20+",
-    title="V5 Layer 1.5 設計缺陷 → V6 binary patch (5/10) 三向 head-to-head 修補",
+    title="V5 Layer 1.5 缺陷 → V6 修對 ★",
     en="V5 Layer 1.5 caveat → V6 patch (5/10) three-way head-to-head fix",
     timing="180 sec / 中 ~480 字 ★ 整份最關鍵+最長",
     title_critical=True,
@@ -814,7 +814,7 @@ add(id="16_v5_caveat", num="16", section="S6 5/9-5/10 V5 缺陷 + V6 修補 ★"
 
 # ─── S7 Errata + Follow-up ────────────────────────────────────────────────
 add(id="17_main_verdict", num="17", section="S7 結論", rg2="3 (main verdict)", ngrep="6 errata",
-    title="整份報告 3 條 main verdict + PI 報告 4-29 6 條 errata 已 patch",
+    title="3 條主結論 + 6 條 errata patch",
     en="3 main verdicts + 6 errata patched",
     timing="120 sec / 中 ~400 字",
     title_critical=True,
@@ -853,7 +853,7 @@ add(id="17_main_verdict", num="17", section="S7 結論", rg2="3 (main verdict)",
     tier3="errata commit chain / V6 patch 待 commit / Phase D 5 樣本 evaluation matrix / 各 errata 段落 cross-ref")
 
 add(id="18_impact_future", num="18", section="S7 結論", rg2="1", ngrep="—",
-    title="改正後影響 + 未來研究方向 — V6 production candidate, 3 follow-up pending",
+    title="改正後影響 + 未來研究 3 方向",
     en="Impact + future directions; V6 production candidate",
     timing="100 sec / 中 ~360 字",
     canvas_html="""
@@ -895,7 +895,7 @@ add(id="18_impact_future", num="18", section="S7 結論", rg2="1", ngrep="—",
 
 # ─── Q&A Backup ───────────────────────────────────────────────────────────
 add(id="b1_pass2", num="B1", section="Q&A Backup", rg2="4 (backup 例外)", ngrep="—",
-    title="Pass 2 = 只重跑 2-point edgeConnectResult; 高 purity 才觸發",
+    title="Pass 2: 重跑 2-point only (高 purity)",
     en="Pass 2 = re-run 2-point only; high purity gate",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
@@ -909,7 +909,7 @@ add(id="b1_pass2", num="B1", section="Q&A Backup", rg2="4 (backup 例外)", ngre
     tier3="patternMining first/second/third path / Pass 2 不重跑 somaticCalling")
 
 add(id="b2_purity06", num="B2", section="Q&A Backup", rg2="1", ngrep="20+",
-    title="purity 0.6 樣本 baseline vs V5 完整對照 — 0 critical regression",
+    title="purity 0.6: 0 critical regression",
     en="purity 0.6 sample fully verified",
     timing="90 sec / 中 ~320 字",
     canvas_html="""
@@ -937,7 +937,7 @@ add(id="b2_purity06", num="B2", section="Q&A Backup", rg2="1", ngrep="20+",
     tier3="V3F vs V5 0.6 對比 / N50 為何接受")
 
 add(id="b3_cross_sample", num="B3", section="Q&A Backup", rg2="1", ngrep="—",
-    title="Phase D 跨 4 樣本 V6 詳細 evaluation matrix + COLO829 推遲",
+    title="Phase D 4 樣本 V6 matrix",
     en="Phase D V6 4-sample evaluation + COLO829 deferred",
     timing="90 sec / 中 ~320 字",
     canvas_html="""
