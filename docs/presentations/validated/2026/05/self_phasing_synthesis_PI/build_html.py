@@ -157,14 +157,14 @@ add(id="03_genome_173", num="03", section="S1 觀察起點", rg2="3", ngrep="8",
       <table class="metric-table">
         <thead><tr><th>指標</th><th>baseline</th><th>隨機</th><th>偏離</th></tr></thead>
         <tbody>
-          <tr><td>HP1 reads</td><td class="num">614,000</td><td class="num">~325K</td><td class="num">1.89×</td></tr>
-          <tr><td>HP2 reads</td><td class="num">35,500</td><td class="num">~325K</td><td class="num">0.11×</td></tr>
-          <tr><td>HP1:HP2 ratio</td><td class="num">17.3:1</td><td class="num">1:1</td><td class="num">17.3×</td></tr>
-          <tr class="row-yellow"><td>HP1 占比</td><td class="num">94.6%</td><td class="num">~50%</td><td class="num">+44.6 pp</td></tr>
+          <tr><td><strong>HP1 family</strong> reads</td><td class="num">614,000</td><td class="num">~325K</td><td class="num">1.89×</td></tr>
+          <tr><td><strong>HP2 family</strong> reads</td><td class="num">35,500</td><td class="num">~325K</td><td class="num">0.11×</td></tr>
+          <tr><td>HP1 fam : HP2 fam ratio</td><td class="num">17.3:1</td><td class="num">1:1</td><td class="num">17.3×</td></tr>
+          <tr class="row-yellow"><td>HP1 family 占比</td><td class="num">94.6%</td><td class="num">~50%</td><td class="num">+44.6 pp</td></tr>
         </tbody>
       </table>
       <div style="text-align:center;align-self:center;background:#FFF7ED;border:2px solid #EA580C;border-radius:10px;padding:18px 14px;">
-        <p style="font-size:38px;color:#C2410C;font-weight:800;margin:0;line-height:1.1;">HP1 占比 94.6%</p>
+        <p style="font-size:38px;color:#C2410C;font-weight:800;margin:0;line-height:1.1;">HP1 family 占比 94.6%</p>
         <p style="font-size:24px;color:#9A3412;margin:8px 0 4px;font-weight:700;">↓↓↓↓</p>
         <p style="font-size:18px;color:#374151;margin:0;">隨機預期 <strong>50%</strong></p>
         <p style="font-size:15px;color:#6B7280;margin:4px 0 0;font-style:italic;">→ 偏離 +44.6 pp</p>
@@ -173,28 +173,34 @@ add(id="03_genome_173", num="03", section="S1 觀察起點", rg2="3", ngrep="8",
     <div class="arg-list">
       <strong>三條獨立論證:</strong><br>
       ①  <strong>生物學:</strong> 跨 23 染色體不該有系統偏單一 haplotype<br>
-      ②  <strong>跨 chr 一致偏 HP1:</strong> cnLOH 最多只影響單一 chr；但 94.6% HP1 偏移在 23 chr 全部一致<br>
-      ③  <strong>拿 paired 對照:</strong> 同樣 reads 在 paired (tumor + normal) 流程 HP1:HP2 ≈ 1:1 — 有 normal 資料時就能正確分到 1:1
+      ②  <strong>跨 chr 一致偏 HP1 family:</strong> cnLOH 最多只影響單一 chr；但 94.6% HP1 family 偏移在 23 chr 全部一致<br>
+      ③  <strong>拿 paired 對照:</strong> 同樣 reads 在 paired (tumor + normal) 流程 HP1 fam:HP2 fam ≈ 1:1 — 有 normal 資料時就能正確分到 1:1
     </div>
     <div class="conclusion-arrow">→ 17.3:1 是 LongPhase-TO 的 systematic engineering artifact</div>
     <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">haplotype:</span> 來自父或母的染色體版本</div>
-      <div class="gloss-item">📖 <span class="term">sub-clone:</span> 腫瘤中帶相同突變的某群癌細胞</div>
-      <div class="gloss-item">📖 <span class="term">cnLOH:</span> 染色體數對但失去其中一個 haplotype</div>
+      <div class="gloss-item" style="background:#FEF3C7;border-color:#CA8A04;color:#7C2D12;font-weight:600;">📖 <span class="term">HP1 family:</span> HP:i:1 (純 germline HP1) + HP:i:11 (HP1+somatic) + HP:i:1-1 (somatic on HP1 染色體) — 都算 HP1 方向</div>
+      <div class="gloss-item" style="background:#FEF3C7;border-color:#CA8A04;color:#7C2D12;font-weight:600;">📖 <span class="term">HP2 family:</span> HP:i:2 + HP:i:21 + HP:i:2-1 — HP2 方向同邏輯</div>
+      <div class="gloss-item">📖 <span class="term">haplotype:</span> 來自父或母的染色體版本 / <span class="term">sub-clone:</span> 腫瘤中帶相同突變的某群癌細胞 / <span class="term">cnLOH:</span> 染色體數對但失去其中一個 haplotype</div>
     </div>""",
     speaker="""[主訊息]
-baseline LongPhase-TO 全基因組 HP1:HP2 = 17.3:1 — 這是 systematic bias 的硬證據。
+baseline LongPhase-TO 全基因組 HP1 family : HP2 family = 17.3:1 — 這是 systematic bias 的硬證據。
+
+[精確化說明]
+HP1 family = HP:i:1 (純 germline HP1) + HP:i:11 (HP1+somatic) + HP:i:1-1 (somatic on HP1 染色體)。
+HP2 family 同邏輯 HP2 系列三 tag。
+這個 17.3:1 是 family-level 偏移, 不只 HP:i:1 vs HP:i:2 而是整族對照。
 
 [數據]
-HP1 reads 614K，HP2 只 35.5K。94.6% 占比，遠離隨機 1:1。
+HP1 family reads 614K, HP2 family 只 35.5K。
+94.6% 占比 HP1 family, 遠離隨機 1:1。
 
 [三條獨立論證]
-論證 1 — 生物學：tumor sub-clone 不該跨 23 chr 系統偏 HP1。
-論證 2 — 跨 chr 一致：cnLOH 只影響單 chr，但這偏移跨 23 chr 一致。
-論證 3 — paired 對照：paired pipeline HP1:HP2 ≈ 1:1，沒這偏移。
+論證 1 — 生物學：tumor sub-clone 不該跨 23 chr 系統偏 HP1 family。
+論證 2 — 跨 chr 一致：cnLOH 只影響單 chr, 但這偏移跨 23 chr 一致。
+論證 3 — paired 對照：paired pipeline HP1 fam : HP2 fam ≈ 1:1, 沒這偏移。
 
 [結論]
-三條互相獨立 → 這是 engineering artifact，不是樣本性質。
+三條互相獨立 → 這是 engineering artifact, 不是樣本性質。
 
 [轉場]
 接下來看具體個案 SP1 — 個別位點上失衡有多極端。""",
