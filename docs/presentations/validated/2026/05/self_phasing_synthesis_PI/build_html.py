@@ -221,9 +221,9 @@ add(id="04a_sp1", num="04a", section="S1 觀察起點", rg2="1", ngrep="3",
     </div>
     <div class="igv-focus-callout" style="font-size:14px;padding:6px 12px;margin-top:4px;"><span class="label">👁 看圖重點：</span>baseline (最上) 紅+綠 reads 集中左欄 = HP1；V5 (panel 4) 紅+綠搬右欄 = HP2 → V5 翻轉對齊 paired</div>
     <div style="background:#FEF3C7;border:2px solid #CA8A04;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:12px;">
-      <strong style="color:#7C2D12;">⚠ V6 在 SP1/2/3 設計取捨</strong>：本位點屬 <strong>germline-absent 區</strong>。V6 移除 Layer 1.5 後退回 <code>hp=33</code> ambiguous (不選邊)，<strong>失去翻 HP2 視覺對齊能力</strong>。但這是 V6 有意識的設計取捨 — V5 Layer 1.5 在全 germline-absent 區整體 4.19:1 偏 HP1（與 baseline 相同），是 priority bug feature 化；V6 還原 V3F 保守策略，全區從 4.19:1 偏移恢復成 hp=33。<strong>V6 的鐵證在 slide 08 全基因組量化 + slide 13 cross-sample，不在 SP1/2/3 IGV</strong>。
+      <strong style="color:#7C2D12;">⚠ V6 在 SP1/2/3 設計取捨</strong>：本位點屬 <strong>germline-absent 區</strong>。V6 移除 Layer 1.5 後退回 <code>hp=33</code> ambiguous (不選邊)，<strong>失去翻 HP2 視覺對齊能力</strong>。但這是 V6 有意識的設計取捨 — V5 Layer 1.5 在全 germline-absent 區整體 4.19:1 偏 HP1（與 baseline 相同），是 priority bug feature 化；V6 還原 V3F 保守策略，全區從 4.19:1 偏移恢復成 hp=33。<strong>V6 的鐵證在 slide 08 全基因組量化 + slide 13 cross-sample，不在 SP1/2/3 IGV</strong>。<br><strong style="color:#16A34A;">★ 5/13 forensic 確認</strong>：V6 chr19 整體距離 paired = 0.065 ≈ V5 = 0.068（命名顛倒後 — 見 slide 09e），<strong>V6 不是退步</strong>；先前 v6_quantification 寫的 0.367 是統計腳本沒考慮跨 codebase 命名顛倒。
     </div>
-    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 hp=33 ambiguous (germline-absent trade-off); V5 翻 HP2 為個案鐵證但全區仍偏 HP1  ² 5versions 順序: baseline / paired_T / V3F / V5 / V6</p>""",
+    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 hp=33 ambiguous (germline-absent trade-off); V5 翻 HP2 為個案鐵證但全區仍偏 HP1  ² 5versions 順序: baseline / paired_T / V3F / V5 / V6  ³ ratio 對齊 paired 不是 V6 正確性 metric (詳 slide 09e + erratum)</p>""",
     speaker="""[從統計到個案]
 全基因組 17.3:1 是平均值。
 用 IGV 6-BAM 並列篩，找到 chr19 三個近 100% 失衡位點。
@@ -277,7 +277,7 @@ add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
     </div>
     <div class="igv-focus-callout" style="font-size:13px;padding:5px 10px;margin-top:4px;"><span class="label">👁 看圖重點：</span>兩圖同 SP1 模式 — baseline 紅+綠 reads 集中左欄；V5 (panel 4) 紅+綠搬右欄 → V5 翻 HP2 對齊 paired 3/3</div>
     <div style="background:#FEF3C7;border:2px solid #CA8A04;border-radius:6px;padding:6px 12px;margin-top:4px;font-size:11.5px;">
-      <strong style="color:#7C2D12;">⚠ V6 SP1/2/3 caveat</strong>：SP2/3 同屬 germline-absent 區。V6 退回 hp=33（不翻）— 設計取捨換取全區 4.19:1 偏移消除。V6 鐵證在 slide 08 (全基因組 34,855 victims) + slide 13 (cross-sample 4/5)，<strong>不在 SP IGV</strong>。
+      <strong style="color:#7C2D12;">⚠ V6 SP1/2/3 caveat</strong>：SP2/3 同屬 germline-absent 區。V6 退回 hp=33（不翻）— 設計取捨換取全區 4.19:1 偏移消除。V6 鐵證在 slide 08 (全基因組 34,855 victims) + slide 13 (cross-sample 4/5)，<strong>不在 SP IGV</strong>。<br><strong style="color:#16A34A;">★ 5/13 forensic</strong>：V6 chr19 distance to paired ≈ V5（命名顛倒後 0.065 vs 0.068，slide 09e）— V6 不是退步。
     </div>
     <div class="conclusion-arrow green" style="font-size:15px;padding:8px 14px;">→ 三 SP 都在 chr19:12-17M → 對齊 slide 08 chr19 752 victims hotspot</div>
     <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ SP2/3 baseline 109:1 / 108:0 → V5 翻 HP2 (個案鐵證) / V6 hp=33 (設計取捨)；5versions 順序: baseline / paired_T / V3F / V5 / V6</p>""",
@@ -1422,7 +1422,7 @@ add(id="17_main_verdict", num="12", section="S7 結論", rg2="3 (main verdict)",
         <div style="flex:none;width:50px;height:50px;border-radius:50%;background:#DCFCE7;border:2px solid #16A34A;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#166534;">②</div>
         <div style="flex:1;">
           <p style="font-size:13px;font-weight:700;color:#166534;margin:0 0 3px;">V6 = production candidate (5/10 binary patch)</p>
-          <p style="font-size:11.5px;color:#374151;margin:0;line-height:1.5;">= V3F 保守 + V5 設計目標 + marker engineering 改善 · hp=33 +4.7% · marker coverage +9.0% · Phase D 4 樣本 ratio 0.61-1.24 中性 · F1 0.7166</p>
+          <p style="font-size:11.5px;color:#374151;margin:0;line-height:1.5;">= V3F 保守 + V5 設計目標 + marker engineering 改善 · hp=33 +4.7% · marker coverage +9.0% · Phase D 4 樣本 ratio 0.61-1.24 中性 · F1 0.7166<br><strong style="color:#16A34A;">★ 5/13 forensic 確認</strong> V6 守恆轉移完美符合 Layer 1.5 移除邏輯預期 (Type B 完全相同 + Type C 守恆 5,927 reads)</p>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#FEF3C7;border:2px solid #CA8A04;border-radius:8px;">
@@ -1524,6 +1524,7 @@ add(id="18_impact_future", num="13", section="S7 結論", rg2="1", ngrep="—",
         <tr class="row-green"><td><strong>F1 ★</strong></td><td><strong>LOH 內外 TP/FP 差異特徵</strong>（用 V6 tag）</td><td>目標 1 (per-CpG 甲基關聯) + 目標 4 (TO normal 補強) + 目標 5 (F1 提升)</td><td>LOH 內 vs LOH 外 × TP/FP × 甲基化率 / read 特徵 / HP_Ratio / NG 分布；驗證 ISM 是否能用 V6 tag 正確識別不同區域差異</td></tr>
         <tr class="row-green"><td><strong>F2 ★</strong></td><td><strong>subclone 結構 + 二次打擊事件順序</strong></td><td>目標 2 (clone 結構) + 目標 3 (二次打擊事件順序)</td><td>用 V6 hp=33 + NG≥3 marker 識別 sub-clone；結合 LOH/CNV/HP 推論 two-hit order；驗證 V6 marker 訊號是否能區分 first-hit vs second-hit</td></tr>
         <tr><td><strong>F3</strong></td><td>7-sample expansion + COLO829 解鎖 + Pass 2 ablation</td><td>F1/F2 cross-sample 一致性驗證基礎</td><td>HCC1395_DORADO/HCC1937/HCC1954/H1437/H2009/COLO829 完整 V6 驗證 + 量化 V6 對 ISM marker rate / FP-TP / NGroups 影響</td></tr>
+        <tr class="row-yellow"><td><strong>F4 ★</strong></td><td><strong>v6_quantification erratum patch + 跨樣本命名顛倒驗證</strong></td><td>修正 5/12 distance to paired 結論 (5/13 forensic 揭露 — slide 09e)</td><td>chr17/chrX/chr8 重新跑命名顛倒檢查; 跨 4 樣本 (H1437/H2009/HCC1954/HCC1937) 命名顛倒一致性; v6_quantification_findings.md erratum commit</td></tr>
       </tbody>
     </table>
     <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ V6 = production candidate；F1/F2 是 ISM 核心主線回歸 (從 longphase-to bug 修補 → 重新驗證 ISM 五大目標)</div>""",
