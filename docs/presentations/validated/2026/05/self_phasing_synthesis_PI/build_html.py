@@ -2,6 +2,22 @@
 """
 build_html.py — Generate 22 slide_XX.html + index.html from inline specs.
 
+[DEPRECATED 2026-05-13]
+================================================================================
+本檔已退役為 legacy reference。v1.1 起 preview/*.html 直接成為編輯標的 (SoT)。
+v1.2 將用 `html-report-build` skill 從 markdown SoT 重生雙版本 HTML
+(理解版 + 報告版) 完全取代本檔。
+
+DO NOT run `python build_html.py` — 會覆蓋 v1.1 對 preview/*.html 的直接編輯
+(02 tldr main statement / 04d 移 backup B5 等)。
+
+如需重生 HTML：
+  1. 先把 v1.1 改動 backport 到 markdown SoT (待 v1.2 設計)
+  2. 再用 html-report-build skill 從 SoT 重生
+
+決策來源: InterSubMod plan v1.1 §14.7 (2026-05-13 用戶 ack 直接動 HTML 路徑)
+================================================================================
+
 Output:
 - preview/index.html              (主頁: top nav + iframe)
 - preview/slide_XX_*.html × 22    (子頁: title + 16:9 canvas + speaker note)
@@ -1071,61 +1087,71 @@ add(id="09b_hp33_mechanism", num="09b", section="S4 修補設計", rg2="2", ngre
     en="HP=33 mechanism — code diff + flow comparison",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
-    <p style="font-size:11.5px;font-weight:700;color:#374151;margin:0 0 4px;">📌 問題: baseline longphase-to 在 germline-absent 區「幾乎不輸出 hp=33」— 因 vector 順序錯</p>
+    <p style="font-size:11.5px;font-weight:700;color:#374151;margin:0 0 4px;">📌 問題: baseline judgeHaplotype 低信心 fallback 區 <strong>enum vs integer 比較 bug</strong> → hp=33 永遠走不到 else 分支</p>
     <div class="grid-2col" style="grid-template-columns: 6fr 6fr; gap:8px;">
       <div>
-        <p style="font-size:10.5px;font-weight:700;color:#7F1D1D;margin:2px 0;">❌ baseline (priority bug)</p>
-        <pre class="code-panel" style="background:#FEE2E2;border:1px solid #DC2626;font-size:9px;padding:4px 6px;line-height:1.4;">vector keys = {
-  {HAPLOTYPE1_1, HAPLOTYPE2_1},  // ① somatic
-  {HAPLOTYPE3,   HAPLOTYPE2_1},  // ② mixed (hp=33)
-  {HAPLOTYPE1,   HAPLOTYPE2}     // ③ germline
-};
-for (pair : keys) {
-  if (countMap[k1]&gt;0 || countMap[k2]&gt;0) {
-    hpResult = haplotypeBase[winner];
-    break;  // ← 1 票就 break
+        <p style="font-size:10.5px;font-weight:700;color:#7F1D1D;margin:2px 0;">❌ baseline (judgeHaplotype:697-701)</p>
+        <pre class="code-panel" style="background:#FEE2E2;border:1px solid #DC2626;font-size:9px;padding:4px 6px;line-height:1.4;">// 進入點: getVote 已把 hpResult
+//        mapped 為 integer 11/21/33
+if (max==0 || ratio &lt; threshold) {
+  pqValue = 0;
+  if (hpResult != HAPLOTYPE1_1  // = 3 (enum)
+   && hpResult != HAPLOTYPE2_1){ // = 4 (enum)
+    hpResult = 0;     // ← 永遠走這
+  } else {
+    hpResult = 33;    // ← 永遠走不到
   }
 }</pre>
-        <p style="font-size:9.5px;color:#7F1D1D;margin:2px 0;">→ ① 永遠先 break，② mixed/hp=33 走不到</p>
+        <p style="font-size:9.5px;color:#7F1D1D;margin:2px 0;">→ hp=11/21/33 ≠ 3 也 ≠ 4 → 條件恆 true → hp=33 else 分支死碼</p>
       </div>
       <div>
-        <p style="font-size:10.5px;font-weight:700;color:#166534;margin:2px 0;">✅ V3F two-layer (41ff147)</p>
-        <pre class="code-panel" style="background:#DCFCE7;border:1px solid #16A34A;font-size:9px;padding:4px 6px;line-height:1.4;">// Layer 1: germline 決方向
-int germlineResult = 0;
-if (germlineHP1&gt;0 || germlineHP2&gt;0) {
-  germlineResult = (HP1&gt;=HP2) ? 1 : 2;
-}
-// Layer 2: somatic encoding
-if (somaticTotal &gt; 0) {
-  hpResult = (germ==1) ? 11 :
-             (germ==2) ? 21 :
-                         33;  // ★ 結構化保證
+        <p style="font-size:10.5px;font-weight:700;color:#166534;margin:2px 0;">✅ V3F 修補 (41ff147)</p>
+        <pre class="code-panel" style="background:#DCFCE7;border:1px solid #16A34A;font-size:9px;padding:4px 6px;line-height:1.4;">// V3F: 顯式 integer 比較 + 邏輯翻轉
+if (max==0 || ratio &lt; threshold) {
+  pqValue = 0;
+  if (hpResult == 11    // 顯式 int
+   || hpResult == 21
+   || hpResult == 33) {
+    hpResult = 33;    // ★ somatic 有票 → hp=33
+  } else {
+    hpResult = 0;     // 純 germline 弱信號 → no tag
+  }
 }</pre>
-        <p style="font-size:9.5px;color:#166534;margin:2px 0;">→ germline 缺席 + somatic 有票 → hp=33 必出</p>
+        <p style="font-size:9.5px;color:#166534;margin:2px 0;">→ enum/integer 比較修對 + 邏輯翻轉 → 低信心 somatic 結構化保證 hp=33</p>
       </div>
     </div>
-    <div class="grid-2col" style="grid-template-columns: 6fr 6fr; gap:8px; margin-top:6px;">
+    <p style="font-size:10.5px;font-weight:700;color:#1E3A8A;margin:6px 0 2px;">💡 修補動作對照 — V3F 同時修兩個獨立缺陷，PI 一眼讀懂差別：</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th style="width:18%;">維度</th><th style="width:38%;background:#FEE2E2;color:#7F1D1D;">❌ baseline 行為</th><th style="width:38%;background:#DCFCE7;color:#166534;">✅ V3F 修補</th><th style="width:6%;">差別</th></tr></thead>
+      <tbody>
+        <tr><td><strong>① 比較目標</strong></td><td class="num">hpResult vs <code>HAPLOTYPE1_1=3</code> (enum)</td><td class="num">hpResult vs <code>11</code> (整數字面)</td><td>修對</td></tr>
+        <tr><td><strong>② 比較結果</strong></td><td class="num">11≠3 ∧ 11≠4 ∧ 33≠3 ∧ 33≠4 → 恆 <code>true</code></td><td class="num">11==11 / 21==21 / 33==33 → 真實命中</td><td>修對</td></tr>
+        <tr><td><strong>③ 判定邏輯方向</strong></td><td class="num"><code>!=</code> → <code>0</code>；<code>==</code> → <code>33</code> (反向)</td><td class="num"><code>==</code> → <code>33</code>；<code>!=</code> → <code>0</code> (正向)</td><td>翻轉</td></tr>
+        <tr class="row-red"><td><strong>somatic read 結果</strong></td><td class="num">hpResult = 0 (no tag) ❌</td><td class="num">hpResult = 33 (somatic ambiguous) ✅</td><td>—</td></tr>
+        <tr class="row-yellow"><td colspan="4" style="font-size:9.5px;"><strong>設計意圖 vs 實際行為</strong>：baseline 寫程式者以為「if 不是 somatic 11/21 → no tag；是 somatic → 標 33」；但因 hpResult 早已被 getVote map 成 11/21/33，比較目標卻用 enum 3/4 → 設計意圖完全失效，hp=33 else 分支變死碼</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:10.5px;font-weight:700;color:#1E3A8A;margin:8px 0 2px;">📐 後續演進 (V5/V6 改的是 getVote 的 Layer 1.5，不同 bug；附對照):</p>
+    <div class="grid-2col" style="grid-template-columns: 6fr 6fr; gap:8px;">
       <div>
         <p style="font-size:10.5px;font-weight:700;color:#CA8A04;margin:2px 0;">⚠ V5 +Layer 1.5 (d0bcd8c bundled)</p>
-        <pre class="code-panel" style="background:#FEF3C7;border:1px solid #CA8A04;font-size:9px;padding:4px 6px;line-height:1.4;">// Layer 1: germline 同 V3F
-if (germlineHP1&gt;0 || germlineHP2&gt;0) {...}
-// Layer 1.5 NEW: germline 缺席 fallback
+        <pre class="code-panel" style="background:#FEF3C7;border:1px solid #CA8A04;font-size:9px;padding:4px 6px;line-height:1.4;">// getVote Layer 1.5 NEW (+13 行)
+// germline 缺席 → 用 somatic vote 強制選邊
 else if (somaticHP1&gt;0 || somaticHP2&gt;0) {
   germlineResult = (somaticHP1&gt;=somaticHP2)
                   ? 1 : 2;  // ← 強制選邊
 }
-// Layer 2 → 出 hp=11/21 (不出 hp=33)</pre>
+// → Layer 2 出 hp=11/21 (而非 hp=33)</pre>
         <p style="font-size:9.5px;color:#CA8A04;margin:2px 0;">→ hp=33 被改派 hp=11/21 (-89.9% 過度修正)</p>
       </div>
       <div>
         <p style="font-size:10.5px;font-weight:700;color:#166534;margin:2px 0;">★ V6 revert L1.5 (5/10)</p>
-        <pre class="code-panel" style="background:#DCFCE7;border:2px solid #16A34A;font-size:9px;padding:4px 6px;line-height:1.4;">// Layer 1: germline 同 V3F
-if (germlineHP1&gt;0 || germlineHP2&gt;0) {...}
+        <pre class="code-panel" style="background:#DCFCE7;border:2px solid #16A34A;font-size:9px;padding:4px 6px;line-height:1.4;">// 刪除 Layer 1.5 整段 (-13 行)
+// HaplotagProcess.cpp:537-548
 
-// ─ 刪除 Layer 1.5 整段 (-13 行) ─
-// (germline 缺席 → germlineResult=0)
-
-// Layer 2 → hp=33 還原 (V3F 行為)</pre>
+// germline 缺席 → germlineResult=0
+// Layer 2 → hp=33 還原 (V3F 行為)
+// ＋ V3F 的 judgeHaplotype enum fix 沿用</pre>
         <p style="font-size:9.5px;color:#166534;margin:2px 0;">→ 還原 V3F 結構化保證 hp=33 (138,317 +4.7%)</p>
       </div>
     </div>
@@ -1133,7 +1159,7 @@ if (germlineHP1&gt;0 || germlineHP2&gt;0) {...}
     <svg viewBox="0 0 720 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
       <text x="6" y="13" font-size="10" fill="#7F1D1D" font-weight="700">baseline</text>
       <rect x="80" y="4" width="3" height="14" fill="#DC2626"/>
-      <text x="100" y="15" font-size="9.5" fill="#7F1D1D" font-weight="700">~0 (順序副作用機率極低)</text>
+      <text x="100" y="15" font-size="9.5" fill="#7F1D1D" font-weight="700">~0 (enum/integer bug → else 分支死碼)</text>
       <text x="6" y="28" font-size="10" fill="#166534" font-weight="700">V3F</text>
       <rect x="80" y="19" width="160" height="14" fill="#16A34A"/>
       <text x="245" y="30" font-size="9.5" fill="#166534" font-weight="700">132,060 (Layer 2 結構化保證)</text>
@@ -1146,48 +1172,60 @@ if (germlineHP1&gt;0 || germlineHP2&gt;0) {...}
     </svg>
     <div class="conclusion-arrow green" style="font-size:12px;margin-top:4px;">→ V6 把 V3F「hp=33 結構化保證」找回 — ISM 下游 mixed-sub-tag marker engineering 可重新依賴此訊號</div>
     <div class="footer-glossary" style="font-size:9.5px;">
+      <div class="gloss-item">ⓘ Util.h:23-25 — enum HAPLOTYPE3=2 / HAPLOTYPE1_1=3 / HAPLOTYPE2_1=4；但 haplotypeBase map 把 hpResult 設為 11/21/33 — 比較目標錯位</div>
       <div class="gloss-item">ⓘ hp=33 = somatic ambiguous (germline 缺席 + somatic 有票) 保守 tag，避免錯標 HP1/HP2 方向</div>
       <div class="gloss-item">ⓘ V5→V6 transfer 82:17 from hp=1-1/hp=2-1 → hp=33 完美 mirror priority bug feature 化方向</div>
     </div>""",
     speaker="""[標題]
-HP=33 修補機制 — 程式碼 + 流程差異深入。
+HP=33 修補機制 — baseline enum/integer 比較 bug + V3F 修補。
 
-[問題]
-baseline longphase-to 在 germline-absent 區「幾乎不輸出 hp=33」。
-不是設計排除 hp=33，而是 vector ordered check + break early 副作用。
+[真正的 baseline bug]
+不是 vector keys 順序，而是 judgeHaplotype 低信心 fallback 區的 enum vs integer 比較錯誤。
+源碼路徑 HaplotagProcess.cpp:697-701。
 
-[baseline 機制]
-getVote 三個 vector key 順序：
-① somatic pair (HAPLOTYPE1_1, HAPLOTYPE2_1)
-② mixed pair (HAPLOTYPE3, HAPLOTYPE2_1) — 走到這出 hp=33
-③ germline pair (HAPLOTYPE1, HAPLOTYPE2)
+[bug 解構]
+進入點：getVote 已把 hpResult mapped 為 integer 11/21/33（透過 haplotypeBase map）。
+低信心 fallback 條件 max==0 或 ratio<threshold 觸發。
 
-for 迴圈第一個非空 pair 就 break — ① 永遠先 break，② mixed/hp=33 機率被嚴重壓縮。
+baseline 寫的比較：
+if (hpResult != HAPLOTYPE1_1 && hpResult != HAPLOTYPE2_1)
+   hpResult = 0;
+else
+   hpResult = 33;
+
+但 Util.h:23-25 定義 enum 值是 HAPLOTYPE3=2 / HAPLOTYPE1_1=3 / HAPLOTYPE2_1=4。
+hpResult 實際值是 mapped 後的 11/21/33。
+所以 11 != 3 ∧ 11 != 4 → true → 走 hpResult=0；
+21 != 3 ∧ 21 != 4 → true → 走 hpResult=0；
+33 != 3 ∧ 33 != 4 → true → 走 hpResult=0。
+
+結論：條件永遠為 true，else 分支 hpResult=33 是死碼，永遠走不到。
 
 [V3F 修補 41ff147]
-重寫為兩層獨立判定。
-Layer 1 germline 決方向 (HP1>=HP2 ? 1 : 2)。
-Layer 2 顯式 if (somaticTotal>0 && germlineResult==0) hpResult=33 — 結構化保證 hp=33。
+顯式 integer 比較 + 邏輯翻轉。
+if (hpResult == 11 || hpResult == 21 || hpResult == 33)
+   hpResult = 33;
+else
+   hpResult = 0;
 
-[V5 Layer 1.5 過度修正]
-加 else if (somaticHP1>0 || somaticHP2>0) 用 somatic vote 強制選邊。
-hp=33 被改派 hp=11/21，全基因組從 132,060 壓到 13,250 (-89.9%)。
+兩個動作：
+1. enum/integer 比較修對（用 11/21/33 直接比，避開 enum 值錯位）
+2. 邏輯翻轉（somatic 有票才保留為 33，純 germline 弱信號才 no tag）
 
-[V6 revert]
-5/10 binary patch 移除 Layer 1.5 整段 (-13 行 HaplotagProcess.cpp:537-548)。
-還原 V3F 結構化保證。
-全基因組 hp=33 從 13,250 還原到 138,317 (+4.7% vs V3F / +944% vs V5)。
+V3F commit message 自己寫了「Also fixes enum/integer comparison bug in low-confidence fallback」。
 
-[V5→V6 transfer 守恆]
-V5 → V6 共有 125,067 reads 從 hp=11+hp=21 拉回 hp=33。
-比例 82% from hp=1-1 + 17% from hp=2-1。
-完美 mirror priority bug feature 化方向。
+[V5/V6 是後續演進，不同 bug]
+V5 Layer 1.5 改的是 getVote — germline 缺席時用 somatic vote 強制選邊 → hp=11/21。
+V6 revert Layer 1.5 → 退回 V3F 行為 + 沿用 V3F 的 judgeHaplotype enum fix。
+
+[量化]
+全基因組 hp=33 從 baseline ~0（死碼）→ V3F 132,060 → V5 13,250（過度修正）→ V6 138,317（還原 V3F 並略超）。
 
 [意義]
 hp=33 還原讓 ISM 下游 marker engineering 重新依賴此訊號。
 mixed-sub-tag (germline 缺席 + somatic 有票) 是識別 sub-clone 結構的關鍵 marker。
 slide 13 future direction F2 (二次打擊事件順序) 依賴此訊號。""",
-    tier3="getVote 完整源碼 line 506-560 / V5→V6 transfer 82:17 守恆細節 / HaplotagProcess.cpp:537-548 V6 diff / Pass 2 reclassify 與 hp=33 關係")
+    tier3="V3F commit 41ff147 完整 diff (line 504-540 getVote + line 697-701 judgeHaplotype) / Util.h:23-25 enum 定義鐵證 / V5/V6 Layer 1.5 設計演進獨立於本 enum bug")
 
 add(id="09c_v6_winning_igv", num="09c", section="S4 修補設計", rg2="3 IGV", ngrep="—",
     title="V6 winning IGV 鐵證 — V5 過度修正 → V6 退 hp=33",

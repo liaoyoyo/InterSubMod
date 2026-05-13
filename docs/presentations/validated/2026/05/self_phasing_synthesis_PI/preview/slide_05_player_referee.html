@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 05 — phasing 層「球員兼裁判」— somatic 反過來主導 graph</title>
+  <title>Slide 05 — phasing 層球員兼裁判機制</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -223,7 +223,7 @@ table.metric-table tr.row-yellow td { background: #FEF3C7; }
   background: #EDE9FE; padding: 4px 10px; border-radius: 4px; font-size: 11px;
   color: #6D28D9; display: inline-block; margin-bottom: 10px; font-weight: 600;
 }
-.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; }
+.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; white-space: pre-line; }
 .note-section .tier3 {
   margin-top: 12px; padding: 8px 12px; border-radius: 4px;
   background: #F9FAFB; border: 1px dashed #9CA3AF;
@@ -263,6 +263,44 @@ details.collapsible summary:hover { color: #1D4ED8; }
 .kbd-hint kbd {
   background: white; color: #1F2937; padding: 1px 6px; border-radius: 3px; font-size: 10px; margin: 0 2px;
 }
+
+/* ─── Section-based color theming (2026-05-13) ─────────────────────── */
+.slide-canvas[data-section="S0"] h1.slide-title,
+.slide-canvas[data-section="S0"] h2.slide-title { color: #7C3AED; border-bottom-color: #7C3AED; }
+.slide-canvas[data-section="S1"] h1.slide-title,
+.slide-canvas[data-section="S1"] h2.slide-title { color: #DC2626; border-bottom-color: #DC2626; }
+.slide-canvas[data-section="S2"] h1.slide-title,
+.slide-canvas[data-section="S2"] h2.slide-title { color: #EA580C; border-bottom-color: #EA580C; }
+.slide-canvas[data-section="S3"] h1.slide-title,
+.slide-canvas[data-section="S3"] h2.slide-title { color: #CA8A04; border-bottom-color: #CA8A04; }
+.slide-canvas[data-section="S4"] h1.slide-title,
+.slide-canvas[data-section="S4"] h2.slide-title { color: #1E3A8A; border-bottom-color: #1E3A8A; }
+.slide-canvas[data-section="S5"] h1.slide-title,
+.slide-canvas[data-section="S5"] h2.slide-title { color: #16A34A; border-bottom-color: #16A34A; }
+.slide-canvas[data-section="S7"] h1.slide-title,
+.slide-canvas[data-section="S7"] h2.slide-title { color: #B45309; border-bottom-color: #B45309; }
+.slide-canvas[data-section="Q&A"] h1.slide-title,
+.slide-canvas[data-section="Q&A"] h2.slide-title { color: #6B7280; border-bottom-color: #6B7280; }
+
+/* Section meta badge in upper-right corner of canvas */
+.slide-canvas::before {
+  content: attr(data-section);
+  position: absolute; top: 8px; right: 28px;
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 12px; color: white; opacity: 0.9;
+}
+.slide-canvas[data-section="S0"]::before { background: #7C3AED; }
+.slide-canvas[data-section="S1"]::before { background: #DC2626; }
+.slide-canvas[data-section="S2"]::before { background: #EA580C; }
+.slide-canvas[data-section="S3"]::before { background: #CA8A04; }
+.slide-canvas[data-section="S4"]::before { background: #1E3A8A; }
+.slide-canvas[data-section="S5"]::before { background: #16A34A; }
+.slide-canvas[data-section="S7"]::before { background: #B45309; }
+.slide-canvas[data-section="Q&A"]::before { background: #6B7280; }
+.slide-canvas.cover-slide::before { display: none; }
+
+/* Speaker note teleprompter format — handle newlines */
+.note-section .speak-text { white-space: pre-line !important; }
 </style>
   <!-- PanZoom.js CDN — fail-soft：載入失敗時 fallback 到 CSS hover scale + new-tab full size -->
   <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
@@ -277,14 +315,73 @@ details.collapsible summary:hover { color: #1D4ED8; }
     <div><span class="label">N grep:</span><span class="value">3 + 1 commit</span></div>
   </div>
 
-  <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">phasing 層「球員兼裁判」— somatic 反過來主導 graph</h1>
+  <article class="slide-canvas" data-section="S2" aria-label="Main slide canvas">
+    <h1 class="slide-title ">phasing 層球員兼裁判機制</h1>
     <p class="en-subtitle">Phasing layer player-as-referee — somatic 100% co-occurrence overrules germline 50/50</p>
-    
+
+    <!-- v1.1.5 audit B 改動: 加 S1→S2 銜接 + metaphor caveat -->
+    <p style="font-size:11.5px;color:#0C4A6E;background:#F0F9FF;border-left:3px solid #0EA5E9;padding:5px 10px;margin:3px 0 8px;border-radius:3px;">
+      <strong>從 S1 銜接</strong>：SP1/2/3 三案失衡來自 getVote 內部兩層機制 — <strong>本張先講 phasing 層</strong>（決定 read 怎麼投票），下張 06 講 tagging 層 (priority bug 落判)
+    </p>
+
     <div class="grid-2col" style="grid-template-columns: 6fr 6fr;">
       <div>
-        <img class="fig-thumb" src="../figures/G1_player_as_referee.png" alt="G1" style="max-height:280px;">
-        <p class="fig-caption">G1: phasing graph 中 somatic edge (100%) 主導，germline (50/50) 被 overrule</p>
+        <!-- 左圖：SVG 直繪 phasing graph schematic（取代不清楚的 G1） -->
+        <svg viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:Arial,sans-serif;">
+          <!-- 標題 -->
+          <text x="240" y="16" font-size="12" fill="#1E3A8A" text-anchor="middle" font-weight="700">phasing graph — 從 germline het 推斷染色體分配</text>
+
+          <!-- 上半：germline only（balanced graph） -->
+          <text x="14" y="44" font-size="11" fill="#1E3A8A" font-weight="700">① 只用 germline het</text>
+          <text x="14" y="58" font-size="10" fill="#166534">edge weight 50%（隨機分散）</text>
+          <!-- 染色體 HP1 (橘) -->
+          <line x1="60" y1="80" x2="440" y2="80" stroke="#FB923C" stroke-width="3"/>
+          <text x="450" y="84" font-size="10" fill="#B45309" font-weight="700">HP1</text>
+          <!-- 染色體 HP2 (藍) -->
+          <line x1="60" y1="110" x2="440" y2="110" stroke="#3B82F6" stroke-width="3"/>
+          <text x="450" y="114" font-size="10" fill="#1E40AF" font-weight="700">HP2</text>
+          <!-- 3 個 het 點 -->
+          <circle cx="120" cy="80" r="5" fill="#FB923C" stroke="#9A3412" stroke-width="1"/>
+          <circle cx="120" cy="110" r="5" fill="#3B82F6" stroke="#1E40AF" stroke-width="1"/>
+          <circle cx="240" cy="80" r="5" fill="#FB923C"/>
+          <circle cx="240" cy="110" r="5" fill="#3B82F6"/>
+          <circle cx="360" cy="80" r="5" fill="#FB923C"/>
+          <circle cx="360" cy="110" r="5" fill="#3B82F6"/>
+          <!-- read connect (thin lines 50%) -->
+          <line x1="120" y1="80" x2="240" y2="80" stroke="#9CA3AF" stroke-width="0.8" opacity="0.6"/>
+          <line x1="240" y1="110" x2="360" y2="110" stroke="#9CA3AF" stroke-width="0.8" opacity="0.6"/>
+          <line x1="120" y1="110" x2="360" y2="80" stroke="#9CA3AF" stroke-width="0.6" opacity="0.4" stroke-dasharray="2,2"/>
+          <text x="240" y="138" font-size="10" fill="#166534" text-anchor="middle">→ graph 平衡，HP1/HP2 分明</text>
+
+          <!-- 中間分隔 -->
+          <line x1="14" y1="158" x2="466" y2="158" stroke="#D1D5DB" stroke-dasharray="3,3"/>
+
+          <!-- 下半：加入 somatic（dominated） -->
+          <text x="14" y="178" font-size="11" fill="#7F1D1D" font-weight="700">② TO 模式：somatic 被當 germline 進 graph</text>
+          <text x="14" y="192" font-size="10" fill="#B45309">edge weight 100% > germline 50% → somatic 主導</text>
+          <!-- 染色體 -->
+          <line x1="60" y1="220" x2="440" y2="220" stroke="#FB923C" stroke-width="3"/>
+          <text x="450" y="224" font-size="10" fill="#B45309" font-weight="700">HP1</text>
+          <line x1="60" y1="250" x2="440" y2="250" stroke="#3B82F6" stroke-width="3"/>
+          <text x="450" y="254" font-size="10" fill="#1E40AF" font-weight="700">HP2</text>
+          <!-- germline 點 -->
+          <circle cx="120" cy="220" r="5" fill="#FB923C"/>
+          <circle cx="120" cy="250" r="5" fill="#3B82F6"/>
+          <circle cx="360" cy="220" r="5" fill="#FB923C"/>
+          <circle cx="360" cy="250" r="5" fill="#3B82F6"/>
+          <!-- somatic 點（中間，全在 HP1，100% clonal）-->
+          <rect x="234" y="214" width="12" height="12" fill="#FBBF24" stroke="#B45309" stroke-width="2"/>
+          <text x="240" y="208" font-size="9" fill="#92400E" text-anchor="middle" font-weight="700">som</text>
+          <!-- 粗紅 edge: somatic 連到所有 HP1 點 -->
+          <line x1="120" y1="220" x2="240" y2="220" stroke="#DC2626" stroke-width="3.5"/>
+          <line x1="240" y1="220" x2="360" y2="220" stroke="#DC2626" stroke-width="3.5"/>
+          <text x="180" y="212" font-size="9" fill="#7F1D1D" font-weight="700">edge 100%</text>
+          <text x="300" y="212" font-size="9" fill="#7F1D1D" font-weight="700">edge 100%</text>
+          <!-- 細線 germline 50% -->
+          <line x1="120" y1="250" x2="360" y2="250" stroke="#9CA3AF" stroke-width="0.8" opacity="0.5" stroke-dasharray="2,2"/>
+          <text x="240" y="282" font-size="10" fill="#7F1D1D" text-anchor="middle" font-weight="700">→ somatic 反過來決定 phase 方向（球員當裁判）</text>
+          <text x="240" y="298" font-size="10" fill="#166534" text-anchor="middle">解法：PON-only flag 排除 somatic 進 graph，只保留 germline 50/50 平衡</text>
+        </svg>
       </div>
       <div>
         <!-- Step 1: 物理基礎 -->
@@ -307,7 +404,7 @@ details.collapsible summary:hover { color: #1D4ED8; }
           <p style="font-size:13px;font-weight:700;color:#7F1D1D;margin:0 0 4px;">③ 致命連鎖 — somatic 「球員兼裁判」</p>
           <p style="font-size:14px;color:#7F1D1D;margin:0;line-height:1.45;">
             edge weight 100% &gt; germline 50% → <strong>somatic 主導 phasing decision</strong><br>
-            <span style="font-style:italic;">應被 phase 的 somatic，反過來決定 phase 結果</span>
+            <span style="font-weight:600;">應被 phase 的 somatic，反過來決定 phase 結果</span>
           </p>
         </div>
         <!-- 修法 -->
@@ -320,13 +417,27 @@ details.collapsible summary:hover { color: #1D4ED8; }
     <div class="footer-glossary">
       <div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals — 多正常樣本建構的 germline reference</div>
       <div class="gloss-item">📖 <span class="term">phasing graph:</span> het 位點當 node, read 共現當 edge</div>
+      <div class="gloss-item">ⓘ 此為 phasing layer / tagging layer per-read getVote 詳 slide 06</div>
     </div>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide 05">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
-      <div class="speak-text">phasing 層球員兼裁判機制三步: ① 物理基礎 germline het 50/50 隨機 vs somatic mut 100% 同染色體; ② TO 模式缺 paired normal 只能用 PoN, 非 PoN 變異被當 germline 進 graph; ③ somatic edge weight 100% 暴漲主導 graph - 本應被 phase 的 somatic 反過來決定 phasing - 即球員兼裁判。修法 8b8c1fd PON-only flag, phasing 階段排除非 PoN 變異, 只用 germline het 建 graph, somatic 不再當 node。但只解 phasing 層, tag 還壞 (slide 06)。</div>
+      <div class="speak-text">[標題]
+phasing 層的「球員兼裁判」機制。
+
+[三步推導]
+步驟 1 — 物理基礎：germline het 50/50 隨機，somatic mut 100% 同染色體。
+步驟 2 — TO 模式缺 paired normal，只能用 PoN 過濾。非 PoN 變異被當 germline 進 phasing graph。
+步驟 3 — somatic edge weight 100% 暴漲，主導 graph。本應被 phase 的 somatic 反過來決定 phasing — 這就是球員兼裁判。
+
+[修法]
+8b8c1fd PON-only flag。
+phasing 階段排除非 PoN 變異，只用 germline het 建 graph，somatic 不再當 node。
+
+[caveat]
+但只解 phasing 層。tag 階段還是壞的 — 下一頁說明。</div>
       <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> TO vs paired PoN 對照 / 自我增強迴圈 / Pass 1 vs Pass 2 預告 / edge weight 計算細節</div>
     </details>
   </aside>
@@ -338,8 +449,8 @@ details.collapsible summary:hover { color: #1D4ED8; }
 </main>
 
 <nav class="nav-bottom" aria-label="Slide navigation">
-  <a href="slide_04b_sp2_sp3.html">← Prev</a>
-  <span class="counter">Slide 05 (6/22)</span>
+  <a href="slide_04c_priority_bug_fix_site.html">← Prev</a>
+  <span class="counter">Slide 05 (7/23)</span>
   <a href="slide_06_priority_bug.html">Next →</a>
 </nav>
 
@@ -347,7 +458,7 @@ details.collapsible summary:hover { color: #1D4ED8; }
 
 <script>
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowLeft' && True) location.href = 'slide_04b_sp2_sp3.html';
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_04c_priority_bug_fix_site.html';
     if (e.key === 'ArrowRight' && True) location.href = 'slide_06_priority_bug.html';
   });
 

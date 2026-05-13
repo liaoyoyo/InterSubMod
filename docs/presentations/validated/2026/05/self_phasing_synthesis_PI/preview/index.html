@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Self-Phasing PPT Preview — 22 slide multi-page</title>
+  <title>Self-Phasing PPT Preview — 17 主 + 5 backup multi-page (v1.6)</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -223,7 +223,7 @@ table.metric-table tr.row-yellow td { background: #FEF3C7; }
   background: #EDE9FE; padding: 4px 10px; border-radius: 4px; font-size: 11px;
   color: #6D28D9; display: inline-block; margin-bottom: 10px; font-weight: 600;
 }
-.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; }
+.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; white-space: pre-line; }
 .note-section .tier3 {
   margin-top: 12px; padding: 8px 12px; border-radius: 4px;
   background: #F9FAFB; border: 1px dashed #9CA3AF;
@@ -263,12 +263,50 @@ details.collapsible summary:hover { color: #1D4ED8; }
 .kbd-hint kbd {
   background: white; color: #1F2937; padding: 1px 6px; border-radius: 3px; font-size: 10px; margin: 0 2px;
 }
+
+/* ─── Section-based color theming (2026-05-13) ─────────────────────── */
+.slide-canvas[data-section="S0"] h1.slide-title,
+.slide-canvas[data-section="S0"] h2.slide-title { color: #7C3AED; border-bottom-color: #7C3AED; }
+.slide-canvas[data-section="S1"] h1.slide-title,
+.slide-canvas[data-section="S1"] h2.slide-title { color: #DC2626; border-bottom-color: #DC2626; }
+.slide-canvas[data-section="S2"] h1.slide-title,
+.slide-canvas[data-section="S2"] h2.slide-title { color: #EA580C; border-bottom-color: #EA580C; }
+.slide-canvas[data-section="S3"] h1.slide-title,
+.slide-canvas[data-section="S3"] h2.slide-title { color: #CA8A04; border-bottom-color: #CA8A04; }
+.slide-canvas[data-section="S4"] h1.slide-title,
+.slide-canvas[data-section="S4"] h2.slide-title { color: #1E3A8A; border-bottom-color: #1E3A8A; }
+.slide-canvas[data-section="S5"] h1.slide-title,
+.slide-canvas[data-section="S5"] h2.slide-title { color: #16A34A; border-bottom-color: #16A34A; }
+.slide-canvas[data-section="S7"] h1.slide-title,
+.slide-canvas[data-section="S7"] h2.slide-title { color: #B45309; border-bottom-color: #B45309; }
+.slide-canvas[data-section="Q&A"] h1.slide-title,
+.slide-canvas[data-section="Q&A"] h2.slide-title { color: #6B7280; border-bottom-color: #6B7280; }
+
+/* Section meta badge in upper-right corner of canvas */
+.slide-canvas::before {
+  content: attr(data-section);
+  position: absolute; top: 8px; right: 28px;
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 12px; color: white; opacity: 0.9;
+}
+.slide-canvas[data-section="S0"]::before { background: #7C3AED; }
+.slide-canvas[data-section="S1"]::before { background: #DC2626; }
+.slide-canvas[data-section="S2"]::before { background: #EA580C; }
+.slide-canvas[data-section="S3"]::before { background: #CA8A04; }
+.slide-canvas[data-section="S4"]::before { background: #1E3A8A; }
+.slide-canvas[data-section="S5"]::before { background: #16A34A; }
+.slide-canvas[data-section="S7"]::before { background: #B45309; }
+.slide-canvas[data-section="Q&A"]::before { background: #6B7280; }
+.slide-canvas.cover-slide::before { display: none; }
+
+/* Speaker note teleprompter format — handle newlines */
+.note-section .speak-text { white-space: pre-line !important; }
 </style>
 </head>
 <body>
 
 <header class="topbar" role="banner">
-  <h1>📊 Self-Phasing PPT Preview — 22 slides multi-page</h1>
+  <h1>📊 Self-Phasing PPT Preview — 17 主 slide + 5 backup (v1.6 2026-05-13)</h1>
   <div class="meta">
     <code>InterSubMod/docs/presentations/validated/2026/05/self_phasing_synthesis_PI/</code>
     &nbsp;|&nbsp; Build: 2026-05-11
@@ -276,28 +314,29 @@ details.collapsible summary:hover { color: #1D4ED8; }
 </header>
 
 <nav class="slidetabs" id="tabs" role="navigation" aria-label="Slide selector">
-  <button data-slide="01_cover" class=" active">01 S0 Cov</button>
-  <button data-slide="02_tldr" class="">02 S0 報告流</button>
-  <button data-slide="03_genome_173" class="">03 S1 觀察起</button>
-  <button data-slide="04a_sp1" class="">04a S1 觀察起</button>
-  <button data-slide="04b_sp2_sp3" class="">04b S1 觀察起</button>
+  <button data-slide="01_cover" class=" active">01 S0 Cover</button>
+  <!-- v1.6 2026-05-13: 02 整張砍除, main statement 移至 01 cover; 02 檔案保留作 legacy reference 但 nav 不列入 -->
+  <button data-slide="03_genome_173" class="">02 S1 觀察起</button>
+  <button data-slide="04_sp1_2_3" class="">04 S1 觀察起</button>
+  <button data-slide="04c_priority_bug_fix_site" class="">04c S1 觀察起</button>
   <button data-slide="05_player_referee" class="">05 S2 機制</button>
   <button data-slide="06_priority_bug" class="">06 S2 機制</button>
   <button data-slide="07_two_layer_table" class="">07 S2 機制</button>
-  <button data-slide="08_chr19_752" class="">08 S3 量化鐵</button>
-  <button data-slide="09_genome_34855" class="">09 S3 量化鐵</button>
-  <button data-slide="10_5_commits" class="">10 S4 修補設</button>
-  <button data-slide="11_getvote" class="">11 S4 修補設</button>
-  <button data-slide="12_sp_fixed" class="">12 S5 驗證</button>
-  <button data-slide="13_20_metrics" class="">13 S5 驗證</button>
-  <button data-slide="14_caller_f1" class="nav-arrow">14 S5 驗證 </button>
-  <button data-slide="15_paired_mode" class="">15 S6 5/9</button>
-  <button data-slide="16_v5_caveat" class="nav-star">16 S6 5/9</button>
-  <button data-slide="17_errata" class="">17 S7 結論</button>
-  <button data-slide="18_followup" class="">18 S7 結論</button>
+  <button data-slide="08_quant_evidence" class="">08 S3 量化鐵</button>
+  <button data-slide="10_fix_design" class="">09 S4 修補設</button>
+  <button data-slide="09b_hp33_mechanism" class="">09b S4 修補設</button>
+  <button data-slide="09c_v6_winning_igv" class="">09c S4 修補設</button>
+  <button data-slide="09d_v6_evidence_summary" class="">09d S4 修補設</button>
+  <button data-slide="09e_v6_forensic_validation" class="">09e S4 修補設</button>
+  <button data-slide="12_no_regression" class="">10 S5 驗證</button>
+  <button data-slide="14_caller_f1" class="">11 S5 驗證 </button>
+  <button data-slide="17_main_verdict" class="">12 S7 結論</button>
+  <button data-slide="18_impact_future" class="">13 S7 結論</button>
   <button data-slide="b1_pass2" class="nav-backup">B1 Q&A Ba</button>
-  <button data-slide="b2_purity06" class="nav-backup">B2 Q&A Ba</button>
-  <button data-slide="b3_cross_sample" class="nav-backup">B3 Q&A Ba</button>
+  <button data-slide="b2_f1_dual_metric" class="nav-backup">B2 Q&A Ba</button>
+  <button data-slide="b3_hp33_paired" class="nav-backup">B3 Q&A Ba</button>
+  <button data-slide="b4_phase_d_outliers" class="nav-backup">B4 Q&A Ba</button>
+  <button data-slide="04d_5reads_vote_trace_igv" class="nav-backup">B5 read-level rescue</button>
 </nav>
 
 <main class="iframe-wrap" role="main">

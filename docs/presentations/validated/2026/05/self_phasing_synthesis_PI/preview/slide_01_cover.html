@@ -223,7 +223,7 @@ table.metric-table tr.row-yellow td { background: #FEF3C7; }
   background: #EDE9FE; padding: 4px 10px; border-radius: 4px; font-size: 11px;
   color: #6D28D9; display: inline-block; margin-bottom: 10px; font-weight: 600;
 }
-.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; }
+.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; white-space: pre-line; }
 .note-section .tier3 {
   margin-top: 12px; padding: 8px 12px; border-radius: 4px;
   background: #F9FAFB; border: 1px dashed #9CA3AF;
@@ -263,6 +263,44 @@ details.collapsible summary:hover { color: #1D4ED8; }
 .kbd-hint kbd {
   background: white; color: #1F2937; padding: 1px 6px; border-radius: 3px; font-size: 10px; margin: 0 2px;
 }
+
+/* ─── Section-based color theming (2026-05-13) ─────────────────────── */
+.slide-canvas[data-section="S0"] h1.slide-title,
+.slide-canvas[data-section="S0"] h2.slide-title { color: #7C3AED; border-bottom-color: #7C3AED; }
+.slide-canvas[data-section="S1"] h1.slide-title,
+.slide-canvas[data-section="S1"] h2.slide-title { color: #DC2626; border-bottom-color: #DC2626; }
+.slide-canvas[data-section="S2"] h1.slide-title,
+.slide-canvas[data-section="S2"] h2.slide-title { color: #EA580C; border-bottom-color: #EA580C; }
+.slide-canvas[data-section="S3"] h1.slide-title,
+.slide-canvas[data-section="S3"] h2.slide-title { color: #CA8A04; border-bottom-color: #CA8A04; }
+.slide-canvas[data-section="S4"] h1.slide-title,
+.slide-canvas[data-section="S4"] h2.slide-title { color: #1E3A8A; border-bottom-color: #1E3A8A; }
+.slide-canvas[data-section="S5"] h1.slide-title,
+.slide-canvas[data-section="S5"] h2.slide-title { color: #16A34A; border-bottom-color: #16A34A; }
+.slide-canvas[data-section="S7"] h1.slide-title,
+.slide-canvas[data-section="S7"] h2.slide-title { color: #B45309; border-bottom-color: #B45309; }
+.slide-canvas[data-section="Q&A"] h1.slide-title,
+.slide-canvas[data-section="Q&A"] h2.slide-title { color: #6B7280; border-bottom-color: #6B7280; }
+
+/* Section meta badge in upper-right corner of canvas */
+.slide-canvas::before {
+  content: attr(data-section);
+  position: absolute; top: 8px; right: 28px;
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 12px; color: white; opacity: 0.9;
+}
+.slide-canvas[data-section="S0"]::before { background: #7C3AED; }
+.slide-canvas[data-section="S1"]::before { background: #DC2626; }
+.slide-canvas[data-section="S2"]::before { background: #EA580C; }
+.slide-canvas[data-section="S3"]::before { background: #CA8A04; }
+.slide-canvas[data-section="S4"]::before { background: #1E3A8A; }
+.slide-canvas[data-section="S5"]::before { background: #16A34A; }
+.slide-canvas[data-section="S7"]::before { background: #B45309; }
+.slide-canvas[data-section="Q&A"]::before { background: #6B7280; }
+.slide-canvas.cover-slide::before { display: none; }
+
+/* Speaker note teleprompter format — handle newlines */
+.note-section .speak-text { white-space: pre-line !important; }
 </style>
   <!-- PanZoom.js CDN — fail-soft：載入失敗時 fallback 到 CSS hover scale + new-tab full size -->
   <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
@@ -270,26 +308,31 @@ details.collapsible summary:hover { color: #1D4ED8; }
 <body>
 <main class="slide-page" role="main" aria-label="Slide 01 content">
   <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
-    <div><span class="label">Slide:</span><span class="value">01 / 22</span></div>
+    <div><span class="label">Slide:</span><span class="value">01 / 23 (含 main statement, v1.6)</span></div>
     <div><span class="label">Section:</span><span class="value">S0 Cover</span></div>
     <div><span class="label">Tier 2:</span><span class="value">30 sec / 中 ~90 字</span></div>
     <div><span class="label">R-G2 術語:</span><span class="value">—</span></div>
     <div><span class="label">N grep:</span><span class="value">—</span></div>
   </div>
 
-  <article class="slide-canvas cover-slide" aria-label="Main slide canvas">
+  <article class="slide-canvas cover-slide" data-section="S0" aria-label="Main slide canvas">
     
     
     
-    <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;padding:32px 0;">
-      <h1 style="font-size:44px;color:#1E3A8A;margin:0 0 14px;font-weight:bold;line-height:1.2;">Self-Phasing 問題修正與驗證</h1>
-      <p style="font-size:20px;color:#374151;margin:0 0 40px;font-weight:normal;">longphase-to tag layer 設計缺陷揭露與三版修正</p>
+    <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:100%;text-align:center;padding:24px 0;">
+      <h1 style="font-size:40px;color:#1E3A8A;margin:0 0 8px;font-weight:bold;line-height:1.15;">Self-Phasing 問題修正與驗證</h1>
+      <p style="font-size:18px;color:#374151;margin:0 0 16px;font-weight:normal;">longphase-to tag layer 設計缺陷揭露與三版修正</p>
 
-      <div style="border-top:1px solid #9CA3AF;padding-top:20px;width:55%;margin-top:24px;">
-        <p style="font-size:15px;color:#1F2937;margin:8px 0;">日期：2026-05-01 ~ 2026-05-11</p>
-        <p style="font-size:15px;color:#1F2937;margin:8px 0;">場合：實驗室週報</p>
-        <p style="font-size:15px;color:#1F2937;margin:8px 0;">報告人：廖子游</p>
-        <p style="font-size:13px;color:#6B7280;margin:14px 0 0;">中正大學 資工系 ・ 黃耀廷 教授 Lab405 實驗室</p>
+      <!-- v1.6 2026-05-13: main statement banner 從 02 移入 (取代 02 整張) -->
+      <div style="margin:6px auto 18px;padding:14px 26px;background:linear-gradient(90deg,#1E3A8A 0%,#3B82F6 100%);color:white;border-radius:8px;box-shadow:0 4px 12px rgba(30,58,138,0.25);max-width:78%;">
+        <p style="font-size:13px;font-weight:600;opacity:0.85;margin:0 0 6px;text-transform:uppercase;letter-spacing:0.05em;">🎯 報告主軸</p>
+        <p style="font-size:22px;font-weight:700;margin:0;line-height:1.4;">我們發現並修好了 longphase 一個被忽略的 priority bug</p>
+        <p style="font-size:14px;font-weight:500;margin:6px 0 0;opacity:0.9;line-height:1.5;">完整邏輯鏈：discovery → mechanism → fix → validation → impact</p>
+      </div>
+
+      <div style="border-top:1px solid #9CA3AF;padding-top:14px;width:55%;">
+        <p style="font-size:14px;color:#1F2937;margin:6px 0;">日期：2026-05-01 ~ 2026-05-11　·　場合：實驗室週報　·　報告人：廖子游</p>
+        <p style="font-size:12px;color:#6B7280;margin:8px 0 0;">中正大學 資工系 ・ 黃耀廷 教授 Lab405 實驗室</p>
       </div>
     </div>
   </article>
@@ -297,7 +340,18 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <aside class="note-section" aria-label="Speaker notes for slide 01">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (30 sec / 中 ~90 字)</summary>
-      <div class="speak-text">謝謝各位。今天的報告主題是 self-phasing 問題的修正與驗證 — 在 longphase-to 工具的 tag 層發現一個設計缺陷，整理修正過程與跨樣本驗證的結果。報告人廖子游，這是 5/1 至 5/11 的階段性整理。</div>
+      <div class="speak-text">[開場]
+謝謝各位。
+
+[主題]
+今天的報告主題 — self-phasing 問題的修正與驗證。
+
+[範圍]
+我們在 longphase-to 工具的 tag 層發現一個設計缺陷。
+報告整理修正過程，以及跨樣本驗證的結果。
+
+[資訊]
+報告人 廖子游。這是 5/1 至 5/11 的階段性整理。</div>
       <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> (封面 speaker note 精簡至 30 sec，不透露後續 slide 結論)</div>
     </details>
   </aside>
@@ -310,8 +364,8 @@ details.collapsible summary:hover { color: #1D4ED8; }
 
 <nav class="nav-bottom" aria-label="Slide navigation">
   <a class="disabled">← Prev</a>
-  <span class="counter">Slide 01 (1/22)</span>
-  <a href="slide_02_tldr.html">Next →</a>
+  <span class="counter">Slide 01 (1/23)</span>
+  <a href="slide_03_genome_173.html">Next →</a>
 </nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
@@ -319,7 +373,7 @@ details.collapsible summary:hover { color: #1D4ED8; }
 <script>
   document.addEventListener('keydown', function(e) {
     if (e.key === 'ArrowLeft' && False) location.href = 'slide_None.html';
-    if (e.key === 'ArrowRight' && True) location.href = 'slide_02_tldr.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_03_genome_173.html';
   });
 
   // PanZoom.js progressive enhancement — fail-soft if CDN blocked

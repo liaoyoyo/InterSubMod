@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 07 — 兩層 bug 兩層修補 — 修了什麼 + 為何缺一不可</title>
+  <title>Slide 07 — 兩層 bug 對應兩層修補</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -223,7 +223,7 @@ table.metric-table tr.row-yellow td { background: #FEF3C7; }
   background: #EDE9FE; padding: 4px 10px; border-radius: 4px; font-size: 11px;
   color: #6D28D9; display: inline-block; margin-bottom: 10px; font-weight: 600;
 }
-.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; }
+.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; white-space: pre-line; }
 .note-section .tier3 {
   margin-top: 12px; padding: 8px 12px; border-radius: 4px;
   background: #F9FAFB; border: 1px dashed #9CA3AF;
@@ -263,6 +263,44 @@ details.collapsible summary:hover { color: #1D4ED8; }
 .kbd-hint kbd {
   background: white; color: #1F2937; padding: 1px 6px; border-radius: 3px; font-size: 10px; margin: 0 2px;
 }
+
+/* ─── Section-based color theming (2026-05-13) ─────────────────────── */
+.slide-canvas[data-section="S0"] h1.slide-title,
+.slide-canvas[data-section="S0"] h2.slide-title { color: #7C3AED; border-bottom-color: #7C3AED; }
+.slide-canvas[data-section="S1"] h1.slide-title,
+.slide-canvas[data-section="S1"] h2.slide-title { color: #DC2626; border-bottom-color: #DC2626; }
+.slide-canvas[data-section="S2"] h1.slide-title,
+.slide-canvas[data-section="S2"] h2.slide-title { color: #EA580C; border-bottom-color: #EA580C; }
+.slide-canvas[data-section="S3"] h1.slide-title,
+.slide-canvas[data-section="S3"] h2.slide-title { color: #CA8A04; border-bottom-color: #CA8A04; }
+.slide-canvas[data-section="S4"] h1.slide-title,
+.slide-canvas[data-section="S4"] h2.slide-title { color: #1E3A8A; border-bottom-color: #1E3A8A; }
+.slide-canvas[data-section="S5"] h1.slide-title,
+.slide-canvas[data-section="S5"] h2.slide-title { color: #16A34A; border-bottom-color: #16A34A; }
+.slide-canvas[data-section="S7"] h1.slide-title,
+.slide-canvas[data-section="S7"] h2.slide-title { color: #B45309; border-bottom-color: #B45309; }
+.slide-canvas[data-section="Q&A"] h1.slide-title,
+.slide-canvas[data-section="Q&A"] h2.slide-title { color: #6B7280; border-bottom-color: #6B7280; }
+
+/* Section meta badge in upper-right corner of canvas */
+.slide-canvas::before {
+  content: attr(data-section);
+  position: absolute; top: 8px; right: 28px;
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 12px; color: white; opacity: 0.9;
+}
+.slide-canvas[data-section="S0"]::before { background: #7C3AED; }
+.slide-canvas[data-section="S1"]::before { background: #DC2626; }
+.slide-canvas[data-section="S2"]::before { background: #EA580C; }
+.slide-canvas[data-section="S3"]::before { background: #CA8A04; }
+.slide-canvas[data-section="S4"]::before { background: #1E3A8A; }
+.slide-canvas[data-section="S5"]::before { background: #16A34A; }
+.slide-canvas[data-section="S7"]::before { background: #B45309; }
+.slide-canvas[data-section="Q&A"]::before { background: #6B7280; }
+.slide-canvas.cover-slide::before { display: none; }
+
+/* Speaker note teleprompter format — handle newlines */
+.note-section .speak-text { white-space: pre-line !important; }
 </style>
   <!-- PanZoom.js CDN — fail-soft：載入失敗時 fallback 到 CSS hover scale + new-tab full size -->
   <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
@@ -277,52 +315,86 @@ details.collapsible summary:hover { color: #1D4ED8; }
     <div><span class="label">N grep:</span><span class="value">5 commits + 1</span></div>
   </div>
 
-  <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">兩層 bug 兩層修補 — 修了什麼 + 為何缺一不可</h1>
-    <p class="en-subtitle">Two layers two fixes — what each fix actually does, and why both required</p>
-    
+  <article class="slide-canvas" data-section="S2" aria-label="Main slide canvas">
+    <h1 class="slide-title ">為何需要兩層修補（vs 單層）</h1>
+    <p class="en-subtitle">Why two layers required — each layer has distinct responsibility (vote vs judge)</p>
+
+    <!-- v1.1.5 audit B 改動: take-home 收斂為「為何兩層」單一焦點 + 責任分離 caveat -->
+    <p style="font-size:11.5px;color:#7C2D12;background:#FEF3C7;border-left:3px solid #CA8A04;padding:5px 10px;margin:3px 0 8px;border-radius:3px;">
+      <strong>單一焦點</strong>：getVote (Layer 1 投票決策) + judgeHaplotype (Layer 1.5 輸出落判) <strong>責任分離</strong> — 兩層各自有 bug，必須各別修；單層修無法 cover 另一層
+    </p>
+
     <!-- Timeline -->
     <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:6px;padding:8px 12px;margin:2px 0 8px;">
-      <p style="font-size:12px;color:#6B7280;margin:0 0 4px;font-weight:600;">commit 時序鏈：</p>
-      <div style="display:flex;align-items:center;gap:4px;font-size:12px;flex-wrap:wrap;">
-        <span style="background:#DBEAFE;color:#1E3A8A;padding:3px 8px;border-radius:4px;font-weight:600;">2026-04 phasing 層</span>
+      <p style="font-size:12px;color:#6B7280;margin:0 0 4px;font-weight:600;">commit 時序鏈（baseline → V3F → V5 → V6）：</p>
+      <div style="display:flex;align-items:center;gap:4px;font-size:11px;flex-wrap:wrap;">
+        <span style="background:#DBEAFE;color:#1E3A8A;padding:3px 8px;border-radius:4px;font-weight:600;">2026-04 phasing</span>
         <code style="font-size:11px;">8b8c1fd</code>
         <span style="color:#6B7280;">→</span>
-        <span style="background:#DCFCE7;color:#166534;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05 tagging Layer 1 (V3F)</span>
+        <span style="background:#DCFCE7;color:#166534;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05 V3F</span>
         <code style="font-size:11px;">41ff147 + 380e8d2</code>
         <span style="color:#6B7280;">→</span>
-        <span style="background:#FEF3C7;color:#92400E;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05 Layer 1.5 (V5)</span>
+        <span style="background:#FEF3C7;color:#92400E;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05 V5</span>
         <code style="font-size:11px;">d0bcd8c + 938f0df</code>
+        <span style="color:#6B7280;">→</span>
+        <span style="background:#F3E8FF;color:#6D28D9;padding:3px 8px;border-radius:4px;font-weight:600;">2026-05-11 V6</span>
+        <code style="font-size:11px;">revert Layer 1.5</code>
       </div>
     </div>
     <!-- "修了什麼" 表 -->
-    <table class="metric-table" style="font-size:14px;">
-      <thead><tr><th style="width:18%;">Layer</th><th style="width:18%;">Bug</th><th>修法做了什麼</th><th style="width:10%;">Slide</th></tr></thead>
+    <table class="metric-table" style="font-size:13px;">
+      <thead><tr><th style="width:18%;">Layer / Bug</th><th>修法做了什麼</th><th style="width:10%;">Slide</th></tr></thead>
       <tbody>
-        <tr style="background:#DBEAFE;"><td><strong>phasing 層</strong></td><td>球員兼裁判</td><td>phasing 階段<strong>排除非 PoN 變異</strong>，只用 germline het 建 graph（somatic 不再當 node）</td><td>05</td></tr>
-        <tr style="background:#DCFCE7;"><td><strong>tagging Layer 1</strong></td><td>priority bug</td><td><strong>getVote 順序反轉</strong>：germline 第一順位 → break；somatic 1 票無法蓋過 germline 主導</td><td>06</td></tr>
-        <tr style="background:#FEF3C7;"><td><strong>tagging Layer 1.5</strong></td><td>germline-absent</td><td><strong>somatic fallback</strong>：純 somatic vote 區補 hp tag（V3F 此處 untagged）<span style="color:#92400E;font-style:italic;">⚠ 有 caveat</span></td><td>16</td></tr>
+        <tr style="background:#DBEAFE;"><td><strong>phasing 層</strong><br>球員兼裁判</td><td>phasing 階段<strong>排除非 PoN 變異</strong>，只用 germline het 建 graph（somatic 不再當 node）</td><td>05</td></tr>
+        <tr style="background:#DCFCE7;"><td><strong>tagging Layer 1</strong><br>priority bug (vote 順序)</td><td><strong>重寫 two-layer</strong>：Layer 1 germline 決方向 / Layer 2 somatic 加 sub-tag（不再 iterate variantKeys break-early）</td><td>06</td></tr>
+        <tr style="background:#DCFCE7;"><td><strong>tagging Layer 1</strong><br>enum vs int literal mismatch</td><td><code>HAPLOTYPE1_1=2</code> enum 與 HP tag int <code>11</code> 不一致，V3F 改用 int literal 11/21/33 直接賦值（搭 380e8d2 INDEL guard）</td><td>backup</td></tr>
+        <tr style="background:#FEF3C7;"><td><strong>tagging Layer 1.5</strong><br>germline-absent</td><td><strong>V5 somatic fallback</strong>：純 somatic vote 區補 hp tag（V3F 此處 untagged）<span style="color:#92400E;font-weight:600;"> ⚠ 4.19:1 偏 HP1 caveat</span></td><td>16</td></tr>
+        <tr style="background:#F3E8FF;"><td><strong>V6 revert</strong><br>Layer 1.5 移除</td><td>germline-absent 區回退 V3F 保守行為（hp=33），marker coverage +30% / 4 樣本 ratio 中性化；但 SP1/2/3 失去 Layer 1.5 翻方向能力</td><td>16</td></tr>
       </tbody>
     </table>
-    <!-- 為何缺一不可（左 phasing / 右 tagging - 與表 row 順序對齊） -->
-    <div class="grid-2col" style="gap:10px;margin-top:6px;">
-      <div class="caveat-box" style="padding:8px 12px;font-size:14px;">
-        <span class="label">只 PON-only？</span>
-        解 phasing 但 tag 仍壞 → <strong>99.9% reads 仍標 HP:i:11</strong>
+    <!-- 5 commits inline 列表（每 commit 一行差異） -->
+    <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:4px;padding:5px 10px;margin-top:5px;font-size:10px;line-height:1.45;">
+      <p style="margin:0;color:#1E3A8A;font-family:monospace;"><code>8b8c1fd</code> 加 <code>--pon-only-phasing</code> flag · <span style="color:#166534;"><code>41ff147</code> getVote 重寫 Layer 1/2 + enum→int literal</span> · <span style="color:#166534;"><code>380e8d2</code> INDEL guard</span> · <span style="color:#92400E;"><code>d0bcd8c</code> Pass 2 ploidy+Layer 1.5</span> · <span style="color:#92400E;"><code>938f0df</code> purity 0.95→0.9</span> · <span style="color:#6D28D9;"><code>V6</code> revert Layer 1.5</span></p>
+    </div>
+    <!-- 為何缺一不可 + V6 trade-off (合併 2-col 緊湊) -->
+    <div class="grid-2col" style="gap:8px;margin-top:5px;">
+      <div class="caveat-box" style="padding:5px 9px;font-size:10px;">
+        <span class="label">只 PON-only？</span>解 phasing 但 tag 仍壞 → <strong>99.9% reads 仍 HP:i:11</strong>
       </div>
-      <div class="caveat-box" style="padding:8px 12px;font-size:14px;">
-        <span class="label">只 V3F？</span>
-        Layer 1 only → <strong>germline 缺席區 reads 全 untagged</strong>；V5 Layer 1.5 補 fallback（slide 16 詳述 caveat）
+      <div class="caveat-box" style="padding:5px 9px;font-size:10px;">
+        <span class="label">只 V3F（無 8b8c1fd）？</span>tag 修但 phasing 仍被 somatic 主導 → PS block 邊界錯
       </div>
     </div>
-    <div class="footer-glossary"><div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals</div><div class="gloss-item">ⓘ Layer 1.5 = V3F 之上補丁，非獨立層</div></div>
+    <div class="footer-glossary">
+      <div class="gloss-item">📖 <span class="term">PoN:</span> Panel of Normals</div>
+      <div class="gloss-item">ⓘ Layer 1.5 = V3F 之上補丁，非獨立層</div>
+      <div class="gloss-item">ⓘ V6 trade-off: marker ✓ / SP1/2/3 翻方向 ✗</div>
+    </div>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide 07">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (90 sec / 中 ~310 字)</summary>
-      <div class="speak-text">兩層 bug 三 fix stacking 時序: 2026-04 phasing 層 8b8c1fd PON-only → 2026-05 tagging Layer 1 V3F (41ff147 順序反轉 + 380e8d2 INDEL guard) → 2026-05 Layer 1.5 V5 (d0bcd8c Pass 2 ploidy + 938f0df threshold 0.95→0.9, bundle Layer 1.5 fallback)。修法做了什麼: phasing 層排除非 PoN 變異只用 germline het 建 graph; tagging Layer 1 getVote 順序反轉 germline 第一順位; Layer 1.5 純 somatic vote 區補 hp tag。為何缺一不可: 只 PON-only tag 仍偏 99.9%; 只 V3F germline 缺席區 untagged; V5 Layer 1.5 補 fallback 但 germline-absent 區有 caveat (slide 16)。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 5 commit 順序細節 / V3F 命名歷史 / 跨層交互 / 為何不能合併修 / d0bcd8c 為何跨兩層</div>
+      <div class="speak-text">[時序]
+兩層 bug × 四 fix stacking — 五個 commits 漸進完成。
+
+2026-04 phasing 層：8b8c1fd PON-only。
+2026-05 tagging V3F：41ff147 重寫 two-layer + 380e8d2 INDEL guard。
+2026-05 V5：d0bcd8c Pass 2 ploidy + 938f0df threshold + Layer 1.5 somatic fallback。
+2026-05-11 V6：revert Layer 1.5。
+
+[每個修法做什麼]
+phasing 層 — 排除非 PoN 變異，只用 germline het 建 graph。
+tagging Layer 1 — 重寫兩層獨立判定 + 修 enum/int literal。
+Layer 1.5 — 純 somatic vote 區補 hp tag。
+V6 — germline-absent 區回退保守 hp=33。
+
+[為何缺一不可]
+只 PON-only — tag 仍偏 99.9%。
+只 V3F — germline 缺席區 untagged。
+V5 Layer 1.5 — 補 fallback 但 germline-absent 4.19:1 偏 HP1。
+V6 — 是 trade-off 修正不是完美解，但 marker coverage +30%。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 5 commit 順序細節 / V3F 命名歷史 / 跨層交互 / 為何不能合併修 / d0bcd8c 為何跨兩層 / enum=2 vs int=11 mismatch 細節 / V6 SP1/2/3 反向 caveat</div>
     </details>
   </aside>
 
@@ -334,8 +406,8 @@ details.collapsible summary:hover { color: #1D4ED8; }
 
 <nav class="nav-bottom" aria-label="Slide navigation">
   <a href="slide_06_priority_bug.html">← Prev</a>
-  <span class="counter">Slide 07 (8/22)</span>
-  <a href="slide_08_chr19_752.html">Next →</a>
+  <span class="counter">Slide 07 (9/23)</span>
+  <a href="slide_08_quant_evidence.html">Next →</a>
 </nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
@@ -343,7 +415,7 @@ details.collapsible summary:hover { color: #1D4ED8; }
 <script>
   document.addEventListener('keydown', function(e) {
     if (e.key === 'ArrowLeft' && True) location.href = 'slide_06_priority_bug.html';
-    if (e.key === 'ArrowRight' && True) location.href = 'slide_08_chr19_752.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_08_quant_evidence.html';
   });
 
   // PanZoom.js progressive enhancement — fail-soft if CDN blocked

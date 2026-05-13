@@ -57,6 +57,11 @@ dialogue_breaks: 5 (此首版 §0-§2 等 dialogue break 1 後續寫 §3+)
 
 # Self-Phasing 完整觀察整合報告 — 2026-05-08
 
+> **📌 ERRATUM BANNER 2026-05-13** — 主要結論不撤回。3 處 V6 attribution 模糊已透過 erratum 補強（17.3:1 修對 / +13.3 pp paired GT / 34,855 100% 修對 三處）。
+> 完整 errata: [`InterSubMod/docs/reports/validated/2026/05/20260513_V6_Attribution_Errata_01.md`](20260513_V6_Attribution_Errata_01.md)
+> 受影響章節: §0 TL;DR / §2.1 全基因組 17.3:1 / §4.1-4.4 read-level / §6.2 全基因組 / §7.1 / §7.2 / §9.x 表格
+> 核心修正: ratio 修對主力為 **V3F** (commit 41ff147)；V5 加 Layer 1.5 退步；**V6** 改善 vs baseline 但 trade-off marker eng；+13.3 pp = **V5** vs baseline (V6 未實測但預期保留)；34,855 = **V3F/V5/V6** 100% (V3F 主力, V5/V6 logic 繼承)
+
 ## 0. TL;DR
 
 ### 核心結論（PI 必讀，3 條）

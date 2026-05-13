@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 14 — Caller F1 vs SEQC2 三版完全相同; purity 0.6 完整對照 0 critical regression</title>
+  <title>Slide 11 — Caller F1 四版完全相同 = 0.7166</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -223,7 +223,7 @@ table.metric-table tr.row-yellow td { background: #FEF3C7; }
   background: #EDE9FE; padding: 4px 10px; border-radius: 4px; font-size: 11px;
   color: #6D28D9; display: inline-block; margin-bottom: 10px; font-weight: 600;
 }
-.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; }
+.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; white-space: pre-line; }
 .note-section .tier3 {
   margin-top: 12px; padding: 8px 12px; border-radius: 4px;
   background: #F9FAFB; border: 1px dashed #9CA3AF;
@@ -263,56 +263,145 @@ details.collapsible summary:hover { color: #1D4ED8; }
 .kbd-hint kbd {
   background: white; color: #1F2937; padding: 1px 6px; border-radius: 3px; font-size: 10px; margin: 0 2px;
 }
+
+/* ─── Section-based color theming (2026-05-13) ─────────────────────── */
+.slide-canvas[data-section="S0"] h1.slide-title,
+.slide-canvas[data-section="S0"] h2.slide-title { color: #7C3AED; border-bottom-color: #7C3AED; }
+.slide-canvas[data-section="S1"] h1.slide-title,
+.slide-canvas[data-section="S1"] h2.slide-title { color: #DC2626; border-bottom-color: #DC2626; }
+.slide-canvas[data-section="S2"] h1.slide-title,
+.slide-canvas[data-section="S2"] h2.slide-title { color: #EA580C; border-bottom-color: #EA580C; }
+.slide-canvas[data-section="S3"] h1.slide-title,
+.slide-canvas[data-section="S3"] h2.slide-title { color: #CA8A04; border-bottom-color: #CA8A04; }
+.slide-canvas[data-section="S4"] h1.slide-title,
+.slide-canvas[data-section="S4"] h2.slide-title { color: #1E3A8A; border-bottom-color: #1E3A8A; }
+.slide-canvas[data-section="S5"] h1.slide-title,
+.slide-canvas[data-section="S5"] h2.slide-title { color: #16A34A; border-bottom-color: #16A34A; }
+.slide-canvas[data-section="S7"] h1.slide-title,
+.slide-canvas[data-section="S7"] h2.slide-title { color: #B45309; border-bottom-color: #B45309; }
+.slide-canvas[data-section="Q&A"] h1.slide-title,
+.slide-canvas[data-section="Q&A"] h2.slide-title { color: #6B7280; border-bottom-color: #6B7280; }
+
+/* Section meta badge in upper-right corner of canvas */
+.slide-canvas::before {
+  content: attr(data-section);
+  position: absolute; top: 8px; right: 28px;
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 12px; color: white; opacity: 0.9;
+}
+.slide-canvas[data-section="S0"]::before { background: #7C3AED; }
+.slide-canvas[data-section="S1"]::before { background: #DC2626; }
+.slide-canvas[data-section="S2"]::before { background: #EA580C; }
+.slide-canvas[data-section="S3"]::before { background: #CA8A04; }
+.slide-canvas[data-section="S4"]::before { background: #1E3A8A; }
+.slide-canvas[data-section="S5"]::before { background: #16A34A; }
+.slide-canvas[data-section="S7"]::before { background: #B45309; }
+.slide-canvas[data-section="Q&A"]::before { background: #6B7280; }
+.slide-canvas.cover-slide::before { display: none; }
+
+/* Speaker note teleprompter format — handle newlines */
+.note-section .speak-text { white-space: pre-line !important; }
 </style>
   <!-- PanZoom.js CDN — fail-soft：載入失敗時 fallback 到 CSS hover scale + new-tab full size -->
   <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
 </head>
 <body>
-<main class="slide-page" role="main" aria-label="Slide 14 content">
+<main class="slide-page" role="main" aria-label="Slide 11 content">
   <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
-    <div><span class="label">Slide:</span><span class="value">14 / 22</span></div>
+    <div><span class="label">Slide:</span><span class="value">11 / 22</span></div>
     <div><span class="label">Section:</span><span class="value">S5 驗證 + ⚡ Cliffhanger</span></div>
     <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
     <div><span class="label">R-G2 術語:</span><span class="value">2</span></div>
     <div><span class="label">N grep:</span><span class="value">15+</span></div>
   </div>
 
-  <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">Caller F1 vs SEQC2 三版完全相同; purity 0.6 完整對照 0 critical regression</h1>
-    <p class="en-subtitle">Caller F1 identical; purity 0.6 fully verified</p>
+  <article class="slide-canvas" data-section="S5" aria-label="Main slide canvas">
+    <h1 class="slide-title ">Caller F1 四版完全相同 = 0.7166</h1>
+    <p class="en-subtitle">Caller F1 identical across 4 versions; V6 no regression</p>
     
-    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0;">HCC1395 5kHz @ 0.93 purity:</p>
-    <table class="metric-table" style="font-size:10px;">
-      <thead><tr><th>版本</th><th>TP</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">📊 兩 purity 對照 — 四版 F1 都相同, 但 0.93 與 0.6 不同 (caller 性質):</p>
+    <table class="metric-table" style="font-size:10.5px;">
+      <thead><tr><th>樣本</th><th>四版本</th><th>TP</th><th>FP</th><th>FN</th><th>F1</th><th>Δ vs 純</th></tr></thead>
       <tbody>
-        <tr class="row-green"><td>A1 baseline</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
-        <tr class="row-green"><td>A3 V3F</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
-        <tr class="row-green"><td>A5 V5</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num">0.7107</td><td class="num">0.7227</td><td class="num"><strong>0.7166</strong></td></tr>
+        <tr class="row-green"><td><strong>HCC1395 5kHz @ 0.93 (純)</strong></td><td class="num">baseline/V3F/V5/V6</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num"><strong>0.7166</strong></td><td>—</td></tr>
+        <tr class="row-yellow"><td><strong>HCC1395 t30_n20 @ 0.6 (低)</strong></td><td class="num">baseline/V3F/V5/V6</td><td class="num">24,190</td><td class="num">13,487</td><td class="num">15,257</td><td class="num"><strong>0.6273</strong></td><td class="num">−0.0893</td></tr>
       </tbody>
     </table>
-    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:6px 0 0;">HCC1395 t30_n20 @ 0.6 purity:</p>
-    <table class="metric-table" style="font-size:10px;">
-      <thead><tr><th>版本</th><th>TP</th><th>FP</th><th>FN</th><th>F1</th></tr></thead>
-      <tbody><tr class="row-green"><td>B1/B3/B5 三版</td><td class="num">24,190</td><td class="num">13,487</td><td class="num">15,257</td><td class="num"><strong>0.6273</strong></td></tr></tbody>
+    <p style="font-size:10.5px;color:#16A34A;margin:3px 0 0;font-weight:600;">→ 兩 purity 都驗證: 四版 F1 完全相同 (0 差異); 0.93→0.6 ΔF1=−0.0893 為 ClairS-TO 低 purity 性質，與 self-phasing 修補無關</p>
+    <p style="font-size:11px;font-weight:700;color:#374151;margin:8px 0 4px;">🔬 為何 F1 invariant — 因果機制圖示:</p>
+    <svg viewBox="0 0 720 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
+      <defs><marker id="arr14" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9CA3AF"/></marker></defs>
+      <rect x="20"  y="35" width="135" height="60" rx="6" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+      <text x="87"  y="53" font-size="10" fill="#1E3A8A" text-anchor="middle" font-weight="700">ClairS-TO caller</text>
+      <text x="87"  y="68" font-size="9"  fill="#374151" text-anchor="middle">snv.vcf</text>
+      <text x="87"  y="83" font-size="9" fill="#7F1D1D" text-anchor="middle" font-weight="700">FILTER=PASS</text>
+      <text x="87"  y="93" font-size="8" fill="#6B7280" text-anchor="middle">(47,798 一次性決定)</text>
+      <path d="M155,65 L200,65" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr14)"/>
+      <rect x="205" y="20" width="210" height="90" rx="6" fill="#F0FDF4" stroke="#16A34A" stroke-width="1.5"/>
+      <text x="310" y="38" font-size="10" fill="#166534" text-anchor="middle" font-weight="700">longphase-to (V3F/V5/V6)</text>
+      <text x="310" y="55" font-size="9" fill="#166534" text-anchor="middle">✓ 改 GT / PS / GT2 / GT3 / PON tag</text>
+      <text x="310" y="69" font-size="9" fill="#166534" text-anchor="middle">✓ 改 BAM HP:i tag</text>
+      <text x="310" y="86" font-size="9.5" fill="#DC2626" text-anchor="middle" font-weight="700">✗ 不改 FILTER 欄位</text>
+      <text x="310" y="100" font-size="8" fill="#6B7280" text-anchor="middle" font-style="italic">三版 PASS set 完全相同</text>
+      <path d="M415,65 L460,65" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr14)"/>
+      <rect x="465" y="35" width="150" height="60" rx="6" fill="#FEF3C7" stroke="#CA8A04" stroke-width="1.5"/>
+      <text x="540" y="53" font-size="10" fill="#7C2D12" text-anchor="middle" font-weight="700">bcftools isec</text>
+      <text x="540" y="69" font-size="9"  fill="#374151" text-anchor="middle">取 FILTER=PASS</text>
+      <text x="540" y="83" font-size="9"  fill="#374151" text-anchor="middle">vs SEQC2 truth</text>
+      <path d="M615,65 L660,65" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr14)"/>
+      <rect x="665" y="35" width="55" height="60" rx="6" fill="#DCFCE7" stroke="#16A34A" stroke-width="2"/>
+      <text x="692" y="53" font-size="10" fill="#166534" text-anchor="middle" font-weight="700">F1</text>
+      <text x="692" y="70" font-size="11" fill="#166534" text-anchor="middle" font-weight="700">0.7166</text>
+      <text x="692" y="85" font-size="8.5" fill="#166534" text-anchor="middle" font-weight="600">四版相同</text>
+      <text x="370" y="128" font-size="9.5" fill="#16A34A" text-anchor="middle" font-weight="600">→ FILTER 不動 → PASS set 不變 → TP/FP/FN 不變 → F1 數學保證 invariant</text>
+    </svg>
+    <table class="metric-table" style="font-size:10px;margin-top:6px;">
+      <thead><tr><th>F1 評估口徑</th><th>結果</th><th>對 V3F/V5/V6 修補?</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td><strong>caller-level F1</strong> (bcftools isec, 業界標準)</td><td>四版 0.7166 / 0.6273 完全相同</td><td>invariant ✓ (FILTER 不動)</td></tr>
+        <tr class="row-green"><td>論文 §4.3 V_H/V_L refined F1</td><td>Verdict_Somatic INFO tag 三版實證 0 records (本 pipeline N/A)</td><td>invariant ✓ (Step 4 不改)</td></tr>
+      </tbody>
     </table>
-    <div class="arg-list" style="font-size:11px;">
-      <strong>因果鏈:</strong> ClairS-TO PASS set 由 caller 決定 → V5 改 GT/PS 不改 FILTER → PASS set 不變 → TP/FP/FN 不變 → F1 不變
-    </div>
-    <div class="cliffhanger-box">
-      → V5 (與 V6) 都不改 caller; ΔF1 (0.93→0.6) = -0.0893 為 ClairS-TO 性質<br>
-      <strong>→ 5/9 paired cross-ref 揭 V5 Layer 1.5 缺陷 → 5/10 V6 binary patch 已修補...</strong> 〔next: slide 15-16〕
-    </div>
-    <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">purity:</span> 樣本中腫瘤細胞占比</div>
-      <div class="gloss-item">ⓘ <span class="term">PASS set:</span> ClairS-TO snv.vcf FILTER=PASS 集合</div>
+    <div class="footer-glossary" style="font-size:9.5px;margin-top:4px;">
+      <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance (+13.3 pp paired GT @ 0.93)，不在 caller F1 〔next: slide 12 主結論 + slide 13 未來方向〕</div>
     </div>
   </article>
 
-  <aside class="note-section" aria-label="Speaker notes for slide 14">
+  <aside class="note-section" aria-label="Speaker notes for slide 11">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
-      <div class="speak-text">Caller F1 vs SEQC2: 0.93 三版 F1=0.7166 完全相同; 0.6 三版 F1=0.6273 完全相同。因果鏈: ClairS-TO PASS set 由 caller 決定, V5 改 GT/PS/GT2/GT3 不改 FILTER → PASS set 不變 → F1 不變。V5 不改 caller, ΔF1 -0.0893 是 ClairS-TO 在低 purity 性質。turning point — 但 5/9 paired cross-ref 揭露另一面。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> PASS set / FILTER 機制 / purity 0.6 N50 微差</div>
+      <div class="speak-text">[標題]
+Caller F1 vs SEQC2 — 四版完全相同。
+這是 V6 不退步的 caller-side 鐵證。
+
+[兩 purity 對照]
+HCC1395 5kHz 0.93 純樣本：
+baseline / V3F / V5 / V6 四版 TP=28,509 / FP=11,606 / FN=10,938 / F1=0.7166 — 完全相同。
+
+HCC1395 t30_n20 0.6 低純度：
+四版 TP=24,190 / FP=13,487 / FN=15,257 / F1=0.6273 — 完全相同。
+
+[釐清 0.93 vs 0.6 差異]
+兩 purity 都驗證了，四版內 0 差異。
+但 0.93 → 0.6 ΔF1 = −0.0893 是 ClairS-TO 在低 purity 性質。
+與 self-phasing 修補無關。
+
+[為何 invariant — 因果機制]
+ClairS-TO snv.vcf 一次性決定 FILTER=PASS 47,798 條。
+longphase-to phase 改 GT / PS / GT2 / GT3 / PON tag — 不改 FILTER。
+longphase-to haplotag 只改 BAM HP:i tag — 不碰 VCF。
+bcftools isec 取 FILTER=PASS 跟 truth 比對。
+FILTER 不動 → PASS set 不變 → TP/FP/FN 不變 → F1 數學保證 invariant。
+
+[兩種 F1 口徑都 invariant]
+業界 caller-level F1：四版 0.7166 / 0.6273 完全相同。
+論文 §4.3 V_H/V_L refined F1：實證三版 Verdict tag INFO 全 0 records（ClairS-TO 預設未啟用 Verdict tagging）→ 本 pipeline N/A。
+
+[結論]
+V6 真實價值不在 caller F1。
+真實價值在 read-level tag concordance — +13.3 pp paired GT @ 0.93。
+下一節 — slide 12 主結論，slide 13 未來方向。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> PASS set / FILTER 機制 / purity 0.6 N50 微差 / V6 patch 不改 phasing 層 detail</div>
     </details>
   </aside>
 
@@ -323,17 +412,17 @@ details.collapsible summary:hover { color: #1D4ED8; }
 </main>
 
 <nav class="nav-bottom" aria-label="Slide navigation">
-  <a href="slide_13_20_metrics.html">← Prev</a>
-  <span class="counter">Slide 14 (15/22)</span>
-  <a href="slide_15_paired_mode.html">Next →</a>
+  <a href="slide_12_no_regression.html">← Prev</a>
+  <span class="counter">Slide 11 (17/23)</span>
+  <a href="slide_17_main_verdict.html">Next →</a>
 </nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
 
 <script>
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowLeft' && True) location.href = 'slide_13_20_metrics.html';
-    if (e.key === 'ArrowRight' && True) location.href = 'slide_15_paired_mode.html';
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_12_no_regression.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_17_main_verdict.html';
   });
 
   // PanZoom.js progressive enhancement — fail-soft if CDN blocked

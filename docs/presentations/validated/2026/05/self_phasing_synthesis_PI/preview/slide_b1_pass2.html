@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide B1 — Pass 2 = 只重跑 2-point edgeConnectResult; 高 purity 才觸發</title>
+  <title>Slide B1 — Pass 2: 重跑 2-point only (高 purity >0.9)</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -223,7 +223,7 @@ table.metric-table tr.row-yellow td { background: #FEF3C7; }
   background: #EDE9FE; padding: 4px 10px; border-radius: 4px; font-size: 11px;
   color: #6D28D9; display: inline-block; margin-bottom: 10px; font-weight: 600;
 }
-.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; }
+.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; white-space: pre-line; }
 .note-section .tier3 {
   margin-top: 12px; padding: 8px 12px; border-radius: 4px;
   background: #F9FAFB; border: 1px dashed #9CA3AF;
@@ -263,6 +263,44 @@ details.collapsible summary:hover { color: #1D4ED8; }
 .kbd-hint kbd {
   background: white; color: #1F2937; padding: 1px 6px; border-radius: 3px; font-size: 10px; margin: 0 2px;
 }
+
+/* ─── Section-based color theming (2026-05-13) ─────────────────────── */
+.slide-canvas[data-section="S0"] h1.slide-title,
+.slide-canvas[data-section="S0"] h2.slide-title { color: #7C3AED; border-bottom-color: #7C3AED; }
+.slide-canvas[data-section="S1"] h1.slide-title,
+.slide-canvas[data-section="S1"] h2.slide-title { color: #DC2626; border-bottom-color: #DC2626; }
+.slide-canvas[data-section="S2"] h1.slide-title,
+.slide-canvas[data-section="S2"] h2.slide-title { color: #EA580C; border-bottom-color: #EA580C; }
+.slide-canvas[data-section="S3"] h1.slide-title,
+.slide-canvas[data-section="S3"] h2.slide-title { color: #CA8A04; border-bottom-color: #CA8A04; }
+.slide-canvas[data-section="S4"] h1.slide-title,
+.slide-canvas[data-section="S4"] h2.slide-title { color: #1E3A8A; border-bottom-color: #1E3A8A; }
+.slide-canvas[data-section="S5"] h1.slide-title,
+.slide-canvas[data-section="S5"] h2.slide-title { color: #16A34A; border-bottom-color: #16A34A; }
+.slide-canvas[data-section="S7"] h1.slide-title,
+.slide-canvas[data-section="S7"] h2.slide-title { color: #B45309; border-bottom-color: #B45309; }
+.slide-canvas[data-section="Q&A"] h1.slide-title,
+.slide-canvas[data-section="Q&A"] h2.slide-title { color: #6B7280; border-bottom-color: #6B7280; }
+
+/* Section meta badge in upper-right corner of canvas */
+.slide-canvas::before {
+  content: attr(data-section);
+  position: absolute; top: 8px; right: 28px;
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 12px; color: white; opacity: 0.9;
+}
+.slide-canvas[data-section="S0"]::before { background: #7C3AED; }
+.slide-canvas[data-section="S1"]::before { background: #DC2626; }
+.slide-canvas[data-section="S2"]::before { background: #EA580C; }
+.slide-canvas[data-section="S3"]::before { background: #CA8A04; }
+.slide-canvas[data-section="S4"]::before { background: #1E3A8A; }
+.slide-canvas[data-section="S5"]::before { background: #16A34A; }
+.slide-canvas[data-section="S7"]::before { background: #B45309; }
+.slide-canvas[data-section="Q&A"]::before { background: #6B7280; }
+.slide-canvas.cover-slide::before { display: none; }
+
+/* Speaker note teleprompter format — handle newlines */
+.note-section .speak-text { white-space: pre-line !important; }
 </style>
   <!-- PanZoom.js CDN — fail-soft：載入失敗時 fallback 到 CSS hover scale + new-tab full size -->
   <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
@@ -272,28 +310,84 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
     <div><span class="label">Slide:</span><span class="value">B1 / 22</span></div>
     <div><span class="label">Section:</span><span class="value">Q&A Backup</span></div>
-    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
-    <div><span class="label">R-G2 術語:</span><span class="value">4 (backup 例外)</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">90 sec / 中 ~300 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">1</span></div>
     <div><span class="label">N grep:</span><span class="value">—</span></div>
   </div>
 
-  <article class="slide-canvas" aria-label="Main slide canvas">
-    <h1 class="slide-title ">Pass 2 = 只重跑 2-point edgeConnectResult; 高 purity 才觸發</h1>
+  <article class="slide-canvas" data-section="Q&A" aria-label="Main slide canvas">
+    <h1 class="slide-title ">Pass 2: 重跑 2-point only (高 purity >0.9)</h1>
     <p class="en-subtitle">Pass 2 = re-run 2-point only; high purity gate</p>
     
-    <img class="fig-thumb" src="../figures/G2_pass_two_flow.png" alt="G2" style="max-height:380px;">
-    <p class="fig-caption">Pass 1 always runs 2-point + 3-point; Pass 2 only re-runs 2-point</p>
-    <div class="footer-glossary">
-      <div class="gloss-item">📖 <span class="term">somaticCalling vs edgeConnectResult:</span> 兩 phasing graph 演算法</div>
-      <div class="gloss-item">📖 <span class="term">purity:</span> 樣本中腫瘤細胞占比</div>
-    </div>
+    <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">❓ Q: Pass 2 為什麼只跑 2-point? 為什麼高 purity 才觸發?</p>
+    <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
+      <defs><marker id="arrB1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9CA3AF"/></marker></defs>
+      <rect x="15" y="15" width="230" height="190" rx="6" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+      <text x="130" y="35" font-size="11" fill="#1E3A8A" text-anchor="middle" font-weight="700">Pass 1 (always runs)</text>
+      <rect x="30" y="50" width="200" height="42" rx="4" fill="white" stroke="#1E3A8A"/>
+      <text x="130" y="68" font-size="10" fill="#374151" text-anchor="middle" font-weight="600">3-point patternMining</text>
+      <text x="130" y="83" font-size="8.5" fill="#6B7280" text-anchor="middle">somaticCalling V_H/V_L/V_N 分類</text>
+      <rect x="30" y="100" width="200" height="42" rx="4" fill="white" stroke="#1E3A8A"/>
+      <text x="130" y="118" font-size="10" fill="#374151" text-anchor="middle" font-weight="600">2-point edgeConnectResult</text>
+      <text x="130" y="133" font-size="8.5" fill="#6B7280" text-anchor="middle">phasing graph 建構</text>
+      <text x="130" y="165" font-size="9" fill="#1E3A8A" text-anchor="middle" font-weight="700">→ 產出 origin + phased VCF</text>
+      <text x="130" y="186" font-size="8" fill="#6B7280" text-anchor="middle" font-style="italic">三路徑算法不依賴 purity</text>
+      <path d="M245,110 L290,110" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arrB1)"/>
+      <rect x="295" y="80" width="125" height="60" rx="6" fill="#FEF3C7" stroke="#CA8A04" stroke-width="2"/>
+      <text x="357" y="100" font-size="11" fill="#7C2D12" text-anchor="middle" font-weight="700">purity 判定</text>
+      <text x="357" y="118" font-size="11" fill="#7C2D12" text-anchor="middle" font-weight="700">purity &gt; 0.9 ?</text>
+      <text x="357" y="132" font-size="8" fill="#6B7280" text-anchor="middle">(原 0.95 → 938f0df 改 0.9)</text>
+      <path d="M357,140 L357,165" stroke="#DC2626" stroke-width="2" marker-end="url(#arrB1)"/>
+      <text x="395" y="155" font-size="9" fill="#DC2626" font-weight="700">No (≤0.9)</text>
+      <path d="M420,110 L455,110" stroke="#16A34A" stroke-width="2" marker-end="url(#arrB1)"/>
+      <text x="437" y="100" font-size="9" fill="#16A34A" font-weight="700">Yes (&gt;0.9)</text>
+      <rect x="460" y="55" width="245" height="100" rx="6" fill="#DCFCE7" stroke="#16A34A" stroke-width="2"/>
+      <text x="582" y="78" font-size="11" fill="#166534" text-anchor="middle" font-weight="700">Pass 2 second round</text>
+      <text x="582" y="93" font-size="10" fill="#166534" text-anchor="middle">(only 2-point edgeConnectResult)</text>
+      <text x="582" y="115" font-size="9" fill="#374151" text-anchor="middle">重跑 edgeConnectResult</text>
+      <text x="582" y="128" font-size="9" fill="#374151" text-anchor="middle">用 Pass 1 origin 精修 graph</text>
+      <text x="582" y="146" font-size="9.5" fill="#16A34A" text-anchor="middle" font-weight="700">N50 +3.51% · blocks −9.79% · phased −2.9 pp</text>
+      <rect x="295" y="170" width="245" height="35" rx="6" fill="#FEE2E2" stroke="#DC2626" stroke-width="2"/>
+      <text x="418" y="190" font-size="10" fill="#7F1D1D" text-anchor="middle" font-weight="700">Pass 2 跳過 (低 purity)</text>
+      <text x="418" y="202" font-size="8.5" fill="#6B7280" text-anchor="middle">HCC1395 0.6 樣本不觸發 / Pass 1 已穩定</text>
+    </svg>
+    <p style="font-size:10.5px;font-weight:600;color:#16A34A;margin:6px 0 0;">★ 關鍵: Pass 2 只重跑 2-point edgeConnectResult，不重跑 3-point somaticCalling — 後者 patternMining 基於 read linkage 拓樸 (V_H 12 + V_L 3 patterns)，與 purity 無關</p>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide B1">
     <details class="collapsible" open>
-      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
-      <div class="speak-text">Q: Pass 2 為什麼只跑 2-point? somaticCalling 用 3-point patternMining (與 purity 無關); edgeConnectResult 用 2-point 永遠跑。低 purity ≤0.9 Pass 2 跳過; 高 purity >0.9 Pass 2 只重跑 2-point (Pass 1 已產出穩定 origin 分類)。Pass 2 incremental: phased var -2.90 pp / blocks -9.79% / N50 +3.51%。常見誤解: 低 purity 用 3-point 倒過來; 高 purity 才多做事。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> patternMining first/second/third path / Pass 2 不重跑 somaticCalling</div>
+      <summary>🎤 Speaker Note (90 sec / 中 ~300 字)</summary>
+      <div class="speak-text">[Q]
+Pass 2 為什麼只跑 2-point？為什麼高 purity 才觸發？
+
+[Pass 1 永遠跑]
+Pass 1 跑兩件事：
+3-point patternMining — somaticCalling 做 V_H / V_L / V_N 分類。
+2-point edgeConnectResult — phasing graph 建構。
+三路徑算法不依賴 purity（基於 read linkage 拓樸）。
+
+[purity 判定]
+purity > 0.9 才觸發 Pass 2（原 0.95，938f0df commit 改 0.9）。
+低 purity ≤ 0.9 Pass 2 跳過 — Pass 1 已穩定。
+
+[Pass 2 做什麼]
+只重跑 2-point edgeConnectResult。
+用 Pass 1 已分類 origin 精修 phasing graph。
+不重跑 3-point somaticCalling。
+
+[Pass 2 incremental 效果]
+N50 +3.51%。
+blocks −9.79%。
+phased var −2.9 pp。
+
+[常見誤解]
+「低 purity 用 3-point 倒過來」— 實情相反。
+高 purity 才多做事，因為 Pass 1 origin 穩定可重用。
+
+[低 purity 樣本案例]
+HCC1395 0.6 purity 樣本兩版都不觸發 Pass 2。
+V5 改 GT 在低 purity 自我治癒。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> patternMining first/second/third path / Pass 2 不重跑 somaticCalling / threshold 0.95→0.9 cherry-pick</div>
     </details>
   </aside>
 
@@ -304,17 +398,17 @@ details.collapsible summary:hover { color: #1D4ED8; }
 </main>
 
 <nav class="nav-bottom" aria-label="Slide navigation">
-  <a href="slide_18_followup.html">← Prev</a>
-  <span class="counter">Slide B1 (20/22)</span>
-  <a href="slide_b2_purity06.html">Next →</a>
+  <a href="slide_18_impact_future.html">← Prev</a>
+  <span class="counter">Slide B1 (20/23)</span>
+  <a href="slide_b2_f1_dual_metric.html">Next →</a>
 </nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
 
 <script>
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowLeft' && True) location.href = 'slide_18_followup.html';
-    if (e.key === 'ArrowRight' && True) location.href = 'slide_b2_purity06.html';
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_18_impact_future.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_b2_f1_dual_metric.html';
   });
 
   // PanZoom.js progressive enhancement — fail-soft if CDN blocked

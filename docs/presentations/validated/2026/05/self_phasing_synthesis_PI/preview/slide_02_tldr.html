@@ -223,7 +223,7 @@ table.metric-table tr.row-yellow td { background: #FEF3C7; }
   background: #EDE9FE; padding: 4px 10px; border-radius: 4px; font-size: 11px;
   color: #6D28D9; display: inline-block; margin-bottom: 10px; font-weight: 600;
 }
-.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; }
+.note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; white-space: pre-line; }
 .note-section .tier3 {
   margin-top: 12px; padding: 8px 12px; border-radius: 4px;
   background: #F9FAFB; border: 1px dashed #9CA3AF;
@@ -263,6 +263,44 @@ details.collapsible summary:hover { color: #1D4ED8; }
 .kbd-hint kbd {
   background: white; color: #1F2937; padding: 1px 6px; border-radius: 3px; font-size: 10px; margin: 0 2px;
 }
+
+/* ─── Section-based color theming (2026-05-13) ─────────────────────── */
+.slide-canvas[data-section="S0"] h1.slide-title,
+.slide-canvas[data-section="S0"] h2.slide-title { color: #7C3AED; border-bottom-color: #7C3AED; }
+.slide-canvas[data-section="S1"] h1.slide-title,
+.slide-canvas[data-section="S1"] h2.slide-title { color: #DC2626; border-bottom-color: #DC2626; }
+.slide-canvas[data-section="S2"] h1.slide-title,
+.slide-canvas[data-section="S2"] h2.slide-title { color: #EA580C; border-bottom-color: #EA580C; }
+.slide-canvas[data-section="S3"] h1.slide-title,
+.slide-canvas[data-section="S3"] h2.slide-title { color: #CA8A04; border-bottom-color: #CA8A04; }
+.slide-canvas[data-section="S4"] h1.slide-title,
+.slide-canvas[data-section="S4"] h2.slide-title { color: #1E3A8A; border-bottom-color: #1E3A8A; }
+.slide-canvas[data-section="S5"] h1.slide-title,
+.slide-canvas[data-section="S5"] h2.slide-title { color: #16A34A; border-bottom-color: #16A34A; }
+.slide-canvas[data-section="S7"] h1.slide-title,
+.slide-canvas[data-section="S7"] h2.slide-title { color: #B45309; border-bottom-color: #B45309; }
+.slide-canvas[data-section="Q&A"] h1.slide-title,
+.slide-canvas[data-section="Q&A"] h2.slide-title { color: #6B7280; border-bottom-color: #6B7280; }
+
+/* Section meta badge in upper-right corner of canvas */
+.slide-canvas::before {
+  content: attr(data-section);
+  position: absolute; top: 8px; right: 28px;
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 12px; color: white; opacity: 0.9;
+}
+.slide-canvas[data-section="S0"]::before { background: #7C3AED; }
+.slide-canvas[data-section="S1"]::before { background: #DC2626; }
+.slide-canvas[data-section="S2"]::before { background: #EA580C; }
+.slide-canvas[data-section="S3"]::before { background: #CA8A04; }
+.slide-canvas[data-section="S4"]::before { background: #1E3A8A; }
+.slide-canvas[data-section="S5"]::before { background: #16A34A; }
+.slide-canvas[data-section="S7"]::before { background: #B45309; }
+.slide-canvas[data-section="Q&A"]::before { background: #6B7280; }
+.slide-canvas.cover-slide::before { display: none; }
+
+/* Speaker note teleprompter format — handle newlines */
+.note-section .speak-text { white-space: pre-line !important; }
 </style>
   <!-- PanZoom.js CDN — fail-soft：載入失敗時 fallback 到 CSS hover scale + new-tab full size -->
   <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
@@ -277,11 +315,23 @@ details.collapsible summary:hover { color: #1D4ED8; }
     <div><span class="label">N grep:</span><span class="value">—</span></div>
   </div>
 
-  <article class="slide-canvas" aria-label="Main slide canvas">
+  <article class="slide-canvas" data-section="S0" aria-label="Main slide canvas">
+    <!-- v1.6 2026-05-13 [DEPRECATED]: 02 整張從主線砍除 — Agenda 在 PI 1-on-1 25 min 單主題報告為 wayfinding overhead;
+         main statement banner 已移至 01 cover; 6 章節結構不再向 PI 預告 (避免劇透 + 認知負擔).
+         本檔保留作 legacy reference, 不在 index.html nav 中列入 (從 23 主 + 5 backup → 17 主 + 5 backup). -->
+    <div style="margin:0 0 12px;padding:10px 16px;background:#FEE2E2;border-left:4px solid #DC2626;border-radius:4px;font-size:13px;color:#7F1D1D;">
+      <strong>[DEPRECATED 2026-05-13 v1.6]</strong>　本張已從主線砍除（main statement 移至 01 cover；6 章節 Agenda 違反 PI 1-on-1 wayfinding 規則）。檔案保留作 legacy reference。
+    </div>
     <h1 class="slide-title ">報告流程</h1>
-    
-    
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin:20px 0;">
+
+    <!-- v1.1 2026-05-13: 直接主軸 main statement (取代 build_html.py 路徑) -->
+    <div style="margin:6px 0 14px;padding:14px 22px;background:linear-gradient(90deg,#1E3A8A 0%,#3B82F6 100%);color:white;border-radius:8px;box-shadow:0 4px 12px rgba(30,58,138,0.25);">
+      <p style="font-size:13px;font-weight:600;opacity:0.85;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.05em;">🎯 報告主軸</p>
+      <p style="font-size:22px;font-weight:700;margin:0;line-height:1.4;">我們發現並修好了 longphase 一個被忽略的 priority bug</p>
+      <p style="font-size:14px;font-weight:500;margin:6px 0 0;opacity:0.9;line-height:1.5;">完整邏輯鏈：read-level 因果定位 → V6 修補 → 跨指標 / 跨樣本驗證</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin:14px 0;">
       <!-- 階段 1: 問題發現 -->
       <div>
         <div style="background:#FEE2E2;color:#7F1D1D;padding:12px 18px;border-radius:8px;font-weight:700;font-size:22px;margin-bottom:20px;text-align:center;">問題發現</div>
@@ -331,15 +381,36 @@ details.collapsible summary:hover { color: #1D4ED8; }
       </p>
     </div>
 
-    <div style="margin-top:14px;padding:10px 16px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;color:#0C4A6E;font-size:16px;font-weight:600;text-align:center;">
-      18 章節 slide + 3 backup（Q&A）  ·  預計 20 分鐘 + 5 分鐘問答
+    <div style="margin-top:10px;padding:10px 16px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;color:#0C4A6E;font-size:15px;font-weight:600;text-align:center;">
+      18 主 slide + 5 backup（Q&A）  ·  預計 25 分鐘 + 5 分鐘問答
     </div>
   </article>
 
   <aside class="note-section" aria-label="Speaker notes for slide 02">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (60 sec / 中 ~240 字)</summary>
-      <div class="speak-text">今天報告分三個階段六個章節。問題發現階段：先看觀察起點的偏移現象，再解析兩層機制。修正過程階段：用 read-level 量化鐵證驗證，並設計三版漸進修補。驗證結果階段：跨指標跨樣本一致性驗證，最後給結論與後續方向。為何先解這問題：ISM 後續所有 read 聚合、NGroups、TP/FP 分類統計都依賴 longphase-to HP tag — 若 tag 不可信，下游分析標準全失準。longphase-to 作者較少思考 audit tag 行為（缺解答與標準），本報告先填這缺口，確認 tag 合理可信。預計 20 分鐘 + 5 分鐘問答。</div>
+      <div class="speak-text">[結構]
+今天報告分三個階段、六個章節。
+
+[階段 1]
+問題發現 — 先看觀察起點的偏移現象，再解析兩層機制。
+
+[階段 2]
+修正過程 — 用 read-level 量化鐵證驗證，並設計三版漸進修補。
+
+[階段 3]
+驗證結果 — 跨指標跨樣本一致性驗證，最後給結論與後續方向。
+
+[為何先解這問題]
+ISM 後續所有分析 — read 聚合、NGroups、TP/FP 分類，都依賴 longphase-to HP tag。
+若 tag 不可信，下游分析標準全失準。
+
+[本報告價值]
+longphase-to 作者較少思考 audit tag 行為（缺解答與標準）。
+本報告先填這缺口，確認 tag 合理可信。
+
+[時長]
+預計 20 分鐘 + 5 分鐘問答。</div>
       <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> (目錄 speaker note 精簡至 60 sec，純預告章節 + 動機說明，不透露具體結論)</div>
     </details>
   </aside>
@@ -352,7 +423,7 @@ details.collapsible summary:hover { color: #1D4ED8; }
 
 <nav class="nav-bottom" aria-label="Slide navigation">
   <a href="slide_01_cover.html">← Prev</a>
-  <span class="counter">Slide 02 (2/22)</span>
+  <span class="counter">Slide 02 (2/23)</span>
   <a href="slide_03_genome_173.html">Next →</a>
 </nav>
 
