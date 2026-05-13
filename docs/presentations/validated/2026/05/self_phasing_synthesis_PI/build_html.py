@@ -273,7 +273,7 @@ add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
       </div>
     </div>
     <div class="igv-focus-callout" style="font-size:13px;padding:5px 10px;margin-top:4px;"><span class="label">👁 看圖重點：</span>兩圖同 SP1 模式 — baseline 紅+綠 reads 集中左欄；V6/paired_T 紅+綠搬右欄 → 3/3 對齊。HP1=(HP1+HP1-1) 紅綠；HP2=(HP2+HP2-1) 藍橙</div>
-    <div class="conclusion-arrow green" style="font-size:15px;padding:8px 14px;">→ 三 SP 都在 chr19:12-17M → 對齊 slide 09 chr19 752 victims hotspot</div>
+    <div class="conclusion-arrow green" style="font-size:15px;padding:8px 14px;">→ 三 SP 都在 chr19:12-17M → 對齊 slide 08 chr19 752 victims hotspot</div>
     <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 精確 count 待 vote_dump 量化；圖檔待 V6 重擷取後替換</p>""",
     speaker="""[SP2/SP3 確認同模式]
 SP2 chr19:12,452,332 — baseline 109:1。
@@ -747,7 +747,7 @@ chr8 priority bug enrichment 0.34× avg — rank 21 冷區。
     tier3="chr19 1Mb hotspot 30M=215 + 27M=133 + 16M=41 / 4-path 驗證表 (個案 trace / Density 共變 / 修正後消失) / read_name case (1c50034a-f0f) / 全 24 chr enrichment ‰ / chrY 小 N 高 ‰ / Pass 2 reclassify 104K germline het")
 
 # ─── S4 修補設計 ───────────────────────────────────────────────────────────
-add(id="10_fix_design", num="10", section="S4 修補設計", rg2="1", ngrep="5 hash",
+add(id="10_fix_design", num="09", section="S4 修補設計", rg2="1", ngrep="5 hash",
     title="5 commits + getVote 四版 → V6 終態",
     en="5 commits fix + getVote 4-version: V6 production-grade",
     timing="150 sec / 中 ~420 字",
@@ -847,9 +847,9 @@ V6 = V3F germline-absent 保守 + V5 設計目標 + marker engineering 改善 = 
 caller F1 三版完全相同 (重用 V5 phased VCF)，下一頁說明。""",
     tier3="commit 各別 line count (8b8c1fd +69/-6 / 41ff147 +36/-25 / 380e8d2 +8/-4 / d0bcd8c +68/-9 / 938f0df +4/-4) / V6 patch HaplotagProcess.cpp:537-548 移除 13 行 / V5 Layer 1.5 設計動機 (補 V3F untagged) / cherry-pick from zhenyu")
 
-add(id="12_no_regression", num="12", section="S5 驗證", rg2="1", ngrep="20+",
-    title="23 指標 0 regression + 個案 3/3 對齊",
-    en="baseline → V6: SP 3/3 aligned + 20 metrics no regression + 6 improvements",
+add(id="12_no_regression", num="10", section="S5 驗證", rg2="1", ngrep="20+",
+    title="4 類同層驗證 + 個案 3/3 對齊",
+    en="baseline → V6: 4 same-layer + SP 3/3 aligned with paired",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
     <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">🎯 baseline → V6 同層驗證 — 4 類指標各自的驗證方法:</p>
@@ -902,8 +902,8 @@ add(id="12_no_regression", num="12", section="S5 驗證", rg2="1", ngrep="20+",
     </svg>
     <div class="conclusion-arrow green" style="font-size:12.5px;">→ 4 類同層驗證全綠 + 個案層 3/3 對齊 paired → V6 修補在 longphase-to 端鐵證確立</div>
     <div class="footer-glossary" style="font-size:9.5px;">
-      <div class="gloss-item">ⓘ scope: HCC1395 5kHz @ 0.93 purity; V6 同層 metric = V5 (重用 phased VCF)；caller F1 不變 (slide 14)</div>
-      <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance — paired GT +13.3 pp 為 PI 鐵證；ISM 下游影響量化留 slide 18 future direction</div>
+      <div class="gloss-item">ⓘ scope: HCC1395 5kHz @ 0.93 purity; V6 同層 metric = V5 (重用 phased VCF)；caller F1 不變 (slide 11)</div>
+      <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance — paired GT +13.3 pp 為 PI 鐵證；ISM 下游影響量化留 slide 13 future direction</div>
     </div>""",
     speaker="""[標題]
 S5 驗證 — baseline → V6 同層 4 類全綠。
@@ -934,10 +934,10 @@ V6 全翻 HP2 對齊 paired 3/3。
 
 [結論]
 4 類同層驗證全綠 + 個案層 3/3 對齊 paired → V6 修補在 longphase-to 端鐵證確立。
-ISM 下游影響量化是未來研究方向 — slide 18 會展開。""",
-    tier3="methylation 6 feat 列表 / Layer 1.5 zero-sum 細節 (留 slide 16) / V2b/V3F 中間版本 / HP_Ratio 詳解 / LOH Jaccard=1.0 細節")
+ISM 下游影響量化是未來研究方向 — slide 13 會展開。""",
+    tier3="methylation 6 feat 列表 / Layer 1.5 zero-sum 細節 (留 slide 12-13) / V2b/V3F 中間版本 / HP_Ratio 詳解 / LOH Jaccard=1.0 細節")
 
-add(id="14_caller_f1", num="14", section="S5 驗證 + ⚡ Cliffhanger", rg2="2", ngrep="15+",
+add(id="14_caller_f1", num="11", section="S5 驗證 + ⚡ Cliffhanger", rg2="2", ngrep="15+",
     title="Caller F1 四版完全相同 = 0.7166",
     en="Caller F1 identical across 4 versions; V6 no regression",
     timing="120 sec / 中 ~360 字",
@@ -986,7 +986,7 @@ add(id="14_caller_f1", num="14", section="S5 驗證 + ⚡ Cliffhanger", rg2="2",
       </tbody>
     </table>
     <div class="footer-glossary" style="font-size:9.5px;margin-top:4px;">
-      <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance (+13.3 pp paired GT @ 0.93)，不在 caller F1 〔next: slide 17 主結論 + slide 18 未來方向〕</div>
+      <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance (+13.3 pp paired GT @ 0.93)，不在 caller F1 〔next: slide 12 主結論 + slide 13 未來方向〕</div>
     </div>""",
     speaker="""[標題]
 Caller F1 vs SEQC2 — 四版完全相同。
@@ -1018,11 +1018,11 @@ FILTER 不動 → PASS set 不變 → TP/FP/FN 不變 → F1 數學保證 invari
 [結論]
 V6 真實價值不在 caller F1。
 真實價值在 read-level tag concordance — +13.3 pp paired GT @ 0.93。
-下一節 slide 17 是主結論，slide 18 是未來方向。""",
+下一節 — slide 12 主結論，slide 13 未來方向。""",
     tier3="PASS set / FILTER 機制 / purity 0.6 N50 微差 / V6 patch 不改 phasing 層 detail")
 
 # ─── S7 Errata + Follow-up ────────────────────────────────────────────────
-add(id="17_main_verdict", num="17", section="S7 結論", rg2="3 (main verdict)", ngrep="6 errata",
+add(id="17_main_verdict", num="12", section="S7 結論", rg2="3 (main verdict)", ngrep="6 errata",
     title="3 條主結論 + 6 條 errata patch",
     en="3 main verdicts + 6 errata patched",
     timing="120 sec / 中 ~400 字",
@@ -1099,7 +1099,7 @@ E6 — V6 binary patch 完成 + Phase D 4 樣本驗證閉環。
 下一頁 — 改正後影響 + 未來研究方向。""",
     tier3="errata commit chain / V6 patch 待 commit / Phase D 5 樣本 evaluation matrix / 各 errata 段落 cross-ref")
 
-add(id="18_impact_future", num="18", section="S7 結論", rg2="1", ngrep="—",
+add(id="18_impact_future", num="13", section="S7 結論", rg2="1", ngrep="—",
     title="改正後影響 + 未來研究 3 方向",
     en="Impact + future directions; V6 production candidate",
     timing="100 sec / 中 ~360 字",
@@ -1265,7 +1265,7 @@ add(id="b2_f1_dual_metric", num="B2", section="Q&A Backup", rg2="3", ngrep="—"
     en="F1 dual metric + Verdict tag empirical N/A",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
-    <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">❓ Q: longphase-to 論文 §4.3 寫 F1 改善 — 為何我們 slide 14 寫 F1 不變?</p>
+    <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">❓ Q: longphase-to 論文 §4.3 寫 F1 改善 — 為何我們 slide 11 寫 F1 不變?</p>
     <p style="font-size:10.5px;color:#166534;font-weight:600;margin:2px 0 6px;">→ 雙口徑差異, 不衝突: 不同 metric 定義 + 我們 pipeline 沒啟用 Verdict tagging</p>
     <table class="metric-table" style="font-size:11.5px;">
       <thead><tr><th>F1 評估口徑</th><th>somatic call set</th><th>本 pipeline?</th><th>結果</th></tr></thead>
@@ -1460,7 +1460,7 @@ def render_slide_page(s, prev_id, next_id, idx, total):
     <div><span class="label">N grep:</span><span class="value">{s['ngrep']}</span></div>
   </div>
 
-  <article class="slide-canvas{' cover-slide' if s.get('is_cover') else ''}" aria-label="Main slide canvas">
+  <article class="slide-canvas{' cover-slide' if s.get('is_cover') else ''}" data-section="{s.get('section','').split()[0] if s.get('section') else 'S0'}" aria-label="Main slide canvas">
     {'' if s.get('is_cover') else f'<h1 class="slide-title {title_class}">{s["title"]}</h1>'}
     {'' if (s.get('is_cover') or not s.get('en')) else f'<p class="en-subtitle">{s["en"]}</p>'}
     {s['canvas_html']}
