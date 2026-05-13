@@ -223,7 +223,7 @@ add(id="04a_sp1", num="04a", section="S1 觀察起點", rg2="1", ngrep="3",
     <div style="background:#FEF3C7;border:2px solid #CA8A04;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:12px;">
       <strong style="color:#7C2D12;">⚠ V6 在 SP1/2/3 設計取捨</strong>：本位點屬 <strong>germline-absent 區</strong>。V6 移除 Layer 1.5 後退回 <code>hp=33</code> ambiguous (不選邊)，<strong>失去翻 HP2 視覺對齊能力</strong>。但這是 V6 有意識的設計取捨 — V5 Layer 1.5 在全 germline-absent 區整體 4.19:1 偏 HP1（與 baseline 相同），是 priority bug feature 化；V6 還原 V3F 保守策略，全區從 4.19:1 偏移恢復成 hp=33。<strong>V6 的鐵證在 slide 08 全基因組量化 + slide 13 cross-sample，不在 SP1/2/3 IGV</strong>。<br><strong style="color:#16A34A;">★ 5/13 forensic 確認</strong>：V6 chr19 整體距離 paired = 0.065 ≈ V5 = 0.068（命名顛倒後 — 見 slide 09e），<strong>V6 不是退步</strong>；先前 v6_quantification 寫的 0.367 是統計腳本沒考慮跨 codebase 命名顛倒。
     </div>
-    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 hp=33 ambiguous (germline-absent trade-off); V5 翻 HP2 為個案鐵證但全區仍偏 HP1  ² 5versions 順序: baseline / paired_T / V3F / V5 / V6  ³ ratio 對齊 paired 不是 V6 正確性 metric (詳 slide 09e + erratum)</p>""",
+    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 hp=33 ambiguous (germline-absent trade-off); V5 翻 HP2 為個案鐵證但全區仍偏 HP1  ² 5versions 順序: baseline / paired_T / V3F / V5 / V6  ³ ratio 對齊 paired 不是 V6 正確性 metric (詳 slide 09e + erratum)  <strong style="color:#7C2D12;">⁴ IGV 適合展示 baseline 問題（極端失衡）；V6 改善看 read-level 數據鐵證 (slide 04c 條形圖 + 04d 5 reads BAM + 08 全基因組 34,855) — IGV 無 HP color coding 跨 panel 對照效果有限</strong></p>""",
     speaker="""[從統計到個案]
 全基因組 17.3:1 是平均值。
 用 IGV 6-BAM 並列篩，找到 chr19 三個近 100% 失衡位點。
@@ -280,7 +280,7 @@ add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
       <strong style="color:#7C2D12;">⚠ V6 SP1/2/3 caveat</strong>：SP2/3 同屬 germline-absent 區。V6 退回 hp=33（不翻）— 設計取捨換取全區 4.19:1 偏移消除。V6 鐵證在 slide 08 (全基因組 34,855 victims) + slide 13 (cross-sample 4/5)，<strong>不在 SP IGV</strong>。<br><strong style="color:#16A34A;">★ 5/13 forensic</strong>：V6 chr19 distance to paired ≈ V5（命名顛倒後 0.065 vs 0.068，slide 09e）— V6 不是退步。
     </div>
     <div class="conclusion-arrow green" style="font-size:15px;padding:8px 14px;">→ 三 SP 都在 chr19:12-17M → 對齊 slide 08 chr19 752 victims hotspot</div>
-    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ SP2/3 baseline 109:1 / 108:0 → V5 翻 HP2 (個案鐵證) / V6 hp=33 (設計取捨)；5versions 順序: baseline / paired_T / V3F / V5 / V6</p>""",
+    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ SP2/3 baseline 109:1 / 108:0 → V5 翻 HP2 (個案鐵證) / V6 hp=33 (設計取捨)；5versions 順序: baseline / paired_T / V3F / V5 / V6  <strong style="color:#7C2D12;">² IGV 視覺鐵證在 baseline 極端失衡; V6 改善鐵證在 read-level 數據 (slide 04c 條形圖 + 04d 5 reads + 09d 4 鐵證匯總)</strong></p>""",
     speaker="""[SP2/SP3 確認同模式]
 SP2 chr19:12,452,332 — baseline 109:1。
 SP3 chr19:12,467,180 — baseline 108:0。
@@ -329,19 +329,57 @@ add(id="04c_priority_bug_fix_site", num="04c", section="S1 觀察起點", rg2="1
         <p style="font-size:9.5px;color:#6B7280;margin:2px 0;text-align:center;">panel 順序: baseline / V2b / V3F / V5 / V6 / paired tumor / paired normal</p>
       </div>
     </div>
-    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">📊 跨 6 chr19 候選位點 V6 修對 summary (HP:i:11 reduction):</p>
-    <table class="metric-table" style="font-size:10px;">
-      <thead><tr><th>chr19 位點</th><th>baseline HP:i:11</th><th>V6 HP:i:11</th><th>修對率</th><th>paired_T ground truth</th></tr></thead>
-      <tbody>
-        <tr class="row-green"><td><strong>27,376,222 ★</strong> (主鐵證)</td><td class="num">106</td><td class="num">36</td><td class="num">−66%</td><td>HP:Z:1-1=33 + 2-1=28 雙向</td></tr>
-        <tr class="row-green"><td><strong>27,373,006 ★</strong></td><td class="num">77</td><td class="num">29</td><td class="num">−62%</td><td>HP:Z:2-1=39 主導 (HP2)</td></tr>
-        <tr><td>30,138,000</td><td class="num">70</td><td class="num">45</td><td class="num">−36%</td><td>HP:Z:1-1=24 + Z:2=59</td></tr>
-        <tr><td>30,146,000</td><td class="num">83</td><td class="num">53</td><td class="num">−36%</td><td>HP:Z:1-1=49 + Z:2=57 雙向</td></tr>
-        <tr><td>30,132,000</td><td class="num">36</td><td class="num">28</td><td class="num">−22%</td><td>HP:Z:1=51 + Z:2=50 (混合)</td></tr>
-        <tr><td>38,400,000 (window)</td><td class="num">274</td><td class="num">234</td><td class="num">−15%</td><td>HP:Z:1=228 + Z:1-1=159 HP1 主導</td></tr>
-      </tbody>
-    </table>
-    <p style="font-size:10px;color:#16A34A;margin:4px 0 0;font-weight:600;">→ 6/6 候選位點 V6 都減少 HP:i:11 (priority bug 過度集中) ; 2 位點 V6 -60%+ 強修對 + paired_T 雙向 sub-clone 對齊</p>
+    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">📊 跨 6 chr19 候選位點 baseline → V6 HP:i:11 reduction 視覺化:</p>
+    <svg viewBox="0 0 720 165" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
+      <text x="360" y="14" font-size="10" fill="#374151" text-anchor="middle" font-weight="600">baseline (紅) vs V6 (綠) HP:i:11 count - 每位點橫條對照</text>
+      <line x1="135" y1="20" x2="660" y2="20" stroke="#9CA3AF" stroke-width="0.5"/>
+      <text x="135" y="20" font-size="7.5" fill="#9CA3AF" text-anchor="middle">0</text>
+      <text x="397.5" y="20" font-size="7.5" fill="#9CA3AF" text-anchor="middle">150</text>
+      <text x="660" y="20" font-size="7.5" fill="#9CA3AF" text-anchor="middle">300</text>
+      <g transform="translate(0,28)">
+        <text x="130" y="6" font-size="9" fill="#374151" text-anchor="end" font-weight="600">27,376,222</text>
+        <rect x="135" y="0" width="186" height="6" fill="#DC2626"/>
+        <text x="325" y="6" font-size="8" fill="#7F1D1D" font-weight="700">106</text>
+        <rect x="135" y="8" width="63" height="6" fill="#16A34A"/>
+        <text x="202" y="13" font-size="8" fill="#166534" font-weight="700">36 (-66%) ★</text>
+      </g>
+      <g transform="translate(0,48)">
+        <text x="130" y="6" font-size="9" fill="#374151" text-anchor="end" font-weight="600">27,373,006</text>
+        <rect x="135" y="0" width="135" height="6" fill="#DC2626"/>
+        <text x="274" y="6" font-size="8" fill="#7F1D1D" font-weight="700">77</text>
+        <rect x="135" y="8" width="51" height="6" fill="#16A34A"/>
+        <text x="190" y="13" font-size="8" fill="#166534" font-weight="700">29 (-62%) ★</text>
+      </g>
+      <g transform="translate(0,68)">
+        <text x="130" y="6" font-size="9" fill="#374151" text-anchor="end" font-weight="600">30,138,000</text>
+        <rect x="135" y="0" width="122" height="6" fill="#DC2626"/>
+        <text x="261" y="6" font-size="8" fill="#7F1D1D" font-weight="700">70</text>
+        <rect x="135" y="8" width="79" height="6" fill="#16A34A"/>
+        <text x="218" y="13" font-size="8" fill="#166534" font-weight="700">45 (-36%)</text>
+      </g>
+      <g transform="translate(0,88)">
+        <text x="130" y="6" font-size="9" fill="#374151" text-anchor="end" font-weight="600">30,146,000</text>
+        <rect x="135" y="0" width="145" height="6" fill="#DC2626"/>
+        <text x="284" y="6" font-size="8" fill="#7F1D1D" font-weight="700">83</text>
+        <rect x="135" y="8" width="93" height="6" fill="#16A34A"/>
+        <text x="232" y="13" font-size="8" fill="#166534" font-weight="700">53 (-36%)</text>
+      </g>
+      <g transform="translate(0,108)">
+        <text x="130" y="6" font-size="9" fill="#374151" text-anchor="end" font-weight="600">30,132,000</text>
+        <rect x="135" y="0" width="63" height="6" fill="#DC2626"/>
+        <text x="201" y="6" font-size="8" fill="#7F1D1D" font-weight="700">36</text>
+        <rect x="135" y="8" width="49" height="6" fill="#16A34A"/>
+        <text x="188" y="13" font-size="8" fill="#166534" font-weight="700">28 (-22%)</text>
+      </g>
+      <g transform="translate(0,128)">
+        <text x="130" y="6" font-size="9" fill="#374151" text-anchor="end" font-weight="600">38,400,000 (window)</text>
+        <rect x="135" y="0" width="479" height="6" fill="#DC2626"/>
+        <text x="618" y="6" font-size="8" fill="#7F1D1D" font-weight="700">274</text>
+        <rect x="135" y="8" width="409" height="6" fill="#16A34A"/>
+        <text x="548" y="13" font-size="8" fill="#166534" font-weight="700">234 (-15%)</text>
+      </g>
+      <text x="360" y="160" font-size="10" fill="#16A34A" text-anchor="middle" font-weight="700">→ 6/6 位點 V6 都減少 HP:i:11 (priority bug 個案); 2 位點 V6 -60%+ 強修對</text>
+    </svg>
     <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ 全基因組 17.3:1 偏移在位點層具體化: baseline priority bug 過度集中 → V6 修對拆分 + 對齊 paired_T 雙向 sub-clone 共現</div>
     <div class="footer-glossary" style="font-size:9.5px;">
       <div class="gloss-item">ⓘ HP:i: = longphase-to (TO mode) / HP:Z: = longphase-s (paired mode) — 跨 codebase 命名不同</div>
@@ -449,6 +487,7 @@ add(id="04d_5reads_vote_trace_igv", num="04d", section="S1 觀察起點", rg2="5
       <div class="gloss-item">ⓘ IGV panel 順序: baseline / V2b / V3F / V5 / V6 / paired tumor / paired normal — 點圖放大</div>
       <div class="gloss-item">ⓘ ✅ = baseline HP:i:11 priority bug → V6 翻 HP:i:21 修對；⚠ = baseline HP:i:2 → V5 Layer 1.5 改成 HP:i:21 (V6 繼承)</div>
       <div class="gloss-item">ⓘ 752 chr19 victims 中代表 5 reads — 從 vote_dump 5/13 forensic samtools 跑 4 BAM 實證</div>
+      <div class="gloss-item" style="background:#FEF3C7;border-color:#CA8A04;color:#7C2D12;font-weight:600;">⚠ IGV 縮圖適合看 read 配置變化 + multi-panel 對照; HP tag color coding 不直觀 (colorBy HP 試後仍不明顯) — V6 改善鐵證主在 BAM 數據表 + 條形圖 (slide 04c) + 數據匯總 (slide 09d)</div>
     </div>""",
     speaker="""[標題]
 5 vote_dump reads — read-level 因果 BAM + IGV 鐵證。
