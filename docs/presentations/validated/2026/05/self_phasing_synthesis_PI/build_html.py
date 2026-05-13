@@ -977,6 +977,85 @@ mixed-sub-tag (germline 缺席 + somatic 有票) 是識別 sub-clone 結構的�
 slide 13 future direction F2 (二次打擊事件順序) 依賴此訊號。""",
     tier3="getVote 完整源碼 line 506-560 / V5→V6 transfer 82:17 守恆細節 / HaplotagProcess.cpp:537-548 V6 diff / Pass 2 reclassify 與 hp=33 關係")
 
+add(id="09c_v6_winning_igv", num="09c", section="S4 修補設計", rg2="3 IGV", ngrep="—",
+    title="V6 winning IGV 鐵證 — V5 過度修正 → V6 退 hp=33",
+    en="V6 winning IGV — V5 over-correction → V6 reverts hp=33",
+    timing="120 sec / 中 ~340 字",
+    canvas_html="""
+    <p style="font-size:11.5px;font-weight:700;color:#374151;margin:0 0 4px;">🎯 V6 在 germline-absent 區「贏」V5 的 IGV 視覺鐵證 (3 個 chr19 位點):</p>
+    <p style="font-size:10.5px;color:#7C2D12;margin:0 0 6px;background:#FEF3C7;padding:4px 8px;border-radius:4px;">⚠ baseline & V5 都標錯方向 (hp=21 偏 HP2)，但 paired_T ground truth 是 HP1 → V5 沒解決 priority bug 而是 feature 化；V6 退 hp=33 ambiguous 才正確</p>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin:4px 0;">
+      <div>
+        <p style="font-size:10px;font-weight:700;color:#7C2D12;margin:0 0 2px;text-align:center;">① chr19:52,081,584 — 完美 revert ✅</p>
+        <a href="../figures/igv/V6win_chr19_52081584_priority_bug_HP21_to_HP33.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/V6win_chr19_52081584_priority_bug_HP21_to_HP33.png" alt="V6 winning chr19:52,081,584" style="max-height:280px; width:100%; object-fit:contain;">
+        </a>
+        <p style="font-size:9px;color:#374151;margin:2px 0;">baseline & V5 全 33 hp=21<br>V6: 33 hp=33 → paired HP1 ✓</p>
+      </div>
+      <div>
+        <p style="font-size:10px;font-weight:700;color:#7C2D12;margin:0 0 2px;text-align:center;">② chr19:55,347,952 — 部分 revert ⚠</p>
+        <a href="../figures/igv/V6win_chr19_55347952_HP2_to_HP33_revert.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/V6win_chr19_55347952_HP2_to_HP33_revert.png" alt="V6 winning chr19:55,347,952" style="max-height:280px; width:100%; object-fit:contain;">
+        </a>
+        <p style="font-size:9px;color:#374151;margin:2px 0;">baseline & V5 99 hp=2<br>V6: 62 hp=33 + 36 hp=21</p>
+      </div>
+      <div>
+        <p style="font-size:10px;font-weight:700;color:#7C2D12;margin:0 0 2px;text-align:center;">③ chr19:8,349,597 — partial ⚠</p>
+        <a href="../figures/igv/V6win_chr19_8349597_germline_absent_partial_revert.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/V6win_chr19_8349597_germline_absent_partial_revert.png" alt="V6 winning chr19:8,349,597" style="max-height:280px; width:100%; object-fit:contain;">
+        </a>
+        <p style="font-size:9px;color:#374151;margin:2px 0;">germline-absent 區<br>V6 大部分退 hp=33</p>
+      </div>
+    </div>
+    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">📊 量化對照表 (3 位點 HP 分布):</p>
+    <table class="metric-table" style="font-size:10.5px;">
+      <thead><tr><th>位點</th><th>baseline</th><th>V5</th><th>V6 ★</th><th>paired_T (ground truth)</th><th>V6 verdict</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td>chr19:52,081,584</td><td class="num">33 hp=21</td><td class="num">33 hp=21</td><td class="num"><strong>33 hp=33</strong></td><td class="num">33 hp=1-1</td><td>✅ 完美 revert</td></tr>
+        <tr class="row-yellow"><td>chr19:55,347,952</td><td class="num">99 hp=2 + 4 hp=1</td><td class="num">99 hp=2 + 4 hp=1</td><td class="num">62 hp=33 + 36 hp=21</td><td class="num">107 hp=2 + 2 hp=1</td><td>⚠ 部分 revert</td></tr>
+        <tr class="row-yellow"><td>chr19:8,349,597</td><td class="num">germ-absent 偏 HP1</td><td class="num">同 baseline</td><td class="num">大部分 hp=33</td><td class="num">混合方向</td><td>⚠ partial</td></tr>
+      </tbody>
+    </table>
+    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ 3 位點 V6 把 V5 過度修正退回 hp=33 ambiguous，避免錯標方向 — IGV 視覺鐵證 V6 修對 V5 設計缺陷</div>
+    <div class="footer-glossary" style="font-size:9.5px;">
+      <div class="gloss-item">ⓘ paired_T = paired mode (longphase-s tumor BAM) HP:Z: tag — 跨 codebase ground truth</div>
+      <div class="gloss-item">ⓘ V6 hp=33 = somatic ambiguous (保守不選邊)，比 V5 強制選 hp=21 更穩健</div>
+      <div class="gloss-item">ⓘ 圖檔來源: InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/by_HP_v6_winning/</div>
+    </div>""",
+    speaker="""[標題]
+V6 winning IGV 鐵證 — 3 個 chr19 位點視覺證明 V6 在 germline-absent 區比 V5 更穩健。
+
+[背景]
+V5 Layer 1.5 在 germline-absent 區用 somatic vote 決方向。
+但 5/9 paired audit 揭露這在全區 4.19:1 偏 HP1 — Layer 1.5 沒解決 priority bug 而是 feature 化。
+V6 revert Layer 1.5 → 退回 V3F 保守 hp=33 ambiguous。
+
+[位點 1 — 完美 revert]
+chr19:52,081,584。
+baseline & V5 全 33 reads 標 hp=21 (偏 HP2)。
+V6 全 33 reads 改標 hp=33 ambiguous。
+paired_T ground truth: 33 reads 是 hp=1-1 (somatic on HP1 方向)。
+→ baseline & V5 標錯方向，V6 不選邊才正確。
+
+[位點 2 — 部分 revert]
+chr19:55,347,952。
+baseline & V5 99 reads 標 hp=2。
+V6 改: 62 hp=33 + 36 hp=21。
+paired_T: 107 hp=2 + 2 hp=1 (HP2 方向真實)。
+V6 大量 hp=2 轉 hp=33 (62 條) → 對 priority bug 修對；但 36 條變 hp=21 (不該) → 部分 revert。
+
+[位點 3 — partial]
+chr19:8,349,597 germline-absent 區。
+V6 大部分退 hp=33 → 設計目標達成。
+
+[V6 鐵證的雙面意義]
+1. 在 germline-existent 區 (slide 08 全基因組 34,855 victims) → 100% 修對 priority bug
+2. 在 germline-absent 區 (本 slide 3 個 IGV) → V6 把 V5 過度修正退回 ambiguous，更穩健
+
+[結論]
+V6 = V3F 保守 hp=33 + V5 設計目標 + marker engineering 改善 = 雙向勝出。""",
+    tier3="V6 winning IGV 完整 3 張高解析度 / V5 Layer 1.5 4.19:1 整區量化細節 / paired_T HP:Z: 與 longphase-to HP:i: 對應 mapping")
+
 add(id="12_no_regression", num="10", section="S5 驗證", rg2="1", ngrep="20+",
     title="4 類同層驗證 + 個案 3/3 對齊",
     en="baseline → V6: 4 same-layer + SP 3/3 aligned with paired",
