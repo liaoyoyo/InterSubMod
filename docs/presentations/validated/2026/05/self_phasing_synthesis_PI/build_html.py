@@ -1164,18 +1164,18 @@ add(id="09d_v6_evidence_summary", num="09d", section="S4 修補設計", rg2="4",
         <tr class="row-green"><td>4</td><td><strong>hp=33 訊號還原 +944% vs V5</strong> (marker engineering)</td><td>chr19:52,081,584 完美 revert / 55,347,952 部分 / 8,349,597 partial</td><td>V6 winning IGV 3 張 5versions (baseline / paired / V3F / V5 / V6 對照)</td><td>09c</td></tr>
       </tbody>
     </table>
-    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">📋 鐵證 2 — vote_dump 5 個案 trace 表 (chr19 752 victims 中前 5 條):</p>
+    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">📋 鐵證 2 — 5 vote_dump reads BAM 實證表 (5/13 forensic samtools 跑 baseline/V3F/V5/V6 BAM):</p>
     <table class="metric-table" style="font-size:10.5px;">
-      <thead><tr><th>read_name (前 12)</th><th>chr19:pos</th><th>germ HP1/HP2</th><th>som HP1_1/HP2_1</th><th>germ_maj</th><th>som_maj</th><th>baseline → V3F → V5/V6</th></tr></thead>
+      <thead><tr><th>read_name</th><th>chr19:pos</th><th>baseline</th><th>V3F</th><th>V5</th><th>V6</th><th>修對 verdict</th></tr></thead>
       <tbody>
-        <tr><td>1c50034a-f0f</td><td class="num">201,417</td><td class="num">1 / 3</td><td class="num">1 / 0</td><td>HP2</td><td>HP1</td><td><strong>11 → 21 → 21</strong></td></tr>
-        <tr><td>afb8e89b-893</td><td class="num">585,252</td><td class="num">1 / 2</td><td class="num">1 / 0</td><td>HP2</td><td>HP1</td><td><strong>11 → 21 → 21</strong></td></tr>
-        <tr><td>35c7e166-ec3</td><td class="num">824,360</td><td class="num">0 / 1</td><td class="num">1 / 0</td><td>HP2</td><td>HP1</td><td><strong>11 → 21 → 21</strong></td></tr>
-        <tr><td>096ab9a7-030</td><td class="num">1,574,442</td><td class="num">0 / 3</td><td class="num">1 / 0</td><td>HP2</td><td>HP1</td><td><strong>11 → 21 → 21</strong></td></tr>
-        <tr><td>ccc8185d-f9b</td><td class="num">2,558,240</td><td class="num">0 / 1</td><td class="num">2 / 0</td><td>HP2</td><td>HP1</td><td><strong>11 → 21 → 21</strong></td></tr>
+        <tr class="row-green"><td>1c50034a-f0f</td><td class="num">201,417</td><td class="num red">HP:i:11</td><td class="num green">HP:i:21</td><td class="num green">HP:i:21</td><td class="num green">HP:i:21</td><td>✅ priority bug 修對</td></tr>
+        <tr class="row-green"><td>afb8e89b-893</td><td class="num">585,252</td><td class="num red">HP:i:11</td><td class="num green">HP:i:21</td><td class="num green">HP:i:21</td><td class="num green">HP:i:21</td><td>✅ priority bug 修對</td></tr>
+        <tr class="row-yellow"><td>35c7e166-ec3</td><td class="num">824,360</td><td class="num">HP:i:2</td><td class="num">HP:i:2</td><td class="num">HP:i:21</td><td class="num">HP:i:21</td><td>⚠ V5 Layer 1.5 改方向</td></tr>
+        <tr class="row-green"><td>096ab9a7-030</td><td class="num">1,574,442</td><td class="num red">HP:i:11</td><td class="num green">HP:i:21</td><td class="num green">HP:i:21</td><td class="num green">HP:i:21</td><td>✅ priority bug 修對</td></tr>
+        <tr class="row-yellow"><td>ccc8185d-f9b</td><td class="num">2,558,240</td><td class="num">HP:i:2</td><td class="num">HP:i:2</td><td class="num">HP:i:21</td><td class="num">HP:i:21</td><td>⚠ V5 Layer 1.5 改方向</td></tr>
       </tbody>
     </table>
-    <p style="font-size:10px;color:#16A34A;margin:4px 0 0;font-weight:600;">→ 全 752 條 chr19 + 全基因組 34,855 條皆 baseline=11 → V6=21 單向修正 (germline_majority 反向, 0 反向例)</p>
+    <p style="font-size:10px;color:#16A34A;margin:4px 0 0;font-weight:600;">→ <strong>3/5 reads baseline=11 → V6=21 完美 priority bug 修對</strong>；2/5 reads baseline=2 → V5/V6=21 (V5 Layer 1.5 改方向, V6 繼承) — read-level 因果鏈 BAM 實證</p>
     <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ 4 維度鐵證皆有「位點 + 圖片/數據」實證: per-read 對齊 + read-level 因果 + cross-sample + hp=33 還原 — 4 角度互相獨立 corroborate V6 正確性</div>
     <div class="footer-glossary" style="font-size:9.5px;">
       <div class="gloss-item">ⓘ vote_dump 個案 trace 來源: InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/vote_dump_*_chr19.tsv.gz</div>
