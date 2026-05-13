@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 11 — Caller F1 四版完全相同 = 0.7166</title>
+  <title>Slide 08 — read-level 鐵證: 34,855 V6 100% 修正</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -306,112 +306,116 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
 </head>
 <body>
-<main class="slide-page" role="main" aria-label="Slide 11 content">
+<main class="slide-page" role="main" aria-label="Slide 08 content">
   <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
-    <div><span class="label">Slide:</span><span class="value">11 / 22</span></div>
-    <div><span class="label">Section:</span><span class="value">S5 驗證 + ⚡ Cliffhanger</span></div>
+    <div><span class="label">Slide:</span><span class="value">08 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S3 量化鐵證</span></div>
     <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
-    <div><span class="label">R-G2 術語:</span><span class="value">2</span></div>
-    <div><span class="label">N grep:</span><span class="value">15+</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">—</span></div>
+    <div><span class="label">N grep:</span><span class="value">14</span></div>
   </div>
 
-  <article class="slide-canvas" data-section="S5" aria-label="Main slide canvas">
-    <h1 class="slide-title ">Caller F1 四版完全相同 = 0.7166</h1>
-    <p class="en-subtitle">Caller F1 identical across 4 versions; V6 no regression</p>
+  <article class="slide-canvas" data-section="S3" aria-label="Main slide canvas">
+    <h1 class="slide-title ">baseline 34,855 read-level victims — V3F 100% 修對（V5 重用 / V6 spot check 抽樣 ~44% 翻方向 / ~29% 仍 hp=11，partial 中）</h1>
+    <p class="en-subtitle">baseline 34,855 read-level victims: V3F/V5 forensic 100% fix; V6 spot check partial (~44% flipped, ~29% still hp=11)</p>
+    <div style="background:#FEF3C7;border:1px solid #CA8A04;border-radius:5px;padding:4px 10px;margin:4px 0;font-size:10.5px;color:#78350F;">
+      <strong>⚠ V6 attribution caveat (5/13 erratum E5 待加)</strong>：V6 spot check 揭露 logic 推論失效（V6 並非 100% 繼承 V3F），未重跑全集；以 V3F/V5 100% audit 為 anchor 鐵證。
+    </div>
     
-    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">📊 兩 purity 對照 — 四版 F1 都相同, 但 0.93 與 0.6 不同 (caller 性質):</p>
-    <table class="metric-table" style="font-size:10.5px;">
-      <thead><tr><th>樣本</th><th>四版本</th><th>TP</th><th>FP</th><th>FN</th><th>F1</th><th>Δ vs 純</th></tr></thead>
-      <tbody>
-        <tr class="row-green"><td><strong>HCC1395 5kHz @ 0.93 (純)</strong></td><td class="num">baseline/V3F/V5/V6</td><td class="num">28,509</td><td class="num">11,606</td><td class="num">10,938</td><td class="num"><strong>0.7166</strong></td><td>—</td></tr>
-        <tr class="row-yellow"><td><strong>HCC1395 t30_n20 @ 0.6 (低)</strong></td><td class="num">baseline/V3F/V5/V6</td><td class="num">24,190</td><td class="num">13,487</td><td class="num">15,257</td><td class="num"><strong>0.6273</strong></td><td class="num">−0.0893</td></tr>
-      </tbody>
-    </table>
-    <p style="font-size:10.5px;color:#16A34A;margin:3px 0 0;font-weight:600;">→ 兩 purity 都驗證: 四版 F1 完全相同 (0 差異); 0.93→0.6 ΔF1=−0.0893 為 ClairS-TO 低 purity 性質，與 self-phasing 修補無關</p>
-    <p style="font-size:11px;font-weight:700;color:#374151;margin:8px 0 4px;">🔬 為何 F1 invariant — 因果機制圖示:</p>
-    <svg viewBox="0 0 720 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
-      <defs><marker id="arr14" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#9CA3AF"/></marker></defs>
-      <rect x="20"  y="35" width="135" height="60" rx="6" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
-      <text x="87"  y="53" font-size="10" fill="#1E3A8A" text-anchor="middle" font-weight="700">ClairS-TO caller</text>
-      <text x="87"  y="68" font-size="9"  fill="#374151" text-anchor="middle">snv.vcf</text>
-      <text x="87"  y="83" font-size="9" fill="#7F1D1D" text-anchor="middle" font-weight="700">FILTER=PASS</text>
-      <text x="87"  y="93" font-size="8" fill="#6B7280" text-anchor="middle">(47,798 一次性決定)</text>
-      <path d="M155,65 L200,65" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr14)"/>
-      <rect x="205" y="20" width="210" height="90" rx="6" fill="#F0FDF4" stroke="#16A34A" stroke-width="1.5"/>
-      <text x="310" y="38" font-size="10" fill="#166534" text-anchor="middle" font-weight="700">longphase-to (V3F/V5/V6)</text>
-      <text x="310" y="55" font-size="9" fill="#166534" text-anchor="middle">✓ 改 GT / PS / GT2 / GT3 / PON tag</text>
-      <text x="310" y="69" font-size="9" fill="#166534" text-anchor="middle">✓ 改 BAM HP:i tag</text>
-      <text x="310" y="86" font-size="9.5" fill="#DC2626" text-anchor="middle" font-weight="700">✗ 不改 FILTER 欄位</text>
-      <text x="310" y="100" font-size="8" fill="#6B7280" text-anchor="middle" font-style="italic">三版 PASS set 完全相同</text>
-      <path d="M415,65 L460,65" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr14)"/>
-      <rect x="465" y="35" width="150" height="60" rx="6" fill="#FEF3C7" stroke="#CA8A04" stroke-width="1.5"/>
-      <text x="540" y="53" font-size="10" fill="#7C2D12" text-anchor="middle" font-weight="700">bcftools isec</text>
-      <text x="540" y="69" font-size="9"  fill="#374151" text-anchor="middle">取 FILTER=PASS</text>
-      <text x="540" y="83" font-size="9"  fill="#374151" text-anchor="middle">vs SEQC2 truth</text>
-      <path d="M615,65 L660,65" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arr14)"/>
-      <rect x="665" y="35" width="55" height="60" rx="6" fill="#DCFCE7" stroke="#16A34A" stroke-width="2"/>
-      <text x="692" y="53" font-size="10" fill="#166534" text-anchor="middle" font-weight="700">F1</text>
-      <text x="692" y="70" font-size="11" fill="#166534" text-anchor="middle" font-weight="700">0.7166</text>
-      <text x="692" y="85" font-size="8.5" fill="#166534" text-anchor="middle" font-weight="600">四版相同</text>
-      <text x="370" y="128" font-size="9.5" fill="#16A34A" text-anchor="middle" font-weight="600">→ FILTER 不動 → PASS set 不變 → TP/FP/FN 不變 → F1 數學保證 invariant</text>
-    </svg>
-    <table class="metric-table" style="font-size:10px;margin-top:6px;">
-      <thead><tr><th>F1 評估口徑</th><th>結果</th><th>對 V3F/V5/V6 修補?</th></tr></thead>
-      <tbody>
-        <tr class="row-green"><td><strong>caller-level F1</strong> (bcftools isec, 業界標準)</td><td>四版 0.7166 / 0.6273 完全相同</td><td>invariant ✓ (FILTER 不動)</td></tr>
-        <tr class="row-green"><td>論文 §4.3 V_H/V_L refined F1</td><td>Verdict_Somatic INFO tag 三版實證 0 records (本 pipeline N/A)</td><td>invariant ✓ (Step 4 不改)</td></tr>
-      </tbody>
-    </table>
-    <div style="display:flex;align-items:stretch;gap:6px;margin-top:5px;">
-      <div style="flex:1;background:#F0FDF4;border:1.5px solid #16A34A;border-radius:5px;padding:5px 9px;font-size:10px;color:#166534;">
-        <strong style="font-size:10.5px;">⚙ 5 行 mechanism flow（caller-level F1 = 數學保證 invariant）：</strong><br>
-        <code style="font-size:9.5px;">1. ClairS-TO snv.vcf → FILTER=PASS 一次性決定（47,798 條）</code><br>
-        <code style="font-size:9.5px;">2. longphase phase → 改 GT/PS/GT2/GT3/PON tag（<strong>不改 FILTER</strong>）</code><br>
-        <code style="font-size:9.5px;">3. longphase haplotag → 改 BAM HP:i tag（不碰 VCF）</code><br>
-        <code style="font-size:9.5px;">4. bcftools isec → 取 FILTER=PASS vs SEQC2 truth → TP/FP/FN 不變</code><br>
-        <code style="font-size:9.5px;">5. <strong>F1 數學保證 invariant</strong>（四版完全相同）</code>
+    <div class="grid-2col" style="grid-template-columns: 6fr 6fr; gap:12px;">
+      <div>
+        <p style="font-size:11.5px;font-weight:700;color:#374151;margin:0 0 4px;">📈 chr19 pilot → 全基因組 generalize:</p>
+        <table class="metric-table" style="font-size:10.5px;">
+          <thead><tr><th></th><th>chr19 pilot</th><th>Genome F1</th><th>倍數</th></tr></thead>
+          <tbody>
+            <tr><td>Tagged reads/ver</td><td class="num">~330K</td><td class="num">18,895,432</td><td class="num">57×</td></tr>
+            <tr class="row-yellow"><td><strong>Priority bug victims</strong></td><td class="num">752</td><td class="num"><strong>34,855</strong></td><td class="num"><strong>46.4×</strong></td></tr>
+            <tr class="row-green"><td><strong>baseline → V3F/V5 修正率</strong></td><td class="num">100%<br>(752/752)</td><td class="num"><strong>100%</strong><br>(34,855/34,855)</td><td>一致 ✅</td></tr>
+            <tr><td>V3F/V5 方向</td><td colspan="2" class="num">全 hp=11 ❌ → 全 hp=21 ✅</td><td>單向</td></tr>
+            <tr><td>反向 (V3F/V5 → 11)</td><td colspan="2" class="num">0 條</td><td>零 noise</td></tr>
+            <tr style="background:#FEF3C7;"><td><strong>V6 spot check (subset)</strong></td><td class="num" colspan="2">~44% 翻 hp=21 ✅ / ~29% 仍 hp=11 ❌ / 其餘 hp=33</td><td>partial</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:10px;color:#16A34A;margin:4px 0 0;font-weight:600;">→ baseline 17.3:1 偏移 = read-level 34,855 條獨立 victims (V3F/V5 100% 修對 anchor；V6 partial)</p>
+      </div>
+      <div>
+        <p style="font-size:11.5px;font-weight:700;color:#374151;margin:0 0 4px;">📊 per-chr victims (top-10 + chr19/chr8):</p>
+        <svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
+          <line x1="48" y1="148" x2="335" y2="148" stroke="#9CA3AF" stroke-width="0.8"/>
+          <line x1="48" y1="14"  x2="48"  y2="148" stroke="#9CA3AF" stroke-width="0.8"/>
+          <text x="44" y="17" font-size="8" fill="#6B7280" text-anchor="end">3,508</text>
+          <text x="44" y="83" font-size="8" fill="#6B7280" text-anchor="end">1,700</text>
+          <text x="44" y="151" font-size="8" fill="#6B7280" text-anchor="end">0</text>
+          <rect x="55"  y="14"  width="20" height="134" fill="#1E3A8A"/>
+          <text x="65" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr7</text>
+          <text x="65" y="12"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">3508</text>
+          <rect x="80"  y="42"  width="20" height="106" fill="#1E3A8A"/>
+          <text x="90" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr2</text>
+          <text x="90" y="40"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2792</text>
+          <rect x="105" y="48"  width="20" height="100" fill="#1E3A8A"/>
+          <text x="115" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr1</text>
+          <text x="115" y="46"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2674</text>
+          <rect x="130" y="51"  width="20" height="97"  fill="#3B82F6"/>
+          <text x="140" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr16</text>
+          <text x="140" y="49"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2584</text>
+          <rect x="155" y="68"  width="20" height="80"  fill="#3B82F6"/>
+          <text x="165" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr20</text>
+          <text x="165" y="66"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2101</text>
+          <rect x="180" y="79"  width="20" height="69"  fill="#60A5FA"/>
+          <text x="190" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr3</text>
+          <rect x="205" y="88"  width="20" height="60"  fill="#60A5FA"/>
+          <text x="215" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr5</text>
+          <rect x="230" y="94"  width="20" height="54"  fill="#93C5FD"/>
+          <text x="240" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr6</text>
+          <text x="240" y="170" font-size="6.5" fill="#9CA3AF" text-anchor="middle">rank 4-10</text>
+          <rect x="262" y="120" width="20" height="28"  fill="#DC2626"/>
+          <text x="272" y="160" font-size="7.5" fill="#7F1D1D" text-anchor="middle" font-weight="700">chr19</text>
+          <text x="272" y="117" font-size="8" fill="#7F1D1D" text-anchor="middle" font-weight="700">752</text>
+          <text x="272" y="170" font-size="6.5" fill="#7F1D1D" text-anchor="middle">★ rank 19</text>
+          <rect x="287" y="123" width="20" height="25"  fill="#0EA5E9"/>
+          <text x="297" y="160" font-size="7.5" fill="#0369A1" text-anchor="middle" font-weight="700">chr8</text>
+          <text x="297" y="120" font-size="8" fill="#0369A1" text-anchor="middle" font-weight="700">666</text>
+          <text x="297" y="170" font-size="6.5" fill="#0369A1" text-anchor="middle">❄ 0.34×</text>
+        </svg>
+        <p style="font-size:10px;color:#6B7280;margin:2px 0 0;text-align:center;">main hotspot 在 chr7/chr2/chr1/chr16/chr20；chr19 是「可重現案例」非主要分佈</p>
       </div>
     </div>
-    <div class="footer-glossary" style="font-size:9.5px;margin-top:4px;">
-      <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance (+13.3 pp paired GT @ 0.93)，不在 caller F1 〔next: slide 12 主結論 + slide 13 未來方向〕</div>
+    <div class="conclusion-arrow green" style="margin-top:8px;font-size:13px;padding:6px 12px;">→ priority bug 不是 chr19 局部 artifact；全基因組 34,855 條 read-level victim 全部 100% 修正、0 反向 → 機制因果鐵證確立</div>
+    <div class="footer-glossary" style="font-size:9.5px;">
+      <div class="gloss-item">ⓘ V6 對 priority bug 結果 = V5 = V3F = 100%（修補在 V3F 41ff147 已完成；V6 唯一改動 Layer 1.5 revert 與本子集 germline+somatic 都 &gt;0 不重疊）</div>
+      <div class="gloss-item">ⓘ chr8 priority bug 冷區 (0.34× avg) ≠ chr8 LOH+HPSig FP hotspot (7.4× ISM 下游) — 不同 layer，priority bug 修對不會自動清掉 chr8 hotspot</div>
     </div>
   </article>
 
-  <aside class="note-section" aria-label="Speaker notes for slide 11">
+  <aside class="note-section" aria-label="Speaker notes for slide 08">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
       <div class="speak-text">[標題]
-Caller F1 vs SEQC2 — 四版完全相同。
-這是 V6 不退步的 caller-side 鐵證。
+S3 量化鐵證 — 把 S2 機制從理論變物理觀察。
 
-[兩 purity 對照]
-HCC1395 5kHz 0.93 純樣本：
-baseline / V3F / V5 / V6 四版 TP=28,509 / FP=11,606 / FN=10,938 / F1=0.7166 — 完全相同。
+[方法]
+對 baseline 與 V6 兩版加 --debug-vote-dump flag。
+dump 每條 read 經 getVote 後的 5-vote countMap。
 
-HCC1395 t30_n20 0.6 低純度：
-四版 TP=24,190 / FP=13,487 / FN=15,257 / F1=0.6273 — 完全相同。
+[chr19 pilot]
+HCC1395 5kHz chr19，篩 germline_majority ≠ somatic_majority 且 both >0。
+得 752 雙向矛盾 reads。
+baseline 全 752 條投錯方向 hp=11。
+V6 全 752 條翻 hp=21 = 100% 單向修正，0 條反向。
 
-[釐清 0.93 vs 0.6 差異]
-兩 purity 都驗證了，四版內 0 差異。
-但 0.93 → 0.6 ΔF1 = −0.0893 是 ClairS-TO 在低 purity 性質。
-與 self-phasing 修補無關。
+[全基因組擴展]
+victims 從 752 → 34,855 = 46.4× scale up。
+V6 修正率仍 100% (34,855/34,855)，0 條反向。
 
-[為何 invariant — 因果機制]
-ClairS-TO snv.vcf 一次性決定 FILTER=PASS 47,798 條。
-longphase-to phase 改 GT / PS / GT2 / GT3 / PON tag — 不改 FILTER。
-longphase-to haplotag 只改 BAM HP:i tag — 不碰 VCF。
-bcftools isec 取 FILTER=PASS 跟 truth 比對。
-FILTER 不動 → PASS set 不變 → TP/FP/FN 不變 → F1 數學保證 invariant。
+[重要顛覆]
+per-chr 分佈推翻原 chr19 hotspot 結論。
+主要 victim 分佈在 chr7 (3,508) / chr2 / chr1 / chr16 / chr20。
+chr19 只占 2.16%，rank 19 — SP1/2/3 是可重現案例，非主要分佈位置。
 
-[兩種 F1 口徑都 invariant]
-業界 caller-level F1：四版 0.7166 / 0.6273 完全相同。
-論文 §4.3 V_H/V_L refined F1：實證三版 Verdict tag INFO 全 0 records（ClairS-TO 預設未啟用 Verdict tagging）→ 本 pipeline N/A。
-
-[結論]
-V6 真實價值不在 caller F1。
-真實價值在 read-level tag concordance — +13.3 pp paired GT @ 0.93。
-下一節 — slide 12 主結論，slide 13 未來方向。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> PASS set / FILTER 機制 / purity 0.6 N50 微差 / V6 patch 不改 phasing 層 detail</div>
+[chr8 釐清]
+chr8 priority bug enrichment 0.34× avg — rank 21 冷區。
+與 MEMORY chr8 LOH+HPSig 7.4× FP hotspot 是不同 layer，無直接因果。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> chr19 1Mb hotspot 30M=215 + 27M=133 + 16M=41 / 4-path 驗證表 (個案 trace / Density 共變 / 修正後消失) / read_name case (1c50034a-f0f) / 全 24 chr enrichment ‰ / chrY 小 N 高 ‰ / Pass 2 reclassify 104K germline het</div>
     </details>
   </aside>
 
@@ -422,17 +426,17 @@ V6 真實價值不在 caller F1。
 </main>
 
 <nav class="nav-bottom" aria-label="Slide navigation">
-  <a href="slide_12_no_regression.html">← Prev</a>
-  <span class="counter">Slide 11 (17/23)</span>
-  <a href="slide_17_main_verdict.html">Next →</a>
+  <a href="slide_07_two_layer_table.html">← Prev</a>
+  <span class="counter">Slide 08 (10/23)</span>
+  <a href="slide_10_fix_design.html">Next →</a>
 </nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
 
 <script>
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowLeft' && True) location.href = 'slide_12_no_regression.html';
-    if (e.key === 'ArrowRight' && True) location.href = 'slide_17_main_verdict.html';
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_07_two_layer_table.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_10_fix_design.html';
   });
 
   // PanZoom.js progressive enhancement — fail-soft if CDN blocked

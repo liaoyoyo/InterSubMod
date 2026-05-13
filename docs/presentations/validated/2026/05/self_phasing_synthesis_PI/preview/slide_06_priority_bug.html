@@ -316,9 +316,13 @@ details.collapsible summary:hover { color: #1D4ED8; }
   </div>
 
   <article class="slide-canvas" data-section="S2" aria-label="Main slide canvas">
-    <h1 class="slide-title ">tagging 層 priority bug 機制</h1>
-    <p class="en-subtitle">getVote priority bug — single somatic vote triggers mislabel (break-early on wrong order)</p>
-    
+    <h1 class="slide-title ">getVote 順序優先 + break-early — HP1_1 一票就決定，不看 HP2 票數</h1>
+    <p class="en-subtitle">getVote: order-priority + break-early — HP1_1 single vote decides, HP2 tally ignored</p>
+
+    <div style="background:#FEF3C7;border:2px solid #CA8A04;border-radius:6px;padding:6px 12px;margin:4px 0;font-size:11.5px;color:#7C2D12;">
+      <strong>⚠ #2/3 連鎖 bug：程式 bug — vector 順序 + break early</strong>（兩個 bug 共同造成 baseline 全偏 HP1；缺一不可，先順序後 break-early）
+    </div>
+
     <!-- 上半：A1 Multi-read IGV view (per-read 框架) -->
     <svg viewBox="0 0 1200 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:Arial,sans-serif;display:block;">
       <!-- reference axis -->

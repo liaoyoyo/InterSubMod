@@ -316,8 +316,8 @@ details.collapsible summary:hover { color: #1D4ED8; }
   </div>
 
   <article class="slide-canvas" data-section="S2" aria-label="Main slide canvas">
-    <h1 class="slide-title ">為何需要兩層修補（vs 單層）</h1>
-    <p class="en-subtitle">Why two layers required — each layer has distinct responsibility (vote vs judge)</p>
+    <h1 class="slide-title ">2 層分類 × 3 連鎖 bug × 5 commits 修補 — 缺一不可</h1>
+    <p class="en-subtitle">2 layers × 3 chained bugs × 5 commits — none-optional architecture fix</p>
 
     <!-- v1.1.5 audit B 改動: take-home 收斂為「為何兩層」單一焦點 + 責任分離 caveat -->
     <p style="font-size:11.5px;color:#7C2D12;background:#FEF3C7;border-left:3px solid #CA8A04;padding:5px 10px;margin:3px 0 8px;border-radius:3px;">
@@ -347,7 +347,7 @@ details.collapsible summary:hover { color: #1D4ED8; }
       <tbody>
         <tr style="background:#DBEAFE;"><td><strong>phasing 層</strong><br>球員兼裁判</td><td>phasing 階段<strong>排除非 PoN 變異</strong>，只用 germline het 建 graph（somatic 不再當 node）</td><td>05</td></tr>
         <tr style="background:#DCFCE7;"><td><strong>tagging Layer 1</strong><br>priority bug (vote 順序)</td><td><strong>重寫 two-layer</strong>：Layer 1 germline 決方向 / Layer 2 somatic 加 sub-tag（不再 iterate variantKeys break-early）</td><td>06</td></tr>
-        <tr style="background:#DCFCE7;"><td><strong>tagging Layer 1</strong><br>enum vs int literal mismatch</td><td><code>HAPLOTYPE1_1=2</code> enum 與 HP tag int <code>11</code> 不一致，V3F 改用 int literal 11/21/33 直接賦值（搭 380e8d2 INDEL guard）</td><td>backup</td></tr>
+        <tr style="background:#DCFCE7;"><td><strong>tagging Layer 1</strong><br>enum vs int literal mismatch</td><td><code>HAPLOTYPE1_1=3</code> enum（Util.h:24）被當 int 與 hpResult <code>11</code> 比較永遠 ≠ → <code>HP:i:33</code> = dead code 9 年未經 read-level audit；V3F 改用 int literal 11/21/33 直接賦值（搭 380e8d2 INDEL guard）</td><td>backup</td></tr>
         <tr style="background:#FEF3C7;"><td><strong>tagging Layer 1.5</strong><br>germline-absent</td><td><strong>V5 somatic fallback</strong>：純 somatic vote 區補 hp tag（V3F 此處 untagged）<span style="color:#92400E;font-weight:600;"> ⚠ 4.19:1 偏 HP1 caveat</span></td><td>16</td></tr>
         <tr style="background:#F3E8FF;"><td><strong>V6 revert</strong><br>Layer 1.5 移除</td><td>germline-absent 區回退 V3F 保守行為（hp=33），marker coverage +30% / 4 樣本 ratio 中性化；但 SP1/2/3 失去 Layer 1.5 翻方向能力</td><td>16</td></tr>
       </tbody>
@@ -394,7 +394,7 @@ V6 — germline-absent 區回退保守 hp=33。
 只 V3F — germline 缺席區 untagged。
 V5 Layer 1.5 — 補 fallback 但 germline-absent 4.19:1 偏 HP1。
 V6 — 是 trade-off 修正不是完美解，但 marker coverage +30%。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 5 commit 順序細節 / V3F 命名歷史 / 跨層交互 / 為何不能合併修 / d0bcd8c 為何跨兩層 / enum=2 vs int=11 mismatch 細節 / V6 SP1/2/3 反向 caveat</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 5 commit 順序細節 / V3F 命名歷史 / 跨層交互 / 為何不能合併修 / d0bcd8c 為何跨兩層 / enum HAPLOTYPE1_1=3 (Util.h:24) vs int 11 mismatch → dead code 細節 / V6 SP1/2/3 反向 caveat</div>
     </details>
   </aside>
 
