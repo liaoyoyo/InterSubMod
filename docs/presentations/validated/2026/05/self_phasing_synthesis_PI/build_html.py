@@ -206,103 +206,83 @@ HP1 family reads 614K, HP2 family 只 35.5K。
 接下來看具體個案 SP1 — 個別位點上失衡有多極端。""",
     tier3="cnLOH 機制細節 / 23 chr 一致性表 / paired pipeline 程式碼差異")
 
-add(id="04a_sp1", num="04a", section="S1 觀察起點", rg2="1", ngrep="3",
-    title="SP1: baseline 113:0 → V5 翻 HP2 對齊",
-    en="SP1 chr19:17,565,944 — baseline 113:0 → V5 flips to HP2",
-    timing="60 sec / 中 ~250 字",
+add(id="04_sp1_2_3", num="04", section="S1 觀察起點", rg2="3 個案", ngrep="3",
+    title="SP1/2/3 個案 — baseline 113:0 / 109:1 / 108:0 極端失衡",
+    en="SP1/2/3 cases: baseline near-100% biased to HP1 family",
+    timing="90 sec / 中 ~320 字",
     canvas_html="""
-    <div class="grid-2col" style="grid-template-columns: 3fr 2fr;gap:14px;margin:6px 0;">
-      <div class="igv-zoom-wrap">
-        <span class="igv-zoom-hint">💡 hover / 點擊全尺寸</span>
+    <p style="font-size:11.5px;font-weight:700;color:#374151;margin:0 0 4px;">🔍 從全基因組 17.3:1 →個案層: IGV 6-BAM 並列篩到 chr19 三個近 100% 失衡位點</p>
+    <div class="grid-3col" style="gap:10px;">
+      <div>
+        <div style="text-align:center;background:#FFF7ED;border:2px solid #EA580C;border-radius:6px;padding:6px;margin-bottom:4px;">
+          <p style="font-size:11px;font-weight:700;color:#9A3412;margin:0;">SP1 · chr19:17,565,944</p>
+          <p style="font-size:22px;font-weight:800;color:#C2410C;margin:2px 0;">113 : 0</p>
+          <p style="font-size:9.5px;color:#7C2D12;margin:0;">baseline HP1 fam : HP2 fam</p>
+        </div>
         <a href="../figures/igv/SP1_chr19_17565944_5versions.png" target="_blank">
-          <img class="igv-thumb" src="../figures/igv/SP1_chr19_17565944_5versions.png" alt="IGV SP1" style="max-height:340px;">
+          <img class="igv-thumb" src="../figures/igv/SP1_chr19_17565944_5versions.png" alt="IGV SP1" style="max-height:260px;width:100%;object-fit:contain;">
         </a>
-        <p class="fig-caption" style="font-size:12px;margin:2px 0;">chr19:17,565,944 · 上→下 baseline / V6 / paired_T / paired_N²</p>
       </div>
       <div>
-        <div class="stat-box" style="margin-bottom:6px;padding:8px;"><div class="number orange" style="font-size:24px;">113 : 0</div><div class="label">baseline HP1:HP2 (reads)</div></div>
-        <div class="stat-box" style="margin-bottom:6px;padding:8px;"><div class="number" style="font-size:22px;">V6 翻 HP2</div><div class="label">V6 HP1:HP2 (待量化)¹</div></div>
-        <div class="stat-box" style="padding:8px;"><div class="number green" style="font-size:24px;">HP2 ✅</div><div class="label">paired direction · 對齊</div></div>
+        <div style="text-align:center;background:#FFF7ED;border:2px solid #EA580C;border-radius:6px;padding:6px;margin-bottom:4px;">
+          <p style="font-size:11px;font-weight:700;color:#9A3412;margin:0;">SP2 · chr19:12,452,332</p>
+          <p style="font-size:22px;font-weight:800;color:#C2410C;margin:2px 0;">109 : 1</p>
+          <p style="font-size:9.5px;color:#7C2D12;margin:0;">baseline HP1 fam : HP2 fam</p>
+        </div>
+        <a href="../figures/igv/SP2_chr19_12452332_5versions.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/SP2_chr19_12452332_5versions.png" alt="IGV SP2" style="max-height:260px;width:100%;object-fit:contain;">
+        </a>
+      </div>
+      <div>
+        <div style="text-align:center;background:#FFF7ED;border:2px solid #EA580C;border-radius:6px;padding:6px;margin-bottom:4px;">
+          <p style="font-size:11px;font-weight:700;color:#9A3412;margin:0;">SP3 · chr19:12,467,180</p>
+          <p style="font-size:22px;font-weight:800;color:#C2410C;margin:2px 0;">108 : 0</p>
+          <p style="font-size:9.5px;color:#7C2D12;margin:0;">baseline HP1 fam : HP2 fam</p>
+        </div>
+        <a href="../figures/igv/SP3_chr19_12467180_5versions.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/SP3_chr19_12467180_5versions.png" alt="IGV SP3" style="max-height:260px;width:100%;object-fit:contain;">
+        </a>
       </div>
     </div>
-    <div class="igv-focus-callout" style="font-size:14px;padding:6px 12px;margin-top:4px;"><span class="label">👁 看圖重點：</span>baseline (最上) 紅+綠 reads 集中左欄 = HP1；V5 (panel 4) 紅+綠搬右欄 = HP2 → V5 翻轉對齊 paired</div>
-    <div style="background:#FEF3C7;border:2px solid #CA8A04;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:12px;">
-      <strong style="color:#7C2D12;">⚠ V6 在 SP1/2/3 設計取捨</strong>：本位點屬 <strong>germline-absent 區</strong>。V6 移除 Layer 1.5 後退回 <code>hp=33</code> ambiguous (不選邊)，<strong>失去翻 HP2 視覺對齊能力</strong>。但這是 V6 有意識的設計取捨 — V5 Layer 1.5 在全 germline-absent 區整體 4.19:1 偏 HP1（與 baseline 相同），是 priority bug feature 化；V6 還原 V3F 保守策略，全區從 4.19:1 偏移恢復成 hp=33。<strong>V6 的鐵證在 slide 08 全基因組量化 + slide 13 cross-sample，不在 SP1/2/3 IGV</strong>。<br><strong style="color:#16A34A;">★ 5/13 forensic 確認</strong>：V6 chr19 整體距離 paired = 0.065 ≈ V5 = 0.068（命名顛倒後 — 見 slide 09e），<strong>V6 不是退步</strong>；先前 v6_quantification 寫的 0.367 是統計腳本沒考慮跨 codebase 命名顛倒。
+    <div class="igv-focus-callout" style="font-size:12px;padding:5px 10px;margin-top:4px;"><span class="label">👁 看圖重點：</span>baseline (最上 panel) 紅+綠 reads 集中左欄 = HP1 family；V5 (panel 4) 紅+綠搬右欄 = HP2 family → V5 翻轉對齊 paired_T 方向 3/3</div>
+    <div style="background:#FEF3C7;border:2px solid #CA8A04;border-radius:6px;padding:6px 12px;margin-top:4px;font-size:11.5px;">
+      <strong style="color:#7C2D12;">⚠ V6 SP1/2/3 設計取捨</strong>：3 位點都屬 <strong>germline-absent 區</strong>。V6 退回 hp=33 ambiguous (不選邊) — 失去翻 HP2 視覺對齊能力。但這是 V5 Layer 1.5 在全 germline-absent 區 4.19:1 偏 HP1 (priority bug feature 化) 修對的代價。<strong>V6 改善鐵證在 slide 04c 條形圖 + slide 08 全基因組量化 + slide 13 cross-sample，不在 SP IGV</strong>。<br><strong style="color:#16A34A;">★ 5/13 forensic</strong>：V6 chr19 distance to paired = 0.065 ≈ V5 = 0.068 (命名顛倒後, 見 slide 09e) — V6 不是退步。
     </div>
-    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 hp=33 ambiguous (germline-absent trade-off); V5 翻 HP2 為個案鐵證但全區仍偏 HP1  ² 5versions 順序: baseline / paired_T / V3F / V5 / V6  ³ ratio 對齊 paired 不是 V6 正確性 metric (詳 slide 09e + erratum)  <strong style="color:#7C2D12;">⁴ IGV 適合展示 baseline 問題（極端失衡）；V6 改善看 read-level 數據鐵證 (slide 04c 條形圖 + 04d 5 reads BAM + 08 全基因組 34,855) — IGV 無 HP color coding 跨 panel 對照效果有限</strong></p>""",
+    <div class="conclusion-arrow green" style="font-size:14px;padding:6px 14px;">→ 三 SP 都在 chr19:12-17M, 對齊 slide 08 chr19 752 victims hotspot - 同機制不同層級觀察</div>
+    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;"><strong style="color:#7C2D12;">⚠ IGV 限制</strong>：適合展示 baseline 極端失衡 (113:0 等); V6 改善鐵證看數據 (slide 04c 條形圖 / 04d 5 reads BAM / 08 全基因組 / 09d 4 鐵證匯總); 5versions 順序: baseline / paired_T / V3F / V5 / V6 (點圖放大)</p>""",
     speaker="""[從統計到個案]
 全基因組 17.3:1 是平均值。
-用 IGV 6-BAM 並列篩，找到 chr19 三個近 100% 失衡位點。
+用 IGV 6-BAM 並列篩, 找到 chr19 三個近 100% 失衡位點。
 
-[SP1 數據]
-位點 chr19:17,565,944。
-baseline — 113 條 reads 全 HP1，HP2 = 0。
-V5 修正後 — 翻到約 5:108，對齊 paired tumor 的 HP2 方向。
+[SP1/2/3 三個案數據]
+SP1 chr19:17,565,944 — baseline 113:0 (HP1 family : HP2 family)
+SP2 chr19:12,452,332 — baseline 109:1
+SP3 chr19:12,467,180 — baseline 108:0
+三個位點都近 100% 偏 HP1 family - 極端失衡。
 
-[排除三個 alternative]
+[排除三個 alternative explanation]
 噪音？baseline 與 paired 方向完全相反 — 是翻轉不是衰減。
 caller 錯？V5 修正後與 paired 重合 — 不是 caller。
 alignment 錯？跨 binary 一致 — 不是 alignment。
+→ read assignment 被強制集中的鐵證。
 
-[結論]
-read assignment 被強制集中的鐵證。""",
-    tier3="6-BAM 並列順序細節 / V2b 中間階段意義 / HP1-1 sub-tag 與 HP1 合併原則")
+[V5 翻方向 vs V6 設計取捨]
+V5 Layer 1.5 在 SP1/2/3 個案翻 HP2 對齊 paired (3/3)。
+但 V5 Layer 1.5 在全 germline-absent 區整體 4.19:1 偏 HP1 (與 baseline 完全相同 priority bug feature 化)。
+V6 revert Layer 1.5 → 還原 V3F 保守策略 (hp=33 ambiguous)。
+SP1/2/3 因而失去翻方向能力 — 但全區 4.19:1 偏移消除。
 
-add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
-    title="SP2/SP3 同模式 3/3 對齊 paired",
-    en="SP2 + SP3 follow SP1 pattern, 3/3 aligned with paired",
-    timing="60 sec / 中 ~260 字",
-    canvas_html="""
-    <div class="grid-2col" style="gap:14px;">
-      <div>
-        <table class="metric-table" style="font-size:14px;">
-          <thead><tr><th colspan="2">SP2 · chr19:12,452,332</th></tr>
-                 <tr><th>baseline HP1:HP2</th><th>V6 (待量化)¹</th></tr></thead>
-          <tbody><tr class="row-red"><td class="num">109 : 1</td><td class="num">翻 HP2</td></tr></tbody>
-        </table>
-        <div class="igv-zoom-wrap" style="margin-top:2px;">
-          <span class="igv-zoom-hint">💡 hover/點擊</span>
-          <a href="../figures/igv/SP2_chr19_12452332_5versions.png" target="_blank">
-            <img class="igv-thumb" src="../figures/igv/SP2_chr19_12452332_5versions.png" alt="IGV SP2" style="max-height:240px;">
-          </a>
-        </div>
-      </div>
-      <div>
-        <table class="metric-table" style="font-size:14px;">
-          <thead><tr><th colspan="2">SP3 · chr19:12,467,180</th></tr>
-                 <tr><th>baseline HP1:HP2</th><th>V6 (待量化)¹</th></tr></thead>
-          <tbody><tr class="row-red"><td class="num">108 : 0</td><td class="num">翻 HP2</td></tr></tbody>
-        </table>
-        <div class="igv-zoom-wrap" style="margin-top:2px;">
-          <span class="igv-zoom-hint">💡 hover/點擊</span>
-          <a href="../figures/igv/SP3_chr19_12467180_5versions.png" target="_blank">
-            <img class="igv-thumb" src="../figures/igv/SP3_chr19_12467180_5versions.png" alt="IGV SP3" style="max-height:240px;">
-          </a>
-        </div>
-      </div>
-    </div>
-    <div class="igv-focus-callout" style="font-size:13px;padding:5px 10px;margin-top:4px;"><span class="label">👁 看圖重點：</span>兩圖同 SP1 模式 — baseline 紅+綠 reads 集中左欄；V5 (panel 4) 紅+綠搬右欄 → V5 翻 HP2 對齊 paired 3/3</div>
-    <div style="background:#FEF3C7;border:2px solid #CA8A04;border-radius:6px;padding:6px 12px;margin-top:4px;font-size:11.5px;">
-      <strong style="color:#7C2D12;">⚠ V6 SP1/2/3 caveat</strong>：SP2/3 同屬 germline-absent 區。V6 退回 hp=33（不翻）— 設計取捨換取全區 4.19:1 偏移消除。V6 鐵證在 slide 08 (全基因組 34,855 victims) + slide 13 (cross-sample 4/5)，<strong>不在 SP IGV</strong>。<br><strong style="color:#16A34A;">★ 5/13 forensic</strong>：V6 chr19 distance to paired ≈ V5（命名顛倒後 0.065 vs 0.068，slide 09e）— V6 不是退步。
-    </div>
-    <div class="conclusion-arrow green" style="font-size:15px;padding:8px 14px;">→ 三 SP 都在 chr19:12-17M → 對齊 slide 08 chr19 752 victims hotspot</div>
-    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ SP2/3 baseline 109:1 / 108:0 → V5 翻 HP2 (個案鐵證) / V6 hp=33 (設計取捨)；5versions 順序: baseline / paired_T / V3F / V5 / V6  <strong style="color:#7C2D12;">² IGV 視覺鐵證在 baseline 極端失衡; V6 改善鐵證在 read-level 數據 (slide 04c 條形圖 + 04d 5 reads + 09d 4 鐵證匯總)</strong></p>""",
-    speaker="""[SP2/SP3 確認同模式]
-SP2 chr19:12,452,332 — baseline 109:1。
-SP3 chr19:12,467,180 — baseline 108:0。
-與 SP1 同模式 3/3 — V6 修正後三位點都翻 HP2 對齊 paired。
+[V6 鐵證在何處]
+V6 鐵證不在 SP1/2/3 IGV (germline-absent 個案);
+而在 slide 04c chr19:27M 條形圖 (germline-existent V6 修對視覺) + slide 08 全基因組 34,855 victims 100% 修正 + slide 13 Phase D cross-sample。
 
 [空間對應]
 三 SP 都在 chr19:12-17M 區段。
-對齊後續 slide 08 chr19 752 victims hotspot — 同機制不同層級觀察。
+對齊 slide 08 chr19 752 victims hotspot — 同機制不同層級觀察 (SP 是 individual peaks, 752 是 read-level victims)。
 
 [口述過渡]
-接下來四個章節分別回答：
-① 為何全集中一邊？S2 機制
-② read 層級多少？S3 量化
-③ 三版各修什麼？S4 修補
-④ 是否都修對？S5 驗證""",
-    tier3="paired_T 與 paired_N 對照細節 / 三 SP 完整座標表 / V6 vs V5 差異 / HP sub-tag 分組原則")
+接下來看 V6 修對的位點層鐵證 (slide 04c) — germline-existent 區 baseline priority bug → V6 修對。""",
+    tier3="6-BAM 並列順序細節 / V2b 中間階段意義 / HP1-1 sub-tag 與 HP1 合併原則 / paired_T 與 paired_N 對照 / 三 SP 完整座標表")
 
 add(id="04c_priority_bug_fix_site", num="04c", section="S1 觀察起點", rg2="1", ngrep="—",
     title="位點鐵證: chr19:27M baseline priority bug → V6 修對",
