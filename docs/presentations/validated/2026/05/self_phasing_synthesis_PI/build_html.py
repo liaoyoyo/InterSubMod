@@ -208,8 +208,8 @@ add(id="04a_sp1", num="04a", section="S1 觀察起點", rg2="1", ngrep="3",
     <div class="grid-2col" style="grid-template-columns: 3fr 2fr;gap:14px;margin:6px 0;">
       <div class="igv-zoom-wrap">
         <span class="igv-zoom-hint">💡 hover / 點擊全尺寸</span>
-        <a href="../figures/igv/D_SP1_chr19_17565944.png" target="_blank">
-          <img class="igv-thumb" src="../figures/igv/D_SP1_chr19_17565944.png" alt="IGV SP1" style="max-height:340px;">
+        <a href="../figures/igv/SP1_chr19_17565944_5versions.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/SP1_chr19_17565944_5versions.png" alt="IGV SP1" style="max-height:340px;">
         </a>
         <p class="fig-caption" style="font-size:12px;margin:2px 0;">chr19:17,565,944 · 上→下 baseline / V6 / paired_T / paired_N²</p>
       </div>
@@ -253,8 +253,8 @@ add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
         </table>
         <div class="igv-zoom-wrap" style="margin-top:2px;">
           <span class="igv-zoom-hint">💡 hover/點擊</span>
-          <a href="../figures/igv/D_SP2_chr19_12452332.png" target="_blank">
-            <img class="igv-thumb" src="../figures/igv/D_SP2_chr19_12452332.png" alt="IGV SP2" style="max-height:240px;">
+          <a href="../figures/igv/SP2_chr19_12452332_5versions.png" target="_blank">
+            <img class="igv-thumb" src="../figures/igv/SP2_chr19_12452332_5versions.png" alt="IGV SP2" style="max-height:240px;">
           </a>
         </div>
       </div>
@@ -266,8 +266,8 @@ add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
         </table>
         <div class="igv-zoom-wrap" style="margin-top:2px;">
           <span class="igv-zoom-hint">💡 hover/點擊</span>
-          <a href="../figures/igv/D_SP3_chr19_12467180.png" target="_blank">
-            <img class="igv-thumb" src="../figures/igv/D_SP3_chr19_12467180.png" alt="IGV SP3" style="max-height:240px;">
+          <a href="../figures/igv/SP3_chr19_12467180_5versions.png" target="_blank">
+            <img class="igv-thumb" src="../figures/igv/SP3_chr19_12467180_5versions.png" alt="IGV SP3" style="max-height:240px;">
           </a>
         </div>
       </div>
@@ -852,7 +852,17 @@ add(id="12_no_regression", num="12", section="S5 驗證", rg2="1", ngrep="20+",
     en="baseline → V6: SP 3/3 aligned + 20 metrics no regression + 6 improvements",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
-    <p style="font-size:11.5px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">🎯 baseline → V6 同層驗證 (longphase-to + 結果 tag + paired 對比 + 個案層):</p>
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">🎯 baseline → V6 同層驗證 — 4 類指標各自的驗證方法:</p>
+    <table class="metric-table" style="font-size:10.5px;margin-bottom:6px;">
+      <thead><tr><th>類別</th><th>驗證方法與計算來源</th></tr></thead>
+      <tbody>
+        <tr><td><strong>① phasing 結構</strong></td><td>從 longphase-to <code>phasing.log</code> + phased VCF 直接讀統計（N50 / Phased% / wall time）; LOH.bed bp-level intersect (Jaccard)</td></tr>
+        <tr><td><strong>② 結果 tag 分布</strong></td><td>samtools 統計 BAM HP:i: tag count 分布; chr19 1Mb window per-region 計算 hp=1-1:2-1 ratio</td></tr>
+        <tr><td><strong>③ paired GT 比對</strong></td><td>per-read 比對 paired BAM HP:Z: vs TO BAM HP:i:; 計算 concordance % (clean PS / 15-site filtered)</td></tr>
+        <tr><td><strong>④ 個案 SP1/2/3</strong></td><td>IGV 6-BAM 並列視覺驗證 (baseline / paired / V3F / V5 / V6) + samtools coverage per-position</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:6px 0 4px;">📊 baseline → V6 同層 4 類驗證結果:</p>
     <table class="metric-table" style="font-size:10.5px;">
       <thead><tr><th>類別</th><th>驗證層級</th><th>指標（baseline → V6）</th></tr></thead>
       <tbody>
@@ -1023,27 +1033,27 @@ add(id="17_main_verdict", num="17", section="S7 結論", rg2="3 (main verdict)",
       <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#F0FDF4;border:2px solid #16A34A;border-radius:8px;">
         <div style="flex:none;width:50px;height:50px;border-radius:50%;background:#DCFCE7;border:2px solid #16A34A;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#166534;">①</div>
         <div style="flex:1;">
-          <p style="font-size:11.5px;font-weight:700;color:#166534;margin:0 0 2px;">priority bug 修補機制確立</p>
-          <p style="font-size:10px;color:#374151;margin:0;line-height:1.4;">17.3:1 → ~1:1 全基因組 · 34,855 read-level victims baseline → V6 100% 修正 0 反向 · SP1/2/3 IGV 對齊 paired 3/3 ✅</p>
+          <p style="font-size:13px;font-weight:700;color:#166534;margin:0 0 3px;">priority bug 修補機制確立</p>
+          <p style="font-size:11.5px;color:#374151;margin:0;line-height:1.5;">17.3:1 → ~1:1 全基因組 · 34,855 read-level victims baseline → V6 100% 修正 0 反向 · SP1/2/3 IGV 對齊 paired 3/3 ✅</p>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#F0FDF4;border:2px solid #16A34A;border-radius:8px;">
         <div style="flex:none;width:50px;height:50px;border-radius:50%;background:#DCFCE7;border:2px solid #16A34A;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#166534;">②</div>
         <div style="flex:1;">
-          <p style="font-size:11.5px;font-weight:700;color:#166534;margin:0 0 2px;">V6 = production candidate (5/10 binary patch)</p>
-          <p style="font-size:10px;color:#374151;margin:0;line-height:1.4;">= V3F 保守 + V5 設計目標 + marker engineering 改善 · hp=33 +4.7% · marker coverage +9.0% · Phase D 4 樣本 ratio 0.61-1.24 中性 · F1 0.7166</p>
+          <p style="font-size:13px;font-weight:700;color:#166534;margin:0 0 3px;">V6 = production candidate (5/10 binary patch)</p>
+          <p style="font-size:11.5px;color:#374151;margin:0;line-height:1.5;">= V3F 保守 + V5 設計目標 + marker engineering 改善 · hp=33 +4.7% · marker coverage +9.0% · Phase D 4 樣本 ratio 0.61-1.24 中性 · F1 0.7166</p>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#FEF3C7;border:2px solid #CA8A04;border-radius:8px;">
         <div style="flex:none;width:50px;height:50px;border-radius:50%;background:#FBBF24;border:2px solid #CA8A04;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#7C2D12;">★</div>
         <div style="flex:1;">
-          <p style="font-size:11.5px;font-weight:700;color:#7C2D12;margin:0 0 2px;">真實價值在 read-level tag concordance — 非 caller F1</p>
-          <p style="font-size:10px;color:#374151;margin:0;line-height:1.4;">+13.3 pp paired GT @ 0.93 · hp=33 還原 · marker coverage +9.0% → ISM 下游 marker engineering 受惠 · caller F1 對 V3F/V5/V6 數學保證 invariant</p>
+          <p style="font-size:13px;font-weight:700;color:#7C2D12;margin:0 0 3px;">真實價值在 read-level tag concordance — 非 caller F1</p>
+          <p style="font-size:11.5px;color:#374151;margin:0;line-height:1.5;">+13.3 pp paired GT @ 0.93 · hp=33 還原 · marker coverage +9.0% → ISM 下游 marker engineering 受惠 · caller F1 對 V3F/V5/V6 數學保證 invariant</p>
         </div>
       </div>
     </div>
-    <p style="font-size:11px;font-weight:700;color:#374151;margin:8px 0 4px;">📝 PI 報告 4-29 核心 errata (3 條，完整 6 條詳見報告):</p>
-    <table class="metric-table" style="font-size:10.5px;">
+    <p style="font-size:12px;font-weight:700;color:#374151;margin:10px 0 4px;">📝 PI 報告 4-29 核心 errata (3 條，完整 6 條詳見報告):</p>
+    <table class="metric-table" style="font-size:12px;">
       <thead><tr><th></th><th>段落</th><th>原 → 新</th></tr></thead>
       <tbody>
         <tr class="row-yellow"><td><strong>★ E4</strong></td><td>V5 數值歸因</td><td>V5 整體效益 → V5 = Pass 1 only; 主要功勞 V3F + Layer 1.5; Pass 2 二次效益尚未量化</td></tr>
@@ -1098,27 +1108,27 @@ add(id="18_impact_future", num="18", section="S7 結論", rg2="1", ngrep="—",
     <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
       <defs><marker id="arr18" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#16A34A"/></marker></defs>
       <rect x="15" y="20" width="220" height="160" rx="8" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
-      <text x="125" y="40" font-size="12" fill="#166534" text-anchor="middle" font-weight="700">upstream (longphase-to V6)</text>
-      <text x="25" y="62" font-size="10" fill="#166534">✓ priority bug 修對</text>
-      <text x="40" y="76" font-size="9" fill="#374151">17.3:1 → ~1:1 (全基因組)</text>
-      <text x="25" y="96" font-size="10" fill="#166534">✓ hp=33 mixed-sub-tag 訊號還原</text>
-      <text x="40" y="110" font-size="9" fill="#374151">V6 = 138,317 (+4.7% vs V3F)</text>
-      <text x="25" y="130" font-size="10" fill="#166534">✓ marker coverage +9.0% vs V3F</text>
-      <text x="40" y="144" font-size="9" fill="#374151">23,980 NG≥3 regions</text>
-      <text x="25" y="164" font-size="10" fill="#166534">✓ Phase D 4 樣本 ratio 全中性</text>
+      <text x="125" y="40" font-size="13" fill="#166534" text-anchor="middle" font-weight="700">upstream (longphase-to V6)</text>
+      <text x="25" y="62" font-size="11" fill="#166534">✓ priority bug 修對</text>
+      <text x="40" y="76" font-size="10" fill="#374151">17.3:1 → ~1:1 (全基因組)</text>
+      <text x="25" y="96" font-size="11" fill="#166534">✓ hp=33 mixed-sub-tag 訊號還原</text>
+      <text x="40" y="110" font-size="10" fill="#374151">V6 = 138,317 (+4.7% vs V3F)</text>
+      <text x="25" y="130" font-size="11" fill="#166534">✓ marker coverage +9.0% vs V3F</text>
+      <text x="40" y="144" font-size="10" fill="#374151">23,980 NG≥3 regions</text>
+      <text x="25" y="164" font-size="11" fill="#166534">✓ Phase D 4 樣本 ratio 全中性</text>
       <path d="M240,100 L295,100" stroke="#16A34A" stroke-width="3" marker-end="url(#arr18)"/>
       <text x="267" y="92" font-size="9" fill="#16A34A" text-anchor="middle" font-weight="700">因果鏈</text>
       <text x="267" y="115" font-size="8" fill="#374151" text-anchor="middle" font-style="italic">tag 訊號乾淨 →</text>
       <text x="267" y="127" font-size="8" fill="#374151" text-anchor="middle" font-style="italic">下游分析更精確</text>
       <rect x="300" y="20" width="240" height="160" rx="8" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="2"/>
-      <text x="420" y="40" font-size="12" fill="#1E3A8A" text-anchor="middle" font-weight="700">downstream (ISM)</text>
-      <text x="310" y="62" font-size="10" fill="#1E3A8A">✓ HP_Ratio tag bias 修正</text>
-      <text x="325" y="76" font-size="9" fill="#374151">0.788 → 0.574</text>
-      <text x="310" y="96" font-size="10" fill="#1E3A8A">✓ HP1/HP2 read 集合更乾淨</text>
-      <text x="325" y="110" font-size="9" fill="#374151">→ methylation delta 更精確</text>
-      <text x="310" y="130" font-size="10" fill="#1E3A8A">✓ marker engineering 訊號完整</text>
-      <text x="325" y="144" font-size="9" fill="#374151">hp=33 + NG≥3 訊號</text>
-      <text x="310" y="164" font-size="10.5" fill="#7C2D12" font-weight="700">★ paired GT concordance +13.3 pp @ 0.93</text>
+      <text x="420" y="40" font-size="13" fill="#1E3A8A" text-anchor="middle" font-weight="700">downstream (ISM)</text>
+      <text x="310" y="62" font-size="11" fill="#1E3A8A">✓ HP_Ratio tag bias 修正</text>
+      <text x="325" y="76" font-size="10" fill="#374151">0.788 → 0.574</text>
+      <text x="310" y="96" font-size="11" fill="#1E3A8A">✓ HP1/HP2 read 集合更乾淨</text>
+      <text x="325" y="110" font-size="10" fill="#374151">→ methylation delta 更精確</text>
+      <text x="310" y="130" font-size="11" fill="#1E3A8A">✓ marker engineering 訊號完整</text>
+      <text x="325" y="144" font-size="10" fill="#374151">hp=33 + NG≥3 訊號</text>
+      <text x="310" y="164" font-size="11" fill="#7C2D12" font-weight="700">★ paired GT concordance +13.3 pp @ 0.93</text>
       <rect x="555" y="60" width="155" height="80" rx="8" fill="#FEF3C7" stroke="#CA8A04" stroke-width="2"/>
       <text x="632" y="78" font-size="11" fill="#7C2D12" text-anchor="middle" font-weight="700">主結論</text>
       <text x="632" y="98" font-size="10.5" fill="#7C2D12" text-anchor="middle" font-weight="700">V6 = production</text>
@@ -1126,8 +1136,8 @@ add(id="18_impact_future", num="18", section="S7 結論", rg2="1", ngrep="—",
       <text x="632" y="130" font-size="9" fill="#374151" text-anchor="middle" font-style="italic">可升級替代 V5</text>
       <path d="M540,100 L555,100" stroke="#CA8A04" stroke-width="2" marker-end="url(#arr18)"/>
     </svg>
-    <p style="font-size:11px;font-weight:700;color:#DC2626;margin:8px 0 4px;">🔬 未來研究方向 — 回到 ISM 五大目標主線 (V6 = 下游驗證基礎):</p>
-    <table class="metric-table" style="font-size:10px;">
+    <p style="font-size:12.5px;font-weight:700;color:#DC2626;margin:10px 0 4px;">🔬 未來研究方向 — 回到 ISM 五大目標主線 (V6 = 下游驗證基礎):</p>
+    <table class="metric-table" style="font-size:11.5px;">
       <thead><tr><th>#</th><th>主軸任務</th><th>對應 ISM 五大目標</th><th>具體驗證重點</th></tr></thead>
       <tbody>
         <tr class="row-green"><td><strong>F1 ★</strong></td><td><strong>LOH 內外 TP/FP 差異特徵</strong>（用 V6 tag）</td><td>目標 1 (per-CpG 甲基關聯) + 目標 4 (TO normal 補強) + 目標 5 (F1 提升)</td><td>LOH 內 vs LOH 外 × TP/FP × 甲基化率 / read 特徵 / HP_Ratio / NG 分布；驗證 ISM 是否能用 V6 tag 正確識別不同區域差異</td></tr>
@@ -1257,7 +1267,7 @@ add(id="b2_f1_dual_metric", num="B2", section="Q&A Backup", rg2="3", ngrep="—"
     canvas_html="""
     <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">❓ Q: longphase-to 論文 §4.3 寫 F1 改善 — 為何我們 slide 14 寫 F1 不變?</p>
     <p style="font-size:10.5px;color:#166534;font-weight:600;margin:2px 0 6px;">→ 雙口徑差異, 不衝突: 不同 metric 定義 + 我們 pipeline 沒啟用 Verdict tagging</p>
-    <table class="metric-table" style="font-size:10.5px;">
+    <table class="metric-table" style="font-size:11.5px;">
       <thead><tr><th>F1 評估口徑</th><th>somatic call set</th><th>本 pipeline?</th><th>結果</th></tr></thead>
       <tbody>
         <tr class="row-green"><td><strong>caller-level F1</strong><br>(業界 bcftools isec)</td><td>phased_VCF.FILTER=PASS<br>vs SEQC2 truth</td><td>✅ 採用</td><td>四版 F1=0.7166 完全相同</td></tr>
@@ -1265,7 +1275,7 @@ add(id="b2_f1_dual_metric", num="B2", section="Q&A Backup", rg2="3", ngrep="—"
       </tbody>
     </table>
     <p style="font-size:10.5px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">🔬 longphase-to 真實修改範圍 (V3F/V5/V6 都不動 FILTER):</p>
-    <table class="metric-table" style="font-size:10px;">
+    <table class="metric-table" style="font-size:11.5px;">
       <thead><tr><th>階段</th><th>改什麼欄位</th><th>影響 caller F1?</th></tr></thead>
       <tbody>
         <tr class="row-green"><td>phase</td><td>GT / PS / GT2 / GT3 / PON tag (FORMAT/INFO)</td><td>❌ 不影響</td></tr>
@@ -1305,7 +1315,7 @@ add(id="b3_hp33_paired", num="B3", section="Q&A Backup", rg2="2", ngrep="—",
     timing="120 sec / 中 ~360 字",
     canvas_html="""
     <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">❓ Q1: hp=33 (mixed-sub-tag) 為何重要 — baseline 沒有 / V3F 首現 / V5 壓掉 / V6 還原?</p>
-    <table class="metric-table" style="font-size:10.5px;">
+    <table class="metric-table" style="font-size:11.5px;">
       <thead><tr><th>版本</th><th>hp=33 reads (全基因組)</th><th>機制</th><th>對下游影響</th></tr></thead>
       <tbody>
         <tr class="row-red"><td><strong>baseline</strong></td><td class="num">少 (≈0 結構化)</td><td>vector ① somatic break early → ② mixed pair 罕走到; hp=33 為「順序副作用」</td><td>HP_Ratio 失衡 / 無 mixed 訊號</td></tr>
@@ -1317,7 +1327,7 @@ add(id="b3_hp33_paired", num="B3", section="Q&A Backup", rg2="2", ngrep="—",
     <p style="font-size:10px;color:#16A34A;margin:6px 0 0;font-weight:600;">→ V5→V6 transfer 守恆: 82% from hp=1-1 + 17% from hp=2-1 → hp=33 (mirror priority bug feature 化方向)</p>
 
     <p style="font-size:11px;font-weight:700;color:#374151;margin:10px 0 4px;">❓ Q2: 為何看 paired mode? — 它是 priority bug 的 control group</p>
-    <table class="metric-table" style="font-size:10.5px;">
+    <table class="metric-table" style="font-size:11.5px;">
       <thead><tr><th>Mode</th><th>HP1:HP2 ratio (chr19)</th><th>som_ratio (mean)</th><th>codebase</th><th>有無 priority bug?</th></tr></thead>
       <tbody>
         <tr class="row-red"><td>TO baseline</td><td class="num">17.3:1 (94.6% HP1)</td><td class="num">0.946 偏 HP1</td><td>longphase-to (球員兼裁判 + getVote)</td><td>✗ 有 bug</td></tr>
@@ -1362,7 +1372,7 @@ add(id="b4_phase_d_outliers", num="B4", section="Q&A Backup", rg2="1", ngrep="�
     timing="100 sec / 中 ~340 字",
     canvas_html="""
     <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">❓ Q: V6 跨樣本一致性? 為何 HCC1937 marker rate 0.817 邊緣 fail?</p>
-    <table class="metric-table" style="font-size:10px;">
+    <table class="metric-table" style="font-size:11px;">
       <thead><tr><th>Sample</th><th>ratio (target≈1)</th><th>hp=33</th><th>marker rate (≥0.85)</th><th>NG_on=2 (≥0.85)</th><th>FP/TP</th></tr></thead>
       <tbody>
         <tr class="row-green"><td>HCC1395 (ref)</td><td class="num">1.838</td><td class="num">138,317</td><td class="num">0.909 ✅</td><td class="num">0.829</td><td class="num">—</td></tr>
