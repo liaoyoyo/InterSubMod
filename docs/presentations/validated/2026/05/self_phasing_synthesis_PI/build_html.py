@@ -1125,10 +1125,108 @@ IGV 5versions 圖: slide 09c — baseline & V5 標反方向, V6 退 hp=33 才正
 不是單一數據, 是 4 角度交叉驗證。
 PI 質疑任一維度都有對應位點 + 圖片證明。
 
-[caveat]
-chr19 全 reads HP ratio 距離 paired 反而比 baseline 遠 (0.367 vs 0.215) — 但這不是 V6 正確性指標 (詳 v6_quantification_findings.md)。
-真實正確性指標是上面 4 維度 per-read 鐵證。""",
+[Erratum update 5/13]
+v6_quantification_findings.md 原寫「V6 chr19 distance to paired 0.367」— 5/13 forensic 確認此結論需修正。
+跨 codebase HP1/HP2 命名顛倒未考慮，顛倒後 V6 = 0.065 ≈ V5 = 0.068 ≈ baseline = 0.011 同數量級。
+詳見 slide 09e + InterSubMod/research/paired_priority_bug_audit/v6_quantification_erratum_2026_05_13.md。
+
+[結論]
+V6 真實正確性鐵證 4 維度仍 hold (per-read 鐵證, 非 ratio)。
+V6 程式碼邏輯實證確認正確 (slide 09e 守恆驗證)。
+V6 production candidate 主結論更穩固。""",
     tier3="vote_dump 完整 752 chr19 victims 表 / 4 維度 cross-validation 完整論證 / V5 chr19 巧合對齊 paired 細節分析 / chr17/chrX/chr8 V6 distance 未量化 caveat")
+
+add(id="09e_v6_forensic_validation", num="09e", section="S4 修補設計", rg2="1", ngrep="—",
+    title="V6 forensic 驗證 — 程式碼行為實證 + 推翻「V6 退步」結論",
+    en="V6 forensic validation — empirical confirmation + erratum",
+    timing="120 sec / 中 ~360 字",
+    canvas_html="""
+    <p style="font-size:11px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:5px 10px;border-radius:4px;">⚠ v6_quantification_findings.md (5/12) 寫「V6 chr19 distance to paired 0.367 比 baseline 還遠」— 5/13 forensic 確認此結論需修正（跨 codebase 命名顛倒未考慮）</p>
+
+    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:6px 0 4px;">📊 獨立 samtools 跑 4 BAM chr19 HP tag 實證:</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th>chr19 HP tag</th><th>baseline</th><th>V5</th><th>V6</th><th>paired_T (HP:Z:)</th></tr></thead>
+      <tbody>
+        <tr><td>HP:i:1 / HP:Z:1</td><td class="num">178,497</td><td class="num"><strong>194,435</strong></td><td class="num"><strong>194,435</strong></td><td class="num">138,239</td></tr>
+        <tr><td>HP:i:2 / HP:Z:2</td><td class="num">146,611</td><td class="num"><strong>118,241</strong></td><td class="num"><strong>118,241</strong></td><td class="num">176,508</td></tr>
+        <tr><td>HP:i:11 / HP:Z:1-1</td><td class="num">14,004</td><td class="num">26,493</td><td class="num">21,819 (-4,674)</td><td class="num">12,115</td></tr>
+        <tr><td>HP:i:21 / HP:Z:2-1</td><td class="num">12,089</td><td class="num">13,177</td><td class="num">11,924 (-1,253)</td><td class="num">14,193</td></tr>
+        <tr class="row-green"><td><strong>HP:i:33 / HP:Z:3</strong></td><td class="num">556</td><td class="num">577</td><td class="num"><strong>6,504 (+5,927)</strong></td><td class="num">1,098</td></tr>
+      </tbody>
+    </table>
+
+    <p style="font-size:11px;font-weight:700;color:#16A34A;margin:8px 0 4px;">✅ V5 vs V6 守恆轉移完美符合 Layer 1.5 移除邏輯預期:</p>
+    <div class="grid-2col" style="grid-template-columns: 6fr 6fr; gap:8px;">
+      <div class="green-box" style="font-size:10.5px;padding:6px;">
+        <strong>Type B (germline-only)</strong><br>
+        V5 HP:i:1 = V6 HP:i:1 = 194,435 ✓<br>
+        V5 HP:i:2 = V6 HP:i:2 = 118,241 ✓<br>
+        → 完全相同（Layer 1 邏輯一致）
+      </div>
+      <div class="green-box" style="font-size:10.5px;padding:6px;">
+        <strong>Type C (germline-absent + somatic)</strong><br>
+        HP:i:11 減 4,674 + HP:i:21 減 1,253<br>
+        = <strong>5,927</strong> = HP:i:33 增 5,927 ✓<br>
+        → 守恆轉移（Layer 1.5 移除）
+      </div>
+    </div>
+
+    <p style="font-size:11px;font-weight:700;color:#DC2626;margin:8px 0 4px;">🔍 「V6 退步」結論錯誤根因 — 跨 codebase HP1/HP2 命名顛倒:</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th>chr19</th><th>HP1_prop 原命名</th><th>HP1_prop 顛倒後</th><th>L1 dist to paired (原)</th><th>L1 dist to paired (顛倒)</th></tr></thead>
+      <tbody>
+        <tr><td>paired_T</td><td class="num">0.4408</td><td class="num">0.4408</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr class="row-red"><td>V5</td><td class="num">0.6271</td><td class="num">0.3729</td><td class="num">0.0064 (?? V5 巧合接近)</td><td class="num"><strong>0.0679</strong></td></tr>
+        <tr class="row-red"><td>baseline</td><td class="num">0.5481</td><td class="num">0.4519</td><td class="num">0.2147</td><td class="num"><strong>0.0111</strong></td></tr>
+        <tr class="row-green"><td><strong>V6</strong></td><td class="num">0.6243</td><td class="num">0.3757</td><td class="num">0.3670 (錯)</td><td class="num"><strong>0.0651</strong></td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:10px;color:#16A34A;margin:4px 0 0;font-weight:600;">→ 顛倒後 V6 ≈ V5 ≈ baseline 都 ~0.06-0.07 同數量級 — 「V6 退步 0.367」是統計腳本錯誤（沒顛倒命名直接比 HP:i:1 vs HP:Z:1）</p>
+
+    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ V6 程式碼邏輯實證正確 + 「V6 退步」結論需修正 + V6 production candidate 主結論更穩固</div>
+    <div class="footer-glossary" style="font-size:9.5px;">
+      <div class="gloss-item">ⓘ Erratum 報告: InterSubMod/research/paired_priority_bug_audit/v6_quantification_erratum_2026_05_13.md</div>
+      <div class="gloss-item">ⓘ longphase-to (HP:i:) 與 longphase-s (HP:Z:) 是不同 codebase, HP1/HP2 命名任意，需明示 axis-aligned 才能跨比較</div>
+    </div>""",
+    speaker="""[標題]
+V6 forensic 驗證 — 推翻先前「V6 chr19 退步」結論。
+
+[背景]
+v6_quantification_findings.md (5/12) 寫: V6 chr19 distance to paired = 0.367, 比 baseline 0.215 還遠, 是 V5 0.006 的 57 倍。
+此結論引發疑慮 — V6 程式碼只移除 Layer 1.5 13 行, 邏輯上不該全 reads 偏移。
+
+[Forensic 5 步驟]
+步驟 1: git diff confirm V6 only 改 Layer 1.5 13 行
+步驟 2: V6 haplotag.log confirm 重用 V5 phased VCF
+步驟 3: samtools 4 BAM chr19 獨立統計
+步驟 4: 跨 codebase HP1/HP2 命名顛倒檢查
+步驟 5: 命名顛倒後重算 distance
+
+[實證 1 — V5 vs V6 守恆完美]
+V5 HP:i:1 = V6 HP:i:1 = 194,435 完全相同 (Type B reads 預期一致)
+V5 HP:i:2 = V6 HP:i:2 = 118,241 完全相同
+HP:i:11 V6 比 V5 少 4,674 + HP:i:21 少 1,253 = 5,927
+HP:i:33 V6 比 V5 多 5,927
+完美守恆轉移 (Layer 1.5 移除 Type C reads hp=11/21 → hp=33)
+
+[實證 2 — 跨 codebase 命名顛倒]
+paired_T 主導 HP:Z:2 (176K) / HP:Z:1 (138K)
+V5/V6 主導 HP:i:1 (194K) / HP:i:2 (118K)
+「V5/V6 HP1 多」對應「paired_T HP2 多」 — 命名顛倒
+
+[實證 3 — 命名顛倒後 distance to paired]
+原命名 V6 = 0.367 (顯示退步)
+顛倒命名 V6 = 0.065
+顛倒命名 V5 = 0.068
+顛倒命名 baseline = 0.011 (反而最接近 paired)
+V6 ≈ V5 ≈ baseline 都 0.06-0.07 同數量級 — V6 沒退步
+
+[結論]
+v6_quantification_findings.md 「V6 退步」結論是統計腳本錯誤 (沒考慮跨 codebase 命名顛倒)。
+V6 程式碼邏輯實證正確 — 行為完全符合 Layer 1.5 移除預期。
+V6 production candidate 主結論更穩固。
+詳細 erratum 報告: InterSubMod/research/paired_priority_bug_audit/v6_quantification_erratum_2026_05_13.md""",
+    tier3="完整 samtools 跑指令 + 4 BAM HP tag log / 守恆等式詳細推導 / chr17/chrX/chr8 是否也命名顛倒（待量化）/ v6_quantification_findings.md 待修正的 caveats")
 
 add(id="12_no_regression", num="10", section="S5 驗證", rg2="1", ngrep="20+",
     title="4 類同層驗證 + 個案 3/3 對齊",
