@@ -320,27 +320,44 @@ details.collapsible summary:hover { color: #1D4ED8; }
     <p class="en-subtitle">V6 4-dimensional evidence: positions + figures</p>
     
     <p style="font-size:11px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:5px 10px;border-radius:4px;">⚠ 關鍵釐清: V6 正確性鐵證是 <strong>per-read</strong> 而非 ratio (跨 codebase HP1/HP2 命名任意, ratio 對齊 paired 不是正確性指標)</p>
-    <table class="metric-table" style="font-size:10.5px;">
-      <thead><tr><th>#</th><th>鐵證</th><th>位點/數據</th><th>圖片/實證</th><th>slide</th></tr></thead>
-      <tbody>
-        <tr class="row-green"><td>1</td><td><strong>paired GT concordance +13.3 pp @ 0.93</strong> (per-read 對齊)</td><td>15-site Problem PS clean / Aggr / Clean PS GT 三項</td><td>SP1/2/3 IGV 5versions (V5 翻 HP2 對齊 paired 個案視覺)</td><td>04a/04b + 10</td></tr>
-        <tr class="row-yellow"><td>2</td><td><strong>34,855 read-level victims: V3F/V5 forensic 100% 修對</strong>（read-level 因果 anchor）<br><span style="color:#7C2D12;font-weight:600;">⚠ V6 spot check 全集 17,404 reads: <strong>44.6%</strong> 翻 hp=21 ✅ / <strong>31.7%</strong> 仍 hp=11 ❌ / 14.1% hp=33 / 9.6% empty — V6 不完全繼承 V3F (logic 推論失效)</span></td><td>chr19 752 (HCC1395 5kHz) + 全基因組 34,855 baseline=11 → V3F/V5=21；V6 對此 subset 約 1/3 reads 仍 hp=11 (與 baseline 同方向)</td><td>vote_dump 5 read 個案表 (read_name + countMap + baseline/V3F/V5/V6 hp)</td><td>08 + 主報告 §4.1 + 5/13 erratum E5</td></tr>
-        <tr class="row-green"><td>3</td><td><strong>cross-sample 4 樣本 ratio 中性化</strong> (跨樣本驗證)</td><td>H1437 1.243 / H2009 0.901 / HCC1954 0.958 / HCC1937 0.611 (vs V5 1.86 / baseline 17.3:1)</td><td>Phase D 5 樣本 evaluation matrix</td><td>B4 + 13</td></tr>
-        <tr class="row-green"><td>4</td><td><strong>hp=33 訊號還原 +944% vs V5</strong> (marker engineering)</td><td>chr19:52,081,584 完美 revert / 55,347,952 部分 / 8,349,597 partial</td><td>V6 winning IGV 3 張 5versions (baseline / paired / V3F / V5 / V6 對照)</td><td>09c</td></tr>
-      </tbody>
-    </table>
-    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">📋 鐵證 2 — 5 vote_dump reads BAM 實證表 (5/13 forensic samtools 跑 baseline/V3F/V5/V6 BAM):</p>
-    <table class="metric-table" style="font-size:10.5px;">
-      <thead><tr><th>read_name</th><th>chr19:pos</th><th>baseline</th><th>V3F</th><th>V5</th><th>V6</th><th>修對 verdict</th></tr></thead>
-      <tbody>
-        <tr class="row-green"><td>1c50034a-f0f</td><td class="num">201,417</td><td class="num red">HP:i:11</td><td class="num green">HP:i:21</td><td class="num green">HP:i:21</td><td class="num green">HP:i:21</td><td>✅ priority bug 修對</td></tr>
-        <tr class="row-green"><td>afb8e89b-893</td><td class="num">585,252</td><td class="num red">HP:i:11</td><td class="num green">HP:i:21</td><td class="num green">HP:i:21</td><td class="num green">HP:i:21</td><td>✅ priority bug 修對</td></tr>
-        <tr class="row-yellow"><td>35c7e166-ec3</td><td class="num">824,360</td><td class="num">HP:i:2</td><td class="num">HP:i:2</td><td class="num">HP:i:21</td><td class="num">HP:i:21</td><td>⚠ V5 Layer 1.5 改方向</td></tr>
-        <tr class="row-green"><td>096ab9a7-030</td><td class="num">1,574,442</td><td class="num red">HP:i:11</td><td class="num green">HP:i:21</td><td class="num green">HP:i:21</td><td class="num green">HP:i:21</td><td>✅ priority bug 修對</td></tr>
-        <tr class="row-yellow"><td>ccc8185d-f9b</td><td class="num">2,558,240</td><td class="num">HP:i:2</td><td class="num">HP:i:2</td><td class="num">HP:i:21</td><td class="num">HP:i:21</td><td>⚠ V5 Layer 1.5 改方向</td></tr>
-      </tbody>
-    </table>
-    <p style="font-size:10px;color:#16A34A;margin:4px 0 0;font-weight:600;">→ <strong>3/5 reads baseline=11 → V6=21 完美 priority bug 修對</strong>；2/5 reads baseline=2 → V5/V6=21 (V5 Layer 1.5 改方向, V6 繼承) — read-level 因果鏈 BAM 實證</p>
+
+    <!-- v1.7-F G1: 4 維度 → 4 card layout -->
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:8px 0;">
+      <!-- Card 1: paired GT concordance -->
+      <div style="border:2px solid #16A34A;border-radius:8px;padding:10px;background:#F0FDF4;">
+        <div style="font-size:24px;">🎯</div>
+        <h3 style="margin:4px 0;font-size:13px;color:#166534;">鐵證 1 — paired GT concordance</h3>
+        <p style="font-size:11.5px;font-weight:700;margin:2px 0;">+13.3 pp @ 0.93</p>
+        <p style="font-size:10.5px;color:#374151;margin:2px 0;line-height:1.45;">15-site Clean PS GT (V5 vs baseline)；V6 重用 V5 phased VCF 預期保留未實測</p>
+        <p style="font-size:9.5px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: SP1/2/3 IGV (B6)</p>
+      </div>
+      <!-- Card 2: 34,855 victims -->
+      <div style="border:2px solid #CA8A04;border-radius:8px;padding:10px;background:#FEF3C7;">
+        <div style="font-size:24px;">🔬</div>
+        <h3 style="margin:4px 0;font-size:13px;color:#92400E;">鐵證 2 — 34,855 read-level victims</h3>
+        <p style="font-size:11.5px;font-weight:700;margin:2px 0;">V3F/V5 100% / V6 spot check 44.6%/31.7%/14.1%/9.6%</p>
+        <p style="font-size:10.5px;color:#374151;margin:2px 0;line-height:1.45;">⚠ V6 不完全繼承 V3F (logic 推論失效 5/14 spot check)</p>
+        <p style="font-size:9.5px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: 08 + erratum E5</p>
+      </div>
+      <!-- Card 3: cross-sample neutralization -->
+      <div style="border:2px solid #16A34A;border-radius:8px;padding:10px;background:#F0FDF4;">
+        <div style="font-size:24px;">📊</div>
+        <h3 style="margin:4px 0;font-size:13px;color:#166534;">鐵證 3 — cross-sample 4 樣本中性化</h3>
+        <p style="font-size:11.5px;font-weight:700;margin:2px 0;">ratio 0.61-1.24 全中性</p>
+        <p style="font-size:10.5px;color:#374151;margin:2px 0;line-height:1.45;">H1437 / H2009 / HCC1954 / HCC1937 (vs V5 1.86 / baseline 17.3:1)</p>
+        <p style="font-size:9.5px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: B4 Phase D</p>
+      </div>
+      <!-- Card 4: hp=33 marker engineering -->
+      <div style="border:2px solid #16A34A;border-radius:8px;padding:10px;background:#F0FDF4;">
+        <div style="font-size:24px;">⚙</div>
+        <h3 style="margin:4px 0;font-size:13px;color:#166534;">鐵證 4 — hp=33 訊號還原 +944%</h3>
+        <p style="font-size:11.5px;font-weight:700;margin:2px 0;">marker coverage +9.0%</p>
+        <p style="font-size:10.5px;color:#374151;margin:2px 0;line-height:1.45;">chr19:52,081,584 完美 revert / 55,347,952 部分 / 8,349,597 partial</p>
+        <p style="font-size:9.5px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: 09c V6 winning IGV</p>
+      </div>
+    </div>
+
+    <!-- v1.7-F G2: 移除「📋 鐵證 2 — 5 vote_dump reads BAM 實證表」(已在 B5 backup slide_04d_5reads_vote_trace_igv) -->
     <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ 4 維度鐵證皆有「位點 + 圖片/數據」實證: per-read 對齊 + read-level 因果 + cross-sample + hp=33 還原 — 4 角度互相獨立 corroborate V6 正確性</div>
     <div class="footer-glossary" style="font-size:9.5px;">
       <div class="gloss-item">ⓘ vote_dump 個案 trace 來源: InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/vote_dump_*_chr19.tsv.gz</div>
@@ -369,7 +386,7 @@ per-read 對齊驗證。
 read-level 因果。
 chr19 752 (HCC1395 5kHz pilot) → 全基因組 34,855 (46.4× generalize)。
 baseline=11 → V6=21 單向, 0 反向例。
-個案實證: vote_dump 5 read trace 表 (slide 09d 本頁) — read_name + countMap + 修正方向。
+個案實證: vote_dump 5 read trace 表 (slide B5 backup, slide_04d_5reads_vote_trace_igv) — read_name + countMap + 修正方向。
 
 [鐵證 3 — cross-sample 4 樣本 ratio 中性化]
 跨樣本驗證 (Phase D)。

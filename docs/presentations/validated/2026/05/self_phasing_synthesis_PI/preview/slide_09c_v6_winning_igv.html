@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 09e — V6 forensic 驗證 — 程式碼行為實證 + 推翻「V6 退步」結論</title>
+  <title>Slide 09c — V6 winning IGV 鐵證 — V5 過度修正 → V6 退 hp=33</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -306,70 +306,100 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
 </head>
 <body>
-<main class="slide-page" role="main" aria-label="Slide 09e content">
+<main class="slide-page" role="main" aria-label="Slide 09c content">
   <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
-    <div><span class="label">Slide:</span><span class="value">09e / 22</span></div>
+    <div><span class="label">Slide:</span><span class="value">09c / 22</span></div>
     <div><span class="label">Section:</span><span class="value">S4 修補設計</span></div>
-    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
-    <div><span class="label">R-G2 術語:</span><span class="value">1</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~340 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">3 IGV</span></div>
     <div><span class="label">N grep:</span><span class="value">—</span></div>
   </div>
 
   <article class="slide-canvas" data-section="S4" aria-label="Main slide canvas">
-    <h1 class="slide-title ">V6 forensic 驗證 — 程式碼行為實證 + 推翻「V6 退步」結論</h1>
-    <p class="en-subtitle">V6 forensic validation — empirical confirmation + erratum</p>
+    <h1 class="slide-title ">V6 winning IGV 鐵證 — V5 過度修正 → V6 退 hp=33</h1>
+    <p class="en-subtitle">V6 winning IGV — V5 over-correction → V6 reverts hp=33</p>
     
-    <p style="font-size:11px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:5px 10px;border-radius:4px;">⚠ v6_quantification_findings.md (5/12) 寫「V6 chr19 distance to paired 0.367 比 baseline 還遠」— 5/13 forensic 確認此結論需修正（跨 codebase 命名顛倒未考慮）</p>
-
-    <p style="font-size:13px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">📊 獨立 samtools 跑 BAM HP tag 實證 (chr19 pilot + 全基因組 hp=33 跨 chr 總計):</p>
-    <table class="metric-table" style="font-size:13px;">
-      <thead>
-        <tr><th style="padding:6px;">HP tag</th><th style="padding:6px;">baseline</th><th style="padding:6px;">V6 ★</th><th style="padding:6px;">paired_T (HP:Z:)</th></tr>
-      </thead>
-      <tbody>
-        <tr><td style="padding:5px;">chr19 HP:i:1 / HP:Z:1</td><td class="num" style="padding:5px;">178,497</td><td class="num" style="padding:5px;"><strong>194,435</strong></td><td class="num" style="padding:5px;">138,239</td></tr>
-        <tr><td style="padding:5px;">chr19 HP:i:2 / HP:Z:2</td><td class="num" style="padding:5px;">146,611</td><td class="num" style="padding:5px;"><strong>118,241</strong></td><td class="num" style="padding:5px;">176,508</td></tr>
-        <tr><td style="padding:5px;">chr19 HP:i:11 / HP:Z:1-1</td><td class="num" style="padding:5px;">14,004</td><td class="num" style="padding:5px;">21,819 (−4,674)</td><td class="num" style="padding:5px;">12,115</td></tr>
-        <tr><td style="padding:5px;">chr19 HP:i:21 / HP:Z:2-1</td><td class="num" style="padding:5px;">12,089</td><td class="num" style="padding:5px;">11,924 (−1,253)</td><td class="num" style="padding:5px;">14,193</td></tr>
-        <tr class="row-green"><td style="padding:5px;"><strong>chr19 HP:i:33 / HP:Z:3</strong></td><td class="num" style="padding:5px;">556</td><td class="num" style="padding:5px;"><strong>6,504 (+5,927)</strong></td><td class="num" style="padding:5px;">1,098</td></tr>
-        <tr class="row-yellow"><td style="padding:5px;"><strong>全基因組 hp=33</strong></td><td class="num" style="padding:5px;">~0</td><td class="num" style="padding:5px;"><strong>138,317</strong> (+944% vs V5=13,250)</td><td class="num" style="padding:5px;">—</td></tr>
-      </tbody>
-    </table>
-    <p style="font-size:10.5px;color:#6B7280;margin:2px 0 0;font-style:italic;">chr19 row 為 pilot；全基因組 hp=33 row 為跨 chr 總計（資料來源 09b 全基因組量化）。V5 欄已砍（V5↔V6 守恆完美已驗證；詳 speaker note tier3）</p>
-
-    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ V6 程式碼邏輯實證正確（chr19 守恆 + 全基因組 hp=33 還原 +944%） + V6 production candidate 主結論穩固</div>
+    <p style="font-size:11.5px;font-weight:700;color:#374151;margin:0 0 4px;">🎯 V6 在 germline-absent 區「贏」V5 的 IGV 視覺鐵證 (3 個 chr19 位點):</p>
+    <p style="font-size:10.5px;color:#7C2D12;margin:0 0 6px;background:#FEF3C7;padding:4px 8px;border-radius:4px;">⚠ baseline & V5 都標錯方向 (hp=21 偏 HP2)，但 paired_T ground truth 是 HP1 → V5 沒解決 priority bug 而是 feature 化；V6 退 hp=33 ambiguous 才正確</p>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin:4px 0;">
+      <div>
+        <p style="font-size:10px;font-weight:700;color:#7C2D12;margin:0 0 2px;text-align:center;">① chr19:52,081,584 — 完美 revert ✅</p>
+        <a href="../figures/igv/V6win_chr19_52081584_5versions.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/V6win_chr19_52081584_5versions.png" alt="V6 winning chr19:52,081,584 5 versions" style="max-height:280px; width:100%; object-fit:contain;">
+        </a>
+        <p style="font-size:9px;color:#374151;margin:2px 0;">baseline & V5 全 33 hp=21<br>V6: 33 hp=33 → paired HP1 ✓</p>
+      </div>
+      <div>
+        <p style="font-size:10px;font-weight:700;color:#7C2D12;margin:0 0 2px;text-align:center;">② chr19:55,347,952 — 部分 revert ⚠</p>
+        <a href="../figures/igv/V6win_chr19_55347952_5versions.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/V6win_chr19_55347952_5versions.png" alt="V6 winning chr19:55,347,952 5 versions" style="max-height:280px; width:100%; object-fit:contain;">
+        </a>
+        <p style="font-size:9px;color:#374151;margin:2px 0;">baseline & V5 99 hp=2<br>V6: 62 hp=33 + 36 hp=21</p>
+      </div>
+      <div>
+        <p style="font-size:10px;font-weight:700;color:#7C2D12;margin:0 0 2px;text-align:center;">③ chr19:8,349,597 — partial ⚠</p>
+        <a href="../figures/igv/V6win_chr19_8349597_5versions.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/V6win_chr19_8349597_5versions.png" alt="V6 winning chr19:8,349,597 5 versions" style="max-height:280px; width:100%; object-fit:contain;">
+        </a>
+        <p style="font-size:9px;color:#374151;margin:2px 0;">germline-absent 區<br>V6 大部分退 hp=33</p>
+      </div>
+    </div>
+    <!-- v1.7-F F1: 加 margin-top + collapsible details 修 overflow -->
+    <details open style="margin-top:14px;">
+      <summary style="font-size:11px;font-weight:700;color:#1E3A8A;cursor:pointer;padding:4px 0;">📊 量化對照表 (3 位點 HP 分布) — click to collapse</summary>
+      <table class="metric-table" style="font-size:10.5px;margin-top:4px;">
+        <thead><tr><th>位點</th><th>baseline</th><th>V5</th><th>V6 ★</th><th>paired_T (ground truth)</th><th>V6 verdict</th></tr></thead>
+        <tbody>
+          <tr class="row-green"><td>chr19:52,081,584</td><td class="num">33 hp=21</td><td class="num">33 hp=21</td><td class="num"><strong>33 hp=33</strong></td><td class="num">33 hp=1-1</td><td>✅ 完美 revert</td></tr>
+          <tr class="row-yellow"><td>chr19:55,347,952</td><td class="num">99 hp=2 + 4 hp=1</td><td class="num">99 hp=2 + 4 hp=1</td><td class="num">62 hp=33 + 36 hp=21</td><td class="num">107 hp=2 + 2 hp=1</td><td>⚠ 部分 revert</td></tr>
+          <tr class="row-yellow"><td>chr19:8,349,597</td><td class="num">germ-absent 偏 HP1</td><td class="num">同 baseline</td><td class="num">大部分 hp=33</td><td class="num">混合方向</td><td>⚠ partial</td></tr>
+        </tbody>
+      </table>
+    </details>
+    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ 3 位點 V6 把 V5 過度修正退回 hp=33 ambiguous，避免錯標方向 — IGV 視覺鐵證 V6 修對 V5 設計缺陷</div>
     <div class="footer-glossary" style="font-size:9.5px;">
-      <div class="gloss-item">ⓘ Erratum 報告: InterSubMod/research/paired_priority_bug_audit/v6_quantification_erratum_2026_05_13.md</div>
-      <div class="gloss-item">ⓘ longphase-to (HP:i:) 與 longphase-s (HP:Z:) 是不同 codebase, HP1/HP2 命名任意，需明示 axis-aligned 才能跨比較</div>
+      <div class="gloss-item">ⓘ paired_T = paired mode (longphase-s tumor BAM) HP:Z: tag — 跨 codebase ground truth</div>
+      <div class="gloss-item">ⓘ V6 hp=33 = somatic ambiguous (保守不選邊)，比 V5 強制選 hp=21 更穩健</div>
+      <div class="gloss-item">ⓘ 圖檔來源: InterSubMod/docs/reports/pi_reports/2026/04/figures/igv_v5_audit/by_HP_v6_winning/</div>
     </div>
   </article>
 
-  <aside class="note-section" aria-label="Speaker notes for slide 09e">
+  <aside class="note-section" aria-label="Speaker notes for slide 09c">
     <details class="collapsible" open>
-      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
+      <summary>🎤 Speaker Note (120 sec / 中 ~340 字)</summary>
       <div class="speak-text">[標題]
-V6 forensic 驗證 — 推翻先前「V6 chr19 退步」結論。
+V6 winning IGV 鐵證 — 3 個 chr19 位點視覺證明 V6 在 germline-absent 區比 V5 更穩健。
 
 [背景]
-v6_quantification_findings.md (5/12) 寫: V6 chr19 distance to paired = 0.367, 比 baseline 0.215 還遠, 是 V5 0.006 的 57 倍。
-此結論引發疑慮 — V6 程式碼只移除 Layer 1.5 13 行, 邏輯上不該全 reads 偏移。
+V5 Layer 1.5 在 germline-absent 區用 somatic vote 決方向。
+但 5/9 paired audit 揭露這在全區 4.19:1 偏 HP1 — Layer 1.5 沒解決 priority bug 而是 feature 化。
+V6 revert Layer 1.5 → 退回 V3F 保守 hp=33 ambiguous。
 
-[Forensic 5 步驟]
-步驟 1: git diff confirm V6 only 改 Layer 1.5 13 行
-步驟 2: V6 haplotag.log confirm 重用 V5 phased VCF
-步驟 3: samtools 4 BAM chr19 獨立統計
-步驟 4: 跨 codebase HP1/HP2 命名顛倒檢查
-步驟 5: 命名顛倒後重算 distance
+[位點 1 — 完美 revert]
+chr19:52,081,584。
+baseline & V5 全 33 reads 標 hp=21 (偏 HP2)。
+V6 全 33 reads 改標 hp=33 ambiguous。
+paired_T ground truth: 33 reads 是 hp=1-1 (somatic on HP1 方向)。
+→ baseline & V5 標錯方向，V6 不選邊才正確。
 
-[實證]
-chr19 HP tag 4 BAM 統計顯示: V6 hp=33 對 baseline 增 +5,927（守恆 hp=11/21 減 4,674+1,253=5,927）；
-全基因組 hp=33 從 baseline ~0（enum/integer bug 死碼）→ V6 138,317（+944% vs V5 13,250）。
+[位點 2 — 部分 revert]
+chr19:55,347,952。
+baseline & V5 99 reads 標 hp=2。
+V6 改: 62 hp=33 + 36 hp=21。
+paired_T: 107 hp=2 + 2 hp=1 (HP2 方向真實)。
+V6 大量 hp=2 轉 hp=33 (62 條) → 對 priority bug 修對；但 36 條變 hp=21 (不該) → 部分 revert。
+
+[位點 3 — partial]
+chr19:8,349,597 germline-absent 區。
+V6 大部分退 hp=33 → 設計目標達成。
+
+[V6 鐵證的雙面意義]
+1. 在 germline-existent 區 (slide 08 全基因組 34,855 victims) → 100% 修對 priority bug
+2. 在 germline-absent 區 (本 slide 3 個 IGV) → V6 把 V5 過度修正退回 ambiguous，更穩健
 
 [結論]
-V6 程式碼邏輯實證正確 — 行為完全符合 Layer 1.5 移除 + V3F enum fix 沿用預期。
-V6 production candidate 主結論更穩固。
-詳細 erratum 報告: InterSubMod/research/paired_priority_bug_audit/v6_quantification_erratum_2026_05_13.md</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 完整 samtools 跑指令 + 4 BAM HP tag log / V5 vs V6 守恆完美等式（HP:i:1/2 完全相同 + hp=11/21 減量=hp=33 增量）/ 跨 codebase HP1/HP2 命名顛倒導致「V6 退步 0.367」原為統計腳本錯誤（顛倒後 V6≈V5≈baseline 0.06-0.07 同數量級）/ chr17/chrX/chr8 是否也命名顛倒（待量化）/ v6_quantification_findings.md 待修正的 caveats</div>
+V6 = V3F 保守 hp=33 + V5 設計目標 + marker engineering 改善 = 雙向勝出。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> V6 winning IGV 完整 3 張高解析度 / V5 Layer 1.5 4.19:1 整區量化細節 / paired_T HP:Z: 與 longphase-to HP:i: 對應 mapping</div>
     </details>
   </aside>
 
@@ -380,17 +410,17 @@ V6 production candidate 主結論更穩固。
 </main>
 
 <nav class="nav-bottom" aria-label="Slide navigation">
-  <a href="slide_09d_v6_evidence_summary.html">← Prev</a>
-  <span class="counter">Slide 09e (15/23)</span>
-  <a href="slide_09f_internal_pipeline.html">Next →</a>
+  <a href="slide_09b_hp33_mechanism.html">← Prev</a>
+  <span class="counter">Slide 09c (13/23)</span>
+  <a href="slide_09d_v6_evidence_summary.html">Next →</a>
 </nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
 
 <script>
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowLeft' && True) location.href = 'slide_09d_v6_evidence_summary.html';
-    if (e.key === 'ArrowRight' && True) location.href = 'slide_12_no_regression.html';
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_09b_hp33_mechanism.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_09d_v6_evidence_summary.html';
   });
 
   // PanZoom.js progressive enhancement — fail-soft if CDN blocked

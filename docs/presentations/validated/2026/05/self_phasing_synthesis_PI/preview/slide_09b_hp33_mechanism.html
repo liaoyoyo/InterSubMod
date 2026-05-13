@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 09e — V6 forensic 驗證 — 程式碼行為實證 + 推翻「V6 退步」結論</title>
+  <title>Slide 09b — HP=33 修補機制 — 程式碼 + 流程差異</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -306,70 +306,126 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
 </head>
 <body>
-<main class="slide-page" role="main" aria-label="Slide 09e content">
+<main class="slide-page" role="main" aria-label="Slide 09b content">
   <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
-    <div><span class="label">Slide:</span><span class="value">09e / 22</span></div>
+    <div><span class="label">Slide:</span><span class="value">09b / 22</span></div>
     <div><span class="label">Section:</span><span class="value">S4 修補設計</span></div>
     <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
-    <div><span class="label">R-G2 術語:</span><span class="value">1</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">2</span></div>
     <div><span class="label">N grep:</span><span class="value">—</span></div>
   </div>
 
   <article class="slide-canvas" data-section="S4" aria-label="Main slide canvas">
-    <h1 class="slide-title ">V6 forensic 驗證 — 程式碼行為實證 + 推翻「V6 退步」結論</h1>
-    <p class="en-subtitle">V6 forensic validation — empirical confirmation + erratum</p>
-    
-    <p style="font-size:11px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:5px 10px;border-radius:4px;">⚠ v6_quantification_findings.md (5/12) 寫「V6 chr19 distance to paired 0.367 比 baseline 還遠」— 5/13 forensic 確認此結論需修正（跨 codebase 命名顛倒未考慮）</p>
+    <h1 class="slide-title ">HP=33 修補機制 — 程式碼 + 流程差異</h1>
+    <p class="en-subtitle">HP=33 mechanism — code diff + flow comparison</p>
 
-    <p style="font-size:13px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">📊 獨立 samtools 跑 BAM HP tag 實證 (chr19 pilot + 全基因組 hp=33 跨 chr 總計):</p>
-    <table class="metric-table" style="font-size:13px;">
-      <thead>
-        <tr><th style="padding:6px;">HP tag</th><th style="padding:6px;">baseline</th><th style="padding:6px;">V6 ★</th><th style="padding:6px;">paired_T (HP:Z:)</th></tr>
-      </thead>
+    <!-- E1: 問題敘述放大紅色強調 banner -->
+    <div style="background:#FEE2E2;border:2px solid #DC2626;border-radius:6px;padding:8px 14px;margin:6px 0;">
+      <p style="font-size:15px;font-weight:700;color:#7F1D1D;margin:0;line-height:1.5;">⚠ 問題：judgeHaplotype <code>enum vs integer</code> 比較 bug → <code>HP:i:33</code> 永遠不會輸出（9 年 dead code branch）</p>
+    </div>
+
+    <!-- E2: 程式碼比較改 baseline / V3F 上下排 -->
+    <div style="display:flex;flex-direction:column;gap:6px;margin:6px 0;">
+      <div>
+        <p style="font-size:10.5px;font-weight:700;color:#7F1D1D;margin:2px 0;">❌ baseline (judgeHaplotype:697-701) — enum vs integer 錯位</p>
+        <pre class="code-panel baseline" style="font-size:9.5px;padding:6px 10px;line-height:1.45;margin:0;">// 進入點: getVote 已把 hpResult mapped 為 integer 11/21/33
+if (max==0 || ratio &lt; threshold) {
+  pqValue = 0;
+  if (hpResult != HAPLOTYPE1_1  // = 3 (enum)
+   && hpResult != HAPLOTYPE2_1){ // = 4 (enum)
+    hpResult = 0;     // ← 永遠走這（11/21/33 ≠ 3 ≠ 4 → 恆 true）
+  } else {
+    hpResult = 33;    // ← 永遠走不到 (dead code)
+  }
+}</pre>
+      </div>
+      <div>
+        <p style="font-size:10.5px;font-weight:700;color:#166534;margin:2px 0;">✅ V3F 修補 (41ff147) — 顯式 int literal + 邏輯翻轉（V6 繼承）</p>
+        <pre class="code-panel v3f" style="font-size:9.5px;padding:6px 10px;line-height:1.45;margin:0;">// V3F: 顯式 integer 比較 + 邏輯翻轉
+if (max==0 || ratio &lt; threshold) {
+  pqValue = 0;
+  if (hpResult == 11    // 顯式 int literal
+   || hpResult == 21
+   || hpResult == 33) {
+    hpResult = 33;    // ★ somatic 有票 → hp=33
+  } else {
+    hpResult = 0;     // 純 germline 弱信號 → no tag
+  }
+}</pre>
+      </div>
+    </div>
+    <p style="font-size:10.5px;font-weight:700;color:#1E3A8A;margin:6px 0 2px;">💡 修補動作對照 — V3F 同時修兩個獨立缺陷，PI 一眼讀懂差別：</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th style="width:18%;">維度</th><th style="width:38%;background:#FEE2E2;color:#7F1D1D;">❌ baseline 行為</th><th style="width:38%;background:#DCFCE7;color:#166534;">✅ V3F 修補</th><th style="width:6%;">差別</th></tr></thead>
       <tbody>
-        <tr><td style="padding:5px;">chr19 HP:i:1 / HP:Z:1</td><td class="num" style="padding:5px;">178,497</td><td class="num" style="padding:5px;"><strong>194,435</strong></td><td class="num" style="padding:5px;">138,239</td></tr>
-        <tr><td style="padding:5px;">chr19 HP:i:2 / HP:Z:2</td><td class="num" style="padding:5px;">146,611</td><td class="num" style="padding:5px;"><strong>118,241</strong></td><td class="num" style="padding:5px;">176,508</td></tr>
-        <tr><td style="padding:5px;">chr19 HP:i:11 / HP:Z:1-1</td><td class="num" style="padding:5px;">14,004</td><td class="num" style="padding:5px;">21,819 (−4,674)</td><td class="num" style="padding:5px;">12,115</td></tr>
-        <tr><td style="padding:5px;">chr19 HP:i:21 / HP:Z:2-1</td><td class="num" style="padding:5px;">12,089</td><td class="num" style="padding:5px;">11,924 (−1,253)</td><td class="num" style="padding:5px;">14,193</td></tr>
-        <tr class="row-green"><td style="padding:5px;"><strong>chr19 HP:i:33 / HP:Z:3</strong></td><td class="num" style="padding:5px;">556</td><td class="num" style="padding:5px;"><strong>6,504 (+5,927)</strong></td><td class="num" style="padding:5px;">1,098</td></tr>
-        <tr class="row-yellow"><td style="padding:5px;"><strong>全基因組 hp=33</strong></td><td class="num" style="padding:5px;">~0</td><td class="num" style="padding:5px;"><strong>138,317</strong> (+944% vs V5=13,250)</td><td class="num" style="padding:5px;">—</td></tr>
+        <tr><td><strong>① 比較目標</strong></td><td class="num">hpResult vs <code>HAPLOTYPE1_1=3</code> (enum)</td><td class="num">hpResult vs <code>11</code> (整數字面)</td><td>修對</td></tr>
+        <tr><td><strong>② 比較結果</strong></td><td class="num">11≠3 ∧ 11≠4 ∧ 33≠3 ∧ 33≠4 → 恆 <code>true</code></td><td class="num">11==11 / 21==21 / 33==33 → 真實命中</td><td>修對</td></tr>
+        <tr><td><strong>③ 判定邏輯方向</strong></td><td class="num"><code>!=</code> → <code>0</code>；<code>==</code> → <code>33</code> (反向)</td><td class="num"><code>==</code> → <code>33</code>；<code>!=</code> → <code>0</code> (正向)</td><td>翻轉</td></tr>
+        <tr class="row-red"><td><strong>somatic read 結果</strong></td><td class="num">hpResult = 0 (no tag) ❌</td><td class="num">hpResult = 33 (somatic ambiguous) ✅</td><td>—</td></tr>
+        <tr class="row-yellow"><td colspan="4" style="font-size:9.5px;"><strong>設計意圖 vs 實際行為</strong>：baseline 寫程式者以為「if 不是 somatic 11/21 → no tag；是 somatic → 標 33」；但因 hpResult 早已被 getVote map 成 11/21/33，比較目標卻用 enum 3/4 → 設計意圖完全失效，hp=33 else 分支變死碼</td></tr>
       </tbody>
     </table>
-    <p style="font-size:10.5px;color:#6B7280;margin:2px 0 0;font-style:italic;">chr19 row 為 pilot；全基因組 hp=33 row 為跨 chr 總計（資料來源 09b 全基因組量化）。V5 欄已砍（V5↔V6 守恆完美已驗證；詳 speaker note tier3）</p>
-
-    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ V6 程式碼邏輯實證正確（chr19 守恆 + 全基因組 hp=33 還原 +944%） + V6 production candidate 主結論穩固</div>
+    <!-- v1.7-F E3: 移除「📐 後續演進」+ hp=33 全基因組量化區 (V5/V6 演進細節下放至 09c/09e + speaker note tier3) -->
     <div class="footer-glossary" style="font-size:9.5px;">
-      <div class="gloss-item">ⓘ Erratum 報告: InterSubMod/research/paired_priority_bug_audit/v6_quantification_erratum_2026_05_13.md</div>
-      <div class="gloss-item">ⓘ longphase-to (HP:i:) 與 longphase-s (HP:Z:) 是不同 codebase, HP1/HP2 命名任意，需明示 axis-aligned 才能跨比較</div>
+      <div class="gloss-item">ⓘ Util.h:23-25 — enum HAPLOTYPE3=2 / HAPLOTYPE1_1=3 / HAPLOTYPE2_1=4；但 haplotypeBase map 把 hpResult 設為 11/21/33 — 比較目標錯位</div>
+      <div class="gloss-item">ⓘ hp=33 = somatic ambiguous (germline 缺席 + somatic 有票) 保守 tag，避免錯標 HP1/HP2 方向</div>
+      <div class="gloss-item">ⓘ V5→V6 transfer 82:17 from hp=1-1/hp=2-1 → hp=33 完美 mirror priority bug feature 化方向</div>
     </div>
   </article>
 
-  <aside class="note-section" aria-label="Speaker notes for slide 09e">
+  <aside class="note-section" aria-label="Speaker notes for slide 09b">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
       <div class="speak-text">[標題]
-V6 forensic 驗證 — 推翻先前「V6 chr19 退步」結論。
+HP=33 修補機制 — baseline enum/integer 比較 bug + V3F 修補。
 
-[背景]
-v6_quantification_findings.md (5/12) 寫: V6 chr19 distance to paired = 0.367, 比 baseline 0.215 還遠, 是 V5 0.006 的 57 倍。
-此結論引發疑慮 — V6 程式碼只移除 Layer 1.5 13 行, 邏輯上不該全 reads 偏移。
+[真正的 baseline bug]
+不是 vector keys 順序，而是 judgeHaplotype 低信心 fallback 區的 enum vs integer 比較錯誤。
+源碼路徑 HaplotagProcess.cpp:697-701。
 
-[Forensic 5 步驟]
-步驟 1: git diff confirm V6 only 改 Layer 1.5 13 行
-步驟 2: V6 haplotag.log confirm 重用 V5 phased VCF
-步驟 3: samtools 4 BAM chr19 獨立統計
-步驟 4: 跨 codebase HP1/HP2 命名顛倒檢查
-步驟 5: 命名顛倒後重算 distance
+[bug 解構]
+進入點：getVote 已把 hpResult mapped 為 integer 11/21/33（透過 haplotypeBase map）。
+低信心 fallback 條件 max==0 或 ratio<threshold 觸發。
 
-[實證]
-chr19 HP tag 4 BAM 統計顯示: V6 hp=33 對 baseline 增 +5,927（守恆 hp=11/21 減 4,674+1,253=5,927）；
-全基因組 hp=33 從 baseline ~0（enum/integer bug 死碼）→ V6 138,317（+944% vs V5 13,250）。
+baseline 寫的比較：
+if (hpResult != HAPLOTYPE1_1 && hpResult != HAPLOTYPE2_1)
+   hpResult = 0;
+else
+   hpResult = 33;
 
-[結論]
-V6 程式碼邏輯實證正確 — 行為完全符合 Layer 1.5 移除 + V3F enum fix 沿用預期。
-V6 production candidate 主結論更穩固。
-詳細 erratum 報告: InterSubMod/research/paired_priority_bug_audit/v6_quantification_erratum_2026_05_13.md</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> 完整 samtools 跑指令 + 4 BAM HP tag log / V5 vs V6 守恆完美等式（HP:i:1/2 完全相同 + hp=11/21 減量=hp=33 增量）/ 跨 codebase HP1/HP2 命名顛倒導致「V6 退步 0.367」原為統計腳本錯誤（顛倒後 V6≈V5≈baseline 0.06-0.07 同數量級）/ chr17/chrX/chr8 是否也命名顛倒（待量化）/ v6_quantification_findings.md 待修正的 caveats</div>
+但 Util.h:23-25 定義 enum 值是 HAPLOTYPE3=2 / HAPLOTYPE1_1=3 / HAPLOTYPE2_1=4。
+hpResult 實際值是 mapped 後的 11/21/33。
+所以 11 != 3 ∧ 11 != 4 → true → 走 hpResult=0；
+21 != 3 ∧ 21 != 4 → true → 走 hpResult=0；
+33 != 3 ∧ 33 != 4 → true → 走 hpResult=0。
+
+結論：條件永遠為 true，else 分支 hpResult=33 是死碼，永遠走不到。
+
+[V3F 修補 41ff147]
+顯式 integer 比較 + 邏輯翻轉。
+if (hpResult == 11 || hpResult == 21 || hpResult == 33)
+   hpResult = 33;
+else
+   hpResult = 0;
+
+兩個動作：
+1. enum/integer 比較修對（用 11/21/33 直接比，避開 enum 值錯位）
+2. 邏輯翻轉（somatic 有票才保留為 33，純 germline 弱信號才 no tag）
+
+V3F commit message 自己寫了「Also fixes enum/integer comparison bug in low-confidence fallback」。
+
+[V5/V6 是後續演進，不同 bug]
+V5 Layer 1.5 改的是 getVote — germline 缺席時用 somatic vote 強制選邊 → hp=11/21。
+V6 revert Layer 1.5 → 退回 V3F 行為 + 沿用 V3F 的 judgeHaplotype enum fix。
+
+[量化]
+全基因組 hp=33 從 baseline ~0（死碼）→ V3F 132,060 → V5 13,250（過度修正）→ V6 138,317（還原 V3F 並略超）。
+
+[意義]
+hp=33 還原讓 ISM 下游 marker engineering 重新依賴此訊號。
+mixed-sub-tag (germline 缺席 + somatic 有票) 是識別 sub-clone 結構的關鍵 marker。
+slide 13 future direction F2 (二次打擊事件順序) 依賴此訊號。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> V3F commit 41ff147 完整 diff (line 504-540 getVote + line 697-701 judgeHaplotype) / Util.h:23-25 enum 定義鐵證 / V5/V6 Layer 1.5 設計演進獨立於本 enum bug</div>
     </details>
   </aside>
 
@@ -380,17 +436,17 @@ V6 production candidate 主結論更穩固。
 </main>
 
 <nav class="nav-bottom" aria-label="Slide navigation">
-  <a href="slide_09d_v6_evidence_summary.html">← Prev</a>
-  <span class="counter">Slide 09e (15/23)</span>
-  <a href="slide_09f_internal_pipeline.html">Next →</a>
+  <a href="slide_10_fix_design.html">← Prev</a>
+  <span class="counter">Slide 09b (12/23)</span>
+  <a href="slide_09c_v6_winning_igv.html">Next →</a>
 </nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
 
 <script>
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowLeft' && True) location.href = 'slide_09d_v6_evidence_summary.html';
-    if (e.key === 'ArrowRight' && True) location.href = 'slide_12_no_regression.html';
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_10_fix_design.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_09c_v6_winning_igv.html';
   });
 
   // PanZoom.js progressive enhancement — fail-soft if CDN blocked

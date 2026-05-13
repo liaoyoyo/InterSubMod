@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Self-Phasing PPT Preview — 17 主 + 5 backup multi-page (v1.6)</title>
+  <title>Self-Phasing PPT Preview — 15 主 + 8 backup multi-page (v1.7-F)</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -32,8 +32,9 @@ nav.slidetabs {
   border-bottom: 1px solid #E5E7EB; display: flex; gap: 6px; overflow-x: auto; flex-wrap: wrap;
 }
 nav.slidetabs button {
-  background: #F3F4F6; border: 1px solid #D1D5DB; color: #374151; padding: 6px 12px;
-  border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500; white-space: nowrap;
+  background: #F3F4F6; border: 1px solid #D1D5DB; color: #374151; padding: 8px 14px;
+  border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; white-space: normal;
+  min-width: 110px; min-height: 38px; line-height: 1.3; text-align: center;
   transition: all 0.15s;
 }
 nav.slidetabs button:hover { background: #E5E7EB; border-color: #9CA3AF; }
@@ -306,7 +307,7 @@ details.collapsible summary:hover { color: #1D4ED8; }
 <body>
 
 <header class="topbar" role="banner">
-  <h1>📊 Self-Phasing PPT Preview — 16 主 slide + 7 backup (v1.7-D 2026-05-14, 04/04c 移 backup)</h1>
+  <h1>📊 Self-Phasing PPT Preview — 15 主 slide + 8 backup (v1.7-F 2026-05-14, 10_fix_design 移 B8)</h1>
   <div class="meta">
     <code>InterSubMod/docs/presentations/validated/2026/05/self_phasing_synthesis_PI/</code>
     &nbsp;|&nbsp; Build: 2026-05-11
@@ -322,7 +323,7 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <button data-slide="06_priority_bug" class="">06 S2 機制</button>
   <button data-slide="07_two_layer_table" class="">07 S2 機制</button>
   <button data-slide="08_quant_evidence" class="">08 S3 量化鐵</button>
-  <button data-slide="10_fix_design" class="">09 S4 修補設</button>
+  <!-- v1.7-F 2026-05-14: 10_fix_design 移至 backup B8（PI 追問 5 commits timeline / getVote 4 版演進細節才秀） -->
   <button data-slide="09b_hp33_mechanism" class="">09b S4 修補設</button>
   <button data-slide="09c_v6_winning_igv" class="">09c S4 修補設</button>
   <button data-slide="09d_v6_evidence_summary" class="">09d S4 修補設</button>
@@ -339,6 +340,7 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <button data-slide="04d_5reads_vote_trace_igv" class="nav-backup">B5 read-level rescue</button>
   <button data-slide="04_sp1_2_3" class="nav-backup">B6 SP1/2/3 個案</button>
   <button data-slide="04c_priority_bug_fix_site" class="nav-backup">B7 chr19:27M 主峰</button>
+  <button data-slide="10_fix_design" class="nav-backup">B8 fix design timeline</button>
 </nav>
 
 <main class="iframe-wrap" role="main">
