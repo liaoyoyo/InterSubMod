@@ -391,6 +391,100 @@ SP1/2/3 (germline-absent) 顯示 V6 退 hp=33 設計取捨。
 兩個 case 共同證 V6 雙區行為符合預期。""",
     tier3="chr19:27,373,006 同模式 baseline 77→V6 29 hp=11 / 大量候選位點待跑命名顛倒檢查 / IGV session v6_all_5versions.xml 完整 7 panel 對照")
 
+add(id="04d_5reads_vote_trace_igv", num="04d", section="S1 觀察起點", rg2="5 IGV", ngrep="—",
+    title="5 vote_dump reads — read-level 因果 BAM + IGV 鐵證",
+    en="5 vote_dump reads — read-level BAM + IGV evidence",
+    timing="120 sec / 中 ~360 字",
+    canvas_html="""
+    <p style="font-size:11px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:5px 10px;border-radius:4px;">⚠ 對 5 條 chr19 vote_dump 中代表 reads 跑 samtools 4 BAM HP tag forensic + IGV 多版對照, 確認 read-level priority bug 修對因果鏈</p>
+
+    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:6px 0 4px;">📋 5 reads BAM 實證表 (4 版 HP:i: tag forensic):</p>
+    <table class="metric-table" style="font-size:10.5px;">
+      <thead><tr><th>read_name (前 12)</th><th>chr19:pos</th><th>baseline</th><th>V3F</th><th>V5</th><th>V6</th><th>verdict</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td>1c50034a-f0f</td><td class="num">201,417</td><td class="num"><strong>HP:i:11</strong></td><td class="num">HP:i:21</td><td class="num">HP:i:21</td><td class="num"><strong>HP:i:21</strong></td><td>✅ priority bug 修對</td></tr>
+        <tr class="row-green"><td>afb8e89b-893</td><td class="num">585,252</td><td class="num"><strong>HP:i:11</strong></td><td class="num">HP:i:21</td><td class="num">HP:i:21</td><td class="num"><strong>HP:i:21</strong></td><td>✅ priority bug 修對</td></tr>
+        <tr class="row-yellow"><td>35c7e166-ec3</td><td class="num">824,360</td><td class="num">HP:i:2</td><td class="num">HP:i:2</td><td class="num">HP:i:21</td><td class="num">HP:i:21</td><td>⚠ V5 Layer 1.5 改方向</td></tr>
+        <tr class="row-green"><td>096ab9a7-030</td><td class="num">1,574,442</td><td class="num"><strong>HP:i:11</strong></td><td class="num">HP:i:21</td><td class="num">HP:i:21</td><td class="num"><strong>HP:i:21</strong></td><td>✅ priority bug 修對</td></tr>
+        <tr class="row-yellow"><td>ccc8185d-f9b</td><td class="num">2,558,240</td><td class="num">HP:i:2</td><td class="num">HP:i:2</td><td class="num">HP:i:21</td><td class="num">HP:i:21</td><td>⚠ V5 Layer 1.5 改方向</td></tr>
+      </tbody>
+    </table>
+
+    <p style="font-size:11px;font-weight:700;color:#374151;margin:8px 0 4px;">🔬 5 reads 位點 IGV 多版對照 (v6_all_5versions session — baseline/V2b/V3F/V5/V6/paired_T/paired_N):</p>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap:6px; margin:4px 0;">
+      <div style="text-align:center;">
+        <a href="../figures/igv/VoteRead1_chr19_201417_1c50034a.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/VoteRead1_chr19_201417_1c50034a.png" alt="Read1 chr19:201,417" style="max-height:200px; width:100%; object-fit:contain;">
+        </a>
+        <p style="font-size:9px;color:#374151;margin:1px 0;">① 201,417<br>1c50034a ✅</p>
+      </div>
+      <div style="text-align:center;">
+        <a href="../figures/igv/VoteRead2_chr19_585252_afb8e89b.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/VoteRead2_chr19_585252_afb8e89b.png" alt="Read2 chr19:585,252" style="max-height:200px; width:100%; object-fit:contain;">
+        </a>
+        <p style="font-size:9px;color:#374151;margin:1px 0;">② 585,252<br>afb8e89b ✅</p>
+      </div>
+      <div style="text-align:center;">
+        <a href="../figures/igv/VoteRead3_chr19_824360_35c7e166.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/VoteRead3_chr19_824360_35c7e166.png" alt="Read3 chr19:824,360" style="max-height:200px; width:100%; object-fit:contain;">
+        </a>
+        <p style="font-size:9px;color:#7C2D12;margin:1px 0;">③ 824,360<br>35c7e166 ⚠</p>
+      </div>
+      <div style="text-align:center;">
+        <a href="../figures/igv/VoteRead4_chr19_1574442_096ab9a7.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/VoteRead4_chr19_1574442_096ab9a7.png" alt="Read4 chr19:1,574,442" style="max-height:200px; width:100%; object-fit:contain;">
+        </a>
+        <p style="font-size:9px;color:#374151;margin:1px 0;">④ 1,574,442<br>096ab9a7 ✅</p>
+      </div>
+      <div style="text-align:center;">
+        <a href="../figures/igv/VoteRead5_chr19_2558240_ccc8185d.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/VoteRead5_chr19_2558240_ccc8185d.png" alt="Read5 chr19:2,558,240" style="max-height:200px; width:100%; object-fit:contain;">
+        </a>
+        <p style="font-size:9px;color:#7C2D12;margin:1px 0;">⑤ 2,558,240<br>ccc8185d ⚠</p>
+      </div>
+    </div>
+
+    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ 3/5 reads 完美驗證 priority bug 修對 (baseline HP:i:11 → V6 HP:i:21); 2/5 reads 揭露 V5 Layer 1.5 在 germline-existent 區也影響 (baseline HP:i:2 → V5/V6 HP:i:21)</div>
+    <div class="footer-glossary" style="font-size:9.5px;">
+      <div class="gloss-item">ⓘ IGV panel 順序: baseline / V2b / V3F / V5 / V6 / paired tumor / paired normal — 點圖放大</div>
+      <div class="gloss-item">ⓘ ✅ = baseline HP:i:11 priority bug → V6 翻 HP:i:21 修對；⚠ = baseline HP:i:2 → V5 Layer 1.5 改成 HP:i:21 (V6 繼承)</div>
+      <div class="gloss-item">ⓘ 752 chr19 victims 中代表 5 reads — 從 vote_dump 5/13 forensic samtools 跑 4 BAM 實證</div>
+    </div>""",
+    speaker="""[標題]
+5 vote_dump reads — read-level 因果 BAM + IGV 鐵證。
+從 chr19 752 victims 中取代表 5 reads 對 4 版 BAM 跑 samtools forensic + IGV 多版對照。
+
+[BAM 實證表 — 5/13 samtools forensic]
+對應 read_name + position 在 baseline / V3F / V5 / V6 BAM 找實際 HP tag。
+
+[3/5 priority bug 修對個案 ✅]
+1c50034a-f0f @ chr19:201,417: baseline HP:i:11 → V3F/V5/V6 HP:i:21
+afb8e89b-893 @ chr19:585,252: baseline HP:i:11 → V3F/V5/V6 HP:i:21
+096ab9a7-030 @ chr19:1,574,442: baseline HP:i:11 → V3F/V5/V6 HP:i:21
+→ 3 條 reads 完美 priority bug 修對 read-level 鐵證。
+
+[2/5 V5 Layer 1.5 改方向 ⚠]
+35c7e166-ec3 @ chr19:824,360: baseline HP:i:2 → V3F HP:i:2 → V5 HP:i:21 → V6 HP:i:21
+ccc8185d-f9b @ chr19:2,558,240: baseline HP:i:2 → V3F HP:i:2 → V5 HP:i:21 → V6 HP:i:21
+→ 揭露 V5 Layer 1.5 不只影響 germline-absent 區; 也改變 germline-existent 某些 reads tag。
+→ V6 繼承 V5 phased VCF, 這 2 reads V6 也 HP:i:21 (不是 V6 邏輯獨立改的)。
+
+[IGV 5 縮圖]
+IGV multi-panel 對照 (v6_all_5versions session)。
+panel 順序: baseline / V2b / V3F / V5 / V6 / paired tumor / paired normal。
+點圖放大看完整 multi-version read 配置。
+
+[與 slide 04a/04b/04c 區別]
+04a/04b: SP1/2/3 個案 — germline-absent (V6 退 hp=33)
+04c: chr19:27M 位點 — germline-existent (V6 翻 HP:i:21)
+本 slide 04d: 5 reads 個案 — read-level priority bug 修對因果
+
+[結論]
+read-level BAM 實證鐵證確立 — 3/5 reads 完美修對 priority bug。
+2/5 reads 揭露 V5 Layer 1.5 影響範圍超出 germline-absent 區。
+詳細 forensic 報告: InterSubMod/research/paired_priority_bug_audit/v6_quantification_erratum_2026_05_13.md""",
+    tier3="完整 752 reads 跨 4 版 BAM HP tag 統計 (待跑大規模) / V5 Layer 1.5 影響 germline-existent 區的全範圍量化 / paired_T HP:Z: 對應這 5 reads")
+
 # ─── S2 機制 ──────────────────────────────────────────────────────────────
 add(id="05_player_referee", num="05", section="S2 機制", rg2="4 (核心 forced)", ngrep="3 + 1 commit",
     title="phasing 層球員兼裁判機制",
