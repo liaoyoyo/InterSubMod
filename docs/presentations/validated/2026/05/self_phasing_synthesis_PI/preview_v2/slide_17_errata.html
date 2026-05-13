@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 17 — 5 條 PI errata 已 patch</title>
+  <style>
+    :root {
+      --c-accent: #D97757; --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #F5F5F7; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-info: #1E3A8A;
+      --ff-body: "Noto Sans CJK TC", "Source Han Sans TW", "Droid Sans Fallback",
+                 -apple-system, system-ui, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", monospace;
+      --shadow-lg: 0 4px 16px rgba(20,20,19,0.10);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--c-bg); color: var(--c-text);
+           font-family: var(--ff-body); line-height: 1.5; }
+
+    main.slide-page { max-width: 1280px; margin: 0 auto; padding: 24px; }
+
+    .slide-meta { background: var(--c-surface); padding: 12px 16px; margin-bottom: 14px;
+                  border-radius: 8px; border-left: 4px solid #B45309;
+                  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 12px; }
+    .slide-meta .label { color: var(--c-text-soft); font-weight: 500; }
+    .slide-meta .value { color: var(--c-text); margin-left: 4px; font-weight: 600; }
+
+    .slide-canvas { background: var(--c-surface); border: 1px solid var(--c-border);
+                    border-radius: 8px; aspect-ratio: 16 / 9;
+                    padding: 26px 36px; position: relative; box-shadow: var(--shadow-lg);
+                    overflow: hidden; }
+    .slide-canvas h2.slide-title { font-size: 26px; margin: 0; border-bottom: 2px solid;
+                                    padding-bottom: 3px;
+                                    color: #B45309; border-bottom-color: #B45309; }
+    .slide-canvas .en-subtitle { font-size: 12px; color: var(--c-text-soft);
+                                  font-style: italic; margin: 3px 0 12px; padding-left: 1em; }
+    .slide-canvas[data-section="S7"]::before {
+      content: attr(data-section);
+      position: absolute; top: 8px; right: 28px;
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 12px; color: white; background: #B45309; opacity: 0.9;
+    }
+
+    /* Errata table */
+    .errata-table { width: 100%; border-collapse: collapse; font-size: 13.5px;
+                     margin: 6px 0; }
+    .errata-table th, .errata-table td {
+      padding: 7px 10px; border: 1px solid var(--c-border); text-align: left;
+      vertical-align: top;
+    }
+    .errata-table th { background: #FEF3C7; color: #78350F; font-weight: 700;
+                        text-align: center; font-size: 12px; }
+    .errata-table .id-cell { text-align: center; font-weight: 700; color: #B45309;
+                              background: #FFFBEB; font-family: var(--ff-mono);
+                              white-space: nowrap; }
+    .errata-table .section-cell { font-family: var(--ff-mono); font-size: 12px;
+                                    color: var(--c-text-soft); white-space: nowrap; }
+    .errata-table tr.core td { background: #FEF7E6; }
+    .errata-table tr.core .id-cell { background: #FCD34D; color: #78350F; }
+    .errata-table .arrow { color: #B45309; font-weight: 700; padding: 0 4px; }
+    .errata-table code { background: var(--c-surface); padding: 1px 5px; border-radius: 3px;
+                          font-family: var(--ff-mono); font-size: 0.92em; border: 1px solid var(--c-border); }
+    .errata-table .commit { font-family: var(--ff-mono); font-size: 11px; color: #047857; }
+
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px;
+             font-size: 10px; font-weight: 700; margin-left: 4px; }
+    .badge.core { background: #FCD34D; color: #78350F; }
+    .badge.minor { background: #E5E7EB; color: #4B5563; }
+
+    /* Conclusion arrow (allowed gradient) */
+    .conclusion-arrow { background: linear-gradient(90deg, #15803D, #22C55E);
+                        color: white; padding: 10px 16px; margin: 12px 0 0;
+                        border-radius: 6px; font-weight: 600; font-size: 15px; }
+
+    .footer-glossary { position: absolute; bottom: 8px; left: 28px; right: 28px;
+                       font-size: 11px; color: var(--c-text-soft);
+                       border-top: 1px solid var(--c-border); padding-top: 4px;
+                       display: flex; gap: 16px; }
+    .footer-glossary .term { font-weight: 600; color: var(--c-text); }
+    .footer-glossary code { font-family: var(--ff-mono); }
+
+    .note-section { margin-top: 16px; background: #FAFBFE; border: 1px solid #C7D2FE;
+                    border-left: 4px solid #8B5CF6; border-radius: 8px; padding: 12px 16px; }
+    .note-section summary { cursor: pointer; font-size: 13px; font-weight: 600; color: #6D28D9; }
+    .note-section .timing { background: #EDE9FE; padding: 3px 9px; border-radius: 4px;
+                             font-size: 11px; color: #6D28D9; display: inline-block; margin: 6px 0;
+                             font-weight: 600; }
+    .note-section .speak-text { font-size: 13px; line-height: 1.65; white-space: pre-line;
+                                 color: var(--c-text); }
+    .note-section .tier3 { margin-top: 10px; padding: 6px 10px; border-radius: 4px;
+                           background: #F9FAFB; border: 1px dashed #9CA3AF;
+                           font-size: 11px; color: var(--c-text-soft); }
+    .note-section .tier3 .label { font-weight: 700; color: #374151; margin-right: 4px; }
+
+    .nav-bottom { display: flex; justify-content: space-between; margin: 16px 0; padding: 0 4px; }
+    .nav-bottom a { background: var(--c-info); color: white; text-decoration: none;
+                    padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+    .nav-bottom a.disabled { opacity: 0.4; pointer-events: none; }
+    .nav-bottom .counter { align-self: center; color: var(--c-text-soft); font-size: 11px; }
+
+    @media print {
+      body { background: white; }
+      .slide-meta, .nav-bottom { display: none; }
+      .slide-canvas { box-shadow: none; aspect-ratio: auto; }
+      details[open] summary, details summary { list-style: none; }
+      details { open: true; }
+    }
+  </style>
+</head>
+<body>
+
+<main class="slide-page">
+
+  <div class="slide-meta">
+    <span class="label">Slide</span><span class="value">17 / 22</span>
+    <span class="label">Section</span><span class="value">S7 結論 + errata</span>
+    <span class="label">Timing</span><span class="value">1.5 分鐘</span>
+  </div>
+
+  <article class="slide-canvas" data-section="S7" aria-label="5 條 PI errata 已 patch">
+
+    <h2 class="slide-title">PI 4-29 5 條 errata 已 patch — 主結論不撤回</h2>
+    <p class="en-subtitle">All five PI report errata addressed; main conclusion stands; E4/E5 are core revisions</p>
+
+    <table class="errata-table">
+      <thead>
+        <tr>
+          <th style="width:6%">ID</th>
+          <th style="width:12%">Section</th>
+          <th style="width:62%">表述修訂</th>
+          <th style="width:20%">證據 / commit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id-cell">E1<span class="badge minor">minor</span></td>
+          <td class="section-cell">§3.3.3</td>
+          <td>chr19 SP1/2/3 從「主要 hotspot」<span class="arrow">→</span>「可重現案例」（占 2.16% rank 19）</td>
+          <td><span class="commit">數據引用 §9 表</span></td>
+        </tr>
+        <tr>
+          <td class="id-cell">E2<span class="badge minor">minor</span></td>
+          <td class="section-cell">§5.2</td>
+          <td>V5 working tree <span class="arrow">→</span> 已 commit；不再有「未提交修補」 footprint</td>
+          <td><span class="commit">d0bcd8c · 938f0df</span></td>
+        </tr>
+        <tr>
+          <td class="id-cell">E3<span class="badge minor">minor</span></td>
+          <td class="section-cell">§5.2</td>
+          <td>證據強度升級：「commit msg + 3 IGV」<span class="arrow">→</span>「+ 34,855 read-level 鐵證」</td>
+          <td><span class="commit">§S3 量化</span></td>
+        </tr>
+        <tr class="core">
+          <td class="id-cell">E4<span class="badge core">core</span></td>
+          <td class="section-cell">§6.4 / §6.5</td>
+          <td>V5 數值歸因更正：「Pass 1 only；主要 V3F + Layer 1.5；<strong>Pass 2 二次效益尚未量化</strong>」</td>
+          <td><span class="commit">§S5 驗證</span></td>
+        </tr>
+        <tr class="core">
+          <td class="id-cell">E5<span class="badge core">core</span></td>
+          <td class="section-cell">§5.2 (5/10 加)</td>
+          <td>V5 Layer 1.5「germline-absent 區與 baseline 4.19:1 相同 — <strong>設計缺陷非修補</strong>」</td>
+          <td><span class="commit">F-paired-D paired cross-ref</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="conclusion-arrow">
+      ✓ 5 條 errata 已 patch；主結論（priority bug + 兩層修補）不撤回；E4 / E5 為核心精確化
+    </div>
+
+    <div class="footer-glossary">
+      <span><span class="term">errata</span> 報告勘誤；E4/E5 為核心、E1-E3 為表述精確化</span>
+      <span><span class="term">working tree</span> 已 commit 至 main branch，非 uncommitted patch</span>
+    </div>
+
+  </article>
+
+  <details class="note-section" open>
+    <summary>🎤 Speaker Note</summary>
+    <div class="timing">1.5 分鐘</div>
+    <div class="speak-text">[開場]
+PI 4-29 報告 review 後找出 5 條 errata，這張投影片是 patch 結果總結。
+
+[主軸]
+E1-E3 是表述精確化（chr19 hotspot → 可重現案例、working tree → 已 commit、證據強度升級）。
+E4 + E5 是核心 errata：
+  • E4 — V5 的 F1 改善歸因更正：「主要是 V3F + Layer 1.5，Pass 2 尚未獨立量化」；
+  • E5 — V5 Layer 1.5 在 germline-absent 區與 baseline 4.19:1 相同，是設計缺陷不是修補。
+
+[結論]
+主結論（priority bug 機制 + 兩層修補的因果鏈）不撤回。E5 開啟 F-paired-D3 follow-up（下一張）。</div>
+    <div class="tier3">
+      <span class="label">Tier 3 (口頭可選):</span>
+      errata commit chain — f17754f → 2553e96 → 71d21bd 三 commit 對應 §3.3.3 / §5.2 / §6.4 三段修訂。
+      若 PI 問「為什麼 E5 比 E1 晚加」，補充：E5 是 5/10 paired cross-ref Step D 才發現的設計缺陷。
+    </div>
+  </details>
+
+  <nav class="nav-bottom">
+    <a href="slide_06_priority_bug.html">← Prev</a>
+    <span class="counter">17 / 22 (pilot subset)</span>
+    <a href="#" class="disabled">Next →</a>
+  </nav>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Phasing 完整觀察整合報告 — 2026-05-08</title>
+  <style>
+    :root {
+      --c-accent: #D97757; --c-accent-deep: #B85A3F;
+      --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-code-bg: #F4EFE6;
+      --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+      --c-info: #1E3A8A;
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+      --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+                 "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+      --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+      --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 32px;
+      --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+      --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+      --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--c-bg); color: var(--c-text);
+           font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.6; }
+
+    .layout { max-width: 1320px; margin: 0 auto; display: grid;
+              grid-template-columns: 220px 1fr; gap: var(--sp-5);
+              padding: var(--sp-5) var(--sp-4); }
+
+    aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+                background: var(--c-surface); border: 1px solid var(--c-border);
+                border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+                box-shadow: var(--shadow-sm);
+                max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+    aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase;
+                    letter-spacing: 0.5px; color: var(--c-text-soft);
+                    margin: 0 0 var(--sp-2); font-weight: 700; }
+    aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+    aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+    aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+                  color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+                  border-left: 3px solid transparent; }
+    aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+    aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                          font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+    aside.toc a.core { font-weight: 600; }
+    aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px; font-size: 0.85em; }
+
+    main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+                  border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+                  padding: var(--sp-6); min-width: 0; }
+
+    .report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                      margin-bottom: var(--sp-5); }
+    .report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                                letter-spacing: 1px; color: var(--c-accent-deep);
+                                font-weight: 700; margin-bottom: var(--sp-2); }
+    .report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+    .report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                            gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+    .report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+    .report-header .meta dd { margin: 0; }
+    .report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                                 border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                                 font-size: 0.92em; }
+
+    .verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                       border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md);
+                       background: linear-gradient(90deg, #15803D, #22C55E); }
+    .verdict-banner.caution { background: linear-gradient(90deg, #A16207, #CA8A04); }
+
+    h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+          padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+          scroll-margin-top: var(--sp-4); }
+    h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+                font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+    h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+    h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2); color: var(--c-text-soft); }
+
+    p, ul, ol { margin: var(--sp-3) 0; }
+    ul, ol { padding-left: var(--sp-5); }
+    a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { color: var(--c-accent-deep); }
+    blockquote { border-left: 3px solid var(--c-accent); padding-left: var(--sp-4);
+                  color: var(--c-text-soft); margin: var(--sp-3) 0;
+                  background: var(--c-code-bg); padding: var(--sp-3) var(--sp-4);
+                  border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+    code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+            font-family: var(--ff-mono); font-size: 0.92em; }
+    pre { background: var(--c-code-bg); padding: var(--sp-3); border-radius: var(--radius-md);
+           overflow-x: auto; font-family: var(--ff-mono); font-size: var(--fs-sm); line-height: 1.55; }
+    pre code { background: none; padding: 0; }
+
+    table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+    th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left;
+             vertical-align: top; }
+    th { background: var(--c-code-bg); font-weight: 600; }
+    td.num { text-align: right; font-family: var(--ff-mono); }
+    tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+    tr.row-safe td { background: #DCFCE7; color: #166534; }
+    tr.row-warn td { background: #FEF3C7; }
+
+    /* Tier badge (Rule 9: colorblind-safe — color + text + symbol) */
+    .tier { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: var(--fs-xs);
+            font-weight: 700; font-family: var(--ff-mono); }
+    .tier-5 { background: #DCFCE7; color: #166534; border: 1px solid #15803D; }
+    .tier-4 { background: #FEF3C7; color: #78350F; border: 1px solid #A16207; }
+    .tier-3 { background: #FEE2E2; color: #7F1D1D; border: 1px solid #C2410C; }
+    .verdict-cell { display: inline-block; padding: 1px 6px; border-radius: 3px; font-weight: 700;
+                     font-family: var(--ff-mono); font-size: 11px; margin-left: 4px; }
+    .v-pass { background: #15803D; color: white; }
+    .v-caveat { background: #A16207; color: white; }
+    .v-pending { background: #6B6B66; color: white; }
+
+    /* Section cards (Rule 3 assertion-evidence + Rule 5 CRAP-proximity) */
+    .section-card { border: 1.5px solid var(--c-border); border-radius: var(--radius-lg);
+                     margin: var(--sp-4) 0; overflow: hidden; background: var(--c-surface); }
+    .section-card.core { border-color: var(--c-warning); box-shadow: var(--shadow-sm); }
+    .section-card > summary { cursor: pointer; padding: var(--sp-3) var(--sp-4);
+                               display: flex; align-items: center; gap: var(--sp-3);
+                               background: var(--c-code-bg); list-style: none; flex-wrap: wrap; }
+    .section-card > summary::-webkit-details-marker { display: none; }
+    .section-card > summary::before { content: "▸"; transition: transform 0.2s;
+                                       color: var(--c-text-soft); font-size: var(--fs-sm); }
+    .section-card[open] > summary::before { transform: rotate(90deg); }
+    .section-card.core > summary { background: #FEF7E6; }
+    .section-card .card-id { font-family: var(--ff-mono); font-weight: 700; font-size: var(--fs-md);
+                              color: var(--c-warning); background: var(--c-surface);
+                              padding: 2px 10px; border-radius: 12px;
+                              border: 1.5px solid var(--c-warning); white-space: nowrap; }
+    .section-card.core .card-id { color: var(--c-critical); border-color: var(--c-critical); }
+    .section-card .card-title { flex: 1; min-width: 200px; font-weight: 600; font-size: var(--fs-md); }
+    .section-card .card-badge { padding: 2px 8px; border-radius: 10px; font-size: var(--fs-xs); font-weight: 700; }
+    .section-card .card-badge.core { background: #FCD34D; color: #78350F; }
+    .section-card .card-badge.minor { background: #E5E7EB; color: #4B5563; }
+    .section-card .card-body { padding: var(--sp-4); }
+
+    /* Callouts */
+    .callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                         padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                         border-radius: var(--radius-md); color: #7F1D1D; }
+    .callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #78350F; }
+    .callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #166534; }
+
+    /* Stat grid (Rule 1: 5-sec test) */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                  gap: var(--sp-3); margin: var(--sp-4) 0; }
+    .stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+                 border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+    .stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1; }
+    .stat-box .number.bug { color: var(--c-critical); }
+    .stat-box .number.success { color: var(--c-success); }
+    .stat-box .number.warning { color: var(--c-warning); }
+    .stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+
+    /* SVG figures (Rule 11: vector first) */
+    .svg-figure { margin: var(--sp-4) 0; text-align: center; }
+    .svg-figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto;
+                       background: var(--c-bg); border-radius: var(--radius-md);
+                       padding: var(--sp-3); border: 1px solid var(--c-border); }
+    .svg-figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                              margin-top: var(--sp-2); font-style: italic; }
+    .icon { width: 18px; height: 18px; vertical-align: -3px; margin-right: 5px; }
+
+    .references { background: var(--c-bg); border-radius: var(--radius-md);
+                   padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-5); }
+    .references h2 { border-bottom: none; margin-top: 0; font-size: var(--fs-xl); padding-bottom: 0; }
+    .references ol { list-style: decimal; padding-left: var(--sp-5); }
+    .references li { margin: var(--sp-2) 0; font-size: var(--fs-sm); }
+
+    @media print {
+      body { background: white; }
+      .layout { display: block; max-width: 100%; padding: 0; }
+      aside.toc { display: none; }
+      main.report { box-shadow: none; border: none; padding: 0; }
+      .section-card { page-break-inside: avoid; border-color: #999; }
+      details[open] > summary, details > summary { list-style: none; }
+      details:not([open]) > * { display: block !important; }
+      details:not([open]) > summary { background: white !important; }
+      a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #666; }
+      a[href^="../"]::after { content: " [" attr(href) "]"; font-size: 0.8em; color: #999; }
+      pre, table, blockquote, .section-card, svg { page-break-inside: avoid; }
+      h1, h2, h3 { page-break-after: avoid; }
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside.toc { position: static; max-height: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="toc" aria-label="Table of contents">
+    <h3>章節導航</h3>
+    <ol>
+      <li><a href="#tldr" class="core">TL;DR (3 核心結論)</a></li>
+      <li><a href="#observation">§2 觀察：17.3:1 偏移</a></li>
+      <li><a href="#mechanism" class="core">§3 機制：兩層 bug</a></li>
+      <li><a href="#quantification">§4 量化：34,855 victims</a></li>
+      <li><a href="#fix">§5 修補：5 commits</a></li>
+      <li><a href="#validation">§6 驗證鐵證</a></li>
+      <li><a href="#provenance">§7 V5 Provenance bonus</a></li>
+      <li><a href="#twist" class="core">§8 顛覆性發現</a></li>
+      <li><a href="#maturity" class="core">§9.1 成熟度表</a></li>
+      <li><a href="#errata">§9.2 5 errata</a></li>
+      <li><a href="#followup">§9.3 後續行動</a></li>
+      <li><a href="#refs">引用文件</a></li>
+    </ol>
+  </aside>
+
+  <main class="report">
+
+    <header class="report-header">
+      <div class="pretitle">Comprehensive Synthesis · Self-Phasing</div>
+      <h1>Self-Phasing 完整觀察整合報告 — 2026-05-08</h1>
+      <dl class="meta">
+        <dt>Build date</dt>      <dd>2026-05-08 (revised 2026-05-11)</dd>
+        <dt>Audience</dt>        <dd>PI / lab meeting (30-40 min)</dd>
+        <dt>Parent report</dt>   <dd><code>InterSubMod/docs/reports/validated/2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md</code></dd>
+        <dt>Status</dt>          <dd>validated · last verified 2026-05-11</dd>
+        <dt>Errata companion</dt><dd><code>InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md</code> (E1-E5 已 patch)</dd>
+        <dt>Template</dt>        <dd>structured-tech-report v1.0 (synthesis variant)</dd>
+      </dl>
+
+      <div class="verdict-banner">
+        <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="verified">
+          <circle cx="12" cy="12" r="10" fill="white" opacity="0.25"/>
+          <polyline points="6,12 10,16 18,8" fill="none" stroke="white" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Verdict: self-phasing 主軸修補成熟可用；read-level 34,855 victims 全部 100% 修正；20 指標 no regression；V5 Layer 1.5 在 germline-absent 區為設計缺陷（V6 patch 已驗證為 production candidate，待 PI ack）
+      </div>
+    </header>
+
+    <h2 id="tldr"><span class="h-num">0.</span>TL;DR — 3 核心結論</h2>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="number bug">17.3 : 1</div>
+        <div class="label">baseline HP1:HP2 全基因組偏移</div>
+      </div>
+      <div class="stat-box">
+        <div class="number bug">34,855</div>
+        <div class="label">全基因組 read-level victims</div>
+      </div>
+      <div class="stat-box">
+        <div class="number success">100%</div>
+        <div class="label">V3F / V5 修正率（兩版皆）</div>
+      </div>
+      <div class="stat-box">
+        <div class="number">5</div>
+        <div class="label">commits 漸進完成修補</div>
+      </div>
+      <div class="stat-box">
+        <div class="number success">20 / 20</div>
+        <div class="label">指標 no regression</div>
+      </div>
+      <div class="stat-box">
+        <div class="number warning">4.19 : 1</div>
+        <div class="label">V5 germline-absent 區（與 baseline 同）⚠</div>
+      </div>
+    </div>
+
+    <details class="section-card core" open id="tldr-1">
+      <summary>
+        <span class="card-id">①</span>
+        <span class="card-title">17.3:1 priority bug 修補確立 — 個案 + 統計 + 機制三重佐證</span>
+        <span class="card-badge core">CORE</span>
+      </summary>
+      <div class="card-body">
+        <p>baseline LongPhase-TO 全基因組 HP1:HP2 = 17.3:1（94.6% somatic ALT 偏 HP1），根因 <code>getVote()</code> vector 順序錯 + break early。Read-level 鐵證 chr19 <strong>752 victims</strong> + 全基因組 <strong>34,855 victims</strong>，V3F/V5 修正率均 <strong>100%</strong>。</p>
+      </div>
+    </details>
+
+    <details class="section-card core" open id="tldr-2">
+      <summary>
+        <span class="card-id">②</span>
+        <span class="card-title">20 指標 no regression — V5 vs baseline 0 critical regression</span>
+        <span class="card-badge core">CORE</span>
+      </summary>
+      <div class="card-body">
+        <p>caller F1 / HP 結構 / phase block / LOH / paired GT concordance 全表 0 critical regression。Purity 0.93 sample 加 paired GT +13.3 pp；purity 0.6 sample 6 caller F1 + 9 結構指標亦 0 regression。</p>
+      </div>
+    </details>
+
+    <details class="section-card core" open id="tldr-3">
+      <summary>
+        <span class="card-id">③</span>
+        <span class="card-title">V5 Layer 1.5 設計缺陷（5/9 新發現）— V6 binary patch 已驗證為 production candidate</span>
+        <span class="card-badge core">CORE</span>
+      </summary>
+      <div class="card-body">
+        <p><strong>Paired cross-ref 揭露</strong>：V5 在 germline-absent 區域與 baseline 4.19:1 偏 HP1 完全相同（不是修補而是 priority bug 的 feature 化）；V3F 標 hp=33 保守處理反而更穩健。<strong>V6 binary patch</strong>（V5 主結構 + germline-absent 區改回 V3F hp=33）已實作並 chr19+全基因組三向驗證 — V6 marker coverage 超越 V3F 與 V5（§8.6.11）。</p>
+      </div>
+    </details>
+
+    <!-- ─── SVG 1: Hero 因果鏈總圖 ─── -->
+    <figure class="svg-figure" aria-label="self-phasing 完整因果鏈總圖">
+      <svg viewBox="0 0 820 240" role="img"
+           aria-labelledby="hero-title hero-desc"
+           xmlns="http://www.w3.org/2000/svg">
+        <title id="hero-title">Self-phasing 完整因果鏈</title>
+        <desc id="hero-desc">observation 17.3:1 → mechanism 兩層 bug → quantification 34,855 → fix 5 commits → validation 100% 修正</desc>
+        <g font-family="system-ui, -apple-system, 'Noto Sans CJK TC', sans-serif" font-size="13">
+          <text x="410" y="22" text-anchor="middle" font-weight="700" fill="#141413" font-size="14">
+            Self-phasing 完整因果鏈：observation → mechanism → quantification → fix → validation
+          </text>
+
+          <!-- 5 cards horizontal -->
+          <rect x="20"  y="60" width="140" height="100" rx="10" fill="#FEE2E2" stroke="#C2410C" stroke-width="1.5"/>
+          <text x="90" y="84" text-anchor="middle" font-weight="700" fill="#7F1D1D">§2 觀察</text>
+          <text x="90" y="106" text-anchor="middle" font-size="11" fill="#7F1D1D">HP1:HP2 = 17.3:1</text>
+          <text x="90" y="124" text-anchor="middle" font-size="11" fill="#7F1D1D">SP1/2/3 (113:0)</text>
+          <text x="90" y="146" text-anchor="middle" font-size="10" fill="#7F1D1D">跨 23 chr 同向</text>
+
+          <rect x="180" y="60" width="140" height="100" rx="10" fill="#FEF7E6" stroke="#EA580C" stroke-width="1.5"/>
+          <text x="250" y="84" text-anchor="middle" font-weight="700" fill="#78350F">§3 機制</text>
+          <text x="250" y="106" text-anchor="middle" font-size="11" fill="#78350F">球員兼裁判</text>
+          <text x="250" y="124" text-anchor="middle" font-size="11" fill="#78350F">+ priority bug</text>
+          <text x="250" y="146" text-anchor="middle" font-size="10" fill="#78350F">兩層獨立</text>
+
+          <rect x="340" y="60" width="140" height="100" rx="10" fill="#FFFBEB" stroke="#CA8A04" stroke-width="1.5"/>
+          <text x="410" y="84" text-anchor="middle" font-weight="700" fill="#78350F">§4 量化</text>
+          <text x="410" y="106" text-anchor="middle" font-size="11" fill="#78350F">chr19 752 victims</text>
+          <text x="410" y="124" text-anchor="middle" font-size="11" fill="#78350F">genome 34,855</text>
+          <text x="410" y="146" text-anchor="middle" font-size="10" fill="#78350F">46× chr19 量級</text>
+
+          <rect x="500" y="60" width="140" height="100" rx="10" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+          <text x="570" y="84" text-anchor="middle" font-weight="700" fill="#1E3A8A">§5 修補</text>
+          <text x="570" y="106" text-anchor="middle" font-size="11" fill="#1E3A8A">5 commits</text>
+          <text x="570" y="124" text-anchor="middle" font-size="11" fill="#1E3A8A">PON-only + V3F + V5</text>
+          <text x="570" y="146" text-anchor="middle" font-size="10" fill="#1E3A8A">兩層 stacking</text>
+
+          <rect x="660" y="60" width="140" height="100" rx="10" fill="#DCFCE7" stroke="#15803D" stroke-width="1.5"/>
+          <text x="730" y="84" text-anchor="middle" font-weight="700" fill="#166534">§6 驗證</text>
+          <text x="730" y="106" text-anchor="middle" font-size="11" fill="#166534">V3F+V5 100%</text>
+          <text x="730" y="124" text-anchor="middle" font-size="11" fill="#166534">SP1/2/3 對齊 paired</text>
+          <text x="730" y="146" text-anchor="middle" font-size="10" fill="#166534">20 指標 no regression</text>
+
+          <!-- Arrows -->
+          <defs>
+            <marker id="arrow-flow" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="8" markerHeight="8" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#6B6B66"/>
+            </marker>
+          </defs>
+          <line x1="160" y1="110" x2="178" y2="110" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#arrow-flow)"/>
+          <line x1="320" y1="110" x2="338" y2="110" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#arrow-flow)"/>
+          <line x1="480" y1="110" x2="498" y2="110" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#arrow-flow)"/>
+          <line x1="640" y1="110" x2="658" y2="110" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#arrow-flow)"/>
+
+          <!-- §7/§8 caveat below -->
+          <rect x="180" y="190" width="460" height="40" rx="8" fill="#FFFBEB" stroke="#A16207" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="410" y="213" text-anchor="middle" font-weight="700" fill="#78350F" font-size="12">
+            §7 V5 Provenance (Pass 1 only) · §8 顛覆三項 chr19 結論 · §8.6 Layer 1.5 設計缺陷
+          </text>
+        </g>
+      </svg>
+      <figcaption>圖 1：報告主敘事 5 階段（§2-§6）+ 後續顛覆與 caveat（§7-§8）</figcaption>
+    </figure>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- 主章節 cards — §2-§9（順序敘事）                       -->
+    <!-- ═══════════════════════════════════════════════════ -->
+
+    <h2 id="observation"><span class="h-num">2.</span>觀察起點：17.3:1 偏移與 chr19 SP1/2/3</h2>
+
+    <details class="section-card" id="obs-genome">
+      <summary>
+        <span class="card-id">§2.1</span>
+        <span class="card-title">全基因組 HP1:HP2 = 17.3:1（94.6% 偏 HP1）— 3 條獨立論證</span>
+        <span class="card-badge minor">obs</span>
+      </summary>
+      <div class="card-body">
+        <table>
+          <thead><tr><th>指標</th><th>baseline</th><th>隨機預期</th><th>偏離</th></tr></thead>
+          <tbody>
+            <tr><td>HP1 reads（somatic ALT）</td><td class="num">614,000</td><td class="num">~325,000</td><td class="num">1.89×</td></tr>
+            <tr><td>HP2 reads（somatic ALT）</td><td class="num">35,500</td><td class="num">~325,000</td><td class="num">0.11×</td></tr>
+            <tr class="row-bug"><td><strong>HP1:HP2</strong></td><td class="num"><strong>17.3:1</strong></td><td class="num">1:1</td><td class="num"><strong>17.3×</strong></td></tr>
+            <tr class="row-bug"><td><strong>HP1 占比</strong></td><td class="num"><strong>94.6%</strong></td><td class="num">~50%</td><td class="num">+44.6 pp</td></tr>
+          </tbody>
+        </table>
+        <p><strong>為什麼真實存在</strong>（3 條獨立論證）：</p>
+        <ol>
+          <li><strong>生物學</strong>：tumor 的 somatic ALT 屬某 sub-clone 的真實 haplotype，跨 23 染色體不該系統性偏 HP1。</li>
+          <li><strong>跨染色體一致</strong>：cnLOH artifact 只影響單一 chr；94.6% 跨 23 chr 同向必為工程 bias。</li>
+          <li><strong>paired GT 對照</strong>：paired tumor-normal 同樣 reads HP1:HP2 ≈ 1:1；只 TO 模式出現 17.3:1。</li>
+        </ol>
+      </div>
+    </details>
+
+    <details class="section-card" id="obs-sp123">
+      <summary>
+        <span class="card-id">§2.2</span>
+        <span class="card-title">chr19 SP1/2/3 三極端案例（113:0 / 109:1 / 108:0）— V5 翻回 paired 3/3</span>
+        <span class="card-badge minor">obs</span>
+      </summary>
+      <div class="card-body">
+        <table>
+          <thead><tr><th>位點</th><th>染色體位置</th><th>baseline HP1:HP2</th><th>V5 HP1:HP2</th><th>vs paired</th></tr></thead>
+          <tbody>
+            <tr class="row-bug"><td><strong>SP1</strong></td><td>chr19:17,565,944</td><td class="num"><strong>113 : 0</strong></td><td>翻 HP2</td><td>對齊 ✓</td></tr>
+            <tr class="row-bug"><td><strong>SP2</strong></td><td>chr19:12,452,332</td><td class="num"><strong>109 : 1</strong></td><td>翻 HP2</td><td>對齊 ✓</td></tr>
+            <tr class="row-bug"><td><strong>SP3</strong></td><td>chr19:12,467,180</td><td class="num"><strong>108 : 0</strong></td><td>翻 HP2</td><td>對齊 ✓</td></tr>
+          </tbody>
+        </table>
+        <p>SP1/SP3 完全失衡（0 reads 對側），SP2 僅 1 → 不是噪音、caller、alignment 問題；是 <strong>read assignment 強制集中</strong>。baseline 與 paired <strong>方向相反</strong>（baseline HP1 → paired HP2）→ 翻轉而非弱化。V5 修正後 3/3 翻回 paired → 「修對了」初步證據。</p>
+      </div>
+    </details>
+
+    <!-- ═══ §3 機制 ═══ -->
+    <h2 id="mechanism"><span class="h-num">3.</span>機制：兩層 bug 對應兩層修補</h2>
+
+    <details class="section-card core" open id="mech-overview">
+      <summary>
+        <span class="card-id">§3</span>
+        <span class="card-title">問題分兩層：phasing layer（球員兼裁判）+ tagging layer（priority bug）</span>
+        <span class="card-badge core">CORE</span>
+      </summary>
+      <div class="card-body">
+        <table>
+          <thead><tr><th>Layer</th><th>bug</th><th>修補 commit</th></tr></thead>
+          <tbody>
+            <tr><td><strong>phasing layer</strong>（建 graph）</td>
+                <td>somatic 進 graph 球員兼裁判 → edge weight 暴漲 → 自我增強迴圈</td>
+                <td><code>8b8c1fd</code> PON-only flag</td></tr>
+            <tr><td><strong>tagging layer</strong>（tag read）</td>
+                <td><code>getVote()</code> vector 順序錯 + break early → 1 票 somatic 蓋 5 票 germline</td>
+                <td><code>41ff147</code> two-layer getVote</td></tr>
+          </tbody>
+        </table>
+
+<pre><code>// baseline HaplotagProcess.cpp:512 ❌ priority bug
+vector&lt;pair&lt;int,int&gt;&gt; variantKeys = {
+    {HAPLOTYPE1_1, HAPLOTYPE2_1},   // ① somatic pair  ← FIRST
+    {HAPLOTYPE3,   HAPLOTYPE2_1},   // ② mixed pair
+    {HAPLOTYPE1,   HAPLOTYPE2}      // ③ germline pair ← LAST
+};
+for (pair : variantKeys) {
+    if (countMap[k1]&gt;0 || countMap[k2]&gt;0) {
+        hpResult = ...;
+        break;   // ← 1 票 somatic 就 break，germline 看不到
+    }
+}</code></pre>
+
+        <p><strong>1 票 somatic 觸發範例</strong>：germline HP2=5, somatic HP1_1=1 → baseline 標 hp=11 ❌；正確應 hp=21（germline 5 票主導）。</p>
+
+        <p><strong>為什麼全偏 HP1</strong>：tumor sub-clone 的 somatic 都同方向（100% 共現）→ priority bug 把所有 reads 標 HP:i:11 → <strong>17.3:1 偏移在 tag layer 形成</strong>。</p>
+
+        <p>V3F 還要再加 INDEL guard（<code>380e8d2</code>）+ Layer 1.5 fallback / ploidy fix / threshold（<code>d0bcd8c</code> + <code>938f0df</code>）才成 V5 — 完整演進見 §5。</p>
+      </div>
+    </details>
+
+    <!-- ═══ §4 量化 ═══ -->
+    <h2 id="quantification"><span class="h-num">4.</span>量化：chr19 752 + 全基因組 34,855 victims</h2>
+
+    <details class="section-card" id="quant-chr19">
+      <summary>
+        <span class="card-id">§4.1</span>
+        <span class="card-title">chr19 read-level：752 priority bug victims，V3F/V5 修正率 100%</span>
+        <span class="card-badge minor">data</span>
+      </summary>
+      <div class="card-body">
+        <p>三版 testing-only binary patch + <code>--debug-vote-dump</code> dump 每條 read 經 <code>getVote()</code> 後的 5-vote countMap + hpResult。chr19 子集 549,206 rows × 3-way merged 1,069,832 events。</p>
+        <table>
+          <thead><tr><th>指標</th><th>數量</th></tr></thead>
+          <tbody>
+            <tr><td>雙向矛盾 reads（germline_maj ≠ somatic_maj）</td><td class="num">752</td></tr>
+            <tr class="row-bug"><td>baseline 標到 somatic 方向（priority bug confirmed）</td><td class="num"><strong>752</strong></td></tr>
+            <tr class="row-safe"><td><strong>V3F 修正比例</strong></td><td class="num"><strong>100.00%</strong></td></tr>
+            <tr class="row-safe"><td><strong>V5 修正比例</strong></td><td class="num"><strong>100.00%</strong></td></tr>
+          </tbody>
+        </table>
+        <p>752 條 reads <strong>全部 baseline=11 → V3F=21 → V5=21</strong>（單一方向修正，無一條反向）→ 完美對應 §2.1 全基因組 17.3:1（94.6% somatic→HP1）的單向偏移。</p>
+      </div>
+    </details>
+
+    <details class="section-card" id="quant-genome">
+      <summary>
+        <span class="card-id">§4.2-4.3</span>
+        <span class="card-title">全基因組擴展：34,855 victims（46× chr19 量級），分佈廣泛非 chr19</span>
+        <span class="card-badge minor">data</span>
+      </summary>
+      <div class="card-body">
+        <table>
+          <thead><tr><th>規模</th><th>chr19 pilot</th><th>Genome F1</th><th>倍數</th></tr></thead>
+          <tbody>
+            <tr><td>Dump rows</td><td class="num">549,206</td><td class="num">29,973,253</td><td class="num">54.6×</td></tr>
+            <tr class="row-bug"><td><strong>Priority bug victims</strong></td><td class="num">752</td><td class="num"><strong>34,855</strong></td><td class="num">46.4×</td></tr>
+            <tr class="row-safe"><td>V3F 修正率</td><td class="num">100%</td><td class="num"><strong>100%</strong></td><td>一致 ✓</td></tr>
+            <tr class="row-safe"><td>V5 修正率</td><td class="num">100%</td><td class="num"><strong>100%</strong></td><td>一致 ✓</td></tr>
+          </tbody>
+        </table>
+
+        <figure class="svg-figure">
+          <svg viewBox="0 0 720 200" role="img"
+               aria-labelledby="chr-title chr-desc"
+               xmlns="http://www.w3.org/2000/svg">
+            <title id="chr-title">Priority bug 跨染色體分佈</title>
+            <desc id="chr-desc">chr7 rank 1 (3,508); chr19 僅 rank 19 (752, 2.16%)</desc>
+            <g font-family="system-ui, -apple-system, 'Noto Sans CJK TC', sans-serif" font-size="12">
+              <text x="360" y="22" text-anchor="middle" font-weight="700" fill="#141413" font-size="13">
+                Priority bug victims per chromosome (top 5 + chr19)
+              </text>
+              <text x="60" y="56" text-anchor="end" font-weight="600" fill="#141413">chr7</text>
+              <rect x="80" y="44" width="500" height="16" fill="#C2410C"/>
+              <text x="590" y="56" font-family="ui-monospace, monospace" fill="#7F1D1D" font-weight="600">3,508 · rank 1</text>
+              <text x="60" y="84" text-anchor="end" font-weight="600" fill="#141413">chr2</text>
+              <rect x="80" y="72" width="398" height="16" fill="#EA580C"/>
+              <text x="488" y="84" font-family="ui-monospace, monospace" fill="#7F1D1D">2,792 · rank 2</text>
+              <text x="60" y="112" text-anchor="end" font-weight="600" fill="#141413">chr1</text>
+              <rect x="80" y="100" width="381" height="16" fill="#EA580C"/>
+              <text x="471" y="112" font-family="ui-monospace, monospace" fill="#7F1D1D">2,674 · rank 3</text>
+              <text x="60" y="140" text-anchor="end" font-weight="600" fill="#141413">chr16</text>
+              <rect x="80" y="128" width="368" height="16" fill="#EA580C"/>
+              <text x="458" y="140" font-family="ui-monospace, monospace" fill="#7F1D1D">2,584 · rank 4</text>
+              <text x="60" y="168" text-anchor="end" font-weight="600" fill="#141413">chr20</text>
+              <rect x="80" y="156" width="299" height="16" fill="#EA580C"/>
+              <text x="389" y="168" font-family="ui-monospace, monospace" fill="#7F1D1D">2,101 · rank 7</text>
+              <text x="60" y="196" text-anchor="end" font-weight="700" fill="#A16207">chr19 ★</text>
+              <rect x="80" y="184" width="107" height="16" fill="#CA8A04" stroke="#78350F" stroke-width="1.5"/>
+              <text x="197" y="196" font-family="ui-monospace, monospace" fill="#78350F" font-weight="700">752 · rank 19 (2.16%)</text>
+            </g>
+          </svg>
+          <figcaption>圖 2：chr19 priority bug 占比僅 2.16% — 不是主要 hotspot</figcaption>
+        </figure>
+
+        <div class="callout-warning">
+          <strong>顛覆性發現</strong>：chr19 SP1/2/3 是「可重現案例」而非「主要分佈位置」（§8.1 詳述）。chr8 (rank 21, 0.34× avg) 是 priority bug <strong>冷區</strong>，與 chr8 LOH+HPSig hotspot 是不同 layer。
+        </div>
+      </div>
+    </details>
+
+    <!-- ═══ §5 修補 ═══ -->
+    <h2 id="fix"><span class="h-num">5.</span>修補設計：5 commits 漸進完成</h2>
+
+    <figure class="svg-figure" aria-label="V5 5 commit 時間軸">
+      <svg viewBox="0 0 760 220" role="img"
+           aria-labelledby="commit-title commit-desc"
+           xmlns="http://www.w3.org/2000/svg">
+        <title id="commit-title">V5 commit chain 時間軸</title>
+        <desc id="commit-desc">5 commits 從 04-09 到 04-30，分屬 phasing layer / tagging layer / 跨層</desc>
+        <g font-family="system-ui, -apple-system, 'Noto Sans CJK TC', sans-serif" font-size="11">
+          <text x="380" y="22" text-anchor="middle" font-weight="700" fill="#141413" font-size="13">
+            V5 commit chain — 5 commits 漸進完成 (2026-04-09 → 04-30)
+          </text>
+          <line x1="60" y1="105" x2="700" y2="105" stroke="#6B6B66" stroke-width="2"/>
+          <polygon points="700,105 692,101 692,109" fill="#6B6B66"/>
+
+          <circle cx="80" cy="105" r="14" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="2"/>
+          <text x="80" y="109" text-anchor="middle" font-weight="700" fill="#1E3A8A" font-size="11">1</text>
+          <text x="80" y="80" text-anchor="middle" font-weight="700" fill="#1E3A8A" font-size="11">04-09</text>
+          <text x="80" y="138" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#1E3A8A" font-weight="600">8b8c1fd</text>
+          <text x="80" y="152" text-anchor="middle" font-size="10" fill="#1E3A8A">PON-only</text>
+
+          <circle cx="170" cy="105" r="14" fill="#FEF3C7" stroke="#A16207" stroke-width="2.5"/>
+          <text x="170" y="109" text-anchor="middle" font-weight="700" fill="#78350F" font-size="12">2★</text>
+          <text x="170" y="80" text-anchor="middle" font-weight="700" fill="#78350F" font-size="11">04-10</text>
+          <text x="170" y="138" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#78350F" font-weight="700">41ff147</text>
+          <text x="170" y="152" text-anchor="middle" font-size="10" fill="#78350F">V3F two-layer</text>
+
+          <circle cx="350" cy="105" r="14" fill="#FEF3C7" stroke="#A16207" stroke-width="2"/>
+          <text x="350" y="109" text-anchor="middle" font-weight="700" fill="#78350F" font-size="11">3</text>
+          <text x="350" y="80" text-anchor="middle" font-weight="700" fill="#78350F" font-size="11">04-25</text>
+          <text x="350" y="138" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#78350F" font-weight="600">380e8d2</text>
+          <text x="350" y="152" text-anchor="middle" font-size="10" fill="#78350F">INDEL guard</text>
+
+          <circle cx="500" cy="105" r="16" fill="#E9D5FF" stroke="#7C3AED" stroke-width="2.5"/>
+          <text x="500" y="110" text-anchor="middle" font-weight="700" fill="#5B21B6" font-size="12">4</text>
+          <text x="500" y="80" text-anchor="middle" font-weight="700" fill="#5B21B6" font-size="11">04-30</text>
+          <text x="500" y="138" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#5B21B6" font-weight="700">d0bcd8c</text>
+          <text x="500" y="152" text-anchor="middle" font-size="10" fill="#5B21B6">ploidy + Layer 1.5</text>
+
+          <circle cx="620" cy="105" r="14" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="2"/>
+          <text x="620" y="109" text-anchor="middle" font-weight="700" fill="#1E3A8A" font-size="11">5</text>
+          <text x="620" y="80" text-anchor="middle" font-weight="700" fill="#1E3A8A" font-size="11">04-30</text>
+          <text x="620" y="138" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#1E3A8A" font-weight="600">938f0df</text>
+          <text x="620" y="152" text-anchor="middle" font-size="10" fill="#1E3A8A">threshold 0.95→0.9</text>
+
+          <!-- legend -->
+          <g transform="translate(60, 180)">
+            <circle cx="6" cy="6" r="5" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+            <text x="18" y="9" font-size="10" fill="#1E3A8A">phasing layer (3 commits)</text>
+            <circle cx="160" cy="6" r="5" fill="#FEF3C7" stroke="#A16207" stroke-width="1.5"/>
+            <text x="172" y="9" font-size="10" fill="#78350F">tagging layer (2 commits)</text>
+            <circle cx="310" cy="6" r="5" fill="#E9D5FF" stroke="#7C3AED" stroke-width="1.5"/>
+            <text x="322" y="9" font-size="10" fill="#5B21B6">跨層 (d0bcd8c bundled)</text>
+            <text x="490" y="9" font-size="10" fill="#A16207" font-weight="700">★ 41ff147 = 修偏移關鍵 commit</text>
+          </g>
+        </g>
+      </svg>
+      <figcaption>圖 3：V5 5 commit chain — phasing layer + tagging layer 兩層 stacking；<code>41ff147</code> ★ 是修偏移的關鍵 commit</figcaption>
+    </figure>
+
+    <details class="section-card" id="fix-table">
+      <summary>
+        <span class="card-id">§5.5</span>
+        <span class="card-title">三版 layer 對應表 — 任一單獨 commit 不夠</span>
+        <span class="card-badge minor">design</span>
+      </summary>
+      <div class="card-body">
+        <table>
+          <thead>
+            <tr><th>版本</th><th>Commit</th><th>解 phasing layer</th><th>解 tagging layer</th><th>germline 缺席 fallback</th><th>Pass 2 真實觸發</th></tr>
+          </thead>
+          <tbody>
+            <tr class="row-bug"><td>baseline</td><td><code>8b8c1fd</code></td><td>✓ PON-only</td><td>✗ priority bug 仍在</td><td>✗</td><td>✗ (purity=0)</td></tr>
+            <tr class="row-warn"><td>V3-Fixed</td><td>+ <code>41ff147</code> + <code>380e8d2</code></td><td>✓</td><td>✓ two-layer + INDEL</td><td>✗</td><td>✗ (purity=0 同因)</td></tr>
+            <tr class="row-safe"><td><strong>V5</strong></td><td>+ <code>d0bcd8c</code> + <code>938f0df</code></td><td>✓</td><td>✓ + Layer 1.5</td><td>✓</td><td>✓ (threshold 0.9)</td></tr>
+          </tbody>
+        </table>
+        <p><strong>為什麼不能只用 PON-only</strong>：解 phasing layer，但 read tagging 階段 <code>getVote()</code> 還是優先吃 somatic 票（priority bug）→ 99.9% reads 仍標 HP:i:11。</p>
+        <p><strong>為什麼 V3F 不夠還要 V5</strong>：(1) V3F Layer 1 only → germline 缺席區 reads 全 untagged；(2) V3F 之後 4-29 PI 報告引用 BAM 是 Pass 1 only（ploidy bug 讓 Pass 2 從未觸發）；(3) threshold 0.95 太嚴 → 0.91-0.94 purity sample 跑不到 Pass 2。</p>
+      </div>
+    </details>
+
+    <!-- ═══ §6 驗證 ═══ -->
+    <h2 id="validation"><span class="h-num">6.</span>修補驗證鐵證 — 100% / SP1-3 全翻 / 結構修復</h2>
+
+    <details class="section-card" id="val-summary">
+      <summary>
+        <span class="card-id">§6</span>
+        <span class="card-title">完整證據鏈：理論 → 統計 → 個案 → read-level → 修正後對齊 paired</span>
+        <span class="card-badge minor">evidence</span>
+      </summary>
+      <div class="card-body">
+        <h4>chr19 752 victims：4-path 驗證 3.5/4 PASS</h4>
+        <table>
+          <thead><tr><th>路徑</th><th>結果</th><th>判定</th></tr></thead>
+          <tbody>
+            <tr class="row-safe"><td>① 個案 trace ≥10 條</td><td>752 條</td><td>PASS ✓</td></tr>
+            <tr class="row-warn"><td>② chr19 1Mb 區域聚集</td><td>chr19:30M (215) + 27M (133) 集中 46%</td><td>PARTIAL ⚠</td></tr>
+            <tr class="row-warn"><td>③ Somatic density 共變</td><td>high somatic vote ≥5 = 0 受害；低票觸發</td><td>反向但有意義 🔄</td></tr>
+            <tr class="row-safe"><td>④ 修正後消失（V3F/V5 修正率）</td><td>100% / 100%</td><td>PASS ✓</td></tr>
+          </tbody>
+        </table>
+
+        <h4>整體 HP 結構修復（PI 報告 §6.5 引用）</h4>
+        <table>
+          <thead><tr><th>指標</th><th>baseline</th><th>V5 修正後</th><th>變化</th></tr></thead>
+          <tbody>
+            <tr class="row-safe"><td>HP1:HP2 ratio</td><td class="num">17.3:1</td><td class="num">~1:1</td><td><strong>消除偏移</strong></td></tr>
+            <tr class="row-safe"><td>94.6% somatic→HP1</td><td>是</td><td>~50% balanced</td><td><strong>修正</strong></td></tr>
+            <tr class="row-safe"><td>15-site Problem PS（SP1/2/3 含）</td><td class="num">48.5%</td><td class="num">52.0%</td><td>+3.5 pp</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- ═══ §7 V5 Provenance ═══ -->
+    <h2 id="provenance"><span class="h-num">7.</span>V5 Provenance Bonus — PI 報告 V5 實為 Pass 1 Only</h2>
+
+    <details class="section-card" id="prov-main">
+      <summary>
+        <span class="card-id">§7</span>
+        <span class="card-title">PI 報告 V5 數據 = Pass 1 only（ploidy bug 讓 purity=0），主要功勞 V3F + Layer 1.5</span>
+        <span class="card-badge minor">audit</span>
+      </summary>
+      <div class="card-body">
+        <p><strong>因果鏈</strong>：</p>
+<pre><code>PhasingProcess.cpp:158  Pass 1 傳 nullptr  →  ploidyRatioMap 留空
+                                                      │
+Pass 2 somaticCalling + syncOrigins 也沒 refill ──────┘
+                                                      ▼
+                                ploidyRatioMap = {} (空)
+                                                      ▼
+                                q1 = q3 = 0  →  polynomial 負值 → clamp 0
+                                                      ▼
+                                purity = 0  →  highPurity = false
+                                                      ▼
+                                Pass 2 second round 永不觸發</code></pre>
+
+        <h4>對 PI 報告數值的影響（修正歸因）</h4>
+        <table>
+          <thead><tr><th>PI 報告數值</th><th>主要功勞來源</th><th>Pass 2 觸發後預期</th></tr></thead>
+          <tbody>
+            <tr><td>HP1:HP2 17.3:1 → ~1:1</td><td>V3F tagging fix</td><td>應持平</td></tr>
+            <tr><td>sanity 15/15 PASS</td><td>V3F + V5 Layer 1.5</td><td>應持平</td></tr>
+            <tr><td>clean PS paired GT concordance +13.3 pp</td><td>V3F + V5 Layer 1.5</td><td>持平 or 微升</td></tr>
+            <tr><td>HP:i:33 −54%</td><td>V3F + V5 Layer 1.5</td><td>應持平</td></tr>
+            <tr><td>Phase block N50 +99.7%</td><td>主要 PON-only Pass 1</td><td>Pass 2 後可能更升</td></tr>
+          </tbody>
+        </table>
+        <p><strong>歸因更正</strong>：從「V5 four-commit chain 的整體效益」精確化為「主要 V3F + Layer 1.5；Pass 2 二次效益尚未獨立量化」。</p>
+      </div>
+    </details>
+
+    <!-- ═══ §8 顛覆性發現 ═══ -->
+    <h2 id="twist"><span class="h-num">8.</span>顛覆性發現 — 三項 chr19 結論被推翻 + V5 Layer 1.5 設計缺陷</h2>
+
+    <details class="section-card core" open id="twist-chr19">
+      <summary>
+        <span class="card-id">§8.1-8.4</span>
+        <span class="card-title">三項 chr19 結論顛覆：占比 2.16% / chr8 冷區 / Layer 1.5 在 germline-absent 區觸發 +560,881</span>
+        <span class="card-badge core">TWIST</span>
+      </summary>
+      <div class="card-body">
+        <ol>
+          <li><strong>chr19 不是 hotspot</strong> — 占全基因組 priority bug 僅 2.16%（rank 19）；主要分佈 chr7 / chr2 / chr1 / chr16 / chr20</li>
+          <li><strong>chr8 是 priority bug 冷區</strong>（0.34× avg, rank 21）— 與 chr8 LOH+HPSig 7.4× FP enrichment 是不同 layer</li>
+          <li><strong>Layer 1.5 在 germline 缺席區觸發 +560,881 reads</strong> — V5 改 GT2 reclassify 104K germline het → reads shift Layer 1 → Layer 1.5（zero-sum 重分配）</li>
+        </ol>
+        <div class="callout-success">
+          <strong>機制因果不變</strong>：priority bug 仍是真，V3F/V5 仍 100% 修對。但 hotspot 詮釋與 Layer 1.5 觸發角色都需修訂。
+        </div>
+      </div>
+    </details>
+
+    <details class="section-card core" open id="twist-layer15">
+      <summary>
+        <span class="card-id">§8.6</span>
+        <span class="card-title">V5 Layer 1.5 設計缺陷：germline-absent 區與 baseline 4.19:1 完全相同（5/9 paired cross-ref 新發現）</span>
+        <span class="card-badge core">CORE</span>
+      </summary>
+      <div class="card-body">
+        <p>對 paired chr19 read_name × baseline / V3F / V5 vote dump JOIN，篩 <code>cnt_HP1+cnt_HP2=0</code> 且 <code>somatic&gt;0</code> 的 5,789 events：</p>
+        <table>
+          <thead>
+            <tr><th>版本</th><th>hp=11 (HP1)</th><th>hp=21 (HP2)</th><th>hp=33 (ambiguous)</th><th>評語</th></tr>
+          </thead>
+          <tbody>
+            <tr class="row-bug">
+              <td><strong>baseline</strong></td><td class="num"><strong>3,312</strong></td><td class="num">791</td><td class="num">80</td>
+              <td><strong>4.19:1 偏 HP1</strong>（priority bug 次峰）</td>
+            </tr>
+            <tr class="row-safe">
+              <td><strong>V3F</strong></td><td class="num">0</td><td class="num">0</td><td class="num"><strong>5,789</strong></td>
+              <td>全標 hp=33（保守不選邊）✓</td>
+            </tr>
+            <tr class="row-bug">
+              <td><strong>V5</strong></td><td class="num"><strong>3,313</strong></td><td class="num">790</td><td class="num">53</td>
+              <td><strong>4.19:1 偏 HP1（與 baseline 完全相同！）</strong> ⚠</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout-critical">
+          <strong>核心發現</strong>：V5 Layer 1.5 = <strong>priority bug 的 feature 化</strong>。把「baseline 用 somatic vote 蓋過 germline」buggy 行為，改成「germline 缺席時才用 somatic vote」designed 行為，但<strong>該區域偏移本質沒變</strong>。V3F 標 hp=33（純 somatic ambiguous，方向不選邊）反而保守正確。
+        </div>
+
+        <h4>V6 binary patch 三向驗證（5/10 補強）</h4>
+        <table>
+          <thead><tr><th>範圍</th><th>BAM</th><th>NG≥3 regions</th><th>TP</th><th>rate (off)</th><th>marker coverage</th></tr></thead>
+          <tbody>
+            <tr><td>chr19</td><td>V3F</td><td class="num">489</td><td class="num">463</td><td class="num">0.947</td><td>baseline</td></tr>
+            <tr><td>chr19</td><td>V5</td><td class="num">396</td><td class="num">366</td><td class="num">0.924</td><td>-19% vs V3F</td></tr>
+            <tr class="row-safe"><td>chr19</td><td><strong>V6</strong></td><td class="num"><strong>524</strong></td><td class="num">490</td><td class="num">0.935</td><td><strong>+7% vs V3F</strong></td></tr>
+            <tr><td>全基因組</td><td>V3F</td><td class="num">21,997</td><td class="num">20,183</td><td class="num">0.9175</td><td>baseline</td></tr>
+            <tr><td>全基因組</td><td>V5</td><td class="num">18,382</td><td class="num">16,428</td><td class="num">0.8937</td><td>-16% vs V3F</td></tr>
+            <tr class="row-safe"><td>全基因組</td><td><strong>V6</strong></td><td class="num"><strong>23,980</strong></td><td class="num">21,806</td><td class="num">0.9093</td><td><strong>+9% vs V3F, +30.5% vs V5</strong></td></tr>
+          </tbody>
+        </table>
+        <p><strong>V6 verdict</strong>：V5 主結構 + germline-absent 區改回 V3F hp=33；消除 Layer 1.5 priority bug feature 化 + marker coverage 超越 V3F+V5 + caller F1 不變 + AMB% 設計目標保留 → <strong>production candidate</strong>，待 PI ack + 7 sample 擴展。</p>
+      </div>
+    </details>
+
+    <!-- ═══ §9.1 成熟度 ═══ -->
+    <h2 id="maturity"><span class="h-num">9.1</span>整體 self-phasing 修補成熟度（14 維度）</h2>
+
+    <table>
+      <thead>
+        <tr><th>維度</th><th>狀態</th><th>Stability tier</th><th>證據</th></tr>
+      </thead>
+      <tbody>
+        <tr class="row-safe">
+          <td>機制因果</td>
+          <td>確立<span class="verdict-cell v-pass">PASS</span></td>
+          <td><span class="tier tier-5">⭐5</span></td>
+          <td>17.3:1 + 34,855 victims + 100% 修正 (PROV-V5-002/003)</td>
+        </tr>
+        <tr class="row-safe">
+          <td>修補設計合理性</td>
+          <td>完整<span class="verdict-cell v-pass">PASS</span></td>
+          <td><span class="tier tier-5">⭐5</span></td>
+          <td>5 commits 兩 layer + Pass 2</td>
+        </tr>
+        <tr class="row-safe">
+          <td>chr19 SP1/2/3 案例</td>
+          <td>對齊 paired 3/3<span class="verdict-cell v-pass">PASS</span></td>
+          <td><span class="tier tier-5">⭐5</span></td>
+          <td>IGV 6-BAM 並列截圖</td>
+        </tr>
+        <tr class="row-safe">
+          <td>全基因組擴展</td>
+          <td>chr19 結論部分顛覆但機制不變<span class="verdict-cell v-pass">PASS</span></td>
+          <td><span class="tier tier-5">⭐5</span></td>
+          <td>T1.2-F1 (PROV-V5-003)</td>
+        </tr>
+        <tr class="row-safe">
+          <td>V5 vs V3F zero-sum 機制</td>
+          <td>已釐清<span class="verdict-cell v-pass">PASS</span></td>
+          <td><span class="tier tier-5">⭐5</span></td>
+          <td>§8.4 Pass 2 reclassify 104K germline het</td>
+        </tr>
+        <tr class="row-safe">
+          <td>20 指標 no regression</td>
+          <td>全持平或變好<span class="verdict-cell v-pass">PASS</span></td>
+          <td><span class="tier tier-5">⭐5</span></td>
+          <td>§8.5.1 PI 報告 §6 全表 + LOH bed 三版相同</td>
+        </tr>
+        <tr class="row-safe">
+          <td>Caller F1 vs SEQC2 truth</td>
+          <td>三版完全相同<span class="verdict-cell v-pass">PASS</span></td>
+          <td><span class="tier tier-5">⭐5</span></td>
+          <td>§8.5.2 0.93=0.7166 / 0.6=0.6273（V5 不改 caller）</td>
+        </tr>
+        <tr class="row-safe">
+          <td>purity 0.6 樣本完整對照</td>
+          <td>6 F1 + 9 結構 0 regression<span class="verdict-cell v-pass">PASS</span></td>
+          <td><span class="tier tier-5">⭐5</span></td>
+          <td>§8.5.2 caller F1 同、phased% +4 pp</td>
+        </tr>
+        <tr class="row-safe">
+          <td>三路徑算法不依賴 purity</td>
+          <td>Pass 1 永遠跑<span class="verdict-cell v-pass">PASS</span></td>
+          <td><span class="tier tier-5">⭐5</span></td>
+          <td>附錄 D PhasingGraph.cpp:267 patternMining 不 gated</td>
+        </tr>
+        <tr class="row-safe">
+          <td>Pass 2 = 只重跑 2-point</td>
+          <td>量化<span class="verdict-cell v-pass">PASS</span></td>
+          <td><span class="tier tier-5">⭐5</span></td>
+          <td>附錄 D N50 +3.51% / block −9.79%</td>
+        </tr>
+        <tr class="row-safe">
+          <td>版本對齊</td>
+          <td>HEAD 938f0df = 最新有效演算法<span class="verdict-cell v-pass">PASS</span></td>
+          <td><span class="tier tier-5">⭐5</span></td>
+          <td>§8.5.4 origin/main 後 10 commits 全 doc/dead-code</td>
+        </tr>
+        <tr class="row-safe">
+          <td>Paired mode 整體 priority bug</td>
+          <td>NEGATIVE<span class="verdict-cell v-pass">PASS</span></td>
+          <td><span class="tier tier-5">⭐5</span></td>
+          <td>§8.6 Step A+C HP1:HP2 = 1:1.275</td>
+        </tr>
+        <tr class="row-warn">
+          <td><strong>V5 Layer 1.5 germline-absent</strong></td>
+          <td>設計缺陷<span class="verdict-cell v-caveat">CAVEAT</span></td>
+          <td><span class="tier tier-4">⭐4</span></td>
+          <td>§8.6.4 與 baseline 4.19:1 完全相同；V3F 標 hp=33 更穩健</td>
+        </tr>
+        <tr class="row-safe">
+          <td><strong>V6 binary patch 驗證</strong></td>
+          <td>chr19+全基因組 marker coverage 超越 V3F+V5<span class="verdict-cell v-pass">PASS</span></td>
+          <td><span class="tier tier-4">⭐4</span></td>
+          <td>§8.6.11 chr19 +7.2% vs V3F；genome +9%/+30.5%；待跨樣本</td>
+        </tr>
+        <tr class="row-warn">
+          <td>Pass 2 second round 獨立貢獻</td>
+          <td>未量化<span class="verdict-cell v-pending">PEND</span></td>
+          <td><span class="tier tier-3">⭐3</span></td>
+          <td>ISM benchmark 用戶 5/7 決策 cancel</td>
+        </tr>
+        <tr class="row-warn">
+          <td>跨樣本一致性</td>
+          <td>待擴展<span class="verdict-cell v-pending">PEND</span></td>
+          <td><span class="tier tier-3">⭐3</span></td>
+          <td>僅 HCC1395 5kHz 一樣本（T3 候選）</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-success">
+      <strong>整體</strong>：self-phasing 主軸修補成熟可用。新發現 V5 Layer 1.5 在 germline-absent 區的設計缺陷不阻擋 V5 作為 production tag baseline（germline-absent 區佔 chr19 events 比例小）；V6 patch 已驗證為 production upgrade candidate。剩跨樣本擴展 + Pass 2 獨立貢獻量化 + Layer 1.5 改回 V3F 的 ISM 影響為下游 follow-up。
+    </div>
+
+    <!-- ═══ §9.2 5 errata ═══ -->
+    <h2 id="errata"><span class="h-num">9.2</span>對 PI 報告 4-29 的 5 errata 已 patch</h2>
+
+    <p>詳細逐條修訂見 <a href="20260509_PI_Report_4_29_Errata_01.standalone.html">errata standalone HTML</a> 或 <code>InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md</code>。摘要：</p>
+
+    <table>
+      <thead><tr><th>ID</th><th>段落</th><th>類型</th><th>核心修訂</th></tr></thead>
+      <tbody>
+        <tr><td><strong>E1</strong></td><td>§3.3.3</td><td>minor</td><td>chr19 SP1/2/3 從「主要 hotspot」→「可重現案例」（占 2.16% rank 19）</td></tr>
+        <tr><td><strong>E2</strong></td><td>§5.2</td><td>minor</td><td>V5 working tree → 已 commit（<code>d0bcd8c</code> + <code>938f0df</code>）</td></tr>
+        <tr><td><strong>E3</strong></td><td>§5.2 / §3.3</td><td>minor</td><td>證據強度升級：commit msg + 3 IGV → + 34,855 read-level 鐵證</td></tr>
+        <tr class="row-warn"><td><strong>E4</strong></td><td>§6.4 / §6.5</td><td>CORE</td><td>V5 數值歸因：Pass 1 only；主要 V3F + Layer 1.5；Pass 2 二次效益尚未量化</td></tr>
+        <tr class="row-warn"><td><strong>E5</strong></td><td>§5.2 (5/10 加)</td><td>CORE</td><td>V5 Layer 1.5 germline-absent 區 = baseline 4.19:1（設計缺陷非修補）</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ═══ §9.3 後續行動 ═══ -->
+    <h2 id="followup"><span class="h-num">9.3</span>待解問題與後續行動</h2>
+
+    <table>
+      <thead><tr><th>ID</th><th>主題</th><th>狀態</th><th>預估</th></tr></thead>
+      <tbody>
+        <tr class="row-safe"><td>F1</td><td>PI 報告 errata patch (E1-E4)</td><td>DONE 2026-05-09 commit f17754f</td><td>—</td></tr>
+        <tr class="row-safe"><td>~~F2~~</td><td>V5 vs V3F zero-sum 釐清</td><td>已釐清 §8.4</td><td>DONE</td></tr>
+        <tr><td>F3</td><td>chr8 LOH+HPSig hotspot 另案</td><td>視 scope</td><td>—</td></tr>
+        <tr><td><strong>T3</strong></td><td>7 樣本跨樣本擴展</td><td>HCC1395_DORADO / HCC1937 / HCC1954 / H1437 / H2009 / COLO829</td><td>1-2 天</td></tr>
+        <tr><td>T1.3</td><td>4-cell ablation（conditional）</td><td>Pass 2 vs V3F 獨立貢獻量化</td><td>3 天</td></tr>
+        <tr><td>F-paired-D1</td><td>germline-absent xref 全基因組擴展</td><td>Step D chr19 → 全 chr</td><td>0.5 天</td></tr>
+        <tr><td>F-paired-D2</td><td>Phase block 內 axis-aligned 分析</td><td>計算真正錯標率</td><td>1 天</td></tr>
+        <tr class="row-warn"><td><strong>V6-C</strong></td><td>HPFineNGroups marker flag=on 重評估</td><td><strong>HIGH</strong> 影響 LOH-constrained phasing 主軸論文 thesis</td><td>1-2 天</td></tr>
+        <tr class="row-safe"><td><strong>V6</strong></td><td>V6 binary patch validated → production candidate</td><td>待 PI ack + 7-sample expansion</td><td>DONE eval 2026-05-10</td></tr>
+      </tbody>
+    </table>
+
+    <!-- References -->
+    <section class="references" id="refs">
+      <h2>引用文件</h2>
+      <ol>
+        <li><code>InterSubMod/docs/reports/validated/2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md</code> — PI 報告原文 (4-29)</li>
+        <li><code>InterSubMod/docs/reports/validated/2026/05/20260505_self_phasing_V5_data_provenance_audit_01.md</code> — V5 audit (5-05)</li>
+        <li><code>InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md</code> — 5 errata patch (5-09)</li>
+        <li><code>InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/T1_2_priority_bug_mechanism_report.md</code> — chr19 752 機制</li>
+        <li><code>InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/T1_2_F1_genome_wide_audit.md</code> — 全基因組 34,855</li>
+        <li><code>InterSubMod/research/paired_priority_bug_audit/00_audit_report.md</code> — Paired Step A+C (5-9)</li>
+        <li><code>InterSubMod/research/paired_priority_bug_audit/01_step_D_germline_absent_finding.md</code> — Step D germline-absent (5-9)</li>
+        <li><code>InterSubMod/research/paired_priority_bug_audit/07_V6_validation_findings.md</code> — V6 binary patch validation (5-10)</li>
+      </ol>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>

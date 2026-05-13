@@ -1,0 +1,60 @@
+<!-- igv_zoom_panel.html — Zoomable IGV / large figure with PanZoom fallback
+     When source .md references IGV screenshots, chromosome plots, or any large image
+     needing zoom interaction.
+-->
+
+<!-- Single IGV panel (slide context) -->
+<div class="igv-zoom-wrap">
+  <a href="../figures/igv_chr19_27M.png" target="_blank">
+    <img class="igv-thumb" src="../figures/igv_chr19_27M.png"
+         alt="IGV screenshot chr19:27,500,000 region — V6 phasing fix"
+         loading="lazy">
+  </a>
+  <span class="igv-zoom-hint">滾輪縮放 / 拖曳平移 / Shift+點 開圖</span>
+  <button class="igv-pz-reset">Reset</button>
+</div>
+<p class="fig-caption">圖：V6 修正後 chr19:27M 區域 HP1/HP2 平衡比例</p>
+
+<!-- Multi-panel grid (4 versions comparison) -->
+<div class="grid-2col">
+  <div>
+    <div class="igv-zoom-wrap">
+      <a href="../figures/igv_baseline.png" target="_blank">
+        <img class="igv-thumb" src="../figures/igv_baseline.png" alt="baseline">
+      </a>
+    </div>
+    <p class="fig-caption" style="text-align:center"><strong>baseline</strong> — 17.3:1 偏移</p>
+  </div>
+  <div>
+    <div class="igv-zoom-wrap">
+      <a href="../figures/igv_v6.png" target="_blank">
+        <img class="igv-thumb" src="../figures/igv_v6.png" alt="V6">
+      </a>
+    </div>
+    <p class="fig-caption" style="text-align:center"><strong>V6</strong> — 1.04:1 balanced</p>
+  </div>
+</div>
+
+<!-- JS reference (already in slide_skeleton.html):
+(function loadPanZoom() {
+  if (!document.querySelector('.igv-zoom-wrap')) return;
+  const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@panzoom/panzoom@4.5.1/dist/panzoom.min.js';
+  s.onerror = () => console.warn('[panzoom] CDN failed, CSS hover fallback');
+  s.onload = () => {
+    document.querySelectorAll('.igv-zoom-wrap').forEach(w => {
+      const img = w.querySelector('img.igv-thumb');
+      const pz = panzoom(img, { minScale: 0.5, maxScale: 8, contain: 'outside' });
+      w.classList.add('has-panzoom');
+      w.addEventListener('wheel', pz.zoomWithWheel);
+      w.querySelector('.igv-pz-reset')?.addEventListener('click', () => pz.reset());
+    });
+  };
+  document.head.appendChild(s);
+})();
+
+CDN fail-soft strategy:
+  - CDN loads → real PanZoom (wheel+drag+pinch)
+  - CDN fails → CSS .igv-zoom-wrap:hover transform: scale(1.8) fallback
+  - Shift+click on <a> → open image in new tab (always works)
+-->

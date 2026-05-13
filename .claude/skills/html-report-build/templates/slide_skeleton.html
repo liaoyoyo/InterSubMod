@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide {{SLIDE_NUM}} — {{SLIDE_TITLE}}</title>
+  <style>
+    /* ── Design tokens ── */
+    :root {
+      --c-accent: #D97757; --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #F5F5F7; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-info: #1E3A8A; --c-critical: #DC2626; --c-warning: #A16207; --c-success: #15803D;
+      --ff-body: "Noto Sans CJK TC", "Source Han Sans TW", "Droid Sans Fallback",
+                 -apple-system, "Segoe UI", system-ui, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+      --radius-md: 6px; --radius-lg: 8px;
+      --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+      --shadow-lg: 0 4px 16px rgba(20,20,19,0.10);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--c-bg); color: var(--c-text);
+           font-family: var(--ff-body); line-height: 1.5; }
+
+    /* ── Slide page wrapper ── */
+    main.slide-page { max-width: 1280px; margin: 0 auto; padding: 24px; }
+
+    /* ── Meta strip ── */
+    .slide-meta { background: var(--c-surface); padding: 12px 16px; margin-bottom: 14px;
+                  border-radius: 8px; border-left: 4px solid var(--c-info);
+                  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 12px; }
+    .slide-meta .label { color: var(--c-text-soft); font-weight: 500; }
+    .slide-meta .value { color: var(--c-text); margin-left: 4px; font-weight: 600; }
+    .slide-meta.critical { border-left-color: var(--c-critical); }
+
+    /* ── 16:9 canvas ── */
+    .slide-canvas {
+      background: var(--c-surface); border: 1px solid var(--c-border);
+      border-radius: var(--radius-lg); aspect-ratio: 16 / 9;
+      padding: 28px 40px; position: relative; box-shadow: var(--shadow-lg);
+      overflow: hidden; color: var(--c-text);
+    }
+    .slide-canvas h2.slide-title { font-size: 30px; margin: 0;
+                                    border-bottom: 2px solid; padding-bottom: 2px;
+                                    color: var(--c-info); border-bottom-color: var(--c-info); }
+    .slide-canvas .en-subtitle { font-size: 14px; color: var(--c-text-soft); font-style: italic;
+                                  margin: 0 0 6px; padding: 0 0 0 1em; }
+
+    /* ── Section badge (top-right) ── */
+    .slide-canvas::before {
+      content: attr(data-section);
+      position: absolute; top: 8px; right: 28px;
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 12px; color: white; opacity: 0.9;
+    }
+    .slide-canvas.cover-slide::before { display: none; }
+
+    /* ── Section color theming (8 sections + Q&A) ── */
+    .slide-canvas[data-section="S0"] h2.slide-title { color: #7C3AED; border-bottom-color: #7C3AED; }
+    .slide-canvas[data-section="S0"]::before { background: #7C3AED; }
+    .slide-canvas[data-section="S1"] h2.slide-title { color: #DC2626; border-bottom-color: #DC2626; }
+    .slide-canvas[data-section="S1"]::before { background: #DC2626; }
+    .slide-canvas[data-section="S2"] h2.slide-title { color: #EA580C; border-bottom-color: #EA580C; }
+    .slide-canvas[data-section="S2"]::before { background: #EA580C; }
+    .slide-canvas[data-section="S3"] h2.slide-title { color: #CA8A04; border-bottom-color: #CA8A04; }
+    .slide-canvas[data-section="S3"]::before { background: #CA8A04; }
+    .slide-canvas[data-section="S4"] h2.slide-title { color: #1E3A8A; border-bottom-color: #1E3A8A; }
+    .slide-canvas[data-section="S4"]::before { background: #1E3A8A; }
+    .slide-canvas[data-section="S5"] h2.slide-title { color: #15803D; border-bottom-color: #15803D; }
+    .slide-canvas[data-section="S5"]::before { background: #15803D; }
+    .slide-canvas[data-section="S6"] h2.slide-title { color: #0E7490; border-bottom-color: #0E7490; }
+    .slide-canvas[data-section="S6"]::before { background: #0E7490; }
+    .slide-canvas[data-section="S7"] h2.slide-title { color: #B45309; border-bottom-color: #B45309; }
+    .slide-canvas[data-section="S7"]::before { background: #B45309; }
+    .slide-canvas[data-section="Q&A"] h2.slide-title { color: #6B7280; border-bottom-color: #6B7280; }
+    .slide-canvas[data-section="Q&A"]::before { background: #6B7280; }
+
+    /* ── Footer glossary inside canvas ── */
+    .slide-canvas .footer-glossary {
+      position: absolute; bottom: 10px; left: 28px; right: 28px;
+      font-size: 14px; color: var(--c-text-soft); border-top: 1px solid var(--c-border);
+      padding-top: 6px; display: flex; flex-wrap: wrap; gap: 12px;
+    }
+    .slide-canvas .footer-glossary .gloss-item {
+      background: #FAFAFA; padding: 2px 8px; border-radius: 4px;
+    }
+    .slide-canvas .footer-glossary .gloss-item .term { font-weight: 600; color: var(--c-text); }
+
+    /* ── Layout helpers ── */
+    .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 10px 0; }
+    .grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 10px 0; }
+
+    .stat-box {
+      background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px;
+      padding: 14px; text-align: center;
+    }
+    .stat-box .number { font-size: 32px; font-weight: 700; color: var(--c-info); line-height: 1.1; }
+    .stat-box .number.green { color: #16A34A; }
+    .stat-box .number.orange { color: #9A3412; }
+    .stat-box .label { font-size: 15px; color: var(--c-text-soft); margin-top: 6px; }
+
+    /* ── Callouts (slide-context, smaller than report version) ── */
+    .caveat-box { background: #FFF3CD; border: 1px solid #F59E0B; border-radius: 6px;
+                  padding: 10px 14px; margin: 10px 0; color: #78350F; font-size: 16px; }
+    .red-frame { background: #FEE2E2; border: 2px solid #DC2626; border-radius: 6px;
+                 padding: 12px 16px; margin: 10px 0; color: #7F1D1D; font-size: 16px; }
+    .green-box { background: #DCFCE7; border: 1px solid #16A34A; border-radius: 6px;
+                 padding: 10px 14px; margin: 10px 0; color: #166534; font-size: 16px; }
+
+    /* ── Metric table ── */
+    table.metric-table { width: 100%; border-collapse: collapse; font-size: 16px; margin: 8px 0; }
+    table.metric-table th, table.metric-table td {
+      padding: 6px 10px; border: 1px solid #E5E7EB; text-align: left;
+    }
+    table.metric-table th { background: #F3F4F6; font-weight: 600; text-align: center; }
+    table.metric-table td.num { text-align: center; font-family: monospace; }
+    table.metric-table tr.row-red td { background: #FEE2E2; color: #7F1D1D; }
+    table.metric-table tr.row-green td { background: #DCFCE7; color: #166534; }
+    table.metric-table tr.row-yellow td { background: #FEF3C7; }
+
+    /* ── Conclusion arrow (allowed gradient exception) ── */
+    .conclusion-arrow { background: linear-gradient(90deg, #1E3A8A, #3B82F6); color: white;
+                        padding: 12px 18px; margin: 12px 0; border-radius: 6px;
+                        font-weight: 600; font-size: 17px; }
+    .conclusion-arrow.green { background: linear-gradient(90deg, #16A34A, #22C55E); }
+
+    /* ── IGV zoom wrapper ── */
+    .igv-zoom-wrap { position: relative; overflow: hidden; border-radius: 6px;
+                     display: inline-block; width: 100%; }
+    .igv-zoom-wrap a { display: block; cursor: zoom-in; }
+    .igv-zoom-wrap img.igv-thumb { width: 100%; max-height: 320px; object-fit: contain;
+                                    border: 1px solid #374151; border-radius: 4px;
+                                    background: #1F2937; transition: transform 0.25s ease-out; }
+    .igv-zoom-wrap:hover img.igv-thumb { transform: scale(1.8); z-index: 50;
+                                         box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+    .igv-zoom-wrap.has-panzoom { cursor: grab; }
+    .igv-zoom-wrap.has-panzoom:hover img.igv-thumb { transform: none; }
+    .igv-zoom-hint { position: absolute; top: 6px; right: 8px; z-index: 51;
+                     background: rgba(30,58,138,0.85); color: white; font-size: 11px;
+                     padding: 3px 8px; border-radius: 4px; pointer-events: none; }
+    .igv-pz-reset { position: absolute; bottom: 8px; right: 8px; z-index: 52;
+                    background: rgba(30,58,138,0.9); color: white; border: none;
+                    padding: 4px 10px; border-radius: 4px; font-size: 11px;
+                    cursor: pointer; font-weight: 600; }
+
+    /* ── Speaker note section ── */
+    .note-section { margin-top: 20px; background: #FAFBFE; border: 1px solid #C7D2FE;
+                    border-left: 4px solid #8B5CF6; border-radius: 8px; padding: 14px 18px; }
+    .note-section summary { cursor: pointer; padding: 6px 0; font-size: 13px;
+                            font-weight: 600; color: #6D28D9; }
+    .note-section .timing { background: #EDE9FE; padding: 4px 10px; border-radius: 4px;
+                             font-size: 11px; color: #6D28D9; display: inline-block;
+                             margin: 8px 0; font-weight: 600; }
+    .note-section .speak-text { font-size: 14px; line-height: 1.7; color: var(--c-text);
+                                 white-space: pre-line; }
+    .note-section .tier3 { margin-top: 12px; padding: 8px 12px; border-radius: 4px;
+                            background: #F9FAFB; border: 1px dashed #9CA3AF;
+                            font-size: 11px; color: #6B7280; }
+    .note-section .tier3 .label { font-weight: 700; color: #374151; margin-right: 4px; }
+
+    /* ── Bottom nav ── */
+    .nav-bottom { display: flex; justify-content: space-between; margin: 20px 0;
+                  max-width: 1280px; margin-left: auto; margin-right: auto; padding: 0 16px; }
+    .nav-bottom a { background: var(--c-info); color: white; text-decoration: none;
+                    padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; }
+    .nav-bottom a.disabled { opacity: 0.4; pointer-events: none; }
+    .nav-bottom .counter { align-self: center; color: var(--c-text-soft); font-size: 12px; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: white; }
+      .slide-meta, .nav-bottom { display: none; }
+      .slide-canvas { box-shadow: none; aspect-ratio: auto; min-height: 720px; }
+      details[open] summary, details summary { list-style: none; }
+      details { open: true; }
+    }
+  </style>
+</head>
+<body>
+
+<main class="slide-page">
+
+  <!-- Meta strip (visible to presenter for context) -->
+  <div class="slide-meta">
+    <span class="label">Slide</span><span class="value">{{SLIDE_NUM}} / {{TOTAL_SLIDES}}</span>
+    <span class="label">Section</span><span class="value">{{SECTION_DESCRIPTION}}</span>
+    <span class="label">Timing</span><span class="value">{{TIMING}}</span>
+  </div>
+
+  <!-- 16:9 canvas — main slide content -->
+  <article class="slide-canvas" data-section="{{SECTION_CODE}}" aria-label="Main slide canvas">
+
+    <h2 class="slide-title">{{SLIDE_TITLE}}</h2>
+    <p class="en-subtitle">{{EN_SUBTITLE}}</p>
+
+    <!--
+      LLM: Insert slide body here.
+      Available components:
+        .grid-2col / .grid-3col       — multi-column layout
+        .stat-box                      — big number + label
+        .caveat-box / .red-frame / .green-box — colored callouts
+        table.metric-table            — data table with row-red/green/yellow
+        .conclusion-arrow             — gradient verdict bar (allowed exception)
+        .igv-zoom-wrap                 — zoomable image (PanZoom CDN + CSS fallback)
+        figure / img                   — standard figure
+      Keep content fitting 16:9 — text overflow will be cut.
+    -->
+
+    {{SLIDE_BODY}}
+
+    <!-- Optional glossary footer (term explanations on first appearance) -->
+    <div class="footer-glossary">
+      <!-- <span class="gloss-item"><span class="term">術語1</span> 解釋</span> -->
+    </div>
+
+  </article>
+
+  <!-- Speaker note (presenter only, hidden in print except [open]) -->
+  <details class="note-section" open>
+    <summary>🎤 Speaker Note</summary>
+    <div class="timing">{{TIMING}}</div>
+    <div class="speak-text">{{SPEAKER_SCRIPT}}</div>
+    <div class="tier3">
+      <span class="label">Tier 3 (口頭可選):</span> {{TIER3_OPTIONAL}}
+    </div>
+  </details>
+
+  <!-- Bottom nav -->
+  <nav class="nav-bottom">
+    <a href="{{PREV_SLIDE}}">← Prev</a>
+    <span class="counter">{{SLIDE_NUM}} / {{TOTAL_SLIDES}}</span>
+    <a href="{{NEXT_SLIDE}}">Next →</a>
+  </nav>
+
+</main>
+
+<!-- PanZoom (optional, CDN with CSS hover fallback) -->
+<script>
+  (function loadPanZoom() {
+    if (!document.querySelector('.igv-zoom-wrap')) return;
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@panzoom/panzoom@4.5.1/dist/panzoom.min.js';
+    s.onerror = () => console.warn('[panzoom] CDN failed, using CSS hover');
+    s.onload = () => {
+      document.querySelectorAll('.igv-zoom-wrap').forEach(w => {
+        const img = w.querySelector('img.igv-thumb');
+        const pz = panzoom(img, { minScale: 0.5, maxScale: 8, contain: 'outside' });
+        w.classList.add('has-panzoom');
+        w.addEventListener('wheel', pz.zoomWithWheel);
+        w.querySelector('.igv-pz-reset')?.addEventListener('click', () => pz.reset());
+      });
+    };
+    document.head.appendChild(s);
+  })();
+</script>
+
+</body>
+</html>

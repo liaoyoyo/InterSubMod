@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{REPORT_TITLE}}</title>
+  <style>
+    /* ── Design tokens (Anthropic palette + 8-pt spacing) ── */
+    :root {
+      --c-accent: #D97757; --c-accent-deep: #B85A3F;
+      --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-code-bg: #F4EFE6;
+      --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+      --c-info: #1E3A8A;
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+      --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+                 "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+      --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+      --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+      --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+      --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+      --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--c-bg); color: var(--c-text);
+           font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.6; }
+
+    /* ── Page layout: sticky TOC + main content ── */
+    .layout { max-width: 1320px; margin: 0 auto; display: grid;
+              grid-template-columns: 220px 1fr; gap: var(--sp-5);
+              padding: var(--sp-5) var(--sp-4); }
+
+    aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+                background: var(--c-surface); border: 1px solid var(--c-border);
+                border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+                box-shadow: var(--shadow-sm);
+                max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+    aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                    color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+    aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+    aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+    aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+                  color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+                  border-left: 3px solid transparent; }
+    aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+    aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                          font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+    aside.toc a.core { font-weight: 600; }
+    aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px;
+                              font-size: 0.85em; }
+
+    /* ── Main article ── */
+    main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+                  border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+                  padding: var(--sp-6) var(--sp-6); min-width: 0; }
+
+    .report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                      margin-bottom: var(--sp-5); }
+    .report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                                letter-spacing: 1px; color: var(--c-accent-deep);
+                                font-weight: 700; margin-bottom: var(--sp-2); }
+    .report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+    .report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                            gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+    .report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+    .report-header .meta dd { margin: 0; }
+    .report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                                 border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                                 font-size: 0.92em; }
+
+    .verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                       border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); }
+    .verdict-banner.positive { background: linear-gradient(90deg, #15803D, #22C55E); }
+    .verdict-banner.neutral  { background: linear-gradient(90deg, #1E3A8A, #3B82F6); }
+    .verdict-banner.caution  { background: linear-gradient(90deg, #A16207, #CA8A04); }
+
+    h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+          padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+          scroll-margin-top: var(--sp-4); }
+    h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+                font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+    h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+    h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2); color: var(--c-text-soft); }
+
+    p, ul, ol { margin: var(--sp-3) 0; }
+    ul, ol { padding-left: var(--sp-5); }
+    a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { color: var(--c-accent-deep); }
+    blockquote { border-left: 3px solid var(--c-accent); padding-left: var(--sp-4);
+                  color: var(--c-text-soft); margin: var(--sp-3) 0; font-style: italic;
+                  background: var(--c-code-bg); padding: var(--sp-3) var(--sp-4);
+                  border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+    code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+            font-family: var(--ff-mono); font-size: 0.92em; }
+    pre { background: var(--c-code-bg); padding: var(--sp-3); border-radius: var(--radius-md);
+           overflow-x: auto; font-family: var(--ff-mono); font-size: var(--fs-sm); }
+    pre code { background: none; padding: 0; }
+
+    table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+    th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; }
+    th { background: var(--c-code-bg); font-weight: 600; }
+    td.num { text-align: right; font-family: var(--ff-mono); }
+    tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+    tr.row-safe td { background: #DCFCE7; color: #166534; }
+    tr.row-warn td { background: #FEF3C7; }
+
+    /* ── Section cards (Rule 3) ── */
+    .section-card { border: 1.5px solid var(--c-border); border-radius: var(--radius-lg);
+                     margin: var(--sp-4) 0; overflow: hidden; background: var(--c-surface); }
+    .section-card.core { border-color: var(--c-warning); box-shadow: var(--shadow-sm); }
+    .section-card > summary { cursor: pointer; padding: var(--sp-3) var(--sp-4);
+                               display: flex; align-items: center; gap: var(--sp-3);
+                               background: var(--c-code-bg); list-style: none; }
+    .section-card > summary::-webkit-details-marker { display: none; }
+    .section-card > summary::before { content: "▸"; transition: transform 0.2s;
+                                       color: var(--c-text-soft); font-size: var(--fs-sm); }
+    .section-card[open] > summary::before { transform: rotate(90deg); }
+    .section-card.core > summary { background: #FEF7E6; }
+    .section-card .card-id { font-family: var(--ff-mono); font-weight: 700; font-size: var(--fs-md);
+                              color: var(--c-warning); background: var(--c-surface);
+                              padding: 3px 10px; border-radius: 12px; border: 1.5px solid var(--c-warning); }
+    .section-card.core .card-id { color: var(--c-critical); border-color: var(--c-critical); }
+    .section-card .card-section { font-family: var(--ff-mono); font-size: var(--fs-sm);
+                                   color: var(--c-text-soft); }
+    .section-card .card-title { flex: 1; font-weight: 600; font-size: var(--fs-md); }
+    .section-card .card-badge { padding: 2px 8px; border-radius: 10px; font-size: var(--fs-xs); font-weight: 700; }
+    .section-card .card-badge.core { background: #FCD34D; color: #78350F; }
+    .section-card .card-badge.minor { background: #E5E7EB; color: #4B5563; }
+    .section-card .card-body { padding: var(--sp-4); }
+
+    /* ── Callouts ── */
+    .callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                         padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                         border-radius: var(--radius-md); color: #7F1D1D; }
+    .callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #78350F; }
+    .callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #166534; }
+
+    /* ── Stat grid (Rule 6) ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                  gap: var(--sp-3); margin: var(--sp-4) 0; }
+    .stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+                 border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+    .stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1; }
+    .stat-box .number.bug { color: var(--c-critical); }
+    .stat-box .number.success { color: var(--c-success); }
+    .stat-box .number.warning { color: var(--c-warning); }
+    .stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+
+    /* ── SVG diagram wrapper (Rule 4) ── */
+    .svg-figure { margin: var(--sp-4) 0; text-align: center; }
+    .svg-figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto;
+                       background: var(--c-bg); border-radius: var(--radius-md);
+                       padding: var(--sp-3); }
+    .svg-figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                              margin-top: var(--sp-2); font-style: italic; }
+
+    /* ── References footer ── */
+    .references { background: var(--c-bg); border-radius: var(--radius-md);
+                   padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-5); }
+    .references h2 { border-bottom: none; margin-top: 0; font-size: var(--fs-xl); padding-bottom: 0; }
+    .references ol { list-style: decimal; padding-left: var(--sp-5); }
+    .references li { margin: var(--sp-2) 0; font-size: var(--fs-sm); }
+    .references li code { font-family: var(--ff-mono); }
+
+    /* ── Print mode (Rule 7) ── */
+    @media print {
+      body { background: white; }
+      .layout { display: block; max-width: 100%; padding: 0; }
+      aside.toc { display: none; }
+      main.report { box-shadow: none; border: none; padding: 0; }
+      .section-card { open: true; page-break-inside: avoid; border-color: #999; }
+      details[open] > summary, details > summary { list-style: none; }
+      details:not([open]) > * { display: block !important; }
+      details:not([open]) > summary { background: white !important; }
+      a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #666; }
+      a[href^="../"]::after { content: " [" attr(href) "]"; font-size: 0.8em; color: #999; }
+      pre, table, blockquote, .section-card, svg { page-break-inside: avoid; }
+      h1, h2, h3 { page-break-after: avoid; }
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside.toc { position: static; max-height: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="toc" aria-label="Table of contents">
+    <h3>章節導航</h3>
+    <ol>
+      {{TOC_ENTRIES}}
+      <!-- e.g.:
+      <li><a href="#tldr">TL;DR</a></li>
+      <li><a href="#e4" class="core">E4 — V5 數值歸因</a></li>
+      <li><a href="#refs">引用文件</a></li>
+      -->
+    </ol>
+  </aside>
+
+  <main class="report">
+
+    <header class="report-header">
+      <div class="pretitle">{{REPORT_CLASS}}</div>
+      <h1>{{REPORT_TITLE}}</h1>
+      <dl class="meta">
+        <dt>Build date</dt>      <dd>{{BUILD_DATE}}</dd>
+        <dt>Audience</dt>        <dd>{{AUDIENCE}}</dd>
+        <dt>Parent report</dt>   <dd><code>{{PARENT_REPORT}}</code></dd>
+        <dt>Status</dt>          <dd>{{STATUS}}</dd>
+      </dl>
+      <div class="verdict-banner positive">
+        <!-- positive | neutral | caution -->
+        ✓ {{VERDICT_LINE}}
+      </div>
+    </header>
+
+    <!-- ─── TL;DR section ─── -->
+    <h2 id="tldr"><span class="h-num">0.</span>TL;DR</h2>
+    {{TLDR_BLOCK}}
+
+    <!-- Optional stat-grid for focal numbers (Rule 6) -->
+    {{STAT_GRID}}
+
+    <!-- ─── Section cards (Rule 3) for repeated logical units ─── -->
+    {{CARD_GRID}}
+
+    <!-- ─── SVG figures (Rule 4) — small inline diagrams ─── -->
+    <!-- See components/svg_*.html for starter examples -->
+    {{SVG_FIGURES}}
+
+    <!-- ─── Body sections (non-card) ─── -->
+    {{BODY_SECTIONS}}
+
+    <!-- ─── Timeline / change log (if source has 修訂歷程) ─── -->
+    {{TIMELINE_TABLE}}
+
+    <!-- ─── References footer ─── -->
+    <section class="references" id="refs">
+      <h2>引用文件</h2>
+      <ol>
+        {{REFERENCES_LIST}}
+        <!-- e.g.: <li><code>InterSubMod/docs/.../foo.md</code> — short description</li> -->
+      </ol>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>

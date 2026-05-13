@@ -1,12 +1,39 @@
 ---
 name: html-preview
 description: |
-  Generate companion HTML viewer next to any markdown report by converting source to MVP.css-styled single-file HTML or, for large reports (>=200 lines OR >=5 figures), a topic folder with index.html + chapter files + README. Inlines design tokens (Anthropic palette + 8-point spacing), inlines PNG assets as base64, audits result against 6 design taboos (gradient overuse / glass morphism / multi-indigo / emoji headers / text-shadow / glow), and provides print-friendly @media print rules. Companion (not replacement) for the source .md.
-  USE WHEN: 「想看看排版」「給 PI 看 preview」「快速確認感覺」「html preview」「報告 HTML 預覽」「companion HTML」「.md 預覽」「給人看的版本」、寫完報告後 PI 提到「想先看看」、weekly-report / structured-tech-report / results-report / feature-layered-observation / methodology-audit / conclude-research 結束時自動觸發。
-  SKIP WHEN: README.md（GitHub 原生渲染即可）、Slack 片段、給其他 LLM 消費的 .md（如 CLAUDE.md / state.json / hypothesis_queue.json）、純個人筆記、CI 自動化文件、JSON / YAML / CSV state 檔。
+  **[DEPRECATED 2026-05-13]** Superseded by `html-report-build` (LLM-direct, no Python middleware). New invocations should use html-report-build. This skill kept for 1 release as fallback only — see migration note below.
+  Legacy purpose: Generate companion HTML viewer next to any markdown report by converting source to MVP.css-styled single-file HTML or, for large reports (>=200 lines OR >=5 figures), a topic folder with index.html + chapter files + README. Uses Python pipeline (markdown lib + jinja2 + bs4 + Pillow). Companion (not replacement) for the source .md.
+  USE WHEN: **DO NOT** — use `html-report-build` instead. Only invoke explicitly with `--legacy` flag if html-report-build LLM-direct output unexpectedly fails and Python fallback needed.
+  SKIP WHEN: All normal use cases — route to html-report-build.
 ---
 
-# html-preview
+# html-preview ⚠ DEPRECATED
+
+> **[2026-05-13] SUPERSEDED BY `html-report-build`**
+>
+> This skill is **deprecated** in favor of `html-report-build`, which removes the entire Python middleware chain (markdown lib / jinja2 / bs4 / Pillow) and uses LLM-direct HTML generation following the Claude Artifacts pattern (Anthropic's HTML-first default since 2026-05).
+>
+> **Why deprecated**:
+> 1. Python middleware is no longer needed — LLM can directly read `.md` and produce semantically-restructured HTML, not just transform markdown syntax.
+> 2. Actual adoption count was **0** (`.preview.html` files never produced; only 1 manual self_phasing topic folder).
+> 3. User feedback (2026-05-13): "直接產生適合釐清邏輯思路的 HTML 比較好" — LLM-direct beats Python transformation.
+>
+> **Migration**:
+> - Old: `python3 .claude/skills/html-preview/tools/dispatch.py <md>`
+> - New: Invoke `html-report-build` skill (manual, auto-trigger, or via `Skill` tool)
+>
+> **Sunset timeline**:
+> - **Stage 1 (now)**: Banner added; skill remains callable but discouraged.
+> - **Stage 2 (Tier A skill rewrite)**: 6 Tier A skills (weekly-report / structured-tech-report / results-report / feature-layered-observation / methodology-audit / conclude-research) switch Stop hook to `html-report-build`.
+> - **Stage 3 (2 weeks, if no regression)**: Delete `tools/*.py`; keep this SKILL.md as stub.
+>
+> **References**:
+> - New skill: `InterSubMod/.claude/skills/html-report-build/SKILL.md`
+> - Plan: `/bip7_disk/liaoyoyo2001/.claude/plans/frolicking-tinkering-hopcroft.md`
+
+---
+
+# html-preview (legacy reference content below)
 
 ## Phase & Chain Position
 

@@ -1,0 +1,112 @@
+<!-- svg_compare_bar.html — Inline SVG horizontal proportion bar
+     When source .md describes: HP1:HP2 比例, baseline vs V3F vs V5 對比, 修正前後比例
+     Standalone mode (Rule 4): better than table for visual proportion at-a-glance.
+-->
+
+<!-- Example 1: HP1:HP2 proportion across 4 versions -->
+<figure class="svg-figure">
+  <svg viewBox="0 0 720 220" role="img"
+       aria-labelledby="bar1-title bar1-desc"
+       xmlns="http://www.w3.org/2000/svg">
+    <title id="bar1-title">HP1:HP2 比例 baseline vs V3F vs V5</title>
+    <desc id="bar1-desc">baseline 17.3:1 偏 HP1；V3F 修正到接近 1:1；V5 進一步平衡</desc>
+
+    <g font-family="var(--ff-body, system-ui)" font-size="13">
+
+      <!-- Title -->
+      <text x="360" y="22" text-anchor="middle" font-weight="600" fill="#141413">
+        HP1 reads vs HP2 reads — 全基因組
+      </text>
+
+      <!-- baseline bar -->
+      <text x="10" y="60" font-weight="600" fill="#141413">baseline</text>
+      <rect x="100" y="48" width="500" height="20" fill="#FEE2E2" stroke="#C2410C" stroke-width="0.5"/>
+      <rect x="100" y="48" width="472" height="20" fill="#C2410C"/>
+      <text x="336" y="62" text-anchor="middle" fill="white" font-weight="600">HP1 94.6% (614K)</text>
+      <text x="608" y="62" fill="#7F1D1D" font-size="11">HP2 5.4%</text>
+      <text x="660" y="62" font-family="var(--ff-mono, monospace)" font-size="11" fill="#7F1D1D" font-weight="700">17.3:1</text>
+
+      <!-- V3F bar -->
+      <text x="10" y="105" font-weight="600" fill="#141413">V3F</text>
+      <rect x="100" y="93" width="500" height="20" fill="#FEF3C7" stroke="#A16207" stroke-width="0.5"/>
+      <rect x="100" y="93" width="252" height="20" fill="#15803D"/>
+      <text x="226" y="107" text-anchor="middle" fill="white" font-weight="600">HP1 50.4%</text>
+      <text x="475" y="107" text-anchor="middle" fill="white" font-weight="600">HP2 49.6%</text>
+      <rect x="352" y="93" width="248" height="20" fill="#22C55E"/>
+      <text x="660" y="107" font-family="var(--ff-mono, monospace)" font-size="11" fill="#166534" font-weight="700">1.02:1</text>
+
+      <!-- V5 bar -->
+      <text x="10" y="150" font-weight="600" fill="#141413">V5</text>
+      <rect x="100" y="138" width="500" height="20" fill="#F0FDF4" stroke="#15803D" stroke-width="0.5"/>
+      <rect x="100" y="138" width="248" height="20" fill="#15803D"/>
+      <text x="224" y="152" text-anchor="middle" fill="white" font-weight="600">HP1 49.6%</text>
+      <text x="475" y="152" text-anchor="middle" fill="white" font-weight="600">HP2 50.4%</text>
+      <rect x="348" y="138" width="252" height="20" fill="#22C55E"/>
+      <text x="660" y="152" font-family="var(--ff-mono, monospace)" font-size="11" fill="#166534" font-weight="700">0.98:1</text>
+
+      <!-- Reference line at 50% -->
+      <line x1="350" y1="40" x2="350" y2="170" stroke="#6B6B66"
+            stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="350" y="190" text-anchor="middle" font-size="11" fill="#6B6B66">50% balance</text>
+
+      <!-- Legend -->
+      <g transform="translate(100, 200)">
+        <rect x="0" y="0" width="14" height="12" fill="#C2410C"/>
+        <text x="20" y="10" font-size="11" fill="#141413">HP1 family</text>
+        <rect x="100" y="0" width="14" height="12" fill="#22C55E"/>
+        <text x="120" y="10" font-size="11" fill="#141413">HP2 family</text>
+      </g>
+    </g>
+  </svg>
+  <figcaption>圖 1：HP1:HP2 從 baseline 94.6:5.4 (17.3:1) → V3F/V5 ≈ 50:50 (≈1:1)</figcaption>
+</figure>
+
+<!-- Example 2: Simple side-by-side score comparison -->
+<figure class="svg-figure">
+  <svg viewBox="0 0 600 150" role="img"
+       aria-labelledby="bar2-title bar2-desc"
+       xmlns="http://www.w3.org/2000/svg">
+    <title id="bar2-title">F1 三版對照</title>
+    <desc id="bar2-desc">baseline / V3F / V5 三版 caller F1 完全相同 0.7166</desc>
+
+    <g font-family="var(--ff-body, system-ui)" font-size="13">
+      <text x="300" y="22" text-anchor="middle" font-weight="600" fill="#141413">
+        Caller F1 (vs SEQC2 truth, HCC1395 0.93)
+      </text>
+
+      <!-- 3 vertical bars, all same height (visual proof of "no regression") -->
+      <g transform="translate(80, 40)">
+        <rect x="0"   y="20" width="100" height="72" fill="#94A3B8"/>
+        <rect x="160" y="20" width="100" height="72" fill="#3B82F6"/>
+        <rect x="320" y="20" width="100" height="72" fill="#22C55E"/>
+
+        <text x="50"  y="105" text-anchor="middle" font-weight="600" fill="#141413">baseline</text>
+        <text x="210" y="105" text-anchor="middle" font-weight="600" fill="#141413">V3F</text>
+        <text x="370" y="105" text-anchor="middle" font-weight="600" fill="#141413">V5</text>
+
+        <text x="50"  y="16" text-anchor="middle" font-weight="700"
+              fill="#141413" font-family="var(--ff-mono, monospace)">0.7166</text>
+        <text x="210" y="16" text-anchor="middle" font-weight="700"
+              fill="#141413" font-family="var(--ff-mono, monospace)">0.7166</text>
+        <text x="370" y="16" text-anchor="middle" font-weight="700"
+              fill="#141413" font-family="var(--ff-mono, monospace)">0.7166</text>
+      </g>
+    </g>
+  </svg>
+  <figcaption>圖 2：三版 caller F1 完全相同 = 0.7166（V5 不改 caller，符合預期）</figcaption>
+</figure>
+
+<!--
+USAGE NOTES (for LLM):
+
+1. Bar width = (proportion × scale). For HP1:HP2 = 94.6:5.4 → width 472:28 out of 500.
+2. Color semantics: red = problem, green = fixed, yellow = caveat, blue = neutral baseline.
+3. Inline reference lines (50% balance) with stroke-dasharray="4,3".
+4. Number labels in monospace (var(--ff-mono)) for alignment.
+5. Legend at bottom only if >2 colors; single-color bars don't need legend.
+
+When NOT to use compare-bar:
+- ❌ >5 versions on same chart (gets crowded)
+- ❌ Continuous distribution (use matplotlib histogram → PNG)
+- ❌ Negative values (use diverging bar variant or table)
+-->

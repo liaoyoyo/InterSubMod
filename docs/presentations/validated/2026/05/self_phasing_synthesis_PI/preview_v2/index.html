@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Phasing PPT preview_v2 — html-report-build skill pilot (3 slides)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0;
+           font-family: "Noto Sans CJK TC", "Source Han Sans TW", "Droid Sans Fallback",
+                        -apple-system, system-ui, sans-serif;
+           background: #F5F5F7; color: #1F2937; line-height: 1.5; }
+
+    header.topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: #1E3A8A; color: white;
+      padding: 12px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    header.topbar h1 { color: white; font-size: 18px; margin: 0; font-weight: 600; }
+    header.topbar .meta { font-size: 13px; opacity: 0.85; }
+    header.topbar code { font-family: "JetBrains Mono", monospace; font-size: 0.9em; }
+    header.topbar .pilot-badge {
+      background: #D97757; color: white; padding: 3px 10px;
+      border-radius: 12px; font-size: 11px; font-weight: 700; margin-left: 10px;
+    }
+
+    nav.slidetabs {
+      position: sticky; top: 60px; z-index: 99;
+      background: #FFFFFF; padding: 8px 16px;
+      border-bottom: 1px solid #E5E7EB;
+      display: flex; gap: 6px; overflow-x: auto; flex-wrap: wrap;
+    }
+    nav.slidetabs button {
+      background: #F3F4F6; border: 1px solid #D1D5DB; color: #374151;
+      padding: 6px 12px; border-radius: 6px; cursor: pointer;
+      font-size: 12px; font-weight: 500; white-space: nowrap;
+      transition: all 0.15s;
+    }
+    nav.slidetabs button:hover { background: #E5E7EB; border-color: #9CA3AF; }
+    nav.slidetabs button.active { background: #1E3A8A; color: white; border-color: #1E3A8A; }
+
+    /* Section badge (left border) */
+    nav.slidetabs button[data-section="S1"] { border-left: 3px solid #DC2626; }
+    nav.slidetabs button[data-section="S2"] { border-left: 3px solid #EA580C; }
+    nav.slidetabs button[data-section="S7"] { border-left: 3px solid #B45309; }
+
+    main.iframe-wrap { max-width: 1280px; margin: 16px auto; padding: 0 16px; }
+    main.iframe-wrap iframe {
+      width: 100%; height: calc(100vh - 200px); min-height: 720px;
+      border: 1px solid #D1D5DB; border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08); background: white;
+    }
+
+    .pilot-banner {
+      max-width: 1280px; margin: 16px auto 0; padding: 12px 16px;
+      background: #FFFBEB; border: 1px solid #FBBF24; border-radius: 6px;
+      font-size: 13px; color: #78350F;
+    }
+    .pilot-banner strong { color: #92400E; }
+    .pilot-banner code { background: #FEF3C7; padding: 1px 5px; border-radius: 3px;
+                         font-family: "JetBrains Mono", monospace; font-size: 0.92em; }
+
+    .kbd-hint {
+      position: fixed; bottom: 12px; left: 12px;
+      background: rgba(0,0,0,0.7); color: white;
+      padding: 6px 12px; border-radius: 4px;
+      font-size: 11px; pointer-events: none;
+    }
+    .kbd-hint kbd {
+      background: white; color: #1F2937; padding: 1px 6px;
+      border-radius: 3px; font-size: 10px; margin: 0 2px;
+    }
+
+    @media print {
+      header.topbar, nav.slidetabs, .kbd-hint, .pilot-banner { display: none; }
+      main.iframe-wrap iframe { height: 720px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar" role="banner">
+  <h1>📊 Self-Phasing PPT preview<span class="pilot-badge">html-report-build pilot</span></h1>
+  <div class="meta">
+    <code>preview_v2/ · 3 slides · LLM-direct</code>
+    &nbsp;|&nbsp; Build: 2026-05-13
+  </div>
+</header>
+
+<nav class="slidetabs" id="tabs" role="navigation" aria-label="Slide selector">
+  <button data-slide="03_observation" data-section="S1" class="active">03 S1 觀察起點</button>
+  <button data-slide="06_priority_bug" data-section="S2">06 S2 機制</button>
+  <button data-slide="17_errata" data-section="S7">17 S7 結論</button>
+</nav>
+
+<div class="pilot-banner">
+  <strong>📌 Pilot preview</strong> — 用新 <code>html-report-build</code> skill 從 <code>02_slide_outline.md</code> LLM-direct 生成。
+  非完整 22 slide deck；目的為驗證 skill 在實際使用場景下的可用性。
+  對比 legacy：<code>InterSubMod/docs/presentations/validated/2026/05/self_phasing_synthesis_PI/preview/</code>。
+</div>
+
+<main class="iframe-wrap" role="main">
+  <iframe id="slide-frame" src="slide_03_observation.html" title="Active slide preview"></iframe>
+</main>
+
+<div class="kbd-hint">點 nav 切換 / <kbd>←</kbd><kbd>→</kbd> 鍵盤導覽 / 子頁可雙擊獨立開啟</div>
+
+<script>
+  document.querySelectorAll('nav.slidetabs button').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const id = btn.dataset.slide;
+      document.getElementById('slide-frame').src = 'slide_' + id + '.html';
+      document.querySelectorAll('nav.slidetabs button').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+    });
+  });
+
+  document.addEventListener('keydown', function(e) {
+    const buttons = Array.from(document.querySelectorAll('nav.slidetabs button'));
+    const active = buttons.findIndex(b => b.classList.contains('active'));
+    if (e.key === 'ArrowRight' && active < buttons.length - 1) buttons[active + 1].click();
+    if (e.key === 'ArrowLeft' && active > 0) buttons[active - 1].click();
+  });
+</script>
+
+</body>
+</html>

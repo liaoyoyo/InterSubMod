@@ -1,0 +1,55 @@
+<!--
+  slide_pair_example.html — Pointer file, not standalone slides
+
+  Purpose: This file resolves the "examples/slide_pair_example.html" reference
+  in prompts/slide_prompt.md Rule 8 + Step 3. Rather than duplicating 48 KB of
+  legacy HTML, this file tells the LLM **which two real slides** to Read as
+  few-shot reference.
+
+  At skill invocation time, the LLM should:
+    1. Skip this stub file (it's not a real slide — no <article> tag).
+    2. Use Read tool to fetch the two reference slides at the paths below.
+    3. Use them as layout + structure few-shot examples.
+
+  ──────────────────────────────────────────────────────────────────────
+  REFERENCE SLIDE 1 — Layout pattern (3-col image grid + IGV + callouts)
+  ──────────────────────────────────────────────────────────────────────
+  Read: InterSubMod/docs/presentations/validated/2026/05/self_phasing_synthesis_PI/preview/slide_04_sp1_2_3.html
+  Shows:
+    - <article class="slide-canvas" data-section="S1"> structure
+    - 3-col grid layout (.grid-3col)
+    - IGV thumbnail with PanZoom (.igv-zoom-wrap)
+    - Section badge color (S1 = #DC2626 red)
+    - <details class="note-section"> speaker note with timing
+    - footer-glossary at canvas bottom
+
+  ──────────────────────────────────────────────────────────────────────
+  REFERENCE SLIDE 2 — Data-heavy pattern (metric table + stat-box + evidence chain)
+  ──────────────────────────────────────────────────────────────────────
+  Read: InterSubMod/docs/presentations/validated/2026/05/self_phasing_synthesis_PI/preview/slide_08_quant_evidence.html
+  Shows:
+    - <article class="slide-canvas" data-section="S3"> (yellow = quant evidence)
+    - .metric-table with row-red/yellow/green coloring
+    - .stat-box with .number.green / .number.orange variants
+    - .conclusion-arrow gradient verdict (the ONE allowed gradient)
+    - Speaker note Tier 3 oral-optional content
+
+  ──────────────────────────────────────────────────────────────────────
+  REFERENCE INDEX — sticky topbar + tab nav + iframe
+  ──────────────────────────────────────────────────────────────────────
+  Read: InterSubMod/docs/presentations/validated/2026/05/self_phasing_synthesis_PI/preview/index.html
+  Shows:
+    - <header class="topbar"> sticky
+    - <nav class="slidetabs"> with per-slide buttons
+    - <iframe id="slide-frame"> for active slide preview
+    - JS event listener for tab click → iframe.src swap
+
+  ──────────────────────────────────────────────────────────────────────
+  WHY POINTER NOT COPY:
+    - Avoid 48 KB duplicate of working slides
+    - Single source of truth (self_phasing legacy is frozen, doesn't drift)
+    - If self_phasing pattern updates, examples auto-track
+    - Skill stays lean (<150 KB total)
+
+  See also: examples/README.md for pattern lookup table.
+-->

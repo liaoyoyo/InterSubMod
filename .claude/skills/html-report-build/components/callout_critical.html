@@ -1,0 +1,29 @@
+<!-- callout_critical.html — Red-frame for risks / invalidating evidence / 撤回
+     When source .md contains: "🚨", "⚠️", "撤回", "NEGATIVE verdict", "blocker", "high risk"
+-->
+
+<!-- Report context: -->
+<div class="callout-critical">
+  <strong>⚠ 撤回/警告：</strong>
+  本結論基於 X 樣本，但後續發現 Y 機制無法跨樣本一致 → tier 從 ⭐3 降為 ⭐2。
+  詳見 <code>InterSubMod/docs/experiments/concluded/...</code>。
+</div>
+
+<!-- Slide context (smaller / brighter): -->
+<div class="red-frame">
+  <span class="label">⚠ 撤回：</span>
+  HPFineNGroups Marker tier ⭐4 → ⭐3，flag=on NG≥3=0 無法重現 master 89.1%
+</div>
+
+<!-- CSS reference (already in design_tokens.css + report_skeleton.html):
+.callout-critical {
+  background: #FEF2F0; border-left: 4px solid var(--c-critical);
+  padding: var(--sp-3) var(--sp-4); margin: var(--sp-4) 0;
+  border-radius: var(--radius-md); color: #7F1D1D;
+}
+.red-frame {
+  background: #FEE2E2; border: 2px solid #DC2626; border-radius: 6px;
+  padding: 12px 16px; margin: 10px 0; color: #7F1D1D; font-size: 16px;
+}
+.red-frame .label { color: #DC2626; font-weight: 700; }
+-->

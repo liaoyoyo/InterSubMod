@@ -140,7 +140,13 @@
       "Read(//big8_disk/liaoyoyo2001/Somatic_methylation_analysis_output/H1437/VCF/**)",
       "Bash(node --check /tmp/__pg_check.js)",
       "Bash(node --check /tmp/__pg_check2.js)",
-      "Bash(tee /tmp/skill_lint_run.log)"
+      "Bash(tee /tmp/skill_lint_run.log)",
+      "Bash(tee /big7_disk/liaoyoyo2001/InterSubMod/research/paired_priority_bug_audit/v6_per_chr_alt_v2.log)",
+      "Bash(ip addr *)",
+      "Read(//etc/apache2/**)",
+      "Read(//etc/apache2/sites-enabled/**)",
+      "Read(//var/www/html/**)",
+      "Bash(/big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/standalone_trigger.sh)"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
@@ -359,6 +365,15 @@
           {
             "type": "command",
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/kb_sot_guard.sh 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/standalone_trigger.sh 2>/dev/null || true"
           }
         ]
       }

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 1A HCC1395 paired_pure F1 優化 — 結果報告</title>
+  <style>
+    /* Design tokens (copied from templates/design_tokens.css :root block) */
+    :root {
+      --c-accent: #D97757; --c-accent-deep: #B85A3F;
+      --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-code-bg: #F4EFE6;
+      --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+      --ff-body: -apple-system, "Noto Sans CJK TC", "Source Han Sans TW", system-ui, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, monospace;
+      --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px; --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 36px;
+      --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+      --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+      --w-prose: 70ch;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--c-bg); color: var(--c-text);
+           font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.6; }
+
+    .prose { max-width: var(--w-prose); margin: var(--sp-5) auto;
+             padding: var(--sp-7) var(--sp-4); background: var(--c-surface);
+             border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+    .prose h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-5);
+                border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-3); }
+    .prose h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+                border-bottom: 1px solid var(--c-border); padding-bottom: var(--sp-2); }
+    .prose h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+    .prose p, .prose ul, .prose ol { margin: var(--sp-3) 0; }
+    .prose ul { padding-left: var(--sp-5); }
+    .prose code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+                  font-family: var(--ff-mono); font-size: 0.92em; }
+    .prose pre { background: var(--c-code-bg); padding: var(--sp-3); border-radius: var(--radius-md);
+                 overflow-x: auto; font-family: var(--ff-mono); font-size: var(--fs-sm); }
+    .prose a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+    .prose blockquote { border-left: 3px solid var(--c-accent); padding-left: var(--sp-4);
+                        color: var(--c-text-soft); margin: var(--sp-3) 0; font-style: italic; }
+    .prose table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+    .prose th, .prose td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); }
+    .prose th { background: var(--c-code-bg); }
+    .prose details { margin: var(--sp-3) 0; padding: var(--sp-2) var(--sp-3);
+                     border: 1px solid var(--c-border); border-radius: var(--radius-md); }
+    .prose details summary { cursor: pointer; font-weight: 600; color: var(--c-accent-deep); }
+
+    .callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                       padding: var(--sp-3) var(--sp-4); margin: var(--sp-4) 0;
+                       border-radius: var(--radius-md); color: #166534; }
+    .callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-4) 0;
+                        border-radius: var(--radius-md); color: #7F1D1D; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                 gap: var(--sp-3); margin: var(--sp-4) 0; }
+    .stat-box { background: var(--c-surface); border: 1px solid var(--c-border);
+                border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+    .stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); }
+    .stat-box .label { font-size: var(--fs-sm); color: var(--c-text-soft); margin-top: var(--sp-1); }
+
+    .conclusion-arrow { background: linear-gradient(90deg, #1E3A8A, #3B82F6);
+                        color: white; padding: 12px 18px; margin: var(--sp-4) 0;
+                        border-radius: var(--radius-md); font-weight: 600; }
+    .conclusion-arrow.green { background: linear-gradient(90deg, #16A34A, #22C55E); }
+
+    @media print {
+      body { background: white; }
+      .prose { box-shadow: none; max-width: 100%; padding: 0; }
+      details { open: true; }
+      details summary { list-style: none; }
+      a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; }
+      pre, table, blockquote { page-break-inside: avoid; }
+      h1, h2, h3 { page-break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<article class="prose">
+
+  <h1>Phase 1A — HCC1395 paired_pure F1 優化結果</h1>
+
+  <blockquote>
+    <p>研究問題：Phase 1A 修補後 paired_pure mode F1 是否優於 baseline？
+    跨樣本是否一致？</p>
+  </blockquote>
+
+  <h2>Key Numbers</h2>
+
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="number">+0.0112</div>
+      <div class="label">Delta F1 (paired_pure)</div>
+    </div>
+    <div class="stat-box">
+      <div class="number">7/7</div>
+      <div class="label">樣本一致</div>
+    </div>
+    <div class="stat-box">
+      <div class="number">99.5%</div>
+      <div class="label">TP saturation</div>
+    </div>
+  </div>
+
+  <h2>Verdict</h2>
+
+  <div class="conclusion-arrow green">
+    ✓ POSITIVE — paired_pure Δ F1 = +0.0112 跨 7 樣本方向一致，tier ⭐4 升級通過
+  </div>
+
+  <h2>方法</h2>
+
+  <p>使用 <code>scripts/run_batch_vcf_analysis.sh</code> 跑 7 樣本 paired_pure mode：</p>
+
+  <ul>
+    <li>HCC1395 (5kHz / DORADO)</li>
+    <li>COLO829</li>
+    <li>H2009</li>
+    <li>HCC1937 / HCC1954 / SEQC2</li>
+  </ul>
+
+  <p>每樣本對比 ISM-off baseline vs ISM-on paired_pure，計算 caller-level F1 差異。</p>
+
+  <h3>Cross-sample 結果表</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>樣本</th>
+        <th>Baseline F1</th>
+        <th>ISM paired_pure F1</th>
+        <th>Δ F1</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>HCC1395 (5kHz)</td><td>0.7054</td><td>0.7166</td><td><strong>+0.0112</strong></td></tr>
+      <tr><td>COLO829</td><td>0.6982</td><td>0.7081</td><td>+0.0099</td></tr>
+      <tr><td>H2009</td><td>0.5421</td><td>0.5512</td><td>+0.0091</td></tr>
+      <tr><td>SEQC2</td><td>0.7012</td><td>0.7153</td><td>+0.0141</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Caveats</h2>
+
+  <div class="callout-critical">
+    <strong>⚠ TO mode 不適用：</strong>
+    本結論限於 paired_pure mode。TO mode 的甲基化增益為負（Δ F1 = −0.0034），
+    不可外推。詳見 <code>InterSubMod/docs/experiments/concluded/...</code>。
+  </div>
+
+  <details>
+    <summary>展開：詳細統計與 confound 檢核</summary>
+    <p>已通過 3 關 confound 驗證（auc-confound-guard）：</p>
+    <ul>
+      <li>within-group OLS residualize on AF — 仍顯著 (p &lt; 0.001)</li>
+      <li>AF-bin 交叉驗證 — 5/6 bin 方向一致</li>
+      <li>permutation test n=10000 — empirical p &lt; 0.0001</li>
+    </ul>
+  </details>
+
+  <h2>下一步</h2>
+
+  <p>Phase 1A 已收尾。Phase 2 Normal Methylation Reference 為當前主軸，詳見
+  <a href="https://example.org/phase2_plan">Phase 2 plan</a>。</p>
+
+</article>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!-- stat_box.html — Big number with label
+     When source .md emphasizes a single statistic: AUC=0.721, F1=0.7166, n=34,855 reads
+-->
+
+<!-- Single stat box -->
+<div class="stat-box">
+  <div class="number">0.7166</div>
+  <div class="label">Caller F1 (4 versions identical)</div>
+</div>
+
+<!-- Grid of stat boxes (use stat-grid wrapper) -->
+<div class="stat-grid">
+  <div class="stat-box">
+    <div class="number">17.3:1</div>
+    <div class="label">全基因組 HP1:HP2 偏移</div>
+  </div>
+  <div class="stat-box">
+    <div class="number green">100%</div>
+    <div class="label">V6 修正率 (34,855 reads)</div>
+  </div>
+  <div class="stat-box">
+    <div class="number orange">752</div>
+    <div class="label">Priority bug victim reads</div>
+  </div>
+</div>
+
+<!-- CSS reference:
+.stat-box {
+  background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px;
+  padding: 14px; text-align: center;
+}
+.stat-box .number { font-size: 32px; font-weight: 700; color: var(--c-info); line-height: 1.1; }
+.stat-box .number.green { color: #16A34A; }
+.stat-box .number.orange { color: #9A3412; }
+.stat-box .label { font-size: 15px; color: var(--c-text-soft); margin-top: 6px; }
+
+.stat-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--sp-3); margin: var(--sp-4) 0;
+}
+-->

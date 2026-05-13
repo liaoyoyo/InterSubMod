@@ -1,0 +1,127 @@
+<!-- svg_icon_set.html — Inline SVG icons (replaces emoji in headings)
+     6-Taboo Rule 4 forbids emoji as heading prefix (looks AI-generated).
+     Use these SVG icons instead — semantic, scalable, accessible.
+
+     Usage in HTML:
+       <h2><svg class="icon" .../> Warning section</h2>
+       <span class="badge"><svg class="icon-sm".../> Verified</span>
+-->
+
+<style>
+  /* Add these to the host <style> block */
+  .icon    { width: 20px; height: 20px; vertical-align: -3px; margin-right: 6px; }
+  .icon-sm { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
+  .icon-lg { width: 32px; height: 32px; vertical-align: -6px; margin-right: 8px; }
+</style>
+
+<!-- ─── Warning / risk (replaces ⚠️) ─── -->
+<svg class="icon" viewBox="0 0 24 24" role="img" aria-label="warning"
+     fill="none" stroke="#C2410C" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round"
+     xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 2 L22 20 L2 20 Z"/>
+  <line x1="12" y1="9"  x2="12" y2="14"/>
+  <circle cx="12" cy="17" r="0.5" fill="#C2410C"/>
+</svg>
+
+<!-- ─── Critical / blocker (replaces 🚨) ─── -->
+<svg class="icon" viewBox="0 0 24 24" role="img" aria-label="critical"
+     fill="#FEE2E2" stroke="#C2410C" stroke-width="2"
+     xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="12" r="10"/>
+  <line x1="12" y1="7" x2="12" y2="13" stroke-linecap="round"/>
+  <circle cx="12" cy="17" r="1" fill="#C2410C" stroke="none"/>
+</svg>
+
+<!-- ─── Check / verified (replaces ✅) ─── -->
+<svg class="icon" viewBox="0 0 24 24" role="img" aria-label="check"
+     fill="none" stroke="#15803D" stroke-width="2.5"
+     stroke-linecap="round" stroke-linejoin="round"
+     xmlns="http://www.w3.org/2000/svg">
+  <polyline points="4,12 10,18 20,6"/>
+</svg>
+
+<!-- ─── Check filled (alternative — bolder verdict) ─── -->
+<svg class="icon" viewBox="0 0 24 24" role="img" aria-label="check filled"
+     xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="12" r="10" fill="#15803D"/>
+  <polyline points="6,12 10,16 18,8" fill="none" stroke="white"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+<!-- ─── Cross / failed (replaces ❌) ─── -->
+<svg class="icon" viewBox="0 0 24 24" role="img" aria-label="cross"
+     fill="none" stroke="#C2410C" stroke-width="2.5"
+     stroke-linecap="round" xmlns="http://www.w3.org/2000/svg">
+  <line x1="6"  y1="6"  x2="18" y2="18"/>
+  <line x1="18" y1="6"  x2="6"  y2="18"/>
+</svg>
+
+<!-- ─── Info (replaces ℹ️) ─── -->
+<svg class="icon" viewBox="0 0 24 24" role="img" aria-label="info"
+     fill="#DBEAFE" stroke="#1E3A8A" stroke-width="2"
+     xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="12" r="10"/>
+  <line x1="12" y1="11" x2="12" y2="17" stroke-linecap="round"/>
+  <circle cx="12" cy="8" r="1" fill="#1E3A8A" stroke="none"/>
+</svg>
+
+<!-- ─── Arrow right (replaces ➜ / →) ─── -->
+<svg class="icon-sm" viewBox="0 0 24 24" role="img" aria-label="arrow right"
+     fill="none" stroke="#D97757" stroke-width="2.5"
+     stroke-linecap="round" stroke-linejoin="round"
+     xmlns="http://www.w3.org/2000/svg">
+  <line x1="4" y1="12" x2="20" y2="12"/>
+  <polyline points="14,6 20,12 14,18"/>
+</svg>
+
+<!-- ─── Trend up (small inline indicator) ─── -->
+<svg class="icon-sm" viewBox="0 0 24 24" role="img" aria-label="trend up"
+     fill="none" stroke="#15803D" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round"
+     xmlns="http://www.w3.org/2000/svg">
+  <polyline points="3,17 9,11 13,15 21,7"/>
+  <polyline points="14,7 21,7 21,14"/>
+</svg>
+
+<!-- ─── Trend down ─── -->
+<svg class="icon-sm" viewBox="0 0 24 24" role="img" aria-label="trend down"
+     fill="none" stroke="#C2410C" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round"
+     xmlns="http://www.w3.org/2000/svg">
+  <polyline points="3,7 9,13 13,9 21,17"/>
+  <polyline points="14,17 21,17 21,10"/>
+</svg>
+
+<!-- ─── Sample usage patterns ─── -->
+<!--
+HEADING usage (replaces emoji prefix taboo):
+<h2>
+  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2"
+       stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2 L22 20 L2 20 Z"/><line x1="12" y1="9" x2="12" y2="14"/>
+  </svg>
+  Critical findings
+</h2>
+
+CALLOUT usage:
+<div class="callout-success">
+  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#15803D"/>
+    <polyline points="6,12 10,16 18,8" fill="none" stroke="white" stroke-width="2.5"/></svg>
+  <strong>Verified</strong> — cross-sample consistency 7/7 PASS
+</div>
+
+INLINE in table cell:
+<td>
+  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="#15803D"
+       stroke-width="2.5"><polyline points="4,12 10,18 20,6"/></svg>
+  PASS
+</td>
+
+WHY THIS BEATS EMOJI:
+- Color follows design tokens (--c-critical / --c-success), not OS-rendered emoji
+- Vector — scales for print, doesn't blur
+- Accessible (aria-label)
+- Consistent rendering across Mac / Linux / Windows
+- Doesn't trigger 6-taboo Rule 4 (emoji-in-heading)
+-->

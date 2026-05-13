@@ -1,0 +1,180 @@
+{
+  "skill": "html-report-build",
+  "version": "1.1.0",
+  "description": "Eval suite for html-report-build skill. 3 modes (report / slide / standalone) × multiple case types: typical (should trigger), skip (should NOT trigger), edge (boundary case).",
+  "evals": [
+    {
+      "id": "eval_01_typical_report",
+      "type": "typical",
+      "description": "Typical report HTML generation request — should invoke skill in report mode.",
+      "input": {
+        "user_message": "把 InterSubMod/docs/reports/validated/2026/05/20260507_某報告_01.md 轉成 HTML 給 PI 看",
+        "context": "Report .md exists, 120 lines, 2 figures (single-file mode expected)."
+      },
+      "expected_behavior": {
+        "skill_should_trigger": true,
+        "mode": "report",
+        "topic_folder": false,
+        "output_pattern": "{basename}.html",
+        "checks": [
+          "Output contains <article class=\"prose\">",
+          "Inline :root CSS variables from design_tokens.css",
+          "@media print rules present",
+          "No <link rel=\"stylesheet\">",
+          "No taboo: linear-gradient (>1), backdrop-filter, text-shadow, 0 0 *px",
+          "Original .md untouched (Companion D11)"
+        ]
+      }
+    },
+    {
+      "id": "eval_02_skip_readme",
+      "type": "skip",
+      "description": "README.md request — skill should DECLINE / route elsewhere.",
+      "input": {
+        "user_message": "把 README.md 轉成 HTML preview",
+        "context": "Root README.md, ~50 lines."
+      },
+      "expected_behavior": {
+        "skill_should_trigger": false,
+        "reason": "README.md is GitHub-rendered natively; no need for companion HTML. Skip per SKIP WHEN rule.",
+        "alternative": "Suggest user view on GitHub or local markdown preview."
+      }
+    },
+    {
+      "id": "eval_03_edge_pptx_slide_deck",
+      "type": "edge",
+      "description": "Slide deck generation from outline .md — should invoke skill in slide mode (not report).",
+      "input": {
+        "user_message": "依據這份 outline 產 PPT slide preview HTML",
+        "context": "Outline .md has numbered slides (## Slide 01, ## Slide 02, ...), speaker notes, no prose body. 22 slides total."
+      },
+      "expected_behavior": {
+        "skill_should_trigger": true,
+        "mode": "slide",
+        "topic_folder": true,
+        "output_pattern": "preview/index.html + preview/slide_XX_*.html × 22",
+        "checks": [
+          "All slide files have <article class=\"slide-canvas\" data-section=\"...\">",
+          "aspect-ratio: 16/9 present in CSS",
+          "Every slide has <details class=\"note-section\"> with timing + speak-text",
+          "Each slide is single-file portable (inline CSS, no external link)",
+          "index.html has sticky topbar + tab nav with one button per slide",
+          "Section badge color matches data-section value (S0-S7 + Q&A)",
+          "PanZoom CDN fallback script present if any .igv-zoom-wrap exists",
+          "Keyboard nav (←/→) works in index.html"
+        ]
+      }
+    },
+    {
+      "id": "eval_04_topic_folder_threshold",
+      "type": "edge",
+      "description": "Long report (>=200 lines OR >=5 figures) should trigger topic folder mode.",
+      "input": {
+        "user_message": "把這份大報告轉成 HTML",
+        "context": "Report .md is 350 lines with 8 figures."
+      },
+      "expected_behavior": {
+        "skill_should_trigger": true,
+        "mode": "report",
+        "topic_folder": true,
+        "output_pattern": "{basename}/index.html + ch01_*.html + ch02_*.html + ... + README.md",
+        "checks": [
+          "{basename}/ directory created",
+          "index.html has TOC linking to chapter files",
+          "Each H2 in source maps to one ch{NN}_*.html",
+          "Auto-generated README.md lists contents",
+          "Figures referenced via relative path ../figures/ (not all base64 inline)"
+        ]
+      }
+    },
+    {
+      "id": "eval_05_standalone_validated_pi_report",
+      "type": "typical",
+      "description": "Validated PI report from docs/reports/validated/ — should invoke standalone mode (not report).",
+      "input": {
+        "user_message": "把 InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md 轉成給 PI 看的終版 HTML",
+        "context": "Source .md in validated/ folder, frontmatter status=validated, audience=PI/lab/future-self, has 5 errata sections (repeated logical units), has causal chain in narrative."
+      },
+      "expected_behavior": {
+        "skill_should_trigger": true,
+        "mode": "standalone",
+        "output_pattern": "{basename}.standalone.html (sibling of .md)",
+        "checks": [
+          "Output contains sticky <aside class=\"toc\">",
+          ".layout has grid-template-columns: 220px 1fr",
+          "5 errata cards as <details class=\"section-card\" id=\"e1\"..\"e5\">",
+          "Core entries (E4, E5) have class=\"core\" and open by default",
+          "Minor entries (E1-E3) collapsed by default",
+          ".verdict-banner uses ONE allowed gradient",
+          ".stat-grid present with 3-6 focal numbers",
+          "Optional inline <svg role=\"img\"> diagram (≤5 per report)",
+          "If SVG present: has <title> + <desc>, viewBox set, no <animate>, no <filter>",
+          "@media print rules: TOC hidden, all details forced open, URLs printed",
+          "No <link rel=\"stylesheet\">",
+          "No <script src=\"...cdn...\">",
+          "Total file size <500 KB",
+          "Taboo audit: ≤2 gradient hits (verdict-banner + optional conclusion-arrow)",
+          "Original .md untouched (D11 companion)"
+        ]
+      }
+    },
+    {
+      "id": "eval_06_svg_inline_diagram_decision",
+      "type": "edge",
+      "description": "Standalone report with causal-chain narrative — should LLM use inline SVG or fall back to PNG?",
+      "input": {
+        "user_message": "把這份 priority bug 機制報告轉成 standalone HTML",
+        "context": "Source has 4-step causal chain (somatic→break early→germline ignored→17.3:1 bias), 3 version comparison (baseline/V3F/V5 proportion), no real-data scatter plot."
+      },
+      "expected_behavior": {
+        "skill_should_trigger": true,
+        "mode": "standalone",
+        "svg_usage": "yes — small flow diagram + proportion bar",
+        "svg_count_expected": "2-3 (within ≤5 limit)",
+        "checks": [
+          "Causal chain rendered as inline <svg> with 4 <rect> nodes + 3 <marker> arrows",
+          "Proportion bar uses width-scaled <rect> based on data ratio",
+          "Colors via design tokens (--c-critical / --c-success / --c-info), NOT hardcoded",
+          "Each SVG has role=\"img\" + <title id> + <desc id> + aria-labelledby",
+          "Font-family inherits from CSS (no SVG-internal font declaration)",
+          "NO <animate>, NO <filter>, NO <linearGradient> inside SVG",
+          "ViewBox ≤ 800×400; if larger, defer to matplotlib PNG"
+        ],
+        "fallback_to_png_if": [
+          "Scatter plot with >50 points",
+          "Histogram with continuous distribution",
+          "Heatmap (use matplotlib + base64 inline)",
+          "IGV screenshot (always PNG)"
+        ]
+      }
+    },
+    {
+      "id": "eval_07_skip_state_json_consumed_by_llm",
+      "type": "skip",
+      "description": "JSON state file or LLM-consumption .md — should NOT trigger.",
+      "input": {
+        "user_message": "把 hypothesis_queue.json 轉成 HTML preview",
+        "context": "JSON file consumed by other skills, not human report."
+      },
+      "expected_behavior": {
+        "skill_should_trigger": false,
+        "reason": "JSON / YAML / CSV state files are for LLM consumption, not human reading. Skip per SKIP WHEN rule.",
+        "alternative": "If user wants visualization of state, suggest /cycle-state or /research-dashboard skill instead."
+      }
+    }
+  ],
+  "audit_commands": {
+    "taboo_grep": "grep -E '(linear-gradient|radial-gradient|backdrop-filter|text-shadow|0 0 [0-9]+px)' <output.html>",
+    "structure_check_report": "grep -c '<article class=\"prose\"' <output.html>",
+    "structure_check_slide": "grep -c '<article class=\"slide-canvas\"' <preview/slide_*.html>",
+    "size_check": "test $(stat -c%s <output.html>) -lt 500000",
+    "no_external_css": "grep -c '<link rel=\"stylesheet\"' <output.html> | grep -q '^0$'"
+  },
+  "thresholds": {
+    "max_taboo_violations": 0,
+    "min_structure_match": 1,
+    "max_size_kb_single_file": 500,
+    "max_size_mb_topic_folder": 5,
+    "min_speaker_notes_per_slide": 1
+  }
+}

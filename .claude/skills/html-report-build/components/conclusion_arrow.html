@@ -1,0 +1,35 @@
+<!-- conclusion_arrow.html — Final verdict callout
+     When source .md has: tier ⭐4-5 conclusion, final verdict, "結論", "POSITIVE/NEGATIVE/CONDITIONAL"
+     This is the ONE allowed gradient exception (Rule 7 in report_prompt.md).
+-->
+
+<!-- Standard (blue gradient) — neutral / informational verdict -->
+<div class="conclusion-arrow">
+  ➜ 結論：V6 為當前最佳，34,855 reads 100% 修正，無 caller-level F1 regression
+</div>
+
+<!-- Green variant — POSITIVE verdict / passed validation -->
+<div class="conclusion-arrow green">
+  ✓ POSITIVE：跨 7 樣本 Inter AF→NGroups +0.705~+0.787，Phase 2A 通過
+</div>
+
+<!-- CSS reference (already in slide_skeleton.html):
+.conclusion-arrow {
+  background: linear-gradient(90deg, #1E3A8A, #3B82F6);
+  color: white;
+  padding: 12px 18px; margin: 12px 0;
+  border-radius: 6px; font-weight: 600; font-size: 17px;
+}
+.conclusion-arrow.green {
+  background: linear-gradient(90deg, #16A34A, #22C55E);
+}
+
+⚠ This is the ONE gradient exception (Rule 7 taboo audit).
+   Any OTHER linear-gradient / radial-gradient in output = taboo violation.
+
+When NOT to use:
+  - Mid-section transitions (use plain text or border)
+  - Statistical summary (use .stat-box instead)
+  - Warning / risk (use .red-frame or .callout-critical)
+  - Tier ≤3 conclusion (not strong enough for gradient emphasis)
+-->

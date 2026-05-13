@@ -1,0 +1,57 @@
+<!-- metric_table.html — Comparison table with row coloring
+     When source .md has comparison: baseline vs V3F vs V5 vs V6, TP vs FP, AUC across samples
+-->
+
+<table class="metric-table">
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>HP1:HP2</th>
+      <th>Caller F1</th>
+      <th>Verdict</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="row-red">
+      <td>baseline</td>
+      <td class="num">17.3:1</td>
+      <td class="num">0.7166</td>
+      <td>❌ 偏移嚴重</td>
+    </tr>
+    <tr class="row-yellow">
+      <td>V3F</td>
+      <td class="num">4.19:1</td>
+      <td class="num">0.7166</td>
+      <td>⚠ 改善但仍偏</td>
+    </tr>
+    <tr class="row-yellow">
+      <td>V5</td>
+      <td class="num">0.95:1</td>
+      <td class="num">0.7166</td>
+      <td>⚠ Layer 1.5 over-correct</td>
+    </tr>
+    <tr class="row-green">
+      <td><strong>V6</strong></td>
+      <td class="num"><strong>1.04:1</strong></td>
+      <td class="num">0.7166</td>
+      <td>✅ 終態</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- CSS reference:
+table.metric-table { width: 100%; border-collapse: collapse; font-size: 16px; margin: 8px 0; }
+table.metric-table th, table.metric-table td {
+  padding: 6px 10px; border: 1px solid #E5E7EB; text-align: left;
+}
+table.metric-table th { background: #F3F4F6; font-weight: 600; text-align: center; }
+table.metric-table td.num { text-align: center; font-family: monospace; }
+table.metric-table tr.row-red    td { background: #FEE2E2; color: #7F1D1D; }
+table.metric-table tr.row-green  td { background: #DCFCE7; color: #166534; }
+table.metric-table tr.row-yellow td { background: #FEF3C7; }
+
+Row class semantics:
+  row-red    = failing / negative / blocker
+  row-yellow = partial / improving / caveat
+  row-green  = passing / verified / final
+-->

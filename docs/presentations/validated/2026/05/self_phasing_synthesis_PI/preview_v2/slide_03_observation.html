@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 03 — 17.3:1 偏移真實存在</title>
+  <style>
+    :root {
+      --c-accent: #D97757; --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #F5F5F7; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-info: #1E3A8A; --c-critical: #DC2626;
+      --ff-body: "Noto Sans CJK TC", "Source Han Sans TW", "Droid Sans Fallback",
+                 -apple-system, system-ui, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", monospace;
+      --shadow-lg: 0 4px 16px rgba(20,20,19,0.10);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--c-bg); color: var(--c-text);
+           font-family: var(--ff-body); line-height: 1.5; }
+
+    main.slide-page { max-width: 1280px; margin: 0 auto; padding: 24px; }
+
+    .slide-meta { background: var(--c-surface); padding: 12px 16px; margin-bottom: 14px;
+                  border-radius: 8px; border-left: 4px solid var(--c-critical);
+                  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 12px; }
+    .slide-meta .label { color: var(--c-text-soft); font-weight: 500; }
+    .slide-meta .value { color: var(--c-text); margin-left: 4px; font-weight: 600; }
+
+    .slide-canvas { background: var(--c-surface); border: 1px solid var(--c-border);
+                    border-radius: 8px; aspect-ratio: 16 / 9;
+                    padding: 28px 40px; position: relative; box-shadow: var(--shadow-lg);
+                    overflow: hidden; }
+    .slide-canvas h2.slide-title { font-size: 28px; margin: 0;
+                                    border-bottom: 2px solid;
+                                    padding-bottom: 4px;
+                                    color: #DC2626; border-bottom-color: #DC2626; }
+    .slide-canvas .en-subtitle { font-size: 13px; color: var(--c-text-soft);
+                                  font-style: italic; margin: 4px 0 12px; padding-left: 1em; }
+    .slide-canvas[data-section="S1"]::before {
+      content: attr(data-section);
+      position: absolute; top: 8px; right: 28px;
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 12px; color: white; background: #DC2626; opacity: 0.9;
+    }
+
+    /* Stat grid (focal numbers) */
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr);
+                 gap: 12px; margin: 12px 0; }
+    .stat-box { background: #FEF2F0; border: 1px solid #FCA5A5; border-radius: 8px;
+                padding: 12px; text-align: center; }
+    .stat-box .number { font-size: 30px; font-weight: 700; color: #DC2626; line-height: 1.1; }
+    .stat-box .label { font-size: 13px; color: var(--c-text-soft); margin-top: 4px; }
+
+    /* Reads table */
+    table.reads-table { width: 100%; border-collapse: collapse; font-size: 15px;
+                         margin: 8px 0; }
+    table.reads-table th, table.reads-table td {
+      padding: 5px 10px; border: 1px solid var(--c-border); text-align: left;
+    }
+    table.reads-table th { background: #FEF2F0; font-weight: 600; text-align: center;
+                            color: #7F1D1D; }
+    table.reads-table td.num { text-align: center; font-family: var(--ff-mono); }
+    table.reads-table tr.row-hp1 td { background: #FEE2E2; color: #7F1D1D; }
+    table.reads-table tr.row-hp2 td { background: #DBEAFE; color: #1E3A8A; }
+
+    /* Three-argument list */
+    .arg-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+                margin: 12px 0; }
+    .arg-card { background: #FAFAFA; border: 1px solid var(--c-border);
+                border-left: 3px solid var(--c-critical); border-radius: 6px;
+                padding: 10px 12px; }
+    .arg-card .arg-num { font-size: 11px; font-weight: 700; color: var(--c-critical);
+                          background: #FEE2E2; padding: 2px 8px; border-radius: 12px;
+                          display: inline-block; margin-bottom: 4px; }
+    .arg-card .arg-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .arg-card .arg-detail { font-size: 13px; color: var(--c-text-soft); line-height: 1.45; }
+
+    /* Conclusion arrow (allowed gradient exception) */
+    .conclusion-arrow { background: linear-gradient(90deg, #1E3A8A, #3B82F6);
+                        color: white; padding: 10px 16px; margin: 10px 0 0;
+                        border-radius: 6px; font-weight: 600; font-size: 16px; }
+
+    /* Footer glossary */
+    .footer-glossary { position: absolute; bottom: 8px; left: 28px; right: 28px;
+                       font-size: 11px; color: var(--c-text-soft);
+                       border-top: 1px solid var(--c-border); padding-top: 4px;
+                       display: flex; gap: 12px; }
+    .footer-glossary .term { font-weight: 600; color: var(--c-text); }
+
+    /* Speaker note */
+    .note-section { margin-top: 16px; background: #FAFBFE; border: 1px solid #C7D2FE;
+                    border-left: 4px solid #8B5CF6; border-radius: 8px; padding: 12px 16px; }
+    .note-section summary { cursor: pointer; font-size: 13px; font-weight: 600; color: #6D28D9; }
+    .note-section .timing { background: #EDE9FE; padding: 3px 9px; border-radius: 4px;
+                             font-size: 11px; color: #6D28D9; display: inline-block; margin: 6px 0;
+                             font-weight: 600; }
+    .note-section .speak-text { font-size: 13px; line-height: 1.65; white-space: pre-line;
+                                 color: var(--c-text); }
+    .note-section .tier3 { margin-top: 10px; padding: 6px 10px; border-radius: 4px;
+                           background: #F9FAFB; border: 1px dashed #9CA3AF;
+                           font-size: 11px; color: var(--c-text-soft); }
+    .note-section .tier3 .label { font-weight: 700; color: #374151; margin-right: 4px; }
+
+    /* Bottom nav */
+    .nav-bottom { display: flex; justify-content: space-between; margin: 16px 0;
+                  padding: 0 4px; }
+    .nav-bottom a { background: var(--c-info); color: white; text-decoration: none;
+                    padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+    .nav-bottom a.disabled { opacity: 0.4; pointer-events: none; }
+    .nav-bottom .counter { align-self: center; color: var(--c-text-soft); font-size: 11px; }
+
+    @media print {
+      body { background: white; }
+      .slide-meta, .nav-bottom { display: none; }
+      .slide-canvas { box-shadow: none; aspect-ratio: auto; }
+      details[open] summary, details summary { list-style: none; }
+      details { open: true; }
+    }
+  </style>
+</head>
+<body>
+
+<main class="slide-page">
+
+  <div class="slide-meta">
+    <span class="label">Slide</span><span class="value">03 / 22</span>
+    <span class="label">Section</span><span class="value">S1 觀察起點</span>
+    <span class="label">Timing</span><span class="value">1.5 分鐘</span>
+  </div>
+
+  <article class="slide-canvas" data-section="S1" aria-label="17.3:1 偏移真實存在">
+
+    <h2 class="slide-title">17.3:1 偏移真實存在 — 三條獨立論證</h2>
+    <p class="en-subtitle">Genome-wide HP1:HP2 = 17.3:1 is engineering bias, not biological reality</p>
+
+    <!-- Focal stat row -->
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="number">17.3 : 1</div>
+        <div class="label">HP1:HP2 全基因組比例</div>
+      </div>
+      <div class="stat-box">
+        <div class="number">94.6%</div>
+        <div class="label">HP1 占比 (隨機應 50%)</div>
+      </div>
+      <div class="stat-box">
+        <div class="number">23 / 23</div>
+        <div class="label">染色體全部同向</div>
+      </div>
+    </div>
+
+    <!-- Reads count table -->
+    <table class="reads-table">
+      <thead>
+        <tr>
+          <th>Haplotype tag</th>
+          <th>Reads count</th>
+          <th>Per-chr 平均</th>
+          <th>vs 隨機 (1.0×)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row-hp1">
+          <td>HP1 family (hp:i:11)</td>
+          <td class="num">614,032</td>
+          <td class="num">26,697 / chr</td>
+          <td class="num">1.89×</td>
+        </tr>
+        <tr class="row-hp2">
+          <td>HP2 family (hp:i:21)</td>
+          <td class="num">35,505</td>
+          <td class="num">1,543 / chr</td>
+          <td class="num">0.11×</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Three independent arguments -->
+    <div class="arg-list">
+      <div class="arg-card">
+        <span class="arg-num">① 生物學</span>
+        <div class="arg-title">跨 chr 不應同向</div>
+        <div class="arg-detail">真實 het variant phasing 應每條染色體獨立；23 chr 全偏 HP1 無生物學基礎</div>
+      </div>
+      <div class="arg-card">
+        <span class="arg-num">② 跨染色體</span>
+        <div class="arg-title">cnLOH artifact 不適用</div>
+        <div class="arg-detail">cnLOH 只影響單一染色體；23 chr 一致同向排除 cnLOH 解釋</div>
+      </div>
+      <div class="arg-card">
+        <span class="arg-num">③ Paired 對照</span>
+        <div class="arg-title">Paired mode = 1:1</div>
+        <div class="arg-detail">同 BAM 經 paired mode 重 phasing → HP1:HP2 ≈ 1:1 → 證明非 BAM 本質</div>
+      </div>
+    </div>
+
+    <div class="conclusion-arrow">
+      ➜ 結論：17.3:1 是 LongPhase-TO 工程 bias，非生物學
+    </div>
+
+    <div class="footer-glossary">
+      <span><span class="term">cnLOH</span> copy-neutral loss of heterozygosity</span>
+      <span><span class="term">paired mode</span> 雙樣本 phasing（tumor+normal）</span>
+    </div>
+
+  </article>
+
+  <details class="note-section" open>
+    <summary>🎤 Speaker Note</summary>
+    <div class="timing">1.5 分鐘</div>
+    <div class="speak-text">[開場]
+這張投影片要解釋 17.3:1 偏移不是噪音、不是 cnLOH artifact，是系統性 bias。
+
+[主軸]
+三條獨立論證互相補強：
+1. 生物學：23 條染色體不應同向；
+2. cnLOH 只影響單 chr，無法解釋 23/23；
+3. Paired mode 對同一份 BAM 重 phasing → 1:1，證明問題在 TO mode 的 phasing 路徑。
+
+[結論]
+這是 LongPhase-TO 工程 bias，下一張投影片進入 chr19 SP1/2/3 個案 IGV 鐵證。</div>
+    <div class="tier3">
+      <span class="label">Tier 3 (口頭可選):</span>
+      cnLOH artifact 詳細解釋 — cnLOH 區域兩 allele 都源自單親，phasing 會把所有 het variants 標到同一 haplotype，但這只影響該 chr，不會擴散到全 genome。
+    </div>
+  </details>
+
+  <nav class="nav-bottom">
+    <a href="#" class="disabled">← Prev</a>
+    <span class="counter">03 / 22 (pilot subset)</span>
+    <a href="slide_06_priority_bug.html">Next →</a>
+  </nav>
+
+</main>
+
+</body>
+</html>

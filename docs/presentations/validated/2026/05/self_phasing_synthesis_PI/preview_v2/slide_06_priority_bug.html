@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 06 — getVote priority bug</title>
+  <style>
+    :root {
+      --c-accent: #D97757; --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #F5F5F7; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-info: #1E3A8A;
+      --ff-body: "Noto Sans CJK TC", "Source Han Sans TW", "Droid Sans Fallback",
+                 -apple-system, system-ui, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", monospace;
+      --shadow-lg: 0 4px 16px rgba(20,20,19,0.10);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--c-bg); color: var(--c-text);
+           font-family: var(--ff-body); line-height: 1.5; }
+
+    main.slide-page { max-width: 1280px; margin: 0 auto; padding: 24px; }
+
+    .slide-meta { background: var(--c-surface); padding: 12px 16px; margin-bottom: 14px;
+                  border-radius: 8px; border-left: 4px solid #EA580C;
+                  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 12px; }
+    .slide-meta .label { color: var(--c-text-soft); font-weight: 500; }
+    .slide-meta .value { color: var(--c-text); margin-left: 4px; font-weight: 600; }
+
+    .slide-canvas { background: var(--c-surface); border: 1px solid var(--c-border);
+                    border-radius: 8px; aspect-ratio: 16 / 9;
+                    padding: 26px 36px; position: relative; box-shadow: var(--shadow-lg);
+                    overflow: hidden; }
+    .slide-canvas h2.slide-title { font-size: 26px; margin: 0; border-bottom: 2px solid;
+                                    padding-bottom: 3px;
+                                    color: #EA580C; border-bottom-color: #EA580C; }
+    .slide-canvas .en-subtitle { font-size: 12px; color: var(--c-text-soft);
+                                  font-style: italic; margin: 3px 0 10px; padding-left: 1em; }
+    .slide-canvas[data-section="S2"]::before {
+      content: attr(data-section);
+      position: absolute; top: 8px; right: 28px;
+      font-size: 11px; font-weight: 600; padding: 3px 10px;
+      border-radius: 12px; color: white; background: #EA580C; opacity: 0.9;
+    }
+
+    /* Two-column code + example layout */
+    .grid-2col { display: grid; grid-template-columns: 1.1fr 1fr; gap: 14px; margin-top: 8px; }
+
+    .panel-label { font-size: 11px; font-weight: 700; color: var(--c-text-soft);
+                    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .panel-label.bug { color: #B91C1C; }
+    .panel-label.fix { color: #047857; }
+
+    /* Code panel */
+    .code-panel { font-family: var(--ff-mono); font-size: 11.5px; line-height: 1.55;
+                  padding: 10px 12px; border-radius: 6px; white-space: pre;
+                  overflow-x: auto; }
+    .code-panel.baseline { background: #FEF2F0; border: 1px solid #FCA5A5; color: #7F1D1D; }
+    .code-panel .kw { color: #B91C1C; font-weight: 600; }
+    .code-panel .comment { color: #92400E; font-style: italic; }
+    .code-panel .hi { background: #FECACA; padding: 0 2px; border-radius: 2px; }
+
+    /* 5-vote example panel */
+    .vote-example { background: #FAFAFA; border: 1px solid var(--c-border);
+                    border-radius: 6px; padding: 10px 12px; font-size: 13px; }
+    .vote-table { width: 100%; border-collapse: collapse; margin: 6px 0;
+                   font-family: var(--ff-mono); font-size: 12px; }
+    .vote-table th, .vote-table td { padding: 3px 6px; border: 1px solid var(--c-border);
+                                       text-align: center; }
+    .vote-table th { background: #F3F4F6; color: var(--c-text); font-weight: 600; }
+    .vote-table .germ { background: #DBEAFE; }
+    .vote-table .som { background: #FEE2E2; }
+    .vote-table .winner { background: #FECACA; color: #7F1D1D; font-weight: 700; }
+
+    .vote-trace { font-size: 12px; line-height: 1.6; margin-top: 6px; }
+    .vote-trace .step { display: block; padding: 2px 0; }
+    .vote-trace .step .num { display: inline-block; width: 18px; font-weight: 700;
+                              color: #B45309; }
+    .vote-trace .step.bad { color: #7F1D1D; font-weight: 600; }
+    .vote-trace .step.fix { color: #047857; font-weight: 600; }
+
+    /* Causal chain */
+    .causal-chain { background: #FFFBEB; border: 1.5px solid #FCD34D; border-radius: 6px;
+                    padding: 10px 14px; margin-top: 10px; font-size: 13.5px;
+                    line-height: 1.6; color: #78350F; }
+    .causal-chain strong { color: #92400E; }
+    .causal-chain .arrow { color: #B45309; font-weight: 700; padding: 0 4px; }
+
+    /* Footer glossary */
+    .footer-glossary { position: absolute; bottom: 8px; left: 28px; right: 28px;
+                       font-size: 11px; color: var(--c-text-soft);
+                       border-top: 1px solid var(--c-border); padding-top: 4px;
+                       display: flex; gap: 16px; flex-wrap: wrap; }
+    .footer-glossary .term { font-weight: 600; color: var(--c-text); }
+
+    /* Speaker note */
+    .note-section { margin-top: 16px; background: #FAFBFE; border: 1px solid #C7D2FE;
+                    border-left: 4px solid #8B5CF6; border-radius: 8px; padding: 12px 16px; }
+    .note-section summary { cursor: pointer; font-size: 13px; font-weight: 600; color: #6D28D9; }
+    .note-section .timing { background: #EDE9FE; padding: 3px 9px; border-radius: 4px;
+                             font-size: 11px; color: #6D28D9; display: inline-block; margin: 6px 0;
+                             font-weight: 600; }
+    .note-section .speak-text { font-size: 13px; line-height: 1.65; white-space: pre-line;
+                                 color: var(--c-text); }
+    .note-section .tier3 { margin-top: 10px; padding: 6px 10px; border-radius: 4px;
+                           background: #F9FAFB; border: 1px dashed #9CA3AF;
+                           font-size: 11px; color: var(--c-text-soft); }
+    .note-section .tier3 .label { font-weight: 700; color: #374151; margin-right: 4px; }
+
+    .nav-bottom { display: flex; justify-content: space-between; margin: 16px 0; padding: 0 4px; }
+    .nav-bottom a { background: var(--c-info); color: white; text-decoration: none;
+                    padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+    .nav-bottom .counter { align-self: center; color: var(--c-text-soft); font-size: 11px; }
+
+    @media print {
+      body { background: white; }
+      .slide-meta, .nav-bottom { display: none; }
+      .slide-canvas { box-shadow: none; aspect-ratio: auto; }
+      details[open] summary, details summary { list-style: none; }
+      details { open: true; }
+    }
+  </style>
+</head>
+<body>
+
+<main class="slide-page">
+
+  <div class="slide-meta">
+    <span class="label">Slide</span><span class="value">06 / 22</span>
+    <span class="label">Section</span><span class="value">S2 機制</span>
+    <span class="label">Timing</span><span class="value">2 分鐘</span>
+  </div>
+
+  <article class="slide-canvas" data-section="S2" aria-label="tagging 層 getVote priority bug">
+
+    <h2 class="slide-title">getVote priority bug：1 票 somatic 蓋 5 票 germline</h2>
+    <p class="en-subtitle">Vector-ordered + break-early loop ignores germline majority — by design, by mistake</p>
+
+    <div class="grid-2col">
+
+      <!-- LEFT: baseline code panel -->
+      <div>
+        <div class="panel-label bug">⚠ baseline (HaplotagProcess.cpp:533)</div>
+<pre class="code-panel baseline">// countMap reset per-read
+countMap.clear();
+for (auto v : votes) {            <span class="comment">// vector 順序 ❶ somatic ❷ mixed ❸ germline</span>
+  <span class="hi">if (v.type == SOMATIC) {</span>
+      hp = somatic_to_hp(v);
+      <span class="kw">break;</span>                    <span class="comment">// ❌ 1 票即 break-early</span>
+  }
+  if (v.type == MIXED)    { ... }
+  if (v.type == GERMLINE) { ... }  <span class="comment">// 永遠到不了</span>
+}
+return hp;
+</pre>
+      </div>
+
+      <!-- RIGHT: 5-vote example -->
+      <div>
+        <div class="panel-label">📊 真實 read 範例 (vote_dump trace)</div>
+        <div class="vote-example">
+          <table class="vote-table">
+            <thead>
+              <tr><th>type</th><th>HP</th><th>count</th></tr>
+            </thead>
+            <tbody>
+              <tr class="germ"><td>germline</td><td>HP2</td><td>5</td></tr>
+              <tr class="som winner"><td>somatic</td><td>HP1</td><td>1 ← 觸發</td></tr>
+            </tbody>
+          </table>
+          <div class="vote-trace">
+            <span class="step bad"><span class="num">①</span> baseline 標 hp=11 (HP1) ❌</span>
+            <span class="step fix"><span class="num">②</span> 正解 hp=21 (HP2, 5 票主導) ✓</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Causal chain to 17.3:1 -->
+    <div class="causal-chain">
+      <strong>為何全偏 HP1？</strong> tumor sub-clone somatic 100% 同方向
+      <span class="arrow">➜</span> 任何 read 遇 1 票 somatic 就被標 hp=11 系列
+      <span class="arrow">➜</span> <strong>17.3:1 偏移在 tag layer 形成</strong>（非 phasing 也非 alignment 問題）
+    </div>
+
+    <div class="footer-glossary">
+      <span><span class="term">getVote</span> longphase-to 的 HP tag 決策函式</span>
+      <span><span class="term">countMap</span> per-read 票數累計表（line 533 reset bug 受害區）</span>
+      <span><span class="term">vector 順序</span> 投票類型優先序 (somatic→mixed→germline)</span>
+    </div>
+
+  </article>
+
+  <details class="note-section" open>
+    <summary>🎤 Speaker Note</summary>
+    <div class="timing">2 分鐘</div>
+    <div class="speak-text">[開場]
+這張投影片揭露 tagging 層 priority bug 的程式碼層級機制。
+
+[主軸]
+baseline 的 getVote 函式 line 533 有兩個 bug：
+1. vector 順序錯：somatic 優先於 germline；
+2. break-early：1 票 somatic 就跳出迴圈，5 票 germline 永遠到不了。
+
+[範例]
+真實 read 案例：germline HP2 有 5 票、somatic HP1 只 1 票。
+按多數決應 hp=21，但 baseline 標 hp=11 — 1 票把 5 票蓋掉。
+
+[因果]
+tumor sub-clone 的 somatic 100% 同方向 → 所有 reads 都被標到 HP1 系列 → 這就是 17.3:1 偏移在 tag layer 形成的方式。
+
+[結論]
+下張投影片會看兩層 bug（phasing + tagging）對應兩層修補。</div>
+    <div class="tier3">
+      <span class="label">Tier 3 (口頭可選):</span>
+      enum 差異 — HAPLOTYPE1_1=2 是內部 enum，HP tag=11 是 BAM 寫出值。
+      兩者經 somatic_to_hp() 映射，bug 在映射前的 break-early 邏輯，不在 enum 本身。
+    </div>
+  </details>
+
+  <nav class="nav-bottom">
+    <a href="slide_03_observation.html">← Prev</a>
+    <span class="counter">06 / 22 (pilot subset)</span>
+    <a href="slide_17_errata.html">Next →</a>
+  </nav>
+
+</main>
+
+</body>
+</html>

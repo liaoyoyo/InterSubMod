@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Errata for PI Report 2026-04-29 — Self-Phasing 後續修訂</title>
+  <style>
+    /* ── Design tokens (Anthropic palette + 8-pt spacing) ── */
+    :root {
+      --c-accent: #D97757; --c-accent-deep: #B85A3F;
+      --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-code-bg: #F4EFE6;
+      --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+      --c-info: #1E3A8A;
+
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+
+      --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+                 "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+
+      --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+      --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+      --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+      --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+      --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+      --shadow-lg: 0 4px 16px rgba(20,20,19,0.10);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--c-bg); color: var(--c-text);
+           font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.6; }
+
+    /* ── Page layout: sticky TOC + main content ── */
+    .layout { max-width: 1320px; margin: 0 auto; display: grid;
+              grid-template-columns: 220px 1fr; gap: var(--sp-5);
+              padding: var(--sp-5) var(--sp-4); }
+
+    aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+                background: var(--c-surface); border: 1px solid var(--c-border);
+                border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+                box-shadow: var(--shadow-sm);
+                max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+    aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase;
+                    letter-spacing: 0.5px; color: var(--c-text-soft);
+                    margin: 0 0 var(--sp-2); font-weight: 700; }
+    aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+    aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+    aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+                  color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+                  border-left: 3px solid transparent; }
+    aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+    aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                          font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+    aside.toc a.core { font-weight: 600; }
+    aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px;
+                              font-size: 0.85em; }
+
+    /* ── Main article ── */
+    main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+                  border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+                  padding: var(--sp-6) var(--sp-6); min-width: 0; }
+
+    /* ── Article header ── */
+    .report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                      margin-bottom: var(--sp-5); }
+    .report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                                letter-spacing: 1px; color: var(--c-accent-deep);
+                                font-weight: 700; margin-bottom: var(--sp-2); }
+    .report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25;
+                         color: var(--c-text); }
+    .report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                            gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+    .report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+    .report-header .meta dd { margin: 0; }
+    .report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                                 border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                                 font-size: 0.92em; }
+    .verdict-banner { background: linear-gradient(90deg, #15803D, #22C55E);
+                       color: white; padding: var(--sp-3) var(--sp-4); margin: var(--sp-4) 0 0;
+                       border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); }
+
+    /* ── Headings (Section level) ── */
+    h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+          padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+          color: var(--c-text); scroll-margin-top: var(--sp-4); }
+    h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+                font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+    h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); color: var(--c-text); }
+    h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2); color: var(--c-text-soft); }
+
+    p, ul, ol { margin: var(--sp-3) 0; }
+    ul, ol { padding-left: var(--sp-5); }
+    li { margin: var(--sp-1) 0; }
+    a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { color: var(--c-accent-deep); }
+    blockquote { border-left: 3px solid var(--c-accent); padding-left: var(--sp-4);
+                  color: var(--c-text-soft); margin: var(--sp-3) 0; font-style: italic;
+                  background: var(--c-code-bg); padding: var(--sp-3) var(--sp-4);
+                  border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+    code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+            font-family: var(--ff-mono); font-size: 0.92em; }
+    pre { background: var(--c-code-bg); padding: var(--sp-3); border-radius: var(--radius-md);
+           overflow-x: auto; font-family: var(--ff-mono); font-size: var(--fs-sm); }
+    pre code { background: none; padding: 0; }
+
+    table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0;
+             font-size: var(--fs-sm); }
+    th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; }
+    th { background: var(--c-code-bg); font-weight: 600; }
+    td.num { text-align: right; font-family: var(--ff-mono); }
+    tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+    tr.row-safe td { background: #DCFCE7; color: #166534; }
+    tr.row-warn td { background: #FEF3C7; }
+
+    /* ── Errata cards (the centerpiece) ── */
+    .errata-card { border: 1.5px solid var(--c-border); border-radius: var(--radius-lg);
+                    margin: var(--sp-4) 0; overflow: hidden; background: var(--c-surface); }
+    .errata-card.core { border-color: var(--c-warning); box-shadow: var(--shadow-sm); }
+    .errata-card > summary { cursor: pointer; padding: var(--sp-3) var(--sp-4);
+                              display: flex; align-items: center; gap: var(--sp-3);
+                              background: var(--c-code-bg); list-style: none; }
+    .errata-card > summary::-webkit-details-marker { display: none; }
+    .errata-card > summary::before { content: "▸"; transition: transform 0.2s;
+                                       color: var(--c-text-soft); font-size: var(--fs-sm); }
+    .errata-card[open] > summary::before { transform: rotate(90deg); }
+    .errata-card.core > summary { background: #FEF7E6; }
+    .errata-card .errata-id { font-family: var(--ff-mono); font-weight: 700; font-size: var(--fs-md);
+                               color: var(--c-warning); background: var(--c-surface);
+                               padding: 3px 10px; border-radius: 12px; border: 1.5px solid var(--c-warning); }
+    .errata-card.core .errata-id { color: var(--c-critical); border-color: var(--c-critical); }
+    .errata-card .errata-section { font-family: var(--ff-mono); font-size: var(--fs-sm);
+                                    color: var(--c-text-soft); }
+    .errata-card .errata-title { flex: 1; font-weight: 600; font-size: var(--fs-md);
+                                  color: var(--c-text); }
+    .errata-card .errata-badge { padding: 2px 8px; border-radius: 10px; font-size: var(--fs-xs);
+                                  font-weight: 700; }
+    .errata-card .errata-badge.core { background: #FCD34D; color: #78350F; }
+    .errata-card .errata-badge.minor { background: #E5E7EB; color: #4B5563; }
+    .errata-card .errata-body { padding: var(--sp-4); }
+
+    /* ── Inline callouts ── */
+    .callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                         padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                         border-radius: var(--radius-md); color: #7F1D1D; }
+    .callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #78350F; }
+    .callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #166534; }
+
+    /* ── Stat row ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                  gap: var(--sp-3); margin: var(--sp-4) 0; }
+    .stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+                 border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+    .stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1; }
+    .stat-box .number.bug { color: var(--c-critical); }
+    .stat-box .number.success { color: var(--c-success); }
+    .stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+
+    /* ── Commit chain visualization ── */
+    .commit-chain { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin: var(--sp-3) 0;
+                     padding: var(--sp-3); background: var(--c-bg); border-radius: var(--radius-md); }
+    .commit-chip { background: var(--c-surface); border: 1px solid var(--c-border);
+                    border-radius: var(--radius-sm); padding: 4px 8px; font-family: var(--ff-mono);
+                    font-size: var(--fs-xs); }
+    .commit-chip.core { border-color: var(--c-critical); background: #FEF2F0; color: #7F1D1D; font-weight: 600; }
+    .commit-chip .date { color: var(--c-text-soft); margin-right: 4px; }
+
+    /* ── SVG figures (Rule 4 standalone mode) ── */
+    .svg-figure { margin: var(--sp-4) 0; text-align: center; }
+    .svg-figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto;
+                       background: var(--c-bg); border-radius: var(--radius-md);
+                       padding: var(--sp-3); border: 1px solid var(--c-border); }
+    .svg-figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                              margin-top: var(--sp-2); font-style: italic; }
+    .icon    { width: 18px; height: 18px; vertical-align: -3px; margin-right: 5px; }
+    .icon-sm { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
+
+    /* ── References footer ── */
+    .references { background: var(--c-bg); border-radius: var(--radius-md);
+                   padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-5); }
+    .references h2 { border-bottom: none; margin-top: 0; font-size: var(--fs-xl); padding-bottom: 0; }
+    .references ol { list-style: decimal; padding-left: var(--sp-5); }
+    .references li { margin: var(--sp-2) 0; font-size: var(--fs-sm); }
+    .references li code { font-family: var(--ff-mono); }
+
+    /* ── Print mode ── */
+    @media print {
+      body { background: white; }
+      .layout { display: block; max-width: 100%; padding: 0; }
+      aside.toc { display: none; }
+      main.report { box-shadow: none; border: none; padding: 0; }
+      .errata-card { open: true; page-break-inside: avoid; border-color: #999; }
+      details[open] > summary, details > summary { list-style: none; }
+      details:not([open]) > * { display: block !important; }
+      details:not([open]) > summary { background: white !important; }
+      a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #666; }
+      a[href^="../"]::after { content: " [" attr(href) "]"; font-size: 0.8em; color: #999; }
+      pre, table, blockquote, .errata-card { page-break-inside: avoid; }
+      h1, h2, h3 { page-break-after: avoid; }
+    }
+
+    /* ── Mobile/narrow viewport ── */
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside.toc { position: static; max-height: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ─── Sticky TOC (HTML-only feature; not possible in MD) ─── -->
+  <aside class="toc" aria-label="Table of contents">
+    <h3>章節導航</h3>
+    <ol>
+      <li><a href="#tldr">TL;DR</a></li>
+      <li><a href="#e1">E1 — chr19 hotspot 降級</a></li>
+      <li><a href="#e2">E2 — V5 commit 狀態</a></li>
+      <li><a href="#e3">E3 — 機制證據強度</a></li>
+      <li><a href="#e4" class="core">E4 — V5 數值歸因</a></li>
+      <li><a href="#e5" class="core">E5 — Layer 1.5 設計缺陷</a></li>
+      <li><a href="#revised-tldr">修訂後一句結論</a></li>
+      <li><a href="#timeline">修訂歷程</a></li>
+      <li><a href="#refs">引用文件</a></li>
+    </ol>
+  </aside>
+
+  <main class="report">
+
+    <!-- ─── Header ─── -->
+    <header class="report-header">
+      <div class="pretitle">Errata Companion · Self-Phasing</div>
+      <h1>PI Report 2026-04-29 — 5 條 errata 已 patch；主結論不撤回</h1>
+
+      <dl class="meta">
+        <dt>Build date</dt>      <dd>2026-05-09 (revised 2026-05-10)</dd>
+        <dt>Audience</dt>        <dd>PI / lab member / 自己未來</dd>
+        <dt>Parent report</dt>   <dd><code>InterSubMod/docs/reports/validated/2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md</code></dd>
+        <dt>Status</dt>          <dd>validated · last verified 2026-05-10</dd>
+        <dt>Template</dt>        <dd>errata-companion v1.0</dd>
+        <dt>Companion to</dt>    <dd><code>20260509_PI_Report_4_29_Errata_01.md</code></dd>
+      </dl>
+
+      <div class="verdict-banner">
+        <svg class="icon" viewBox="0 0 24 24" role="img" aria-label="verified" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" fill="white" opacity="0.2"/>
+          <polyline points="6,12 10,16 18,8" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Verdict: 5 條 errata patch；主結論不撤回；E4 + E5 為核心精確化（歸因更正 + 設計缺陷揭露）
+      </div>
+    </header>
+
+    <!-- ─── TL;DR ─── -->
+    <h2 id="tldr"><span class="h-num">0.</span>TL;DR</h2>
+
+    <p>PI 報告 <code>2026-04-29 longphase_TO_vs_V5_Somatic_Fallback_技術報告</code> <strong>主要結論不撤回</strong>（self-phasing 真實存在、V3F + V5 修正確立、V5 可作 production tag baseline）。本 erratum 修訂 5 處表述：</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="number bug">17.3 : 1</div>
+        <div class="label">HP1:HP2 全基因組偏移（baseline）</div>
+      </div>
+      <div class="stat-box">
+        <div class="number success">100%</div>
+        <div class="label">V3F + V5 修正率（34,855 reads）</div>
+      </div>
+      <div class="stat-box">
+        <div class="number">5 / 5</div>
+        <div class="label">errata 已 patch</div>
+      </div>
+      <div class="stat-box">
+        <div class="number">2 / 5</div>
+        <div class="label">core (E4, E5)</div>
+      </div>
+    </div>
+
+    <!-- ─── Hero SVG: Errata patch summary (5-second skim) ─── -->
+    <figure class="svg-figure" aria-label="5 errata 修訂視覺摘要">
+      <svg viewBox="0 0 760 220" role="img"
+           aria-labelledby="hero-title hero-desc"
+           xmlns="http://www.w3.org/2000/svg">
+        <title id="hero-title">5 errata patch 摘要圖</title>
+        <desc id="hero-desc">E1-E3 為 minor 表述精確化；E4-E5 為 core 歸因更正 + 設計缺陷揭露</desc>
+
+        <g font-family="system-ui, -apple-system, 'Noto Sans CJK TC', sans-serif" font-size="13">
+          <!-- Header -->
+          <text x="380" y="22" text-anchor="middle" font-weight="700" fill="#141413" font-size="14">
+            5 errata 修訂類型分流
+          </text>
+
+          <!-- Minor group (left, 3 cards) -->
+          <rect x="20" y="50" width="340" height="150" rx="10"
+                fill="#FFFBEB" stroke="#A16207" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="190" y="72" text-anchor="middle" font-weight="700" fill="#78350F" font-size="13">
+            Minor — 表述精確化 (3)
+          </text>
+
+          <!-- E1 -->
+          <rect x="40" y="92" width="100" height="40" rx="6" fill="#FEF7E6" stroke="#A16207" stroke-width="1.5"/>
+          <text x="90" y="110" text-anchor="middle" font-weight="700" fill="#78350F">E1</text>
+          <text x="90" y="125" text-anchor="middle" font-size="10" fill="#78350F">chr19 hotspot</text>
+
+          <!-- E2 -->
+          <rect x="155" y="92" width="100" height="40" rx="6" fill="#FEF7E6" stroke="#A16207" stroke-width="1.5"/>
+          <text x="205" y="110" text-anchor="middle" font-weight="700" fill="#78350F">E2</text>
+          <text x="205" y="125" text-anchor="middle" font-size="10" fill="#78350F">commit 狀態</text>
+
+          <!-- E3 -->
+          <rect x="270" y="92" width="80" height="40" rx="6" fill="#FEF7E6" stroke="#A16207" stroke-width="1.5"/>
+          <text x="310" y="110" text-anchor="middle" font-weight="700" fill="#78350F">E3</text>
+          <text x="310" y="125" text-anchor="middle" font-size="10" fill="#78350F">證據強度</text>
+
+          <text x="190" y="175" text-anchor="middle" font-size="11" fill="#78350F">
+            不影響結論；補強精確度
+          </text>
+
+          <!-- Core group (right, 2 cards) -->
+          <rect x="400" y="50" width="340" height="150" rx="10"
+                fill="#FEF2F0" stroke="#C2410C" stroke-width="2"/>
+          <text x="570" y="72" text-anchor="middle" font-weight="700" fill="#7F1D1D" font-size="13">
+            CORE — 歸因 + 設計缺陷 (2)
+          </text>
+
+          <!-- E4 -->
+          <rect x="420" y="92" width="150" height="60" rx="6" fill="#FEE2E2" stroke="#C2410C" stroke-width="1.5"/>
+          <text x="495" y="112" text-anchor="middle" font-weight="700" fill="#7F1D1D">E4</text>
+          <text x="495" y="128" text-anchor="middle" font-size="10" fill="#7F1D1D">V5 數值歸因</text>
+          <text x="495" y="142" text-anchor="middle" font-size="10" fill="#7F1D1D">Pass 1 only</text>
+
+          <!-- E5 -->
+          <rect x="585" y="92" width="150" height="60" rx="6" fill="#FEE2E2" stroke="#C2410C" stroke-width="1.5"/>
+          <text x="660" y="112" text-anchor="middle" font-weight="700" fill="#7F1D1D">E5</text>
+          <text x="660" y="128" text-anchor="middle" font-size="10" fill="#7F1D1D">Layer 1.5</text>
+          <text x="660" y="142" text-anchor="middle" font-size="10" fill="#7F1D1D">設計缺陷</text>
+
+          <text x="570" y="175" text-anchor="middle" font-size="11" fill="#7F1D1D">
+            主結論不撤回；歸因更正 + V3F 改回考量
+          </text>
+
+          <!-- Connecting line: both groups → bottom verdict -->
+          <line x1="380" y1="200" x2="380" y2="215" stroke="#6B6B66" stroke-width="1" stroke-dasharray="3,2"/>
+        </g>
+      </svg>
+      <figcaption>圖 1：5 errata 分流 — 3 minor 精確化 + 2 core 修訂；主結論不撤回</figcaption>
+    </figure>
+
+    <!-- ─── E1 ─── -->
+    <details class="errata-card" id="e1">
+      <summary>
+        <span class="errata-id">E1</span>
+        <span class="errata-section">§3.3.3</span>
+        <span class="errata-title">chr19 SP1/2/3 從「主要 hotspot」→「可重現案例」</span>
+        <span class="errata-badge minor">minor</span>
+      </summary>
+      <div class="errata-body">
+        <p><strong>原文（PI 報告 line 146 + 170-184）</strong>：</p>
+        <blockquote>
+          個別位點層（IGV 6-BAM 並列）｜ 3 個 SP-extreme 位點 baseline HP2:HP1 ratio：SP1 chr19:17565944 = <strong>113:0</strong>；SP2 chr19:12452332 = <strong>109:1</strong>；SP3 chr19:12467180 = <strong>108:0</strong>
+        </blockquote>
+
+        <p><strong>5/8 全基因組顛覆性發現</strong> — chr19 priority bug 占比僅 <strong>2.16%</strong>（752 / 34,855 全基因組 victims，rank 19）：</p>
+
+        <table>
+          <thead>
+            <tr><th>染色體</th><th>victims</th><th>占全基因組</th><th>rank</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>chr7</td><td class="num">3,508</td><td class="num">10.1%</td><td class="num">1</td></tr>
+            <tr><td>chr2</td><td class="num">2,792</td><td class="num">8.0%</td><td class="num">2</td></tr>
+            <tr><td>chr1</td><td class="num">2,674</td><td class="num">7.7%</td><td class="num">3</td></tr>
+            <tr><td>chr16</td><td class="num">2,584</td><td class="num">7.4%</td><td class="num">4</td></tr>
+            <tr><td>chr20</td><td class="num">2,101</td><td class="num">6.0%</td><td class="num">7</td></tr>
+            <tr class="row-warn"><td><strong>chr19</strong></td><td class="num"><strong>752</strong></td><td class="num"><strong>2.16%</strong></td><td class="num"><strong>19</strong></td></tr>
+          </tbody>
+        </table>
+
+        <figure class="svg-figure" aria-label="chr19 在全基因組 priority bug 分佈中僅 rank 19">
+          <svg viewBox="0 0 720 200" role="img"
+               aria-labelledby="bar-chr-title bar-chr-desc"
+               xmlns="http://www.w3.org/2000/svg">
+            <title id="bar-chr-title">Priority bug 跨染色體分佈</title>
+            <desc id="bar-chr-desc">chr7 為 rank 1 (3,508 victims)；chr19 僅 rank 19 (752 victims, 2.16%)</desc>
+
+            <g font-family="system-ui, -apple-system, 'Noto Sans CJK TC', sans-serif" font-size="12">
+              <text x="360" y="22" text-anchor="middle" font-weight="700" fill="#141413" font-size="13">
+                Priority bug victims per chromosome (top 5 + chr19)
+              </text>
+
+              <!-- bars (width proportional to victim count, max=3508 → 500px) -->
+              <!-- chr7 -->
+              <text x="60" y="56" text-anchor="end" font-weight="600" fill="#141413">chr7</text>
+              <rect x="80" y="44" width="500" height="16" fill="#C2410C"/>
+              <text x="590" y="56" font-family="ui-monospace, monospace" fill="#7F1D1D" font-weight="600">3,508 · rank 1</text>
+
+              <!-- chr2 -->
+              <text x="60" y="84" text-anchor="end" font-weight="600" fill="#141413">chr2</text>
+              <rect x="80" y="72" width="398" height="16" fill="#EA580C"/>
+              <text x="488" y="84" font-family="ui-monospace, monospace" fill="#7F1D1D">2,792 · rank 2</text>
+
+              <!-- chr1 -->
+              <text x="60" y="112" text-anchor="end" font-weight="600" fill="#141413">chr1</text>
+              <rect x="80" y="100" width="381" height="16" fill="#EA580C"/>
+              <text x="471" y="112" font-family="ui-monospace, monospace" fill="#7F1D1D">2,674 · rank 3</text>
+
+              <!-- chr16 -->
+              <text x="60" y="140" text-anchor="end" font-weight="600" fill="#141413">chr16</text>
+              <rect x="80" y="128" width="368" height="16" fill="#EA580C"/>
+              <text x="458" y="140" font-family="ui-monospace, monospace" fill="#7F1D1D">2,584 · rank 4</text>
+
+              <!-- chr20 -->
+              <text x="60" y="168" text-anchor="end" font-weight="600" fill="#141413">chr20</text>
+              <rect x="80" y="156" width="299" height="16" fill="#EA580C"/>
+              <text x="389" y="168" font-family="ui-monospace, monospace" fill="#7F1D1D">2,101 · rank 7</text>
+
+              <!-- chr19 (highlighted) -->
+              <text x="60" y="196" text-anchor="end" font-weight="700" fill="#A16207">chr19 ★</text>
+              <rect x="80" y="184" width="107" height="16" fill="#CA8A04" stroke="#78350F" stroke-width="1.5"/>
+              <text x="197" y="196" font-family="ui-monospace, monospace" fill="#78350F" font-weight="700">752 · rank 19 (2.16%)</text>
+            </g>
+          </svg>
+          <figcaption>圖 2：chr19 (★) 僅 rank 19 — SP1/2/3 為可重現案例，非主要分佈位置</figcaption>
+        </figure>
+
+        <div class="callout-success">
+          <strong>修訂建議</strong>：保留 IGV 截圖與數字；加註「chr19 SP1/2/3 為經 IGV 篩選之可重現極端案例，全基因組 priority bug 主要分佈於 chr7/chr2/chr1/chr16/chr20。SP1/2/3 用於 demonstrate 機制，不代表分佈位置。」
+        </div>
+      </div>
+    </details>
+
+    <!-- ─── E2 ─── -->
+    <details class="errata-card" id="e2">
+      <summary>
+        <span class="errata-id">E2</span>
+        <span class="errata-section">§5.2</span>
+        <span class="errata-title">V5 working tree → 已 commit（d0bcd8c · 938f0df）</span>
+        <span class="errata-badge minor">minor</span>
+      </summary>
+      <div class="errata-body">
+        <p><strong>當時（2026-04-29）</strong>：V5 改動仍在 working tree，未 commit。</p>
+        <p><strong>5/9 更新</strong>：V5 chain 已完成 commit。</p>
+
+        <figure class="svg-figure" aria-label="V5 5 commit 時間軸">
+          <svg viewBox="0 0 760 220" role="img"
+               aria-labelledby="commit-title commit-desc"
+               xmlns="http://www.w3.org/2000/svg">
+            <title id="commit-title">V5 commit 鏈時間軸</title>
+            <desc id="commit-desc">5 commits 從 04-09 到 04-30；最後 2 個 (d0bcd8c, 938f0df) 為核心修補</desc>
+
+            <g font-family="system-ui, -apple-system, 'Noto Sans CJK TC', sans-serif" font-size="11">
+              <!-- Header -->
+              <text x="380" y="22" text-anchor="middle" font-weight="700" fill="#141413" font-size="13">
+                V5 commit chain — 5 commits 漸進完成 (2026-04-09 → 04-30)
+              </text>
+
+              <!-- Timeline axis -->
+              <line x1="60" y1="105" x2="700" y2="105" stroke="#6B6B66" stroke-width="2"/>
+              <polygon points="700,105 692,101 692,109" fill="#6B6B66"/>
+
+              <!-- Tick marks -->
+              <line x1="80"  y1="100" x2="80"  y2="110" stroke="#6B6B66"/>
+              <line x1="220" y1="100" x2="220" y2="110" stroke="#6B6B66"/>
+              <line x1="430" y1="100" x2="430" y2="110" stroke="#6B6B66"/>
+              <line x1="600" y1="100" x2="600" y2="110" stroke="#6B6B66"/>
+
+              <!-- Commit 1: 8b8c1fd (04-09) - phasing layer (blue) -->
+              <circle cx="80" cy="105" r="14" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="2"/>
+              <text x="80" y="109" text-anchor="middle" font-weight="700" fill="#1E3A8A" font-size="11">1</text>
+              <text x="80" y="80" text-anchor="middle" font-weight="700" fill="#1E3A8A" font-size="11">04-09</text>
+              <text x="80" y="138" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#1E3A8A" font-weight="600">8b8c1fd</text>
+              <text x="80" y="152" text-anchor="middle" font-size="10" fill="#1E3A8A">PON-only</text>
+
+              <!-- Commit 2: 41ff147 (04-10) - tagging fix (yellow) -->
+              <circle cx="160" cy="105" r="14" fill="#FEF3C7" stroke="#A16207" stroke-width="2"/>
+              <text x="160" y="109" text-anchor="middle" font-weight="700" fill="#78350F" font-size="11">2</text>
+              <text x="160" y="80" text-anchor="middle" font-weight="700" fill="#78350F" font-size="11">04-10</text>
+              <text x="160" y="138" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#78350F" font-weight="600">41ff147</text>
+              <text x="160" y="152" text-anchor="middle" font-size="10" fill="#78350F">V3F two-layer</text>
+
+              <!-- Commit 3: 380e8d2 (04-25) - INDEL guard (yellow) -->
+              <circle cx="350" cy="105" r="14" fill="#FEF3C7" stroke="#A16207" stroke-width="2"/>
+              <text x="350" y="109" text-anchor="middle" font-weight="700" fill="#78350F" font-size="11">3</text>
+              <text x="350" y="80" text-anchor="middle" font-weight="700" fill="#78350F" font-size="11">04-25</text>
+              <text x="350" y="138" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#78350F" font-weight="600">380e8d2</text>
+              <text x="350" y="152" text-anchor="middle" font-size="10" fill="#78350F">INDEL guard</text>
+
+              <!-- Commit 4: d0bcd8c (04-30) - CORE (red) -->
+              <circle cx="500" cy="105" r="16" fill="#FEE2E2" stroke="#C2410C" stroke-width="2.5"/>
+              <text x="500" y="110" text-anchor="middle" font-weight="700" fill="#7F1D1D" font-size="12">4★</text>
+              <text x="500" y="80" text-anchor="middle" font-weight="700" fill="#7F1D1D" font-size="11">04-30</text>
+              <text x="500" y="138" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#7F1D1D" font-weight="700">d0bcd8c</text>
+              <text x="500" y="152" text-anchor="middle" font-size="10" fill="#7F1D1D">ploidy + Layer 1.5</text>
+
+              <!-- Commit 5: 938f0df (04-30) - CORE (red) -->
+              <circle cx="620" cy="105" r="16" fill="#FEE2E2" stroke="#C2410C" stroke-width="2.5"/>
+              <text x="620" y="110" text-anchor="middle" font-weight="700" fill="#7F1D1D" font-size="12">5★</text>
+              <text x="620" y="80" text-anchor="middle" font-weight="700" fill="#7F1D1D" font-size="11">04-30</text>
+              <text x="620" y="138" text-anchor="middle" font-family="ui-monospace, monospace" font-size="10" fill="#7F1D1D" font-weight="700">938f0df</text>
+              <text x="620" y="152" text-anchor="middle" font-size="10" fill="#7F1D1D">threshold 0.95→0.9</text>
+
+              <!-- Layer legend -->
+              <g transform="translate(60, 180)">
+                <circle cx="6" cy="6" r="5" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+                <text x="18" y="9" font-size="10" fill="#1E3A8A">phasing layer</text>
+                <circle cx="120" cy="6" r="5" fill="#FEF3C7" stroke="#A16207" stroke-width="1.5"/>
+                <text x="132" y="9" font-size="10" fill="#78350F">tagging layer</text>
+                <circle cx="240" cy="6" r="5" fill="#FEE2E2" stroke="#C2410C" stroke-width="1.5"/>
+                <text x="252" y="9" font-size="10" fill="#7F1D1D">★ CORE 修補 (E2 + E4 證據)</text>
+              </g>
+            </g>
+          </svg>
+          <figcaption>圖 3：V5 為 5 commits（非 4）；commit #4-5 為 PI 報告 4-29 後新增的 core 修補</figcaption>
+        </figure>
+
+        <p>V5 為 <strong>5 commits</strong>（非 4）；全部 commit 完成；HEAD = <code>938f0df</code> = 最新有效演算法版本。</p>
+
+        <div class="callout-success">
+          <strong>修訂建議</strong>：§5.2 「V5（uncommitted working tree）」→「V5（commit <code>d0bcd8c</code> + <code>938f0df</code> 完成於 2026-04-30）」；caveat 對應同步更新。
+        </div>
+      </div>
+    </details>
+
+    <!-- ─── E3 ─── -->
+    <details class="errata-card" id="e3">
+      <summary>
+        <span class="errata-id">E3</span>
+        <span class="errata-section">§5.2 / §3.3</span>
+        <span class="errata-title">證據強度升級：「commit msg + 3 IGV」→「+ 34,855 read-level 鐵證」</span>
+        <span class="errata-badge minor">minor</span>
+      </summary>
+      <div class="errata-body">
+        <p>§3.3 原 3 層獨立證據鏈：理論層 / 全基因組層 (17.3:1) / 個別位點層 (SP1/2/3 IGV) — <strong>read-level 個案層尚未涵蓋</strong>。</p>
+
+        <table>
+          <thead>
+            <tr><th>規模</th><th>chr19 pilot</th><th>全基因組</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Dump rows</td><td class="num">549,206</td><td class="num">29,973,253</td></tr>
+            <tr class="row-bug"><td><strong>Priority bug victims</strong></td><td class="num"><strong>752</strong></td><td class="num"><strong>34,855</strong></td></tr>
+            <tr class="row-safe"><td>V3F 修正比例</td><td class="num">100.00%</td><td class="num">100.00%</td></tr>
+            <tr class="row-safe"><td>V5 修正比例</td><td class="num">100.00%</td><td class="num">100.00%</td></tr>
+            <tr><td>4-path 驗證</td><td>3.5/4 PASS</td><td>—</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout-success">
+          <strong>修訂建議</strong>：§3.3 證據鏈加第 4 層「read-level 個案層」；§5.2 機制段加註「升級為『個案 + 統計 + 機制』三重佐證」。
+        </div>
+      </div>
+    </details>
+
+    <!-- ─── E4 (CORE) ─── -->
+    <details class="errata-card core" id="e4" open>
+      <summary>
+        <span class="errata-id">E4</span>
+        <span class="errata-section">§6.4 / §6.5</span>
+        <span class="errata-title">V5 數值歸因 → Pass 1 only；主要 V3F + Layer 1.5；Pass 2 二次效益尚未量化</span>
+        <span class="errata-badge core">CORE</span>
+      </summary>
+      <div class="errata-body">
+        <p><strong>關鍵發現</strong>：PI 報告引用之 V5 BAM 是 <code>output/pononly_v5_somatic_fallback/tumor_tagged.bam</code>（4-12，吃 4-3 V2b phased VCF），實為 <strong>Pass 1 only</strong>：</p>
+
+<pre>4-12 V5 BAM 對應的 phasing.log:
+   purity: 0       ← ploidy bug 讓 ploidyRatioMap 留空 → q1=q3=0 → polynomial → clamp 到 0
+   highPurity = (0 &gt; 0.9) = false
+   Pass 2 second round phasing 從未觸發
+   = Pass 1 only 結果</pre>
+
+        <p><strong>功勞歸因分解</strong>：</p>
+
+        <table>
+          <thead>
+            <tr><th>PI 報告數值</th><th>主要功勞來源</th><th>Pass 2 觸發後預期</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>HP1:HP2 17.3:1 → ~1:1</td><td>V3F tagging fix</td><td>應持平</td></tr>
+            <tr><td>94.6% somatic→HP1 → ~50% balanced</td><td>V3F</td><td>應持平</td></tr>
+            <tr><td>sanity 15/15 PASS</td><td>V3F + Layer 1.5</td><td>應持平</td></tr>
+            <tr><td>clean PS paired GT concordance +13.3 pp</td><td>V3F + Layer 1.5</td><td>持平 or 微升</td></tr>
+            <tr><td>HP:i:33 −54% (110,197)</td><td>V3F + Layer 1.5</td><td>應持平</td></tr>
+            <tr><td>Phase block N50 +99.7%</td><td>主要 PON-only Pass 1</td><td>Pass 2 後可能更升</td></tr>
+          </tbody>
+        </table>
+
+        <p><strong>Pass 2 incremental 獨立量化</strong>（4-30 重跑後 Pass 1 vs Pass 1+2）：</p>
+
+        <table>
+          <thead>
+            <tr><th>指標</th><th>Pass 1 only</th><th>Pass 1 + Pass 2</th><th>Δ</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Phase blocks</td><td class="num">1,808</td><td class="num">1,631</td><td>−177 (−9.79%)</td></tr>
+            <tr><td>Phased variants</td><td class="num">1,848,538 (58.00%)</td><td class="num">1,756,339 (55.10%)</td><td>−2.90 pp</td></tr>
+            <tr class="row-safe"><td><strong>N50 (bp)</strong></td><td class="num"><strong>11,388,114</strong></td><td class="num"><strong>11,788,053</strong></td><td><strong>+399,939 (+3.51%)</strong></td></tr>
+          </tbody>
+        </table>
+
+        <p>→ Pass 2 incremental N50 = <strong>+3.51%</strong>（從 4-12 到 4-30 重跑），相比於 baseline → V5 整體 N50 +99.7% 只是小幅。</p>
+
+        <div class="callout-warning">
+          <strong>修訂建議</strong>：§6.4/§6.5 表後加註「歸因精確化 — Pass 1 only；主要 V3F + Layer 1.5；Pass 2 second round 二次效益尚未獨立量化（用戶 5/7 決策 cancel ISM benchmark — ISM 為下游消費者）」；§1 一句結論補「caller F1 三版相同（V5 不改 caller）」。
+        </div>
+      </div>
+    </details>
+
+    <!-- ─── E5 (CORE) ─── -->
+    <details class="errata-card core" id="e5" open>
+      <summary>
+        <span class="errata-id">E5</span>
+        <span class="errata-section">§5.2 (5/10 加)</span>
+        <span class="errata-title">V5 Layer 1.5 — germline-absent 區與 baseline 4.19:1 相同（設計缺陷非修補）</span>
+        <span class="errata-badge core">CORE</span>
+      </summary>
+      <div class="errata-body">
+        <p><strong>5/9 paired germline-absent xref</strong> — 對 paired chr19 read_name × T1.2 baseline / V3F / V5 vote dump JOIN，篩 <code>cnt_HP1+cnt_HP2=0</code> 且 <code>somatic&gt;0</code>（5,789 events）：</p>
+
+        <table>
+          <thead>
+            <tr><th>版本</th><th>hp=11 (HP1 系列)</th><th>hp=21 (HP2 系列)</th><th>hp=33 (somatic ambiguous)</th><th>評語</th></tr>
+          </thead>
+          <tbody>
+            <tr class="row-bug">
+              <td><strong>baseline</strong></td>
+              <td class="num"><strong>3,312</strong></td><td class="num">791</td><td class="num">80</td>
+              <td><strong>4.19:1 偏 HP1</strong>（priority bug 次峰）</td>
+            </tr>
+            <tr class="row-safe">
+              <td><strong>V3F</strong></td>
+              <td class="num">0</td><td class="num">0</td><td class="num"><strong>5,789</strong></td>
+              <td>全標 hp=33（保守不選邊）✅</td>
+            </tr>
+            <tr class="row-bug">
+              <td><strong>V5</strong></td>
+              <td class="num"><strong>3,313</strong></td><td class="num">790</td><td class="num">53</td>
+              <td><strong>4.19:1 偏 HP1（與 baseline 完全相同！）</strong> ⚠️</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-critical">
+          <strong>核心發現</strong>：V5 Layer 1.5 = <strong>priority bug 的 feature 化</strong>。把「baseline 用 somatic vote 蓋過 germline」buggy 行為，改成「germline 缺席時才用 somatic vote」designed 行為，但<strong>該區域偏移本質沒變</strong>。V3F 標 hp=33（純 somatic ambiguous，方向不選邊）反而保守正確。
+        </div>
+
+        <h4>不影響的 PI 結論</h4>
+        <ul>
+          <li>✅ 17.3:1 全基因組偏移確立（priority bug 主要由 germline_vote&gt;0 區域貢獻）</li>
+          <li>✅ V3F + V5 修正 752 / 34,855 victims 100% 修正率（germline_vote&gt;0 區）</li>
+          <li>✅ sanity 15/15 PASS · caller F1 三版相同</li>
+          <li>⚠ E5 僅影響 V5 vs V3F 在 <strong>germline-absent 區域</strong> 的設計選擇</li>
+        </ul>
+
+        <h4>對 region-level downstream 的影響（V6-C Phase B，5/10）</h4>
+
+        <table>
+          <thead>
+            <tr><th>量化</th><th>結果</th><th>說明</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>chr19 marker filter (NG≥3) flag=off TP rate</td><td class="num">94.7% (463/489)</td><td>germline-existent 區為主</td></tr>
+            <tr><td>對應 flag=on (NG_on=2) cell TP rate</td><td class="num">91.5% (367/401)</td><td>bucket collapse 後仍 ≥0.85</td></tr>
+            <tr class="row-safe"><td>最強 cell (NG_off=5 → NG_on=2)</td><td class="num">99.2% (122/123)</td><td>schema 訊號塌陷後物理屬性仍區辨</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout-success">
+          <strong>結論</strong>：Layer 1.5 設計缺陷在 read-level 真實，但 region-level 影響輕微；不阻擋 V5 作為 production tag baseline；germline-absent 區改回 V3F 的 ISM 影響待 Phase C 7 樣本量化（F-paired-D3 follow-up）。
+        </div>
+      </div>
+    </details>
+
+    <!-- ─── Revised TL;DR ─── -->
+    <h2 id="revised-tldr"><span class="h-num">6.</span>修訂後 §1 一句結論</h2>
+
+    <blockquote>
+      Self-phasing 在 baseline LongPhase-TO 是真實 tag-level artifact（94.6% somatic ALT reads 集中於 HP1，HP1:HP2 = 17.3:1）；修補在 longphase-to-mod fork 內以 <strong>5 commits</strong> 漸進完成（<code>8b8c1fd</code> → <code>41ff147</code> → <code>380e8d2</code> → <code>d0bcd8c</code> → <code>938f0df</code>，全部 commit 完成於 2026-04-30），總修補集中於 3 函式、介面契約零變動；V5 通過 4 項硬性 sanity check 15/15 PASS、clean PS paired GT concordance +13.3 pp，可作為新 haplotag baseline。Read-level audit 補強 priority bug 機制因果至 chr19 752 + 全基因組 34,855 victims 鐵證、V3F+V5 修正率 100%。<strong>但 PI 報告 §6 V5 數值為 4-12 BAM = Pass 1 only</strong>，主要功勞來自 V3F + Layer 1.5（tagging layer），Pass 2 second round 二次效益尚未獨立量化。<strong>5/9 paired cross-ref 揭露 V5 Layer 1.5 在 germline-absent 區域與 baseline 4.19:1 偏 HP1 完全相同（priority bug 的 feature 化而非修補），V3F 標 hp=33 反而更穩健</strong>；但 germline-absent 區域佔比小，不阻擋 V5 作為整體 production baseline。
+    </blockquote>
+
+    <!-- ─── Timeline ─── -->
+    <h2 id="timeline"><span class="h-num">7.</span>修訂歷程</h2>
+
+    <table>
+      <thead>
+        <tr><th style="width:14%">時間</th><th>修訂事件</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2026-04-29</td><td>PI 報告原文 commit</td></tr>
+        <tr><td>2026-04-30</td><td>V5 chain 完成 commit (<code>d0bcd8c</code>, <code>938f0df</code>)</td></tr>
+        <tr><td>2026-05-05</td><td>V5 audit 揭露 PI 報告 V5 數據 = Pass 1 only</td></tr>
+        <tr><td>2026-05-07</td><td>T1.2 chr19 752 victims read-level 鐵證</td></tr>
+        <tr><td>2026-05-08</td><td>T1.2-F1 全基因組 34,855 + 顛覆三項 chr19 結論</td></tr>
+        <tr><td>2026-05-08</td><td>Self-Phasing 整合報告（4 條 errata）</td></tr>
+        <tr class="row-warn"><td><strong>2026-05-09</strong></td><td><strong>本 erratum companion + PI 報告頂部 banner (E1-E4)</strong></td></tr>
+        <tr><td>2026-05-09</td><td>Paired audit Step D — V5 Layer 1.5 設計缺陷</td></tr>
+        <tr class="row-warn"><td><strong>2026-05-10</strong></td><td><strong>本檔加 E5 + §5.5 V6-C Phase B robustness</strong></td></tr>
+      </tbody>
+    </table>
+
+    <!-- ─── References ─── -->
+    <section class="references" id="refs">
+      <h2><span class="h-num">8.</span>引用文件</h2>
+      <ol>
+        <li><code>InterSubMod/docs/reports/validated/2026/04/20260429_longphase_TO_vs_V5_Somatic_Fallback_技術報告_01.md</code> — PI 報告原文 (4-29)</li>
+        <li><code>InterSubMod/docs/reports/validated/2026/05/20260505_self_phasing_V5_data_provenance_audit_01.md</code> — V5 Audit (5-05)</li>
+        <li><code>InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md</code> §8.6 Paired Cross-Ref Audit</li>
+        <li><code>InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/T1_2_priority_bug_mechanism_report.md</code> — chr19 priority bug mechanism (5-7)</li>
+        <li><code>InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/T1_2_F1_genome_wide_audit.md</code> — 全基因組 audit (5-8)</li>
+        <li><code>InterSubMod/research/paired_priority_bug_audit/00_audit_report.md</code> — Paired Step A+C (5-9)</li>
+        <li><code>InterSubMod/research/paired_priority_bug_audit/01_step_D_germline_absent_finding.md</code> — Step D germline-absent (5-9)</li>
+        <li><code>InterSubMod/research/paired_priority_bug_audit/05_V6C_phaseB_findings.md</code> — V6-C Phase B (5-10)</li>
+      </ol>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>

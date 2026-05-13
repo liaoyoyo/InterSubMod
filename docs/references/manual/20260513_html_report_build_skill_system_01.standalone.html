@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>html-report-build Skill 系統文件 — 2026-05-13</title>
+  <style>
+    :root {
+      --c-accent: #D97757; --c-accent-deep: #B85A3F;
+      --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-code-bg: #F4EFE6;
+      --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D; --c-info: #1E3A8A;
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+      --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+                 "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+      --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+      --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 32px;
+      --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+      --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+      --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--c-bg); color: var(--c-text);
+           font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.6; }
+
+    .layout { max-width: 1320px; margin: 0 auto; display: grid;
+              grid-template-columns: 220px 1fr; gap: var(--sp-5);
+              padding: var(--sp-5) var(--sp-4); }
+    aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+                background: var(--c-surface); border: 1px solid var(--c-border);
+                border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+                box-shadow: var(--shadow-sm);
+                max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+    aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                    color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+    aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+    aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+    aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+                  color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+                  border-left: 3px solid transparent; }
+    aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+    aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                          font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+    aside.toc a.core { font-weight: 600; }
+    aside.toc a.core::after { content: "★"; color: var(--c-accent); margin-left: 6px; font-size: 0.85em; }
+
+    main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+                  border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+                  padding: var(--sp-6); min-width: 0; }
+
+    .report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                      margin-bottom: var(--sp-5); }
+    .report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                                letter-spacing: 1px; color: var(--c-accent-deep);
+                                font-weight: 700; margin-bottom: var(--sp-2); }
+    .report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+    .report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                            gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+    .report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+    .report-header .meta dd { margin: 0; }
+    .report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                                 border-radius: var(--radius-sm); font-family: var(--ff-mono); font-size: 0.92em; }
+
+    .verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                       border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md);
+                       background: linear-gradient(90deg, #15803D, #22C55E); }
+
+    h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+          padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border); scroll-margin-top: var(--sp-4); }
+    h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+                font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+    h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+
+    p, ul, ol { margin: var(--sp-3) 0; }
+    ul, ol { padding-left: var(--sp-5); }
+    a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+    code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+            font-family: var(--ff-mono); font-size: 0.92em; }
+    pre { background: var(--c-code-bg); padding: var(--sp-3); border-radius: var(--radius-md);
+           overflow-x: auto; font-family: var(--ff-mono); font-size: var(--fs-sm); line-height: 1.5; }
+    pre code { background: none; padding: 0; }
+
+    table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+    th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; vertical-align: top; }
+    th { background: var(--c-code-bg); font-weight: 600; }
+    tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+    tr.row-safe td { background: #DCFCE7; color: #166534; }
+    tr.row-warn td { background: #FEF3C7; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                  gap: var(--sp-3); margin: var(--sp-4) 0; }
+    .stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+                 border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+    .stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1; }
+    .stat-box .number.success { color: var(--c-success); }
+    .stat-box .number.info { color: var(--c-info); }
+    .stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+
+    .callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #166534; }
+    .callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #78350F; }
+
+    .section-card { border: 1.5px solid var(--c-border); border-radius: var(--radius-lg);
+                     margin: var(--sp-4) 0; overflow: hidden; background: var(--c-surface); }
+    .section-card.core { border-color: var(--c-accent); box-shadow: var(--shadow-sm); }
+    .section-card > summary { cursor: pointer; padding: var(--sp-3) var(--sp-4);
+                               display: flex; align-items: center; gap: var(--sp-3);
+                               background: var(--c-code-bg); list-style: none; flex-wrap: wrap; }
+    .section-card > summary::-webkit-details-marker { display: none; }
+    .section-card > summary::before { content: "▸"; transition: transform 0.2s;
+                                       color: var(--c-text-soft); font-size: var(--fs-sm); }
+    .section-card[open] > summary::before { transform: rotate(90deg); }
+    .section-card.core > summary { background: #FFF7ED; }
+    .section-card .card-id { font-family: var(--ff-mono); font-weight: 700; font-size: var(--fs-md);
+                              color: var(--c-accent-deep); background: var(--c-surface);
+                              padding: 2px 10px; border-radius: 12px;
+                              border: 1.5px solid var(--c-accent); white-space: nowrap; }
+    .section-card .card-title { flex: 1; min-width: 200px; font-weight: 600; font-size: var(--fs-md); }
+    .section-card .card-body { padding: var(--sp-4); }
+
+    .svg-figure { margin: var(--sp-4) 0; text-align: center; }
+    .svg-figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto;
+                       background: var(--c-bg); border-radius: var(--radius-md);
+                       padding: var(--sp-3); border: 1px solid var(--c-border); }
+    .svg-figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                              margin-top: var(--sp-2); font-style: italic; }
+    .icon { width: 18px; height: 18px; vertical-align: -3px; margin-right: 5px; }
+
+    .references { background: var(--c-bg); border-radius: var(--radius-md);
+                   padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-5); }
+    .references h2 { border-bottom: none; margin-top: 0; font-size: var(--fs-xl); padding-bottom: 0; }
+    .references ol { list-style: decimal; padding-left: var(--sp-5); }
+    .references li { margin: var(--sp-2) 0; font-size: var(--fs-sm); }
+
+    @media print {
+      body { background: white; }
+      .layout { display: block; max-width: 100%; padding: 0; }
+      aside.toc { display: none; }
+      main.report { box-shadow: none; border: none; padding: 0; }
+      .section-card { page-break-inside: avoid; border-color: #999; }
+      details[open] > summary, details > summary { list-style: none; }
+      details:not([open]) > * { display: block !important; }
+      details:not([open]) > summary { background: white !important; }
+      a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #666; }
+      pre, table, .section-card, svg { page-break-inside: avoid; }
+      h1, h2, h3 { page-break-after: avoid; }
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside.toc { position: static; max-height: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="toc" aria-label="Table of contents">
+    <h3>章節導航</h3>
+    <ol>
+      <li><a href="#tldr" class="core">TL;DR</a></li>
+      <li><a href="#overview" class="core">系統組件總圖</a></li>
+      <li><a href="#modes">3 個 prompt mode</a></li>
+      <li><a href="#principles" class="core">12 設計準則</a></li>
+      <li><a href="#svg">SVG 啟用規則</a></li>
+      <li><a href="#hook">Auto-trigger 機制</a></li>
+      <li><a href="#pilots">2 + 1 個 pilot 成果</a></li>
+      <li><a href="#files">Skill 23 檔案清單</a></li>
+      <li><a href="#sources">業界 sources</a></li>
+      <li><a href="#future">未來方向</a></li>
+      <li><a href="#refs">引用文件</a></li>
+    </ol>
+  </aside>
+
+  <main class="report">
+
+    <header class="report-header">
+      <div class="pretitle">Skill System Documentation · InterSubMod</div>
+      <h1>html-report-build Skill 系統文件</h1>
+      <dl class="meta">
+        <dt>Build date</dt>      <dd>2026-05-13</dd>
+        <dt>Audience</dt>        <dd>PI / lab member / 自己未來</dd>
+        <dt>Status</dt>          <dd>validated · last verified 2026-05-13</dd>
+        <dt>Skill location</dt>  <dd><code>InterSubMod/.claude/skills/html-report-build/</code></dd>
+        <dt>Replaces</dt>        <dd><code>html-preview</code> (deprecated 2026-05-13)</dd>
+        <dt>Inspired by</dt>     <dd>Anthropic Thariq (May 2026) · Claude Artifacts pattern</dd>
+      </dl>
+      <div class="verdict-banner">
+        <svg class="icon" viewBox="0 0 24 24" role="img" aria-label="verified" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" fill="white" opacity="0.25"/>
+          <polyline points="6,12 10,16 18,8" fill="none" stroke="white" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Verdict: html-report-build skill 系統完整 shipped — 3 mode + LLM-direct + 12 design principles + hook auto-trigger + 23 files / 200 KB
+      </div>
+    </header>
+
+    <h2 id="tldr"><span class="h-num">0.</span>TL;DR — 5 個焦點</h2>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="number">3</div>
+        <div class="label">prompt modes (report/slide/standalone)</div>
+      </div>
+      <div class="stat-box">
+        <div class="number info">23</div>
+        <div class="label">skill files</div>
+      </div>
+      <div class="stat-box">
+        <div class="number">12</div>
+        <div class="label">design principles 業界規則</div>
+      </div>
+      <div class="stat-box">
+        <div class="number success">0</div>
+        <div class="label">Python 中介（純 LLM-direct）</div>
+      </div>
+      <div class="stat-box">
+        <div class="number success">1</div>
+        <div class="label">auto-trigger hook</div>
+      </div>
+    </div>
+
+    <h2 id="overview"><span class="h-num">1.</span>系統組件總圖</h2>
+
+    <figure class="svg-figure" aria-label="html-report-build 系統架構">
+      <svg viewBox="0 0 820 360" role="img"
+           aria-labelledby="arch-title arch-desc"
+           xmlns="http://www.w3.org/2000/svg">
+        <title id="arch-title">html-report-build 系統架構</title>
+        <desc id="arch-desc">用戶 → hook → skill (3 modes) → design principles + components + templates → standalone HTML</desc>
+        <g font-family="system-ui, -apple-system, 'Noto Sans CJK TC', sans-serif" font-size="12">
+
+          <text x="410" y="22" text-anchor="middle" font-weight="700" fill="#141413" font-size="14">
+            html-report-build 系統架構 — 用戶 → Hook → Skill → Output
+          </text>
+
+          <!-- Layer 1: User action -->
+          <rect x="20" y="50" width="780" height="50" rx="8" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.5"/>
+          <text x="410" y="72" text-anchor="middle" font-weight="700" fill="#7F1D1D">
+            ① 用戶 Edit/Write .md 檔案
+          </text>
+          <text x="410" y="90" text-anchor="middle" font-size="11" fill="#7F1D1D">
+            docs/reports/validated/ · docs/concepts/ · docs/data_specs/ · docs/references/manual/ · 其他
+          </text>
+
+          <!-- Arrow down -->
+          <defs>
+            <marker id="arrow-flow" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#6B6B66"/>
+            </marker>
+          </defs>
+          <line x1="410" y1="105" x2="410" y2="118" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#arrow-flow)"/>
+
+          <!-- Layer 2: PostToolUse hook -->
+          <rect x="20" y="125" width="780" height="55" rx="8" fill="#FEF7E6" stroke="#A16207" stroke-width="1.5"/>
+          <text x="410" y="148" text-anchor="middle" font-weight="700" fill="#78350F">
+            ② PostToolUse Hook: standalone_trigger.sh
+          </text>
+          <text x="410" y="166" text-anchor="middle" font-size="11" fill="#78350F">
+            檢查路徑 → SKIP (README/state/draft/.standalone newer) or TRIGGER → 印 [html-report-build] reminder
+          </text>
+
+          <line x1="410" y1="185" x2="410" y2="198" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#arrow-flow)"/>
+
+          <!-- Layer 3: Skill (3 modes) -->
+          <rect x="20" y="205" width="780" height="100" rx="8" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+          <text x="410" y="228" text-anchor="middle" font-weight="700" fill="#1E3A8A">
+            ③ Claude 呼叫 Skill: html-report-build
+          </text>
+
+          <!-- 3 mode boxes inside -->
+          <rect x="40" y="240" width="240" height="55" rx="6" fill="white" stroke="#1E3A8A" stroke-width="1"/>
+          <text x="160" y="258" text-anchor="middle" font-weight="700" fill="#1E3A8A">report mode</text>
+          <text x="160" y="274" text-anchor="middle" font-size="10" fill="#1E3A8A">in-progress / 一般 .md</text>
+          <text x="160" y="288" text-anchor="middle" font-size="10" fill="#1E3A8A">→ {basename}.html (prose)</text>
+
+          <rect x="290" y="240" width="240" height="55" rx="6" fill="white" stroke="#1E3A8A" stroke-width="1"/>
+          <text x="410" y="258" text-anchor="middle" font-weight="700" fill="#1E3A8A">slide mode</text>
+          <text x="410" y="274" text-anchor="middle" font-size="10" fill="#1E3A8A">02_slide_outline.md</text>
+          <text x="410" y="288" text-anchor="middle" font-size="10" fill="#1E3A8A">→ preview/index.html + slides</text>
+
+          <rect x="540" y="240" width="240" height="55" rx="6" fill="#FFFBEB" stroke="#A16207" stroke-width="2"/>
+          <text x="660" y="258" text-anchor="middle" font-weight="700" fill="#78350F">standalone mode ★</text>
+          <text x="660" y="274" text-anchor="middle" font-size="10" fill="#78350F">validated/concepts/manual</text>
+          <text x="660" y="288" text-anchor="middle" font-size="10" fill="#78350F">→ {basename}.standalone.html</text>
+
+          <line x1="410" y1="310" x2="410" y2="323" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#arrow-flow)"/>
+
+          <!-- Layer 4: Output -->
+          <rect x="20" y="330" width="780" height="25" rx="6" fill="#DCFCE7" stroke="#15803D" stroke-width="1.5"/>
+          <text x="410" y="348" text-anchor="middle" font-weight="700" fill="#166534" font-size="11">
+            ④ Output: self-contained HTML + 12 design principles + 6-taboo audit + companion to .md (D11)
+          </text>
+        </g>
+      </svg>
+      <figcaption>圖 1：系統 4 層架構 — 用戶 → Hook 偵測 → Skill (3 modes) → Output HTML</figcaption>
+    </figure>
+
+    <h3>5 大組件</h3>
+    <table>
+      <thead><tr><th>組件</th><th>位置</th><th>功能</th></tr></thead>
+      <tbody>
+        <tr class="row-safe">
+          <td><strong>新 skill</strong></td>
+          <td><code>InterSubMod/.claude/skills/html-report-build/</code></td>
+          <td>3 mode HTML 生成（23 檔案）</td>
+        </tr>
+        <tr class="row-warn">
+          <td>舊 skill (deprecated)</td>
+          <td><code>InterSubMod/.claude/skills/html-preview/</code></td>
+          <td>標 DEPRECATED；過渡保留 1 個 release</td>
+        </tr>
+        <tr class="row-safe">
+          <td><strong>Hook 自動觸發</strong></td>
+          <td><code>InterSubMod/scripts/hooks/standalone_trigger.sh</code></td>
+          <td>PostToolUse Edit/Write 偵測路徑提示</td>
+        </tr>
+        <tr class="row-safe">
+          <td>Settings 註冊</td>
+          <td><code>InterSubMod/.claude/settings.local.json</code></td>
+          <td>PostToolUse 第 10 個 hook entry</td>
+        </tr>
+        <tr class="row-safe">
+          <td><strong>Design Principles</strong></td>
+          <td><code>...skills/html-report-build/references/design_principles.md</code></td>
+          <td>12 條業界準則 + 5 秒測試 + 6-item checklist</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="modes"><span class="h-num">2.</span>3 個 prompt mode 對照</h2>
+
+    <details class="section-card" open id="mode-report">
+      <summary>
+        <span class="card-id">report</span>
+        <span class="card-title">In-progress 草稿 / 短報告 — Tailwind prose 風格 companion</span>
+      </summary>
+      <div class="card-body">
+        <p><strong>觸發路徑</strong>：<code>docs/experiments/in_progress/</code> / 一般 .md / <200 行 + <5 figures</p>
+        <p><strong>輸出</strong>：<code>{basename}.html</code>（單檔）或 <code>{basename}/</code> folder（≥200 行或 ≥5 figures 時）</p>
+        <p><strong>特色</strong>：max-width 70ch prose 容器、light restructure（不改 .md 邏輯）、callout for 警告、stat-grid 可選</p>
+      </div>
+    </details>
+
+    <details class="section-card" open id="mode-slide">
+      <summary>
+        <span class="card-id">slide</span>
+        <span class="card-title">PPT 簡報 — 16:9 canvas + section colors + speaker note</span>
+      </summary>
+      <div class="card-body">
+        <p><strong>觸發路徑</strong>：<code>docs/presentations/*/02_slide_outline.md</code> 或含 <code>## Slide NN</code> heading</p>
+        <p><strong>輸出</strong>：<code>preview/index.html</code>（topbar + tab nav + iframe）+ <code>slide_XX_*.html</code> × N（self-contained）</p>
+        <p><strong>9 section colors</strong>：S0 紫 / S1 紅 / S2 橘 / S3 黃 / S4 深藍 / S5 綠 / S6 青（reserved）/ S7 棕 / Q&A 灰</p>
+        <p><strong>互動</strong>：PanZoom CDN + CSS hover fallback / 鍵盤 ←→ 切換</p>
+      </div>
+    </details>
+
+    <details class="section-card core" open id="mode-standalone">
+      <summary>
+        <span class="card-id">standalone ★</span>
+        <span class="card-title">PI 終版單檔 — sticky TOC + section cards + inline SVG + 列印友善</span>
+      </summary>
+      <div class="card-body">
+        <p><strong>觸發路徑</strong>：<code>docs/reports/validated/</code> / <code>pi_reports/</code> / <code>concepts/</code> / <code>data_specs/</code> / <code>references/manual/</code> / <code>experiments/concluded/</code></p>
+        <p><strong>輸出</strong>：<code>{basename}.standalone.html</code> — single-file self-contained，給 PI 一個附件就完事</p>
+        <p><strong>特色</strong>（HTML-only，MD 做不到）：</p>
+        <ul>
+          <li>Sticky 左側 TOC（220px column）</li>
+          <li>Section cards <code>&lt;details&gt;</code> 折疊（core open / minor collapsed）</li>
+          <li>Inline SVG 圖（≤5，因果鏈/比例條/icon）</li>
+          <li>Stat-grid 焦點數字</li>
+          <li>Print mode 強制展開 + 印 URL</li>
+          <li>Mobile fallback ≤900px 單欄</li>
+          <li>Colorblind-safe row coloring + 文字 verdict 雙重編碼</li>
+        </ul>
+        <p><strong>本文件本身就是 standalone mode 的範例</strong> — 用 dogfooding 方式自我介紹。</p>
+      </div>
+    </details>
+
+    <h2 id="principles"><span class="h-num">3.</span>12 設計準則（業界 source）</h2>
+
+    <table>
+      <thead><tr><th>#</th><th>Rule</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>5 秒測試 — first-time viewer 抓 takeaway</td><td>NN/g + Berkeley dataviz</td></tr>
+        <tr><td>2</td><td>3 秒 glance / billboard 隱喻</td><td>Nancy Duarte《slide:ology》</td></tr>
+        <tr class="row-warn"><td>3</td><td><strong>Assertion-Evidence</strong> — 標題 = 結論句</td><td>Penn State, NSF-backed</td></tr>
+        <tr><td>4</td><td>Data-ink ratio — 移除 chartjunk</td><td>Edward Tufte</td></tr>
+        <tr class="row-warn"><td>5</td><td><strong>CRAP</strong> — Contrast / Repetition / Alignment / Proximity</td><td>Robin Williams 1993</td></tr>
+        <tr><td>6</td><td>Whitespace as design</td><td>Garr Reynolds Presentation Zen</td></tr>
+        <tr><td>7</td><td>Hierarchy — 最重要元素最強權重</td><td>NN/g</td></tr>
+        <tr><td>8</td><td>1-2 primary + 1 accent</td><td>dataviz BP 2026</td></tr>
+        <tr class="row-warn"><td>9</td><td><strong>Colorblind-safe</strong> — 雙重編碼</td><td>Nature 2026 + WCAG</td></tr>
+        <tr><td>10</td><td>WCAG contrast ≥ 4.5:1</td><td>WCAG 2.1</td></tr>
+        <tr><td>11</td><td>Vector first — SVG > PNG for diagrams</td><td>Nature / Cell figure guideline</td></tr>
+        <tr class="row-warn"><td>12</td><td><strong>Pre-publish 6-item checklist</strong></td><td>Synthesis</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="svg"><span class="h-num">4.</span>SVG 啟用規則</h2>
+
+    <figure class="svg-figure" aria-label="SVG vs PNG 決策樹">
+      <svg viewBox="0 0 720 230" role="img"
+           aria-labelledby="svg-title svg-desc"
+           xmlns="http://www.w3.org/2000/svg">
+        <title id="svg-title">SVG vs PNG 決策樹</title>
+        <desc id="svg-desc">流程/比例/icon 用 SVG；scatter/heatmap/IGV 用 PNG</desc>
+        <g font-family="system-ui, -apple-system, 'Noto Sans CJK TC', sans-serif" font-size="12">
+
+          <!-- Decision diamond -->
+          <polygon points="340,40 460,90 340,140 220,90" fill="#FEF7E6" stroke="#A16207" stroke-width="1.5"/>
+          <text x="340" y="83" text-anchor="middle" font-weight="700" fill="#78350F">需要圖？</text>
+          <text x="340" y="100" text-anchor="middle" font-size="10" fill="#78350F">≤10 nodes?</text>
+
+          <!-- Left branch: SVG -->
+          <line x1="222" y1="90" x2="180" y2="90" stroke="#6B6B66" stroke-width="1.5"/>
+          <text x="200" y="80" text-anchor="middle" font-size="10" fill="#15803D" font-weight="700">YES, ≤10</text>
+
+          <rect x="20" y="115" width="160" height="90" rx="8" fill="#DCFCE7" stroke="#15803D" stroke-width="1.5"/>
+          <text x="100" y="138" text-anchor="middle" font-weight="700" fill="#166534">✓ Use inline SVG</text>
+          <text x="100" y="158" text-anchor="middle" font-size="10" fill="#166534">flow / causal chain</text>
+          <text x="100" y="174" text-anchor="middle" font-size="10" fill="#166534">proportion bar</text>
+          <text x="100" y="190" text-anchor="middle" font-size="10" fill="#166534">icon (替代 emoji)</text>
+
+          <!-- Right branch: PNG -->
+          <line x1="458" y1="90" x2="500" y2="90" stroke="#6B6B66" stroke-width="1.5"/>
+          <text x="480" y="80" text-anchor="middle" font-size="10" fill="#C2410C" font-weight="700">NO, &gt;50pt 或 raster</text>
+
+          <rect x="540" y="115" width="160" height="90" rx="8" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.5"/>
+          <text x="620" y="138" text-anchor="middle" font-weight="700" fill="#7F1D1D">⛔ Use PNG instead</text>
+          <text x="620" y="158" text-anchor="middle" font-size="10" fill="#7F1D1D">scatter &gt;50 點</text>
+          <text x="620" y="174" text-anchor="middle" font-size="10" fill="#7F1D1D">heatmap / histogram</text>
+          <text x="620" y="190" text-anchor="middle" font-size="10" fill="#7F1D1D">IGV / 照片</text>
+
+          <!-- Bottom note -->
+          <text x="360" y="225" text-anchor="middle" font-size="10" fill="#6B6B66" font-style="italic">
+            max 5 SVG per report · viewBox max 800×400 · NO animate / NO filter / NO SVG gradient
+          </text>
+        </g>
+      </svg>
+      <figcaption>圖 2：SVG vs PNG 決策樹 — diagram ≤10 nodes 用 SVG；真實數據用 matplotlib PNG</figcaption>
+    </figure>
+
+    <h2 id="hook"><span class="h-num">5.</span>Auto-trigger 機制</h2>
+
+    <pre><code>1. 用戶 Edit/Write docs/reports/validated/.../foo.md
+2. PostToolUse hook → standalone_trigger.sh 觸發
+3. Hook 檢查路徑：
+   - SKIP: README.md / CLAUDE.md / state.json / in_progress 草稿
+   - SKIP: 若 .standalone.html 已比 .md 新
+   - TRIGGER: validated reports / concepts / data_specs / manual
+4. Hook 印 3 行 [html-report-build] reminder
+5. Claude 看到 reminder，呼叫 Skill html-report-build
+6. Skill 讀取：source .md + design_principles.md + standalone_prompt.md
+              + standalone_skeleton.html + components/svg_*.html
+7. 生成 {basename}.standalone.html (sticky TOC + cards + SVG)
+8. 6-Taboo audit + 12 rules self-check → ship</code></pre>
+
+    <h2 id="pilots"><span class="h-num">6.</span>2 + 1 個 pilot 成果</h2>
+
+    <table>
+      <thead><tr><th>Pilot</th><th>Source 大小</th><th>Output</th><th>大小</th></tr></thead>
+      <tbody>
+        <tr class="row-safe">
+          <td>Errata standalone</td>
+          <td>281 行 / 22 KB</td>
+          <td><code>InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.standalone.html</code></td>
+          <td>44 KB / 724 行 / 4 SVG</td>
+        </tr>
+        <tr class="row-safe">
+          <td>Synthesis standalone</td>
+          <td>1,451 行 / 92 KB</td>
+          <td><code>InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.standalone.html</code></td>
+          <td>59 KB / 931 行 / 4 SVG</td>
+        </tr>
+        <tr class="row-safe">
+          <td>Slide pilot</td>
+          <td>463 行 / 28 KB</td>
+          <td><code>InterSubMod/docs/presentations/validated/2026/05/self_phasing_synthesis_PI/preview_v2/</code></td>
+          <td>38 KB / 808 行 / 3 slides + index</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-success">
+      <strong>所有 3 個 pilot 通過 audit</strong>：6-taboo 全綠 / 12 rules 全套用 / 0 anti-pattern / colorblind-safe / 列印友善。
+    </div>
+
+    <h2 id="files"><span class="h-num">7.</span>Skill 23 個檔案清單</h2>
+
+    <pre><code>InterSubMod/.claude/skills/html-report-build/
+├── SKILL.md                          # 269 lines
+├── evals.json                        # 7 test cases
+├── prompts/
+│   ├── report_prompt.md              # 報告 mode (8+ rules)
+│   ├── slide_prompt.md               # PPT mode (8+ rules)
+│   └── standalone_prompt.md          # PI 終版 mode (10+ rules, SVG)
+├── templates/
+│   ├── design_tokens.css             # :root variables
+│   ├── report_skeleton.html
+│   ├── slide_skeleton.html
+│   ├── slide_index_skeleton.html
+│   └── standalone_skeleton.html      # sticky TOC + cards layout
+├── components/
+│   ├── callout_critical.html
+│   ├── stat_box.html
+│   ├── metric_table.html
+│   ├── igv_zoom_panel.html
+│   ├── speaker_note.html
+│   ├── conclusion_arrow.html
+│   ├── svg_flow_diagram.html         # 因果鏈 + 兩層 bug
+│   ├── svg_compare_bar.html          # 比例對比
+│   └── svg_icon_set.html             # 8 icons (warning/check/info/...)
+├── examples/
+│   ├── README.md
+│   ├── report_short_example.html
+│   └── slide_pair_example.html
+└── references/
+    └── design_principles.md          # 12 rules canonical</code></pre>
+
+    <h2 id="sources"><span class="h-num">8.</span>業界 sources</h2>
+
+    <ul>
+      <li><strong>Anthropic Thariq (May 2026)</strong> — Claude Code 預設輸出從 MD 切 HTML</li>
+      <li><strong>Anthropic Claude Artifacts pattern</strong> — self-contained 單檔 HTML</li>
+      <li><strong>Edward Tufte</strong> — 《Visual Display of Quantitative Information》</li>
+      <li><strong>Garr Reynolds</strong> — 《Presentation Zen》系列</li>
+      <li><strong>Nancy Duarte</strong> — 《slide:ology》/《Resonate》</li>
+      <li><strong>Robin Williams</strong> — 《Non-Designer's Design Book》(CRAP 1993)</li>
+      <li><strong>Michael Alley</strong> — Assertion-Evidence (Penn State, NSF-backed)</li>
+      <li><strong>Nature / Cell / Science</strong> — figure guidelines (2025-2026)</li>
+      <li><strong>WCAG 2.1</strong> — contrast accessibility</li>
+      <li><strong>Nielsen Norman Group</strong> — dataviz heuristics</li>
+    </ul>
+
+    <h2 id="future"><span class="h-num">9.</span>未來方向</h2>
+
+    <table>
+      <thead><tr><th>Stage</th><th>內容</th><th>狀態</th></tr></thead>
+      <tbody>
+        <tr class="row-safe"><td>Stage 1 (immediate)</td><td>新 skill ship + html-preview 標 deprecated banner</td><td>DONE 2026-05-13</td></tr>
+        <tr class="row-warn"><td>Stage 2 (Tier A rewrite)</td><td>6 Tier A skill (weekly-report / structured-tech-report / results-report / feature-layered-observation / methodology-audit / conclude-research) 的 Stop hook 切到 html-report-build</td><td>PENDING</td></tr>
+        <tr class="row-warn"><td>Stage 3 (2 週 sunset)</td><td>2 週後刪 html-preview Python tools</td><td>PENDING (2026-05-27)</td></tr>
+        <tr><td>Backfill</td><td>對既有 validated reports 補產 standalone HTML</td><td>OPT-IN</td></tr>
+        <tr><td>Skill-reviewer 整合</td><td>產出後自動跑 plugin-dev:skill-reviewer 評分</td><td>OPT-IN</td></tr>
+      </tbody>
+    </table>
+
+    <section class="references" id="refs">
+      <h2>引用文件</h2>
+      <ol>
+        <li><code>InterSubMod/.claude/skills/html-report-build/SKILL.md</code> — 主 skill 入口</li>
+        <li><code>InterSubMod/.claude/skills/html-report-build/references/design_principles.md</code> — 12 規則</li>
+        <li><code>InterSubMod/.claude/skills/html-preview/SKILL.md</code> — deprecated skill</li>
+        <li><code>InterSubMod/scripts/hooks/standalone_trigger.sh</code> — auto-trigger hook</li>
+        <li><code>InterSubMod/.claude/settings.local.json</code> — hook registration</li>
+        <li><code>InterSubMod/docs/references/manual/20260513_html_report_build_skill_system_01.md</code> — 本文件 source markdown</li>
+      </ol>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>

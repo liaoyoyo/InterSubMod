@@ -1,0 +1,55 @@
+<!-- speaker_note.html — Required on every slide (slide mode)
+     Tier system:
+       Tier 1 = on-canvas (visible to audience)
+       Tier 2 = .speak-text (presenter teleprompter)
+       Tier 3 = .tier3 (optional oral content, skip if short on time)
+-->
+
+<details class="note-section" open>
+  <summary>🎤 Speaker Note</summary>
+
+  <div class="timing">3 分鐘 + 2 分鐘問答</div>
+
+  <div class="speak-text">[開場]
+這張投影片解釋 priority bug 的核心機制。
+
+[主軸]
+longphase-to 在 getVote 函式 line 533 有一個 countMap per-read reset bug：
+當一條 read 經過 3 個 germline het 位點時，計票被錯誤清零。
+
+[數據]
+我們用 5 條 vote_dump reads 驗證了這個行為，
+詳細跡證在下一張 slide 的 IGV 圖。
+
+[結論]
+V6 修正後 752 個 victim reads 100% 恢復正確 HP tag。</div>
+
+  <div class="tier3">
+    <span class="label">Tier 3 (口頭可選):</span>
+    這個 bug 在 paired mode 不出現，因為 paired mode 走另一條 phasing 路徑；
+    這也是為什麼之前在 paired benchmark 沒看到偏移。如果問到「為什麼之前沒發現」，補充這段。
+  </div>
+</details>
+
+<!-- CSS reference (already in slide_skeleton.html):
+.note-section {
+  margin-top: 20px; background: #FAFBFE; border: 1px solid #C7D2FE;
+  border-left: 4px solid #8B5CF6; border-radius: 8px; padding: 14px 18px;
+}
+.note-section summary { cursor: pointer; padding: 6px 0; font-size: 13px;
+                        font-weight: 600; color: #6D28D9; }
+.note-section .timing { background: #EDE9FE; padding: 4px 10px; border-radius: 4px;
+                         font-size: 11px; color: #6D28D9; display: inline-block;
+                         margin: 8px 0; font-weight: 600; }
+.note-section .speak-text { font-size: 14px; line-height: 1.7;
+                             white-space: pre-line;  /* preserves \n */ }
+.note-section .tier3 { margin-top: 12px; padding: 8px 12px; border-radius: 4px;
+                        background: #F9FAFB; border: 1px dashed #9CA3AF;
+                        font-size: 11px; color: #6B7280; }
+.note-section .tier3 .label { font-weight: 700; color: #374151; margin-right: 4px; }
+
+Notes:
+- white-space: pre-line allows \n in .speak-text to render as line breaks
+- <details open> = expanded by default (presenter wants script visible)
+- In @media print: details forced open (no list-style triangle)
+-->
