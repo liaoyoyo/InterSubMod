@@ -148,3 +148,92 @@ research/paired_priority_bug_audit/v6c_phaseB_v6bam_runs/
 preview/
 **/preview/*.html
 examples/phase1_demo/**/index.html
+
+# === OS / IDE 垃圾 (added 2026-05-13, prevention) ===
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+# JetBrains IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+# Vim
+*.swp
+*.swo
+*.swn
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+.netrwhist
+# Emacs
+\#*\#
+.\#*
+
+# === Backup / temp / tmp 檔案 (added 2026-05-13) ===
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.tmp
+*.temp
+*~
+
+# === Python build/cache artifact (already partially covered) ===
+*.egg-info/
+*.egg
+dist/
+.tox/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+
+# === Research/archive observation 流程 log (regenerable) ===
+research/**/observations/*.log
+research/**/v6_quantification_evidence/*.log
+research/**/scripts/*.log
+**/run.log
+**/*_run.log
+# Archived legacy logs (legacy runs, regenerable from BAM)
+docs/archive/**/*.log
+
+# === C++ build artifact 補充 (CMake / compiled) ===
+*.obj
+*.exe
+*.lib
+*.dylib
+compile_commands.json
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+DartConfiguration.tcl
+Makefile.bak
+
+# === 其他 transient ===
+*.pid
+*.seed
+.eslintcache
+.parcel-cache
