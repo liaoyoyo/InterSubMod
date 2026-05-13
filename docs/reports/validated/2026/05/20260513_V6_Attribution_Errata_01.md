@@ -136,6 +136,73 @@ V6 audit `07_V6_validation_findings.md` 沒重跑 34,855 read-level forensic；�
 - **可以說「V3F/V5/V6 三版在此子集 100% 修對」** — 但**必須標明 V3F 是主力**
 - **不能說「V6 100% 修對 34,855」單獨 framing** — 給 PI 錯印象 V6 是修對版本
 
+> **⚠ 2026-05-14 amend (E5)**：本節 §3.2 logic 推論 (V6 = V3F = V5 valid) 已被 V6 spot check 全集實測**推翻**。詳見下節 E5。
+
+---
+
+## 3a. E5 — V6 spot check 全集實測推翻 logic 推論（**2026-05-14 新增**）
+
+### 3a.1 方法
+
+- **驗證對象**：17,404 unique reads（從 V3F vote_dump on baseline 抽 germline_maj ≠ somatic_maj 且 both >0 子集，去重後）
+- **方法**：用 V3F vote_dump 抽 victim read_names → samtools view V6 BAM (`/big7_disk/liaoyoyo2001/longphase-to-mod/output/v6_germline_absent_revert/tumor_tagged.bam`) → 提取每條 victim read 的 HP:i: tag → 統計 V6 對此 subset 的 HP tag 分布
+- **執行**：2026-05-14 02:19 啟動 samtools view (287GB BAM) → 03:33 完成 (~74 min)；output `/tmp/v6_victim_hp_tags.tsv` (958KB, 24,227 events, dedupe 17,404 unique reads = 100% cover)
+- **驗證 criteria**：若 logic 推論成立，V6 hp=21 count 應 ≥ 80%、hp=11 count 應 ~ 0%
+
+### 3a.2 實測結果（per-unique-read dedupe, 17,404 reads）
+
+| V6 HP tag | Count | % | 預期 (logic 推論) | 實測 vs 預期 |
+|---|---|---|---|---|
+| **hp=21** (V6 翻方向修對) | 7,769 | **44.6%** | ≥ 80% | ❌ 嚴重低於預期 |
+| **hp=11** (V6 仍 baseline 錯方向) | **5,510** | **31.7%** | ~ 0% | ❌ **意外存在** — 推翻 logic 推論 |
+| **hp=33** (V6 保守 ambiguous) | 2,458 | 14.1% | ≤ 20% | ✅ 預期內 |
+| 空 (V6 未 tag) | 1,667 | 9.6% | ≤ 10% | ✅ 預期內 |
+
+### 3a.3 結論 — Logic 推論失效
+
+> **V6 對此 victim subset 不是 100% 修對。約 31.7% reads V6 仍標 hp=11（與 baseline 同方向）。V6 並非完全繼承 V3F。**
+
+### 3a.4 可能原因（待深掘）
+
+1. **V6 重用 V5 phased VCF** — V5 phased VCF 對 germline-absent 邊界 reads 已標 hp=11 → V6 繼承這些 reads 的 hp tag（並非由 Layer 1.5 重新決定）
+2. **vote_dump (getVote 階段) vs BAM HP tag (haplotag 階段) 不一致** — 兩階段不同處理邏輯
+3. **vote_dump 篩 criteria 邊界 case** — 「germline_maj ≠ somatic_maj + both >0」可能包含 baseline 已標 HP1 family + V3F vote 翻 HP2 但 V6 BAM 邊界仍標 hp=11 的 edge case reads
+4. **V3F victim list 主要分布於 germline-existent + somatic 共現區，但部分 reads 跨到 germline-absent 邊界**，V6 移除 Layer 1.5 後此邊界 reads 反而標 hp=11
+
+### 3a.5 對 §3 (E3) 的修正
+
+§3.2 「V6 改動對 germline-existent 子集不適用」假設**部分失效**：實測顯示至少 31.7% reads V6 行為與 V5 不一致（V5 應 = V3F = hp=21；V6 = hp=11）。
+
+修正後 attribution：
+- 「**V3F (commit 41ff147) 100% 修對 34,855 victims**」(read-level forensic anchor)
+- 「**V5 logic 上繼承 V3F**」(V5 audit 確認 V5 = V3F 在此 subset)
+- 「**V6 對此 subset 不完全繼承 V3F**」(spot check 31.7% reads V6 仍 hp=11)；機制待深掘
+
+### 3a.6 對 PPT 的更新（5/14 已 apply）
+
+| 檔案 | 改動 |
+|---|---|
+| `preview/slide_08_quant_evidence.html` | title / caveat / table row 更新 partial → final 44.6%/31.7%/14.1%/9.6% |
+| `preview/slide_09d_v6_evidence_summary.html` | row 2 V3F/V5 forensic 100% + V6 不完全繼承說明 |
+| `preview/slide_17_main_verdict.html` | verdict ① + speaker note 對齊 final 數字 |
+| `REHEARSAL_CHEATSHEET.md` | 必背 #2 + Q11 完整改寫 |
+
+### 3a.7 對核心結論的影響
+
+| 結論 | 是否成立？ | 理由 |
+|---|---|---|
+| priority bug 修對機制因果確立 | ✅ 仍成立 | V3F 100% 修對 34,855 + SP1/2/3 IGV 對齊 paired 3/3 |
+| V6 = production candidate | 🟡 部分成立 | hp=33 +4.7% / marker coverage +9.0% / caller F1 invariant / Phase D 4 樣本 ratio 中性都成立；但「V6 在 34,855 子集繼承 V3F 修對」推翻 → V6 是「marker engineering 強 + ratio 改善 + 但對 priority bug 全集子集修對不完全」的 trade-off candidate |
+| 20 指標 no regression / caller F1 invariant | ✅ 仍成立 | FILTER 不動 → F1 數學保證 invariant |
+
+### 3a.8 後續行動
+
+1. ✅ PPT 5 處更新（slide 08 / 09d / 17 / cheatsheet 必背 #2 / Q11）
+2. ✅ 本 erratum E5 加入
+3. ⏳ V6 hp=11 reads chr/pos 分布分析（10 min awk）— 確認是否集中於 germline-absent 邊界
+4. ⏳ V6 hp=11 reads 對齊 V5 phased VCF 邊界檢查（mechanism 確認）
+5. ⏳ 若機制確認為「V6 重用 V5 phased VCF 邊界繼承 hp=11」→ 補進 5/8 整合報告作補丁（不撤回主結論，但 attribution 精確化）
+
 ---
 
 ## 4. 對 PI 報告 (4-29) errata 的關聯

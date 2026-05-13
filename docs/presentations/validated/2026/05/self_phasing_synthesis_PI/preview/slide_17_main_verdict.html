@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 08 — read-level 鐵證: 34,855 V6 100% 修正</title>
+  <title>Slide 12 — 3 條主結論 + 6 條 errata patch</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -306,116 +306,94 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
 </head>
 <body>
-<main class="slide-page" role="main" aria-label="Slide 08 content">
-  <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
-    <div><span class="label">Slide:</span><span class="value">08 / 22</span></div>
-    <div><span class="label">Section:</span><span class="value">S3 量化鐵證</span></div>
-    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
-    <div><span class="label">R-G2 術語:</span><span class="value">—</span></div>
-    <div><span class="label">N grep:</span><span class="value">14</span></div>
+<main class="slide-page" role="main" aria-label="Slide 12 content">
+  <div class="slide-meta critical" role="contentinfo" aria-label="Slide metadata">
+    <div><span class="label">Slide:</span><span class="value">12 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S7 結論</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~400 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">3 (main verdict)</span></div>
+    <div><span class="label">N grep:</span><span class="value">6 errata</span></div>
   </div>
 
-  <article class="slide-canvas" data-section="S3" aria-label="Main slide canvas">
-    <h1 class="slide-title ">baseline 34,855 read-level victims — V3F 100% 修對（V5 重用 / V6 spot check 全集 17,404 reads: 45% 翻方向 · 32% 仍 hp=11）</h1>
-    <p class="en-subtitle">baseline 34,855 read-level victims: V3F/V5 forensic 100% fix; V6 spot check final (17,404 reads: 45% flipped, 32% still hp=11, 14% hp=33, 10% empty)</p>
-    <div style="background:#FEF3C7;border:1px solid #CA8A04;border-radius:5px;padding:4px 10px;margin:4px 0;font-size:10.5px;color:#78350F;">
-      <strong>⚠ V6 attribution caveat (5/13 erratum E5)</strong>：V6 spot check 全集 17,404 reads 揭露 logic 推論失效 — V6 不完全繼承 V3F（<strong>31.7% reads V6 仍 hp=11 同 baseline</strong>, 44.6% 翻 hp=21）。以 V3F/V5 100% audit 為 anchor 鐵證。
-    </div>
+  <article class="slide-canvas" data-section="S7" aria-label="Main slide canvas">
+    <h1 class="slide-title critical">3 條主結論 + 6 條 errata patch</h1>
+    <p class="en-subtitle">3 main verdicts + 6 errata patched</p>
     
-    <div class="grid-2col" style="grid-template-columns: 6fr 6fr; gap:12px;">
-      <div>
-        <p style="font-size:11.5px;font-weight:700;color:#374151;margin:0 0 4px;">📈 chr19 pilot → 全基因組 generalize:</p>
-        <table class="metric-table" style="font-size:10.5px;">
-          <thead><tr><th></th><th>chr19 pilot</th><th>Genome F1</th><th>倍數</th></tr></thead>
-          <tbody>
-            <tr><td>Tagged reads/ver</td><td class="num">~330K</td><td class="num">18,895,432</td><td class="num">57×</td></tr>
-            <tr class="row-yellow"><td><strong>Priority bug victims</strong></td><td class="num">752</td><td class="num"><strong>34,855</strong></td><td class="num"><strong>46.4×</strong></td></tr>
-            <tr class="row-green"><td><strong>baseline → V3F/V5 修正率</strong></td><td class="num">100%<br>(752/752)</td><td class="num"><strong>100%</strong><br>(34,855/34,855)</td><td>一致 ✅</td></tr>
-            <tr><td>V3F/V5 方向</td><td colspan="2" class="num">全 hp=11 ❌ → 全 hp=21 ✅</td><td>單向</td></tr>
-            <tr><td>反向 (V3F/V5 → 11)</td><td colspan="2" class="num">0 條</td><td>零 noise</td></tr>
-            <tr style="background:#FEF3C7;"><td><strong>V6 spot check (final, 17,404 reads)</strong></td><td class="num" colspan="2">44.6% 翻 hp=21 ✅ / <strong>31.7% 仍 hp=11</strong> ❌ / 14.1% hp=33 / 9.6% empty</td><td>complete</td></tr>
-          </tbody>
-        </table>
-        <p style="font-size:10px;color:#16A34A;margin:4px 0 0;font-weight:600;">→ baseline 17.3:1 偏移 = read-level 34,855 條獨立 victims (V3F/V5 100% 修對 anchor；V6 partial)</p>
+    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">🎯 整份報告 3 條 main verdict (PI 必記):</p>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#F0FDF4;border:2px solid #16A34A;border-radius:8px;">
+        <div style="flex:none;width:50px;height:50px;border-radius:50%;background:#DCFCE7;border:2px solid #16A34A;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#166534;">①</div>
+        <div style="flex:1;">
+          <p style="font-size:13px;font-weight:700;color:#166534;margin:0 0 3px;">priority bug 修補機制確立</p>
+          <p style="font-size:11.5px;color:#374151;margin:0;line-height:1.5;">17.3:1 → 1.84:1 全基因組 · 34,855 read-level victims: V3F/V5 forensic 100% 修對；V6 spot check 17,404 reads 44.6%/31.7%/14.1%/9.6% (見 erratum E5) · SP1/2/3 IGV 對齊 paired 3/3 ✅</p>
+        </div>
       </div>
-      <div>
-        <p style="font-size:11.5px;font-weight:700;color:#374151;margin:0 0 4px;">📊 per-chr victims (top-10 + chr19/chr8):</p>
-        <svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
-          <line x1="48" y1="148" x2="335" y2="148" stroke="#9CA3AF" stroke-width="0.8"/>
-          <line x1="48" y1="14"  x2="48"  y2="148" stroke="#9CA3AF" stroke-width="0.8"/>
-          <text x="44" y="17" font-size="8" fill="#6B7280" text-anchor="end">3,508</text>
-          <text x="44" y="83" font-size="8" fill="#6B7280" text-anchor="end">1,700</text>
-          <text x="44" y="151" font-size="8" fill="#6B7280" text-anchor="end">0</text>
-          <rect x="55"  y="14"  width="20" height="134" fill="#1E3A8A"/>
-          <text x="65" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr7</text>
-          <text x="65" y="12"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">3508</text>
-          <rect x="80"  y="42"  width="20" height="106" fill="#1E3A8A"/>
-          <text x="90" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr2</text>
-          <text x="90" y="40"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2792</text>
-          <rect x="105" y="48"  width="20" height="100" fill="#1E3A8A"/>
-          <text x="115" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr1</text>
-          <text x="115" y="46"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2674</text>
-          <rect x="130" y="51"  width="20" height="97"  fill="#3B82F6"/>
-          <text x="140" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr16</text>
-          <text x="140" y="49"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2584</text>
-          <rect x="155" y="68"  width="20" height="80"  fill="#3B82F6"/>
-          <text x="165" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr20</text>
-          <text x="165" y="66"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2101</text>
-          <rect x="180" y="79"  width="20" height="69"  fill="#60A5FA"/>
-          <text x="190" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr3</text>
-          <rect x="205" y="88"  width="20" height="60"  fill="#60A5FA"/>
-          <text x="215" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr5</text>
-          <rect x="230" y="94"  width="20" height="54"  fill="#93C5FD"/>
-          <text x="240" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr6</text>
-          <text x="240" y="170" font-size="6.5" fill="#9CA3AF" text-anchor="middle">rank 4-10</text>
-          <rect x="262" y="120" width="20" height="28"  fill="#DC2626"/>
-          <text x="272" y="160" font-size="7.5" fill="#7F1D1D" text-anchor="middle" font-weight="700">chr19</text>
-          <text x="272" y="117" font-size="8" fill="#7F1D1D" text-anchor="middle" font-weight="700">752</text>
-          <text x="272" y="170" font-size="6.5" fill="#7F1D1D" text-anchor="middle">★ rank 19</text>
-          <rect x="287" y="123" width="20" height="25"  fill="#0EA5E9"/>
-          <text x="297" y="160" font-size="7.5" fill="#0369A1" text-anchor="middle" font-weight="700">chr8</text>
-          <text x="297" y="120" font-size="8" fill="#0369A1" text-anchor="middle" font-weight="700">666</text>
-          <text x="297" y="170" font-size="6.5" fill="#0369A1" text-anchor="middle">❄ 0.34×</text>
-        </svg>
-        <p style="font-size:10px;color:#6B7280;margin:2px 0 0;text-align:center;">main hotspot 在 chr7/chr2/chr1/chr16/chr20；chr19 是「可重現案例」非主要分佈</p>
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#F0FDF4;border:2px solid #16A34A;border-radius:8px;">
+        <div style="flex:none;width:50px;height:50px;border-radius:50%;background:#DCFCE7;border:2px solid #16A34A;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#166534;">②</div>
+        <div style="flex:1;">
+          <p style="font-size:13px;font-weight:700;color:#166534;margin:0 0 3px;">V6 = production candidate (5/10 binary patch)</p>
+          <p style="font-size:11.5px;color:#374151;margin:0;line-height:1.5;">= V3F 保守 + V5 設計目標 + marker engineering 改善 · hp=33 +4.7% · marker coverage +9.0% · Phase D 4 樣本 ratio 0.61-1.24 中性 · F1 0.7166<br><strong style="color:#16A34A;">★ 5/13 forensic 確認</strong> V6 守恆轉移完美符合 Layer 1.5 移除邏輯預期 (Type B 完全相同 + Type C 守恆 5,927 reads)</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:#FEF3C7;border:2px solid #CA8A04;border-radius:8px;">
+        <div style="flex:none;width:50px;height:50px;border-radius:50%;background:#FBBF24;border:2px solid #CA8A04;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#7C2D12;">★</div>
+        <div style="flex:1;">
+          <p style="font-size:13px;font-weight:700;color:#7C2D12;margin:0 0 3px;">真實價值在 read-level tag concordance — 非 caller F1</p>
+          <p style="font-size:11.5px;color:#374151;margin:0;line-height:1.5;">+13.3 pp paired GT @ 0.93 · hp=33 還原 · marker coverage +9.0% → ISM 下游 marker engineering 受惠 · caller F1 對 V3F/V5/V6 數學保證 invariant</p>
+        </div>
       </div>
     </div>
-    <div class="conclusion-arrow green" style="margin-top:8px;font-size:13px;padding:6px 12px;">→ priority bug 不是 chr19 局部 artifact；全基因組 34,855 條 read-level victim 全部 100% 修正、0 反向 → 機制因果鐵證確立</div>
+    <p style="font-size:12px;font-weight:700;color:#374151;margin:10px 0 4px;">📝 PI 報告 4-29 核心 errata (3 條，完整 6 條詳見報告):</p>
+    <table class="metric-table" style="font-size:12px;">
+      <thead><tr><th></th><th>段落</th><th>原 → 新</th></tr></thead>
+      <tbody>
+        <tr class="row-yellow"><td><strong>★ E4</strong></td><td>V5 數值歸因</td><td>V5 整體效益 → V5 = Pass 1 only; 主要功勞 V3F + Layer 1.5; Pass 2 二次效益尚未量化</td></tr>
+        <tr class="row-yellow"><td><strong>★ E5</strong></td><td>Layer 1.5 設計 (5/10 加)</td><td>fallback 隱含修補 → germline-absent 區與 baseline 4.19:1 偏 HP1 完全相同</td></tr>
+        <tr class="row-green"><td><strong>★ E6</strong></td><td>follow-up (5/11)</td><td>F-paired-D3 ⏸ → ✅ V6 binary patch DONE + Phase D 4 樣本驗證 4/5 通過</td></tr>
+      </tbody>
+    </table>
     <div class="footer-glossary" style="font-size:9.5px;">
-      <div class="gloss-item">ⓘ V6 對 priority bug 結果 = V5 = V3F = 100%（修補在 V3F 41ff147 已完成；V6 唯一改動 Layer 1.5 revert 與本子集 germline+somatic 都 &gt;0 不重疊）</div>
-      <div class="gloss-item">ⓘ chr8 priority bug 冷區 (0.34× avg) ≠ chr8 LOH+HPSig FP hotspot (7.4× ISM 下游) — 不同 layer，priority bug 修對不會自動清掉 chr8 hotspot</div>
+      <div class="gloss-item">ⓘ commit chain: f17754f → 2553e96 → 71d21bd → V6 patch (待 commit)</div>
+      <div class="gloss-item">ⓘ E1-E3 表述精確化（chr19 hotspot 降級 / V5 commit / 證據鏈升級）詳見 errata 完整報告</div>
     </div>
   </article>
 
-  <aside class="note-section" aria-label="Speaker notes for slide 08">
+  <aside class="note-section" aria-label="Speaker notes for slide 12">
     <details class="collapsible" open>
-      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
+      <summary>🎤 Speaker Note (120 sec / 中 ~400 字)</summary>
       <div class="speak-text">[標題]
-S3 量化鐵證 — 把 S2 機制從理論變物理觀察。
+整份報告主結論 3 條 — PI 必記。
 
-[方法]
-對 baseline 與 V6 兩版加 --debug-vote-dump flag。
-dump 每條 read 經 getVote 後的 5-vote countMap。
+[結論 1]
+priority bug 修補機制因果確立。
+17.3:1 偏移 → ~1:1 全基因組。
+34,855 read-level victims baseline → V3F/V5 forensic 100% 修對；V6 spot check 17,404 reads 中 44.6% 翻方向 / 31.7% 仍 hp=11 / 14.1% hp=33 / 9.6% empty — V6 不完全繼承 V3F（詳 erratum E5）。
+SP1/2/3 IGV 對齊 paired 3/3。
 
-[chr19 pilot]
-HCC1395 5kHz chr19，篩 germline_majority ≠ somatic_majority 且 both >0。
-得 752 雙向矛盾 reads。
-baseline 全 752 條投錯方向 hp=11。
-V6 全 752 條翻 hp=21 = 100% 單向修正，0 條反向。
+[結論 2]
+V6 = production candidate（5/10 binary patch）。
+等於 V3F 保守 hp=33 + V5 ploidy/threshold/phased VCF + marker engineering 改善。
+hp=33 +4.7% vs V3F。
+marker coverage +9.0%。
+Phase D 4 樣本 ratio 0.61-1.24 全中性。
+caller F1 三版相同 0.7166。
 
-[全基因組擴展]
-victims 從 752 → 34,855 = 46.4× scale up。
-V6 修正率仍 100% (34,855/34,855)，0 條反向。
+[結論 3 — ★ 最重要]
+真實價值在 read-level tag concordance — 非 caller F1。
++13.3 pp paired GT concordance @ 0.93。
+hp=33 還原。
+marker coverage +9.0% → ISM 下游 marker engineering 受惠。
+caller F1 對 V3F/V5/V6 數學保證 invariant — FILTER 不動。
 
-[重要顛覆]
-per-chr 分佈推翻原 chr19 hotspot 結論。
-主要 victim 分佈在 chr7 (3,508) / chr2 / chr1 / chr16 / chr20。
-chr19 只占 2.16%，rank 19 — SP1/2/3 是可重現案例，非主要分佈位置。
+[errata 簡述]
+PI 報告 4-29 errata 6 條，3 條核心：
+E4 — V5 = Pass 1 only 歸因修正。
+E5 — V5 Layer 1.5 germline-absent 4.19:1 缺陷。
+E6 — V6 binary patch 完成 + Phase D 4 樣本驗證閉環。
 
-[chr8 釐清]
-chr8 priority bug enrichment 0.34× avg — rank 21 冷區。
-與 MEMORY chr8 LOH+HPSig 7.4× FP hotspot 是不同 layer，無直接因果。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> chr19 1Mb hotspot 30M=215 + 27M=133 + 16M=41 / 4-path 驗證表 (個案 trace / Density 共變 / 修正後消失) / read_name case (1c50034a-f0f) / 全 24 chr enrichment ‰ / chrY 小 N 高 ‰ / Pass 2 reclassify 104K germline het</div>
+[轉場]
+下一頁 — 改正後影響 + 未來研究方向。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> errata commit chain / V6 patch 待 commit / Phase D 5 樣本 evaluation matrix / 各 errata 段落 cross-ref</div>
     </details>
   </aside>
 
@@ -426,17 +404,17 @@ chr8 priority bug enrichment 0.34× avg — rank 21 冷區。
 </main>
 
 <nav class="nav-bottom" aria-label="Slide navigation">
-  <a href="slide_07_two_layer_table.html">← Prev</a>
-  <span class="counter">Slide 08 (10/23)</span>
-  <a href="slide_10_fix_design.html">Next →</a>
+  <a href="slide_14_caller_f1.html">← Prev</a>
+  <span class="counter">Slide 12 (18/23)</span>
+  <a href="slide_18_impact_future.html">Next →</a>
 </nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
 
 <script>
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowLeft' && True) location.href = 'slide_07_two_layer_table.html';
-    if (e.key === 'ArrowRight' && True) location.href = 'slide_10_fix_design.html';
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_14_caller_f1.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_18_impact_future.html';
   });
 
   // PanZoom.js progressive enhancement — fail-soft if CDN blocked

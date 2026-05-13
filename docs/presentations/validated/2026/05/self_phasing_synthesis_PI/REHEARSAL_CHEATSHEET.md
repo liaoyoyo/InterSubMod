@@ -23,7 +23,7 @@ source_plan: /bip7_disk/liaoyoyo2001/.claude/plans/agent-harness-langgraph-resil
 | # | 數字 | 含義 | 出處 slide | section |
 |---|---|---|---|---|
 | 1 | **17.3 : 1 → V6 1.84 : 1 (改善 -29.8 pp vs baseline)** | baseline 94.6% 偏 HP1 → V6 64.8%；V3F 1.14:1 (53.2%) 為 ratio 最佳 / V6 換 marker eng 改善 (trade-off) | slide 03 / 12 / 17 | S1 / S5 / S7 |
-| 2 | **34,855 V3F/V5/V6 100% 修對 (V3F 主力)** | baseline read-level victims → V3F (41ff147) 100% 修對；V5/V6 此 germline-existent 子集繼承 V3F (Layer 1.5 revert 對此子集不適用)；V6 audit 沒重跑 34,855 forensic 但 logic 推論 V6=V3F=V5 valid | slide 08 / 09d | S3 / S4 |
+| 2 | **34,855 V3F/V5 100% 修對 (V3F 主力)；V6 spot check 全集 17,404 reads: 44.6%/31.7%/14.1%/9.6%** | baseline read-level victims → V3F (41ff147) 100% 修對；V5 繼承 V3F；**V6 不完全繼承 V3F** — 5/14 spot check 揭露 31.7% reads V6 仍 hp=11 同 baseline（logic 推論失效，詳 erratum E5）| slide 08 / 09d / 17 | S3 / S4 / S7 |
 | 3 | **+13.3 pp = V5 vs baseline 達成** (V3F + Layer 1.5 合力, PI 4-29) | paired GT concordance @ 0.93 — read-level 真實 value；V6 重用 V5 phased VCF 預期保留, **未實測** | slide 09d / 17 | S4 / S7 |
 | 4 | **caller F1 = 0.7166** | 三版（V3F/V5/V6）caller F1 數學保證 invariant | slide 12 / 14 / 17 | S5 / S7 |
 | 5 | **hp=33 +4.7% / marker coverage +9.0%** | V6 vs V3F marker engineering 改善 | slide 09d / 17 | S4 / S7 |
@@ -76,15 +76,25 @@ source_plan: /bip7_disk/liaoyoyo2001/.claude/plans/agent-harness-langgraph-resil
 ### Q8: ISM 五大目標研究怎麼接上去？
 **A**：本報告 priority bug 修復鏈到 slide 17 verdict 完結；slide 18 future 是**轉場意圖預告**（已在 v1.1.5 加 caveat box 明示），未來 F1 LOH 內外 TP/FP 差異、F2 subclone 結構 + two-hit、F3 7-sample expansion、F4 erratum patch 都是 ISM 五大目標延伸 — 但**不在本次報告主軸內**。
 
-### Q11: 34,855 read-level victims 是 V6 修對嗎？(歸功正確性 #3)
-**A**：「34,855 victims 100% 修對」由 **V3F (commit 41ff147 tagging fix)** 達成 (T1.2-F1 audit, 主報告 line 64/564/572)；V5/V6 在此 germline-existent 子集**繼承 V3F 修對結果**，因為：
-- 34,855 victims 屬「germline + somatic 都 >0」(germline-existent) 子集
-- V6 唯一改動 = 移除 V5 Layer 1.5 (germline-absent 邏輯)
-- → V6 改動對 germline-existent 子集**不適用** → V6 = V3F = V5 = 100% (logic 推論 valid)
+### Q11: 34,855 read-level victims 是 V6 修對嗎？(歸功正確性 #3, **5/14 spot check 重大更新**)
+**A**：「34,855 victims 100% 修對」由 **V3F (commit 41ff147 tagging fix)** 達成 (T1.2-F1 audit, 主報告 line 64/564/572)。
 
-V6 audit 07_V6_validation_findings **沒重跑 34,855 read-level forensic** (因 logic 上不需要)；只測過 chr19 V5→V6 zero-sum transfer 2,542 reads (germline-absent 子集)。
+**V5/V6 不是簡單繼承 V3F**：
+- V5 在 germline-existent 子集 logic 上繼承 V3F (Layer 1.5 對此子集不適用)
+- **V6 spot check 5/14 全集 17,404 reads 揭露 logic 推論失效**：
+  - 44.6% reads 翻 hp=21 (V6 ≠ baseline ✅)
+  - **31.7% reads V6 仍 hp=11** (與 baseline 同方向 ❌ — 推翻 V6=V3F 假設)
+  - 14.1% V6 hp=33 (保守 ambiguous)
+  - 9.6% V6 未 tag
 
-**核心訊息**：不要在 PI 面前說「V6 修對 34,855」(歸功不準) — 應說「**baseline 34,855 priority bug victims；V3F (41ff147) 是 tagging fix 修對主力；V5/V6 在此子集 logic 上繼承 V3F**」。
+**為何 V6 不完全繼承 V3F**（待深掘）：
+1. V6 重用 V5 phased VCF — V5 對 germline-absent 邊界 reads 已標 hp=11 → V6 繼承這些 hp tag
+2. vote_dump (getVote 階段) vs BAM HP tag (haplotag 階段) 不一致
+3. V3F victim 篩 criteria 包含 edge case (baseline 已標 HP1 family + V3F vote 翻 HP2 但 V6 BAM 邊界仍標 hp=11)
+
+**核心訊息**：不要在 PI 面前說「V6 修對 34,855」(歸功完全錯) — 應說「**V3F (41ff147) 是 tagging fix 修對主力 (T1.2-F1 audit 100% on 34,855)；V5 繼承 V3F；V6 對此 subset 不完全繼承 — spot check 31.7% reads V6 仍 hp=11；機制待深掘**」。
+
+詳見 erratum E5 in `InterSubMod/docs/reports/validated/2026/05/20260513_V6_Attribution_Errata_01.md`
 
 ### Q10: +13.3 pp paired GT 是 V6 還是 V5 達成？(歸功正確性 #2)
 **A**：是 **V5 (V3F tagging fix + Layer 1.5) vs baseline** 達成（74.9% → 88.2%, PI 4-29 報告 15-site Clean PS metric, line 824/687）。**V6 從沒測過此 metric** — V6 audit 12 個 md 0 hits。
