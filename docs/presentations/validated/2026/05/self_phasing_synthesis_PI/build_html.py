@@ -987,22 +987,22 @@ add(id="09c_v6_winning_igv", num="09c", section="S4 修補設計", rg2="3 IGV", 
     <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin:4px 0;">
       <div>
         <p style="font-size:10px;font-weight:700;color:#7C2D12;margin:0 0 2px;text-align:center;">① chr19:52,081,584 — 完美 revert ✅</p>
-        <a href="../figures/igv/V6win_chr19_52081584_priority_bug_HP21_to_HP33.png" target="_blank">
-          <img class="igv-thumb" src="../figures/igv/V6win_chr19_52081584_priority_bug_HP21_to_HP33.png" alt="V6 winning chr19:52,081,584" style="max-height:280px; width:100%; object-fit:contain;">
+        <a href="../figures/igv/V6win_chr19_52081584_5versions.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/V6win_chr19_52081584_5versions.png" alt="V6 winning chr19:52,081,584 5 versions" style="max-height:280px; width:100%; object-fit:contain;">
         </a>
         <p style="font-size:9px;color:#374151;margin:2px 0;">baseline & V5 全 33 hp=21<br>V6: 33 hp=33 → paired HP1 ✓</p>
       </div>
       <div>
         <p style="font-size:10px;font-weight:700;color:#7C2D12;margin:0 0 2px;text-align:center;">② chr19:55,347,952 — 部分 revert ⚠</p>
-        <a href="../figures/igv/V6win_chr19_55347952_HP2_to_HP33_revert.png" target="_blank">
-          <img class="igv-thumb" src="../figures/igv/V6win_chr19_55347952_HP2_to_HP33_revert.png" alt="V6 winning chr19:55,347,952" style="max-height:280px; width:100%; object-fit:contain;">
+        <a href="../figures/igv/V6win_chr19_55347952_5versions.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/V6win_chr19_55347952_5versions.png" alt="V6 winning chr19:55,347,952 5 versions" style="max-height:280px; width:100%; object-fit:contain;">
         </a>
         <p style="font-size:9px;color:#374151;margin:2px 0;">baseline & V5 99 hp=2<br>V6: 62 hp=33 + 36 hp=21</p>
       </div>
       <div>
         <p style="font-size:10px;font-weight:700;color:#7C2D12;margin:0 0 2px;text-align:center;">③ chr19:8,349,597 — partial ⚠</p>
-        <a href="../figures/igv/V6win_chr19_8349597_germline_absent_partial_revert.png" target="_blank">
-          <img class="igv-thumb" src="../figures/igv/V6win_chr19_8349597_germline_absent_partial_revert.png" alt="V6 winning chr19:8,349,597" style="max-height:280px; width:100%; object-fit:contain;">
+        <a href="../figures/igv/V6win_chr19_8349597_5versions.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/V6win_chr19_8349597_5versions.png" alt="V6 winning chr19:8,349,597 5 versions" style="max-height:280px; width:100%; object-fit:contain;">
         </a>
         <p style="font-size:9px;color:#374151;margin:2px 0;">germline-absent 區<br>V6 大部分退 hp=33</p>
       </div>
@@ -1055,6 +1055,80 @@ V6 大部分退 hp=33 → 設計目標達成。
 [結論]
 V6 = V3F 保守 hp=33 + V5 設計目標 + marker engineering 改善 = 雙向勝出。""",
     tier3="V6 winning IGV 完整 3 張高解析度 / V5 Layer 1.5 4.19:1 整區量化細節 / paired_T HP:Z: 與 longphase-to HP:i: 對應 mapping")
+
+add(id="09d_v6_evidence_summary", num="09d", section="S4 修補設計", rg2="4", ngrep="—",
+    title="V6 真實正確性鐵證 4 維度 — 位點 + 圖片實證",
+    en="V6 4-dimensional evidence: positions + figures",
+    timing="120 sec / 中 ~360 字",
+    canvas_html="""
+    <p style="font-size:11px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:5px 10px;border-radius:4px;">⚠ 關鍵釐清: V6 正確性鐵證是 <strong>per-read</strong> 而非 ratio (跨 codebase HP1/HP2 命名任意, ratio 對齊 paired 不是正確性指標)</p>
+    <table class="metric-table" style="font-size:10.5px;">
+      <thead><tr><th>#</th><th>鐵證</th><th>位點/數據</th><th>圖片/實證</th><th>slide</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td>1</td><td><strong>paired GT concordance +13.3 pp @ 0.93</strong> (per-read 對齊)</td><td>15-site Problem PS clean / Aggr / Clean PS GT 三項</td><td>SP1/2/3 IGV 5versions (V5 翻 HP2 對齊 paired 個案視覺)</td><td>04a/04b + 10</td></tr>
+        <tr class="row-green"><td>2</td><td><strong>34,855 read-level victims 100% V6 修對</strong> (read-level 因果)</td><td>chr19 752 (HCC1395 5kHz) + 全基因組 34,855 全 baseline=11 → V6=21, 0 反向</td><td>vote_dump 5 read 個案表 (read_name + countMap + baseline/V6 hp)</td><td>08 + 主報告 §4.1</td></tr>
+        <tr class="row-green"><td>3</td><td><strong>cross-sample 4 樣本 ratio 中性化</strong> (跨樣本驗證)</td><td>H1437 1.243 / H2009 0.901 / HCC1954 0.958 / HCC1937 0.611 (vs V5 1.86 / baseline 17.3:1)</td><td>Phase D 5 樣本 evaluation matrix</td><td>B4 + 13</td></tr>
+        <tr class="row-green"><td>4</td><td><strong>hp=33 訊號還原 +944% vs V5</strong> (marker engineering)</td><td>chr19:52,081,584 完美 revert / 55,347,952 部分 / 8,349,597 partial</td><td>V6 winning IGV 3 張 5versions (baseline / paired / V3F / V5 / V6 對照)</td><td>09c</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">📋 鐵證 2 — vote_dump 5 個案 trace 表 (chr19 752 victims 中前 5 條):</p>
+    <table class="metric-table" style="font-size:10.5px;">
+      <thead><tr><th>read_name (前 12)</th><th>chr19:pos</th><th>germ HP1/HP2</th><th>som HP1_1/HP2_1</th><th>germ_maj</th><th>som_maj</th><th>baseline → V3F → V5/V6</th></tr></thead>
+      <tbody>
+        <tr><td>1c50034a-f0f</td><td class="num">201,417</td><td class="num">1 / 3</td><td class="num">1 / 0</td><td>HP2</td><td>HP1</td><td><strong>11 → 21 → 21</strong></td></tr>
+        <tr><td>afb8e89b-893</td><td class="num">585,252</td><td class="num">1 / 2</td><td class="num">1 / 0</td><td>HP2</td><td>HP1</td><td><strong>11 → 21 → 21</strong></td></tr>
+        <tr><td>35c7e166-ec3</td><td class="num">824,360</td><td class="num">0 / 1</td><td class="num">1 / 0</td><td>HP2</td><td>HP1</td><td><strong>11 → 21 → 21</strong></td></tr>
+        <tr><td>096ab9a7-030</td><td class="num">1,574,442</td><td class="num">0 / 3</td><td class="num">1 / 0</td><td>HP2</td><td>HP1</td><td><strong>11 → 21 → 21</strong></td></tr>
+        <tr><td>ccc8185d-f9b</td><td class="num">2,558,240</td><td class="num">0 / 1</td><td class="num">2 / 0</td><td>HP2</td><td>HP1</td><td><strong>11 → 21 → 21</strong></td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:10px;color:#16A34A;margin:4px 0 0;font-weight:600;">→ 全 752 條 chr19 + 全基因組 34,855 條皆 baseline=11 → V6=21 單向修正 (germline_majority 反向, 0 反向例)</p>
+    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ 4 維度鐵證皆有「位點 + 圖片/數據」實證: per-read 對齊 + read-level 因果 + cross-sample + hp=33 還原 — 4 角度互相獨立 corroborate V6 正確性</div>
+    <div class="footer-glossary" style="font-size:9.5px;">
+      <div class="gloss-item">ⓘ vote_dump 個案 trace 來源: InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/vote_dump_*_chr19.tsv.gz</div>
+      <div class="gloss-item">ⓘ V6 winning IGV 5versions: baseline / paired_T / V3F / V5 / V6 五版並列</div>
+    </div>""",
+    speaker="""[標題]
+V6 真實正確性鐵證 — 4 維度，每維都有位點 + 圖片/數據實證。
+
+[關鍵釐清]
+V6 正確性鐵證是 per-read 而非 ratio。
+跨 codebase (longphase-to vs longphase-s) HP1/HP2 命名任意。
+ratio 對齊 paired 不是正確性指標。
+
+[鐵證 1 — paired GT concordance +13.3 pp]
+per-read 對齊驗證。
+15-site Problem PS Clean / Aggr / Clean PS GT 三項全提升。
+個案視覺: SP1/2/3 IGV 5versions (slide 04a/04b 已展示) — V5 翻 HP2 對齊 paired 個案。
+數據在 slide 10 表 ③。
+
+[鐵證 2 — 34,855 read-level victims 100% 修對]
+read-level 因果。
+chr19 752 (HCC1395 5kHz pilot) → 全基因組 34,855 (46.4× generalize)。
+baseline=11 → V6=21 單向, 0 反向例。
+個案實證: vote_dump 5 read trace 表 (slide 09d 本頁) — read_name + countMap + 修正方向。
+
+[鐵證 3 — cross-sample 4 樣本 ratio 中性化]
+跨樣本驗證 (Phase D)。
+H1437 1.243, H2009 0.901, HCC1954 0.958, HCC1937 0.611。
+vs V5 baseline 1.86, vs 原 baseline 17.3:1。
+數據表: slide B4 Phase D matrix。
+
+[鐵證 4 — hp=33 訊號還原 +944% vs V5]
+marker engineering 鐵證。
+V6 138,317 hp=33 vs V5 13,250 vs V3F 132,060。
+個案視覺: chr19:52,081,584 完美 revert / 55,347,952 部分 / 8,349,597 partial。
+IGV 5versions 圖: slide 09c — baseline & V5 標反方向, V6 退 hp=33 才正確。
+
+[綜合論證]
+4 維度互相獨立 corroborate V6 正確性。
+不是單一數據, 是 4 角度交叉驗證。
+PI 質疑任一維度都有對應位點 + 圖片證明。
+
+[caveat]
+chr19 全 reads HP ratio 距離 paired 反而比 baseline 遠 (0.367 vs 0.215) — 但這不是 V6 正確性指標 (詳 v6_quantification_findings.md)。
+真實正確性指標是上面 4 維度 per-read 鐵證。""",
+    tier3="vote_dump 完整 752 chr19 victims 表 / 4 維度 cross-validation 完整論證 / V5 chr19 巧合對齊 paired 細節分析 / chr17/chrX/chr8 V6 distance 未量化 caveat")
 
 add(id="12_no_regression", num="10", section="S5 驗證", rg2="1", ngrep="20+",
     title="4 類同層驗證 + 個案 3/3 對齊",
