@@ -329,10 +329,24 @@ add(id="04c_priority_bug_fix_site", num="04c", section="S1 觀察起點", rg2="1
         <p style="font-size:9.5px;color:#6B7280;margin:2px 0;text-align:center;">panel 順序: baseline / V2b / V3F / V5 / V6 / paired tumor / paired normal</p>
       </div>
     </div>
-    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ 全基因組 17.3:1 偏移在這位點具體化: baseline 106 reads 全 hp=11 → V6 修對拆分; SP 位點 (germline-absent) + 本位點 (germline-existent) 共同證 V6 雙區修對</div>
+    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">📊 跨 6 chr19 候選位點 V6 修對 summary (HP:i:11 reduction):</p>
+    <table class="metric-table" style="font-size:10px;">
+      <thead><tr><th>chr19 位點</th><th>baseline HP:i:11</th><th>V6 HP:i:11</th><th>修對率</th><th>paired_T ground truth</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td><strong>27,376,222 ★</strong> (主鐵證)</td><td class="num">106</td><td class="num">36</td><td class="num">−66%</td><td>HP:Z:1-1=33 + 2-1=28 雙向</td></tr>
+        <tr class="row-green"><td><strong>27,373,006 ★</strong></td><td class="num">77</td><td class="num">29</td><td class="num">−62%</td><td>HP:Z:2-1=39 主導 (HP2)</td></tr>
+        <tr><td>30,138,000</td><td class="num">70</td><td class="num">45</td><td class="num">−36%</td><td>HP:Z:1-1=24 + Z:2=59</td></tr>
+        <tr><td>30,146,000</td><td class="num">83</td><td class="num">53</td><td class="num">−36%</td><td>HP:Z:1-1=49 + Z:2=57 雙向</td></tr>
+        <tr><td>30,132,000</td><td class="num">36</td><td class="num">28</td><td class="num">−22%</td><td>HP:Z:1=51 + Z:2=50 (混合)</td></tr>
+        <tr><td>38,400,000 (window)</td><td class="num">274</td><td class="num">234</td><td class="num">−15%</td><td>HP:Z:1=228 + Z:1-1=159 HP1 主導</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:10px;color:#16A34A;margin:4px 0 0;font-weight:600;">→ 6/6 候選位點 V6 都減少 HP:i:11 (priority bug 過度集中) ; 2 位點 V6 -60%+ 強修對 + paired_T 雙向 sub-clone 對齊</p>
+    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ 全基因組 17.3:1 偏移在位點層具體化: baseline priority bug 過度集中 → V6 修對拆分 + 對齊 paired_T 雙向 sub-clone 共現</div>
     <div class="footer-glossary" style="font-size:9.5px;">
       <div class="gloss-item">ⓘ HP:i: = longphase-to (TO mode) / HP:Z: = longphase-s (paired mode) — 跨 codebase 命名不同</div>
-      <div class="gloss-item">ⓘ paired_T HP:Z:1-1 + HP:Z:2-1 雙向 = sub-clone 共現 (兩 haplotype 各帶不同 somatic); baseline 全 hp=11 = 強迫單向</div>
+      <div class="gloss-item">ⓘ V6 修對表現: HP:i:11 大幅減少 (priority bug 個案減少); HP:i:21 從 0 變多 (翻方向修對); HP:i:33 從 0 變多 (ambiguous 保守)</div>
+      <div class="gloss-item">ⓘ paired_T 雙向 (HP:Z:1-1 + Z:2-1) = sub-clone 共現真實 phenotype; baseline 全 hp=11 = 強迫單向錯</div>
     </div>""",
     speaker="""[標題]
 位點鐵證 — chr19:27,376,222 baseline priority bug → V6 修對。
