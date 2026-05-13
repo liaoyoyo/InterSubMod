@@ -219,8 +219,11 @@ add(id="04a_sp1", num="04a", section="S1 觀察起點", rg2="1", ngrep="3",
         <div class="stat-box" style="padding:8px;"><div class="number green" style="font-size:24px;">HP2 ✅</div><div class="label">paired direction · 對齊</div></div>
       </div>
     </div>
-    <div class="igv-focus-callout" style="font-size:14px;padding:6px 12px;margin-top:4px;"><span class="label">👁 看圖重點：</span>baseline (最上) 紅+綠 reads 集中左欄 = HP1；V6 / paired_T (下) 紅+綠搬右欄 = HP2 → 三方向一致</div>
-    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 精確 count 待 vote_dump 量化  ²V6 取代 V2b/V3F/V5 簡化並列</p>""",
+    <div class="igv-focus-callout" style="font-size:14px;padding:6px 12px;margin-top:4px;"><span class="label">👁 看圖重點：</span>baseline (最上) 紅+綠 reads 集中左欄 = HP1；V5 (panel 4) 紅+綠搬右欄 = HP2 → V5 翻轉對齊 paired</div>
+    <div style="background:#FEF3C7;border:2px solid #CA8A04;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:12px;">
+      <strong style="color:#7C2D12;">⚠ V6 在 SP1/2/3 設計取捨</strong>：本位點屬 <strong>germline-absent 區</strong>。V6 移除 Layer 1.5 後退回 <code>hp=33</code> ambiguous (不選邊)，<strong>失去翻 HP2 視覺對齊能力</strong>。但這是 V6 有意識的設計取捨 — V5 Layer 1.5 在全 germline-absent 區整體 4.19:1 偏 HP1（與 baseline 相同），是 priority bug feature 化；V6 還原 V3F 保守策略，全區從 4.19:1 偏移恢復成 hp=33。<strong>V6 的鐵證在 slide 08 全基因組量化 + slide 13 cross-sample，不在 SP1/2/3 IGV</strong>。
+    </div>
+    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 hp=33 ambiguous (germline-absent trade-off); V5 翻 HP2 為個案鐵證但全區仍偏 HP1  ² 5versions 順序: baseline / paired_T / V3F / V5 / V6</p>""",
     speaker="""[從統計到個案]
 全基因組 17.3:1 是平均值。
 用 IGV 6-BAM 並列篩，找到 chr19 三個近 100% 失衡位點。
@@ -272,9 +275,12 @@ add(id="04b_sp2_sp3", num="04b", section="S1 觀察起點", rg2="0", ngrep="6",
         </div>
       </div>
     </div>
-    <div class="igv-focus-callout" style="font-size:13px;padding:5px 10px;margin-top:4px;"><span class="label">👁 看圖重點：</span>兩圖同 SP1 模式 — baseline 紅+綠 reads 集中左欄；V6/paired_T 紅+綠搬右欄 → 3/3 對齊。HP1=(HP1+HP1-1) 紅綠；HP2=(HP2+HP2-1) 藍橙</div>
+    <div class="igv-focus-callout" style="font-size:13px;padding:5px 10px;margin-top:4px;"><span class="label">👁 看圖重點：</span>兩圖同 SP1 模式 — baseline 紅+綠 reads 集中左欄；V5 (panel 4) 紅+綠搬右欄 → V5 翻 HP2 對齊 paired 3/3</div>
+    <div style="background:#FEF3C7;border:2px solid #CA8A04;border-radius:6px;padding:6px 12px;margin-top:4px;font-size:11.5px;">
+      <strong style="color:#7C2D12;">⚠ V6 SP1/2/3 caveat</strong>：SP2/3 同屬 germline-absent 區。V6 退回 hp=33（不翻）— 設計取捨換取全區 4.19:1 偏移消除。V6 鐵證在 slide 08 (全基因組 34,855 victims) + slide 13 (cross-sample 4/5)，<strong>不在 SP IGV</strong>。
+    </div>
     <div class="conclusion-arrow green" style="font-size:15px;padding:8px 14px;">→ 三 SP 都在 chr19:12-17M → 對齊 slide 08 chr19 752 victims hotspot</div>
-    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ V6 精確 count 待 vote_dump 量化；圖檔待 V6 重擷取後替換</p>""",
+    <p style="font-size:11px;color:#6B7280;margin:2px 0 0;">¹ SP2/3 baseline 109:1 / 108:0 → V5 翻 HP2 (個案鐵證) / V6 hp=33 (設計取捨)；5versions 順序: baseline / paired_T / V3F / V5 / V6</p>""",
     speaker="""[SP2/SP3 確認同模式]
 SP2 chr19:12,452,332 — baseline 109:1。
 SP3 chr19:12,467,180 — baseline 108:0。
@@ -846,6 +852,130 @@ V6 138,317，+4.7% 還原並略超 V3F。
 V6 = V3F germline-absent 保守 + V5 設計目標 + marker engineering 改善 = production-grade 終態。
 caller F1 三版完全相同 (重用 V5 phased VCF)，下一頁說明。""",
     tier3="commit 各別 line count (8b8c1fd +69/-6 / 41ff147 +36/-25 / 380e8d2 +8/-4 / d0bcd8c +68/-9 / 938f0df +4/-4) / V6 patch HaplotagProcess.cpp:537-548 移除 13 行 / V5 Layer 1.5 設計動機 (補 V3F untagged) / cherry-pick from zhenyu")
+
+# ─── S4 修補設計 — HP=33 修補機制深入 ────────────────────────────────────
+add(id="09b_hp33_mechanism", num="09b", section="S4 修補設計", rg2="2", ngrep="—",
+    title="HP=33 修補機制 — 程式碼 + 流程差異",
+    en="HP=33 mechanism — code diff + flow comparison",
+    timing="120 sec / 中 ~360 字",
+    canvas_html="""
+    <p style="font-size:11.5px;font-weight:700;color:#374151;margin:0 0 4px;">📌 問題: baseline longphase-to 在 germline-absent 區「幾乎不輸出 hp=33」— 因 vector 順序錯</p>
+    <div class="grid-2col" style="grid-template-columns: 6fr 6fr; gap:8px;">
+      <div>
+        <p style="font-size:10.5px;font-weight:700;color:#7F1D1D;margin:2px 0;">❌ baseline (priority bug)</p>
+        <pre class="code-panel" style="background:#FEE2E2;border:1px solid #DC2626;font-size:9px;padding:4px 6px;line-height:1.4;">vector keys = {
+  {HAPLOTYPE1_1, HAPLOTYPE2_1},  // ① somatic
+  {HAPLOTYPE3,   HAPLOTYPE2_1},  // ② mixed (hp=33)
+  {HAPLOTYPE1,   HAPLOTYPE2}     // ③ germline
+};
+for (pair : keys) {
+  if (countMap[k1]&gt;0 || countMap[k2]&gt;0) {
+    hpResult = haplotypeBase[winner];
+    break;  // ← 1 票就 break
+  }
+}</pre>
+        <p style="font-size:9.5px;color:#7F1D1D;margin:2px 0;">→ ① 永遠先 break，② mixed/hp=33 走不到</p>
+      </div>
+      <div>
+        <p style="font-size:10.5px;font-weight:700;color:#166534;margin:2px 0;">✅ V3F two-layer (41ff147)</p>
+        <pre class="code-panel" style="background:#DCFCE7;border:1px solid #16A34A;font-size:9px;padding:4px 6px;line-height:1.4;">// Layer 1: germline 決方向
+int germlineResult = 0;
+if (germlineHP1&gt;0 || germlineHP2&gt;0) {
+  germlineResult = (HP1&gt;=HP2) ? 1 : 2;
+}
+// Layer 2: somatic encoding
+if (somaticTotal &gt; 0) {
+  hpResult = (germ==1) ? 11 :
+             (germ==2) ? 21 :
+                         33;  // ★ 結構化保證
+}</pre>
+        <p style="font-size:9.5px;color:#166534;margin:2px 0;">→ germline 缺席 + somatic 有票 → hp=33 必出</p>
+      </div>
+    </div>
+    <div class="grid-2col" style="grid-template-columns: 6fr 6fr; gap:8px; margin-top:6px;">
+      <div>
+        <p style="font-size:10.5px;font-weight:700;color:#CA8A04;margin:2px 0;">⚠ V5 +Layer 1.5 (d0bcd8c bundled)</p>
+        <pre class="code-panel" style="background:#FEF3C7;border:1px solid #CA8A04;font-size:9px;padding:4px 6px;line-height:1.4;">// Layer 1: germline 同 V3F
+if (germlineHP1&gt;0 || germlineHP2&gt;0) {...}
+// Layer 1.5 NEW: germline 缺席 fallback
+else if (somaticHP1&gt;0 || somaticHP2&gt;0) {
+  germlineResult = (somaticHP1&gt;=somaticHP2)
+                  ? 1 : 2;  // ← 強制選邊
+}
+// Layer 2 → 出 hp=11/21 (不出 hp=33)</pre>
+        <p style="font-size:9.5px;color:#CA8A04;margin:2px 0;">→ hp=33 被改派 hp=11/21 (-89.9% 過度修正)</p>
+      </div>
+      <div>
+        <p style="font-size:10.5px;font-weight:700;color:#166534;margin:2px 0;">★ V6 revert L1.5 (5/10)</p>
+        <pre class="code-panel" style="background:#DCFCE7;border:2px solid #16A34A;font-size:9px;padding:4px 6px;line-height:1.4;">// Layer 1: germline 同 V3F
+if (germlineHP1&gt;0 || germlineHP2&gt;0) {...}
+
+// ─ 刪除 Layer 1.5 整段 (-13 行) ─
+// (germline 缺席 → germlineResult=0)
+
+// Layer 2 → hp=33 還原 (V3F 行為)</pre>
+        <p style="font-size:9.5px;color:#166534;margin:2px 0;">→ 還原 V3F 結構化保證 hp=33 (138,317 +4.7%)</p>
+      </div>
+    </div>
+    <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">📊 hp=33 reads 全基因組四版量化 (V5→V6 transfer 守恆 82:17):</p>
+    <svg viewBox="0 0 720 60" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+      <text x="6" y="13" font-size="10" fill="#7F1D1D" font-weight="700">baseline</text>
+      <rect x="80" y="4" width="3" height="14" fill="#DC2626"/>
+      <text x="100" y="15" font-size="9.5" fill="#7F1D1D" font-weight="700">~0 (順序副作用機率極低)</text>
+      <text x="6" y="28" font-size="10" fill="#166534" font-weight="700">V3F</text>
+      <rect x="80" y="19" width="160" height="14" fill="#16A34A"/>
+      <text x="245" y="30" font-size="9.5" fill="#166534" font-weight="700">132,060 (Layer 2 結構化保證)</text>
+      <text x="6" y="43" font-size="10" fill="#CA8A04" font-weight="700">V5 +L1.5</text>
+      <rect x="80" y="34" width="16" height="14" fill="#FBBF24"/>
+      <text x="100" y="45" font-size="9.5" fill="#7C2D12" font-weight="700">13,250 (-89.9% 過度修正壓掉)</text>
+      <text x="6" y="58" font-size="10" fill="#166534" font-weight="700">V6 ★</text>
+      <rect x="80" y="49" width="168" height="9" fill="#16A34A" stroke="#16A34A" stroke-width="2"/>
+      <text x="253" y="58" font-size="9.5" fill="#166534" font-weight="700">138,317 (+4.7% vs V3F / +944% vs V5) 還原 + 略超</text>
+    </svg>
+    <div class="conclusion-arrow green" style="font-size:12px;margin-top:4px;">→ V6 把 V3F「hp=33 結構化保證」找回 — ISM 下游 mixed-sub-tag marker engineering 可重新依賴此訊號</div>
+    <div class="footer-glossary" style="font-size:9.5px;">
+      <div class="gloss-item">ⓘ hp=33 = somatic ambiguous (germline 缺席 + somatic 有票) 保守 tag，避免錯標 HP1/HP2 方向</div>
+      <div class="gloss-item">ⓘ V5→V6 transfer 82:17 from hp=1-1/hp=2-1 → hp=33 完美 mirror priority bug feature 化方向</div>
+    </div>""",
+    speaker="""[標題]
+HP=33 修補機制 — 程式碼 + 流程差異深入。
+
+[問題]
+baseline longphase-to 在 germline-absent 區「幾乎不輸出 hp=33」。
+不是設計排除 hp=33，而是 vector ordered check + break early 副作用。
+
+[baseline 機制]
+getVote 三個 vector key 順序：
+① somatic pair (HAPLOTYPE1_1, HAPLOTYPE2_1)
+② mixed pair (HAPLOTYPE3, HAPLOTYPE2_1) — 走到這出 hp=33
+③ germline pair (HAPLOTYPE1, HAPLOTYPE2)
+
+for 迴圈第一個非空 pair 就 break — ① 永遠先 break，② mixed/hp=33 機率被嚴重壓縮。
+
+[V3F 修補 41ff147]
+重寫為兩層獨立判定。
+Layer 1 germline 決方向 (HP1>=HP2 ? 1 : 2)。
+Layer 2 顯式 if (somaticTotal>0 && germlineResult==0) hpResult=33 — 結構化保證 hp=33。
+
+[V5 Layer 1.5 過度修正]
+加 else if (somaticHP1>0 || somaticHP2>0) 用 somatic vote 強制選邊。
+hp=33 被改派 hp=11/21，全基因組從 132,060 壓到 13,250 (-89.9%)。
+
+[V6 revert]
+5/10 binary patch 移除 Layer 1.5 整段 (-13 行 HaplotagProcess.cpp:537-548)。
+還原 V3F 結構化保證。
+全基因組 hp=33 從 13,250 還原到 138,317 (+4.7% vs V3F / +944% vs V5)。
+
+[V5→V6 transfer 守恆]
+V5 → V6 共有 125,067 reads 從 hp=11+hp=21 拉回 hp=33。
+比例 82% from hp=1-1 + 17% from hp=2-1。
+完美 mirror priority bug feature 化方向。
+
+[意義]
+hp=33 還原讓 ISM 下游 marker engineering 重新依賴此訊號。
+mixed-sub-tag (germline 缺席 + somatic 有票) 是識別 sub-clone 結構的關鍵 marker。
+slide 13 future direction F2 (二次打擊事件順序) 依賴此訊號。""",
+    tier3="getVote 完整源碼 line 506-560 / V5→V6 transfer 82:17 守恆細節 / HaplotagProcess.cpp:537-548 V6 diff / Pass 2 reclassify 與 hp=33 關係")
 
 add(id="12_no_regression", num="10", section="S5 驗證", rg2="1", ngrep="20+",
     title="4 類同層驗證 + 個案 3/3 對齊",
