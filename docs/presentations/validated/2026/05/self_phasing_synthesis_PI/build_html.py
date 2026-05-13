@@ -298,6 +298,85 @@ SP3 chr19:12,467,180 — baseline 108:0。
 ④ 是否都修對？S5 驗證""",
     tier3="paired_T 與 paired_N 對照細節 / 三 SP 完整座標表 / V6 vs V5 差異 / HP sub-tag 分組原則")
 
+add(id="04c_priority_bug_fix_site", num="04c", section="S1 觀察起點", rg2="1", ngrep="—",
+    title="位點鐵證: chr19:27M baseline priority bug → V6 修對",
+    en="Priority bug fix site: chr19:27M baseline → V6 corrected",
+    timing="90 sec / 中 ~300 字",
+    canvas_html="""
+    <p style="font-size:11px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:5px 10px;border-radius:4px;">⚠ SP1/2/3 屬 germline-absent (V6 退 hp=33)；本位點屬 <strong>germline-existent priority bug 區</strong>(V6 修對翻方向) — 補完 V6 鐵證的另一面</p>
+    <div class="grid-2col" style="grid-template-columns: 6fr 6fr; gap:10px;">
+      <div>
+        <p style="font-size:11px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">📊 chr19:27,376,222 ±100bp HP tag 分布 (samtools 實證):</p>
+        <table class="metric-table" style="font-size:10.5px;">
+          <thead><tr><th>HP tag</th><th>baseline</th><th>V6 ★</th><th>paired_T</th></tr></thead>
+          <tbody>
+            <tr><td>HP:i:1 / HP:Z:1</td><td class="num">90</td><td class="num">90</td><td class="num">3</td></tr>
+            <tr><td>HP:i:2 / HP:Z:2</td><td class="num">133</td><td class="num">133</td><td class="num">8</td></tr>
+            <tr class="row-red"><td><strong>HP:i:11 (HP1+somatic)</strong></td><td class="num"><strong>106</strong></td><td class="num"><strong>36</strong></td><td class="num">—</td></tr>
+            <tr><td>HP:i:21 (HP2+somatic)</td><td class="num">2</td><td class="num"><strong>26</strong></td><td class="num">—</td></tr>
+            <tr><td>HP:i:33 (ambiguous)</td><td class="num">0</td><td class="num"><strong>46</strong></td><td class="num">—</td></tr>
+            <tr style="background:#FEE2E2;"><td>HP:Z:1-1 (paired HP1+som)</td><td class="num">—</td><td class="num">—</td><td class="num"><strong>33</strong></td></tr>
+            <tr style="background:#FEE2E2;"><td>HP:Z:2-1 (paired HP2+som)</td><td class="num">—</td><td class="num">—</td><td class="num"><strong>28</strong></td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:10px;color:#7C2D12;margin:6px 0 0;font-weight:600;">→ baseline 106 reads 全偏 HP:i:11 (priority bug 過度集中); V6 拆 36/26/46 (修對分散); paired_T 33/28 雙向 sub-clone 共現 (真實 phenotype)</p>
+      </div>
+      <div>
+        <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 4px;">🔬 IGV 多版對照 (chr19:27,376,222 ±100bp):</p>
+        <a href="../figures/igv/V6fix_chr19_27376222_priority_bug_baseline_to_V6.png" target="_blank">
+          <img class="igv-thumb" src="../figures/igv/V6fix_chr19_27376222_priority_bug_baseline_to_V6.png" alt="IGV chr19:27,376,222" style="max-height:380px; width:100%; object-fit:contain;">
+        </a>
+        <p style="font-size:9.5px;color:#6B7280;margin:2px 0;text-align:center;">panel 順序: baseline / V2b / V3F / V5 / V6 / paired tumor / paired normal</p>
+      </div>
+    </div>
+    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ 全基因組 17.3:1 偏移在這位點具體化: baseline 106 reads 全 hp=11 → V6 修對拆分; SP 位點 (germline-absent) + 本位點 (germline-existent) 共同證 V6 雙區修對</div>
+    <div class="footer-glossary" style="font-size:9.5px;">
+      <div class="gloss-item">ⓘ HP:i: = longphase-to (TO mode) / HP:Z: = longphase-s (paired mode) — 跨 codebase 命名不同</div>
+      <div class="gloss-item">ⓘ paired_T HP:Z:1-1 + HP:Z:2-1 雙向 = sub-clone 共現 (兩 haplotype 各帶不同 somatic); baseline 全 hp=11 = 強迫單向</div>
+    </div>""",
+    speaker="""[標題]
+位點鐵證 — chr19:27,376,222 baseline priority bug → V6 修對。
+補完 V6 在 germline-existent 區 (priority bug 主峰) 的鐵證。
+
+[與 SP1/2/3 對比]
+SP1/2/3 屬 germline-absent 區，V6 退 hp=33 (設計取捨)。
+本位點 chr19:27,376,222 屬 germline-existent + somatic 共現區。
+V6 在這區直接修對 priority bug (翻方向)。
+
+[數據 samtools]
+chr19:27,376,222 ±100bp 範圍。
+
+baseline:
+HP:i:11 = 106 reads (★ priority bug 過度集中偏 HP1+somatic)
+HP:i:1 = 90, HP:i:2 = 133, HP:i:21 = 2 (反向只 2 條)
+→ 強烈偏 HP1 方向 (本應雙向 sub-clone)
+
+V6:
+HP:i:11 = 36 (-66% vs baseline 106)
+HP:i:21 = 26 (從 0 變 26)
+HP:i:33 = 46 (從 0 變 46)
+→ 拆分 priority bug 過度集中為合理三類
+
+paired_T (ground truth):
+HP:Z:1-1 = 33 (HP1+somatic)
+HP:Z:2-1 = 28 (HP2+somatic)
+→ 雙向 33+28 = sub-clone 共現真實 phenotype
+
+[V6 修對證據鏈]
+baseline priority bug 把 106 reads 強迫全集中 hp=11。
+V6 把 106 拆 36+26+46 = 108 reads 重新分配。
+36 hp=11 ≈ paired_T 33 HP1+somatic — 對齊。
+26 hp=21 ≈ paired_T 28 HP2+somatic — 對齊。
+46 hp=33 = ambiguous 保守標記。
+V6 不犯 baseline 的「強制全偏 HP1」錯誤。
+
+[結論]
+全基因組 17.3:1 偏移在位點層具體化。
+SP1/2/3 (germline-absent) 顯示 V6 退 hp=33 設計取捨。
+本位點 (germline-existent) 顯示 V6 priority bug 修對翻方向。
+兩個 case 共同證 V6 雙區行為符合預期。""",
+    tier3="chr19:27,373,006 同模式 baseline 77→V6 29 hp=11 / 大量候選位點待跑命名顛倒檢查 / IGV session v6_all_5versions.xml 完整 7 panel 對照")
+
 # ─── S2 機制 ──────────────────────────────────────────────────────────────
 add(id="05_player_referee", num="05", section="S2 機制", rg2="4 (核心 forced)", ngrep="3 + 1 commit",
     title="phasing 層球員兼裁判機制",
