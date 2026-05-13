@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide 09f — longphase-to 內部 5 階段 — 我們只動 haplotag, 不動 FILTER</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: "Noto Sans CJK TC", "Source Han Sans TW", "Droid Sans Fallback", "DejaVu Sans", sans-serif;
+      background: #F5F5F7; color: #1F2937; line-height: 1.5;
+    }
+    code { font-family: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, Consolas, monospace; font-size: 0.92em; }
+    main.slide-page { max-width: 1280px; margin: 0 auto; padding: 24px; }
+    .slide-meta { background: #FFFFFF; padding: 12px 16px; margin-bottom: 14px; border-radius: 8px;
+      border-left: 4px solid #1E3A8A; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; font-size: 12px; }
+    .slide-meta .label { color: #6B7280; font-weight: 500; }
+    .slide-meta .value { color: #111827; margin-left: 4px; font-weight: 600; }
+    .slide-canvas { background: white; border: 1px solid #D1D5DB; border-radius: 8px; aspect-ratio: 16 / 9;
+      padding: 28px 40px; position: relative; box-shadow: 0 4px 16px rgba(0,0,0,0.08); overflow: hidden; color: #1F2937; }
+    .slide-canvas h1.slide-title, .slide-canvas h2.slide-title { font-size: 26px; color: #1E3A8A; margin: 0;
+      border-bottom: 2px solid #1E3A8A; padding-bottom: 2px; }
+    .slide-canvas[data-section="S4"]::before { content: attr(data-section); position: absolute; top: 8px; right: 28px;
+      font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; color: white; opacity: 0.9; background: #1E3A8A; }
+    .slide-canvas .en-subtitle { font-size: 13px; color: #6B7280; font-style: italic; margin: 0 0 6px; padding: 0 0 0 1em; }
+    .slide-canvas .footer-glossary { position: absolute; bottom: 10px; left: 28px; right: 28px;
+      font-size: 12px; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 6px; display: flex; flex-wrap: wrap; gap: 12px; }
+    .slide-canvas .footer-glossary .gloss-item { background: #FAFAFA; padding: 2px 8px; border-radius: 4px; }
+    .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 8px 0; }
+    .conclusion-arrow { background: linear-gradient(90deg, #16A34A, #22C55E); color: white;
+      padding: 8px 14px; margin: 8px 0; border-radius: 6px; font-weight: 600; font-size: 14px; }
+    .note-section { margin-top: 20px; background: #FAFBFE; border: 1px solid #C7D2FE;
+      border-left: 4px solid #8B5CF6; border-radius: 8px; padding: 14px 18px; }
+    .note-section h3 { color: #6D28D9; margin: 0 0 8px; font-size: 14px; }
+    .note-section .speak-text { font-size: 14px; line-height: 1.7; color: #1F2937; white-space: pre-line; }
+    .note-section .tier3 { margin-top: 12px; padding: 8px 12px; border-radius: 4px;
+      background: #F9FAFB; border: 1px dashed #9CA3AF; font-size: 11px; color: #6B7280; }
+    .note-section .tier3 .label { font-weight: 700; color: #374151; margin-right: 4px; }
+    details.collapsible summary { cursor: pointer; padding: 6px 0; font-size: 13px; font-weight: 600; color: #1E3A8A; }
+    .cross-link { margin-top: 12px; padding: 8px 14px; background: #FFFBEB;
+      border: 1px solid #FBBF24; border-radius: 4px; font-size: 12px; color: #78350F; }
+    .cross-link a { color: #92400E; text-decoration: underline; }
+    .nav-bottom { display: flex; justify-content: space-between; margin: 20px 0;
+      max-width: 1280px; margin-left: auto; margin-right: auto; padding: 0 16px; }
+    .nav-bottom a { background: #1E3A8A; color: white; text-decoration: none;
+      padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; }
+    .nav-bottom a:hover { background: #1E40AF; }
+    .nav-bottom .counter { align-self: center; color: #6B7280; font-size: 12px; }
+    .kbd-hint { position: fixed; bottom: 12px; left: 12px; background: rgba(0,0,0,0.7); color: white;
+      padding: 6px 12px; border-radius: 4px; font-size: 11px; pointer-events: none; }
+    .kbd-hint kbd { background: white; color: #1F2937; padding: 1px 6px; border-radius: 3px; font-size: 10px; margin: 0 2px; }
+  </style>
+</head>
+<body>
+<main class="slide-page" role="main" aria-label="Slide 09f content">
+  <div class="slide-meta" role="contentinfo" aria-label="Slide metadata">
+    <div><span class="label">Slide:</span><span class="value">09f / 23 (S4→S5 橋, v1.7-C 新增 2026-05-14)</span></div>
+    <div><span class="label">Section:</span><span class="value">S4 修補設計 (轉 S5 驗證)</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">90 sec / 中 ~300 字</span></div>
+    <div><span class="label">N grep:</span><span class="value">5 階段 + 改動範圍</span></div>
+  </div>
+
+  <article class="slide-canvas" data-section="S4" aria-label="Main slide canvas">
+    <h1 class="slide-title">longphase-to 內部 5 階段 — 我們只動 haplotag, 不動 FILTER → F1 數學保證 invariant</h1>
+    <p class="en-subtitle">longphase-to 5-stage pipeline — we only modified haplotag layer; caller VCF FILTER untouched → caller F1 mathematically invariant</p>
+
+    <p style="font-size:11.5px;color:#7C2D12;background:#FEF3C7;border-left:3px solid #CA8A04;padding:5px 10px;margin:6px 0;border-radius:3px;">
+      <strong>S4→S5 橋接</strong>: 接下來 slide 10/11 會說「caller F1 三版相同 = 0.7166」— PI 會問<strong>「為何相同」</strong>。答案在本張：我們只動 haplotag 層的 read HP tag，caller VCF FILTER PASS/nonPASS 由 ClairS-TO 決定, longphase-to 不動 → F1 invariant 是<strong>數學保證</strong>而非巧合
+    </p>
+
+    <div class="grid-2col" style="grid-template-columns: 7fr 5fr;">
+      <!-- 左：5 階段 pipeline SVG -->
+      <div>
+        <p style="font-size:11.5px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">📊 longphase-to 內部 5 階段（input → output）</p>
+        <svg viewBox="0 0 500 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:Arial,sans-serif;">
+          <defs>
+            <marker id="arrPipe" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+              <path d="M0,0 L9,4.5 L0,9 Z" fill="#6B7280"/>
+            </marker>
+          </defs>
+          <!-- Stage 0: Input -->
+          <rect x="80" y="10" width="340" height="34" rx="6" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="1.5"/>
+          <text x="250" y="28" font-size="12" fill="#1E3A8A" text-anchor="middle" font-weight="700">Input: ClairS-TO VCF (已標 FILTER) + tumor BAM</text>
+          <text x="250" y="40" font-size="9.5" fill="#1E40AF" text-anchor="middle">(FILTER PASS/nonPASS 已由 caller 決定, longphase-to 不改)</text>
+          <line x1="250" y1="44" x2="250" y2="55" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrPipe)"/>
+
+          <!-- Stage 1: Pass 1 always -->
+          <rect x="50" y="60" width="400" height="56" rx="6" fill="#F3F4F6" stroke="#6B7280" stroke-width="1.5"/>
+          <text x="250" y="78" font-size="12" fill="#1F2937" text-anchor="middle" font-weight="700">Stage 1 · Pass 1 (always runs)</text>
+          <text x="60" y="95" font-size="10" fill="#374151">①  3-point patternMining (somaticCalling V_H/V_L/V_N 分類)</text>
+          <text x="60" y="108" font-size="10" fill="#374151">②  2-point edgeConnectResult (phasing graph 建構)</text>
+          <text x="445" y="96" font-size="9" fill="#16A34A" text-anchor="end" font-weight="700">不動 ✓</text>
+          <text x="445" y="109" font-size="9" fill="#16A34A" text-anchor="end" font-weight="700">不動 ✓</text>
+          <line x1="250" y1="116" x2="250" y2="127" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrPipe)"/>
+
+          <!-- Stage 2: purity check -->
+          <polygon points="250,132 320,156 250,180 180,156" fill="#FEF3C7" stroke="#CA8A04" stroke-width="1.5"/>
+          <text x="250" y="153" font-size="11" fill="#7C2D12" text-anchor="middle" font-weight="700">purity > 0.9 ?</text>
+          <text x="250" y="166" font-size="9" fill="#92400E" text-anchor="middle">(938f0df: 0.95→0.9)</text>
+
+          <!-- Stage 3a: Pass 2 (Yes path) -->
+          <line x1="320" y1="156" x2="400" y2="156" stroke="#16A34A" stroke-width="1.5" marker-end="url(#arrPipe)"/>
+          <text x="360" y="151" font-size="9" fill="#16A34A" font-weight="700">Yes</text>
+          <rect x="395" y="135" width="100" height="42" rx="5" fill="#DCFCE7" stroke="#16A34A"/>
+          <text x="445" y="151" font-size="10" fill="#166534" text-anchor="middle" font-weight="700">Pass 2</text>
+          <text x="445" y="164" font-size="8.5" fill="#374151" text-anchor="middle">2-point only</text>
+          <text x="445" y="175" font-size="8" fill="#16A34A" text-anchor="middle" font-weight="700">不動 ✓</text>
+
+          <!-- Stage 3b: skip (No path) -->
+          <line x1="180" y1="156" x2="100" y2="156" stroke="#DC2626" stroke-width="1.5" marker-end="url(#arrPipe)"/>
+          <text x="140" y="151" font-size="9" fill="#DC2626" font-weight="700">No</text>
+          <rect x="5" y="135" width="95" height="42" rx="5" fill="#FEE2E2" stroke="#DC2626"/>
+          <text x="52" y="151" font-size="10" fill="#7F1D1D" text-anchor="middle" font-weight="700">skip Pass 2</text>
+          <text x="52" y="164" font-size="8.5" fill="#374151" text-anchor="middle">(HCC1395 0.6)</text>
+          <text x="52" y="175" font-size="8" fill="#16A34A" text-anchor="middle" font-weight="700">不動 ✓</text>
+
+          <!-- merge arrows back -->
+          <line x1="52" y1="177" x2="52" y2="195" stroke="#9CA3AF" stroke-width="1"/>
+          <line x1="445" y1="177" x2="445" y2="195" stroke="#9CA3AF" stroke-width="1"/>
+          <line x1="52" y1="195" x2="445" y2="195" stroke="#9CA3AF" stroke-width="1"/>
+          <line x1="250" y1="195" x2="250" y2="210" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrPipe)"/>
+
+          <!-- Stage 4: phased VCF output -->
+          <rect x="120" y="215" width="260" height="34" rx="6" fill="#DBEAFE" stroke="#1E3A8A"/>
+          <text x="250" y="231" font-size="11" fill="#1E3A8A" text-anchor="middle" font-weight="700">產出 phased VCF + origin</text>
+          <text x="250" y="244" font-size="9" fill="#1E40AF" text-anchor="middle">(V6 重用 V5 phased VCF; FILTER 仍 ClairS-TO 原值)</text>
+          <line x1="250" y1="249" x2="250" y2="260" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrPipe)"/>
+
+          <!-- Stage 5: HAPLOTAG (改動處) -->
+          <rect x="40" y="265" width="420" height="60" rx="6" fill="#FEE2E2" stroke="#DC2626" stroke-width="2.5"/>
+          <text x="250" y="284" font-size="13" fill="#7F1D1D" text-anchor="middle" font-weight="700">⭐ Stage 5 · Haplotag (我們改動處)</text>
+          <text x="55" y="301" font-size="10" fill="#7F1D1D">·  getVote() — V3F 41ff147 重寫 (#2 priority bug)</text>
+          <text x="55" y="314" font-size="10" fill="#7F1D1D">·  judgeHaplotype() — enum=3 修 dead code (#3) + V5/V6 Layer 1.5</text>
+          <text x="445" y="304" font-size="11" fill="#DC2626" text-anchor="end" font-weight="700">改 ✏</text>
+          <line x1="250" y1="325" x2="250" y2="336" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrPipe)"/>
+
+          <!-- Output -->
+          <rect x="80" y="340" width="340" height="20" rx="4" fill="#DCFCE7" stroke="#16A34A"/>
+          <text x="250" y="355" font-size="11" fill="#166534" text-anchor="middle" font-weight="700">Output: tumor_tagged.bam (HP:i: tag 改變; VCF FILTER 不變)</text>
+        </svg>
+      </div>
+
+      <!-- 右：改動範圍 + F1 invariant 證明 -->
+      <div>
+        <p style="font-size:11.5px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">✏ 改動範圍對照 + F1 invariant</p>
+
+        <div style="background:#DCFCE7;border:1.5px solid #16A34A;border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:11.5px;color:#166534;">
+          <strong>不動的 4 件事</strong> (所以 caller F1 invariant):<br>
+          <span style="font-size:10.5px;">① ClairS-TO 內部變異 calling<br>② VCF FILTER PASS/nonPASS 決定<br>③ Pass 1 phasing graph (3-point + 2-point)<br>④ Pass 2 second round (若觸發)</span>
+        </div>
+
+        <div style="background:#FEE2E2;border:1.5px solid #DC2626;border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:11.5px;color:#7F1D1D;">
+          <strong>我們改的只有 haplotag 階段</strong>:<br>
+          <span style="font-size:10.5px;">·  V3F (41ff147): 重寫 getVote + 修 enum→int<br>·  V5 (d0bcd8c): 加 Layer 1.5 (副作用)<br>·  V6: revert Layer 1.5</span><br>
+          <strong style="color:#7C2D12;">→ 只改 BAM 內 HP:i: tag, 不改 VCF FILTER</strong>
+        </div>
+
+        <div style="background:#DBEAFE;border:1.5px solid #1E3A8A;border-radius:6px;padding:8px 12px;font-size:11.5px;color:#1E3A8A;">
+          <strong>caller F1 數學保證 invariant</strong>:<br>
+          <span style="font-size:10.5px;">caller F1 = ClairS-TO VCF FILTER PASS 變異 vs SEQC2 truth<br>↓ 我們不動 FILTER PASS<br>↓ V3F = V5 = V6 = 0.7166 (0.93 樣本, slide 11)<br>↓ <strong>三版 F1 相同是數學必然, 非巧合</strong></span>
+        </div>
+
+        <p style="font-size:10px;color:#7C2D12;background:#FEF3C7;padding:4px 10px;border-radius:3px;margin:6px 0 0;">
+          ⚠ < 0.9 樣本 (HCC1395 0.6) 也驗證: Pass 2 不觸發, 但 haplotag 仍跑, F1 仍三版相同 = 0.6273 (B1 backup 詳)
+        </p>
+      </div>
+    </div>
+
+    <div class="conclusion-arrow">→ 下兩張 slide 10/11 「F1 三版相同 + 4 類同層驗證全綠」=  本張機制圖的實證結果; 改動<strong>有效</strong>由 read-level / marker / Phase D 驗證, 改動<strong>無傷</strong>由 F1 invariant 證明</div>
+
+    <div class="footer-glossary">
+      <div class="gloss-item">📖 <strong>FILTER PASS</strong>: caller 內部判定變異夠強, 由 ClairS-TO 決定</div>
+      <div class="gloss-item">📖 <strong>haplotag</strong>: 對 BAM 內 read 標 HP:i: tag</div>
+      <div class="gloss-item">ⓘ Pass 1/2 細節詳 backup B1</div>
+    </div>
+  </article>
+
+  <aside class="note-section" aria-label="Speaker notes for slide 09f">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (90 sec / 中 ~300 字)</summary>
+      <div class="speak-text">[S4→S5 橋接]
+上一張 09e forensic 確認 V6 守恆設計成立. 接下來 slide 10/11 要說「caller F1 三版相同 = 0.7166」.
+PI 會問: 為何 F1 不變? 這張先給機制根據, 下兩張給實證.
+
+[longphase-to 5 階段 + 改動範圍]
+longphase-to 內部 5 階段:
+① 接收 ClairS-TO VCF (FILTER 已決定) + tumor BAM
+② Pass 1 (always): 3-point patternMining + 2-point edgeConnectResult — 不動
+③ purity > 0.9 判定: Pass 2 second round 或 skip — 不動
+④ 產出 phased VCF + origin — 不動 (V6 重用 V5 的)
+⑤ Haplotag 階段 (getVote + judgeHaplotype) — ⭐ 改動處
+
+我們改動 4 件不做:
+不改 caller 內部 variant calling.
+不改 VCF FILTER PASS/nonPASS.
+不改 Pass 1 phasing graph.
+不改 Pass 2 (若觸發).
+
+我們改動 3 件做:
+V3F 41ff147 重寫 getVote + 修 enum→int (priority bug + dead code).
+V5 加 Layer 1.5 (germline-absent fallback, 後評有副作用).
+V6 revert V5 Layer 1.5.
+
+[F1 數學保證 invariant]
+caller F1 = ClairS-TO VCF 內 FILTER PASS 變異 vs SEQC2 truth.
+我們不動 FILTER → V3F/V5/V6 caller F1 數學保證 = 0.7166.
+這不是巧合, 是設計必然.
+
+[< 0.9 樣本驗證]
+HCC1395 0.6 樣本 Pass 2 不觸發, 但 haplotag 仍跑.
+F1 仍三版相同 = 0.6273. 證實改動跨 purity 範圍都不傷 F1.
+細節 backup B1.
+
+[轉場到 S5 驗證]
+改動「有效」由 read-level / marker coverage / Phase D ratio 驗證 (slide 10/11/B4).
+改動「無傷」由 F1 invariant 證明 (slide 10).</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> V_H/V_L/V_N 三類細節 / Pass 1 3-point vs Pass 2 2-point 差異 / V6 phased VCF 重用 V5 的細節 (slide 09e) / 938f0df threshold 0.95→0.9 commit 動機</div>
+    </details>
+  </aside>
+
+  <aside class="cross-link" aria-label="Cross-reference to markdown spec">
+    📋 詳細 multi-agent review 與修正紀錄請見：<a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+    · Pass 1/2 機制 backup → <a href="slide_b1_pass2.html">B1</a>
+  </aside>
+</main>
+
+<nav class="nav-bottom" aria-label="Slide navigation">
+  <a href="slide_09e_v6_forensic_validation.html">← Prev</a>
+  <span class="counter">Slide 09f (18/24, S4→S5 橋)</span>
+  <a href="slide_12_no_regression.html">Next →</a>
+</nav>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft') location.href = 'slide_09e_v6_forensic_validation.html';
+    if (e.key === 'ArrowRight') location.href = 'slide_12_no_regression.html';
+  });
+</script>
+
+</body>
+</html>

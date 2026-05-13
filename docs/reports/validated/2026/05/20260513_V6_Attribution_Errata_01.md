@@ -36,6 +36,7 @@ report_template: errata-companion v1.0
 | **E1** | 17.3:1 → 1:1 修對 | §2.1 / §9.x 表沒指版本 | V3F 1.14:1 是 ratio 最佳；V5 退步至 2.00；V6 改善至 1.84 (vs baseline 17.3) 但仍偏 V3F；V6 換取 marker eng 改善是 trade-off |
 | **E2** | +13.3 pp paired GT @ 0.93 | TL;DR ② 已正確標 V5；但易被讀為 V6 成就 | V5 (V3F + Layer 1.5) vs baseline 達成；V6 重用 V5 phased VCF 預期保留但**未重跑 15-site Clean PS metric** |
 | **E3** | 34,855 100% 修對 | §0/§4/§6 已正確標 V3F/V5；V6 未提 | V3F (commit 41ff147 tagging fix) 是修對主力；V5/V6 在此 germline-existent 子集 **logic 繼承 V3F**（V6 唯一改動 Layer 1.5 revert 對 germline-absent 子集，與 34,855 不重疊）；V6 audit 沒重跑 forensic 但 logic 推論 V6 = V3F = V5 valid |
+| **E4** ⚠ | judgeHaplotype enum 數值錯誤 | PPT slide 07 line 345 寫「`HAPLOTYPE1_1=2` enum 與 HP tag int `11` 不一致」(2026-05-13 v1.6-E audit 發現)| 實際 `HAPLOTYPE1_1 = 3` (Util.h:24 確認, 不是 2)。dead code 機制不變: enum=3 被當 int 與 hpResult int 11 比較永遠 ≠ → if 永遠 false → HP:i:33 dead code 是**長期未經 read-level tag audit 因而未生效**（非 longphase 作者疏失，是該 codebase 著重 caller F1 / phase block 等 caller-level metric，較少 audit 個別 HP tag 行為）。**修正範圍**: PPT slide 07 (v1.6-E HTML 改完) + 不影響 5/8 報告主結論 (報告 §3.4 機制描述未誤用此數值) |
 
 證據來源：
 - V6 audit 12 個 md 0 hits for {`13.3`, `Clean PS`, `15-site`, `88.2`}（V6 未實測 +13.3 pp）

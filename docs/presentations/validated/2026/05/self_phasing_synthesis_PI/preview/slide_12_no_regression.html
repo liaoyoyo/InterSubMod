@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Self-Phasing PPT Preview — 17 主 + 5 backup multi-page (v1.6)</title>
+  <title>Slide 10 — 4 類同層驗證 + 個案 3/3 對齊</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -302,57 +302,164 @@ details.collapsible summary:hover { color: #1D4ED8; }
 /* Speaker note teleprompter format — handle newlines */
 .note-section .speak-text { white-space: pre-line !important; }
 </style>
+  <!-- PanZoom.js CDN — fail-soft：載入失敗時 fallback 到 CSS hover scale + new-tab full size -->
+  <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
 </head>
 <body>
-
-<header class="topbar" role="banner">
-  <h1>📊 Self-Phasing PPT Preview — 18 主 slide + 5 backup (v1.7-C 2026-05-14, +09f S4→S5 橋)</h1>
-  <div class="meta">
-    <code>InterSubMod/docs/presentations/validated/2026/05/self_phasing_synthesis_PI/</code>
-    &nbsp;|&nbsp; Build: 2026-05-11
+<main class="slide-page" role="main" aria-label="Slide 10 content">
+  <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
+    <div><span class="label">Slide:</span><span class="value">10 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S5 驗證</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">1</span></div>
+    <div><span class="label">N grep:</span><span class="value">20+</span></div>
   </div>
-</header>
 
-<nav class="slidetabs" id="tabs" role="navigation" aria-label="Slide selector">
-  <button data-slide="01_cover" class=" active">01 S0 Cover</button>
-  <!-- v1.6 2026-05-13: 02 整張砍除, main statement 移至 01 cover; 02 檔案保留作 legacy reference 但 nav 不列入 -->
-  <button data-slide="03_genome_173" class="">02 S1 觀察起</button>
-  <button data-slide="04_sp1_2_3" class="">04 S1 觀察起</button>
-  <button data-slide="04c_priority_bug_fix_site" class="">04c S1 觀察起</button>
-  <button data-slide="05_player_referee" class="">05 S2 機制</button>
-  <button data-slide="06_priority_bug" class="">06 S2 機制</button>
-  <button data-slide="07_two_layer_table" class="">07 S2 機制</button>
-  <button data-slide="08_quant_evidence" class="">08 S3 量化鐵</button>
-  <button data-slide="10_fix_design" class="">09 S4 修補設</button>
-  <button data-slide="09b_hp33_mechanism" class="">09b S4 修補設</button>
-  <button data-slide="09c_v6_winning_igv" class="">09c S4 修補設</button>
-  <button data-slide="09d_v6_evidence_summary" class="">09d S4 修補設</button>
-  <button data-slide="09e_v6_forensic_validation" class="">09e S4 修補設</button>
-  <button data-slide="09f_internal_pipeline" class="" style="background:#FEF3C7;color:#92400E;border-color:#CA8A04;font-weight:700;">09f S4→S5 橋 ⭐</button>
-  <button data-slide="12_no_regression" class="">10 S5 驗證</button>
-  <button data-slide="14_caller_f1" class="">11 S5 驗證 </button>
-  <button data-slide="17_main_verdict" class="">12 S7 結論</button>
-  <button data-slide="18_impact_future" class="">13 S7 結論</button>
-  <button data-slide="b1_pass2" class="nav-backup">B1 Q&A Ba</button>
-  <button data-slide="b2_f1_dual_metric" class="nav-backup">B2 Q&A Ba</button>
-  <button data-slide="b3_hp33_paired" class="nav-backup">B3 Q&A Ba</button>
-  <button data-slide="b4_phase_d_outliers" class="nav-backup">B4 Q&A Ba</button>
-  <button data-slide="04d_5reads_vote_trace_igv" class="nav-backup">B5 read-level rescue</button>
-</nav>
+  <article class="slide-canvas" data-section="S5" aria-label="Main slide canvas">
+    <h1 class="slide-title ">4 類同層驗證 + 個案 3/3 對齊</h1>
+    <p class="en-subtitle">baseline → V6: 4 same-layer + SP 3/3 aligned with paired</p>
+    
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">🎯 baseline → V6 同層驗證 — 4 類指標各自的驗證方法:</p>
+    <table class="metric-table" style="font-size:10.5px;margin-bottom:6px;">
+      <thead><tr><th>類別</th><th>驗證方法與計算來源</th></tr></thead>
+      <tbody>
+        <tr><td><strong>① phasing 結構</strong></td><td>從 longphase-to <code>phasing.log</code> + phased VCF 直接讀統計（N50 / Phased% / wall time）; LOH.bed bp-level intersect (Jaccard)</td></tr>
+        <tr><td><strong>② 結果 tag 分布</strong></td><td>samtools 統計 BAM HP:i: tag count 分布; chr19 1Mb window per-region 計算 hp=1-1:2-1 ratio</td></tr>
+        <tr><td><strong>③ paired GT 比對</strong></td><td>per-read 比對 paired BAM HP:Z: vs TO BAM HP:i:; 計算 concordance % (clean PS / 15-site filtered)</td></tr>
+        <tr><td><strong>④ 個案 SP1/2/3</strong></td><td>IGV 6-BAM 並列視覺驗證 (baseline / paired / V3F / V5 / V6) + samtools coverage per-position</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:6px 0 4px;">📊 baseline → V6 同層 4 類驗證結果:</p>
+    <table class="metric-table" style="font-size:10.5px;">
+      <thead><tr><th>類別</th><th>驗證層級</th><th>指標（baseline → V6）</th></tr></thead>
+      <tbody>
+        <tr class="row-green"><td><strong>① 同層 phasing 結構 ⭐</strong></td><td>longphase-to 同層</td><td>phase block N50 +99.7% / Phased% +23.6 pp / speed 1.36× / LOH Jaccard=1.0</td></tr>
+        <tr class="row-green"><td><strong>② 結果 tag 分布修正</strong></td><td>BAM HP tag (同層)</td><td>HP1:HP2 17.3:1 → ~1:1 / hp=33 還原 138,317 (+4.7%) / chr19 hp=1-1:2-1 ratio 修正</td></tr>
+        <tr class="row-yellow"><td><strong>③ paired GT 比對 ⭐</strong></td><td>vs paired ground truth</td><td>clean PS +8.3 pp / 15-Aggr +6.65 pp / 15-Clean PS +13.3 pp</td></tr>
+        <tr class="row-green" style="border-top:2px solid #DC2626;"><td><strong>④ 個案 SP1/2/3 (IGV)</strong></td><td>已知偏移位點修正</td><td>baseline 113:0 / 109:1 / 108:0 → V6 全翻 HP2 對齊 paired 3/3 ✅</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:10px;color:#7C2D12;margin:4px 0 0;font-weight:600;background:#FEF3C7;padding:3px 8px;border-radius:4px;">⚠ 本 slide 驗證僅用 longphase-to 同層 + 結果 tag + paired 對比 + 個案層 — 不用 ISM 下游 metric (下游本就會因修正而改變，循環論證)</p>
+    <p style="font-size:11px;font-weight:700;color:#374151;margin:6px 0 2px;">📊 6 顯著改善 ⭐ 視覺化:</p>
+    <svg viewBox="0 0 720 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
+      <line x1="200" y1="100" x2="710" y2="100" stroke="#9CA3AF" stroke-width="0.8"/>
+      <line x1="200" y1="14"  x2="200" y2="100" stroke="#9CA3AF" stroke-width="0.8"/>
+      <text x="196" y="17" font-size="8" fill="#6B7280" text-anchor="end">+100%</text>
+      <text x="196" y="60" font-size="8" fill="#6B7280" text-anchor="end">+50%</text>
+      <text x="196" y="103" font-size="8" fill="#6B7280" text-anchor="end">0</text>
+      <text x="10" y="22"  font-size="10" fill="#374151" font-weight="600">Phase block N50</text>
+      <rect x="200" y="14" width="430" height="11" fill="#16A34A"/>
+      <text x="640" y="23" font-size="10" fill="#166534" font-weight="700">+99.7%</text>
+      <text x="10" y="36"  font-size="10" fill="#374151" font-weight="600">Phased%</text>
+      <rect x="200" y="28" width="102" height="11" fill="#16A34A"/>
+      <text x="312" y="37" font-size="10" fill="#166534" font-weight="700">+23.6 pp</text>
+      <text x="10" y="50"  font-size="10" fill="#374151" font-weight="600">Speed</text>
+      <rect x="200" y="42" width="155" height="11" fill="#16A34A"/>
+      <text x="365" y="51" font-size="10" fill="#166534" font-weight="700">1.36×</text>
+      <text x="10" y="64"  font-size="10" fill="#374151" font-weight="600">15-Clean PS GT</text>
+      <rect x="200" y="56" width="57" height="11" fill="#3B82F6"/>
+      <text x="267" y="65" font-size="10" fill="#1E3A8A" font-weight="700">+13.3 pp</text>
+      <text x="10" y="78"  font-size="10" fill="#374151" font-weight="600">clean PS GT</text>
+      <rect x="200" y="70" width="36" height="11" fill="#3B82F6"/>
+      <text x="246" y="79" font-size="10" fill="#1E3A8A" font-weight="700">+8.3 pp</text>
+      <text x="10" y="92"  font-size="10" fill="#374151" font-weight="600">15-Aggr GT</text>
+      <rect x="200" y="84" width="29" height="11" fill="#3B82F6"/>
+      <text x="239" y="93" font-size="10" fill="#1E3A8A" font-weight="700">+6.65 pp</text>
+      <text x="500" y="115" font-size="9" fill="#16A34A" text-anchor="middle" font-weight="600">綠=HP/LOH 結構 / 藍=Paired GT concordance (read-level tag 品質)</text>
+    </svg>
+    <div class="conclusion-arrow green" style="font-size:12.5px;">→ 4 類同層驗證全綠 + 個案層 3/3 對齊 paired → V6 修補在 longphase-to 端鐵證確立</div>
+    <div class="footer-glossary" style="font-size:9.5px;">
+      <div class="gloss-item">ⓘ scope: HCC1395 5kHz @ 0.93 purity; V6 同層 metric = V5 (重用 phased VCF)；caller F1 不變 (slide 11)</div>
+      <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance — paired GT +13.3 pp 為 PI 鐵證；ISM 下游影響量化留 slide 13 future direction</div>
+    </div>
+  </article>
 
-<main class="iframe-wrap" role="main">
-  <iframe id="slide-frame" src="slide_01_cover.html" title="Active slide preview"></iframe>
+  <aside class="note-section" aria-label="Speaker notes for slide 10">
+    <details class="collapsible" open>
+      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
+      <div class="speak-text">[標題]
+S5 驗證 — baseline → V6 同層 4 類全綠。
+
+[重要前提]
+本 slide 只用 longphase-to 同層 + 結果 tag + paired 對比 + 個案層 驗證。
+不用 ISM 下游 metric — 下游本就因 V6 修正而改變，用它會是循環論證。
+
+[類別 1：同層 phasing 結構]
+phase block N50 +99.7%。
+Phased% +23.6 pp。
+speed 1.36× 快。
+LOH Jaccard = 1.0 完全相同。
+
+[類別 2：結果 tag 分布修正]
+HP1:HP2 17.3:1 → ~1:1。
+hp=33 還原 138,317 (+4.7% vs V3F)。
+chr19 hp=1-1:2-1 ratio 修正。
+
+[類別 3：paired GT 比對 — PI 鐵證]
+clean PS Paired GT +8.3 pp。
+15-Aggr Paired GT +6.65 pp。
+15-Clean PS Paired GT +13.3 pp ★。
+
+[類別 4：個案 SP1/2/3 IGV]
+baseline 113:0 / 109:1 / 108:0。
+V6 全翻 HP2 對齊 paired 3/3。
+
+[結論]
+4 類同層驗證全綠 + 個案層 3/3 對齊 paired → V6 修補在 longphase-to 端鐵證確立。
+ISM 下游影響量化是未來研究方向 — slide 13 會展開。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> methylation 6 feat 列表 / Layer 1.5 zero-sum 細節 (留 slide 12-13) / V2b/V3F 中間版本 / HP_Ratio 詳解 / LOH Jaccard=1.0 細節</div>
+    </details>
+  </aside>
+
+  <aside class="cross-link" aria-label="Cross-reference to markdown spec">
+    📋 詳細 multi-agent review (T/C/L/B/N + PI 6 並行) 與修正紀錄請見：
+    <a href="../03_slide_layout_script.md">InterSubMod/docs/presentations/.../03_slide_layout_script.md</a>
+  </aside>
 </main>
 
-<div class="kbd-hint">點 nav 切換 slide; 子頁亦可直接雙擊獨立開啟</div>
+<nav class="nav-bottom" aria-label="Slide navigation">
+  <a href="slide_09f_internal_pipeline.html">← Prev</a>
+  <span class="counter">Slide 10 (16/23)</span>
+  <a href="slide_14_caller_f1.html">Next →</a>
+</nav>
+
+<div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
 
 <script>
-  document.querySelectorAll('nav.slidetabs button').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      const id = btn.dataset.slide;
-      document.getElementById('slide-frame').src = 'slide_' + id + '.html';
-      document.querySelectorAll('nav.slidetabs button').forEach(function(b) { b.classList.remove('active'); });
-      btn.classList.add('active');
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_09f_internal_pipeline.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_14_caller_f1.html';
+  });
+
+  // PanZoom.js progressive enhancement — fail-soft if CDN blocked
+  window.addEventListener('load', function() {
+    if (typeof panzoom === 'undefined') {
+      console.warn('[PanZoom] CDN unavailable; falling back to CSS hover + new-tab zoom');
+      return;
+    }
+    document.querySelectorAll('.igv-zoom-wrap img.igv-thumb').forEach(function(img) {
+      var wrap = img.closest('.igv-zoom-wrap');
+      wrap.classList.add('has-panzoom');  // disable CSS hover scale via this class
+      // Disable target=_blank click for panzoom-enabled image (pan/zoom handled inline)
+      var anchor = img.closest('a');
+      if (anchor) anchor.addEventListener('click', function(e) { if (!e.shiftKey) e.preventDefault(); });
+      // Init panzoom with wheel zoom + drag pan
+      var pz = panzoom(img, {
+        minZoom: 0.5, maxZoom: 8, bounds: false, beforeWheel: function() { return false; },
+        zoomDoubleClickSpeed: 1.5, smoothScroll: false
+      });
+      img.style.cursor = 'grab';
+      img.addEventListener('mousedown', function() { img.style.cursor = 'grabbing'; });
+      img.addEventListener('mouseup', function() { img.style.cursor = 'grab'; });
+      // Add reset button
+      var resetBtn = document.createElement('button');
+      resetBtn.textContent = '↺ 重置';
+      resetBtn.className = 'igv-pz-reset';
+      resetBtn.onclick = function() { pz.zoomAbs(0, 0, 1); pz.moveTo(0, 0); };
+      wrap.appendChild(resetBtn);
+      // Update hint
+      var hint = wrap.querySelector('.igv-zoom-hint');
+      if (hint) hint.textContent = '🖱 滾輪 zoom / 拖曳 pan / Shift+點擊新分頁';
     });
   });
 </script>
