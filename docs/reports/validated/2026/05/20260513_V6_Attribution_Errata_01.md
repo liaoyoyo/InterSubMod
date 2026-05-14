@@ -617,14 +617,14 @@ F1 = 0.7166 (baseline/V3F/V5/V6 全相同 — 必然)
 - **HP2 family (HAP2 + HAP2_1) = 14,931**
 - **baseline phased PASS altHaplotype HP1:HP2 ratio = 1.77:1 偏 HP1** ← assignment bias 本身存在
 
-### 完整修正 Stage Amplification Matrix (3 pathways)
+### 完整修正 Stage Amplification Matrix (3 pathways) — **5/15 amend: V3F-only 全基因組實證 1.85:1**
 
-| Stage | baseline | V5/V6 | V3F |
-|---|---|---|---|
-| S2 phased PASS **altHaplotype assignment** | **1.77:1** (was reported as 1.013, error) | **2.03:1** (PON-only 設計更偏) | (推測 ~2:1 同 V5) |
-| S4 vote_dump on 17,404 victim subset | 0.989:1 | (未測) | 0.989:1 |
-| S5 BAM HP family | **17.3:1** | 1.84:1 | 1.14:1 |
-| **S5 priority bug amplification** | **9.8× (17.3 / 1.77)** | **0.91× (1.84 / 2.03)** | **0.56× (1.14 / 2.03)** |
+| Stage | baseline | V5/V6 PON-only | V3F-only (no PON-only) | V3F PON-only |
+|---|---|---|---|---|
+| S2 phased PASS **altHaplotype assignment** (per-variant) | **1.77:1** (theoretical, parser logic) | **2.03:1** (PON-only mode 設計更偏) | 1.77:1 (繼承 baseline) | ~2:1 同 V5 |
+| S4 vote_dump on 17,404 victim subset | 0.989:1 | (未測) | (未測) | 0.989:1 |
+| **S5 BAM HP family (per-read, 全基因組)** | **17.3:1** | **1.84:1** | **1.85:1 ⭐ (5/15 empirical, chr19 1.21)** | 1.14:1 |
+| **S5 priority bug amplification** | **9.4× (17.3 / 1.85 empirical)** ★ | 0.99× (1.84 / 1.85 ≈ same) | (baseline amplifier 移除) | 0.62× (1.14 / 1.85) |
 
 ### 真實機制 — 兩 mechanism 疊加
 
@@ -686,7 +686,7 @@ V5/V6 BAM 1.84:1 = V3F priority bug 修對 (移 9.8× 放大) + PON-only 設計 
 
 | Claim | 之前 framing | 修正後 framing | 嚴重度 |
 |---|---|---|---|
-| S5 priority bug amplification | 17.5× | **9.8×** | 數值精確化 |
+| S5 priority bug amplification | 17.5× | **9.4× (5/15 empirical)** or 9.8× (theoretical) | 5/15 empirical 修正：V3F-only 全基因組 BAM = 1.85:1，amplification = 17.3/1.85 = 9.4× (vs L1 theoretical 17.3/1.77 = 9.8×) |
 | baseline 17.3:1 源頭 | priority bug 唯一 amplifier | assignment 1.77:1 × priority bug 9.8× **疊加** | 機制完整化 |
 | PON-only 修 17:1 | 必要 | **非必要** (修 self-phasing 設計問題 + LOH artifact + N50 + Phased rate; 17:1 由 V3F 修對) | 角色釐清 |
 | V5/V6 BAM 1.84:1 | priority bug partial | **assignment 2.03:1 + V3F fix 些微平衡** | 機制完整化 |

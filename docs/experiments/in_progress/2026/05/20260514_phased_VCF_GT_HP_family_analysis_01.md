@@ -29,8 +29,9 @@ report_template: deep-dive v1.0
 | **S4 baseline vote_dump HP1 vs HP2 family vote (17,404 victim subset)** | **0.989:1** (182,758 vs 184,846) | conflict-prone subset | ⭐⭐⭐⭐⭐ |
 | **S5 baseline BAM HP1 family** | **17.3:1** | full HCC1395 5kHz BAM | ⭐⭐⭐⭐⭐ |
 
-→ **17.3:1 = assignment 1.77:1 × priority bug 9.8× 放大** (兩 mechanism 疊加)
-→ **GT 偏向部分對 (assignment 1.77:1), 但主要源頭是 priority bug 9.8× 放大**
+→ **17.3:1 = assignment 1.77:1 × priority bug 9.4× 放大** (兩 mechanism 疊加, 5/15 empirical 修正)
+→ **GT 偏向部分對 (assignment 1.77:1), 但主要源頭是 priority bug 9.4× 放大** (empirical V3F-only 全基因組 1.85:1)
+→ **5/15 補實證**：V3F-only (no PON-only) 全基因組 BAM = 1.85:1 (HP1 12.6M / HP2 6.8M)；amplification = 17.3/1.85 = 9.4× empirical (vs L1 theoretical 9.8×)；chr19 subset best case 1.21:1
 → V3F (41ff147) 修對 priority bug 是 **17.3:1 偏移核心 fix**
 → PON-only (8b8c1fd) 是 self-phasing 設計修補 (LOH artifact / N50 / Phased rate), **非 17.3:1 必要 commit**
 

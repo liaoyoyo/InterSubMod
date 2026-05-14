@@ -318,8 +318,8 @@
         <div class="verdict bug">L0 + L1(a) + L1(b) + L2 疊乘</div>
       </div>
       <div class="stat-box">
-        <div class="number success">1.21 : 1</div>
-        <div class="label">V3F-only chr19（PON-only OFF）<br>17.3 → 1.21 = 90%+ 修對</div>
+        <div class="number success">1.85 : 1</div>
+        <div class="label">V3F-only 全基因組（PON-only OFF）<br>17.3 → 1.85 = 89.3% 修對<br><span style="font-size:10px;color:#6B6B66;">(chr19 子集 best case: 1.21:1)</span></div>
         <div class="verdict safe">L2 修對效果</div>
       </div>
       <div class="stat-box">
@@ -471,10 +471,10 @@
           </marker>
         </defs>
       </svg>
-      <figcaption>圖 §1.3 — 17.3:1 機制疊乘示意：兩 mechanism 獨立 + 可分別量化 + 修補後 chr19 V3F-only = 1.21:1（L2 修對，L1(b) 殘留）。</figcaption>
+      <figcaption>圖 §1.3 — 17.3:1 機制疊乘示意：兩 mechanism 獨立 + 可分別量化 + 修補後 V3F-only 全基因組 = 1.85:1（L2 修對，L1(b) 殘留）；chr19 subset best case = 1.21:1。</figcaption>
     </figure>
 
-    <h4>具體量化（HCC1395 5kHz，baseline PASS altHaplotype 分佈）</h4>
+    <h4>具體量化（HCC1395 5kHz，baseline PASS altHaplotype 分佈 + V3F-only BAM empirical）</h4>
     <pre><code>baseline PASS altHaplotype 分佈 (per parser HaplotagProcess.cpp:161-194):
   HAP1   (germline hp=1) :  6,559    ┐
   HAP1_1 (somatic  hp=11): 19,877    ├─ HP1 family = 26,436
@@ -485,9 +485,24 @@
                             ─────────
   OTHER  (unphased/hom)  :  5,860    (excluded from family ratio)
 
-L1(b) assignment ratio  = 26,436 / 14,931 = 1.771 : 1
-L2 priority amplifier   = 17.3 / 1.77 ≈ 9.8 ×
-Final BAM ratio observed = 17.3 : 1  (genome-wide, parent report §8)</code></pre>
+L1(b) per-variant assignment ratio = 26,436 / 14,931 = 1.771 : 1 (theoretical)
+
+V3F-only BAM empirical (全基因組, 5/14 measured):
+  HP:i:1  = 11,861,981   ┐  HP1 family = 12,607,167 (64.41%)
+  HP:i:11 =    745,186   ┘
+  HP:i:2  =  6,338,272   ┐  HP2 family =  6,812,830 (34.81%)
+  HP:i:21 =    474,558   ┘
+  HP:i:33 =    152,328     (0.78%)
+  V3F-only BAM ratio = 1.851 : 1   ← empirical 全基因組
+
+L2 priority bug amplification (empirical):
+  baseline BAM 17.3 / V3F-only BAM 1.85 ≈ 9.4 ×
+  (vs L1 theoretical 17.3 / 1.77 = 9.8 × — 兩數差距為 V3F two-layer 微 noise ~5%)
+
+Final BAM ratio:
+  baseline           17.3 : 1
+  V3F-only           1.85 : 1   (全基因組, 89.3% 修對)
+  V5/V6 PON-only     1.84 : 1   (≈ V3F-only, 確認 PON-only 不額外修 17:1)</code></pre>
 
     <div class="callout-info">
       <strong>注意：L1(b) 1.77 是 partial encoding 主導</strong>。具體：GT=<code>0|.</code> partial 在 PON-only mode 出現頻率比 <code>.|0</code> 高（因為 ClairS-TO 內部 sorting + germline phasing 將 ALT 偏定向 left side），對應 parser line 184-185 `altHaplotype = HAPLOTYPE1_1`。這是上游設計取捨（line 161-194 的編碼選擇），詳見 §4.3。
@@ -545,7 +560,7 @@ Final BAM ratio observed = 17.3 : 1  (genome-wide, parent report §8)</code></pr
           <td>derived</td>
         </tr>
         <tr>
-          <td>V3F-only chr19 修對至 1.21:1（PON-only OFF）</td>
+          <td>V3F-only 全基因組 1.85:1（PON-only OFF, 5/14 empirical; chr19 best case 1.21:1）</td>
           <td>L2 修對</td>
           <td class="grade">⭐⭐⭐⭐⭐</td>
           <td>5/14 實測 BAM samtools count</td>
@@ -655,7 +670,7 @@ Final BAM ratio observed = 17.3 : 1  (genome-wide, parent report §8)</code></pr
           <td><strong>L2</strong></td>
           <td>getVote priority bug + dead code</td>
           <td><code>41ff147</code> V3F two-layer</td>
-          <td><strong>本報告主軸</strong>；read-level victim 17.3:1 → 1.21:1 chr19（V3F alone 即可大幅修對）</td>
+          <td><strong>本報告主軸</strong>；read-level victim 17.3:1 → 1.85:1 全基因組 (V3F alone empirical, 5/14)；chr19 best case 1.21:1。priority bug amplification empirical = 9.4× (vs 1.77 theoretical 9.8×)</td>
         </tr>
         <tr class="row-l3">
           <td><strong>L3</strong></td>
@@ -697,7 +712,7 @@ Final BAM ratio observed = 17.3 : 1  (genome-wide, parent report §8)</code></pr
         若改動 parser 的 GT→Haplotype mapping，影響所有 longphase paired mode 用戶（含其他 caller、其他 organism）。屬 breaking change，需 upstream PR + 廣泛測試。
       </li>
       <li>
-        <strong>L2 修對已足以將 17.3 → 1.21（90%+）</strong>，剩餘 1.21 偏移在 marker engineering / LOH detection 不顯著影響結論（§8 量化）。L1(b) 殘餘需要時可加 post-haplotag 重平衡，但 ROI 不對稱（高風險低增益）。
+        <strong>L2 修對已足以將 17.3 → 1.85 全基因組（89.3% 修對；chr19 best case 1.21）</strong>，剩餘 1.21 偏移在 marker engineering / LOH detection 不顯著影響結論（§8 量化）。L1(b) 殘餘需要時可加 post-haplotag 重平衡，但 ROI 不對稱（高風險低增益）。
       </li>
       <li>
         <strong>診斷錯誤的歷史經驗</strong>：5/14 上午第一版報告把 17.3:1 全歸因 L2 priority bug，忽略 L1(b) 是 phased VCF 內建的 assignment ratio。誠實標記 out of scope 比假裝完整修補更安全（learning from over-claim, see §11.E5 erratum）。
@@ -949,9 +964,9 @@ else if( gt == ".|1" ) { refHaplotype = HAPLOTYPE1; altHaplotype = HAPLOTYPE2; }
         <h4>效果（chr19 實測，5/14）</h4>
         <ul>
           <li>baseline chr19 HP1:HP2 ≈ 17.3:1（與全基因組一致）</li>
-          <li>V3F-only (PON-only OFF) chr19 = <strong>1.21 : 1</strong></li>
-          <li>修對率：(17.3 − 1.21) / (17.3 − 1.0) ≈ 98.7%（將 BAM 推回接近 1:1 隨機）</li>
-          <li>剩餘 1.21:1 偏移 ≈ L1(b) 1.77 / 1.21 ≈ V3F 進一步壓制了部分 L1(b)（family aggregation 降低 partial encoding 影響）</li>
+          <li>V3F-only (PON-only OFF) 全基因組 = <strong>1.85 : 1</strong> (5/14 empirical)；chr19 subset = 1.21:1 (best case)</li>
+          <li>修對率：(17.3 − 1.85) / (17.3 − 1.0) ≈ 94.8% (全基因組)；chr19 98.7%</li>
+          <li>V3F-only 1.85:1 ≈ V5/V6 PON-only 1.84:1 → 確認 PON-only 在 17:1 dimension 不額外修；剩餘 ~1.85:1 反映 L1(b) assignment quirk 殘餘</li>
         </ul>
 
       </div>
@@ -1086,7 +1101,7 @@ if (hpResult == 33) {              // ← 比較 int hpResult vs literal 33
         <text x="490" y="302" font-size="11" fill="#6B6B66" text-anchor="middle">L1(b) assignment bias × L2 priority bug → BAM HP1 family : HP2 family</text>
 
         <!-- post-fix formula -->
-        <text x="490" y="350" font-size="13" font-weight="600" fill="#15803D" text-anchor="middle">修補後 V3F-only chr19：1.21 : 1  ·  V5/V6 全基因組：1.84 : 1  ·  caller F1：invariant 0.7166</text>
+        <text x="490" y="350" font-size="13" font-weight="600" fill="#15803D" text-anchor="middle">修補後 V3F-only 全基因組：1.85 : 1  ·  V5/V6 全基因組：1.84 : 1  ·  caller F1：invariant 0.7166</text>
 
       </svg>
       <figcaption>圖 §4.6 — 4-Layer cross-layer integration：每層獨立 + 修補可分別量化 + L1(b) 殘餘解釋 V6 BAM 1.84:1 偏移。</figcaption>
@@ -1125,7 +1140,7 @@ if (hpResult == 33) {              // ← 比較 int hpResult vs literal 33
           <td>2026-04</td>
           <td>haplotag</td>
           <td>L2</td>
-          <td>two-layer getVote (Layer 1 germline strict / Layer 1.5 family aggregate / Layer 2 priority) <strong>+ dead code fix</strong>（enum HAPLOTYPE3 unique + HP:i:33 正確輸出）。修對 9.8× priority bug。chr19 V3F-only 1.21:1。</td>
+          <td>two-layer getVote (Layer 1 germline strict / Layer 1.5 family aggregate / Layer 2 priority) <strong>+ dead code fix</strong>（enum HAPLOTYPE3 unique + HP:i:33 正確輸出）。修對 9.4× priority bug (empirical)。V3F-only 全基因組 1.85:1；chr19 best case 1.21:1。</td>
         </tr>
         <tr>
           <td><code>380e8d2</code></td>
@@ -1532,6 +1547,142 @@ if (hpResult == 33) {              // ← 比較 int hpResult vs literal 33
 
     <h3><span class="h-num">§8.5</span>caller F1 = 0.7166 Invariant（empirical proof）</h3>
     <p>見 §6.1 數學證明 + Gate 5 empirical diff = 0 lines。caller-level performance metric 完全不變，本修補為 read-level epigenetic context characterization 改善，與 caller filtering 正交。</p>
+
+    <h3><span class="h-num">§8.6</span>PON-only Mode 對 ISM 的影響推論（5/15 補加）</h3>
+
+    <p>用戶提問: 「PON-only 既然不修 17:1，是否對 ISM 仍有影響？」基於以下 empirical + 邏輯推論：<strong>影響 substantial</strong>，且角色與 V3F 互補。</p>
+
+    <h4>§8.6.1 PON-only 改善 → ISM downstream 對應 (5 條依賴鏈)</h4>
+
+    <table>
+      <thead>
+        <tr>
+          <th>PON-only 改善 (commit 8b8c1fd)</th>
+          <th>對 ISM downstream 影響</th>
+          <th>強度</th>
+          <th>Evidence Grade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row-warn">
+          <td>Phase block N50 4,061 → 8,109 (+99.7%)</td>
+          <td>ISM HPFineNGroups marker pool 廣度（phase blocks 為 marker 連續分組單位）</td>
+          <td>強</td>
+          <td>⭐⭐⭐⭐⭐</td>
+        </tr>
+        <tr class="row-warn">
+          <td>Phased rate 54.9% → 78.5% (+23.6 pp)</td>
+          <td>ISM 可用 phased variants ↑ — 之前 45.1% unphased reads 無法分 HP, 改善後 78.5% 可分 → ISM coverage 大幅加深</td>
+          <td>強</td>
+          <td>⭐⭐⭐⭐⭐</td>
+        </tr>
+        <tr class="row-warn">
+          <td>TO LOH 31.2% self-phasing artifact 消除</td>
+          <td>ISM LOH-conditioned features (F1 內外 TP/FP) 純度提升 — 之前 31% LOH 為假 LOH，污染 LOH-aware analysis</td>
+          <td>強</td>
+          <td>⭐⭐⭐⭐</td>
+        </tr>
+        <tr class="row-warn">
+          <td>Phase D 4 樣本 ratio 中性化 (0.61-1.24)</td>
+          <td>Cross-sample ISM comparison 可行 — 之前 baseline 全 17.3:1 偏移，無法分辨樣本 vs artifact，改善後可做 meaningful comparison</td>
+          <td>強</td>
+          <td>⭐⭐⭐⭐</td>
+        </tr>
+        <tr class="row-warn">
+          <td>HPFineNGroups marker coverage NG≥3 +9% (23,980 vs 21,997)</td>
+          <td>ISM subclone (F2) + 跨樣本 (F3) 分析可用 marker pool 增</td>
+          <td>中</td>
+          <td>⭐⭐⭐⭐</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>§8.6.2 ISM 五大目標 ↔ V3F + PON-only 角色分工</h4>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ISM 目標</th>
+          <th>V3F 受益 (priority bug 修)</th>
+          <th>PON-only 受益 (self-phasing 設計修)</th>
+          <th>整合 verdict</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>F1 LOH 內外 TP/FP</strong></td>
+          <td>read-level HP tag 正確 (17:1 修)</td>
+          <td>LOH 31.2% artifact 消除 (純 LOH set)</td>
+          <td>兩者必要疊加</td>
+        </tr>
+        <tr>
+          <td><strong>F2 Subclone + two-hit</strong></td>
+          <td>subclone HP 不偏 family</td>
+          <td>phase blocks 變長 → HP-aware feature 精確</td>
+          <td>兩者必要</td>
+        </tr>
+        <tr>
+          <td><strong>F3 Cross-sample 7-sample</strong></td>
+          <td>跨樣本 priority bug 一致修對</td>
+          <td>cross-sample ratio 中性化 → 可比較</td>
+          <td>兩者必要</td>
+        </tr>
+        <tr>
+          <td><strong>F4 Erratum patch</strong></td>
+          <td>(不直接相關)</td>
+          <td>(不直接相關)</td>
+          <td>不相關</td>
+        </tr>
+        <tr>
+          <td><strong>F5 Read-level epigenetic</strong></td>
+          <td>HP tag 正確 (核心)</td>
+          <td>phased VCF 結構穩</td>
+          <td>兩者必要</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>§8.6.3 假想實驗 — 純 V3F (沒 PON-only) 對 ISM 的影響</h4>
+
+    <pre><code>V3F alone (修 L2 priority bug) but no PON-only (L0 unchanged):
+   ↓
+✅ BAM HP1:HP2 全基因組 = 1.85:1 (17:1 修對 ✓, 5/14 v3f_no_pononly empirical)
+❌ Phase block N50 = 4,061 (短 — 未修 L0)
+❌ Phased rate = 54.9% (低)
+❌ TO LOH 31.2% self-phasing artifact 仍存在
+❌ 上游 graph 仍含 somatic node (球員兼裁判)
+   ↓
+ISM downstream impact:
+   ⚠ HPFineNGroups marker pool 限制 (phase blocks 短 → NG≥3 regions ↓)
+   ⚠ LOH-aware features 受 31% false LOH 污染 → F1 內外 TP/FP 不可靠
+   ⚠ Cross-sample comparison 受 phasing instability 影響 → F3 expansion 風險
+   ⚠ F1 / F2 / F3 受限</code></pre>
+
+    <p>→ 即使 17:1 修對，<strong>ISM 仍受 phasing infrastructure 品質限制</strong>。</p>
+
+    <h4>§8.6.4 結論 — V3F + PON-only 角色互補</h4>
+
+    <div class="callout-success">
+      <strong>PON-only 對 ISM 的影響 SUBSTANTIAL 且必要</strong>，但角色與 V3F 互補不重疊：
+      <ul style="margin:6px 0 6px 18px;">
+        <li><strong>V3F (41ff147)</strong> 修「ISM read-level HP tag 正確性」（17:1 偏移） → ISM 用得「對」方向</li>
+        <li><strong>PON-only (8b8c1fd)</strong> 修「ISM phasing infrastructure 品質」（N50 / Phased rate / LOH 純度） → ISM 用得「夠 + 純」</li>
+        <li>兩個 fix 都是 ISM 五大目標的必要 infrastructure</li>
+        <li>「修 17:1 數字本身」: V3F 一個 commit 就夠</li>
+        <li>「對 ISM 五大目標可用」: 需要 V3F + PON-only 兩者</li>
+      </ul>
+    </div>
+
+    <h4>§8.6.5 待量化 (Future Work)</h4>
+
+    <ul>
+      <li>HPFineNGroups marker rate V5 0.8937 → V6 0.9093 (+1.7%) — ⭐⭐⭐⭐ 已量化</li>
+      <li>Marker coverage NG≥3: V5 18,382 → V6 23,980 (+30.5% abs / +9% rel) — ⭐⭐⭐⭐ 已量化</li>
+      <li>ISM F1 / F2 / F3 metric 改善幅度 — <strong>⚠ Pending T1+T2</strong> (7-sample V6 full TO re-run + ISM feature TSV V6 重算)</li>
+      <li>V3F-only (沒 PON-only) 對 ISM F1 受 phase blocks 短 + LOH 31% artifact 影響的 quantification — <strong>⚠ Pending</strong> 假想實驗未跑</li>
+    </ul>
+
+    <p>Cross-ref: <code>InterSubMod/docs/experiments/in_progress/2026/05/20260514_phased_VCF_GT_HP_family_analysis_01.md</code> §5 downstream impact + erratum E5 §3a.5b.</p>
 
     <!-- =================== §9 Caveats & Future Work =================== -->
     <h2 id="s9"><span class="h-num">§9</span>Caveats &amp; Future Work</h2>
