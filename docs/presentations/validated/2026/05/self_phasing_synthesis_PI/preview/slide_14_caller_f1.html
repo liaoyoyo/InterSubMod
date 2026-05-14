@@ -362,16 +362,6 @@ details.collapsible summary:hover { color: #1D4ED8; }
         <tr class="row-green"><td>論文 §4.3 V_H/V_L refined F1</td><td>Verdict_Somatic INFO tag 三版實證 0 records (本 pipeline N/A)</td><td>invariant ✓ (Step 4 不改)</td></tr>
       </tbody>
     </table>
-    <div style="display:flex;align-items:stretch;gap:6px;margin-top:5px;">
-      <div style="flex:1;background:#F0FDF4;border:1.5px solid #16A34A;border-radius:5px;padding:5px 9px;font-size:10px;color:#166534;">
-        <strong style="font-size:10.5px;">⚙ 5 行 mechanism flow（caller-level F1 = 數學保證 invariant）：</strong><br>
-        <code style="font-size:9.5px;">1. ClairS-TO snv.vcf → FILTER=PASS 一次性決定（47,798 條）</code><br>
-        <code style="font-size:9.5px;">2. longphase phase → 改 GT/PS/GT2/GT3/PON tag（<strong>不改 FILTER</strong>）</code><br>
-        <code style="font-size:9.5px;">3. longphase haplotag → 改 BAM HP:i tag（不碰 VCF）</code><br>
-        <code style="font-size:9.5px;">4. bcftools isec → 取 FILTER=PASS vs SEQC2 truth → TP/FP/FN 不變</code><br>
-        <code style="font-size:9.5px;">5. <strong>F1 數學保證 invariant</strong>（四版完全相同）</code>
-      </div>
-    </div>
     <div class="footer-glossary" style="font-size:9.5px;margin-top:4px;">
       <div class="gloss-item" style="background:#DCFCE7;border-color:#16A34A;color:#166534;font-weight:600;">★ 真實價值在 read-level tag concordance (+13.3 pp paired GT @ 0.93)，不在 caller F1 〔next: slide 12 主結論 + slide 13 未來方向〕</div>
     </div>

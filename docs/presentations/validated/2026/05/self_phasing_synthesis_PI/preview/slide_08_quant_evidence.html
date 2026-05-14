@@ -316,10 +316,14 @@ details.collapsible summary:hover { color: #1D4ED8; }
   </div>
 
   <article class="slide-canvas" data-section="S3" aria-label="Main slide canvas">
-    <h1 class="slide-title ">baseline 34,855 read-level victims — V3F 100% 修對（V5 重用 / V6 spot check 全集 17,404 reads: 45% 翻方向 · 32% 仍 hp=11）</h1>
-    <p class="en-subtitle">baseline 34,855 read-level victims: V3F/V5 forensic 100% fix; V6 spot check final (17,404 reads: 45% flipped, 32% still hp=11, 14% hp=33, 10% empty)</p>
+    <h1 class="slide-title ">34,855 victims：V3F 100% 修對</h1>
+    <p class="en-subtitle">baseline 34,855 read-level priority bug victims — V3F 100% fixed (V5 inherits, V6 spot check shows ~32% hp=11 in Layer 1.5 region)</p>
+    <!-- P0 fix 2026-05-14: 加 baseline → V3F → V6 連續改善 anchor + 區分 priority bug victim subset (100%) vs V6 broader subset (含 Layer 1.5 區) -->
+    <div style="background:#DCFCE7;border:1px solid #16A34A;border-radius:5px;padding:5px 10px;margin:4px 0;font-size:11px;color:#166534;">
+      <strong>📊 連續改善 anchor (priority bug victim subset, n=34,855)</strong>：baseline <strong>100% hp=11</strong> ❌ → V3F <strong>0% hp=11 (100% 翻 hp=21)</strong> ✅ → V5 inherit V3F 100% → V6 inherit V3F 100%。本 slide 主數據 = priority-bug-only subset。
+    </div>
     <div style="background:#FEF3C7;border:1px solid #CA8A04;border-radius:5px;padding:4px 10px;margin:4px 0;font-size:10.5px;color:#78350F;">
-      <strong>⚠ V6 attribution caveat (5/14 PM final correction, erratum E5 §3a.5b.7)</strong>：BAM 三層對比 — V3F BAM hp=11=<strong>14.46%</strong> (含 hp=2=16.65%/empty=15.24%/hp=33=7.77%/hp=1=4.38%) ; V5 BAM = V6 BAM 100% identical (hp=11=<strong>31.66%</strong>/hp=21=44.64%/hp=33=14.12%/empty=9.58%, 無 hp=1/hp=2)。<strong>V6 patch 對此 subset 完全無效 (V5≡V6)；V3F → V5 phasing reshuffle 改 63% reads，3,198 reads direction flip (HP1↔HP2)</strong>。「V6 vs V3F 哪好」需 paired_T ground truth 確定。
+      <strong>⚠ 不要混淆兩個 subset (slide 04c 教訓)</strong>：V6 spot check 17,404 reads (45% flip / 32% hp=11 / 14% hp=33) 是 <strong>V6 broader subset (含 Layer 1.5 germline-absent 區)</strong>，不是 priority bug victim — 這 32% 仍 hp=11 多在 Layer 1.5 revert 區，V6 patch 對此 subset 設計上無效 (V5≡V6)。詳 erratum E5 §3a.5b.7 / slide 09e。
     </div>
     
     <div class="grid-2col" style="grid-template-columns: 6fr 6fr; gap:12px;">
@@ -333,7 +337,7 @@ details.collapsible summary:hover { color: #1D4ED8; }
             <tr class="row-green"><td><strong>baseline → V3F/V5 修正率</strong></td><td class="num">100%<br>(752/752)</td><td class="num"><strong>100%</strong><br>(34,855/34,855)</td><td>一致 ✅</td></tr>
             <tr><td>V3F/V5 方向</td><td colspan="2" class="num">全 hp=11 ❌ → 全 hp=21 ✅</td><td>單向</td></tr>
             <tr><td>反向 (V3F/V5 → 11)</td><td colspan="2" class="num">0 條</td><td>零 noise</td></tr>
-            <tr style="background:#FEF3C7;"><td><strong>V6 spot check (final, 17,404 reads)</strong></td><td class="num" colspan="2">44.6% 翻 hp=21 ✅ / <strong>31.7% 仍 hp=11</strong> ❌ / 14.1% hp=33 / 9.6% empty</td><td>complete</td></tr>
+            <tr style="background:#FEF3C7;"><td><strong>V6 broader subset (17,404 reads, 含 Layer 1.5 區 — 非 priority bug victim)</strong></td><td class="num" colspan="2">44.6% 翻 hp=21 ✅ / <strong>31.7% 仍 hp=11 (≈ Layer 1.5 revert)</strong> / 14.1% hp=33 / 9.6% empty</td><td>不同 subset</td></tr>
           </tbody>
         </table>
         <p style="font-size:10px;color:#16A34A;margin:4px 0 0;font-weight:600;">→ baseline 17.3:1 偏移 = read-level 34,855 條獨立 victims (V3F/V5 100% 修對 anchor；V6 partial)</p>

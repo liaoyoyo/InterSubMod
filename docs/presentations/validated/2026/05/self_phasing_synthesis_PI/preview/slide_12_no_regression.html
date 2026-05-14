@@ -329,44 +329,50 @@ details.collapsible summary:hover { color: #1D4ED8; }
         <tr><td><strong>④ 個案 SP1/2/3</strong></td><td>IGV 6-BAM 並列視覺驗證 (baseline / paired / V3F / V5 / V6) + samtools coverage per-position</td></tr>
       </tbody>
     </table>
-    <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:6px 0 4px;">📊 baseline → V6 同層 4 類驗證結果:</p>
-    <table class="metric-table" style="font-size:10.5px;">
-      <thead><tr><th>類別</th><th>驗證層級</th><th>指標（baseline → V6）</th></tr></thead>
-      <tbody>
-        <tr class="row-green"><td><strong>① 同層 phasing 結構 ⭐</strong></td><td>longphase-to 同層</td><td>phase block N50 +99.7% / Phased% +23.6 pp / speed 1.36× / LOH Jaccard=1.0</td></tr>
-        <tr class="row-green"><td><strong>② 結果 tag 分布修正</strong></td><td>BAM HP tag (同層)</td><td>HP1:HP2 17.3:1 → ~1:1 / hp=33 還原 138,317 (+4.7%) / chr19 hp=1-1:2-1 ratio 修正</td></tr>
-        <tr class="row-yellow"><td><strong>③ paired GT 比對 ⭐</strong></td><td>vs paired ground truth</td><td>clean PS +8.3 pp / 15-Aggr +6.65 pp / 15-Clean PS +13.3 pp</td></tr>
-        <tr class="row-green" style="border-top:2px solid #DC2626;"><td><strong>④ 個案 SP1/2/3 (IGV)</strong></td><td>已知偏移位點修正</td><td>baseline 113:0 / 109:1 / 108:0 → V6 全翻 HP2 對齊 paired 3/3 ✅</td></tr>
-      </tbody>
-    </table>
-    <p style="font-size:10px;color:#7C2D12;margin:4px 0 0;font-weight:600;background:#FEF3C7;padding:3px 8px;border-radius:4px;">⚠ 本 slide 驗證僅用 longphase-to 同層 + 結果 tag + paired 對比 + 個案層 — 不用 ISM 下游 metric (下游本就會因修正而改變，循環論證)</p>
-    <p style="font-size:11px;font-weight:700;color:#374151;margin:6px 0 2px;">📊 6 顯著改善 ⭐ 視覺化:</p>
-    <svg viewBox="0 0 720 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
-      <line x1="200" y1="100" x2="710" y2="100" stroke="#9CA3AF" stroke-width="0.8"/>
-      <line x1="200" y1="14"  x2="200" y2="100" stroke="#9CA3AF" stroke-width="0.8"/>
-      <text x="196" y="17" font-size="8" fill="#6B7280" text-anchor="end">+100%</text>
-      <text x="196" y="60" font-size="8" fill="#6B7280" text-anchor="end">+50%</text>
-      <text x="196" y="103" font-size="8" fill="#6B7280" text-anchor="end">0</text>
-      <text x="10" y="22"  font-size="10" fill="#374151" font-weight="600">Phase block N50</text>
-      <rect x="200" y="14" width="430" height="11" fill="#16A34A"/>
-      <text x="640" y="23" font-size="10" fill="#166534" font-weight="700">+99.7%</text>
-      <text x="10" y="36"  font-size="10" fill="#374151" font-weight="600">Phased%</text>
-      <rect x="200" y="28" width="102" height="11" fill="#16A34A"/>
-      <text x="312" y="37" font-size="10" fill="#166534" font-weight="700">+23.6 pp</text>
-      <text x="10" y="50"  font-size="10" fill="#374151" font-weight="600">Speed</text>
-      <rect x="200" y="42" width="155" height="11" fill="#16A34A"/>
-      <text x="365" y="51" font-size="10" fill="#166534" font-weight="700">1.36×</text>
-      <text x="10" y="64"  font-size="10" fill="#374151" font-weight="600">15-Clean PS GT</text>
-      <rect x="200" y="56" width="57" height="11" fill="#3B82F6"/>
-      <text x="267" y="65" font-size="10" fill="#1E3A8A" font-weight="700">+13.3 pp</text>
-      <text x="10" y="78"  font-size="10" fill="#374151" font-weight="600">clean PS GT</text>
-      <rect x="200" y="70" width="36" height="11" fill="#3B82F6"/>
-      <text x="246" y="79" font-size="10" fill="#1E3A8A" font-weight="700">+8.3 pp</text>
-      <text x="10" y="92"  font-size="10" fill="#374151" font-weight="600">15-Aggr GT</text>
-      <rect x="200" y="84" width="29" height="11" fill="#3B82F6"/>
-      <text x="239" y="93" font-size="10" fill="#1E3A8A" font-weight="700">+6.65 pp</text>
-      <text x="500" y="115" font-size="9" fill="#16A34A" text-anchor="middle" font-weight="600">綠=HP/LOH 結構 / 藍=Paired GT concordance (read-level tag 品質)</text>
-    </svg>
+    <div style="display:grid;grid-template-columns:5fr 7fr;gap:10px;margin:6px 0 0;align-items:start;">
+      <div>
+        <p style="font-size:12px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">📊 baseline → V6 同層 4 類驗證結果:</p>
+        <table class="metric-table" style="font-size:9.5px;">
+          <thead><tr><th>類別</th><th>指標（baseline → V6）</th></tr></thead>
+          <tbody>
+            <tr class="row-green"><td><strong>① phasing 結構 ⭐</strong></td><td>N50 +99.7% / Phased +23.6pp / 1.36× / Jaccard=1.0</td></tr>
+            <tr class="row-green"><td><strong>② tag 分布修正</strong></td><td>HP1:HP2 17.3:1→~1:1 / hp=33 +4.7% / ratio 修正</td></tr>
+            <tr class="row-yellow"><td><strong>③ paired GT ⭐</strong></td><td>clean PS +8.3pp / 15-Aggr +6.65pp / 15-Clean PS +13.3pp</td></tr>
+            <tr class="row-green" style="border-top:2px solid #DC2626;"><td><strong>④ SP1/2/3 (IGV)</strong></td><td>113:0 / 109:1 / 108:0 → V6 全翻 HP2 對齊 paired 3/3 ✅</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:9.5px;color:#7C2D12;margin:4px 0 0;font-weight:600;background:#FEF3C7;padding:3px 8px;border-radius:4px;">⚠ 僅用同層 + tag + paired + 個案 — 不用 ISM 下游 (循環論證)</p>
+      </div>
+      <div>
+        <p style="font-size:11px;font-weight:700;color:#374151;margin:0 0 2px;">📊 6 顯著改善 ⭐ 視覺化:</p>
+        <svg viewBox="0 0 720 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
+          <line x1="200" y1="100" x2="710" y2="100" stroke="#9CA3AF" stroke-width="0.8"/>
+          <line x1="200" y1="14"  x2="200" y2="100" stroke="#9CA3AF" stroke-width="0.8"/>
+          <text x="196" y="17" font-size="8" fill="#6B7280" text-anchor="end">+100%</text>
+          <text x="196" y="60" font-size="8" fill="#6B7280" text-anchor="end">+50%</text>
+          <text x="196" y="103" font-size="8" fill="#6B7280" text-anchor="end">0</text>
+          <text x="10" y="22"  font-size="10" fill="#374151" font-weight="600">Phase block N50</text>
+          <rect x="200" y="14" width="430" height="11" fill="#16A34A"/>
+          <text x="640" y="23" font-size="10" fill="#166534" font-weight="700">+99.7%</text>
+          <text x="10" y="36"  font-size="10" fill="#374151" font-weight="600">Phased%</text>
+          <rect x="200" y="28" width="102" height="11" fill="#16A34A"/>
+          <text x="312" y="37" font-size="10" fill="#166534" font-weight="700">+23.6 pp</text>
+          <text x="10" y="50"  font-size="10" fill="#374151" font-weight="600">Speed</text>
+          <rect x="200" y="42" width="155" height="11" fill="#16A34A"/>
+          <text x="365" y="51" font-size="10" fill="#166534" font-weight="700">1.36×</text>
+          <text x="10" y="64"  font-size="10" fill="#374151" font-weight="600">15-Clean PS GT</text>
+          <rect x="200" y="56" width="57" height="11" fill="#3B82F6"/>
+          <text x="267" y="65" font-size="10" fill="#1E3A8A" font-weight="700">+13.3 pp</text>
+          <text x="10" y="78"  font-size="10" fill="#374151" font-weight="600">clean PS GT</text>
+          <rect x="200" y="70" width="36" height="11" fill="#3B82F6"/>
+          <text x="246" y="79" font-size="10" fill="#1E3A8A" font-weight="700">+8.3 pp</text>
+          <text x="10" y="92"  font-size="10" fill="#374151" font-weight="600">15-Aggr GT</text>
+          <rect x="200" y="84" width="29" height="11" fill="#3B82F6"/>
+          <text x="239" y="93" font-size="10" fill="#1E3A8A" font-weight="700">+6.65 pp</text>
+          <text x="500" y="115" font-size="9" fill="#16A34A" text-anchor="middle" font-weight="600">綠=HP/LOH 結構 / 藍=Paired GT concordance (read-level tag 品質)</text>
+        </svg>
+      </div>
+    </div>
     <div style="background:#FEF3C7;border:1.5px solid #CA8A04;border-radius:5px;padding:5px 10px;margin:5px 0;font-size:10.5px;color:#7C2D12;">
       <strong>⚠ V5 Layer 1.5 副作用 trade-off</strong>：V5 在 germline-absent 區 4.19:1 偏 HP1（feature 化 baseline bug）；V6 移除 Layer 1.5 修補 → 換取 marker eng +9.0% 與 4 樣本 ratio 中性 0.61-1.24，是<strong>工程取捨非退化</strong>（SP1/2/3 失去 Layer 1.5 翻方向能力為已知代價）。
     </div>
