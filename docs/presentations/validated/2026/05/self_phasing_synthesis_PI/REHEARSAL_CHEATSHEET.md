@@ -78,7 +78,7 @@ source_plan: /bip7_disk/liaoyoyo2001/.claude/plans/agent-harness-langgraph-resil
 
 ### Q11: 34,855 read-level victims 是 V6 修對嗎？(歸功正確性 #3, **5/14 PM interim revision — V6 非退步而是保守化**)
 
-> ⚠ **5/14 PM 補正**：本 Q 原 framing 誤導。V3F vote_dump 對同樣 17,404 victim subset 自己也 42.76% hp=11；V6 31.7% **比 V3F 改善 11 pp**。詳見 erratum E5 §3a.5b。V3F BAM extract 完成後 finalize（background `bq4dajhz9`/`bbsoraygs`）。
+> ⚠ **5/14 PM 終版補正** (erratum E5 §3a.5b.7)：BAM 三層 final — V3F BAM hp=11=14.46% (含 hp=2=16.65%/empty=15.24%/hp=33=7.77%/hp=1=4.38%, 六類 outcome)；V5 BAM = V6 BAM 100% identical (hp=11=31.66%/hp=21=44.64%/hp=33=14.12%/empty=9.58%, 無 hp=1/hp=2)。**V6 patch 對此 subset 完全無效 (V5≡V6)**；V3F→V5 改 63% reads + 3,198 direction flip (HP1↔HP2)。「V6 vs V3F 哪好」需 paired_T HP:Z: ground truth 確定（pending background extract）。**註**：vote_dump 是 getVote() 中間記錄非 BAM 最終決策，前 framing 用 vote_dump 比較有誤。
 
 
 **A**：「34,855 victims 100% 修對」由 **V3F (commit 41ff147 tagging fix)** 達成 (T1.2-F1 audit, 主報告 line 64/564/572)。

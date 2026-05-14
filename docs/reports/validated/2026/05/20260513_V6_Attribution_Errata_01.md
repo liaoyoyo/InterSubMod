@@ -275,14 +275,93 @@ V6 對 17,404 reads 的差異 = V6 改 purity threshold 觸發 HCC1395 Pass 2 �
 
 V6 的「保守化」與既知優點一致：hp=33 marker engineering +4.7% / coverage +9.0% / Phase D 4 樣本 ratio 中性化。
 
-### 3a.5b.6 後續驗證（background tasks）
+### 3a.5b.6 後續驗證（background tasks）— **2026-05-14 PM 完成**
 
-| Task ID | 內容 | 預期 |
+| Task ID | 內容 | 結果 |
 |---|---|---|
-| `bq4dajhz9` | V3F BAM extract on 17,404 victim | V3F BAM ≈ V3F vote_dump (42.76% hp=11 / 57.24% hp=21) → 證實 vote_dump = BAM |
-| `bbsoraygs` | V5 BAM extract on 17,404 victim | V5 BAM 介於 V3F 與 V6（V5 phasing 改但未觸發 Pass 2）|
+| `bq4dajhz9` ✅ | V3F BAM extract on 17,404 victim | **V3F BAM ≠ V3F vote_dump**！V3F BAM hp 分布: hp=21=41.5% / hp=2=16.65% / empty=15.24% / hp=11=14.46% / hp=33=7.77% / hp=1=4.38%（vote_dump 二元 42.76%/57.24% 是 getVote() 中間記錄，BAM 是 judgeHaplotype 整合最終決策）|
+| `bbsoraygs` ✅ | V5 BAM extract on 17,404 victim | **V5 BAM = V6 BAM 100% read-by-read 完全相同**（0 diff after normalization）|
 
-待此兩 task 完成 → finalize §3a.5b 表格 + 移除 caveat + commit final。
+## 3a.5b.7 V3F vs V5/V6 BAM Final Truth (2026-05-14 PM, **修正 §3a.5b 1-6 多項解讀**)
+
+### Triple Comparison (V3F / V5 / V6 BAM on 17,404 V3F victim subset)
+
+| HP tag | V3F BAM | V5 BAM | V6 BAM | V5/V6 vs V3F |
+|---|---|---|---|---|
+| hp=21 (HP2+somatic) | 7,222 (41.50%) | 7,769 (44.64%) | 7,769 (44.64%) | +3.1 pp |
+| hp=11 (HP1+somatic) | 2,517 (14.46%) | 5,510 (31.66%) | 5,510 (31.66%) | **+17.2 pp** ⚠ |
+| hp=33 (ambiguous) | 1,353 (7.77%) | 2,458 (14.12%) | 2,458 (14.12%) | +6.4 pp |
+| empty | 2,652 (15.24%) | 1,667 (9.58%) | 1,667 (9.58%) | -5.7 pp |
+| hp=2 (HP2 germline) | 2,898 (16.65%) | 0 (0%) | 0 (0%) | **-16.7 pp** |
+| hp=1 (HP1 germline) | 762 (4.38%) | 0 (0%) | 0 (0%) | -4.4 pp |
+
+### Key Finding 1: V5 = V6 (V6 patch 對此 subset 完全無效)
+
+V6 purity threshold `938f0df` (0.95→0.9) 對 HCC1395 5kHz priority bug victim subset **完全沒影響**：
+- 物理檔案不同 (inode 615562637 vs 684605118, size +280KB)
+- 但 read-by-read HP tag 100% 相同：7,769 hp=21 / 5,510 hp=11 / 2,458 hp=33 / 1,667 empty
+- transition matrix: 4 種 unchanged 100%（21→21 / 11→11 / 33→33 / empty→empty）
+- → 在 HCC1395 5kHz 上「V6 比 V5 好」**不可區別**
+
+### Key Finding 2: V3F → V5 改動 63% reads（d0bcd8c ploidyRatio 真正生效）
+
+V3F → V5 transition (V5 = V6 indistinguishable from here):
+- Unchanged (V3F = V5): 6,419 (**36.88%**)
+- Changed (V3F ≠ V5): 10,985 (**63.12%**)
+- **Direction FLIP (HP1 ↔ HP2)**: **3,198 reads (18.4%)** — 2,128 V3F hp=21 → V5 hp=11 + 1,070 V3F hp=11 → V5 hp=21
+
+| Top transitions | Count | 意義 |
+|---|---|---|
+| V3F hp=21 → V5 hp=21 | 3,398 | 不變 |
+| V3F hp=21 → V5 hp=11 | 2,128 | **direction FLIP** |
+| V3F hp=2 → V5 hp=21 | 1,688 | germline-only → HP2+somatic |
+| V3F hp=21 → V5 hp=33 | 1,644 | 確定 → ambiguous |
+| V3F hp=11 → V5 hp=11 | 1,340 | 不變 |
+| V3F hp=11 → V5 hp=21 | 1,070 | **direction FLIP** |
+
+→ V5 d0bcd8c phasing fix **不是局部修補**，是**全 BAM 大規模 phase block 重組**。
+
+### Key Finding 3: vote_dump ≠ BAM (重要 caveat)
+
+V3F vote_dump 二元 hpResult (42.76% hp=11 / 57.24% hp=21) **不等於** V3F BAM 最終 HP:i: tag (14.46% hp=11 / 41.50% hp=21 / 16.65% hp=2 / 15.24% empty / 7.77% hp=33 / 4.38% hp=1)。
+
+- vote_dump = getVote() 階段中間記錄（per-variant-position，二元決策）
+- BAM HP:i: = judgeHaplotype 階段最終決策（per-read，整合所有變異 + 含 hp=1/hp=2/hp=33/empty 多種 outcome）
+
+§3a.5b 1-5 之前用「V3F vote_dump 42.76% hp=11」對比 V6 BAM 31.7% 是 **不正確比較對象**。
+
+### Key Finding 4: V5/V6 vs V3F 「31.7% hp=11 變 17 pp 多」可能不是退步
+
+V5/V6 對 V3F **17 pp 多 hp=11** + **24% 多 hp=33+empty** + **失去 21% hp=1/hp=2** — 三個 framework 可能解讀：
+
+| Framework | V5/V6 vs V3F 解讀 |
+|---|---|
+| **(α) 命名顛倒** | V5 Pass 2 phasing 重組 phase block 翻 HP1/HP2 designation；3,198 reads direction flip 是命名差異非實質差異 |
+| **(β) V5 過度修正** | V5 把 V3F 認為 germline-only (hp=1/hp=2) 的 reads 強行加 somatic → hp=11/hp=21；可能誤加 somatic |
+| **(γ) V5 修對更多** | V5 ploidyRatio fix 更精確識別 somatic 信號 → 之前 V3F 漏標的 somatic 在 V5 被補回 |
+
+→ **不能單靠 V3F vs V5/V6 BAM 對比判定優劣**；需 ground truth (paired_T HP:Z:) 對齊驗證。
+
+### Key Finding 5: 「V6 比 V3F 改善」claim 需修正
+
+之前 v1.7-G interim 寫「V6 比 V3F 改善 hp=11 -11 pp」**錯誤**（比較對象是 V3F vote_dump 非 V3F BAM）。
+
+正確版本：
+- V3F BAM hp=11: 14.46% — **V3F 自己最少 hp=11 (priority bug 修對最徹底 in this dimension)**
+- V5/V6 BAM hp=11: 31.66% — V5/V6 在 d0bcd8c phasing reshuffle 後 hp=11 增加 17 pp
+- 「V6 比 V3F 改善」此單一 metric **不成立**
+- 但 V6 的其他優勢 (cross-sample 4 樣本中性化 / marker coverage +9% / hp=33 marker eng +4.7%) **仍成立** — 這些是 codebase-invariant metrics
+
+### 3a.5b.8 後續行動 (final)
+
+| Action | Status |
+|---|---|
+| 認知更新: V5 = V6 (V6 patch 在此 subset 無效) | ✅ confirmed |
+| 認知更新: V3F vote_dump ≠ V3F BAM | ✅ confirmed |
+| 認知更新: V3F → V5 63% reads 改 phase block | ✅ confirmed (transition matrix) |
+| paired_T BAM extract on 17,404 victim → 對齊 ground truth | ⏳ pending (background extract 啟動中) |
+| 完成 paired_T 對齊後 finalize Q11/E5 + PPT 5 處 | ⏳ pending |
+| 主報告 verdict 「V6 = production candidate」**仍成立**（cross-sample + marker eng + caller F1 三 dimension 不受影響）| ✅ 不撤回 |
 
 ---
 

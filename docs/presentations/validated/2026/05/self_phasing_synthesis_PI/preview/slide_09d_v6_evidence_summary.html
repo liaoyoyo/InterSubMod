@@ -320,41 +320,49 @@ details.collapsible summary:hover { color: #1D4ED8; }
     <p class="en-subtitle">V6 4-dimensional evidence: positions + figures</p>
     
     <p style="font-size:11px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:5px 10px;border-radius:4px;">⚠ 關鍵釐清: V6 正確性鐵證是 <strong>per-read</strong> 而非 ratio (跨 codebase HP1/HP2 命名任意, ratio 對齊 paired 不是正確性指標)</p>
-    <p style="font-size:10.5px;font-weight:700;color:#166534;margin:0 0 4px;background:#DCFCE7;padding:5px 10px;border-radius:4px;">✅ <strong>5/14 PM interim correction</strong> (erratum E5 §3a.5b): V3F vote_dump 對 17,404 victim subset 自己 42.76% hp=11；V6 31.7% **比 V3F 改善 -11 pp** + 24% 保守 hp=33/empty。<strong>V6 非退步，是保守化</strong>。</p>
+    <p style="font-size:10.5px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:5px 10px;border-radius:4px;">⚠ <strong>5/14 PM final correction</strong> (erratum E5 §3a.5b.7): BAM 三層對比 V3F (hp=11=14.46% + hp=2=16.65%+empty=15.24%+hp=33=7.77%+hp=1=4.38%) ; V5≡V6 100% 相同 (hp=11=31.66%+hp=21=44.64%+hp=33=14.12%+empty=9.58%)。<strong>V6 patch 對此 subset 完全無效</strong>；V3F→V5 改 63% reads 含 3,198 direction flip (HP1↔HP2)。「V6 vs V3F 哪好」需 paired_T 對齊驗證。</p>
 
-    <!-- v1.7-F G1: 4 維度 → 4 card layout -->
+    <!-- v1.7-F G1: 4 維度 → 4 card layout (字級放大: title 13→18px / body 10.5→14px) -->
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:8px 0;">
       <!-- Card 1: paired GT concordance -->
-      <div style="border:2px solid #16A34A;border-radius:8px;padding:10px;background:#F0FDF4;">
-        <div style="font-size:24px;">🎯</div>
-        <h3 style="margin:4px 0;font-size:13px;color:#166534;">鐵證 1 — paired GT concordance</h3>
-        <p style="font-size:11.5px;font-weight:700;margin:2px 0;">+13.3 pp @ 0.93</p>
-        <p style="font-size:10.5px;color:#374151;margin:2px 0;line-height:1.45;">15-site Clean PS GT (V5 vs baseline)；V6 重用 V5 phased VCF 預期保留未實測</p>
-        <p style="font-size:9.5px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: SP1/2/3 IGV (B6)</p>
+      <div style="border:2px solid #16A34A;border-radius:8px;padding:10px 12px;background:#F0FDF4;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+          <div style="font-size:30px;line-height:1;">🎯</div>
+          <h3 style="margin:0;font-size:18px;color:#166534;font-weight:700;">鐵證 1 — paired GT concordance</h3>
+        </div>
+        <p style="font-size:15px;font-weight:700;margin:4px 0;color:#16A34A;">+13.3 pp @ 0.93</p>
+        <p style="font-size:13.5px;color:#1F2937;margin:3px 0;line-height:1.5;">15-site Clean PS GT (V5 vs baseline)；V6 重用 V5 phased VCF 預期保留未實測</p>
+        <p style="font-size:11px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: SP1/2/3 IGV (B6)</p>
       </div>
       <!-- Card 2: 34,855 victims -->
-      <div style="border:2px solid #CA8A04;border-radius:8px;padding:10px;background:#FEF3C7;">
-        <div style="font-size:24px;">🔬</div>
-        <h3 style="margin:4px 0;font-size:13px;color:#92400E;">鐵證 2 — 34,855 read-level victims</h3>
-        <p style="font-size:11.5px;font-weight:700;margin:2px 0;">V3F/V5 100% / V6 spot check 44.6%/31.7%/14.1%/9.6%</p>
-        <p style="font-size:10.5px;color:#374151;margin:2px 0;line-height:1.45;">⚠ V6 不完全繼承 V3F (logic 推論失效 5/14 spot check)</p>
-        <p style="font-size:9.5px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: 08 + erratum E5</p>
+      <div style="border:2px solid #CA8A04;border-radius:8px;padding:10px 12px;background:#FEF3C7;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+          <div style="font-size:30px;line-height:1;">🔬</div>
+          <h3 style="margin:0;font-size:18px;color:#92400E;font-weight:700;">鐵證 2 — 34,855 read-level victims</h3>
+        </div>
+        <p style="font-size:14px;font-weight:700;margin:4px 0;color:#92400E;">V3F/V5 100% / V6 spot check 44.6%/31.7%/14.1%/9.6%</p>
+        <p style="font-size:13.5px;color:#1F2937;margin:3px 0;line-height:1.5;">⚠ V6 不完全繼承 V3F (logic 推論失效 5/14 spot check)</p>
+        <p style="font-size:11px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: 08 + erratum E5</p>
       </div>
       <!-- Card 3: cross-sample neutralization -->
-      <div style="border:2px solid #16A34A;border-radius:8px;padding:10px;background:#F0FDF4;">
-        <div style="font-size:24px;">📊</div>
-        <h3 style="margin:4px 0;font-size:13px;color:#166534;">鐵證 3 — cross-sample 4 樣本中性化</h3>
-        <p style="font-size:11.5px;font-weight:700;margin:2px 0;">ratio 0.61-1.24 全中性</p>
-        <p style="font-size:10.5px;color:#374151;margin:2px 0;line-height:1.45;">H1437 / H2009 / HCC1954 / HCC1937 (vs V5 1.86 / baseline 17.3:1)</p>
-        <p style="font-size:9.5px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: B4 Phase D</p>
+      <div style="border:2px solid #16A34A;border-radius:8px;padding:10px 12px;background:#F0FDF4;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+          <div style="font-size:30px;line-height:1;">📊</div>
+          <h3 style="margin:0;font-size:18px;color:#166534;font-weight:700;">鐵證 3 — cross-sample 4 樣本中性化</h3>
+        </div>
+        <p style="font-size:15px;font-weight:700;margin:4px 0;color:#16A34A;">ratio 0.61-1.24 全中性</p>
+        <p style="font-size:13.5px;color:#1F2937;margin:3px 0;line-height:1.5;">H1437 / H2009 / HCC1954 / HCC1937 (vs V5 1.86 / baseline 17.3:1)</p>
+        <p style="font-size:11px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: B4 Phase D</p>
       </div>
       <!-- Card 4: hp=33 marker engineering -->
-      <div style="border:2px solid #16A34A;border-radius:8px;padding:10px;background:#F0FDF4;">
-        <div style="font-size:24px;">⚙</div>
-        <h3 style="margin:4px 0;font-size:13px;color:#166534;">鐵證 4 — hp=33 訊號還原 +944%</h3>
-        <p style="font-size:11.5px;font-weight:700;margin:2px 0;">marker coverage +9.0%</p>
-        <p style="font-size:10.5px;color:#374151;margin:2px 0;line-height:1.45;">chr19:52,081,584 完美 revert / 55,347,952 部分 / 8,349,597 partial</p>
-        <p style="font-size:9.5px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: 09c V6 winning IGV</p>
+      <div style="border:2px solid #16A34A;border-radius:8px;padding:10px 12px;background:#F0FDF4;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+          <div style="font-size:30px;line-height:1;">⚙</div>
+          <h3 style="margin:0;font-size:18px;color:#166534;font-weight:700;">鐵證 4 — hp=33 訊號還原 +944%</h3>
+        </div>
+        <p style="font-size:15px;font-weight:700;margin:4px 0;color:#16A34A;">marker coverage +9.0%</p>
+        <p style="font-size:13.5px;color:#1F2937;margin:3px 0;line-height:1.5;">chr19:52,081,584 完美 revert / 55,347,952 部分 / 8,349,597 partial</p>
+        <p style="font-size:11px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: 09c V6 winning IGV</p>
       </div>
     </div>
 
