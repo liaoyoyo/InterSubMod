@@ -64,6 +64,10 @@
     <h1 class="slide-title">longphase-to 內部 5 階段 — 我們改動的層在哪 (為 slide 06 priority bug 鋪墊)</h1>
     <p class="en-subtitle">longphase-to 5-stage pipeline — locating where our patches happen, anchor for slide 06 priority bug mechanism</p>
 
+    <p style="font-size:14px;color:#166534;background:#DCFCE7;border-left:4px solid #16A34A;padding:6px 12px;margin:6px 0;border-radius:4px;font-weight:600;line-height:1.4;">
+      ✓ 我們只動第 5 階段 haplotag → caller F1 數學保證 invariant (slide 13 預先回答)
+    </p>
+
     <p style="font-size:11.5px;color:#7C2D12;background:#FEF3C7;border-left:3px solid #CA8A04;padding:5px 10px;margin:6px 0;border-radius:3px;">
       <strong>S2 入口定位</strong>: PI 看 slide 06 priority bug 之前，先建立「longphase-to 內部有哪 5 階段」的地圖，這樣才知 priority bug 發生在<strong>第 5 階段 haplotag</strong>，不在 caller 也不在 phasing。同時奠基 caller-level F1 invariant — 我們只動 haplotag (read HP tag)，VCF FILTER PASS/nonPASS 由 ClairS-TO 決定, longphase-to 不改。
     </p>

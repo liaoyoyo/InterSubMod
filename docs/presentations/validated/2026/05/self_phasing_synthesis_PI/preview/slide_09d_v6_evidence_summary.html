@@ -319,8 +319,10 @@ details.collapsible summary:hover { color: #1D4ED8; }
     <h1 class="slide-title ">V6 真實正確性鐵證 4 維度 — 位點 + 圖片實證</h1>
     <p class="en-subtitle">V6 4-dimensional evidence: positions + figures</p>
     
-    <p style="font-size:11px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:5px 10px;border-radius:4px;">⚠ 關鍵釐清: V6 正確性鐵證是 <strong>per-read</strong> 而非 ratio (跨 codebase HP1/HP2 命名任意, ratio 對齊 paired 不是正確性指標)</p>
-    <p style="font-size:10.5px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:5px 10px;border-radius:4px;">⚠ <strong>5/14 PM final correction</strong> (erratum E5 §3a.5b.7): BAM 三層對比 V3F (hp=11=14.46% + hp=2=16.65%+empty=15.24%+hp=33=7.77%+hp=1=4.38%) ; V5≡V6 100% 相同 (hp=11=31.66%+hp=21=44.64%+hp=33=14.12%+empty=9.58%)。<strong>V6 patch 對此 subset 完全無效</strong>；V3F→V5 改 63% reads 含 3,198 direction flip (HP1↔HP2)。「V6 vs V3F 哪好」需 paired_T 對齊驗證。</p>
+    <!-- v1.8 McKinsey #3 收斂: 2 caveat banner → footer-glossary + speaker note；main canvas focus = 4 鐵證卡 -->
+    <p style="font-size:16px;font-weight:700;color:#166534;background:#F0FDF4;border-left:4px solid #16A34A;padding:8px 14px;margin:8px 0 10px;border-radius:4px;">
+      所以怎樣 (so-what)：4 角度互相獨立 corroborate V6 正確性 — 不是單一數據，而是 <strong>per-read 對齊 + read-level 因果 + cross-sample + hp=33 還原</strong>
+    </p>
 
     <!-- v1.7-F G1: 4 維度 → 4 card layout (字級放大: title 13→18px / body 10.5→14px) -->
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:8px 0;">
@@ -372,9 +374,10 @@ details.collapsible summary:hover { color: #1D4ED8; }
 
     <!-- v1.7-F G2: 移除「📋 鐵證 2 — 5 vote_dump reads BAM 實證表」(已在 B5 backup slide_04d_5reads_vote_trace_igv) -->
     <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ 4 維度鐵證皆有「位點 + 圖片/數據」實證: per-read 對齊 + read-level 因果 + cross-sample + hp=33 還原 — 4 角度互相獨立 corroborate V6 正確性</div>
-    <div class="footer-glossary" style="font-size:9.5px;">
-      <div class="gloss-item">ⓘ vote_dump 個案 trace 來源: InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/vote_dump_*_chr19.tsv.gz</div>
-      <div class="gloss-item">ⓘ V6 winning IGV 5versions: baseline / paired_T / V3F / V5 / V6 五版並列</div>
+    <div class="footer-glossary" style="font-size:11px;">
+      <div class="gloss-item">⚠ <span class="term">per-read &gt; ratio:</span> 跨 codebase HP1/HP2 命名任意，ratio 對齊非正確性指標</div>
+      <div class="gloss-item">⚠ <span class="term">5/14 erratum E5:</span> V5≡V6 BAM 對此 subset 100% 同 → cross-ref slide 14</div>
+      <div class="gloss-item">ⓘ vote_dump trace: InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/</div>
     </div>
   </article>
 
