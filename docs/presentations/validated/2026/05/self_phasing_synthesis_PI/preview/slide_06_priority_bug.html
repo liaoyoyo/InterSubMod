@@ -316,8 +316,11 @@ details.collapsible summary:hover { color: #1D4ED8; }
   </div>
 
   <article class="slide-canvas" data-section="S2" aria-label="Main slide canvas">
-    <h1 class="slide-title ">getVote 順序優先 + break-early — HP1_1 一票就決定，不看 HP2 票數</h1>
-    <p class="en-subtitle">getVote: order-priority + break-early — HP1_1 single vote decides, HP2 tally ignored</p>
+    <h1 class="slide-title ">priority bug：HP1_1 一票決定 hp=11</h1>
+    <p class="en-subtitle">getVote priority bug — single HP1_1 somatic vote breaks early, HP2 germline tally ignored</p>
+    <p style="font-size:11.5px;color:#7C2D12;background:#FEF3C7;border-left:3px solid #CA8A04;padding:5px 10px;margin:4px 0 8px;border-radius:3px;">
+      <strong>機制細節</strong>：getVote 用 <code style="background:#fff;padding:1px 4px;">vector variantKeys = {(HP1_1,HP2_1),(HP3,HP2_1),(HP1,HP2)}</code> iterate + break early — somatic pair (1) 第一個非空就 hp=11 決定，germline pair (3) 永遠不到。
+    </p>
 
     <div style="background:#FEF3C7;border:2px solid #CA8A04;border-radius:6px;padding:6px 12px;margin:4px 0;font-size:11.5px;color:#7C2D12;">
       <strong>⚠ #2/3 連鎖 bug：程式 bug — vector 順序 + break early</strong>（兩個 bug 共同造成 baseline 全偏 HP1；缺一不可，先順序後 break-early）
@@ -525,8 +528,8 @@ tag layer 與 phasing layer 是不同層 bug，必須分別修補，不能合併
 </main>
 
 <nav class="nav-bottom" aria-label="Slide navigation">
-  <a href="slide_05_player_referee.html">← Prev</a>
-  <span class="counter">Slide 06 (8/23)</span>
+  <a href="slide_09f_internal_pipeline.html">← Prev (09f S2 入口)</a>
+  <span class="counter">Slide 06 priority bug (7/15)</span>
   <a href="slide_07_two_layer_table.html">Next →</a>
 </nav>
 
@@ -534,7 +537,7 @@ tag layer 與 phasing layer 是不同層 bug，必須分別修補，不能合併
 
 <script>
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowLeft' && True) location.href = 'slide_05_player_referee.html';
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_09f_internal_pipeline.html';
     if (e.key === 'ArrowRight' && True) location.href = 'slide_07_two_layer_table.html';
   });
 

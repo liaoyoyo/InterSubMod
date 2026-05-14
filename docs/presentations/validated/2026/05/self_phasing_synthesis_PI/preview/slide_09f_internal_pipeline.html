@@ -20,8 +20,8 @@
       padding: 28px 40px; position: relative; box-shadow: 0 4px 16px rgba(0,0,0,0.08); overflow: hidden; color: #1F2937; }
     .slide-canvas h1.slide-title, .slide-canvas h2.slide-title { font-size: 26px; color: #1E3A8A; margin: 0;
       border-bottom: 2px solid #1E3A8A; padding-bottom: 2px; }
-    .slide-canvas[data-section="S4"]::before { content: attr(data-section); position: absolute; top: 8px; right: 28px;
-      font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; color: white; opacity: 0.9; background: #1E3A8A; }
+    .slide-canvas[data-section="S2 入口"]::before { content: attr(data-section); position: absolute; top: 8px; right: 28px;
+      font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; color: white; opacity: 0.9; background: #CA8A04; }
     .slide-canvas .en-subtitle { font-size: 13px; color: #6B7280; font-style: italic; margin: 0 0 6px; padding: 0 0 0 1em; }
     .slide-canvas .footer-glossary { position: absolute; bottom: 10px; left: 28px; right: 28px;
       font-size: 12px; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 6px; display: flex; flex-wrap: wrap; gap: 12px; }
@@ -54,24 +54,31 @@
 <body>
 <main class="slide-page" role="main" aria-label="Slide 09f content">
   <div class="slide-meta" role="contentinfo" aria-label="Slide metadata">
-    <div><span class="label">Slide:</span><span class="value">09f / 23 (S4→S5 橋, v1.7-C 新增 2026-05-14)</span></div>
-    <div><span class="label">Section:</span><span class="value">S4 修補設計 (轉 S5 驗證)</span></div>
+    <div><span class="label">Slide:</span><span class="value">09f / 15 (S2 入口 — longphase-to 內部, v1.7-G 移到 06 前 2026-05-14)</span></div>
+    <div><span class="label">Section:</span><span class="value">S2 機制入口 (longphase-to 內部 5 階段, 為 slide 06 priority bug 鋪墊)</span></div>
     <div><span class="label">Tier 2:</span><span class="value">90 sec / 中 ~300 字</span></div>
     <div><span class="label">N grep:</span><span class="value">5 階段 + 改動範圍</span></div>
   </div>
 
-  <article class="slide-canvas" data-section="S4" aria-label="Main slide canvas">
-    <h1 class="slide-title">longphase-to 內部 5 階段 — 我們只動 haplotag, 不動 FILTER → F1 數學保證 invariant</h1>
-    <p class="en-subtitle">longphase-to 5-stage pipeline — we only modified haplotag layer; caller VCF FILTER untouched → caller F1 mathematically invariant</p>
+  <article class="slide-canvas" data-section="S2 入口" aria-label="Main slide canvas">
+    <h1 class="slide-title">longphase-to 內部 5 階段 — 我們改動的層在哪 (為 slide 06 priority bug 鋪墊)</h1>
+    <p class="en-subtitle">longphase-to 5-stage pipeline — locating where our patches happen, anchor for slide 06 priority bug mechanism</p>
 
     <p style="font-size:11.5px;color:#7C2D12;background:#FEF3C7;border-left:3px solid #CA8A04;padding:5px 10px;margin:6px 0;border-radius:3px;">
-      <strong>S4→S5 橋接</strong>: 接下來 slide 10/11 會說「caller F1 三版相同 = 0.7166」— PI 會問<strong>「為何相同」</strong>。答案在本張：我們只動 haplotag 層的 read HP tag，caller VCF FILTER PASS/nonPASS 由 ClairS-TO 決定, longphase-to 不動 → F1 invariant 是<strong>數學保證</strong>而非巧合
+      <strong>S2 入口定位</strong>: PI 看 slide 06 priority bug 之前，先建立「longphase-to 內部有哪 5 階段」的地圖，這樣才知 priority bug 發生在<strong>第 5 階段 haplotag</strong>，不在 caller 也不在 phasing。同時奠基 caller-level F1 invariant — 我們只動 haplotag (read HP tag)，VCF FILTER PASS/nonPASS 由 ClairS-TO 決定, longphase-to 不改。
     </p>
 
     <div class="grid-2col" style="grid-template-columns: 7fr 5fr;">
       <!-- 左：5 階段 pipeline SVG -->
       <div>
-        <p style="font-size:11.5px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">📊 longphase-to 內部 5 階段（input → output）</p>
+        <p style="font-size:13px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">📊 longphase-to 內部 5 階段（input → output）</p>
+        <!-- 三色 legend -->
+        <div style="display:flex;gap:8px;margin:0 0 4px;font-size:11px;flex-wrap:wrap;align-items:center;">
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="display:inline-block;width:14px;height:10px;background:#DBEAFE;border:1.5px solid #1E3A8A;border-radius:2px;"></span><strong style="color:#1E3A8A;">藍 = Input/Output</strong></span>
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="display:inline-block;width:14px;height:10px;background:#DCFCE7;border:1.5px solid #16A34A;border-radius:2px;"></span><strong style="color:#166534;">綠 = 不動 / invariant</strong></span>
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="display:inline-block;width:14px;height:10px;background:#FEE2E2;border:1.5px solid #DC2626;border-radius:2px;"></span><strong style="color:#7F1D1D;">紅 = 我們改動處</strong></span>
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="display:inline-block;width:14px;height:10px;background:#FEF3C7;border:1.5px solid #CA8A04;border-radius:2px;"></span><strong style="color:#7C2D12;">黃 = 判定分支</strong></span>
+        </div>
         <svg viewBox="0 0 500 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:Arial,sans-serif;">
           <defs>
             <marker id="arrPipe" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
@@ -84,9 +91,9 @@
           <text x="250" y="40" font-size="9.5" fill="#1E40AF" text-anchor="middle">(FILTER PASS/nonPASS 已由 caller 決定, longphase-to 不改)</text>
           <line x1="250" y1="44" x2="250" y2="55" stroke="#6B7280" stroke-width="1.5" marker-end="url(#arrPipe)"/>
 
-          <!-- Stage 1: Pass 1 always -->
-          <rect x="50" y="60" width="400" height="56" rx="6" fill="#F3F4F6" stroke="#6B7280" stroke-width="1.5"/>
-          <text x="250" y="78" font-size="12" fill="#1F2937" text-anchor="middle" font-weight="700">Stage 1 · Pass 1 (always runs)</text>
+          <!-- Stage 1: Pass 1 always (unchanged → green) -->
+          <rect x="50" y="60" width="400" height="56" rx="6" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.5"/>
+          <text x="250" y="78" font-size="12" fill="#166534" text-anchor="middle" font-weight="700">Stage 1 · Pass 1 (always runs)</text>
           <text x="60" y="95" font-size="10" fill="#374151">①  3-point patternMining (somaticCalling V_H/V_L/V_N 分類)</text>
           <text x="60" y="108" font-size="10" fill="#374151">②  2-point edgeConnectResult (phasing graph 建構)</text>
           <text x="445" y="96" font-size="9" fill="#16A34A" text-anchor="end" font-weight="700">不動 ✓</text>
@@ -142,31 +149,29 @@
 
       <!-- 右：改動範圍 + F1 invariant 證明 -->
       <div>
-        <p style="font-size:11.5px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">✏ 改動範圍對照 + F1 invariant</p>
+        <p style="font-size:13px;font-weight:700;color:#1E3A8A;margin:0 0 4px;">✏ 改動範圍對照 + F1 invariant</p>
 
-        <div style="background:#DCFCE7;border:1.5px solid #16A34A;border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:11.5px;color:#166534;">
-          <strong>不動的 4 件事</strong> (所以 caller F1 invariant):<br>
-          <span style="font-size:10.5px;">① ClairS-TO 內部變異 calling<br>② VCF FILTER PASS/nonPASS 決定<br>③ Pass 1 phasing graph (3-point + 2-point)<br>④ Pass 2 second round (若觸發)</span>
+        <div style="background:#DCFCE7;border:1.5px solid #16A34A;border-radius:6px;padding:9px 12px;margin-bottom:7px;font-size:13.5px;color:#166534;line-height:1.5;">
+          <strong style="font-size:14px;">綠｜不動的 4 件事</strong> (所以 caller F1 invariant):<br>
+          <span style="font-size:12.5px;">① ClairS-TO <strong>內部變異 calling</strong><br>② VCF <strong>FILTER PASS/nonPASS</strong> 決定<br>③ Pass 1 <strong>phasing graph</strong> (3-point + 2-point)<br>④ Pass 2 <strong>second round</strong> (若觸發)</span>
         </div>
 
-        <div style="background:#FEE2E2;border:1.5px solid #DC2626;border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:11.5px;color:#7F1D1D;">
-          <strong>我們改的只有 haplotag 階段</strong>:<br>
-          <span style="font-size:10.5px;">·  V3F (41ff147): 重寫 getVote + 修 enum→int<br>·  V5 (d0bcd8c): 加 Layer 1.5 (副作用)<br>·  V6: revert Layer 1.5</span><br>
-          <strong style="color:#7C2D12;">→ 只改 BAM 內 HP:i: tag, 不改 VCF FILTER</strong>
+        <div style="background:#FEE2E2;border:1.5px solid #DC2626;border-radius:6px;padding:9px 12px;margin-bottom:7px;font-size:13.5px;color:#7F1D1D;line-height:1.5;">
+          <strong style="font-size:14px;">紅｜我們改的只有 haplotag 階段</strong>:<br>
+          <span style="font-size:12.5px;">·  V3F (41ff147): 重寫 <strong>getVote</strong> + 修 enum→int<br>·  V5 (d0bcd8c): 加 <strong>Layer 1.5</strong> (副作用)<br>·  V6: <strong>revert</strong> Layer 1.5</span><br>
+          <strong style="color:#7C2D12;font-size:13px;">→ 只改 BAM 內 HP:i: tag, 不改 VCF FILTER</strong>
         </div>
 
-        <div style="background:#DBEAFE;border:1.5px solid #1E3A8A;border-radius:6px;padding:8px 12px;font-size:11.5px;color:#1E3A8A;">
-          <strong>caller F1 數學保證 invariant</strong>:<br>
-          <span style="font-size:10.5px;">caller F1 = ClairS-TO VCF FILTER PASS 變異 vs SEQC2 truth<br>↓ 我們不動 FILTER PASS<br>↓ V3F = V5 = V6 = 0.7166 (0.93 樣本, slide 11)<br>↓ <strong>三版 F1 相同是數學必然, 非巧合</strong></span>
+        <div style="background:#DBEAFE;border:1.5px solid #1E3A8A;border-radius:6px;padding:9px 12px;font-size:13.5px;color:#1E3A8A;line-height:1.5;">
+          <strong style="font-size:14px;">藍｜caller F1 數學保證 invariant</strong>:<br>
+          <span style="font-size:12.5px;">caller F1 = ClairS-TO VCF <strong>FILTER PASS</strong> 變異 vs SEQC2 truth<br>↓ 我們<strong>不動 FILTER PASS</strong><br>↓ V3F = V5 = V6 = <strong>0.7166</strong> (0.93 樣本)<br>↓ <strong>三版 F1 相同是數學必然, 非巧合</strong></span>
         </div>
 
-        <p style="font-size:10px;color:#7C2D12;background:#FEF3C7;padding:4px 10px;border-radius:3px;margin:6px 0 0;">
-          ⚠ < 0.9 樣本 (HCC1395 0.6) 也驗證: Pass 2 不觸發, 但 haplotag 仍跑, F1 仍三版相同 = 0.6273 (B1 backup 詳)
+        <p style="font-size:12px;color:#7C2D12;background:#FEF3C7;padding:5px 10px;border-radius:3px;margin:7px 0 0;line-height:1.45;">
+          ⚠ <strong>&lt; 0.9 樣本</strong> (HCC1395 0.6) 也驗證: Pass 2 不觸發, 但 haplotag 仍跑, F1 仍<strong>三版相同 = 0.6273</strong> (B1 backup 詳)
         </p>
       </div>
     </div>
-
-    <div class="conclusion-arrow">→ 下兩張 slide 10/11 「F1 三版相同 + 4 類同層驗證全綠」=  本張機制圖的實證結果; 改動<strong>有效</strong>由 read-level / marker / Phase D 驗證, 改動<strong>無傷</strong>由 F1 invariant 證明</div>
 
     <div class="footer-glossary">
       <div class="gloss-item">📖 <strong>FILTER PASS</strong>: caller 內部判定變異夠強, 由 ClairS-TO 決定</div>
@@ -225,17 +230,17 @@ F1 仍三版相同 = 0.6273. 證實改動跨 purity 範圍都不傷 F1.
 </main>
 
 <nav class="nav-bottom" aria-label="Slide navigation">
-  <a href="slide_09e_v6_forensic_validation.html">← Prev</a>
-  <span class="counter">Slide 09f (18/24, S4→S5 橋)</span>
-  <a href="slide_12_no_regression.html">Next →</a>
+  <a href="slide_05_player_referee.html">← Prev (05 球員兼裁判)</a>
+  <span class="counter">Slide 09f (6/15, S2 入口 — longphase 內部)</span>
+  <a href="slide_06_priority_bug.html">Next → (06 priority bug)</a>
 </nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
 
 <script>
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowLeft') location.href = 'slide_09e_v6_forensic_validation.html';
-    if (e.key === 'ArrowRight') location.href = 'slide_12_no_regression.html';
+    if (e.key === 'ArrowLeft') location.href = 'slide_05_player_referee.html';
+    if (e.key === 'ArrowRight') location.href = 'slide_06_priority_bug.html';
   });
 </script>
 
