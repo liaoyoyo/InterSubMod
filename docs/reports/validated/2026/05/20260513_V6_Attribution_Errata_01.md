@@ -142,6 +142,8 @@ V6 audit `07_V6_validation_findings.md` 沒重跑 34,855 read-level forensic；�
 
 ## 3a. E5 — V6 spot check 全集實測推翻 logic 推論（**2026-05-14 新增**）
 
+> **⚠ 2026-05-14 PM amend (Interim revision)**：本節原 framing「V6 31.7% 仍 hp=11 = V6 失敗繼承 V3F 修對」**有誤導**。V3F vote_dump 對同樣 17,404 victim subset 自己也 42.76% hp=11；V6 31.7% 實際**比 V3F 改善 11 pp** + 加 24% 保守 hp=33/empty tag。詳見 §3a.5b（待 V3F/V5 BAM 完成後 finalize）。
+
 ### 3a.1 方法
 
 - **驗證對象**：17,404 unique reads（從 V3F vote_dump on baseline 抽 germline_maj ≠ somatic_maj 且 both >0 子集，去重後）
@@ -202,6 +204,85 @@ V6 audit `07_V6_validation_findings.md` 沒重跑 34,855 read-level forensic；�
 3. ⏳ V6 hp=11 reads chr/pos 分布分析（10 min awk）— 確認是否集中於 germline-absent 邊界
 4. ⏳ V6 hp=11 reads 對齊 V5 phased VCF 邊界檢查（mechanism 確認）
 5. ⏳ 若機制確認為「V6 重用 V5 phased VCF 邊界繼承 hp=11」→ 補進 5/8 整合報告作補丁（不撤回主結論，但 attribution 精確化）
+
+---
+
+## 3a.5b. Interim Revision (2026-05-14 PM) — V6 非退步而是保守化
+
+> 此節為 5/14 下午 v1.7-G 深度調查的 interim 結論；最終數據待 V3F / V5 BAM extract 完成後 finalize（background tasks bq4dajhz9 + bbsoraygs，~60-90 min）。
+
+### 3a.5b.1 新發現
+
+V3F vote_dump (genome) 對同樣 17,404 victim subset 的 hpResult 分布：
+
+| HP tag | V3F vote_dump | V6 BAM | Δ V6 vs V3F |
+|---|---|---|---|
+| **hp=21** (HP2 family) | 9,962 (**57.24%**) | 7,769 (44.6%) | -12.64 pp |
+| **hp=11** (HP1 family) | 7,442 (**42.76%**) | 5,510 (31.7%) | **-11.06 pp** ✅ V6 比 V3F 少 |
+| hp=33 (ambiguous) | 0 (binary 決策) | 2,458 (14.1%) | +14.1 pp ✅ V6 加保守 |
+| empty (未 tag) | 0 (vote_dump 全 cover) | 1,667 (9.6%) | +9.6 pp |
+
+→ **V6 不是退步**：V6 hp=11 比 V3F 自己**少 11 pp**；V6 把 V3F 的 ~24% 邊界 reads **保守化** 重標為 hp=33/empty。
+
+### 3a.5b.2 之前 framing 為何錯誤
+
+**原 framing**（§3a.5）：「V6 31.7% hp=11 = V6 不完全繼承 V3F = V6 失敗」
+
+**錯誤前提**：
+- 假設 V3F「100% 修對 34,855」適用於 V3F vote_dump 抽出的 17,404 victim subset
+- 實際「34,855 V3F 100% 修對」是**狹義 subset**「baseline=hp=11 → V3F=hp=21 flip」（by construction = 100%）
+- 17,404 是**廣義 subset**「germline_maj ≠ somatic_maj + both >0」— 含 V3F 自己也標 hp=11 的邊界 case
+- 兩個 subset 不同，不能直接比較
+
+### 3a.5b.3 真實機制（**待 BAM 完成驗證**）
+
+**關鍵程式碼發現** — `/big7_disk/liaoyoyo2001/longphase-to-mod` git log（commit chain）:
+
+| commit | stage | 變動 |
+|---|---|---|
+| `41ff147` (V3F) | **haplotag** | two-layer getVote — 唯一 動 haplotag |
+| `380e8d2` | haplotag | INDEL guard |
+| `d0bcd8c` (V5) | **phasing** | ploidyRatio after PON-only Pass 2 |
+| `938f0df` (V6) | **phasing** | purity calculation + threshold 0.95→0.9 |
+
+→ **V5 / V6 都是 phasing stage 改動，haplotag binary 自 V3F 後沒變過**。
+
+| Stage | V3F | V5 | V6 |
+|---|---|---|---|
+| haplotag binary | `41ff147` | 同 V3F | 同 V3F |
+| phasing binary | baseline | `d0bcd8c` | + `938f0df` |
+| HCC1395 Pass 2 trigger | No (0.93 < 0.95) | No | **Yes (0.93 > 0.9)** |
+| phased VCF for HCC1395 | V3F phasing | ≈ V3F | **改變** (Pass 2 觸發) |
+
+V6 對 17,404 reads 的差異 = V6 改 purity threshold 觸發 HCC1395 Pass 2 → phased VCF 重組 phase block → V3F haplotag binary 對 17,404 reads 給出不同 tag。
+
+### 3a.5b.4 對 3 hypothesis 的修正 verdict
+
+| Hypothesis | 原 verdict (§3a.4) | 修正 verdict |
+|---|---|---|
+| **H1** V6 重用 V5 phased VCF | candidate | 🟢 **valid mechanism** — V6 phased VCF 與 V3F 不同（Pass 2 trigger 差異） |
+| **H2** vote_dump vs BAM 階段不一致 | candidate | 🔴 **refuted in V3F case** — V3F vote_dump = V3F BAM 預期一致（待 BAM 確認）；V6 用 V3F 同 haplotag binary 但不同 phased VCF |
+| **H3** V3F victim list edge case | candidate | 🟡 **partial — broader criteria 包含 V3F 自己也 hp=11 reads**；不是 edge case leak 而是 criteria 太廣 |
+| **H4 新** phasing stage 差異 | n/a | 🟢 **主機制** — V6 purity threshold 0.95→0.9 → HCC1395 Pass 2 trigger → phased VCF 重組 |
+
+### 3a.5b.5 對核心結論影響（再評估）
+
+| 結論 | 原 verdict | 修正 verdict |
+|---|---|---|
+| priority bug 修對機制因果確立 | ✅ 仍成立 | ✅ 不變 |
+| V6 = production candidate | 🟡 部分成立 (V6 對 subset 修對不完全) | ✅ **完全成立** — V6 對 broader subset 改善 11 pp hp=11 + 加 24% 保守 ambiguous |
+| caller F1 invariant | ✅ 仍成立 | ✅ 不變 |
+
+V6 的「保守化」與既知優點一致：hp=33 marker engineering +4.7% / coverage +9.0% / Phase D 4 樣本 ratio 中性化。
+
+### 3a.5b.6 後續驗證（background tasks）
+
+| Task ID | 內容 | 預期 |
+|---|---|---|
+| `bq4dajhz9` | V3F BAM extract on 17,404 victim | V3F BAM ≈ V3F vote_dump (42.76% hp=11 / 57.24% hp=21) → 證實 vote_dump = BAM |
+| `bbsoraygs` | V5 BAM extract on 17,404 victim | V5 BAM 介於 V3F 與 V6（V5 phasing 改但未觸發 Pass 2）|
+
+待此兩 task 完成 → finalize §3a.5b 表格 + 移除 caveat + commit final。
 
 ---
 

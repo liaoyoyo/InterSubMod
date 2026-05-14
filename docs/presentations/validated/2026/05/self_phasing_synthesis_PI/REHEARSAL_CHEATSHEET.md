@@ -76,7 +76,11 @@ source_plan: /bip7_disk/liaoyoyo2001/.claude/plans/agent-harness-langgraph-resil
 ### Q8: ISM 五大目標研究怎麼接上去？
 **A**：本報告 priority bug 修復鏈到 slide 17 verdict 完結；slide 18 future 是**轉場意圖預告**（已在 v1.1.5 加 caveat box 明示），未來 F1 LOH 內外 TP/FP 差異、F2 subclone 結構 + two-hit、F3 7-sample expansion、F4 erratum patch 都是 ISM 五大目標延伸 — 但**不在本次報告主軸內**。
 
-### Q11: 34,855 read-level victims 是 V6 修對嗎？(歸功正確性 #3, **5/14 spot check 重大更新**)
+### Q11: 34,855 read-level victims 是 V6 修對嗎？(歸功正確性 #3, **5/14 PM interim revision — V6 非退步而是保守化**)
+
+> ⚠ **5/14 PM 補正**：本 Q 原 framing 誤導。V3F vote_dump 對同樣 17,404 victim subset 自己也 42.76% hp=11；V6 31.7% **比 V3F 改善 11 pp**。詳見 erratum E5 §3a.5b。V3F BAM extract 完成後 finalize（background `bq4dajhz9`/`bbsoraygs`）。
+
+
 **A**：「34,855 victims 100% 修對」由 **V3F (commit 41ff147 tagging fix)** 達成 (T1.2-F1 audit, 主報告 line 64/564/572)。
 
 **V5/V6 不是簡單繼承 V3F**：
