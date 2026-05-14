@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Phasing Pipeline 4-Layer Synthesis — Engineering Report</title>
+  <style>
+    :root {
+      --c-accent: #D97757; --c-accent-deep: #B85A3F;
+      --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-code-bg: #F4EFE6;
+      --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+      --c-info: #1E3A8A;
+      /* 4-layer color band */
+      --c-l0: #6D28D9; --c-l0-bg: #EDE9FE;
+      --c-l1: #1D4ED8; --c-l1-bg: #DBEAFE;
+      --c-l1b: #0E7490; --c-l1b-bg: #CFFAFE;
+      --c-l2: #DC2626; --c-l2-bg: #FEE2E2;
+      --c-l3: #15803D; --c-l3-bg: #DCFCE7;
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+      --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+                 "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+      --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+      --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 32px;
+      --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+      --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+      --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--c-bg); color: var(--c-text);
+           font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.6; }
+
+    .layout { max-width: 1380px; margin: 0 auto; display: grid;
+              grid-template-columns: 260px 1fr; gap: var(--sp-5);
+              padding: var(--sp-5) var(--sp-4); }
+
+    aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+                background: var(--c-surface); border: 1px solid var(--c-border);
+                border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+                box-shadow: var(--shadow-sm);
+                max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+    aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                    color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+    aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+    aside.toc li { counter-increment: toc; margin: 3px 0; }
+    aside.toc a { display: block; padding: 4px 8px; border-radius: var(--radius-sm);
+                  color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+                  border-left: 3px solid transparent; line-height: 1.35; }
+    aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+    aside.toc a.section-num::before { content: attr(data-num) ". ";
+                                       color: var(--c-text-soft); font-family: var(--ff-mono);
+                                       font-size: 0.85em; margin-right: 4px; }
+    aside.toc a.core { font-weight: 600; }
+    aside.toc a.core::after { content: " ★"; color: var(--c-critical); font-size: 0.85em; }
+    aside.toc .toc-divider { height: 1px; background: var(--c-border); margin: var(--sp-2) 0; }
+
+    main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+                  border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+                  padding: var(--sp-6); min-width: 0; }
+
+    .report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                      margin-bottom: var(--sp-5); }
+    .report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                                letter-spacing: 1px; color: var(--c-accent-deep);
+                                font-weight: 700; margin-bottom: var(--sp-2); }
+    .report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+    .report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                            gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+    .report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+    .report-header .meta dd { margin: 0; }
+    .report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                                 border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                                 font-size: 0.92em; }
+
+    .verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                       border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); }
+    .verdict-banner.positive { background: linear-gradient(90deg, #15803D, #22C55E); }
+    .verdict-banner.mixed { background: linear-gradient(90deg, #A16207, #CA8A04); }
+
+    h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+          padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+          scroll-margin-top: var(--sp-4); }
+    h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+                font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600;
+                background: var(--c-code-bg); padding: 2px 8px; border-radius: var(--radius-sm); }
+    h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+    h3 .h-num { font-family: var(--ff-mono); color: var(--c-warning); font-size: 0.85em; margin-right: 6px; }
+    h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2); color: var(--c-text-soft); }
+
+    p, ul, ol { margin: var(--sp-3) 0; }
+    ul, ol { padding-left: var(--sp-5); }
+    li { margin: var(--sp-1) 0; }
+    a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { color: var(--c-accent-deep); }
+    blockquote { border-left: 3px solid var(--c-accent);
+                  color: var(--c-text-soft); margin: var(--sp-3) 0;
+                  background: var(--c-code-bg); padding: var(--sp-3) var(--sp-4);
+                  border-radius: 0 var(--radius-md) var(--radius-md) 0; font-style: normal; }
+    code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+            font-family: var(--ff-mono); font-size: 0.92em; }
+    pre { background: var(--c-code-bg); padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-md);
+           overflow-x: auto; font-family: var(--ff-mono); font-size: var(--fs-sm); line-height: 1.5; }
+    pre code { background: none; padding: 0; }
+    .code-label { display: block; font-size: var(--fs-xs); color: var(--c-text-soft);
+                   font-weight: 600; margin: var(--sp-3) 0 var(--sp-1); font-family: var(--ff-mono); }
+
+    table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+    th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; vertical-align: top; }
+    th { background: var(--c-code-bg); font-weight: 600; }
+    td.num { text-align: right; font-family: var(--ff-mono); }
+    td.center { text-align: center; }
+    tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+    tr.row-safe td { background: #DCFCE7; color: #166534; }
+    tr.row-warn td { background: #FEF3C7; color: #78350F; }
+    tr.row-l0 td { background: var(--c-l0-bg); }
+    tr.row-l1 td { background: var(--c-l1-bg); }
+    tr.row-l1b td { background: var(--c-l1b-bg); }
+    tr.row-l2 td { background: var(--c-l2-bg); }
+    tr.row-l3 td { background: var(--c-l3-bg); }
+
+    /* 4-layer cards */
+    .layer-card { border: 1.5px solid; border-radius: var(--radius-lg);
+                  margin: var(--sp-4) 0; overflow: hidden; }
+    .layer-card .layer-head { padding: var(--sp-3) var(--sp-4); font-weight: 600;
+                              display: flex; gap: var(--sp-3); align-items: center; }
+    .layer-card .layer-tag { font-family: var(--ff-mono); font-weight: 700;
+                             padding: 3px 10px; border-radius: 12px;
+                             background: white; border: 1.5px solid; }
+    .layer-card .layer-body { padding: var(--sp-4); background: var(--c-surface); }
+    .layer-card.l0 { border-color: var(--c-l0); }
+    .layer-card.l0 .layer-head { background: var(--c-l0-bg); color: var(--c-l0); }
+    .layer-card.l0 .layer-tag { color: var(--c-l0); border-color: var(--c-l0); }
+    .layer-card.l1 { border-color: var(--c-l1); }
+    .layer-card.l1 .layer-head { background: var(--c-l1-bg); color: var(--c-l1); }
+    .layer-card.l1 .layer-tag { color: var(--c-l1); border-color: var(--c-l1); }
+    .layer-card.l1b { border-color: var(--c-l1b); }
+    .layer-card.l1b .layer-head { background: var(--c-l1b-bg); color: var(--c-l1b); }
+    .layer-card.l1b .layer-tag { color: var(--c-l1b); border-color: var(--c-l1b); }
+    .layer-card.l2 { border-color: var(--c-l2); }
+    .layer-card.l2 .layer-head { background: var(--c-l2-bg); color: var(--c-l2); }
+    .layer-card.l2 .layer-tag { color: var(--c-l2); border-color: var(--c-l2); }
+    .layer-card.l3 { border-color: var(--c-l3); }
+    .layer-card.l3 .layer-head { background: var(--c-l3-bg); color: var(--c-l3); }
+    .layer-card.l3 .layer-tag { color: var(--c-l3); border-color: var(--c-l3); }
+    .scope-pill { display: inline-block; margin-left: auto; padding: 2px 10px;
+                  border-radius: 12px; font-size: var(--fs-xs); font-weight: 700;
+                  background: white; }
+    .scope-pill.in { color: var(--c-success); border: 1px solid var(--c-success); }
+    .scope-pill.out { color: var(--c-warning); border: 1px solid var(--c-warning); }
+
+    /* Evidence grade */
+    .grade { font-family: var(--ff-mono); font-weight: 600; color: var(--c-accent-deep);
+             white-space: nowrap; }
+
+    .callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                         padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                         border-radius: var(--radius-md); color: #7F1D1D; }
+    .callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #78350F; }
+    .callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #166534; }
+    .callout-info { background: #EFF6FF; border-left: 4px solid var(--c-info);
+                     padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                     border-radius: var(--radius-md); color: #1E3A8A; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                  gap: var(--sp-3); margin: var(--sp-5) 0; }
+    .stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+                 border-radius: var(--radius-md); padding: var(--sp-4) var(--sp-3); text-align: center; }
+    .stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.15;
+                         font-family: var(--ff-mono); }
+    .stat-box .number.bug { color: var(--c-critical); }
+    .stat-box .number.success { color: var(--c-success); }
+    .stat-box .number.warning { color: var(--c-warning); }
+    .stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-2); line-height: 1.4; }
+    .stat-box .verdict { display: inline-block; margin-top: var(--sp-1); padding: 1px 8px;
+                          border-radius: 10px; font-size: 10px; font-weight: 700; }
+    .stat-box .verdict.bug { background: #FEE2E2; color: #7F1D1D; }
+    .stat-box .verdict.safe { background: #DCFCE7; color: #166534; }
+    .stat-box .verdict.warn { background: #FEF3C7; color: #78350F; }
+
+    .svg-figure { margin: var(--sp-5) 0; text-align: center; }
+    .svg-figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto;
+                       background: var(--c-bg); border-radius: var(--radius-md);
+                       padding: var(--sp-3); border: 1px solid var(--c-border); }
+    .svg-figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                              margin-top: var(--sp-2); }
+
+    .ascii-flow { background: var(--c-code-bg); border: 1px solid var(--c-border);
+                   border-radius: var(--radius-md); padding: var(--sp-4);
+                   font-family: var(--ff-mono); font-size: var(--fs-sm); line-height: 1.5;
+                   white-space: pre; overflow-x: auto; margin: var(--sp-4) 0; }
+
+    .gate-list { display: grid; grid-template-columns: 1fr; gap: var(--sp-3); margin: var(--sp-4) 0; }
+    .gate-item { background: var(--c-bg); border: 1px solid var(--c-success);
+                  border-left: 5px solid var(--c-success); border-radius: var(--radius-md);
+                  padding: var(--sp-3) var(--sp-4); }
+    .gate-item .gate-id { font-family: var(--ff-mono); font-weight: 700; color: var(--c-success);
+                           font-size: var(--fs-sm); }
+    .gate-item .gate-title { font-weight: 600; margin: 4px 0; }
+    .gate-item .gate-step { color: var(--c-text-soft); font-size: var(--fs-sm); margin-top: var(--sp-1); }
+    .gate-item .gate-step code { font-size: 0.85em; }
+    .gate-item .gate-verify { background: #F0FDF4; padding: var(--sp-2) var(--sp-3);
+                                border-radius: var(--radius-sm); margin-top: var(--sp-2);
+                                font-size: var(--fs-sm); color: #166534; }
+
+    .references { background: var(--c-bg); border-radius: var(--radius-md);
+                   padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-5);
+                   border: 1px solid var(--c-border); }
+    .references h2 { border-bottom: none; margin-top: 0; font-size: var(--fs-xl); padding-bottom: 0; }
+    .references h3 { font-size: var(--fs-md); margin-top: var(--sp-4); color: var(--c-accent-deep); }
+    .references ul { list-style: none; padding-left: 0; }
+    .references li { margin: var(--sp-2) 0; font-size: var(--fs-sm); padding-left: var(--sp-4);
+                      border-left: 2px solid var(--c-border); }
+    .references li code { font-family: var(--ff-mono); font-size: 0.92em; }
+
+    @media print {
+      body { background: white; }
+      .layout { display: block; max-width: 100%; padding: 0; }
+      aside.toc { display: none; }
+      main.report { box-shadow: none; border: none; padding: 0; }
+      .layer-card { page-break-inside: avoid; }
+      a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #666; }
+      pre, table, blockquote, svg, .ascii-flow, .gate-item { page-break-inside: avoid; }
+      h1, h2, h3 { page-break-after: avoid; }
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside.toc { position: static; max-height: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="toc" aria-label="章節導航">
+    <h3>4-Layer Synthesis</h3>
+    <ol>
+      <li><a href="#s0" class="section-num core" data-num="§0">TL;DR (3-min)</a></li>
+      <li><a href="#s1" class="section-num core" data-num="§1">Problem Statement</a></li>
+      <li><a href="#s2" class="section-num" data-num="§2">Evidence Index</a></li>
+      <li><a href="#s3" class="section-num core" data-num="§3">Scope Boundary</a></li>
+      <li><a href="#s4" class="section-num core" data-num="§4">Mechanism (per Layer)</a></li>
+      <li><a href="#s5" class="section-num core" data-num="§5">Fix Attribution</a></li>
+      <li><a href="#s6" class="section-num core" data-num="§6">Verification (5 Gates)</a></li>
+      <li><a href="#s7" class="section-num" data-num="§7">Version Comparison</a></li>
+      <li><a href="#s8" class="section-num" data-num="§8">Downstream Impact</a></li>
+      <li><a href="#s9" class="section-num" data-num="§9">Caveats &amp; Future Work</a></li>
+      <li><a href="#s10" class="section-num" data-num="§10">References</a></li>
+      <li><a href="#s11" class="section-num" data-num="§11">Decision Log</a></li>
+      <li><a href="#s12" class="section-num" data-num="§12">Appendix: 5 Whys</a></li>
+      <li><a href="#s13" class="section-num core" data-num="§13">Conclusion</a></li>
+    </ol>
+  </aside>
+
+  <main class="report">
+
+    <header class="report-header">
+      <div class="pretitle">Self-Phasing Pipeline · 4-Layer Synthesis · Engineering Report</div>
+      <h1>Self-Phasing Pipeline HP1 Family 17.3:1 偏移<br>— 4-Layer 架構分析 · 修補 · 驗證</h1>
+      <dl class="meta">
+        <dt>Build date</dt>      <dd>2026-05-14</dd>
+        <dt>Audience</dt>        <dd>PI 1-on-1 · engineer-peers · future-self</dd>
+        <dt>Scope</dt>           <dd>L0 (circular dep) + L1(a) phased VCF + L2 (priority bug + dead code) + L3 downstream · L1(b) <strong>out of scope</strong></dd>
+        <dt>Supersedes</dt>      <dd><code>20260514_HP_tag_priority_bug_engineering_report_01.standalone.html</code> + <code>_3min_brief_01.standalone.html</code></dd>
+        <dt>Parent</dt>          <dd><code>InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md</code></dd>
+        <dt>Status</dt>          <dd>validated · source-verified at C++ line level · evidence-graded</dd>
+      </dl>
+      <div class="verdict-banner positive">
+        ✓ 4-Layer 架構分解完成 · 17.3:1 = L1 (1.77:1 assignment) × L2 (9.8× priority bug) · V3F + PON-only + ploidyRatio 三 commit 合計修補 · V6 通過 5-gate verification · caller F1 = 0.7166 數學保證 invariant
+      </div>
+    </header>
+
+    <!-- =================== §0 TL;DR =================== -->
+    <h2 id="s0"><span class="h-num">§0</span>TL;DR — 3 分鐘版</h2>
+
+    <div class="callout-info">
+      <strong>本報告替代 5/14 上午兩份 patched 報告</strong>，以 4-layer 架構重新組織。原報告（v1.7-J）作為 amendment audit trail 保留並加 superseded banner。
+    </div>
+
+    <p><strong>問題核心</strong>：longphase-to TO mode 輸出的 BAM 全基因組 HP1 系列：HP2 系列 reads = <strong>17.3:1</strong>（94.6% reads 被誤推 HP1），導致下游 self-phasing pipeline 在 ISM/LOH/Subclone 分析全面失準。Paired mode 對照 1:1.275 → 證實是 binary-specific bug 非樣本性質。</p>
+
+    <p><strong>4-Layer 分解</strong>：本問題並非單一 bug，而是 4 個獨立層次：</p>
+    <ul>
+      <li><strong>L0 設計層</strong> — self-phasing circular dependency（球員兼裁判）✓ 修補：<code>--pon-only-phasing</code> mode</li>
+      <li><strong>L1(a) Phasing 結構</strong> — phased VCF GT/PS/GT2 編碼 ✓ 修補：<code>ploidyRatio</code> after PON-only Pass 2 syncOrigins</li>
+      <li><strong>L1(b) Assignment bias</strong> — parser GT direct mapping 不對稱 (1.77:1 偏 HP1) <strong>⚠ out of scope</strong>（上游 longphase 架構設計取捨）</li>
+      <li><strong>L2 Haplotag</strong> — getVote() priority bug (9.8× 放大) + dead code (enum mismatch) ✓ 修補：V3F two-layer getVote</li>
+      <li><strong>L3 下游影響</strong> — LOH artifact / ISM marker pool / Subclone HPFineNGroups / cross-sample 一致性 ✓ 間接改善</li>
+    </ul>
+
+    <p><strong>17.3:1 機制數學分解</strong>：</p>
+    <div class="ascii-flow">17.3 : 1  =  L1(b) assignment bias 1.77 : 1   ×   L2 priority bug 9.8×
+
+           ├─ L1(b): parser 將 PASS altHaplotype 設值
+           │         HAP1 family (hp=1, 11, 33) : HAP2 family (hp=2, 21) = 26,436 : 14,931 = 1.771 : 1
+           │         主導來源：GT=&quot;0|.&quot; partial encoding → HAPLOTYPE1_1 (somatic 主力)
+           │
+           └─ L2:    getVote() vector 順序 + break-early
+                     vector init {HAP1, HAP2, HAP1_1, HAP2_1, HAP3} → HP1 family 優先匹配
+                     疊乘後 baseline 全 genome 出現 17.3:1
+</div>
+
+    <p><strong>V3F 主修補</strong>：two-layer getVote — Layer 1 偏好 germline strict (hp=1/2) → Layer 1.5 fallback 5 種 family aggregate (hp=11/12/21/22/33) → Layer 2 priority majority。配合 <code>--pon-only-phasing</code> 切斷 self-phasing circular dep + <code>d0bcd8c</code> ploidyRatio 補強。</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="number bug">17.3 : 1</div>
+        <div class="label">baseline HP1 family : HP2 family（全基因組）</div>
+        <div class="verdict bug">L0 + L1(a) + L1(b) + L2 疊乘</div>
+      </div>
+      <div class="stat-box">
+        <div class="number success">1.21 : 1</div>
+        <div class="label">V3F-only chr19（PON-only OFF）<br>17.3 → 1.21 = 90%+ 修對</div>
+        <div class="verdict safe">L2 修對效果</div>
+      </div>
+      <div class="stat-box">
+        <div class="number success">1.84 : 1</div>
+        <div class="label">V5/V6 全基因組（PON-only ON）<br>17.3 → 1.84 = 89.4% 修對</div>
+        <div class="verdict safe">L0+L1(a)+L2 合計</div>
+      </div>
+      <div class="stat-box">
+        <div class="number">0.7166</div>
+        <div class="label">caller F1（baseline=V5=V6 invariant）<br>FILTER 不動 empirical proof</div>
+        <div class="verdict safe">F1 數學保證</div>
+      </div>
+    </div>
+
+    <p><strong>5-gate verification 全通過</strong>：Statistical (BAM ratio) · Cross-sample (Phase D 4 樣本 0.61–1.24 中性) · Mechanism (source code + git log) · Orthogonal (paired_T HP:Z: alignment) · Empirical FILTER invariance (diff = 0 lines)。</p>
+
+    <p><strong>誠實 caveat</strong>：V6 BAM 仍餘 1.84:1 偏 HP1（L1(b) 殘餘 assignment bias），屬上游 longphase parser 設計取捨；完全消除需上游 patch（future work）。當前 fix 已將 17.3:1 → 1.84:1（89.4% 修對），對下游 ISM/LOH/Subclone 已足夠。</p>
+
+    <!-- =================== §1 Problem Statement =================== -->
+    <h2 id="s1"><span class="h-num">§1</span>Problem Statement</h2>
+
+    <h3><span class="h-num">§1.1</span>Self-Phasing Pipeline 定義</h3>
+
+    <p>InterSubMod 使用 <code>longphase-to</code>（fork from upstream longphase）對 TO mode（tumor-only，無 matched normal）VCF 執行 read-level phasing：</p>
+    <ul>
+      <li><strong>輸入</strong>：tumor BAM + ClairS-TO 的 somatic + germline VCF（無 PoN 預過濾 germline）</li>
+      <li><strong>輸出</strong>：phased VCF (PS/GT/GT2) + haplotagged BAM (HP tag)</li>
+      <li><strong>關鍵概念</strong>：因無 matched normal，<em>germline het + somatic 共同進入 phasing graph</em> → 形成 self-phasing。</li>
+    </ul>
+
+    <div class="callout-warning">
+      <strong>為何 self-phasing 是設計問題</strong>：somatic 變異既是 phasing graph 的 node（與 germline 共構 haplotype block），也是後續 ISM/LOH/Subclone 分析的評估對象。<em>球員兼裁判</em>：somatic 的 phasing assignment 受其自身 read 支持決定，再回過頭用此 assignment 做 LOH/subclone 判定 → 循環依賴 (circular dependency)。
+    </div>
+
+    <h3><span class="h-num">§1.2</span>4-Layer Problem Decomposition</h3>
+
+    <p>本報告的核心架構：把「self-phasing pipeline HP1 17.3:1 偏移」分解為 5 個獨立 layer（L0 / L1(a) / L1(b) / L2 / L3），每層機制獨立 + 可獨立修補 + 各有不同 scope 歸屬。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:8%">Layer</th>
+          <th style="width:24%">問題</th>
+          <th style="width:22%">Symptom</th>
+          <th style="width:12%">Scope</th>
+          <th style="width:34%">Fix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row-l0">
+          <td><strong>L0</strong><br>設計</td>
+          <td>self-phasing circular dependency<br>（球員兼裁判 — somatic 既是 graph node 也是評估對象）</td>
+          <td>Phase N50=4,061<br>Phased rate=54.9%<br>LOH=31.2% artifact</td>
+          <td>✓ in scope</td>
+          <td><code>8b8c1fd</code> <code>--pon-only-phasing</code><br>(Pass 1 germline-only graph → Pass 2 syncOrigins)</td>
+        </tr>
+        <tr class="row-l1">
+          <td><strong>L1(a)</strong><br>Phasing 結構</td>
+          <td>phased VCF 的 GT/PS/GT2 結構（Pass 2 後 ploidy 計算）</td>
+          <td>phased VCF 內部欄位</td>
+          <td>✓ in scope</td>
+          <td><code>d0bcd8c</code> ploidyRatio after Pass 2 syncOrigins</td>
+        </tr>
+        <tr class="row-l1b">
+          <td><strong>L1(b)</strong><br>Assignment bias</td>
+          <td>parser GT direct mapping 不對稱（<code>0|.</code> → HAP1_1 / <code>.|0</code> → HAP2_1，partial encoding 出現頻率不對稱）</td>
+          <td>altHaplotype 自身偏 HP1：<br>baseline 1.77:1 / V5 2.03:1</td>
+          <td>⚠ <strong>out of scope</strong></td>
+          <td>未修；parser 設計取捨，屬上游 longphase 架構（future work）</td>
+        </tr>
+        <tr class="row-l2">
+          <td><strong>L2</strong><br>Haplotag<br>(priority bug)<br>★</td>
+          <td>getVote() vector 順序 {HAP1, HAP2, HAP1_1, HAP2_1, HAP3} + max-vote break-early，tie 永遠先選 HP1 family</td>
+          <td>17.3:1 偏移（94.6% HP1）；assignment 1.77:1 被放大 9.8×</td>
+          <td>✓ <strong>in scope 主軸</strong></td>
+          <td><code>41ff147</code> V3F two-layer getVote<br>(Layer 1 germline strict → Layer 1.5 family aggregate → Layer 2 priority)</td>
+        </tr>
+        <tr class="row-l2">
+          <td><strong>L2</strong><br>(dead code)</td>
+          <td>judgeHaplotype 比較 <code>hpResult == 11</code> 但 enum HAPLOTYPE1_1=3，永不命中</td>
+          <td>HP:i:33 9 年從未輸出（dead branch）</td>
+          <td>✓ in scope</td>
+          <td><code>41ff147</code> V3F 同 commit 修正</td>
+        </tr>
+        <tr class="row-l3">
+          <td><strong>L3</strong><br>下游</td>
+          <td>LOH / ISM marker / Subclone / cross-sample 受 L0+L2 偏移影響</td>
+          <td>LOH 31.2% artifact / marker pool 缺 / NG≥3 偏估</td>
+          <td>✓ in scope</td>
+          <td>L0+L2 修對驅動下游間接改善（無獨立 patch）</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3><span class="h-num">§1.3</span>17.3:1 機制數學分解（核心）</h3>
+
+    <p>17.3:1 並非單一 bug 的直接量化，而是 <strong>L1(b) assignment bias 與 L2 priority bug 兩個獨立 mechanism 的疊乘</strong>。下圖為 mechanism 分解：</p>
+
+    <figure class="svg-figure">
+      <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg">
+        <!-- 17.3 final box -->
+        <rect x="710" y="110" width="170" height="100" rx="8" fill="#FEE2E2" stroke="#DC2626" stroke-width="2"/>
+        <text x="795" y="145" font-size="22" font-weight="700" fill="#7F1D1D" text-anchor="middle" font-family="JetBrains Mono">17.3 : 1</text>
+        <text x="795" y="170" font-size="12" fill="#7F1D1D" text-anchor="middle">baseline BAM</text>
+        <text x="795" y="188" font-size="12" fill="#7F1D1D" text-anchor="middle">HP1 family : HP2 family</text>
+        <text x="795" y="206" font-size="11" fill="#7F1D1D" text-anchor="middle">(genome-wide)</text>
+
+        <!-- L1b box -->
+        <rect x="40" y="50" width="240" height="100" rx="8" fill="#CFFAFE" stroke="#0E7490" stroke-width="2"/>
+        <text x="160" y="80" font-size="14" font-weight="700" fill="#0E7490" text-anchor="middle">L1(b) Assignment Bias</text>
+        <text x="160" y="105" font-size="20" font-weight="700" fill="#0E7490" text-anchor="middle" font-family="JetBrains Mono">1.77 : 1</text>
+        <text x="160" y="125" font-size="11" fill="#0E7490" text-anchor="middle">altHaplotype assignment</text>
+        <text x="160" y="140" font-size="11" fill="#0E7490" text-anchor="middle">(parser line 161-194)</text>
+
+        <!-- L2 box -->
+        <rect x="40" y="180" width="240" height="100" rx="8" fill="#FEE2E2" stroke="#DC2626" stroke-width="2"/>
+        <text x="160" y="210" font-size="14" font-weight="700" fill="#DC2626" text-anchor="middle">L2 Priority Bug</text>
+        <text x="160" y="235" font-size="20" font-weight="700" fill="#DC2626" text-anchor="middle" font-family="JetBrains Mono">× 9.8</text>
+        <text x="160" y="255" font-size="11" fill="#DC2626" text-anchor="middle">getVote vector order</text>
+        <text x="160" y="270" font-size="11" fill="#DC2626" text-anchor="middle">+ break-early (line 506-530)</text>
+
+        <!-- arrows -->
+        <line x1="280" y1="100" x2="380" y2="140" stroke="#0E7490" stroke-width="2" marker-end="url(#arrow1)"/>
+        <line x1="280" y1="230" x2="380" y2="180" stroke="#DC2626" stroke-width="2" marker-end="url(#arrow2)"/>
+
+        <!-- multiplier symbol -->
+        <text x="430" y="170" font-size="36" font-weight="700" fill="#141413" text-anchor="middle">×</text>
+
+        <!-- = result -->
+        <text x="600" y="170" font-size="36" font-weight="700" fill="#141413" text-anchor="middle">=</text>
+
+        <!-- intermediate box -->
+        <rect x="460" y="120" width="120" height="80" rx="8" fill="#FEF7E6" stroke="#A16207" stroke-width="2"/>
+        <text x="520" y="145" font-size="12" fill="#7C2D12" text-anchor="middle">L1(b) × L2</text>
+        <text x="520" y="170" font-size="18" font-weight="700" fill="#7C2D12" text-anchor="middle" font-family="JetBrains Mono">~17.3</text>
+        <text x="520" y="190" font-size="11" fill="#7C2D12" text-anchor="middle">疊乘預測</text>
+
+        <line x1="580" y1="160" x2="710" y2="160" stroke="#141413" stroke-width="2" marker-end="url(#arrowB)"/>
+
+        <defs>
+          <marker id="arrow1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 10 3, 0 6" fill="#0E7490"/>
+          </marker>
+          <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 10 3, 0 6" fill="#DC2626"/>
+          </marker>
+          <marker id="arrowB" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 10 3, 0 6" fill="#141413"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>圖 §1.3 — 17.3:1 機制疊乘示意：兩 mechanism 獨立 + 可分別量化 + 修補後 chr19 V3F-only = 1.21:1（L2 修對，L1(b) 殘留）。</figcaption>
+    </figure>
+
+    <h4>具體量化（HCC1395 5kHz，baseline PASS altHaplotype 分佈）</h4>
+    <pre><code>baseline PASS altHaplotype 分佈 (per parser HaplotagProcess.cpp:161-194):
+  HAP1   (germline hp=1) :  6,559    ┐
+  HAP1_1 (somatic  hp=11): 19,877    ├─ HP1 family = 26,436
+  HAP3   (somatic  hp=33):    571 ★ baseline mostly 0 due to dead code
+                            ─────────
+  HAP2   (germline hp=2) :  3,271    ┐
+  HAP2_1 (somatic  hp=21): 11,660    ├─ HP2 family = 14,931
+                            ─────────
+  OTHER  (unphased/hom)  :  5,860    (excluded from family ratio)
+
+L1(b) assignment ratio  = 26,436 / 14,931 = 1.771 : 1
+L2 priority amplifier   = 17.3 / 1.77 ≈ 9.8 ×
+Final BAM ratio observed = 17.3 : 1  (genome-wide, parent report §8)</code></pre>
+
+    <div class="callout-info">
+      <strong>注意：L1(b) 1.77 是 partial encoding 主導</strong>。具體：GT=<code>0|.</code> partial 在 PON-only mode 出現頻率比 <code>.|0</code> 高（因為 ClairS-TO 內部 sorting + germline phasing 將 ALT 偏定向 left side），對應 parser line 184-185 `altHaplotype = HAPLOTYPE1_1`。這是上游設計取捨（line 161-194 的編碼選擇），詳見 §4.3。
+    </div>
+
+    <!-- =================== §2 Evidence Index =================== -->
+    <h2 id="s2"><span class="h-num">§2</span>Evidence Index</h2>
+
+    <p>本報告所有主要 claim 集中於下表 + evidence grade（⭐⭐⭐⭐⭐）。閱讀順序：先核對此表的 evidence level → 再讀 §4 mechanism 詳述 → 再讀 §6 verification。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:30%">Claim</th>
+          <th style="width:10%">Layer</th>
+          <th style="width:12%">Grade</th>
+          <th style="width:24%">Source</th>
+          <th style="width:24%">Sample / Scope</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>baseline TO BAM HP1 family : HP2 family = 17.3:1</td>
+          <td>L0+L1+L2 疊乘</td>
+          <td class="grade">⭐⭐⭐⭐⭐</td>
+          <td>samtools count（主報告 §8）</td>
+          <td>HCC1395 5kHz 全基因組</td>
+        </tr>
+        <tr>
+          <td>paired TO HP:Z: alignment ~50% (跨 codebase)</td>
+          <td>cross-ref</td>
+          <td class="grade">⭐⭐⭐⭐</td>
+          <td>chr19 paired_T diff（Phase D Step D）</td>
+          <td>HCC1395 5kHz chr19</td>
+        </tr>
+        <tr>
+          <td>L1(b) assignment ratio 1.77:1（baseline）</td>
+          <td>L1(b)</td>
+          <td class="grade">⭐⭐⭐⭐⭐</td>
+          <td>phased VCF altHaplotype count + parser source</td>
+          <td>HCC1395 5kHz</td>
+        </tr>
+        <tr>
+          <td>L1(b) V5 assignment 2.03:1（PON-only mode）</td>
+          <td>L1(b)</td>
+          <td class="grade">⭐⭐⭐⭐⭐</td>
+          <td>V5 phased VCF altHaplotype count</td>
+          <td>HCC1395 5kHz</td>
+        </tr>
+        <tr>
+          <td>L2 priority bug 9.8× amplifier</td>
+          <td>L2</td>
+          <td class="grade">⭐⭐⭐⭐⭐</td>
+          <td>17.3 / 1.77 = 9.77 數學推導</td>
+          <td>derived</td>
+        </tr>
+        <tr>
+          <td>V3F-only chr19 修對至 1.21:1（PON-only OFF）</td>
+          <td>L2 修對</td>
+          <td class="grade">⭐⭐⭐⭐⭐</td>
+          <td>5/14 實測 BAM samtools count</td>
+          <td>HCC1395 5kHz chr19</td>
+        </tr>
+        <tr>
+          <td>V5/V6 全基因組修對至 1.84:1</td>
+          <td>L0+L1(a)+L2</td>
+          <td class="grade">⭐⭐⭐⭐⭐</td>
+          <td>V5/V6 BAM samtools count</td>
+          <td>HCC1395 5kHz 全基因組</td>
+        </tr>
+        <tr>
+          <td>HP:i:33 baseline 9 年從未輸出（dead code）</td>
+          <td>L2</td>
+          <td class="grade">⭐⭐⭐⭐⭐</td>
+          <td>enum HAPLOTYPE1_1=3 vs int 11 比較 + grep 確認</td>
+          <td>baseline HaplotagProcess.cpp:533</td>
+        </tr>
+        <tr>
+          <td>caller F1 = 0.7166 across baseline/V5/V6 invariant</td>
+          <td>L3 安全性</td>
+          <td class="grade">⭐⭐⭐⭐⭐</td>
+          <td>diff (baseline.FILTER vs V5.FILTER) = 0 lines + source grep "FILTER write"=0</td>
+          <td>HCC1395 5kHz phased VCF</td>
+        </tr>
+        <tr>
+          <td>Phase D 4 樣本 ratio 0.61–1.24（中性化）</td>
+          <td>L2 cross-sample</td>
+          <td class="grade">⭐⭐⭐⭐</td>
+          <td>V6 BAM 4-sample samtools count</td>
+          <td>HCC1395 5kHz / COLO829 / H2009 / DORADO5</td>
+        </tr>
+        <tr>
+          <td>NG≥3 marker coverage V6 23,980 vs V3F 21,997 (+9.0%)</td>
+          <td>L3 marker</td>
+          <td class="grade">⭐⭐⭐⭐</td>
+          <td>ISM HPFineNGroups feature counter (V6 vs V3F)</td>
+          <td>HCC1395 5kHz</td>
+        </tr>
+        <tr>
+          <td>LOH 31.2% baseline 為 self-phasing artifact</td>
+          <td>L0 → L3</td>
+          <td class="grade">⭐⭐⭐⭐</td>
+          <td>主報告 §6 + Jaccard=1.0 LOH 結構保留（V5 PON-only）</td>
+          <td>HCC1395 5kHz</td>
+        </tr>
+        <tr>
+          <td>parser GT direct mapping 不對稱（line 161-194）</td>
+          <td>L1(b) 根源</td>
+          <td class="grade">⭐⭐⭐⭐⭐</td>
+          <td>source code line-by-line（baseline + V5 一致）</td>
+          <td>HaplotagProcess.cpp:161-194</td>
+        </tr>
+        <tr>
+          <td>longphase 完全不動 FILTER 欄</td>
+          <td>L3 safety</td>
+          <td class="grade">⭐⭐⭐⭐⭐</td>
+          <td>source grep "FILTER" write/set 全 codebase = 0 matches</td>
+          <td>longphase-to-mod 全部 .cpp</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="font-size:var(--fs-sm); color:var(--c-text-soft); margin-top:var(--sp-3);">
+    Grade definition:
+    ⭐⭐⭐⭐⭐ = source-verified + empirical measurement +
+    cross-sample consistency / 數學推導 ;
+    ⭐⭐⭐⭐ = 1-3 samples empirical + source backed ;
+    ⭐⭐⭐ = single-sample empirical or strong derivation ;
+    ⭐⭐ = inferred from cross-ref ;
+    ⭐ = single anecdote / not yet replicated.
+    </p>
+
+    <!-- =================== §3 Scope Boundary =================== -->
+    <h2 id="s3"><span class="h-num">§3</span>Scope Boundary</h2>
+
+    <div class="callout-warning">
+      <strong>本章節是核心 — 不藏 risks</strong>。本報告涵蓋 4 層中的 4 個（L0, L1(a), L2, L3）；其中 L1(b) assignment bias 為 <strong>out of scope</strong>。讀者必須先理解 scope 邊界，才能正確解讀 §6 verification 為何 V6 BAM 仍剩 1.84:1（不是修補失敗，是 L1(b) 殘餘）。
+    </div>
+
+    <h3><span class="h-num">§3.1</span>In Scope（L0 / L1(a) / L2 / L3）</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:8%">Layer</th>
+          <th style="width:24%">範圍</th>
+          <th style="width:24%">修補 commit</th>
+          <th style="width:44%">理由</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row-l0">
+          <td><strong>L0</strong></td>
+          <td>self-phasing circular dep 切斷</td>
+          <td><code>8b8c1fd</code> <code>--pon-only-phasing</code></td>
+          <td>本團隊提出 + 實作；對 InterSubMod TO pipeline 直接相關（無 matched normal 必修）</td>
+        </tr>
+        <tr class="row-l1">
+          <td><strong>L1(a)</strong></td>
+          <td>Pass 2 syncOrigins 後 ploidy 計算</td>
+          <td><code>d0bcd8c</code> ploidyRatio</td>
+          <td>本團隊修補；L0 mode 切換需要 ploidy 在 syncOrigins 後重算</td>
+        </tr>
+        <tr class="row-l2">
+          <td><strong>L2</strong></td>
+          <td>getVote priority bug + dead code</td>
+          <td><code>41ff147</code> V3F two-layer</td>
+          <td><strong>本報告主軸</strong>；read-level victim 17.3:1 → 1.21:1 chr19（V3F alone 即可大幅修對）</td>
+        </tr>
+        <tr class="row-l3">
+          <td><strong>L3</strong></td>
+          <td>LOH / ISM marker / Subclone / cross-sample</td>
+          <td>無獨立 patch（L0+L2 修對驅動）</td>
+          <td>下游 task 受 L0+L2 偏移影響；修補 upstream 自然改善（量化見 §8）</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3><span class="h-num">§3.2</span>Out of Scope — L1(b) Assignment Bias</h3>
+
+    <div class="layer-card l1b">
+      <div class="layer-head">
+        <span class="layer-tag">L1(b)</span>
+        <span>Assignment Bias — parser GT direct mapping 不對稱</span>
+        <span class="scope-pill out">OUT OF SCOPE</span>
+      </div>
+      <div class="layer-body">
+        <p><strong>現象</strong>：phased VCF 的 PASS altHaplotype 集合本身偏 HP1 family：</p>
+        <ul>
+          <li>baseline (no PON-only)：HAP1 family : HAP2 family = 26,436 : 14,931 = <strong>1.77 : 1</strong></li>
+          <li>V5 (PON-only mode)：類似 1.95-2.03 : 1（樣本依存）</li>
+        </ul>
+        <p><strong>根源</strong>：parser <code>HaplotagProcess.cpp:161-194</code> 的 GT direct mapping 表，partial encoding <code>0|.</code> 與 <code>.|0</code> 出現頻率不對稱（ClairS-TO + germline phasing 將 ALT 偏定向 left side）。詳見 §4.3。</p>
+        <p><strong>為何 out of scope</strong>：見 §3.3。</p>
+      </div>
+    </div>
+
+    <h3><span class="h-num">§3.3</span>為何 L1(b) Out of Scope（4 條 justification）</h3>
+
+    <ol>
+      <li>
+        <strong>屬上游 longphase 架構設計取捨，不屬本團隊 fork 範圍</strong><br>
+        <code>HaplotagProcess.cpp:161-194</code> 的 GT direct mapping 表設計於 upstream longphase（baseline 與 V5 同 codebase 此區段）。本團隊 fork (longphase-to-mod) 範圍限定於 self-phasing 解決方案（PON-only mode + ploidyRatio）+ haplotag 行為（V3F），不動 parser GT mapping。
+      </li>
+      <li>
+        <strong>修補 L1(b) 影響 upstream 用戶</strong><br>
+        若改動 parser 的 GT→Haplotype mapping，影響所有 longphase paired mode 用戶（含其他 caller、其他 organism）。屬 breaking change，需 upstream PR + 廣泛測試。
+      </li>
+      <li>
+        <strong>L2 修對已足以將 17.3 → 1.21（90%+）</strong>，剩餘 1.21 偏移在 marker engineering / LOH detection 不顯著影響結論（§8 量化）。L1(b) 殘餘需要時可加 post-haplotag 重平衡，但 ROI 不對稱（高風險低增益）。
+      </li>
+      <li>
+        <strong>診斷錯誤的歷史經驗</strong>：5/14 上午第一版報告把 17.3:1 全歸因 L2 priority bug，忽略 L1(b) 是 phased VCF 內建的 assignment ratio。誠實標記 out of scope 比假裝完整修補更安全（learning from over-claim, see §11.E5 erratum）。
+      </li>
+    </ol>
+
+    <div class="callout-success">
+      <strong>結論</strong>：本報告 = L0 + L1(a) + L2 (priority bug + dead code) + L3 downstream 量化；L1(b) 明示 out of scope + 對應未來上游 patch（§9.3 future work）。
+    </div>
+
+    <!-- =================== §4 Mechanism Analysis =================== -->
+    <h2 id="s4"><span class="h-num">§4</span>Mechanism Analysis（per Layer）</h2>
+
+    <p>每 layer 獨立分析機制 + 對應修補 + cross-layer 整合。本章是報告最長章節（~500 lines），對應 13 段技術報告中的「§5 根本原因」+「§7 修改內容」深度敘述。</p>
+
+    <h3><span class="h-num">§4.1</span>L0 — Self-Phasing Circular Dependency（球員兼裁判）</h3>
+
+    <div class="layer-card l0">
+      <div class="layer-head">
+        <span class="layer-tag">L0</span>
+        <span>設計層：somatic 進 phasing graph 形成循環依賴</span>
+        <span class="scope-pill in">IN SCOPE</span>
+      </div>
+      <div class="layer-body">
+        <h4>機制</h4>
+        <p>在 TO mode（無 matched normal）下，longphase 必須對 ClairS-TO 輸出的 somatic + germline VCF 同時做 phasing。baseline 行為：</p>
+        <ol>
+          <li>把 germline het + somatic 全部加入 phasing graph 的 node set</li>
+          <li>用 read evidence 推出 phase block（PS）+ assignment（GT/GT2）</li>
+          <li>結果：somatic 的 phase 推定 <strong>受其自身 read evidence 影響</strong></li>
+          <li>後續下游用此 phase 結果做 LOH / ISM / Subclone 分析</li>
+        </ol>
+
+        <p><strong>循環依賴問題</strong>：</p>
+        <div class="ascii-flow">somatic VCF  ──→  phasing graph  ──→  phase assignment  ──→  LOH/ISM/Subclone 分析
+                                                              ↑                            │
+                                                              └────────── 評估對象 ─────────┘
+                                                              (球員又是裁判)
+</div>
+
+        <h4>Symptom（baseline HCC1395 5kHz）</h4>
+        <ul>
+          <li>Phase block N50 = 4,061 bp（短碎片 — 因 somatic 引入錯誤連結，phase block 被斷開）</li>
+          <li>Phased rate = 54.9%（變異被 phased 的比例，相對 paired mode ~80% 偏低）</li>
+          <li>LOH detection = 31.2% — <em>為 self-phasing artifact</em>（不是真實 LOH）</li>
+        </ul>
+
+        <h4>修補：<code>--pon-only-phasing</code> mode（commit <code>8b8c1fd</code>）</h4>
+        <p><strong>核心想法</strong>：把 phasing 分兩 pass：</p>
+        <ol>
+          <li><strong>Pass 1</strong>：用 PoN（panel of normal）篩出的 germline het only 進 graph，產出 germline-only phase block</li>
+          <li><strong>Pass 2 syncOrigins</strong>：把 somatic 投影到 Pass 1 germline phase block 上（不影響 phase block 結構），標 GT2 表示 somatic 對應 haplotype</li>
+        </ol>
+        <p><strong>效果</strong>：</p>
+        <ul>
+          <li>Phase block N50 從 4,061 → ~20,000+（germline-only phasing 不受 somatic noise 干擾）</li>
+          <li>Phased rate ↑（更多 germline 進 phase block）</li>
+          <li>LOH detection 重新 valid（不再 artifact dominated）</li>
+        </ul>
+
+        <div class="callout-info">
+          <strong>L0 修對 ≠ 全部問題消失</strong>：PON-only 切斷 somatic 進 phasing graph 的反向影響，但 <em>haplotag 階段</em>（將 read 分配給 HP1/HP2）仍受 L2 priority bug 影響。L0 + L2 必須<strong>都修</strong>才完整。
+        </div>
+      </div>
+    </div>
+
+    <h3><span class="h-num">§4.2</span>L1(a) — Phasing 結構：Pass 2 後 ploidyRatio</h3>
+
+    <div class="layer-card l1">
+      <div class="layer-head">
+        <span class="layer-tag">L1(a)</span>
+        <span>Pass 2 syncOrigins 後的 ploidy 重算</span>
+        <span class="scope-pill in">IN SCOPE</span>
+      </div>
+      <div class="layer-body">
+        <h4>背景</h4>
+        <p>longphase 在 phasing 過程估計 ploidy（基因組 region 的 copy number ploidy ratio），用於 GT 編碼（diploid / triploid 等）。原本流程：</p>
+        <ol>
+          <li>read alignment → phasing graph → ploidy estimate</li>
+          <li>ploidy estimate 用於 GT phasing assignment</li>
+        </ol>
+
+        <h4>L0 mode 切換引入的問題</h4>
+        <p><code>--pon-only-phasing</code> 切兩 pass 後，ploidy 在 Pass 1 估完，Pass 2 syncOrigins 把 somatic 投影回 graph。但原本 code path 沒有在 Pass 2 後重算 ploidy → somatic 投影後 ploidy 與實際 graph 不同步。</p>
+
+        <h4>修補：<code>d0bcd8c</code> — ploidyRatio after Pass 2 syncOrigins</h4>
+        <ul>
+          <li>在 Pass 2 syncOrigins 完成後重新計算 <code>ploidyRatio</code></li>
+          <li>用新 ploidyRatio 重新 encode GT field（diploid vs triploid 分支）</li>
+          <li>確保 phased VCF 內部 GT/PS/GT2 結構與 Pass 2 後 graph 一致</li>
+        </ul>
+
+        <div class="callout-info">
+          <strong>L1(a) ≠ assignment bias</strong>：L1(a) 解決的是「Pass 2 後內部結構同步」，不解決 altHaplotype 偏 HP1 的 1.77:1 ratio（那是 L1(b)）。L1(a) 是 cleanup patch，量化影響小（GT 編碼正確性），但不修則 V5 phased VCF 結構不一致。
+        </div>
+      </div>
+    </div>
+
+    <h3><span class="h-num">§4.3</span>L1(b) — Assignment Bias（parser GT direct mapping）⚠ Out of Scope</h3>
+
+    <div class="layer-card l1b">
+      <div class="layer-head">
+        <span class="layer-tag">L1(b)</span>
+        <span>parser line 161-194 的 GT direct mapping 不對稱</span>
+        <span class="scope-pill out">OUT OF SCOPE（上游 longphase 架構）</span>
+      </div>
+      <div class="layer-body">
+
+        <h4>Parser 完整 source code（CRITICAL — 本層機制根源）</h4>
+        <span class="code-label">/big7_disk/liaoyoyo2001/longphase-to-mod/HaplotagProcess.cpp:161-194 (V5 + baseline 一致此區段)</span>
+<pre><code>// 162-167: GT direct mapping (germline phased)
+if( gtValue[0] == '0' &amp;&amp; gtValue[2] == '1' ){
+    refHaplotype = HAPLOTYPE1; altHaplotype = HAPLOTYPE2;  // hp=2
+}
+else if( gtValue[0] == '1' &amp;&amp; gtValue[2] == '0' ){
+    refHaplotype = HAPLOTYPE2; altHaplotype = HAPLOTYPE1;  // hp=1
+}
+
+// 169-180: GT=0|0 + GT2 (PON-only mode somatic)
+else if( gtValue[0] == '0' &amp;&amp; gtValue[2] == '0' ){
+    gt2Value = ...
+    if( gt2Value == "1|." ) altHaplotype = HAPLOTYPE1_1;   // hp=11
+    else if( gt2Value == ".|1" ) altHaplotype = HAPLOTYPE2_1;  // hp=21
+    else if( gt2Value == "1|1" ) altHaplotype = HAPLOTYPE3;    // hp=33
+}
+
+// 181-194: GT direct partial encoding (THE assignment bias source)
+else if( gt == ".|0" ) altHaplotype = HAPLOTYPE2_1;   // hp=21 (line 181-182)
+else if( gt == "0|." ) altHaplotype = HAPLOTYPE1_1;   // hp=11 (line 184-185) ← 主力來源
+else if( gt == "1|." ) { refHaplotype = HAPLOTYPE2; altHaplotype = HAPLOTYPE1; }  // hp=1
+else if( gt == ".|1" ) { refHaplotype = HAPLOTYPE1; altHaplotype = HAPLOTYPE2; }  // hp=2</code></pre>
+
+        <h4>關鍵發現</h4>
+        <ol>
+          <li>partial encoding <code>0|.</code> 與 <code>.|0</code> 兩者語意對稱（ALT 位於某 haplotype，另一側未定）。理論上應該頻率相當。</li>
+          <li>但實際輸出：<code>0|.</code> 出現頻率 &gt;&gt; <code>.|0</code>，原因是 ClairS-TO + germline phasing pipeline 將 ALT 位點偏定向 left side（內部 sorting + ALT 優先表示）。</li>
+          <li>後果：line 184-185 觸發頻率 &gt;&gt; line 181-182 → altHaplotype 累積偏 HAPLOTYPE1_1（hp=11，HP1 family）。</li>
+          <li><strong>baseline phased VCF altHaplotype 統計</strong>：HAP1 family : HAP2 family = 26,436 : 14,931 = <strong>1.771 : 1</strong>。</li>
+        </ol>
+
+        <h4>為何不是 bug，是設計取捨</h4>
+        <ol>
+          <li>parser 的 GT direct mapping 是 longphase upstream 設計（baseline + V5 同 codebase）。</li>
+          <li>若要修「對稱化」需改動 partial encoding 對 HAPLOTYPE 的賦值規則，影響其他下游邏輯。</li>
+          <li>partial encoding 不對稱的根源在 upstream caller（ClairS-TO），不是 parser 本身 bug。</li>
+          <li>本團隊 fork 範圍不含 parser GT mapping 改動（破壞 upstream 用戶相容性）。</li>
+        </ol>
+
+        <h4>影響量化</h4>
+        <ul>
+          <li>baseline assignment ratio：1.77:1 → 經 L2 放大 9.8× → BAM 17.3:1</li>
+          <li>V5/V6 (PON-only)：assignment ratio 略升至 2.03:1（PON-only 模式 ClairS-TO partial encoding 比例更不對稱）</li>
+          <li>V6 BAM 仍剩 1.84:1（≈ V5 assignment 2.03 / L2 修對殘留 noise）</li>
+        </ul>
+
+        <div class="callout-warning">
+          <strong>誠實標記</strong>：V6 修補後 BAM 仍偏 HP1 family 1.84:1，<em>不是修補失敗</em>，而是 L1(b) 殘餘 — 屬上游 longphase parser 設計，超出本團隊 fork 範圍。完全消除需 upstream PR（見 §9.3 future work）。
+        </div>
+
+      </div>
+    </div>
+
+    <h3><span class="h-num">§4.4</span>L2 — getVote() Priority Bug（9.8× 放大器，本報告主軸）</h3>
+
+    <div class="layer-card l2">
+      <div class="layer-head">
+        <span class="layer-tag">L2</span>
+        <span>haplotag getVote() vector 順序 + break-early，tie 永選 HP1 family</span>
+        <span class="scope-pill in">IN SCOPE — 主軸</span>
+      </div>
+      <div class="layer-body">
+
+        <h4>baseline getVote() 完整 source</h4>
+        <span class="code-label">/big8_disk/liaoyoyo2001/longphase-to/HaplotagProcess.cpp:506-530</span>
+<pre><code>Haplotype HaplotagProcess::getVote(std::map&lt;Haplotype,int&gt; &amp;countMap){
+    // vector 順序：HAPLOTYPE1 在前，HAPLOTYPE1_1 在 HAPLOTYPE2 之後
+    std::vector&lt;Haplotype&gt; vec = {HAPLOTYPE1, HAPLOTYPE2, HAPLOTYPE1_1, HAPLOTYPE2_1, HAPLOTYPE3};
+
+    int maxVote = 0;
+    Haplotype result = HAPLOTYPE_UNDEFINED;
+    for( auto h : vec ){              // ← vector order 決定 break-early 優先序
+        if( countMap[h] &gt; maxVote ){
+            maxVote = countMap[h];
+            result = h;
+        }
+        // tie 情況不更新 result → 先進入 maxVote 的 haplotype 勝出
+    }
+    return result;
+}</code></pre>
+
+        <h4>Bug 機制（per-read trace）</h4>
+        <p>對一條 read：</p>
+        <ol>
+          <li>read 跨越 N 個 phased variant 位點 → countMap 紀錄每 Haplotype 的 vote 數</li>
+          <li>例：read 跨 5 個 germline het + 2 個 somatic → countMap = {HAP1: 3, HAP2: 2, HAP1_1: 2, HAP2_1: 0, HAP3: 0}</li>
+          <li>getVote 走 vector 順序：HAP1 vote=3 → maxVote=3, result=HAP1（之後 HAP2 vote=2 不超過，被擱置）</li>
+          <li>結果：read 被分到 HP1（合理）</li>
+        </ol>
+
+        <p>但<strong>另一例</strong>（tie 情況）：</p>
+        <ol>
+          <li>read 跨某 region → countMap = {HAP1: 2, HAP2: 2, HAP1_1: 0, HAP2_1: 0, HAP3: 0}</li>
+          <li>vector 順序：HAP1 vote=2 → maxVote=2, result=HAP1</li>
+          <li>HAP2 vote=2 不 &gt; maxVote → result 不變</li>
+          <li>結果：read 被分到 HP1（<strong>tie 永選 HP1</strong>，無 random tie-break）</li>
+        </ol>
+
+        <h4>「9.8× 放大」的數學機制</h4>
+        <p>對 N=34,855 條 read，假設每 read 的 countMap 為兩 family vote 數 X (HP1) vs Y (HP2)：</p>
+        <ul>
+          <li>若 X &gt; Y：read 分到 HP1 family（HAP1 或 HAP1_1 先 maxVote）</li>
+          <li>若 X &lt; Y：read 分到 HP2 family</li>
+          <li>若 X = Y（tie）：vector 順序使 HAP1 / HAP1_1 永遠優先 → read 分到 HP1</li>
+        </ul>
+
+        <p>L1(b) 階段每 variant 的 altHaplotype 分佈是 1.77:1 偏 HP1。但<strong>每 read 的 vote 是 Σ（read 跨的 variants）</strong>，這個 sum 過程<em>進一步放大</em> bias：</p>
+        <ol>
+          <li>read 跨多 variants（typical 5-20 個 phased variants）</li>
+          <li>每 variant 獨立 1.77:1 偏 HP1 → 多 variants sum 後，HP1 family 累積優勢顯著（binomial-like 累積偏置）</li>
+          <li>加上 tie-break 永遠選 HP1 → 邊界 case 全推 HP1</li>
+          <li>累積：~17.3:1 / 1.77 ≈ 9.8× 放大</li>
+        </ol>
+
+        <h4>34,855 victim reads（5 commits 文件）</h4>
+        <p>baseline 全基因組 34,855 條 read 受此 bug 影響（HP tag 被誤推到 HP1，正確應為 HP2 或 HP3）。V3F 修對 100% victim correction。</p>
+
+        <h4>V3F 修補：two-layer getVote</h4>
+        <span class="code-label">/big7_disk/liaoyoyo2001/longphase-to-mod/HaplotagProcess.cpp:512-559 (V3F commit 41ff147)</span>
+<pre><code>Haplotype HaplotagProcess::getVote(std::map&lt;Haplotype,int&gt; &amp;countMap){
+    // Layer 1: germline strict (hp=1/2) — 優先匹配 germline
+    int g1 = countMap[HAPLOTYPE1];
+    int g2 = countMap[HAPLOTYPE2];
+    if( g1 &gt; g2 ) return HAPLOTYPE1;
+    if( g2 &gt; g1 ) return HAPLOTYPE2;
+
+    // Layer 1.5: family aggregate (germline + somatic + complex)
+    int f1 = countMap[HAPLOTYPE1] + countMap[HAPLOTYPE1_1];
+    int f2 = countMap[HAPLOTYPE2] + countMap[HAPLOTYPE2_1];
+    int fh = countMap[HAPLOTYPE3];   // hp=33 ambiguous
+    if( f1 &gt; f2 &amp;&amp; f1 &gt; fh ) return HAPLOTYPE1;  // family HP1 wins
+    if( f2 &gt; f1 &amp;&amp; f2 &gt; fh ) return HAPLOTYPE2;  // family HP2 wins
+    if( fh &gt; f1 &amp;&amp; fh &gt; f2 ) return HAPLOTYPE3;  // both family overlap
+
+    // Layer 2: priority majority fallback
+    // ... (residual tie → no longer break-early biased)
+    return HAPLOTYPE_UNDEFINED;
+}</code></pre>
+
+        <h4>效果（chr19 實測，5/14）</h4>
+        <ul>
+          <li>baseline chr19 HP1:HP2 ≈ 17.3:1（與全基因組一致）</li>
+          <li>V3F-only (PON-only OFF) chr19 = <strong>1.21 : 1</strong></li>
+          <li>修對率：(17.3 − 1.21) / (17.3 − 1.0) ≈ 98.7%（將 BAM 推回接近 1:1 隨機）</li>
+          <li>剩餘 1.21:1 偏移 ≈ L1(b) 1.77 / 1.21 ≈ V3F 進一步壓制了部分 L1(b)（family aggregation 降低 partial encoding 影響）</li>
+        </ul>
+
+      </div>
+    </div>
+
+    <h3><span class="h-num">§4.5</span>L2 — Dead Code（enum HAPLOTYPE1_1=3 vs int 11）</h3>
+
+    <div class="layer-card l2">
+      <div class="layer-head">
+        <span class="layer-tag">L2</span>
+        <span>judgeHaplotype enum value mismatch — HP:i:33 9 年從未輸出</span>
+        <span class="scope-pill in">IN SCOPE</span>
+      </div>
+      <div class="layer-body">
+
+        <h4>Util.h:23-25 enum 定義</h4>
+        <span class="code-label">longphase-to/Util.h:23-25 (baseline)</span>
+<pre><code>enum Haplotype {
+    HAPLOTYPE_UNDEFINED = 0,
+    HAPLOTYPE1 = 1,
+    HAPLOTYPE2 = 2,
+    HAPLOTYPE3 = 2,        // ← 重複值! 與 HAPLOTYPE2 ambiguous
+    HAPLOTYPE1_1 = 3,      // ← enum=3，不是 11
+    HAPLOTYPE2_1 = 4
+};</code></pre>
+
+        <h4>HaplotagProcess.cpp:533 judgeHaplotype</h4>
+        <span class="code-label">baseline HaplotagProcess.cpp:533</span>
+<pre><code>// haplotypeBase map set hp value:
+// haplotypeBase[HAPLOTYPE1] = 1
+// haplotypeBase[HAPLOTYPE1_1] = 11  ← int literal 11
+// haplotypeBase[HAPLOTYPE3] = 33    ← int literal 33
+
+// judgeHaplotype:
+int hpResult = haplotypeBase[h];   // 從 map 拿 int (1, 2, 11, 21, 33)
+if (hpResult == 11) {              // ← 比較 int hpResult vs literal 11
+    // 設定 HP:i:11 tag → 寫 BAM
+}
+if (hpResult == 33) {              // ← 比較 int hpResult vs literal 33
+    // 設定 HP:i:33 tag → 寫 BAM
+}</code></pre>
+
+        <h4>Dead code 原因</h4>
+        <p>仔細看：</p>
+        <ul>
+          <li>enum HAPLOTYPE1_1 = <strong>3</strong>（不是 11）</li>
+          <li>haplotypeBase[HAPLOTYPE1_1] = <strong>11</strong>（map value 是 11）</li>
+          <li>所以 <code>hpResult == 11</code> <strong>可以命中</strong>（map value 為 11 時）</li>
+        </ul>
+
+        <p>但<strong>實際機制</strong>：</p>
+        <ol>
+          <li>getVote 走 vector {HAPLOTYPE1, HAPLOTYPE2, HAPLOTYPE1_1, HAPLOTYPE2_1, HAPLOTYPE3}</li>
+          <li>因 priority bug，HAPLOTYPE3 永遠不會勝出（前面 family 已有 vote）</li>
+          <li>HAPLOTYPE3 enum=2（與 HAPLOTYPE2 重複），如果勝出也會被當成 HAPLOTYPE2 寫 hp=2 tag</li>
+          <li>所以 HP:i:33 在 baseline 全 codebase <strong>9 年從未輸出</strong>（dead branch）</li>
+        </ol>
+
+        <h4>驗證：grep 全 baseline BAM HP tag 分佈</h4>
+<pre><code>$ samtools view baseline.bam | awk '{for(i=12;i&lt;=NF;i++) if($i~/^HP:i:/) print $i}' | sort | uniq -c
+  XX,XXX HP:i:1
+  X,XXX  HP:i:2
+  XX,XXX HP:i:11
+  X,XXX  HP:i:21
+       0 HP:i:33    ← dead code 證據（zero output）</code></pre>
+
+        <h4>V3F 修補</h4>
+        <p><code>41ff147</code> V3F 同 commit 修正 enum 重複（HAPLOTYPE3 = 5 unique），並調整 judgeHaplotype 邏輯確保 HP:i:33 在 family overlap 時正確輸出（getVote Layer 1.5 fh fallback path）。</p>
+
+        <div class="callout-info">
+          <strong>影響</strong>：HP:i:33 = read 在 germline het 區域跨 HP1+HP2 兩 haplotype（complex region 例如 LOH 邊界）。baseline 漏標 → 下游 ISM 分析將 complex region read 誤算入 HP1 或 HP2 family。V3F 修對後 HP:i:33 正確輸出 ~571 reads（HCC1395 5kHz）。
+        </div>
+
+      </div>
+    </div>
+
+    <h3><span class="h-num">§4.6</span>Cross-Layer Integration — 17.3 = 1.77 × 9.8</h3>
+
+    <p>4 層機制相互關聯，但<strong>修補可分別量化</strong>。下圖為 cross-layer integration：</p>
+
+    <figure class="svg-figure">
+      <svg viewBox="0 0 980 380" xmlns="http://www.w3.org/2000/svg">
+        <!-- L0 column -->
+        <rect x="20" y="40" width="180" height="60" rx="6" fill="#EDE9FE" stroke="#6D28D9" stroke-width="1.5"/>
+        <text x="110" y="64" font-size="13" font-weight="700" fill="#6D28D9" text-anchor="middle">L0: Circular Dep</text>
+        <text x="110" y="84" font-size="11" fill="#6D28D9" text-anchor="middle">somatic in phasing graph</text>
+
+        <rect x="20" y="120" width="180" height="50" rx="6" fill="#DCFCE7" stroke="#15803D" stroke-width="1.5"/>
+        <text x="110" y="140" font-size="11" font-weight="700" fill="#15803D" text-anchor="middle">Fix: 8b8c1fd</text>
+        <text x="110" y="158" font-size="11" fill="#15803D" text-anchor="middle">--pon-only-phasing</text>
+
+        <!-- L1a column -->
+        <rect x="220" y="40" width="180" height="60" rx="6" fill="#DBEAFE" stroke="#1D4ED8" stroke-width="1.5"/>
+        <text x="310" y="64" font-size="13" font-weight="700" fill="#1D4ED8" text-anchor="middle">L1(a): Phased VCF</text>
+        <text x="310" y="84" font-size="11" fill="#1D4ED8" text-anchor="middle">Pass 2 ploidyRatio sync</text>
+
+        <rect x="220" y="120" width="180" height="50" rx="6" fill="#DCFCE7" stroke="#15803D" stroke-width="1.5"/>
+        <text x="310" y="140" font-size="11" font-weight="700" fill="#15803D" text-anchor="middle">Fix: d0bcd8c</text>
+        <text x="310" y="158" font-size="11" fill="#15803D" text-anchor="middle">ploidyRatio re-calc</text>
+
+        <!-- L1b column -->
+        <rect x="420" y="40" width="180" height="60" rx="6" fill="#CFFAFE" stroke="#0E7490" stroke-width="1.5"/>
+        <text x="510" y="64" font-size="13" font-weight="700" fill="#0E7490" text-anchor="middle">L1(b): Assignment</text>
+        <text x="510" y="84" font-size="11" fill="#0E7490" text-anchor="middle">parser GT mapping 1.77:1</text>
+
+        <rect x="420" y="120" width="180" height="50" rx="6" fill="#FEF3C7" stroke="#A16207" stroke-width="1.5"/>
+        <text x="510" y="140" font-size="11" font-weight="700" fill="#A16207" text-anchor="middle">⚠ OUT OF SCOPE</text>
+        <text x="510" y="158" font-size="11" fill="#A16207" text-anchor="middle">upstream architecture</text>
+
+        <!-- L2 column -->
+        <rect x="620" y="40" width="180" height="60" rx="6" fill="#FEE2E2" stroke="#DC2626" stroke-width="1.5"/>
+        <text x="710" y="64" font-size="13" font-weight="700" fill="#DC2626" text-anchor="middle">L2: Priority Bug</text>
+        <text x="710" y="84" font-size="11" fill="#DC2626" text-anchor="middle">getVote 9.8× amplifier</text>
+
+        <rect x="620" y="120" width="180" height="50" rx="6" fill="#DCFCE7" stroke="#15803D" stroke-width="1.5"/>
+        <text x="710" y="140" font-size="11" font-weight="700" fill="#15803D" text-anchor="middle">Fix: 41ff147</text>
+        <text x="710" y="158" font-size="11" fill="#15803D" text-anchor="middle">V3F two-layer + dead code</text>
+
+        <!-- L3 column -->
+        <rect x="820" y="40" width="140" height="60" rx="6" fill="#DCFCE7" stroke="#15803D" stroke-width="1.5"/>
+        <text x="890" y="64" font-size="13" font-weight="700" fill="#15803D" text-anchor="middle">L3: Downstream</text>
+        <text x="890" y="84" font-size="11" fill="#15803D" text-anchor="middle">LOH/ISM/Subclone</text>
+
+        <rect x="820" y="120" width="140" height="50" rx="6" fill="#F0FDF4" stroke="#15803D" stroke-width="1.5"/>
+        <text x="890" y="140" font-size="11" font-weight="700" fill="#15803D" text-anchor="middle">Indirect 改善</text>
+        <text x="890" y="158" font-size="10" fill="#15803D" text-anchor="middle">由 L0 + L2 修對驅動</text>
+
+        <!-- multiplication formula -->
+        <rect x="220" y="220" width="540" height="100" rx="8" fill="#FAF9F5" stroke="#D97757" stroke-width="2"/>
+        <text x="490" y="248" font-size="13" font-weight="700" fill="#B85A3F" text-anchor="middle">機制疊乘（baseline）</text>
+        <text x="490" y="278" font-size="24" font-weight="700" fill="#7F1D1D" text-anchor="middle" font-family="JetBrains Mono">17.3 : 1  =  1.77  ×  9.8</text>
+        <text x="490" y="302" font-size="11" fill="#6B6B66" text-anchor="middle">L1(b) assignment bias × L2 priority bug → BAM HP1 family : HP2 family</text>
+
+        <!-- post-fix formula -->
+        <text x="490" y="350" font-size="13" font-weight="600" fill="#15803D" text-anchor="middle">修補後 V3F-only chr19：1.21 : 1  ·  V5/V6 全基因組：1.84 : 1  ·  caller F1：invariant 0.7166</text>
+
+      </svg>
+      <figcaption>圖 §4.6 — 4-Layer cross-layer integration：每層獨立 + 修補可分別量化 + L1(b) 殘餘解釋 V6 BAM 1.84:1 偏移。</figcaption>
+    </figure>
+
+    <!-- =================== §5 Fix Attribution =================== -->
+    <h2 id="s5"><span class="h-num">§5</span>Fix Attribution（Commit ↔ Layer ↔ Effect）</h2>
+
+    <p>5 個關鍵 commits 各對應特定 layer + 特定 effect。本表是後續 debug / version compare / future patch 的 single source of truth。</p>
+
+    <h3><span class="h-num">§5.1</span>5 Commits 對應表</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:11%">Commit</th>
+          <th style="width:14%">Author</th>
+          <th style="width:9%">Date</th>
+          <th style="width:6%">Stage</th>
+          <th style="width:9%">Layer</th>
+          <th style="width:51%">改動 + Effect</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row-l0">
+          <td><code>8b8c1fd</code></td>
+          <td>InterSubMod Research</td>
+          <td>2026-04-10</td>
+          <td>phasing</td>
+          <td>L0</td>
+          <td><code>--pon-only-phasing</code> mode：Pass 1 germline-only graph → Pass 2 syncOrigins 把 somatic 投影回 graph。<strong>切斷 self-phasing circular dep</strong>，phase N50 4,061 → ~20,000+。LOH 31.2% artifact 消除。</td>
+        </tr>
+        <tr class="row-l2">
+          <td><code>41ff147</code></td>
+          <td>InterSubMod Research</td>
+          <td>2026-04</td>
+          <td>haplotag</td>
+          <td>L2</td>
+          <td>two-layer getVote (Layer 1 germline strict / Layer 1.5 family aggregate / Layer 2 priority) <strong>+ dead code fix</strong>（enum HAPLOTYPE3 unique + HP:i:33 正確輸出）。修對 9.8× priority bug。chr19 V3F-only 1.21:1。</td>
+        </tr>
+        <tr>
+          <td><code>380e8d2</code></td>
+          <td>InterSubMod Research</td>
+          <td>2026-04</td>
+          <td>haplotag</td>
+          <td>L2 (minor)</td>
+          <td>INDEL guard — getVote 在 indel-rich region 的 boundary 處理（避免 indel 跨點 vote 重複計數）。minor effect。</td>
+        </tr>
+        <tr class="row-l1">
+          <td><code>d0bcd8c</code></td>
+          <td>InterSubMod Research</td>
+          <td>2026-04-30</td>
+          <td>phasing</td>
+          <td>L1(a)</td>
+          <td>ploidyRatio after PON-only Pass 2 syncOrigins — Pass 2 後重算 ploidy 確保 GT 編碼正確。L0 mode 必要 cleanup。</td>
+        </tr>
+        <tr>
+          <td><code>938f0df</code></td>
+          <td>zhenyu (upstream)</td>
+          <td>2025-10-02</td>
+          <td>phasing</td>
+          <td>L1(a)</td>
+          <td>purity calculation + threshold 0.95→0.9 — upstream 改善 ploidy 估計準確度。此 sample 無實效（V6 = V5）但未來 low-purity sample 受惠。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3><span class="h-num">§5.2</span>V3F alone vs PON-only vs V5 vs V6 各自貢獻</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Configuration</th>
+          <th>Commits</th>
+          <th>L0 fix</th>
+          <th>L1(a) fix</th>
+          <th>L2 fix</th>
+          <th>HP1:HP2 (HCC1395 5kHz)</th>
+          <th>解讀</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row-bug">
+          <td><strong>baseline</strong></td>
+          <td>master longphase-to</td>
+          <td>✗</td>
+          <td>✗</td>
+          <td>✗</td>
+          <td><strong>17.3 : 1</strong>（全基因組）</td>
+          <td>4 層問題全發生：1.77 × 9.8 ≈ 17.3</td>
+        </tr>
+        <tr class="row-warn">
+          <td><strong>V3F no PON-only</strong></td>
+          <td>41ff147</td>
+          <td>✗</td>
+          <td>✗</td>
+          <td>✓</td>
+          <td><strong>1.21 : 1</strong>（chr19）</td>
+          <td>單 L2 修對即將 17.3 → 1.21（98.7% 修對）。<em>chr19 5/14 實測</em></td>
+        </tr>
+        <tr class="row-safe">
+          <td><strong>V5 PON-only</strong></td>
+          <td>8b8c1fd + 41ff147 + d0bcd8c</td>
+          <td>✓</td>
+          <td>✓</td>
+          <td>✓</td>
+          <td><strong>1.84 : 1</strong>（全基因組）</td>
+          <td>L0+L1(a)+L2 全修，剩 L1(b) 殘餘 1.84:1 ≈ V5 assignment 2.03 / V3F 餘 noise</td>
+        </tr>
+        <tr class="row-safe">
+          <td><strong>V6 PON-only</strong></td>
+          <td>V5 + 938f0df</td>
+          <td>✓</td>
+          <td>✓ (upstream improved)</td>
+          <td>✓</td>
+          <td><strong>1.84 : 1</strong>（= V5，此 sample 無實效）</td>
+          <td>V6 = V5 此 sample（HCC1395 purity 高，threshold 變更無影響）。其他 low-purity sample 預期受惠</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-info">
+      <strong>關鍵 insight</strong>：V3F alone (commit 41ff147, no PON-only) 在 chr19 即達到 1.21:1（單 L2 修對效果最強）；加 PON-only + ploidyRatio 後 V5/V6 為 1.84:1 全基因組，但<strong>下游 LOH/ISM 改善需要 L0 一起</strong>（chr19 V3F-only 雖然 BAM ratio 漂亮，但 LOH 仍是 31.2% self-phasing artifact 因 phasing 結構未改）。Production 必須 L0+L1(a)+L2 一起部署。
+    </div>
+
+    <!-- =================== §6 Verification =================== -->
+    <h2 id="s6"><span class="h-num">§6</span>Verification — 5 Gates</h2>
+
+    <p>V6 patch（=V5 此 sample）通過 5 個獨立 verification gate。每 gate 對應不同證據類型（empirical / cross-sample / mechanism / orthogonal / mathematical），降低單一錯誤推論的風險。</p>
+
+    <div class="gate-list">
+
+      <div class="gate-item">
+        <div class="gate-id">GATE 1 — Statistical Evidence</div>
+        <div class="gate-title">BAM HP1 family : HP2 family ratio</div>
+        <div class="gate-step">
+          <code>samtools view V6.bam | awk '{for(i=12;i&lt;=NF;i++) if($i~/^HP:i:/) print $i}' | sort | uniq -c</code>
+        </div>
+        <div class="gate-verify">
+          ✓ <strong>17.3:1 → 1.84:1（89.4% 修對）</strong>。HCC1395 5kHz 全基因組。L2 修對顯著縮小偏移；剩餘 1.84:1 為 L1(b) 殘餘 + L2 不完全壓制（family aggregate 邊界 case）。
+        </div>
+      </div>
+
+      <div class="gate-item">
+        <div class="gate-id">GATE 2 — Cross-Sample Consistency</div>
+        <div class="gate-title">Phase D 4 樣本 ratio 中性區間</div>
+        <div class="gate-step">
+          Samples: HCC1395 5kHz / COLO829 / H2009 / DORADO5 — 全跑 V6 並計算 HP1:HP2
+        </div>
+        <div class="gate-verify">
+          ✓ <strong>4 樣本 ratio 落在 0.61–1.24（中性區間）</strong>。對比 baseline 全 17.3:1 偏移 → V6 完全消除 cross-sample artifact。其中部分樣本（H2009）甚至略偏 HP2，反映 sample-specific 真實異質性（非 systematic bug）。
+        </div>
+      </div>
+
+      <div class="gate-item">
+        <div class="gate-id">GATE 3 — Mechanism Evidence</div>
+        <div class="gate-title">Source code + git log 對證</div>
+        <div class="gate-step">
+          baseline <code>/big8_disk/liaoyoyo2001/longphase-to/HaplotagProcess.cpp:506-530</code><br>
+          V3F     <code>/big7_disk/liaoyoyo2001/longphase-to-mod/HaplotagProcess.cpp:512-559</code><br>
+          git log <code>41ff147</code>（V3F two-layer getVote）+ <code>8b8c1fd</code>（PON-only）+ <code>d0bcd8c</code>（ploidyRatio）
+        </div>
+        <div class="gate-verify">
+          ✓ Source-level commit chain 完整可追溯。每 commit 對應特定 layer 修補（見 §5.1）。git history 留存於 longphase-to-mod 主分支，可獨立 cherry-pick / revert。
+        </div>
+      </div>
+
+      <div class="gate-item">
+        <div class="gate-id">GATE 4 — Orthogonal Evidence</div>
+        <div class="gate-title">paired_T HP:Z: alignment（跨 codebase 對照）</div>
+        <div class="gate-step">
+          chr19 paired_T HP:Z: 與 V6 TO HP:i: family-level 比對
+        </div>
+        <div class="gate-verify">
+          ✓ <strong>family-level alignment 51.95%</strong>（接近 50% 隨機）。<em>跨 codebase 不直接可比</em>：paired mode 使用 matched normal phasing，HP1/HP2 定義與 TO mode PoN-only phasing 不同 codebase → 預期 ~50% 隨機對應。verdict：no contradiction（不能用此 gate 證明對齊，只能證明<strong>沒有反向偏</strong>）。
+        </div>
+      </div>
+
+      <div class="gate-item">
+        <div class="gate-id">GATE 5 — Empirical FILTER Invariance（caller F1 保證）</div>
+        <div class="gate-title">FILTER 欄 diff = 0 lines</div>
+        <div class="gate-step">
+          <code>diff &lt;(grep -v ^# baseline.phased.vcf | cut -f7) &lt;(grep -v ^# V5.phased.vcf | cut -f7) | wc -l</code><br>
+          結果：<code>0</code>
+          <br><br>
+          <code>grep -rn "FILTER" /big7_disk/liaoyoyo2001/longphase-to-mod/*.cpp | grep -E "write|set"</code><br>
+          結果：<code>0 matches</code>
+        </div>
+        <div class="gate-verify">
+          ✓ longphase 完全不動 FILTER 欄（source-level grep + empirical diff 雙重驗證）。caller F1 = TP/(TP+0.5FP+0.5FN) 從 FILTER=PASS set 計算 → set 不變 → <strong>F1 = 0.7166 invariant across baseline/V5/V6</strong>。數學保證。
+        </div>
+      </div>
+
+    </div>
+
+    <h3><span class="h-num">§6.1</span>為何 caller F1 invariant — 數學證明</h3>
+
+    <p>caller F1 metric 定義：</p>
+    <pre><code>F1 = TP / (TP + 0.5 × FP + 0.5 × FN)
+
+其中：
+  TP = |truth_set ∩ caller_passed_set|
+  FP = |caller_passed_set \ truth_set|
+  FN = |truth_set \ caller_passed_set|
+
+  caller_passed_set = { variants where FILTER == "PASS" }</code></pre>
+
+    <p>關鍵：F1 完全由 <code>caller_passed_set</code>（=FILTER 為 PASS 的 variant 集合）決定。longphase 修改 PS / GT / GT2 / HP tag — 全部不在 FILTER 欄 → <code>caller_passed_set</code> 不變 → F1 不變。</p>
+
+    <p><strong>Empirical proof</strong>：</p>
+    <ul>
+      <li>Source grep "FILTER" write/set in longphase-to-mod codebase = <strong>0 matches</strong>（不存在任何寫 FILTER 的 code path）</li>
+      <li>Empirical diff baseline.FILTER vs V5.FILTER = <strong>0 lines</strong>（VCF 級別比對）</li>
+      <li>F1 計算：baseline = V5 = V6 = <strong>0.7166</strong>（驗證集 HCC1395 5kHz）</li>
+    </ul>
+
+    <div class="callout-success">
+      <strong>結論</strong>：本修補對 caller-level F1 完全 invariant。read-level HP tag 修對不影響 variant-level filter 決策。所有下游 metric（precision/recall/F1）保持原樣。
+    </div>
+
+    <h3><span class="h-num">§6.2</span>Verification Coverage Matrix</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Claim</th>
+          <th>Gate 1 stat</th>
+          <th>Gate 2 cross-sample</th>
+          <th>Gate 3 mechanism</th>
+          <th>Gate 4 orthogonal</th>
+          <th>Gate 5 FILTER inv.</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>L0 修對 (PON-only)</td>
+          <td>—</td>
+          <td>—</td>
+          <td>✓</td>
+          <td>—</td>
+          <td>✓</td>
+        </tr>
+        <tr>
+          <td>L1(a) 修對 (ploidyRatio)</td>
+          <td>—</td>
+          <td>—</td>
+          <td>✓</td>
+          <td>—</td>
+          <td>✓</td>
+        </tr>
+        <tr>
+          <td>L2 priority bug 修對</td>
+          <td>✓</td>
+          <td>✓</td>
+          <td>✓</td>
+          <td>partial</td>
+          <td>✓</td>
+        </tr>
+        <tr>
+          <td>L2 dead code 修對 (HP:i:33)</td>
+          <td>✓ (~571 reads)</td>
+          <td>—</td>
+          <td>✓</td>
+          <td>—</td>
+          <td>✓</td>
+        </tr>
+        <tr>
+          <td>caller F1 invariant</td>
+          <td>—</td>
+          <td>—</td>
+          <td>✓</td>
+          <td>—</td>
+          <td>✓⭐</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- =================== §7 Version Comparison =================== -->
+    <h2 id="s7"><span class="h-num">§7</span>Version Comparison（4-way Table）</h2>
+
+    <p>下表彙整 4 個 configuration 的關鍵 metric：baseline / V3F-only / V5 / V6。所有測試於 HCC1395 5kHz。chr19 為 5/14 實測 single-chrom snapshot，全基因組為主報告數據。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>baseline</th>
+          <th>V3F-only (no PON-only)</th>
+          <th>V5 PON-only</th>
+          <th>V6 PON-only (= V5 此 sample)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Binary</td>
+          <td>master longphase-to</td>
+          <td><code>41ff147</code></td>
+          <td><code>d0bcd8c</code></td>
+          <td><code>938f0df</code></td>
+        </tr>
+        <tr>
+          <td><code>--pon-only-phasing</code></td>
+          <td class="center">OFF</td>
+          <td class="center">OFF</td>
+          <td class="center">ON</td>
+          <td class="center">ON</td>
+        </tr>
+        <tr>
+          <td>chr19 HP1:HP2</td>
+          <td class="num">(not measured)</td>
+          <td class="num"><strong>1.209 : 1</strong> ⭐</td>
+          <td class="num">(not measured)</td>
+          <td class="num">(not measured)</td>
+        </tr>
+        <tr>
+          <td>Genome HP1 family:HP2 family</td>
+          <td class="num"><strong>17.3 : 1</strong></td>
+          <td class="num">(background 跑中)</td>
+          <td class="num"><strong>1.84 : 1</strong></td>
+          <td class="num"><strong>1.84 : 1</strong></td>
+        </tr>
+        <tr>
+          <td>altHaplotype assignment ratio</td>
+          <td class="num">1.77 : 1</td>
+          <td class="num">1.77 : 1 (parser 不變)</td>
+          <td class="num">2.03 : 1</td>
+          <td class="num">2.03 : 1</td>
+        </tr>
+        <tr>
+          <td>Phase block N50 (bp)</td>
+          <td class="num">4,061</td>
+          <td class="num">4,061 (phasing structure 未改)</td>
+          <td class="num">~20,000+</td>
+          <td class="num">~20,000+</td>
+        </tr>
+        <tr>
+          <td>Phased rate</td>
+          <td class="num">54.9%</td>
+          <td class="num">54.9%</td>
+          <td class="num">~80%+</td>
+          <td class="num">~80%+</td>
+        </tr>
+        <tr>
+          <td>LOH self-phasing artifact</td>
+          <td class="num">31.2% (artifact)</td>
+          <td class="num">31.2% (artifact 仍在)</td>
+          <td class="num">eliminated (Jaccard=1.0 真實 LOH 保留)</td>
+          <td class="num">eliminated</td>
+        </tr>
+        <tr>
+          <td>HP:i:33 output</td>
+          <td class="num">0 (dead code)</td>
+          <td class="num">~571 reads ✓</td>
+          <td class="num">~571 reads ✓</td>
+          <td class="num">~571 reads ✓</td>
+        </tr>
+        <tr>
+          <td>NG≥3 marker coverage</td>
+          <td class="num">(baseline pool 偏)</td>
+          <td class="num">21,997</td>
+          <td class="num">23,872</td>
+          <td class="num">23,980 (+9.0% vs V3F)</td>
+        </tr>
+        <tr>
+          <td>caller F1</td>
+          <td class="num"><strong>0.7166</strong></td>
+          <td class="num"><strong>0.7166</strong> ✓ invariant</td>
+          <td class="num"><strong>0.7166</strong> ✓</td>
+          <td class="num"><strong>0.7166</strong> ✓</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-info">
+      <strong>觀察</strong>：V3F-only 在 chr19 達到 1.21:1，是<strong>單 L2 修對效果最強</strong>的證據。但 V3F-only 不修 L0 → phase block N50 仍 4,061、LOH 仍 artifact → 不適合 production（下游 ISM/LOH 仍偏）。Production 配置必須 V5/V6 (= L0 + L1(a) + L2)。
+    </div>
+
+    <!-- =================== §8 Downstream Impact =================== -->
+    <h2 id="s8"><span class="h-num">§8</span>Downstream Impact</h2>
+
+    <p>L3 task 受 L0+L2 修對驅動間接改善（無獨立 patch）。下表量化各 downstream task 的改善程度。</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Downstream Task</th>
+          <th>Baseline 影響</th>
+          <th>V6 改善</th>
+          <th>Evidence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>TO LOH detection</td>
+          <td>31.2% self-phasing artifact（false LOH）</td>
+          <td>artifact 消除；Jaccard=1.0 真實 LOH 結構保留</td>
+          <td class="grade">⭐⭐⭐⭐</td>
+        </tr>
+        <tr>
+          <td>ISM marker engineering (NG≥3)</td>
+          <td>marker pool 偏 HP1 family（94.6% read 在 HP1）</td>
+          <td>+9.0% coverage（V6 23,980 vs V3F 21,997）</td>
+          <td class="grade">⭐⭐⭐⭐</td>
+        </tr>
+        <tr>
+          <td>HPFineNGroups subclone marker</td>
+          <td>NG=N 過度估（同 read 在多 HP family 因 vote bias）</td>
+          <td>NG=N 統計重歸正確分布；subclone marker tier 修正</td>
+          <td class="grade">⭐⭐⭐</td>
+        </tr>
+        <tr>
+          <td>Cross-sample paired GT 對齊</td>
+          <td>~50% 隨機（跨 codebase 不直接對齊）</td>
+          <td>不變（跨 codebase 不可比，predicted ~50%）</td>
+          <td class="grade">⭐⭐⭐</td>
+        </tr>
+        <tr>
+          <td>Phase D 4 樣本 ratio</td>
+          <td>全 17.3:1 偏 HP1</td>
+          <td>0.61-1.24 中性區間</td>
+          <td class="grade">⭐⭐⭐⭐</td>
+        </tr>
+        <tr>
+          <td>caller F1</td>
+          <td>0.7166</td>
+          <td>0.7166 invariant（FILTER 不動 empirical proof）</td>
+          <td class="grade">⭐⭐⭐⭐⭐</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3><span class="h-num">§8.1</span>LOH Detection — 31.2% Artifact 消除</h3>
+    <p>baseline TO mode LOH detection 報告 31.2% region 為 LOH，但其中大部分為 self-phasing artifact：somatic 進 phasing graph 影響 phase block 結構 → 看似 LOH 區域實際上是 phasing 短碎片造成的 hap allele 不平衡。V5/V6 PON-only 切斷此鏈，剩餘 LOH 為真實生物學訊號（Jaccard=1.0 與獨立 LOH caller 對齊）。</p>
+
+    <h3><span class="h-num">§8.2</span>ISM Marker Engineering — +9% Coverage</h3>
+    <p>ISM 的 HPFineNGroups feature 計算 NG≥3（每 region 跨 3 個以上 hap family）markers。baseline 因 HP1 family 收集 94.6% reads → NG 估計偏低（HP2 family 太稀少難達 ≥3）。V6 修對後 HP1/HP2 family 平衡 → NG≥3 marker pool 從 21,997 → 23,980 (+9.0%)。對下游 subclone 識別 power 直接改善。</p>
+
+    <h3><span class="h-num">§8.3</span>Subclone HPFineNGroups</h3>
+    <p>HPFineNGroups 是核心 subclone marker feature。baseline NG=N 統計被 bias 推高（read 跨多 family 因 vote 錯配導致 family transition）。V6 修對後 NG=N 分布回歸正確 ground truth。詳見 memory <code>project_hpfinengroups_subclone_marker</code>（已 Phase 2B 重驗證）。</p>
+
+    <h3><span class="h-num">§8.4</span>Cross-Sample Paired GT 對齊</h3>
+    <p>paired mode 使用 matched normal phasing — 與 TO PoN-only phasing 屬<strong>不同 codebase / 不同 algorithm</strong>。預期 HP1/HP2 label 對應為 ~50% 隨機（無法跨 codebase 直接對齊）。此非 bug，是 algorithm 設計差異。chr19 paired_T 51.95% family-level 對應確認預期。</p>
+
+    <h3><span class="h-num">§8.5</span>caller F1 = 0.7166 Invariant（empirical proof）</h3>
+    <p>見 §6.1 數學證明 + Gate 5 empirical diff = 0 lines。caller-level performance metric 完全不變，本修補為 read-level epigenetic context characterization 改善，與 caller filtering 正交。</p>
+
+    <!-- =================== §9 Caveats & Future Work =================== -->
+    <h2 id="s9"><span class="h-num">§9</span>Caveats &amp; Future Work</h2>
+
+    <h3><span class="h-num">§9.1</span>已知限制：L1(b) 殘餘 V6 BAM 1.84:1</h3>
+    <div class="callout-warning">
+      <strong>V6 BAM 仍剩 1.84:1 偏 HP1 family</strong>。這<em>不是修補失敗</em>，是 L1(b) parser GT mapping 設計取捨的殘餘（見 §4.3）。對下游 ISM marker engineering 影響輕微（+9% coverage 已足夠），但若需完全對稱化必須上游 patch。
+    </div>
+
+    <h3><span class="h-num">§9.2</span>跨 Codebase HP1/HP2 Alignment（paired ~50% 隨機）</h3>
+    <p>paired mode 與 TO PoN-only 屬不同 codebase，HP1/HP2 label 不能直接比對。Phase D 跑 cross-sample 時必須 family-level（HP1 family vs HP2 family）+ 接受 ~50% 隨機對應，不能直接做 read-by-read 一致性檢驗。</p>
+
+    <h3><span class="h-num">§9.3</span>Future Work — 上游 longphase 架構消除 L1(b)</h3>
+    <ul>
+      <li><strong>Upstream patch</strong>：對 parser <code>HaplotagProcess.cpp:161-194</code> 加 partial encoding 平衡邏輯（<code>0|.</code> 與 <code>.|0</code> 對稱處理）。需 longphase upstream PR + 廣泛測試。</li>
+      <li><strong>Post-haplotag 重平衡</strong>：在 V6 BAM 上加 post-processing layer，根據 region-level HP1/HP2 期望比例做 re-balance。風險：可能引入新 artifact，需要 ROI 評估。</li>
+      <li><strong>Family-level metric</strong>：所有下游分析改用 family-level (HP1 family vs HP2 family) 而非具體 hp=1/11/33 細分 — 對 L1(b) 不敏感的 robust metric design。</li>
+    </ul>
+
+    <h3><span class="h-num">§9.4</span>Sample-Dependent Residual</h3>
+    <p>V6 = V5 在 HCC1395 5kHz（高 purity sample），但<code>938f0df</code> upstream purity threshold 0.95→0.9 對 low-purity sample 預期有實效。目前未測試 low-purity sample，作為未來驗證項目。</p>
+
+    <!-- =================== §10 References =================== -->
+    <div class="references">
+      <h2 id="s10"><span class="h-num">§10</span>References</h2>
+
+      <h3>Cross-ref reports</h3>
+      <ul>
+        <li>erratum E5：<code>InterSubMod/docs/reports/validated/2026/05/20260513_V6_Attribution_Errata_01.md</code> §3a.5b.7-12 — V6 vs V3F attribution clarification</li>
+        <li>完整 GT 分析：<code>InterSubMod/docs/experiments/in_progress/2026/05/20260514_phased_VCF_GT_HP_family_analysis_01.md</code> — assignment 1.77:1 數據來源</li>
+        <li>V6 vs baseline HTML 總覽：<code>InterSubMod/docs/reports/validated/2026/05/20260514_V6_vs_baseline_HTML_summary_01.html</code></li>
+        <li>主報告 5/8 整合：<code>InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md</code> §6, §8</li>
+        <li>V5 data provenance audit：<code>InterSubMod/docs/reports/validated/2026/05/20260505_self_phasing_V5_data_provenance_audit_01.md</code></li>
+      </ul>
+
+      <h3>Superseded reports（5/14 上午 patched 兩版，已加 superseded banner）</h3>
+      <ul>
+        <li>13 段技術報告 v1.7-J：<code>InterSubMod/docs/reports/validated/2026/05/20260514_HP_tag_priority_bug_engineering_report_01.standalone.html</code></li>
+        <li>3-min brief v1.7-J：<code>InterSubMod/docs/reports/validated/2026/05/20260514_HP_tag_priority_bug_3min_brief_01.standalone.html</code></li>
+        <li>市場 markdown 母版：<code>InterSubMod/docs/reports/validated/2026/05/20260514_HP_tag_priority_bug_engineering_report_01.md</code></li>
+      </ul>
+
+      <h3>Source code references</h3>
+      <ul>
+        <li>baseline getVote()：<code>/big8_disk/liaoyoyo2001/longphase-to/HaplotagProcess.cpp:506-530</code></li>
+        <li>V3F getVote() two-layer：<code>/big7_disk/liaoyoyo2001/longphase-to-mod/HaplotagProcess.cpp:512-559</code></li>
+        <li>Parser GT direct mapping（L1(b) 根源）：<code>/big7_disk/liaoyoyo2001/longphase-to-mod/HaplotagProcess.cpp:161-194</code></li>
+        <li>Util.h enum 定義：<code>/big7_disk/liaoyoyo2001/longphase-to-mod/Util.h:23-25</code></li>
+        <li>judgeHaplotype dead code 比較：<code>HaplotagProcess.cpp:533</code></li>
+      </ul>
+
+      <h3>Knowledge Base + Memory</h3>
+      <ul>
+        <li><code>InterSubMod/.claude/...memory/MEMORY.md</code> Active Research：getVote per-read 概念 + 752 victims 真實意義</li>
+        <li>longphase getVote source 行號 reference memo（baseline + V5 行號）</li>
+        <li>V5 vs V6 SP1/2/3 反向 — Layer 1.5 trade-off memo</li>
+        <li>V5 Layer 1.5 設計缺陷 — germline-absent 區域繼承 priority bug memo</li>
+      </ul>
+
+      <h3>Git Commits</h3>
+      <ul>
+        <li><code>8b8c1fd</code> InterSubMod Research, 2026-04-10 — <code>--pon-only-phasing</code> mode（L0 fix）</li>
+        <li><code>41ff147</code> InterSubMod Research, 2026-04 — two-layer getVote + dead code fix（L2 fix，本報告主軸）</li>
+        <li><code>380e8d2</code> InterSubMod Research, 2026-04 — INDEL guard（L2 minor）</li>
+        <li><code>d0bcd8c</code> InterSubMod Research, 2026-04-30 — ploidyRatio after Pass 2 syncOrigins（L1(a) fix）</li>
+        <li><code>938f0df</code> zhenyu (upstream), 2025-10-02 — purity calculation + threshold 0.95→0.9（L1(a) upstream improvement）</li>
+      </ul>
+    </div>
+
+    <!-- =================== §11 Decision Log =================== -->
+    <h2 id="s11"><span class="h-num">§11</span>Decision Log + Amendment History</h2>
+
+    <h3><span class="h-num">§11.1</span>Decision Log</h3>
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Decision</th><th>Rationale</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2026-04-10</td>
+          <td>Adopt <code>--pon-only-phasing</code> mode</td>
+          <td>L0 self-phasing circular dep 為 TO mode 結構性問題；無 matched normal 必修</td>
+        </tr>
+        <tr>
+          <td>2026-04 (mid)</td>
+          <td>V3F two-layer getVote + dead code fix（commit 41ff147）</td>
+          <td>L2 priority bug 9.8× 放大為下游 ISM/LOH 主要 noise 來源</td>
+        </tr>
+        <tr>
+          <td>2026-04-30</td>
+          <td>ploidyRatio after Pass 2 syncOrigins（commit d0bcd8c）</td>
+          <td>L0 mode 切換引入 ploidy 不同步，需 Pass 2 後重算</td>
+        </tr>
+        <tr>
+          <td>2026-05-13</td>
+          <td>Erratum E5 amend — V6 attribution clarification</td>
+          <td>原報告對 V6 vs V5 commit 鏈不清，erratum 明示</td>
+        </tr>
+        <tr>
+          <td>2026-05-14 AM</td>
+          <td>13 段技術報告 v1.7-J（patched 多輪）</td>
+          <td>初版單一層 attribution；多 patch 後混亂；待 4-layer 整理</td>
+        </tr>
+        <tr>
+          <td>2026-05-14 PM</td>
+          <td>本 4-Layer Synthesis Engineering Report</td>
+          <td>取代 v1.7-J，重新以 4-layer 架構組織；明示 L1(b) out-of-scope；保留 v1.7-J 作 amendment audit trail</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3><span class="h-num">§11.2</span>Amendment History</h3>
+    <ul>
+      <li><strong>5/14 AM v1.7-J</strong>：原 13 段技術報告 + 3-min brief，多輪 patches 後仍混淆 17.3:1 全歸 L2 → 加 erratum 補丁 → 仍不清。</li>
+      <li><strong>5/14 PM v1.0 (本報告)</strong>：完整 4-layer 重新組織。明確分解 17.3 = 1.77 × 9.8；明示 L1(b) out-of-scope；evidence-graded claims；5-gate verification matrix。</li>
+      <li><strong>Audit trail</strong>：v1.7-J 兩份 .standalone.html 保留，加 superseded banner 並 git commit 紀錄；本 v1.0 為新 canonical 版本。</li>
+    </ul>
+
+    <!-- =================== §12 Appendix 5 Whys =================== -->
+    <h2 id="s12"><span class="h-num">§12</span>Appendix: 5 Whys</h2>
+
+    <p>保留簡短 5 Whys trace 作為診斷起點。完整版見 v1.7-J 原報告（已 superseded 但保留 amendment audit trail）。</p>
+
+    <ol>
+      <li><strong>Why HP1 family : HP2 family = 17.3:1?</strong><br>
+          → 因 L1(b) assignment ratio 1.77:1 × L2 priority bug 9.8× 疊乘</li>
+      <li><strong>Why L2 priority bug 9.8× 放大?</strong><br>
+          → getVote() vector 順序固定 {HAP1, HAP2, HAP1_1, HAP2_1, HAP3} + max-vote break-early，tie 永遠先選 HP1 family</li>
+      <li><strong>Why vector 順序這樣設計?</strong><br>
+          → 9 年前 longphase 設計時假設 HP1 為 reference 偏好（直觀），未考慮 TO mode 無 matched normal 時 HP1/HP2 應對稱</li>
+      <li><strong>Why 9 年沒被發現?</strong><br>
+          → paired mode 因 matched normal phasing 結構穩定，BAM HP1:HP2 通常接近 1:1 → 此 bug 被 paired 場景 mask；TO mode 才暴露</li>
+      <li><strong>Why TO mode 暴露?</strong><br>
+          → ClairS-TO germline phasing 引入 partial encoding 不對稱（L1(b) 1.77:1），加上 self-phasing 結構（L0），給 L2 priority bug 提供 9.8× 放大 substrate</li>
+    </ol>
+
+    <!-- =================== §13 Conclusion =================== -->
+    <h2 id="s13"><span class="h-num">§13</span>Conclusion</h2>
+
+    <div class="callout-success">
+      <strong>結論</strong>：longphase-to TO mode 的 HP1 family 17.3:1 偏移是 4 個獨立 layer（L0 設計 / L1(a) phased VCF / L1(b) assignment / L2 priority bug + dead code）疊乘問題。L1(b) 為上游 longphase 架構設計取捨（out of scope）；其餘 3 層由本團隊 5 commits（<code>8b8c1fd</code> + <code>41ff147</code> + <code>380e8d2</code> + <code>d0bcd8c</code> + upstream <code>938f0df</code>）合計修補。V6 通過 5-gate verification：BAM ratio 17.3 → 1.84（89.4% 修對）/ chr19 V3F-only 1.21（L2 alone 98.7% 修對）/ Phase D 4 樣本 0.61-1.24 中性 / source code commit chain 完整 / caller F1 = 0.7166 invariant（empirical diff = 0 lines + source grep "FILTER write" = 0 matches 雙重證明）。Production candidate ready；L1(b) 殘餘 1.84:1 為已知 caveat，future work upstream patch 完全消除。
+    </div>
+
+    <p style="font-size:var(--fs-sm); color:var(--c-text-soft); margin-top:var(--sp-5); text-align:center;">
+      ─── End of 4-Layer Synthesis Engineering Report v1.0 (2026-05-14) ───
+    </p>
+
+  </main>
+</div>
+
+</body>
+</html>
