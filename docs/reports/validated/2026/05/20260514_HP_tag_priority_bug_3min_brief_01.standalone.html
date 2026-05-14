@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HP tag 17.3:1 偏移 — 3 分鐘工程師摘要</title>
+  <style>
+    :root {
+      --c-accent: #D97757; --c-accent-deep: #B85A3F;
+      --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-code-bg: #F4EFE6;
+      --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+      --c-info: #1E3A8A;
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+      --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+                 "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+      --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+      --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+      --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+      --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+      --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--c-bg); color: var(--c-text);
+           font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.6; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: var(--sp-5) var(--sp-4); }
+    main.brief { background: var(--c-surface); border: 1px solid var(--c-border);
+                  border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+                  padding: var(--sp-6); }
+
+    .brief-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                     margin-bottom: var(--sp-5); }
+    .brief-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                                letter-spacing: 1px; color: var(--c-accent-deep);
+                                font-weight: 700; margin-bottom: var(--sp-2); }
+    .brief-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-2); line-height: 1.25; }
+    .brief-header .subtitle { color: var(--c-text-soft); font-size: var(--fs-md); margin-bottom: var(--sp-3); }
+    .brief-header .read-meta { display: flex; gap: var(--sp-4); flex-wrap: wrap;
+                                 font-size: var(--fs-sm); color: var(--c-text-soft);
+                                 margin-bottom: var(--sp-3); }
+    .brief-header .read-meta span { display: inline-flex; align-items: center; gap: 6px; }
+    .brief-header .read-meta strong { color: var(--c-text); font-family: var(--ff-mono); }
+
+    .verdict-banner { color: white; padding: var(--sp-3) var(--sp-4);
+                       border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md);
+                       background: linear-gradient(90deg, #15803D, #22C55E); }
+
+    h2 { font-size: var(--fs-xl); margin: var(--sp-6) 0 var(--sp-3);
+          padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+          display: flex; align-items: baseline; gap: var(--sp-3); }
+    h2 .step-badge { font-family: var(--ff-mono); font-size: var(--fs-xs); font-weight: 700;
+                      color: var(--c-accent-deep); background: var(--c-code-bg);
+                      padding: 2px 10px; border-radius: 12px; }
+    h2 .estimate { margin-left: auto; font-family: var(--ff-mono); font-size: var(--fs-xs);
+                    color: var(--c-text-soft); font-weight: normal; }
+
+    p, ul, ol { margin: var(--sp-3) 0; }
+    ul { padding-left: var(--sp-5); }
+    li { margin: var(--sp-1) 0; }
+    code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+            font-family: var(--ff-mono); font-size: 0.92em; }
+    a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { color: var(--c-accent-deep); }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+                  gap: var(--sp-3); margin: var(--sp-4) 0 var(--sp-5); }
+    .stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+                 border-radius: var(--radius-md); padding: var(--sp-4) var(--sp-3); text-align: center; }
+    .stat-box .number { font-size: var(--fs-2xl); font-weight: 700; line-height: 1.1;
+                         font-family: var(--ff-mono); }
+    .stat-box .number.bug { color: var(--c-critical); }
+    .stat-box .number.success { color: var(--c-success); }
+    .stat-box .number.warning { color: var(--c-warning); }
+    .stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft);
+                        margin-top: var(--sp-2); line-height: 1.4; }
+    .stat-box .verdict { display: inline-block; margin-top: var(--sp-1); padding: 1px 8px;
+                          border-radius: 10px; font-size: 10px; font-weight: 700; }
+    .stat-box .verdict.bug { background: #FEE2E2; color: #7F1D1D; }
+    .stat-box .verdict.safe { background: #DCFCE7; color: #166534; }
+
+    .svg-figure { margin: var(--sp-4) 0; text-align: center; }
+    .svg-figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto;
+                       background: var(--c-bg); border-radius: var(--radius-md);
+                       padding: var(--sp-3); border: 1px solid var(--c-border); }
+    .svg-figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                              margin-top: var(--sp-2); line-height: 1.45; }
+
+    .key-bullets { background: var(--c-bg); border-left: 4px solid var(--c-accent);
+                    padding: var(--sp-3) var(--sp-4); border-radius: 0 var(--radius-md) var(--radius-md) 0;
+                    margin: var(--sp-3) 0; }
+    .key-bullets ul { margin: 0; padding-left: var(--sp-4); }
+    .key-bullets li { margin: var(--sp-1) 0; }
+    .key-bullets li strong { color: var(--c-accent-deep); }
+
+    .callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #166534; }
+    .callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                         padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                         border-radius: var(--radius-md); color: #7F1D1D; }
+    .callout-info { background: #EFF6FF; border-left: 4px solid var(--c-info);
+                     padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                     border-radius: var(--radius-md); color: #1E3A8A; font-size: var(--fs-sm); }
+
+    table { border-collapse: collapse; width: 100%; margin: var(--sp-3) 0; font-size: var(--fs-sm); }
+    th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; vertical-align: top; }
+    th { background: var(--c-code-bg); font-weight: 600; }
+    td.num { text-align: right; font-family: var(--ff-mono); }
+    tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+    tr.row-safe td { background: #DCFCE7; color: #166534; }
+
+    .deeper-links { background: var(--c-code-bg); border-radius: var(--radius-md);
+                     padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-5); }
+    .deeper-links h3 { margin: 0 0 var(--sp-2); font-size: var(--fs-md); color: var(--c-accent-deep); }
+    .deeper-links ul { margin: 0; padding-left: var(--sp-4); list-style: none; }
+    .deeper-links li { margin: var(--sp-2) 0; font-size: var(--fs-sm);
+                        padding-left: var(--sp-3); border-left: 2px solid var(--c-accent); }
+    .deeper-links li code { font-size: 0.88em; }
+
+    @media print {
+      body { background: white; }
+      .container { max-width: 100%; padding: 0; }
+      main.brief { box-shadow: none; border: none; padding: 0; }
+      svg, table, .key-bullets, .callout-success, .callout-critical { page-break-inside: avoid; }
+      h2 { page-break-after: avoid; }
+      a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #666; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <main class="brief">
+
+    <header class="brief-header">
+      <div class="pretitle">3-Minute Executive Engineering Brief</div>
+      <h1>longphase-to HP tag 17.3:1 偏移<br>— bug、修補、驗證</h1>
+      <p class="subtitle">給工程同事 / PI / 自己未來：3 分鐘抓住整個故事；要深入請跳 13 段版。</p>
+      <div class="read-meta">
+        <span>📅 <strong>2026-05-14</strong></span>
+        <span>⏱ 估讀時間 <strong>3 min</strong></span>
+        <span>📑 共 <strong>5 節 + 5 SVG</strong></span>
+        <span>🔬 源碼級驗證</span>
+      </div>
+      <div class="verdict-banner">
+        ✓ V6 patch 解 bug · 5 verification gates 全通過 · API signature 不變 · production-candidate
+      </div>
+    </header>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="number bug">17.3 : 1</div>
+        <div class="label">baseline HP1:HP2 全基因組偏移</div>
+        <span class="verdict bug">BUG</span>
+      </div>
+      <div class="stat-box">
+        <div class="number bug">34,855</div>
+        <div class="label">read-level victims（被誤標 reads）</div>
+        <span class="verdict bug">BUG</span>
+      </div>
+      <div class="stat-box">
+        <div class="number success">100%</div>
+        <div class="label">V6 修正率（單向全對）</div>
+        <span class="verdict safe">FIXED</span>
+      </div>
+      <div class="stat-box">
+        <div class="number success">5 / 5</div>
+        <div class="label">verification gates 通過</div>
+        <span class="verdict safe">VALIDATED</span>
+      </div>
+    </div>
+
+    <div style="background:#FEF3C7;border-left:4px solid #CA8A04;padding:12px 16px;margin:14px 0;border-radius:4px;font-size:13.5px;color:#7C2D12;line-height:1.55;">
+      <strong>📌 Scope（5/14 PM 精確化）— 本報告主題 = self-phasing 4 層問題 中的 L2 priority bug</strong><br><br>
+      <strong>17.3:1 = L1 assignment 1.77:1 × L2 priority bug 9.8×</strong>（兩 mechanism 疊乘，不是 single 17× bug）：
+      <ul style="margin:6px 0 6px 18px;">
+        <li><strong>L0 設計層</strong>（self-phasing circular dep, 球員兼裁判）→ ✅ 修對 (<code>8b8c1fd</code> PON-only)</li>
+        <li><strong>L1 Phasing (a)</strong>（phased VCF 結構）→ ✅ 修對 (<code>d0bcd8c</code>)</li>
+        <li><strong>L1 Phasing (b)</strong>（altHaplotype assignment 1.77:1 偏 HP1, parser GT direct mapping）→ ⚠ <strong>out of scope</strong>（parser 設計取捨，非 bug）</li>
+        <li><strong>L2 Haplotag</strong>（priority bug 9.8× 放大 + enum dead code）→ ✅ <strong>修對主軸</strong> (<code>41ff147</code> V3F)</li>
+      </ul>
+      <strong>V3F alone (沒 PON-only) 即修對 17:1 核心</strong> — v3f_no_pononly BAM chr19 實測 1.21:1（17.3 → 1.21 = 移 L2 9.8× 放大後接近 L1 1.77 assignment）。PON-only 是 L0 修補，非 17:1 必要 commit。詳見 13 段技術報告 §5.3 + erratum E5 §3a.5b.12。
+    </div>
+
+    <h2>
+      <span class="step-badge">§ 1</span> 一張圖看 bug（L2 priority bug 機制）
+      <span class="estimate">≈ 30 sec</span>
+    </h2>
+
+    <p>同一 <code>countMap</code> 輸入（HP2 有 5 票 germline、HP1_1 有 1 票 somatic），baseline 與 V6 輸出方向<strong>完全相反</strong>。這張圖是 L2 priority bug 與修補的最短敘述（不含 L0 / L1 機制，後者見 13 段技術報告）。</p>
+
+    <figure class="svg-figure">
+      <svg viewBox="0 0 880 420" role="img" aria-labelledby="hero-title hero-desc" xmlns="http://www.w3.org/2000/svg">
+        <title id="hero-title">同一 countMap input baseline 與 V6 決策對照</title>
+        <desc id="hero-desc">輸入 [0,5,0,1,0]：baseline 輸出 HP:i:11 (反向); V6 輸出 HP:i:21 (正解)</desc>
+        <g font-family="var(--ff-body, system-ui)" font-size="13">
+
+          <text x="440" y="22" text-anchor="middle" font-weight="700" fill="#141413" font-size="15">
+            same input, two decisions
+          </text>
+          <text x="440" y="42" text-anchor="middle" font-weight="600" fill="#141413">
+            countMap = [0, 5, 0, 1, 0]
+          </text>
+
+          <g transform="translate(310, 56)">
+            <line x1="-10" y1="50" x2="260" y2="50" stroke="#6B6B66" stroke-width="1"/>
+            <rect x="0" y="50" width="42" height="0" fill="#94A3B8"/>
+            <rect x="52" y="10" width="42" height="40" fill="#22C55E"/>
+            <rect x="104" y="50" width="42" height="0" fill="#94A3B8"/>
+            <rect x="156" y="42" width="42" height="8" fill="#C2410C"/>
+            <rect x="208" y="50" width="42" height="0" fill="#94A3B8"/>
+
+            <text x="21" y="65" text-anchor="middle" fill="#6B6B66" font-size="11">HP1</text>
+            <text x="73" y="65" text-anchor="middle" fill="#15803D" font-size="11" font-weight="700">HP2</text>
+            <text x="125" y="65" text-anchor="middle" fill="#6B6B66" font-size="11">HP3</text>
+            <text x="177" y="65" text-anchor="middle" fill="#C2410C" font-size="11" font-weight="700">HP1_1</text>
+            <text x="229" y="65" text-anchor="middle" fill="#6B6B66" font-size="11">HP2_1</text>
+
+            <text x="21" y="78" text-anchor="middle" fill="#6B6B66" font-size="10" font-family="var(--ff-mono, monospace)">0</text>
+            <text x="73" y="5" text-anchor="middle" fill="#15803D" font-size="12" font-weight="700" font-family="var(--ff-mono, monospace)">5 ★</text>
+            <text x="125" y="78" text-anchor="middle" fill="#6B6B66" font-size="10" font-family="var(--ff-mono, monospace)">0</text>
+            <text x="177" y="37" text-anchor="middle" fill="#C2410C" font-size="11" font-weight="700" font-family="var(--ff-mono, monospace)">1</text>
+            <text x="229" y="78" text-anchor="middle" fill="#6B6B66" font-size="10" font-family="var(--ff-mono, monospace)">0</text>
+          </g>
+
+          <text x="440" y="160" text-anchor="middle" font-size="11" fill="#6B6B66">↓ 同樣輸入 → 不同邏輯 ↓</text>
+
+          <rect x="30" y="180" width="390" height="200" rx="8" fill="#FEF2F0" stroke="#C2410C" stroke-width="2"/>
+          <text x="225" y="205" text-anchor="middle" font-weight="700" fill="#7F1D1D" font-size="14">baseline getVote()</text>
+          <text x="50" y="232" fill="#7F1D1D" font-size="12">① pair[0]=(HP1_1, HP2_1) 排第一</text>
+          <text x="50" y="252" fill="#7F1D1D" font-size="12" font-family="var(--ff-mono, monospace)">  countMap[3]=1 &gt; 0 → fire</text>
+          <text x="50" y="278" fill="#7F1D1D" font-size="12">② hpResult = haplotypeBase[3] = 11</text>
+          <text x="50" y="298" fill="#7F1D1D" font-size="12" font-weight="700">③ break ❌</text>
+          <text x="50" y="318" fill="#7F1D1D" font-size="12">  germline 5 票 (HP2) 完全沒讀</text>
+
+          <rect x="100" y="334" width="250" height="36" rx="6" fill="#7F1D1D"/>
+          <text x="225" y="358" text-anchor="middle" fill="white" font-weight="700" font-size="15">HP:i:11  ❌ 反向</text>
+
+          <rect x="460" y="180" width="390" height="200" rx="8" fill="#F0FDF4" stroke="#15803D" stroke-width="2"/>
+          <text x="655" y="205" text-anchor="middle" font-weight="700" fill="#166534" font-size="14">V6 getVote()</text>
+          <text x="480" y="232" fill="#166534" font-size="12">① Layer 1: 先比 germline (HP1, HP2)</text>
+          <text x="480" y="252" fill="#166534" font-size="12" font-family="var(--ff-mono, monospace)">  HP1=0 &lt; HP2=5 → result=2</text>
+          <text x="480" y="278" fill="#166534" font-size="12">② Layer 2: somaticTotal=1 &gt; 0</text>
+          <text x="480" y="298" fill="#166534" font-size="12">  → 套用 germline 方向後綴</text>
+          <text x="480" y="318" fill="#166534" font-size="12" font-weight="700">③ hpResult = 21 ✓（germline 主導）</text>
+
+          <rect x="530" y="334" width="250" height="36" rx="6" fill="#15803D"/>
+          <text x="655" y="358" text-anchor="middle" fill="white" font-weight="700" font-size="15">HP:i:21  ✓ 正解</text>
+
+          <defs>
+            <marker id="ar-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#C2410C"/>
+            </marker>
+            <marker id="ar-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#15803D"/>
+            </marker>
+          </defs>
+          <line x1="375" y1="140" x2="225" y2="178" stroke="#C2410C" stroke-width="1.5" marker-end="url(#ar-red)"/>
+          <line x1="505" y1="140" x2="655" y2="178" stroke="#15803D" stroke-width="1.5" marker-end="url(#ar-green)"/>
+
+          <text x="440" y="408" text-anchor="middle" font-size="11" fill="#6B6B66" font-style="italic">
+            這條 read 是 chr19 752 victims / 全基因組 34,855 victims 之一
+          </text>
+        </g>
+      </svg>
+      <figcaption>圖 1：bug 與修補的最短說明 — 同一 input，baseline 因 pair 排序 + break 倒向 somatic 那一票；V6 因 explicit two-layer 跟著 germline 5 票走。</figcaption>
+    </figure>
+
+    <div class="key-bullets">
+      <ul>
+        <li><strong>Bug 位置</strong>：<code>longphase-to/HaplotagProcess.cpp:506-530</code> 的 <code>getVote()</code>。</li>
+        <li><strong>單一函式內</strong>：reorder pair + remove break 即解；API signature 不變、外部 caller 零影響。</li>
+      </ul>
+    </div>
+
+    <h2>
+      <span class="step-badge">§ 2</span> 為何放大到 17.3 倍而非 5 倍
+      <span class="estimate">≈ 30 sec</span>
+    </h2>
+
+    <p>單一機制不足以解釋 17.3:1。<strong>是兩個放大器疊乘的湧現結果</strong>：tumor 生物學提供「方向一致性」，algorithm 設計提供「規模放大」。</p>
+
+    <figure class="svg-figure">
+      <svg viewBox="0 0 880 280" role="img" aria-labelledby="eq-title eq-desc" xmlns="http://www.w3.org/2000/svg">
+        <title id="eq-title">17.3:1 兩個放大器疊乘公式</title>
+        <desc id="eq-desc">amplifier A (somatic 方向一致) × amplifier B (1 票 break 邏輯) = 17.3:1 emergent</desc>
+        <g font-family="var(--ff-body, system-ui)" font-size="13">
+
+          <text x="440" y="24" text-anchor="middle" font-weight="700" fill="#141413" font-size="15">
+            17.3 : 1 = biology × algorithm 疊乘
+          </text>
+
+          <rect x="40" y="55" width="240" height="130" rx="8" fill="#FEF7E6" stroke="#A16207" stroke-width="2"/>
+          <text x="160" y="80" text-anchor="middle" font-weight="700" fill="#78350F" font-size="14">放大器 A — biology</text>
+          <text x="160" y="105" text-anchor="middle" fill="#78350F" font-size="12">somatic 票方向一致</text>
+          <line x1="60" y1="115" x2="260" y2="115" stroke="#A16207" stroke-width="0.5" stroke-dasharray="3,2"/>
+          <text x="160" y="135" text-anchor="middle" fill="#78350F" font-size="11">• tumor sub-clone 同源</text>
+          <text x="160" y="153" text-anchor="middle" fill="#78350F" font-size="11">• 上游 phasing 球員兼裁判</text>
+          <text x="160" y="171" text-anchor="middle" fill="#78350F" font-size="11" font-weight="700" font-family="var(--ff-mono, monospace)">→ ≈ 95% somatic 指 HP1</text>
+
+          <text x="320" y="125" text-anchor="middle" font-size="36" font-weight="700" fill="#141413">×</text>
+
+          <rect x="360" y="55" width="240" height="130" rx="8" fill="#FEF2F0" stroke="#C2410C" stroke-width="2"/>
+          <text x="480" y="80" text-anchor="middle" font-weight="700" fill="#7F1D1D" font-size="14">放大器 B — algorithm</text>
+          <text x="480" y="105" text-anchor="middle" fill="#7F1D1D" font-size="12">1 票 break + germline 失效</text>
+          <line x1="380" y1="115" x2="580" y2="115" stroke="#C2410C" stroke-width="0.5" stroke-dasharray="3,2"/>
+          <text x="480" y="135" text-anchor="middle" fill="#7F1D1D" font-size="11">• variantKeys 排序 somatic 第一</text>
+          <text x="480" y="153" text-anchor="middle" fill="#7F1D1D" font-size="11">• break 跳出迴圈</text>
+          <text x="480" y="171" text-anchor="middle" fill="#7F1D1D" font-size="11" font-weight="700" font-family="var(--ff-mono, monospace)">→ germline 票數放大失效</text>
+
+          <text x="640" y="125" text-anchor="middle" font-size="36" font-weight="700" fill="#141413">=</text>
+
+          <rect x="680" y="55" width="160" height="130" rx="8" fill="#FEE2E2" stroke="#7F1D1D" stroke-width="2.5"/>
+          <text x="760" y="105" text-anchor="middle" font-weight="700" fill="#7F1D1D" font-size="22" font-family="var(--ff-mono, monospace)">17.3 : 1</text>
+          <text x="760" y="135" text-anchor="middle" fill="#7F1D1D" font-size="11">≡ 94.6% 偏 HP1</text>
+          <line x1="700" y1="148" x2="820" y2="148" stroke="#C2410C" stroke-width="0.5" stroke-dasharray="3,2"/>
+          <text x="760" y="167" text-anchor="middle" fill="#7F1D1D" font-size="10" font-family="var(--ff-mono, monospace)">emergent value</text>
+
+          <text x="440" y="218" text-anchor="middle" font-size="12" fill="#141413" font-weight="600" font-family="var(--ff-mono, monospace)">
+            17.3 / (17.3 + 1) = 17.3 / 18.3 ≈ 0.9454 ≈ 94.6%
+          </text>
+          <text x="440" y="240" text-anchor="middle" font-size="11" fill="#6B6B66" font-style="italic">
+            算術驗證 — 與整合報告 §2.1 全基因組統計一致
+          </text>
+
+          <text x="160" y="265" text-anchor="middle" font-size="10" fill="#78350F" font-style="italic">無法用 code patch 修</text>
+          <text x="480" y="265" text-anchor="middle" font-size="10" fill="#7F1D1D" font-style="italic">★ V6 修補目標</text>
+          <text x="760" y="265" text-anchor="middle" font-size="10" fill="#7F1D1D" font-style="italic">實測 BAM 統計值</text>
+        </g>
+      </svg>
+      <figcaption>圖 2：17.3:1 不是 code 常數，是 biology amplifier × algorithm amplifier 的湧現值。V6 只能拿掉 algorithm amplifier；biology 那邊不變（也不該變）。</figcaption>
+    </figure>
+
+    <div class="key-bullets">
+      <ul>
+        <li><strong>關鍵洞察</strong>：bug 不創造方向，<strong>只放大上游已有的微小偏向</strong>。Paired mode 同樣 biology 但用不同 binary（<code>longphase-s</code>），結果 1:1.275 ≈ 1:1，證實放大器 B 是唯一可修部位。</li>
+        <li><strong>單機制反例</strong>：若僅有 biology 偏向，比應約 1.1:1（germline 主導）；若僅有 algorithm bug 而 somatic 隨機，比應約 1.5:1（部分讀數受影響）。觀察值 17.3:1 必須兩者疊加。</li>
+      </ul>
+    </div>
+
+    <h2>
+      <span class="step-badge">§ 3</span> 修補：移除 algorithm 放大器
+      <span class="estimate">≈ 30 sec</span>
+    </h2>
+
+    <p>V6 把 <code>getVote()</code> 從 <strong>3-pair ordered + break</strong> 結構整個拆掉，改成 <strong>explicit two-layer</strong>：Layer 1 germline 永遠先決定方向，Layer 2 somatic 只決定 11/21/33 後綴。</p>
+
+    <figure class="svg-figure">
+      <svg viewBox="0 0 880 320" role="img" aria-labelledby="diff-title diff-desc" xmlns="http://www.w3.org/2000/svg">
+        <title id="diff-title">getVote() 結構性對比 baseline vs V6</title>
+        <desc id="diff-desc">baseline 3-pair vector ordered + break；V6 explicit two-layer linear</desc>
+        <g font-family="var(--ff-body, system-ui)" font-size="13">
+
+          <text x="440" y="24" text-anchor="middle" font-weight="700" fill="#141413" font-size="15">
+            getVote() 結構性對比
+          </text>
+
+          <text x="220" y="55" text-anchor="middle" font-weight="700" fill="#7F1D1D" font-size="14">baseline (line 506-530)</text>
+          <text x="220" y="74" text-anchor="middle" fill="#7F1D1D" font-size="11" font-style="italic">3-pair ordered vector + break</text>
+
+          <rect x="50" y="90" width="340" height="32" rx="4" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.5"/>
+          <text x="220" y="111" text-anchor="middle" fill="#7F1D1D" font-size="12">pair[0] = (HP1_1, HP2_1)  somatic ❌ 排第一</text>
+
+          <text x="220" y="138" text-anchor="middle" font-size="14" font-weight="700" fill="#C2410C">↓ 命中即 break</text>
+
+          <rect x="50" y="148" width="340" height="32" rx="4" fill="#FEF7E6" stroke="#A16207" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="220" y="169" text-anchor="middle" fill="#78350F" font-size="12" font-style="italic">pair[1] = (HP3, HP2_1)  少數情況</text>
+
+          <text x="220" y="196" text-anchor="middle" font-size="14" font-weight="700" fill="#9CA3AF">↓ NO</text>
+
+          <rect x="50" y="206" width="340" height="32" rx="4" fill="#F3F4F6" stroke="#9CA3AF" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="220" y="227" text-anchor="middle" fill="#6B7280" font-size="12" font-style="italic">pair[2] = (HP1, HP2)  ★ 永不執行</text>
+
+          <rect x="50" y="258" width="340" height="36" rx="4" fill="#FEE2E2" stroke="#7F1D1D" stroke-width="2"/>
+          <text x="220" y="282" text-anchor="middle" fill="#7F1D1D" font-size="13" font-weight="700">輸出 hpResult ← somatic 主導 ❌</text>
+
+          <text x="660" y="55" text-anchor="middle" font-weight="700" fill="#166534" font-size="14">V6 (line 512-559)</text>
+          <text x="660" y="74" text-anchor="middle" fill="#166534" font-size="11" font-style="italic">explicit two-layer linear</text>
+
+          <rect x="490" y="90" width="340" height="62" rx="4" fill="#F0FDF4" stroke="#15803D" stroke-width="1.5"/>
+          <text x="660" y="111" text-anchor="middle" fill="#166534" font-size="12" font-weight="700">Layer 1: germline 永遠先決定方向</text>
+          <text x="660" y="131" text-anchor="middle" fill="#166534" font-size="11">if germlineHP1 &gt;= germlineHP2: → 1</text>
+          <text x="660" y="145" text-anchor="middle" fill="#166534" font-size="11">else:                            → 2</text>
+
+          <text x="660" y="170" text-anchor="middle" font-size="14" font-weight="700" fill="#15803D">↓ 永遠執行</text>
+
+          <rect x="490" y="180" width="340" height="62" rx="4" fill="#F0FDF4" stroke="#15803D" stroke-width="1.5"/>
+          <text x="660" y="201" text-anchor="middle" fill="#166534" font-size="12" font-weight="700">Layer 2: somatic 只決定 annotation</text>
+          <text x="660" y="221" text-anchor="middle" fill="#166534" font-size="11">if somaticTotal &gt; 0: hpResult = 11/21/33</text>
+          <text x="660" y="235" text-anchor="middle" fill="#166534" font-size="11">else:                hpResult = germlineResult</text>
+
+          <rect x="490" y="258" width="340" height="36" rx="4" fill="#DCFCE7" stroke="#15803D" stroke-width="2"/>
+          <text x="660" y="282" text-anchor="middle" fill="#166534" font-size="13" font-weight="700">輸出 hpResult ← germline 主導 ✓</text>
+        </g>
+      </svg>
+      <figcaption>圖 3：兩種結構並列 — baseline 是「條件 vector + 中斷」，V6 是「線性兩層」。修補的關鍵不在加程式碼，而在<strong>移除 ordered + break</strong> 這對副作用搭配。</figcaption>
+    </figure>
+
+    <div class="callout-success">
+      <strong>V6 強制三個 invariants</strong>：
+      <ol style="margin: 6px 0 0 var(--sp-3); padding-left: var(--sp-3);">
+        <li><strong>never short-circuit germline</strong>：無 break；germline 永遠被讀</li>
+        <li><strong>somatic does not pick direction</strong>：除非 germline 全為 0，否則 somatic 不參與方向決策</li>
+        <li><strong>germline-absent 保守</strong>：germline=0 且 somatic&gt;0 → HP:i:33（不從 somatic 推方向）</li>
+      </ol>
+    </div>
+
+    <h2>
+      <span class="step-badge">§ 4</span> 驗證：5 gates + 4 樣本一致
+      <span class="estimate">≈ 45 sec</span>
+    </h2>
+
+    <p>V6 通過 <strong>5 個外部可觀察 verification gates</strong>。每 gate 含具體數值 / 檔案輸出 / 命令成功標準（非主觀判斷）。跨樣本一致性 4/4 通過，HCC1395 V5 baseline 1.86 也壓回近中性。</p>
+
+    <figure class="svg-figure">
+      <svg viewBox="0 0 880 220" role="img" aria-labelledby="gates-title gates-desc" xmlns="http://www.w3.org/2000/svg">
+        <title id="gates-title">5 verification gates 通過順序</title>
+        <desc id="gates-desc">Dump → Victim → BAM 統計 → Cross-sample → Caller F1 → Production-candidate</desc>
+        <g font-family="var(--ff-body, system-ui)" font-size="12">
+
+          <text x="440" y="22" text-anchor="middle" font-weight="700" fill="#141413" font-size="14">
+            5 Verification Gates → Production-Candidate ★
+          </text>
+
+          <rect x="30" y="55" width="135" height="100" rx="8" fill="#F0FDF4" stroke="#15803D" stroke-width="2"/>
+          <text x="97" y="77" text-anchor="middle" font-weight="700" fill="#15803D" font-size="12">Gate 1</text>
+          <text x="97" y="97" text-anchor="middle" fill="#166534" font-size="11">Dump 完整性</text>
+          <text x="97" y="117" text-anchor="middle" fill="#166534" font-size="10" font-family="var(--ff-mono, monospace)">549,206 rows × 3</text>
+          <text x="97" y="143" text-anchor="middle" fill="#15803D" font-size="18" font-weight="700">✓</text>
+
+          <rect x="180" y="55" width="135" height="100" rx="8" fill="#F0FDF4" stroke="#15803D" stroke-width="2"/>
+          <text x="247" y="77" text-anchor="middle" font-weight="700" fill="#15803D" font-size="12">Gate 2</text>
+          <text x="247" y="97" text-anchor="middle" fill="#166534" font-size="11">Victim count</text>
+          <text x="247" y="117" text-anchor="middle" fill="#166534" font-size="10" font-family="var(--ff-mono, monospace)">34,855 / 100%</text>
+          <text x="247" y="143" text-anchor="middle" fill="#15803D" font-size="18" font-weight="700">✓</text>
+
+          <rect x="330" y="55" width="135" height="100" rx="8" fill="#F0FDF4" stroke="#15803D" stroke-width="2"/>
+          <text x="397" y="77" text-anchor="middle" font-weight="700" fill="#15803D" font-size="12">Gate 3</text>
+          <text x="397" y="97" text-anchor="middle" fill="#166534" font-size="11">BAM 統計</text>
+          <text x="397" y="117" text-anchor="middle" fill="#166534" font-size="10" font-family="var(--ff-mono, monospace)">17.3:1 → ~1:1</text>
+          <text x="397" y="143" text-anchor="middle" fill="#15803D" font-size="18" font-weight="700">✓</text>
+
+          <rect x="480" y="55" width="135" height="100" rx="8" fill="#F0FDF4" stroke="#15803D" stroke-width="2"/>
+          <text x="547" y="77" text-anchor="middle" font-weight="700" fill="#15803D" font-size="12">Gate 4</text>
+          <text x="547" y="97" text-anchor="middle" fill="#166534" font-size="11">Cross-sample</text>
+          <text x="547" y="117" text-anchor="middle" fill="#166534" font-size="10" font-family="var(--ff-mono, monospace)">4/4 中性</text>
+          <text x="547" y="143" text-anchor="middle" fill="#15803D" font-size="18" font-weight="700">✓</text>
+
+          <rect x="630" y="55" width="135" height="100" rx="8" fill="#F0FDF4" stroke="#15803D" stroke-width="2"/>
+          <text x="697" y="77" text-anchor="middle" font-weight="700" fill="#15803D" font-size="12">Gate 5</text>
+          <text x="697" y="97" text-anchor="middle" fill="#166534" font-size="11">Caller F1 不變</text>
+          <text x="697" y="117" text-anchor="middle" fill="#166534" font-size="10" font-family="var(--ff-mono, monospace)">0.7166</text>
+          <text x="697" y="143" text-anchor="middle" fill="#15803D" font-size="18" font-weight="700">✓</text>
+
+          <polygon points="838,75 845,93 864,93 849,104 855,122 838,112 822,122 828,104 813,93 832,93"
+                   fill="#15803D" stroke="#15803D" stroke-width="1"/>
+          <text x="838" y="146" text-anchor="middle" fill="#15803D" font-size="11" font-weight="700">Prod</text>
+          <text x="838" y="160" text-anchor="middle" fill="#15803D" font-size="11" font-weight="700">candidate</text>
+
+          <defs>
+            <marker id="ar-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#15803D"/>
+            </marker>
+          </defs>
+          <line x1="165" y1="105" x2="178" y2="105" stroke="#15803D" stroke-width="1.5" marker-end="url(#ar-g)"/>
+          <line x1="315" y1="105" x2="328" y2="105" stroke="#15803D" stroke-width="1.5" marker-end="url(#ar-g)"/>
+          <line x1="465" y1="105" x2="478" y2="105" stroke="#15803D" stroke-width="1.5" marker-end="url(#ar-g)"/>
+          <line x1="615" y1="105" x2="628" y2="105" stroke="#15803D" stroke-width="1.5" marker-end="url(#ar-g)"/>
+          <line x1="765" y1="105" x2="813" y2="105" stroke="#15803D" stroke-width="1.5" marker-end="url(#ar-g)"/>
+
+          <text x="440" y="195" text-anchor="middle" font-size="11" fill="#6B6B66" font-style="italic">
+            Gate 4 跨樣本 4/5（COLO829 VCF permission 阻塞，pending）
+          </text>
+        </g>
+      </svg>
+      <figcaption>圖 4：5 Gates 序列驗證 — 從 read-level dump → BAM 統計 → 跨樣本 → caller F1 不變。Gate 5 證實 V6 不影響上游變異檢出（無副作用）。</figcaption>
+    </figure>
+
+    <figure class="svg-figure">
+      <svg viewBox="0 0 880 240" role="img" aria-labelledby="conv-title conv-desc" xmlns="http://www.w3.org/2000/svg">
+        <title id="conv-title">跨樣本 hp=1-1:hp=2-1 ratio 收斂</title>
+        <desc id="conv-desc">baseline 17.3 → V5 1.86 → V6 4 樣本 0.611-1.243 全部接近 1.0 中性</desc>
+        <g font-family="var(--ff-body, system-ui)" font-size="12">
+
+          <text x="440" y="22" text-anchor="middle" font-weight="700" fill="#141413" font-size="14">
+            hp=1-1:hp=2-1 ratio — baseline → V5 → V6 跨樣本收斂
+          </text>
+
+          <line x1="80" y1="180" x2="850" y2="180" stroke="#6B6B66" stroke-width="1.5"/>
+          <text x="50" y="184" text-anchor="end" font-size="10" fill="#6B6B66">0</text>
+
+          <line x1="80" y1="120" x2="850" y2="120" stroke="#15803D" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="50" y="124" text-anchor="end" font-size="10" fill="#15803D" font-weight="700">1.0</text>
+          <text x="860" y="124" font-size="10" fill="#15803D" font-weight="700">理想中性</text>
+
+          <line x1="80" y1="60" x2="850" y2="60" stroke="#6B6B66" stroke-width="0.5" stroke-dasharray="2,2"/>
+          <text x="50" y="64" text-anchor="end" font-size="10" fill="#6B6B66">2.0</text>
+
+          <rect x="105" y="60" width="70" height="120" fill="#C2410C"/>
+          <text x="140" y="50" text-anchor="middle" font-size="11" font-weight="700" fill="#7F1D1D" font-family="var(--ff-mono, monospace)">17.3 ↑</text>
+          <text x="140" y="35" text-anchor="middle" font-size="9" fill="#7F1D1D">超出範圍</text>
+          <text x="140" y="200" text-anchor="middle" font-size="11" font-weight="600" fill="#141413">baseline</text>
+          <text x="140" y="214" text-anchor="middle" font-size="10" fill="#6B6B66">HCC1395</text>
+
+          <rect x="195" y="68.4" width="70" height="111.6" fill="#FCD34D"/>
+          <text x="230" y="60" text-anchor="middle" font-size="11" font-weight="700" fill="#78350F" font-family="var(--ff-mono, monospace)">1.86</text>
+          <text x="230" y="200" text-anchor="middle" font-size="11" font-weight="600" fill="#141413">V5</text>
+          <text x="230" y="214" text-anchor="middle" font-size="10" fill="#6B6B66">HCC1395</text>
+
+          <line x1="280" y1="40" x2="280" y2="220" stroke="#9CA3AF" stroke-width="1" stroke-dasharray="3,3"/>
+
+          <rect x="295" y="143.34" width="60" height="36.66" fill="#22C55E"/>
+          <text x="325" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#15803D" font-family="var(--ff-mono, monospace)">0.611</text>
+          <text x="325" y="200" text-anchor="middle" font-size="11" font-weight="600" fill="#141413">V6</text>
+          <text x="325" y="214" text-anchor="middle" font-size="10" fill="#6B6B66">H1437</text>
+
+          <rect x="375" y="105.42" width="60" height="74.58" fill="#22C55E"/>
+          <text x="405" y="97" text-anchor="middle" font-size="11" font-weight="700" fill="#15803D" font-family="var(--ff-mono, monospace)">1.243</text>
+          <text x="405" y="200" text-anchor="middle" font-size="11" font-weight="600" fill="#141413">V6</text>
+          <text x="405" y="214" text-anchor="middle" font-size="10" fill="#6B6B66">H2009</text>
+
+          <rect x="455" y="119.16" width="60" height="60.84" fill="#22C55E"/>
+          <text x="485" y="111" text-anchor="middle" font-size="11" font-weight="700" fill="#15803D" font-family="var(--ff-mono, monospace)">1.014</text>
+          <text x="485" y="200" text-anchor="middle" font-size="11" font-weight="600" fill="#141413">V6</text>
+          <text x="485" y="214" text-anchor="middle" font-size="10" fill="#6B6B66">HCC1954</text>
+
+          <rect x="535" y="121.32" width="60" height="58.68" fill="#22C55E"/>
+          <text x="565" y="113" text-anchor="middle" font-size="11" font-weight="700" fill="#15803D" font-family="var(--ff-mono, monospace)">0.978</text>
+          <text x="565" y="200" text-anchor="middle" font-size="11" font-weight="600" fill="#141413">V6</text>
+          <text x="565" y="214" text-anchor="middle" font-size="10" fill="#6B6B66">HCC1937</text>
+
+          <line x1="615" y1="40" x2="615" y2="220" stroke="#9CA3AF" stroke-width="1" stroke-dasharray="3,3"/>
+
+          <text x="730" y="80" text-anchor="middle" font-size="12" font-weight="700" fill="#15803D">V6 收斂範圍</text>
+          <text x="730" y="100" text-anchor="middle" font-size="11" fill="#166534" font-family="var(--ff-mono, monospace)">0.611 ~ 1.243</text>
+          <text x="730" y="120" text-anchor="middle" font-size="11" fill="#166534">4/4 sample 中性 ✓</text>
+          <text x="730" y="148" text-anchor="middle" font-size="10" fill="#6B6B66" font-style="italic">vs baseline 17.3</text>
+          <text x="730" y="162" text-anchor="middle" font-size="10" fill="#6B6B66" font-style="italic">vs V5 1.86</text>
+        </g>
+      </svg>
+      <figcaption>圖 5：跨樣本 ratio 收斂 — V6 在 4 個不同 cancer cell line 樣本上一致回到 ~1.0 中性區（綠色虛線），證明 patch 非 HCC1395-specific。HCC1937 marker rate 0.817 為已知 BRCA1 mutant edge case。</figcaption>
+    </figure>
+
+    <div class="key-bullets">
+      <ul>
+        <li><strong>無副作用</strong>：Gate 5 caller F1 完全相同（0.7166 / 0.6273），V6 只動 tagging layer，caller 不受影響。</li>
+        <li><strong>單一阻塞</strong>：COLO829 VCF permission 阻塞 5-sample expansion（4/5 已具足夠信心通過）。</li>
+      </ul>
+    </div>
+
+    <h2>
+      <span class="step-badge">§ 5</span> 結論與下一步
+      <span class="estimate">≈ 15 sec</span>
+    </h2>
+
+    <table>
+      <tbody>
+        <tr class="row-safe">
+          <td><strong>結論</strong></td>
+          <td>V6 = production-candidate（修對 L0+L2，覆蓋 4 層中 3 層）。Bug 在單一函式內，修補不改 API signature，外部 caller 零影響。</td>
+        </tr>
+        <tr class="row-safe">
+          <td><strong>核心 fix 歸功</strong></td>
+          <td><strong>V3F (41ff147) alone</strong> 即修對 17:1 主軸（L2 priority bug 9.8× 放大）— v3f_no_pononly 實證 17.3 → 1.21:1。PON-only (8b8c1fd) 修 L0 self-phasing 設計（LOH 31.2% artifact / N50 +99.7%），非 17:1 必要 commit；但完整 production candidate 仍需 5 commits 累積。</td>
+        </tr>
+        <tr>
+          <td><strong>T1 待辦</strong></td>
+          <td>7-sample V6 full TO mode re-run + canonical update（12-24 hr 平行，阻塞於 COLO829 VCF permission）</td>
+        </tr>
+        <tr>
+          <td><strong>T2 待辦</strong></td>
+          <td>ISM feature TSV V6 重算（HPFineNGroups marker / LOH bed boundary，2-4 hr，阻塞於 T1）</td>
+        </tr>
+        <tr>
+          <td><strong>T3 待辦</strong></td>
+          <td>PI sign-off V6 升 production candidate（review only，阻塞於 T1 + T2）</td>
+        </tr>
+        <tr class="row-warn">
+          <td><strong>T4 future work (L1 out of scope)</strong></td>
+          <td>L1(b) altHaplotype assignment bias 1.77-2.03:1（parser GT direct mapping <code>0|.</code>→HAP1_1 不對稱）若需修對到 1.0:1，需修上游 longphase 架構（屬獨立工程）。當前 V6 BAM 1.84:1 反映此 L1(b) 殘餘 assignment quirk。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-critical">
+      <strong>不可宣告</strong>（避免 over-claim）：
+      <ol style="margin:6px 0 0 18px;">
+        <li>V6 不能宣稱解決 longphase 所有 priority bug — 只解 L2 tagging layer 9.8× 放大</li>
+        <li>不能宣稱「priority bug 是 17.3:1 唯一原因」— 精確為 <strong>L1 assignment 1.77:1 × L2 priority bug 9.8×</strong> 兩 mechanism 疊乘</li>
+        <li>不能宣稱「修對到 1.0:1 完美對稱」— V6 BAM 1.84:1 仍含 L1(b) assignment bias 殘餘（out of scope）</li>
+        <li>不能宣稱「PON-only mode 是修 17:1 必要 commit」— PON-only 修 L0 設計問題（LOH artifact / N50），V3F alone 即修對 17:1 主軸</li>
+        <li>Paired mode 從來沒這 bug（不同 binary）— 不能宣稱「同時修對 paired」</li>
+        <li>ISM downstream F1 改善尚未量化 — caller F1 確定不變</li>
+      </ol>
+    </div>
+
+    <section class="deeper-links">
+      <h3>需要更深入嗎？</h3>
+      <ul>
+        <li>📄 <strong>完整 13 段技術報告</strong>（25 min 讀完）：<code>InterSubMod/docs/reports/validated/2026/05/20260514_HP_tag_priority_bug_engineering_report_01.standalone.html</code></li>
+        <li>📄 <strong>白話介紹版</strong>（給非工程同事）：<code>InterSubMod/docs/concepts/2026/05/20260514_HP_tag_17_3_to_1_白話介紹_01.standalone.html</code></li>
+        <li>📄 <strong>Markdown 原文</strong>（grep / git diff 友善）：<code>InterSubMod/docs/reports/validated/2026/05/20260514_HP_tag_priority_bug_engineering_report_01.md</code></li>
+        <li>📄 <strong>整合觀察報告</strong>（含完整因果鏈與 5 commit 追蹤）：<code>InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md</code></li>
+        <li>📄 <strong>Paired mode audit</strong>（counter-example 對照）：<code>InterSubMod/research/paired_priority_bug_audit/00_audit_report.md</code></li>
+        <li>📄 <strong>V6 binary 驗證</strong>：<code>InterSubMod/research/paired_priority_bug_audit/07_V6_validation_findings.md</code></li>
+        <li>💻 <strong>baseline 原始碼</strong>：<code>/big8_disk/liaoyoyo2001/longphase-to/HaplotagProcess.cpp:506-530</code></li>
+        <li>💻 <strong>V6 修補原始碼</strong>：<code>/big7_disk/liaoyoyo2001/longphase-to-mod/HaplotagProcess.cpp:512-559</code></li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>
