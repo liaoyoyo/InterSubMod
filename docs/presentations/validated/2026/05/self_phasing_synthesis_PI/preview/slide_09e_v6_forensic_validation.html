@@ -316,37 +316,40 @@ details.collapsible summary:hover { color: #1D4ED8; }
   </div>
 
   <article class="slide-canvas" data-section="S4" aria-label="Main slide canvas">
-    <h1 class="slide-title ">baseline → V3F → V5 → V6 各層 tag 改了多少 reads</h1>
-    <p class="en-subtitle">Quantifying how many HP tags changed at each layer (chr19 pilot + 全基因組 hp=33)</p>
+    <h1 class="slide-title ">V6 改 N reads · 守恆 ✓</h1>
+    <p class="en-subtitle">V6 tag deltas — conservation</p>
 
-    <!-- Main quantification banner: 改變了多少 reads -->
-    <div style="background:#DCFCE7;border:2px solid #16A34A;border-radius:6px;padding:8px 14px;margin:6px 0 8px;display:flex;justify-content:space-between;align-items:center;gap:14px;">
-      <div style="font-size:13px;font-weight:700;color:#166534;">🎯 主訊息: V6 改了 N reads — 守恆驗證 + 跨 chr 量化</div>
-      <div style="font-size:14px;font-weight:700;color:#166534;background:white;padding:5px 12px;border-radius:4px;border:1.5px solid #16A34A;">chr19 守恆: <code style="color:#7F1D1D;">−4,674</code> + <code style="color:#7F1D1D;">−1,253</code> = <code style="color:#16A34A;">+5,927</code> hp=33 ✓</div>
+    <!-- HERO: 守恆等式 keyword + 符號 -->
+    <div style="background:linear-gradient(135deg,#F0FDF4 0%,#DCFCE7 100%);border:2px solid #16A34A;border-radius:10px;padding:20px 24px;margin:12px 0;text-align:center;">
+      <div style="font-size:13px;font-weight:600;color:#166534;margin-bottom:10px;">chr19 ΔHP (V6 − baseline)</div>
+      <div style="display:flex;justify-content:center;align-items:center;gap:24px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;">
+        <div style="text-align:center;"><div style="font-size:13px;color:#7F1D1D;font-weight:700;">hp=11</div><div style="font-size:36px;color:#DC2626;font-weight:800;line-height:1;">▼ 4,674</div></div>
+        <div style="font-size:32px;color:#374151;font-weight:700;">+</div>
+        <div style="text-align:center;"><div style="font-size:13px;color:#7F1D1D;font-weight:700;">hp=21</div><div style="font-size:36px;color:#DC2626;font-weight:800;line-height:1;">▼ 1,253</div></div>
+        <div style="font-size:32px;color:#374151;font-weight:700;">═</div>
+        <div style="text-align:center;"><div style="font-size:13px;color:#166534;font-weight:700;">hp=33</div><div style="font-size:36px;color:#16A34A;font-weight:800;line-height:1;">▲ 5,927</div></div>
+        <div style="font-size:36px;color:#16A34A;font-weight:800;">✓</div>
+      </div>
     </div>
 
-    <p style="font-size:11px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:4px 10px;border-radius:4px;">⚠ erratum: v6_quantification_findings.md (5/12)「V6 chr19 distance to paired 0.367」結論已修正（跨 codebase HP1/HP2 命名顛倒未考慮，顛倒後 V6≈V5≈baseline 同數量級 0.06-0.07）— 詳 speaker note</p>
-
-    <p style="font-size:13px;font-weight:700;color:#1E3A8A;margin:6px 0 4px;">📊 baseline → V6 各 HP tag 改變量化 (samtools 獨立統計):</p>
-    <table class="metric-table" style="font-size:13px;">
+    <!-- 精簡 table: scope/baseline/V6/Δ -->
+    <table class="metric-table" style="font-size:14px;">
       <thead>
-        <tr><th style="padding:6px;">HP tag</th><th style="padding:6px;">baseline</th><th style="padding:6px;">V6 ★</th><th style="padding:6px;">Δ reads (V6−baseline)</th><th style="padding:6px;">paired_T (HP:Z:)</th></tr>
+        <tr><th style="padding:7px;">scope</th><th style="padding:7px;">baseline</th><th style="padding:7px;">V6 ★</th><th style="padding:7px;">Δ</th></tr>
       </thead>
       <tbody>
-        <tr><td style="padding:5px;">chr19 HP:i:1 / HP:Z:1</td><td class="num" style="padding:5px;">178,497</td><td class="num" style="padding:5px;"><strong>194,435</strong></td><td class="num" style="padding:5px;color:#166534;font-weight:700;">+15,938</td><td class="num" style="padding:5px;">138,239</td></tr>
-        <tr><td style="padding:5px;">chr19 HP:i:2 / HP:Z:2</td><td class="num" style="padding:5px;">146,611</td><td class="num" style="padding:5px;"><strong>118,241</strong></td><td class="num" style="padding:5px;color:#7F1D1D;font-weight:700;">−28,370</td><td class="num" style="padding:5px;">176,508</td></tr>
-        <tr><td style="padding:5px;">chr19 HP:i:11 / HP:Z:1-1</td><td class="num" style="padding:5px;">14,004</td><td class="num" style="padding:5px;">21,819</td><td class="num" style="padding:5px;color:#7F1D1D;font-weight:700;">−4,674 →hp=33</td><td class="num" style="padding:5px;">12,115</td></tr>
-        <tr><td style="padding:5px;">chr19 HP:i:21 / HP:Z:2-1</td><td class="num" style="padding:5px;">12,089</td><td class="num" style="padding:5px;">11,924</td><td class="num" style="padding:5px;color:#7F1D1D;font-weight:700;">−1,253 →hp=33</td><td class="num" style="padding:5px;">14,193</td></tr>
-        <tr class="row-green"><td style="padding:5px;"><strong>chr19 HP:i:33 / HP:Z:3</strong></td><td class="num" style="padding:5px;">556</td><td class="num" style="padding:5px;"><strong>6,504</strong></td><td class="num" style="padding:5px;color:#16A34A;font-weight:700;">+5,927 ✓ 守恆</td><td class="num" style="padding:5px;">1,098</td></tr>
-        <tr class="row-yellow"><td style="padding:5px;"><strong>全基因組 hp=33</strong></td><td class="num" style="padding:5px;">~0</td><td class="num" style="padding:5px;"><strong>138,317</strong></td><td class="num" style="padding:5px;color:#16A34A;font-weight:700;">+138,317 (+944% vs V5=13,250)</td><td class="num" style="padding:5px;">—</td></tr>
+        <tr><td style="padding:6px;">chr19 hp=11</td><td class="num" style="padding:6px;">14,004</td><td class="num" style="padding:6px;">9,330</td><td class="num" style="padding:6px;color:#7F1D1D;font-weight:700;">▼ 4,674 → 33</td></tr>
+        <tr><td style="padding:6px;">chr19 hp=21</td><td class="num" style="padding:6px;">12,089</td><td class="num" style="padding:6px;">10,836</td><td class="num" style="padding:6px;color:#7F1D1D;font-weight:700;">▼ 1,253 → 33</td></tr>
+        <tr class="row-green"><td style="padding:6px;"><strong>chr19 hp=33</strong></td><td class="num" style="padding:6px;">556</td><td class="num" style="padding:6px;"><strong>6,483</strong></td><td class="num" style="padding:6px;color:#16A34A;font-weight:700;">▲ 5,927 · 守恆 ✓</td></tr>
+        <tr class="row-yellow"><td style="padding:6px;"><strong>全基因組 hp=33</strong></td><td class="num" style="padding:6px;">~0</td><td class="num" style="padding:6px;"><strong>138,317</strong></td><td class="num" style="padding:6px;color:#16A34A;font-weight:700;">▲ +944% vs V5</td></tr>
       </tbody>
     </table>
-    <p style="font-size:10.5px;color:#6B7280;margin:2px 0 0;font-style:italic;">chr19 = pilot（單 chr 改變量）；全基因組 hp=33 = 跨 chr 總計改變量。「→hp=33」表示這些 reads 在 V6 重歸到 hp=33 桶（守恆等式 4,674+1,253=5,927）。V5 欄已砍（V5↔V6 守恆完美驗證；詳 speaker note）</p>
 
-    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ V6 改了 reads，但<strong>守恆等式成立</strong>（hp=11/21 減少完全進 hp=33）+ 全基因組 hp=33 還原 +944% — 程式碼行為實證正確</div>
-    <div class="footer-glossary" style="font-size:9.5px;">
-      <div class="gloss-item">ⓘ Erratum 報告: InterSubMod/research/paired_priority_bug_audit/v6_quantification_erratum_2026_05_13.md</div>
-      <div class="gloss-item">ⓘ longphase-to (HP:i:) 與 longphase-s (HP:Z:) 是不同 codebase, HP1/HP2 命名任意，需明示 axis-aligned 才能跨比較</div>
+    <div class="conclusion-arrow green" style="font-size:15px;margin-top:10px;font-weight:700;">✓ 守恆 ⇒ V6 邏輯實證 OK</div>
+    <div class="footer-glossary" style="font-size:11px;">
+      <div class="gloss-item">⚠ erratum · V6 chr19 dist 0.367 → 跨 codebase HP1/HP2 顛倒 · 顛倒後 ≈ baseline ≈ 0.06</div>
+      <div class="gloss-item">ⓘ paired_T (HP:Z:) · hp=11→12,115 / hp=21→14,193 / hp=33→1,098 · 軸線顛倒</div>
+      <div class="gloss-item">ⓘ erratum: InterSubMod/research/paired_priority_bug_audit/v6_quantification_erratum_2026_05_13.md</div>
     </div>
   </article>
 
