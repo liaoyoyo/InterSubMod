@@ -580,6 +580,64 @@ F1 = 0.7166 (baseline/V3F/V5/V6 全相同 — 必然)
 
 ---
 
+## 3a.5b.12 Phased VCF GT Source Tracing (**2026-05-14 PM v1.7-I**)
+
+> 用戶提 5 輪 feedback 追問: phased VCF GT 偏向是否造成 HP1 family 17.3:1 偏移? 哪個 stage 開始造成影響?
+
+### Stage Amplification Matrix (baseline pathway)
+
+| Stage | bias ratio (HP1:HP2) | Evidence | Grade |
+|---|---|---|---|
+| **S2 baseline NonSomatic GT (germline)** | 1.10:1 (52:48 偏 0\|1) | 1,051,022 variants | ⭐⭐⭐⭐⭐ |
+| **S2 baseline PASS GT (somatic, phased)** | **1.013:1 (3,108:3,147)** | 6,255 phased PASS variants | ⭐⭐⭐⭐ |
+| **S4 baseline vote_dump HP1+HP1_1 vs HP2+HP2_1** | **0.989:1 (182,758:184,846)** | 17,404 victim subset × 全 genome | ⭐⭐⭐⭐⭐ |
+| **S5 baseline BAM HP family** | **17.3:1** | full BAM | ⭐⭐⭐⭐⭐ |
+
+### **S5 Priority Bug Amplification = 17.3 / 0.989 = 17.5×** (Critical Finding)
+
+→ baseline pathway 從 S2 → S4 都接近 50:50 (1.013:1 / 0.989:1)
+→ **S5 (haplotag judgeHaplotype priority bug) 是唯一 17.5× 放大器**
+→ HP1 family 17.3:1 偏移**完全產生於 S5 階段**, 與 GT/vote stage 無關
+
+### V3F Pathway (priority bug 修對後)
+
+| Stage | bias ratio | amplification |
+|---|---|---|
+| S2/S3 V3F PON-only GT2 | ~1.18:1 (推測, 同 V5) | — |
+| S4 vote (V3F binary) | 0.989:1 | — |
+| **S5 V3F BAM** | **1.14:1** | **~1× (修對後無放大)** |
+
+→ V3F 修對 priority bug 後, S5 amplification 從 17.5× 降到 ~1×。BAM 直接反映 vote ratio (with 微 noise)。
+
+### V5/V6 Pathway
+
+| Stage | bias ratio | amplification |
+|---|---|---|
+| **S2/S3 V5 PON-only PASS GT2 (ALT direction)** | **1.18:1 (17,216 : 14,608 偏 HP1)** | — |
+| S4 vote | (V5 binary 未測, presumed similar) | — |
+| **S5 V5/V6 BAM** | **1.84:1** | **~1.56×** (V5 phasing reshuffle) |
+
+→ V5/V6 BAM 1.84:1 = V5 PON-only mode GT2 1.18:1 + V5 phasing reshuffle (V3F→V5 改 63%)
+→ V5/V6 沒有 17× priority bug 放大 (因為 V3F two-layer fix 已修對)
+
+### 對用戶假設的最終 verdict
+
+| 用戶假設 | 結果 | 證據 |
+|---|---|---|
+| GT 0\|1 vs 1\|0 偏向是 17.3:1 源頭 | ❌ **推翻** | PASS GT 1.013:1 不顯著, vote 0.989:1 ~50:50 |
+| HP:i:11 對應的 GT pattern 是否考慮到 | ✅ 已 cover | §3 HP family ↔ GT pattern 對映表 + GT2 統計 |
+| 全面 downstream 影響評估 | ✅ 已 cover | §5 downstream impact 6 dimension |
+| 統計確認問題的源頭 | ✅ **S5 priority bug** | stage amplification 17.5× 鐵證 |
+| 統計結果 + 影響範圍 + 數據支持 | ✅ 已 cover | §6 evidence grading ⭐⭐⭐⭐⭐ 全集 |
+
+### 完整 deep-dive 報告
+
+`InterSubMod/docs/experiments/in_progress/2026/05/20260514_phased_VCF_GT_HP_family_analysis_01.md`
+
+含完整 Phase 0-6 stage tracing + Chi-square + downstream impact + verdict A 確認。
+
+---
+
 ## 4. 對 PI 報告 (4-29) errata 的關聯
 
 本 erratum (5/13) **不取代** [`20260509_PI_Report_4_29_Errata_01.md`](20260509_PI_Report_4_29_Errata_01.md)（5/9 PI 報告 4-29 errata, 5 條 E1-E5）。兩者並存：
