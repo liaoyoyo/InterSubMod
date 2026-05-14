@@ -582,59 +582,122 @@ F1 = 0.7166 (baseline/V3F/V5/V6 全相同 — 必然)
 
 ## 3a.5b.12 Phased VCF GT Source Tracing (**2026-05-14 PM v1.7-I**)
 
-> 用戶提 5 輪 feedback 追問: phased VCF GT 偏向是否造成 HP1 family 17.3:1 偏移? 哪個 stage 開始造成影響?
+> 用戶提 6 輪 feedback 追問: phased VCF GT 偏向是否造成 HP1 family 17.3:1 偏移? 哪個 stage 開始造成影響? PON-only 是否必要?
 
-### Stage Amplification Matrix (baseline pathway)
+### ⚠ 2026-05-14 PM late amendment — 兩 mechanism 疊加非單一放大
 
-| Stage | bias ratio (HP1:HP2) | Evidence | Grade |
+**原 framing**（早期版本 §3a.5b.12）「S5 priority bug 是 17.5× 唯一放大器」**過於簡化**：
+
+漏算 parser 從 GT direct 路徑 (line 184-185 / 181-182) 將 GT=`0|.` 直接 map 到 HAPLOTYPE1_1（不需 GT2）。完整 source code 邏輯 (`HaplotagProcess.cpp:161-194`):
+
+| GT 值 | refHaplotype | altHaplotype | parser line |
 |---|---|---|---|
-| **S2 baseline NonSomatic GT (germline)** | 1.10:1 (52:48 偏 0\|1) | 1,051,022 variants | ⭐⭐⭐⭐⭐ |
-| **S2 baseline PASS GT (somatic, phased)** | **1.013:1 (3,108:3,147)** | 6,255 phased PASS variants | ⭐⭐⭐⭐ |
-| **S4 baseline vote_dump HP1+HP1_1 vs HP2+HP2_1** | **0.989:1 (182,758:184,846)** | 17,404 victim subset × 全 genome | ⭐⭐⭐⭐⭐ |
-| **S5 baseline BAM HP family** | **17.3:1** | full BAM | ⭐⭐⭐⭐⭐ |
+| `0\|1` | HAP1 | HAP2 | 161-163 |
+| `1\|0` | HAP2 | HAP1 | 165-167 |
+| `0\|0` + GT2=`1\|.` | — | **HAP1_1** | 171-172 |
+| `0\|0` + GT2=`.\|1` | — | **HAP2_1** | 174-175 |
+| `0\|0` + GT2=`1\|1` | — | HAP3 | 177-178 |
+| **`.\|0`** | — | **HAP2_1** | 181-182 |
+| **`0\|.`** | — | **HAP1_1** | 184-185 |
+| `1\|.` | HAP2 | HAP1 (germline) | 187-189 |
+| `.\|1` | HAP1 | HAP2 (germline) | 191-193 |
 
-### **S5 Priority Bug Amplification = 17.3 / 0.989 = 17.5×** (Critical Finding)
+### 完整修正後 baseline PASS altHaplotype 分配 (per source code)
 
-→ baseline pathway 從 S2 → S4 都接近 50:50 (1.013:1 / 0.989:1)
-→ **S5 (haplotag judgeHaplotype priority bug) 是唯一 17.5× 放大器**
-→ HP1 family 17.3:1 偏移**完全產生於 S5 階段**, 與 GT/vote stage 無關
-
-### V3F Pathway (priority bug 修對後)
-
-| Stage | bias ratio | amplification |
+| altHaplotype | Count | path |
 |---|---|---|
-| S2/S3 V3F PON-only GT2 | ~1.18:1 (推測, 同 V5) | — |
-| S4 vote (V3F binary) | 0.989:1 | — |
-| **S5 V3F BAM** | **1.14:1** | **~1× (修對後無放大)** |
+| HAP1 (hp=1 germline) | 6,559 | GT=`1\|0` or `1\|.` |
+| HAP2 (hp=2 germline) | 3,271 | GT=`0\|1` or `.\|1` |
+| HAP1_1 (hp=11 somatic) | **19,877** | GT=`0\|.` (主力) + GT=`0\|0`+GT2=`1\|.` |
+| HAP2_1 (hp=21 somatic) | **11,660** | GT=`.\|0` + GT=`0\|0`+GT2=`.\|1` |
+| HAP3 (hp=33 ambiguous) | 571 | GT=`0\|0`+GT2=`1\|1` |
+| OTHER (unphased/hom) | 5,860 | — |
 
-→ V3F 修對 priority bug 後, S5 amplification 從 17.5× 降到 ~1×。BAM 直接反映 vote ratio (with 微 noise)。
+- **HP1 family (HAP1 + HAP1_1) = 26,436**
+- **HP2 family (HAP2 + HAP2_1) = 14,931**
+- **baseline phased PASS altHaplotype HP1:HP2 ratio = 1.77:1 偏 HP1** ← assignment bias 本身存在
 
-### V5/V6 Pathway
+### 完整修正 Stage Amplification Matrix (3 pathways)
 
-| Stage | bias ratio | amplification |
+| Stage | baseline | V5/V6 | V3F |
+|---|---|---|---|
+| S2 phased PASS **altHaplotype assignment** | **1.77:1** (was reported as 1.013, error) | **2.03:1** (PON-only 設計更偏) | (推測 ~2:1 同 V5) |
+| S4 vote_dump on 17,404 victim subset | 0.989:1 | (未測) | 0.989:1 |
+| S5 BAM HP family | **17.3:1** | 1.84:1 | 1.14:1 |
+| **S5 priority bug amplification** | **9.8× (17.3 / 1.77)** | **0.91× (1.84 / 2.03)** | **0.56× (1.14 / 2.03)** |
+
+### 真實機制 — 兩 mechanism 疊加
+
+baseline 17.3:1 偏移實際由**兩個 mechanism 疊加**:
+
+```
+Mechanism #1: altHaplotype assignment bias
+  PON-only & GT direct mapping 設計 (parser line 181-194)
+  → baseline PASS altHaplotype 自身 1.77:1 偏 HP1
+  → 此 bias 是「設計 quirk」(partial encoding 不對稱), 不是 bug
+
+Mechanism #2: priority bug amplification
+  haplotag judgeHaplotype S5 stage (vector 順序 + break-early)
+  → 將 1.77:1 underlying bias 放大 9.8× 到 17.3:1
+  → 此放大是 bug (修對方向 = V3F two-layer getVote)
+
+→ baseline BAM 17.3:1 = 1.77 (assignment) × 9.8 (priority bug 放大)
+```
+
+### V3F (41ff147) 修對 mechanism #2
+
+V3F two-layer getVote 移除 priority bug 放大效應。修對後:
+- BAM 直接反映 underlying assignment ratio (不再放大)
+- 若沒 PON-only flag (v3f_no_pononly): BAM ≈ 1.77:1
+- 若開 PON-only flag (V5/V6): assignment 變 2.03:1 → BAM 1.84:1 (些微平衡)
+
+### PON-only (8b8c1fd) 不是修 17:1 的必要 commit (重要澄清)
+
+| 問題 | 必要 commit | PON-only 是否必要 |
 |---|---|---|
-| **S2/S3 V5 PON-only PASS GT2 (ALT direction)** | **1.18:1 (17,216 : 14,608 偏 HP1)** | — |
-| S4 vote | (V5 binary 未測, presumed similar) | — |
-| **S5 V5/V6 BAM** | **1.84:1** | **~1.56×** (V5 phasing reshuffle) |
+| **17.3:1 HP1 family 偏移核心** | **V3F (41ff147)** alone 即修對 mech #2 | ❌ 非必要 |
+| TO LOH 31.2% self-phasing artifact | PON-only Pass 2 | ✅ 必要 |
+| Phase block N50 +99.7% | PON-only Pass 2 | ✅ 必要 |
+| Phased rate +23.6 pp | PON-only Pass 2 | ✅ 必要 |
+| HP_Ratio extreme 99.9% (self-phasing 副作用) | PON-only | ✅ 必要 |
+| Cross-sample 4 樣本 ratio 中性化 | PON-only + V3F + V5 | ✅ 累積 |
 
-→ V5/V6 BAM 1.84:1 = V5 PON-only mode GT2 1.18:1 + V5 phasing reshuffle (V3F→V5 改 63%)
-→ V5/V6 沒有 17× priority bug 放大 (因為 V3F two-layer fix 已修對)
+→ **PON-only mode 修「self-phasing 設計問題」, V3F 修「priority bug 放大」, 兩者修不同 layer 問題**。
+→ 早期 PPT 描述「PON-only 修 17:1」是簡化過度; 精確說法: V3F 是 17:1 的核心 fix。
 
-### 對用戶假設的最終 verdict
+### V5/V6 BAM 1.84:1 解讀
+
+V5/V6 BAM 1.84:1 = V3F priority bug 修對 (移 9.8× 放大) + PON-only 設計 (assignment 變 2.03:1, 略偏 HP1) + V3F two-layer getVote 些微平衡 → BAM ~1.84:1。
+
+不是「partial priority bug 未修」, 是 PON-only mode 自身 assignment quirk + V3F 完全修對的 net 結果。
+
+### 對用戶 6 輪 feedback 的最終 verdict
 
 | 用戶假設 | 結果 | 證據 |
 |---|---|---|
-| GT 0\|1 vs 1\|0 偏向是 17.3:1 源頭 | ❌ **推翻** | PASS GT 1.013:1 不顯著, vote 0.989:1 ~50:50 |
-| HP:i:11 對應的 GT pattern 是否考慮到 | ✅ 已 cover | §3 HP family ↔ GT pattern 對映表 + GT2 統計 |
-| 全面 downstream 影響評估 | ✅ 已 cover | §5 downstream impact 6 dimension |
-| 統計確認問題的源頭 | ✅ **S5 priority bug** | stage amplification 17.5× 鐵證 |
-| 統計結果 + 影響範圍 + 數據支持 | ✅ 已 cover | §6 evidence grading ⭐⭐⭐⭐⭐ 全集 |
+| GT 0\|1 vs 1\|0 偏向是 17.3:1 源頭 | 🟡 **部分對** — assignment 1.77:1 contribute ~10%, priority bug 9.8× contribute ~90% | source-traced |
+| HP:i:11 對應的 GT pattern 是否考慮到 | ✅ 已 cover (含 GT direct + GT2 全 9 種路徑) | parser source code |
+| 全面 downstream 影響評估 | ✅ 已 cover | §5 downstream impact |
+| 統計確認問題的源頭 | ✅ **S5 priority bug + S2 PON-only/GT direct mapping 設計** | stage matrix |
+| 統計結果 + 影響範圍 + 數據支持 | ✅ 已 cover | §6 evidence grading |
+| PON-only 是否修 17:1 的必要 commit | ❌ **非必要** (V3F alone 即修對 mech #2) | source code + parser logic |
+
+### 對主敘事影響
+
+| Claim | 之前 framing | 修正後 framing | 嚴重度 |
+|---|---|---|---|
+| S5 priority bug amplification | 17.5× | **9.8×** | 數值精確化 |
+| baseline 17.3:1 源頭 | priority bug 唯一 amplifier | assignment 1.77:1 × priority bug 9.8× **疊加** | 機制完整化 |
+| PON-only 修 17:1 | 必要 | **非必要** (修 self-phasing 設計問題 + LOH artifact + N50 + Phased rate; 17:1 由 V3F 修對) | 角色釐清 |
+| V5/V6 BAM 1.84:1 | priority bug partial | **assignment 2.03:1 + V3F fix 些微平衡** | 機制完整化 |
+
+主結論不變: **V3F (41ff147) 是 17.3:1 偏移的核心修對 commit**; priority bug 確實是放大器, 只是 amplitude 從 17.5× 修正為 9.8×。
 
 ### 完整 deep-dive 報告
 
 `InterSubMod/docs/experiments/in_progress/2026/05/20260514_phased_VCF_GT_HP_family_analysis_01.md`
 
-含完整 Phase 0-6 stage tracing + Chi-square + downstream impact + verdict A 確認。
+含完整 Phase 0-6 stage tracing + Chi-square + downstream impact + verdict A 修正版 + parser source code 對應。
 
 ---
 

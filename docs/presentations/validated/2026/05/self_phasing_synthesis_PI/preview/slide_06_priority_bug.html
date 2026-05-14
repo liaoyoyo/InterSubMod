@@ -323,7 +323,8 @@ details.collapsible summary:hover { color: #1D4ED8; }
     </p>
 
     <div style="background:#FEF3C7;border:2px solid #CA8A04;border-radius:6px;padding:6px 12px;margin:4px 0;font-size:11.5px;color:#7C2D12;">
-      <strong>⚠ #2/3 連鎖 bug：程式 bug — vector 順序 + break early</strong>（兩個 bug 共同造成 baseline 全偏 HP1；缺一不可，先順序後 break-early）
+      <strong>⚠ #2/3 連鎖 bug：程式 bug — vector 順序 + break early</strong>（兩個 bug 共同造成 baseline 全偏 HP1；缺一不可，先順序後 break-early）<br>
+      <span style="font-size:10.5px;color:#7C2D12;display:block;margin-top:4px;">📌 <strong>5/14 精確化</strong> (E5 §3a.5b.12)：baseline 17.3:1 = altHaplotype assignment <strong>1.77:1</strong> (PON 設計 + GT direct mapping 不對稱) × <strong>priority bug 9.8× 放大</strong>。V3F (41ff147) 移除此 9.8× 放大 = <strong>17.3:1 偏移核心 fix</strong>；PON-only mode (8b8c1fd) 修 self-phasing 設計（LOH 31.2% artifact / N50 +99.7%）但非 17.3:1 必要 commit。</span>
     </div>
 
     <!-- 上半：A1 Multi-read IGV view (per-read 框架) -->

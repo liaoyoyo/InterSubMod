@@ -321,7 +321,8 @@ details.collapsible summary:hover { color: #1D4ED8; }
 
     <!-- v1.8 McKinsey #3 收斂: lead with so-what, ≤3 messages = (核心修法表) + (1-line take-away) -->
     <p style="font-size:16px;font-weight:700;color:#7C2D12;background:#FEF3C7;border-left:4px solid #CA8A04;padding:8px 14px;margin:8px 0 10px;border-radius:4px;">
-      所以怎樣 (so-what)：3 連鎖 bug 跨 2 層 (phasing + tagging)，必須 5 commits 各別修 — <strong>任意拆解 (PON-only / V3F-only) 都不夠</strong>
+      所以怎樣 (so-what)：3 連鎖 bug 跨 2 層 (phasing + tagging)，必須 5 commits 各別修 — <strong>任意拆解 (PON-only / V3F-only) 都不夠完整</strong><br>
+      <span style="font-size:11.5px;color:#7C2D12;display:block;margin-top:4px;">📌 <strong>5/14 精確化</strong> (E5 §3a.5b.12)：嚴格說 <strong>V3F (41ff147) alone 即修對 17.3:1 偏移核心</strong>（移除 priority bug 9.8× 放大 → BAM ~1.77:1）；但 PON-only (8b8c1fd) 是「修 self-phasing 設計 + LOH 31.2% artifact + N50 +99.7%」必要 commit。完整 production candidate (V6) 需 5 commits 累積。</span>
     </p>
 
     <!-- 核心修法表 (5 列) -->

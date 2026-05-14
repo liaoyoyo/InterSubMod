@@ -17,19 +17,22 @@ report_template: deep-dive v1.0
 
 # Phased VCF GT 偏向分析 — Stage-by-Stage Source Tracing for HP1 Family 17.3:1 偏移
 
-## 0. TL;DR — Verdict A: priority bug 是唯一 17.5× 放大器
+> **⚠ 2026-05-14 PM late amendment**: 原 §0 TL;DR 「17.5× 唯一放大器」**過於簡化**。精確 verdict 為**兩 mechanism 疊加** (assignment 1.77 × priority bug 9.8 = 17.3)。詳見下方 §6.3 修正。
 
-**用戶 5 輪 feedback 最終驗證結論**:
+## 0. TL;DR — Verdict A 修正版: 兩 mechanism 疊加, V3F 修對核心 9.8× 放大
+
+**用戶 6 輪 feedback 最終驗證結論 (5/14 PM 修正版)**:
 
 | Stage | bias ratio | Source | Evidence Grade |
 |---|---|---|---|
-| **S2 baseline phased PASS GT (0\|1 vs 1\|0)** | **1.013:1** (3,108 : 3,147) | 6,255 phased PASS variants | ⭐⭐⭐⭐ |
-| **S4 baseline vote_dump HP1 vs HP2 family vote** | **0.989:1** (182,758 vs 184,846) | 17,404 victim subset × 全 genome | ⭐⭐⭐⭐⭐ |
+| **S2 baseline phased PASS altHaplotype (per-variant)** | **1.77:1 偏 HP1** (26,436 : 14,931) | 47,838 PASS variants (per parser logic) | ⭐⭐⭐⭐⭐ |
+| **S4 baseline vote_dump HP1 vs HP2 family vote (17,404 victim subset)** | **0.989:1** (182,758 vs 184,846) | conflict-prone subset | ⭐⭐⭐⭐⭐ |
 | **S5 baseline BAM HP1 family** | **17.3:1** | full HCC1395 5kHz BAM | ⭐⭐⭐⭐⭐ |
 
-→ **S5 priority bug amplification = 17.3 / 0.989 = 17.5×** (唯一 amplifier)
-→ **GT 偏向不是 17.3:1 偏移源頭** (PASS GT ~50:50, vote ratio ~50:50)
-→ **既有結論「priority bug 是主因」徹底證實**, erratum / PPT 主敘事不需改
+→ **17.3:1 = assignment 1.77:1 × priority bug 9.8× 放大** (兩 mechanism 疊加)
+→ **GT 偏向部分對 (assignment 1.77:1), 但主要源頭是 priority bug 9.8× 放大**
+→ V3F (41ff147) 修對 priority bug 是 **17.3:1 偏移核心 fix**
+→ PON-only (8b8c1fd) 是 self-phasing 設計修補 (LOH artifact / N50 / Phased rate), **非 17.3:1 必要 commit**
 
 ## 1. Context — 5 輪用戶 feedback
 
