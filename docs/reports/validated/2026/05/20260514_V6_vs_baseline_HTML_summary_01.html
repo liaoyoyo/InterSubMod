@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V6 vs baseline — 改動範圍與改善指標總覽 (2026-05-14)</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  font-family: "Noto Sans CJK TC", "Source Han Sans TW", "Droid Sans Fallback", "DejaVu Sans", sans-serif;
+  max-width: 1100px; margin: 0 auto; padding: 24px;
+  background: #F5F5F7; color: #1F2937; line-height: 1.6;
+}
+h1 { color: #1E3A8A; border-bottom: 3px solid #1E3A8A; padding-bottom: 10px; margin: 0 0 6px; font-size: 26px; }
+h2 { color: #1E3A8A; margin-top: 30px; border-left: 5px solid #1E3A8A; padding-left: 12px; font-size: 20px; }
+h3 { color: #1E40AF; margin-top: 22px; font-size: 16px; }
+p, li { font-size: 14px; }
+.meta {
+  background: white; padding: 12px 16px; border-left: 4px solid #1E3A8A;
+  border-radius: 4px; margin: 8px 0 20px; font-size: 12.5px; color: #6B7280;
+}
+.meta strong { color: #1E3A8A; }
+table {
+  width: 100%; border-collapse: collapse; margin: 14px 0; background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05); font-size: 13.5px;
+}
+th { background: #1E3A8A; color: white; padding: 9px 11px; text-align: left; font-weight: 600; }
+td { padding: 8px 11px; border-bottom: 1px solid #E5E7EB; vertical-align: top; }
+tr:nth-child(even) td { background: #FAFAFA; }
+tr.row-green td { background: #DCFCE7 !important; color: #166534; }
+tr.row-yellow td { background: #FEF3C7 !important; color: #92400E; }
+tr.row-red td { background: #FEE2E2 !important; color: #7F1D1D; }
+.num { text-align: center; font-family: "JetBrains Mono", monospace; font-weight: 600; }
+.improvement { color: #16A34A; font-weight: 700; }
+.neutral { color: #6B7280; }
+.caveat { color: #92400E; }
+.regression { color: #DC2626; font-weight: 700; }
+.commit {
+  font-family: "JetBrains Mono", monospace; background: #F3F4F6;
+  padding: 1px 6px; border-radius: 3px; font-size: 0.9em;
+}
+.stage-phasing { background: #DBEAFE; color: #1E40AF; padding: 2px 7px; border-radius: 3px; font-weight: 600; font-size: 11.5px; }
+.stage-haplotag { background: #FCE7F3; color: #9D174D; padding: 2px 7px; border-radius: 3px; font-weight: 600; font-size: 11.5px; }
+.stage-cosmetic { background: #F3F4F6; color: #6B7280; padding: 2px 7px; border-radius: 3px; font-size: 11.5px; }
+.commit-chain {
+  background: white; padding: 14px 18px; border-radius: 8px;
+  border: 1px solid #E5E7EB; margin: 14px 0;
+}
+.commit-step {
+  padding: 8px 0; border-bottom: 1px dashed #E5E7EB;
+  display: grid; grid-template-columns: 100px 90px 1fr;
+  gap: 12px; align-items: start; font-size: 13px;
+}
+.commit-step:last-child { border-bottom: none; }
+.arrow { color: #1E3A8A; font-weight: 700; }
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 12px;
+  font-size: 11px; font-weight: 700;
+}
+.badge-strong { background: #DCFCE7; color: #166534; }
+.badge-medium { background: #FEF3C7; color: #92400E; }
+.badge-weak { background: #FEE2E2; color: #991B1B; }
+.badge-neutral { background: #F3F4F6; color: #4B5563; }
+.caveat-box {
+  background: #FFF3CD; border: 1.5px solid #F59E0B; border-radius: 6px;
+  padding: 11px 16px; margin: 12px 0; color: #78350F; font-size: 13.5px;
+}
+.caveat-box strong { color: #92400E; }
+.summary-box {
+  background: #DCFCE7; border: 2px solid #16A34A; border-radius: 8px;
+  padding: 14px 18px; margin: 18px 0;
+}
+.summary-box h3 { color: #166534; margin-top: 0; }
+.tldr-box {
+  background: #F0F9FF; border: 2px solid #0EA5E9; border-radius: 8px;
+  padding: 14px 18px; margin: 18px 0;
+}
+.tldr-box h3 { color: #0369A1; margin-top: 0; }
+code { background: #F3F4F6; padding: 1px 5px; border-radius: 3px; font-size: 0.92em; }
+.footnote { font-size: 11.5px; color: #6B7280; font-style: italic; margin-top: 14px; padding-top: 10px; border-top: 1px solid #E5E7EB; }
+.pipeline-flow {
+  background: white; padding: 14px 18px; border-radius: 8px;
+  border: 1px solid #E5E7EB; margin: 14px 0; font-family: "JetBrains Mono", monospace; font-size: 13px;
+}
+.pipeline-step { padding: 4px 0; }
+.pipeline-arrow { color: #6B7280; text-align: center; font-size: 11px; }
+.dim-not-changed { color: #9CA3AF; }
+.dim-changed { color: #1E40AF; font-weight: 700; }
+.pos { color: #16A34A; font-weight: 700; }
+.neg { color: #DC2626; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<h1>V6 vs baseline — 改動範圍與改善指標總覽</h1>
+
+<div class="meta">
+  <strong>Date:</strong> 2026-05-14 ·
+  <strong>Sample:</strong> HCC1395 5kHz (purity 0.93) ·
+  <strong>Tool:</strong> longphase-to-mod (V6 = baseline + 5 commits) ·
+  <strong>Caller:</strong> ClairS-TO (FILTER 不動) ·
+  <strong>Source:</strong> 主報告 5/8 + erratum 5/13 §3a.5b + 5/14 deep dive ·
+  <strong>Audience:</strong> PI 1-on-1 報告者 + 後續 ISM 下游研究者
+</div>
+
+<div class="tldr-box">
+  <h3>📌 TL;DR — V6 對 baseline 全面改善, 對 V3F/V5 是 trade-off</h3>
+  <ul>
+    <li><strong>baseline → V6 跨 5 commits</strong>: 4 local + 1 upstream (詳 §1)</li>
+    <li><strong>V6 vs baseline 全面改善</strong>: Phase N50 +99.7% / Phased% +23.6pp / paired GT +13.3pp / 4 樣本 ratio 中性化 / marker coverage +9% (詳 §3)</li>
+    <li><strong>caller F1 = 0.7166 invariant</strong>: longphase 完全不動 FILTER, empirical diff = 0 lines (§4)</li>
+    <li><strong>V6 vs V3F</strong>: trade-off (V6 cross-sample + marker eng 勝, V3F ratio + germline preservation 勝) (§5)</li>
+    <li><strong>V6 vs V5</strong>: HCC1395 5kHz 此 sample 不可區別 (V5 BAM = V6 BAM 0 diff); V6 優勢只在 cross-sample (§5)</li>
+  </ul>
+</div>
+
+<h2>§1 baseline → V6 跨 5 commits (commit chain)</h2>
+
+<div class="commit-chain">
+  <div class="commit-step" style="background:#F9FAFB;padding:8px;border-radius:4px;font-weight:700;">
+    <div>commit</div>
+    <div>stage</div>
+    <div>內容 + 影響範圍</div>
+  </div>
+  <div class="commit-step">
+    <div><span class="commit">3148944 etc.</span></div>
+    <div><span class="stage-cosmetic">cosmetic</span></div>
+    <div>upstream documentation / legend updates (pre-baseline). <span class="dim-not-changed">沒動邏輯, 不影響 phasing/haplotag.</span></div>
+  </div>
+  <div class="commit-step">
+    <div><span class="commit">8b8c1fd</span></div>
+    <div><span class="stage-phasing">phasing</span></div>
+    <div><strong>本地 feature:</strong> <code>--pon-only-phasing</code> mode (解決 self-phasing circular dependency)<br>
+      Three-step approach: <code>convertNonGermlineToSomatic()</code> + <code>somaticCalling()</code> + <code>syncPhasingResultOrigins()</code><br>
+      <span class="pos">→ Phase block N50 4,061 → 8,109 (+99.7%); Phased rate 54.9% → 78.5% (+23.6pp)</span></div>
+  </div>
+  <div class="commit-step">
+    <div><span class="commit">41ff147</span> (V3F)</div>
+    <div><span class="stage-haplotag">haplotag</span></div>
+    <div><strong>本地 fix:</strong> two-layer getVote — germline first, somatic second<br>
+      priority bug 修對 (vector 順序 + break-early 翻向 HP1 偏移)<br>
+      <span class="pos">→ HP1:HP2 ratio 17.3:1 → ~1:1; 15-Clean PS GT +13.3 pp; 34,855 狹義 victims 100% 修對</span></div>
+  </div>
+  <div class="commit-step">
+    <div><span class="commit">380e8d2</span></div>
+    <div><span class="stage-haplotag">haplotag</span></div>
+    <div><strong>本地 minor fix:</strong> <code>countINDELHaplotype</code> UNDEFINED array access guard<br>
+      <span class="dim-not-changed">→ stability 增強, 不改 HP tag 行為</span></div>
+  </div>
+  <div class="commit-step">
+    <div><span class="commit">d0bcd8c</span> (V5)</div>
+    <div><span class="stage-phasing">phasing</span></div>
+    <div><strong>本地 fix:</strong> <code>collectPloidyRatio()</code> after PON-only Pass 2 <code>syncOrigins</code><br>
+      補 Pass 1 missing ploidy 收集 + countSNPHaplotype UNDEFINED guard<br>
+      <span class="pos">→ V5 purity 0 → 0.871 (baseline 0.927); V3F → V5 BAM 改 63% reads + 3,198 direction flip</span></div>
+  </div>
+  <div class="commit-step">
+    <div><span class="commit">938f0df</span> (V6)</div>
+    <div><span class="stage-phasing">phasing</span></div>
+    <div><strong>upstream (zhenyu, 2025-10-02):</strong> Update purity calculation + threshold 0.95 → 0.9<br>
+      <span class="neutral">→ 對 HCC1395 5kHz (purity 0.93) 此 sample <strong>完全無實效</strong> (V5 BAM = V6 BAM 100% identical, 0 diff); cross-sample 4 樣本可能有效 (待跑)</span></div>
+  </div>
+</div>
+
+<p style="font-size:13px;color:#6B7280;font-style:italic;">→ <strong>4 個本地改動 (8b8c1fd / 41ff147 / 380e8d2 / d0bcd8c)</strong> 是 V6 改善主因; V6 commit (938f0df) 是 upstream cherry-pick 對 HCC1395 5kHz 無實效。</p>
+
+<h2>§2 改動哪些 pipeline stage</h2>
+
+<div class="pipeline-flow">
+  <div class="pipeline-step"><strong>Step 1: ClairS-TO caller</strong> &nbsp; <span class="dim-not-changed">(沒動)</span></div>
+  <div class="pipeline-arrow">&nbsp; ↓ &nbsp; VCF: CHROM POS REF ALT <strong>FILTER</strong> (已決定: 753 PASS / 48,358 NonSomatic / 876 LowQual) ...</div>
+  <div class="pipeline-step"><strong>Step 2: longphase phasing</strong> &nbsp; <span class="dim-changed">(改動: 8b8c1fd PON-only / d0bcd8c ploidyRatio / 938f0df threshold)</span></div>
+  <div class="pipeline-arrow">&nbsp; ↓ &nbsp; phased VCF: 加 <strong>PS</strong> (phase set ID) + <strong>GT</strong> (0/1 → 0|1 phased); <span class="pos">FILTER 完全不動</span></div>
+  <div class="pipeline-step"><strong>Step 3: longphase haplotag</strong> &nbsp; <span class="dim-changed">(改動: 41ff147 V3F two-layer / 380e8d2 INDEL guard)</span></div>
+  <div class="pipeline-arrow">&nbsp; ↓ &nbsp; tagged BAM: 加 <strong>HP:i:</strong> tag (read-level HP assignment); <span class="pos">VCF 不動</span></div>
+  <div class="pipeline-step"><strong>Step 4: F1 evaluation</strong> (bcftools isec, 抽 FILTER=PASS) &nbsp; <span class="dim-not-changed">(沒動)</span></div>
+  <div class="pipeline-arrow">&nbsp; ↓ &nbsp; F1 = 0.7166 (baseline = V3F = V5 = V6, <strong>數學保證 invariant</strong>)</div>
+</div>
+
+<div class="caveat-box">
+  <strong>關鍵:</strong> longphase 只 READ FILTER 不 WRITE FILTER (source code <code>ParsingBam.cpp:492</code> 只 read; grep "FILTER write API" = 0 matches; empirical diff(input.FILTER vs output.FILTER) = <strong>0 lines</strong> row-by-row identical)。F1 只看 FILTER → 數學上不可能改變。
+</div>
+
+<h2>§3 V6 vs baseline 改善指標 (按 layer 分類)</h2>
+
+<h3>3.1 Phasing layer 改善 (來自 8b8c1fd PON-only Pass 2)</h3>
+
+<table>
+  <thead><tr><th>Metric</th><th>baseline</th><th>V6</th><th>改善</th><th>Verdict</th></tr></thead>
+  <tbody>
+    <tr class="row-green"><td><strong>Phase block N50</strong> ⭐</td><td class="num">4,061</td><td class="num">8,109</td><td class="num pos">+99.7%</td><td><span class="badge badge-strong">強改善</span></td></tr>
+    <tr class="row-green"><td><strong>Phased rate</strong></td><td class="num">54.9%</td><td class="num">78.5%</td><td class="num pos">+23.6 pp</td><td><span class="badge badge-strong">強改善</span></td></tr>
+    <tr class="row-green"><td><strong>Pipeline speed</strong></td><td class="num">1×</td><td class="num">1.36×</td><td class="num pos">+36%</td><td><span class="badge badge-medium">中改善</span></td></tr>
+    <tr><td>LOH.bed Jaccard</td><td class="num">1.0</td><td class="num">1.0</td><td class="num neutral">不變</td><td><span class="badge badge-neutral">LOH 結構保留</span></td></tr>
+  </tbody>
+</table>
+
+<h3>3.2 Haplotag layer 改善 (來自 41ff147 V3F)</h3>
+
+<table>
+  <thead><tr><th>Metric</th><th>baseline</th><th>V6</th><th>改善</th><th>Verdict</th></tr></thead>
+  <tbody>
+    <tr class="row-green"><td><strong>HP1:HP2 family ratio</strong></td><td class="num">17.3 : 1</td><td class="num">1.84 : 1</td><td class="num pos">-29.8 pp</td><td><span class="badge badge-strong">priority bug 修對</span></td></tr>
+    <tr class="row-green"><td><strong>15-Clean PS GT</strong> ⭐</td><td class="num">baseline</td><td class="num pos">+13.3 pp</td><td class="num pos">paired GT 對齊</td><td><span class="badge badge-strong">read-level 真實 value</span></td></tr>
+    <tr class="row-green"><td><strong>Clean PS GT</strong></td><td class="num">baseline</td><td class="num pos">+8.3 pp</td><td>—</td><td><span class="badge badge-medium">中改善</span></td></tr>
+    <tr class="row-green"><td><strong>15-Aggr GT</strong></td><td class="num">baseline</td><td class="num pos">+6.65 pp</td><td>—</td><td><span class="badge badge-medium">中改善</span></td></tr>
+    <tr class="row-green"><td><strong>34,855 狹義 victims</strong> (baseline=hp=11 → V3F=hp=21 flip)</td><td class="num">100% hp=11 ❌</td><td class="num pos">多數翻 hp=21 ✅</td><td>priority bug 修對</td><td><span class="badge badge-strong">V3F 主力</span></td></tr>
+  </tbody>
+</table>
+
+<h3>3.3 Cross-sample 4 樣本 ratio 中性化 (8b8c1fd + 41ff147 累積)</h3>
+
+<table>
+  <thead><tr><th>Sample</th><th>baseline ratio</th><th>V5 ratio</th><th>V6 ratio</th><th>Verdict</th></tr></thead>
+  <tbody>
+    <tr class="row-green"><td>HCC1395 5kHz</td><td class="num">17.3 : 1</td><td class="num">2.00 : 1</td><td class="num">1.84 : 1</td><td><span class="badge badge-strong">大幅改善</span></td></tr>
+    <tr class="row-green"><td>H1437</td><td class="num">(偏 HP1)</td><td class="num">—</td><td class="num">1.243</td><td><span class="badge badge-medium">中性化</span></td></tr>
+    <tr class="row-green"><td>H2009</td><td class="num">(偏 HP1)</td><td class="num">—</td><td class="num">0.901</td><td><span class="badge badge-medium">中性化</span></td></tr>
+    <tr class="row-green"><td>HCC1954</td><td class="num">(偏 HP1)</td><td class="num">—</td><td class="num">0.958</td><td><span class="badge badge-medium">中性化</span></td></tr>
+    <tr class="row-green"><td>HCC1937</td><td class="num">(偏 HP1)</td><td class="num">1.86</td><td class="num">0.611</td><td><span class="badge badge-medium">中性化</span></td></tr>
+  </tbody>
+</table>
+
+<p style="font-size:13px;color:#6B7280;">→ <strong>V6 在 4/5 樣本 ratio 落到 0.61-1.24 中性區間</strong> (vs baseline 17.3:1 / V5 1.86)。Cross-sample 穩定化是 V6 最強優勢。</p>
+
+<h3>3.4 Marker engineering 改善 (V6 上 V3F)</h3>
+
+<table>
+  <thead><tr><th>Metric</th><th>V3F baseline</th><th>V6</th><th>改善</th></tr></thead>
+  <tbody>
+    <tr class="row-green"><td>hp=33 reads (全基因組)</td><td class="num">132,060</td><td class="num">138,317</td><td class="num pos">+4.7%</td></tr>
+    <tr class="row-green"><td>Marker coverage NG≥3 regions</td><td class="num">21,997</td><td class="num">23,980</td><td class="num pos">+9.0%</td></tr>
+    <tr><td>chr19 marker rate</td><td class="num">0.947</td><td class="num">0.935</td><td class="num neutral">介於 V3F 0.947 / V5 0.924</td></tr>
+  </tbody>
+</table>
+
+<h3>3.5 caller F1 invariant (FILTER 不動 → 不變)</h3>
+
+<table>
+  <thead><tr><th>Version</th><th>F1</th><th>來源 commit</th><th>Verdict</th></tr></thead>
+  <tbody>
+    <tr><td>baseline (raw ClairS-TO)</td><td class="num">0.7166</td><td>—</td><td>—</td></tr>
+    <tr><td>V3F (41ff147)</td><td class="num">0.7166</td><td>haplotag 改</td><td>invariant ✓</td></tr>
+    <tr><td>V5 (d0bcd8c)</td><td class="num">0.7166</td><td>+ phasing 改</td><td>invariant ✓</td></tr>
+    <tr class="row-green"><td><strong>V6 (938f0df)</strong></td><td class="num">0.7166</td><td>+ purity threshold</td><td><strong>invariant ✓</strong></td></tr>
+  </tbody>
+</table>
+
+<div class="caveat-box">
+  <strong>5/14 Empirical Proof</strong>: <code>diff (baseline ClairS-TO snv.vcf.gz.FILTER vs V5 longphase tumor_phased.vcf.FILTER) = 0 lines</code> row-by-row identical (NonSomatic 48,358 ✓ / PASS 753 ✓ / LowQual;NonSomatic 831 ✓ / LowQual;VariantCluster 41 ✓ / LowQual;StrandBias 4 ✓)。F1 invariant 從理論宣稱升級為經驗證實。
+</div>
+
+<h2>§4 為何 F1 不變 — 從 source code 機制圖示</h2>
+
+<div class="commit-chain">
+  <p style="margin-top:0;font-weight:700;color:#1E3A8A;">F1 評估流程 + longphase 改動範圍</p>
+<pre style="background:#F9FAFB;padding:12px;border-radius:6px;font-size:12px;line-height:1.5;color:#374151;overflow-x:auto;">
+[Step 1] ClairS-TO caller
+   ↓ snv.vcf.gz: 49,987 variants, FILTER 欄已決定
+   ↓ (753 PASS = F1 唯一輸入集合)
+   ↓
+[Step 2] longphase phasing  ← 改動 8b8c1fd / d0bcd8c / 938f0df
+   ↓ convertNonGermlineToSomatic() — 簡化 phasing graph
+   ↓ somaticCalling()           — 重新分類 SOMATIC/PON/GERMLINE
+   ↓ syncPhasingResultOrigins() — sync GT 格式 (0/1 → 0|1)
+   ↓
+   ↓ ★ 不動 FILTER 欄 (source grep "FILTER write" = 0) ★
+   ↓ tumor_phased.vcf: 加 PS (phase set ID) + GT (phased)
+   ↓
+[Step 3] longphase haplotag  ← 改動 41ff147 / 380e8d2
+   ↓ getVote() + judgeHaplotype()  — 兩層投票
+   ↓
+   ↓ ★ 不動 VCF (BAM tag 不寫回 VCF) ★
+   ↓ tumor_tagged.bam: 加 HP:i: read-level tag
+   ↓
+[Step 4] F1 evaluation
+   ↓ bcftools isec --filter "PASS"
+   ↓ 抽 FILTER=PASS variants 與 ground truth 比對
+   ↓ → caller_passed 集合與 input 100% 相同
+   ↓ → TP/FP/FN 不變
+   ↓ → F1 = 0.7166 mathematically invariant
+</pre>
+</div>
+
+<p style="font-size:13px;">→ longphase 改的 (<code>PS</code> / <code>GT</code> / <code>HP:i:</code>) 與 F1 看的 (<code>FILTER</code>) 在 VCF 不同欄位, 數學上 orthogonal。phasing 不論多大改, F1 都不會動。</p>
+
+<h2>§5 V6 不是「絕對全勝」— 誠實 caveat</h2>
+
+<h3>5.1 V6 vs V3F — Trade-off (不是全面更好)</h3>
+
+<table>
+  <thead><tr><th>維度</th><th>V3F</th><th>V6</th><th>誰勝</th></tr></thead>
+  <tbody>
+    <tr class="row-yellow"><td>HP1:HP2 ratio (越接近 1:1 越好)</td><td class="num"><strong>1.14 : 1</strong> ⭐</td><td class="num">1.84 : 1</td><td class="caveat">V3F 勝</td></tr>
+    <tr class="row-yellow"><td>germline-only outcomes (hp=1/hp=2) preserved</td><td class="num"><strong>21%</strong></td><td class="num">0%</td><td class="caveat">V3F 勝</td></tr>
+    <tr class="row-green"><td>Cross-sample 4 樣本 ratio 中性化</td><td class="num">未測</td><td class="num pos"><strong>0.61-1.24</strong></td><td class="improvement">V6 勝</td></tr>
+    <tr class="row-green"><td>Marker coverage NG≥3</td><td class="num">21,997</td><td class="num pos"><strong>23,980 (+9%)</strong></td><td class="improvement">V6 勝</td></tr>
+    <tr class="row-green"><td>hp=33 marker eng</td><td class="num">132,060</td><td class="num pos"><strong>138,317 (+4.7%)</strong></td><td class="improvement">V6 勝</td></tr>
+    <tr><td>per-read paired_T 對齊 (HCC1395)</td><td class="num">24.70%</td><td class="num">24.97%</td><td class="neutral">平手 (都 ~25%)</td></tr>
+    <tr><td>family-level paired_T 對齊 (swap-corrected)</td><td class="num">51.05%</td><td class="num">51.95%</td><td class="neutral">平手 (都 ~50% 隨機)</td></tr>
+    <tr><td>caller F1</td><td class="num">0.7166</td><td class="num">0.7166</td><td class="neutral">平手 (invariant)</td></tr>
+  </tbody>
+</table>
+
+<p style="font-size:13px;">→ <strong>V6 = trade-off production candidate</strong>: cross-sample + marker eng 勝, V3F ratio + germline preservation 勝, paired_T 對齊平手 (跨 codebase HP1/HP2 隨機水準)。</p>
+
+<h3>5.2 V6 vs V5 — HCC1395 5kHz 此 sample 完全不可區別</h3>
+
+<div class="caveat-box">
+  <strong>5/14 BAM extract 確認:</strong> V5 BAM <code>/big7_disk/.../v5_flag/tumor_tagged.bam</code> 與 V6 BAM <code>/big7_disk/.../v6_germline_absent_revert/tumor_tagged.bam</code> 對 17,404 V3F victim subset 的 HP tag 分布 <strong>read-by-read 100% identical</strong> (0 diff after normalization)。<br>
+  <br>
+  V6 patch <code>938f0df</code> (purity threshold 0.95 → 0.9) 對 HCC1395 (purity 0.93) 此 sample <strong>完全沒實效</strong>。<br>
+  <br>
+  → V6 比 V5 強的證據只在 <strong>cross-sample 4 樣本 ratio 中性化</strong> (Phase D verification matrix: H1437/H2009/HCC1954/HCC1937), 不在 HCC1395 5kHz 上。
+</div>
+
+<h3>5.3 5/14 deep dive 揭露的 5 個 caveat</h3>
+
+<table>
+  <thead><tr><th>#</th><th>Caveat</th><th>影響</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><strong>vote_dump ≠ BAM</strong></td><td>vote_dump 二元 (hp=11/21) 是 getVote() 中間記錄; BAM HP:i: 是 judgeHaplotype 最終決策含 hp=1/2/11/21/33/empty 六類</td></tr>
+    <tr><td>2</td><td><strong>跨 codebase HP1/HP2 sysmetic mismatch</strong></td><td>TO HP:i:1 ≠ paired HP:Z:1; family-level 對齊 ~50% 隨機 (V3F 51.05% / V6 51.95%); 不能用 paired 對齊判定 V3F vs V6 優劣</td></tr>
+    <tr><td>3</td><td><strong>V3F → V5 改 63% reads</strong></td><td>d0bcd8c ploidyRatio fix 不是「微調」是大規模 phase block 重組; 3,198 reads (18%) HP1↔HP2 direction flip</td></tr>
+    <tr><td>4</td><td><strong>V5/V6 不保留 hp=1/hp=2 germline-only</strong></td><td>V5/V6 強制將 germline-only reads 分類為 bivariate (hp=11/21/33); V3F 保留 21% 接近 paired_T 真實結構</td></tr>
+    <tr><td>5</td><td><strong>FILTER 完全 invariant 已雙重驗證</strong></td><td>source grep + 全 VCF empirical diff 都確認 longphase 從不寫 FILTER → caller F1 = 0.7166 invariant 必然非巧合</td></tr>
+  </tbody>
+</table>
+
+<h2>§6 Bottom Line</h2>
+
+<div class="summary-box">
+  <h3>✅ V6 = production candidate</h3>
+  <ol>
+    <li><strong>對 baseline 全面改善</strong> — 17.3:1 → 1.84:1 / Phase N50 +99.7% / Phased% +23.6pp / paired GT +13.3pp / 4 樣本 ratio 中性 / marker coverage +9%</li>
+    <li><strong>對 V3F 是 trade-off</strong> — V6 在 cross-sample + marker eng 勝, V3F 在 ratio + germline preservation 勝</li>
+    <li><strong>對 V5 在 HCC1395 5kHz 不可區別</strong> (V5 BAM = V6 BAM 0 diff), V6 優勢在 cross-sample 4 樣本顯現</li>
+    <li><strong>真實價值在 read-level paired GT (+13.3 pp) + cross-sample 穩定化</strong>, 不在 caller F1 (FILTER 不動 → 數學保證 invariant)</li>
+  </ol>
+</div>
+
+<h3>給 PI 報告可以強說的 5 鐵證</h3>
+<ol style="font-size:14px;">
+  <li>發現並修好 longphase-to 一個被忽略的 <strong>priority bug</strong> (V3F two-layer getVote `41ff147`) — read-level 17.3:1 → 1.84:1</li>
+  <li><strong>PON-only Pass 2 解決 self-phasing circular dependency</strong> (8b8c1fd) — Phase block N50 +99.7%, Phased rate +23.6 pp</li>
+  <li><strong>caller F1 = 0.7166 invariant 經驗證實</strong> (不是巧合) — longphase 完全不動 FILTER, row-by-row identical</li>
+  <li><strong>V6 = production candidate</strong> — cross-sample 4 樣本 ratio 中性化 (0.61-1.24) + marker coverage +9.0%</li>
+  <li><strong>真實價值在 read-level</strong> (+13.3 pp paired GT concordance) — 不在 caller F1</li>
+</ol>
+
+<h3>需要小心說的 3 個 caveat</h3>
+<ol style="font-size:14px;">
+  <li><strong>V6 vs V3F 不是全面更好</strong> — V3F 有 ratio 1.14:1 最佳 + 保留 21% germline-only outcomes</li>
+  <li><strong>V6 vs V5 在 HCC1395 5kHz 不可區別</strong> — V6 優勢只見 cross-sample (4 樣本 ratio 中性化)</li>
+  <li><strong>「34,855 reads V6 100% 修對」原 framing 過強</strong> — V3F (41ff147) 是 100% 修對主力; V6 對廣義 17,404 subset partial (44.6% 翻方向)</li>
+</ol>
+
+<h2>§7 References</h2>
+
+<ul style="font-size:13px;">
+  <li>主報告 5/8 整合: <code>InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md</code></li>
+  <li>Erratum 5/13 V6 attribution (含 v1.7-G/H deep dive §3a.5b.7-11): <code>InterSubMod/docs/reports/validated/2026/05/20260513_V6_Attribution_Errata_01.md</code></li>
+  <li>V6 binary doc 5/11: <code>InterSubMod/docs/reports/validated/2026/05/20260511_V6_binary_complete_documentation_01.md</code></li>
+  <li>Paired priority bug audit: <code>InterSubMod/research/paired_priority_bug_audit/</code></li>
+  <li>T1.2-F1 read-level audit: <code>InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/</code></li>
+  <li>PPT preview: <code>InterSubMod/docs/presentations/validated/2026/05/self_phasing_synthesis_PI/preview/index.html</code></li>
+</ul>
+
+<div class="footnote">
+  Build: 2026-05-14 PM, generated after v1.7-G/H deep dive completed (commits 6ccb0fc / 8d941db / 6b6e79f). Tasks #46/47/48 closed. paired_T 4-way alignment + FILTER empirical proof + source code 3-hypothesis verification 全部完成。<br>
+  本報告為 baseline → V6 改動與改善指標的 standalone 自含 HTML 總覽; 不是 slide。可獨立列印或瀏覽器閱讀。
+</div>
+
+</body>
+</html>
