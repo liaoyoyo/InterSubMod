@@ -78,7 +78,14 @@ source_plan: /bip7_disk/liaoyoyo2001/.claude/plans/agent-harness-langgraph-resil
 
 ### Q11: 34,855 read-level victims 是 V6 修對嗎？(歸功正確性 #3, **5/14 PM interim revision — V6 非退步而是保守化**)
 
-> ⚠ **5/14 PM 終版補正** (erratum E5 §3a.5b.7)：BAM 三層 final — V3F BAM hp=11=14.46% (含 hp=2=16.65%/empty=15.24%/hp=33=7.77%/hp=1=4.38%, 六類 outcome)；V5 BAM = V6 BAM 100% identical (hp=11=31.66%/hp=21=44.64%/hp=33=14.12%/empty=9.58%, 無 hp=1/hp=2)。**V6 patch 對此 subset 完全無效 (V5≡V6)**；V3F→V5 改 63% reads + 3,198 direction flip (HP1↔HP2)。「V6 vs V3F 哪好」需 paired_T HP:Z: ground truth 確定（pending background extract）。**註**：vote_dump 是 getVote() 中間記錄非 BAM 最終決策，前 framing 用 vote_dump 比較有誤。
+> ✅ **5/14 PM 終版完成** (erratum E5 §3a.5b.7-10, 4-way alignment 完成)：
+> - **V3F BAM**: hp=21=41.5% / hp=2=16.7% / empty=15.2% / hp=11=14.5% / hp=33=7.8% / hp=1=4.4% (六類)
+> - **V5 BAM ≡ V6 BAM** 100% identical: hp=11=31.66% / hp=21=44.64% / hp=33=14.12% / empty=9.58%
+> - **paired_T HP:Z:** ground truth: 1-1=25.4% / 2-1=23.7% / empty=16.9% / 2=15.7% / 1=15.2% / 3=3.1%
+> - **4-way alignment family-level (HP1/HP2 only)**: V3F vs paired_T 51.05% / V6 vs paired_T 51.95% — **兩者都 ~50% 隨機水準, 跨 codebase HP1/HP2 無系統對應**
+> - **V6 vs V3F 哪好**: paired_T per-read 對齊 **平手**; 但 V6 在 cross-sample 4 樣本中性 + marker eng +9% 勝; V3F 保留 germline-only outcomes 勝。**V6 = trade-off candidate**
+> - **caller F1 invariant 經驗證實** (§3a.5b.10): diff(input.FILTER vs output.FILTER)=0 lines, longphase 不動 FILTER row-by-row 完全 identical
+> - **註**：vote_dump 是 getVote() 中間記錄非 BAM 最終決策；跨 codebase HP1/HP2 alignment 不是判定優劣的合理 metric
 
 
 **A**：「34,855 victims 100% 修對」由 **V3F (commit 41ff147 tagging fix)** 達成 (T1.2-F1 audit, 主報告 line 64/564/572)。

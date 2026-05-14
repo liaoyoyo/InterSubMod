@@ -352,16 +352,101 @@ V5/V6 對 V3F **17 pp 多 hp=11** + **24% 多 hp=33+empty** + **失去 21% hp=1/
 - 「V6 比 V3F 改善」此單一 metric **不成立**
 - 但 V6 的其他優勢 (cross-sample 4 樣本中性化 / marker coverage +9% / hp=33 marker eng +4.7%) **仍成立** — 這些是 codebase-invariant metrics
 
-### 3a.5b.8 後續行動 (final)
+### 3a.5b.8 後續行動 (final, **2026-05-14 全部完成**)
 
 | Action | Status |
 |---|---|
 | 認知更新: V5 = V6 (V6 patch 在此 subset 無效) | ✅ confirmed |
 | 認知更新: V3F vote_dump ≠ V3F BAM | ✅ confirmed |
 | 認知更新: V3F → V5 63% reads 改 phase block | ✅ confirmed (transition matrix) |
-| paired_T BAM extract on 17,404 victim → 對齊 ground truth | ⏳ pending (background extract 啟動中) |
-| 完成 paired_T 對齊後 finalize Q11/E5 + PPT 5 處 | ⏳ pending |
+| paired_T BAM extract on 17,404 victim → 對齊 ground truth | ✅ **completed** (background biak3oadj) |
+| 完成 paired_T 對齊後 finalize Q11/E5 + PPT | ✅ §3a.5b.9 added; PPT updated |
 | 主報告 verdict 「V6 = production candidate」**仍成立**（cross-sample + marker eng + caller F1 三 dimension 不受影響）| ✅ 不撤回 |
+| caller F1 invariant **empirical 驗證** (VCF FILTER diff = 0 lines) | ✅ confirmed (§3a.5b.10) |
+
+---
+
+## 3a.5b.9 paired_T 4-way Alignment Final Verdict (**2026-05-14 PM, biak3oadj 完成後**)
+
+### paired_T BAM HP:Z: 分布（17,404 V3F victim subset 全集，HCC1395 longphase-s paired_full）
+
+| HP:Z: | Count | % | 對應 longphase-to HP:i: |
+|---|---|---|---|
+| 1-1 (HP1+somatic) | 4,426 | **25.43%** | HP:i:11 |
+| 2-1 (HP2+somatic) | 4,124 | **23.70%** | HP:i:21 |
+| 1 (HP1 germline) | 2,648 | 15.21% | HP:i:1 |
+| 2 (HP2 germline) | 2,740 | 15.74% | HP:i:2 |
+| empty (未 tag) | 2,936 | 16.87% | empty |
+| 3 (ambiguous) | 530 | 3.05% | HP:i:33 |
+
+### 4-way per-read alignment (V3F BAM / V5≡V6 BAM / paired_T)
+
+#### Per-read full 6-class matching:
+
+| 比較 | Straight match | Inverse match (HP1↔HP2 swap) | Neither |
+|---|---|---|---|
+| V3F vs paired_T | 4,299 (24.70%) | 3,432 (19.72%) | 9,673 (55.58%) |
+| V6 vs paired_T | 4,346 (24.97%) | 3,235 (18.59%) | 9,823 (56.44%) |
+
+#### Family-level (排除 germline-only/empty/ambiguous, 只比 somatic family HP1/HP2):
+
+| 比較 | n | same direction | inverse direction | Best after swap correction |
+|---|---|---|---|---|
+| V3F vs paired_T | 11,233 | 48.95% | 51.05% | **51.05%** |
+| V6 vs paired_T | 10,924 | 51.95% | 48.05% | **51.95%** |
+
+### Final Verdict
+
+**V3F 和 V6 對 paired_T 的 family-level 對齊都 ~50% — 等於隨機水準**:
+- TO codebase HP1/HP2 designation 與 paired_T codebase 沒有系統性對應（既不一致也不顛倒）
+- 跨 codebase HP1/HP2 alignment **不是判定 V6 vs V3F 優劣的標準**
+- 此現象與 paired_priority_bug_audit/01_step_D §「paired BAM HP:Z:1 與 TO BAM HP:i:1 在同 chr 內不保證同 axis」一致
+
+### V6 vs V3F 最終 verdict
+
+| 判斷依據 | V3F 勝/V6 勝/平手 | 理由 |
+|---|---|---|
+| paired_T per-read 對齊 | **平手** (24.70% vs 24.97%) | 都 ~25%，差距無統計意義 |
+| paired_T family-level 對齊 (swap-corrected) | **平手** (51.05% vs 51.95%) | 都接近 50% 隨機 |
+| 保留 germline-only outcomes (hp=1/hp=2) | **V3F 勝** (21% preserved vs V5/V6 0%) | V3F 不強迫 bivariate 分類 |
+| Cross-sample 4 樣本 ratio 中性化 | **V6 勝** (0.61-1.24 中性 vs baseline 17.3:1) | V3F 未跑此 metric |
+| Marker coverage NG≥3 | **V6 勝** (+9% vs V3F baseline) | V6 hp=33 marker engineering |
+| caller F1 invariant | **平手** (4 版 0.7166 相同) | FILTER 不動 |
+
+**結論**：
+- ❌ **不能單獨說「V6 比 V3F 好」or「V6 比 V3F 差」** — 看 dimension
+- ✅ **V6 = trade-off production candidate** — codebase-invariant metrics (cross-sample + marker eng) 勝出，但 per-read 對齊 paired_T 沒比 V3F 強
+- ✅ **5/13 erratum E5 §3a.5 原 framing「V6 31.7% hp=11 = 失敗繼承 V3F」徹底失效** — 因為「繼承 V3F = 正確」前提本身就不成立（V3F 對 paired_T 也只 ~50% 對齊）
+- ✅ **主報告 verdict「V6 = production candidate」仍成立**，但理由需轉到 codebase-invariant metrics
+
+## 3a.5b.10 Empirical Proof — Caller F1 Invariant (FILTER 欄 row-by-row 完全相同)
+
+### 驗證命令
+
+```bash
+diff <(zcat baseline_clairs_to.vcf.gz | grep -v "^#" | awk '{print $1"\t"$2"\t"$4"\t"$5"\t"$7}' | sort) \
+     <(grep -v "^#" v5_longphase_phased.vcf | awk '{print $1"\t"$2"\t"$4"\t"$5"\t"$7}' | sort) \
+     | wc -l
+# Output: 0
+```
+
+### 結果
+
+| 比較對象 | input (ClairS-TO baseline VCF) | output (V5 longphase phased VCF) |
+|---|---|---|
+| NonSomatic | 48,358 | 48,358 ✓ |
+| LowQual;NonSomatic | 831 | 831 ✓ |
+| PASS | 753 | 753 ✓ |
+| LowQual;VariantCluster | 41 | 41 ✓ |
+| LowQual;StrandBias | 4 | 4 ✓ |
+| **完整 VCF diff (CHROM/POS/REF/ALT/FILTER)** | **0 lines** | row-by-row 完全 identical |
+
+### 含義
+
+- longphase 輸出 phased VCF **每一個 variant 的 FILTER 欄與 input 100% 完全相同**
+- F1 = TP/(TP+0.5FP+0.5FN) 來自 FILTER=PASS 集合 → **set 完全相同 → TP/FP/FN 不變 → F1 mathematically invariant**
+- 從理論宣稱（slide 14 mechanism box）升級為**經驗證實**
+- → caller F1 = 0.7166 對 baseline/V3F/V5/V6 4 版全相同**不是巧合是必然**
 
 ---
 
