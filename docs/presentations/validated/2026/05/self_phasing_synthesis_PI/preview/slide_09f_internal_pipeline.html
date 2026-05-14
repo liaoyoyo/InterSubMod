@@ -180,12 +180,12 @@
     </div>
   </article>
 
-  <aside class="note-section" aria-label="Speaker notes for slide 09f">
+  <aside class="note-section" aria-label="Speaker notes for slide 06">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (90 sec / 中 ~300 字)</summary>
-      <div class="speak-text">[S4→S5 橋接]
-上一張 09e forensic 確認 V6 守恆設計成立. 接下來 slide 10/11 要說「caller F1 三版相同 = 0.7166」.
-PI 會問: 為何 F1 不變? 這張先給機制根據, 下兩張給實證.
+      <div class="speak-text">[S2 入口 — 為 priority bug 鋪墊]
+上一張 (nav 05 = slide_05_player_referee) phasing 層球員兼裁判機制. 接下來 (nav 07/08 = slide_06_priority_bug / slide_07_two_layer_table) 要進 tagging 層 priority bug 機制.
+本張先建 longphase-to 內部 5 階段地圖, 讓 PI 知 priority bug 發生在第 5 階段 haplotag, 同時奠基 caller-level F1 invariant (證據在 nav 14/15).
 
 [longphase-to 5 階段 + 改動範圍]
 longphase-to 內部 5 階段:
@@ -217,9 +217,9 @@ F1 仍三版相同 = 0.6273. 證實改動跨 purity 範圍都不傷 F1.
 細節 backup B1.
 
 [轉場到 S5 驗證]
-改動「有效」由 read-level / marker coverage / Phase D ratio 驗證 (slide 10/11/B4).
-改動「無傷」由 F1 invariant 證明 (slide 10).</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> V_H/V_L/V_N 三類細節 / Pass 1 3-point vs Pass 2 2-point 差異 / V6 phased VCF 重用 V5 的細節 (slide 09e) / 938f0df threshold 0.95→0.9 commit 動機</div>
+改動「有效」由 read-level / marker coverage / Phase D ratio 驗證 (nav 14/15/B4 = slide_12_no_regression / slide_14_caller_f1 / slide_b4_phase_d_outliers).
+改動「無傷」由 F1 invariant 證明 (nav 14 = slide_12_no_regression).</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> V_H/V_L/V_N 三類細節 / Pass 1 3-point vs Pass 2 2-point 差異 / V6 phased VCF 重用 V5 的細節 (nav 12 = slide_09e_v6_forensic_validation) / 938f0df threshold 0.95→0.9 commit 動機</div>
     </details>
   </aside>
 

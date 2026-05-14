@@ -491,7 +491,7 @@ details.collapsible summary:hover { color: #1D4ED8; }
     </div>
   </article>
 
-  <aside class="note-section" aria-label="Speaker notes for slide 06">
+  <aside class="note-section" aria-label="Speaker notes for slide 07">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
       <div class="speak-text">[標題]
@@ -501,10 +501,11 @@ tagging 層的 priority bug 機制。
 [三件套]
 件 1 — vector 順序錯：baseline ① somatic / ② mixed / ③ germline。for 迴圈第一個非空 pair 就 break early。同一條 read 的 germline 5 票永遠看不到。
 
-件 2 — 真實例子：chr19 752 victims 同模式。
-單一條 read 經過 5 個 germline het 位點，累積 countMap[HP2]=5 主導。
-加上 1 個 somatic 位點，countMap[HP1_1]=1。
-baseline 錯標這條 read 為 hp=11，正確應 hp=21。
+件 2 — 真實例子（對齊上方 SVG read 1/3）：
+read 1：經 2 個 germline het + 1 個 somatic — countMap[HP2]=2、HP1_1=1。即使 HP2 主導，baseline 仍因 vector 順序遇到 somatic pair 第一個非空 → break early → hp=11 ❌（正確應 hp=21）。
+read 3：1 germline + 1 somatic — countMap[HP2]=1、HP1_1=1，同模式 hp=11 ❌。
+read 2（純 germline 對照）：countMap[HP2]=3、無 somatic → baseline 與 V6 一致 hp=2 ✓ 不受影響。
+chr19 752 victims = 752 條獨立 read，各自落在 read 1/3 模式（germline+somatic mix）。
 
 件 3 — V3F 修法 41ff147：重寫為兩層獨立判定。
 germline 先決方向，somatic 再加 sub-tag encoding。

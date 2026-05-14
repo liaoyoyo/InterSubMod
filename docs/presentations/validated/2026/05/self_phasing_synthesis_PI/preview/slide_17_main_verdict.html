@@ -319,27 +319,29 @@ details.collapsible summary:hover { color: #1D4ED8; }
     <h1 class="slide-title critical">3 條主結論 + 6 條 errata patch</h1>
     <p class="en-subtitle">3 main verdicts + 6 errata patched</p>
     
-    <p style="font-size:16px;font-weight:700;color:#1E3A8A;margin:0 0 8px;">🎯 整份報告 3 條 main verdict (PI 必記):</p>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:#F0FDF4;border:2px solid #16A34A;border-radius:8px;">
-        <div style="flex:none;width:54px;height:54px;border-radius:50%;background:#DCFCE7;border:2px solid #16A34A;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#166534;">①</div>
+    <p style="font-size:16px;font-weight:700;color:#1E3A8A;margin:0 0 6px;">🎯 整份報告 3 條 main verdict — 每條附「為何解決 / 仍待持續」:</p>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:6px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:8px 12px;background:#F0FDF4;border:2px solid #16A34A;border-radius:8px;">
+        <div style="flex:none;width:48px;height:48px;border-radius:50%;background:#DCFCE7;border:2px solid #16A34A;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#166534;">①</div>
         <div style="flex:1;">
-          <p style="font-size:20px;font-weight:700;color:#166534;margin:0 0 4px;">priority bug 修補機制確立</p>
-          <p style="font-size:13.5px;color:#374151;margin:0;line-height:1.55;"><strong style="color:#DC2626;">17.3:1 → 1.84:1</strong> 全基因組 · <strong>34,855</strong> 狹義 victims V3F <strong style="color:#16A34A;">100% 修對</strong> · 17,404 廣義 BAM 三層: V3F hp=11=14.46% / <strong>V5≡V6 hp=11=31.66%</strong> (V6 patch 對此 subset 無效, V3F→V5 改 63% reads, E5 §3a.5b.7) · SP1/2/3 IGV 對齊 paired <strong style="color:#16A34A;">3/3 ✅</strong></p>
+          <p style="font-size:20px;font-weight:700;color:#166534;margin:0 0 2px;">✅ <span style="background:#DCFCE7;padding:1px 6px;border-radius:3px;">priority bug 修對</span>：<strong>ratio 17.3:1 → 1.84:1</strong> + IGV <strong>3/3 對齊 paired</strong></p>
+          <p style="font-size:11px;color:#6B7280;margin:0;line-height:1.4;font-style:italic;">細節：34,855 狹義 victims V3F 100% / V5≡V6 broader subset 17,404 reads 仍 31.66% hp=11 (Layer 1.5 region；E5 §3a.5b.7 詳)。完整數據詳 speaker note。</p>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:#F0FDF4;border:2px solid #16A34A;border-radius:8px;">
-        <div style="flex:none;width:54px;height:54px;border-radius:50%;background:#DCFCE7;border:2px solid #16A34A;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#166534;">②</div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:8px 12px;background:#F0FDF4;border:2px solid #16A34A;border-radius:8px;">
+        <div style="flex:none;width:48px;height:48px;border-radius:50%;background:#DCFCE7;border:2px solid #16A34A;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#166534;">②</div>
         <div style="flex:1;">
-          <p style="font-size:20px;font-weight:700;color:#166534;margin:0 0 4px;">V6 = production candidate <span style="font-size:14px;font-weight:600;color:#6B7280;">(5/10 binary patch)</span></p>
-          <p style="font-size:13.5px;color:#374151;margin:0;line-height:1.55;">= V3F 保守 + V5 設計目標 + marker engineering 改善 · <strong>hp=33 +4.7%</strong> · <strong>marker coverage +9.0%</strong> · Phase D 4 樣本 ratio <strong style="color:#16A34A;">0.61–1.24 中性</strong> · F1 <strong>0.7166</strong><br><strong style="color:#16A34A;">★ 5/13 forensic 確認</strong> V6 守恆轉移完美符合 Layer 1.5 移除邏輯預期 (Type B 完全相同 + Type C 守恆 5,927 reads)</p>
+          <p style="font-size:18px;font-weight:700;color:#166534;margin:0 0 2px;">✅ <span style="background:#DCFCE7;padding:1px 6px;border-radius:3px;">V6 = production candidate</span> <span style="font-size:12px;font-weight:600;color:#6B7280;">(5/10 binary patch)</span></p>
+          <p style="font-size:12.5px;color:#374151;margin:0 0 2px;line-height:1.5;"><strong style="color:#166534;">為何 production:</strong> V3F 保守 + V5 設計目標 + marker engineering · hp=33 <strong>+4.7%</strong> · marker coverage <strong>+9.0%</strong> · Phase D 4 樣本 ratio <strong>0.61–1.24 中性</strong> · F1 <strong>0.7166</strong> · 5/13 forensic 守恆轉移完美</p>
+          <p style="font-size:12px;color:#7C2D12;margin:0;line-height:1.45;"><strong style="color:#CA8A04;">⚠ 待持續:</strong> Pass 2 二次效益尚未量化 · COLO829 解鎖待補 · 7 樣本完整 V6 ablation 未跑</p>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:#FEF3C7;border:2px solid #CA8A04;border-radius:8px;">
-        <div style="flex:none;width:54px;height:54px;border-radius:50%;background:#FBBF24;border:2px solid #CA8A04;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#7C2D12;">★</div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:8px 12px;background:#FEF3C7;border:2px solid #CA8A04;border-radius:8px;">
+        <div style="flex:none;width:48px;height:48px;border-radius:50%;background:#FBBF24;border:2px solid #CA8A04;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#7C2D12;">🎯</div>
         <div style="flex:1;">
-          <p style="font-size:20px;font-weight:700;color:#7C2D12;margin:0 0 4px;">真實價值在 <span style="color:#16A34A;">read-level tag concordance</span> — 非 <span style="color:#DC2626;">caller F1</span></p>
-          <p style="font-size:13.5px;color:#374151;margin:0;line-height:1.55;"><strong style="color:#16A34A;">+13.3 pp</strong> paired GT @ 0.93 · <strong>hp=33 還原</strong> · <strong>marker coverage +9.0%</strong> → ISM 下游 marker engineering 受惠 · caller F1 對 V3F/V5/V6 <strong style="color:#DC2626;">數學保證 invariant</strong></p>
+          <p style="font-size:18px;font-weight:700;color:#7C2D12;margin:0 0 2px;">🎯 <span style="background:#FEF3C7;padding:1px 6px;border-radius:3px;">真實價值 = read-level concordance</span> — 非 caller F1</p>
+          <p style="font-size:12.5px;color:#374151;margin:0 0 2px;line-height:1.5;"><strong style="color:#166534;">為何重要:</strong> paired GT concordance <strong style="color:#16A34A;">+13.3 pp @ 0.93</strong> · hp=33 還原 · marker coverage +9.0% → ISM 下游 marker engineering 受惠 · caller F1 對 V3F/V5/V6 <strong style="color:#DC2626;">數學保證 invariant</strong>（FILTER 不動）</p>
+          <p style="font-size:12px;color:#7C2D12;margin:0;line-height:1.45;"><strong style="color:#CA8A04;">⚠ 主目標:</strong> ISM 五大目標主線（per-CpG 關聯/clone 結構/two-hit order/normal/F1）回歸 — 詳下頁未來方向</p>
         </div>
       </div>
     </div>
@@ -358,7 +360,7 @@ details.collapsible summary:hover { color: #1D4ED8; }
     </div>
   </article>
 
-  <aside class="note-section" aria-label="Speaker notes for slide 12">
+  <aside class="note-section" aria-label="Speaker notes for slide 16">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (120 sec / 中 ~400 字)</summary>
       <div class="speak-text">[標題]
@@ -392,7 +394,7 @@ E5 — V5 Layer 1.5 germline-absent 4.19:1 缺陷。
 E6 — V6 binary patch 完成 + Phase D 4 樣本驗證閉環。
 
 [轉場]
-下一頁 — 改正後影響 + 未來研究方向。</div>
+下一頁 (nav 17 = slide_18_impact_future) — 改正後影響 + 未來研究方向。</div>
       <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> errata commit chain / V6 patch 待 commit / Phase D 5 樣本 evaluation matrix / 各 errata 段落 cross-ref</div>
     </details>
   </aside>

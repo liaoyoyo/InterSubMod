@@ -316,35 +316,41 @@ details.collapsible summary:hover { color: #1D4ED8; }
   </div>
 
   <article class="slide-canvas" data-section="S4" aria-label="Main slide canvas">
-    <h1 class="slide-title ">V6 forensic 驗證 — 程式碼行為實證 + 推翻「V6 退步」結論</h1>
-    <p class="en-subtitle">V6 forensic validation — empirical confirmation + erratum</p>
-    
-    <p style="font-size:11px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:5px 10px;border-radius:4px;">⚠ v6_quantification_findings.md (5/12) 寫「V6 chr19 distance to paired 0.367 比 baseline 還遠」— 5/13 forensic 確認此結論需修正（跨 codebase 命名顛倒未考慮）</p>
+    <h1 class="slide-title ">baseline → V3F → V5 → V6 各層 tag 改了多少 reads</h1>
+    <p class="en-subtitle">Quantifying how many HP tags changed at each layer (chr19 pilot + 全基因組 hp=33)</p>
 
-    <p style="font-size:13px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">📊 獨立 samtools 跑 BAM HP tag 實證 (chr19 pilot + 全基因組 hp=33 跨 chr 總計):</p>
+    <!-- Main quantification banner: 改變了多少 reads -->
+    <div style="background:#DCFCE7;border:2px solid #16A34A;border-radius:6px;padding:8px 14px;margin:6px 0 8px;display:flex;justify-content:space-between;align-items:center;gap:14px;">
+      <div style="font-size:13px;font-weight:700;color:#166534;">🎯 主訊息: V6 改了 N reads — 守恆驗證 + 跨 chr 量化</div>
+      <div style="font-size:14px;font-weight:700;color:#166534;background:white;padding:5px 12px;border-radius:4px;border:1.5px solid #16A34A;">chr19 守恆: <code style="color:#7F1D1D;">−4,674</code> + <code style="color:#7F1D1D;">−1,253</code> = <code style="color:#16A34A;">+5,927</code> hp=33 ✓</div>
+    </div>
+
+    <p style="font-size:11px;font-weight:700;color:#7C2D12;margin:0 0 4px;background:#FEF3C7;padding:4px 10px;border-radius:4px;">⚠ erratum: v6_quantification_findings.md (5/12)「V6 chr19 distance to paired 0.367」結論已修正（跨 codebase HP1/HP2 命名顛倒未考慮，顛倒後 V6≈V5≈baseline 同數量級 0.06-0.07）— 詳 speaker note</p>
+
+    <p style="font-size:13px;font-weight:700;color:#1E3A8A;margin:6px 0 4px;">📊 baseline → V6 各 HP tag 改變量化 (samtools 獨立統計):</p>
     <table class="metric-table" style="font-size:13px;">
       <thead>
-        <tr><th style="padding:6px;">HP tag</th><th style="padding:6px;">baseline</th><th style="padding:6px;">V6 ★</th><th style="padding:6px;">paired_T (HP:Z:)</th></tr>
+        <tr><th style="padding:6px;">HP tag</th><th style="padding:6px;">baseline</th><th style="padding:6px;">V6 ★</th><th style="padding:6px;">Δ reads (V6−baseline)</th><th style="padding:6px;">paired_T (HP:Z:)</th></tr>
       </thead>
       <tbody>
-        <tr><td style="padding:5px;">chr19 HP:i:1 / HP:Z:1</td><td class="num" style="padding:5px;">178,497</td><td class="num" style="padding:5px;"><strong>194,435</strong></td><td class="num" style="padding:5px;">138,239</td></tr>
-        <tr><td style="padding:5px;">chr19 HP:i:2 / HP:Z:2</td><td class="num" style="padding:5px;">146,611</td><td class="num" style="padding:5px;"><strong>118,241</strong></td><td class="num" style="padding:5px;">176,508</td></tr>
-        <tr><td style="padding:5px;">chr19 HP:i:11 / HP:Z:1-1</td><td class="num" style="padding:5px;">14,004</td><td class="num" style="padding:5px;">21,819 (−4,674)</td><td class="num" style="padding:5px;">12,115</td></tr>
-        <tr><td style="padding:5px;">chr19 HP:i:21 / HP:Z:2-1</td><td class="num" style="padding:5px;">12,089</td><td class="num" style="padding:5px;">11,924 (−1,253)</td><td class="num" style="padding:5px;">14,193</td></tr>
-        <tr class="row-green"><td style="padding:5px;"><strong>chr19 HP:i:33 / HP:Z:3</strong></td><td class="num" style="padding:5px;">556</td><td class="num" style="padding:5px;"><strong>6,504 (+5,927)</strong></td><td class="num" style="padding:5px;">1,098</td></tr>
-        <tr class="row-yellow"><td style="padding:5px;"><strong>全基因組 hp=33</strong></td><td class="num" style="padding:5px;">~0</td><td class="num" style="padding:5px;"><strong>138,317</strong> (+944% vs V5=13,250)</td><td class="num" style="padding:5px;">—</td></tr>
+        <tr><td style="padding:5px;">chr19 HP:i:1 / HP:Z:1</td><td class="num" style="padding:5px;">178,497</td><td class="num" style="padding:5px;"><strong>194,435</strong></td><td class="num" style="padding:5px;color:#166534;font-weight:700;">+15,938</td><td class="num" style="padding:5px;">138,239</td></tr>
+        <tr><td style="padding:5px;">chr19 HP:i:2 / HP:Z:2</td><td class="num" style="padding:5px;">146,611</td><td class="num" style="padding:5px;"><strong>118,241</strong></td><td class="num" style="padding:5px;color:#7F1D1D;font-weight:700;">−28,370</td><td class="num" style="padding:5px;">176,508</td></tr>
+        <tr><td style="padding:5px;">chr19 HP:i:11 / HP:Z:1-1</td><td class="num" style="padding:5px;">14,004</td><td class="num" style="padding:5px;">21,819</td><td class="num" style="padding:5px;color:#7F1D1D;font-weight:700;">−4,674 →hp=33</td><td class="num" style="padding:5px;">12,115</td></tr>
+        <tr><td style="padding:5px;">chr19 HP:i:21 / HP:Z:2-1</td><td class="num" style="padding:5px;">12,089</td><td class="num" style="padding:5px;">11,924</td><td class="num" style="padding:5px;color:#7F1D1D;font-weight:700;">−1,253 →hp=33</td><td class="num" style="padding:5px;">14,193</td></tr>
+        <tr class="row-green"><td style="padding:5px;"><strong>chr19 HP:i:33 / HP:Z:3</strong></td><td class="num" style="padding:5px;">556</td><td class="num" style="padding:5px;"><strong>6,504</strong></td><td class="num" style="padding:5px;color:#16A34A;font-weight:700;">+5,927 ✓ 守恆</td><td class="num" style="padding:5px;">1,098</td></tr>
+        <tr class="row-yellow"><td style="padding:5px;"><strong>全基因組 hp=33</strong></td><td class="num" style="padding:5px;">~0</td><td class="num" style="padding:5px;"><strong>138,317</strong></td><td class="num" style="padding:5px;color:#16A34A;font-weight:700;">+138,317 (+944% vs V5=13,250)</td><td class="num" style="padding:5px;">—</td></tr>
       </tbody>
     </table>
-    <p style="font-size:10.5px;color:#6B7280;margin:2px 0 0;font-style:italic;">chr19 row 為 pilot；全基因組 hp=33 row 為跨 chr 總計（資料來源 09b 全基因組量化）。V5 欄已砍（V5↔V6 守恆完美已驗證；詳 speaker note tier3）</p>
+    <p style="font-size:10.5px;color:#6B7280;margin:2px 0 0;font-style:italic;">chr19 = pilot（單 chr 改變量）；全基因組 hp=33 = 跨 chr 總計改變量。「→hp=33」表示這些 reads 在 V6 重歸到 hp=33 桶（守恆等式 4,674+1,253=5,927）。V5 欄已砍（V5↔V6 守恆完美驗證；詳 speaker note）</p>
 
-    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ V6 程式碼邏輯實證正確（chr19 守恆 + 全基因組 hp=33 還原 +944%） + V6 production candidate 主結論穩固</div>
+    <div class="conclusion-arrow green" style="font-size:12px;margin-top:6px;">→ V6 改了 reads，但<strong>守恆等式成立</strong>（hp=11/21 減少完全進 hp=33）+ 全基因組 hp=33 還原 +944% — 程式碼行為實證正確</div>
     <div class="footer-glossary" style="font-size:9.5px;">
       <div class="gloss-item">ⓘ Erratum 報告: InterSubMod/research/paired_priority_bug_audit/v6_quantification_erratum_2026_05_13.md</div>
       <div class="gloss-item">ⓘ longphase-to (HP:i:) 與 longphase-s (HP:Z:) 是不同 codebase, HP1/HP2 命名任意，需明示 axis-aligned 才能跨比較</div>
     </div>
   </article>
 
-  <aside class="note-section" aria-label="Speaker notes for slide 09e">
+  <aside class="note-section" aria-label="Speaker notes for slide 12">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
       <div class="speak-text">[標題]
@@ -380,17 +386,17 @@ V6 production candidate 主結論更穩固。
 </main>
 
 <nav class="nav-bottom" aria-label="Slide navigation">
-  <a href="slide_09d_v6_evidence_summary.html">← Prev</a>
-  <span class="counter">Slide 09e (13/15)</span>
-  <a href="slide_12_no_regression.html">Next →</a>
+  <a href="slide_09c_v6_winning_igv.html">← Prev (11 V6 winning IGV)</a>
+  <span class="counter">Slide 09e (12/15) — tag 改變多少 (swap 後在 09d 之前)</span>
+  <a href="slide_09d_v6_evidence_summary.html">Next → (13 evidence — 4 鐵證 可信度)</a>
 </nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
 
 <script>
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowLeft' && True) location.href = 'slide_09d_v6_evidence_summary.html';
-    if (e.key === 'ArrowRight' && True) location.href = 'slide_12_no_regression.html';
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_09c_v6_winning_igv.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_09d_v6_evidence_summary.html';
   });
 
   // PanZoom.js progressive enhancement — fail-soft if CDN blocked

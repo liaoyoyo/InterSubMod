@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Slide 08 — read-level 鐵證: 34,855 V6 100% 修正</title>
+  <title>Slide 13 — 改正後影響 + 未來研究 3 方向</title>
   <style>/* Self-Phasing PPT Preview — shared style.css
  * Used by index.html (主頁) + slide_XX.html (子頁)
  * Color palette aligned with output.pptx + 03_slide_layout_script.md
@@ -306,121 +306,127 @@ details.collapsible summary:hover { color: #1D4ED8; }
   <script src="https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js" defer></script>
 </head>
 <body>
-<main class="slide-page" role="main" aria-label="Slide 08 content">
+<main class="slide-page" role="main" aria-label="Slide 13 content">
   <div class="slide-meta " role="contentinfo" aria-label="Slide metadata">
-    <div><span class="label">Slide:</span><span class="value">08 / 22</span></div>
-    <div><span class="label">Section:</span><span class="value">S3 量化鐵證</span></div>
-    <div><span class="label">Tier 2:</span><span class="value">120 sec / 中 ~360 字</span></div>
-    <div><span class="label">R-G2 術語:</span><span class="value">—</span></div>
-    <div><span class="label">N grep:</span><span class="value">14</span></div>
+    <div><span class="label">Slide:</span><span class="value">13 / 22</span></div>
+    <div><span class="label">Section:</span><span class="value">S7 結論</span></div>
+    <div><span class="label">Tier 2:</span><span class="value">100 sec / 中 ~360 字</span></div>
+    <div><span class="label">R-G2 術語:</span><span class="value">1</span></div>
+    <div><span class="label">N grep:</span><span class="value">—</span></div>
   </div>
 
-  <article class="slide-canvas" data-section="S3" aria-label="Main slide canvas">
-    <h1 class="slide-title ">34,855 victims：V3F & V6 priority 100%</h1>
-    <p class="en-subtitle">baseline 34,855 read-level priority bug victims — V3F 100% fixed; V6 priority subset 100% / V6 broader subset partial (~32% hp=11 in Layer 1.5 region) — see banner</p>
-    <!-- P0 fix 2026-05-14: 加 baseline → V3F → V6 連續改善 anchor + 區分 priority bug victim subset (100%) vs V6 broader subset (含 Layer 1.5 區) -->
-    <div style="background:#DCFCE7;border:1px solid #16A34A;border-radius:5px;padding:5px 10px;margin:4px 0;font-size:11px;color:#166534;">
-      <strong>📊 連續改善 anchor (priority bug victim subset, n=34,855)</strong>：baseline <strong>100% hp=11</strong> ❌ → V3F <strong>0% hp=11 (100% 翻 hp=21)</strong> ✅ → V5 inherit V3F 100% → V6 inherit V3F 100%。本 slide 主數據 = priority-bug-only subset。
-    </div>
-    <div style="background:#FEF3C7;border:1px solid #CA8A04;border-radius:5px;padding:4px 10px;margin:4px 0;font-size:10.5px;color:#78350F;">
-      <strong>⚠ 不要混淆兩個 subset (slide 04c 教訓)</strong>：V6 spot check 17,404 reads (45% flip / 32% hp=11 / 14% hp=33) 是 <strong>V6 broader subset (含 Layer 1.5 germline-absent 區)</strong>，不是 priority bug victim — 這 32% 仍 hp=11 多在 Layer 1.5 revert 區，V6 patch 對此 subset 設計上無效 (V5≡V6)。詳 erratum E5 §3a.5b.7 / slide 09e。
-    </div>
+  <article class="slide-canvas" data-section="S7" aria-label="Main slide canvas">
+    <h1 class="slide-title ">改正後影響 + 未來研究 3 方向</h1>
+    <p class="en-subtitle">Impact + future directions; V6 production candidate</p>
     
-    <div class="grid-2col" style="grid-template-columns: 6fr 6fr; gap:12px;">
-      <div>
-        <p style="font-size:11.5px;font-weight:700;color:#374151;margin:0 0 4px;">📈 chr19 pilot → 全基因組 generalize:</p>
-        <table class="metric-table" style="font-size:10.5px;">
-          <thead><tr><th></th><th>chr19 pilot</th><th>Genome F1</th><th>倍數</th></tr></thead>
-          <tbody>
-            <tr><td>Tagged reads/ver</td><td class="num">~330K</td><td class="num">18,895,432</td><td class="num">57×</td></tr>
-            <tr class="row-yellow"><td><strong>Priority bug victims</strong></td><td class="num">752</td><td class="num"><strong>34,855</strong></td><td class="num"><strong>46.4×</strong></td></tr>
-            <tr class="row-green"><td><strong>baseline → V3F/V5 修正率</strong></td><td class="num">100%<br>(752/752)</td><td class="num"><strong>100%</strong><br>(34,855/34,855)</td><td>一致 ✅</td></tr>
-            <tr><td>V3F/V5 方向</td><td colspan="2" class="num">全 hp=11 ❌ → 全 hp=21 ✅</td><td>單向</td></tr>
-            <tr><td>反向 (V3F/V5 → 11)</td><td colspan="2" class="num">0 條</td><td>零 noise</td></tr>
-            <tr style="background:#FEF3C7;"><td><strong>V6 broader subset (17,404 reads, 含 Layer 1.5 區 — 非 priority bug victim)</strong></td><td class="num" colspan="2">44.6% 翻 hp=21 ✅ / <strong>31.7% 仍 hp=11 (≈ Layer 1.5 revert)</strong> / 14.1% hp=33 / 9.6% empty</td><td>不同 subset</td></tr>
-          </tbody>
-        </table>
-        <p style="font-size:10px;color:#16A34A;margin:4px 0 0;font-weight:600;">→ baseline 17.3:1 偏移 = read-level 34,855 條獨立 victims (V3F/V5 100% 修對 anchor；V6 partial)</p>
+    <p style="font-size:11px;font-weight:700;color:#16A34A;margin:0 0 4px;">🎯 改正後影響 — upstream → downstream 因果鏈:</p>
+    <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
+      <defs><marker id="arr18" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#16A34A"/></marker></defs>
+      <rect x="15" y="20" width="220" height="160" rx="8" fill="#F0FDF4" stroke="#16A34A" stroke-width="2"/>
+      <text x="125" y="40" font-size="13" fill="#166534" text-anchor="middle" font-weight="700">upstream (longphase-to V6)</text>
+      <text x="25" y="62" font-size="11" fill="#166534">✓ priority bug 修對</text>
+      <text x="40" y="76" font-size="10" fill="#374151">17.3:1 → ~1:1 (全基因組)</text>
+      <text x="25" y="96" font-size="11" fill="#166534">✓ hp=33 mixed-sub-tag 訊號還原</text>
+      <text x="40" y="110" font-size="10" fill="#374151">V6 = 138,317 (+4.7% vs V3F)</text>
+      <text x="25" y="130" font-size="11" fill="#166534">✓ marker coverage +9.0% vs V3F</text>
+      <text x="40" y="144" font-size="10" fill="#374151">23,980 NG≥3 regions</text>
+      <text x="25" y="164" font-size="11" fill="#166534">✓ Phase D 4 樣本 ratio 全中性</text>
+      <path d="M240,100 L295,100" stroke="#16A34A" stroke-width="3" marker-end="url(#arr18)"/>
+      <text x="267" y="92" font-size="9" fill="#16A34A" text-anchor="middle" font-weight="700">因果鏈</text>
+      <text x="267" y="115" font-size="8" fill="#374151" text-anchor="middle" font-style="italic">tag 訊號乾淨 →</text>
+      <text x="267" y="127" font-size="8" fill="#374151" text-anchor="middle" font-style="italic">下游分析更精確</text>
+      <rect x="300" y="20" width="240" height="160" rx="8" fill="#DBEAFE" stroke="#1E3A8A" stroke-width="2"/>
+      <text x="420" y="40" font-size="13" fill="#1E3A8A" text-anchor="middle" font-weight="700">downstream (ISM)</text>
+      <text x="310" y="62" font-size="11" fill="#1E3A8A">✓ HP_Ratio tag bias 修正</text>
+      <text x="325" y="76" font-size="10" fill="#374151">0.788 → 0.574</text>
+      <text x="310" y="96" font-size="11" fill="#1E3A8A">✓ HP1/HP2 read 集合更乾淨</text>
+      <text x="325" y="110" font-size="10" fill="#374151">→ methylation delta 更精確</text>
+      <text x="310" y="130" font-size="11" fill="#1E3A8A">✓ marker engineering 訊號完整</text>
+      <text x="325" y="144" font-size="10" fill="#374151">hp=33 + NG≥3 訊號</text>
+      <text x="310" y="164" font-size="11" fill="#7C2D12" font-weight="700">★ paired GT concordance +13.3 pp @ 0.93</text>
+      <rect x="555" y="60" width="155" height="80" rx="8" fill="#FEF3C7" stroke="#CA8A04" stroke-width="2"/>
+      <text x="632" y="78" font-size="11" fill="#7C2D12" text-anchor="middle" font-weight="700">主結論</text>
+      <text x="632" y="98" font-size="10.5" fill="#7C2D12" text-anchor="middle" font-weight="700">V6 = production</text>
+      <text x="632" y="112" font-size="10.5" fill="#7C2D12" text-anchor="middle" font-weight="700">candidate</text>
+      <text x="632" y="130" font-size="9" fill="#374151" text-anchor="middle" font-style="italic">可升級替代 V5</text>
+      <path d="M540,100 L555,100" stroke="#CA8A04" stroke-width="2" marker-end="url(#arr18)"/>
+    </svg>
+    <p style="font-size:12.5px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">🔬 未來研究方向 — 三類分流（已解決 / 可繼續 / 主目標）:</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1.05fr;gap:8px;margin-bottom:4px;">
+      <div style="background:#F0FDF4;border:2px solid #16A34A;border-radius:8px;padding:8px 10px;">
+        <p style="font-size:13px;font-weight:700;color:#166534;margin:0 0 4px;">✅ 已解決 <span style="font-size:10px;color:#6B7280;">(本報告閉環)</span></p>
+        <ul style="font-size:11px;color:#166534;margin:0;padding-left:14px;line-height:1.5;">
+          <li><strong>priority bug 機制因果</strong> — 17.3:1→1.84:1 全基因組 + IGV 3/3</li>
+          <li><strong>V6 patch 完成</strong> — hp=33 +4.7%, marker +9.0%, Phase D 4 樣本中性</li>
+          <li><strong>read-level concordance</strong> — paired GT +13.3 pp @ 0.93</li>
+          <li><strong>V5 Layer 1.5 trade-off 量化</strong> — germline-absent 4.19:1 缺陷揭露 (E5)</li>
+        </ul>
       </div>
-      <div>
-        <p style="font-size:11.5px;font-weight:700;color:#374151;margin:0 0 4px;">📊 per-chr victims (top-10 + chr19/chr8):</p>
-        <svg viewBox="0 0 340 175" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border:1px solid #E5E7EB;background:#F9FAFB;">
-          <line x1="48" y1="148" x2="335" y2="148" stroke="#9CA3AF" stroke-width="0.8"/>
-          <line x1="48" y1="14"  x2="48"  y2="148" stroke="#9CA3AF" stroke-width="0.8"/>
-          <text x="44" y="17" font-size="8" fill="#6B7280" text-anchor="end">3,508</text>
-          <text x="44" y="83" font-size="8" fill="#6B7280" text-anchor="end">1,700</text>
-          <text x="44" y="151" font-size="8" fill="#6B7280" text-anchor="end">0</text>
-          <rect x="55"  y="14"  width="20" height="134" fill="#1E3A8A"/>
-          <text x="65" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr7</text>
-          <text x="65" y="12"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">3508</text>
-          <rect x="80"  y="42"  width="20" height="106" fill="#1E3A8A"/>
-          <text x="90" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr2</text>
-          <text x="90" y="40"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2792</text>
-          <rect x="105" y="48"  width="20" height="100" fill="#1E3A8A"/>
-          <text x="115" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr1</text>
-          <text x="115" y="46"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2674</text>
-          <rect x="130" y="51"  width="20" height="97"  fill="#3B82F6"/>
-          <text x="140" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr16</text>
-          <text x="140" y="49"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2584</text>
-          <rect x="155" y="68"  width="20" height="80"  fill="#3B82F6"/>
-          <text x="165" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr20</text>
-          <text x="165" y="66"  font-size="8" fill="#1E3A8A" text-anchor="middle" font-weight="700">2101</text>
-          <rect x="180" y="79"  width="20" height="69"  fill="#60A5FA"/>
-          <text x="190" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr3</text>
-          <rect x="205" y="88"  width="20" height="60"  fill="#60A5FA"/>
-          <text x="215" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr5</text>
-          <rect x="230" y="94"  width="20" height="54"  fill="#93C5FD"/>
-          <text x="240" y="160" font-size="7.5" fill="#374151" text-anchor="middle">chr6</text>
-          <text x="240" y="170" font-size="6.5" fill="#9CA3AF" text-anchor="middle">rank 4-10</text>
-          <rect x="262" y="120" width="20" height="28"  fill="#DC2626"/>
-          <text x="272" y="160" font-size="7.5" fill="#7F1D1D" text-anchor="middle" font-weight="700">chr19</text>
-          <text x="272" y="117" font-size="8" fill="#7F1D1D" text-anchor="middle" font-weight="700">752</text>
-          <text x="272" y="170" font-size="6.5" fill="#7F1D1D" text-anchor="middle">★ rank 19</text>
-          <rect x="287" y="123" width="20" height="25"  fill="#0EA5E9"/>
-          <text x="297" y="160" font-size="7.5" fill="#0369A1" text-anchor="middle" font-weight="700">chr8</text>
-          <text x="297" y="120" font-size="8" fill="#0369A1" text-anchor="middle" font-weight="700">666</text>
-          <text x="297" y="170" font-size="6.5" fill="#0369A1" text-anchor="middle">❄ 0.34×</text>
-        </svg>
-        <p style="font-size:10px;color:#6B7280;margin:2px 0 0;text-align:center;">main hotspot 在 chr7/chr2/chr1/chr16/chr20；chr19 是「可重現案例」非主要分佈</p>
+      <div style="background:#FEF3C7;border:2px solid #CA8A04;border-radius:8px;padding:8px 10px;">
+        <p style="font-size:13px;font-weight:700;color:#7C2D12;margin:0 0 4px;">➡️ 可以繼續 <span style="font-size:10px;color:#6B7280;">(短期 1–2 cycle)</span></p>
+        <ul style="font-size:11px;color:#78350F;margin:0;padding-left:14px;line-height:1.5;">
+          <li><strong>F3 — 7-sample expansion</strong>: HCC1395_DORADO/H1437/H2009/HCC1954/HCC1937/COLO829 完整 V6<br><span style="color:#6B7280;font-size:10px;">→ next: 跑 V6 ablation matrix, 量化 marker rate / FP-TP / NGroups 影響</span></li>
+          <li><strong>F4 — v6_quantification erratum patch</strong>: chr17/chrX/chr8 命名顛倒重驗 + 跨 4 樣本一致性 (5/13 揭露)<br><span style="color:#6B7280;font-size:10px;">→ next: erratum commit, 修正 5/12 distance-to-paired 結論</span></li>
+          <li><strong>Pass 2 ablation</strong>: V5/V6 二次效益量化 (E4 缺口)<br><span style="color:#6B7280;font-size:10px;">→ next: T1.3 4-cell ablation, 對比 Pass 1 only vs Pass 1+2</span></li>
+        </ul>
+      </div>
+      <div style="background:#FEE2E2;border:2px solid #DC2626;border-radius:8px;padding:8px 10px;">
+        <p style="font-size:13px;font-weight:700;color:#991B1B;margin:0 0 4px;">🎯 主要目標 <span style="font-size:10px;color:#6B7280;">(ISM 五大目標 — 仍未達成)</span></p>
+        <ul style="font-size:11px;color:#7F1D1D;margin:0;padding-left:14px;line-height:1.5;">
+          <li><strong>F1 ★ LOH 內外 TP/FP 差異特徵</strong> (V6 tag 為基礎)<br><span style="color:#6B7280;font-size:10px;">→ 目標 1 per-CpG 甲基關聯 + 目標 4 TO normal + 目標 5 F1 提升</span></li>
+          <li><strong>F2 ★ subclone + two-hit order</strong> (用 V6 hp=33+NG≥3 marker)<br><span style="color:#6B7280;font-size:10px;">→ 目標 2 clone 結構 + 目標 3 二次打擊事件順序</span></li>
+          <li><strong>Phase 2 — Normal BAM 整合</strong> (sample ASM + LOH BED 標註)<br><span style="color:#6B7280;font-size:10px;">→ 目標 4 epigenetic context 補強的根本前提</span></li>
+        </ul>
       </div>
     </div>
-    <div class="conclusion-arrow green" style="margin-top:8px;font-size:13px;padding:6px 12px;">→ priority bug 不是 chr19 局部 artifact；全基因組 34,855 條 read-level victim 全部 100% 修正、0 反向 → 機制因果鐵證確立</div>
-    <div style="background:#FEF3C7;border:1.5px dashed #F59E0B;border-radius:6px;padding:6px 12px;margin-top:6px;font-size:12.5px;color:#78350F;font-weight:600;">→ 但 V6 在 germline-absent 區 32% 仍 hp=11 — <strong>下節 (09b 系列)</strong> 解構此 caveat 的兩底層 bug</div>
-    <div class="footer-glossary" style="font-size:9.5px;">
-      <div class="gloss-item">ⓘ V6 對 priority bug 結果 = V5 = V3F = 100%（修補在 V3F 41ff147 已完成；V6 唯一改動 Layer 1.5 revert 與本子集 germline+somatic 都 &gt;0 不重疊）</div>
-      <div class="gloss-item">ⓘ chr8 priority bug 冷區 (0.34× avg) ≠ chr8 LOH+HPSig FP hotspot (7.4× ISM 下游) — 不同 layer，priority bug 修對不會自動清掉 chr8 hotspot</div>
-    </div>
+    <div class="conclusion-arrow green" style="font-size:11.5px;margin-top:4px;padding:8px 14px;">→ <strong>主軸定位</strong>：longphase-to bug 修補階段完成 (✅) ⇒ V6 為下游乾淨基礎，回歸 ISM 五大目標主線研究 (F1/F2 為核心) — InterSubMod 是可解釋 epigenetic evidence 整合框架，非另一個 somatic caller</div>
   </article>
 
-  <aside class="note-section" aria-label="Speaker notes for slide 09">
+  <aside class="note-section" aria-label="Speaker notes for slide 17">
     <details class="collapsible" open>
-      <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
+      <summary>🎤 Speaker Note (100 sec / 中 ~360 字)</summary>
       <div class="speak-text">[標題]
-S3 量化鐵證 — 把 S2 機制從理論變物理觀察。
+改正後影響 + 未來研究方向 — 回到 ISM 五大目標主線。
 
-[方法]
-對 baseline 與 V6 兩版加 --debug-vote-dump flag。
-dump 每條 read 經 getVote 後的 5-vote countMap。
+[upstream 影響]
+longphase-to V6 端：
+priority bug 修對 17.3:1 → ~1:1。
+hp=33 還原 138,317。
+marker coverage +9.0%。
+Phase D 4 樣本 ratio 全中性。
 
-[chr19 pilot]
-HCC1395 5kHz chr19，篩 germline_majority ≠ somatic_majority 且 both >0。
-得 752 雙向矛盾 reads。
-baseline 全 752 條投錯方向 hp=11。
-V6 全 752 條翻 hp=21 = 100% 單向修正，0 條反向。
+[downstream 影響]
+ISM 端受惠：
+HP_Ratio tag bias 修正 0.788 → 0.574。
+HP1/HP2 read 集合更乾淨 → methylation delta 更精確。
+marker engineering 訊號完整。
+★ paired GT concordance +13.3 pp @ 0.93。
 
-[全基因組擴展]
-victims 從 752 → 34,855 = 46.4× scale up。
-V6 修正率仍 100% (34,855/34,855)，0 條反向。
+[主結論連結]
+V6 = production candidate，可升級替代 V5。
 
-[重要顛覆]
-per-chr 分佈推翻原 chr19 hotspot 結論。
-主要 victim 分佈在 chr7 (3,508) / chr2 / chr1 / chr16 / chr20。
-chr19 只占 2.16%，rank 19 — SP1/2/3 是可重現案例，非主要分佈位置。
+[未來研究方向 — 回到 ISM 五大目標主線]
+F1 ★ LOH 內外 TP/FP 差異特徵驗證。
+用 V6 tag 在 LOH 內 vs LOH 外 區域對 TP/FP 比較甲基化率、read 特徵、HP_Ratio、NGroups 分布。
+對應五大目標 1 (per-CpG 甲基關聯) + 4 (TO normal 補強) + 5 (F1 提升)。
 
-[chr8 釐清]
-chr8 priority bug enrichment 0.34× avg — rank 21 冷區。
-與 MEMORY chr8 LOH+HPSig 7.4× FP hotspot 是不同 layer，無直接因果。</div>
-      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> chr19 1Mb hotspot 30M=215 + 27M=133 + 16M=41 / 4-path 驗證表 (個案 trace / Density 共變 / 修正後消失) / read_name case (1c50034a-f0f) / 全 24 chr enrichment ‰ / chrY 小 N 高 ‰ / Pass 2 reclassify 104K germline het</div>
+F2 ★ subclone 結構 + 二次打擊事件順序。
+用 V6 hp=33 + NG≥3 marker 識別 sub-clone 結構。
+結合 LOH/CNV/HP 推論 two-hit order。
+驗證 V6 marker 訊號是否能區分 first-hit vs second-hit。
+對應五大目標 2 (clone 結構) + 3 (二次打擊事件順序)。
+
+F3 7-sample expansion + COLO829 + Pass 2 ablation。
+F1/F2 cross-sample 驗證基礎。
+
+[研究定位]
+InterSubMod 是可解釋 epigenetic evidence 整合框架，不是另一個 somatic caller。
+F1/F2 是從 longphase-to bug 修補完成後，回歸 ISM 核心主線的研究重啟。
+V6 是 production candidate 的同時，也是下游 ISM 驗證的乾淨基礎。
+
+[結尾]
+今天主軸到這裡。後續 4 張 QA backup slides 補充對話質疑點。</div>
+      <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> ISM 五大目標完整列表 (目標 1-5) / LOH 內外 TP/FP 差異分層方案 / two-hit order 推論方法 / HCC1937 BRCA1 mutant / COLO829 chmod / T1.3 4-cell ablation 設計</div>
     </details>
   </aside>
 
@@ -431,17 +437,17 @@ chr8 priority bug enrichment 0.34× avg — rank 21 冷區。
 </main>
 
 <nav class="nav-bottom" aria-label="Slide navigation">
-  <a href="slide_07_two_layer_table.html">← Prev</a>
-  <span class="counter">Slide 08 (10/23)</span>
-  <a href="slide_10_fix_design.html">Next →</a>
+  <a href="slide_17_main_verdict.html">← Prev</a>
+  <span class="counter">Slide 13 (19/23)</span>
+  <a href="slide_b1_pass2.html">Next →</a>
 </nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
 
 <script>
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowLeft' && True) location.href = 'slide_07_two_layer_table.html';
-    if (e.key === 'ArrowRight' && True) location.href = 'slide_10_fix_design.html';
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_17_main_verdict.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_b1_pass2.html';
   });
 
   // PanZoom.js progressive enhancement — fail-soft if CDN blocked

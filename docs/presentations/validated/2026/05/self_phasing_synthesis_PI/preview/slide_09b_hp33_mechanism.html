@@ -357,22 +357,24 @@ if (max==0 || ratio &lt; threshold) {
 }</pre>
       </div>
     </div>
-    <!-- 修補動作對照 — 重點化：兩個獨立缺陷 (2026-05-14) -->
-    <p style="font-size:11.5px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">💡 V3F 同時修<span style="color:#DC2626;">兩個獨立缺陷</span> — keyword 速覽</p>
+    <!-- 修補動作對照 — 短段落敘述：兩個獨立缺陷 (2026-05-14 改寫) -->
+    <p style="font-size:13px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">💡 V3F 同時修<span style="color:#DC2626;">兩個獨立缺陷</span> — 機制敘述</p>
     <div class="grid-2col" style="gap:8px;margin:0 0 4px;">
-      <div style="background:#FEF3C7;border-left:3px solid #CA8A04;border-radius:4px;padding:6px 10px;">
-        <p style="font-size:11px;font-weight:700;color:#78350F;margin:0 0 3px;">[缺陷 1] 比較目標錯位 <span style="color:#6B7280;font-weight:500;">(type mismatch)</span></p>
-        <p style="font-size:10px;color:#7F1D1D;margin:1px 0;">❌ baseline：<code>hpResult</code> (=11/21/33) <strong>vs</strong> <code>enum=3,4</code> → 恆 <code>true</code></p>
-        <p style="font-size:10px;color:#166534;margin:1px 0;">✅ V3F：改用 <code>11/21/33</code> int literal → <strong>真實命中</strong></p>
+      <div style="background:#FEF3C7;border-left:3px solid #CA8A04;border-radius:4px;padding:8px 12px;">
+        <p style="font-size:13px;font-weight:700;color:#78350F;margin:0 0 4px;">[缺陷 1] 型別錯位 <span style="color:#6B7280;font-weight:500;">(enum vs integer literal mismatch)</span></p>
+        <p style="font-size:12px;color:#7F1D1D;margin:2px 0;line-height:1.45;"><strong>原問題：</strong>baseline 比較 <code>hpResult != HAPLOTYPE1_1</code>，而 <code>HAPLOTYPE1_1</code> 是 <code>enum=3</code>；但 getVote 上游已透過 haplotypeBase map 把 <code>hpResult</code> 設為 integer <code>11/21/33</code>。比較跨型別永遠不等 → 條件恆 true。</p>
+        <p style="font-size:12px;color:#166534;margin:2px 0;line-height:1.45;"><strong>V3F 改法：</strong>commit 41ff147 改用 integer literal 直接比較 <code>hpResult == 11 || == 21 || == 33</code>，避開 enum 值。</p>
+        <p style="font-size:12px;color:#374151;margin:2px 0;line-height:1.45;"><strong>為何有效：</strong>消除型別歧義，比較目標與 HP tag 實際寫入值對齊，hp=33 分支才有可能命中。</p>
       </div>
-      <div style="background:#FEF3C7;border-left:3px solid #CA8A04;border-radius:4px;padding:6px 10px;">
-        <p style="font-size:11px;font-weight:700;color:#78350F;margin:0 0 3px;">[缺陷 2] 判定邏輯方向反 <span style="color:#6B7280;font-weight:500;">(logic inversion)</span></p>
-        <p style="font-size:10px;color:#7F1D1D;margin:1px 0;">❌ baseline：<code>!=</code>→<code>0</code> / <code>==</code>→<code>33</code>（反向）</p>
-        <p style="font-size:10px;color:#166534;margin:1px 0;">✅ V3F：<code>==</code>→<code>33</code> / <code>!=</code>→<code>0</code>（<strong>正向</strong>）</p>
+      <div style="background:#FEF3C7;border-left:3px solid #CA8A04;border-radius:4px;padding:8px 12px;">
+        <p style="font-size:13px;font-weight:700;color:#78350F;margin:0 0 4px;">[缺陷 2] 判定方向反 <span style="color:#6B7280;font-weight:500;">(logic inversion)</span></p>
+        <p style="font-size:12px;color:#7F1D1D;margin:2px 0;line-height:1.45;"><strong>原問題：</strong>baseline 寫 <code>!=</code> 分支設 <code>hp=0</code>、<code>==</code> 分支設 <code>hp=33</code> — 即使型別對齊，方向也是反的：somatic 有票時被丟回 0，純弱 germline 反而給 33。</p>
+        <p style="font-size:12px;color:#166534;margin:2px 0;line-height:1.45;"><strong>V3F 改法：</strong>翻轉條件 — <code>==</code>（somatic 11/21/33 命中）→ <code>hp=33</code>；<code>!=</code>（純 germline 弱信號）→ <code>hp=0</code>。</p>
+        <p style="font-size:12px;color:#374151;margin:2px 0;line-height:1.45;"><strong>為何有效：</strong>somatic 有訊號時保留為 ambiguous tag (33) 供下游使用，純弱信號才丟棄；語意與 hp=33 設計初衷對齊。</p>
       </div>
     </div>
-    <div style="background:#FEE2E2;border:1px solid #DC2626;border-radius:4px;padding:5px 10px;margin:0;">
-      <p style="font-size:10.5px;color:#7F1D1D;margin:0;line-height:1.5;"><strong>結果差異</strong> — somatic read：baseline → <code>hp=0</code> (no tag) ❌　/　V3F → <code>hp=33</code> (somatic ambiguous) ✅　<span style="color:#92400E;">→ 設計意圖被 enum 錯位完全失效，hp=33 else 分支變死碼 9 年</span></p>
+    <div style="background:#FEE2E2;border:1px solid #DC2626;border-radius:4px;padding:6px 12px;margin:0;">
+      <p style="font-size:12px;color:#7F1D1D;margin:0;line-height:1.5;"><strong>合併結果差異</strong> — 同一條 somatic read：baseline → <code>hp=0</code>（no tag，被丟棄）❌　/　V3F → <code>hp=33</code>（somatic ambiguous，下游可用）✅　<span style="color:#92400E;">兩缺陷疊加讓 hp=33 設計意圖完全失效，else 分支死碼 9 年；V3F 同 commit 一次修正型別與方向。</span></p>
     </div>
     <!-- v1.7-F E3: 移除「📐 後續演進」+ hp=33 全基因組量化區 (V5/V6 演進細節下放至 09c/09e + speaker note tier3) -->
     <div class="footer-glossary" style="font-size:9.5px;">
@@ -382,7 +384,7 @@ if (max==0 || ratio &lt; threshold) {
     </div>
   </article>
 
-  <aside class="note-section" aria-label="Speaker notes for slide 09b">
+  <aside class="note-section" aria-label="Speaker notes for slide 10">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
       <div class="speak-text">[標題]
@@ -433,7 +435,7 @@ V6 revert Layer 1.5 → 退回 V3F 行為 + 沿用 V3F 的 judgeHaplotype enum f
 [意義]
 hp=33 還原讓 ISM 下游 marker engineering 重新依賴此訊號。
 mixed-sub-tag (germline 缺席 + somatic 有票) 是識別 sub-clone 結構的關鍵 marker。
-slide 13 future direction F2 (二次打擊事件順序) 依賴此訊號。</div>
+nav 17 (slide_18_impact_future) future direction F2 (二次打擊事件順序) 依賴此訊號。</div>
       <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> V3F commit 41ff147 完整 diff (line 504-540 getVote + line 697-701 judgeHaplotype) / Util.h:23-25 enum 定義鐵證 / V5/V6 Layer 1.5 設計演進獨立於本 enum bug</div>
     </details>
   </aside>

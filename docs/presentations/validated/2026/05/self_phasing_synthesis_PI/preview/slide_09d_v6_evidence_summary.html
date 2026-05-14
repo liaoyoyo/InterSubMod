@@ -331,7 +331,8 @@ details.collapsible summary:hover { color: #1D4ED8; }
           <h3 style="margin:0;font-size:18px;color:#166534;font-weight:700;">鐵證 1 — paired GT concordance</h3>
         </div>
         <p style="font-size:15px;font-weight:700;margin:4px 0;color:#16A34A;">+13.3 pp @ 0.93</p>
-        <p style="font-size:13.5px;color:#1F2937;margin:3px 0;line-height:1.5;">15-site Clean PS GT (V5 vs baseline)；V6 重用 V5 phased VCF 預期保留未實測</p>
+        <p style="font-size:12px;color:#1F2937;margin:3px 0;line-height:1.4;"><strong>📐 計算</strong>: per-read 取 TO BAM HP:i: 與 paired_T BAM HP:Z: 同 read_name 比對，計 concordance = 同方向/總對齊 reads；15 PS site Clean filter (高品質 phased site only)。</p>
+        <p style="font-size:12px;color:#166534;margin:3px 0;line-height:1.4;"><strong>✓ 為何可信</strong>: paired_T (phasing-with-normal) 是業界 phasing ground truth；per-read 比對非 ratio aggregate，避開 HP1/HP2 命名顛倒 caveat（兩端各自 axis-aligned）。</p>
         <p style="font-size:11px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: SP1/2/3 IGV (B6)</p>
       </div>
       <!-- Card 2: 34,855 victims -->
@@ -341,7 +342,8 @@ details.collapsible summary:hover { color: #1D4ED8; }
           <h3 style="margin:0;font-size:18px;color:#92400E;font-weight:700;">鐵證 2 — 34,855 read-level victims</h3>
         </div>
         <p style="font-size:14px;font-weight:700;margin:4px 0;color:#92400E;">V3F/V5 100% / V6 spot check 44.6%/31.7%/14.1%/9.6%</p>
-        <p style="font-size:13.5px;color:#1F2937;margin:3px 0;line-height:1.5;">⚠ V6 不完全繼承 V3F (logic 推論失效 5/14 spot check)</p>
+        <p style="font-size:12px;color:#1F2937;margin:3px 0;line-height:1.4;"><strong>📐 計算</strong>: judgeHaplotype:533 vote_dump 輸出 read_name + countMap[HP1/HP2/...] + final tag；逐筆 diff baseline vs V3F/V5/V6 同 read_name 的 tag 變動，34,855 = 全基因組「baseline tag != Vx tag」的 read 數。</p>
+        <p style="font-size:12px;color:#166534;margin:3px 0;line-height:1.4;"><strong>✓ 為何可信</strong>: per-read scope（752 chr19 victims = 752 條獨立 read，非 ratio aggregate）；read-level 因果 trace 直接對證 C++ 碼路徑，不靠統計推論。</p>
         <p style="font-size:11px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: 08 + erratum E5</p>
       </div>
       <!-- Card 3: cross-sample neutralization -->
@@ -351,7 +353,8 @@ details.collapsible summary:hover { color: #1D4ED8; }
           <h3 style="margin:0;font-size:18px;color:#166534;font-weight:700;">鐵證 3 — cross-sample 4 樣本中性化</h3>
         </div>
         <p style="font-size:15px;font-weight:700;margin:4px 0;color:#16A34A;">ratio 0.61-1.24 全中性</p>
-        <p style="font-size:13.5px;color:#1F2937;margin:3px 0;line-height:1.5;">H1437 / H2009 / HCC1954 / HCC1937 (vs V5 1.86 / baseline 17.3:1)</p>
+        <p style="font-size:12px;color:#1F2937;margin:3px 0;line-height:1.4;"><strong>📐 計算</strong>: 各樣本 samtools 統計 BAM HP:i:1 / HP:i:2 全基因組 read count，ratio = HP1/HP2；4 樣本獨立跑 V6 phasing，比對 V5 baseline 1.86 / 原 baseline 17.3:1。</p>
+        <p style="font-size:12px;color:#166534;margin:3px 0;line-height:1.4;"><strong>✓ 為何可信</strong>: 4 獨立樣本 cross-validation（不只 HCC1395 single-sample artifact）；ratio 落 0.61-1.24 接近 1:1，跨樣本一致顯示 V6 不繼承 baseline 17.3:1 偏 HP1 bug。</p>
         <p style="font-size:11px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: B4 Phase D</p>
       </div>
       <!-- Card 4: hp=33 marker engineering -->
@@ -361,7 +364,8 @@ details.collapsible summary:hover { color: #1D4ED8; }
           <h3 style="margin:0;font-size:18px;color:#166534;font-weight:700;">鐵證 4 — hp=33 訊號還原 +944%</h3>
         </div>
         <p style="font-size:15px;font-weight:700;margin:4px 0;color:#16A34A;">marker coverage +9.0%</p>
-        <p style="font-size:13.5px;color:#1F2937;margin:3px 0;line-height:1.5;">chr19:52,081,584 完美 revert / 55,347,952 部分 / 8,349,597 partial</p>
+        <p style="font-size:12px;color:#1F2937;margin:3px 0;line-height:1.4;"><strong>📐 計算</strong>: samtools 全基因組計 HP:i:33 read count（V6=138,317 vs V5=13,250 vs V3F=132,060）；3 個 hot-site 用 IGV 5versions 並列 (baseline / paired_T / V3F / V5 / V6) per-position 視覺對證。</p>
+        <p style="font-size:12px;color:#166534;margin:3px 0;line-height:1.4;"><strong>✓ 為何可信</strong>: hp=33 = 跨 phase block ambiguous read 訊號，baseline 因 enum/integer bug 死碼 ~0；V6 還原至 V3F 量級顯示移除 Layer 1.5 + 沿用 V3F enum fix 行為實證；非單站結論。</p>
         <p style="font-size:11px;color:#6B7280;margin:2px 0;font-style:italic;">cross-ref: 09c V6 winning IGV</p>
       </div>
     </div>
@@ -374,7 +378,7 @@ details.collapsible summary:hover { color: #1D4ED8; }
     </div>
   </article>
 
-  <aside class="note-section" aria-label="Speaker notes for slide 09d">
+  <aside class="note-section" aria-label="Speaker notes for slide 13">
     <details class="collapsible" open>
       <summary>🎤 Speaker Note (120 sec / 中 ~360 字)</summary>
       <div class="speak-text">[標題]
@@ -388,8 +392,8 @@ ratio 對齊 paired 不是正確性指標。
 [鐵證 1 — paired GT concordance +13.3 pp]
 per-read 對齊驗證。
 15-site Problem PS Clean / Aggr / Clean PS GT 三項全提升。
-個案視覺: SP1/2/3 IGV 5versions (slide 04a/04b 已展示) — V5 翻 HP2 對齊 paired 個案。
-數據在 slide 10 表 ③。
+個案視覺: SP1/2/3 IGV 5versions (backup B6 = slide_04_sp1_2_3) — V5 翻 HP2 對齊 paired 個案。
+數據在 nav 14 (slide_12_no_regression) 表 ③。
 
 [鐵證 2 — 34,855 read-level victims 100% 修對]
 read-level 因果。
@@ -407,7 +411,7 @@ vs V5 baseline 1.86, vs 原 baseline 17.3:1。
 marker engineering 鐵證。
 V6 138,317 hp=33 vs V5 13,250 vs V3F 132,060。
 個案視覺: chr19:52,081,584 完美 revert / 55,347,952 部分 / 8,349,597 partial。
-IGV 5versions 圖: slide 09c — baseline & V5 標反方向, V6 退 hp=33 才正確。
+IGV 5versions 圖: nav 11 (slide_09c_v6_winning_igv) — baseline & V5 標反方向, V6 退 hp=33 才正確。
 
 [綜合論證]
 4 維度互相獨立 corroborate V6 正確性。
@@ -417,11 +421,11 @@ PI 質疑任一維度都有對應位點 + 圖片證明。
 [Erratum update 5/13]
 v6_quantification_findings.md 原寫「V6 chr19 distance to paired 0.367」— 5/13 forensic 確認此結論需修正。
 跨 codebase HP1/HP2 命名顛倒未考慮，顛倒後 V6 = 0.065 ≈ V5 = 0.068 ≈ baseline = 0.011 同數量級。
-詳見 slide 09e + InterSubMod/research/paired_priority_bug_audit/v6_quantification_erratum_2026_05_13.md。
+詳見 nav 12 (slide_09e_v6_forensic_validation) + InterSubMod/research/paired_priority_bug_audit/v6_quantification_erratum_2026_05_13.md。
 
 [結論]
 V6 真實正確性鐵證 4 維度仍 hold (per-read 鐵證, 非 ratio)。
-V6 程式碼邏輯實證確認正確 (slide 09e 守恆驗證)。
+V6 程式碼邏輯實證確認正確 (nav 12 = slide_09e_v6_forensic_validation 守恆驗證)。
 V6 production candidate 主結論更穩固。</div>
       <div class="tier3"><span class="label">[ORAL-OPTIONAL]</span> vote_dump 完整 752 chr19 victims 表 / 4 維度 cross-validation 完整論證 / V5 chr19 巧合對齊 paired 細節分析 / chr17/chrX/chr8 V6 distance 未量化 caveat</div>
     </details>
@@ -434,17 +438,17 @@ V6 production candidate 主結論更穩固。</div>
 </main>
 
 <nav class="nav-bottom" aria-label="Slide navigation">
-  <a href="slide_09c_v6_winning_igv.html">← Prev</a>
-  <span class="counter">Slide 09d (14/23)</span>
-  <a href="slide_09e_v6_forensic_validation.html">Next →</a>
+  <a href="slide_09e_v6_forensic_validation.html">← Prev (12 forensic — tag 改變多少)</a>
+  <span class="counter">Slide 09d (13/15) — 4 鐵證可信度 (swap 後在 09e 之後)</span>
+  <a href="slide_12_no_regression.html">Next → (14 S5 同層驗證)</a>
 </nav>
 
 <div class="kbd-hint">快速鍵: <kbd>←</kbd> <kbd>→</kbd> 切換</div>
 
 <script>
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowLeft' && True) location.href = 'slide_09c_v6_winning_igv.html';
-    if (e.key === 'ArrowRight' && True) location.href = 'slide_09e_v6_forensic_validation.html';
+    if (e.key === 'ArrowLeft' && True) location.href = 'slide_09e_v6_forensic_validation.html';
+    if (e.key === 'ArrowRight' && True) location.href = 'slide_12_no_regression.html';
   });
 
   // PanZoom.js progressive enhancement — fail-soft if CDN blocked
