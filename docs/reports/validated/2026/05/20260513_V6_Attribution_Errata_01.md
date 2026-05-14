@@ -450,6 +450,136 @@ diff <(zcat baseline_clairs_to.vcf.gz | grep -v "^#" | awk '{print $1"\t"$2"\t"$
 
 ---
 
+## 3a.5b.11 Source Code Verification — 3 用戶假設全部證實 (**2026-05-14 PM**)
+
+用戶提 3 個 hypothesis 為何 phasing 改但 F1 不變；source code 完整驗證:
+
+### Hypothesis 1: 是否 github 累積 upstream updates 造成 phase 改變? 🟡 **部分對**
+
+**驗證 (commit chain @ `/big7_disk/liaoyoyo2001/longphase-to-mod`):**
+
+| commit | author | date | stage | 性質 |
+|---|---|---|---|---|
+| `c7f59d3` ~ `3148944` | upstream | pre-baseline | doc/cosmetic | upstream documentation/legend updates, **無邏輯改動** |
+| **`8b8c1fd`** | **InterSubMod Research** (us) | **2026-04-10** | phasing | **本地 feature: --pon-only-phasing mode** |
+| `41ff147` (V3F) | InterSubMod Research | 2026-04 | haplotag | 本地 priority bug 修對 |
+| `380e8d2` | InterSubMod Research | 2026-04 | haplotag | INDEL guard |
+| `d0bcd8c` (V5) | InterSubMod Research | 2026-04-30 | phasing | 本地 ploidyRatio fix |
+| `938f0df` (V6) | **zhenyu (upstream)** | **2025-10-02** | phasing | upstream purity threshold (cherry-picked) |
+
+→ **5 個 phasing/haplotag 邏輯改動中 4 個是本地** (`8b8c1fd` / `41ff147` / `380e8d2` / `d0bcd8c`)，**1 個是 upstream** (`938f0df` V6, 但對 HCC1395 5kHz 此 subset V5=V6 0 diff 即無實效)。
+→ Phase 改變**主因不是 github 累積**，是本地加的 PON-only mode (`8b8c1fd`)。
+
+### Hypothesis 2: 是否「改用 PON phase2」造成 phase 改變? ✅ **完全正確**
+
+**驗證 (8b8c1fd commit message + source code):**
+
+8b8c1fd commit message 原文（節錄）:
+> Problem: In standard LongPhase-TO, somatic variants participate as phasing anchors AND are evaluated targets, creating circular dependency. This causes:
+> - 94.6% somatic variants biased to HP1 (17.3:1 ratio)
+> - 31.2% TO LOH are self-phasing artifacts
+> - Phase block N50 degraded by somatic contamination
+>
+> Solution: New --pon-only-phasing flag implements three-step approach:
+> 1. convertNonGermlineToSomatic() — clean phasing using only PON germline
+> 2. resetNonPonOrigin() + somaticCalling() — correct somatic classification
+> 3. syncPhasingResultOrigins() — sync GT format (germline→0\|1, somatic→0\|0+GT2)
+>
+> Verified on HCC1395 5kHz:
+> - LOH.bed Jaccard=1.0000 (unchanged)
+> - **Somatic HP bias 17.3:1 → eliminated**
+> - **Phase block N50: 4,061 → 8,109 (+99.7%)**
+> - **Phased rate: 54.9% → 78.5% (+23.6pp)**
+
+**Source code 證實** (`PhasingProcess.cpp:155-181`):
+```cpp
+// PON-only phasing with correct classification:
+// 1. Clean phasing: mark all non-PON as SOMATIC → simplified graph → better N50
+vGraph->convertNonGermlineToSomatic();
+
+// 2. Correct classification: reset origins, then run somaticCalling
+vGraph->somaticCalling(snpFile.getVariants((*chrIter)));
+
+// (Pass 2 between)
+vGraph->syncPhasingResultOrigins(chrInfo.posPhasingResult);
+
+// Pass 1's phasingProcess(..., nullptr) skipped ploidy collection; Pass 2's
+// somaticCalling+syncOrigins finalizes which variants are truly somatic.
+vGraph->somaticCalling(snpFile.getVariants((*chrIter)));
+vGraph->convertNonGermlineToSomatic();
+```
+
+→ **PON-only mode (8b8c1fd) 確實是 phase block N50 +99.7% / Phased rate +23.6pp 的根本原因**。slide 12 的「phasing 結構 ⭐ N50 +99.7% / Phased +23.6pp / 1.36× / Jaccard=1.0」**完全對應**此 commit。
+
+### Hypothesis 3: Pass 2 不改 FILTER, 直接拿 caller 輸出, 所以 F1 不變? ✅ **完全正確**
+
+**驗證 (source code grep)**:
+
+```bash
+# 整個 longphase-to-mod repo 找寫 FILTER 的 code
+grep -rnE "bcf_update_filter|update_filter|filterStr|set_filter|FILTER.*=.*\"" *.cpp *.h
+→ 0 matches (沒有 write FILTER 的 API call)
+
+# 找讀 FILTER 的 code
+grep "FILTER" Phasing.cpp
+→ Phasing.cpp:33: "--disable-pon-tag  disable reading the VCF FILTER field PON ..." (只 read)
+
+# ParsingBam.cpp:492 PASS 處理
+if (strcmp(filter_str, "PASS") == 0) {
+    originType = SOMATIC;  // ← 只 read, 用 FILTER 來分類 variant origin
+    break;
+} else if (strcmp(filter_str, "PON") == 0 || strcmp(filter_str, "NonSomatic") == 0) {
+    originType = (!params->disablePonTag) ? PON : GERMLINE;
+    break;
+}
+```
+
+→ **longphase 只 READ FILTER 不 WRITE FILTER**。FILTER 欄保持 ClairS-TO caller 原始輸出。
+
+**Pass 2 改動什麼 (從 8b8c1fd Step 3 source)**:
+- `syncPhasingResultOrigins()` → sync **GT 欄格式** (germline `0/1` → `0|1`, somatic `0/0+GT2`)
+- 加 `PS=` (phase set ID) 欄位
+- 加 BAM `HP:i:` tag (read-level)
+- **完全不動 FILTER 欄**
+
+### 三 hypothesis 整合機制圖
+
+```
+ClairS-TO caller
+  ↓ 產生 VCF: 49,987 variants, FILTER 已決定 (PASS=753 / NonSomatic=48,358 / ...)
+  ↓
+longphase-to read VCF:
+  ↓ ParsingBam.cpp:492 read FILTER 來分類 origin (SOMATIC/PON/GERMLINE)
+  ↓
+8b8c1fd PON-only Pass 1 phasing:
+  ↓ convertNonGermlineToSomatic() — 簡化 graph
+  ↓ phasing 演算法產出 phase blocks
+  ↓
+Pass 2:
+  ↓ somaticCalling + syncPhasingResultOrigins
+  ↓ 改 GT 欄 (0/1 → 0|1) + 加 PS 欄
+  ↓ ★ 不動 FILTER ★
+  ↓
+output phased VCF: 49,987 variants, FILTER 完全同 input
+  ↓
+F1 evaluation (bcftools isec, 看 FILTER=PASS):
+  ↓ PASS set 完全相同 → TP/FP/FN 不變
+  ↓
+F1 = 0.7166 (baseline/V3F/V5/V6 全相同 — 必然)
+```
+
+### 用戶 3 假設驗證結論
+
+| Hypothesis | Verdict | 證據 |
+|---|---|---|
+| Q1: github 累積 updates 是 phase 改變主因 | 🟡 部分對（V6 938f0df 是 upstream 但無實效；主因是本地 8b8c1fd） | commit chain author/date |
+| Q2: 改用 PON phase2 造成 phase 改變 | ✅ 完全正確 | 8b8c1fd commit message + PhasingProcess.cpp:155-181 source |
+| Q3: Pass 2 不改 FILTER, F1 因此不變 | ✅ 完全正確 | source grep "FILTER write" = 0 matches + empirical diff = 0 lines |
+
+→ 用戶**整套機制理解正確**：**PON-only Pass 2 (8b8c1fd) 改 phasing structure 大幅提升 N50/Phased%，但不動 FILTER → F1 數學保證 invariant**。
+
+---
+
 ## 4. 對 PI 報告 (4-29) errata 的關聯
 
 本 erratum (5/13) **不取代** [`20260509_PI_Report_4_29_Errata_01.md`](20260509_PI_Report_4_29_Errata_01.md)（5/9 PI 報告 4-29 errata, 5 條 E1-E5）。兩者並存：
