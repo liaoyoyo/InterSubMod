@@ -324,47 +324,56 @@ details.collapsible summary:hover { color: #1D4ED8; }
       <p style="font-size:15px;font-weight:700;color:#7F1D1D;margin:0;line-height:1.5;">⚠ 問題：judgeHaplotype <code>enum vs integer</code> 比較 bug → <code>HP:i:33</code> 永遠不會輸出（9 年 dead code branch）</p>
     </div>
 
-    <!-- E2: 程式碼比較改 baseline / V3F 上下排 -->
-    <div style="display:flex;flex-direction:column;gap:6px;margin:6px 0;">
+    <!-- E2: 程式碼比較改 baseline / V3F 左右並排 (2026-05-14) -->
+    <div class="grid-2col" style="gap:10px;margin:6px 0;">
       <div>
-        <p style="font-size:10.5px;font-weight:700;color:#7F1D1D;margin:2px 0;">❌ baseline (judgeHaplotype:697-701) — enum vs integer 錯位</p>
-        <pre class="code-panel baseline" style="font-size:9.5px;padding:6px 10px;line-height:1.45;margin:0;">// 進入點: getVote 已把 hpResult mapped 為 integer 11/21/33
+        <p style="font-size:11px;font-weight:700;color:#7F1D1D;margin:2px 0;">❌ baseline (judgeHaplotype:697-701) — <strong>enum vs integer 錯位</strong></p>
+        <pre class="code-panel baseline" style="font-size:9.5px;padding:6px 10px;line-height:1.45;margin:0;">// 進入點: getVote 已把 hpResult
+// mapped 為 integer 11/21/33
 if (max==0 || ratio &lt; threshold) {
   pqValue = 0;
-  if (hpResult != HAPLOTYPE1_1  // = 3 (enum)
-   && hpResult != HAPLOTYPE2_1){ // = 4 (enum)
-    hpResult = 0;     // ← 永遠走這（11/21/33 ≠ 3 ≠ 4 → 恆 true）
+  if (hpResult != HAPLOTYPE1_1  // =3 (enum)
+   && hpResult != HAPLOTYPE2_1){// =4 (enum)
+    hpResult = 0;   // ← 永遠走這
+                    //   (11/21/33 ≠ 3,4 恆 true)
   } else {
-    hpResult = 33;    // ← 永遠走不到 (dead code)
+    hpResult = 33;  // ← dead code
   }
 }</pre>
       </div>
       <div>
-        <p style="font-size:10.5px;font-weight:700;color:#166534;margin:2px 0;">✅ V3F 修補 (41ff147) — 顯式 int literal + 邏輯翻轉（V6 繼承）</p>
-        <pre class="code-panel v3f" style="font-size:9.5px;padding:6px 10px;line-height:1.45;margin:0;">// V3F: 顯式 integer 比較 + 邏輯翻轉
+        <p style="font-size:11px;font-weight:700;color:#166534;margin:2px 0;">✅ V3F 修補 (41ff147) — <strong>int literal + 邏輯翻轉</strong>（V6 繼承）</p>
+        <pre class="code-panel v3f" style="font-size:9.5px;padding:6px 10px;line-height:1.45;margin:0;">// V3F: 顯式 integer 比較
+//      + 邏輯翻轉
 if (max==0 || ratio &lt; threshold) {
   pqValue = 0;
   if (hpResult == 11    // 顯式 int literal
    || hpResult == 21
    || hpResult == 33) {
-    hpResult = 33;    // ★ somatic 有票 → hp=33
+    hpResult = 33;  // ★ somatic 有票 → hp=33
   } else {
-    hpResult = 0;     // 純 germline 弱信號 → no tag
+    hpResult = 0;   // 純 germline 弱信號 → no tag
   }
 }</pre>
       </div>
     </div>
-    <p style="font-size:10.5px;font-weight:700;color:#1E3A8A;margin:6px 0 2px;">💡 修補動作對照 — V3F 同時修兩個獨立缺陷，PI 一眼讀懂差別：</p>
-    <table class="metric-table" style="font-size:10px;">
-      <thead><tr><th style="width:18%;">維度</th><th style="width:38%;background:#FEE2E2;color:#7F1D1D;">❌ baseline 行為</th><th style="width:38%;background:#DCFCE7;color:#166534;">✅ V3F 修補</th><th style="width:6%;">差別</th></tr></thead>
-      <tbody>
-        <tr><td><strong>① 比較目標</strong></td><td class="num">hpResult vs <code>HAPLOTYPE1_1=3</code> (enum)</td><td class="num">hpResult vs <code>11</code> (整數字面)</td><td>修對</td></tr>
-        <tr><td><strong>② 比較結果</strong></td><td class="num">11≠3 ∧ 11≠4 ∧ 33≠3 ∧ 33≠4 → 恆 <code>true</code></td><td class="num">11==11 / 21==21 / 33==33 → 真實命中</td><td>修對</td></tr>
-        <tr><td><strong>③ 判定邏輯方向</strong></td><td class="num"><code>!=</code> → <code>0</code>；<code>==</code> → <code>33</code> (反向)</td><td class="num"><code>==</code> → <code>33</code>；<code>!=</code> → <code>0</code> (正向)</td><td>翻轉</td></tr>
-        <tr class="row-red"><td><strong>somatic read 結果</strong></td><td class="num">hpResult = 0 (no tag) ❌</td><td class="num">hpResult = 33 (somatic ambiguous) ✅</td><td>—</td></tr>
-        <tr class="row-yellow"><td colspan="4" style="font-size:9.5px;"><strong>設計意圖 vs 實際行為</strong>：baseline 寫程式者以為「if 不是 somatic 11/21 → no tag；是 somatic → 標 33」；但因 hpResult 早已被 getVote map 成 11/21/33，比較目標卻用 enum 3/4 → 設計意圖完全失效，hp=33 else 分支變死碼</td></tr>
-      </tbody>
-    </table>
+    <!-- 修補動作對照 — 重點化：兩個獨立缺陷 (2026-05-14) -->
+    <p style="font-size:11.5px;font-weight:700;color:#1E3A8A;margin:8px 0 4px;">💡 V3F 同時修<span style="color:#DC2626;">兩個獨立缺陷</span> — keyword 速覽</p>
+    <div class="grid-2col" style="gap:8px;margin:0 0 4px;">
+      <div style="background:#FEF3C7;border-left:3px solid #CA8A04;border-radius:4px;padding:6px 10px;">
+        <p style="font-size:11px;font-weight:700;color:#78350F;margin:0 0 3px;">[缺陷 1] 比較目標錯位 <span style="color:#6B7280;font-weight:500;">(type mismatch)</span></p>
+        <p style="font-size:10px;color:#7F1D1D;margin:1px 0;">❌ baseline：<code>hpResult</code> (=11/21/33) <strong>vs</strong> <code>enum=3,4</code> → 恆 <code>true</code></p>
+        <p style="font-size:10px;color:#166534;margin:1px 0;">✅ V3F：改用 <code>11/21/33</code> int literal → <strong>真實命中</strong></p>
+      </div>
+      <div style="background:#FEF3C7;border-left:3px solid #CA8A04;border-radius:4px;padding:6px 10px;">
+        <p style="font-size:11px;font-weight:700;color:#78350F;margin:0 0 3px;">[缺陷 2] 判定邏輯方向反 <span style="color:#6B7280;font-weight:500;">(logic inversion)</span></p>
+        <p style="font-size:10px;color:#7F1D1D;margin:1px 0;">❌ baseline：<code>!=</code>→<code>0</code> / <code>==</code>→<code>33</code>（反向）</p>
+        <p style="font-size:10px;color:#166534;margin:1px 0;">✅ V3F：<code>==</code>→<code>33</code> / <code>!=</code>→<code>0</code>（<strong>正向</strong>）</p>
+      </div>
+    </div>
+    <div style="background:#FEE2E2;border:1px solid #DC2626;border-radius:4px;padding:5px 10px;margin:0;">
+      <p style="font-size:10.5px;color:#7F1D1D;margin:0;line-height:1.5;"><strong>結果差異</strong> — somatic read：baseline → <code>hp=0</code> (no tag) ❌　/　V3F → <code>hp=33</code> (somatic ambiguous) ✅　<span style="color:#92400E;">→ 設計意圖被 enum 錯位完全失效，hp=33 else 分支變死碼 9 年</span></p>
+    </div>
     <!-- v1.7-F E3: 移除「📐 後續演進」+ hp=33 全基因組量化區 (V5/V6 演進細節下放至 09c/09e + speaker note tier3) -->
     <div class="footer-glossary" style="font-size:9.5px;">
       <div class="gloss-item">ⓘ Util.h:23-25 — enum HAPLOTYPE3=2 / HAPLOTYPE1_1=3 / HAPLOTYPE2_1=4；但 haplotypeBase map 把 hpResult 設為 11/21/33 — 比較目標錯位</div>
