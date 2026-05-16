@@ -1,0 +1,108 @@
+# InterSubMod Research Project Manifest
+# Project: thread_d_paper — TP-enriched phasing signatures Tool Paper Draft
+# Established: 2026-05-16 (via init-research after 4-round Socratic calibration)
+# Parent plan: ~/.claude/plans/tender-pondering-blossom.md
+
+project:
+  name: "thread_d_paper"
+  title: "Thread D — TP-enriched phasing signatures (LOH × cross_het) Tool Paper Draft"
+  created: "2026-05-16"
+  status: "initiated"
+  conclusion: null
+
+hypotheses:
+  - id: "H1"
+    statement: "Inner LOH NG=2 same-hap is a TP-enriched phasing signature; 6/6 cell line samples show consistent direction (Wilcoxon p=0.0156, X5 KDE-corrected)"
+    preconditions:
+      - "KDE-corrected master available (commit 374fad4)"
+      - "X3 flag-on + B3 paired NC passed"
+    confounds:
+      - "caller FP background (HCC1954 ceiling, B2 root cause)"
+      - "HPFineN_HP1S self-reference (R-SELFREF, Phase 2B pending)"
+    positive_criterion: "Wilcoxon p < 0.05 across n>=6 samples + paired NC gap |median|<0.05"
+    negative_criterion: "n>=7 expansion drops to <5/7 same direction"
+    verdict: "partial"  # B1/X5 confirmed; R-SELFREF pending Phase 2B
+  - id: "H2"
+    statement: "Outer cross_het is a TP-pure signature (Z-OCH FP rate 0.017 << global 0.137, Fisher p=3.8e-62), not FP marker — paradigm reframe 2026-05-15"
+    preconditions:
+      - "V3F/V5/V6 three-way ISM comparison on HCC1395 full chr"
+      - "V5 over-promote quantified (Inner LOH NG=2: V5=8,136 vs V3F=5,064, +60%)"
+    confounds:
+      - "V5 over-promote artifact (V5/V3F ratio 5.95× in cross_het_inv bucket)"
+      - "sample-specific CNV driver (HCC1937 BRCA1 chr15/17/14)"
+    positive_criterion: "Cross-sample n>=4 same direction + Fisher p<0.001 for TP enrichment"
+    negative_criterion: "V6 cross-sample shows Z-OCH FP rate regresses to global level"
+    verdict: "partial"  # HCC1395 confirmed; cross-sample n=5 pending
+  - id: "H3"
+    statement: "InterSubMod framework (methylation × phasing × CN) explains ~37% TP/FP signatures with mechanistic interpretability; 63% unexplained becomes paper limitation (not blocker)"
+    preconditions:
+      - "V6 production tag finalized"
+      - "Z-AUTO KDE cross-sample (n>=4) done"
+    confounds:
+      - "framework boundary definition itself (axis selection bias)"
+      - "sample-specific noise inflation"
+    positive_criterion: "37% framework coverage reproducible across n>=4 samples"
+    negative_criterion: "37% coverage sample-specific (HCC1395-only)"
+    verdict: null
+  - id: "H4"
+    statement: "Strategy A sample hierarchy holds: HCC1395 = primary discovery (SEQC2 truth set详细) + 6 others = replication cohort with consistent direction"
+    preconditions:
+      - "HCC1395 full-chr deep panel finalized"
+      - "6 cross-sample KDE-corrected via Archive TO rerun (V6 binary)"
+    confounds:
+      - "SEQC2 vs internal truth set granularity asymmetry"
+      - "platform diversity (5kHz vs DORADO vs PAO)"
+    positive_criterion: "HCC1395 deep mechanism narrative + 6 samples direction match for H1/H2"
+    negative_criterion: "Mechanism works only on HCC1395 (no replication)"
+    verdict: null
+
+datasets:
+  - path: "InterSubMod/output/canonical/HCC1395/V6/"
+    description: "HCC1395 V6 binary full chr ISM (2026-05-15 multi-agent fan-out)"
+    rows: 35332
+    columns_used:
+      - "HPFineN_HP1"
+      - "HPFineN_HP1S"
+      - "HPFineN_HP2"
+      - "HPFineN_HP2S"
+      - "Inner_LOH"
+      - "Coverage_Multiple"
+      - "TP_FP_label"
+      - "Region_ID"
+  - path: "research/v6_bam_tpfp_hp_loh_cn/step1_master_three_way.tsv"
+    description: "V3F/V5/V6 three-way ISM master (HCC1395 full chr)"
+    rows: 35332
+    columns_used: []  # 64 columns; see step1 doc
+  - path: "/big8_disk/liaoyoyo2001/Knowledge/02_samples/cancer-samples.md"
+    description: "7-sample LOH/CN/purity profile reference"
+    rows: null
+    columns_used: []
+
+artifacts:
+  scripts: []
+  figures: []
+  data: []
+
+dependencies:
+  git_commit: ""  # Fill after V6 production tag finalize (Tier 1.2)
+  python_packages:
+    - "pandas"
+    - "scipy"
+    - "matplotlib"
+    - "seaborn"
+    - "pyyaml"
+    - "numpy"
+
+reproducibility:
+  python_version: "3.x"
+  key_parameters:
+    binary_version: "v6 (TBD final tag, dependency on selfphasing_v6_production)"
+    framework_coverage_target: 0.37
+    cross_sample_min_n: 4
+    wilcoxon_alpha: 0.05
+    fisher_alpha: 0.001
+
+report:
+  path: ""  # docs/experiments/in_progress/2026/05/ to be created
+  index_entry: false
+  memory_entry: ""

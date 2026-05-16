@@ -1,7 +1,7 @@
 <!--
 建立時間: 2026-04-26
 狀態: VALIDATED main-axis report
-研究主軸: Thread D — LOH-constrained phasing signatures
+研究主軸: Thread D — TP-enriched phasing signatures (LOH × cross_het)
 證據強度: Grade B (4-layer evidence chain on n=6 TO + n=7 paired)
 產出形式: Validated 研究報告（standalone .md，下一階段論文骨架）
 配套文件:
@@ -10,7 +10,19 @@
   - 資料 provenance: research/data_registry/kde_corrected_provenance_20260426.tsv
 -->
 
-# Thread D — LOH-Constrained Phasing Signatures（研究主軸正式化）
+> **2026-05-15 PARADIGM REFRAME — 主軸正名通知**
+>
+> 本報告原命名為 "LOH-constrained phasing signatures"（單一機制），於 2026-05-15 透過 V3F/V5/V6 三向 ISM 比較（HCC1395 全染色體 + 4 樣本擴展）發現**雙重機制**：
+> - **Inner LOH NG=2 same-hap**（原主軸，本報告 §2-§4）— LOH 區內單 haplotype 物理約束
+> - **Outer cross_het**（2026-05-15 新發現，本報告 §2.5）— Z-OCH FP rate **0.017** << global 0.137（Fisher p=3.8e-62 for TP enrichment），cross_het = somatic-evidence marker
+>
+> 主軸已正名為「TP-enriched phasing signatures (LOH × cross_het)」。原 §1-§4 內容（單一機制論述）保留作為**雙重機制的第一支柱**；§2.5 補述第二支柱（Outer cross_het TP signature）；§3-§4 evidence chain 後續會在 paper draft 階段重組為雙支柱對照表。
+>
+> Evidence grade 維持 ⭐3 PARTIAL POSITIVE（2026-05-15 cycle）；升 ⭐4 需 Z-AUTO KDE 跨 4 樣本擴展 + 63% unexplained FP 新軸測試（已於 plan `tender-pondering-blossom` Tier 2 排程）。
+>
+> 主要新證據來源：`InterSubMod/docs/experiments/in_progress/2026/05/20260515_V6_TPFP_HP_LOH_CN_Characterization_01.md`
+
+# Thread D — TP-Enriched Phasing Signatures (LOH × cross_het)（研究主軸正式化）
 
 **日期**：2026-04-26
 **主軸 ID**：LOH-constrained-phasing-D
@@ -82,6 +94,37 @@ flowchart TD
 2. LOH 區內物理上只保留單一 haplotype，所以 NG=2 的「兩 bucket 占用」只能是 `(HPx, HPx-1)`（同邊）
 3. LOH 區外仍有 germline het（cross-haplotype），caller 將其當作 somatic candidate
 4. `HPFineN_HP1S/HP2S` 的 somatic-tag attribution 是訊號分離的關鍵；關閉此 attribution（`--germline-hp-only=on`）會讓 same-hap bucket 物理消失
+
+### 2.5 Paradigm Reframe — Outer cross_het 也是 TP signature（2026-05-15 新增）
+
+**2026-05-15 V3F/V5/V6 三向 ISM 比較（HCC1395 全 chr + 4 樣本擴展 ~3.5 hr）** 對 50-cell grid + power gate + LR + 7 道 confound guard + 4 FP zone deep dive 完整觀察後揭露：原本假設 "Outer cross_het = germline het FP" 的單向機制不完整。
+
+**關鍵觀察**：
+
+| Zone | FP rate | Global FP rate | Fisher p (for TP enrichment) | 重詮釋 |
+|------|--------:|---------------:|-----------------------------:|--------|
+| **Z-OCH** (Outer cross_het) | **0.017** | 0.137 | **3.8e-62** | **TP-pure signature**（非 FP marker）|
+| **Z-GL** (Inner gain+LOH) | **0.003** | 0.137 | (highly significant) | **TP-pure signature**（somatic on gained hap）|
+| Z-CHR8 + Z-AUTO | (FP-rich) | — | — | 捕獲 ~37% 全 FP；剩 63% 不被現有 framework 解釋 |
+
+**雙重機制重述**：
+
+1. **Inner LOH NG=2 same-hap**（原 §1-§4 主軸）— LOH 區內物理約束 → somatic 分裂於同一 haplotype → high TP
+2. **Outer cross_het**（本節新增）— LOH 區外 cross-haplotype bucket 占用模式（HP1 + HP2-1）在 V3F/V5/V6 比較中持續呈現 **TP enrichment 而非 FP 污染**；機制候選：cross_het 模式需要 somatic evidence 落在 germline het 對側才能形成，這個物理限制本身就是 somatic evidence marker
+
+**Framework coverage gap**：Z-CHR8 + Z-AUTO 僅捕獲 37% 全 FP，剩 **63% FP 不被現有 framework 解釋**（需新軸如 mappability / repeat / GC / SV）。此為已知 limitation，將寫入 paper Discussion（不影響本主軸 evidence grade，因主軸聚焦在 TP signature 而非完整 FP filter）。
+
+**V5 over-promote 直接證據**：Inner LOH NG=2 region V5=8,136（+60% over V3F 5,064），TP rate 沒升；V6 修補回 5,353（V3F 水準）。V5/V3F top cell ratio 達 5.95× 集中在 `Inner|cross_het_inv|cov_normal`（same_HP* 全 ~1.0×）→ **V5 Layer 1.5 機制只在 somatic-fallback heterozygous reads 作用**。這驗證了 §2.2 機制圖 Inner−Outer gap 在 V5 binary 下被人為放大，V6 binary 才是 paradigm reframe 的乾淨基準。
+
+**Cross-sample (n=5) 一致性**：唯一 signature candidate `Outer|other|cov_high_gain` 5/5 同方向（Wilcoxon p=0.0625, Δ=+0.0069），受 paired caller 飽和（≥0.998）限制；HCC1937 chr15/17/14 BRCA1 driver outlier（不專屬 — HCC1395 共有 chr17 FP）。
+
+**對 §3-§4 evidence chain 的影響**：
+- §3.1 X5 Layer 1（Inner same_HP1 vs Outer cross_het gap）— 原假設「Inner 高 Outer 低」中的「Outer 低」現修正為「Outer 也有 TP 但 cross_het bucket 內被特定 FP zone 污染」。Gap 觀察仍成立，但機制解讀從「caller 污染只發生在 Outer」修正為「caller 污染在 Z-CHR8 / Z-AUTO；Z-OCH 本身也是 TP signature」。
+- 後續 paper draft 階段 §3 將重組為「雙支柱 evidence」對照表（Inner LOH same-hap + Outer cross_het Z-OCH）。
+
+主要證據檔案：
+- `InterSubMod/docs/experiments/in_progress/2026/05/20260515_V6_TPFP_HP_LOH_CN_Characterization_01.md`
+- `InterSubMod/research/v6_bam_tpfp_hp_loh_cn/` (step1-step4 完整 artifacts)
 
 ---
 

@@ -12,6 +12,182 @@
 
 # 當前目標
 
+## 2026-05-17 — Tier 1-4 序列化執行 + T1.1/T1.3 完成
+
+**Session anchor**：4 輪 Socratic 燒烤對話收斂 9 條決策 + plan `~/.claude/plans/tender-pondering-blossom.md`
+
+### Plan tender-pondering-blossom Tier 1-4 進度追蹤
+
+```
+Tier 1 (W3 2026-05-15~22) 必須前置
+  T1.1 Thread D 主軸正名         ✅ DONE 2026-05-16
+       → 加 banner + §2.5 paradigm reframe + 主標題改名
+       → InterSubMod/docs/reports/validated/2026/04/20260426_Thread_D_*.md (338→381 行)
+       → 新名稱「TP-enriched phasing signatures (LOH × cross_het)」
+  T1.2 V6 production tag finalize 🔴 Hard Gate (待執行)
+       → 詳見 InterSubMod/research/selfphasing_v6_production/00_PLAN.md §Tier 1.2 workflow
+  T1.3 init-research scaffolding ✅ DONE 2026-05-16
+       → InterSubMod/research/thread_d_paper/         (165 行 00_PLAN + 108 行 manifest)
+       → InterSubMod/research/selfphasing_v6_production/ (154 行 00_PLAN + 122 行 manifest)
+
+Tier 2 (W3-W4) 證據強化
+  T2.1 Z-AUTO KDE 跨 4 樣本擴展     ⏳ ⭐3 → ⭐4 升級必要條件
+  T2.2 HCC1395 primary discovery 章節骨架  ⏳ Strategy A §3
+  T2.3 6-sample replication cohort 章節骨架 ⏳ Strategy A §4（含 HCC1954/HCC1937）
+
+Tier 3 (W4-W6) Paper draft + 工程平行
+  T3.1 Paper full outline (abstract + 6 章 + 6 主圖)  ⏳ Tool paper (Bioinformatics / NAR GB)
+  T3.2 GitHub repo 整理 + public 化      ⏳ Reproducible release
+  T3.3 Docker image build + tutorial      ⏳ 1-hour install + run
+  T3.4 Benchmark suite 公開化             ⏳ HG002 subset or HCC1395 SEQC2 公開部分
+  T3.5 Discussion 章節                    ⏳ 63% gap + cancer-only + Normal BAM future
+
+Tier 4 (W6+) reactive 擴展
+  T4.1 Phase 2A Normal BAM cross-sample   ⏳ G4 characterization (45% → 70%)
+  T4.2 GC/mappability/repeat 新軸 pilot   ⏳ reactive (if reviewer 質疑 framework gap)
+  T4.3 PI Report 4-29 errata + V6 sign-off ⏳ T1.2 完成後一併打包（written email）
+  T4.4 HG002 non-cancer pilot             ⏳ reactive (if reviewer 強質疑 cancer-only)
+```
+
+### T1.2 V6 Production Tag — Hard Gate 5-day workflow
+
+詳見 `InterSubMod/research/selfphasing_v6_production/00_PLAN.md` §"Tier 1.2 V6 Production Tag Workflow"：
+
+| Day | Action | Gate level |
+|-----|--------|------------|
+| 1-2 | COLO829 V6 ISM 補完（Archive TO rerun + KDE-corrected） | 🟢 normal |
+| 3   | 7-sample marker coverage + caller F1 比較 (V3F vs V5 vs V6 vs SEQC2) | 🟢 normal |
+| 4   | Binary commit hash 寫 `manifest.yaml` | 🟡 review |
+| 4   | `git tag v6-prod-{YYYYMMDD}` | 🔴 **Hard Gate**（不可逆） |
+| 5   | PI errata 5 條 + V6 sign-off written email draft | 🟡 review |
+| 5   | User review email → send | 🔴 **Hard Gate**（送出後不可逆） |
+
+**T1.2 Gate 通過後解鎖**：
+- thread_d_paper Tier 2 Archive TO 7-sample rerun (V6 binary, ~10 hr parallel)
+- T4.3 PI errata package 同期完成
+
+### 已收斂的 9 條決策（plan §"4 輪燒烤確認的 9 條決策"）
+
+主軸與目標：(1) 主軸雙軌平行；(2) G1/G2/G4 → characterization-only / G3 暫緩 / G5 降權
+論文：(3) Tool paper（Bioinformatics / NAR GB）；(4) 核心 contribution = read-level framework；(5) 主軸正名「TP-enriched phasing signatures (LOH × cross_het)」；(6) Strategy A 樣本階層 HCC1395 primary + 6 replication；(7) 接受 37% framework + 63% gap discussion；(8) Cancer-only 接受 limitation
+釋出：(9) 完全 reproducible（binary + Docker + benchmark suite + GitHub）
+
+### 與下方 2026-05-13/2026-05-15 區塊的關係
+
+- **2026-05-13**：原 3 週 V6 序列化估計（已 deprecated；保留 historical reference）
+- **2026-05-15**：multi-agent fan-out paradigm reframe（evidence base，本區塊 T1.1 + T1.3 的執行依據）
+- **2026-05-17（本區塊）**：plan tender-pondering-blossom 細化 + 序列化執行追蹤（live progress）
+
+---
+
+## 2026-05-15 — V3F/V5/V6 ISM 三向 × LOH × HP × CN characterization 完成（⭐3 PARTIAL POSITIVE）
+
+**Session anchor**：`"驗證ISM"` (multi-agent fan-out A/B/C/D/E + Coordinator)
+
+### 完成項目（HCC1395 pilot + 4 樣本擴展，~3.5 hr 全執行）
+
+- ✅ phaseC 12 個 ISM run 整合 → step1_master_three_way.tsv (35,332 rows × 64 cols)
+- ✅ 3 軸 50-cell grid + power gate (46% powered) + LR + 7 道 confound guard
+- ✅ 4 FP zone deep dive (Z-OCH / Z-CHR8 / Z-GL / Z-AUTO)
+- ✅ 4 樣本擴展 V6 ISM (H1437/H2009/HCC1954/HCC1937; COLO829 deferred)
+- ✅ Prior art (TumorLens/ROCIT/SGZ/Wakhan/SAVANA) 全無同口徑等效物
+- 主報告：[InterSubMod/docs/experiments/in_progress/2026/05/20260515_V6_TPFP_HP_LOH_CN_Characterization_01.md](experiments/in_progress/2026/05/20260515_V6_TPFP_HP_LOH_CN_Characterization_01.md)
+- 研究目錄：`research/v6_bam_tpfp_hp_loh_cn/` (00_PLAN + 01_data + 02_methodology + 02_prior_art + step1-4)
+
+### 關鍵發現
+
+**🤯 Paradigm reframe**: 2/3 預設「FP-rich」zone 實際 **TP-pure signatures**（不是 FP markers）：
+- Z-OCH (Outer cross_het): FP rate 0.017 << global 0.137 (Fisher p=3.8e-62 for **TP**-enrichment) — cross_het = somatic-evidence marker
+- Z-GL (Inner gain+LOH): FP rate 0.003 (0.022× global) — gain on somatic hap = somatic signature
+
+**✅ H4 POSITIVE — chr8 hotspot CN+AF 主導**:
+- LR deviance: caller_af 0.393 > **CN 0.211** > HP 0.063 > LOH 0.038
+- (LOH+CN) − HP = +0.186 (3.7× threshold 0.05)
+- chr8 FP enrichment 2.31× (highest of 23 chr)，捕獲 20% 全 FP，但 sample-specific
+
+**🔍 V5 over-promote 直接證據**: Inner LOH NG=2 region V5=8,136 (+60% over V3F 5,064)，TP rate 沒升；V6 修補回 V3F 水準 (5,353)。V5/V3F top cell ratio 達 5.95× (Inner|cross_het_inv|cov_normal)，**集中 cross_het bucket**（same_HP* 全 ~1.0×）→ Layer 1.5 機制只在 somatic-fallback heterozygous reads 作用
+
+**⚠️ Framework coverage gap**:
+- Z-CHR8 + Z-AUTO 共捕獲 ~37% 全 FP
+- **剩 ~63% FP 不被此 framework 解釋** → 需新軸（mappability/repeat/GC/SV）
+
+**Cross-sample (n=5)**: 唯一 signature candidate `Outer|other|cov_high_gain` 5/5 同方向 (Wilcoxon p=0.0625, Δ=+0.0069)；受 caller 飽和 (≥0.998) 限制。HCC1937 BRCA1 outlier chr15/17/14 driver；chr17 FP 不專屬（HCC1395 共有）
+
+### 評估與後續
+
+- **Tier ⭐3 PARTIAL POSITIVE**：H4 POSITIVE + paradigm reframe + 1 cross-sample candidate ✅；但 H7 confound guard 通過<5 + Z-CHR8 sample-specific + 63% FP unexplained → 未到 ⭐4
+- **升 ⭐4 需做**：(a) Z-AUTO KDE 跨 4 樣本各自做（驗證機制是否 recur）、(b) 加新軸測 63% unexplained FP
+- **V6 production tag finalize**（CURRENT_FOCUS W3 phase 1 gate）：本 cycle 確認 V6 marker coverage +9% over V3F + caller F1 不變 → 可作 V5→V6 production 升級依據
+
+---
+
+## 2026-05-13 — 主軸切換：V6 Production → Thread D Paper（4-6 週序列化雙軌）
+
+**Session anchor**：本次大盤點對話 `"未來目標方向的釐清與探索"`
+
+### 決策摘要
+
+- **主軸切換**：Self-Phasing V6 production 化（Track B 先）→ Thread D Paper 主軸（Track A 後）
+- **G5 處理**：保留但降權；F1 路線實質關閉，等 V6 + Phase 2 rerun 後再評估一次
+- **PI 報告 4-29 errata**：延後到 V6 production 完成後（W3 末）一併打包；目前不主動推進
+- **論文期刊**：暫不鎖定，先寫 framework paper 骨架
+- **Scaffolding**：建立 `research/thread_d_paper/` + `research/selfphasing_v6_production/` 兩個 init-research 專案目錄
+- **Archive TO 6 樣本 rerun binary**：等 V6 production tag 完成後一次到位（避免重跑）
+
+### 4-6 週序列化雙軌時程
+
+```
+Phase 1 (W1-3): Track B — Self-Phasing V6 production 化
+  W1: F-paired-D3 V5 Layer 1.5 ISM 影響量化 (chr19+全基因組)
+  W2: V6 7-sample expansion (1-2 day workload)
+  W3: V6 production tag finalize + binary commit hash 寫 manifest
+      Gate: V6 marker coverage > V3F/V5 且 0 critical regression
+      Deliverable: PI 報告 errata package 一併出（含 4-29 5 條 errata + V6 sign-off）
+
+Phase 2 (W3-5): Track A — Thread D evidence 升 grade A
+  W3-4: Archive TO 6 樣本 ISM rerun (V6 binary, ~10 hr parallel)
+  W4:   Wilcoxon n=7 重算（同方向預期 p<0.0156）
+  W4-5: HPFineNGroups marker × 兩 flag 跨樣本驗證
+        HCC1954 outlier deep panel + Normal BAM pilot (R17)
+
+Phase 3 (W5-6+): Thread D framework paper draft
+  W5-6: paper framework 骨架（暫不鎖期刊）
+        - 主軸：read-level epigenetic characterization
+        - G1 ASM 全域章節 + G2 cross-sample 4-group subclone
+        - HCC1954 專章（outlier + Thread B 撤回脈絡）
+```
+
+### 五大目標成功標準切換（2026-05-13 正式生效）
+
+| 目標 | 舊標準 | 新標準 |
+|------|--------|--------|
+| G1 per-CpG ASM | F1 提升 + 可解釋性 | **僅可解釋性**（characterization-only） |
+| G2 clone 結構 | F1 提升 + 可解釋性 | **僅可解釋性**（4-group subclone characterization） |
+| G3 二次打擊順序 | 推論成功 | **依賴 G1 突破，暫緩** |
+| G4 TO normal 補強 | F1 提升 + 可解釋性 | **僅可解釋性**（R1-Global 已 NEGATIVE for F1） |
+| G5 evidence panel F1 | F1 提升 | **保留 ceiling +0.0112；不投入新資源** |
+
+### 已關閉死路（不再投入）
+
+- 純 methylation TP/FP filter (CL-008 ⭐5)
+- LOH/CNV zone-aware filter (CL-024 ⭐5)
+- FN methylation rescue (O9 ⭐5)
+- S3 cross-sample whitelist (Thread B 撤回 2026-04-26)
+- TO single-sample post-hoc germline FP filter
+- G3 事件順序（暫緩等 G1 突破）
+
+### Immediate next actions（執行序）
+
+1. ✅ 2026-05-13：本區塊已寫入 CURRENT_FOCUS.md
+2. ⏳ 待執行：`init-research` 建立 `research/thread_d_paper/` + `research/selfphasing_v6_production/` scaffolding
+3. ⏳ 待執行：W1 F-paired-D3 V5 Layer 1.5 ISM 影響量化（chr19+全基因組）
+
+### 為何序列化而非完全平行
+
+Archive TO 6 樣本 rerun 直接吃 V6 binary 可避免重跑；V6 production 化包含 ISM 影響量化（F-paired-D3）本身就需要先量化 V5→V6 改變才能 sign-off — 兩者實質有 binary 依賴關係。序列化讓 W3 後 Phase 2 一次到位，整體節省 ~10 hr × 1 次重跑成本。
+
+---
+
 ## 2026-05-11 — html-preview skill shipped (Phase 2)
 
 ✅ `InterSubMod/.claude/skills/html-preview/` shipped. End-to-end demo at

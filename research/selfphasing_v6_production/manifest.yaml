@@ -1,0 +1,122 @@
+# InterSubMod Research Project Manifest
+# Project: selfphasing_v6_production — V6 Binary Production Tag & PI Errata Package
+# Established: 2026-05-16 (via init-research after 4-round Socratic calibration)
+# Parent plan: ~/.claude/plans/tender-pondering-blossom.md
+
+project:
+  name: "selfphasing_v6_production"
+  title: "Self-Phasing V6 Binary Production Tag & PI Errata Package"
+  created: "2026-05-16"
+  status: "executing"  # 2026-05-15 already shipped HCC1395 full chr + 4-sample expansion
+  conclusion: null
+
+hypotheses:
+  - id: "H1"
+    statement: "V6 binary patch fixes V5 Layer 1.5 over-promote in germline-absent + LOH regions while preserving V3F conservative behavior (hp=33 for ambiguous)"
+    preconditions:
+      - "V3F/V5/V6 three-way ISM comparison available (HCC1395 full chr)"
+      - "step1_master_three_way.tsv exists with 35,332 rows × 64 cols"
+    confounds:
+      - "binary commit hash drift (V5 baseline vs HEAD 938f0df)"
+      - "sample-specific over-promote magnitude"
+    positive_criterion: "Inner LOH NG=2 V6 region count ≈ V3F (within ±10%) AND V5/V3F ratio >1.5× in cross_het bucket"
+    negative_criterion: "V6 region count > V5 (no improvement) OR V5/V3F ratio not isolated to cross_het"
+    verdict: "supported"  # 2026-05-15 HCC1395: V3F=5,064, V5=8,136, V6=5,353; V5/V3F ratio 5.95× in cross_het_inv
+  - id: "H2"
+    statement: "V6 marker coverage > V3F/V5 with 0 critical regression (caller F1 unchanged across all 7 samples)"
+    preconditions:
+      - "7-sample V6 ISM completed (5/7 done; COLO829 pending)"
+      - "Caller F1 vs SEQC2 truth set computed for V3F/V5/V6 (HCC1395 done: 0.7166 all three)"
+    confounds:
+      - "COLO829 ONT R10 has no methylation (sample-specific limitation)"
+      - "caller F1 metric definition (per CL paper §4.3)"
+    positive_criterion: "V6 marker coverage +5%+ over V3F, n>=5/7 samples consistent direction"
+    negative_criterion: "≥1 sample marker coverage regresses OR caller F1 drops"
+    verdict: "partial"  # 5/7 done (HCC1395 5/8 confirmed +9% marker; 4 samples extending)
+  - id: "H3"
+    statement: "V6 production tag enables Archive TO 7-sample rerun + PI Report 4-29 errata 5-item package one-shot delivery"
+    preconditions:
+      - "H1 supported + H2 supported"
+      - "binary commit hash finalized + git tag created"
+      - "manifest.yaml updated with v6 commit"
+    confounds:
+      - "PI ack timing (lab meeting vs written email)"
+      - "errata content drift (5/9 paired audit added new errata candidate E5)"
+    positive_criterion: "Git tag v6-prod-* exists + 5 errata + V6 sign-off email delivered"
+    negative_criterion: "PI requests new audit before sign-off (T4.3 workload expands)"
+    verdict: null
+
+datasets:
+  - path: "research/v6_bam_tpfp_hp_loh_cn/step1_master_three_way.tsv"
+    description: "V3F/V5/V6 three-way ISM master, HCC1395 full chr"
+    rows: 35332
+    columns_used:
+      - "Region_ID"
+      - "HPFineN_HP1/HP1S/HP2/HP2S"
+      - "binary_version (V3F|V5|V6)"
+      - "TP_FP_label"
+  - path: "InterSubMod/output/canonical/H1437/V6/"
+    description: "H1437 V6 ISM (2026-05-15)"
+    rows: null
+    columns_used: []
+  - path: "InterSubMod/output/canonical/H2009/V6/"
+    description: "H2009 V6 ISM (2026-05-15)"
+    rows: null
+    columns_used: []
+  - path: "InterSubMod/output/canonical/HCC1954/V6/"
+    description: "HCC1954 V6 ISM (2026-05-15)"
+    rows: null
+    columns_used: []
+  - path: "InterSubMod/output/canonical/HCC1937/V6/"
+    description: "HCC1937 V6 ISM (2026-05-15)"
+    rows: null
+    columns_used: []
+  - path: "(待補) InterSubMod/output/canonical/COLO829/V6/"
+    description: "COLO829 V6 ISM (pending Archive TO rerun)"
+    rows: null
+    columns_used: []
+  - path: "InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md"
+    description: "5/8 self-phasing 整合報告 — V6 patch motivation source"
+    rows: null
+    columns_used: []
+  - path: "InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01/"
+    description: "PI Report 4-29 errata companion (5 條) — to be packaged with V6 sign-off"
+    rows: null
+    columns_used: []
+
+artifacts:
+  scripts: []
+  figures: []
+  data: []
+
+dependencies:
+  git_commit: ""  # V6 final tag commit, to fill at Tier 1.2 finalize
+  python_packages:
+    - "pandas"
+    - "numpy"
+    - "matplotlib"
+    - "pyyaml"
+  cpp_binary_chain:
+    - "8b8c1fd (V3F baseline)"
+    - "41ff147"
+    - "380e8d2"
+    - "d0bcd8c (ploidy bug fix)"
+    - "938f0df (HEAD - V5 threshold 0.95→0.9)"
+    - "v6-patch-TBD (V6 Layer 1.5 + V3F-style hp=33)"
+
+reproducibility:
+  python_version: "3.x"
+  key_parameters:
+    v6_binary_commit: "TBD (Tier 1.2)"
+    v5_baseline_commit: "938f0df"
+    v3f_baseline_commit: "8b8c1fd"
+    inner_loh_ng2_v3f_count: 5064
+    inner_loh_ng2_v5_count: 8136
+    inner_loh_ng2_v6_count: 5353
+    v5_over_promote_ratio: 1.60
+    v5_v3f_top_cell_ratio: 5.95
+
+report:
+  path: "InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md"
+  index_entry: false  # to update at conclude-research
+  memory_entry: "project_v5_v6_tradeoff_sp123.md"
