@@ -1,232 +1,286 @@
-# Repository Guidelines
+# AGENTS.md — InterSubMod Repository Guidelines
 
-## 語言
-- **語言要求**：所有回覆、思考過程及任務清單必須使用**繁體中文**(zh-TW)
-- **固定指令**： 'Implementation Plan, Task List and Thought in **Traditional Chinese**
-
-## 與 big7 workspace root 規範的銜接
-- 本 repo 之外，工作區另有一份 root 級規範：`/big7_disk/liaoyoyo2001/AGENTS.md`
-- 分工原則：
-  - `InterSubMod/AGENTS.md`：管理 `InterSubMod` repo 內的程式碼、研究文件、腳本、知識庫查閱與開發習慣
-  - `/big7_disk/liaoyoyo2001/AGENTS.md`：管理整個 big7 工作區的目錄分工、輸出落點、runbook/meeting/canonical/synthesis 的角色與新建檔案規範
-- 若任務只修改 `InterSubMod/` 內的程式碼、文件或腳本，先遵守本檔，再視需要參考 root 規範。
-- 若任務涉及以下任一目錄，必須同時閱讀並遵守 root 規範：
-  - `/big7_disk/liaoyoyo2001/big7_disk_output/`
-  - `/big7_disk/liaoyoyo2001/InterSubMod_big7_runbook/`
-  - `/big7_disk/liaoyoyo2001/Meeting/`
-- 判斷原則：
-  - 先用 root 規範判斷「檔案應該放在哪一類目錄」
-  - 再用本檔判斷「若檔案放在 `InterSubMod/` 內，應遵守哪些 repo 內規則」
-- 若兩份規範看似衝突，優先採用「路徑更具體者」：
-  - `InterSubMod/` 內部細節以本檔為準
-  - 跨目錄放置與 big7 輸出分流以 root 檔為準
-
-## Project Structure & Module Organization
-- `src/` holds the C++ core (split into `core/`, `io/`, `utils/`); headers live in `include/`.
-- `tests/` contains GoogleTest unit tests; `src/test/` contains phase-specific test drivers.
-- `tools/` houses Python analysis/plotting utilities; `scripts/` contains shell workflows.
-- `data/` stores example inputs; `output/` is the repo-local symlink entry to `/big7_disk/liaoyoyo2001/big7_disk_output/`; `docs/` supports documentation; `research/` holds research workspaces with figures/data/scripts.
-- `build/` is the out-of-tree build output created by CMake.
-
-## Build, Test, and Development Commands
-- Build: `mkdir -p build && cd build && cmake .. && make -j$(nproc)`; binary at `build/bin/inter_sub_mod`.
-- Run core manually: `./build/bin/inter_sub_mod --tumor-bam data/tumor.bam --reference data/ref.fa --vcf data/somatic.vcf --output-dir results`.
-- Full pipeline script: `./scripts/run_vcf_all_snv.sh --mode all-with-w1000 --plot-type distance` (see `--help` for options).
-- Output checks: `./scripts/verify_output.sh` validates expected files and matrix dimensions.
-- Python deps for plotting: `pip install -r requirements.txt`.
-- Optional container: `docker build -f Dockerfile.dev -t intersubmod:dev .` and `docker run -it --rm -v $(pwd):/workspace intersubmod:dev`.
-
-## Coding Style & Naming Conventions
-- C++17 code with `.hpp` headers and `.cpp` sources; namespace is `InterSubMod`.
-- Formatting follows `.clang-format` (Google base, 4-space indent, 120 column limit); run `clang-format` on touched C++ files.
-- Naming patterns: `CamelCase` classes (e.g., `BamReader`), `snake_case` methods and files.
-
-## Testing Guidelines
-- Unit tests live in `tests/test_*.cpp`; run with `ctest --test-dir build` or `./build/bin/run_tests`.
-- Phase tests compile to `build/bin/test_phase*` from `src/test/`; `scripts/run_random_snv_test.sh` provides a quick smoke test.
-- No explicit coverage target is enforced; add GTest coverage for new core logic when feasible.
-
-## Commit & Pull Request Guidelines
-- Commit messages in recent history use short imperative summaries like `Add ...` or `Refactor: ...`; keep to one line and add a prefix (`Fix:`, `Docs:`) when helpful.
-- PRs should include a concise summary, commands run, and sample outputs/logs or plots when analysis or visualization changes.
-
-## Data, Outputs, and Configuration Tips
-- `output/` is the repo entry point to the current big7 output root: `/big7_disk/liaoyoyo2001/big7_disk_output/`.
-- New formal sample/mode/run outputs belong under `output/canonical/{sample}/{canonical_mode}/{run_id}/`.
-- New pure / tumor-only / exploratory rounds belong under `output/synthesis/research_rounds/`; cross-sample diagnostics and observation workspaces belong under `output/synthesis/observation_workspaces/`.
-- `output/big8_output_archive/` and `output/bip8_output_archive/` are historical archive roots, not the default destination for new outputs.
-- Some older scripts or docs still mention absolute `/big8_disk/...` output paths; treat those as legacy or archive-era references unless the task explicitly targets historical runs.
-- Keep generated artifacts in `output/` and avoid committing large datasets unless explicitly requested.
-
-## 繼續研究前的必讀清單
-
-見 `.claude/CLAUDE.md`「繼續研究前的必讀清單」區段（含速查表）。
+> **此檔職責**：跨 agent 共用 governance — 任何 agent 框架（OpenHands / Claude Code / Codex / Aider / Cline）都會讀。
+> **Claude Code 特定行為（確認矩陣 / Skills / Hooks）→ `.claude/CLAUDE.md`**。
 
 ---
 
-## AI Agent 預設操作政策（2026-03-01）
-- `check_ai_agent_readiness.sh` 採「異常觸發」：僅在環境重建、路徑變更、腳本異常、或結果不一致時執行，不要求每次任務都先跑。
-- `output/` 保持 repo 內入口；目前實體輸出根目錄固定為 `/big7_disk/liaoyoyo2001/big7_disk_output/`。
-- 正式 sample/mode/run bundle 放在 `output/canonical/`；研究 round、觀察工作區與彙整產物放在 `output/synthesis/`。
-- 除非任務明確指定歷史 archive，否則不要再把新的正式輸出寫到舊的 `/big8_disk/.../InterSubMod_runs/output` 類路徑。
-- Agent 不可直接刪除檔案（包含 `rm`, `find -delete`, 覆寫式清空）。
-- 若需移除內容，先搬移到與目前 `output/` 同卷、由 root 規範或使用者指定的 Archive 暫存區；若暫存區尚未建立，先回報並確認，不可直接刪除。
-- 除非使用者明確要求，否則不做任何實際清除動作；若清理行為必須存在，需寫在可審核的執行腳本中。
+## §1 語言與輸出規範
 
-
-## 實驗室知識庫 (Knowledge Base)
-
-**路徑**：`/big8_disk/liaoyoyo2001/knowledge/`（`Knowledge` 為 symlink，兩者等價）
-
-當對話涉及以下主題時，**必須**先查閱知識庫對應文件確認細節，再進行回答或操作：
-
-| 主題           | 查閱路徑                    | 觸發關鍵字                                                              |
-| -------------- | --------------------------- | ----------------------------------------------------------------------- |
-| 資料總覽與路徑 | `01_data_overview/`         | 資料位置、目錄結構、儲存空間                                            |
-| 癌症樣本資訊   | `02_samples/`               | HCC1395, COLO829, H1437, H2009, HG002, purity, subsample                |
-| 檔案格式規格   | `03_file_formats/`          | VCF, BAM, MM/ML, FILTER, phased VCF, modcall, HP tag                    |
-| 資料庫與參考集 | `04_databases/`             | PON, gnomAD, dbSNP, CoLoRSdb, SEQC2, truth set, reference genome        |
-| 工具使用與參數 | `05_tools/`                 | LongPhase, ClairS, ClairS-TO, DeepSomatic, InterSubMod                  |
-| 分析流程       | `06_workflows/`             | somatic calling, phasing, haplotagging, methylation analysis, benchmark |
-| 腳本操作說明   | `07_scripts/`               | auto_run.sh, benchmark script, 自動化腳本                               |
-| 論文與參考資料 | `08_references/` + `paper/` | paper, 論文, server paths                                               |
-
-### 查閱深度指引
-
-| 情境                   | 查閱深度 | 動作                              |
-| ---------------------- | -------- | --------------------------------- |
-| 快速確認（路徑、名稱） | 淺層     | 讀 `README.md` 速查表             |
-| 格式或參數細節         | 中層     | 讀對應子目錄的特定文件            |
-| 完整流程或工具操作     | 深層     | 讀 workflow + tool 文件，交叉驗證 |
-| 工具原始碼邏輯         | 最深層   | 讀 `codebase/` 目錄下的原始碼     |
-
-### 查閱原則
-
-- **不要憑記憶回答可以查證的事實**：檔案路徑、工具參數、VCF 欄位定義等務必查閱確認
-- **引用來源**：回答時標註「根據 Knowledge/03_file_formats/vcf_clairs_to.md」
-- **發現過時資訊時主動提醒使用者**
+- **回應語言**: 繁體中文（zh-TW）所有回覆、思考、任務清單
+- **程式碼註解**: 英文
+- **.md 路徑前綴**: `InterSubMod/...`（hook 強制檢核）；更高層級用全域絕對路徑
+- **圖片嵌入**:
+  - Markdown: `![標題](相對路徑)` 必須真實顯示，禁止只列路徑
+  - HTML: 嵌入時保留**原始比例**，用相對路徑
+- **設計準則**: 12 條 canonical（Tufte / CRAP / Assertion-Evidence / WCAG）→ `/doc-standards` skill
 
 ---
 
-## 研究輸出組織規範（2026-04-05）
+## §2 與 big7 workspace root 銜接
 
-### 目錄結構
+- Root 規範：`/big7_disk/liaoyoyo2001/AGENTS.md`
+- **本檔權威範圍**：InterSubMod repo 內程式、研究文件、腳本、KB 查閱、開發習慣
+- **Root 規範權威範圍**：跨目錄分工、輸出落點
 
-| 目錄 | 用途 | 索引檔 |
-|------|------|--------|
-| `research/{study_name}/` | 單一研究主題的完整工作區 | `README.md` |
-| `research/{study_name}/figures/` | 該研究的所有圖表（PNG/SVG） | — |
-| `research/{study_name}/data/` | 中間數據（TSV/CSV） | — |
-| `research/{study_name}/scripts/` | 分析腳本 | — |
-| `research/{study_name}/reports/` | 研究報告 | — |
-| `docs/reports/{topic}/` | 多檔案正式說明文件 | `00_INDEX.md` |
-| `docs/reports/{topic}/figures/` | 說明文件圖表 | — |
-| `docs/experiments/` | 實驗紀錄索引 | `INDEX.md` |
+**任務涉及以下任一目錄 → 必須同時閱讀並遵守 root 規範**：
+- `/big7_disk/liaoyoyo2001/big7_disk_output/`
+- `/big7_disk/liaoyoyo2001/InterSubMod_big7_runbook/`
+- `/big7_disk/liaoyoyo2001/Meeting/`
 
-### 圖片存放規則
+衝突原則：路徑更具體者優先（InterSubMod 內以本檔 / 跨目錄以 root）。
 
-1. **統一命名**：純圖片子目錄一律叫 `figures/`（不用 `images/`、`plots/`）
-   - **例外**：當子目錄包含混合類型資源（圖片 + JSON/TSV/PDF 等非圖片檔案）時，可使用 `assets/` 命名
-2. **相對路徑**：.md 引用圖片必須用相對路徑 `figures/xxx.png`，禁止絕對路徑
-3. **最大深度**：圖片相對路徑最多 2 層（`../figures/` 可，`../../../figures/` 禁止）
-   - **例外**：引用 `output/` 或 `research/` 下的實驗圖片時，因目錄結構深度差異，允許超過 2 層（需確保目標檔案存在）
-4. **命名格式**：`{NN}_{英文描述}.png`（如 `01_stability_overview.png`）
+**Agent 上下文 5 入口分工**（跨 agent 都需要知道）：
+| 入口 | 權威範圍 |
+|------|--------|
+| `InterSubMod/AGENTS.md`（本檔）| 跨 agent governance |
+| `InterSubMod/.claude/CLAUDE.md` | Claude Code 特定（其他 agent 不讀）|
+| `InterSubMod/docs/references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md` | 研究壓縮上下文、重要數據 |
+| `InterSubMod/docs/CURRENT_FOCUS.md` | live 主軸、阻塞 |
+| `InterSubMod/research/autoresearch/research_direction.md` | AutoResearch 候選 queue（**僅候選**，不作觸發）|
 
-### 檔案命名格式
+---
 
-- Markdown：`{YYYYMMDD}_{中文說明目標}_{流水號}.md`
-  - **例外**：`architecture/`（半永久結構文件）、`refactor_baseline/`（歷史基線快照）、`research_landscape/`（序號索引系列 `NN_名稱.md`）及特殊用途檔案（`INDEX_DETAIL_ARCHIVE.md`、`*_ARCHIVED.md`）不受此限
-- 圖片：`{NN}_{英文描述}.png`
-- 數據：`{YYYYMMDD}_{描述}.tsv`
+## §3 五大研究目標與當前主軸
 
-### 多步驟研究專案目錄
+**G1-G5**（每小任務必須回答「服務哪個 Gx」）：
+- **G1**: longphase 家族 + ISM 整合突破（願景主軸）
+- **G2**: longphase-s + longphase-to 協同 > 單獨任一
+- **G3**: ISM read-level epigenetic 給領域突破
+- **G4**: 多樣本一致性 + reproducibility
+- **G5**: 業界級貢獻（可被外部驗證）
 
-多 Step 研究在 `plans/` 和 `architecture/` 下建專案子資料夾：
-```
-docs/plans/YYYY/MM/{YYYYMMDD}_{專案主題}/
-  ├── 00_總覽與執行順序.md    # 索引
-  ├── Step1_xxx.md            # Step 計劃
-  └── Step2_xxx.md
-docs/architecture/{YYYYMMDD}_{專案主題}/
-  ├── 架構文件.md
-  └── 資料追蹤表.md
-```
+**當前主要 phase**: **Phase 2 Normal Methylation Reference (方向 A+D)** — 服務 G2/G3
 
-### Git 追蹤規則
+**歷史觀察（非定論，仍應深入研究）**：
+- Phase 1A paired-pure F1 delta = +0.0112（marginal）— **仍需更完整研究驗證**
+- TO 模式甲基化整合無顯著 F1 增益（早期觀察）— **不應作為放棄方向理由**；可能機制：訊號被遮蔽 / 樣本特性 / metric 口徑不對
+- **任何「F1 / TO mode / variant filter」方向仍是合理研究範圍** — 不可僅憑舊觀察直接放棄；應重新設計實驗驗證
 
-| 類型 | 追蹤 | 說明 |
-|------|------|------|
-| `docs/reports/*/figures/*.png` | 追蹤 | 正式說明文件的關鍵圖 |
-| `docs/reports/*/*.md` | 追蹤 | 正式說明文件 |
-| `research/*/figures/*.png` | gitignore | 研究中間圖表 |
-| `research/*/data/` | gitignore | 中間數據 |
-| `research/*/scripts/*.py` | 追蹤 | 可重現腳本 |
-| `*.pdf`（根目錄） | gitignore | 簡報 PDF |
+**成功標準**: 每小任務完整詳細觀察 → 整合驗證 → 業界級可驗證突破
 
-### 資訊分層與封存規則（2026-04-05）
+---
 
-| 層級 | 條件 | 位置 | 說明 |
+## §4 啟動研究任務 5 問
+
+接到研究任務必先回答（防踩已知坑）：
+1. **Thread D**（read-level epigenetic）相關？
+2. **Thread B 撤回範圍**內？（已 NO-GO 方向）
+3. 資料 **KDE-corrected** 否？
+4. 需要 **VCF caller AF**（非 merged AF）否？
+5. 觸及 **長計算 / C++ / 檔案搬移 / NO-GO gate** 否？
+
+---
+
+## §5 高影響場景識別
+
+下列場景**典型落在高影響區**，需高信心理由才能自主推進，否則預設暫停：
+
+| 場景 | 典型影響 | 危險 | 正確做法 |
 |------|------|------|------|
-| Active | 當月 + 進行中 | 原始目錄 | 完整內容 |
-| Recent | 1-3 月內已完成 | 原始目錄 | 保留但可精簡 |
-| Archive | >3 月 或 已被取代 | `docs/archive/YYYY/MM/` | 只搬移不刪除 |
-| Deep Archive | 歷史快照/重複 | `docs/archive/deep/` | immutable |
-
-**封存原則**：
-1. **不刪除任何檔案**，一律搬移到 `docs/archive/YYYY/MM/`
-2. 封存時建立 `SUMMARY.md` 提取重點結論
-3. 原位置留 redirect notice（`ARCHIVED.md`）
-4. 更新所有引用該檔案的索引連結
-5. 大型檔案（>500 行）封存前提取精簡版保留在活躍目錄
-
-### 元數據要求
-
-每個 .md 檔案開頭必須有 HTML 註解元數據：
-
-```markdown
-<!--
-建立時間: YYYY-MM-DD HH:MM
-目標: [本檔案的目標或用途]
-處理範圍: [涵蓋的工作範圍]
-關聯檔案:
-  - [相關檔案路徑 1]
-  - [相關檔案路徑 2]
--->
-```
+| 研究重點排序 | 高（>1h 投入）| 浪費數天 | 列候選方向 + 收益/風險 → 等用戶決定 |
+| 假說選擇 | 高（影響結論）| 隱含假設導致偏誤 | 寫出前提 + 可能 confound |
+| 統計方法選擇 | 中-高 | 不同方法相反結論 | 說明為何選 + 替代方案 |
+| 「改進」/「優化」模糊指令 | 高 | 方向無數 | 要求用戶定義成功標準 |
+| 多檔案 / 多步驟重構 | 中-高 | 影響範圍不明 | 列受影響檔案 + 預期改動 |
 
 ---
 
-## 主要查詢路徑與重點資訊（2026-04-05）
+## §6 假設陳述與 Step → Verify
 
-### 四層導航架構
+**實作前必做**:
+- 列關鍵假設；不確定標 `⚠ 待確認`
+- 多種解讀時列所有合理選項 + 傾向理由（**不可默默選擇沉默執行**）
+- 有更簡單替代方案要主動提
 
-| 層級 | 檔案 | 回答的問題 | 何時查閱 |
-|------|------|-----------|---------|
-| L1 入口 | `docs/README.md` | 文件在哪裡？怎麼導航？ | 首次接觸專案 |
-| L2 焦點 | `docs/CURRENT_FOCUS.md` | 現在在做什麼？什麼阻塞？ | 每次對話開始 |
-| L3 歷史 | `docs/experiments/INDEX.md` | 過去試過什麼？成功/失敗？ | 計劃新實驗前 |
-| L4 深度 | `docs/reports/research_landscape/00_INDEX.md` | 完整研究推論鏈、證據與穩定性 | 需要完整理解 |
+**Step → Verify 格式**（多步驟任務必用）：
+```
+1. [步驟] → 驗證: [具體可觀察]
+2. [步驟] → 驗證: [具體可觀察]
+```
 
-### 重點資訊速查表
+**範例**（任務：加入 Normal BAM read 過濾邏輯）：
+```
+1. 讀取現有 ReadParser     → 驗證: 能指出 normal read 進入的函數位置
+2. 新增 normal BAM 參數     → 驗證: make -j$(nproc) 無 warning
+3. 實作過濾條件             → 驗證: 單元測試覆蓋 normal/tumor/mixed 三情境
+4. 全量測試                  → 驗證: F1 差異 < 0.01
+```
 
-| 我想知道... | 去哪裡找 |
-|-------------|---------|
-| TO FP 為什麼過濾不掉 | `docs/reports/research_landscape/01_TO_FP問題全貌.md` |
-| Self-phasing 是什麼、影響多大 | `docs/reports/research_landscape/02_Self_Phasing根因.md` |
-| ISM 哪些特徵可信、哪些不可信 | `docs/reports/research_landscape/03_ISM分析價值界定.md` |
-| 哪些結論需要修正後重測 | `docs/reports/research_landscape/04_暫停判定與重評估.md` |
-| 8 條證據鏈的完整推論 | `docs/reports/research_landscape/05_證據鏈總覽.md` |
-| 14 個結論各自的穩定度評分 | `docs/reports/research_landscape/06_結論穩定性審查.md` |
-| 當前研究策略與優先級 | `docs/CURRENT_FOCUS.md` |
-| 過去實驗的成功/失敗記錄 | `docs/experiments/INDEX.md` |
-| 樣本資訊、VCF 格式、工具參數 | Knowledge Base（見上方知識庫區段） |
-| LOH 深度調查數據 | `research/loh_investigation/` |
-| FP 來源追蹤分析 | `research/fp_provenance/` |
+- **強驗證（要求）**: 數值範圍 / 檔案輸出含路徑 / 命令退出碼 / 預期輸出片段
+- **弱驗證（禁止）**: 「看起來正確」「double-check」「讓它能動」「確認結果合理」
 
-### Agent 查詢義務
+Opus 4.7 模型特性備註 → `.claude/CLAUDE.md` §2。
 
-- **開始研究前**：必讀 L2（CURRENT_FOCUS）+ L3（INDEX）
-- **計劃新實驗前**：必讀 L3 確認未重複失敗方向
-- **涉及 HP tag / LOH**：必讀 L4 的 02（Self-Phasing）和 04（暫停判定）
-- **涉及 TO FP 過濾**：必讀 L4 的 01（FP 全貌）和 03（ISM 價值界定）
-- **樣本/格式/工具問題**：必查 Knowledge Base
+---
+
+## §7 變動頻率規則
+
+| 層級 | 上限 | 維護機制 |
+|------|------|----------|
+| Foundation（§3 目標）| 季度 | 手動 |
+| Governance（§1-§8）| 月度 | 手動 |
+| Working State（CURRENT_FOCUS）| **週級** ⚠ | SessionStart hook + 手動 |
+| Memory Concluded 區 | grep-only | `/memory-consolidation` skill |
+
+`InterSubMod/docs/CURRENT_FOCUS.md` > 7 天未更新 → hook 主動提醒。
+
+---
+
+## §8 KB 義務（P-14 強制查詢順序）
+
+**觸發**: 討論外部工具（longphase / clairs-to / claude-code）F1/AUC、論文 claim、業界口徑（bcftools isec / hap.py） → **不可從本專案 report 推論外部行為**
+
+**強制 3 步**:
+1. 查 KB：`mcp__knowledge__knowledge_search` 或 `Read /big8_disk/Knowledge/05_tools/<tool>.md`
+2. 引用 paper §N 或 KB 段落（明示出處）
+3. 才下結論，對照本專案 report 口徑
+
+**反例 ❌**: 「我記得 longphase 不改 FILTER」（憑記憶）
+**正例 ✅**: 「先 Read `Knowledge/05_tools/longphase-to.md` 確認論文 §4.3 F1 口徑為 V_H/V_L post-filter」
+
+### KB 主題速查表
+
+| 主題 | 路徑 | 觸發關鍵字 |
+|------|------|-----------|
+| 資料總覽 | `/big8_disk/Knowledge/01_data_overview/` | 資料位置、目錄結構 |
+| 癌症樣本 | `02_samples/` | HCC1395, COLO829, H1437, H2009, HG002 |
+| 檔案格式 | `03_file_formats/` | VCF, BAM, MM/ML, phased VCF, HP tag |
+| 資料庫 | `04_databases/` | PON, gnomAD, dbSNP, SEQC2 |
+| 工具 | `05_tools/` | LongPhase, ClairS, ClairS-TO, DeepSomatic, InterSubMod |
+| 流程 | `06_workflows/` | somatic calling, phasing, methylation |
+| 腳本 | `07_scripts/` | auto_run.sh, benchmark |
+| 論文 | `08_references/` + `paper/` | paper, 論文 |
+
+---
+
+## §9 Project Structure
+
+- `src/` C++ core（`core/` / `io/` / `utils/`）+ `include/` headers
+- `tests/` GoogleTest unit tests；`src/test/` phase-specific drivers
+- `tools/` Python 分析/繪圖；`scripts/` shell workflows
+- `data/` 範例輸入；`output/` → symlink `/big7_disk/liaoyoyo2001/big7_disk_output/`
+- `docs/` 文件；`research/` 研究工作區（含 `figures/` `data/` `scripts/` `reports/`）
+- `build/` CMake out-of-tree 輸出
+
+---
+
+## §10 Build / Test / Dev 命令
+
+```bash
+# Build
+mkdir -p build && cd build && cmake .. && make -j$(nproc)
+# Binary: build/bin/inter_sub_mod
+
+# Run core
+./build/bin/inter_sub_mod --tumor-bam data/tumor.bam --reference data/ref.fa \
+    --vcf data/somatic.vcf --output-dir results
+
+# Full pipeline
+./scripts/run_vcf_all_snv.sh --mode all-with-w1000 --plot-type distance
+
+# Test
+ctest --test-dir build  # 或 ./build/bin/run_tests
+
+# Python plotting deps
+pip install -r requirements.txt
+```
+
+Coding: C++17 / `.hpp` headers / namespace `InterSubMod` / `.clang-format`（Google 4-space 120-col）/ CamelCase class + snake_case method/file
+
+---
+
+## §11 執行檔案 IO 顯示規則
+
+執行檔案、程式或命令時**必須**顯示：
+1. **輸入路徑**（含完整路徑前綴 `InterSubMod/...` 或全域路徑）
+2. **執行命令**（完整命令含參數）
+3. **輸出路徑**（產出檔案位置）
+4. **執行後**顯示**實際輸出片段**（供用戶確認結果與預期一致；如未跑過則先述「預期應產出」）
+
+目的：用戶可逐步檢核，避免錯誤輸入 / 不知道輸出位置 / 結果未驗證。
+
+---
+
+## §12 Output 目錄結構
+
+| 目錄 | 分類 | 說明 |
+|------|------|------|
+| `output/canonical/` | Canonical | 7 樣本 × 3 模式 ISM baseline（19 runs）|
+| `output/synthesis/research_rounds/` | Research rounds | 新研究 round 落點 |
+| `output/synthesis/observation_workspaces/` | Observation | 跨樣本診斷、觀察工作區 |
+| `output/big8_output_archive/` / `bip8_output_archive/` | Archive | 歷史，**非**新輸出落點 |
+
+**完整索引**: `InterSubMod/output/OUTPUT_INDEX.md`
+**信任度規範**: `InterSubMod/docs/data_specs/20260414_output資料信任度與生命週期_01.md`
+**Region 結構細節** → `.claude/rules/output-structure.md`（條件載入）
+
+---
+
+## §13 AI Agent 預設操作政策
+
+- **不可直接刪除檔案**（含 `rm`, `find -delete`, 覆寫式清空）— 需先搬移到 Archive 區
+- 不可直接寫到 `/big8_disk/.../InterSubMod_runs/output` 等舊路徑
+- 環境異常 / 結果不一致 → 跑 `check_ai_agent_readiness.sh`（非每次必跑）
+- 清理動作必須在可審核腳本中執行
+
+---
+
+## §14 任務切割與 Agent 啟動
+
+**原則**：可切割且需要大量 context 處理的任務 → 啟動 agent 處理
+
+**必要紀錄**（科學工程化）:
+1. 子任務啟動前：列清楚輸入 + 預期輸出 + 驗證標準
+2. 子任務完成後：**清楚回報主 agent**（不只是「完成了」，要列具體結果）
+3. **紀錄成文件**（`InterSubMod/research/{topic}/` 或 `docs/experiments/`）供檢核驗證查詢
+4. 文件必含：執行命令、輸入路徑、輸出路徑、驗證結果、邏輯鏈
+
+---
+
+## §15 回應分級機制
+
+依任務內容選擇對應回應方式：
+- **預設**: Markdown 對話
+- **大量解釋 / 複雜架構**: 整理成 HTML 報告（`/html-report-build`）讓用戶離線細看
+- **需要用戶理解學習**: 啟用一步步對話 skill（如 `/fast-learning-coach`）
+- **需要用戶判斷與推進**: 預設使用 **AskUserQuestionTool**
+
+---
+
+## §16 文檔規範（精要 + 跳轉）
+
+**識別性規則**（內聯）:
+- 檔案命名：`{YYYYMMDD}_{中文說明}_{NN}.md`
+- 圖片命名：`{NN}_{英文描述}.png`
+- 每 .md 開頭必含 HTML 註解元數據（建立時間 / 目標 / 處理範圍 / 關聯檔案）
+- **圖片必用 `![標題](相對路徑)`**，禁止只列路徑（除非明示列路徑）
+- 圖片相對路徑最深 2 層（例外：`output/`、`research/` 因深度差異可超過）
+
+**🔴 Hard Gate — 封存原則（不可逆操作保護）**:
+- **不刪除任何檔案** — 一律搬移到 `InterSubMod/docs/archive/YYYY/MM/`
+- 封存時建立 `SUMMARY.md` 提取重點結論
+- 原位置留 redirect notice（`ARCHIVED.md`）
+- 大型檔案（>500 行）封存前提取精簡版
+
+**資訊分層**（4 層）:
+- Active（當月+進行中，原目錄）/ Recent（1-3 月，原目錄精簡）/ Archive（>3 月，docs/archive/）/ Deep Archive（歷史快照，immutable）
+
+**執行性細節**: 完整命名例外、多步驟專案目錄、Git tracking 表 → `/doc-standards` skill
+
+---
+
+## §17 主要查詢路徑（4 層導航）
+
+| 層級 | 檔案 | 何時查 |
+|------|------|------|
+| L1 入口 | `InterSubMod/docs/README.md` | 首次接觸 |
+| L2 焦點 | `InterSubMod/docs/CURRENT_FOCUS.md` | 每次對話開始 |
+| L3 歷史 | `InterSubMod/docs/experiments/INDEX.md` | 計劃新實驗 |
+| L4 深度 | `InterSubMod/docs/reports/research_landscape/00_INDEX.md` | 完整理解 |
+
+**Agent 查詢義務**:
+- 開始研究前必讀 L2 + L3
+- HP tag / LOH 相關 → L4 02 (Self-Phasing) + 04 (暫停判定)
+- TO FP 過濾相關 → L4 01 (FP 全貌) + 03 (ISM 價值)
+- 樣本/格式/工具 → KB（§8）
