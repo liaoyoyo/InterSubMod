@@ -198,3 +198,15 @@ Load only what is needed:
 - **Anchor #1 「L4 多層驗證必建」** → test fail 不允許 skip；必須查根因
 - **Anchor #5 「One-turn mechanism freeze」** → 一次完整 verify，不在迴圈中逐步 fix（先收集所有 issue 再批次解）
 - **/cpp-change Step 6 PDD 規範** → 本 skill 是 PDD 最後一步，必過才能 commit C++ 修改
+
+---
+
+## 與 /scientific-rigor 元方法論的關係
+
+本 skill 為 `/scientific-rigor §7.2 可重現性 checklist` 的**程式碼層級具體驗證**:
+- Phase 1-6 對應 `/scientific-rigor §7.2 可重現性 7 項 checklist` 中與程式碼相關的子集（build / type / lint / test / security / diff）
+- **場景分流明示**: 研究實驗 reproducibility（seed / data version / commit hash）→ `/check-staleness`；程式碼 build/test 驗證 → 本 skill
+- `/scientific-rigor §11 協作圖 step 8` 直接呼叫本 skill 作為「程式碼級驗證」節點
+- `/scientific-rigor §8.3 Reflexion buffer` 的「下次避免方法」常含本 skill 的失敗診斷症狀
+
+**級聯觸發**: `/scientific-rigor §6 消融` 完成後 → `/cpp-change` PDD step 5-6 → 本 skill 6 phase → 通過才進 git commit Hard Gate

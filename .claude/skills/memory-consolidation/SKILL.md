@@ -117,3 +117,19 @@ wc -l $MEM/MEMORY.md
 2. **合併檔案必須列出 merged_from** — 保留 provenance
 3. **MEMORY.md 是索引** — 每條 <150 字元，總長 <200 行
 4. **AI 提合併建議，用戶決定** — 不可自主執行 step 3
+
+---
+
+## 與 /scientific-rigor 元方法論的關係
+
+本 skill 支援 `/scientific-rigor §10.1 Spaced Repetition` 的**結論週期回想機制**:
+- Concluded / NEGATIVE 條目的 last_relevant / status 標記 = `/scientific-rigor §10.1` 「7d / 30d / 90d 後 spaced check」的觸發依據
+- 合併 + 降級邏輯（active → archived）對應 `/scientific-rigor §8.4 知識追溯 audit` 的「來自哪份數據 / 哪個 cycle」溯源（provenance 由本 skill 的 `merged_from` 提供）
+- MEMORY.md 索引維持 <200 行對應 `/scientific-rigor §0.5 最小可用子集` 的 Cognitive Load 限制原則
+
+**Step 2c — 理解追溯檢核**（建議在 Step 2 識別可合併項時新增）: 掃描 `project_*.md` / `feedback_*.md`，檢查：
+- ☐ 包含「為什麼這結論可信」的證據鏈來源？
+- ☐ 是否記錄「人類閱讀 AI 分析後修正過的假設」？
+- ☐ concluded 檔是否清楚說明「下次如何應用此發現」（呼應 `/scientific-rigor §8.3 Reflexion buffer`）？
+
+**級聯觸發**: `/scientific-rigor §10.2 程式修改前 retrieval practice` → Read MEMORY.md → 本 skill 維持索引健康度

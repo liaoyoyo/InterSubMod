@@ -167,3 +167,14 @@ user-invocable: true
 **正例**：「先 Read `Knowledge/05_tools/longphase-to.md` 確認論文 §4.3 F1 口徑為 V_H/V_L post-filter；本專案 §8.6.2 是 caller-level F1。兩者不衝突，是不同 metric。」
 
 **來源**：2026-05-13 slide 14 F1 雙口徑事件。Memory: `feedback_outside_claim_must_query_kb.md`
+
+---
+
+## 與 /scientific-rigor 元方法論的關係
+
+本 skill 為 `/scientific-rigor` 元方法論層的**反例 / 陷阱知識庫**:
+- `/scientific-rigor §4 DAG 因果審計` 引用 **P-01 (L2 Collider Bias)** + **P-02 (Pooled OLS Trap)** 作為「殘差 over collider → 自動降級 characterization only」的反例依據
+- `/scientific-rigor §3 Effect Size + §7 文獻追溯` 引用 **P-14 (外部工具 claim 必查 KB)** 作為 effect size 宣告必跑 KB 對照的 trigger
+- `/scientific-rigor §8.3 Reflexion buffer` 的 reopen threshold 設計呼應本 skill 的「陷阱可重啟條件」邏輯
+
+**級聯觸發**: 任務啟動 → 本 skill 查歷史陷阱 → `/scientific-rigor §0.5 最小可用子集`決定下游 → 視場景進入 `§4 DAG` 或 `§9.2 Postmortem`

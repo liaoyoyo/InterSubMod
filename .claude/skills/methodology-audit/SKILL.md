@@ -123,3 +123,14 @@ python3 scripts/analysis/collect_baseline_metrics.py
 - `methodology-reviewer` subagent：深度分析 C++ 實作細節
 - `cpp-change` skill：取得決策後的 6 步驟實作協議
 - `scripts/analysis/classify_boundary_analysis.py`：VerificationClass 邊界分析
+
+---
+
+## 與 /scientific-rigor 元方法論的關係
+
+本 skill 為 `/scientific-rigor §6 消融實驗設計` 的**具體實作**:
+- Step 1 IDENTIFY / Step 2 QUANTIFY / Step 3 OPTIONS 對應 `/scientific-rigor §6 消融原則 4 步紀錄`（改了什麼 / 預期 / 實際 / 差異解讀）
+- Step 3 OPTIONS 表（3+ 方案 + 成本估算）為 `/scientific-rigor §6 最小單元改動` 的實質執行格式
+- Step 5 DECISION 必經 `/scientific-rigor §1 Hard Gate` 與 §11.6 雙環學習（質疑根本假設）對齊
+
+**級聯觸發**: `/scientific-rigor §0.5 最小可用子集` 對「中影響」任務必跑 §6 → 觸發本 skill → Step 5 DECISION 後進 `/cpp-change` 6 步 PDD

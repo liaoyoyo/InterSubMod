@@ -264,3 +264,18 @@ Q3（鑑別題）：<X> 和 <Y> 容易搞混，差別在哪？
 - 「每步驟收斂問題」對應 plan mode 的 mid-execution check
 
 之所以採寬鬆觸發，是因為**用戶往往不知道自己在學習** — 隨口問「X 是什麼」其實已經啟動學習意圖。明確 announce 給用戶選擇權，避免 over-engineer 簡單的事實查詢。
+
+---
+
+## 與 /scientific-rigor §10 啟發式學習工作流映射的關係
+
+兩個 skill **互補不重複**:
+- **本 skill** = **學新主題**（5 步：費曼 / 帕雷托 / 主動回想 / 應用例子 / 間隔重複）
+- **`/scientific-rigor §10`** = **套用既學原則到所有工作流**（程式修改、研究推進、文件改動、重大決策）
+
+**Step 4.5 應用驗證入口**（建議路由）: Step 4「具體化應用」結束後，若應用情境涉及：
+- 研究假說 / 統計分析 / 結論宣稱 → 路由至 `/validation-protocol` L1-L4
+- AUC / 相關性 claim → 路由至 `/auc-confound-guard` 3-gate + `/scientific-rigor §4 DAG`
+- 歷史教訓相關 → 路由至 `/known-pitfalls` P-XX
+
+**級聯**: 本 skill 學會概念 → `/scientific-rigor §10` 將原則套到工作流 → 對應領域 skill 執行

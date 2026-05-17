@@ -257,3 +257,14 @@ L4 通過? ──No──→ CONDITIONAL（科學發現，非工具）
 
 模板路徑：`.claude/skills/research-loop/references/HYPOTHESIS_TRACKER_TEMPLATE.md`
 NO-GO 報告模板：`.claude/skills/research-loop/references/NOGO_REPORT_TEMPLATE.md`
+
+---
+
+## 與 /scientific-rigor 元方法論的關係
+
+本 skill 為 `/scientific-rigor §5 對照組 + 多方驗證` 的**完整實作**（元 skill 不重複，全部引用本 skill）:
+- L1 AUC Screening → L2 Confound Check → L3 Cross-sample → L4 Beyond-AUC + 4-track coverage 表 對應 `/scientific-rigor §5 對照組 + 多方驗證`
+- L2 Confound Check 內部步驟 = `/auc-confound-guard` 3-gate（within-group OLS + AF-bin + permutation），由 `/scientific-rigor §5 何時觸發哪個` 明示
+- L4 ⭐4/⭐5 升級需 4-track coverage = `/scientific-rigor §2 證據分級` 的 L1 完全佐證強制條件
+
+**級聯觸發**: `/scientific-rigor §11 協作圖 step 6-7` 直接呼叫本 skill；NO-GO 時跳 `§9.2 Blameless Postmortem` + `§8.3 Reflexion`
