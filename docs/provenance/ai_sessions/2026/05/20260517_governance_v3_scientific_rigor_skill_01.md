@@ -41,8 +41,12 @@ type: meta_governance_refactor
 | `c1dde00` | docs(skills): 6 既有 skill 加 /scientific-rigor cross-reference | 76 ins / 6 files |
 | `a031d21` | feat(templates): postmortem + research_index | 247 ins / 2 files |
 | `dce837f` | fix(skills): 驗證後補強 + 2 skill cross-ref 補齊 | 55 ins / 1 del / 3 files |
+| `8af496b` | docs(ai_session): governance v3 + scientific-rigor skill session report | 269 ins / 1 file |
+| `f3611a7` | docs(harness-review): Q5 erratum — biorxiv/ensembl MCP 不是僵屍 | 827 ins / 1 file（含 HTML 報告 commit）|
+| `3e45709` | docs(skills): 加 README.md 視覺化分層索引（M2 方案 2）| 221 ins / 1 file |
+| `<本輪>` | docs(agents-archive): Q9 archive README.md + session report 更新 | TBD |
 
-**共 +1465 行 / -513 行 / 16 個檔案**
+**共 ~3060+ ins / -513 del / 20 files**（含本輪 D 新增）
 
 ---
 
@@ -259,11 +263,34 @@ type: meta_governance_refactor
 - **Governance**: `InterSubMod/.claude/CLAUDE.md` (161 行) + `InterSubMod/AGENTS.md` (286 行)
 - **Backup**: `InterSubMod/docs/drafts/backup/{CLAUDE,AGENTS}_md_prod_20260517_pre_v3deploy.md`
 - **Drafts (中間設計版本)**: `InterSubMod/docs/drafts/20260516_*` + `20260517_*`
-- **舊 HTML 整體審查**: `InterSubMod/docs/reports/validated/2026/05/20260515_claude_code_AI_harness_full_architecture_01.standalone.html`
+- **舊 HTML 整體審查** (含 Q5 erratum)**: `InterSubMod/docs/reports/validated/2026/05/20260515_claude_code_AI_harness_full_architecture_01.standalone.html`
+- **Skills 視覺化索引**: `InterSubMod/.claude/skills/README.md`（commit `3e45709`，221 行 8 章）
+- **Archive 標示**: `InterSubMod/.claude/agents/archive/README.md`（本輪建立）
 
 ---
 
-> **Session 完成時間**: 2026-05-17（橫跨 2 天）
+## §11 後續 commits（2026-05-18 加入）
+
+| Commit | 內容 |
+|--------|------|
+| `8af496b` | session report 第一版（截至 commit dce837f）|
+| `f3611a7` | **Q5 erratum** — biorxiv/ensembl MCP 實測非僵屍；HTML 報告加 erratum banner；feedback memory `feedback_researcher_claim_needs_empirical_verification.md` |
+| `3e45709` | **M2 方案 2** — `.claude/skills/README.md` 視覺化分層索引（8 章 / 43 skill）|
+| `<本輪 D>` | **Q9** — `.claude/agents/archive/README.md` 標明 deprecation + AGENTS.md §13 對應 |
+
+### Q5 erratum 教訓（新增 memory）
+
+`memory/feedback_researcher_claim_needs_empirical_verification.md` — **researcher 推測屬 ⭐⭐⭐ L3 證據級，移除 / 修改前必須實測升 L1**。biorxiv + ensembl 都是真實可運作的本地 Python MCP servers（從 bioRxiv / Ensembl REST API 5 秒成功取資料），researcher 誤把「allow list 未授權」當「僵屍」。
+
+### M2 視覺化（不重組目錄）
+
+`.claude/skills/README.md` 8 章：場景對應 / 6 大類分層 / 依賴 hub 圖 / 觸發頻率 / templates / 版本演進 / plugin 關係 / 設計原則。
+
+方案 1（子目錄重組）已放棄 — Anthropic Skills 標準 + Voyager / OpenHands / AutoGen 業界共識都是 flat structure，巢狀可能違反規範。
+
+---
+
+> **Session 完成時間**: 2026-05-17 → 2026-05-18（橫跨 3 天）
 > **Branch**: `refactor/phase1-safety`
 > **HEAD**: `dce837f`
 > **未 push**: 等用戶決定（依規則不主動 push）
