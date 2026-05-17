@@ -82,6 +82,15 @@ user-invocable: true
 
 **禁止**: 用「鎖定」「定論」「已證實」假裝 L1 等級而無多 dataset + 反例排除。
 
+### §2.1 結論敘述 Checklist（必跑）
+
+每個結論宣告前自查:
+- [ ] **Effect size 有無量化**（依 §3 ribbon — 不只「+0.0112」，要附「marginal / < Cohen's small 0.2」等級）
+- [ ] **樣本數明確**（n=N，N≥3 才能跨樣本，N=1 必標 single-sample exploratory）
+- [ ] **CI 區間齊全**（95% CI [lower, upper]；若 N 太小無法算 CI 必明示）
+- [ ] **證據級對應條件**（L1 需多 dataset + 機制 + 反例 + 重現；L2-L5 對照 §2 表）
+- [ ] **未排除 confound 不可宣告因果**（依 §4 DAG 審計）
+
 ---
 
 ## §3 Effect Size 量化標準 ⭐ 新
@@ -188,7 +197,7 @@ graph LR
 
 ### §7.1 Pre-registration（從 Replication Crisis 教訓）
 
-**研究方向開跑前**必在 `research/<topic>/00_INDEX.md` 強制三欄:
+**研究方向開跑前**必在 `InterSubMod/research/<topic>/00_INDEX.md` 強制三欄（直接複製 `InterSubMod/templates/research_index.md` §1 範本）:
 
 ```markdown
 ## Pre-registration (Confirmatory)
@@ -201,6 +210,8 @@ graph LR
 - 達 NO-GO 條件 → verdict **不可事後改寫**（呼應 CLAUDE.md §1 Hard Gate）
 - 區分 **confirmatory**（事先註冊，強制）vs **exploratory**（事後分析，標 "exploratory" tag）
 - 註冊後 commit hash 為錨點
+
+**Template 完整範本**: `InterSubMod/templates/research_index.md`（含 §1 Pre-reg + §2 G1-G5 對應 + §3 reproducibility checklist + §6 子目錄結構）
 
 ### §7.2 可重現性 7 項 checklist
 
@@ -351,6 +362,26 @@ graph LR
 | **Interleaving** | Rohrer 2015 | 跨樣本 / 跨研究方向穿插驗證，避免 sample-specific overfit |
 | **Deliberate Practice** | Ericsson 1993 | 每個 NEGATIVE 走 §9 postmortem + 設計改進實驗 |
 | **Retrieval Practice** | Roediger 2006 | 開始任務前先回憶相關歷史結論（`Read MEMORY.md`）|
+
+### §10.1.1 Spaced Recall 儲存機制
+
+**Spaced recall dates 必標於**:
+- `InterSubMod/research/<topic>/00_INDEX.md` §7 進度表「Next spaced check」欄
+- 或 `memory/project_<slug>.md` frontmatter 加 `next_recall: YYYY-MM-DD`
+
+**範例**（一個 NEGATIVE 結論）:
+```yaml
+---
+status: concluded
+verdict: NEGATIVE
+concluded_date: 2026-04-22
+next_recall: 2026-05-22  # 30d 後
+next_recall_2: 2026-07-22  # 90d 後
+reopen_conditions: [見 docs/postmortems/<...>.md §Reopen Threshold]
+---
+```
+
+**觸發機制**: 由 `/memory-consolidation` skill 月度掃描 `next_recall` 過期項，提示重訪。
 
 ### §10.2 工作流套用範例
 

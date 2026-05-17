@@ -102,3 +102,14 @@ next steps:
 - 不對 LlamaIndex 索引查 precedent — 由 `/run-evaluator` (P5) 負責
 - 不主動建議「下一個 fresh 的 dataset」— 只報告 stale，由用戶決定
 - 不重新跑 benchmark — 只比對已存在的 artifacts metadata
+
+---
+
+## 與 /scientific-rigor 元方法論的關係
+
+本 skill 為 `/scientific-rigor §7.2 可重現性 checklist` 的**研究實驗層級具體驗證**:
+- binary / dataset / upstream 新鮮度檢核 對應 `/scientific-rigor §7.2` 7 項中的「環境記錄 + 數據版本 + 中間產出存檔」
+- **場景分流明示**: 研究實驗 reproducibility（seed / data version / commit hash）→ 本 skill；程式碼 build/test 驗證 → `/verification-loop`
+- `/scientific-rigor §11 協作圖 step 4 → 5` 之間若 cycle plan.json 已存在，必經本 skill PRECHECK
+
+**級聯觸發**: `/cycle-init` P0 → `/research-loop` P1 → 本 skill P2 → `/feature-layered-observation` P3

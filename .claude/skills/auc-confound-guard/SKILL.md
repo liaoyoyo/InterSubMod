@@ -148,3 +148,15 @@ p_value = np.mean(np.array(null_aucs) >= observed_auc)
 - `/known-pitfalls` P-01, P-02, P-06（collider bias、pooled OLS、n_reads confound）
 - `docs/standards/evidence_tier_rubric.md`（tier 分級規範）
 - MEMORY: `feedback_L2_collider_bias.md`、`feedback_pooled_ols_residualization_trap.md`
+
+---
+
+## 與 /scientific-rigor 元方法論的關係
+
+本 skill 為 `/scientific-rigor §4 DAG 因果審計` + `§5 對照組 + 多方驗證` 的**統計層級具體實作**:
+- Gate 1 within-group OLS 對應 `/scientific-rigor §4` 「殘差 over confounder vs collider」的工程化驗證
+- Gate 2 AF-bin stratification 對應 `/scientific-rigor §5` L2 Confound Check 內部步驟
+- Gate 3 permutation test 對應 `/scientific-rigor §3 Effect Size` + §5 統計顯著性驗證
+- 3-gate 整體被 `/scientific-rigor §5` 完全引用為「**何時觸發哪個** — L2 內部步驟 = auc-confound-guard 3-gate」
+
+**級聯觸發**: `/scientific-rigor §11 協作圖 step 6` 直接呼叫本 skill；通過後進 `/validation-protocol` L1-L4 證據分級
