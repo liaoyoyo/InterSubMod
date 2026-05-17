@@ -276,7 +276,9 @@ type: meta_governance_refactor
 | `8af496b` | session report 第一版（截至 commit dce837f）|
 | `f3611a7` | **Q5 erratum** — biorxiv/ensembl MCP 實測非僵屍；HTML 報告加 erratum banner；feedback memory `feedback_researcher_claim_needs_empirical_verification.md` |
 | `3e45709` | **M2 方案 2** — `.claude/skills/README.md` 視覺化分層索引（8 章 / 43 skill）|
-| `<本輪 D>` | **Q9** — `.claude/agents/archive/README.md` 標明 deprecation + AGENTS.md §13 對應 |
+| `361abc0` | **Q9** — `.claude/agents/archive/README.md` 標明 deprecation + session report 更新 |
+| `d11b270` | **P0 KB freshness 解**: 5 snapshot 加 2026-05-18 update notice + refresh + Cline activeContext 對照（CLAUDE.md §6 + AGENTS.md §7）|
+| `<本輪 收尾>` | verification_guide 補完 placeholder + 本表更新 |
 
 ### Q5 erratum 教訓（新增 memory）
 
