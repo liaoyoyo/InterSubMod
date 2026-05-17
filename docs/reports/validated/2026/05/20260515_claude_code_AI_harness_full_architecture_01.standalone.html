@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code AI Harness — InterSubMod 全架構現況審查（2026-05-15）</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --fg-soft: #4a4a4a;
+    --accent: #0b5394;
+    --accent-soft: #cfe2f3;
+    --warn: #b45f06;
+    --warn-soft: #fff2cc;
+    --danger: #cc0000;
+    --danger-soft: #f4cccc;
+    --ok: #38761d;
+    --ok-soft: #d9ead3;
+    --grid: #e0e0e0;
+    --code-bg: #f4f4f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a;
+      --fg: #e8e8e8;
+      --fg-soft: #b8b8b8;
+      --accent: #6fa8dc;
+      --accent-soft: #1c3d5a;
+      --warn: #f6b26b;
+      --warn-soft: #4a3a1a;
+      --danger: #e06666;
+      --danger-soft: #4a1a1a;
+      --ok: #93c47d;
+      --ok-soft: #1f3a1a;
+      --grid: #3a3a3a;
+      --code-bg: #2a2a2a;
+    }
+  }
+  html { font-size: 16px; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    line-height: 1.65;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+  h1, h2, h3, h4 { color: var(--fg); line-height: 1.3; margin-top: 2em; }
+  h1 { font-size: 1.9rem; border-bottom: 3px solid var(--accent); padding-bottom: 0.4em; }
+  h2 { font-size: 1.5rem; border-bottom: 1px solid var(--grid); padding-bottom: 0.3em; margin-top: 2.5em; }
+  h3 { font-size: 1.2rem; color: var(--accent); }
+  h4 { font-size: 1.05rem; color: var(--fg-soft); }
+  .meta {
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    padding: 12px 16px;
+    margin: 16px 0 32px;
+    font-size: 0.95rem;
+  }
+  .meta dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0; }
+  .meta dt { font-weight: 600; color: var(--accent); }
+  .meta dd { margin: 0; }
+
+  .tldr {
+    background: var(--ok-soft);
+    border: 1px solid var(--ok);
+    padding: 16px 20px;
+    border-radius: 6px;
+    margin: 24px 0;
+  }
+  .tldr h3 { margin-top: 0; color: var(--ok); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 20px;
+    font-size: 0.93rem;
+  }
+  th, td {
+    border: 1px solid var(--grid);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  tr:nth-child(even) td { background: rgba(0,0,0,0.02); }
+  @media (prefers-color-scheme: dark) {
+    tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+  }
+
+  code, pre { font-family: "SF Mono", Monaco, "Cascadia Mono", Consolas, monospace; }
+  code { background: var(--code-bg); padding: 1px 6px; border-radius: 3px; font-size: 0.9em; }
+  pre { background: var(--code-bg); padding: 12px 16px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+
+  .badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin: 0 2px;
+    white-space: nowrap;
+  }
+  .badge-ok    { background: var(--ok-soft);    color: var(--ok); }
+  .badge-warn  { background: var(--warn-soft);  color: var(--warn); }
+  .badge-danger{ background: var(--danger-soft);color: var(--danger); }
+  .badge-info  { background: var(--accent-soft);color: var(--accent); }
+
+  .callout {
+    border-left: 4px solid;
+    padding: 12px 16px;
+    margin: 12px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout-warn  { background: var(--warn-soft);  border-color: var(--warn);  color: var(--fg); }
+  .callout-danger{ background: var(--danger-soft);border-color: var(--danger);color: var(--fg); }
+  .callout-info  { background: var(--accent-soft);border-color: var(--accent);color: var(--fg); }
+  .callout-ok    { background: var(--ok-soft);    border-color: var(--ok);    color: var(--fg); }
+  .callout strong { color: inherit; }
+
+  details {
+    border: 1px solid var(--grid);
+    border-radius: 6px;
+    padding: 8px 16px;
+    margin: 12px 0;
+    background: rgba(0,0,0,0.01);
+  }
+  details summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--accent);
+    padding: 4px 0;
+  }
+  details[open] summary { border-bottom: 1px solid var(--grid); margin-bottom: 12px; padding-bottom: 8px; }
+
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .arch-card {
+    border: 1px solid var(--grid);
+    border-radius: 6px;
+    padding: 12px 14px;
+    background: rgba(0,0,0,0.015);
+  }
+  .arch-card h4 { margin: 0 0 6px; color: var(--accent); font-size: 1rem; }
+  .arch-card .count { font-size: 1.5rem; font-weight: 700; color: var(--fg); }
+  .arch-card .desc { font-size: 0.85rem; color: var(--fg-soft); margin-top: 4px; }
+
+  .checklist {
+    list-style: none;
+    padding-left: 0;
+  }
+  .checklist li {
+    padding: 8px 12px;
+    margin: 4px 0;
+    border-left: 3px solid var(--grid);
+    background: rgba(0,0,0,0.015);
+  }
+  .checklist li.q { border-left-color: var(--warn); }
+  .checklist li.d { border-left-color: var(--danger); }
+  .checklist li.ok { border-left-color: var(--ok); }
+
+  .toc {
+    background: rgba(0,0,0,0.02);
+    border: 1px solid var(--grid);
+    border-radius: 6px;
+    padding: 16px 24px;
+    margin: 24px 0;
+  }
+  .toc ol { columns: 2; column-gap: 24px; margin: 0; padding-left: 1.4em; }
+  .toc li { padding: 2px 0; break-inside: avoid; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  .layer-diagram {
+    font-family: "SF Mono", Monaco, monospace;
+    background: var(--code-bg);
+    padding: 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .footer-note {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--grid);
+    color: var(--fg-soft);
+    font-size: 0.85rem;
+  }
+
+  hr { border: none; border-top: 1px solid var(--grid); margin: 32px 0; }
+</style>
+</head>
+<body>
+
+<div class="callout callout-danger" style="margin: 16px 0 32px;">
+  <strong>📝 Erratum (2026-05-17)</strong>: §5 + §10 Q5 評估「biorxiv/ensembl MCP 疑似僵屍」<strong>錯誤</strong>。實測證明（5 秒內成功從外部 API 取得資料 — biorxiv 抓 5 篇 2026-03 cancer biology preprints；ensembl 抓 BRCA1 + 47 transcripts），兩個 server 都是真實可運作的本地 Python script（<code>InterSubMod/scripts/mcp/{biorxiv,ensembl}_server.py</code>）。
+  <br><br>
+  <strong>根本原因</strong>: researcher agent 誤把「allow list 未授權」當「僵屍」— 實際啟用機制是 <code>.mcp.json</code> + <code>enabledMcpjsonServers</code>，與 allow list 無關。
+  <br><br>
+  <strong>教訓（呼應 /scientific-rigor §2 證據分級）</strong>: 業界對照 researcher 的推測屬 ⭐⭐⭐ L3 證據級（推論），需 L1 實測才能定論。詳見 <code>memory/feedback_researcher_claim_needs_empirical_verification.md</code>。
+  <br><br>
+  <strong>對本報告其他質疑項的影響</strong>: 其餘 11 個 Q（Q1-Q4, Q6-Q12）多為實際盤點而非推測，仍有效。但讀者應對任何「疑似」級別評估保持懷疑。
+</div>
+
+<h1>Claude Code AI Harness — InterSubMod 全架構現況審查</h1>
+
+<div class="meta">
+  <dl>
+    <dt>作者</dt><dd>系統架構說明工程師（5 個 Explore agents 並行盤點 + 主對話整合）</dd>
+    <dt>日期</dt><dd>2026-05-15</dd>
+    <dt>受眾</dt><dd>具科技與程式背景的決策者 — 用於確認架構合理性與識別待改進處</dd>
+    <dt>盤點範圍</dt><dd>專案 <code>.claude/</code> + 用戶層 <code>~/.claude/</code> + plugins + MCP + memory + hooks + rules</dd>
+    <dt>對照舊版</dt><dd><code>20260508_Harness_Complete_Architecture_Review_01.md</code>（plan-centric，本報告為 inventory-centric）</dd>
+    <dt>方法</dt><dd>5 路並行盤點（skills / agents+commands / hooks+settings / plugins+MCP+memory / 觸發關鍵字+gate）→ 主對話交叉驗證</dd>
+  </dl>
+</div>
+
+<div class="tldr">
+  <h3>TL;DR — 一張紙看完整套 AI Harness</h3>
+  <p>InterSubMod 在 Claude Code 上建構了 <strong>5 層深度</strong>的 AI harness：(1) 用戶層全域設定 + (2) 17 個第三方 plugins + (3) 8 個 MCP servers（其中 1 個自製癌症 KB）+ (4) 專案層 22 個 hooks + 41 個 skills + 14 個 agents + 8 個 slash commands + 4 條自動載入 rules + (5) 87 個 memory 檔案。整套設計圍繞「<strong>4 層確認協議</strong>（Hard Gate / Gate / Review / FYI）+ <strong>7-Phase Resilient Waterfall</strong>（P0 REGISTER → P6 CONCLUDE）+ <strong>長讀長測序研究域陷阱清單</strong>」。</p>
+  <p><strong>整體評等</strong>：⭐⭐⭐⭐（4/5）— 設計成熟、有真實規模、自動化到位；但累積負債集中於三處：(A) 報告生成線重複（5 個 skill 競爭同一輸入）、(B) 22 個 hooks 已逾管理閾值且 PostToolUse 路由分散、(C) 17 個 plugins 中 3 個重複功能、MCP 中 biorxiv/ensembl 可能僵屍。本報告第 §9 章列出 12 個需用戶決策的條目。</p>
+</div>
+
+<div class="toc">
+  <strong>章節索引</strong>
+  <ol>
+    <li><a href="#s1">系統 5 層架構鳥瞰</a></li>
+    <li><a href="#s2">L1 設定與 Permission 系統</a></li>
+    <li><a href="#s3">L2 Hooks 系統（22 個）</a></li>
+    <li><a href="#s4">L2 條件式自動載入 Rules</a></li>
+    <li><a href="#s5">L3 Plugins（17 個）與 MCP Servers（8 個）</a></li>
+    <li><a href="#s6">L4 Skills 清單（41 個專案 + 1 用戶）</a></li>
+    <li><a href="#s7">L4 Agents（14 個）+ Slash Commands（8 個）</a></li>
+    <li><a href="#s8">L5 Memory 系統（87 個檔案）</a></li>
+    <li><a href="#s9">觸發關鍵字與檢核機制</a></li>
+    <li><a href="#s10">合理性質疑與待決策清單</a></li>
+    <li><a href="#s11">建議行動順序</a></li>
+    <li><a href="#s12">附錄：完整清單</a></li>
+  </ol>
+</div>
+
+<hr>
+
+<h2 id="s1">§1 系統 5 層架構鳥瞰</h2>
+
+<p>整套 AI harness 由外（用戶層）至內（記憶層）共 5 層。每層皆有獨立配置入口與所有權邊界。</p>
+
+<div class="layer-diagram">┌───────────────────────────────────────────────────────────────────────┐
+│ L1 用戶全域層  /bip7_disk/liaoyoyo2001/.claude/                       │
+│   • settings.json (144 條 allow / 7 deny / 模式: auto, effort: xhigh) │
+│   • 1 個全域 skill: fast-learning-coach                               │
+│   • 0 個全域 agent                                                    │
+├───────────────────────────────────────────────────────────────────────┤
+│ L2 工具與 MCP 層                                                      │
+│   • 17 個 Plugins（superpowers / pr-review-toolkit / context7 等）    │
+│   • 8 個 MCP servers（knowledge / context7 / Gmail / Calendar /       │
+│                       Drive / Notion / biorxiv? / ensembl?）          │
+│   • Marketplaces: claude-plugins-official                             │
+├───────────────────────────────────────────────────────────────────────┤
+│ L3 專案配置層  InterSubMod/.claude/                                   │
+│   • CLAUDE.md（15 KB，always-loaded 主指南）                          │
+│   • settings.local.json（403 行，22 hooks，152 allow rules）          │
+│   • 4 條 rules/ 條件式自動載入                                        │
+├───────────────────────────────────────────────────────────────────────┤
+│ L4 自製能力層                                                         │
+│   • 41 個 Skills（研究流程 / 程式開發 / 報告生成 / 元方法論）         │
+│   • 14 個 Agents（researcher / developer / parallel-* / reviewer 等） │
+│   • 8 個 Slash Commands（build / test-* / git-* / validate）          │
+├───────────────────────────────────────────────────────────────────────┤
+│ L5 持久化記憶層  ~/.claude/projects/.../memory/                       │
+│   • 87 個 .md（49 project + 34 feedback + 3 reference + 1 index）     │
+│   • MEMORY.md 為唯一 always-loaded 索引                               │
+└───────────────────────────────────────────────────────────────────────┘</div>
+
+<div class="arch-grid">
+  <div class="arch-card"><h4>Hooks</h4><div class="count">22</div><div class="desc">UserPrompt 4 · PreTool 6 · PostTool 10 · SubagentStop 1 · Stop 1</div></div>
+  <div class="arch-card"><h4>Skills</h4><div class="count">41</div><div class="desc">+1 全域；6 大類：研究/程式/文件/報告/元方法論/元框架</div></div>
+  <div class="arch-card"><h4>Agents</h4><div class="count">14</div><div class="desc">+1 archived；含 2 個 parallel-* fan-out 專用</div></div>
+  <div class="arch-card"><h4>Commands</h4><div class="count">8</div><div class="desc">build / test ×3 / git ×3 / validate</div></div>
+  <div class="arch-card"><h4>Plugins</h4><div class="count">17</div><div class="desc">全來自 claude-plugins-official，3 個 disabled</div></div>
+  <div class="arch-card"><h4>MCP servers</h4><div class="count">8</div><div class="desc">含 1 個自製 knowledge KB（5 工具）</div></div>
+  <div class="arch-card"><h4>Memory</h4><div class="count">87</div><div class="desc">49 project + 34 feedback + 3 reference</div></div>
+  <div class="arch-card"><h4>Allow rules</h4><div class="count">152</div><div class="desc">專案層 settings.local.json 內</div></div>
+</div>
+
+<hr>
+
+<h2 id="s2">§2 L1 設定與 Permission 系統</h2>
+
+<h3>2.1 三層設定優先級</h3>
+<table>
+  <thead>
+    <tr><th>層級</th><th>檔案</th><th>核心設定</th><th>覆蓋誰</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>用戶全域</td>
+      <td><code>/bip7_disk/liaoyoyo2001/.claude/settings.json</code></td>
+      <td>defaultMode: <code>auto</code>；effort: <code>xhigh</code>；144 條 allow；自動接受危險權限</td>
+      <td>所有 session 預設</td>
+    </tr>
+    <tr>
+      <td>專案層</td>
+      <td><code>InterSubMod/.claude/settings.local.json</code></td>
+      <td>defaultMode: <code>acceptEdits</code>；152 條 allow；22 個 hooks；Docker sandbox 啟用</td>
+      <td>覆蓋全域</td>
+    </tr>
+    <tr>
+      <td>專案 always-loaded</td>
+      <td><code>InterSubMod/.claude/CLAUDE.md</code></td>
+      <td>Opus 4.7 行為規範、暫停判斷矩陣、KB 查閱義務、確認時機協議</td>
+      <td>所有 prompt</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout callout-warn">
+  <strong>不一致風險（Q1）</strong>：全域 <code>defaultMode: auto</code> 與專案 <code>acceptEdits</code> 衝突 — 用戶可能不清楚何時編輯會自動接受、何時需要確認。
+  <br>建議：明確規範「auto = 批次/長任務（headless-research）」「acceptEdits = 互動研究」「ask = 純探索」。
+</div>
+
+<h3>2.2 Permission Allow/Deny/Ask 三類規則</h3>
+<table>
+  <thead>
+    <tr><th>類型</th><th>數量</th><th>典型例子</th><th>風險評估</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><span class="badge badge-ok">Allow</span></td><td>152</td><td><code>Bash(make:*)</code>、<code>WebFetch(domain:gnomad.broadinstitute.org)</code>、ISM binary 具體路徑</td><td>過長且含過時路徑（見 Q4）</td></tr>
+    <tr><td><span class="badge badge-warn">Ask</span></td><td>~12</td><td><code>git reset</code>、<code>curl</code>、<code>rm</code>、<code>mv</code></td><td>合理 — 可逆變動需確認</td></tr>
+    <tr><td><span class="badge badge-danger">Deny</span></td><td>7</td><td>rm -rf、mkfs、密鑰檔案、<code>git push --force main</code></td><td>覆蓋面偏窄</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2 id="s3">§3 L2 Hooks 系統（22 個）</h2>
+
+<p>Claude Code 透過 hooks 在工具呼叫的特定生命週期事件注入檢查或提醒。本專案 hooks 配置位於 <code>settings.local.json</code> 的 <code>hooks</code> 區段。</p>
+
+<h3>3.1 完整 Hooks 表</h3>
+
+<details>
+<summary>UserPromptSubmit（4 個）— 用戶提問時觸發</summary>
+<table>
+<thead><tr><th>檢查項</th><th>動作</th><th>對應腳本</th></tr></thead>
+<tbody>
+<tr><td>KB 相關主題提醒</td><td>提醒查閱 <code>/big8_disk/Knowledge/</code></td><td><code>knowledge_check.sh</code></td></tr>
+<tr><td>研究方向警告</td><td>已關閉（避免噪音）</td><td><code>research_direction_guard.sh</code></td></tr>
+<tr><td>KB 新鮮度警告</td><td>>14 天未驗證提醒重新驗證</td><td><code>kb_freshness_warn.sh</code></td></tr>
+<tr><td>.md 路徑格式</td><td>強制 <code>InterSubMod/</code> 前綴</td><td><code>md_path_format_rule.sh</code></td></tr>
+</tbody>
+</table>
+</details>
+
+<details>
+<summary>PreToolUse（6 個）— 工具執行前檢查</summary>
+<table>
+<thead><tr><th>觸發條件</th><th>檢查項</th><th>阻擋/提醒</th><th>對應腳本</th></tr></thead>
+<tbody>
+<tr><td>所有 Bash</td><td>危險命令（rm -rf / git reset）</td><td>提醒</td><td>jq 內嵌</td></tr>
+<tr><td><code>git commit</code></td><td><strong>C++ 編譯狀態檢查</strong></td><td><span class="badge badge-danger">阻擋 exit 2</span></td><td><code>pre_commit_compile_check.sh</code></td></tr>
+<tr><td>Bash</td><td>KB 架構檢查</td><td>提醒</td><td><code>kb_schema_check.sh</code></td></tr>
+<tr><td>Bash</td><td>Pipeline block 檢查</td><td>提醒</td><td><code>pipeline_block_check.sh</code></td></tr>
+<tr><td>Skill 工具</td><td>Skill 使用日誌</td><td>記錄</td><td><code>skill_usage_logger.sh</code></td></tr>
+<tr><td>Bash</td><td>二進制檔 commit 防護</td><td>提醒</td><td><code>no_binary_commit.sh</code></td></tr>
+</tbody>
+</table>
+</details>
+
+<details>
+<summary>PostToolUse（10 個）— 工具完成後處理</summary>
+<table>
+<thead><tr><th>觸發條件</th><th>動作</th><th>對應腳本</th></tr></thead>
+<tbody>
+<tr><td>Edit/Write <code>.cpp</code>/<code>.hpp</code></td><td>建立 <code>.need_compile</code> 待編譯標記</td><td><code>cpp_edit_guard.sh</code></td></tr>
+<tr><td>Edit/Write 任意檔</td><td>路由提示（依檔案類型建議對應流程）</td><td><code>trigger_routing.sh</code></td></tr>
+<tr><td>Edit/Write 任意檔</td><td>Evidence ledger 自動同步</td><td><code>evidence_ledger_sync.sh</code></td></tr>
+<tr><td>Edit/Write 任意檔</td><td>術語守衛（檢查專案術語一致性）</td><td><code>terminology_guard.sh</code></td></tr>
+<tr><td>Edit/Write <code>.md</code></td><td>內部連結有效性檢查</td><td><code>md_link_check.sh</code></td></tr>
+<tr><td>Bash <code>make</code> 成功</td><td>清除 <code>.need_compile</code> 標記</td><td><code>compile_success_clear.sh</code></td></tr>
+<tr><td>Bash <code>git commit</code></td><td>提醒測試與文檔確認</td><td>jq 內嵌</td></tr>
+<tr><td>C++ commit 後</td><td>無效化既有編譯標記</td><td><code>post_cpp_commit_invalidate.sh</code></td></tr>
+<tr><td>Edit/Write 任意檔</td><td>KB 真理來源守衛</td><td><code>kb_sot_guard.sh</code></td></tr>
+<tr><td>Edit/Write 任意檔</td><td>獨立觸發機制（餘類）</td><td><code>standalone_trigger.sh</code></td></tr>
+</tbody>
+</table>
+</details>
+
+<details>
+<summary>SubagentStop（1 個）+ Stop（1 個）— 結束點提醒</summary>
+<ul>
+  <li><strong>SubagentStop</strong>：子代理完成時提醒主代理檢查結果</li>
+  <li><strong>Stop</strong>：會話結束時提醒撰寫執行報告</li>
+</ul>
+</details>
+
+<div class="callout callout-warn">
+  <strong>密度警告（Q2）</strong>：22 個 hooks（其中 10 個 PostToolUse 同條件觸發）已超合理上限。每次 Edit/Write 至少跑 5 個檢查腳本，主對話對 Bash 工具的反應時間明顯延長。<br>
+  <strong>建議</strong>：合併 10 個 PostToolUse 為單一 <code>master_router.sh</code>，內部分支處理 → 降為 1 個 hook 入口。
+</div>
+
+<hr>
+
+<h2 id="s4">§4 L2 條件式自動載入 Rules</h2>
+
+<p>位於 <code>.claude/rules/</code>，由 CLAUDE.md 引用，符合特定編輯條件時自動載入到上下文。設計目的：降低 always-loaded 部分大小（CLAUDE.md ≈ 3K tokens）。</p>
+
+<table>
+<thead><tr><th>規則檔</th><th>觸發條件</th><th>核心內容</th></tr></thead>
+<tbody>
+<tr><td><code>cpp-build.md</code></td><td>編輯 <code>src/</code> / <code>include/</code> / <code>tests/</code> / <code>CMakeLists.txt</code></td><td>C++17 編譯命令、Post-change 6 步、新模組流程</td></tr>
+<tr><td><code>opus47-behavior.md</code></td><td>編輯 <code>SKILL.md</code> / <code>*.json</code></td><td>Opus 4.7 literal 執行特性、prompt 策略、subagent 觸發規則</td></tr>
+<tr><td><code>workflow-commands.md</code></td><td>編輯 <code>scripts/</code></td><td>VCF 分析、批次測試、快速驗證命令</td></tr>
+<tr><td><code>output-structure.md</code></td><td>操作 <code>output/</code></td><td>Region 目錄結構、檔案說明</td></tr>
+</tbody>
+</table>
+
+<div class="callout callout-info">
+  <strong>觀察</strong>：rules 機制不是 Claude Code 原生功能，而是透過 CLAUDE.md「自動載入於 .claude/rules/xxx.md（觸發：...）」的<strong>提示式約定</strong>。實際上 Claude 並無 hook 強制讀取對應 rules — 是模型在 CLAUDE.md 中讀到引用後自主拉取。<br>
+  <strong>風險（Q3）</strong>：模型可能忽略條件，導致規則文字在 CLAUDE.md 中存在但未被遵循。
+</div>
+
+<hr>
+
+<h2 id="s5">§5 L3 Plugins（17 個）與 MCP Servers（8 個）</h2>
+
+<h3>5.1 Plugins 完整清單</h3>
+<p>來源：<code>claude-plugins-official</code> marketplace。安裝記錄於 <code>~/.claude/plugins/installed_plugins.json</code>。</p>
+
+<table>
+<thead><tr><th>Plugin</th><th>版本</th><th>scope</th><th>功能</th><th>合理性</th></tr></thead>
+<tbody>
+<tr><td><strong>superpowers</strong></td><td>5.1.0</td><td>project</td><td>14 個工程技能總包（含 using-superpowers / brainstorming / TDD / debugging 等）</td><td><span class="badge badge-ok">核心</span></td></tr>
+<tr><td><strong>context7</strong></td><td>—</td><td>user</td><td>外部 library 文檔 MCP（React/Next.js/Prisma...）</td><td><span class="badge badge-ok">核心</span></td></tr>
+<tr><td>clangd-lsp</td><td>1.0.0</td><td>project</td><td>C++ LSP 整合（給 LSP 工具）</td><td><span class="badge badge-ok">必要</span></td></tr>
+<tr><td>feature-dev</td><td>—</td><td>project</td><td>特徵開發引導（含 code-architect/explorer/reviewer 三 agent）</td><td><span class="badge badge-ok">必要</span></td></tr>
+<tr><td>code-simplifier</td><td>1.0.0</td><td>user</td><td>代碼簡化審查</td><td><span class="badge badge-warn">與 pr-review-toolkit 重疊</span></td></tr>
+<tr><td>frontend-design</td><td>—</td><td>project</td><td>HTML/UI 設計</td><td><span class="badge badge-ok">本報告依賴</span></td></tr>
+<tr><td>code-review</td><td>—</td><td>project</td><td>PR 審查</td><td><span class="badge badge-warn">與 pr-review-toolkit:code-reviewer 重疊</span></td></tr>
+<tr><td>commit-commands</td><td>—</td><td>user</td><td>git commit/push/PR 命令</td><td><span class="badge badge-warn">與 release agent 重疊</span></td></tr>
+<tr><td>ralph-loop</td><td>1.0.0</td><td>user</td><td>長迴圈任務自動化</td><td><span class="badge badge-info">與 headless-research 互補</span></td></tr>
+<tr><td>claude-md-management</td><td>1.0.0</td><td>user</td><td>CLAUDE.md 管理</td><td><span class="badge badge-info">維護用</span></td></tr>
+<tr><td>pr-review-toolkit</td><td>—</td><td>user</td><td>PR 審查 7 agent 工具集（type-design / silent-failure / comment-analyzer 等）</td><td><span class="badge badge-ok">高價值</span></td></tr>
+<tr><td>claude-code-setup</td><td>1.0.0</td><td>user</td><td>專案初始化</td><td><span class="badge badge-info">setup 用</span></td></tr>
+<tr><td>skill-creator</td><td>—</td><td>user</td><td>skill 生成（含 skill-development skill）</td><td><span class="badge badge-ok">本次審查必需</span></td></tr>
+<tr><td>agent-sdk-dev</td><td>—</td><td>user</td><td>Anthropic SDK 開發（含 agent-sdk-verifier-py/ts）</td><td><span class="badge badge-info">SDK 開發用</span></td></tr>
+<tr><td>hookify</td><td>—</td><td>project</td><td>Hook 管理 + conversation-analyzer agent</td><td><span class="badge badge-ok">維護用</span></td></tr>
+<tr><td>plugin-dev</td><td>—</td><td>user</td><td>plugin 開發工具集（含 plugin-validator / agent-creator / skill-reviewer）</td><td><span class="badge badge-ok">維護用</span></td></tr>
+<tr><td>security-guidance</td><td>—</td><td>user</td><td>安全建議</td><td><span class="badge badge-info">passive</span></td></tr>
+<tr><td>playground</td><td>—</td><td>user</td><td>HTML 互動遊樂場</td><td><span class="badge badge-warn">可能無用</span></td></tr>
+</tbody>
+</table>
+
+<p><strong>已 Disabled</strong>：github (local) / anthropic-skills (local) / sourcegraph</p>
+
+<h3>5.2 MCP Servers 清單</h3>
+<table>
+<thead><tr><th>Server</th><th>工具數</th><th>用途</th><th>使用頻率</th></tr></thead>
+<tbody>
+<tr><td><strong>knowledge</strong>（自製）</td><td>5</td><td>癌症長讀長測序 KB（search / get_doc / resolve_path / list / backlinks）</td><td><span class="badge badge-ok">高（每外部 claim 必查）</span></td></tr>
+<tr><td>context7</td><td>2</td><td>library 文檔即時查詢</td><td><span class="badge badge-info">中</span></td></tr>
+<tr><td>claude_ai_Gmail</td><td>11</td><td>Gmail 收發 / labels / threads</td><td><span class="badge badge-info">低（研究 session 罕用）</span></td></tr>
+<tr><td>claude_ai_Google_Calendar</td><td>7</td><td>行事曆 events / suggest_time</td><td><span class="badge badge-info">低</span></td></tr>
+<tr><td>claude_ai_Google_Drive</td><td>2</td><td>OAuth 認證（需手動）</td><td><span class="badge badge-warn">需手動授權</span></td></tr>
+<tr><td>claude_ai_Notion</td><td>13</td><td>Notion 頁面/資料庫操作</td><td><span class="badge badge-info">中（管理 task）</span></td></tr>
+<tr><td>biorxiv</td><td>?</td><td>預印本論文搜尋</td><td><span class="badge badge-danger">疑似僵屍（Q5）</span></td></tr>
+<tr><td>ensembl</td><td>?</td><td>基因組資料庫</td><td><span class="badge badge-danger">疑似僵屍（Q5）</span></td></tr>
+</tbody>
+</table>
+
+<div class="callout callout-warn">
+  <strong>Q5 — MCP server 僵屍</strong>：<code>biorxiv</code> 與 <code>ensembl</code> 在 enabledMcpjsonServers 啟用，但未見 allow list 授權，且系統提示中無工具暴露。建議：跑 <code>claude mcp list</code> 確認連線狀態，若離線則移除。
+</div>
+
+<hr>
+
+<h2 id="s6">§6 L4 Skills 清單（41 個專案 + 1 用戶）</h2>
+
+<p>Skills 是 InterSubMod 自製的「按需技能包」— 模型在識別關鍵字/觸發條件時透過 <code>Skill</code> 工具拉取對應 <code>SKILL.md</code>，內容包含執行步驟、checklist、failure mode 診斷。</p>
+
+<h3>6.1 6 大分類統計</h3>
+<table>
+<thead><tr><th>分類</th><th>數量</th><th>代表 skill</th><th>觸發模式</th></tr></thead>
+<tbody>
+<tr><td>研究流程</td><td>8</td><td>research-loop · feature-layered-observation · multi-sample-consistency · inject-hypothesis · pivot-direction · results-analysis · provenance-tier-audit · observation-analysis</td><td>P1-P4 phase 推進</td></tr>
+<tr><td>程式開發</td><td>4</td><td>cpp-change · methodology-audit · infra-ops · verification-loop</td><td>C++ 修改 / pipeline 故障</td></tr>
+<tr><td>文件管理</td><td>4</td><td>doc-standards · memory-consolidation · data-audit · citation-verification</td><td>新 .md / 維護週期</td></tr>
+<tr><td>報告生成</td><td>7</td><td>weekly-report · pptx-build · html-report-build · results-report · structured-tech-report · report · <s>html-preview</s>（deprecated）</td><td>「我要做報告/簡報/週報」</td></tr>
+<tr><td>元方法論</td><td>13</td><td>confirmation-protocol · known-pitfalls · cycle-state · research-dashboard · research-context-loader · fast-learning-coach · myPPT · grill-me · pivot-direction · validation-protocol · review-evidence · problem-framing-ideation · check-staleness</td><td>跨 phase 通用</td></tr>
+<tr><td>元框架</td><td>4</td><td>cycle-init · check-staleness · run-evaluator · conclude-research</td><td>P0/P2/P5/P6 phase 控制點</td></tr>
+</tbody>
+</table>
+
+<h3>6.2 Skills 完整清單（41 個）</h3>
+<details>
+<summary>展開完整表格</summary>
+<table>
+<thead><tr><th>#</th><th>Skill</th><th>類型</th><th>Phase</th><th>核心功能</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>auc-confound-guard</td><td>研究流程</td><td>—</td><td>特徵 AUC 三關 confound 驗證</td></tr>
+<tr><td>2</td><td>check-staleness</td><td>元框架</td><td>P2</td><td>PRECHECK — binary/dataset/report fresh 度</td></tr>
+<tr><td>3</td><td>citation-verification</td><td>文件管理</td><td>—</td><td>學術引用 WebSearch 每筆必驗</td></tr>
+<tr><td>4</td><td>conclude-research</td><td>元框架</td><td>P6</td><td>研究收尾（INDEX/MEMORY/evidence_ledger 更新）</td></tr>
+<tr><td>5</td><td>confirmation-protocol</td><td>元方法論</td><td>—</td><td>4 層確認協議</td></tr>
+<tr><td>6</td><td>cpp-change</td><td>程式開發</td><td>—</td><td>6 步驟 PDD C++ 修改協議</td></tr>
+<tr><td>7</td><td>cycle-init</td><td>元框架</td><td>P0</td><td>REGISTER 短週期 hypothesis cycle</td></tr>
+<tr><td>8</td><td>cycle-state</td><td>元方法論</td><td>—</td><td>跨 cycle dashboard（read-only）</td></tr>
+<tr><td>9</td><td>data-audit</td><td>文件管理</td><td>—</td><td>研究輸出 6 項檢核</td></tr>
+<tr><td>10</td><td>doc-standards</td><td>文件管理</td><td>—</td><td>檔名/元數據/目錄結構</td></tr>
+<tr><td>11</td><td>fast-learning-coach</td><td>元方法論</td><td>—</td><td>費曼技巧教學（用戶層也有）</td></tr>
+<tr><td>12</td><td>feature-layered-observation</td><td>研究流程</td><td>P3</td><td>PILOT 特徵 6 層分析</td></tr>
+<tr><td>13</td><td>grill-me</td><td>元方法論</td><td>—</td><td>對自身結論刁難式 reality check</td></tr>
+<tr><td>14</td><td>html-preview</td><td><span class="badge badge-danger">deprecated</span></td><td>—</td><td>Phase 2 已被 html-report-build 取代</td></tr>
+<tr><td>15</td><td>html-report-build</td><td>報告生成</td><td>—</td><td>自包含 HTML（Tailwind，無 Python middleware）</td></tr>
+<tr><td>16</td><td>image-gen</td><td>報告生成</td><td>—</td><td>雙軌生圖（AI + cairo）</td></tr>
+<tr><td>17</td><td>image-vision-check</td><td>報告生成</td><td>—</td><td>6 維品檢，閥值 4/6 通過</td></tr>
+<tr><td>18</td><td>infra-ops</td><td>程式開發</td><td>—</td><td>pipeline preflight / disk-full / OOM</td></tr>
+<tr><td>19</td><td>init-research</td><td>元框架</td><td>—</td><td>多週級長期專案初始化</td></tr>
+<tr><td>20</td><td>inject-hypothesis</td><td>研究流程</td><td>—</td><td>注入新假說到 queue</td></tr>
+<tr><td>21</td><td>known-pitfalls</td><td>元方法論</td><td>—</td><td>AI 已知陷阱清單（P-14 KB 查閱義務）</td></tr>
+<tr><td>22</td><td>memory-consolidation</td><td>文件管理</td><td>—</td><td>掃描 → 合併 → 降級 → 索引精簡</td></tr>
+<tr><td>23</td><td>methodology-audit</td><td>程式開發</td><td>—</td><td>C++ 改動前 3-4 方案評估</td></tr>
+<tr><td>24</td><td>multi-sample-consistency</td><td>研究流程</td><td>P4</td><td>7 樣本一致性驗證</td></tr>
+<tr><td>25</td><td>myPPT</td><td>元方法論</td><td>—</td><td>PPT 總入口路由（→weekly-report / pptx-build）</td></tr>
+<tr><td>26</td><td>observation-analysis</td><td>研究流程</td><td>—</td><td>標準化觀察分析（描述不明 — Q6）</td></tr>
+<tr><td>27</td><td>pivot-direction</td><td>研究流程</td><td>—</td><td>快速切換研究方向</td></tr>
+<tr><td>28</td><td>pptx-build</td><td>報告生成</td><td>—</td><td>P1-P5 PPT 製作流程</td></tr>
+<tr><td>29</td><td>problem-framing-ideation</td><td>元方法論</td><td>P0 前置</td><td>框架問題 + ideation</td></tr>
+<tr><td>30</td><td>provenance-tier-audit</td><td>研究流程</td><td>—</td><td>跨 cycle 證據鏈一致性</td></tr>
+<tr><td>31</td><td>report</td><td>報告生成</td><td>—</td><td>AI 對話執行報告（session-end）</td></tr>
+<tr><td>32</td><td>research-context-loader</td><td>元方法論</td><td>—</td><td>研究景況 3-tier 按需載入</td></tr>
+<tr><td>33</td><td>research-dashboard</td><td>元方法論</td><td>—</td><td>專案級看板</td></tr>
+<tr><td>34</td><td>research-loop</td><td>研究流程</td><td>P1</td><td>PLAN 前 4 步</td></tr>
+<tr><td>35</td><td>results-analysis</td><td>研究流程</td><td>—</td><td>嚴格統計與圖表</td></tr>
+<tr><td>36</td><td>results-report</td><td>報告生成</td><td>—</td><td>實驗結果決策報告</td></tr>
+<tr><td>37</td><td>review-evidence</td><td>元方法論</td><td>—</td><td>查閱歷史結論</td></tr>
+<tr><td>38</td><td>run-evaluator</td><td>元框架</td><td>P5</td><td>EVALUATE retraction risk 評分</td></tr>
+<tr><td>39</td><td>structured-tech-report</td><td>報告生成</td><td>—</td><td>13 段技術報告（Toyota A3）</td></tr>
+<tr><td>40</td><td>validation-protocol</td><td>元方法論</td><td>—</td><td>假說驗證協議（職責與 verification 重疊 — Q6）</td></tr>
+<tr><td>41</td><td>verification-loop</td><td>程式開發</td><td>—</td><td>程式碼級綜合驗證</td></tr>
+<tr><td>42</td><td>weekly-report</td><td>報告生成</td><td>—</td><td>W1-W7 週報母稿</td></tr>
+</tbody>
+</table>
+</details>
+
+<div class="callout callout-warn">
+  <strong>Q6 — 5 個 Skill 職責邊界模糊</strong>：<code>observation-analysis</code> / <code>problem-framing-ideation</code> / <code>provenance-tier-audit</code> / <code>review-evidence</code> / <code>validation-protocol</code> 五者描述不夠明確，與其他 skill 有重疊嫌疑。建議補完 frontmatter 三段（Phase Position / Dependencies / Failure Mode）— 這也是 memory 中 <code>feedback_skill_md_must_state_dependencies_and_diagnostics</code> 已要求的規範。
+</div>
+
+<div class="callout callout-warn">
+  <strong>Q7 — 報告生成線重複（中度）</strong>：5 個 skill 都產出某種報告：
+  <code>html-report-build</code> / <code>pptx-build</code> / <code>weekly-report</code> / <code>results-report</code> / <code>structured-tech-report</code>。用戶說「我要寫個報告」時不確定觸發誰。<br>
+  <strong>建議</strong>：在 <code>myPPT</code>（已存在路由 skill）旁邊增加 <code>report-entry-router</code>，依輸入內容（週報？實驗結果？技術 retro？）決定下游。
+</div>
+
+<hr>
+
+<h2 id="s7">§7 L4 Agents（14 個）+ Slash Commands（8 個）</h2>
+
+<h3>7.1 專案 Agents 完整表</h3>
+<table>
+<thead><tr><th>Agent</th><th>用途</th><th>Tools 限制</th><th>觸發語</th></tr></thead>
+<tbody>
+<tr><td><strong>researcher</strong></td><td>論文/文件/GitHub 搜尋</td><td>Web + Read/Write/Glob/Grep</td><td>「查論文」「搜尋」</td></tr>
+<tr><td><strong>developer</strong></td><td>C++ 程式碼撰寫</td><td>Read/Edit/Write + <code>Bash(make:*)</code>/<code>clang-format</code></td><td>「改程式」「實作」</td></tr>
+<tr><td><strong>parallel-benchmark</strong></td><td>多獨立 benchmark 並行</td><td>Read/Write/Bash/Glob/Grep</td><td>「跨樣本 benchmark」</td></tr>
+<tr><td><strong>parallel-analysis</strong></td><td>多分析腳本並行（Wave 式）</td><td>Read/Write/Bash/Glob/Grep</td><td>「cross-sample 分析」</td></tr>
+<tr><td><strong>architect</strong></td><td>任務拆分 + 計劃書</td><td>Read/Write/Glob/Grep/<code>Bash(ls:*)</code></td><td>「規劃」「計畫」</td></tr>
+<tr><td><strong>tester</strong></td><td>自動化測試</td><td>Read/Write/Bash/Glob/Grep</td><td><code>/test-*</code></td></tr>
+<tr><td><strong>reviewer</strong></td><td>科學家視角驗證數據</td><td>Read/Write/Glob/Grep/<code>Bash(python3:*)</code></td><td>「分析結果」</td></tr>
+<tr><td><strong>research-orchestrator</strong></td><td>意圖→skill 路由</td><td>Read/Glob/Grep/<code>Bash(ls:*)</code></td><td>「怎麼做」</td></tr>
+<tr><td><strong>headless-research</strong></td><td>夜間/離線自動迴圈</td><td>Read/Write/Edit/Glob/Grep/Bash</td><td>「夜間跑」「headless」</td></tr>
+<tr><td><strong>methodology-reviewer</strong></td><td>C++ 方法分析（被 methodology-audit skill 呼叫）</td><td>限定 Grep/Glob/Read/<code>Bash(python3:*)</code></td><td>內部呼叫</td></tr>
+<tr><td><strong>literature-reviewer</strong></td><td>系統性文獻 + Zotero 整合</td><td>Web + Zotero MCP</td><td>「文獻回顧」</td></tr>
+<tr><td><strong>paper-miner</strong></td><td>論文寫作知識挖掘</td><td>Read/Write/Bash/Grep/Glob</td><td>「分析論文寫作」</td></tr>
+<tr><td><strong>optimizer</strong></td><td>程式碼審查與優化</td><td>Read/Edit/Glob/Grep/<code>clang-format</code></td><td>「審查代碼」</td></tr>
+<tr><td><strong>release</strong></td><td>Git/Docker/版本發布</td><td>Read/Edit/Write/Bash/Glob/Grep</td><td><code>/git-*</code></td></tr>
+</tbody>
+</table>
+
+<p>另有 <strong>archive/intersubmod-weekly-research-agent.md</strong> 已被 <code>weekly-report</code> skill 取代，建議移除。</p>
+
+<h3>7.2 Slash Commands</h3>
+<table>
+<thead><tr><th>命令</th><th>用途</th><th>下游</th></tr></thead>
+<tbody>
+<tr><td><code>/build</code></td><td>編譯（Release）</td><td>cmake + make</td></tr>
+<tr><td><code>/test-quick</code></td><td>chr19 單點測試（&lt;30s）</td><td>run_vcf_all_snv.sh</td></tr>
+<tr><td><code>/test-data</code></td><td>完整數據測試（~1min）</td><td>run_vcf_all_snv.sh</td></tr>
+<tr><td><code>/test-full</code></td><td>完整流程（~5min）</td><td>run_batch_vcf_analysis.sh</td></tr>
+<tr><td><code>/git-start</code></td><td>建立 feature branch</td><td>release agent</td></tr>
+<tr><td><code>/git-commit</code></td><td>commit（含 Co-Author）</td><td>release agent</td></tr>
+<tr><td><code>/git-finish</code></td><td>合併回 develop</td><td>release agent</td></tr>
+<tr><td><code>/validate</code></td><td>驗證命令（細節未讀）</td><td>—</td></tr>
+</tbody>
+</table>
+
+<div class="callout callout-info">
+  <strong>觀察</strong>：系統內建 Agent（general-purpose / Explore / Plan / pr-review-toolkit 系列等）由 plugins 提供，與專案自製 14 個 agent 共存。Opus 4.7 預設「單回合優先，不主動 spawn subagent」 — 需明示「平行 spawn N agents」才會啟動 parallel-*。
+</div>
+
+<hr>
+
+<h2 id="s8">§8 L5 Memory 系統（87 個檔案）</h2>
+
+<p>位置：<code>/bip7_disk/liaoyoyo2001/.claude/projects/-big7-disk-liaoyoyo2001-InterSubMod/memory/</code></p>
+
+<h3>8.1 4 大類別分布</h3>
+<table>
+<thead><tr><th>類別</th><th>數量</th><th>占比</th><th>典型用途</th></tr></thead>
+<tbody>
+<tr><td><strong>project</strong></td><td>49</td><td>56%</td><td>研究發現、實驗結論、bugfix 記錄、Concluded 結案</td></tr>
+<tr><td><strong>feedback</strong></td><td>34</td><td>39%</td><td>用戶偏好、方法論、設計規範、互動慣例</td></tr>
+<tr><td><strong>reference</strong></td><td>3</td><td>3%</td><td>外部來源行號（longphase / context7 library ID）</td></tr>
+<tr><td><strong>MEMORY.md</strong></td><td>1</td><td>1%</td><td>always-loaded 索引</td></tr>
+</tbody>
+</table>
+
+<p><strong>MEMORY.md 結構</strong>：分為 7 大區（Skills / Active Research / Pending Items / Methodology &amp; Preferences / Reporting Skills &amp; Templates / PPTX &amp; Weekly Report / Concluded）。其中 Concluded 占約 50%，自動記憶歷史防止重複調查。</p>
+
+<h3>8.2 高引用 memory（推估）</h3>
+<ol>
+  <li><code>feedback_design_principles_canonical.md</code>（2026-05-13）— 12 條設計準則，每 HTML/slide 生成必查</li>
+  <li><code>feedback_outside_claim_must_query_kb.md</code>（2026-05-13）— 外部工具 claim 必查 KB</li>
+  <li><code>project_loh_constrained_phasing_discovery.md</code>（2026-04-22）— NG=2 phasing 新發現，新論文主軸候選</li>
+  <li><code>feedback_full_auto_parallel_execution.md</code>— 全自動 + multi-agent 並行偏好</li>
+</ol>
+
+<div class="callout callout-info">
+  <strong>觀察</strong>：MEMORY.md 已達 ~155 行（接近 200 行截斷上限）。memory-consolidation skill 設計目標即為定期精簡到 &lt;200 行。建議週度執行。
+</div>
+
+<hr>
+
+<h2 id="s9">§9 觸發關鍵字與檢核機制</h2>
+
+<h3>9.1 4 層確認協議</h3>
+<table>
+<thead><tr><th>級別</th><th>互動模式</th><th>全自動模式</th><th>場景</th></tr></thead>
+<tbody>
+<tr><td><span class="badge badge-danger">Hard Gate 🔴</span></td><td>必停 + AskUserQuestion</td><td>必停（無例外）</td><td>刪檔 / C++ commit / NO-GO 判定 / evidence_ledger 覆寫 / git push</td></tr>
+<tr><td><span class="badge badge-warn">Gate 🟠</span></td><td>暫停報告</td><td>自動過（預設選項）</td><td>假說選取 / benchmark 決策 / 多檔重構</td></tr>
+<tr><td><span class="badge badge-info">Review 🟡</span></td><td>暫停展示結果</td><td>自動過 + 記錄</td><td>觀察分析 / 週報草稿 / PPTX storyboard</td></tr>
+<tr><td><span class="badge badge-ok">FYI 🟢</span></td><td>顯示通知</td><td>靜默跳過</td><td>Python 分析 / git commit / 記憶更新</td></tr>
+</tbody>
+</table>
+
+<h3>9.2 暫停判斷矩陣（影響度 × 信心度 + 可逆性 override）</h3>
+<table>
+<thead><tr><th>影響 ＼ 信心</th><th>高信心</th><th>中信心</th><th>低信心</th></tr></thead>
+<tbody>
+<tr><td><strong>低</strong>（可逆 &lt;10min）</td><td>🟢 一行告知後繼續</td><td>🟡 列假設後繼續</td><td>🟠 節點暫停</td></tr>
+<tr><td><strong>中</strong>（需重跑 10min-1h）</td><td>🟡 列假設後繼續</td><td>🟠 節點暫停</td><td>🔴 立即暫停</td></tr>
+<tr><td><strong>高</strong>（影響結論 &gt;1h）</td><td>🟠 節點暫停</td><td>🔴 立即暫停</td><td>🔴 立即暫停</td></tr>
+</tbody>
+</table>
+<p><strong>可逆性 override</strong>：不可逆操作（刪檔/C++ commit/NO-GO/覆寫 ledger）永遠 🔴。</p>
+
+<h3>9.3 模式切換關鍵字</h3>
+<table>
+<thead><tr><th>關鍵字</th><th>啟動模式</th><th>影響</th></tr></thead>
+<tbody>
+<tr><td><code>互動模式</code></td><td>預設互動</td><td>所有 Gate/Review 暫停確認</td></tr>
+<tr><td><code>全自動</code> / <code>auto</code></td><td>全自動執行</td><td>Review/Gate 自動過，Hard Gate 仍停</td></tr>
+<tr><td><code>研究方向</code> / <code>pivot</code></td><td>觸發 pivot-direction skill</td><td>Hard Gate 確認</td></tr>
+<tr><td><code>跑全量</code> / <code>平行 N 樣本</code>（明示啟動長計算）</td><td>FYI 模式</td><td>不再二次確認</td></tr>
+<tr><td>外部工具 F1/AUC claim</td><td>強制查 KB</td><td>P-14 陷阱</td></tr>
+</tbody>
+</table>
+
+<h3>9.4 自動載入鏈（Always-loaded vs On-demand）</h3>
+<table>
+<thead><tr><th>類型</th><th>檔案</th><th>大小</th><th>觸發</th></tr></thead>
+<tbody>
+<tr><td>Always-loaded</td><td>CLAUDE.md + CURRENT_FOCUS.md</td><td>~3K tokens</td><td>每 session</td></tr>
+<tr><td>條件式 Rules</td><td>4 條（cpp-build / opus47 / workflow / output）</td><td>~3-5K tokens</td><td>編輯特定路徑</td></tr>
+<tr><td>Skill on-demand</td><td>41 SKILL.md</td><td>~2-10K each</td><td>Skill 工具呼叫</td></tr>
+<tr><td>Tier 2 載入</td><td>experiments INDEX + landscape 00_INDEX + concepts 索引</td><td>~3-5K</td><td>research-context-loader 觸發</td></tr>
+<tr><td>Tier 3 載入</td><td>特定 landscape 檔案</td><td>~5-15K</td><td>research-context-loader 深度模式</td></tr>
+<tr><td>Memory 索引</td><td>MEMORY.md（截 200 行）</td><td>~3K</td><td>每 session</td></tr>
+</tbody>
+</table>
+
+<hr>
+
+<h2 id="s10">§10 合理性質疑與待決策清單</h2>
+
+<p>以下 12 項由 5 個 Explore agents 獨立發現後，主對話交叉驗證。按優先序排列。</p>
+
+<ul class="checklist">
+  <li class="d">
+    <strong>Q1 [高] defaultMode 不一致</strong>：全域 <code>auto</code> vs 專案 <code>acceptEdits</code>。用戶可能不確定何時自動接受編輯、何時需確認。
+    <br><em>建議</em>：明文規範三模式邊界（auto 用於 headless / acceptEdits 用於互動研究 / ask 用於探索）。
+  </li>
+  <li class="d">
+    <strong>Q2 [高] 22 個 Hooks 已逾管理閾值</strong>：10 個 PostToolUse 同條件觸發，造成 Edit/Write 反應時間延長且邏輯分散。
+    <br><em>建議</em>：合併為單一 <code>master_router.sh</code>，內部分支處理；保留 <code>pre_commit_compile_check.sh</code> 為獨立 Hard Gate。
+  </li>
+  <li class="q">
+    <strong>Q3 [中] Rules 自動載入機制是「約定」而非「強制」</strong>：CLAUDE.md 註明「編輯 X 時自動載入 Y」，但無 hook 攔截 — 仰賴模型自主拉取。
+    <br><em>建議</em>：若視為關鍵，改用 PostToolUse hook 注入 system-reminder；若視為提示，明寫「最佳做法 — 模型自主」避免規範化錯覺。
+  </li>
+  <li class="q">
+    <strong>Q4 [中] Permission Allow List 152 條已過長</strong>：包含過時具體命令路徑（ISM binary 行 86-90）。
+    <br><em>建議</em>：改用 glob pattern（<code>Bash(./build/bin/*)</code>），刪除過時路徑；用 <code>fewer-permission-prompts</code> skill 重構。
+  </li>
+  <li class="q">
+    <strong>Q5 [中] MCP servers biorxiv/ensembl 疑似僵屍</strong>：在 enabledMcpjsonServers 啟用但無 allow list 授權。
+    <br><em>建議</em>：跑 <code>claude mcp list</code> 確認連線；若離線則移除避免每次 session 嘗試連線浪費時間。
+  </li>
+  <li class="q">
+    <strong>Q6 [中] 5 個 skill 職責邊界模糊</strong>：<code>observation-analysis</code> / <code>problem-framing-ideation</code> / <code>provenance-tier-audit</code> / <code>review-evidence</code> / <code>validation-protocol</code>。
+    <br><em>建議</em>：補完 frontmatter 三段（Phase Position / Dependencies / Failure Mode）；考慮合併 <code>validation-protocol</code> 與 <code>verification-loop</code>。
+  </li>
+  <li class="q">
+    <strong>Q7 [中] 報告生成線重複（5 skill）</strong>：用戶說「我要做報告」時不確定觸發誰。
+    <br><em>建議</em>：建立 <code>report-entry-router</code>，依輸入決定下游；或在每個 report skill 的 description 加 "DO NOT USE WHEN"。
+  </li>
+  <li class="q">
+    <strong>Q8 [中] Plugins 3 個功能重疊</strong>：<code>code-simplifier</code> + <code>code-review</code> + <code>pr-review-toolkit</code>；<code>commit-commands</code> + <code>release agent</code>。
+    <br><em>建議</em>：明確分工 — pr-review-toolkit 為深度審查（PR/diff）、code-review 為快速 check；commit-commands 為一鍵流程、release agent 為工作流協調。
+  </li>
+  <li class="q">
+    <strong>Q9 [低-中] archive/ 內過時 agent</strong>：<code>intersubmod-weekly-research-agent.md</code> 已被 <code>weekly-report</code> skill 取代。
+    <br><em>建議</em>：git rm + 在 conclude memory 留紀錄。
+  </li>
+  <li class="q">
+    <strong>Q10 [低-中] MEMORY.md 接近 200 行截斷</strong>：~155 行，Concluded 區佔 50%。
+    <br><em>建議</em>：執行 <code>/memory-consolidation</code>，將 Concluded 區精簡為單行 hook 索引。
+  </li>
+  <li class="ok">
+    <strong>Q11 [低] 高 hook 密度雖佔資源但分工合理</strong>：對應 CLAUDE.md 各條規則，不是過度設計。
+    <br><em>建議</em>：保留現狀，但與 Q2 合併後維護成本可顯著降低。
+  </li>
+  <li class="ok">
+    <strong>Q12 [低] 14 個專案 agent 與系統內建 agent 邊界清晰</strong>：parallel-* / methodology-reviewer / paper-miner 等專案 agent 對應特定研究域需求，無重複。
+    <br><em>建議</em>：保留。但 <code>/validate</code> command 細節未讀，建議補完文件。
+  </li>
+</ul>
+
+<hr>
+
+<h2 id="s11">§11 建議行動順序</h2>
+
+<table>
+<thead><tr><th>優先序</th><th>行動</th><th>對應 Q</th><th>預估工時</th></tr></thead>
+<tbody>
+<tr><td>P0（本週）</td><td>修 defaultMode 不一致；定義三模式邊界</td><td>Q1</td><td>30 min</td></tr>
+<tr><td>P0（本週）</td><td>確認 biorxiv/ensembl MCP 狀態，移除僵屍</td><td>Q5</td><td>15 min</td></tr>
+<tr><td>P1（下週）</td><td>合併 10 個 PostToolUse hooks 為 master_router</td><td>Q2</td><td>2 h</td></tr>
+<tr><td>P1（下週）</td><td>補完 5 個模糊 skill 的 frontmatter</td><td>Q6</td><td>1.5 h</td></tr>
+<tr><td>P2（月度）</td><td>建立 report-entry-router 或加強 report skill description</td><td>Q7</td><td>1 h</td></tr>
+<tr><td>P2（月度）</td><td>重構 152 條 allow list（用 glob pattern）</td><td>Q4</td><td>1 h</td></tr>
+<tr><td>P3（季度）</td><td>3 個重疊 plugin 寫明 use-when 邊界</td><td>Q8</td><td>30 min</td></tr>
+<tr><td>P3（季度）</td><td>清理 archive/ 內過時 agent</td><td>Q9</td><td>10 min</td></tr>
+<tr><td>P3（季度）</td><td>執行 memory-consolidation 精簡 MEMORY.md</td><td>Q10</td><td>30 min</td></tr>
+<tr><td>觀察</td><td>Rules 自動載入機制：強制 vs 約定 — 視實際遵循率決定</td><td>Q3</td><td>—</td></tr>
+</tbody>
+</table>
+
+<hr>
+
+<h2 id="s12">§12 附錄：完整檔案路徑與引用</h2>
+
+<details>
+<summary>關鍵配置檔案路徑</summary>
+<ul>
+  <li>用戶全域 settings：<code>/bip7_disk/liaoyoyo2001/.claude/settings.json</code></li>
+  <li>用戶 plugins 安裝記錄：<code>/bip7_disk/liaoyoyo2001/.claude/plugins/installed_plugins.json</code></li>
+  <li>用戶 marketplaces：<code>/bip7_disk/liaoyoyo2001/.claude/plugins/marketplaces/claude-plugins-official/</code></li>
+  <li>用戶全域 skill：<code>/bip7_disk/liaoyoyo2001/.claude/skills/fast-learning-coach/</code></li>
+  <li>專案 CLAUDE.md：<code>InterSubMod/.claude/CLAUDE.md</code></li>
+  <li>專案 settings：<code>InterSubMod/.claude/settings.local.json</code>（403 行）</li>
+  <li>專案 skills：<code>InterSubMod/.claude/skills/</code>（41 個子目錄）</li>
+  <li>專案 agents：<code>InterSubMod/.claude/agents/</code>（14 個 .md + archive/）</li>
+  <li>專案 commands：<code>InterSubMod/.claude/commands/</code>（8 個 .md）</li>
+  <li>專案 rules：<code>InterSubMod/.claude/rules/</code>（4 個 .md）</li>
+  <li>Memory：<code>/bip7_disk/liaoyoyo2001/.claude/projects/-big7-disk-liaoyoyo2001-InterSubMod/memory/</code></li>
+  <li>Knowledge Base：<code>/big8_disk/liaoyoyo2001/Knowledge/</code>（MCP server 接入）</li>
+</ul>
+</details>
+
+<details>
+<summary>對照舊版審查報告（2026-05-08）</summary>
+<p>舊版 <code>20260508_Harness_Complete_Architecture_Review_01.md</code> 為 plan-centric 審查（v1.7 Resilient Waterfall plan 對照），本報告為 inventory-centric 全面盤點。差異：</p>
+<ul>
+  <li>新報告涵蓋用戶層全域設定（舊版聚焦專案層）</li>
+  <li>新報告涵蓋 17 plugins + 8 MCP（舊版僅敘述自製 skills/agents）</li>
+  <li>新報告附 12 個 Q&amp;A 待決策（舊版聚焦 plan 驗收狀態）</li>
+  <li>新增變化（5-08 → 5-15）：skill 從 36 增至 41；新 design_principles 12 條 canonical；新 outside_claim_must_query_kb 規範</li>
+</ul>
+</details>
+
+<details>
+<summary>查證方法（避免幻覺）</summary>
+<p>本報告由 5 個 Explore agents 獨立盤點以下範圍：</p>
+<ol>
+  <li>Agent 1：<code>InterSubMod/.claude/skills/</code> 41 個 SKILL.md frontmatter</li>
+  <li>Agent 2：<code>InterSubMod/.claude/agents/</code> + <code>commands/</code> 全部 .md</li>
+  <li>Agent 3：<code>settings.local.json</code> + <code>settings.json</code> + <code>rules/</code></li>
+  <li>Agent 4：<code>~/.claude/plugins/installed_plugins.json</code> + MCP cache + memory 87 檔</li>
+  <li>Agent 5：CLAUDE.md + confirmation-protocol + known-pitfalls + cpp-change SKILL</li>
+</ol>
+<p>主對話交叉驗證後產出本報告。檔案數字（如 41 skills、17 plugins、22 hooks、87 memory）均為 agent 實際 ls/grep 結果，非推估。</p>
+</details>
+
+<div class="footer-note">
+  <p><strong>產出</strong>：InterSubMod/docs/reports/validated/2026/05/20260515_claude_code_AI_harness_full_architecture_01.standalone.html</p>
+  <p><strong>建議下一步</strong>：用戶逐項確認 §10 的 12 個質疑項，標記同意/不同意/需討論，由主對話進入逐項實作（依 memory 中 <code>feedback_strategy_then_per_item_confirmation</code> 規範執行）。</p>
+  <p><strong>設計遵循</strong>：12 條 canonical design principles（Tufte data-ink / CRAP / Assertion-Evidence / 5-second test / WCAG 對比 / 字級 ≥16px / 暗色模式友善 / 摺疊章節）</p>
+</div>
+
+</body>
+</html>
