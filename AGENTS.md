@@ -125,6 +125,10 @@ Opus 4.7 模型特性備註 → `.claude/CLAUDE.md` §2。
 
 `InterSubMod/docs/CURRENT_FOCUS.md` > 7 天未更新 → hook 主動提醒。
 
+> **業界對照**: `docs/CURRENT_FOCUS.md` 概念等同 [Cline Memory Bank `activeContext.md`](https://docs.cline.bot/features/memory-bank)（live working state，最高變動層）。命名保留 `CURRENT_FOCUS.md` 以維持既有 20+ 引用，不重新命名。
+>
+> **KB 鏡像**: `InterSubMod/knowledge/10_research_status/01_current_focus_snapshot.md` 為 2 週週期 KB 快照（每 14 天 freshness hook 警告需 verify）。
+
 ---
 
 ## §8 KB 義務（P-14 強制查詢順序）

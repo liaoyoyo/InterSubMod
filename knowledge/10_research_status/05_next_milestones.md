@@ -3,7 +3,7 @@ id: ism-kb-10-research-status-next-milestones
 name: "Next Milestones"
 description: "Phase 2 下一里程碑：M1 7 樣本 paired_full 重跑、M2 Phase 2A 正式分析、M3 Normal Reference v1。⚠ 2 週有效。"
 status: active
-last_verified: 2026-04-22
+last_verified: 2026-05-18
 content_nature: runtime-fact
 doc_type: reference
 verified_scope: "milestones against docs/CURRENT_FOCUS.md phase 2 roadmap"
@@ -19,6 +19,14 @@ alias_paths: []
 # Next Milestones
 
 > ⚠️ **此為 2026-04-22 roadmap**；每 2 週檢視
+>
+> **📅 2026-05-18 Update Notice**: roadmap 已演進（詳見 `docs/CURRENT_FOCUS.md §2026-05-17 Tier 1-4`）：
+> - **Tier 1 (W3 2026-05-15~22)**: T1.1 ✅ / T1.2 🔴 / T1.3 ✅
+> - **Tier 2 (W3-W4)**: Z-AUTO KDE 4 樣本擴展 + HCC1395 primary 章節 + 6 樣本 replication
+> - **Tier 3 (W4-W6)**: Paper outline + GitHub + Docker + Benchmark suite
+> - **Tier 4 (W6+)**: Phase 2A Normal BAM cross-sample, PI Report errata
+>
+> 本快照僅作 2026-04-22 milestone 鏡像；下次完整內容更新待後續 session。
 
 - 一句結論：3 個短期里程碑（M1-M3）聚焦 Phase 2A 7 樣本全量驗證
 - 適用對象：中期規劃、進度預估

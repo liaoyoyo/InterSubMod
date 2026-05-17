@@ -3,7 +3,7 @@ id: ism-kb-09-conclusions-hypothesis-queue-snapshot
 name: "Hypothesis Queue Snapshot"
 description: "research/autoresearch/hypothesis_queue.json 的結構與最新快照；adopted/rejected/conditional 分類。⚠ 每 2 週更新。"
 status: active
-last_verified: 2026-04-22
+last_verified: 2026-05-18
 content_nature: reference
 doc_type: reference
 verified_scope: "hypothesis queue against research/autoresearch/hypothesis_queue.json"
@@ -19,6 +19,13 @@ alias_paths: []
 # Hypothesis Queue Snapshot
 
 > ⚠️ **此為快照，2 週有效**。最新狀態：`research/autoresearch/hypothesis_queue.json`
+>
+> **📅 2026-05-18 Update Notice**: 新增假說與狀態變更（詳見 `docs/CURRENT_FOCUS.md §2026-05-17`）：
+> - 新 category: Pre-registration confirmatory（依 `/scientific-rigor §7.1` 強制 3 欄 H 預測/否證/threshold）
+> - HCC1395 chr8 hotspot ⭐3 PARTIAL POSITIVE（2026-05-15 multi-agent fan-out）
+> - Q5 biorxiv/ensembl MCP 僵屍誤判 NEGATIVE→修正（已實測非僵屍）
+>
+> 本快照僅作 2026-04-22 queue 鏡像；下次完整內容更新待後續 session。
 
 - 一句結論：95+ 假說記錄於 queue；狀態分 adopted / rejected / annotation_only / conditional_positive；高優先假說 priority=95
 - 適用對象：AI 研究迴圈、假說選擇、證據追蹤

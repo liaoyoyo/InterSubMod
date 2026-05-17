@@ -3,7 +3,7 @@ id: ism-kb-10-research-status-current-focus-snapshot
 name: "CURRENT_FOCUS Snapshot"
 description: "docs/CURRENT_FOCUS.md 的結構化鏡像；Phase 2 方向 A+D 進行中。⚠ 2 週有效。"
 status: active
-last_verified: 2026-04-22
+last_verified: 2026-05-18
 content_nature: runtime-fact
 doc_type: reference
 verified_scope: "mirror of docs/CURRENT_FOCUS.md on 2026-04-22"
@@ -22,6 +22,15 @@ alias_paths: []
 
 > ⚠️ **此為 2026-04-22 快照，2 週有效至 2026-05-06**
 > 最新：[docs/CURRENT_FOCUS.md](../../docs/CURRENT_FOCUS.md)
+>
+> **📅 2026-05-18 Update Notice**: 自 04-22 以來主軸與 governance 大改：
+> - **主軸切換** 2026-05-13: Self-Phasing V6 production → Thread D Paper（4-6 週序列化雙軌）— 詳見 `docs/CURRENT_FOCUS.md §2026-05-13 / §2026-05-17`
+> - **Tier 1-4 序列化** 2026-05-17: T1.1 主軸正名 ✅, T1.2 V6 prod tag 🔴 Hard Gate 待執行, T1.3 init-research scaffolding ✅
+> - **governance v3 D2 分流** 2026-05-17 (commit `696c7c1`): CLAUDE.md 161 行 + AGENTS.md 286 行重構
+> - **新元 skill** `/scientific-rigor` 2026-05-17 (commit `42217cf`)
+> - **Q5 erratum** 2026-05-17 (commit `f3611a7`): biorxiv/ensembl MCP 實測非僵屍
+>
+> 本快照僅作 2026-04-22 之前的歷史鏡像；下次完整內容更新待後續 session。
 
 - 一句結論：Phase 2 方向 A+D 進行中；HCC1395 pilot POSITIVE (97.3%)；7 樣本 paired_full haplotag 重跑待執行
 - 適用對象：決策前快速了解現況

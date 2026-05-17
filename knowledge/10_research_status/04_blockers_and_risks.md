@@ -3,7 +3,7 @@ id: ism-kb-10-research-status-blockers-and-risks
 name: "Blockers & Risks"
 description: "當前阻塞：haplotag 重跑、expected_coverage hardcoded bug、COLO829 TO 無 methylation；merged 檔 AF 欄位陷阱 + HCC1395 phase1_new LOH 殘缺 (2026-04-23 新加)；風險清單與緩解。⚠ 2 週有效。"
 status: active
-last_verified: 2026-04-23
+last_verified: 2026-05-18
 content_nature: runtime-fact
 doc_type: reference
 verified_scope: "blockers against MEMORY pending items"
@@ -21,6 +21,14 @@ alias_paths: []
 # Blockers & Risks
 
 > ⚠️ **此為 2026-04-22 快照**。阻塞狀態變動快；決策前先核對 `docs/CURRENT_FOCUS.md`
+>
+> **📅 2026-05-18 Update Notice**: 新增/解除阻塞（詳見 `docs/CURRENT_FOCUS.md §2026-05-17`）：
+> - **新 Hard Gate**: T1.2 V6 production tag finalize（commit hash + manifest + PI errata package）
+> - **解除**: Q5 MCP 僵屍誤判（commit `f3611a7` 實測證明 biorxiv/ensembl 真實可運作）
+> - **持續**: haplotag 重跑、expected_coverage hardcoded bug、COLO829 TO methylation 缺失
+> - **新增風險**: CURRENT_FOCUS goal drift (>25 天未深度更新 KB 快照)
+>
+> 本快照僅作 2026-04-22 阻塞鏡像；下次完整內容更新待後續 session。
 
 - 一句結論：3 個主要阻塞（haplotag 重跑、expected_coverage bug、COLO829 TO）；風險可控
 - 適用對象：決策前、排除阻塞優先級排序

@@ -3,7 +3,7 @@ id: ism-kb-10-research-status-active-hypotheses
 name: "Active Hypotheses"
 description: "當前 priority=high 活躍假說清單：H011 QS≥50、H012 GQ≥3、H_COMBO 組合 filter 等 adopted 假說。⚠ 2 週有效。"
 status: active
-last_verified: 2026-04-22
+last_verified: 2026-05-18
 content_nature: runtime-fact
 doc_type: reference
 verified_scope: "active hypotheses against research/autoresearch/hypothesis_queue.json"
@@ -20,6 +20,14 @@ alias_paths: []
 # Active Hypotheses
 
 > ⚠️ **此為 2026-04-22 快照**，最新：`research/autoresearch/hypothesis_queue.json`
+>
+> **📅 2026-05-18 Update Notice**: 自 04-22 以來新增/狀態變更（詳見 `docs/CURRENT_FOCUS.md §2026-05-17`）：
+> - Thread D 主軸正名「TP-enriched phasing signatures (LOH × cross_het)」（commit T1.1）
+> - V6 production tag 待 Hard Gate（T1.2）— 影響 Phase 2A archive TO rerun
+> - HCC1395 chr8 hotspot CN+AF POSITIVE（⭐3 PARTIAL POSITIVE，2026-05-15）
+> - 新 hypothesis category：Pre-registration 強制（依 `/scientific-rigor §7.1`）
+>
+> 本快照僅作 2026-04-22 之前活躍假說鏡像；下次完整內容更新待後續 session。
 
 - 一句結論：當前 adopted 假說 4 個（H011/H012/H_COMBO/H_KDE_001）；rejected 假說不再追
 - 適用對象：研究迴圈下一輪選擇、假說優先級決策
