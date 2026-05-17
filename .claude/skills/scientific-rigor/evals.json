@@ -1,0 +1,143 @@
+{
+  "skill": "scientific-rigor",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "created_at": "2026-05-17",
+  "evals": [
+    {
+      "id": "eval_01_research_conclusion_claim",
+      "category": "activation",
+      "query": "我發現 ISM 在 paired-pure 模式 F1 +0.0112，可以宣告 ISM 是有效的 variant filter 嗎？",
+      "context": {
+        "files_in_scope": ["InterSubMod/.claude/skills/scientific-rigor/SKILL.md"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '宣告', 'F1', 'effective', 'variant filter')",
+        "Applies §2 Evidence Level: F1 +0.0112 = marginal, < Cohen's small 0.2; should NOT claim L1",
+        "Applies §3 Effect Size: must state 'marginal' explicitly, not 'significant improvement'",
+        "Applies §4 DAG: ask if AlleleDelta ← AF → TP/FP collider risk has been checked",
+        "Recommends §5 multi-method validation via /auc-confound-guard 3-gate",
+        "Defers final claim until §11 chain completes through L4 4-track coverage"
+      ],
+      "must_not": [
+        "Accept the F1 +0.0112 claim as L1 evidence without challenge",
+        "Skip Effect Size context (must mention Cohen's small 0.2)",
+        "Recommend skipping DAG audit"
+      ]
+    },
+    {
+      "id": "eval_02_pre_registration",
+      "category": "activation",
+      "query": "我要開始研究 Normal BAM 對 ASM 的影響，先準備一下",
+      "context": {
+        "files_in_scope": ["InterSubMod/.claude/skills/scientific-rigor/SKILL.md"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: '研究', '開始', '實驗設計')",
+        "Triggers §7.1 Pre-registration: requires research/<topic>/00_INDEX.md with 3 columns (H_預測 / 否證條件 / decision_threshold)",
+        "Distinguishes confirmatory (registered, strict) vs exploratory (tagged, flexible)",
+        "Reminds: NO-GO 後 verdict 不可事後改寫 (CLAUDE.md §1 Hard Gate)",
+        "Also triggers §10.2 Retrieval practice: Read MEMORY.md for prior NormalASM conclusions"
+      ],
+      "must_not": [
+        "Skip Pre-registration step",
+        "Allow vague hypothesis without quantified threshold"
+      ]
+    },
+    {
+      "id": "eval_03_negative_postmortem",
+      "category": "activation",
+      "query": "我們的 ReadParser germline-hp-only Phase 1 是 CONDITIONAL NEGATIVE，下次該怎麼避免？",
+      "context": {
+        "files_in_scope": ["InterSubMod/.claude/skills/scientific-rigor/SKILL.md"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'NEGATIVE', 'postmortem', '下次怎麼避免', 'NO-GO')",
+        "Triggers §9.2 Blameless Postmortem template (Summary/Timeline/Root Cause/Well/Poorly/Action Items)",
+        "Triggers §8.3 Reflexion Buffer: warning signs + root cause + improvement direction + spaced recall date",
+        "Stores reflection in research/<topic>/REFLECTION.md or memory/feedback_*.md",
+        "Frames blamelessly (system not individual)"
+      ],
+      "must_not": [
+        "Blame individuals or assign fault",
+        "Skip writing REFLECTION.md",
+        "Accept vague 'we should be more careful' without concrete action items"
+      ]
+    },
+    {
+      "id": "eval_04_spaced_recall_30d",
+      "category": "activation",
+      "query": "30 天前我們結論 TO 模式甲基化增益為負，現在情況有變嗎？",
+      "context": {
+        "files_in_scope": ["InterSubMod/.claude/skills/scientific-rigor/SKILL.md"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'spaced recall', '30 天前', '結論', '現在')",
+        "Triggers §10.1 Spaced Repetition + §10.2 Retrieval Practice workflow",
+        "Reads memory + concluded archives for the TO methylation conclusion",
+        "Checks if new data/cycles have changed the picture (per §9.3 monthly health check)",
+        "Re-evaluates §2 Evidence Level (may need downgrade or rebuild)",
+        "If still valid → keep conclusion + schedule next 90d recall; if invalid → propose §9 PDCA new experiment"
+      ],
+      "must_not": [
+        "Accept the 30-day-old conclusion without re-verification",
+        "Skip checking newer experimental cycles",
+        "Forget to schedule next spaced recall date"
+      ]
+    },
+    {
+      "id": "eval_05_skip_pure_build",
+      "category": "skip",
+      "query": "幫我跑 make 看編譯有沒有過",
+      "context": {
+        "files_in_scope": ["InterSubMod/.claude/skills/scientific-rigor/SKILL.md"]
+      },
+      "expected_behavior": [
+        "Skill does NOT activate (SKIP WHEN matched: 'pure build')",
+        "Defers to /cpp-change or direct bash make",
+        "May briefly note: 'if this build is part of an experiment with results to evaluate, /scientific-rigor applies after build completes'"
+      ],
+      "must_not": [
+        "Force scientific-rigor activation for routine build",
+        "Demand Pre-registration for a simple compile check"
+      ]
+    },
+    {
+      "id": "eval_06_program_modification_active_recall",
+      "category": "activation",
+      "query": "我要改 ReadParser 加 normal BAM filter 邏輯",
+      "context": {
+        "files_in_scope": ["InterSubMod/.claude/skills/scientific-rigor/SKILL.md"]
+      },
+      "expected_behavior": [
+        "Skill activates if change has measurable impact on research metric (USE WHEN matched: '改動評估')",
+        "Triggers §10.2 program modification workflow: Active recall first (口述方案 + 預期 F1 變化), then execute, then compare",
+        "Cross-references AGENTS.md §6 Step→Verify format",
+        "If unexpected outcome → §8.3 Reflexion buffer entry"
+      ],
+      "must_not": [
+        "Allow execute-first-think-later approach",
+        "Skip expected-outcome documentation"
+      ]
+    },
+    {
+      "id": "eval_07_dag_collider_audit",
+      "category": "activation",
+      "query": "我做了 residualize on AF，AUC 從 0.50 升到 0.59，是不是發現了新信號？",
+      "context": {
+        "files_in_scope": ["InterSubMod/.claude/skills/scientific-rigor/SKILL.md"]
+      },
+      "expected_behavior": [
+        "Skill activates (USE WHEN matched: 'residualize', 'AUC', '新信號')",
+        "Immediately triggers §4 DAG causal audit: ask whether AF is confounder or collider",
+        "References /known-pitfalls P-01 (L2 Collider Bias) explicitly",
+        "Warns: if AF is collider, AUC jump is spurious, verdict auto-downgrades to characterization only",
+        "Requires DAG drawing in docs/concepts/DAG/<topic>.md before accepting claim"
+      ],
+      "must_not": [
+        "Accept the 0.50→0.59 jump as valid signal without DAG check",
+        "Skip /known-pitfalls P-01 reference"
+      ]
+    }
+  ]
+}
