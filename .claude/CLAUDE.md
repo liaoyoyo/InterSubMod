@@ -47,7 +47,7 @@
 
 ---
 
-## §3 Skills 分類索引（41 個，Claude Code 特定）
+## §3 Skills 分類索引（44 個，Claude Code 特定）
 
 - **元方法論**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/grill-me` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor`
 - **7-Phase Waterfall**: P0 `/cycle-init` → P1 `/research-loop` → P2 `/check-staleness` → P3 `/feature-layered-observation` → P4 `/multi-sample-consistency` → P5 `/run-evaluator` → P6 `/conclude-research`

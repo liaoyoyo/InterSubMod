@@ -146,7 +146,19 @@
       "Read(//etc/apache2/**)",
       "Read(//etc/apache2/sites-enabled/**)",
       "Read(//var/www/html/**)",
-      "Bash(/big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/standalone_trigger.sh)"
+      "Bash(/big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/standalone_trigger.sh)",
+      "Bash(git log *)",
+      "Bash(cp /tmp/keep_04c_1778701661.html preview/slide_04c_priority_bug_fix_site.html)",
+      "Bash(cp /tmp/keep_06_1778701661.html preview/slide_06_priority_bug.html)",
+      "Bash(git -C /big7_disk/liaoyoyo2001/InterSubMod add .claude/skills/scientific-rigor/)",
+      "Bash(git -C /big7_disk/liaoyoyo2001/InterSubMod status --short .claude/skills/scientific-rigor/)",
+      "Bash(git -C /big7_disk/liaoyoyo2001/InterSubMod diff --cached --stat .claude/skills/scientific-rigor/)",
+      "Bash(nohup bash /tmp/run_skill_validation.sh)",
+      "Bash(mount)",
+      "Bash(/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod --help)",
+      "Bash(mkdir -p /big7_disk/liaoyoyo2001/tmp)",
+      "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/skill_change_audit.sh)",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('/big7_disk/liaoyoyo2001/InterSubMod/.claude/settings.local.json'\\)\\); pt=d['hooks'].get\\('PostToolUse',[]\\); print\\(f'PostToolUse matchers: {len\\(pt\\)}'\\); print\\(pt[-1]\\)\")"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
@@ -196,6 +208,16 @@
     "ensembl"
   ],
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/session_start_inject_focus.sh 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "hooks": [
@@ -374,6 +396,15 @@
           {
             "type": "command",
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/standalone_trigger.sh 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/skill_change_audit.sh 2>/dev/null || true"
           }
         ]
       }

@@ -185,7 +185,8 @@ ISM 研究域特定方法。
 - **目前 active**: 43 skills（含 1 個 deprecated `/html-preview`）
 - **2026-05-17 建立**: `/scientific-rigor` 元方法論層（commit `42217cf`）
 - **2026-05-13 deprecated**: `/html-preview`（Python middleware）→ 取代為 `/html-report-build`（LLM-direct）
-- **未來規劃**: F.4 P2/P3 業界空缺（Cynefin / Productive Failure / Living-update）— 詳見 plan `~/.claude/plans/scientific-rigor-skill-draft-lazy-muffin.md`
+- **2026-05-18 落地**: F.4 P2 Cynefin → `/confirmation-protocol §Cynefin 域對照`；F.4 P2 Productive Failure → `/scientific-rigor §8.3.1`
+- **未來規劃**: F.4 P3 Living-update hook（`skill_change_audit.sh` PostToolUse on `.claude/skills/`）— 詳見 plan `~/.claude/plans/scientific-rigor-skill-draft-lazy-muffin.md`
 
 ---
 

@@ -204,6 +204,14 @@ None
 - **修復某 cycle artifact** — 用該 cycle 對應 phase skill；本 skill 純 read-only audit
 - **mass tier downgrade** — 必須逐 cycle 過 run-evaluator + reviewer override，不可批次改 INDEX
 
+## 與 /scientific-rigor 元方法論的關係
+
+本 skill 為 `/scientific-rigor §8.4 知識追溯 audit` 的**全域定期實作**：
+- §8.4 要求「每個結論必能回答來自哪份數據 / 哪個 cycle / 哪個 commit」 → 本 skill 跨 cycle 掃 hypothesis_queue + evidence_ledger + INDEX + MEMORY.md 5 處 artifact 偵測 over-claim / stale / orphan
+- §8.3 Reflexion + §8.3.1 Productive Failure reopen 3 條件（C1 新數據 / C2 新方法 / C3 新前置）→ 本 skill 偵測「stale ⭐4-5 lock」即觸發 reopen threshold 強制檢核（避免無條件改寫）
+- §9.2 SRE Postmortem → 本 skill 報告為 retroactive audit 形式；發現 over-claimed tier 觸發 `templates/postmortem.md` 補錄
+- /scientific-rigor 是**單 cycle 級**證據分級 → 本 skill 為**全域 cross-cycle**一致性掃描，兩者互補
+
 ## Quality Checklist — 交付 audit 報告前自我檢查（v1.7 batch B）
 
 - [ ] **5 處 artifact 全掃**：hypothesis_queue / evidence_ledger / state/cycles / experiments INDEX / MEMORY.md
