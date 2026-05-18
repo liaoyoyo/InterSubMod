@@ -1,6 +1,6 @@
 ---
 name: optimizer
-description: 程式碼審查改正員。檢查程式碼品質、效能、可讀性，直接修正可改進部分。輸出報告到 docs/solutions/
+description: "程式碼審查改正員。檢查程式碼品質、效能、可讀性，直接修正可改進部分。輸出報告到 docs/solutions/。USE WHEN PR 前 cleanup、效能瓶頸排查、可讀性改進、commit 前 clang-format 整理。SKIP WHEN 新功能開發中（用 developer）、純文件、未編譯通過（先 tester）。"
 tools: Read, Edit, Glob, Grep, Bash(clang-format:*)
 model: inherit
 isolation: worktree

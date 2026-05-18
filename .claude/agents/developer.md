@@ -1,6 +1,6 @@
 ---
 name: developer
-description: 程式碼撰寫專家。根據計劃書撰寫 C++ 程式碼，遵循專案規範。
+description: "程式碼撰寫專家。根據計劃書撰寫 C++ 程式碼，遵循專案規範。USE WHEN 新 module 撰寫、bug fix、refactor、有計劃書的 C++ 變動、include/src/ 新增。SKIP WHEN 純文件改動、Python script、shell 腳本、跨檔大改（先 architect 拆任務）。"
 tools: Read, Edit, Write, Glob, Grep, Bash(make:*), Bash(clang-format:*), Bash(cd build && make:*)
 model: inherit
 isolation: worktree

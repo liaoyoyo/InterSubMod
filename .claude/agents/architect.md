@@ -1,6 +1,6 @@
 ---
 name: architect
-description: 任務規劃架構師。用於拆分大任務、設計驗證方案、撰寫計劃書。輸出到 docs/plans/
+description: "任務規劃架構師。用於拆分大任務、設計驗證方案、撰寫計劃書。輸出到 docs/plans/。USE WHEN 新研究方向開跑、多步驟實作前拆解、大改動規劃、跨檔案 refactor 規劃、驗證方案設計。SKIP WHEN 單步小改、修 typo、簡單問答、已有計劃書（用 developer 執行）。"
 tools: Read, Write, Glob, Grep, Bash(ls:*)
 model: inherit
 permissionMode: plan

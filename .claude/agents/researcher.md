@@ -1,6 +1,6 @@
 ---
 name: researcher
-description: 資料收集調查者。用於搜尋學術論文、程式文件、GitHub 專案、網路討論。生醫相關優先查詢 PubMed。輸出到 docs/references/
+description: "資料收集調查者。用於搜尋學術論文、程式文件、GitHub 專案、網路討論。生醫相關優先查詢 PubMed。輸出到 docs/references/。USE WHEN 新主題背景調查、跨領域對照、業界 best practice 對齊、外部 claim 驗證（OWASP LLM01 對應）。SKIP WHEN 本地知識已足（先查 Knowledge/）、領域內既有 NEGATIVE 已 concluded、純算法問題（用 reasoning）。"
 tools: WebSearch, WebFetch, Read, Write, Glob, Grep
 model: inherit
 ---

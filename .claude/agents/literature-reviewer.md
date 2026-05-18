@@ -1,6 +1,6 @@
 ---
 name: literature-reviewer
-description: Use this agent when the user asks to "conduct literature review", "search for papers", "analyze research papers", "identify research gaps", "review related work", or mentions starting a research project. This agent integrates with Zotero for automated paper collection, organization, and full-text analysis. Examples:
+description: Literature review specialist with Zotero MCP integration. USE WHEN user asks to "conduct literature review", "search for papers", "analyze research papers", "identify research gaps", "review related work", or mentions starting a new research project. SKIP WHEN local Knowledge/ already covers the topic, when user only needs a single paper analysis (use paper-miner), when no Zotero MCP is configured. Examples:
 
 <example>
 Context: User wants to start a new research project

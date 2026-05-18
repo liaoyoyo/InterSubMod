@@ -1,6 +1,6 @@
 ---
 name: parallel-analysis
-description: 平行分析執行器。將多個獨立 Python 分析腳本同時執行，匯總輸出表與圖表。適用 cross-sample 分析、多樣本特徵比較、批次圖表生成。預設使用 git worktree isolation（避免平行 subagent 在同 figures/ 目錄寫入競爭）。
+description: "平行分析執行器。將多個獨立 Python 分析腳本同時執行，匯總輸出表與圖表。適用 cross-sample 分析、多樣本特徵比較、批次圖表生成。預設使用 git worktree isolation（避免平行 subagent 在同 figures/ 目錄寫入競爭）。USE WHEN ≥3 個獨立 Python 分析、跨樣本同 script 多參數、批次圖表生成。SKIP WHEN 單一 script、需循序依賴（串行更穩）、需互動結果。"
 tools: Read, Write, Bash, Glob, Grep
 model: inherit
 isolation: worktree

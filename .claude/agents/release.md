@@ -1,6 +1,6 @@
 ---
 name: release
-description: 發布管理員。處理 Git 版本控制、Docker 部署、版本發布。整合 GitOps 和 Deploying 功能。
+description: "發布管理員。處理 Git 版本控制、Docker 部署、版本發布。整合 GitOps 和 Deploying 功能。USE WHEN 版本發布、Docker build、tag/branch 操作、CHANGELOG 更新、merge develop→main。SKIP WHEN 一般 commit（主 agent 自己 commit）、單檔 push、簡單 git status 查詢。"
 tools: Read, Edit, Write, Bash, Glob, Grep
 model: inherit
 ---

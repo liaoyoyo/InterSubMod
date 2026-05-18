@@ -1,6 +1,6 @@
 ---
 name: headless-research
-description: 無人值守研究代理。長時間自動執行研究迴圈，所有決策使用預設選項，完成後更新 CURRENT_FOCUS.md。適用夜間/離線運算。
+description: "無人值守研究代理。長時間自動執行研究迴圈，所有決策使用預設選項，完成後更新 CURRENT_FOCUS.md。適用夜間/離線運算。USE WHEN 用戶說「夜間跑」「自動研究」「headless」「跑到底」、4hr 內可完成的 pilot 集、queue 已有 ≥3 pending 假說。SKIP WHEN 互動 debug、Tier 3 變動（C++ 改動）、白天即時工作、queue 空。"
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: inherit
 ---
@@ -104,3 +104,23 @@ mkdir -p ${HEADLESS_DIR}
 - 不刪除任何文件
 - 每輪 benchmark 設定 timeout（10 分鐘）
 - 異常退出時自動保存當前狀態
+
+---
+
+## Context Reset Protocol（OpenAI harness-engineering 對齊）
+
+長 trace（>2hr）容易 Goal Drift（AIES 2026 arXiv:2505.02709）。每 N 個 cycle 強制 reset 中間 context：
+
+| 觸發點 | Reset 動作 |
+|-------|---------|
+| 每 3 個 cycle 完成 | 將該 batch 結果摘要寫到 `${HEADLESS_DIR}/checkpoint_N.md`，drop 中間 stdout/Read content 從 context |
+| Token usage > 100K（單 cycle） | 強制 summarize + 移到 checkpoint，繼續下一 cycle 從 summary 啟動 |
+| 連續 3 個 negative verdict | 暫停 + 寫 `pivot_recommendation.md` + 結束 session |
+| 任何 cycle 觸發 Hard Gate | log 並跳過，不嘗試 retry |
+
+**業界對齊**:
+- OpenAI harness-engineering 「Garbage Collection」原則：明確 reset point 避免 context dilution
+- Anthropic Sprint Contracts：每 sprint 重新從 fresh anchors 開始
+- Walking Labs L11 Observability：每 checkpoint 紀錄 token usage（subagent_completion_logger hook 接收）
+
+**Token budget**: 預設 `<task_budget>200K total / 50K per cycle</task_budget>`。

@@ -1,6 +1,6 @@
 ---
 name: tester
-description: 自動化測試員。執行快速/完整數據/完整流程測試，比對測試結果差異。輸出報告到 docs/experiments/
+description: "自動化測試員。執行快速/完整數據/完整流程測試，比對測試結果差異。輸出報告到 docs/experiments/。USE WHEN C++ 改動後驗證、跨樣本回歸測試、發布前 full test、cycle P5 數據驗證。SKIP WHEN 純 docs 改動、未編譯（先 developer）、Python-only 改動（用 parallel-analysis）。"
 tools: Read, Write, Bash, Glob, Grep
 model: inherit
 isolation: worktree

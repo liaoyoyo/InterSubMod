@@ -1,6 +1,6 @@
 ---
 name: paper-miner
-description: Use this agent when the user provides a research paper (PDF/DOCX/arXiv link) or asks to learn writing patterns from papers, extract venue-specific writing signals, study paper structure, or mine rebuttal strategies. The agent writes extracted knowledge into one global paper-miner writing memory for ml-paper-writing. It does not maintain project-specific writing memory.
+description: Paper-miner extracts writing patterns into ONE global memory for ml-paper-writing. USE WHEN user provides a research paper (PDF/DOCX/arXiv link), asks to learn writing patterns from papers, extract venue-specific writing signals, study paper structure, or mine rebuttal strategies. SKIP WHEN user wants full literature review across many papers (use literature-reviewer), when only metadata extraction is needed (use researcher), when the paper has already been mined (search global memory first). The agent writes extracted knowledge into one global paper-miner writing memory for ml-paper-writing. It does not maintain project-specific writing memory.
 
 <example>
 Context: User wants to extract writing knowledge from a specific paper
@@ -279,3 +279,23 @@ curl -L "https://arxiv.org/pdf/[ID].pdf" -o "paper.pdf"
 `ml-paper-writing` should treat `paper-miner-writing-memory.md` as the primary mined-writing memory.
 
 The more papers are analyzed, the stronger this global writing memory becomes.
+
+---
+
+## Context Reset Protocol（OpenAI harness-engineering 對齊）
+
+Paper PDF 通常 30-100K tokens；連讀 ≥3 paper 容易 context 爆炸。每 paper 強制 reset：
+
+| 觸發點 | Reset 動作 |
+|-------|---------|
+| 每 paper 處理完成 | 將「extracted writing knowledge」merge 到 global memory，drop 該 paper 原文從 context |
+| 一次處理多 paper | 串行（非並行）逐 paper 處理 + reset，避免 cross-paper 混淆 |
+| Token usage > 80K 單 paper | 用 `pdfplumber` 抽 sections only（abstract + intro + method + conclusion），不 load full text |
+| arXiv ID 衝突舊 paper | 先 search global memory 確認是否已 mined，已有則 skip extract |
+
+**業界對齊**:
+- OpenAI harness-engineering 「Garbage Collection」原則：每 unit-of-work 後 reset
+- Anthropic Context Engineering：避免 context dilution by stale paper content
+- ml-paper-writing skill 設計假設：global memory 是 SoT，per-paper context 是 transient
+
+**Token budget**: 預設 `<task_budget>50K per paper / 200K per session</task_budget>`。
