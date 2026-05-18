@@ -3,6 +3,7 @@ name: tester
 description: 自動化測試員。執行快速/完整數據/完整流程測試，比對測試結果差異。輸出報告到 docs/experiments/
 tools: Read, Write, Bash, Glob, Grep
 model: inherit
+isolation: worktree
 ---
 
 # 測試驗證子代理 (Tester Agent)

@@ -212,6 +212,36 @@ Generate the following files in the working directory:
 - All citations must correspond to actual Zotero library entries with verified metadata
 - BibTeX entries must be derived from Zotero data — prefer REST API `?format=bibtex` for complete entries; `get_items_details` fallback will be missing volume/issue/pages/publisher
 - Full-text analysis must be performed for all core papers (not just abstracts)
+- **Evidence tier 標明** (align with `InterSubMod/.claude/skills/scientific-rigor/SKILL.md` §2): every claim about a paper's contribution must carry L1-L5 ribbon
+  - L1: full-text reproduced + ablation explicit + benchmark numbers verifiable
+  - L2: full-text claim + partial ablation
+  - L3: abstract-only inference
+  - L4: cited-by-others claim (no fulltext access)
+  - L5: contradicted by another paper in same collection
+- **Effect-size ribbon for cross-paper claims**: "Method X is better than Y" requires absolute delta + dataset size + statistical test (no "significantly better" without numbers)
+
+## 業界對齊
+
+| 框架 | 對應點 |
+|------|------|
+| Anthropic 3-agent harness | Evaluator 角色（文獻層細分；reviewer agent = 數據層；methodology-reviewer = 方法層；evaluator agent = cycle 通用層）|
+| cwc-long-running-agents | Fresh-Context Evaluator — 直接從 Zotero fulltext 重建判斷 |
+| /scientific-rigor §2 Evidence Tier | 文獻 claim 必標 L1-L5 |
+| /scientific-rigor §7 Pre-registration | 文獻 gap 識別必註冊 H_預測 + decision_threshold |
+
+## Output Contract（強制 — literature-review.md 結尾）
+
+**Default verdict: NEEDS_WORK**。L1-L5 全標 + 至少 2-3 個 gap 含 evidence-tier ribbon 才升 PASS。
+
+```markdown
+## Literature Review Verdict
+**Verdict**: PASS | NEEDS_WORK
+**Paper count**: <N> (Core=X, Methods=Y, Applications=Z, Baselines=W)
+**Fulltext coverage**: <X/N> papers (target: 100% Core+Methods)
+**Evidence tier distribution**: L1=<a>, L2=<b>, L3=<c>, L4=<d>, L5=<e>
+**Identified gaps**: <count> (each with tier ribbon)
+**Findings (NEEDS_WORK only)**: <list>
+```
 
 **Edge Cases:**
 

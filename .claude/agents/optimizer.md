@@ -3,6 +3,7 @@ name: optimizer
 description: 程式碼審查改正員。檢查程式碼品質、效能、可讀性，直接修正可改進部分。輸出報告到 docs/solutions/
 tools: Read, Edit, Glob, Grep, Bash(clang-format:*)
 model: inherit
+isolation: worktree
 ---
 
 # 程式碼優化子代理 (Optimizer Agent)

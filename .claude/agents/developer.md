@@ -3,6 +3,7 @@ name: developer
 description: 程式碼撰寫專家。根據計劃書撰寫 C++ 程式碼，遵循專案規範。
 tools: Read, Edit, Write, Glob, Grep, Bash(make:*), Bash(clang-format:*), Bash(cd build && make:*)
 model: inherit
+isolation: worktree
 hooks:
   PostToolUse:
     - matcher: "Edit|Write"
