@@ -1,6 +1,6 @@
 ---
 name: provenance-tier-audit
-description: **跨 cycle 證據鏈一致性審計（system-level，非單 cycle 升級判定）**。掃描 hypothesis_queue / evidence_ledger / state/cycles / docs/experiments/INDEX / MEMORY.md 五處 artifact，偵測：(1) orphan cycle (無 ledger 對應)、(2) over-claimed tier (ledger stability < tier_used)、(3) stale entry (>365 天 active)、(4) 跨 artifact 不一致（如 INDEX 標 ⭐4 但 ledger verdict=NEGATIVE）、(5) tier 分佈異常（⭐4-5 過多）。**與 /run-evaluator 分工**：本 skill = 全域審計（週級別跑），/run-evaluator = 單 cycle P5 升 tier 前 retraction risk（cycle 級別跑）；兩者互補不重疊。觸發：「週報 evidence」「tier 分佈」「audit ledger」「證據鏈檢查」「結論盤點」「provenance 審計」「跨 cycle 一致性」。SKIP WHEN 單 cycle P5 tier 升級判定（用 run-evaluator）、單實驗結果分析（用 results-analysis）、查單一假說歷史（用 review-evidence）、純 build / commit / docs。
+description: "**跨 cycle 證據鏈一致性審計（system-level，非單 cycle 升級判定）**。掃描 hypothesis_queue / evidence_ledger / state/cycles / docs/experiments/INDEX / MEMORY.md 五處 artifact，偵測：(1) orphan cycle (無 ledger 對應)、(2) over-claimed tier (ledger stability < tier_used)、(3) stale entry (>365 天 active)、(4) 跨 artifact 不一致（如 INDEX 標 ⭐4 但 ledger verdict=NEGATIVE）、(5) tier 分佈異常（⭐4-5 過多）。**與 /run-evaluator 分工**：本 skill = 全域審計（週級別跑），/run-evaluator = 單 cycle P5 升 tier 前 retraction risk（cycle 級別跑）；兩者互補不重疊。觸發：「週報 evidence」「tier 分佈」「audit ledger」「證據鏈檢查」「結論盤點」「provenance 審計」「跨 cycle 一致性」。SKIP WHEN 單 cycle P5 tier 升級判定（用 run-evaluator）、單實驗結果分析（用 results-analysis）、查單一假說歷史（用 review-evidence）、純 build / commit / docs。"
 allowed-tools: Read, Write, Bash, Grep
 user-invocable: true
 version: 0.2.0

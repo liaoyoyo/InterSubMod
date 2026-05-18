@@ -213,7 +213,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/session_start_inject_focus.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/session_start_inject_focus.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       }
@@ -223,7 +223,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/knowledge_check.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/knowledge_check.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
@@ -231,7 +231,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/research_direction_guard.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/research_direction_guard.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
@@ -239,7 +239,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/kb_freshness_warn.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/kb_freshness_warn.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
@@ -247,7 +247,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/md_path_format_rule.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/md_path_format_rule.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       }
@@ -314,7 +314,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/cpp_edit_guard.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/cpp_edit_guard.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
@@ -323,7 +323,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/trigger_routing.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/trigger_routing.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
@@ -332,7 +332,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/evidence_ledger_sync.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/evidence_ledger_sync.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
@@ -341,7 +341,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/terminology_guard.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/terminology_guard.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
@@ -350,7 +350,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/md_link_check.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/md_link_check.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
@@ -359,7 +359,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/compile_success_clear.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/compile_success_clear.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
@@ -368,7 +368,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.command // empty' | { read -r cmd; [ -n \"$cmd\" ] && echo \"$cmd\" | grep -q 'git commit' && echo '[Hook] 提交完成，請確認：1. 測試已通過 2. 文檔已更新'; } 2>/dev/null || true"
+            "command": "jq -r '.tool_input.command // empty' | { read -r cmd; [ -n \"$cmd\" ] && echo \"$cmd\" | grep -q 'git commit' && echo '[Hook] 提交完成，請確認：1. 測試已通過 2. 文檔已更新'; } 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
@@ -377,7 +377,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/post_cpp_commit_invalidate.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/post_cpp_commit_invalidate.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
@@ -386,7 +386,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/kb_sot_guard.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/kb_sot_guard.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
@@ -395,7 +395,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/standalone_trigger.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/standalone_trigger.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
@@ -404,7 +404,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/skill_change_audit.sh 2>/dev/null || true"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/skill_change_audit.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       }

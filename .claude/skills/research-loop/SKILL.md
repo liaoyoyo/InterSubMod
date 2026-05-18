@@ -1,6 +1,6 @@
 ---
 name: research-loop
-description: **P1 PLAN 階段：研究迴圈設計**（前 4 步 觀察→定向→假設→驗證設計）。為 1 個假說 cycle 產生 plan.json（含 binary_version / dataset_id / upstream_reports / 預期 effect_size / stop criteria）— **不負責執行 / 記錄 / 呈現 / 回饋**（這些由下游 skill 接手：/check-staleness P2 → /test-quick or feature-layered-observation P3 → /run-evaluator P5 → results-report / weekly-report P5-P6 → pivot-direction or conclude-research P6）。USE WHEN：「開始研究迴圈」「research loop」「測試新假設」「下一輪假設」「設計驗證計畫」「P1 PLAN」。適用 paired_full / paired_pileup / TO 三條 pipeline track。SKIP WHEN 假說尚未註冊（先 inject-hypothesis）、cycle 已過 P1 進入 P2+（用對應 phase skill）、純 build / commit / docs、單一實驗複盤（用 results-report）。
+description: "**P1 PLAN 階段：研究迴圈設計**（前 4 步 觀察→定向→假設→驗證設計）。為 1 個假說 cycle 產生 plan.json（含 binary_version / dataset_id / upstream_reports / 預期 effect_size / stop criteria）— **不負責執行 / 記錄 / 呈現 / 回饋**（這些由下游 skill 接手：/check-staleness P2 → /test-quick or feature-layered-observation P3 → /run-evaluator P5 → results-report / weekly-report P5-P6 → pivot-direction or conclude-research P6）。USE WHEN：「開始研究迴圈」「research loop」「測試新假設」「下一輪假設」「設計驗證計畫」「P1 PLAN」。適用 paired_full / paired_pileup / TO 三條 pipeline track。SKIP WHEN 假說尚未註冊（先 inject-hypothesis）、cycle 已過 P1 進入 P2+（用對應 phase skill）、純 build / commit / docs、單一實驗複盤（用 results-report）。"
 allowed-tools: Read, Write, Bash, Glob, Grep
 user-invocable: true
 version: 0.2.0

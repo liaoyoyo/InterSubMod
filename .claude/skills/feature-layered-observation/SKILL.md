@@ -1,6 +1,6 @@
 ---
 name: feature-layered-observation
-description: **P3 PILOT 主要分析 skill** — 標準化 TP/FP 特徵分層觀察協議。對任一 ISM/VCF/BAM-QC 特徵或特徵群組執行 Step 1-6（global AUC → LOH×AF×CN 32-cell → 7-sample 一致性 → 分層 AUC → confound guard → spatial autocorr），產出 10 章節 .md + 6 類圖 + verdict + pilot.json（schema 對齊 `state/schemas/pilot.schema.json`）供 P4 multi-sample-consistency 接手。封裝 Phase A-E G1-G10 方法學。觸發：「觀察特徵」「feature layered」「feature × LOH×AF×CN」「TP FP 分層」「跨樣本一致性」「單一特徵觀察」「特徵群組觀察」「run Step 1-6」「P3 PILOT」。USE WHEN：新增功能群組、對現有特徵重跑、延伸到新 pipeline 的特徵驗證。SKIP WHEN 純 build / commit / docs、多樣本一致性驗證（用 multi-sample-consistency）、tier 升級判定（用 run-evaluator）、程式碼層級驗證（用 verification-loop）。
+description: "**P3 PILOT 主要分析 skill** — 標準化 TP/FP 特徵分層觀察協議。對任一 ISM/VCF/BAM-QC 特徵或特徵群組執行 Step 1-6（global AUC → LOH×AF×CN 32-cell → 7-sample 一致性 → 分層 AUC → confound guard → spatial autocorr），產出 10 章節 .md + 6 類圖 + verdict + pilot.json（schema 對齊 `state/schemas/pilot.schema.json`）供 P4 multi-sample-consistency 接手。封裝 Phase A-E G1-G10 方法學。觸發：「觀察特徵」「feature layered」「feature × LOH×AF×CN」「TP FP 分層」「跨樣本一致性」「單一特徵觀察」「特徵群組觀察」「run Step 1-6」「P3 PILOT」。USE WHEN：新增功能群組、對現有特徵重跑、延伸到新 pipeline 的特徵驗證。SKIP WHEN 純 build / commit / docs、多樣本一致性驗證（用 multi-sample-consistency）、tier 升級判定（用 run-evaluator）、程式碼層級驗證（用 verification-loop）。"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 user-invocable: true
 version: 0.2.0

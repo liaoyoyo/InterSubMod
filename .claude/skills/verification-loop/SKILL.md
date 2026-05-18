@@ -1,6 +1,6 @@
 ---
 name: verification-loop
-description: **程式碼級綜合驗證迴圈**（不同於 /validate command 的研究假說 benchmark）— build、type check、lint、測試、安全掃描、diff review。USE WHEN：「驗證程式碼」「verify」「check quality」「PR 前 review」「程式碼品質」、建立 PR 前。涉及 .cpp/.hpp/.py 原始碼、build/ 產出。**職責邊界**：本 skill = 程式碼語法/build/test 級驗證；`/validate` command = 研究假說 benchmark + experiment_report；兩者互補不重疊。SKIP WHEN 研究假說 benchmark（用 /validate command）、tier 升級判定（用 run-evaluator）、純 docs / 純 .md 編輯、已通過 CI 不需重 verify。
+description: "**程式碼級綜合驗證迴圈**（不同於 /validate command 的研究假說 benchmark）— build、type check、lint、測試、安全掃描、diff review。USE WHEN：「驗證程式碼」「verify」「check quality」「PR 前 review」「程式碼品質」、建立 PR 前。涉及 .cpp/.hpp/.py 原始碼、build/ 產出。**職責邊界**：本 skill = 程式碼語法/build/test 級驗證；`/validate` command = 研究假說 benchmark + experiment_report；兩者互補不重疊。SKIP WHEN 研究假說 benchmark（用 /validate command）、tier 升級判定（用 run-evaluator）、純 docs / 純 .md 編輯、已通過 CI 不需重 verify。"
 version: 1.1.0
 user-invocable: true
 ---
