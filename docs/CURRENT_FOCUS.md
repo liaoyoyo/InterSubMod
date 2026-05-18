@@ -12,6 +12,81 @@
 
 # 當前目標
 
+## 2026-05-19 — Phase 2 Cycle 2 結束 (⭐3 保持 + caveat) + Cycle 3 啟動
+
+**Session anchor**：2026-05-18 cycle 1 ⭐3 strong → 2026-05-19 cycle 2 cross-sample DIRECTION_NEGATIVE + cross-binary PASS → user 5/19 三選決議
+
+### Cycle 2 結論
+
+| Hypothesis | Verdict | 細節 |
+|---|---|---|
+| **H_C1_5** cross-sample n=5 Wilcoxon | **DIRECTION_NEGATIVE** | Transfer 1+/4- p=0.1875 ΔRecall p=0.0625；re-fit 3+/0-/2≈0 MIXED；僅 HCC1937 (F1=0.37) re-fit +0.00761 |
+| **H_C1_6** V3F/V5/V6 HCC1395 cross-binary | **PASS** | max_var transfer 0.00073 / re-fit 0.00055；V6 re-fit bit-exact reproduce cycle 1 drift 0 |
+
+**Mechanism**: caller-F1-headroom-bounded — 3/4 新樣本 caller F1 > 0.83 + FP density < 4% 不留 filtering room；HCC1954 transfer 災難 -0.377 = caller_af coef overfit HCC1395 AF 非 methylation 失敗。
+
+### User 5/19 三選決議
+
+| 決策 | 選項 |
+|---|---|
+| Cycle 1 tier | **保持 ⭐3 + caveat** — internal valid + cross-sample bounded |
+| HTML PI preview | **等 cycle 3 結果後再做** — 避免在不完整故事上 PI 決策 |
+| Cycle 3 方向 | **啟動 Caller-F1-headroom-aware redesign** — IF caller F1<0.80 + FP density>0.10 apply per-sample re-fit ELSE skip |
+
+### 新增四軌狀態（patch v2）
+
+| 軌道 | 5/18 狀態 | 5/19 狀態 |
+|------|----------|----------|
+| methyl_filter_phase2 | cycle 1 ⭐3 strong | **cycle 2 ⭐3 + caveat (cross-sample bounded)，cycle 3 caller-F1-headroom-aware 啟動** |
+| thread_d_paper | 5/22 Tier 2 啟動 | unchanged |
+| selfphasing_v6_production | 5/19-22 4-day | **5/19 整合 H_C1_6 PASS evidence (V6 zero F1 regression)** |
+| phase_block_3d | 5/23 init-research | unchanged |
+
+### Cycle 3 Plan 概要
+
+- **H_C3_1**: Caller-F1-headroom rule (caller F1 < 0.80) qualifying subset (HCC1395 + HCC1937) re-fit mean ΔF1 ≥ +0.01
+- **H_C3_2**: 擴 low-F1 panel n≥4 Wilcoxon p<0.05
+- **H_C3_3**: High-F1 (>0.83) 樣本 skip filter caller F1 preserved drift < 0.001
+
+### Cycle 2 artifacts
+
+- Coordinator synthesis: `InterSubMod/research/methyl_augmented_filter_phase2/cycle2/cycle2_findings.md`
+- H_C1_5 detail: `InterSubMod/research/methyl_augmented_filter_phase2/cycle2/cycle2_step_b3_b4_findings.md`
+- H_C1_6 detail: `InterSubMod/research/methyl_augmented_filter_phase2/cycle2/cycle2_step_c1_h_c1_6_sanity.md`
+- Evidence ledger entry: `cycle_id: 20260519_phase2_cycle2_cross_sample_negative`
+
+### 🔍 5/19 (晚) Multi-Agent Audit 揭露 + Cycle 3 啟動延後
+
+**4-agent Explore audit（平行 × 4）校對 cycle 2 claim 與原始資料**：
+
+- ✅ **數字 fidelity 100% verified** — line 23-26 所有數字（transfer/refit/sanity max_var）在原始報告精確找到
+- ⚠️ **Mechanism 量化證據不足** — HCC1954 caller_af overfit + caller-headroom-bounded 定性 OK 但**缺視覺化**（AF 分佈 / coef inspection / scatter plot）；paper draft 前需補
+- 🔴 **Plan v2 R-MENTAL-DRIFT 0% compliance** — 48hr cooling-off + NEGATIVE postmortem 完全缺；同日 cycle 2 NEGATIVE → cycle 3 啟動違反 plan v2 自定紀律
+- 🔴 **cycle_id narrative bias** — `_negative` 預定 verdict（append-only ledger 精神違反）
+- 🔴 **Cycle 3 H_C3_2 low-F1 panel 樣本名單不存在** — 僅 HCC1395+HCC1937，缺 2-3 個；無 BAM 可用驗證
+- 🔴 **Provenance 缺漏** — binary_commit / dataset_id / pre-reg link 全缺
+
+### Cycle 3 啟動延後（plan v2 R-MENTAL-DRIFT 紀律執行）
+
+| 動作 | 狀態 |
+|------|------|
+| 48hr cooling-off period | ✅ 2026-05-19 → 2026-05-21 |
+| NEGATIVE postmortem .md | ✅ `InterSubMod/research/methyl_augmented_filter_phase2/cycle2/cycle2_NEGATIVE_postmortem.md` |
+| evidence_ledger postmortem entry | ✅ cycle_id `20260519_phase2_cycle2_negative_postmortem` |
+| Cycle 3 H_C3_2 low-F1 panel 樣本名單 | ⏳ 待 explore archive 或 user 提供 |
+| Cycle 3 啟動時間 | 🟡 **2026-05-21 後**（cooling-off 完成 + panel 名單就緒 + 4 must-fix 解除） |
+
+### Cycle 3 啟動前 4 個 Must-Fix
+
+1. 🔴 H_C3_2 low-F1 panel 具體 4 樣本名單（含 BAM 可用性驗證）
+2. 🟠 cycle_id 重命名規範：未來 cycle 用 `_validation` 不 `_negative`（verdict 在 entry 不在 name）
+3. 🟠 ledger entry 補 binary_commit hash / dataset_id / pre-reg link
+4. 🟡 H_C3_1 target 計算澄清：cycle 2 re-fit mean (+0.015) vs cycle 3 重新 re-fit
+
+**Plan v2 R-MENTAL-DRIFT 紀律檢驗**：本次為 plan v2 commitment 的真實測試 — cycle 2 NEGATIVE 後若立即啟動 cycle 3 屬於 confirmation loop。經 4-agent audit 揭露 + 用戶 explicit 暫停決策後**正式延後執行**，紀律保持 commitment 而非表演。
+
+---
+
 ## 2026-05-18 (晚晚) — Plan v2 patch（cycle 1 strong 後四軌定案）
 
 **Session anchor**：7 輪 Socratic 燒烤 (5/15+5/18) 累積 27 燒烤點 → plan v2 寫入 `~/.claude/plans/tender-pondering-blossom.md` → cycle 1 strong 結果 patch
