@@ -113,3 +113,21 @@ next steps:
 - `/scientific-rigor §11 協作圖 step 4 → 5` 之間若 cycle plan.json 已存在，必經本 skill PRECHECK
 
 **級聯觸發**: `/cycle-init` P0 → `/research-loop` P1 → 本 skill P2 → `/feature-layered-observation` P3
+
+---
+
+## Phase Chain Position & Dependencies
+
+- **Phase**: P2 STALENESS（在 /research-loop P1 之後、/feature-layered-observation P3 之前）
+- **Upstream**: `/research-loop`（plan.json 已生成）
+- **Downstream**: `/feature-layered-observation`（pass）或 `/pivot-direction`（fail）
+- **Reads**: `hypothesis_queue.json` + `evidence_ledger.jsonl` + `MEMORY.md` Concluded
+- **Writes**: Staleness verdict + reopen-eligibility check
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| Cycle 啟動但 hypothesis 已 NEGATIVE 30d | 未跑 staleness check | 強制 §8.3.1 reopen 三條件對齊 |
+| Reopen 條件模糊 | C1/C2/C3 未具體化 | 要求填 specific 新數據 / 新方法 / 新前置 |
+

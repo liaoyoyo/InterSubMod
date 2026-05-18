@@ -279,3 +279,27 @@ Q3（鑑別題）：<X> 和 <Y> 容易搞混，差別在哪？
 - 歷史教訓相關 → 路由至 `/known-pitfalls` P-XX
 
 **級聯**: 本 skill 學會概念 → `/scientific-rigor §10` 將原則套到工作流 → 對應領域 skill 執行
+
+---
+
+## Phase Chain Position & Dependencies
+
+- **Phase**: 元方法論層（用戶學新主題時啟動）
+- **Upstream**: 用戶說「教我 X」「想學 Y」「不熟 Z」
+- **Downstream**: 學完後 `/scientific-rigor §10.3` 應用驗證入口
+- **Reads**: 外部知識（WebSearch / Knowledge MCP）+ `references/learning-frameworks.md`
+- **Writes**: Inline 5-step learning plan 給用戶
+
+## 與 /scientific-rigor 元方法論的關係
+
+- **§10 啟發式學習工作流映射**: 本 skill = 學新主題；§10 = 套用既學原則到工作流（互補不重複）
+- **§0.5 最小可用子集**: 5 步學習對齊 80/20 Pareto 找關鍵 20%
+- **§10.1 Active Recall**: 步驟 1 主動回想為核心方法
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| 學完不會應用 | 缺步驟 4「具體化」 | 強制配 1 真實情境 |
+| 用戶單純查事實但 skill 啟動 | trigger 過寬 | 走 SKIP WHEN — 查版本號 / 簡單事實不啟動 |
+

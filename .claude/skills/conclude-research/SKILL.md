@@ -229,3 +229,28 @@ last_relevant: {today}
 3. **NEGATIVE 同樣重要**：失敗結論也必須完整記錄，防止未來重複
 4. **手動已完成的也可用**：即使研究是手動完成的（如 LOH-AF），也可用此 skill 補做 PROPAGATE
 5. **DECLARE 不取代 evidence**：checklist 是 cognitive forcing；不能替代 L4 多軌證據鏈本身（PMID 24423999 有警示 CFS 對新手 randomized trial 不顯效）
+
+---
+
+## Phase Chain Position & Dependencies
+
+- **Phase**: P6 CONCLUDE（cycle 終點）
+- **Upstream**: `/run-evaluator` P5（tier 已升至 ⭐4-5）
+- **Downstream**: `/memory-consolidation`（寫 MEMORY.md）+ `/weekly-report`（report PI）
+- **Reads**: cycle artifacts + INDEX.md + evidence_ledger.jsonl
+- **Writes**: MEMORY.md Concluded 新增條目 + INDEX.md status flip + CURRENT_FOCUS 更新
+
+## 與 /scientific-rigor 元方法論的關係
+
+- **§9.2 SRE Postmortem**: NEGATIVE 結論強制走 `templates/postmortem.md` 8 段範本
+- **§8 任務壓縮**: 寫 MEMORY.md Concluded = semantic memory consolidation
+- **§9 PDCA Act 階段**: 本 skill 為 cycle 的 Act 收尾（升級 / 修正 / 廢棄判定）
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| Conclude 但缺多樣本驗證 | 未跑 multi-sample-consistency | 回 P4 補 7-sample cross-check |
+| ⭐4-5 但 ledger stability 低 | over-claim — `/provenance-tier-audit` 會抓 | 降級或補實驗 |
+| Concluded 條目超 200 行 cap | MEMORY.md 過載 | archive 至 `memory/archive/`（P4 fix） |
+

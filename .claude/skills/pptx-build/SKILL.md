@@ -9,7 +9,7 @@ user-invocable: true
 
 PPT 製作子流程，承擔原 myPPT skill 的 P1-P5（outline → section → slide → visual review → speaker script）內容。**不負責 raw data 收集 / 母稿撰寫**（這是 weekly-report skill 的責任）。
 
-> **2026-05-05 從 myPPT 拆出**：原 myPPT 6-stage pipeline 拆分為 (a) weekly-report W1-W7 母稿生成 + (b) pptx-build P1-P5 PPTX 製作 + (c) myPPT 輕量總入口（場景識別 → 委派）。詳見 `InterSubMod/.claude/skills/weekly-master-draft/outlines/UPGRADE_PLAN_FOR_WEEKLY_REPORT.md`。
+> **2026-05-05 從 myPPT 拆出**：原 myPPT 6-stage pipeline 拆分為 (a) weekly-report W1-W7 母稿生成 + (b) pptx-build P1-P5 PPTX 製作 + (c) myPPT 輕量總入口（場景識別 → 委派）。詳見 `InterSubMod/.claude/skills/weekly-report/SKILL.md`（前身 weekly-master-draft 已 merge）。
 
 ---
 

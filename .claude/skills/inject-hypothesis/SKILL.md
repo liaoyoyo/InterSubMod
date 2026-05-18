@@ -148,3 +148,27 @@ for i, h in enumerate(pending[:5]):
 - 修改 ISM 執行參數 → `param_combo`（Tier 1）
 - 文獻中的新特徵 → `literature_feature`（Tier 1 or 2）
 - 修改 C++ 核心邏輯 → `cpp_improvement`（Tier 3）
+
+---
+
+## Phase Chain Position & Dependencies
+
+- **Phase**: P0 REGISTER（在 /problem-framing-ideation 之後、/cycle-init 之前）
+- **Upstream**: `/problem-framing-ideation`（候選假說清單）
+- **Downstream**: `/cycle-init`（用註冊後的 hypothesis_id 啟動 cycle）
+- **Reads**: `InterSubMod/research/autoresearch/hypothesis_queue.json` + `MEMORY.md` Concluded section
+- **Writes**: `InterSubMod/research/autoresearch/hypothesis_queue.json`（追加新 H_ID）
+
+## 與 /scientific-rigor 元方法論的關係
+
+- **§7.1 Pre-registration**: 本 skill 寫入 hypothesis_queue.json 含 H_預測 / 否證條件 / decision_threshold 3 欄 → confirmatory cycle 啟動的鎖點
+- **§8.3.1 Reopen Threshold**: 註冊前必查 MEMORY.md Concluded — 若與已 NEGATIVE 方向重複，需符 C1 新數據 / C2 新方法 / C3 新前置 至少一條，否則拒絕註冊
+- **§2 Evidence Tier**: 新 hypothesis 預設 ⭐2 hypothesis tier；經 cycle 驗證後由 `/run-evaluator` 升級
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| hypothesis_queue.json schema 驗證失敗 | 缺欄位 (h_id / tier / pipeline_track) | 對照 `state/schemas/hypothesis.schema.json` 補齊 |
+| H_ID 衝突（重複） | 未先查既有 queue | 跑 `jq '.hypotheses[].h_id' hypothesis_queue.json` 查最大號 +1 |
+| 註冊已 NEGATIVE 重複方向 | 未查 Concluded | 查 `MEMORY.md` Concluded + 套用 §8.3.1 reopen threshold |

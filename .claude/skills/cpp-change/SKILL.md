@@ -265,3 +265,13 @@ chore: evidence_ledger record [H_ID] cpp_improvement [問題名稱]
 - `pr-review-toolkit:code-reviewer` — Step 4.5 自動程式碼審查
 - `pr-review-toolkit:silent-failure-hunter` — 錯誤處理審查（可選）
 - `pr-review-toolkit:type-design-analyzer` — 型別設計審查（可選）
+
+---
+
+## 與 /scientific-rigor 元方法論的關係
+
+本 skill 為 `/scientific-rigor §6 消融實驗設計` 的 **C++ 程式碼層級具體實作**：
+- §6 「最小單元改動 / 快速反饋 / 4 步紀錄」 → 本 skill Step 1 BASELINE + Step 2 IMPLEMENT 對應「一次只改一個變數」
+- §9 PDCA cycle → 本 skill 6 steps 為 Do 階段；Step 5 VALIDATE 為 Check 階段；Step 6 EVIDENCE LEDGER 為 Act 階段
+- §7.2 可重現性 7 項 → 本 skill Step 1 baseline F1 + Step 6 commit hash binding 滿足 reproducibility
+- §8.3 Reflexion → Step 5 若 F1 大幅下降 → 走 §9.2 SRE Postmortem template 紀錄 lessons

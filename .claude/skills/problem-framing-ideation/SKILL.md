@@ -10,15 +10,19 @@ Supports the complete workflow for the research project initiation phase, from l
 
 ## Core Features
 
-### 1. Idea Brainstorming (5W1H Framework)
+### 1. Idea Brainstorming (5W2H Framework — 2026-05-18 P3 audit M2 升級)
 
-Systematically brainstorm research ideas using the 5W1H framework:
+Systematically brainstorm research ideas using the **5W2H** framework (5W1H + How Much):
 - **What**: What problem or phenomenon to study
 - **Why**: Why this problem is important
 - **Who**: Target audience and stakeholders
 - **When**: Time scope and context of the research
 - **Where**: Application scenarios and domains
 - **How**: Preliminary research methodology ideas
+- **How Much** (2026-05-18 新增): 預估 cost + 工時上限（對齊個人風格 anchor #5 「小規模快速驗證 <2hr」）
+  - Cost estimate: API USD（如 ~$1-2 for skill validation, ~$5-10 for cross-sample analysis）
+  - Time estimate: 工時上限（pilot <2hr / full cycle <1 week / paper-scale <1 month）
+  - **若 How Much > 預算 → 強制降為 pilot scope 或進 inject-hypothesis 拆 cycle**
 
 **Integration with superpowers:brainstorming**: Can invoke the superpowers:brainstorming skill for interactive brainstorming to help rapidly generate and evaluate research ideas.
 

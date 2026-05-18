@@ -196,3 +196,28 @@ prompt: |
 - [ ] 跨樣本平行不超過 5 並行（避免 IO contention）
 - [ ] verdict 寫入：`consistent` / `mostly_consistent` / `inconsistent` 對應 stop_criteria
 - [ ] outlier analysis 段（即使 0 outlier 也標記）
+
+---
+
+## Phase Chain Position & Dependencies
+
+- **Phase**: P4 CROSS-SAMPLE（在 /feature-layered-observation P3 之後）
+- **Upstream**: `/feature-layered-observation` pilot.json（單樣本 verdict）
+- **Downstream**: `/run-evaluator` P5（cross-sample passed_count 升 tier）
+- **Reads**: 7-sample feature TSVs + 各樣本 LOH / AF / CN 結構
+- **Writes**: Cross-sample consistency report + passed_count
+
+## 與 /scientific-rigor 元方法論的關係
+
+- **§5 對照組 + 多方驗證 L3**: 本 skill = 「跨 7 樣本一致性」具體實作
+- **§7.2 可重現性**: 跨樣本 verdict 一致 = reproducibility 證據
+- **§9 PDCA Check 階段**: 預期 vs 實際的 cross-sample diff 即為 Check 結果
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| 7/7 全 POSITIVE 但 effect 微弱 | 未對齊 §3 effect size | 補 Cohen's d + clinical meaning ribbon |
+| 3-4/7 POSITIVE 但宣告「跨樣本一致」 | passed_count 閾值寬鬆 | 對齊 ledger schema ≥5/7 才算 strong |
+| HCC1395 chr8 異常拉高 mean | sample-specific artifact | 用 median + IQR 替代 mean ± SD |
+

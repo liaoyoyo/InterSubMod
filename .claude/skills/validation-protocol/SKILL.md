@@ -268,3 +268,22 @@ NO-GO 報告模板：`.claude/skills/research-loop/references/NOGO_REPORT_TEMPLA
 - L4 ⭐4/⭐5 升級需 4-track coverage = `/scientific-rigor §2 證據分級` 的 L1 完全佐證強制條件
 
 **級聯觸發**: `/scientific-rigor §11 協作圖 step 6-7` 直接呼叫本 skill；NO-GO 時跳 `§9.2 Blameless Postmortem` + `§8.3 Reflexion`
+
+---
+
+## Phase Chain Position & Dependencies
+
+- **Phase**: 元方法論層（為 P5 EVALUATE 提供四層驗證梯度）
+- **Upstream**: `/feature-layered-observation` 完成 → 進 L1 AUC screening
+- **Downstream**: `/run-evaluator` P5（用四層 verdict 升 tier）
+- **Reads**: Pilot output + cross-sample TSVs
+- **Writes**: L1-L4 verdict + 4-track coverage 表
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| L1 通過但 L2 Confound 跳過 | 未走完整四層 | 強制 sequential L1→L2→L3→L4 |
+| 4-track coverage 缺 | 未對齊 ledger schema | 補 paired_full / paired_pileup / TO / cross-platform |
+| L4 Beyond-AUC 未跑 | ceiling 0.58 但仍宣告強信號 | 走 fine-pairwise / mechanism analysis |
+

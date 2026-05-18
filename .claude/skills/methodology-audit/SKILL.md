@@ -134,3 +134,22 @@ python3 scripts/analysis/collect_baseline_metrics.py
 - Step 5 DECISION 必經 `/scientific-rigor §1 Hard Gate` 與 §11.6 雙環學習（質疑根本假設）對齊
 
 **級聯觸發**: `/scientific-rigor §0.5 最小可用子集` 對「中影響」任務必跑 §6 → 觸發本 skill → Step 5 DECISION 後進 `/cpp-change` 6 步 PDD
+
+---
+
+## Phase Chain Position & Dependencies
+
+- **Phase**: C++ change 前置（在 /cpp-change Step 0 之前）
+- **Upstream**: 用戶提出 C++ 修改需求
+- **Downstream**: `/cpp-change` 6-step（用戶選方案後）
+- **Reads**: src/ / include/ / tests/ + benchmark baseline
+- **Writes**: `InterSubMod/docs/methodology/YYYYMMDD_*.md`（含 Step 1-3 OPTIONS）
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| 方案列出但未量化 effect size | Step 2 不完整 | 補 baseline F1 + expected delta + cohen's d |
+| OPTIONS 只列 1-2 方案 | 未盡 §6 「列 ≥3 方案」 | 補替代方案 + SWOT 比較（P2 M4 fix） |
+| 方案 A「不做」未顯式列 | 潛在偏好 bias | 始終列 A=「維持現狀」為對照 |
+

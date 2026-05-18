@@ -208,3 +208,26 @@ Load only what is needed:
 - `examples/example-analysis-report.md`
 - `examples/example-stats-appendix.md`
 - `examples/example-figure-catalog.md`
+
+---
+
+## Phase Chain Position & Dependencies
+
+- **Phase**: P5 EVALUATE 子任務（產生 analysis report，feed run-evaluator）
+- **Upstream**: `/feature-layered-observation`（pilot.json）+ `/multi-sample-consistency`（cross-sample results）
+- **Downstream**: `/run-evaluator`（tier upgrade 判定）+ `/results-report`（PI-facing report）
+- **Writes**: `InterSubMod/docs/experiments/in_progress/YYYY/MM/<analysis>.md` + figures/
+
+## 與 /scientific-rigor 元方法論的關係
+
+- **§3 Effect Size 量化**: 本 skill 報 metric 時必含「Cohen's d / NNT / 相對風險縮減 / 臨床意義」ribbon — 禁止單一 metric 宣告「更好」
+- **§2 Evidence Tier**: 結論宣告必標 L1-L5（含 n / 95% CI / 是否多 dataset / 機制清楚度）
+- **§9.2 SRE Postmortem**: 若分析發現 confound / over-claim → 走 `templates/postmortem.md` 5 段範本
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| AUC 0.5X 宣告「發現」 | 缺 effect size 量化 | 加 Cohen's d + 對齊 §3 ribbon thresholds |
+| 多 metric inconsistent 但只報好的 | cherry-picking | 走 §5 多方驗證 L1-L4 完整跑 |
+| Figure 缺數值標註 | 違反 references/visualization-best-practices.md | 補 95% CI / sample size annotation |

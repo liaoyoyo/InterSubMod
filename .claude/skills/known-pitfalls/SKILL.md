@@ -178,3 +178,21 @@ user-invocable: true
 - `/scientific-rigor §8.3 Reflexion buffer` 的 reopen threshold 設計呼應本 skill 的「陷阱可重啟條件」邏輯
 
 **級聯觸發**: 任務啟動 → 本 skill 查歷史陷阱 → `/scientific-rigor §0.5 最小可用子集`決定下游 → 視場景進入 `§4 DAG` 或 `§9.2 Postmortem`
+
+---
+
+## Phase Chain Position & Dependencies
+
+- **Phase**: 元方法論層（防重複犯錯，任何研究啟動前查詢）
+- **Upstream**: 新研究方向 / 重大改動 / 用戶 query
+- **Downstream**: 依 pitfalls 對齊到對應 skill 修正
+- **Reads**: 本 skill 內 P-01 至 P-N pitfall 條目（references/）
+- **Writes**: Inline 警告引用
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| Pitfall 條目 >3 個月 stale | 新教訓未寫入 | 走 §9.2 postmortem 後同步條目 |
+| 用戶忽略警告強推 | 缺 Hard Gate 對齊 | 依 §8.3.1 reopen threshold 拒絕，C1/C2/C3 一條方可繞 pitfall |
+

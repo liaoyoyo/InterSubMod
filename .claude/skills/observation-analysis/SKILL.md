@@ -137,3 +137,26 @@ LOH_BED_PATHS = {
 1. 數值一致性檢查（與已知基準比對）
 2. 跨 7 samples 方向一致性
 3. 微弱信號（AUC 0.55-0.65）必須排除 confound（O11-O13 教訓）
+
+---
+
+## Phase Chain Position & Dependencies
+
+- **Phase**: P3 PILOT 子任務（產生 O-系列 Python 腳本，feed feature-layered-observation）
+- **Upstream**: `/inject-hypothesis`（hypothesis_id 註冊後）
+- **Downstream**: `/feature-layered-observation`（執行 Step 1-6）+ `/results-report`（產報告）
+- **Writes**: `InterSubMod/scripts/analysis/O*.py` + `InterSubMod/docs/experiments/in_progress/YYYY/MM/<topic>.md`
+
+## 與 /scientific-rigor 元方法論的關係
+
+- **§4 因果 DAG**: O-script 產生 AUC/相關性前必畫 DAG（標 confounder / collider）→ 殘差過 collider 自動降級 characterization
+- **§5 對照組 + 多方驗證**: 微弱信號 AUC 0.55-0.65 強制走 `/auc-confound-guard` 3-gate（within-group OLS / AF-bin / permutation）
+- **§3 Effect Size**: O-script 報 AUC delta 時必標 Cohen's d / NNT / 臨床意義 ribbon
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| AUC 跨 7 樣本方向不一致 | confound 或 sample-specific artifact | 跑 `/multi-sample-consistency` + 分層分析 |
+| 殘差 OLS 後 AUC 升高 | collider bias (P-01) | 自動降級 verdict 為 "characterization only" |
+| 微弱信號 chr+pos 聚合特徵 | spatial autocorrelation (P-09) | 必跑 mid-TP-rate window 驗證 |

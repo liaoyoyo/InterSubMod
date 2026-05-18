@@ -160,3 +160,22 @@ p_value = np.mean(np.array(null_aucs) >= observed_auc)
 - 3-gate 整體被 `/scientific-rigor §5` 完全引用為「**何時觸發哪個** — L2 內部步驟 = auc-confound-guard 3-gate」
 
 **級聯觸發**: `/scientific-rigor §11 協作圖 step 6` 直接呼叫本 skill；通過後進 `/validation-protocol` L1-L4 證據分級
+
+---
+
+## Phase Chain Position & Dependencies
+
+- **Phase**: 元方法論層（D 模組 — 為 P3-P5 所有 AUC/相關性 claim 提供 confound 驗證）
+- **Upstream**: `/feature-layered-observation` / `/observation-analysis`（產 AUC claim）
+- **Downstream**: `/results-analysis`（confound 驗完才宣告）+ `/run-evaluator`（升 tier 前驗）
+- **Reads**: `InterSubMod/research/autoresearch/cycles/<id>/*.tsv` (raw features)
+- **Writes**: Confound report MD（含 3-gate 結果）
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| 殘差 AUC 顯著但 raw AUC 無 | collider bias (P-01) | 改 within-group OLS，禁用 pooled OLS (P-02) |
+| 3-gate 結果矛盾 | feature 跨 AF-bin 分布不均 | 報告 stratified result 並標 stratum-conditional |
+| permutation p > 0.05 | 信號不顯著或樣本不足 | 提升 n 或接受 NEGATIVE verdict |
+

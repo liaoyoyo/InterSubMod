@@ -286,3 +286,28 @@ Opus 4.7 預設**少 spawn subagent、少 tool call、優先單回合 reasoning*
 ### FYI：`/cpp-change` Step 4.5 的 code-reviewer 呼叫
 
 屬於「結構性必要」的 agent 呼叫（非 4.7 預設行為可覆蓋），仍須執行，不因 4.7 自我審查能力提升而跳過。理由：獨立 context 的審查可抓出模型本身的盲點。
+
+---
+
+## Phase Chain Position & Dependencies
+
+- **Phase**: 元方法論層（決策時動態啟動 — 不在 7-Phase 序列中）
+- **Upstream**: 用戶 query / Hard Gate 觸發
+- **Downstream**: 依矩陣判定推進或暫停
+- **Reads**: `CLAUDE.md §1` + `feedback_full_auto_parallel_execution.md`
+- **Writes**: Inline decision rationale 給用戶
+
+## 與 /scientific-rigor 元方法論的關係
+
+- **§1 Cynefin 域對照**（2026-05-18 落地）: 在暫停判斷矩陣前先做域分類（Clear/Complicated/Complex/Chaotic/Disorder）
+- **§8.3.1 Productive Failure reopen**: Complex/Chaotic 域失敗有教育價值，但需 C1/C2/C3 三條件才可 reopen
+- **§9.2 Hard Gate 不可繞**: 刪檔 / C++ commit / NO-GO 判定永遠 🔴，無 override
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| 用戶說「全自動」但 AI 仍逐項問 | 未識別模式觸發詞 | 對齊 `feedback_full_auto_parallel_execution` |
+| Complex 域被當 Complicated 直接 fan-out | Cynefin 域分類缺失 | 強制 probe-first（1 樣本 pilot < 2hr） |
+| Hard Gate 被繞 | 用 `|| true` 吞 exit 2 | 見 P0 H4-3 fix |
+

@@ -7,6 +7,27 @@ user-invocable: true
 
 # 查閱研究歷史 (Review Evidence)
 
+## Phase Chain Position & Dependencies
+
+- **Phase**: P0/P1 前置查詢（任何新 cycle 啟動前的 retrieval practice）
+- **Upstream**: 用戶 query / `/cycle-init` 前置 check
+- **Downstream**: `/inject-hypothesis` 或 `/cycle-init`（依查詢結果決定推進或暫停）
+- **Reads**: `InterSubMod/research/autoresearch/evidence_ledger.jsonl` + `hypothesis_queue.json` + `MEMORY.md`
+
+## 與 /scientific-rigor 元方法論的關係
+
+- **§2 Evidence Tier**: 本 skill 列歷史結論時必標 tier ⭐1-5 + 證據強度 L1-L5
+- **§8.3.1 Reopen Threshold**: 列已 NEGATIVE / NO-GO 結論時對齊 C1/C2/C3 reopen 條件，幫用戶判斷是否可重啟
+- **§10.2 Retrieval practice**: 本 skill 是 spaced repetition 的具體實作 — 30d / 90d 後檢核舊結論是否仍適用
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| 列出 NEGATIVE 但用戶仍想重試 | 未套 §8.3.1 reopen 三條件 | 強制要求 C1 新數據 / C2 新方法 / C3 新前置 至少一條 |
+| 漏掉 NEGATIVE conclusion | 未查 MEMORY.md Concluded 區 | `grep -A2 NEGATIVE MEMORY.md` |
+| Tier 標註與 ledger 不一致 | 跨 artifact drift | 跑 `/provenance-tier-audit` 全域檢核 |
+
 ## 觸發時機
 
 - 「查看研究歷史」/ 「過去做了什麼」/ 「有哪些假設已測過」

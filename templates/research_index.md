@@ -35,6 +35,16 @@
 | <如: ISM 在 NormalASM 場景 inter > intra> | <如: 跨 5 樣本 ≥3 樣本反向> | <如: inter-intra delta < 0 in ≥3 samples → NO-GO> |
 | <H2 ...> | <... > | <... > |
 
+**SMART 自我審查**（2026-05-18 P3 audit M3 強制 — 每個 H 預測欄勾選）：
+
+- [ ] **S**pecific: 主預測量 + 對照組明確（不是「驗證 X 有效」這種空話）
+- [ ] **M**easurable: 量化 metric + 樣本數 + CI 區間（如 ΔF1 ± 95% CI, n=7）
+- [ ] **A**chievable: 在現有 compute / time budget 內可跑（呼應 5W2H 「How Much」）
+- [ ] **R**elevant: 對應 §2 G1-G5 至少 1 個目標
+- [ ] **T**ime-bound: 完成 deadline 明確（如 W3 結束前 / 2026-05-22）
+
+→ **5 字未全勾 → 不可進入 confirmatory cycle**（強制改 exploratory tag）
+
 **Exploratory（事後分析）**: 任何不在上表的觀察 → 必須標 `exploratory` tag，**不能宣告 confirmatory 結論**。
 
 ---

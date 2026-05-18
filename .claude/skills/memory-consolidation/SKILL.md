@@ -133,3 +133,22 @@ wc -l $MEM/MEMORY.md
 - ☐ concluded 檔是否清楚說明「下次如何應用此發現」（呼應 `/scientific-rigor §8.3 Reflexion buffer`）？
 
 **級聯觸發**: `/scientific-rigor §10.2 程式修改前 retrieval practice` → Read MEMORY.md → 本 skill 維持索引健康度
+
+---
+
+## Phase Chain Position & Dependencies
+
+- **Phase**: P6 後置（cycle 結束後）+ 30d/90d spaced repetition 觸發
+- **Upstream**: `/conclude-research` 後 + spaced repetition 排程
+- **Downstream**: `MEMORY.md` 更新 + `/scientific-rigor §10.1` recall 提示
+- **Reads**: `MEMORY.md` + `evidence_ledger.jsonl` + `feedback_*.md`
+- **Writes**: `MEMORY.md` Concluded / Active / Pending 區
+
+## Failure Mode & Diagnostics
+
+| 症狀 | 可能原因 | 修法 |
+|------|---------|------|
+| MEMORY.md 超 200 行 cap | 新條目未 archive 舊 | 走 `memory/archive/` 機制（P4 fix） |
+| Spaced check 從未觸發 | 缺排程 hook | P3 backlog: 加 weekly_recall_check.sh |
+| 條目與 ledger drift | 未自動同步 | `/provenance-tier-audit` 跨 artifact 檢查 |
+
