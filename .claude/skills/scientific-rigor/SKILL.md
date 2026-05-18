@@ -1,6 +1,6 @@
 ---
 name: scientific-rigor
-description: 科學工程嚴謹度元方法論 — 證據分級、Effect Size、因果推論、消融、可重現性、Pre-registration、任務壓縮、持續改進迴圈、啟發式學習工作流映射。元 skill 引用既有 6 個嚴謹度 skill，補空缺、提供協作圖、把啟發式學習套用到所有工作流。USE WHEN 研究結論宣告、結論判斷、實驗設計、改動評估、重大決策、跨方法比較、宣告「更好」、需建立工作流回饋迴路、需 Pre-registration 假設、需 NEGATIVE postmortem、需 spaced recall 檢核舊結論。SKIP WHEN 純 code edit / build / commit / 單檔 docs 寫作（無實驗證據需要評估時）。
+description: 科學工程嚴謹度元方法論 — 證據分級、Effect Size、因果推論、消融、可重現性、Pre-registration、任務壓縮、持續改進迴圈、啟發式學習工作流映射。元 skill 引用既有 6 個嚴謹度 skill，補空缺、提供協作圖、把啟發式學習套用到所有工作流。USE WHEN 研究結論宣告、結論判斷、實驗設計、改動評估、重大決策、跨方法比較、宣告「更好」、需建立工作流回饋迴路、需 NEGATIVE postmortem、需 spaced recall 檢核舊結論、**新研究方向開跑前 / 研究啟動準備（「我要開始研究 X」「先準備一下 Y 方向」「規劃 Z」「啟動 X 主軸」即觸發 §7.1 Pre-registration 3 欄強制）**。SKIP WHEN 純 code edit / build / commit / 單檔 docs 寫作（無實驗證據需要評估時）。
 allowed-tools: Read, Write, Edit
 user-invocable: true
 ---
