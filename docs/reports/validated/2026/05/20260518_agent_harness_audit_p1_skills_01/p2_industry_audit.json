@@ -1,0 +1,359 @@
+{
+  "metadata": {
+    "audit_date": "2026-05-18 14:37",
+    "reference": "Lessons from Building Claude Code: Prompt Caching is Everything + Anthropic Cookbook",
+    "scope": "7 Harness Engineering modules + 5 real-world challenges"
+  },
+  "metrics": {
+    "static_prefix_sizes": {
+      "CLAUDE.md": 7776,
+      "AGENTS.md": 12560,
+      "rules/total": 5251,
+      "CURRENT_FOCUS.md_full": 34954,
+      "CURRENT_FOCUS_hook_inject_target": 3000
+    },
+    "skill_metrics": {
+      "total": 42,
+      "user_invocable_real": 33,
+      "paths_scoped": 3,
+      "yaml_invalid": 5,
+      "avg_desc_len": 432,
+      "max_desc_len": 1411
+    },
+    "permission_metrics": {
+      "allow_count": 158,
+      "deny_count": 17
+    },
+    "hook_metrics": {
+      "total_scripts": 21,
+      "silent_failure_count": 6,
+      "hard_gate_count": 5,
+      "stdin_consume_count": 17,
+      "scripts": [
+        {
+          "name": "compile_success_clear.sh",
+          "silent_failure": false,
+          "hard_gate": false,
+          "consumes_stdin": true,
+          "line_count": 20
+        },
+        {
+          "name": "cpp_edit_guard.sh",
+          "silent_failure": false,
+          "hard_gate": false,
+          "consumes_stdin": true,
+          "line_count": 18
+        },
+        {
+          "name": "evidence_ledger_sync.sh",
+          "silent_failure": true,
+          "hard_gate": false,
+          "consumes_stdin": true,
+          "line_count": 75
+        },
+        {
+          "name": "kb_freshness_warn.sh",
+          "silent_failure": false,
+          "hard_gate": false,
+          "consumes_stdin": false,
+          "line_count": 39
+        },
+        {
+          "name": "kb_schema_check.sh",
+          "silent_failure": false,
+          "hard_gate": true,
+          "consumes_stdin": true,
+          "line_count": 48
+        },
+        {
+          "name": "kb_sot_guard.sh",
+          "silent_failure": false,
+          "hard_gate": false,
+          "consumes_stdin": true,
+          "line_count": 36
+        },
+        {
+          "name": "knowledge_check.sh",
+          "silent_failure": false,
+          "hard_gate": false,
+          "consumes_stdin": true,
+          "line_count": 54
+        },
+        {
+          "name": "md_link_check.sh",
+          "silent_failure": true,
+          "hard_gate": false,
+          "consumes_stdin": true,
+          "line_count": 25
+        },
+        {
+          "name": "md_path_format_rule.sh",
+          "silent_failure": false,
+          "hard_gate": false,
+          "consumes_stdin": false,
+          "line_count": 12
+        },
+        {
+          "name": "no_binary_commit.sh",
+          "silent_failure": false,
+          "hard_gate": true,
+          "consumes_stdin": true,
+          "line_count": 73
+        },
+        {
+          "name": "pipeline_block_check.sh",
+          "silent_failure": true,
+          "hard_gate": true,
+          "consumes_stdin": false,
+          "line_count": 57
+        },
+        {
+          "name": "post_cpp_commit_invalidate.sh",
+          "silent_failure": true,
+          "hard_gate": false,
+          "consumes_stdin": true,
+          "line_count": 76
+        },
+        {
+          "name": "pre_commit_compile_check.sh",
+          "silent_failure": false,
+          "hard_gate": true,
+          "consumes_stdin": true,
+          "line_count": 27
+        },
+        {
+          "name": "pre_tier_upgrade_check.sh",
+          "silent_failure": false,
+          "hard_gate": true,
+          "consumes_stdin": true,
+          "line_count": 121
+        },
+        {
+          "name": "research_direction_guard.sh",
+          "silent_failure": false,
+          "hard_gate": false,
+          "consumes_stdin": true,
+          "line_count": 90
+        },
+        {
+          "name": "session_start_inject_focus.sh",
+          "silent_failure": false,
+          "hard_gate": false,
+          "consumes_stdin": false,
+          "line_count": 85
+        },
+        {
+          "name": "skill_change_audit.sh",
+          "silent_failure": false,
+          "hard_gate": false,
+          "consumes_stdin": true,
+          "line_count": 60
+        },
+        {
+          "name": "skill_usage_logger.sh",
+          "silent_failure": true,
+          "hard_gate": false,
+          "consumes_stdin": true,
+          "line_count": 44
+        },
+        {
+          "name": "standalone_trigger.sh",
+          "silent_failure": false,
+          "hard_gate": false,
+          "consumes_stdin": true,
+          "line_count": 100
+        },
+        {
+          "name": "terminology_guard.sh",
+          "silent_failure": true,
+          "hard_gate": false,
+          "consumes_stdin": true,
+          "line_count": 66
+        },
+        {
+          "name": "trigger_routing.sh",
+          "silent_failure": false,
+          "hard_gate": false,
+          "consumes_stdin": true,
+          "line_count": 48
+        }
+      ]
+    },
+    "memory_metrics": {
+      "feedback_count": 37,
+      "project_count": 49,
+      "reference_count": 3,
+      "MEMORY_md_lines": 116
+    },
+    "agent_metrics": {
+      "active": 14,
+      "archived": 2,
+      "worktree_default": 0
+    }
+  },
+  "verdicts": {
+    "M1_PromptCaching": {
+      "score": "🟢 Mostly aligned",
+      "wins": [
+        "靜態 prefix 25KB（CLAUDE.md 7KB + AGENTS.md 12KB + rules 5KB）= cache-friendly",
+        "Memory MEMORY.md 116 行 (~10KB) always-loaded prefix",
+        "CURRENT_FOCUS 完整 35KB → hook 截 3KB 注入（避免破 cache）"
+      ],
+      "gaps": [
+        "**無 cache hit telemetry** — 不知道實際命中率，無法驗證 cache 策略效果",
+        "**rules/ 4 個 always-loaded（5KB）** — CLAUDE.md §5 已標規劃加 paths frontmatter 變條件式，未執行",
+        "Hook 注入位置在 UserPromptSubmit（每次都加 = 每 prompt 後 invalidate 部分 cache）— 改 SessionStart-only 或加 cache_control 可省"
+      ],
+      "fixes": [
+        "P3 加 cache_hit_telemetry hook（記錄 turn 後 cache_read_input_tokens / cache_creation_input_tokens）",
+        "P4 補 rules/ paths frontmatter（4 個 rules → 條件式，省 5KB always-loaded）",
+        "P5 評估改 SessionStart-only inject CURRENT_FOCUS（不 UserPromptSubmit 重複）"
+      ]
+    },
+    "M2_ToolDesign": {
+      "score": "🟡 Mixed",
+      "wins": [
+        "命名統一（slash + kebab-case）",
+        "user-invocable 33/42 (78%)",
+        "USE WHEN / SKIP WHEN trigger 詞清楚（D4 ✅42/42）"
+      ],
+      "gaps": [
+        "**avg desc len 432 chars / max 1411** — 業界推薦 150-300 chars 純 trigger，偏長稀釋訊號",
+        "**paths-scoped 僅 3/42** — 大多 skill 描述 always-discoverable，違反 Deferred Loading 精神",
+        "**5 YAML invalid description** — 跨 parser 行為不一致 latent bug（P1 critical fix）",
+        "skill description 含大量中英混 + markdown ** + 引號 — LLM-friendly 但 token 浪費"
+      ],
+      "fixes": [
+        "P0 修 5 YAML invalid（30 min）",
+        "P3 評估 max-1411-char desc 縮短到 ≤400 chars（重 trigger 詞、移移 markdown）",
+        "P4 補 paths frontmatter 至 ≥20 個 file-scoped skills"
+      ]
+    },
+    "M3_Permission": {
+      "score": "🟡 Mixed (allow list bloat)",
+      "wins": [
+        "deny list 17 entries（顯式 Deny-First）",
+        "Docker sandbox enabled",
+        "Hooks 縱深防禦（hard gate 5 個 exit 2）"
+      ],
+      "gaps": [
+        "**allow list 158 entries** — 累積無 audit，含許多一次性命令（如 specific bash invocations）",
+        "未顯式設 default permission mode（CLI default = default）",
+        "缺季度 allow list review 機制",
+        "缺 PreToolUse modify input 範例（業界推薦的「透明攔截」未使用）"
+      ],
+      "fixes": [
+        "P3 寫 allow_list_audit.sh — 偵測 > 30 天未用 entry + 過度具體 entry",
+        "P4 評估明確設 permissionMode（plan / default / acceptEdits 選一）",
+        "P5 設計一個 PreToolUse modify hook 示範（如 production DB → test DB redirect）"
+      ]
+    },
+    "M4_HookSystem": {
+      "score": "🟠 Improvement needed (silent failure anti-pattern)",
+      "wins": [
+        "21 hook scripts 覆蓋 5 events",
+        "5 個 hard gate (exit 2) ✅",
+        "17 個 hooks 處理 stdin tool_input",
+        "新加 SessionStart + skill_change_audit ✅"
+      ],
+      "gaps": [
+        "**6/21 (28%) 用 `2>/dev/null || true`** — 業界明確的 anti-pattern",
+        "無統一 hook log 目的地（debug 時很難 trace）",
+        "缺 PreToolUse modify input 示範 — Anthropic 官方提的「透明攔截」未實作",
+        "PreToolUse Bash matcher 多次（5 個）— 可整合為單一 router hook",
+        "缺 hook failure alert 機制（失敗就 silent）"
+      ],
+      "fixes": [
+        "P0 改 6 silent failure hooks → 失敗寫 `docs/postmortems/hook_failures.log`（不 silent）",
+        "P3 整合 5 個 PreToolUse Bash hooks → 單一 router_pre_bash.sh",
+        "P4 設計示範 modify hook（如 dangerous_path_redirect.sh）",
+        "P5 建 hook_health_check.sh weekly 跑"
+      ]
+    },
+    "M5_Memory": {
+      "score": "🟢 Best in class",
+      "wins": [
+        "37 feedback + 49 project + 3 reference memory（業界級數量）",
+        "MEMORY.md 116 行索引（< 200 line cap）",
+        "Concluded 區明確分隔（防 re-investigation）— 創新做法",
+        "Auto memory 系統（4 types user/feedback/project/reference）符合 Cookbook 推薦",
+        "今天新加 Cynefin + PF reopen 2 條 — 主動 evolve"
+      ],
+      "gaps": [
+        "**無 Memory Tool（工具呼叫式）** — Anthropic 尚未釋出獨立 Memory Tool，N/A",
+        "Concluded 區條目達 30 行（接近 200 line cap 30%） — 未來需 archive 機制",
+        "缺 memory recall 命中監測（哪些 memory 真被引用了？）"
+      ],
+      "fixes": [
+        "P4 設計 memory_recall_logger.sh — 偵測 AI response 引用 memory feedback file 並計數",
+        "P5 評估 memory archive 機制（>1 年 stale conclusions → memory/archive/ 子目錄）"
+      ]
+    },
+    "M6_SubAgents": {
+      "score": "🟡 Functional but no telemetry",
+      "wins": [
+        "14 active agents + 2 archived（合理分類）",
+        "specialist agents (parallel-benchmark / methodology-reviewer / headless-research) 覆蓋場景",
+        "CLAUDE.md §8 明確「預設不 spawn」+ 明示觸發語 — 符合 Opus 4.7 literal"
+      ],
+      "gaps": [
+        "**worktree isolation 預設 OFF**（active agents 中 0 個明示 isolation: worktree） — 業界 Cursor 2.0 / Devin 推薦預設 ON for parallel safety",
+        "缺 sub-agent cache hit telemetry — 平行 agent 是否真的省 cache？無資料",
+        "缺 sub-agent 失敗回報協議標準化（agent 跑掛了主 agent 不知道）"
+      ],
+      "fixes": [
+        "P4 parallel-benchmark agent 加 default isolation: worktree（安全並行）",
+        "P5 加 subagent_completion_logger.sh — SubagentStop hook 記錄 cost / cache / status"
+      ]
+    },
+    "M7_PromptCache": {
+      "score": "🟠 Unknown effectiveness (no telemetry)",
+      "wins": [
+        "CLAUDE.md + AGENTS.md + rules 結構符合 cache prefix 模式（靜態前端）",
+        "Skill description progressive disclosure（按需載入）"
+      ],
+      "gaps": [
+        "**無 cache_read_input_tokens / cache_creation_input_tokens telemetry** — 無法量化 90% 降本是否實際達成",
+        "CLI 自動處理 cache_control — 無人為控制空間（trade-off）",
+        "Sub-agent 獨立 cache 但無命中率資料",
+        "UserPromptSubmit hooks 4 個都加 dynamic context — 每次 prompt 後 cache 部分失效"
+      ],
+      "fixes": [
+        "P3 加 cache_telemetry.sh — 在 Stop hook 解析 cost report 抽 cache stats",
+        "P5 評估改 SessionStart-only inject（不 UserPromptSubmit 重複）省 cache invalidation"
+      ]
+    }
+  },
+  "challenges": {
+    "C1_PromptInjection": {
+      "status": "🟠 Partial",
+      "current": "PreToolUse Bash hooks 攔截 rm -rf / git push --force / pipeline_block_check",
+      "gap": "缺 external data (WebFetch / Read of foreign files) PreToolUse sanitization",
+      "fix": "P5 加 external_input_sanitizer.sh — WebFetch / Read 大檔時偵測「Ignore previous instructions」pattern"
+    },
+    "C2_ContextDrift": {
+      "status": "🟢 Good",
+      "current": "CLAUDE.md §7 /compact 保留指令明確 + auto memory 系統補長期記憶",
+      "gap": "無自動測試 compact 後保留度",
+      "fix": "P5 加 compact_test.sh — 跑 /compact 後檢核保留指令是否仍在"
+    },
+    "C3_Evaluation": {
+      "status": "🟢 Best in class",
+      "current": "verification_guide.md 13 query × 6 維度 fresh CLI 套組 + audit_report.html 機械掃描",
+      "gap": "缺跨版本 regression baseline（Q1-Q13 在 Opus 4.7 vs 4.8 diff）",
+      "fix": "P6 每 Claude major version 升級時跑 13 query，存 baseline JSON"
+    },
+    "C4_CostVsLatency": {
+      "status": "🟠 No dashboard",
+      "current": "skill_validation 跑時記錄 cost ($1.21 Q9+Q10) + sub-agent isolated cache",
+      "gap": "缺日常 cost dashboard / 缺 turn-by-turn 比較",
+      "fix": "P5 加 weekly_cost_summary.sh — 解析 ~/.claude transcripts 統計"
+    },
+    "C5_Reproducibility": {
+      "status": "🟢 Best in class",
+      "current": "evidence_ledger.jsonl + commit hash binding + ai_sessions 歸檔 + manifest.yaml",
+      "gap": "skill_validation rerun 偶爾 cost variance ±20%（cache hit/miss）",
+      "fix": "P6 加 noise floor 文件化（接受 ±20% variance 為 normal）"
+    }
+  }
+}

@@ -1,0 +1,455 @@
+{
+  "audit_date": "2026-05-18 15:13",
+  "p4_hooks": {
+    "multi_hook_per_event": [
+      [
+        "UserPromptSubmit",
+        "—",
+        4,
+        "並行執行各獲獨立 stdin 副本；hook 之間無 explicit ordering 保證"
+      ],
+      [
+        "PreToolUse",
+        "Bash",
+        5,
+        "5 hooks 含 rm-rf guard / pre_commit_compile / kb_schema / pipeline_block / no_binary — 可整合為單一 router_pre_bash.sh"
+      ],
+      [
+        "PostToolUse",
+        "Edit|Write",
+        8,
+        "8 hooks 含 cpp_edit / trigger_routing / evidence_ledger / terminology / md_link / kb_sot / standalone / skill_change_audit — 高耦合"
+      ],
+      [
+        "PostToolUse",
+        "Bash",
+        3,
+        "compile_success + bash_logger + post_cpp_commit"
+      ]
+    ],
+    "stdin_consumers": 17,
+    "hard_gate_count": 5,
+    "silent_failure_count": 6,
+    "issues": [
+      [
+        "H4-1",
+        "5 個 PreToolUse Bash hooks 整合為單一 router_pre_bash.sh → 降 maintenance cost / 統一 stdin 處理",
+        "P3"
+      ],
+      [
+        "H4-2",
+        "8 個 PostToolUse Edit|Write hooks 是否全必要？評估 deprecate 候選（terminology_guard / md_link_check 與 kb_sot_guard 是否重疊）",
+        "P3"
+      ],
+      [
+        "H4-3",
+        "6 silent failure hooks 改 stderr → InterSubMod/docs/postmortems/hook_failures.log",
+        "P0"
+      ],
+      [
+        "H4-4",
+        "Hook 並行執行假設未驗證 — 應跑 hook_concurrency_test.sh 確認",
+        "P3"
+      ],
+      [
+        "H4-5",
+        "缺 hook latency telemetry — 22 hooks × 每 turn 可能加 0.5-2s",
+        "P4"
+      ]
+    ]
+  },
+  "p5_agents": {
+    "active": [
+      "architect",
+      "developer",
+      "headless-research",
+      "literature-reviewer",
+      "methodology-reviewer",
+      "optimizer",
+      "paper-miner",
+      "parallel-analysis",
+      "parallel-benchmark",
+      "release",
+      "researcher",
+      "research-orchestrator",
+      "reviewer",
+      "tester"
+    ],
+    "archived": [
+      "intersubmod-weekly-research-agent"
+    ],
+    "plugin_overlaps": [
+      [
+        "architect",
+        "feature-dev:code-architect",
+        "high",
+        "兩者都做 design — InterSubMod architect 更研究導向 (docs/plans/) / feature-dev 更 codebase 導向"
+      ],
+      [
+        "reviewer",
+        "feature-dev:code-reviewer + pr-review-toolkit:*",
+        "high",
+        "InterSubMod reviewer = 科學家驗證數據 / plugin = 程式碼審查 — scope 不同但命名衝突"
+      ],
+      [
+        "researcher",
+        "Explore (builtin)",
+        "medium",
+        "InterSubMod researcher = web search 論文 / Explore = codebase 搜尋 — scope 不同"
+      ],
+      [
+        "optimizer",
+        "code-simplifier:code-simplifier (plugin)",
+        "medium",
+        "InterSubMod optimizer 更廣 (品質+效能+可讀性) / plugin 只簡化"
+      ],
+      [
+        "developer",
+        "—",
+        "n/a",
+        "無顯著 plugin 對應；InterSubMod 專屬 C++ PDD"
+      ]
+    ],
+    "issues": [
+      [
+        "A5-1",
+        "archive/ 只有 1 個 .md + README — 是否該真刪 intersubmod-weekly-research-agent？",
+        "P3"
+      ],
+      [
+        "A5-2",
+        "reviewer 命名與 plugin code-reviewer 衝突 — 評估改名為 scientist-reviewer",
+        "P4"
+      ],
+      [
+        "A5-3",
+        "缺 cache_hit / cost / completion telemetry — 不知道哪些 agent 真有用",
+        "P3"
+      ],
+      [
+        "A5-4",
+        "parallel-benchmark + parallel-analysis 命名一致 ✅",
+        "—"
+      ],
+      [
+        "A5-5",
+        "research-orchestrator 與 myPPT 風格類似（dispatcher）— 但 scope 不同（meta 路由 vs PPT 場景）",
+        "—"
+      ]
+    ]
+  },
+  "p6_components": {
+    "commands": [
+      [
+        "/build",
+        "編譯專案 Release",
+        "OK"
+      ],
+      [
+        "/git-commit",
+        "提交變更含 Co-Author",
+        "OK"
+      ],
+      [
+        "/git-finish",
+        "合併分支回 develop",
+        "OK"
+      ],
+      [
+        "/git-start",
+        "建立功能分支",
+        "OK"
+      ],
+      [
+        "/test-quick",
+        "快速 chr19 驗證 <30s",
+        "OK"
+      ],
+      [
+        "/test-data",
+        "完整數據測試 ~1min",
+        "OK"
+      ],
+      [
+        "/test-full",
+        "完整流程 ~5min",
+        "OK"
+      ],
+      [
+        "/validate",
+        "研究假說 benchmark",
+        "OK"
+      ]
+    ],
+    "templates": [
+      [
+        "templates/postmortem.md",
+        "SRE Blameless 8 段",
+        "OK"
+      ],
+      [
+        "templates/research_index.md",
+        "Pre-reg 3 欄 + G1-G5",
+        "OK"
+      ]
+    ],
+    "entry_points": [
+      [
+        "AGENTS.md",
+        "0d",
+        "0d, 12.5KB",
+        "✅"
+      ],
+      [
+        ".claude/CLAUDE.md",
+        "0d",
+        "0d, 7.8KB",
+        "✅"
+      ],
+      [
+        "docs/references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md",
+        "9d",
+        "9d, 16KB",
+        "⚠ stale (>7d cap)"
+      ],
+      [
+        "docs/CURRENT_FOCUS.md",
+        "1d",
+        "1d, 35KB (hook 截 3KB)",
+        "✅"
+      ],
+      [
+        "research/autoresearch/research_direction.md",
+        "9d",
+        "9d, 3.7KB",
+        "⚠ stale (>7d cap)"
+      ]
+    ],
+    "issues": [
+      [
+        "E6-1",
+        "20260424_AI啟動壓縮上下文 9d 未更新 — 屬 SoT 文件需週級維護",
+        "P2"
+      ],
+      [
+        "E6-2",
+        "research_direction.md 9d 未更新 — autoresearch queue 是否仍 active？",
+        "P3"
+      ],
+      [
+        "E6-3",
+        "8 commands 描述短 (各 <30 char) ✅ 業界推薦長度",
+        "—"
+      ],
+      [
+        "E6-4",
+        "缺 templates 第 3 個：M15 提問模板 (P0 fix item)",
+        "P0"
+      ],
+      [
+        "E6-5",
+        "缺 templates 第 4 個：M10 四象限 task triage (P3 fix item)",
+        "P3"
+      ]
+    ]
+  },
+  "p7_drift": {
+    "broken_refs_real": [
+      [
+        "InterSubMod/.claude/skills/weekly-master-draft/outlines/UPGRADE_PLAN_FOR_WEEKLY_REPORT.md",
+        "Referenced in: InterSubMod/.claude/skills/pptx-build/SKILL.md",
+        "weekly-master-draft skill 已被 /weekly-report 取代但 pptx-build 仍引用舊路徑"
+      ]
+    ],
+    "placeholder_refs": [
+      "InterSubMod/docs/concepts/DAG/<topic>.md (placeholder, OK)",
+      "InterSubMod/docs/postmortems/<YYYYMMDD>_<topic>.md (template syntax, OK)",
+      "InterSubMod/docs/reports/validated/YYYY/MM/... (template syntax, OK)"
+    ],
+    "issues": [
+      [
+        "D7-1",
+        "pptx-build SKILL.md 第 X 行引用 weekly-master-draft → 改為 /weekly-report 對應 master 路徑",
+        "P1"
+      ],
+      [
+        "D7-2",
+        "其他 placeholder 路徑（<topic>, {YYYY}）保持作為 template syntax — 無 fix",
+        "—"
+      ],
+      [
+        "D7-3",
+        "缺自動 broken-ref scanner — 評估加 PostToolUse markdown_link_check (已存 md_link_check.sh 看實際效果)",
+        "P3"
+      ]
+    ]
+  },
+  "consolidated_fix_plan": {
+    "P0": {
+      "label": "🔴 P0 Critical (1.5 hr)",
+      "color": "#cf222e",
+      "items": [
+        [
+          "M15",
+          "新建 InterSubMod/templates/user_query_template.md 6 欄提問模板",
+          "30 min"
+        ],
+        [
+          "H4-3",
+          "改 6 silent failure hooks → 失敗寫 InterSubMod/docs/postmortems/hook_failures.log",
+          "45 min"
+        ],
+        [
+          "P1-YAML",
+          "修 5 YAML invalid skill description (feature-layered-observation / problem-framing-ideation / provenance-tier-audit / research-loop / verification-loop)",
+          "30 min"
+        ]
+      ]
+    },
+    "P1": {
+      "label": "🟠 P1 This Week (5 hr)",
+      "color": "#fb8500",
+      "items": [
+        [
+          "P1-D2",
+          "13 個非工具類 skill 補 D2 診斷段 (Phase chain / Dependencies / Failure Mode)",
+          "3.5 hr"
+        ],
+        [
+          "P1-D3",
+          "5 個非工具類 skill 加 /scientific-rigor cross-ref",
+          "30 min"
+        ],
+        [
+          "M2",
+          "/problem-framing-ideation §1 加 How Much (5W2H 升級)",
+          "30 min"
+        ],
+        [
+          "M3",
+          "templates/research_index.md Pre-reg 加 SMART 5-字 checklist",
+          "30 min"
+        ],
+        [
+          "D7-1",
+          "pptx-build 引用改 weekly-master-draft → /weekly-report 路徑",
+          "5 min"
+        ]
+      ]
+    },
+    "P2": {
+      "label": "🟡 P2 Next 2 weeks (3 hr)",
+      "color": "#bf8700",
+      "items": [
+        [
+          "M3-Permission-Audit",
+          "allow_list_audit.sh 偵測 158 entries 未用 / 過度具體",
+          "30 min"
+        ],
+        [
+          "M7-Cache-Telemetry",
+          "cache_telemetry.sh — Stop hook 解析 cost report 抽 cache_read / cache_creation tokens",
+          "1 hr"
+        ],
+        [
+          "M4-SWOT",
+          "/methodology-audit Step 3 OPTIONS 加 SWOT 2x2 matrix template",
+          "45 min"
+        ],
+        [
+          "M5-TLDR",
+          "AGENTS.md §15 加「Tier 3+ 首句 TL;DR」規則",
+          "15 min"
+        ],
+        [
+          "M13-Ledger",
+          "evidence_ledger.jsonl schema 加 next_action + identified_issues 欄",
+          "1 hr"
+        ],
+        [
+          "E6-1",
+          "更新 20260424_AI啟動壓縮上下文與研究索引_01.md (9d stale)",
+          "30 min"
+        ]
+      ]
+    },
+    "P3": {
+      "label": "🔵 P3 Next Month (4 hr)",
+      "color": "#0969da",
+      "items": [
+        [
+          "H4-1",
+          "整合 5 個 PreToolUse Bash hooks → 單一 router_pre_bash.sh",
+          "1 hr"
+        ],
+        [
+          "H4-2",
+          "evaluate 8 個 PostToolUse Edit|Write 重疊 → deprecate 候選 2-3 個",
+          "45 min"
+        ],
+        [
+          "Compact-Test",
+          "compact_test.sh — /compact 後保留指令自動回歸測試",
+          "45 min"
+        ],
+        [
+          "Subagent-Logger",
+          "subagent_completion_logger.sh — SubagentStop 記錄 cost/cache/status",
+          "30 min"
+        ],
+        [
+          "M6-Worktree",
+          "parallel-benchmark agent 預設 isolation: worktree",
+          "15 min"
+        ],
+        [
+          "Rules-Paths",
+          "4 個 .claude/rules/ 加 paths frontmatter (省 5KB always-loaded)",
+          "30 min"
+        ],
+        [
+          "M2-Desc-Shorten",
+          "5 個 max desc > 600 chars skill 縮短到 ≤400 chars",
+          "30 min"
+        ],
+        [
+          "M10-Matrix",
+          "新建 templates/task_priority_matrix.md (Eisenhower)",
+          "20 min"
+        ]
+      ]
+    },
+    "P4": {
+      "label": "⚫ P4 Future / Opt-in (3 hr)",
+      "color": "#6e7781",
+      "items": [
+        [
+          "Injection-Guard",
+          "external_input_sanitizer.sh — WebFetch / 大 Read 偵測 prompt injection",
+          "1 hr"
+        ],
+        [
+          "Memory-Archive",
+          "memory archive 機制 (>1 年 stale → memory/archive/)",
+          "30 min"
+        ],
+        [
+          "Memory-Recall-Log",
+          "memory_recall_logger.sh — 量化 feedback memory 引用率",
+          "45 min"
+        ],
+        [
+          "Modify-Hook-Demo",
+          "dangerous_path_redirect.sh — PreToolUse modify input 示範",
+          "30 min"
+        ],
+        [
+          "Cross-Version-Baseline",
+          "Q1-Q13 跨 Claude version baseline JSON (每 major 升版前跑)",
+          "—"
+        ]
+      ]
+    }
+  },
+  "total_hours_estimate": 18.166666666666664
+}

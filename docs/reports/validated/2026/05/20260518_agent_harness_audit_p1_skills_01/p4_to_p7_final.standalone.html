@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P4-P7 Audit + Final Consolidated Fix Plan</title>
+<style>
+  body { font-family: -apple-system, "Segoe UI", "Microsoft JhengHei", "Noto Sans CJK TC", sans-serif;
+         max-width: 1500px; margin: 2em auto; padding: 0 1em; line-height: 1.55; color: #1f2328; background: #fafbfc; }
+  h1 { border-bottom: 2px solid #d0d7de; padding-bottom: 0.3em; }
+  h2 { border-bottom: 1px solid #d0d7de; padding-bottom: 0.2em; margin-top: 2em; }
+  h3 { margin-top: 1.5em; }
+  .meta { color: #57606a; font-size: 0.9em; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.88em; margin: 1em 0; background: #fff; }
+  th, td { border: 1px solid #d0d7de; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #f6f8fa; font-weight: 600; }
+  code { background: #f6f8fa; padding: 1px 4px; border-radius: 3px; font-family: ui-monospace,monospace; font-size: 0.9em; }
+  .phase-box { background: #fff; border: 1px solid #d0d7de; border-left: 5px solid; border-radius: 6px; padding: 1em 1.5em; margin: 1em 0; }
+  .priority { display: inline-block; padding: 2px 8px; border-radius: 3px; color: white; font-weight: bold; font-size: 0.85em; }
+  .status { display: inline-block; padding: 2px 6px; border-radius: 3px; font-weight: bold; font-size: 0.85em; }
+  .stat-ok { background: #dafbe1; color: #1a7f37; }
+  .stat-warn { background: #fff8c5; color: #bf8700; }
+  .stat-bad { background: #ffeef0; color: #cf222e; }
+  details { background: #fff; border: 1px solid #d0d7de; border-radius: 4px; padding: 0.5em 1em; margin: 0.5em 0; }
+  summary { cursor: pointer; font-weight: bold; }
+  .item-id { font-family: ui-monospace,monospace; font-size: 0.9em; color: #0969da; font-weight: bold; }
+</style></head>
+<body>
+<h1>P4-P7 Audit + Final Consolidated Fix Plan</h1>
+<p class="meta">Audit date: 2026-05-18 15:13 · This report consolidates P1 (Skills) + P2 (Industry) + P3 (Methodology) + P4 (Hooks deep) + P5 (Agents) + P6 (Commands/Templates/Entry) + P7 (Doc drift) findings into a single execution plan.</p>
+
+<h2>📊 Overall Harness Health</h2>
+<table>
+<thead><tr><th>Phase</th><th>Scope</th><th>Status</th><th>Critical findings count</th></tr></thead>
+<tbody>
+<tr><td><strong>P1 Skills</strong></td><td>42 skills × 6 維度</td><td><span class="status stat-warn">⚠ 18 issues</span></td><td>5 YAML invalid + 13 D2 缺診斷 + 5 D3 缺 cross-ref</td></tr>
+<tr><td><strong>P2 Industry</strong></td><td>7 modules + 5 challenges</td><td><span class="status stat-warn">⚠ Mixed</span></td><td>M4 28% silent failure / M3 allow list bloat / M7 no telemetry</td></tr>
+<tr><td><strong>P3 Methodology</strong></td><td>17 framework 對照</td><td><span class="status stat-ok">✅ 41% strong</span></td><td>1 P0 (M15 提問模板)</td></tr>
+<tr><td><strong>P4 Hooks Deep</strong></td><td>22 hooks routing</td><td><span class="status stat-warn">⚠ 5 issues</span></td><td>20 hooks in multi-matcher; stdin handling 17/21</td></tr>
+<tr><td><strong>P5 Agents</strong></td><td>14 active + 2 archive</td><td><span class="status stat-ok">✅ OK</span></td><td>1 archive cleanup candidate; plugin naming overlap (low impact)</td></tr>
+<tr><td><strong>P6 Commands/Templates/Entry</strong></td><td>8 + 2 + 5</td><td><span class="status stat-ok">✅ OK</span></td><td>2 entry 9d stale (manual + research_direction)</td></tr>
+<tr><td><strong>P7 Doc drift</strong></td><td>broken refs scan</td><td><span class="status stat-ok">✅ OK</span></td><td>1 真 broken ref (pptx-build → weekly-master-draft)</td></tr>
+</tbody>
+</table>
+
+<h2>P4 — Hooks Deep Dive (補 M4 未深入)</h2>
+<h3>Multi-hook Per Event 分析</h3>
+<table>
+<thead><tr><th>Event</th><th>Matcher</th><th>Hooks #</th><th>備註</th></tr></thead>
+<tbody>
+<tr><td>UserPromptSubmit</td><td><code>—</code></td><td>4</td><td>並行執行各獲獨立 stdin 副本；hook 之間無 explicit ordering 保證</td></tr>
+<tr><td>PreToolUse</td><td><code>Bash</code></td><td>5</td><td>5 hooks 含 rm-rf guard / pre_commit_compile / kb_schema / pipeline_block / no_binary — 可整合為單一 router_pre_bash.sh</td></tr>
+<tr><td>PostToolUse</td><td><code>Edit|Write</code></td><td>8</td><td>8 hooks 含 cpp_edit / trigger_routing / evidence_ledger / terminology / md_link / kb_sot / standalone / skill_change_audit — 高耦合</td></tr>
+<tr><td>PostToolUse</td><td><code>Bash</code></td><td>3</td><td>compile_success + bash_logger + post_cpp_commit</td></tr>
+</tbody></table>
+
+<p><strong>Stdin consumers</strong>: 17/21 hooks 讀 stdin (jq -r / cat)</p>
+<p><strong>Hard gate (exit 2)</strong>: 5 hooks ✅</p>
+<p><strong>Silent failure</strong>: 6/21 (28%) <span class="status stat-bad">需修</span></p>
+
+<h3>P4 Issues</h3>
+<table>
+<thead><tr><th>ID</th><th>Issue</th><th>Priority</th></tr></thead>
+<tbody>
+<tr><td><span class="item-id">H4-1</span></td><td>5 個 PreToolUse Bash hooks 整合為單一 router_pre_bash.sh → 降 maintenance cost / 統一 stdin 處理</td><td><span class="priority" style="background:#0969da">P3</span></td></tr>
+<tr><td><span class="item-id">H4-2</span></td><td>8 個 PostToolUse Edit|Write hooks 是否全必要？評估 deprecate 候選（terminology_guard / md_link_check 與 kb_sot_guard 是否重疊）</td><td><span class="priority" style="background:#0969da">P3</span></td></tr>
+<tr><td><span class="item-id">H4-3</span></td><td>6 silent failure hooks 改 stderr → InterSubMod/docs/postmortems/hook_failures.log</td><td><span class="priority" style="background:#cf222e">P0</span></td></tr>
+<tr><td><span class="item-id">H4-4</span></td><td>Hook 並行執行假設未驗證 — 應跑 hook_concurrency_test.sh 確認</td><td><span class="priority" style="background:#0969da">P3</span></td></tr>
+<tr><td><span class="item-id">H4-5</span></td><td>缺 hook latency telemetry — 22 hooks × 每 turn 可能加 0.5-2s</td><td><span class="priority" style="background:#6e7781">P4</span></td></tr>
+</tbody></table>
+
+<h2>P5 — Agents Audit (14 active + 1 archived)</h2>
+<h3>Active agents</h3>
+<p><code>architect</code>, <code>developer</code>, <code>headless-research</code>, <code>literature-reviewer</code>, <code>methodology-reviewer</code>, <code>optimizer</code>, <code>paper-miner</code>, <code>parallel-analysis</code>, <code>parallel-benchmark</code>, <code>release</code>, <code>researcher</code>, <code>research-orchestrator</code>, <code>reviewer</code>, <code>tester</code></p>
+
+<h3>Plugin overlap 分析</h3>
+<table>
+<thead><tr><th>InterSubMod agent</th><th>Plugin equivalent</th><th>重疊度</th><th>備註</th></tr></thead>
+<tbody>
+<tr><td><code>architect</code></td><td><code>feature-dev:code-architect</code></td><td><span class="status" style="background:#fb8500;color:white">high</span></td><td>兩者都做 design — InterSubMod architect 更研究導向 (docs/plans/) / feature-dev 更 codebase 導向</td></tr>
+<tr><td><code>reviewer</code></td><td><code>feature-dev:code-reviewer + pr-review-toolkit:*</code></td><td><span class="status" style="background:#fb8500;color:white">high</span></td><td>InterSubMod reviewer = 科學家驗證數據 / plugin = 程式碼審查 — scope 不同但命名衝突</td></tr>
+<tr><td><code>researcher</code></td><td><code>Explore (builtin)</code></td><td><span class="status" style="background:#bf8700;color:white">medium</span></td><td>InterSubMod researcher = web search 論文 / Explore = codebase 搜尋 — scope 不同</td></tr>
+<tr><td><code>optimizer</code></td><td><code>code-simplifier:code-simplifier (plugin)</code></td><td><span class="status" style="background:#bf8700;color:white">medium</span></td><td>InterSubMod optimizer 更廣 (品質+效能+可讀性) / plugin 只簡化</td></tr>
+<tr><td><code>developer</code></td><td><code>—</code></td><td><span class="status" style="background:#6e7781;color:white">n/a</span></td><td>無顯著 plugin 對應；InterSubMod 專屬 C++ PDD</td></tr>
+</tbody></table>
+<h3>P5 Issues</h3>
+<table><thead><tr><th>ID</th><th>Issue</th><th>Priority</th></tr></thead><tbody>
+<tr><td><span class="item-id">A5-1</span></td><td>archive/ 只有 1 個 .md + README — 是否該真刪 intersubmod-weekly-research-agent？</td><td><span class="priority" style="background:#0969da">P3</span></td></tr>
+<tr><td><span class="item-id">A5-2</span></td><td>reviewer 命名與 plugin code-reviewer 衝突 — 評估改名為 scientist-reviewer</td><td><span class="priority" style="background:#6e7781">P4</span></td></tr>
+<tr><td><span class="item-id">A5-3</span></td><td>缺 cache_hit / cost / completion telemetry — 不知道哪些 agent 真有用</td><td><span class="priority" style="background:#0969da">P3</span></td></tr>
+</tbody></table>
+<h2>P6 — Commands / Templates / 5 Entry Points</h2>
+<h3>5 Entry Points (CLAUDE.md §9)</h3>
+<table><thead><tr><th>Path</th><th>Status</th></tr></thead><tbody>
+<tr><td><code>InterSubMod/AGENTS.md</code></td><td><span class="status stat-ok">✅</span> 0d, 12.5KB</td></tr>
+<tr><td><code>InterSubMod/.claude/CLAUDE.md</code></td><td><span class="status stat-ok">✅</span> 0d, 7.8KB</td></tr>
+<tr><td><code>InterSubMod/docs/references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md</code></td><td><span class="status stat-warn">⚠ stale (>7d cap)</span> 9d, 16KB</td></tr>
+<tr><td><code>InterSubMod/docs/CURRENT_FOCUS.md</code></td><td><span class="status stat-ok">✅</span> 1d, 35KB (hook 截 3KB)</td></tr>
+<tr><td><code>InterSubMod/research/autoresearch/research_direction.md</code></td><td><span class="status stat-warn">⚠ stale (>7d cap)</span> 9d, 3.7KB</td></tr>
+</tbody></table>
+<h3>P6 Issues</h3>
+<table><thead><tr><th>ID</th><th>Issue</th><th>Priority</th></tr></thead><tbody>
+<tr><td><span class="item-id">E6-1</span></td><td>20260424_AI啟動壓縮上下文 9d 未更新 — 屬 SoT 文件需週級維護</td><td><span class="priority" style="background:#bf8700">P2</span></td></tr>
+<tr><td><span class="item-id">E6-2</span></td><td>research_direction.md 9d 未更新 — autoresearch queue 是否仍 active？</td><td><span class="priority" style="background:#0969da">P3</span></td></tr>
+<tr><td><span class="item-id">E6-4</span></td><td>缺 templates 第 3 個：M15 提問模板 (P0 fix item)</td><td><span class="priority" style="background:#cf222e">P0</span></td></tr>
+<tr><td><span class="item-id">E6-5</span></td><td>缺 templates 第 4 個：M10 四象限 task triage (P3 fix item)</td><td><span class="priority" style="background:#0969da">P3</span></td></tr>
+</tbody></table>
+<h2>P7 — Documentation Drift</h2>
+<h3>真 Broken References (排除 placeholder)</h3>
+<table><thead><tr><th>Broken target</th><th>Source</th><th>Reason</th></tr></thead><tbody>
+<tr><td><code>InterSubMod/.claude/skills/weekly-master-draft/outlines/UPGRADE_PLAN_FOR_WEEKLY_REPORT.md</code></td><td>Referenced in: InterSubMod/.claude/skills/pptx-build/SKILL.md</td><td>weekly-master-draft skill 已被 /weekly-report 取代但 pptx-build 仍引用舊路徑</td></tr>
+</tbody></table>
+<p>Placeholder refs (NOT broken — template syntax): 3 entries</p>
+<h2>🎯 Final Consolidated Fix Plan</h2>
+<p>合併 P1-P7 所有 fix items，依優先級分 5 階段。每階段含完整實作路徑 + 工時。</p>
+<div class="phase-box" style="border-left-color:#cf222e">
+<h3 style="margin:0 0 0.5em 0;color:#cf222e">🔴 P0 Critical (1.5 hr)</h3>
+<table><thead><tr><th>Item ID</th><th>Action</th><th>Est. Time</th></tr></thead><tbody>
+<tr><td><span class="item-id">M15</span></td><td>新建 InterSubMod/templates/user_query_template.md 6 欄提問模板</td><td>30 min</td></tr>
+<tr><td><span class="item-id">H4-3</span></td><td>改 6 silent failure hooks → 失敗寫 InterSubMod/docs/postmortems/hook_failures.log</td><td>45 min</td></tr>
+<tr><td><span class="item-id">P1-YAML</span></td><td>修 5 YAML invalid skill description (feature-layered-observation / problem-framing-ideation / provenance-tier-audit / research-loop / verification-loop)</td><td>30 min</td></tr>
+</tbody></table>
+<p><strong>Phase total: ~1.8 hr</strong></p>
+</div>
+<div class="phase-box" style="border-left-color:#fb8500">
+<h3 style="margin:0 0 0.5em 0;color:#fb8500">🟠 P1 This Week (5 hr)</h3>
+<table><thead><tr><th>Item ID</th><th>Action</th><th>Est. Time</th></tr></thead><tbody>
+<tr><td><span class="item-id">P1-D2</span></td><td>13 個非工具類 skill 補 D2 診斷段 (Phase chain / Dependencies / Failure Mode)</td><td>3.5 hr</td></tr>
+<tr><td><span class="item-id">P1-D3</span></td><td>5 個非工具類 skill 加 /scientific-rigor cross-ref</td><td>30 min</td></tr>
+<tr><td><span class="item-id">M2</span></td><td>/problem-framing-ideation §1 加 How Much (5W2H 升級)</td><td>30 min</td></tr>
+<tr><td><span class="item-id">M3</span></td><td>templates/research_index.md Pre-reg 加 SMART 5-字 checklist</td><td>30 min</td></tr>
+<tr><td><span class="item-id">D7-1</span></td><td>pptx-build 引用改 weekly-master-draft → /weekly-report 路徑</td><td>5 min</td></tr>
+</tbody></table>
+<p><strong>Phase total: ~5.1 hr</strong></p>
+</div>
+<div class="phase-box" style="border-left-color:#bf8700">
+<h3 style="margin:0 0 0.5em 0;color:#bf8700">🟡 P2 Next 2 weeks (3 hr)</h3>
+<table><thead><tr><th>Item ID</th><th>Action</th><th>Est. Time</th></tr></thead><tbody>
+<tr><td><span class="item-id">M3-Permission-Audit</span></td><td>allow_list_audit.sh 偵測 158 entries 未用 / 過度具體</td><td>30 min</td></tr>
+<tr><td><span class="item-id">M7-Cache-Telemetry</span></td><td>cache_telemetry.sh — Stop hook 解析 cost report 抽 cache_read / cache_creation tokens</td><td>1 hr</td></tr>
+<tr><td><span class="item-id">M4-SWOT</span></td><td>/methodology-audit Step 3 OPTIONS 加 SWOT 2x2 matrix template</td><td>45 min</td></tr>
+<tr><td><span class="item-id">M5-TLDR</span></td><td>AGENTS.md §15 加「Tier 3+ 首句 TL;DR」規則</td><td>15 min</td></tr>
+<tr><td><span class="item-id">M13-Ledger</span></td><td>evidence_ledger.jsonl schema 加 next_action + identified_issues 欄</td><td>1 hr</td></tr>
+<tr><td><span class="item-id">E6-1</span></td><td>更新 20260424_AI啟動壓縮上下文與研究索引_01.md (9d stale)</td><td>30 min</td></tr>
+</tbody></table>
+<p><strong>Phase total: ~4.0 hr</strong></p>
+</div>
+<div class="phase-box" style="border-left-color:#0969da">
+<h3 style="margin:0 0 0.5em 0;color:#0969da">🔵 P3 Next Month (4 hr)</h3>
+<table><thead><tr><th>Item ID</th><th>Action</th><th>Est. Time</th></tr></thead><tbody>
+<tr><td><span class="item-id">H4-1</span></td><td>整合 5 個 PreToolUse Bash hooks → 單一 router_pre_bash.sh</td><td>1 hr</td></tr>
+<tr><td><span class="item-id">H4-2</span></td><td>evaluate 8 個 PostToolUse Edit|Write 重疊 → deprecate 候選 2-3 個</td><td>45 min</td></tr>
+<tr><td><span class="item-id">Compact-Test</span></td><td>compact_test.sh — /compact 後保留指令自動回歸測試</td><td>45 min</td></tr>
+<tr><td><span class="item-id">Subagent-Logger</span></td><td>subagent_completion_logger.sh — SubagentStop 記錄 cost/cache/status</td><td>30 min</td></tr>
+<tr><td><span class="item-id">M6-Worktree</span></td><td>parallel-benchmark agent 預設 isolation: worktree</td><td>15 min</td></tr>
+<tr><td><span class="item-id">Rules-Paths</span></td><td>4 個 .claude/rules/ 加 paths frontmatter (省 5KB always-loaded)</td><td>30 min</td></tr>
+<tr><td><span class="item-id">M2-Desc-Shorten</span></td><td>5 個 max desc > 600 chars skill 縮短到 ≤400 chars</td><td>30 min</td></tr>
+<tr><td><span class="item-id">M10-Matrix</span></td><td>新建 templates/task_priority_matrix.md (Eisenhower)</td><td>20 min</td></tr>
+</tbody></table>
+<p><strong>Phase total: ~4.6 hr</strong></p>
+</div>
+<div class="phase-box" style="border-left-color:#6e7781">
+<h3 style="margin:0 0 0.5em 0;color:#6e7781">⚫ P4 Future / Opt-in (3 hr)</h3>
+<table><thead><tr><th>Item ID</th><th>Action</th><th>Est. Time</th></tr></thead><tbody>
+<tr><td><span class="item-id">Injection-Guard</span></td><td>external_input_sanitizer.sh — WebFetch / 大 Read 偵測 prompt injection</td><td>1 hr</td></tr>
+<tr><td><span class="item-id">Memory-Archive</span></td><td>memory archive 機制 (>1 年 stale → memory/archive/)</td><td>30 min</td></tr>
+<tr><td><span class="item-id">Memory-Recall-Log</span></td><td>memory_recall_logger.sh — 量化 feedback memory 引用率</td><td>45 min</td></tr>
+<tr><td><span class="item-id">Modify-Hook-Demo</span></td><td>dangerous_path_redirect.sh — PreToolUse modify input 示範</td><td>30 min</td></tr>
+<tr><td><span class="item-id">Cross-Version-Baseline</span></td><td>Q1-Q13 跨 Claude version baseline JSON (每 major 升版前跑)</td><td>—</td></tr>
+</tbody></table>
+<p><strong>Phase total: ~2.8 hr</strong></p>
+</div>
+<h2>📈 Total Effort Estimate</h2>
+<table>
+<thead><tr><th>Phase</th><th>Hours</th><th>Cumulative</th><th>Recommended Window</th></tr></thead>
+<tbody>
+<tr><td>P0 Critical</td><td>1.5</td><td>1.5</td><td>今天 / 立刻</td></tr>
+<tr><td>P1 This week</td><td>5.0</td><td>6.5</td><td>本週剩餘工作日</td></tr>
+<tr><td>P2 Next 2 weeks</td><td>3.0</td><td>9.5</td><td>W4-W5</td></tr>
+<tr><td>P3 Next month</td><td>4.0</td><td>13.5</td><td>W6-W7</td></tr>
+<tr><td>P4 Future/opt-in</td><td>3.0</td><td>16.5</td><td>W8+ / 評估後</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>18.2 hr</strong></td><td>—</td><td>~4 週可全清</td></tr>
+</tbody>
+</table>
+
+<h2>⚖️ Dependency Map（為什麼依此順序）</h2>
+<table>
+<thead><tr><th>Dependency</th><th>順序理由</th></tr></thead>
+<tbody>
+<tr><td>P0 YAML fix → P1 D2 diagnostic 段補</td><td>D2 補時若 YAML 無效，YAML parser 仍寬鬆 trigger，但補完 YAML 後 D2 diff 更可靠</td></tr>
+<tr><td>P0 hook silent failure 修 → P2 cache_telemetry</td><td>cache telemetry 屬新 hook，先解 silent failure 模式才能保新 hook 正確 fail-loud</td></tr>
+<tr><td>P1 D2 補完 → P3 H4-1 router 整合</td><td>整合 5 PreToolUse hooks 前需要每個 hook 有 Failure Mode 段（D2）才能評估 deprecate 候選</td></tr>
+<tr><td>P2 ledger 7 欄擴充 → P4 memory archive</td><td>archive 需依新 schema 標記 stale entries</td></tr>
+<tr><td>M15 templates 模板（P0）→ M2/M3/M10 其他模板（P1/P3）</td><td>建立 InterSubMod/templates/ 統一風格規範後其他 template 才一致</td></tr>
+</tbody>
+</table>
+
+<h2>🏗️ Cross-cutting Architecture Improvements (NOT in fix list)</h2>
+<details>
+<summary>未列入 P0-P4 但值得評估的 architecture-level 改進</summary>
+<ul>
+<li><strong>Skill ↔ Hook ↔ Agent 三層責任邊界文件化</strong>: CLAUDE.md §X 加一張表釐清 (skill = behavior recipe / hook = guardrail / agent = autonomous worker)</li>
+<li><strong>5 入口聲明降到 3</strong>: CURRENT_FOCUS 已被 SessionStart hook 注入，是否仍需 AGENTS.md §9 列為「主動 Read」？評估合併</li>
+<li><strong>Permission mode 顯式化</strong>: 在 settings.local.json 加 <code>"permissionMode": "default"</code> 等 (CLI default 但顯式化便於 audit)</li>
+<li><strong>Hook chain visualization</strong>: 22 hooks 跨 5 events 用 mermaid graph 自動產生（git-pre-push）</li>
+<li><strong>Memory feedback hit-rate 量化</strong>: 加 grep counter — 哪些 feedback memory 從未被引用？候選 archive</li>
+</ul>
+</details>
+
+<h2>📦 Deliverables 索引</h2>
+<table>
+<thead><tr><th>檔案</th><th>內容</th></tr></thead>
+<tbody>
+<tr><td><code>InterSubMod/docs/reports/validated/2026/05/20260518_agent_harness_audit_p1_skills_01/audit_report.standalone.html</code></td><td>P1 Skills audit (42 × 6)</td></tr>
+<tr><td><code>InterSubMod/docs/reports/validated/2026/05/20260518_agent_harness_audit_p1_skills_01/p2_industry_audit.standalone.html</code></td><td>P2 業界對照 (7 modules + 5 challenges)</td></tr>
+<tr><td><code>InterSubMod/docs/reports/validated/2026/05/20260518_agent_harness_audit_p1_skills_01/p3_methodology_alignment.standalone.html</code></td><td>P3 17 方法論對照</td></tr>
+<tr><td><code>InterSubMod/docs/reports/validated/2026/05/20260518_agent_harness_audit_p1_skills_01/p4_to_p7_final.standalone.html</code></td><td>🎯 本報告 (P4-P7 + Final Fix Plan)</td></tr>
+</tbody></table>
+
+<hr>
+<p class="meta">Generated: 2026-05-18 15:13 · Total audit effort: ~3 hr spent / 16.5 hr fix backlog</p>
+</body></html>
