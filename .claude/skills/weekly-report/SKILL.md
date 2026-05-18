@@ -206,6 +206,26 @@ AskUserQuestion: 母稿已完成。下一步？
 
 ---
 
+## 嚴謹度繼承（/scientific-rigor）
+
+本 skill 輸出（週報母稿）必須繼承 `InterSubMod/.claude/skills/scientific-rigor/SKILL.md` 規範：
+
+- **§2 證據分級**: 每個結論標 ⭐⭐⭐⭐⭐ L1-L5 ribbon（範例：「⭐⭐⭐⭐ 證據：5 樣本 paired F1 +0.0112, n=5, 95% CI [+0.003, +0.020]」）
+- **§3 Effect Size**: AUC/F1 delta 必含 Cohen's ribbon（範例：「+0.0112 F1, marginal < Cohen's small 0.2」）— 禁止單 metric 宣告「更好」
+- **§4 DAG (when AUC/相關性 claim)**: 引用 `InterSubMod/docs/concepts/DAG/<topic>.md` mermaid + 標 confounder / collider
+- **§7 Pre-registration alignment**: 紅旗 (W5) / 教授問答 (W6) 段必對照事先註冊 `H_預測 / 否證條件 / decision_threshold`
+- **§10.2 Retrieval Practice**: W1-W2 phase 強制查 `MEMORY.md Concluded 區` 避免重複已 NEGATIVE 方向
+
+**最小可用子集**（依 §0.5 cognitive load 校正）:
+- 高影響（PI report / 大進展宣告）: §2 + §3 + §4 + §7 全跑
+- 中影響（一般週報）: §2 + §3
+- 低影響（純 admin 內容）: §2 only
+
+**反 pattern**（看到立即修）:
+- 「F1 +0.05 → 鎖定」（無 effect size ribbon + 無 CI）
+- 「跨樣本一致」（無 n / 無 95% CI）
+- 「clearly / strongly / rigorously」confidence 詞彙
+
 ## 與其他 skill 的關聯
 
 - **pptx-build**：下游接棒。C4 後 4 選 A/D 觸發。母稿 frontmatter 提供 main thesis / report_type，pptx-build 跳過 P1 main thesis 鎖定

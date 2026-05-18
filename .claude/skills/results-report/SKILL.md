@@ -169,6 +169,26 @@ The report must end with operational decisions, for example:
 - The report must separate stable conclusion from tentative interpretation.
 - The report must say what changed in project belief and what should happen next.
 
+## 嚴謹度繼承（/scientific-rigor）
+
+results-report 是「decision object」— 比 results-analysis 更需要嚴謹度（影響升 tier 決策）。必繼承 `InterSubMod/.claude/skills/scientific-rigor/SKILL.md`：
+
+- **§2 證據分級**: 報告每個 finding 必標 L1-L5 ribbon + 升 tier 建議必對齊 tier
+- **§3 Effect Size**: F1/AUC delta 必含 Cohen ribbon + 95% CI（results-analysis 已抽 stats，此處只需引用）
+- **§4 DAG**: 因果 claim 必 reference DAG 路徑（`InterSubMod/docs/concepts/DAG/<topic>.md`）
+- **§7 Pre-reg**: decision section 必對照 pre-reg `H_預測 / decision_threshold`，禁止 post-hoc HARKing
+- **§9.2 Blameless Postmortem**: NEGATIVE / NO-GO 報告必走 SRE 5-段格式
+
+**最小可用子集**:
+- Upgrade tier ⭐4-5 報告: §2 + §3 + §4 + §7 全跑（強制觸發 evaluator agent 7-check 通過）
+- ⭐3 中段報告: §2 + §3
+- 草稿 / 內部 dry-run: §2
+
+**Decision 紅旗**（NEEDS_WORK 訊號）:
+- 「mostly positive」「partial」「marginal」未量化為 effect size
+- 「跨樣本 X 一致」未列 n / CI
+- 結論超出 pre-reg 範圍（HARKing）
+
 ## Reference files
 
 Load only what is needed:

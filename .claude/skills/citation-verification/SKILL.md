@@ -43,6 +43,22 @@ WebSearch: site:scholar.google.com "<title>" <first author>
 - ❌ 假設「這篇有名我記得」→ 即使 Transformer 也要查
 - ❌ Claim 引用未實際對照原文 → reviewer 會抓
 
+## 嚴謹度繼承（/scientific-rigor）
+
+citation-verification 是 /scientific-rigor 的「引用層」防線。本 skill 直接執行 §2 證據分級 + §4 DAG 的引用驗證部分：
+
+- **§2 Evidence Tier 對應「引用分級」**:
+  - L1 引用: KB primary source + verified URL + 本地 mirror
+  - L2 引用: 一手論文 + DOI 可訪問
+  - L3 引用: 二手 review + 業界 blog
+  - L4 引用: 推測無源（標 `[需驗證]`）
+  - L5 引用: 已知矛盾來源
+- **§4 DAG 引用 confound 識別**:
+  - 引用 paper claim 必對應其 DAG 假設（如 confounder 對應）
+  - 若 paper 與本專案 DAG 不對齊 → flag「外部引用 vs 本地驗證 gap」
+- **§8.4 Provenance 強制**: 每個引用必含 access_date + verified_at + L1-L5 tier
+- **§7 Pre-reg**: 跨領域引用必對應事先註冊的「相關假說」欄
+
 ## 與其他 skill 的關係
 
 獨立 skill；本專案 Phase 2 撰寫論文時使用。撰寫流程中，每加一個 `\cite{...}` 即觸發本 skill 一次驗證。

@@ -259,6 +259,23 @@ grep -E '(linear-gradient|radial-gradient|backdrop-filter|text-shadow|0 0 [0-9]+
 
 Both must pass before Write. If a rule conflicts (e.g., Rule 8 "1-2 primary" vs slide 9-section coloring) — slide colors are **semantic encoding** (section identity), not decorative; the spirit is preserved.
 
+## 嚴謹度繼承（/scientific-rigor）
+
+HTML 報告（特別 standalone PI 終版）必繼承 `InterSubMod/.claude/skills/scientific-rigor/SKILL.md`：
+
+- **§2 證據分級**: 每個 claim card 必標 ⭐⭐⭐⭐⭐ tier badge（HTML badge style: `<span class="tier-l2">⭐⭐⭐⭐ L2</span>`）
+- **§3 Effect Size**: 報告內 metric table 必含 Cohen ribbon + CI 欄
+- **§4 DAG**: standalone 模式必嵌 SVG DAG 圖（mermaid CDN 或 inline SVG）
+- **§7 Pre-registration**: validated 報告必含「Pre-registration 對照表」欄
+- **§8.4 Provenance**: standalone 報告必有 footer 含 commit hash + cycle_id + 生成時間
+
+**最小可用子集**:
+- standalone PI 終版: §2 + §3 + §4 + §7 + §8.4 全跑
+- report 一般技術報告: §2 + §3
+- slide HTML preview: §2 + §3 + slide-level ribbon
+
+**6-Taboo Audit 擴展**: §6-Taboo 加第 7 條「Evidence Tier missing」— 任何 claim card 無 tier badge → 紅旗。
+
 ## See Also
 
 - **Spec**: `InterSubMod/docs/references/manual/20260510_HTML預覽_圖示生成_3skill_設計_01.md` (D11 / D15-D20)

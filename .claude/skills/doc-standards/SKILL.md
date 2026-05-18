@@ -94,6 +94,23 @@ docs/architecture/{YYYYMMDD}_{專案主題}/
 - 相對路徑最多 2 層（禁止 `../../../`）；引用 `output/` 或 `research/` 圖片時允許超過 2 層
 - 圖片命名：`{NN}_{英文描述}.png`
 
+## 嚴謹度繼承（/scientific-rigor）
+
+文件元數據規範（檔案命名 / metadata / 目錄結構）+ **嚴謹度敘述格式** 雙軌。本 skill 加入 `InterSubMod/.claude/skills/scientific-rigor/SKILL.md` 對照：
+
+- **§2 Evidence Tier ribbon 標註位置**:
+  - 文件 metadata block 加 `證據等級: L1/L2/L3/L4/L5 ⭐...`
+  - 主要 claim 標題 + 內文用 `⭐⭐⭐⭐ L2` inline 標
+- **§3 Effect Size 敘述標準**:
+  - 數字 metric 必含 Cohen ribbon: 「+0.0112 (Cohen's d 0.08, marginal)」
+  - CI 95% 必標: 「n=5, 95% CI [+0.003, +0.020]」
+- **§10.2 confidence 詞彙紅線**: 禁止「clearly」「strongly」「rigorously」「significant」（無 p-value 對齊）— 用具體 evidence 敘述替代
+- **§8.4 Provenance 引用**: 報告必含 commit hash / cycle_id / 數據版本（standalone 報告 footer 強制）
+
+**檔案命名 + tier 結合範例**:
+- `20260518_HP_priority_bug_L1_完全佐證_01.md`（tier 嵌入 filename，便於 grep）
+- 或 metadata block：`<!-- 證據等級: L1 ⭐⭐⭐⭐⭐ / Cohen: d=2.3 large effect -->`
+
 ## AI 對話紀錄撰寫
 
 每次 AI 對話完成重要任務後，撰寫執行報告（可使用 `/report` skill）：

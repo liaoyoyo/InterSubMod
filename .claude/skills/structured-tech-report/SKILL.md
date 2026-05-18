@@ -189,6 +189,23 @@ verdict: <pending|POSITIVE|NEGATIVE|CONDITIONAL>
 - **AI session 紀錄** — 用 `/report`（docs/provenance/ai_sessions/）
 - **PPTX 投影片** — 用 `/pptx-build`
 
+## 嚴謹度繼承（/scientific-rigor）
+
+13 段技術報告（Toyota A3 / ADR / SRE Postmortem 整合）天然 align 嚴謹度方法論。本 skill 繼承 `InterSubMod/.claude/skills/scientific-rigor/SKILL.md`：
+
+- **§2 證據分級**: §6 因果鏈每環標 L1-L5；§10 風險與不確定性段必含 tier 分布
+- **§3 Effect Size**: §4 量化結果段強制 Cohen ribbon + CI（不只列數字）
+- **§4 DAG**: §6 因果鏈 mermaid 圖必標 confounder / collider / mediator
+- **§7 Pre-reg**: §2 問題定位段必對照事先註冊預測；事後新發現入 §11 follow-up（不污染 main verdict）
+- **§9.2 SRE Postmortem**: NEGATIVE 結論 (§7-§9) 必走 blameless 5-段格式（timeline / RCA / what went well / poorly / action items）
+
+**既有部分 align**: §「必繼承的既有規範」+ §「DO NOT USE WHEN」已部分覆蓋 — 本段加完整繼承索引避免 implicit。
+
+**最小可用子集**:
+- 因果鏈技術報告（如 priority bug analysis）: §2 + §3 + §4 + §7 + §9.2 全跑
+- 純現象描述（如 data audit）: §2 + §3
+- 純定義/概念整理: §2
+
 ## Quality Checklist — 交付 13 段技術報告前自我檢查（v1.7 batch B）
 
 - [ ] 13 段全寫齊（不可跳；缺段加 `(N/A，理由：...)` 而非靜默省略）

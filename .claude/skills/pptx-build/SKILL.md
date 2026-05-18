@@ -186,6 +186,26 @@ API 索引 → `tools/README.md`
 
 ---
 
+## 嚴謹度繼承（/scientific-rigor）
+
+PPTX / HTML slide 對外發佈權重最高，必嚴格繼承 `InterSubMod/.claude/skills/scientific-rigor/SKILL.md`：
+
+- **§2 證據分級**: 每張 claim slide 必標 ⭐⭐⭐⭐⭐ ribbon（slide 角落 metadata）
+- **§3 Effect Size ribbon**: 任何「+X」「-Y」數字 slide 必含 Cohen / CI 註腳；slide title 禁止 confidence 詞彙
+- **§4 DAG**: TP/FP/AUC 因果 claim slide 配對 DAG 子圖（必要時 1 slide 1 DAG）
+- **§7 Pre-registration**: PI report PPTX 結尾段必含 pre-reg vs actual 對照表
+- **§10.1 Feynman**: slide 結論句必通過「12 歲能懂」測試（無 jargon stack）
+
+**最小可用子集**:
+- PI report / 對外論文 PPTX: §2 + §3 + §4 + §7 全跑（強制 §0.5 最高層級）
+- 內部 weekly review PPTX: §2 + §3
+- 草稿 / 學習材料: §2
+
+**Slide 紅旗**（看到立即削減）:
+- 1 張 slide 多個未標 evidence tier 的 claim
+- F1 / AUC 數字無 ribbon
+- 對外「更好」「最佳」「顯著」無數據佐證
+
 ## 與其他 skill 關聯
 
 - **上游觸發** → `weekly-report` C4 後 handoff A 自動觸發 `/pptx-build --from-draft <path>`
