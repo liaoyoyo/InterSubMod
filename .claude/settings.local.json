@@ -429,6 +429,33 @@
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/evidence_read_tracker.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/researcher_claim_evidence_check.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/memory_recall_logger.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
+      {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/external_input_sanitizer.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
       }
     ],
     "SubagentStop": [

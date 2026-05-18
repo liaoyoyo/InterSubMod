@@ -128,15 +128,19 @@
 
 ---
 
-## §9 Agent 上下文 5 入口分工（Claude Code 角度）
+## §9 Agent 上下文 3 入口分工（2026-05-18 P4 E5 — 從 5 降到 3）
 
 | 入口 | 權威範圍 | Claude Code 載入方式 |
 |------|--------|--------|
-| `InterSubMod/AGENTS.md` | 跨 agent governance（語言、結構、build、目標、KB 義務、研究輸出組織）| 自動 concatenate |
+| `InterSubMod/AGENTS.md` | 跨 agent governance（語言、結構、build、目標、KB 義務、研究輸出組織、回應分級 §15）| 自動 concatenate |
 | `.claude/CLAUDE.md`（本檔）| Claude Code 模式特定（確認矩陣、Skills、Hooks、Rules、subagent）| 自動載入 |
-| `InterSubMod/docs/references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md` | 研究壓縮上下文、重要數據、任務順序、待決策矩陣 | 由 AI 主動 Read（觸發：對話開始 + 跨 session 交接）|
-| `InterSubMod/docs/CURRENT_FOCUS.md` | live 主軸、阻塞 | SessionStart hook 注入（待建立）+ AI 主動 Read |
-| `InterSubMod/research/autoresearch/research_direction.md` | AutoResearch 候選 queue | **僅候選**，不作自動執行觸發 |
+| `InterSubMod/docs/CURRENT_FOCUS.md` | live 主軸、阻塞、active cycle、剛 audit / fix 紀錄 | **SessionStart hook 自動注入** ✅（commit ee648fb 已落地）|
+
+**降級後備用入口**（不在主流程）：
+- `InterSubMod/docs/references/manual/20260424_AI啟動壓縮上下文與研究索引_01.md` — **降為 reference manual**；新內容直接寫 CURRENT_FOCUS §11 Agent Harness 狀態
+- `InterSubMod/research/autoresearch/research_direction.md` — **降為 hypothesis backlog 索引**；不再作為對話啟動入口
+
+⚠ **2026-05-18 變更理由**: Researcher agent 與 Architect agent 雙重 cross-validate 結論「Anthropic single source of truth + Walking Labs L04 'one giant instruction file fails' + OpenAI 'map not 1000-page manual'」三條業界共識指向 — 5 入口稀釋 SoT，降到 3 入口（governance / agent-specific / live state）對齊。
 
 ---
 

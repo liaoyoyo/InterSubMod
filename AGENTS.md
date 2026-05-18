@@ -5,6 +5,22 @@
 
 ---
 
+## §0 Cold-Start Test — 5 問題（Walking Labs L03）
+
+**規則**: 新 agent / 新 session 開始時，應能從 repo 直接答出以下 5 問題（不依賴外部記憶）。若任何一題答不出 → repo 缺 SoT，需補。
+
+| # | 問題 | 從 repo 哪裡答 |
+|---|------|---------------|
+| Q1 | **What is this project?** | `InterSubMod/README.md` + `AGENTS.md §3-4`（生醫研究 — cancer somatic variant calling with ONT methylation phasing）|
+| Q2 | **How do I run it?** | `AGENTS.md §10 Build/Test/Dev 命令` + `.claude/rules/cpp-build.md` + `.claude/commands/{build,test-*,validate}.md` |
+| Q3 | **How do I verify changes?** | `/verification-loop` skill + `/validate` command + `InterSubMod/scripts/run_batch_vcf_analysis.sh` + `evidence_ledger.jsonl` |
+| Q4 | **What is the current focus?** | `InterSubMod/docs/CURRENT_FOCUS.md`（SessionStart hook 自動注入）+ §11 Agent Harness 狀態（最新 audit） |
+| Q5 | **What recent decisions were made?** | `git log --oneline -10` + `MEMORY.md` Concluded 區 + `evidence_ledger.jsonl` 最近 entries |
+
+✅ 2026-05-18 cold-start audit: Q1-Q5 全可從 repo 答（無外部記憶依賴）。
+
+---
+
 ## §1 語言與輸出規範
 
 - **回應語言**: 繁體中文（zh-TW）所有回覆、思考、任務清單
