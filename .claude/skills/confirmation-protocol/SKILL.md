@@ -180,6 +180,54 @@ user-invocable: true
 
 ---
 
+### Cynefin 域對照（2026-05-18 新增 — plan §F.4 P2）
+
+> 暫停判斷矩陣（影響度 × 信心度）的**業界對照層**：補強「為何同樣 🟠 節點暫停在不同情境需不同處置」的決策依據。
+> 參考：Snowden & Boone 2007 "A Leader's Framework for Decision Making"（HBR），Cynefin sense-making framework。
+
+#### 4 域 + 1 域定義 → 本協議對應
+
+| Cynefin 域 | 因果性質 | 推薦處置 | 對應本協議級別 | 典型 InterSubMod 場景 |
+|-----------|---------|---------|--------------|---------------------|
+| **Clear (Simple)** | 因果明確、有 best practice | sense → categorize → respond | 🟢 一行告知 | clang-format 套用、改 matplotlib 字型、已有 precedent 的統計方法選擇 |
+| **Complicated** | 因果可分析、需專家知識 | sense → analyze → respond | 🟡 列假設 / 🟠 節點暫停 | 選擇距離度量算法、設計 ablation、新增特徵欄位 |
+| **Complex** | 因果只在事後可見、需 emergent practice | **probe → sense → respond** | 🟠 節點暫停（**強制 pilot 小範圍 probe**）| 新研究方向開跑、跨樣本 generalization 評估、Phase 2A Normal BAM 整合 |
+| **Chaotic** | 無明顯因果、需即時穩定 | **act → sense → respond** | 🔴 立即暫停（但 act 後才 stabilize）| 災情處理（如 2026-05-08 `/tmp` 800GB 災情）、production 中斷 |
+| **Disorder** | 未能歸類 | 先做分類，禁止繼續推進 | 🔴 立即暫停 | 規格缺項 ≥2 + 高影響 → 先回問補資訊（CLAUDE.md §2 首 turn 規格完整度檢核） |
+
+#### 關鍵 framework 區辨
+
+| 區辨點 | Complicated vs Complex | 為何重要 |
+|--------|----------------------|--------|
+| 因果可預測性 | Complicated 可分析推導 / Complex 只能事後解釋 | Complex 域不能用「列假設」直接續做 — 必先 probe |
+| Action 順序 | Complicated: sense → analyze → respond / Complex: **probe → sense → respond** | 對應本專案「小規模 pilot 優先」（memory `feedback_small_scale_validation_first.md`） |
+| 失敗成本 | Complicated 失敗可預測損失 / Complex 失敗可能帶突破洞見 | 呼應 `/scientific-rigor §8.3.1` Productive Failure |
+
+#### 實務操作層
+
+1. **首先問域**（在套用暫停判斷矩陣前）：
+   - 此任務的因果關係是 Clear / Complicated / Complex / Chaotic / Disorder？
+2. **Complex 域必加 probe step**：
+   - 即使矩陣判出 🟡 列假設，若域為 Complex → 升為 🟠 節點暫停 + 強制 pilot
+   - 範例：「新研究方向 cross_het × ASM」即使有 precedent，仍須先跑 HCC1395 pilot 才能擴展全 7 樣本
+3. **Chaotic 域 act-first 例外**：
+   - Hard Gate 仍適用（不可逆操作不可繞過），但其他暫停層級允許先 act 後 sense
+   - 範例：production 中斷時先 kill process（act）→ 再 root cause（sense）→ 再 fix（respond）
+4. **Disorder 域對應規格不足**：
+   - 與 CLAUDE.md §2 「首 turn 規格完整度檢核」對齊：規格缺項 ≥2 且高影響 → 必須回問
+
+#### 與暫停判斷矩陣的互補
+
+| 維度 | 暫停判斷矩陣 | Cynefin 域 |
+|------|------------|----------|
+| 決定什麼 | 「自主時是否需告知/節點暫停」 | 「應採用何種 action 順序」 |
+| 適用 | 所有任務 | 所有任務的前置分類 |
+| 互補關係 | 矩陣告訴 **how loud**（多大聲告知/暫停）| 域告訴 **how to act**（probe / analyze / act / sense 何者先） |
+
+→ 引用 `/scientific-rigor §8.3.1` Productive Failure（Complex/Chaotic 域失敗的轉化條件）
+
+---
+
 ## 各場景暫停類型
 
 | 場景 | 暫停類型 | 全自動時的預設行為 |

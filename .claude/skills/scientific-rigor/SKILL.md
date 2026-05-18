@@ -267,6 +267,61 @@ graph LR
 - Concluded 區: 紀錄「結論本身」（事實）
 - Reflection: 紀錄「下次避免方法」（教訓）
 
+### §8.3.1 Productive Failure + Reopen Threshold（2026-05-18 新增 — plan §F.4 P2）
+
+> **核心觀念**（Kapur 2008, 2012, 2016 "Productive Failure"）：
+> 在 well-defined 但 ill-structured 問題上**先讓 learner 嘗試失敗**，再給結構化 instruction，比直接 instruction 學習效果更好。NEGATIVE 結論不是浪費，是「productive struggle」— 但需要明確的**轉化條件 + 重啟門檻**。
+
+#### 設計原則
+
+| 階段 | 動作 | 對應本專案 |
+|------|------|---------|
+| 1. Generation phase | learner 嘗試多種 invented strategies（多半失敗） | NEGATIVE cycles 累積（如 G1-G7、Z3 內 12 特徵、O11 epipolymorphism）|
+| 2. Activation phase | 將失敗中暴露的隱含知識結構化 | Postmortem §9.2 + Reflexion §8.3 |
+| 3. Consolidation phase | 給 canonical solution / expert framework | KB `concluded/` + memory「Concluded」區 |
+| 4. **Reopen phase**（本專案新增）| 在特定條件下重啟已 NEGATIVE 方向 | 本節 reopen threshold |
+
+#### Reopen Threshold（重啟已 NEGATIVE 方向的 3 條件，須至少滿足 1 條）
+
+| 條件 | 定義 | 範例 |
+|------|------|------|
+| **C1: 新數據** | 新樣本 / 新 metric / 重跑 with bug fix / 新覆蓋層 | 2026-04-23 HCC1395 phase1_new LOH 殘缺修復後，舊 Inter AF 結論需重評 |
+| **C2: 新方法** | 新算法 / 新框架可能繞過原 confound / 新 baseline 出現 | Q5 biorxiv/ensembl「實測」新方法（vs researcher 推測）→ NEGATIVE 轉 POSITIVE（commit `f3611a7`）|
+| **C3: 新前置** | 原 blocker 解除 / 原 confound 機制澄清 / 新 KB 知識可用 | KDE Fix 後重評 COLO829 9x 樣本；V6 production tag 後重評 Archive TO |
+
+#### Reopen 操作流程
+
+1. **Trigger detection**：發現任一 C1/C2/C3 條件 → 在當前對話標記「⚡ Reopen Trigger」
+2. **Cross-reference 既有 Reflection**：Read `research/<topic>/REFLECTION.md` + memory `feedback_*` 對應條目
+3. **Diff 評估**：新條件 vs 原 NEGATIVE 根因 — 是否真的繞過原 confound？（避免「換湯不換藥」重跑）
+4. **Pre-registration 升級**：依 §7.1 重新註冊 3 欄（H 預測 / 否證條件 / decision threshold）— **不可沿用原 NEGATIVE 的 3 欄**
+5. **新 cycle 標籤**：cycle_id 加 `reopen:<original_cycle_id>` 標籤，便於 provenance 追溯
+6. **歷史結論 status 更新**：原 NEGATIVE memory 加「⚠ Reopened @ <date>, see <new_cycle_id>」註記，不刪除
+
+#### 反例：禁止 reopen 的情境
+
+| 情境 | 為何不該 reopen |
+|------|-------------|
+| 「再跑一次看會不會不一樣」 | 無 C1/C2/C3 → 純隨機性差異，違反 Pre-registration |
+| 「之前的人沒做對，我重做」 | 未明示原根因被解除 → 重複失敗 |
+| 「我相信它應該 work」 | confirmation bias，違反 §2 證據分級 |
+| 「換個 prompt 試試」 | 不算新方法 — 必須是 systematic 新框架 |
+
+#### 與 Reflexion buffer 的差異
+
+| | Reflexion (§8.3) | Productive Failure (§8.3.1) |
+|--|----------------|---------------------------|
+| 視角 | 「下次避免」（防再踩雷）| 「何時重啟」（轉化條件）|
+| 動作時機 | NEGATIVE 結論落地 | 累積新條件後評估 |
+| 對 NEGATIVE 的態度 | 永久 cautionary | 條件式可重啟 |
+| 互補 | 二者合用 — Reflexion 寫 reopen threshold；Productive Failure 在新證據出現時觸發評估 |
+
+#### 與 Cynefin 域的關係（cross-reference）
+
+→ `/confirmation-protocol §「Cynefin 域對照」` Complex/Chaotic 域 ⇄ Productive Failure 失敗的「productive」性質：
+- **Complex 域失敗**：emergent practice 出現前必經失敗 → 為下次 probe 提供方向（高轉化價值）
+- **Chaotic 域失敗**：穩定後的 root cause analysis 即 productive failure 落地
+
 ### §8.4 知識追溯 audit
 
 每個結論必能回答 3 問:
