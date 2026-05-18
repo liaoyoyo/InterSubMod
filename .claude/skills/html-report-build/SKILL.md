@@ -3,6 +3,7 @@ name: html-report-build
 description: |
   LLM-direct HTML 報告生成（無 Python middleware）— 3 模式：report (Tailwind prose 排版) / slide (16:9 PPT 風) / standalone (PI 終版 + sticky TOC + 折疊 cards + SVG 圖)。Output 為 .md 的 companion 不取代。
   USE WHEN: 「想看 HTML 排版」「給 PI 看 preview」「PPT HTML」「standalone HTML」「html-report-build」、weekly/structured-tech/results-report 結束自動觸發、validated 報告需 PI 終版閱讀體驗。
+  standalone PI 終版前必繼承 InterSubMod/.claude/skills/scientific-rigor/SKILL.md §2-§7（claim card 必有 tier badge、§8.4 provenance footer 必含 commit hash）。
   SKIP WHEN: README.md (GitHub 原生 render)、給 LLM 消費的 .md (CLAUDE.md / *.json / MEMORY.md)、純筆記 / CI 文件、in-progress 草稿（用 report companion）。
 ---
 

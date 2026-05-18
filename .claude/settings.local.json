@@ -162,7 +162,9 @@
       "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/allow_list_audit.sh)",
       "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/cache_telemetry.sh)",
       "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/compact_test.sh)",
-      "Bash(timeout 3 bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/watch_session.sh 10 --no-clear)"
+      "Bash(timeout 3 bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/watch_session.sh 10 --no-clear)",
+      "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/evidence_level_lint.sh)",
+      "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/causal_claim_check.sh)"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
@@ -454,6 +456,24 @@
           {
             "type": "command",
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/external_input_sanitizer.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/evidence_level_lint.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/causal_claim_check.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       }
