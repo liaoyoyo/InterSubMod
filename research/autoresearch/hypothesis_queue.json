@@ -205,5 +205,50 @@
     "status": "adopted",
     "added_at": "2026-03-22",
     "notes": "[AUTO-DISCOVERED 2026-03-22]: GQ sweep from GQ=0 to GQ=24. GQ>=3=+0.009365>H011. QS>=50⊂GQ>=3. Extra 86TP/62FP have 58.1% precision. Adopted as alternate rescue rule with higher F1 but lower precision."
+  },
+  {
+    "id": "H013",
+    "type": "feature_hypothesis",
+    "priority": 80,
+    "hypothesis": "X1 cis-effect: Phase block 邊界內 CN-stratified methylation 高一致 → TP enrichment。Phasing block 內 read 物理共源、CN 均勻 → methylation pattern 一致性高 → TP 標的集中於此 zone (cis-acting methylation)",
+    "source": "7-round Socratic calibration session 2026-05-15 to 2026-05-18 (27 燒烤點); plan v2 Tier 4.2 升 active; manual-queue-edit per research/CLAUDE.md",
+    "target_track": "TO",
+    "target_datasets": ["HCC1395_V6_TO"],
+    "scale": "pilot",
+    "track": "deep",
+    "tier": 2,
+    "status": "queued",
+    "added_at": "2026-05-18",
+    "notes": "phase_block_3d project X1 hypothesis. Phase A (W3-W8) cycle 1 verifier: HCC1395 block-inside vs cross-block TP rate Wilcoxon p<0.05 + Cohen's d>0.5. Init-research scaffolding 5/23 (post V6 deadline)."
+  },
+  {
+    "id": "H014",
+    "type": "feature_hypothesis",
+    "priority": 80,
+    "hypothesis": "X2 boundary artifact: Phase block 跨越大 CN segment 時 methylation 不連續 → FP marker。Phasing 不可靠區（block boundary 附近 + CN transition）methylation pattern 不一致 → FP enrichment",
+    "source": "7-round Socratic calibration session; plan v2 Tier 4.2 升 active; manual-queue-edit per research/CLAUDE.md",
+    "target_track": "TO",
+    "target_datasets": ["HCC1395_V6_TO"],
+    "scale": "pilot",
+    "track": "deep",
+    "tier": 2,
+    "status": "queued",
+    "added_at": "2026-05-18",
+    "notes": "phase_block_3d project X2 hypothesis. Phase A cycle 1 verifier: block boundary ± window TP/FP ratio vs in-block ratio + Fisher exact p<0.05. Init-research 5/23 (post V6 deadline)."
+  },
+  {
+    "id": "H015",
+    "type": "feature_hypothesis",
+    "priority": 75,
+    "hypothesis": "X3 zone-stratified joint score: NG × CN tier × methylation rank-2 → heterogeneous τ filter per zone。Methylation 在 X3 為 weak axis (rank-5 in methyl_filter_phase2 cycle 1 global LR, coef +0.75 vs caller_af +3.44)；X3 zone-stratified 探索是否在 specific zone (Z-OCH / Z-GL) 內 methyl 訊號變強",
+    "source": "7-round Socratic calibration session; methyl_filter_phase2 cycle 1 evidence base (ΔF1=+0.02236 HCC1395-internal, methyl 5th rank)",
+    "target_track": "TO",
+    "target_datasets": ["HCC1395_V6_TO", "H1437_V6_TO", "H2009_V6_TO", "HCC1954_V6_TO", "HCC1937_V6_TO"],
+    "scale": "pilot",
+    "track": "deep",
+    "tier": 2,
+    "status": "queued",
+    "added_at": "2026-05-18",
+    "notes": "phase_block_3d project X3 hypothesis. Distinct from methyl_filter_phase2 cycle 2 (pure global LR) — X3 is zone-stratified. Caveat: methylation as confound annotation per known-pitfalls P-1. Phase A cycle 1 verifier: ΔF1 ≥ +0.005 with no caller_af proxy reliance (residualized AF check) + zone-specific methyl coef significantly > global rank-5 baseline."
   }
 ]

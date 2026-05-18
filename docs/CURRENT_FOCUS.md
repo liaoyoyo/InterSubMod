@@ -12,6 +12,143 @@
 
 # 當前目標
 
+## 2026-05-18 (晚晚) — Plan v2 patch（cycle 1 strong 後四軌定案）
+
+**Session anchor**：7 輪 Socratic 燒烤 (5/15+5/18) 累積 27 燒烤點 → plan v2 寫入 `~/.claude/plans/tender-pondering-blossom.md` → cycle 1 strong 結果 patch
+
+### v2 核心變更（vs v1）
+
+- 雙軌 → **四軌平行**（thread_d + V6 + phase_block_3d + methyl_filter_phase2 cycle 2）
+- 5 目標**階段化 active**（A→G4+G5, B→G2, C→G1+G3）取代 v1「降權」二元語言
+- 三階段 paper（A framework W3-W8 / B clone preprint M2-M5 / C ASM+two-hit M6-M12）
+- B/C 從 sub-analysis 抽取（不新建 project）
+- methyl_filter_phase2 升 4th 軌（不 merge phase_block_3d，因 cycle 1 ΔF1=+0.02236 strong）
+
+### 四軌定案
+
+| 軌道 | 狀態 |
+|------|------|
+| thread_d_paper | 5/15 init, Tier 2 啟動 5/22+ |
+| selfphasing_v6_production | 5/15 init, 4-day workflow 5/19-22 |
+| phase_block_3d | 5/18-19 inject 3 H, 5/23 init-research |
+| methyl_filter_phase2 | 5/15 init, **5/18 晚 cycle 1 ⭐3 strong**, cycle 2 cross-sample 待 V6 4 樣本 ISM |
+
+### Phase A/B/C timeline（四軌延長為 6-8 週）
+
+| Phase | 時程 | Deliverable | G 對齊 |
+|-------|------|-------------|--------|
+| A | W3-W8 (5/19-6/30, 6-8 wk) | framework draft + V6 + phase_block_3d + methyl cycle 2 + G1/G2/G3 skeleton | G4 + G5 |
+| B | M2-M5 (7/1-9/30) | framework 投稿 + clone preprint（thread_d §4 抽取） | + G2 |
+| C | M6-M12 (10/1+) | ASM short + two-hit notes（phase_block_3d X1/X2 抽取） | + G1 + G3 |
+
+### 3 Hypothesis 並託 phase_block_3d（待 5/18-19 inject）
+
+- **H013 (X1)**: Phase block 邊界內 CN-stratified methylation 高一致 → TP enrichment (cis-effect)
+- **H014 (X2)**: Phase block 跨越大 CN segment 時 methylation 不連續 → FP marker (boundary artifact)
+- **H015 (X3)**: Joint multi-feature zone score: NG × CN tier × methylation rank-2 — **methylation 為 weak axis (rank-5 per methyl cycle 1)，X3 zone-stratified 探索 zone 內 methyl 是否強化**
+
+### 啟動時序
+
+- **5/18-19**: inject H013/H014/H015 進 hypothesis_queue.json（純 metadata, 5 min）
+- **5/19-22**: V6 production 4-day workflow 獨享 focus
+- **5/22 後**: thread_d_paper Tier 2 + phase_block_3d init-research scaffolding + methyl_filter_phase2 cycle 2
+
+### 5 Risk Items
+
+- R-CONFIRMATION-LOOP: cycle 1 結果決定（5/18 晚 strong → (a) 路徑通過）
+- R-A-SCOPE: A 階段 G1/G2/G3 skeleton only, no deep dive
+- R-PAPER-THIN: B/C 接受 thin（preprint 不是 main journal）
+- R-OPS-CREEP: ops <2 hr/week
+- R-MENTAL-DRIFT: 下次 reactivate 前 48 hr cooling-off + NEGATIVE postmortem
+
+### Mental Model Shift 日誌
+
+| Date | Shift | Trigger |
+|------|-------|---------|
+| 5/15 | G3/G5 降權（plan v1）| 4 輪 Socratic 燒烤 |
+| 5/18 上午 | G3/G5 reactivate（plan v2 階段化 active）| methyl filter v1.0 ΔF1=+0.00242 marginal |
+| **5/18 晚** | **methyl_filter_phase2 升 4th 軌** | Phase 2 Cycle 1 ΔF1=+0.02236 strong (9.24× v1.0, 2.24× Cohen ribbon) |
+
+---
+
+## 2026-05-18 (晚) — Phase 2 Cycle 1 Global FP Filter 完成 (⭐3 strong, ΔF1 +0.02236 = 9.24× v1.0)
+
+**Session anchor**: v1.0 cycle ⭐3 marginal → pivot global FP exploration → ⭐3 strong (HCC1395-internal validated)
+
+### 完成項目（Phase 2 Cycle 1, ~30 min wall clock, Track A only）
+
+- ✅ **Step 0 Global FP audit** (Agent A1, ~0.7 min): D1 94.22% top 10 cells / D2 ΔF1 +0.02637 Strategy B / D3 heterogeneous FAIL / D4 high-AF FAIL → **Path B selected** (pure global LR)
+- ✅ **Step 1 Filter design** (Agent A2): VIF=217 → drop NumReads_master + L2 C=1.0；NaN MNAR confirmed → impute correct；final filter 10 features
+- ✅ **Step 2 HCC1395 ΔF1 verdict**: **ΔF1 +0.02236** (9.24× v1.0)，τ*=0.39，Step 5c lost TP 81% rescued
+- 🔵 **Track B (cross-sample) DEFERRED to cycle 2**: 4 樣本 V3F/V5 BAM 物理不存在
+- 主報告: [InterSubMod/docs/experiments/in_progress/2026/05/20260518_Phase2_Cycle1_Global_FP_Filter_01.md](experiments/in_progress/2026/05/20260518_Phase2_Cycle1_Global_FP_Filter_01.md)
+- 研究目錄: `research/methyl_augmented_filter_phase2/cycle1/`
+
+### 關鍵發現
+
+**🎯 ΔF1 +0.02236 從 v1.0 marginal 升至 substantial** (2.24× Cohen 小 effect ribbon)
+- caller_af (+3.44) > LOH_inner (+1.46) > Cov (+1.27) > NG (+1.07) > **HPFineF (+0.75)** + 4 個更小 methyl coef
+- TP loss 只 1.56% / FP removed 70.20% → Precision 0.9541 / Recall 0.6030
+
+**🔍 Step 5c lost TP 17/21 (81%) rescued by cycle 1 global LR** vs v1.0 cell-gated 0% — 證明 v1.0 over-restrictive
+
+**⚠️ Methylation 是 5th-rank covariate** — filter 主導為非-methyl 軸；reframe "multi-axis filter incl. methylation"
+
+**Multi-seed std = 5e-5** (20× below threshold) — high intra-sample stability
+
+**⚠️ R-Step0 5 caveats**: 4 RESOLVED (NaN MNAR / VIF collinearity / lost TP overlap / methyl marginal) + 1 OPEN (HCC1395-only)
+
+### 評估與後續
+
+- **Tier ⭐3 strong** (HCC1395-internal validated): 3/4 H PASS + multi-seed stable + lost TP 81% rescue
+- ⭐3 而非 ⭐4 因 cross-sample DEFERRED (V3F/V5 4 樣本 BAM 不存在)
+- **⭐4 升級必要條件 (cycle 2)**: V6 4 樣本 ISM rerun (~3.2 hr, BAM 已存在 v6_5sample_extension/) + Wilcoxon n=5 + HCC1395 phaseC V3F/V5/V6 三向 cycle 1 filter apply
+- **Cycle 2 可與 V6 production 4-day workflow 共用 ISM data** (Day 2 6-sample marker coverage)
+
+---
+
+## 2026-05-18 — Methylation-Augmented FP Filter Pilot 完成 (⭐3 PARTIAL POSITIVE marginal) + Phase 2 project init
+
+**Session anchor**: 跨越 characterization → filter F1 evaluation；plan v1.0 cycle 完成 + phase 2 project scaffolded
+
+### 完成項目（v1.0 cycle, ~80 min Step -1 ISM rerun + ~1 hr 後分析 multi-agent）
+
+- ✅ Step -1: phaseC ISM 12 runs 重跑 with significance (移除 `--no-distance-matrix` flag) — 80 min, 12/12 全成功
+- ✅ Step 0: augmented master TSV (35,332 × 202 cols, 13 methylation features × V3F+V5+V6 × off/on)
+- ✅ Step 1+2: 138 augmented LR + LRT + 12 FP-rich τ sweep — H1 16/30 cells q<0.05 / H5 V5≈V6 Δβ=1.87e-5
+- ✅ Step 3: ΔF1 vs caller F1=0.7166 — **+0.00242 @ τ*=0.52 marginal** (POSITIVE-but-marginal)
+- ✅ Step 4: 13 mechanism candidates + 14 PubMed refs (H4 POSITIVE relaxed gate)
+- ✅ Step 5c TP rescue **NEGATIVE** — 95.2% lost TP 是 low-AF subclone，methylation 訊號實為 caller_af proxy
+- ✅ Step 5d robustness GREEN with caveats — ΔF1 std 2e-5 stable, 4 unique LRT cells, NaN borderline
+- 主報告: `InterSubMod/docs/experiments/in_progress/2026/05/20260518_V6_Methyl_Filter_Pilot_01.md`
+- 研究目錄: `research/v6_bam_tpfp_hp_loh_cn/step5_methyl_filter_pilot/`
+- **Phase 2 project init**: `research/methyl_augmented_filter_phase2/` (4 H, 3-5 cycles 預期)
+
+### 關鍵發現
+
+**⭐3 Verdict (ALL 5 H POSITIVE but ΔF1 marginal)**:
+- H1 LRT q<0.05 在 16/30 cells (top p=1.8e-58)
+- H2 ΔF1 +0.00242 < +0.005 Cohen ribbon "marginal"
+- H3 FP_removal 98.3% > TP_loss 35.0%
+- H4 13 mechanism × 14 PubMed refs (cis-mQTL/cancer ASM/allele-imbalance/repeat/replication timing)
+- H5 V5/V6 LR β median diff = 1.87e-5 (V6 重用 V5 phased VCF)
+
+**Prior art (TumorLens/ROCIT/SGZ/Wakhan/SAVANA) 全無同口徑** — read-level multi-axis methylation-augmented filter 為新貢獻
+
+**TP rescue NEGATIVE 機制解釋**: lost TP 與 removed FP 在 caller_af 空間嚴重重疊；methylation 沒有獨立 axis 訊號 → rescue rule 必然 reimport FP
+
+**Plan v1.0 → v2.0 pivot**:
+- v1.0 cycle 完成 ⭐3 marginal
+- v2.0 plan (2026-05-18 批准): Phase 2 Cycle 1 pivot 為 global FP exploration + heterogeneous threshold filter (Track A) → cross-sample 4 樣本 ISM rerun (Track B) — 目標 ΔF1 ≥ +0.01
+
+### 評估與後續
+
+- **Tier ⭐3 PARTIAL POSITIVE (marginal)**: 5 H POSITIVE 但 effect size < +0.005 → 需 cross-sample 才能升 ⭐4
+- **與 V6 production 4-day workflow 整合**: phase 2 cycle 1 Track B (4 樣本 V3F+V5 ISM ~1 hr) 與 V6 production COLO829 V6 ISM (~2 hr Day 1) 可平行；7-sample marker coverage data 共用
+- **Pre-registration 5 H 已寫入 Phase 2 manifest** (research/methyl_augmented_filter_phase2/manifest.yaml)
+
+---
+
 ## 2026-05-18 — Agent Harness Audit P0-P4 完整收尾 (11 commits)
 
 **Session anchor**: 2026-05-18 single-day sprint 完成 InterSubMod agent harness 7-phase audit (P1-P7) + 5-tier fix (P0-P4) 共 29 fix items × 11 commits × ~10 hr。
