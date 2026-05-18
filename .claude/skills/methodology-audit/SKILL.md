@@ -49,7 +49,7 @@ import pandas as pd
 - 若問題是「特徵貢獻」：計算 AUROC（sklearn.metrics.roc_auc_score）
 - 若問題是「閾值」：畫 precision-recall 曲線或計算 F1 delta per threshold
 
-### Step 3：OPTIONS — 列出選項
+### Step 3：OPTIONS — 列出選項 + SWOT 2x2 matrix
 
 列出至少 3 個選項（含「不改」選項）：
 
@@ -58,6 +58,20 @@ import pandas as pd
 | A | 不修改 | 接受現狀，補文件 | 無 | 低 | 0 |
 | B | [具體名稱] | [一句話] | `src/core/XX.cpp:LL` | 中 | ±? |
 | C | [備選] | [一句話] | `src/core/YY.cpp:LL` | 高 | ±? |
+
+**SWOT 4 象限分析**（2026-05-18 P2 audit M4 強制 — 每個非 A 方案必填）：
+
+對方案 B（同樣對 C, D...）：
+
+|  | Helpful（有助達成目標）| Harmful（阻礙達成目標）|
+|---|---|---|
+| **Internal**（可控因子） | **S** Strengths：本方案內部優勢（如：實作簡單、可重用既有 module、test coverage 高）| **W** Weaknesses：本方案內部劣勢（如：增加 coupling、降低 testability、引入新依賴）|
+| **External**（外部因子） | **O** Opportunities：外部機會（如：對齊業界 best practice、開啟下游研究方向、可發 paper）| **T** Threats：外部風險（如：未來 API breaking、SEQC2 標準變動、ONT 升版相容）|
+
+**強制規則**：
+- **每個非 A 方案至少填 1 個 S + 1 個 W + 1 個 O + 1 個 T**（4 象限不可空）
+- 若 W + T > S + O 數量 → 自動降級為「條件性方案」，需 Step 2 補強量化才可推進
+- A 方案（不改）的 SWOT 是「對照組」：S=穩定 / W=不解問題 / O=資源投他處 / T=問題擴大
 
 ### Step 4：WRITE — 輸出審查文件
 

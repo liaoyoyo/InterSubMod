@@ -250,6 +250,31 @@ Coding: C++17 / `.hpp` headers / namespace `InterSubMod` / `.clang-format`（Goo
 - **需要用戶理解學習**: 啟用一步步對話 skill（如 `/fast-learning-coach`）
 - **需要用戶判斷與推進**: 預設使用 **AskUserQuestionTool**
 
+### §15.1 30 秒法則 — Tier 3+ 任務首句強制 TL;DR（2026-05-18 P2 audit M5 落地）
+
+**規則**: 中等以上複雜度的任務回應，**第一句必須是 TL;DR**（≤30 秒可讀完），讓用戶 5 秒內掌握重點。
+
+**Tier 分級**:
+| Tier | 場景 | TL;DR 強制 |
+|------|------|-----------|
+| **T1** 簡單 | 純命令 / 單檔查詢 / 簡短事實 | 不需 — 直接答 |
+| **T2** 中等 | 1 個 file 修改 / 簡單分析 / 短 report | 建議但不強制 |
+| **T3** 複雜 | 多 file change / 跨 skill 協作 / decision table | **強制首句 TL;DR** |
+| **T4** 重大 | Hard Gate / NO-GO / 跨樣本驗證 / paper-scope | **強制 TL;DR + 影響/信心標註** |
+
+**TL;DR 格式**:
+```
+[動詞] X — [關鍵結果 / 決策]（[影響: 低/中/高], [信心: 低/中/高]）
+```
+
+**範例**:
+- ❌ Bad: 「我先做了 A 然後做了 B 接著做了 C 最後...」（埋頭分析無重點）
+- ✅ Good: 「**P1 fix 完成 — 18 skills 修補，D2/D3 非工具類 ❌ 歸零（影響: 中, 信心: 高）。** 細節如下...」
+
+**例外**: 純對話延續（「OK 繼續」「然後呢」）不需 TL;DR。
+
+**業界對照**: Tufte data-ink + Garr Reynolds Zen「先講結論再展開」+ McKinsey Pyramid Principle SCQA。
+
 ---
 
 ## §16 文檔規範（精要 + 跳轉）
