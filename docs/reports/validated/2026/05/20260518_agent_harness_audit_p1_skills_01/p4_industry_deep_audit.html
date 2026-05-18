@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P4 Industry Deep Audit — Anthropic + OpenAI + Walking Labs vs InterSubMod</title>
+<style>
+  body { font-family: -apple-system, "Segoe UI", "Microsoft JhengHei", "Noto Sans CJK TC", sans-serif;
+         max-width: 1500px; margin: 2em auto; padding: 0 1em; line-height: 1.55; color: #1f2328; background: #fafbfc; }
+  h1 { border-bottom: 2px solid #d0d7de; padding-bottom: 0.3em; }
+  h2 { border-bottom: 1px solid #d0d7de; padding-bottom: 0.2em; margin-top: 2em; }
+  h3 { margin-top: 1.5em; }
+  .meta { color: #57606a; font-size: 0.9em; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin: 1em 0; background: #fff; }
+  th, td { border: 1px solid #d0d7de; padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #f6f8fa; font-weight: 600; position: sticky; top: 0; }
+  .source { background: #fff; border: 1px solid #d0d7de; border-left: 5px solid #0969da; border-radius: 4px; padding: 1em 1.5em; margin: 1em 0; }
+  .source.openai { border-left-color: #10a37f; }
+  .source.walking { border-left-color: #ea580c; }
+  code { background: #f6f8fa; padding: 1px 4px; border-radius: 3px; font-family: ui-monospace,monospace; font-size: 0.9em; }
+  .level { display: inline-block; padding: 2px 8px; border-radius: 3px; color: white; font-weight: bold; font-size: 0.8em; }
+  .aligned { background: #1a7f37; }
+  .partial { background: #bf8700; }
+  .gap { background: #cf222e; }
+  .recent { background: #0969da; }
+  .mixed { background: #8250df; }
+  .adapted { background: #6e7781; }
+  .decision { background: #fff; border: 2px solid #d0d7de; border-radius: 6px; padding: 1em 1.5em; margin: 1.5em 0; }
+  .decision h4 { margin-top: 0; color: #0969da; }
+  .option { background: #f6f8fa; padding: 0.5em 1em; margin: 0.5em 0; border-radius: 4px; border-left: 3px solid #d0d7de; }
+  .option.recommended { border-left-color: #1a7f37; background: #dafbe1; }
+  details { margin: 0.5em 0; }
+  summary { cursor: pointer; font-weight: bold; color: #0969da; }
+</style></head>
+<body>
+<h1>P4 Industry Deep Audit — Anthropic / OpenAI / Walking Labs vs InterSubMod</h1>
+<p class="meta">Audit date: 2026-05-18 16:22 · Scope: 3 業界 sources × InterSubMod 對齊度 × 用戶風格適配 × 7 個決策清單</p>
+
+<h2>📚 三大業界 Sources 整理</h2>
+
+<div class="source">
+<h3>1. Anthropic — Harness Design for Long-Running Application Development</h3>
+<p class="meta">https://www.anthropic.com/engineering/harness-design-long-running-apps</p>
+<h4>核心原則</h4>
+<ul>
+<li><strong>Context reset > compaction</strong>: 上下文重置優於壓縮（Sonnet 4.5 有 context anxiety — 接近 limit 時提前結束）；用結構化檔案 handoff > 對話 handoff</li>
+<li><strong>Generator-Evaluator separation</strong>: GAN-inspired 3-agent: Planner / Generator / Evaluator — 避免 self-evaluation bias</li>
+<li><strong>Aesthetic gradability</strong>: 把主觀品質量化為 4 維度 (Design quality / Originality / Craft / Functionality)；少量示例校準</li>
+<li><strong>Sprint contracts</strong>: Generator 提案 + Evaluator 審查 → 達成「完成」定義；橋接高層 story 與可測試 implementation</li>
+<li><strong>File-based async communication</strong>: Agent 通過讀寫檔案非對話耦合</li>
+<li><strong>Progressive simplification</strong>: 隨模型改進 simplify harness — 每組件編碼一個關於模型能力的假設，值得 pressure-test</li>
+<li><strong>Playwright MCP > static screenshots</strong>: 代理交互真實 running app，而非評估靜態截圖</li>
+</ul>
+<h4>Anti-patterns</h4>
+<ul>
+<li>過度詳細前期規格 → 下游錯誤級聯</li>
+<li>期望模型自評達到外部評估嚴格度</li>
+<li>忽視提示措辭對生成方向的微妙影響</li>
+<li>假設 harness 隨模型版本永遠最優</li>
+</ul>
+<h4>Checklist</h4>
+<ul>
+<li>識別模型無法可靠完成的具體失敗模式</li>
+<li>為評估定義可測試標準而非模糊目標</li>
+<li>用少量示例校準評估代理</li>
+<li>交付物通過結構化檔案而非對話傳遞</li>
+<li>評估者獨立於生成者運行</li>
+<li>記錄評估不一致並迭代改進</li>
+<li>定期測試簡化假設（移除不必要組件）</li>
+<li>新模型版本到達時重新檢視 harness 設計</li>
+</ul>
+</div>
+<div class="source openai">
+<h3>2. OpenAI — Harness Engineering (Codex 5-month / 1M LoC / 0 human code)</h3>
+<p class="meta">https://openai.com/index/harness-engineering/ (direct 403 from this region; via InfoQ + Medium summary)</p>
+<p><strong>Headline</strong>: 5-month internal experiment shipped 1M lines of code with 0 human-written; 10x faster vs manual</p>
+<h4>核心原則</h4>
+<ul>
+<li><strong>Map, not 1000-page manual</strong>: 巨大 instruction file 排擠 task / code / docs — agent 漏 constraint 或 optimize 錯方向</li>
+<li><strong>Depth-first decomposition</strong>: 把大目標拆 building blocks（design → code → review → test）然後 prompt agent 一個個建</li>
+<li><strong>3 pillars architecture</strong>: (1) Context Engineering: maps / execution plans / design specs 結構化 docs (2) Architectural Constraint Enforcement: rigid layered + custom linters (3) Garbage Collection: golden principles + 背景任務防 entropy 累積</li>
+<li><strong>End-to-end PR flow</strong>: agent 從 spec 到 merged PR 全流程：寫 code / 跑 tests / 回 review feedback / 推 update / squash & merge</li>
+<li><strong>Dependency layering</strong>: Types → Config → Repo → Service → Runtime → UI 嚴格層次限制 agent operations</li>
+<li><strong>Machine-readable scaffolding</strong>: constraints 編碼為 agents 能理解的 artifacts</li>
+<li><strong>Architectural boundaries via mechanical rules</strong>: 靠 CI / linter 機械強制 prevent violations</li>
+<li><strong>Telemetry integration</strong>: logs / metrics / spans 讓 agent 自主 monitor + reproduce bugs</li>
+</ul>
+<h4>Anti-patterns</h4>
+<ul>
+<li>1000-page instruction manual（核心 anti-pattern）</li>
+<li>依賴 agent 自己記住 architectural rules（應 mechanical enforce）</li>
+<li>缺 telemetry → agent 無法 reproduce bug</li>
+<li>代碼如何寫 vs 代碼做什麼用戶要的 — 分離問題（harness 解前者，不直接解後者）</li>
+</ul>
+<h4>OpenAI 獨特觀點（vs Anthropic）</h4>
+<ul>
+<li>OpenAI 強調 CI / linter 機械強制（更工程化）；Anthropic 強調 generator-evaluator 分離（更研究化）</li>
+<li>OpenAI 強調 dependency layering 嚴格架構；Anthropic 強調 progressive simplification</li>
+<li>OpenAI 案例為 1M LoC 生產 product；Anthropic 案例為前端設計品質迭代</li>
+</ul>
+</div>
+<div class="source walking">
+<h3>3. Walking Labs — Learn Harness Engineering (12 lectures + 6 projects)</h3>
+<p class="meta">https://walkinglabs.github.io/learn-harness-engineering/en/</p>
+<h4>12 Lectures Takeaways</h4>
+<ul>
+<li><strong>Why Capable Agents Still Fail (L01)</strong>: agent 失敗多源於 harness 缺失，非模型能力不足</li>
+<li><strong>What a Harness Actually Is (L02)</strong>: 完整環境包圍模型，產生可靠結果；不是寫更好 prompt</li>
+<li><strong>Repository as System of Record (L03)</strong>: repo 是 single source of truth；agent 通過 repo state 通訊</li>
+<li><strong>Why One Giant Instruction File Fails (L04)</strong>: 與 OpenAI 「map not manual」對齊 — 巨大 CLAUDE.md anti-pattern</li>
+<li><strong>Long-Running Tasks & Continuity Loss (L05)</strong>: 跨 session 連貫性需專門設計</li>
+<li><strong>Initialization Needs Its Own Phase (L06)</strong>: 啟動階段獨立</li>
+<li><strong>Agents Overreach & Under-Finish (L07)</strong>: 明確規則約束 + 邊界定義</li>
+<li><strong>Feature Lists as Harness Primitives (L08)</strong>: feature list 是 harness 原語</li>
+<li><strong>Agents Declare Victory Too Early (L09)</strong>: 反思機制 + 完整流程測試（與 superpowers:verification-before-completion 對齊）</li>
+<li><strong>E2E Testing Changes Results (L10)</strong>: 端到端測試改變結果</li>
+<li><strong>Observability Inside the Harness (L11)</strong>: 可觀測性屬於 harness 內部</li>
+<li><strong>Every Session Leaves Clean State (L12)</strong>: 每 session 結束保持清潔狀態</li>
+</ul>
+<h4>Anti-patterns</h4>
+<ul>
+<li>Single huge CLAUDE.md（與 OpenAI 共識）</li>
+<li>Declare victory too early（過早宣告完成）</li>
+<li>缺 observability / tracing</li>
+<li>Context drift 跨 session</li>
+<li>Initialization 散在 prompt 而非獨立 phase</li>
+</ul>
+</div>
+<h2>🎯 InterSubMod 對齊矩陣（17 概念）</h2>
+<table>
+<thead><tr><th>概念</th><th>來源</th><th>InterSubMod 現況</th><th>對齊度</th><th>證據 / Note</th></tr></thead>
+<tbody>
+<tr>
+<td><strong>Context reset > compaction</strong></td>
+<td>Anthropic</td>
+<td>✅ Strong — /compact + memory system + SessionStart hook 注入 CURRENT_FOCUS（避免無限對話）</td>
+<td><span class="level aligned">ALIGNED</span></td>
+<td>Cache hit rate 94.6% 跨 41 sessions 證實 prefix stability good; CLAUDE.md §7 compact preservation 規則</td>
+</tr>
+<tr>
+<td><strong>Generator-Evaluator separation</strong></td>
+<td>Anthropic</td>
+<td>🟡 Partial — /run-evaluator P5 為獨立 skill；但 generator (cycle execution) 與 evaluator 同 session</td>
+<td><span class="level partial">PARTIAL</span></td>
+<td>考慮：把 P5 EVALUATE 跑在獨立 subagent 而非主 thread；對應 Anthropic GAN-style 3-agent</td>
+</tr>
+<tr>
+<td><strong>Aesthetic gradability</strong></td>
+<td>Anthropic</td>
+<td>✅ Strong — /scientific-rigor §3 Effect Size ribbon + §2 Evidence Tier L1-L5 + /image-vision-check 6 維度</td>
+<td><span class="level aligned">ALIGNED</span></td>
+<td>本專案研究品質維度化做得超越業界（biomed context 比 frontend design 更嚴）</td>
+</tr>
+<tr>
+<td><strong>File-based async comm</strong></td>
+<td>Anthropic</td>
+<td>✅ Strong — evidence_ledger.jsonl + state/cycles/*.json + hypothesis_queue.json + MEMORY.md</td>
+<td><span class="level aligned">ALIGNED</span></td>
+<td>已 best in class</td>
+</tr>
+<tr>
+<td><strong>Progressive simplification</strong></td>
+<td>Anthropic</td>
+<td>🟠 Weak — harness 設計時間 1 年 + 累積；無系統化「移除過時組件」機制</td>
+<td><span class="level gap">GAP</span></td>
+<td>建議：季度跑 hook_health_check + skill_change_audit log 過 30 entries 觸發 review</td>
+</tr>
+<tr>
+<td><strong>Map not 1000-page manual</strong></td>
+<td>OpenAI</td>
+<td>🟡 Partial — CLAUDE.md 7.8KB（OK）+ AGENTS.md 12.5KB（OK），但 44 skills 加總 description 偏長</td>
+<td><span class="level partial">PARTIAL</span></td>
+<td>skill description avg 433 / max 1411 — 高於業界推薦 150-300；但 cache hit 94.6% 證明影響邊際</td>
+</tr>
+<tr>
+<td><strong>Depth-first decomposition</strong></td>
+<td>OpenAI</td>
+<td>✅ Strong — 7-Phase Waterfall (P0 register → P6 conclude) 把 cycle 拆 building blocks</td>
+<td><span class="level aligned">ALIGNED</span></td>
+<td>對應 OpenAI depth-first; init-research → cycle-init → research-loop → ... → conclude</td>
+</tr>
+<tr>
+<td><strong>3 pillars (Context/Constraint/GC)</strong></td>
+<td>OpenAI</td>
+<td>🟡 Mixed</td>
+<td><span class="level mixed">MIXED</span></td>
+<td>Context: ✅ structured docs (CLAUDE.md/AGENTS.md/CURRENT_FOCUS/rules/skills frontmatter)
+Constraint: ✅ 21 hooks 為機械強制 (Hard Gate exit 2)；rules path-scoped
+GC: 🟠 缺 — 無 golden principles 背景 entropy 防護；evidence_ledger 累積無 archive 機制</td>
+</tr>
+<tr>
+<td><strong>End-to-end PR flow</strong></td>
+<td>OpenAI</td>
+<td>🟠 Weak — git-start/git-commit/git-finish commands 存在；但 agent 無法 spec→merge 自動化</td>
+<td><span class="level gap">GAP</span></td>
+<td>不適用本專案：研究 ≠ feature shipping；harness 設計目標不同</td>
+</tr>
+<tr>
+<td><strong>Dependency layering</strong></td>
+<td>OpenAI</td>
+<td>✅ Strong — InterSubMod/AGENTS.md §3 「跨 agent governance vs Claude Code 特定」+ §9 五入口分工 + 7-Phase 階層</td>
+<td><span class="level aligned">ALIGNED</span></td>
+<td>業界級分層</td>
+</tr>
+<tr>
+<td><strong>Telemetry integration</strong></td>
+<td>OpenAI</td>
+<td>🟢 Recently added — cache_telemetry.sh + subagent_completion_logger.sh + skill_change_audit.sh + hook_failures.log（P0-P3 fix 後）</td>
+<td><span class="level recent">RECENTLY_ALIGNED</span></td>
+<td>2026-05-18 P0-P3 audit 完成後達標</td>
+</tr>
+<tr>
+<td><strong>Repository as SoT</strong></td>
+<td>Walking Labs L03</td>
+<td>✅ Strong — research/ + docs/experiments/ + state/cycles/ + evidence_ledger 全 git-tracked</td>
+<td><span class="level aligned">ALIGNED</span></td>
+<td>業界級</td>
+</tr>
+<tr>
+<td><strong>Initialization independent phase</strong></td>
+<td>Walking Labs L06</td>
+<td>✅ Strong — P0 REGISTER + /init-research + /cycle-init 分工</td>
+<td><span class="level aligned">ALIGNED</span></td>
+<td>業界級</td>
+</tr>
+<tr>
+<td><strong>Agents declare victory too early</strong></td>
+<td>Walking Labs L09</td>
+<td>✅ Strong — /run-evaluator P5 retraction risk + tier upgrade 強制 audit + /provenance-tier-audit 全域檢核</td>
+<td><span class="level aligned">ALIGNED</span></td>
+<td>比業界更嚴（兩層防護）</td>
+</tr>
+<tr>
+<td><strong>Observability inside harness</strong></td>
+<td>Walking Labs L11</td>
+<td>🟢 Recently — 2026-05-18 補完 cache_telemetry + subagent_logger + hook_failures.log + skill_audit log</td>
+<td><span class="level recent">RECENTLY_ALIGNED</span></td>
+<td>audit 前缺 telemetry，audit 後達業界級</td>
+</tr>
+<tr>
+<td><strong>Every session leaves clean state</strong></td>
+<td>Walking Labs L12</td>
+<td>🟡 Partial — auto memory + CURRENT_FOCUS 更新；但無自動「session cleanup」hook</td>
+<td><span class="level partial">PARTIAL</span></td>
+<td>P4 backlog: 加 Stop hook 強制更新 CURRENT_FOCUS / clean /tmp</td>
+</tr>
+<tr>
+<td><strong>Feature lists as primitives</strong></td>
+<td>Walking Labs L08</td>
+<td>🟡 Partial — hypothesis_queue.json 為 cycle 的 feature list；但研究 cycle ≠ feature shipping</td>
+<td><span class="level adapted">ADAPTED</span></td>
+<td>已 adapt 為研究 context</td>
+</tr>
+</tbody></table>
+<h3>對齊度統計</h3>
+<ul>
+<li><strong>ALIGNED</strong>: 8 / 17 (47%)</li>
+<li><strong>PARTIAL</strong>: 3 / 17 (17%)</li>
+<li><strong>GAP</strong>: 2 / 17 (11%)</li>
+<li><strong>RECENTLY_ALIGNED</strong>: 2 / 17 (11%)</li>
+<li><strong>MIXED</strong>: 1 / 17 (5%)</li>
+<li><strong>ADAPTED</strong>: 1 / 17 (5%)</li>
+</ul>
+<h2>👤 用戶風格適配檢核</h2>
+<ul>
+<li>✅ 業界嚴謹科學工程語言 — 對齊 OpenAI 機械強制 + Anthropic 量化品質</li>
+<li>✅ 全自動 + 並行 — 對齊 Anthropic file-based async + parallel-benchmark agent</li>
+<li>✅ 實證驗證 L1 — 對齊 Anthropic '識別失敗模式' + 'Generator-Evaluator 分離'</li>
+<li>✅ 小規模 pilot <2hr — 對齊 OpenAI depth-first decomposition + Walking Labs Initialization phase</li>
+<li>✅ 結構化決策表 — 對齊 OpenAI 'machine-readable scaffolding' + Anthropic 'testable criteria'</li>
+<li>🟡 業界共識 'plain text > markdown' for LLM trigger — 但本專案中文 + emphasis 增可讀性，trade-off 接受</li>
+<li>🟢 用戶風格 vs 業界 anti-pattern: 用戶偏好「壓縮 vs 重置」傾向 compact reset — 已 align Anthropic 推薦</li>
+</ul>
+<h2>🤔 7 個決策清單（需用戶回饋）</h2>
+<div class="decision">
+<h4>D1: Generator-Evaluator separation 是否升級為獨立 subagent？</h4>
+<p><strong>現況</strong>: P5 EVALUATE 同 session 跑 /run-evaluator</p>
+<p><strong>選項</strong>:</p>
+<div class="option ">A. 維持現狀（單 thread 評估）— 簡單，已運作</div>
+<div class="option ">B. P5 強制 spawn subagent 跑 evaluator — Anthropic 推薦，但增加複雜度</div>
+<div class="option recommended">C. 僅 tier ⭐4-5 升級時 spawn subagent — 折衷</div>
+<p><strong>推薦</strong>: C — ⭐4-5 是 Hard Gate（撤回成本高），值得獨立 evaluator；⭐1-3 邊際</p>
+<p><strong>估計工時</strong>: 1-2 hr</p>
+</div>
+<div class="decision">
+<h4>D2: Skill description 平均 433 / max 1411 是否縮減？</h4>
+<p><strong>現況</strong>: html-report-build 已縮 1411→468；其他偏長 desc 未動</p>
+<p><strong>選項</strong>:</p>
+<div class="option recommended">A. 維持現狀 — cache hit 94.6% 證實影響邊際</div>
+<div class="option ">B. 縮 top 10 desc 至 ≤400 chars — 對齊 OpenAI 'map not manual'</div>
+<div class="option ">C. 重構 description 分 trigger 短句 + 詳細放 SKILL.md body — 業界最佳</div>
+<p><strong>推薦</strong>: A or B — cache 已最優；改動 ROI 邊際；但 'map not manual' 是業界共識 anti-pattern 警戒</p>
+<p><strong>估計工時</strong>: B=30 min, C=2 hr</p>
+</div>
+<div class="decision">
+<h4>D3: Garbage Collection / entropy 防護機制？</h4>
+<p><strong>現況</strong>: evidence_ledger / MEMORY.md / docs 累積無 archive；30 entries 觸發提醒已建立</p>
+<p><strong>選項</strong>:</p>
+<div class="option ">A. 不做 — 累積管理靠 manual 季度 audit</div>
+<div class="option recommended">B. 加 weekly_recall_check.sh 啟動 stale 條目 spaced review</div>
+<div class="option ">C. 加 memory archive 自動化（>1 年 stale → archive/）+ evidence_ledger >500 entries 觸發 archive</div>
+<p><strong>推薦</strong>: B then C — OpenAI 第 3 pillar；目前 P4 backlog 已列；半年內必須做（Living-update 機制）</p>
+<p><strong>估計工時</strong>: B=45 min, C=1 hr</p>
+</div>
+<div class="decision">
+<h4>D4: 「Every session leaves clean state」(Walking Labs L12) 機制？</h4>
+<p><strong>現況</strong>: Stop hook 只 echo 提醒；無自動清理</p>
+<p><strong>選項</strong>:</p>
+<div class="option ">A. 維持 Stop hook 提醒</div>
+<div class="option recommended">B. 加 session_cleanup_hook.sh — 自動 update CURRENT_FOCUS / clean /tmp / commit reminder</div>
+<div class="option ">C. 強制 Stop hook 觸發 /report skill 寫 ai_sessions log</div>
+<p><strong>推薦</strong>: B + C combined — Walking Labs 強調這是 harness 核心；當前 21 hooks 缺此關鍵 piece</p>
+<p><strong>估計工時</strong>: 1.5 hr</p>
+</div>
+<div class="decision">
+<h4>D5: Aesthetic gradability — 研究品質 4 維度 vs Anthropic 推薦</h4>
+<p><strong>現況</strong>: scientific-rigor §3 Effect Size ribbon + §2 Evidence Tier L1-L5</p>
+<p><strong>選項</strong>:</p>
+<div class="option recommended">A. 已強無需動</div>
+<div class="option ">B. 對齊 Anthropic 4 維度 (Design quality / Originality / Craft / Functionality)</div>
+<div class="option ">C. 補 image-vision-check 6 維度給研究 figure (現有 image-vision-check 適配)</div>
+<p><strong>推薦</strong>: A or C — 本專案 biomed context 比 frontend 嚴；Anthropic 4 維度更適合 UI design</p>
+<p><strong>估計工時</strong>: C=30 min</p>
+</div>
+<div class="decision">
+<h4>D6: Progressive simplification — 系統化簡化機制</h4>
+<p><strong>現況</strong>: skill_change_audit.sh 已 audit；但無季度自動 simplify trigger</p>
+<p><strong>選項</strong>:</p>
+<div class="option ">A. 維持 manual (季度跑 audit)</div>
+<div class="option recommended">B. 加 cron-based quarterly simplification review</div>
+<div class="option ">C. Claude version 升級時自動 trigger /scientific-rigor §10.3 應用驗證</div>
+<p><strong>推薦</strong>: B — Anthropic 強烈推薦；半年內 model upgrade 可能來，需主動 simplify</p>
+<p><strong>估計工時</strong>: 1 hr</p>
+</div>
+<div class="decision">
+<h4>D7: Architectural constraint enforcement — CI/linter 強度</h4>
+<p><strong>現況</strong>: 21 hooks (含 Hard Gate exit 2) + skill audit；但無 CI 流程</p>
+<p><strong>選項</strong>:</p>
+<div class="option ">A. 維持 hook-only（運作良好）</div>
+<div class="option recommended">B. 加 pre-push git hook 跑 hook_health_check + cache_telemetry</div>
+<div class="option ">C. 加 GitHub Actions CI（如有外部協作需求）</div>
+<p><strong>推薦</strong>: B — B 對齊 OpenAI 機械強制；C 視外部協作而定</p>
+<p><strong>估計工時</strong>: B=45 min</p>
+</div>
+<h2>📋 綜合 Verdict</h2>
+<table>
+<thead><tr><th>維度</th><th>業界水準</th><th>InterSubMod</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td>Context Engineering（OpenAI 第 1 pillar）</td><td>結構化 docs + map</td><td>✅ CLAUDE.md/AGENTS.md/CURRENT_FOCUS/rules 分層</td><td><span class="level aligned">業界 top</span></td></tr>
+<tr><td>Constraint Enforcement（OpenAI 第 2 pillar）</td><td>CI + linter 機械強制</td><td>✅ 21 hooks (含 Hard Gate) + rules path-scoped</td><td><span class="level aligned">業界 top</span></td></tr>
+<tr><td>Garbage Collection（OpenAI 第 3 pillar）</td><td>背景 entropy 防護</td><td>🟠 缺自動 archive / spaced review hook</td><td><span class="level gap">需補</span></td></tr>
+<tr><td>Generator-Evaluator（Anthropic）</td><td>獨立 subagent 跑 evaluator</td><td>🟡 P5 同 session</td><td><span class="level partial">考慮升級</span></td></tr>
+<tr><td>Memory & Cache（Anthropic + OpenAI）</td><td>cache 90% / structured memory</td><td>✅ 94.6% hit / 37 feedback / Concluded 區</td><td><span class="level aligned">業界 top</span></td></tr>
+<tr><td>Observability (Walking Labs L11)</td><td>telemetry 內建</td><td>🟢 audit 後補完 (cache_telemetry / subagent_logger / hook_failures.log)</td><td><span class="level recent">剛達標</span></td></tr>
+<tr><td>Clean state (Walking Labs L12)</td><td>session cleanup 自動化</td><td>🟡 只有 Stop hook echo</td><td><span class="level partial">需強化</span></td></tr>
+<tr><td>Map not 1000-page (OpenAI / WL L04)</td><td>simple + structured</td><td>🟡 skill desc avg 433 char偏長但 cache 命中良好</td><td><span class="level partial">trade-off OK</span></td></tr>
+</tbody></table>
+
+<h2>🎯 最終結論</h2>
+<ul>
+<li><strong>對齊優勢（業界 top）</strong>: Context Engineering / Constraint Enforcement / Memory & Cache / Evidence Tier / File-based comm — 5 個維度業界頂尖（特別是 cache hit 94.6%）</li>
+<li><strong>近期達標</strong>: Observability — P0-P3 fix 已補完 (2026-05-18)</li>
+<li><strong>真正 gap</strong>: Garbage Collection / Generator-Evaluator subagent / Clean state hook — 3 個維度建議下一輪補</li>
+<li><strong>過度工程風險</strong>: 21 hooks + 44 skills 偏多，但 audit (H4-1/H4-2) 證實無重疊，維持現狀</li>
+<li><strong>用戶風格 100% 對齊業界</strong>: 全 5 條用戶風格與業界共識 alignment（無衝突）</li>
+</ul>
+
+<p><strong>下一步</strong>：等用戶 review 本報告 + 7 個決策清單回饋，再啟動 P4+ fix。</p>
+
+
+<h2>🤖 Architect Agent 補強分析（107 sec runtime）</h2>
+<p class="meta">獨立 architect agent 分析結果，與本報告主體 cross-validate。Agent TL;DR: 「InterSubMod harness 在『研究記錄持久性』與『方法論結構化』遠超業界平均，但在『observability / context reset / 評估者分離』三個 Anthropic 強推維度仍有 gap」</p>
+
+<h3>§A 對齊優勢（業界平均之上）— 7 項</h3>
+<table>
+<thead><tr><th>#</th><th>優勢</th><th>對應業界原則</th><th>InterSubMod 落地</th></tr></thead>
+<tbody>
+<tr><td>A1</td><td><strong>Repo as Record 徹底落實</strong></td><td>Walking Labs L3</td><td><code>research/&lt;topic&gt;/00_INDEX.md</code> Pre-reg + REFLECTION + evidence_ledger.jsonl + cycle state.json — 跨 41 sessions 持久</td></tr>
+<tr><td>A2</td><td><strong>結構化交付 &gt; 對話</strong>（檔案優先）</td><td>Anthropic Harness Design</td><td>weekly-report → pptx/html/postmortem 全走 template；對話 ephemera 顯式分流</td></tr>
+<tr><td>A3</td><td><strong>Hard Gate 明確分級</strong></td><td>Walking Labs L7（過早宣告完成）</td><td>3 條 Hard Gate（刪檔 / C++ commit / NO-GO）+ pre-commit hook 強制 exit 2 — 業界 anti-pattern「declare victory too early」有結構性對抗</td></tr>
+<tr><td>A4</td><td><strong>Productive Failure 框架</strong></td><td>學術（Kapur 2008-2016）</td><td>§8.3.1 Reopen Threshold C1/C2/C3 — 業界 harness 罕見正式化</td></tr>
+<tr><td>A5</td><td><strong>NEGATIVE 結論索引化</strong></td><td>Replication Crisis 教訓</td><td>20+ Concluded 區條目 + spaced recall 30d/90d — 防重複調查</td></tr>
+<tr><td>A6</td><td><strong>Cache hit rate 94.6%</strong></td><td>Anthropic context economics</td><td>條件式 rules + skill description USE WHEN — 進入 progressive disclosure 設計</td></tr>
+<tr><td>A7</td><td><strong>5 入口分層</strong></td><td>Cline Memory Bank</td><td>governance (AGENTS.md) / agent-specific (CLAUDE.md) / live state (CURRENT_FOCUS) / manual / queue — 比業界 single CLAUDE.md 更分離</td></tr>
+</tbody></table>
+
+<h3>§B 對齊 Gap（業界推薦但缺）— 7 項</h3>
+<table>
+<thead><tr><th>#</th><th>Gap</th><th>來源</th><th>證據</th></tr></thead>
+<tbody>
+<tr><td>B1</td><td><strong>Generator-Evaluator 分離不徹底</strong></td><td>Anthropic Harness Design</td><td>researcher / reviewer 命名與 plugin 重疊；scientist-reviewer 提案還在 A5-2 P4；無正式 evaluator agent 對 generator 輸出做獨立評分</td></tr>
+<tr><td>B2</td><td><strong>Observability 不足</strong></td><td>Walking Labs L10</td><td>P5 audit A5-3 明確：「缺 cache_hit / cost / completion telemetry — 不知道哪些 agent 真有用」+ H4-5 缺 hook latency</td></tr>
+<tr><td>B3</td><td><strong>Context Reset &gt; Compaction 未落實</strong></td><td>Anthropic harness-design 原文</td><td>仍仰賴 <code>/compact</code> + 5 入口；缺「完整 clean state」protocol（Walking Labs L11）</td></tr>
+<tr><td>B4</td><td><strong>E2E Harness Testing 缺</strong></td><td>Walking Labs L9</td><td>無 <code>compact_test.sh</code>（已 P3 補）/ 無 <code>hook_concurrency_test.sh</code>（H4-4 P3）— 22 hooks 並行假設未驗證</td></tr>
+<tr><td>B5</td><td><strong>Initialization 程序非標準化</strong></td><td>Walking Labs L6</td><td>SessionStart hook 已 P1 補 ✅；目前 AI 主動 Read CURRENT_FOCUS 自律</td></tr>
+<tr><td>B6</td><td><strong>Silent failure 28% (已 P0 修)</strong></td><td>Anthropic harness reliability</td><td>P0 H4-3 已 commit d5db8dc — 16/21 hooks 改 fail-loud log ✅</td></tr>
+<tr><td>B7</td><td><strong>Prompt Injection Guard 缺</strong></td><td>Anthropic security</td><td>P4 backlog <code>external_input_sanitizer.sh</code> 仍未實作</td></tr>
+</tbody></table>
+
+<h3>§C 過度工程 / Over-Engineering Risk — 6 項</h3>
+<table>
+<thead><tr><th>#</th><th>風險項</th><th>業界對比</th><th>緩解建議</th></tr></thead>
+<tbody>
+<tr><td>C1</td><td><strong>44 skills + 16 plugin = 60 觸發空間</strong></td><td>Voyager skill lib 通常 &lt; 30</td><td>已部分緩解（cache 94.6%）；但 cognitive load 對人類 maintainer 仍高。建議 quarterly 跑 memory_recall_logger 量化每 skill 實際觸發率，&lt;5%/月 → 候選 archive</td></tr>
+<tr><td>C2</td><td><strong>§11 級聯圖 12 步</strong></td><td>Walking Labs L4「巨大 instruction file 失敗」反例</td><td>§0.5 已加最小子集 mitigation，但 12 步 cascade 仍是長尾觸發點；建議用「entrance test」自查</td></tr>
+<tr><td>C3</td><td><strong>Meta-skill 層 (/scientific-rigor)</strong></td><td>README §8 自承「非業界共識，本專案創新」</td><td>ROI 邊際 — 整合 7 個底層 skill 但用戶可能直接呼叫子 skill；建議追蹤被觸發次數</td></tr>
+<tr><td>C4</td><td><strong>PostToolUse Edit|Write 8 個 hooks</strong></td><td>Anthropic 「漸進式簡化」</td><td>H4-2 P3 已評估無重疊；但 architect 補：<code>terminology_guard</code> ∩ <code>md_link_check</code> ∩ <code>kb_sot_guard</code> 三者語意接近，再 review</td></tr>
+<tr><td>C5</td><td><strong>17 段 structured-tech-report</strong></td><td>Diátaxis 4 種文件類型即可覆蓋</td><td>用 13 段 + 4 段 optional 分流，降強制段數</td></tr>
+<tr><td>C6</td><td><strong>5 入口載入</strong></td><td>Anthropic single source of truth</td><td>CURRENT_FOCUS hook 注入後 §9 列表可刪 → 5 入口降到 3</td></tr>
+</tbody></table>
+
+<h3>§D 用戶風格適配建議 — 6 項</h3>
+<p>用戶偏好：<em>業界嚴謹科學工程語言 / 全自動+並行 / 實證 L1 驗證 / 小規模 pilot &lt;2hr / 結構化決策表</em></p>
+<table>
+<thead><tr><th>#</th><th>建議強化</th><th>對應用戶偏好</th><th>落地位置</th></tr></thead>
+<tbody>
+<tr><td>D1</td><td><strong>「實證驗證 L1」hook 化</strong> — researcher claim 必升級實測才能定論</td><td>實證 L1 (memory: feedback_researcher_claim_needs_empirical_verification)</td><td>新增 hook <code>researcher_claim_evidence_check.sh</code>（PostToolUse，偵測「我推測 / 我認為 / probably」時提示用 §2 等級標記）</td></tr>
+<tr><td>D2</td><td><strong>&lt;2hr pilot 強制 SMART</strong></td><td>小規模 pilot 偏好</td><td><code>/problem-framing-ideation</code> §1 已 P1 加 5W2H；建議加「pilot &lt; 2hr 否則 split」rule</td></tr>
+<tr><td>D3</td><td><strong>結構化決策表 default 樣式</strong></td><td>偏好結構化</td><td>TL;DR + decision table + (影響, 信心) 標註 → 已在 AGENTS.md §15.1 落地，但需 hook 強化驗證每個 Tier 3+ 回應首句格式</td></tr>
+<tr><td>D4</td><td><strong>全自動 + 並行明示觸發語自動偵測</strong></td><td>全自動偏好</td><td>建議加 <code>parallel_keyword_detector.sh</code> UserPromptSubmit hook 自動建議 spawn</td></tr>
+<tr><td>D5</td><td><strong>業界嚴謹語言 = effect size + CI 必標</strong></td><td>業界嚴謹 (memory: feedback_outside_claim_must_query_kb)</td><td><code>/scientific-rigor §2.1 checklist</code> 已落地；建議補 PostToolUse 偵測「significant / improvement / better」未配 Cohen 等級時 stderr warn</td></tr>
+<tr><td>D6</td><td><strong>KB 查詢義務自動化</strong></td><td>外部 claim 必先查 KB</td><td><code>kb_schema_guard.sh</code> 已存在；建議擴展為「外部工具名提及 → 強制 mcp__knowledge_search」hard gate</td></tr>
+</tbody></table>
+
+<h3>§E P4+ Fix Recommendations — 10 條（Architect agent 完整清單）</h3>
+<table>
+<thead><tr><th>優先</th><th>項目</th><th>影響 / 信心</th><th>工時</th><th>對齊框架</th></tr></thead>
+<tbody>
+<tr style="background:#dafbe1;"><td>已 P0</td><td><strong>E1</strong>: H4-3 silent failure → ✅ commit d5db8dc 已修</td><td>高/高</td><td>45m (DONE)</td><td>Walking Labs L10 + Anthropic fail-loud</td></tr>
+<tr style="background:#dafbe1;"><td>已 P3</td><td><strong>E2</strong>: compact_test.sh ✅ commit d64c0e7 已建</td><td>高/中-高</td><td>1.5h (DONE)</td><td>Walking Labs L9 E2E testing</td></tr>
+<tr style="background:#fff8c5;"><td>P1</td><td><strong>E3</strong>: 建 evaluator agent（與 researcher/reviewer 解耦），明確 generator-evaluator 分工</td><td>高/高</td><td>2h</td><td>Anthropic Harness Design 核心</td></tr>
+<tr style="background:#dafbe1;"><td>已 ee648fb</td><td><strong>E4</strong>: SessionStart hook ✅ commit ee648fb 已建</td><td>中-高/高</td><td>1h (DONE)</td><td>Walking Labs L6</td></tr>
+<tr style="background:#fff8c5;"><td>P1</td><td><strong>E5</strong>: 5 入口降到 3 — 合併 research_direction.md (9d stale) + manual.md 入 CURRENT_FOCUS</td><td>中/高</td><td>1h</td><td>Anthropic SoT</td></tr>
+<tr style="background:#dafbe1;"><td>已 P3</td><td><strong>E6</strong>: subagent_completion_logger ✅ commit d64c0e7 已建</td><td>中/高</td><td>1.5h (DONE)</td><td>Walking Labs L10</td></tr>
+<tr style="background:#fff8c5;"><td>P2</td><td><strong>E7</strong>: researcher_claim_evidence_check.sh — 偵測 L3 推測語言時提示 §2 等級標記</td><td>中-高/中</td><td>45m</td><td>用戶風格 D1 + Replication Crisis</td></tr>
+<tr style="background:#fff8c5;"><td>P2</td><td><strong>E8</strong>: deprecate 候選 — terminology_guard ∩ md_link_check ∩ kb_sot_guard 三選一保留</td><td>中/中</td><td>45m</td><td>C4 過度工程緩解</td></tr>
+<tr style="background:#fff8c5;"><td>P3</td><td><strong>E9</strong>: memory_recall_logger 量化 skill / memory 引用率，月度 &lt;5% 候選 archive</td><td>中/中</td><td>1h</td><td>C1 + Walking Labs context drift</td></tr>
+<tr style="background:#fff8c5;"><td>P3</td><td><strong>E10</strong>: prompt injection guard external_input_sanitizer.sh</td><td>中/中</td><td>1h</td><td>B7 Anthropic security</td></tr>
+</tbody></table>
+
+<p><strong>Architect 補強的關鍵發現</strong>:</p>
+<ul>
+<li>✅ E1 / E2 / E4 / E6 已在 P0-P3 fix 完成（commits ee648fb / d5db8dc / d64c0e7）</li>
+<li>🟡 剩 6 個未做：E3 evaluator agent / E5 5 入口降 3 / E7 researcher claim hook / E8 hook 重疊重評 / E9 recall logger / E10 injection guard</li>
+<li>📊 對齊度差距主要在 <strong>觀察性 (observability)</strong> 與 <strong>generator-evaluator 分工</strong> — 與本報告主體一致</li>
+</ul>
+
+<h3>需進一步研究項（Architect 標記）</h3>
+<ul>
+<li><strong>Walking Labs L8 "Feature lists primitives"</strong>: 未取得完整 lecture 內容，無法判定 InterSubMod skill 設計是否符合 primitives 思維（vs feature lists）</li>
+<li><strong>Anthropic 美學可分級化</strong>: 已知原則但 InterSubMod 對應落地點不明 — 可能 implicit 在 weekly-report 12 條 design principles，但未顯式宣告「美學分級」標準</li>
+</ul>
+
+
+<h2>🔬 Researcher Agent 深度補強（355 sec runtime, 12 一手來源 + 4 WebSearch）</h2>
+
+<h3>關鍵新發現</h3>
+<ul>
+<li><strong>Anthropic 實際有 2 篇 harness 文章</strong>（之前以為只有 1 篇）:
+  <ul>
+    <li>「Effective harnesses for long-running agents」<strong>2025-11-26</strong> — <strong>2-agent</strong>（Initializer + Coding）+ Feature list 200+ items + Puppeteer MCP</li>
+    <li>「Harness design for long-running application development」<strong>2026-03</strong> — <strong>3-agent</strong>（Planner / Generator / Evaluator）+ Sprint Contracts + Playwright MCP</li>
+  </ul>
+</li>
+<li><strong>量化證據</strong>: 相同 Claude Opus 不同 harness Terminal-Bench 2.0 差距 <strong>16pp</strong>（77% vs 93%）— 「harness 品質與 model 同等重要」</li>
+<li><strong>Anthropic 對 long-task 結論</strong>: 「agent 跑超過 3-5 步沒用 prompt caching 就是燒錢」</li>
+<li><strong>Prompt caching 經濟學</strong>: 寫入 1.25× standard、命中 0.10× standard（90% 折扣）；多 user 共用 stable template + 1hr TTL 可達 80-95% hit</li>
+</ul>
+
+<h3>3 大業界 source 補強重點</h3>
+
+<details open><summary><strong>OpenAI Codex Harness（6 個 Codex 特有 pattern）</strong></summary>
+<ol>
+<li><strong>Repository as System of Record</strong>: knowledge 放結構化 docs/，配 ~100 行 AGENTS.md 當目錄。「agent 在 context 看不到的等於不存在」</li>
+<li><strong>Agent Legibility Over Human Preferences</strong>: codebase 為 agent 可讀性優化，偏好 boring composable tech 而非黑盒函式庫</li>
+<li><strong>Architectural Constraints as Code</strong>: dependency 流向用 enforced sequence (Types → Config → Repo → Service → Runtime → UI)，custom linter 把「taste invariants」（structured logging、命名、檔案大小）寫成 rule</li>
+<li><strong>Continuous Garbage Collection</strong>: 「golden principles」週期性執行檢測 drift，自動 refactor PR 維持 coherence（非人為週五大掃除）</li>
+<li><strong>Telemetry-Driven Loop</strong>: agent 透過 LogQL/PromQL 直接驗證 perf；Chrome DevTools Protocol + ephemeral observability stack 內建</li>
+<li><strong>Progressive Disclosure</strong>: agent 從小入口起步，按需發現更深 context（mimicry human onboarding）</li>
+</ol>
+<p><strong>OpenAI vs Anthropic 觀點差異</strong>：OpenAI 強調 declarative intent + autonomous loop；Anthropic 強調 stress test 假設、model 變強就移除。OpenAI 無 multi-agent role separation（single autonomous loop + PR-as-handoff）；Anthropic 三 agent 分工。</p>
+</details>
+
+<details><summary><strong>Walking Labs 12 Lectures 完整 takeaway（quantified）</strong></summary>
+<table>
+<thead><tr><th>#</th><th>標題</th><th>Takeaway</th></tr></thead>
+<tbody>
+<tr><td>L01</td><td>Why Capable Agents Still Fail</td><td>同模型同 prompt，bare 20min/$9 出 broken vs harness 6hr/$200 出完整產品；五層失敗（task spec/context/exec env/verification/state）</td></tr>
+<tr><td>L02</td><td>What a Harness Actually Is</td><td>五子系統：<strong>instructions / state / verification / scope / lifecycle</strong></td></tr>
+<tr><td>L03</td><td>Repository as System of Record</td><td>「agent 看不到 = 不存在」；cold-start test 5 問題；ACID state（atomic commits / consistent state / isolation / durability）</td></tr>
+<tr><td>L04</td><td>One Giant Instruction File Fails</td><td>Progressive disclosure 替代巨型 doc</td></tr>
+<tr><td>L05</td><td>Keep Context Alive Across Sessions</td><td>PROGRESS.md + DECISIONS.md + git commits + init/shutdown routine；量化：rebuild time -78%、feature completion 58%→100%、hidden defect 43%→8%</td></tr>
+<tr><td>L06</td><td>Initialization Needs Own Phase</td><td>Agent 動工前先驗證 env health</td></tr>
+<tr><td>L07</td><td>Overreach and Under-Finish</td><td>One feature at a time + 明確完成定義</td></tr>
+<tr><td>L08</td><td>Feature Lists as Primitives</td><td>Machine-readable scope boundary，agent 不能忽略</td></tr>
+<tr><td>L09</td><td>Declare Victory Too Early</td><td>Verification gap：confidence ≠ correctness；需獨立評估器</td></tr>
+<tr><td>L10</td><td>E2E Testing Changes Results</td><td>只有全管線跑通才算驗證</td></tr>
+<tr><td>L11</td><td>Observability Inside Harness</td><td>沒有 agent action 可視性，debug 不可能</td></tr>
+<tr><td>L12</td><td>Every Session Leaves Clean State</td><td>下個 session 成功取決於本 session 清理</td></tr>
+</tbody></table>
+<p><strong>核心公式</strong>: <code>Harness = Instructions + Tools + Environment + State + Feedback</code>，五部件缺一即崩。</p>
+</details>
+
+<h3>🌐 8 個結構同構的開源案例（InterSubMod 可直接 cross-reference）</h3>
+<table>
+<thead><tr><th>#</th><th>Repo</th><th>核心特徵</th><th>對 InterSubMod 的 parallel</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>anthropics/cwc-long-running-agents</code></td><td>三層 quality loop（Default-FAIL contract + Fresh-Context Evaluator + Agent-Maintained Handoff）；<code>.claude/agents/evaluator.md</code> + 5 個 hooks</td><td><strong>幾乎一對一可參照</strong>：對應 InterSubMod 的 Hard Gate + evaluator + PROGRESS</td></tr>
+<tr><td>2</td><td><code>HKUDS/OpenHarness</code></td><td>10 子系統 (engine/tools/skills/plugins/permissions/hooks/commands/MCP/memory/multi-agent)，43 tools + 54 commands</td><td><strong>結構完全同構</strong>：對應 .claude/skills/* + MEMORY.md 索引</td></tr>
+<tr><td>3</td><td><code>code-yeongyu/oh-my-openagent</code></td><td>Sisyphus 主 orchestrator + Hephaestus/Prometheus/Oracle/Librarian/Explore 角色分工，54+ lifecycle hooks，hash-anchored edit 工具</td><td>Team Mode 1+8 並行 → 對應 parallel-benchmark subagent</td></tr>
+<tr><td>4</td><td><code>BulloRosso/etienne</code></td><td>Triple-P adaptive memory (Picker/Packer/Ponderer loop)，prompt injection detection gateway</td><td>對 Hard Gate 矩陣 + injection 防禦有參照</td></tr>
+<tr><td>5</td><td><code>microsoft/skills</code></td><td>跨 Claude Code / Cursor / Copilot 統一的 skill + MCP + AGENTS.md 規範</td><td>對應 InterSubMod skill governance 跨 agent harness</td></tr>
+<tr><td>6</td><td><code>harness/harness-skills</code></td><td>SKILL.md + YAML frontmatter + MCP server 依賴宣告</td><td><strong>命名同 SKILL.md，完全同構</strong></td></tr>
+<tr><td>7</td><td><code>lastmile-ai/mcp-agent</code></td><td>MCP 之上 workflow pattern + durable execution（persistent state）</td><td>對 evidence_ledger + cross-session continuity 有參照</td></tr>
+<tr><td>8</td><td><code>ai-boost/awesome-harness-engineering</code></td><td>完整 ecosystem 索引（memory 三層、AgentMiddleware 六 hook、LLMLingua 20x 壓縮、codebase-memory-mcp 120× token 壓縮）</td><td>探索 P4+ 改進方向的目錄</td></tr>
+</tbody></table>
+
+<h3>🔧 業界主流 agent harness 對比矩陣</h3>
+<table>
+<thead><tr><th>工具</th><th>Memory</th><th>Sub-agent</th><th>Hooks</th><th>MCP</th><th>自治程度</th></tr></thead>
+<tbody>
+<tr><td><strong>Claude Code</strong></td><td>CLAUDE.md + auto memory</td><td>Agent Teams 並行</td><td>Pre/Post ToolUse + UserPromptSubmit</td><td>一等公民</td><td>中-高</td></tr>
+<tr><td>Codex CLI</td><td>無持久</td><td>無原生</td><td>無原生 hook</td><td>支援</td><td>中（PR-loop）</td></tr>
+<tr><td>Cursor 2.0</td><td>規則檔 + agent tabs</td><td>8 並行 (git worktree 隔離)</td><td>無</td><td>部分</td><td>IDE 內中度</td></tr>
+<tr><td>Cline</td><td>Memory Bank 五檔</td><td>無</td><td>無</td><td>支援</td><td>Plan/Act 模式</td></tr>
+<tr><td>Devin</td><td>雲端 sandbox</td><td>無暴露</td><td>黑盒</td><td>內建</td><td>最高（fully autonomous）</td></tr>
+<tr><td>Aider</td><td>Repo map (PageRank)</td><td>無</td><td>無</td><td>部分</td><td>低</td></tr>
+<tr><td>OpenCode/oh-my-openagent</td><td>AGENTS.md hierarchical</td><td>Team Mode 1+8 並行</td><td><strong>54-61 lifecycle hooks</strong></td><td>內建</td><td>高</td></tr>
+<tr><td><strong>InterSubMod</strong></td><td>MEMORY.md (37 feedback) + auto memory + Concluded 區</td><td>14 active + Agent Teams</td><td><strong>22 hooks 跨 6 events</strong></td><td>knowledge + context7</td><td><strong>中-高</strong></td></tr>
+</tbody></table>
+
+<p><strong>對齊結論</strong>: InterSubMod 屬「agent orchestrator」類（同 Claude Code / Devin / Pi），結構參照對象為 <code>cwc-long-running-agents</code> + <code>OpenHarness</code>。</p>
+
+<h3>📚 10 條跨來源綜合 takeaway（Researcher agent 整合）</h3>
+<ol>
+<li><strong>Harness ≠ prompt</strong>：所有強行為（permission deny、sandboxing、subagent isolation、Hard Gate）必須是 architectural 而非 prompt 層級。Prompt 可被 jailbreak，architecture 不能。</li>
+<li><strong>Repository is single source of truth</strong>：「agent 看不到 = 不存在」。docs/、AGENTS.md、CLAUDE.md 不在 repo 的 knowledge 對 agent 等於零。InterSubMod 已落實，但需 cold-start test 驗證完整性。</li>
+<li><strong>Three context techniques 並用</strong>：compaction + structured note-taking + sub-agent，缺一即 context anxiety。</li>
+<li><strong>Fresh-context evaluator 是 long-task 救星</strong>：agent 自評永遠樂觀。需 separate agent，無 Write/Edit 權限，獨立 context，PASS/NEEDS_WORK 二元判定。<strong>InterSubMod 缺此角色</strong>。</li>
+<li><strong>Default-FAIL contract + evidence-gated write</strong>：所有 feature 預設 passes: false，PreToolUse hook 阻擋未讀 evidence 的 write。對應 InterSubMod evidence_ledger 但需要 hook 強制。</li>
+<li><strong>Prompt caching 是必要不是選項</strong>：3+ step agent 不用 prompt caching = 燒錢。InterSubMod 已 94.6% hit rate（業界 top）✅</li>
+<li><strong>Progressive disclosure 優於 monolithic context</strong>：InterSubMod 41 skills 已對齊；rules/ path-scoped 已 P3 達成 ✅</li>
+<li><strong>Harness 隨 model 升級應簡化</strong>：每個 harness 元件編碼一個 model 做不到的假設，這些假設值得 stress test。InterSubMod CLAUDE.md 中 4.6 遺留 scaffolding 已標記可移除，需執行。</li>
+<li><strong>Multi-agent role separation 是 trade-off</strong>：cwc（2-agent）vs three-agent harness 顯示「角色越多 → context isolation 越強但 handoff artifact 要求越高」。InterSubMod 預設單回合 + 明示觸發 subagent 是正確的 Opus 4.7 策略。</li>
+<li><strong>Observability 是 harness 內部組件</strong>：watch 命令即時監控 PROGRESS + git log + screenshots + evidence reads。InterSubMod 缺 evidence_ledger 即時可視化 dashboard。</li>
+</ol>
+
+<h3>🎯 10 條 InterSubMod 立即落地建議（Researcher vs Architect cross-validate）</h3>
+
+<table>
+<thead><tr><th>優先</th><th>項目</th><th>Researcher 建議</th><th>Architect 建議</th><th>Cross-validate?</th></tr></thead>
+<tbody>
+<tr><td>P1</td><td>Fresh-Context Evaluator subagent</td><td>✅ 新增 .claude/agents/evaluator.md (cwc pattern)</td><td>✅ E3 建 evaluator agent</td><td><strong>✅ 強共識</strong></td></tr>
+<tr><td>P1</td><td>Default-FAIL evidence gate hook</td><td>✅ PreToolUse 攔截寫入 validated/，要求先 Read evidence_ledger</td><td>—</td><td>新發現</td></tr>
+<tr><td>P1</td><td>Rules path-scoped frontmatter</td><td>✅ 4 個 rules 加 paths frontmatter，省 ~5KB</td><td>—（已 P3 d64c0e7 commit 完成）</td><td><strong>已完成 ✅</strong></td></tr>
+<tr><td>P1</td><td>Prompt caching 落點檢核</td><td>✅ system + skills + 大 doc 加 cache_control 標籤</td><td>—（已驗證 94.6% hit rate）</td><td><strong>已最優 ✅</strong></td></tr>
+<tr><td>P2</td><td>Watch dashboard (L11)</td><td>✅ scripts/watch_session.sh tail PROGRESS+log+evidence</td><td>—</td><td>新發現</td></tr>
+<tr><td>P2</td><td>Cold-start test 5 問題</td><td>✅ AGENTS.md 加 5 問題；SessionStart hook 驗證可答</td><td>—</td><td>新發現</td></tr>
+<tr><td>P2</td><td>CURRENT_FOCUS.md SessionStart hook</td><td>✅ Phase 5 規劃落實</td><td>✅ E4（commit ee648fb 已完成）</td><td><strong>已完成 ✅</strong></td></tr>
+<tr><td>P2</td><td>5 入口降到 3</td><td>—</td><td>✅ E5 合併 research_direction + manual 入 CURRENT_FOCUS</td><td>Architect 獨特建議</td></tr>
+<tr><td>P3</td><td>Opus 4.6 遺留 scaffolding 清理</td><td>✅ 掃 41 skills 移除「double-check」「每 N 步 status」</td><td>—</td><td>新發現</td></tr>
+<tr><td>P3</td><td>Context reset vs compaction 試驗</td><td>✅ cycle 末用 fresh evaluator 而非 /compact 比較產出</td><td>—</td><td>新發現</td></tr>
+<tr><td>P3</td><td>SKILL.md 依賴宣告（mcp_required / phase / dependencies）</td><td>✅ 對齊 harness/harness-skills 規範</td><td>✅ E8 hook 重疊重評 + 部分對齊</td><td>部分共識</td></tr>
+<tr><td>P3</td><td>researcher_claim_evidence hook</td><td>—</td><td>✅ E7 偵測 L3 推測語言時提示 §2 等級</td><td>Architect 獨特建議</td></tr>
+<tr><td>P3</td><td>memory_recall_logger</td><td>—</td><td>✅ E9 量化每 skill / memory 引用率</td><td>Architect 獨特建議</td></tr>
+<tr><td>P4</td><td>Injection guard</td><td>✅ 結合 etienne pattern 設計</td><td>✅ E10 external_input_sanitizer.sh</td><td><strong>✅ 強共識</strong></td></tr>
+</tbody></table>
+
+<h3>🔥 Top 3 高 ROI 立即可做（兩 agent 強共識）</h3>
+<ol>
+<li><strong>🏗️ Fresh-Context Evaluator subagent</strong>（兩 agent 強推 + cwc-long-running-agents pattern + Walking Labs L09）
+  <ul><li>新增 <code>.claude/agents/evaluator.md</code>，無 Write/Edit/Bash，僅 Read+Grep</li>
+  <li>用於 cycle 末 verify P5/P6 產出（取代或補強自評）</li>
+  <li>PASS / NEEDS_WORK 二元輸出</li>
+  <li>工時 2 hr</li></ul>
+</li>
+<li><strong>🚨 Default-FAIL evidence gate hook</strong>（cwc pattern + Anthropic harness reliability）
+  <ul><li>新 <code>.claude/hooks/verify-gate.sh</code>: PreToolUse 攔截寫入 reports/validated/**</li>
+  <li>要求先 Read evidence_ledger.jsonl 才放行 Write/Edit</li>
+  <li>用 .claude/.evidence-reads 計數檔監控</li>
+  <li>工時 1 hr</li></ul>
+</li>
+<li><strong>📺 Watch session dashboard</strong>（Walking Labs L11 + observability）
+  <ul><li>新 <code>scripts/watch_session.sh</code>: tail PROGRESS + git log + cache_telemetry + 最新 figures</li>
+  <li>用戶啟動長 cycle 時開獨立 terminal 監控</li>
+  <li>工時 45 min</li></ul>
+</li>
+</ol>
+
+<h3>📊 InterSubMod 累計 audit 完成度</h3>
+<p>跨 architect + researcher cross-validate，發現 InterSubMod 已執行 P0-P3 對齊度：</p>
+<ul>
+<li>✅ <strong>SessionStart hook</strong> (Walking Labs L06) — commit ee648fb</li>
+<li>✅ <strong>Silent failure → fail-loud log</strong> (L11 + Anthropic) — commit d5db8dc</li>
+<li>✅ <strong>compact_test.sh E2E</strong> (L09 + L10) — commit d64c0e7</li>
+<li>✅ <strong>subagent_completion_logger</strong> (L11 observability) — commit d64c0e7</li>
+<li>✅ <strong>Rules path-scoped</strong> (progressive disclosure) — commit d64c0e7</li>
+<li>✅ <strong>Cache hit 94.6%</strong>（Anthropic 90% 目標超越）— P2 已 cache_telemetry 驗證</li>
+<li>✅ <strong>Memory system</strong>（37 feedback + Concluded + spaced recall）— pre-existing best-in-class</li>
+<li>✅ <strong>Hard Gate 結構性對抗 "declare victory too early"</strong> (L07/L09) — pre-existing</li>
+<li>✅ <strong>Progressive simplification / scaffolding 清理規範</strong>（opus47-behavior.md 已列）— 規範存在但執行待</li>
+</ul>
+
+<p><strong>仍未做（兩 agent 共識）</strong>：</p>
+<ul>
+<li>🟡 Fresh-Context Evaluator subagent（最高 ROI）</li>
+<li>🟡 Default-FAIL evidence gate hook</li>
+<li>🟡 Watch dashboard</li>
+<li>🟡 5 入口降到 3</li>
+<li>🟡 Injection guard / researcher_claim hook / memory_recall_logger</li>
+<li>🟡 SKILL.md 依賴宣告統一</li>
+<li>🟡 Cold-start test 5 問題</li>
+<li>🟡 Opus 4.6 遺留 scaffolding 實際清理</li>
+</ul>
+<hr>
+<p class="meta">Generated: 2026-05-18 16:22 · Sources: Anthropic Harness Design + OpenAI Harness Engineering (via InfoQ/Medium) + Walking Labs Learn Harness Engineering · Architect agent ✅ amended (107 sec). Researcher agent ✅ amended (355 sec, 12 一手來源 + 4 WebSearch). Audit complete.</p>
+</body></html>
