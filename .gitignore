@@ -12,6 +12,10 @@ data/
 # Logs
 heatmap_generation.log
 
+# Ephemeral hook state (per-session tracker, not version-controlled)
+.claude/.evidence-reads
+.claude/.compile-pending
+
 # Build artifacts
 build/
 *.o
