@@ -47,7 +47,7 @@
 
 ---
 
-## §3 Skills 分類索引（44 個，Claude Code 特定）
+## §3 Skills 分類索引（42 個，Claude Code 特定 — 2026-05-18 reviewer 修正）
 
 - **元方法論**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/grill-me` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor`
 - **7-Phase Waterfall**: P0 `/cycle-init` → P1 `/research-loop` → P2 `/check-staleness` → P3 `/feature-layered-observation` → P4 `/multi-sample-consistency` → P5 `/run-evaluator` → P6 `/conclude-research`
@@ -58,16 +58,30 @@
 
 ---
 
-## §4 Hooks 概覽（Claude Code 特定）
+## §4 Hooks 概覽（Claude Code 特定 — 2026-05-18 P4 完整收尾）
 
-依 `InterSubMod/.claude/settings.local.json` 完整定義（含 UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop 多個 matcher 與 command；實際 hook script 數量 20+，每個 matcher 可對應多個 command）。
+依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop 6 個 events；**30 hook scripts** 跨 22 matchers）。
 
-**Hard Gate hooks**（不可繞過）:
-- `pre_commit_compile_check.sh`（C++ commit 必編譯，`exit 2` 阻擋）
+**Hard Gate hooks**（不可繞過 — `exit 2` 阻擋）:
+- `pre_commit_compile_check.sh`（C++ commit 必編譯）
+- `kb_schema_check.sh`（KB 寫入前 schema 檢核）
+- `pipeline_block_check.sh`（長 pipeline 磁碟檢核）
+- `no_binary_commit.sh`（commit binary 阻擋）
+- `kb_sot_guard.sh`（F1 SoT 數字保護）
 
-**規劃新增**（Phase 5 部署）:
-- `session_start_inject_focus.sh`（SessionStart 注入 CURRENT_FOCUS）
-- `md_path_format_rule.sh`（強化 `InterSubMod/...` 前綴檢核）
+**已落地 hooks**（2026-05-18 P0-P4 新增 11 個）:
+- `session_start_inject_focus.sh` ✅（SessionStart CURRENT_FOCUS 注入，commit ee648fb）
+- `md_path_format_rule.sh` ✅（UserPromptSubmit 路徑前綴）
+- `skill_change_audit.sh` ✅（PostToolUse skill 變動月度 log）
+- `verify_gate.sh` ✅（PreToolUse Edit|Write Default-FAIL evidence gate）
+- `evidence_read_tracker.sh` ✅（PostToolUse Read 追蹤）
+- `cache_telemetry.sh` ✅（manual telemetry, 證實 96.8% hit）
+- `subagent_completion_logger.sh` ✅（SubagentStop cost/cache 紀錄）
+- `compact_test.sh` ✅（manual /compact 後 preservation 驗證）
+- `allow_list_audit.sh` ✅（manual 158 entries audit）
+- `researcher_claim_evidence_check.sh` ✅（PostToolUse 偵測 hedge 語言）
+- `memory_recall_logger.sh` ✅（PostToolUse 引用率量化）
+- `external_input_sanitizer.sh` ✅（PostToolUse WebFetch injection 偵測）
 
 ---
 
@@ -86,15 +100,15 @@
 
 ---
 
-## §6 Working State Pointer（動態狀態）
+## §6 Working State Pointer（動態狀態 — 2026-05-18 SessionStart hook 已落地）
 
-**當前主軸**: 由 SessionStart hook 從 `InterSubMod/docs/CURRENT_FOCUS.md` 注入（≤ 500 tokens）
+**當前主軸**: 由 SessionStart hook 從 `InterSubMod/docs/CURRENT_FOCUS.md` 自動注入（截 ~3000 chars / ~500 tokens）✅
 **Pending Items**: 見 MEMORY.md 索引
 **研究方向變更**: 觸發 `/pivot-direction`
 **詳細上下文載入**: 觸發 `/research-context-loader`（Tier 1 / Tier 2 / Tier 3 深度）
 
-⚠ **SessionStart hook 狀態**: **待建立**（Phase 5）
-⚠ **hook 建立前的暫行做法**: AI 必須主動執行 `Read InterSubMod/docs/CURRENT_FOCUS.md`
+✅ **SessionStart hook 狀態**: **已落地** (commit ee648fb, 2026-05-18)
+✅ **mtime > 7 天**: hook 自動加 STALE WARNING（CURRENT_FOCUS.md weekly cadence 強制）
 ⚠ **何時不需詳細上下文**: 純 code edits（make/test/commit）、單檔 doc 寫作、簡單問答
 
 ⚠ **變動頻率上限：週級** — CURRENT_FOCUS.md > 7 天未更新 → hook 主動提醒。

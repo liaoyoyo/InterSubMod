@@ -12,6 +12,55 @@
 
 # 當前目標
 
+## 2026-05-18 — Agent Harness Audit P0-P4 完整收尾 (11 commits)
+
+**Session anchor**: 2026-05-18 single-day sprint 完成 InterSubMod agent harness 7-phase audit (P1-P7) + 5-tier fix (P0-P4) 共 29 fix items × 11 commits × ~10 hr。
+
+### 完成項目（依 commit chain）
+
+| Commit | 範圍 |
+|--------|------|
+| `ee648fb` | G1+G4 hooks（SessionStart + skill_change_audit）+ verification_guide |
+| `61055b8` | 7-phase audit deliverables (P1-P7 HTML/JSON × 5) |
+| `d5db8dc` | P0 critical (5 YAML invalid + 16 silent failure + query template) |
+| `a7c1495` | P1 (13 D2 + 5 D3 cross-ref + 5W2H + SMART + D7-1) |
+| `1a9379e` | P2 (TL;DR / SWOT / allow_audit / cache_telemetry / ledger v2 / manual) |
+| `d64c0e7` | P3 (worktree / Eisenhower / subagent_logger / rules paths / compact_test + H4 no-op) |
+| `43d8b28` | P4 Industry Deep Audit (Anthropic + OpenAI + Walking Labs × architect/researcher cross-validate) |
+| `3ff0980` | P4 Top 3 (Evaluator agent + Evidence gate + Watch dashboard) |
+| `93659a8` | P4 剩 7 (E5 5→3 入口 / E7 claim hook / E9 recall / E10 injection / cold-start / cleanup / spec) |
+| `6998470` | wrap-up (gitignore + log baseline) |
+| `56e00c7` | 00_COMPLETION_REPORT.md |
+
+### Verification 結果
+
+- **Cache hit rate 96.8%**（業界 Anthropic claim 90% 超越）
+- **30 hooks 跨 6 events**（silent failure 0/30）
+- **42/42 skills YAML valid**
+- **Cold-start test Q1-Q5 全 ✅**（Walking Labs L03）
+- 4 audit HTML reports（P1 / P2 / P3 / P4 industry / P4 final）
+- 11 new hook scripts + 3 new templates + 1 evaluator agent + 1 SKILL spec
+
+### 完整 deliverables 索引
+
+`InterSubMod/docs/reports/validated/2026/05/20260518_agent_harness_audit_p1_skills_01/00_COMPLETION_REPORT.md` — 282 行完整 §1-§10 結構化文件
+
+### 業界對齊
+
+| 維度 | InterSubMod 達標 |
+|------|---------------|
+| Anthropic 3-agent harness | ✅ evaluator agent 已建 |
+| Walking Labs 12 lectures | ✅ 12/12 對齊 (L03 cold-start / L06 init / L11 observability / L12 clean state) |
+| OpenAI 3 pillars | ✅ Context / Constraint / GC (recall_logger + skill_audit) |
+| cwc-long-running-agents | ✅ evaluator + verify_gate + evidence_tracker |
+| Prompt Caching 90% claim | ✅ 96.8% 超越 |
+
+### 下一階段
+
+V6 production 4-day workflow (W3 deadline 5/22) — `InterSubMod/research/selfphasing_v6_production/4day_compressed_workflow.md`
+
+---
+
 ## 2026-05-17 — Tier 1-4 序列化執行 + T1.1/T1.3 完成
 
 **Session anchor**：4 輪 Socratic 燒烤對話收斂 9 條決策 + plan `~/.claude/plans/tender-pondering-blossom.md`

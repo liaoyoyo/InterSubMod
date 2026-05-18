@@ -5,6 +5,18 @@
 
 ---
 
+## §-1 Agent 上下文 3 入口（2026-05-18 從 5 降為 3 — 詳見 .claude/CLAUDE.md §9）
+
+| 入口 | 權威範圍 |
+|------|--------|
+| `InterSubMod/AGENTS.md`（本檔）| 跨 agent governance（語言、結構、build、目標、KB 義務、回應分級）|
+| `.claude/CLAUDE.md` | Claude Code 模式特定（確認矩陣、Skills、Hooks、Rules、subagent） |
+| `InterSubMod/docs/CURRENT_FOCUS.md` | live 主軸、阻塞、active cycle、SessionStart hook 自動注入 |
+
+降級備用入口（不在主流程）:
+- `InterSubMod/docs/references/manual/20260424_*.md` — reference manual
+- `InterSubMod/research/autoresearch/research_direction.md` — hypothesis backlog 索引
+
 ## §0 Cold-Start Test — 5 問題（Walking Labs L03）
 
 **規則**: 新 agent / 新 session 開始時，應能從 repo 直接答出以下 5 問題（不依賴外部記憶）。若任何一題答不出 → repo 缺 SoT，需補。
