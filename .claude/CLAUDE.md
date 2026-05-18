@@ -71,18 +71,18 @@
 
 ---
 
-## §5 Rules 載入狀態（path-scoped 過渡中）
+## §5 Rules 載入狀態（path-scoped 已落地 2026-05-18）
 
-| Rule 檔案 | 當前狀態 | 規劃 paths frontmatter |
-|----------|--------|---------------------|
-| `.claude/rules/cpp-build.md` | **永遠載入** | `paths: ["src/**", "include/**", "tests/**", "CMakeLists.txt"]` |
-| `.claude/rules/opus47-behavior.md` | **永遠載入** | `paths: ["**/SKILL.md", "**/*.json"]` |
-| `.claude/rules/workflow-commands.md` | **永遠載入** | `paths: ["scripts/**"]` |
-| `.claude/rules/output-structure.md` | **永遠載入** | `paths: ["output/**"]` |
+| Rule 檔案 | 狀態 | globs 條件 |
+|----------|------|-----------|
+| `.claude/rules/cpp-build.md` | **條件式載入** ✅ | `src/**/*.cpp`, `src/**/*.hpp`, `include/**/*.hpp`, `include/**/*.h`, `tests/**/*.cpp`, `CMakeLists.txt` |
+| `.claude/rules/opus47-behavior.md` | **條件式載入** ✅ | `.claude/skills/**/SKILL.md`, `.claude/skills/**/*.json`, `.claude/rules/**/*.md`, `.claude/skills/**/playbook.md`, `.claude/skills/**/prompts/*.md` |
+| `.claude/rules/workflow-commands.md` | **條件式載入** ✅ | `scripts/**/*.sh`, `scripts/**/*.py` |
+| `.claude/rules/output-structure.md` | **條件式載入** ✅ | `output/**/*`, `results/**/*` |
 
-⚠ **目前狀態**：4 個 rules **永遠載入**（無 `paths:` frontmatter）
-⚠ **規劃**：Phase 5 加 frontmatter 後變條件式 → 省 ~5KB always-loaded
-⚠ **C++ Hard Gate 保留**：即使 `cpp-build.md` 變條件式後（編輯 src/ 才載入），C++ commit Hard Gate（§1 + pre-commit hook）**仍適用** — Hard Gate 不依賴 rule 載入，而是不可逆操作的絕對規則
+✅ **2026-05-18 P3 audit M2 落地**：4 個 rules 全部 path-scoped（採 `globs:` Cursor spec，與 `paths:` Anthropic skill spec 等價）。
+✅ **省 ~5KB always-loaded**：rules 改為條件式後，僅在編輯對應 path 時才載入。
+✅ **C++ Hard Gate 保留**：即使 `cpp-build.md` 變條件式（編輯 src/ 才載入），C++ commit Hard Gate（§1 + pre-commit hook）**仍適用** — Hard Gate 不依賴 rule 載入，而是不可逆操作的絕對規則
 
 ---
 

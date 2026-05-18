@@ -1,8 +1,9 @@
 ---
 name: parallel-benchmark
-description: 平行 benchmark 執行器。接收多個 Python benchmark 腳本與參數，同時在獨立 subagent 中執行，匯總結果表。適用 Phase 1A 多 dataset benchmark、cross-sample 驗證等場景。
+description: 平行 benchmark 執行器。接收多個 Python benchmark 腳本與參數，同時在獨立 subagent 中執行，匯總結果表。適用 Phase 1A 多 dataset benchmark、cross-sample 驗證等場景。預設使用 git worktree isolation（業界 Cursor 2.0 / Devin 推薦），避免平行 subagent 互改同 file 競爭。
 tools: Read, Write, Bash, Glob, Grep
 model: inherit
+isolation: worktree
 ---
 
 # 平行 Benchmark 執行器 (Parallel Benchmark Agent)

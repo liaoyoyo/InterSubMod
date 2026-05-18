@@ -1,9 +1,9 @@
 ---
 name: html-report-build
 description: |
-  Generate self-contained HTML reports / standalone PI-view documents / PPT-style slide decks **directly by LLM** (no Python middleware) from markdown source or in-context content. Single skill, three prompt modes: (1) report mode → Tailwind-prose-style typography with inline design tokens, conditional topic folder for >=200 lines or >=5 figures; (2) slide mode → 16:9 canvas + section theming + speaker notes + tab nav index; (3) **standalone mode** → PI-end terminal HTML with sticky TOC + collapsible section cards + inline SVG diagrams + stat-grid + print-friendly (the Anthropic Claude Artifacts terminal-interface-language pattern). Replaces html-preview Python pipeline (markdown lib + jinja2 + bs4 + Pillow). Output is companion to .md (NEVER replaces source).
-  USE WHEN: 「想看 HTML 排版」「給 PI 看 preview」「report HTML」「PPT HTML」「standalone HTML」「終版單檔」「給人看的版本」「直接出 HTML」「html-report-build」、weekly-report / structured-tech-report / results-report / feature-layered-observation / methodology-audit / conclude-research / pptx-build 結束時自動觸發、用戶請求把 .md 報告轉為「適合釐清邏輯思路的 HTML」、製作 PPT slide deck 取代 PPTX 流程、validated 報告需要 PI 終版閱讀體驗。
-  SKIP WHEN: README.md（GitHub 原生 render 即可）、給其他 LLM 消費的 .md（CLAUDE.md / state.json / hypothesis_queue.json / MEMORY.md）、純個人筆記、CI 自動化文件、JSON / YAML / CSV / TSV state 檔、self_phasing_synthesis_PI/preview/* 等已 shipped legacy 客製 PPT（除非用戶明確要求重做）、in-progress 草稿（仍會 diff 多次，用 report companion 即可）。
+  LLM-direct HTML 報告生成（無 Python middleware）— 3 模式：report (Tailwind prose 排版) / slide (16:9 PPT 風) / standalone (PI 終版 + sticky TOC + 折疊 cards + SVG 圖)。Output 為 .md 的 companion 不取代。
+  USE WHEN: 「想看 HTML 排版」「給 PI 看 preview」「PPT HTML」「standalone HTML」「html-report-build」、weekly/structured-tech/results-report 結束自動觸發、validated 報告需 PI 終版閱讀體驗。
+  SKIP WHEN: README.md (GitHub 原生 render)、給 LLM 消費的 .md (CLAUDE.md / *.json / MEMORY.md)、純筆記 / CI 文件、in-progress 草稿（用 report companion）。
 ---
 
 # html-report-build

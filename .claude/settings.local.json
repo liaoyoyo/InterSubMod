@@ -158,7 +158,10 @@
       "Bash(/big7_disk/liaoyoyo2001/InterSubMod/build/bin/inter_sub_mod --help)",
       "Bash(mkdir -p /big7_disk/liaoyoyo2001/tmp)",
       "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/skill_change_audit.sh)",
-      "Bash(python3 -c \"import json; d=json.load\\(open\\('/big7_disk/liaoyoyo2001/InterSubMod/.claude/settings.local.json'\\)\\); pt=d['hooks'].get\\('PostToolUse',[]\\); print\\(f'PostToolUse matchers: {len\\(pt\\)}'\\); print\\(pt[-1]\\)\")"
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('/big7_disk/liaoyoyo2001/InterSubMod/.claude/settings.local.json'\\)\\); pt=d['hooks'].get\\('PostToolUse',[]\\); print\\(f'PostToolUse matchers: {len\\(pt\\)}'\\); print\\(pt[-1]\\)\")",
+      "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/allow_list_audit.sh)",
+      "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/cache_telemetry.sh)",
+      "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/compact_test.sh)"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
@@ -415,6 +418,14 @@
           {
             "type": "command",
             "command": "echo '[SubagentStop] 子代理任務完成，請檢查輸出結果並確認是否符合預期' || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/subagent_completion_logger.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       }
