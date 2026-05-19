@@ -1,11 +1,12 @@
 ---
 name: pre-decision-audit
 description: |
-  快速 (≤30min) pre-decision evidence audit — 在進入 cycle / spec / 大改之前做 7 類審查：
-  (1) 資訊充分性 Widen (2) 觀察完整性 checklist L1-L5 (3) 假設可信度評分 5 維 0-100
-  (4) 快速測試方向建議 <30min pilot 指引 + checkpoint (5) 未來方向排序 Bland 2x2
-  (6) 可信度評估 WRAP falsifier "what would I see if wrong"
-  (7) 決策路徑建議 GO / PROBE / NO-GO + 後續 action.
+  快速 (≤30min) pre-decision evidence audit — 在進入 cycle / spec / 大改之前做
+  §0 Cynefin front-gate (domain classification) + §1-§7 七個 core outputs：
+  §1 觀察完整性 checklist L1-L5 ｜ §2 假設可信度評分 5 維 0-100 (含 Pre-Mortem falsifier observable + WRAP Reality-test 三反例)
+  §3 Assumption Map 2x2 Bland (importance × known) ｜ §4 Quick pilot guide <30min + checkpoint
+  §5 Gap diagnosis (缺什麼+影響+工時+優先級) ｜ §6 Evidence conflict scan (cross-link 既有 NEGATIVE)
+  §7 Decision path GO / PROBE / NO-GO + 後續 action.
   與 /implementation-notes (process-time) + /run-evaluator (post) 形成「假說驗證三層樓」之首層；
   對齊 ADR pre-decision separation 原則 (exploration BEFORE decision).
   USE WHEN: cycle 啟動前 (P0), 新 spec 實作前, 跨樣本推廣前 (P3->P4), tier 升級前 (⭐3->⭐4),
@@ -102,7 +103,7 @@ paths:
      "cycle_id": "...",
      "topic": "...",
      "score": 65,
-     "dimensions": {"theory": 20, "observation": 15, "mechanism": 10, "counter": 10, "resource": 10},
+     "dimensions": {"theory": 20, "observation": 15, "mechanism": 10, "counter_risk": 10, "resource": 10},
      "falsifier_observable": "...",
      "scored_at": "ISO8601"
    }
@@ -120,7 +121,7 @@ paths:
    - PROBE → 列 §4 pilot 步驟 + checkpoint
    - NO-GO → 建議寫 MEMORY.md Concluded entry / postmortem（若 mid-cycle）
 
-## §4 Seven core output sections
+## §4 §0 Front-gate + §1-§7 Seven core output sections
 
 ### §0 🟤 Cynefin Domain Gate (front-gate)
 
@@ -191,7 +192,7 @@ grep + cross-link 既有 NEGATIVE / Concluded / dependent reports：
 **強制**：
 - `grep -i "concluded\|negative" InterSubMod/MEMORY.md` → 列所有相關 entries
 - `find InterSubMod/docs/reports/validated -name "*NEGATIVE*"` → 列檔案
-- 若 conflict 找到 ≥ 1 → tier 自動降級 1 階
+- 若 conflict 找到 ≥ 1 → §2 反例風險維度自動 −10（如 10→0 或 20→10）
 
 ### §7 ⚫ Decision Threshold + Path
 
@@ -204,11 +205,11 @@ grep + cross-link 既有 NEGATIVE / Concluded / dependent reports：
 
 | 來源 | 用法 |
 |---|---|
-| [Pre-Mortem (Klein HBR 2007)](https://hbr.org/2007/09/performing-a-project-premortem) | §2 falsifier observable — silent failure imagination |
-| [Assumption Mapping (Bland Precoil)](https://www.precoil.com/assumptions-mapping) | §3 2x2 importance × known |
-| [WRAP (Heath ModelThinkers)](https://modelthinkers.com/mental-model/wrap-decision-process) | §2 Reality-test "what would I see if wrong" |
-| [Cynefin (Snowden Untools)](https://untools.co/cynefin-framework/) | §0 front-gate domain classification |
-| [ADR pre-decision (AWS)](https://docs.aws.amazon.com/prescriptive-guidance/latest/architectural-decision-records/adr-process.html) | 整 skill 定位 — exploration BEFORE decision |
+| [Pre-Mortem (Klein HBR 2007)](https://hbr.org/2007/09/performing-a-project-premortem) | §2 **Falsifier observable** — "假定失敗反推" prospective hindsight |
+| [Assumption Mapping (Bland Precoil)](https://www.precoil.com/assumptions-mapping) | §3 2×2 importance × known/unknown — 右上 quadrant MUST validate |
+| [WRAP (Heath ModelThinkers)](https://modelthinkers.com/mental-model/wrap-decision-process) | §2 **Reality-test 三反例觀察** — Heath "R" step（"列若假設成立應看到/不該看到"），與 Pre-Mortem falsifier 互補 |
+| [Cynefin (Snowden Untools)](https://untools.co/cynefin-framework/) | §0 front-gate domain classification — Complex 域強制 probe-first |
+| [ADR pre-decision (AWS)](https://docs.aws.amazon.com/prescriptive-guidance/latest/architectural-decision-records/adr-process.html) | 整 skill 定位 — exploration BEFORE decision separation |
 
 額外 reference：
 - [Microsoft Well-Architected ADR (含 confidence level)](https://learn.microsoft.com/en-us/azure/well-architected/architect-role/architecture-decision-record)
