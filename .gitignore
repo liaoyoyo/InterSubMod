@@ -71,6 +71,9 @@ research/**/*.bam
 research/**/*.bai
 research/**/*.gz
 research/**/*.log
+research/**/*.txt
+research/**/*.nwk
+
 # Pipeline working dirs — heavy intermediate artifacts (added 2026-05-19)
 # Use dir/** (not dir/) so !exception below can re-include .md/.py/.json
 research/**/intermediate/**
@@ -82,23 +85,14 @@ research/**/outputs/**
 research/**/tmp/**
 research/**/_tmp/**
 research/**/cache/**
-# Pipeline-specific output dirs (added 2026-05-19 — methyl / priority bug / v6_bam observations)
-research/methyl_augmented_filter_phase2/cycle*/**
-research/methyl_augmented_filter_phase2/reports/**
-research/paired_priority_bug_audit/v6_per_chr_alt_work/**
+# Pipeline-specific output dirs (added 2026-05-19, revised 2026-05-20)
+# ⚠ Git limitation: "dir/**" 等同 dir excluded — !exception 無法救回內部 .md/.py/.json
+# 修正: 只保留「整 tree 全 output」的 dir; 其他依賴既有 generic regex (data/, figures/, *.csv 等)
 research/paired_priority_bug_audit/phaseC_*_with_significance/**
-research/v6_bam_tpfp_hp_loh_cn/**
-# Re-include source files inside ignored output dirs (對齊 line 54-55 policy:
-# "*.md *.py *.yaml *.yml *.json *.txt belong in git")
-!research/**/*.md
-!research/**/*.py
-!research/**/*.sh
-!research/**/*.yaml
-!research/**/*.yml
-!research/**/*.json
-!research/**/*.txt
-!research/**/README*
-!research/**/manifest*
+# 移除 over-broad rules (內含 source files 被誤 ignored, 共 30+ files):
+#   cycle*/** (cycle1-3 內含 cycle*_findings.md / 00_PLAN.md / *.json)
+#   reports/** / v6_bam_tpfp_hp_loh_cn/** (內含 00_PLAN / 01-02_*.md)
+#   v6_per_chr_alt_work/** (已被下方 *.txt override 處理)
 # Override !*.txt exception for specific per-chr calculation outputs (added 2026-05-20)
 # v6_per_chr_alt_work/*.txt 是 per-chr alt ratio 計算 output 不是 conclusion text
 research/paired_priority_bug_audit/v6_per_chr_alt_work/*.txt
