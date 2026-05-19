@@ -96,6 +96,7 @@ advisory: on  # set to "off" 關閉 AI 自我偵測 advisory mode
 - **Default if no answer**: <若用戶不回的 fallback>
 - **Revisit if**: <重評條件>
 - **Priority**: critical | major | minor
+- **Evidence tier**: L5 (pre-evidence by definition — questions are unresolved; upgrade to L1-L4 once answered)
 
 ---
 

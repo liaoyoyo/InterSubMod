@@ -79,9 +79,14 @@ case "$FILE_PATH" in
         echo "[html-report-build] Concept doc modified: $(basename "$FILE_PATH")"
         echo "[html-report-build] → 建議跑 'html-report-build' skill in standalone mode (技術說明文章，sticky TOC 受益大)"
         ;;
-    */research/*/implementation-notes.md|*/research/*/implementation_notes.md|*/docs/concepts/*/implementation-notes.md)
+    */research/*/implementation-notes.md|*/docs/concepts/*/implementation-notes.md)
         echo "[html-report-build] Implementation notes (in-progress living document) modified: $(basename "$FILE_PATH")"
         echo "[html-report-build] → 建議跑 'html-report-build' skill in standalone mode (per-spec living document, 4 sections + Lore)"
+        echo "[html-report-build] → Output: ${STANDALONE_HTML#*/InterSubMod/}"
+        ;;
+    */docs/reports/validated/*/*implementation_notes*.md)
+        echo "[html-report-build] Implementation notes (finalized) modified: $(basename "$FILE_PATH")"
+        echo "[html-report-build] → 建議跑 'html-report-build' skill in standalone mode (validated per-spec living document)"
         echo "[html-report-build] → Output: ${STANDALONE_HTML#*/InterSubMod/}"
         ;;
     */docs/data_specs/*)

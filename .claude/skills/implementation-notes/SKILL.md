@@ -90,15 +90,23 @@ AI: 已 append 到 ## 🔵 設計決定 section（無需再問）
 
 ### 2.2 AI 自我偵測 → 主動 prompt（≥2 linguistic markers 才問）
 
-**Linguistic markers 列表**:
-- 「考量因素」「為何不選」「但這假設」「不確定」「mock 替代」
-- 「我選 A 不選 B」「trade-off 是 X」「之後可能要重評」
-- 「目前 hardcode 等以後改」「skip 這部分為了 MVP」
+**Linguistic markers**（closed enumeration — 擴充需用戶 opt-in）:
+- 設計選擇類：「考量因素」「為何不選」「我選 A 不選 B」「trade-off」
+- 假設類：「但這假設」「假定 X」「前提是 Y」
+- 不確定類：「不確定」「TBD」「待確認」「mock 替代」
+- 暫存類：「目前 hardcode 等以後改」「skip 這部分為了 MVP」「之後可能要重評」
 
-**Threshold**:
-- 單一片語 → 不問（避免噪音）
-- ≥2 markers 同一段 → AI prompt：「要記下這個 [類型] 嗎？」
-- 用戶可關閉 advisory mode（在 frontmatter 加 `advisory: off`）
+**Threshold（operationalized）**:
+- **「同一段」定義 = within one AI assistant response (single turn)** — 一個 AI 回覆 turn 內出現 ≥2 markers 才啟動 advisory
+- 單一片語不問（避免噪音）
+- ≥2 markers within one turn → AI prompt：「要記下這個 [類型] 嗎？」
+- 用戶可關閉 advisory mode（在 implementation-notes.md frontmatter 加 `advisory: off` — 純 documentation marker, AI 讀檔時識別）
+
+### 2.3 Open Questions 的 evidence tier 例外規則
+
+- **🔵 Design Decisions / 🟠 Deviations / 🟡 Trade-offs entry**: 必標 L1-L5 tier ribbon（依 /scientific-rigor §2）
+- **🔴 Open Questions entry**: 預設 L5（pre-evidence by definition — questions are unresolved by nature）
+- 一旦 Open Question 被 answered → 升 tier 到 L1-L4（依答案 evidence 強度）+ Status 改 `answered`
 
 ### 2.3 Cross-Session continuity
 
