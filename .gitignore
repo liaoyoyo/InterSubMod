@@ -97,6 +97,11 @@ slides/
 # === Transient session/tooling artifacts (added 2026-05-11) ===
 # HTML preview playground (per-session experiment output)
 preview/
+# === LLM-direct HTML companion (.standalone.html — added 2026-05-19) ===
+# Regenerable from source .md via html-report-build skill standalone mode.
+# Source-of-truth = .md; HTML 為 PI viewable companion (sticky TOC + collapsible cards).
+# All paths ignored — regenerate on demand via standalone_trigger.sh hook.
+**/*.standalone.html
 # Codex CLI 0-byte staging marker
 .codex
 # Claude Code scheduled task lock (transient runtime state)
