@@ -47,13 +47,14 @@
 
 ---
 
-## §3 Skills 分類索引（42 個，Claude Code 特定 — 2026-05-18 reviewer 修正）
+## §3 Skills 分類索引（43 個，Claude Code 特定 — 2026-05-19 新增 /implementation-notes）
 
 - **元方法論**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/grill-me` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor`
 - **7-Phase Waterfall**: P0 `/cycle-init` → P1 `/research-loop` → P2 `/check-staleness` → P3 `/feature-layered-observation` → P4 `/multi-sample-consistency` → P5 `/run-evaluator` → P6 `/conclude-research`
 - **程式開發**: `/cpp-change` `/methodology-audit` `/infra-ops` `/verification-loop`
 - **文件管理**: `/doc-standards` `/data-audit` `/memory-consolidation` `/citation-verification`
-- **報告生成**: `/weekly-report` → `/pptx-build` / `/html-report-build` / `/results-report` / `/structured-tech-report`
+- **報告生成（retrospective）**: `/weekly-report` → `/pptx-build` / `/html-report-build` / `/results-report` / `/structured-tech-report` / `/report`
+- **Living Document（process-time）⭐ 新**: `/implementation-notes` (spec 實作中 per-spec 4 sections live tracking — 設計決定 / 偏離 / 折衷 / 未決 + Lore)
 - **研究專用**: `/auc-confound-guard` `/feature-layered-observation` `/multi-sample-consistency` `/pivot-direction` `/inject-hypothesis`
 
 ---

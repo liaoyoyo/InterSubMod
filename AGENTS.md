@@ -268,6 +268,17 @@ Coding: C++17 / `.hpp` headers / namespace `InterSubMod` / `.clang-format`（Goo
 3. **紀錄成文件**（`InterSubMod/research/{topic}/` 或 `docs/experiments/`）供檢核驗證查詢
 4. 文件必含：執行命令、輸入路徑、輸出路徑、驗證結果、邏輯鏈
 
+### §14.1 進行中 Living Document（spec 實作期）— 2026-05-19 新增
+
+**機制**: `/implementation-notes` skill — per-spec 紀錄 4 類訊息給用戶隨時翻閱
+- **路徑**: `InterSubMod/research/<topic>/implementation-notes.md`（in_progress）→ `InterSubMod/docs/reports/validated/{YYYY}/{MM}/` (validated)
+- **觸發**: 用戶輸入 `[決策]`/`[偏離]`/`[折衷]`/`[未決]` 4 markers 或 AI 自我偵測 ≥2 linguistic markers
+- **HTML companion**: standalone_trigger.sh 自動生成 `.standalone.html`（PI 終版 sticky TOC + collapsible cards + tier badge）
+- **業界對齊**: ADR Nygard + Augment Code Living Specs + Cline Memory Bank + PhotoStructure TPP
+- **與 §14 #3 互補**: §14 #3 是「完成後紀錄」（retrospective），implementation-notes 是「進行中紀錄」（prospective live）
+
+完整 spec → `InterSubMod/.claude/skills/implementation-notes/SKILL.md`
+
 ---
 
 ## §15 回應分級機制
