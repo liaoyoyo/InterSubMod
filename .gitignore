@@ -99,6 +99,9 @@ research/v6_bam_tpfp_hp_loh_cn/**
 !research/**/*.txt
 !research/**/README*
 !research/**/manifest*
+# Override !*.txt exception for specific per-chr calculation outputs (added 2026-05-20)
+# v6_per_chr_alt_work/*.txt 是 per-chr alt ratio 計算 output 不是 conclusion text
+research/paired_priority_bug_audit/v6_per_chr_alt_work/*.txt
 # Heavy binary data formats (added 2026-05-19) — numpy / parquet / HDF5 / Python serialized
 research/**/*.npy
 research/**/*.npz
@@ -128,6 +131,9 @@ research/**/*.crai
 # Stale directories
 Testing/
 slides/
+# CLAUDE.md / AGENTS.md / skill draft work-in-progress (added 2026-05-20)
+# Production versions 已 commit；drafts 為 historical work-in-progress，git log 可追
+docs/drafts/
 
 # === image-gen / html-preview (added 2026-05-10, design doc D7) ===
 # Generated PNGs not committed; prompts/ retained for reproducibility
