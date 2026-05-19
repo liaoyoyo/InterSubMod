@@ -71,6 +71,53 @@ research/**/*.bam
 research/**/*.bai
 research/**/*.gz
 research/**/*.log
+# Pipeline working dirs — heavy intermediate artifacts (added 2026-05-19)
+# Use dir/** (not dir/) so !exception below can re-include .md/.py/.json
+research/**/intermediate/**
+research/**/work/**
+research/**/_work/**
+research/**/runs/**
+research/**/output/**
+research/**/outputs/**
+research/**/tmp/**
+research/**/_tmp/**
+research/**/cache/**
+# Pipeline-specific output dirs (added 2026-05-19 — methyl / priority bug / v6_bam observations)
+research/methyl_augmented_filter_phase2/cycle*/**
+research/methyl_augmented_filter_phase2/reports/**
+research/paired_priority_bug_audit/v6_per_chr_alt_work/**
+research/paired_priority_bug_audit/phaseC_*_with_significance/**
+research/v6_bam_tpfp_hp_loh_cn/**
+# Re-include source files inside ignored output dirs (對齊 line 54-55 policy:
+# "*.md *.py *.yaml *.yml *.json *.txt belong in git")
+!research/**/*.md
+!research/**/*.py
+!research/**/*.sh
+!research/**/*.yaml
+!research/**/*.yml
+!research/**/*.json
+!research/**/*.txt
+!research/**/README*
+!research/**/manifest*
+# Heavy binary data formats (added 2026-05-19) — numpy / parquet / HDF5 / Python serialized
+research/**/*.npy
+research/**/*.npz
+research/**/*.parquet
+research/**/*.pkl
+research/**/*.feather
+research/**/*.h5
+research/**/*.hdf5
+research/**/*.zarr
+# Genomic raw formats (added 2026-05-19) — fasta / fastq / cram
+research/**/*.fasta
+research/**/*.fa
+research/**/*.fai
+research/**/*.fastq
+research/**/*.fq
+research/**/*.fastq.gz
+research/**/*.fq.gz
+research/**/*.cram
+research/**/*.crai
 
 # Agent worktree isolation — temporary workspaces, not source of truth
 .claude/worktrees/
@@ -97,11 +144,8 @@ slides/
 # === Transient session/tooling artifacts (added 2026-05-11) ===
 # HTML preview playground (per-session experiment output)
 preview/
-# === LLM-direct HTML companion (.standalone.html — added 2026-05-19) ===
-# Regenerable from source .md via html-report-build skill standalone mode.
-# Source-of-truth = .md; HTML 為 PI viewable companion (sticky TOC + collapsible cards).
-# All paths ignored — regenerate on demand via standalone_trigger.sh hook.
-**/*.standalone.html
+# (.standalone.html 保留 tracked — 2026-05-19 用戶決策：HTML 為重要結論的 PI 終版，
+# 含 commit hash provenance footer，可隨時間追溯查閱，不視為純 regenerable artifact)
 # Codex CLI 0-byte staging marker
 .codex
 # Claude Code scheduled task lock (transient runtime state)
