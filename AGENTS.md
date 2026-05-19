@@ -87,6 +87,27 @@
 
 **成功標準**: 每小任務完整詳細觀察 → 整合驗證 → 業界級可驗證突破
 
+### §3.7 假說驗證三層樓（cross-cutting P0-P6 — 2026-05-19 新增）
+
+依時序排列 3 層 skill 形成完整 audit chain（pre → process → post）：
+
+| 層 | Skill | 時機 | Verdict / Output |
+|---|---|---|---|
+| **Pre** | `/pre-decision-audit` (新) | cycle / spec / 大改 **前**（≤30min） | GO / PROBE / NO-GO |
+| **Process** | `/implementation-notes` | spec 實作**中** | 4 sections live tracking（設計決定 / 偏離 / 折衷 / 未決 + Lore）|
+| **Post** | `/run-evaluator` (P5) | cycle 結束**後** | tier ⭐1-5 + 6 risk components |
+
+**強制觸發點**（必跑 pre-decision-audit）：
+- **P0 `/cycle-init`** 註冊前 — 新 cycle 假設驗證
+- **P3 → P4** 跨樣本推廣前（Gate） — 從 1 樣本擴 N 樣本
+- **⭐3 → ⭐4** tier 升級前（Gate） — 升級門檻
+- **Hard NO-GO** 判定前 — 補 §6 conflict scan 證據
+- **新 spec 實作** 前（用戶說「實作 X」/「研究 Y」/「探索 Z」）
+
+**業界對齊**：對應 ADR pre-decision separation 原則（AWS）+ Pre-Mortem (Klein) + Assumption Mapping (Bland) + WRAP (Heath) + Cynefin (Snowden)。完整 references → `InterSubMod/.claude/skills/pre-decision-audit/SKILL.md §5`。
+
+**頻率上限**：1 次 / hour / cycle（避免 nagging）。
+
 ---
 
 ## §4 啟動研究任務 5 問

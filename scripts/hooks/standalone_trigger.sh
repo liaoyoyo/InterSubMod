@@ -89,6 +89,16 @@ case "$FILE_PATH" in
         echo "[html-report-build] → 建議跑 'html-report-build' skill in standalone mode (validated per-spec living document)"
         echo "[html-report-build] → Output: ${STANDALONE_HTML#*/InterSubMod/}"
         ;;
+    */research/*/pre-decision-audit.md|*/research/*/audit.md)
+        echo "[html-report-build] Pre-decision audit (in-progress) modified: $(basename "$FILE_PATH")"
+        echo "[html-report-build] → 建議跑 'html-report-build' skill in standalone mode (7 sections + Cynefin gate + 5-dim credibility)"
+        echo "[html-report-build] → Output: ${STANDALONE_HTML#*/InterSubMod/}"
+        ;;
+    */docs/reports/validated/*/*pre_decision_audit*.md)
+        echo "[html-report-build] Pre-decision audit (finalized) modified: $(basename "$FILE_PATH")"
+        echo "[html-report-build] → 建議跑 'html-report-build' skill in standalone mode (validated pre-decision audit)"
+        echo "[html-report-build] → Output: ${STANDALONE_HTML#*/InterSubMod/}"
+        ;;
     */docs/data_specs/*)
         echo "[html-report-build] Data spec modified: $(basename "$FILE_PATH")"
         echo "[html-report-build] → 建議跑 'html-report-build' skill in standalone mode (規格類技術文章)"

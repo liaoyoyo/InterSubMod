@@ -25,9 +25,12 @@ paths: ["research/**/implementation-notes.md", "docs/concepts/**/implementation-
   - `/html-report-build` (standalone 模式) — 生成 .standalone.html companion
   - `/doc-standards` — filename + metadata block + evidence tier ribbon
   - `/scientific-rigor` §2-§7 — 每個 entry 標 L1-L5 evidence tier ribbon
+  - `/pre-decision-audit`（**上游 — 假說驗證三層樓首層**）— `init` 時讀取 `state/cycles/<cycle_id>/audit.json` 並把 assumptions 預填到「🟡 折衷考量」section（若 audit verdict=GO）
 - **Used by**（預計）: `/cycle-init` (P0) / `/research-loop` (P1) / `/cpp-change` (C++ 修改前) / 任何 design decision moment
-- **Reads**: `InterSubMod/templates/implementation-notes-template.md`
+- **Reads**: `InterSubMod/templates/implementation-notes-template.md`、`state/cycles/<cycle_id>/audit.json`（若 pre-decision-audit 已跑）
 - **Writes**: `InterSubMod/research/<topic>/implementation-notes.md`（進行中）或 `InterSubMod/docs/reports/validated/{YYYY}/{MM}/{YYYYMMDD}_<topic>_implementation_notes_01.md`（完成後）
+
+**假說驗證三層樓位置**：`/pre-decision-audit` (pre, ≤30min) → **`/implementation-notes` (process, live)** → `/run-evaluator` (post, P5 tier)
 
 ## Failure Mode & Diagnostics
 

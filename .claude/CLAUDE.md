@@ -47,14 +47,17 @@
 
 ---
 
-## §3 Skills 分類索引（43 個，Claude Code 特定 — 2026-05-19 新增 /implementation-notes）
+## §3 Skills 分類索引（44 個，Claude Code 特定 — 2026-05-19 新增 /pre-decision-audit）
 
-- **元方法論**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/grill-me` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor`
+- **元方法論**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/grill-me` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor` `/pre-decision-audit` ⭐ 新
 - **7-Phase Waterfall**: P0 `/cycle-init` → P1 `/research-loop` → P2 `/check-staleness` → P3 `/feature-layered-observation` → P4 `/multi-sample-consistency` → P5 `/run-evaluator` → P6 `/conclude-research`
 - **程式開發**: `/cpp-change` `/methodology-audit` `/infra-ops` `/verification-loop`
 - **文件管理**: `/doc-standards` `/data-audit` `/memory-consolidation` `/citation-verification`
 - **報告生成（retrospective）**: `/weekly-report` → `/pptx-build` / `/html-report-build` / `/results-report` / `/structured-tech-report` / `/report`
-- **Living Document（process-time）⭐ 新**: `/implementation-notes` (spec 實作中 per-spec 4 sections live tracking — 設計決定 / 偏離 / 折衷 / 未決 + Lore)
+- **假說驗證三層樓（pre → process → post）⭐ 新 (2026-05-19)**:
+  - **Pre** (entry-point ≤30min): `/pre-decision-audit` (7 outputs + Cynefin gate + 5-dim credibility + GO/PROBE/NO-GO verdict)
+  - **Process** (spec 實作中 live): `/implementation-notes` (4 sections + Lore — 設計決定 / 偏離 / 折衷 / 未決)
+  - **Post** (P5 cycle 結束後): `/run-evaluator` (tier ⭐1-5 + 6 risk components)
 - **研究專用**: `/auc-confound-guard` `/feature-layered-observation` `/multi-sample-consistency` `/pivot-direction` `/inject-hypothesis`
 
 ---
