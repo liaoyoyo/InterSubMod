@@ -47,18 +47,23 @@
 
 ---
 
-## §3 Skills 分類索引（45 個 SKILL.md，Claude Code 特定 — 2026-05-19 新增 /pre-decision-audit）
+## §3 Skills 分類索引（44 個 SKILL.md，Claude Code 特定 — 2026-05-20 索引 drift 修正）
 
-- **元方法論**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/grill-me` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor` `/pre-decision-audit` ⭐ 新
-- **7-Phase Waterfall**: P0 `/cycle-init` → P1 `/research-loop` → P2 `/check-staleness` → P3 `/feature-layered-observation` → P4 `/multi-sample-consistency` → P5 `/run-evaluator` → P6 `/conclude-research`
-- **程式開發**: `/cpp-change` `/methodology-audit` `/infra-ops` `/verification-loop`
-- **文件管理**: `/doc-standards` `/data-audit` `/memory-consolidation` `/citation-verification`
-- **報告生成（retrospective）**: `/weekly-report` → `/pptx-build` / `/html-report-build` / `/results-report` / `/structured-tech-report` / `/report`
-- **假說驗證三層樓（pre → process → post）⭐ 新 (2026-05-19)**:
+> **drift 修正紀錄**：原寫 45 → 實際 44（`grill-me/` 不存在已移除）；新增 12 個未分類 skills 進對應類別。
+> **重複交叉位置**：`/feature-layered-observation`（P3 + 研究專用）/ `/multi-sample-consistency`（P4 + 研究專用）/ `/pre-decision-audit`（元方法論 + 三層樓 pre）/ `/run-evaluator`（P5 + 三層樓 post）— 在多分類列出表示同 skill 多角色。
+
+- **元方法論（9）**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor` `/pre-decision-audit` ⭐ 新 `/problem-framing-ideation` `/provenance-tier-audit`
+- **7-Phase Waterfall（7）**: P0 `/cycle-init` → P1 `/research-loop` → P2 `/check-staleness` → P3 `/feature-layered-observation` → P4 `/multi-sample-consistency` → P5 `/run-evaluator` → P6 `/conclude-research`
+- **程式開發（4）**: `/cpp-change` `/methodology-audit` `/infra-ops` `/verification-loop`
+- **文件管理（4）**: `/doc-standards` `/data-audit` `/memory-consolidation` `/citation-verification`
+- **報告生成 retrospective（7）**: `/weekly-report` → `/pptx-build` / `/html-report-build` / `/results-report` / `/structured-tech-report` / `/report` / `/myPPT`
+- **視覺化（4）**: `/html-preview` `/image-gen` `/image-vision-check` `/research-dashboard`
+- **研究專用（8）**: `/auc-confound-guard` `/feature-layered-observation` `/multi-sample-consistency` `/pivot-direction` `/inject-hypothesis` `/init-research` `/review-evidence` `/observation-analysis`
+- **資料分析 / 驗證（2）**: `/results-analysis` `/validation-protocol`
+- **假說驗證三層樓（pre → process → post）⭐ 2026-05-19**:
   - **Pre** (entry-point ≤30min): `/pre-decision-audit` (7 outputs + Cynefin gate + 5-dim credibility + GO/PROBE/NO-GO verdict)
   - **Process** (spec 實作中 live): `/implementation-notes` (4 sections + Lore — 設計決定 / 偏離 / 折衷 / 未決)
   - **Post** (P5 cycle 結束後): `/run-evaluator` (tier ⭐1-5 + 6 risk components)
-- **研究專用**: `/auc-confound-guard` `/feature-layered-observation` `/multi-sample-consistency` `/pivot-direction` `/inject-hypothesis`
 
 ---
 
