@@ -12,6 +12,54 @@
 
 # 當前目標
 
+## 2026-05-20 — Cycle 3 Step 1.5 Ablation: ISM Vestigial Confirmed + Filter Reframe ⭐
+
+**Session anchor**：5/19 cycle 3 Step 1 PASS (qualifying mean +0.01499) 但 74.6% by HCC1395 alone → 用戶質疑 ISM 是否真貢獻 → plan v2.1 pre-reg 4 H ablation → 最小評估 (~25 sec on cycle 2 既有資料) → **H_M1a FAIL + H_A1 MARGINAL**
+
+### Ablation Verdicts (n=5, refit OOF + transfer coef shrinkage)
+
+| H | Pre-reg threshold | Computed | Verdict | 含義 |
+|---|---|---|---|---|
+| **H_M1a** drop ISM → HCC1395 refit ΔF1 drop | PASS ≥ +0.003 / FAIL < +0.001 | **+0.00065** | **FAIL** | ISM 為 vestigial covariate |
+| **H_A1** caller_af shrink → HCC1954 ΔF1 改善 | PASS > +0.30 / FAIL ≤ +0.10 | **+0.25114** | **MARGINAL** | caller_af = 67% disaster confound |
+
+**5-sample refit pivot 關鍵發現**：
+- full mean +0.00619 vs **no-methyl mean +0.00630** (no-methyl 略勝)
+- 4/5 樣本 no-methyl ΔF1 ≥ full (HCC1395 -0.00065 是唯一 marginal drop)
+- HPFineF coef +0.75 (cycle 1 LR rank 5) 為 caller_af L2 ridge-split 而非 incremental signal
+- 與 cycle 1 主報告 Step 5c「methylation 訊號實為 caller_af proxy」線索完全一致
+
+### Cycle 3 Reframe Action（5/20）
+
+| 動作 | 狀態 |
+|---|---|
+| Filter 命名: "methyl-augmented" → **"caller-F1-headroom-gated 4-feature filter"** (caller_af + LOH_inner + Coverage_Multiple + NG) | ✅ 落地 |
+| `cycle3_caller_f1_gate.json` features_production = 4 | ✅ 更新 |
+| Paper §3 撤回 "methylation-augmented filter" 宣稱 | 待 paper draft |
+| ISM characterization (v0.3 cycle ⭐3) 保留作 mechanistic understanding | ✅ 不變 |
+| Cycle 3 Step 2 panel survey 改驗 4-feature filter cross-sample | 待啟動 |
+| 大規模 ablation (M2/M3/M0/LOFO) 降級 paper supplementary | ✅ deferred |
+| A2 caller_af KS test (~30 min) 補強 H_A1 殘餘 33% | 建議跑 |
+
+### 跨 session 結論交叉確認
+
+5/19 V6 vs baseline 報告 §13 Day 3 5-Goal validation 已測 H_ABL_1 methylation contribution +0.0005-0.0007 — **與本 cycle 3 Step 1.5 H_M1a FAIL (+0.00065) 同方向同 magnitude** — 兩條獨立路徑收斂同結論強化信度。
+
+### Artifacts
+
+- Findings: `InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/cycle3_step1_5_min_ablation_findings.md`
+- Script: `InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/scripts/run_ablation_variants.py`
+- Data TSV: `InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/data/cycle3_step1_5_min_ablation.tsv`
+- Figure: `InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/figures/cycle3_step1_5_min_ablation.png`
+- Evidence ledger: `cycle_id: 20260520_cycle3_step1_5_ism_ablation_vestigial` (line 48)
+- Gate config: `InterSubMod/research/methyl_augmented_filter_phase2/cycle3/cycle3_caller_f1_gate.json` (features_production 4-feature)
+
+### Pre-reg prediction 命中
+
+plan v2.1 事前預測 55% A1 PASS + M1a FAIL → 實際 A1 MARGINAL (between PASS-MARGINAL) + M1a FAIL → 命中方向，避免 confirmation bias 解讀。
+
+---
+
 ## 2026-05-19 — Phase 2 Cycle 2 結束 (⭐3 保持 + caveat) + Cycle 3 啟動
 
 **Session anchor**：2026-05-18 cycle 1 ⭐3 strong → 2026-05-19 cycle 2 cross-sample DIRECTION_NEGATIVE + cross-binary PASS → user 5/19 三選決議
@@ -191,7 +239,7 @@
 - ✅ Step -1: phaseC ISM 12 runs 重跑 with significance (移除 `--no-distance-matrix` flag) — 80 min, 12/12 全成功
 - ✅ Step 0: augmented master TSV (35,332 × 202 cols, 13 methylation features × V3F+V5+V6 × off/on)
 - ✅ Step 1+2: 138 augmented LR + LRT + 12 FP-rich τ sweep — H1 16/30 cells q<0.05 / H5 V5≈V6 Δβ=1.87e-5
-- ✅ Step 3: ΔF1 vs caller F1=0.7166 — **+0.00242 @ τ*=0.52 marginal** (POSITIVE-but-marginal)
+- ✅ Step 3: ΔF1 vs **ClairS-TO ssrs caller F1=0.7166** (per 09_V6_caller_F1_verification.md, tumor-only mode, ClairS-TO v0.3.0 ssrs model + LongPhase-TO + ISM pipeline; ⚠️ 早期 reports 誤標 "paired-pileup" 已 5/20 framing patch — canonical alias = `clairs_to_ssrs`, see `InterSubMod/docs/data_specs/20260411_工作區命名與目錄結構_01.md` §1.5) — **+0.00242 @ τ*=0.52 marginal** (POSITIVE-but-marginal)
 - ✅ Step 4: 13 mechanism candidates + 14 PubMed refs (H4 POSITIVE relaxed gate)
 - ✅ Step 5c TP rescue **NEGATIVE** — 95.2% lost TP 是 low-AF subclone，methylation 訊號實為 caller_af proxy
 - ✅ Step 5d robustness GREEN with caveats — ΔF1 std 2e-5 stable, 4 unique LRT cells, NaN borderline
