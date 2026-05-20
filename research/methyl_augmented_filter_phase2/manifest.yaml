@@ -1,0 +1,126 @@
+# InterSubMod Research Project Manifest
+# Project: methyl_augmented_filter_phase2
+
+project:
+  name: "methyl_augmented_filter_phase2"
+  title: "Methylation-Augmented FP Filter — TP Rescue + Cross-Sample Validation + ⭐4 升級路徑"
+  created: "2026-05-18"
+  status: "initiated"
+  conclusion: null
+  predecessor:
+    cycle: "v6_bam_tpfp_hp_loh_cn/step5_methyl_filter_pilot"
+    verdict: "⭐3 PARTIAL POSITIVE (ALL 5 H POSITIVE but ΔF1=+0.00242 marginal)"
+    report: "InterSubMod/docs/experiments/in_progress/2026/05/20260518_V6_Methyl_Filter_Pilot_01.md"
+
+hypotheses:
+  - id: "H_PHASE2_1_TP_RESCUE"
+    statement: |
+      在 4 FP-rich aggregated cells (τ*=0.52) 內，35% lost TP 有可識別共同特徵
+      (S1 caller_af 邊緣 / S2 methylation 弱訊號 / S3 sub-clone / S4 chr-specific)，
+      可設計二級 whitelist rule 將 ≥50% lost TP 救回而不引入 >10% new FP，使 HCC1395
+      ΔF1 從 +0.00242 升至 ≥ +0.01 (Cohen 小 effect threshold)。
+    preconditions:
+      - "Step 5c TP rescue analysis 完成 (Agent J in v6 cycle)"
+      - "Lost TP/Kept TP/Removed FP 四群有顯著特徵差異"
+    confounds:
+      - "Multi-test inflation across feature candidates → BH-FDR q<0.05"
+      - "Cross-validation overfit → 5-fold CV out-of-fold rescue rule"
+      - "Sample-size: lost TP ~21 — Wilson CI 寬"
+    positive_criterion: "Rescue rule 在 5-fold CV 平均使 ΔF1 ≥ +0.01 + 不引入 >10% new FP"
+    negative_criterion: "Rescue rule 在 hold-out 無 ΔF1 改善 OR 新 FP > 10%"
+    verdict: null
+
+  - id: "H_PHASE2_2_CROSS_SAMPLE"
+    statement: |
+      Methylation-augmented filter (Model B + rescue rule) 在 H1437/H2009/HCC1954/HCC1937
+      4 樣本上 ≥4/5 ΔF1 > 0 (Wilcoxon paired p<0.05)，使 cycle 升 ⭐4 cross-sample validated。
+    preconditions:
+      - "phaseC_genome_three_way_with_significance 補跑 4 樣本 V3F+V5+V6 ISM (~5 hr parallel)"
+      - "H_PHASE2_1 完成且 POSITIVE"
+    confounds:
+      - "Sample-specific (歷史 HCC1395 chr8 hotspot 跨樣本崩 mean AUC ≤0.641)"
+      - "HCC1937 BRCA1 outlier marker rate 0.817 邊緣"
+      - "HCC1954 caller ceiling outlier"
+    positive_criterion: "≥4/5 ΔF1 > 0 + Wilcoxon paired p<0.05"
+    negative_criterion: "≤2/5 same direction OR Wilcoxon n.s."
+    verdict: null
+
+  - id: "H_PHASE2_3_MECHANISM_VERIFICATION"
+    statement: |
+      Step 5_methyl_filter_pilot Step 4 列的 13 個 mechanism hypotheses 中，至少 2 個
+      (cis-mQTL + cancer ASM) 可在 cycle-specific 驗證 — top 5 lost-TP / removed-FP
+      region 與 GoDMC mQTL hotspots ≥30% overlap，與 cancer ASM atlas (Loyfer 2025) ≥40% overlap。
+    preconditions:
+      - "Step 5c TP rescue 找出 dominant source"
+      - "WebFetch GoDMC + Loyfer 2025 specific position data 可取得"
+    confounds:
+      - "Sample-size lost TP ~21 → small overlap test power"
+      - "Database coverage gap (GoDMC 主要 blood tissue)"
+    positive_criterion: "≥1 mechanism category 達 overlap threshold"
+    negative_criterion: "All categories overlap < random expectation"
+    verdict: null
+
+  - id: "H_PHASE2_4_FIVE_GOAL_IMPACT"
+    statement: |
+      Methylation-augmented filter 對五大目標 (G1 ASM / G2 subclone / G3 second-hit /
+      G4 normal BAM / G5 evidence panel F1) 至少有 1 個 incremental 證據貢獻 —
+      G1 從 characterization-only 補強 / G5 從 **ClairS-TO ssrs baseline F1=0.7166 提升**（canonical pipeline: ClairS-TO v0.3.0 ssrs → LongPhase-TO V3F/V5/V6 → ISM, tumor-only mode；paired-pure +0.0112 為 paired ClairS pipeline 的 historical ceiling，獨立於本 project 的 ClairS-TO pipeline，僅作 cross-mode comparison reference）。
+    preconditions:
+      - "H_PHASE2_1 + H_PHASE2_2 都 POSITIVE"
+    confounds:
+      - "G1-G4 是 characterization-only (per CURRENT_FOCUS 2026-05-13 decision)"
+      - "G5 ceiling +0.0112 from Phase 1A 已鎖定"
+    positive_criterion: "≥1 G 目標獲得 measurable incremental signal"
+    negative_criterion: "All G 無 incremental signal"
+    verdict: null
+
+datasets:
+  - path: "research/paired_priority_bug_audit/phaseC_genome_three_way_with_significance/"
+    description: "HCC1395 12 ISM runs with significance computation (V3F+V5+V6 × on/off × tp/fp)"
+    rows: 211000
+    columns_used:
+      - "RegionID, Chr, Pos, Ref, Alt, NumReads, NumCpGs"
+      - "HPMergedDelta, HPFineF, HPFineNGroups, NME_HP1/2, Epipoly_HP1/2/Delta"
+      - "ClusterPermanovaF/P, AlleleDelta/P, Entropy_Imbalance"
+
+  - path: "research/v6_bam_tpfp_hp_loh_cn/step5_methyl_filter_pilot/step5_master_augmented.tsv"
+    description: "HCC1395 augmented master TSV (Step 0 產出, 35332 rows × 202 cols)"
+    rows: 35332
+    columns_used: ["202 cols total (4 keys + 72 HP + 12 v0.3 annot + 114 methyl)"]
+
+  - path: "research/seqc2_cnv_stratification/data/annotated_hcc1395_cnv.tsv"
+    description: "SEQC2 truth (CNV-stratified subset)"
+    rows: 31640
+
+  - path: "research/paired_priority_bug_audit/phaseD_v6_5sample/"
+    description: "4 樣本 V6 ISM (H1437/H2009/HCC1954/HCC1937) — phase 2 需補 V3F+V5 ISM"
+    rows: null
+    columns_used: ["same as phaseC"]
+
+artifacts:
+  scripts: []
+  figures: []
+  data: []
+
+dependencies:
+  git_commit: ""
+  python_packages:
+    - "pandas"
+    - "scipy"
+    - "statsmodels"
+    - "sklearn"
+    - "matplotlib"
+    - "numpy"
+
+reproducibility:
+  python_version: "3.10+"
+  key_parameters:
+    tau_sweep_range: [0.1, 0.95, 0.01]
+    cv_folds: 5
+    bh_fdr_threshold: 0.05
+    rescue_rule_new_fp_threshold: 0.1
+
+report:
+  path: ""
+  index_entry: false
+  memory_entry: ""
