@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>研究路徑與五大目標路線圖 — Snapshot 2026-05-19</title>
+  <style>
+    :root {
+      --c-accent: #D97757; --c-accent-deep: #B85A3F;
+      --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-code-bg: #F4EFE6;
+      --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+      --c-info: #1E3A8A;
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+      --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+                 "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+      --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+      --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+      --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+      --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+      --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--c-bg); color: var(--c-text);
+           font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.6; }
+
+    .layout { max-width: 1320px; margin: 0 auto; display: grid;
+              grid-template-columns: 240px 1fr; gap: var(--sp-5);
+              padding: var(--sp-5) var(--sp-4); }
+
+    aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+                background: var(--c-surface); border: 1px solid var(--c-border);
+                border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+                box-shadow: var(--shadow-sm);
+                max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+    aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                    color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+    aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+    aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+    aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+                  color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+                  border-left: 3px solid transparent; }
+    aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+    aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                          font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+    aside.toc a.core { font-weight: 600; }
+    aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px;
+                              font-size: 0.85em; }
+
+    main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+                  border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+                  padding: var(--sp-6); min-width: 0; }
+
+    .report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                      margin-bottom: var(--sp-5); }
+    .report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                                letter-spacing: 1px; color: var(--c-accent-deep);
+                                font-weight: 700; margin-bottom: var(--sp-2); }
+    .report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+    .report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                            gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+    .report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+    .report-header .meta dd { margin: 0; }
+    .report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                                 border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                                 font-size: 0.92em; }
+
+    .verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                       border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); }
+    .verdict-banner.positive { background: linear-gradient(90deg, #15803D, #22C55E); }
+    .verdict-banner.neutral  { background: linear-gradient(90deg, #1E3A8A, #3B82F6); }
+
+    h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+          padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+          scroll-margin-top: var(--sp-4); }
+    h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+                font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+    h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+    h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2); color: var(--c-text-soft); }
+
+    p, ul, ol { margin: var(--sp-3) 0; }
+    ul, ol { padding-left: var(--sp-5); }
+    a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { color: var(--c-accent-deep); }
+    blockquote { border-left: 3px solid var(--c-accent); padding-left: var(--sp-4);
+                  color: var(--c-text-soft); margin: var(--sp-3) 0; font-style: italic;
+                  background: var(--c-code-bg); padding: var(--sp-3) var(--sp-4);
+                  border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+    code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+            font-family: var(--ff-mono); font-size: 0.92em; }
+    pre { background: var(--c-code-bg); padding: var(--sp-3); border-radius: var(--radius-md);
+           overflow-x: auto; font-family: var(--ff-mono); font-size: var(--fs-sm); line-height: 1.4; }
+    pre code { background: none; padding: 0; }
+
+    table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+    th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; vertical-align: top; }
+    th { background: var(--c-code-bg); font-weight: 600; }
+    td.num { text-align: right; font-family: var(--ff-mono); }
+    tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+    tr.row-safe td { background: #DCFCE7; color: #166534; }
+    tr.row-warn td { background: #FEF3C7; }
+
+    /* Tier badges (scientific-rigor §2) */
+    .tier-badge { display: inline-block; padding: 1px 7px; border-radius: 10px;
+                  font-size: var(--fs-xs); font-weight: 700; font-family: var(--ff-mono);
+                  vertical-align: middle; margin-left: 4px; }
+    .tier-l5 { background: #064E3B; color: #ECFDF5; }
+    .tier-l4 { background: #15803D; color: white; }
+    .tier-l3 { background: #CA8A04; color: #422006; }
+    .tier-l3p { background: #FCD34D; color: #422006; }
+    .tier-l2 { background: #E5E7EB; color: #4B5563; }
+    .tier-na { background: #F4F4F5; color: #6B6B66; }
+
+    /* Section cards for G1-G5 */
+    .goal-card { border: 1.5px solid var(--c-border); border-radius: var(--radius-lg);
+                 margin: var(--sp-4) 0; overflow: hidden; background: var(--c-surface); }
+    .goal-card.active { border-color: var(--c-warning); box-shadow: var(--shadow-sm); }
+    .goal-card.deferred { border-color: var(--c-text-soft); opacity: 0.95; }
+    .goal-card.partial { border-color: var(--c-accent); }
+    .goal-card > summary { cursor: pointer; padding: var(--sp-3) var(--sp-4);
+                           display: flex; align-items: center; gap: var(--sp-3);
+                           background: var(--c-code-bg); list-style: none; flex-wrap: wrap; }
+    .goal-card > summary::-webkit-details-marker { display: none; }
+    .goal-card > summary::before { content: "▸"; transition: transform 0.2s;
+                                   color: var(--c-text-soft); font-size: var(--fs-sm); }
+    .goal-card[open] > summary::before { transform: rotate(90deg); }
+    .goal-card.active > summary { background: #FEF7E6; }
+    .goal-card .goal-id { font-family: var(--ff-mono); font-weight: 700; font-size: var(--fs-md);
+                          color: var(--c-warning); background: var(--c-surface);
+                          padding: 3px 10px; border-radius: 12px; border: 1.5px solid var(--c-warning); }
+    .goal-card.active .goal-id { color: var(--c-critical); border-color: var(--c-critical); }
+    .goal-card.deferred .goal-id { color: var(--c-text-soft); border-color: var(--c-text-soft); }
+    .goal-card .goal-title { flex: 1; font-weight: 600; font-size: var(--fs-md); min-width: 200px; }
+    .goal-card .goal-completion { font-family: var(--ff-mono); font-weight: 700;
+                                  padding: 2px 10px; border-radius: 12px; background: white;
+                                  border: 1.5px solid currentColor; font-size: var(--fs-sm); }
+    .goal-card .goal-body { padding: var(--sp-4); }
+
+    /* Callouts */
+    .callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                         padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                         border-radius: var(--radius-md); color: #7F1D1D; }
+    .callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #78350F; }
+    .callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #166534; }
+    .callout-info { background: #EFF6FF; border-left: 4px solid var(--c-info);
+                     padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                     border-radius: var(--radius-md); color: #1E40AF; }
+    .callout-critical strong, .callout-warning strong, .callout-success strong { display: block; margin-bottom: 4px; }
+
+    /* Stat grid */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                  gap: var(--sp-3); margin: var(--sp-4) 0; }
+    .stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+                 border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+    .stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1;
+                        font-family: var(--ff-mono); }
+    .stat-box .number.bug { color: var(--c-critical); }
+    .stat-box .number.success { color: var(--c-success); }
+    .stat-box .number.warning { color: var(--c-warning); }
+    .stat-box .number.info { color: var(--c-info); }
+    .stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+
+    /* SVG diagrams */
+    .svg-figure { margin: var(--sp-4) 0; text-align: center;
+                  background: var(--c-bg); border: 1px solid var(--c-border);
+                  border-radius: var(--radius-md); padding: var(--sp-4); }
+    .svg-figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+    .svg-figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                              margin-top: var(--sp-3); font-style: italic; }
+
+    /* Provenance footer (scientific-rigor §8.4) */
+    .provenance { background: var(--c-code-bg); border-top: 2px solid var(--c-border);
+                  margin-top: var(--sp-7); padding: var(--sp-4) var(--sp-5);
+                  border-radius: var(--radius-md); font-size: var(--fs-sm); color: var(--c-text-soft); }
+    .provenance dl { display: grid; grid-template-columns: max-content 1fr; gap: var(--sp-1) var(--sp-4); margin: 0; }
+    .provenance dt { font-weight: 600; color: var(--c-text); }
+    .provenance dd { margin: 0; font-family: var(--ff-mono); }
+    .provenance .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                            letter-spacing: 1px; color: var(--c-accent-deep);
+                            font-weight: 700; margin-bottom: var(--sp-3); }
+
+    /* References footer */
+    .references { background: var(--c-bg); border-radius: var(--radius-md);
+                   padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-5); }
+    .references h2 { border-bottom: none; margin-top: 0; font-size: var(--fs-xl); padding-bottom: 0; }
+    .references ol { list-style: decimal; padding-left: var(--sp-5); }
+    .references li { margin: var(--sp-2) 0; font-size: var(--fs-sm); }
+    .references li code { font-family: var(--ff-mono); }
+
+    @media print {
+      body { background: white; }
+      .layout { display: block; max-width: 100%; padding: 0; }
+      aside.toc { display: none; }
+      main.report { box-shadow: none; border: none; padding: 0; }
+      .goal-card { page-break-inside: avoid; border-color: #999; }
+      details[open] > summary, details > summary { list-style: none; }
+      details:not([open]) > * { display: block !important; }
+      details:not([open]) > summary { background: white !important; }
+      a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #666; }
+      a[href^="../"]::after { content: " [" attr(href) "]"; font-size: 0.8em; color: #999; }
+      pre, table, blockquote, .goal-card, svg { page-break-inside: avoid; }
+      h1, h2, h3 { page-break-after: avoid; }
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside.toc { position: static; max-height: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="toc" aria-label="章節導航">
+    <h3>章節導航</h3>
+    <ol>
+      <li><a href="#tldr">TL;DR · 完成度速覽</a></li>
+      <li><a href="#sec-1">文件目的與使用方式</a></li>
+      <li><a href="#sec-2" class="core">五大目標完成度</a></li>
+      <li><a href="#sec-3" class="core">三時間維度 Inventory</a></li>
+      <li><a href="#sec-4">22 條穩定結論索引</a></li>
+      <li><a href="#sec-5" class="core">Dependency 關係圖</a></li>
+      <li><a href="#sec-6">關鍵 Active Gates</a></li>
+      <li><a href="#sec-7">Plan v2 紀律 Status</a></li>
+      <li><a href="#sec-8">已關閉死路</a></li>
+      <li><a href="#sec-9">Modification 機制</a></li>
+      <li><a href="#sec-10" class="core">路線圖總結</a></li>
+      <li><a href="#refs">引用文件</a></li>
+      <li><a href="#provenance">Provenance</a></li>
+    </ol>
+  </aside>
+
+  <main class="report">
+
+    <!-- ─── Header ─── -->
+    <header class="report-header">
+      <div class="pretitle">Architecture · L2 Path Snapshot</div>
+      <h1>研究路徑與五大目標路線圖</h1>
+      <dl class="meta">
+        <dt>Build date</dt>      <dd>2026-05-19</dd>
+        <dt>Audience</dt>        <dd>PI / Reviewer / 未來 session</dd>
+        <dt>Source</dt>          <dd><code>InterSubMod/docs/architecture/20260519_研究路徑與五大目標路線圖_01.md</code></dd>
+        <dt>Status</dt>          <dd>validated · snapshot</dd>
+        <dt>Parent (L1)</dt>     <dd><code>20260327_InterSubMod研究願景定錨_01.md</code></dd>
+        <dt>Plan (L3)</dt>       <dd><code>~/.claude/plans/tender-pondering-blossom.md</code> (v2)</dd>
+      </dl>
+      <div class="verdict-banner positive">
+        ✓ 四層架構建立完成（L1 願景 / L2 路徑 / L3 plan / L4 live）— 未來 session 啟動只需讀本檔 §2 + §3.B + §6 三章即可 resume；任何方向修改依 §9 機制執行
+      </div>
+    </header>
+
+    <!-- ─── TL;DR ─── -->
+    <h2 id="tldr"><span class="h-num">0.</span>TL;DR · 五大目標完成度速覽</h2>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="number warning">G1 70%</div>
+        <div class="label">per-CpG ASM mechanism<br>(CL-007 ⭐4 + Phase C pending)</div>
+      </div>
+      <div class="stat-box">
+        <div class="number warning">G2 55%</div>
+        <div class="label">Clone 結構分析<br>(雙證據 ⭐4 + Phase B preprint)</div>
+      </div>
+      <div class="stat-box">
+        <div class="number bug">G3 15%</div>
+        <div class="label">二次打擊順序<br>(依賴 G1 突破，暫緩)</div>
+      </div>
+      <div class="stat-box">
+        <div class="number warning">G4 50%</div>
+        <div class="label">TO normal 補強<br>+ 流程合理性</div>
+      </div>
+      <div class="stat-box">
+        <div class="number bug">G5 35%</div>
+        <div class="label">F1 提升<br>(path (a) 邊界灰)</div>
+      </div>
+    </div>
+
+    <div class="callout-info">
+      <strong>四軌平行（plan v2 §2 定案）</strong>
+      <code>thread_d_paper</code> · <code>selfphasing_v6_production</code> · <code>phase_block_3d</code> · <code>methyl_filter_phase2</code>。
+      Phase A (W3-W8 framework) → Phase B (M2-M5 投稿+clone preprint) → Phase C (M6-M12 ASM+two-hit)。
+    </div>
+
+    <!-- ─── §1 文件目的與使用方式 ─── -->
+    <h2 id="sec-1"><span class="h-num">1.</span>文件目的與使用方式</h2>
+
+    <h3>1.1 用途</h3>
+    <ul>
+      <li><strong>持久化 status snapshot</strong>：避免 session 啟動時需在 plan v2 / CURRENT_FOCUS / 22 條結論之間拼湊</li>
+      <li><strong>修改 anchor</strong>：未來提 roadmap 變更時對照本檔識別差異</li>
+      <li><strong>教學與交接</strong>：新 collaborator / paper reviewer 快速理解研究全景</li>
+    </ul>
+
+    <h3>1.2 四層架構（與既有入口的關係）</h3>
+
+    <figure class="svg-figure">
+      <svg viewBox="0 0 760 320" role="img" aria-labelledby="arch-title arch-desc"
+           xmlns="http://www.w3.org/2000/svg">
+        <title id="arch-title">四層文檔架構：L1 願景 → L2 路徑 → L3 計畫 → L4 live</title>
+        <desc id="arch-desc">由上至下為永久不動的 L1 五大目標願景、月度更新的 L2 路徑 snapshot、燒烤後更新的 L3 plan v2、每日 cycle 後更新的 L4 CURRENT_FOCUS</desc>
+
+        <!-- L1 -->
+        <rect x="200" y="20" width="360" height="60" rx="6"
+              fill="#FCD34D" stroke="#A16207" stroke-width="2"/>
+        <text x="380" y="46" text-anchor="middle" font-family="var(--ff-body)"
+              font-size="14" font-weight="700" fill="#422006">
+          L1 願景（永久不動）
+        </text>
+        <text x="380" y="66" text-anchor="middle" font-family="var(--ff-mono)"
+              font-size="11" fill="#422006">
+          20260327_InterSubMod研究願景定錨_01.md
+        </text>
+
+        <!-- arrow 1→2 -->
+        <line x1="380" y1="80" x2="380" y2="110" stroke="#6B6B66" stroke-width="2"
+              marker-end="url(#arrow)"/>
+
+        <!-- L2 -->
+        <rect x="200" y="115" width="360" height="60" rx="6"
+              fill="#FED7AA" stroke="#D97757" stroke-width="2"/>
+        <text x="380" y="141" text-anchor="middle" font-family="var(--ff-body)"
+              font-size="14" font-weight="700" fill="#9A3412">
+          L2 路徑 snapshot（本檔, 月度更新）
+        </text>
+        <text x="380" y="161" text-anchor="middle" font-family="var(--ff-mono)"
+              font-size="11" fill="#9A3412">
+          20260519_研究路徑與五大目標路線圖_01.md
+        </text>
+
+        <!-- arrow 2→3 -->
+        <line x1="380" y1="175" x2="380" y2="205" stroke="#6B6B66" stroke-width="2"
+              marker-end="url(#arrow)"/>
+
+        <!-- L3 -->
+        <rect x="200" y="210" width="360" height="60" rx="6"
+              fill="#DBEAFE" stroke="#1E3A8A" stroke-width="2"/>
+        <text x="380" y="236" text-anchor="middle" font-family="var(--ff-body)"
+              font-size="14" font-weight="700" fill="#1E3A8A">
+          L3 計畫（4-6 週 plan v2）
+        </text>
+        <text x="380" y="256" text-anchor="middle" font-family="var(--ff-mono)"
+              font-size="11" fill="#1E3A8A">
+          ~/.claude/plans/tender-pondering-blossom.md
+        </text>
+
+        <!-- arrow 3→4 (right side, to L4 box) -->
+        <line x1="560" y1="240" x2="640" y2="240" stroke="#6B6B66" stroke-width="2"
+              marker-end="url(#arrow)"/>
+
+        <!-- L4 -->
+        <rect x="640" y="210" width="110" height="60" rx="6"
+              fill="#D1FAE5" stroke="#15803D" stroke-width="2"/>
+        <text x="695" y="234" text-anchor="middle" font-family="var(--ff-body)"
+              font-size="13" font-weight="700" fill="#064E3B">
+          L4 live
+        </text>
+        <text x="695" y="252" text-anchor="middle" font-family="var(--ff-mono)"
+              font-size="10" fill="#064E3B">
+          CURRENT_FOCUS
+        </text>
+        <text x="695" y="265" text-anchor="middle" font-family="var(--ff-mono)"
+              font-size="9" fill="#15803D">
+          每日/每週
+        </text>
+
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4"
+                  orient="auto" markerUnits="strokeWidth">
+            <path d="M 0 0 L 8 4 L 0 8 z" fill="#6B6B66"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>四層文檔架構：L1 永久 → L2 月度（本檔）→ L3 4-6 週 → L4 每日</figcaption>
+    </figure>
+
+    <h3>1.3 Modification 機制</h3>
+    <p>詳見 <a href="#sec-9">§9 Modification Proposal 機制</a>。</p>
+
+    <!-- ─── §2 五大目標完成度 ─── -->
+    <h2 id="sec-2"><span class="h-num">2.</span>五大目標完成度（claim cards）</h2>
+
+    <p>每張 G card 含：完成 milestone（含 tier badge）+ 進行中項目 + 缺口。Tier 標準對齊 <code>InterSubMod/.claude/skills/scientific-rigor/SKILL.md §2</code> evidence ladder。</p>
+
+    <details class="goal-card partial" open id="goal-g1">
+      <summary>
+        <span class="goal-id">G1</span>
+        <span class="goal-title">per-CpG 甲基位點多標籤關聯性評分（ASM）</span>
+        <span class="goal-completion" style="color: var(--c-warning);">~70%</span>
+      </summary>
+      <div class="goal-body">
+        <h4>已達 milestone</h4>
+        <ul>
+          <li>Germline ASM &gt;&gt; somatic passenger SNV 3-6× <span class="tier-badge tier-l4">⭐⭐⭐⭐ L4</span>（CL-007）</li>
+          <li>ASM 32-66% per-region POSITIVE <span class="tier-badge tier-l4">⭐⭐⭐⭐ L4</span>（5 方法交叉驗證）</li>
+        </ul>
+        <h4>進行中</h4>
+        <ul>
+          <li>phase_block_3d X1 cis-effect hypothesis（5/23 init-research）</li>
+        </ul>
+        <h4>未來計畫</h4>
+        <ul>
+          <li>Phase C ASM short report（M6-M12，從 phase_block_3d X1 抽取）</li>
+        </ul>
+        <div class="callout-warning">
+          <strong>缺口</strong>
+          Global region AUC 仍 ≤ 0.58（CL-008 <span class="tier-badge tier-l5">⭐⭐⭐⭐⭐ L5</span> ceiling）；patient-derived cohort 未驗證
+        </div>
+      </div>
+    </details>
+
+    <details class="goal-card partial" open id="goal-g2">
+      <summary>
+        <span class="goal-id">G2</span>
+        <span class="goal-title">Clone 結構分析（subclone + 跨位點共演化）</span>
+        <span class="goal-completion" style="color: var(--c-warning);">~55%</span>
+      </summary>
+      <div class="goal-body">
+        <h4>已達 milestone</h4>
+        <ul>
+          <li>HPFineNGroups somatic heterogeneity marker <span class="tier-badge tier-l4">⭐⭐⭐⭐ L4</span>（CL-010）</li>
+          <li>LOH Subclone AF × Methylation 雙證據 <span class="tier-badge tier-l4">⭐⭐⭐⭐ L4</span>（CL-011, r=+0.705~+0.787, 7/7 同方向）</li>
+          <li>2026-05-15 paradigm reframe：Outer cross_het 為 TP signature（Fisher p=3.8e-62）<span class="tier-badge tier-l3p">⭐⭐⭐ L3</span></li>
+          <li>HCC1395 single sample 4-group subclone 識別（Phase 2 B/C/D）<span class="tier-badge tier-l3">⭐⭐⭐ L3</span></li>
+        </ul>
+        <h4>進行中</h4>
+        <ul>
+          <li>thread_d_paper Tier 2（cross-sample 4-group subclone characterization）</li>
+          <li>phase_block_3d X1 + X2（5/23 init）</li>
+        </ul>
+        <h4>未來計畫</h4>
+        <ul>
+          <li>Phase B clone preprint（M2-M5，從 thread_d §4 抽取）</li>
+        </ul>
+        <div class="callout-warning">
+          <strong>缺口</strong>
+          跨樣本 4-group subclone（R12 pending）；HCC1937 BRCA1 outlier 機制
+        </div>
+      </div>
+    </details>
+
+    <details class="goal-card deferred" id="goal-g3">
+      <summary>
+        <span class="goal-id">G3</span>
+        <span class="goal-title">二次打擊與事件順序推論（暫緩，依賴 G1）</span>
+        <span class="goal-completion" style="color: var(--c-critical);">~15%</span>
+      </summary>
+      <div class="goal-body">
+        <h4>歷史</h4>
+        <ul>
+          <li>P4 region-level pilot：無 two-hit order 訊號 <span class="tier-badge tier-l3">⭐⭐⭐ L3 NEGATIVE</span></li>
+        </ul>
+        <h4>進行中（旁系）</h4>
+        <ul>
+          <li>phase_block_3d X2 boundary artifact（可能對齊 two-hit pattern，5/23 啟動）</li>
+        </ul>
+        <h4>未來計畫</h4>
+        <ul>
+          <li>Phase C two-hit notes（M6-M12，依 G1+G2 進度）</li>
+        </ul>
+        <div class="callout-critical">
+          <strong>缺口</strong>
+          無患者 cohort 提供時序 evidence；現有 cell line 無法提供 single-cell timing
+        </div>
+      </div>
+    </details>
+
+    <details class="goal-card partial" open id="goal-g4">
+      <summary>
+        <span class="goal-id">G4</span>
+        <span class="goal-title">TO normal 資訊補強 + 整體流程合理性</span>
+        <span class="goal-completion" style="color: var(--c-warning);">~50%</span>
+      </summary>
+      <div class="goal-body">
+        <h4>已達 milestone</h4>
+        <ul>
+          <li>Phase 2 程式碼完工 173/173 tests <span class="tier-badge tier-l4">⭐⭐⭐⭐ L4 (code)</span></li>
+          <li>HCC1395 single sample 驗證：Sample ASM 97.3% / Normal 100% / LOH concordance 94.1% <span class="tier-badge tier-l3">⭐⭐⭐ L3</span></li>
+          <li>Self-Phasing 17.3:1 priority bug 修補 <span class="tier-badge tier-l5">⭐⭐⭐⭐⭐ L5</span>（CL-001）</li>
+          <li>V6 binary patch validated（V5 over-promote +60% Inner LOH NG=2 修補） <span class="tier-badge tier-l3p">⭐⭐⭐ L3</span></li>
+          <li>V6 ISM paradigm reframe（5/15 multi-agent characterization）<span class="tier-badge tier-l3p">⭐⭐⭐ L3</span></li>
+          <li>Agent Harness Audit P0-P4（30 hooks / 42 skills / cache 96.8%）</li>
+        </ul>
+        <h4>進行中</h4>
+        <ul>
+          <li>selfphasing_v6_production T1.2（4-day workflow 5/19-22）</li>
+          <li>thread_d_paper 含 normal augmentation framework</li>
+        </ul>
+        <h4>未來計畫</h4>
+        <ul>
+          <li>Tier 3 reproducible release（binary + Docker + benchmark suite + GitHub）</li>
+          <li>T4.1 Phase 2A Normal BAM cross-sample（W6+ reactive）</li>
+        </ul>
+        <div class="callout-warning">
+          <strong>缺口</strong>
+          跨樣本 Normal BAM Phase 2A 全量驗證；reproducible release 工程
+        </div>
+      </div>
+    </details>
+
+    <details class="goal-card active" open id="goal-g5">
+      <summary>
+        <span class="goal-id">G5</span>
+        <span class="goal-title">整合 evidence panel 提升 F1（path (a) 邊界灰）</span>
+        <span class="goal-completion" style="color: var(--c-critical);">~35%</span>
+      </summary>
+      <div class="goal-body">
+        <div class="callout-info">
+          <strong>G5 兩條 pipeline path 並存（2026-05-20 framing audit 後校正）</strong>
+          <ul>
+            <li><strong>[paired ClairS path]</strong>（歷史，已 ceiling）：Phase 1A paired-pure +0.0112</li>
+            <li><strong>[ClairS-TO ssrs path]</strong>（phase 2 主軸）：Cycle 1 +0.02236 strong / Cycle 2 cross-sample NEGATIVE</li>
+          </ul>
+          兩條 path <strong>不相通</strong>（不同 caller + F1 baseline + pipeline），不可直接比較。詳見 <code>InterSubMod/docs/data_specs/20260411_工作區命名與目錄結構_01.md</code> §1.5 Canonical Naming Alias Table。
+        </div>
+        <h4>已達 milestone</h4>
+        <ul>
+          <li><strong>[paired path]</strong> Phase 1A paired-pure ceiling +0.0112（鎖定不投入；paired ClairS pipeline）<span class="tier-badge tier-l4">⭐⭐⭐⭐ L4</span></li>
+          <li>CL-008 Beyond-AUC ≤ 0.58（純 methylation ceiling；跨 mode 適用）<span class="tier-badge tier-l5">⭐⭐⭐⭐⭐ L5</span></li>
+          <li><strong>[ClairS-TO ssrs path]</strong> Phase 2 Cycle 1 ⭐3 strong（HCC1395-internal ΔF1=+0.02236 = 9.24× v1.0；vs ClairS-TO ssrs baseline F1=0.7166）<span class="tier-badge tier-l3">⭐⭐⭐ L3 strong</span></li>
+          <li><strong>[ClairS-TO ssrs path]</strong> Phase 2 Cycle 2 cross-sample DIRECTION_NEGATIVE（ClairS-TO ssrs caller-F1-headroom-bounded：H1437/H2009/HCC1954 各自 caller F1 &gt; 0.83）<span class="tier-badge tier-l3">⭐⭐⭐ L3 caveat</span></li>
+          <li><strong>[ClairS-TO ssrs path]</strong> H_C1_6 V3F/V5/V6 cross-binary PASS（LongPhase-TO V3F→V5→V6 五階段 caller F1 完全不變；per <code>09_V6_caller_F1_verification.md</code>）<span class="tier-badge tier-l3">⭐⭐⭐ L3</span></li>
+        </ul>
+        <h4>真實 pipeline（per 5/20 framing audit）</h4>
+        <p>ClairS-TO v0.3.0 (ssrs model) → LongPhase-TO V3F/V5/V6 (<code>longphase-to-mod</code> fork) → tumor_tagged.bam (Normal=None) → ISM filter。<strong>全程 tumor-only mode</strong>。</p>
+        <h4>進行中（blocked）</h4>
+        <ul>
+          <li>🔴 methyl_filter_phase2 cycle 3 blocked（4 must-fix + 48hr cooling-off）</li>
+        </ul>
+        <h4>未來決策</h4>
+        <ul>
+          <li>🤔 G5 <strong>ClairS-TO ssrs path</strong> 真正關閉 vs cycle 3 productive failure escalation 待 2026-05-21 後決定（paired ClairS path 不變仍 ceiling）</li>
+        </ul>
+        <div class="callout-critical">
+          <strong>缺口</strong>
+          ClairS-TO ssrs path 的 caller F1 &lt; 0.80 low-F1 sample panel 不存在；mechanism 視覺化 figures 缺
+        </div>
+      </div>
+    </details>
+
+    <!-- ─── §3 三時間維度 ─── -->
+    <h2 id="sec-3"><span class="h-num">3.</span>三時間維度 Inventory</h2>
+
+    <h3 id="sec-3a">3.A 已完成（17 個主要 milestone）</h3>
+
+    <table>
+      <thead>
+        <tr><th>日期</th><th>項目</th><th>G 對齊</th><th>Tier</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2026-04-13</td><td>Phase 2 程式碼完工 + HCC1395 single sample 驗證</td><td>G4</td><td><span class="tier-badge tier-l4">L4 code</span> / <span class="tier-badge tier-l3">L3 biology</span></td></tr>
+        <tr><td>2026-04-26</td><td>Thread D 主軸正式化 + Thread B retraction</td><td>G2 + G4</td><td><span class="tier-badge tier-l3">L3 grade B</span></td></tr>
+        <tr><td>2026-05-08</td><td>Self-Phasing 完整觀察整合報告（5 commit chain）</td><td>G4</td><td><span class="tier-badge tier-l5">L5</span></td></tr>
+        <tr><td>2026-05-10</td><td>image-gen + image-vision-check skills shipped</td><td>meta</td><td><span class="tier-badge tier-na">—</span></td></tr>
+        <tr><td>2026-05-11</td><td>html-preview skill (Phase 2)</td><td>meta</td><td><span class="tier-badge tier-na">—</span></td></tr>
+        <tr><td>2026-05-13</td><td>Plan v1（4 輪 Socratic 9 條決策）</td><td>meta</td><td><span class="tier-badge tier-na">—</span></td></tr>
+        <tr><td>2026-05-15</td><td>V6 ISM characterization + paradigm reframe</td><td>G2 + G4</td><td><span class="tier-badge tier-l3p">L3 partial</span></td></tr>
+        <tr><td>2026-05-16</td><td>T1.1 Thread D 主軸正名「TP-enriched phasing signatures」</td><td>G2 + G4</td><td><span class="tier-badge tier-na">—</span></td></tr>
+        <tr><td>2026-05-16</td><td>T1.3 init-research × 2（thread_d_paper + V6 production）</td><td>meta</td><td><span class="tier-badge tier-na">—</span></td></tr>
+        <tr><td>2026-05-17</td><td>CURRENT_FOCUS Tier 1-4 細化</td><td>meta</td><td><span class="tier-badge tier-na">—</span></td></tr>
+        <tr><td>2026-05-18 上午</td><td>methyl filter v1.0 cycle marginal +0.00242</td><td>G5</td><td><span class="tier-badge tier-l3">L3 marginal</span></td></tr>
+        <tr class="row-safe"><td>2026-05-18 晚</td><td>Phase 2 Cycle 1 global FP filter strong +0.02236</td><td>G5</td><td><span class="tier-badge tier-l3">L3 strong</span></td></tr>
+        <tr><td>2026-05-18</td><td>Agent Harness Audit P0-P4（11 commits）</td><td>G4 (meta-ops)</td><td><span class="tier-badge tier-na">—</span></td></tr>
+        <tr><td>2026-05-18</td><td>Plan v2 + 四軌定案 + inject H013/H014/H015</td><td>meta</td><td><span class="tier-badge tier-na">—</span></td></tr>
+        <tr class="row-bug"><td>2026-05-19 早</td><td>Phase 2 Cycle 2 cross-sample DIRECTION_NEGATIVE + H_C1_6 PASS</td><td>G5</td><td><span class="tier-badge tier-l3">L3 caveat</span></td></tr>
+        <tr class="row-warn"><td>2026-05-19 晚</td><td>4-agent multi-agent audit 揭露 R-MENTAL-DRIFT 違規</td><td>meta</td><td><span class="tier-badge tier-na">—</span></td></tr>
+        <tr class="row-safe"><td>2026-05-19 晚</td><td>NEGATIVE postmortem + cooling-off + Plan v2 紀律首次 enforce</td><td>meta</td><td><span class="tier-badge tier-na">—</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="sec-3b">3.B 進行中（active / in-flight）</h3>
+
+    <table>
+      <thead>
+        <tr><th>項目</th><th>5/19 狀態</th><th>解除/完成條件</th><th>G</th></tr>
+      </thead>
+      <tbody>
+        <tr class="row-warn"><td><strong>48hr cooling-off</strong></td><td>⏰ active 5/19→5/21</td><td>自然完成</td><td>meta</td></tr>
+        <tr><td><strong>selfphasing_v6_production</strong></td><td>🟡 4-day workflow 5/19-22</td><td>COLO829 V6 ISM → manifest → git tag → PI errata</td><td>G4 + G5</td></tr>
+        <tr><td><strong>thread_d_paper</strong></td><td>⏳ Tier 2 啟動 5/22+</td><td>T2.2/T2.3 章節骨架（依賴 V6 完成 + cooling-off）</td><td>G2 + G4</td></tr>
+        <tr><td><strong>phase_block_3d</strong></td><td>⏳ 5/23 init-research</td><td>3 H 已 inject；待 scaffolding</td><td>G1 + G2 + G4</td></tr>
+        <tr class="row-bug"><td><strong>methyl_filter_phase2</strong></td><td>🔴 cycle 3 blocked</td><td>4 must-fix 解除 OR G5 path (a) close</td><td>G5</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Cycle 3 啟動前 4 個 Must-Fix（in ledger blocked_on）</h4>
+
+    <table>
+      <thead><tr><th>Pri</th><th>項目</th><th>G</th></tr></thead>
+      <tbody>
+        <tr class="row-bug"><td>🔴 P0</td><td>H_C3_2 low-F1 panel 4 樣本名單（caller F1 &lt; 0.80 + BAM 驗證）</td><td>G5</td></tr>
+        <tr class="row-warn"><td>🟠 P1</td><td>cycle_id rename convention <code>_validation</code></td><td>meta</td></tr>
+        <tr class="row-warn"><td>🟠 P1</td><td>ledger entry 補 binary_commit / dataset_id / pre-reg link</td><td>meta</td></tr>
+        <tr><td>🟡 P2</td><td>H_C3_1 target 計算澄清（cycle 2 re-fit mean vs cycle 3 新 re-fit）</td><td>G5</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="sec-3c">3.C 未來計畫（Tier 1-4 + Phase A/B/C）</h3>
+
+    <h4>Tier 1 收尾（W3 5/19-5/22）</h4>
+    <ul>
+      <li>T1.2 V6 production tag finalize <span class="tier-badge" style="background: #C2410C; color: white;">🔴 Hard Gate</span> git tag 5/22 內</li>
+    </ul>
+
+    <h4>Tier 2 證據強化（W3-W4 5/22-5/29）</h4>
+    <ul>
+      <li>T2.1 Z-AUTO KDE 跨 4 樣本擴展（⭐3 → ⭐4 升級）</li>
+      <li>T2.2 HCC1395 primary discovery 章節骨架（paper §3）</li>
+      <li>T2.3 6-sample replication cohort 章節骨架（paper §4）</li>
+    </ul>
+
+    <h4>Tier 3 Paper draft + 工程平行（W4-W6 5/29-6/30）</h4>
+    <ul>
+      <li>T3.1 Paper full outline（abstract + 6 章 + 6 主圖）</li>
+      <li>T3.2 GitHub repo public 化（reproducibility）</li>
+      <li>T3.3 Docker image build + tutorial（1-hour install+run）</li>
+      <li>T3.4 Benchmark suite 公開化</li>
+      <li>T3.5 Discussion 章節（63% gap + cancer-only + Normal BAM future）</li>
+    </ul>
+
+    <h4>Tier 4 reactive 擴展（W6+ 6/30+）</h4>
+    <ul>
+      <li>T4.1 Phase 2A Normal BAM cross-sample（G4 45%→70%）</li>
+      <li>T4.2 GC/mappability/repeat 新軸 pilot（if reviewer 質疑 framework gap）</li>
+      <li>T4.3 PI Report 4-29 errata + V6 sign-off（T1.2 完成後）</li>
+      <li>T4.4 HG002 non-cancer pilot（if reviewer 強質疑 cancer-only）</li>
+    </ul>
+
+    <h4>Phase B/C papers</h4>
+    <table>
+      <thead><tr><th>Phase</th><th>時程</th><th>Deliverable</th><th>G</th></tr></thead>
+      <tbody>
+        <tr><td>B</td><td>M2-M5（7/1-9/30）</td><td>framework 投稿 + clone preprint（thread_d §4 抽取）</td><td>G2</td></tr>
+        <tr><td>C</td><td>M6-M12（10/1+）</td><td>ASM short + two-hit notes（phase_block_3d X1/X2 抽取）</td><td>G1 + G3</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ─── §4 22 條穩定結論索引 ─── -->
+    <h2 id="sec-4"><span class="h-num">4.</span>22 條穩定結論索引（與 G 對齊）</h2>
+
+    <h3>⭐⭐⭐⭐⭐ 堅固結論（防 reactivation 用）</h3>
+    <table>
+      <thead><tr><th>CL #</th><th>結論</th><th>G</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td>CL-008</td><td>Beyond-AUC ≤ 0.58 純 methylation ceiling <span class="tier-badge tier-l5">L5</span></td><td>G5 (close)</td><td>防 G5 純 methyl 路徑重啟</td></tr>
+        <tr><td>CL-024</td><td>Z3 amplicon blacklist NEGATIVE-for-canonical <span class="tier-badge tier-l5">L5</span></td><td>G5 (close)</td><td>防 zone-aware filter 重啟</td></tr>
+        <tr><td>CL-025</td><td>LOH.bed 自由於 self-phasing（Jaccard=1.0000）<span class="tier-badge tier-l5">L5</span></td><td>G4</td><td>LOH-dependent 結論可信</td></tr>
+      </tbody>
+    </table>
+
+    <h3>⭐⭐⭐⭐ 穩固結論</h3>
+    <table>
+      <thead><tr><th>CL #</th><th>結論</th><th>G</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td>CL-001</td><td>Self-phasing 17.3:1 bias <span class="tier-badge tier-l4">L4</span></td><td>G4</td><td>主軸機制根因</td></tr>
+        <tr><td>CL-007</td><td>Germline ASM &gt;&gt; somatic 3-6× <span class="tier-badge tier-l4">L4</span></td><td>G1</td><td>ASM characterization</td></tr>
+        <tr><td>CL-010</td><td>HPFineNGroups somatic heterogeneity marker <span class="tier-badge tier-l4">L4</span></td><td>G2</td><td>clone 結構 marker</td></tr>
+        <tr><td>CL-011</td><td>LOH Subclone AF × Methylation 雙證據 <span class="tier-badge tier-l4">L4</span></td><td>G2</td><td>clone subclone evidence</td></tr>
+        <tr><td>CL-020</td><td>Coverage_Multiple CN proxy r=0.831 <span class="tier-badge tier-l4">L4</span></td><td>G2 + G4</td><td>CN 代理可信</td></tr>
+      </tbody>
+    </table>
+
+    <h3>5/18-5/19 新增結論候選（待入主表）</h3>
+    <table>
+      <thead><tr><th>候選</th><th>結論</th><th>G</th><th>Tier</th></tr></thead>
+      <tbody>
+        <tr><td>5/15 reframe</td><td>Outer cross_het Z-OCH 是 TP signature（Fisher p=3.8e-62）</td><td>G2</td><td><span class="tier-badge tier-l3p">L3 partial</span></td></tr>
+        <tr class="row-safe"><td>5/18 Cycle 1</td><td>HCC1395-internal multi-axis filter ΔF1=+0.02236</td><td>G5</td><td><span class="tier-badge tier-l3">L3 strong</span></td></tr>
+        <tr><td>5/18 V5 over-promote</td><td>V5 Layer 1.5 在 Inner LOH NG=2 over-promote +60%，V6 修補</td><td>G4</td><td><span class="tier-badge tier-l3p">L3-4</span></td></tr>
+        <tr class="row-bug"><td>5/19 Cycle 2</td><td>cross-sample DIRECTION_NEGATIVE; caller-F1-headroom-bounded</td><td>G5</td><td><span class="tier-badge tier-l3">L3 caveat</span></td></tr>
+        <tr><td>5/19 H_C1_6</td><td>V3F/V5/V6 cross-binary PASS; V6 production zero F1 regression</td><td>G4</td><td><span class="tier-badge tier-l3">L3</span></td></tr>
+      </tbody>
+    </table>
+
+    <!-- ─── §5 Dependency 關係圖 ─── -->
+    <h2 id="sec-5"><span class="h-num">5.</span>Dependency 關係圖（核心 critical path）</h2>
+
+    <figure class="svg-figure">
+      <svg viewBox="0 0 920 460" role="img" aria-labelledby="dep-title dep-desc"
+           xmlns="http://www.w3.org/2000/svg">
+        <title id="dep-title">研究路徑核心依賴圖</title>
+        <desc id="dep-desc">V6 production tag → 三軌平行（thread_d / phase_block_3d / methyl cycle 3）→ A 階段 framework paper → B 階段投稿+clone preprint → C 階段 ASM+two-hit</desc>
+
+        <defs>
+          <marker id="darrow" markerWidth="8" markerHeight="8" refX="7" refY="4"
+                  orient="auto" markerUnits="strokeWidth">
+            <path d="M 0 0 L 8 4 L 0 8 z" fill="#6B6B66"/>
+          </marker>
+          <marker id="darrow-dash" markerWidth="8" markerHeight="8" refX="7" refY="4"
+                  orient="auto" markerUnits="strokeWidth">
+            <path d="M 0 0 L 8 4 L 0 8 z" fill="#A16207"/>
+          </marker>
+        </defs>
+
+        <!-- V6 production (root) -->
+        <rect x="370" y="20" width="180" height="50" rx="6"
+              fill="#FEF7E6" stroke="#A16207" stroke-width="2"/>
+        <text x="460" y="40" text-anchor="middle" font-size="13" font-weight="700" fill="#78350F">V6 production tag</text>
+        <text x="460" y="58" text-anchor="middle" font-size="11" fill="#78350F" font-family="JetBrains Mono">5/19-22 4-day workflow</text>
+
+        <!-- Cooling-off -->
+        <rect x="20" y="20" width="170" height="50" rx="6"
+              fill="#FEF2F0" stroke="#C2410C" stroke-width="2"/>
+        <text x="105" y="40" text-anchor="middle" font-size="13" font-weight="700" fill="#7F1D1D">48hr cooling-off</text>
+        <text x="105" y="58" text-anchor="middle" font-size="11" fill="#7F1D1D" font-family="JetBrains Mono">5/19→5/21</text>
+
+        <!-- 三軌 -->
+        <rect x="180" y="110" width="160" height="50" rx="6"
+              fill="#EFF6FF" stroke="#1E3A8A" stroke-width="1.5"/>
+        <text x="260" y="130" text-anchor="middle" font-size="12" font-weight="700" fill="#1E3A8A">thread_d_paper</text>
+        <text x="260" y="148" text-anchor="middle" font-size="10" fill="#1E3A8A" font-family="JetBrains Mono">Tier 2 5/22+</text>
+
+        <rect x="380" y="110" width="160" height="50" rx="6"
+              fill="#EFF6FF" stroke="#1E3A8A" stroke-width="1.5"/>
+        <text x="460" y="130" text-anchor="middle" font-size="12" font-weight="700" fill="#1E3A8A">phase_block_3d</text>
+        <text x="460" y="148" text-anchor="middle" font-size="10" fill="#1E3A8A" font-family="JetBrains Mono">init 5/23</text>
+
+        <rect x="580" y="110" width="160" height="50" rx="6"
+              fill="#FEF2F0" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <text x="660" y="130" text-anchor="middle" font-size="12" font-weight="700" fill="#7F1D1D">methyl cycle 3?</text>
+        <text x="660" y="148" text-anchor="middle" font-size="10" fill="#7F1D1D" font-family="JetBrains Mono">blocked 4 must-fix</text>
+
+        <!-- Errata -->
+        <rect x="760" y="20" width="140" height="50" rx="6"
+              fill="#F4F4F5" stroke="#6B6B66" stroke-width="1.5"/>
+        <text x="830" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#374151">T4.3 PI errata</text>
+        <text x="830" y="58" text-anchor="middle" font-size="10" fill="#6B6B66" font-family="JetBrains Mono">reactive</text>
+
+        <!-- Phase A -->
+        <rect x="290" y="210" width="340" height="50" rx="6"
+              fill="#FED7AA" stroke="#D97757" stroke-width="2"/>
+        <text x="460" y="232" text-anchor="middle" font-size="13" font-weight="700" fill="#9A3412">A 階段 framework paper draft</text>
+        <text x="460" y="250" text-anchor="middle" font-size="11" fill="#9A3412" font-family="JetBrains Mono">W3-W8 5/19-6/30</text>
+
+        <!-- Phase B -->
+        <rect x="160" y="320" width="280" height="50" rx="6"
+              fill="#D1FAE5" stroke="#15803D" stroke-width="2"/>
+        <text x="300" y="342" text-anchor="middle" font-size="13" font-weight="700" fill="#064E3B">B 階段：framework 投稿 + clone preprint</text>
+        <text x="300" y="360" text-anchor="middle" font-size="11" fill="#064E3B" font-family="JetBrains Mono">M2-M5 7/1-9/30</text>
+
+        <!-- Phase C -->
+        <rect x="480" y="320" width="280" height="50" rx="6"
+              fill="#D1FAE5" stroke="#15803D" stroke-width="2"/>
+        <text x="620" y="342" text-anchor="middle" font-size="13" font-weight="700" fill="#064E3B">C 階段：ASM short + two-hit notes</text>
+        <text x="620" y="360" text-anchor="middle" font-size="11" fill="#064E3B" font-family="JetBrains Mono">M6-M12 10/1+</text>
+
+        <!-- G5 close fallback -->
+        <rect x="320" y="410" width="280" height="40" rx="6"
+              fill="#F4F4F5" stroke="#6B6B66" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <text x="460" y="427" text-anchor="middle" font-size="12" font-weight="700" fill="#374151">G5 path (a) close (cycle 3 NEGATIVE 後)</text>
+        <text x="460" y="442" text-anchor="middle" font-size="10" fill="#6B6B66" font-family="JetBrains Mono">fallback path</text>
+
+        <!-- Arrows: V6 → 三軌 -->
+        <line x1="430" y1="70" x2="280" y2="105" stroke="#6B6B66" stroke-width="2" marker-end="url(#darrow)"/>
+        <line x1="460" y1="70" x2="460" y2="105" stroke="#6B6B66" stroke-width="2" marker-end="url(#darrow)"/>
+        <line x1="490" y1="70" x2="640" y2="105" stroke="#6B6B66" stroke-width="2" marker-end="url(#darrow)"/>
+        <line x1="550" y1="45" x2="755" y2="45" stroke="#6B6B66" stroke-width="2" marker-end="url(#darrow)"/>
+
+        <!-- cooling-off → cycle 3 -->
+        <line x1="105" y1="70" x2="580" y2="130" stroke="#A16207" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#darrow-dash)"/>
+
+        <!-- 三軌 → Phase A -->
+        <line x1="280" y1="160" x2="370" y2="205" stroke="#6B6B66" stroke-width="2" marker-end="url(#darrow)"/>
+        <line x1="460" y1="160" x2="460" y2="205" stroke="#6B6B66" stroke-width="2" marker-end="url(#darrow)"/>
+        <line x1="640" y1="160" x2="550" y2="205" stroke="#A16207" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#darrow-dash)"/>
+
+        <!-- Phase A → B/C -->
+        <line x1="400" y1="260" x2="320" y2="315" stroke="#6B6B66" stroke-width="2" marker-end="url(#darrow)"/>
+        <line x1="520" y1="260" x2="600" y2="315" stroke="#6B6B66" stroke-width="2" marker-end="url(#darrow)"/>
+
+        <!-- Phase A → G5 close (fallback) -->
+        <line x1="460" y1="260" x2="460" y2="405" stroke="#A16207" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#darrow-dash)"/>
+
+      </svg>
+      <figcaption>Critical path：V6 production (root) → 三軌平行 → A 階段 framework → B/C 階段 papers。橘色虛線 = conditional fallback（若 cycle 3 NEGATIVE → G5 close）。</figcaption>
+    </figure>
+
+    <p><strong>核心 critical path</strong>：V6 production tag → 三軌 unlock → A 階段 framework paper → B 階段投稿 + clone preprint → C 階段 ASM + two-hit。</p>
+
+    <!-- ─── §6 Active Gates ─── -->
+    <h2 id="sec-6"><span class="h-num">6.</span>關鍵 Active Gates（next 14 days）</h2>
+
+    <table>
+      <thead>
+        <tr><th>Gate</th><th>性質</th><th>時間點</th><th>不可逆性</th><th>決策內容</th></tr>
+      </thead>
+      <tbody>
+        <tr class="row-bug"><td>🔴 Hard</td><td><code>git tag v6-prod-{date}</code></td><td>5/22 內</td><td>不可逆</td><td>V6 production tag</td></tr>
+        <tr class="row-bug"><td>🔴 Hard</td><td>PI errata email send</td><td>5/22 後</td><td>不可逆</td><td>external communication</td></tr>
+        <tr class="row-warn"><td>🟡 Soft</td><td>Cycle 3 啟動 OR G5 close</td><td>5/21 後</td><td>可逆</td><td>取決於 4 must-fix + G5 path 決定</td></tr>
+        <tr><td>🟢 Auto</td><td>48hr cooling-off</td><td>5/21 自然完成</td><td>—</td><td>紀律 enforce</td></tr>
+        <tr class="row-warn"><td>🟡 Soft</td><td>phase_block_3d init-research</td><td>5/23</td><td>可逆</td><td>開新軌（G1+G2 兼顧）</td></tr>
+        <tr class="row-warn"><td>🟡 Soft</td><td>thread_d_paper Tier 2 啟動</td><td>5/22+</td><td>可逆</td><td>paper draft 啟動</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ─── §7 Plan v2 紀律 Status ─── -->
+    <h2 id="sec-7"><span class="h-num">7.</span>Plan v2 五大紀律 Active Status</h2>
+
+    <table>
+      <thead>
+        <tr><th>Risk</th><th>規範</th><th>5/19 status</th><th>觸發紀錄</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>R-CONFIRMATION-LOOP</td><td>cycle 1 結果決定（NEGATIVE → G5 真正關閉）</td><td>🟡 邊界灰</td><td>cycle 1 strong → path (a) 通過；cycle 2 NEGATIVE 屬 productive failure escalation</td></tr>
+        <tr><td>R-A-SCOPE</td><td>A 階段 G1/G2/G3 skeleton only no deep dive</td><td>🟢 未測試</td><td>Tier 2 尚未啟動</td></tr>
+        <tr><td>R-PAPER-THIN</td><td>B/C 從 sub-analysis 抽取接受 thin</td><td>🟢 未測試</td><td>Phase B 7/1+ 啟動</td></tr>
+        <tr class="row-warn"><td>R-OPS-CREEP</td><td>ops &lt; 2 hr/week</td><td>⚠️ 違反 (exception)</td><td>5/18 single-day 10 hr Agent Harness Audit；接受為 exception，未來限制</td></tr>
+        <tr class="row-safe"><td><strong>R-MENTAL-DRIFT</strong></td><td>48hr cooling-off + NEGATIVE postmortem 才能 reactivate</td><td>✅ <strong>首次 enforce 通過</strong></td><td>5/19 4-agent audit 揭露 → 用戶 explicit 暫停 cycle 3 → postmortem + cooling-off ledger 紀錄</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout-success">
+      <strong>R-MENTAL-DRIFT 首次真實 enforce milestone</strong>
+      5/19 cycle 2 NEGATIVE 後 → 4-agent multi-agent audit 介入 → 用戶 explicit 暫停 cycle 3 → 48hr cooling-off + NEGATIVE postmortem + ledger entry。為 plan v2 紀律遵守建立先例。
+    </div>
+
+    <!-- ─── §8 已關閉死路 ─── -->
+    <h2 id="sec-8"><span class="h-num">8.</span>已關閉死路（防 reactivation）</h2>
+
+    <table>
+      <thead><tr><th>#</th><th>死路</th><th>對應結論</th><th>關閉日期</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>純 methylation TP/FP filter</td><td>CL-008 <span class="tier-badge tier-l5">L5</span> + 5/18 methyl_filter v1.0 marginal</td><td>2026-04-08 + 5/18 確認</td></tr>
+        <tr><td>2</td><td>LOH/CNV zone-aware filter</td><td>CL-024 <span class="tier-badge tier-l5">L5</span></td><td>2026-04-19</td></tr>
+        <tr><td>3</td><td>FN methylation rescue</td><td>O9 <span class="tier-badge tier-l5">L5</span></td><td>2026-04-08</td></tr>
+        <tr><td>4</td><td>S3 cross-sample whitelist</td><td>Thread B retraction</td><td>2026-04-26</td></tr>
+        <tr><td>5</td><td>TO single-sample post-hoc germline FP filter</td><td>G1-G7 NO-GO <span class="tier-badge tier-l4">L4</span></td><td>2026-04-08</td></tr>
+        <tr><td>6</td><td>G3 二次打擊獨立路徑</td><td>暫緩，依賴 G1 突破</td><td>plan v1 5/15</td></tr>
+        <tr><td>7</td><td>F1 提升不限樣本 ceiling 假設（<strong>paired ClairS path only</strong>）</td><td>Phase 1A paired-pure +0.0112 ceiling</td><td>已鎖定不投入</td></tr>
+        <tr><td>7b</td><td>F1 提升 ClairS-TO ssrs path 真實 ceiling 假設</td><td>Cycle 1 +0.02236 (HCC1395-internal) / Cycle 2 cross-sample NEGATIVE (caller-F1-headroom-bounded)</td><td>待 5/21 後 cycle 3 vs G5 close 決定</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ─── §9 Modification 機制 ─── -->
+    <h2 id="sec-9"><span class="h-num">9.</span>Modification Proposal 機制</h2>
+
+    <h3>9.1 何時提 modification</h3>
+    <table>
+      <thead><tr><th>觸發類型</th><th>範例</th><th>處理路徑</th></tr></thead>
+      <tbody>
+        <tr><td>Cycle 結果改變 G 評估</td><td>cycle 3 NEGATIVE → G5 完成度 35% → 30% close</td><td>inline 更新 §2</td></tr>
+        <tr><td>新方向 inject hypothesis</td><td>5/20 reviewer 建議加 GC bias 軸</td><td>plan v2 amendment + §2/§3 更新</td></tr>
+        <tr><td>重大方向變更</td><td>四軌→五軌 / G3 reactivate</td><td>plan v3 + 本檔 retire</td></tr>
+        <tr><td>4-6 週 review milestone</td><td>6/30 W8 結束</td><td>月度 review + inline 更新</td></tr>
+        <tr><td>Reviewer feedback</td><td>round 1 要求補 HG002</td><td>inline 更新 §3.C T4.4 active</td></tr>
+      </tbody>
+    </table>
+
+    <h3>9.2 三路徑分流</h3>
+    <table>
+      <thead><tr><th>路徑</th><th>適用</th><th>動作</th></tr></thead>
+      <tbody>
+        <tr><td><strong>A. Inline update</strong></td><td>小變更（G 完成度 ±5%）</td><td>Edit 本檔 + filename version bump</td></tr>
+        <tr><td><strong>B. Plan v2 amendment</strong></td><td>中變更（軌道狀態 / Phase timeline shift）</td><td>改 plan v2 + 本檔 inline</td></tr>
+        <tr><td><strong>C. Plan v3 重寫 + 本檔 retire</strong></td><td>重大變更（&gt; 3 條 9 決策推翻）</td><td>新建 plan v3 + 新建 roadmap v2 + 舊兩檔 retire banner</td></tr>
+      </tbody>
+    </table>
+
+    <h3>9.3 紀律 enforcement</h3>
+    <div class="callout-warning">
+      <strong>任何 modification 需通過 plan v2 R-MENTAL-DRIFT 紀律</strong>
+      <ul>
+        <li><strong>48hr cooling-off</strong>（從 trigger 到 modification 寫入）</li>
+        <li><strong>NEGATIVE postmortem</strong>（若是因 NEGATIVE 結果觸發）</li>
+        <li><strong>Multi-agent audit</strong>（若涉及多個項目變更）</li>
+      </ul>
+      對應 <code>~/.claude/plans/tender-pondering-blossom.md</code> §6 Risk Items。
+    </div>
+
+    <h3>9.4 Commit message convention</h3>
+    <pre><code>docs(roadmap): {change_type} — {short summary}
+
+Trigger: {cycle/reviewer/milestone}
+Affected G: {G1-G5 list}
+Cooling-off observed: {Y/N + dates}
+Postmortem: {path or N/A}</code></pre>
+
+    <!-- ─── §10 總結 ─── -->
+    <h2 id="sec-10"><span class="h-num">10.</span>路線圖單句總結</h2>
+
+    <div class="callout-info">
+      <strong>One-line summary</strong>
+      V6 production tag (5/22) → unlock 三軌平行（thread_d paper + phase_block_3d + 可能 cycle 3）→ A 階段 framework paper draft (W3-W8) → B 階段 framework 投稿 + clone preprint (M2-M5) → C 階段 ASM + two-hit (M6-M12)。<strong>G4 全程主軸 / G2 階段 B / G1+G3 階段 C / G5 ClairS-TO ssrs path 邊界灰待 cycle 3 結果決定（paired ClairS path 已 ceiling）/ G3 暫緩依賴 G1 突破。</strong>
+    </div>
+
+    <h3>時間 × G 視覺化</h3>
+    <pre><code>Week  │ W3      W4      W5      W6      W7-8   M2-5      M6-12
+─────────────────────────────────────────────────────────────────
+G1    │                                                   ●●●● (ASM paper)
+G2    │ ───→●  ───→●  ───→●  ───→●  ───→●  ●●●● (clone)
+G3    │                                                   ●●●● (two-hit, 依 G1)
+G4    │ ●●●●●  ●●●●●  ●●●●●  ●●●●●  ●●●●●  ●●●●●●●●●●●● (全程)
+G5    │ ?      ?      ?      ?      ?      [path (a) close vs cycle 3]
+
+軌道  │ V6+thread_d+phase_block_3d+(methyl cycle 3?)
+       └─────────────── A framework paper draft ──────┘
+                                                       └ B 投稿 ┘
+                                                                └ C papers ┘
+
+Gates │ 🔴git_tag  🟡pb3d  🟡Tier2  🟢🟢🟢  🟢paper_outline  submit ...
+        🔴PI_email  ⏰5/21 cooling-off</code></pre>
+
+    <h3>五個目標的關係（依賴 + 互補）</h3>
+    <pre><code>G4 (流程合理性) ──┬─→ G2 (clone characterization)
+                  ├─→ G1 (ASM mechanism)
+                  ├─→ G5 (F1 ceiling 已知)
+                  └─→ Phase A Tool paper baseline
+
+G1 (ASM mechanism) ──→ G3 (二次打擊順序)
+G2 (clone) ──→ B 階段 clone preprint
+G5 (F1 path a) ──→ A 階段 framework 補強 OR 確定 close</code></pre>
+
+    <div class="callout-success">
+      <strong>核心觀察</strong>
+      <ul>
+        <li><strong>G4</strong> 是 enabler（流程改進 unlock 其他）</li>
+        <li><strong>G2</strong> 是 secondary main thrust（clone evidence）</li>
+        <li><strong>G1 ⇒ G3</strong>（依賴順序）</li>
+        <li><strong>G5</strong> 是 productivity uncertainty（cycle 3 結果決定 close vs marginal contribute）</li>
+      </ul>
+    </div>
+
+    <!-- ─── References ─── -->
+    <section class="references" id="refs">
+      <h2>引用文件</h2>
+      <ol>
+        <li>L1 願景 — <code>InterSubMod/docs/architecture/20260327_InterSubMod研究願景定錨_01.md</code></li>
+        <li>L2 路徑（本檔 markdown 源）— <code>InterSubMod/docs/architecture/20260519_研究路徑與五大目標路線圖_01.md</code></li>
+        <li>L3 計畫 — <code>~/.claude/plans/tender-pondering-blossom.md</code>（plan v1 + v2）</li>
+        <li>L4 live — <code>InterSubMod/docs/CURRENT_FOCUS.md</code></li>
+        <li>22 條穩定結論 — <code>InterSubMod/docs/reports/research_landscape/06_結論穩定性審查.md</code></li>
+        <li>Thread D 主軸 — <code>InterSubMod/docs/reports/validated/2026/04/20260426_Thread_D_LOH_constrained_phasing_main_axis_01.md</code></li>
+        <li>NEGATIVE postmortem — <code>InterSubMod/research/methyl_augmented_filter_phase2/cycle2/cycle2_NEGATIVE_postmortem.md</code></li>
+        <li>thread_d_paper project — <code>InterSubMod/research/thread_d_paper/00_PLAN.md</code></li>
+        <li>selfphasing_v6_production project — <code>InterSubMod/research/selfphasing_v6_production/00_PLAN.md</code></li>
+        <li>methyl_filter_phase2 project — <code>InterSubMod/research/methyl_augmented_filter_phase2/manifest.yaml</code></li>
+        <li>evidence_ledger — <code>InterSubMod/research/autoresearch/evidence_ledger.jsonl</code>（47 entries）</li>
+        <li>hypothesis_queue — <code>InterSubMod/research/autoresearch/hypothesis_queue.json</code>（H011-H015 含 5/18 inject 3 H）</li>
+        <li>Scientific rigor 紀律繼承 — <code>InterSubMod/.claude/skills/scientific-rigor/SKILL.md</code></li>
+      </ol>
+    </section>
+
+    <!-- ─── Provenance footer (scientific-rigor §8.4) ─── -->
+    <section class="provenance" id="provenance">
+      <div class="pretitle">Provenance · Scientific Rigor §8.4</div>
+      <dl>
+        <dt>Generated</dt>
+        <dd>2026-05-19 (standalone HTML companion)</dd>
+        <dt>Source MD commit</dt>
+        <dd>a132051 (docs/roadmap: L2 snapshot 2026-05-19)</dd>
+        <dt>Tool</dt>
+        <dd>html-report-build skill (standalone mode, LLM-direct)</dd>
+        <dt>Audit chain</dt>
+        <dd>4-agent multi-agent audit (5/19) → R-MENTAL-DRIFT 首次 enforce → cycle 3 暫停</dd>
+        <dt>Inherits</dt>
+        <dd>scientific-rigor §2 (Tier badge) + §4 (DAG) + §7 (Pre-reg) + §8.4 (Provenance)</dd>
+        <dt>Sibling files</dt>
+        <dd><code>20260519_研究路徑與五大目標路線圖_01.md</code> (source) + this <code>.standalone.html</code> (companion)</dd>
+        <dt>Total ledger entries</dt>
+        <dd>47 (through cycle_id 20260519_phase2_cycle2_negative_postmortem)</dd>
+        <dt>Plan v2 commits</dt>
+        <dd>6933793 (plan v2 + 4 軌) → 17c77ad (4-agent audit + postmortem) → a132051 (本 roadmap)</dd>
+      </dl>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>
