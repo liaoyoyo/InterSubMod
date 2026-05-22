@@ -5,6 +5,12 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Agent
 user-invocable: true
 ---
 
+> **⚠ 2026-05-22 thin wrapper migration**: 本 skill 為 `/narrative-frame` skill 的 **thin wrapper**。
+> 預設 framework = **Audience-Scenario-Pitch**（即下述 5 階段 P1-P5 + 6 報告模板識別）。
+> 等同 `/narrative-frame apply Audience-Scenario-Pitch`。
+> 用戶可隨時換 framework：對話中説「用 Pixar Spine 講」或直接走 `/narrative-frame N1-N6` 動態挑。
+> Catalog: `InterSubMod/.claude/skills/narrative-frame/references/framework_catalog.md` §11 hybrid。
+
 # pptx-build Skill
 
 PPT 製作子流程，承擔原 myPPT skill 的 P1-P5（outline → section → slide → visual review → speaker script）內容。**不負責 raw data 收集 / 母稿撰寫**（這是 weekly-report skill 的責任）。
@@ -68,11 +74,24 @@ P5. Speaker script              → C5 字數 ↔ 時長 + Tier 3 拆遷 ★ 必
 
 ## 強制 Checkpoint（C1-C5）
 
-- **C1（P1 結束）**：Main Thesis ≤ 30 字 + Audience tier ★ fast-track 必停
+- **C1（P1 結束）**：Main Thesis ≤ 30 字 + **Audience scenario**（PI 1-on-1 / Lab meeting / Conference / Lab informal）★ fast-track 必停
 - **C2（P2 結束）**：5-7 段 outline + 每段 thesis sentence
 - **C3（每 section ×N）**：5-7 slide 標題 + focal point ≤ 20 字
-- **C4（每 slide ×24）**：三層分流（Tier 1 slide / Tier 2 note / Tier 3 oral）+ Vision 10-check
+- **C4（每 slide ×24）**：三層分流（Tier 1 slide / Tier 2 note / Tier 3 oral）+ Vision 10-check + **scenario chars/rows audit**
 - **C5（P5 結束）**：字數 vs 預設時長 + Tier 3 拆遷建議 ★ 必停
+
+## Audience Scenario 量化標準（2026-05-20 Issue #4 升級）
+
+C1 確認的 audience scenario 直接套對應量化標準（細節見 memory `reference-pi-scenario-quantitative-standards` 與 `html-report-build/references/design_principles.md` Rule 13）：
+
+| 場景 | Slide 數 | chars/slide | Table rows | Visual ratio | Reading test |
+|------|:-------:|:-----------:|:----------:|:------------:|:------------:|
+| PI 1-on-1 | 3-6 | ≤ 150 純 / ≤ 250 含表 | ≤ 5 | 60-75% | 3-sec |
+| Lab meeting | 8-15 | ≤ 250 純 / ≤ 350 含表 | ≤ 8 | 50-65% | 5-sec |
+| Conference | 20-40 | ≤ 350 純 / ≤ 450 含表 | ≤ 12 | 40-60% | 10-sec |
+| Lab informal | 3-5 | ≤ 100 純 / ≤ 200 含表 | ≤ 4 | 70-80% | 3-sec |
+
+C4 每張 slide build 完 audit：超限自動 flag for compression / split / move-to-note。
 
 詳細 prompt 模板 → `prompts/{outline,section,slide,focal_point_audit,tier_evaluation,visual_review,from_draft_loader}_confirm.md`
 

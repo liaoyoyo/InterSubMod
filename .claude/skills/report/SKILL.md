@@ -5,6 +5,12 @@ allowed-tools: Read, Write, Glob, Grep
 user-invocable: true
 ---
 
+> **⚠ 2026-05-22 thin wrapper migration**: 本 skill 為 `/narrative-frame` skill 的 **thin wrapper**。
+> 預設 framework = **AI-Session-Companion**（Timeline + Key decisions + Provenance）。
+> 等同 `/narrative-frame apply AI-Session-Companion`。
+> 用戶可隨時換 framework：對話中説「用 13 段技術報告風」或直接走 `/narrative-frame N1-N6` 動態挑。
+> Catalog: `InterSubMod/.claude/skills/narrative-frame/references/framework_catalog.md` §11 hybrid。
+
 # AI 對話報告撰寫技能
 
 你是一位專業的技術文件撰寫者，負責記錄 AI 對話的重要內容。

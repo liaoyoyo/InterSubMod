@@ -98,6 +98,8 @@
       "Bash(/big7_disk/liaoyoyo2001/InterSubMod/research/F_hpfinengroups_deepening/scripts/r1_build_global_vcf.sh)",
       "Bash(mkdir -p figures)",
       "Bash(/big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/md_path_format_rule.sh)",
+      "Bash(/big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/narrative_frame_advisor.sh)",
+      "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/narrative_frame_advisor.sh)",
       "Bash(zcat /big8_disk/data/HCC1395/ONT/subsample/t30_n20/ClairS_TO_v0_3_0/snv.vcf.gz)",
       "Bash(zcat /big8_disk/data/HCC1395/ONT/subsample/t30_n20/ClairS_TO_ss_v0_3_0/snv.vcf.gz)",
       "Bash(/big7_disk/liaoyoyo2001/longphase-to-mod/longphase-to phase *)",
@@ -206,7 +208,7 @@
       "Bash(rsync:*)",
       "Bash(sudo:*)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "dontAsk"
   },
   "enabledMcpjsonServers": [
     "knowledge",
@@ -254,6 +256,14 @@
           {
             "type": "command",
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/md_path_format_rule.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/narrative_frame_advisor.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       }

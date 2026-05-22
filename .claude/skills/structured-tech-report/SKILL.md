@@ -6,6 +6,12 @@ user-invocable: true
 tags: ["report", "documentation", "engineering", "rca", "adr", "postmortem", "13-section"]
 ---
 
+> **⚠ 2026-05-22 thin wrapper migration**: 本 skill 為 `/narrative-frame` skill 的 **thin wrapper**。
+> 預設 framework = **A3+ADR+Postmortem-hybrid**（即下述 13 段）。
+> 等同 `/narrative-frame apply A3+ADR+Postmortem-hybrid`。
+> 用戶可隨時換 framework：對話中説「換 X framework」或直接走 `/narrative-frame N1-N6` 動態挑。
+> Catalog: `InterSubMod/.claude/skills/narrative-frame/references/framework_catalog.md` §11 hybrid。
+
 # Structured Tech Report（結構化技術報告）
 
 把工程／pipeline／方法學的單一修改整理成 **13 段式** 技術報告，對齊 InterSubMod 既有最佳範本（`v5_audit_suite/07_paired_ground_truth_concordance.md`）。

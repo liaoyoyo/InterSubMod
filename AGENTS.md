@@ -335,6 +335,47 @@ Coding: C++17 / `.hpp` headers / namespace `InterSubMod` / `.clang-format`（Goo
 
 **業界對照**: Tufte data-ink + Garr Reynolds Zen「先講結論再展開」+ McKinsey Pyramid Principle SCQA。
 
+### §15.2 框架聲明維度（2026-05-22 narrative-frame 落地）
+
+**規則**: 中等以上整理 / 報告類回應，**回覆首行必須聲明使用的敘述框架**（如「用 PREP：」「用 SCQA + STAR：」）— 讓用戶 5 秒內掌握你的敘述結構。
+
+**Tier 對應框架聲明**:
+| Tier | 框架聲明 |
+|------|---------|
+| **T1** 簡單問答 | skip — 無敘述結構需求 |
+| **T2** 中等整理（200-500 字 / 跨 2-3 概念）| **首行聲明 framework**（inline 模式） |
+| **T3** 複雜回覆（≥500 字 / 跨 ≥3 概念 / 多文件） | **完整跑 `/narrative-frame` N1-N6** + structured output + source mapping + footer 引用業界源 |
+| **T4** 重大 paper-scope / NO-GO | T3 + Tier 升級對齊 `/scientific-rigor` §2-§7（每 claim 標 L1-L5 tier） |
+
+**Framework 聲明格式範例**:
+```
+用 SCQA（Barbara Minto, McKinsey 1960s）：
+【Situation】... 【Complication】... 【Question】... 【Answer】...
+```
+
+```
+用 ABT（Randy Olson 2019）：
+AND <共識>，BUT <衝突>，THEREFORE <結論>。
+```
+
+```
+用 PREP：
+P: <直答結論>
+R: <理由 1 句>
+E: <證據 1 個>
+P: <重申結論>
+```
+
+**用戶 override 規則**:
+- 説「不用框架」/「skip framework」/「raw answer」→ AI 直接答不套
+- 説「換 X」/「用 SCQA 改寫」→ AI 重 N5 套
+- 説「用 Tier 2 inline」→ 強制走 inline（即使 ≥500 字）
+
+**完整 50+ catalog**: `InterSubMod/.claude/skills/narrative-frame/references/framework_catalog.md`
+**場景對照**: `InterSubMod/.claude/skills/narrative-frame/references/scenario_to_framework.md`
+
+**業界對照**: Barbara Minto SCQA + Randy Olson ABT + Nancy Duarte Sparkline + Cynefin 域 5 分類 + 12 條 design principles。
+
 ---
 
 ## §16 文檔規範（精要 + 跳轉）

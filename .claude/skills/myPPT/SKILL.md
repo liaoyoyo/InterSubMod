@@ -5,6 +5,12 @@ allowed-tools: Read, AskUserQuestion
 user-invocable: true
 ---
 
+> **⚠ 2026-05-22 thin wrapper migration**: 本 skill 為 `/narrative-frame` skill 的 **thin wrapper / 場景路由總入口**。
+> 用戶説「我要做簡報」→ 場景識別後路由到 `/weekly-report`（週報母稿）或 `/pptx-build`（PPTX 製作）。
+> 兩者皆已 thin-wrapper 化（預設 framework = Multi-Thread-Narrative / Audience-Scenario-Pitch）。
+> 用戶可在任一階段説「換 framework」直接走 `/narrative-frame N1-N6` 動態挑。
+> Catalog: `InterSubMod/.claude/skills/narrative-frame/references/framework_catalog.md`。
+
 # myPPT — 整體 PPT 工作流總入口
 
 從用戶意圖識別場景，委派對應 sub-skill：
@@ -24,11 +30,13 @@ user-invocable: true
                   --from-draft
 ```
 
-## 場景識別 4 options（核心邏輯）
+## 場景識別 — 2-axis（必問兩個 questions，**2026-05-20 Issue #3 升級**）
+
+**Axis 1 · 來源**（決定 weekly-report 是否經過）：
 
 ```yaml
 question: "您要做什麼類型的簡報/報告？"
-header: "場景識別"
+header: "來源軸"
 options:
   - label: "週報整理（給教授/PI 看的進度）"
     description: "→ 委派 weekly-report skill 走 W1-W7 母稿。完成後可選 handoff A 接 pptx-build 產 PPTX"
@@ -39,6 +47,24 @@ options:
   - label: "完整 pipeline（先週報母稿，再產 PPT）"
     description: "→ 先 weekly-report 走 W1-W7，C4 後自動 handoff A 觸發 pptx-build"
 ```
+
+**Axis 2 · 受眾/場景**（決定 slide 數 / chars / rows 量化標準 — 對齊 memory `reference-pi-scenario-quantitative-standards`）：
+
+```yaml
+question: "報告場景是哪種？"
+header: "場景軸"
+options:
+  - label: "PI 1-on-1（週報, 5-10 min）"
+    description: "≤ 6 slides · ≤ 150 chars 純文字 / ≤ 250 含表 · ≤ 5 table rows · 60-75% visual · 3-second test"
+  - label: "Lab meeting（15-30 min）"
+    description: "8-15 slides · ≤ 250 chars 純文字 / ≤ 350 含表 · ≤ 8 table rows · 50-65% visual · 5-second test"
+  - label: "Conference talk（45-60 min）"
+    description: "20-40 slides · ≤ 350 chars 純文字 / ≤ 450 含表 · ≤ 12 table rows · 40-60% visual · 10-second test"
+  - label: "Lab informal pitch（5 min 短報告）"
+    description: "3-5 slides · ≤ 100 chars 純文字 / ≤ 200 含表 · ≤ 4 table rows · 70-80% visual · 3-second test"
+```
+
+**輸出 frontmatter**：兩 axis 選擇寫入 master_draft.md frontmatter (`source_path: ...` + `audience_scenario: pi-1on1`)，下游 pptx-build / html-report-build 讀取套用量化標準。
 
 ## 委派邏輯
 
@@ -72,4 +98,5 @@ options:
 
 1. 不要直接在 myPPT skill 內做實作 — 必須委派
 2. 觸發詞與 weekly-report / pptx-build 部分重疊，由 myPPT 優先觸發場景識別
-3. 場景識別 AskUserQuestion 為**必停**（不論 fast-track）
+3. 場景識別 AskUserQuestion 為**必停**（不論 fast-track）— **兩個 axis 都要問**
+4. **2026-05-20 Issue #8 落地**：「整理本週的重點」「給 PI 看的進度」「研究進度」「lab meeting」→ 來源軸**必經 weekly-report W1-W7**，不可直接跳 html-report-build / pptx-build。除非用戶明示「不需要母稿」或「已有母稿」。

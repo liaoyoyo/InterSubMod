@@ -6,6 +6,12 @@ user-invocable: true
 paths: ["docs/reports/**/*.md", "docs/presentations/**/*.md"]
 ---
 
+> **⚠ 2026-05-22 thin wrapper migration**: 本 skill 為 `/narrative-frame` skill 的 **thin wrapper**。
+> 預設 framework = **Multi-Thread-Narrative**（即下述 17 段 4 主線）。
+> 等同 `/narrative-frame apply Multi-Thread-Narrative`。
+> 用戶可隨時換 framework：對話中説「用 SCQA 改寫週報」或直接走 `/narrative-frame N1-N6` 動態挑。
+> Catalog: `InterSubMod/.claude/skills/narrative-frame/references/framework_catalog.md` §11 hybrid。
+
 # weekly-report Skill (v2)
 
 > **2026-05-02 v1 → v2 升級說明**：本版本相對 v1 主要差異：
@@ -226,10 +232,25 @@ AskUserQuestion: 母稿已完成。下一步？
 - 「跨樣本一致」（無 n / 無 95% CI）
 - 「clearly / strongly / rigorously」confidence 詞彙
 
+**Number-source-grep audit（2026-05-20 Issue #2 升級）**：W7 母稿產出前必檢查所有 numerical values 都有 `[source: <path>:line]` 標註；下游 html-report-build / pptx-build 套此標註做 grep 驗證，避免 LLM 內插「合理範圍」數字。
+
 ## 與其他 skill 的關聯
 
-- **pptx-build**：下游接棒。C4 後 4 選 A/D 觸發。母稿 frontmatter 提供 main thesis / report_type，pptx-build 跳過 P1 main thesis 鎖定
+- **pptx-build**：下游接棒。C4 後 4 選 A/D 觸發。母稿 frontmatter 提供 main thesis / report_type / `audience_scenario`，pptx-build 跳過 P1 main thesis 鎖定
+- **html-report-build**：下游接棒（slide 模式）。母稿 frontmatter `audience_scenario` 提供 PI 1-on-1 / Lab meeting / Conf 場景對應量化標準
 - **myPPT（總入口）**：用戶說「做週報」時 myPPT 場景識別後委派本 skill
+
+## ⚠ Skip 條件（2026-05-20 Issue #8 升級）
+
+**本 skill 為「整理本週重點 / PI 進度匯報 / lab meeting」的 source-of-truth 入口**，**不可被略過直接跳 html-report-build / pptx-build**，除非：
+
+1. 用戶明示「已有 master_draft.md」+ 提供路徑
+2. 用戶明示「不需要母稿」+「直接產 PPT」+「從零開始」
+3. 場景非週報（單實驗報告 → results-report / 單工程改動 → structured-tech-report / 研究收尾 → conclude-research）
+
+否則「整理本週」「PI 進度」「lab meeting」等觸發語必經 W1-W7 + C0-C4 checkpoint，產出 master_draft.md 後再 handoff。
+
+**為何**：本次 2026-05-20 session 暴露 — skip weekly-report 後無 SoT 母稿，多版 HTML 迭代各自編造數字，導致 +0.057 fabrication 跨 4 版本傳遞 evaluator 第二輪才 catch。
 - **structured-tech-report**：平行（單一工程改動 deep dive，不在週期 cadence）
 - **review-evidence / provenance-tier-audit**：W1 上游工具
 - **confirmation-protocol**：規範來源，C0-C4 對應 Hard Gate / Gate / Review 級別

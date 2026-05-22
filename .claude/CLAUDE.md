@@ -64,6 +64,11 @@
   - **Pre** (entry-point ≤30min): `/pre-decision-audit` (7 outputs + Cynefin gate + 5-dim credibility + GO/PROBE/NO-GO verdict)
   - **Process** (spec 實作中 live): `/implementation-notes` (4 sections + Lore — 設計決定 / 偏離 / 折衷 / 未決)
   - **Post** (P5 cycle 結束後): `/run-evaluator` (tier ⭐1-5 + 6 risk components)
+- **敘述框架庫 ⭐ 2026-05-22**: `/narrative-frame`（主入口 + 50+ catalog；取代既有 7 報告類 skill 固定範本）
+  - 7 thin wrapper skill: `/structured-tech-report`（→ A3+ADR+Postmortem-hybrid）/ `/weekly-report`（→ Multi-Thread-Narrative）/ `/pptx-build`（→ Audience-Scenario-Pitch）/ `/results-report`（→ Data-Showcase）/ `/conclude-research`（→ Verdict-Pyramid）/ `/report`（→ AI-Session-Companion）/ `/myPPT`（場景路由）
+  - 1 sub-agent: `narrative-organizer`（≥3 文件並行萃取 + cross-file 主題聚類）
+  - 1 hook: `narrative_frame_advisor.sh`（UserPromptSubmit 偵測 keyword 推薦套 framework）
+  - 與 `/pre-decision-audit` decision 層正交（decision 決定要不要做 + narrative-frame 決定怎麼講）
 
 ---
 
@@ -171,3 +176,42 @@
 
 詳見 `InterSubMod/AGENTS.md §15`（跨 agent governance；Claude Code 完全遵循）。
 本檔不重複內容以避免 drift。
+
+---
+
+## §11 敘述框架預設啟用（2026-05-22 落地）
+
+> **目的**：減少用戶理解負擔 — 所有「整理 / 報告 / 説明」AI 回覆預設套敘述框架。
+
+### Tier 對應啟用條件
+
+| Tier | 條件 | 行為 |
+|------|------|------|
+| **Tier 1** | factual lookup / single-line answer / `<10 字 / yes-no | **skip** framework — 直接答 |
+| **Tier 2** | 200-500 字 / 跨 2-3 概念 | 回覆**首行**聲明 framework（如「用 PREP：」）+ 結構化內容 |
+| **Tier 3** | ≥500 字 / 跨 ≥3 概念 / 多文件統整 / 結論性報告 | 完整跑 `/narrative-frame` N1-N6 + structured output + source mapping |
+
+### 觸發 keyword（中英）
+
+UserPromptSubmit hook `narrative_frame_advisor.sh` 偵測：
+- **中**：整理 / 報告 / 説明 / 彙報 / 總結 / 介紹 / 講解 / 解釋 / 簡報 / 教 / 寫 / 整合 / 分析 / 對比 / 比較 / pitch / 答辯
+- **英**：explain / summarize / report / pitch / present / teach / walk through / integrate / outline / breakdown
+
+### 用戶 override
+
+- 説「不用框架」/「skip framework」 → advisor skip + AI 不套用
+- 説「換 X framework」 → 直接跳 N5 重套
+- 説「用 Tier 2 inline」 → 強制走 Tier 2（即使 ≥500 字）
+
+### 與 thin wrapper skill 關係
+
+- 既有 7 報告類 skill（`/structured-tech-report` / `/weekly-report` / `/pptx-build` 等）已 thin-wrapper 化
+- 用戶説「整理 commit」 → 路由 `/structured-tech-report` thin wrapper → 預設 framework = A3+ADR+Postmortem-hybrid（即原 13 段）
+- 用戶説「換 framework」 → 跳 `/narrative-frame` N1-N6 動態挑
+
+### 50+ framework catalog
+
+`InterSubMod/.claude/skills/narrative-frame/references/framework_catalog.md`（10 大類 SoT）
+快速查表：`InterSubMod/.claude/skills/narrative-frame/references/scenario_to_framework.md`
+
+⚠ **變動頻率上限**：新框架進 catalog → 必同步 scenario_to_framework + business_sources；每月 audit 一次 drift。

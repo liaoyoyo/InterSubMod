@@ -6,6 +6,12 @@ tags: [Research, Reporting, Experiments, Obsidian]
 user-invocable: true
 ---
 
+> **⚠ 2026-05-22 thin wrapper migration**: 本 skill 為 `/narrative-frame` skill 的 **thin wrapper**。
+> 預設 framework = **Data-Showcase**（Hypothesis → Data → Stats → Caveats）。
+> 等同 `/narrative-frame apply Data-Showcase`。
+> 用戶可隨時換 framework：對話中説「換 SCQA」或直接走 `/narrative-frame N1-N6` 動態挑。
+> Catalog: `InterSubMod/.claude/skills/narrative-frame/references/framework_catalog.md` §11 hybrid。
+
 # Results Report
 
 Write the **complete post-experiment summary report** after analysis artifacts are ready.

@@ -5,6 +5,12 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep
 user-invocable: true
 ---
 
+> **⚠ 2026-05-22 thin wrapper migration**: 本 skill 為 `/narrative-frame` skill 的 **thin wrapper**。
+> 預設 framework = **Verdict-Pyramid**（Pyramid + WRAP falsifier observable）。
+> 等同 `/narrative-frame apply Verdict-Pyramid`。
+> 用戶可隨時換 framework：對話中説「用 SCQA + STAR」或直接走 `/narrative-frame N1-N6` 動態挑。
+> Catalog: `InterSubMod/.claude/skills/narrative-frame/references/framework_catalog.md` §11 hybrid。
+
 # 研究收尾與知識傳播 (Conclude Research)
 
 完成研究後的標準化收尾流程：驗證產出物 → 撰寫報告 → 傳播結論到所有追蹤系統。
