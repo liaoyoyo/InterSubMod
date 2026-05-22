@@ -582,20 +582,77 @@
 
 ---
 
-## §12 跨類補充（非核心但有用）
+### 6 Sub-templates of Audience-Scenario-Pitch（pptx-build §11 hoisted to first-class — 2026-05-22 V1 review fix F-D2-01）
 
-| Framework | 結構 | 適合 |
-|-----------|------|------|
-| **PESTLE** | Political / Economic / Social / Technological / Legal / Environmental | 外部環境分析 |
-| **SWOT** | Strengths / Weaknesses / Opportunities / Threats | 內部 + 外部評估 |
-| **First Principles** | 拆到最基本不可分原則 → 重建 | Elon Musk 風推理 |
-| **Six Thinking Hats** | 6 帽子（白 / 紅 / 黑 / 黃 / 綠 / 藍）依序戴 | brainstorm 防偏見 |
-| **Hourglass Writing** | Wide → Narrow → Wide | essay / paper |
-| **CRABS** | Coherence / Relevance / Accuracy / Brevity / Structure | writing checklist |
-| **5C Analysis** | Customer / Company / Competitor / Collaborator / Context | marketing situational |
-| **OKR** | Objectives + Key Results | goal-setting |
-| **STP** | Segmentation / Targeting / Positioning | marketing strategy |
-| **Job-To-Be-Done** | When ___, I want ___, so I can ___ | product design |
+> 這 6 個原本只在 `pptx-build` 6 報告模板識別表內定義；V1 review 發現 scenario_to_framework.md 引用為 first-class 但無對應 catalog entry。hoisted 補齊。
+
+#### Improvement Report
+- **結構**: Before → Problem → Cause → Solution → Verify → Impact
+- **適合**: 修補 / 優化 / fix 類 PPT
+- **不適合**: 探索性新方向（用 Pixar Spine）
+- **InterSubMod 對應**: pptx-build trigger keyword 「修補/修復/優化/fix」
+
+#### Comparison Report
+- **結構**: Setup → A → B → Side-by-side → Verdict
+- **適合**: A vs B 對照 / benchmark / before-after
+- **不適合**: 多選項（>2）比較（用 MECE）
+- **InterSubMod 對應**: pptx-build trigger keyword 「A vs B / 對照 / benchmark」
+
+#### Executive Summary
+- **結構**: TL;DR → Top 3 → Risks → Asks
+- **適合**: 月會 / PI / KPI / quarterly review
+- **不適合**: 探索性開放討論（缺結論先行）
+- **InterSubMod 對應**: pptx-build trigger keyword 「月會/PI/KPI/quarterly」
+
+#### Data Showcase（= §11 Data-Showcase 同義）
+- **結構**: Hypothesis → Data → Stats → Caveats
+- **適合**: 單實驗結果 / metric 解讀
+- **InterSubMod 對應**: pptx-build trigger keyword 「結果/實驗/統計」+ /results-report thin wrapper
+
+#### Concept Walkthrough
+- **結構**: Why → Define → Mechanism → Examples → Boundary
+- **適合**: 教學 / 解釋 / 方法論
+- **不適合**: 結論性 verdict（用 Verdict-Pyramid）
+- **InterSubMod 對應**: pptx-build trigger keyword 「教學/解釋/方法論」
+
+#### Academic Defense
+- **結構**: Background → Question → Method → Result → Discussion → Future
+- **適合**: 教授 / 同儕審查 / thesis defense
+- **不適合**: 短 pitch（≤5min）（用 PREP / SCQA）
+- **InterSubMod 對應**: pptx-build trigger keyword 「教授/同儕審查/thesis」
+
+---
+
+### Bland 2×2 (Assumption Map) — 決策評估 sub-framework（V1 review fix F-D2-01）
+
+> 原本只在 /pre-decision-audit §3 內使用；V1 review 發現 scenario_to_framework.md 引用為 first-class 但無對應 catalog entry。hoisted 補齊。
+
+- **結構**: 2×2 axis (Importance × Known/Unknown)
+  - HIGH importance × KNOWN → (1) verify quickly
+  - **HIGH importance × UNKNOWN → (2) MUST validate ⚠ 右上 quadrant**
+  - LOW importance × KNOWN → (3) document only
+  - LOW importance × UNKNOWN → (4) defer / ignore
+- **適合**: 決策前審計 / pre-mortem 補強 / 假設可信度評估
+- **不適合**: 線性 yes-no 決策（用 DECIDE）/ 高速場合（用 OODA）
+- **業界源**: David Bland《Testing Business Ideas》(2019); [Precoil Assumptions Mapping](https://www.precoil.com/assumptions-mapping)
+- **InterSubMod 對應**: `/pre-decision-audit` §3 已內建
+
+---
+
+## §12 跨類補充（非核心但有用 — 4-col 已對齊 §15 maintenance rule，2026-05-22 V1 review fix F-D1-01）
+
+| Framework | 結構 | 適合 | 不適合 / 業界源 |
+|-----------|------|------|------|
+| **PESTLE** | Political / Economic / Social / Technological / Legal / Environmental | 外部環境分析 / market 進入評估 | 內部營運分析（用 SWOT）/ Aguilar 1967 ETPS 衍生 |
+| **SWOT** | Strengths / Weaknesses / Opportunities / Threats | 內部 + 外部評估 / 戰略規劃 | 高速決策（用 OODA）/ Albert Humphrey, Stanford 1960s |
+| **First Principles** | 拆到最基本不可分原則 → 重建 | Elon Musk 風推理 / 跳脱類比 | 已知問題 best-practice（用 SCQA）/ Aristotle《Metaphysics》 |
+| **Six Thinking Hats** | 6 帽子（白事實 / 紅情緒 / 黑批判 / 黃樂觀 / 綠創意 / 藍 process）依序戴 | brainstorm 防偏見 / 團隊會議 | 1 人快決策（用 PREP）/ Edward de Bono《Six Thinking Hats》1985 |
+| **Hourglass Writing** | Wide → Narrow → Wide | essay / paper / Intro-Methods-Discussion | 結論先行 exec brief（用 BLUF）/ 學術寫作 pedagogy |
+| **CRABS** | Coherence / Relevance / Accuracy / Brevity / Structure | writing checklist / editor self-review | 創意 brainstorm（用 Six Thinking Hats）/ Writing pedagogy |
+| **5C Analysis** | Customer / Company / Competitor / Collaborator / Context | marketing situational analysis | 內部組織分析（用 SWOT）/ Marketing textbook standard |
+| **OKR** | Objectives + 3-5 Key Results | goal-setting / quarterly planning | 短期 todo 排序（用 Eisenhower）/ Andy Grove (Intel) → John Doerr《Measure What Matters》2018 |
+| **STP** | Segmentation / Targeting / Positioning | marketing strategy / 産品定位 | 個人 decision（用 WRAP）/ Marketing textbook standard |
+| **Job-To-Be-Done** | When ___, I want ___, so I can ___ | product design / user research | 純技術 spec（用 ADR）/ Clayton Christensen《Competing Against Luck》2016 |
 
 ---
 

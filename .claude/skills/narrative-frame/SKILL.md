@@ -39,13 +39,14 @@ tags: ["narrative", "framework", "catalog", "expression", "communication", "scqa
 
 **Cross-cutting**：覆蓋所有「整理 / 報告 / 説明」AI 回覆 — 跨 P0-P6 phase、跨對話模式、跨輸出形式（口頭 / .md / slide / HTML / paper）。
 
-### 啟用層級（3 Tier — 對應 AGENTS.md §15 框架聲明維度）
+### 啟用層級（4 Tier — 對應 AGENTS.md §15.2 框架聲明維度，2026-05-22 V1 review fix）
 
 | Tier | 觸發條件 | 行為 |
 |------|---------|------|
-| **Tier 1** 簡單問答 | factual lookup / single-line / yes-no | **skip** framework（無 overhead） |
+| **Tier 1** 簡單問答 | factual lookup / single-line / yes-no / `<12 字 prompt` | **skip** framework（無 overhead） |
 | **Tier 2** 中度整理 | 200-500 字 / 跨 2-3 概念 | 回覆**首行**聲明 framework（如「用 PREP：」），結構化但不跑完整 N1-N6 |
-| **Tier 3** 複雜回覆 | ≥500 字 / 跨 ≥3 概念 / 多文件 / 結論性報告 | 完整跑 **N1-N6** + structured output + source mapping |
+| **Tier 3** 複雜回覆 | ≥500 字 / 跨 ≥3 概念 / 多文件 / 結論性報告 | 完整跑 **N1-N6** + structured output + source mapping + footer 引用業界源 |
+| **Tier 4** 重大 paper-scope / NO-GO | NO-GO 判定 / paper-scope 結論 / 跨樣本 verdict 升 tier ⭐4-5 | Tier 3 + **對齊 `/scientific-rigor` §2-§7**（每 claim 標 L1-L5 + DAG + Pre-reg 對照）|
 
 ### 與「假説驗證三層樓」關係
 

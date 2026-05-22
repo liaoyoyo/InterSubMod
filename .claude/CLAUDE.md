@@ -183,13 +183,14 @@
 
 > **目的**：減少用戶理解負擔 — 所有「整理 / 報告 / 説明」AI 回覆預設套敘述框架。
 
-### Tier 對應啟用條件
+### Tier 對應啟用條件（4-tier，與 SKILL.md §1 + AGENTS.md §15.2 同步）
 
 | Tier | 條件 | 行為 |
 |------|------|------|
-| **Tier 1** | factual lookup / single-line answer / `<10 字 / yes-no | **skip** framework — 直接答 |
+| **Tier 1** | factual lookup / single-line answer / `<12 字 prompt` / yes-no | **skip** framework — 直接答 |
 | **Tier 2** | 200-500 字 / 跨 2-3 概念 | 回覆**首行**聲明 framework（如「用 PREP：」）+ 結構化內容 |
-| **Tier 3** | ≥500 字 / 跨 ≥3 概念 / 多文件統整 / 結論性報告 | 完整跑 `/narrative-frame` N1-N6 + structured output + source mapping |
+| **Tier 3** | ≥500 字 / 跨 ≥3 概念 / 多文件統整 / 結論性報告 | 完整跑 `/narrative-frame` N1-N6 + structured output + source mapping + 業界源 footer |
+| **Tier 4** | 重大 paper-scope / NO-GO 判定 / tier 升級至 ⭐4-5 | Tier 3 + 對齊 `/scientific-rigor` §2-§7（每 claim 標 L1-L5 + DAG + Pre-reg 對照表）|
 
 ### 觸發 keyword（中英）
 
