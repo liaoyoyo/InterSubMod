@@ -87,6 +87,53 @@ docs/architecture/{YYYYMMDD}_{專案主題}/
 -->
 ```
 
+## ⭐ 2026-05-26 新增 — Partial-Scope Ribbon 強制規則（A5 落地，5/24 incident postmortem）
+
+**規則**：當文件涵蓋的 scope < 100%（如 3/24 chr, 1/7 sample, single-cycle subset），**必須在以下 3 個位置同步標註 partial flag**：
+
+### 1. 元數據區（HTML comment 開頭）
+
+```markdown
+<!--
+建立時間: YYYY-MM-DD HH:MM
+目標: ...
+處理範圍: ⚠ PARTIAL SCOPE — 3/24 chr (chr1, chr8, chr19) × 1/7 sample (HCC1395)
+完整 scope 未驗證: chr2-7, chr9-23, chrX, chrY × 其他 6 樣本
+補強計劃: cycle N+1 擴展至全 24 chr × 7 樣本 (預估 +30-50 min)
+-->
+```
+
+### 2. 文件首段 hero / TL;DR 顯著位置
+
+```markdown
+> ⚠ **PARTIAL SCOPE**: 本報告僅涵蓋 3/24 chr × 1/7 sample。完整 scope 待 cycle N+1 驗證。
+```
+
+### 3. HTML standalone footer / .md 結尾 caveat 段
+
+```markdown
+## Scope Limitation
+- 已驗證: chr1 (5,000 sites), chr8 (3,200 sites), chr19 (2,100 sites) × HCC1395
+- 未驗證: 剩餘 21 chr + 6 樣本（包含 chr16, chrX phasing-weak outlier 風險）
+- 推論限制: 結論僅適用已驗證 scope；不可外推到 full genome 直到 cycle N+1 完成
+- 補強動作: 預定 YYYY-MM-DD 跑全量
+```
+
+### Task Type 對應 partial flag 義務（per AGENTS.md §15.3）
+
+| Task Type | partial flag 義務 |
+|-----------|------------------|
+| (A) Exploratory pilot | 必標 partial flag + 後續補強計劃 |
+| **(B) Comprehensive validation** | **不應 partial** — 若 partial 必明示為何（時間 / 計算成本）+ 補強 deadline |
+| **(C) Production deployment** | **不應 partial** — partial 視為 NOT release-ready |
+| **(D) Handoff to external** | **不應 partial** — 必先補完全 scope 才能對外 |
+| (E) Hotfix | 最小可重現 OK，但必加 regression test scope 説明 |
+| (F) Demo | 必首段標 `[DEMO]` + 不可作 validation evidence |
+
+**5/24 incident reference**: HKU handoff 任務（task type D）PI .md / HTML / dashboard 均無 partial flag → 5/26 修正為 mandatory 3-locations。
+
+---
+
 ## 圖片存放與引用規則
 
 - 純圖片子目錄統一命名 `figures/`（不用 `images/`、`plots/`）；混合類型資源目錄可用 `assets/`

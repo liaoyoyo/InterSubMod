@@ -166,7 +166,10 @@
       "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/compact_test.sh)",
       "Bash(timeout 3 bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/watch_session.sh 10 --no-clear)",
       "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/evidence_level_lint.sh)",
-      "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/causal_claim_check.sh)"
+      "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/causal_claim_check.sh)",
+      "Bash(mkdir -p /big7_disk/liaoyoyo2001/data/bam)",
+      "Bash(netstat -tln)",
+      "Bash(ip -4 addr show)"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
@@ -264,6 +267,14 @@
           {
             "type": "command",
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/narrative_frame_advisor.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/task_type_advisor.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       }

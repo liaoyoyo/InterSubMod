@@ -6,6 +6,33 @@
 
 ---
 
+## §0 任務類型 gate（2026-05-26 5/24 incident postmortem 落地 — prerequisite）
+
+**規則**: 任何 conversation 啟動時 / 接到新任務時，**先做 task type classification** 再進 §1 暫停判斷矩陣。task type 決定 default scope 與 deliverable 義務。
+
+**6 類速查**（完整定義見 `InterSubMod/AGENTS.md §15.3`）:
+
+| Type | Keyword | Default Scope |
+|------|---------|--------------|
+| A pilot | pilot / 探索 / 試 / 先看 | Subset OK |
+| **B validation** | 完整 / final / validation / 驗證 | **全基因組 + 全樣本** |
+| **C production** | release / deploy / merge | **全 scope + cross-platform** |
+| **D handoff** | handoff / 交付 / HKU / external | **全 scope + 説明文件** |
+| E hotfix | bugfix / hotfix / urgent | 最小可重現 |
+| F demo | demo / 示意 / 教學 | Subset OK + DEMO 標 |
+
+**強制行為**:
+1. **啟動先分類** — 不可省略；模糊 → AskUserQuestion 必問 task type
+2. **AskUserQuestion 強制含 scope 維度** — 觀察/報告類任務問卷必含「scope 全 vs subset？」
+3. **subset 必標 partial flag** — `/doc-standards` ribbon
+4. **「見樹也見林」四層** — aggregate / canonical / extreme outlier / well-explained
+
+**主動 recall**: 啟動 prompt 含 keyword（完整 / 報告 / 整理 / handoff / 驗證 / final / 對外）→ 必 recall `feedback_observation_scope_default_comprehensive` 與 `feedback_task_first_then_doc_then_plan` 兩條 memory。
+
+**業界對照**: Cynefin domain + DACI/DECIDE + Bland Assumption Map。完整 governance → `InterSubMod/AGENTS.md §15.3`。
+
+---
+
 ## §1 確認協議與暫停判斷（Claude Code 特定）
 
 **模式觸發詞**: `互動模式`（預設） / `全自動` / `auto`
@@ -96,6 +123,7 @@
 - `researcher_claim_evidence_check.sh` ✅（PostToolUse 偵測 hedge 語言）
 - `memory_recall_logger.sh` ✅（PostToolUse 引用率量化）
 - `external_input_sanitizer.sh` ✅（PostToolUse WebFetch injection 偵測）
+- `task_type_advisor.sh` ✅ **2026-05-26 新增**（UserPromptSubmit task type 6 類 keyword 偵測 → 注入 advisory + telemetry log；A6 落地 5/24 incident postmortem）
 
 ---
 

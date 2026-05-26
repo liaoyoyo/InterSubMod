@@ -376,6 +376,31 @@ P: <重申結論>
 
 **業界對照**: Barbara Minto SCQA + Randy Olson ABT + Nancy Duarte Sparkline + Cynefin 域 5 分類 + 12 條 design principles。
 
+### §15.3 任務類型 gate（2026-05-26 5/24 incident postmortem 落地）
+
+**規則**: 任何 conversation 啟動時，AI **必先做 task type classification**（A-F 6 類），再進入後續流程（暫停判斷 / 觀察 / 報告 / commit）。task type 決定 default scope + deliverable 義務。
+
+**6 類 + Default Scope + Deliverable 義務**:
+
+| Task Type | 觸發 keyword | Default Scope | Deliverable 義務 | 可否 subset |
+|-----------|------------|--------------|----------------|------------|
+| **(A) Exploratory pilot** | pilot / 探索 / 試 / 先看 / 小規模 / 快速 | Subset OK（1-3 chr / 1-2 樣本） | partial flag + caveat + 後續補強計劃 | ✅ |
+| **(B) Comprehensive validation** | 完整 / 全部 / final / validation / 驗證 / 對應 / 對齊 | **全基因組 + 全樣本** | verification 證據鏈 + ledger 紀錄 | ❌（必問用戶確認）|
+| **(C) Production deployment** | release / deploy / merge to main / production | **全 scope + cross-platform** | release 流程 + smoke + release notes | ❌ |
+| **(D) Handoff to external** | handoff / 交付 / HKU / collaborator / external / 對外 | **全 scope + 説明文件** | scope 説明 + 外部 reviewer format + 限制清單 | ❌ |
+| **(E) Hotfix / Bugfix** | bugfix / hotfix / regress / urgent / 排除 | 最小可重現（≤1 chr / ≤1 樣本 OK） | regression test + 根因記錄 + ledger reference | ✅ |
+| **(F) Demo / Illustration** | demo / 示意 / example / 教學 / show | Subset OK + 顯著「DEMO」標 | 不可作 validation evidence / 不寫 ledger | ✅ |
+
+**強制行為**:
+1. **conversation 啟動先分類** — 不可省略；模糊 → AskUserQuestion 必問 task type
+2. **AskUserQuestion 強制含 scope 維度** — 任何觀察 / 報告類任務啟動的問卷必含「scope 全 vs subset？」
+3. **subset 必標 partial flag** — `/doc-standards` ribbon + HTML/MD footer
+4. **見樹也見林四層展示** — aggregate / canonical / extreme outlier / well-explained（見 `feedback_observation_scope_default_comprehensive` Step 3）
+
+**5/24 incident reference**: HKU handoff 任務（task type D）AI 預設繼承前一 cycle 3-chr scope（task type A）；應為 scope=全 24 chr。詳見 `feedback_observation_scope_default_comprehensive` 「5/24 incident postmortem reference」段。
+
+**業界對照**: Cynefin domain（task type 對應 domain 判斷）+ DACI / DECIDE（決策框架）+ Bland Assumption Map（partial flag 義務化）。
+
 ---
 
 ## §16 文檔規範（精要 + 跳轉）

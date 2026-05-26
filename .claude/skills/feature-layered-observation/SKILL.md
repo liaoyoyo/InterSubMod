@@ -42,10 +42,19 @@ G1-G10 十個功能群組驗證了同一條流程穩定可行（見 `research/fe
 
 ### Step 0 · 前置檢查（必做）
 
-1. 確認 feature 存在於 `merged_with_vcf.tsv.gz` 或指定 master；不存在 → 暫停並詢問來源 pipeline
-2. 查 `feature_registry.tsv` 是否已有 `prior_conclusion` — 若已有 NEGATIVE/CONFOUND_COLLAPSED → **一行告知後繼續**或用戶明示 skip
-3. 讀 `docs/reports/research_landscape/03_ISM分析價值界定.md` 確認該特徵未被標為 `annotation_only`（若已標：降為 characterization-only observation）
-4. 呼叫 `/known-pitfalls`：涉及 OLS/residualization/AF collider 場景必讀
+1. **⭐ 2026-05-26 新增 — Task Type Gate + Scope 確認**（5/24 incident A3+A4 落地）：
+   - 從 6 類（A-F per `AGENTS.md §15.3` / CLAUDE.md §0）識別當前 task type
+   - **AskUserQuestion 必含 scope 維度**：
+     > Q: 觀察 scope？
+     > A1: 全基因組 + 全樣本（Recommended for B validation / C production / D handoff）
+     > A2: Subset（理由：時間 / 小步驗證 / hotfix）— 必標 partial flag
+     > A3: 自訂 + 後續補強計劃
+   - 若 task type ∈ {B, C, D} 但用戶選 A2 → 必加 caveat（PI .md / HTML / dashboard 顯著位置）
+   - 若 task type ∈ {A, E, F} → subset 預設 OK 但 deliverable 必標 partial flag
+2. 確認 feature 存在於 `merged_with_vcf.tsv.gz` 或指定 master；不存在 → 暫停並詢問來源 pipeline
+3. 查 `feature_registry.tsv` 是否已有 `prior_conclusion` — 若已有 NEGATIVE/CONFOUND_COLLAPSED → **一行告知後繼續**或用戶明示 skip
+4. 讀 `docs/reports/research_landscape/03_ISM分析價值界定.md` 確認該特徵未被標為 `annotation_only`（若已標：降為 characterization-only observation）
+5. 呼叫 `/known-pitfalls`：涉及 OLS/residualization/AF collider 場景必讀
 
 ### Step 1 · 全域分佈
 
@@ -139,6 +148,22 @@ G1-G10 十個功能群組驗證了同一條流程穩定可行（見 `research/fe
 8. **Spatial autocorrelation**（Step 6 warning or pass + fig06）
 9. **論文與知識庫背景**（knowledge MCP search + bibliography，至少 3 refs）
 10. **結論與質疑**（verdict + 邏輯鏈 + 3 質疑 + 後續建議）
+
+### ⭐ 2026-05-26 新增 — Mandatory「見樹也見林」四層展示（A4 落地）
+
+每個 finding（特別是 task type B/C/D = validation / production / handoff）**必須 cover 四層**，缺一即補 caveat：
+
+| 層次 | 例 | 在 10 章節中的位置 |
+|------|-----|------------------|
+| **林（aggregate）** | 全 24 chr / 全 7 樣本 mean ± SD / median + IQR / total count | §3 全域分佈 + §6 分層 AUC global bar |
+| **樹 1（canonical）** | 典型 chr 或樣本（如 chr1 baseline / HCC1395 主樣本） | §5 跨樣本一致性 + §4 32-cell 主要 cell |
+| **樹 2（extreme outlier）** | 極端 chr/樣本（如 chr16/chrX phasing weak / chr8 99% LOH / 某樣本 5σ 偏離） | §4 32-cell outlier cell + §5 per-sample outlier |
+| **樹 3（well-explained）** | 深度解釋的單一範例（單一位置完整因果鏈 + 機制示範） | §10 結論與質疑「機制範例」段 |
+
+**Quality gate**：deliverable 缺任何一層 → 必補；補不了 → §10 明示 caveat。
+**Subset scope 例外**：若 task type ∈ {A, E, F} subset 被 ack，林 / 樹 2 / 樹 3 可降低詳盡程度，但仍須至少 1 例 outlier + 1 例 well-explained。
+
+**5/24 incident reference**：HKU handoff 任務 3-chr scope 缺 chr16/chrX outlier 與 well-explained 單位置範例 → 5/26 修正為 mandatory four-layer。
 
 ## 圖表規範
 

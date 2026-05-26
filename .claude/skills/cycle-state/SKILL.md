@@ -45,9 +45,30 @@ Resilient Waterfall harness 的中央看板。把分散在 `state/active.json` �
 | **Reads** | `state/active.json` | active cycles 索引 |
 | **Reads** | `state/cycles/{id}/state.json` | per-cycle snapshot |
 | **Reads (optional)** | `state/retro_cycles/{id}/state.json` | 只在 `--include-retro` 時顯示 |
+| **Reads (optional)** | `docs/postmortems/task_type_recall_YYYYMM.log` ⭐ 2026-05-26 | task type telemetry（A7 落地）|
 | **Used by** | Master conversation | dashboard 輔助決策 |
 | **Used by** | SessionStart hook (建議) | 自動列出 active 概覽 |
 | **Writes** | (nothing) | **唯讀** |
+
+## ⭐ 2026-05-26 新增 — Scope / Task Type 月度 Audit（A7 落地，5/24 incident postmortem）
+
+**用途**：每月 audit task type classification 是否被觸發 + scope misalignment 事件追蹤。
+
+**指令**:
+```bash
+# 查當月 task type 偵測 telemetry
+LOG="/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/task_type_recall_$(date +%Y%m).log"
+[ -f "$LOG" ] && awk -F'\t' '{print $2}' "$LOG" | sort | uniq -c | sort -rn
+
+# 查 partial-scope deliverable（grep .md / .html with PARTIAL flag）
+grep -lE "⚠ PARTIAL SCOPE|PARTIAL_SCOPE" \
+  /big7_disk/liaoyoyo2001/InterSubMod/docs/reports/validated/$(date +%Y/%m)/*.md 2>/dev/null
+
+# 查當月 B/C/D task type 但 deliverable 未標 partial flag → 警告
+# (manual review: cross-ref task_type_recall log + grep deliverable for missing flag)
+```
+
+**月度 audit 觸發**: 月初 manual review；alerts → `feedback_observation_scope_default_comprehensive` 「主動 recall 觸發條件」段。
 
 ## 何時使用
 

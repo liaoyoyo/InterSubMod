@@ -10,6 +10,25 @@ tags: ["analysis", "observation", "research"]
 
 依據 O1-O15 系列分析腳本的標準模式，生成新的觀察分析 Python 腳本。
 
+## ⭐ 2026-05-26 新增 — Task Type + Scope Gate（A3 落地）
+
+**腳本生成前必先做** task type classification（A-F per `AGENTS.md §15.3` / CLAUDE.md §0）：
+
+1. **AskUserQuestion 必含 scope 維度**：
+   > Q: 分析腳本 scope？
+   > A1: 全基因組 + 全樣本（Recommended for B/C/D）— 預估時間長但證據完整
+   > A2: Subset（chr1+chr8+chr19 / 1-2 樣本）— 必標 partial flag
+   > A3: 自訂
+2. **task type ∈ {B, C, D}** → 腳本 default 跑全 scope；用戶明示 subset 才縮小
+3. **task type ∈ {A, E, F}** → subset OK 但腳本輸出 .md / .tsv 必加 `# PARTIAL_SCOPE: ...` header
+4. **腳本 docstring 必含** `task_type` 與 `scope` 兩個元信息：
+   ```python
+   """[主題描述]
+   task_type: B (Comprehensive validation)
+   scope: full genome × 7 samples
+   """
+   ```
+
 ## 標準模式
 
 所有分析腳本遵循以下結構：
