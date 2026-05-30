@@ -226,7 +226,7 @@ Q3（鑑別題）：<X> 和 <Y> 容易搞混，差別在哪？
 | 學了之後想設計驗證 | `/validation-protocol` |
 | 主題涉及 InterSubMod 既有研究 | 提議查 knowledge base、`MEMORY.md`、`docs/CURRENT_FOCUS.md` |
 | 想排定複習提醒 | `/schedule`（一週後 / 兩週後） |
-| 想壓力測試自己學到什麼 | `/grill-me` |
+| 想壓力測試自己學到什麼 | `/scientific-rigor` §11.6 double-loop 自審 3 問 |
 
 ---
 

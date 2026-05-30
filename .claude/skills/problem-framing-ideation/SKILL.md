@@ -236,14 +236,14 @@ Complete working examples:
 
 | 失敗症狀 | 先看哪 | 排查步驟 |
 |---|---|---|
-| 用戶輸入太模糊無法收斂 | 對話歷史前 5 turn + `docs/CURRENT_FOCUS.md` | 用 `grill-me` skill 補充缺項；若仍無法 → 升級到 confirmation-protocol Hard Gate |
+| 用戶輸入太模糊無法收斂 | 對話歷史前 5 turn + `docs/CURRENT_FOCUS.md` | 用 `/pre-decision-audit` 補充缺項；若仍無法 → 升級到 confirmation-protocol Hard Gate |
 | 5W1H 表填不出來（缺 What/Why） | `docs/concepts/2026/04/20260409_研究構想總索引_01.md` | 查既有相似研究方向，借用其 Why 框架 |
 | 候選假說 > 5 個（太發散） | 用戶優先序 + 個人風格 anchor #5（限 <2hr） | 限投入時間；超時則選 top 3 進 inject-hypothesis，其餘 archive 到 research_direction.md backlog |
 | 與已 NEGATIVE 方向重複 | `docs/experiments/INDEX.md` 的 ❌ NO-GO 區、`MEMORY.md` Concluded 區 | 搜「相似 keywords」，找到歷史結論並引用；若重複 → 警告用戶並回到框架化 |
 | 與當前 Active Cycle 衝突 | `state/active.json`（≤5 個 active）+ `docs/CURRENT_FOCUS.md` | 若 active 已滿 5 個 → 不註冊新假說，先收尾舊 cycle |
 
 **何時升級到別的 skill / agent / 人工審查**：
-- 連續 3 次無法收斂候選假說 → 跳到 `grill-me` skill（深度互審）
+- 連續 3 次無法收斂候選假說 → 跳到 `/pre-decision-audit`（深度互審）
 - 涉及 NO-GO 判定（推翻已驗證結論） → Hard Gate，必停問用戶
 - 候選假說涉及 C++ 修改 → 預先呼叫 `methodology-audit` 評估方法學可行性
 

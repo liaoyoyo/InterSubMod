@@ -1,6 +1,6 @@
 # CLAUDE.md — Claude Code 行為規範
 
-> **此檔職責**：僅約束 Claude Code 特定行為（確認矩陣、Skills/Hooks 機制、Opus 4.7 特性）。
+> **此檔職責**：僅約束 Claude Code 特定行為（確認矩陣、Skills/Hooks 機制、Opus 4.8 特性）。
 > **跨 agent governance（專案目標、研究主軸、Step→Verify、KB 義務、Output 規範等）→ `InterSubMod/AGENTS.md`**。
 > Claude Code 啟動時 concatenate 載入兩檔。
 
@@ -60,29 +60,35 @@
 
 ---
 
-## §2 Opus 4.7 模型特性備註
+## §2 Opus 4.8 模型特性備註（2026-05-30 由 4.7 對齊；model = claude-opus-4-8）
 
-> **Opus 4.7 literal 特性**：模型不會推斷未明講需求、不會悄悄泛化指令。模糊輸入會被按字面執行 — **假設陳述是唯一屏障**。
+> **Opus 4.8 literal 特性（4.8 更甚）**：模型不會推斷未明講需求、不會悄悄泛化指令。模糊輸入會被按字面執行 — **假設陳述是唯一屏障**。
 
-- **預設不 spawn subagent**（單回合優先）
+- **預設不 spawn subagent**（單回合優先；大 fan-out 用 Dynamic Workflow，見 §8）
 - **預設少 tool calls**（reasoning 解決優先於反覆讀檔）
 - **回應長度動態化**（不再固定冗長）
 - **首 turn 規格完整度檢核**：規格缺項 ≥2 且高影響 → 必須回問
+- **Effort 比前代更關鍵**：project 已 pin `xhigh`；遇淺推理 raise effort 而非 prompt around it；深推理用 `ultrathink` 關鍵字
+- **Adaptive thinking 預設 OFF**（取代 4.7 的 budget_tokens / display:summarized）
 
 完整 Step→Verify 格式 / 假設陳述規則 / 證據敘述 → **`InterSubMod/AGENTS.md` §6**。
-完整模型執行特性 → `.claude/rules/opus47-behavior.md`（**目前永遠載入**；frontmatter 加入後變條件式 — 詳見 §5）
+完整模型執行特性 → **`.claude/rules/opus48-behavior.md`**（條件式載入；取代已停用的 opus47-behavior.md — 詳見 §5）
 
 ---
 
-## §3 Skills 分類索引（44 個 SKILL.md，Claude Code 特定 — 2026-05-20 索引 drift 修正）
+## §3 Skills 分類索引（46 個 SKILL.md，Claude Code 特定 — 2026-05-28 drift 再校正）
 
-> **drift 修正紀錄**：原寫 45 → 實際 44（`grill-me/` 不存在已移除）；新增 12 個未分類 skills 進對應類別。
+> **drift 修正紀錄**：
+> - 2026-05-20：原寫 45 → 一度改 44（誤判 `grill-me/` 為 phantom +1）。
+> - **2026-05-28 實測校正**：`find .claude/skills -name SKILL.md | wc -l` = **46**（先前一度誤記 44）；46 = 原 45（含 deprecated 的 `/html-preview` 仍計數）+ 新增 `/pipeline-manifest`（社群 gap G1）。校正機制：新增 `creation_guard.sh` hook 在 Write 新 SKILL.md 時提醒同步本計數。
+> - **2026-05-30 補正**：`grill-me` 並非「完全不存在」— 它是一個 **dangling symlink**（`.claude/skills/grill-me -> ../../.agents/skills/grill-me`，target 已不存在）。因無 `SKILL.md`，**不計入 46**（故 `find -maxdepth 1 -type d` = 47 但 `find -name SKILL.md` = 46，差 1 即此 symlink）。Claude Code 按 SKILL.md 列舉故不受影響。物理清除屬 Hard Gate 刪檔（待 ack `git rm .claude/skills/grill-me`）。
+> - 新增 12 個未分類 skills 進對應類別（2026-05-20）。
 > **重複交叉位置**：`/feature-layered-observation`（P3 + 研究專用）/ `/multi-sample-consistency`（P4 + 研究專用）/ `/pre-decision-audit`（元方法論 + 三層樓 pre）/ `/run-evaluator`（P5 + 三層樓 post）— 在多分類列出表示同 skill 多角色。
 
 - **元方法論（9）**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor` `/pre-decision-audit` ⭐ 新 `/problem-framing-ideation` `/provenance-tier-audit`
 - **7-Phase Waterfall（7）**: P0 `/cycle-init` → P1 `/research-loop` → P2 `/check-staleness` → P3 `/feature-layered-observation` → P4 `/multi-sample-consistency` → P5 `/run-evaluator` → P6 `/conclude-research`
 - **程式開發（4）**: `/cpp-change` `/methodology-audit` `/infra-ops` `/verification-loop`
-- **文件管理（4）**: `/doc-standards` `/data-audit` `/memory-consolidation` `/citation-verification`
+- **文件管理（5）**: `/doc-standards` `/data-audit` `/memory-consolidation` `/citation-verification` `/pipeline-manifest` ⭐ 新（reproducibility provenance DAG；與 data-audit 分工：data-audit 查組織、pipeline-manifest 查 script→figure 因果鏈）
 - **報告生成 retrospective（7）**: `/weekly-report` → `/pptx-build` / `/html-report-build` / `/results-report` / `/structured-tech-report` / `/report` / `/myPPT`
 - **視覺化（4）**: `/html-preview` `/image-gen` `/image-vision-check` `/research-dashboard`
 - **研究專用（8）**: `/auc-confound-guard` `/feature-layered-observation` `/multi-sample-consistency` `/pivot-direction` `/inject-hypothesis` `/init-research` `/review-evidence` `/observation-analysis`
@@ -101,7 +107,13 @@
 
 ## §4 Hooks 概覽（Claude Code 特定 — 2026-05-18 P4 完整收尾）
 
-依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop 6 個 events；**30 hook scripts** 跨 22 matchers）。
+依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop / **PreCompact** 7 個 events；**38 hook scripts**，2026-05-30 實測 `ls scripts/hooks/*.sh | wc -l`）。
+
+**2026-05-28~30 新增 4 個 hook**（社群 gap + 搜尋紀律）:
+- `search_scope_guard.sh`（PreToolUse Bash — **exit 2 阻擋** `grep -r .` / `find .` 無 maxdepth / `du */` 等不尊重 .gitignore 的 repo-root 遞迴搜尋；§12 搜尋紀律強制層）
+- `precompact_autosave.sh`（PreCompact 事件 — 壓縮前自動 dump active cycle + CURRENT_FOCUS 快照到 `state/compact_snapshots/`；對齊 §7 保留指令；gap G6）
+- `creation_guard.sh`（PreToolUse Write — 新建 SKILL.md/agent 前 dedup + 計數同步提醒；防 §3 計數 drift；gap G5）
+- `skill_registry_sync.sh`（PostToolUse Edit|Write — 編輯 README/CLAUDE.md 時比對「磁碟實際 skill/agent 計數 vs 文件宣稱最大數」，雙向 drift 守衛；2026-05-30 gap G5 補完）
 
 **Hard Gate hooks**（不可繞過 — `exit 2` 阻擋）:
 - `pre_commit_compile_check.sh`（C++ commit 必編譯）
@@ -132,7 +144,8 @@
 | Rule 檔案 | 狀態 | globs 條件 |
 |----------|------|-----------|
 | `.claude/rules/cpp-build.md` | **條件式載入** ✅ | `src/**/*.cpp`, `src/**/*.hpp`, `include/**/*.hpp`, `include/**/*.h`, `tests/**/*.cpp`, `CMakeLists.txt` |
-| `.claude/rules/opus47-behavior.md` | **條件式載入** ✅ | `.claude/skills/**/SKILL.md`, `.claude/skills/**/*.json`, `.claude/rules/**/*.md`, `.claude/skills/**/playbook.md`, `.claude/skills/**/prompts/*.md` |
+| `.claude/rules/opus48-behavior.md` | **條件式載入** ✅（2026-05-30 取代 opus47）| `.claude/skills/**/SKILL.md`, `.claude/skills/**/*.json`, `.claude/rules/**/*.md`, `.claude/skills/**/playbook.md`, `.claude/skills/**/prompts/*.md` |
+| ~~`.claude/rules/opus47-behavior.md`~~ | **DEPRECATED**（已移除 globs，不再 auto-load；待 Hard Gate `git rm`）| — |
 | `.claude/rules/workflow-commands.md` | **條件式載入** ✅ | `scripts/**/*.sh`, `scripts/**/*.py` |
 | `.claude/rules/output-structure.md` | **條件式載入** ✅ | `output/**/*`, `results/**/*` |
 
@@ -172,7 +185,7 @@
 
 ---
 
-## §8 Opus 4.7 Subagent 觸發
+## §8 Subagent 觸發 + Dynamic Workflow 路由（2026-05-30 更新）
 
 **預設不 spawn**（單回合優先）。**明示觸發語**才啟動：
 - 跨樣本平行 benchmark → `parallel-benchmark`
@@ -180,7 +193,24 @@
 - PR 審查 → `pr-review-toolkit`
 - 夜間/離線研究 → `headless-research`
 
+> **`.claude/agents/` 實有 18 個 project agent**（2026-05-30 實測 `ls .claude/agents/*.md`）：architect / developer / optimizer / tester / researcher / reviewer / evaluator / methodology-reviewer / parallel-benchmark / parallel-analysis / headless-research / narrative-organizer / research-orchestrator / literature-reviewer / paper-miner / release / **reproducibility-audit** ⭐ / **security-reviewer** ⭐（後 2 為 2026-05-30 新增 fresh-context read-only agent）。新增/刪除 agent 必同步本清單（`creation_guard.sh` 會在 Write agent 時提醒）。
+>
+> **新增的 read-only 機械型 agent 用 `model: haiku` 降 token**：`research-orchestrator`（純路由）+ `narrative-organizer`（純萃取）；驗證/coding agent（evaluator/reviewer/methodology-reviewer/architect/developer 等）維持 `inherit` 不降智力。
+
 **任務切割原則**：可切割且需要大量 context 處理 → 啟動 agent + **必須清楚回報主 agent** + **科學工程紀錄成文件**供檢核驗證。
+
+**Sub-agent return-contract（2026-05-30）**：subagent 回主 agent 時 — (a) full detail 落地成 OUTPUT_DIR 下 .md/.json；(b) 回 parent **只**回 `{status, key metrics/verdict, anomalies, path-to-landed-doc}`；(c) ~1-2K token soft target（**非 hard cap** — 勿截斷 parallel-benchmark 的多樣本 canonical 表）。`subagent_completion_logger.sh` 已捕 OUTPUT_TOKENS 可作 >3K advisory flag。
+
+### Dynamic Workflow 路由規則（2026-05-30 落地 — Opus 4.8 Workflow 工具）
+
+| 條件 | 用什麼 | 理由 |
+|------|--------|------|
+| **大規模 fan-out + 無資料依賴 + 終態明確**（跨 7 樣本 benchmark / 文獻 cross-check / NO-GO 前多角度 stress-test）| **Dynamic Workflow**（prompt 含 `workflow` keyword 觸發 / 存 `.claude/workflows/`）| plan 從 context 移到 script、resumable、adversarial 內建 |
+| **含 Hard Gate**（C++ commit 必編譯 / 刪檔 / NO-GO 判定 / evidence_ledger 覆寫）| **維持主 agent 編排，絕不包進 workflow** | ⚠ workflow subagent 一律 acceptEdits、**繞過 exit-2 hook**（pre_commit_compile_check / kb_sot_guard）、無 mid-run 暫停 |
+| **互動探索 / 需中間結果決定下一步** | 主回合 or 既有 sub-agent | workflow 無 mid-run user input |
+| **單樣本 pilot / 5 分鐘小活** | 主回合直接做 | workflow 10× token，殺雞用牛刀 |
+
+> `/effort ultracode` 不設長期預設（每任務自動編排 workflow + 略過 launch 提問 → 繞過確認矩陣 + 放大 token）；改逐案 `workflow` keyword 觸發，符合 §1「長計算需當輪明示」。
 
 ---
 
@@ -244,3 +274,25 @@ UserPromptSubmit hook `narrative_frame_advisor.sh` 偵測：
 快速查表：`InterSubMod/.claude/skills/narrative-frame/references/scenario_to_framework.md`
 
 ⚠ **變動頻率上限**：新框架進 catalog → 必同步 scenario_to_framework + business_sources；每月 audit 一次 drift。
+
+---
+
+## §12 搜尋紀律（Search Discipline — 2026-05-30 落地）
+
+> **背景**：本 repo 極大（build/output/data/_deps/research/figures/assets + 3 個 worktree 副本，**均已 .gitignore**）。大規模遞迴搜尋是「卡住 / 高消耗」主因。
+
+**核心原則：判斷先 → 精準搜尋。**
+
+| 工具 | 尊重 .gitignore？ | 用法 |
+|------|:---:|------|
+| **Grep / Glob 工具**（ripgrep）| ✅ **自動跳過 9 重目錄** | **廣搜首選** — 直接用，無需手動排除 |
+| Bash `grep -r` / `find` / `du` | ❌ 掃全 repo 含 GB 級 data/output/worktree | **僅限 scope 到子目錄**，或加 `-maxdepth 1` |
+
+**規則**：
+1. **廣搜一律用 Grep/Glob 工具**（非 Bash grep -r）— 它們已自動排除重目錄。
+2. Bash `grep -r`/`find` **必 scope 到輕目錄**（`.claude/ src include docs scripts state tests tools templates`），禁止對 repo root（`.`）遞迴。
+3. `find` 淺掃加 `-maxdepth 1/2`；深掃必加 `-path ... -prune` 排除重目錄。
+4. **預先排除目錄**（重，勿掃）：`build output data _deps research figures assets slides .claude/worktrees` + binary（`*.bam *.vcf.gz *.png`）。
+5. 真要全掃 → 指令加 `ALLOW_FULL_SCAN` 顯式 opt-in。
+
+**強制層**：`search_scope_guard.sh`（PreToolUse Bash，**exit 2 阻擋** `grep -r .` / `find .` 無 maxdepth / `du */`）。

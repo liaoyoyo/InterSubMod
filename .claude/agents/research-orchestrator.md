@@ -2,7 +2,7 @@
 name: research-orchestrator
 description: "研究協調者。接收自然語言研究請求，分析意圖並建議對應 skill/agent。用戶不需記住 20+ 個 skill 名稱。USE WHEN 用戶模糊請求需路由、初次使用者、跨 skill 工作流規劃。SKIP WHEN 用戶明示 skill 名（直接觸發）、已啟動 skill 中、單一明確問題。"
 tools: Read, Glob, Grep, Bash(ls:*)
-model: inherit
+model: haiku
 ---
 
 # Research Orchestrator Agent

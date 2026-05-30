@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-05-18
-目標: .claude/skills/ 視覺化分層索引 — 43 個 skill 的場景對應 + 6 大類 + 依賴 hub 圖
+目標: .claude/skills/ 視覺化分層索引 — 46 個 skill 的場景對應 + 6 大類 + 依賴 hub 圖
 處理範圍: M2 (41 skills 視覺分層) 的方案 2 實作
 關聯檔案:
   - InterSubMod/.claude/CLAUDE.md §3 (Skills 分類索引，本檔擴展視覺化)
@@ -10,7 +10,7 @@
 
 # InterSubMod Claude Code Skills — 視覺化分層索引
 
-> `.claude/skills/` 下 **43 個 skill** 的分層導覽。
+> `.claude/skills/` 下 **46 個 skill** 的分層導覽（45 active + 1 deprecated `/html-preview`；2026-05-28 drift 校正）。
 > CLAUDE.md §3 已含簡短分類；本檔提供**場景對應 + 依賴 hub 圖 + 觸發頻率**等視覺化補充。
 
 ---
@@ -42,7 +42,7 @@
 
 ## §2 6 大類分層
 
-### §2.1 元方法論（Meta — 7 skills）
+### §2.1 元方法論（Meta — 8 skills）
 
 所有任務的**通用基礎方法**。
 
@@ -51,9 +51,10 @@
 | `/scientific-rigor` ⭐ | 元 skill — 證據分級 + DAG + Pre-reg + Postmortem + 啟發式工作流映射 | high |
 | `/confirmation-protocol` | 4 層確認協議（Hard Gate / Gate / Review / FYI）| high |
 | `/known-pitfalls` | AI 已知陷阱清單（P-01~P-14 反例庫）| high |
+| `/pre-decision-audit` | entry-point ≤30min 決策審計（7 outputs + Cynefin + 5-dim credibility + GO/PROBE/NO-GO）| mid |
 | `/cycle-state` | 跨 cycle dashboard（read-only）| mid |
 | `/research-context-loader` | 3-tier landscape 上下文按需載入 | mid |
-| `/grill-me` | 對自身結論刁難式 reality check | low |
+| `/implementation-notes` | spec 實作中 live 紀錄（設計決定 / 偏離 / 折衷 / 未決）| mid |
 | `/fast-learning-coach` | 費曼 + 帕雷托 + 主動回想 + 間隔重複 5 步學新主題 | low |
 
 ### §2.2 7-Phase Resilient Waterfall（Framework — 7 skills）
@@ -81,9 +82,9 @@ C++ 修改 + pipeline 維護。
 | `/verification-loop` | 程式碼 build/test 6 phase 驗證（build/type/lint/test/security/diff）|
 | `/infra-ops` | pipeline preflight + disk-full / OOM 診斷 |
 
-### §2.4 文件管理（Docs — 4 skills）
+### §2.4 文件管理（Docs — 5 skills）
 
-.md 規範 + 記憶系統。
+.md 規範 + 記憶系統 + 可重現性。
 
 | Skill | 一句話 |
 |-------|------|
@@ -91,13 +92,15 @@ C++ 修改 + pipeline 維護。
 | `/data-audit` | 研究輸出 6 項組織檢核（圖片連結 / INDEX 覆蓋 / 命名 / 元數據 / gitignore / 散落）|
 | `/memory-consolidation` | 記憶生命週期（掃描 / 合併 / 降級 / 索引 < 200 行）|
 | `/citation-verification` | 學術引用 WebSearch + Google Scholar 必驗 |
+| `/pipeline-manifest` | script→inputs→outputs→figures/tables provenance DAG + orphan 偵測（與 data-audit 分工：查因果鏈）|
 
-### §2.5 報告生成（Reporting — 7 active + 1 deprecated）
+### §2.5 報告生成（Reporting — 8 active + 1 deprecated）
 
-從週報母稿到 PPT / HTML 輸出。
+從週報母稿到 PPT / HTML 輸出。敘述框架由 `/narrative-frame` 統一挑選。
 
 | Skill | 一句話 | 場景 |
 |-------|------|----|
+| `/narrative-frame` | 全域敘述框架挑選 + 套用 + 自審（50+ catalog；7 報告 skill 之上層動態挑選）| 框架入口 |
 | `/myPPT` | PPT 場景識別**總入口**（路由到 weekly-report / pptx-build）| 路由 |
 | `/weekly-report` | W1-W7 週報母稿生成（17 段分流）| 週報 |
 | `/pptx-build` | P1-P5 PPTX 製作 + 6 報告模板識別 + Vision check | 給教授 |
@@ -105,9 +108,9 @@ C++ 修改 + pipeline 維護。
 | `/results-report` | 實驗結果決策導向報告 | 單實驗 |
 | `/structured-tech-report` | 13 段技術報告（Toyota A3 + ADR + SRE postmortem）| 工程修改 |
 | `/report` | AI 對話執行報告（session-end）| 對話結尾 |
-| ~~`/html-preview`~~ | **DEPRECATED 2026-05-13** — 取代為 /html-report-build | — |
+| ~~`/html-preview`~~ | **DEPRECATED 2026-05-13** — 取代為 /html-report-build（待移除）| — |
 
-### §2.6 研究專用（Research-specific — 12 skills）
+### §2.6 研究專用（Research-specific — 13 skills）
 
 ISM 研究域特定方法。
 
@@ -167,7 +170,7 @@ ISM 研究域特定方法。
 |------|------|-------|------|
 | **High freq**（每 session 多次）| AI 自動觸發 | `/scientific-rigor` / `/confirmation-protocol` / `/known-pitfalls` / `/cpp-change` / `/doc-standards` | description USE WHEN 廣 |
 | **Mid freq**（週級）| 條件觸發 | `/memory-consolidation` / `/weekly-report` / `/research-context-loader` / `/validation-protocol` / `/cycle-state` | 特定階段或週期 |
-| **Low freq**（月級或顯式）| 顯式呼叫 | `/init-research` / `/provenance-tier-audit` / `/grill-me` / `/fast-learning-coach` / `/citation-verification` | 用戶明示觸發 |
+| **Low freq**（月級或顯式）| 顯式呼叫 | `/init-research` / `/provenance-tier-audit` / `/pipeline-manifest` / `/fast-learning-coach` / `/citation-verification` | 用戶明示觸發 |
 
 ---
 
@@ -182,7 +185,8 @@ ISM 研究域特定方法。
 
 ## §6 版本 / 演進
 
-- **目前 active**: 43 skills（含 1 個 deprecated `/html-preview`）
+- **目前**: 46 skills（45 active + 1 deprecated `/html-preview`）— 2026-05-28 drift 校正（補列 implementation-notes / narrative-frame / pre-decision-audit / pipeline-manifest，索引移除 grill-me 條目）
+- **grill-me 註記**（2026-05-30 補正）: `.claude/skills/grill-me` 為 **dangling symlink**（target `../../.agents/skills/grill-me` 已不存在），無 SKILL.md 故不計入 46。索引已不列；物理清除待 Hard Gate ack。
 - **2026-05-17 建立**: `/scientific-rigor` 元方法論層（commit `42217cf`）
 - **2026-05-13 deprecated**: `/html-preview`（Python middleware）→ 取代為 `/html-report-build`（LLM-direct）
 - **2026-05-18 落地**: F.4 P2 Cynefin → `/confirmation-protocol §Cynefin 域對照`；F.4 P2 Productive Failure → `/scientific-rigor §8.3.1`

@@ -36,7 +36,10 @@ with open(FOCUS_FILE, "r", encoding="utf-8") as f:
     content = f.read()
 
 lines = content.splitlines()
-date_header = re.compile(r"^## \d{4}-\d{2}-\d{2}")
+# Match "## YYYY-MM-DD ..." allowing an optional leading marker/emoji token
+# (e.g. "## 🔴 2026-05-22 ...") — fixes silent-skip of emoji-prefixed headers
+# that previously caused the injector to grab an OLDER plain-date section.
+date_header = re.compile(r"^##\s+(?:\S+\s+)?\d{4}-\d{2}-\d{2}")
 
 # Find the first dated section "## YYYY-MM-DD" — that's the latest (newest at top per convention)
 start = None

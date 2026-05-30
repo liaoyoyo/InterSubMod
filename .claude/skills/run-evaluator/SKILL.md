@@ -119,7 +119,7 @@ Written to: state/cycles/20260504-1430-loh-kde/evaluation.json
 
 | 場景 | 此 skill 做什麼 | 既有 skill 接手 |
 |---|---|---|
-| risk > 0.7 (pending_review) | 寫入 evaluation.json + verdict=pending_review | 用戶呼叫 `/grill-me` 或 P4 重做 |
+| risk > 0.7 (pending_review) | 寫入 evaluation.json + verdict=pending_review | 人工 reality check（/scientific-rigor §11.6）或 P4 重做 |
 | 1 component < 0.2 critical | escalate to pending_review | 用戶查 `/known-pitfalls` 判斷是否該 component 真的崩了 |
 | pitfall_hits 含 P-04 (pileup symlink) | 寫入 hit + severity=block | 用戶必須回 P2 PRECHECK 重驗 dataset |
 | 全部 components > 0.6 | approve_tier | 用戶可呼叫 `/conclude-research` 進 P6 |

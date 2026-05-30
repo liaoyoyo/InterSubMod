@@ -169,7 +169,18 @@
       "Bash(bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/causal_claim_check.sh)",
       "Bash(mkdir -p /big7_disk/liaoyoyo2001/data/bam)",
       "Bash(netstat -tln)",
-      "Bash(ip -4 addr show)"
+      "Bash(ip -4 addr show)",
+      "Bash(touch /bip8_disk/liaoyoyo2001/.write_test)",
+      "Read(//bip8_disk/liaoyoyo2001/**)",
+      "Bash(zcat cpgIslandExt_hg38.txt.gz)",
+      "Bash(zcat hg38.ncbiRefSeq.gtf.gz)",
+      "Read(//big8_disk/liaoyoyo2001/igv/jdk-21/bin/**)",
+      "Bash(cp /big7_disk/liaoyoyo2001/InterSubMod/figures/ASM_ex/20260527_ASM_ZAR1L_ex.png /tmp/check_size.png)",
+      "Bash(timeout 1200 bash scripts/16_genome_asm_batch.sh chr13)",
+      "Bash(python3 -c ' *)",
+      "Bash(zcat /big8_disk/data/HCC1395/SEQC2/high-confidence_sSNV_in_HC_regions_v1.2.1.vcf.gz)",
+      "Bash(xargs -n1 basename)",
+      "Bash([ -f \"$CWD/$REL\" ])"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
@@ -210,9 +221,9 @@
       "Bash(scp:*)",
       "Bash(rsync:*)",
       "Bash(sudo:*)"
-    ],
-    "defaultMode": "dontAsk"
+    ]
   },
+  "model": "claude-opus-4-8[1m]",
   "enabledMcpjsonServers": [
     "knowledge",
     "biorxiv",
@@ -317,6 +328,15 @@
         ]
       },
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/search_scope_guard.sh"
+          }
+        ]
+      },
+      {
         "matcher": "Skill",
         "hooks": [
           {
@@ -340,6 +360,15 @@
           {
             "type": "command",
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/verify_gate.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/creation_guard.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       }
@@ -445,6 +474,15 @@
         ]
       },
       {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/skill_registry_sync.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
+      {
         "matcher": "Read",
         "hooks": [
           {
@@ -526,6 +564,16 @@
           }
         ]
       }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/precompact_autosave.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {
@@ -542,9 +590,11 @@
     "mode": "docker",
     "containerImage": "debian:bookworm"
   },
+  "effortLevel": "xhigh",
   "remote": {
     "defaultEnvironmentId": "env_01PzQvyh42s16EdwAsEyV5Ei"
   },
+  "compactPrompt": "壓縮時必保留（依 CLAUDE.md §7）：架構決策+理由 / 未解決 blockers / 涉及檔案路徑含行號 / 用戶限制條件 / 假說 ID+驗證層級(L1-L5,⭐tier) / 未完成步驟 / Hard Gate 待確認項 / CLAUDE.md §1-§8 規則 + AGENTS.md governance。用戶風格：繁中回覆、emoji 不入圖、Co-Authored-By 僅 commit footer。可安全摘要：已通過測試的輸出、冗長工具結果、中間計算（保留結論數值+來源路徑）。",
   "autoUpdater": {
     "enabled": false
   },

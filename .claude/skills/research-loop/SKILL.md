@@ -404,7 +404,7 @@ with open('research/autoresearch/evidence_ledger.jsonl', 'a') as f:
 **何時升級到別的 skill / agent / 人工審查**：
 - Step 2 連續 3 次假說都被 tombstone 阻擋 → `pivot-direction` 換方向
 - Step 3 設計涉及 C++ 改動 → `methodology-audit`（Hard Gate）→ `cpp-change`
-- Step 3 完成但用戶對 effect_size threshold 沒信心 → `grill-me` 互審
+- Step 3 完成但用戶對 effect_size threshold 沒信心 → `/pre-decision-audit` 互審（或 /scientific-rigor §11.6）
 - 涉及論文層級結論（⭐4-5）→ Step 3 結束後**先**過 `validation-protocol` L4 設計，再進 P3
 
 **個人風格適配**（依 `feedback_*` memory）：

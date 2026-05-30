@@ -132,7 +132,7 @@ G1-G10 十個功能群組驗證了同一條流程穩定可行（見 `research/fe
 | `/known-pitfalls` | Step 0 + Step 5 | OLS/AF collider/n_reads 警告必讀 |
 | `/citation-verification` | 第 9 章（論文背景） | bibliography 寫入前必驗 |
 | `/observation-analysis` | 生成 Python 腳本時 | 已有標準模板 |
-| `/grill-me` | 第 10 章（結論與質疑） | 3 個質疑題 |
+| `/scientific-rigor` §11.6 | 第 10 章（結論與質疑） | 內建 3 個質疑題（見下方模板）|
 
 ## 標準輸出格式（feature-level 10 章節 .md）
 
@@ -204,7 +204,7 @@ G1-G10 十個功能群組驗證了同一條流程穩定可行（見 `research/fe
 7. **Diploid_Coverage_Used 是 assay-level**（G1 教訓）— 全樣本同值，AUC 0.79 是 "which sample?" shortcut
 8. **Master `AF` 欄位 ≠ caller VAF** — master `AF` = `|AlleleDelta|`；要用 `vcf_AF`
 
-## 質疑模板（第 10 章 grill-me 3 問）
+## 質疑模板（第 10 章 reality-check 3 問）
 
 對每個 verdict POSITIVE / CONDITIONAL_POSITIVE 的結論，必問：
 
@@ -245,7 +245,7 @@ G1-G10 十個功能群組驗證了同一條流程穩定可行（見 `research/fe
 ☐ Step 6 spatial artifact 檢查過嗎
 ☐ Cross-sample 固定順序對嗎
 ☐ 第 9 章至少 3 個 citation 且 /citation-verification 驗過嗎
-☐ 第 10 章 3 個 grill-me 質疑寫了嗎
+☐ 第 10 章 3 個 reality-check 質疑寫了嗎
 ☐ Verdict 有根據 rubric（非主觀）嗎
 ☐ evidence_ledger.jsonl 登記了嗎
 ```
@@ -266,7 +266,7 @@ G1-G10 十個功能群組驗證了同一條流程穩定可行（見 `research/fe
   - `references/step_1_6_sop.md` — Step 1-6 詳細 SOP
   - `references/verdict_rubric.md` — verdict 決策樹
 - **Quick script**：`scripts/quick_observe.py` — 通用單特徵觀察器
-- **相關 skills**：`/auc-confound-guard`, `/multi-sample-consistency`, `/known-pitfalls`, `/citation-verification`, `/observation-analysis`, `/grill-me`
+- **相關 skills**：`/auc-confound-guard`, `/multi-sample-consistency`, `/known-pitfalls`, `/citation-verification`, `/observation-analysis`, `/scientific-rigor`
 - **Memory**：
   - `feedback_L2_collider_bias`
   - `feedback_pooled_ols_residualization_trap`

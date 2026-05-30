@@ -9,6 +9,7 @@ description: |
   SKIP WHEN: source <3 docs (主 skill 直接 Read); 不需 framework 套用; 純 grep / lookup;
   binary file (.bam / .vcf.gz) — agent 不讀 binary.
 tools: Read, Glob, Grep
+model: haiku
 ---
 
 # narrative-organizer Agent
