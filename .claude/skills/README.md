@@ -185,7 +185,7 @@ ISM 研究域特定方法。
 ## §6 版本 / 演進
 
 - **目前**: 45 skills（全 active）— 2026-05-30 校正（補列 implementation-notes / narrative-frame / pre-decision-audit / pipeline-manifest，索引移除 grill-me，git rm deprecated html-preview）
-- **grill-me 註記**（2026-05-30 補正）: `.claude/skills/grill-me` 為 **dangling symlink**（target `../../.agents/skills/grill-me` 已不存在），無 SKILL.md 故不計入 46。索引已不列；物理清除待 Hard Gate ack。
+- **grill-me 清理**（2026-05-30）: 曾為 dangling symlink，已 `git rm` 移除；索引不再列。
 - **2026-05-17 建立**: `/scientific-rigor` 元方法論層（commit `42217cf`）
 - **2026-05-13 deprecated**: `/html-preview`（Python middleware）→ 取代為 `/html-report-build`（LLM-direct）
 - **2026-05-18 落地**: F.4 P2 Cynefin → `/confirmation-protocol §Cynefin 域對照`；F.4 P2 Productive Failure → `/scientific-rigor §8.3.1`

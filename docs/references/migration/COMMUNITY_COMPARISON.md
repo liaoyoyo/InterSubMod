@@ -140,8 +140,9 @@
 ### Deferred / Resolved（2026-05-30 對抗式 impact-audit workflow `wf_4fccc199-341` 裁決）
 
 - **evaluator 三合一 → RESOLVED = KEEP-SEPARATE**（不合併）。決定性理由（L1，已對證磁碟）：3 agent 的 `tools` 權限不可參數化 —— evaluator `Read,Grep,Glob,NotebookRead`（機械保證無 Write/Bash = Fresh-Context Evaluator 核心）vs reviewer `+Write,Bash(python3)` vs methodology-reviewer `+Bash(python3,ls)`。合併取並集 → evaluator 喪失 no-write 保證；取交集 → 另二者功能殘廢。HYBRID 共用前言去重屬低價值 churn，不採。
-- **D1 移除 deprecated `/html-preview` → 待 Hard Gate ack**：`git rm -r .claude/skills/html-preview/` + 8 檔 lockstep（CLAUDE.md §3 46→45 + 視覺化(4)→(3) / README ×4 / image-gen:25 / image-vision-check:15,25 + playbook:33 / myPPT/evals.json:55,68）。單獨 commit。
-- **grill-me dangling symlink → 待 Hard Gate ack**：`.claude/skills/grill-me -> ../../.agents/skills/grill-me`（target 不存在）；`git rm .claude/skills/grill-me`。可與 D1 同批。
+- **D1 移除 deprecated `/html-preview` → ✅ DONE 2026-05-30**：`git rm -r` 33 檔 + 8 檔 lockstep + 清 __pycache__ 殘留空目錄。SKILL.md 46→45。單獨 commit（batch 2）。
+- **grill-me dangling symlink → ✅ DONE 2026-05-30**：`git rm .claude/skills/grill-me`（batch 3）。
+- **opus47-behavior.md stub → ✅ DONE 2026-05-30**：`git rm -f`（已被 opus48-behavior.md 取代）（batch 3）。
 - **P1 hook 計數 36→37（已修）** + **P2 grill-me「完全不存在」假陳述（已改為 dangling symlink 正確描述）** — 2026-05-30 非破壞性修正完成。
 
 ---

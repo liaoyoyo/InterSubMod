@@ -65,4 +65,4 @@ globs:
 - Evidence ledger 每輪必記錄
 
 ---
-> **2026-05-30 變更**：本檔取代 `opus47-behavior.md`（後者已轉為 deprecation stub，物理移除待 Hard Gate ack）。CLAUDE.md §2 + §5 已同步指向本檔。
+> **2026-05-30 變更**：本檔取代 `opus47-behavior.md`（後者已 `git rm` 移除）。CLAUDE.md §2 + §5 已同步指向本檔。

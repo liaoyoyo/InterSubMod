@@ -81,7 +81,7 @@
 > **drift 修正紀錄**：
 > - 2026-05-20：原寫 45 → 一度改 44（誤判 `grill-me/` 為 phantom +1）。
 > - **2026-05-30 實測校正**：`find .claude/skills -name SKILL.md | wc -l` = **45**；46（含 deprecated html-preview）→ git rm `/html-preview` 後 = 45 全 active。校正機制：`creation_guard.sh`（Write 新 SKILL.md 提醒）+ `skill_registry_sync.sh`（編 README/CLAUDE.md 時比對磁碟實際計數）。
-> - **2026-05-30 補正**：`grill-me` 並非「完全不存在」— 它是一個 **dangling symlink**（`.claude/skills/grill-me -> ../../.agents/skills/grill-me`，target 已不存在）。因無 `SKILL.md`，**不計入 46**（故 `find -maxdepth 1 -type d` = 47 但 `find -name SKILL.md` = 46，差 1 即此 symlink）。Claude Code 按 SKILL.md 列舉故不受影響。物理清除屬 Hard Gate 刪檔（待 ack `git rm .claude/skills/grill-me`）。
+> - **2026-05-30 清理**：`grill-me` 曾是 dangling symlink（→ `../../.agents/skills/grill-me`，target 不存在），**已 `git rm` 移除**。現 `find -maxdepth 1 -type d` 與 `find -name SKILL.md` 一致 = 45（無 orphan symlink）。
 > - 新增 12 個未分類 skills 進對應類別（2026-05-20）。
 > **重複交叉位置**：`/feature-layered-observation`（P3 + 研究專用）/ `/multi-sample-consistency`（P4 + 研究專用）/ `/pre-decision-audit`（元方法論 + 三層樓 pre）/ `/run-evaluator`（P5 + 三層樓 post）— 在多分類列出表示同 skill 多角色。
 
@@ -145,7 +145,7 @@
 |----------|------|-----------|
 | `.claude/rules/cpp-build.md` | **條件式載入** ✅ | `src/**/*.cpp`, `src/**/*.hpp`, `include/**/*.hpp`, `include/**/*.h`, `tests/**/*.cpp`, `CMakeLists.txt` |
 | `.claude/rules/opus48-behavior.md` | **條件式載入** ✅（2026-05-30 取代 opus47）| `.claude/skills/**/SKILL.md`, `.claude/skills/**/*.json`, `.claude/rules/**/*.md`, `.claude/skills/**/playbook.md`, `.claude/skills/**/prompts/*.md` |
-| ~~`.claude/rules/opus47-behavior.md`~~ | **DEPRECATED**（已移除 globs，不再 auto-load；待 Hard Gate `git rm`）| — |
+| ~~`.claude/rules/opus47-behavior.md`~~ | **已 git rm 2026-05-30**（由 opus48-behavior.md 取代）| — |
 | `.claude/rules/workflow-commands.md` | **條件式載入** ✅ | `scripts/**/*.sh`, `scripts/**/*.py` |
 | `.claude/rules/output-structure.md` | **條件式載入** ✅ | `output/**/*`, `results/**/*` |
 
