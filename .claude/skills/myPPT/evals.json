@@ -52,7 +52,7 @@
       "expected_behavior": [
         "Skill activates but recognizes no-PPTX scenario in routing",
         "Suggests weekly-report (W1-W7 master draft only, stop at W7)",
-        "Suggests html-preview to generate companion HTML viewer for PI",
+        "Suggests html-report-build to generate companion HTML viewer for PI",
         "Does NOT delegate to pptx-build (PPTX explicitly not needed)"
       ],
       "must_not": [
@@ -65,6 +65,6 @@
     "Evals are per Anthropic best-practices (SOP §10).",
     "Run manually via Claude Code with the skill loaded; observe behavior matches expected_behavior.",
     "myPPT is routing-only — never produces master draft or PPTX itself.",
-    "Sub-skills: weekly-report (W1-W7 master), pptx-build (P1-P5 PPTX), html-preview (companion HTML)."
+    "Sub-skills: weekly-report (W1-W7 master), pptx-build (P1-P5 PPTX), html-report-build (companion HTML)."
   ]
 }

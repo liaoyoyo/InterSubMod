@@ -76,11 +76,11 @@
 
 ---
 
-## §3 Skills 分類索引（46 個 SKILL.md，Claude Code 特定 — 2026-05-28 drift 再校正）
+## §3 Skills 分類索引（45 個 SKILL.md，Claude Code 特定 — 2026-05-30 drift 再校正）
 
 > **drift 修正紀錄**：
 > - 2026-05-20：原寫 45 → 一度改 44（誤判 `grill-me/` 為 phantom +1）。
-> - **2026-05-28 實測校正**：`find .claude/skills -name SKILL.md | wc -l` = **46**（先前一度誤記 44）；46 = 原 45（含 deprecated 的 `/html-preview` 仍計數）+ 新增 `/pipeline-manifest`（社群 gap G1）。校正機制：新增 `creation_guard.sh` hook 在 Write 新 SKILL.md 時提醒同步本計數。
+> - **2026-05-30 實測校正**：`find .claude/skills -name SKILL.md | wc -l` = **45**；46（含 deprecated html-preview）→ git rm `/html-preview` 後 = 45 全 active。校正機制：`creation_guard.sh`（Write 新 SKILL.md 提醒）+ `skill_registry_sync.sh`（編 README/CLAUDE.md 時比對磁碟實際計數）。
 > - **2026-05-30 補正**：`grill-me` 並非「完全不存在」— 它是一個 **dangling symlink**（`.claude/skills/grill-me -> ../../.agents/skills/grill-me`，target 已不存在）。因無 `SKILL.md`，**不計入 46**（故 `find -maxdepth 1 -type d` = 47 但 `find -name SKILL.md` = 46，差 1 即此 symlink）。Claude Code 按 SKILL.md 列舉故不受影響。物理清除屬 Hard Gate 刪檔（待 ack `git rm .claude/skills/grill-me`）。
 > - 新增 12 個未分類 skills 進對應類別（2026-05-20）。
 > **重複交叉位置**：`/feature-layered-observation`（P3 + 研究專用）/ `/multi-sample-consistency`（P4 + 研究專用）/ `/pre-decision-audit`（元方法論 + 三層樓 pre）/ `/run-evaluator`（P5 + 三層樓 post）— 在多分類列出表示同 skill 多角色。
@@ -90,7 +90,7 @@
 - **程式開發（4）**: `/cpp-change` `/methodology-audit` `/infra-ops` `/verification-loop`
 - **文件管理（5）**: `/doc-standards` `/data-audit` `/memory-consolidation` `/citation-verification` `/pipeline-manifest` ⭐ 新（reproducibility provenance DAG；與 data-audit 分工：data-audit 查組織、pipeline-manifest 查 script→figure 因果鏈）
 - **報告生成 retrospective（7）**: `/weekly-report` → `/pptx-build` / `/html-report-build` / `/results-report` / `/structured-tech-report` / `/report` / `/myPPT`
-- **視覺化（4）**: `/html-preview` `/image-gen` `/image-vision-check` `/research-dashboard`
+- **視覺化（3）**: `/image-gen` `/image-vision-check` `/research-dashboard`（html-preview 2026-05-30 移除，取代為 /html-report-build）
 - **研究專用（8）**: `/auc-confound-guard` `/feature-layered-observation` `/multi-sample-consistency` `/pivot-direction` `/inject-hypothesis` `/init-research` `/review-evidence` `/observation-analysis`
 - **資料分析 / 驗證（2）**: `/results-analysis` `/validation-protocol`
 - **假說驗證三層樓（pre → process → post）⭐ 2026-05-19**:

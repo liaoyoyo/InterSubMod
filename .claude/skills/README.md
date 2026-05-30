@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-05-18
-目標: .claude/skills/ 視覺化分層索引 — 46 個 skill 的場景對應 + 6 大類 + 依賴 hub 圖
+目標: .claude/skills/ 視覺化分層索引 — 45 個 skill 的場景對應 + 6 大類 + 依賴 hub 圖
 處理範圍: M2 (41 skills 視覺分層) 的方案 2 實作
 關聯檔案:
   - InterSubMod/.claude/CLAUDE.md §3 (Skills 分類索引，本檔擴展視覺化)
@@ -10,7 +10,7 @@
 
 # InterSubMod Claude Code Skills — 視覺化分層索引
 
-> `.claude/skills/` 下 **46 個 skill** 的分層導覽（45 active + 1 deprecated `/html-preview`；2026-05-28 drift 校正）。
+> `.claude/skills/` 下 **45 個 skill** 的分層導覽（全 active；html-preview 2026-05-30 移除）。
 > CLAUDE.md §3 已含簡短分類；本檔提供**場景對應 + 依賴 hub 圖 + 觸發頻率**等視覺化補充。
 
 ---
@@ -94,7 +94,7 @@ C++ 修改 + pipeline 維護。
 | `/citation-verification` | 學術引用 WebSearch + Google Scholar 必驗 |
 | `/pipeline-manifest` | script→inputs→outputs→figures/tables provenance DAG + orphan 偵測（與 data-audit 分工：查因果鏈）|
 
-### §2.5 報告生成（Reporting — 8 active + 1 deprecated）
+### §2.5 報告生成（Reporting — 8 active）
 
 從週報母稿到 PPT / HTML 輸出。敘述框架由 `/narrative-frame` 統一挑選。
 
@@ -108,7 +108,6 @@ C++ 修改 + pipeline 維護。
 | `/results-report` | 實驗結果決策導向報告 | 單實驗 |
 | `/structured-tech-report` | 13 段技術報告（Toyota A3 + ADR + SRE postmortem）| 工程修改 |
 | `/report` | AI 對話執行報告（session-end）| 對話結尾 |
-| ~~`/html-preview`~~ | **DEPRECATED 2026-05-13** — 取代為 /html-report-build（待移除）| — |
 
 ### §2.6 研究專用（Research-specific — 13 skills）
 
@@ -185,7 +184,7 @@ ISM 研究域特定方法。
 
 ## §6 版本 / 演進
 
-- **目前**: 46 skills（45 active + 1 deprecated `/html-preview`）— 2026-05-28 drift 校正（補列 implementation-notes / narrative-frame / pre-decision-audit / pipeline-manifest，索引移除 grill-me 條目）
+- **目前**: 45 skills（全 active）— 2026-05-30 校正（補列 implementation-notes / narrative-frame / pre-decision-audit / pipeline-manifest，索引移除 grill-me，git rm deprecated html-preview）
 - **grill-me 註記**（2026-05-30 補正）: `.claude/skills/grill-me` 為 **dangling symlink**（target `../../.agents/skills/grill-me` 已不存在），無 SKILL.md 故不計入 46。索引已不列；物理清除待 Hard Gate ack。
 - **2026-05-17 建立**: `/scientific-rigor` 元方法論層（commit `42217cf`）
 - **2026-05-13 deprecated**: `/html-preview`（Python middleware）→ 取代為 `/html-report-build`（LLM-direct）

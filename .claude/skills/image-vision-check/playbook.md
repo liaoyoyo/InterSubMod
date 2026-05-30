@@ -30,7 +30,7 @@ If any verdict ∈ {`partial`, `fail`}:
 - If still fail → set verdict `needs_human` and write to `quality.json`. Do not retry again (D8: max 1 retry).
 
 ### Step 5: Hand off
-- If `all_pass`, suggest `/html-preview` (Phase 2) or report DONE.
+- If `all_pass`, suggest `/html-report-build` or report DONE.
 - If `needs_human`, surface checklist + suggestions to PI for manual prompt tuning.
 
 ## quality.json structure (cumulative)

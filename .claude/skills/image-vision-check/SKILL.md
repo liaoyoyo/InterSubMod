@@ -12,7 +12,7 @@ description: |
 
 - Stand-alone skill, callable directly or via myPPT routing.
 - Upstream: `image-gen` (consumes its PNG output).
-- Downstream: `html-preview` (Phase 2; uses verdict to decide which images to inline).
+- Downstream: `html-report-build` (uses verdict to decide which images to inline).
 
 ## Dependencies
 
@@ -22,7 +22,7 @@ description: |
 
 **Used by**:
 - `image-gen` (auto-retry loop on fail)
-- `html-preview` (Phase 2)
+- `html-report-build` (companion HTML)
 - `myPPT` (orchestration)
 
 **Reads**:

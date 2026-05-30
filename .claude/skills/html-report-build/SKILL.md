@@ -54,6 +54,10 @@ description: |
 | `data-section` color not applied | Section attribute missing or typo | Check S0-S7 + Q&A enum; ensure `<article ... data-section="S2">` exact match |
 | Companion replaced .md | Wrong filename collision | Output **MUST** be `{basename}.html`, never `{basename}.md` rewrite |
 | Multi-language CJK font fallback | System font missing on PI machine | Use full font stack: Noto Sans CJK TC + Source Han Sans TW + Droid Sans Fallback |
+| **Figure broken in browser** ⚠ **2026-05-20 Issue #1** | Relative path `../` off-by-one (LLM 易 miscount) | Before Write: count depth_of(source_dir to repo_root) and verify `../` 數量等於該 depth。grep `<img src="..">` + post-Write `ls path` verify exists |
+| **Fabricated metric** ⚠ **2026-05-20 Issue #2** | LLM 內插「合理範圍」數字而非嚴格 source-grep | Before Write 每張 slide: list 所有 numerical values + grep source .md confirm verbatim 或 rounded ≤ 2 sf；多版迭代鎖 source set 不可新增數字 |
+| **Slide chars/rows over scenario limit** ⚠ **2026-05-20 Issue #4** | 缺場景對齊量化標準（PI 1-on-1 / Lab meeting / Conf）| Read frontmatter `audience_scenario` 套 memory `reference-pi-scenario-quantitative-standards`；超限自動 flag for compression |
+| **Path prefix not InterSubMod/** ⚠ **2026-05-20 Issue #9** | LLM 生成 footer source 引用未自審路徑前綴 | grep `href=` and source citations: any `.md` path must start with `InterSubMod/...` not absolute `/big7_disk/...` or relative `docs/...` |
 
 ## Files Manifest (self-check before invocation)
 
@@ -109,9 +113,32 @@ Workflow:
 4. Read templates/design_tokens.css → inline into output <style>
 5. Read 1-2 examples/*.html for few-shot grounding
 6. Generate output .html using Write tool
-7. Self-audit: 6-taboo grep + structural checks (see Failure Modes table)
-8. Report path to user
+7. **Self-audit suite (2026-05-20 Issue #1/#2/#4/#7/#9 升級)**:
+   a) 6-taboo grep + structural checks (see Failure Modes table)
+   b) **Number-source-grep audit**: list all numerical values in slides; grep source .md to confirm verbatim or rounded ≤ 2 sf. ANY un-sourced number → FAIL, ask user OR use range.
+   c) **Path off-by-one audit**: count source_dir → repo_root depth; verify all `<img src="../...">` 數量符合 depth. Post-Write `ls` each path to confirm exists.
+   d) **Path prefix audit**: any `.md` path reference in footer/source must start with `InterSubMod/...`.
+   e) **Scenario chars/rows audit**: read frontmatter `audience_scenario`; per-slide count chars (excl speaker note) + table rows; flag any exceeding scenario threshold (memory `reference-pi-scenario-quantitative-standards`).
+8. Report path to user + audit summary
 ```
+
+## Multi-Version Output (2026-05-20 Issue #6 升級)
+
+When user requests N versions for comparison (e.g. "produce 3 styles"):
+
+1. **Define N differentiation axes explicitly** before any Write (e.g. minimal / standard / dense / hybrid)
+2. Each version picks ONE axis — NOT N=N independent designs
+3. **Common source-of-truth lock**: shared metadata block (cycle_id + commit + source .md lines) at top of each HTML; numbers across versions must come from this locked set
+4. After all versions: produce 1-page comparison `index.html` with per-version use-case + slide-count + chars-avg
+5. **Multi-version fabrication prevention**: when iterating version N+1, **MUST grep version N for all numerical values** and reuse the exact set; new numbers require new source citation
+
+## Evaluator Polish Loop (2026-05-20 Issue #10 升級)
+
+After evaluator audit returns `polish notes`:
+
+- If user selects `ship as-is` → log notes to `known-pitfalls.md` + skill MEMORY.md as future prevention guidance
+- If user selects `apply polish` → batch edit + re-run evaluator to confirm no regression
+- Do NOT silently drop polish notes — they encode reusable lessons
 
 ## Mode Selection (concrete signatures)
 
@@ -282,6 +309,6 @@ HTML 報告（特別 standalone PI 終版）必繼承 `InterSubMod/.claude/skill
 - **Spec**: `InterSubMod/docs/references/manual/20260510_HTML預覽_圖示生成_3skill_設計_01.md` (D11 / D15-D20)
 - **SOP**: `InterSubMod/docs/references/manual/20260511_HTML_MD_PPTX輸出格式SOP_01.md` (§3 排除 / §5 模板 / §6 evaluator-optimizer)
 - **Plan** (outside InterSubMod repo, design rationale only): `~/.claude/plans/frolicking-tinkering-hopcroft.md` — not required at runtime; reference for design lineage only
-- **Deprecated predecessor**: `InterSubMod/.claude/skills/html-preview/SKILL.md` (Python middleware version)
+- **Deprecated predecessor**: `html-preview` (Python middleware version; **git rm'd 2026-05-30**, see commit history)
 - **Legacy reference**: `InterSubMod/docs/presentations/validated/2026/05/self_phasing_synthesis_PI/build_html.py` (PPT custom generator, kept frozen)
 - **Companion skills**: `image-gen`, `image-vision-check` (Phase 1, unchanged)

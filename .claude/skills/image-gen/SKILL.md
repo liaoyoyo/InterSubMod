@@ -22,7 +22,7 @@ description: |
 
 **Used by**:
 - `image-vision-check` (consumes PNG output)
-- `html-preview` (Phase 2; consumes PNG via PIL base64 encoding)
+- `html-report-build` (consumes PNG; LLM-direct HTML companion)
 - `myPPT` (orchestration)
 
 **Reads**:
