@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>如何清楚定義 Self-Phasing Pipeline 的問題源頭 — 5 層方法論</title>
+<style>
+:root {
+  --c-accent: #D97757; --c-accent-deep: #B85A3F;
+  --c-text: #141413; --c-text-soft: #6B6B66;
+  --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+  --c-code-bg: #F4EFE6;
+  --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+  --c-info: #1E3A8A;
+  --c-layer1: #1E3A8A; --c-layer2: #047857; --c-layer3: #7C3AED;
+  --c-layer4: #B45309; --c-layer5: #B91C1C;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+  --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+             "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+  --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+  --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+  --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+  --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--c-bg); color: var(--c-text);
+       font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.65; }
+
+.layout { max-width: 1320px; margin: 0 auto; display: grid;
+          grid-template-columns: 240px 1fr; gap: var(--sp-5);
+          padding: var(--sp-5) var(--sp-4); }
+
+aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+            background: var(--c-surface); border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+            box-shadow: var(--shadow-sm);
+            max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+              color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+              border-left: 3px solid transparent; }
+aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                      font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+aside.toc a.core { font-weight: 600; border-left-color: var(--c-accent); background: #FEF7E6; }
+
+main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+              border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+              padding: var(--sp-6) var(--sp-6); min-width: 0; }
+
+.report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                  margin-bottom: var(--sp-5); }
+.report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                            letter-spacing: 1px; color: var(--c-accent-deep);
+                            font-weight: 700; margin-bottom: var(--sp-2); }
+.report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+.report-header .subtitle { font-size: var(--fs-lg); color: var(--c-text-soft);
+                            margin: 0 0 var(--sp-3); }
+.report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                        gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+.report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+.report-header .meta dd { margin: 0; }
+.report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                             border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                             font-size: 0.92em; }
+
+.verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                   border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); }
+.verdict-banner.neutral  { background: linear-gradient(90deg, #1E3A8A, #3B82F6); }
+
+h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+      padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+      scroll-margin-top: var(--sp-4); }
+h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+            font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2); color: var(--c-accent-deep); }
+
+p, ul, ol { margin: var(--sp-3) 0; }
+ul, ol { padding-left: var(--sp-5); }
+li { margin: var(--sp-1) 0; }
+a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--c-accent-deep); }
+blockquote { border-left: 3px solid var(--c-accent); padding-left: var(--sp-4);
+              color: var(--c-text-soft); margin: var(--sp-3) 0; font-style: italic;
+              background: var(--c-code-bg); padding: var(--sp-3) var(--sp-4);
+              border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+        font-family: var(--ff-mono); font-size: 0.92em; }
+pre { background: var(--c-code-bg); padding: var(--sp-3); border-radius: var(--radius-md);
+       overflow-x: auto; font-family: var(--ff-mono); font-size: var(--fs-sm); line-height: 1.5; }
+pre code { background: none; padding: 0; }
+
+table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3);
+         text-align: left; vertical-align: top; }
+th { background: var(--c-code-bg); font-weight: 600; }
+td.num { text-align: right; font-family: var(--ff-mono); }
+tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+tr.row-safe td { background: #DCFCE7; color: #166534; }
+tr.row-warn td { background: #FEF3C7; }
+
+.layer-card { border: 1.5px solid var(--c-border); border-radius: var(--radius-lg);
+              margin: var(--sp-5) 0; overflow: hidden; background: var(--c-surface); }
+.layer-card .layer-head { padding: var(--sp-4) var(--sp-4); display: flex; align-items: center;
+                          gap: var(--sp-3); border-bottom: 1px solid var(--c-border); }
+.layer-card.l1 .layer-head { background: #EFF2FB; border-left: 6px solid var(--c-layer1); }
+.layer-card.l2 .layer-head { background: #ECF7F3; border-left: 6px solid var(--c-layer2); }
+.layer-card.l3 .layer-head { background: #F2EBFA; border-left: 6px solid var(--c-layer3); }
+.layer-card.l4 .layer-head { background: #FBF1E2; border-left: 6px solid var(--c-layer4); }
+.layer-card.l5 .layer-head { background: #FBEBEB; border-left: 6px solid var(--c-layer5); }
+.layer-card .layer-tag { font-family: var(--ff-mono); font-weight: 700; font-size: var(--fs-md);
+                         color: white; padding: 4px 10px; border-radius: 12px; min-width: 52px;
+                         text-align: center; }
+.layer-card.l1 .layer-tag { background: var(--c-layer1); }
+.layer-card.l2 .layer-tag { background: var(--c-layer2); }
+.layer-card.l3 .layer-tag { background: var(--c-layer3); }
+.layer-card.l4 .layer-tag { background: var(--c-layer4); }
+.layer-card.l5 .layer-tag { background: var(--c-layer5); }
+.layer-card .layer-title { flex: 1; font-weight: 700; font-size: var(--fs-lg); }
+.layer-card .layer-question { font-size: var(--fs-sm); color: var(--c-text-soft);
+                               font-style: italic; }
+.layer-card .layer-body { padding: var(--sp-4) var(--sp-5); }
+.layer-card .layer-body h4 { margin-top: var(--sp-3); }
+
+.callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                     padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                     border-radius: var(--radius-md); color: #7F1D1D; }
+.callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                    padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                    border-radius: var(--radius-md); color: #78350F; }
+.callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                    padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                    border-radius: var(--radius-md); color: #166534; }
+.callout-info { background: #EFF2FB; border-left: 4px solid var(--c-info);
+                 padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                 border-radius: var(--radius-md); color: #1E3A8A; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+              gap: var(--sp-3); margin: var(--sp-4) 0; }
+.stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+             border-radius: var(--radius-md); padding: var(--sp-4) var(--sp-3); text-align: center; }
+.stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1; }
+.stat-box .number.bug { color: var(--c-critical); }
+.stat-box .number.success { color: var(--c-success); }
+.stat-box .number.warning { color: var(--c-warning); }
+.stat-box .number.info { color: var(--c-info); }
+.stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-2); }
+
+.svg-figure { margin: var(--sp-5) 0; text-align: center; }
+.svg-figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto;
+                   background: var(--c-bg); border-radius: var(--radius-md);
+                   padding: var(--sp-3); border: 1px solid var(--c-border); }
+.svg-figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                          margin-top: var(--sp-2); font-style: italic; }
+
+.checklist { list-style: none; padding: 0; }
+.checklist li { display: flex; align-items: flex-start; gap: var(--sp-3);
+                padding: var(--sp-2) 0; border-bottom: 1px dashed var(--c-border); }
+.checklist li:last-child { border-bottom: none; }
+.checklist .ck-box { font-family: var(--ff-mono); color: var(--c-accent);
+                     font-weight: 700; min-width: 22px; }
+.checklist .ck-label { flex: 1; }
+.checklist .ck-tag { font-family: var(--ff-mono); font-size: var(--fs-xs);
+                     background: var(--c-code-bg); padding: 1px 6px; border-radius: 10px;
+                     color: var(--c-text-soft); margin-left: var(--sp-2); }
+
+.do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4);
+           margin: var(--sp-4) 0; }
+.do-dont .col { padding: var(--sp-4); border-radius: var(--radius-md); border: 1px solid; }
+.do-dont .col.do { background: #F0FDF4; border-color: var(--c-success); }
+.do-dont .col.dont { background: #FEF2F0; border-color: var(--c-critical); }
+.do-dont .col h4 { margin-top: 0; }
+.do-dont .col.do h4 { color: var(--c-success); }
+.do-dont .col.dont h4 { color: var(--c-critical); }
+.do-dont ul { margin: 0; padding-left: var(--sp-4); }
+.do-dont li { font-size: var(--fs-sm); margin-bottom: var(--sp-2); }
+
+.references { background: var(--c-bg); border-radius: var(--radius-md);
+               padding: var(--sp-4) var(--sp-5); margin-top: var(--sp-6); }
+.references h2 { border-bottom: none; margin-top: 0; font-size: var(--fs-xl); padding-bottom: 0; }
+.references ol { list-style: decimal; padding-left: var(--sp-5); }
+.references li { margin: var(--sp-2) 0; font-size: var(--fs-sm); }
+.references li code { font-family: var(--ff-mono); font-size: 0.9em; }
+
+@media print {
+  body { background: white; }
+  .layout { display: block; max-width: 100%; padding: 0; }
+  aside.toc { display: none; }
+  main.report { box-shadow: none; border: none; padding: 0; }
+  .layer-card { page-break-inside: avoid; border-color: #999; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #666; }
+  a[href^="../"]::after { content: " [" attr(href) "]"; font-size: 0.8em; color: #999; }
+  pre, table, blockquote, .layer-card, svg { page-break-inside: avoid; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  aside.toc { position: static; max-height: none; }
+  .do-dont { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="toc" aria-label="Table of contents">
+    <h3>章節導航</h3>
+    <ol>
+      <li><a href="#tldr">TL;DR — 5 層方法論</a></li>
+      <li><a href="#why" class="core">為何要 5 層 — 認知偏誤陷阱</a></li>
+      <li><a href="#flow">方法論流程圖</a></li>
+      <li><a href="#l1" class="core">Layer 1 — 現象量化</a></li>
+      <li><a href="#l2" class="core">Layer 2 — 獨立性測試</a></li>
+      <li><a href="#l3" class="core">Layer 3 — 個案級 trace</a></li>
+      <li><a href="#l4" class="core">Layer 4 — 5 Whys + 機制疊乘</a></li>
+      <li><a href="#l5" class="core">Layer 5 — 4 軌證據鏈</a></li>
+      <li><a href="#negative">不可宣告事項 — 誠實揭露</a></li>
+      <li><a href="#checklist">Pre-publish 6 點檢核</a></li>
+      <li><a href="#template">問題定義範本（可複製）</a></li>
+      <li><a href="#refs">引用文件</a></li>
+    </ol>
+  </aside>
+
+  <main class="report">
+
+    <header class="report-header">
+      <div class="pretitle">Methodology Concept · Self-Phasing Pipeline</div>
+      <h1>如何清楚定義 Self-Phasing Pipeline 的問題源頭</h1>
+      <p class="subtitle">5 層方法論：現象 → 獨立性 → 個案 → 機制 → 證據鏈</p>
+      <dl class="meta">
+        <dt>Build date</dt>      <dd>2026-05-14</dd>
+        <dt>Audience</dt>        <dd>future-self / 同事 / PI</dd>
+        <dt>Parent case study</dt><dd><code>InterSubMod/docs/reports/validated/2026/05/20260514_HP_tag_priority_bug_engineering_report_01.md</code></dd>
+        <dt>Status</dt>          <dd>concept · methodology-canonical</dd>
+        <dt>Use when</dt>        <dd>新 pipeline bug 出現 / 改寫舊報告 / 教學新成員</dd>
+        <dt>Skip when</dt>       <dd>單行 typo / 已有完整工程報告無需重新框架化</dd>
+      </dl>
+      <div class="verdict-banner neutral">
+        ✓ 問題源頭定義 = <b>量化現象 + 排除替代解釋 + 個案逐條 trace + 機制疊乘拆解 + 4 軌證據鏈</b>，五者缺一不可
+      </div>
+    </header>
+
+    <h2 id="tldr"><span class="h-num">0.</span>TL;DR — 5 層方法論</h2>
+
+    <p>當有人問你「self-phasing pipeline 的問題源頭在哪？」— <b>單一句答案（「HP tag 偏」或「getVote bug」）幾乎一定錯</b>。正確答案是一條由淺到深的 5 層敘事鏈。每往下一層，都要有<b>外部可驗證</b>的證據（不是「我覺得」），且不能跳層。</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="number bug">17.3 : 1</div>
+        <div class="label">現象 — HP1:HP2 全基因組偏移（baseline）</div>
+      </div>
+      <div class="stat-box">
+        <div class="number info">1 : 1.275</div>
+        <div class="label">獨立性對照 — Paired binary 同樣本</div>
+      </div>
+      <div class="stat-box">
+        <div class="number warning">34,855</div>
+        <div class="label">個案 — Read-level priority bug victims</div>
+      </div>
+      <div class="stat-box">
+        <div class="number bug">2 × 機制</div>
+        <div class="label">疊乘 — 生物 × 演算法 = 17.3:1</div>
+      </div>
+      <div class="stat-box">
+        <div class="number success">4 軌</div>
+        <div class="label">證據鏈 — 統計 / 跨樣本 / 機制 / 正交</div>
+      </div>
+    </div>
+
+    <div class="callout-info">
+      <b>核心原則</b>：問題源頭的「源頭」不是<b>單一點</b>，而是<b>一條因果鏈</b>。本方法論的目的是把這條鏈拆到「每一層都可被獨立驗證 / 反駁 / 取代」的程度。如果有人能在任一層舉反例，整個敘事必須修正 — 這才是「清楚定義」的真正意涵。
+    </div>
+
+    <h2 id="why"><span class="h-num">1.</span>為何需要 5 層 — 常見認知偏誤陷阱</h2>
+
+    <p>不分層就解釋 pipeline 問題，會掉入以下陷阱（self-phasing 案例都實際發生過，已留下 5 條 errata 紀錄）：</p>
+
+    <table>
+      <thead>
+        <tr><th>陷阱</th><th>典型錯誤敘述</th><th>為何錯</th><th>對應 Layer 修正</th></tr>
+      </thead>
+      <tbody>
+        <tr class="row-bug">
+          <td><b>定性化</b></td>
+          <td>「HP tag 方向偏」「somatic 投票異常」</td>
+          <td>沒給量化值；無法被反駁 — 不滿足科學陳述最低要求</td>
+          <td>Layer 1 強制量化（17.3:1 而非「偏」）</td>
+        </tr>
+        <tr class="row-bug">
+          <td><b>單因論</b></td>
+          <td>「getVote 有 bug 所以偏 HP1」</td>
+          <td>忽略 17.3 倍量級需要疊乘解釋；單 bug 通常只造成 1.x 倍</td>
+          <td>Layer 4 機制疊乘（A × B 才到 17.3:1）</td>
+        </tr>
+        <tr class="row-bug">
+          <td><b>單樣本歸納</b></td>
+          <td>「HCC1395 chr19 觀察到 113:0」</td>
+          <td>無法排除「樣本性質」或「region 性質」假設</td>
+          <td>Layer 2 獨立性對照（paired binary + 全 chr 分佈）</td>
+        </tr>
+        <tr class="row-bug">
+          <td><b>統計層停止</b></td>
+          <td>「BAM 統計顯示偏移」</td>
+          <td>不知是哪些 read、修正方向是否一致 — 修補後無法驗證</td>
+          <td>Layer 3 個案級逐條 trace（34,855 victims）</td>
+        </tr>
+        <tr class="row-bug">
+          <td><b>機制懸空</b></td>
+          <td>「somatic 票被誤用」</td>
+          <td>沒指到 file:line — 同事 / 未來自己無法接手 patch</td>
+          <td>Layer 5 機制證據（HaplotagProcess.cpp:506-530）</td>
+        </tr>
+        <tr class="row-bug">
+          <td><b>過度宣告</b></td>
+          <td>「V6 修對 self-phasing 所有問題」</td>
+          <td>混淆 tagging layer vs phasing layer；混淆 caller F1 vs tag ratio</td>
+          <td>「不可宣告事項」誠實揭露</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>5 層方法論就是針對這 6 個陷阱設計的，<b>每一層都對應反制特定陷阱</b>。</p>
+
+    <h2 id="flow"><span class="h-num">2.</span>方法論流程圖</h2>
+
+    <figure class="svg-figure">
+      <svg viewBox="0 0 800 420" role="img" aria-labelledby="flow-title flow-desc"
+           xmlns="http://www.w3.org/2000/svg">
+        <title id="flow-title">5 層問題源頭定義方法論流程</title>
+        <desc id="flow-desc">從觀察到證據鏈的 5 層遞進，每層輸出餵下一層輸入</desc>
+
+        <!-- Layer 1 -->
+        <rect x="20" y="30" width="140" height="60" rx="6" fill="#1E3A8A" stroke="#1E3A8A"/>
+        <text x="90" y="55" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700"
+              font-family="system-ui">L1 現象量化</text>
+        <text x="90" y="75" text-anchor="middle" fill="#FFFFFF" font-size="11"
+              font-family="system-ui">「偏」→「17.3:1」</text>
+
+        <!-- arrow 1→2 -->
+        <line x1="160" y1="60" x2="200" y2="60" stroke="#6B6B66" stroke-width="2"
+              marker-end="url(#arrow)"/>
+
+        <!-- Layer 2 -->
+        <rect x="200" y="30" width="140" height="60" rx="6" fill="#047857" stroke="#047857"/>
+        <text x="270" y="55" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700"
+              font-family="system-ui">L2 獨立性測試</text>
+        <text x="270" y="75" text-anchor="middle" fill="#FFFFFF" font-size="11"
+              font-family="system-ui">排除 sample / binary 性質</text>
+
+        <line x1="340" y1="60" x2="380" y2="60" stroke="#6B6B66" stroke-width="2"
+              marker-end="url(#arrow)"/>
+
+        <!-- Layer 3 -->
+        <rect x="380" y="30" width="140" height="60" rx="6" fill="#7C3AED" stroke="#7C3AED"/>
+        <text x="450" y="55" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700"
+              font-family="system-ui">L3 個案 trace</text>
+        <text x="450" y="75" text-anchor="middle" fill="#FFFFFF" font-size="11"
+              font-family="system-ui">逐條 read dump</text>
+
+        <line x1="520" y1="60" x2="560" y2="60" stroke="#6B6B66" stroke-width="2"
+              marker-end="url(#arrow)"/>
+
+        <!-- Layer 4 -->
+        <rect x="560" y="30" width="140" height="60" rx="6" fill="#B45309" stroke="#B45309"/>
+        <text x="630" y="55" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700"
+              font-family="system-ui">L4 機制疊乘</text>
+        <text x="630" y="75" text-anchor="middle" fill="#FFFFFF" font-size="11"
+              font-family="system-ui">5 Whys + A×B</text>
+
+        <!-- arrow down to L5 -->
+        <line x1="630" y1="90" x2="630" y2="180" stroke="#6B6B66" stroke-width="2"
+              marker-end="url(#arrow)"/>
+
+        <!-- Layer 5 (centered below) -->
+        <rect x="220" y="180" width="380" height="70" rx="6" fill="#B91C1C" stroke="#B91C1C"/>
+        <text x="410" y="210" text-anchor="middle" fill="#FFFFFF" font-size="15" font-weight="700"
+              font-family="system-ui">L5 — 4 軌證據鏈</text>
+        <text x="410" y="232" text-anchor="middle" fill="#FFFFFF" font-size="11"
+              font-family="system-ui">統計 · 跨樣本 · C++ 原始碼 · 正交 binary（每軌獨立可推翻）</text>
+
+        <!-- output box -->
+        <rect x="280" y="290" width="260" height="50" rx="6" fill="#15803D" stroke="#15803D"/>
+        <text x="410" y="316" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="700"
+              font-family="system-ui">「可被反駁的 5 層敘事」</text>
+        <text x="410" y="332" text-anchor="middle" fill="#FFFFFF" font-size="11"
+              font-family="system-ui">— 任一層失敗，整鏈須修正 —</text>
+
+        <line x1="410" y1="250" x2="410" y2="285" stroke="#6B6B66" stroke-width="2"
+              marker-end="url(#arrow)"/>
+
+        <!-- Self-phasing case study annotations -->
+        <text x="90" y="115" text-anchor="middle" fill="#6B6B66" font-size="10"
+              font-family="system-ui" font-style="italic">case: HP1:HP2 = 17.3:1</text>
+        <text x="270" y="115" text-anchor="middle" fill="#6B6B66" font-size="10"
+              font-family="system-ui" font-style="italic">case: paired 1:1.275</text>
+        <text x="450" y="115" text-anchor="middle" fill="#6B6B66" font-size="10"
+              font-family="system-ui" font-style="italic">case: 34,855 victims</text>
+        <text x="630" y="115" text-anchor="middle" fill="#6B6B66" font-size="10"
+              font-family="system-ui" font-style="italic">case: 生物 × algorithm</text>
+
+        <!-- Negative list annotation -->
+        <text x="410" y="370" text-anchor="middle" fill="#C2410C" font-size="11"
+              font-family="system-ui" font-weight="600">+ 不可宣告事項清單（誠實揭露負面邊界）</text>
+        <text x="410" y="390" text-anchor="middle" fill="#6B6B66" font-size="10"
+              font-family="system-ui">eg. 不可宣告「V6 解決所有 self-phasing 問題」</text>
+
+        <!-- arrow marker -->
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3"
+                  orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L9,3 z" fill="#6B6B66"/>
+          </marker>
+        </defs>
+      </svg>
+      <figcaption>圖 1 · 5 層方法論流程：每層輸出嚴格定義下一層輸入，最終匯合到 4 軌證據鏈再加負面清單</figcaption>
+    </figure>
+
+    <!-- ───────────────── Layer 1 ───────────────── -->
+    <section class="layer-card l1" id="l1">
+      <div class="layer-head">
+        <span class="layer-tag">L1</span>
+        <div style="flex: 1;">
+          <div class="layer-title">現象量化 — 把「偏」變成數字</div>
+          <div class="layer-question">回答：偏離預期多少？單位是什麼？基準是什麼？</div>
+        </div>
+      </div>
+      <div class="layer-body">
+
+        <h4>核心動作</h4>
+        <p>把問題敘述中所有<b>定性詞</b>（「方向偏」「票數異常」「分佈不平均」）替換成<b>帶單位的比值或差值</b>，並標明「預期值」與「實測值」。</p>
+
+        <h4>Self-phasing 案例對照</h4>
+        <table>
+          <thead>
+            <tr><th>定性敘述（壞）</th><th>量化敘述（好）</th><th>來源</th></tr>
+          </thead>
+          <tbody>
+            <tr class="row-bug">
+              <td>「HP tag 方向偏 HP1」</td>
+              <td>—</td>
+              <td>無從驗證</td>
+            </tr>
+            <tr class="row-safe">
+              <td>—</td>
+              <td>HP1 系列 reads : HP2 系列 reads = <b>17.3 : 1</b>（全基因組）；HP1 占比 <b>94.6%</b>（vs 預期 50%）</td>
+              <td><code>samtools view -F 256 tagged.bam | grep -oE "HP:i:[0-9]+" | sort | uniq -c</code></td>
+            </tr>
+            <tr class="row-bug">
+              <td>「somatic 投票異常」</td>
+              <td>—</td>
+              <td>無從驗證</td>
+            </tr>
+            <tr class="row-safe">
+              <td>—</td>
+              <td>baseline somatic ALT 偏 HP1 比例 = <b>94.6%</b>；對齊 17.3/(17.3+1) ≈ 0.9454 算術自洽</td>
+              <td>整合報告 §2.1</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>具體要求</h4>
+        <ul>
+          <li>每個數字必須有<b>單位</b>（read 數、比值、百分比、bp 距離）。</li>
+          <li>每個數字必須有<b>預期值對照</b>（隨機應為 50%、無 bug 應為 1:1）— 否則「偏」沒意義。</li>
+          <li>每個數字必須有<b>可重現命令</b>（samtools / awk / 一行 Python）— 否則不能審查。</li>
+          <li>避免「大量」「明顯」「顯著」這類無單位形容詞，除非後面緊跟 p-value 或 effect size。</li>
+        </ul>
+
+        <div class="callout-warning">
+          <b>常見錯誤</b>：止步於 chr19 局部觀察（如 SP1 位點 113:0），未量化全基因組。Self-phasing 早期報告就掉過這坑，5/8 整合報告補上全基因組 17.3:1 才完整。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ───────────────── Layer 2 ───────────────── -->
+    <section class="layer-card l2" id="l2">
+      <div class="layer-head">
+        <span class="layer-tag">L2</span>
+        <div style="flex: 1;">
+          <div class="layer-title">獨立性測試 — 排除替代解釋</div>
+          <div class="layer-question">回答：這偏移是 sample 的、binary 的、region 的，還是<b>真的</b> bug？</div>
+        </div>
+      </div>
+      <div class="layer-body">
+
+        <h4>核心動作</h4>
+        <p>對 L1 觀察到的偏移，<b>逐項排除「不是 bug 的可能解釋」</b>。每個解釋都用一個獨立對照組驗證：</p>
+        <ul>
+          <li><b>排除 sample 性質</b>：用同 sample 跑<b>獨立 binary</b> — 若獨立 binary 不偏，則排除「sample 天生偏」。</li>
+          <li><b>排除 binary 性質</b>：用同 binary 跑<b>獨立 sample</b> — 若多 sample 都偏，則是 binary 的問題。</li>
+          <li><b>排除 region 性質</b>：檢查偏移在<b>全基因組分佈</b>是否一致 — 若僅某 chr 偏，則可能是 region 屬性而非全域 bug。</li>
+          <li><b>排除上游 caller 性質</b>：對照<b>caller F1 vs SEQC2 truth</b>是否變動 — 若 F1 不變但 tag 偏，則 bug 在 tagging 而非 calling。</li>
+        </ul>
+
+        <h4>Self-phasing 案例對照</h4>
+        <table>
+          <thead>
+            <tr><th>替代假設</th><th>對照組</th><th>結果</th><th>判定</th></tr>
+          </thead>
+          <tbody>
+            <tr class="row-safe">
+              <td>「HCC1395 sample 天生 HP1 偏」</td>
+              <td>HCC1395 paired binary (longphase-s) 同 BAM</td>
+              <td>HP1:HP2 = <b>1 : 1.275</b></td>
+              <td>排除 ✓ 是 binary-specific</td>
+            </tr>
+            <tr class="row-safe">
+              <td>「TO mode 7 樣本都偏因 caller 偏」</td>
+              <td>caller F1 vs SEQC2（baseline / V3F / V5 / V6 四版）</td>
+              <td>F1 = <b>0.7166 / 0.6273 四版皆同</b></td>
+              <td>排除 ✓ caller 不變，bug 在 tagging</td>
+            </tr>
+            <tr class="row-safe">
+              <td>「chr19 局部偏因 region 性質」</td>
+              <td>全基因組 24 chr 分佈一致性</td>
+              <td>chr19 占全基因組 priority bug 僅 2.16%（rank 19）</td>
+              <td>排除 ✓ 全域均勻發生</td>
+            </tr>
+            <tr class="row-bug">
+              <td>「paired mode 也有同 bug 只是沒測到」</td>
+              <td>paired binary 原始碼閱讀</td>
+              <td><code>SomaticHaplotagProcess.cpp</code> 不 ordered + 無 break</td>
+              <td>排除 ✓ paired binary 邏輯獨立，無 priority bug</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>4 個對照組設計原則</h4>
+        <ul>
+          <li><b>正交性</b>：每個對照組只變動<b>一個維度</b>（binary / sample / region / 上游 caller），否則無法歸因。</li>
+          <li><b>同口徑</b>：對照組統計方法<b>完全相同</b>（同 samtools 指令、同篩選條件）— 否則差異可能來自方法而非物件。</li>
+          <li><b>對照組必須能輸出「無偏」結果</b>：若所有對照都偏，就無法定位 bug — 至少要有一組「應該無偏的對照」（例：paired binary）。</li>
+        </ul>
+
+        <div class="callout-info">
+          <b>哲學備註</b>：L2 是<b>科學方法的核心</b> — Karl Popper 的 falsifiability。觀察到偏移不等於發現 bug；只有當「不是 bug 的所有解釋」都被獨立對照組推翻，才能下一步進入 L3 個案 trace。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ───────────────── Layer 3 ───────────────── -->
+    <section class="layer-card l3" id="l3">
+      <div class="layer-head">
+        <span class="layer-tag">L3</span>
+        <div style="flex: 1;">
+          <div class="layer-title">個案級 trace — 從統計到逐條 read</div>
+          <div class="layer-question">回答：具體是哪些 read 被影響？修正方向是否一致？反向案例有多少？</div>
+        </div>
+      </div>
+      <div class="layer-body">
+
+        <h4>核心動作</h4>
+        <p>L1/L2 是<b>宏觀層</b>；L3 必須潛入<b>微觀層</b>。對 baseline / 修補版本 / 對照版本三組，dump 每個 read 經關鍵函式後的 intermediate state，merge 後檢查：</p>
+        <ul>
+          <li><b>受影響 read 數量</b>（被誤判方向的 read 數）</li>
+          <li><b>修正率</b>（修補版本將多少受影響 read 改對）</li>
+          <li><b>反向案例數</b>（修補版本意外改錯的 read 數）— 此項必須接近 0，否則修補有 regression</li>
+        </ul>
+
+        <h4>Self-phasing 案例對照</h4>
+        <p>對 baseline / V3F / V6 三版加 <code>--debug-vote-dump</code> flag，dump 每條 read 經 <code>getVote()</code> 後的 5-vote countMap + hpResult。</p>
+
+        <pre><code># Dump command (per version)
+./longphase haplotag --debug-vote-dump out.tsv -s in.vcf -b in.bam ...
+
+# Merge & analyze
+awk -v OFS='\t' '...' out.baseline.tsv out.v3f.tsv out.v6.tsv > merged.tsv
+# Filter priority bug victims (baseline somatic dir != v6 corrected dir)
+python3 priority_bug_victims.py merged.tsv</code></pre>
+
+        <table>
+          <thead>
+            <tr><th>統計</th><th>數量</th><th>意義</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>chr19 dump rows（三版各）</td>
+              <td class="num">549,206</td>
+              <td>三版相同 — 確保 dump 完整一致</td>
+            </tr>
+            <tr>
+              <td>三版 merged events</td>
+              <td class="num">1,069,832</td>
+              <td>覆蓋無漏 — 後續統計基於完整 events</td>
+            </tr>
+            <tr class="row-bug">
+              <td>chr19 priority bug victims</td>
+              <td class="num">752</td>
+              <td>baseline 標 somatic 方向且 V6 反向 — 即 bug 受害者</td>
+            </tr>
+            <tr class="row-bug">
+              <td>全基因組 victims</td>
+              <td class="num">34,855</td>
+              <td>chr19 占 2.16% — 全域分佈，非局部</td>
+            </tr>
+            <tr class="row-safe">
+              <td>V6 修正率</td>
+              <td class="num">100% (34,855/34,855)</td>
+              <td>修補完全覆蓋 — 無遺漏</td>
+            </tr>
+            <tr class="row-safe">
+              <td>反向案例（baseline=21 → V6=11）</td>
+              <td class="num">0</td>
+              <td>無 regression — 修補單向改善</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>為何 L3 不可省略</h4>
+        <ul>
+          <li>L1 只看 aggregate ratio — 修補可能把 A 改對但把 B 改錯，aggregate 仍變好但<b>個案層面有 regression</b>。</li>
+          <li>L3 的「反向案例 = 0」是<b>修補正確性的最強證據</b>。若反向案例 > 0%，修補有未列出的副作用。</li>
+          <li>L3 也提供<b>修正率上限</b>：若修補只覆蓋 80% victims，剩下 20% 需要 follow-up 或承認限制。</li>
+        </ul>
+
+        <div class="callout-warning">
+          <b>常見錯誤</b>：只 dump baseline 不 dump 修補版本，無法驗證「修對」。三版 dump 是最小集合（baseline + 修補 + 對照）。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ───────────────── Layer 4 ───────────────── -->
+    <section class="layer-card l4" id="l4">
+      <div class="layer-head">
+        <span class="layer-tag">L4</span>
+        <div style="flex: 1;">
+          <div class="layer-title">5 Whys + 機制疊乘 — 量級必須有解釋</div>
+          <div class="layer-question">回答：為何放大到 17.3 倍？單一機制能解釋嗎？若不能，哪些機制疊加？</div>
+        </div>
+      </div>
+      <div class="layer-body">
+
+        <h4>核心動作 A — 5 Whys 拆到 file:line</h4>
+        <p>每個 Why 必須指到具體位置（file:line / 函式 / 上游模組），不能停在「設計選擇」「歷史原因」。</p>
+
+        <table>
+          <thead>
+            <tr><th>Why #</th><th>問題</th><th>答（必須帶 file:line）</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>為什麼 HP1:HP2 = 17.3:1？</td><td>大量 reads 被誤標 HP1 系列（HP:i:1 / HP:i:11）</td></tr>
+            <tr><td>2</td><td>為什麼那些 reads 被誤標？</td><td><code>getVote()</code> 在 countMap 有 ≥1 票 somatic 時直接決定方向</td></tr>
+            <tr><td>3</td><td>為什麼 ≥1 票 somatic 就能決定？</td><td><code>HaplotagProcess.cpp:506-530</code> 把 somatic pair 排第一 + <code>break</code> 跳出</td></tr>
+            <tr><td>4</td><td>為什麼 pair 順序 somatic-first？</td><td>原始設計假設 somatic 優先（commit 歷史無記載原因）— 設計缺陷</td></tr>
+            <tr><td>5</td><td>為什麼 somatic 票偏 HP1？</td><td>上游：tumor sub-clone lineage 同源 + phasing 把 somatic 當投票員 → VCF GT2 偏 <code>1\|.</code></td></tr>
+          </tbody>
+        </table>
+
+        <h4>核心動作 B — 機制疊乘量化</h4>
+        <p>單一機制通常只造成 1.x 倍偏移。<b>17.3 倍量級必須有 ≥2 個機制疊乘解釋</b>，否則敘事不完整。</p>
+
+        <figure class="svg-figure">
+          <svg viewBox="0 0 700 220" role="img" aria-labelledby="mech-title mech-desc"
+               xmlns="http://www.w3.org/2000/svg">
+            <title id="mech-title">Self-phasing 17.3:1 機制疊乘</title>
+            <desc id="mech-desc">機制 A 生物與上游 phasing × 機制 B 演算法 = 17.3 倍偏移</desc>
+
+            <!-- Mechanism A -->
+            <rect x="20" y="40" width="280" height="80" rx="6" fill="#FBF1E2" stroke="#B45309" stroke-width="2"/>
+            <text x="160" y="65" text-anchor="middle" font-size="13" font-weight="700"
+                  font-family="system-ui" fill="#78350F">機制 A — 生物 + 上游 phasing</text>
+            <text x="160" y="85" text-anchor="middle" font-size="11"
+                  font-family="system-ui" fill="#78350F">somatic 票方向天生一致（lineage 同源）</text>
+            <text x="160" y="100" text-anchor="middle" font-size="11"
+                  font-family="system-ui" fill="#78350F">+ phasing「球員兼裁判」放大偏移</text>
+            <text x="160" y="115" text-anchor="middle" font-size="11"
+                  font-family="system-ui" fill="#78350F">≈ P(偏 HP1 | somatic) ≈ 1.0</text>
+
+            <!-- × symbol -->
+            <text x="335" y="90" text-anchor="middle" font-size="32" font-weight="700"
+                  font-family="system-ui" fill="#B45309">×</text>
+
+            <!-- Mechanism B -->
+            <rect x="370" y="40" width="280" height="80" rx="6" fill="#FBEBEB" stroke="#B91C1C" stroke-width="2"/>
+            <text x="510" y="65" text-anchor="middle" font-size="13" font-weight="700"
+                  font-family="system-ui" fill="#7F1D1D">機制 B — 演算法缺陷</text>
+            <text x="510" y="85" text-anchor="middle" font-size="11"
+                  font-family="system-ui" fill="#7F1D1D"><tspan font-family="JetBrains Mono">getVote()</tspan> 1 票觸發 + break</text>
+            <text x="510" y="100" text-anchor="middle" font-size="11"
+                  font-family="system-ui" fill="#7F1D1D">germline 證據完全失效</text>
+            <text x="510" y="115" text-anchor="middle" font-size="11"
+                  font-family="system-ui" fill="#7F1D1D">≈ 放大係數 17×</text>
+
+            <!-- equals -->
+            <line x1="335" y1="145" x2="335" y2="165" stroke="#6B6B66" stroke-width="2"
+                  marker-end="url(#arrow2)"/>
+
+            <!-- Result -->
+            <rect x="220" y="170" width="240" height="40" rx="6" fill="#C2410C" stroke="#C2410C"/>
+            <text x="340" y="195" text-anchor="middle" font-size="14" font-weight="700"
+                  font-family="system-ui" fill="#FFFFFF">= HP1 : HP2 ≈ 17.3 : 1</text>
+
+            <defs>
+              <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3"
+                      orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#6B6B66"/>
+              </marker>
+            </defs>
+          </svg>
+          <figcaption>圖 2 · 機制疊乘：缺一不可。修補機制 B 即可消除 17.3:1（V6 patch）；機制 A 是 self-phasing 固有生物學現象，不需修</figcaption>
+        </figure>
+
+        <h4>為何「機制 A × 機制 B」很重要</h4>
+        <p>知道是<b>疊乘</b>而非<b>單一機制</b>，決定了修補策略：</p>
+        <ul>
+          <li>若敘事只說「somatic 偏 HP1」（單機制 A），修補方向會錯（會嘗試修 caller，但 caller F1 不變）。</li>
+          <li>若敘事只說「getVote bug」（單機制 B），無法解釋為何修補後仍有 V5 Layer 1.5 在 germline-absent 區<b>4.19:1 殘餘偏移</b>。</li>
+          <li>正解：「機制 A 永遠存在（生物現象），修機制 B 就足以解 bug」— V6 patch 設計依此判斷，<b>germline-absent 區保守標 hp=33</b> 而非嘗試從 somatic 推方向（避免 Layer 1.5 復現機制 A 偏移）。</li>
+        </ul>
+
+        <div class="callout-info">
+          <b>算術自洽檢查</b>：機制疊乘的好處是可以做數字驗證。17.3 / (17.3 + 1) ≈ 94.6%（HP1 占比），與整合報告 §2.1 全基因組 94.6% somatic ALT 偏 HP1 完全一致 — 雙重來源算術閉合，敘事可信。
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ───────────────── Layer 5 ───────────────── -->
+    <section class="layer-card l5" id="l5">
+      <div class="layer-head">
+        <span class="layer-tag">L5</span>
+        <div style="flex: 1;">
+          <div class="layer-title">4 軌證據鏈 — 每軌可獨立推翻整個敘事</div>
+          <div class="layer-question">回答：若有人質疑，4 個獨立證據來源都站得住嗎？</div>
+        </div>
+      </div>
+      <div class="layer-body">
+
+        <h4>核心動作</h4>
+        <p>把 L1-L4 的證據組織成<b>4 條獨立軌道</b>，每條都來自不同來源，任一條失敗則整個敘事必須修正。這是 InterSubMod 專案 <code>/structured-tech-report</code> skill 的 evidence layer 設計。</p>
+
+        <table>
+          <thead>
+            <tr><th>軌</th><th>類型</th><th>Self-phasing 案例證據</th><th>來源</th></tr>
+          </thead>
+          <tbody>
+            <tr class="row-safe">
+              <td><b>軌 1</b></td>
+              <td>統計證據（BAM stats）</td>
+              <td>HP1:HP2 = 17.3:1 全基因組</td>
+              <td>整合報告 §2.1</td>
+            </tr>
+            <tr class="row-safe">
+              <td><b>軌 2</b></td>
+              <td>跨樣本證據（4-sample expansion）</td>
+              <td>V6 修補後 4 樣本 hp ratio 0.611-1.243（中性）</td>
+              <td><code>paired_priority_bug_audit/08_phaseD_v6_cross_sample_findings.md</code></td>
+            </tr>
+            <tr class="row-safe">
+              <td><b>軌 3</b></td>
+              <td>機制證據（C++ 原始碼 file:line）</td>
+              <td><code>HaplotagProcess.cpp:506-530</code> baseline getVote;<code>:512-559</code> V6 patch</td>
+              <td><code>/big8_disk/.../longphase-to/</code> + <code>/big7_disk/.../longphase-to-mod/</code></td>
+            </tr>
+            <tr class="row-safe">
+              <td><b>軌 4</b></td>
+              <td>正交證據（獨立 binary 對照）</td>
+              <td>paired binary <code>SomaticHaplotagProcess.cpp</code> 同樣本 1:1.275 無偏</td>
+              <td><code>paired_priority_bug_audit/00_audit_report.md</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>4 軌的「獨立」意涵</h4>
+        <ul>
+          <li><b>軌 1 來自 baseline BAM</b> — 即使後續所有分析都錯，原始 BAM 統計仍存在。</li>
+          <li><b>軌 2 來自不同樣本</b> — 排除「HCC1395 特殊」可能性。</li>
+          <li><b>軌 3 來自原始碼閱讀</b> — 完全不依賴 BAM 統計，是純語法 / 邏輯層證據。</li>
+          <li><b>軌 4 來自獨立 binary</b> — 完全不依賴 longphase-to 任何行為，是純對照組證據。</li>
+        </ul>
+
+        <p>若有人能在任一軌舉反例（例：發現某個樣本 paired binary 也有 17.3 偏移），整個敘事必須重新檢視 — 但 4 軌獨立性使這種反例非常難找。<b>這是敘事「可被反駁」的具體實現</b>。</p>
+
+        <h4>4 軌完整性自我檢核（4 軌全綠才能宣告解決）</h4>
+        <ul class="checklist">
+          <li><span class="ck-box">✓</span><span class="ck-label">軌 1（統計）—— 有量化數字 + 預期值對照 + 可重現命令</span><span class="ck-tag">L1 強化</span></li>
+          <li><span class="ck-box">✓</span><span class="ck-label">軌 2（跨樣本）—— ≥3 樣本一致；單樣本不可宣告</span><span class="ck-tag">L2 + L1 跨樣本</span></li>
+          <li><span class="ck-box">✓</span><span class="ck-label">軌 3（機制）—— file:line 指到具體函式 + diff 對照</span><span class="ck-tag">L4 + 原始碼</span></li>
+          <li><span class="ck-box">✓</span><span class="ck-label">軌 4（正交）—— 對照組來源完全獨立（不同 binary / 不同 pipeline）</span><span class="ck-tag">L2 強化</span></li>
+        </ul>
+
+      </div>
+    </section>
+
+    <!-- ───────────────── 不可宣告事項 ───────────────── -->
+    <h2 id="negative"><span class="h-num">3.</span>不可宣告事項 — 誠實揭露的負面清單</h2>
+
+    <p>5 層方法論定義的是<b>正面證據鏈</b>。但敘事完整性也需要<b>負面清單</b> — 明確列出「即使所有證據都成立，仍<b>不能</b>宣告的事」。這是 self-phasing 系列 5 條 errata 的根本起因（過度宣告 → 後續發現邊界 → 撤回 / 修正）。</p>
+
+    <div class="do-dont">
+      <div class="col do">
+        <h4>✓ 可以宣告</h4>
+        <ul>
+          <li>「baseline longphase-to 在 tagging layer 有 priority bug」</li>
+          <li>「V6 patch 在 4 樣本 hp ratio 接近中性」</li>
+          <li>「機制 A × B 疊乘解釋 17.3:1 量級」</li>
+          <li>「caller-level F1 不變（本專案口徑）」</li>
+          <li>「paired binary 不受同 bug 影響」</li>
+        </ul>
+      </div>
+      <div class="col dont">
+        <h4>✗ 不可宣告</h4>
+        <ul>
+          <li>「V6 解決 longphase 所有 priority bug」（只解 tagging layer，phasing layer 另有「球員兼裁判」by PON-only flag）</li>
+          <li>「ISM downstream F1 因 V6 改善」（V6 不改 caller；ISM feature 影響未量化）</li>
+          <li>「longphase 論文 F1 == 本專案 F1」（不同口徑 — 論文用 V_H/V_L post-filter，本專案用 caller-level；詳見 KB query 規則）</li>
+          <li>「Paired 與 TO 同 bug 已解」（Paired 從沒這 bug）</li>
+          <li>「17.3:1 = 完全 bug；無生物學成分」（機制 A 是 self-phasing 生物現象，無法 0 化）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout-critical">
+      <b>負面清單規則</b>：每寫一條正面宣告，<b>同時思考它的 boundary</b> — 在什麼條件下這條會失效？把那條失效寫入負面清單。這就是 InterSubMod 「2026-05-13 outside-claim 必先查 KB」教訓的具體實現（slide 14 F1 雙口徑事件直接源自此類過度宣告）。
+    </div>
+
+    <!-- ───────────────── Pre-publish Checklist ───────────────── -->
+    <h2 id="checklist"><span class="h-num">4.</span>Pre-publish 6 點檢核（每份報告必跑）</h2>
+
+    <p>寫完問題源頭定義後，用以下 6 點自我檢核。任一項打 ✗ 不發布。</p>
+
+    <ul class="checklist">
+      <li>
+        <span class="ck-box">☐</span>
+        <span class="ck-label"><b>L1 量化檢核</b> — 所有「偏」「異常」「不平均」是否都已替換成帶單位的數字 + 預期值對照？</span>
+        <span class="ck-tag">Layer 1</span>
+      </li>
+      <li>
+        <span class="ck-box">☐</span>
+        <span class="ck-label"><b>L2 獨立性檢核</b> — 「不是 bug 的 4 個假設」（sample / binary / region / 上游 caller）是否都有對照組排除？</span>
+        <span class="ck-tag">Layer 2</span>
+      </li>
+      <li>
+        <span class="ck-box">☐</span>
+        <span class="ck-label"><b>L3 個案檢核</b> — 修正率 = 100%？反向案例 = 0？若否，是否誠實說明殘留？</span>
+        <span class="ck-tag">Layer 3</span>
+      </li>
+      <li>
+        <span class="ck-box">☐</span>
+        <span class="ck-label"><b>L4 機制檢核</b> — 偏移量級是否需要疊乘解釋？若 >5 倍偏移卻只給單機制，補機制 A 或拒絕單一敘事。</span>
+        <span class="ck-tag">Layer 4</span>
+      </li>
+      <li>
+        <span class="ck-box">☐</span>
+        <span class="ck-label"><b>L5 證據鏈檢核</b> — 4 軌（統計 / 跨樣本 / 機制 / 正交）都有獨立證據？任一軌缺失 → 敘事降級為「假設」而非「結論」。</span>
+        <span class="ck-tag">Layer 5</span>
+      </li>
+      <li>
+        <span class="ck-box">☐</span>
+        <span class="ck-label"><b>負面清單檢核</b> — 每條正面宣告是否有對應的 boundary 敘述？外部工具 claim 是否已查 KB？</span>
+        <span class="ck-tag">Honesty</span>
+      </li>
+    </ul>
+
+    <!-- ───────────────── Template ───────────────── -->
+    <h2 id="template"><span class="h-num">5.</span>問題定義範本（可複製套用）</h2>
+
+    <p>新 pipeline 問題出現時，填入以下範本（建議放在報告 §0 或 §1）：</p>
+
+    <pre><code># Self-Phasing Pipeline Bug 問題源頭 — 5 層敘事
+
+## L1 現象（量化）
+- 觀察值: HP1:HP2 = 17.3 : 1 (全基因組)
+- 預期值: 1 : 1 (假設無偏 phasing)
+- 偏離: HP1 占 94.6% vs 預期 50%
+- 可重現命令: `samtools view -F 256 tagged.bam | grep -oE "HP:i:[0-9]+" | sort | uniq -c`
+
+## L2 獨立性（排除替代解釋）
+- 排除 sample 性質: paired binary 同樣本 1:1.275 → 排除
+- 排除 region 性質: 全基因組分佈均勻, chr19 占 2.16% → 排除
+- 排除 caller 性質: F1 vs SEQC2 baseline/V3F/V5/V6 四版皆 0.7166 → 排除
+- 殘留假設: binary-specific tagging bug
+
+## L3 個案 trace（逐條 read）
+- 三版 dump (baseline / V3F / V6) chr19 各 549,206 rows
+- Priority bug victims: chr19 752, 全基因組 34,855
+- V6 修正率: 100% (34,855/34,855)
+- 反向案例: 0
+
+## L4 5 Whys + 機制疊乘
+- Why 1-5: ... (見上文)
+- 機制 A: 生物 + 上游 phasing (P ≈ 1.0)
+- 機制 B: getVote 1 票觸發 + break (放大係數 ≈ 17×)
+- 疊乘 ≈ 17.3 : 1 (與 L1 算術自洽)
+
+## L5 4 軌證據鏈
+- 軌 1 統計: 整合報告 §2.1
+- 軌 2 跨樣本: paired_priority_bug_audit/08_phaseD_v6_cross_sample_findings.md
+- 軌 3 機制: HaplotagProcess.cpp:506-530 (baseline) / :512-559 (V6)
+- 軌 4 正交: SomaticHaplotagProcess.cpp 同樣本 1:1.275
+
+## 不可宣告事項
+- ❌ V6 解決所有 self-phasing 問題
+- ❌ ISM F1 因 V6 改善
+- ❌ longphase 論文 F1 與本專案口徑相同 (查 KB longphase-to.md §4.3)
+</code></pre>
+
+    <p>把這個範本放在 <code>structured-tech-report</code> §1 或 §5 即可滿足 InterSubMod 13 段式技術報告的「問題源頭」段落要求。</p>
+
+    <!-- ───────────────── References ───────────────── -->
+    <section class="references" id="refs">
+      <h2>引用文件</h2>
+      <ol>
+        <li><code>InterSubMod/docs/reports/validated/2026/05/20260514_HP_tag_priority_bug_engineering_report_01.md</code> — Self-phasing 完整工程報告（13 段式，本方法論的對照案例）</li>
+        <li><code>InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md</code> — 10 段整合報告，含 §2.1 全基因組 17.3:1 BAM 統計</li>
+        <li><code>InterSubMod/research/paired_priority_bug_audit/00_audit_report.md</code> — Paired binary 正交對照組</li>
+        <li><code>InterSubMod/research/paired_priority_bug_audit/08_phaseD_v6_cross_sample_findings.md</code> — V6 4 樣本跨樣本驗證</li>
+        <li><code>/big8_disk/liaoyoyo2001/longphase-to/HaplotagProcess.cpp:506-530</code> — baseline <code>getVote()</code> 原始碼</li>
+        <li><code>/big7_disk/liaoyoyo2001/longphase-to-mod/HaplotagProcess.cpp:512-559</code> — V6 patch 原始碼</li>
+        <li><code>/big8_disk/liaoyoyo2001/longphase-s/src/somatic_haplotag/SomaticHaplotagProcess.cpp</code> — 正交 binary（paired mode）</li>
+        <li><code>InterSubMod/.claude/skills/structured-tech-report/</code> — 13 段式技術報告 skill（本方法論的下游消費者）</li>
+        <li><code>InterSubMod/.claude/skills/known-pitfalls/</code> — P-14 outside-claim 必查 KB 規則（負面清單的對應 enforcement）</li>
+        <li><code>InterSubMod/.claude/CLAUDE.md</code> §「外部工具 / 論文 claim 查詢順序」— F1 雙口徑教訓的成文規則</li>
+      </ol>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>

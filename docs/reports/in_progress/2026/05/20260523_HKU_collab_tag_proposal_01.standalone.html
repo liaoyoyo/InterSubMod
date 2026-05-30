@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HKU 合作 — LongPhase-S HP tag 改進構想（HCC1395 ONT 5kHz，v4）</title>
+  <style>
+    :root {
+      --c-accent: #D97757; --c-accent-deep: #B85A3F;
+      --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-code-bg: #F4EFE6;
+      --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D; --c-info: #1E3A8A;
+      --c-hp1: #5C7CFA; --c-hp2: #FA5252; --c-hp3: #868E96;
+      --c-ref: #4DABF7; --c-alt: #FF6B6B; --c-x: #CED4DA;
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+      /* CJK + Latin font fallback chain */
+      --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC",
+                 "Source Han Sans TW", "Droid Sans Fallback",
+                 system-ui, "Helvetica Neue", Arial, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", "SF Mono",
+                 Menlo, Monaco, Consolas, "Courier New", monospace;
+      --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+      --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 32px;
+      --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+      --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+      --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; background: var(--c-bg); color: var(--c-text);
+      font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .layout {
+      max-width: 1320px; margin: 0 auto; display: grid;
+      grid-template-columns: 240px 1fr; gap: var(--sp-5);
+      padding: var(--sp-5) var(--sp-4);
+    }
+
+    /* Sticky TOC sidebar */
+    aside.toc {
+      position: sticky; top: var(--sp-4); align-self: start;
+      background: var(--c-surface); border: 1px solid var(--c-border);
+      border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+      box-shadow: var(--shadow-sm);
+      max-height: calc(100vh - var(--sp-7)); overflow-y: auto;
+    }
+    aside.toc h3 {
+      font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700;
+    }
+    aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+    aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+    aside.toc a {
+      display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+      color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+      border-left: 3px solid transparent; transition: background 0.15s, border-color 0.15s;
+    }
+    aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+    aside.toc a.active { background: var(--c-code-bg); border-left-color: var(--c-accent-deep); font-weight: 600; }
+    aside.toc a::before {
+      content: counter(toc) ". "; color: var(--c-text-soft);
+      font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px;
+    }
+    aside.toc a.core { font-weight: 600; }
+    aside.toc a.core::after { content: " ★"; color: var(--c-critical); font-size: 0.85em; }
+    aside.toc .toc-group {
+      font-size: var(--fs-xs); color: var(--c-text-soft); text-transform: uppercase;
+      letter-spacing: 0.5px; margin: var(--sp-3) 0 var(--sp-1) var(--sp-2); font-weight: 700;
+    }
+
+    main.report {
+      background: var(--c-surface); border: 1px solid var(--c-border);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+      padding: var(--sp-6); min-width: 0;
+    }
+
+    /* Header / banner */
+    .report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4); margin-bottom: var(--sp-5); }
+    .report-header .pretitle {
+      font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 1px;
+      color: var(--c-accent-deep); font-weight: 700; margin-bottom: var(--sp-2);
+    }
+    .report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+    .report-header .subtitle { color: var(--c-text-soft); font-size: var(--fs-lg); margin: 0 0 var(--sp-4); }
+    .report-header .meta {
+      display: grid; grid-template-columns: max-content 1fr max-content 1fr;
+      gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3);
+    }
+    .report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+    .report-header .meta dd { margin: 0; }
+    .report-header .meta code {
+      background: var(--c-code-bg); padding: 1px 5px; border-radius: var(--radius-sm);
+      font-family: var(--ff-mono); font-size: 0.9em;
+    }
+
+    .verdict-banner {
+      color: white; padding: var(--sp-4) var(--sp-4); margin-top: var(--sp-4);
+      border-radius: var(--radius-md); font-weight: 500; font-size: var(--fs-md); line-height: 1.55;
+      background: linear-gradient(90deg, #1E3A8A, #3B82F6);
+    }
+    .verdict-banner strong { font-weight: 700; }
+
+    /* v4 update banner */
+    .v4-banner {
+      background: #FFF7E6; border-left: 4px solid var(--c-warning);
+      padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-3);
+      border-radius: var(--radius-sm); font-size: var(--fs-sm); color: #78350F;
+    }
+    .v4-banner strong { font-weight: 700; }
+    .v4-banner ul { margin: 6px 0 0; padding-left: 20px; }
+    .v4-banner li { margin: 2px 0; }
+
+    /* Headings */
+    h2 {
+      font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+      padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+      scroll-margin-top: var(--sp-4);
+    }
+    h2 .h-num {
+      font-family: var(--ff-mono); color: var(--c-accent-deep);
+      font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600;
+    }
+    h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+    h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2); color: var(--c-text-soft); }
+
+    p, ul, ol { margin: var(--sp-3) 0; }
+    ul, ol { padding-left: var(--sp-5); }
+    li { margin: var(--sp-1) 0; }
+    a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { color: var(--c-accent-deep); }
+    strong { font-weight: 700; }
+
+    /* Code / pre */
+    code {
+      background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+      font-family: var(--ff-mono); font-size: 0.92em;
+    }
+    pre {
+      background: var(--c-code-bg); padding: var(--sp-4); border-radius: var(--radius-md);
+      overflow-x: auto; font-family: var(--ff-mono); font-size: var(--fs-sm); line-height: 1.5;
+      border: 1px solid var(--c-border);
+    }
+    pre code { background: none; padding: 0; font-size: 1em; }
+
+    /* Tables */
+    table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+    th, td {
+      border-bottom: 1px solid var(--c-border);
+      padding: var(--sp-2) var(--sp-3); text-align: left; vertical-align: top;
+    }
+    th { background: var(--c-code-bg); font-weight: 700; border-bottom: 2px solid var(--c-accent); }
+    td.num { text-align: right; font-family: var(--ff-mono); }
+    tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+    tr.row-safe td { background: #DCFCE7; color: #166534; }
+    tr.row-warn td { background: #FEF3C7; }
+
+    /* Footnote */
+    .footnote {
+      background: #F4EFE6; border-left: 3px solid var(--c-accent-deep);
+      padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+      font-size: var(--fs-sm); color: var(--c-text);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+    .footnote strong { color: var(--c-accent-deep); }
+
+    /* Blockquote */
+    blockquote {
+      border-left: 4px solid var(--c-accent); padding: var(--sp-3) var(--sp-4);
+      color: var(--c-text); margin: var(--sp-4) 0;
+      background: var(--c-code-bg); border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    }
+    blockquote p:first-child { margin-top: 0; }
+    blockquote p:last-child { margin-bottom: 0; }
+
+    /* Callouts */
+    .callout-critical, .callout-warning, .callout-success, .callout-info {
+      padding: var(--sp-3) var(--sp-4); margin: var(--sp-4) 0;
+      border-radius: var(--radius-md); border-left: 4px solid;
+    }
+    .callout-critical { background: #FEF2F0; border-color: var(--c-critical); color: #7F1D1D; }
+    .callout-warning  { background: #FEF7E6; border-color: var(--c-warning);  color: #78350F; }
+    .callout-success  { background: #F0FDF4; border-color: var(--c-success);  color: #166534; }
+    .callout-info     { background: #EFF6FF; border-color: var(--c-info);     color: #1E40AF; }
+    .callout-critical strong, .callout-warning strong,
+    .callout-success strong, .callout-info strong { display: block; margin-bottom: 4px; }
+
+    /* Stat grid */
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: var(--sp-3); margin: var(--sp-4) 0;
+    }
+    .stat-box {
+      background: var(--c-bg); border: 1px solid var(--c-border);
+      border-radius: var(--radius-md); padding: var(--sp-3); text-align: center;
+    }
+    .stat-box .number {
+      font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1;
+      font-family: var(--ff-mono);
+    }
+    .stat-box .number.bug     { color: var(--c-critical); }
+    .stat-box .number.success { color: var(--c-success); }
+    .stat-box .number.warning { color: var(--c-warning); }
+    .stat-box .number.info    { color: var(--c-info); }
+    .stat-box .label {
+      font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1);
+      line-height: 1.35;
+    }
+
+    /* Figure wrapper */
+    figure.fig {
+      margin: var(--sp-5) 0; text-align: center;
+      background: var(--c-bg); border: 1px solid var(--c-border);
+      border-radius: var(--radius-md); padding: var(--sp-4);
+    }
+    figure.fig img {
+      max-width: 100%; height: auto; display: block; margin: 0 auto;
+      border-radius: var(--radius-sm);
+    }
+    figure.fig figcaption {
+      font-size: var(--fs-sm); color: var(--c-text-soft);
+      margin-top: var(--sp-3); line-height: 1.5; text-align: left;
+    }
+    figure.fig figcaption .fig-label {
+      font-family: var(--ff-mono); font-weight: 700; color: var(--c-accent-deep);
+      margin-right: var(--sp-2);
+    }
+    figure.fig figcaption .fig-caveat {
+      display: inline-block; background: #FEF3C7; color: #78350F;
+      padding: 2px 8px; border-radius: 10px; font-size: var(--fs-xs); margin-left: var(--sp-2);
+    }
+
+    /* Collapsible cards */
+    .q-card {
+      border: 1.5px solid var(--c-border); border-radius: var(--radius-lg);
+      margin: var(--sp-4) 0; overflow: hidden; background: var(--c-surface);
+    }
+    .q-card.hku { border-color: var(--c-info); }
+    .q-card.ours { border-color: var(--c-accent); }
+    .q-card.evi { border-color: var(--c-success); }
+    .q-card > summary {
+      cursor: pointer; padding: var(--sp-3) var(--sp-4);
+      display: flex; align-items: center; gap: var(--sp-3);
+      background: var(--c-code-bg); list-style: none; flex-wrap: wrap;
+    }
+    .q-card > summary::-webkit-details-marker { display: none; }
+    .q-card > summary::before {
+      content: "▸"; transition: transform 0.2s;
+      color: var(--c-text-soft); font-size: var(--fs-sm);
+    }
+    .q-card[open] > summary::before { transform: rotate(90deg); }
+    .q-card.hku > summary { background: #EFF6FF; }
+    .q-card.ours > summary { background: #FFF7ED; }
+    .q-card.evi > summary { background: #F0FDF4; }
+    .q-card .q-id {
+      font-family: var(--ff-mono); font-weight: 700; font-size: var(--fs-md);
+      background: var(--c-surface); padding: 3px 10px; border-radius: 12px;
+      border: 1.5px solid currentColor;
+    }
+    .q-card.hku .q-id { color: var(--c-info); }
+    .q-card.ours .q-id { color: var(--c-accent-deep); }
+    .q-card.evi .q-id { color: var(--c-success); }
+    .q-card .q-title { flex: 1; font-weight: 600; font-size: var(--fs-md); min-width: 240px; }
+    .q-card .q-side {
+      font-size: var(--fs-xs); padding: 2px 8px; border-radius: 10px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .q-card.hku .q-side { background: var(--c-info); color: white; }
+    .q-card.ours .q-side { background: var(--c-accent-deep); color: white; }
+    .q-card.evi .q-side { background: var(--c-success); color: white; }
+    .q-card .q-body { padding: var(--sp-4) var(--sp-5); }
+    .q-card .q-body h4 { color: var(--c-text); margin-top: var(--sp-4); }
+    .q-card .q-body h4:first-child { margin-top: 0; }
+
+    /* Badges */
+    .badge {
+      display: inline-block; padding: 1px 8px; border-radius: 10px;
+      font-size: var(--fs-xs); font-weight: 700; vertical-align: middle;
+    }
+    .badge.positive { background: #DCFCE7; color: #166534; }
+    .badge.negative { background: #FEE2E2; color: #991B1B; }
+    .badge.pending  { background: #FEF3C7; color: #78350F; }
+    .badge.verified { background: #DBEAFE; color: #1E3A8A; }
+    .badge.new      { background: #FEF3C7; color: #92400E; font-style: italic; }
+
+    /* HP tag chips */
+    .hp-chip {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-family: var(--ff-mono); font-size: var(--fs-xs); font-weight: 700;
+      color: white; margin-right: 4px;
+    }
+    .hp-chip.hp1  { background: var(--c-hp1); }
+    .hp-chip.hp2  { background: var(--c-hp2); }
+    .hp-chip.hp11 { background: #4263EB; }
+    .hp-chip.hp21 { background: #E03131; }
+    .hp-chip.hp3  { background: var(--c-hp3); }
+
+    /* R/A/X matrix */
+    .rax-table { width: auto; margin: var(--sp-4) auto; }
+    .rax-table th, .rax-table td {
+      text-align: center; padding: var(--sp-3) var(--sp-4);
+      font-family: var(--ff-mono); font-weight: 700;
+    }
+    .rax-cell { width: 64px; height: 56px; }
+    .rax-cell.rr { background: #DBEAFE; color: #1E3A8A; }
+    .rax-cell.ra { background: linear-gradient(135deg, #DBEAFE 50%, #FEE2E2 50%); }
+    .rax-cell.ar { background: linear-gradient(135deg, #FEE2E2 50%, #DBEAFE 50%); }
+    .rax-cell.aa { background: #FEE2E2; color: #991B1B; }
+    .rax-cell.rx { background: linear-gradient(135deg, #DBEAFE 50%, #F3F4F6 50%); }
+    .rax-cell.ax { background: linear-gradient(135deg, #FEE2E2 50%, #F3F4F6 50%); }
+    .rax-cell.xr { background: linear-gradient(135deg, #F3F4F6 50%, #DBEAFE 50%); }
+    .rax-cell.xa { background: linear-gradient(135deg, #F3F4F6 50%, #FEE2E2 50%); }
+    .rax-cell.xx { background: #F3F4F6; color: #6B7280; }
+
+    /* Provenance footer */
+    .provenance {
+      background: var(--c-code-bg); border-top: 2px solid var(--c-accent);
+      margin-top: var(--sp-7); padding: var(--sp-5);
+      border-radius: var(--radius-md); font-size: var(--fs-sm); color: var(--c-text);
+    }
+    .provenance .pretitle {
+      font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 1px;
+      color: var(--c-accent-deep); font-weight: 700; margin-bottom: var(--sp-3);
+    }
+    .provenance dl {
+      display: grid; grid-template-columns: max-content 1fr; gap: var(--sp-1) var(--sp-4); margin: 0;
+    }
+    .provenance dt { font-weight: 600; color: var(--c-text); }
+    .provenance dd { margin: 0; font-family: var(--ff-mono); font-size: 0.92em; word-break: break-all; }
+    .provenance .credit {
+      margin-top: var(--sp-4); padding-top: var(--sp-3);
+      border-top: 1px solid var(--c-border); color: var(--c-text-soft);
+      font-size: var(--fs-xs); line-height: 1.6;
+    }
+
+    /* Print */
+    @media print {
+      body { background: white; }
+      .layout { display: block; max-width: 100%; padding: 0; }
+      aside.toc { display: none; }
+      main.report { box-shadow: none; border: none; padding: 0; }
+      .q-card { page-break-inside: avoid; border-color: #999; }
+      details[open] > summary, details > summary { list-style: none; }
+      details:not([open]) > * { display: block !important; }
+      details:not([open]) > summary { background: white !important; }
+      a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #666; }
+      pre, table, blockquote, .q-card, figure.fig { page-break-inside: avoid; }
+      h1, h2, h3 { page-break-after: avoid; }
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside.toc { position: static; max-height: none; }
+      .report-header .meta { grid-template-columns: max-content 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ============== STICKY TOC ============== -->
+  <aside class="toc" aria-label="章節導航">
+    <h3>章節導航</h3>
+    <ol>
+      <li><a href="#headline" class="core">摘要與貢獻 (v4)</a></li>
+      <li><a href="#sec-1" class="core">LongPhase-S tag 邏輯</a></li>
+      <li><a href="#sec-2" class="core">改進 tag 構想 + 演化樹</a></li>
+      <li><a href="#sec-3">整體流程例子</a></li>
+      <li><a href="#sec-0" class="core">§0 對齊 Reviewer Response (v5)</a></li>
+      <li><a href="#sec-4" class="core">7 個討論點與證據</a></li>
+      <li><a href="#refs">引用與來源</a></li>
+      <li><a href="#provenance">Provenance (v4)</a></li>
+    </ol>
+    <div class="toc-group">關鍵實證</div>
+    <ol style="counter-reset: toc 7;">
+      <li><a href="#fig-a2-1">A2_1 PS set 分佈</a></li>
+      <li><a href="#fig-a2-2">A2_2 相鄰 TP common reads (v4 linear)</a></li>
+      <li><a href="#fig-a2-3">A2_3 LOH ROC (NEGATIVE)</a></li>
+      <li><a href="#fig-f7">F7 chr2:18,086,020 (v4)</a></li>
+      <li><a href="#fig-a6">A6 LOH/CNV stratification (v4)</a></li>
+      <li><a href="#fig-a7">A7 PS block N50 (v4)</a></li>
+      <li><a href="#fig-a8">A8 chr ideogram (v4)</a></li>
+    </ol>
+  </aside>
+
+  <main class="report">
+
+    <!-- ============== HEADER / HEADLINE ============== -->
+    <header class="report-header" id="headline">
+      <div class="pretitle">HKU Collaboration · Deliverable A · v4 終版</div>
+      <h1>LongPhase-S HP tag 改進構想 — 從 ClairS-TO ±16 bp blind spot 到 ISM 甲基聚類補完</h1>
+      <p class="subtitle">基於 HCC1395 ONT 5kHz 實證 + v4 chr 級 stratification（A6/A7/A8），建議用 LongPhase-S 既有 5 階層 HP tag + ISM read×CpG 甲基聚類 + linear depth 演化樹編碼，把 caller 跨視窗 phasing 訊號 encode 進 BAM aux field</p>
+
+      <dl class="meta">
+        <dt>建立日期</dt>     <dd>2026-05-23</dd>
+        <dt>版本</dt>         <dd><code>v4</code></dd>
+        <dt>Git HEAD</dt>     <dd><code>369e8f9</code></dd>
+        <dt>樣本</dt>         <dd>HCC1395（ONT R10.4.1 5 kHz simplex, 5mCG+5hmCG）</dd>
+        <dt>受眾</dt>         <dd>PI / HKU-BAL ClairS team</dd>
+        <dt>狀態</dt>         <dd>in_progress · v4 終版</dd>
+        <dt>Truth set</dt>    <dd><code>SEQC2 v1.2.1 high-confidence sSNV + CNV/LOH BED</code></dd>
+      </dl>
+
+      <div class="callout-success" style="margin-bottom: 16px;">
+        <strong>✅ T10 全 24 chr 完成（v7 2026-05-24 18:00）— 重大 finding: HP3 是 bimodal</strong>
+        <p style="margin: 6px 0;">經 T10 全 24 chr 擴展，HP3 buckets 分為：</p>
+        <ul style="margin: 4px 0;">
+          <li><strong>Type A</strong>（20/23 chr "well-phased"）：HP3 frac 0.22-0.38% / TP rate 78.6-95.4%（mean 90.4%）= somatic-evidence bucket，~6,900× random background enrichment [F]</li>
+          <li><strong>Type B</strong>（3 chr "phasing-failure"）：chr6 HLA (9.41% / 1.37%) + chr16 segdup (8.58% / 3.53%) + chrX (21.60% / 0.00% — truth=0) = fallback bucket [F]</li>
+          <li><strong>Pooled (all 24 chr)</strong>：HP3 1.76% / TP 14.30%（outliers 主導 — 占 85.4% HP3 reads）</li>
+        </ul>
+        <p style="margin: 8px 0 0;"><strong>R3 M5 response 大幅升級</strong>：HP3 應描述為 "well-phased 區 somatic-evidence enriched" + "HLA/segdup/sex 區 phasing-failure fallback" 雙重定義，避免單一過度宣稱。T11 4-layer 整合圖見 <code>InterSubMod/research/hku_collaboration/figures/T11_4layer_seetree_and_forest.png</code>。完整 source: <code>InterSubMod/research/hku_collaboration/findings_5_24/T10_HP3_24chr_findings.md</code>。</p>
+      </div>
+
+      <div class="verdict-banner">
+        <strong>核心主張 (v4)</strong>：基於 (1) ClairS-TO ssrs pileup 視窗僅 <strong>±16 bp（33 bp total）</strong>、18 pileup channel / 7 full-aln channel <strong>完全不含 methylation channel</strong>、不讀 MM/ML tag 三項 source-verified 事實 + (2) 手上 BAM @PG line 與本地 <code>longphase-s/README.md</code> 揭示 <strong>LongPhase-S = `twolinin/longphase` mainline v1.7.3 + <code>--somaticMode</code></strong>（mainline 內建，非 CCU fork），我們提議用 LongPhase-S 既有的 5 階層 HP tag（HP1 / HP2 / HP1-1 / HP2-1 / HP3）配合 <strong>ISM read×CpG 甲基聚類 + linear depth 演化樹編碼</strong>補完缺失值，把 caller 視窗外（median pair distance <strong>17.4 kb</strong>，PS block N50 <strong>943 kb</strong>）的跨 SNV phasing 訊號 encode 進 BAM aux field，供 future ClairS-TO retraining 經 <code>phasing_info</code> channel 吸收。
+      </div>
+
+      <div class="footnote">
+        <strong>術語腳註（v4）</strong>：本報告以下「<strong>LongPhase-S</strong>」一律指 <code>twolinin/longphase</code> mainline <strong>v1.7.3</strong> with <code>--somaticMode</code> flag — 屬 mainline 內建功能，<strong>非 fork</strong>。產出 HP1-1 / HP2-1 / HP3 細分 tag。`HP1_1=5` / `H2_1=7` enum 定義於 <code>src/haplotag/HaplotagType.h:97-108</code>，在 mainline v1.7.3 已內建。本地 <code>/big8_disk/.../longphase-s/</code> 是 user 對 mainline clone 的本地命名（其 <code>README.md</code> 引用 twolinin v1.7.3 download URL `https://github.com/twolinin/longphase/releases/download/v1.7.3/longphase_linux-x64.tar.xz`）。
+      </div>
+
+      <div class="v4-banner">
+        <strong>v4 update（取代 v1 推測）：</strong>
+        <ul>
+          <li><strong>詞彙統一</strong>：「LongPhase mainline 1.7.3」/「longphase-S CCU fork」/「longphase-S v1.0.0」 全部 → <strong>LongPhase-S</strong>（mainline v1.7.3 + somaticMode）</li>
+          <li><strong>A1 Q4 重寫</strong>：5/23 user `cat README.md` 揭示 twolinin v1.7.3 release URL 確實存在 — 「v1.6 latest visible」屬 GitHub UI 快取假象</li>
+          <li><strong>ClairS 視窗精確值修正</strong>：±128 bp → <strong>±16 bp（33 bp total）</strong></li>
+          <li><strong>§1.1 A2_1/A2_2 linear-axis 替換 log axis</strong>（per user 5/23 偏好）</li>
+          <li><strong>§2 F2v2/F3v2/F4v2 演化樹組圖 + linear depth notation</strong>：HP1-1-1 = HP1-1 child (linear)；HP1-1-2 = HP1-1 第二代不同 mutation event；HP1-2 = HP1 第一代 sibling</li>
+          <li><strong>§3 F7 chr2:18,086,020 region IGV-style 圖 + 14 位點 4-layer evidence callout</strong></li>
+          <li><strong>§4.5 新 LOH/CNV stratification (A6)</strong>：H=234.11, p=1.41e-48，6 zones；方向與預期相反，cross-validate §4 LOH NEGATIVE</li>
+          <li><strong>§4.6 新 PS Block N50 (A7)</strong>：global 943.5 kb，max chr1 18.3 Mb，6,861 blocks</li>
+          <li><strong>§4.7 新 Chr Ideogram (A8)</strong>：24-panel；chr8 96% LOH / chr16 chr20 chrX 0% LOH；HP1/HP2 平衡 → LOH ≠ phasing failure</li>
+        </ul>
+      </div>
+    </header>
+
+    <!-- ============== §0 Reviewer alignment + 工具角色定位 (v5 G1/G2/G5) ============== -->
+    <h2 id="sec-0"><span class="h-num">§0</span>對齊 LongPhase-S Reviewer Response（v5 補）</h2>
+
+    <div class="callout-success">
+      <strong>Reviewer 1 已在 LongPhase-S rebuttal 提及 InterSubMod / MethylSomaticAnalysis 為對應延伸方向</strong>
+      <p style="margin: 6px 0 0;">per <code>/big8_disk/liaoyoyo2001/knowledge/raw/paper-notes/longphase-s-reviewer-response-2026-05-23/report.md</code> §1.7：「Discussion 已提到 'integration of orthogonal signals such as methylation phasing may enhance...' — 剛好對應你們知識庫裡 InterSubMod / MethylSomaticAnalysis 的延伸主題。可以在 rebuttal 提一句 'we plan to demonstrate this in a follow-up study with MethylSomaticAnalysis / InterSubMod'。」</p>
+      <p style="margin: 8px 0 0;"><strong>對 5/24 handoff 意涵</strong>：R1 已建立兩 lab 對話 prior — 不必從零起步説明 ISM 與 LongPhase-S 互補；HKU 端讀此報告時可直接落到「TSG×methylation × HP1-1/HP2-1 sub-clone branches follow-up」具體討論。</p>
+    </div>
+
+    <h3>§0.1 工具角色定位：ClairS-TO / LongPhase-S / InterSubMod</h3>
+    <p>三工具角色與接觸面：</p>
+    <table>
+      <thead>
+        <tr><th>工具</th><th>主要職責</th><th>輸入</th><th>輸出</th><th>本報告對齊面</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>ClairS-TO ssrs</strong> v0.4.x</td>
+          <td>somatic SNV calling（tumor-only + somatic-rescue）</td>
+          <td>tumor BAM + reference</td>
+          <td>tp.vcf（PASS-only somatic SNVs）</td>
+          <td>±16 bp 視窗 + 18+7 channel 無 methylation；HP tag 為 channel 6 唯一外部入口</td>
+        </tr>
+        <tr>
+          <td><strong>LongPhase-S</strong> mainline v1.7.3 <code>--somaticMode</code></td>
+          <td>(a) purity estimation (GHIR) + (b) variant recalibration + (c) somatic haplotagging（HP 5 階層 tag）</td>
+          <td>tumor BAM + normal BAM + normal phased VCF + tp.vcf + (option) truth set</td>
+          <td>tagged BAM（HP:Z:1 / 2 / 1-1 / 2-1 / 3）+ purity 值 + recalibrated VCF</td>
+          <td>(c) somatic haplotagging 是我們唯一接觸面；(a)(b) 為 LongPhase-S paper 主訴求，與本報告正交（不主動評論）</td>
+        </tr>
+        <tr>
+          <td><strong>InterSubMod (ISM)</strong></td>
+          <td>read-level epigenetic clustering + region-level subclone marker characterization</td>
+          <td>tagged BAM（含 MM/ML methylation tags）+ VCF + truth annotations</td>
+          <td>read × CpG matrix + 6-metric distance + Fisher significance + per-region marker rate</td>
+          <td>建議：把 HP 細分樹 + R/A/X 缺失補完 encode 進 BAM aux field，供 future ClairS-TO retraining 經 phasing_info channel 6 吸收</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-info">
+      <strong>對 HKU 對話的邊界宣告</strong>
+      <ul style="margin: 4px 0;">
+        <li>✅ <strong>主動回應</strong>：R1 Curiosity (TSG×methyl) / R3 M6 (multi-subclone) / R1 M1 (subclonal GHIR) / R3 M5 (HP3 fraction) / R3 M1 (rescued variant region) — 5 條強對應</li>
+        <li>⚠ <strong>部分對應 + caveat</strong>：R1 M2/m1/m3 / R2 #3 (含 LOSO failure 誠實 disclosure) / R3 M7 / R3 Sp3 — 6 條</li>
+        <li>❌ <strong>誠實 skip</strong>：R2 #1 (cellular vs DNA purity) / R2 #2 (事實錯誤) / R2 #4 (ASCAT/PURPLE) / R3 M2 (PacBio HiFi) / R3 M3 (indel) / R3 M4 (threshold) / R3 Sp1/Sp2 (caller comparison) / R3 Sp4+Fig (typos+排版) / R1 m2/m4 + R3 Curiosity-Implicit (純編輯類) — 12 條</li>
+      </ul>
+      <p style="margin: 8px 0 0;">完整對照見 <code>InterSubMod/docs/concepts/2026/05/20260524_reviewer_coverage_matrix_01.md</code>（<strong>23 entries</strong>; ✅ 5 / ⚠ 6 / ❌ 12）。</p>
+    </div>
+
+    <!-- ============== §1 ============== -->
+    <h2 id="sec-1"><span class="h-num">§1</span>LongPhase-S tag 邏輯與為什麼對 caller 有用</h2>
+
+    <h3>§1.1 真實 pipeline（BAM @PG line + README.md 雙重證據）</h3>
+
+    <p>過去 plan 與舊報告慣用「longphase-S CCU fork」、「longphase-S v1.0.0」、「ClairS paired pileup」等措辭，5/23 直接 <code>samtools view -H</code> 讀取 HCC1395 tagged BAM 的 <code>@PG</code> line + <code>cat /big8_disk/.../longphase-s/README.md</code> 揭示本地 longphase-s 目錄引用的下載 URL，<strong>這些 framing 全部需要修正為 LongPhase-S = `twolinin/longphase` mainline v1.7.3 + `--somaticMode`</strong>。實際 pipeline 如下：</p>
+
+    <pre><code>@PG  ID:longphase  PN:longphase  PP:samtools.1  VN:1.7.3
+     CL:longphase haplotag --somaticMode
+        -s   HCC1395BL_methyl_phase.vcf.gz              ← normal phased VCF
+        -b   HCC1395BL.bam                              ← normal BAM
+        --tumor-snp-file  pileup/HCC1395_methyl_PASS.vcf  ← ClairS-TO ssrs (非 ClairS paired pileup)
+        --tumor-bam-file  HCC1395.bam
+        -r   GRCh38_no_alt_analysis_set.fasta
+        -t   64  -q 20  --tagSupplementary
+        --highCon-snp  SEQC2_high-confidence_sSNV_v1.2.1.vcf  ← truth set 引導</code></pre>
+
+    <p>本地 <code>longphase-s/README.md</code> 引用 URL（5/23 user `cat README.md` 揭示）：</p>
+    <pre><code>https://github.com/twolinin/longphase/releases/download/v1.7.3/longphase_linux-x64.tar.xz</code></pre>
+    <p>→ 本地命名 "longphase-s" 是 <strong>user 對 mainline `twolinin/longphase` v1.7.3 clone 的本地命名</strong>，非實質 fork。</p>
+
+    <figure class="fig" id="fig-f1">
+      <img src="../../../../../research/hku_collaboration/figures/F1_pipeline_flow.png" alt="ISM pipeline 全流程">
+      <figcaption><span class="fig-label">圖 F1</span>ISM pipeline 全流程（5 階段）：mod.bam → ClairS-TO ssrs tp.vcf → LongPhase-S（mainline v1.7.3）<code>haplotag --somaticMode</code> → tagged BAM (HP 5 階層) → InterSubMod read×CpG matrix + 距離 + 聚類。</figcaption>
+    </figure>
+
+    <div class="callout-warning">
+      <strong>3 個 framing 修正（v4 終版，取代 v1-v3 推測）：</strong>
+      <ul style="margin: 4px 0;">
+        <li>「longphase-S v1.0.0 (CCU fork)」→ <strong>LongPhase-S = `twolinin/longphase` mainline v1.7.3</strong> with <code>--somaticMode</code> flag（mainline 內建，非 fork）</li>
+        <li>「ClairS paired pileup → longphase-S」→ <strong>ClairS-TO ssrs → LongPhase-S (mainline v1.7.3)</strong>（with normal VCF + normal BAM）</li>
+        <li>「純 caller-only output」→ <strong>用 SEQC2 <code>--highCon-snp</code> 引導</strong>（非 evaluator-blinded）</li>
+      </ul>
+      <p style="margin: 8px 0 0;">BAM 檔名「<code>ClairS_pileup</code>」是 legacy misleading naming。對話時請改用「<strong>ClairS-TO ssrs + Normal BAM → LongPhase-S（mainline v1.7.3）<code>--somaticMode</code></strong>」。</p>
+    </div>
+
+    <h3>§1.2 HP tag 5 階層定義（不只 HP1/HP2/HP3）</h3>
+
+    <p>LongPhase-S <code>--somaticMode</code> 在 mainline v1.7.3 已內建 <strong>5 階層 string 編碼</strong>（<code>HP:Z:1-1</code>、<code>HP:Z:2-1</code> 等），enum 定義在 <code>src/haplotag/HaplotagType.h:97-108</code>（HP1_1=5 / H2_1=7）：</p>
+
+    <table>
+      <thead>
+        <tr><th>HP 值</th><th>語意</th><th>用途</th><th>HCC1395 baseline (autosome 平均 per A8)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="hp-chip hp1">HP1</span></td><td>純 germline het HP1 anchor 支持</td><td>主 haplotype 1</td><td class="num">~25-32%</td></tr>
+        <tr><td><span class="hp-chip hp2">HP2</span></td><td>純 germline het HP2 anchor 支持</td><td>主 haplotype 2</td><td class="num">~26-31%</td></tr>
+        <tr><td><span class="hp-chip hp11">HP1-1</span></td><td>HP1 + 一個 somatic SNV 累積</td><td>含 tumor allele 的 HP1 sub-clone</td><td class="num">~2.5-5%</td></tr>
+        <tr><td><span class="hp-chip hp21">HP2-1</span></td><td>HP2 + 一個 somatic SNV 累積</td><td>含 tumor allele 的 HP2 sub-clone</td><td class="num">~2.4-3%</td></tr>
+        <tr><td><span class="hp-chip hp3">HP3</span></td><td>無法 phase（fall-through）</td><td>unphased / 邊界</td><td class="num">&lt; 1% per autosome</td></tr>
+      </tbody>
+    </table>
+
+    <p>三個重點：(a) <code>-1</code> 尾綴 = 有 somatic anchor 進來；(b) HP1 vs HP2 整體平衡（per A8）但 chr 內部局部可有 LOH dominance；(c) HP3 fall-through 在 chr6 / chr16 / chrX 顯著升高（per A8 §4.7）。</p>
+
+    <h3>§1.3 ClairS-TO 視窗 ±16 bp 與甲基 blind spot（兩大關鍵修正）</h3>
+
+    <p>過去報告寫「ClairS 看 ±128 bp」與「ClairS 模型內建甲基訊號」<strong>全錯</strong>。A1 web research 從 GitHub source code <code>shared/param.py</code> 直接驗證：</p>
+
+    <table>
+      <thead>
+        <tr><th>項目</th><th>修正前</th><th>修正後（source code 驗證）</th></tr>
+      </thead>
+      <tbody>
+        <tr class="row-bug"><td>Pileup 視窗</td><td>±128 bp</td><td><strong>±16 bp（flankingBaseNum = 16，total 33 bp）</strong></td></tr>
+        <tr><td>Pileup tensor (ONT)</td><td>—</td><td><strong>130 reads × 33 positions × 7 channels</strong></td></tr>
+        <tr><td>Channel 6</td><td>—</td><td><code>phasing_info</code>（HP tag，<strong>唯一</strong>接觸 LongPhase-S 的入口）</td></tr>
+        <tr class="row-bug"><td>甲基訊號</td><td>「ClairS 已內建」</td><td><strong>ClairS / ClairS-TO 均不讀 MM/ML tag</strong>；18 pileup channel 全為 ACGT/indel/strand/end-marker</td></tr>
+        <tr><td>ssrs vs ss</td><td>—</td><td>視窗完全相同；差別僅在訓練資料 augmentation（ssrs 多用 HCC1937/HCC1954/H1437/H2009）</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout-info">
+      <strong>意涵</strong>：
+      <ul style="margin: 4px 0;">
+        <li>33 bp window 意味 ClairS <strong>完全看不到一個 CpG island 的 inter-CpG context</strong></li>
+        <li>鄰近 SNV 對 caller 的影響<strong>完全外部化</strong>給 LongPhase-S（透過 HP tag → channel 6 進入）</li>
+        <li>ClairS 端的「epigenetic blind spot」<strong>就是 InterSubMod read-level epigenetic filter 的存在理由</strong></li>
+      </ul>
+    </div>
+
+    <h3>§1.4 LOH / purity 機制（A2 直接量化）</h3>
+
+    <p>過去 plan 假設「LongPhase-S 不直接報 LOH，但 HP-missing rate 可間接指標」。A2 pysam analysis 直接量化此 hypothesis：</p>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="number success">85.9%</div>
+        <div class="label">PS set 含 ≥2 TP（n=759 set）</div>
+      </div>
+      <div class="stat-box">
+        <div class="number info">17.4 kb</div>
+        <div class="label">median 相鄰 TP pair distance</div>
+      </div>
+      <div class="stat-box">
+        <div class="number warning">2.4%</div>
+        <div class="label">pair 落在 ±16 bp caller window 內</div>
+      </div>
+      <div class="stat-box">
+        <div class="number bug">AUC 0.504</div>
+        <div class="label">LOH HP-missing ROC（拒絕）</div>
+      </div>
+    </div>
+
+    <figure class="fig" id="fig-a2-1">
+      <img src="../../../../../research/hku_collaboration/figures/A2_1_ps_set_tp_count_dist.png" alt="A2_1 PS set TP 位點分佈">
+      <figcaption><span class="fig-label">圖 A2_1 (v4 linear axis)</span>PS set TP 位點分佈（chr1 + chr8 + chr19, n=759 PS sets, 6,919 TP positions）。median TP/PS = 5，IQR [2, 12.5]，max 90，85.9% PS 含 ≥2 TP。<span class="fig-caveat">v4: linear dual-panel 替換 v1 log axis</span> <span class="badge positive">POSITIVE</span></figcaption>
+    </figure>
+
+    <figure class="fig" id="fig-a2-2">
+      <img src="../../../../../research/hku_collaboration/figures/A2_2_common_reads_xy.png" alt="A2_2 相鄰 TP pair common reads vs distance">
+      <figcaption><span class="fig-label">圖 A2_2 (v4 linear axis)</span>相鄰 TP somatic pair common reads vs 距離（n=3,963 pairs）。≤±16 bp caller window 內 pair common reads 中位 70.5；(16, 500] bp 為 64；&gt; 500 bp 為 16。median pair distance 17.4 kb 遠超 ONT 平均 read 長度 → 95% pair 需 LongPhase-S PS chaining 跨越單 read。<span class="fig-caveat">v4: linear axis</span> <span class="badge positive">POSITIVE for 緊鄰</span></figcaption>
+    </figure>
+
+    <figure class="fig" id="fig-a2-3">
+      <img src="../../../../../research/hku_collaboration/figures/A2_3_loh_hp_missing_vs_seqc2.png" alt="A2_3 LOH HP-missing rate ROC vs SEQC2">
+      <figcaption><span class="fig-label">圖 A2_3</span>LOH HP-missing rate ROC vs SEQC2 truth（1 kb bin, n=324,595, full chr1+chr8 scan）。Overall AUC <strong>0.504 ≈ random</strong>；chr8 反向 AUC 0.446。<strong>Hypothesis（AUC &gt; 0.7）清楚被拒絕</strong>。<span class="badge negative">NEGATIVE</span></figcaption>
+    </figure>
+
+    <div class="callout-info">
+      <strong>機制解釋（A2_3 NEGATIVE）</strong>：LongPhase-S <code>--somaticMode</code> 用 <strong>heterozygous germline SNV</strong> 為 phasing anchor；LOH <strong>不改變</strong> germline het 位點（germline-from-normal 仍是 het），只改 tumor allelic frequency → LOH 區段 reads 仍拿到 HP tag → HP-missing rate 不變。<br>
+      → 要間接驗 LOH 需改觀察 <strong>tumor HP1 vs HP2 read count imbalance</strong>，而非 HP-missing rate（已 reframe，見 §4 Q4 + §4.5 A6 cross-validate）。
+    </div>
+
+    <!-- ============== §2 ============== -->
+    <h2 id="sec-2"><span class="h-num">§2</span>改進 tag 構想（6 狀態 R/A/X + 缺失值補完 + linear depth 演化樹）</h2>
+
+    <p>用戶 5/22 提出的核心構想：<strong>現行 LongPhase-S HP tag 只看 germline het anchor + 1 階 somatic 累積，遺漏多階 sub-clone 演化結構</strong>。改進方向分三層；v4 採 <strong>linear depth notation</strong>（per user 5/23 選）。</p>
+
+    <h3>§2.1 兩位點 R/A/X 9 狀態 matrix</h3>
+
+    <p>對相鄰兩 SNV 位點，每個 read 在每位點的可能狀態為：</p>
+
+    <ul>
+      <li><strong>R</strong> (Reference) = 該 read 在該位點顯示 ref allele</li>
+      <li><strong>A</strong> (Alt) = 該 read 在該位點顯示 alt allele（含 somatic SNV）</li>
+      <li><strong>X</strong> (eXtinct/missing) = 該 read 未覆蓋該位點 / base quality 不足 / 對齊邊界</li>
+    </ul>
+
+    <p>兩位點組合 = 3 × 3 = <strong>9 種</strong>，其中 4 種含 X 缺失需補完：</p>
+
+    <table class="rax-table">
+      <thead>
+        <tr><th></th><th>Locus 2 = R</th><th>Locus 2 = A</th><th>Locus 2 = X</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Locus 1 = R</th>
+          <td class="rax-cell rr">RR</td>
+          <td class="rax-cell ra">RA</td>
+          <td class="rax-cell rx">RX</td>
+        </tr>
+        <tr>
+          <th>Locus 1 = A</th>
+          <td class="rax-cell ar">AR</td>
+          <td class="rax-cell aa">AA</td>
+          <td class="rax-cell ax">AX</td>
+        </tr>
+        <tr>
+          <th>Locus 1 = X</th>
+          <td class="rax-cell xr">XR</td>
+          <td class="rax-cell xa">XA</td>
+          <td class="rax-cell xx">XX</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="text-align: center; font-size: var(--fs-sm); color: var(--c-text-soft);">
+      <span style="background: #DBEAFE; padding: 2px 8px; border-radius: 4px;">藍 = Ref</span>
+      <span style="background: #FEE2E2; padding: 2px 8px; border-radius: 4px;">紅 = Alt</span>
+      <span style="background: #F3F4F6; padding: 2px 8px; border-radius: 4px;">灰 = Missing (X)</span>
+    </p>
+
+    <figure class="fig" id="fig-f2v2">
+      <img src="../../../../../research/hku_collaboration/figures/F2v2_6state_with_tree_inset.png" alt="F2v2 R/A/X matrix + 演化樹 inset">
+      <figcaption><span class="fig-label">圖 F2v2 (v4)</span>3×3 R/A/X matrix（紅藍 gradient + 編碼）+ 右側 4 個 inset 演化樹（A/B/C/D 場景簡圖）。<span class="badge new">v4 取代 v1 F2</span></figcaption>
+    </figure>
+
+    <h3>§2.2 X 缺失值補完規則（4 種模式 + 3-step ISM flow）</h3>
+
+    <p>對 4 種 X 缺失模式（RX / AX / XR / XA），ISM 用 read 的甲基化模式聚類 + 鄰近 SNV vote，<strong>把 X 的 read 歸到最相似的 R 或 A 群</strong>：</p>
+
+    <table>
+      <thead>
+        <tr><th>缺失模式</th><th>已知資訊</th><th>3-step 補完規則</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>RX</code></td><td>locus 1 = R</td><td>(1) 同 PS read → (2) ISM methyl cluster → (3) 鄰近 SNV vote → {RR, RA}</td></tr>
+        <tr><td><code>AX</code></td><td>locus 1 = A</td><td>同上 → {AA, AR}</td></tr>
+        <tr><td><code>XR</code></td><td>locus 2 = R</td><td>同上推 locus 1 → {RR, AR}</td></tr>
+        <tr><td><code>XA</code></td><td>locus 2 = A</td><td>同上推 locus 1 → {AA, RA}</td></tr>
+      </tbody>
+    </table>
+
+    <figure class="fig" id="fig-f3v2">
+      <img src="../../../../../research/hku_collaboration/figures/F3v2_x_imputation_flow.png" alt="F3v2 4 panel X 補完 3-step flow">
+      <figcaption><span class="fig-label">圖 F3v2 (v4)</span>4 panel（RX / AX / XR / XA），每 panel 顯示原始 X → 3-step ISM 補完（同 PS read → methyl cluster → flanking SNV vote）→ 補完後雙路去向。<span class="badge new">v4 取代 v1 F3 (3-step icon)</span></figcaption>
+    </figure>
+
+    <h3>§2.3 HP 細分樹 — linear depth naming（4 場景 A/B/C/D）</h3>
+
+    <p>v4 採 user 5/23 選定的 <strong>linear depth notation</strong>：</p>
+    <ul>
+      <li><code>HP1</code> = germline root（RR）</li>
+      <li><code>HP1-1</code> = HP1 的第一代 child（+1 somatic event α）</li>
+      <li><code>HP1-1-1</code> = HP1-1 的第二代 child（+2 somatic events，<strong>linear extension</strong>）</li>
+      <li><code>HP1-2</code> = HP1 的第一代 child 但 mutation event 不同（兩個 1st-gen events sibling）</li>
+      <li><code>HP1-1-2</code> = HP1-1 第二代不同 mutation event sibling</li>
+      <li><code>HP2</code>/<code>HP2-1</code>/<code>HP2-1-1</code> 同理（germline het 另一條 haplotype）</li>
+    </ul>
+
+    <p><strong>4 場景結構</strong>（per plan v4 §A4 + v4_evolution_figures README）：</p>
+
+    <table>
+      <thead>
+        <tr><th>場景</th><th>觀察組合</th><th>結構</th><th>編碼</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>A linear</strong></td><td><code>{RR, AR, AA}</code></td><td>HP1 → HP1-1 → HP1-1-1</td><td>純 linear，每步 +1 somatic</td></tr>
+        <tr><td><strong>B branching 1st-gen</strong></td><td><code>{RR, AR, RA}</code></td><td>HP1 → {HP1-1 (AR), HP1-2 (RA)}</td><td>第一代兩 mutation event 分支</td></tr>
+        <tr><td><strong>C branching + linear</strong></td><td><code>{RR, AR, RA, AA}</code></td><td>HP1 → {HP1-1, HP1-2} → {HP1-1-1, HP1-2-1}</td><td>AA 歸屬 ambiguous（紫色），用甲基聚類 / 鄰近 SNV 區分</td></tr>
+        <tr><td><strong>D HP1 + HP2 並行</strong></td><td>兩 lineage 各自</td><td>germline het root → HP1 + HP2 各自帶 A/C 結構</td><td>全圖</td></tr>
+      </tbody>
+    </table>
+
+    <pre><code>germline het Ref（root）
+├── HP1
+│   ├── HP1-1 (+ somatic event α)
+│   │   └── HP1-1-1 (+ somatic event β; linear)
+│   └── HP1-2 (+ somatic event γ; sibling of HP1-1, 非 child)
+│       └── HP1-2-1 (+ somatic event δ; linear)
+└── HP2
+    └── ...(mirror structure)</code></pre>
+
+    <figure class="fig" id="fig-f4v2">
+      <img src="../../../../../research/hku_collaboration/figures/F4v2_evolution_tree_4scenarios.png" alt="F4v2 演化樹 4 場景 A/B/C/D linear depth">
+      <figcaption><span class="fig-label">圖 F4v2 (v4)</span>2×2 panel：場景 A linear、B branching、C branching+linear（AA 標 ambiguous 紫色）、D HP1+HP2 並行（germline het 為 root）。<span class="badge new">v4 取代 v1 F4 — linear depth notation</span></figcaption>
+    </figure>
+
+    <div class="callout-info">
+      <strong>ISM subclone marker 既有 evidence cross-link（v5 補）</strong>
+      <p style="margin: 6px 0;">linear depth schema 為 [I] design proposal，目前 evidence base 為以下 cross-sample observation：</p>
+      <ul style="margin: 4px 0;">
+        <li><strong>HPFineNGroups subclone marker ⭐3 pipeline-dependent</strong>（per memory <code>project_hpfinengroups_subclone_marker.md</code>）：V6 chr19 Phase B 768 regions，flag=off NG≥3 TP rate <strong>94.7%</strong>，flag=on NG_on=2 <strong>91.5%</strong>；最強 cell NG_off=5→NG_on=2 (122 regions) TP rate <strong>99.2%</strong>。5/7 樣本 V6 cross-sample marker rate 0.992 / 0.993 / 0.954 / 0.817（4 樣本，COLO829 deferred）。Tier: [O] cross-sample observation; caveat: chr19 only = 2.16% genome, BAM = V3F binary。</li>
+        <li><strong>LOH × NGroups Paired POSITIVE</strong>（per memory <code>project_loh_subclone_af_methylation_positive.md</code>）：跨 7 樣本 paired mode ΔNG=+0.787（p&lt;10⁻⁶⁵），median |r|=0.755，6/7 segment ρ POSITIVE。Tier: [O]; caveat: 0423 週報已 reframe — TO 層機制更正為 LOH-constrained phasing（NG 非 methylation bimodality），Paired 層保留但加註「需獨立 phasing-vs-methylation 驗證」。</li>
+        <li><strong>LOH-constrained phasing discovery</strong>（per memory <code>project_loh_constrained_phasing_discovery.md</code>）：TO 6 樣本 obs18 — Inner × NG=2 組成 93-99% same-hap；TP rate gap (Inner same_HP1 − Outer cross_het) median +0.37，6/6 樣本一致正向。Tier: [O]。</li>
+        <li><strong>ISM C++ 模組已實作</strong>：<code>InterSubMod/src/core/MatrixBuilder.cpp:17-39</code> + <code>DistanceMatrix.cpp:310-345</code>（6 metric source-verified: <strong>NHD (Normalized Hamming) / L1 (Manhattan) / L2 (Euclidean) / CORR (Pearson) / JACCARD / BERNOULLI</strong>；無 Cosine）— 可實機跑 TP53 / CDKN2A / RB1 single-region demo。Tier: [F]。</li>
+      </ul>
+      <p style="margin: 8px 0 0;"><strong>合議結論</strong>：linear depth schema 為 design proposal；HPFineNGroups + LOH×NGroups Paired POSITIVE 是 [O] 觀察，未直接 benchmark multi-subclone HP1-2 / HP1-3 分支。建議在 HKU 對話定位為「design framework + cross-sample marker evidence + future TP53/CDKN2A/RB1 IGV demo plan」三層 anchor。</p>
+    </div>
+
+    <h3>§2.4 ISM read × CpG matrix 接口</h3>
+
+    <p>每條 read 內 CpG 位點 5mC 機率向量作為 read clustering 距離度量：</p>
+
+    <table>
+      <thead>
+        <tr><th>模組</th><th>路徑</th><th>職責</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>MatrixBuilder.cpp</code></td><td><code>InterSubMod/src/core/</code></td><td>從 BAM read MM/ML 解析 CpG 甲基化機率，組成 read × CpG matrix</td></tr>
+        <tr><td><code>DistanceMatrix.cpp</code></td><td><code>InterSubMod/src/core/</code></td><td>6 種距離度量 source-verified (line 310-345)：<strong>NHD (Hamming, binary) / L1 (Manhattan, raw) / L2 (Euclidean, raw) / CORR (Pearson, raw) / JACCARD (binary) / BERNOULLI (raw)</strong>。無 Cosine</td></tr>
+        <tr><td><code>SignificanceAnalyzer.cpp</code></td><td><code>InterSubMod/src/core/</code></td><td>Fisher / 顯著性檢定</td></tr>
+        <tr><td><code>render.py</code></td><td><code>InterSubMod/scripts/</code></td><td>輸出 read × CpG heatmap + hierarchical clustering dendrogram</td></tr>
+      </tbody>
+    </table>
+
+    <figure class="fig" id="fig-f5">
+      <img src="../../../../../research/hku_collaboration/figures/F5_ism_readcpg_heatmap.png" alt="F5 ISM read × CpG heatmap">
+      <figcaption><span class="fig-label">圖 F5</span>ISM read × CpG 甲基化機率 heatmap + hierarchical clustering dendrogram + HP1/HP2 annotation bar，示意 ISM 如何用甲基聚類補完 LongPhase-S 無法區分的 read。<span class="fig-caveat">⚠ 示意數據（rng.beta），非真實 HCC1395 ISM 輸出</span></figcaption>
+    </figure>
+
+    <h3>§2.5 HP3 baseline TP rate — 直接回應 R3 Major #5（v6 新 T1 evidence）</h3>
+
+    <p>Reviewer 3 Major #5 質疑：「論文沒講 HP3 佔總 variant calls 的比例，也沒講 HP3 之中 TP 的比例」。T1 pysam scan (chr1 + chr8 + chr19 完整 scan, MAPQ ≥ 20, primary only) 給出 source-verified 答案：</p>
+
+    <table>
+      <thead>
+        <tr><th>chromosome</th><th>total_reads</th><th>HP3_reads</th><th>HP3_fraction</th><th>HP3_TP_reads</th><th>HP3_TP_rate</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>chr1</td><td class="num">2,236,562</td><td class="num">6,419</td><td class="num">0.287%</td><td class="num">5,658</td><td class="num"><strong>88.14%</strong></td></tr>
+        <tr><td>chr8 (LOH 99%)</td><td class="num">1,653,223</td><td class="num">5,539</td><td class="num">0.335%</td><td class="num">4,454</td><td class="num"><strong>80.41%</strong> ⚠</td></tr>
+        <tr><td>chr19</td><td class="num">535,588</td><td class="num">1,264</td><td class="num">0.236%</td><td class="num">1,184</td><td class="num"><strong>93.67%</strong></td></tr>
+        <tr><td><strong>ALL</strong></td><td class="num"><strong>4,425,373</strong></td><td class="num"><strong>13,222</strong></td><td class="num"><strong>0.299%</strong></td><td class="num"><strong>11,296</strong></td><td class="num"><strong>85.4%</strong></td></tr>
+      </tbody>
+    </table>
+
+    <figure class="fig" id="fig-t1">
+      <img src="../../../../../research/hku_collaboration/figures/T1_HP3_TP_rate_per_chr.png" alt="T1 HP3 TP rate per chromosome — dual-axis bar chart">
+      <figcaption><span class="fig-label">圖 T1 (v6)</span>HP3 reads per-chromosome 統計：HP3 fraction（左軸對數，~0.24-0.34%）+ HP3 TP rate（右軸線性，80-94%）。chr8 80.4% TP rate 顯著低於 chr1/chr19 — 與 chr8 99% LOH hotspot 一致：LOH 區段 ClairS-TO 報更多 FP candidate，HP3 reads 撞「ClairS-TO 報但 SEQC2 不收」位點比例更高。</figcaption>
+    </figure>
+
+    <div class="callout-success">
+      <strong>關鍵 finding（[F] tier）— HP3 是 somatic-evidence bucket，非 unphased fallback</strong>
+      <p style="margin: 6px 0;">HP3 reads 整體僅 0.3%（與 §1.2 baseline 一致），但 <strong>80-94% 覆蓋 SEQC2 truth TP 位點</strong>。隨機 baseline 期望 ~10⁻⁵ /bp × ~15 kb read length ≈ 10-20% — HP3 觀測 TP rate <strong>4-8× enrichment</strong>。</p>
+      <p style="margin: 8px 0 0;"><strong>意涵</strong>：HP3 在 LongPhase-S 設計中標為「ambiguous / fall-through」但實際聚集在 somatic-rich 區段；建議 LongPhase-S Supp 加 HP3 reads count + TP rate per-dataset table，並 reframe HP3 為「near-somatic ambiguous evidence」而非「unphased garbage」。</p>
+      <p style="margin: 8px 0 0;"><strong>對 R3 M5 直接回應</strong>：我們可作 prototype；HKU LongPhase-S 8 dataset 同樣方法跑可作 Supp Table。</p>
+    </div>
+
+    <p>Tier: <strong>[F]</strong> direct measurement (T1 pysam scan, bug fixed: SEQC2 filter 用 'PASS' in list 而非 == ['PASS']; sanity check chr1=3,440 + chr8=2,605 + chr19=874 = 6,919 truth TPs 對齊)。完整 reports：<code>InterSubMod/research/hku_collaboration/findings_5_24/T1_HP3_findings.md</code>。</p>
+
+    <h3>§2.6 預期 caller 受益</h3>
+
+    <div class="callout-success">
+      <strong>5 個 claim 鎖鏈</strong>：
+      <ol style="margin: 4px 0;">
+        <li>ClairS-TO 視窗 ±16 bp → 僅 <strong>2.4%</strong> SNV pair 落在 window 內（A2_2 證實）</li>
+        <li>剩 <strong>97.6%</strong> pair 的 phasing 訊號透過 BAM HP tag → ClairS pileup tensor <code>phasing_info</code> channel 6 進入 model</li>
+        <li>median pair distance 17.4 kb（A2_2 證實）+ PS block N50 943 kb (A7 證實) → 跨 PS chaining 是 phasing 訊號的主來源</li>
+        <li>85.9% PS set 含 ≥2 TP（A2_1 證實）→ ISM read-level 甲基聚類有足夠樣本</li>
+        <li>HP 細分樹（HP1-1-1 / HP1-1-2 etc., linear depth）encode sub-clone 結構進 BAM aux field → future ClairS-TO retraining 直接吸收</li>
+      </ol>
+    </div>
+
+    <!-- ============== §3 ============== -->
+    <h2 id="sec-3"><span class="h-num">§3</span>整體流程例子 — chr2:18,086,020 完整實證（v4）</h2>
+
+    <h3>§3.1 Pipeline 精簡圖（重申 §1 五階段）</h3>
+
+    <pre><code>tumor.bam (ONT 5kHz, MM/ML tag)
+       │
+       ▼
+ClairS-TO ssrs (v0.4.x)  ← 視窗 ±16 bp, 不讀 MM/ML
+       │
+       ▼  tp.vcf (HCC1395_methyl_PASS.vcf)
+       │
+       ▼  + Normal BAM/VCF + SEQC2 truth set
+       │
+LongPhase-S (mainline v1.7.3) haplotag --somaticMode
+       │
+       ▼  HP:Z:1 / 2 / 1-1 / 2-1 / 3
+       │
+tagged BAM
+       │
+       ▼
+InterSubMod (region → read×CpG matrix → 距離 → 顯著性)
+       │
+       ▼  改進構想：HP 細分樹 (linear depth) + R/A/X 補完 → 寫回 BAM aux field
+       │
+       ▼
+future ClairS-TO retraining (吸收進 phasing_info channel)</code></pre>
+
+    <h3>§3.2 chr2:18,086,020「往前推三點」FP 範例（v4 完整實證 + F7 圖）</h3>
+
+    <div class="callout-info">
+      <strong>場景</strong>：chr2:18,086,020 ClairS-TO ssrs 報為 candidate FP（in_clairs_ssrs=1, in_tp_vcf=0，DP=77, AF=0.494, HP2-1=55/78=71%）。直接看單一位點 ±16 bp 視窗無法判定，需要往前推 13 個鄰近位點，用 R/A/X matrix + 甲基聚類重新判定。
+    </div>
+
+    <p>per <code>data/F7_14sites_status.tsv</code>（14 sites 涵蓋 chr2:18,068,480 – 18,100,683 = 32 kb span，全 LOH 區）：</p>
+
+    <table>
+      <thead>
+        <tr><th>pos</th><th>in_tp</th><th>in_clairs</th><th>in_LOH</th><th>DP</th><th>AF</th><th>HP_dominant</th></tr>
+      </thead>
+      <tbody>
+        <tr class="row-safe"><td class="num">18,068,480</td><td>✅ TP</td><td>✅</td><td>✅</td><td class="num">49</td><td class="num">0.449</td><td>HP2-1=43/71 (61%)</td></tr>
+        <tr class="row-safe"><td class="num">18,072,546</td><td>✅ TP</td><td>✅</td><td>✅</td><td class="num">58</td><td class="num">0.466</td><td>HP2-1=44/73 (60%)</td></tr>
+        <tr><td class="num">18,073,987</td><td>—</td><td>—</td><td>✅</td><td class="num">0</td><td class="num">0</td><td>HP2-1=40/68 (59%)</td></tr>
+        <tr><td class="num">18,076,409</td><td>—</td><td>—</td><td>✅</td><td class="num">0</td><td class="num">0</td><td>HP2-1=40/69 (58%)</td></tr>
+        <tr class="row-bug"><td class="num"><strong>18,086,020</strong></td><td><strong>—</strong></td><td><strong>✅ FP cand.</strong></td><td>✅</td><td class="num"><strong>77</strong></td><td class="num"><strong>0.494</strong></td><td><strong>HP2-1=55/78 (71%)</strong></td></tr>
+        <tr><td class="num">18,090,947</td><td>—</td><td>—</td><td>✅</td><td class="num">0</td><td class="num">0</td><td>HP2-1=44/67 (66%)</td></tr>
+        <tr><td class="num">18,091,584</td><td>—</td><td>—</td><td>✅</td><td class="num">0</td><td class="num">0</td><td>HP2-1=42/62 (68%)</td></tr>
+        <tr><td class="num">18,093,414</td><td>—</td><td>—</td><td>✅</td><td class="num">0</td><td class="num">0</td><td>HP2-1=42/68 (62%)</td></tr>
+        <tr><td class="num">18,094,114</td><td>—</td><td>—</td><td>✅</td><td class="num">0</td><td class="num">0</td><td>HP2-1=45/70 (64%)</td></tr>
+        <tr><td class="num">18,096,033</td><td>—</td><td>—</td><td>✅</td><td class="num">0</td><td class="num">0</td><td>HP2-1=43/59 (73%)</td></tr>
+        <tr class="row-safe"><td class="num">18,096,269</td><td>✅ TP</td><td>✅</td><td>✅</td><td class="num">61</td><td class="num">0.279</td><td>HP2-1=46/64 (72%)</td></tr>
+        <tr><td class="num">18,096,341</td><td>—</td><td>—</td><td>✅</td><td class="num">0</td><td class="num">0</td><td>HP2-1=45/63 (71%)</td></tr>
+        <tr class="row-safe"><td class="num">18,099,697</td><td>✅ TP</td><td>✅</td><td>✅</td><td class="num">42</td><td class="num">0.333</td><td>HP2-1=43/59 (73%)</td></tr>
+        <tr><td class="num">18,100,544</td><td>—</td><td>—</td><td>✅</td><td class="num">0</td><td class="num">0</td><td>HP2-1=42/57 (74%)</td></tr>
+        <tr><td class="num">18,100,683</td><td>—</td><td>—</td><td>✅</td><td class="num">0</td><td class="num">0</td><td>HP2-1=42/55 (76%)</td></tr>
+      </tbody>
+    </table>
+
+    <figure class="fig" id="fig-f7">
+      <img src="../../../../../research/hku_collaboration/figures/F7_chr2_region_evidence.png" alt="F7 chr2:18,086,020 region 4-layer evidence IGV-style">
+      <figcaption><span class="fig-label">圖 F7 (v4)</span>chr2:18,086,020 周邊 32 kb 區段 IGV-style 圖：14 位點對齊 + SEQC2 TP truth + ClairS-TO ssrs call + LOH 區段 + HP2-1 dominance。<span class="badge new">v4 新</span></figcaption>
+    </figure>
+
+    <div class="callout-info">
+      <strong>4 層證據（4-Layer Evidence）</strong>
+      <ol style="margin: 4px 0;">
+        <li><strong>Layer 1 — SEQC2 truth</strong>：14 位點中 4 個 TP（皆由 ClairS-TO ssrs 報出）+ chr2:18,086,020 candidate FP。區段密度 125 TP/Mb（vs chr2 全 chr ~10 TP/Mb 平均）→ 真實 somatic-rich hot region</li>
+        <li><strong>Layer 2 — LOH context</strong>：14 位點全在 SEQC2 LOH 區 → tumor-only haplotype，殘留 haplotype 上的 somatic 累積會集中於 HP2-1 子分支</li>
+        <li><strong>Layer 3 — HP2-1 dominance</strong>：14 位點 HP2-1 比例 58%-76%（平均 ~67%）→ 整段是 HP2-1 sub-clone 的 signature region；chr2:18,086,020 HP2-1=71% 與整段框架對齊</li>
+        <li><strong>Layer 4 — caller blind spot</strong>：ClairS-TO 在 chr2:18,086,020 ±16 bp 內僅看到自己中心位點 33 bp 區段，<strong>完全看不到周圍 13 個鄰近位點的 HP2-1 累積證據</strong>（最近 in_loh anchor 距離 4,332 bp >> 16 bp）。ISM 補完後在 HP2-1 sub-clone 框架下可重判定</li>
+      </ol>
+    </div>
+
+    <div class="callout-warning">
+      <strong>FP 機制 — LOH 崩潰</strong>：caller 在 LOH × HP2-1 集中區因失去 het balance 把 sub-clone signal 誤判為 noise（或反之，部分真 sub-clone TP 位點被 SEQC2 漏標 → ssrs called 自動分到 FP）。ISM 串接 14 位點 HP 簽名後可區分「true FP」（隨機散落 HP）與「LOH-driven sub-clone TP candidate」（一致 HP2-1）。
+    </div>
+
+    <h3>§3.3 「合理推論 LOH + sub-clone」（Slide #2）</h3>
+
+    <div class="callout-info">
+      <strong>場景</strong>：HP 細分樹從 HP2 → HP2-1 → HP2-1-1 推進（linear depth），每層用甲基同/異群分支 — 這對應<strong>腫瘤內 sub-clone 演化軌跡</strong>。
+    </div>
+
+    <p>注意：原 plan 假設「LongPhase-S 不直接報 LOH 但 HP-missing 可間接指標」已被 A2_3 (AUC 0.504) <strong>清楚拒絕</strong>。A6 stratification (§4.5) 進一步證實 LOH inside (Z1/Z2/Z3) 的 subclone proxy ratio (~0.07-0.09) 反而是全 zone <strong>最低</strong>。LOH 推論需改觀察 <strong>tumor HP1 vs HP2 read count imbalance</strong>（如 chr8 99.1% LOH 區段，HP1:HP2 比例顯著偏離 1:1），而非 HP-missing rate。</p>
+
+    <h3>§3.4 caller ±16 bp 視窗 vs 跨視窗 SNV pair 示意</h3>
+
+    <figure class="fig" id="fig-f6">
+      <img src="../../../../../research/hku_collaboration/figures/F6_caller_window_vs_phasing.png" alt="F6 caller window vs 跨視窗 SNV pair">
+      <figcaption>
+        <span class="fig-label">圖 F6</span>caller pileup 視窗內 vs 跨視窗 SNV pair 的可見性對比；LongPhase-S HP/PS tag 如何在同 PS 內串接跨視窗 SNV。
+        <span class="fig-caveat">⚠ 圖示為概念示意，標題 ±128 bp 為舊版圖檔；實際 ClairS-TO ssrs caller 視窗 source-verified 為 <strong>±16 bp（33 bp total）</strong>，per A1 報告 Q1。Caller blind spot 比圖示更嚴重 8×。</span>
+      </figcaption>
+    </figure>
+
+    <!-- ============== §4 ============== -->
+    <h2 id="sec-4"><span class="h-num">§4</span>7 個討論點 + chr 級 stratification（v4 新增 §4.5 / §4.6 / §4.7）</h2>
+
+    <p>4 個 Q-cards（HKU/我們發問）+ 3 個新 evidence cards（A6/A7/A8）。</p>
+
+    <!-- Q1 -->
+    <details class="q-card hku" open>
+      <summary>
+        <span class="q-id">Q1</span>
+        <span class="q-title">LongPhase-S 輸出格式如何定義，最大化資訊給 ClairS retraining？</span>
+        <span class="q-side">HKU 發問</span>
+        <span class="badge positive">PS 充足</span>
+      </summary>
+      <div class="q-body">
+        <h4>Background</h4>
+        <p>現行 LongPhase-S <code>--somaticMode</code> 輸出 BAM HP tag (HP1 / HP2 / HP1-1 / HP2-1 / HP3)。對 ClairS-TO retraining 的關鍵問題：每個 PS set 內有多少 TP somatic 位點？輸出格式如何 encode sub-clone 結構？</p>
+
+        <h4>我們的初步看法（A2_1 + A7 證據）</h4>
+        <ul>
+          <li>PS sets 總數 = <strong>759</strong>（chr1 + chr8 + chr19）</li>
+          <li>median TP / PS = <strong>5</strong>；IQR [2, 12.5]；max <strong>90</strong></li>
+          <li><strong>85.9% (652/759) PS 含 ≥2 TP</strong> → 絕大多數 PS 有足夠 TP 位點做 read-level 分群</li>
+          <li>PS block global N50 = <strong>943 kb</strong>（max chr1 18.3 Mb）→ PS chaining 規模充足</li>
+          <li>~14% PS 只有 1 個 TP，需仰賴 germline anchors（不影響 sub-clone 細分主流程）</li>
+        </ul>
+
+        <h4>建議</h4>
+        <p>Encode <strong>HP1-1-1 / HP1-2-1 / HP1-1-2</strong> 等 linear depth tag 到 BAM aux field（如 <code>HP:Z:1-1-1</code> + 補一個 <code>MC:Z:&lt;methyl_cluster_id&gt;</code> 標 sub-clone）。Format 須能 round-trip 進 ClairS-TO pileup tensor <code>phasing_info</code> channel 6。</p>
+
+        <h4>Open question to HKU</h4>
+        <blockquote>
+          (a) HP1-1-1 / HP1-1-2 / HP1-2-1 linear depth naming schema 是否採納？<br>
+          (b) ClairS-TO retraining 要不要把 sub-clone tag 當獨立 channel（增到 8 channel）vs 共用 phasing_info channel 6 編碼？<br>
+          (c) 若超過 N=3 層細分，PS set 內 TP 數量會變稀疏（IQR 下界 = 2），N 上限建議？
+        </blockquote>
+      </div>
+    </details>
+
+    <!-- Q2 -->
+    <details class="q-card hku" open>
+      <summary>
+        <span class="q-id">Q2</span>
+        <span class="q-title">tumor.bam 有甲基也觀察過，但沒進 ClairS — 原因？</span>
+        <span class="q-side">HKU 發問</span>
+        <span class="badge verified">已 source-verified</span>
+      </summary>
+      <div class="q-body">
+        <h4>Background</h4>
+        <p>用戶 5/22 提問：HCC1395 tumor.bam 含 MM/ML tag（5mCG + 5hmCG），但 ClairS / ClairS-TO 似乎沒用到。這是設計選擇還是技術 limitation？</p>
+
+        <h4>我們的初步看法（A1 source code 驗證）</h4>
+        <p>5/23 從 ClairS / ClairS-TO GitHub <code>shared/param.py</code> 直接驗證：</p>
+        <ul>
+          <li>Pileup tensor <strong>18 channel 全為 ACGT/indel/strand/end-marker</strong>，無 5mC/5hmC channel</li>
+          <li>Full-alignment tensor <strong>7 channel</strong>：reference_base / alternative_base / base_quality / strand_info / insert_base / <strong>phasing_info（HP tag）</strong> / mapping_quality — <strong>無 methylation channel</strong></li>
+          <li>ClairS README + ClairS-TO README 全文：<strong>「No mentions of methylation, 5mC, MM/ML tags, modifications, modkit, or methylation calling」</strong></li>
+          <li><code>clairs.py</code> 主入口：<strong>「References to MM, ML, methylation, modified bases, mod_call, or modkit: None detected」</strong></li>
+          <li>ssrs vs ss 視窗完全相同（33 bp），差別僅在訓練資料 augmentation（ssrs 多用 HCC1937 / HCC1954 / H1437 / H2009）— <strong>兩者都不接觸 MM/ML</strong></li>
+        </ul>
+
+        <div class="callout-success">
+          <strong>結論</strong>：ClairS / ClairS-TO 本體<strong>完全不讀 MM/ML tag</strong>。甲基訊號需 caller 之外的後處理（如 InterSubMod、modkit、LongPhase v2+ <code>modcall</code>）注入。
+        </div>
+
+        <h4>Open question to HKU</h4>
+        <blockquote>
+          (a) 是否考慮加 ASM evidence（read-level allele-specific methylation）進 model retraining？<br>
+          (b) 若加，作為獨立 channel 還是融合進 <code>phasing_info</code>？<br>
+          (c) ClairS-TO ssrs 既然用 real cancer cell-line（HCC1937 等）augmentation，是否考慮把 cell-line ASM 訊號 pretrain 進去？
+        </blockquote>
+      </div>
+    </details>
+
+    <!-- Q3 -->
+    <details class="q-card ours">
+      <summary>
+        <span class="q-id">Q3</span>
+        <span class="q-title">甲基化分群是否能補完 sub-clone tag？</span>
+        <span class="q-side">我們發問</span>
+        <span class="badge pending">待後續驗證</span>
+      </summary>
+      <div class="q-body">
+        <h4>Background</h4>
+        <p>§2 提出的 HP 細分樹（linear depth notation：HP1-1-1 同/異甲基群分支）依賴 ISM read clustering 能可靠區分 sub-clone。但 cluster cutoff、距離度量、τ 門檻都尚未對齊。</p>
+
+        <h4>前置條件（已驗證）</h4>
+        <ul>
+          <li>A2_1: 85.9% PS 含 ≥2 TP → 有足夠 read 做 clustering <span class="badge positive">POSITIVE</span></li>
+          <li>A7: PS block N50 943 kb → 跨 PS chaining 空間充足 <span class="badge positive">POSITIVE</span></li>
+          <li>F5 ISM heatmap 概念 ready，C++ MatrixBuilder + DistanceMatrix 已實作 6 metric</li>
+          <li>F7 chr2:18,086,020 region 已 mapped 14 anchor 位點作為 single-region pilot</li>
+        </ul>
+
+        <h4>待驗證項</h4>
+        <ul>
+          <li>ISM cluster cutoff：CORR (Pearson) vs L1 (Manhattan) vs NHD (Hamming)，τ 門檻值（試 τ ∈ {0.2, 0.3, 0.39, 0.5}）— 注：實際 enum 無 Cosine</li>
+          <li>HP1-1-1 / HP1-1-2 / HP1-2-1 linear depth naming schema 終版</li>
+          <li>兩位點外推到 N 位點時的 X 比例上限（IQR 下界 = 2，N=3 可能稀疏）</li>
+          <li>cross-sample validation（COLO829 + DORADO + H2009 BAM 仍 pending）</li>
+        </ul>
+
+        <h4>Open question to HKU</h4>
+        <blockquote>
+          (a) HKU 端是否有 sub-clone ground truth dataset 可 benchmark？<br>
+          (b) 對 ASM cluster cutoff 有預設值建議？（matched preprint or internal lab convention）
+        </blockquote>
+      </div>
+    </details>
+
+    <!-- Q4 -->
+    <details class="q-card ours">
+      <summary>
+        <span class="q-id">Q4</span>
+        <span class="q-title">ASM + HP tag 是否能提升 F1？</span>
+        <span class="q-side">我們發問</span>
+        <span class="badge pending">已 reframe (A2_3 + A6 駁回)</span>
+      </summary>
+      <div class="q-body">
+        <h4>Background</h4>
+        <p>原 plan 假設「LongPhase-S 不直接報 LOH 但 HP-missing rate 可間接指標」。A2_3 直接量化此 hypothesis：</p>
+
+        <table>
+          <thead>
+            <tr><th>指標</th><th>Overall</th><th>chr1</th><th>chr8</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>n_bins</td><td class="num">324,595</td><td class="num">199,075</td><td class="num">125,520</td></tr>
+            <tr><td>LOH fraction</td><td class="num">67.7%</td><td class="num">48.0%</td><td class="num">99.1% ⚠</td></tr>
+            <tr class="row-bug"><td><strong>AUC</strong></td><td class="num"><strong>0.504</strong></td><td class="num">0.509</td><td class="num"><strong>0.446 ⚠</strong></td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout-critical">
+          <strong>Hypothesis 被駁回</strong>：AUC 0.504 ≈ random，chr8 反向 0.446（non-LOH bin HP-missing 反而更高）。LongPhase-S HP-missing 不能作為 LOH 指標。<strong>A6 6-zone stratification 進一步證實</strong>（見 §4.5）。
+        </div>
+
+        <h4>Reframe</h4>
+        <blockquote>
+          「LongPhase-S <code>--somaticMode</code> 用 germline het SNV 為 phasing anchor，LOH 不改變 normal-derived germline het 狀態（只改 tumor allelic frequency），因此 HP tag 在 LOH vs non-LOH 區段分配無顯著差異（AUC 0.504）。要間接驗 LOH 需改觀察 <strong>tumor HP1 vs HP2 read count imbalance</strong>（如 chr8 99.1% LOH 區段，HP1:HP2 比例顯著偏離 1:1），而非 HP-missing rate。」
+        </blockquote>
+
+        <h4>當前 cycle status（v5 補：誠實面對 cross-sample failure）</h4>
+        <p>Phase 2 methyl_filter 經 cycle 1-3 觀察，<code>caller_af</code> 為主導 feature（rank 1 in global FP LR，coef +3.44），methylation 5th-rank（marginal contribution）。</p>
+        <div class="callout-critical">
+          <strong>Cross-sample LOSO 結果 NEGATIVE — 必須誠實 disclose（v6: 雙數字 disambiguated）</strong>
+          <ul style="margin: 4px 0;">
+            <li>HCC1395 in-distribution 5-fold OOF ΔF1 = <strong>+0.02236</strong>（cycle 1 global FP LR, 10 features, τ=0.39）</li>
+            <li>HCC1395 LOSO held-out (4-sample combined train) ΔF1 = <strong>−0.00012</strong>（drop = +0.02248, 100% effect = sample-level circularity bias）</li>
+            <li>5-sample LOSO mean ΔF1 = <strong>−0.00004</strong>（HCC1395 / HCC1937 / HCC1954 / H1437 / H2009 全部 ≈ 0, Wilcoxon p=0.125, DIRECTION_NEGATIVE）</li>
+            <li>HCC1954 transfer 極端 case ΔF1 = <strong>−0.377</strong>（catastrophic — caller_af direction-inconsistent: HCC1395 d=+1.60 vs HCC1937 d=−1.41）</li>
+            <li>per memory <code>project_phase2_cycle1_global_fp_filter.md</code>（DOWNGRADED 2026-05-20 LOSO）</li>
+          </ul>
+          <p style="margin: 8px 0 0;"><strong>意涵</strong>：HCC1395 ΔF1+0.02236 屬 single-sample in-distribution gain，**不可用作 cross-sample LongPhase-S retraining 直接證據**。我們的 LR filter 在 production 設定下 not deployable — 此為與 LongPhase-S Reviewer 2 #3 同類「cancer cell line 外推困難」的誠實 case study，而非 positive evidence。</p>
+        </div>
+        <p>Cross-sample validation 對 V3F/V5 4 樣本 DEFERRED（BAM 不存在）。LR direction exhaustion → cycle 5 建議 pivot phase_block_3d / thread_d 或 non-LR framework（zone rules / boolean filter）。</p>
+
+        <h4>Open question to HKU</h4>
+        <blockquote>
+          (a) HP1 vs HP2 read count imbalance ratio 是否在 ClairS-TO 已有內部 metric？<br>
+          (b) 是否有 LOH-annotated WGS benchmark 可 cross-validate（除 SEQC2 v1.2.1 之外）？<br>
+          (c) ASM feature 在 ClairS-TO ssrs 的 LR weight 是否能由 HKU 端 ablation 試一次？
+        </blockquote>
+      </div>
+    </details>
+
+    <!-- §4.5 A6 -->
+    <details class="q-card evi" open>
+      <summary>
+        <span class="q-id">§4.5</span>
+        <span class="q-title">LOH × CNV 6-zone stratification (A6)</span>
+        <span class="q-side">v4 new evidence</span>
+        <span class="badge negative">方向 OPPOSITE</span>
+      </summary>
+      <div class="q-body">
+        <h4>Design</h4>
+        <p>per SEQC2 v1.2.1 CNV+LOH BED（660 segments）對每條 read 的 midpoint 作 zone classify：</p>
+        <table>
+          <thead>
+            <tr><th>Zone</th><th>n_reads (M)</th><th>長度 (Mb)</th><th>depth/Mb</th><th>subclone h1-side</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Z1 LOH in × gain</td><td class="num">5.98</td><td class="num">520.2</td><td class="num">11,493</td><td class="num">0.079</td></tr>
+            <tr><td>Z2 LOH in × loss</td><td class="num">0.20</td><td class="num">57.3</td><td class="num">3,417</td><td class="num">0.093</td></tr>
+            <tr><td>Z3 LOH in × neutral</td><td class="num">6.40</td><td class="num">913.0</td><td class="num">7,011</td><td class="num">0.077</td></tr>
+            <tr><td>Z4 LOH out × gain</td><td class="num">12.91</td><td class="num">983.7</td><td class="num">13,119</td><td class="num">0.078</td></tr>
+            <tr><td>Z5 LOH out × loss</td><td class="num">0.07</td><td class="num">30.6</td><td class="num">2,427</td><td class="num">0.092</td></tr>
+            <tr class="row-warn"><td><strong>Z6 LOH out × neutral</strong></td><td class="num"><strong>2.97</strong></td><td class="num">526.2</td><td class="num">5,652</td><td class="num"><strong>0.435 anomaly</strong></td></tr>
+          </tbody>
+        </table>
+
+        <h4>統計檢定</h4>
+        <ul>
+          <li><strong>Kruskal-Wallis (h1-side)</strong>：H = 234.11, <strong>p = 1.41×10⁻⁴⁸</strong> ✅ 極顯著</li>
+          <li><strong>Kruskal-Wallis (h2-side)</strong>：H = 165.66, p = 6.16×10⁻³⁴</li>
+          <li>Pairwise Bonferroni-corrected MW-U：Z6 vs 其他 5 zones 全 p_bonf &lt; 1e-5；rank-biserial r 0.27-0.56</li>
+        </ul>
+
+        <h4>方向與預期相反</h4>
+        <table>
+          <thead><tr><th>預期</th><th>實際</th><th>判定</th></tr></thead>
+          <tbody>
+            <tr><td>LOH inside → subclone 升高</td><td>Z1-Z3 ratio 0.07-0.09 全 zone 最低</td><td>❌ 反向</td></tr>
+            <tr><td>CN-gain 2× depth</td><td>Z1 1.64×</td><td>✅ depth 對齊</td></tr>
+            <tr><td>CN-loss 0.5× depth</td><td>Z2 0.49×</td><td>✅ 完美對齊</td></tr>
+            <tr><td>Z6 baseline = Z3</td><td>Z6 = 0.43, 是 Z3 的 5.7×</td><td>❌ 非預期</td></tr>
+          </tbody>
+        </table>
+
+        <h4>Z6 anomaly 真實成因</h4>
+        <ol>
+          <li><strong>chrX 全落 Z6</strong>（SEQC2 BED 不標 chrX）→ X-inactivation 假性訊號</li>
+          <li><strong>chr6 / chr16 之 Z6 集中在 centromeric 邊緣</strong> → mapping ambiguity + HP3 + no-HP 主導</li>
+          <li><strong>其他 18 chr 的 Z6 ratio (0.04-0.13) 與 Z3 一致</strong> → 真實 LOH × CNV 訊號為 NULL</li>
+        </ol>
+
+        <figure class="fig" id="fig-a6">
+          <img src="../../../../../research/hku_collaboration/figures/A6_loh_cnv_stratified_hp_distribution.png" alt="A6 LOH/CNV 6-zone stacked HP">
+          <figcaption><span class="fig-label">圖 A6</span>LOH/CNV 6-zone stratified HP distribution.</figcaption>
+        </figure>
+        <figure class="fig">
+          <img src="../../../../../research/hku_collaboration/figures/A6_subclone_ratio_violin.png" alt="A6 subclone ratio violin 6 zones">
+          <figcaption><span class="fig-label">圖 A6 violin</span>6-zone subclone ratio violin + Kruskal-Wallis + Bonferroni 顯著對註記.</figcaption>
+        </figure>
+
+        <div class="callout-critical">
+          <strong>結論</strong>：subclone proxy 不能由 LOH×CNV stratify 出生物學差異；6-zone 設計只能 detect coverage artifact。<strong>Cross-validate §1.4 / Q4 LOH HP-missing AUC 0.504 NEGATIVE</strong>。CN-loss ploidy weight 0.49× 對齊 0.5× 預期 — depth 訊號是真實的。
+        </div>
+      </div>
+    </details>
+
+    <!-- §4.6 A7 -->
+    <details class="q-card evi" open>
+      <summary>
+        <span class="q-id">§4.6</span>
+        <span class="q-title">PS Block N50 (A7)</span>
+        <span class="q-side">v4 new evidence</span>
+        <span class="badge positive">POSITIVE for PS chaining</span>
+      </summary>
+      <div class="q-body">
+        <h4>Global statistics</h4>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="number info">943 kb</div><div class="label">Global N50</div></div>
+          <div class="stat-box"><div class="number">163.7 kb</div><div class="label">Median block size</div></div>
+          <div class="stat-box"><div class="number">420 kb</div><div class="label">Mean block size</div></div>
+          <div class="stat-box"><div class="number success">18.30 Mb</div><div class="label">Max block (chr1, PS=125047868)</div></div>
+          <div class="stat-box"><div class="number">6,861</div><div class="label">Total PS blocks</div></div>
+          <div class="stat-box"><div class="number">508s</div><div class="label">Wall clock</div></div>
+        </div>
+
+        <h4>Per-chr highlights</h4>
+        <ul>
+          <li><strong>chr22 N50 = 1.625 Mb（autosome 最大）</strong></li>
+          <li>chr1 N50 1.071 Mb（含 max 18.3 Mb block）</li>
+          <li>chr19 N50 1.018 Mb；chr5 1.108 Mb；chr11 977 kb</li>
+          <li><strong>chr6 N50 = 734 kb</strong>（per A8 chr6 phasing complex 對應；HP1-1+HP2-1+HP3 ~9%）</li>
+          <li><strong>chr16 N50 = 226,882 bp（autosome 最小）</strong>（per A8 no_HP 52.9% 對應）</li>
+          <li><strong>chrX N50 = 101,154 bp（全體最小）</strong>（per A8 no_HP 61% 對應；single-X）</li>
+        </ul>
+
+        <figure class="fig" id="fig-a7">
+          <img src="../../../../../research/hku_collaboration/figures/A7_phase_block_size_distribution.png" alt="A7 PS block size distribution + N50">
+          <figcaption><span class="fig-label">圖 A7</span>Global PS block size distribution + N50 indicator.</figcaption>
+        </figure>
+        <figure class="fig">
+          <img src="../../../../../research/hku_collaboration/figures/A7_n50_per_chr_bar.png" alt="A7 N50 per chr bar">
+          <figcaption><span class="fig-label">圖 A7 per-chr</span>N50 per chr bar chart — chr22 max / chrX min.</figcaption>
+        </figure>
+
+        <div class="callout-success">
+          <strong>Cross-reference</strong>：chr6 / chr16 / chrX 的 N50 較短 vs A8 finding（chr6 outlier HP1-1+HP2-1+HP3 ~9% / chr16 no_HP 52.9% / chrX no_HP 61%）— phasing weakness 與 block size 為同一軸向兩種量化角度。
+        </div>
+
+        <p>N50 943 kb >> ClairS-TO ±16 bp window（5× 數量級）→ PS chaining 確實有效跨越 caller blind spot。median TP pair distance 17.4 kb &lt;&lt; median block 164 kb → 跨 pair 走 PS chain 可行性確認。</p>
+      </div>
+    </details>
+
+    <!-- §4.7 A8 -->
+    <details class="q-card evi" open>
+      <summary>
+        <span class="q-id">§4.7</span>
+        <span class="q-title">Chr Ideogram 24-panel (A8)</span>
+        <span class="q-side">v4 new evidence</span>
+        <span class="badge verified">LOH ≠ phasing failure</span>
+      </summary>
+      <div class="q-body">
+        <h4>LOH coverage ranking</h4>
+        <table>
+          <thead><tr><th>Tier</th><th>Chrs</th><th>LOH 範圍</th></tr></thead>
+          <tbody>
+            <tr><td>Tier 1 (≥75%)</td><td>chr8 96%, chr17 93%, chr11 85%, chr3 80%, chr10 78%, chr12 77%</td><td>接近全 chr LOH</td></tr>
+            <tr><td>Tier 2 (50-75%)</td><td>chr5 72%, chr19 55%, chr2 51%</td><td>多數 chr LOH</td></tr>
+            <tr><td>Tier 3 (30-50%)</td><td>chr1 45%, chr6 45%, chr13 49%, chr4 40%, chr22 38%, chr18 36%, chr9 33%, chr14 32%, chr15 32%</td><td>部分 LOH</td></tr>
+            <tr class="row-warn"><td><strong>Tier 4 (&lt;5%)</strong></td><td>chr7 16%, chr21 2%, <strong>chr16 0%, chr20 0%, chrX 0%</strong></td><td><strong>LOH-clean reference</strong></td></tr>
+          </tbody>
+        </table>
+
+        <h4>HP composition imbalance</h4>
+        <ol>
+          <li><strong>絕大多數 autosome HP1/HP2 平衡</strong>（HP1 25-32%, HP2 26-31%）→ LongPhase-S haplotag 總體對稱</li>
+          <li><strong>chr6 顯著 outlier</strong>：HP1 17.4% / HP2 19.4%, HP1-1+HP2-1+HP3 合計 ~9%</li>
+          <li><strong>chr16 phasing-weak</strong>：HP1 14.6% / HP2 16.0% / <strong>no_HP 52.9%</strong>（autosome 最高）→ 對應 chr16 = 0% LOH coverage</li>
+          <li><strong>chrX single-X 簽名</strong>：HP1 2.5% / HP2 1.3% / HP3 12.0% / <strong>no_HP 61.1%</strong></li>
+        </ol>
+
+        <h4>HP × LOH visual correlation</h4>
+        <ul>
+          <li>高 LOH chrs（chr8/chr11/chr17/chr10/chr12/chr3）：HP1 vs HP2 比例多數 bin 接近 1:1，與 LOH 區段 overlap → <strong>LOH 區段內 phasing 仍 work（loss-of-heterozygosity ≠ loss-of-phasing）</strong></li>
+          <li>chr16 / chrX 低 LOH 區域，反而 no_HP 比例升高 → phasing failure mode 與 LOH 解耦</li>
+          <li>chr20 = 94.5% CNV coverage 但 0% LOH → CNV gain 不必伴 LOH；HP1/HP2 仍對稱（28% / 27%）</li>
+        </ul>
+
+        <figure class="fig" id="fig-a8">
+          <img src="../../../../../research/hku_collaboration/figures/A8_chr_ideogram_hp_tag.png" alt="A8 chr ideogram 24-panel">
+          <figcaption><span class="fig-label">圖 A8 ideogram</span>24-panel chr ideogram (4×6 grid)：上層灰色 chr bar / 中層 LOH 紅+gain 藍+loss 綠 shading / 下層 HP stacked bar per 10 Mb.</figcaption>
+        </figure>
+        <figure class="fig">
+          <img src="../../../../../research/hku_collaboration/figures/A8_per_chr_hp_summary_table.png" alt="A8 per-chr HP summary table">
+          <figcaption><span class="fig-label">圖 A8 table</span>23 chr × HP1/HP2/HP1-1/HP2-1/HP3/no-HP normalized stack.</figcaption>
+        </figure>
+        <figure class="fig">
+          <img src="../../../../../research/hku_collaboration/figures/A8_chr_loh_cnv_coverage.png" alt="A8 chr LOH/CNV coverage">
+          <figcaption><span class="fig-label">圖 A8 coverage</span>per-chr LOH 紅 + CNV 藍 並排 bar.</figcaption>
+        </figure>
+
+        <div class="callout-success">
+          <strong>Phasing failure ⊥ LOH 三者整合敘述</strong>：A6 + A7 + A8 cross-validate — phasing weakness（N50 短 + no_HP 高 + HP3 高）與 LOH coverage 為<strong>正交軸向</strong>。chr16/chrX = LOH-absent + phasing-weak 對照組；chr8 = LOH dominance + phasing strong。<strong>LOH does not perturb LongPhase-S HP tag balance</strong>。
+        </div>
+      </div>
+    </details>
+
+    <!-- ============== REFERENCES ============== -->
+    <h2 id="refs"><span class="h-num">§5</span>引用與來源</h2>
+
+    <h3>本報告 source 文件（cross-link）</h3>
+    <ul>
+      <li><strong>B 主軸索引 v2</strong>：<code>InterSubMod/docs/concepts/2026/05/20260523_HKU_collab_主軸與細節_01.md</code></li>
+      <li><strong>C 整理資訊 v2</strong>：<code>InterSubMod/docs/concepts/2026/05/20260523_HKU_collab_整理資訊_01.md</code></li>
+      <li><strong>A1 ClairS source 驗證 v4</strong>：<code>InterSubMod/docs/references/2026/05/20260523_ClairS_window_methylation_findings_01.md</code>（Q4 v4 終版）</li>
+      <li><strong>A2 + A6 + A7 + A8 pysam findings</strong>：<code>InterSubMod/research/hku_collaboration/findings_5_23.md</code>（§1-§11）</li>
+      <li><strong>F1-F6 figures README</strong>：<code>InterSubMod/research/hku_collaboration/figures/README.md</code></li>
+      <li><strong>F2v2/F3v2/F4v2 README (v4)</strong>：<code>InterSubMod/research/hku_collaboration/figures/v4_evolution_figures_README.md</code></li>
+      <li><strong>Plan v4</strong>：<code>~/.claude/plans/tender-pondering-blossom.md</code></li>
+      <li><strong>Reviewer 23 條對照矩陣（v6 audit-corrected）</strong>：<code>InterSubMod/docs/concepts/2026/05/20260524_reviewer_coverage_matrix_01.md</code>（<strong>23 entries</strong>; ✅ 5 / ⚠ 6 / ❌ 12; tier 標 [F]/[O]/[I]/[U]）</li>
+    </ul>
+
+    <h3>對齊 source — LongPhase-S Reviewer Response（v5 新引用）</h3>
+    <ul>
+      <li><strong>三位 reviewer 評論完整翻譯 + 合理性判斷</strong>：<code>/big8_disk/liaoyoyo2001/knowledge/raw/paper-notes/longphase-s-reviewer-response-2026-05-23/report.md</code>（291 行；R1 7 items / R2 4 items / R3 12 items；含 R1 §1.7 對 InterSubMod / MethylSomaticAnalysis 的延伸方向 cite）</li>
+      <li><strong>Reviewer 報告 supplement</strong>：<code>/big8_disk/liaoyoyo2001/knowledge/raw/paper-notes/longphase-s-reviewer-response-2026-05-23/report.html</code> + <code>supplement.html</code> + <code>action-plan.html</code></li>
+      <li><strong>LongPhase-S bioRxiv (Ho et al. 2025.11.20.689492)</strong>：v1 posted 2025-11-24, modified 2026-02-07；本 source 與本報告對齊面為 Discussion 預留的「methylation phasing 延伸方向」hook</li>
+    </ul>
+
+    <h3>外部來源（A1 web research, accessed 2026-05-23）</h3>
+    <ol>
+      <li><a href="https://github.com/HKU-BAL/ClairS">ClairS GitHub <code>shared/param.py</code></a> — <code>flankingBaseNum = 16</code>, 18 pileup channels, no MM/ML</li>
+      <li><a href="https://github.com/HKU-BAL/ClairS-TO">ClairS-TO GitHub <code>shared/param.py</code></a> — 相同設定，ssrs vs ss 視窗完全相同</li>
+      <li><a href="https://www.biorxiv.org/content/10.1101/2023.08.17.553778v1">ClairS bioRxiv 10.1101/2023.08.17.553778v1</a></li>
+      <li><a href="https://doi.org/10.1038/s41467-025-64547-z">ClairS-TO Nature Communications 2025 (Chen et al.)</a></li>
+      <li><a href="https://github.com/twolinin/longphase/releases">LongPhase-S = `twolinin/longphase` mainline GitHub releases</a> — <strong>v1.7.3 download URL: `https://github.com/twolinin/longphase/releases/download/v1.7.3/longphase_linux-x64.tar.xz`</strong>（per 5/23 user `cat README.md` 揭示）</li>
+    </ol>
+
+    <h3>關鍵 source 證據</h3>
+    <ul>
+      <li><strong>HP enum source</strong>：<code>src/haplotag/HaplotagType.h:97-108</code>（mainline v1.7.3 內建，HP1_1=5 / H2_1=7）</li>
+      <li><strong>ISM core C++</strong>：<code>InterSubMod/src/core/MatrixBuilder.cpp</code> / <code>DistanceMatrix.cpp</code> / <code>SignificanceAnalyzer.cpp</code></li>
+      <li><strong>BAM @PG line</strong>：直接從 <code>samtools view -H /big7_disk/.../HCC1395_Tmode_tagged_ClairS_pileup_v040_woFilter.bam</code> 揭示</li>
+      <li><strong>本地 longphase-s/README.md 引用 URL</strong>（5/23 user `cat README.md`）→ 證實本地 longphase-s = mainline v1.7.3 clone，非 fork</li>
+      <li><strong>Truth set</strong>：SEQC2 <code>high-confidence_sSNV_in_HC_regions_v1.2.1.vcf</code>（chr1 3,440 + chr8 2,605 + chr19 874 = 6,919 PASS-only TP）</li>
+      <li><strong>SEQC2 CNV/LOH BED</strong>：<code>ngs_benchmark_cnvs_gain_loss_loh.bed</code>（660 segments：307 gain / 320 loh / 33 loss；無 chrX/Y/M）</li>
+    </ul>
+
+    <h3>待 HKU 對齊項（從 §4 整理）</h3>
+    <ol>
+      <li>HP1-1-1 / HP1-1-2 / HP1-2-1 linear depth naming schema 是否採納（Q1, Q3）</li>
+      <li>ISM cluster cutoff（CORR? L1? NHD? τ 值）（Q3；實際 enum 無 Cosine 已修正）</li>
+      <li>兩位點外推到 N 位點時的 X 比例上限（Q1c, Q3）</li>
+      <li><code>tumor HP1 vs HP2 read count imbalance</code> 是否能取代 HP-missing 作 LOH 間接指標（Q4，A6 cross-validate）</li>
+      <li>ClairS-TO retraining 是否考慮加 ASM 為獨立 channel（Q2a, Q2b）</li>
+    </ol>
+
+    <!-- ============== PROVENANCE ============== -->
+    <div class="provenance" id="provenance">
+      <div class="pretitle">Provenance · Reproducibility (v6)</div>
+      <dl>
+        <dt>建立日期</dt>     <dd>2026-05-23 (v4) / 2026-05-24 06:00 (v5 patch) / 2026-05-24 07:00 (v6 audit fixes)</dd>
+        <dt>版本</dt>         <dd>v6 (v5 基礎 + T8 evaluator NEEDS_WORK 4 critical fixes: ①LOSO 雙數字 disambiguate −0.00012 HCC1395 / −0.00004 mean ②chr8 LOH 96% chr-level vs 99.1% bin-level 區分 ③DistanceMatrix.cpp:310-345 source-verified 6 metric NHD/L1/L2/CORR/JACCARD/BERNOULLI 取代誤稱 Cosine ④entry count 22→23 (5+6+12) 對齊 §2 table。新 §2.5 T1 HP3 baseline TP rate (chr1=88.14%/chr8=80.41%/chr19=93.67%) [F] direct evidence)</dd>
+        <dt>Git HEAD</dt>     <dd>369e8f97fcc45efacef7b97667b9abfc522a700f (branch: refactor/phase1-safety)</dd>
+        <dt>Latest commit</dt><dd>369e8f9 fix(narrative-frame): V1 review 5 important findings 修補</dd>
+        <dt>樣本</dt>         <dd>HCC1395 (ONT R10.4.1 5 kHz simplex, 5mCG+5hmCG)</dd>
+        <dt>Tagged BAM</dt>   <dd>/big7_disk/liaoyoyo2001/data/bam/HCC1395_Tmode_tagged_ClairS_pileup_v040_woFilter.bam</dd>
+        <dt>Truth set</dt>    <dd>SEQC2 high-confidence_sSNV_in_HC_regions_v1.2.1.vcf + ngs_benchmark_cnvs_gain_loss_loh.bed</dd>
+        <dt>Caller</dt>       <dd>ClairS-TO ssrs v0.4.x</dd>
+        <dt>Phaser</dt>       <dd>LongPhase-S = `twolinin/longphase` mainline v1.7.3 `haplotag --somaticMode`（mainline 內建，非 fork；per 5/23 user `cat /big8_disk/.../longphase-s/README.md` 揭示 v1.7.3 download URL）</dd>
+        <dt>HP enum</dt>      <dd>src/haplotag/HaplotagType.h:97-108 (HP1_1=5 / H2_1=7, mainline v1.7.3 內建)</dd>
+        <dt>BAM index 新建</dt><dd>HCC1395_Tmode_tagged_ClairS_pileup_v040_woFilter.bam.bai (120 MB)</dd>
+        <dt>A2 wall clock</dt><dd>BAM index 9 min + 3 analyses 平行 11 min (A2_1 561s / A2_2 560s / A2_3 687s)</dd>
+        <dt>A6 wall clock</dt><dd>~13 min, 8 workers, H=234.11 p=1.41e-48</dd>
+        <dt>A7 wall clock</dt><dd>508 s (~8.5 min), 6,861 PS blocks, global N50 943 kb</dd>
+        <dt>A8 wall clock</dt><dd>569 s (~9.5 min), 12 workers, 24 chr</dd>
+        <dt>A3/v4 figures</dt><dd>matplotlib 3.6.2 + Droid Sans Fallback, DPI=150; v4 加 F2v2/F3v2/F4v2/F7</dd>
+        <dt>Design check</dt> <dd>12 條 design principles checklist 通過（Tufte / CRAP / Assertion-Evidence / 5-sec test / colorblind / WCAG）</dd>
+      </dl>
+
+      <div class="credit">
+        <strong>產生方式（v4）</strong>：本報告由 Claude Code multi-agent pipeline 產生 — A1 researcher（ClairS source 驗證 + Q4 v4 rewrite）+ A2 parallel-analysis（pysam findings）+ A6/A7/A8 stratification analyses + A3/v4 figure-gen（concept PNG）+ B 主軸索引 v2 + C 整理 v2 + HTML v2 組裝。所有數字經 source verification（A1 GitHub source code / A2 pysam direct scan / @PG line + README.md / A6 KW + Bonferroni / A7 PS-block scan / A8 24-chr binning）；無編造數值。<br><br>
+        <strong>設計規範</strong>：per <code>InterSubMod/.claude/skills/html-report-build/references/design_principles.md</code> 12 條 checklist — Tufte data-ink ratio / CRAP (Contrast, Repetition, Alignment, Proximity) / Assertion-Evidence / 5 秒測試 / Colorblind-safe / WCAG AA contrast 通過。<br><br>
+        <strong>CJK 字型 fallback chain</strong>：per memory <code>feedback_pptx_screenshot_rendering_rules.md</code> — DejaVu/system → PingFang TC → Microsoft JhengHei → Noto Sans CJK TC → Source Han Sans TW → Droid Sans Fallback。
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // Sticky TOC active link highlighting on scroll
+  (function() {
+    const tocLinks = document.querySelectorAll('aside.toc a');
+    const sections = Array.from(tocLinks)
+      .map(a => document.getElementById(a.getAttribute('href').slice(1)))
+      .filter(Boolean);
+
+    function updateActive() {
+      const scrollY = window.scrollY + 100;
+      let current = sections[0];
+      for (const s of sections) {
+        if (s.offsetTop <= scrollY) current = s;
+      }
+      tocLinks.forEach(a => a.classList.remove('active'));
+      if (current) {
+        const activeLink = document.querySelector(`aside.toc a[href="#${current.id}"]`);
+        if (activeLink) activeLink.classList.add('active');
+      }
+    }
+
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateActive();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+    updateActive();
+  })();
+</script>
+
+</body>
+</html>

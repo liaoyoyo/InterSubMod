@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClairS `--haplotagged_tumor_bam_provided` Option — Help Text 與實際行為矛盾分析</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #1a1a1a;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --warn: #d97706;
+    --err: #dc2626;
+    --ok: #16a34a;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --code-bg: #f3f4f6;
+    --code-fg: #1f2937;
+    --tier-l1: #15803d;
+    --tier-l3: #ca8a04;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", Roboto, sans-serif;
+    line-height: 1.65;
+    color: var(--fg);
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  nav.toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 1.5rem 1rem;
+    border-right: 1px solid var(--border);
+    background: var(--card);
+    font-size: 0.875rem;
+  }
+  nav.toc h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 0.5rem 0;
+    letter-spacing: 0.05em;
+  }
+  nav.toc ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  nav.toc li {
+    margin: 0.3rem 0;
+  }
+  nav.toc a {
+    color: var(--fg);
+    text-decoration: none;
+    display: block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    border-left: 2px solid transparent;
+  }
+  nav.toc a:hover {
+    background: var(--code-bg);
+    border-left-color: var(--accent);
+  }
+  main {
+    padding: 2rem 3rem;
+    max-width: 920px;
+  }
+  header.report-header {
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  h1 {
+    font-size: 1.75rem;
+    margin: 0 0 0.5rem 0;
+    color: var(--fg);
+  }
+  .meta {
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 1rem;
+    font-size: 0.875rem;
+    margin-top: 1rem;
+  }
+  .meta-grid dt {
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .meta-grid dd {
+    margin: 0;
+  }
+  h2 {
+    font-size: 1.375rem;
+    margin: 2rem 0 0.75rem 0;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--fg);
+  }
+  h3 {
+    font-size: 1.1rem;
+    margin: 1.5rem 0 0.5rem 0;
+    color: var(--fg);
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .card.warn {
+    border-left: 4px solid var(--warn);
+  }
+  .card.err {
+    border-left: 4px solid var(--err);
+  }
+  .card.ok {
+    border-left: 4px solid var(--ok);
+  }
+  .tier {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+    margin-right: 0.4rem;
+    vertical-align: 0.1em;
+  }
+  .tier-l1 {
+    background: var(--tier-l1);
+    color: white;
+  }
+  .tier-l3 {
+    background: var(--tier-l3);
+    color: white;
+  }
+  code {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.875em;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 0.85rem 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    border-left: 3px solid var(--accent);
+  }
+  pre code {
+    background: transparent;
+    padding: 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--code-bg);
+    font-weight: 600;
+  }
+  details {
+    margin: 0.75rem 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    background: var(--card);
+  }
+  details[open] {
+    background: var(--card);
+  }
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--accent);
+    padding: 0.25rem 0;
+  }
+  summary:hover {
+    color: var(--fg);
+  }
+  .flag {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+  }
+  .flag-bug { background: #fee2e2; color: var(--err); }
+  .flag-ok { background: #dcfce7; color: var(--ok); }
+  .flag-warn { background: #fef3c7; color: var(--warn); }
+  .footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .src-link {
+    color: var(--accent);
+    text-decoration: none;
+    word-break: break-all;
+  }
+  .src-link:hover {
+    text-decoration: underline;
+  }
+  .tldr {
+    background: linear-gradient(to right, #eff6ff 0%, #f0fdf4 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    padding: 1rem 1.25rem;
+    border-radius: 6px;
+    margin: 1.5rem 0;
+  }
+  .tldr h3 {
+    margin-top: 0;
+    color: var(--accent);
+    font-size: 1rem;
+  }
+  .flow-svg {
+    width: 100%;
+    max-width: 800px;
+    display: block;
+    margin: 1rem auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+    main { padding: 1.5rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<nav class="toc">
+  <h3>目錄</h3>
+  <ol>
+    <li><a href="#tldr">TL;DR</a></li>
+    <li><a href="#sec-1">§1 問題陳述</a></li>
+    <li><a href="#sec-2">§2 Background — Option 設計意圖</a></li>
+    <li><a href="#sec-3">§3 Help text 承諾 vs 實際 code</a></li>
+    <li><a href="#sec-4">§4 矛盾的兩段 source code</a></li>
+    <li><a href="#sec-5">§5 下游影響鏈</a></li>
+    <li><a href="#sec-6">§6 三種 BAM 餵法對照</a></li>
+    <li><a href="#sec-7">§7 即使繞過 Layer 1，Layer 2 仍 block</a></li>
+    <li><a href="#sec-8">§8 修正建議</a></li>
+    <li><a href="#sec-9">§9 對 InterSubMod 研究的意涵</a></li>
+    <li><a href="#sec-10">§10 Sources</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="report-header">
+  <h1>ClairS <code>--haplotagged_tumor_bam_provided_so_skip_intermediate_phasing_and_haplotagging</code> Option<br>
+  Help Text 與實際行為矛盾分析</h1>
+  <p class="meta">Bug-like behavior in ClairS pipeline — EXPERIMENTAL option 行為與文件描述不符</p>
+  <dl class="meta-grid">
+    <dt>Date</dt><dd>2026-05-25</dd>
+    <dt>Verified scope</dt><dd>ClairS main HEAD <code>88f887a</code> (2026-04-16) + 最新 stable v0.4.4 (2025-11-18)</dd>
+    <dt>Evidence tier</dt><dd><span class="tier tier-l1">L1</span> Direct source code inspection (GitHub raw fetch)</dd>
+    <dt>Reporter</dt><dd>InterSubMod Research</dd>
+    <dt>Severity</dt><dd><span class="flag flag-warn">MEDIUM</span> Documentation/implementation mismatch — affects user understanding，不影響 default 流程</dd>
+    <dt>Affected releases</dt><dd>所有含此 option 的版本（≥ v0.4.x）</dd>
+  </dl>
+</header>
+
+<div class="tldr" id="tldr">
+  <h3>TL;DR</h3>
+  <p><strong>ClairS 的 <code>--haplotagged_tumor_bam_provided...</code> option 的 help text 承諾「haplotype information will be acquired from haplotagged tumor BAM」，但實際 code 在 line 691 將 <code>phase_tumor=False</code>，導致下游 mpileup 不抽 HP tag。最終行為與 <code>--disable_phasing</code> 等同 — user 提供的 HP tag 完全不會進入 model。</strong></p>
+  <p>對 InterSubMod Phase 2 Cycle 2 計劃的意涵：<strong>不能依賴此 option 把 longphase-s 結果注入 ClairS</strong>，必須走 post-filter framing。</p>
+</div>
+
+<h2 id="sec-1">§1 問題陳述</h2>
+
+<div class="card err">
+  <p><strong><span class="flag flag-bug">BUG-LIKE</span> Argparse help 與 runtime behavior 矛盾</strong></p>
+  <p>ClairS 提供 <code>--haplotagged_tumor_bam_provided_so_skip_intermediate_phasing_and_haplotagging</code> option，文件描述為「使用 user-provided haplotagged BAM，跳過 intermediate phasing，HP info 從 BAM 取得」。但實際程式碼將 <code>phase_tumor</code> flag 設為 <code>False</code>，造成下游 samtools mpileup 不輸出 HP tag，最終 phase channel 全為 untag。</p>
+  <p>結果：<strong>此 option 等同 <code>--disable_phasing</code></strong>，user 提供的 HP tag 完全 invisible to model。</p>
+</div>
+
+<h2 id="sec-2">§2 Background — Option 的設計意圖</h2>
+
+<p>ClairS 預設流程在 STEP 1 之前會跑兩個 pre-phasing step（NVTB mode 預設）：</p>
+
+<ul>
+  <li><strong>Pre-D</strong>: <code>longphase phase</code> — 用 normal Clair3 het SNP + tumor BAM evidence 推 phasing</li>
+  <li><strong>Pre-E</strong>: <code>longphase haplotag</code> — 把 HP:i:1/2 寫入 tumor BAM</li>
+</ul>
+
+<p>這兩個 step 在 ONT 30× tumor BAM 上約耗 30-60 分鐘。當 user 已有 phased BAM（如先前已跑過 LongPhase 或 WhatsHap），重跑是浪費。</p>
+
+<div class="card ok">
+  <p><strong>設計初衷（合理）</strong>：</p>
+  <ol>
+    <li><strong>節省 wall time</strong>：跳過 Pre-D/E 約 30-50% pipeline 時間</li>
+    <li><strong>支援 multi-tool integration</strong>：user 已有 phased BAM 不需重跑</li>
+    <li><strong>靈活性</strong>：對 CI/CD 或 batch pipeline 有用</li>
+  </ol>
+</div>
+
+<h2 id="sec-3">§3 Help text 承諾 vs 實際 code</h2>
+
+<h3>Help text（argparse declaration）</h3>
+
+<pre><code>// run_clairs:1815-1819
+halotagging_group.add_argument(
+    "--haplotagged_tumor_bam_provided_so_skip_intermediate_phasing_and_haplotagging",
+    action='store_true',
+    help="EXPERIMENTAL: Use haplotagged tumor bam as input, If enabled, will skip
+intermediate phasing and haplotagging, and <strong>the haplotype information will be
+acquired from haplotagged tumor BAM</strong>. Default: disabled."
+)</code></pre>
+
+<p>關鍵承諾：「<em>the haplotype information <strong>will be acquired</strong> from haplotagged tumor BAM</em>」</p>
+
+<h3>實際 runtime 行為（line 690-691）</h3>
+
+<pre><code>// run_clairs:690-691
+if args.disable_phasing or args.haplotagged_tumor_bam_provided_so_skip_intermediate_phasing_and_haplotagging:
+    args.phase_tumor = False   # ← 把 phase_tumor 直接設為 False</code></pre>
+
+<div class="card warn">
+  <p><strong>關鍵觀察</strong>：兩個語意完全不同的 option（<code>--disable_phasing</code> = 完全不要 phasing；<code>--haplotagged_tumor_bam_provided...</code> = 已 phase 好直接用）走<strong>完全相同分支</strong>，都把 <code>phase_tumor=False</code>。</p>
+</div>
+
+<h2 id="sec-4">§4 矛盾的兩段 source code（並排比對）</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>檔案:行</th>
+      <th>Code</th>
+      <th>對 HP 訊號的影響</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>argparse</strong></td>
+      <td><code>run_clairs:1815-1819</code></td>
+      <td>help 寫「HP info acquired from BAM」</td>
+      <td>承諾 ✓</td>
+    </tr>
+    <tr>
+      <td><strong>runtime branch</strong></td>
+      <td><code>run_clairs:690-691</code></td>
+      <td><code>phase_tumor = False</code></td>
+      <td>關閉 phase_tumor flag ✗</td>
+    </tr>
+    <tr>
+      <td><strong>BAM 路由</strong></td>
+      <td><code>run_clairs:931-932</code></td>
+      <td><code>tumor_bam_fn = phased_output/... if args.phase_tumor else args.tumor_bam_fn</code></td>
+      <td>用 user-provided BAM 直接傳 ✓<br>（這部分符合 help text）</td>
+    </tr>
+    <tr>
+      <td><strong>mpileup HP flag</strong></td>
+      <td><code>src/create_pair_tensor.py:661</code></td>
+      <td><code>tumor_phasing_option = " --output-extra HP" if phase_tumor else " "</code></td>
+      <td>不加 <code>--output-extra HP</code> → mpileup <strong>不輸出 HP 欄位</strong> ✗</td>
+    </tr>
+    <tr>
+      <td><strong>phase channel build</strong></td>
+      <td><code>src/create_pair_tensor.py</code></td>
+      <td><code>phasing_info_in_bam = args.phase_tumor and args.platform == 'ont'</code></td>
+      <td>False → phase channel 全填 untag (60) ✗</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="sec-5">§5 下游影響鏈（flow diagram）</h2>
+
+<svg class="flow-svg" viewBox="0 0 780 540" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#374151" />
+    </marker>
+    <marker id="arrowred" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#dc2626" />
+    </marker>
+  </defs>
+
+  <!-- User input -->
+  <rect x="20" y="20" width="220" height="50" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="130" y="42" text-anchor="middle" font-size="13" font-weight="600">User 提供 phased BAM</text>
+  <text x="130" y="60" text-anchor="middle" font-size="11" fill="#6b7280">含 HP:i:1/2 (germline tagged)</text>
+
+  <!-- CLI option -->
+  <rect x="280" y="20" width="260" height="50" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="410" y="42" text-anchor="middle" font-size="12" font-weight="600">+ --haplotagged_tumor_bam_provided</text>
+  <text x="410" y="60" text-anchor="middle" font-size="11" fill="#6b7280">EXPERIMENTAL flag enabled</text>
+
+  <!-- Branch -->
+  <rect x="280" y="100" width="260" height="60" rx="6" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <text x="410" y="125" text-anchor="middle" font-size="12" font-weight="600">run_clairs:690-691</text>
+  <text x="410" y="143" text-anchor="middle" font-size="11" font-family="monospace">args.phase_tumor = False</text>
+
+  <line x1="410" y1="70" x2="410" y2="98" stroke="#dc2626" stroke-width="2" marker-end="url(#arrowred)"/>
+
+  <!-- Two parallel consequences -->
+  <rect x="40" y="200" width="320" height="80" rx="6" fill="#fff" stroke="#16a34a" stroke-width="2"/>
+  <text x="200" y="223" text-anchor="middle" font-size="12" font-weight="600">✓ STEP 3 BAM 路由 (line 931-932)</text>
+  <text x="200" y="245" text-anchor="middle" font-size="11" font-family="monospace">tumor_bam_fn = args.tumor_bam_fn</text>
+  <text x="200" y="265" text-anchor="middle" font-size="11" fill="#16a34a">(符合 help text — 用 user BAM)</text>
+
+  <rect x="400" y="200" width="320" height="80" rx="6" fill="#fff" stroke="#dc2626" stroke-width="2"/>
+  <text x="560" y="223" text-anchor="middle" font-size="12" font-weight="600">✗ mpileup HP flag (create_pair_tensor:661)</text>
+  <text x="560" y="245" text-anchor="middle" font-size="11" font-family="monospace">tumor_phasing_option = " "</text>
+  <text x="560" y="265" text-anchor="middle" font-size="11" fill="#dc2626">(矛盾 help text — 不抽 HP)</text>
+
+  <line x1="350" y1="160" x2="200" y2="200" stroke="#374151" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="470" y1="160" x2="560" y2="200" stroke="#dc2626" stroke-width="2" marker-end="url(#arrowred)"/>
+
+  <!-- mpileup output -->
+  <rect x="400" y="320" width="320" height="50" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="560" y="342" text-anchor="middle" font-size="12" font-weight="600">samtools mpileup 不輸出 HP 欄位</text>
+  <text x="560" y="360" text-anchor="middle" font-size="11" fill="#6b7280">user HP tag 無法被 ClairS 讀到</text>
+
+  <line x1="560" y1="280" x2="560" y2="318" stroke="#dc2626" stroke-width="2" marker-end="url(#arrowred)"/>
+
+  <!-- Phase channel -->
+  <rect x="400" y="400" width="320" height="50" rx="6" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <text x="560" y="422" text-anchor="middle" font-size="12" font-weight="600">phase channel 5 全填 untag (60)</text>
+  <text x="560" y="440" text-anchor="middle" font-size="11" fill="#dc2626">等同 --disable_phasing</text>
+
+  <line x1="560" y1="370" x2="560" y2="398" stroke="#dc2626" stroke-width="2" marker-end="url(#arrowred)"/>
+
+  <!-- Final result -->
+  <rect x="200" y="480" width="380" height="50" rx="6" fill="#dc2626" stroke="#991b1b" stroke-width="2"/>
+  <text x="390" y="502" text-anchor="middle" font-size="13" font-weight="600" fill="white">★ Result: User HP tag 完全浪費 ★</text>
+  <text x="390" y="520" text-anchor="middle" font-size="11" fill="white">與 --disable_phasing 行為等同</text>
+
+  <line x1="560" y1="450" x2="500" y2="478" stroke="#dc2626" stroke-width="2" marker-end="url(#arrowred)"/>
+  <line x1="200" y1="280" x2="350" y2="478" stroke="#374151" stroke-width="2" stroke-dasharray="3,3"/>
+</svg>
+
+<details>
+  <summary>展開：每一步驟詳細解釋</summary>
+  <ol>
+    <li><strong>User 提供 phased BAM</strong>：假設 user 已用 LongPhase 跑過 germline phasing，BAM 含 HP:i:1/2 tag</li>
+    <li><strong>啟用 EXPERIMENTAL flag</strong>：CLI 加 <code>--haplotagged_tumor_bam_provided_so_skip_intermediate_phasing_and_haplotagging</code></li>
+    <li><strong>line 690-691 分支</strong>：phase_tumor 被設為 False</li>
+    <li><strong>STEP 3 BAM 路由</strong>（綠色 ✓）：phase_tumor=False → 不切到 phased_output/tumor_*.bam → 直接傳 user-provided BAM（這部分符合 help text）</li>
+    <li><strong>mpileup HP flag</strong>（紅色 ✗）：phase_tumor=False → 不加 --output-extra HP → mpileup 不輸出 HP 欄位</li>
+    <li><strong>結果</strong>：即使 user-provided BAM 有完整 HP tag，ClairS 也讀不到 → phase channel 全填 untag → 等同 disable_phasing</li>
+  </ol>
+</details>
+
+<h2 id="sec-6">§6 三種 BAM 餵法對照</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>輸入 BAM</th>
+      <th>啟用 flag</th>
+      <th>實際 phase 訊號可用？</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>原始 BAM（無 HP）</td>
+      <td>不啟用</td>
+      <td><span class="flag flag-ok">YES</span> ClairS 自己跑 longphase phase + haplotag → HP 進 model</td>
+      <td><strong>預設 path — works as expected</strong></td>
+    </tr>
+    <tr>
+      <td>LongPhase germline tagged BAM (HP:i:1/2)</td>
+      <td>啟用</td>
+      <td><span class="flag flag-bug">NO</span> phase_tumor=False → mpileup 不抽 HP</td>
+      <td>HP 完全浪費 — 行為 = <code>--disable_phasing</code></td>
+    </tr>
+    <tr>
+      <td>LongPhase-S somatic tagged BAM (HP:z:1-1/2-1/3)</td>
+      <td>啟用</td>
+      <td><span class="flag flag-bug">NO</span> 同上 + 字串編碼亦不相容</td>
+      <td>HP 完全浪費 + 即使能讀也會 silently drop</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="sec-7">§7 即使 Layer 1 被繞過，Layer 2 仍 block</h2>
+
+<p>有人可能想 hack：手動強制 <code>--phase_tumor True</code> + <code>--haplotagged_tumor_bam_provided...</code> 同時開啟，繞過 line 691 的 disable。即使這樣，餵 longphase-s tagged BAM 仍會撞 Layer 2 阻礙：</p>
+
+<pre><code>// src/create_pair_tensor_pileup.py
+for b, hap in zip(base_list, phasing_info):
+    if hap in '12' and base in 'ACGTacgt':   # ← Python substring check
+        pileup_tensor[channel_size + base_index[base + "HP" + hap]] += 1</code></pre>
+
+<p>對 longphase-s 寫的 <code>HP:z:</code> 字串 tag，substring check 結果：</p>
+
+<table>
+  <thead>
+    <tr><th>longphase-s tag</th><th>mpileup 輸出</th><th><code>hap in '12'</code></th><th>結果</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>HP:z:1</td><td>"1"</td><td>True</td><td>計入 HP1 ✓</td></tr>
+    <tr><td>HP:z:2</td><td>"2"</td><td>True</td><td>計入 HP2 ✓</td></tr>
+    <tr><td>HP:z:1-1</td><td>"1-1"</td><td><strong>False</strong></td><td>silently dropped ✗</td></tr>
+    <tr><td>HP:z:2-1</td><td>"2-1"</td><td><strong>False</strong></td><td>silently dropped ✗</td></tr>
+    <tr><td>HP:z:3</td><td>"3"</td><td><strong>False</strong></td><td>silently dropped ✗</td></tr>
+  </tbody>
+</table>
+
+<div class="card warn">
+  <p><strong>含義</strong>：longphase-s 的 somatic-aware tag (1-1/2-1/3) <strong>從來不可能</strong>進入 ClairS model — 即使 Layer 1 被 fix，Layer 2 仍 silently drop。要支援 somatic-aware HP 必須改 create_pair_tensor.py 的 parsing 邏輯 + retrain model with extended HAP_TYPE encoding。</p>
+</div>
+
+<h2 id="sec-8">§8 修正建議</h2>
+
+<details open>
+  <summary>建議修正 line 690-691（decoupling fix）</summary>
+  <p>把兩個語意不同的 option 分開：</p>
+  <pre><code>// Proposed fix for run_clairs:690-691
+
+# Original (problematic):
+if args.disable_phasing or args.haplotagged_tumor_bam_provided_so_skip_intermediate_phasing_and_haplotagging:
+    args.phase_tumor = False
+
+# Proposed:
+if args.disable_phasing:
+    args.phase_tumor = False
+elif args.haplotagged_tumor_bam_provided_so_skip_intermediate_phasing_and_haplotagging:
+    # Keep phase_tumor=True so HP info is read from user BAM via mpileup
+    if args.phase_tumor is None:
+        args.phase_tumor = True if args.platform != 'ilmn' else False
+    # But skip the Pre-D/Pre-E longphase steps (separate flag)
+    args.skip_intermediate_phasing_steps = True</code></pre>
+  <p>同時調整 Pre-D/E 條件：</p>
+  <pre><code>// Add condition guard at run_clairs:1064 and 1103
+if not args.skip_intermediate_phasing_steps:
+    echo_list.append("[INFO] Phase the Tumor BAM")
+    ...
+    echo_list.append("[INFO] Haplotag the Tumor BAM")
+    ...</code></pre>
+  <p>這樣才能達到 help text 承諾的「skip intermediate phasing AND acquire HP from user BAM」。</p>
+</details>
+
+<details>
+  <summary>建議：Help text 重寫</summary>
+  <p>若上游不修 code，至少修 help text 反映實際行為：</p>
+  <pre><code>help="EXPERIMENTAL: Skip intermediate phasing and haplotagging steps to save runtime.
+NOTE: This currently also DISABLES HP tag reading from the input BAM (behavior is equivalent to
+--disable_phasing). To use HP tags from a pre-phased BAM, do NOT enable this flag — let ClairS
+run its own haplotag step (which will overwrite existing HP tags). Default: disabled."</code></pre>
+</details>
+
+<details>
+  <summary>建議：上報 HKU-BAL GitHub issue</summary>
+  <p>建議 issue 內容：</p>
+  <blockquote>
+  Title: <code>--haplotagged_tumor_bam_provided_so_skip_intermediate_phasing_and_haplotagging</code> behavior conflicts with help text<br><br>
+  The argparse help (run_clairs:1818) states "the haplotype information will be acquired from haplotagged tumor BAM", but line 690-691 sets <code>phase_tumor=False</code>, which propagates to <code>create_pair_tensor.py:661</code> and disables <code>--output-extra HP</code> in samtools mpileup. As a result, HP tags from the user-provided BAM are never read, and the phase channel is filled with untag values — equivalent to <code>--disable_phasing</code>.<br><br>
+  Suggested fix: decouple "skip intermediate phasing steps" from "disable HP reading" by introducing a separate internal flag, or update the help text to reflect the current behavior.
+  </blockquote>
+</details>
+
+<h2 id="sec-9">§9 對 InterSubMod 研究的意涵</h2>
+
+<table>
+  <thead>
+    <tr><th>影響項</th><th>對策</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>不能用 <code>--haplotagged_tumor_bam_provided...</code> 把 longphase-s 結果注入 ClairS</td>
+      <td>✅ 已確認 — Phase 2 Cycle 2 設計就是 <strong>post-filter framing</strong>，不需動 caller 內部</td>
+    </tr>
+    <tr>
+      <td>不能依賴此 option 跳過 ClairS 內部 phasing 來餵自己的 phase tag</td>
+      <td>✅ 已確認 — 餵 features 進 re-ranker，與 caller 解耦</td>
+    </tr>
+    <tr>
+      <td>此 option 的 EXPERIMENTAL 標記名副其實</td>
+      <td>建議 Cycle 2 documentation 註明此 option 不可信，防止下游研究者誤用</td>
+    </tr>
+    <tr>
+      <td>longphase-s <code>HP:z:1-1/2-1/3</code> 對 ClairS 永遠 invisible（Layer 1 + Layer 2 雙重阻礙）</td>
+      <td>✅ 強化 <strong>post-filter only</strong> 結論 — 你可以從 tagged BAM <strong>自己 parse</strong> HP:z 統計作 re-ranker feature，不需 ClairS 解析</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="sec-10">§10 Sources（main HEAD <code>88f887a</code>，2026-05-25 查驗）</h2>
+
+<ul>
+  <li><span class="tier tier-l1">L1</span> ClairS argparse declaration:
+    <a class="src-link" href="https://github.com/HKU-BAL/ClairS/blob/main/run_clairs">run_clairs:1815-1819</a></li>
+  <li><span class="tier tier-l1">L1</span> ClairS runtime branch:
+    <a class="src-link" href="https://github.com/HKU-BAL/ClairS/blob/main/run_clairs">run_clairs:690-691</a></li>
+  <li><span class="tier tier-l1">L1</span> ClairS STEP 3 BAM routing:
+    <a class="src-link" href="https://github.com/HKU-BAL/ClairS/blob/main/run_clairs">run_clairs:931-932</a></li>
+  <li><span class="tier tier-l1">L1</span> ClairS mpileup HP flag:
+    <a class="src-link" href="https://github.com/HKU-BAL/ClairS/blob/main/src/create_pair_tensor.py">src/create_pair_tensor.py:661</a></li>
+  <li><span class="tier tier-l1">L1</span> ClairS substring check:
+    <a class="src-link" href="https://github.com/HKU-BAL/ClairS/blob/main/src/create_pair_tensor_pileup.py">src/create_pair_tensor_pileup.py</a></li>
+  <li><span class="tier tier-l1">L1</span> ClairS shared param:
+    <a class="src-link" href="https://github.com/HKU-BAL/ClairS/blob/main/shared/param.py">shared/param.py:63-79</a></li>
+  <li><span class="tier tier-l1">L1</span> longphase-s HP:z write:
+    <a class="src-link" href="https://github.com/CCU-Bioinformatics-Lab/longphase-s/blob/main/src/somatic_haplotag/SomaticHaplotagProcess.cpp">SomaticHaplotagProcess.cpp:533</a></li>
+  <li><span class="tier tier-l3">L3</span> Design intent reasoning（推測，非官方說明）— 來自本文 §2 設計初衷分析</li>
+  <li>InterSubMod 對應計劃文件:
+    <a class="src-link" href="../20260524_ClairS_caller_augmentation_research_plan_01.md">InterSubMod/docs/concepts/2026/05/20260524_ClairS_caller_augmentation_research_plan_01.md</a></li>
+</ul>
+
+<div class="footer">
+  <p><strong>Provenance</strong>: Generated by Claude Code (Opus 4.7) consolidation of 14-round conversation on 2026-05-23 ~ 2026-05-25 (session: "確認 ClairS 細節"). All source code claims verified via <code>gh api repos/HKU-BAL/ClairS/contents/...</code> direct fetch. KB references: <code>/big8_disk/liaoyoyo2001/Knowledge/05_tools/longphase-s.md</code> (last_verified 2026-04-17).</p>
+  <p><strong>Drift triggers</strong>: ClairS 新版本發布（v0.4.5+ → 需重 verify line 690-691）、longphase-s schema 變更、ISM Phase 2 Cycle 2 結束（更新對策）。</p>
+  <p><strong>Companion</strong>: 對應 markdown 計劃文件見 <code>InterSubMod/docs/concepts/2026/05/20260524_ClairS_caller_augmentation_research_plan_01.md</code></p>
+</div>
+
+</main>
+
+</div>
+
+</body>
+</html>
