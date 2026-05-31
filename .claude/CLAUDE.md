@@ -108,7 +108,7 @@
 
 ## §4 Hooks 概覽（Claude Code 特定 — 2026-05-18 P4 完整收尾）
 
-依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop / **PreCompact** 7 個 events；**38 hook scripts**，2026-05-30 實測 `ls scripts/hooks/*.sh | wc -l`）。
+依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop / **PreCompact** 7 個 events；**39 hook scripts**，2026-06-01 實測 `ls scripts/hooks/*.sh | wc -l`；2026-06-01 +`number_provenance_check.sh`）。
 
 **2026-05-28~30 新增 4 個 hook**（社群 gap + 搜尋紀律）:
 - `search_scope_guard.sh`（PreToolUse Bash — **exit 2 阻擋** `grep -r .` / `find .` 無 maxdepth / `du */` 等不尊重 .gitignore 的 repo-root 遞迴搜尋；§12 搜尋紀律強制層）
@@ -116,13 +116,17 @@
 - `creation_guard.sh`（PreToolUse Write — 新建 SKILL.md/agent 前 dedup + 計數同步提醒；防 §3 計數 drift；gap G5）
 - `skill_registry_sync.sh`（PostToolUse Edit|Write — 編輯 README/CLAUDE.md 時比對「磁碟實際 skill/agent 計數 vs 文件宣稱最大數」，雙向 drift 守衛；2026-05-30 gap G5 補完）
 
-**Hard Gate hooks**（不可繞過 — 真 `exit 2` 阻擋；2026-05-31 audit 校正 = **4 個**，外加 search/tier 兩個 exit-2）:
+**2026-06-01 新增 1 個 hook**（數據捏造防呆 — 落地 `20260601_fabricated_metric_in_html_preview_postmortem` A4/A5/A7）:
+- `number_provenance_check.sh`（PreToolUse Edit|Write `*.md`/`*.html` — **分級 anti-fabrication gate**：抽報告內「metric 形數字」(`AUC=` `p=` `%` `Δ` `≥2 位小數`)，逐一去 bounded 來源（frontmatter `data_sources:` / 同層 `_assets/` / 同目錄 `.json|.tsv|.txt|.csv`）grep；**validated/pi_reports 路徑找不到來源 → exit 2 阻擋**；其他路徑 → advisory exit 0 提醒。fail-OPEN（python 缺/解析錯 → exit 0，絕不擋所有 Write — 與 neutering bug 本質不同）。override：內文含 `<!-- provenance-verified: 理由 -->`。三層防線見 §13。)
+
+**Hard Gate hooks**（不可繞過 — 真 `exit 2` 阻擋；2026-06-01 audit = **4 核心** + search/tier/number-provenance 三個條件式 exit-2）:
 - `pre_commit_compile_check.sh`（C++ commit 必編譯）
 - `kb_schema_check.sh`（KB 寫入前 schema 檢核）
 - `pipeline_block_check.sh`（長 pipeline 磁碟檢核）
 - `no_binary_commit.sh`（commit binary 阻擋）
 - `search_scope_guard.sh`（exit 2 阻擋 repo-root 遞迴搜尋；§12，亦 exit-2 但屬搜尋紀律類）
 - `pre_tier_upgrade_check.sh`（**2026-05-31 wired** — Edit/Write `state/cycles/*/state.json` 含 ⭐4/5 tier 但無 `evaluation.json`(verdict=approve_tier) 或 override 註解 → exit 2；INDEX/CURRENT_FOCUS 散文路徑降 advisory 不擋。研究誠信 gate）
+- `number_provenance_check.sh`（**2026-06-01 wired** — validated/pi_reports 報告含無來源 metric → exit 2；in_progress → advisory。數據誠信 gate，見上 + §13）
 
 > ⚠ **2026-05-31 校正 + 修復**：
 > - `kb_sot_guard.sh`（F1 SoT）與 `verify_gate.sh`（evidence gate）**本就是 advisory**（全 `exit 0` / 自宣告 SOFT），非 exit-2；文件曾誤列為 Hard Gate。
@@ -304,3 +308,24 @@ UserPromptSubmit hook `narrative_frame_advisor.sh` 偵測：
 5. 真要全掃 → 指令加 `ALLOW_FULL_SCAN` 顯式 opt-in。
 
 **強制層**：`search_scope_guard.sh`（PreToolUse Bash，**exit 2 阻擋** `grep -r .` / `find .` 無 maxdepth / `du */`）。
+
+---
+
+## §13 數據誠信 — 三層防捏造（2026-06-01 落地）
+
+> **背景**：2026-06-01 事件 — AI 在報告/HTML 把「預期數字」當真值寫入，分析其實未完成/失敗，方向還相反。postmortem §9 證實**純文字規則失效兩次** → 只有機械防線有效。完整：`InterSubMod/docs/postmortems/20260601_fabricated_metric_in_html_preview_postmortem.md`、memory `feedback_no_fabricated_numbers_in_reports`。
+
+**核心問句**：報告裡每個數字，問「**這個數字現在能在哪個檔案 grep 到？**」grep 不到 = 捏造。
+
+| 層 | 機制 | 何時 | 強弱 |
+|----|------|------|------|
+| **A 由構造防止**（最優先）| `scripts/fill_report.py <template> <data.json> -o <out>`：數字從 data.json 注入，缺 key 直接 refuse 不 render。含 metric 報告**一律 template+data 注入，不手打**（延續 `harness_health.py` 從不捏造的模式）| 所有資料密集 HTML/報告 | ★★★ 物理上無法捏造 |
+| **B 寫入時 gate**（backstop）| `number_provenance_check.sh`（§4）：抽 metric 形數字 → grep bounded 來源。validated/pi → exit 2 擋；其他 → advisory | 手寫不可免時 | ★★ 抓手打捏造 |
+| **C 任務結束溯源表**（紀錄依據）| `python3 scripts/number_provenance.py audit <report> [--sources ...]`：產「metric→檔案:行+狀態」表 | validated / PI / handoff 收尾前 | ★★ 紀錄 + 邊界攔截 |
+
+**鐵則（與模型無關，純文字規則不夠所以有機械層）**：
+1. **序列依賴**：`分析 → 寫檔(.json/.tsv) → Read 讀回 → 才 Write 報告`。**「跑分析」與「寫報告」絕不同批平行**。
+2. **未完成留白**：寫 `{{待填}}` 或整段不寫，**絕不填預期值**。
+3. **聲明來源**：報告 frontmatter 加 `data_sources: <path>,<path>` 讓 B 層 gate 找得到；或數字放同層 `_assets/`。
+4. **override**：數字確實來自他處（如引用另一 validated 報告）→ 內文加 `<!-- provenance-verified: 來源説明 -->`。
+5. **平衡（真實×消耗×錯誤率）**：三層全確定性 grep（flat-rate≈0）；B 只抓 metric 形數字（跳年份/章節號）降假陽性；衍生數字假陰性靠 A 層補。**不裝 LLM-judge 偵測**（EMNLP 2025：對數字/量詞最不準，三軸全輸）。
