@@ -180,7 +180,10 @@
       "Bash(python3 -c ' *)",
       "Bash(zcat /big8_disk/data/HCC1395/SEQC2/high-confidence_sSNV_in_HC_regions_v1.2.1.vcf.gz)",
       "Bash(xargs -n1 basename)",
-      "Bash([ -f \"$CWD/$REL\" ])"
+      "Bash([ -f \"$CWD/$REL\" ])",
+      "Bash(bash scripts/hooks/compile_success_clear.sh)",
+      "Bash(python3 -c \"import json; json.load\\(open\\('.claude/settings.local.json'\\)\\); print\\('VALID'\\)\")",
+      "Bash(python3 scripts/harness_health.py)"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
@@ -305,7 +308,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/pre_commit_compile_check.sh 2>/dev/null || exit 0"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/pre_commit_compile_check.sh 1>&2"
           }
         ]
       },
@@ -314,7 +317,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/kb_schema_check.sh 2>/dev/null || exit 0"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/kb_schema_check.sh 1>&2"
           }
         ]
       },
@@ -369,6 +372,15 @@
           {
             "type": "command",
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/creation_guard.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/pre_tier_upgrade_check.sh"
           }
         ]
       }

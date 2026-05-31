@@ -20,7 +20,7 @@ model: haiku
 | 「測試新假設」「下一輪」 | `/research-loop` | 八步驟研究迴圈 |
 | 「看看現在狀態」「在哪」 | `/research-dashboard` | 一頁式看板 |
 | 「整理週報」「報告」 | `/weekly-report` | 七 Phase 週報流程 |
-| 「有什麼新想法」「brainstorm」 | `/research-ideation` | 假說腦力激盪 |
+| 「有什麼新想法」「brainstorm」 | `/problem-framing-ideation` | 假說腦力激盪（5W1H + gap，收斂 1-3 候選）|
 | 「加入假說」「新假說」 | `/inject-hypothesis` | 注入假說佇列 |
 | 「換方向」「pivot」 | `/pivot-direction` | 切換研究方向 |
 | 「查看歷史」「之前做過什麼」 | `/review-evidence` | 查閱 evidence ledger |

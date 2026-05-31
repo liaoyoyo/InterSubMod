@@ -38,7 +38,10 @@ if not targets:
     print("No transcripts found", file=sys.stderr)
     sys.exit(1)
 
-# Pricing (Opus 4.7 per million tokens, approximation as of 2026-05)
+# Pricing (legacy Opus 4.7 list price per million tokens; kept ONLY to compute the
+# relative cache-vs-no-cache ratio. NOTE: this project runs Opus 4.8 on a FLAT-RATE
+# subscription, so the USD figures below do NOT correspond to real spend (marginal
+# cost ~= 0). The only trustworthy signal from this hook is cache_hit_rate (%).
 PRICING = {"input": 15.0, "cache_read": 1.50, "cache_creation": 18.75, "output": 75.0}
 
 agg = {"files": 0, "turns": 0, "input": 0, "cache_read": 0, "cache_creation": 0, "output": 0, "per_file": []}

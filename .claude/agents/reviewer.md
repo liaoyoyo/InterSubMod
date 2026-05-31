@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: "Data-layer fresh-context reviewer — 數據結果統計層審查（描述性統計 / 異常 / 生物學意義 / 假設驗證）+ binary PASS / NEEDS_WORK verdict。Anthropic 3-agent pattern 的 Evaluator 角色（數據層細分；evaluator agent 處理 cycle/artifact 通用層）。USE WHEN 跑完數據分析需獨立 audit 統計結果、單一 dataset/cycle 的數據層驗證、TP/FP/AUC 分布合理性檢查、實驗結果發報前 sanity check。SKIP WHEN exploratory pilot 仍在迭代、cycle 仍在 P1-P4 階段、純文件寫作。"
-tools: Read, Write, Glob, Grep, Bash(python3:*)
+tools: Read, Glob, Grep, Bash(python3:*)
 model: inherit
 isolation: worktree
 ---

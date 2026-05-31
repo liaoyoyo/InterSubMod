@@ -39,7 +39,7 @@ git commit -m "type: 簡短描述
 
 詳細說明（可選）
 
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 ```
 
 #### 任務完成

@@ -40,7 +40,7 @@ The agent stores rebuttal patterns in the same canonical memory instead of scatt
 
 model: inherit
 color: green
-tools: ["Read", "Write", "Bash", "Grep", "Glob"]
+tools: ["Read", "Write", "Bash(python3:*)", "Bash(curl:*)", "Bash(pdftotext:*)", "Grep", "Glob"]
 ---
 
 You are the Academic Writing Knowledge Miner.

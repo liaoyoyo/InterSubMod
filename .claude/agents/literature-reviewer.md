@@ -1,6 +1,6 @@
 ---
 name: literature-reviewer
-description: Literature review specialist with Zotero MCP integration. USE WHEN user asks to "conduct literature review", "search for papers", "analyze research papers", "identify research gaps", "review related work", or mentions starting a new research project. SKIP WHEN local Knowledge/ already covers the topic, when user only needs a single paper analysis (use paper-miner), when no Zotero MCP is configured. Examples:
+description: "[DEPRECATED 2026-05-31 — depends on zotero MCP which is NOT in this project's configured MCP set (knowledge/biorxiv/ensembl only); every mcp__zotero__* call would InputValidationError. DO NOT dispatch. Route instead: single paper → paper-miner; broad web/GitHub survey → researcher; local KB → knowledge MCP via main agent. Re-enable only after a zotero MCP server is added to settings.local.json enabledMcpjsonServers.] Literature review specialist with Zotero MCP integration. USE WHEN (only if zotero MCP configured) conduct literature review / search for papers / identify research gaps / review related work. SKIP WHEN no Zotero MCP configured (current state — always skip), local Knowledge/ covers the topic, or single paper (use paper-miner). Examples:"
 
 <example>
 Context: User wants to start a new research project

@@ -3,6 +3,7 @@ name: headless-research
 description: "無人值守研究代理。長時間自動執行研究迴圈，所有決策使用預設選項，完成後更新 CURRENT_FOCUS.md。適用夜間/離線運算。USE WHEN 用戶說「夜間跑」「自動研究」「headless」「跑到底」、4hr 內可完成的 pilot 集、queue 已有 ≥3 pending 假說。SKIP WHEN 互動 debug、Tier 3 變動（C++ 改動）、白天即時工作、queue 空。"
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: inherit
+isolation: worktree
 ---
 
 # Headless Research Agent

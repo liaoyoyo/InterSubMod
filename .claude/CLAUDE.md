@@ -76,16 +76,17 @@
 
 ---
 
-## §3 Skills 分類索引（45 個 SKILL.md，Claude Code 特定 — 2026-05-30 drift 再校正）
+## §3 Skills 分類索引（46 個 SKILL.md，Claude Code 特定 — 2026-05-31 drift 再校正）
 
 > **drift 修正紀錄**：
 > - 2026-05-20：原寫 45 → 一度改 44（誤判 `grill-me/` 為 phantom +1）。
 > - **2026-05-30 實測校正**：`find .claude/skills -name SKILL.md | wc -l` = **45**；46（含 deprecated html-preview）→ git rm `/html-preview` 後 = 45 全 active。校正機制：`creation_guard.sh`（Write 新 SKILL.md 提醒）+ `skill_registry_sync.sh`（編 README/CLAUDE.md 時比對磁碟實際計數）。
 > - **2026-05-30 清理**：`grill-me` 曾是 dangling symlink（→ `../../.agents/skills/grill-me`，target 不存在），**已 `git rm` 移除**。現 `find -maxdepth 1 -type d` 與 `find -name SKILL.md` 一致 = 45（無 orphan symlink）。
 > - 新增 12 個未分類 skills 進對應類別（2026-05-20）。
+> - **2026-05-31**：新增 `/harness-health`（元方法論 9→10）→ 45→**46**。磁碟現有 **2** 個 Dynamic Workflow（`cross_sample_benchmark.js` + 新增 `harness_audit_2026.js`；§8 未硬編碼計數，故無數字需改）。`harness_health.py` 燈 #1 持續監看此計數 drift。
 > **重複交叉位置**：`/feature-layered-observation`（P3 + 研究專用）/ `/multi-sample-consistency`（P4 + 研究專用）/ `/pre-decision-audit`（元方法論 + 三層樓 pre）/ `/run-evaluator`（P5 + 三層樓 post）— 在多分類列出表示同 skill 多角色。
 
-- **元方法論（9）**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor` `/pre-decision-audit` ⭐ 新 `/problem-framing-ideation` `/provenance-tier-audit`
+- **元方法論（10）**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor` `/pre-decision-audit` `/problem-framing-ideation` `/provenance-tier-audit` `/harness-health` ⭐ 新（2026-05-31；harness 自我稽核 6 燈儀表板，read-only `scripts/harness_health.py`）
 - **7-Phase Waterfall（7）**: P0 `/cycle-init` → P1 `/research-loop` → P2 `/check-staleness` → P3 `/feature-layered-observation` → P4 `/multi-sample-consistency` → P5 `/run-evaluator` → P6 `/conclude-research`
 - **程式開發（4）**: `/cpp-change` `/methodology-audit` `/infra-ops` `/verification-loop`
 - **文件管理（5）**: `/doc-standards` `/data-audit` `/memory-consolidation` `/citation-verification` `/pipeline-manifest` ⭐ 新（reproducibility provenance DAG；與 data-audit 分工：data-audit 查組織、pipeline-manifest 查 script→figure 因果鏈）
@@ -115,12 +116,19 @@
 - `creation_guard.sh`（PreToolUse Write — 新建 SKILL.md/agent 前 dedup + 計數同步提醒；防 §3 計數 drift；gap G5）
 - `skill_registry_sync.sh`（PostToolUse Edit|Write — 編輯 README/CLAUDE.md 時比對「磁碟實際 skill/agent 計數 vs 文件宣稱最大數」，雙向 drift 守衛；2026-05-30 gap G5 補完）
 
-**Hard Gate hooks**（不可繞過 — `exit 2` 阻擋）:
+**Hard Gate hooks**（不可繞過 — 真 `exit 2` 阻擋；2026-05-31 audit 校正 = **4 個**，外加 search/tier 兩個 exit-2）:
 - `pre_commit_compile_check.sh`（C++ commit 必編譯）
 - `kb_schema_check.sh`（KB 寫入前 schema 檢核）
 - `pipeline_block_check.sh`（長 pipeline 磁碟檢核）
 - `no_binary_commit.sh`（commit binary 阻擋）
-- `kb_sot_guard.sh`（F1 SoT 數字保護）
+- `search_scope_guard.sh`（exit 2 阻擋 repo-root 遞迴搜尋；§12，亦 exit-2 但屬搜尋紀律類）
+- `pre_tier_upgrade_check.sh`（**2026-05-31 wired** — Edit/Write `state/cycles/*/state.json` 含 ⭐4/5 tier 但無 `evaluation.json`(verdict=approve_tier) 或 override 註解 → exit 2；INDEX/CURRENT_FOCUS 散文路徑降 advisory 不擋。研究誠信 gate）
+
+> ⚠ **2026-05-31 校正 + 修復**：
+> - `kb_sot_guard.sh`（F1 SoT）與 `verify_gate.sh`（evidence gate）**本就是 advisory**（全 `exit 0` / 自宣告 SOFT），非 exit-2；文件曾誤列為 Hard Gate。
+> - 🔴 **修復 neutering bug**：`pre_commit_compile_check` + `kb_schema_check` 的 settings wiring 先前是 `2>/dev/null || exit 0` → `|| exit 0` 把 script 的 `exit 2` 吃成 `exit 0` → **兩個 Hard Gate 實際從不阻擋**（C++ compile gate de-facto 失效一段時間）。已移除 mask（改 `1>&2` 讓阻擋原因 surface）。
+> - 🔴 **修復 lifecycle bug**：`compile_success_clear.sh` 讀錯欄位 `.tool_result.exit_code`（應 `.tool_response`）→ jq 永遠 fallback `"1"` → marker 從不被清 → 自 2026-05-10 累積 32-檔 stale marker。已改 `.tool_response` + 多重 success 訊號 cascade + 清掉 stale marker。
+> - 磁碟實況（修復後）= **6 個真 exit-2**：pre_commit_compile_check / kb_schema_check / pipeline_block_check / no_binary_commit（4 核心）+ search_scope_guard + pre_tier_upgrade_check。`/harness-health` 燈 #2 永久監看 neutering 復發。
 
 **已落地 hooks**（2026-05-18 P0-P4 新增 11 個）:
 - `session_start_inject_focus.sh` ✅（SessionStart CURRENT_FOCUS 注入，commit ee648fb）
@@ -206,7 +214,7 @@
 | 條件 | 用什麼 | 理由 |
 |------|--------|------|
 | **大規模 fan-out + 無資料依賴 + 終態明確**（跨 7 樣本 benchmark / 文獻 cross-check / NO-GO 前多角度 stress-test）| **Dynamic Workflow**（prompt 含 `workflow` keyword 觸發 / 存 `.claude/workflows/`）| plan 從 context 移到 script、resumable、adversarial 內建 |
-| **含 Hard Gate**（C++ commit 必編譯 / 刪檔 / NO-GO 判定 / evidence_ledger 覆寫）| **維持主 agent 編排，絕不包進 workflow** | ⚠ workflow subagent 一律 acceptEdits、**繞過 exit-2 hook**（pre_commit_compile_check / kb_sot_guard）、無 mid-run 暫停 |
+| **含 Hard Gate**（C++ commit 必編譯 / 刪檔 / NO-GO 判定 / evidence_ledger 覆寫）| **維持主 agent 編排，絕不包進 workflow** | ⚠ workflow subagent 一律 acceptEdits、**繞過 exit-2 hook**（pre_commit_compile_check / kb_schema_check / pre_tier_upgrade_check）、無 mid-run 暫停 |
 | **互動探索 / 需中間結果決定下一步** | 主回合 or 既有 sub-agent | workflow 無 mid-run user input |
 | **單樣本 pilot / 5 分鐘小活** | 主回合直接做 | workflow 10× token，殺雞用牛刀 |
 

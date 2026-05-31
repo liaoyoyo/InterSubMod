@@ -23,6 +23,20 @@ set -u
 REPO_ROOT="/big7_disk/liaoyoyo2001/InterSubMod"
 AUDIT_LOG="${REPO_ROOT}/state/invalidation/tier_overrides.jsonl"
 
+# gate_exit: hard-block (exit 2) ONLY for the structured authoritative path
+# (state/cycles/*/state.json). For prose docs (INDEX.md / CURRENT_FOCUS.md) the
+# ⭐4/⭐5 marker fires constantly in narrative ("⭐4 需 COLO829"), so blocking there
+# would be a false-positive nightmare — degrade to ADVISORY (exit 0 + warning).
+# Cross-artifact tier consistency on prose docs is covered by /provenance-tier-audit.
+gate_exit() {
+    if [ "${WATCH_KIND:-}" = "state_json" ]; then
+        exit 2
+    fi
+    echo "  ↑ ADVISORY only (prose doc); the ENFORCED exit-2 gate is on state/cycles/*/state.json." >&2
+    echo "    For INDEX.md / CURRENT_FOCUS.md tier consistency, run /provenance-tier-audit." >&2
+    exit 0
+}
+
 INPUT=$(cat)
 
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
@@ -101,7 +115,7 @@ if [ -n "$CYCLE_ID" ]; then
             echo "  retraction_risk: ${RISK}" >&2
             echo "  Required: re-run /run-evaluator after addressing low components, OR add override:" >&2
             echo "  <!-- tier-upgrade-override: <reason ≤300 chars> -->" >&2
-            exit 2
+            gate_exit
         fi
     fi
 
@@ -110,7 +124,7 @@ if [ -n "$CYCLE_ID" ]; then
     echo "  Run: /run-evaluator ${CYCLE_ID}" >&2
     echo "  OR add explicit override:" >&2
     echo "  <!-- tier-upgrade-override: <reason ≤300 chars> -->" >&2
-    exit 2
+    gate_exit
 fi
 
 # Could not resolve cycle_id (e.g. INDEX.md upgrade row without recognizable id)
@@ -118,4 +132,4 @@ echo "[TierUpgradeHook] BLOCKED: tier ⭐4-5 marker detected in ${FILE_PATH} but
 echo "  Either include the cycle_id (YYYYMMDD-HHMM-slug) near the tier change," >&2
 echo "  OR add explicit override:" >&2
 echo "  <!-- tier-upgrade-override: <reason; legacy entries pre-dating harness need this> -->" >&2
-exit 2
+gate_exit
