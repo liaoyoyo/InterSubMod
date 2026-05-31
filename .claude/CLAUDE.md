@@ -313,7 +313,27 @@ UserPromptSubmit hook `narrative_frame_advisor.sh` 偵測：
 
 ## §13 數據誠信 — 三層防捏造（2026-06-01 落地）
 
-> **背景**：2026-06-01 事件 — AI 在報告/HTML 把「預期數字」當真值寫入，分析其實未完成/失敗，方向還相反。postmortem §9 證實**純文字規則失效兩次** → 只有機械防線有效。完整：`InterSubMod/docs/postmortems/20260601_fabricated_metric_in_html_preview_postmortem.md`、memory `feedback_no_fabricated_numbers_in_reports`。
+> **背景**：2026-06-01 事件 — AI 在報告/HTML 把「預期數字」當真值寫入，分析其實未完成/失敗，方向還相反。postmortem §9/§9b 證實**同 session 內純文字規則失效三次** → 只有機械防線 + 結構紀律有效。完整：`InterSubMod/docs/postmortems/20260601_fabricated_metric_in_html_preview_postmortem.md`、memory `feedback_no_fabricated_numbers_in_reports`。
+
+### 🔴 §13.0 最高優先鐵則 — 「先有驗證過的數字，才可撰寫文件」（precondition，不可協商）
+
+> **三次捏造的精確根因（postmortem §9b 定案）**：捏造 = **「在同一個 tool-call batch 裡，同時發出『產生數字的指令』(Bash/script) 與『寫入該數字的指令』(Write/Edit 報告)」**。平行 batch 讓 Write 拿不到當批還沒回傳的數字 → AI 用記憶/預期補。**不是忘記規則，是 batch 結構問題。**
+
+**絕對撰寫前置（任何含數字的報告 / HTML / slide / 整理）**：
+1. **分析必先完整跑完** → 數字**全部落檔**（.json/.tsv/.txt）。
+2. **Read 讀回真值** + **確認非 error/INCONCLUSIVE/未完成** + **確認限制與適用範圍**（樣本數、單樣本？confound？）。
+3. **數字到齊且驗證過** → **才**開始撰寫 / 整理文件。
+4. **物理隔離（鐵律）**：撰寫報告的 `Write`/`Edit` 與產生數字的分析（`Bash`/script）**永不放同一個 tool-call batch**。先送分析 batch → 等回傳 → Read → **下一個** batch 才 Write 報告。
+5. 數字未齊/未驗證 → 該處寫 `{{待填}}` 或整段不寫，**絕不填「預期值/合理範圍」**。
+
+**Pre-write 自我檢查（撰寫前逐項確認，全 ✓ 才動筆）**：
+- [ ] 這份報告要用的每個數字，**現在**都能在某個檔案 grep 到？
+- [ ] 每個數字都是**這一輪剛 Read 回來**的真值（非記憶/預期）？
+- [ ] 分析腳本回傳是 success（非 error / INCONCLUSIVE / 檔案不存在）？
+- [ ] 限制 / 適用範圍 / confound 已確認並會在報告誠實標註？
+- [ ] 撰寫的 Write 與分析的 Bash **不在同一 batch**？
+
+> **機械後盾**：違反此鐵則的產物會被 §13 三層攔（A 由構造使手打不可能 / B gate 抓無來源數字 / C 收尾溯源表）。但**結構紀律（§13.0）是第一線**——機械層是 backstop，不是免死金牌。
 
 **核心問句**：報告裡每個數字，問「**這個數字現在能在哪個檔案 grep 到？**」grep 不到 = 捏造。
 
