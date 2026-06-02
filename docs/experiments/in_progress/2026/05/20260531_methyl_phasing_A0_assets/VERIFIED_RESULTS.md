@@ -106,6 +106,36 @@ null median 0.974 **高得可疑**，與文獻「somatic ASM Δβ≈0.12 偏弱�
 - 能否救 unphase：**仍未證** — (a) CpG-SNP 未排除（最大嫌疑）(b) null 區是 anchor 充足篩出（40/111），unphase read 住在稀疏區，外推未證 (c) 仍 2/40 無訊號。
 - 下一步：CpG-SNP 排除 → 若 95% 撐住，才是穩固「甲基帶真 ASM 訊號」。
 
+## V7. LOH 純-LOH 分得開異常 — 定性（VAF + 邊界 + KB 口徑）
+
+- **問題**：前輪 76% 分得開的 LOH 是 pureLOH（非 cnLOH+gain），「純 LOH 該分不開卻分得開」是異常，需定性。
+- **腳本**：`loh_characterize.py`（43 LOH 區量 het VAF / 邊界距離 / HP 平衡 / GMM）→ `loh_characterize.json`；tumor VAF 抽查 `tumor_vaf_check.txt`
+- **KB 確認**（outside-claim 必查 KB，hcc1395.md:61）：SEQC2 LOH 定義 = **「CN=2 但失去 heterozygosity」= cnLOH**，覆蓋 1490.4 Mb（~半基因組，Masood 2024）。
+- **germline VCF 來源**（config 確認）：`clair3_normal_output`（**normal HCC1395BL** call）。normal 是正常細胞 → 全基因組雜合 → germline het VAF~0.5 在任何區（含腫瘤 cnLOH 區）都正常。
+
+- **真值**（直接 copy 自 loh_characterize.json + tumor_vaf_check.txt）：
+
+| 指標（43 LOH 區 median）| 分得開 (n=27) | 分不開 (n=16) | 解讀 |
+|---|---|---|---|
+| germline het VAF | 0.466 | 0.502 | **兩者都 ~0.5（都平衡雜合）** |
+| het SNP 數 | 8 | 5 | 分得開的 het 略多 |
+| 到 LOH 邊界距離 | 1.87 Mb | 0.68 Mb | 分得開的**更深在 LOH 內部**（非邊界效應）|
+| HP1/HP2 平衡度 | 0.434 | 0.277 | 分得開的 read **更平衡** |
+| GMM 雙峰 | 3.32 | 11.5 | 分不開的雙峰反而更強 |
+
+- **系統驗證**（chr15 全 LOH 區）：SEQC2 LOH 區內 **21,387 germline het SNP，VAF median 0.488**（與非 LOH 區 0.491 幾乎相同）。
+- **個案 tumor 端 VAF**（normal 該位 ~0.49）：chr15:28455307 tumor VAF=**0.492**（仍雜合，無真 cnLOH）/ chr8:87663325 tumor VAF=**0.159**（明顯 allelic imbalance，呼應 HP 96:17）/ chr15:28453731 VAF=0.430。
+
+### V7 結論（核心定性，部分推翻先前猜測）
+1. **「純 LOH 卻分得開」的根本解釋 = germline VCF 是 normal call 的，normal 全基因組雜合**。SEQC2 cnLOH 是**腫瘤事件**，normal 沒有 → germline het 在 cnLOH 區仍 VAF~0.5、仍有兩條 haplotype 可被甲基分開。**異常不在甲基，在「用 normal germline 定相 + SEQC2 用腫瘤 cnLOH 口徑」的層級錯配**。
+2. **個案分兩型**（tumor VAF 驗證）：(a) chr15 型 = tumor 也 VAF~0.5 → 該區腫瘤**沒有真 cnLOH**（SEQC2 標記與 ONT 不符 / 低純度 / subclonal）；(b) chr8 型 = tumor VAF 0.159 偏移 → 真有 allelic imbalance（部分 cnLOH），甲基分的是真實的偏移兩群。
+3. **方法學含義**：甲基「在 SEQC2 LOH 區分得開」**不矛盾**——因為 phasing 用 normal germline（該區仍雜合）。甲基救援在 LOH 區仍可運作，但「救的是 normal-defined haplotype」，與腫瘤 cnLOH 狀態正交。
+
+### V7 caveat / 待驗
+- tumor VAF 僅抽 3 loci；系統化需全 LOH 區 tumor VAF 分布。
+- chr15 型「SEQC2 標 LOH 但 tumor 仍雜合」需 SEQC2 原始 segment 信心分 + 純度校正確認。
+- 單樣本 HCC1395。
+
 ## V6. ⭐⭐ 外推驗證（最後一哩）— PS-block held-out 救援模擬，全基因組
 
 - **問題**：前所有 anchor AUC 用「有 germline 證據的 read」自證；unphase read 無 ground truth，「甲基分 anchor」→「救 unphase」是外推未證。

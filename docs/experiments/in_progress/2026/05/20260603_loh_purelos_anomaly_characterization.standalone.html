@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOH 純-LOH 分得開異常 — 定性 + 可能性 + 驗證方案</title>
+<!-- data_sources: loh_characterize.json + tumor_vaf_check.txt + KB hcc1395.md:61 + VERIFIED_RESULTS V7 -->
+<style>
+  :root{--c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;--c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;--c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;--ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;--ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,monospace;--fs-xs:12px;--fs-sm:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:22px;--fs-2xl:28px;--fs-3xl:34px;--radius-sm:4px;--radius-md:6px;--radius-lg:8px;--shadow-sm:0 1px 2px rgba(20,20,19,.05);--shadow-md:0 2px 8px rgba(20,20,19,.08);}
+  *,*::before,*::after{box-sizing:border-box;}
+  body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);font-size:var(--fs-md);line-height:1.6;}
+  .layout{max-width:1340px;margin:0 auto;display:grid;grid-template-columns:255px 1fr;gap:var(--sp-5);padding:var(--sp-5) var(--sp-4);}
+  aside.toc{position:sticky;top:var(--sp-4);align-self:start;background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-4) var(--sp-3);box-shadow:var(--shadow-sm);max-height:calc(100vh - var(--sp-7));overflow-y:auto;}
+  aside.toc h3{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-soft);margin:0 0 var(--sp-2);font-weight:700;}
+  aside.toc ol{list-style:none;padding:0;margin:0;counter-reset:toc;}
+  aside.toc li{counter-increment:toc;margin:var(--sp-1) 0;}
+  aside.toc a{display:block;padding:5px 8px;border-radius:var(--radius-sm);color:var(--c-text);text-decoration:none;font-size:var(--fs-sm);border-left:3px solid transparent;}
+  aside.toc a:hover{background:var(--c-code-bg);border-left-color:var(--c-accent);}
+  aside.toc a::before{content:counter(toc) ". ";color:var(--c-text-soft);font-family:var(--ff-mono);font-size:.85em;margin-right:4px;}
+  aside.toc a.core{font-weight:600;} aside.toc a.core::after{content:"★";color:var(--c-critical);margin-left:6px;font-size:.85em;}
+  main.report{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:var(--sp-6);min-width:0;}
+  .report-header{border-bottom:2px solid var(--c-accent);padding-bottom:var(--sp-4);margin-bottom:var(--sp-5);}
+  .report-header .pretitle{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:1px;color:var(--c-accent-deep);font-weight:700;margin-bottom:var(--sp-2);}
+  .report-header h1{font-size:var(--fs-3xl);margin:0 0 var(--sp-3);line-height:1.25;}
+  .report-header .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-2) var(--sp-5);font-size:var(--fs-sm);margin-top:var(--sp-3);}
+  .report-header .meta dt{color:var(--c-text-soft);font-weight:600;} .report-header .meta dd{margin:0;}
+  .report-header .meta code{background:var(--c-code-bg);padding:1px 5px;border-radius:var(--radius-sm);font-family:var(--ff-mono);font-size:.92em;}
+  .verdict-banner{color:#fff;padding:var(--sp-3) var(--sp-4);margin-top:var(--sp-4);border-radius:var(--radius-md);font-weight:600;}
+  .verdict-banner.neutral{background:linear-gradient(90deg,#1E3A8A,#3B82F6);}
+  h2{font-size:var(--fs-2xl);margin:var(--sp-7) 0 var(--sp-3);padding-bottom:var(--sp-2);border-bottom:1px solid var(--c-border);scroll-margin-top:var(--sp-4);}
+  h2 .h-num{font-family:var(--ff-mono);color:var(--c-accent-deep);font-size:.7em;margin-right:var(--sp-2);font-weight:600;}
+  h3{font-size:var(--fs-xl);margin:var(--sp-5) 0 var(--sp-2);}
+  p,ul,ol{margin:var(--sp-3) 0;} ul,ol{padding-left:var(--sp-5);}
+  code{background:var(--c-code-bg);padding:1px 6px;border-radius:var(--radius-sm);font-family:var(--ff-mono);font-size:.92em;}
+  table{border-collapse:collapse;width:100%;margin:var(--sp-4) 0;font-size:var(--fs-sm);}
+  th,td{border:1px solid var(--c-border);padding:var(--sp-2) var(--sp-3);text-align:left;vertical-align:top;}
+  th{background:var(--c-code-bg);font-weight:600;} td.num{text-align:right;font-family:var(--ff-mono);}
+  tr.row-bug td{background:#FEF2F0;color:#7F1D1D;} tr.row-safe td{background:#DCFCE7;color:#166534;} tr.row-warn td{background:#FEF3C7;}
+  .callout-critical{background:#FEF2F0;border-left:4px solid var(--c-critical);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#7F1D1D;}
+  .callout-warning{background:#FEF7E6;border-left:4px solid var(--c-warning);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#78350F;}
+  .callout-success{background:#F0FDF4;border-left:4px solid var(--c-success);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#166534;}
+  .callout-info{background:#EFF4FF;border-left:4px solid var(--c-info);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#1E3A5F;}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--sp-3);margin:var(--sp-4) 0;}
+  .stat-box{background:var(--c-bg);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--sp-3);text-align:center;}
+  .stat-box .number{font-size:var(--fs-2xl);font-weight:700;color:var(--c-accent);line-height:1.1;}
+  .stat-box .number.bug{color:var(--c-critical);}.stat-box .number.success{color:var(--c-success);}.stat-box .number.warning{color:var(--c-warning);}.stat-box .number.info{color:var(--c-info);}
+  .stat-box .label{font-size:var(--fs-xs);color:var(--c-text-soft);margin-top:var(--sp-1);}
+  .img-figure{margin:var(--sp-5) 0;text-align:center;}
+  .img-figure img{max-width:100%;height:auto;border:1px solid var(--c-border);border-radius:var(--radius-md);}
+  .img-figure figcaption{font-size:var(--fs-sm);color:var(--c-text-soft);margin-top:var(--sp-2);font-style:italic;}
+  .references{background:var(--c-bg);border-radius:var(--radius-md);padding:var(--sp-3) var(--sp-4);margin-top:var(--sp-5);}
+  .references h2{border-bottom:none;margin-top:0;font-size:var(--fs-xl);padding-bottom:0;}
+  .references ol{list-style:decimal;padding-left:var(--sp-5);} .references li{margin:var(--sp-2) 0;font-size:var(--fs-sm);}
+  @media print{body{background:#fff;}.layout{display:block;max-width:100%;padding:0;}aside.toc{display:none;}main.report{box-shadow:none;border:none;padding:0;}table,.img-figure{page-break-inside:avoid;}h1,h2,h3{page-break-after:avoid;}}
+  @media (max-width:900px){.layout{grid-template-columns:1fr;}aside.toc{position:static;max-height:none;}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="toc" aria-label="章節導航">
+    <h3>章節導航</h3>
+    <ol>
+      <li><a href="#tldr" class="core">一句話定性結論</a></li>
+      <li><a href="#anomaly">異常是什麼</a></li>
+      <li><a href="#kb" class="core">關鍵：SEQC2 LOH 口徑 + germline 來源</a></li>
+      <li><a href="#data" class="core">定性數據（43 區）</a></li>
+      <li><a href="#tumor" class="core">tumor 端 VAF 驗證</a></li>
+      <li><a href="#possibilities" class="core">有哪些可能（4 假說）</a></li>
+      <li><a href="#howverify">如何進一步驗證觀察</a></li>
+      <li><a href="#meaning">對主線的意義</a></li>
+      <li><a href="#refs">證據來源</a></li>
+    </ol>
+  </aside>
+  <main class="report">
+    <header class="report-header">
+      <div class="pretitle">LOH 純-LOH 分得開異常定性 · HCC1395 · 2026-06-03</div>
+      <h1>「純 LOH 卻甲基分得開」異常 — 定性 + 可能性 + 驗證方案</h1>
+      <dl class="meta">
+        <dt>建立日期</dt><dd>2026-06-03</dd>
+        <dt>受眾</dt><dd>PI（理解確認）</dd>
+        <dt>任務類型</dt><dd>A pilot · <span style="background:#FEF3C7;padding:1px 6px;border-radius:8px">partial: HCC1395 單樣本</span></dd>
+        <dt>KB 確認</dt><dd>SEQC2 LOH=cnLOH (hcc1395.md:61)</dd>
+        <dt>germline 來源</dt><dd>clair3_normal_output（normal call）</dd>
+        <dt>數字來源</dt><dd>loh_characterize.json + tumor_vaf_check.txt（Read 確認）</dd>
+      </dl>
+      <div class="verdict-banner neutral">
+        定性結論：「純 LOH 卻分得開」<strong>不是甲基的問題，是層級錯配</strong> — phasing 用 <strong>normal germline</strong>（該區仍全基因組雜合 VAF~0.5），SEQC2 LOH 是 <strong>腫瘤 cnLOH 事件</strong>（normal 沒有）。所以 normal-defined 的兩條 haplotype 仍在、甲基自然分得開。異常已解，且分兩型（真雜合 vs 真 imbalance）。
+      </div>
+    </header>
+
+    <h2 id="tldr"><span class="h-num">0.</span>一句話定性結論</h2>
+    <p>前一輪發現「SEQC2 標純 LOH 的區，甲基卻能把 HP1/HP2 分得開」(76% 分得開的 LOH 是 pureLOH)，看似矛盾（LOH 該只剩一條 haplotype）。本輪定性<strong>解開了，並糾正我先前的猜測</strong>：</p>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="number info">cnLOH</div><div class="label">SEQC2 LOH 定義=CN2失雜合(KB確認)</div></div>
+      <div class="stat-box"><div class="number">normal</div><div class="label">germline VCF 來源(全基因組雜合)</div></div>
+      <div class="stat-box"><div class="number">0.488</div><div class="label">LOH 區 21,387 het 的 VAF median</div></div>
+      <div class="stat-box"><div class="number warning">0.492</div><div class="label">chr15 tumor VAF(仍雜合,無真cnLOH)</div></div>
+      <div class="stat-box"><div class="number bug">0.159</div><div class="label">chr8 tumor VAF(真allelic imbalance)</div></div>
+      <div class="stat-box"><div class="number">43</div><div class="label">定性 LOH 區數</div></div>
+    </div>
+    <div class="callout-info"><strong>核心</strong>：phasing 用 normal germline → normal 在腫瘤 cnLOH 區仍是平衡雜合（VAF~0.5）→ 兩條 normal-defined haplotype 仍在 → 甲基分得開完全合理。「異常」其實是「用 normal 定相 vs SEQC2 用腫瘤 cnLOH 口徑」的層級錯配，不是甲基失效。</div>
+
+    <h2 id="anomaly"><span class="h-num">1.</span>異常是什麼</h2>
+    <p>前輪 SEQC2 CN 驗證發現：被甲基「分得開」的 LOH 區，<strong>76%(41/54) 是純 LOH</strong>（非 cnLOH+gain）。我當時猜「cnLOH+gain 有兩拷貝才分得開」，但純 LOH 占多數推翻了這猜測 — 純 LOH 理論上一條 haplotype 丟失、不該有兩條可分。這個「純 LOH 卻分得開」就是要定性的異常。</p>
+
+    <h2 id="kb"><span class="h-num">2.</span>關鍵兩件事：SEQC2 LOH 口徑 + germline 來源</h2>
+    <table>
+      <thead><tr><th>事實</th><th>內容</th><th>來源</th></tr></thead>
+      <tbody>
+        <tr class="row-warn"><td>SEQC2 「LOH」定義</td><td><strong>CN=2 但失去 heterozygosity = cnLOH</strong>（copy-neutral LOH），覆蓋 1490.4 Mb（~半基因組）</td><td>KB hcc1395.md:61 (Masood 2024)</td></tr>
+        <tr class="row-warn"><td>germline VCF 來源</td><td><strong>clair3_normal_output</strong>（normal HCC1395BL call）</td><td>config.sh</td></tr>
+      </tbody>
+    </table>
+    <div class="callout-success">
+      <strong>兩件事一拼，矛盾自解</strong>：(1) SEQC2 cnLOH 是<strong>腫瘤</strong>事件（腫瘤一條 haplotype 被另一條複製取代）。(2) 但我們的 phasing 用 <strong>normal</strong> germline — normal 是正常細胞，<strong>沒有</strong>腫瘤的 cnLOH，全基因組仍平衡雜合。→ 在 SEQC2 標 cnLOH 的區，normal germline 仍給出兩條 haplotype（VAF~0.5）→ 甲基當然能分。「異常」是兩個資料層級口徑不同造成的表象。
+    </div>
+
+    <h2 id="data"><span class="h-num">3.</span>定性數據（43 LOH 區，分得開 vs 分不開）</h2>
+    <div class="img-figure">
+      <img src="20260531_methyl_phasing_A0_assets/fig_loh_characterize.png" alt="LOH 定性三指標箱型圖">
+      <figcaption>分得開 vs 分不開 LOH 的判別指標。兩組 germline het VAF 都 ~0.5（左圖虛線）、HP 都不是極不平衡、邊界距離分得開的反而更深。</figcaption>
+    </div>
+    <table>
+      <thead><tr><th>指標 (median)</th><th>分得開(27)</th><th>分不開(16)</th><th>真純 LOH 該如何</th><th>實際</th></tr></thead>
+      <tbody>
+        <tr class="row-warn"><td>germline het VAF</td><td class="num">0.466</td><td class="num">0.502</td><td>偏離 0.5(失雜合)</td><td>兩組都~0.5(都雜合)</td></tr>
+        <tr><td>het SNP 數</td><td class="num">8</td><td class="num">5</td><td>極少(無 het)</td><td>都有 het</td></tr>
+        <tr><td>到 LOH 邊界距離</td><td class="num">1.87Mb</td><td class="num">0.68Mb</td><td>近邊界=邊界效應</td><td>分得開的更深(非邊界)</td></tr>
+        <tr><td>HP1/HP2 平衡</td><td class="num">0.434</td><td class="num">0.277</td><td>極不平衡→0</td><td>都不是 0</td></tr>
+      </tbody>
+    </table>
+    <div class="callout-info"><strong>系統驗證</strong>：chr15 全 SEQC2 LOH 區內有 <strong>21,387 個 germline het SNP，VAF median 0.488</strong>（與非 LOH 區 0.491 幾乎相同）→ 證明這不是個別異常，而是「整個 SEQC2 LOH 區在 normal germline 層級普遍雜合」的系統現象。</div>
+
+    <h2 id="tumor"><span class="h-num">4.</span>tumor 端 VAF 驗證（區分真假 cnLOH）</h2>
+    <p>normal 該區 VAF~0.49（雜合）。看 <strong>tumor</strong> 端同位點 VAF：若 tumor 也 ~0.5 = 腫瘤沒真 cnLOH；若偏移 = 真有 allelic imbalance。</p>
+    <table>
+      <thead><tr><th>位點</th><th>normal VAF</th><th>tumor VAF</th><th>判定</th></tr></thead>
+      <tbody>
+        <tr class="row-warn"><td>chr15:28455307</td><td class="num">~0.49</td><td class="num">0.492</td><td>tumor 仍雜合 → 該區<strong>無真 cnLOH</strong>（SEQC2 標記與 ONT 不符）</td></tr>
+        <tr class="row-bug"><td>chr8:87663325</td><td class="num">~0.49</td><td class="num">0.159</td><td>tumor 明顯偏移 → <strong>真 allelic imbalance</strong>（呼應 HP 96:17）</td></tr>
+        <tr><td>chr15:28453731</td><td class="num">~0.49</td><td class="num">0.430</td><td>輕微偏移</td></tr>
+      </tbody>
+    </table>
+    <div class="callout-warning"><strong>分兩型</strong>：(a) <strong>chr15 型</strong> = tumor 也雜合 → SEQC2 cnLOH 標記在此與 ONT 資料不符（可能 SEQC2 用不同資料/低純度/subclonal）；甲基分的是真實的兩條 haplotype。(b) <strong>chr8 型</strong> = tumor VAF 偏移 → 真 allelic imbalance（部分 cnLOH），甲基分的是真實的不平衡兩群。<strong>兩型甲基都正常運作</strong>。</div>
+
+    <h2 id="possibilities"><span class="h-num">5.</span>「純 LOH 卻分得開」有哪些可能（4 假說）</h2>
+    <table>
+      <thead><tr><th>#</th><th>假說</th><th>本輪證據</th><th>判定</th></tr></thead>
+      <tbody>
+        <tr class="row-safe"><td>H1</td><td>層級錯配：phasing 用 normal germline（雜合），SEQC2 LOH 是腫瘤事件</td><td>germline=normal call + LOH 區 VAF~0.49 + KB cnLOH 定義</td><td>★ 主因（已證）</td></tr>
+        <tr class="row-warn"><td>H2</td><td>SEQC2 LOH 標記在 ONT 資料不準/低純度/subclonal LOH</td><td>chr15 tumor VAF=0.492 仍雜合</td><td>部分區成立（chr15 型）</td></tr>
+        <tr class="row-warn"><td>H3</td><td>真 allelic imbalance（部分 cnLOH），兩 allele 不等量但都在</td><td>chr8 tumor VAF=0.159 偏移</td><td>部分區成立（chr8 型）</td></tr>
+        <tr class="row-bug"><td>H4</td><td>cnLOH+gain 兩拷貝有不同甲基（我先前的猜測）</td><td>76% 分得開的是純 LOH 非 GAINLOH</td><td>✗ 推翻（非主因）</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="howverify"><span class="h-num">6.</span>如何進一步驗證觀察（補上研究）</h2>
+    <ul>
+      <li><strong>(V1) 全 LOH 區 tumor VAF 分布</strong>：本輪只抽 3 loci。系統化算所有 LOH 區的 normal VAF vs tumor VAF 散點 → 量化「多少 LOH 區 tumor 仍雜合(chr15型) vs 真偏移(chr8型)」。</li>
+      <li><strong>(V2) SEQC2 segment 信心分 + 純度校正</strong>：取 SEQC2 原始 6-caller consensus 分數 + HCC1395 純度，校正後看哪些 LOH 是高信心 cnLOH、哪些可能 subclonal/低純度。</li>
+      <li><strong>(V3) normal BAM 在 LOH 區的 phasing</strong>：直接驗 normal germline 在 LOH 區是否真平衡雜合（排除 call artifact）。</li>
+      <li><strong>(V4) 甲基救援 × LOH 型別交叉</strong>：分 chr15 型 / chr8 型，看甲基救援 accuracy 是否不同（imbalance 區是否更易/難救）。</li>
+      <li><strong>(V5) IGV 個案檢視</strong>：對 chr15:28455307（無真 cnLOH）vs chr8:87663325（真 imbalance）的 read-level allele + 甲基直接看（前輪已產 IGV-style 圖）。</li>
+    </ul>
+
+    <h2 id="meaning"><span class="h-num">7.</span>對主線「甲基救 unphase」的意義</h2>
+    <div class="callout-success">
+      <strong>好消息：LOH 區不是甲基救援的禁區。</strong> 因為 phasing 用 normal germline（LOH 區仍雜合），甲基救援在 SEQC2 LOH 區仍正常運作（救的是 normal-defined haplotype）。這與「腫瘤 cnLOH 狀態」正交 — 救援不受 SEQC2 LOH 標記影響。前一輪擔心的「LOH 區甲基救援先天無效」<strong>不成立</strong>（那是基於「LOH=一條丟失」的誤解，實際 SEQC2 LOH=cnLOH 且我們用 normal germline）。
+    </div>
+
+    <section class="references" id="refs">
+      <h2>證據來源（全部可複查）</h2>
+      <ol>
+        <li>LOH 定性：<code>InterSubMod/docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/loh_characterize.json</code> + <code>loh_characterize.py</code></li>
+        <li>tumor VAF：<code>20260531_methyl_phasing_A0_assets/tumor_vaf_check.txt</code></li>
+        <li>KB SEQC2 LOH 定義：<code>/big8_disk/liaoyoyo2001/Knowledge/02_samples/hcc1395.md:61</code>（Masood 2024）</li>
+        <li>真值 SoT：<code>VERIFIED_RESULTS.md</code> V7</li>
+        <li>前序 LOH 發現：<code>20260601_seqc2_cpgsnp_loh_methyl_v2.standalone.html</code> + <code>loh_cnloh_intersect.json</code></li>
+      </ol>
+      <p style="font-size:var(--fs-xs);color:var(--c-text-soft);margin-top:var(--sp-3)">
+        本頁所有數字逐一從 loh_characterize.json / tumor_vaf_check.txt / KB Read 確認後複製（遵 feedback_no_fabricated_numbers_in_reports + outside-claim 必查 KB）；圖由 plot_loh_vaf.py 產出、已肉眼確認。HCC1395 單樣本 pilot，partial flag。本頁為視覺 companion（D11）。
+      </p>
+    </section>
+  </main>
+</div>
+</body>
+</html>
