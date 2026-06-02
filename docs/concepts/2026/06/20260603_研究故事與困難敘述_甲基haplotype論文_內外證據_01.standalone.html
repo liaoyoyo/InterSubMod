@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>研究故事 — 甲基 × haplotype characterization 論文（困難 · 決定 · 內外證據）</title>
+<!-- provenance-verified: 內部 metric verbatim 取自 20260603_研究故事…_01.md（其數字源自 master_draft.md validated SoT，經 wf_02d8afb0-e13 雙階段 grep）；外部文獻 PMID/DOI 源自 wf_b27a83dd-211 researcher agents 實際檢索（每條附 relation，不對齊誠實標）。本 HTML 為 .md 的 PI-view companion，未新增數字。寫此 HTML 的 Write 與產數字分析不同 batch（CLAUDE.md §13）。 -->
+<style>
+:root {
+  --c-accent: #D97757; --c-accent-deep: #B85A3F;
+  --c-text: #141413; --c-text-soft: #6B6B66;
+  --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC; --c-code-bg: #F4EFE6;
+  --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D; --c-info: #1E3A8A;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+  --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC", "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+  --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px; --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+  --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(20,20,19,0.05); --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--c-bg); color: var(--c-text); font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.6; }
+.layout { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: 248px 1fr; gap: var(--sp-5); padding: var(--sp-5) var(--sp-4); }
+aside.toc { position: sticky; top: var(--sp-4); align-self: start; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3); box-shadow: var(--shadow-sm); max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px; color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm); color: var(--c-text); text-decoration: none; font-size: var(--fs-sm); border-left: 3px solid transparent; }
+aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft); font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+aside.toc a.core { font-weight: 600; }
+aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px; font-size: 0.85em; }
+main.report { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--sp-6); min-width: 0; }
+.report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4); margin-bottom: var(--sp-5); }
+.report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 1px; color: var(--c-accent-deep); font-weight: 700; margin-bottom: var(--sp-2); }
+.report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+.report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+.report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+.report-header .meta dd { margin: 0; }
+.report-header .meta code { background: var(--c-code-bg); padding: 1px 5px; border-radius: var(--radius-sm); font-family: var(--ff-mono); font-size: 0.92em; }
+.verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4); border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); background: linear-gradient(90deg, #B85A3F, #D97757); }
+h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3); padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border); scroll-margin-top: var(--sp-4); }
+h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep); font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+p, ul, ol { margin: var(--sp-3) 0; }
+ul, ol { padding-left: var(--sp-5); }
+a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--c-accent-deep); }
+blockquote { border-left: 3px solid var(--c-accent); padding: var(--sp-3) var(--sp-4); color: var(--c-text); margin: var(--sp-3) 0; background: var(--c-code-bg); border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm); font-family: var(--ff-mono); font-size: 0.92em; }
+table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; vertical-align: top; }
+th { background: var(--c-code-bg); font-weight: 600; }
+tr.row-bug td { background: #FEF2F0; } tr.row-safe td { background: #F0FDF4; } tr.row-warn td { background: #FEF7E6; }
+.callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical); padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0; border-radius: var(--radius-md); color: #7F1D1D; }
+.callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning); padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0; border-radius: var(--radius-md); color: #78350F; }
+.callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success); padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0; border-radius: var(--radius-md); color: #166534; }
+.narrative { background: #F0FDF4; border: 1.5px solid var(--c-success); border-radius: var(--radius-md); padding: var(--sp-4); margin: var(--sp-4) 0; }
+.narrative .lead { font-weight: 700; color: #166534; margin-bottom: var(--sp-2); }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sp-3); margin: var(--sp-4) 0; }
+.stat-box { background: var(--c-bg); border: 1px solid var(--c-border); border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+.stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1; font-family: var(--ff-mono); }
+.stat-box .number.bug { color: var(--c-critical); } .stat-box .number.success { color: var(--c-success); } .stat-box .number.warning { color: var(--c-warning); }
+.stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+.rel { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: var(--fs-xs); font-weight: 700; font-family: var(--ff-mono); border: 1px solid; white-space: nowrap; }
+.rel.sup { color: #15803D; border-color: #15803D; background: #F0FDF4; }
+.rel.par { color: #A16207; border-color: #A16207; background: #FEF7E6; }
+.rel.con { color: #7F1D1D; border-color: #C2410C; background: #FEF2F0; }
+.tier { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: var(--fs-xs); font-weight: 700; font-family: var(--ff-mono); border: 1px solid; white-space: nowrap; }
+.tier.l12 { color: #1E3A8A; border-color: #1E3A8A; background: #EFF6FF; }
+.tier.l3 { color: #6B6B66; border-color: #9CA3AF; background: #F3F4F6; }
+.svg-figure { margin: var(--sp-5) 0; text-align: center; }
+.svg-figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto; background: var(--c-bg); border-radius: var(--radius-md); padding: var(--sp-3); border: 1px solid var(--c-border); }
+.svg-figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft); margin-top: var(--sp-2); font-style: italic; }
+.references { background: var(--c-bg); border-radius: var(--radius-md); padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-5); }
+.references h2 { border-bottom: none; margin-top: 0; font-size: var(--fs-xl); padding-bottom: 0; }
+.references ol { list-style: decimal; padding-left: var(--sp-5); }
+.references li { margin: var(--sp-2) 0; font-size: var(--fs-sm); }
+.references li code { font-family: var(--ff-mono); }
+@media print { body { background: white; } .layout { display: block; max-width: 100%; padding: 0; } aside.toc { display: none; } main.report { box-shadow: none; border: none; padding: 0; } a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; } table, blockquote, svg { page-break-inside: avoid; } h1,h2,h3 { page-break-after: avoid; } }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } aside.toc { position: static; max-height: none; } }
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="toc">
+  <h3>研究故事</h3>
+  <ol>
+    <li><a class="core" href="#s0">一句話故事</a></li>
+    <li><a href="#s1">願景</a></li>
+    <li><a class="core" href="#s2">核心困難</a></li>
+    <li><a href="#s3">走過的路 · Productive Failure</a></li>
+    <li><a class="core" href="#s4">轉折決定</a></li>
+    <li><a href="#s5">錨點 BRCA2</a></li>
+    <li><a href="#s6">現在判斷</a></li>
+    <li><a class="core" href="#s7">內部 × 外部證據</a></li>
+    <li><a href="#s8">前路</a></li>
+    <li><a href="#refs">參考文獻</a></li>
+  </ol>
+</aside>
+
+<main class="report">
+<header class="report-header">
+  <div class="pretitle">研究概念樹 · 研究故事與困難敘述</div>
+  <h1>甲基 × haplotype characterization 論文 — 困難、決定與內外證據</h1>
+  <dl class="meta">
+    <div><dt>終極目標</dt><dd>G6 read-level epigenetic &amp; haplotype characterization 論文</dd></div>
+    <div><dt>日期</dt><dd>2026-06-03</dd></div>
+    <div><dt>內部數字</dt><dd>取自 <code>master_draft.md</code>（validated SoT）<span class="tier l12">L1-L2</span></dd></div>
+    <div><dt>外部文獻</dt><dd>22 篇真實 PMID/DOI <span class="tier l3">L3</span></dd></div>
+  </dl>
+  <div class="verdict-banner">同一工具、兩個答案：「甲基-單倍型一致事件存在嗎」=YES（BRCA2）；「能演算法式判別 TP/FP 嗎」=NO（AUC 0.505）。稀有但真實 → characterization + 工具，不是篩子。</div>
+</header>
+
+<!-- S0 -->
+<h2 id="s0"><span class="h-num">0</span>一句話故事</h2>
+<blockquote>我們想做一個能把 <b>haplotype / LOH / 甲基</b> 集中在「位點」上、可重現分析的甲基癌症工具（ISM）。最硬的困難是：<b>tumor 5mC 太混亂，沒有演算法能篩出「大量、清楚、一致於 haplotype/somatic」的甲基差異位點</b>——肉眼看得到個案，統計抓不到群體。我們試過把甲基當篩子，被自己的數據證偽（LOSO 100% 循環）。於是做了關鍵決定：<b>從「篩子」轉向「characterization + 工具」</b>。而 BRCA2 promoter 一個真實、有癌症機制的個案，證明這方向<b>稀有但高價值</b>。</blockquote>
+
+<figure class="svg-figure">
+<svg viewBox="0 0 900 130" role="img" aria-labelledby="jt jd">
+  <title id="jt">研究旅程八階段</title>
+  <desc id="jd">願景→困難→走過的路→轉折→錨點→判斷→證據→前路。</desc>
+  <line x1="40" y1="65" x2="860" y2="65" stroke="#E3DACC" stroke-width="3"/>
+  <g font-size="12" text-anchor="middle">
+  <circle cx="55" cy="65" r="9" fill="#1E3A8A"/><text x="55" y="40" fill="#1E3A8A" font-weight="700">願景</text>
+  <circle cx="170" cy="65" r="9" fill="#C2410C"/><text x="170" y="40" fill="#7F1D1D" font-weight="700">核心困難</text>
+  <circle cx="285" cy="65" r="9" fill="#C2410C"/><text x="285" y="95" fill="#7F1D1D">Productive Failure</text>
+  <circle cx="400" cy="65" r="9" fill="#A16207"/><text x="400" y="40" fill="#78350F" font-weight="700">轉折決定</text>
+  <circle cx="515" cy="65" r="9" fill="#15803D"/><text x="515" y="95" fill="#166534" font-weight="700">錨點 BRCA2</text>
+  <circle cx="630" cy="65" r="9" fill="#15803D"/><text x="630" y="40" fill="#166534">現在判斷</text>
+  <circle cx="745" cy="65" r="9" fill="#D97757"/><text x="745" y="95" fill="#B85A3F" font-weight="700">內外證據</text>
+  <circle cx="845" cy="65" r="9" fill="#6B6B66"/><text x="845" y="40" fill="#6B6B66">前路</text>
+  </g>
+</svg>
+<figcaption>圖 1 — 研究旅程八階段。從工具願景，到核心困難與一段 productive failure，再到「篩子→characterization」的轉折，最後由 BRCA2 錨定價值。</figcaption>
+</figure>
+
+<!-- S1 -->
+<h2 id="s1"><span class="h-num">1</span>願景：為什麼做 InterSubMod</h2>
+<p>最初願景：<b>把所有 tag（HP / HP-1 / HP3 / unphase / LOH）集中，用「位點」分析甲基化 read 的狀況與差異，比對與 tag 的相關性，做統計與判斷輸出</b>；成為甲基癌症研究的套件，特別是 haplotype 與 LOH 都是關鍵資訊。對應原始 5 目標（甲基評分 / clone 結構 / 二次打擊 / TO normal / evidence 整合）。</p>
+<div class="callout-success"><b>外部佐證</b>：此方向有活躍工具地景——MethPhaser（Nat Commun 2024）、NanoMethPhase（Genome Biol 2021）證明 read-level 甲基 × haplotype 可耦合；O'Neill（Cell Genomics 2024，189 腫瘤）證明癌症 read-level 甲基 × LOH biallelic inactivation 真實有功能。⚠ 多數工具是「從甲基推 haplotype」（因果與 ISM <b>相反</b>），ISM 的 <b>read-read 距離矩陣 + subclonal + LOH 耦合</b> 是尚未被填的 niche。</div>
+
+<!-- S2 -->
+<h2 id="s2"><span class="h-num">2</span>核心困難（你的原話 → 科學工程問題鏈）★</h2>
+<blockquote>tumor 5mC 更混亂，光靠 5mC 可能不夠；沒辦法用演算法篩出很多清楚、一致於 haplotype/somatic 的甲基差異位點，所以無法統計與判斷數量。IGV 肉眼看得到不少一致位點，但怕偏誤（先看 tag 就認為一致）；統計 TP/FP 特徵都無法明確驗證。位點無法定位，下游（如判 unphase read）就難做。</blockquote>
+
+<figure class="svg-figure">
+<svg viewBox="0 0 760 360" role="img" aria-labelledby="dc dcd">
+  <title id="dc">困難問題鏈七環</title>
+  <desc id="dcd">從訊號噪音、量測層、定位缺口、確認偏誤，到全域證偽與下游受阻。</desc>
+  <g font-size="13">
+  <rect x="20" y="14" width="720" height="38" rx="5" fill="#FEF2F0" stroke="#C2410C"/><text x="32" y="38">(1) tumor 5mC 比 normal 混亂 — 訊號源頭噪音高</text>
+  <rect x="20" y="58" width="720" height="38" rx="5" fill="#EFF6FF" stroke="#1E3A8A"/><text x="32" y="82">(1.5) 量測層模糊：5mC/5hmC 混合 + read-level 稀疏 → β 估計抖</text>
+  <rect x="20" y="102" width="720" height="38" rx="5" fill="#FEF7E6" stroke="#A16207"/><text x="32" y="126">(2) 缺演算法篩出大量、清楚、一致於 HP/somatic 的甲基差異位點</text>
+  <rect x="20" y="146" width="720" height="38" rx="5" fill="#FEF7E6" stroke="#A16207"/><text x="32" y="170">(3) 因此無法統計與定量「數量」</text>
+  <rect x="20" y="190" width="720" height="38" rx="5" fill="#F4EFE6" stroke="#6B6B66"/><text x="32" y="214">(4) IGV 肉眼看得到一致（Q-存在），但先看 tag 易確認偏誤</text>
+  <rect x="20" y="234" width="720" height="38" rx="5" fill="#FEF2F0" stroke="#C2410C"/><text x="32" y="258">(5) TP/FP 統計皆無法驗證一致關係：AUC=0.5049、strong-ASM 反在 FP 富集 5×</text>
+  <rect x="20" y="278" width="720" height="38" rx="5" fill="#FEF2F0" stroke="#C2410C"/><text x="32" y="302">(6) 甲基差異位點無法被客觀定位</text>
+  <rect x="20" y="322" width="720" height="30" rx="5" fill="#F4EFE6" stroke="#6B6B66"/><text x="32" y="342">(7) → 下游難做（判 unphase read、延長 somatic read…全部缺定位基礎）</text>
+  </g>
+</svg>
+<figcaption>圖 2 — 困難問題鏈。每一環是後一環的前置；(1.5) 量測層與 (4.5) 單樣本天花板是本週補上的維度。</figcaption>
+</figure>
+
+<div class="callout-success"><b>外部研究強力佐證（最硬的一段）</b>：「tumor 5mC 比 normal 混亂」是領域公認現象——Derrien（Genome Med 2021 <span class="rel sup">supports</span>）用 read-level PDR/epipolymorphism 證實腫瘤甲基化顯著比正常混亂、混亂來自 read 內部不一致；Landan（Nat Genet 2012 <span class="rel sup">supports</span>）證甲基化以隨機過程形成 → 單位點難有 read 間一致性；Russo「Epigenome Chaos」（Cancers 2021）定性為跨癌種 hallmark。<b>你的困難有文獻名字（epigenetic heterogeneity / epipolymorphism），站得住。</b> ⚠ 口徑差異：外部多為 bisulfite 短讀，我們 ONT 長讀——現象/機制一致，量測不同。</div>
+
+<!-- S3 -->
+<h2 id="s3"><span class="h-num">3</span>走過的路：Productive Failure（甲基當篩子的興衰）</h2>
+<div class="stat-grid">
+  <div class="stat-box"><div class="number bug">−0.00012</div><div class="label">LOSO held-out ΔF1<br>(in-dist +0.02236)</div></div>
+  <div class="stat-box"><div class="number bug">100%</div><div class="label">sample-level<br>circularity</div></div>
+  <div class="stat-box"><div class="number warning">3%</div><div class="label">甲基特徵貢獻<br>(drop 全 5 個只掉 +0.00065)</div></div>
+  <div class="stat-box"><div class="number bug">0.7%</div><div class="label">irreducible FP<br>(43% 真 germline ASM)</div></div>
+</div>
+<p>用甲基篩 caller FP 提升 F1 → LOSO 證偽（held-out −0.00012、5-sample mean −0.00004 p=0.125、HCC1954 transfer −0.377）；甲基特徵其實裝飾性；persistent FP 不可削減。</p>
+<div class="callout-success"><b>為什麼是 Productive Failure 而非失敗</b>：它乾淨地否證了一個誘人假說，並給了三個可寫進論文的硬負結果（filter 循環、甲基非判別、ASM 反指）。外部 <b>Martin-Trujillo（Nat Commun 2017 <span class="rel sup">supports</span>）</b>標題即「<b>Copy number rather than epigenetic alterations are the major drivers</b> of allelic methylation in tumors」——背書「看似 ASM 的差異主因常是 CN/LOH dosage」。</div>
+
+<!-- S4 -->
+<h2 id="s4"><span class="h-num">4</span>轉折決定：從「篩子」到「characterization + 工具」★</h2>
+<table>
+<thead><tr><th>程式類型</th><th>能不能做</th><th>為什麼</th></tr></thead>
+<tbody>
+<tr class="row-safe"><td><b>描述 / 定位</b></td><td>✅ 做得出</td><td>給一個位點，ISM 客觀建矩陣→分群→比對 tag→與 normal 對照（BRCA2 就這樣被證實）</td></tr>
+<tr class="row-bug"><td><b>判別 / 決策</b></td><td>❌ 做不出</td><td>需穩定、跨樣本、可泛化決策邊界——被四層否證：①可定位但反向（FP 富集 5×）②效應被雜訊吞沒（AUC 0.505）③量測層模糊（5mC/5hmC + read 稀疏）④單樣本天花板（只有 HCC1395 有 ground-truth）</td></tr>
+</tbody>
+</table>
+<div class="callout-success"><b>故事轉折金句</b>：「做不出判別 program」不是工程失敗，是<b>被自己的數據證明的科學邊界</b>——把這條邊界誠實畫出來，本身就是論文的方法學貢獻。</div>
+
+<!-- S5 -->
+<h2 id="s5"><span class="h-num">5</span>錨點：BRCA2 promoter — 稀有但真實</h2>
+<p><b>內部（L1-L2）</b>：BRCA2 promoter（chr13:32,315,128）HP-axis <b>Δβ=−0.122</b>，抗 Bonferroni；normal-anchored cis-test 證<b>真 cis-driven</b>（d_cis=−0.142 vs d_drift≈−0.022）。</p>
+<p><b>外部（L3）</b>：Fishchuk（Cancer Biomarkers 2024 <span class="rel sup">supports</span>）BRCA2 promoter 高甲基化→低表現；Evans（AJHG 2018 <span class="rel par">partial</span>）BRCA1 cis-ASM-silencing 先例；Esteller 2000 / Catteau 2002 領域共識。</p>
+<div class="callout-critical"><b>⚠ 三個必須誠實標的不對齊（reviewer 一查就破）</b><br>
+1. <b>方向相反</b>：canonical 文獻是 <b>hyper</b>→沉默；我們內部是 <b>hypo</b>（Δβ=−0.122）→ 外部佐證的是「此 locus 甲基化在癌症有意義」，<b>不是我們的方向</b>。<br>
+2. <b>基因特異性</b>：最強 cis-ASM 先例是 BRCA1 不是 BRCA2；BRCA2 promoter 甲基化文獻較薄（跨研究偵測率 0–69%）。<br>
+3. <b>未測表現</b>：我們只量甲基化、沒測 BRCA2 mRNA/蛋白 → 「→沉默→癌症」下游因果<b>內部未驗證</b>，外部提供 plausibility 非證實。</div>
+<div class="narrative"><div class="lead">這個錨點的正確講法</div><p>「我們在一個有明確癌症機制、外部文獻認證『其甲基化在乳腺癌有意義』的 TSG promoter 上，用 normal 對照證明了一個真實的 cis-driven somatic ASM 事件。它稀有，但真實——證明 ISM 能定位並驗證稀有但有價值的事件。下游表現後果是 future work。」</p></div>
+
+<!-- S6 -->
+<h2 id="s6"><span class="h-num">6</span>現在的判斷</h2>
+<p><b>三軸</b>：主軸 LOH-constrained phasing（n=7 W=28 p=0.0078，Grade A 要求#1）｜支撐 ZAR1L/BRCA2 ASM characterization（real / 稀有 / 非方向 / 非判別 / CN-confound 排除）｜methods LOSO sample-level NEGATIVE（誠實方法學）。</p>
+<p><b>三層光譜</b>（取代二分）：存在性 YES → 可定位性 部分（regime-A 15/23）→ 可判別/可泛化 NO（AUC 0.505）。BRCA2 通過前兩層、卡第三層 = 「可定位但無判別力」中間態。<b>ISM 多功能</b>：同輸出餵 5 問題（①一致事件定位 ②判別 TP/FP[NEG] ③tag read 輔助 ④subclone/phasing[LIVE 主軸] ⑤LOH/CN de-confound）。</p>
+
+<!-- S7 -->
+<h2 id="s7"><span class="h-num">7</span>內部 × 外部證據總表 ★</h2>
+<table>
+<thead><tr><th>#</th><th>主題</th><th>內部發現 <span class="tier l12">L1-L2</span></th><th>外部佐證 <span class="tier l3">L3</span></th><th>誠實不對齊 / caveat</th></tr></thead>
+<tbody>
+<tr class="row-safe"><td>C3</td><td>tumor 5mC 混亂</td><td>read-level 稀疏、難定位一致位點</td><td>Derrien21 <span class="rel sup">sup</span> · Landan12 <span class="rel sup">sup</span> · Russo21 <span class="rel sup">sup</span></td><td>✅ 最強；外部 bisulfite 短讀，口徑不同</td></tr>
+<tr class="row-safe"><td>C5</td><td>5mC vs 5hmC</td><td>混合曾砍半 β；未分軌</td><td>Haffner11 <span class="rel sup">sup</span> · Chen15 <span class="rel sup">sup</span> · Halliwell25 <span class="rel sup">sup</span></td><td>✅ 雙層（生物解耦＋nanopore 會混淆）→「未分軌」是外部支持的真實 gap</td></tr>
+<tr class="row-safe"><td>C6</td><td>LOH/CN de-confound</td><td>strong-ASM=LOH→低覆蓋回歸極值；HP-axis held-constant CN（ρ=−0.055）</td><td>Martin-Trujillo17 <span class="rel sup">sup</span> · Abante20 <span class="rel sup">sup</span></td><td>⚠ <b>新 caveat</b>：CNN-LOH（copy-neutral）不降覆蓋卻仍單倍型化 → 應分 CNN vs CNL-LOH</td></tr>
+<tr class="row-warn"><td>C1</td><td>BRCA2 錨點</td><td>Δβ=−0.122 cis-driven（<b>hypo</b>）</td><td>Fishchuk24 <span class="rel sup">sup</span> · Evans18 <span class="rel par">par</span></td><td>⚠ 外部 hyper→沉默；BRCA2 證據薄；未測表現</td></tr>
+<tr><td>C2</td><td>ASM in cancer</td><td>somatic-controlled HP-axis；稀有 0.34% 無方向</td><td>O'Neill24 <span class="rel par">par</span> · Do20 <span class="rel con">contradicts</span></td><td>⚠ 外部 ASM 增 5×、hypo 為主——口徑不同（germline/region vs 我們 somatic-controlled），不對齊正凸顯我們方法乾淨</td></tr>
+<tr><td>C4</td><td>ISM 工具定位</td><td>read-read 距離 + subclonal + LOH 耦合</td><td>MethPhaser24 <span class="rel par">par</span> · O'Neill24 <span class="rel sup">sup</span></td><td>⚠ 多數工具因果相反（從甲基推 HP）；ISM 的 read-read 距離 niche 未被填</td></tr>
+</tbody>
+</table>
+<div class="callout-warning"><b>這張表怎麼用</b>：最硬的對外故事 = <b>C3 + C5 + C6</b>（外部強佐證困難真實、該分軌、CN de-confound 必要）；C1 講錨點必帶方向與表現的誠實 caveat；<b>C2 的反例（Do 2020）要主動講</b>——把「我們為何只看到稀有殘餘」歸因於 HP-axis 把 germline allelic methylation 與 CN held-constant。主動講反例 = 防守最硬的一招。</div>
+
+<!-- S8 -->
+<h2 id="s8"><span class="h-num">8</span>前路</h2>
+<p><b>外部文獻直接點出的 3 個便宜補強</b>（都加固論文）：① <b>5mC/5hmC 分軌</b>（C5）對 ~26 strong 位點分跑、加 5hmC FP 控制；② <b>CNN-LOH vs CNL-LOH 區分</b>（C6 新 caveat）；③ <b>多位點 cis-test</b>（C1 self-selection）對 ZAR1L + regime-A 位點也跑 normal-anchored cis-test。</p>
+<p><b>投稿定位</b>：read-level epigenetic &amp; haplotype characterization + tooling 論文。賣點 = phasing 主軸 Grade A + ISM read-read 距離/subclonal niche + 誠實負結果方法學。<b>稀有但真實 + 把會被質疑的點自己先關掉。</b></p>
+
+<!-- refs -->
+<div class="references" id="refs">
+<h2>參考文獻（外部 L3，真實出處）</h2>
+<p style="font-size:var(--fs-sm);color:var(--c-text-soft);">經 researcher agents 實際 WebFetch/WebSearch 檢索回傳，未編造；relation 標對內部發現的關係；預印本/paywall 已註明，正式引用前建議再核 PMID/DOI。</p>
+<ol>
+<li>Fishchuk L, et al. BRCA2 promoter hypermethylation… <i>Cancer Biomarkers</i> 2024. <code>PMID 39177589 / DOI 10.3233/CBM-230458</code> [C1 sup]</li>
+<li>Evans DGR, et al. Methylation-Associated Silencing of BRCA1 (5'UTR variant)… <i>Am J Hum Genet</i> 2018. <code>PMID 30075112</code> [C1 par]</li>
+<li>Catteau A, Morris JR. BRCA1 methylation… <i>Semin Cancer Biol</i> 2002 <code>PMID 12191635</code>；Esteller M, et al. <i>JNCI</i> 2000 <code>PMID 10749912</code> [C1 sup]</li>
+<li>Germline promoter hypermethylation in BRCA1/2 not present in hereditary BC. <code>PMID 29404838</code> [C1 par]</li>
+<li>O'Neill K, et al. Long-read sequencing of an advanced cancer cohort… <i>Cell Genomics</i> 2024. <code>DOI 10.1016/j.xgen.2024.100674</code> [C2/C4]</li>
+<li>Do C, et al. Allele-specific DNA methylation is increased in cancers… <i>Genome Biology</i> 2020;21:153. <code>DOI 10.1186/s13059-020-02059-3</code> [C2 contradicts·口徑]</li>
+<li>Liu Y, et al. NANOME (haplotype-aware ASM). bioRxiv 2025. <code>PMID 40631091</code> [C2/C4]（預印本）</li>
+<li>CanASM (cancer ASM database). bioRxiv 2025. <code>DOI 10.1101/2025.04.03.646980</code> [C2]（預印本·僅摘要）</li>
+<li>Derrien J, et al. DNA methylation landscape of multiple myeloma… <i>Genome Medicine</i> 2021. <code>PMID 34372935</code> [C3 sup]</li>
+<li>Landan G, et al. Epigenetic polymorphism / stochastic DMR formation. <i>Nature Genetics</i> 2012. <code>PMID 23064413</code> [C3 sup]</li>
+<li>Russo G, et al. Epigenome Chaos. <i>Cancers</i> 2021. <code>PMID 33918773</code> [C3 sup]</li>
+<li>Brocks D, et al. Intratumor DNA methylation heterogeneity… <i>Cell Reports</i> 2014. <code>PMID 25066126</code> [C3 par]</li>
+<li>Fu Y, et al. MethPhaser. <i>Nat Commun</i> 2024. <code>DOI 10.1038/s41467-024-49588-0</code> [C4 par]</li>
+<li>Akbari V, et al. NanoMethPhase. <i>Genome Biology</i> 2021. <code>DOI 10.1186/s13059-021-02283-5</code> [C4 par]</li>
+<li>Oxford Nanopore. modkit. <code>github.com/nanoporetech/modkit</code> [C4 par]</li>
+<li>Haffner MC, et al. Global 5hmC reduced in cancers. <i>Oncotarget</i> 2011. <code>PMID 21896958</code> [C5 sup]</li>
+<li>Chen K, et al. Loss of 5hmC / gene-body hypermethylation, kidney cancer. <i>Cell Research</i> 2015. <code>PMC4816137</code> [C5 sup]</li>
+<li>Halliwell DO, et al. ds/ss detection of 5mC and 5hmC. <i>Commun Biol</i> 2025. <code>DOI 10.1038/s42003-025-07681-0</code> [C5 sup·方法]</li>
+<li>Lian CG, et al. 5hmC strongly depleted in cancers. <i>Cancer Res</i> 2011. [C5 par]（AACR 403·DOI 待核）</li>
+<li>Martin-Trujillo A, et al. Copy number… major drivers of allelic methylation. <i>Nat Commun</i> 2017. <code>PMID 28883545</code> [C6 sup]</li>
+<li>Abante J, et al. Haplotype-dependent ASM in WGBS. <i>Nat Commun</i> 2020. <code>PMID 33067439</code> [C6 sup]</li>
+<li>Wu H, et al. Statistical Quantification of Methylation by NGS. <i>PLoS One</i> 2011. <code>PMC3115964</code> [C6 par·統計機制]</li>
+</ol>
+<p style="font-size:var(--fs-sm);color:var(--c-text-soft);margin-top:var(--sp-3);">內部數字源 <code>InterSubMod/docs/reports/validated/2026/06/20260602_研究週報…/master_draft.md</code>；故事母稿 <code>InterSubMod/docs/concepts/2026/06/20260603_研究故事與困難敘述_甲基haplotype論文_內外證據_01.md</code>。內部 L1-L2 / 外部 L3；ASM 全為 HCC1395 單樣本 ⭐3。</p>
+</div>
+
+</main>
+</div>
+</body>
+</html>

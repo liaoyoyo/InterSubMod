@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>目標概念整理 · 討論看板 — 甲基 × haplotype characterization 論文</title>
+<!-- provenance-verified: 全 metric verbatim 取自 master_draft.md（本週 validated SoT，數字經 wf_02d8afb0-e13 雙階段 grep）；本 HTML 為 20260603_目標概念整理 .md 的討論看板 companion，未新增任何數字。三支驗證 workflow（wf_7b4d2561-1a4 分類 / wf_9c7e6ae4-c25 盲點 / wf_9dc061ba-7aa 硬化）grounding。寫此 HTML 的 Write 與產數字分析不同 batch（CLAUDE.md §13）。 -->
+<style>
+:root {
+  --c-accent: #D97757; --c-accent-deep: #B85A3F;
+  --c-text: #141413; --c-text-soft: #6B6B66;
+  --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+  --c-code-bg: #F4EFE6;
+  --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D; --c-info: #1E3A8A;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+  --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC", "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+  --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px; --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+  --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(20,20,19,0.05); --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--c-bg); color: var(--c-text); font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.6; }
+.layout { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: 248px 1fr; gap: var(--sp-5); padding: var(--sp-5) var(--sp-4); }
+aside.toc { position: sticky; top: var(--sp-4); align-self: start; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3); box-shadow: var(--shadow-sm); max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px; color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm); color: var(--c-text); text-decoration: none; font-size: var(--fs-sm); border-left: 3px solid transparent; }
+aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft); font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+aside.toc a.core { font-weight: 600; }
+aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px; font-size: 0.85em; }
+main.report { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); padding: var(--sp-6); min-width: 0; }
+.report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4); margin-bottom: var(--sp-5); }
+.report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 1px; color: var(--c-accent-deep); font-weight: 700; margin-bottom: var(--sp-2); }
+.report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+.report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+.report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+.report-header .meta dd { margin: 0; }
+.report-header .meta code { background: var(--c-code-bg); padding: 1px 5px; border-radius: var(--radius-sm); font-family: var(--ff-mono); font-size: 0.92em; }
+.verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4); border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); background: linear-gradient(90deg, #B85A3F, #D97757); }
+h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3); padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border); scroll-margin-top: var(--sp-4); }
+h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep); font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2); color: var(--c-text-soft); }
+p, ul, ol { margin: var(--sp-3) 0; }
+ul, ol { padding-left: var(--sp-5); }
+a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--c-accent-deep); }
+blockquote { border-left: 3px solid var(--c-accent); padding: var(--sp-3) var(--sp-4); color: var(--c-text); margin: var(--sp-3) 0; background: var(--c-code-bg); border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm); font-family: var(--ff-mono); font-size: 0.92em; }
+table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; vertical-align: top; }
+th { background: var(--c-code-bg); font-weight: 600; }
+tr.row-bug td { background: #FEF2F0; }
+tr.row-safe td { background: #F0FDF4; }
+tr.row-warn td { background: #FEF7E6; }
+.callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical); padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0; border-radius: var(--radius-md); color: #7F1D1D; }
+.callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning); padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0; border-radius: var(--radius-md); color: #78350F; }
+.callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success); padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0; border-radius: var(--radius-md); color: #166534; }
+.narrative { background: #F0FDF4; border: 1.5px solid var(--c-success); border-radius: var(--radius-md); padding: var(--sp-4); margin: var(--sp-4) 0; }
+.narrative .lead { font-weight: 700; color: #166534; margin-bottom: var(--sp-2); }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sp-3); margin: var(--sp-4) 0; }
+.stat-box { background: var(--c-bg); border: 1px solid var(--c-border); border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+.stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1; font-family: var(--ff-mono); }
+.stat-box .number.bug { color: var(--c-critical); }
+.stat-box .number.success { color: var(--c-success); }
+.stat-box .number.warning { color: var(--c-warning); }
+.stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+.tier { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: var(--fs-xs); font-weight: 700; font-family: var(--ff-mono); border: 1px solid; white-space: nowrap; }
+.tier.live { color: #15803D; border-color: #15803D; background: #F0FDF4; }
+.tier.t3 { color: #A16207; border-color: #A16207; background: #FEF7E6; }
+.tier.dead { color: #7F1D1D; border-color: #C2410C; background: #FEF2F0; }
+.tier.hold { color: #78350F; border-color: #A16207; background: #FEFCE8; }
+.tier.na { color: #4B5563; border-color: #9CA3AF; background: #F3F4F6; }
+.domain { display:inline-block; padding:1px 6px; border-radius:10px; font-size:var(--fs-xs); font-weight:700; border:1px solid; white-space:nowrap; }
+.domain.clear { color:#15803D; border-color:#15803D; background:#F0FDF4; }
+.domain.complicated { color:#1E3A8A; border-color:#1E3A8A; background:#EFF6FF; }
+.domain.complex { color:#A16207; border-color:#A16207; background:#FEF7E6; }
+.svg-figure { margin: var(--sp-5) 0; text-align: center; }
+.svg-figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto; background: var(--c-bg); border-radius: var(--radius-md); padding: var(--sp-3); border: 1px solid var(--c-border); }
+.svg-figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft); margin-top: var(--sp-2); font-style: italic; }
+.gap-list { list-style: none; padding: 0; }
+.gap-item { border: 1px solid var(--c-border); border-left: 4px solid var(--c-warning); border-radius: var(--radius-md); padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0; background: var(--c-surface); }
+.gap-item label { display: flex; gap: var(--sp-2); align-items: flex-start; cursor: pointer; font-weight: 700; font-size: var(--fs-md); }
+.gap-item input { margin-top: 5px; transform: scale(1.2); }
+.gap-item .q { color: var(--c-text-soft); font-size: var(--fs-sm); margin: var(--sp-2) 0 var(--sp-1); padding-left: 30px; }
+.gap-item .resolve { font-size: var(--fs-sm); margin-top: var(--sp-1); padding-left: 30px; }
+.gap-item .resolve b { color: var(--c-success); }
+.pill { display:inline-block; padding:1px 7px; border-radius:10px; font-size:var(--fs-xs); font-weight:700; background:var(--c-code-bg); color:var(--c-accent-deep); font-family:var(--ff-mono); }
+.references { background: var(--c-bg); border-radius: var(--radius-md); padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-5); }
+.references h2 { border-bottom: none; margin-top: 0; font-size: var(--fs-xl); padding-bottom: 0; }
+.references ol { list-style: decimal; padding-left: var(--sp-5); }
+.references li { margin: var(--sp-2) 0; font-size: var(--fs-sm); }
+.draft-flag { background:#FEF7E6; border:1.5px dashed var(--c-warning); color:#78350F; padding:var(--sp-3) var(--sp-4); border-radius:var(--radius-md); margin:var(--sp-4) 0; font-size:var(--fs-sm); }
+@media print { body { background: white; } .layout { display: block; max-width: 100%; padding: 0; } aside.toc { display: none; } main.report { box-shadow: none; border: none; padding: 0; } a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; } table, blockquote, svg, .gap-item { page-break-inside: avoid; } h1,h2,h3 { page-break-after: avoid; } }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } aside.toc { position: static; max-height: none; } }
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="toc">
+  <h3>目錄</h3>
+  <ol>
+    <li><a class="core" href="#s0">定調：同工具兩答案</a></li>
+    <li><a class="core" href="#s1">三層光譜（存在→定位→判別）</a></li>
+    <li><a class="core" href="#s2">為何可行卻無法系統化</a></li>
+    <li><a href="#s3">ISM 能力 × 5 目標映射</a></li>
+    <li><a href="#s4">難度 × 價值矩陣</a></li>
+    <li><a href="#s5">任務切分（4 桶）</a></li>
+    <li><a class="core" href="#s6">待你確認 · open gaps</a></li>
+    <li><a href="#s7">敘述腳本</a></li>
+  </ol>
+</aside>
+
+<main class="report">
+<header class="report-header">
+  <div class="pretitle">研究概念樹 · 討論看板（草版）</div>
+  <h1>甲基 × haplotype characterization 論文 — 目標概念整理</h1>
+  <dl class="meta">
+    <div><dt>終極目標</dt><dd>G6 read-level epigenetic &amp; haplotype characterization 論文</dd></div>
+    <div><dt>日期</dt><dd>2026-06-03</dd></div>
+    <div><dt>母稿</dt><dd><code>InterSubMod/docs/concepts/2026/06/20260603_目標概念整理…雙軸_01.md</code></dd></div>
+    <div><dt>數字 provenance</dt><dd>全取自 <code>master_draft.md</code>（驗證 SoT）</dd></div>
+  </dl>
+  <div class="verdict-banner">這份是「討論看板」：每個 ★ 區塊都等你確認；§6 的 open gaps 可在瀏覽器直接勾選你想討論的項目。</div>
+</header>
+
+<div class="draft-flag">⚠ <b>草版說明</b>：本看板由三支驗證 workflow grounding（分類 → 盲點掃描 → 硬化對抗質疑，共 30 agents）。所有 metric 沿用 master_draft 驗證真值、未新增。你確認 §6 後，我會把修正同步回寫概念 <code>.md</code>（HTML 是 companion，不讓兩者 drift）。</div>
+
+<!-- ============ S0 ============ -->
+<h2 id="s0"><span class="h-num">0</span>定調：ISM 是多功能平台，「同一工具、兩個答案」</h2>
+
+<p>整個專案最容易被混淆的一點：<b>ISM（InterSubMod）不是「甲基篩變異的篩子」，而是一個 read-level epigenetic context 引擎</b>。同一套輸出（read×CpG 甲基矩陣 → read-read 距離 → 分群 → 比對 HP/LOH/somatic tag → 可用 normal BAM 對照），餵給<b>不同的問題</b>，得到<b>不同的答案</b>：</p>
+
+<div class="stat-grid">
+  <div class="stat-box"><div class="number success">YES</div><div class="label">① 甲基-單倍型一致事件<br><b>存在嗎？</b>（BRCA2 已證）</div></div>
+  <div class="stat-box"><div class="number bug">NO</div><div class="label">② 能演算法式<br><b>判別 TP/FP 嗎？</b>（AUC=0.505）</div></div>
+  <div class="stat-box"><div class="number warning">未知</div><div class="label">③ tag read 輔助判斷<br>（外部 claim 待實測）</div></div>
+  <div class="stat-box"><div class="number success">LIVE</div><div class="label">④ subclone / phasing<br>（主軸 Grade A）</div></div>
+</div>
+
+<div class="callout-success"><b>關鍵洞見</b>：能力 ① 和 ② 用<b>同一套輸出</b>、問<b>不同問題</b>。①「存在嗎」=YES、②「能判別嗎」=NO，<b>兩者並存不矛盾</b>。這就是為什麼「ISM 有用（①③④⑤）」和「甲基當 filter 無效（②）」可以同時成立——把這兩件事分開，整個故事就通了。</div>
+
+<!-- ============ S1 ============ -->
+<h2 id="s1"><span class="h-num">1</span>三層光譜：存在 → 可定位 → 可判別（取代原本的二分法）★</h2>
+
+<p>盲點掃描抓到我原本「存在 vs 可定位」二分法的<b>真漏洞</b>：缺一個中間態 ——「<b>可定位、但反向 / 無判別</b>」。BRCA2 與 strong-ASM 正是這態：找得到位點，卻無法用來判別真假突變、甚至反指。所以正確的描述是<b>三層光譜，訊號逐層收窄</b>：</p>
+
+<figure class="svg-figure">
+<svg viewBox="0 0 820 320" role="img" aria-labelledby="spec-t spec-d">
+  <title id="spec-t">甲基訊號三層光譜漏斗</title>
+  <desc id="spec-d">從存在性（強）到可定位性（部分）到可判別/可泛化性（弱），訊號逐層收窄；BRCA2 通過前兩層、卡在第三層。</desc>
+  <!-- layer 1 -->
+  <polygon points="40,40 780,40 660,120 160,120" fill="#F0FDF4" stroke="#15803D" stroke-width="2"/>
+  <text x="410" y="72" text-anchor="middle" font-size="19" font-weight="700" fill="#166534">① 存在性 — YES</text>
+  <text x="410" y="98" text-anchor="middle" font-size="13" fill="#166534">甲基-單倍型一致事件真實存在（BRCA2 normal-anchored cis-test 證 cis-driven）</text>
+  <!-- layer 2 -->
+  <polygon points="160,130 660,130 560,210 260,210" fill="#FEF7E6" stroke="#A16207" stroke-width="2"/>
+  <text x="410" y="162" text-anchor="middle" font-size="18" font-weight="700" fill="#78350F">② 可定位性 — 部分</text>
+  <text x="410" y="188" text-anchor="middle" font-size="13" fill="#78350F">regime-A 嚴格篩後 15/23 存活；全基因組僅 0.34%（~26 獨立位點）稀有</text>
+  <!-- layer 3 -->
+  <polygon points="260,220 560,220 500,295 320,295" fill="#FEF2F0" stroke="#C2410C" stroke-width="2"/>
+  <text x="410" y="250" text-anchor="middle" font-size="18" font-weight="700" fill="#7F1D1D">③ 可判別 / 可泛化 — NO</text>
+  <text x="410" y="274" text-anchor="middle" font-size="12.5" fill="#7F1D1D">連續|Δβ| AUC=0.5049 中性；strong-ASM 反在 FP 富集 5×（OR=0.194）</text>
+  <!-- BRCA2 marker -->
+  <text x="795" y="80" text-anchor="end" font-size="11" fill="#166534">BRCA2 ✓</text>
+  <text x="795" y="170" text-anchor="end" font-size="11" fill="#78350F">BRCA2 ✓(borderline)</text>
+  <text x="795" y="258" text-anchor="end" font-size="11" fill="#7F1D1D">BRCA2 ✗(個案≠判別)</text>
+</svg>
+<figcaption>圖 1 — 三層光譜漏斗。訊號從「存在」（強）到「可判別/可泛化」（弱）逐層收窄。BRCA2 通過 ①②、卡在 ③ ——這就是「可定位但無判別力」的中間態。</figcaption>
+</figure>
+
+<p>中間態還要再分兩種失效機制（硬化 workflow 補的）：<b>(a) 訊號反向</b> —— strong-ASM 不是沒訊號，而是反向富集在 FP（LOH→單倍型化→低覆蓋→極端 baseline 的回歸極值 artifact，<code>61%</code> 來自 chr8 hotspot，drop-chr8 後 OR 仍 5.16→2.84 表示體系性而非一地）；<b>(b) 雜訊吞沒</b> —— 效應量在全域被 read-level 稀疏 + 量測噪音稀釋到 AUC≈隨機。</p>
+
+<!-- ============ S2 ============ -->
+<h2 id="s2"><span class="h-num">2</span>為何「想法可行 + 有觀察佐證」，卻「無法清楚分析 + 建系統流程程式」★</h2>
+
+<p>關鍵在分清<b>兩種 program</b>：</p>
+<table>
+<thead><tr><th>程式類型</th><th>能不能做</th><th>為什麼</th></tr></thead>
+<tbody>
+<tr class="row-safe"><td><b>描述 / 定位 program</b></td><td>✅ 做得出</td><td>給一個位點，ISM 客觀建甲基矩陣→分群→比對 tag→與 normal 對照，告訴你「這位點有沒有 ASM、是不是 cis-driven」。BRCA2 就是這樣被證實的。</td></tr>
+<tr class="row-bug"><td><b>判別 / 決策 program</b></td><td>❌ 做不出</td><td>給全基因組自動「判別 TP/FP」或「自動篩出一大批一致位點」，需要一個<b>穩定、跨樣本、可泛化的決策邊界</b>——而證據說它不存在 / 不穩定。</td></tr>
+</tbody>
+</table>
+
+<p><b>決策邊界為什麼不存在？四層疊加</b>（這也補上了原困難敘述漏掉的維度）：</p>
+
+<figure class="svg-figure">
+<svg viewBox="0 0 800 250" role="img" aria-labelledby="hard-t hard-d">
+  <title id="hard-t">無決策邊界的四層成因</title>
+  <desc id="hard-d">可定位但反向、效應被雜訊吞沒、量測層模糊、單樣本天花板，四層疊加導致無法建判別程式。</desc>
+  <g font-size="13.5" fill="#141413">
+  <rect x="20" y="20" width="375" height="95" rx="6" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.5"/>
+  <text x="32" y="44" font-weight="700" fill="#7F1D1D">① 可定位但反向</text>
+  <text x="32" y="66" font-size="12.5">strong-ASM 反在 FP 富集 5×（OR=0.194）</text>
+  <text x="32" y="86" font-size="12.5">→ 定位 ≠ 判別，甚至反指</text>
+  <rect x="405" y="20" width="375" height="95" rx="6" fill="#FEF7E6" stroke="#A16207" stroke-width="1.5"/>
+  <text x="417" y="44" font-weight="700" fill="#78350F">② 效應被雜訊吞沒</text>
+  <text x="417" y="66" font-size="12.5">連續|Δβ| AUC=0.5049（perm-p=0.496）</text>
+  <text x="417" y="86" font-size="12.5">→ 不是調參，是訊號功率不足</text>
+  <rect x="20" y="130" width="375" height="100" rx="6" fill="#EFF6FF" stroke="#1E3A8A" stroke-width="1.5"/>
+  <text x="32" y="154" font-weight="700" fill="#1E3A8A">③ 量測層模糊</text>
+  <text x="32" y="176" font-size="12.5">5mC/5hmC 混合曾把 β 砍半 +</text>
+  <text x="32" y="196" font-size="12.5">read-level 稀疏 → 每位點 β 估計抖</text>
+  <text x="32" y="216" font-size="12.5">→ 統計檢定力天花板低</text>
+  <rect x="405" y="130" width="375" height="100" rx="6" fill="#F4EFE6" stroke="#6B6B66" stroke-width="1.5"/>
+  <text x="417" y="154" font-weight="700">④ 單樣本天花板（生物必然）</text>
+  <text x="417" y="176" font-size="12.5">只有 HCC1395 有 ground-truth；</text>
+  <text x="417" y="196" font-size="12.5">癌株間甲基高度個體特異 →</text>
+  <text x="417" y="216" font-size="12.5">判準無法泛化 → 寫不成 program</text>
+  </g>
+</svg>
+<figcaption>圖 2 — 無決策邊界的四層成因。任一層都足以擋住「自動判別程式」，四層疊加使它在現有證據下不可達。</figcaption>
+</figure>
+
+<div class="callout-success"><b>一句話</b>：「可行」在<b>個案 + 機制 + 描述</b>層（ISM 做得好、有 BRCA2 鐵證）；「無法系統化」在<b>全域 + 跨樣本 + 一致判別</b>層（需要一個被你自己數據否證的決策邊界）。<br><b>所以「做不出判別 program」不是工程失敗，是一個被數據證明的科學邊界</b>——這本身就是論文的誠實貢獻。論文是 <b>characterization + tooling</b>，不是 filter / classifier。</div>
+
+<!-- ============ S3 ============ -->
+<h2 id="s3"><span class="h-num">3</span>ISM 能力 ①-⑤ × 原始 5 目標 × 構想 映射</h2>
+<p>你說得對 —— ISM 範圍<b>不只</b>「甲基-單倍型-突變一致事件」。它的輸出餵 5 種問題，分屬不同原始目標（每條附 Cynefin 因果域）：</p>
+<table>
+<thead><tr><th>ISM 能力</th><th>原始目標</th><th>構想</th><th>Cynefin 域</th><th>verdict</th></tr></thead>
+<tbody>
+<tr class="row-safe"><td>① 一致事件定位 / 驗證</td><td>目標1</td><td>I4a</td><td><span class="domain complicated">Complicated</span></td><td><span class="tier t3">⭐3 個案 POSITIVE</span></td></tr>
+<tr class="row-bug"><td>② 演算法 find-many / 判別 TP/FP</td><td>目標1+5</td><td>I1, I4b</td><td><span class="domain complex">Complex</span></td><td><span class="tier dead">NEGATIVE · 放緩</span></td></tr>
+<tr><td>③ tag read 輔助判斷</td><td>目標2</td><td>I2, I3</td><td><span class="domain complex">Complex</span></td><td><span class="tier hold">未知 / hold</span></td></tr>
+<tr class="row-safe"><td>④ subclone / phasing 分析</td><td>目標2</td><td>I2.2, 主軸</td><td><span class="domain complicated">Complicated</span></td><td><span class="tier live">LIVE ⭐3 Grade A</span></td></tr>
+<tr><td>⑤ LOH/CN-aware de-confound</td><td>目標1 支撐</td><td>I6</td><td><span class="domain complicated">Complicated</span></td><td><span class="tier t3">可能 / 已用</span></td></tr>
+</tbody>
+</table>
+<p>原始 5 目標的完整落點：<b>目標1</b>=能力①+⑤（引擎核心）；<b>目標2</b>=能力③+④（LIVE 主軸）；<b>目標3</b>（二次打擊）=依賴目標1（I5，暫緩）；<b>目標4</b>（TO normal）=normal 當 cis-test 對照（off-goal 但方法已用）；<b>目標5</b>（evidence 整合）= G6 論文本身。</p>
+<div class="callout-warning"><b>待你確認</b>：能力②（判別 TP/FP）是目標1+5 的細項，但答案 NEGATIVE。依你指示，已標<b>「已驗證負結果 → 先放緩、不重啟；可能是資料/觀察或工程限制，非必然根本不可能」</b>，寫進論文當誠實負結果，不再投入。</div>
+
+<!-- ============ S4 ============ -->
+<h2 id="s4"><span class="h-num">4</span>難度 × 價值矩陣（7 構想，含 n=1/⭐3 caveat）</h2>
+<p>難度看「現有證據實況」、價值看「對 G6 論文貢獻」。⚠ 盲點掃描提醒：I4a「高可能」必須標明<b>僅 HCC1395 單樣本 ⭐3</b>，別誤讀成跨樣本已驗。</p>
+<table>
+<thead><tr><th>#</th><th>構想</th><th>你暫標</th><th>證據裁決</th><th>價值</th><th>狀態 / caveat</th></tr></thead>
+<tbody>
+<tr class="row-bug"><td>I1</td><td>用甲基提升 F1</td><td>困難</td><td>困難（1.4 非常困難）</td><td>目標低價值</td><td><span class="tier dead">DEAD 勿再開</span></td></tr>
+<tr><td>I2</td><td>tag 幫其他 caller</td><td>可能</td><td>未知（外部 claim 無實測）</td><td>高價值</td><td><span class="tier hold">協作 ≠ 甲基 filter</span></td></tr>
+<tr><td>I3</td><td>甲基救 unphase read</td><td>可能</td><td>非常困難（AUC 0.505）</td><td>目標低價值</td><td><span class="tier hold">hold</span></td></tr>
+<tr class="row-safe"><td>I4a</td><td>—</td><td>高可能（BRCA2 已證）</td><td>目標高價值</td><td>—</td><td><span class="tier t3">⭐3 HCC1395 單樣本</span></td></tr>
+<tr><td>I4b</td><td>—</td><td>偏難（稀有 / 非判別）</td><td>目標有益</td><td>—</td><td><span class="tier na">characterization</span></td></tr>
+<tr><td>I5</td><td>—</td><td>不可行（region-level）</td><td>目標有益</td><td>—</td><td><span class="tier hold">暫緩 · 依賴 I4</span></td></tr>
+<tr class="row-safe"><td>I6</td><td>—</td><td>可能（本週已答）</td><td>目標有益（de-confound）</td><td>—</td><td><span class="tier t3">已用於 reviewer-proof</span></td></tr>
+<tr><td>I7</td><td>—</td><td>困難（7.2 高可能/7.3 困難）</td><td>目標有益</td><td>—</td><td><span class="tier na">bounded polish</span></td></tr>
+</tbody>
+</table>
+<p class="resolve" style="font-size:var(--fs-sm);color:var(--c-text-soft);">另：§4 原本「稀有→高特異性特性」的價值論證偏 spin（盲點掃描指出），已改謙遜口徑：<b>「ISM 提供新維度（read-level epigenetic context），具體下游價值需領域專家評估」</b>，不自封「高價值」。</p>
+
+<!-- ============ S5 ============ -->
+<h2 id="s5"><span class="h-num">5</span>任務切分：4 桶 + 2 個新獨立子任務</h2>
+<table>
+<thead><tr><th>桶</th><th>內容</th><th>狀態</th></tr></thead>
+<tbody>
+<tr class="row-safe"><td><b>A 論文定稿</b></td><td>phasing 主軸 + I4a 個案 + <b>I4.3 normal-anchored cis-test 元件（獨立）</b> + I6.1 de-confound + LOSO + <b>純 phasing 延長 read（獨立，屬主軸不靠甲基）</b></td><td>寫</td></tr>
+<tr class="row-warn"><td><b>B 便宜 polish</b></td><td>I7a 5hmC 萃取驗尺（必做）+ I7b 26 位點分軌（可選）+ TSG promoter 擴展掃描 + imprinting 正控驗尺</td><td>可選</td></tr>
+<tr><td><b>C 協作</b></td><td>I2 tag→caller + tag 規格凍結（HKU，不阻塞論文）</td><td>平行</td></tr>
+<tr class="row-bug"><td><b>D 關閉 / 暫緩</b></td><td>I1 全部（DEAD）、I3 甲基版（hold）、I5（依賴 I4，deferred）、能力②（負結果放緩）</td><td>不動手</td></tr>
+</tbody>
+</table>
+<div class="callout-success"><b>2 個被掃描抓出、應獨立的子任務</b>：①<b>純 phasing 延長 read（不靠甲基）</b> —— 原本埋在 I3 甲基失敗敘述裡，其實是<b>主軸 phasing 工作</b>，難度/價值完全不同；②<b>normal-anchored cis-test 抽成可重用方法元件</b> —— 它是論文最硬的方法學亮點之一，應有獨立 deliverable（供 BRCA2/ZAR1L/其他位點重用）。</div>
+<p><b>依賴鏈</b>：I5 卡 I4（個案稀有 → 二階 ceiling）；I3 甲基版卡甲基判別力（AUC 0.505）；能力② 已 NEGATIVE 封頂。</p>
+
+<!-- ============ S6 ============ -->
+<h2 id="s6"><span class="h-num">6</span>待你確認 · open gaps（可勾選你想討論的）★</h2>
+<p>三支 workflow 的 22 條 open gap，收斂成 <b>6 個討論主題</b>。每條附我的<b>初步處置建議</b>；你勾選想深入討論的，或直接告訴我哪些 OK。</p>
+
+<ul class="gap-list">
+  <li class="gap-item">
+    <label><input type="checkbox"> G1 · BRCA2 cis-test 的方法論硬度 <span class="pill">P1·P3</span></label>
+    <div class="q">質疑：「high cohesion = cis-driven」假設可被挑戰嗎？是否只驗了 BRCA2 <b>一個</b>位點（self-selection bias）？高 cohesion read 會不會只是 mapping/phasing artifact？</div>
+    <div class="resolve">處置：<b>可補強且應補</b> —— 對 ZAR1L + 幾個 regime-A 位點也跑 normal-anchored cis-test（單樣本內可做、不需新樣本），把「1 個位點」變「&gt;1 個位點」。這會直接把論文最硬的方法學再加固。<b>建議納入 B 桶。</b></div>
+  </li>
+  <li class="gap-item">
+    <label><input type="checkbox"> G2 · 單樣本天花板：物理限制 or 工程限制？ <span class="pill">P3·P2</span></label>
+    <div class="q">質疑：「M9 跨樣本不可達」聽起來像物理限制，實際是「目前只有 HCC1395 tagged BAM + SEQC2 CN ground-truth」的工程限制。<b>若有 COLO829 tagged BAM + ground-truth，能升 Tier-B 嗎？</b>這對論文位階影響大。</div>
+    <div class="resolve">處置：<b>需你拍板</b> —— 這是「ASM 維持 ⭐3 單樣本 off-goal」vs「投入做 COLO829 升 ⭐4」的策略決定（上週決議是 off-goal）。我建議論文初版維持 ⭐3 誠實邊界，但把「⭐4 路徑＝COLO829 ground-truth」明列為 future work（而非含糊說「不可達」）。</div>
+  </li>
+  <li class="gap-item">
+    <label><input type="checkbox"> G3 · 稀有性的 reviewer 風險：0.34% 會被當「無意義」嗎？ <span class="pill">P2·P3</span></label>
+    <div class="q">質疑：「support 有多硬」取決於 reviewer 怎麼讀稀有性。若審閱者認為 0.34%≡無意義，need 預備「為何稀有仍有價值」+「可用於 X / 不適用 Y」的具體功能表。</div>
+    <div class="resolve">處置：<b>寫作前備好</b> —— (a) BRCA2 真實案例 + 明確癌症機制；(b) 「可用於：位點層級 ASM 驗證、TSG 沉默機制、與 tag 比對；不適用：全基因組 TP/FP 篩選、跨樣本自動判別」功能表；(c) 對標 Nature 級「發現稀有但真實現象 + 方法學亮點」敘事。<b>建議納入 A 桶論文 §價值段。</b></div>
+  </li>
+  <li class="gap-item">
+    <label><input type="checkbox"> G4 · 量測層尚未量化（coverage→β CI / 5mC-5hmC artifact 規模 / 個體特異性）<span class="pill">P4</span></label>
+    <div class="q">質疑：read-level 稀疏→β 估計噪音的<b>量化曲線</b>缺失；5mC/5hmC 砍半 artifact 是個案（BRCA2）還是系統性，未跨強位點驗；跨 6 樣本個體特異性只知方向一致、未知大小可比性。</div>
+    <div class="resolve">處置：<b>部分可補（單樣本內）</b> —— coverage vs β CI 曲線 + 對 26 strong 位點驗 5mC/5hmC artifact 規模（= I7a/I7b）可在 HCC1395 內做；跨樣本 β 平行度<b>結構性不可達</b>（誠實標 caveat）。<b>建議 I7a 納入 B 桶必做。</b></div>
+  </li>
+  <li class="gap-item">
+    <label><input type="checkbox"> G5 · I3 的 ensemble 可能性（H-B 弱信號疊加）<span class="pill">P1</span></label>
+    <div class="q">質疑：H-B 顯示甲基對 CN 有<b>弱信號</b>（perm p=0.001 非 null，但 AUC&lt;0.58）。reviewer 可能問：100 萬位點各 AUC 0.54，<b>疊加 ensemble</b> 是否能升到可用判別力？</div>
+    <div class="resolve">處置：<b>記為 open，但不重啟 filter</b> —— 這屬 I3/能力② 留白。依你指示「能力② 放緩、可能是資料/工程限制」，我建議論文標「ensemble 未探索，屬 future work；但單特徵層級已證非判別」，<b>不在本論文投入</b>（避免重開 concluded 方向）。</div>
+  </li>
+  <li class="gap-item">
+    <label><input type="checkbox"> G6 · 敘述框架：採 WRAP+Cynefin+Feynman hybrid？ <span class="pill">narrative</span></label>
+    <div class="q">評選結果建議 <code>adopt_alternative</code>：純 Verdict-Pyramid 給了結論卻沒給「為什麼會這樣」；改用 <b>Cynefin 域分類 + WRAP 自我證偽 + Feynman「為何難」</b> hybrid 更貼合「解釋為何可行但有界限」。</div>
+    <div class="resolve">處置：<b>本看板已採其精神</b>（§2 Feynman why-hard + §3 Cynefin 域 tag + §6 WRAP-style falsifier 區）。<b>待你確認</b>要不要在正式論文/PI 簡報也走這套，還是維持矩陣為主。</div>
+  </li>
+</ul>
+
+<!-- ============ S7 ============ -->
+<h2 id="s7"><span class="h-num">7</span>敘述腳本</h2>
+<div class="narrative">
+<div class="lead">60 秒版（給 PI）</div>
+<p>「ISM 不是甲基篩子，是一個 read-level epigenetic context 引擎。<b>同一工具、兩個答案</b>：問『甲基-單倍型一致事件存在嗎』——存在，BRCA2 用 normal 對照證明是真 cis-driven；問『能不能演算法式判別真假突變』——不能，全基因組稀有 0.34%、判別力 AUC 0.505 中性。<b>『做不出判別程式』不是工程失敗，是被數據證明的科學邊界</b>，這正是論文 characterization + tooling 的誠實定位。主軸 phasing 本週已到 Grade A 強度。」</p>
+</div>
+<div class="narrative">
+<div class="lead">30 秒版（給協作者）</div>
+<p>「我們能在位點層級可重現地<b>定位並驗證</b>稀有但真實的甲基-單倍型事件（如 BRCA2 promoter），但<b>無法</b>把它做成跨樣本自動篩 TP/FP 的程式——訊號太稀疏、太反向、太樣本特異。所以 ISM 的價值是 characterization 工具 + 可調靈敏度，不是 classifier。」</p>
+</div>
+
+<div class="references">
+<h2>數據來源（provenance）</h2>
+<ol>
+<li>全 metric 沿用 <code>InterSubMod/docs/reports/validated/2026/06/20260602_研究週報…/master_draft.md</code>（本週 validated SoT；數字經 workflow wf_02d8afb0-e13 雙階段 grep 驗證）。</li>
+<li>母稿概念文件：<code>InterSubMod/docs/concepts/2026/06/20260603_目標概念整理_甲基haplotype論文_難度價值雙軸_01.md</code>。</li>
+<li>本看板 grounding：分類 workflow <code>wf_7b4d2561-1a4</code> / 盲點掃描 <code>wf_9c7e6ae4-c25</code> / 硬化對抗質疑 <code>wf_9dc061ba-7aa</code>（共 30 agents）。</li>
+<li>關鍵數字錨點：phasing W=28 p=0.0078125（n=7）；BRCA2 Δβ=−0.122 / cis d=−0.142；strong-ASM 172（0.34%）；AUC=0.5049；FP 富集 5× OR=0.194；CN partial ρ=−0.055；regime-A 15/23；LOSO held-out −0.00012。</li>
+<li>口徑提醒：ASM 全為 HCC1395 單樣本 ⭐3 Tier-A（⭐4 需 COLO829 ground-truth，off-goal）；read-instance vs unique、Tmode vs paired、FDR vs Bonferroni 不可並列。</li>
+</ol>
+</div>
+
+</main>
+</div>
+</body>
+</html>
