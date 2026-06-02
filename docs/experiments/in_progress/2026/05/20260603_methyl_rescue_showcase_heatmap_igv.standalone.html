@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>甲基救援展示 — ISM 熱圖 + IGV-style 交互驗證（HCC1395 精選 loci）</title>
+<!-- data_sources: unphase_rescue_chr20.json + seqc2_v2_dedup_aggregate.json + showcase/igv PNG -->
+<style>
+  :root{--c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;--c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;--c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;--ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;--ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,monospace;--fs-xs:12px;--fs-sm:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:22px;--fs-2xl:28px;--fs-3xl:34px;--radius-sm:4px;--radius-md:6px;--radius-lg:8px;--shadow-sm:0 1px 2px rgba(20,20,19,.05);--shadow-md:0 2px 8px rgba(20,20,19,.08);}
+  *,*::before,*::after{box-sizing:border-box;}
+  body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);font-size:var(--fs-md);line-height:1.6;}
+  .layout{max-width:1340px;margin:0 auto;display:grid;grid-template-columns:250px 1fr;gap:var(--sp-5);padding:var(--sp-5) var(--sp-4);}
+  aside.toc{position:sticky;top:var(--sp-4);align-self:start;background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-4) var(--sp-3);box-shadow:var(--shadow-sm);max-height:calc(100vh - var(--sp-7));overflow-y:auto;}
+  aside.toc h3{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-soft);margin:0 0 var(--sp-2);font-weight:700;}
+  aside.toc ol{list-style:none;padding:0;margin:0;counter-reset:toc;}
+  aside.toc li{counter-increment:toc;margin:var(--sp-1) 0;}
+  aside.toc a{display:block;padding:5px 8px;border-radius:var(--radius-sm);color:var(--c-text);text-decoration:none;font-size:var(--fs-sm);border-left:3px solid transparent;}
+  aside.toc a:hover{background:var(--c-code-bg);border-left-color:var(--c-accent);}
+  aside.toc a::before{content:counter(toc) ". ";color:var(--c-text-soft);font-family:var(--ff-mono);font-size:.85em;margin-right:4px;}
+  aside.toc a.core{font-weight:600;} aside.toc a.core::after{content:"★";color:var(--c-critical);margin-left:6px;font-size:.85em;}
+  main.report{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:var(--sp-6);min-width:0;}
+  .report-header{border-bottom:2px solid var(--c-accent);padding-bottom:var(--sp-4);margin-bottom:var(--sp-5);}
+  .report-header .pretitle{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:1px;color:var(--c-accent-deep);font-weight:700;margin-bottom:var(--sp-2);}
+  .report-header h1{font-size:var(--fs-3xl);margin:0 0 var(--sp-3);line-height:1.25;}
+  .report-header .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-2) var(--sp-5);font-size:var(--fs-sm);margin-top:var(--sp-3);}
+  .report-header .meta dt{color:var(--c-text-soft);font-weight:600;} .report-header .meta dd{margin:0;}
+  .report-header .meta code{background:var(--c-code-bg);padding:1px 5px;border-radius:var(--radius-sm);font-family:var(--ff-mono);font-size:.92em;}
+  .verdict-banner{color:#fff;padding:var(--sp-3) var(--sp-4);margin-top:var(--sp-4);border-radius:var(--radius-md);font-weight:600;}
+  .verdict-banner.positive{background:linear-gradient(90deg,#15803D,#22C55E);}
+  h2{font-size:var(--fs-2xl);margin:var(--sp-7) 0 var(--sp-3);padding-bottom:var(--sp-2);border-bottom:1px solid var(--c-border);scroll-margin-top:var(--sp-4);}
+  h2 .h-num{font-family:var(--ff-mono);color:var(--c-accent-deep);font-size:.7em;margin-right:var(--sp-2);font-weight:600;}
+  h3{font-size:var(--fs-xl);margin:var(--sp-5) 0 var(--sp-2);}
+  p,ul,ol{margin:var(--sp-3) 0;} ul,ol{padding-left:var(--sp-5);}
+  code{background:var(--c-code-bg);padding:1px 6px;border-radius:var(--radius-sm);font-family:var(--ff-mono);font-size:.92em;}
+  table{border-collapse:collapse;width:100%;margin:var(--sp-4) 0;font-size:var(--fs-sm);}
+  th,td{border:1px solid var(--c-border);padding:var(--sp-2) var(--sp-3);text-align:left;vertical-align:top;}
+  th{background:var(--c-code-bg);font-weight:600;} td.num{text-align:right;font-family:var(--ff-mono);}
+  tr.row-bug td{background:#FEF2F0;color:#7F1D1D;} tr.row-safe td{background:#DCFCE7;color:#166534;} tr.row-warn td{background:#FEF3C7;}
+  .callout-success{background:#F0FDF4;border-left:4px solid var(--c-success);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#166534;}
+  .callout-warning{background:#FEF7E6;border-left:4px solid var(--c-warning);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#78350F;}
+  .callout-info{background:#EFF4FF;border-left:4px solid var(--c-info);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#1E3A5F;}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--sp-3);margin:var(--sp-4) 0;}
+  .stat-box{background:var(--c-bg);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--sp-3);text-align:center;}
+  .stat-box .number{font-size:var(--fs-2xl);font-weight:700;color:var(--c-accent);line-height:1.1;}
+  .stat-box .number.bug{color:var(--c-critical);}.stat-box .number.success{color:var(--c-success);}.stat-box .number.warning{color:var(--c-warning);}.stat-box .number.info{color:var(--c-info);}
+  .stat-box .label{font-size:var(--fs-xs);color:var(--c-text-soft);margin-top:var(--sp-1);}
+  .img-figure{margin:var(--sp-4) 0;text-align:center;}
+  .img-figure img{max-width:100%;height:auto;border:1px solid var(--c-border);border-radius:var(--radius-md);}
+  .img-figure figcaption{font-size:var(--fs-sm);color:var(--c-text-soft);margin-top:var(--sp-2);font-style:italic;}
+  .img-pair{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin:var(--sp-4) 0;}
+  @media (max-width:760px){.img-pair{grid-template-columns:1fr;}}
+  .loci-card{border:1.5px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-4);margin:var(--sp-5) 0;}
+  .loci-card.success{border-color:var(--c-success);} .loci-card.anomaly{border-color:var(--c-warning);}
+  .references{background:var(--c-bg);border-radius:var(--radius-md);padding:var(--sp-3) var(--sp-4);margin-top:var(--sp-5);}
+  .references h2{border-bottom:none;margin-top:0;font-size:var(--fs-xl);padding-bottom:0;}
+  .references ol{list-style:decimal;padding-left:var(--sp-5);} .references li{margin:var(--sp-2) 0;font-size:var(--fs-sm);}
+  @media print{body{background:#fff;}.layout{display:block;max-width:100%;padding:0;}aside.toc{display:none;}main.report{box-shadow:none;border:none;padding:0;}table,.img-figure,.loci-card{page-break-inside:avoid;}h1,h2,h3{page-break-after:avoid;}}
+  @media (max-width:900px){.layout{grid-template-columns:1fr;}aside.toc{position:static;max-height:none;}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="toc" aria-label="章節導航">
+    <h3>章節導航</h3>
+    <ol>
+      <li><a href="#tldr" class="core">展示總覽 + 怎麼讀圖</a></li>
+      <li><a href="#proto">救援原型結果（chr20）</a></li>
+      <li><a href="#loci1" class="core">Loci 1: 救援成功案例</a></li>
+      <li><a href="#loci2" class="core">Loci 2: LOH 純-LOH 異常</a></li>
+      <li><a href="#loci3" class="core">Loci 3: LOH HP 極不平衡</a></li>
+      <li><a href="#howread">圖例與限制</a></li>
+      <li><a href="#next">下一步</a></li>
+      <li><a href="#refs">證據來源</a></li>
+    </ol>
+  </aside>
+  <main class="report">
+    <header class="report-header">
+      <div class="pretitle">甲基救援展示 · ISM 熱圖 + IGV-style · HCC1395 · 2026-06-03</div>
+      <h1>甲基救 unphase read — 可驗證展示（熱圖 + IGV-style 交互數據）</h1>
+      <dl class="meta">
+        <dt>建立日期</dt><dd>2026-06-03</dd>
+        <dt>受眾</dt><dd>PI（驗證確認）</dd>
+        <dt>任務類型</dt><dd>A pilot · <span style="background:#FEF3C7;padding:1px 6px;border-radius:8px">partial: HCC1395 精選 loci</span></dd>
+        <dt>原型</dt><dd>Python 旁路（不改 C++，已 commit fe18c06）</dd>
+        <dt>展示</dt><dd>3 loci × (ISM 甲基熱圖 + IGV-style read track)</dd>
+        <dt>數字來源</dt><dd>unphase_rescue_chr20.json 等（Read 確認）</dd>
+      </dl>
+      <div class="verdict-banner positive">
+        每個 loci 給兩張可驗證的圖：<strong>ISM 甲基熱圖</strong>（read×CpG + 救援前後 HP 側欄）+ <strong>IGV-style read track</strong>（read 依基因組位置排列 + HP 著色 + CpG 甲基點）。你可直接肉眼比對「unphase read 被甲基分到哪群、是否合理」。
+      </div>
+    </header>
+
+    <h2 id="tldr"><span class="h-num">0.</span>展示總覽 + 怎麼讀圖</h2>
+    <p>承接前驗證（外推 88.5% 證明甲基能救 unphase），本頁用 HCC1395 真實資料的 3 個精選 loci，給你<strong>可肉眼驗證</strong>的視覺證據。每 loci 兩張圖：</p>
+    <div class="callout-info">
+      <strong>① ISM 甲基熱圖</strong>：每列=一條 read，每欄=一個 CpG，顏色=5mC 機率（藍未甲基/紅甲基）。最左<strong>兩欄側欄</strong>=「原 HP」與「救援後 HP」（灰=unphase；救援後變淺藍/淺紅=被預測成 HP1/HP2）。<br>
+      <strong>② IGV-style read track</strong>：每橫條=一條 read 依基因組位置排列（藍 HP1/紅 HP2/灰 unphase），條上的點=CpG（深紅甲基/深藍未甲基）。虛線=loci 中心。
+    </div>
+    <p><strong>驗證重點</strong>：看 unphase（灰）read 的甲基模式是否與它被救到的那群（HP1 藍 / HP2 紅）一致 → 一致＝救援合理。</p>
+
+    <h2 id="proto"><span class="h-num">1.</span>救援原型結果（chr20，真 unphase read）</h2>
+    <p>對 chr20 真正無 HP tag 的 read（非「假裝」）跑救援原型：</p>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="number">8</div><div class="label">測試窗（±2kb）</div></div>
+      <div class="stat-box"><div class="number">40</div><div class="label">真 unphase target read</div></div>
+      <div class="stat-box"><div class="number success">35</div><div class="label">被甲基指派 HP（87.5%）</div></div>
+      <div class="stat-box"><div class="number info">20</div><div class="label">高信心（conf≥0.1）</div></div>
+      <div class="stat-box"><div class="number">0.107</div><div class="label">conf median</div></div>
+      <div class="stat-box"><div class="number warning">24:11</div><div class="label">救向 HP1:HP2（略偏，小樣本）</div></div>
+    </div>
+    <div class="callout-success">守恆 ✓：35 指派 + 5 無法救（無共享 CpG）= 40 target。原型不覆寫原 tag，輸出 <code>reassigned_hp</code> + <code>reassign_conf</code> + <code>original_hp</code>（可回溯）。</div>
+
+    <!-- Loci 1 -->
+    <h2 id="loci1"><span class="h-num">2.</span>Loci 1：unphase 救援成功案例（chr20:54,059,756）</h2>
+    <div class="loci-card success">
+      <p>此窗 anchor HP1/HP2=63/20，9 個真 unphase read，4 個高信心被救。</p>
+      <div class="img-figure">
+        <img src="20260531_methyl_phasing_A0_assets/showcase_chr20_rescue.png" alt="chr20 救援 ISM 甲基熱圖">
+        <figcaption>① ISM 甲基熱圖：左側欄灰色（unphase）在「救援後」欄變淺藍/淺紅 = 被甲基分到 HP1/HP2。</figcaption>
+      </div>
+      <div class="img-figure">
+        <img src="20260531_methyl_phasing_A0_assets/igv_chr20_rescue.png" alt="chr20 救援 IGV-style">
+        <figcaption>② IGV-style：read 依位置排列，HP1(藍)/unphase(灰)/HP2-1(紅) 三群 + CpG 甲基點。</figcaption>
+      </div>
+    </div>
+
+    <!-- Loci 2 -->
+    <h2 id="loci2"><span class="h-num">3.</span>Loci 2：★ LOH 純-LOH 分得開異常（chr15:28,455,307）</h2>
+    <div class="loci-card anomaly">
+      <p>SEQC2 標為<strong>純 LOH</strong>（非 cnLOH+gain），理論上一條 haplotype 丟失該分不開，<strong>但甲基 AUC=0.986 分得開、GMM 雙峰 BIC=47.4</strong>。這是本研究最值得深究的異常。</p>
+      <div class="img-figure">
+        <img src="20260531_methyl_phasing_A0_assets/showcase_chr15_loh_anomaly.png" alt="chr15 LOH 異常 ISM 熱圖">
+        <figcaption>① ISM 甲基熱圖（293 CpG）：HP1 區（上）vs HP2 區（下）甲基模式明顯不同 — 純 LOH 卻有兩種甲基模式。</figcaption>
+      </div>
+      <div class="img-figure">
+        <img src="20260531_methyl_phasing_A0_assets/igv_chr15_loh.png" alt="chr15 LOH 異常 IGV-style">
+        <figcaption>② IGV-style：HP1(藍)/HP2(紅) read 的 CpG 甲基點分布不同 → 視覺確認「純 LOH 區有兩種甲基」。</figcaption>
+      </div>
+      <div class="callout-warning"><strong>異常意義</strong>：純 LOH 區出現兩種可分的甲基模式，可能是 (1) LOH 不完整（殘留另一 haplotype）(2) subclone 異質性 (3) SEQC2 LOH 邊界不精準 (4) 甲基細胞間異質性（非 haplotype）。需後續定性。</div>
+    </div>
+
+    <!-- Loci 3 -->
+    <h2 id="loci3"><span class="h-num">4.</span>Loci 3：LOH 分得開 + HP 極不平衡（chr8:87,663,325）</h2>
+    <div class="loci-card anomaly">
+      <p>HP1/HP2 = <strong>96/17</strong>（極不平衡，AUC=0.984）。完全 LOH 該只剩一條 haplotype，但這裡兩 HP 都有 read（雖懸殊）→ 疑非完全 LOH（殘留少量另一 haplotype）。</p>
+      <div class="img-pair">
+        <figure class="img-figure"><img src="20260531_methyl_phasing_A0_assets/showcase_chr8_loh_imbalance.png" alt="chr8 ISM 熱圖"><figcaption>① ISM 熱圖：HP1（大塊藍，96條）vs HP2（小塊紅，17條）</figcaption></figure>
+        <figure class="img-figure"><img src="20260531_methyl_phasing_A0_assets/igv_chr8_imbalance.png" alt="chr8 IGV-style"><figcaption>② IGV-style：HP1 read 主導（顯示上限 120 條）</figcaption></figure>
+      </div>
+      <div class="callout-warning"><strong>異常意義</strong>：96:17 的 HP 不平衡 + LOH 標記 → 此區 LOH 可能不完整，或一條 haplotype 大量擴增（cnLOH 殘跡）。甲基能分這兩群，但「兩群」的生物本質待查。</div>
+    </div>
+
+    <h2 id="howread"><span class="h-num">5.</span>圖例與限制</h2>
+    <table>
+      <thead><tr><th>項目</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td>ISM 熱圖列順序</td><td>HP1 → 救HP1 → unphase → 救HP2 → HP2（依救援結果排）</td></tr>
+        <tr><td>熱圖缺值</td><td>未覆蓋 CpG 以欄均值插補供顯示（偏紅是插補非真甲基）</td></tr>
+        <tr><td>IGV-style</td><td>自寫 pysam→matplotlib（desktop IGV 需 X display 無法 headless）；read 最多顯示 120 條</td></tr>
+        <tr><td>救援信心</td><td>conf = margin×cov_factor，margin=|d1-d2|/(d1+d2)</td></tr>
+        <tr><td>scope</td><td>HCC1395 單樣本精選 loci；非全基因組結論</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="next"><span class="h-num">6.</span>下一步</h2>
+    <ul>
+      <li>LOH 純-LOH 異常定性：對 chr15/chr8 異常 loci 查 SEQC2 LOH 邊界 + VAF + subclone 證據。</li>
+      <li>真 unphase 救援的正確性：unphase read 無真 HP，可用「鄰近 PS-block 延伸」或重跑時保留證據交叉驗證。</li>
+      <li>跨樣本 COLO829 驗證救援泛化。</li>
+      <li>評估回灌 longphase-S / ISM C++（方向已驗證）。</li>
+    </ul>
+
+    <section class="references" id="refs">
+      <h2>證據來源（全部可複查）</h2>
+      <ol>
+        <li>救援原型真值：<code>InterSubMod/docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/unphase_rescue_chr20.json</code></li>
+        <li>LOH loci 真值：<code>seqc2_v2_dedup_aggregate.json</code>（separable_top10）+ <code>loh_cnloh_intersect.json</code></li>
+        <li>展示腳本：<code>unphase_rescue_prototype.py</code> + <code>plot_showcase_heatmap.py</code> + <code>plot_igv_style.py</code></li>
+        <li>開發紀錄：<code>20260531_methyl_phasing_A0_assets/DEV_LOG.md</code>（commit fe18c06）</li>
+        <li>前序驗證：<code>20260602_methyl_rescue_extrapolation_loh_final.standalone.html</code>（外推 88.5%）</li>
+        <li>真值 SoT：<code>VERIFIED_RESULTS.md</code>（V1-V6）</li>
+      </ol>
+      <p style="font-size:var(--fs-xs);color:var(--c-text-soft);margin-top:var(--sp-3)">
+        本頁救援統計數字從 unphase_rescue_chr20.json Read 確認；6 張展示圖由 plot_showcase_heatmap.py / plot_igv_style.py 從真實 BAM 抽取產出、已肉眼確認。HCC1395 paired 單樣本精選 loci，partial flag。本頁為視覺 companion（D11）。
+      </p>
+    </section>
+  </main>
+</div>
+</body>
+</html>
