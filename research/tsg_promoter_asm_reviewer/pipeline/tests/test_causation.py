@@ -14,9 +14,10 @@ from lib.causation import RefContext, causation_summary  # noqa: E402
 
 # golden: (tag, chrom, pos, ref, alt, expected_mechanical)
 GOLDEN = [
-    ("BRCA2",     "chr13", 32315128, "G", "A", "NEUTRAL"),       # regulatory cis, not mechanical
-    ("het_DYTN",  "chr2",  206705390, "G", "A", "DESTROYS_CpG"),  # germline het destroying a CpG
-    ("FP_chr9",   "chr9",  41788031, "A", "T", "CREATES_CpG"),    # FP creating a CpG
+    ("BRCA2",         "chr13", 32315128,  "G", "A", "NEUTRAL"),       # AGA: regulatory cis, not mechanical
+    ("het_DYTN",      "chr2",  206705390, "G", "A", "DESTROYS_CpG"),  # CGT: G>A breaks CG -> CA
+    ("FP_chr9_neut",  "chr9",  41788031,  "A", "T", "NEUTRAL"),       # AAG: A>T cannot form a CpG
+    ("FP_chr9_creat", "chr9",  39580868,  "G", "C", "CREATES_CpG"),   # TGG: G>C makes mid C, mid-right CG
 ]
 
 
