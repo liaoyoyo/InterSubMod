@@ -39,7 +39,8 @@ pipeline/
 |-------|------|------|------|
 | **P0 地基** | pipeline/ + lib + loci.yaml + **BRCA2 regression test** | ✅ **完成** (99f052d) | `make test` PASS；故意 break(min-collapse)→7/7 FAIL ✓ |
 | **P1 抽取 substrate** | `stages/stage_extract.py`（BAM-direct，mod_code 欄，window-restricted）+ Level-1-plus 持久化 cache + `lib` 加 load_level1_plus/dbeta_mod | ✅ **完成** | `test_brca2_bam_extract` PASS：5mC=−0.121 / 5hmC=−0.001 / **any=−0.122==Level-1(cross-extractor invariant)** / cache MISS→HIT ✓ |
-| P2 cis-core + LOH/CNV | cis 欄 genome-wide + cis-ladder T0-T3 + 整數 CN + axis-gate(HP nonLOH-only) | TODO | HP-axis 100% nonLOH；BRCA2 CN=5 |
+| **P2a LOH/CNV + axis-gate** | `lib/genomic_context.py`：整數 CN（SEQC2 gain/loss_cn bed）+ loh_status + **axis_validity gate**（LOH→ALLELE primary，修 43% HP-in-LOH 違規）| ✅ **完成** | `test_genomic_context` PASS：BRCA2 CN=5/nonLOH/HP-valid；LOH→ALLELE ✓ |
+| P2b cis-core | cis 欄 genome-wide + cis-ladder T0-T3 verdict + power-class | TODO | het-null 落 T0/T1；BRCA2 T3 |
 | P3 scan + causation | two-stage scan + ranking + 證據卡 + mechanical-cis + (pooled 轉換 signature) | TODO | scan grep 到 BRCA2；het-null 落 T0/T1 |
 | P4 持續驗證閉環 | git-diff hook（advisory exit-0）+ provenance manifest | TODO | 編輯 stage 觸發 advisory |
 
