@@ -159,6 +159,104 @@
 
 ---
 
+## Rule 13 — 場景對應量化標準（2026-05-20 Issue #4 升級）
+
+> 不同 PI 報告場景對應不同 slide 數 / chars / rows / visual ratio 上限。生成前必對齊 frontmatter `audience_scenario`。
+
+### 場景量化標準表
+
+| 場景 | 時長 | Slide 數 | 純文字 chars/slide | 含表 chars/slide | Table rows | Main visual 佔比 | Reading test |
+|------|:----:|:-------:|:------------------:|:----------------:|:----------:|:----------------:|:------------:|
+| **PI 1-on-1（週報）** | 5-10 min | 3-6 | ≤ 150 | ≤ 250 | ≤ 5 | 60-75% | 3-second |
+| **Lab meeting** | 15-30 min | 8-15 | ≤ 250 | ≤ 350 | ≤ 8 | 50-65% | 5-second |
+| **Conference talk** | 45-60 min | 20-40 | ≤ 350 | ≤ 450 | ≤ 12 | 40-60% | 10-second |
+| **Lab informal pitch** | 5 min | 3-5 | ≤ 100 | ≤ 200 | ≤ 4 | 70-80% | 3-second |
+
+### 配套：speaker note 機制對齊
+
+- **PI 1-on-1 / Lab meeting**：speaker note 用 `<details>` 折疊（`components/speaker_note_details.html`）
+- **Conference**：speaker note 用 visible block（`components/speaker_note.html`）
+- **Lab informal**：可省略 speaker note，slide 已含全部資訊
+
+### 落地 audit
+
+每張 slide 生成後 self-audit：
+```
+chars_visible = count_chars(slide content excl <details>)
+table_rows = count(<tr>) per slide
+if chars_visible > scenario_limit OR table_rows > scenario_row_limit:
+    flag for compression / split / move to speaker note
+```
+
+### Cross-reference
+- Memory: `reference-pi-scenario-quantitative-standards.md`
+- Audit report: `InterSubMod/docs/solutions/optimization/2026/05/20260520_pptx_workflow_skill_audit_01.md` Issue #4
+- Companion: [[feedback-ppt-minimal-visual-first]]
+
+---
+
+## Rule 14 — Interactive Dashboard / Web-UI Patterns（2026-06-03 新增；補 Rule 1-13 print/figure 導向之互動 HTML 缺口）
+
+> **適用**：互動 HTML 儀表板 / 工作板（`state/focus_board.html`、goal-landscape workboard、harness_health dashboard）—— 非單向 print/slide，而是**可探索、可收納、可追蹤變化**的介面。Rule 1-13（Tufte/CRAP/Nature）仍全適用；本條補「互動層」。
+> **總綱（Shneiderman's Mantra）**：**Overview first, zoom & filter, details on demand.** 先全貌 → 再下鑽。
+
+### 14.1 漸進揭露（Progressive Disclosure）
+- 預設只露**當下決策必需**；其餘收摺（native `<details>` 零 JS，或 `.collapsed` class）。
+- 分層揭露對應既有 L0-L3：**L0 一眼焦點 → L1 主軸 → L2 關聯/譜系 → L3 細節（預設收）**。
+- 反模式：一次攤開所有資訊（牆）= 認知過載（NN/g cognitive load）。
+
+### 14.2 資訊密度層級 + WIP-limit
+- 高資訊頁用**密度梯度**：hero（最大）> 卡 > 列 > 收摺細節；非均一密度。
+- 焦點槽 **WIP-limit ≤2**（逼聚焦，借 Kanban / Disco Thought Cabinet）。
+- 提供**密度切換**（寬鬆/緊湊 toggle）讓用戶自選資訊密度（Refactoring UI: "design for density choice"）。
+
+### 14.3 可掃描性（Scannability, F-pattern）
+- section 標題用**問句**（「現在做什麼?」「結果怎麼累積?」「卡在哪?」）= 資訊氣味（information scent）。
+- 視覺權重梯度引導眼睛：accent hero → section header → body。
+- 重要狀態用**雙重編碼**（色 + icon/文字，呼應 Rule 9 colorblind）：✓ 綠 / ⚠ 黃 / ✗ 紅 + 文字。
+
+### 14.4 可操作性 affordance + 即時回饋
+- 可點擊元素必有 affordance：`cursor:pointer` + `:hover` 變化 + chevron（▾/▸ 旋轉）標收合態。
+- 狀態回饋即時：toggle 後立刻反映；無「點了沒反應」。
+- 反模式：看起來可點但不可點 / 可點但無 hover 提示。
+
+### 14.5 Responsive grid + overflow 安全
+- grid 用 `repeat(auto-fit, minmax(...))` 或 `@media` 斷點；窄螢幕降單欄。
+- **overflow 鐵則**：flex/grid 子項加 `min-width:0`（經典 flexbox 溢出根因）+ 長文字 `overflow-wrap:anywhere; word-break:break-word`。長 id/title 放 `title=` tooltip + short label 顯示。
+
+### 14.6 Detail-on-demand（下鑽）
+- 摘要 + 點開細節（`<details>` / tooltip / 連結到 source 檔）。
+- 數字/結論可追溯：hover/點擊 → 來源（呼應 §13 provenance；如 lineage node 附 ledger entry id）。
+
+### 14.7 狀態與「變化/進退」回饋（temporal）
+- 進度用 **stepper（P0-P6 階段點，current 高亮）** + **roll-up %**（goal← cycle phase），非假甘特日期（Rule：研究無確定日期勿假精確）。
+- **「自上次檢視變化」diff**（localStorage 存上次快照 → 比對 → 標 ▲推進 / ▼退 / +新）= 直接服務「任務進退理解」。⚠ localStorage 僅 UI 偏好/快照，非 SoT（§13 + [[feedback_self_phasing_PI_no_build_html_py]]）。
+
+### 14.8 互動層 restraint（與 Rule 1-13 一致的克制）
+- **inline vanilla JS 優先**（零 CDN / 零 framework / 零 build）→ 維持 offline 單檔、可 grep、可版控。需重互動（live filter / sortable table）才考慮 Alpine（已在 PI stack，但引 CDN/vendor 依賴）；**永不** React/Vue/webpack（破壞單檔特性）。
+- 數字一律 **by-construction 注入**（derive script 讀真檔 render，§13 Layer A），非手打。
+- 遊戲化只取「服務聚焦」的部分（HUD pin / 進度條 / 安靜 checkmark）；**剝離** celebration 特效 / 集點 / 排行榜 / RNG / 隱藏成就（§13.7 未驗證滿足感 + Goodhart）。
+
+### Dashboard 專屬 pre-publish 檢查（疊加 Rule 12 的 6 項）
+- [ ] **5 秒儀表板測試**：一眼能答「現在該做什麼 + 下一步」？
+- [ ] 預設收摺態合理（細節收、焦點露）？
+- [ ] 所有可點元素有 affordance + hover？
+- [ ] 窄螢幕不溢出（min-width:0 + overflow-wrap）？
+- [ ] 每個數字可追溯真檔（derive，非手打）？
+
+### 對應 focus_board.html 元素
+| Rule 14 | focus_board 實作 |
+|---------|------------------|
+| 14.1 漸進揭露 | L0-L3 + `.sec` collapsible + `<details>` lineage |
+| 14.2 密度 + WIP | hero>卡>列梯度 + pinned≤2 + ⇲緊湊 toggle |
+| 14.3 可掃描 | 問句 section header + accent hero + 雙重編碼 badge |
+| 14.4 affordance | `.sec-h` cursor:pointer + hover + chevron 旋轉 |
+| 14.5 responsive | grid auto + `min-width:0` + `overflow-wrap` |
+| 14.7 進退 | phase stepper + goal roll-up % +（規劃中）since-last-view diff |
+| 14.8 restraint | inline vanilla JS 零 CDN + Layer A derive |
+
+---
+
 ## Sources
 
 - Edward Tufte — *The Visual Display of Quantitative Information* (1983, 2001)
@@ -173,3 +271,7 @@
 - Berkeley BPM dataviz checklist (PDF)
 - Depict Data Studio dataviz checklist
 - dataviz best practices 2026 (Techment, Julius AI, Omni Analytics)
+- **（Rule 14 互動層）** Ben Shneiderman — "Overview first, zoom & filter, details on demand" mantra
+- **（Rule 14）** Refactoring UI — Adam Wathan & Steve Schoger（density, hierarchy, affordance）
+- **（Rule 14）** NN/g — Progressive Disclosure + Cognitive Load heuristics
+- **（Rule 14）** GOV.UK Design System / Material Design / Apple HIG（interaction affordance, responsive）

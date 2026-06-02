@@ -93,6 +93,18 @@ def tier_label(tier):
     return "⭐" * int(tier) if str(tier).isdigit() else esc(tier)
 
 
+def phase_pct(phase):
+    """Progress % from phase position in P0-P6 (honest: only where a real phase exists)."""
+    return round(PHASE_FULL.index(phase) / 6 * 100) if phase in PHASE_FULL else None
+
+
+def sec(title_html, body_html, is_open=True):
+    """Collapsible section wrapper (vanilla JS toggle, zero framework)."""
+    cls = "sec" if is_open else "sec collapsed"
+    return (f'<section class="{cls}"><h2 class="sec-h" onclick="tg(this)">{title_html}'
+            f'<span class="chev">▾</span></h2><div class="sec-body">{body_html}</div></section>')
+
+
 def main():
     focus = load_json(_p("state", "focus.json"), {}) or {}
     active = load_json(_p("state", "active.json"), {}) or {}
@@ -170,7 +182,7 @@ def main():
         <div class="cid">{esc(cid)}</div>
         <div class="next"><b>下一步：</b>{esc(nextstep.get(cid,''))}</div>
       </div>""")
-    l1 = f'<section><h2>★ 兩條主軸 <span class="sub">（pinned · 機械 cycle）</span></h2><div class="grid2">{"".join(cards)}</div></section>'
+    l1 = sec('★ 兩條主軸 <span class="sub">（pinned · 機械 cycle）</span>', f'<div class="grid2">{"".join(cards)}</div>')
 
     # ---- 6 goals overview (見林) ----
     goals = focus.get("goals", [])
@@ -181,11 +193,14 @@ def main():
         cls, lab = GST.get(g.get("status"), ("g-active", g.get("status", "")))
         cyc = g.get("cycle")
         cyclink = f'<span class="g-cyc">▶ {esc(str(cyc)[:32])}</span>' if cyc else ""
+        pct = phase_pct(cyc_state.get(cyc, {}).get("phase", "")) if cyc else None
+        bar = (f'<span class="g-bar" title="phase roll-up {pct}%"><span class="g-fill" style="width:{pct}%"></span></span>'
+               f'<span class="g-pct">{pct}%</span>') if pct is not None else ''
         grows.append(
             f'<div class="goal {cls}"><span class="g-id">{esc(g.get("id"))}</span>'
-            f'<span class="g-st">{lab}</span><span class="g-short">{esc(g.get("short",""))}</span>{cyclink}</div>')
-    goals_sec = ('<section><h2>🎯 6 目標全景 <span class="sub">（見林 · 哪些活 / 暫緩 / 受阻 / 關閉）</span></h2>'
-                 f'<div class="goals">{"".join(grows)}</div></section>') if goals else ""
+            f'<span class="g-st">{lab}</span><span class="g-short">{esc(g.get("short",""))}</span>{bar}{cyclink}</div>')
+    goals_sec = sec('🎯 6 目標全景 <span class="sub">（見林 · 活 / 暫緩 / 受阻 / 關閉 · roll-up %）</span>',
+                    f'<div class="goals">{"".join(grows)}</div>') if goals else ""
 
     # ---- blockers strip ----
     blockers = focus.get("blockers", [])
@@ -223,7 +238,7 @@ def main():
         lin_blocks.append(
             f'<details open><summary>{esc(st.get("title", cid))}</summary>'
             f'<div class="chain">{body}</div>{rp}</details>')
-    l2 = '<section><h2>🧬 結果怎麼累積的 <span class="sub">（result lineage · 來自 evidence_ledger）</span></h2>' + "".join(lin_blocks) + "</section>"
+    l2 = sec('🧬 結果怎麼累積的 <span class="sub">（result lineage · 來自 evidence_ledger）</span>', "".join(lin_blocks), is_open=False)
 
     # ---- L3 detail row: background / queue / recent ----
     bg = focus.get("background", [])
@@ -238,23 +253,45 @@ def main():
         f'<span class="v-mut">{esc(str(e.get("cycle_id",""))[:30])}</span></li>'
         for e in recent) or "<li class='v-mut'>（無）</li>"
 
-    l3 = f"""
-  <section><h2>▸ 背景 · 佇列 · 近期 <span class="sub">（L3 detail）</span></h2>
-    {blk_sec}
-    <div class="grid3">
-      <div class="panel"><div class="ph">▸ 背景孵化（≤2）</div>{bg_html}</div>
-      <div class="panel"><div class="ph">📋 假說佇列</div>
-        <div class="big">{q_live}<span class="unit"> live</span></div>
-        <div class="v-mut">{q_closed} closed / {q_total} total</div></div>
-      <div class="panel"><div class="ph">🕐 近期結果（ledger tail）</div><ul class="rec">{rec_html}</ul></div>
-    </div>
-  </section>"""
+    l3_body = (
+        f'{blk_sec}<div class="grid3">'
+        f'<div class="panel"><div class="ph">▸ 背景孵化（≤2）</div>{bg_html}</div>'
+        f'<div class="panel"><div class="ph">📋 假說佇列</div>'
+        f'<div class="big">{q_live}<span class="unit"> live</span></div>'
+        f'<div class="v-mut">{q_closed} closed / {q_total} total</div></div>'
+        f'<div class="panel"><div class="ph">🕐 近期結果（ledger tail）</div><ul class="rec">{rec_html}</ul></div>'
+        f'</div>')
+    l3 = sec('▸ 背景 · 佇列 · 近期 <span class="sub">（L3 detail · 預設收摺）</span>', l3_body, is_open=False)
 
     # ---- L3 dead ----
     dead = focus.get("dead", [])
     dead_html = "".join(
         f'<div><s>{esc(d.get("title",""))}</s> — {esc(d.get("why",""))}</div>' for d in dead)
     l3dead = f'<section><details><summary>❌ 已死路 / Concluded（透明保留 · 勿再開）</summary><div class="dead">{dead_html}</div></details></section>'
+
+    # ---- snapshot for since-last-view diff (Rule 14.7 進退追蹤) ----
+    snap_goals = [{"id": g.get("id"),
+                   "pct": (phase_pct(cyc_state.get(g.get("cycle"), {}).get("phase", "")) if g.get("cycle") else None),
+                   "status": g.get("status")} for g in goals]
+    snap_cycles = [{"id": c.get("cycle_id"),
+                    "phase": cyc_state.get(c.get("cycle_id"), {}).get("phase", ""),
+                    "tier": cyc_state.get(c.get("cycle_id"), {}).get("tier", "")} for c in active.get("cycles", [])]
+    cur_json = json.dumps({"gen": gen, "queue_live": q_live, "queue_total": q_total,
+                           "ledger_n": len(ledger), "goals": snap_goals, "cycles": snap_cycles}, ensure_ascii=False)
+    since_js = (
+        "const CUR=__CURJSON__;(function(){var K='focusboard_snapshot',P=null,el=document.getElementById('sincebar');"
+        "if(!el)return;try{P=JSON.parse(localStorage.getItem(K)||'null')}catch(e){}"
+        "if(P){var d=[];"
+        "if(P.queue_live!==CUR.queue_live){var x=CUR.queue_live-P.queue_live;d.push('假說live '+(x>0?'▲+'+x:'▼'+x))}"
+        "if(P.ledger_n!==CUR.ledger_n){var y=CUR.ledger_n-P.ledger_n;d.push('ledger '+(y>0?'▲+'+y:'▼'+y))}"
+        "var pg={};(P.goals||[]).forEach(function(g){pg[g.id]=g});"
+        "(CUR.goals||[]).forEach(function(g){var p=pg[g.id];if(p&&g.pct!=null&&p.pct!=null&&p.pct!==g.pct){var z=g.pct-p.pct;d.push(g.id+' '+(z>0?'▲+'+z:'▼'+z)+'%')}});"
+        "var pc={};(P.cycles||[]).forEach(function(c){pc[c.id]=c});"
+        "(CUR.cycles||[]).forEach(function(c){var p=pc[c.id];if(!p){d.push('+新cycle '+c.id.slice(0,16))}else if(p.phase!==c.phase){d.push(c.id.slice(0,16)+' '+p.phase+'→'+c.phase)}});"
+        "el.textContent=d.length?('🔄 自上次檢視: '+d.join(' · ')):'✓ 自上次檢視無變化';el.className='sincebar '+(d.length?'changed':'same')}"
+        "else{el.textContent='（首次檢視，已存基準快照）'}"
+        "try{localStorage.setItem(K,JSON.stringify(CUR))}catch(e){}})();"
+    ).replace("__CURJSON__", cur_json)
 
     # ---- assemble ----
     doc = f"""<!DOCTYPE html>
@@ -315,10 +352,10 @@ summary{{cursor:pointer;font-weight:600;font-size:13.5px}}
 .dead{{font-size:13px;color:var(--dead);padding:4px 0}}.dead s{{color:var(--neg)}}.dead div{{margin:4px 0}}
 .v-good{{color:var(--good)}}.v-warn{{color:var(--warn)}}.v-neg{{color:var(--neg)}}.v-mut{{color:var(--mut)}}
 .goals{{display:flex;flex-direction:column;gap:6px}}
-.goal{{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--mut);border-radius:6px;padding:7px 11px;font-size:13px}}
+.goal{{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--mut);border-radius:6px;padding:7px 11px;font-size:13px}}
 .goal .g-id{{font-weight:700;font-family:ui-monospace,monospace;min-width:30px}}
 .goal .g-st{{font-size:11px;font-weight:600;padding:1px 7px;border-radius:9px;white-space:nowrap}}
-.goal .g-short{{flex:1;color:#24292f;min-width:180px}}
+.goal .g-short{{flex:1;color:#24292f;min-width:110px}}
 .goal .g-cyc{{font-family:ui-monospace,monospace;font-size:10.5px;color:var(--accent)}}
 .g-primary{{border-left-color:var(--accent);background:#f0f7ff}}.g-primary .g-st{{background:var(--accent);color:#fff}}
 .g-active{{border-left-color:var(--good)}}.g-active .g-st{{background:#cae7d0;color:var(--good)}}
@@ -328,6 +365,24 @@ summary{{cursor:pointer;font-weight:600;font-size:13.5px}}
 .blockers{{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}}
 .blk{{font-size:12px;padding:4px 9px;border-radius:6px;border:1px solid #eedfa0;background:#fff8c5;color:var(--warn)}}
 .blk-high{{background:#ffebe9;color:var(--neg);border-color:#ffc1bc}}
+.ctrl{{display:flex;gap:8px;margin:14px 0 0;flex-wrap:wrap}}
+.ctrl button{{font-size:12px;padding:4px 10px;border:1px solid var(--line);background:var(--card);border-radius:6px;cursor:pointer;color:var(--ink)}}
+.ctrl button:hover{{background:#eef3f8}}
+.sincebar{{font-size:12px;margin:8px 0 0;padding:5px 10px;border-radius:6px;background:#eef3f8;color:var(--mut)}}
+.sincebar.changed{{background:#fff8e6;color:var(--warn);font-weight:600}}
+.sincebar.same{{background:#eef7ef;color:var(--good)}}
+.sec-h{{cursor:pointer;user-select:none}}.sec-h:hover{{color:var(--accent)}}
+.chev{{float:right;font-size:12px;color:var(--mut);transition:transform .15s}}
+.sec.collapsed .sec-body{{display:none}}.sec.collapsed .chev{{transform:rotate(-90deg)}}
+.card,.goal,.node,.panel,.grid2,.grid3{{min-width:0}}
+.l0-title,.l0-next,.card h3,.g-short,.node .nv,.node .ndec,.next,.blk,.mini{{overflow-wrap:anywhere;word-break:break-word}}
+.g-bar{{flex:0 0 64px;height:7px;background:#e6e9ee;border-radius:4px;overflow:hidden}}
+.g-fill{{display:block;height:100%;background:var(--good)}}.g-primary .g-fill{{background:var(--accent)}}
+.g-pct{{font-size:11px;color:var(--mut);font-weight:600;min-width:32px;text-align:right}}
+body.compact{{font-size:13.5px}}
+body.compact .card,body.compact .panel,body.compact .goal{{padding:6px 9px}}
+body.compact .l0{{padding:10px 13px;margin:12px 0}}body.compact .l0-title{{font-size:17px}}
+body.compact h2{{margin:14px 0 6px}}body.compact .stepper{{margin:4px 0}}
 footer{{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--mut)}}
 code{{background:#eff1f3;padding:1px 5px;border-radius:4px;font-size:11.5px}}
 </style></head><body>
@@ -337,6 +392,8 @@ code{{background:#eff1f3;padding:1px 5px;border-radius:4px;font-size:11.5px}}
   <span class="hstrip">harness <span class="hg">{hg}G</span>·<span class="hy">{hy}Y</span>·<span class="hr">{hr}R</span></span>
 </div></div>
 <div class="wrap">
+<div class="ctrl"><button onclick="allSec(1)">▾ 展開全部</button><button onclick="allSec(0)">▸ 收合全部</button><button onclick="document.body.classList.toggle('compact')">⇲ 緊湊/寬鬆</button></div>
+<div id="sincebar" class="sincebar"></div>
 {l0}
 {l1}
 {goals_sec}
@@ -350,7 +407,13 @@ code{{background:#eff1f3;padding:1px 5px;border-radius:4px;font-size:11.5px}}
     本檔 = <b>derived</b>(gitignored，勿手改)。<br>
     <b>重生</b>：<code>python3 scripts/build_focus_board.py</code>。harness 系統健康獨立看 <code>/harness-health</code>；專案全局 <code>/research-dashboard</code>。
   </footer>
-</div></body></html>"""
+</div>
+<script>
+function tg(h){{h.parentElement.classList.toggle('collapsed')}}
+function allSec(o){{document.querySelectorAll('.sec').forEach(s=>s.classList.toggle('collapsed',!o))}}
+{since_js}
+</script>
+</body></html>"""
 
     out = _p("state", "focus_board.html")
     with open(out, "w", encoding="utf-8") as f:
