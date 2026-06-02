@@ -17,7 +17,8 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, ".."))
-from lib.cis_asm_core import load_level1, dbeta_axis, cis_test, cohesion_per_tag  # noqa: E402
+from lib.cis_asm_core import (load_level1, dbeta_axis, cis_test, cohesion_per_tag,  # noqa: E402
+                              classify_cis_tier, power_class)
 
 FIXTURE = os.path.join(HERE, "..", "fixtures", "brca2_level1.tsv.gz")
 SPOS = "32315128"  # BRCA2/ZAR1L chr13:32,315,128
@@ -34,15 +35,25 @@ GOLDEN = {
 }
 
 
+STR_GOLDEN = {
+    "cis_tier": "T3",        # cis-candidate (BRCA2 is nonLOH -> HP-axis valid, cis passes)
+    "power_class": "DETECTED",
+}
+
+
 def _compute():
     D = load_level1(FIXTURE)
     coh = cohesion_per_tag(D, SPOS)
     ct = cis_test(D, SPOS)
+    # BRCA2 is nonLOH (golden, see test_genomic_context) -> HP-axis valid
+    tier = classify_cis_tier(ct.get("d_somatic"), ct.get("p_cis"), ct, hp_axis_valid=True)
     return {
         "dbeta_HP": dbeta_axis(D, SPOS, {"1"}, {"1-1"}),
         "d_cis": ct.get("d_cis"), "d_drift": ct.get("d_drift"),
         "d_somatic": ct.get("d_somatic"), "p_cis": ct.get("p_cis"),
         "sil_HP11": coh.get("1-1"), "sil_HP1": coh.get("1"),
+        "cis_tier": tier["cis_tier"],
+        "power_class": power_class(ct.get("n_shared_cpg", 0), ct.get("p_cis")),
     }
 
 
@@ -56,7 +67,14 @@ def run():
         print(f"  [{'PASS' if ok else 'FAIL'}] {name:11s} got={v}  golden={exp}  (tol {tol})")
         if not ok:
             failed += 1
-    print(f"\n{'== ALL PASS ==' if failed == 0 else '== %d FAILED ==' % failed}  ({len(GOLDEN)} checks)")
+    for name, exp in STR_GOLDEN.items():
+        v = got.get(name)
+        ok = (v == exp)
+        print(f"  [{'PASS' if ok else 'FAIL'}] {name:11s} got={v}  golden={exp}")
+        if not ok:
+            failed += 1
+    n = len(GOLDEN) + len(STR_GOLDEN)
+    print(f"\n{'== ALL PASS ==' if failed == 0 else '== %d FAILED ==' % failed}  ({n} checks)")
     return failed
 
 

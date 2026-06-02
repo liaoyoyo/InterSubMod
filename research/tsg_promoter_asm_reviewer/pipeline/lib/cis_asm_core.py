@@ -222,3 +222,47 @@ def dbeta_mod(Dp, spos, mode, germ_hps=("1",), som_hps=("1-1",), bam="tumor"):
     if len(sh) < MIN_PAIR:
         return None
     return round(float(np.mean([S[c][0] - G[c][0] for c in sh])), 3)
+
+
+# ---- P2b: cis-ladder verdict + power class ----
+
+BONF_ALPHA = 0.05 / 51091  # genome-wide Bonferroni (frozen denominator from the survey)
+
+
+def power_class(n_shared, p, alpha=BONF_ALPHA):
+    """Wilcoxon signed-rank discreteness-aware power. floor = smallest reachable two-sided p.
+    UNDERPOWERED loci must NOT be folded into a NEGATIVE/rare count (would underestimate ASM)."""
+    floor = min(1.0, 2.0 / (2 ** n_shared)) if n_shared and n_shared <= 25 else 0.0
+    if p is not None and p < alpha:
+        return "DETECTED"
+    if floor >= alpha:
+        return "UNDERPOWERED"
+    return "NULL"
+
+
+def classify_cis_tier(d_somatic, p_somatic, cis, hp_axis_valid, dmin=0.10, p_sig=0.05):
+    """3-step causal LADDER — characterization, NOT causation proof.
+      T0 NO-ASM        : |d_somatic| < dmin or not significant
+      T1 ASM-assoc     : ASM present but axis-confounded (LOH -> no valid HP-axis)
+      T2 somatic-ctrl  : T1 on valid HP-axis (germline-haplotype controlled), not cis-specific
+      T3 cis-candidate : T2 + normal-anchored cis passes (somatic diverges from baseline,
+                         germline does NOT) -> still needs P3 causation evidence.
+    T0-T2 must NOT use causation wording; only T3 is 'candidate' + carries missing_evidence."""
+    if d_somatic is None or abs(d_somatic) < dmin or (p_somatic is not None and p_somatic >= p_sig):
+        return {"cis_tier": "T0", "label": "NO-ASM", "missing_evidence": []}
+    if not hp_axis_valid:
+        return {"cis_tier": "T1", "label": "ASM-assoc (axis-confounded: LOH)",
+                "missing_evidence": ["valid HP-axis (locus is LOH; use ALLELE-axis caveat)"]}
+    if cis and cis.get("testable"):
+        d_cis, d_drift, p_cis = cis.get("d_cis"), cis.get("d_drift"), cis.get("p_cis")
+        cis_specific = (p_cis is not None and p_cis < p_sig and d_cis is not None
+                        and d_drift is not None and abs(d_cis) > 1.8 * abs(d_drift) + 0.02)
+        if cis_specific:
+            return {"cis_tier": "T3", "label": "cis-candidate (needs causation evidence)",
+                    "missing_evidence": ["mechanical-cis (CpG gain/loss)",
+                                         "subclone-partition (mutation-specific vs subclone-general)",
+                                         "cross-sample replication"]}
+        return {"cis_tier": "T2", "label": "somatic-controlled ASM (not cis-specific: drift~cis)",
+                "missing_evidence": ["cis >> drift separation"]}
+    return {"cis_tier": "T2", "label": "somatic-controlled ASM (no normal anchor)",
+            "missing_evidence": ["normal-anchored cis-test"]}
