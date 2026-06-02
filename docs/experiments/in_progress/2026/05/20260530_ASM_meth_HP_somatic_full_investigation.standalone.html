@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASM × Haplotype × Somatic 完整調查 — InterSubMod</title>
+<style>
+:root{
+  --c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;
+  --c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;
+  --c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;
+  --sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;
+  --ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;
+  --ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,Consolas,monospace;
+  --radius-md:6px;--radius-lg:8px;--shadow-sm:0 1px 2px rgba(20,20,19,.05);--shadow-md:0 2px 8px rgba(20,20,19,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--ff-body);color:var(--c-text);background:var(--c-bg);line-height:1.65;font-size:16px}
+.layout{display:grid;grid-template-columns:260px 1fr;max-width:1280px;margin:0 auto}
+.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:var(--sp-5);border-right:1px solid var(--c-border);font-size:14px}
+.toc h3{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--c-text-soft)}
+.toc ol{list-style:none;padding:0;margin:0}
+.toc li{margin:6px 0}
+.toc a{color:var(--c-text-soft);text-decoration:none;display:block;padding:3px 8px;border-radius:4px}
+.toc a:hover{background:var(--c-code-bg);color:var(--c-accent-deep)}
+main{padding:var(--sp-7) var(--sp-7) 120px;max-width:860px}
+h1{font-size:34px;line-height:1.2;margin:0 0 var(--sp-3)}
+h2{font-size:25px;margin:var(--sp-7) 0 var(--sp-4);padding-top:var(--sp-4);border-top:2px solid var(--c-border)}
+h3{font-size:19px;margin:var(--sp-5) 0 var(--sp-3)}
+p,li{font-size:16px}
+.sub{color:var(--c-text-soft);font-size:15px;margin-top:0}
+.card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-5);margin:var(--sp-4) 0;box-shadow:var(--shadow-sm)}
+.crit{border-left:4px solid var(--c-critical);background:#FDF4F0}
+.warn{border-left:4px solid var(--c-warning);background:#FDFAF0}
+.ok{border-left:4px solid var(--c-success);background:#F1FAF3}
+.tier{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:10px;font-family:var(--ff-mono)}
+.l1{background:#E6F2EA;color:var(--c-success)}.l2{background:#FBF1DE;color:var(--c-warning)}.l3{background:#F4EFE6;color:var(--c-text-soft)}
+table{border-collapse:collapse;width:100%;margin:var(--sp-4) 0;font-size:14.5px}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left}
+th{background:var(--c-code-bg);font-weight:600}
+td.num,th.num{text-align:right;font-family:var(--ff-mono)}
+.neg{color:var(--c-critical);font-weight:600}.pos{color:var(--c-success);font-weight:600}
+code{font-family:var(--ff-mono);background:var(--c-code-bg);padding:1px 5px;border-radius:3px;font-size:13.5px}
+.verdict{background:var(--c-text);color:var(--c-bg);padding:var(--sp-5);border-radius:var(--radius-lg);font-size:18px;margin:var(--sp-5) 0}
+.verdict b{color:var(--c-accent)}
+.pill{display:inline-block;background:var(--c-code-bg);border:1px solid var(--c-border);border-radius:12px;padding:2px 10px;font-size:13px;margin:2px}
+footer{border-top:2px solid var(--c-border);margin-top:var(--sp-7);padding-top:var(--sp-5);font-size:13px;color:var(--c-text-soft);font-family:var(--ff-mono)}
+.step{counter-increment:s;position:relative;padding-left:38px;margin:var(--sp-4) 0}
+.step::before{content:counter(s);position:absolute;left:0;top:0;width:26px;height:26px;background:var(--c-accent);color:#fff;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:14px}
+.steps{counter-reset:s}
+svg{max-width:100%;height:auto}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="toc">
+<h3>章節導航</h3>
+<ol>
+<li><a href="#tldr">TL;DR — 一句裁決</a></li>
+<li><a href="#goal">1. 目標 + 3 層框架</a></li>
+<li><a href="#method">2. 方法與步驟（pipeline）</a></li>
+<li><a href="#bugs">3. 過程修正的 5 個 bug</a></li>
+<li><a href="#b1">4. B1 平均檢定 → NEGATIVE</a></li>
+<li><a href="#ruler">5. 分群品質尺（驗尺）</a></li>
+<li><a href="#b2">6. B2 clustering → NEGATIVE</a></li>
+<li><a href="#verdict">7. 完整裁決 + 可重用資產</a></li>
+<li><a href="#prov">8. Provenance / Ledger</a></li>
+</ol>
+</aside>
+<main>
+<h1>methylation × haplotype × somatic 完整調查</h1>
+<p class="sub">InterSubMod · HCC1395 paired_full（單樣本）· 2026-05-29 → 05-30 · 供方法步驟驗證</p>
+
+<section id="tldr">
+<div class="verdict">
+<b>ISM 機器能正確「量測」somatic 位點的甲基化結構，但「somatic 事件驅動 ASM / 子克隆甲基化聚集」這個科學主張不成立</b> —— 用兩個獨立新方法（平均檢定 B1 + read-level 聚類 B2，後者配一把已驗證的分群品質尺）測，somatic 位點的 ASM/clustering 都<b>不高於任意 germline-het 位點的 baseline allelic 甲基化</b>。BRCA2 等個別位點有真實強 cluster，但反映 pre-existing 等位甲基化（突變落在本就有該甲基狀態的 allele），非 somatic 驅動。
+</div>
+<p>這份報告組織整個調查的<strong>方法、步驟、細節、結果</strong>供驗證。每個 claim 標證據等級
+<span class="tier l1">L1 親測</span> <span class="tier l2">L2 推導</span> <span class="tier l3">L3 推測</span>。</p>
+</section>
+
+<section id="goal">
+<h2>1. 目標 + 3 層框架</h2>
+<p><strong>目標</strong>：在 tumor 裡，read 按 haplotype 分群後，找出受 somatic 事件影響的甲基化子分群與狀態（observe→discover→verify→analyze→output）。關鍵在把訊號拆成 3 層：</p>
+<svg viewBox="0 0 760 200" role="img" aria-labelledby="t3 d3"><title id="t3">3 層訊號框架</title><desc id="d3">A germline baseline / B1 平均位移 / B2 子克隆聚集</desc>
+<rect x="10" y="20" width="240" height="160" rx="8" fill="#F1FAF3" stroke="#15803D"/>
+<rect x="260" y="20" width="240" height="160" rx="8" fill="#FDF4F0" stroke="#C2410C"/>
+<rect x="510" y="20" width="240" height="160" rx="8" fill="#FDFAF0" stroke="#A16207"/>
+<text x="130" y="48" text-anchor="middle" font-size="16" font-weight="700" fill="#15803D">A · germline 等位</text>
+<text x="130" y="74" text-anchor="middle" font-size="13" fill="#141413">HP1 vs HP2</text>
+<text x="130" y="96" text-anchor="middle" font-size="13" fill="#141413">imprinting / baseline ASM</text>
+<text x="130" y="124" text-anchor="middle" font-size="12.5" fill="#6B6B66">normal 就乾淨</text>
+<text x="130" y="150" text-anchor="middle" font-size="13" font-weight="600" fill="#15803D">要剔除的背景</text>
+<text x="380" y="48" text-anchor="middle" font-size="16" font-weight="700" fill="#C2410C">B1 · 平均位移</text>
+<text x="380" y="74" text-anchor="middle" font-size="13" fill="#141413">HP1 vs HP1-1</text>
+<text x="380" y="96" text-anchor="middle" font-size="13" fill="#141413">per-CpG 平均 Δβ</text>
+<text x="380" y="124" text-anchor="middle" font-size="12.5" fill="#6B6B66">本研究測 → 漏掉聚集</text>
+<text x="380" y="150" text-anchor="middle" font-size="13" font-weight="600" fill="#C2410C">NEGATIVE</text>
+<text x="630" y="48" text-anchor="middle" font-size="16" font-weight="700" fill="#A16207">B2 · 子克隆聚集</text>
+<text x="630" y="74" text-anchor="middle" font-size="13" fill="#141413">read-level clustering</text>
+<text x="630" y="96" text-anchor="middle" font-size="13" fill="#141413">獨立內聚 cluster?</text>
+<text x="630" y="124" text-anchor="middle" font-size="12.5" fill="#6B6B66">真正目標 → 用對工具測</text>
+<text x="630" y="150" text-anchor="middle" font-size="13" font-weight="600" fill="#A16207">NEGATIVE（非特異）</text>
+</svg>
+<div class="card l3" style="border-left-color:var(--c-info)">
+<p><strong>文獻前提</strong> <span class="tier l2">L2</span>：甲基化是癌症 established driver（ASM/aDMR 於 RET/CDKN2A；TSG 啟動子沉默）。但「甲基-突變相關」機制<strong>多為 trans</strong>（IDH/EZH2/DNMT3A 等表觀修飾酶突變 + 拷貝數 → 全域甲基化），<strong>非 cis</strong>（somatic SNV 自身 read 的甲基化）。read-level 聚類偵測子族群有業界工具（cvlr、NanoMethPhase）。</p>
+</div>
+</section>
+
+<section id="method">
+<h2>2. 方法與步驟（pipeline）</h2>
+<div class="steps">
+<div class="step"><strong>分群定義</strong> <span class="tier l1">L1</span>：longphase-to-mod 用 <code>HP:Z</code> tag 分 reads。<strong>HP1-1（HP:i:11）= phase 到 germline HP1 且攜帶 somatic ALT allele 的 read</strong>；HP1 = 不帶 somatic 變異。親讀源碼 <code>HaplotagProcess.cpp:512-722</code> 確認分群<strong>只用 SNV/INDEL allele，不用甲基化</strong> → 非循環。</div>
+<div class="step"><strong>甲基化抽取</strong> <span class="tier l1">L1</span>：MSA C++（REF-anchored CpG）→ Level1 per-read per-CpG。BAM 是 5mCG_5hmCG，每 CpG 發 5mC + 5hmC 兩列 → <strong>max-collapse 成 any-modification beta</strong>。</div>
+<div class="step"><strong>雙軸 ASM</strong> <span class="tier l1">L1</span>：HP-axis（HP1 vs HP1-1，somatic-controlled）+ ALLELE-axis（ALT vs REF reads）。per-CpG Wilcoxon paired（B1）。</div>
+<div class="step"><strong>B2 read-level clustering</strong> <span class="tier l1">L1</span>：read×CpG 矩陣 → read-read Hamming 距離（<strong>observed-only，禁 imputation</strong>）→ PERMANOVA + 盲分群 ARI + dispersion。</div>
+<div class="step"><strong>對照</strong> <span class="tier l1">L1</span>：germline-het null（baseline Layer A）+ n_reads-match + placebo-anchor（collider）+ TP/FP/FN 分類。</div>
+</div>
+<p><strong>規模</strong>：全 39,447 SEQC2 high-conf TP 重跑 → 51,171 dual-axis records（含 LOH 20,564）；germline-het null n≈1,670；B2 廣掃 TP/FP/FN/het 各 ~45 隨機位點。</p>
+</section>
+
+<section id="bugs">
+<h2>3. 過程中修正的 5 個 bug（方法嚴謹度）</h2>
+<p class="sub">這套方法的價值之一：它自己連續抓到並修正 5 個會導致過度宣稱的問題。</p>
+<table>
+<tr><th>#</th><th>Bug</th><th>影響</th><th>修正</th></tr>
+<tr><td>1</td><td>script03 CpG-anchoring</td><td>27.5% 'm' call 非 CpG context → 膨脹 effect</td><td>改用 MSA REF-anchored</td></tr>
+<tr><td>2</td><td>5mC/5hmC pooling</td><td>Level1 雙修飾每列獨立計數 → beta 砍半（−0.122 誤成 −0.054）</td><td>max-collapse any-mod</td></tr>
+<tr><td>3</td><td>Agent 誤診 export bug</td><td>agent 說 p/1−p export bug</td><td>BAM MM tag 證實是 5mC+5hmC</td></tr>
+<tr><td>4</td><td>ALLELE-axis baseline confound</td><td>TP 11.1% &lt; het 15.2% → 非 somatic-特異</td><td>只認 HP-axis（somatic-controlled）</td></tr>
+<tr><td>5</td><td>HP-axis 門檻 artifact + imputation</td><td>OR 1.79@p&lt;.05 → 0.81@Bonferroni（反轉）；pilot median-impute 造假結構</td><td>observed-only + blind-ARI</td></tr>
+</table>
+</section>
+
+<section id="b1">
+<h2>4. B1 平均檢定 → NEGATIVE</h2>
+<div class="card">
+<table>
+<tr><th>檢定</th><th class="num">somatic</th><th class="num">germline-het null</th><th>判定</th></tr>
+<tr><td>HP-axis strong 率 @ p&lt;0.05</td><td class="num">7.2%</td><td class="num">4.1%</td><td>OR=1.79（似顯著）</td></tr>
+<tr><td>HP-axis strong 率 @ Bonferroni</td><td class="num">0.24%</td><td class="num">0.29%</td><td class="neg">OR=0.81 反轉 → 門檻 artifact</td></tr>
+<tr><td>ALLELE-axis strong 率</td><td class="num">11.1%</td><td class="num">15.2%</td><td class="neg">TP &lt; null → confounded</td></tr>
+</table>
+<p><span class="tier l1">L1</span> effect 隨 coverage 下降（Spearman=−0.245, p&lt;1e-300）= noise-driven artifact 簽名。<strong>B1 結論：somatic ASM 平均位移不高於 baseline。</strong> 另：B-discrimination（用甲基分 TP/FP）strong-ASM 在 FP enriched 5×（OR=0.194, p=1.8e-28）→ anti-discriminative。</p>
+</div>
+</section>
+
+<section id="ruler">
+<h2>5. 分群品質「尺」— 先驗尺再用尺</h2>
+<p>為避免肉眼判斷，設計 red-team-硬化的評估尺。<strong>主判準 = M1 blind-ARI（盲分群能否恢復 somatic/germline split，最難造假）</strong>，加 M0 observed-only / M8 placebo-collider / M2 het-null / M5-M6 artifact 簽名 / M9 cross-sample。</p>
+<div class="card ok">
+<h3 style="margin-top:0">驗尺結果（meta-validation）<span class="tier l1">L1</span></h3>
+<table>
+<tr><th>對照</th><th class="num">blind-ARI</th><th>期望</th><th>結果</th></tr>
+<tr><td>PC1 模擬真 cluster（Δβ=0.3）</td><td class="num">0.557</td><td>偵測到（GOOD）</td><td class="pos">✓</td></tr>
+<tr><td>NC1 隨機分群（無真結構）</td><td class="num">−0.005</td><td>拒絕（ARTIFACT）</td><td class="pos">✓</td></tr>
+</table>
+<p><strong>尺 VALIDATED</strong> —— 有能力偵測真 cluster、拒絕假 cluster。所以後續 NEGATIVE 是真 biology，非尺看不到。</p>
+</div>
+</section>
+
+<section id="b2">
+<h2>6. B2 read-level clustering → NEGATIVE（非 somatic-特異）</h2>
+<h3>BRCA2 單點：真實強 cluster <span class="tier l1">L1</span></h3>
+<p>BRCA2 observed-only <strong>blind-ARI=0.79</strong>（&gt; 模擬真 cluster 0.56）、R² 0.48→0.70（去 imputation 後不降反升 = 真訊號）、placebo=0.13（6× 低於真）。<strong>BRCA2 確有真可分 cluster。</strong></p>
+<h3>但廣掃 TP/FP/FN/het（隨機抽樣）→ 非特異 <span class="tier l1">L1</span></h3>
+<div class="card crit">
+<table>
+<tr><th>類別</th><th class="num">n</th><th class="num">median blind-ARI</th><th class="num">B2-cluster 率</th></tr>
+<tr><td><strong>TP (somatic)</strong></td><td class="num">45</td><td class="num">0.135</td><td class="num">24.4%</td></tr>
+<tr><td>FP</td><td class="num">36</td><td class="num">0.099</td><td class="num">25.0%</td></tr>
+<tr><td>FN (真 somatic 漏掉)</td><td class="num">45</td><td class="num">0.200</td><td class="num">37.8%</td></tr>
+<tr><td><strong>het-NULL (baseline)</strong></td><td class="num">45</td><td class="num">0.177</td><td class="num">37.8%</td></tr>
+</table>
+<p class="neg">TP vs het-NULL：Mann-Whitney(TP&gt;het) p=0.922（不顯著，TP 甚至低於 baseline）。het 位點 clustering 率與 somatic 一樣高。</p>
+</div>
+<p><strong>解讀</strong>：clustering 機器真實（BRCA2 鐵證），但這些 cluster 是<strong>任意 het 位點都有的 baseline allelic 甲基化（Layer A）</strong>，非 somatic 驅動。BRCA2 強 cluster 反映 pre-existing 等位甲基化。早先 marginal positive（p=0.042）是手挑 8 位點 + imputation 的 selection/artifact，被 observed-only + 隨機抽樣 superseded。</p>
+</section>
+
+<section id="verdict">
+<h2>7. 完整裁決 + 可重用資產</h2>
+<div class="card">
+<p><strong>分兩層，結論相反</strong>：</p>
+<ul>
+<li><span class="pos">機器 SOUND</span>：dual-axis ASM pipeline + read-level clustering + 驗證過的分群品質尺，都正確、可重用</li>
+<li><span class="neg">科學主張 NEGATIVE</span>：somatic 事件驅動 ASM / 子克隆甲基聚集 = 不成立（兩方法、兩軸、validated ruler 全 NEGATIVE）</li>
+</ul>
+<p>與既有 concluded <code>project_snv_methylation_association</code>（ASM 普遍但無法區分）<strong>用兩個獨立新方法（C2）再確認一致</strong>。somatic-ASM-discovery 方向 EXHAUSTED。</p>
+</div>
+<h3>可重用資產（這 session 的工程價值）</h3>
+<p>
+<span class="pill">dual-axis ASM pipeline (scripts 18-19)</span>
+<span class="pill">germline-het negative control (script 20)</span>
+<span class="pill">read-level human-eye viz (script 21)</span>
+<span class="pill">validated cluster-quality ruler (scripts 24, framework.md)</span>
+<span class="pill">5mC/5hmC max-collapse 修正</span>
+</p>
+<p class="sub">這把驗證過的尺 + ASM pipeline 可用於未來真 imprinting / germline ASM 偵測。BRCA2 可作 read-level epigenetic context 的 descriptive 例（非 somatic-driven claim）。ASM 在 G6 phasing 論文定位為 methods/supplement 的誠實 null。</p>
+</section>
+
+<section id="prov">
+<h2>8. Provenance / Ledger</h2>
+<p>本調查 5 條 ledger entry（corrects 鏈，append-only）：</p>
+<table>
+<tr><th>cycle_id</th><th>verdict</th></tr>
+<tr><td><code>20260529_ism_zar1l_brca2_asm_verification</code></td><td>BRCA2 ASM 方向 robust + magnitude provisional</td></tr>
+<tr><td><code>20260530_ism_meth_hp_somatic_full_tp_characterization</code></td><td>全 TP 修正口徑 + B-discrimination NEGATIVE</td></tr>
+<tr><td><code>20260530_ism_asm_negative_control_refinement</code></td><td>ALLELE-axis confounded / HP-axis modest</td></tr>
+<tr><td><code>20260530_ism_asm_threshold_artifact_negative</code></td><td>HP-axis 富集是門檻 artifact</td></tr>
+<tr><td><code>20260530_b2_clustering_validated_ruler_negative</code></td><td class="neg">B2 clustering 非 somatic-特異（validated ruler）</td></tr>
+</table>
+</section>
+
+<footer>
+cycle_id: 20260530_b2_clustering_validated_ruler_negative · sample: HCC1395 paired_full (single-sample) ·
+artifacts: InterSubMod/research/tsg_promoter_asm_reviewer/ (scripts 18-25 + output/cluster_quality_eval_framework.md + genome_survey_v2/) ·
+ledger: research/autoresearch/evidence_ledger.jsonl (60 entries) ·
+generated: 2026-05-30 · 所有數字本 session 親自重算驗證 (L1) · partial-scope flag: single-sample, cross-sample NOT run (within-sample TP≈het 已決定)
+</footer>
+</main>
+</div>
+</body>
+</html>

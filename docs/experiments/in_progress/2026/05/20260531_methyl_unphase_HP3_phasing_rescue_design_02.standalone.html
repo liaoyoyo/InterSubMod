@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>甲基分群拯救 unphase/HP3 相位 tag — 設計與已觀察數據 review</title>
+<style>
+  :root {
+    --c-accent: #D97757; --c-accent-deep: #B85A3F;
+    --c-text: #141413; --c-text-soft: #6B6B66;
+    --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+    --c-code-bg: #F4EFE6;
+    --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+    --c-info: #1E3A8A;
+    --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+    --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+    --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+               "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+    --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+    --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+    --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+    --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+    --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+    --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--c-bg); color: var(--c-text);
+         font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.6; }
+  .layout { max-width: 1320px; margin: 0 auto; display: grid;
+            grid-template-columns: 240px 1fr; gap: var(--sp-5);
+            padding: var(--sp-5) var(--sp-4); }
+  aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+              background: var(--c-surface); border: 1px solid var(--c-border);
+              border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+              box-shadow: var(--shadow-sm);
+              max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+  aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                  color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+  aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+  aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+  aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+                color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+                border-left: 3px solid transparent; }
+  aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+  aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                        font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+  aside.toc a.core { font-weight: 600; }
+  aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px; font-size: 0.85em; }
+  main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+                border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+                padding: var(--sp-6) var(--sp-6); min-width: 0; }
+  .report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                    margin-bottom: var(--sp-5); }
+  .report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                              letter-spacing: 1px; color: var(--c-accent-deep);
+                              font-weight: 700; margin-bottom: var(--sp-2); }
+  .report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+  .report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                          gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+  .report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+  .report-header .meta dd { margin: 0; }
+  .report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                               border-radius: var(--radius-sm); font-family: var(--ff-mono); font-size: 0.92em; }
+  .verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                     border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); }
+  .verdict-banner.neutral  { background: linear-gradient(90deg, #1E3A8A, #3B82F6); }
+  h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+        padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border); scroll-margin-top: var(--sp-4); }
+  h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+              font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+  h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+  h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2); color: var(--c-text-soft); }
+  p, ul, ol { margin: var(--sp-3) 0; }
+  ul, ol { padding-left: var(--sp-5); }
+  a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+  a:hover { color: var(--c-accent-deep); }
+  blockquote { border-left: 3px solid var(--c-accent); padding: var(--sp-3) var(--sp-4);
+                color: var(--c-text-soft); margin: var(--sp-3) 0; background: var(--c-code-bg);
+                border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+  code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+          font-family: var(--ff-mono); font-size: 0.92em; }
+  table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+  th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; vertical-align: top; }
+  th { background: var(--c-code-bg); font-weight: 600; }
+  td.num { text-align: right; font-family: var(--ff-mono); }
+  tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+  tr.row-safe td { background: #DCFCE7; color: #166534; }
+  tr.row-warn td { background: #FEF3C7; }
+  .section-card { border: 1.5px solid var(--c-border); border-radius: var(--radius-lg);
+                   margin: var(--sp-4) 0; overflow: hidden; background: var(--c-surface); }
+  .section-card.core { border-color: var(--c-warning); box-shadow: var(--shadow-sm); }
+  .section-card > summary { cursor: pointer; padding: var(--sp-3) var(--sp-4);
+                             display: flex; align-items: center; gap: var(--sp-3);
+                             background: var(--c-code-bg); list-style: none; }
+  .section-card > summary::-webkit-details-marker { display: none; }
+  .section-card > summary::before { content: "▸"; transition: transform 0.2s;
+                                     color: var(--c-text-soft); font-size: var(--fs-sm); }
+  .section-card[open] > summary::before { transform: rotate(90deg); }
+  .section-card.core > summary { background: #FEF7E6; }
+  .section-card .card-id { font-family: var(--ff-mono); font-weight: 700; font-size: var(--fs-sm);
+                            color: var(--c-warning); background: var(--c-surface);
+                            padding: 3px 10px; border-radius: 12px; border: 1.5px solid var(--c-warning); }
+  .section-card .card-title { flex: 1; font-weight: 600; font-size: var(--fs-md); }
+  .section-card .card-body { padding: var(--sp-4); }
+  .callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                       padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0; border-radius: var(--radius-md); color: #7F1D1D; }
+  .callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                      padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0; border-radius: var(--radius-md); color: #78350F; }
+  .callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                      padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0; border-radius: var(--radius-md); color: #166534; }
+  .callout-info { background: #EFF4FF; border-left: 4px solid var(--c-info);
+                   padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0; border-radius: var(--radius-md); color: #1E3A5F; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: var(--sp-3); margin: var(--sp-4) 0; }
+  .stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+               border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+  .stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1; }
+  .stat-box .number.bug { color: var(--c-critical); }
+  .stat-box .number.success { color: var(--c-success); }
+  .stat-box .number.warning { color: var(--c-warning); }
+  .stat-box .number.info { color: var(--c-info); }
+  .stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+  .svg-figure { margin: var(--sp-5) 0; text-align: center; }
+  .svg-figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto;
+                     background: var(--c-bg); border-radius: var(--radius-md); padding: var(--sp-3); }
+  .svg-figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                            margin-top: var(--sp-2); font-style: italic; }
+  .references { background: var(--c-bg); border-radius: var(--radius-md);
+                 padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-5); }
+  .references h2 { border-bottom: none; margin-top: 0; font-size: var(--fs-xl); padding-bottom: 0; }
+  .references ol { list-style: decimal; padding-left: var(--sp-5); }
+  .references li { margin: var(--sp-2) 0; font-size: var(--fs-sm); }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: var(--fs-xs);
+           font-weight: 700; font-family: var(--ff-mono); }
+  .badge.locked { background: #DCFCE7; color: #166534; }
+  .badge.pending { background: #FEF3C7; color: #78350F; }
+  .ask-box { background: #EFF4FF; border: 2px solid var(--c-info); border-radius: var(--radius-lg);
+             padding: var(--sp-4); margin: var(--sp-4) 0; }
+  .ask-box h4 { color: var(--c-info); margin-top: 0; }
+  @media print {
+    body { background: white; }
+    .layout { display: block; max-width: 100%; padding: 0; }
+    aside.toc { display: none; }
+    main.report { box-shadow: none; border: none; padding: 0; }
+    .section-card { page-break-inside: avoid; border-color: #999; }
+    details:not([open]) > * { display: block !important; }
+    details:not([open]) > summary { background: white !important; }
+    a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #666; }
+    pre, table, blockquote, .section-card, svg { page-break-inside: avoid; }
+    h1, h2, h3 { page-break-after: avoid; }
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    aside.toc { position: static; max-height: none; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="toc" aria-label="章節導航">
+    <h3>章節導航</h3>
+    <ol>
+      <li><a href="#tldr" class="core">一句話結論 + 焦點數字</a></li>
+      <li><a href="#bigpic" class="core">一張圖看懂任務</a></li>
+      <li><a href="#finding" class="core">關鍵發現：救 42%、不碰 unphase</a></li>
+      <li><a href="#targets">三類救援族群</a></li>
+      <li><a href="#plan" class="core">方案：先旁路驗證再開 C++</a></li>
+      <li><a href="#gate" class="core">GO / NO-GO 量化門檻</a></li>
+      <li><a href="#ledger" class="core">方法抉擇 ledger（可檢核）</a></li>
+      <li><a href="#confidence">信心量化指標</a></li>
+      <li><a href="#redline">兩條紅線（防滑回死路）</a></li>
+      <li><a href="#ask" class="core">待你確認</a></li>
+      <li><a href="#refs">證據來源</a></li>
+    </ol>
+  </aside>
+
+  <main class="report">
+
+    <header class="report-header">
+      <div class="pretitle">Design Spec Review · 甲基 × phasing rescue</div>
+      <h1>甲基分群拯救 unphase / HP3 與更遠 read 的相位 tag</h1>
+      <dl class="meta">
+        <dt>建立日期</dt>   <dd>2026-05-31</dd>
+        <dt>受眾</dt>       <dd>PI（決策 review）</dd>
+        <dt>任務類型</dt>   <dd>A pilot · <span class="badge pending">partial: HCC1395 單樣本</span></dd>
+        <dt>來源 spec</dt>  <dd><code>InterSubMod/docs/experiments/in_progress/2026/05/20260531_..._design_02.md</code></dd>
+        <dt>分析基礎</dt>   <dd>13 agent · ~270 萬 token · 逐位元組 + 雙重對抗驗證</dd>
+        <dt>狀態</dt>       <dd>設計定案待你確認 → 通過後拆實作計畫</dd>
+      </dl>
+      <div class="verdict-banner neutral">
+        設計已定案、數據已坐實 — 這是「用甲基救相位 tag」的<strong>新方向</strong>，不是已死的「甲基當 FP filter」死路。等你看完此頁確認，再進實作。
+      </div>
+    </header>
+
+    <!-- ═══ 0. TL;DR ═══ -->
+    <h2 id="tldr"><span class="h-num">0.</span>一句話結論：longphase-S 已救一半 H3，但完全放棄 unphase — 甲基來補這塊</h2>
+    <p>
+      paired 模式下，phasing 工具 <strong>longphase-S</strong> 已內建把「卡住的 somatic read（H3）」往
+      haplotype 救（H1-1 / H2-1）的機制，且已救掉 <strong>42%</strong>。但它對 <strong>unphase read 完全不處理</strong>
+      （inheritance 前後一條都沒動）。本任務 = 對 longphase-S <em>放棄的 unphase</em> +
+      <em>救不動的 H3</em>，用甲基分群再救一層相位歸屬，並量化能不能做、做得多好。
+    </p>
+
+    <div class="stat-grid">
+      <div class="stat-box"><div class="number success">42%</div><div class="label">longphase-S 既有 inheritance 已救的 H3（read-instance）</div></div>
+      <div class="stat-box"><div class="number bug">0</div><div class="label">unphase read 被 inheritance 改動的數量（完全不碰）</div></div>
+      <div class="stat-box"><div class="number">1,777,511</div><div class="label">unphase read（甲基最乾淨的機會空間）</div></div>
+      <div class="stat-box"><div class="number warning">2,520,324</div><div class="label">救不動仍卡 H3 的 read-instance</div></div>
+      <div class="stat-box"><div class="number info">65,033</div><div class="label">DeriveHP=H0 難定相位點（53.8%）</div></div>
+      <div class="stat-box"><div class="number">&gt;0.58</div><div class="label">甲基判別 AUC 的 GO 門檻（過則開 C++）</div></div>
+    </div>
+
+    <div class="callout-info">
+      <strong>怎麼讀這頁</strong>：§1 一張圖看懂任務 → §2-§4 已坐實的數據與方案 → §6 方法抉擇 ledger（你要能逐項檢核的核心）→ §9 待你確認的點。所有數字都來自 longphase-S 既有輸出檔，已親自重算 + 守恆驗證。
+    </div>
+
+    <!-- ═══ 1. 一張圖看懂 ═══ -->
+    <h2 id="bigpic"><span class="h-num">1.</span>一張圖看懂：read 怎麼被分類，哪些是我們要救的</h2>
+    <p>longphase-S 對每條 read 用 germline het 投票（門檻 <code>percentageThreshold = 0.6</code>）決定 HP。下圖紅框 = 它放棄/救不動、本任務要甲基介入的對象。</p>
+
+    <figure class="svg-figure">
+      <svg viewBox="0 0 760 420" role="img" aria-labelledby="t1 d1">
+        <title id="t1">longphase-S read 分類決策樹</title>
+        <desc id="d1">read 經 germline 與 somatic 投票分成 H1/H2/H1-1/H2-1/H3/unphase；H3 經 inheritance 救 42%，unphase 完全不處理，兩者與 H0 位點是甲基介入目標。</desc>
+        <!-- root -->
+        <rect x="300" y="14" width="160" height="44" rx="6" fill="var(--c-surface)" stroke="var(--c-accent)" stroke-width="2"/>
+        <text x="380" y="32" text-anchor="middle" font-family="var(--ff-body)" font-size="13" font-weight="700" fill="var(--c-text)">每條 read</text>
+        <text x="380" y="48" text-anchor="middle" font-family="var(--ff-body)" font-size="11" fill="var(--c-text-soft)">judgeSomaticReadHap</text>
+        <!-- branches level 1 -->
+        <line x1="380" y1="58" x2="160" y2="96" stroke="var(--c-border)" stroke-width="1.5"/>
+        <line x1="380" y1="58" x2="600" y2="96" stroke="var(--c-border)" stroke-width="1.5"/>
+        <!-- left: somatic present -->
+        <rect x="60" y="96" width="200" height="42" rx="6" fill="var(--c-code-bg)" stroke="var(--c-border)"/>
+        <text x="160" y="113" text-anchor="middle" font-size="12" font-weight="600" fill="var(--c-text)">有 somatic 變異</text>
+        <text x="160" y="129" text-anchor="middle" font-size="10.5" fill="var(--c-text-soft)">tumHPsim ≥ 0.6</text>
+        <!-- right: germline only -->
+        <rect x="500" y="96" width="200" height="42" rx="6" fill="var(--c-code-bg)" stroke="var(--c-border)"/>
+        <text x="600" y="113" text-anchor="middle" font-size="12" font-weight="600" fill="var(--c-text)">純 germline / 其他</text>
+        <text x="600" y="129" text-anchor="middle" font-size="10.5" fill="var(--c-text-soft)">無 somatic 變異</text>
+        <!-- left children -->
+        <line x1="120" y1="138" x2="80" y2="176" stroke="var(--c-border)" stroke-width="1.5"/>
+        <line x1="200" y1="138" x2="240" y2="176" stroke="var(--c-border)" stroke-width="1.5"/>
+        <!-- H1-1/H2-1 OK -->
+        <rect x="14" y="176" width="150" height="58" rx="6" fill="#DCFCE7" stroke="var(--c-success)" stroke-width="1.5"/>
+        <text x="89" y="196" text-anchor="middle" font-size="12" font-weight="700" fill="#166534">norHPsim ≥ 0.6</text>
+        <text x="89" y="212" text-anchor="middle" font-size="12" fill="#166534">→ H1-1 / H2-1 ✓</text>
+        <text x="89" y="227" text-anchor="middle" font-size="10" fill="#166534">已成功定相位</text>
+        <!-- H3 -->
+        <rect x="180" y="176" width="150" height="58" rx="6" fill="#FEF3C7" stroke="var(--c-warning)" stroke-width="2"/>
+        <text x="255" y="196" text-anchor="middle" font-size="12" font-weight="700" fill="#78350F">norHPsim &lt; 0.6</text>
+        <text x="255" y="212" text-anchor="middle" font-size="12" fill="#78350F">→ H3（卡住）</text>
+        <text x="255" y="227" text-anchor="middle" font-size="10" fill="#78350F">germline 方向不明</text>
+        <!-- right child: unphase -->
+        <line x1="600" y1="138" x2="600" y2="176" stroke="var(--c-border)" stroke-width="1.5"/>
+        <rect x="510" y="176" width="180" height="58" rx="6" fill="#FEF2F0" stroke="var(--c-critical)" stroke-width="2"/>
+        <text x="600" y="196" text-anchor="middle" font-size="12" font-weight="700" fill="#7F1D1D">unphase（unTag）</text>
+        <text x="600" y="212" text-anchor="middle" font-size="10" fill="#7F1D1D">票數不足 / 跨 block /</text>
+        <text x="600" y="226" text-anchor="middle" font-size="10" fill="#7F1D1D">無變異</text>
+        <!-- inheritance stage on H3 -->
+        <line x1="255" y1="234" x2="255" y2="270" stroke="var(--c-warning)" stroke-width="1.5"/>
+        <rect x="150" y="270" width="210" height="46" rx="6" fill="var(--c-surface)" stroke="var(--c-warning)" stroke-width="1.5"/>
+        <text x="255" y="289" text-anchor="middle" font-size="11.5" font-weight="600" fill="#78350F">inheritHaplotype（第二段救援）</text>
+        <text x="255" y="305" text-anchor="middle" font-size="10.5" fill="var(--c-text-soft)">deriveByHpSim ≥ 0.6 → 救成 H1-1/H2-1</text>
+        <!-- H3 outcomes -->
+        <line x1="200" y1="316" x2="150" y2="352" stroke="var(--c-border)" stroke-width="1.5"/>
+        <line x1="310" y1="316" x2="360" y2="352" stroke="var(--c-warning)" stroke-width="1.5"/>
+        <rect x="60" y="352" width="180" height="42" rx="6" fill="#DCFCE7" stroke="var(--c-success)"/>
+        <text x="150" y="370" text-anchor="middle" font-size="11" font-weight="600" fill="#166534">42% 救回 ✓</text>
+        <text x="150" y="385" text-anchor="middle" font-size="10" fill="#166534">longphase-S 自己完成</text>
+        <rect x="270" y="352" width="190" height="42" rx="6" fill="#FEF3C7" stroke="var(--c-warning)" stroke-width="2"/>
+        <text x="365" y="370" text-anchor="middle" font-size="11" font-weight="700" fill="#78350F">仍卡 H3（待甲基救）</text>
+        <text x="365" y="385" text-anchor="middle" font-size="10" fill="#78350F">deriveByHpSim &lt; 0.6</text>
+        <!-- unphase outcome -->
+        <line x1="600" y1="234" x2="600" y2="352" stroke="var(--c-critical)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <rect x="505" y="352" width="190" height="42" rx="6" fill="#FEF2F0" stroke="var(--c-critical)" stroke-width="2"/>
+        <text x="600" y="370" text-anchor="middle" font-size="11" font-weight="700" fill="#7F1D1D">原封不動（待甲基救）</text>
+        <text x="600" y="385" text-anchor="middle" font-size="10" fill="#7F1D1D">longphase-S 完全放棄</text>
+      </svg>
+      <figcaption>圖 1：read 分類決策樹。黃框（仍卡 H3）+ 紅框（unphase）= 本任務甲基介入的兩大目標；綠框 = longphase-S 已成功，不碰。</figcaption>
+    </figure>
+
+    <!-- ═══ 2. 關鍵發現 ═══ -->
+    <h2 id="finding"><span class="h-num">2.</span>關鍵發現：inheritance 救 42% H3、untag 一條不動 — 守恆已驗證</h2>
+    <p>下圖比較 longphase-S inheritance 執行<strong>前 vs 後</strong>各類 read 的數量（HCC1395，120,834 somatic 位點，read-instance 口徑）。這是用它既有輸出檔親自重算、守恆檢查通過的權威基線。</p>
+
+    <figure class="svg-figure">
+      <svg viewBox="0 0 720 300" role="img" aria-labelledby="t2 d2">
+        <title id="t2">inheritance 前後 read 分布比較</title>
+        <desc id="d2">H3 從 434 萬降到 252 萬（救42%），H1-1 與 H2-1 對等增加，untag 維持 178 萬不變。</desc>
+        <!-- axis labels -->
+        <text x="20" y="24" font-size="12" font-weight="700" fill="var(--c-text)">read-instance（百萬）</text>
+        <!-- legend -->
+        <rect x="430" y="14" width="12" height="12" fill="var(--c-text-soft)"/><text x="448" y="24" font-size="11" fill="var(--c-text-soft)">before</text>
+        <rect x="520" y="14" width="12" height="12" fill="var(--c-accent)"/><text x="538" y="24" font-size="11" fill="var(--c-text-soft)">after</text>
+        <!-- bars: scale 1M = 46px, baseline y=250, max ~4.34M -->
+        <!-- H3 -->
+        <rect x="60" y="50" width="34" height="200" fill="var(--c-text-soft)"/>
+        <text x="77" y="44" text-anchor="middle" font-size="10" fill="var(--c-text-soft)">4.34M</text>
+        <rect x="96" y="134" width="34" height="116" fill="var(--c-warning)"/>
+        <text x="113" y="128" text-anchor="middle" font-size="10" font-weight="700" fill="#78350F">2.52M</text>
+        <text x="95" y="266" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--c-text)">H3 卡住</text>
+        <text x="95" y="281" text-anchor="middle" font-size="10" fill="var(--c-success)">▼ 救 42%</text>
+        <!-- H1-1 -->
+        <rect x="200" y="190" width="34" height="60" fill="var(--c-text-soft)"/>
+        <text x="217" y="184" text-anchor="middle" font-size="10" fill="var(--c-text-soft)">1.30M</text>
+        <rect x="236" y="130" width="34" height="120" fill="var(--c-success)"/>
+        <text x="253" y="124" text-anchor="middle" font-size="10" font-weight="700" fill="#166534">2.60M</text>
+        <text x="235" y="266" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--c-text)">H1-1</text>
+        <text x="235" y="281" text-anchor="middle" font-size="10" fill="var(--c-success)">▲ +1.30M</text>
+        <!-- H2-1 -->
+        <rect x="340" y="203" width="34" height="47" fill="var(--c-text-soft)"/>
+        <text x="357" y="197" text-anchor="middle" font-size="10" fill="var(--c-text-soft)">1.01M</text>
+        <rect x="376" y="179" width="34" height="71" fill="var(--c-success)"/>
+        <text x="393" y="173" text-anchor="middle" font-size="10" font-weight="700" fill="#166534">1.53M</text>
+        <text x="375" y="266" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--c-text)">H2-1</text>
+        <text x="375" y="281" text-anchor="middle" font-size="10" fill="var(--c-success)">▲ +0.52M</text>
+        <!-- untag -->
+        <rect x="500" y="168" width="34" height="82" fill="var(--c-critical)"/>
+        <text x="517" y="162" text-anchor="middle" font-size="10" fill="var(--c-text-soft)">1.78M</text>
+        <rect x="536" y="168" width="34" height="82" fill="var(--c-critical)"/>
+        <text x="553" y="162" text-anchor="middle" font-size="10" font-weight="700" fill="#7F1D1D">1.78M</text>
+        <text x="535" y="266" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--c-text)">unphase</text>
+        <text x="535" y="281" text-anchor="middle" font-size="10" font-weight="700" fill="#7F1D1D">＝ 完全不變</text>
+        <!-- baseline -->
+        <line x1="50" y1="250" x2="600" y2="250" stroke="var(--c-border)" stroke-width="1"/>
+      </svg>
+      <figcaption>圖 2：H1-1 + H2-1 的增量（+1.30M +0.52M = 1.82M）恰好等於 H3 的減量（1.82M），守恆 ✓。untag 1,777,511 條 before == after，longphase-S 對 unphase 零處理。</figcaption>
+    </figure>
+
+    <div class="callout-success">
+      <strong>為什麼這對設計是好消息</strong>：本任務<strong>不是從零建重指派</strong>，而是站在 longphase-S 已做好的基礎上補最後一塊。unphase 是它<em>主動放棄</em>、無既有方法競爭的乾淨空間 — 甲基若有訊號，這裡最容易看出來。
+    </div>
+
+    <!-- ═══ 3. 三類救援族群 ═══ -->
+    <h2 id="targets"><span class="h-num">3.</span>救援目標分三類，優先序 unphase &gt; 卡住 H3 &gt; H0 位點</h2>
+    <table>
+      <thead><tr><th>優先序</th><th>族群</th><th>規模（HCC1395）</th><th>longphase-S 對它做了什麼</th><th>甲基機會</th></tr></thead>
+      <tbody>
+        <tr class="row-bug"><td><strong>P1</strong></td><td>unphase read</td><td class="num">1,777,511 read-inst</td><td>完全放棄（inheritance 不碰）</td><td>✓ 最乾淨、無競爭</td></tr>
+        <tr class="row-warn"><td><strong>P2</strong></td><td>仍卡 H3 read</td><td class="num">2,520,324 read-inst</td><td>救援過但 deriveByHpSim&lt;0.6 失敗</td><td>⚠ 部分有 derive 線索</td></tr>
+        <tr class="row-warn"><td><strong>P3</strong></td><td>H0 難定相位點</td><td class="num">65,033 位點 (53.8%)</td><td>無法定 derive 方向</td><td>⚠ derive_by_H1_H2 25,653 子集</td></tr>
+        <tr class="row-safe"><td>—</td><td>distant read（更遠）</td><td class="num">後期</td><td>跨 PS-block 強制 unphase</td><td>🔴 首版只做可視化，不重指派</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:var(--fs-sm); color:var(--c-text-soft)">
+      註：P1/P2 為 read-instance（一條 read 跨 N 位點計 N 次），Phase A 會另算 unique-read 層級。distant read 因「定義未定 + 跨中介傳遞累積誤差 + 對抗 longphase 跨 block 保守設計」三重風險，首版不做重指派。
+    </p>
+
+    <!-- ═══ 4. 方案 ═══ -->
+    <h2 id="plan"><span class="h-num">4.</span>方案：先純 Python 旁路驗證判別力，過門檻才動 C++</h2>
+    <p>你已拍板的策略（MD1=C）：先在零改碼的 Python 旁路驗證甲基有沒有判別力，<strong>只有過 GO 門檻才投入不可逆的 longphase-S C++ 工程</strong>。這把最貴、最不可逆的步驟延後到證據充足之後。</p>
+
+    <figure class="svg-figure">
+      <svg viewBox="0 0 720 220" role="img" aria-labelledby="t3 d3">
+        <title id="t3">分階段流程與 GO/NO-GO gate</title>
+        <desc id="d3">Phase A 純 Python 旁路驗證判別力，GO 則進 Phase B longphase-S C++ 增強，NO-GO 則停止不投入 C++。</desc>
+        <!-- Phase A -->
+        <rect x="20" y="80" width="200" height="64" rx="8" fill="#EFF4FF" stroke="var(--c-info)" stroke-width="2"/>
+        <text x="120" y="104" text-anchor="middle" font-size="13" font-weight="700" fill="#1E3A5F">Phase A（現在）</text>
+        <text x="120" y="122" text-anchor="middle" font-size="11" fill="#1E3A5F">純 Python 旁路</text>
+        <text x="120" y="137" text-anchor="middle" font-size="10" fill="var(--c-text-soft)">零 C++ · 可逆 · 算甲基 AUC</text>
+        <!-- arrow to gate -->
+        <line x1="220" y1="112" x2="270" y2="112" stroke="var(--c-text-soft)" stroke-width="2"/>
+        <polygon points="270,112 262,108 262,116" fill="var(--c-text-soft)"/>
+        <!-- gate diamond -->
+        <polygon points="350,72 410,112 350,152 290,112" fill="var(--c-surface)" stroke="var(--c-accent)" stroke-width="2"/>
+        <text x="350" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="var(--c-text)">AUC &gt; 0.58?</text>
+        <text x="350" y="123" text-anchor="middle" font-size="9.5" fill="var(--c-text-soft)">過 het null?</text>
+        <!-- GO -->
+        <line x1="410" y1="112" x2="460" y2="112" stroke="var(--c-success)" stroke-width="2"/>
+        <polygon points="460,112 452,108 452,116" fill="var(--c-success)"/>
+        <text x="435" y="104" text-anchor="middle" font-size="11" font-weight="700" fill="#166534">GO</text>
+        <rect x="460" y="80" width="240" height="64" rx="8" fill="#FEF7E6" stroke="var(--c-warning)" stroke-width="2"/>
+        <text x="580" y="104" text-anchor="middle" font-size="13" font-weight="700" fill="#78350F">Phase B（條件式）</text>
+        <text x="580" y="122" text-anchor="middle" font-size="11" fill="#78350F">longphase-S C++ 增強</text>
+        <text x="580" y="137" text-anchor="middle" font-size="10" fill="var(--c-text-soft)">O(300-500) 行 · Hard Gate</text>
+        <!-- NO-GO -->
+        <line x1="350" y1="152" x2="350" y2="190" stroke="var(--c-critical)" stroke-width="2"/>
+        <polygon points="350,190 346,182 354,182" fill="var(--c-critical)"/>
+        <text x="368" y="178" text-anchor="middle" font-size="11" font-weight="700" fill="#7F1D1D">NO-GO</text>
+        <rect x="240" y="190" width="220" height="26" rx="6" fill="#FEF2F0" stroke="var(--c-critical)"/>
+        <text x="350" y="207" text-anchor="middle" font-size="10.5" fill="#7F1D1D">停止，不投入任何 C++（最便宜的擋點）</text>
+      </svg>
+      <figcaption>圖 3：Phase A 是最便宜的擋點。甲基若撞 AUC ≤ 0.58 天花板（這是 ISM 多次驗證的系統限制），就在動 C++ 前停下，零浪費。</figcaption>
+    </figure>
+
+    <!-- ═══ 5. GO/NO-GO gate ═══ -->
+    <h2 id="gate"><span class="h-num">5.</span>GO / NO-GO 用量化門檻判定，不靠感覺</h2>
+    <table>
+      <thead><tr><th>判定</th><th>量化條件</th><th>後續動作</th></tr></thead>
+      <tbody>
+        <tr class="row-safe"><td><strong>GO ✓</strong></td><td>unphase 或卡住 H3 子集的甲基 affinity <strong>AUC &gt; 0.58</strong> 且顯著超過 germline-het null（過 /auc-confound-guard 三關）</td><td>升級評估 Phase B C++ 增強（另開 spec）</td></tr>
+        <tr class="row-bug"><td><strong>NO-GO ✗</strong></td><td>AUC ≤ 0.58，<strong>或</strong> AUC&gt;0.58 但被 germline-het null 解釋（=baseline 甲基 confound 非 somatic 訊號）</td><td>兩路皆停，不投入任何 C++</td></tr>
+        <tr class="row-warn"><td><strong>PROBE ⚠</strong></td><td>AUC&gt;0.58 僅特定子集（如 non-LOH 區）成立</td><td>限定 scope 重評</td></tr>
+      </tbody>
+    </table>
+    <div class="callout-warning">
+      <strong>為什麼這個門檻嚴格</strong>：本 repo 已多次確認「純甲基特徵的 TP/FP 判別 AUC ≤ 0.58 天花板」。本任務目標雖不同（救相位非判別 TP/FP），但沒理由假設甲基訊號會因換目標就突破天花板 — 所以 Phase A 先驗證，是誠實的前置擋點。
+    </div>
+
+    <!-- ═══ 6. Method Decision Ledger ═══ -->
+    <h2 id="ledger"><span class="h-num">6.</span>方法抉擇 ledger — 每個分岔都有量化判準，供你檢核</h2>
+    <p>你要求「抉擇方法時要紀錄觀察數據 + 可量化的抉擇依據與決定」。以下 10 項即此用途；<span class="badge locked">已拍板</span> = 你已確認，<span class="badge pending">建議</span> = 有量化判準的當前建議，跑完觀察後回填實測值再定。</p>
+
+    <table>
+      <thead><tr><th>ID</th><th>方法分岔</th><th>量化判準</th><th>決定</th></tr></thead>
+      <tbody>
+        <tr class="row-safe"><td><strong>MD1</strong></td><td>介入層：ISM 旁路 vs longphase-S C++</td><td>AUC&gt;0.58 過 het null 才升 C++；≤0.58 兩路皆停</td><td><span class="badge locked">C 先旁路</span></td></tr>
+        <tr class="row-safe"><td><strong>MD2</strong></td><td>甲基證據軸：HP-axis vs ALLELE-axis</td><td>HP-axis OR/AUC 須 &gt; germline-het null（OR=1.79 基線）</td><td><span class="badge locked">HP-axis 主</span></td></tr>
+        <tr class="row-warn"><td><strong>MD3</strong></td><td>per-read 信心指標</td><td>須覆蓋 unphase（deriveByHpSim 對 unphase 無定義）</td><td><span class="badge pending">deriveByHpSim + 自定甲基信心</span></td></tr>
+        <tr class="row-warn"><td><strong>MD4</strong></td><td>甲基特徵：binary vs raw matrix</td><td>raw 比 binary AUC 高 &gt;0.02 才用 raw</td><td><span class="badge pending">binary 先 pilot</span></td></tr>
+        <tr class="row-safe"><td><strong>MD5</strong></td><td>救援範圍：H3 vs unphase</td><td>各子集 affinity AUC 分別評</td><td><span class="badge locked">兩者，unphase 優先</span></td></tr>
+        <tr class="row-warn"><td><strong>MD6</strong></td><td>重指派接受門檻</td><td>cutoff 使 precision ≥ 已知 HP read baseline 一致率</td><td><span class="badge pending">ROC 決定 + 並列 0.6</span></td></tr>
+        <tr class="row-warn"><td><strong>MD7</strong></td><td>LOH/CN read gate</td><td>LOH 顯著異於 non-LOH → 分層不排除</td><td><span class="badge pending">標記分層、仍救</span></td></tr>
+        <tr class="row-warn"><td><strong>MD8</strong></td><td>無甲基覆蓋 read</td><td>雙口徑報告（全 vs 有覆蓋子集）</td><td><span class="badge pending">保留原 tag + 標記</span></td></tr>
+        <tr class="row-warn"><td><strong>MD9</strong></td><td>口徑對齊：SSRS dump vs paired 重產</td><td>兩 build inheritance 規則須驗證一致；最終口徑來自 paired</td><td><span class="badge pending">SSRS 基線 + paired 真口徑</span></td></tr>
+        <tr class="row-warn"><td><strong>MD10</strong></td><td>HP-tag 細類統計工具</td><td>須分 unphase/HP3/HP1-1/HP2-1（hp_other 混合不可用）</td><td><span class="badge pending">擴充現成腳本</span></td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:var(--fs-sm); color:var(--c-text-soft)">完整 ledger（含每項「要觀察什麼數據」+「理由」+「實測值待回填欄」）見 source spec §4。</p>
+
+    <!-- ═══ 7. 信心量化 ═══ -->
+    <h2 id="confidence"><span class="h-num">7.</span>tag 信心量化用 longphase-S 現成訊號，不重新發明</h2>
+    <p>你要求 tag 結果要可數值化。longphase-S 已輸出多個現成連續分數可直接當 baseline：</p>
+    <table>
+      <thead><tr><th>指標</th><th>意義</th><th>適用</th></tr></thead>
+      <tbody>
+        <tr><td><code>deriveByHpSimilarity</code></td><td>H3 read 上 somatic SNP derive 自 H1 vs H2 的票比，值域 [0.5,1]∪{0}</td><td>僅 H3（unphase 無 derive → 須甲基補）</td></tr>
+        <tr><td><code>PQ</code></td><td>Phred-scale phasing 信心（−10·log10(min/total)，純→40）</td><td>可覆蓋 unphase</td></tr>
+        <tr><td><code>existDeriveByH1andH2</code></td><td>同一 somatic SNP 的 H3 read 同時 derive 自 H1+H2 的歸屬混亂旗標</td><td>per-variant，標甲基最該拆解的位點</td></tr>
+        <tr><td><code>germlineVarSimilarity</code></td><td>per-read germline 投票相似度（現成 dump 零改碼可讀）</td><td>baseline 信心對照</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ═══ 8. 紅線 ═══ -->
+    <h2 id="redline"><span class="h-num">8.</span>兩條紅線：防止滑回已死的「甲基當 FP filter」死路</h2>
+    <div class="callout-critical">
+      <strong>紅線 1 — metric 鎖死在 read tag / phasing 層級。</strong>
+      success = 被救回 read 與 ground-truth haplotype 一致率 + 對 LOH-phasing 活軸的增益。
+      <strong>絕不可</strong>回頭包裝成「改善 variant TP/FP F1」— 那是已 concluded 的死路（⭐2 L4，100% sample-level circularity）。
+    </div>
+    <div class="callout-critical">
+      <strong>紅線 2 — HP-axis 為主證據軸。</strong>
+      你提的 Ref-Alt vs Alt-Ref（ALLELE-axis）會被 germline-het 基線甲基化 confound（TP 11.1% &lt; het null 15.2%）。
+      只有 HP-axis（HP1 vs HP1-1）是 somatic-controlled；ALLELE-axis 僅作描述且強制 germline-het negative control。
+    </div>
+
+    <!-- ═══ 9. 待確認 ═══ -->
+    <h2 id="ask"><span class="h-num">9.</span>待你確認</h2>
+    <div class="ask-box">
+      <h4>這份設計頁是要給你 review 的視覺化版本。請確認：</h4>
+      <ol>
+        <li><strong>整體方向</strong>：「站在 longphase-S 既有 inheritance 上，對 unphase + 卡住 H3 用甲基再救一層」這個定位對嗎？</li>
+        <li><strong>救援優先序</strong>：unphase（P1）&gt; 卡住 H3（P2）&gt; H0 位點（P3），distant read 留後期只做可視化 — 同意嗎？</li>
+        <li><strong>GO/NO-GO 門檻</strong>：AUC&gt;0.58 過 het null 才開 C++，這個擋點嚴格度可以嗎？</li>
+        <li><strong>method ledger 的 pending 項（MD3/4/6/7/8/9/10）</strong>：當前建議與量化判準你接受嗎？還是某項要改判準？</li>
+        <li><strong>視覺化本身</strong>：圖表 / 表格清楚嗎？需要補哪種圖（例如某類 read 的甲基分布實例圖）？</li>
+      </ol>
+      <p style="margin-bottom:0">確認後我會 invoke <code>writing-plans</code>，把 Phase A 拆成 TDD 風格的最小單元實作計畫（每步 commit + 驗證 + 可回溯）。</p>
+    </div>
+
+    <!-- ═══ refs ═══ -->
+    <section class="references" id="refs">
+      <h2>證據來源</h2>
+      <ol>
+        <li><code>InterSubMod/docs/experiments/in_progress/2026/05/20260531_methyl_unphase_HP3_phasing_rescue_design_02.md</code> — 本頁 source design spec（完整 method ledger + Phase A 規劃）</li>
+        <li><code>InterSubMod/docs/experiments/in_progress/2026/05/20260531_methyl_unphase_HP3_phasing_rescue_scoping_01.md</code> — 探索證據與卡關根因（已凍結）</li>
+        <li>longphase-S 原始碼：<code>/big8_disk/liaoyoyo2001/longphase-s/src/somatic_haplotag/</code>（SomaticHaplotagProcess.cpp:461-527 inheritHaplotype；HaplotagStrategy.cpp:452-602 judgeSomaticReadHap）— 逐位元組 + 雙重對抗驗證 confirmed</li>
+        <li>SSRS inheritance dump：<code>/big8_disk/liaoyoyo2001/longphase_somatic_output_ssrs/*_readDistri_before/afterInheritance.out</code>（120,834 位點，守恆已親自重算）</li>
+        <li>paired HCC1395 tagged BAM：<code>/big7_disk/.../paired_full/.../longphase_s/HCC1395_tagged.bam</code>（278GB，Phase A 主資料）</li>
+      </ol>
+      <p style="font-size:var(--fs-xs); color:var(--c-text-soft); margin-top:var(--sp-3)">
+        分析 provenance：workflow wf_41624212（卡關根因）+ wf_7cbe71fc（longphase-S 逐位元組 + method ledger）；13 agent，~270 萬 subagent token。所有數字來自 longphase-S 既有輸出檔，親自重算 + 守恆驗證。本頁為 .md spec 的視覺 companion（D11，不取代 .md）。
+      </p>
+    </section>
+
+  </main>
+</div>
+</body>
+</html>

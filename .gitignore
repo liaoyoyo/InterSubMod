@@ -299,3 +299,8 @@ state/focus_board.html
 # cis-ASM pipeline regression-test fixture (frozen BRCA2 Level-1; needed for `make test` portability)
 # exception to *.tsv.gz (line 31) / research/**/*.tsv — small (149KB), a hermetic test golden not bulk data
 !research/tsg_promoter_asm_reviewer/pipeline/fixtures/brca2_level1.tsv.gz
+
+# 甲基救 unphase pilot — 中間 per-read matrix/meta（可由腳本重產，不進 git）
+docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/*_matrix.tsv
+docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/*_meta.tsv
+docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/per_chr/

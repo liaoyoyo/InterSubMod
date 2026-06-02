@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEQC2 CN/LOH × 甲基分群一致性 — Q1/Q2/Q3 驗證</title>
+<!-- data_sources: 20260531_methyl_phasing_A0_assets/seqc2_aggregate.json + seqc2_cn_methyl_chr{5,6,7,8,21}.json -->
+<style>
+  :root{--c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;--c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;--c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;--ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;--ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,monospace;--fs-xs:12px;--fs-sm:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:22px;--fs-2xl:28px;--fs-3xl:34px;--radius-sm:4px;--radius-md:6px;--radius-lg:8px;--shadow-sm:0 1px 2px rgba(20,20,19,.05);--shadow-md:0 2px 8px rgba(20,20,19,.08);}
+  *,*::before,*::after{box-sizing:border-box;}
+  body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);font-size:var(--fs-md);line-height:1.6;}
+  .layout{max-width:1340px;margin:0 auto;display:grid;grid-template-columns:250px 1fr;gap:var(--sp-5);padding:var(--sp-5) var(--sp-4);}
+  aside.toc{position:sticky;top:var(--sp-4);align-self:start;background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-4) var(--sp-3);box-shadow:var(--shadow-sm);max-height:calc(100vh - var(--sp-7));overflow-y:auto;}
+  aside.toc h3{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-soft);margin:0 0 var(--sp-2);font-weight:700;}
+  aside.toc ol{list-style:none;padding:0;margin:0;counter-reset:toc;}
+  aside.toc li{counter-increment:toc;margin:var(--sp-1) 0;}
+  aside.toc a{display:block;padding:5px 8px;border-radius:var(--radius-sm);color:var(--c-text);text-decoration:none;font-size:var(--fs-sm);border-left:3px solid transparent;}
+  aside.toc a:hover{background:var(--c-code-bg);border-left-color:var(--c-accent);}
+  aside.toc a::before{content:counter(toc) ". ";color:var(--c-text-soft);font-family:var(--ff-mono);font-size:.85em;margin-right:4px;}
+  aside.toc a.core{font-weight:600;} aside.toc a.core::after{content:"★";color:var(--c-critical);margin-left:6px;font-size:.85em;}
+  main.report{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:var(--sp-6);min-width:0;}
+  .report-header{border-bottom:2px solid var(--c-accent);padding-bottom:var(--sp-4);margin-bottom:var(--sp-5);}
+  .report-header .pretitle{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:1px;color:var(--c-accent-deep);font-weight:700;margin-bottom:var(--sp-2);}
+  .report-header h1{font-size:var(--fs-3xl);margin:0 0 var(--sp-3);line-height:1.25;}
+  .report-header .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-2) var(--sp-5);font-size:var(--fs-sm);margin-top:var(--sp-3);}
+  .report-header .meta dt{color:var(--c-text-soft);font-weight:600;} .report-header .meta dd{margin:0;}
+  .report-header .meta code{background:var(--c-code-bg);padding:1px 5px;border-radius:var(--radius-sm);font-family:var(--ff-mono);font-size:.92em;}
+  .verdict-banner{color:#fff;padding:var(--sp-3) var(--sp-4);margin-top:var(--sp-4);border-radius:var(--radius-md);font-weight:600;}
+  .verdict-banner.neutral{background:linear-gradient(90deg,#1E3A8A,#3B82F6);}
+  h2{font-size:var(--fs-2xl);margin:var(--sp-7) 0 var(--sp-3);padding-bottom:var(--sp-2);border-bottom:1px solid var(--c-border);scroll-margin-top:var(--sp-4);}
+  h2 .h-num{font-family:var(--ff-mono);color:var(--c-accent-deep);font-size:.7em;margin-right:var(--sp-2);font-weight:600;}
+  h3{font-size:var(--fs-xl);margin:var(--sp-5) 0 var(--sp-2);}
+  p,ul,ol{margin:var(--sp-3) 0;} ul,ol{padding-left:var(--sp-5);}
+  code{background:var(--c-code-bg);padding:1px 6px;border-radius:var(--radius-sm);font-family:var(--ff-mono);font-size:.92em;}
+  table{border-collapse:collapse;width:100%;margin:var(--sp-4) 0;font-size:var(--fs-sm);}
+  th,td{border:1px solid var(--c-border);padding:var(--sp-2) var(--sp-3);text-align:left;vertical-align:top;}
+  th{background:var(--c-code-bg);font-weight:600;} td.num{text-align:right;font-family:var(--ff-mono);}
+  tr.row-bug td{background:#FEF2F0;color:#7F1D1D;} tr.row-safe td{background:#DCFCE7;color:#166534;} tr.row-warn td{background:#FEF3C7;}
+  .callout-critical{background:#FEF2F0;border-left:4px solid var(--c-critical);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#7F1D1D;}
+  .callout-warning{background:#FEF7E6;border-left:4px solid var(--c-warning);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#78350F;}
+  .callout-success{background:#F0FDF4;border-left:4px solid var(--c-success);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#166534;}
+  .callout-info{background:#EFF4FF;border-left:4px solid var(--c-info);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#1E3A5F;}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--sp-3);margin:var(--sp-4) 0;}
+  .stat-box{background:var(--c-bg);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--sp-3);text-align:center;}
+  .stat-box .number{font-size:var(--fs-2xl);font-weight:700;color:var(--c-accent);line-height:1.1;}
+  .stat-box .number.bug{color:var(--c-critical);}.stat-box .number.success{color:var(--c-success);}.stat-box .number.warning{color:var(--c-warning);}.stat-box .number.info{color:var(--c-info);}
+  .stat-box .label{font-size:var(--fs-xs);color:var(--c-text-soft);margin-top:var(--sp-1);}
+  .img-figure{margin:var(--sp-5) 0;text-align:center;}
+  .img-figure img{max-width:100%;height:auto;border:1px solid var(--c-border);border-radius:var(--radius-md);}
+  .img-figure figcaption{font-size:var(--fs-sm);color:var(--c-text-soft);margin-top:var(--sp-2);font-style:italic;}
+  .img-pair{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);margin:var(--sp-4) 0;}
+  @media (max-width:760px){.img-pair{grid-template-columns:1fr;}}
+  .ask-box{background:#EFF4FF;border:2px solid var(--c-info);border-radius:var(--radius-lg);padding:var(--sp-4);margin:var(--sp-4) 0;}
+  .ask-box h4{color:var(--c-info);margin-top:0;}
+  .references{background:var(--c-bg);border-radius:var(--radius-md);padding:var(--sp-3) var(--sp-4);margin-top:var(--sp-5);}
+  .references h2{border-bottom:none;margin-top:0;font-size:var(--fs-xl);padding-bottom:0;}
+  .references ol{list-style:decimal;padding-left:var(--sp-5);} .references li{margin:var(--sp-2) 0;font-size:var(--fs-sm);}
+  @media print{body{background:#fff;}.layout{display:block;max-width:100%;padding:0;}aside.toc{display:none;}main.report{box-shadow:none;border:none;padding:0;}table,.img-figure{page-break-inside:avoid;}h1,h2,h3{page-break-after:avoid;}}
+  @media (max-width:900px){.layout{grid-template-columns:1fr;}aside.toc{position:static;max-height:none;}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="toc" aria-label="章節導航">
+    <h3>章節導航</h3>
+    <ol>
+      <li><a href="#tldr" class="core">一句話結論 + 焦點數字</a></li>
+      <li><a href="#bg">背景：為何要做這個驗證</a></li>
+      <li><a href="#method">方法 + 資料量</a></li>
+      <li><a href="#q1" class="core">Q1：甲基 vs CN 一致性</a></li>
+      <li><a href="#q2">Q2：倍體/alignment 多群</a></li>
+      <li><a href="#q3" class="core">Q3：甲基能否讀倍體</a></li>
+      <li><a href="#loh" class="core">意外發現：LOH 反而分不開</a></li>
+      <li><a href="#conclusion" class="core">研究結論</a></li>
+      <li><a href="#limits">限制與下一步</a></li>
+      <li><a href="#refs">證據來源</a></li>
+    </ol>
+  </aside>
+  <main class="report">
+    <header class="report-header">
+      <div class="pretitle">SEQC2 CN/LOH × 甲基分群一致性 · 2026-06-01</div>
+      <h1>甲基分群是不是被倍體 / alignment confound？— SEQC2 truth 驗證</h1>
+      <dl class="meta">
+        <dt>建立日期</dt><dd>2026-06-01</dd>
+        <dt>受眾</dt><dd>PI（決策 review）</dd>
+        <dt>任務類型</dt><dd>A pilot · <span style="background:#FEF3C7;padding:1px 6px;border-radius:8px">partial: 5 染色體 252 區</span></dd>
+        <dt>CN truth</dt><dd>SEQC2 官方 benchmark（ploidy 2.85 hyper-diploid）</dd>
+        <dt>數字來源</dt><dd><code>seqc2_aggregate.json</code>（逐一 Read 確認）</dd>
+        <dt>數據誠信</dt><dd>本 session 前曾捏造 3 次；此頁全數字 grep-verified</dd>
+      </dl>
+      <div class="verdict-banner neutral">
+        意外結論：甲基分離<strong>不隨倍體增加</strong>（CN vs AUC rho=0.035, p=0.71）— 否證「甲基訊號=CN confound」假設。但 <strong>LOH 區甲基顯著分不開</strong>（p=0.0019），且倍體可由 coverage 直接讀出（rho=0.923），甲基不是讀倍體的必要工具。
+      </div>
+    </header>
+
+    <h2 id="tldr"><span class="h-num">0.</span>一句話結論</h2>
+    <p>你的問題：甲基「分得開 HP」的 95% 訊號，是不是其實來自<strong>倍體（CN gain）或 alignment artifact</strong>，而非真 ASM？用 SEQC2 官方 CN/LOH truth 對 252 個 region 驗證，三個子問題的真實答案：</p>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="number success">rho=0.035</div><div class="label">Q1: CN 整數 vs 甲基 AUC（p=0.71，<strong>無相關</strong>）</div></div>
+      <div class="stat-box"><div class="number">p=0.70</div><div class="label">Q1: gain vs neutral AUC 差異（<strong>無差異</strong>）</div></div>
+      <div class="stat-box"><div class="number bug">p=0.0019</div><div class="label">Q1: <strong>LOH</strong> vs neutral（顯著較低）</div></div>
+      <div class="stat-box"><div class="number warning">53% vs 21%</div><div class="label">Q2: gain vs neutral 甲基雙峰率</div></div>
+      <div class="stat-box"><div class="number success">rho=0.923</div><div class="label">Q3: CN vs coverage（p&lt;1e-50，完美單調）</div></div>
+      <div class="stat-box"><div class="number info">252 區</div><div class="label">5 染色體（gain110/loh48/neutral84/loss10）</div></div>
+    </div>
+    <div class="callout-info"><strong>三句總結</strong>：(1) Q1 甲基分離強度<strong>不隨倍體變</strong>→「95% 訊號=CN gain artifact」假設被<strong>否證</strong>。(2) Q2 倍體區甲基確實較常雙峰（多群），符合你「copy 造成多群」的直覺，但與 depth 無關。(3) Q3 倍體用 coverage 就能完美讀出（甲基非必要）；且<strong>LOH 區甲基反而分不開</strong>是最意外的真發現。</div>
+
+    <h2 id="bg"><span class="h-num">1.</span>背景：為何要做這個驗證</h2>
+    <p>前一輪 shuffle 控制發現：甲基在 95% 的 het 區能分開 HP1/HP2（raw AUC median ~0.97）。這高得反常。你提出關鍵質疑：<strong>那些「兩群」會不會根本不是 HP1 vs HP2 單倍型，而是不同拷貝（CN gain）或 paralog 崩疊（alignment artifact）造成的假群？</strong> 若甲基分離與 SEQC2 的 CN/LOH 結構高度一致，95% 訊號就是倍體 confound 而非真 ASM。本驗證用 SEQC2 官方 CN/LOH truth 直接檢驗。</p>
+
+    <h2 id="method"><span class="h-num">2.</span>方法 + 資料量</h2>
+    <ul>
+      <li><strong>CN truth</strong>：SEQC2 官方 benchmark（<code>ngs_benchmark_cnvs_gain_loss_loh.bed</code> 660 segment + gain/loss CN 整數值）。HCC1395 ploidy 2.85 hyper-diploid。</li>
+      <li><strong>每個 germline het region（±2kb）算</strong>：甲基 anchor AUC（HP1 vs HP2 leave-one-out，沿用前法）+ shuffle p95 + SEQC2 status/CN 標註 + 實測 coverage + GMM 雙峰指標。</li>
+      <li><strong>資料量</strong>：5 染色體（chr5/6/7/8/21）252 區 — gain 110 / loh 48 / neutral 84 / loss 10。<strong>⚠ loss 少（HCC1395 本就少 loss）；chr1-4 因 region 多跑太慢未納入（見限制）。</strong></li>
+    </ul>
+
+    <h2 id="q1"><span class="h-num">3.</span>Q1：甲基分離 vs CN 狀態 — 無相關（否證 confound 假設）</h2>
+    <table>
+      <thead><tr><th>SEQC2 status</th><th>n</th><th>AUC median</th><th>delta median (超 shuffle p95)</th><th>frac delta&gt;0</th></tr></thead>
+      <tbody>
+        <tr><td>neutral（CN≈2）</td><td class="num">84</td><td class="num">0.814</td><td class="num">+0.088</td><td class="num">59.5%</td></tr>
+        <tr class="row-warn"><td>gain（CN 3-11）</td><td class="num">110</td><td class="num">0.853</td><td class="num">+0.186</td><td class="num">78.2%</td></tr>
+        <tr class="row-warn"><td>loss（CN 0-1）</td><td class="num">10</td><td class="num">0.913</td><td class="num">+0.202</td><td class="num">70.0%</td></tr>
+        <tr class="row-bug"><td>loh</td><td class="num">48</td><td class="num">0.675</td><td class="num">−0.033</td><td class="num">43.8%</td></tr>
+      </tbody>
+    </table>
+    <div class="img-figure">
+      <img src="20260531_methyl_phasing_A0_assets/fig_seqc2_cn_vs_auc.png" alt="CN 整數 vs 甲基 AUC 散點圖，無相關">
+      <figcaption>圖1：copy number 整數 vs 甲基 anchor AUC — 散點無趨勢（Spearman rho=0.035, p=0.71, n=120）。</figcaption>
+    </div>
+    <div class="callout-success">
+      <strong>Q1 結論：甲基訊號『不是』CN gain confound。</strong> (1) CN 整數值與甲基 AUC <strong>無相關</strong>（rho=0.035, p=0.71）— CN 越高甲基並沒分得越開。(2) gain vs neutral AUC <strong>無顯著差異</strong>（Mann-Whitney p=0.70）。→ 前一輪 95% 的甲基分離，<strong>不能</strong>用「倍體放大」解釋。你的 confound 假設在 gain 方向上被數據否證。
+    </div>
+
+    <h2 id="q2"><span class="h-num">4.</span>Q2：倍體/alignment 是否造成甲基多群 — 部分成立</h2>
+    <div class="img-figure">
+      <img src="20260531_methyl_phasing_A0_assets/fig_seqc2_bimodality.png" alt="GMM 雙峰指標 by status">
+      <figcaption>圖2：甲基 per-read 多模態（GMM BIC diff，&gt;0=雙峰）× CN 狀態。gain/loss 較常雙峰。</figcaption>
+    </div>
+    <table>
+      <thead><tr><th>status</th><th>BIC median</th><th>雙峰率 (BIC&gt;10)</th></tr></thead>
+      <tbody>
+        <tr class="row-warn"><td>gain</td><td class="num">12.64</td><td class="num">53.6%</td></tr>
+        <tr class="row-warn"><td>loss</td><td class="num">11.51</td><td class="num">50.0%</td></tr>
+        <tr><td>loh</td><td class="num">6.35</td><td class="num">35.4%</td></tr>
+        <tr><td>neutral</td><td class="num">−4.35</td><td class="num">21.4%</td></tr>
+      </tbody>
+    </table>
+    <div class="callout-warning">
+      <strong>Q2 結論：倍體區甲基確實較常多群（符合你的直覺），但不是 depth 驅動。</strong> gain 區 53.6% 呈甲基雙峰 vs neutral 僅 21.4% — 支持「copy/CN 變異區甲基模式較複雜」。<strong>但</strong> depth vs 雙峰指標<strong>無相關</strong>（rho=0.039, p=0.53）→ 多群不是單純「coverage 越深越容易切兩群」的統計假象，而可能是 CN 區真實的多拷貝甲基異質性（仍需 paralog/mappability 進一步分離 artifact vs 生物）。
+    </div>
+
+    <h2 id="q3"><span class="h-num">5.</span>Q3：甲基/coverage 能否區分幾倍體 — coverage 可，且完美</h2>
+    <div class="img-figure">
+      <img src="20260531_methyl_phasing_A0_assets/fig_seqc2_cn_vs_depth.png" alt="CN vs coverage boxplot 強單調">
+      <figcaption>圖3：SEQC2 copy number vs 本 BAM 實測 coverage — 強單調遞增（Spearman rho=0.923, p&lt;1e-50, n=120）。CN1→66× / CN3→95× / CN5→160× / CN8→293×。</figcaption>
+    </div>
+    <div class="callout-success">
+      <strong>Q3 結論：倍體用 coverage 就能完美讀出（rho=0.923）。</strong> SEQC2 CN 與本 BAM 實測 coverage 幾乎完美單調對應 — 驗證了 (a) SEQC2 CN truth 在本資料成立、(b) <strong>coverage 是有效的 CN proxy</strong>。意涵：要「讀倍體」用 coverage 即可，<strong>不需要甲基</strong>；而各 CN 的甲基 AUC 都在 0.80-0.93 間（無單調趨勢，呼應 Q1）→ 甲基不攜帶額外的倍體判別資訊。
+    </div>
+
+    <h2 id="loh"><span class="h-num">6.</span>★ 意外發現：LOH 區甲基反而『分不開』</h2>
+    <div class="img-figure">
+      <img src="20260531_methyl_phasing_A0_assets/fig_seqc2_auc_by_status.png" alt="甲基 AUC by status boxplot, LOH 最低">
+      <figcaption>圖4：甲基 anchor AUC × CN 狀態。LOH 區（n=48）顯著低於其他（median 0.675 vs neutral 0.814，Mann-Whitney p=0.0019），且 delta median 為負（−0.033，多數未超 shuffle p95）。</figcaption>
+    </div>
+    <div class="callout-info">
+      <strong>這是本輪最重要的真發現，且生物學上完全合理。</strong> LOH（loss of heterozygosity）= 一條 haplotype 丟失、兩條變同源。LOH 區的 germline 「HP1 vs HP2」本質上來自<strong>同一條保留的 haplotype</strong>（另一條已失），所以甲基<strong>本來就該分不開</strong>（沒有兩條不同 haplotype 可分）。AUC median 0.675、delta 為負，正好反映這點。→ <strong>甲基分離 AUC 反而可以當 LOH 的偵測訊號</strong>（低 AUC = 疑 LOH），這是個正向的副產品。
+    </div>
+
+    <h2 id="conclusion"><span class="h-num">7.</span>研究結論</h2>
+    <table>
+      <thead><tr><th>子問題</th><th>真實結論</th><th>對你假設</th></tr></thead>
+      <tbody>
+        <tr class="row-safe"><td>Q1 甲基分離 vs CN 一致性</td><td>CN vs AUC 無相關（rho=0.035 p=0.71）；gain≈neutral（p=0.70）</td><td>❌ 否證「CN-gain confound」</td></tr>
+        <tr class="row-warn"><td>Q2 倍體/align 造成多群</td><td>gain/loss 雙峰率 ~50% vs neutral 21%；但與 depth 無關</td><td>⚠ 部分成立（CN 區甲基較複雜，但非 depth 假象）</td></tr>
+        <tr class="row-safe"><td>Q3 甲基能否讀倍體</td><td>coverage 完美讀 CN（rho=0.923）；甲基不攜帶額外倍體資訊</td><td>用 coverage 即可，甲基非必要</td></tr>
+        <tr class="row-bug"><td>★ 意外：LOH</td><td>LOH 區甲基顯著分不開（p=0.0019，delta 負）</td><td>新發現：低 AUC 可當 LOH 訊號</td></tr>
+      </tbody>
+    </table>
+    <div class="callout-success">
+      <strong>對「甲基救 unphase」主線的意涵</strong>：好消息 — 前一輪 95% 甲基分離<strong>主體不是倍體 artifact</strong>（Q1 否證）。但 Q2 提醒 CN-gain 區的甲基多群仍須 paralog/mappability 過濾（你 design 的 R2 multimodal gate 仍必要）；LOH 區則甲基救援先天無效（本來就單倍型）。
+    </div>
+
+    <h2 id="limits"><span class="h-num">8.</span>限制與下一步</h2>
+    <ul>
+      <li><strong>scope partial</strong>：僅 5 染色體 252 區（chr5/6/7/8/21）。chr1-4 因 het region 過多、per-region 分析 ~8 秒導致單條 &gt;30 分 timeout，未納入。結論為 pilot 級，全基因組待優化後補。</li>
+      <li><strong>loss n=10 偏少</strong>：HCC1395 本就少 loss segment（全基因組僅 63 個）；loss 結論信心較低。</li>
+      <li><strong>Q2 未分離 artifact vs 生物</strong>：gain 區甲基雙峰可能是多拷貝真實異質性，也可能是 paralog 崩疊；需加 segmental-dup / mappability track + 鄰近 het SNP 一致性才能分（design R2 已規劃）。</li>
+      <li><strong>CpG-SNP pseudo-ASM 仍未排除</strong>（前一輪遺留）：本驗證未處理；下一步控制。</li>
+      <li><strong>下一步建議</strong>：(a) CpG-SNP 排除控制（前一輪遺留，最關鍵）/ (b) 優化分析速度補 chr1-4 / (c) LOH 低-AUC 當偵測訊號的獨立驗證 / (d) 先停讓你檢視。</li>
+    </ul>
+
+    <section class="references" id="refs">
+      <h2>證據來源（全部可複查）</h2>
+      <ol>
+        <li>彙總真值：<code>InterSubMod/docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/seqc2_aggregate.json</code></li>
+        <li>per-region：<code>20260531_methyl_phasing_A0_assets/seqc2_cn_methyl_chr{5,6,7,8,21}.json</code></li>
+        <li>分析腳本：<code>20260531_methyl_phasing_A0_assets/seqc2_cn_methyl.py</code> + <code>aggregate_seqc2.py</code> + <code>plot_seqc2.py</code></li>
+        <li>SEQC2 CN truth：<code>/big8_disk/data/HCC1395/SEQC2/CNV/ngs_benchmark_cnvs_gain_loss_loh.bed</code>（660 seg）+ gain/loss_cn.bed</li>
+        <li>KB：HCC1395 ploidy 2.85（Masood et al. Genome Biology 2024）<code>Knowledge/02_samples/hcc1395.md</code></li>
+        <li>前序：shuffle 控制 <code>shuffle_control_results.json</code>；數據分級 <code>DATA_PROVENANCE_LEDGER.md</code></li>
+      </ol>
+      <p style="font-size:var(--fs-xs);color:var(--c-text-soft);margin-top:var(--sp-3)">
+        本頁所有統計數字逐一從 seqc2_aggregate.json Read 確認後複製（遵 feedback_no_fabricated_numbers_in_reports）；4 張圖由 plot_seqc2.py 從 per-chr JSON 產出、已肉眼確認。HCC1395 paired 單樣本 5 染色體 pilot，partial flag。本頁為視覺 companion（D11）。
+      </p>
+    </section>
+  </main>
+</div>
+</body>
+</html>

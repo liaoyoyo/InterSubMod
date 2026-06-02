@@ -1,0 +1,15 @@
+N regions = 40
+frac real>shuffle_p95 = 95% (38/40)
+delta(real-shuffle_p95): min=-0.136 median=0.260 max=0.353
+|raw_auc-0.5| separation: median=0.476 min=0.075 max=0.500
+shuffle_sym null median=0.577 max=0.616 (真 null 基準, 非 0.5)
+real_sym median=0.974 (對稱化膨脹值, 勿當 effect size)
+
+STRONG signal (top3 delta):
+  chr5:713482-717482       HP1=119 HP2=86 cpg=70 real=0.979 p95=0.626 d=+0.353
+  chr20:1962623-1966623    HP1=39 HP2=97 cpg=125 real=0.986 p95=0.638 d=+0.348
+  chr9:767358-771358       HP1=59 HP2=59 cpg=48 real=0.978 p95=0.631 d=+0.347
+NO signal (bottom3 delta):
+  chr21:13351912-13355912  HP1=30 HP2=37 cpg=23 real=0.575 p95=0.711 d=-0.136
+  chr6:62995317-62999317   HP1=20 HP2=16 cpg=16 real=0.616 p95=0.741 d=-0.125
+  chr16:409697-413697      HP1=51 HP2=36 cpg=334 real=0.677 p95=0.675 d=+0.002

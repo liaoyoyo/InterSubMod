@@ -1,0 +1,23 @@
+{
+  "title": "brca2_core chr13:32,313,000-32,317,000",
+  "n_reads": 149,
+  "n_cpg_cols": 252,
+  "hp_counts": {
+    "1": 62,
+    "1-1": 52,
+    "2": 29,
+    "unphase": 5,
+    "2-1": 1
+  },
+  "separation": {
+    "silhouette_HP1_vs_HP2": 0.07325388915706095,
+    "anchor_AUC_HP1_vs_HP2": 0.8659621802002224,
+    "shuffle_null_silhouette_mean": 0.0013907670381028971,
+    "shuffle_null_silhouette_p95": 0.020440531454218414,
+    "silhouette_exceeds_null_p95": true,
+    "within_HP_mean_dist": 0.2827381033784472,
+    "between_HP_mean_dist": 0.30579141480324273,
+    "between_minus_within": 0.023053311424795553
+  },
+  "verdict": "SEPARABLE (AUC>0.58 且 silhouette 超 null p95)"
+}

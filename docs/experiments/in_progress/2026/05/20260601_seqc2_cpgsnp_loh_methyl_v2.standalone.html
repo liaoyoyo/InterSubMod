@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CpG-SNP 排除 + LOH 個案 + 全基因組(部分) — v2 驗證</title>
+<!-- data_sources: 20260531_methyl_phasing_A0_assets/seqc2_v2_dedup_aggregate.json + seqc2_cn_methyl_v2_chr*.json -->
+<style>
+  :root{--c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;--c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;--c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;--ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;--ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,monospace;--fs-xs:12px;--fs-sm:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:22px;--fs-2xl:28px;--fs-3xl:34px;--radius-sm:4px;--radius-md:6px;--radius-lg:8px;--shadow-sm:0 1px 2px rgba(20,20,19,.05);--shadow-md:0 2px 8px rgba(20,20,19,.08);}
+  *,*::before,*::after{box-sizing:border-box;}
+  body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);font-size:var(--fs-md);line-height:1.6;}
+  .layout{max-width:1340px;margin:0 auto;display:grid;grid-template-columns:250px 1fr;gap:var(--sp-5);padding:var(--sp-5) var(--sp-4);}
+  aside.toc{position:sticky;top:var(--sp-4);align-self:start;background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-4) var(--sp-3);box-shadow:var(--shadow-sm);max-height:calc(100vh - var(--sp-7));overflow-y:auto;}
+  aside.toc h3{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-soft);margin:0 0 var(--sp-2);font-weight:700;}
+  aside.toc ol{list-style:none;padding:0;margin:0;counter-reset:toc;}
+  aside.toc li{counter-increment:toc;margin:var(--sp-1) 0;}
+  aside.toc a{display:block;padding:5px 8px;border-radius:var(--radius-sm);color:var(--c-text);text-decoration:none;font-size:var(--fs-sm);border-left:3px solid transparent;}
+  aside.toc a:hover{background:var(--c-code-bg);border-left-color:var(--c-accent);}
+  aside.toc a::before{content:counter(toc) ". ";color:var(--c-text-soft);font-family:var(--ff-mono);font-size:.85em;margin-right:4px;}
+  aside.toc a.core{font-weight:600;} aside.toc a.core::after{content:"★";color:var(--c-critical);margin-left:6px;font-size:.85em;}
+  main.report{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:var(--sp-6);min-width:0;}
+  .report-header{border-bottom:2px solid var(--c-accent);padding-bottom:var(--sp-4);margin-bottom:var(--sp-5);}
+  .report-header .pretitle{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:1px;color:var(--c-accent-deep);font-weight:700;margin-bottom:var(--sp-2);}
+  .report-header h1{font-size:var(--fs-3xl);margin:0 0 var(--sp-3);line-height:1.25;}
+  .report-header .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-2) var(--sp-5);font-size:var(--fs-sm);margin-top:var(--sp-3);}
+  .report-header .meta dt{color:var(--c-text-soft);font-weight:600;} .report-header .meta dd{margin:0;}
+  .report-header .meta code{background:var(--c-code-bg);padding:1px 5px;border-radius:var(--radius-sm);font-family:var(--ff-mono);font-size:.92em;}
+  .verdict-banner{color:#fff;padding:var(--sp-3) var(--sp-4);margin-top:var(--sp-4);border-radius:var(--radius-md);font-weight:600;}
+  .verdict-banner.neutral{background:linear-gradient(90deg,#1E3A8A,#3B82F6);}
+  h2{font-size:var(--fs-2xl);margin:var(--sp-7) 0 var(--sp-3);padding-bottom:var(--sp-2);border-bottom:1px solid var(--c-border);scroll-margin-top:var(--sp-4);}
+  h2 .h-num{font-family:var(--ff-mono);color:var(--c-accent-deep);font-size:.7em;margin-right:var(--sp-2);font-weight:600;}
+  h3{font-size:var(--fs-xl);margin:var(--sp-5) 0 var(--sp-2);}
+  p,ul,ol{margin:var(--sp-3) 0;} ul,ol{padding-left:var(--sp-5);}
+  code{background:var(--c-code-bg);padding:1px 6px;border-radius:var(--radius-sm);font-family:var(--ff-mono);font-size:.92em;}
+  table{border-collapse:collapse;width:100%;margin:var(--sp-4) 0;font-size:var(--fs-sm);}
+  th,td{border:1px solid var(--c-border);padding:var(--sp-2) var(--sp-3);text-align:left;vertical-align:top;}
+  th{background:var(--c-code-bg);font-weight:600;} td.num{text-align:right;font-family:var(--ff-mono);}
+  tr.row-bug td{background:#FEF2F0;color:#7F1D1D;} tr.row-safe td{background:#DCFCE7;color:#166534;} tr.row-warn td{background:#FEF3C7;}
+  .callout-critical{background:#FEF2F0;border-left:4px solid var(--c-critical);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#7F1D1D;}
+  .callout-warning{background:#FEF7E6;border-left:4px solid var(--c-warning);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#78350F;}
+  .callout-success{background:#F0FDF4;border-left:4px solid var(--c-success);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#166534;}
+  .callout-info{background:#EFF4FF;border-left:4px solid var(--c-info);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#1E3A5F;}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--sp-3);margin:var(--sp-4) 0;}
+  .stat-box{background:var(--c-bg);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--sp-3);text-align:center;}
+  .stat-box .number{font-size:var(--fs-2xl);font-weight:700;color:var(--c-accent);line-height:1.1;}
+  .stat-box .number.bug{color:var(--c-critical);}.stat-box .number.success{color:var(--c-success);}.stat-box .number.warning{color:var(--c-warning);}.stat-box .number.info{color:var(--c-info);}
+  .stat-box .label{font-size:var(--fs-xs);color:var(--c-text-soft);margin-top:var(--sp-1);}
+  .img-figure{margin:var(--sp-5) 0;text-align:center;}
+  .img-figure img{max-width:100%;height:auto;border:1px solid var(--c-border);border-radius:var(--radius-md);}
+  .img-figure figcaption{font-size:var(--fs-sm);color:var(--c-text-soft);margin-top:var(--sp-2);font-style:italic;}
+  .ask-box{background:#EFF4FF;border:2px solid var(--c-info);border-radius:var(--radius-lg);padding:var(--sp-4);margin:var(--sp-4) 0;}
+  .ask-box h4{color:var(--c-info);margin-top:0;}
+  .references{background:var(--c-bg);border-radius:var(--radius-md);padding:var(--sp-3) var(--sp-4);margin-top:var(--sp-5);}
+  .references h2{border-bottom:none;margin-top:0;font-size:var(--fs-xl);padding-bottom:0;}
+  .references ol{list-style:decimal;padding-left:var(--sp-5);} .references li{margin:var(--sp-2) 0;font-size:var(--fs-sm);}
+  @media print{body{background:#fff;}.layout{display:block;max-width:100%;padding:0;}aside.toc{display:none;}main.report{box-shadow:none;border:none;padding:0;}table,.img-figure{page-break-inside:avoid;}h1,h2,h3{page-break-after:avoid;}}
+  @media (max-width:900px){.layout{grid-template-columns:1fr;}aside.toc{position:static;max-height:none;}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="toc" aria-label="章節導航">
+    <h3>章節導航</h3>
+    <ol>
+      <li><a href="#tldr" class="core">一句話結論 + 焦點數字</a></li>
+      <li><a href="#a" class="core">(a) CpG-SNP 排除：不是 artifact</a></li>
+      <li><a href="#bug" class="core">過程揭露：取樣 bug 已修</a></li>
+      <li><a href="#c" class="core">(c) LOH 可分性是染色體特異</a></li>
+      <li><a href="#anomaly">LOH 異常個案清單</a></li>
+      <li><a href="#b">(b) 全基因組進度</a></li>
+      <li><a href="#conclusion" class="core">研究結論</a></li>
+      <li><a href="#limits">限制與下一步</a></li>
+      <li><a href="#refs">證據來源</a></li>
+    </ol>
+  </aside>
+  <main class="report">
+    <header class="report-header">
+      <div class="pretitle">v2: CpG-SNP 排除 + LOH 個案 + 全基因組(部分) · 2026-06-01</div>
+      <h1>CpG-SNP 排除控制 + LOH 個案分析 — v2 驗證</h1>
+      <dl class="meta">
+        <dt>建立日期</dt><dd>2026-06-01</dd>
+        <dt>受眾</dt><dd>PI（決策 review）</dd>
+        <dt>任務類型</dt><dd>E hotfix（排除控制）+ A pilot · <span style="background:#FEF3C7;padding:1px 6px;border-radius:8px">partial: 7 小染色體</span></dd>
+        <dt>資料量</dt><dd>421 區 raw → 317 區去重疊 window</dd>
+        <dt>數字來源</dt><dd><code>seqc2_v2_dedup_aggregate.json</code>（逐一 Read 確認）</dd>
+        <dt>數據誠信</dt><dd>本輪揭露並修正一個取樣 bug（見 §2）</dd>
+      </dl>
+      <div class="verdict-banner neutral">
+        (a) CpG-SNP 排除後 AUC 幾乎不變（drop median=0.0, Wilcoxon p=0.36）→ <strong>95% 甲基訊號不是 CpG-SNP artifact</strong>。(c) LOH 可分性<strong>是染色體特異的</strong>（chr5/6 分不開 0.6 vs chr8/15/22 分得開 0.8-0.97，chr8 兩版重現 0.80）— 不是 LOH 普遍性質。
+      </div>
+    </header>
+
+    <h2 id="tldr"><span class="h-num">0.</span>一句話結論</h2>
+    <p>本輪做三件事：<strong>(a)</strong> CpG-SNP 排除控制（前一輪最大遺留嫌疑）、<strong>(b)</strong> 速度優化全基因組（部分完成）、<strong>(c)</strong> LOH 個案哪些反而分得開 + 異常。真值如下（全 grep-verified）：</p>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="number success">drop=0.0</div><div class="label">(a) CpG-SNP 排除後 AUC 變化中位數（p=0.36 無差異）</div></div>
+      <div class="stat-box"><div class="number success">0.6%</div><div class="label">(a) 排除後 AUC 掉>0.05 的區（極少）</div></div>
+      <div class="stat-box"><div class="number warning">421→317</div><div class="label">(過程) 取樣 bug：去重疊 window</div></div>
+      <div class="stat-box"><div class="number bug">p=0.96</div><div class="label">(c) LOH vs neutral AUC（去重後無差異）</div></div>
+      <div class="stat-box"><div class="number info">62.8%</div><div class="label">(c) LOH 區「分得開」比例（27/43）</div></div>
+      <div class="stat-box"><div class="number">0.80→0.81</div><div class="label">(c) chr8 LOH 兩版重現（v1/v2）</div></div>
+    </div>
+    <div class="callout-info"><strong>三句總結</strong>：(a) 排除 CpG-SNP 後 95% 訊號穩如山 → 不是序列 artifact，是真的。(c) 但 LOH 故事比想像複雜：前一輪 chr5/6/7 說 LOH 分不開（合理，單倍型），本輪 chr8/15/22 卻分得開 — <strong>可分性是染色體/區段特異</strong>，這幾個「分得開的 LOH」是值得深究的異常。過程中我發現並修了一個取樣 bug（重疊 window 重複計數）。</div>
+
+    <h2 id="a"><span class="h-num">1.</span>(a) CpG-SNP 排除控制：確認 95% 不是 pseudo-ASM artifact ✅</h2>
+    <p>前一輪最大嫌疑：het C/T SNP 直接改變 CpG → 製造「確定性 allele→甲基」假關聯，可能撐起 95% 高 AUC。本輪剔除「被 het SNP 改變的 CpG 欄」重算 AUC，比對排除前後。</p>
+    <div class="img-figure">
+      <img src="20260531_methyl_phasing_A0_assets/fig_v2_cpgsnp_excl.png" alt="CpG-SNP 排除前後 AUC 散點，貼合 y=x">
+      <figcaption>圖1：每點一個 region，x=排除前 AUC，y=排除後 AUC。幾乎完美貼合 y=x（無變化）。</figcaption>
+    </div>
+    <table>
+      <thead><tr><th>指標</th><th>值（317 區去重）</th><th>意義</th></tr></thead>
+      <tbody>
+        <tr class="row-safe"><td>AUC drop median</td><td class="num">0.0</td><td>排除前後無變化</td></tr>
+        <tr class="row-safe"><td>AUC drop mean</td><td class="num">0.0007</td><td>平均幾乎 0</td></tr>
+        <tr class="row-safe"><td>drop &gt; 0.05 的區</td><td class="num">0.6%</td><td>僅極少數受影響</td></tr>
+        <tr class="row-safe"><td>tainted CpG 中位數</td><td class="num">0</td><td>多數區無 het 落 CpG</td></tr>
+        <tr class="row-safe"><td>Wilcoxon 排除前 vs 後</td><td class="num">p=0.36</td><td>統計無顯著差異</td></tr>
+      </tbody>
+    </table>
+    <div class="callout-success"><strong>(a) 結論：CpG-SNP pseudo-ASM 不是 95% 高 AUC 的成因。</strong> het SNP 落在 CpG 上太稀少（中位 0 個），剔除它們對甲基分離無影響（drop=0, p=0.36）。→ 前一輪 95% 甲基帶 haplotype 訊號的結論<strong>通過此關鍵控制，最大嫌疑排除</strong>。</div>
+
+    <h2 id="bug"><span class="h-num">2.</span>過程揭露：我發現並修正一個取樣 bug</h2>
+    <div class="callout-warning">
+      <strong>誠實揭露：原始 v2 有重疊 window 重複計數問題。</strong> 每個 region 取 ±2kb window，但相鄰 het SNP 間距常 &lt;4kb → window 重疊、共享同一批 read，等於同一證據被算多次。最嚴重：chr22 有 8 個 LOH window 擠在 16,508,969–16,511,702（僅 2.7kb），全部 (n_hp1,n_hp2)≈(19,15) = 同批 read 算 8 次。
+      <br><br>
+      <strong>修正</strong>：去重疊（同 chr 內貪婪保留間距≥4kb），421 區 → 317 區。本頁所有數字均為<strong>去重後</strong>真值。loss 受影響最大（17→3 區，故 loss 結論信心低）。<strong>核心結論（a 不變、c LOH 染色體特異不變）在去重後依然成立。</strong>
+    </div>
+
+    <h2 id="c"><span class="h-num">3.</span>(c) LOH 可分性是染色體特異的（核心發現）★</h2>
+    <div class="img-figure">
+      <img src="20260531_methyl_phasing_A0_assets/fig_v2_loh_by_chr.png" alt="LOH AUC by chromosome boxplot">
+      <figcaption>圖2：各染色體 LOH 區甲基 AUC。chr5/6（v1，前一輪）median ~0.6（分不開）vs chr8/15/22（本輪）0.8-0.97（分得開）。chr8 兩版（v1 0.80 / v2 0.81）重現。</figcaption>
+    </div>
+    <table>
+      <thead><tr><th>染色體</th><th>來源</th><th>LOH n</th><th>AUC median</th><th>可分？</th></tr></thead>
+      <tbody>
+        <tr class="row-bug"><td>chr5</td><td>v1</td><td class="num">30</td><td class="num">0.620</td><td>✗ 分不開（符合 LOH 預期）</td></tr>
+        <tr class="row-bug"><td>chr6</td><td>v1</td><td class="num">6</td><td class="num">0.596</td><td>✗ 分不開</td></tr>
+        <tr class="row-warn"><td>chr8</td><td>v1+v2</td><td class="num">12+18</td><td class="num">0.80 / 0.81</td><td>⚠ 分得開（兩版重現）</td></tr>
+        <tr class="row-warn"><td>chr15</td><td>v2</td><td class="num">12</td><td class="num">0.914</td><td>⚠ 分得開</td></tr>
+        <tr class="row-warn"><td>chr22</td><td>v2</td><td class="num">13</td><td class="num">0.974</td><td>⚠ 分得開</td></tr>
+      </tbody>
+    </table>
+    <div class="callout-info">
+      <strong>(c) 結論：LOH 區甲基可分性不是 LOH 普遍性質，而是染色體/區段特異。</strong> 理論上 LOH（一條 haplotype 丟失）甲基該分不開 — chr5/6 符合（0.6）。但 chr8/15/22 卻分得開（0.8-0.97），且 chr8 兩次獨立跑重現（0.80/0.81，非偶然）。本輪 7 條染色體去重後 LOH vs neutral <strong>無差異（p=0.96）</strong>，與前輪 chr5/6/7（p=0.0019）相反 — 證實此現象高度依賴看哪些染色體。<strong>chr8/15/22 的「分得開 LOH」是真正值得深究的異常。</strong>
+    </div>
+
+    <h2 id="anomaly"><span class="h-num">4.</span>LOH 異常個案清單（哪些 LOH 反而分得開 + 為何可疑）</h2>
+    <p>去重後 43 個 LOH 區中 27 個（62.8%）「分得開」（AUC 超 shuffle p95 &gt; 0.05）。Top 個案：</p>
+    <table>
+      <thead><tr><th>region</th><th>AUC raw</th><th>排除後</th><th>shuffle p95</th><th>depth</th><th>CpG</th><th>GMM雙峰</th><th>HP1/HP2</th></tr></thead>
+      <tbody>
+        <tr><td>chr22:16508969</td><td class="num">1.00</td><td class="num">1.00</td><td class="num">0.68</td><td class="num">77</td><td class="num">49</td><td class="num">−2.1</td><td class="num">19/14</td></tr>
+        <tr><td>chr22:21539547</td><td class="num">1.00</td><td class="num">1.00</td><td class="num">0.76</td><td class="num">50</td><td class="num">140</td><td class="num">−4.5</td><td class="num">11/13</td></tr>
+        <tr><td>chr15:28424659</td><td class="num">0.995</td><td class="num">0.995</td><td class="num">0.68</td><td class="num">97</td><td class="num">140</td><td class="num">3.2</td><td class="num">19/45</td></tr>
+        <tr class="row-warn"><td>chr15:28455307</td><td class="num">0.986</td><td class="num">0.986</td><td class="num">0.65</td><td class="num">133</td><td class="num">297</td><td class="num">47.4</td><td class="num">54/74</td></tr>
+        <tr class="row-warn"><td>chr8:87663325</td><td class="num">0.984</td><td class="num">0.986</td><td class="num">0.62</td><td class="num">124</td><td class="num">40</td><td class="num">25.7</td><td class="num">96/17</td></tr>
+      </tbody>
+    </table>
+    <div class="callout-warning">
+      <strong>異常解讀（待進一步驗證，不下定論）</strong>：(1) 分得開的 LOH 部分有<strong>高 GMM 雙峰</strong>（chr15:28455307 BIC=47、chr8:87663325 BIC=26）→ 可能是 cnLOH 上疊加 subclone 或多拷貝甲基異質性。(2) chr8:87663325 HP1/HP2 = 96/17 極不平衡 → 疑該「LOH」區其實有 allelic imbalance（非完全 LOH）。(3) 但分得開 vs 分不開 LOH 的 depth 中位數相近（111 vs 107），<strong>不是單純高 depth 驅動</strong>。→ 這些 region 值得對照 SEQC2 cnLOH 細分類 + IGV 檢視（下一步）。
+    </div>
+
+    <h2 id="b"><span class="h-num">5.</span>(b) 全基因組進度（部分完成）</h2>
+    <div class="callout-warning">
+      <strong>速度仍是瓶頸，全基因組未完成。</strong> 已優化（pysam in-process depth + 向量化 AUC + 22 平行吃 80% 資源），但大染色體 het SNP 太多（chr1 幾萬個），每區 per-read 甲基解析 ~8 秒，22 條同時平行互搶 CPU → chr1-6/9-14/17-19 在 90 分鐘 timeout 仍未完成。<strong>目前 7 條小染色體（chr7/8/15/16/20/21/22）完成。</strong> 全基因組需進一步優化（如預載 MM/ML、減 K、或分批而非全平行）。本頁結論為 7 染色體 pilot 級。
+    </div>
+
+    <h2 id="conclusion"><span class="h-num">6.</span>研究結論</h2>
+    <table>
+      <thead><tr><th>任務</th><th>結論</th><th>狀態</th></tr></thead>
+      <tbody>
+        <tr class="row-safe"><td>(a) CpG-SNP 排除</td><td>排除後 AUC drop median=0.0, p=0.36 無差異 → 95% 訊號非 artifact</td><td>✅ 完成，嫌疑排除</td></tr>
+        <tr class="row-warn"><td>(b) 全基因組</td><td>7/22 染色體完成；大染色體速度瓶頸未解</td><td>⚠ 部分</td></tr>
+        <tr class="row-warn"><td>(c) LOH 個案</td><td>可分性染色體特異；chr8/15/22 分得開是異常；chr8 兩版重現</td><td>✅ 發現 + 異常清單</td></tr>
+        <tr class="row-bug"><td>過程 bug</td><td>重疊 window 重複計數，已修（421→317 去重）</td><td>✅ 已揭露+修正</td></tr>
+      </tbody>
+    </table>
+    <div class="callout-success">
+      <strong>對主線「甲基救 unphase」的累積意涵</strong>：前一輪三大嫌疑（方法 leak、CpG-SNP、CN confound）<strong>已全部排除</strong>（shuffle 證真 + CpG-SNP 排除 + Q1 CN 無相關）→ 甲基帶 haplotype 訊號是<strong>穩固的真發現</strong>。但 LOH 區的甲基行為複雜（染色體特異），救援時須 per-region 判斷而非全域套用。
+    </div>
+
+    <h2 id="limits"><span class="h-num">7.</span>限制與下一步</h2>
+    <ul>
+      <li><strong>partial scope</strong>：僅 7 小染色體；大染色體速度瓶頸未解（全基因組待優化）。</li>
+      <li><strong>loss n=3</strong>（去重後）：信心低，HCC1395 本就少 loss。</li>
+      <li><strong>LOH 異常未深究</strong>：chr8/15/22 分得開的 LOH 為何分得開（cnLOH? subclone? allelic imbalance?）需對照 SEQC2 cnLOH 細分 + IGV。</li>
+      <li><strong>下一步建議</strong>：(a) 深究 LOH 異常個案（IGV + SEQC2 cnLOH 細分）/ (b) 解全基因組速度瓶頸 / (c) 回主線寫 unphase 救援原型 / (d) 先停讓你檢視。</li>
+    </ul>
+
+    <section class="references" id="refs">
+      <h2>證據來源（全部可複查）</h2>
+      <ol>
+        <li>去重彙總真值：<code>InterSubMod/docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/seqc2_v2_dedup_aggregate.json</code></li>
+        <li>per-region v2：<code>20260531_methyl_phasing_A0_assets/seqc2_cn_methyl_v2_chr{7,8,15,16,20,21,22}.json</code></li>
+        <li>腳本：<code>seqc2_cn_methyl_v2.py</code>（CpG-SNP 排除）+ <code>aggregate_v2_dedup.py</code>（去重）+ <code>plot_v2.py</code></li>
+        <li>前序：<code>VERIFIED_RESULTS.md</code> V5（SEQC2 一致性）+ <code>DATA_PROVENANCE_LEDGER.md</code></li>
+        <li>SEQC2 CN truth：<code>/big8_disk/data/HCC1395/SEQC2/CNV/</code></li>
+      </ol>
+      <p style="font-size:var(--fs-xs);color:var(--c-text-soft);margin-top:var(--sp-3)">
+        本頁所有統計數字逐一從 seqc2_v2_dedup_aggregate.json Read 確認後複製（遵 feedback_no_fabricated_numbers_in_reports）；3 圖由 plot_v2.py 產出、已肉眼確認。HCC1395 paired 7 染色體 pilot，partial flag。本頁為視覺 companion（D11）。
+      </p>
+    </section>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+======== brca2_core (chr13:32,313,000-32,317,000) ========
+region=chr13:32,313,000-32,317,000
+  reads_seen(primary)=182  no_mod_tag=0  reads_kept(>=5CpG)=149
+  CpG positions=555
+  HP distribution: {'1-1': 52, '2': 29, '1': 62, 'unphase': 5, '2-1': 1}
+  -> brca2_core_matrix.tsv
+  -> brca2_core_meta.tsv
+/bip7_disk/liaoyoyo2001/miniconda3/lib/python3.9/site-packages/seaborn/matrix.py:560: UserWarning: Clustering large matrix with scipy. Installing `fastcluster` may give better performance.
+  warnings.warn(msg)
+  RESULT reads=149 cpg=252 AUC=0.866 sil=0.0733 null_p95=0.02044 exceeds=True verdict=SEPARABLE (AUC>0.58 且 silhouette 超 null p95)
+  hp_counts={'1': 62, '1-1': 52, '2': 29, 'unphase': 5, '2-1': 1}
+======== gnas_core (chr20:58,899,000-58,904,000) ========
+region=chr20:58,899,000-58,904,000
+  reads_seen(primary)=205  no_mod_tag=0  reads_kept(>=5CpG)=155
+  CpG positions=385
+  HP distribution: {'1-1': 3, '2-1': 10, '2': 52, '1': 62, 'unphase': 28}
+  -> gnas_core_matrix.tsv
+  -> gnas_core_meta.tsv
+/bip7_disk/liaoyoyo2001/miniconda3/lib/python3.9/site-packages/seaborn/matrix.py:560: UserWarning: Clustering large matrix with scipy. Installing `fastcluster` may give better performance.
+  warnings.warn(msg)
+  RESULT reads=155 cpg=167 AUC=0.567 sil=0.0036 null_p95=0.00735 exceeds=False verdict=NOT-SEPARABLE (AUC<=0.58)
+  hp_counts={'1': 62, '2': 52, 'unphase': 28, '2-1': 10, '1-1': 3}
+======== h19_core (chr11:1,999,000-2,003,000) ========
+region=chr11:1,999,000-2,003,000
+  reads_seen(primary)=16  no_mod_tag=0  reads_kept(>=5CpG)=15
+  CpG positions=388
+  HP distribution: {'unphase': 15}
+  -> h19_core_matrix.tsv
+  -> h19_core_meta.tsv
+  RESULT reads=15 cpg=292 AUC=None sil=None null_p95=None exceeds=None verdict=INCONCLUSIVE
+  hp_counts={'unphase': 15}
+======== snrpn_core (chr15:24,954,000-24,957,000) ========
+region=chr15:24,954,000-24,957,000
+  reads_seen(primary)=104  no_mod_tag=0  reads_kept(>=5CpG)=82
+  CpG positions=437
+  HP distribution: {'2': 77, '2-1': 1, 'unphase': 4}
+  -> snrpn_core_matrix.tsv
+  -> snrpn_core_meta.tsv
+/bip7_disk/liaoyoyo2001/miniconda3/lib/python3.9/site-packages/seaborn/matrix.py:560: UserWarning: Clustering large matrix with scipy. Installing `fastcluster` may give better performance.
+  warnings.warn(msg)
+  RESULT reads=82 cpg=244 AUC=None sil=None null_p95=None exceeds=None verdict=INCONCLUSIVE
+  hp_counts={'2': 77, 'unphase': 4, '2-1': 1}
+
+=== 全部 region RESULT 行 ===

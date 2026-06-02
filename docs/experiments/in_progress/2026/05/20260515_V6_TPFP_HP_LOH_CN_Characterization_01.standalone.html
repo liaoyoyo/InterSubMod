@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V3F / V5 / V6 ISM 三向 × LOH × HP × CN — HCC1395 pilot + 4 樣本擴展 TP/FP characterization</title>
+<style>
+:root {
+  --c-accent: #D97757; --c-accent-deep: #B85A3F;
+  --c-text: #141413; --c-text-soft: #6B6B66; --c-text-dim: #9A9994;
+  --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+  --c-code-bg: #F4EFE6;
+  --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+  --c-info: #1E3A8A; --c-neutral: #4B5563;
+  --c-pos-bg: #F0FDF4; --c-pos-border: #15803D; --c-pos-text: #14532D;
+  --c-neg-bg: #FEF2F0; --c-neg-border: #C2410C; --c-neg-text: #7F1D1D;
+  --c-warn-bg: #FEF3C7; --c-warn-border: #A16207; --c-warn-text: #78350F;
+  --c-reframe-bg: #FEF7E6; --c-reframe-border: #D97757; --c-reframe-text: #7C2D12;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+  --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+             "Noto Sans CJK TC", "Source Han Sans TW", "Droid Sans Fallback",
+             system-ui, sans-serif;
+  --ff-mono: "JetBrains Mono", "SF Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+  --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+  --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+  --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+  --shadow-lg: 0 4px 16px rgba(20,20,19,0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-text: #ECECEC; --c-text-soft: #A8A8A0; --c-text-dim: #7A7A75;
+    --c-bg: #1A1A18; --c-surface: #25241F; --c-border: #3A3833;
+    --c-code-bg: #2E2C26;
+    --c-pos-bg: #0F2A1A; --c-pos-text: #86EFAC;
+    --c-neg-bg: #2D1816; --c-neg-text: #FCA5A5;
+    --c-warn-bg: #2A2010; --c-warn-text: #FCD34D;
+    --c-reframe-bg: #2A1F12; --c-reframe-text: #FDBA74;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.5);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.6);
+  }
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--c-bg); color: var(--c-text);
+       font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.65;
+       -webkit-font-smoothing: antialiased; }
+
+/* ── Layout: sticky TOC + main ── */
+.layout { max-width: 1380px; margin: 0 auto; display: grid;
+          grid-template-columns: 240px 1fr; gap: var(--sp-5);
+          padding: var(--sp-5) var(--sp-4); }
+aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+            background: var(--c-surface); border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+            box-shadow: var(--shadow-sm);
+            max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.6px;
+               color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+              color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+              border-left: 3px solid transparent; line-height: 1.35; }
+aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                      font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+aside.toc a.core { font-weight: 700; color: var(--c-accent-deep); }
+aside.toc a.core::after { content: " ★"; color: var(--c-critical); }
+aside.toc .toc-tag { display: inline-block; font-size: 9.5px; padding: 1px 5px;
+                     border-radius: 3px; margin-left: 4px; font-weight: 600;
+                     font-family: var(--ff-mono); vertical-align: middle; }
+aside.toc .toc-tag.pos { background: var(--c-pos-bg); color: var(--c-pos-text); }
+aside.toc .toc-tag.neg { background: var(--c-neg-bg); color: var(--c-neg-text); }
+aside.toc .toc-tag.reframe { background: var(--c-reframe-bg); color: var(--c-reframe-text); }
+
+main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+              border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+              padding: var(--sp-6) var(--sp-6); min-width: 0; }
+
+/* ── Header ── */
+.report-header { border-bottom: 2px solid var(--c-accent);
+                 padding-bottom: var(--sp-4); margin-bottom: var(--sp-5); }
+.report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                           letter-spacing: 1px; color: var(--c-accent-deep);
+                           font-weight: 700; margin-bottom: var(--sp-2); }
+.report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3);
+                    line-height: 1.25; font-weight: 700; letter-spacing: -0.01em; }
+.report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                       gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm);
+                       margin-top: var(--sp-3); }
+.report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+.report-header .meta dd { margin: 0; }
+.report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                            border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                            font-size: 0.92em; }
+.verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                  border-radius: var(--radius-md); font-weight: 600;
+                  font-size: var(--fs-md); display: flex; align-items: center; gap: var(--sp-3); }
+.verdict-banner svg { flex-shrink: 0; }
+.verdict-banner.partial { background: linear-gradient(90deg, #A16207, #D97757); }
+
+/* ── Typography ── */
+h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+     padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+     scroll-margin-top: var(--sp-4); font-weight: 700; letter-spacing: -0.005em; }
+h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+            font-size: 0.65em; margin-right: var(--sp-3); font-weight: 600;
+            display: inline-block; padding: 4px 10px;
+            background: var(--c-code-bg); border-radius: var(--radius-sm);
+            vertical-align: middle; }
+h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); font-weight: 600;
+     scroll-margin-top: var(--sp-4); }
+h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2);
+     color: var(--c-text); font-weight: 600; }
+h4.pos-tag::after { content: "POSITIVE"; margin-left: var(--sp-2); font-size: var(--fs-xs);
+                    padding: 2px 7px; border-radius: 3px; background: var(--c-pos-bg);
+                    color: var(--c-pos-text); font-family: var(--ff-mono); font-weight: 700;
+                    vertical-align: middle; }
+h4.neg-tag::after { content: "NEGATIVE"; margin-left: var(--sp-2); font-size: var(--fs-xs);
+                    padding: 2px 7px; border-radius: 3px; background: var(--c-neg-bg);
+                    color: var(--c-neg-text); font-family: var(--ff-mono); font-weight: 700;
+                    vertical-align: middle; }
+p, ul, ol { margin: var(--sp-3) 0; }
+ul, ol { padding-left: var(--sp-5); }
+li { margin: var(--sp-1) 0; }
+a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--c-accent-deep); }
+strong { font-weight: 700; }
+em { font-style: italic; color: var(--c-text); }
+blockquote { border-left: 3px solid var(--c-accent); padding: var(--sp-3) var(--sp-4);
+             color: var(--c-text-soft); margin: var(--sp-3) 0;
+             background: var(--c-code-bg);
+             border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+       font-family: var(--ff-mono); font-size: 0.9em; }
+pre { background: var(--c-code-bg); padding: var(--sp-3); border-radius: var(--radius-md);
+      overflow-x: auto; font-family: var(--ff-mono); font-size: var(--fs-sm); }
+pre code { background: none; padding: 0; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0;
+        font-size: var(--fs-sm); }
+th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3);
+         text-align: left; vertical-align: top; }
+th { background: var(--c-code-bg); font-weight: 600; }
+td.num, th.num { text-align: right; font-family: var(--ff-mono); }
+td.center, th.center { text-align: center; }
+tr.row-bug td { background: var(--c-neg-bg); color: var(--c-neg-text); }
+tr.row-safe td { background: var(--c-pos-bg); color: var(--c-pos-text); }
+tr.row-warn td { background: var(--c-warn-bg); color: var(--c-warn-text); }
+tr.row-emph td { background: var(--c-code-bg); font-weight: 600; }
+
+/* ── Stat grid ── */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+             gap: var(--sp-3); margin: var(--sp-4) 0; }
+.stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+            border-radius: var(--radius-md); padding: var(--sp-4) var(--sp-3);
+            text-align: center; }
+.stat-box .number { font-size: var(--fs-2xl); font-weight: 700;
+                    color: var(--c-accent); line-height: 1.1; font-family: var(--ff-mono); }
+.stat-box .number.success { color: var(--c-success); }
+.stat-box .number.warning { color: var(--c-warning); }
+.stat-box .number.bug { color: var(--c-critical); }
+.stat-box .number.neutral { color: var(--c-info); }
+.stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft);
+                   margin-top: var(--sp-2); line-height: 1.35; }
+.stat-box .sub { display: block; font-size: 11px; color: var(--c-text-dim);
+                 margin-top: 2px; font-family: var(--ff-mono); }
+
+/* ── Callouts ── */
+.callout { padding: var(--sp-3) var(--sp-4); margin: var(--sp-4) 0;
+           border-radius: var(--radius-md); border-left: 4px solid; }
+.callout > p:first-child { margin-top: 0; }
+.callout > p:last-child { margin-bottom: 0; }
+.callout-critical { background: var(--c-neg-bg); border-color: var(--c-critical);
+                    color: var(--c-neg-text); }
+.callout-warning  { background: var(--c-warn-bg); border-color: var(--c-warning);
+                    color: var(--c-warn-text); }
+.callout-success  { background: var(--c-pos-bg); border-color: var(--c-success);
+                    color: var(--c-pos-text); }
+.callout-info     { background: var(--c-code-bg); border-color: var(--c-info); }
+
+/* ── PARADIGM REFRAME — high-contrast hero callout ── */
+.paradigm-reframe { background: var(--c-reframe-bg);
+                    border: 2px solid var(--c-reframe-border);
+                    border-radius: var(--radius-lg);
+                    padding: var(--sp-5) var(--sp-5);
+                    margin: var(--sp-5) 0;
+                    box-shadow: var(--shadow-md);
+                    position: relative; }
+.paradigm-reframe::before { content: "PARADIGM REFRAME"; position: absolute;
+                            top: -10px; left: var(--sp-4);
+                            background: var(--c-accent-deep); color: white;
+                            padding: 3px 14px; border-radius: 12px;
+                            font-size: 11px; font-weight: 700; letter-spacing: 1px;
+                            font-family: var(--ff-mono); }
+.paradigm-reframe h3 { color: var(--c-reframe-text); margin-top: var(--sp-2); }
+.paradigm-reframe .reframe-old { color: var(--c-neg-text); font-weight: 600;
+                                  background: var(--c-neg-bg); padding: 2px 8px;
+                                  border-radius: 3px; }
+.paradigm-reframe .reframe-arrow { color: var(--c-accent-deep);
+                                    font-family: var(--ff-mono); font-weight: 700;
+                                    margin: 0 var(--sp-2); }
+.paradigm-reframe .reframe-new { color: var(--c-pos-text); font-weight: 600;
+                                  background: var(--c-pos-bg); padding: 2px 8px;
+                                  border-radius: 3px; }
+.reframe-table { margin-top: var(--sp-4); }
+.reframe-table th { background: var(--c-reframe-bg); }
+
+/* ── Section cards ── */
+details.section-card { border: 1.5px solid var(--c-border);
+                       border-radius: var(--radius-lg);
+                       margin: var(--sp-4) 0; overflow: hidden;
+                       background: var(--c-surface); }
+details.section-card.pos { border-color: var(--c-pos-border); }
+details.section-card.neg { border-color: var(--c-neg-border); }
+details.section-card.reframe { border-color: var(--c-reframe-border);
+                                 box-shadow: var(--shadow-md); }
+details.section-card > summary { cursor: pointer; padding: var(--sp-3) var(--sp-4);
+                                  display: flex; align-items: center; gap: var(--sp-3);
+                                  background: var(--c-code-bg); list-style: none;
+                                  user-select: none; }
+details.section-card > summary::-webkit-details-marker { display: none; }
+details.section-card > summary::before { content: "▸"; transition: transform 0.2s;
+                                          color: var(--c-text-soft);
+                                          font-size: var(--fs-sm); width: 12px; }
+details.section-card[open] > summary::before { transform: rotate(90deg); }
+details.section-card.pos > summary { background: var(--c-pos-bg); }
+details.section-card.neg > summary { background: var(--c-neg-bg); }
+details.section-card.reframe > summary { background: var(--c-reframe-bg); }
+.card-id { font-family: var(--ff-mono); font-weight: 700; font-size: var(--fs-md);
+           background: var(--c-surface);
+           padding: 3px 10px; border-radius: 12px; border: 1.5px solid; }
+.card-id.pos { color: var(--c-pos-border); border-color: var(--c-pos-border); }
+.card-id.neg { color: var(--c-neg-border); border-color: var(--c-neg-border); }
+.card-id.reframe { color: var(--c-reframe-border); border-color: var(--c-reframe-border); }
+.card-title { flex: 1; font-weight: 600; font-size: var(--fs-md); }
+.card-badge { padding: 2px 8px; border-radius: 10px; font-size: var(--fs-xs);
+              font-weight: 700; font-family: var(--ff-mono); }
+.card-badge.pos { background: var(--c-pos-border); color: white; }
+.card-badge.neg { background: var(--c-neg-border); color: white; }
+.card-badge.reframe { background: var(--c-reframe-border); color: white; }
+.card-body { padding: var(--sp-4) var(--sp-4) var(--sp-3); }
+
+/* ── SVG figure wrapper ── */
+.svg-figure { margin: var(--sp-5) 0; }
+.svg-figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto;
+                  background: var(--c-bg); border-radius: var(--radius-md);
+                  border: 1px solid var(--c-border);
+                  padding: var(--sp-4); }
+.svg-figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                          margin-top: var(--sp-2); text-align: center;
+                          font-style: italic; }
+.svg-figure .fig-label { font-family: var(--ff-mono); font-weight: 700;
+                          color: var(--c-accent-deep); font-style: normal; margin-right: 6px; }
+
+/* ── References footer ── */
+.references { background: var(--c-bg); border: 1px solid var(--c-border);
+              border-radius: var(--radius-md);
+              padding: var(--sp-4); margin-top: var(--sp-6); }
+.references h2 { border-bottom: none; margin-top: 0;
+                 font-size: var(--fs-xl); padding-bottom: 0; }
+.references ol, .references ul { padding-left: var(--sp-5); }
+.references li { margin: var(--sp-2) 0; font-size: var(--fs-sm); }
+
+/* ── Print mode ── */
+@media print {
+  body { background: white; color: black; }
+  .layout { display: block; max-width: 100%; padding: 0; }
+  aside.toc { display: none; }
+  main.report { box-shadow: none; border: none; padding: 0; }
+  details.section-card { page-break-inside: avoid; border-color: #999; }
+  details > summary { list-style: none; }
+  details:not([open]) > *:not(summary) { display: block !important; }
+  details:not([open]) > summary::before { transform: rotate(90deg); }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #666; }
+  pre, table, blockquote, details, svg, .svg-figure, .paradigm-reframe,
+  .stat-grid, .callout { page-break-inside: avoid; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  aside.toc { position: static; max-height: none; }
+}
+
+/* ── Utility ── */
+.muted { color: var(--c-text-soft); }
+.mono { font-family: var(--ff-mono); }
+.nowrap { white-space: nowrap; }
+.tag { display: inline-block; padding: 1px 6px; border-radius: 3px;
+       font-size: 11px; font-family: var(--ff-mono); font-weight: 600;
+       vertical-align: middle; }
+.tag-pos { background: var(--c-pos-bg); color: var(--c-pos-text); }
+.tag-neg { background: var(--c-neg-bg); color: var(--c-neg-text); }
+.tag-warn { background: var(--c-warn-bg); color: var(--c-warn-text); }
+.divider { height: 1px; background: var(--c-border); margin: var(--sp-5) 0; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<aside class="toc" aria-label="章節導航">
+  <h3>章節導航</h3>
+  <ol>
+    <li><a href="#tldr" class="core">TL;DR &amp; 7 假設裁決</a></li>
+    <li><a href="#core-findings" class="core">核心發現 3 卡<span class="toc-tag pos">POS</span><span class="toc-tag reframe">RFR</span></a></li>
+    <li><a href="#context">研究背景與動機</a></li>
+    <li><a href="#method">方法 — 3 軸 50-cell grid + 7-guard</a></li>
+    <li><a href="#step1">Step 1 — V3F / V5 / V6 三向比較</a></li>
+    <li><a href="#step2">Step 2 — 50-cell grid + LR 拆解</a></li>
+    <li><a href="#step3" class="core">Step 3 — 4 FP zone + Paradigm Reframe<span class="toc-tag reframe">RFR</span></a></li>
+    <li><a href="#step4">Step 4 — Cross-sample n=5</a></li>
+    <li><a href="#coverage-gap" class="core">Framework Coverage Gap (~63% FP)<span class="toc-tag neg">GAP</span></a></li>
+    <li><a href="#limitations">Limitations</a></li>
+    <li><a href="#path-to-4star">升 ⭐4 路徑</a></li>
+    <li><a href="#refs">檔案索引 &amp; 證據鏈</a></li>
+  </ol>
+</aside>
+
+<main class="report">
+
+  <header class="report-header">
+    <div class="pretitle">Characterization · post-hoc · multi-stage cycle synthesis</div>
+    <h1>V3F / V5 / V6 ISM 三向 × LOH × HP × CN — HCC1395 pilot + 4 樣本擴展 TP/FP characterization</h1>
+    <dl class="meta">
+      <dt>Build date</dt>
+      <dd>2026-05-15</dd>
+      <dt>Audience</dt>
+      <dd>PI · lab member · 自己未來</dd>
+      <dt>Parent plan</dt>
+      <dd><code>InterSubMod/research/v6_bam_tpfp_hp_loh_cn/00_PLAN.md</code> (v0.3)</dd>
+      <dt>Status</dt>
+      <dd>in_progress · tier <strong>⭐3 PARTIAL POSITIVE</strong> · last_verified 2026-05-15</dd>
+      <dt>Scope</dt>
+      <dd>HCC1395 paired-pileup (30,490 TP + 4,842 FP) + 4 cross-sample (H1437 / H2009 / HCC1954 / HCC1937); COLO829 deferred</dd>
+      <dt>Source</dt>
+      <dd><code>InterSubMod/docs/experiments/in_progress/2026/05/20260515_V6_TPFP_HP_LOH_CN_Characterization_01.md</code></dd>
+    </dl>
+    <div class="verdict-banner partial" role="status">
+      <svg width="22" height="22" viewBox="0 0 22 22" role="img" aria-label="partial verdict">
+        <circle cx="11" cy="11" r="9" fill="none" stroke="white" stroke-width="2"/>
+        <path d="M11 2 A9 9 0 0 1 20 11 L11 11 Z" fill="white" opacity="0.85"/>
+      </svg>
+      <span><strong>PARTIAL POSITIVE (⭐3)</strong> — H4 chr8 hotspot 由 CN+AF 主導（HP 次要）+ paradigm reframe (Z-OCH/Z-GL = TP signatures) + 1 cross-sample candidate；H3/H5/H7 NEGATIVE；~63% FP 未被此 framework 解釋</span>
+    </div>
+  </header>
+
+  <!-- ─── §1 TL;DR + 7 hypothesis verdict ─── -->
+  <h2 id="tldr"><span class="h-num">§1</span>TL;DR &amp; 7 假設裁決</h2>
+
+  <p>本 cycle 用 V3F / V5 / V6 三個 longphase haplotag 版本對 HCC1395 paired-pileup 30,490 TP + 4,842 FP 跑
+  <strong>LOH × HP bucket × Coverage_Multiple 3 軸 50-cell grid</strong>，再擴展 4 樣本（H1437 / H2009 / HCC1954 / HCC1937，COLO829 deferred）。
+  所有上游 ISM 結果已存在（phaseC_genome_three_way + phaseD_v6_5sample），<strong>本計畫純粹 post-hoc 後分析，不重跑 BAM/ISM</strong>。</p>
+
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="number warning">⭐3</div>
+      <div class="label">Tier (PARTIAL POSITIVE)<span class="sub">未升 ⭐4</span></div>
+    </div>
+    <div class="stat-box">
+      <div class="number">5</div>
+      <div class="label">樣本 (含 HCC1395 pilot)<span class="sub">COLO829 deferred</span></div>
+    </div>
+    <div class="stat-box">
+      <div class="number">7</div>
+      <div class="label">假設裁決<span class="sub">2 POS / 5 NEG</span></div>
+    </div>
+    <div class="stat-box">
+      <div class="number neutral">3</div>
+      <div class="label">Paradigm reframe<span class="sub">Z-OCH / Z-GL / chr8</span></div>
+    </div>
+    <div class="stat-box">
+      <div class="number bug">~63%</div>
+      <div class="label">FP 未被 framework 解釋<span class="sub">Z-CHR8 ∪ Z-AUTO 僅 ~37%</span></div>
+    </div>
+  </div>
+
+  <h3 id="verdict-table">7 大假設裁決表</h3>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>假設</th><th class="center">Verdict</th><th>關鍵數值</th></tr>
+    </thead>
+    <tbody>
+      <tr class="row-warn"><td class="mono">H1a</td><td>V5 Inner same-hap TP gap &gt; V3F (Δ ≥ 0.03)</td><td class="center"><span class="tag tag-neg">✗ NEG (ceiling)</span></td><td class="mono">Δ = +0.003 (NG=2 TP rate ≥0.99 飽和)</td></tr>
+      <tr class="row-warn"><td class="mono">H1b</td><td>V6 Inner same-hap TP gap &gt; V5 (Δ ≥ 0.03)</td><td class="center"><span class="tag tag-neg">✗ NEG (ceiling)</span></td><td class="mono">Δ = +0.001</td></tr>
+      <tr class="row-warn"><td class="mono">H1c</td><td>V6 vs V3F 累積增益 (Δ ≥ 0.06)</td><td class="center"><span class="tag tag-neg">✗ NEG (ceiling)</span></td><td class="mono">Δ = +0.004</td></tr>
+      <tr class="row-safe"><td class="mono">H2</td><td>Inner × same_HP TP enrichment</td><td class="center"><span class="tag tag-pos">✓ POS (directional)</span></td><td class="mono">6 cells, mean enrichment 1.011× (max 1.017×)</td></tr>
+      <tr class="row-bug"><td class="mono">H3</td><td>Z-OCH × cov_gain FP enrichment ≥ 2.0×</td><td class="center"><span class="tag tag-neg">✗ NEG (reframe!)</span></td><td class="mono">FP_enrichment 0.124× — Z-OCH 是 TP-pure</td></tr>
+      <tr class="row-safe row-emph"><td class="mono">H4</td><td><strong>chr8 hotspot (LOH+CN) − HP ≥ 0.05 dev_explained</strong></td><td class="center"><span class="tag tag-pos">✓ POSITIVE</span></td><td class="mono"><strong>Δ = +0.186 (3.7× threshold), CN 0.211 vs HP 0.063</strong></td></tr>
+      <tr class="row-bug"><td class="mono">H5</td><td>Z-AUTO ∪ known zones Jaccard ≥ 0.60</td><td class="center"><span class="tag tag-neg">✗ NEGATIVE</span></td><td class="mono">Jaccard = 0.184 (~70% Z-AUTO 在 known zone 外)</td></tr>
+      <tr class="row-safe"><td class="mono">H6</td><td>Powered cells (n ≥ 50) ≥ 30%</td><td class="center"><span class="tag tag-pos">✓ POSITIVE</span></td><td class="mono">46% (23/50)</td></tr>
+      <tr class="row-warn"><td class="mono">H7</td><td>≥ 5 cells 通過 7 confound guards</td><td class="center"><span class="tag tag-neg">✗ NEG (biology, not artifact)</span></td><td class="mono">2 cells 通過全部，8 通過 6/7 (Guard 7 HP-symmetry 失敗為真實 HP1:HP2 bias)</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ─── §2 Core findings — 3 hero cards ─── -->
+  <h2 id="core-findings"><span class="h-num">§2</span>核心發現 — 3 cards</h2>
+
+  <details class="section-card pos" id="finding-h4" open>
+    <summary>
+      <span class="card-id pos">H4</span>
+      <span class="card-title">chr8 hotspot 由 CN + caller_af 主導，HP / LOH 次要 — 量化證實</span>
+      <span class="card-badge pos">POSITIVE</span>
+    </summary>
+    <div class="card-body">
+      <p>在 master-joined chr8 (n = 2,373) 上做 4-axis LR deviance decomposition，dropping each axis 計算 incremental dev_explained：</p>
+      <ul>
+        <li><code>caller_af</code> 軸 <strong>0.393</strong>（dominant，AF gradient 為主軸）</li>
+        <li><code>Coverage_Multiple</code> (CN) <strong>0.211</strong></li>
+        <li><code>hp_bucket</code> <strong>0.063</strong></li>
+        <li><code>loh_side</code> <strong>0.038</strong></li>
+      </ul>
+      <p><strong>(LOH + CN) − HP = 0.038 + 0.211 − 0.063 = +0.186</strong> (= 3.7× 0.05 threshold) → <strong>H4 POSITIVE</strong>。
+      CN 軸獨立貢獻 <strong>3.3× HP 軸</strong>，量化證實 chr8 FP hotspot 由 CN-driven 機制主導（與 HCC1395 chr8 大型 gain+LOH 已知特性一致）。
+      chr8 是 23 chromosomes 中 FP rate 最高 (0.316 vs global 0.137)；chr17 次之 (0.198)。</p>
+      <p class="muted"><em>Caveat</em>: chr8 hotspot <strong>sample-specific</strong>（Memory <code>project_hcc1395_chr8_hotspot.md</code>，prior Wave 3 跨樣本 mean AUC ≤ 0.641）— 不可泛化。</p>
+    </div>
+  </details>
+
+  <details class="section-card reframe" id="finding-reframe" open>
+    <summary>
+      <span class="card-id reframe">RFR</span>
+      <span class="card-title">Z-OCH 與 Z-GL 不是 FP markers，是 TP signatures — 詮釋方向反轉</span>
+      <span class="card-badge reframe">PARADIGM</span>
+    </summary>
+    <div class="card-body">
+      <p>原本被視為「FP-rich zones」的兩個區域，在 full FP set (n = 4,842) 上測試，<strong>實際上是 TP-pure</strong>：</p>
+      <ul>
+        <li><strong>Z-OCH</strong> (Outer cross_het): FP rate 0.017 vs global 0.137 → FP_enrichment <strong>0.124×</strong>（Fisher p = 3.8e-62 朝 <em>TP-enrichment</em> 方向）</li>
+        <li><strong>Z-GL</strong> (Inner gain+LOH): FP rate 0.003 vs global 0.137 → FP_enrichment <strong>0.022×</strong></li>
+      </ul>
+      <p><strong>新詮釋</strong>：<code>cross_het</code> = germline het + bona-fide somatic。FP germline-only calls 沒有真實 somatic read support → 不會產生 cross_het pattern → <strong>Z-OCH = somatic-evidence signature</strong>。同理 Z-GL gain-on-somatic-hap 也是 somatic-evidence。</p>
+      <p>真正的 FP-rich zone 只剩 <strong>Z-CHR8</strong> (2.31×, sample-specific) 與 <strong>Z-AUTO</strong> (5.02×, mechanism unknown)。</p>
+    </div>
+  </details>
+
+  <details class="section-card neg" id="finding-gap" open>
+    <summary>
+      <span class="card-id neg">GAP</span>
+      <span class="card-title">Framework coverage gap — ~63% HCC1395 FP 未被 LOH × HP × CN 解釋</span>
+      <span class="card-badge neg">UNRESOLVED</span>
+    </summary>
+    <div class="card-body">
+      <p>合併兩個真正 FP-rich zones (Z-CHR8 + Z-AUTO) 後：</p>
+      <ul>
+        <li>Z-CHR8 捕獲 967 / 4,842 FP = <strong>20.0%</strong>（sample-specific）</li>
+        <li>Z-AUTO 捕獲 1,216 / 4,842 FP = <strong>25.1%</strong>，但 Jaccard with known zones = 0.184 → ~70% Z-AUTO 不在 known zones 內</li>
+        <li>兩 zone 合併（去重）≈ <strong>1,800 / 4,842 = 37%</strong> 全 FP 覆蓋</li>
+      </ul>
+      <p>剩餘 <strong>~63% HCC1395 FP 缺乏 LOH / HP / CN signature</strong>。暗示需要新軸：mappability score、repeat context (RepeatMasker)、GC bias、structural variant proximity (SAVANA SV-call)。</p>
+    </div>
+  </details>
+
+  <!-- ─── §3 Context ─── -->
+  <h2 id="context"><span class="h-num">§3</span>研究背景與動機</h2>
+
+  <h3>3.1 為什麼做這個</h3>
+  <p>CURRENT_FOCUS 2026-05-13 主軸切換：Phase 1 W1 F-paired-D3 = V5 Layer 1.5 ISM 影響量化。本 cycle 是該任務的延伸 + Thread D 主軸（LOH-constrained phasing signatures）的 LOH × HP × CN 三軸交叉擴充。</p>
+  <p><strong>3 個新變量</strong>讓重做 HP × LOH × CN 三軸交叉有意義：</p>
+  <ol>
+    <li><strong>V6 phased BAM 已產出</strong>（5/10 commit 鏈完成 + 4 樣本驗證），未量化過 V3F → V5 → V6 在 LOH.bed 內外的 TP/FP 區分能力差異</li>
+    <li>Thread D 已有「LOH 內外 × HP 4-bucket」框架，<strong>但未加入 CN 軸</strong></li>
+    <li>Coverage_Multiple KDE-corrected 已驗證 (r = 0.831 vs SEQC2 CNV truth)，幾倍體軸首次與 LOH 內外 × HP bucket 交叉</li>
+  </ol>
+
+  <h3>3.2 歷史警訊與本研究的差異化</h3>
+  <p>歷史上類似嘗試全 NEGATIVE：LOH binary filter 10/10 策略失敗、CN zone-aware filter 跨樣本不一致、LOH + HPMergedSig 7.4× 87.5% 來自 HCC1395 chr8 樣本特異性。</p>
+  <div class="callout callout-info">
+    <p><strong>但這些都是 <em>filter</em> 失敗，不是 <em>characterization</em> 失敗</strong>。本 cycle 嚴守 characterization 邊界：不評估 ΔF1 / AUC &gt; 0.58 不報告為 signature；改用 deviance decomposition + Wilcoxon n=5 + 7 confound guards。</p>
+  </div>
+
+  <h3>3.3 Prior art positioning (Agent D)</h3>
+  <table>
+    <thead>
+      <tr><th>Tool</th><th>與本研究關係</th><th>Critical overlap?</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>ROCIT</strong> (bioRxiv 2026-03)</td><td>per-read transformer 用 methylation；LOH/CN/HP 當 training label 而非 grid axis</td><td class="center mono">❌ 無</td></tr>
+      <tr><td><strong>TumorLens</strong> (medRxiv 2026-03)</td><td>Long-read joint SNV + CN + LOH + methylation；sample-level，不做 per-read TP/FP</td><td class="center mono">❌ 無</td></tr>
+      <tr><td><strong>SGZ</strong> (PLoS CB 2018)</td><td>FoundationOne 4-axis (purity × ploidy × CN × AF) variant-level；無 phasing / methylation</td><td class="center mono">❌ 無</td></tr>
+    </tbody>
+  </table>
+  <p><strong>本研究獨特處</strong>（prior art 未涵蓋）：read-level 5 軸（HP × LOH × CN × AF × methylation-ready） + V3F/V5/V6 phasing variant 比較 + 5kHz simplex ONT。</p>
+
+  <!-- ─── §4 Method ─── -->
+  <h2 id="method"><span class="h-num">§4</span>方法 — 3 軸 50-cell grid + 7-guard</h2>
+
+  <h3>4.1 BAM 三版本對照</h3>
+  <table>
+    <thead>
+      <tr><th>版本</th><th>longphase 設計</th><th>hp_1_1:hp_2_1 ratio</th><th>重要差異</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>V3F</strong></td><td>PON-only + 無 Layer 1.5 + germline-absent → <code>hp=33</code> 保守</td><td class="mono center">1.138 (中性)</td><td>baseline</td></tr>
+      <tr><td><strong>V5</strong></td><td>V3F + 加 Layer 1.5 somatic fallback (<code>HaplotagProcess.cpp:537-548</code>)</td><td class="mono center">1.860 (priority bug 殘餘)</td><td>增加 marker 但 over-promote</td></tr>
+      <tr><td><strong>V6</strong></td><td>V5 + 移除 Layer 1.5（重用 V5 phased VCF）</td><td class="mono center">1.838 (germline-existent 殘留)</td><td>marker coverage 修正回 V3F 等級</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.2 主 grid 結構</h3>
+  <ul>
+    <li><strong>3 主軸</strong>：LOH (Inner / Outer) × HP bucket (5: same_HP1 / same_HP2 / cross_het / cross_het_inv / other) × Coverage_Multiple (5 bins: cov_loss / normal / elevated / gain / high_gain) = <strong>50 cells</strong></li>
+    <li><strong>2 covariate</strong>（per-cell LR 控制）：HPFineNGroups (NG) + caller_af + NumReads</li>
+    <li><strong>Power stratification</strong>: powered (n ≥ 50) / marginal (30-49) / underpowered (&lt; 30)</li>
+    <li><strong>7 道 confound guard</strong>: NumReads OLS · caller_af OLS · AF-bin L3 · permutation (max-statistic null) · marginal expectation · chr-stratified Mantel-Haenszel · HP1/HP2 symmetry binomial</li>
+    <li><strong>多重比較</strong>: BH-FDR q &lt; 0.05</li>
+  </ul>
+
+  <h3>4.3 Fan-out 編制</h3>
+  <p>5 sub-agents：A (Step 1 V3F/V5/V6 整合) · B (Step 1.5 power + Step 2 grid + LR + 7-guard) · C (Step 3 4 zone deep dive) · D (Prior art) · E (Step 4 cross-sample n=5) + Coordinator (main synthesis)。
+  總執行 ~3.5 h；BAM/ISM 零重跑。</p>
+
+  <!-- ─── §5 Step 1 ─── -->
+  <h2 id="step1"><span class="h-num">§5</span>Step 1 — V3F → V5 → V6 三向整合 (HCC1395)</h2>
+
+  <h3>5.1 三方 marker (NG_off ≥ 3) summary</h3>
+  <table>
+    <thead>
+      <tr><th>BAM</th><th class="num">marker n</th><th class="num">TP</th><th class="num">FP</th><th>TP rate (95% CI)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>V3F</strong></td><td class="num">21,997</td><td class="num">20,183</td><td class="num">1,814</td><td class="mono">0.918 [0.914, 0.921]</td></tr>
+      <tr><td><strong>V5</strong></td><td class="num">18,382</td><td class="num">16,428</td><td class="num">1,954</td><td class="mono">0.894 [0.889, 0.898]</td></tr>
+      <tr class="row-emph"><td><strong>V6</strong></td><td class="num"><strong>23,980</strong></td><td class="num"><strong>21,806</strong></td><td class="num"><strong>2,174</strong></td><td class="mono"><strong>0.909 [0.906, 0.913]</strong></td></tr>
+    </tbody>
+  </table>
+  <p>觀察：<strong>V6 marker coverage 最多</strong> (+9.0% over V3F, +30.5% over V5)；<strong>V3F marker TP rate 最純</strong>；V6 在 coverage 與 TP rate 取得最佳平衡（與 PI errata 一致）。</p>
+
+  <!-- SVG 1 — 3-bar BAM compare with dual axis -->
+  <figure class="svg-figure">
+    <svg viewBox="0 0 760 340" role="img" aria-labelledby="svg1-title svg1-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="svg1-title">V3F / V5 / V6 BAM marker coverage 與 TP rate 雙軸對照</title>
+      <desc id="svg1-desc">Bar chart 顯示三 BAM 的 marker n 與 TP n；右軸 line 顯示 TP rate</desc>
+      <style>
+        .axis-line { stroke: #6B6B66; stroke-width: 1.2; }
+        .axis-text { fill: #6B6B66; font: 11px var(--ff-mono); }
+        .axis-label { fill: #141413; font: 12px var(--ff-body); font-weight: 600; }
+        .bar-total { fill: #D97757; }
+        .bar-tp { fill: #15803D; }
+        .bar-text { fill: #141413; font: 11px var(--ff-mono); font-weight: 600; }
+        .rate-line { stroke: #1E3A8A; stroke-width: 2.5; fill: none; }
+        .rate-dot { fill: #1E3A8A; }
+        .rate-text { fill: #1E3A8A; font: 11px var(--ff-mono); font-weight: 700; }
+        .legend-text { fill: #141413; font: 11px var(--ff-body); }
+      </style>
+      <!-- Title -->
+      <text x="380" y="22" text-anchor="middle" fill="#141413" font-size="13" font-weight="700">V3F / V5 / V6 marker coverage vs TP rate (HCC1395 paired-pileup)</text>
+
+      <!-- Y-axis left (coverage) -->
+      <line x1="80" y1="60" x2="80" y2="270" class="axis-line"/>
+      <text x="40" y="65" class="axis-text">25k</text>
+      <text x="40" y="112" class="axis-text">20k</text>
+      <text x="40" y="159" class="axis-text">15k</text>
+      <text x="40" y="206" class="axis-text">10k</text>
+      <text x="40" y="253" class="axis-text">5k</text>
+      <text x="40" y="275" class="axis-text">0</text>
+      <text x="32" y="165" class="axis-label" transform="rotate(-90 32 165)">marker n / TP n</text>
+
+      <!-- Y-axis right (TP rate) -->
+      <line x1="640" y1="60" x2="640" y2="270" class="axis-line"/>
+      <text x="650" y="65" class="rate-text">0.95</text>
+      <text x="650" y="135" class="rate-text">0.90</text>
+      <text x="650" y="205" class="rate-text">0.85</text>
+      <text x="650" y="275" class="rate-text">0.80</text>
+      <text x="710" y="165" class="rate-text" transform="rotate(90 710 165)">TP rate</text>
+
+      <!-- X-axis -->
+      <line x1="80" y1="270" x2="640" y2="270" class="axis-line"/>
+      <text x="170" y="290" text-anchor="middle" class="axis-label">V3F</text>
+      <text x="360" y="290" text-anchor="middle" class="axis-label">V5</text>
+      <text x="550" y="290" text-anchor="middle" class="axis-label">V6</text>
+
+      <!-- Coverage bars (scaled: 25000=210px) -->
+      <!-- V3F: 21997 total, 20183 TP -->
+      <rect x="120" y="65" width="50" height="184.7" class="bar-total" opacity="0.4"/>
+      <rect x="120" y="80.4" width="50" height="169.6" class="bar-tp"/>
+      <text x="145" y="60" text-anchor="middle" class="bar-text">21,997</text>
+      <text x="145" y="78" text-anchor="middle" class="bar-text" fill="white">20,183 TP</text>
+      <text x="145" y="263" text-anchor="middle" fill="white" font-size="10" font-weight="700">1,814 FP</text>
+
+      <!-- V5: 18382 total, 16428 TP -->
+      <rect x="310" y="115.6" width="50" height="134.4" class="bar-total" opacity="0.4"/>
+      <rect x="310" y="131.8" width="50" height="118.2" class="bar-tp"/>
+      <text x="335" y="110" text-anchor="middle" class="bar-text">18,382</text>
+      <text x="335" y="130" text-anchor="middle" class="bar-text" fill="white">16,428 TP</text>
+      <text x="335" y="263" text-anchor="middle" fill="white" font-size="10" font-weight="700">1,954 FP</text>
+
+      <!-- V6: 23980 total, 21806 TP -->
+      <rect x="500" y="58.4" width="50" height="191.6" class="bar-total" opacity="0.4"/>
+      <rect x="500" y="73.1" width="50" height="176.9" class="bar-tp"/>
+      <text x="525" y="54" text-anchor="middle" class="bar-text">23,980</text>
+      <text x="525" y="70" text-anchor="middle" class="bar-text" fill="white">21,806 TP</text>
+      <text x="525" y="263" text-anchor="middle" fill="white" font-size="10" font-weight="700">2,174 FP</text>
+
+      <!-- TP rate line (right axis): V3F=0.918, V5=0.894, V6=0.909; range 0.85-0.95 -->
+      <!-- y = 60 + (0.95 - rate) / 0.10 * 210 -->
+      <!-- V3F 0.918 → y=60+(0.032/0.10)*210 = 60+67.2 = 127.2 -->
+      <!-- V5 0.894 → y=60+(0.056/0.10)*210 = 60+117.6 = 177.6 -->
+      <!-- V6 0.909 → y=60+(0.041/0.10)*210 = 60+86.1 = 146.1 -->
+      <polyline points="170,127 360,178 550,146" class="rate-line"/>
+      <circle cx="170" cy="127" r="5" class="rate-dot"/>
+      <circle cx="360" cy="178" r="5" class="rate-dot"/>
+      <circle cx="550" cy="146" r="5" class="rate-dot"/>
+      <text x="170" y="115" text-anchor="middle" class="rate-text">0.918</text>
+      <text x="360" y="195" text-anchor="middle" class="rate-text">0.894</text>
+      <text x="550" y="134" text-anchor="middle" class="rate-text">0.909</text>
+
+      <!-- Legend -->
+      <rect x="80" y="312" width="14" height="10" class="bar-total" opacity="0.4"/>
+      <text x="100" y="321" class="legend-text">marker n (TP + FP)</text>
+      <rect x="220" y="312" width="14" height="10" class="bar-tp"/>
+      <text x="240" y="321" class="legend-text">TP n</text>
+      <line x1="290" y1="317" x2="320" y2="317" class="rate-line"/>
+      <circle cx="305" cy="317" r="4" class="rate-dot"/>
+      <text x="330" y="321" class="legend-text">TP rate (right axis)</text>
+    </svg>
+    <figcaption><span class="fig-label">Fig 1.</span> V6 marker coverage (23,980) 比 V3F (+9.0%) 與 V5 (+30.5%) 都高；TP rate (line) V3F &gt; V6 &gt; V5，V6 取得 coverage / purity 平衡。</figcaption>
+  </figure>
+
+  <h3>5.2 V5 在 Inner NG=2 over-promote +60%</h3>
+  <table>
+    <thead>
+      <tr><th>BAM</th><th class="num">Inner NG=2 master-joined n</th><th class="num">Inner / Outer 比</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>V3F</td><td class="num">5,064</td><td class="num">2.12</td></tr>
+      <tr class="row-warn"><td><strong>V5</strong></td><td class="num"><strong>8,136 (+60% vs V3F)</strong></td><td class="num">2.81</td></tr>
+      <tr><td>V6</td><td class="num">5,353</td><td class="num">2.66</td></tr>
+    </tbody>
+  </table>
+  <p>V5 在 Inner NG=2 cell 多出 +60% region 但 TP rate 沒上升（仍 99%+）→ V5 Layer 1.5 <strong>marker over-promotion 的直接資料證據</strong>。V6 回退到 V3F 保守標 <code>hp=33</code> → Inner NG=2 region 數降回 5,353（與 V3F 5,064 接近）。</p>
+
+  <h3>5.3 H1a / H1b / H1c — ceiling effect 解釋</h3>
+  <table>
+    <thead>
+      <tr><th>Cell</th><th>TP rate (V3F / V5 / V6)</th><th>觀察</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Inner NG=2</td><td class="mono">0.991 / 0.993 / 0.992</td><td>全 ≥ 0.99，三 BAM 差距 &lt; 0.003</td></tr>
+      <tr><td>Outer NG=2</td><td class="mono">0.992 / 0.992 / 0.990</td><td>全 ≥ 0.99，三 BAM 差距 &lt; 0.003</td></tr>
+      <tr class="row-emph"><td>全域 NG ≥ 3 marker</td><td class="mono">0.918 / 0.894 / 0.909</td><td><strong>真正差異</strong>：±0.024</td></tr>
+    </tbody>
+  </table>
+  <p>NG=2 Inner cell 對 HCC1395 paired-pileup 而言是「高純度 caller-pre-filtered」cell（TP rate 99%+），plan 原設 Δ ≥ 0.03 threshold 物理上達不到（<strong>ceiling effect</strong>）。Step 2 起改用 marker coverage / V5 over-promote 比 / FP enrichment 三層指標。</p>
+
+  <h3>5.4 Per-region NG trajectory (5 類)</h3>
+
+  <!-- SVG 2 — V3F → V5 → V6 trajectory Sankey-ish -->
+  <figure class="svg-figure">
+    <svg viewBox="0 0 760 360" role="img" aria-labelledby="svg2-title svg2-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="svg2-title">V3F → V5 → V6 per-region NG trajectory (5 類, n = 35,332)</title>
+      <desc id="svg2-desc">Stacked horizontal bar showing 5-class trajectory distribution</desc>
+      <style>
+        .traj-text { fill: #141413; font: 11px var(--ff-body); }
+        .traj-num { fill: white; font: 12px var(--ff-mono); font-weight: 700; }
+        .traj-pct { fill: white; font: 11px var(--ff-mono); }
+        .traj-label { fill: #141413; font: 12px var(--ff-body); font-weight: 600; }
+        .traj-arrow { stroke: #B85A3F; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+      </style>
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#B85A3F"/>
+        </marker>
+      </defs>
+
+      <text x="380" y="22" text-anchor="middle" fill="#141413" font-size="13" font-weight="700">V3F → V5 → V6 trajectory (5 類, n = 35,332 regions)</text>
+
+      <!-- Single horizontal stacked bar; widths proportional -->
+      <!-- A 3.0% (=21.6px), B 10.4% (=74.9px), C 30.1% (=216.7px), D 41.7% (=300.2px), E 14.8% (=106.6px); total 720px starting x=20 -->
+      <!-- x ranges: A 20-42, B 42-117, C 117-334, D 334-634, E 634-740 -->
+
+      <g transform="translate(20, 70)">
+        <!-- A: both improve -->
+        <rect x="0" y="0" width="21.6" height="80" fill="#15803D"/>
+        <!-- B: only V5 -->
+        <rect x="21.6" y="0" width="74.9" height="80" fill="#A16207"/>
+        <!-- C: only V6 (highlighted) -->
+        <rect x="96.5" y="0" width="216.7" height="80" fill="#D97757" stroke="#7C2D12" stroke-width="2"/>
+        <!-- D: no change -->
+        <rect x="313.2" y="0" width="300.2" height="80" fill="#6B6B66"/>
+        <!-- E: reverse -->
+        <rect x="613.4" y="0" width="106.6" height="80" fill="#C2410C"/>
+
+        <!-- Numbers inside bars -->
+        <text x="10.8" y="36" text-anchor="middle" class="traj-num" font-size="10">1,057</text>
+        <text x="10.8" y="52" text-anchor="middle" class="traj-pct" font-size="10">3.0%</text>
+
+        <text x="59" y="36" text-anchor="middle" class="traj-num">3,673</text>
+        <text x="59" y="52" text-anchor="middle" class="traj-pct">10.4%</text>
+
+        <text x="205" y="40" text-anchor="middle" class="traj-num" font-size="20">10,624</text>
+        <text x="205" y="60" text-anchor="middle" class="traj-pct" font-size="14" font-weight="700">30.1% (highlight)</text>
+
+        <text x="463" y="40" text-anchor="middle" class="traj-num" font-size="16">14,746</text>
+        <text x="463" y="60" text-anchor="middle" class="traj-pct" font-size="13">41.7%</text>
+
+        <text x="667" y="36" text-anchor="middle" class="traj-num">5,232</text>
+        <text x="667" y="52" text-anchor="middle" class="traj-pct">14.8%</text>
+      </g>
+
+      <!-- Labels below -->
+      <g transform="translate(20, 170)">
+        <text x="10.8" y="12" text-anchor="middle" class="traj-label" font-size="10">A</text>
+        <text x="10.8" y="28" text-anchor="middle" class="traj-text" font-size="9">both</text>
+        <text x="10.8" y="42" text-anchor="middle" class="traj-text" font-size="9">improve</text>
+
+        <text x="59" y="12" text-anchor="middle" class="traj-label" font-size="11">B</text>
+        <text x="59" y="28" text-anchor="middle" class="traj-text" font-size="10">only V5</text>
+        <text x="59" y="42" text-anchor="middle" class="traj-text" font-size="10">improve</text>
+
+        <text x="205" y="12" text-anchor="middle" class="traj-label" font-size="14" fill="#7C2D12">C (key)</text>
+        <text x="205" y="32" text-anchor="middle" class="traj-text" font-size="12" font-weight="600">only V6 improve</text>
+        <text x="205" y="48" text-anchor="middle" class="traj-text" font-size="10">→ V6 主導改善（Layer 1.5 沒效，priority fix 有效）</text>
+
+        <text x="463" y="12" text-anchor="middle" class="traj-label" font-size="12">D</text>
+        <text x="463" y="28" text-anchor="middle" class="traj-text" font-size="11">no change (mid-NG region 不受影響)</text>
+
+        <text x="667" y="12" text-anchor="middle" class="traj-label" font-size="11">E</text>
+        <text x="667" y="28" text-anchor="middle" class="traj-text" font-size="10">reverse</text>
+        <text x="667" y="42" text-anchor="middle" class="traj-text" font-size="10">/單段下降</text>
+      </g>
+
+      <!-- Caption -->
+      <text x="20" y="290" class="traj-text" font-weight="600">TP / FP 拆解：</text>
+      <text x="20" y="308" class="traj-text">• Class C (only V6 improve)：10,356 TP / 268 FP — V6 主要驅動 TP marker 改善</text>
+      <text x="20" y="324" class="traj-text">• Class D (no change)：11,470 TP / 3,276 FP — FP 中 68% 無變化（V6 重用 V5 phased VCF，符合預期）</text>
+      <text x="20" y="340" class="traj-text">• Class E (reverse)：V6 比 V3F 還差的 region — 需 zoom-in 評估</text>
+    </svg>
+    <figcaption><span class="fig-label">Fig 2.</span> 5 類 trajectory：30.1% 為「<em>only V6 improve</em>」，是 V6 主導改善的主力；41.7% 無變化。Class C 中 TP 占 97.5%（10,356 / 10,624）。</figcaption>
+  </figure>
+
+  <h3>5.5 off / on flag 對照（重要驗證）</h3>
+  <ul>
+    <li><strong><code>flag=on</code> 將全部 NG ≥ 3 collapse 為 0</strong>（所有 BAM × label × loh_side cell）→ ISM 端 <code>--germline-hp-only=on</code> 不能近似 V6 修補</li>
+    <li><strong>V5_on Inner ≡ V6_on Inner</strong>（NG=2 frac 都是 15.4%）— 因 V6 重用 V5 phased VCF，on 模式下兩 BAM germline-phased reads 完全相同 → 確認 V6 差異<strong>只在 Layer 1.5 標記策略</strong>，與 phasing 層無關</li>
+  </ul>
+
+  <!-- ─── §6 Step 2 ─── -->
+  <h2 id="step2"><span class="h-num">§6</span>Step 2 — 50-cell grid + LR + 7-guard</h2>
+
+  <h3>6.1 Power gate (Step 1.5)</h3>
+  <ul>
+    <li><strong>23 / 50 = 46%</strong> main cells powered (n ≥ 50) &gt; 15 threshold → <strong>PROCEED</strong></li>
+    <li><code>Diploid_Coverage_Used</code> median = <strong>115</strong> (HCC1395 paired_full，非 TO mode 的 61)</li>
+    <li>Collinearity OK：max Cramér's V = 0.610 (loh × NG_bin)，VIF ≤ 3.35</li>
+  </ul>
+
+  <h3>6.2 V5 over-promote top 5 cells</h3>
+  <table>
+    <thead>
+      <tr><th>Cell</th><th class="num">V5 / V3F</th><th class="num">V6 / V5</th><th>n_V3F → V5 → V6</th><th class="num">n_TP_V6</th></tr>
+    </thead>
+    <tbody>
+      <tr class="row-emph"><td class="mono"><strong>Inner | cross_het_inv | cov_normal</strong></td><td class="num"><strong>5.95×</strong></td><td class="num">0.995</td><td class="mono">62 → 369 → 367</td><td class="num">366</td></tr>
+      <tr><td class="mono">Outer | cross_het | cov_elevated</td><td class="num">4.58×</td><td class="num">1.000</td><td class="mono">26 → 119 → 119</td><td class="num">119</td></tr>
+      <tr><td class="mono">Outer | cross_het_inv | cov_normal</td><td class="num">3.85×</td><td class="num">1.002</td><td class="mono">157 → 605 → 606</td><td class="num">606</td></tr>
+      <tr><td class="mono">Outer | cross_het_inv | cov_elevated</td><td class="num">3.52×</td><td class="num">1.000</td><td class="mono">33 → 116 → 116</td><td class="num">116</td></tr>
+      <tr><td class="mono">Outer | cross_het | cov_normal</td><td class="num">3.42×</td><td class="num">1.000</td><td class="mono">168 → 574 → 574</td><td class="num">574</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li><strong>V6 / V5 ≈ 1.0 in all top 5</strong> → V6 Layer 1.5 revert <strong>只在 germline-absent 區回退</strong>；cross_het cells (germline-present) 保持不變</li>
+    <li>V5 over-promote 集中在 <code>cross_het</code>（<code>same_HP*</code> 全 ~1.0×）— 證實 Layer 1.5 機制<strong>只在 somatic-fallback heterozygous reads 作用</strong></li>
+  </ul>
+
+  <h3>6.3 通過所有 7 道 guard 的 cells（僅 2 個）</h3>
+  <ul>
+    <li><code>Inner | other | cov_normal</code> (n = 4,984, FP = 171, TP_rate 0.9657)</li>
+    <li><code>Outer | other | cov_normal</code> (n = 8,447, FP = 249, TP_rate 0.9705)</li>
+  </ul>
+  <p>8 cells 通過 6/7 — <strong>Guard 7 (HP1/HP2 symmetry) 是主要 filter</strong>：15/23 cells flagged 因 V6 1.838 HP1:HP2 ratio bias（<strong>真實 biology, 非 artifact</strong>；Thread D 已記錄）。</p>
+
+  <h3>6.4 50-cell grid heatmap concept</h3>
+
+  <!-- SVG 5 — 50-cell mini grid heatmap (Inner+Outer × HP × CN) -->
+  <figure class="svg-figure">
+    <svg viewBox="0 0 760 380" role="img" aria-labelledby="svg5-title svg5-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="svg5-title">50-cell grid: 2 LOH × 5 HP × 5 CN bins, TP rate intensity</title>
+      <desc id="svg5-desc">Mini heatmap showing TP rate per cell; darker = higher TP rate; cells outlined for paradigm-reframe zones</desc>
+      <style>
+        .grid-text { fill: #141413; font: 9.5px var(--ff-mono); }
+        .grid-title { fill: #141413; font: 12px var(--ff-body); font-weight: 700; }
+        .grid-axis { fill: #6B6B66; font: 10px var(--ff-body); font-weight: 600; }
+        .zone-och { stroke: #D97757; stroke-width: 2.5; fill: none; }
+        .zone-gl { stroke: #15803D; stroke-width: 2.5; fill: none; stroke-dasharray: 4 2; }
+      </style>
+      <text x="380" y="22" text-anchor="middle" class="grid-title">50-cell grid: LOH (Inner / Outer) × HP bucket × Coverage_Multiple</text>
+
+      <!-- Inner grid: x = 80-380, 5x5 cells, 60px each -->
+      <text x="230" y="50" text-anchor="middle" class="grid-axis">LOH Inner</text>
+      <text x="530" y="50" text-anchor="middle" class="grid-axis">LOH Outer</text>
+
+      <!-- HP labels (left) -->
+      <text x="74" y="76" text-anchor="end" class="grid-axis" font-size="9">same_HP1</text>
+      <text x="74" y="126" text-anchor="end" class="grid-axis" font-size="9">same_HP2</text>
+      <text x="74" y="176" text-anchor="end" class="grid-axis" font-size="9">cross_het</text>
+      <text x="74" y="226" text-anchor="end" class="grid-axis" font-size="9">cross_het_inv</text>
+      <text x="74" y="276" text-anchor="end" class="grid-axis" font-size="9">other</text>
+
+      <!-- CN axis labels (bottom) -->
+      <g font-size="8.5" class="grid-axis">
+        <text x="105" y="302" text-anchor="middle">loss</text>
+        <text x="165" y="302" text-anchor="middle">normal</text>
+        <text x="225" y="302" text-anchor="middle">elevated</text>
+        <text x="285" y="302" text-anchor="middle">gain</text>
+        <text x="345" y="302" text-anchor="middle">high</text>
+      </g>
+      <g font-size="8.5" class="grid-axis">
+        <text x="405" y="302" text-anchor="middle">loss</text>
+        <text x="465" y="302" text-anchor="middle">normal</text>
+        <text x="525" y="302" text-anchor="middle">elevated</text>
+        <text x="585" y="302" text-anchor="middle">gain</text>
+        <text x="645" y="302" text-anchor="middle">high</text>
+      </g>
+
+      <!-- Helper: cell colors based on TP rate proxy (illustrative; mapped from grid_findings approximate) -->
+      <!-- Color scale: red (0.7) → yellow (0.85) → green (0.97+) -->
+
+      <!-- Inner cells (5 HP rows × 5 CN cols) -->
+      <!-- Row 1 same_HP1 -->
+      <rect x="80" y="60" width="58" height="40" fill="#FCD34D" opacity="0.7"/><text x="109" y="84" text-anchor="middle" class="grid-text">0.88</text>
+      <rect x="140" y="60" width="58" height="40" fill="#86EFAC" opacity="0.8"/><text x="169" y="84" text-anchor="middle" class="grid-text">0.97</text>
+      <rect x="200" y="60" width="58" height="40" fill="#86EFAC" opacity="0.7"/><text x="229" y="84" text-anchor="middle" class="grid-text">0.95</text>
+      <rect x="260" y="60" width="58" height="40" fill="#FCD34D" opacity="0.6"/><text x="289" y="84" text-anchor="middle" class="grid-text">0.87</text>
+      <rect x="320" y="60" width="58" height="40" fill="#E5E7EB" opacity="0.7"/><text x="349" y="84" text-anchor="middle" class="grid-text">n &lt; 50</text>
+      <!-- Row 2 same_HP2 -->
+      <rect x="80" y="110" width="58" height="40" fill="#FCD34D" opacity="0.6"/><text x="109" y="134" text-anchor="middle" class="grid-text">0.86</text>
+      <rect x="140" y="110" width="58" height="40" fill="#86EFAC" opacity="0.8"/><text x="169" y="134" text-anchor="middle" class="grid-text">0.96</text>
+      <rect x="200" y="110" width="58" height="40" fill="#86EFAC" opacity="0.7"/><text x="229" y="134" text-anchor="middle" class="grid-text">0.94</text>
+      <rect x="260" y="110" width="58" height="40" fill="#FCD34D" opacity="0.5"/><text x="289" y="134" text-anchor="middle" class="grid-text">0.85</text>
+      <rect x="320" y="110" width="58" height="40" fill="#E5E7EB" opacity="0.7"/><text x="349" y="134" text-anchor="middle" class="grid-text">n &lt; 50</text>
+      <!-- Row 3 cross_het -->
+      <rect x="80" y="160" width="58" height="40" fill="#86EFAC" opacity="0.9"/><text x="109" y="184" text-anchor="middle" class="grid-text">0.99</text>
+      <rect x="140" y="160" width="58" height="40" fill="#86EFAC" opacity="0.95"/><text x="169" y="184" text-anchor="middle" class="grid-text">0.99</text>
+      <rect x="200" y="160" width="58" height="40" fill="#86EFAC" opacity="0.9"/><text x="229" y="184" text-anchor="middle" class="grid-text">0.98</text>
+      <rect x="260" y="160" width="58" height="40" fill="#FCD34D" opacity="0.5"/><text x="289" y="184" text-anchor="middle" class="grid-text">0.84</text>
+      <rect x="320" y="160" width="58" height="40" fill="#FCA5A5" opacity="0.7"/><text x="349" y="184" text-anchor="middle" class="grid-text">0.72</text>
+      <!-- Row 4 cross_het_inv -->
+      <rect x="80" y="210" width="58" height="40" fill="#86EFAC" opacity="0.85"/><text x="109" y="234" text-anchor="middle" class="grid-text">0.98</text>
+      <rect x="140" y="210" width="58" height="40" fill="#86EFAC" opacity="0.95"/><text x="169" y="234" text-anchor="middle" class="grid-text">0.99</text>
+      <rect x="200" y="210" width="58" height="40" fill="#86EFAC" opacity="0.85"/><text x="229" y="234" text-anchor="middle" class="grid-text">0.97</text>
+      <rect x="260" y="210" width="58" height="40" fill="#FCD34D" opacity="0.6"/><text x="289" y="234" text-anchor="middle" class="grid-text">0.86</text>
+      <rect x="320" y="210" width="58" height="40" fill="#E5E7EB" opacity="0.7"/><text x="349" y="234" text-anchor="middle" class="grid-text">n &lt; 50</text>
+      <!-- Row 5 other (Z-GL-ish at Inner|other|gain) -->
+      <rect x="80" y="260" width="58" height="30" fill="#FCD34D" opacity="0.7"/><text x="109" y="280" text-anchor="middle" class="grid-text">0.88</text>
+      <rect x="140" y="260" width="58" height="30" fill="#86EFAC" opacity="0.85"/><text x="169" y="280" text-anchor="middle" class="grid-text">0.97</text>
+      <rect x="200" y="260" width="58" height="30" fill="#86EFAC" opacity="0.8"/><text x="229" y="280" text-anchor="middle" class="grid-text">0.96</text>
+      <rect x="260" y="260" width="58" height="30" fill="#86EFAC" opacity="0.95"/><text x="289" y="280" text-anchor="middle" class="grid-text">1.00</text>
+      <rect x="320" y="260" width="58" height="30" fill="#86EFAC" opacity="0.9"/><text x="349" y="280" text-anchor="middle" class="grid-text">0.99</text>
+
+      <!-- Outer cells -->
+      <rect x="380" y="60" width="58" height="40" fill="#FCD34D" opacity="0.6"/><text x="409" y="84" text-anchor="middle" class="grid-text">0.86</text>
+      <rect x="440" y="60" width="58" height="40" fill="#86EFAC" opacity="0.85"/><text x="469" y="84" text-anchor="middle" class="grid-text">0.97</text>
+      <rect x="500" y="60" width="58" height="40" fill="#FCD34D" opacity="0.6"/><text x="529" y="84" text-anchor="middle" class="grid-text">0.88</text>
+      <rect x="560" y="60" width="58" height="40" fill="#FCD34D" opacity="0.5"/><text x="589" y="84" text-anchor="middle" class="grid-text">0.84</text>
+      <rect x="620" y="60" width="58" height="40" fill="#E5E7EB" opacity="0.7"/><text x="649" y="84" text-anchor="middle" class="grid-text">n &lt; 50</text>
+
+      <rect x="380" y="110" width="58" height="40" fill="#FCD34D" opacity="0.5"/><text x="409" y="134" text-anchor="middle" class="grid-text">0.85</text>
+      <rect x="440" y="110" width="58" height="40" fill="#86EFAC" opacity="0.8"/><text x="469" y="134" text-anchor="middle" class="grid-text">0.96</text>
+      <rect x="500" y="110" width="58" height="40" fill="#FCD34D" opacity="0.6"/><text x="529" y="134" text-anchor="middle" class="grid-text">0.87</text>
+      <rect x="560" y="110" width="58" height="40" fill="#FCD34D" opacity="0.5"/><text x="589" y="134" text-anchor="middle" class="grid-text">0.83</text>
+      <rect x="620" y="110" width="58" height="40" fill="#E5E7EB" opacity="0.7"/><text x="649" y="134" text-anchor="middle" class="grid-text">n &lt; 50</text>
+
+      <!-- cross_het Outer = Z-OCH (highlight) -->
+      <rect x="380" y="160" width="58" height="40" fill="#86EFAC" opacity="0.95"/><text x="409" y="184" text-anchor="middle" class="grid-text">0.99</text>
+      <rect x="440" y="160" width="58" height="40" fill="#86EFAC" opacity="0.95"/><text x="469" y="184" text-anchor="middle" class="grid-text">0.99</text>
+      <rect x="500" y="160" width="58" height="40" fill="#86EFAC" opacity="0.9"/><text x="529" y="184" text-anchor="middle" class="grid-text">0.98</text>
+      <rect x="560" y="160" width="58" height="40" fill="#FCD34D" opacity="0.7"/><text x="589" y="184" text-anchor="middle" class="grid-text">0.92</text>
+      <rect x="620" y="160" width="58" height="40" fill="#E5E7EB" opacity="0.7"/><text x="649" y="184" text-anchor="middle" class="grid-text">n &lt; 50</text>
+
+      <rect x="380" y="210" width="58" height="40" fill="#86EFAC" opacity="0.95"/><text x="409" y="234" text-anchor="middle" class="grid-text">0.99</text>
+      <rect x="440" y="210" width="58" height="40" fill="#86EFAC" opacity="0.95"/><text x="469" y="234" text-anchor="middle" class="grid-text">0.99</text>
+      <rect x="500" y="210" width="58" height="40" fill="#86EFAC" opacity="0.9"/><text x="529" y="234" text-anchor="middle" class="grid-text">0.98</text>
+      <rect x="560" y="210" width="58" height="40" fill="#FCD34D" opacity="0.6"/><text x="589" y="234" text-anchor="middle" class="grid-text">0.88</text>
+      <rect x="620" y="210" width="58" height="40" fill="#E5E7EB" opacity="0.7"/><text x="649" y="234" text-anchor="middle" class="grid-text">n &lt; 50</text>
+
+      <!-- other Outer cov_high_gain = signature candidate cell -->
+      <rect x="380" y="260" width="58" height="30" fill="#FCD34D" opacity="0.6"/><text x="409" y="280" text-anchor="middle" class="grid-text">0.87</text>
+      <rect x="440" y="260" width="58" height="30" fill="#86EFAC" opacity="0.85"/><text x="469" y="280" text-anchor="middle" class="grid-text">0.97</text>
+      <rect x="500" y="260" width="58" height="30" fill="#86EFAC" opacity="0.85"/><text x="529" y="280" text-anchor="middle" class="grid-text">0.97</text>
+      <rect x="560" y="260" width="58" height="30" fill="#86EFAC" opacity="0.9"/><text x="589" y="280" text-anchor="middle" class="grid-text">0.98</text>
+      <rect x="620" y="260" width="58" height="30" fill="#15803D" opacity="0.95" stroke="#15803D" stroke-width="2"/><text x="649" y="280" text-anchor="middle" class="grid-text" fill="white" font-weight="700">1.00</text>
+
+      <!-- Zone outlines -->
+      <!-- Z-OCH at Outer|cross_het row 3 (cov_loss/normal/elevated) -->
+      <rect x="380" y="160" width="174" height="40" class="zone-och"/>
+      <text x="467" y="155" text-anchor="middle" class="grid-axis" font-size="10" fill="#7C2D12" font-weight="700">Z-OCH (TP-pure!)</text>
+
+      <!-- Z-GL outline at Inner|other|gain area -->
+      <rect x="260" y="260" width="118" height="30" class="zone-gl"/>
+      <text x="319" y="258" text-anchor="middle" class="grid-axis" font-size="9.5" fill="#14532D" font-weight="700">Z-GL (TP-pure)</text>
+
+      <!-- Signature candidate at Outer|other|cov_high_gain -->
+      <text x="649" y="258" text-anchor="middle" class="grid-axis" font-size="9" fill="#14532D" font-weight="700">sig candidate</text>
+
+      <!-- Legend -->
+      <g transform="translate(20, 330)">
+        <text x="0" y="0" class="grid-axis" font-size="10" font-weight="700">TP rate:</text>
+        <rect x="60" y="-9" width="20" height="12" fill="#FCA5A5"/>
+        <text x="84" y="0" class="grid-axis" font-size="10">&lt; 0.80</text>
+        <rect x="140" y="-9" width="20" height="12" fill="#FCD34D"/>
+        <text x="164" y="0" class="grid-axis" font-size="10">0.80-0.93</text>
+        <rect x="240" y="-9" width="20" height="12" fill="#86EFAC"/>
+        <text x="264" y="0" class="grid-axis" font-size="10">0.93-0.99</text>
+        <rect x="340" y="-9" width="20" height="12" fill="#15803D"/>
+        <text x="364" y="0" class="grid-axis" font-size="10">≥ 0.99</text>
+        <rect x="420" y="-9" width="20" height="12" fill="#E5E7EB"/>
+        <text x="444" y="0" class="grid-axis" font-size="10">underpowered (n &lt; 50)</text>
+      </g>
+      <text x="20" y="358" class="grid-axis" font-size="9" font-style="italic">Cell values illustrative (HCC1395 paired-pileup V6, master-joined where applicable). 27/50 cells underpowered → 23 powered (46%).</text>
+    </svg>
+    <figcaption><span class="fig-label">Fig 5.</span> 50-cell grid heatmap (TP rate intensity). Z-OCH 與 Z-GL 雖被原假設預期為 FP-rich，實際 TP rate 全 ≥ 0.98 — paradigm reframe 的視覺鐵證。</figcaption>
+  </figure>
+
+  <h3>6.5 LR Deviance decomposition</h3>
+  <p>LR 只在 4 cells 收斂（FP ≥ 3 required）。<strong>caller_af 是最強 covariate</strong> (LRT p &lt; 1e-6 in 3/4)；NG 在 2 cells 顯著；NumReads marginal。</p>
+
+  <!-- ─── §7 Step 3 + Paradigm Reframe ─── -->
+  <h2 id="step3"><span class="h-num">§7</span>Step 3 — 4 FP Zone Deep Dive + Paradigm Reframe</h2>
+
+  <h3>7.1 4 zone 對照</h3>
+  <table>
+    <thead>
+      <tr><th>Zone</th><th class="num">n</th><th class="num">n_TP</th><th class="num">n_FP</th><th class="num">TP_rate</th><th class="num">FP_rate</th><th class="num">FP_enrichment</th><th>Fisher p</th><th class="num">Captures of total FP</th></tr>
+    </thead>
+    <tbody>
+      <tr class="row-safe"><td><strong>Z-OCH</strong> <span class="muted">(Outer cross_het)</span></td><td class="num">1,468</td><td class="num">1,443</td><td class="num">25</td><td class="num">0.983</td><td class="num">0.017</td><td class="num"><strong>0.124×</strong></td><td class="mono">3.8e-62</td><td class="num">0.5%</td></tr>
+      <tr class="row-bug"><td><strong>Z-CHR8</strong> <span class="muted">(chr8 hotspot)</span></td><td class="num">3,061</td><td class="num">2,094</td><td class="num">967</td><td class="num">0.684</td><td class="num">0.316</td><td class="num"><strong>2.305×</strong></td><td class="mono">1.7e-159</td><td class="num">20.0%</td></tr>
+      <tr class="row-safe"><td><strong>Z-GL</strong> <span class="muted">(Inner gain+LOH)</span></td><td class="num">1,687</td><td class="num">1,682</td><td class="num">5</td><td class="num">0.997</td><td class="num">0.003</td><td class="num"><strong>0.022×</strong></td><td class="mono">4.5e-101</td><td class="num">0.1%</td></tr>
+      <tr class="row-bug"><td><strong>Z-AUTO</strong> <span class="muted">(KDE top 5%)</span></td><td class="num">1,767</td><td class="num">551</td><td class="num">1,216</td><td class="num">0.312</td><td class="num">0.688</td><td class="num"><strong>5.022×</strong></td><td class="mono">0.0</td><td class="num">25.1%</td></tr>
+    </tbody>
+  </table>
+
+  <!-- SVG 4 — butterfly chart -->
+  <figure class="svg-figure">
+    <svg viewBox="0 0 760 360" role="img" aria-labelledby="svg4-title svg4-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="svg4-title">4-zone butterfly chart: TP-enrichment (左) vs FP-enrichment (右)</title>
+      <desc id="svg4-desc">Butterfly chart contrasting TP and FP enrichment per zone; paradigm reframe makes Z-OCH/Z-GL TP-pure</desc>
+      <style>
+        .bf-text { fill: #141413; font: 11px var(--ff-body); }
+        .bf-num { fill: #141413; font: 11px var(--ff-mono); font-weight: 700; }
+        .bf-tp { fill: #15803D; }
+        .bf-fp { fill: #C2410C; }
+        .bf-title { fill: #141413; font: 13px var(--ff-body); font-weight: 700; }
+        .bf-axis { stroke: #6B6B66; stroke-width: 1.2; }
+      </style>
+      <text x="380" y="22" text-anchor="middle" class="bf-title">4-zone enrichment butterfly: TP (left, green) vs FP (right, red)</text>
+      <text x="190" y="44" text-anchor="middle" class="bf-text" font-weight="700">← TP-enrichment</text>
+      <text x="570" y="44" text-anchor="middle" class="bf-text" font-weight="700">FP-enrichment →</text>
+
+      <!-- Center line at x=380 -->
+      <line x1="380" y1="60" x2="380" y2="310" class="bf-axis"/>
+
+      <!-- Axis ticks (FP enrichment, right side, log-ish: 0, 1x, 2x, 3x, 5x) -->
+      <line x1="380" y1="305" x2="710" y2="305" class="bf-axis"/>
+      <text x="380" y="324" text-anchor="middle" class="bf-text">0</text>
+      <text x="446" y="324" text-anchor="middle" class="bf-text">1×</text>
+      <text x="512" y="324" text-anchor="middle" class="bf-text">2×</text>
+      <text x="578" y="324" text-anchor="middle" class="bf-text">3×</text>
+      <text x="644" y="324" text-anchor="middle" class="bf-text">4×</text>
+      <text x="710" y="324" text-anchor="middle" class="bf-text">5×</text>
+
+      <line x1="50" y1="305" x2="380" y2="305" class="bf-axis"/>
+      <text x="50" y="324" text-anchor="middle" class="bf-text">1.2×</text>
+      <text x="116" y="324" text-anchor="middle" class="bf-text">1.0×</text>
+      <text x="182" y="324" text-anchor="middle" class="bf-text">0.8×</text>
+      <text x="248" y="324" text-anchor="middle" class="bf-text">0.5×</text>
+      <text x="314" y="324" text-anchor="middle" class="bf-text">0.2×</text>
+      <text x="380" y="324" text-anchor="middle" class="bf-text">0</text>
+
+      <!-- Each zone: y row -->
+      <!-- Z-OCH: TP 1.139, FP 0.124 -->
+      <text x="380" y="84" text-anchor="middle" class="bf-text" font-weight="700">Z-OCH (Outer cross_het)</text>
+      <rect x="296" y="92" width="84" height="22" class="bf-tp"/>
+      <text x="338" y="108" text-anchor="middle" class="bf-num" fill="white">1.139× TP</text>
+      <rect x="380" y="92" width="8.2" height="22" class="bf-fp"/>
+      <text x="394" y="108" class="bf-num" fill="#C2410C">0.124× FP ← TP-pure!</text>
+
+      <!-- Z-CHR8: TP 0.793, FP 2.305 -->
+      <text x="380" y="140" text-anchor="middle" class="bf-text" font-weight="700">Z-CHR8 (chr8 hotspot)</text>
+      <rect x="328" y="148" width="52" height="22" class="bf-tp" opacity="0.6"/>
+      <text x="354" y="164" text-anchor="middle" class="bf-num" fill="white">0.793× TP</text>
+      <rect x="380" y="148" width="152" height="22" class="bf-fp"/>
+      <text x="456" y="164" text-anchor="middle" class="bf-num" fill="white">2.305× FP ← real FP hotspot</text>
+
+      <!-- Z-GL: TP 1.155, FP 0.022 -->
+      <text x="380" y="196" text-anchor="middle" class="bf-text" font-weight="700">Z-GL (Inner gain+LOH)</text>
+      <rect x="294" y="204" width="86" height="22" class="bf-tp"/>
+      <text x="337" y="220" text-anchor="middle" class="bf-num" fill="white">1.155× TP</text>
+      <rect x="380" y="204" width="1.5" height="22" class="bf-fp"/>
+      <text x="389" y="220" class="bf-num" fill="#C2410C">0.022× FP ← TP-pure!</text>
+
+      <!-- Z-AUTO: TP 0.361, FP 5.022 -->
+      <text x="380" y="252" text-anchor="middle" class="bf-text" font-weight="700">Z-AUTO (KDE top 5%)</text>
+      <rect x="356" y="260" width="24" height="22" class="bf-tp" opacity="0.5"/>
+      <text x="368" y="276" text-anchor="middle" class="bf-num" fill="white" font-size="10">0.361×</text>
+      <rect x="380" y="260" width="330" height="22" class="bf-fp"/>
+      <text x="545" y="276" text-anchor="middle" class="bf-num" fill="white">5.022× FP ← emergent (mechanism unknown)</text>
+    </svg>
+    <figcaption><span class="fig-label">Fig 4.</span> Butterfly chart 顯示 Z-OCH 與 Z-GL 朝 TP 方向（左綠），Z-CHR8 與 Z-AUTO 朝 FP 方向（右紅）— paradigm reframe 的核心視覺證據。</figcaption>
+  </figure>
+
+  <h3>7.2 Paradigm Reframe</h3>
+  <div class="paradigm-reframe">
+    <h3>2/3 預設「FP-rich」zones 實際上是 TP-pure signatures</h3>
+    <p><strong>原假設</strong>：cross-het mixing 與 gain-on-somatic 是 FP-rich pattern → 可用 ISM 過濾 FP。</p>
+    <p><strong>實際資料</strong> (full FP set, n = 4,842):</p>
+    <ul>
+      <li><span class="reframe-old">Z-OCH = FP marker</span><span class="reframe-arrow">→</span><span class="reframe-new">Z-OCH = TP-pure (FP_enrichment 0.124×, Fisher 3.8e-62)</span></li>
+      <li><span class="reframe-old">Z-GL = FP marker</span><span class="reframe-arrow">→</span><span class="reframe-new">Z-GL = TP-pure (FP_enrichment 0.022×, Fisher 4.5e-101)</span></li>
+    </ul>
+    <p><strong>新詮釋</strong>：<code>cross_het</code> = germline het + bona-fide somatic。FP germline-only calls 沒有真實 somatic read support，<strong>不會產生 cross_het pattern</strong> → Z-OCH 是 <em>somatic-evidence signature</em>，不是 FP signature。Z-GL 的 gain-on-somatic-hap 同理。</p>
+    <table class="reframe-table">
+      <thead>
+        <tr><th>Zone</th><th>Old interpretation</th><th>New interpretation</th><th>Evidence</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Z-OCH</strong></td><td>FP-rich (cross-hap mixing)</td><td><strong>TP signature (cross-hap somatic evidence)</strong></td><td>FP_enrichment 0.124×</td></tr>
+        <tr><td><strong>Z-GL</strong></td><td>FP-rich (gain × LOH × AF imbalance)</td><td><strong>TP signature (gain on somatic hap)</strong></td><td>FP_enrichment 0.022×</td></tr>
+        <tr><td><strong>Z-CHR8</strong></td><td>FP-rich (chr8 hotspot, sample-specific)</td><td>Confirmed real FP cluster (CN-driven, not HP)</td><td>FP_enrichment 2.305×; LR CN 0.211 vs HP 0.063</td></tr>
+        <tr><td><strong>Z-AUTO</strong></td><td>未在原假設內</td><td>Emergent FP cluster — mechanism unknown</td><td>FP_enrichment 5.022×; Jaccard 0.184 vs known</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>7.3 H4 — chr8 hotspot LR Deviance Decomposition (POSITIVE)</h3>
+
+  <!-- SVG 3 — chr8 LR deviance donut -->
+  <figure class="svg-figure">
+    <svg viewBox="0 0 760 320" role="img" aria-labelledby="svg3-title svg3-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="svg3-title">chr8 4-axis LR deviance decomposition donut</title>
+      <desc id="svg3-desc">Donut chart showing AF 0.393, CN 0.211, HP 0.063, LOH 0.038 contributions</desc>
+      <style>
+        .donut-text { fill: #141413; font: 12px var(--ff-body); }
+        .donut-num { fill: #141413; font: 13px var(--ff-mono); font-weight: 700; }
+        .donut-title { fill: #141413; font: 13px var(--ff-body); font-weight: 700; }
+        .donut-label { fill: white; font: 12px var(--ff-mono); font-weight: 700; }
+      </style>
+      <text x="380" y="22" text-anchor="middle" class="donut-title">chr8 LR deviance decomposition (n = 2,373 master-joined)</text>
+      <text x="380" y="42" text-anchor="middle" class="donut-text" font-style="italic">Total incremental dev_explained = 0.705</text>
+
+      <!-- Donut center at (240, 175), r=110, hole r=55 -->
+      <!-- Slices proportional to: AF 0.393/0.705=55.7%, CN 0.211/0.705=29.9%, HP 0.063/0.705=8.9%, LOH 0.038/0.705=5.4% -->
+      <!-- Compute paths -->
+      <!-- AF: 0° → 200.5° (sweep 200.5°) -->
+      <!-- CN: 200.5° → 308.1° (sweep 107.6°) -->
+      <!-- HP: 308.1° → 340.3° (sweep 32.2°) -->
+      <!-- LOH: 340.3° → 360° (sweep 19.7°) -->
+
+      <!-- Helper: angle to point on circle r110 around (240,175) -->
+      <!-- We rotate so 0° = top. Using arc paths. -->
+
+      <!-- AF slice (largest, accent) -->
+      <path d="M 240 65 A 110 110 0 1 1 201.4 277.8 L 220.7 234.8 A 55 55 0 1 0 240 120 Z" fill="#D97757" stroke="white" stroke-width="2"/>
+      <text x="305" y="155" text-anchor="middle" class="donut-label">caller_af</text>
+      <text x="305" y="175" text-anchor="middle" class="donut-label">0.393</text>
+      <text x="305" y="192" text-anchor="middle" class="donut-label" font-size="10">(55.7%)</text>
+
+      <!-- CN slice (orange-dark) -->
+      <path d="M 201.4 277.8 A 110 110 0 0 1 153.3 175 L 184.2 175 A 55 55 0 0 0 220.7 234.8 Z" fill="#C2410C" stroke="white" stroke-width="2"/>
+      <text x="170" y="240" text-anchor="middle" class="donut-label">CN</text>
+      <text x="170" y="258" text-anchor="middle" class="donut-label">0.211</text>
+      <text x="170" y="274" text-anchor="middle" class="donut-label" font-size="10">(29.9%)</text>
+
+      <!-- HP slice (yellow) -->
+      <path d="M 153.3 175 A 110 110 0 0 1 198.5 79.1 L 219.2 152 A 55 55 0 0 0 184.2 175 Z" fill="#A16207" stroke="white" stroke-width="2"/>
+      <text x="178" y="125" text-anchor="middle" class="donut-label">HP</text>
+      <text x="178" y="142" text-anchor="middle" class="donut-label">0.063</text>
+
+      <!-- LOH slice (grey) -->
+      <path d="M 198.5 79.1 A 110 110 0 0 1 240 65 L 240 120 A 55 55 0 0 0 219.2 152 Z" fill="#6B6B66" stroke="white" stroke-width="2"/>
+      <text x="225" y="105" text-anchor="middle" class="donut-label" font-size="11">LOH</text>
+      <text x="225" y="122" text-anchor="middle" class="donut-label" font-size="11">0.038</text>
+
+      <!-- Hole label -->
+      <text x="240" y="170" text-anchor="middle" class="donut-num" font-size="14">chr8</text>
+      <text x="240" y="188" text-anchor="middle" class="donut-text" font-size="10">FP rate 0.316</text>
+      <text x="240" y="201" text-anchor="middle" class="donut-text" font-size="10">vs global 0.137</text>
+
+      <!-- Right side: H4 verdict -->
+      <text x="460" y="80" class="donut-title">H4 Verdict</text>
+      <rect x="460" y="92" width="280" height="180" fill="#F0FDF4" stroke="#15803D" stroke-width="2" rx="6"/>
+      <text x="475" y="115" class="donut-text" font-weight="700" fill="#14532D">POSITIVE</text>
+      <text x="475" y="138" class="donut-text" font-size="11">(LOH + CN) − HP = ?</text>
+      <text x="475" y="158" class="donut-num" font-size="13">= 0.038 + 0.211 − 0.063</text>
+      <text x="475" y="180" class="donut-num" font-size="18" fill="#15803D">= +0.186</text>
+      <text x="475" y="202" class="donut-text" font-size="11">vs threshold ≥ 0.05</text>
+      <text x="475" y="220" class="donut-num" font-size="13" fill="#15803D">= 3.7× threshold ✓</text>
+      <text x="475" y="246" class="donut-text" font-size="11" font-style="italic">CN 軸 (0.211)</text>
+      <text x="475" y="262" class="donut-text" font-size="11" font-style="italic">= 3.3× HP 軸 (0.063)</text>
+
+      <!-- Note -->
+      <text x="380" y="305" text-anchor="middle" class="donut-text" font-size="11" font-style="italic">chr8 FP hotspot 由 CN + AF 主導；HP / LOH 次要。Sample-specific (HCC1395)，不可泛化。</text>
+    </svg>
+    <figcaption><span class="fig-label">Fig 3.</span> chr8 4-axis LR deviance decomposition donut。caller_af 主導 (0.393)，CN 次之 (0.211)，HP 與 LOH 合計僅 0.101 — 量化證實 chr8 FP hotspot 由 CN + AF 機制驅動。</figcaption>
+  </figure>
+
+  <h3>7.4 H5 — Z-AUTO Jaccard (NEGATIVE)</h3>
+  <ul>
+    <li>Z-AUTO 在 top 5% positions 捕獲 25.1% 全 FP (FP_enrichment 5.02×)</li>
+    <li>Jaccard with known-zone union = <strong>0.184</strong> &lt;&lt; 0.60 → <strong>H5 NEGATIVE</strong></li>
+    <li><strong>~70% Z-AUTO 在 known zones 外</strong> → novel FP mechanism lacks LOH/HP/CN signature</li>
+    <li>暗示需要新軸：mappability, repeat context, GC bias, structural variants</li>
+  </ul>
+
+  <h3>7.5 SEQC2 KDE validation</h3>
+  <p>Z-GL 內 KDE-corrected Coverage_Multiple 與 SEQC2 CN 單調對應（CN=3 → 1.34，CN=8 → 2.08），確認 KDE binary 校正（commits <code>374fad4</code> + <code>12d9b3e</code>）。</p>
+
+  <!-- ─── §8 Step 4 ─── -->
+  <h2 id="step4"><span class="h-num">§8</span>Step 4 — 4 樣本擴展 (n = 5 含 HCC1395)</h2>
+
+  <h3>8.1 Per-sample master TSV 建構</h3>
+  <table>
+    <thead>
+      <tr><th>Sample</th><th class="num">rows</th><th class="num">TP</th><th class="num">FP</th><th class="num">Join rate</th><th class="num">FP_joined</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>HCC1395 (Step 1)</td><td class="num">35,332</td><td class="num">30,490</td><td class="num">4,842</td><td class="num">85.0%</td><td class="num">10.5%</td></tr>
+      <tr><td>H1437</td><td class="num">70,964</td><td class="num">70,191</td><td class="num">773</td><td class="num">95.1%</td><td class="num">1.0%</td></tr>
+      <tr><td>H2009</td><td class="num">136,701</td><td class="num">135,359</td><td class="num">1,342</td><td class="num">97.3%</td><td class="num">1.6%</td></tr>
+      <tr><td>HCC1954</td><td class="num">20,136</td><td class="num">19,449</td><td class="num">687</td><td class="num">89.1%</td><td class="num">4.2%</td></tr>
+      <tr><td>HCC1937</td><td class="num">16,607</td><td class="num">13,910</td><td class="num">2,697</td><td class="num">75.8%</td><td class="num">7.2%</td></tr>
+    </tbody>
+  </table>
+  <p class="muted"><strong>FP join rate 跨樣本只 1-7%</strong>（vs TP 89-97%）— phaseD VCF 是 paired-pileup mode 但 master.tsv 是 paired_full mode，不對稱。</p>
+
+  <h3>8.2 Wilcoxon n=5 唯一 signature candidate</h3>
+  <table>
+    <thead>
+      <tr><th>Cell</th><th>Direction concordance</th><th>Wilcoxon p</th><th>Δ (mean)</th><th>per-sample TP rate</th></tr>
+    </thead>
+    <tbody>
+      <tr class="row-safe"><td class="mono"><strong>Outer | other | cov_high_gain</strong></td><td class="center"><strong>5/5 above global</strong></td><td class="mono"><strong>0.0625</strong> (n=5 exact min)</td><td class="mono"><strong>+0.0069</strong></td><td class="mono">全 5 樣本 = 1.000</td></tr>
+    </tbody>
+  </table>
+
+  <!-- SVG 7 — Cross-sample dotplot -->
+  <figure class="svg-figure">
+    <svg viewBox="0 0 760 280" role="img" aria-labelledby="svg7-title svg7-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="svg7-title">Cross-sample (n=5) signature candidate cell TP rate dotplot</title>
+      <desc id="svg7-desc">Dotplot showing 5 samples all hitting TP rate 1.000 in Outer|other|cov_high_gain</desc>
+      <style>
+        .dp-text { fill: #141413; font: 11px var(--ff-body); }
+        .dp-title { fill: #141413; font: 13px var(--ff-body); font-weight: 700; }
+        .dp-axis { stroke: #6B6B66; stroke-width: 1.2; }
+        .dp-dot { fill: #15803D; }
+        .dp-dot-global { fill: #6B6B66; }
+        .dp-line-cand { stroke: #15803D; stroke-width: 2; stroke-dasharray: 6 3; }
+      </style>
+      <text x="380" y="22" text-anchor="middle" class="dp-title">Cross-sample (n=5) cell: Outer | other | cov_high_gain</text>
+      <text x="380" y="42" text-anchor="middle" class="dp-text" font-style="italic">All 5 samples TP rate = 1.000 (Δ = +0.0069 from global; Wilcoxon p = 0.0625)</text>
+
+      <!-- Y axis: TP rate 0.97 to 1.005 -->
+      <line x1="120" y1="70" x2="120" y2="220" class="dp-axis"/>
+      <text x="100" y="74" text-anchor="end" class="dp-text">1.000</text>
+      <text x="100" y="124" text-anchor="end" class="dp-text">0.990</text>
+      <text x="100" y="174" text-anchor="end" class="dp-text">0.980</text>
+      <text x="100" y="220" text-anchor="end" class="dp-text">0.970</text>
+      <text x="80" y="145" text-anchor="middle" class="dp-text" font-weight="600" transform="rotate(-90 80 145)">TP rate</text>
+
+      <!-- X axis -->
+      <line x1="120" y1="220" x2="700" y2="220" class="dp-axis"/>
+
+      <!-- 5 samples × 2 dots (global + candidate cell) -->
+      <!-- Global TP rates: HCC1395 0.9832, H1437 0.9999, H2009 0.9994, HCC1954 0.9984, HCC1937 0.9845 -->
+      <!-- Candidate cell: all 1.000 → y=70 -->
+      <!-- Scale: y = 70 + (1.0 - rate)/0.03 * 150; so 0.97 → y=70+150=220 -->
+
+      <!-- HCC1395 -->
+      <g transform="translate(170, 0)">
+        <text x="0" y="245" text-anchor="middle" class="dp-text" font-weight="600">HCC1395</text>
+        <text x="0" y="259" text-anchor="middle" class="dp-text" font-size="9">n=33</text>
+        <circle cx="0" cy="155.8" r="8" class="dp-dot-global"/>
+        <text x="0" y="148" text-anchor="middle" class="dp-text" font-size="9" fill="#6B6B66">0.983</text>
+        <circle cx="0" cy="70" r="10" class="dp-dot"/>
+        <text x="0" y="62" text-anchor="middle" class="dp-text" font-size="10" fill="#15803D" font-weight="700">1.000</text>
+        <line x1="0" y1="78" x2="0" y2="148" stroke="#15803D" stroke-width="1" stroke-dasharray="2 2"/>
+      </g>
+
+      <!-- H1437 -->
+      <g transform="translate(275, 0)">
+        <text x="0" y="245" text-anchor="middle" class="dp-text" font-weight="600">H1437</text>
+        <text x="0" y="259" text-anchor="middle" class="dp-text" font-size="9">n=11</text>
+        <circle cx="0" cy="74.5" r="8" class="dp-dot-global"/>
+        <text x="20" y="78" class="dp-text" font-size="9" fill="#6B6B66">0.9999</text>
+        <circle cx="0" cy="70" r="10" class="dp-dot"/>
+        <text x="0" y="62" text-anchor="middle" class="dp-text" font-size="10" fill="#15803D" font-weight="700">1.000</text>
+      </g>
+
+      <!-- H2009 -->
+      <g transform="translate(380, 0)">
+        <text x="0" y="245" text-anchor="middle" class="dp-text" font-weight="600">H2009</text>
+        <text x="0" y="259" text-anchor="middle" class="dp-text" font-size="9">n=1587</text>
+        <circle cx="0" cy="73" r="8" class="dp-dot-global"/>
+        <text x="20" y="78" class="dp-text" font-size="9" fill="#6B6B66">0.9994</text>
+        <circle cx="0" cy="70" r="10" class="dp-dot"/>
+        <text x="0" y="62" text-anchor="middle" class="dp-text" font-size="10" fill="#15803D" font-weight="700">1.000</text>
+      </g>
+
+      <!-- HCC1954 -->
+      <g transform="translate(485, 0)">
+        <text x="0" y="245" text-anchor="middle" class="dp-text" font-weight="600">HCC1954</text>
+        <text x="0" y="259" text-anchor="middle" class="dp-text" font-size="9">n=186</text>
+        <circle cx="0" cy="78" r="8" class="dp-dot-global"/>
+        <text x="20" y="82" class="dp-text" font-size="9" fill="#6B6B66">0.9984</text>
+        <circle cx="0" cy="70" r="10" class="dp-dot"/>
+        <text x="0" y="62" text-anchor="middle" class="dp-text" font-size="10" fill="#15803D" font-weight="700">1.000</text>
+      </g>
+
+      <!-- HCC1937 (outlier) -->
+      <g transform="translate(590, 0)">
+        <text x="0" y="245" text-anchor="middle" class="dp-text" font-weight="600">HCC1937</text>
+        <text x="0" y="259" text-anchor="middle" class="dp-text" font-size="9">n=34</text>
+        <circle cx="0" cy="147.5" r="8" class="dp-dot-global"/>
+        <text x="20" y="151" class="dp-text" font-size="9" fill="#6B6B66">0.9845</text>
+        <circle cx="0" cy="70" r="10" class="dp-dot"/>
+        <text x="0" y="62" text-anchor="middle" class="dp-text" font-size="10" fill="#15803D" font-weight="700">1.000</text>
+        <line x1="0" y1="78" x2="0" y2="140" stroke="#15803D" stroke-width="1" stroke-dasharray="2 2"/>
+      </g>
+
+      <!-- Reference line at 1.000 -->
+      <line x1="120" y1="70" x2="700" y2="70" class="dp-line-cand"/>
+      <text x="710" y="74" class="dp-text" font-size="10" fill="#15803D">candidate</text>
+
+      <!-- Legend -->
+      <g transform="translate(120, 270)">
+        <circle cx="0" cy="-4" r="6" class="dp-dot"/>
+        <text x="10" y="0" class="dp-text" font-size="10">candidate cell (Outer|other|cov_high_gain)</text>
+        <circle cx="280" cy="-4" r="6" class="dp-dot-global"/>
+        <text x="290" y="0" class="dp-text" font-size="10">global sample-wide TP rate</text>
+      </g>
+    </svg>
+    <figcaption><span class="fig-label">Fig 7.</span> Signature candidate cell — 5 樣本一致 TP rate=1.000，但 effect size 極小 (+0.0069)。HCC1395 與 HCC1937 較分散，H1437/H2009/HCC1954 因 global TP rate ≥ 0.998 而 ceiling effect 嚴重。</figcaption>
+  </figure>
+
+  <p><strong>Effect size 極小</strong> (+0.0069) — H1437/H2009/HCC1954 global TP rate ≥ 0.998 caller 已近完美 → <strong>ceiling effect 嚴重限制 cross-sample signature 強度</strong>。</p>
+  <p><strong>Sensitivity</strong> (n=4 排除 HCC1937)：同樣 1 candidate → HCC1937 不驅動 candidate ✓</p>
+
+  <h3>8.3 HCC1937 BRCA1 outlier 分析</h3>
+  <ul>
+    <li><strong>chr15 / chr17 / chr14</strong> 為 driver chromosomes (FP rate 3.2-4.3%)</li>
+    <li><strong>chr17 FP 不專屬 HCC1937</strong> — HCC1395 也是 chr17 FP rate 最高 (0.0430) → BRCA1 / TP53 region issue 是 HCC1395 + HCC1937 兩樣本共有</li>
+    <li>Top outlier cell <code>Inner|same_HP1|cov_normal</code>: HCC1937 TP=0.300 vs others 0.998 (z = −362, n = 10, FP = 7 underpowered)</li>
+  </ul>
+
+  <!-- ─── §9 Framework coverage gap ─── -->
+  <h2 id="coverage-gap"><span class="h-num">§9</span>Framework Coverage Gap — 63% FP 未被解釋</h2>
+
+  <!-- SVG 6 — FP coverage waterfall -->
+  <figure class="svg-figure">
+    <svg viewBox="0 0 760 320" role="img" aria-labelledby="svg6-title svg6-desc" xmlns="http://www.w3.org/2000/svg">
+      <title id="svg6-title">HCC1395 FP coverage waterfall: 100% → unexplained 63%</title>
+      <desc id="svg6-desc">Waterfall chart showing FP capture by Z-CHR8 and Z-AUTO, with residual unexplained portion in red</desc>
+      <style>
+        .wf-text { fill: #141413; font: 11px var(--ff-body); }
+        .wf-title { fill: #141413; font: 13px var(--ff-body); font-weight: 700; }
+        .wf-num { fill: white; font: 12px var(--ff-mono); font-weight: 700; }
+        .wf-axis { stroke: #6B6B66; stroke-width: 1.2; }
+        .wf-zchr8 { fill: #A16207; }
+        .wf-zauto { fill: #C2410C; }
+        .wf-resid { fill: #DC2626; }
+        .wf-baseline { fill: #6B6B66; }
+        .wf-arrow { stroke: #6B6B66; stroke-width: 1.2; fill: none; marker-end: url(#wfarrow); }
+      </style>
+      <defs>
+        <marker id="wfarrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#6B6B66"/>
+        </marker>
+      </defs>
+
+      <text x="380" y="22" text-anchor="middle" class="wf-title">HCC1395 FP coverage waterfall — total 4,842 FP</text>
+
+      <!-- Y axis -->
+      <line x1="100" y1="60" x2="100" y2="250" class="wf-axis"/>
+      <line x1="100" y1="250" x2="700" y2="250" class="wf-axis"/>
+      <g class="wf-text">
+        <text x="92" y="65" text-anchor="end">100%</text>
+        <text x="92" y="103" text-anchor="end">80%</text>
+        <text x="92" y="140" text-anchor="end">60%</text>
+        <text x="92" y="178" text-anchor="end">40%</text>
+        <text x="92" y="216" text-anchor="end">20%</text>
+        <text x="92" y="253" text-anchor="end">0%</text>
+      </g>
+
+      <!-- Bar 1: Total FP 100% (height 188) -->
+      <rect x="130" y="62" width="100" height="188" class="wf-baseline"/>
+      <text x="180" y="155" text-anchor="middle" class="wf-num" font-size="13">100%</text>
+      <text x="180" y="173" text-anchor="middle" class="wf-num" font-size="11">(4,842)</text>
+      <text x="180" y="270" text-anchor="middle" class="wf-text" font-weight="600">Total FP</text>
+
+      <!-- Arrow → -->
+      <line x1="240" y1="155" x2="270" y2="155" class="wf-arrow"/>
+
+      <!-- Bar 2: minus Z-CHR8 = 20%; remaining 80% (height 150) -->
+      <rect x="280" y="99" width="100" height="151" class="wf-baseline" opacity="0.6"/>
+      <rect x="280" y="62" width="100" height="37" class="wf-zchr8"/>
+      <text x="330" y="84" text-anchor="middle" class="wf-num" font-size="11">−20.0%</text>
+      <text x="330" y="180" text-anchor="middle" class="wf-num" font-size="13">80%</text>
+      <text x="330" y="196" text-anchor="middle" class="wf-num" font-size="11">remain</text>
+      <text x="330" y="270" text-anchor="middle" class="wf-text" font-weight="600">− Z-CHR8</text>
+      <text x="330" y="284" text-anchor="middle" class="wf-text" font-size="10">(967 FP)</text>
+
+      <!-- Arrow → -->
+      <line x1="390" y1="155" x2="420" y2="155" class="wf-arrow"/>
+
+      <!-- Bar 3: minus Z-AUTO unique = 17% (only non-chr8 Z-AUTO); remaining 63% (height 118.4) -->
+      <rect x="430" y="131" width="100" height="119" class="wf-baseline" opacity="0.6"/>
+      <rect x="430" y="99" width="100" height="32" class="wf-zauto"/>
+      <text x="480" y="120" text-anchor="middle" class="wf-num" font-size="11">−17%</text>
+      <text x="480" y="190" text-anchor="middle" class="wf-num" font-size="13">63%</text>
+      <text x="480" y="206" text-anchor="middle" class="wf-num" font-size="11">remain</text>
+      <text x="480" y="270" text-anchor="middle" class="wf-text" font-weight="600">− Z-AUTO unique</text>
+      <text x="480" y="284" text-anchor="middle" class="wf-text" font-size="10">(~850 non-chr8 FP)</text>
+
+      <!-- Arrow → -->
+      <line x1="540" y1="180" x2="570" y2="180" class="wf-arrow"/>
+
+      <!-- Bar 4: Unexplained 63% (height 118.4) — HIGHLIGHTED RED -->
+      <rect x="580" y="131" width="100" height="119" class="wf-resid" stroke="#7F1D1D" stroke-width="3"/>
+      <text x="630" y="180" text-anchor="middle" class="wf-num" font-size="20">63%</text>
+      <text x="630" y="202" text-anchor="middle" class="wf-num" font-size="11">unexplained</text>
+      <text x="630" y="270" text-anchor="middle" class="wf-text" font-weight="700" fill="#7F1D1D">~3,000 FP</text>
+      <text x="630" y="284" text-anchor="middle" class="wf-text" font-size="10" fill="#7F1D1D">需新軸 (mappability / repeat / GC / SV)</text>
+
+      <!-- Legend -->
+      <g transform="translate(130, 308)">
+        <rect x="0" y="-9" width="14" height="10" class="wf-baseline"/>
+        <text x="20" y="0" class="wf-text" font-size="10">FP residual</text>
+        <rect x="100" y="-9" width="14" height="10" class="wf-zchr8"/>
+        <text x="120" y="0" class="wf-text" font-size="10">Z-CHR8 captured (CN-driven, sample-specific)</text>
+        <rect x="370" y="-9" width="14" height="10" class="wf-zauto"/>
+        <text x="390" y="0" class="wf-text" font-size="10">Z-AUTO unique (KDE, mechanism unknown)</text>
+      </g>
+    </svg>
+    <figcaption><span class="fig-label">Fig 6.</span> Z-CHR8 (20.0%) + Z-AUTO unique (17.0%) ≈ 37% 全 FP 解釋；剩 <strong>63%</strong> 缺乏 LOH / HP / CN signature（紅框）。這是本 framework 的主要限制。</figcaption>
+  </figure>
+
+  <div class="callout callout-critical">
+    <p><strong>結論</strong>：本 framework 在 HCC1395 paired-pileup 上的 FP 解釋率為 ~37%。要解釋剩餘 63% 需引入新軸：mappability score、repeat context、GC bias、SV proximity。這也定義了下一輪 cycle 的方向。</p>
+  </div>
+
+  <!-- ─── §10 Limitations ─── -->
+  <h2 id="limitations"><span class="h-num">§10</span>Limitations</h2>
+
+  <ol>
+    <li><strong>Master-join FP loss ~90%</strong>：paired-pileup VCF 與 paired_full master.tsv 不對稱 (4,842 → 506 FP master-joined)。Step 3 用全 FP set 重測 H3 已 mitigate，但 LOH/CN annotation 限制了 FP 子空間分析</li>
+    <li><strong>Ceiling effect 主導</strong>：global TP rate 0.983 (HCC1395 paired-pileup) → effect size 物理上難 &gt; 0.02</li>
+    <li><strong>HP1/HP2 asymmetry 為 design choice 非 bug</strong>：V6 重用 V5 phased VCF 殘留 hp_1_1:hp_2_1 ratio 1.838 → Guard 7 失敗為預期</li>
+    <li><strong>Z-CHR8 sample-specific</strong>：HCC1395 chr8 大型 gain+LOH 是已知 sample 特性（Memory <code>project_hcc1395_chr8_hotspot.md</code>），不可泛化</li>
+    <li><strong>COLO829 deferred</strong>：truth set 0600 權限阻塞，Step 4 為 n=5 而非完整 7 樣本</li>
+    <li><strong>3 軸 grid effective dim ≈ 2.5-3</strong>：caller_af 與 LOH inner/outer 高相關 (Cramér's V 0.610)；改用 covariate 控制部分緩解但非完全</li>
+    <li><strong>未測 methylation 軸</strong>：本 framework 不含甲基化特徵；ROCIT prior art 顯示 methylation read pattern 是獨立軸</li>
+    <li><strong>paired vs TO mode 限定 paired-pileup</strong>：phaseC 僅 HCC1395 paired-pileup；TO mode 三向對照需另獨立做</li>
+  </ol>
+
+  <!-- ─── §11 升 ⭐4 路徑 ─── -->
+  <h2 id="path-to-4star"><span class="h-num">§11</span>升 ⭐4 路徑</h2>
+
+  <h3 class="pos-tag">11.1 Z-AUTO 跨樣本驗證（高優先）</h3>
+  <p>對 4 樣本各自跑 KDE FP-density top 5%，看 Z-AUTO 密度機制是否 recur（即使 positions 不同）。若 recur → 升 ⭐4 cross-sample emergent FP signature。</p>
+
+  <h3 class="pos-tag">11.2 加新軸測 ~63% FP（高優先）</h3>
+  <ul>
+    <li>Mappability score (per-region)</li>
+    <li>Repeat context (RepeatMasker overlap)</li>
+    <li>GC bias (per-region)</li>
+    <li>Structural variant proximity (SAVANA SV-call distance)</li>
+  </ul>
+  <p>這 4 軸可能解釋 Z-AUTO 機制 + 63% unexplained FP。</p>
+
+  <h3>11.3 加 methylation 軸（中優先）</h3>
+  <p>本研究只用 HP tag + caller AF + LOH/CN，未用 methylation distance matrix（ROCIT prior art 的核心特徵）。在 powered cells 內加 ASM delta + methylation cluster ID covariate 看是否解釋 unexplained FP。</p>
+
+  <h3>11.4 COLO829 補入（低優先，依權限）</h3>
+  <p>COLO829 truth set 解 0600 權限後補入 Step 4 → n=6 Wilcoxon exact min p=0.0313（更嚴格 threshold）。</p>
+
+  <h3>11.5 V6 production tag finalize (CURRENT_FOCUS W3)</h3>
+  <p>本 cycle 確認 V6 marker coverage +9% 與 caller F1 不變，可作 V5 → V6 production 升級依據（PI errata 待 W3 末打包）。</p>
+
+  <!-- ─── §12 References ─── -->
+  <section class="references" id="refs">
+    <h2><span class="h-num">§12</span>檔案索引 &amp; 證據鏈</h2>
+
+    <h3>12.1 計畫與方法</h3>
+    <ul>
+      <li><code>InterSubMod/research/v6_bam_tpfp_hp_loh_cn/00_PLAN.md</code> — 計畫書 v0.3</li>
+      <li><code>InterSubMod/research/v6_bam_tpfp_hp_loh_cn/01_data_provenance.md</code> — 資料來源</li>
+      <li><code>InterSubMod/research/v6_bam_tpfp_hp_loh_cn/02_methodology_notes.md</code> — 方法學</li>
+      <li><code>InterSubMod/research/v6_bam_tpfp_hp_loh_cn/02_prior_art_notes.md</code> — Agent D prior art (ROCIT / TumorLens / SGZ / Wakhan / SAVANA)</li>
+    </ul>
+
+    <h3>12.2 Step 1 — V3F / V5 / V6 三向</h3>
+    <ul>
+      <li><code>InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/step1_findings.md</code></li>
+      <li><code>step1_master_three_way.tsv</code> (9.3 MB, 35,332 rows × 64 cols)</li>
+      <li><code>step1_delta_v5_vs_v3f.tsv</code> / <code>step1_delta_v6_vs_v5.tsv</code> / <code>step1_delta_v6_vs_v3f.tsv</code></li>
+      <li><code>step1_trajectory.tsv</code> (5-class A-E)</li>
+      <li><code>step1_off_vs_on_compare.tsv</code></li>
+      <li><code>step1_summary_stats.json</code></li>
+      <li><code>figures/step1/{step1_three_panel_heatmap,step1_delta_heatmap,step1_trajectory_sankey}.png</code></li>
+    </ul>
+
+    <h3>12.3 Step 1.5 + 2 — power gate + 50-cell grid + LR + 7-guard</h3>
+    <ul>
+      <li><code>InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step2_three_axis_grid/power_dry_run.md</code></li>
+      <li><code>InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step2_three_axis_grid/step2_findings.md</code></li>
+      <li><code>step2_grid_3d.tsv</code> / <code>step2_trajectory_per_cell.tsv</code> / <code>step2_top_lists.tsv</code></li>
+      <li><code>step2_confound_guard.tsv</code> / <code>step2_marginal_vs_observed.tsv</code></li>
+      <li><code>step2_power_curve.png</code> / <code>step2_facets.png</code></li>
+    </ul>
+
+    <h3>12.4 Step 3 — 4 FP zone deep dive</h3>
+    <ul>
+      <li><code>InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step3_fp_zone_zoom/step3_synthesis.md</code></li>
+      <li>4 zone 子目錄各含 <code>zone_findings.md</code> + <code>zone_summary.tsv</code> + <code>zone_grid.tsv</code> + <code>zone_three_version_trajectory.tsv</code> + <code>zone_confound_guards.tsv</code></li>
+      <li><code>figures/step3_zone_enrichment.png</code> / <code>figures/step3_per_chr_fp_rate.png</code></li>
+      <li><code>step3_cross_zone_summary.tsv</code> / <code>step3_jaccard_overlap.tsv</code> / <code>step3_verdicts.json</code></li>
+    </ul>
+
+    <h3>12.5 Step 4 — 4 樣本擴展</h3>
+    <ul>
+      <li><code>InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step4_cross_sample_extension/step4_findings.md</code></li>
+      <li><code>step4_signature_candidates.md</code> / <code>step4_HCC1937_outlier_analysis.md</code></li>
+      <li><code>step4_per_sample_grid.tsv</code> / <code>step4_consistency.tsv</code></li>
+      <li>4 樣本 per-sample master TSV 與 grid</li>
+      <li><code>figures/{sample}_facets.png</code> × 4</li>
+    </ul>
+
+    <h3>12.6 上游證據鏈</h3>
+    <ul>
+      <li><code>InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md</code></li>
+      <li><code>InterSubMod/docs/reports/validated/2026/04/20260426_Thread_D_LOH_constrained_phasing_main_axis_01.md</code></li>
+      <li><code>InterSubMod/research/paired_priority_bug_audit/07_V6_validation_findings.md</code></li>
+      <li><code>InterSubMod/research/paired_priority_bug_audit/08_phaseD_v6_cross_sample_findings.md</code></li>
+      <li><code>InterSubMod/research/paired_priority_bug_audit/09_V6_caller_F1_verification.md</code></li>
+    </ul>
+
+    <h3>12.7 Source markdown</h3>
+    <ul>
+      <li><code>InterSubMod/docs/experiments/in_progress/2026/05/20260515_V6_TPFP_HP_LOH_CN_Characterization_01.md</code> — source of truth for this standalone HTML</li>
+    </ul>
+  </section>
+
+</main>
+</div>
+
+</body>
+</html>
