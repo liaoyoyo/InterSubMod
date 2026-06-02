@@ -164,3 +164,61 @@ def score_locus(D, spos):
                            if coh.get("1-1") is not None and coh.get("1") is not None else None),
         "cis": ct,
     }
+
+
+# ---- P1: BAM-direct Level-1-plus (mod-type-aware: 5mC / 5hmC separated) ----
+
+def load_level1_plus(path):
+    """BAM-direct Level-1-plus (stage_extract output, with mod_code column) ->
+    Dp[spos][(bam,hp,allele)][cpg][read_id] = {'m': call, 'h': call}."""
+    Dp = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+    op = gzip.open if str(path).endswith(".gz") else open
+    with op(path, "rt") as f:
+        hdr = f.readline().rstrip("\n").split("\t")
+        ix = {c: i for i, c in enumerate(hdr)}
+        for col in ("somatic_pos", "bam_source", "haplotype_tag", "somatic_allele_type",
+                    "methyl_pos", "read_id", "mod_code", "meth_call"):
+            if col not in ix:
+                raise KeyError(f"Level-1-plus missing column {col!r} in {path}")
+        for line in f:
+            p = line.rstrip("\n").split("\t")
+            try:
+                mc = float(p[ix["meth_call"]])
+            except (ValueError, IndexError):
+                continue
+            cell = Dp[p[ix["somatic_pos"]]][(p[ix["bam_source"]], p[ix["haplotype_tag"]],
+                                             p[ix["somatic_allele_type"]])][p[ix["methyl_pos"]]]
+            cell.setdefault(p[ix["read_id"]], {})[p[ix["mod_code"]]] = mc
+    return Dp
+
+
+def dbeta_mod(Dp, spos, mode, germ_hps=("1",), som_hps=("1-1",), bam="tumor"):
+    """paired per-CpG Δβ under a mod policy. mode: 'm'(5mC) / 'h'(5hmC) / 'any'(max per read).
+    INVARIANT: dbeta_mod(any) on the BAM-direct substrate == dbeta_axis(HP) on MSA Level-1
+    (cross-extractor consistency; if it diverges, the extractor is broken)."""
+    germ_hps = set(germ_hps)
+    som_hps = set(som_hps)
+
+    def beta_cpg(hps):
+        bycpg = defaultdict(dict)
+        for (b, hp, al), cpgd in Dp[spos].items():
+            if b != bam or hp not in hps:
+                continue
+            for cpg, rd in cpgd.items():
+                for rid, modd in rd.items():
+                    if mode == "any":
+                        v = max(modd.get("m", 0.0), modd.get("h", 0.0))
+                    elif mode in modd:
+                        v = modd[mode]
+                    else:
+                        continue
+                    bycpg[cpg][rid] = v
+        return {c: (float(np.mean([1 if x >= THR else 0 for x in d.values()])), len(d))
+                for c, d in bycpg.items()}
+
+    G = beta_cpg(germ_hps)
+    S = beta_cpg(som_hps)
+    sh = [c for c in set(G) & set(S) if G[c][1] >= MIN_N and S[c][1] >= MIN_N]
+    if len(sh) < MIN_PAIR:
+        return None
+    return round(float(np.mean([S[c][0] - G[c][0] for c in sh])), 3)

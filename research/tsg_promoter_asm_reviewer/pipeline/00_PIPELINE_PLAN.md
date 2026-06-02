@@ -37,8 +37,8 @@ pipeline/
 
 | Phase | 內容 | 狀態 | exit |
 |-------|------|------|------|
-| **P0 地基** | pipeline/ + lib + loci.yaml + **BRCA2 regression test** | ✅ **完成** | `make test` PASS；故意 break(min-collapse)→7/7 FAIL ✓ |
-| P1 抽取 substrate | BAM-direct extractor（mod_code 欄）+ Level-1 持久化 cache | TODO | BRCA2 5mC-only Δβ=−0.121；cache HIT 不重抽 |
+| **P0 地基** | pipeline/ + lib + loci.yaml + **BRCA2 regression test** | ✅ **完成** (99f052d) | `make test` PASS；故意 break(min-collapse)→7/7 FAIL ✓ |
+| **P1 抽取 substrate** | `stages/stage_extract.py`（BAM-direct，mod_code 欄，window-restricted）+ Level-1-plus 持久化 cache + `lib` 加 load_level1_plus/dbeta_mod | ✅ **完成** | `test_brca2_bam_extract` PASS：5mC=−0.121 / 5hmC=−0.001 / **any=−0.122==Level-1(cross-extractor invariant)** / cache MISS→HIT ✓ |
 | P2 cis-core + LOH/CNV | cis 欄 genome-wide + cis-ladder T0-T3 + 整數 CN + axis-gate(HP nonLOH-only) | TODO | HP-axis 100% nonLOH；BRCA2 CN=5 |
 | P3 scan + causation | two-stage scan + ranking + 證據卡 + mechanical-cis + (pooled 轉換 signature) | TODO | scan grep 到 BRCA2；het-null 落 T0/T1 |
 | P4 持續驗證閉環 | git-diff hook（advisory exit-0）+ provenance manifest | TODO | 編輯 stage 觸發 advisory |
