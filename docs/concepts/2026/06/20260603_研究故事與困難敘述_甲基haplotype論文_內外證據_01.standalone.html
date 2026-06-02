@@ -94,6 +94,7 @@ tr.row-bug td { background: #FEF2F0; } tr.row-safe td { background: #F0FDF4; } t
     <li><a href="#s5">錨點 BRCA2</a></li>
     <li><a href="#s6">現在判斷</a></li>
     <li><a class="core" href="#s7">內部 × 外部證據</a></li>
+    <li><a class="core" href="#s7b">工具地景 vs ISM</a></li>
     <li><a href="#s8">前路</a></li>
     <li><a href="#refs">參考文獻</a></li>
   </ol>
@@ -206,15 +207,34 @@ tr.row-bug td { background: #FEF2F0; } tr.row-safe td { background: #F0FDF4; } t
 <table>
 <thead><tr><th>#</th><th>主題</th><th>內部發現 <span class="tier l12">L1-L2</span></th><th>外部佐證 <span class="tier l3">L3</span></th><th>誠實不對齊 / caveat</th></tr></thead>
 <tbody>
-<tr class="row-safe"><td>C3</td><td>tumor 5mC 混亂</td><td>read-level 稀疏、難定位一致位點</td><td>Derrien21 <span class="rel sup">sup</span> · Landan12 <span class="rel sup">sup</span> · Russo21 <span class="rel sup">sup</span></td><td>✅ 最強；外部 bisulfite 短讀，口徑不同</td></tr>
+<tr class="row-safe"><td>C3</td><td>tumor 5mC 混亂</td><td>read-level 稀疏、難定位一致位點</td><td>Rossi25 <span class="rel sup">sup</span> · Lin21 <span class="rel sup">sup</span> · Derrien21 <span class="rel sup">sup</span> · Landan12 <span class="rel sup">sup</span></td><td>✅ 最強（跨 ≥4 癌種+2025 新證）；全 bisulfite 短讀，口徑不同</td></tr>
 <tr class="row-safe"><td>C5</td><td>5mC vs 5hmC</td><td>混合曾砍半 β；未分軌</td><td>Haffner11 <span class="rel sup">sup</span> · Chen15 <span class="rel sup">sup</span> · Halliwell25 <span class="rel sup">sup</span></td><td>✅ 雙層（生物解耦＋nanopore 會混淆）→「未分軌」是外部支持的真實 gap</td></tr>
 <tr class="row-safe"><td>C6</td><td>LOH/CN de-confound</td><td>strong-ASM=LOH→低覆蓋回歸極值；HP-axis held-constant CN（ρ=−0.055）</td><td>Martin-Trujillo17 <span class="rel sup">sup</span> · Abante20 <span class="rel sup">sup</span></td><td>⚠ <b>新 caveat</b>：CNN-LOH（copy-neutral）不降覆蓋卻仍單倍型化 → 應分 CNN vs CNL-LOH</td></tr>
 <tr class="row-warn"><td>C1</td><td>BRCA2 錨點</td><td>Δβ=−0.122 cis-driven（<b>hypo</b>）</td><td>Fishchuk24 <span class="rel sup">sup</span> · Evans18 <span class="rel par">par</span></td><td>⚠ 外部 hyper→沉默；BRCA2 證據薄；未測表現</td></tr>
 <tr><td>C2</td><td>ASM in cancer</td><td>somatic-controlled HP-axis；稀有 0.34% 無方向</td><td>O'Neill24 <span class="rel par">par</span> · Do20 <span class="rel con">contradicts</span></td><td>⚠ 外部 ASM 增 5×、hypo 為主——口徑不同（germline/region vs 我們 somatic-controlled），不對齊正凸顯我們方法乾淨</td></tr>
-<tr><td>C4</td><td>ISM 工具定位</td><td>read-read 距離 + subclonal + LOH 耦合</td><td>MethPhaser24 <span class="rel par">par</span> · O'Neill24 <span class="rel sup">sup</span></td><td>⚠ 多數工具因果相反（從甲基推 HP）；ISM 的 read-read 距離 niche 未被填</td></tr>
+<tr><td>C4</td><td>ISM 工具定位</td><td>read-read 距離 + subclonal + LOH 耦合</td><td>MethPhaser24 <span class="rel par">par</span> · O'Neill24 <span class="rel sup">sup</span> · methclone/Epihet（量 disorder，見 §7B）</td><td>⚠ 工具因果相反（從甲基推 HP）或量 epipolymorphism（disorder）；ISM 的 haplotype-linked read-read 距離 niche 未被填</td></tr>
 </tbody>
 </table>
 <div class="callout-warning"><b>這張表怎麼用</b>：最硬的對外故事 = <b>C3 + C5 + C6</b>（外部強佐證困難真實、該分軌、CN de-confound 必要）；C1 講錨點必帶方向與表現的誠實 caveat；<b>C2 的反例（Do 2020）要主動講</b>——把「我們為何只看到稀有殘餘」歸因於 HP-axis 把 germline allelic methylation 與 CN held-constant。主動講反例 = 防守最硬的一招。</div>
+
+<!-- S7B -->
+<h2 id="s7b"><span class="h-num">7B</span>工具地景：epipolymorphism（methclone/Epihet）vs ASM（ISM）★</h2>
+<p><b>核心釐清</b>：epipolymorphism 量「<b>失序 disorder</b>」（一個位點內部多亂）≠ ISM 量「<b>結構/一致性 structure</b>」（read 是否一致於 haplotype/somatic）。這定義了 ISM 的差異化 niche。</p>
+<table>
+<thead><tr><th>維度</th><th>methclone / Epihet</th><th>ISM（InterSubMod）</th></tr></thead>
+<tbody>
+<tr><td>量什麼</td><td>epipolymorphism / 組合熵（位點內失序度）</td><td>read×CpG 矩陣 + read-read 距離 + 分群（結構一致性）</td></tr>
+<tr><td>核心問題</td><td>位點多亂 / 兩樣本 clonality 變化（<b>disorder</b>）</td><td>read 是否一致於 haplotype/somatic（<b>cis-driven ASM</b>）</td></tr>
+<tr><td>平台</td><td>bisulfite 短讀</td><td><b>ONT 長讀</b>（modBAM MM/ML）</td></tr>
+<tr><td>位點</td><td>固定 4 相鄰 CpG（~72bp）</td><td>範圍內全 CpG（長 read 跨 kb）</td></tr>
+<tr class="row-safe"><td>haplotype/SNV 連結</td><td>無</td><td><b>有</b>（HP/HP-1/LOH tag + somatic SNV + cis-test）</td></tr>
+<tr class="row-safe"><td>read-read 距離矩陣</td><td>無（算位點熵）</td><td><b>有</b>（L1/NHD/Bernoulli + 階層分群）</td></tr>
+<tr class="row-safe"><td>5mC/5hmC</td><td>bisulfite 混淆</td><td><b>可分軌</b>（C+m vs C+h）</td></tr>
+<tr><td>語言</td><td>C++（methclone）/ R（Epihet）</td><td>C++17 + Python</td></tr>
+</tbody>
+</table>
+<div class="callout-success"><b>對故事的深層意義</b>：epipolymorphism 文獻群（methclone/Epihet/Rossi25/Lin21/Derrien21）<b>量化了我們的困難（tumor 甲基 read 層高失序）並提供成熟工具地景</b>——但它們回答「disorder」、<b>不是</b>我們的「haplotype-consistent ASM structure」。它們量到的<b>高失序背景</b>正是 ISM 要在其中撈「稀有一致結構」的<b>噪音地板</b>，再次解釋我們訊號為何稀有（0.34%）。<b>沒有人用長讀做 haplotype-linked read-read 距離的 ASM 結構分析 = ISM 的差異化定位。</b></div>
+<p><b>工具/文獻</b>：methclone（Li 2014, <i>Genome Biol</i>, <code>PMID 25260792</code>）· Epihet（Chen 2021, <i>Sci Rep</i> 11:376, <code>DOI 10.1038/s41598-020-79627-x</code>）· Martin-Trujillo 2017（<i>Nat Commun</i>, <code>PMID 28883545</code>）「CN 主導 allelic methylation」（C6 深確認；Nature 全文本輪被 auth 擋，中心 claim 與 DOI/PMID 已確認）。</p>
 
 <!-- S8 -->
 <h2 id="s8"><span class="h-num">8</span>前路</h2>
@@ -248,6 +268,10 @@ tr.row-bug td { background: #FEF2F0; } tr.row-safe td { background: #F0FDF4; } t
 <li>Martin-Trujillo A, et al. Copy number… major drivers of allelic methylation. <i>Nat Commun</i> 2017. <code>PMID 28883545</code> [C6 sup]</li>
 <li>Abante J, et al. Haplotype-dependent ASM in WGBS. <i>Nat Commun</i> 2020. <code>PMID 33067439</code> [C6 sup]</li>
 <li>Wu H, et al. Statistical Quantification of Methylation by NGS. <i>PLoS One</i> 2011. <code>PMC3115964</code> [C6 par·統計機制]</li>
+<li>Li S, et al. Dynamic evolution of clonal epialleles revealed by methclone. <i>Genome Biology</i> 2014;15:472. <code>PMID 25260792 / DOI 10.1186/s13059-014-0472-5</code> [§7B 工具·epipolymorphism]</li>
+<li>Chen X, Ashoor H, Musich R, et al. epihet for intra-tumoral epigenetic heterogeneity analysis and visualization. <i>Scientific Reports</i> 2021;11:376. <code>DOI 10.1038/s41598-020-79627-x</code> (PMC7801679) [§7B 工具·Epihet]</li>
+<li>Rossi SH, et al. Evidence of DNA methylation heterogeneity and epipolymorphism in kidney cancer tissue samples. <i>Oncogene</i> 2025;44(15):1024-1036. <code>PMID 39824946 / DOI 10.1038/s41388-024-03270-3</code> [C3 sup·ccRCC 2025]</li>
+<li>Lin et al. Intratumor heterogeneity of breast cancer detected by epialleles shows association with hypoxic microenvironment. 2021 (PMC7977462 / <code>PMID 33754068</code>) [C3 sup·乳腺]</li>
 </ol>
 <p style="font-size:var(--fs-sm);color:var(--c-text-soft);margin-top:var(--sp-3);">內部數字源 <code>InterSubMod/docs/reports/validated/2026/06/20260602_研究週報…/master_draft.md</code>；故事母稿 <code>InterSubMod/docs/concepts/2026/06/20260603_研究故事與困難敘述_甲基haplotype論文_內外證據_01.md</code>。內部 L1-L2 / 外部 L3；ASM 全為 HCC1395 單樣本 ⭐3。</p>
 </div>
