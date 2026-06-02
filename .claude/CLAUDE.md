@@ -86,7 +86,7 @@
 > - **2026-05-31**：新增 `/harness-health`（元方法論 9→10）→ 45→**46**。磁碟現有 **2** 個 Dynamic Workflow（`cross_sample_benchmark.js` + 新增 `harness_audit_2026.js`；§8 未硬編碼計數，故無數字需改）。`harness_health.py` 燈 #1 持續監看此計數 drift。
 > **重複交叉位置**：`/feature-layered-observation`（P3 + 研究專用）/ `/multi-sample-consistency`（P4 + 研究專用）/ `/pre-decision-audit`（元方法論 + 三層樓 pre）/ `/run-evaluator`（P5 + 三層樓 post）— 在多分類列出表示同 skill 多角色。
 
-- **元方法論（10）**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor` `/pre-decision-audit` `/problem-framing-ideation` `/provenance-tier-audit` `/harness-health` ⭐ 新（2026-05-31；harness 自我稽核 6 燈儀表板，read-only `scripts/harness_health.py`）
+- **元方法論（10）**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor` `/pre-decision-audit` `/problem-framing-ideation` `/provenance-tier-audit` `/harness-health` ⭐ 新（2026-05-31；harness 自我稽核 8 燈儀表板，read-only `scripts/harness_health.py`；2026-06-03 +燈#7 memory-drift +燈#8 doc-path-currency）
 - **7-Phase Waterfall（7）**: P0 `/cycle-init` → P1 `/research-loop` → P2 `/check-staleness` → P3 `/feature-layered-observation` → P4 `/multi-sample-consistency` → P5 `/run-evaluator` → P6 `/conclude-research`
 - **程式開發（4）**: `/cpp-change` `/methodology-audit` `/infra-ops` `/verification-loop`
 - **文件管理（5）**: `/doc-standards` `/data-audit` `/memory-consolidation` `/citation-verification` `/pipeline-manifest` ⭐ 新（reproducibility provenance DAG；與 data-audit 分工：data-audit 查組織、pipeline-manifest 查 script→figure 因果鏈）

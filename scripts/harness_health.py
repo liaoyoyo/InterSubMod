@@ -4,7 +4,7 @@
 Generates a single standalone HTML dashboard that lets a solo researcher, on every
 harness change, confirm BOTH the moving parts AND the whole architecture:
 
-  1. L0 health lights (6)  — count drift / Hard-Gate truth / tier-gate / state<->doc / ledger / queue
+  1. L0 health lights (8)  — count drift / Hard-Gate truth / tier-gate / state<->doc / ledger / queue / memory-drift / doc-path-currency
   2. Architecture map      — 3 entrypoints · 7-Phase Waterfall · meta + 3-storey assurance ·
                              18 agents by role · 38 hooks by event · state machine · evidence chain · workflows
   3. Component detail       — skills by category · agent table (tools/model/isolation) · hooks by event
@@ -34,6 +34,7 @@ CURRENT_FOCUS = os.path.join(REPO, "docs", "CURRENT_FOCUS.md")
 LEDGER = os.path.join(REPO, "research", "autoresearch", "evidence_ledger.jsonl")
 ACTIVE = os.path.join(REPO, "state", "active.json")
 QUEUE = os.path.join(REPO, "research", "autoresearch", "hypothesis_queue.json")
+MEM_DIR = "/bip7_disk/liaoyoyo2001/.claude/projects/-big7-disk-liaoyoyo2001-InterSubMod/memory"
 COMPILE_MARKER = "/tmp/ism_cpp_pending_compile.txt"
 POSTMORTEMS = ["evidence_gate_bypass.log", "hook_failures.log", "injection_attempts.log",
                "recall_log_202605.log", "skill_audit_202605.log", "subagent_completion_202605.log"]
@@ -317,6 +318,45 @@ def light_queue(queue):
     return worst, rows
 
 
+def light_memory_drift():
+    """#7 — memory index↔files drift（升 /memory-consolidation Step-4 手動 grep 為持續偵測；read-only）。"""
+    idx = _read(os.path.join(MEM_DIR, "MEMORY.md"))
+    files = [os.path.basename(f) for f in glob.glob(os.path.join(MEM_DIR, "*.md"))
+             if os.path.basename(f) != "MEMORY.md"]
+    if not idx or not files:
+        return "GREY", ["MEMORY.md / memory/ 不可讀（外部路徑）"]
+    fileset = set(files)
+    linked = set(re.findall(r"\(([a-z0-9_][a-z0-9_-]*\.md)\)", idx))   # [title](slug.md) bare-name links
+    orphan_files = sorted(f for f in files if f not in idx)            # exists on disk but not in index
+    dead_links = sorted(l for l in linked if l not in fileset)        # index points to non-existent file
+    rows = [f"memory={len(files)} 檔；index links={len(linked)}"]
+    worst = "GREEN"
+    if dead_links:
+        worst = "YELLOW"
+        rows.append(f"⚠ {len(dead_links)} 索引連結指向不存在檔: {dead_links[:5]}")
+    if orphan_files:
+        worst = "YELLOW"
+        rows.append(f"⚠ {len(orphan_files)} 檔未進 MEMORY.md 索引（不會被 recall）: {orphan_files[:5]}")
+    if worst == "GREEN":
+        rows.append("✓ index↔files 一致")
+    return worst, rows
+
+
+def light_doc_paths(cmd):
+    """#8 — DOC PATH CURRENCY: CLAUDE.md 引用的 explicit scripts/*.sh|.py 路徑是否存在（references-to-deleted）。
+    只查 explicit scripts/ 路徑，跳過散文裸名以避免假陽性（critique 建議）。"""
+    paths = sorted(set(re.findall(r"(scripts/[A-Za-z0-9_./-]+\.(?:sh|py))", cmd)))
+    missing = [p for p in paths if not os.path.exists(os.path.join(REPO, p))]
+    rows = [f"CLAUDE.md 引用 {len(paths)} 個 explicit scripts/ 路徑"]
+    worst = "GREEN"
+    if missing:
+        worst = "RED"
+        rows.append(f"⚠ {len(missing)} 個不存在（references-to-deleted）: {missing[:6]}")
+    else:
+        rows.append("✓ 全部存在於磁碟")
+    return worst, rows
+
+
 def compile_marker_status():
     if os.path.exists(COMPILE_MARKER) and os.path.getsize(COMPILE_MARKER) > 0:
         try:
@@ -488,7 +528,7 @@ code{{background:#eef1f4;padding:1px 4px;border-radius:3px;font-size:11.5px}} ul
 <div class="bar"><b>OVERALL</b> {ov['green']} GREEN · {ov['yellow']} YELLOW · {ov['red']} RED
 <div class="diff" id="diff">vs last: (computing…)</div></div>
 
-<h2 id="health">① L0 健康燈（6）</h2><div class="grid">{lights_html}</div>
+<h2 id="health">① L0 健康燈（8）</h2><div class="grid">{lights_html}</div>
 
 <h2 id="arch">② 整體架構（一眼掌握）</h2>
 <div class="layer"><div class="lt">3 入口（context 載入）</div><div class="row">{ep}</div></div>
@@ -572,6 +612,8 @@ def main():
     l4 = light_state(active, focus)
     l5 = light_ledger(focus)
     l6 = light_queue(queue)
+    l7 = light_memory_drift()
+    l8 = light_doc_paths(cmd)
     lights = [
         {"name": "COUNT DRIFT", "status": l1[0], "rows": l1[1]},
         {"name": "HARD-GATE TRUTH", "status": l2[0], "rows": l2[1]},
@@ -579,6 +621,8 @@ def main():
         {"name": "STATE<->DOC SYNC", "status": l4[0], "rows": l4[1]},
         {"name": "LEDGER FRESH", "status": l5[0], "rows": l5[1]},
         {"name": "QUEUE HYGIENE", "status": l6[0], "rows": l6[1]},
+        {"name": "MEMORY DRIFT", "status": l7[0], "rows": l7[1]},
+        {"name": "DOC PATH CURRENCY", "status": l8[0], "rows": l8[1]},
     ]
     mk = compile_marker_status()
     if mk.get("present"):

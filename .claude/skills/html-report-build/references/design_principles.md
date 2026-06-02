@@ -252,7 +252,7 @@ if chars_visible > scenario_limit OR table_rows > scenario_row_limit:
 | 14.3 可掃描 | 問句 section header + accent hero + 雙重編碼 badge |
 | 14.4 affordance | `.sec-h` cursor:pointer + hover + chevron 旋轉 |
 | 14.5 responsive | grid auto + `min-width:0` + `overflow-wrap` |
-| 14.7 進退 | phase stepper + goal roll-up % +（規劃中）since-last-view diff |
+| 14.7 進退 | phase stepper + goal roll-up % + since-last-view diff ✓（focus_board sincebar localStorage 已實作 2026-06-03）|
 | 14.8 restraint | inline vanilla JS 零 CDN + Layer A derive |
 
 ---
