@@ -15,6 +15,22 @@ paths: ["src/**/*.cpp", "src/**/*.hpp", "src/**/*.h", "include/**/*.hpp", "inclu
 
 ---
 
+## 修 Bug 前置：root-cause-first + 測試有效性（2026-06-02 借鑑 superpowers）
+
+> **鐵律：NO FIXES WITHOUT ROOT CAUSE FIRST** — 修 bug 前先走 4-phase，禁「先 quick fix 之後再查」。
+
+**4-phase root-cause（systematic-debugging）**：
+1. **調查**：讀完整 error/stack；**穩定重現**（記錄精確步驟）；查 `git diff`/近期 commit；多組件系統（bam→ISM→output）在**每個邊界 instrument** 看資料進出；往回 trace 資料流找源頭（非只看症狀處）。
+2. **比對**：找同 codebase 可運作的相似程式完整讀；列「正常 vs 壞掉」每個差異 + 依賴/設定/假設。
+3. **假說**：形成**單一具體**假說「我認為 X 是根因，因為 Y」；**一次只改一個變數**最小測試；不成換假說，**勿疊加多個改動**。
+4. **實作**：先寫**失敗測試**；單一修正打中根因；**修 2-3 次不好 → 停下質疑架構**，而非再加 fix。
+
+**測試有效性（TDD revert check）**：回歸測試寫完，驗其真的抓得到 bug — `寫測試(紅) → 修(綠) → 把修 revert（測試必須再紅）→ 還原`。先寫 code 再補的測試易「假綠」（根本沒測到那個 bug）。
+
+> 適用 C++ bug fix；純探索/分析腳本不強加 TDD。陷阱卡見 `/known-pitfalls` P-16。
+
+---
+
 ## 6 步驟執行協議
 
 ### Step 1：BASELINE COMMIT（基線快照）

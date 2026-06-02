@@ -212,6 +212,7 @@
 **任務切割原則**：可切割且需要大量 context 處理 → 啟動 agent + **必須清楚回報主 agent** + **科學工程紀錄成文件**供檢核驗證。
 
 **Sub-agent return-contract（2026-05-30）**：subagent 回主 agent 時 — (a) full detail 落地成 OUTPUT_DIR 下 .md/.json；(b) 回 parent **只**回 `{status, key metrics/verdict, anomalies, path-to-landed-doc}`；(c) ~1-2K token soft target（**非 hard cap** — 勿截斷 parallel-benchmark 的多樣本 canonical 表）。`subagent_completion_logger.sh` 已捕 OUTPUT_TOKENS 可作 >3K advisory flag。
+> **4-狀態 status enum（2026-06-02 借鑑 superpowers subagent-driven-development）**：`status` 用 `DONE` / `DONE_WITH_CONCERNS`（非阻擋疑慮，附說明）/ `NEEDS_CONTEXT`（缺資訊，parent 補後 re-dispatch）/ `BLOCKED`（需升級或重構任務）四值，取代模糊的 done/fail。多階段 review **spec-compliance 先過，才進 code-quality**（禁顛倒 — generator/evaluator 分離的明確排序）。
 
 ### Dynamic Workflow 路由規則（2026-05-30 落地 — Opus 4.8 Workflow 工具）
 
@@ -349,3 +350,16 @@ UserPromptSubmit hook `narrative_frame_advisor.sh` 偵測：
 3. **聲明來源**：報告 frontmatter 加 `data_sources: <path>,<path>` 讓 B 層 gate 找得到；或數字放同層 `_assets/`。
 4. **override**：數字確實來自他處（如引用另一 validated 報告）→ 內文加 `<!-- provenance-verified: 來源説明 -->`。
 5. **平衡（真實×消耗×錯誤率）**：三層全確定性 grep（flat-rate≈0）；B 只抓 metric 形數字（跳年份/章節號）降假陽性；衍生數字假陰性靠 A 層補。**不裝 LLM-judge 偵測**（EMNLP 2025：對數字/量詞最不準，三軸全輸）。
+
+### 🔴 §13.7 完成宣稱通用 gate（2026-06-02 借鑑 superpowers verification-before-completion）
+
+> **§13.0 數字鐵則是此通用鐵則的特例**：不只「數字」，**任何完成/成功宣稱**都需 fresh 驗證證據。
+
+**鐵律：NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE** — 宣稱「done / 修好了 / tests pass / build ok / 已落地 / 已驗證」前，跑 5-step gate：
+1. **IDENTIFY**：什麼指令/檔案能證明此宣稱？
+2. **RUN**：跑**完整**指令（fresh，非憑記憶）。
+3. **READ**：讀完整輸出 + 查 exit code + 數失敗數。
+4. **VERIFY**：輸出真的支持宣稱嗎？
+5. **CLAIM**：確認後才宣稱。**跳任一步 = 説謊不是驗證**。
+
+**紅旗語言（宣稱前出現 = 停下驗證）**：`should / probably / seems to / 應該 / 大概`、`Done! / Perfect! / 搞定`（未驗證的滿足感）、**信任 subagent/postmortem 回報而不獨立驗證**（本輪實例：postmortem 宣稱「P-15 陷阱卡已落地」但 grep 不到 → 驗證才發現根本沒做）。半自動對應 hook `researcher_claim_evidence_check.sh`（hedge 偵測）。

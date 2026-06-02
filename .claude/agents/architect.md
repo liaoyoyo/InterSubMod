@@ -81,3 +81,5 @@ permissionMode: plan
 - 每個子任務應有明確的驗證方法
 - 考慮現有程式碼架構和依賴
 - 避免過度設計
+- **計劃品質條（2026-06-02 借鑑 superpowers writing-plans）**：禁 `TBD / TODO / implement later / 之後再說`；禁空話如「加適當的錯誤處理」（要寫**具體**做什麼）；禁「同 Task N」（要重述）；每個子任務標 **exact 檔案路徑** + **指令的預期 output**；只說 what 不說 how = 不合格。
+- ⚠ **研究計劃例外**：研究是假說驅動、探索式 → **不強求「完整 code 上前」**（superpowers 的 app-dev 假設）；但「no 空話 placeholder + 標預期 output + exact path」仍適用。

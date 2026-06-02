@@ -170,6 +170,28 @@ user-invocable: true
 
 ---
 
+## 數據誠信陷阱
+
+### P-15: 捏造 metric / 報告搶先分析（同一 batch 平行）
+
+**錯誤**：含數字報告把「預期值」當真值寫入；或報告 Write 與產生數字的分析 Bash 放**同一 tool-call batch** → Write 拿不到當批未回傳的數字 → 用記憶/預期補。
+
+**症狀**：報告數字 grep 不到任何來源檔；或方向與真值相反（2026-06-01：H19 捏造 0.985；BRCA2 寫 0.572「弱」真值 0.866「強」）。同 session 30 分鐘違反 3 次 → 純文字規則必失敗，需機械層。
+
+**正確做法**：CLAUDE.md §13.0 鐵則 — `分析跑完 → 落檔 → Read 驗證 → 才撰寫`；Write 與分析 Bash **永不放同一 batch**；機械後盾 §13 三層（`fill_report.py` by-construction / `number_provenance_check.sh` gate / `audit` 溯源表）。
+
+**來源**：`20260601_fabricated_metric_in_html_preview_postmortem.md`；memory `feedback_no_fabricated_numbers_in_reports`。
+
+### P-16: 修 Bug 不先 root-cause / 多變數齊改 / 失敗硬疊
+
+**錯誤**：「先 quick fix 之後再查」；一次改多個變數無法隔離哪個有效；修 2-3 次不好仍硬加 fix 不質疑架構。
+
+**正確做法**：`/cpp-change` 4-phase root-cause（穩定重現 → 多組件邊界 instrument → 單一假說一次一變數 → 失敗測試先行）；**2-3 次失敗 → 停下質疑架構**；回歸測試用 revert-must-fail-again 驗有效性。
+
+**來源**：2026-06-02 借鑑 superpowers systematic-debugging。
+
+---
+
 ## 與 /scientific-rigor 元方法論的關係
 
 本 skill 為 `/scientific-rigor` 元方法論層的**反例 / 陷阱知識庫**:
