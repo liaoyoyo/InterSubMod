@@ -293,3 +293,9 @@ Makefile.bak
 
 # harness-health generated snapshots + dashboard (regenerated each run)
 state/health_snapshots/
+# focus board — DERIVED view snapshot (not SoT; regenerate from active.json+ledger; do not commit)
+state/focus_board.html
+
+# cis-ASM pipeline regression-test fixture (frozen BRCA2 Level-1; needed for `make test` portability)
+# exception to *.tsv.gz (line 31) / research/**/*.tsv — small (149KB), a hermetic test golden not bulk data
+!research/tsg_promoter_asm_reviewer/pipeline/fixtures/brca2_level1.tsv.gz

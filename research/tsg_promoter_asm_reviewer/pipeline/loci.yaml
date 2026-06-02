@@ -1,0 +1,113 @@
+# cis-ASM pipeline — loci SoT (Single source of truth). role: canonical|control|candidate
+# generated 2026-06-03 from control_loci_manifest + feature_matrix_trial. characterization only.
+loci:
+  - tag: BRCA2
+    locus: chr13:32315128
+    ref: G
+    alt: A
+    cls: TP
+    loh: False
+    cn: 5.0
+    vaf: 0.202
+    gene: ZAR1L
+    dist_to_tss: 235
+    role: canonical
+  - tag: FP
+    locus: chr9:39580868
+    ref: G
+    alt: C
+    cls: FP
+    loh: False
+    cn: 3.0
+    vaf: 0.174
+    gene: CNTNAP3P3
+    dist_to_tss: 40328
+    role: control
+  - tag: FP
+    locus: chr9:41788031
+    ref: A
+    alt: T
+    cls: FP
+    loh: False
+    cn: 4.0
+    vaf: 0.146
+    gene: LOC124902163
+    dist_to_tss: 926
+    role: control
+  - tag: TP_hiARI
+    locus: chr12:33107142
+    ref: C
+    alt: A
+    cls: TP
+    loh: False
+    cn: 3.0
+    vaf: 0.588
+    gene: ASS1P14
+    dist_to_tss: 121404
+    role: candidate
+  - tag: TP_LOH
+    locus: chr4:10739757
+    ref: G
+    alt: A
+    cls: TP
+    loh: True
+    cn: 2.0
+    vaf: 0.395
+    gene: LINC02498
+    dist_to_tss: 2166
+    role: candidate
+  - tag: TP_LOH
+    locus: chr5:77167912
+    ref: C
+    alt: G
+    cls: TP
+    loh: True
+    cn: 2.0
+    vaf: 0.378
+    gene: PDE8B
+    dist_to_tss: 12392
+    role: candidate
+  - tag: TP_loARI
+    locus: chr7:88114368
+    ref: G
+    alt: T
+    cls: TP
+    loh: False
+    cn: 5.0
+    vaf: 0.213
+    gene: LOC105375386
+    dist_to_tss: 36050
+    role: candidate
+  - tag: het
+    locus: chr1:181698147
+    ref: A
+    alt: G
+    cls: het-NULL
+    loh: False
+    cn: 3.0
+    vaf: 0.308
+    gene: RNA5SP70
+    dist_to_tss: 73419
+    role: control
+  - tag: het
+    locus: chr2:206705390
+    ref: G
+    alt: A
+    cls: het-NULL
+    loh: False
+    cn: 2.0
+    vaf: 0.377
+    gene: DYTN
+    dist_to_tss: 13006
+    role: control
+  - tag: het
+    locus: chr2:58616453
+    ref: A
+    alt: G
+    cls: het-NULL
+    loh: False
+    cn: 3.0
+    vaf: 0.634
+    gene: LINC01122
+    dist_to_tss: 95700
+    role: control
