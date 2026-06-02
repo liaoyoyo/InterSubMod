@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260602-1521-g6-loh-phasing-formal-stats",
+  "title": "G6 LOH-constrained phasing 論文主軸：formal stats + paired phasing-vs-methyl 分解 + 全基因組延伸",
+  "hypothesis_id": null,
+  "phase": "P4_GENERALIZE",
+  "tier": "3",
+  "verdict": "active",
+  "priority": 75,
+  "started_at": "2026-06-02T15:21:49Z",
+  "last_advanced_at": "2026-06-02T15:21:49Z",
+  "preconditions": {
+    "binary_version": null,
+    "dataset_id": null,
+    "upstream_reports": [
+      "InterSubMod/docs/reports/validated/2026/04/20260423_研究週報_20260416_20260423_NG2_LOH_constrained_phasing與TO_pivot_01.md"
+    ]
+  },
+  "open_gates": [],
+  "artifacts": {
+    "plan": null,
+    "precheck": null,
+    "pilot": null,
+    "generalize": null,
+    "evaluation": null
+  },
+  "history": [
+    {
+      "timestamp": "2026-06-02T15:21:49Z",
+      "from_phase": null,
+      "to_phase": "P4_GENERALIZE",
+      "actor": "user",
+      "note": "Backfill 註冊（/cycle-init）：此主軸已跑數週、於 docs+memory+ledger 外部追蹤，2026-06-02 補註冊成機械 cycle 以修復 active.json 空的根因落差。phase=P4_GENERALIZE 反映真實進度（n7 cross-sample Wilcoxon 已完成於 ledger 20260530_loh_phasing_n7_cross_sample_wilcoxon），非全新 P0。剩餘工作：paired phasing-vs-methyl 分解 + 全基因組延伸 + paper §3。tier ⭐3 繼承自 ledger 記錄之既有 characterization，provenance 見 links.ledger_entries。"
+    }
+  ],
+  "links": {
+    "ledger_entries": [
+      "20260530_loh_phasing_n7_cross_sample_wilcoxon",
+      "20260511_V6_phaseD_4sample_cross_validation",
+      "20260423_phase3_s1s7_synthesis"
+    ],
+    "report_path": "InterSubMod/docs/reports/validated/2026/04/20260423_研究週報_20260416_20260423_NG2_LOH_constrained_phasing與TO_pivot_01.md"
+  },
+  "main_axis": {
+    "anchor_doc": "InterSubMod/docs/CURRENT_FOCUS.md",
+    "anchor_section": "當前主軸",
+    "one_line_goal": "LOH-constrained phasing 論文主軸：formal Wilcoxon 全樣本 + paired phasing-vs-methyl 分解 + 全基因組延伸",
+    "drift_keywords_required": ["phasing", "LOH", "Wilcoxon"],
+    "drift_keywords_forbidden": ["methylation filter", "FP filter"]
+  }
+}

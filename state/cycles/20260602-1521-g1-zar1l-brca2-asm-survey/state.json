@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "cycle_id": "20260602-1521-g1-zar1l-brca2-asm-survey",
+  "title": "G1 ZAR1L/BRCA2 ASM characterization：全基因組 survey + dup-bug-fixed magnitude rerun",
+  "hypothesis_id": null,
+  "phase": "P3_PILOT",
+  "tier": "3",
+  "verdict": "active",
+  "priority": 65,
+  "started_at": "2026-06-02T15:21:49Z",
+  "last_advanced_at": "2026-06-02T15:21:49Z",
+  "preconditions": {
+    "binary_version": null,
+    "dataset_id": null,
+    "upstream_reports": [
+      "InterSubMod/docs/experiments/in_progress/2026/05/20260529_ISM_ZAR1L_BRCA2_ASM_verification_01.md"
+    ]
+  },
+  "open_gates": [
+    {
+      "gate": "P3_PILOT_CONFOUND",
+      "status": "open",
+      "reason": "MSA Level1 5mC+5hmC dup-emission bug（2.4x n inflation → 2x magnitude undercount）未修；全 39,447-TP corrected-collapse rerun 待跑；全基因組 survey chr5-22 進行中。magnitude 標 PROVISIONAL（ledger 20260530_ism_zar1l_brca2_magnitude_correction）"
+    }
+  ],
+  "artifacts": {
+    "plan": null,
+    "precheck": null,
+    "pilot": null,
+    "generalize": null,
+    "evaluation": null
+  },
+  "history": [
+    {
+      "timestamp": "2026-06-02T15:21:49Z",
+      "from_phase": null,
+      "to_phase": "P3_PILOT",
+      "actor": "user",
+      "note": "Backfill 註冊（/cycle-init）：此主軸已跑數週、於 docs+memory+ledger 外部追蹤，2026-06-02 補註冊成機械 cycle 以修復 active.json 空的根因落差。phase=P3_PILOT 反映真實進度（chr1-4 TP done、chr5-22 survey 跑中、magnitude PROVISIONAL 待 dup-bug 修 + rerun），非全新 P0。characterization-only（非 discriminative，per ASM 收斂口徑）。tier ⭐3 繼承自 ledger 記錄之既有 characterization，provenance 見 links.ledger_entries。"
+    }
+  ],
+  "links": {
+    "ledger_entries": [
+      "20260529_ism_zar1l_brca2_asm_verification",
+      "20260530_ism_zar1l_brca2_magnitude_correction",
+      "20260531_asm_credibility_patch_correction_robust",
+      "20260601_brca2_cis_test_normal_anchored"
+    ],
+    "report_path": "InterSubMod/docs/experiments/in_progress/2026/05/20260529_ISM_ZAR1L_BRCA2_ASM_verification_01.md"
+  },
+  "main_axis": {
+    "anchor_doc": "InterSubMod/docs/CURRENT_FOCUS.md",
+    "anchor_section": "當前主軸",
+    "one_line_goal": "ZAR1L/BRCA2 ASM characterization-only：全基因組 survey + dup-bug-fixed magnitude rerun（real but non-directional + non-discriminative + coverage-modulated）",
+    "drift_keywords_required": ["ASM", "BRCA2", "characterization"],
+    "drift_keywords_forbidden": ["FP filter", "discriminative", "方向 POSITIVE"]
+  }
+}

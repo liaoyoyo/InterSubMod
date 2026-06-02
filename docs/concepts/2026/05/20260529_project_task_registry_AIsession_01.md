@@ -8,6 +8,8 @@ companion_html: InterSubMod/docs/reports/in_progress/2026/05/20260529_project_go
 machine_json: InterSubMod/docs/concepts/2026/05/20260529_project_tasks_01.json
 ---
 
+> 🗄️ **ARCHIVE（2026-06-03 凍結快照）**：本 5/29 三件套（.md / .json / .html）為**一次性規劃快照**，已不再更新（之後 cycle3 conclude / ASM correction / queue hygiene / G6+G1 cycle 註冊均未反映）。**Live 任務態請看** `state/focus_board.html`（自動 derive）+ `/cycle-state` + `docs/CURRENT_FOCUS.md` 焦點區塊。本檔保留作歷史全圖規劃參考。設計決策見 `InterSubMod/docs/references/migration/20260602_task_dashboard_data_structure_review_01.md`。
+
 # InterSubMod — 全專案目標與任務登錄表
 
 > **給接手的 AI session**：本檔是整個 InterSubMod 專案（不只 HKU）的目標樹 + 任務 DAG 快照，由 7 條主軸的 fresh-context 並行盤點 + 合成 + 對抗式驗證產生。讀完即可掌握「現在在哪、什麼緊急、下一步、什麼不能碰」。互動版見 companion HTML；機器可讀版見 machine_json。

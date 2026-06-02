@@ -1,0 +1,38 @@
+{
+  "_note": "人工策展焦點偏好（唯一手維護層）。機械事實（cycle phase/tier/lineage/queue/health）NOT here — 由 scripts/build_focus_board.py 從 active.json+cycles+evidence_ledger+hypothesis_queue+health_snapshots 自動 derive。本檔只放『不可機械 derive 的焦點決定』：哪個 cycle 是 #1 NOW、≤2 背景孵化槽、每個 pinned 的 next_step、已死路備忘。可手改 + 可 commit（小、穩定、非 localStorage）。",
+  "schema_hint": "now=cycle_id; pinned=[{cycle,next_step}]; background=[{title,detail}] (≤2); dead=[{title,why}]",
+  "updated_at": "2026-06-03",
+  "now": "20260602-1521-g6-loh-phasing-formal-stats",
+  "pinned": [
+    {
+      "cycle": "20260602-1521-g6-loh-phasing-formal-stats",
+      "short": "G6 · LOH-phasing 論文主軸",
+      "next_step": "paired phasing-vs-methyl 分解 + 全基因組延伸 + paper §3"
+    },
+    {
+      "cycle": "20260602-1521-g1-zar1l-brca2-asm-survey",
+      "short": "G1 · ZAR1L/BRCA2 ASM（characterization-only）",
+      "next_step": "修 MSA Level1 dup-bug + 全 39,447-TP corrected-collapse rerun"
+    }
+  ],
+  "background": [
+    {"title": "ASM 全基因組 survey", "detail": "chr1-4 TP done · chr5-22 跑中 · 需 dup-bug 修後重定量"},
+    {"title": "HKU handoff commit", "detail": "3 docs + 22 figs + 10 scripts 未 commit（待決）"}
+  ],
+  "dead": [
+    {"title": "甲基化當 FP filter", "why": "⭐2 L4 LOSO sample-level circularity (held-out 5-sample mean −0.00004), direction exhausted"},
+    {"title": "ASM 當 standalone discriminator", "why": "strong-ASM 在 FP enriched 5× = regression-to-extreme artifact, non-discriminative (guardrail)"}
+  ],
+  "goals": [
+    {"id": "G6", "status": "ACTIVE-PRIMARY", "cycle": "20260602-1521-g6-loh-phasing-formal-stats", "short": "LOH-constrained phasing 論文主軸（LongPhase+LOH bed 可重現，不需 methylation）"},
+    {"id": "G1", "status": "ACTIVE", "cycle": "20260602-1521-g1-zar1l-brca2-asm-survey", "short": "per-CpG ASM characterization（BRCA2/ZAR1L ⭐3 單位點；全基因組普查中）"},
+    {"id": "G4", "status": "ACTIVE", "short": "TO normal 資訊補強（Normal BAM 跨樣本 Tier4.1，HCC1395 normal-ASM pilot 待 BAM）"},
+    {"id": "G2", "status": "DEFERRED", "short": "clone 結構分析（Phase B；HPFineNGroups ⭐3 依賴 pipeline）"},
+    {"id": "G3", "status": "BLOCKED", "short": "二次打擊/事件順序（blocked on G1 per-read epigenotype；region-level CONDITIONAL NEGATIVE）"},
+    {"id": "G5", "status": "DEAD", "short": "整合 evidence panel 提升 F1（LOSO NEGATIVE，路線關閉，僅留 methods）"}
+  ],
+  "blockers": [
+    {"title": "磁碟 critical", "detail": "/big7 97% · /big8 98%（big8 唯讀 NFS 不可刪）", "sev": "high"},
+    {"title": "MSA Level1 dup-bug", "detail": "5mC+5hmC 2.4x n inflation → 阻 ASM 最終定量", "sev": "high"}
+  ]
+}
