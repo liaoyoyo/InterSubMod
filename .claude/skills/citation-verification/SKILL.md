@@ -36,6 +36,10 @@ WebSearch: site:scholar.google.com "<title>" <first author>
 | Claim 在論文中找不到 | 移除該 claim 或改述為 weaker form；勿假設論文支持 |
 | Citation count 異常低（<5） | 警示用戶可能是 obscure 或被撤稿 |
 
+## 每個文獻 fact 附 source（2026-06-02 借鑑 PaperQA2 citation-by-construction）
+
+延伸 CLAUDE.md §13 反捏造到**文獻 claim**：報告/論文裡每個引用某文獻的**具體陳述**（數字 / 結論 / 方法），必標**可追溯 source**（`(Author Year, §N/p.N)` 或 DOI + 該 claim 出現的段落）。原文 grep 不到支持 = 等同捏造（PaperQA2 即使 ~9% err 仍以「每個 fact 附 source」為設計核心）。與 `number_provenance`（內部產出數字）**互補分工**：B8 管外部文獻 claim、number_provenance 管內部數字。
+
 ## 反模式（紅線）
 
 - ❌ 從記憶生成 BibTeX → 40% 錯誤率

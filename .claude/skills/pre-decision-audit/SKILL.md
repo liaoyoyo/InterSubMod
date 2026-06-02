@@ -121,6 +121,15 @@ paths:
    - PROBE → 列 §4 pilot 步驟 + checkpoint
    - NO-GO → 建議寫 MEMORY.md Concluded entry / postmortem（若 mid-cycle）
 
+### Red-team gate（2026-06-02 借鑑 Google co-scientist Reflection agent — 正名 G7 devils-advocate）
+
+**GO verdict 前必跑一次獨立紅隊**（不可與 `score` 同一思路 — generator/evaluator 分離精神）：
+1. **最強反方**：「這假說最可能怎麼錯？」列 ≥2 failure mode（confound / circularity / 已 concluded-dead 變體 / 樣本量不足 / collider）。
+2. **對照 MEMORY Concluded**：與已 NEGATIVE 方向重疊？重疊 → 需 Productive-Failure reopen 3 條件（C1 新數據 / C2 新方法 / C3 新前置）至少一項，否則 **NO-GO**。
+3. **falsifier 檢查**：§7 falsifier_observable 真能否證？不能否證 → 降 **PROBE** 不 GO。
+
+紅隊未過 → verdict 降一級（GO→PROBE / PROBE→NO-GO）。與 4 個 post-數據 read-only verifier **正交**（這是 pre-cycle 假說層紅隊）。
+
 ## §4 §0 Front-gate + §1-§7 Seven core output sections
 
 ### §0 🟤 Cynefin Domain Gate (front-gate)

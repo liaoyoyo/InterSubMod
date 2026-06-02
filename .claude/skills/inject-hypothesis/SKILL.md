@@ -141,6 +141,15 @@ for i, h in enumerate(pending[:5]):
 | 參數組合探索 | 55-65 |
 | 低風險嘗試性假設 | 40-55 |
 
+## 假說對抗排名（2026-06-02 借鑑 co-scientist idea tournament — 輕量版，非全 Elo）
+
+當 pending 假說 **≥4 個**、priority 整數打結或主觀時，用 **pairwise 三維對抗**定序（tiebreak，非取代上表）：
+1. 三維各 1-5：**novelty**（vs MEMORY Concluded 是否新）×**feasibility**（<2hr pilot 可驗？資源夠？）×**impact**（過了推進哪個 final goal？）。
+2. 打結假說兩兩比：「H_a vs H_b 哪個 novelty×feasibility×impact 乘積高？」記勝場。
+3. 勝場多 → 微調 priority（±5~10），只做**打結時 tiebreak**。
+
+> 輕量原則（restraint）：不建 Elo 引擎、不每輪全跑；只在 queue 擁擠/主觀打結時用。
+
 ## Type 類型選擇
 
 - 修改篩選閾值 → `rule_change`（Tier 1）
