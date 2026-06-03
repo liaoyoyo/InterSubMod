@@ -224,6 +224,19 @@ def dbeta_mod(Dp, spos, mode, germ_hps=("1",), som_hps=("1-1",), bam="tumor"):
     return round(float(np.mean([S[c][0] - G[c][0] for c in sh])), 3)
 
 
+def collapse_modtype(Dp):
+    """Dp (mod-labeled, load_level1_plus) -> D (any-mod max-collapse, load_level1 shape) so
+    cis_test / cohesion_per_tag / dbeta_axis apply unchanged. Reproduces the MSA Level-1
+    'any-modification' representation from the BAM-direct substrate (cross-extractor consistent)."""
+    D = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+    for spos, groups in Dp.items():
+        for key, cpgd in groups.items():
+            for cpg, rd in cpgd.items():
+                for rid, modd in rd.items():
+                    D[spos][key][cpg][rid] = max(modd.get("m", 0.0), modd.get("h", 0.0))
+    return D
+
+
 # ---- P2b: cis-ladder verdict + power class ----
 
 BONF_ALPHA = 0.05 / 51091  # genome-wide Bonferroni (frozen denominator from the survey)
