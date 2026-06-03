@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<!--
+  provenance-verified: 所有 metric 來自本目錄 20260531_methyl_phasing_A0_assets/admr_aggregate.json
+  與 admr_chr*.json（本輪 Read 回真值），figure = fig_admr_enrichment.png（plot_admr.py 生成）。
+  data_sources: 20260531_methyl_phasing_A0_assets/admr_aggregate.json, 20260531_methyl_phasing_A0_assets/admr_chr2.json, 20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>aDMR × LOH 富集對照文獻 79% — 數字相符但無真富集（V9）</title>
+<style>
+:root {
+  --c-accent:#D97757; --c-accent-deep:#B85A3F; --c-text:#141413; --c-text-soft:#6B6B66;
+  --c-bg:#FAF9F5; --c-surface:#FFFFFF; --c-border:#E3DACC; --c-code-bg:#F4EFE6;
+  --c-critical:#C2410C; --c-warning:#A16207; --c-success:#15803D; --c-info:#1E3A8A;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px;
+  --ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;
+  --ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,Monaco,Consolas,monospace;
+  --radius-md:6px; --radius-lg:8px;
+  --shadow-sm:0 1px 2px rgba(20,20,19,.05); --shadow-md:0 2px 8px rgba(20,20,19,.08);
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);line-height:1.6;font-size:16px;}
+.wrap{display:grid;grid-template-columns:240px 1fr;max-width:1180px;margin:0 auto;gap:var(--sp-6);padding:var(--sp-5);}
+nav.toc{position:sticky;top:var(--sp-4);align-self:start;font-size:14px;border-right:1px solid var(--c-border);padding-right:var(--sp-4);}
+nav.toc h3{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--c-text-soft);margin:0 0 var(--sp-3);}
+nav.toc a{display:block;padding:var(--sp-1) 0;color:var(--c-text-soft);text-decoration:none;border-left:2px solid transparent;padding-left:var(--sp-3);}
+nav.toc a:hover{color:var(--c-accent);border-left-color:var(--c-accent);}
+main{min-width:0;}
+header.hero{border-left:4px solid var(--c-accent);padding:var(--sp-3) var(--sp-5);margin-bottom:var(--sp-6);}
+header.hero h1{font-size:28px;margin:0 0 var(--sp-2);line-height:1.25;}
+header.hero .sub{color:var(--c-text-soft);font-size:15px;}
+.badges{margin-top:var(--sp-3);display:flex;gap:var(--sp-2);flex-wrap:wrap;}
+.badge{font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--c-border);background:var(--c-surface);}
+.badge.tier{background:#FBEEE8;border-color:var(--c-accent);color:var(--c-accent-deep);}
+.badge.pilot{background:#FEF3E2;border-color:var(--c-warning);color:var(--c-warning);}
+section{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-5) var(--sp-6);margin-bottom:var(--sp-5);box-shadow:var(--shadow-sm);}
+section h2{font-size:21px;margin:0 0 var(--sp-4);padding-bottom:var(--sp-2);border-bottom:1px solid var(--c-border);}
+section h3{font-size:17px;margin:var(--sp-5) 0 var(--sp-3);}
+.headline{font-size:18px;font-weight:600;line-height:1.5;}
+.headline .yes{color:var(--c-success);}
+.headline .no{color:var(--c-critical);}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:var(--sp-3) 0;}
+th,td{text-align:left;padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--c-border);}
+th{background:var(--c-code-bg);font-weight:600;}
+td.num{text-align:right;font-family:var(--ff-mono);}
+tr.key td{background:#FBEEE8;font-weight:600;}
+.callout{border-left:4px solid;border-radius:var(--radius-md);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:15px;}
+.callout.crit{border-color:var(--c-critical);background:#FEF1EC;}
+.callout.warn{border-color:var(--c-warning);background:#FEF9EC;}
+.callout.ok{border-color:var(--c-success);background:#EDF7F0;}
+.callout.info{border-color:var(--c-info);background:#EEF1FA;}
+.callout b{color:inherit;}
+figure{margin:var(--sp-4) 0;text-align:center;}
+figure img{max-width:100%;height:auto;border:1px solid var(--c-border);border-radius:var(--radius-md);}
+figcaption{font-size:13px;color:var(--c-text-soft);margin-top:var(--sp-2);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);}
+.statbox{border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--sp-4);text-align:center;}
+.statbox .big{font-size:32px;font-weight:700;font-family:var(--ff-mono);line-height:1;}
+.statbox .lbl{font-size:13px;color:var(--c-text-soft);margin-top:var(--sp-2);}
+.statbox.good .big{color:var(--c-success);} .statbox.bad .big{color:var(--c-critical);} .statbox.neu .big{color:var(--c-info);}
+code{font-family:var(--ff-mono);font-size:13px;background:var(--c-code-bg);padding:1px 5px;border-radius:4px;}
+ol li,ul li{margin:var(--sp-2) 0;}
+footer{font-size:12px;color:var(--c-text-soft);border-top:1px solid var(--c-border);padding-top:var(--sp-4);margin-top:var(--sp-6);}
+.prov{font-family:var(--ff-mono);font-size:12px;}
+@media(max-width:820px){.wrap{grid-template-columns:1fr;}nav.toc{position:static;border-right:none;}.grid2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc">
+  <h3>目錄</h3>
+  <a href="#tldr">0 · 一句話結論</a>
+  <a href="#question">1 · 問題與文獻錨</a>
+  <a href="#result">2 · 本資料真值</a>
+  <a href="#fig">3 · 雙圖證據</a>
+  <a href="#why">4 · 為何數字相符卻無富集</a>
+  <a href="#conclusion">5 · 三點誠實結論</a>
+  <a href="#method">6 · 方法與決策依據</a>
+  <a href="#caveat">7 · 限制</a>
+  <a href="#prov">8 · 數據溯源</a>
+</nav>
+<main>
+
+<header class="hero">
+  <h1>aDMR × LOH 富集：對照文獻 79% — 數字相符，但無真富集</h1>
+  <div class="sub">HCC1395 paired ONT · 直接從本資料計算 allele-specific DMR 是否偏好落在 CNV/LOH 區 · VERIFIED_RESULTS V9</div>
+  <div class="badges">
+    <span class="badge tier">⭐3 characterization</span>
+    <span class="badge pilot">A pilot · 單樣本 HCC1395</span>
+    <span class="badge">2026-06-03</span>
+    <span class="badge">1012 窗 · 12 染色體</span>
+  </div>
+</header>
+
+<section id="tldr">
+  <h2>0 · 一句話結論</h2>
+  <p class="headline">
+    本資料 aDMR <span class="yes">80.6% 落在 CNV/LOH 區，對照文獻 79% 數字成立甚至更高</span>；
+    <span class="no">但這是 HCC1395 高背景的假象，不是真富集</span>
+    （背景率 96.5%、富集 OR=1.46、Fisher p=0.382 不顯著）。
+    aDMR 本身<b>是真甲基訊號</b>（窗內 maxΔβ median 0.80 vs 非 aDMR 0.27），只是<b>不偏好</b> LOH 區。
+  </p>
+  <div class="callout warn">
+    <b>方法學教訓：</b>「對照文獻數字相符 ≠ 證實機制」。文獻 79% 是相對「全基因組背景」的富集；
+    HCC1395 是 hyper-diploid（ploidy 2.85），全基因組已 ~96% 被 CNV/LOH 覆蓋，
+    使該對照<b>失去區辨力</b>。要真驗證 ASM×LOH 富集需<b>低背景樣本（近二倍體）或 matched 對照</b>。
+  </div>
+</section>
+
+<section id="question">
+  <h2>1 · 問題與文獻錨</h2>
+  <p>
+    前一輪（V8）引用文獻「<b>79% 的 aDMR 落在 CNV/LOH 區</b>（advanced cancer ONT cohort）」，
+    當時推論「LOH 是 allele-specific methylation（ASM）的富集區」。本輪<b>不靠引用，直接在本資料計算</b>，
+    檢驗這個富集在 HCC1395 是否真的成立。
+  </p>
+  <h3>aDMR 操作型定義（本 pilot）</h3>
+  <ul>
+    <li>沿全基因組取 ±2kb 滑動窗，每窗算 HP1 vs HP2 的 per-CpG 甲基差 |Δβ|。</li>
+    <li>窗判為 <b>aDMR</b> ⟺ 窗內 ≥2 個 CpG 同時達 <code>|Δβ|≥0.25</code> 且 <code>Mann-Whitney p&lt;0.05</code>。</li>
+    <li>每窗再標記是否落在 SEQC2 標記的 CNV/LOH 區（<code>in_cnvloh</code>）與純 LOH 區（<code>in_loh</code>）。</li>
+    <li>富集判準＝<b>Fisher exact OR</b>（aDMR vs 非 aDMR 落 CNV/LOH 的勝算比），<b>不是絕對 %</b>。</li>
+  </ul>
+  <div class="callout info">
+    為什麼用 OR 不用絕對 %：若整個基因組 96% 都是 CNV/LOH，那「aDMR 96% 落 CNV/LOH」是<b>必然</b>，
+    不代表 aDMR 偏好 LOH。只有「aDMR 落 LOH 的比例 <i>高於</i> 非 aDMR」（OR&gt;1 且顯著）才是真富集。
+  </div>
+</section>
+
+<section id="result">
+  <h2>2 · 本資料真值</h2>
+  <div class="grid2" style="grid-template-columns:repeat(4,1fr);gap:var(--sp-3);">
+    <div class="statbox good"><div class="big">80.6%</div><div class="lbl">窗被判為 aDMR<br>(816 / 1012)</div></div>
+    <div class="statbox neu"><div class="big">96.8%</div><div class="lbl">aDMR 落 CNV/LOH<br>(對照文獻 79%)</div></div>
+    <div class="statbox bad"><div class="big">1.46</div><div class="lbl">富集 OR<br>(aDMR vs 非)</div></div>
+    <div class="statbox bad"><div class="big">0.382</div><div class="lbl">Fisher p<br>(不顯著)</div></div>
+  </div>
+
+  <table>
+    <thead><tr><th>指標</th><th class="num">值</th><th>對照／解讀</th></tr></thead>
+    <tbody>
+      <tr><td>分析窗總數</td><td class="num">1012</td><td>12 條染色體</td></tr>
+      <tr><td>aDMR 窗數 / 比例</td><td class="num">816 / 0.806</td><td>—</td></tr>
+      <tr><td>aDMR 落 CNV/LOH</td><td class="num">0.968</td><td>文獻 79%（本資料更高）</td></tr>
+      <tr class="key"><td>背景率（全窗落 CNV/LOH）</td><td class="num">0.965</td><td>← 關鍵：背景本來就這麼高</td></tr>
+      <tr><td>非 aDMR 落 CNV/LOH</td><td class="num">0.954</td><td>與 aDMR 幾乎相同</td></tr>
+      <tr class="key"><td>富集 Fisher OR（aDMR vs 非）</td><td class="num">1.462</td><td>接近 1 = 無偏好</td></tr>
+      <tr class="key"><td>Fisher p</td><td class="num">0.382</td><td><b>不顯著</b></td></tr>
+      <tr><td>aDMR 窗內 maxΔβ median</td><td class="num">0.802</td><td>訊號強</td></tr>
+      <tr><td>非 aDMR 窗內 maxΔβ median</td><td class="num">0.269</td><td>對比基線</td></tr>
+      <tr><td>aDMR 落「純 LOH」(in_loh)</td><td class="num">0.012</td><td>SEQC2 純 LOH 標記區極少（多落 gain）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="fig">
+  <h2>3 · 雙圖證據</h2>
+  <figure>
+    <img src="20260531_methyl_phasing_A0_assets/fig_admr_enrichment.png" alt="左圖：每染色體 aDMR 落 CNV/LOH 比例(橘) ≈ 背景率(灰)，幾乎完全重疊；右圖：aDMR 窗的 max|Δβ| 分布(綠)明顯右偏 vs 非 aDMR(灰)">
+    <figcaption>
+      <b>圖1（左）：無富集的直接證據</b> — 每條染色體「aDMR 落 CNV/LOH」(橘) 與「背景率」(灰) 幾乎重疊
+      （如 chr2: 0.726 vs 0.75），藍虛線為文獻 79%。橘≈灰 = aDMR 沒有比隨機窗更偏好 LOH。<br>
+      <b>圖2（右）：aDMR 是真訊號</b> — aDMR 窗的 max|Δβ| 分布(綠) 明顯右偏（median 0.80），
+      遠離非 aDMR(灰, median 0.27)，證明 HP1/HP2 甲基差異真實存在。
+    </figcaption>
+  </figure>
+  <div class="callout ok">
+    兩圖合起來講一個完整故事：<b>甲基的 haplotype 差異是真的（圖2）</b>，
+    <b>但它不挑 LOH 區落腳（圖1）</b>。文獻 79% 的對照在這個高背景樣本上無法用來支持「LOH 富集 ASM」。
+  </div>
+</section>
+
+<section id="why">
+  <h2>4 · 為何數字相符卻無富集</h2>
+  <ol>
+    <li><b>HCC1395 是 hyper-diploid（ploidy 2.85）</b>：SEQC2 標記的 CNV/LOH 覆蓋全基因組極廣，
+      窗級背景率達 <b>96.5%</b>（per-chr 68%~99%）。</li>
+    <li><b>背景這麼高，「落 CNV/LOH」幾乎是必然</b>：aDMR 96.8% 落 CNV/LOH、非 aDMR 也 95.4%，
+      兩者差距僅 1.4 個百分點。</li>
+    <li><b>OR 把背景除掉後 = 1.46，Fisher p=0.382</b>：統計上無法拒絕「aDMR 與 LOH 無關聯」的虛無假設。</li>
+    <li><b>每條染色體一致</b>（圖1）：沒有任何一條染色體出現 aDMR 率顯著高於背景，排除「單染色體驅動」。</li>
+  </ol>
+  <div class="callout crit">
+    <b>這正是「對照文獻數字相符」最危險的地方</b>：80.6% / 96.8% 看起來「漂亮地對上 79%」，
+    若只看絕對 % 就會錯誤地宣稱「證實 LOH 富集 ASM」。背景校正（OR）才揭穿這是 confound。
+  </div>
+</section>
+
+<section id="conclusion">
+  <h2>5 · 三點誠實結論</h2>
+  <table>
+    <thead><tr><th>#</th><th>結論</th><th>判定</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>本資料 aDMR <b>80.6% 落 CNV/LOH</b>，對照文獻 79% 數字成立（甚至更高 96.8%）。</td>
+        <td style="color:var(--c-success)">✅ 數字成立</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>但這是<b>背景假象，非真富集</b>：背景 96.5%、OR=1.46、Fisher p=0.382、每染色體 aDMR≈背景。
+          在 hyper-diploid 樣本無法區分「aDMR 偏好 LOH」與「整個基因組就高 LOH」。</td>
+        <td style="color:var(--c-critical)">⚠ 無真富集</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>aDMR <b>本身是真甲基訊號</b>（maxΔβ median 0.80 vs 非 aDMR 0.27）—
+          HP1/HP2 甲基差異真實存在，只是不偏好 LOH 區。</td>
+        <td style="color:var(--c-success)">✅ 訊號真實</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout info">
+    <b>與本 session 主線的關係：</b>這條結論<b>不影響</b>「甲基可救援 unphase reads」的主結論
+    （外推法 88.5% 準確度，V6）。aDMR×LOH 富集只是「機制歸因」的一個旁支假說，
+    本輪誠實判定它在 HCC1395 無法被驗證 —— 救援能力靠的是 HP1/HP2 甲基差異本身（圖2 證實為真），
+    而非「LOH 區特別容易分」。
+  </div>
+</section>
+
+<section id="method">
+  <h2>6 · 方法與決策依據（可檢核）</h2>
+  <table>
+    <thead><tr><th>決策點</th><th>選擇</th><th>可量化依據</th></tr></thead>
+    <tbody>
+      <tr><td>富集判準</td><td>Fisher OR 而非絕對 %</td><td>背景率 96.5% → 絕對 % 必然高，無區辨力</td></tr>
+      <tr><td>aDMR 門檻</td><td>≥2 CpG &amp; |Δβ|≥0.25 &amp; p&lt;0.05</td><td>對齊文獻 aDMR 量級；maxΔβ 0.80 vs 0.27 證明門檻有效分離</td></tr>
+      <tr><td>窗大小</td><td>±2kb 局部窗</td><td>避免 ±50kb 大窗 reads 不共享 CpG（前輪 0-block bug 已修）</td></tr>
+      <tr><td>軸選擇</td><td>HP1 vs HP2（HP-axis）</td><td>ALLELE-axis 被 germline-het 基線 ASM confound（memory 已記）</td></tr>
+      <tr><td>CN/LOH 真值</td><td>SEQC2 CNV/LOH bed</td><td>外部 benchmark，非本資料自證</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:14px;color:var(--c-text-soft)">
+    腳本：<code>admr_loh_enrichment.py</code>（窗級 aDMR 計算）+ <code>admr_aggregate.py</code>（Fisher OR）+
+    <code>plot_admr.py</code>（雙圖）。全基因組 12 染色體經 <code>run_admr_genome.sh</code> 平行跑出。
+  </p>
+</section>
+
+<section id="caveat">
+  <h2>7 · 限制</h2>
+  <ul>
+    <li><b>單樣本 HCC1395</b>：hyper-diploid 是此 cell line 的特性，非通則。不可外推到其他樣本（tier 封頂 ⭐3）。</li>
+    <li><b>aDMR 定義為本 pilot 設定</b>（Δβ≥0.25, ≥2 CpG），未對標文獻使用的精確 aDMR caller，數字量級可比但非逐位點對齊。</li>
+    <li><b>純 LOH（in_loh）窗極少</b>（aDMR 中僅 1.2%）：SEQC2 標「純 LOH」的區域本就少，多數 aDMR 落在 gain 區，故「LOH 專屬」的問法本身在此樣本資料量不足。</li>
+    <li><b>要真驗證需低背景樣本</b>：近二倍體腫瘤或 matched normal 對照，才能讓背景率遠低於 aDMR 率，使 OR 有區辨力。</li>
+  </ul>
+</section>
+
+<section id="prov">
+  <h2>8 · 數據溯源（provenance）</h2>
+  <table>
+    <thead><tr><th>數字</th><th>來源檔案（本目錄 20260531_methyl_phasing_A0_assets/）</th><th>tier</th></tr></thead>
+    <tbody>
+      <tr><td>1012 / 816 / 0.806 / 0.968 / 0.954 / 0.965 / 1.462 / 0.382 / 0.802 / 0.269 / 0.012</td><td class="prov">admr_aggregate.json</td><td>P 原始可信</td></tr>
+      <tr><td>chr2: 0.726 vs 背景 0.75（圖1 範例）</td><td class="prov">admr_chr2.json</td><td>P 原始可信</td></tr>
+      <tr><td>圖 fig_admr_enrichment.png</td><td class="prov">plot_admr.py（讀 admr_chr*.json 繪）</td><td>P 原始可信</td></tr>
+      <tr><td>文獻 79%</td><td class="prov">外部 cohort 引用（advanced cancer ONT）</td><td>S 二次紀錄（待 KB 對標精確 citation）</td></tr>
+      <tr><td>ploidy 2.85 / 背景成因</td><td class="prov">SEQC2 CNV/LOH（V5 已記）</td><td>P-caveat（SEQC2 benchmark）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  <p>
+    <b>來源報告：</b> InterSubMod/docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md §V9 ·
+    <b>資產目錄：</b> 20260531_methyl_phasing_A0_assets/ ·
+    <b>生成：</b> 2026-06-03 · 單樣本 HCC1395 A pilot ⭐3 characterization-only
+  </p>
+  <p>
+    所有 metric 為本輪 Read 回真值（admr_aggregate.json / admr_chr2.json）後寫入，未與分析同批平行（§13.0 反捏造序列紀律）。
+  </p>
+</footer>
+
+</main>
+</div>
+</body>
+</html>

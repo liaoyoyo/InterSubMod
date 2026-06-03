@@ -106,6 +106,40 @@ null median 0.974 **高得可疑**，與文獻「somatic ASM Δβ≈0.12 偏弱�
 - 能否救 unphase：**仍未證** — (a) CpG-SNP 未排除（最大嫌疑）(b) null 區是 anchor 充足篩出（40/111），unphase read 住在稀疏區，外推未證 (c) 仍 2/40 無訊號。
 - 下一步：CpG-SNP 排除 → 若 95% 撐住，才是穩固「甲基帶真 ASM 訊號」。
 
+## V9. ⭐ 本資料直接算 aDMR × LOH 富集 — 對照文獻 79%（背景 confound 揭露）
+
+> ⚠ **修正 V8 解讀**：V8 引文獻「79% aDMR 落 CNV/LOH → LOH 是 ASM 富集區」。本輪直接在本資料算，發現**對照數字相符但無真富集**（HCC1395 背景 CNV/LOH 覆蓋太高）。V8 文獻引用保留，但「LOH 是 ASM 富集區」結論在 HCC1395 **無法驗證**（背景 confound）。
+
+- **腳本**：`admr_loh_enrichment.py`（per ±2kb 窗算 HP1 vs HP2 甲基 |Δβ| + Mann-Whitney → 窗級 aDMR）+ `admr_aggregate.py`（Fisher OR）→ `admr_aggregate.json`
+- **aDMR 定義**：窗內 ≥2 個 CpG 達 |Δβ|≥0.25 且 p<0.05。
+- **真值**（1012 窗，12 染色體；copy 自 admr_aggregate.json）：
+
+| 指標 | 值 | 對照 |
+|------|---:|------|
+| aDMR 窗比例 | 80.6% (816/1012) | — |
+| aDMR 落 CNV/LOH | **96.8%** | 文獻 79%（數字相符甚至更高）|
+| **背景率（全窗落 CNV/LOH）** | **96.5%** | ← 關鍵：背景就這麼高 |
+| 非 aDMR 落 CNV/LOH | 95.4% | 與 aDMR 幾乎相同 |
+| **富集 Fisher OR** | **1.46** | — |
+| **Fisher p** | **0.382** | **不顯著** |
+| aDMR maxΔβ median | 0.802 | vs 非 aDMR 0.269 |
+
+- **per-chr**：每條染色體 aDMR 落 CNV/LOH ≈ 背景率（chr2: 0.726 vs 0.75；chr13: 0.95 vs 0.958；全部幾乎相等）。
+- **背景成因**：HCC1395 hyper-diploid (ploidy 2.85) → 基因組 68-98% 被 SEQC2 CNV/LOH 覆蓋（chr1 90.9% / chr8 97.7% / chr22 68.1%）。
+
+### V9 結論（科學誠實的關鍵）
+1. ✅ **本資料 aDMR 80.6% 落 CNV/LOH，對照文獻 79% 數字成立**（甚至更高 96.8%）。
+2. ⚠ **但這是背景假象，不是真富集**：背景率 96.5%、OR=1.46、Fisher p=0.382（不顯著）、每條染色體 aDMR 率≈背景。在 HCC1395 這種 hyper-diploid 樣本，**無法區分「aDMR 偏好 LOH」與「整個基因組就高 LOH」**。
+3. ✅ **aDMR 本身是真甲基訊號**（maxΔβ 0.802 vs 非 aDMR 0.269）— 確認 HP1/HP2 甲基差異真實存在，只是不偏好 LOH 區。
+4. **方法學教訓**：「對照文獻數字相符 ≠ 證實機制」。文獻 79% 是相對全基因組背景的富集；在 hyper-diploid 樣本背景已 ~96%，該對照失去區辨力。要真驗證 ASM×LOH 富集需 **低背景樣本（近二倍體）或 matched 對照**。
+
+### V9 caveat
+- 單樣本 HCC1395（hyper-diploid 是此樣本特性，非通則）。
+- aDMR 定義門檻（Δβ≥0.25, ≥2 CpG）為本 pilot 設定，未對標文獻精確 aDMR caller。
+- 純 loh（in_loh）僅 10/816（SEQC2 純 loh 標記區少）；多數 aDMR 落 gain 區。
+
+---
+
 ## V8. ⭐ 全 LOH 區 tumor VAF 系統分布 + 文獻證實（更正 V7 的單點外推錯誤）
 
 > ⚠ **更正 V7**：V7 從**單點** chr15:28455307（tumor VAF=0.492 仍雜合）外推「LOH 區仍普遍雜合」是**錯的**。全 LOH 系統分析（2693 位點）證實**反向**：98.6% 是真 cnLOH。V7 個案結論保留（chr15:28455307 確實是少數例外），但「普遍雜合」的推論作廢，以 V8 為準。
