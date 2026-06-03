@@ -208,12 +208,13 @@ tr.row-bug td { background: #FEF2F0; } tr.row-safe td { background: #F0FDF4; } t
 <thead><tr><th>#</th><th>主題</th><th>內部發現 <span class="tier l12">L1-L2</span></th><th>外部佐證 <span class="tier l3">L3</span></th><th>誠實不對齊 / caveat</th></tr></thead>
 <tbody>
 <tr class="row-safe"><td>C3</td><td>tumor 5mC 混亂</td><td>read-level 稀疏、難定位一致位點</td><td>Kerr23 <span class="rel sup">sup</span>(nanopore) · Rossi25 <span class="rel sup">sup</span> · Wang21 <span class="rel sup">sup</span> · Derrien21 <span class="rel sup">sup</span></td><td>✅ 最強（≥4 癌種+nanopore+機制）；DIFFERENT-VIEW：失序雙向 + PMD/核小體脈絡依賴（Kerr23 ρ=−0.610）非單純「更亂」</td></tr>
-<tr class="row-safe"><td>C5</td><td>5mC vs 5hmC</td><td>混合曾砍半 β；未分軌</td><td>Haffner11 <span class="rel sup">sup</span> · Chen15 <span class="rel sup">sup</span> · Halliwell25 <span class="rel sup">sup</span></td><td>✅ 雙層（生物解耦＋nanopore 會混淆）→「未分軌」是外部支持的真實 gap</td></tr>
-<tr class="row-safe"><td>C6</td><td>LOH/CN de-confound</td><td>strong-ASM=LOH→低覆蓋回歸極值；HP-axis held-constant CN（ρ=−0.055）</td><td>Martin-Trujillo17 <span class="rel sup">sup</span> · Abante20 <span class="rel sup">sup</span></td><td>⚠ <b>新 caveat</b>：CNN-LOH（copy-neutral）不降覆蓋卻仍單倍型化 → 應分 CNN vs CNL-LOH</td></tr>
-<tr class="row-warn"><td>C1</td><td>BRCA2 錨點</td><td>Δβ=−0.122 cis-driven（<b>hypo</b>）</td><td>Fishchuk24 <span class="rel sup">sup</span> · Evans18 <span class="rel par">par</span></td><td>⚠ 外部 hyper→沉默；BRCA2 證據薄；未測表現</td></tr>
+<tr class="row-safe"><td>C5</td><td>5mC vs 5hmC</td><td><b>已分軌（tsg @06-03）</b>：BRCA2 各 HP 5hmC 全低均勻 0.03–0.07、ASM 由 5mC 主導</td><td>Haffner11 <span class="rel sup">sup</span> · Chen15 <span class="rel sup">sup</span> · Halliwell25 <span class="rel sup">sup</span></td><td>✅ <b>gap CLOSED</b>：5hmC marginal、混合砍半確為 artifact、訊號是 5mC [src: tsg brca2_5mc_5hmc]</td></tr>
+<tr class="row-safe"><td>C6</td><td>LOH/CN de-confound</td><td>strong-ASM=LOH→低覆蓋回歸極值；HP-axis held-constant CN；<b>已做 CN-partition（tsg @06-03）</b> d_within/d_allele/d_copy 四維+total_cn</td><td>Martin-Trujillo17 <span class="rel sup">sup</span> · Abante20 <span class="rel sup">sup</span></td><td>⚠ CNN vs CNL：d_copy 已拆 CN 成分（BRCA2 d_copy=−0.11）[src: tsg copy_partition]</td></tr>
+<tr class="row-warn"><td>C1</td><td>BRCA2 錨點</td><td><b>兩者並陳</b>：HP-axis Δβ=−0.122（含 allele/copy）／純 within-somatic d_within=−0.023（p=0.022，小但真，<b>hypo</b>）[tsg @06-03]</td><td>Fishchuk24 <span class="rel sup">sup</span> · Evans18 <span class="rel par">par</span></td><td>⚠ 外部 hyper→沉默；−0.122 是 HP-axis 總和、−0.023 才是最乾淨 somatic；未測表現</td></tr>
 <tr><td>C2</td><td>ASM in cancer</td><td>somatic-controlled HP-axis；稀有 0.34% 無方向</td><td>O'Neill24 <span class="rel par">par</span> · Do20 <span class="rel con">contradicts</span></td><td>⚠ 外部 ASM 增 5×、hypo 為主——口徑不同（germline/region vs 我們 somatic-controlled），不對齊正凸顯我們方法乾淨</td></tr>
 <tr><td>C4</td><td>ISM 工具定位</td><td>read-read 距離 + subclonal + LOH 耦合</td><td>MethPhaser24 <span class="rel par">par</span> · O'Neill24 <span class="rel sup">sup</span> · methclone/Epihet（量 disorder，見 §7B）</td><td>⚠ 工具因果相反（從甲基推 HP）或量 epipolymorphism（disorder）；ISM 的 haplotype-linked read-read 距離 niche 未被填</td></tr>
 <tr class="row-safe"><td>C7</td><td>甲基 filter 循環/無判別</td><td>LOSO 100% circularity（held-out −0.00012）+ O11 epipolymorphism AUC 0.845→0.530（n_reads 校正後崩）</td><td>Soneson14 <span class="rel sup">sup</span> · van de Mortel25 <span class="rel sup">sup</span></td><td>✅ <b>強 CONFIRM</b>：filter 循環有 ML 方法學文獻背書（混淆-CV 虛假完美）；O11 崩潰被 Kerr23 覆蓋/核小體機制解釋</td></tr>
+<tr><td>C8</td><td>多位點 cis-test（破 self-selection）</td><td>tsg @06-03 全基因組 cis-scan 816 位點 → T3 cis-candidate 60 / T2 196 / T0 560；survivor-permutation 4 genuine（chr17/18/20/BRCA2 perm p 0.001–0.024）</td><td>—（內部方法）</td><td>✅ <b>BRCA2 非孤例</b>（60 cis-candidate，多為 needs-causation；4 過 permutation）[src: tsg cis_scan_full]</td></tr>
 </tbody>
 </table>
 <div class="callout-warning"><b>這張表怎麼用</b>：最硬的對外故事 = <b>C3 + C5 + C6</b>（外部強佐證困難真實、該分軌、CN de-confound 必要）；C1 講錨點必帶方向與表現的誠實 caveat；<b>C2 的反例（Do 2020）要主動講</b>——把「我們為何只看到稀有殘餘」歸因於 HP-axis 把 germline allelic methylation 與 CN held-constant。主動講反例 = 防守最硬的一招。</div>
@@ -239,7 +240,7 @@ tr.row-bug td { background: #FEF2F0; } tr.row-safe td { background: #F0FDF4; } t
 
 <!-- S8 -->
 <h2 id="s8"><span class="h-num">8</span>前路</h2>
-<p><b>外部文獻直接點出的 3 個便宜補強</b>（都加固論文）：① <b>5mC/5hmC 分軌</b>（C5）對 ~26 strong 位點分跑、加 5hmC FP 控制；② <b>CNN-LOH vs CNL-LOH 區分</b>（C6 新 caveat）；③ <b>多位點 cis-test</b>（C1 self-selection）對 ZAR1L + regime-A 位點也跑 normal-anchored cis-test。</p>
+<div class="callout-success"><b>3 個補強 → ✅ 已在 active <code>tsg_promoter_asm_reviewer</code> project @2026-06-03 跑完（14:16 快照；project 仍 active，數字可能再動）</b>：① <b>5mC/5hmC 分軌</b> ✅ 5hmC marginal（0.03–0.07）、ASM 是 5mC；② <b>CN-partition</b> ✅ 四維分解（d_within/d_allele/d_copy）+ total_cn；③ <b>多位點 cis-test</b> ✅ 816 位點 → 60 T3 cis-candidate + 4 survivor、破 BRCA2 self-selection。<b>正式投稿前以 tsg 定稿數字為準。</b></div>
 <p><b>投稿定位</b>：read-level epigenetic &amp; haplotype characterization + tooling 論文。賣點 = phasing 主軸 Grade A + ISM read-read 距離/subclonal niche + 誠實負結果方法學。<b>稀有但真實 + 把會被質疑的點自己先關掉。</b></p>
 
 <!-- refs -->
