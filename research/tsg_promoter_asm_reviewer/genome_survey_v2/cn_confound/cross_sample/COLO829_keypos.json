@@ -1,0 +1,1671 @@
+{
+  "meta": {
+    "script": "57_cross_sample_keypos.py",
+    "sample": "COLO829",
+    "cancer_type": "melanoma",
+    "task_type": "A pilot (targeted cross-sample)",
+    "bam": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/COLO829/paired_full/20260315_COLO829_paired_full_full_complete_matrix/longphase_s/COLO829_tagged.bam",
+    "somatic_vcf": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/COLO829/paired_full/20260315_COLO829_paired_full_full_complete_matrix/longphase_s/somatic_pass.vcf.gz",
+    "ref": "/big8_disk/ref/GRCh38_no_alt_analysis_set.fasta",
+    "window": 600,
+    "min_n": 3,
+    "som_tol": 5,
+    "mod_thr": 0.5,
+    "n_key_positions": 38,
+    "method": "validated pysam (54 crossval Pearson=1.0); 5mC primary, 5hmC separate; HP:Z split"
+  },
+  "aggregates": {
+    "n_positions": 38,
+    "n_somatic_in_sample": 0,
+    "n_with_somatic_subhap": 28,
+    "n_hp_axis_computable": 5,
+    "n_germline_delta_computable": 23,
+    "n_covered_ge10reads": 38
+  },
+  "per_position": [
+    {
+      "chrom": "chr2",
+      "pos": 89763668,
+      "gene": "ABCD1P1",
+      "set": "regimeA_tierA",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "",
+      "hcc1395_delta": -0.1942,
+      "hcc1395_ari": 0.6689908392982976,
+      "n_reads_window": 53,
+      "n_untagged": 1,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1",
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 16,
+          "beta": 0.0517,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0706
+        },
+        "1-1": {
+          "n": 12,
+          "beta": 0.061,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0903
+        },
+        "2": {
+          "n": 16,
+          "beta": 0.0313,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0798
+        },
+        "2-1": {
+          "n": 8,
+          "beta": 0.0551,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0684
+        },
+        "untagged": {
+          "n": 1,
+          "beta": 0.0007,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0529
+        }
+      },
+      "hp_axis_delta": 0.0238,
+      "hp_axis_info": "beta(2-1)=0.0551 - beta(2)=0.0313",
+      "germline_delta": -0.0204,
+      "germline_info": "beta(HP2)=0.0313 - beta(HP1)=0.0517"
+    },
+    {
+      "chrom": "chr2",
+      "pos": 89763903,
+      "gene": "ABCD1P1",
+      "set": "regimeA_tierA",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "",
+      "hcc1395_delta": -0.1666,
+      "hcc1395_ari": 0.6689908392982976,
+      "n_reads_window": 53,
+      "n_untagged": 1,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1",
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 16,
+          "beta": 0.0619,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0725
+        },
+        "1-1": {
+          "n": 12,
+          "beta": 0.0924,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0954
+        },
+        "2": {
+          "n": 16,
+          "beta": 0.0314,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0778
+        },
+        "2-1": {
+          "n": 8,
+          "beta": 0.0539,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0837
+        },
+        "untagged": {
+          "n": 1,
+          "beta": 0.0,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0289
+        }
+      },
+      "hp_axis_delta": 0.0225,
+      "hp_axis_info": "beta(2-1)=0.0539 - beta(2)=0.0314",
+      "germline_delta": -0.0305,
+      "germline_info": "beta(HP2)=0.0314 - beta(HP1)=0.0619"
+    },
+    {
+      "chrom": "chr3",
+      "pos": 181696093,
+      "gene": "SOX2",
+      "set": "regimeA_tierA",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "",
+      "hcc1395_delta": -0.1103,
+      "hcc1395_ari": 0.6031705907843421,
+      "n_reads_window": 42,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 25,
+          "beta": 0.8451,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.1261
+        },
+        "1-1": {
+          "n": 1,
+          "beta": 0.7894,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.1578
+        },
+        "2": {
+          "n": 16,
+          "beta": 0.7934,
+          "frac_meth": 0.9375,
+          "beta_5hmC": 0.1343
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": -0.0517,
+      "germline_info": "beta(HP2)=0.7934 - beta(HP1)=0.8451"
+    },
+    {
+      "chrom": "chr4",
+      "pos": 88378565,
+      "gene": "HERC6",
+      "set": "regimeA_tierA",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "",
+      "hcc1395_delta": 0.091,
+      "hcc1395_ari": 1.0,
+      "n_reads_window": 46,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 7,
+          "beta": 0.2224,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1257
+        },
+        "1-1": {
+          "n": 14,
+          "beta": 0.342,
+          "frac_meth": 0.0714,
+          "beta_5hmC": 0.1045
+        },
+        "2": {
+          "n": 24,
+          "beta": 0.3437,
+          "frac_meth": 0.0833,
+          "beta_5hmC": 0.0983
+        }
+      },
+      "hp_axis_delta": 0.1196,
+      "hp_axis_info": "beta(1-1)=0.342 - beta(1)=0.2224",
+      "germline_delta": 0.1213,
+      "germline_info": "beta(HP2)=0.3437 - beta(HP1)=0.2224"
+    },
+    {
+      "chrom": "chr5",
+      "pos": 3031739,
+      "gene": "LOC105374621",
+      "set": "regimeA_tierA",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "",
+      "hcc1395_delta": 0.0586,
+      "hcc1395_ari": 0.5046711403865665,
+      "n_reads_window": 19,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 10,
+          "beta": 0.0019,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0577
+        },
+        "1-1": {
+          "n": 9,
+          "beta": 0.0086,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0448
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr7",
+      "pos": 62336585,
+      "gene": "RNU6-417P",
+      "set": "regimeA_tierA",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "",
+      "hcc1395_delta": -0.214,
+      "hcc1395_ari": 0.45998149867276633,
+      "n_reads_window": 34,
+      "n_untagged": 5,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 5,
+          "beta": 0.0221,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0581
+        },
+        "1-1": {
+          "n": 5,
+          "beta": 0.0316,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.049
+        },
+        "2": {
+          "n": 19,
+          "beta": 0.0218,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1101
+        },
+        "untagged": {
+          "n": 5,
+          "beta": 0.0247,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1482
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": -0.0003,
+      "germline_info": "beta(HP2)=0.0218 - beta(HP1)=0.0221"
+    },
+    {
+      "chrom": "chr7",
+      "pos": 157865097,
+      "gene": "PTPRN2-AS1",
+      "set": "regimeA_tierA",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "",
+      "hcc1395_delta": -0.1215,
+      "hcc1395_ari": 0.5866471497113117,
+      "n_reads_window": 25,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": false,
+      "subhap_tags": [],
+      "hp_groups": {
+        "2": {
+          "n": 25,
+          "beta": 0.0253,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0594
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr7",
+      "pos": 27204619,
+      "gene": "HOTTIP",
+      "set": "regimeA_tierA",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "",
+      "hcc1395_delta": -0.0835,
+      "hcc1395_ari": 1.0,
+      "n_reads_window": 59,
+      "n_untagged": 4,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 24,
+          "beta": 0.7204,
+          "frac_meth": 0.9583,
+          "beta_5hmC": 0.1386
+        },
+        "2": {
+          "n": 27,
+          "beta": 0.7309,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.1342
+        },
+        "2-1": {
+          "n": 2,
+          "beta": 0.7799,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.1262
+        },
+        "untagged": {
+          "n": 4,
+          "beta": 0.619,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.1391
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": 0.0105,
+      "germline_info": "beta(HP2)=0.7309 - beta(HP1)=0.7204"
+    },
+    {
+      "chrom": "chr7",
+      "pos": 157483647,
+      "gene": "LOC101927914",
+      "set": "regimeA_tierA",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "",
+      "hcc1395_delta": -0.0754,
+      "hcc1395_ari": 0.7134378145614311,
+      "n_reads_window": 20,
+      "n_untagged": 1,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "2-1"
+      ],
+      "hp_groups": {
+        "2": {
+          "n": 15,
+          "beta": 0.2953,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0887
+        },
+        "2-1": {
+          "n": 4,
+          "beta": 0.3005,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1101
+        },
+        "untagged": {
+          "n": 0,
+          "beta": null,
+          "frac_meth": null,
+          "beta_5hmC": null
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr7",
+      "pos": 159023938,
+      "gene": "LINC00689",
+      "set": "regimeA_tierA",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "",
+      "hcc1395_delta": 0.0619,
+      "hcc1395_ari": 0.5466471626265441,
+      "n_reads_window": 17,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": false,
+      "subhap_tags": [],
+      "hp_groups": {
+        "2": {
+          "n": 17,
+          "beta": 0.5566,
+          "frac_meth": 0.6471,
+          "beta_5hmC": 0.1618
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr9",
+      "pos": 95427087,
+      "gene": "LOC105376156",
+      "set": "regimeA_tierA",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "",
+      "hcc1395_delta": -0.0823,
+      "hcc1395_ari": 0.3266845744984855,
+      "n_reads_window": 54,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 4,
+          "beta": 0.4227,
+          "frac_meth": 0.25,
+          "beta_5hmC": 0.1365
+        },
+        "1-1": {
+          "n": 16,
+          "beta": 0.1631,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1109
+        },
+        "2": {
+          "n": 34,
+          "beta": 0.32,
+          "frac_meth": 0.1471,
+          "beta_5hmC": 0.1605
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": -0.1027,
+      "germline_info": "beta(HP2)=0.32 - beta(HP1)=0.4227"
+    },
+    {
+      "chrom": "chr9",
+      "pos": 137436072,
+      "gene": "ENTPD8",
+      "set": "regimeA_tierA",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "",
+      "hcc1395_delta": 0.0652,
+      "hcc1395_ari": 0.7503471257983894,
+      "n_reads_window": 43,
+      "n_untagged": 2,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": false,
+      "subhap_tags": [],
+      "hp_groups": {
+        "1": {
+          "n": 16,
+          "beta": 0.4694,
+          "frac_meth": 0.375,
+          "beta_5hmC": 0.1396
+        },
+        "2": {
+          "n": 24,
+          "beta": 0.4579,
+          "frac_meth": 0.2083,
+          "beta_5hmC": 0.1475
+        },
+        "untagged": {
+          "n": 2,
+          "beta": 0.3094,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.3088
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": -0.0115,
+      "germline_info": "beta(HP2)=0.4579 - beta(HP1)=0.4694"
+    },
+    {
+      "chrom": "chr9",
+      "pos": 65466642,
+      "gene": "LOC105379446",
+      "set": "regimeA_tierA",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "",
+      "hcc1395_delta": 0.0775,
+      "hcc1395_ari": 0.8097742035261367,
+      "n_reads_window": 41,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 4,
+          "beta": 0.7779,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.1518
+        },
+        "1-1": {
+          "n": 17,
+          "beta": 0.7901,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.115
+        },
+        "2": {
+          "n": 20,
+          "beta": 0.854,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.0907
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": 0.0761,
+      "germline_info": "beta(HP2)=0.854 - beta(HP1)=0.7779"
+    },
+    {
+      "chrom": "chr10",
+      "pos": 42756004,
+      "gene": "LOC283028",
+      "set": "regimeA_tierA",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "",
+      "hcc1395_delta": -0.1105,
+      "hcc1395_ari": 0.3580257370907314,
+      "n_reads_window": 26,
+      "n_untagged": 2,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": false,
+      "subhap_tags": [],
+      "hp_groups": {
+        "1": {
+          "n": 2,
+          "beta": 0.5275,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.1694
+        },
+        "2": {
+          "n": 22,
+          "beta": 0.4374,
+          "frac_meth": 0.3636,
+          "beta_5hmC": 0.1574
+        },
+        "untagged": {
+          "n": 2,
+          "beta": 0.3676,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.2706
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr11",
+      "pos": 56496394,
+      "gene": "LOC100128210",
+      "set": "regimeA_tierA",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "",
+      "hcc1395_delta": 0.0889,
+      "hcc1395_ari": 0.7898523286633851,
+      "n_reads_window": 32,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 9,
+          "beta": 0.7733,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.0953
+        },
+        "1-1": {
+          "n": 23,
+          "beta": 0.8103,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.103
+        }
+      },
+      "hp_axis_delta": 0.037,
+      "hp_axis_info": "beta(1-1)=0.8103 - beta(1)=0.7733",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr15",
+      "pos": 89369159,
+      "gene": "MIR9-3HG",
+      "set": "regimeA_tierA",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "",
+      "hcc1395_delta": 0.0548,
+      "hcc1395_ari": 0.6220599807641864,
+      "n_reads_window": 52,
+      "n_untagged": 7,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1",
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 10,
+          "beta": 0.0792,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0619
+        },
+        "1-1": {
+          "n": 13,
+          "beta": 0.1024,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0683
+        },
+        "2": {
+          "n": 1,
+          "beta": 0.0545,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0558
+        },
+        "2-1": {
+          "n": 18,
+          "beta": 0.0692,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0683
+        },
+        "3": {
+          "n": 3,
+          "beta": 0.0731,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0474
+        },
+        "untagged": {
+          "n": 7,
+          "beta": 0.1362,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0705
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr15",
+      "pos": 78131522,
+      "gene": "CIB2",
+      "set": "regimeA_tierA",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "",
+      "hcc1395_delta": 0.0756,
+      "hcc1395_ari": 0.6683069176632145,
+      "n_reads_window": 29,
+      "n_untagged": 5,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 23,
+          "beta": 0.0845,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0906
+        },
+        "1-1": {
+          "n": 1,
+          "beta": 0.0321,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.098
+        },
+        "untagged": {
+          "n": 5,
+          "beta": 0.1289,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0956
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr16",
+      "pos": 1173821,
+      "gene": "LOC124903622",
+      "set": "regimeA_tierA",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "",
+      "hcc1395_delta": 0.0758,
+      "hcc1395_ari": 0.7398297997933986,
+      "n_reads_window": 39,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": false,
+      "subhap_tags": [],
+      "hp_groups": {
+        "1": {
+          "n": 20,
+          "beta": 0.1111,
+          "frac_meth": 0.05,
+          "beta_5hmC": 0.0716
+        },
+        "2": {
+          "n": 19,
+          "beta": 0.1156,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0831
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": 0.0045,
+      "germline_info": "beta(HP2)=0.1156 - beta(HP1)=0.1111"
+    },
+    {
+      "chrom": "chr17",
+      "pos": 79991709,
+      "gene": "TBC1D16",
+      "set": "regimeA_tierA",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "",
+      "hcc1395_delta": 0.1345,
+      "hcc1395_ari": 0.36648680949786455,
+      "n_reads_window": 49,
+      "n_untagged": 3,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 24,
+          "beta": 0.2537,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1117
+        },
+        "2": {
+          "n": 12,
+          "beta": 0.2291,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1331
+        },
+        "2-1": {
+          "n": 10,
+          "beta": 0.2096,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1032
+        },
+        "untagged": {
+          "n": 3,
+          "beta": 0.2429,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0937
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": -0.0246,
+      "germline_info": "beta(HP2)=0.2291 - beta(HP1)=0.2537"
+    },
+    {
+      "chrom": "chr17",
+      "pos": 79991714,
+      "gene": "TBC1D16",
+      "set": "regimeA_tierA",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "",
+      "hcc1395_delta": 0.138,
+      "hcc1395_ari": 0.36648680949786455,
+      "n_reads_window": 49,
+      "n_untagged": 3,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 24,
+          "beta": 0.2536,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1115
+        },
+        "2": {
+          "n": 12,
+          "beta": 0.2291,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1331
+        },
+        "2-1": {
+          "n": 10,
+          "beta": 0.2096,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1032
+        },
+        "untagged": {
+          "n": 3,
+          "beta": 0.2429,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0937
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": -0.0245,
+      "germline_info": "beta(HP2)=0.2291 - beta(HP1)=0.2536"
+    },
+    {
+      "chrom": "chr17",
+      "pos": 79992185,
+      "gene": "TBC1D16",
+      "set": "regimeA_tierA",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "",
+      "hcc1395_delta": 0.1489,
+      "hcc1395_ari": 0.42198511554267676,
+      "n_reads_window": 48,
+      "n_untagged": 3,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 24,
+          "beta": 0.2675,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1274
+        },
+        "2": {
+          "n": 11,
+          "beta": 0.2137,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1127
+        },
+        "2-1": {
+          "n": 10,
+          "beta": 0.2413,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1173
+        },
+        "untagged": {
+          "n": 3,
+          "beta": 0.3534,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1061
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": -0.0538,
+      "germline_info": "beta(HP2)=0.2137 - beta(HP1)=0.2675"
+    },
+    {
+      "chrom": "chr19",
+      "pos": 35993975,
+      "gene": "SDHAF1",
+      "set": "regimeA_tierA",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "",
+      "hcc1395_delta": -0.0124,
+      "hcc1395_ari": 0.31438356164383563,
+      "n_reads_window": 34,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": false,
+      "subhap_tags": [],
+      "hp_groups": {
+        "1": {
+          "n": 27,
+          "beta": 0.8287,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.1285
+        },
+        "2": {
+          "n": 7,
+          "beta": 0.8336,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.1138
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": 0.0049,
+      "germline_info": "beta(HP2)=0.8336 - beta(HP1)=0.8287"
+    },
+    {
+      "chrom": "chr20",
+      "pos": 29325050,
+      "gene": "DUX4L33",
+      "set": "regimeA_tierA",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "",
+      "hcc1395_delta": -0.0903,
+      "hcc1395_ari": 0.7328947368421053,
+      "n_reads_window": 96,
+      "n_untagged": 31,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 30,
+          "beta": 0.4951,
+          "frac_meth": 0.5,
+          "beta_5hmC": 0.1542
+        },
+        "1-1": {
+          "n": 3,
+          "beta": 0.544,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.1856
+        },
+        "2": {
+          "n": 32,
+          "beta": 0.2127,
+          "frac_meth": 0.0312,
+          "beta_5hmC": 0.11
+        },
+        "untagged": {
+          "n": 31,
+          "beta": 0.4641,
+          "frac_meth": 0.6452,
+          "beta_5hmC": 0.1626
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": -0.2824,
+      "germline_info": "beta(HP2)=0.2127 - beta(HP1)=0.4951"
+    },
+    {
+      "chrom": "chr10",
+      "pos": 92741604,
+      "gene": "HHEX",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "cnLOH",
+      "hcc1395_delta": 0.1936,
+      "hcc1395_ari": 0.425,
+      "n_reads_window": 19,
+      "n_untagged": 1,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": false,
+      "subhap_tags": [],
+      "hp_groups": {
+        "1": {
+          "n": 18,
+          "beta": 0.7401,
+          "frac_meth": 0.9444,
+          "beta_5hmC": 0.16
+        },
+        "untagged": {
+          "n": 1,
+          "beta": 0.7259,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.2462
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr12",
+      "pos": 113803619,
+      "gene": "DYNLL1P4",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "cnLOH",
+      "hcc1395_delta": 0.1646,
+      "hcc1395_ari": 0.613,
+      "n_reads_window": 43,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1",
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 5,
+          "beta": 0.6596,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.2132
+        },
+        "1-1": {
+          "n": 14,
+          "beta": 0.7464,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.1361
+        },
+        "2": {
+          "n": 22,
+          "beta": 0.6798,
+          "frac_meth": 0.9545,
+          "beta_5hmC": 0.1489
+        },
+        "2-1": {
+          "n": 2,
+          "beta": 0.7142,
+          "frac_meth": 1.0,
+          "beta_5hmC": 0.1404
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": 0.0202,
+      "germline_info": "beta(HP2)=0.6798 - beta(HP1)=0.6596"
+    },
+    {
+      "chrom": "chr10",
+      "pos": 24044239,
+      "gene": "NUP35P1",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "cnLOH",
+      "hcc1395_delta": -0.1045,
+      "hcc1395_ari": 0.535,
+      "n_reads_window": 31,
+      "n_untagged": 7,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 20,
+          "beta": 0.005,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.054
+        },
+        "1-1": {
+          "n": 2,
+          "beta": 0.0,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0563
+        },
+        "2": {
+          "n": 2,
+          "beta": 0.0011,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1441
+        },
+        "untagged": {
+          "n": 7,
+          "beta": 0.0002,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.044
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr12",
+      "pos": 72171986,
+      "gene": "TRHDE",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "cnLOH",
+      "hcc1395_delta": -0.2886,
+      "hcc1395_ari": 0.789,
+      "n_reads_window": 45,
+      "n_untagged": 40,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1"
+      ],
+      "hp_groups": {
+        "1-1": {
+          "n": 2,
+          "beta": 0.0,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.022
+        },
+        "2": {
+          "n": 3,
+          "beta": 0.0027,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0562
+        },
+        "untagged": {
+          "n": 40,
+          "beta": 0.0068,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0423
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr11",
+      "pos": 2146993,
+      "gene": "IGF2",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "cnLOH",
+      "hcc1395_delta": -0.0758,
+      "hcc1395_ari": 0.892,
+      "n_reads_window": 28,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": false,
+      "subhap_tags": [],
+      "hp_groups": {
+        "1": {
+          "n": 28,
+          "beta": 0.0423,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0584
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr12",
+      "pos": 72204591,
+      "gene": "TRHDE",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "cnLOH",
+      "hcc1395_delta": -0.1561,
+      "hcc1395_ari": 0.439,
+      "n_reads_window": 39,
+      "n_untagged": 27,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1",
+        "2-1"
+      ],
+      "hp_groups": {
+        "1-1": {
+          "n": 3,
+          "beta": 0.0742,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0431
+        },
+        "2-1": {
+          "n": 9,
+          "beta": 0.0297,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0997
+        },
+        "untagged": {
+          "n": 25,
+          "beta": 0.0261,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0365
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr22",
+      "pos": 16664086,
+      "gene": "PARP4P3",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "cnLOH",
+      "hcc1395_delta": 0.1055,
+      "hcc1395_ari": 0.508,
+      "n_reads_window": 71,
+      "n_untagged": 1,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1",
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 26,
+          "beta": 0.0156,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0568
+        },
+        "1-1": {
+          "n": 18,
+          "beta": 0.0087,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0491
+        },
+        "2-1": {
+          "n": 26,
+          "beta": 0.0301,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0459
+        },
+        "untagged": {
+          "n": 1,
+          "beta": 0.0,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0319
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr2",
+      "pos": 23386385,
+      "gene": "KLHL29",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "cnLOH",
+      "hcc1395_delta": -0.1516,
+      "hcc1395_ari": 0.531,
+      "n_reads_window": 33,
+      "n_untagged": 4,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": false,
+      "subhap_tags": [],
+      "hp_groups": {
+        "1": {
+          "n": 21,
+          "beta": 0.0068,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.05
+        },
+        "2": {
+          "n": 8,
+          "beta": 0.0699,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0788
+        },
+        "untagged": {
+          "n": 4,
+          "beta": 0.0234,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0788
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": 0.0631,
+      "germline_info": "beta(HP2)=0.0699 - beta(HP1)=0.0068"
+    },
+    {
+      "chrom": "chr13",
+      "pos": 78534486,
+      "gene": "ELOCP23",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "cnLOH",
+      "hcc1395_delta": -0.2046,
+      "hcc1395_ari": 0.376,
+      "n_reads_window": 39,
+      "n_untagged": 1,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1",
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 13,
+          "beta": 0.0117,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0554
+        },
+        "1-1": {
+          "n": 5,
+          "beta": 0.0185,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0835
+        },
+        "2": {
+          "n": 19,
+          "beta": 0.0249,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1168
+        },
+        "2-1": {
+          "n": 1,
+          "beta": 0.0,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0246
+        },
+        "untagged": {
+          "n": 1,
+          "beta": 0.0265,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0392
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": 0.0132,
+      "germline_info": "beta(HP2)=0.0249 - beta(HP1)=0.0117"
+    },
+    {
+      "chrom": "chr17",
+      "pos": 79507599,
+      "gene": "RBFOX3",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "gainLOH",
+      "hcc1395_delta": -0.0771,
+      "hcc1395_ari": 0.52,
+      "n_reads_window": 43,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 31,
+          "beta": 0.099,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0578
+        },
+        "2": {
+          "n": 7,
+          "beta": 0.0755,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0585
+        },
+        "2-1": {
+          "n": 5,
+          "beta": 0.043,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.037
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": -0.0235,
+      "germline_info": "beta(HP2)=0.0755 - beta(HP1)=0.099"
+    },
+    {
+      "chrom": "chr3",
+      "pos": 50530225,
+      "gene": "LOC105377083",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "gainLOH",
+      "hcc1395_delta": -0.113,
+      "hcc1395_ari": 0.728,
+      "n_reads_window": 42,
+      "n_untagged": 9,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "1-1",
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 7,
+          "beta": 0.1129,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1005
+        },
+        "1-1": {
+          "n": 15,
+          "beta": 0.1134,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0697
+        },
+        "2": {
+          "n": 10,
+          "beta": 0.0644,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0629
+        },
+        "2-1": {
+          "n": 1,
+          "beta": 0.0743,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0511
+        },
+        "untagged": {
+          "n": 8,
+          "beta": 0.1131,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0681
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": -0.0485,
+      "germline_info": "beta(HP2)=0.0644 - beta(HP1)=0.1129"
+    },
+    {
+      "chrom": "chr8",
+      "pos": 95908980,
+      "gene": "LOC107986957",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "gainLOH",
+      "hcc1395_delta": 0.1068,
+      "hcc1395_ari": 0.366,
+      "n_reads_window": 30,
+      "n_untagged": 1,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 17,
+          "beta": 0.0855,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0796
+        },
+        "2-1": {
+          "n": 12,
+          "beta": 0.0239,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.064
+        },
+        "untagged": {
+          "n": 1,
+          "beta": 0.0641,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.2
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": null,
+      "germline_info": null
+    },
+    {
+      "chrom": "chr8",
+      "pos": 82258105,
+      "gene": "HNRNPA1P4",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "gainLOH",
+      "hcc1395_delta": 0.1427,
+      "hcc1395_ari": 0.703,
+      "n_reads_window": 38,
+      "n_untagged": 6,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 22,
+          "beta": 0.0797,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0645
+        },
+        "2": {
+          "n": 4,
+          "beta": 0.0582,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0789
+        },
+        "2-1": {
+          "n": 6,
+          "beta": 0.0905,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0725
+        },
+        "untagged": {
+          "n": 6,
+          "beta": 0.0256,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0375
+        }
+      },
+      "hp_axis_delta": 0.0323,
+      "hp_axis_info": "beta(2-1)=0.0905 - beta(2)=0.0582",
+      "germline_delta": -0.0215,
+      "germline_info": "beta(HP2)=0.0582 - beta(HP1)=0.0797"
+    },
+    {
+      "chrom": "chr19",
+      "pos": 51245519,
+      "gene": "SIGLECL1",
+      "set": "LOH_candidate_subclone",
+      "axis": "HP2_vs_HP2-1",
+      "cn_class": "gainLOH",
+      "hcc1395_delta": -0.0893,
+      "hcc1395_ari": 0.425,
+      "n_reads_window": 33,
+      "n_untagged": 4,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": true,
+      "subhap_tags": [
+        "2-1"
+      ],
+      "hp_groups": {
+        "1": {
+          "n": 18,
+          "beta": 0.1156,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0495
+        },
+        "2": {
+          "n": 9,
+          "beta": 0.1712,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0691
+        },
+        "2-1": {
+          "n": 2,
+          "beta": 0.1347,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0814
+        },
+        "untagged": {
+          "n": 4,
+          "beta": 0.1437,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0432
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": 0.0556,
+      "germline_info": "beta(HP2)=0.1712 - beta(HP1)=0.1156"
+    },
+    {
+      "chrom": "chr13",
+      "pos": 32315128,
+      "gene": "BRCA2/ZAR1L",
+      "set": "flagship_brca2",
+      "axis": "HP1_vs_HP1-1",
+      "cn_class": "",
+      "hcc1395_delta": -0.122,
+      "hcc1395_ari": 0.79,
+      "n_reads_window": 39,
+      "n_untagged": 0,
+      "somatic_in_sample": false,
+      "somatic_info": "",
+      "has_somatic_subhap": false,
+      "subhap_tags": [],
+      "hp_groups": {
+        "1": {
+          "n": 19,
+          "beta": 0.3026,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.1001
+        },
+        "2": {
+          "n": 20,
+          "beta": 0.255,
+          "frac_meth": 0.0,
+          "beta_5hmC": 0.0864
+        }
+      },
+      "hp_axis_delta": null,
+      "hp_axis_info": "subhap_absent_or_lowN",
+      "germline_delta": -0.0476,
+      "germline_info": "beta(HP2)=0.255 - beta(HP1)=0.3026"
+    }
+  ]
+}

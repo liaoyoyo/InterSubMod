@@ -1,0 +1,161 @@
+{
+  "meta": {
+    "script": "59_genomewide_asm_rate.py",
+    "sample": "COLO829",
+    "cancer_type": "melanoma",
+    "task_type": "A pilot expansion (genome-wide rate)",
+    "bam": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/COLO829/paired_full/20260315_COLO829_paired_full_full_complete_matrix/longphase_s/COLO829_tagged.bam",
+    "tp_vcf": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/COLO829/paired_full/20260315_COLO829_paired_full_full_complete_matrix/longphase_s/filtered_snv_tp.vcf.gz",
+    "window": 600,
+    "min_n": 3,
+    "strong_threshold": 0.1,
+    "n_som_target": 2000,
+    "seed": 42,
+    "method": "own TP somatic SNVs, random subset; somatic-controlled HP-axis \u0394\u03b2 = beta(subhap)-beta(main), 5mC-only, validated pysam"
+  },
+  "genomewide_somatic_asm": {
+    "n_tp_total": 35185,
+    "n_sampled": 2000,
+    "n_evaluable": 802,
+    "n_no_subhap": 106,
+    "n_low_cov": 1092,
+    "n_strong_asm": 184,
+    "rate_strong_asm": 0.2294,
+    "n_strong_null": 103,
+    "rate_strong_null": 0.1284,
+    "rate_excess_over_null": 0.101,
+    "median_abs_delta": 0.0374,
+    "median_abs_null": 0.0496,
+    "mean_delta": 0.0036,
+    "frac_hypo": 0.4788,
+    "frac_hyper": 0.5175,
+    "p10_abs": 0.0038,
+    "p90_abs": 0.1638
+  },
+  "imprinted_dmr_panel": {
+    "n_evaluable": 5,
+    "n_strong": 4,
+    "loci": [
+      {
+        "name": "H19/IGF2_ICR",
+        "region": "chr11:1999000-2004000",
+        "germline_delta": null,
+        "best_center": null,
+        "n_hp1": null,
+        "n_hp2": null,
+        "covered": true,
+        "note": "uncomputable_germline (likely LOH/single-hap)"
+      },
+      {
+        "name": "IGF2",
+        "region": "chr11:2129000-2148000",
+        "germline_delta": null,
+        "best_center": null,
+        "n_hp1": null,
+        "n_hp2": null,
+        "covered": true,
+        "note": "uncomputable_germline (likely LOH/single-hap)"
+      },
+      {
+        "name": "KCNQ1OT1_KvDMR",
+        "region": "chr11:2698000-2722000",
+        "germline_delta": null,
+        "best_center": null,
+        "n_hp1": null,
+        "n_hp2": null,
+        "covered": true,
+        "note": "uncomputable_germline (likely LOH/single-hap)"
+      },
+      {
+        "name": "MEG3_DLK1",
+        "region": "chr14:100808000-100828000",
+        "germline_delta": null,
+        "best_center": null,
+        "n_hp1": null,
+        "n_hp2": null,
+        "covered": true,
+        "note": "uncomputable_germline (likely LOH/single-hap)"
+      },
+      {
+        "name": "SNRPN_PWS",
+        "region": "chr15:24954000-25069000",
+        "germline_delta": null,
+        "best_center": null,
+        "n_hp1": null,
+        "n_hp2": null,
+        "covered": true,
+        "note": "uncomputable_germline (likely LOH/single-hap)"
+      },
+      {
+        "name": "GNAS",
+        "region": "chr20:58839000-58912000",
+        "germline_delta": 0.1472,
+        "best_center": "chr20:58860114",
+        "n_hp1": 11,
+        "n_hp2": 19,
+        "covered": true,
+        "note": "ok"
+      },
+      {
+        "name": "PEG3",
+        "region": "chr19:56792000-56840000",
+        "germline_delta": 0.0358,
+        "best_center": "chr19:56799285",
+        "n_hp1": 11,
+        "n_hp2": 4,
+        "covered": true,
+        "note": "ok"
+      },
+      {
+        "name": "PLAGL1_ZAC1",
+        "region": "chr6:144005000-144009000",
+        "germline_delta": -0.74,
+        "best_center": "chr6:144008000",
+        "n_hp1": 12,
+        "n_hp2": 11,
+        "covered": true,
+        "note": "ok"
+      },
+      {
+        "name": "GRB10",
+        "region": "chr7:50780000-50861000",
+        "germline_delta": -0.1084,
+        "best_center": "chr7:50826200",
+        "n_hp1": 20,
+        "n_hp2": 17,
+        "covered": true,
+        "note": "ok"
+      },
+      {
+        "name": "MEST_PEG1",
+        "region": "chr7:130490000-130540000",
+        "germline_delta": null,
+        "best_center": null,
+        "n_hp1": null,
+        "n_hp2": null,
+        "covered": true,
+        "note": "uncomputable_germline (likely LOH/single-hap)"
+      },
+      {
+        "name": "NNAT",
+        "region": "chr20:37520000-37530000",
+        "germline_delta": -0.2094,
+        "best_center": "chr20:37525628",
+        "n_hp1": 32,
+        "n_hp2": 5,
+        "covered": true,
+        "note": "ok"
+      },
+      {
+        "name": "PEG10",
+        "region": "chr7:94656000-94670000",
+        "germline_delta": null,
+        "best_center": null,
+        "n_hp1": null,
+        "n_hp2": null,
+        "covered": true,
+        "note": "uncomputable_germline (likely LOH/single-hap)"
+      }
+    ]
+  }
+}
