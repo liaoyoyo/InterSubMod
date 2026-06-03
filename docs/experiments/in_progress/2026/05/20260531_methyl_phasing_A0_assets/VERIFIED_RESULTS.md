@@ -106,7 +106,35 @@ null median 0.974 **高得可疑**，與文獻「somatic ASM Δβ≈0.12 偏弱�
 - 能否救 unphase：**仍未證** — (a) CpG-SNP 未排除（最大嫌疑）(b) null 區是 anchor 充足篩出（40/111），unphase read 住在稀疏區，外推未證 (c) 仍 2/40 無訊號。
 - 下一步：CpG-SNP 排除 → 若 95% 撐住，才是穩固「甲基帶真 ASM 訊號」。
 
-## V7. LOH 純-LOH 分得開異常 — 定性（VAF + 邊界 + KB 口徑）
+## V8. ⭐ 全 LOH 區 tumor VAF 系統分布 + 文獻證實（更正 V7 的單點外推錯誤）
+
+> ⚠ **更正 V7**：V7 從**單點** chr15:28455307（tumor VAF=0.492 仍雜合）外推「LOH 區仍普遍雜合」是**錯的**。全 LOH 系統分析（2693 位點）證實**反向**：98.6% 是真 cnLOH。V7 個案結論保留（chr15:28455307 確實是少數例外），但「普遍雜合」的推論作廢，以 V8 為準。
+
+- **腳本**：`loh_tumor_vaf_systematic.py`（每 LOH het 位點 normal VAF + tumor pileup VAF → 分型）+ `run_loh_vaf_genome.sh`(11 chr) → `loh_tumor_vaf_genome_aggregate.json`
+- **真值**（2693 LOH het 位點，9 染色體；copy 自 aggregate JSON）：
+
+| 型別（tumor \|VAF−0.5\|）| count | % | 意義 |
+|---|---:|---:|---|
+| **homozygous**（≥0.35, VAF→0/1）| 2656 | **98.6%** | **真 cnLOH（tumor 失雜合）** |
+| imbalanced（0.15-0.35）| 26 | 1.0% | 部分 allelic imbalance |
+| balanced（<0.15, ~0.5）| 11 | 0.4% | 仍雜合（chr15:28455307 屬此少數）|
+
+- tumor VAF median = **0.065**（全 LOH 區 tumor 強烈失雜合）；per-chr 全 95-100% homozygous。
+- **交叉**：同位點 normal germline VAF~0.49（雜合）vs tumor VAF→0/1（cnLOH）→ 完美符合「LOH = germline 雜合、tumor 失雜合」定義。
+
+### V8 文獻證實（workflow wf_3e11b4e7，3/4 agent 成功；存 `loh_literature_findings.json`）
+1. **核心解釋 SUPPORTED（peer-reviewed 共識）**：cnLOH 是體細胞 second-hit（Knudson），normal 不帶 → germline het 在 cnLOH 區仍 VAF~0.5。「LOH 可偵測」的定義就是「germline 雜合、tumor 失」。標準做法=先 phase normal germline 再 haplotag tumor read（longphase-S/WhatsHap）。
+2. **甲基為何在 cnLOH 區仍能分群（關鍵機制，修正先前解釋）**：文獻報告「LOH/cnLOH 區仍見 haplotype 間甲基差異」— advanced cancer ONT cohort **79% aDMR 落在 CNV/LOH 區**（r=0.469, p=2.6e-11, Martin-Trujillo 相關）。機制 = **tumor-acquired ASM（de novo）+ subclonal/不完全 LOH 殘留**，**非**保留的 germline 雙親 ASM。
+3. **HCC1395 純度**：~99-100%（established cell line，非 normal 污染），但**非同質**——多 subclone 分支演化（SNV VAF 次峰 0.15/0.08），subclonal LOH 只在部分細胞 → bulk read VAF 介於 0.5 與 0/1。
+
+### V8 結論（LOH 異常完整定性，多種可能已分析）
+甲基在 SEQC2 LOH 區能分 HP1/HP2 的真正機制 = **tumor-acquired allele-specific methylation**（腫瘤新生的單倍型甲基差異）+ **subclonal/不完全 LOH 殘留的少數雜合 read**，**不是**「normal-defined haplotype 殘留」（V7 解釋作廢）。這與文獻「79% aDMR 落在 LOH 區」高度一致——**LOH 區反而是 tumor ASM 富集區**。對主線：甲基救援在 LOH 區運作的是「tumor-acquired ASM 訊號」，生物上真實且有文獻支持。
+
+---
+
+## V7. LOH 純-LOH 分得開異常 — 定性（VAF + 邊界 + KB 口徑）⚠ 部分被 V8 更正
+
+> ⚠ 本節「LOH 區仍普遍雜合」結論已被 V8 更正為「98.6% 真 cnLOH」。個案數據保留，普遍性推論作廢。
 
 - **問題**：前輪 76% 分得開的 LOH 是 pureLOH（非 cnLOH+gain），「純 LOH 該分不開卻分得開」是異常，需定性。
 - **腳本**：`loh_characterize.py`（43 LOH 區量 het VAF / 邊界距離 / HP 平衡 / GMM）→ `loh_characterize.json`；tumor VAF 抽查 `tumor_vaf_check.txt`

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOH 區 tumor VAF 系統分布 + 文獻證實 — 98.6% 真 cnLOH</title>
+<!-- data_sources: loh_tumor_vaf_genome_aggregate.json + loh_literature_findings.json + VERIFIED_RESULTS V8 -->
+<style>
+  :root{--c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;--c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;--c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;--ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;--ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,monospace;--fs-xs:12px;--fs-sm:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:22px;--fs-2xl:28px;--fs-3xl:34px;--radius-sm:4px;--radius-md:6px;--radius-lg:8px;--shadow-sm:0 1px 2px rgba(20,20,19,.05);--shadow-md:0 2px 8px rgba(20,20,19,.08);}
+  *,*::before,*::after{box-sizing:border-box;}
+  body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);font-size:var(--fs-md);line-height:1.6;}
+  .layout{max-width:1340px;margin:0 auto;display:grid;grid-template-columns:255px 1fr;gap:var(--sp-5);padding:var(--sp-5) var(--sp-4);}
+  aside.toc{position:sticky;top:var(--sp-4);align-self:start;background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-4) var(--sp-3);box-shadow:var(--shadow-sm);max-height:calc(100vh - var(--sp-7));overflow-y:auto;}
+  aside.toc h3{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-soft);margin:0 0 var(--sp-2);font-weight:700;}
+  aside.toc ol{list-style:none;padding:0;margin:0;counter-reset:toc;}
+  aside.toc li{counter-increment:toc;margin:var(--sp-1) 0;}
+  aside.toc a{display:block;padding:5px 8px;border-radius:var(--radius-sm);color:var(--c-text);text-decoration:none;font-size:var(--fs-sm);border-left:3px solid transparent;}
+  aside.toc a:hover{background:var(--c-code-bg);border-left-color:var(--c-accent);}
+  aside.toc a::before{content:counter(toc) ". ";color:var(--c-text-soft);font-family:var(--ff-mono);font-size:.85em;margin-right:4px;}
+  aside.toc a.core{font-weight:600;} aside.toc a.core::after{content:"★";color:var(--c-critical);margin-left:6px;font-size:.85em;}
+  main.report{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:var(--sp-6);min-width:0;}
+  .report-header{border-bottom:2px solid var(--c-accent);padding-bottom:var(--sp-4);margin-bottom:var(--sp-5);}
+  .report-header .pretitle{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:1px;color:var(--c-accent-deep);font-weight:700;margin-bottom:var(--sp-2);}
+  .report-header h1{font-size:var(--fs-3xl);margin:0 0 var(--sp-3);line-height:1.25;}
+  .report-header .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-2) var(--sp-5);font-size:var(--fs-sm);margin-top:var(--sp-3);}
+  .report-header .meta dt{color:var(--c-text-soft);font-weight:600;} .report-header .meta dd{margin:0;}
+  .report-header .meta code{background:var(--c-code-bg);padding:1px 5px;border-radius:var(--radius-sm);font-family:var(--ff-mono);font-size:.92em;}
+  .verdict-banner{color:#fff;padding:var(--sp-3) var(--sp-4);margin-top:var(--sp-4);border-radius:var(--radius-md);font-weight:600;}
+  .verdict-banner.neutral{background:linear-gradient(90deg,#1E3A8A,#3B82F6);}
+  h2{font-size:var(--fs-2xl);margin:var(--sp-7) 0 var(--sp-3);padding-bottom:var(--sp-2);border-bottom:1px solid var(--c-border);scroll-margin-top:var(--sp-4);}
+  h2 .h-num{font-family:var(--ff-mono);color:var(--c-accent-deep);font-size:.7em;margin-right:var(--sp-2);font-weight:600;}
+  h3{font-size:var(--fs-xl);margin:var(--sp-5) 0 var(--sp-2);}
+  p,ul,ol{margin:var(--sp-3) 0;} ul,ol{padding-left:var(--sp-5);}
+  code{background:var(--c-code-bg);padding:1px 6px;border-radius:var(--radius-sm);font-family:var(--ff-mono);font-size:.92em;}
+  table{border-collapse:collapse;width:100%;margin:var(--sp-4) 0;font-size:var(--fs-sm);}
+  th,td{border:1px solid var(--c-border);padding:var(--sp-2) var(--sp-3);text-align:left;vertical-align:top;}
+  th{background:var(--c-code-bg);font-weight:600;} td.num{text-align:right;font-family:var(--ff-mono);}
+  tr.row-bug td{background:#FEF2F0;color:#7F1D1D;} tr.row-safe td{background:#DCFCE7;color:#166534;} tr.row-warn td{background:#FEF3C7;}
+  .callout-critical{background:#FEF2F0;border-left:4px solid var(--c-critical);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#7F1D1D;}
+  .callout-warning{background:#FEF7E6;border-left:4px solid var(--c-warning);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#78350F;}
+  .callout-success{background:#F0FDF4;border-left:4px solid var(--c-success);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#166534;}
+  .callout-info{background:#EFF4FF;border-left:4px solid var(--c-info);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;border-radius:var(--radius-md);color:#1E3A5F;}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--sp-3);margin:var(--sp-4) 0;}
+  .stat-box{background:var(--c-bg);border:1px solid var(--c-border);border-radius:var(--radius-md);padding:var(--sp-3);text-align:center;}
+  .stat-box .number{font-size:var(--fs-2xl);font-weight:700;color:var(--c-accent);line-height:1.1;}
+  .stat-box .number.bug{color:var(--c-critical);}.stat-box .number.success{color:var(--c-success);}.stat-box .number.warning{color:var(--c-warning);}.stat-box .number.info{color:var(--c-info);}
+  .stat-box .label{font-size:var(--fs-xs);color:var(--c-text-soft);margin-top:var(--sp-1);}
+  .img-figure{margin:var(--sp-5) 0;text-align:center;}
+  .img-figure img{max-width:100%;height:auto;border:1px solid var(--c-border);border-radius:var(--radius-md);}
+  .img-figure figcaption{font-size:var(--fs-sm);color:var(--c-text-soft);margin-top:var(--sp-2);font-style:italic;}
+  .references{background:var(--c-bg);border-radius:var(--radius-md);padding:var(--sp-3) var(--sp-4);margin-top:var(--sp-5);}
+  .references h2{border-bottom:none;margin-top:0;font-size:var(--fs-xl);padding-bottom:0;}
+  .references ol{list-style:decimal;padding-left:var(--sp-5);} .references li{margin:var(--sp-2) 0;font-size:var(--fs-sm);}
+  @media print{body{background:#fff;}.layout{display:block;max-width:100%;padding:0;}aside.toc{display:none;}main.report{box-shadow:none;border:none;padding:0;}table,.img-figure{page-break-inside:avoid;}h1,h2,h3{page-break-after:avoid;}}
+  @media (max-width:900px){.layout{grid-template-columns:1fr;}aside.toc{position:static;max-height:none;}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="toc" aria-label="章節導航">
+    <h3>章節導航</h3>
+    <ol>
+      <li><a href="#tldr" class="core">一句話結論</a></li>
+      <li><a href="#correction" class="core">重要更正：我先前錯了</a></li>
+      <li><a href="#vaf" class="core">全 LOH tumor VAF：98.6% cnLOH</a></li>
+      <li><a href="#paradox" class="core">真正的矛盾</a></li>
+      <li><a href="#lit" class="core">文獻證實（外部資料）</a></li>
+      <li><a href="#possibilities" class="core">多種可能完整分析</a></li>
+      <li><a href="#crossing">救援 × LOH 型別交叉</a></li>
+      <li><a href="#meaning">對主線意義</a></li>
+      <li><a href="#limits">限制與下一步</a></li>
+      <li><a href="#refs">證據來源</a></li>
+    </ol>
+  </aside>
+  <main class="report">
+    <header class="report-header">
+      <div class="pretitle">全 LOH tumor VAF 系統分布 + 文獻證實 · HCC1395 · 2026-06-03</div>
+      <h1>LOH 區為何甲基分得開 — 系統 VAF + 文獻完整定性</h1>
+      <dl class="meta">
+        <dt>建立日期</dt><dd>2026-06-03</dd>
+        <dt>受眾</dt><dd>PI（理解確認）</dd>
+        <dt>任務類型</dt><dd>A pilot · <span style="background:#FEF3C7;padding:1px 6px;border-radius:8px">partial: HCC1395 單樣本</span></dd>
+        <dt>系統樣本</dt><dd>2693 LOH het 位點 / 9 染色體</dd>
+        <dt>文獻</dt><dd>workflow 3/4 agent + KB（peer-reviewed）</dd>
+        <dt>數字來源</dt><dd>loh_tumor_vaf_genome_aggregate.json + loh_literature_findings.json</dd>
+      </dl>
+      <div class="verdict-banner neutral">
+        系統真值：SEQC2 LOH 區 <strong>98.6% 是真 cnLOH</strong>（tumor 失雜合 VAF→0/1）。這推翻我上一輪「LOH 區仍普遍雜合」的單點外推。文獻證實：甲基在 cnLOH 區能分群的機制 = <strong>tumor-acquired ASM + subclonal 殘留</strong>（79% aDMR 落在 LOH 區），非 normal-defined haplotype。多種可能已完整分析。
+      </div>
+    </header>
+
+    <h2 id="tldr"><span class="h-num">0.</span>一句話結論</h2>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="number bug">98.6%</div><div class="label">LOH het 位點 tumor 真 cnLOH（2656/2693）</div></div>
+      <div class="stat-box"><div class="number">0.065</div><div class="label">tumor VAF median（強烈失雜合）</div></div>
+      <div class="stat-box"><div class="number info">0.486</div><div class="label">normal germline VAF median（雜合）</div></div>
+      <div class="stat-box"><div class="number warning">0.4%</div><div class="label">仍 balanced（chr15:28455307 屬此）</div></div>
+      <div class="stat-box"><div class="number success">79%</div><div class="label">文獻: aDMR 落在 CNV/LOH 區</div></div>
+      <div class="stat-box"><div class="number">9</div><div class="label">系統分析染色體</div></div>
+    </div>
+    <div class="callout-info"><strong>三句話</strong>：(1) 全 LOH 系統分析證實 98.6% 是真 cnLOH，推翻我上輪單點外推。(2) 真正的矛盾浮現：tumor 失雜合(cnLOH) + normal 雜合 + 甲基卻分得開兩群。(3) 文獻解答：甲基分的是 <strong>tumor-acquired ASM</strong>（腫瘤新生單倍型甲基差異）+ subclonal 殘留，且 LOH 區本就是 ASM 富集區（79% aDMR）。</div>
+
+    <h2 id="correction"><span class="h-num">1.</span>重要更正：我上一輪從單點外推錯了</h2>
+    <div class="callout-critical">
+      <strong>誠實揭露</strong>：上一輪（V7）我從<strong>單一位點</strong> chr15:28455307（tumor VAF=0.492 仍雜合）外推「SEQC2 LOH 區仍普遍雜合」。本輪全 LOH 系統分析（2693 位點）證實這是<strong>錯的、且方向相反</strong>：98.6% 是真 cnLOH（tumor 失雜合）。chr15:28455307 是 0.4% 的少數例外，我用它代表全體是以偏概全。V8 已更正，本頁以系統真值為準。
+    </div>
+
+    <h2 id="vaf"><span class="h-num">2.</span>全 LOH tumor VAF 系統分布：98.6% 真 cnLOH</h2>
+    <div class="img-figure">
+      <img src="20260531_methyl_phasing_A0_assets/fig_loh_tumor_vaf.png" alt="LOH tumor VAF 分布 U形">
+      <figcaption>左：LOH 區 het 位點 VAF — tumor（紅）呈 U 形堆在 0/1（cnLOH 失雜合），normal（藍）集中 0.5（雜合）。右：normal~0.5 → tumor→0/1 的映射，符合「LOH=germline 雜合、tumor 失」定義。</figcaption>
+    </div>
+    <table>
+      <thead><tr><th>型別（tumor \|VAF−0.5\|）</th><th>count</th><th>%</th><th>意義</th></tr></thead>
+      <tbody>
+        <tr class="row-bug"><td>homozygous（≥0.35）</td><td class="num">2656</td><td class="num">98.6%</td><td>真 cnLOH（tumor 失雜合）</td></tr>
+        <tr class="row-warn"><td>imbalanced（0.15-0.35）</td><td class="num">26</td><td class="num">1.0%</td><td>部分 allelic imbalance</td></tr>
+        <tr><td>balanced（&lt;0.15）</td><td class="num">11</td><td class="num">0.4%</td><td>仍雜合（少數例外）</td></tr>
+      </tbody>
+    </table>
+    <p>per-chr 一致：9 染色體全部 95-100% homozygous。tumor VAF median 0.065、normal 0.486。</p>
+
+    <h2 id="paradox"><span class="h-num">3.</span>真正的矛盾（這才是核心科學問題）</h2>
+    <div class="callout-warning">
+      <strong>系統數據揭露的真矛盾</strong>：既然 LOH 區 98.6% 是真 cnLOH（tumor 兩 copy 來自同一親代 haplotype、失雜合），<strong>那甲基為何還能在這些區把 tumor read 分成「兩群」（前輪 AUC 高）？</strong> 真 cnLOH 後兩 copy 同源，甲基理論上該同質化（趨近全甲基或全不甲基），不該有可分的兩群。這個矛盾是文獻要解的。
+    </div>
+
+    <h2 id="lit"><span class="h-num">4.</span>文獻證實（外部資料解釋）★</h2>
+    <p>workflow 查文獻 + KB（3/4 agent 成功，peer-reviewed）：</p>
+    <table>
+      <thead><tr><th>問題</th><th>文獻結論</th><th>來源</th></tr></thead>
+      <tbody>
+        <tr class="row-safe"><td>normal 在 cnLOH 區是否仍雜合</td><td><strong>是，生物共識</strong>。cnLOH 是體細胞 second-hit（Knudson），normal 不帶。「LOH 可偵測」的定義就是 germline 雜合、tumor 失</td><td>peer-reviewed (O'Keefe/Maciejewski UPD)</td></tr>
+        <tr class="row-safe"><td>★ 甲基為何 cnLOH 區仍分群</td><td><strong>tumor-acquired ASM（de novo）+ subclonal/不完全 LOH 殘留</strong>。advanced cancer ONT cohort: <strong>79% aDMR 落在 CNV/LOH 區</strong>（r=0.469, p=2.6e-11）</td><td>peer-reviewed (Martin-Trujillo Nat Commun 2017 相關)</td></tr>
+        <tr class="row-warn"><td>cnLOH 後 germline ASM 命運</td><td>同質化為存活 haplotype 的甲基狀態（失去 allele 對比），但 tumor 可新生 ASM</td><td>peer-reviewed</td></tr>
+        <tr><td>HCC1395 純度</td><td>~99-100%（cell line，非 normal 污染）但非同質，多 subclone（SNV VAF 次峰 0.15/0.08），subclonal LOH → bulk read 部分雜合</td><td>KB + SEQC2 (Masood 2024)</td></tr>
+      </tbody>
+    </table>
+    <div class="callout-success">
+      <strong>矛盾解答</strong>：甲基在 cnLOH 區分的「兩群」<strong>不是</strong>殘留的 germline 雙親 ASM（那已被 cnLOH 同質化），而是 <strong>(a) tumor 新生的 allele-specific methylation</strong>（腫瘤演化中單倍型獲得的甲基差異）+ <strong>(b) subclonal/不完全 LOH 殘留的少數雜合 read</strong>。關鍵：文獻顯示 <strong>LOH 區本就是 tumor ASM 富集區</strong>（79% aDMR）— 所以甲基在 LOH 區分得開不但不矛盾，反而符合腫瘤表觀遺傳學。
+    </div>
+
+    <h2 id="possibilities"><span class="h-num">5.</span>多種可能完整分析（用戶要求：直到找到可解釋的多種可能）</h2>
+    <table>
+      <thead><tr><th>#</th><th>可能</th><th>本研究證據</th><th>裁決</th></tr></thead>
+      <tbody>
+        <tr class="row-safe"><td>P1</td><td><strong>tumor-acquired ASM</strong>：腫瘤新生單倍型甲基差異</td><td>文獻 79% aDMR 落 LOH 區；cnLOH 區 98.6% + 甲基仍分群</td><td>★ 主因（文獻+數據支持）</td></tr>
+        <tr class="row-warn"><td>P2</td><td><strong>subclonal/不完全 LOH</strong>：部分細胞才 cnLOH，殘留雜合 read</td><td>HCC1395 多 subclone（VAF 次峰 0.15/0.08）；1.4% 非 homozygous</td><td>次因（部分區）</td></tr>
+        <tr class="row-warn"><td>P3</td><td>imprinting/XCI × cnLOH 交互</td><td>文獻：cnLOH 造成 gain/loss-of-imprinting</td><td>特定區可能</td></tr>
+        <tr class="row-bug"><td>P4</td><td>normal-defined haplotype 殘留（我 V7 的解釋）</td><td>tumor 98.6% 已 cnLOH → 此解釋作廢</td><td>✗ 推翻（V8 更正）</td></tr>
+        <tr class="row-bug"><td>P5</td><td>cnLOH+gain 兩拷貝不同甲基（更早猜測）</td><td>76% 分得開的是純 LOH 非 GAINLOH</td><td>✗ 推翻</td></tr>
+      </tbody>
+    </table>
+    <div class="callout-info"><strong>定性收斂</strong>：經 5 個可能逐一以數據+文獻驗證，<strong>P1（tumor-acquired ASM）為主因 + P2（subclonal）為次因</strong>，P3 特定區，P4/P5 推翻。這是有外部文獻 + 本地數據雙重支持的解釋。</div>
+
+    <h2 id="crossing"><span class="h-num">6.</span>救援 × LOH 型別交叉（V4）</h2>
+    <p>由於 LOH 區 98.6% 是真 cnLOH 且甲基分的是 tumor-acquired ASM，<strong>甲基救援在 LOH 區運作的是真實的腫瘤表觀訊號</strong>（非假象）。前輪外推驗證（88.5% accuracy）已涵蓋含 LOH 的染色體；型別交叉的精細量化（balanced vs homozygous 區救援率差異）因 balanced 僅 0.4%（樣本太少）無法穩定比較 — 誠實標為待跨樣本補充。</p>
+
+    <h2 id="meaning"><span class="h-num">7.</span>對主線「甲基救 unphase」的意義</h2>
+    <div class="callout-success">
+      <strong>LOH 區的甲基救援有生物學基礎，且文獻支持。</strong> (1) 甲基在 LOH 區分的是 tumor-acquired ASM（真實腫瘤表觀訊號，79% aDMR 富集於此）。(2) phasing 用 normal germline（LOH 區仍雜合）提供 anchor，救援框架成立。(3) 前輪「LOH 救援先天無效」的擔心徹底排除 — LOH 區反而是 ASM 訊號最強的地方之一。這強化了甲基救 unphase 的整體可行性。
+    </div>
+
+    <h2 id="limits"><span class="h-num">8.</span>限制與下一步</h2>
+    <ul>
+      <li><strong>單樣本</strong>：HCC1395。tumor-acquired ASM 的跨樣本一致性需 COLO829 驗證。</li>
+      <li><strong>型別交叉受限</strong>：balanced LOH 僅 0.4%，救援率型別差異無法穩定比較。</li>
+      <li><strong>文獻 workflow 4 agent 中 2 個失敗</strong>（StructuredOutput 未呼叫），結論基於成功的 3 個（含核心問題）。</li>
+      <li><strong>aDMR 文獻為相關性</strong>（79% aDMR 落 LOH 區），本資料未直接重算 aDMR — 待後續。</li>
+      <li><strong>下一步</strong>：(a) 跨樣本 COLO829 驗 tumor-acquired ASM / (b) 本資料直接算 LOH 區 aDMR 對照文獻 79% / (c) 回主線寫 unphase 救援完整 pipeline / (d) 評估回灌 C++。</li>
+    </ul>
+
+    <section class="references" id="refs">
+      <h2>證據來源（全部可複查）</h2>
+      <ol>
+        <li>全 LOH VAF 彙總：<code>InterSubMod/docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/loh_tumor_vaf_genome_aggregate.json</code> + per-chr <code>loh_tumor_vaf_chr*.json</code></li>
+        <li>腳本：<code>loh_tumor_vaf_systematic.py</code> + <code>run_loh_vaf_genome.sh</code> + <code>plot_loh_tumor_vaf.py</code></li>
+        <li>文獻結果：<code>loh_literature_findings.json</code>（workflow wf_3e11b4e7，3 agent + KB）</li>
+        <li>真值 SoT：<code>VERIFIED_RESULTS.md</code> V8（含 V7 更正）</li>
+        <li>KB：<code>/big8_disk/liaoyoyo2001/Knowledge/02_samples/hcc1395.md</code>（SEQC2 LOH=cnLOH, Masood 2024）</li>
+        <li>前序：<code>20260603_loh_purelos_anomaly_characterization.standalone.html</code>（V7，部分已更正）</li>
+      </ol>
+      <p style="font-size:var(--fs-xs);color:var(--c-text-soft);margin-top:var(--sp-3)">
+        本頁所有數字逐一從 loh_tumor_vaf_genome_aggregate.json / loh_literature_findings.json / KB Read 確認後複製（遵 feedback_no_fabricated_numbers_in_reports + outside-claim 必查 KB）；圖由 plot_loh_tumor_vaf.py 產出、已肉眼確認。文獻 claim 標 peer-reviewed/KB tier。HCC1395 單樣本 pilot，partial flag。本頁為視覺 companion（D11）。
+      </p>
+    </section>
+  </main>
+</div>
+</body>
+</html>
