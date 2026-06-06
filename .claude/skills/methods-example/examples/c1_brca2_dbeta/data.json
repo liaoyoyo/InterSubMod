@@ -1,0 +1,55 @@
+{
+  "_comment": "C1 BRCA2 Δβ somatic-cis 方法解釋圖 — 真值 + 示意分離。verified 區每個數字附 src（可 grep 回源）；schematic 區為示意放大（synthetic）。renderer 缺 verified key 直接 refuse（§13-A 構造防捏造）。",
+  "meta": {
+    "case": "C1_directional_anchor",
+    "locus": "chr13:32315128",
+    "gene": "BRCA2/ZAR1L",
+    "sample": "HCC1395",
+    "snv": "G>A",
+    "single_sample_caveat": "單樣本 ★3；真 cis 小（d_within=−0.023 marginal, p=0.022）；不宣稱 strong cis-driven",
+    "data_sources": [
+      "research/tsg_promoter_asm_reviewer/genome_survey_v2/control_cohesion_cistest.json",
+      "research/tsg_promoter_asm_reviewer/genome_survey_v2/brca2_pertag_cohesion.json",
+      "research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json"
+    ]
+  },
+  "verified": {
+    "beta_normalHP1": {"value": 0.25,  "src": "control_cohesion_cistest.json#32315128.cis.mean_beta.normalHP1"},
+    "beta_tumorHP1":  {"value": 0.228, "src": "control_cohesion_cistest.json#32315128.cis.mean_beta.tumorHP1"},
+    "beta_tumorHP11": {"value": 0.108, "src": "control_cohesion_cistest.json#32315128.cis.mean_beta.tumorHP1-1"},
+    "dbeta_mean":     {"value": -0.122, "src": "control_cohesion_cistest.json#32315128.cis.d_somatic_C_minus_B=-0.1201"},
+    "n_shared_cpg":   {"value": 193,    "src": "control_cohesion_cistest.json#32315128.cis.n_shared_cpg"},
+    "p_somatic":      {"value": 0.0,    "src": "control_cohesion_cistest.json#32315128.cis.p_somatic"},
+    "d_cis":          {"value": -0.142, "src": "control_cohesion_cistest.json#32315128.cis.d_cis_C_minus_normalA=-0.1418"},
+    "p_cis":          {"value": 0.0,    "src": "control_cohesion_cistest.json#32315128.cis.p_cis"},
+    "d_drift":        {"value": -0.022, "src": "control_cohesion_cistest.json#32315128.cis.d_drift_B_minus_normalA=-0.0217"},
+    "p_drift":        {"value": 0.087,  "src": "control_cohesion_cistest.json#32315128.cis.p_drift"},
+    "d_within":       {"value": -0.023, "src": "copy_partition_confirm.json#rows[chr13:32315128].d_within"},
+    "p_within":       {"value": 0.022,  "src": "copy_partition_confirm.json#brca2_perm.p"},
+    "d_copy":         {"value": -0.11,  "src": "copy_partition_confirm.json#rows[chr13:32315128].d_copy"},
+    "d_allele":       {"value": -0.099, "src": "copy_partition_confirm.json#rows[chr13:32315128].d_allele"},
+    "silhouette_hp11":{"value": 0.267,  "src": "brca2_pertag_cohesion.json#per_HP_tag_cohesion.1-1.silhouette=0.2672"},
+    "ari_blind":      {"value": 0.79,   "src": "control_cohesion_cistest.json#32315128.ari_blind_allele"},
+    "n_reads_hp1":    {"value": 37,     "src": "control_cohesion_cistest.json#32315128.cohesion.1.n"},
+    "n_reads_hp11":   {"value": 38,     "src": "control_cohesion_cistest.json#32315128.cohesion.1-1.n"},
+    "max_abs_delta":  {"value": null,   "src": "TODO: BRCA2 per-CpG max|Δ| 未在 verified JSON；副鍵以方法說明呈現，不顯示未驗證數字"}
+  },
+  "schematic": {
+    "synthetic": true,
+    "note": "read 甲基狀態為示意（方向已放大），非實際 read；實際 ~193 shared CpG",
+    "cpg_labels": ["CpG", "CpG", "CpG", "CpG", "CpG", "CpG"],
+    "snv_after_col": 3,
+    "groups": [
+      {
+        "track": "tumorHP1", "label": "HP1", "sublabel": "germline·G", "color_key": "hp1",
+        "reads": ["m u u m u u", "u m u u m u", "m u m u u u"]
+      },
+      {
+        "track": "tumorHP1-1", "label": "HP1-1", "sublabel": "somatic·A", "color_key": "hp11",
+        "reads": ["u u u m u u", "u u u u u m", "u u u m u u"]
+      }
+    ]
+  },
+  "label_flip_note": "HP1-1（分析側）≡ HP2-1（舊 ISM／圖側）為同一物（label flip）；HP1-1 = HP1 germline 單倍型下的 somatic-allele 子標，非獨立第三 haplotype。",
+  "intuition": "比同一人 germline 那條（HP1）vs 長了 somatic 突變那條（HP1-1），在同一批 CpG 上甲基差多少。"
+}

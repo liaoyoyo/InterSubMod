@@ -156,6 +156,12 @@ examples/phase1_demo/demo_topic/figures/_check_instructions.json
 # === Pipeline run output dirs — heavy data, source-of-truth lives in summary md/tsv ===
 # output is a symlink to /big7_disk/.../big7_disk_output/ (root-level, distinct from output/)
 /output
+
+# === PPTX convention study raw extraction (added 2026-06-07) ===
+# 抽取的 deck 媒體圖含 PNG binary + 大 JSON；distilled 慣例已落
+# .claude/skills/methods-example/references/genomics_figure_conventions.md（committed）。
+# extract_pptx.py 工具保留 tracked，raw extract/ 不 commit。
+docs/references/manual/20260607_pptx_convention_study/extract/
 # paired_priority_bug_audit phase run outputs (1.2M-2.9M files each — pipeline artifacts)
 research/paired_priority_bug_audit/phaseC_genome_three_way/
 research/paired_priority_bug_audit/phaseD_v6_5sample/

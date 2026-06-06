@@ -1,0 +1,34 @@
+{
+  "_comment": "C1 案例組合規格。case_template_id 決定佈局；primitives 列要組哪些物件 + 各自 data_ref；shared 集中色標/glyph/座標（design-token）。renderer = tools/render_figure_spec.py。",
+  "case_template_id": "C1_directional_anchor",
+  "title": "BRCA2 promoter：Δβ somatic-cis 怎麼把 read 收斂成一個方向性判斷",
+  "subtitle": "chr13:32,315,128 G>A · HCC1395 · 同 germline 單倍型依 somatic allele 分兩群",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "read_cpg_matrix",
+      "intuition_ref": "intuition",
+      "params": { "groups_ref": "schematic.groups", "cpg_labels_ref": "schematic.cpg_labels", "snv_after_ref": "schematic.snv_after_col", "synthetic_note_ref": "schematic.note" } },
+    { "type": "beta_bar",
+      "title": "① 每 CpG 把該群 reads 平均成群率 β（第 1 層平均，消 read 數不均）",
+      "params": { "bars": [
+        { "label": "HP1 β",   "value_ref": "verified.beta_tumorHP1",  "color_key": "hp1"  },
+        { "label": "HP1-1 β", "value_ref": "verified.beta_tumorHP11", "color_key": "hp11" } ] } },
+    { "type": "dbeta_step",
+      "title": "② per-CpG Δ → ③ Δβ=平均(Δ) 主鍵 + max|Δ| 副鍵 → ④ paired Wilcoxon over CpG",
+      "params": { "mean_ref": "verified.dbeta_mean", "n_ref": "verified.n_shared_cpg", "p_ref": "verified.p_somatic", "maxabs_ref": "verified.max_abs_delta" } },
+    { "type": "normal_cis_triplet",
+      "title": "⑤ normal-anchored cis-test：加 normal 基線，分「真 cis」與「drift」",
+      "params": { "normal_ref": "verified.beta_normalHP1", "tumorHP1_ref": "verified.beta_tumorHP1", "tumorHP11_ref": "verified.beta_tumorHP11",
+        "dcis_ref": "verified.d_cis", "pcis_ref": "verified.p_cis", "ddrift_ref": "verified.d_drift", "pdrift_ref": "verified.p_drift", "dwithin_ref": "verified.d_within", "pwithin_ref": "verified.p_within" } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "meth": "#C0392B", "unmeth": "#2D6CB5", "hp1": "#2F5597", "hp11": "#C55A11", "normal": "#999999", "ink": "#141413", "soft": "#6B6B66", "synthetic": "#9a6212" },
+    "glyph": { "meth": "solid_circle", "unmeth": "open_circle" }
+  },
+  "annotations": {
+    "label_flip_ref": "label_flip_note",
+    "single_sample_caveat_ref": "meta.single_sample_caveat",
+    "synthetic_watermark": true
+  }
+}

@@ -76,7 +76,7 @@
 
 ---
 
-## §3 Skills 分類索引（46 個 SKILL.md，Claude Code 特定 — 2026-05-31 drift 再校正）
+## §3 Skills 分類索引（47 個 SKILL.md，Claude Code 特定 — 2026-06-05 +methods-example）
 
 > **drift 修正紀錄**：
 > - 2026-05-20：原寫 45 → 一度改 44（誤判 `grill-me/` 為 phantom +1）。
@@ -84,6 +84,7 @@
 > - **2026-05-30 清理**：`grill-me` 曾是 dangling symlink（→ `../../.agents/skills/grill-me`，target 不存在），**已 `git rm` 移除**。現 `find -maxdepth 1 -type d` 與 `find -name SKILL.md` 一致 = 45（無 orphan symlink）。
 > - 新增 12 個未分類 skills 進對應類別（2026-05-20）。
 > - **2026-05-31**：新增 `/harness-health`（元方法論 9→10）→ 45→**46**。磁碟現有 **2** 個 Dynamic Workflow（`cross_sample_benchmark.js` + 新增 `harness_audit_2026.js`；§8 未硬編碼計數，故無數字需改）。`harness_health.py` 燈 #1 持續監看此計數 drift。
+> - **2026-06-05**：新增 `/methods-example`（視覺化 3→4）→ 46→**47**。方法解釋圖 generate+verify 整體 skill（物件庫 primitive + 案例模板 case + data_ref 注入 renderer〔缺 verified 真值 refuse〕+ 圖例細節 verify loop）；C1 BRCA2 Δβ pilot 已驗證可跑。
 > **重複交叉位置**：`/feature-layered-observation`（P3 + 研究專用）/ `/multi-sample-consistency`（P4 + 研究專用）/ `/pre-decision-audit`（元方法論 + 三層樓 pre）/ `/run-evaluator`（P5 + 三層樓 post）— 在多分類列出表示同 skill 多角色。
 
 - **元方法論（10）**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor` `/pre-decision-audit` `/problem-framing-ideation` `/provenance-tier-audit` `/harness-health` ⭐ 新（2026-05-31；harness 自我稽核 8 燈儀表板，read-only `scripts/harness_health.py`；2026-06-03 +燈#7 memory-drift +燈#8 doc-path-currency）
@@ -91,7 +92,7 @@
 - **程式開發（4）**: `/cpp-change` `/methodology-audit` `/infra-ops` `/verification-loop`
 - **文件管理（5）**: `/doc-standards` `/data-audit` `/memory-consolidation` `/citation-verification` `/pipeline-manifest` ⭐ 新（reproducibility provenance DAG；與 data-audit 分工：data-audit 查組織、pipeline-manifest 查 script→figure 因果鏈）
 - **報告生成 retrospective（7）**: `/weekly-report` → `/pptx-build` / `/html-report-build` / `/results-report` / `/structured-tech-report` / `/report` / `/myPPT`
-- **視覺化（3）**: `/image-gen` `/image-vision-check` `/research-dashboard`（html-preview 2026-05-30 移除，取代為 /html-report-build）
+- **視覺化（4）**: `/image-gen` `/image-vision-check` `/research-dashboard` `/methods-example` ⭐ 新（2026-06-05；方法解釋圖物件組合 generate+verify，data_ref 注入防捏造，圖例細節迭代）（html-preview 2026-05-30 移除，取代為 /html-report-build）
 - **研究專用（8）**: `/auc-confound-guard` `/feature-layered-observation` `/multi-sample-consistency` `/pivot-direction` `/inject-hypothesis` `/init-research` `/review-evidence` `/observation-analysis`
 - **資料分析 / 驗證（2）**: `/results-analysis` `/validation-protocol`
 - **假說驗證三層樓（pre → process → post）⭐ 2026-05-19**:
@@ -222,6 +223,9 @@
 | **含 Hard Gate**（C++ commit 必編譯 / 刪檔 / NO-GO 判定 / evidence_ledger 覆寫）| **維持主 agent 編排，絕不包進 workflow** | ⚠ workflow subagent 一律 acceptEdits、**繞過 exit-2 hook**（pre_commit_compile_check / kb_schema_check / pre_tier_upgrade_check）、無 mid-run 暫停 |
 | **互動探索 / 需中間結果決定下一步** | 主回合 or 既有 sub-agent | workflow 無 mid-run user input |
 | **單樣本 pilot / 5 分鐘小活** | 主回合直接做 | workflow 10× token，殺雞用牛刀 |
+| **產數字的長 compute**（ISM C++ 全跑 / BAM 處理 / `scripts/run_*.sh` / 任何結果無法 mid-run Read-back 的重跑）| **絕不放進 workflow `agent()` step**；主回合 `Bash(run_in_background)` 或 `scripts/run_*.sh` 跑 → 落檔 → Read 驗 → **才**用 workflow fan-out 匯總「已落檔結果」 | workflow step 短壽 + acceptEdits 黑箱 + 無 mid-run Read-back → 中斷則半完成無法驗 = 撞 §13.0 捏造根因；§1 長計算須主回合可見啟動 |
+
+> **長 job × workflow 鐵則（2026-06-03）**：workflow `agent()` step 是「**輕量驗證 / 讀檔匯總**」單元，**非長 compute 容器**。判準＝該 step 結果能否 **mid-run Read-back 驗證**（用可驗證性，非分鐘數——「10min」只是粗估）。**標準 hybrid**：① 主回合背景跑 compute 落 `.json/.tsv` → ② Read 回真值確認非 error/未完成（§13.0 step 2）→ ③ **才** workflow fan-out 匯總。⚠ ≥3 樣本「實跑腳本」用 `parallel-benchmark` agent，但須先 resource preflight（N 個 30-45min BAM 平行恐撞 CPU/mem → 預設改循序背景跑）；workflow 只接「讀已算結果」階段。實證：cross-sample ASM workflow 4 樣本曾被殺改背景補跑（memory `project_cross_sample_asm_reproducibility`）。**判斷錯誤屬路由類（非 §13 數字捏造類）→ 純文字規則即足，不加機械守衛**（除非日後出現實際 in-the-wild 事故）。
 
 > `/effort ultracode` 不設長期預設（每任務自動編排 workflow + 略過 launch 提問 → 繞過確認矩陣 + 放大 token）；改逐案 `workflow` keyword 觸發，符合 §1「長計算需當輪明示」。
 

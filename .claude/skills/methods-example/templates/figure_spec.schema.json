@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "methods-example figure_spec",
+  "description": "宣告式方法解釋圖規格。圖 = case_template_id + primitives(物件列) + shared(design-token)。真值一律走 data_ref 注入，不在 spec 內硬編數字（§13-A 構造防捏造）。",
+  "type": "object",
+  "required": ["case_template_id", "data_file", "primitives", "shared"],
+  "additionalProperties": true,
+  "properties": {
+    "case_template_id": {
+      "type": "string",
+      "description": "案例模板：決定整體佈局與物件擺位",
+      "enum": ["C1_directional_anchor", "C2_old_vs_new", "C3_blindspot_synthetic", "Cx_custom"]
+    },
+    "title": { "type": "string" },
+    "subtitle": { "type": "string" },
+    "data_file": { "type": "string", "description": "同目錄 data.json 相對路徑；含 verified(附 src) + schematic(synthetic) 兩區" },
+    "primitives": {
+      "type": "array", "minItems": 1,
+      "description": "要組合的物件列，依序渲染",
+      "items": {
+        "type": "object",
+        "required": ["type", "params"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "物件 primitive 型別（見 references/object_library.md P1-P7）",
+            "enum": ["read_cpg_matrix", "beta_bar", "dbeta_step", "normal_cis_triplet", "cluster_v_box", "blindspot_scenario"]
+          },
+          "title": { "type": "string" },
+          "intuition_ref": { "type": "string", "description": "data 內白話直覺句的 dotted-ref（先直覺後公式）" },
+          "params": {
+            "type": "object",
+            "description": "物件參數；凡 *_ref 結尾者為 data.json 的 dotted-path。指向 verified.* 的 ref 缺 key 或 value=null → renderer refuse（synthetic.* / schematic.* 例外，可為示意）。"
+          }
+        }
+      }
+    },
+    "shared": {
+      "type": "object",
+      "description": "design-token：全域共用座標/色標/glyph，案例只引用不重定義",
+      "required": ["color_scale"],
+      "properties": {
+        "width": { "type": "integer" },
+        "color_scale": { "type": "object" },
+        "glyph": { "type": "object" }
+      }
+    },
+    "annotations": {
+      "type": "object",
+      "description": "誠實標註掛點：label_flip / single_sample_caveat / synthetic_watermark 等",
+      "properties": {
+        "label_flip_ref": { "type": "string" },
+        "single_sample_caveat_ref": { "type": "string" },
+        "synthetic_watermark": { "type": "boolean" }
+      }
+    }
+  }
+}
