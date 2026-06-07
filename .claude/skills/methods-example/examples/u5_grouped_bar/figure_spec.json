@@ -1,0 +1,17 @@
+{
+  "_comment": "U5 grouped bar 跨樣本對照（baseline vs method）。zoomed=true 放大非零軸 → 必標 caveat。值=示意非真值。",
+  "case_template_id": "Cx_custom",
+  "title": "跨樣本 grouped bar：baseline vs method（示意數值，非真值）",
+  "subtitle": "示意 · 每樣本兩條 bar + 末端數值 + 虛線 y 網格 · ⚠ y 軸非零起點放大差異，標 caveat",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "readtrack_legend", "params": { "items_ref": "legend" } },
+    { "type": "grouped_bar", "params": { "samples_ref": "samples", "methods_ref": "methods", "zoomed": true, "ymin": 0.80, "ymax": 0.95 } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#999999", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "synthetic_watermark": true, "methyl_legend": false }
+}

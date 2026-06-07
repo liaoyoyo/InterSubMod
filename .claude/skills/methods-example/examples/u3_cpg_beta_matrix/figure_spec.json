@@ -1,0 +1,17 @@
+{
+  "_comment": "U3 read×CpG β matrix（甲基化軸 = red/blue ramp，非 genotype 字母）+ W 視窗。methyl_legend 開（header 顯 5mC 圖例）。",
+  "case_template_id": "Cx_custom",
+  "title": "read × CpG 甲基矩陣：β = 某群 reads 在某 CpG 的甲基比例",
+  "subtitle": "示意 · 列=read（依 HP 分群）、欄=CpG、格色=β（紅高/藍低 ramp）· W=統計視窗",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "cpg_beta_matrix", "intuition_ref": "intuition",
+      "params": { "groups_ref": "schematic.groups", "n_cpg": 8, "window": [4, 5] } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#999999", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "label_flip_ref": "label_flip_note", "synthetic_watermark": true, "methyl_legend": true }
+}

@@ -1,0 +1,33 @@
+{
+  "_comment": "U1 Germline→Somatic haplotype split track — 純示意(synthetic)教學圖，無 verified 真值（方法機制示意，非特定位點資料）。marks: .=無變異 / 1=germline-HP1 變異 / 2=germline-HP2 變異 / s=somatic / e=seq-error。",
+  "meta": {
+    "title": "U1 haplotagging split track (schematic)",
+    "synthetic_note": "read 與鹼基為教學示意（synthetic），非實際定序資料"
+  },
+  "schematic": {
+    "synthetic": true,
+    "cols": ["pos1", "pos2", "pos3", "pos4", "pos5"],
+    "germline_groups": [
+      { "label": "HP1", "sublabel": "母本 Maternal", "color_key": "hp1", "reads": [
+        { "bases": "A C G T A", "marks": ". . 1 . ." },
+        { "bases": "A C G T A", "marks": ". . 1 . ." } ] },
+      { "label": "HP2", "sublabel": "父本 Paternal", "color_key": "hp2", "reads": [
+        { "bases": "A T G T A", "marks": ". 2 . . ." },
+        { "bases": "A T G T A", "marks": ". 2 . . ." } ] }
+    ],
+    "somatic_groups": [
+      { "label": "HP1-1", "sublabel": "HP1 + somatic", "color_key": "hp11", "reads": [
+        { "bases": "A C G A A", "marks": ". . 1 s ." } ] },
+      { "label": "HP2-1", "sublabel": "HP2 + somatic", "color_key": "hp11", "reads": [
+        { "bases": "A T G A C", "marks": ". 2 . s e" } ] }
+    ]
+  },
+  "legend": [
+    { "label": "Germline (HP1)", "color_key": "hp1" },
+    { "label": "Germline (HP2)", "color_key": "hp2" },
+    { "label": "Somatic", "color_key": "hp11" },
+    { "label": "Seq error", "color_key": "seqerr" }
+  ],
+  "label_flip_note": "HP1-1 / HP2-1 = germline HP1 / HP2 鏈上因 somatic 變異細分的子單倍型，非獨立第三 haplotype。",
+  "intuition": "把每條 read 依攜帶的 germline 變異 tag 到 HP1/HP2（haplotag）；帶 somatic 變異的 read 再從所屬 germline 鏈細分出 HP1-1 / HP2-1 子標。"
+}

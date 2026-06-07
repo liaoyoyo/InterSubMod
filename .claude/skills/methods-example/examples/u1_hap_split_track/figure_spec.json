@@ -1,0 +1,18 @@
+{
+  "_comment": "U1 案例：haplotagging 兩層 split track。純示意（synthetic），用 readtrack_legend(4 類) + hap_split_track。色採實驗室慣例：藍 germline / 橘 somatic。",
+  "case_template_id": "Cx_custom",
+  "title": "Haplotagging：germline 先分 HP1/HP2，somatic 再細分子標 HP1-1/HP2-1",
+  "subtitle": "示意 · read=五邊形箭頭、鹼基=ATGC、變異格=分類上色（藍 germline / 橘 somatic / 灰 seq-error）",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "readtrack_legend", "params": { "items_ref": "legend" } },
+    { "type": "hap_split_track", "intuition_ref": "intuition",
+      "params": { "germline_ref": "schematic.germline_groups", "somatic_ref": "schematic.somatic_groups", "cols_ref": "schematic.cols" } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#999999", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "label_flip_ref": "label_flip_note", "synthetic_watermark": true, "methyl_legend": false }
+}

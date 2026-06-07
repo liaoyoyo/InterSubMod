@@ -1,0 +1,17 @@
+{
+  "_comment": "U2 IGV haplotype-lane pileup（真實結果風格示意）。lane 底色=HP；SNV=base 色 tick；中央虛線=locus。detail=tick（無 base 字母，降載）。",
+  "case_template_id": "Cx_custom",
+  "title": "IGV haplotype-lane read pileup：read 依 HP 分群、SNV 直 tick",
+  "subtitle": "示意 · lane 底色=HP（藍 germline / 橘 somatic / 灰 unphased）· SNV tick=IGV base 色 · 中央虛線=locus",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "readtrack_legend", "params": { "items_ref": "legend" } },
+    { "type": "igv_pileup", "params": { "lanes_ref": "schematic.lanes", "n_cols": 24 } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#999999", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "label_flip_ref": "label_flip_note", "synthetic_watermark": true, "methyl_legend": false }
+}

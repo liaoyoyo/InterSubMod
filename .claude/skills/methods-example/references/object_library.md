@@ -58,7 +58,7 @@
 
 ## 新 primitive roadmap（從簡報慣例研究 2026-06-07，workflow wf_b6aa4c96-be9）
 
-> 來源：2 份 PI 實驗室口試簡報萃取（詳見 `references/genomics_figure_conventions.md`）。**狀態：待實作**（renderer 尚未註冊 render 函式；介面已定）。色彩約定見 conventions §2（藍=germline/橘=somatic；**甲基化軸仍用 red/blue ramp 不套藍橘**）。
+> 來源：2 份 PI 實驗室口試簡報萃取（詳見 `references/genomics_figure_conventions.md`）。**狀態（2026-06-07）：U1-U7 已實作**（`hap_split_track` / `igv_pileup` / `cpg_beta_matrix` / `grouped_bar` / `facet_grid` / `stacked_bar` / `loh_ideogram` / `readtrack_legend` 已註冊於 `tools/render_figure_spec.py`，對應 `examples/u1-u7/`，lint 全 PASS）。**仍待實作**：P-CALIB / P8 axis-dot / P9 allele-graph。色彩約定見 conventions §2（藍=germline/橘=somatic；**甲基化軸仍用 red/blue ramp 不套藍橘**）。分級顯示見 `references/detail_levels.md`。
 
 | ID | primitive | 代表 | data_ref 契約 | 優先 |
 |----|-----------|------|--------------|------|

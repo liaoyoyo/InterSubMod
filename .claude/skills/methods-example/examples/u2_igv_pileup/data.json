@@ -1,0 +1,20 @@
+{
+  "_comment": "U2 IGV haplotype-lane pileup 示意(synthetic)。lane 底色編 HP；SNV tick 用 IGV base 色（A綠/C藍/G棕/T紅）。",
+  "meta": { "synthetic_note": "示意 pileup（synthetic），非實際 BAM 截圖" },
+  "schematic": {
+    "synthetic": true,
+    "lanes": [
+      { "label": "HP1", "color_key": "hp1", "n_reads": 5, "variants": [ { "col": 12, "base": "G" } ] },
+      { "label": "HP1-1", "color_key": "hp11", "n_reads": 3, "variants": [ { "col": 12, "base": "A" }, { "col": 18, "base": "T" } ] },
+      { "label": "HP2", "color_key": "hp2", "n_reads": 5, "variants": [ { "col": 12, "base": "G" } ] },
+      { "label": "unphased", "color_key": "normal", "n_reads": 2, "variants": [] }
+    ]
+  },
+  "legend": [
+    { "label": "HP1", "color_key": "hp1" },
+    { "label": "HP1-1 somatic", "color_key": "hp11" },
+    { "label": "HP2", "color_key": "hp2" },
+    { "label": "unphased", "color_key": "normal" }
+  ],
+  "label_flip_note": "HP1-1 = HP1 germline 下 somatic-allele 子標，非獨立第三 haplotype（IGV 中常見 group-by-HP-tag）。"
+}

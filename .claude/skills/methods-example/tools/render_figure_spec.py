@@ -193,7 +193,254 @@ def p_normal_cis_triplet(data, prim, sh, y):
     return "\n".join(s), yy - y + 8
 
 
+# ---------- P-READTRACK-LEGEND / hap_split_track (U1; deck 慣例：藍 germline / 橘 somatic) ----------
+def p_readtrack_legend(data, prim, sh, y):
+    cs = sh["color_scale"]
+    items = resolve(data, prim["params"]["items_ref"])
+    s = [f'<text x="10" y="{y+11}" font-size="10" font-weight="700" fill="{cs["soft"]}">圖例</text>']
+    x = 56
+    for it in items:
+        col = cs.get(it["color_key"], cs["ink"])
+        s.append(f'<circle cx="{x}" cy="{y+7}" r="5.5" fill="{col}"/>'
+                 f'<text x="{x+11}" y="{y+11}" font-size="10.5" fill="{cs["ink"]}">{esc(it["label"])}</text>')
+        x += 168
+    return "\n".join(s), 24
+
+
+def p_hap_split_track(data, prim, sh, y):
+    cs = sh["color_scale"]
+    detail = prim["params"].get("detail", "tick")  # tick(預設,隱藏 base 降載) / base(變異格才顯字母,強調哪種突變) / sequence(全序列,僅特例)
+    germ = resolve(data, prim["params"]["germline_ref"])
+    som = resolve(data, prim["params"]["somatic_ref"])
+    cols = resolve(data, prim["params"]["cols_ref"])
+    vcol = {"1": cs.get("hp1", "#2F5597"), "2": cs.get("hp2", "#8FAADC"),
+            "s": cs.get("hp11", "#C55A11"), "e": cs.get("seqerr", "#7F7F7F")}
+    x0, col0, dx = 150, 172, 40
+    colx = [col0 + i * dx for i in range(len(cols))]
+    s, st = [], {"yy": y}
+
+    def draw_group(grp, layer_label):
+        s.append(f'<text x="{x0-12}" y="{st["yy"]+2}" font-size="10" font-weight="700" fill="{cs["soft"]}" text-anchor="end">{esc(layer_label)}</text>')
+        for g in grp:
+            gcol = cs.get(g["color_key"], cs["ink"])
+            s.append(f'<text x="{x0-12}" y="{st["yy"]+18}" font-size="10.5" font-weight="800" fill="{gcol}" text-anchor="end">{esc(g["label"])}</text>')
+            if g.get("sublabel"):
+                s.append(f'<text x="{x0-12}" y="{st["yy"]+29}" font-size="8" fill="{cs["soft"]}" text-anchor="end">{esc(g["sublabel"])}</text>')
+            for read in g["reads"]:
+                marks = (read.get("marks", "") or "").split()
+                bases = (read.get("bases", "") or "").split()
+                yy = st["yy"]
+                x1, x2, tip = col0 - 14, colx[-1] + 14, colx[-1] + 24
+                s.append(f'<polygon points="{x1},{yy+4} {x2},{yy+4} {tip},{yy+12} {x2},{yy+20} {x1},{yy+20}" fill="{gcol}" opacity=".14"/>')
+                for i, cx in enumerate(colx):
+                    m = marks[i] if i < len(marks) else "."
+                    b = bases[i] if i < len(bases) else ""
+                    if m != ".":  # 變異一律顯（位置 + 類別色）= L0 必要
+                        r = 5.5 if detail == "tick" else 8
+                        s.append(f'<circle cx="{cx}" cy="{yy+12}" r="{r}" fill="{vcol.get(m, cs["ink"])}"/>')
+                        if detail in ("base", "sequence") and b:  # base 字母 = L2，僅強調「哪種突變」時
+                            s.append(f'<text x="{cx}" y="{yy+16}" font-size="10" font-weight="800" fill="#fff" text-anchor="middle">{esc(b)}</text>')
+                    elif detail == "sequence" and b:  # 背景 base = L3 噪音，預設隱藏；僅 full-sequence 顯（淡）
+                        s.append(f'<text x="{cx}" y="{yy+16}" font-size="9" fill="#c4c2ba" text-anchor="middle">{esc(b)}</text>')
+                st["yy"] += 24
+            st["yy"] += 8
+
+    draw_group(germ, "Germline")
+    s.append(f'<line x1="{x0-40}" y1="{st["yy"]}" x2="{colx[-1]+28}" y2="{st["yy"]}" stroke="{cs.get("line","#ccc")}" stroke-dasharray="4 3"/>')
+    s.append(f'<text x="{x0-40}" y="{st["yy"]-3}" font-size="8.5" fill="{cs["soft"]}">↓ haplotag → 依 somatic 變異細分子標</text>')
+    st["yy"] += 16
+    draw_group(som, "Somatic")
+    return "\n".join(s), st["yy"] - y + 4
+
+
+# ---------- U2 igv_pileup（真實結果風格；read=lane rect，SNV=base 色直 tick）----------
+def p_igv_pileup(data, prim, sh, y):
+    cs = sh["color_scale"]
+    lanes = resolve(data, prim["params"]["lanes_ref"])
+    ncol = prim["params"].get("n_cols", 24)
+    W = sh.get("width", 760)
+    x0 = 150
+    w = W - x0 - 20
+    base_col = {"A": "#3a8a3a", "C": "#2D6CB5", "G": "#9a6a2a", "T": "#C0392B"}
+    s, yy = [], y
+    s.append(f'<text x="{x0-10}" y="{yy+9}" font-size="9" fill="{cs["soft"]}" text-anchor="end">coverage</text>')
+    for i in range(ncol):
+        h = 5 + (i * 5) % 13
+        cx = x0 + i * (w / ncol)
+        s.append(f'<rect x="{cx:.1f}" y="{yy+13-h}" width="{w/ncol-1:.1f}" height="{h}" fill="#cfcabd"/>')
+    yy += 20
+    locus_top, locus_x = yy, x0 + w * 0.5
+    for lane in lanes:
+        lcol = cs.get(lane["color_key"], "#bbb")
+        nreads = lane.get("n_reads", 4)
+        s.append(f'<text x="{x0-10}" y="{yy+10}" font-size="9.5" font-weight="700" fill="{lcol}" text-anchor="end">{esc(lane["label"])}</text>')
+        for r in range(nreads):
+            s.append(f'<rect x="{x0}" y="{yy+r*6}" width="{w:.1f}" height="4.5" rx="2" fill="{lcol}" opacity=".5"/>')
+        for vc in lane.get("variants", []):
+            vx = x0 + (vc["col"] / ncol) * w
+            s.append(f'<rect x="{vx:.1f}" y="{yy}" width="2.6" height="{nreads*6-2}" fill="{base_col.get(vc.get("base","A"),"#444")}"/>')
+        yy += nreads * 6 + 8
+    s.insert(0, f'<line x1="{locus_x:.1f}" y1="{locus_top}" x2="{locus_x:.1f}" y2="{yy-8}" stroke="{cs.get("hp11","#C55A11")}" stroke-dasharray="2 3" opacity=".55"/>')
+    return "\n".join(s), yy - y
+
+
+# ---------- U3 cpg_beta_matrix（甲基化軸：cell = red>0.5 / blue<0.5 ramp）+ W 視窗 ----------
+def p_cpg_beta_matrix(data, prim, sh, y):
+    cs = sh["color_scale"]
+    groups = resolve(data, prim["params"]["groups_ref"])
+    ncpg = prim["params"].get("n_cpg", 8)
+    win = prim["params"].get("window")
+    col0, dx, x0 = 172, 30, 150
+    colx = [col0 + i * dx for i in range(ncpg)]
+    s, yy = [], y
+    if win:
+        wx1, wx2 = colx[win[0]] - 13, colx[win[1]] + 13
+        s.append(f'<text x="{(wx1+wx2)/2:.0f}" y="{yy+8}" font-size="9" font-weight="700" fill="{cs["synthetic"]}" text-anchor="middle">W 視窗</text>')
+        s.append(f'<path d="M{wx1},{yy+20} L{wx1},{yy+13} L{wx2},{yy+13} L{wx2},{yy+20}" fill="none" stroke="{cs["synthetic"]}" stroke-width="1.4"/>')
+        yy += 22
+    for cx in colx:
+        s.append(f'<text x="{cx}" y="{yy+8}" font-size="8" fill="{cs["soft"]}" text-anchor="middle">CpG</text>')
+    yy += 12
+    for g in groups:
+        gcol = cs.get(g.get("color_key", "hp1"), cs["ink"])
+        s.append(f'<text x="{x0-10}" y="{yy+11}" font-size="10" font-weight="700" fill="{gcol}" text-anchor="end">{esc(g["label"])}</text>')
+        for row in g["rows"]:
+            for cx, v in zip(colx, [float(x) for x in row.split()]):
+                col, op = (cs["meth"], (v - 0.5) * 1.5 + 0.3) if v >= 0.5 else (cs["unmeth"], (0.5 - v) * 1.5 + 0.3)
+                s.append(f'<rect x="{cx-12}" y="{yy}" width="24" height="13" rx="2" fill="{col}" opacity="{min(op,1):.2f}"/>')
+            yy += 16
+        yy += 6
+    return "\n".join(s), yy - y
+
+
+# ---------- U5 grouped_bar（跨樣本 method 對照；zoomed 軸必標 caveat）----------
+def p_grouped_bar(data, prim, sh, y):
+    cs = sh["color_scale"]
+    samples = resolve(data, prim["params"]["samples_ref"])
+    methods = resolve(data, prim["params"]["methods_ref"])
+    zoomed = prim["params"].get("zoomed", False)
+    ymin, ymax = prim["params"].get("ymin", 0.0), prim["params"].get("ymax", 1.0)
+    x0, W = 150, sh.get("width", 760)
+    plot_w, plot_h = W - x0 - 30, 150
+    base_y = y + 14 + plot_h
+    s = []
+    for gv in range(5):
+        gy = base_y - gv / 4 * plot_h
+        s.append(f'<line x1="{x0}" y1="{gy:.1f}" x2="{x0+plot_w}" y2="{gy:.1f}" stroke="#eee" stroke-dasharray="2 2"/>')
+        s.append(f'<text x="{x0-6}" y="{gy+3:.1f}" font-size="8.5" fill="{cs["soft"]}" text-anchor="end">{ymin+gv/4*(ymax-ymin):.2f}</text>')
+    group_w = plot_w / len(samples)
+    bw = group_w * 0.66 / len(methods)
+    for si, samp in enumerate(samples):
+        gx = x0 + si * group_w + group_w * 0.17
+        for mi, m in enumerate(methods):
+            v = samp["values"].get(m["name"])
+            if v is None:
+                continue
+            bh = (v - ymin) / (ymax - ymin) * plot_h
+            bx = gx + mi * bw
+            mcol = cs.get(m["color_key"], "#888")
+            s.append(f'<rect x="{bx:.1f}" y="{base_y-bh:.1f}" width="{bw-2:.1f}" height="{bh:.1f}" fill="{mcol}"/>')
+            s.append(f'<text x="{bx+bw/2:.1f}" y="{base_y-bh-2:.1f}" font-size="8" fill="{mcol}" text-anchor="middle">{v:.3f}</text>')
+        s.append(f'<text x="{gx+group_w*0.33:.1f}" y="{base_y+13}" font-size="9" fill="{cs["ink"]}" text-anchor="middle">{esc(samp["name"])}</text>')
+    yy = base_y + 20
+    if zoomed:
+        s.append(f'<text x="{x0}" y="{yy+9}" font-size="9" font-weight="700" fill="{cs["synthetic"]}">⚠ y 軸非零起點（{ymin}–{ymax}）放大差異，注意感知偏誤</text>')
+        yy += 14
+    return "\n".join(s), yy - y
+
+
+# ---------- U4 facet_grid（小倍數 metric×sample；邊緣才標軸 + 共用 legend）----------
+def p_facet_grid(data, prim, sh, y):
+    cs = sh["color_scale"]
+    rows = resolve(data, prim["params"]["rows_ref"])      # [{metric, cells:[{baseline,method}]}]
+    cols = resolve(data, prim["params"]["col_labels_ref"])  # [sample]
+    W, x0 = sh.get("width", 760), 150
+    grid_w = W - x0 - 20
+    cw, ph = grid_w / len(cols), 52
+    s, yy = [], y
+    for ci, c in enumerate(cols):
+        s.append(f'<text x="{x0+ci*cw+cw/2:.0f}" y="{yy+8}" font-size="9" font-weight="700" fill="{cs["ink"]}" text-anchor="middle">{esc(c)}</text>')
+    yy += 14
+    for row in rows:
+        s.append(f'<text x="{x0-8}" y="{yy+ph/2:.0f}" font-size="9.5" font-weight="700" fill="{cs["soft"]}" text-anchor="end">{esc(row["metric"])}</text>')
+        for ci, cell in enumerate(row["cells"]):
+            px, pw, by, ph_in = x0 + ci * cw + 6, cw - 12, yy + ph - 8, ph - 16
+            s.append(f'<rect x="{px:.1f}" y="{yy+2}" width="{pw:.1f}" height="{ph-4}" fill="none" stroke="#eee"/>')
+            for key, col, off in [("baseline", cs["unmeth"], 4), ("method", cs["hp11"], pw / 2 + 2)]:
+                bh = float(cell.get(key, 0)) * ph_in
+                s.append(f'<rect x="{px+off:.1f}" y="{by-bh:.1f}" width="{pw/2-6:.1f}" height="{bh:.1f}" fill="{col}"/>')
+        yy += ph + 4
+    s.append(f'<circle cx="{x0+10}" cy="{yy+6}" r="5" fill="{cs["unmeth"]}"/><text x="{x0+20}" y="{yy+10}" font-size="9.5" fill="{cs["ink"]}">baseline</text>')
+    s.append(f'<circle cx="{x0+120}" cy="{yy+6}" r="5" fill="{cs["hp11"]}"/><text x="{x0+130}" y="{yy+10}" font-size="9.5" fill="{cs["ink"]}">method</text>')
+    return "\n".join(s), yy + 18 - y
+
+
+# ---------- U6 stacked_bar（組成隨 param sweep；schematic idealized）----------
+def p_stacked_bar(data, prim, sh, y):
+    cs = sh["color_scale"]
+    xs = resolve(data, prim["params"]["x_values_ref"])
+    series = resolve(data, prim["params"]["series_ref"])
+    W, x0 = sh.get("width", 760), 150
+    plot_w, plot_h = W - x0 - 120, 150
+    base_y = y + 16 + plot_h
+    n, bw = len(xs), (W - x0 - 120) / len(xs) * 0.6
+    s = [f'<text x="{x0-6}" y="{y+22}" font-size="8.5" fill="{cs["soft"]}" text-anchor="end">100%</text>',
+         f'<text x="{x0-6}" y="{base_y+3}" font-size="8.5" fill="{cs["soft"]}" text-anchor="end">0%</text>']
+    for i, xv in enumerate(xs):
+        bx, acc = x0 + i * (plot_w / n) + (plot_w / n - bw) / 2, 0.0
+        for ser in series:
+            h = float(ser["values"][i]) * plot_h
+            s.append(f'<rect x="{bx:.1f}" y="{base_y-acc-h:.1f}" width="{bw:.1f}" height="{h:.1f}" fill="{cs.get(ser["color_key"],"#888")}"/>')
+            acc += h
+        s.append(f'<text x="{bx+bw/2:.1f}" y="{base_y+12}" font-size="8.5" fill="{cs["ink"]}" text-anchor="middle">{esc(str(xv))}</text>')
+    s.append(f'<text x="{x0+plot_w/2:.0f}" y="{base_y+26}" font-size="9" fill="{cs["soft"]}" text-anchor="middle">{esc(prim["params"].get("x_label",""))}</text>')
+    ly = y + 16
+    for ser in series:
+        s.append(f'<rect x="{x0+plot_w+16}" y="{ly}" width="10" height="10" fill="{cs.get(ser["color_key"],"#888")}"/>'
+                 f'<text x="{x0+plot_w+30}" y="{ly+9}" font-size="9" fill="{cs["ink"]}">{esc(ser["name"])}</text>')
+        ly += 16
+    return "\n".join(s), base_y + 30 - y
+
+
+# ---------- U7 loh_ideogram（單染色體 band + centromere + interval 軌）----------
+def p_loh_ideogram(data, prim, sh, y):
+    cs = sh["color_scale"]
+    chrom = prim["params"].get("chrom", "chr13")
+    length = float(prim["params"].get("length_mb", 115))
+    cen = float(prim["params"].get("centromere_mb", 17))
+    tracks = resolve(data, prim["params"]["tracks_ref"])
+    W, x0 = sh.get("width", 760), 150
+    w = W - x0 - 20
+
+    def mb2x(mb):
+        return x0 + float(mb) / length * w
+
+    cx = mb2x(cen)
+    s, yy = [], y
+    s.append(f'<text x="{x0-10}" y="{yy+16}" font-size="10" font-weight="700" fill="{cs["ink"]}" text-anchor="end">{esc(chrom)}</text>')
+    s.append(f'<rect x="{x0}" y="{yy+5}" width="{cx-x0:.1f}" height="15" rx="6" fill="#d8d5cc"/>')
+    s.append(f'<rect x="{cx:.1f}" y="{yy+5}" width="{x0+w-cx:.1f}" height="15" rx="6" fill="#d8d5cc"/>')
+    s.append(f'<circle cx="{cx:.1f}" cy="{yy+12}" r="4" fill="#a8a59c"/>')
+    yy += 28
+    for tr in tracks:
+        s.append(f'<text x="{x0-10}" y="{yy+10}" font-size="9" fill="{cs["soft"]}" text-anchor="end">{esc(tr["label"])}</text>')
+        s.append(f'<line x1="{x0}" y1="{yy+6}" x2="{x0+w}" y2="{yy+6}" stroke="#eee"/>')
+        for iv in tr.get("intervals", []):
+            ix1, ix2 = mb2x(iv["start"]), mb2x(iv["end"])
+            s.append(f'<rect x="{ix1:.1f}" y="{yy}" width="{max(ix2-ix1,2):.1f}" height="12" rx="2" fill="{cs.get(iv.get("color_key","loh"),"#8E44AD")}" opacity=".8"/>')
+        yy += 18
+    return "\n".join(s), yy - y
+
+
 RENDERERS = {
+    "hap_split_track": p_hap_split_track,
+    "readtrack_legend": p_readtrack_legend,
+    "igv_pileup": p_igv_pileup,
+    "cpg_beta_matrix": p_cpg_beta_matrix,
+    "grouped_bar": p_grouped_bar,
+    "facet_grid": p_facet_grid,
+    "stacked_bar": p_stacked_bar,
+    "loh_ideogram": p_loh_ideogram,
     "read_cpg_matrix": p_read_cpg_matrix,
     "beta_bar": p_beta_bar,
     "dbeta_step": p_dbeta_step,
@@ -221,11 +468,13 @@ def render(spec, data):
     head = [
         f'<text x="10" y="26" font-size="16" font-weight="800" fill="{cs["ink"]}">{title}</text>',
         f'<text x="10" y="46" font-size="11.5" fill="{cs["soft"]}">{sub}</text>',
-        f'<g transform="translate(10,58)">'
-        f'<circle cx="8" cy="8" r="5" fill="{cs["meth"]}"/><text x="18" y="12" font-size="10.5" fill="{cs["ink"]}">5mC high（甲基）</text>'
-        f'<circle cx="150" cy="8" r="5" fill="#fff" stroke="{cs["unmeth"]}" stroke-width="2"/><text x="160" y="12" font-size="10.5" fill="{cs["ink"]}">5mC low（去甲基）</text>'
-        f'<text x="300" y="12" font-size="10.5" fill="{cs["ink"]}">β＝該群在某 CpG 的甲基比例</text></g>',
     ]
+    if spec.get("annotations", {}).get("methyl_legend", True):  # 甲基化圖預設顯示 5mC legend；haplotype 圖關閉用 readtrack_legend
+        head.append(
+            f'<g transform="translate(10,58)">'
+            f'<circle cx="8" cy="8" r="5" fill="{cs["meth"]}"/><text x="18" y="12" font-size="10.5" fill="{cs["ink"]}">5mC high（甲基）</text>'
+            f'<circle cx="150" cy="8" r="5" fill="#fff" stroke="{cs["unmeth"]}" stroke-width="2"/><text x="160" y="12" font-size="10.5" fill="{cs["ink"]}">5mC low（去甲基）</text>'
+            f'<text x="300" y="12" font-size="10.5" fill="{cs["ink"]}">β＝該群在某 CpG 的甲基比例</text></g>')
     # annotations footer
     ann = spec.get("annotations", {})
     foot = []

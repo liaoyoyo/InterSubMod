@@ -21,8 +21,11 @@ description: |
 
 | 方向 | 對象 | 用途 |
 |---|---|---|
-| **Uses** | `tools/render_figure_spec.py` | 讀 spec+data → 注入真值 → 出 SVG；缺 verified 真值 refuse |
+| **Uses** | `tools/render_figure_spec.py` | 讀 spec+data → 注入真值 → 出 SVG；缺 verified 真值 refuse；12 primitive（hap_split_track / igv_pileup / cpg_beta_matrix / grouped_bar / facet_grid / stacked_bar / loh_ideogram / readtrack_legend / read_cpg_matrix / beta_bar / dbeta_step / normal_cis_triplet）|
+| **Uses** | `tools/lint_figure.py` | pixel-free 設計自檢（字型/溢出/認知負擔/label-flip/色約定/示意）→ render→lint→fix 自我迭代 |
+| **Uses** | `tools/build_gallery.py` | 把 examples/*/method_explainer.svg 併成單頁 `_gallery.html` 供一次眼驗 |
 | **Uses** | `templates/figure_spec.schema.json` | spec 格式（case + primitives + shared） |
+| **Reads** | `references/detail_levels.md` | 分級顯示（L0 必要/L1 輔助/L2 on-demand/L3 隱藏）+ detail 參數 + 字型對齊目的 |
 | **Reads** | `references/object_library.md` | 物件 primitive 定義（P1-P7 + 如何擴新物件） |
 | **Reads** | `references/case_templates.md` | 案例模板（C1-C3 + goal→objects 組合法） |
 | **Reads** | `references/explainer_checklist.md` | 12-criteria + 圖例細節迭代 verify + SciFig R1-R6 |

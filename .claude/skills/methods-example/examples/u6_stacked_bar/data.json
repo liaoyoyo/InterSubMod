@@ -1,0 +1,12 @@
+{
+  "_comment": "U6 stacked composition over purity sweep 示意(synthetic, idealized 趨勢)。藍 ref 隨 purity 減、橘 somatic 增。",
+  "meta": { "synthetic_note": "理想化示意(synthetic)，非真值；展示組成隨 purity 變化趨勢" },
+  "schematic": { "synthetic": true },
+  "x_values": ["0.2", "0.4", "0.6", "0.8", "1.0"],
+  "series": [
+    { "name": "Ref HP1", "color_key": "hp1", "values": [0.45, 0.40, 0.32, 0.25, 0.20] },
+    { "name": "Ref HP2", "color_key": "hp2", "values": [0.45, 0.38, 0.33, 0.27, 0.22] },
+    { "name": "Alt HP1-1 (somatic)", "color_key": "hp11", "values": [0.10, 0.22, 0.35, 0.48, 0.58] }
+  ],
+  "label_flip_note": "HP1-1 = HP1 germline 下 somatic-allele 子標，非第三 haplotype。"
+}

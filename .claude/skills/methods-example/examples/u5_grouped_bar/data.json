@@ -1,0 +1,18 @@
+{
+  "_comment": "U5 grouped bar 跨樣本 method 對照 示意(synthetic)。值為展示圖型用的 SCHEMATIC，非本專案真值（§13）。",
+  "meta": { "synthetic_note": "示意數值（synthetic），非本專案真值；僅展示 grouped-bar 圖型 + zoomed-axis caveat" },
+  "schematic": { "synthetic": true },
+  "samples": [
+    { "name": "Sample-1", "values": { "baseline": 0.86, "method": 0.89 } },
+    { "name": "Sample-2", "values": { "baseline": 0.84, "method": 0.90 } },
+    { "name": "Sample-3", "values": { "baseline": 0.88, "method": 0.91 } }
+  ],
+  "methods": [
+    { "name": "baseline", "color_key": "unmeth" },
+    { "name": "method", "color_key": "hp11" }
+  ],
+  "legend": [
+    { "label": "baseline", "color_key": "unmeth" },
+    { "label": "method", "color_key": "hp11" }
+  ]
+}

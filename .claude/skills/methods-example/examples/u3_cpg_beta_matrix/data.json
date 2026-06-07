@@ -1,0 +1,18 @@
+{
+  "_comment": "U3 read×CpG β matrix 示意(synthetic)。cell=甲基比例 β，red>0.5/blue<0.5 ramp（甲基化軸，非 deck 字母編色）。rows 每格=該 read 在該 CpG 的 β。",
+  "meta": { "synthetic_note": "示意 β 值（synthetic），非實際甲基化資料" },
+  "schematic": {
+    "synthetic": true,
+    "groups": [
+      { "label": "HP1", "color_key": "hp1", "rows": [
+        "0.8 0.7 0.9 0.8 0.2 0.3 0.8 0.7",
+        "0.7 0.8 0.8 0.9 0.3 0.2 0.9 0.8",
+        "0.8 0.9 0.7 0.8 0.2 0.2 0.8 0.9" ] },
+      { "label": "HP1-1", "color_key": "hp11", "rows": [
+        "0.2 0.3 0.2 0.1 0.2 0.3 0.2 0.1",
+        "0.3 0.2 0.1 0.2 0.1 0.2 0.3 0.2" ] }
+    ]
+  },
+  "label_flip_note": "HP1-1 = HP1 germline 下 somatic 子標，非第三 haplotype。",
+  "intuition": "列=read（依 HP 分群），欄=CpG 位置，格色=甲基比例 β（紅=高甲基 / 藍=低甲基）；W=做統計的視窗。"
+}

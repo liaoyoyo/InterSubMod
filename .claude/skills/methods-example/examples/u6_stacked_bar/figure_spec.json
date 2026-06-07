@@ -1,0 +1,16 @@
+{
+  "_comment": "U6 stacked composition bar over purity sweep（schematic）。展示 §13-A 示意與真值分離。",
+  "case_template_id": "Cx_custom",
+  "title": "組成隨 purity 變化：stacked composition（schematic 趨勢）",
+  "subtitle": "示意（idealized）· x=purity、y=read 組成 · 藍 ref 減 / 橘 somatic 增 · 非真值",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "stacked_bar", "params": { "x_values_ref": "x_values", "series_ref": "series", "x_label": "tumor purity" } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#999999", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "label_flip_ref": "label_flip_note", "synthetic_watermark": true, "methyl_legend": false }
+}

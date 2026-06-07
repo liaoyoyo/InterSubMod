@@ -1,0 +1,16 @@
+{
+  "_comment": "U4 facet small-multiples。列=metric、欄=sample、每格 2 bar。值=示意非真值。",
+  "case_template_id": "Cx_custom",
+  "title": "Faceted small-multiples：metric × sample（baseline vs method）",
+  "subtitle": "示意 · 列=metric、欄=sample、每格 2 bar（藍 baseline / 橘 method）· 邊緣才標籤 · 共用 legend",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "facet_grid", "params": { "rows_ref": "rows", "col_labels_ref": "col_labels" } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#999999", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "synthetic_watermark": true, "methyl_legend": false }
+}

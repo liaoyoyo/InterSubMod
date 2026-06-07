@@ -1,0 +1,16 @@
+{
+  "_comment": "U7 單染色體 LOH ideogram + interval 軌。loh 紫 token。chr13 length/centromere(Mb)。",
+  "case_template_id": "Cx_custom",
+  "title": "LOH cytoband ideogram：單染色體 + 對齊 interval 軌",
+  "subtitle": "示意 · 染色體帶狀 + centromere · 下方軌：Reference(array) vs method call · LOH interval=紫",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "loh_ideogram", "params": { "chrom": "chr13", "length_mb": 115, "centromere_mb": 17, "tracks_ref": "tracks" } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "loh": "#8E44AD", "seqerr": "#7F7F7F", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#999999", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "synthetic_watermark": true, "methyl_legend": false }
+}
