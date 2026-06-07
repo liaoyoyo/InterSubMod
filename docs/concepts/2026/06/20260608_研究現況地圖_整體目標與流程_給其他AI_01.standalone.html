@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<!-- companion to 20260608_研究現況地圖_整體目標與流程_給其他AI_01.md (D11). data_sources: knowledge/11_external_literature/10_paper_readiness_convergence.md, evidence_ledger.jsonl, state/active.json -->
+<!-- provenance-verified: 數字取自收斂稽核 wf_9e169112-573 + ledger + active.json；orientation 導航非新分析；Write 與分析不同 batch（§13.0）。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>研究現況地圖 — 整體目標與流程（給其他 AI）2026-06-08</title>
+<style>
+:root{--c-accent:#D97757;--c-text:#141413;--c-text-soft:#6B6B66;--c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;--c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;--ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;--ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,Consolas,monospace;--radius:8px}
+*{box-sizing:border-box}body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);line-height:1.6;font-size:16px}
+main{max-width:1060px;margin:0 auto;padding:32px 24px 64px}
+h1{font-size:30px;margin:0 0 8px}h2{font-size:23px;margin:40px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--c-border)}
+.sub{color:var(--c-text-soft);font-size:15px;margin-top:0}
+code{font-family:var(--ff-mono);background:var(--c-code-bg);padding:1px 5px;border-radius:4px;font-size:.85em}
+.card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius);padding:24px;margin:16px 0;box-shadow:0 1px 2px rgba(20,20,19,.05)}
+.goal{border-left:4px solid var(--c-accent);background:#FFF9F4}
+.bossfight{border:2px solid var(--c-critical);background:#FBEAE3;border-radius:var(--radius);padding:16px 20px;margin:16px 0}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:12px 0}th,td{border:1px solid var(--c-border);padding:6px 9px;text-align:left;vertical-align:top}th{background:var(--c-code-bg);font-weight:600}tr:nth-child(even) td{background:#FCFBF8}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:middle}.g{background:var(--c-success)}.b{background:var(--c-info)}.y{background:var(--c-warning)}.r{background:var(--c-critical)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px}.b-ready{background:#EAF0F7;color:var(--c-info);border:1px solid #C3D0EC}.b-work{background:#FBF3DF;color:var(--c-warning);border:1px solid #EAD9A6}.b-not{background:#FBEAE3;color:var(--c-critical);border:1px solid #F0C9B6}
+.tier{border-radius:6px;padding:10px 14px;margin:8px 0;border:1px solid var(--c-border)}.t-spine{background:#FBF3DF;border-color:#EAD9A6}.t-sup{background:#F4EFE6}.t-neg{background:#EAF0F7;border-color:#C3D0EC}.t-fut{background:#FCFBF8;opacity:.92}
+.warn{border-left:4px solid var(--c-critical);background:#FBEAE3;padding:14px 18px;border-radius:0 6px 6px 0;margin:12px 0}
+.warn ol{margin:6px 0;padding-left:22px}.warn li{margin:4px 0;font-size:14.5px}
+footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--c-border);font-size:13px;color:var(--c-text-soft)}
+</style></head>
+<body><main>
+<h1>研究現況地圖 — 整體目標與流程</h1>
+<p class="sub">給其他 AI session / 協作者 / 未來的自己的單頁入口 ｜ 2026-06-08 ｜ 權威真值順序：本圖 → <code>knowledge/11_external_literature/10_paper_readiness_convergence.md</code> → <code>evidence_ledger.jsonl</code> → <code>state/active.json</code>（衝突時 ledger 為準）</p>
+
+<div class="card goal">
+<strong style="font-size:17px">L0 — 終極目標 + 論文主軸</strong>
+<p style="margin:10px 0 6px"><strong>目標</strong>：在癌症長讀（ONT 5mC/5hmC）以<strong>單 read 解析度</strong> characterize <strong>somatic 突變 + LOH 如何重塑 haplotype/甲基地景</strong>，並交付利用它的 tooling。<strong>是 characterization + tooling 論文，不是 variant filter。</strong></p>
+<p style="margin:0"><strong>主軸</strong>：LOH 區腫瘤只保留單一 haplotype → somatic SNV 形成同-haplotype 子家族、跨樣本可偵測；ASM 真實存在、現象層復現，但小、非方向、與 copy-dosage 無關、<strong>不能判別真/假變異</strong>（甲基不能當 filter，死四道）。貢獻 = LOH-driven haplotype 結構 characterization + 誠實的「甲基能/不能做什麼」目錄。</p>
+</div>
+
+<h2>L1 — 論文結構（質量在 NEGATIVE 底座）</h2>
+<div class="tier t-spine"><span class="dot y"></span><strong>主軸</strong> LOH-constrained phasing <span class="badge b-work">Grade B+ ⭐3</span> — NG=2 Inner > Outer 7/7 (p=0.0078)；but by-construction 部分循環、對照未跑（HD-1）</div>
+<div class="tier t-sup"><span class="dot b"></span><strong>支撐</strong> ASM characterization ⭐3 單樣本 — ASM 真非判別；chr17/TBC1D16 唯一乾淨 cis；6/6 跨樣本 excess；AF→NGroups 7/7（待歸因）</div>
+<div class="tier t-neg"><span class="dot b"></span><strong>底座（最強）</strong> methods NEGATIVE <span class="badge b-ready">READY</span> — filter 死<strong>四</strong>道：LOSO 循環 / AUC=0.505 / regression-to-extreme / clustering=germline-allelic（+Zone +CNV-zone +V6-LR）</div>
+<div class="tier t-fut"><span class="dot r"></span><strong>future</strong> umtag 救 unphase read / ⭐4 升級 <span class="badge b-not">NOT-READY</span> — 白地真實但 prototype；Discussion + 1 圖</div>
+
+<h2>L2 — 7 研究線現況</h2>
+<table>
+<tr><th>線</th><th>狀態</th><th>可寫</th><th>已死/反例</th><th>數據在哪</th></tr>
+<tr><td><strong>T1 LOH-phasing</strong></td><td><span class="dot y"></span>NEEDS-WORK</td><td>NG=2 7/7；≥93% same-hap 6/6；paired 負控</td><td>filter DEAD；HPFineNGroups ⭐4→⭐3</td><td><code>tpfp_loh_af_kde_discrimination/</code></td></tr>
+<tr><td><strong>T2 ASM 存在</strong></td><td><span class="dot b"></span>READY-AS-NEG</td><td>ASM 真非 filter；628 consensus</td><td>somatic_specificity NEG；B2 NEG</td><td><code>tsg.../genome_survey_v2/</code> ⏳06-07 仍寫</td></tr>
+<tr><td><strong>T3 cis/copy-partition</strong></td><td><span class="dot b"></span>READY-AS-NEG</td><td>dosage falsified；chr17/TBC1D16 乾淨 cis</td><td><strong>BRCA2=copy-artifact</strong>；60T3→1</td><td>同上 <code>fast_cnv_validation.json</code></td></tr>
+<tr><td><strong>T4 methyl→TP/FP</strong></td><td><span class="dot b"></span>READY-AS-NEG（強）</td><td>LOSO 100% circularity；AUC=0.505</td><td>整個 filter DEAD</td><td><code>methyl_augmented_filter_phase2/</code></td></tr>
+<tr><td><strong>T5 跨樣本 ASM</strong></td><td><span class="dot b"></span>READY-AS-NEG</td><td>6/6 excess (3 癌種)</td><td>同-locus 0/38（underpowered）</td><td><code>tsg.../cn_confound/cross_sample/</code></td></tr>
+<tr><td><strong>T6 subclone</strong></td><td><span class="dot y"></span>+1 IF 歸因解</td><td>AF→NGroups 7/7</td><td>B2 NEG；cis 1/816 clean</td><td><code>loh_subclone_af_paired/</code> ⏳HD-4 中</td></tr>
+<tr><td><strong>T7 umtag</strong></td><td><span class="dot r"></span>NOT-READY</td><td>白地；held-out 0.8852；V10 非-copy</td><td>aDMR×LOH 非富集；<strong>未註冊</strong></td><td><code>selfphasing_v6_production/</code></td></tr>
+</table>
+
+<h2>L3 — 現在流程/分工 + 開放決策</h2>
+<div class="card">
+<p style="margin-top:0"><strong>並行（多 session）</strong>：<strong>tsg ASM/cis 線</strong>（另一 session，06-07 仍在寫）持續收緊 cis 分析（BRCA2→copy-artifact、chr17 唯一乾淨 cis、dosage refuted）→ T2/T3/T5/T6 數字可能再動。<strong>本 session</strong>：外部文獻地景 + 7 線收斂稽核 + HD-4 歸因（背景中）。<strong>active cycle</strong>：G6 LOH-phasing (P4 ⭐3) + G1 ASM (P3 ⭐3)。</p>
+<p style="margin-bottom:0"><strong>開放決策</strong>：🔴 <strong>HD-1（用戶決定·hold）</strong> 跑 R-SELFREF 對照 or 降 phasing 為 characterization ｜ <strong>HD-3 ✅</strong> BRCA2 口徑已 amend ｜ <strong>HD-4 ✅</strong> AF→NGroups=phasing 非甲基 ｜ <strong>HD-5 ⏳</strong> T7 註冊 ｜ HD-2/HD-6 投稿前。</p>
+</div>
+
+<h2>🔴 別踩的雷（其他 AI 必讀）</h2>
+<div class="warn"><ol>
+<li><strong>甲基→TP/FP filter 已 concluded NEGATIVE/死四道 — 勿重開</strong>（除非 C1 新數據/C2 新方法/C3 新前置）。</li>
+<li><strong>characterization-set（628/15391/strong-ASM）絕不寫成 filter</strong>（15391 TP/FP=1.0；strong-ASM anti-discriminative OR=0.194）。</li>
+<li><strong>BRCA2 ≠ 乾淨 cis 錨點</strong>（~80% copy-artifact）；乾淨 cis 改 <strong>chr17/TBC1D16</strong>；BRCA2 hypo≠canonical hyper，勿當 TSG-silencing 證據。</li>
+<li><strong>「Grade A」是 Grade B+</strong>；p=0.0078 是方向一致性非 effect；n=7 = bio-n=6。</li>
+<li><strong>所有 ASM 單樣本 HCC1395 ⭐3 / 單 pipeline</strong>；⭐4 需 COLO829；跨樣本 6/6 是 phenomenon-level；private 0/38 是 underpowered。</li>
+<li><strong>改 validated 文件需用戶核准</strong>（加 amendment 不覆寫）；<strong>只 git add 自己的檔</strong>；<strong>長 compute 不放 workflow agent step</strong>（背景 Bash 落檔→Read 驗→才寫，§13.0）。</li>
+</ol></div>
+
+<h2>權威文件地圖</h2>
+<table>
+<tr><th>要查</th><th>去哪</th></tr>
+<tr><td>論文就緒/可寫/矛盾/GO-NO-GO</td><td><code>knowledge/11_external_literature/10_paper_readiness_convergence.md</code> (+HTML)</td></tr>
+<tr><td>7 角度外部文獻內外證據</td><td><code>knowledge/11_external_literature/00-09</code></td></tr>
+<tr><td>跨 cycle 歷史真理（append-only）</td><td><code>research/autoresearch/evidence_ledger.jsonl</code></td></tr>
+<tr><td>active cycle 快照</td><td><code>state/active.json</code></td></tr>
+<tr><td>本週 validated 數字 SoT</td><td><code>docs/reports/validated/2026/06/20260602_…/master_draft.md</code></td></tr>
+<tr><td>KB 單一入口</td><td><code>knowledge/README.md</code></td></tr>
+</table>
+
+<footer>數字取自收斂稽核 <code>wf_9e169112-573</code>（2026-06-08，7 線獨立 auditor 實讀 ledger/json）+ <code>evidence_ledger.jsonl</code> + <code>state/active.json</code>；orientation 導航非新分析。內部 L1-L2。⚠ tsg 專案仍 active，T2/T3/T5/T6 數字可能再動；HD-1~6 待決議。companion of <code>InterSubMod/docs/concepts/2026/06/20260608_研究現況地圖_整體目標與流程_給其他AI_01.md</code>（D11）。</footer>
+</main></body></html>

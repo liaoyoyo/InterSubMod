@@ -116,10 +116,12 @@ G6 論文
 
 <!-- provenance-verified: d_within −0.023 來自 research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json (2026-06-03 14:06 快照; brca2_perm obs=−0.0233 p=0.022)；≈ 既有 d_drift −0.022（line 119 cis-test）。 -->
 > **【2026-06-03 amendment — BRCA2 改「兩者並陳」口徑】**：tsg `copy_partition_confirm.json` 四維分解顯示 BRCA2 **HP-axis −0.122** 大半為 allele/copy（d_allele=−0.099 / d_copy=−0.11），**純 within-somatic d_within=−0.023**（perm p=0.022，小但真）。故對外引用 BRCA2 強度敘述須**溫和**：「**真實、抗 confound，但純 somatic 效應小**」，不可講「強 somatic ASM」。[src: tsg copy_partition_confirm.json @06-03 快照，project 仍 active，投稿前以定稿為準]
+>
+> 🔴 **【2026-06-08 amendment — BRCA2 進一步降級為 copy-predominant；本 §2.2「cis-test 雙軸通過 / 真 cis-driven」口徑已過時】**（收斂稽核 wf_9e169112-573）：06-07 `fast_cnv_validation.json` 決策表把 BRCA2 (chr13:32,315,128) 列為 **predominantly copy-artifact**（~80% copy），純 within-somatic 殘餘 d_within=−0.023（perm p=0.022, **邊際·未確立**）。816 HP-axis loci 經 Bonferroni+copy-test 後**唯一乾淨 cis = chr17:79,991,120 (TBC1D16)**（within 0.142 > HP 0.122, perm p=0.001, 單樣本）。**copy-DOSAGE 決定性非 driver**（MW p=0.6183, signed ρ=−0.083 反向 REFUTED）。⇒ 對外**勿**再寫「BRCA2 真 cis-driven / 雙軸通過」（下文 (c) line 122 已被本 amendment supersede）；改「BRCA2 = 小 copy-confounded 例，chr17/TBC1D16 = 唯一乾淨 cis exemplar」。完整 paper-readiness + GO/NO-GO → `InterSubMod/knowledge/11_external_literature/10_paper_readiness_convergence.md`（HD-3）。⚠ tsg project 仍 active，投稿前以定稿為準。
 
 **(b) 5/31 六-agent 紅隊 critique [O]**：核心 NEGATIVE 更穩（correction-robust：FDR 較寬鬆但 null≥TP 在兩種校正都成立）；修正 5 個正面子 claim 口徑 — **5× FP 富集中 61% 來自 chr8 hotspot**（drop-chr8 後 OR 5.16→2.84）；"FP |Δβ| larger" claim **已 RETRACTED**（p=0.137 NS）。
 
-**(c) 6/01 BRCA2 cis-test（方法學亮點）[F]**：normal-anchored cis-test（normal-HP1 / tumor-HP1 / tumor-HP1-1）證 **BRCA2 真 cis-driven**（d_cis=−0.142/−0.152, d_drift≈−0.022）；高 cohesion / 高 ARI 的 germline-het 只 drift → **cohesion/ARI ≠ cis**。HP1-1 somatic silhouette 0.267 > HP1 0.119 > HP2 0.089。釐清 **MSA = 外部抽取工具 ≠ ISM binary**。[src: 20260601_ISM_BRCA2_cis_deepdive (ledger 20260601_brca2_cis_test)]
+**(c) 6/01 BRCA2 cis-test（方法學亮點）[F]** ⚠ **【2026-06-08 SUPERSEDED — 見上 06-08 amendment：06-07 重分析後 BRCA2 = copy-predominant，此「真 cis-driven」口徑已退役，乾淨 cis 改 chr17/TBC1D16】**：normal-anchored cis-test（normal-HP1 / tumor-HP1 / tumor-HP1-1）證 **BRCA2 真 cis-driven**（d_cis=−0.142/−0.152, d_drift≈−0.022）；高 cohesion / 高 ARI 的 germline-het 只 drift → **cohesion/ARI ≠ cis**。HP1-1 somatic silhouette 0.267 > HP1 0.119 > HP2 0.089。釐清 **MSA = 外部抽取工具 ≠ ISM binary**。[src: 20260601_ISM_BRCA2_cis_deepdive (ledger 20260601_brca2_cis_test)]
 
 > **magnitude 演變史（口徑）**：buggy Δβ=−0.054 = MSA Level1 把 5mC+5hmC 雙列各計一次把 beta 砍半的 artifact（非 CpG-set 差異）；正確口徑 max-collapse any-mod = **−0.122**。舊 Wilcoxon p=6.09e-11 因 n 灌水 ~2.4×，**絕對值不可引用**（符號方向不受影響）。
 

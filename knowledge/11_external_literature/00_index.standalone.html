@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<!-- companion to 00_index.md (D11). data_sources: 11_external_literature/01..09_*.md (all WebFetch-verified via wf_37b2cc97-663, 2026-06-05). -->
+<!-- provenance-verified: 所有外部數字取自同目錄 01-09 angle .md（由 workflow wf_37b2cc97-663 verify agent 實際 WebFetch 取得 PMID/DOI）；內部數字取自既有 validated SoT（master_draft / 研究故事 §7 / tsg snapshot）。撰寫 HTML 的 Write 與外部查證 WebFetch 不同 batch（§13.0）。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ISM 癌症長讀甲基化 — 7 角度外部文獻地景</title>
+<style>
+:root{
+  --c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;
+  --c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;
+  --c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;--sp-8:64px;
+  --ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;
+  --ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,Monaco,Consolas,monospace;
+  --radius-md:6px;--radius-lg:8px;
+  --shadow-sm:0 1px 2px rgba(20,20,19,.05);--shadow-md:0 2px 8px rgba(20,20,19,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);line-height:1.6;font-size:16px}
+.layout{display:grid;grid-template-columns:268px 1fr;max-width:1320px;margin:0 auto;gap:var(--sp-6)}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:var(--sp-5) var(--sp-4);border-right:1px solid var(--c-border);font-size:14px}
+nav.toc h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--c-text-soft);margin:var(--sp-5) 0 var(--sp-2)}
+nav.toc a{display:block;color:var(--c-text);text-decoration:none;padding:4px 8px;border-radius:4px;border-left:2px solid transparent}
+nav.toc a:hover{background:var(--c-code-bg);border-left-color:var(--c-accent)}
+main{padding:var(--sp-6) var(--sp-5) var(--sp-8);min-width:0}
+h1{font-size:34px;line-height:1.2;margin:0 0 var(--sp-3)}
+h2{font-size:25px;margin:var(--sp-8) 0 var(--sp-3);padding-bottom:var(--sp-2);border-bottom:2px solid var(--c-border)}
+h3{font-size:19px;margin:var(--sp-6) 0 var(--sp-2)}
+p,li{font-size:16px}
+.sub{color:var(--c-text-soft);font-size:15px;margin-top:0}
+code{font-family:var(--ff-mono);background:var(--c-code-bg);padding:1px 5px;border-radius:4px;font-size:.88em}
+.card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-5);margin:var(--sp-4) 0;box-shadow:var(--shadow-sm)}
+.thesis{border-left:4px solid var(--c-accent);background:#FFF9F4}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;vertical-align:middle}
+.b-real{background:#E7F4EC;color:var(--c-success);border:1px solid #BFE3CC}
+.b-blocked{background:#FBEAE3;color:var(--c-critical);border:1px solid #F0C9B6}
+.b-possible{background:#FBF3DF;color:var(--c-warning);border:1px solid #EAD9A6}
+.b-l12{background:#E8EDF7;color:var(--c-info);border:1px solid #C3D0EC}
+.b-l3{background:#EEE9E1;color:var(--c-text-soft);border:1px solid var(--c-border)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.d-real{background:var(--c-success)}.d-blocked{background:var(--c-critical)}.d-possible{background:var(--c-warning)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3)}
+.mini{border-radius:var(--radius-md);padding:var(--sp-3) var(--sp-4);font-size:14px;border:1px solid var(--c-border)}
+.mini h4{margin:0 0 var(--sp-2);font-size:14px}
+.mini.dead{background:#FBEAE3;border-color:#F0C9B6}
+.mini.live{background:#E7F4EC;border-color:#BFE3CC}
+.mini.open{background:#FBF3DF;border-color:#EAD9A6}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:var(--sp-3) 0}
+th,td{border:1px solid var(--c-border);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:var(--c-code-bg);font-weight:600}
+tr:nth-child(even) td{background:#FCFBF8}
+td.c-none,span.c-none{color:var(--c-success);font-weight:600}
+td.c-cal,span.c-cal{color:var(--c-warning);font-weight:600}
+td.c-dir,span.c-dir{color:var(--c-critical);font-weight:600}
+details{border:1px solid var(--c-border);border-radius:var(--radius-lg);margin:var(--sp-3) 0;background:var(--c-surface);overflow:hidden}
+details>summary{cursor:pointer;padding:var(--sp-4) var(--sp-5);font-weight:600;font-size:17px;list-style:none;background:#FCFBF8}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸";color:var(--c-accent);margin-right:10px;font-weight:700}
+details[open]>summary::before{content:"▾"}
+details>summary:hover{background:var(--c-code-bg)}
+.det-body{padding:0 var(--sp-5) var(--sp-4)}
+.chain-row{display:grid;grid-template-columns:60px 1fr;gap:var(--sp-3);padding:var(--sp-3) 0;border-bottom:1px dashed var(--c-border)}
+.chain-row:last-child{border-bottom:none}
+.chain-k{font-family:var(--ff-mono);font-weight:700;color:var(--c-text-soft)}
+.legend{font-size:13px;color:var(--c-text-soft);margin:var(--sp-2) 0 var(--sp-4)}
+.legend span{margin-right:var(--sp-4)}
+footer{margin-top:var(--sp-8);padding-top:var(--sp-4);border-top:1px solid var(--c-border);font-size:13px;color:var(--c-text-soft)}
+.caveat{border-left:4px solid var(--c-warning);background:#FCF7E8;padding:var(--sp-3) var(--sp-4);border-radius:0 var(--radius-md) var(--radius-md) 0;font-size:14px;margin:var(--sp-3) 0}
+.crit{border-left:4px solid var(--c-critical);background:#FBEAE3;padding:var(--sp-3) var(--sp-4);border-radius:0 var(--radius-md) var(--radius-md) 0;font-size:14px;margin:var(--sp-3) 0}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav.toc{position:static;height:auto;border-right:none;border-bottom:1px solid var(--c-border)}.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc">
+  <strong style="font-size:15px">文獻地景導覽</strong>
+  <h2>總覽</h2>
+  <a href="#headline">L0 — 一句話 + 主張</a>
+  <a href="#dreams">夢的狀態（死/活/開放）</a>
+  <a href="#chain">跨問題依賴鏈</a>
+  <h2>7 角度</h2>
+  <a href="#q1">Q1 長短讀方法·時間軸</a>
+  <a href="#q2">Q2 找甲基差異位點</a>
+  <a href="#q3">Q3 ISM 方法對比</a>
+  <a href="#q4">Q4 Subclone</a>
+  <a href="#q5">Q5 分 TP/FP·germline</a>
+  <a href="#q6">Q6 甲基輔助 phasing</a>
+  <a href="#q7">Q7 ASM/cis·癌症影響</a>
+  <h2>整合</h2>
+  <a href="#matrix">可信度 × 衝突矩陣</a>
+  <a href="#defense">論文主張 + reviewer 防守</a>
+  <a href="#refs">參考文獻 + provenance</a>
+</nav>
+
+<main>
+<section id="headline">
+<h1>ISM 癌症長讀甲基化 — 7 角度外部文獻地景</h1>
+<p class="sub">內部發現 <span class="badge b-l12">L1-L2 本專案實測</span> × 外部文獻 <span class="badge b-l3">L3 WebFetch 驗證</span>　｜　workflow <code>wf_37b2cc97-663</code>（16 agents · ~38 篇實證文獻 · 2026-06-05）</p>
+
+<div class="card thesis">
+<h3 style="margin-top:0">一句話結論</h3>
+<p>ISM 的整體方向（read-level haplotype-linked 甲基 characterization + tooling、誠實負結果）在文獻中<strong>大方向被證實、無真正反駁</strong>。理想情境鏈不是一條完整可走的路，而是<strong>「前段使能 REAL、中段白地 LIVE、後段死路 BLOCKED」</strong>的分段鏈。所有 ASM 結論受<strong>單樣本 HCC1395 ⭐3 / 單一 pipeline</strong> 天花板限制。</p>
+<h3>最可防守的論文主張</h3>
+<p style="font-size:15px">「在 ONT 長讀癌症基因組中，allele/haplotype-specific 甲基化（ASM）<strong>真實、cis-driven、且設計上獨立於 copy number</strong>——但它是<strong>結構/連結的 characterization 訊號，不是 somatic variant filter</strong>。我們貢獻 (a) <strong>normal-anchored somatic cis-test</strong>（HP1-vs-HP1-1 軸 held-constant CN/ploidy/alignment 分辨真 cis-driven ASM 與 drift）；(b) 把 haplotype-linked 甲基用於 <strong>LOH 區（germline-het anchor 消失處）的 phasing/tagging</strong>——現有 germline methyl-phaser（MethPhaser/NanoMethPhase/HapBridge）明確留為 future work 的白地。」</p>
+</div>
+</section>
+
+<section id="dreams">
+<h2>夢的狀態 — 死 / 活 / 開放</h2>
+<p class="legend"><span><span class="dot d-blocked"></span>DEAD/BLOCKED</span><span><span class="dot d-real"></span>LIVE/REAL</span><span><span class="dot d-possible"></span>OPEN/未證</span></p>
+<div class="grid3">
+  <div class="mini dead">
+    <h4><span class="dot d-blocked"></span>DEAD（死夢）</h4>
+    <ul style="margin:0;padding-left:18px">
+      <li>甲基當 TP/FP filter（L5，concluded NEGATIVE）</li>
+      <li>跨 region 二次打擊<strong>順序</strong>（L4，NEGATIVE）</li>
+      <li>單樣本群體統計定位「大量乾淨」位點（L1）</li>
+      <li>BRCA2 當 TSG-silencing 證據（方向 hypo≠hyper）</li>
+    </ul>
+  </div>
+  <div class="mini live">
+    <h4><span class="dot d-real"></span>LIVE（最強活夢）</h4>
+    <ul style="margin:0;padding-left:18px">
+      <li><strong>tumor/LOH 甲基輔助 phasing/tagging</strong>（白地，germline 已證、無人在癌症測）</li>
+      <li>LOH-constrained phasing 主軸（Grade A，p=0.0078）</li>
+      <li>ASM 存在 + cis + CN-controlled（U1）</li>
+    </ul>
+  </div>
+  <div class="mini open">
+    <h4><span class="dot d-possible"></span>OPEN（開放未證）</h4>
+    <ul style="margin:0;padding-left:18px">
+      <li>ISM 方法<em>優於</em> pycoMeth/cvlr（無 head-to-head）</li>
+      <li>subclone <em>characterization</em>（非 reconstruction）</li>
+      <li>5mC/5hmC 分軌新穎性（文獻 silent）</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<section id="chain">
+<h2>跨問題依賴鏈（逐環裁決）</h2>
+<p class="sub">理想鏈：找甲基差異位點(Q2) → 助 phasing/tagging(Q6) → ISM 改造(Q3) → 解 subclone(Q4) → 分 TP/FP(Q5)；底層 ASM/cis(Q7)、長讀使能(Q1)。</p>
+<div class="card">
+  <div class="chain-row"><div class="chain-k">L0</div><div><span class="badge b-real">REAL</span> <strong>長讀使能 read-level haplotype-linked 甲基（Q1）</strong>——NanoMethPhase/POG/de Abreu 背書；array/WGBS 做不到。無爭議使能前提。</div></div>
+  <div class="chain-row"><div class="chain-k">L1</div><div><span class="badge b-blocked">BLOCKED</span> <span class="badge b-real">/REAL</span> <strong>找「大量乾淨群體統計」位點（Q2）</strong>——失序公認(Landau 67.6%/Landan/Jenkinson)；但 Lin/POG 在 cohort 找 ~23.6K aDMR/腫瘤 → 我們限制是 <em>power 非生物</em>。O11 0.845→0.530 被 Scherer20 機制背書。</div></div>
+  <div class="chain-row"><div class="chain-k">L2</div><div><span class="badge b-possible">POSSIBLE（最強 LIVE 白地）</span> <strong>甲基 → 助 phasing/tagging（Q6）</strong>——機制 germline 已證(MethPhaser/HapBridge)、LOH-訊號已證(Wakhan/HiCancer，非甲基)，<strong>但 tumor/LOH 甲基-phasing 無人做(含我們)</strong>。</div></div>
+  <div class="chain-row"><div class="chain-k">L3</div><div><span class="badge b-real">REAL</span> <span class="badge b-possible">/POSSIBLE</span> <strong>ISM 改造（Q3）</strong>——structure≠disorder 成立(Landau 明文)；niche 窄化：<strong>cis-test + LOH/CN 耦合零競爭</strong>，read-read 距離<em>單獨</em>非新(cvlr/Metheor)。無 head-to-head 故「更好」未證。</div></div>
+  <div class="chain-row"><div class="chain-k">L4</div><div><span class="badge b-blocked">BLOCKED</span> <span class="badge b-possible">/POSSIBLE</span> <strong>解 subclone（Q4）</strong>——概念被撐(Landau/Lee25)，但缺 phylogeny(EVOFLUx/BitPhylogeny)/CN-deconv(CAMDAC)/單細胞三金標準 → 「characterize」可、「reconstruct」誇大。</div></div>
+  <div class="chain-row"><div class="chain-k">L5</div><div><span class="badge b-blocked">BLOCKED — 鏈終止</span> <strong>分 TP/FP（Q5）</strong>——concluded NEGATIVE：LOSO 100% circularity、AUC 0.5049、strong-ASM 在 FP 富集 5×。Kapoor/Soneson 背書負結果；無 caller 用甲基當 standalone FP。</div></div>
+  <div class="chain-row"><div class="chain-k">U1</div><div><span class="badge b-real">REAL</span> <span class="badge b-possible">/部分</span> <span class="badge b-blocked">/recurrence BLOCKED</span> <strong>底層 ASM/cis（Q7）</strong>——存在+cis+CN-controlled(Martin-Trujillo 最強背書)；但 BRCA2 hypo≠canonical hyper、recurrence underpowered(vs POG 189)。</div></div>
+</div>
+</section>
+
+<h2 id="angles" style="margin-bottom:0">7 角度詳解（內部 × 外部 × 衝突度）</h2>
+<p class="legend">衝突度：<span class="c-none">none/confirmed</span> ｜ <span class="c-cal">caliber-only</span> ｜ <span class="c-dir">direction/contradiction</span></p>
+
+<details id="q1" open>
+<summary>Q1 目標對齊：長/短讀方法、時間軸、paired vs tumor-only　<span class="badge b-real">CONFIRM</span></summary>
+<div class="det-body">
+<p><strong>裁決</strong>：方向 CONFIRM——長讀獨家 read-level、array→WGBS/EM-seq→long-read 時間軸、paired vs TO somatic 設計軸三者全被背書。ISM <strong>程式定位</strong>穩坐活躍領域；<strong>特定方法</strong>(read-read 距離+cis-test) 相對 niche 是 DIFFERENT-VIEW（未反駁也未對 incumbents 證優）。</p>
+<table>
+<tr><th>文獻</th><th>年·平台</th><th>關係</th><th>對我們的意義</th></tr>
+<tr><td>NanoMethPhase (Akbari)</td><td>2021 長 ONT</td><td class="c-none">CONFIRM</td><td>~10× 全基因組 ASM phasing 可行</td></tr>
+<tr><td>POG cohort (O'Neill)</td><td>2024 長 ONT · 189+41 paired</td><td class="c-none">CONFIRM</td><td>最近大 cohort 先例；復發 aDMR vs 我們 private 0/38</td></tr>
+<tr><td>Teer</td><td>2017 短讀</td><td class="c-cal">CONTEXT</td><td>TO precision 20-21% vs matched 30-82% → paired 是標準</td></tr>
+<tr><td>de Abreu</td><td>2025 混合</td><td class="c-cal">CONTEXT</td><td>ONT 一致度較低但抓獨特 loci + 長程</td></tr>
+<tr><td>Capper</td><td>2018 array</td><td class="c-cal">CONTEXT</td><td>array→seq 時間軸錨；TO 臨床規範</td></tr>
+</table>
+<p class="caveat"><strong>缺口</strong>：cohort recurrence、獨立 caller 共識、vs NanoMethPhase/NANOME 同資料 head-to-head、orthogonal 平台甲基 truth。</p>
+<p style="font-size:13px;color:var(--c-text-soft)">完整：<code>01_goal_alignment_methods_timeline.md</code></p>
+</div>
+</details>
+
+<details id="q2">
+<summary>Q2 癌症甲基差異位點：做法與困難　<span class="badge b-real">CONFIRM 困難</span> <span class="badge b-possible">部分 REFUTE「找不到很多」</span></summary>
+<div class="det-body">
+<p><strong>裁決</strong>：困難（失序/隨機）<strong>領域公認</strong>(Landau 67.6% 變異來自 discordant reads / Landan / Jenkinson)；但 Lin/POG 在 cohort 定位 ~23.6K aDMR/腫瘤(79% in CNV/LOH) → 我們「找不到很多」<strong>糾纏單樣本+單 pipeline underpowering 非硬天花板</strong>。<strong>O11 epipolymorphism AUC 0.845→0.530</strong> 被 Scherer20（epipolymorphism/entropy coverage-依賴 >10×）機制背書 = 真方法學 win。</p>
+<table>
+<tr><th>文獻</th><th>年·平台</th><th>關係</th><th>意義</th></tr>
+<tr><td>Landau (CLL PDR)</td><td>2014 短讀</td><td class="c-none">CONFIRM</td><td>67.6% 瘤內變異來自 discordant reads，genome-wide stochastic</td></tr>
+<tr><td>Scherer (WSH battery)</td><td>2020 短讀</td><td class="c-none">CONFIRM 機制</td><td>epipolymorphism/entropy 需 >10×、coverage-sensitive → 解釋 O11 崩潰</td></tr>
+<tr><td>Lin/POG (長讀)</td><td>2024 長 ONT</td><td class="c-dir">CONFIRM + 部分 REFUTE</td><td>23.6K aDMR/腫瘤；79% 在 CNV/LOH（= copy-component confound 外部框架）</td></tr>
+<tr><td>pycoMeth</td><td>2023 長 ONT</td><td class="c-cal">DIFFERENT-VIEW</td><td>haplotype-aware read-level DMR = 最近方法對手（無 read-read 距離/cis）</td></tr>
+<tr><td>Zhang/Sun (11 癌 MHB)</td><td>2025 短讀</td><td class="c-none">CONFIRM</td><td>81,567 MHB，haplotype-block 跨癌公認</td></tr>
+</table>
+<p class="caveat"><strong>缺口</strong>：cohort power + ground-truth panel；CNV/LOH-aware aDMR 率（取代 flat 0.34%）；vs pycoMeth head-to-head；<strong>5mC/5hmC 分軌是最可防守 novelty</strong>。</p>
+<p style="font-size:13px;color:var(--c-text-soft)">完整：<code>02_finding_methyl_diff_loci.md</code></p>
+</div>
+</details>
+
+<details id="q3">
+<summary>Q3 ISM 方法對比：structure vs disorder　<span class="badge b-real">CONFIRM framing</span> <span class="badge b-possible">niche 收窄</span></summary>
+<div class="det-body">
+<p><strong>裁決</strong>：framing CONFIRM（Landau 明文 disorder stochastic 非 haplotype-linked）；niche 收窄——read-level haplotype-aware DMR 已被 pycoMeth/cvlr/NanoMethPhase/Lin24 佔，<strong>零競爭只剩 normal-anchored somatic cis-test + LOH/CN 耦合 + 5mC/5hmC 分軌</strong>。read-read 距離<strong>單獨</strong>非新。是方法-niche 裁決非生物-impact 裁決。</p>
+<table>
+<tr><th>文獻</th><th>年·平台</th><th>關係</th><th>意義</th></tr>
+<tr><td>Landau (PDR)</td><td>2014 短讀</td><td class="c-none">CONFIRM 二分</td><td>明文 disorder 非 allelic/haplotype-linked → 撐 structure≠disorder</td></tr>
+<tr><td>cvlr (Raineri)</td><td>2023 長 ONT</td><td class="c-cal">DIFFERENT-VIEW</td><td>最近 read-level clustering(Bernoulli+EM)；無顯式距離矩陣/LOH/cis</td></tr>
+<tr><td>Metheor (LPMD)</td><td>2023 短讀</td><td class="c-cal">DIFFERENT-VIEW</td><td>LPMD 是 <em>within-read</em> CpG-CpG 距離 ≠ 我們 read-read（須區分）</td></tr>
+<tr><td>methclone / epihet</td><td>2014/2021 短讀</td><td class="c-cal">CONTEXT(disorder 極)</td><td>量 DISORDER；零 haplotype linkage</td></tr>
+<tr><td>Mazzocco (Bayesian epiallele)</td><td>2017 短讀</td><td class="c-cal">CONTEXT</td><td>subclonal deconv 目標一致但 disorder-based、無 read-read</td></tr>
+</table>
+<p class="caveat"><strong>缺口</strong>：vs cvlr/pycoMeth head-to-head；imprinting ICR 正控；coverage-confound 領域少報（可發 methods note）。</p>
+<p style="font-size:13px;color:var(--c-text-soft)">完整：<code>03_ism_method_comparison.md</code></p>
+</div>
+</details>
+
+<details id="q4">
+<summary>Q4 Subclone 重建：文獻 vs 我們觀察　<span class="badge b-real">概念 CONFIRM</span> <span class="badge b-blocked">「reconstruction」過度</span></summary>
+<div class="det-body">
+<p><strong>裁決</strong>：方向 CONFIRM——read-level 甲基多樣性追蹤 clonal(Landau/Li/Hong)、甲基 ITH mirror 基因組(CAMDAC/TRACERx)、長讀可重建軌跡(Lee25)。但金標準我們都缺(phylogeny/CN-deconv/單細胞)，<strong>「reconstruct」誇大、「characterize subclonal structure」才可防守</strong>。niche 成立但因 2024-25 論文窗口收窄。</p>
+<table>
+<tr><th>文獻</th><th>年·平台</th><th>關係</th><th>意義</th></tr>
+<tr><td>Hong/Siegmund</td><td>2010 array</td><td class="c-cal">CONTEXT</td><td>phyloepigenetics 奠基 = AF→NGroups-as-clock 概念父</td></tr>
+<tr><td>EVOFLUx (Gabbutt)</td><td>2025 Nature n=1,976</td><td class="c-cal">DIFFERENT-VIEW</td><td>bulk subclonal 推論 SOTA = 我們缺的定量演化模型</td></tr>
+<tr><td>CAMDAC / TRACERx</td><td>2025 短讀 RRBS</td><td class="c-none">CONFIRM + CONTEXT</td><td>甲基 ITH mirror 基因組 clonal；CN-aware deconv 金標準（我們缺）</td></tr>
+<tr><td>Lee（長讀黑色素瘤）</td><td>2025 長 ONT</td><td class="c-none">CONFIRM</td><td>長讀甲基 subclone 重建可行 = 最近 ISM setup</td></tr>
+<tr><td>MethPhaser</td><td>2024 長 ONT</td><td class="c-cal">CONFIRM(germline)</td><td>甲基<em>是</em> haplotype-phasable；我們新穎=在 LOH 做</td></tr>
+</table>
+<p class="crit"><strong>最大 credibility gap</strong>：無單細胞 ground-truth（Lee25/Gaiti2019 是金標準）、無 phylogeny、無 CN-aware deconv。HPFineNGroups ⭐4→⭐3（pipeline-dependent）；二次打擊順序 NEGATIVE 正確 parked。</p>
+<p style="font-size:13px;color:var(--c-text-soft)">完整：<code>04_subclone_landscape.md</code></p>
+</div>
+</details>
+
+<details id="q5">
+<summary>Q5 甲基區分 TP/FP 或 germline/somatic　<span class="badge b-blocked">DEAD 但被背書</span></summary>
+<div class="det-body">
+<p><strong>裁決</strong>：DEAD 但 vindicated。循環性是公認 ML 陷阱(Kapoor L3.2/L1.3、Soneson)；<strong>無 production caller 用甲基當 standalone FP 訊號</strong>(ClairS-TO/VarNet/AIVariant 用 alignment/PoN/purity/CN)；ALLELE-axis germline confound 被 2024 nanopore fine-mapping（同 HCC1395/COLO829）確認。AIVariant 唯一部分反例 → 誠實 DIFFERENT-VIEW 非乾淨 refute。負結果<strong>可信、正確 locked</strong>。</p>
+<table>
+<tr><th>文獻</th><th>年·平台</th><th>關係</th><th>意義</th></tr>
+<tr><td>Kapoor & Narayanan</td><td>2023 ML meta</td><td class="c-none">CONFIRM</td><td>L3.2 樣本非獨立 + L1.3 select-then-train 直接命名我們 LOSO 循環</td></tr>
+<tr><td>Soneson</td><td>2014 microarray</td><td class="c-none">CONFIRM</td><td>null CV 0% vs external ~50% = 我們 in-dist +0.0224 vs held-out −0.0001</td></tr>
+<tr><td>ClairS-TO</td><td>2025 長 ONT TO</td><td class="c-cal">DIFFERENT-VIEW</td><td>FP 控制靠 hard-filter/PoN/purity-CN，<strong>無甲基</strong>就成功</td></tr>
+<tr><td>AIVariant</td><td>2023 短讀 paired</td><td class="c-cal">DIFFERENT-VIEW</td><td>epigenetic 特徵在低 purity DL image 有助（唯一部分反例）</td></tr>
+<tr><td>Fine-mapping nanopore</td><td>2024 長 ONT</td><td class="c-none">CONFIRM</td><td>ASM genotype/cis-driven（含我們 HCC1395/COLO829）→ 撐 ALLELE-axis confound</td></tr>
+</table>
+<p class="caveat"><strong>缺口</strong>：filter-negative 單 pipeline（無第二 caller 重驗）；未扣 imprinted DMR；未測甲基當<em>邊際</em> DL 特徵（領域唯一報有益的配置）。</p>
+<p style="font-size:13px;color:var(--c-text-soft)">完整：<code>05_methyl_tp_fp_germline_somatic.md</code></p>
+</div>
+</details>
+
+<details id="q6">
+<summary>Q6 癌症甲基輔助 phasing/tagging（LOH 脈絡）　<span class="badge b-possible">LIVE 真白地</span></summary>
+<div class="det-body">
+<p><strong>裁決</strong>：方向 LIVE 真白地、方法可行——但文獻<strong>尚未提供</strong> methyl-assisted phasing 在 tumor/LOH 可行的外部佐證，<em>那正是白地</em>。germline 機制已證(MethPhaser/NanoMethPhase/HapBridge，全明確留 cancer/LOH future)；LOH-as-phasing 被 ≥3 癌症論文背書但走 CNA/SV/Hi-C 非甲基；tag→caller 被 LongPhase-S 證(ClairS +4.5% SNV)但 germline-anchored。</p>
+<table>
+<tr><th>文獻</th><th>年·平台</th><th>關係</th><th>意義</th></tr>
+<tr><td>MethPhaser (Fu)</td><td>2024 長 ONT germline</td><td class="c-cal">CONTEXT</td><td>甲基延伸 SNV phasing；<strong>cancer 是 future work</strong></td></tr>
+<tr><td>HapBridge</td><td>2025 長 ONT germline</td><td class="c-cal">CONTEXT</td><td>正是我們「甲基 tag unphase read」機制，但 germline-only</td></tr>
+<tr><td>Wakhan</td><td>2025 長讀 tumor</td><td class="c-none">CONFIRM(LOH 機制)</td><td>LOH/imbalance-driven phasing = 我們 NG=2 軸，但非甲基</td></tr>
+<tr><td>LongPhase-S (HKU)</td><td>2025 長 ONT paired</td><td class="c-none">CONFIRM tag→caller</td><td>somatic tagging → ClairS +4.5% SNV；germline-anchored（留 methyl-assist 空間）</td></tr>
+<tr><td>Sakamoto (NSCLC)</td><td>2022 長 ONT paired</td><td class="c-cal">CONTEXT</td><td>SNV-only somatic phasing 有效；甲基是下游讀出非 phasing input</td></tr>
+</table>
+<p class="caveat"><strong>缺口</strong>：vs MethPhaser/HapBridge 的 switch-error/N50 head-to-head；LOH 內 phase-truth（只有 SNV truth）；cis/trans framing；read-length 敏感度。升 ⭐3+ 需多樣本 tumor + orthogonal phase-truth。</p>
+<p style="font-size:13px;color:var(--c-text-soft)">完整：<code>06_methyl_assisted_phasing.md</code></p>
+</div>
+</details>
+
+<details id="q7">
+<summary>Q7 ASM / cis 與癌症影響　<span class="badge b-real">方法 CONFIRM</span> <span class="badge b-possible">方向部分</span></summary>
+<div class="det-body">
+<p><strong>裁決</strong>：方法 CONFIRM、方向部分（兩誠實 caveat）。CN-confound 最強對齊（Martin-Trujillo：CN 解釋 82-92% imprinted allelic 甲基 = 我們 HP-axis held-constant 的 artifact；ASM×CN ρ=−0.055 確認非 CN-driven）。private 被 Sakamoto 確認、recurrence 被 POG 證但我們 underpowered。</p>
+<table>
+<tr><th>文獻</th><th>年·平台</th><th>關係</th><th>意義</th></tr>
+<tr><td>Martin-Trujillo</td><td>2017 array · 287 株</td><td class="c-none">CONFIRM 最強</td><td>CN 解釋 82-92% imprinted allelic 甲基 = 我們 HP-axis 擊敗的 confound</td></tr>
+<tr><td>Do</td><td>2020 短讀 · 16 癌</td><td class="c-cal">DIFFERENT-VIEW</td><td>ASM +5× hypo-dominant；<strong>不同分母 = 口徑差非矛盾</strong></td></tr>
+<tr><td>Sakamoto</td><td>2022 長 ONT paired</td><td class="c-none">CONFIRM private</td><td>patient-specific hap-DMR 直接撐我們 private 0/38</td></tr>
+<tr><td>O'Neill/POG</td><td>2024 長 ONT · 189</td><td class="c-dir">DIFFERENT-VIEW(復發)</td><td>復發 RET/CDKN2A aDMR；我們單 pipeline 偵不到 = underpowered</td></tr>
+<tr><td>Herman & Baylin (VHL)</td><td>2001 review</td><td class="c-dir">REFUTE-方向</td><td>canonical TSG silencing 是 <strong>hyper</strong>；我們 BRCA2 <strong>hypo</strong></td></tr>
+</table>
+<p class="crit"><strong>兩誠實 caveat</strong>：(a) Do2020「+5×」是 cross-individual SNP-anchored 率，我們「0.34%」是 within-sample somatic-controlled 率——<strong>口徑差非矛盾</strong>；(b) BRCA2 <strong>hypo</strong> 違 canonical TSG <strong>hyper</strong>——我們軸是等位結構差(含 allele+copy)非 promoter-mean silencing，<strong>勿當 TSG-silencing 證據</strong>。</p>
+<p style="font-size:13px;color:var(--c-text-soft)">完整：<code>07_asm_cis_cancer_impact.md</code></p>
+</div>
+</details>
+
+<section id="matrix">
+<h2>可信度 × 衝突矩陣（關鍵內部 claim）</h2>
+<table>
+<tr><th>內部 claim</th><th>tier</th><th>外部狀態</th><th>衝突度</th></tr>
+<tr><td>長讀使能 read-level HP-linked 甲基</td><td><span class="badge b-l12">L1-L2</span></td><td>external-confirmed</td><td class="c-none">none</td></tr>
+<tr><td>tumor 5mC 混亂，單樣本群體統計抓不到大量乾淨位點</td><td><span class="badge b-l12">L1-L2</span></td><td>external-different-view（部分-contradict）</td><td class="c-dir">direction(部分)</td></tr>
+<tr><td>O11 epipolymorphism AUC 0.845→0.530 coverage 校正</td><td><span class="badge b-l12">L1</span></td><td>external-confirmed</td><td class="c-none">none</td></tr>
+<tr><td>strong-ASM 稀有 0.34% 無 hypo/hyper 偏</td><td><span class="badge b-l12">L2 單樣本</span></td><td>internal-only-novel</td><td class="c-cal">unaddressed(caliber)</td></tr>
+<tr><td>ASM private (0/38)；跨癌 6/6 excess</td><td><span class="badge b-l12">L2-L3 ⭐3</span></td><td>external-different-view（分裂）</td><td class="c-dir">direction-of-recurrence</td></tr>
+<tr><td><strong>ASM×CN HP-axis ρ=−0.055（非 CN-driven）</strong></td><td><span class="badge b-l12">L2 ⭐3</span></td><td><strong>external-confirmed（最強佐證）</strong></td><td class="c-none">none(互撐)</td></tr>
+<tr><td>BRCA2 cis-driven (d_cis=−0.142 vs drift≈−0.022)</td><td><span class="badge b-l12">L2 ⭐3</span></td><td>external-confirmed（機制）</td><td class="c-none">none</td></tr>
+<tr><td>BRCA2 HP-axis Δβ <strong>hypo</strong> 方向</td><td><span class="badge b-l12">L2 ⭐3</span></td><td>external-contradicted（方向）</td><td class="c-dir">direction(vs canonical)</td></tr>
+<tr><td>methyl-filter LOSO 100% circularity / AUC 0.5049</td><td><span class="badge b-l12">L2 6 樣本</span></td><td>external-confirmed</td><td class="c-none">none</td></tr>
+<tr><td>ALLELE-axis 被 germline allelic 甲基 confound</td><td><span class="badge b-l12">L2</span></td><td>external-confirmed</td><td class="c-none">none</td></tr>
+<tr><td>HPFineNGroups subclone marker ⭐4→⭐3</td><td><span class="badge b-l12">L2-L3</span></td><td>internal-only-novel</td><td class="c-cal">caliber-only</td></tr>
+<tr><td>LOH-constrained phasing Grade A (NG=2 inner 93-99% 6/6)</td><td><span class="badge b-l12">Grade A 7 樣本</span></td><td>external-confirmed（原則）</td><td class="c-cal">caliber(germline vs LOH)</td></tr>
+<tr><td>read-read 距離+cis-test+5mC/5hmC 分軌 = unfilled niche</td><td><span class="badge b-l12">L2 claim</span></td><td>external-different-view</td><td class="c-cal">caliber-only</td></tr>
+</table>
+</section>
+
+<section id="defense">
+<h2>論文主張 + 3 大 reviewer 脆弱點防守</h2>
+<div class="card">
+<ol>
+<li style="margin-bottom:var(--sp-3)"><strong>「單樣本/單 pipeline——ASM 不可復現/不復發」</strong>（最硬）→ concede ⭐3 cap；引 Sakamoto22（private hap-DMR 證實 0/38 是 cohort-一致而非失敗）+ POG（recurrence 是 cohort-scale future work）。Frame「現象 replicate(6/6 excess, 3 癌種)；recurrence 需 cohort scale」。</li>
+<li style="margin-bottom:var(--sp-3)"><strong>「read-read 距離不新」</strong> → 自己先窄化：cvlr/pycoMeth/Metheor 已佔 clustering；只押<strong>未佔組合</strong>（somatic cis-test + LOH/CN 耦合零競爭 + 5mC/5hmC 分軌 silent）；承認無 head-to-head → 「互補軸」非「優越工具」。</li>
+<li><strong>「BRCA2 hypo 與 canonical hyper 矛盾」</strong> → 自己先標方向；澄清 HP-axis Δβ 是<strong>等位結構差（含 allele+copy）非 promoter-mean silencing</strong>；引 Do2020 hypo-dominant 顯 allele-specific loss 是公認頻繁 pattern；明說 BRCA2 不當 TSG-silencing 證據。</li>
+</ol>
+</div>
+</section>
+
+<section id="refs">
+<h2>參考文獻 + Provenance</h2>
+<p class="sub">~38 篇經 workflow verify agent 實際 WebFetch（識別碼未驗者標 uv）。完整清單 + 識別碼核對（POG 三 DOI / epihet 作者-PMID / HiCancer venue）+ 未覆蓋工具（WhatsHap/LongPhase/methylKit/Gaiti2019/amrfinder/MLML/COLO829 benchmark）見 <code>09_references_and_provenance.md</code>。</p>
+<div class="caveat"><strong>投稿前必做</strong>：用 <code>/citation-verification</code> 核 09 §B 三個識別碼衝突 + 所有 uv-PMID；補 09 §C 未覆蓋工具。</div>
+</section>
+
+<footer>
+<p><strong>Provenance</strong>：外部文獻 = workflow <code>wf_37b2cc97-663</code>（16 agents · 7 scout + 7 verify(researcher，WebSearch/WebFetch) + cross-synthesis + critic · 210 tool uses · ~8 min · 2026-06-05）實際檢索，每篇附 relation + 真實 PMID/DOI，未 fetch 確認者標 UNVERIFIED。內部數字沿用既有 validated SoT（master_draft / 研究故事 §7 / tsg snapshot @06-03），本輪未跑新分析。內部 L1-L2 / 外部 L3。撰寫此 HTML 的 Write 與外部查證 WebFetch 不同 batch（§13.0 物理隔離）。所有外部數字可在同目錄 <code>01-09_*.md</code> grep 到。</p>
+<p>companion of <code>InterSubMod/knowledge/11_external_literature/00_index.md</code>（D11）｜ 生成 2026-06-05 ｜ branch feat/cis-asm-pipeline</p>
+</footer>
+</main>
+</div>
+</body>
+</html>

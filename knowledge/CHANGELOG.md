@@ -4,6 +4,18 @@
 
 ---
 
+## [v0.6] — 2026-06-05（新頂層群組：外部文獻地景）
+
+### Added — `11_external_literature/`（10 份 .md + 1 standalone HTML companion）
+- **7 角度交叉驗證外部文獻地景**：把「我們的研究目標/做法/困難/觀察」對應到外部文獻是否佐證/反駁/不同看法，每篇標真實 PMID/DOI + relation(CONFIRM/REFUTE/DIFFERENT-VIEW) + caliber 差異 + credibility；內部 L1-L2 / 外部 L3 清楚分離。
+  - `00_index.md`（群組索引 + 夢的狀態死/活/開放）｜ `01`-`07`（Q1 長短讀方法時間軸 / Q2 找甲基差異位點 / Q3 ISM 方法對比 / Q4 subclone / Q5 分 TP/FP / Q6 甲基輔助 phasing / Q7 ASM-cis 癌症影響）｜ `08_cross_question_correlation.md`（理想情境鏈逐環 REAL/BLOCKED/POSSIBLE + 可信度衝突矩陣 + reviewer 防守）｜ `09_references_and_provenance.md`（~38 篇 + 識別碼核對 + 未覆蓋工具）。
+  - `00_index.standalone.html`：PI/協作者視覺版（sticky TOC + 依賴鏈紅綠燈 + 7 角度折疊卡 + 衝突色標）。
+- **來源**：workflow `wf_37b2cc97-663`（16 agents = 7 scout + 7 verify〔WebFetch 實證〕+ cross-synthesis + critic；2026-06-05）。內部數字沿用既有 validated SoT（master_draft / 研究故事 §7 / tsg snapshot），未跑新分析（§13 撰寫與查證分批隔離）。
+- README 速查表 +1 列（外部文獻地景）。
+- ⚠ 投稿前須 `/citation-verification` 核 `09 §B` 三個識別碼衝突（POG 三 DOI / epihet 作者-PMID / HiCancer venue）+ 補 `09 §C` 未覆蓋工具（WhatsHap/LongPhase/methylKit/Gaiti2019/amrfinder/MLML/COLO829 benchmark）。
+
+---
+
 ## [v0.2] — 2026-04-23
 
 ### Added（2026-04-23 S5 PPT 製作過程發現資料陷阱）

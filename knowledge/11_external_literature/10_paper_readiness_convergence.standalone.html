@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<!-- companion to 10_paper_readiness_convergence.md (D11). data_sources: convergence audit wf_9e169112-573 (2026-06-08), grounded in ledger/json/reports. -->
+<!-- provenance-verified: 全部數字取自同目錄 10_paper_readiness_convergence.md（由 wf_9e169112-573 的 7 個獨立 auditor 實讀 landed ledger/json/report 取得）。撰寫 HTML 的 Write 與 auditor 檔案讀取不同 batch（§13.0）。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ISM 論文就緒收斂策略板 — 2026-06-08</title>
+<style>
+:root{
+  --c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;
+  --c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;
+  --c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;
+  --sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;--sp-8:64px;
+  --ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;
+  --ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,Consolas,monospace;
+  --radius-md:6px;--radius-lg:8px;--shadow-sm:0 1px 2px rgba(20,20,19,.05);
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);line-height:1.6;font-size:16px}
+.layout{display:grid;grid-template-columns:240px 1fr;max-width:1300px;margin:0 auto;gap:var(--sp-6)}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:var(--sp-5) var(--sp-4);border-right:1px solid var(--c-border);font-size:14px}
+nav.toc h2{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--c-text-soft);margin:var(--sp-5) 0 var(--sp-2)}
+nav.toc a{display:block;color:var(--c-text);text-decoration:none;padding:4px 8px;border-radius:4px;border-left:2px solid transparent}
+nav.toc a:hover{background:var(--c-code-bg);border-left-color:var(--c-accent)}
+main{padding:var(--sp-6) var(--sp-5) var(--sp-8);min-width:0}
+h1{font-size:32px;line-height:1.2;margin:0 0 var(--sp-3)}
+h2{font-size:24px;margin:var(--sp-8) 0 var(--sp-3);padding-bottom:var(--sp-2);border-bottom:2px solid var(--c-border)}
+h3{font-size:18px;margin:var(--sp-5) 0 var(--sp-2)}
+.sub{color:var(--c-text-soft);font-size:15px;margin-top:0}
+code{font-family:var(--ff-mono);background:var(--c-code-bg);padding:1px 5px;border-radius:4px;font-size:.86em}
+.card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-5);margin:var(--sp-4) 0;box-shadow:var(--shadow-sm)}
+.thesis{border-left:4px solid var(--c-accent);background:#FFF9F4}
+.decision{border:2px solid var(--c-critical);background:#FBEAE3;border-radius:var(--radius-lg);padding:var(--sp-5);margin:var(--sp-5) 0}
+.decision h3{margin-top:0;color:var(--c-critical)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;vertical-align:middle}
+.b-ready{background:#E7F4EC;color:var(--c-success);border:1px solid #BFE3CC}
+.b-neg{background:#EAF0F7;color:var(--c-info);border:1px solid #C3D0EC}
+.b-work{background:#FBF3DF;color:var(--c-warning);border:1px solid #EAD9A6}
+.b-not{background:#FBEAE3;color:var(--c-critical);border:1px solid #F0C9B6}
+.b-l12{background:#E8EDF7;color:var(--c-info);border:1px solid #C3D0EC}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.d-g{background:var(--c-success)}.d-b{background:var(--c-info)}.d-y{background:var(--c-warning)}.d-r{background:var(--c-critical)}
+.pyramid{display:flex;flex-direction:column;gap:var(--sp-3);margin:var(--sp-4) 0}
+.tier-row{border-radius:var(--radius-md);padding:var(--sp-3) var(--sp-4);border:1px solid var(--c-border)}
+.tier-row h4{margin:0 0 4px;font-size:15px}
+.tier-spine{background:#FBF3DF;border-color:#EAD9A6}
+.tier-neg{background:#EAF0F7;border-color:#C3D0EC}
+.tier-sup{background:#F4EFE6;border-color:var(--c-border)}
+.tier-fut{background:#FCFBF8;border-color:var(--c-border);opacity:.92}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:var(--sp-3) 0}
+th,td{border:1px solid var(--c-border);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--c-code-bg);font-weight:600}
+tr:nth-child(even) td{background:#FCFBF8}
+td.ok{color:var(--c-success);font-weight:600}td.no{color:var(--c-critical);font-weight:600}td.mid{color:var(--c-warning);font-weight:600}
+details{border:1px solid var(--c-border);border-radius:var(--radius-lg);margin:var(--sp-3) 0;background:var(--c-surface)}
+details>summary{cursor:pointer;padding:var(--sp-3) var(--sp-5);font-weight:600;font-size:16px;list-style:none;background:#FCFBF8}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸";color:var(--c-accent);margin-right:9px;font-weight:700}
+details[open]>summary::before{content:"▾"}
+.det-body{padding:0 var(--sp-5) var(--sp-4);font-size:14px}
+.crit{border-left:4px solid var(--c-critical);background:#FBEAE3;padding:var(--sp-3) var(--sp-4);border-radius:0 var(--radius-md) var(--radius-md) 0;font-size:14px;margin:var(--sp-3) 0}
+.caveat{border-left:4px solid var(--c-warning);background:#FCF7E8;padding:var(--sp-3) var(--sp-4);border-radius:0 var(--radius-md) var(--radius-md) 0;font-size:14px;margin:var(--sp-3) 0}
+footer{margin-top:var(--sp-8);padding-top:var(--sp-4);border-top:1px solid var(--c-border);font-size:13px;color:var(--c-text-soft)}
+ul{margin:6px 0;padding-left:20px}li{margin:2px 0}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav.toc{position:static;height:auto;border-right:none;border-bottom:1px solid var(--c-border)}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc">
+  <strong style="font-size:15px">論文就緒策略板</strong>
+  <h2>決策</h2>
+  <a href="#headline">L0 — 結論 + 主軸</a>
+  <a href="#decision">🔴 決定性 GO/NO-GO</a>
+  <a href="#contradict">2 個真矛盾</a>
+  <h2>結構</h2>
+  <a href="#structure">論文結構（金字塔）</a>
+  <a href="#inventory">7 線就緒主表</a>
+  <a href="#directions">4 方向逐一裁決</a>
+  <h2>細節</h2>
+  <a href="#threads">7 線折疊卡</a>
+  <a href="#guards">overclaim 防護</a>
+  <a href="#order">依賴 + 撰寫順序</a>
+</nav>
+
+<main>
+<section id="headline">
+<h1>ISM 論文就緒收斂策略板</h1>
+<p class="sub">跨 7 線獨立 fresh-context 稽核（實讀 ledger/json/report 真值）｜ workflow <code>wf_9e169112-573</code> · 10 agents · 2026-06-08 ｜ 內部 <span class="badge b-l12">L1-L2</span></p>
+<div class="card thesis">
+<h3 style="margin-top:0">一句話結論</h3>
+<p><strong>一篇能過 review 的論文今天就存在</strong> —— read-level LOH/haplotype + 甲基化的 <strong>characterization + tooling</strong> 論文：主體是<strong>三~四道防彈 NEGATIVE</strong> + 一個方向一致的跨樣本 phasing 訊號（Grade <strong>B+ 非 A</strong>）+ ASM 當誠實的 copy-confounded 支撐。所有 ASM 結論受<strong>單樣本 HCC1395 ⭐3 / 單 pipeline</strong> 天花板限制。</p>
+<h3>論文敘述主軸（所有存活證據支持）</h3>
+<p style="font-size:15px">「在 LOH 區，腫瘤物理上只保留單一 haplotype，故 somatic SNV 形成同-haplotype 子家族、跨樣本可偵測（NG=2 Inner > Outer，7/7，附乾淨 paired 負控）。ASM 確實存在、現象層跨 6 樣本/3 癌種復現，但小、非方向、與 copy-dosage 無關、<strong>不能判別真/假變異</strong>（三~四種方式證死）。貢獻 = LOH-driven haplotype 結構的 read-level characterization + 誠實機制解明的『甲基能/不能做什麼』目錄。」</p>
+</div>
+</section>
+
+<section id="decision">
+<div class="decision">
+<h3>🔴 決定性 GO/NO-GO（HD-1 — 卡論文最強 claim，由你決定）</h3>
+<p><strong>phasing 脊柱的 positive 是 by-construction 部分循環</strong>：Inner same-HP1 <em>用</em> somatic-attributed HP1-1 bucket 定義。決定性 R-SELFREF circularity 對照（全 7 樣本 flag-on，~25-50hr C++）<strong>經磁碟確認未跑</strong>。critic 加碼：<strong>「加 caveat 保留 Grade-A framing」不是 methods reviewer 會接受的選項</strong>，只有兩條路：</p>
+<table>
+<tr><th>選項</th><th>後果</th></tr>
+<tr><td><strong>(1) 投稿前跑 R-SELFREF 對照</strong>（~25-50hr C++ flag-on 7 樣本）</td><td>唯一讓 phasing 脊柱<strong>防彈</strong> → 可保 positive-spine framing</td></tr>
+<tr><td><strong>(2) 把 phasing 降為 characterization observation</strong></td><td>讓三~四個 NEGATIVE 扛論文 → 變 methods/negative 論文（仍可投，less hero）</td></tr>
+</table>
+<p style="margin-bottom:0"><strong>這是 Hard-Gate-adjacent 研究決定，AI 不代決。</strong>p=0.0078 無論如何要 frame 為「方向一致性」非 effect 大小（W=28 = n=7 最大 signed-rank，全正即 forced；magnitude 跨樣本變 11×）；「n=7」生物上是 <strong>n=6</strong>（HCC1395 算兩次）。</p>
+</div>
+</section>
+
+<section id="contradict">
+<h2>2 個真·數據對數據矛盾（投稿前必改）</h2>
+<div class="crit">
+<strong>矛盾 #1 — BRCA2 cis vs copy-artifact（HD-3）</strong>：<code>master_draft</code> line 122 + <code>07_asm_cis...md</code> 仍寫「BRCA2 真 cis-driven / 60 T3+4 survivor」，但 06-07 <code>fast_cnv_validation.json</code> 把 BRCA2 列為 <strong>copy-artifact</strong>（~80% copy），「60 T3」塌成 <strong>1 個乾淨 cis = chr17/TBC1D16</strong>。<br>✅ <strong>已加 06-08 amendment</strong>（兩檔保留 audit trail + 指向收斂報告）。誠實口徑 = 「~80% copy + 邊際 ~20% 真 cis (d_within −0.023, p=0.022)」，勿從一個 overclaim 換成相反 overclaim。Martin-Trujillo 現在反而 corroborate copy-artifact。
+</div>
+<div class="crit">
+<strong>矛盾 #2 — Grade A vs Grade B+（HD-2）</strong>：active-cycle title / master §0 寫「Grade A」，但同文件 body + Grade A doc §4/§17 寫 <strong>Grade B+（req #2 = R-SELFREF 未達）</strong>。收斂裁決：<strong>B+ 非 A</strong>。投稿前統一。
+</div>
+<p class="caveat">其餘看似矛盾的（跨樣本 6/6 vs「generality 不可達」；兩個「6/6」；兩個 AUC null）都是 <strong>scope/caliber 差異</strong>，明説三層區分（phenomenon ✓ / locus 0/38 underpowered / CN-truth 結構不可達）即解，非真矛盾。</p>
+</section>
+
+<section id="structure">
+<h2>論文結構（金字塔 — 由下往上：質量在 NEGATIVE 底座）</h2>
+<div class="pyramid">
+  <div class="tier-row tier-spine"><h4><span class="dot d-y"></span>主軸（1 個 positive）· phasing 脊柱 · <span class="badge b-work">Grade B+ ⭐3</span></h4>
+    NG=2 Inner same-HP1 > Outer，<strong>7/7</strong>（W=28, p=0.0078, median gap 0.345）；Inner×NG=2 ≥93% same-hap 6/6；C++ 機制 (LabelTest.cpp:265-302)；paired 負控乾淨。⚠ 受 HD-1（循環對照未跑）限制。</div>
+  <div class="tier-row tier-sup"><h4><span class="dot d-b"></span>支撐（characterization）· ASM 真但非判別 · <span class="badge b-l12">⭐3 單樣本</span></h4>
+    ASM 真 (TP 3.95%>FP 1.07%, ~3.5×) 但 sens ~4%、COLO829 TP≈FP；6/6 跨樣本 excess (3 癌種)；chr17/TBC1D16 唯一乾淨 cis（稀有 exemplar）；AF→NGroups 7/7（HD-4 已判 = phasing 非甲基 → 改述 phasing signature）。</div>
+  <div class="tier-row tier-neg"><h4><span class="dot d-b"></span>底座（methods 主體 · 最強）· filter 死<strong>四</strong>道 · <span class="badge b-neg">READY-AS-NEGATIVE</span></h4>
+    ① LOSO 100% circularity + |Δβ| AUC=0.505 null + ~4% sens ② copy-dosage REFUTED (MW p=0.62, ρ=−0.083) ③ high-Δβ→FP = regression-to-extreme（no-clust OR=8.6/LOH OR=4.1, 9×）④ somatic clustering = germline-allelic (ARI 0.135<null 0.177)。<strong>+ Zone-Aware QS F1 NEG + CNV-zone filter 4月關閉 + V6-LR baseline-equivalence</strong>。</div>
+  <div class="tier-row tier-fut"><h4><span class="dot d-r"></span>future-work（不在關鍵路徑）· umtag + ⭐4 升級 · <span class="badge b-not">NOT-READY</span></h4>
+    methyl-assist phasing 救 unphase read（白地真實、held-out 0.8852、V10「非 copy」控）但無 scale 真救援/yardstick/phase-truth、單樣本、未註冊 → Discussion + 1 張 methods 圖。chr17 COLO829 deep-dive 升 ⭐4。</div>
+</div>
+</section>
+
+<section id="inventory">
+<h2>7 線就緒主表</h2>
+<table>
+<tr><th>線</th><th>角色</th><th>USABLE 現在可寫</th><th>FAILED / 反例</th><th>就緒度</th></tr>
+<tr><td><strong>T1 LOH-phasing</strong></td><td>脊柱(主+)</td><td>NG=2 7/7 (p=0.0078)；≥93% same-hap 6/6；C++ 機制；paired 負控</td><td>filter DEAD；HPFineNGroups ⭐4→⭐3</td><td class="mid">NEEDS-WORK (B+ 非 A)</td></tr>
+<tr><td><strong>T2 ASM 存在</strong></td><td>支撐</td><td>ASM 真非 filter；copy-dosage REFUTED；high-Δβ→FP 機制；6/6 excess</td><td>B2 clustering NEG；628/15391 當 filter 矛盾(TP/FP=1.0)</td><td class="no">READY-AS-NEG</td></tr>
+<tr><td><strong>T3 cis/copy-partition</strong></td><td>支撐</td><td>copy-dosage falsified；cis-test 方法；chr17/TBC1D16 唯一乾淨 cis</td><td>BRCA2+chr5 = copy-artifact；「60 T3」塌成 1</td><td class="no">READY-AS-NEG</td></tr>
+<tr><td><strong>T4 methyl→TP/FP</strong></td><td>methods</td><td>LOSO 100% circularity；AUC=0.505 null；ISM vestigial(+0.00065)</td><td>整個 filter DEAD；「FP |Δβ| 較大」RETRACTED(p=0.137)</td><td class="no">READY-AS-NEG(強)</td></tr>
+<tr><td><strong>T5 跨樣本 ASM</strong></td><td>支撐</td><td>6/6 excess +0.101–0.241 (3 癌種)；方法 transfers 6/6</td><td>同-locus 0/38；gene 0/94 (underpowered)</td><td class="no">READY-AS-NEG</td></tr>
+<tr><td><strong>T6 subclone</strong></td><td>支撐</td><td>AF→NGroups 7/7 (Δng +0.637–0.910)，survives NumReads；dosage refuted</td><td>B2 clustering NEG；cis 1/816 clean</td><td class="mid">READY-AS-NEG (+1 IF 歸因解)</td></tr>
+<tr><td><strong>T7 umtag</strong></td><td>future-work</td><td>白地真實；held-out 0.8852；V10 非-copy 控</td><td>aDMR×LOH 非富集(p=0.382)；未註冊</td><td class="no">NOT-READY(prototype)</td></tr>
+</table>
+</section>
+
+<section id="directions">
+<h2>你的 4 方向 + 脊柱 — 逐一裁決</h2>
+<table>
+<tr><th>方向</th><th>能完成？當作什麼</th></tr>
+<tr><td><strong>phasing 脊柱</strong></td><td class="mid">能 —— characterization+tooling positive（Grade B+ ⭐3）；「A」需跑 R-SELFREF（HD-1）</td></tr>
+<tr><td><strong>找甲基差異+驗證</strong></td><td class="ok">能 —— characterization + 防彈 supplement-null；chr17/TBC1D16 唯一乾淨 cis；非 positive discovery</td></tr>
+<tr><td><strong>甲基→TP/FP</strong></td><td class="no">能 —— 強·機制解明的 NEGATIVE（全程式最可防守）。DEAD as filter，勿重開</td></tr>
+<tr><td><strong>subclone</strong></td><td class="mid">部分 —— AF→NGroups 7/7 IF 歸因解 + 乾淨負結果包；非 filter、非乾淨 somatic-cis</td></tr>
+<tr><td><strong>umtag（救 unphase read）</strong></td><td class="no">不能當 result —— future-work/Discussion + 1 張 copy-control 圖；白地真實但 roadmap 非 result</td></tr>
+</table>
+</section>
+
+<section id="threads">
+<h2>7 線細節（折疊）</h2>
+<details><summary>T1 LOH-phasing — 脊柱（Grade B+，受 HD-1 限制）</summary><div class="det-body">
+<p><strong>USABLE</strong>：NG=2 Inner same-HP1 > Outer 7/7 (W=28, p=0.0078125, median gap 0.345, CI[0.104,0.459])；Inner×NG=2 ≥93% same-hap 6/6 (HCC1395 93.2%…DORADO 99.0%)；C++ LabelTest.cpp:265-302；paired 負控 B3 median≈−0.0002 W=10 p=0.578 NS。</p>
+<p><strong>NEEDS-THOUGHT</strong>：🔴 R-SELFREF 對照未跑（by-construction 循環）；HCC1954 Inner TP=0.43 / H2009 gap +0.05 fragile；n=7=bio-n=6。<strong>FAILED</strong>：methyl→phasing-filter DEAD；HPFineNGroups ⭐4→⭐3；V5 Layer-1.5 繼承 priority-bug。</p>
+</div></details>
+<details><summary>T2 ASM 存在 — 支撐（READY-AS-NEGATIVE）</summary><div class="det-body">
+<p><strong>USABLE</strong>：ASM 真非 filter（TP 0.0395>FP 0.0107, subhap 0.0377 vs 0.0109, sens ~4%, COLO829 TP≈FP）；copy-dosage REFUTED；high-Δβ→FP 機制（no-clust OR=8.6/LOH OR=4.1, 9×）；6/6 excess。<strong>OVERCLAIM 防</strong>：628/15391 是單樣本 method-agreement characterization tally，15391 TP/FP=1.0 → 絕不寫 filter。</p>
+</div></details>
+<details><summary>T3 cis / copy-partition — 支撐（BRCA2 退役，chr17 改錨）</summary><div class="det-body">
+<p><strong>USABLE</strong>：copy-DOSAGE 乾淨 falsified（MW p=0.6183, ρ=−0.083 反向）；normal-anchored cis-test 方法；copy-partition 分解；<strong>chr17:79991120 (TBC1D16)</strong> within 0.142 > HP 0.122, perm p=0.001（稀有 exemplar）。<strong>FAILED</strong>：BRCA2+chr5 copy-artifact；chr18 mechanical CpG-create；chr19 destroy；「60 T3」→ 1 clean。<strong>NEEDS</strong>：6 強訊號 untestable（pureALT CGI-desert，copy-test 只能算 7/60）。</p>
+</div></details>
+<details><summary>T4 methyl→TP/FP filter — methods（最強 NEGATIVE）</summary><div class="det-body">
+<p><strong>USABLE</strong>：LOSO in-dist +0.02236 → held-out −0.00012（100% circularity）；|Δβ| AUC=0.505（2000× shuffle null）；ISM vestigial（drop-5-methyl ΔF1 +0.00065）；high-Δβ→FP combo TP 0.86% vs FP 7.97%。<strong>provenance 修</strong>：narrative「0.5049」→ source 真值 0.505。<strong>FAILED</strong>：「FP |Δβ| 較大」RETRACTED (p=0.137 NS)；strong-ASM 5× = anti-discriminative (OR=0.194, 61% 來自 chr8 hotspot)。</p>
+</div></details>
+<details><summary>T5 跨樣本 ASM — 支撐（generality phenomenon-level）</summary><div class="det-body">
+<p><strong>USABLE</strong>：6/6 excess-over-null（HCC1395 0.2413…COLO829 0.101, mean 0.168, 3 癌種）；方法 transfers 6/6；38/38 keypos ≥10×。<strong>FAILED</strong>：同-locus 0/38、gene 0/94 (Jaccard 0)。<strong>必隨行</strong>：0/38 UNDERPOWERED (E[overlap]=0.16) → 「復發稀有」非「private」；6/6 是 allelic-meth-diff 復現非 cis-ASM 復現。</p>
+</div></details>
+<details><summary>T6 subclone — 支撐（1 正向 IF 歸因解）</summary><div class="det-body">
+<p><strong>USABLE</strong>：AF→NGroups 7/7（Δng +0.637–0.910, MW p≈0），survives NumReads 分層（r=−0.47/−0.72/−0.76）；LOH diagnostic partition 72/18/9。<strong>✅ HD-4 RESOLVED</strong>：甲基-vs-phasing 歸因 = <strong>phasing 非甲基</strong>（NGroups=HP-tag sub-family count，C++ LabelTest.cpp:265-305；baseline r=0.656 控甲基不動 0.655）→ AF→NGroups 改述為 phasing signature，<strong>T6 不再有正向甲基發現</strong>。<strong>FAILED</strong>：B2 clustering NEG (ARI 0.135<null 0.177, MW p=0.922)；HPFineNGroups-as-filter ⭐4→⭐3。<strong>OVERCLAIM 防</strong>：「~64% partition」= 7/60 convenience subset（median-of-ratios 實 47%）。</p>
+</div></details>
+<details><summary>T7 umtag — future-work（NOT-READY prototype）</summary><div class="det-body">
+<p><strong>USABLE</strong>：opportunity 45.84% unphased（13.8M reads）；held-out extrap median 0.8852（null 0.5236, 183 windows）；V10「非 copy」控（normal 0.979 > tumor 0.866, depth-matched, LOH 最差 0.782）；白地外部已驗。<strong>FAILED</strong>：aDMR×LOH 非富集（Fisher p=0.382）；germline-het null 非判別（0.974）；2 次 fabrication（已修）。<strong>NEEDS</strong>：chr20 prototype 薄（conf median 0.107）；無真-unphase 救援/switch-error/N50/phase-truth；ledger+INDEX 未註冊。</p>
+</div></details>
+</section>
+
+<section id="guards">
+<h2>overclaim 防護（每節防）</h2>
+<div class="caveat">
+<strong>最高頻陷阱 FT-1 — characterization-set 當 filter</strong>：628 / 15391 / strong-ASM 是 characterization tally；一旦用 filter 動詞就矛盾自身來源（15391 TP/FP=1.0；strong-ASM anti-discriminative OR=0.194）。每條線內部已撤回，但會悄悄爬回 summary slide。
+</div>
+<ul>
+<li><strong>FT-2 cis-anchor vs copy-artifact</strong>：BRCA2 ~80% copy；且 hypo≠canonical hyper，勿當 TSG-silencing 證據。</li>
+<li><strong>FT-3 private vs underpowered</strong>：0/38 是 underpowered（E[overlap]=0.16），非「private」。</li>
+<li><strong>FT-4 phenomenon vs cis recurrence</strong>：6/6 是 allelic-meth-diff 復現，非 cis-ASM 復現。</li>
+<li><strong>FT-5 held-out simulation vs 真救援</strong>：umtag 0.8852 是 held-out 模擬，非真-unphase 救援。</li>
+<li><strong>OR-1</strong>：n=7 p=0.0078 是方向一致性 + by-construction 循環，n=6 生物獨立。</li>
+</ul>
+</section>
+
+<section id="order">
+<h2>依賴 + 撰寫順序</h2>
+<div class="card">
+<p><strong>撰寫關鍵路徑</strong>：① 先定 <strong>HD-1</strong>（R-SELFREF vs reframe，gates 脊柱 grade）→ ② 先寫<strong>三~四個 NEGATIVE methods 段</strong>（今天就防彈、論文最可防守的質量）→ ③ 在選定 grade 寫 phasing 脊柱 → ④ 寫 ASM characterization + chr17 exemplar + 跨樣本現象（BRCA2 降為小 copy-confounded 例）→ ⑤ 改 stale 文件（HD-3 ✅ 已做 amendment）。</p>
+<p style="margin-bottom:0"><strong>依賴關係</strong>：T2/T3/T5/T6 共用 genome_survey_v2 + copy-partition 機制 = 一根支撐柱四個面；T4 (filter-dead) FEED T2 使其「乾淨 characterization 非 filter」；T6 HPFineNGroups 降級 = T1 獲得 phasing signature 的同一事件；T7 供 V10 機制圖。T1 的 R-SELFREF 對照押在它不擁有的 C++ infra。</p>
+</div>
+</section>
+
+<footer>
+<p><strong>Provenance</strong>：收斂稽核 workflow <code>wf_9e169112-573</code>（2026-06-08；10 agents = 7 獨立 thread auditor〔general-purpose，實讀 ledger/json/report〕+ 矛盾獵手 + 收斂 + critic），fresh-context 不信既有結論自行重判。內部數字來源：<code>evidence_ledger.jsonl</code> + <code>tsg_promoter_asm_reviewer/genome_survey_v2/*.json</code>（其他 session 06-07 仍在寫）+ <code>methyl_augmented_filter_phase2/</code> + <code>loh_subclone_af_paired/</code> + validated master_draft + INDEX。內部 L1-L2 / 外部 L3。撰寫 HTML 的 Write 與 auditor 檔案讀取不同 batch（§13.0）。數字可在 <code>10_paper_readiness_convergence.md</code> grep 到。</p>
+<p>companion of <code>InterSubMod/knowledge/11_external_literature/10_paper_readiness_convergence.md</code>（D11）｜ 2026-06-08 ｜ branch feat/cis-asm-pipeline ｜ ⚠ tsg project 仍 active，投稿前以定稿 + HD-1~6 決議為準</p>
+</footer>
+</main>
+</div>
+</body>
+</html>

@@ -14,6 +14,7 @@ related_ids:
   - ism-kb-10-research-status-next-milestones
   - ism-kb-01-project-overview-current-phase
   - ism-kb-03-pipelines-f1-baseline-canonical
+  - ism-kb-09-conclusions-hypothesis-queue-snapshot
 tags: [status, snapshot, current-focus, tier-1-4, thread-d, v6-production]
 canonical_paths: [10_research_status/01_current_focus_snapshot.md]
 alias_paths: []

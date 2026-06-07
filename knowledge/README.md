@@ -56,6 +56,7 @@
 | **週報 / PPTX 怎麼做** | [06_workflows/09_pptx_and_weekly_report.md](06_workflows/09_pptx_and_weekly_report.md) |
 | **HPFineNGroups 是什麼？結論如何？** | [07_derived_features/01_hpfinengroups.md](07_derived_features/01_hpfinengroups.md) |
 | **哪些方向已被證實為 NEGATIVE（別重做）** | [09_conclusions/03_concluded_negative.md](09_conclusions/03_concluded_negative.md) |
+| **外部文獻地景（7 角度：我們做法/困難/觀察的內外證據對照 + 跨問題依賴鏈）** | [11_external_literature/00_index.md](11_external_literature/00_index.md) |
 | **目前最高優先研究方向** | [10_research_status/01_current_focus_snapshot.md](10_research_status/01_current_focus_snapshot.md) |
 | **我想寫新的 KB 文件** | [00_governance/06_update_workflow.md](00_governance/06_update_workflow.md) |
 
