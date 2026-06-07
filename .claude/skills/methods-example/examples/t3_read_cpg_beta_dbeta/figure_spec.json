@@ -1,0 +1,17 @@
+{
+  "_comment": "B6 read×CpG→β→Δβ 入門（schematic 泛化 C1）。reuse read_cpg_matrix；甲基用 red/blue m/u（甲基化軸）。",
+  "case_template_id": "Cx_custom",
+  "title": "read × CpG → 群率 β → 兩群 Δβ（入門）",
+  "subtitle": "示意 · 列=read（依 HP 分群）、欄=CpG、實心紅=甲基/空心藍=未甲基 → HP1 vs HP1-1 的 β 差 = Δβ",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "read_cpg_matrix", "intuition_ref": "intuition",
+      "params": { "groups_ref": "schematic.groups", "cpg_labels_ref": "schematic.cpg_labels", "snv_after_ref": "schematic.snv_after_col", "synthetic_note_ref": "schematic.note" } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "loh": "#8E44AD", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#999999", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "label_flip_ref": "label_flip_note", "synthetic_watermark": true, "methyl_legend": true }
+}

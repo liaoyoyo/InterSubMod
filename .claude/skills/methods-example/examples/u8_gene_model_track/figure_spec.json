@@ -1,0 +1,16 @@
+{
+  "_comment": "B1 gene model track。所有 locus 圖底軌。",
+  "case_template_id": "Cx_custom",
+  "title": "Gene model：exon / intron / UTR + strand",
+  "subtitle": "示意 · exon=實心框（寬∝長）、UTR=細框、intron=線、箭頭=strand · 作所有 locus 圖底軌",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "gene_model_track", "params": { "features_ref": "schematic.features", "length": 100, "strand": "+", "label": "GENE" } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "loh": "#8E44AD", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#999999", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "synthetic_watermark": true, "methyl_legend": false }
+}

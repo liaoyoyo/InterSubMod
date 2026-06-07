@@ -1,0 +1,16 @@
+{
+  "_comment": "B7 變異類別概念卡。category-by-fill 色錨；冷=遺傳/暖=後天。",
+  "case_template_id": "Cx_custom",
+  "title": "變異類別：germline vs somatic（色彩語意錨）",
+  "subtitle": "藍=germline（遺傳）· 橘=somatic（後天）· 灰=seq-error · category-by-fill 不換形狀",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "variant_class_legendcard", "params": { "items_ref": "items" } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "loh": "#8E44AD", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#999999", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "methyl_legend": false }
+}

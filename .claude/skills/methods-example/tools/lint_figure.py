@@ -80,13 +80,16 @@ def lint(svg_path, max_text):
         ok = ("label-flip" in svg) or ("≡" in svg)
         add("PASS" if ok else "FAIL", "C5", "含 somatic 子標且有 label-flip 註" if ok else "含 HP1-1/HP2-1 但缺 label-flip 註明")
 
-    # C6 色彩約定（haplotype 圖）
+    # C6 色彩約定（haplotype 圖；somatic 出現才要求橘；接受 Wong canonical hex）
     is_hap = bool(re.search(r"HP1|HP2|germline|somatic|haplotag|haplotype|Germline|Somatic", svg))
     if is_hap:
-        blue = bool(re.search(r"2F5597|2E75B6", svg, re.I))
-        orange = bool(re.search(r"C55A11|ED7D31", svg, re.I))
-        add("PASS" if (blue and orange) else "WARN", "C6",
-            f"haplotype 色約定 藍={blue} 橘={orange}" + ("" if (blue and orange) else " ← 應藍 germline/橘 somatic"))
+        blue = bool(re.search(r"2F5597|2E75B6|0072B2", svg, re.I))
+        has_som = bool(re.search(r"somatic|Somatic|HP[12]-1", svg))
+        orange = bool(re.search(r"C55A11|ED7D31|E69F00|D55E00", svg, re.I))
+        ok = blue and (orange or not has_som)
+        add("PASS" if ok else "WARN", "C6",
+            f"色約定 藍={blue}" + (f" 橘={orange}(somatic)" if has_som else "（germline-only 不需橘）")
+            + ("" if ok else " ← 應藍 germline / 橘 somatic"))
 
     # C7 示意標註
     dj = os.path.join(ddir, "data.json")

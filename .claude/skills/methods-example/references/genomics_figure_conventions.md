@@ -83,3 +83,37 @@ Canvas：13.33×7.5 in = `viewBox="0 0 1280 720"`（px = inch × 96）。
 5. **schematic factory / 小倍數**：一個 panel `<symbol>` reuse N 次（換 title+data），讀者學一次 legend。
 
 **全部可 HTML SVG 重現**：read=`<polygon>`五邊形箭頭、tick=`<rect>`/`<circle>`、legend=`<circle>`+`<text>`、流程=`<path>`箭頭、IGV pileup=多`<rect>`+彩色 tick、grouped bar=`<rect>`+末端`<text>`、ideogram=帶狀`<rect>`+centromere、graph=`<ellipse>`node+`<line>`edge。deck 的 IGV/array 為 raster 截圖 → **須 re-synthesize 成 SVG**。
+
+---
+
+## 7. 頂尖期刊整合（Cell/Nature/Science，2026-06-07 wf_76c92c4c-0cf；全 L3）
+
+> 全期刊規格 = **L3**（作者指南，非本專案真值）。完整貯備計畫 + 改進 backlog 見 `stockpile_plan.md`。
+
+### Top 共通特性（三家都有 → 優先）
+1. **固定投稿欄寬**：單欄 ~89mm / 欄半 ~120mm / 雙欄 ~180mm；最大高 ~170mm（Nature 最嚴）。
+2. **body 字 5-7pt（絕對下限 5pt）**；但 **px≠pt**：slide 模式維持 ≥8px 下限，journal 模式才在 mm 換算層查 5-7pt。
+3. **panel label = bold 8-9pt upright，never italic**（Nature 小寫 a/b/c、Cell/Sci 大寫 A/B/C）。← 最大結構缺口（待 A1）。
+4. **line/stroke 下限 0.5pt**；相鄰灰填亮度差 ≥20%。
+5. **色盲安全（Wong/Okabe-Ito 金標）+ 絕不單靠顏色**（配形狀/位置/直接標籤；避 red-green；對比 ≥4.5:1）。
+6. **sans-serif 全圖一致**（Arial/Helvetica）；只變數/希臘字斜體。
+7. **vector 優先（PDF/EPS）、text 保 live 不 outline** ← 我們 SVG-first 正中要求 ✓。
+8. **RGB 投稿**（期刊自轉 CMYK）；印刷飽和橘紅偏移 → 優先 vermillion `#D55E00`。
+9. **no-decoration / data-ink**（無 drop-shadow/3D/裝飾格線）← 待 lint C12 enforce。
+10. **每圖 ≤6-8 categorical 色**（4-6 更安全）← 我們 4 色 legend 在限內 ✓。
+11. **一圖一概念 + 明確 reading direction**（線性 L→R / 階層 T→B / 並列 / 環狀）。
+
+### Wong 色盲安全 palette（journal_a11y 平行 token；slide 仍用 deck 藍橘）
+| 語意 | deck（pi_slide，現用）| Wong（journal_a11y）|
+|---|---|---|
+| germline / HP1 | `#2F5597` / `#2E75B6` | `#0072B2`（藍）|
+| somatic / HP1-1 | `#C55A11` | `#E69F00`（橘）/ 印刷 `#D55E00`（vermillion）|
+| 其他 Wong | — | 黑 #000 / sky #56B4E9 / green #009E73 / yellow #F0E442 / purple #CC79A7 |
+
+> 藍↔橘**本就是最安全 CVD 對**；我們現用 hex 已 CVD-safe，journal 投稿時換 Wong canonical hex。甲基 red/blue ramp 與 haplotype 藍橘軸**正交**，且甲基已 filled/open 形狀冗餘（符「不單靠顏色」）。
+
+### Cell graphical abstract（選配 preset）
+方形 1200×1200px @300dpi、Arial 12-16pt（比 in-figure 大，因縮圖）、單一 take-home、**無 data items（純 schematic）**、明確 reading flow。Nature/Science 不要求。
+
+### 改進落點（待逐批；見 stockpile_plan.md backlog）
+renderer A1-A7（panel 編號 / export_target / type_scale / color mode / stroke floor / font-family / reading_flow）；lint C8-C12（CVD / grayscale / panel-label / single-take-home / no-decoration）。

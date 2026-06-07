@@ -1,0 +1,18 @@
+{
+  "_comment": "B4 phasing 101（germline-only，hap_split_track 空 somatic → 跳過子標層）。phasing/ASM 每報告開場。",
+  "case_template_id": "Cx_custom",
+  "title": "Phasing 101：het germline 變異分到 HP1 / HP2",
+  "subtitle": "示意 · 混合 reads 依攜帶的 germline allele 分到母本 HP1 / 父本 HP2 兩單倍型",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "readtrack_legend", "params": { "items_ref": "legend" } },
+    { "type": "hap_split_track", "intuition_ref": "intuition",
+      "params": { "germline_ref": "schematic.germline_groups", "somatic_ref": "schematic.somatic_groups", "cols_ref": "schematic.cols", "detail": "tick" } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "loh": "#8E44AD", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#999999", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "synthetic_watermark": true, "methyl_legend": false }
+}

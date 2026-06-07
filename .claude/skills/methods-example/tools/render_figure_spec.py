@@ -246,10 +246,11 @@ def p_hap_split_track(data, prim, sh, y):
             st["yy"] += 8
 
     draw_group(germ, "Germline")
-    s.append(f'<line x1="{x0-40}" y1="{st["yy"]}" x2="{colx[-1]+28}" y2="{st["yy"]}" stroke="{cs.get("line","#ccc")}" stroke-dasharray="4 3"/>')
-    s.append(f'<text x="{x0-40}" y="{st["yy"]-3}" font-size="8.5" fill="{cs["soft"]}">↓ haplotag → 依 somatic 變異細分子標</text>')
-    st["yy"] += 16
-    draw_group(som, "Somatic")
+    if som:  # 純 phasing 教學件(t1)可給空 somatic → 跳過分隔線+somatic 層
+        s.append(f'<line x1="{x0-40}" y1="{st["yy"]}" x2="{colx[-1]+28}" y2="{st["yy"]}" stroke="{cs.get("line","#ccc")}" stroke-dasharray="4 3"/>')
+        s.append(f'<text x="{x0-40}" y="{st["yy"]-3}" font-size="8.5" fill="{cs["soft"]}">↓ haplotag → 依 somatic 變異細分子標</text>')
+        st["yy"] += 16
+        draw_group(som, "Somatic")
     return "\n".join(s), st["yy"] - y + 4
 
 
@@ -432,9 +433,103 @@ def p_loh_ideogram(data, prim, sh, y):
     return "\n".join(s), yy - y
 
 
+# ---------- B1 gene_model_track（exon/intron/UTR + strand）----------
+def p_gene_model_track(data, prim, sh, y):
+    cs = sh["color_scale"]
+    feats = resolve(data, prim["params"]["features_ref"])
+    length = float(prim["params"].get("length", 100))
+    strand = prim["params"].get("strand", "+")
+    W, x0 = sh.get("width", 760), 150
+    w = W - x0 - 30
+
+    def sx(p):
+        return x0 + float(p) / length * w
+
+    cy = y + 16
+    s = [f'<text x="{x0-10}" y="{cy+4}" font-size="10" font-weight="700" fill="{cs["ink"]}" text-anchor="end">{esc(prim["params"].get("label","gene"))}</text>',
+         f'<line x1="{x0}" y1="{cy}" x2="{x0+w}" y2="{cy}" stroke="{cs.get("ink","#444")}" stroke-width="1.2"/>']
+    for i in range(1, 6):
+        ax, d = x0 + i * w / 6, (4 if strand == "+" else -4)
+        s.append(f'<path d="M{ax-d:.1f},{cy-3} L{ax+d:.1f},{cy} L{ax-d:.1f},{cy+3}" fill="none" stroke="#999" stroke-width="1"/>')
+    for f in feats:
+        x1, x2 = sx(f["start"]), sx(f["end"])
+        if f["type"] == "exon":
+            s.append(f'<rect x="{x1:.1f}" y="{cy-8}" width="{max(x2-x1,2):.1f}" height="16" rx="1.5" fill="{cs.get("hp1","#2F5597")}"/>')
+        elif f["type"] == "utr":
+            s.append(f'<rect x="{x1:.1f}" y="{cy-4}" width="{max(x2-x1,2):.1f}" height="8" rx="1" fill="{cs.get("hp2","#8FAADC")}"/>')
+    s.append(f'<text x="{x0+w}" y="{cy+24}" font-size="8.5" fill="{cs["soft"]}" text-anchor="end">exon=實心框 · UTR=細框 · intron=線 · 箭頭=strand ({strand})</text>')
+    return "\n".join(s), 42
+
+
+# ---------- B2 coverage_track（depth area + ploidy 線）----------
+def p_coverage_track(data, prim, sh, y):
+    cs = sh["color_scale"]
+    depths = [float(v) for v in resolve(data, prim["params"]["depths_ref"])]
+    ploidy = prim["params"].get("ploidy_line")
+    W, x0 = sh.get("width", 760), 150
+    w, h = W - x0 - 30, 70
+    base_y, mx, n = y + 14 + h, max(depths) or 1, len(depths)
+    bw = w / n
+    s = [f'<text x="{x0-10}" y="{y+22}" font-size="10" font-weight="700" fill="{cs["ink"]}" text-anchor="end">{esc(prim["params"].get("label","coverage"))}</text>',
+         f'<text x="{x0-10}" y="{base_y+3}" font-size="8" fill="{cs["soft"]}" text-anchor="end">0</text>',
+         f'<text x="{x0-10}" y="{y+18}" font-size="8" fill="{cs["soft"]}" text-anchor="end">{int(mx)}×</text>']
+    for i, d in enumerate(depths):
+        bh = d / mx * h
+        s.append(f'<rect x="{x0+i*bw:.1f}" y="{base_y-bh:.1f}" width="{bw:.1f}" height="{bh:.1f}" fill="{cs.get("normal","#999")}" opacity=".55"/>')
+    if ploidy is not None:
+        py = base_y - float(ploidy) / mx * h
+        s.append(f'<line x1="{x0}" y1="{py:.1f}" x2="{x0+w}" y2="{py:.1f}" stroke="{cs.get("hp11","#C55A11")}" stroke-dasharray="4 3"/>')
+        s.append(f'<text x="{x0+w}" y="{py-2:.1f}" font-size="8" fill="{cs.get("hp11","#C55A11")}" text-anchor="end">expected ploidy</text>')
+    return "\n".join(s), h + 18
+
+
+# ---------- B3 methyl_lollipop_track（單軌 5mC，filled/open 形狀冗餘）----------
+def p_methyl_lollipop_track(data, prim, sh, y):
+    cs = sh["color_scale"]
+    sites = resolve(data, prim["params"]["sites_ref"])
+    length = float(prim["params"].get("length", 100))
+    W, x0 = sh.get("width", 760), 150
+    w, base_y = W - x0 - 30, y + 40
+
+    def sx(p):
+        return x0 + float(p) / length * w
+
+    s = [f'<text x="{x0-10}" y="{base_y+4}" font-size="10" font-weight="700" fill="{cs["ink"]}" text-anchor="end">{esc(prim["params"].get("label","5mC"))}</text>',
+         f'<line x1="{x0}" y1="{base_y}" x2="{x0+w}" y2="{base_y}" stroke="#cfcabd" stroke-width="2"/>']
+    for st in sites:
+        px, top = sx(st["pos"]), base_y - 22
+        s.append(f'<line x1="{px:.1f}" y1="{base_y}" x2="{px:.1f}" y2="{top}" stroke="#bbb" stroke-width="1"/>')
+        if st.get("meth"):
+            s.append(f'<circle cx="{px:.1f}" cy="{top}" r="5.5" fill="{cs["meth"]}"/>')
+        else:
+            s.append(f'<circle cx="{px:.1f}" cy="{top}" r="5.5" fill="#fff" stroke="{cs["unmeth"]}" stroke-width="2"/>')
+    s.append(f'<text x="{x0+w}" y="{base_y+18}" font-size="8.5" fill="{cs["soft"]}" text-anchor="end">實心=甲基化 / 空心=未甲基化（形狀冗餘，不單靠顏色）</text>')
+    return "\n".join(s), 62
+
+
+# ---------- B7 variant_class_legendcard（germline/somatic 概念圖卡）----------
+def p_variant_class_legendcard(data, prim, sh, y):
+    cs = sh["color_scale"]
+    items = resolve(data, prim["params"]["items_ref"])
+    W, x0 = sh.get("width", 760), 150
+    s = [f'<rect x="{x0}" y="{y}" width="{W-x0-30}" height="{len(items)*30+14}" rx="8" fill="#fff" stroke="{cs.get("line","#E4E2DA")}"/>']
+    yy = y + 24
+    for it in items:
+        col = cs.get(it["color_key"], cs["ink"])
+        s.append(f'<circle cx="{x0+22}" cy="{yy-4}" r="7" fill="{col}"/>')
+        s.append(f'<text x="{x0+40}" y="{yy}" font-size="11.5" font-weight="700" fill="{col}">{esc(it["label"])}</text>')
+        s.append(f'<text x="{x0+150}" y="{yy}" font-size="10.5" fill="{cs["ink"]}">{esc(it.get("desc",""))}</text>')
+        yy += 30
+    return "\n".join(s), yy - y + 6
+
+
 RENDERERS = {
     "hap_split_track": p_hap_split_track,
     "readtrack_legend": p_readtrack_legend,
+    "gene_model_track": p_gene_model_track,
+    "coverage_track": p_coverage_track,
+    "methyl_lollipop_track": p_methyl_lollipop_track,
+    "variant_class_legendcard": p_variant_class_legendcard,
     "igv_pileup": p_igv_pileup,
     "cpg_beta_matrix": p_cpg_beta_matrix,
     "grouped_bar": p_grouped_bar,

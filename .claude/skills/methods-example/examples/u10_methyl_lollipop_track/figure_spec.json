@@ -1,0 +1,16 @@
+{
+  "_comment": "B3 methyl lollipop 單軌（入門級甲基化解釋；形狀冗餘）。",
+  "case_template_id": "Cx_custom",
+  "title": "DNA 甲基化 @ CpG：lollipop 單軌",
+  "subtitle": "示意 · 沿座標每 CpG 一棒 · 實心紅=甲基化 / 空心藍=未甲基化（形狀冗餘，不單靠顏色）",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "methyl_lollipop_track", "params": { "sites_ref": "schematic.sites", "length": 100, "label": "5mC" } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "loh": "#8E44AD", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#999999", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "synthetic_watermark": true, "methyl_legend": true }
+}

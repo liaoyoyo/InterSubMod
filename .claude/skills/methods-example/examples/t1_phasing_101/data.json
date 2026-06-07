@@ -1,0 +1,20 @@
+{
+  "_comment": "B4 phasing 101（拆分單概念：只到 germline HP1/HP2，無 somatic）。reuse hap_split_track，somatic_groups 空。marks: 1=germline-HP1 het / 2=germline-HP2 het。",
+  "meta": { "synthetic_note": "read 為示意（synthetic）" },
+  "schematic": {
+    "synthetic": true,
+    "cols": ["p1", "p2", "p3", "p4", "p5"],
+    "germline_groups": [
+      { "label": "HP1", "sublabel": "Maternal", "color_key": "hp1", "reads": [
+        { "marks": ". . 1 . ." }, { "marks": ". . 1 . ." }, { "marks": ". . 1 . ." } ] },
+      { "label": "HP2", "sublabel": "Paternal", "color_key": "hp2", "reads": [
+        { "marks": ". 2 . . ." }, { "marks": ". 2 . . ." }, { "marks": ". 2 . . ." } ] }
+    ],
+    "somatic_groups": []
+  },
+  "legend": [
+    { "label": "Germline (HP1)", "color_key": "hp1" },
+    { "label": "Germline (HP2)", "color_key": "hp2" }
+  ],
+  "intuition": "把 het germline 變異依所在單套染色體分到 HP1/HP2（phasing）；每條 read 依攜帶的 allele 被 tag 到對應 haplotype。"
+}

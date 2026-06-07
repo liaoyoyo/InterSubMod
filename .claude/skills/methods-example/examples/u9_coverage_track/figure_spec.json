@@ -1,0 +1,16 @@
+{
+  "_comment": "B2 coverage track + ploidy 線（CNV 抬升示意）。與 igv_pileup/gene_model 共 x 軸。",
+  "case_template_id": "Cx_custom",
+  "title": "Coverage / depth track（CNV 區段抬升）",
+  "subtitle": "示意 · 沿座標 depth · 橘虛線=expected ploidy · 抬升段=copy gain · 與 pileup/gene model 共 x 軸",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "coverage_track", "params": { "depths_ref": "schematic.depths", "ploidy_line": 35, "label": "coverage" } }
+  ],
+  "shared": {
+    "width": 760,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "loh": "#8E44AD", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#999999", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "synthetic_watermark": true, "methyl_legend": false }
+}

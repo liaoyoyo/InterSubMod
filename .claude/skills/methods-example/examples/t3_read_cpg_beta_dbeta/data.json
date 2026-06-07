@@ -1,0 +1,18 @@
+{
+  "_comment": "B6 read×CpG → β → Δβ 入門（純 schematic，C1 雛形泛化版）。reuse read_cpg_matrix；HP1 多甲基 vs HP1-1 多未甲基 → 群率 β 差。",
+  "meta": { "synthetic_note": "read 甲基為示意（synthetic 放大方向），非實際" },
+  "schematic": {
+    "synthetic": true,
+    "note": "read 甲基為示意放大",
+    "cpg_labels": ["CpG", "CpG", "CpG", "CpG", "CpG", "CpG"],
+    "snv_after_col": 3,
+    "groups": [
+      { "track": "HP1", "label": "HP1", "sublabel": "germline", "color_key": "hp1", "reads": [
+        "m m u m u m", "m u m m u m", "u m m u m m" ] },
+      { "track": "HP1-1", "label": "HP1-1", "sublabel": "somatic", "color_key": "hp11", "reads": [
+        "u u m u u u", "u m u u u u", "u u u m u u" ] }
+    ]
+  },
+  "label_flip_note": "HP1-1 = HP1 germline 下 somatic 子標，非第三 haplotype。",
+  "intuition": "HP1 多數 CpG 甲基（實心）vs HP1-1 多數未甲基（空心）→ 兩群甲基比例 β 差 = Δβ 方向（此例 Δβ<0）。"
+}
