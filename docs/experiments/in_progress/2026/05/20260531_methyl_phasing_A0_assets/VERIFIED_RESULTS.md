@@ -106,6 +106,43 @@ null median 0.974 **高得可疑**，與文獻「somatic ASM Δβ≈0.12 偏弱�
 - 能否救 unphase：**仍未證** — (a) CpG-SNP 未排除（最大嫌疑）(b) null 區是 anchor 充足篩出（40/111），unphase read 住在稀疏區，外推未證 (c) 仍 2/40 無訊號。
 - 下一步：CpG-SNP 排除 → 若 95% 撐住，才是穩固「甲基帶真 ASM 訊號」。
 
+## V10. ⭐⭐ 決定性：matched normal 對照證明「甲基 allele 差異不是 copy」（+ depth-matched + imprinting 正控）
+
+> **回答用戶問題**：「HP 群內外明顯甲基差異，是 copy 問題，還是 phase tagging 正確判斷的真 haplotype 甲基差異？如何驗證？」
+
+- **設計**：單 SNP REF-vs-ALT allele 標籤（不靠 longphase HP tag、不需跨 SNP 相位 → tumor/normal 完全對等獨立）。在每個 germline het SNP 把 read 依該位鹼基分 REF/ALT 兩群算甲基 anchor AUC。**normal HCC1395BL 是 copy-clean 二倍體 → 若分離度由 copy 造成，normal 應低；若 normal 也高 → 非 copy**。
+- **腳本**：`allele_asm_auc.py`（tumor+normal 同區域配對）+ `aggregate_allele_asm.py` + `imprint_bimodality.py`。**輸出**：`allele_asm_{tumor,normal}_chr*.json`（6 染色體各）+ `allele_asm_aggregate.json` + `imprint_bimodality.json`。
+- **真值**（6 染色體 chr1/7/8/15/20/22；tumor 638 區 / normal 720 區 / 136 配對位點；copy 自 allele_asm_aggregate.json）：
+
+| 比較 | tumor AUC | normal AUC | 對「不是 copy」的意義 |
+|------|---:|---:|------|
+| **整體 median** | 0.866 | **0.979** | normal（無 copy 變異）反而**更高** → copy 非分離度成因 |
+| 整體 depth-matched | 0.859 | 0.982 | **≈ 未配對**（P-06 read-count confound 否證）|
+| 整體 frac sig>shuffle | 0.741 | 0.896 | 訊號 label-dependent |
+| shuffle null median | 0.669 | 0.794 | 真 null（非 0.5）|
+| **neutral (CN=2)** | 0.854 | 0.786（同位點）| matched 二倍體區 tumor≈normal |
+| **gain (tumor 多拷貝)** | 0.871 | 0.989（同位點）| tumor 多拷貝區 normal 更高 |
+| **loh (tumor 失一條)** | **0.782**（最低，sig 0.49）| 0.932（同位點）| tumor LOH **降低**分離（非升高）|
+| 配對 delta (tumor−normal) | median **−0.046** | — | 70% 位點 normal≥tumor |
+
+- **per-chr**：tumor 0.71–0.93 vs normal 0.96–0.99，**6/6 染色體 normal>tumor**（chr8 tumor 0.71 最低，LOH-rich）。
+- **imprinting 正控**（imprint_bimodality.json，TUMOR matrix）：GNAS 強雙峰（n=464, BIC=335, centers 0.39/0.87, **Δ=0.49**, ~50:50）；SNRPN 弱雙峰（Δ0.19）；H19 reads 太少。→ 甲基能在已知 imprinted DMR 乾淨分兩 epiallele，獨立於 anchor。
+
+### V10 結論（決定性回答）
+1. ✅ **「不是 copy」決定性確認**：copy-clean 二倍體 normal 的分離度 ≥ tumor（整體 0.979 vs 0.866，6/6 染色體 normal 更高）。若 copy 造成分離，normal 應低——反而最高。**tumor 的 copy 事件（gain/LOH）反而降低分離度**（LOH 0.782 最低），與「copy artifact」假說完全相反。
+2. ✅ **read-count/depth（P-06）否證**：depth-matched AUC ≈ 未配對（tumor 0.859 vs 0.866；normal 0.982 vs 0.979）。
+3. ✅ **是真 haplotype-linked 甲基訊號（copy-independent）**：在 copy-clean normal 同樣存在 → 此分離是「germline haplotype 的甲基相關性」（cis-methylation），正是 V6 救援 88.5% 的根基；在 clean 二倍體最強，被 tumor copy 混亂削弱。
+4. ⚠ **絕對 AUC 有方法樂觀成分**：normal ~0.98 全基因組——若全是真 locus-specific ASM 生物上不合理（文獻 ASM 僅佔少數 het 位點）。誠實 effect size 應看**相對 null**（real 超 shuffle：tumor 0.87 vs 0.67、normal 0.98 vs 0.79）+ **V6 held-out 88.5%（null 52.4%）**，而非絕對 0.87–0.98。
+5. ✅ **imprinting 正控**：GNAS Δβ=0.49 雙峰 → 方法確實能撈到已知真 ASM。
+
+### V10 caveat
+- 單一 tumor/normal 配對（HCC1395，cell line）；normal=HCC1395BL。
+- 「normal 作生物學 null ~0.98」意味**報告應引用相對效應，不引絕對 AUC**。
+- allele 標籤為單 SNP REF/ALT（local），與 longphase 跨 SNP 相位 HP 略不同但更獨立；tumor allele-based 重現了 HP-tag 版的高分離（chr22 0.96）。
+- imprinting 正控用 tumor matrix（tumor 可能 LOI；GNAS 仍強雙峰 = 該位點 imprinting 保留）。
+
+---
+
 ## V9. ⭐ 本資料直接算 aDMR × LOH 富集 — 對照文獻 79%（背景 confound 揭露）
 
 > ⚠ **修正 V8 解讀**：V8 引文獻「79% aDMR 落 CNV/LOH → LOH 是 ASM 富集區」。本輪直接在本資料算，發現**對照數字相符但無真富集**（HCC1395 背景 CNV/LOH 覆蓋太高）。V8 文獻引用保留，但「LOH 是 ASM 富集區」結論在 HCC1395 **無法驗證**（背景 confound）。

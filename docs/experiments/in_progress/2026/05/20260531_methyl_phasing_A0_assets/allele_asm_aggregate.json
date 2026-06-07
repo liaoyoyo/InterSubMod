@@ -1,0 +1,127 @@
+{
+ "n_tumor_regions": 638,
+ "n_normal_regions": 720,
+ "n_paired_loci": 136,
+ "overall": {
+  "tumor": {
+   "n": 638,
+   "auc_median": 0.8663,
+   "auc_mean": 0.8153,
+   "auc_depthmatched_median": 0.8587,
+   "shuffle_p95_median": 0.6691,
+   "frac_sig_over_shuffle": 0.7414
+  },
+  "normal": {
+   "n": 720,
+   "auc_median": 0.979,
+   "auc_mean": 0.9334,
+   "auc_depthmatched_median": 0.9822,
+   "shuffle_p95_median": 0.7943,
+   "frac_sig_over_shuffle": 0.8958
+  }
+ },
+ "by_tumor_status": {
+  "neutral": {
+   "tumor": {
+    "n": 48,
+    "auc_median": 0.8541,
+    "auc_mean": 0.8078,
+    "auc_depthmatched_median": 0.8446,
+    "shuffle_p95_median": 0.67,
+    "frac_sig_over_shuffle": 0.75
+   },
+   "normal_same_loci": {
+    "n": 20,
+    "auc_median": 0.7855,
+    "auc_mean": 0.7859,
+    "auc_depthmatched_median": 0.7777,
+    "shuffle_p95_median": 0.7589,
+    "frac_sig_over_shuffle": 0.6
+   }
+  },
+  "gain": {
+   "tumor": {
+    "n": 547,
+    "auc_median": 0.871,
+    "auc_mean": 0.8193,
+    "auc_depthmatched_median": 0.8674,
+    "shuffle_p95_median": 0.6665,
+    "frac_sig_over_shuffle": 0.7605
+   },
+   "normal_same_loci": {
+    "n": 99,
+    "auc_median": 0.9887,
+    "auc_mean": 0.9359,
+    "auc_depthmatched_median": 0.9847,
+    "shuffle_p95_median": 0.7879,
+    "frac_sig_over_shuffle": 0.8889
+   }
+  },
+  "loh": {
+   "tumor": {
+    "n": 43,
+    "auc_median": 0.7818,
+    "auc_mean": 0.7727,
+    "auc_depthmatched_median": 0.7773,
+    "shuffle_p95_median": 0.7253,
+    "frac_sig_over_shuffle": 0.4884
+   },
+   "normal_same_loci": {
+    "n": 17,
+    "auc_median": 0.9316,
+    "auc_mean": 0.9084,
+    "auc_depthmatched_median": 0.9116,
+    "shuffle_p95_median": 0.767,
+    "frac_sig_over_shuffle": 0.9412
+   }
+  }
+ },
+ "paired": {
+  "n": 136,
+  "delta_tumor_minus_normal_median": -0.0456,
+  "delta_mean": -0.0755,
+  "frac_tumor_gt_normal": 0.3015,
+  "neutral_delta_median": 0.0612,
+  "neutral_n": 20,
+  "loh_delta_median": -0.0174,
+  "loh_n": 17
+ },
+ "by_chrom": {
+  "chr1": {
+   "tumor_auc_median": 0.8387,
+   "tumor_n": 120,
+   "normal_auc_median": 0.9932,
+   "normal_n": 120
+  },
+  "chr15": {
+   "tumor_auc_median": 0.8016,
+   "tumor_n": 120,
+   "normal_auc_median": 0.9705,
+   "normal_n": 120
+  },
+  "chr20": {
+   "tumor_auc_median": 0.8653,
+   "tumor_n": 120,
+   "normal_auc_median": 0.9885,
+   "normal_n": 120
+  },
+  "chr22": {
+   "tumor_auc_median": 0.9268,
+   "tumor_n": 120,
+   "normal_auc_median": 0.9559,
+   "normal_n": 120
+  },
+  "chr7": {
+   "tumor_auc_median": 0.8695,
+   "tumor_n": 120,
+   "normal_auc_median": 0.9756,
+   "normal_n": 120
+  },
+  "chr8": {
+   "tumor_auc_median": 0.7076,
+   "tumor_n": 38,
+   "normal_auc_median": 0.9868,
+   "normal_n": 120
+  }
+ }
+}
