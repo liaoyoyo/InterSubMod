@@ -433,6 +433,54 @@ def p_loh_ideogram(data, prim, sh, y):
     return "\n".join(s), yy - y
 
 
+# ---------- pipeline_diagram（EPI2ME drawio 風 banded swimlane + scope 註解區塊）----------
+def p_pipeline_diagram(data, prim, sh, y):
+    cs = sh["color_scale"]
+    bands = resolve(data, prim["params"]["bands_ref"])
+    W = sh.get("width", 1100)
+    x0, lblw = 12, 184
+    box_x0 = x0 + lblw + 8
+    avail = W - box_x0 - 16
+    box_h, gap = 34, 26
+    s, yy = [], y
+    for bi, band in enumerate(bands):
+        bcol = cs.get(band.get("color_key", "normal"), "#888")
+        lblcol = bcol if band.get("color_key") not in (None, "normal") else cs["ink"]
+        stages = band["stages"]
+        n = len(stages)
+        bw = max(58, min(150, (avail - gap * (n - 1)) / max(n, 1)))
+        band_h = box_h + 30
+        # scope block（範圍註解意義區塊）= 半透明背景 + 左側 label + note
+        s.append(f'<rect x="{x0}" y="{yy}" width="{W-2*x0}" height="{band_h}" rx="9" fill="{bcol}" opacity=".07"/>')
+        s.append(f'<text x="{x0+10}" y="{yy+20}" font-size="11.5" font-weight="800" fill="{lblcol}">{esc(band["label"])}</text>')
+        if band.get("note"):
+            s.append(f'<text x="{x0+10}" y="{yy+37}" font-size="8.5" fill="{cs["soft"]}">{esc(band["note"])}</text>')
+        cy = yy + band_h / 2
+        fsz = 9.5 if bw >= 92 else (8.5 if bw >= 72 else 8)
+        bx, prev_right = box_x0, None
+        for st in stages:
+            future = st.get("status") == "future"
+            dash = ' stroke-dasharray="4 3"' if future else ''
+            inkc = cs["soft"] if future else cs["ink"]
+            s.append(f'<rect x="{bx:.1f}" y="{cy-box_h/2:.1f}" width="{bw:.1f}" height="{box_h}" rx="6" fill="#fff" stroke="{bcol}" stroke-width="1.4"{dash}/>')
+            sub = st.get("sub")
+            ty = (cy - 1) if sub else (cy + 3)
+            s.append(f'<text x="{bx+bw/2:.1f}" y="{ty:.1f}" font-size="{fsz}" font-weight="700" fill="{inkc}" text-anchor="middle">{esc(st["label"])}</text>')
+            if sub:
+                s.append(f'<text x="{bx+bw/2:.1f}" y="{cy+11:.1f}" font-size="8" fill="{cs["soft"]}" text-anchor="middle">{esc(sub)}</text>')
+            if prev_right is not None:
+                s.append(f'<line x1="{prev_right:.1f}" y1="{cy:.1f}" x2="{bx-4:.1f}" y2="{cy:.1f}" stroke="{bcol}" stroke-width="2.5"/>')
+                s.append(f'<path d="M{bx-4:.1f},{cy-3.5:.1f} L{bx:.1f},{cy:.1f} L{bx-4:.1f},{cy+3.5:.1f}" fill="{bcol}"/>')
+            prev_right = bx + bw
+            bx += bw + gap
+        yy += band_h + 22
+        if bi < len(bands) - 1:  # 向下 connector 到下一 band
+            dx = box_x0 + 28
+            s.append(f'<line x1="{dx}" y1="{yy-22}" x2="{dx}" y2="{yy-5}" stroke="{cs["soft"]}" stroke-width="2"/>')
+            s.append(f'<path d="M{dx-3.5},{yy-9} L{dx},{yy-5} L{dx+3.5},{yy-9}" fill="{cs["soft"]}"/>')
+    return "\n".join(s), yy - y + 2
+
+
 # ---------- B1 gene_model_track（exon/intron/UTR + strand）----------
 def p_gene_model_track(data, prim, sh, y):
     cs = sh["color_scale"]
@@ -524,6 +572,7 @@ def p_variant_class_legendcard(data, prim, sh, y):
 
 
 RENDERERS = {
+    "pipeline_diagram": p_pipeline_diagram,
     "hap_split_track": p_hap_split_track,
     "readtrack_legend": p_readtrack_legend,
     "gene_model_track": p_gene_model_track,

@@ -59,6 +59,8 @@
 ## 新 primitive roadmap（從簡報慣例研究 2026-06-07，workflow wf_b6aa4c96-be9）
 
 > 來源：2 份 PI 實驗室口試簡報萃取（詳見 `references/genomics_figure_conventions.md`）。**狀態（2026-06-07）：U1-U7 已實作**（`hap_split_track` / `igv_pileup` / `cpg_beta_matrix` / `grouped_bar` / `facet_grid` / `stacked_bar` / `loh_ideogram` / `readtrack_legend` 已註冊於 `tools/render_figure_spec.py`，對應 `examples/u1-u7/`，lint 全 PASS）。**仍待實作**：P-CALIB / P8 axis-dot / P9 allele-graph。色彩約定見 conventions §2（藍=germline/橘=somatic；**甲基化軸仍用 red/blue ramp 不套藍橘**）。分級顯示見 `references/detail_levels.md`。
+>
+> **2026-06-08 新增已實作**：`gene_model_track`(exon/intron/UTR) · `coverage_track`(depth+ploidy) · `methyl_lollipop_track`(5mC 單軌 filled/open) · `variant_class_legendcard`(概念卡) · **`pipeline_diagram`**（EPI2ME drawio 風 banded swimlane：每 band = scope 註解區塊 [label+note+背景塊] + 階段圓角框 + 彩箭頭 + 向下 connector；`status:future` 虛線；範例 `examples/p1_intersubmod_pipeline/` = InterSubMod 全流程，模組名取自實際 repo §13）。甲基 vs base **glyph 區分原則**（甲基=圓 lollipop / base·SNV=tick·bar；形狀承載軸、顏色承載值）見 conventions + detail_levels。
 
 | ID | primitive | 代表 | data_ref 契約 | 優先 |
 |----|-----------|------|--------------|------|

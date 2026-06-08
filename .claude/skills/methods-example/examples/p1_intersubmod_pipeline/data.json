@@ -1,0 +1,22 @@
+{
+  "_comment": "InterSubMod 完整流程圖（process schematic；模組/工具名取自實際 repo src/core/* + README + RegionProcessor，無 metric 數字、非捏造）。下游『未來』項明標 status:future。",
+  "meta": { "note": "流程 schematic；C++ 模組與外部工具名為實際 repo，無數值。" },
+  "bands": [
+    { "label": "① 輸入 Input", "note": "Tumor/Normal BAM · Ref · 候選 VCF · LOH.bed", "color_key": "normal", "stages": [
+      { "label": "Tumor BAM", "sub": "ONT 長讀" }, { "label": "Normal BAM", "sub": "配對" },
+      { "label": "Ref", "sub": "genome" }, { "label": "Somatic VCF", "sub": "候選位點" }, { "label": "LOH.bed", "sub": "LOH 區" } ] },
+    { "label": "② 上游 Upstream", "note": "外部 ONT 工具：basecall → align → call → phase → haplotag", "color_key": "gold", "stages": [
+      { "label": "Dorado", "sub": "5mC/5hmC" }, { "label": "minimap2", "sub": "align" }, { "label": "ClairS-TO", "sub": "somatic SNV" },
+      { "label": "longphase", "sub": "phasing" }, { "label": "haplotag", "sub": "HP1/HP2" }, { "label": "LOH 偵測", "sub": "→ LOH.bed" } ] },
+    { "label": "③ ISM C++ 核心", "note": "read → 甲基矩陣 → 距離 → 分群 → baseline → Δβ → 顯著性", "color_key": "teal", "stages": [
+      { "label": "讀取+HP", "sub": "ReadParser" }, { "label": "甲基", "sub": "MM/ML" }, { "label": "矩陣", "sub": "read×CpG" },
+      { "label": "距離", "sub": "NHD/L1" }, { "label": "分群", "sub": "cluster" }, { "label": "基線", "sub": "Normal" },
+      { "label": "Δβ cis", "sub": "PerCpgAsm" }, { "label": "顯著性", "sub": "Global/Local" }, { "label": "亞克隆", "sub": "Subclone" } ] },
+    { "label": "④ 輸出 Output", "note": "區域層級顯著性 + 甲基矩陣 + 熱圖", "color_key": "blue", "stages": [
+      { "label": "significance", "sub": "summary.csv" }, { "label": "甲基矩陣", "sub": "methylation" },
+      { "label": "距離熱圖", "sub": "heatmap" }, { "label": "分群熱圖", "sub": "cluster" } ] },
+    { "label": "⑤ 下游應用 Downstream", "note": "研究主軸（實線）＋ 可能未來應用（虛線）", "color_key": "green", "stages": [
+      { "label": "LOH 相位", "sub": "G6 主軸" }, { "label": "ASM 表徵", "sub": "BRCA2 star3" }, { "label": "TP/FP 特徵", "sub": "filter" },
+      { "label": "跨樣本", "sub": "7 樣本" }, { "label": "純度估計", "sub": "未來", "status": "future" }, { "label": "somatic 相位", "sub": "未來", "status": "future" } ] }
+  ]
+}

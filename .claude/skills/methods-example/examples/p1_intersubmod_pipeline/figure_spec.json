@@ -1,0 +1,16 @@
+{
+  "_comment": "InterSubMod 完整流程圖（EPI2ME drawio 風 banded swimlane）。width 1100。實線=現行 / 虛線=可能未來。模組名取自實際 repo（process schematic，無 metric）。",
+  "case_template_id": "Cx_custom",
+  "title": "InterSubMod 完整分析流程與下游應用",
+  "subtitle": "輸入 → 上游 ONT 工具 → ISM C++ 核心 → 輸出 → 下游應用（實線=現行 · 虛線=可能未來）· 模組名取自實際 repo",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "pipeline_diagram", "params": { "bands_ref": "bands" } }
+  ],
+  "shared": {
+    "width": 1100,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "loh": "#8E44AD", "gold": "#B8860B", "teal": "#1B8A86", "blue": "#027BA5", "green": "#2E7D52", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#7F7F7F", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "methyl_legend": false }
+}

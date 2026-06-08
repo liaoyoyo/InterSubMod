@@ -80,9 +80,10 @@ def lint(svg_path, max_text):
         ok = ("label-flip" in svg) or ("≡" in svg)
         add("PASS" if ok else "FAIL", "C5", "含 somatic 子標且有 label-flip 註" if ok else "含 HP1-1/HP2-1 但缺 label-flip 註明")
 
-    # C6 色彩約定（haplotype 圖；somatic 出現才要求橘；接受 Wong canonical hex）
+    # C6 色彩約定（haplotype glyph 圖；process flowchart 例外：用 band 色非 glyph 色）
+    is_pipeline = bool(re.search(r"流程|pipeline|Pipeline|分析流程|Upstream|Downstream", svg))
     is_hap = bool(re.search(r"HP1|HP2|germline|somatic|haplotag|haplotype|Germline|Somatic", svg))
-    if is_hap:
+    if is_hap and not is_pipeline:
         blue = bool(re.search(r"2F5597|2E75B6|0072B2", svg, re.I))
         has_som = bool(re.search(r"somatic|Somatic|HP[12]-1", svg))
         orange = bool(re.search(r"C55A11|ED7D31|E69F00|D55E00", svg, re.I))

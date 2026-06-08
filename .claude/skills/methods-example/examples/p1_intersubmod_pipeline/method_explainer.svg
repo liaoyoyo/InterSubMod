@@ -1,0 +1,169 @@
+<svg viewBox="0 0 1100 594" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="InterSubMod 完整分析流程與下游應用"><title>InterSubMod 完整分析流程與下游應用</title><desc>輸入 → 上游 ONT 工具 → ISM C++ 核心 → 輸出 → 下游應用（實線=現行 · 虛線=可能未來）· 模組名取自實際 repo</desc><rect width="1100" height="594" fill="#FAF9F5"/>
+<text x="10" y="26" font-size="16" font-weight="800" fill="#141413">InterSubMod 完整分析流程與下游應用</text>
+<text x="10" y="46" font-size="11.5" fill="#6B6B66">輸入 → 上游 ONT 工具 → ISM C++ 核心 → 輸出 → 下游應用（實線=現行 · 虛線=可能未來）· 模組名取自實際 repo</text>
+<rect x="12" y="114" width="1076" height="64" rx="9" fill="#7F7F7F" opacity=".07"/>
+<text x="22" y="134" font-size="11.5" font-weight="800" fill="#141413">① 輸入 Input</text>
+<text x="22" y="151" font-size="8.5" fill="#6B6B66">Tumor/Normal BAM · Ref · 候選 VCF · LOH.bed</text>
+<rect x="204.0" y="129.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#7F7F7F" stroke-width="1.4"/>
+<text x="279.0" y="145.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">Tumor BAM</text>
+<text x="279.0" y="157.0" font-size="8" fill="#6B6B66" text-anchor="middle">ONT 長讀</text>
+<rect x="380.0" y="129.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#7F7F7F" stroke-width="1.4"/>
+<text x="455.0" y="145.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">Normal BAM</text>
+<text x="455.0" y="157.0" font-size="8" fill="#6B6B66" text-anchor="middle">配對</text>
+<line x1="354.0" y1="146.0" x2="376.0" y2="146.0" stroke="#7F7F7F" stroke-width="2.5"/>
+<path d="M376.0,142.5 L380.0,146.0 L376.0,149.5" fill="#7F7F7F"/>
+<rect x="556.0" y="129.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#7F7F7F" stroke-width="1.4"/>
+<text x="631.0" y="145.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">Ref</text>
+<text x="631.0" y="157.0" font-size="8" fill="#6B6B66" text-anchor="middle">genome</text>
+<line x1="530.0" y1="146.0" x2="552.0" y2="146.0" stroke="#7F7F7F" stroke-width="2.5"/>
+<path d="M552.0,142.5 L556.0,146.0 L552.0,149.5" fill="#7F7F7F"/>
+<rect x="732.0" y="129.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#7F7F7F" stroke-width="1.4"/>
+<text x="807.0" y="145.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">Somatic VCF</text>
+<text x="807.0" y="157.0" font-size="8" fill="#6B6B66" text-anchor="middle">候選位點</text>
+<line x1="706.0" y1="146.0" x2="728.0" y2="146.0" stroke="#7F7F7F" stroke-width="2.5"/>
+<path d="M728.0,142.5 L732.0,146.0 L728.0,149.5" fill="#7F7F7F"/>
+<rect x="908.0" y="129.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#7F7F7F" stroke-width="1.4"/>
+<text x="983.0" y="145.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">LOH.bed</text>
+<text x="983.0" y="157.0" font-size="8" fill="#6B6B66" text-anchor="middle">LOH 區</text>
+<line x1="882.0" y1="146.0" x2="904.0" y2="146.0" stroke="#7F7F7F" stroke-width="2.5"/>
+<path d="M904.0,142.5 L908.0,146.0 L904.0,149.5" fill="#7F7F7F"/>
+<line x1="232" y1="178" x2="232" y2="195" stroke="#6B6B66" stroke-width="2"/>
+<path d="M228.5,191 L232,195 L235.5,191" fill="#6B6B66"/>
+<rect x="12" y="200" width="1076" height="64" rx="9" fill="#B8860B" opacity=".07"/>
+<text x="22" y="220" font-size="11.5" font-weight="800" fill="#B8860B">② 上游 Upstream</text>
+<text x="22" y="237" font-size="8.5" fill="#6B6B66">外部 ONT 工具：basecall → align → call → phase → haplotag</text>
+<rect x="204.0" y="215.0" width="125.0" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/>
+<text x="266.5" y="231.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">Dorado</text>
+<text x="266.5" y="243.0" font-size="8" fill="#6B6B66" text-anchor="middle">5mC/5hmC</text>
+<rect x="355.0" y="215.0" width="125.0" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/>
+<text x="417.5" y="231.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">minimap2</text>
+<text x="417.5" y="243.0" font-size="8" fill="#6B6B66" text-anchor="middle">align</text>
+<line x1="329.0" y1="232.0" x2="351.0" y2="232.0" stroke="#B8860B" stroke-width="2.5"/>
+<path d="M351.0,228.5 L355.0,232.0 L351.0,235.5" fill="#B8860B"/>
+<rect x="506.0" y="215.0" width="125.0" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/>
+<text x="568.5" y="231.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">ClairS-TO</text>
+<text x="568.5" y="243.0" font-size="8" fill="#6B6B66" text-anchor="middle">somatic SNV</text>
+<line x1="480.0" y1="232.0" x2="502.0" y2="232.0" stroke="#B8860B" stroke-width="2.5"/>
+<path d="M502.0,228.5 L506.0,232.0 L502.0,235.5" fill="#B8860B"/>
+<rect x="657.0" y="215.0" width="125.0" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/>
+<text x="719.5" y="231.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">longphase</text>
+<text x="719.5" y="243.0" font-size="8" fill="#6B6B66" text-anchor="middle">phasing</text>
+<line x1="631.0" y1="232.0" x2="653.0" y2="232.0" stroke="#B8860B" stroke-width="2.5"/>
+<path d="M653.0,228.5 L657.0,232.0 L653.0,235.5" fill="#B8860B"/>
+<rect x="808.0" y="215.0" width="125.0" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/>
+<text x="870.5" y="231.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">haplotag</text>
+<text x="870.5" y="243.0" font-size="8" fill="#6B6B66" text-anchor="middle">HP1/HP2</text>
+<line x1="782.0" y1="232.0" x2="804.0" y2="232.0" stroke="#B8860B" stroke-width="2.5"/>
+<path d="M804.0,228.5 L808.0,232.0 L804.0,235.5" fill="#B8860B"/>
+<rect x="959.0" y="215.0" width="125.0" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/>
+<text x="1021.5" y="231.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">LOH 偵測</text>
+<text x="1021.5" y="243.0" font-size="8" fill="#6B6B66" text-anchor="middle">→ LOH.bed</text>
+<line x1="933.0" y1="232.0" x2="955.0" y2="232.0" stroke="#B8860B" stroke-width="2.5"/>
+<path d="M955.0,228.5 L959.0,232.0 L955.0,235.5" fill="#B8860B"/>
+<line x1="232" y1="264" x2="232" y2="281" stroke="#6B6B66" stroke-width="2"/>
+<path d="M228.5,277 L232,281 L235.5,277" fill="#6B6B66"/>
+<rect x="12" y="286" width="1076" height="64" rx="9" fill="#1B8A86" opacity=".07"/>
+<text x="22" y="306" font-size="11.5" font-weight="800" fill="#1B8A86">③ ISM C++ 核心</text>
+<text x="22" y="323" font-size="8.5" fill="#6B6B66">read → 甲基矩陣 → 距離 → 分群 → baseline → Δβ → 顯著性</text>
+<rect x="204.0" y="301.0" width="74.7" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/>
+<text x="241.3" y="317.0" font-size="8.5" font-weight="700" fill="#141413" text-anchor="middle">讀取+HP</text>
+<text x="241.3" y="329.0" font-size="8" fill="#6B6B66" text-anchor="middle">ReadParser</text>
+<rect x="304.7" y="301.0" width="74.7" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/>
+<text x="342.0" y="317.0" font-size="8.5" font-weight="700" fill="#141413" text-anchor="middle">甲基</text>
+<text x="342.0" y="329.0" font-size="8" fill="#6B6B66" text-anchor="middle">MM/ML</text>
+<line x1="278.7" y1="318.0" x2="300.7" y2="318.0" stroke="#1B8A86" stroke-width="2.5"/>
+<path d="M300.7,314.5 L304.7,318.0 L300.7,321.5" fill="#1B8A86"/>
+<rect x="405.3" y="301.0" width="74.7" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/>
+<text x="442.7" y="317.0" font-size="8.5" font-weight="700" fill="#141413" text-anchor="middle">矩陣</text>
+<text x="442.7" y="329.0" font-size="8" fill="#6B6B66" text-anchor="middle">read×CpG</text>
+<line x1="379.3" y1="318.0" x2="401.3" y2="318.0" stroke="#1B8A86" stroke-width="2.5"/>
+<path d="M401.3,314.5 L405.3,318.0 L401.3,321.5" fill="#1B8A86"/>
+<rect x="506.0" y="301.0" width="74.7" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/>
+<text x="543.3" y="317.0" font-size="8.5" font-weight="700" fill="#141413" text-anchor="middle">距離</text>
+<text x="543.3" y="329.0" font-size="8" fill="#6B6B66" text-anchor="middle">NHD/L1</text>
+<line x1="480.0" y1="318.0" x2="502.0" y2="318.0" stroke="#1B8A86" stroke-width="2.5"/>
+<path d="M502.0,314.5 L506.0,318.0 L502.0,321.5" fill="#1B8A86"/>
+<rect x="606.7" y="301.0" width="74.7" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/>
+<text x="644.0" y="317.0" font-size="8.5" font-weight="700" fill="#141413" text-anchor="middle">分群</text>
+<text x="644.0" y="329.0" font-size="8" fill="#6B6B66" text-anchor="middle">cluster</text>
+<line x1="580.7" y1="318.0" x2="602.7" y2="318.0" stroke="#1B8A86" stroke-width="2.5"/>
+<path d="M602.7,314.5 L606.7,318.0 L602.7,321.5" fill="#1B8A86"/>
+<rect x="707.3" y="301.0" width="74.7" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/>
+<text x="744.7" y="317.0" font-size="8.5" font-weight="700" fill="#141413" text-anchor="middle">基線</text>
+<text x="744.7" y="329.0" font-size="8" fill="#6B6B66" text-anchor="middle">Normal</text>
+<line x1="681.3" y1="318.0" x2="703.3" y2="318.0" stroke="#1B8A86" stroke-width="2.5"/>
+<path d="M703.3,314.5 L707.3,318.0 L703.3,321.5" fill="#1B8A86"/>
+<rect x="808.0" y="301.0" width="74.7" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/>
+<text x="845.3" y="317.0" font-size="8.5" font-weight="700" fill="#141413" text-anchor="middle">Δβ cis</text>
+<text x="845.3" y="329.0" font-size="8" fill="#6B6B66" text-anchor="middle">PerCpgAsm</text>
+<line x1="782.0" y1="318.0" x2="804.0" y2="318.0" stroke="#1B8A86" stroke-width="2.5"/>
+<path d="M804.0,314.5 L808.0,318.0 L804.0,321.5" fill="#1B8A86"/>
+<rect x="908.7" y="301.0" width="74.7" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/>
+<text x="946.0" y="317.0" font-size="8.5" font-weight="700" fill="#141413" text-anchor="middle">顯著性</text>
+<text x="946.0" y="329.0" font-size="8" fill="#6B6B66" text-anchor="middle">Global/Local</text>
+<line x1="882.7" y1="318.0" x2="904.7" y2="318.0" stroke="#1B8A86" stroke-width="2.5"/>
+<path d="M904.7,314.5 L908.7,318.0 L904.7,321.5" fill="#1B8A86"/>
+<rect x="1009.3" y="301.0" width="74.7" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/>
+<text x="1046.7" y="317.0" font-size="8.5" font-weight="700" fill="#141413" text-anchor="middle">亞克隆</text>
+<text x="1046.7" y="329.0" font-size="8" fill="#6B6B66" text-anchor="middle">Subclone</text>
+<line x1="983.3" y1="318.0" x2="1005.3" y2="318.0" stroke="#1B8A86" stroke-width="2.5"/>
+<path d="M1005.3,314.5 L1009.3,318.0 L1005.3,321.5" fill="#1B8A86"/>
+<line x1="232" y1="350" x2="232" y2="367" stroke="#6B6B66" stroke-width="2"/>
+<path d="M228.5,363 L232,367 L235.5,363" fill="#6B6B66"/>
+<rect x="12" y="372" width="1076" height="64" rx="9" fill="#027BA5" opacity=".07"/>
+<text x="22" y="392" font-size="11.5" font-weight="800" fill="#027BA5">④ 輸出 Output</text>
+<text x="22" y="409" font-size="8.5" fill="#6B6B66">區域層級顯著性 + 甲基矩陣 + 熱圖</text>
+<rect x="204.0" y="387.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#027BA5" stroke-width="1.4"/>
+<text x="279.0" y="403.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">significance</text>
+<text x="279.0" y="415.0" font-size="8" fill="#6B6B66" text-anchor="middle">summary.csv</text>
+<rect x="380.0" y="387.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#027BA5" stroke-width="1.4"/>
+<text x="455.0" y="403.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">甲基矩陣</text>
+<text x="455.0" y="415.0" font-size="8" fill="#6B6B66" text-anchor="middle">methylation</text>
+<line x1="354.0" y1="404.0" x2="376.0" y2="404.0" stroke="#027BA5" stroke-width="2.5"/>
+<path d="M376.0,400.5 L380.0,404.0 L376.0,407.5" fill="#027BA5"/>
+<rect x="556.0" y="387.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#027BA5" stroke-width="1.4"/>
+<text x="631.0" y="403.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">距離熱圖</text>
+<text x="631.0" y="415.0" font-size="8" fill="#6B6B66" text-anchor="middle">heatmap</text>
+<line x1="530.0" y1="404.0" x2="552.0" y2="404.0" stroke="#027BA5" stroke-width="2.5"/>
+<path d="M552.0,400.5 L556.0,404.0 L552.0,407.5" fill="#027BA5"/>
+<rect x="732.0" y="387.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#027BA5" stroke-width="1.4"/>
+<text x="807.0" y="403.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">分群熱圖</text>
+<text x="807.0" y="415.0" font-size="8" fill="#6B6B66" text-anchor="middle">cluster</text>
+<line x1="706.0" y1="404.0" x2="728.0" y2="404.0" stroke="#027BA5" stroke-width="2.5"/>
+<path d="M728.0,400.5 L732.0,404.0 L728.0,407.5" fill="#027BA5"/>
+<line x1="232" y1="436" x2="232" y2="453" stroke="#6B6B66" stroke-width="2"/>
+<path d="M228.5,449 L232,453 L235.5,449" fill="#6B6B66"/>
+<rect x="12" y="458" width="1076" height="64" rx="9" fill="#2E7D52" opacity=".07"/>
+<text x="22" y="478" font-size="11.5" font-weight="800" fill="#2E7D52">⑤ 下游應用 Downstream</text>
+<text x="22" y="495" font-size="8.5" fill="#6B6B66">研究主軸（實線）＋ 可能未來應用（虛線）</text>
+<rect x="204.0" y="473.0" width="125.0" height="34" rx="6" fill="#fff" stroke="#2E7D52" stroke-width="1.4"/>
+<text x="266.5" y="489.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">LOH 相位</text>
+<text x="266.5" y="501.0" font-size="8" fill="#6B6B66" text-anchor="middle">G6 主軸</text>
+<rect x="355.0" y="473.0" width="125.0" height="34" rx="6" fill="#fff" stroke="#2E7D52" stroke-width="1.4"/>
+<text x="417.5" y="489.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">ASM 表徵</text>
+<text x="417.5" y="501.0" font-size="8" fill="#6B6B66" text-anchor="middle">BRCA2 star3</text>
+<line x1="329.0" y1="490.0" x2="351.0" y2="490.0" stroke="#2E7D52" stroke-width="2.5"/>
+<path d="M351.0,486.5 L355.0,490.0 L351.0,493.5" fill="#2E7D52"/>
+<rect x="506.0" y="473.0" width="125.0" height="34" rx="6" fill="#fff" stroke="#2E7D52" stroke-width="1.4"/>
+<text x="568.5" y="489.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">TP/FP 特徵</text>
+<text x="568.5" y="501.0" font-size="8" fill="#6B6B66" text-anchor="middle">filter</text>
+<line x1="480.0" y1="490.0" x2="502.0" y2="490.0" stroke="#2E7D52" stroke-width="2.5"/>
+<path d="M502.0,486.5 L506.0,490.0 L502.0,493.5" fill="#2E7D52"/>
+<rect x="657.0" y="473.0" width="125.0" height="34" rx="6" fill="#fff" stroke="#2E7D52" stroke-width="1.4"/>
+<text x="719.5" y="489.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">跨樣本</text>
+<text x="719.5" y="501.0" font-size="8" fill="#6B6B66" text-anchor="middle">7 樣本</text>
+<line x1="631.0" y1="490.0" x2="653.0" y2="490.0" stroke="#2E7D52" stroke-width="2.5"/>
+<path d="M653.0,486.5 L657.0,490.0 L653.0,493.5" fill="#2E7D52"/>
+<rect x="808.0" y="473.0" width="125.0" height="34" rx="6" fill="#fff" stroke="#2E7D52" stroke-width="1.4" stroke-dasharray="4 3"/>
+<text x="870.5" y="489.0" font-size="9.5" font-weight="700" fill="#6B6B66" text-anchor="middle">純度估計</text>
+<text x="870.5" y="501.0" font-size="8" fill="#6B6B66" text-anchor="middle">未來</text>
+<line x1="782.0" y1="490.0" x2="804.0" y2="490.0" stroke="#2E7D52" stroke-width="2.5"/>
+<path d="M804.0,486.5 L808.0,490.0 L804.0,493.5" fill="#2E7D52"/>
+<rect x="959.0" y="473.0" width="125.0" height="34" rx="6" fill="#fff" stroke="#2E7D52" stroke-width="1.4" stroke-dasharray="4 3"/>
+<text x="1021.5" y="489.0" font-size="9.5" font-weight="700" fill="#6B6B66" text-anchor="middle">somatic 相位</text>
+<text x="1021.5" y="501.0" font-size="8" fill="#6B6B66" text-anchor="middle">未來</text>
+<line x1="933.0" y1="490.0" x2="955.0" y2="490.0" stroke="#2E7D52" stroke-width="2.5"/>
+<path d="M955.0,486.5 L959.0,490.0 L955.0,493.5" fill="#2E7D52"/>
+<line x1="10" y1="544" x2="1090" y2="544" stroke="#eee"/>
+<text x="10" y="566" font-size="9.5" fill="#6B6B66">※ 聚合數字皆 verified 真值（0 項，附 src 可 grep）；read 甲基點為示意（synthetic）。</text>
+</svg>
