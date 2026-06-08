@@ -433,6 +433,61 @@ def p_loh_ideogram(data, prim, sh, y):
     return "\n".join(s), yy - y
 
 
+# ---------- metro_map（地鐵圖：手放 grid 座標 + 線站序；粗彩線 + 轉乘站大圈 + 平行 offset）----------
+def p_metro_map(data, prim, sh, y):
+    cs = sh["color_scale"]
+    stations = resolve(data, prim["params"]["stations_ref"])
+    lines = resolve(data, prim["params"]["lines_ref"])
+    dx = prim["params"].get("col_dx", 70)
+    dy = prim["params"].get("row_dy", 56)
+    x0, y0 = 80, y + 36
+    off, nl = 5.0, len(lines)
+
+    def sxy(sid):
+        st = stations[sid]
+        return x0 + st["col"] * dx, y0 + st["row"] * dy
+
+    member = {}
+    for li, ln in enumerate(lines):
+        for sid in ln["stations"]:
+            member.setdefault(sid, []).append(li)
+    s = []
+    # 線 legend（頂列）
+    lx = x0
+    for ln in lines:
+        col = cs.get(ln["color_key"], "#888")
+        dash = ' stroke-dasharray="6 4"' if ln.get("future") else ''
+        s.append(f'<line x1="{lx}" y1="{y+12}" x2="{lx+22}" y2="{y+12}" stroke="{col}" stroke-width="5"{dash}/>')
+        s.append(f'<text x="{lx+27}" y="{y+15}" font-size="9" fill="{cs["ink"]}">{esc(ln["name"])}</text>')
+        lx += 32 + len(ln["name"]) * 9 + 12
+    # 線（每線垂直 offset → 共段平行）
+    for li, ln in enumerate(lines):
+        col = cs.get(ln["color_key"], "#888")
+        oy = (li - (nl - 1) / 2.0) * off
+        pts = " ".join(f"{sxy(sid)[0]:.1f},{sxy(sid)[1]+oy:.1f}" for sid in ln["stations"])
+        dash = ' stroke-dasharray="7 5"' if ln.get("future") else ''
+        s.append(f'<polyline points="{pts}" fill="none" stroke="{col}" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" opacity="{0.5 if ln.get("future") else 0.92}"{dash}/>')
+    # 站 + label
+    maxy = y0
+    for sid, st in stations.items():
+        x, yy_ = sxy(sid)
+        maxy = max(maxy, yy_)
+        lis = member.get(sid, [])
+        if len(lis) >= 2:  # 轉乘站 = 大白圈黑框
+            s.append(f'<circle cx="{x:.1f}" cy="{yy_:.1f}" r="9" fill="#fff" stroke="{cs["ink"]}" stroke-width="2.5"/>')
+            sy = yy_
+        else:
+            col = cs.get(lines[lis[0]]["color_key"], "#888") if lis else "#888"
+            sy = yy_ + ((lis[0] - (nl - 1) / 2.0) * off if lis else 0)
+            s.append(f'<circle cx="{x:.1f}" cy="{sy:.1f}" r="5.5" fill="#fff" stroke="{col}" stroke-width="2.5"/>')
+        lab = st.get("label", "")
+        if st.get("label_pos") == "right":
+            s.append(f'<text x="{x+12:.1f}" y="{sy+3:.1f}" font-size="8.5" font-weight="700" fill="{cs["ink"]}">{esc(lab)}</text>')
+        else:  # backbone 站 label 旋轉 -38°（EPI2ME 慣例，避重疊）
+            s.append(f'<text transform="rotate(-38 {x:.1f} {yy_-13:.1f})" x="{x:.1f}" y="{yy_-13:.1f}" font-size="8.5" font-weight="700" fill="{cs["ink"]}" text-anchor="start">{esc(lab)}</text>')
+    return "\n".join(s), maxy - y + 40
+
+
 # ---------- pipeline_diagram（EPI2ME drawio 風 banded swimlane + scope 註解區塊）----------
 def p_pipeline_diagram(data, prim, sh, y):
     cs = sh["color_scale"]
@@ -572,6 +627,7 @@ def p_variant_class_legendcard(data, prim, sh, y):
 
 
 RENDERERS = {
+    "metro_map": p_metro_map,
     "pipeline_diagram": p_pipeline_diagram,
     "hap_split_track": p_hap_split_track,
     "readtrack_legend": p_readtrack_legend,

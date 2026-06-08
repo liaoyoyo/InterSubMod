@@ -1,0 +1,16 @@
+{
+  "_comment": "InterSubMod 地鐵圖。線=研究 thread 共用 backbone 再分岔；轉乘站=共用階段。width 1180。模組名取自實際 repo。",
+  "case_template_id": "Cx_custom",
+  "title": "InterSubMod 流程地鐵圖：研究 thread 共用管線 backbone",
+  "subtitle": "每條線=一個研究方向，共用 輸入→上游→ISM核心→輸出 backbone（轉乘站=共用階段），終點=下游應用 · 虛線=可能未來",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "metro_map", "params": { "stations_ref": "stations", "lines_ref": "lines", "col_dx": 72, "row_dy": 58 } }
+  ],
+  "shared": {
+    "width": 1020,
+    "color_scale": { "hp1": "#2F5597", "hp2": "#8FAADC", "hp11": "#C55A11", "seqerr": "#7F7F7F", "loh": "#8E44AD", "gold": "#B8860B", "teal": "#1B8A86", "blue": "#027BA5", "green": "#2E7D52", "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#7F7F7F", "synthetic": "#9a6212" },
+    "glyph": {}
+  },
+  "annotations": { "methyl_legend": false }
+}

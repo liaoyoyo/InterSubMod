@@ -61,6 +61,8 @@
 > 來源：2 份 PI 實驗室口試簡報萃取（詳見 `references/genomics_figure_conventions.md`）。**狀態（2026-06-07）：U1-U7 已實作**（`hap_split_track` / `igv_pileup` / `cpg_beta_matrix` / `grouped_bar` / `facet_grid` / `stacked_bar` / `loh_ideogram` / `readtrack_legend` 已註冊於 `tools/render_figure_spec.py`，對應 `examples/u1-u7/`，lint 全 PASS）。**仍待實作**：P-CALIB / P8 axis-dot / P9 allele-graph。色彩約定見 conventions §2（藍=germline/橘=somatic；**甲基化軸仍用 red/blue ramp 不套藍橘**）。分級顯示見 `references/detail_levels.md`。
 >
 > **2026-06-08 新增已實作**：`gene_model_track`(exon/intron/UTR) · `coverage_track`(depth+ploidy) · `methyl_lollipop_track`(5mC 單軌 filled/open) · `variant_class_legendcard`(概念卡) · **`pipeline_diagram`**（EPI2ME drawio 風 banded swimlane：每 band = scope 註解區塊 [label+note+背景塊] + 階段圓角框 + 彩箭頭 + 向下 connector；`status:future` 虛線；範例 `examples/p1_intersubmod_pipeline/` = InterSubMod 全流程，模組名取自實際 repo §13）。甲基 vs base **glyph 區分原則**（甲基=圓 lollipop / base·SNV=tick·bar；形狀承載軸、顏色承載值）見 conventions + detail_levels。
+>
+> **`metro_map`**（地鐵圖 metro/transit-map 風）：手放 grid 座標（station {col,row,label,label_pos}）+ 線站序（line {name,color_key,stations[],future}）→ octilinear 粗彩 `<polyline>`（per-line 垂直 offset = 共段平行）+ 轉乘站(≥2 線)大白圈 + 單線站小彩圈 + backbone label 旋轉 -38° + 終點 label_pos:right + future 虛線。範例 `examples/p2_intersubmod_metro/` = 研究 thread 為線、共用 backbone 為轉乘站、終點=下游應用。**半自動手控座標，不做全自動 octilinear 最佳化**（MIP/hill-climbing=過度工程；節點少手放即可）。與 `pipeline_diagram` 分工：metro=多 thread 共用管線 overview / banded=線性詳細階段。
 
 | ID | primitive | 代表 | data_ref 契約 | 優先 |
 |----|-----------|------|--------------|------|

@@ -1,0 +1,28 @@
+{
+  "_comment": "InterSubMod 地鐵圖（overview；ISM 9 階段收成 2 站，詳細版見 p1 banded pipeline）。線=研究 thread 共用 backbone，轉乘站=共用階段，終點=下游應用。手放 grid（半自動）。模組名取自實際 repo（§13 無 metric）。future 虛線。",
+  "meta": { "note": "process schematic overview；站名=實際 repo；無數值。" },
+  "stations": {
+    "in":        { "col": 0, "row": 2, "label": "輸入 BAM/VCF/LOH" },
+    "basecall":  { "col": 1, "row": 2, "label": "Dorado 5mC/5hmC" },
+    "align":     { "col": 2, "row": 2, "label": "minimap2" },
+    "callphase": { "col": 3, "row": 2, "label": "ClairS-TO+相位" },
+    "loh":       { "col": 4, "row": 2, "label": "LOH 偵測" },
+    "ismread":   { "col": 5, "row": 2, "label": "ISM 甲基矩陣" },
+    "ismstat":   { "col": 6, "row": 2, "label": "ISM 距離+顯著性" },
+    "out":       { "col": 7, "row": 2, "label": "輸出 csv/熱圖" },
+    "loh_app":   { "col": 8, "row": 0, "label": "LOH 相位 (G6)", "label_pos": "right" },
+    "asm_app":   { "col": 8, "row": 1, "label": "ASM 表徵 (BRCA2)", "label_pos": "right" },
+    "tpfp_app":  { "col": 8, "row": 3, "label": "TP/FP 特徵", "label_pos": "right" },
+    "xs_app":    { "col": 8, "row": 4, "label": "跨樣本一致性", "label_pos": "right" },
+    "purity":    { "col": 9, "row": 0, "label": "純度估計 (未來)", "label_pos": "right" },
+    "soma":      { "col": 9, "row": 4, "label": "somatic 相位 (未來)", "label_pos": "right" }
+  },
+  "lines": [
+    { "name": "LOH-phasing", "color_key": "green", "stations": ["in","basecall","align","callphase","loh","ismread","ismstat","out","loh_app"] },
+    { "name": "ASM", "color_key": "hp11", "stations": ["in","basecall","align","callphase","loh","ismread","ismstat","out","asm_app"] },
+    { "name": "TP/FP", "color_key": "blue", "stations": ["in","basecall","align","callphase","loh","ismread","ismstat","out","tpfp_app"] },
+    { "name": "cross-sample", "color_key": "teal", "stations": ["in","basecall","align","callphase","loh","ismread","ismstat","out","xs_app"] },
+    { "name": "purity (未來)", "color_key": "normal", "future": true, "stations": ["out","purity"] },
+    { "name": "somatic (未來)", "color_key": "normal", "future": true, "stations": ["out","soma"] }
+  ]
+}
