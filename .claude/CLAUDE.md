@@ -109,10 +109,11 @@
 
 ## §4 Hooks 概覽（Claude Code 特定 — 2026-05-18 P4 完整收尾）
 
-依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop / **PreCompact** 7 個 events；**40 hook scripts**，2026-06-09 實測 `ls scripts/hooks/*.sh | wc -l`；2026-06-09 +`health_drift_advisor.sh`〔C7〕；2026-06-01 +`number_provenance_check.sh`）。
+依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop / **PreCompact** 7 個 events；**41 hook scripts**，2026-06-09 實測 `ls scripts/hooks/*.sh | wc -l`；2026-06-09 +`health_drift_advisor.sh`〔C7〕 +`concurrent_session_advisor.sh`〔§G〕；2026-06-01 +`number_provenance_check.sh`）。
 
-**2026-06-09 新增 1 個 hook**（loop-engineering ADR C7 — 修 invocation-dependence 漂移缺口）:
+**2026-06-09 新增 2 個 hook**（loop-engineering ADR C7 + git governance §G — 修 invocation-dependence 漂移 + 並行 session 互撞）:
 - `health_drift_advisor.sh`（SessionStart — **變動觸發的唯讀漂移 advisor**：偵測 `.claude/{skills,agents,rules,hooks,workflows}` + settings/CLAUDE.md/AGENTS.md 自上次 marker 後是否變動 → nudge 跑 `/harness-health`；順帶提醒 active cycle >7d 未推進。**advisory-only 永遠 exit 0、不跑 harness_health.py 本體（零延遲/不 hang/不 spam snapshot）、marker debounce ~once/change-batch**。非 `/loop`/`/goal`/cron。設計依據：`InterSubMod/docs/plans/20260609_loop_engineering_research_cycle_architecture_review_01.md` §5）
+- `concurrent_session_advisor.sh`（SessionStart — **並行 session 互撞 advisor**：偵測主 repo transcript dir（`/bip7_disk/.../projects/-big7-...-InterSubMod`）>1 活躍 .jsonl（worktree session 的 transcript dir 名不同故自動排除）→ 提醒並行 session 各開 git worktree，避免共用 HEAD 讓 commit 落錯 branch。讀 stdin transcript_path 精準排除自己；**advisory-only exit 0、fail-OPEN**。落地 2026-06-09 跨 session commit 污染事故；見 git governance §G）
 
 **2026-05-28~30 新增 4 個 hook**（社群 gap + 搜尋紀律）:
 - `search_scope_guard.sh`（PreToolUse Bash — **exit 2 阻擋** `grep -r .` / `find .` 無 maxdepth / `du */` 等不尊重 .gitignore 的 repo-root 遞迴搜尋；§12 搜尋紀律強制層）

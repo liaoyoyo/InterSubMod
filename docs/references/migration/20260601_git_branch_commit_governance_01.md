@@ -119,6 +119,7 @@ git branch -d <feature>                          # 刪已併入的 feature branc
 | **完成即 commit（F1）縮小工作樹** | 下個任務從乾淨狀態開始 = 少衝突 + 主題單一 = 聚焦 |
 | **一 branch 一主題** | branch 名即主題宣告；混入別主題 = 反模式（同 §A）|
 | **平行第二線 / 大 refactor → git worktree 隔離** | 兩線改同檔不互覆（本 harness `parallel-benchmark` / `Workflow isolation:'worktree'` 已支援；Loop-Engineering 第 2 要素）|
+| **🔴 並行 Claude session 各開 git worktree（2026-06-09 落地）** | **多個 session 共用同一主 working dir = 共用同一 git HEAD**：一個 session 的 `git checkout -b` / `git commit` 會把**別 session 的 commit 落到錯 branch**（2026-06-09 實際發生：harness branch 被另一 session 的 paper_focus + asm-display commit 污染）。**規則：並行工作必各開 worktree** — `git worktree add ../wt-<topic> <branch>` 後在該 dir 起新 session；主 dir 只留一個 session。advisory：`concurrent_session_advisor.sh`（SessionStart）偵測主 repo transcript dir >1 活躍 .jsonl → 提醒開 worktree。**動 branch/commit 前先確認無並行 session 在主 dir。** |
 | **WIP-limit** | active 主題線 ≤ 2-3（對齊 `active.json` ≤5 cycle + `CURRENT_FOCUS` ≤2 background slot）；超過先收斂再開新 → 聚焦 |
 
 **3 句總決策流**（任何要動 git 時自問）：
