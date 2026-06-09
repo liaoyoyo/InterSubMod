@@ -109,7 +109,10 @@
 
 ## §4 Hooks 概覽（Claude Code 特定 — 2026-05-18 P4 完整收尾）
 
-依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop / **PreCompact** 7 個 events；**39 hook scripts**，2026-06-01 實測 `ls scripts/hooks/*.sh | wc -l`；2026-06-01 +`number_provenance_check.sh`）。
+依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop / **PreCompact** 7 個 events；**40 hook scripts**，2026-06-09 實測 `ls scripts/hooks/*.sh | wc -l`；2026-06-09 +`health_drift_advisor.sh`〔C7〕；2026-06-01 +`number_provenance_check.sh`）。
+
+**2026-06-09 新增 1 個 hook**（loop-engineering ADR C7 — 修 invocation-dependence 漂移缺口）:
+- `health_drift_advisor.sh`（SessionStart — **變動觸發的唯讀漂移 advisor**：偵測 `.claude/{skills,agents,rules,hooks,workflows}` + settings/CLAUDE.md/AGENTS.md 自上次 marker 後是否變動 → nudge 跑 `/harness-health`；順帶提醒 active cycle >7d 未推進。**advisory-only 永遠 exit 0、不跑 harness_health.py 本體（零延遲/不 hang/不 spam snapshot）、marker debounce ~once/change-batch**。非 `/loop`/`/goal`/cron。設計依據：`InterSubMod/docs/plans/20260609_loop_engineering_research_cycle_architecture_review_01.md` §5）
 
 **2026-05-28~30 新增 4 個 hook**（社群 gap + 搜尋紀律）:
 - `search_scope_guard.sh`（PreToolUse Bash — **exit 2 阻擋** `grep -r .` / `find .` 無 maxdepth / `du */` 等不尊重 .gitignore 的 repo-root 遞迴搜尋；§12 搜尋紀律強制層）
@@ -182,6 +185,12 @@
 ⚠ **變動頻率上限：週級** — CURRENT_FOCUS.md > 7 天未更新 → hook 主動提醒。
 
 > **業界對照**: `docs/CURRENT_FOCUS.md` 概念等同 [Cline Memory Bank `activeContext.md`](https://docs.cline.bot/features/memory-bank)（live working state，最高變動層）。命名保留 `CURRENT_FOCUS.md` 以維持既有 20+ 引用，不重新命名。
+
+> **🔑 雙層 SoT 分工（2026-06-09 明文化 — loop-engineering ADR §8 resolution）**：避免「機械 cycle 狀態機」與「敘述層」漂移（曾凍在 06-02 vs 工作跑到 06-08）：
+> - **多週論文主軸（如 G6/G1）的權威 SoT = `CURRENT_FOCUS.md` + `evidence_ledger.jsonl` + memory**（敘述層；變動頻率高、粒度大）。
+> - **`state/cycles/` + `active.json` 狀態機 = 僅用於真正的短驗證 hypothesis cycle**（P0→P6 被實際驅動者）；**不再把多週主軸 backfill 註冊成 live cycle 假裝在跑**。
+> - active.json 內現存的 G6/G1 = 06-02 backfill placeholder，其真實進度看 CURRENT_FOCUS（C7 `health_drift_advisor` 會在 >7d 未推進時提醒檢視/archive）。
+> 設計依據：`InterSubMod/docs/plans/20260609_loop_engineering_research_cycle_architecture_review_01.md`。
 
 ---
 
