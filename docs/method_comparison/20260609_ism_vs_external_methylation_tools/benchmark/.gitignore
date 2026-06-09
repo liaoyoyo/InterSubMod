@@ -1,13 +1,16 @@
-# Phase B benchmark — large / binary / regenerable artifacts NOT committed
+# Phase B benchmark — ignore binaries / large / regenerable; KEEP small text results + scripts
+# binaries & installs
 tools/*.tar.gz
 tools/dist_*/
 tools/*_env/
-tools/install.log
-runs/
-compare/*.png
+tools/install*.log
+# large / regenerable run artifacts
 *.bam
 *.bam.bai
 *.bedmethyl
 *.bedmethyl.gz
+*.bedmethyl.gz.tbi
 *.bedgraph
-# keep: install_modkit.sh, .gitignore, *.md, loci.bed (small, reproducible)
+runs/pileup_*/
+compare/*.png
+# KEEP (tracked): runs/*.tsv  runs/*.py  runs/*.sh  runs/chain.log  loci.bed  *.md  .gitignore  tools/install_*.sh
