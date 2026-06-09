@@ -89,3 +89,39 @@ git branch -d <feature>                          # 刪已併入的 feature branc
 - 3 個邏輯變更 → **3 commits**（防捏造系統 / 儀表板治理 / 鐵則強化）✓
 - 只 stage 我的 9 檔，60+ pre-existing 全未動 ✓
 - 用戶確認後 **FF merge 回 `refactor/phase1-safety`** + 刪 chore 分支 ✓
+
+---
+
+## F. 何時「強制建議 commit」— 觸發時機（2026-06-09 補；advisory 非 Hard Gate）
+
+> 用戶 2026-06-09 要求補足「哪些時候強制建議 commit」。這是 advisory（提醒，不阻擋）——目的是**縮小未 commit 工作樹、減少衝突、保持聚焦**。判準一律看「**我這次新增/改的檔**」，不看總 dirty（本 repo 長期 200-300 dirty 多為 pre-existing）。
+
+| # | 觸發時機 | 為什麼 |
+|---|---------|--------|
+| **F1** | **一個已驗證的邏輯單元完成** | 完成 + verified（例：C7 hook 測過、harness_health 8 GREEN）→ 立即 commit，別累積成大堆 |
+| **F2** | **即將切換主題 / 開新 branch 前** | 先把當前主題 commit 乾淨，新 branch 才不會帶著舊主題半成品 → 反「主題混入錯 branch」 |
+| **F3** | **即將做不可逆 / 高風險 git 操作前** | `git checkout`(切 branch) / `reset` / `rebase` / `merge` / 大刪除 前先 commit 保護當前工作 |
+| **F4** | **「我的檔」累積 > ~10 changed 或跨 > 3 邏輯單元** | 未 commit 越多越難精準 stage（混雜風險↑）、越難回溯、conflict 面↑ → 分批 commit |
+| **F5** | **C++ 改動完成並編譯通過後** | compile Hard Gate 一過即 commit，別讓編譯狀態與原始碼漂移 |
+| **F6** | **session 結束 / 跨 session 交接前** | Stop hook 已提醒寫報告；同時把完成單元 commit，交接才乾淨 |
+
+**不該為了湊 commit 而 commit**：半成品 / 未驗證 / 跑到一半的分析**不 commit**（對齊 §13 完成宣稱需 fresh 驗證）；留 `{{待填}}` 或續做完再 commit。
+
+---
+
+## G. 衝突最小化 + 聚焦機制（2026-06-09 補）
+
+> 用戶要求「減少任務與修改衝突，同時更聚焦」。核心矛盾源 = **shared live-state 檔被多任務同時改** + **未 commit 工作樹無限膨脹**。
+
+| 機制 | 做法 |
+|------|------|
+| **shared live-state 檔不入 feature commit** | `CURRENT_FOCUS.md` / `hypothesis_queue.json` / `evidence_ledger.jsonl` / `active.json` / `*.log` / `state/*snapshots/` 是**跨任務共享**，每個任務都改它 = 衝突主源 → 留用戶 / 走 skill，feature commit **不碰**（同 §C）|
+| **完成即 commit（F1）縮小工作樹** | 下個任務從乾淨狀態開始 = 少衝突 + 主題單一 = 聚焦 |
+| **一 branch 一主題** | branch 名即主題宣告；混入別主題 = 反模式（同 §A）|
+| **平行第二線 / 大 refactor → git worktree 隔離** | 兩線改同檔不互覆（本 harness `parallel-benchmark` / `Workflow isolation:'worktree'` 已支援；Loop-Engineering 第 2 要素）|
+| **WIP-limit** | active 主題線 ≤ 2-3（對齊 `active.json` ≤5 cycle + `CURRENT_FOCUS` ≤2 background slot）；超過先收斂再開新 → 聚焦 |
+
+**3 句總決策流**（任何要動 git 時自問）：
+1. **這批工作跟我站的 branch 同主題嗎？** 同 → 繼續 commit；不同/獨立/可能放棄/C++/需 review → **開新 branch**（§A）。
+2. **現在該 commit 了嗎？** 命中 F1-F6 任一 → **commit**（只 stage 自己檔，§B/§C）。
+3. **會不會跟別任務撞？** shared live-state 不碰、平行線用 worktree、WIP ≤ 2-3（§G）。
