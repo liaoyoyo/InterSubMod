@@ -42,6 +42,10 @@ provenance_note: modkit 數字皆自 runs/dmr_*.tsv 實跑讀回(非記憶); ISM
 | **TBC1D16** | +0.122 | **+0.109** | +0.231 (p=0.0) | +0.110 | — | — |
 
 > 對齊 modkit 5mC：BRCA2 modkit **−0.159** ↔ ISM dbeta_5mC **−0.121**（同向同量級）；TBC1D16 modkit **+0.080** ↔ ISM **+0.109**。**率差層收斂**。
+>
+> 📐 **驗證新發現**：modkit dmr **原生輸出 Cohen's h + 95% CI**（dmr tsv 的 `cohen_h/low/high` 欄）：BRCA2 somatic **cohen_h=−0.38 [0.34–0.42]**、TBC1D16 **+0.23 [0.19–0.27]** —— 即改進 **#4「ISM 應加 Cohen's h(arcsine)」對手已原生提供**，可直接照搬。
+>
+> ✅ **2026-06-10 數據確認**：modkit effect_size 算術逐列核驗（=b_pct−a_pct）OK；ISM BRCA2 cis-test 基於 **n_shared_cpg=194**（穩健，非單點）；覆蓋充足，唯 TBC1D16 family HP2 b_total=370 偏低(cnLOH)。
 
 ---
 
