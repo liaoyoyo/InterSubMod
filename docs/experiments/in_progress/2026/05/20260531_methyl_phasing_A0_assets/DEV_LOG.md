@@ -59,6 +59,15 @@ longphase-S 把 45.84% read 標成 unphase（無相位）。能否用 per-read �
 - **結論**：(1) ✅ copy 決定性排除（normal copy-clean 卻 ≥ tumor；tumor copy 事件反而降低分離）；(2) ✅ depth/P-06 否證；(3) ✅ 真 haplotype-linked copy-independent 訊號（V6 88.5% 根基）；(4) ⚠ 絕對 AUC 含方法樂觀（normal ~0.98 全基因組不合理）→ 誠實 effect 用相對 null（real vs shuffle tumor 0.87/0.67、normal 0.98/0.79）+ V6 88.5%；(5) ✅ imprinting 正控過關。
 - **報告**：`20260608_allele_asm_normal_control_not_copy_01.standalone.html`（6-taboo PASS / 圖驗 / 數字全 grep-verified）。
 
+## V11 開發紀錄（2026-06-09）— 甲基輔助 longphase-S tag 矯正三 target（T1/T2 ✅、T3 ❌）
+- **動機**：用戶 — 用甲基弱數據輔助矯正 longphase-S：T1 unphase→H1/H2、T2 H3→H1-1/H2-1、T3 拆 plain H1 是否亞群(H1-1)。
+- **先讀原始碼確認 cascade**（known-pitfall P-10/P-14，不猜 tag 名）：`HaplotagStrategy.cpp:452-600`(judgeSomaticReadHap)+`SomaticHaplotagProcess.cpp:461-527`(inheritHaplotype)，門檻 0.6。6-state：unTag / H1·H2(germline-only) / H1-1·H2-1(somatic 歸 germline 分支) / H3(somatic germline 未知)。plain H1=純germline沒踩somatic位點；H1-1=踩到且歸H1分支。
+- **腳本**：T1=`assist_tag_separable.py`（held-out，train 量分離度/test 量 assist，**無循環**）；T2/T3=`methyl_assist_targets.py`（somatic 位點窗按既有 HP tag 分群算 LOO-AUC+shuffle）+`aggregate_assist_3targets.py`+`plot`。背景跑 run_assist_tag.sh / run_methyl_assist.sh。
+- **真值**（assist_3targets_aggregate.json）：T1 可分位點 held-out **0.926**(conf_yield 0.794/conf_acc 0.974, 不可分 0.682, n=141)；T2 **0.900**(null 0.732, sig 0.729, n=436)；T3-H1 **0.652**(null 0.707, sig 0.359, n=1139)；T3-H2 **0.649**(null 0.702, n=1262)。
+- **結論**：T1✅(分不同 haplotype) + T2✅(分 germline 分支) 可行；**T3❌ NEGATIVE**(AUC 0.65 **低於** shuffle null 0.71，甲基無法區分同 haplotype 內亞群vs母本)。
+- **機制（一致）**：甲基訊號=germline-haplotype 層級(V10)→分不同 haplotype 強、分同 haplotype 內亞群弱；subclone 層級 ASM ≪ haplotype 層級。
+- **報告**：`20260609_methyl_assist_longphase_tag_3targets_01.standalone.html`（6-taboo PASS / 圖驗 / 18 數字全 grep-verified）。
+
 ## 待辦
 - LOH 純-LOH 分得開異常 IGV 深究（76% 分得開的 LOH 是 pureLOH，非 cnLOH）
 - SEQC2 大染色體速度（預載甲基索引）

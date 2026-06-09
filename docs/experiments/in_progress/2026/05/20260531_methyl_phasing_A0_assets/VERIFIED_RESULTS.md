@@ -106,6 +106,35 @@ null median 0.974 **高得可疑**，與文獻「somatic ASM Δβ≈0.12 偏弱�
 - 能否救 unphase：**仍未證** — (a) CpG-SNP 未排除（最大嫌疑）(b) null 區是 anchor 充足篩出（40/111），unphase read 住在稀疏區，外推未證 (c) 仍 2/40 無訊號。
 - 下一步：CpG-SNP 排除 → 若 95% 撐住，才是穩固「甲基帶真 ASM 訊號」。
 
+## V11. ⭐⭐ 甲基輔助 longphase-S tag 矯正三 target — T1/T2 可行、T3 NEGATIVE（機制：甲基是 haplotype 層級非 subclone）
+
+> **回答用戶**：用甲基弱數據輔助矯正 longphase-S 三類 tag — T1 unphase→H1/H2 / T2 H3→H1-1/H2-1 / T3「沒踩 somatic 位點而被叫 H1/H2 的 read」拆成是否亞群（H1 vs H1-1）。
+
+- **背景（讀 longphase-S 原始碼確認）**：`HaplotagStrategy.cpp:452-600` judgeSomaticReadHap + `SomaticHaplotagProcess.cpp:461-527` inheritHaplotype，門檻 percentageThreshold=0.6。6-state：unTag(無證據) / H1·H2(germline-only) / H1-1·H2-1(帶 somatic 變異且歸 germline 分支) / H3(somatic 但 germline 未知)。
+- **腳本**：T1=`assist_tag_separable.py`（held-out，train 量分離度/test 量 assist，無循環）；T2/T3=`methyl_assist_targets.py`（somatic 位點窗按 HP tag 分群算 LOO-AUC+shuffle）+`aggregate_assist_3targets.py`。
+- **真值**（copy 自 assist_3targets_aggregate.json；T1 5 chr / T2T3 6 chr）：
+
+| Target | 切分 | n | AUC/acc | null | frac_sig | 判定 |
+|--------|------|---:|---:|---:|---:|------|
+| **T1** unphase→H1/H2 | 可分位點 held-out | 141 窗 | **0.926** | 不可分 0.682 | conf_acc 0.974 | ✅ 強 |
+| T1 高信心 yield | — | — | 0.794 | — | — | 79% read 可高信心指派 |
+| **T2** H3→H1-1/H2-1 | 1-1 vs 2-1 germline 分支 | 436 位點 | **0.900** | 0.732 | 0.729 | ✅ 強 |
+| **T3-H1** 亞群 vs 母本 | 1-1 vs 1 | 1139 位點 | **0.652** | 0.707 | 0.359 | ❌ 弱（AUC<null）|
+| **T3-H2** 亞群 vs 母本 | 2-1 vs 2 | 1262 位點 | **0.649** | 0.702 | 0.361 | ❌ 弱（AUC<null）|
+
+### V11 結論
+1. ✅ **T1 可行**：在已驗證明顯分群的位點，甲基 held-out 把假 unphase 救回正確 germline haplotype **92.6%**（高信心者 97.4% 命中、79% read 可高信心指派）；不可分位點僅 68%。無循環（分離度 train read 量、assist test read 量）。
+2. ✅ **T2 可行**：甲基判別 somatic read 屬 germline H1 還 H2 分支 **AUC 0.90**（null 0.73，73% 位點顯著）→ 可把 H3 歸 H1-1/H2-1。
+3. ❌ **T3 NEGATIVE**：甲基**無法**區分「同一 haplotype 內的亞群(1-1) vs 母本(1)」（AUC 0.65 **低於** shuffle null 0.71，僅 36% 位點顯著）。→ 「沒踩 somatic 位點的 plain H1 是否其實是亞群」**無法用甲基判別**。
+4. **機制（一致解釋）**：甲基訊號是 **germline-haplotype 層級**（V10 已證 H1 vs H2 真實非copy）。故分**不同 haplotype** 強（T1 unphase、T2 分支），分**同一 haplotype 內亞群 vs 母本** 弱（T3）——亞群與母本共享同一 germline haplotype 甲基，tumor-acquired ASM 不足以製造強 subclone-特異 epiallele。
+
+### V11 caveat
+- 單樣本 HCC1395；T3 的 1-1 群偏小（min_anchor=8）→ shuffle null 對稱化偏高(0.71)，但 real(0.65)連自己 null 都沒過 = 確實無判別，非單純樣本小。
+- T1 ground truth = held-out germline-masked（最強）；T2 ground truth = HP tag 既有 germline 分支；T3 ground truth = HP tag 1-1 vs 1（longphase 既判）。
+- T3 NEGATIVE 是「甲基此弱數據不足以做 subclone 解析」，非「亞群無 ASM」——亞群層級 ASM 若存在也太弱（<haplotype 層級）。
+
+---
+
 ## V10. ⭐⭐ 決定性：matched normal 對照證明「甲基 allele 差異不是 copy」（+ depth-matched + imprinting 正控）
 
 > **回答用戶問題**：「HP 群內外明顯甲基差異，是 copy 問題，還是 phase tagging 正確判斷的真 haplotype 甲基差異？如何驗證？」
