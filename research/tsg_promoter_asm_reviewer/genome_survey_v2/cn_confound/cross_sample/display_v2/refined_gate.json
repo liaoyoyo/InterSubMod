@@ -1,0 +1,70 @@
+{
+  "n_tp": 29723,
+  "n_fp": 627,
+  "base_ratio": 47.4,
+  "orig_pass_tp": 1299,
+  "orig_pass_fp": 9,
+  "sweep": [
+    {
+      "minN": 0,
+      "rec_tp": 2809,
+      "rec_fp": 131,
+      "rec_ratio": 21.44,
+      "enrich_vs_base": 0.45,
+      "comb_tp": 4108,
+      "comb_fp": 140,
+      "rec_loh_pct": 6.1
+    },
+    {
+      "minN": 3,
+      "rec_tp": 2809,
+      "rec_fp": 131,
+      "rec_ratio": 21.44,
+      "enrich_vs_base": 0.45,
+      "comb_tp": 4108,
+      "comb_fp": 140,
+      "rec_loh_pct": 6.1
+    },
+    {
+      "minN": 5,
+      "rec_tp": 2661,
+      "rec_fp": 109,
+      "rec_ratio": 24.41,
+      "enrich_vs_base": 0.51,
+      "comb_tp": 3960,
+      "comb_fp": 118,
+      "rec_loh_pct": 1.6
+    },
+    {
+      "minN": 8,
+      "rec_tp": 2584,
+      "rec_fp": 88,
+      "rec_ratio": 29.36,
+      "enrich_vs_base": 0.62,
+      "comb_tp": 3883,
+      "comb_fp": 97,
+      "rec_loh_pct": 0.4
+    },
+    {
+      "minN": 10,
+      "rec_tp": 2512,
+      "rec_fp": 72,
+      "rec_ratio": 34.89,
+      "enrich_vs_base": 0.74,
+      "comb_tp": 3811,
+      "comb_fp": 81,
+      "rec_loh_pct": 0.3
+    },
+    {
+      "minN": 15,
+      "rec_tp": 2179,
+      "rec_fp": 34,
+      "rec_ratio": 64.09,
+      "enrich_vs_base": 1.35,
+      "comb_tp": 3478,
+      "comb_fp": 43,
+      "rec_loh_pct": 0.1
+    }
+  ],
+  "note": "recovered set TP:FP vs base 47:1 -> enrich~1 means characterization-only (NOT a TP/FP discriminator, consistent with the concluded methylation-filter NEGATIVE)"
+}
