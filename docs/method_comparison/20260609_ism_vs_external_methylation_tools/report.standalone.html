@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<!--
+  provenance-verified: 本 HTML 內容與同目錄 00-06 .md 一致; 外部工具事實引自 workflow wf_9e64e51d-03d 之 WebFetch 一手來源(_assets/workflow_raw_result.json); 內部數字引自 knowledge/11_external_literature/ validated 文件; ISM 方法引自 src/core 源碼。撰寫與分析不同 batch(§13.0)。
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISM vs 外部甲基化方法 — 比較研究</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#1a2129; --panel2:#222b35; --ink:#e6edf3; --mut:#9aa7b4; --line:#2d3742;
+    --accent:#4ea1ff; --good:#3fb950; --warn:#d29922; --bad:#f85149; --info:#a371f7;
+    --axisA:#e8845b; --axisB:#5bb3e8; --axisC:#3fb950; --axisD:#a371f7; --axisE:#d29922; --axisF:#e85b9a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","Noto Sans CJK TC","Microsoft JhengHei",sans-serif;line-height:1.6;font-size:15px}
+  .wrap{display:grid;grid-template-columns:240px 1fr;max-width:1400px;margin:0 auto}
+  nav{position:sticky;top:0;height:100vh;overflow-y:auto;padding:20px 14px;border-right:1px solid var(--line);background:var(--panel)}
+  nav h2{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 8px}
+  nav a{display:block;color:var(--ink);text-decoration:none;padding:5px 8px;border-radius:6px;font-size:13.5px;border-left:2px solid transparent}
+  nav a:hover{background:var(--panel2);border-left-color:var(--accent)}
+  main{padding:34px 40px;min-width:0}
+  h1{font-size:27px;margin:0 0 4px;line-height:1.25}
+  .sub{color:var(--mut);font-size:14px;margin-bottom:22px}
+  h2.sec{font-size:21px;margin:42px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+  h3{font-size:16px;margin:24px 0 8px;color:var(--accent)}
+  p{margin:10px 0}
+  .bluf{background:linear-gradient(135deg,#13202e,#1a2b38);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:18px 22px;margin:18px 0}
+  .bluf ol{margin:8px 0;padding-left:22px} .bluf li{margin:8px 0}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px;background:var(--panel);border-radius:8px;overflow:hidden}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--panel2);color:var(--mut);font-weight:600;position:sticky;top:0}
+  td.c,th.c{text-align:center}
+  tr:hover td{background:#1e2730}
+  .yes{color:var(--good);font-weight:700} .no{color:var(--bad)} .part{color:var(--warn)} .star{color:var(--good);font-weight:800}
+  .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+  .pA{background:rgba(232,132,91,.18);color:var(--axisA)} .pB{background:rgba(91,179,232,.18);color:var(--axisB)}
+  .pC{background:rgba(63,185,80,.18);color:var(--axisC)} .pD{background:rgba(163,113,247,.18);color:var(--axisD)}
+  .pE{background:rgba(210,153,34,.18);color:var(--axisE)} .pF{background:rgba(232,91,154,.18);color:var(--axisF)}
+  .badge{display:inline-block;padding:1px 7px;border-radius:5px;font-size:11px;font-weight:700}
+  .bg{background:rgba(63,185,80,.16);color:var(--good)} .bw{background:rgba(210,153,34,.16);color:var(--warn)} .bb{background:rgba(248,81,73,.16);color:var(--bad)} .bi{background:rgba(78,161,255,.16);color:var(--accent)}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:10px 0;padding:0 16px}
+  summary{cursor:pointer;padding:12px 0;font-weight:600;color:var(--ink)}
+  details[open]{padding-bottom:14px}
+  code{background:var(--panel2);padding:1px 6px;border-radius:4px;font-size:12.5px;color:#e8b65b}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+  .card h4{margin:0 0 6px;font-size:14.5px}
+  .mut{color:var(--mut)} .sm{font-size:12.5px}
+  .foot{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:var(--mut);font-size:12.5px}
+  .warnbox{background:rgba(210,153,34,.1);border:1px solid var(--warn);border-radius:8px;padding:12px 16px;margin:14px 0;font-size:13.5px}
+  @media(max-width:880px){.wrap{grid-template-columns:1fr}nav{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line)}.grid2{grid-template-columns:1fr}main{padding:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <strong style="font-size:14px">ISM vs 外部方法</strong>
+  <div class="mut sm" style="margin:4px 0 10px">比較研究 · 2026-06-10</div>
+  <h2>導覽</h2>
+  <a href="#bluf">L0 三句話結論</a>
+  <a href="#axis">6 軸分類地景</a>
+  <a href="#ism">ISM 方法（6 核心）</a>
+  <a href="#matrix">能力對照矩陣</a>
+  <a href="#closest">3 個最像的工具</a>
+  <a href="#cross">5 維交叉分析</a>
+  <a href="#improve">改進 / 學習建議</a>
+  <a href="#bench">Phase B benchmark</a>
+  <a href="#prov">來源 / Provenance</a>
+</nav>
+<main>
+  <h1>ISM vs 外部甲基化方法 — 比較研究</h1>
+  <div class="sub">ONT modkit · 二代短讀癌症 DMR · 甲基位點關聯方法 · Δβ 方法 · 我們結果 × 外部論文數據交叉 ｜ Phase A（文獻+方法+交叉+建議）完成，Phase B（實機 benchmark）待核准</div>
+
+  <section id="bluf">
+  <div class="bluf">
+    <strong>L0 — 三句話結論</strong>
+    <ol>
+      <li><b>方法定位</b>：外部甲基化方法分 <b>6 條軸</b>；ISM 主要站「<span class="pill pC">軸C read-read 距離+clustering</span>」，而 modkit/DSS/methylKit 等主流站「<span class="pill pA">軸A per-position 率差</span>」——<b>兩者問的問題本質不同</b>（率差 vs 結構）。</li>
+      <li><b>新穎性</b>：<b>無單一工具佔 ISM 完整組合</b>（read-read 距離矩陣 + <b>PERMANOVA 結構顯著性</b> + <b>normal-anchored somatic cis-test</b> + 5mC/5hmC 分軌 + LOH/CN 耦合），但<b>每個單獨元件都有更成熟對手</b>。</li>
+      <li><b>可改進</b>：最高 ROI = ① per-CpG Fisher → <b>beta-binomial + dispersion shrinkage</b>（DSS）；② 距離建在 <b>soft 機率</b>（cvlr/pycoMeth）；③ <b>停 5mC/5hmC max-collapse</b>。另發現源碼引用錯誤（DAMEfinder 誤標「De Waele 2020」應為 Orjuela 2020）。</li>
+    </ol>
+  </div>
+  <div class="warnbox">⚠ <b>誠實邊界</b>：「組合無人佔 ≠ 該組合更好/有用」—— 是否帶真訊號需 <b>Phase B 實機 benchmark</b> 驗證（已規劃未執行）。所有 ASM 結果 = 單樣本 HCC1395 ⭐3 單 pipeline。調查覆蓋 <b>82 工具</b>（10 類），由 24-agent workflow 全程 WebFetch 一手實證。</div>
+  </section>
+
+  <section id="axis">
+  <h2 class="sec">6 軸分類地景</h2>
+  <p>所有外部甲基化方法可乾淨地分成 6 條「分析軸」。這是理解全局的關鍵框架。</p>
+  <table>
+    <tr><th>軸</th><th>問的問題</th><th>代表工具</th><th class="c">ISM 在此？</th></tr>
+    <tr><td><span class="pill pA">A 率差</span></td><td>兩組在這位點平均甲基率差多少</td><td><b>modkit dmr</b> · DSS · methylKit · metilene · BSmooth · dmrseq · DMRcate · comb-p · MOABS · RnBeads</td><td class="c part">部分（CORE4/Δβ）</td></tr>
+    <tr><td><span class="pill pB">B within-read LD</span></td><td>同一 read 上 CpGᵢ 與 CpGⱼ 是否連動</td><td><b>MHB/MHL (Guo 2017)</b> · mHapTk · Metheor LPMD · DAMEfinder tuple</td><td class="c no">✗（可學）</td></tr>
+    <tr><td><span class="pill pC">C read-read 距離</span></td><td>reads 是否分成結構分離的亞群</td><td><b>ISM</b> · cvlr · <b>ASMS</b> · modbamtools(HDBSCAN) · MeConcord · (qFDRP 同 kernel)</td><td class="c yes">✓ 主引擎</td></tr>
+    <tr><td><span class="pill pD">D cohort 網路</span></td><td>跨樣本哪些區域甲基共變/驅動表現</td><td>CoMeBack · Comethyl(WGCNA) · ELMER · MethylMix</td><td class="c no">✗ 單樣本不適用</td></tr>
+    <tr><td><span class="pill pE">E disorder/WSH</span></td><td>甲基有多隨機/失序</td><td>PDR · epipolymorphism · entropy · FDRP · <b>qFDRP</b> · informME · CpelNano · methclone</td><td class="c part">部分（CORE4 對照）</td></tr>
+    <tr><td><span class="pill pF">F phasing/ASM</span></td><td>用甲基 phase，或 phase 後算 ASM</td><td>MethPhaser · NanoMethPhase · NANOME · HapBridge · longphase modcall</td><td class="c part">反向（消費 HP）</td></tr>
+  </table>
+  <p class="mut sm">🔑 核心洞見：modkit dmr 在 <b>per-position 聚合計數</b>上比率差（軸A）；ISM 保留 <b>read×CpG 矩陣</b>量結構（軸C）。modkit dmr 甚至<b>沒有內部 <code>--haplotype</code></b>——單倍型 DMR 須先 <code>pileup --phased</code> 把 HP 當靜態樣本，這正是 ISM 的 somatic-controlled HP1 vs HP1-1 軸的差別。</p>
+  </section>
+
+  <section id="ism">
+  <h2 class="sec">ISM 方法（6 核心，源碼確認）</h2>
+  <div class="grid2">
+    <div class="card"><h4>① read-read 距離矩陣</h4><p class="sm">NHD(預設)/L1/Bernoulli/Pearson/Jaccard；共同覆蓋 ≥5 CpG；NaN→MAX_DIST。<span class="mut">顯式 N×N，between-molecule。</span></p></div>
+    <div class="card"><h4>② 階層 clustering</h4><p class="sm">UPGMA(預設)+Ward/Single/Complete；silhouette 自動選 k=2..10 → subclonal read 群。</p></div>
+    <div class="card"><h4>③ PERMANOVA 結構檢定 ★</h4><p class="sm">pseudo-F + 999 perm + dispersion；檢定 HP/somatic 群是否<b>結構分離</b>。「結構非失序」引擎。</p></div>
+    <div class="card"><h4>④ per-CpG ASM + disorder</h4><p class="sm">Fisher+BH-FDR / NME / epipolymorphism（4-CpG）。<span class="mut">程式碼明文 cite DAMEfinder/pycoMeth/methclone/Metheor。</span></p></div>
+    <div class="card"><h4>⑤ Cramér's V + Cochran 閘</h4><p class="sm">全域 HP×甲基關聯；最小期望格≥5 才標 reliable。</p></div>
+    <div class="card"><h4>⑥ normal-anchored cis-test ★</h4><p class="sm">d_somatic=C−B / d_cis=C−A / d_drift=B−A（A=normal HP1, B=tumor HP1, C=tumor HP1-1）；held CN/ploidy。</p></div>
+  </div>
+  <p class="sm" style="margin-top:12px"><b>Δβ</b> = per-CpG 均甲基差，按 CpG 配對 → Wilcoxon signed-rank + Cohen's d；HP-axis(HP1 vs HP1-1 somatic) / ALLELE-axis(ALT vs REF)；<b>copy-partition</b> 把 d_HP 拆 d_copy + d_within(真 cis) + drift。<span class="mut">詳見 <code>01_ism_method_spec_from_source.md</code>（含 file:line）。</span></p>
+  </section>
+
+  <section id="matrix">
+  <h2 class="sec">能力對照矩陣</h2>
+  <p class="sm mut">✓✓=該工具此能力比 ISM 更成熟（可學習）｜✓=有｜<span class="part">⚠</span>=部分/需前置/塌標量｜<span class="no">✗</span>=無</p>
+  <div style="overflow-x:auto">
+  <table>
+    <tr><th>ISM 能力 ＼ 工具</th><th class="c">ISM</th><th class="c">modkit dmr</th><th class="c">cvlr</th><th class="c">ASMS</th><th class="c">pycoMeth</th><th class="c">NanoMethPhase</th><th class="c">DAMEfinder</th><th class="c">DSS</th><th class="c">MHB/MHL</th><th class="c">Metheor</th><th class="c">qFDRP</th></tr>
+    <tr><td>平台 ONT 長讀</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td></tr>
+    <tr><td>read×CpG 矩陣保留</td><td class="c yes">✓</td><td class="c no">✗</td><td class="c yes">✓</td><td class="c yes">✓</td><td class="c part">⚠</td><td class="c part">⚠</td><td class="c part">⚠</td><td class="c no">✗</td><td class="c part">⚠</td><td class="c yes">✓</td><td class="c part">⚠</td></tr>
+    <tr><td><b>C1 read-read 距離矩陣</b></td><td class="c yes">✓</td><td class="c no">✗</td><td class="c no">✗模型</td><td class="c no">✗模型</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c part">⚠同kernel</td></tr>
+    <tr><td><b>C2 clustering 分亞群</b></td><td class="c yes">✓</td><td class="c no">✗</td><td class="c yes">✓EM</td><td class="c yes">✓EM</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td></tr>
+    <tr><td><b>C3 PERMANOVA 顯著性 ★</b></td><td class="c star">✓</td><td class="c no">✗</td><td class="c no">✗</td><td class="c part">⚠</td><td class="c part">⚠</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td></tr>
+    <tr><td>per-CpG 率差 / Δβ</td><td class="c yes">✓</td><td class="c yes">✓Bayes</td><td class="c no">✗</td><td class="c no">✗</td><td class="c yes">✓</td><td class="c yes">✓DSS</td><td class="c yes">✓</td><td class="c star">✓✓</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td></tr>
+    <tr><td>disorder 度量</td><td class="c yes">✓對照</td><td class="c yes">✓entropy</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c part">⚠</td><td class="c star">✓✓</td><td class="c star">✓✓</td></tr>
+    <tr><td>within-read LD/tuple</td><td class="c no">✗可學</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c star">✓✓</td><td class="c no">✗</td><td class="c star">✓✓</td><td class="c yes">✓</td><td class="c no">✗</td></tr>
+    <tr><td>5mC/5hmC 分軌</td><td class="c part">⚠曾collapse</td><td class="c part">⚠</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗5mC</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td></tr>
+    <tr><td><b>somatic-controlled HP1vsHP1-1</b></td><td class="c star">✓</td><td class="c no">✗對稱</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗germline</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td></tr>
+    <tr><td><b>normal-anchored cis-test ★</b></td><td class="c star">✓唯一</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td></tr>
+    <tr><td>LOH/CN 耦合</td><td class="c yes">✓</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td></tr>
+    <tr><td>dispersion shrinkage</td><td class="c no">✗可學</td><td class="c yes">✓Jeffreys</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td><td class="c yes">✓</td><td class="c yes">✓eBayes</td><td class="c star">✓✓</td><td class="c no">✗</td><td class="c no">✗</td><td class="c no">✗</td></tr>
+  </table>
+  </div>
+  </section>
+
+  <section id="closest">
+  <h2 class="sec">3 個最像 ISM 的工具（投稿必正面對照）</h2>
+  <div class="grid2">
+    <div class="card"><h4><span class="pill pC">C</span> cvlr <span class="mut sm">(Raineri 2023)</span></h4><p class="sm">ONT read-level、不需 phasing、Bernoulli-mixture EM 分群。<b>差別</b>：模型式（非距離矩陣）、<b>無顯著性檢定</b>、germline、固定 k 無 BIC。<span class="badge bw">⚠ GitHub 404</span></p></div>
+    <div class="card"><h4><span class="pill pC">C</span> ASMS <span class="mut sm">(Raineri 2024)</span></h4><p class="sm">ONT modBAM、no-phasing、EM 2-component 依甲基分 reads 找 ASM。<b>單一最像</b>；ISM 多 PERMANOVA + normal-anchor + 多群 silhouette。<span class="badge bw">⚠ UNVERIFIED 須親讀</span></p></div>
+    <div class="card"><h4><span class="pill pE">E</span> qFDRP <span class="mut sm">(Scherer 2020)</span></h4><p class="sm">用<b>和 ISM NHD 完全相同</b>的 normalized-Hamming read-pair kernel，但平均成 per-CpG scalar、丟幾何、無 label/PERMANOVA。<span class="badge bg">✓ verified</span></p></div>
+    <div class="card"><h4><span class="pill pF">F</span> NanoMethPhase <span class="mut sm">(Akbari 2021)</span></h4><p class="sm">HP 軸最直接長讀對照：haplotag + HP1 vs HP2，<b>外包 DSS</b> beta-binomial，5mC only、germline imprinting。ISM 加 somatic HP1 vs HP1-1 + cis + LOH + 5hmC。</p></div>
+  </div>
+  </section>
+
+  <section id="cross">
+  <h2 class="sec">5 維交叉分析（我們結果 × 外部論文數據）</h2>
+  <table>
+    <tr><th>維度</th><th class="c">alignment</th><th>結論（external ↔ ours）</th></tr>
+    <tr><td>Δβ 方法學</td><td class="c"><span class="badge bw">PARTIAL</span></td><td>raw 均-Δβ + Wilcoxon 描述層對齊，但缺 variance-stabilization；magnitude 需 M-value/beta-binomial 交叉（Du 2010 / DSS）</td></tr>
+    <tr><td>ASM 量值/方向</td><td class="c"><span class="badge bw">CALIBER</span></td><td>「稀有 0.34%、無方向、BRCA2 hypo」與 Do2020「+5×/hypo-dominant」是<b>不同分母</b>（within-sample somatic-controlled vs cross-individual SNP-anchored），非矛盾；Martin-Trujillo CN-confound 是最強對齊</td></tr>
+    <tr><td>structure vs disorder</td><td class="c"><span class="badge bg">ALIGNED</span></td><td><b>Landau 2014 明文排除 ASM 是 disorder 來源</b> = 最強外部背書；O11 AUC 0.845→0.530 = 公認 WSH coverage artifact（Scherer 2020）</td></tr>
+    <tr><td>locus-association 軸</td><td class="c"><span class="badge bg">COMPLEMENTARY</span></td><td>within-read LD(MHB) / between-read 距離(ISM) / cohort 網路 三軸正交；ISM 組合無人佔（真空缺）</td></tr>
+    <tr><td>filter-NEG + phasing 白地</td><td class="c"><span class="badge bg">SUPPORTED</span></td><td>無 caller 用甲基當 standalone FP filter；LOSO circularity 是公認 ML 陷阱（Soneson/Bernett/Kapoor）；germline methyl-phaser 明確留 cancer/LOH 為 future</td></tr>
+  </table>
+  <p class="sm mut">內部數字引自 <code>knowledge/11_external_literature/</code> validated 文件；外部數字每維附 PMID/DOI（見 <code>04_cross_analysis_data_vs_literature.md</code>）。🔴 引用修正：Sakamoto 2022 → O'Neill/POG 2024（private/recurrent hap-DMR 乾淨 anchor）。</p>
+  </section>
+
+  <section id="improve">
+  <h2 class="sec">改進 / 學習建議（排序）</h2>
+  <table>
+    <tr><th class="c">#</th><th>類</th><th>建議</th><th>來源工具</th><th class="c">effort</th><th class="c">ROI</th></tr>
+    <tr><td class="c">1</td><td><span class="badge bi">LEARN</span></td><td>per-CpG <b>beta-binomial + dispersion shrinkage</b>（給 Δβ model-based SE/CI；修 Fisher 假設 read 獨立的膨脹）</td><td>DSS</td><td class="c">High</td><td class="c star">★★★</td></tr>
+    <tr><td class="c">2</td><td><span class="badge bi">LEARN</span></td><td>read-read 距離用 <b>soft 機率</b>（非硬 &gt;0.8/&lt;0.2）</td><td>cvlr/pycoMeth</td><td class="c">Med</td><td class="c star">★★★</td></tr>
+    <tr><td class="c">3</td><td><span class="badge bb">FIX</span></td><td><b>停 5mC/5hmC max-collapse</b> → Dirichlet-Multinomial 分軌（與已知 MSA dup-bug 同源）</td><td>modkit</td><td class="c">Low</td><td class="c star">★★★</td></tr>
+    <tr><td class="c">4</td><td><span class="badge bi">LEARN</span></td><td><b>Cohen's h</b>（arcsine）+ M-value 交叉檢核 headline loci</td><td>modkit/Du 2010</td><td class="c">Low</td><td class="c">★★</td></tr>
+    <tr><td class="c">5</td><td><span class="badge bi">LEARN</span></td><td><b>CpG-pair tuple 共甲基 log-odds</b>（HP-stratified，長讀超 150bp）</td><td>DAMEfinder</td><td class="c">Med</td><td class="c">★★</td></tr>
+    <tr><td class="c">6</td><td><span class="badge bi">LEARN</span></td><td><b>modkit dmr 當快速 pre-filter</b> 篩 region 再跑 O(N³) PERMANOVA</td><td>modkit</td><td class="c">Low-Med</td><td class="c">★★</td></tr>
+    <tr><td class="c">7</td><td><span class="badge bi">LEARN</span></td><td><b>qFDRP 作 coverage-robust disorder 對照</b>，與 PERMANOVA 做 2×2（操作化「結構非失序」）</td><td>Scherer 2020</td><td class="c">Low</td><td class="c">★★</td></tr>
+    <tr><td class="c">8</td><td><span class="badge bi">LEARN</span></td><td><b>imprinting/ICR 正控</b>（在已知 ASM 真值處驗證引擎偵得到）</td><td>germline benchmark</td><td class="c">Low-Med</td><td class="c">★★</td></tr>
+    <tr><td class="c">9</td><td><span class="badge bb">FIX</span></td><td>源碼 <code>PerCpgAsm.cpp:6</code> 「De Waele 2020」→ <b>Orjuela et al. 2020</b>（DAMEfinder 正確作者）</td><td>—</td><td class="c">Low</td><td class="c">★</td></tr>
+    <tr><td class="c">10</td><td><span class="badge bb">FIX</span></td><td>論文 Sakamoto 2022 → <b>O'Neill/POG 2024</b>（private/recurrent anchor）</td><td>—</td><td class="c">Low</td><td class="c">★</td></tr>
+  </table>
+  <h3>KEEP — 守住的可防守新穎性</h3>
+  <div class="grid2">
+    <div class="card"><h4>① PERMANOVA「結構非失序」</h4><p class="sm">supervised、label-tested 的 between-molecule 結構顯著性檢定 —— cvlr（最近鄰）有分群但<b>無顯著性檢定</b>。最該 foreground 的單一新穎點。</p></div>
+    <div class="card"><h4>② normal-anchored somatic cis-control</h4><p class="sm"><b>唯一</b>：所有對手都是對稱 A-vs-B/trio，無法分 somatic-specific allelic 甲基 vs germline baseline。</p></div>
+  </div>
+  </section>
+
+  <section id="bench">
+  <h2 class="sec">Phase B — 實機 benchmark 方案（⚠ 尚未執行）</h2>
+  <p><b>核心問題</b>：紙上已知 ISM 組合無人佔，但「無人佔 ≠ 更好/有用」。Phase B 要回答：<b>當 modkit dmr 說「無率差」但 ISM PERMANOVA 說「有結構」時，ISM 的 call 是真訊號還是噪音？</b></p>
+  <p class="sm">在 HCC1395（SEQC2 truth + 既有 haplotagged BAM）上，對 BRCA2 / TBC1D16 / imprinting ICR 正控 + panel，並排跑 <b>ISM vs modkit dmr（率差基準）/ cvlr / ASMS（read-clustering 近鄰）/ DSS（嚴謹統計）/ qFDRP（disorder 對照）</b> → concordance 表 + <b>discordant-case 深析</b> + runtime。</p>
+  <details><summary>安裝難度與執行紀律</summary>
+    <p class="sm">🟢 modkit（單 Rust binary，先裝）｜🟡 ASMS（bioRxiv repo 待查，最關鍵）｜🔴 cvlr（GitHub 404）｜🟢 pycoMeth（pip）｜🟡 NanoMethPhase+DSS。短讀工具（DSS/DAMEfinder/Metheor）僅作方法藍圖（HCC1395 無 bisulfite 資料）。</p>
+    <p class="sm"><b>紀律</b>：長 compute 用背景 Bash（<b>不</b>放 workflow agent step）；資源 preflight + <code>export TMPDIR=/big7_disk/...</code>；§13.0 序列（跑→落檔→Read 驗→才寫結果）；產數字與寫報告絕不同 batch。</p>
+    <p class="sm"><b>決策點（需核准）</b>：先只跑 modkit+ISM，還是全套？位點集 ~5 pilot 還是 panel 20+？是否現在啟動 B0 安裝（modkit ~10min 背景）？</p>
+  </details>
+  </section>
+
+  <section id="prov">
+  <div class="foot">
+    <b>Provenance</b><br>
+    • 外部工具事實：workflow <code>wf_9e64e51d-03d</code>（24 agents：10 survey + 8 deep-read + 5 cross + 1 synth-critic；全程 WebSearch→WebFetch 一手來源；~46 min，2.3M tokens；82 工具）。原始：<code>_assets/workflow_raw_result.json</code>。<br>
+    • ISM 方法：2026-06-09/10 直接讀 <code>src/core</code> + <code>include/core</code> + tsg <code>scripts/{03,34,37}</code> + <code>pipeline/lib/cis_asm_core.py</code>（file:line）。<br>
+    • 內部結果數字：引自 <code>knowledge/11_external_literature/</code> validated 文件（各標來源）。<br>
+    • 標 ⚠UNVERIFIED 者（ASMS/cvlr repo/HapBridge）為無法 fetch 一手確認；DAMEfinder/Sakamoto 引用修正見建議 #9/#10。<br>
+    • 完整 6 份 .md：<code>InterSubMod/docs/method_comparison/20260609_ism_vs_external_methylation_tools/00_INDEX.md … 06_*.md</code><br>
+    • 撰寫與分析在不同 batch（§13.0 物理隔離）；本 HTML 與同目錄 .md 內容一致。
+  </div>
+  </section>
+</main>
+</div>
+</body>
+</html>

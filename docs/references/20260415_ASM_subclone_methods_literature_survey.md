@@ -41,7 +41,8 @@
 
 #### 3.1.1 DAMEfinder
 
-- **論文**: De Waele L, Fourne L, Lent J, et al. (2020). "DAMEfinder: a method to detect differential allele-specific methylation." *Epigenetics & Chromatin*, 13:25. DOI: 10.1186/s13072-020-00346-8
+- **論文**: Orjuela S, Machlab D, Menigatti M, Marra G, Robinson MD (2020). "DAMEfinder: a method to detect differential allele-specific methylation." *Epigenetics & Chromatin*, 13:25. DOI: 10.1186/s13072-020-00346-8 <!-- 2026-06-10 訂正：原誤植作者 "De Waele L, Fourne L, Lent J, et al."（捏造）；一手 PMC7268773 確認應為 Orjuela et al. -->
+
 - **核心原理**: 在每個樣本計算所有 CpG 位點或 CpG pairs 的 ASM score，然後量化兩組條件間 ASM 的變化。不需 SNP 資訊時可純用 reads 量化 ASM，此方法與依賴 SNP 的方法比較表現良好。可偵測 Differentially Allele-specific Methylated regions (DAMEs)。
 - **輸入需求**: Bisulfite sequencing (WGBS/RRBS) BAM 檔；可選 SNP 資訊
 - **輸出指標**: Per-CpG ASM score；per-region DAME status（比較兩組條件）
@@ -516,7 +517,7 @@
 | 來源 | 類型 | 可信度 | 備註 |
 |------|------|--------|------|
 | CPEL - Jenkinson et al. 2020, Nature Communications | 同行評審論文 | 高 | 96% ASM 是 entropy imbalance 的關鍵發現 |
-| DAMEfinder - De Waele et al. 2020, Epigenetics & Chromatin | 同行評審論文 | 高 | Short-read 設計但概念可遷移 |
+| DAMEfinder - Orjuela et al. 2020, Epigenetics & Chromatin | 同行評審論文 | 高 | Short-read 設計但概念可遷移 |
 | pycoMeth - Snajder et al. 2023, Genome Biology | 同行評審論文 | 高 | ONT 原生工具，最相關 |
 | CAMDAC - 2020 bioRxiv + 2025 Nature Genetics (epiTRACERx) | Preprint + 頂級期刊應用 | 高 | CN-aware deconvolution 業界標準 |
 | Do et al. 2020, Genome Biology | 同行評審論文 | 高 | Cancer ASM 5-9x 增幅的核心參考 |

@@ -3,7 +3,7 @@
  * @brief Per-CpG ASM detection and epiallele heterogeneity metrics
  *
  * Literature references:
- * - Per-CpG Fisher: DAMEfinder (De Waele 2020), pycoMeth (Snajder 2023)
+ * - Per-CpG Fisher: DAMEfinder (Orjuela 2020), pycoMeth (Snajder 2023)
  * - NME: CPEL (Jenkinson 2020, Nature Communications)
  * - Epipolymorphism: methclone (Li 2014), Metheor (Lee 2023)
  */

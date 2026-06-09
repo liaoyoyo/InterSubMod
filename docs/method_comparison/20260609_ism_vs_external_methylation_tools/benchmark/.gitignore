@@ -1,0 +1,13 @@
+# Phase B benchmark — large / binary / regenerable artifacts NOT committed
+tools/*.tar.gz
+tools/dist_*/
+tools/*_env/
+tools/install.log
+runs/
+compare/*.png
+*.bam
+*.bam.bai
+*.bedmethyl
+*.bedmethyl.gz
+*.bedgraph
+# keep: install_modkit.sh, .gitignore, *.md, loci.bed (small, reproducible)
