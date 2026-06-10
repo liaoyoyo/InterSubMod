@@ -49,6 +49,7 @@ def main():
     vloci = json.load(open(f"{DV}/validation3.json"))["loci"]
     fn = json.load(open(f"{DV}/funnel_numbers.json"))
     figidx = json.load(open(f"{DV}/fig_index.json")) if os.path.exists(f"{DV}/fig_index.json") else {}
+    seqc2 = json.load(open(f"{DV}/seqc2_cn.json")) if os.path.exists(f"{DV}/seqc2_cn.json") else {}
 
     chrs, chr_idx = [], {}
     rows = []
@@ -75,13 +76,15 @@ def main():
             lohsub = ["None", "LOH_Noise", "LOH_Weak", "LOH_Strong", "LOH_Subclone"].index(r.get("LOH_Subtype", "None")) \
                 if r.get("LOH_Subtype", "None") in ("None", "LOH_Noise", "LOH_Weak", "LOH_Strong", "LOH_Subclone") else 0
             qual = ["High", "Medium", "Low"].index(r.get("Quality_Tier", "High")) if r.get("Quality_Tier", "High") in ("High", "Medium", "Low") else 0
+            sq = seqc2.get(key, [0, 2.0])
             rows.append([chr_idx[ch], pos, cls_i, cat, cv, db, reads, int(num(r, "NumCpGs") or 0),
                          1 if tb(r, "Potential_LOH") else 0, tval, val, mhn,
                          round(num(r, "ClusterPermanovaF") or 0, 1),
                          round(num(r, "LabelHPPermanovaF") or 0, 1),
                          1 if figidx.get(key, 0) else 0,
                          round(num(r, "GlobalP") or 1, 4),
-                         round(num(r, "Coverage_Multiple") or 0, 2), covcat, lohsub, qual])
+                         round(num(r, "Coverage_Multiple") or 0, 2), covcat, lohsub, qual,
+                         sq[0], sq[1]])
 
     nfig = sum(1 for x in rows if x[14])
     payload = json.dumps(rows, separators=(",", ":"))
@@ -182,8 +185,8 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color
     <tr><td>Δβ</td><td>HP 家族「間」減「內」的 read 距離分離量</td><td>大=兩家族甲基模式不同（距離量非平均差）</td></tr>
     <tr><td>PERMANOVA F</td><td>距離法測 HP 分離（對稀疏穩健）</td><td>≫1=分離；救回卡方歸 0 的真結構</td></tr>
     <tr><td>minHP</td><td>較小 HP 家族的 read 數</td><td>太小→卡方不可靠；越大越穩健</td></tr>
-    <tr><td>CN×（Coverage_Multiple）</td><td>相對拷貝數倍數</td><td>1≈二倍體；&gt;1 增幅 / &lt;1 缺失</td></tr>
-    <tr><td>LOH / LOH_Subtype</td><td>雜合性缺失（一條等位基因丟失）</td><td>Strong/Weak/Noise/Subclone</td></tr>
+    <tr><td><b>SEQC2 CN（真值）</b></td><td>SEQC2 benchmark 拷貝數答案（gain/loss/loh/neutral + median CN）</td><td>權威 ground-truth；每位點 intersect <code>ngs_benchmark_cnvs_gain_loss_loh.bed</code></td></tr>
+    <tr><td>ISM CN×（proxy）</td><td>ISM 自算 = NumReads / 53x(KDE 二倍體)</td><td><b>非 SEQC2</b>；read-深度估計，經 SEQC2 校準誤差 7.5%；受純度/GC 影響，可能與真值不一致</td></tr>
     <tr><td>獨立驗證</td><td>不用 TP/FP，換獨立子集能否複製</td><td>✓通過 / ⚠失敗(該肉眼) / 未測</td></tr>
    </table>
   </div>
@@ -229,7 +232,7 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color
   <span class="sub">排序</span><select id="sort"></select>
   <button id="sdir" title="正序/反序">▼ 降序</button>
   <select id="thf"><option value="off">門檻:不套用</option><option value="pass">只顯示「通過門檻」</option><option value="fail">只顯示「被篩掉」</option></select>
-  <select id="cnf"><option value="all">CNV:全部</option><option value="gain">增幅(CN&gt;1.3)</option><option value="loss">缺失(CN&lt;0.7)</option><option value="loh">只 LOH</option><option value="nonloh">排除 LOH</option></select>
+  <select id="cnf"><option value="all">SEQC2 CN:全部</option><option value="1">gain 增幅</option><option value="2">loss 缺失</option><option value="3">loh 雜合缺失</option><option value="0">neutral 正常</option></select>
   <label><input type="checkbox" id="onlyfig"> 只有圖的</label>
   <select id="tierf"><option value="all">Tier:全部</option><option value="A">★A</option><option value="B">B</option><option value="none">無</option></select>
   <select id="valf"><option value="all">驗證:全部</option><option value="1">✓通過</option><option value="0">⚠失敗</option><option value="-1">未測</option></select>
@@ -247,13 +250,14 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color
 <script>
 const D=__DATA__, CHRS=__CHRS__, FN=__FUNNEL__;
 // column index: 0 ck,1 pos,2 cls,3 cat,4 cv,5 db,6 rd,7 cg,8 loh,9 tier,10 val,11 mhn,12 pf,13 hpf,14 fig,15 gp
-const C={ck:0,ps:1,cl:2,cat:3,cv:4,db:5,rd:6,cg:7,loh:8,tier:9,val:10,mhn:11,pf:12,hpf:13,fig:14,gp:15,cnv:16,covcat:17,lohsub:18,qual:19};
+const C={ck:0,ps:1,cl:2,cat:3,cv:4,db:5,rd:6,cg:7,loh:8,tier:9,val:10,mhn:11,pf:12,hpf:13,fig:14,gp:15,cnv:16,covcat:17,lohsub:18,qual:19,sqc:20,sqcn:21};
 const $=id=>document.getElementById(id);
 const key=r=>CHRS[r[C.ck]]+'_'+r[C.ps];
 const CATN=['PASS 通過','可能漏掉(有結構被篩)','確認篩掉(無結構)'];
 const COVCAT=['Normal 正常','CNV_Gain 增幅','Elevated 偏高','Low 偏低','High_Copy 高拷貝','CNV_Loss 缺失'];
 const LOHSUB=['無','LOH_Noise 雜訊','LOH_Weak 弱','LOH_Strong 強','LOH_Subclone 亞克隆'];
 const QUAL=['High','Medium','Low'];
+const SQCLS=['neutral 正常','gain 增幅','loss 缺失','loh 雜合缺失'];  // SEQC2 ground-truth class
 
 // ---- judgments (localStorage) ----
 const JK='ism_judge_ws_v1';
@@ -322,18 +326,18 @@ function bars(title,items){ // items=[[label,count,color]]
   items.map(i=>`<div class="chrow"><div class="lab">${i[0]}</div><div class="bar" style="width:${Math.max(2,180*i[1]/max)}px;background:${i[2]}"></div><div class="val">${i[1].toLocaleString()}</div></div>`).join('')+`</div></div>`;
 }
 function charts(){
- const cat=[0,0,0],tier=[0,0,0],val=[0,0,0],covc=[0,0,0,0,0,0],lohs=[0,0,0,0,0];
- let cvbin=[0,0,0,0,0],cnbin=[0,0,0,0,0];
- for(const r of D){cat[r[C.cat]]++;tier[r[C.tier]]++;val[r[C.val]+1]++;covc[r[C.covcat]]++;lohs[r[C.lohsub]]++;
-   cvbin[Math.min(4,Math.floor(r[C.cv]*5))]++; cnbin[Math.min(4,Math.max(0,Math.floor(r[C.cnv]/0.6)))]++;}
+ const cat=[0,0,0],tier=[0,0,0],val=[0,0,0],sqc=[0,0,0,0],covc=[0,0,0,0,0,0];
+ let cvbin=[0,0,0,0,0];
+ for(const r of D){cat[r[C.cat]]++;tier[r[C.tier]]++;val[r[C.val]+1]++;sqc[r[C.sqc]]++;covc[r[C.covcat]]++;
+   cvbin[Math.min(4,Math.floor(r[C.cv]*5))]++;}
  $('charts').innerHTML=`<div style="display:flex;gap:30px;flex-wrap:wrap">
   ${bars('分類組成',[['PASS',cat[0],'#22c55e'],['可能漏掉',cat[1],'#f59e0b'],['確認篩掉',cat[2],'#64748b']])}
   ${bars('Tier 分層',[['★Tier A',tier[1],'#4ade80'],['Tier B',tier[2],'#60a5fa'],['無',tier[0],'#475569']])}
   ${bars('獨立驗證(已測者)',[['✓通過',val[2],'#16a34a'],['⚠失敗',val[1],'#f59e0b'],['未測',val[0],'#334155']])}
   ${bars('CramersV 分布',cvbin.map((c,i)=>['['+(i/5).toFixed(1)+'-'+((i+1)/5).toFixed(1)+')',c,'#38bdf8']))}
-  ${bars('CNV 拷貝數類別',[['Normal',covc[0],'#64748b'],['CNV_Gain',covc[1],'#fdba74'],['Elevated',covc[2],'#fbbf24'],['High_Copy',covc[4],'#f59e0b'],['Low',covc[3],'#7dd3fc'],['CNV_Loss',covc[5],'#38bdf8']])}
-  ${bars('LOH 亞型',[['無',lohs[0],'#475569'],['Noise',lohs[1],'#94a3b8'],['Weak',lohs[2],'#c4b5fd'],['Strong',lohs[3],'#a78bfa'],['Subclone',lohs[4],'#8b5cf6']])}
- </div><div class="sub" style="margin-top:8px">圖表即時由當前 __NTOTAL__ 位點計算（非預存）。CNV 來自 ISM Coverage_Multiple / Coverage_Category（KDE 二倍體覆蓋 53x 基準）。</div>`;
+  ${bars('★ SEQC2 CN 類別 (真值)',[['gain 增幅',sqc[1],'#fdba74'],['loh 雜合缺失',sqc[3],'#d8b4fe'],['neutral 正常',sqc[0],'#64748b'],['loss 缺失',sqc[2],'#7dd3fc']])}
+  ${bars('ISM CNV 類別 (read-深度 proxy)',[['Normal',covc[0],'#64748b'],['Gain',covc[1],'#d97706'],['Elevated',covc[2],'#b45309'],['High_Copy',covc[4],'#92400e'],['Low',covc[3],'#0ea5e9'],['Loss',covc[5],'#0369a1']])}
+ </div><div class="sub" style="margin-top:8px">圖表即時由當前 __NTOTAL__ 位點計算。<b>SEQC2 CN = 真值</b>（ngs_benchmark_cnvs_gain_loss_loh.bed）；<b>ISM CN× = read-深度 proxy</b>（NumReads/53x KDE 二倍體，經 SEQC2 校準誤差 7.5%）。兩者可能不一致。</div>`;
 }
 
 // ---- live threshold ----
@@ -353,7 +357,7 @@ function live(){
 
 // ---- gallery ----
 const SORTKEY={'reads':r=>r[C.rd],'CramersV':r=>r[C.cv],'|Δβ|':r=>Math.abs(r[C.db]),'PERMANOVA F':r=>r[C.pf],
- 'HP-PERMANOVA F':r=>r[C.hpf],'minHP':r=>r[C.mhn],'CN×拷貝數':r=>r[C.cnv],'global_p':r=>r[C.gp],'位置':r=>r[C.ck]*1e10+r[C.ps]};
+ 'HP-PERMANOVA F':r=>r[C.hpf],'minHP':r=>r[C.mhn],'SEQC2 median CN':r=>r[C.sqcn],'ISM CN×(proxy)':r=>r[C.cnv],'global_p':r=>r[C.gp],'位置':r=>r[C.ck]*1e10+r[C.ps]};
 $('sort').innerHTML=Object.keys(SORTKEY).map(k=>`<option>${k}</option>`).join('');
 let curCat=1,page=0,PER=24,sdir=-1;  // sdir=-1 降序 / 1 升序
 $('sdir').onclick=()=>{sdir*=-1;$('sdir').textContent=sdir===-1?'▼ 降序':'▲ 升序';page=0;draw();};
@@ -372,8 +376,7 @@ function filtered(){
  const th=$('thf').value;
  if(th==='pass')a=a.filter(passThreshold); else if(th==='fail')a=a.filter(r=>!passThreshold(r));
  const cn=$('cnf').value;
- if(cn==='gain')a=a.filter(r=>r[C.cnv]>1.3); else if(cn==='loss')a=a.filter(r=>r[C.cnv]<0.7&&r[C.cnv]>0);
- else if(cn==='loh')a=a.filter(r=>r[C.loh]); else if(cn==='nonloh')a=a.filter(r=>!r[C.loh]);
+ if(cn!=='all')a=a.filter(r=>r[C.sqc]===+cn);  // SEQC2 ground-truth class
  const tf=$('tierf').value;if(tf!=='all')a=a.filter(r=>({A:1,B:2,none:0})[tf]===r[C.tier]);
  const vf=$('valf').value;if(vf!=='all')a=a.filter(r=>String(r[C.val])===vf);
  const jf=$('jf').value;if(jf!=='all')a=a.filter(r=>{const c=(J[key(r)]||{}).c||'un';return jf==='un'?(c==='un'):c===jf;});
@@ -382,17 +385,18 @@ function filtered(){
  a.sort((x,y)=>sdir*(k(x)-k(y)));
  return a;
 }
-function cnvBadge(r){const cn=r[C.cnv];
- if(cn>1.3)return `<span class="badge" style="background:#3f1d0a;color:#fdba74">CN×${cn.toFixed(1)}↑增幅</span>`;
- if(cn>0&&cn<0.7)return `<span class="badge" style="background:#0a2540;color:#7dd3fc">CN×${cn.toFixed(1)}↓缺失</span>`;
- return `<span class="badge" style="background:#1e293b;color:#94a3b8">CN×${cn.toFixed(1)}</span>`;}
+function seqc2Badge(r){const c=r[C.sqc],cn=r[C.sqcn];
+ const m={1:['#3f1d0a','#fdba74','gain'],2:['#0a2540','#7dd3fc','loss'],3:['#3b0764','#d8b4fe','LOH'],0:['#1e293b','#94a3b8','neutral']}[c];
+ return `<span class="badge" style="background:${m[0]};color:${m[1]}" title="SEQC2 真值">SEQC2:${m[2]}${c===1||c===2?' CN'+cn:''}</span>`;}
+function cnvBadge(r){const cn=r[C.cnv];  // ISM read-depth proxy (NumReads/53x)
+ const col=cn>1.3?['#2a1505','#d97706']:cn>0&&cn<0.7?['#06182e','#0ea5e9']:['#171f2e','#64748b'];
+ return `<span class="badge" style="background:${col[0]};color:${col[1]}" title="ISM read-深度 proxy = NumReads/53x">ISM CN×${cn.toFixed(1)}</span>`;}
 function badges(r){let b='';
  b+=['<span class="badge b-pass">PASS</span>','<span class="badge b-miss">可能漏掉</span>','<span class="badge b-fil">篩掉</span>'][r[C.cat]];
  if(r[C.tier]===1)b+='<span class="badge b-A">★A</span>';else if(r[C.tier]===2)b+='<span class="badge b-B">B</span>';
  if(r[C.val]===1)b+='<span class="badge b-vok">✓驗</span>';else if(r[C.val]===0)b+='<span class="badge b-vno">⚠</span>';
  if(r[C.cl]===1)b+='<span class="badge b-fp">FP</span>';
- b+=cnvBadge(r);
- if(r[C.loh])b+=`<span class="badge b-loh">LOH${r[C.lohsub]?'·'+['','Noise','Weak','Strong','Subclone'][r[C.lohsub]]:''}</span>`;return b;}
+ b+=seqc2Badge(r)+cnvBadge(r);return b;}
 function jbtn(k,c,lab,cls){const on=((J[k]||{}).c===c)?' on':'';return `<button class="jb-${cls}${on}" onclick="event.stopPropagation();setJ('${k}','${c}')">${lab}</button>`;}
 function card(r){
  const k=key(r),ch=CHRS[r[C.ck]],j=J[k]||{};
@@ -426,7 +430,9 @@ window.openM=k=>{const r=D.find(x=>key(x)===k);if(!r)return;
  const st=[['分類',CATN[r[C.cat]]],['CramersV (gate)',r[C.cv].toFixed(3)],['Δβ (HPMerged)',(r[C.db]>=0?'+':'')+r[C.db].toFixed(3)],
   ['NumReads',r[C.rd]],['NumCpG',r[C.cg]],['global_p',r[C.gp]],['Cluster PERMANOVA F',r[C.pf]],['HP PERMANOVA F',r[C.hpf]],
   ['Tier',['—','A','B'][r[C.tier]]],['獨立驗證',r[C.val]===1?'✓通過':r[C.val]===0?'⚠失敗':'未測'],['min HP group',r[C.mhn]],
-  ['CN× 拷貝數倍數',r[C.cnv].toFixed(2)],['CNV 類別',COVCAT[r[C.covcat]]],['LOH',r[C.loh]?'是':'否'],['LOH 亞型',LOHSUB[r[C.lohsub]]],['品質',QUAL[r[C.qual]]]];
+  ['SEQC2 CN 類別 (真值)',SQCLS[r[C.sqc]]],['SEQC2 median CN',r[C.sqcn]],
+  ['ISM CN× (read-深度 proxy)',r[C.cnv].toFixed(2)+' (=reads/53x)'],['ISM CNV 類別 (proxy)',COVCAT[r[C.covcat]]],
+  ['ISM LOH (proxy)',r[C.loh]?LOHSUB[r[C.lohsub]]||'是':'否'],['品質',QUAL[r[C.qual]]]];
  const fig=r[C.fig]?`<div class="mfigs"><div><div class="sub" style="text-align:center">甲基 read×CpG</div><img src="figs/${k}_meth.png"></div><div><div class="sub" style="text-align:center">read×read 距離（樹狀+HP側欄）</div><img src="figs/${k}_dist.png"></div></div>`:'<div class="nofig">無圖</div>';
  $('mc').innerHTML=`<div style="display:flex;justify-content:space-between"><h2 style="border:none;margin:0">${ch}:${r[C.ps]} ${badges(r)}</h2><button onclick="closeM()">關閉 ✕</button></div>
   ${fig}<div class="statg">${st.map(s=>`<div class="st"><div class="l">${s[0]}</div><div class="n">${s[1]}</div></div>`).join('')}</div>
