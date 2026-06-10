@@ -70,12 +70,18 @@ def main():
             v = vloci.get(key, {})
             val = 1 if v.get("validated") else (0 if v.get("ok") else -1)
             mhn = int(min(num(r, "HP1FamilyN") or 0, num(r, "HP2FamilyN") or 0))
+            covcat = ["Normal", "CNV_Gain", "Elevated", "Low", "High_Copy", "CNV_Loss"].index(r.get("Coverage_Category", "Normal")) \
+                if r.get("Coverage_Category", "Normal") in ("Normal", "CNV_Gain", "Elevated", "Low", "High_Copy", "CNV_Loss") else 0
+            lohsub = ["None", "LOH_Noise", "LOH_Weak", "LOH_Strong", "LOH_Subclone"].index(r.get("LOH_Subtype", "None")) \
+                if r.get("LOH_Subtype", "None") in ("None", "LOH_Noise", "LOH_Weak", "LOH_Strong", "LOH_Subclone") else 0
+            qual = ["High", "Medium", "Low"].index(r.get("Quality_Tier", "High")) if r.get("Quality_Tier", "High") in ("High", "Medium", "Low") else 0
             rows.append([chr_idx[ch], pos, cls_i, cat, cv, db, reads, int(num(r, "NumCpGs") or 0),
                          1 if tb(r, "Potential_LOH") else 0, tval, val, mhn,
                          round(num(r, "ClusterPermanovaF") or 0, 1),
                          round(num(r, "LabelHPPermanovaF") or 0, 1),
                          1 if figidx.get(key, 0) else 0,
-                         round(num(r, "GlobalP") or 1, 4)])
+                         round(num(r, "GlobalP") or 1, 4),
+                         round(num(r, "Coverage_Multiple") or 0, 2), covcat, lohsub, qual])
 
     nfig = sum(1 for x in rows if x[14])
     payload = json.dumps(rows, separators=(",", ":"))
@@ -148,6 +154,42 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color
 </header>
 <div class="wrap">
 
+<h2>⓪ 圖例與數據說明（先看這裡）</h2>
+<div class="panel">
+ <div style="display:flex;gap:26px;flex-wrap:wrap">
+  <div style="min-width:300px">
+   <div class="sub" style="color:var(--ac);font-weight:700;margin-bottom:6px">兩張圖怎麼讀（HP / allele / 甲基 / 距離）</div>
+   <svg viewBox="0 0 420 200" width="420" height="200" font-family="system-ui" style="background:#0b1222;border-radius:8px">
+    <text x="8" y="16" fill="#cbd5e1" font-size="12">左圖：甲基 read×CpG（每列一條 read，依 HP 分群）</text>
+    <rect x="14" y="26" width="12" height="54" fill="#1d4ed8"/><rect x="28" y="26" width="12" height="54" fill="#0ea5e9"/>
+    <g font-size="11"><rect x="50" y="28" width="13" height="13" fill="#1d4ed8"/><text x="68" y="39" fill="#94a3b8">HP1（germline 單倍型1）</text>
+    <rect x="50" y="45" width="13" height="13" fill="#16a34a"/><text x="68" y="56" fill="#94a3b8">HP1-1（HP1 的體細胞子單倍型）</text>
+    <rect x="50" y="62" width="13" height="13" fill="#9333ea"/><text x="68" y="73" fill="#94a3b8">HP2　　<tspan fill="#ca8a04">▉</tspan> HP2-1</text></g>
+    <text x="8" y="98" fill="#cbd5e1" font-size="11">Allele 側欄：<tspan fill="#dc2626">▉</tspan>ALT(變異)　<tspan fill="#0ea5e9">▉</tspan>REF(參考)</text>
+    <text x="8" y="120" fill="#cbd5e1" font-size="11">甲基色：</text>
+    <rect x="62" y="110" width="120" height="13" fill="url(#rb)"/><text x="186" y="120" fill="#94a3b8" font-size="11"><tspan fill="#dc2626">紅</tspan>=甲基 → <tspan fill="#2563eb">藍</tspan>=未甲基；灰=未覆蓋</text>
+    <line x1="62" y1="128" x2="62" y2="140" stroke="#f59e0b" stroke-width="2" stroke-dasharray="3"/><text x="68" y="139" fill="#f59e0b" font-size="10">橘虛線=變異位置</text>
+    <text x="8" y="162" fill="#cbd5e1" font-size="12">右圖：read×read 距離矩陣（依分群樹排序）</text>
+    <rect x="14" y="170" width="120" height="13" fill="url(#mg)"/><text x="140" y="180" fill="#94a3b8" font-size="11">暗=近(相似) → 亮=遠；<b style="fill:#86efac">對角暗塊且對齊 HP 側欄 = 真分群</b></text>
+    <defs><linearGradient id="rb"><stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#dc2626"/></linearGradient>
+    <linearGradient id="mg"><stop offset="0" stop-color="#000004"/><stop offset="1" stop-color="#fcffa4"/></linearGradient></defs>
+   </svg>
+  </div>
+  <div style="min-width:320px;flex:1">
+   <div class="sub" style="color:var(--ac);font-weight:700;margin-bottom:6px">每個數據欄位是什麼（卡片/modal 會顯示）</div>
+   <table style="font-size:11.5px"><tr><th>欄位</th><th>直覺</th><th>判讀</th></tr>
+    <tr><td>CramersV</td><td>聚類群是否對應 HP 標籤（卡方）</td><td>0–1；≥0.1 才算；稀疏表會歸 0</td></tr>
+    <tr><td>Δβ</td><td>HP 家族「間」減「內」的 read 距離分離量</td><td>大=兩家族甲基模式不同（距離量非平均差）</td></tr>
+    <tr><td>PERMANOVA F</td><td>距離法測 HP 分離（對稀疏穩健）</td><td>≫1=分離；救回卡方歸 0 的真結構</td></tr>
+    <tr><td>minHP</td><td>較小 HP 家族的 read 數</td><td>太小→卡方不可靠；越大越穩健</td></tr>
+    <tr><td>CN×（Coverage_Multiple）</td><td>相對拷貝數倍數</td><td>1≈二倍體；&gt;1 增幅 / &lt;1 缺失</td></tr>
+    <tr><td>LOH / LOH_Subtype</td><td>雜合性缺失（一條等位基因丟失）</td><td>Strong/Weak/Noise/Subclone</td></tr>
+    <tr><td>獨立驗證</td><td>不用 TP/FP，換獨立子集能否複製</td><td>✓通過 / ⚠失敗(該肉眼) / 未測</td></tr>
+   </table>
+  </div>
+ </div>
+</div>
+
 <h2>① 涵蓋與一致性（真實計數）</h2>
 <div class="panel"><div class="stat4" id="cover"></div>
  <div class="sub" id="covnote" style="margin-top:8px"></div></div>
@@ -184,7 +226,10 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color
 <div class="tabs" id="cattabs"></div>
 <div class="panel" style="border-radius:0 10px 10px 10px">
  <div class="row" style="font-size:12px;align-items:center">
-  <select id="sort"></select>
+  <span class="sub">排序</span><select id="sort"></select>
+  <button id="sdir" title="正序/反序">▼ 降序</button>
+  <select id="thf"><option value="off">門檻:不套用</option><option value="pass">只顯示「通過門檻」</option><option value="fail">只顯示「被篩掉」</option></select>
+  <select id="cnf"><option value="all">CNV:全部</option><option value="gain">增幅(CN&gt;1.3)</option><option value="loss">缺失(CN&lt;0.7)</option><option value="loh">只 LOH</option><option value="nonloh">排除 LOH</option></select>
   <label><input type="checkbox" id="onlyfig"> 只有圖的</label>
   <select id="tierf"><option value="all">Tier:全部</option><option value="A">★A</option><option value="B">B</option><option value="none">無</option></select>
   <select id="valf"><option value="all">驗證:全部</option><option value="1">✓通過</option><option value="0">⚠失敗</option><option value="-1">未測</option></select>
@@ -192,6 +237,7 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color
   <select id="clsf"><option value="all">TP+FP</option><option value="0">TP</option><option value="1">FP</option></select>
   <span id="gcount" class="sub"></span>
  </div>
+ <div class="sub" id="thnote" style="margin-top:6px"></div>
  <div class="grid" id="grid"></div>
  <div class="pager" id="pager"></div>
 </div>
@@ -201,10 +247,13 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color
 <script>
 const D=__DATA__, CHRS=__CHRS__, FN=__FUNNEL__;
 // column index: 0 ck,1 pos,2 cls,3 cat,4 cv,5 db,6 rd,7 cg,8 loh,9 tier,10 val,11 mhn,12 pf,13 hpf,14 fig,15 gp
-const C={ck:0,ps:1,cl:2,cat:3,cv:4,db:5,rd:6,cg:7,loh:8,tier:9,val:10,mhn:11,pf:12,hpf:13,fig:14,gp:15};
+const C={ck:0,ps:1,cl:2,cat:3,cv:4,db:5,rd:6,cg:7,loh:8,tier:9,val:10,mhn:11,pf:12,hpf:13,fig:14,gp:15,cnv:16,covcat:17,lohsub:18,qual:19};
 const $=id=>document.getElementById(id);
 const key=r=>CHRS[r[C.ck]]+'_'+r[C.ps];
 const CATN=['PASS 通過','可能漏掉(有結構被篩)','確認篩掉(無結構)'];
+const COVCAT=['Normal 正常','CNV_Gain 增幅','Elevated 偏高','Low 偏低','High_Copy 高拷貝','CNV_Loss 缺失'];
+const LOHSUB=['無','LOH_Noise 雜訊','LOH_Weak 弱','LOH_Strong 強','LOH_Subclone 亞克隆'];
+const QUAL=['High','Medium','Low'];
 
 // ---- judgments (localStorage) ----
 const JK='ism_judge_ws_v1';
@@ -273,16 +322,18 @@ function bars(title,items){ // items=[[label,count,color]]
   items.map(i=>`<div class="chrow"><div class="lab">${i[0]}</div><div class="bar" style="width:${Math.max(2,180*i[1]/max)}px;background:${i[2]}"></div><div class="val">${i[1].toLocaleString()}</div></div>`).join('')+`</div></div>`;
 }
 function charts(){
- const cat=[0,0,0],tier=[0,0,0],val=[0,0,0];
- let cvbin=[0,0,0,0,0],dbbin=[0,0,0,0,0];
- for(const r of D){cat[r[C.cat]]++;tier[r[C.tier]]++;val[r[C.val]+1]++;
-   cvbin[Math.min(4,Math.floor(r[C.cv]*5))]++; dbbin[Math.min(4,Math.floor(Math.abs(r[C.db])*5/0.6))]++;}
+ const cat=[0,0,0],tier=[0,0,0],val=[0,0,0],covc=[0,0,0,0,0,0],lohs=[0,0,0,0,0];
+ let cvbin=[0,0,0,0,0],cnbin=[0,0,0,0,0];
+ for(const r of D){cat[r[C.cat]]++;tier[r[C.tier]]++;val[r[C.val]+1]++;covc[r[C.covcat]]++;lohs[r[C.lohsub]]++;
+   cvbin[Math.min(4,Math.floor(r[C.cv]*5))]++; cnbin[Math.min(4,Math.max(0,Math.floor(r[C.cnv]/0.6)))]++;}
  $('charts').innerHTML=`<div style="display:flex;gap:30px;flex-wrap:wrap">
   ${bars('分類組成',[['PASS',cat[0],'#22c55e'],['可能漏掉',cat[1],'#f59e0b'],['確認篩掉',cat[2],'#64748b']])}
   ${bars('Tier 分層',[['★Tier A',tier[1],'#4ade80'],['Tier B',tier[2],'#60a5fa'],['無',tier[0],'#475569']])}
   ${bars('獨立驗證(已測者)',[['✓通過',val[2],'#16a34a'],['⚠失敗',val[1],'#f59e0b'],['未測',val[0],'#334155']])}
   ${bars('CramersV 分布',cvbin.map((c,i)=>['['+(i/5).toFixed(1)+'-'+((i+1)/5).toFixed(1)+')',c,'#38bdf8']))}
- </div><div class="sub" style="margin-top:8px">圖表即時由當前 __NTOTAL__ 位點計算（非預存）。</div>`;
+  ${bars('CNV 拷貝數類別',[['Normal',covc[0],'#64748b'],['CNV_Gain',covc[1],'#fdba74'],['Elevated',covc[2],'#fbbf24'],['High_Copy',covc[4],'#f59e0b'],['Low',covc[3],'#7dd3fc'],['CNV_Loss',covc[5],'#38bdf8']])}
+  ${bars('LOH 亞型',[['無',lohs[0],'#475569'],['Noise',lohs[1],'#94a3b8'],['Weak',lohs[2],'#c4b5fd'],['Strong',lohs[3],'#a78bfa'],['Subclone',lohs[4],'#8b5cf6']])}
+ </div><div class="sub" style="margin-top:8px">圖表即時由當前 __NTOTAL__ 位點計算（非預存）。CNV 來自 ISM Coverage_Multiple / Coverage_Category（KDE 二倍體覆蓋 53x 基準）。</div>`;
 }
 
 // ---- live threshold ----
@@ -298,33 +349,50 @@ function live(){
   ['TP:FP',ratio+':1',''],['TP 富集 vs 47:1',((ptp/ttp)/((pfp/tfp)||1e-9)/1).toFixed(2)+'×','']]
   .map(s=>`<div class="sb"><div class="n ${s[2]||''}">${s[1]}</div><div class="l">${s[0]}</div></div>`).join('');
 }
-['cv','db','rd','mode'].forEach(id=>$(id).addEventListener('input',live));
+['cv','db','rd','mode'].forEach(id=>$(id).addEventListener('input',()=>{live();if($('thf').value!=='off'){page=0;draw();}}));
 
 // ---- gallery ----
-const SORTS={'reads ↓':(a,b)=>b[C.rd]-a[C.rd],'CramersV ↓':(a,b)=>b[C.cv]-a[C.cv],'|Δβ| ↓':(a,b)=>Math.abs(b[C.db])-Math.abs(a[C.db]),
- 'PERMANOVA F ↓':(a,b)=>b[C.pf]-a[C.pf],'minHP ↓':(a,b)=>b[C.mhn]-a[C.mhn],'位置':(a,b)=>a[C.ck]-b[C.ck]||a[C.ps]-b[C.ps]};
-$('sort').innerHTML=Object.keys(SORTS).map(k=>`<option>${k}</option>`).join('');
-let curCat=1,page=0,PER=24;  // default 可能漏掉
+const SORTKEY={'reads':r=>r[C.rd],'CramersV':r=>r[C.cv],'|Δβ|':r=>Math.abs(r[C.db]),'PERMANOVA F':r=>r[C.pf],
+ 'HP-PERMANOVA F':r=>r[C.hpf],'minHP':r=>r[C.mhn],'CN×拷貝數':r=>r[C.cnv],'global_p':r=>r[C.gp],'位置':r=>r[C.ck]*1e10+r[C.ps]};
+$('sort').innerHTML=Object.keys(SORTKEY).map(k=>`<option>${k}</option>`).join('');
+let curCat=1,page=0,PER=24,sdir=-1;  // sdir=-1 降序 / 1 升序
+$('sdir').onclick=()=>{sdir*=-1;$('sdir').textContent=sdir===-1?'▼ 降序':'▲ 升序';page=0;draw();};
 $('cattabs').innerHTML=CATN.map((n,i)=>`<div class="tab${i===1?' on':''}" data-c="${i}">${n} <span id="cc${i}"></span></div>`).join('');
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{curCat=+t.dataset.c;page=0;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));draw();});
-['sort','onlyfig','tierf','valf','jf','clsf'].forEach(id=>$(id).addEventListener('input',()=>{page=0;draw();}));
+['sort','onlyfig','tierf','valf','jf','clsf','thf','cnf'].forEach(id=>$(id).addEventListener('input',()=>{page=0;draw();}));
 
+function passThreshold(r){ // 依 §⑤ 滑桿判斷此位點是否「通過門檻」
+ const cv=+$('cv').value,db=+$('db').value,rd=+$('rd').value,m=$('mode').value;
+ if(r[C.rd]<rd)return false;
+ return m==='cv'?r[C.cv]>=cv:m==='db'?Math.abs(r[C.db])>=db:m==='and'?(r[C.cv]>=cv&&Math.abs(r[C.db])>=db):(r[C.cv]>=cv||Math.abs(r[C.db])>=db);
+}
 function filtered(){
  let a=D.filter(r=>r[C.cat]===curCat);
  if($('onlyfig').checked)a=a.filter(r=>r[C.fig]);
+ const th=$('thf').value;
+ if(th==='pass')a=a.filter(passThreshold); else if(th==='fail')a=a.filter(r=>!passThreshold(r));
+ const cn=$('cnf').value;
+ if(cn==='gain')a=a.filter(r=>r[C.cnv]>1.3); else if(cn==='loss')a=a.filter(r=>r[C.cnv]<0.7&&r[C.cnv]>0);
+ else if(cn==='loh')a=a.filter(r=>r[C.loh]); else if(cn==='nonloh')a=a.filter(r=>!r[C.loh]);
  const tf=$('tierf').value;if(tf!=='all')a=a.filter(r=>({A:1,B:2,none:0})[tf]===r[C.tier]);
  const vf=$('valf').value;if(vf!=='all')a=a.filter(r=>String(r[C.val])===vf);
  const jf=$('jf').value;if(jf!=='all')a=a.filter(r=>{const c=(J[key(r)]||{}).c||'un';return jf==='un'?(c==='un'):c===jf;});
  const cf=$('clsf').value;if(cf!=='all')a=a.filter(r=>String(r[C.cl])===cf);
- a.sort(SORTS[$('sort').value]||SORTS['reads ↓']);
+ const k=SORTKEY[$('sort').value]||SORTKEY['reads'];
+ a.sort((x,y)=>sdir*(k(x)-k(y)));
  return a;
 }
+function cnvBadge(r){const cn=r[C.cnv];
+ if(cn>1.3)return `<span class="badge" style="background:#3f1d0a;color:#fdba74">CN×${cn.toFixed(1)}↑增幅</span>`;
+ if(cn>0&&cn<0.7)return `<span class="badge" style="background:#0a2540;color:#7dd3fc">CN×${cn.toFixed(1)}↓缺失</span>`;
+ return `<span class="badge" style="background:#1e293b;color:#94a3b8">CN×${cn.toFixed(1)}</span>`;}
 function badges(r){let b='';
  b+=['<span class="badge b-pass">PASS</span>','<span class="badge b-miss">可能漏掉</span>','<span class="badge b-fil">篩掉</span>'][r[C.cat]];
  if(r[C.tier]===1)b+='<span class="badge b-A">★A</span>';else if(r[C.tier]===2)b+='<span class="badge b-B">B</span>';
  if(r[C.val]===1)b+='<span class="badge b-vok">✓驗</span>';else if(r[C.val]===0)b+='<span class="badge b-vno">⚠</span>';
  if(r[C.cl]===1)b+='<span class="badge b-fp">FP</span>';
- if(r[C.loh])b+='<span class="badge b-loh">LOH</span>';return b;}
+ b+=cnvBadge(r);
+ if(r[C.loh])b+=`<span class="badge b-loh">LOH${r[C.lohsub]?'·'+['','Noise','Weak','Strong','Subclone'][r[C.lohsub]]:''}</span>`;return b;}
 function jbtn(k,c,lab,cls){const on=((J[k]||{}).c===c)?' on':'';return `<button class="jb-${cls}${on}" onclick="event.stopPropagation();setJ('${k}','${c}')">${lab}</button>`;}
 function card(r){
  const k=key(r),ch=CHRS[r[C.ck]],j=J[k]||{};
@@ -344,6 +412,9 @@ function draw(){
  const a=filtered();
  for(let i=0;i<3;i++)$('cc'+i).textContent='('+D.filter(r=>r[C.cat]===i).length.toLocaleString()+')';
  $('gcount').textContent=a.length.toLocaleString()+' 個';
+ if($('thf').value!=='off'){const cat=D.filter(r=>r[C.cat]===curCat);const p=cat.filter(passThreshold).length;
+   $('thnote').innerHTML=`此分類「${CATN[curCat]}」共 ${cat.length.toLocaleString()} 個，在目前門檻(CV≥${(+$('cv').value).toFixed(2)}、|Δβ|≥${(+$('db').value).toFixed(2)}、reads≥${$('rd').value}、${$('mode').value})下：<b class="kgreen">通過 ${p.toLocaleString()}</b> ／ <b class="kor">被篩掉 ${(cat.length-p).toLocaleString()}</b>。拉動 §⑤ 滑桿即時改變。`;}
+ else $('thnote').textContent='';
  const pages=Math.max(1,Math.ceil(a.length/PER));page=Math.min(page,pages-1);
  $('grid').innerHTML=a.slice(page*PER,page*PER+PER).map(card).join('')||'<div class="sub">無符合</div>';
  $('pager').innerHTML=`<button ${page<=0?'disabled':''} onclick="page--;draw()">‹</button><span>第 ${page+1}/${pages} 頁</span><button ${page>=pages-1?'disabled':''} onclick="page++;draw()">›</button>`;
@@ -354,7 +425,8 @@ window.openM=k=>{const r=D.find(x=>key(x)===k);if(!r)return;
  const ch=CHRS[r[C.ck]];
  const st=[['分類',CATN[r[C.cat]]],['CramersV (gate)',r[C.cv].toFixed(3)],['Δβ (HPMerged)',(r[C.db]>=0?'+':'')+r[C.db].toFixed(3)],
   ['NumReads',r[C.rd]],['NumCpG',r[C.cg]],['global_p',r[C.gp]],['Cluster PERMANOVA F',r[C.pf]],['HP PERMANOVA F',r[C.hpf]],
-  ['Tier',['—','A','B'][r[C.tier]]],['獨立驗證',r[C.val]===1?'✓通過':r[C.val]===0?'⚠失敗':'未測'],['min HP group',r[C.mhn]],['LOH',r[C.loh]?'是':'否']];
+  ['Tier',['—','A','B'][r[C.tier]]],['獨立驗證',r[C.val]===1?'✓通過':r[C.val]===0?'⚠失敗':'未測'],['min HP group',r[C.mhn]],
+  ['CN× 拷貝數倍數',r[C.cnv].toFixed(2)],['CNV 類別',COVCAT[r[C.covcat]]],['LOH',r[C.loh]?'是':'否'],['LOH 亞型',LOHSUB[r[C.lohsub]]],['品質',QUAL[r[C.qual]]]];
  const fig=r[C.fig]?`<div class="mfigs"><div><div class="sub" style="text-align:center">甲基 read×CpG</div><img src="figs/${k}_meth.png"></div><div><div class="sub" style="text-align:center">read×read 距離（樹狀+HP側欄）</div><img src="figs/${k}_dist.png"></div></div>`:'<div class="nofig">無圖</div>';
  $('mc').innerHTML=`<div style="display:flex;justify-content:space-between"><h2 style="border:none;margin:0">${ch}:${r[C.ps]} ${badges(r)}</h2><button onclick="closeM()">關閉 ✕</button></div>
   ${fig}<div class="statg">${st.map(s=>`<div class="st"><div class="l">${s[0]}</div><div class="n">${s[1]}</div></div>`).join('')}</div>
