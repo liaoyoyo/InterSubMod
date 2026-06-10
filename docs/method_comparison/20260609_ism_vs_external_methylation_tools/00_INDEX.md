@@ -25,7 +25,7 @@ provenance_note: 本 INDEX 為導航/摘要; 數字皆引自子文件(已各標�
 
 ---
 
-## L1 — 六文件導航（讀到夠就停）
+## L1 — 文件導航（讀到夠就停）
 
 | # | 文件 | 一句話 | 何時讀 |
 |---|------|--------|--------|
@@ -34,7 +34,11 @@ provenance_note: 本 INDEX 為導航/摘要; 數字皆引自子文件(已各標�
 | **03** | [`03_method_comparison_matrix.md`](03_method_comparison_matrix.md) | **對照矩陣**：ISM 能力 × 11 工具逐格 ✓/✗/部分 + point-by-point 細節差異 | 要答「細節哪裡不同」 |
 | **04** | [`04_cross_analysis_data_vs_literature.md`](04_cross_analysis_data_vs_literature.md) | **結果×文獻**：我們 Δβ/ASM/結論 vs 外部論文數據（5 維 + alignment verdict）| 要答「我們數據 vs 外部觀察」 |
 | **05** | [`05_improve_learn_recommendations.md`](05_improve_learn_recommendations.md) | **改進/學習**：10 條排序建議（FIX/LEARN/KEEP）+ 引用修正 | 要知道下一步改什麼 |
-| **06** | [`06_benchmark_plan_phaseB.md`](06_benchmark_plan_phaseB.md) | **Phase B 方案**：實機下載運行規劃（modkit/cvlr/ASMS vs ISM）⚠未執行 | 要實機比較時 |
+| **06** | [`06_benchmark_plan_phaseB.md`](06_benchmark_plan_phaseB.md) | **Phase B 方案**：實機下載運行規劃（modkit/cvlr/ASMS vs ISM）| 要實機比較時 |
+| **07** | [`benchmark/07_benchmark_results.md`](benchmark/07_benchmark_results.md) | **Phase B 結果**：modkit dmr vs ISM（BRCA2/TBC1D16）率差層收斂 + ISM 分層分解 | 看實機 head-to-head |
+| **08** ⭐ | [`benchmark/08_external_program_audit.md`](benchmark/08_external_program_audit.md) | **外部程式稽核 ISM**：modkit/DSS/permutation 三審 → 解析正確(r=0.98) + Fisher 不偏樂觀（推翻擔心）| 問「ISM 要不要修」 |
+| **09** | [`09_clustering_verification_illustrated.standalone.html`](09_clustering_verification_illustrated.standalone.html) | **分群驗證方法示意圖 HTML**：Fisher/CramersV/PERMANOVA/Δ/silhouette 圖解 + 487-latent | 想看圖學方法 |
+| **10** ⭐ | [`10_improvement_execution_plan.md`](10_improvement_execution_plan.md) | **改進執行計畫**：12 項（差別/為何有用/怎麼改 file:line）+ 稽核後修訂優先序 | 要動手改 ISM 時 |
 | HTML | [`report.standalone.html`](report.standalone.html) | 清楚整理的單頁互動版（同內容，PI 閱讀版）| 要好讀的視覺版 |
 | 原始 | `_assets/workflow_raw_result.json` + `survey_digest.md` | 82 工具完整結構化資料 + 萃取 | 要查單一工具細節/引用 |
 
