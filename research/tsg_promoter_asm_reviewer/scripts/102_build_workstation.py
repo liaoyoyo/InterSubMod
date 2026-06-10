@@ -50,6 +50,7 @@ def main():
     fn = json.load(open(f"{DV}/funnel_numbers.json"))
     figidx = json.load(open(f"{DV}/fig_index.json")) if os.path.exists(f"{DV}/fig_index.json") else {}
     seqc2 = json.load(open(f"{DV}/seqc2_cn.json")) if os.path.exists(f"{DV}/seqc2_cn.json") else {}
+    sqvs = json.load(open(f"{DV}/seqc2_vs_ism.json")) if os.path.exists(f"{DV}/seqc2_vs_ism.json") else {}
 
     chrs, chr_idx = [], {}
     rows = []
@@ -96,7 +97,8 @@ def main():
 
     H = TEMPLATE
     for tok, val_ in (("__DATA__", payload), ("__CHRS__", chrsj), ("__FUNNEL__", funnel),
-                      ("__STAMP__", stamp), ("__NFIG__", str(nfig), ), ("__NTOTAL__", str(len(rows)))):
+                      ("__STAMP__", stamp), ("__NFIG__", str(nfig), ), ("__NTOTAL__", str(len(rows))),
+                      ("__SQVS__", json.dumps(sqvs, ensure_ascii=False))):
         H = H.replace(tok, val_)
     with open(OUT, "w") as f:
         f.write(H)
@@ -214,6 +216,9 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color
 <h2>④ 觀察圖表（即時，依當前資料）</h2>
 <div class="panel"><div id="charts"></div></div>
 
+<h2>④b SEQC2 CN 真值 × ISM 分類 關連分析（confound 檢查）</h2>
+<div class="panel" id="sqvs"></div>
+
 <h2>⑤ 即時門檻試算（全 __NTOTAL__）</h2>
 <div class="panel">
  <div class="row">
@@ -248,7 +253,20 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color
 <div id="modal" onclick="if(event.target.id==='modal')closeM()"><div class="mc" id="mc"></div></div>
 
 <script>
-const D=__DATA__, CHRS=__CHRS__, FN=__FUNNEL__;
+const D=__DATA__, CHRS=__CHRS__, FN=__FUNNEL__, SQVS=__SQVS__;
+function renderSqvs(){const el=document.getElementById('sqvs');if(!el||!SQVS.B_per_class_rates){el&&(el.innerHTML='(分析檔未生成)');return;}
+ const R=SQVS.B_per_class_rates, order=['gain','loh','neutral','loss'];
+ let h=`<div class="sub" style="margin-bottom:8px">關連強度 Cramér's V = <b>${SQVS.A_cramersV}</b>（弱-中度）。下表：每個 SEQC2 CN 類別中，ISM 各分類的比例與平均統計（全 ${SQVS.n.toLocaleString()} 位點）。</div>
+ <table style="font-size:11.5px"><tr><th>SEQC2 CN (真值)</th><th>n</th><th>PASS%</th><th>可能漏掉%</th><th>Tier A%</th><th>ISM-LOH%</th><th>中位 reads</th><th>平均 CramersV</th><th>平均 Δβ</th><th>PASS 富集×</th></tr>`;
+ for(const k of order){const r=R[k];const en=SQVS.D_pass_enrichment[k];
+  const hi=k==='loh';
+  h+=`<tr${hi?' style="color:#d8b4fe"':''}><td><b>${k}</b></td><td class="n">${r.n.toLocaleString()}</td><td class="n">${r.pass_pct}</td><td class="n">${r.missed_pct}</td><td class="n">${r.tierA_pct}</td><td class="n">${r.ismLOH_pct}</td><td class="n">${r.median_reads}</td><td class="n">${r.mean_cv}</td><td class="n">${r.mean_db}</td><td class="n">${en}×</td></tr>`;}
+ h+=`</table>
+ <div class="note" style="margin-top:10px"><b>結論（confound 檢查）：</b>ASM 結構在 <b>SEQC2 LOH 區最低</b>（PASS 2.0% / Tier A 0.0% / 平均 CramersV 0.018 / Δβ 0.006，富集 0.46×），在 neutral/gain 最高（富集 1.23×）。
+ <b>方向符合生物學</b>：LOH＝一條單倍型丟失 → 只剩單一 haplotype → 無法有 HP1-vs-HP2 甲基差異 → ASM 結構本就該少。<b>這不是 CN 製造假 ASM，而是 CN 狀態決定 ASM 是否「可能存在」（需兩條單倍型）。</b>
+ 過嚴格(稀疏歸零)位點 <b>89% 在 gain</b>（reads 多但 HP-fine 子群不平衡）、僅 4% 在 LOH（基線 29%）→ 過嚴格非 LOH 驅動。獨立驗證通過率各 CN 類別大致均勻（71-92%）→ 驗證過的 ASM 非 CN artifact。
+ ⚠ 單樣本 HCC1395、關連屬描述性（L3 機制推論）；對齊既有 CN-confound pilot（甲基分群差異主要 mutation-linked，confound 通道大致排除）。</div>`;
+ el.innerHTML=h;}
 // column index: 0 ck,1 pos,2 cls,3 cat,4 cv,5 db,6 rd,7 cg,8 loh,9 tier,10 val,11 mhn,12 pf,13 hpf,14 fig,15 gp
 const C={ck:0,ps:1,cl:2,cat:3,cv:4,db:5,rd:6,cg:7,loh:8,tier:9,val:10,mhn:11,pf:12,hpf:13,fig:14,gp:15,cnv:16,covcat:17,lohsub:18,qual:19,sqc:20,sqcn:21};
 const $=id=>document.getElementById(id);
@@ -456,7 +474,7 @@ window.importJ=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReade
   saveJ();draw();prog();redesign();alert('匯入 '+n+' 筆判斷');}catch(err){alert('匯入失敗：'+err);}};rd.readAsText(f);};
 window.clearJ=()=>{J={};saveJ();draw();prog();redesign();};
 
-coverage();prog();redesign();charts();live();draw();
+coverage();prog();redesign();charts();renderSqvs();live();draw();
 </script></body></html>"""
 
 

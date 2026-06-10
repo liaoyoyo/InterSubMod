@@ -1,0 +1,100 @@
+{
+ "n": 30350,
+ "seqc2_dist": {
+  "neutral": 1033,
+  "loh": 8897,
+  "gain": 19946,
+  "loss": 474
+ },
+ "A_contingency": {
+  "neutral": {
+   "PASS": 55,
+   "MISSED": 172,
+   "FILTERED": 806
+  },
+  "gain": {
+   "PASS": 1061,
+   "MISSED": 2608,
+   "FILTERED": 16277
+  },
+  "loss": {
+   "PASS": 17,
+   "MISSED": 23,
+   "FILTERED": 434
+  },
+  "loh": {
+   "PASS": 175,
+   "MISSED": 116,
+   "FILTERED": 8606
+  }
+ },
+ "A_cramersV": 0.146,
+ "B_per_class_rates": {
+  "neutral": {
+   "n": 1033,
+   "pass_pct": 5.3,
+   "missed_pct": 16.7,
+   "overstrict_pct": 16.7,
+   "tierA_pct": 4.9,
+   "ismLOH_pct": 6.4,
+   "median_reads": 54.0,
+   "mean_cv": 0.047,
+   "mean_db": 0.064,
+   "mean_permf": 1936124.0,
+   "val_pass_rate": 78.6
+  },
+  "gain": {
+   "n": 19946,
+   "pass_pct": 5.3,
+   "missed_pct": 13.1,
+   "overstrict_pct": 13.1,
+   "tierA_pct": 4.2,
+   "ismLOH_pct": 27.3,
+   "median_reads": 78.0,
+   "mean_cv": 0.043,
+   "mean_db": 0.045,
+   "mean_permf": 150421.0,
+   "val_pass_rate": 81.1
+  },
+  "loss": {
+   "n": 474,
+   "pass_pct": 3.6,
+   "missed_pct": 4.9,
+   "overstrict_pct": 4.9,
+   "tierA_pct": 3.4,
+   "ismLOH_pct": 84.6,
+   "median_reads": 23.0,
+   "mean_cv": 0.035,
+   "mean_db": 0.021,
+   "mean_permf": 4219423.3,
+   "val_pass_rate": 92.0
+  },
+  "loh": {
+   "n": 8897,
+   "pass_pct": 2.0,
+   "missed_pct": 1.3,
+   "overstrict_pct": 1.3,
+   "tierA_pct": 0.0,
+   "ismLOH_pct": 95.3,
+   "median_reads": 45.0,
+   "mean_cv": 0.018,
+   "mean_db": 0.006,
+   "mean_permf": 337205.0,
+   "val_pass_rate": 71.4
+  }
+ },
+ "C_overstrict_profile": {
+  "n_overstrict": 2919,
+  "pct_in_seqc2_loh": 4.0,
+  "pct_in_seqc2_gain": 89.3,
+  "pct_ismLOH": 6.8,
+  "median_minHP": 21.0,
+  "baseline_seqc2_loh_pct": 29.3
+ },
+ "D_pass_enrichment": {
+  "neutral": 1.23,
+  "gain": 1.23,
+  "loss": 0.84,
+  "loh": 0.46
+ }
+}
