@@ -24,7 +24,8 @@ provenance_note: 每項對應(a)一個外部工具/方法 +(b)一個 ISM 源碼 
 
 **ISM 核心方法沒有「會翻轉結論」的錯誤**（外部程式稽核 08 + 全碼稽核一致）。可改進處分三類：**🔴 補洞/補測試（真高 ROI）· 🟡 統計校準（有用非錯誤）· 🟢 從外部工具學習採納（feature 增強）**。
 
-> 🔴 **最重要的修訂（誠實）**：我先前列「Fisher→beta-binomial」為**最高 ROI #1**，但 **08 外部程式稽核用真資料推翻了它**——per-CpG Fisher 的 null 假陽性只有 **0.7–1.9%（<5%，沒偏樂觀）**，稽核引用的「53–68% 膨脹」是**合成模擬真資料不重現**。→ **per-CpG Fisher 不需改**；真正的統計 gap 是**跨 region/genome 的多重檢定校正**（不同東西）。**不要白做 beta-binomial 改寫。**
+> 🟡 **修訂（誠實，2026-06-11 再校正）**：08 Audit B' 只證了 per-CpG Fisher 的**假陽性端沒問題**（null FP 0.7–1.9% < 5%）——但**只測了 specificity（FP），沒測 sensitivity（會不會漏掉肉眼+tag 看得到的真差異）**。用戶指出「肉眼一致但分析提取不出」的位點 = **敏感度/讀層結構/與 normal 比對**的問題，那種失效**Fisher（逐點率）本來就測不到**。→ **不能因此認定 Fisher→beta-binomial 沒效**；正確結論 = (a) 假陽性端 Fisher OK（不必為「擋假陽性」而改）；(b) **敏感度端 OPEN** —— beta-binomial **配 delta 效果量閾值（DSS callDML 風格）**、或改用**讀層結構（PERMANOVA）+ normal-HP 參考**，才是抓「肉眼看得到但率測漏」的正路。**正在大規模驗證（816 loci）量化 sensitivity gap。**
+> 真正獨立的統計 gap 仍是**跨 region/genome 的多重檢定校正**（與上面正交，見 🔴1）。
 
 ---
 
@@ -45,9 +46,9 @@ provenance_note: 每項對應(a)一個外部工具/方法 +(b)一個 ISM 源碼 
 | **🟢 11** | **imprinting ICR 正控** | 學習 | germline benchmark | 補正控 | 分析 |
 | **🟢 12** | **modkit dmr** 當 genome-wide pre-filter | 學習 | modkit | 省 compute | pipeline |
 
-> ❌ **不要做（外部稽核確認非必要 / 會白做）**：
-> - per-CpG Fisher → beta-binomial **改寫**（08 Audit B' 證 per-CpG Fisher null FP<5%，不偏樂觀）。
-> - **重寫 MM/ML 解析邏輯**（08 Audit A 證 r=0.98 正確；只補測試 pin，勿改邏輯）。
+> ⚠ **要小心、別誤判的**：
+> - per-CpG Fisher → beta-binomial：**不要為了「擋假陽性」而改**（B' 證 FP 端 OK）；**但為了「敏感度/抓肉眼可見差異」仍 OPEN**（見 🟡8b + 🔴13）—— 標準不同結論就不同。
+> - **重寫 MM/ML 解析邏輯**：不要（08 Audit A 證 r=0.98 正確；只補測試 pin，勿改邏輯）。
 
 ---
 
@@ -112,6 +113,23 @@ provenance_note: 每項對應(a)一個外部工具/方法 +(b)一個 ISM 源碼 
 - **差別**：現狀 = CORE 1-3 重（UPGMA O(N³) + 999 perm 每 region）。改進 = 全基因組先跑 modkit dmr（快 Rust）triage，再對通過率差/MHL screen 的 region 跑昂貴結構檢定。
 - **為何有用**：降 compute 不改結論層；modkit 重疊 ISM 的 Δβ 層正好當快速 triage。
 - **怎麼改**：pipeline 前置 `modkit dmr pair`（08 已驗指令）篩 region。檔案：pipeline 編排。
+
+### 🔴 13. normal haplotype-tag 參考比對（用戶提案 — 驗證+提取「肉眼可見差異區」）
+- **差別**：現狀 cis-test 只用 **normal HP1** 當基線 A（`d_cis = tumor HP1-1 − normal HP1`），**沒用 normal HP2**、也沒建「normal 的等位基線（HP1 vs HP2）」。改進 = 加 **normal HP1-vs-HP2 germline-allelic baseline**，把 tumor 的等位差異**相對於 normal 等位基線**校正。
+- **為何可能有用（關鍵）**：
+  1. **驗證肉眼可見差異**：肉眼看到「某 block 在 somatic tag 上甲基化」→ 問「normal 的兩條 haplotype 在同一 CpG 是不是也這樣」。若 **normal HP1≈HP2（平）但 tumor HP1≠HP1-1（差）= 真 tumor-specific**；若 normal HP1-vs-HP2 也有同樣差 = germline allelic baseline（非 tumor-specific，現在會被誤算）。
+  2. **提取率測漏掉的差異**：「肉眼一致但提取不出」常是讀層 block 差異（per-CpG 率中間值，Fisher 測不到）→ normal 參考 + 讀層結構（PERMANOVA）一起，比單純 per-CpG 率更能 surface 這些區域。
+  3. **資料已備**：816 個 Level-1 cache **全部有 normal HP1+HP2**（本 session 確認 BRCA2 normal|1=3960/|2=3996）→ 零額外定序成本。
+- **怎麼改**：
+  - 分析層先驗（不動 binary）：擴 `scripts/34` cis-test 成 **4-way**（normal HP1/HP2 + tumor HP1/HP1-1），加 `d_germline_allelic = normal HP1 − normal HP2`、`d_tumor_net = d_somatic − d_germline_allelic`（tumor 超出 germline 基線的部分）。
+  - 若驗證有效 → 把 normal-HP2 基線納入 ISM 的 `NormalBaseline`（目前只存 per-CpG normal mean，不分 HP）→ 改成 **per-CpG-per-HP normal baseline**。檔案：`NormalBaseline.hpp/.cpp` + `scripts/34`。
+- **狀態**：🔴 **高優先（816-loci 大規模驗證後升級為強建議，見 `benchmark/11`）**：normal germline 等位基線 **|Δβ(HP1vsHP2)| median=0.237 > tumor somatic 0.181 且目前未控**；matched-CpG **73%(209/285) loci 有真 tumor-specific CpG**（normal 平 tumor 差，中位 2/locus）→ normal 參考能**驗證+提取**這些差異區、並提醒 77% 位點 germline 基線 ≥ tumor 差異（不控會誤算）。
+
+### 🟡 8b. Fisher 配 delta 效果量閾值（抓敏感度，非擋假陽性）
+- **差別**：現狀 Fisher 只看 p<0.05（小覆蓋離散 → 偏保守、漏中等差異）。改進 = 加 **effect-size 閾值門（|Δβ|≥0.1 + p）** 或 **beta-binomial + delta**（DSS callDML 風格：同時要 p 小 **且** 可信 Δ 大）。
+- **為何有用**：「肉眼可見但 p 不顯著」常是覆蓋邊際 → 純 p 漏掉；effect-size + 可信區間能保留「Δ 大、雖 p 邊際」的真差異（= 不同標準、不同結論，用戶的點）。
+- **怎麼改**：`PerCpgAsm` / `cis_asm_core` 的 per-CpG 判準加 `|Δβ|≥閾值` 並列；或引 beta-binomial credible-Δ。檔案：`PerCpgAsm.cpp` / `pipeline/lib/cis_asm_core.py`。
+- **狀態（816-loci 驗證後，見 `benchmark/11`）**：🟡 OPEN 確認 —— **8.5–17% 結構顯著 loci 率測弱/不強**（集中 T0/T2），純看 p 的 Fisher 會漏；effect-size 門檻可補回敏感度。**半推翻先前「Fisher 不需改」**：FP 端 OK、**敏感度端需要**。
 
 ---
 
