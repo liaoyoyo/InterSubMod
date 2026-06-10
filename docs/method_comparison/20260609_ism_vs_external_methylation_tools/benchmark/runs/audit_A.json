@@ -1,0 +1,28 @@
+{
+  "BRCA2": {
+    "chrom": "chr13",
+    "coord_offset": -1,
+    "n_matched_cpg": 98,
+    "n_ism_cpg": 285,
+    "n_modkit_cpg": 782,
+    "pearson_r": 0.9759745568611634,
+    "spearman_r": 0.9261773422720724,
+    "mean_abs_diff": 0.042237232382481005,
+    "mean_beta_ism(thr0.5)": 0.19087883624277127,
+    "mean_pct_modkit(thr0.74)": 0.22727040816326533,
+    "note": "threshold differs (ISM 0.5 vs modkit auto ~0.74) -> systematic offset expected; r tests pattern/position fidelity"
+  },
+  "TBC1D16": {
+    "chrom": "chr17",
+    "coord_offset": -1,
+    "n_matched_cpg": 83,
+    "n_ism_cpg": 333,
+    "n_modkit_cpg": 3138,
+    "pearson_r": 0.9929843879419162,
+    "spearman_r": 0.9166895548740085,
+    "mean_abs_diff": 0.03434134260700517,
+    "mean_beta_ism(thr0.5)": 0.6246052044730955,
+    "mean_pct_modkit(thr0.74)": 0.6388240963855422,
+    "note": "threshold differs (ISM 0.5 vs modkit auto ~0.74) -> systematic offset expected; r tests pattern/position fidelity"
+  }
+}
