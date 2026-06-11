@@ -14,10 +14,12 @@ Template placeholders use {{dotted.key}} resolved against data.json (nested dict
 and list indices supported, e.g. {{regions.0.auc}}).
 
 Contract (the whole point — fail loud, never silently fabricate):
-  - Every {{key}} MUST resolve to a value in data.json.
-  - If ANY placeholder is unresolved -> ERROR, refuse to write output (exit 1),
-    list the offending keys. This prevents shipping {{auc}} or a stale value.
-  - --allow-missing renders unresolved keys as {{MISSING:key}} and exits 0 with a
+  - Every {{key}} MUST resolve to a REAL value in data.json.
+  - A key that is absent, OR present but null/NaN, counts as "no value computed"
+    and is treated identically: ERROR, refuse to write output (exit 1), list the
+    offending keys. (0 and False are legitimate computed values and DO render.)
+    This prevents shipping {{auc}}, a stale value, or a literal 'None'/'nan'.
+  - --allow-missing renders such keys as {{MISSING:key}} and exits 0 with a
     warning (for in-progress drafting only; never use for validated/PI output).
 
 Every value written is therefore traceable to <data.json>:<key>, which is exactly
@@ -25,10 +27,21 @@ what number_provenance.py audit/gate verifies downstream.
 """
 import argparse
 import json
+import math
 import re
 import sys
 
 PLACEHOLDER = re.compile(r"\{\{\s*([A-Za-z0-9_.\-]+)\s*\}\}")
+
+
+def is_nullish(value):
+    """A resolved value that carries no real measurement: None or NaN float.
+
+    These must be refused like a missing key (anti-fabrication): rendering them
+    would emit the literal text 'None'/'nan' into a report. Note 0 and False are
+    NOT nullish — they are legitimate computed values.
+    """
+    return value is None or (isinstance(value, float) and math.isnan(value))
 
 
 def resolve(data, dotted):
@@ -77,7 +90,8 @@ def main():
     def sub(m):
         key = m.group(1)
         found, val = resolve(data, key)
-        if not found:
+        # Absent OR present-but-null/NaN are both "no value computed" -> refuse.
+        if not found or is_nullish(val):
             missing.append(key)
             return f"{{{{MISSING:{key}}}}}"
         return fmt(val)
@@ -86,7 +100,8 @@ def main():
 
     if missing:
         uniq = sorted(set(missing))
-        print(f"[fill_report] {len(uniq)} placeholder(s) have NO source in {args.data_json}:",
+        print(f"[fill_report] {len(uniq)} placeholder(s) have NO usable value "
+              f"(absent or null/NaN) in {args.data_json}:",
               file=sys.stderr)
         for k in uniq:
             print(f"  - {{{{{k}}}}}", file=sys.stderr)
