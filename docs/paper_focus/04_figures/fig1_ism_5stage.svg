@@ -1,0 +1,131 @@
+<svg viewBox="0 0 1180 630" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="圖 1. InterSubMod (ISM) read-level 甲基化分析管線：五階段架構"><title>圖 1. InterSubMod (ISM) read-level 甲基化分析管線：五階段架構</title><desc>ISM C++ 核心五階段（模組名取自 src/core/*、常數取自源碼）· 每個 somatic SNV 由 OpenMP 獨立並行處理 · 不含上游 ONT 工具與下游 Python 後處理</desc><rect width="1180" height="630" fill="#FAF9F5"/>
+<text x="10" y="26" font-size="16" font-weight="800" fill="#141413">圖 1. InterSubMod (ISM) read-level 甲基化分析管線：五階段架構</text>
+<text x="10" y="46" font-size="11.5" fill="#6B6B66">ISM C++ 核心五階段（模組名取自 src/core/*、常數取自源碼）· 每個 somatic SNV 由 OpenMP 獨立並行處理 · 不含上游 ONT 工具與下游 Python 後處理</text>
+<rect x="12" y="114" width="1156" height="64" rx="9" fill="#475569" opacity=".07"/>
+<text x="22" y="134" font-size="11.5" font-weight="800" fill="#475569">① 輸入 + Read 擷取</text>
+<text x="22" y="151" font-size="8.5" fill="#6B6B66">每個 somatic SNV 獨立並行</text>
+<rect x="204.0" y="129.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+<text x="279.0" y="145.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">Somatic VCF</text>
+<text x="279.0" y="157.0" font-size="8" fill="#6B6B66" text-anchor="middle">SNV 位點</text>
+<rect x="380.0" y="129.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+<text x="455.0" y="145.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">取視窗</text>
+<text x="455.0" y="157.0" font-size="8" fill="#6B6B66" text-anchor="middle">±1000 bp</text>
+<line x1="354.0" y1="146.0" x2="376.0" y2="146.0" stroke="#475569" stroke-width="2.5"/>
+<path d="M376.0,142.5 L380.0,146.0 L376.0,149.5" fill="#475569"/>
+<rect x="556.0" y="129.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+<text x="631.0" y="145.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">抓 read</text>
+<text x="631.0" y="157.0" font-size="8" fill="#6B6B66" text-anchor="middle">BamReader</text>
+<line x1="530.0" y1="146.0" x2="552.0" y2="146.0" stroke="#475569" stroke-width="2.5"/>
+<path d="M552.0,142.5 L556.0,146.0 L552.0,149.5" fill="#475569"/>
+<rect x="732.0" y="129.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+<text x="807.0" y="145.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">ReadParser 過濾</text>
+<text x="807.0" y="157.0" font-size="8" fill="#6B6B66" text-anchor="middle">MAPQ≥20·len≥1000</text>
+<line x1="706.0" y1="146.0" x2="728.0" y2="146.0" stroke="#475569" stroke-width="2.5"/>
+<path d="M728.0,142.5 L732.0,146.0 L728.0,149.5" fill="#475569"/>
+<rect x="908.0" y="129.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/>
+<text x="983.0" y="145.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">HP tag</text>
+<text x="983.0" y="157.0" font-size="8" fill="#6B6B66" text-anchor="middle">1/2/1-1/2-1/3</text>
+<line x1="882.0" y1="146.0" x2="904.0" y2="146.0" stroke="#475569" stroke-width="2.5"/>
+<path d="M904.0,142.5 L908.0,146.0 L904.0,149.5" fill="#475569"/>
+<line x1="232" y1="178" x2="232" y2="195" stroke="#6B6B66" stroke-width="2"/>
+<path d="M228.5,191 L232,195 L235.5,191" fill="#6B6B66"/>
+<rect x="12" y="200" width="1156" height="64" rx="9" fill="#1B8A86" opacity=".07"/>
+<text x="22" y="220" font-size="11.5" font-weight="800" fill="#1B8A86">② 甲基矩陣建構</text>
+<text x="22" y="237" font-size="8.5" fill="#6B6B66">MM/ML → 矩陣 · 僅 5mC</text>
+<rect x="204.0" y="215.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/>
+<text x="279.0" y="231.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">解 MM/ML</text>
+<text x="279.0" y="243.0" font-size="8" fill="#6B6B66" text-anchor="middle">5mC-only</text>
+<rect x="380.0" y="215.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/>
+<text x="455.0" y="231.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">CIGAR→ref</text>
+<text x="455.0" y="243.0" font-size="8" fill="#6B6B66" text-anchor="middle">定位 CpG</text>
+<line x1="354.0" y1="232.0" x2="376.0" y2="232.0" stroke="#1B8A86" stroke-width="2.5"/>
+<path d="M376.0,228.5 L380.0,232.0 L376.0,235.5" fill="#1B8A86"/>
+<rect x="556.0" y="215.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/>
+<text x="631.0" y="231.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">Read×CpG 矩陣</text>
+<text x="631.0" y="243.0" font-size="8" fill="#6B6B66" text-anchor="middle">MatrixBuilder</text>
+<line x1="530.0" y1="232.0" x2="552.0" y2="232.0" stroke="#1B8A86" stroke-width="2.5"/>
+<path d="M552.0,228.5 L556.0,232.0 L552.0,235.5" fill="#1B8A86"/>
+<rect x="732.0" y="215.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/>
+<text x="807.0" y="231.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">二值化</text>
+<text x="807.0" y="243.0" font-size="8" fill="#6B6B66" text-anchor="middle">閾 0.8 / 0.2</text>
+<line x1="706.0" y1="232.0" x2="728.0" y2="232.0" stroke="#1B8A86" stroke-width="2.5"/>
+<path d="M728.0,228.5 L732.0,232.0 L728.0,235.5" fill="#1B8A86"/>
+<line x1="232" y1="264" x2="232" y2="281" stroke="#6B6B66" stroke-width="2"/>
+<path d="M228.5,277 L232,281 L235.5,277" fill="#6B6B66"/>
+<rect x="12" y="286" width="1156" height="64" rx="9" fill="#2F5597" opacity=".07"/>
+<text x="22" y="306" font-size="11.5" font-weight="800" fill="#2F5597">③ Read-to-read 距離矩陣</text>
+<text x="22" y="323" font-size="8.5" fill="#6B6B66">read×read · 無 imputation</text>
+<rect x="204.0" y="301.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#2F5597" stroke-width="1.4"/>
+<text x="279.0" y="317.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">共同 CpG</text>
+<text x="279.0" y="329.0" font-size="8" fill="#6B6B66" text-anchor="middle">≥3</text>
+<rect x="380.0" y="301.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#2F5597" stroke-width="1.4"/>
+<text x="455.0" y="317.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">距離度量</text>
+<text x="455.0" y="329.0" font-size="8" fill="#6B6B66" text-anchor="middle">NHD / BERNOULLI</text>
+<line x1="354.0" y1="318.0" x2="376.0" y2="318.0" stroke="#2F5597" stroke-width="2.5"/>
+<path d="M376.0,314.5 L380.0,318.0 L376.0,321.5" fill="#2F5597"/>
+<rect x="556.0" y="301.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#2F5597" stroke-width="1.4"/>
+<text x="631.0" y="317.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">N×N 矩陣</text>
+<text x="631.0" y="329.0" font-size="8" fill="#6B6B66" text-anchor="middle">DistanceMatrix</text>
+<line x1="530.0" y1="318.0" x2="552.0" y2="318.0" stroke="#2F5597" stroke-width="2.5"/>
+<path d="M552.0,314.5 L556.0,318.0 L552.0,321.5" fill="#2F5597"/>
+<rect x="732.0" y="301.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#2F5597" stroke-width="1.4"/>
+<text x="807.0" y="317.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">NaN 策略</text>
+<text x="807.0" y="329.0" font-size="8" fill="#6B6B66" text-anchor="middle">MAX_DIST</text>
+<line x1="706.0" y1="318.0" x2="728.0" y2="318.0" stroke="#2F5597" stroke-width="2.5"/>
+<path d="M728.0,314.5 L732.0,318.0 L728.0,321.5" fill="#2F5597"/>
+<line x1="232" y1="350" x2="232" y2="367" stroke="#6B6B66" stroke-width="2"/>
+<path d="M228.5,363 L232,367 L235.5,363" fill="#6B6B66"/>
+<rect x="12" y="372" width="1156" height="64" rx="9" fill="#2E7D52" opacity=".07"/>
+<text x="22" y="392" font-size="11.5" font-weight="800" fill="#2E7D52">④ UPGMA 階層聚類</text>
+<text x="22" y="409" font-size="8.5" fill="#6B6B66">silhouette 選 k=2..min(6,N/2)</text>
+<rect x="204.0" y="387.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#2E7D52" stroke-width="1.4"/>
+<text x="279.0" y="403.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">UPGMA</text>
+<text x="279.0" y="415.0" font-size="8" fill="#6B6B66" text-anchor="middle">linkage</text>
+<rect x="380.0" y="387.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#2E7D52" stroke-width="1.4"/>
+<text x="455.0" y="403.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">選 k</text>
+<text x="455.0" y="415.0" font-size="8" fill="#6B6B66" text-anchor="middle">silhouette</text>
+<line x1="354.0" y1="404.0" x2="376.0" y2="404.0" stroke="#2E7D52" stroke-width="2.5"/>
+<path d="M376.0,400.5 L380.0,404.0 L376.0,407.5" fill="#2E7D52"/>
+<rect x="556.0" y="387.0" width="150.0" height="34" rx="6" fill="#fff" stroke="#2E7D52" stroke-width="1.4"/>
+<text x="631.0" y="403.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">群標籤</text>
+<text x="631.0" y="415.0" font-size="8" fill="#6B6B66" text-anchor="middle">TreeCutter</text>
+<line x1="530.0" y1="404.0" x2="552.0" y2="404.0" stroke="#2E7D52" stroke-width="2.5"/>
+<path d="M552.0,400.5 L556.0,404.0 L552.0,407.5" fill="#2E7D52"/>
+<line x1="232" y1="436" x2="232" y2="453" stroke="#6B6B66" stroke-width="2"/>
+<path d="M228.5,449 L232,453 L235.5,449" fill="#6B6B66"/>
+<rect x="12" y="458" width="1156" height="64" rx="9" fill="#B8860B" opacity=".07"/>
+<text x="22" y="478" font-size="11.5" font-weight="800" fill="#B8860B">⑤ 顯著性檢定套件 → 輸出</text>
+<text x="22" y="495" font-size="8.5" fill="#6B6B66">雙路檢定 → 117 欄/位點</text>
+<rect x="204.0" y="473.0" width="138.3" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/>
+<text x="273.2" y="489.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">GlobalTest</text>
+<text x="273.2" y="501.0" font-size="8" fill="#6B6B66" text-anchor="middle">Fisher-FFH gating</text>
+<rect x="368.3" y="473.0" width="138.3" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/>
+<text x="437.5" y="489.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">StructureTest</text>
+<text x="437.5" y="501.0" font-size="8" fill="#6B6B66" text-anchor="middle">PERMANOVA 99-perm</text>
+<line x1="342.3" y1="490.0" x2="364.3" y2="490.0" stroke="#B8860B" stroke-width="2.5"/>
+<path d="M364.3,486.5 L368.3,490.0 L364.3,493.5" fill="#B8860B"/>
+<rect x="532.7" y="473.0" width="138.3" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/>
+<text x="601.8" y="489.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">LabelTest</text>
+<text x="601.8" y="501.0" font-size="8" fill="#6B6B66" text-anchor="middle">HP/allele 置換</text>
+<line x1="506.7" y1="490.0" x2="528.7" y2="490.0" stroke="#B8860B" stroke-width="2.5"/>
+<path d="M528.7,486.5 L532.7,490.0 L528.7,493.5" fill="#B8860B"/>
+<rect x="697.0" y="473.0" width="138.3" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/>
+<text x="766.2" y="489.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">PerCpgAsm</text>
+<text x="766.2" y="501.0" font-size="8" fill="#6B6B66" text-anchor="middle">逐CpG Fisher+FDR</text>
+<line x1="671.0" y1="490.0" x2="693.0" y2="490.0" stroke="#B8860B" stroke-width="2.5"/>
+<path d="M693.0,486.5 L697.0,490.0 L693.0,493.5" fill="#B8860B"/>
+<rect x="861.3" y="473.0" width="138.3" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/>
+<text x="930.5" y="489.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">判定類別</text>
+<text x="930.5" y="501.0" font-size="8" fill="#6B6B66" text-anchor="middle">4 值 + Significant</text>
+<line x1="835.3" y1="490.0" x2="857.3" y2="490.0" stroke="#B8860B" stroke-width="2.5"/>
+<path d="M857.3,486.5 L861.3,490.0 L857.3,493.5" fill="#B8860B"/>
+<rect x="1025.7" y="473.0" width="138.3" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/>
+<text x="1094.8" y="489.0" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">輸出</text>
+<text x="1094.8" y="501.0" font-size="8" fill="#6B6B66" text-anchor="middle">summary.csv 117欄</text>
+<line x1="999.7" y1="490.0" x2="1021.7" y2="490.0" stroke="#B8860B" stroke-width="2.5"/>
+<path d="M1021.7,486.5 L1025.7,490.0 L1021.7,493.5" fill="#B8860B"/>
+<line x1="10" y1="544" x2="1170" y2="544" stroke="#eee"/>
+<text x="10" y="566" font-size="10.5" font-weight="700" fill="#7a4">▣ label-flip：HP1-1 ≡ HP1 germline 鏈上帶 somatic ALT 的子單倍型（非第三 haplotype）；圖／分析端標示須一致</text>
+<text x="10" y="584" font-size="10.5" fill="#9a6212">⚠ 誠實標註：預設 germline_hp_only=off → HP1-1 併入 HP-family 1（＝ALLELE 軸）；somatic 子單倍型軸需 hp_fine 4 群；cis-test／copy-partition 在下游 Python（非本 binary）；單樣本 HCC1395／⭐3</text>
+<text x="10" y="602" font-size="9.5" fill="#6B6B66">※ 流程 schematic：模組名與常數取自 ISM 源碼（附 file:line，可 grep），本圖無分析數值。</text>
+</svg>

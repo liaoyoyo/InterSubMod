@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<!--
+建立時間: 2026-06-09
+狀態: staging (位點甲基分群 catalog schema 逐欄確認互動 HTML)
+報告類型: catalog_schema_interactive_confirm
+受眾: 廖子游（逐欄打勾確認 schema）
+data_sources:
+  - docs/paper_focus/02_paper_framework/位點甲基分群catalog_schema提案.md
+provenance_note: schema 為設計提案（🔵）；範例數值沿用已驗證集合（🟢🟡）；閾值多 ⚠TBD。互動答案存 localStorage。
+-->
+<!-- provenance-verified: 內容取自 02_paper_framework/位點甲基分群catalog_schema提案.md；本 HTML 為其互動 companion。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>catalog schema — 逐欄確認</title>
+<style>
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#141413; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --radius:10px;
+  --font:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);background:var(--c-bg);color:var(--c-text);line-height:1.55;font-size:15px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border)}
+.topbar .wrap{display:flex;align-items:center;gap:var(--sp-3);min-height:50px;flex-wrap:wrap}
+.topbar h1{font-size:.92rem;margin:0;font-weight:700}
+.topbar .sp{margin-left:auto;display:flex;gap:var(--sp-2)}
+.btn{font-family:var(--font);font-size:.8rem;font-weight:700;padding:5px 12px;border-radius:7px;border:1px solid var(--c-accent);background:var(--c-accent);color:#fff;cursor:pointer}
+.btn.ghost{background:#fff;color:var(--c-accent)}
+header.hero{padding:var(--sp-5) 0 var(--sp-3)}
+header.hero h2{font-size:1.45rem;margin:var(--sp-2) 0}
+.kicker{font-family:var(--mono);font-size:.72rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;font-size:.9rem}
+.howto{background:var(--c-info-soft);border:1px solid var(--c-info);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);font-size:.84rem;margin:var(--sp-3) 0}
+section{padding:var(--sp-4) 0;border-top:1px solid var(--c-border)}
+h3{font-size:1.1rem;margin:0 0 var(--sp-3);display:flex;gap:var(--sp-2);align-items:baseline}
+h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:700;font-size:.85rem}
+.badge{display:inline-block;font-size:.66rem;font-family:var(--mono);font-weight:700;padding:1px 5px;border-radius:4px;border:1px solid;white-space:nowrap}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.row{background:var(--c-card);border:1px solid var(--c-border);border-radius:9px;padding:var(--sp-3) var(--sp-4);margin:var(--sp-2) 0;box-shadow:0 1px 2px rgba(20,20,19,.05)}
+.row .name{font-weight:700;font-family:var(--mono);font-size:.86rem}
+.row .def{font-size:.84rem;color:var(--c-text-soft);margin:2px 0}
+.row .nums{font-size:.78rem;color:var(--c-info);font-family:var(--mono)}
+.confirm[data-item]{margin-top:8px;display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.opts label{cursor:pointer;font-size:.78rem;padding:3px 10px;border:1px solid var(--c-border);border-radius:18px;background:#fff;user-select:none}
+.opts input{display:none}
+.opts label:has(input[value="keep"]:checked){background:var(--c-pass-soft);border-color:var(--c-pass);color:var(--c-pass);font-weight:700}
+.opts label:has(input[value="tweak"]:checked){background:var(--c-warn-soft);border-color:var(--c-warn);color:var(--c-warn);font-weight:700}
+.opts label:has(input[value="drop"]:checked){background:var(--c-dead-soft);border-color:var(--c-dead);color:var(--c-dead);font-weight:700}
+.confirm input.note{flex:1;min-width:180px;border:1px solid var(--c-border);border-radius:6px;padding:5px 8px;font-family:var(--font);font-size:.82rem;background:#FCFBF8}
+.confirm input.note:focus{outline:2px solid var(--c-accent-soft);border-color:var(--c-accent)}
+.tagrow{border-left:4px solid var(--c-accent)}
+.note-inline{font-size:.8rem;color:var(--c-text-soft)}
+footer{border-top:1px solid var(--c-border);padding:var(--sp-5) 0;font-size:.78rem;color:var(--c-text-soft)}
+footer code{font-family:var(--mono);background:#F0EDE6;padding:1px 5px;border-radius:4px}
+#exportBox{display:none;position:fixed;inset:5% 50% auto 50%;transform:translateX(-50%);width:min(720px,90vw);max-height:86vh;overflow:auto;background:#fff;border:2px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-4);z-index:100}
+#exportBox textarea{width:100%;min-height:360px;font-family:var(--mono);font-size:.78rem;border:1px solid var(--c-border);border-radius:7px;padding:9px}
+#overlay{display:none;position:fixed;inset:0;background:rgba(20,20,19,.35);z-index:90}
+@media print{.btn,.confirm input.note{display:none}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="wrap">
+  <h1>catalog schema — 逐欄確認</h1>
+  <div class="sp"><button class="btn ghost" onclick="resetAll()">清空</button><button class="btn" onclick="exportAnswers()">匯出我的回答 ▸</button></div>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <div class="kicker">Locus methylation-clustering catalog · schema confirm</div>
+  <h2>位點甲基分群標籤 catalog — 逐欄勾選確認</h2>
+  <div class="bluf"><b>L0：</b>catalog = 一位點一列 → <b>9 分類欄 + 7 數值欄 → 收斂成 1 個 TAG（共 7 類）+ 6 張觀察分佈圖</b>。核心欄 <code>clustering_reliability</code> 直接答「哪些位點甲基分群明顯」。骨架先跑（現有欄），Δβ/cis 之後補。</div>
+  <div class="howto">📝 每列選 <b>✅保留 / ✏️微調 / ❌移除</b> + 寫意見（自動存瀏覽器）。圖那節是 <b>要/改/不要</b>。答完按右上「匯出我的回答」貼回給我。三色：🟢有證據 / 🟡待對賬 / 🔵設計提案。</div>
+</div></header>
+
+<main class="wrap">
+
+<section>
+  <h3><span class="num">A</span> 核心分類欄（4 — 決定 TAG 的主力）</h3>
+  <div class="row">
+    <div class="name">① clustering_reliability ⭐核心</div>
+    <div class="def">reliable（CramersV Cochran 最小期望格≥5 且顯著）/ latent（CV gated=0 但 PERMANOVA 顯著＝487 類）/ none</div>
+    <div class="nums">配數值：cramersV_value · permanova_p · min_expected_cell ｜⚠ PERMANOVA p 閾值/minN 待校準</div>
+    <div class="confirm" data-item="COL-reliability"><div class="opts"><label><input type="radio" name="COL-reliability" value="keep"><span>✅保留</span></label><label><input type="radio" name="COL-reliability" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="COL-reliability" value="drop"><span>❌移除</span></label></div><input class="note" data-note="COL-reliability" placeholder="閾值/三態定義意見…"></div>
+  </div>
+  <div class="row">
+    <div class="name">② dbeta_magnitude</div>
+    <div class="def">large / medium / small（per-position allele 甲基平均差）<span class="badge b-warn">依賴 ISM-3</span></div>
+    <div class="nums">配數值：dbeta_max ｜⚠ cutoff large≥0.2/med0.1-0.2/small 待校準；高-Δβ FP-prone 須配 clustering</div>
+    <div class="confirm" data-item="COL-dbeta"><div class="opts"><label><input type="radio" name="COL-dbeta" value="keep"><span>✅保留</span></label><label><input type="radio" name="COL-dbeta" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="COL-dbeta" value="drop"><span>❌移除</span></label></div><input class="note" data-note="COL-dbeta" placeholder="cutoff 意見…"></div>
+  </div>
+  <div class="row">
+    <div class="name">③ clustering_origin</div>
+    <div class="def">somatic-linked / germline-allelic / drift（blind-ARI vs germline-het null，imprinting 正控）</div>
+    <div class="nums">配數值：ari_value · ari_null · ari_p ｜B2 證多為 germline-allelic</div>
+    <div class="confirm" data-item="COL-origin"><div class="opts"><label><input type="radio" name="COL-origin" value="keep"><span>✅保留</span></label><label><input type="radio" name="COL-origin" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="COL-origin" value="drop"><span>❌移除</span></label></div><input class="note" data-note="COL-origin" placeholder="…"></div>
+  </div>
+  <div class="row">
+    <div class="name">④ cis_status</div>
+    <div class="def">cis / copy / drift / untestable（normal-anchored cis-test + copy-partition）<span class="badge b-warn">依賴 D3</span></div>
+    <div class="nums">配數值：within_d · hp_axis_d · cis_perm_p ｜⚠ 未 anchor SEQC2 CN；6 個 untestable</div>
+    <div class="confirm" data-item="COL-cis"><div class="opts"><label><input type="radio" name="COL-cis" value="keep"><span>✅保留</span></label><label><input type="radio" name="COL-cis" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="COL-cis" value="drop"><span>❌移除</span></label></div><input class="note" data-note="COL-cis" placeholder="…"></div>
+  </div>
+</section>
+
+<section>
+  <h3><span class="num">B</span> 結構/補充欄（含你加的 n_CpG/coverage/LOH/gene）</h3>
+  <div class="row"><div class="name">⑤ somatic_status</div><div class="def">somatic / germline-het / FP（ClairS-TO VCF + SEQC2 truth）</div>
+    <div class="confirm" data-item="COL-somatic"><div class="opts"><label><input type="radio" name="COL-somatic" value="keep"><span>✅保留</span></label><label><input type="radio" name="COL-somatic" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="COL-somatic" value="drop"><span>❌移除</span></label></div><input class="note" data-note="COL-somatic" placeholder="…"></div></div>
+  <div class="row"><div class="name">⑥ axis（HP-axis / ALLELE-axis）</div><div class="def">somatic-controlled vs germline-confounded；LOH 位點只有 ALLELE-axis</div>
+    <div class="confirm" data-item="COL-axis"><div class="opts"><label><input type="radio" name="COL-axis" value="keep"><span>✅保留</span></label><label><input type="radio" name="COL-axis" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="COL-axis" value="drop"><span>❌移除</span></label></div><input class="note" data-note="COL-axis" placeholder="…"></div></div>
+  <div class="row"><div class="name">⑦ mod_type（5mC / 5hmC / mixed）</div><div class="def">BAM MM/ML <span class="badge b-warn">依賴 MSA Level1 dup-bug 修復</span>（否則 collapse artifact，BRCA2 教訓）</div>
+    <div class="confirm" data-item="COL-mod"><div class="opts"><label><input type="radio" name="COL-mod" value="keep"><span>✅保留</span></label><label><input type="radio" name="COL-mod" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="COL-mod" value="drop"><span>❌移除</span></label></div><input class="note" data-note="COL-mod" placeholder="…"></div></div>
+  <div class="row"><div class="name">⑧ recurrence（single / cross-N）</div><div class="def">跨樣本復現（0/38 underpowered → 復發稀有非 private）</div>
+    <div class="confirm" data-item="COL-recur"><div class="opts"><label><input type="radio" name="COL-recur" value="keep"><span>✅保留</span></label><label><input type="radio" name="COL-recur" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="COL-recur" value="drop"><span>❌移除</span></label></div><input class="note" data-note="COL-recur" placeholder="…"></div></div>
+  <div class="row" style="border-color:var(--c-info)"><div class="name">⑨ LOH_status（in/out LOH）<span class="badge b-info">你加的</span></div><div class="def">影響 axis + artifact 判讀</div>
+    <div class="confirm" data-item="COL-loh"><div class="opts"><label><input type="radio" name="COL-loh" value="keep"><span>✅保留</span></label><label><input type="radio" name="COL-loh" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="COL-loh" value="drop"><span>❌移除</span></label></div><input class="note" data-note="COL-loh" placeholder="…"></div></div>
+  <div class="row" style="border-color:var(--c-info)"><div class="name">⑩ n_CpG / coverage / region_size <span class="badge b-info">你加的</span></div><div class="def">影響 reliability 的基本量（檢查 reliability 是否被覆蓋驅動）</div>
+    <div class="confirm" data-item="COL-cov"><div class="opts"><label><input type="radio" name="COL-cov" value="keep"><span>✅保留</span></label><label><input type="radio" name="COL-cov" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="COL-cov" value="drop"><span>❌移除</span></label></div><input class="note" data-note="COL-cov" placeholder="…"></div></div>
+  <div class="row" style="border-color:var(--c-info)"><div class="name">⑪ gene / is_TSG_promoter <span class="badge b-info">你加的</span></div><div class="def">生物意義（是否落 TSG promoter）</div>
+    <div class="confirm" data-item="COL-gene"><div class="opts"><label><input type="radio" name="COL-gene" value="keep"><span>✅保留</span></label><label><input type="radio" name="COL-gene" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="COL-gene" value="drop"><span>❌移除</span></label></div><input class="note" data-note="COL-gene" placeholder="…"></div></div>
+  <div class="row"><div class="name">⑫ provenance_tier（🟢/🟡）</div><div class="def">數字是否原檔對賬</div>
+    <div class="confirm" data-item="COL-tier"><div class="opts"><label><input type="radio" name="COL-tier" value="keep"><span>✅保留</span></label><label><input type="radio" name="COL-tier" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="COL-tier" value="drop"><span>❌移除</span></label></div><input class="note" data-note="COL-tier" placeholder="…"></div></div>
+</section>
+
+<section>
+  <h3><span class="num">C</span> 7 個 TAG（每位點收斂成 1 個 = 標籤分類）</h3>
+  <div class="row tagrow"><div class="name">TAG-A 乾淨 cis somatic-ASM</div><div class="def">reliable + cis + somatic-linked + somatic（寶物，例 chr17/TBC1D16 🟡）</div>
+    <div class="confirm" data-item="TAG-A"><div class="opts"><label><input type="radio" name="TAG-A" value="keep"><span>✅保留</span></label><label><input type="radio" name="TAG-A" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="TAG-A" value="drop"><span>❌移除</span></label></div><input class="note" data-note="TAG-A" placeholder="…"></div></div>
+  <div class="row tagrow"><div class="name">TAG-B copy-artifact</div><div class="def">cis_status=copy（排除於 cis，例 BRCA2 🟡）</div>
+    <div class="confirm" data-item="TAG-B"><div class="opts"><label><input type="radio" name="TAG-B" value="keep"><span>✅保留</span></label><label><input type="radio" name="TAG-B" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="TAG-B" value="drop"><span>❌移除</span></label></div><input class="note" data-note="TAG-B" placeholder="…"></div></div>
+  <div class="row tagrow"><div class="name">TAG-C germline-allelic 背景</div><div class="def">clustering_origin=germline-allelic（多數 read-clustering）</div>
+    <div class="confirm" data-item="TAG-C"><div class="opts"><label><input type="radio" name="TAG-C" value="keep"><span>✅保留</span></label><label><input type="radio" name="TAG-C" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="TAG-C" value="drop"><span>❌移除</span></label></div><input class="note" data-note="TAG-C" placeholder="…"></div></div>
+  <div class="row tagrow"><div class="name">TAG-D high-Δβ FP-prone artifact</div><div class="def">large-Δβ + (none/latent) + LOH + 低覆蓋（regression-to-extreme，只標註不 filter）</div>
+    <div class="confirm" data-item="TAG-D"><div class="opts"><label><input type="radio" name="TAG-D" value="keep"><span>✅保留</span></label><label><input type="radio" name="TAG-D" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="TAG-D" value="drop"><span>❌移除</span></label></div><input class="note" data-note="TAG-D" placeholder="…"></div></div>
+  <div class="row tagrow"><div class="name">TAG-E latent 真分群</div><div class="def">CV gated 但 PERMANOVA 顯著（487 類，納回提升 characterization）</div>
+    <div class="confirm" data-item="TAG-E"><div class="opts"><label><input type="radio" name="TAG-E" value="keep"><span>✅保留</span></label><label><input type="radio" name="TAG-E" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="TAG-E" value="drop"><span>❌移除</span></label></div><input class="note" data-note="TAG-E" placeholder="…"></div></div>
+  <div class="row tagrow"><div class="name">TAG-F untestable</div><div class="def">pure-ALT/CGI-desert（6 最強訊號，需新法/COLO829）</div>
+    <div class="confirm" data-item="TAG-F"><div class="opts"><label><input type="radio" name="TAG-F" value="keep"><span>✅保留</span></label><label><input type="radio" name="TAG-F" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="TAG-F" value="drop"><span>❌移除</span></label></div><input class="note" data-note="TAG-F" placeholder="…"></div></div>
+  <div class="row tagrow"><div class="name">TAG-G 無訊號</div><div class="def">none + small-Δβ（背景）</div>
+    <div class="confirm" data-item="TAG-G"><div class="opts"><label><input type="radio" name="TAG-G" value="keep"><span>✅保留</span></label><label><input type="radio" name="TAG-G" value="tweak"><span>✏️微調</span></label><label><input type="radio" name="TAG-G" value="drop"><span>❌移除</span></label></div><input class="note" data-note="TAG-G" placeholder="…"></div></div>
+</section>
+
+<section>
+  <h3><span class="num">D</span> 6 張觀察分佈圖（你要的「明確數值 + 分佈圖」forest view）</h3>
+  <p class="note-inline">這節選 ✅要 / ✏️改 / ❌不要。</p>
+  <div class="row"><div class="name">P1 Δβ 分佈</div><div class="def">all loci + large/med/small cutoff 線</div>
+    <div class="confirm" data-item="P1"><div class="opts"><label><input type="radio" name="P1" value="keep"><span>✅要</span></label><label><input type="radio" name="P1" value="tweak"><span>✏️改</span></label><label><input type="radio" name="P1" value="drop"><span>❌不要</span></label></div><input class="note" data-note="P1" placeholder="…"></div></div>
+  <div class="row"><div class="name">P2 CramersV 分佈</div><div class="def">reliable 閾值 + latent 區標色</div>
+    <div class="confirm" data-item="P2"><div class="opts"><label><input type="radio" name="P2" value="keep"><span>✅要</span></label><label><input type="radio" name="P2" value="tweak"><span>✏️改</span></label><label><input type="radio" name="P2" value="drop"><span>❌不要</span></label></div><input class="note" data-note="P2" placeholder="…"></div></div>
+  <div class="row"><div class="name">P3 ARI 分佈</div><div class="def">somatic TP vs germline-het null vs imprinting 正控（0.758/1.000）</div>
+    <div class="confirm" data-item="P3"><div class="opts"><label><input type="radio" name="P3" value="keep"><span>✅要</span></label><label><input type="radio" name="P3" value="tweak"><span>✏️改</span></label><label><input type="radio" name="P3" value="drop"><span>❌不要</span></label></div><input class="note" data-note="P3" placeholder="…"></div></div>
+  <div class="row"><div class="name">P4 within_d vs HP_axis_d scatter</div><div class="def">cis vs copy 對角線分界</div>
+    <div class="confirm" data-item="P4"><div class="opts"><label><input type="radio" name="P4" value="keep"><span>✅要</span></label><label><input type="radio" name="P4" value="tweak"><span>✏️改</span></label><label><input type="radio" name="P4" value="drop"><span>❌不要</span></label></div><input class="note" data-note="P4" placeholder="…"></div></div>
+  <div class="row" style="border-color:var(--c-accent)"><div class="name">P5 per-TAG 計數長條 <span class="badge b-pass">= Results R6 主圖</span></div><div class="def">7 TAG 各幾個</div>
+    <div class="confirm" data-item="P5"><div class="opts"><label><input type="radio" name="P5" value="keep"><span>✅要</span></label><label><input type="radio" name="P5" value="tweak"><span>✏️改</span></label><label><input type="radio" name="P5" value="drop"><span>❌不要</span></label></div><input class="note" data-note="P5" placeholder="…"></div></div>
+  <div class="row"><div class="name">P6 coverage/n_CpG vs reliability</div><div class="def">檢查 reliability 是否被覆蓋驅動</div>
+    <div class="confirm" data-item="P6"><div class="opts"><label><input type="radio" name="P6" value="keep"><span>✅要</span></label><label><input type="radio" name="P6" value="tweak"><span>✏️改</span></label><label><input type="radio" name="P6" value="drop"><span>❌不要</span></label></div><input class="note" data-note="P6" placeholder="…"></div></div>
+</section>
+
+<section>
+  <h3><span class="num">E</span> 待校準/缺漏（要你定的閾值）</h3>
+  <div class="row"><div class="name">閾值校準法</div><div class="def">用 imprinting 正控(GNAS/RB1=1.000) + 已知例(chr17) 校 PERMANOVA p / Δβ cutoff / cis perm p</div>
+    <div class="confirm" data-item="E-cal"><div class="opts"><label><input type="radio" name="E-cal" value="keep"><span>✅這樣校</span></label><label><input type="radio" name="E-cal" value="tweak"><span>✏️改方法</span></label><label><input type="radio" name="E-cal" value="drop"><span>❌之後再說</span></label></div><input class="note" data-note="E-cal" placeholder="…"></div></div>
+  <div class="row"><div class="name">骨架先跑（順序）</div><div class="def">先用現有欄(reliability/origin/somatic/axis/LOH/cov/gene)跑骨架表 → Δβ(ISM-3)/cis(D3) 之後補</div>
+    <div class="confirm" data-item="E-order"><div class="opts"><label><input type="radio" name="E-order" value="keep"><span>✅照這順序</span></label><label><input type="radio" name="E-order" value="tweak"><span>✏️改</span></label><label><input type="radio" name="E-order" value="drop"><span>❌不要</span></label></div><input class="note" data-note="E-order" placeholder="…"></div></div>
+  <div class="row" style="border-color:var(--c-accent)"><div class="name">📋 還想補的欄/圖/意見（自由）</div>
+    <div class="confirm" data-item="FREE" style="display:block"><input class="note" data-note="FREE" placeholder="想加的欄位 / 圖 / 任何意見…" style="width:100%"></div>
+    <p style="margin-top:var(--sp-3)"><button class="btn" onclick="exportAnswers()">匯出我的回答 ▸</button></p>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  <p>互動答案存瀏覽器 localStorage；「匯出」整理成文字貼回給 AI 即照你決定組 catalog。內容沿用已驗證集合（🟢/🟡）· git <code>8dbb931</code> · 2026-06-09 · 來源 <code>InterSubMod/docs/paper_focus/02_paper_framework/位點甲基分群catalog_schema提案.md</code>。</p>
+</div></footer>
+
+<div id="overlay" onclick="closeExport()"></div>
+<div id="exportBox"><h4 style="margin-top:0">你的回答（複製貼回給 AI）</h4><textarea id="exportText" readonly></textarea><p style="margin-bottom:0"><button class="btn" onclick="copyExport()">複製到剪貼簿</button> <button class="btn ghost" onclick="closeExport()">關閉</button></p></div>
+
+<script>
+const KEY='catalog_schema_confirm_v1';
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}}
+function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
+(function(){const d=load();
+  document.querySelectorAll('input[type=radio]').forEach(r=>{if(d['r_'+r.name]===r.value)r.checked=true;});
+  document.querySelectorAll('input.note[data-note]').forEach(t=>{const k='n_'+t.getAttribute('data-note');if(d[k])t.value=d[k];});
+})();
+document.querySelectorAll('input[type=radio]').forEach(r=>r.addEventListener('change',()=>{const d=load();d['r_'+r.name]=r.value;save(d);}));
+document.querySelectorAll('input.note[data-note]').forEach(t=>t.addEventListener('input',()=>{const d=load();d['n_'+t.getAttribute('data-note')]=t.value;save(d);}));
+const LABELS={keep:'✅保留/要',tweak:'✏️微調/改',drop:'❌移除/不要'};
+function exportAnswers(){
+  const d=load();let out='# catalog schema 確認 — 我的回答 ('+new Date().toLocaleString()+')\n\n';
+  document.querySelectorAll('.confirm[data-item]').forEach(c=>{
+    const item=c.getAttribute('data-item');const r=d['r_'+item];const n=d['n_'+item];
+    if(!r&&!n)return;
+    const nm=c.closest('.row')?.querySelector('.name');const title=nm?nm.textContent.trim():item;
+    out+='## '+item+' — '+title+'\n決定: '+(r?(LABELS[r]||r):'(未選)')+(n?('\n意見: '+n):'')+'\n\n';
+  });
+  document.getElementById('exportText').value=out;
+  document.getElementById('overlay').style.display='block';document.getElementById('exportBox').style.display='block';
+}
+function closeExport(){document.getElementById('overlay').style.display='none';document.getElementById('exportBox').style.display='none';}
+function copyExport(){const t=document.getElementById('exportText');t.select();try{navigator.clipboard.writeText(t.value);}catch(e){document.execCommand('copy');}}
+function resetAll(){if(confirm('清空所有勾選與意見？')){localStorage.removeItem(KEY);location.reload();}}
+</script>
+</body>
+</html>

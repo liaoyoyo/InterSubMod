@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<!--
+建立時間: 2026-06-10
+狀態: concept (研究歷史與論文重點 — 用戶敘述版；依用戶自己的時間流程 + 4 目標結構)
+報告類型: research_journey_user_narrative
+受眾: 廖子游（自己的敘述）· PI · 協作者
+framework: 用戶提供的個人研究旅程 timeline + 4-goal 論文結構（忠實保留用戶講法）
+data_sources:
+  - 用戶提供的研究歷史敘述（2025-02 → 2026-06）= [你的敘述] 主體
+  - research/autoresearch/evidence_ledger.jsonl + docs/paper_focus/（2026 段可驗證處 🟢 交叉引用）
+  - memory project_methyl_phasing_assist_line（目標2 V11 T1/T2✅T3❌）+ project_ism_vs_external_methylation_tools_comparison（ISM 軸C 定位）
+provenance_note: 時間軸主體=用戶敘述（其親身研究歷史，標 [你的敘述]）；2026 段數字 🟢 由 ledger 對賬；2025 段 ledger 未涵蓋故不爭議、忠實呈現。§13：本 HTML Write 與數據分析分批。
+-->
+<!-- provenance-verified: 2026 數字(BRCA2 Δβ=−0.122 / d_within=−0.023 / catalog 332705 / 目標2 T1 0.926 T2 0.90)由 ledger+memory 對賬；2025 timeline 為用戶親述其研究歷史（[你的敘述]）。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>研究歷史與論文重點 — 我的研究旅程（甲基 × phasing × 癌症）</title>
+<style>
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --c-you:#5B3FA0; --c-you-soft:#ECE6F6;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.72;font-size:16px}
+.wrap{max-width:1020px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border)}
+.topbar .in{max-width:1020px;margin:0 auto;padding:0 var(--sp-5);display:flex;align-items:center;gap:var(--sp-3);min-height:52px;flex-wrap:wrap}
+.topbar h1{font-size:.9rem;margin:0;font-weight:700}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap;font-size:.74rem;margin-left:auto}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 8px;border:1px solid var(--c-border);border-radius:18px;white-space:nowrap}
+.topbar nav a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+header.hero{padding:var(--sp-7) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h2{font-size:1.8rem;line-height:1.3;margin:var(--sp-3) 0}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-4) var(--sp-5);margin:var(--sp-4) 0}
+.bluf b{color:#9c4a2c}
+.legend{background:var(--c-you-soft);border:1px solid var(--c-you);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);font-size:.86rem;margin:var(--sp-3) 0}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.4rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:700;font-size:.95rem}
+section .sub{color:var(--c-text-soft);font-size:.95rem;margin:0 0 var(--sp-5);max-width:880px}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.b-you{color:var(--c-you);background:var(--c-you-soft);border-color:var(--c-you)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+/* timeline */
+.tl{border-left:3px solid var(--c-you);margin-left:8px;padding-left:var(--sp-5)}
+.tl .ev{position:relative;margin:var(--sp-4) 0}
+.tl .ev::before{content:"";position:absolute;left:calc(-1*var(--sp-5) - 9px);top:7px;width:11px;height:11px;border-radius:50%;background:var(--c-you);border:2px solid #fff}
+.tl .ev.key::before{background:var(--c-accent);width:14px;height:14px;left:calc(-1*var(--sp-5) - 10px)}
+.tl .ev .date{font-family:var(--mono);font-weight:700;color:var(--c-you);font-size:.82rem}
+.tl .ev.key .date{color:var(--c-accent)}
+.tl .ev .ti{font-weight:700;font-size:1.02rem}
+.tl .ev .desc{font-size:.92rem;margin-top:2px}
+.tl .ev .add{font-size:.84rem;color:var(--c-text-soft);background:#FCFBF8;border-left:3px solid var(--c-border);padding:4px 10px;margin-top:6px;border-radius:0 6px 6px 0}
+.tl .ev .add b{color:var(--c-pass)}
+.you-quote{font-style:normal;border-left:3px solid var(--c-you);padding-left:10px;color:#3a2f5a}
+/* goal cards */
+details.goal{margin:var(--sp-3) 0;border:1px solid var(--c-border);border-radius:var(--radius);background:var(--c-card);overflow:hidden;box-shadow:0 1px 2px rgba(20,20,19,.05)}
+details.goal>summary{cursor:pointer;list-style:none;padding:var(--sp-4) var(--sp-5);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap}
+details.goal>summary::-webkit-details-marker{display:none}
+details.goal>summary::before{content:"▸";color:var(--c-accent);font-weight:700}
+details.goal[open]>summary::before{content:"▾"}
+details.goal>summary .gt{font-weight:700;flex:1;min-width:240px;font-size:1.05rem}
+details.goal.g1{border-left:5px solid var(--c-pass)} details.goal.g2{border-left:5px solid var(--c-info)} details.goal.g3{border-left:5px solid var(--c-warn)} details.goal.g4{border-left:5px solid var(--c-dead)}
+.gbody{padding:0 var(--sp-5) var(--sp-5);border-top:1px solid var(--c-border)}
+.sub-list{list-style:none;padding:0;margin:var(--sp-3) 0}
+.sub-list li{border:1px solid var(--c-border);border-radius:7px;padding:var(--sp-2) var(--sp-3);margin:6px 0;font-size:.9rem;background:#FCFBF8}
+.sub-list li .st{font-family:var(--mono);font-size:.7rem;font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;margin-right:6px}
+.sub-list li .src{display:block;font-family:var(--mono);font-size:.7rem;color:var(--c-text-soft);margin-top:3px}
+.concl{border-radius:6px;padding:var(--sp-2) var(--sp-3);font-size:.88rem;margin-top:var(--sp-3)}
+.g1 .concl{background:var(--c-pass-soft)} .g2 .concl{background:var(--c-info-soft)} .g3 .concl{background:var(--c-warn-soft)} .g4 .concl{background:var(--c-dead-soft)}
+.uniq{background:var(--c-card);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-4) var(--sp-5);margin:var(--sp-4) 0}
+figure{margin:var(--sp-4) 0;text-align:center}
+figure svg{max-width:100%;height:auto;border:1px solid var(--c-border);border-radius:8px;background:#fff}
+figcaption{font-size:.8rem;color:var(--c-text-soft);margin-top:6px}
+a.ref{color:var(--c-info);text-decoration:none;border-bottom:1px dotted var(--c-info)}
+footer{border-top:1px solid var(--c-text);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-7);font-size:.78rem;color:var(--c-text-soft)}
+footer code{font-family:var(--mono);background:#F0EDE6;padding:1px 5px;border-radius:4px}
+@media print{.topbar{position:static}details.goal[open] .gbody{display:block}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in">
+  <h1>我的研究旅程 — 甲基 × phasing × 癌症</h1>
+  <nav><a href="#thesis">三支柱</a><a href="#start">緣起</a><a href="#history">研究歷史</a><a href="#uniq">ISM 獨特價值</a><a href="#method">ISM 方法細節</a><a href="#paper">論文 4 目標</a></nav>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <div class="kicker">研究歷史與論文重點 · 用我自己的講法 · 2025 → 2026</div>
+  <h2>從「跟老師討論甲基與 phase 在癌症的狀況」<br>到一篇<b>三支柱</b>的 read-level characterization + tooling 論文<br><span style="font-size:.6em;font-weight:600;color:var(--c-text-soft)">① 主軸 LOH-constrained phasing 工具 ｜ ② 支撐 ASM de-confound 能力 ｜ ③ 地基 四道誠實負結果</span></h2>
+  <div class="bluf"><b>一句話旅程：</b>我想知道<b>甲基化(methylation)與 phasing/haplotype 在癌症樣本是否有關聯</b>，再加上 read 數、LOH、CNV、CN 等資訊共同分析。一路做了 MSA→ISM 兩代工具、試過用甲基區分 TP/FP（碰壁）、轉去找 ASM 位點、最後收斂成<b>三支柱</b>：主軸把 <b>LOH-constrained phasing 做成可交付工具</b>、支撐軸用 <b>ISM 獨有的 normal-anchored cis-test + within-tag 分解</b>拆穿單用 modkit 看不出的表面假象、地基把<b>四道「甲基不能做的事」誠實證偽</b>。</div>
+  <div class="legend"><b>標記說明：</b><span class="badge b-you">你的敘述</span> 我親述的研究歷史（ledger 未必涵蓋早期，忠實呈現）｜<span class="badge b-pass">🟢 已驗</span> 2026 段由 ledger/memory 對賬的數字｜<span class="badge b-warn">機會</span>｜<span class="badge b-dead">碰壁</span>。細節都收在 ▸ 可展開卡片。</div>
+</div></header>
+
+<main class="wrap">
+
+<!-- ============ 三支柱（一眼結構）============ -->
+<section id="thesis">
+  <h3><span class="num">★</span> 這篇論文的三支柱 — 一眼結構</h3>
+  <figure style="margin:6px 0 0">
+  <svg viewBox="0 0 760 352" role="img" aria-labelledby="thx thd" style="width:100%;height:auto;max-width:760px">
+    <title id="thx">三支柱論文結構圖</title>
+    <desc id="thd">兩根脊柱並排——左為主軸 LOH-constrained phasing 工具、右為支撐軸 ASM de-confound 能力——共同站在「四道誠實負結果」的地基上。</desc>
+    <rect x="24" y="16" width="344" height="250" rx="10" fill="#E7F1EC" stroke="#2F7D5B" stroke-width="2.5"/>
+    <text x="196" y="46" text-anchor="middle" font-size="16" font-weight="700" fill="#1f5c42">① 主軸 · LOH-constrained phasing</text>
+    <text x="196" y="68" text-anchor="middle" font-size="12.5" fill="#2F7D5B">論文主軸 ｜ 可交付 tooling</text>
+    <text x="48" y="106" font-size="13.5">• 跨 7 樣本方向全一致</text>
+    <text x="48" y="136" font-size="13.5">• W=28, p=0.0078（Grade B+）</text>
+    <text x="48" y="166" font-size="13.5">• TP gap median +0.37</text>
+    <text x="48" y="196" font-size="13.5">• 交付 LOH-phasing 工具</text>
+    <rect x="48" y="220" width="116" height="26" rx="13" fill="#2F7D5B"/><text x="106" y="238" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">🟢 已驗 n=7</text>
+    <rect x="392" y="16" width="344" height="250" rx="10" fill="#FAEEDD" stroke="#B06A16" stroke-width="2.5"/>
+    <text x="564" y="46" text-anchor="middle" font-size="16" font-weight="700" fill="#8a5212">② 支撐 · ASM de-confound 能力</text>
+    <text x="564" y="68" text-anchor="middle" font-size="12.5" fill="#B06A16">ISM 獨有 ｜ characterization</text>
+    <text x="416" y="106" font-size="13.5">• normal-anchored cis-test + within-tag</text>
+    <text x="416" y="136" font-size="13.5">• 拆穿 BRCA2 表面 −0.122 假象</text>
+    <text x="416" y="166" font-size="13.5">• 真 focal cis 僅 −0.023（邊際, p=0.022）</text>
+    <text x="416" y="196" font-size="13.5">• 定位 chr17/TBC1D16 乾淨 cis</text>
+    <rect x="416" y="220" width="178" height="26" rx="13" fill="#B06A16"/><text x="505" y="238" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">🟡 單樣本 HCC1395 ⭐3</text>
+    <rect x="24" y="286" width="712" height="56" rx="8" fill="#EFEBE3" stroke="#57564F" stroke-width="2"/>
+    <text x="380" y="310" text-anchor="middle" font-size="13.5" font-weight="700" fill="#3a3a37">③ 地基 · 四道誠實負結果（reviewer 打不動的 null）</text>
+    <text x="380" y="330" text-anchor="middle" font-size="11.5" fill="#57564F">甲基不能當 filter（LOSO 100% circularity）· ASM 不判別 TP/FP（AUC≈0.505）· strong-ASM 在 FP 反富集 · LOSO sample-level NEGATIVE</text>
+  </svg>
+  <figcaption style="font-size:.82rem;color:var(--c-text-soft);margin-top:6px">三支柱<b>並陳</b>：<b>主軸 phasing</b>（🟢 已驗、可交付工具）+ <b>支撐 ASM de-confound</b>（🟡 ISM 獨有能力——BRCA2 是<u>示範案例</u>、chr17 是<u>乾淨 cis</u>）+ <b>地基 誠實負結果</b>（甲基能/不能做什麼的機制解明）。下文 §1 講歷史怎麼走到這、§2 深講支撐軸的 de-confound、§3 對應 4 目標。</figcaption>
+  </figure>
+</section>
+
+<!-- ============ 緣起 ============ -->
+<section id="start">
+  <h3><span class="num">0</span> 緣起 — 跟老師討論 + 找到關鍵論文</h3>
+  <p class="sub">研究的起點。</p>
+  <div class="tl">
+    <div class="ev key"><span class="date">起點</span> · <span class="ti">與老師討論：研究甲基與 phase 在癌症上的狀況</span>
+      <div class="desc you-quote">我想研究「甲基化(methylation)與 phasing(haplotype) 在癌症樣本上的關聯」。</div>
+    </div>
+    <div class="ev key"><span class="date">找到關鍵論文</span> · <span class="ti">證明甲基在癌症上與 phase 有觀察意義</span>
+      <div class="desc">Long-read sequencing of an advanced cancer cohort resolves rearrangements, unravels haplotypes, and reveals methylation landscapes（<a class="ref" href="https://doi.org/10.1016/j.xgen.2024.100674">doi:10.1016/j.xgen.2024.100674</a>, Cell Genomics 2024）。</div>
+      <div class="add">這篇是我的<b>奠基動機</b>：證明長讀在癌症能同時解出 rearrangement / haplotype / methylation landscape → 甲基與 phase 在癌症確實有觀察意義，值得深入。<span class="badge b-info">外部 L3</span>（投稿前 /citation-verification 核 DOI）</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 研究歷史 ============ -->
+<section id="history">
+  <h3><span class="num">1</span> 研究歷史 — 我一路怎麼做的（2025 → 2026）</h3>
+  <p class="sub">依我自己的時間流程。橙色大點 = 關鍵轉折。能對賬的 2026 段我補上 🟢 已驗結果。先看一張全貌流程圖掌握整條路。</p>
+  <figure><svg viewBox="0 0 840 320" role="img" aria-labelledby="arct arcd"><title id="arct">研究全貌流程</title><desc id="arcd">從老師討論與奠基論文，做工具試 filter 碰壁，轉向 characterization 與 LOH-phasing，de-confound 收斂到 catalog 與 tooling。</desc>
+    <defs><marker id="a1" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#D97757"/></marker></defs>
+    <rect x="10" y="24" width="160" height="48" rx="8" fill="#ECE6F6" stroke="#5B3FA0"/><text x="20" y="44" font-size="12" font-weight="700">起點：老師討論</text><text x="20" y="62" font-size="11">+ xgen2024 奠基論文</text>
+    <rect x="195" y="24" width="135" height="48" rx="8" fill="#fff" stroke="#E3DACC"/><text x="205" y="44" font-size="12">做工具</text><text x="205" y="62" font-size="11">MSA → ISM（2 代）</text>
+    <rect x="355" y="24" width="150" height="48" rx="8" fill="#fff" stroke="#E3DACC"/><text x="363" y="44" font-size="12">試「甲基 → 提升 F1」</text><text x="363" y="62" font-size="11">(目標 4 filter)</text>
+    <rect x="530" y="24" width="160" height="48" rx="8" fill="#F3E2E2" stroke="#9A3B3B"/><text x="540" y="44" font-size="12" font-weight="700" fill="#9A3B3B">🔴 LOSO 碰壁</text><text x="540" y="62" font-size="11" fill="#9A3B3B">held-out 歸零=100% 循環</text>
+    <path d="M170,48 L193,48" stroke="#D97757" stroke-width="2" marker-end="url(#a1)"/><path d="M330,48 L353,48" stroke="#D97757" stroke-width="2" marker-end="url(#a1)"/><path d="M505,48 L528,48" stroke="#D97757" stroke-width="2" marker-end="url(#a1)"/>
+    <rect x="195" y="120" width="310" height="46" rx="8" fill="#F3E2E2" stroke="#9A3B3B"/><text x="205" y="140" font-size="12" font-weight="700" fill="#9A3B3B">🔴 並行發現：self-phasing 循環 / longphase-TO tag 問題</text><text x="205" y="158" font-size="11" fill="#9A3B3B">→ 解釋為何 HP/甲基特徵在 TO 全失效（污染非設計）</text>
+    <rect x="10" y="240" width="190" height="50" rx="8" fill="#F2E4DC" stroke="#D97757"/><text x="20" y="262" font-size="12" font-weight="700">轉向 characterization</text><text x="20" y="280" font-size="11">+ LOH-phasing 當主軸</text>
+    <rect x="225" y="240" width="190" height="50" rx="8" fill="#F2E4DC" stroke="#D97757"/><text x="235" y="262" font-size="12">de-confound</text><text x="235" y="280" font-size="11">copy-partition（揭真相）</text>
+    <rect x="440" y="240" width="250" height="50" rx="8" fill="#E4F0EA" stroke="#2F7D5B"/><text x="450" y="262" font-size="12" font-weight="700" fill="#2F7D5B">✅ 收斂：332,705 catalog</text><text x="450" y="280" font-size="11" fill="#2F7D5B">+ phasing tooling（characterization 非 filter）</text>
+    <path d="M610,72 L350,238" stroke="#D97757" stroke-width="2" marker-end="url(#a1)"/><text x="470" y="120" font-size="10" fill="#D97757">碰壁→轉向</text>
+    <path d="M350,166 L200,238" stroke="#9A3B3B" stroke-width="1.5" stroke-dasharray="4" marker-end="url(#a1)"/>
+    <path d="M200,265 L223,265" stroke="#D97757" stroke-width="2" marker-end="url(#a1)"/><path d="M415,265 L438,265" stroke="#D97757" stroke-width="2" marker-end="url(#a1)"/>
+  </svg><figcaption>整條路：做工具 → 試 filter 碰壁(目標4) → 轉 characterization+LOH-phasing → de-confound → 收斂 catalog+tooling。self-phasing/tag 問題的發現是關鍵轉折的觸媒。</figcaption></figure>
+  <div class="tl">
+
+    <div class="ev"><span class="date">2025-02-27</span> · <span class="ti">發現實際 subclone 個案 + 甲基關聯 + 演化樹方法</span>
+      <div class="desc you-quote">發現了有實際的 subclone 個案，可使用甲基關聯，加上演化樹分析的方法建立 subclone。</div>
+      <div class="add">這是<b>目標 3（subclone 演化還原）</b>的種子。<span class="badge b-you">你的敘述</span></div>
+    </div>
+
+    <div class="ev"><span class="date">2025-05-29</span> · <span class="ti">設計第一版 MethylSomaticAnalysis (MSA)</span>
+      <div class="desc you-quote">設計 MSA 提取所有甲基數據來觀察；用不同特徵方法確認是否能區分 paired TP/FP，並用 PCA 來區分。</div>
+      <div class="add">第一代工具誕生。<span class="badge b-you">你的敘述</span></div>
+    </div>
+
+    <div class="ev"><span class="date">2025-06-25</span> · <span class="ti">用 IGV 大規模肉眼觀察</span>
+      <div class="desc you-quote">用 IGV 去大規模觀察確認。!! 當時認為有清楚的結構，TP 與 FP 有差別 —— 但怕先入為主，所以需要用程式完整分析甲基觀察。</div>
+      <div class="add">這個<b>自我警覺</b>後來被證明非常正確：肉眼「看到差別」最終被程式嚴謹分析推翻（TP/FP 在甲基空間其實重疊巨大）。這是好的科學紀律。<span class="badge b-you">你的敘述</span></div>
+    </div>
+
+    <div class="ev"><span class="date">2025-07-03</span> · <span class="ti">整理 ASM 種類與分類 + 研究問題對應</span>
+      <div class="desc you-quote">整理各種 ASM 種類與分類，確認可能狀況、如何觀察、與哪些研究問題相關。</div>
+    </div>
+
+    <div class="ev"><span class="date">2025-07-17</span> · <span class="ti">MSA 太慢 → 設計第二版 InterSubMod (ISM)</span>
+      <div class="desc you-quote">發現 MSA 太耗時，找到原因並設計第二版 InterSubMod。</div>
+      <div class="add">第二代工具 = 現在的 ISM。<span class="badge b-you">你的敘述</span></div>
+    </div>
+
+    <div class="ev"><span class="date">2025-08-14</span> · <span class="ti">MSA 確認 AF + 甲基可微幅提升 paired F1</span>
+      <div class="desc you-quote">用 MSA 確認 AF 加上甲基可以微幅提升 HCC1395 paired 的 F1，有合理解釋。</div>
+      <div class="add">這是 <b>目標 4（TP/FP filter）</b>的早期正面訊號。<span class="badge b-pass">🟢 後續對賬</span>：2026 重做為 pilot ΔF1=+0.00242（marginal，&lt;+0.005 Cohen）—— 與你說的「微幅」一致。</div>
+    </div>
+
+    <div class="ev"><span class="date">2025-08-20</span> · <span class="ti">引入 Cursor，AI 化開發</span>
+      <div class="desc you-quote">引入 Cursor AI 化。</div>
+    </div>
+
+    <div class="ev key"><span class="date">2025-09-04 → 09-10</span> · <span class="ti">確認 paired F1 提升很小 → 轉向找 ASM 位點</span>
+      <div class="desc you-quote">確認在 paired 上提升 F1 很小 → 轉向找尋 ASM 位點。</div>
+      <div class="add"><b>第一個關鍵轉折</b>：從「用甲基提升 F1」pivot 到「找 ASM 位點」。這個方向後來成為論文主軸（目標 1）。<span class="badge b-pass">🟢</span> 2026 LOSO 最終證實 filter 方向是 100% sample-level circularity（你當年的直覺對了）。</div>
+    </div>
+
+    <div class="ev"><span class="date">2025-09-17</span> · <span class="ti">重找文獻，確認方法與背景知識</span>
+      <div class="desc you-quote">重新找文獻確認各種方法與背景知識，哪些會影響分析結果。</div>
+    </div>
+
+    <div class="ev"><span class="date">2025-10-22 → 10-29</span> · <span class="ti">整理觀察 + 比較其他軟體 + 論文整理</span>
+      <div class="desc you-quote">整理觀察結果、比較其他軟體、開始論文整理。</div>
+      <div class="add">「比較其他軟體」這條一路延續到 2026 的 ISM vs modkit/NanoMethPhase 6 軸比較（見下方 ISM 獨特價值）。</div>
+    </div>
+
+    <div class="ev"><span class="date">2025-11-26</span> · <span class="ti">InterSubMod 用 Cursor 大規模自動產碼</span>
+      <div class="desc you-quote">用 Cursor 大規模自動產生程式碼。</div>
+    </div>
+
+    <div class="ev"><span class="date">2025-12-18 → 12-19</span> · <span class="ti">設計統計細節（分群與 tag 關係）+ 找 SEQC2 subclone 驗證</span>
+      <div class="desc you-quote">設計統計細節，確認如何驗證「分群與 tag 的關係」；找 SEQC2 的 subclone 研究去驗證。</div>
+      <div class="add">「分群 vs tag 關係」這條最後在 2026 收斂成一個關鍵發現：甲基分群其實是 <b>germline-haplotype 層級</b>（跟 tag 對齊），不是 somatic subclone。</div>
+    </div>
+
+    <div class="ev"><span class="date">2026-01-21 → 01-28</span> · <span class="ti">兩種分群方式 + 知識傳承（實驗室知識庫）</span>
+      <div class="desc you-quote">兩種分群方式；建立實驗室知識庫做知識傳承。</div>
+    </div>
+
+    <div class="ev key"><span class="date">2026-03-12</span> · <span class="ti">AI 自動化 PPT + LOH/CNV SEQC2 解答 + 轉 longphase-TO</span>
+      <div class="desc you-quote">PPT AI 自動化；找到 LOH 與 CNV 的 SEQC2 解答；轉向去 longphase-TO 確認能否提升 F1，但數據仍不明顯，發現 AF 與 HCC1395 有強關係，甲基不好處理；並發現 longphase-TO tag 的一些問題。</div>
+      <div class="add"><b>第二個關鍵轉折</b>：發現 <b>AF 與 HCC1395 強關係</b>（甲基反而是 caller_af 的 proxy）+ <b>longphase-TO tag 問題</b>。<span class="badge b-pass">🟢</span> 2026 對賬：這正是 self-phasing 循環依賴根因（somatic HP bias 17.3:1）+「甲基 vestigial、caller_af 主導 coef +3.44」。</div>
+    </div>
+
+    <div class="ev"><span class="date">2026-04-19 → 04-20</span> · <span class="ti">修 KDE infra bug → 推翻多個 COLO829 結論</span>
+      <div class="desc">CN 估計的 expected_coverage 被 hardcode 成 75×，實際 HCC1395 是 53.0×（真值 54×，舊值是 +39% artifact）。</div>
+      <div class="add"><b>重要清理</b>：這個 infra 修復<b>推翻了 2 個 COLO829 的 CRITICAL 結論</b>（原來是 baseline 計算 artifact，排除率 79.40%→4.87%）。提醒「修對基礎設施會改變結論」。<span class="badge b-pass">🟢 已驗</span><span class="src" style="font-family:var(--mono);font-size:.72rem">ledger 20260420/20260421</span></div>
+    </div>
+    <div class="ev key"><span class="date">2026-04-22 → 04-23</span> · <span class="ti">LOH-constrained phasing 主軸誕生（NG=2 same-hap）</span>
+      <div class="desc">發現 LOH 區 NG=2 的 Inner reads ≥93% 屬同一單倍型（6/6 樣本，0 reversal）。</div>
+      <div class="add"><b>論文主軸候選</b>：NG=2 Inner vs Outer gap 6/6 皆正，Wilcoxon W=21 p=0.0156，TP gap median +0.37。<span class="badge b-pass">🟢 已驗</span> 後加 COLO829 成 n=7（W=28 p=0.0078）。<span class="src" style="font-family:var(--mono);font-size:.72rem">ledger 20260423_B1 / 20260530_n7</span></div>
+    </div>
+    <div class="ev"><span class="date">2026-05-05 → 05-11</span> · <span class="ti">self-phasing priority-bug 完整 audit（V5/V6 修補鏈）</span>
+      <div class="desc">量化 longphase-TO 的 priority bug —— 接續你 2026-03-12 發現的「longphase-TO tag 問題」。</div>
+      <div class="add"><b>承接你發現的 tag 問題</b>：全基因組 34,855 個 read-level victims；三層獨立證據鏈（somatic HP bias 17.3:1 + IGV + 34,855 victims）；V6 patch 移除 Layer 1.5 後 strictly dominates baseline，caller F1 三版不變；PI 簽核（254/273 verified, 0 fabrication）。<span class="badge b-pass">🟢</span><span class="src" style="font-family:var(--mono);font-size:.72rem">ledger 20260508 / 20260522</span></div>
+    </div>
+    <div class="ev key"><span class="date">2026-05-18 → 05-20</span> · <span class="ti">甲基 filter 用 LOSO 嚴格證死（目標 4 碰壁定案）</span>
+      <div class="desc">重做甲基 filter：in-sample ΔF1=+0.02236 看似不錯，但 LOSO（leave-one-sample-out）held-out −0.00012 = 100% sample-level circularity。</div>
+      <div class="add"><b>你 2025-09「F1 很小」的直覺正式被證實</b>：5 樣本 mean −0.00004 Wilcoxon p=0.125（方向負）；HCC1954 transfer −0.377；甲基 vestigial（drop 全 5 甲基特徵只掉 +0.00065）。→ filter 方向 WITHDRAWN，轉 characterization。<span class="badge b-pass">🟢</span><span class="src" style="font-family:var(--mono);font-size:.72rem">ledger 20260520_loso</span></div>
+    </div>
+    <div class="ev key"><span class="date">2026-05-27</span> · <span class="ti">找到 ASM 決定性位點 ZAR1L / BRCA2</span>
+      <div class="desc you-quote">找到 ASM_ZAR1L_ex 決定性位點。</div>
+      <div class="add"><b>目標 1 的決定性實際案例。</b><span class="badge b-pass">🟢 已驗</span> BRCA2 (chr13:32,315,128) HP-axis Δβ=−0.122（純 5mC，2 抽取器交叉驗證）。<span class="src" style="font-family:var(--mono);font-size:.72rem">ledger 20260529/20260530</span></div>
+    </div>
+
+    <div class="ev"><span class="date">2026-05-29 → 05-31</span> · <span class="ti">ASM characterization 全面展開 — 但證實非 somatic 判別器</span>
+      <div class="desc">從 BRCA2/ZAR1L 擴到全 39,447 TP；同時嚴格測「甲基能不能判別 somatic TP/FP」。</div>
+      <div class="add"><b>關鍵誠實結果</b>：ASM 真實存在（BRCA2 hypo p=6.09e-11）但 <b>anti-discriminative</b>（strong-ASM 在 FP enriched 5×, OR=0.194 p=1.8e-28）；甲基分群是 <b>germline-allelic</b>（TP ARI 0.135 &lt; null 0.177）；imprinting 正控 ARI 0.758（5× somatic）反證方法有效 → NEGATIVE 是真 biology 不是方法失敗。<span class="badge b-pass">🟢</span><span class="src" style="font-family:var(--mono);font-size:.72rem">ledger 20260530/20260531</span></div>
+    </div>
+    <div class="ev key"><span class="date">2026-06-04</span> · <span class="ti">完整整理方法與困難（收斂）</span>
+      <div class="desc you-quote">完整整理方法與困難。</div>
+      <div class="add"><b>收斂點</b>：ASM 廣泛存在但非 usable filter（TP significant 3.95% &gt; FP 1.07% 但低 sensitivity ~4%）；全基因組僅 chr17/TBC1D16 唯一乾淨 cis；甲基分群真實但壓倒性非 somatic 判別器。<span class="badge b-pass">🟢</span><span class="src" style="font-family:var(--mono);font-size:.72rem">ledger 20260604 / catalog 332,705 位點 7-TAG</span></div>
+    </div>
+    <div class="ev key"><span class="date">2026-06-07</span> · <span class="ti">copy-partition de-confound — 揭露 chr17 是唯一乾淨 cis</span>
+      <div class="desc">用 normal-anchored cis-test + copy 分解，把「表面看似 cis 的 ASM」拆成 copy vs 真 cis（= 上方「ISM 獨特價值」的核心）。</div>
+      <div class="add"><b>de-confound 收斂</b>：BRCA2 表面 −0.122 主要是 <b>subclone/copy 混淆的 artifact</b>（HP1-1=somatic subclone tag，<b>非 copy-number dosage</b>），真 focal cis 只 d_within=−0.023（邊際）；copy <b>dosage</b> decisively NOT driver（MW p=0.62, ρ=−0.083 反向）；全基因組 816 loci 中僅 <b>chr17/TBC1D16 唯一乾淨 cis</b>。<span class="badge b-pass">🟢</span><span class="src" style="font-family:var(--mono);font-size:.72rem">ledger 20260603/20260607</span></div>
+    </div>
+    <div class="ev key"><span class="date">2026-06-09</span> · <span class="ti">收斂成 332,705 位點 catalog（目標 1 交付物）</span>
+      <div class="desc">把 6 樣本全基因組甲基分群結果結構化成 7-TAG catalog，每位點貼一個語意標籤。</div>
+      <div class="add"><b>目標 1 的最終交付物</b>：A=1（chr17 唯一乾淨 cis）/ C=12,868（germline-allelic 背景）/ G=291,518（無訊號）；獨立 workflow 6/6 重驗。<span class="badge b-pass">🟢</span><span class="src" style="font-family:var(--mono);font-size:.72rem">ledger 20260609 / wf_5644ed77 6/6</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ISM 獨特價值 ============ -->
+<section id="uniq">
+  <h3><span class="num">2</span> ISM 的獨特價值 — 一個 modkit 看不出、ISM 才揭露的真相</h3>
+  <p class="sub">這是整個工具為何值得做的最佳說明（你給的例子）。</p>
+  <div class="uniq">
+    <p class="you-quote" style="font-size:1.02rem">「如果只用 modkit，你會把 BRCA2 的表面 ASM（≈ <b>−0.16</b> / 驗證值 −0.122）當成『強 ASM』；ISM 的 <b>normal-anchored cis-test + within-tag 分解</b>才揭露：這個表面差<b>大部分是 subclone/copy 混淆的 artifact</b>，真正的 focal 等位 cis 效應只有 <b>d_within=−0.023</b>（邊際）。這就是 ISM 獨有的價值。」</p>
+    <div class="legend" style="border-color:var(--c-warn);background:var(--c-warn-soft)">⚠ <b>口徑更正（依 2026-06 標準文件）</b>：你原句「~80% 只是 copy number」要校正 —— ① <b>別寫精確 %</b>（不 robust）、<b>別寫「copy number」</b>：confound 是 <b>subclone-structure</b>（HP1-1 是 somatic subclone tag）<b>非 CN-dosage</b>；② Martin-Trujillo 2017 是 CN-<b>dosage</b> 文獻，而我們 dosage 已 <b>REFUTED</b>（MW p=0.62）→ 它是「被我們控掉的 confound 警告」，<b>不能反過來佐證「BRCA2=copy」</b>（category error）；③ BRCA2 是 <b>hypo</b> ≠ canonical hyper-silencing。→ 正確講法用<b>定性</b>：「表面 ASM 主要是 subclone/copy 混淆、真 focal cis 邊際」。</div>
+    <figure><svg viewBox="0 0 720 200" role="img" aria-labelledby="ut ud"><title id="ut">modkit vs ISM 對 BRCA2</title><desc id="ud">modkit 看到表面強 ASM，ISM within-tag 分解拆出大部分是 subclone/copy 混淆，真 cis 很小。</desc>
+      <text x="10" y="22" font-size="13" font-weight="700" fill="#9A3B3B">modkit / 表面率差：看到「強 ASM」</text>
+      <rect x="20" y="34" width="300" height="26" fill="#F3E2E2" stroke="#9A3B3B"/><text x="28" y="52" font-size="12">BRCA2 表面 Δβ ≈ −0.16（看似很強）</text>
+      <text x="10" y="100" font-size="13" font-weight="700" fill="#2F7D5B">ISM copy-partition 分解後：</text>
+      <rect x="20" y="112" width="350" height="22" fill="#F6EBD8" stroke="#B06A16"/><text x="28" y="128" font-size="11">大部分 = subclone/copy 混淆（tag d≈−0.11；% 不 robust）</text>
+      <rect x="20" y="138" width="44" height="22" fill="#E4F0EA" stroke="#2F7D5B"/><text x="70" y="154" font-size="11">真正等位 cis 只有 d_within = −0.023（很小, perm p=0.022）</text>
+      <rect x="380" y="34" width="320" height="126" fill="#FCFBF8" stroke="#E3DACC" rx="6"/>
+      <text x="392" y="56" font-size="12" font-weight="700" fill="#5B3FA0">ISM 獨有：normal-anchored cis-test</text>
+      <text x="392" y="78" font-size="11">normal HP1 / tumor HP1 / tumor HP1-1 三路比</text>
+      <text x="392" y="98" font-size="11">→ 把「表面 allele 甲基差」拆成</text>
+      <text x="392" y="116" font-size="11">copy（拷貝數）vs cis（真等位驅動）vs drift</text>
+      <text x="392" y="140" font-size="11" fill="#2F7D5B">全基因組僅 chr17/TBC1D16 過這關 🟢</text>
+    </svg><figcaption>🟢 已驗：BRCA2 HP-axis Δβ=−0.122（≈ 你說的 −0.16 表面值），within-tag 分解後真 focal cis d_within=−0.023；⚠ 混淆是 <b>subclone/copy 結構</b>（非 CN-dosage；HP1-1=somatic subclone tag）（ledger 20260603/20260607）。</figcaption></figure>
+    <p style="font-size:.9rem;margin-top:var(--sp-3)"><b>ISM 在工具地景的定位</b>（2026 六軸比較 vs modkit/NanoMethPhase/DSS 等）：ISM 站「<b>軸 C：read-read 距離 + clustering</b>」（modkit/DSS 是「軸 A：率差」）；最相似的外部工具是 cvlr/ASMS/qFDRP。<b>可防守的新穎點 = PERMANOVA 結構 + normal-anchored cis 分解</b>。<span class="badge b-info">memory: ism_vs_external_tools</span></p>
+  </div>
+</section>
+
+<!-- ============ ISM 方法與判別細節 ============ -->
+<section id="method">
+  <h3><span class="num">2.5</span> ISM 方法與判別細節 — 它怎麼做、怎麼下判斷</h3>
+  <p class="sub">這是「製作 ISM 分析甲基分群差異」（目標 1.3）的內部細節。先看 <b>8 步 pipeline 流程圖</b>，每步可展開看「<b>做法</b> + <b>判別方式</b>」；最後是「ISM 怎麼下判斷」的判別標準。</p>
+
+  <figure><svg viewBox="0 0 800 280" role="img" aria-labelledby="ppt ppd"><title id="ppt">ISM 8 步 pipeline</title><desc id="ppd">從 tumor+normal BAM 到 read×CpG 矩陣、距離、分群、reliability gate、HP/LOH 比對、normal-anchored cis-test、7-TAG catalog。</desc>
+    <defs><marker id="p1" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#5B3FA0"/></marker></defs>
+    <rect x="10" y="20" width="175" height="44" rx="8" fill="#ECE6F6" stroke="#5B3FA0"/><text x="18" y="40" font-size="11" font-weight="700">① tumor + normal BAM</text><text x="18" y="56" font-size="10">5mC/5hmC MM/ML</text>
+    <rect x="210" y="20" width="170" height="44" rx="8" fill="#fff" stroke="#E3DACC"/><text x="218" y="40" font-size="11" font-weight="700">② read×CpG 甲基矩陣</text><text x="218" y="56" font-size="10">甲基/未甲基/未覆蓋</text>
+    <rect x="405" y="20" width="170" height="44" rx="8" fill="#fff" stroke="#E3DACC"/><text x="413" y="40" font-size="11" font-weight="700">③ read-read 距離</text><text x="413" y="56" font-size="10">6 度量</text>
+    <rect x="600" y="20" width="170" height="44" rx="8" fill="#fff" stroke="#E3DACC"/><text x="608" y="40" font-size="11" font-weight="700">④ 階層分群 UPGMA</text><text x="608" y="56" font-size="10">分 2+ 甲基子群?</text>
+    <path d="M185,42 L208,42" stroke="#5B3FA0" stroke-width="2" marker-end="url(#p1)"/><path d="M380,42 L403,42" stroke="#5B3FA0" stroke-width="2" marker-end="url(#p1)"/><path d="M575,42 L598,42" stroke="#5B3FA0" stroke-width="2" marker-end="url(#p1)"/>
+    <path d="M685,64 L685,150" stroke="#5B3FA0" stroke-width="2" marker-end="url(#p1)"/>
+    <rect x="600" y="155" width="170" height="46" rx="8" fill="#F2E4DC" stroke="#D97757"/><text x="608" y="175" font-size="11" font-weight="700">⑤ reliability gate</text><text x="608" y="191" font-size="10">CramersV+PERMANOVA</text>
+    <rect x="405" y="155" width="170" height="46" rx="8" fill="#fff" stroke="#E3DACC"/><text x="413" y="175" font-size="11" font-weight="700">⑥ HP/LOH tag 比對</text><text x="413" y="191" font-size="10">blind-ARI vs 正控/null</text>
+    <rect x="210" y="155" width="170" height="46" rx="8" fill="#F2E4DC" stroke="#D97757"/><text x="218" y="175" font-size="11" font-weight="700">⑦ normal-anchored</text><text x="218" y="191" font-size="10">cis-test 3 路 + copy 分解</text>
+    <rect x="10" y="155" width="175" height="46" rx="8" fill="#E4F0EA" stroke="#2F7D5B"/><text x="18" y="175" font-size="11" font-weight="700" fill="#2F7D5B">⑧ 7-TAG catalog 輸出</text><text x="18" y="191" font-size="10" fill="#2F7D5B">每位點 1 個 TAG</text>
+    <path d="M600,178 L578,178" stroke="#5B3FA0" stroke-width="2" marker-end="url(#p1)"/><path d="M405,178 L383,178" stroke="#5B3FA0" stroke-width="2" marker-end="url(#p1)"/><path d="M210,178 L188,178" stroke="#5B3FA0" stroke-width="2" marker-end="url(#p1)"/>
+    <text x="20" y="240" font-size="11" fill="#5C5A54">★ ④⑤ = 判「甲基分群明不明顯」；⑥ = 判「分群來源 somatic vs germline」；⑦ = 判「cis vs copy vs drift」（ISM 獨有）。</text>
+  </svg><figcaption>ISM 8 步：建矩陣 → 距離 → 分群 → reliability gate → HP/LOH 比對 → normal-anchored cis-test → catalog。橙色 = ISM 獨有的判別步驟。</figcaption></figure>
+
+  <p style="font-size:.95rem;font-weight:700;margin-top:var(--sp-5)">每一步的做法 + 判別方式（點 ▸ 展開）：</p>
+
+  <details class="goal g1"><summary><span class="gt">① + ② 建 read×CpG 甲基矩陣</span><span class="badge b-you">資料層</span></summary><div class="gbody">
+    <dl class="kv"><dt>做法</dt><dd>從 tumor + matched normal BAM 的 <code>MM/ML</code> tag 讀每條 read 在每個 CpG 的甲基狀態（5mC），建一個 read（列）× CpG（欄）矩陣，cell = 甲基 / 未甲基 / 未覆蓋（三態）。</dd><dt>判別</dt><dd>這步<b>不判別</b>，是建資料結構。</dd></dl>
+    <p style="font-size:.84rem;color:var(--c-text-soft)">⚠ 重點：覆蓋是 <b>ragged</b>（每條 read 只蓋連續一段 CpG），缺格是<b>結構性</b>（覆蓋）非隨機 → 下游距離度量必須小心別把覆蓋當 confound（這是 O11/O13 失敗的根）。</p>
+  </div></details>
+
+  <details class="goal g1"><summary><span class="gt">③ + ④ read-read 距離 + 階層分群</span><span class="badge b-info">分群</span></summary><div class="gbody">
+    <dl class="kv"><dt>做法</dt><dd>對矩陣每對 read 算甲基 profile 距離（6 度量：NHD / L1 / L2 / Pearson / Bernoulli / Jaccard）→ 得 read×read 距離矩陣 → UPGMA 階層分群把 reads 分子群。</dd><dt>判別</dt><dd>「這個位點的 reads 有沒有分成 2+ 個甲基子群？」= 非監督分群。子群數 = 後續 NGroups（但注意 NGroups 其實主要受 HP-tag 數驅動，非純甲基）。</dd></dl>
+  </div></details>
+
+  <details class="goal g1" open><summary><span class="gt">⑤ CramersV + PERMANOVA reliability gate ★核心判別「分群明不明顯」</span><span class="badge b-warn">★ 判別核心</span></summary><div class="gbody">
+    <dl class="kv">
+      <dt>做法</dt><dd>用 <b>CramersV</b> 量分群與 HP 標籤的關聯強度，但加 <b>Cochran 最小期望格 ≥5</b> 的 gate（稀疏表 = 小 HP group 如 3 vs 51 → CramersV 歸零）；同時用 <b>PERMANOVA</b>（distance-based, robust）測分群顯著性。</dd>
+      <dt>判別（三態）</dt><dd><b>reliable</b> = CramersV≥0.1 且過 Cochran gate 且 GlobalP≤0.05 且 NumReads≥20｜<b>latent</b> = gate 歸零但 PERMANOVA 顯著（= 被 gate 擋掉的真分群，全基因組 487/762 MISSED）｜<b>none</b> = 皆非。</dd>
+    </dl>
+    <p style="font-size:.84rem;color:var(--c-text-soft)">💡 這是「哪些位點甲基分群明顯」的判別核心。<b>CramersV gate 偏嚴</b>（487 個真分群被擋）→ 用 PERMANOVA 救回成 latent，但 latent 集 <b>只能提升 characterization 分辨、不能當 filter</b>（minN&lt;15 FP-leaning, enrich≈base）。<span class="badge b-pass">🟢</span> 待 FDR/null 校準確認 reliable 12,868 非噪音。</p>
+  </div></details>
+
+  <details class="goal g1"><summary><span class="gt">⑥ HP/LOH tag 比對 ★判別「分群來源 somatic vs germline」</span><span class="badge b-info">尺規判別</span></summary><div class="gbody">
+    <dl class="kv">
+      <dt>做法</dt><dd>把 haplotype tag（HP1 / HP2 / HP1-1 / HP2-1）+ LOH tag 疊到甲基分群上，用 <b>blind-ARI</b>（Adjusted Rand Index）量「甲基分群 vs HP 標籤」的一致度。</dd>
+      <dt>判別（用尺規）</dt><dd>對照 <b>imprinting 正控</b>（GNAS/RB1 ARI=1.000，normal DMR 0.758 → 證尺規可靠）+ <b>germline-het null</b>（0.177）。somatic TP ARI 0.135 &lt; null 0.177（p=0.922）→ 判定甲基分群是 <b>germline-allelic 背景</b>，不是 somatic subclone。</dd>
+    </dl>
+    <p style="font-size:.84rem;color:var(--c-text-soft)">💡 這就是為何「甲基分 read」分出來的是 germline haplotype 結構（分不同 haplotype 強、同 haplotype 內 somatic 亞群弱）。imprinting 正控反證「方法有效，NEGATIVE 是真 biology」。<span class="badge b-pass">🟢</span></p>
+  </div></details>
+
+  <details class="goal g1" open><summary><span class="gt">⑦ normal-anchored cis-test ★判別「cis vs copy vs drift」（ISM 獨有）</span><span class="badge b-warn">★ 獨有判別</span></summary><div class="gbody">
+    <dl class="kv">
+      <dt>做法</dt><dd>三路比較甲基：<b>normal HP1</b>（配對正常的單倍型）/ <b>tumor HP1</b> / <b>tumor HP1-1</b>（腫瘤 somatic 子標記）；再用 <b>copy-partition</b> 把表面 allele 甲基差拆成 d_copy（拷貝數造成）vs d_within（真等位 cis 驅動）。</dd>
+      <dt>判別</dt><dd><b>cis</b> = d_within &gt; 1.5×d_copy 且 perm p≤0.05｜<b>copy/subclone-confounded</b> = 混淆主導（BRCA2 即此：表面 −0.122 ≈ tag-partition 混淆 −0.11 + focal cis 邊際 −0.023；⚠ HP1-1 是 somatic subclone tag <b>非 copy-number</b>）｜<b>drift</b> = germline 漂移｜<b>untestable</b> = pure-ALT / CGI-desert（無 within 真值）。</dd>
+    </dl>
+    <p style="font-size:.84rem;color:var(--c-text-soft)">💡 <b>這是 ISM 相對 modkit 的關鍵獨有能力</b>（見上方 §2）：把「表面看似強 ASM」拆出真相。全基因組 816 loci 經此判別後僅 <b>chr17/TBC1D16 唯一過 cis</b>；6 個最強位點 untestable（需 COLO829/新法）。<span class="badge b-pass">🟢</span></p>
+  </div></details>
+
+  <details class="goal g1"><summary><span class="gt">Δβ 互補發現通道（必 clustering-gated）+ ⑧ 7-TAG 輸出</span><span class="badge b-info">分類</span></summary><div class="gbody">
+    <dl class="kv">
+      <dt>Δβ 做法</dt><dd>per-position allele 甲基平均差 <code>dbeta_max</code>（抓「分群不明顯但平均差大」的位點）。</dd>
+      <dt>Δβ 判別</dt><dd>🔴 <b>不可 naive 加</b>（dbeta_only 分支最 FP-enriched, TP:FP 11.9; naive 加會把 TP:FP 3.7→1.0 collapse）→ union = clustered <b>OR</b>（大 Δβ <b>且</b> 有 clustering 佐證）。</dd>
+      <dt>⑧ 7-TAG</dt><dd>綜合上述每位點貼 1 個語意 TAG：A 乾淨 cis somatic-ASM / B copy-confounded / C germline-allelic / D high-Δβ FP-prone artifact / E latent / F untestable / G 無訊號。</dd>
+    </dl>
+  </div></details>
+
+  <h4>ISM 怎麼下判斷 — 用到的所有「對照尺規」</h4>
+  <p class="sub" style="margin-bottom:var(--sp-3)">ISM 不靠單一數字下判斷，而是<b>每個 claim 都要 beat 一把對照尺規</b>。這是它能誠實證死假象的關鍵。</p>
+  <ul class="sub-list">
+    <li><span class="st b-pass">正控</span><b>imprinting 正控（ARI ruler）</b>：GNAS/RB1 ARI=1.000 → 證「方法能偵測真的 allele-specific 行為」，所以 somatic NEGATIVE 是真 biology 非方法壞。</li>
+    <li><span class="st b-warn">負控</span><b>germline-het null</b>：任何「somatic ASM」claim 必須 beat 普通遺傳雜合位點的 baseline（0.177）—— 否則只是 baseline allelic 甲基。</li>
+    <li><span class="st b-warn">負控</span><b>subhap-matched 對照</b>：排除「有無子單倍型」confound（TP 3.77% vs FP 1.09% 仍維持 ~3.5×）。</li>
+    <li><span class="st b-warn">負控</span><b>paired 負控</b>：證 phasing 現象是 TO-specific（paired gap median≈0, NS）。</li>
+    <li><span class="st b-warn">null</span><b>label-shuffle / HP-shuffle null</b>：excess-over-null（打亂標籤重算，看觀察值是否在尾端）—— 6/6 樣本 excess&gt;0。</li>
+    <li><span class="st b-dead">三關</span><b>de-confound 三關</b>：任何 AUC&gt;0.58 的判別宣稱，必過 within-group OLS（先 GROUP BY）+ AF-bin 交叉 + permutation test 才採信（O11/O12/O13 全在此被證死）。</li>
+  </ul>
+  <div class="bluf" style="margin-top:var(--sp-4)"><b>一句話：</b>ISM 的方法核心不是「找訊號」，而是「<b>用一整套對照尺規 + normal-anchored cis 分解，把假象（copy / germline / confound / 循環）一層層剝掉</b>」—— 剝完後剩下的（如 chr17）才是真的。這就是為什麼它能誠實地說「甲基不能 filter，但這些位點的甲基分群是真的」。</div>
+</section>
+
+<!-- ============ 論文 4 目標 ============ -->
+<section id="paper">
+  <h3><span class="num">3</span> 論文重點 — 我的題目 + 4 個目標（用我的結構）</h3>
+  <div class="bluf"><b>題目：</b>找尋甲基(methylation)與 phasing/haplotype 在癌症樣本上是否有關聯，並加上 read 數量、是否 LOH、CNV、CN 等資訊共同分析。</div>
+  <p class="sub">4 個目標 + 子目標（你的原始結構），我補上每個的<b>落點狀態</b>（成果/部分成果/未來/碰壁）+ 已驗數據。先看 4 目標的關係流程圖，再展開每個。</p>
+
+  <figure><svg viewBox="0 0 740 240" role="img" aria-labelledby="g4t g4d"><title id="g4t">4 目標關係</title><desc id="g4d">目標1餵目標2餵目標3；目標4碰壁但其4.3洞見連回目標2。</desc>
+    <defs><marker id="g1m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#D97757"/></marker></defs>
+    <rect x="10" y="30" width="215" height="56" rx="8" fill="#E4F0EA" stroke="#2F7D5B"/><text x="20" y="52" font-size="12" font-weight="700" fill="#2F7D5B">目標 1 ｜ASM 位點 catalog ✅</text><text x="20" y="70" font-size="11">主成果（找+定位+輸出位點）</text>
+    <rect x="262" y="30" width="215" height="56" rx="8" fill="#E2ECF3" stroke="#2F6690"/><text x="272" y="52" font-size="12" font-weight="700" fill="#2F6690">目標 2 ｜甲基輔助 unphase 🟢</text><text x="272" y="70" font-size="11">部分成功 T1 0.926 / T2 0.90</text>
+    <rect x="514" y="30" width="215" height="56" rx="8" fill="#F6EBD8" stroke="#B06A16"/><text x="524" y="52" font-size="12" font-weight="700" fill="#B06A16">目標 3 ｜subclone 演化 🟡</text><text x="524" y="70" font-size="11">未來 / 受阻（需新算法）</text>
+    <rect x="135" y="160" width="340" height="56" rx="8" fill="#F3E2E2" stroke="#9A3B3B"/><text x="145" y="182" font-size="12" font-weight="700" fill="#9A3B3B">目標 4 ｜甲基→TP/FP filter 🔴 碰壁</text><text x="145" y="200" font-size="11" fill="#9A3B3B">→ 轉誠實負結果（論文最可防守 methods）</text>
+    <path d="M225,58 L260,58" stroke="#D97757" stroke-width="2" marker-end="url(#g1m)"/><text x="218" y="22" font-size="10" fill="#D97757">餵位點數值</text>
+    <path d="M477,58 L512,58" stroke="#D97757" stroke-width="2" marker-end="url(#g1m)"/><text x="470" y="22" font-size="10" fill="#D97757">餵分群/串接</text>
+    <path d="M380,160 L370,88" stroke="#9A3B3B" stroke-width="2" stroke-dasharray="4" marker-end="url(#g1m)"/><text x="385" y="130" font-size="10" fill="#9A3B3B">4.3 洞見：真出路是輔助 phasing</text>
+  </svg><figcaption>目標 1（位點 catalog）餵目標 2（甲基輔助 phasing）餵目標 3（subclone 演化）；目標 4 filter 碰壁，但你 4.3 的洞見（真出路是輔助 FN→TP 而非 filter）正好連回目標 2。</figcaption></figure>
+
+  <details class="goal g1" open><summary><span class="gt">目標 1 ｜找尋 ASM（Allele-Specific Methylation）突變位點</span><span class="badge b-pass">✅ 主成果</span></summary><div class="gbody">
+    <div class="concl"><b>落點：這是論文的主成果。</b>你當年「TP/FP 判斷太嚴格、肉眼又不準」的顧慮完全正確 → 所以現在用<b>詳細流程 + 判別細節（catalog）</b>取代。全基因組 332,705 位點貼 7-TAG，每位點標「甲基分群明不明顯 / 是 cis 還 copy 還 germline」。</div>
+    <p style="font-size:.9rem;margin-top:var(--sp-3)">你的 7 個子目標 + 現況：</p>
+    <ul class="sub-list">
+      <li><span class="st b-pass">✅ 已有</span><b>1. 實際案例 BRCA2</b> —— HP-axis Δβ=−0.122（🟢），決定性位點 ZAR1L/BRCA2（2026-05-27）。<span class="src">ledger 20260529/20260530</span></li>
+      <li><span class="st b-pass">✅ 已有</span><b>2. 相關研究輔助佐證（甲基影響突變/甲基影響）</b> —— xgen 2024 + Martin-Trujillo(CN-confound) + TBC1D16(hypo→EGFR 黑色素瘤) 等外部 L3。<span class="src">knowledge/11_external_literature</span></li>
+      <li><span class="st b-pass">✅ 已做</span><b>3. 製作 ISM 分析甲基分群差異</b> —— read×CpG 矩陣 + read-read 距離 + 階層分群 + CramersV/PERMANOVA reliability gate。<span class="src">ISM C++17 + Python, scripts 98-100</span></li>
+      <li><span class="st b-pass">✅ 已做</span><b>4. 確認哪些位點附近有明顯甲基分群</b> —— catalog clustering_reliability 三態：reliable 12,868（但多為 germline-allelic 背景）/ latent 28,254 / none。<span class="src">catalog R6 / wf_5644ed77 6/6 重驗</span></li>
+      <li><span class="st b-pass">✅ 已做</span><b>5. 確認哪些位點有明顯甲基差異 + 排序數值</b> —— Δβ magnitude（strong-ASM 172/51,171, ~26 獨立位點）；Δβ 發現通道（必 clustering-gated）。<span class="src">ledger 20260530 / discovery_venn</span></li>
+      <li><span class="st b-warn">🟡 部分</span><b>6. 定位明顯差異位點供未來任務</b> —— TAG-A（chr17 唯一乾淨 cis）+ TAG-C/D/E 已標；🔴 待 FDR/null 校準確認 12,868 非噪音（#24）。<span class="src">#24 FDR 任務</span></li>
+      <li><span class="st b-warn">🟡 部分</span><b>7. 輸出位點資訊與數值給後續應用</b> —— catalog_skeleton.tsv（332,705×32 欄）可當 supplementary table / 資源；待釋出格式定。<span class="src">catalog 結果 R6</span></li>
+    </ul>
+    <p style="font-size:.84rem;color:var(--c-text-soft)">⚠ 誠實 caveat：catalog 的「reliable 12,868」絕大多數是 <b>germline-allelic 背景</b>（不是 somatic）；全基因組真正乾淨 somatic cis-ASM 只有 chr17 一個。所以目標 1 的精確成果是「<b>一份誠實的 ASM characterization 目錄</b>」，不是「找到一堆 somatic ASM 驅動位點」。</p>
+  </div></details>
+
+  <details class="goal g2"><summary><span class="gt">目標 2 ｜用甲基修正 unphase / HP3 的 tag 結果（需要目標 1）</span><span class="badge b-info">🟢 部分成功（T1/T2 ✅）</span></summary><div class="gbody">
+    <div class="concl"><b>落點：比預期正面 —— 兩個子目標的 held-out 都顯著贏 null。</b>這是「甲基輔助 haplotagging」方向（不是 variant filter）。機制：甲基 = <b>germline-haplotype 層級</b> → 分「不同 haplotype」強、分「同 haplotype 內 somatic 亞群」弱。</div>
+    <ul class="sub-list">
+      <li><span class="st b-pass">✅ 0.926</span><b>2.1 用甲基歸類未定位的 read + 給信心數值</b>（用目標 1.3 的 read 分群相似度）—— V11 <b>T1：unphase → H1/H2 held-out 0.926</b>（顯著贏 null）。<span class="src">memory project_methyl_phasing_assist_line（T1✅0.926）</span></li>
+      <li><span class="st b-pass">✅ 0.90</span><b>2.2 分類哪些 HP1/HP2 其實是 somatic（只是沒過突變位點）</b>（用目標 1.4 的甲基差異確認）—— V11 <b>T2：H3 → H1-1/H2-1 held-out 0.90</b>。<span class="src">memory（T2✅0.90）</span></li>
+      <li><span class="st b-dead">❌ 0.65</span><b>（延伸）拆 plain H1 是否有亞群</b> —— V11 <b>T3 ❌ AUC 0.65 &lt; null 0.71</b>（同 haplotype 內亞群分不出）。🔴 勿再開 T3。<span class="src">memory（T3❌）</span></li>
+    </ul>
+    <p style="font-size:.84rem;color:var(--c-text-soft)">⚠ caveat：T1/T2 是 <b>held-out 模擬</b>（用相對 null），不是真實大規模 unphase 救援；單樣本；缺 switch-error/N50 業界標尺。所以論文定位 = <b>tooling / future-work + 1 張 methods 圖</b>，需 COLO829 + yardstick 才升級為正式 result。（任務 #19/#21）</p>
+  </div></details>
+
+  <details class="goal g3"><summary><span class="gt">目標 3 ｜透過突變位點串接還原 subclone 狀況與演化</span><span class="badge b-warn">🟡 未來 / 受阻</span></summary><div class="gbody">
+    <div class="concl"><b>落點：未來方向，目前受阻（blocked on 目標 1/2）。</b>2025-02-27 的 subclone 個案是種子，但 region-level 的 two-hit order 訊號太弱（Bimodality mean|Δ|=0.043 &lt; 0.15 門檻）→ parked。</div>
+    <ul class="sub-list">
+      <li><span class="st b-warn">🟡 待開發</span><b>3.1 SNV 的串聯分析與新算法</b> —— 需要新算法，尚未開發。<span class="src">P4 second-hit STALLED</span></li>
+      <li><span class="st b-info">↔ 依賴 2.2</span><b>3.2 甲基只能用於串接沒通過的 read</b>（需要問題 2.2 的幫助修正）—— 依賴目標 2.2（已部分成功 T2 0.90），可接力。</li>
+      <li><span class="st b-warn">🟡 待整合</span><b>3.3 加入其他相關研究知識</b> —— 文獻整合（演化樹、SEQC2 subclone 等）。</li>
+    </ul>
+    <p style="font-size:.84rem;color:var(--c-text-soft)">⚠ 這是<b>最有野心、也最遠</b>的目標。現況：region-level 無 order 訊號 + 依賴目標 1 成熟。建議當論文的 future-work / Discussion，不放主 result。</p>
+  </div></details>
+
+  <details class="goal g4"><summary><span class="gt">目標 4 ｜甲基區分 TP/FP，移除 FP 不誤刪 TP 提升 F1（你說：發現碰壁）</span><span class="badge b-dead">🔴 碰壁 → 轉誠實負結果</span></summary><div class="gbody">
+    <div class="concl"><b>落點：你的「發現碰壁」是對的 —— 而且這個「碰壁」本身變成論文最可防守的貢獻（誠實負結果）。</b>2026 LOSO 嚴格證實：filter 改善 100% 是 sample-level circularity（held-out 歸零）。<span class="badge b-pass">🟢</span></div>
+    <p style="font-size:.9rem;margin-top:var(--sp-3)">你寫的 3 個碰壁原因，全被數據證實：</p>
+    <ul class="sub-list">
+      <li><span class="st b-dead">🟢 證實</span><b>4.1 甲基數據不夠精準當判別標準（誤差大 + 生物變動）</b> —— 純甲基特徵 AUC ≤0.58 hard ceiling（CL-008 ⭐5）；caller_af 單獨 AUC 0.654 超越全部 ISM。<span class="src">ledger / MEMORY beyond_auc_exhaustion</span></li>
+      <li><span class="st b-dead">🟢 證實</span><b>4.2 FP 量小 → 提升 F1 難度大</b> —— pilot ΔF1=+0.00242 marginal；LOSO held-out −0.00012（100% circularity）；HCC1954 transfer −0.377。<span class="src">ledger 20260520_loso</span></li>
+      <li><span class="st b-info">↔ 有洞見</span><b>4.3 甲基與 tag 強相關，最可能有用是輔助 FN→TP（但牽扯 caller 與全部 TN）</b> —— 這個洞見正確且重要：甲基訊號完全依賴 HP tag（Option C HP-free AUC 0.564），而 HP 受 self-phasing 污染；「輔助 FN→TP」這條<b>連到目標 2</b>（甲基輔助 phasing）才是真出路。</li>
+    </ul>
+    <p style="font-size:.84rem;color:var(--c-text-soft)">💡 <b>關鍵轉化</b>：目標 4 碰壁不是失敗 —— 把「甲基為什麼不能 filter」嚴謹證死、機制講清楚（circularity / 甲基 vestigial / germline-allelic），<b>本身就是論文 methods 段最 reviewer-proof 的內容</b>。而你 4.3 的直覺（真出路是輔助 phasing 而非 filter）正是現在論文的 tooling 方向（目標 2）。</p>
+  </div></details>
+
+  <div class="bluf" style="margin-top:var(--sp-5)"><b>4 目標一句話總結：</b>目標 1（ASM 位點 catalog）= <b>主成果 ✅</b>；目標 2（甲基輔助 unphase）= <b>部分成功 🟢（T1 0.926/T2 0.90）→ tooling</b>；目標 3（subclone 演化）= <b>未來/受阻 🟡</b>；目標 4（TP/FP filter）= <b>碰壁 🔴 → 轉成誠實負結果（論文最可防守的 methods）</b>。你最初的研究問題「甲基與 phasing 在癌症是否有關聯」答案是 <b>YES（有關聯、可 characterize），但甲基不能當判別器</b>。</div>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  <p><b>說明：</b>本 HTML 依<b>用戶自己的研究歷史敘述與 4 目標結構</b>製作，忠實保留用戶講法。時間軸 2025 段為用戶親述其研究歷史（<span class="badge b-you">你的敘述</span>，ledger 未涵蓋早期不爭議）；2026 段數字 🟢 由 <code>evidence_ledger.jsonl</code> + <code>docs/paper_focus/</code> + memory 對賬（BRCA2 Δβ=−0.122/d_within=−0.023、catalog 332,705、目標2 T1 0.926/T2 0.90）。</p>
+  <p>外部文獻 L3（投稿前 /citation-verification）：xgen 2024 (doi 10.1016/j.xgen.2024.100674)。生成 <code>2026-06-10</code> · git <code>8dbb931</code>。§13：本 HTML Write 與數據分析在不同 batch。</p>
+  <p>合規：已批准、無危害的癌症長讀甲基化生物資訊數據分析（公開細胞株 + SEQC2 公開 truth set 的計算分析）。</p>
+</div></footer>
+</body>
+</html>

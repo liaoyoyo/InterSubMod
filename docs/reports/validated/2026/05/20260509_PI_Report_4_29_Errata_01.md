@@ -1,6 +1,7 @@
 <!--
 build_date: 2026-05-09
 revised: 2026-05-10 (加 E5 V5 Layer 1.5 設計缺陷 — paired germline-absent xref 5/9 Step D 新發現)
+revised: 2026-05-18 (加 §2.4 / §4.4 / §5.6 V6 production tag 補強骨架 — pending Day 4-5 finalize；scope 5/7 樣本，COLO829 + HCC1395_DORADO 本輪不納入)
 agent: errata patch (從 5/8 整合報告 §9.2 + 5/9 V5 commit 狀態更新 + 5/10 Step D 補強)
 status: validated
 report_class: errata-companion (修訂 4-29 PI 報告 5 處表述)
@@ -15,8 +16,8 @@ inputs:
 outputs:
   - 本檔（獨立 erratum companion）
   - PI 報告頂部加一行 erratum banner 引用本檔
-verdict: 5 條 errata，主要 PI 結論不撤回；補強為「機制 + 案例 + 統計」三重佐證；歸因從「V5 整體」精確化為「V3F + Layer 1.5 為主，Pass 2 二次效益尚未獨立量化」；E5 (5/10 加) — V5 Layer 1.5 在 germline-absent 區域與 baseline 4.19:1 偏 HP1 完全相同，是 priority bug 的 feature 化非修補，V3F 標 hp=33 反而更穩健
-last_verified: 2026-05-10
+verdict: 5 條 errata，主要 PI 結論不撤回；補強為「機制 + 案例 + 統計」三重佐證；歸因從「V5 整體」精確化為「V3F + Layer 1.5 為主，Pass 2 二次效益尚未獨立量化」；E5 (5/10 加) — V5 Layer 1.5 在 germline-absent 區域與 baseline 4.19:1 偏 HP1 完全相同，是 priority bug 的 feature 化非修補，V3F 標 hp=33 反而更穩健；§2.4/§4.4/§5.6 V6 production tag 補強骨架 (5/18 加) — V6 patch 為 E5 最終解法，scope 5/7 樣本，pending Day 4-5 finalize
+last_verified: 2026-05-18
 report_template: errata-companion v1.0
 -->
 
@@ -97,6 +98,32 @@ V5 為 5 commits（不是 4），全部 commit 完成；HEAD = `938f0df` = 最�
 - §1 caveat「V5 working tree 未 commit」→ **「✅ 2026-04-30 已 commit（d0bcd8c + 938f0df）」**
 - §5.2 表 4 commit → **5 commit**（補 d0bcd8c, 938f0df）
 
+### 2.4 V6 production tag 補強（2026-05-18 骨架佔位 — pending Day 4 finalize）
+
+> **狀態**：骨架佔位，待 Tier 1.2 Day 4 `git tag v6-prod-{YYYYMMDD}` 完成後回填具體 sha + tag name。
+
+**V5 chain 5 → 6 commits 升級**：
+
+| Commit | 日期 | 內容 | 狀態 |
+|---|---|---|---|
+| `8b8c1fd` | 2026-04-09 | feat: --pon-only-phasing flag | ✅ |
+| `41ff147` | 2026-04-10 | fix(haplotag): two-layer getVote | ✅ |
+| `380e8d2` | 2026-04-25 | fix(haplotag): countINDELHaplotype UNDEFINED guard | ✅ |
+| `d0bcd8c` | 2026-04-30 | fix(purity): collect ploidyRatio + bundled Layer 1.5 | ✅ |
+| `938f0df` | 2026-04-30 | Update purity threshold 0.95→0.9 | ✅ V5 HEAD |
+| **`<TBD-Day4>`** | **2026-05-21** | **fix(haplotag): V6 revert Layer 1.5 in germline-absent (HaplotagProcess.cpp:537-548, +18/-16 lines)** | **🔴 pending Day 4** |
+
+**V6 production tag**：`v6-prod-{YYYYMMDD}`（pending Day 4 finalize；parent = `938f0df`）
+
+**V6 patch 範圍**：
+- 修改檔案：`HaplotagProcess.cpp:537-548`（單一 else if 分支）
+- Diff stats：+18 / -16 lines（淨 +2，主要為註解）
+- 邏輯實質：移除 Layer 1.5 `else if (somaticHP1 > 0 || somaticHP2 > 0) { ... }` 分支，germline-absent 區回歸 Layer 2 預設 `min=0, max=0` → Layer 2 encode 為 `HP:i:33`（V3F-style 保守處理）
+
+**修訂建議（Day 4 finalize 後執行）**：
+- §5.2 表加 V6 row：`V6 (v6-prod-{YYYYMMDD}, commit <sha>)` ｜ V5 phasing + V3F-style haplotag hybrid ｜ HaplotagProcess.cpp:537-548 ｜ ratio 跨 5 樣本 0.61-1.84（中位 0.96, vs baseline 17.3）
+- §1 一句結論加註：「V6 (v6-prod-{YYYYMMDD}) finalize 完成，作為 V5 → V6 production 升級之凍結點」
+
 ---
 
 ## 3. E3 — §5.2 priority bug 機制證據強度升級
@@ -123,6 +150,55 @@ V5 為 5 commits（不是 4），全部 commit 完成；HEAD = `938f0df` = 最�
 
 - §3.3 證據鏈加第 4 層「read-level 個案層」：34,855 全基因組 priority bug confirmed victims，V3F + V5 修正率 100%
 - §5.2 「priority bug 機制」段加註：「**read-level audit (T1.2 + T1.2-F1) 進一步驗證**：chr19 752 victims + 全基因組 34,855 victims，全部單向 baseline=11→V3F=21→V5=21，V3F + V5 修正率 100% — 從『理論 + IGV 3 截圖』升級為『個案 + 統計 + 機制』三重佐證。詳見 [T1.2 mechanism report](../../../research/v5_provenance_followup/T1_2_read_level_audit/T1_2_priority_bug_mechanism_report.md) + [T1.2-F1 全基因組擴展](../../../research/v5_provenance_followup/T1_2_read_level_audit/T1_2_F1_genome_wide_audit.md)」
+
+### 3.4 Source-code dual bug 鐵證（2026-05-20 補強）
+
+證據強度進一步升級為「機制 + 案例 + 統計 + **source code dual bug**」四重佐證。baseline 同時存在 **兩個獨立 source-code-level bug**，V3F (commit 41ff147) 同時修補：
+
+#### Bug 1 — getVote priority order (baseline `HaplotagProcess.cpp:510-513`)
+
+```cpp
+std::vector<std::pair<int, int>> variantKeys = { 
+    {HAPLOTYPE1_1, HAPLOTYPE2_1},   // 🔴 1st priority: somatic 倒置在 germline 之前
+    {HAPLOTYPE3,   HAPLOTYPE2_1},
+    {HAPLOTYPE1,   HAPLOTYPE2} };   //    3rd: germline pair
+```
+
+→ Read 任何 somatic vote 即 break，根本不看 germline。**Effect**: 全基因組 ALT-only HP1:HP2 = 17.3:1。
+
+#### Bug 2 — judgeHaplotype dead code branch (baseline `HaplotagProcess.cpp:697-701`)
+
+```cpp
+if(hpResult != HAPLOTYPE1_1 && hpResult != HAPLOTYPE2_1){
+//  hpResult mapped integer (0,1,2,11,21,33) vs enum value (3,4) ≠ 恆 true
+    hpResult = 0;   // ← 永遠執行
+} else {
+    hpResult = 33;  // ← 9 年 dead code，從未執行
+}
+```
+
+→ **enum-vs-integer type mismatch bug**：`hpResult` mapped integer 與 enum 值 (HAPLOTYPE1_1=3, HAPLOTYPE2_1=4) 比較永遠不相等。low-confidence fallback path 永遠走 `hpResult = 0`，never `33`。
+
+#### Util.h enum 定義（鐵證）
+
+`/big8_disk/liaoyoyo2001/longphase-to/Util.h:19-26`：
+```cpp
+HAPLOTYPE1=0, HAPLOTYPE2=1, HAPLOTYPE3=2,
+HAPLOTYPE1_1=3, HAPLOTYPE2_1=4
+```
+
+`hpResult` 來自 getVote 內 `haplotypeBase` map: `{HAPLOTYPE1→1, HAPLOTYPE2→2, HAPLOTYPE1_1→11, HAPLOTYPE2_1→21, HAPLOTYPE3→33}` — 可能值 {0,1,2,11,21,33}，**從不**會是 3 或 4。
+
+#### V3F 同時修補兩 bug
+
+| Bug | V3F change |
+|---|---|
+| Bug 1 priority order | Two-layer getVote: Layer 1 germline first → Layer 2 somatic annotation (不再 variantKeys priority loop) |
+| Bug 2 dead code | Fallback 改 `if(hpResult == 11 \|\| hpResult == 21 \|\| hpResult == 33)` 用 **integer literal** + **邏輯翻轉** |
+
+#### 修訂建議
+
+§5.2 V5 (commit `d0bcd8c` + `938f0df`) row 加註：「source code 層級，baseline 同時有兩個獨立 bug — getVote priority order (line 510-513) + judgeHaplotype fallback dead code (line 697-701, enum vs integer mismatch)。V3F commit `41ff147` two-layer rewrite + integer literal fallback **同時修補兩者**，V5 + V6 繼承此修補。」
 
 ---
 
@@ -181,6 +257,29 @@ PI 報告引用之 V5 BAM 是 `output/pononly_v5_somatic_fallback/tumor_tagged.b
 - §1 一句結論加註：「PI 報告 V5 數值為 Pass 1 only；4-30 重跑後完整 V5 (Pass 1 + Pass 2) BAM 已產出但未跑 ISM benchmark（用戶 5/7 決策 cancel — ISM 是下游消費者，longphase-to 端 V3F 修對後 ISM 自動受惠）」
 - §1 caveat 「Confidence threshold 0.6 未直接驗證」→ 補「但 6 cell × 4 metric caller F1 vs SEQC2 truth 三版完全相同（HCC1395 5kHz 0.93 = 0.7166 / t30_n20 0.6 = 0.6273），caller F1 與 V5 tag 改動無關（V5 不改 caller）」
 
+### 4.4 V6 caller F1 不變性升級（2026-05-18 骨架佔位 — V6 doc §8.6 已有完整證據）
+
+> **狀態**：骨架佔位 — 待 §2.4 V6 commit sha 填入後 §4.4 同步引用。
+
+E4 §4.3 提及「caller F1 三版完全相同」**現升級為 5 階段完全相同**（V6 production doc §8.6 三層證據已建立）：
+
+| Pipeline 階段 | F1 (HCC1395 0.93) | F1 (purity 0.6) | 不變性機制 |
+|---|---:|---:|---|
+| ClairS-TO caller 原生 | 0.7166 | 0.6273 | source of truth |
+| baseline phased VCF | 0.7166 | 0.6273 | longphase-to phase 階段不動 FILTER 欄 |
+| V3F BAM | 0.7166 | 0.6273 | haplotag 階段不動 VCF（只動 BAM HP:i: tag）|
+| V5 phased VCF | 0.7166 | 0.6273 | 同上 |
+| **V6 BAM** | **0.7166** | **0.6273** | **V6 重用 V5 phased VCF（檔案 identity 數學保證）+ V6 haplotag 不動 VCF** |
+
+**三層獨立證據**（V6 doc §8.6）：
+1. **直接實證**：4/30 6 個 phased VCF F1 直接 hap.py 計算，TP/FP/FN/F1 每位元相同
+2. **檔案層級**：3 版本 phased VCF PASS variants = 47,798, total variants = 3,187,275, FILTER 分布逐 record 相同
+3. **機制證明**：longphase-to phase 僅動 GT/PS/GT2/GT3 + PON tag；FILTER 由 ClairS-TO 一次性決定；haplotag 完全不碰 VCF
+
+**修訂建議（Day 4 V6 tag 完成後執行）**：
+- §6.4/§6.5 表後 caveat 加：「**V6 升級**：caller F1 不變性已擴展至 5 階段（ClairS-TO → baseline → V3F → V5 → V6），詳見 `InterSubMod/docs/reports/validated/2026/05/20260511_V6_binary_complete_documentation_01.md` §8.6 三層證據鏈」
+- §1 caveat「caller F1 三版相同」→ **「5 階段全部相同（含 V6）」**
+
 ---
 
 ## 5. E5（5/10 新加） — §5.2 V5 Layer 1.5 設計描述精確化
@@ -215,6 +314,35 @@ V3F 在該區域標 hp=33（純 somatic ambiguous，方向不選邊）— **保�
 - §5.2 V5 修補敘事改寫：把「V5 含 Layer 1.5 補 germline 缺席區域 fallback」精確化為「V5 Layer 1.5 嘗試在 germline 缺席時用 somatic phased votes 補方向，但該設計在 self-phasing 機制下繼承 priority bug 偏移；germline-absent 區域真正穩健的選擇是 V3F 標 hp=33」
 - §1 caveat 加：「V5 Layer 1.5 設計選擇待 ISM 影響量化（F-paired-D3）— 改回 V3F「germline 缺席標 hp=33」可能是更安全 default」
 
+### 5.4a baseline hp=3 = 10,440 mechanism note + HP:i:33 mapping（2026-05-20 補強）
+
+當 V3F/V5/V6 quantification 顯示 baseline 仍有 10,440 hp=3 (ambig) reads (Day 2 報告 §3.1)，可能被 PI 誤解為「baseline 也有產 ambig output 跟 V6 一樣」。實際機制不同：
+
+**baseline hp=3 唯一 source = getVote 第 2 priority pair (HAPLOTYPE3 winning)**
+
+| 觸發條件 | 必須 |
+|---|---|
+| 1st pair skip | `countMap[HP1_1]=0 && countMap[HP2_1]=0`（read 無 somatic-traceable vote）|
+| 2nd pair enter | `countMap[HP3] > 0`（cover 到 HAPLOTYPE3-annotated variant）|
+| HP3 wins | HP3 vote ≥ HP2_1 vote (HP2_1=0 from 1st skip) → 自動 win |
+| 結果 | `hpResult = haplotypeBase[HAPLOTYPE3] = 33` → BAM HP:i:33 |
+
+→ 10,440 reads = 全 reads 0.42% 小邊界 case（cover HAPLOTYPE3-annotated variant 但自己無 somatic-traceable vote）。**不是來自 Bug 2 dead code fallback path（從未執行）**。
+
+V3F/V6 觸發條件**寬鬆得多**：「somatic > 0 AND germline = 0」（不只 HP3 winning，也含 HP1_1/HP2_1 winning case）。差距 V6 138,317 − baseline 10,440 = +127,877 = baseline 因 Bug 1 priority order 派到 hp=11/21（偏 HP1）但 V3F/V6 拉回 hp=33 的中間區 reads。
+
+**HP:i:33 BAM tag → ISM reads.tsv "3" mapping rule**
+
+InterSubMod ReadParser 主動 mapping (`InterSubMod/src/core/ReadParser.cpp:130-141`)：
+
+```cpp
+case 33: hp_raw = "3"; break;   // HP:i:33 BAM → reads.tsv "3"
+```
+
+→ 4 BAM 都用 longphase-to TO mode 整數 tag，BAM 中所有 ambig 寫 `HP:i:33`，ISM 讀後 mapping 為 `"3"` 字串。`hp="33"` 字串 bucket 只在 paired-mode BAM (longphase-s `HP:Z:33`) 才填值（HCC1395 4 BAM 全 0）。
+
+**對 PI 的精確敘述**：「baseline 確實寫了 10,440 個 HP:i:33 ambig tag 到 BAM (透過 getVote 2nd pair HP3 winning 的小邊界 case)，ISM 顯示為 reads.tsv hp="3"；V6 拉至 138,317 是擴大 ambig 觸發條件 (germline=0 + somatic>0 全包) — 包含 baseline 用 Bug 1 priority order 派到 hp=11/21 偏 HP1 但 V6 拉回保守 hp=33 的 127,877 reads。」
+
 ### 5.4 不影響的 PI 結論
 
 - 17.3:1 全基因組偏移確立 ✅（priority bug 主要由 germline_vote>0 區域貢獻，整體 ratio 由該區域主導）
@@ -240,6 +368,37 @@ V5 Layer 1.5 的 read-level 4.19:1 偏移**在 region-level 後續特徵化（�
 完整量化 → [`InterSubMod/research/paired_priority_bug_audit/05_V6C_phaseB_findings.md`](../../../research/paired_priority_bug_audit/05_V6C_phaseB_findings.md)。
 
 → E5 對 V5 production usage 的結論：**Layer 1.5 設計缺陷在 read-level 真實，但 region-level 影響輕微**；不阻擋 V5 作為 production tag baseline；germline-absent 區改回 V3F 的 ISM 影響待 Phase C 7 樣本量化（F-paired-D3 follow-up）。
+
+### 5.6 V6 patch 為 Layer 1.5 設計缺陷之最終解法（2026-05-18 骨架佔位 — pending Day 4-5 finalize）
+
+> **狀態**：骨架佔位 — 待 Day 4 V6 tag + Day 5 PI email send 完成後 finalize。
+
+E5 §5.3 修訂建議原文「該區域 V5 設計選擇待 ISM 影響量化（F-paired-D3）」**現升級為已有最終解法**：
+
+**2026-05-11 後續行動**：V6 binary patch（移除 Layer 1.5 else if 分支，`HaplotagProcess.cpp:537-548`，germline-absent 區回歸 V3F-style `hp=33` 保守處理）跨 5 樣本驗證完成（V6 production doc §1-§13）：
+
+| 驗證維度 | V6 結果 | 來源 |
+|---|---|---|
+| Priority bug disproof 3 論證 | ✅ 4 個 non-HCC1395 樣本 0/22 chrs 偏 HP1 > 5x；HCC1395 殘餘 3 chrs (chr8/chr12/chr17) 限於已知 cnLOH chrs（biological signal）| V6 doc §8.5 |
+| Cross-sample marker rate ≥ 0.85 | ✅ **4/5 樣本**（H1437 0.992 / H2009 0.993 / HCC1954 0.954 / HCC1937 0.817* / HCC1395 0.9093）| V6 doc §6.5, §7 |
+| NG_on=2 rate ≥ 0.85 | ✅ **5/5 樣本**（0.904-0.992）| 同上 |
+| h11:h21 ratio 接近中性 | ✅ 5/5 樣本 0.61-1.84（vs baseline 17.3:1 = **8.7× 改善**）| V6 doc §8.5 |
+| Marker coverage（HCC1395 全基因組 NG≥3）| ✅ V6 = 23,980 > V3F = 21,997 (+9.0%) > V5 = 18,382 (V6 比 V5 +30.5%) | V6 doc §5.3 |
+| Caller F1 不變 | ✅ HCC1395 0.7166 / 0.6273 五階段相同（見本 errata §4.4）| V6 doc §8.6 |
+
+*HCC1937 marker rate 0.817 為 BRCA1 mutant + CNV-driven germline het 樣本特性（FP/TP = 0.194 vs 其他樣本 0.01）；已知 edge case，需配 AF<0.4 filter（memory `project_hpfinengroups_subclone_marker.md` 已記錄）。
+
+**Production tag 範圍 caveat**：
+- 本輪 V6 production tag (`v6-prod-{YYYYMMDD}`) 涵蓋 **5/7 樣本**（HCC1395 + H1437 + H2009 + HCC1954 + HCC1937）
+- **COLO829** 因 ONT_R10 無 methylation tags + NYGC truth set 0600 permission 阻塞，本輪不納入；待 Phase 2 ONT_PAO 子集（94 GB, 有 5mCG+5hmCG）+ truth permission 處理後補完
+- **HCC1395_DORADO** 因缺 ClairS-TO PASS VCF，本輪不納入
+
+**修訂建議（Day 4-5 finalize 後執行）**：
+- §5.2 V5 row 加註：「**5/18 V6 patch 已 finalize（git tag `v6-prod-{YYYYMMDD}`）為此 caveat 最終解法**；germline-absent 區改回 V3F `hp=33` + 跨 5 樣本驗證通過（5/7 production scope）」
+- §5.4「不影響的 PI 結論」加第 5 項：「V6 patch 修補 V5 Layer 1.5 設計缺陷，priority bug 3 論證 V6 全通過（HCC1395 殘餘限於 cnLOH chrs 為真實生物學）」
+- §5.5「region-level downstream 影響評估」加 cross-reference：V6 production doc §6.6 Phase D 4 樣本 marker rate 4/4 ≥ 0.904 (NG_on=2)
+
+**完整參考**：`InterSubMod/docs/reports/validated/2026/05/20260511_V6_binary_complete_documentation_01.md`（V6 完整說明 single-entry 文件，~30 分鐘掌握全貌）
 
 ---
 
@@ -267,6 +426,8 @@ V5 Layer 1.5 的 read-level 4.19:1 偏移**在 region-level 後續特徵化（�
 | 2026-05-10 | 5/8 整合報告補 §8.6 Paired Mode Cross-Reference Audit | [§8.6](20260508_Self_Phasing_完整觀察整合報告_01.md) (commit df5137e) |
 | **2026-05-10** | **本檔加 E5 + renumber §5/§6/§7 → §6/§7/§8** | 本檔 |
 | **2026-05-10** | **本檔 §5.5 V6-C Phase B chr19 region-level marker robustness 補強** | [V6-C Phase B](../../../research/paired_priority_bug_audit/05_V6C_phaseB_findings.md) |
+| 2026-05-11 | V6 binary patch 完整文件 commit + 跨 5 樣本驗證收斂 | [`InterSubMod/docs/reports/validated/2026/05/20260511_V6_binary_complete_documentation_01.md`](20260511_V6_binary_complete_documentation_01.md) |
+| **2026-05-18** | **本檔加 §2.4 / §4.4 / §5.6 V6 production tag 補強骨架（pending Day 4-5 finalize）** | Tier 1.2 4day workflow Day 1 §1.2 errata content review |
 
 ---
 

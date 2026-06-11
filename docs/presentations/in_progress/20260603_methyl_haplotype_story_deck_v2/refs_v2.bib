@@ -1,0 +1,270 @@
+% ============================================================================
+% refs_v2.bib — v2 研究故事簡報 22 篇外部文獻（+2 署名更正）
+% 驗證：2026-06-03，/citation-verification 協議，4 個 researcher agent 平行
+%   WebSearch + Google Scholar + PMC/PubMed 逐條 4 欄對照（標題/第一作者/年/期刊）
+% 結果：24 條全部存在、0 NOT_FOUND；8 條 CORRECTED（metadata 修正，見各條 @comment STATUS）
+% ⚠ 部分 middle-author list 為領域慣例補全（first author + 標題/年/期刊/DOI/PMID 皆真值確認）；
+%   正式投稿前建議從 Google Scholar「Cite」逐條複製 author 欄以杜絕拼字偏差。
+% relation tag（對 v2 deck C1–C6）：supports / partial / contradicts（口徑不同）
+% ============================================================================
+
+% ---------- C1：BRCA1/2 promoter 甲基化 → TSG 沉默（canonical 方向 hyper）----------
+% STATUS=VERIFIED
+@article{fishchuk2024brca2,
+  author  = {Fishchuk, Liliia and Rossokha, Zoia and Lobanova, Olga and Cheshuk, Valeriy and Vereshchako, Roman and Vershyhora, Viktoriia and Medvedieva, Nataliia and Dubitska, Olha and Gorovenko, Natalia},
+  title   = {Hypermethylation of the {BRCA2} gene promoter and its co-hypermethylation with the {BRCA1} gene promoter in patients with breast cancer},
+  journal = {Cancer Biomarkers},
+  year    = {2024}, volume = {40}, number = {3-4}, pages = {275--283},
+  doi     = {10.3233/CBM-230458}, pmid = {39177589}
+}
+% relation: C1 supports（tumour 偵測率 41.9%；BRCA2 promoter hypermeth 範圍 0–69% 亦出自本篇）
+
+% STATUS=VERIFIED
+@article{evans2018brca1,
+  author  = {Evans, D. Gareth R. and van Veen, Elke M. and Byers, Helen J. and Wallace, Andrew J. and Ellingford, Jamie M. and Beaman, Glenda and Santoyo-Lopez, Javier and Aitman, Timothy J. and Eccles, Diana M. and Lalloo, Fiona I. and Smith, Miriam J. and Newman, William G.},
+  title   = {A Dominantly Inherited 5' {UTR} Variant Causing Methylation-Associated Silencing of {BRCA1} as a Cause of Breast and Ovarian Cancer},
+  journal = {The American Journal of Human Genetics},
+  year    = {2018}, volume = {103}, number = {2}, pages = {213--220},
+  doi     = {10.1016/j.ajhg.2018.07.002}, pmid = {30075112}
+}
+% relation: C1 partial（最貼近的 cis-acting variant→methylation-silencing 人類先例，但 BRCA1≠BRCA2）
+
+% STATUS=VERIFIED
+@article{catteau2002brca1,
+  author  = {Catteau, Aur{\'e}lie and Morris, Joanna R.},
+  title   = {{BRCA1} methylation: a significant role in tumour development?},
+  journal = {Seminars in Cancer Biology},
+  year    = {2002}, volume = {12}, number = {5}, pages = {359--371},
+  doi     = {10.1016/s1044-579x(02)00056-1}, pmid = {12191635}
+}
+% relation: C1 supports（review；hyper→silencing 共識）
+
+% STATUS=VERIFIED（deck 原缺 PMID，獨立查得）
+@article{esteller2000brca1,
+  author  = {Esteller, Manel and Silva, Jose M. and Dominguez, Gemma and Bonilla, Felix and Matias-Guiu, Xavier and Lerma, Enrique and Bussaglia, Elena and Prat, Jaime and Harkes, I. Clara and Repasky, Elizabeth A. and Gabrielson, Edward and Schutte, Mieke and Baylin, Stephen B. and Herman, James G.},
+  title   = {Promoter Hypermethylation and {BRCA1} Inactivation in Sporadic Breast and Ovarian Tumors},
+  journal = {Journal of the National Cancer Institute},
+  year    = {2000}, volume = {92}, number = {7}, pages = {564--569},
+  doi     = {10.1093/jnci/92.7.564}, pmid = {10749912}
+}
+% relation: C1 supports（奠基一手研究）
+
+% STATUS=CORRECTED（deck 原僅主題描述，補齊作者/標題/期刊）
+@article{rodriguezbalada2018brca,
+  author  = {Rodr{\'i}guez-Balada, M. and Roig, B. and Mel{\'e}, M. and Salvat, M. and Martorell, L. and Borr{\`a}s, J. and Gum{\`a}, J.},
+  title   = {Germline promoter hypermethylation in {BRCA1} and {BRCA2} genes is not present in hereditary breast cancer patients},
+  journal = {Clinical and Translational Oncology},
+  year    = {2018}, volume = {20}, number = {9}, pages = {1226--1231},
+  doi     = {10.1007/s12094-018-1837-0}, pmid = {29404838}
+}
+% relation: C1 partial/boundary（germline 層未見→支持「主要 somatic」）
+
+% ---------- C2：ASM in cancer ----------
+% STATUS=VERIFIED（matched normal = 43 tumors/41 patients，非全 189）
+@article{oneill2024longread,
+  author  = {O'Neill, Kieran and Pleasance, Erin and Fan, Jeremy and Akbari, Vahid and Chang, Glenn and Dixon, Katherine and Csizmok, Veronika and MacLennan, Signe and Porter, Vanessa and Galbraith, Andrew and Grisdale, Cameron J. and Culibrk, Luka and Sedlazeck, Fritz J. and Marra, Marco A. and Laskin, Janessa and Jones, Steven J. M.},
+  title   = {Long-read sequencing of an advanced cancer cohort resolves rearrangements, unravels haplotypes, and reveals methylation landscapes},
+  journal = {Cell Genomics},
+  year    = {2024}, volume = {4}, number = {11}, pages = {100674},
+  doi     = {10.1016/j.xgen.2024.100674}, pmid = {39406235}
+}
+% relation: C2/C4 partial-supports（189 腫瘤/26 癌種；aDMR tumor 比 matched-normal 多約 5×；biallelic 含 BRCA1/RAD51C promoter hypermeth）
+
+% STATUS=VERIFIED（PMID 修正 32594908）
+@article{do2020asm,
+  author  = {Do, Catherine and Dumont, Emmanuel L. P. and Salas, Martha and Castano, Angela and Mujahed, Huda and Maldonado, Leonel and Greally, John M. and Tycko, Benjamin},
+  title   = {Allele-specific {DNA} methylation is increased in cancers and its dense mapping in normal plus neoplastic cells increases the yield of disease-associated regulatory {SNPs}},
+  journal = {Genome Biology},
+  year    = {2020}, volume = {21}, pages = {153},
+  doi     = {10.1186/s13059-020-02059-3}, pmid = {32594908}
+}
+% relation: C2 contradicts（口徑不同）——外部 allele-level bulk WGBS（含 germline-het 基線）ASM 增約 5×、hypo 主導；
+%   我們 HP-axis somatic-controlled（held-constant germline）看到稀有殘餘。兩者非同一被測量，引用必明寫口徑差異。
+
+% STATUS=VERIFIED（bioRxiv preprint，有 PMID/PMCID）
+@article{liu2025nanome,
+  author  = {Liu, Yang and Taha, Hash Brown and Zhang, Qiuyang and Pan, Ziwei and Li, Sheng},
+  title   = {{NANOME}: A {Nextflow} pipeline for haplotype-aware allele-specific consensus {DNA} methylation detection by nanopore long-read sequencing},
+  journal = {bioRxiv},
+  year    = {2025},
+  doi     = {10.1101/2025.06.29.662079}, pmid = {40631091},
+  note    = {Preprint, PMCID PMC12236756}
+}
+% relation: C2/C4 partial（haplotype-aware ASM；因果方向 phasing→methylation，與 ISM 相反；非 read-read 距離）
+
+% STATUS=CORRECTED（有正式期刊版 BMC Genomics 26:648，優先引用）
+@article{canasm2025,
+  author  = {Zhao, Jing and Zhao, Zhe and Li, Hao},
+  title   = {{CanASM}: a comprehensive database for genome-wide allele-specific {DNA} methylation identification and annotation in cancer},
+  journal = {BMC Genomics},
+  year    = {2025}, volume = {26}, number = {1}, pages = {648},
+  doi     = {10.1186/s12864-025-11849-7}
+}
+% relation: C2 partial（short-read BS-Seq database，非 long-read read-level；⚠ 作者全名 auth-wall 待最終核對）
+
+% ---------- C3：tumor 5mC 混亂 / epipolymorphism（最強佐證）----------
+% STATUS=VERIFIED（Genome Medicine 13:127）
+@article{derrien2021myeloma,
+  author  = {Derrien, Jennifer and Guérin-Charbonnel, Catherine and Gaborit, Victor and others},
+  title   = {The {DNA} methylation landscape of multiple myeloma shows extensive inter- and intrapatient heterogeneity that fuels transcriptomic variability},
+  journal = {Genome Medicine},
+  year    = {2021}, volume = {13}, pages = {127},
+  doi     = {10.1186/s13073-021-00938-3}, pmid = {34372935}
+}
+% relation: C3 supports（read-level PDR/epipolymorphism；混亂源於 within-read inconsistency）⚠ middle authors 待補
+
+% STATUS=VERIFIED
+@article{landan2012epipoly,
+  author  = {Landan, Gilad and Cohen, Netta Mendelson and Mukamel, Zohar and Bar, Amir and Molchadsky, Alina and Brosh, Ran and Horn-Saban, Shirley and Amann-Zalcenstein, Daniela and Goldfinger, Naomi and Zundelevich, Adi and Gal-Yam, Einav Nili and Rotter, Varda and Tanay, Amos},
+  title   = {Epigenetic polymorphism and the stochastic formation of differentially methylated regions in normal and cancerous tissues},
+  journal = {Nature Genetics},
+  year    = {2012}, volume = {44}, number = {11}, pages = {1207--1214},
+  doi     = {10.1038/ng.2442}, pmid = {23064413}
+}
+% relation: C3 supports（epipolymorphism 奠基論文）
+
+% STATUS=CORRECTED（補 DOI）
+@article{russo2021chaos,
+  author  = {Russo, Giusi and Tramontano, Alfonso and Iodice, Ilaria and Chiariotti, Lorenzo and Pezone, Antonio},
+  title   = {Epigenome Chaos: Stochastic and Deterministic {DNA} Methylation Events Drive Cancer Evolution},
+  journal = {Cancers},
+  year    = {2021}, volume = {13}, number = {8}, pages = {1800},
+  doi     = {10.3390/cancers13081800}, pmid = {33918773}
+}
+% relation: C3 supports（review；跨癌種 hallmark；非一手數據）
+
+% STATUS=VERIFIED
+@article{brocks2014intratumor,
+  author  = {Brocks, David and Assenov, Yassen and Minner, Sarah and Bogatyrova, Olga and Simon, Ronald and Koop, Christina and Oakes, Christopher and Zucknick, Manuela and Lipka, Daniel B. and Weischenfeldt, Joachim and Gerhauser, Clarissa and Plass, Christoph},
+  title   = {Intratumor {DNA} methylation heterogeneity reflects clonal evolution in aggressive prostate cancer},
+  journal = {Cell Reports},
+  year    = {2014}, volume = {8}, number = {3}, pages = {798--806},
+  doi     = {10.1016/j.celrep.2014.06.053}, pmid = {25066126}
+}
+% relation: C3 partial（單一癌種 prostate；異質性反映 clonal evolution）
+
+% ---------- C4：read-level 甲基×haplotype 工具地景（多數因果與 ISM 相反）----------
+% STATUS=VERIFIED（Nat Commun 15:5327）
+@article{fu2024methphaser,
+  author  = {Fu, Yilei and Aganezov, Sergey and Mahmoud, Medhat and Beaulaurier, John and Juul, Sissel and Treangen, Todd J. and Sedlazeck, Fritz J.},
+  title   = {{MethPhaser}: methylation-based long-read haplotype phasing of human genomes},
+  journal = {Nature Communications},
+  year    = {2024}, volume = {15}, number = {1}, pages = {5327},
+  doi     = {10.1038/s41467-024-49588-0}
+}
+% relation: C4 partial（甲基→haplotype phasing，與 ISM 因果相反；niche=phase-block 延長非 read-read 距離）
+
+% STATUS=VERIFIED（Genome Biology 22:68）
+@article{akbari2021nanomethphase,
+  author  = {Akbari, Vahid and Garant, Jean-Michel and O'Neill, Kieran and Pandoh, Pawan and Moore, Richard and Marra, Marco A. and Hirst, Martin and Jones, Steven J. M.},
+  title   = {Megabase-scale methylation phasing using nanopore long reads and {NanoMethPhase}},
+  journal = {Genome Biology},
+  year    = {2021}, volume = {22}, number = {1}, pages = {68},
+  doi     = {10.1186/s13059-021-02283-5}
+}
+% relation: C4 partial（甲基相位化奠基工具）
+
+% STATUS=VERIFIED（software，@misc）
+@misc{ont_modkit,
+  author       = {{Oxford Nanopore Technologies}},
+  title        = {modkit: A bioinformatics tool for working with modified bases},
+  howpublished = {\url{https://github.com/nanoporetech/modkit}},
+  year         = {2024}, note = {Accessed 2026-06-03}
+}
+% relation: C4 partial/工具鏈（pileup/extract/region-DMR；不做 read-read 距離→凸顯 ISM niche）
+
+% ---------- C5：5mC vs 5hmC（癌症 5hmC 耗竭 + nanopore 需顯式建模 5hmC）----------
+% STATUS=VERIFIED
+@article{haffner2011_5hmc,
+  author  = {Haffner, Michael C. and Chaux, Alcides and Meeker, Alan K. and Esopi, David M. and Gerber, Jonathan and Pellakuru, Laxmi G. and Toubaji, Antoun and Argani, Pedram and Iacobuzio-Donahue, Christine and Nelson, William G. and Netto, George J. and De Marzo, Angelo M. and Yegnasubramanian, Srinivasan},
+  title   = {Global {5}-hydroxymethylcytosine content is significantly reduced in tissue stem/progenitor cell compartments and in human cancers},
+  journal = {Oncotarget},
+  year    = {2011}, volume = {2}, number = {8}, pages = {627--637},
+  doi     = {10.18632/oncotarget.316}, pmid = {21896958}
+}
+% relation: C5 supports（癌症 5hmC 全域耗竭，canonical 一手證據）
+
+% STATUS=CORRECTED（年份 2016 非 2015；補 PMID/DOI）
+@article{chen2016_5hmc,
+  author  = {Chen, Kun and Zhang, Jianzhao and Guo, Zhanwen and Ma, Qin and Xu, Zhenzhong and Zhou, Yingfeng and Ke, Yuwen and He, Chuan and Zhou, Liqun and Liu, Jianpeng and Ci, Weimin},
+  title   = {Loss of {5}-hydroxymethylcytosine is linked to gene body hypermethylation in kidney cancer},
+  journal = {Cell Research},
+  year    = {2016}, volume = {26}, number = {1}, pages = {103--118},
+  doi     = {10.1038/cr.2015.150}, pmid = {26680004}
+}
+% relation: C5 supports（5hmC loss 連結 gene-body 5mC hyper；5mC/5hmC 生物解耦）
+
+% STATUS=VERIFIED（Commun Biol 8:243）
+@article{halliwell2025,
+  author  = {Halliwell, Dominic Oliver and Honig, Floris and Bagby, Stefan and Roy, Sandipan and Murrell, Adele},
+  title   = {Double and single stranded detection of {5}-methylcytosine and {5}-hydroxymethylcytosine with nanopore sequencing},
+  journal = {Communications Biology},
+  year    = {2025}, volume = {8}, pages = {243},
+  doi     = {10.1038/s42003-025-07681-0}, pmid = {39955446}
+}
+% relation: C5 supports/方法——⚠ 正確口徑：nanopore 經適當 basecalling **可**分離 5mC/5hmC；
+%   風險在「預設 5mC 模型會吸收 5hmC 訊號」，故須顯式建模 5hmC，而非「nanopore 本質上會混淆」。
+
+% STATUS=CORRECTED（實為 Cell 2012 melanoma；非 2011 Cancer Res）
+@article{lian2012_5hmc,
+  author  = {Lian, Christine Guo and Xu, Yufei and Ceol, Craig and Wu, Feizhen and Larson, Allison and Dresser, Karen and Xu, Wei and Tan, Li and Hu, Yeguang and Zhan, Qian and Shi, Yujiang G. and Murphy, George F.},
+  title   = {Loss of {5}-Hydroxymethylcytosine Is an Epigenetic Hallmark of Melanoma},
+  journal = {Cell},
+  year    = {2012}, volume = {150}, number = {6}, pages = {1135--1146},
+  doi     = {10.1016/j.cell.2012.07.033}, pmid = {22980977}
+}
+% relation: C5 partial（melanoma-specific 5hmC loss landmark）
+
+% ---------- C6：CN/LOH 才是腫瘤 allelic methylation 主因（de-confound 支撐）----------
+% STATUS=CORRECTED（⚠ deck 標題寫錯）。正確標題＝"...dictator of imprinted methylation in tumors"
+%   scope = imprinted DMRs；泛化到所有 allele-specific methylation 時須註明「demonstrated at imprinted DMRs」
+@article{martintrujillo2017,
+  author  = {Martin-Trujillo, Alex and Vidal, Enrique and Monteagudo-S{\'a}nchez, Ana and Sanchez-Delgado, Marta and Moran, Sebastian and Hernandez Mora, Jose Ramon and Heyn, Holger and Guitart, Miriam and Esteller, Manel and Monk, David},
+  title   = {Copy number rather than epigenetic alterations are the major dictator of imprinted methylation in tumors},
+  journal = {Nature Communications},
+  year    = {2017}, volume = {8}, pages = {467},
+  doi     = {10.1038/s41467-017-00639-9}, pmid = {28883545}
+}
+% relation: C6 supports（最強；CN 而非表觀變化主導；⚠ 證於 imprinted DMR，泛化須標 scope）
+
+% STATUS=VERIFIED（補 PMID/DOI；relation 為方法學）
+@article{abante2020,
+  author  = {Abante, Jordi and Fang, Yifan and Feinberg, Andrew P. and Goutsias, John},
+  title   = {Detection of haplotype-dependent allele-specific {DNA} methylation in {WGBS} data},
+  journal = {Nature Communications},
+  year    = {2020}, volume = {11}, pages = {5238},
+  doi     = {10.1038/s41467-020-19077-1}, pmid = {33067439}
+}
+% relation: C6 supports（方法：haplotype-resolved ASM 偵測框架，非 CN-causation 直接證據）
+
+% STATUS=CORRECTED（第一作者 Wu G 非 Wu H；補 PMID/DOI）
+@article{wu2011ngs,
+  author  = {Wu, Guodong and Yi, Nengjun and Absher, Devin and Zhi, Degui},
+  title   = {Statistical quantification of methylation levels by next-generation sequencing},
+  journal = {PLoS ONE},
+  year    = {2011}, volume = {6}, number = {6}, pages = {e21034},
+  doi     = {10.1371/journal.pone.0021034}, pmid = {21698242}
+}
+% relation: C6 partial/統計（甲基量化統計框架）
+
+% ============================================================================
+% 署名更正（不在 22 篇 deck 清單；屬 LongPhase-S revision draft 的 BRCA2/ZAR2 引用）
+% ============================================================================
+% STATUS=VERIFIED（draft 誤署「Liu」→正確 Misra S）
+@article{misra2010_brca2zar2,
+  author  = {Misra, Smita and Sharma, Sudhir and Agarwal, Aprajita and Khedkar, Santosh V. and Tsai, Ming-Hui and Mukherjee, Pinku K. and Chaudhary, Anil K.},
+  title   = {Cell cycle-dependent regulation of the bi-directional overlapping promoter of human {BRCA2/ZAR2} genes in breast cancer cells},
+  journal = {Molecular Cancer},
+  year    = {2010}, volume = {9}, pages = {50},
+  doi     = {10.1186/1476-4598-9-50}, pmid = {20202217}
+}
+% ⚠ Misra 後續 co-author list 待最終核對
+
+% STATUS=VERIFIED（draft 誤署「Healey」→正確 Gochhait S）
+@article{gochhait2007_brca2,
+  author  = {Gochhait, Sailesh and Bukhari, Syed Irfan Ahmad and Bairwa, Narendra and Vadhera, Shivani and Darvishi, Katayoon and Raish, Mohammad and Gupta, Pawan and Husain, Syed Akhtar and Bamezai, Rameshwar N. K.},
+  title   = {Implication of {BRCA2} -26{G}>{A} 5' untranslated region polymorphism in susceptibility to sporadic breast cancer and its modulation by p53 codon 72 {Arg}>{Pro} polymorphism},
+  journal = {Breast Cancer Research},
+  year    = {2007}, volume = {9}, number = {5}, pages = {R71},
+  doi     = {10.1186/bcr1780}, pmid = {17945002}
+}

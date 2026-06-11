@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Target 3 — 5 Features Distributions × 9-cell Combinatorial (PI V6 Signoff)</title>
+
+  <!-- Plotly.js 2.27.0 (CDN; PI 本機可離線下載) -->
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+  <!-- DataTables 1.13.7 (CDN) -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
+  <style>
+    :root {
+      --c-accent: #D97757; --c-accent-deep: #B85A3F;
+      --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-code-bg: #F4EFE6;
+      --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+      --c-info: #1E3A8A;
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+      --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+                 "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+      --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+      --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+      --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+      --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+      --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--c-bg); color: var(--c-text);
+           font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.6; }
+    .layout { max-width: 1400px; margin: 0 auto; display: grid;
+              grid-template-columns: 240px 1fr; gap: var(--sp-5);
+              padding: var(--sp-5) var(--sp-4); }
+    aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+                background: var(--c-surface); border: 1px solid var(--c-border);
+                border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+                box-shadow: var(--shadow-sm);
+                max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+    aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                    color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+    aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+    aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+    aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+                  color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+                  border-left: 3px solid transparent; }
+    aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+    aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                          font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+    aside.toc a.core { font-weight: 600; }
+    aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px; font-size: 0.85em; }
+
+    main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+                  border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+                  padding: var(--sp-6) var(--sp-6); min-width: 0; }
+    .report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                      margin-bottom: var(--sp-5); }
+    .report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                                letter-spacing: 1px; color: var(--c-accent-deep);
+                                font-weight: 700; margin-bottom: var(--sp-2); }
+    .report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+    .report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                            gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+    .report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+    .report-header .meta dd { margin: 0; }
+    .report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                                 border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                                 font-size: 0.92em; }
+    .verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                       border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); }
+    .verdict-banner.neutral  { background: linear-gradient(90deg, #1E3A8A, #3B82F6); }
+
+    .tier-badge { display: inline-block; padding: 2px 8px; border-radius: 10px;
+                  font-size: var(--fs-xs); font-weight: 700; vertical-align: middle;
+                  margin-left: var(--sp-2); }
+    .tier-2 { background: #DBEAFE; color: #1E3A8A; }
+    .tier-3 { background: #FEF3C7; color: #92400E; }
+
+    h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+          padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+          scroll-margin-top: var(--sp-4); }
+    h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+                font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+    h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+    h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2); color: var(--c-text-soft); }
+    p, ul, ol { margin: var(--sp-3) 0; }
+    ul, ol { padding-left: var(--sp-5); }
+    a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+    a:hover { color: var(--c-accent-deep); }
+    code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+            font-family: var(--ff-mono); font-size: 0.92em; }
+    .src { font-family: var(--ff-mono); font-size: 0.85em; color: var(--c-text-soft); }
+
+    table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+    th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; }
+    th { background: var(--c-code-bg); font-weight: 600; }
+    td.num { text-align: right; font-family: var(--ff-mono); }
+    .auc-strong { background: #DCFCE7; }
+    .auc-weak { background: #FEF3C7; }
+    .auc-bad  { background: #FEF2F0; }
+
+    .callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                         padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                         border-radius: var(--radius-md); color: #7F1D1D; }
+    .callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #78350F; }
+    .callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                        padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                        border-radius: var(--radius-md); color: #166534; }
+    .callout-info { background: #EFF6FF; border-left: 4px solid var(--c-info);
+                     padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                     border-radius: var(--radius-md); color: #1E40AF; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                  gap: var(--sp-3); margin: var(--sp-4) 0; }
+    .stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+                 border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+    .stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1; }
+    .stat-box .number.success { color: var(--c-success); }
+    .stat-box .number.warning { color: var(--c-warning); }
+    .stat-box .number.critical { color: var(--c-critical); }
+    .stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+
+    .section-card { border: 1.5px solid var(--c-border); border-radius: var(--radius-lg);
+                     margin: var(--sp-4) 0; overflow: hidden; background: var(--c-surface); }
+    .section-card > summary { cursor: pointer; padding: var(--sp-3) var(--sp-4);
+                               display: flex; align-items: center; gap: var(--sp-3);
+                               background: var(--c-code-bg); list-style: none; }
+    .section-card > summary::-webkit-details-marker { display: none; }
+    .section-card > summary::before { content: "▸"; transition: transform 0.2s;
+                                       color: var(--c-text-soft); font-size: var(--fs-sm); }
+    .section-card[open] > summary::before { transform: rotate(90deg); }
+    .section-card .card-id { font-family: var(--ff-mono); font-weight: 700; font-size: var(--fs-md);
+                              color: var(--c-accent-deep); background: var(--c-surface);
+                              padding: 3px 10px; border-radius: 12px; border: 1.5px solid var(--c-accent); }
+    .section-card .card-title { flex: 1; font-weight: 600; font-size: var(--fs-md); }
+    .section-card .card-body { padding: var(--sp-4); }
+
+    .plot-container { background: var(--c-bg); border: 1px solid var(--c-border);
+                       border-radius: var(--radius-md); padding: var(--sp-3);
+                       margin: var(--sp-3) 0; min-height: 480px; }
+    .figure-caption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                       margin-top: var(--sp-2); font-style: italic; text-align: center; }
+    .controls { display: flex; gap: var(--sp-3); align-items: center; margin: var(--sp-3) 0;
+                 background: var(--c-code-bg); padding: var(--sp-2) var(--sp-3);
+                 border-radius: var(--radius-md); flex-wrap: wrap; }
+    .controls label { font-size: var(--fs-sm); font-weight: 600; color: var(--c-text-soft); }
+    .controls select, .controls button { padding: 4px 10px; font-size: var(--fs-sm);
+                                          border: 1px solid var(--c-border);
+                                          border-radius: var(--radius-sm);
+                                          background: var(--c-surface); cursor: pointer;
+                                          font-family: var(--ff-body); }
+    .controls button { background: var(--c-accent); color: white; border-color: var(--c-accent); }
+    .controls button:hover { background: var(--c-accent-deep); }
+
+    .static-fig { text-align: center; margin: var(--sp-4) 0; }
+    .static-fig img { max-width: 100%; height: auto; border: 1px solid var(--c-border);
+                       border-radius: var(--radius-md); padding: var(--sp-2); background: var(--c-surface); }
+    .static-fallback { text-align: center; padding: 20px; }
+    .static-fallback img { max-width: 100%; height: auto; border: 1px solid var(--c-border);
+                            border-radius: var(--radius-md); }
+    .static-fallback p { font-size: 13px; color: var(--c-text-soft); font-style: italic; margin-top: 8px; }
+
+    .l0-headline { background: linear-gradient(90deg, #FEF3C7, #FFFFFF);
+                    border: 2px solid var(--c-warning); border-radius: var(--radius-lg);
+                    padding: var(--sp-4) var(--sp-5); margin: var(--sp-4) 0;
+                    font-size: var(--fs-lg); font-weight: 600; }
+    .l0-headline .l0-tag { display: inline-block; background: var(--c-warning); color: white;
+                             padding: 2px 10px; border-radius: 12px; font-size: var(--fs-xs);
+                             margin-right: var(--sp-2); }
+
+    .references { background: var(--c-bg); border-radius: var(--radius-md);
+                   padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-5); }
+    .references h2 { border-bottom: none; margin-top: 0; font-size: var(--fs-xl); padding-bottom: 0; }
+    .references ol { list-style: decimal; padding-left: var(--sp-5); }
+    .references li { margin: var(--sp-2) 0; font-size: var(--fs-sm); }
+
+    .provenance { margin-top: var(--sp-6); padding-top: var(--sp-4);
+                   border-top: 1px solid var(--c-border); font-size: var(--fs-xs);
+                   color: var(--c-text-soft); font-family: var(--ff-mono); }
+
+    @media print {
+      body { background: white; }
+      .layout { display: block; max-width: 100%; padding: 0; }
+      aside.toc { display: none; }
+      main.report { box-shadow: none; border: none; padding: 0; }
+      details:not([open]) > * { display: block !important; }
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside.toc { position: static; max-height: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="toc" aria-label="章節導航">
+    <h3>章節導航</h3>
+    <ol>
+      <li><a href="#tldr" class="core">TL;DR</a></li>
+      <li><a href="#headline" class="core">L0 Headline</a></li>
+      <li><a href="#top-findings" class="core">L1 Top Findings</a></li>
+      <li><a href="#sec-3a">3A. 5 features boxplot</a></li>
+      <li><a href="#sec-3a1" class="core">3A.1 loh_inner_flag grouped bar (binary)</a></li>
+      <li><a href="#sec-3b">3B. Methylation 5 sub-features</a></li>
+      <li><a href="#sec-3c" class="core">3C. 9-cell heatmap</a></li>
+      <li><a href="#sec-3d">3D. AUC + Cohen's d bar</a></li>
+      <li><a href="#sec-3e" class="core">3E. caller_af direction inconsistency</a></li>
+      <li><a href="#caveats">Caveats</a></li>
+      <li><a href="#raw-data">L3 Raw Data (DataTables)</a></li>
+      <li><a href="#refs">引用文件</a></li>
+    </ol>
+  </aside>
+
+  <main class="report">
+
+    <header class="report-header">
+      <div class="pretitle">PI V6 Signoff · 4-Goal Hybrid HTML · Target 3</div>
+      <h1>Target 3 — 5 features 獨立 + 組合分布刻畫 <span class="tier-badge tier-2">⭐2 descriptive</span></h1>
+      <dl class="meta">
+        <dt>Build date</dt>      <dd>2026-05-22 (Phase C)</dd>
+        <dt>Audience</dt>        <dd>PI 1-on-1 / Lab meeting (4-goal signoff)</dd>
+        <dt>Parent report</dt>   <dd><code>InterSubMod/docs/experiments/in_progress/2026/05/20260521_A3_5features_distribution_combinatorial_01.md</code></dd>
+        <dt>Status</dt>          <dd>in_progress · Phase A3 verified · awaiting PI review</dd>
+        <dt>Samples</dt>         <dd>5 (HCC1395 / HCC1937 / HCC1954 / H1437 / H2009)</dd>
+        <dt>Commit</dt>          <dd><code>8fd6b6c</code> (refactor/phase1-safety)</dd>
+      </dl>
+      <div class="verdict-banner neutral">
+        ◐ Descriptive characterization — 不做 NO-GO / tier 升級判定。loh_inner_flag 為 5/5 sign-consistent
+        最強 anchor (⭐3 可升)；其他 features purity / coverage 結構依賴 → cycle3 filter 設計需 per-sample stratify。
+      </div>
+    </header>
+
+    <h2 id="tldr"><span class="h-num">0.</span>TL;DR</h2>
+    <p>5 features (caller_af / LOH / Coverage_Multiple / NG / methylation 5-sub) × 5 樣本 個別 AUC 範圍
+    <strong>0.010 – 0.924</strong>；9 features 中 <strong>5/9 sign-consistent ≥4/5</strong>
+    (loh_inner_flag 5/5 最強)；Pairwise Spearman ρ on |Cohen's d| 排序中位數 <strong>0.44</strong>，
+    H1437×H2009 ρ=0.97 同 lineage 近乎一致，HCC1954 (high-purity) 為 outlier；9-cell 最強 FP-enrichment
+    cell <code>HCC1395 outer × NG2 × AF_L</code> TP-rate=0.217 (n=3,034)。
+    <span class="src">[source: phase2_completeness_audit/A3_per_feature_AUC_cohend_5sample.tsv]</span></p>
+
+    <div class="l0-headline" id="headline">
+      <span class="l0-tag">L0</span>
+      <strong>loh_inner_flag 是 G3 filter 的最強跨樣本 anchor (5/5 sign-consistent, AUC 0.54–0.72)；
+      caller_af 方向 sample-dependent (HCC1395 AUC=0.92 vs HCC1937 AUC=0.20) — 無法直接當 filter，
+      必先 per-purity stratify。</strong>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box"><div class="number">9</div><div class="label">individual features 分析</div></div>
+      <div class="stat-box"><div class="number">5</div><div class="label">樣本 (5-sample HP-on master)</div></div>
+      <div class="stat-box"><div class="number success">5/9</div><div class="label">sign-consistent ≥4/5</div></div>
+      <div class="stat-box"><div class="number">0.44</div><div class="label">中位 pairwise Spearman ρ</div></div>
+      <div class="stat-box"><div class="number critical">0.217</div><div class="label">最低 TP-rate cell (n=3,034 FP enrich)</div></div>
+      <div class="stat-box"><div class="number warning">0.97</div><div class="label">H1437×H2009 ρ (同 lineage)</div></div>
+    </div>
+
+    <h2 id="top-findings"><span class="h-num">1.</span>L1 Top Findings (5 條)</h2>
+
+    <div class="callout-success">
+      <strong>F1 · loh_inner_flag 跨樣本最穩定 discriminative <span class="tier-badge tier-3">⭐3 可升</span></strong><br>
+      5/5 樣本 Cohen's d 為正 (0.29 – 0.93)；AUC 0.54 – 0.72，range 緊湊。
+      <span class="src">[source: A3_direction_consistency_spearman.tsv:4]</span>
+    </div>
+
+    <div class="callout-warning">
+      <strong>F2 · caller_af 方向 sample-dependent · 不可直接 filter</strong><br>
+      HCC1395 (5% purity) AUC=<strong>0.924</strong> TP&gt;FP；HCC1937 (high purity) AUC=<strong>0.200</strong> 反向 TP&lt;FP；
+      d range = 2.79 (全 9 features 最大 swing)。
+      <span class="src">[source: A3_per_feature_AUC_cohend_5sample.tsv:2,11]</span>
+    </div>
+
+    <div class="callout-info">
+      <strong>F3 · NG / HPFineF 為次穩定 marker</strong><br>
+      sign_consistent=1, AUC 4/5 樣本 ≥ 0.59；HCC1954 small-FP-pool (n=687) NG 失效為已知 issue。
+      <span class="src">[source: A3_direction_consistency_spearman.tsv:6,8]</span>
+    </div>
+
+    <div class="callout-critical">
+      <strong>F4 · Coverage_Multiple 在 H1437 AUC=0.010 真實反向</strong><br>
+      H1437 FP median Coverage_Multiple=1.65 vs TP median=0.99；FP n=8 small-sample 但方向真實。
+      H1437 FP 集中 amplicon-like high-cov 區。<strong>不是 bug</strong>。
+      <span class="src">[source: A3_per_feature_AUC_cohend_5sample.tsv:31]</span>
+    </div>
+
+    <div class="callout-warning">
+      <strong>F5 · Methylation 5 sub-features 個別 AUC ≤ 0.63 marginal</strong><br>
+      HPFineF top (HCC1395 0.626 / H1437 0.603 / H2009 0.616); NME_imbalance 全 5 樣本 0.50–0.53
+      接近 random — confirm cycle1 step0「methylation 5th-rank、邊際貢獻」結論。
+      <span class="src">[source: A3_per_feature_AUC_cohend_5sample.tsv:8-10,17-19,24-28,33-37,42-46]</span>
+    </div>
+
+    <h2 id="sec-3a"><span class="h-num">3A.</span>5 features individual boxplot</h2>
+    <p>4 core features (caller_af / loh_inner_flag / Coverage_Multiple / NG) TP vs FP 分布，
+    每 sample 一個 panel；每 panel 標 AUC + Cohen's d。本節為 <strong>static 主圖</strong>，
+    互動版見 §3D Plotly cross-sample bar。</p>
+
+    <div class="callout-warning">
+      <strong>⚠ Caveat · loh_inner_flag 是 binary feature {0, 1}，boxplot 不適用</strong><br>
+      下方 Figure 3A boxplot grid 中 loh_inner_flag 的 TP/FP median 都 = 0 (一條線)，
+      這是 binary feature 的 boxplot artefact <em>不是 feature 失效</em>。
+      訊號在 <strong>prevalence (inner% 比例差)</strong>，請看 <a href="#sec-3a1">§3A.1 grouped bar</a>
+      或 <a href="#sec-3c">§3C 9-cell heatmap</a> 判讀。
+      AUC + Cohen's d 是正確 metric (5/5 sign-consistent ⭐3 anchor)。
+    </div>
+
+    <div class="static-fig">
+      <img src="assets/figures/target3/A3_5features_boxplot_per_sample.png"
+           alt="A3 5 features boxplot 4x5 grid (TP blue vs FP red)">
+      <div class="figure-caption">
+        Figure 3A · 4 core features × 5 樣本 TP/FP boxplot。每 panel 標 AUC + Cohen's d。
+        Blue = TP，Red = FP。
+        <span class="src">[source: figures/A3_5features_boxplot_per_sample.png]</span>
+      </div>
+    </div>
+
+    <details class="section-card">
+      <summary>
+        <span class="card-id">L2-3A.1</span>
+        <span class="card-title">為什麼 caller_af HCC1395 出現 AUC=0.924？</span>
+      </summary>
+      <div class="card-body">
+        <p>HCC1395 為 5% 低 tumour purity (tumour-in-normal dilution)；TP 真實 AF≈0.05 但 ClairS-TO 模型
+        會 boost 至 median 0.43；FP germline tail median 0.11 → TP 大幅高於 FP。
+        此 AUC <strong>不能跨樣本推廣</strong> — HCC1937 (high purity) 反向。</p>
+        <p class="src">[source: A3_per_feature_AUC_cohend_5sample.tsv:2 (TP_median=0.4262, FP_median=0.1147),
+        line 11 (HCC1937 TP_median=0.3262, FP_median=0.9931)]</p>
+      </div>
+    </details>
+
+    <details class="section-card">
+      <summary>
+        <span class="card-id">L2-3A.2</span>
+        <span class="card-title">loh_inner_flag 為 binary 0/1，boxplot median 全為 0 — 怎麼解讀？</span>
+      </summary>
+      <div class="card-body">
+        <p>median=0 是 boxplot 的 binary 特性 (大多數變異點 outer-LOH)；訊號在 mean-shift 與 prevalence。
+        Cohen's d 為 mean diff / pooled sd，能量化 binary feature 的分布偏移：</p>
+        <ul>
+          <li>HCC1395 d=0.88 → TP inner 比 FP inner 比例顯著高</li>
+          <li>HCC1937 d=0.93 → 同向</li>
+          <li>HCC1954 d=0.29 (最弱但同向 — high-purity small-FP-pool)</li>
+        </ul>
+        <p>正確視覺化見 <a href="#sec-3a1">§3A.1 grouped bar</a> (TP-inner% vs FP-inner% per sample)。</p>
+        <p class="src">[source: A3_per_feature_AUC_cohend_5sample.tsv:3,12,21,30,39]</p>
+      </div>
+    </details>
+
+    <h2 id="sec-3a1"><span class="h-num">3A.1</span>loh_inner_flag — grouped bar (TP vs FP inner%)</h2>
+    <p>Binary feature {0, 1} 的正確視覺化：以 <strong>% positive in each class</strong> 量化
+    prevalence shift；Gap (pp) = TP-inner% − FP-inner% 為 sign/magnitude 視覺對應 Cohen's d。
+    <strong>5/5 樣本 TP-inner% &gt; FP-inner%</strong>，Gap 範圍 +8.5 ~ +43.4 pp。</p>
+
+    <div class="static-fig">
+      <img src="assets/figures/target3/A3_loh_inner_flag_grouped_bar_5sample.png"
+           alt="loh_inner_flag grouped bar — TP-inner% (blue) vs FP-inner% (red) across 5 samples">
+      <div class="figure-caption">
+        Figure 3A.1 · loh_inner_flag TP vs FP inner% per sample (binary feature 的正確視覺化)。
+        Blue = TP-inner%；Red = FP-inner%；Gap (pp) + AUC + Cohen's d 標於每個 sample 群組上方。
+        <span class="src">[source: phase2_completeness_audit/figures/A3_loh_inner_flag_grouped_bar_5sample.png]</span>
+      </div>
+    </div>
+
+    <details class="section-card" open>
+      <summary>
+        <span class="card-id">L2-3A.1.1</span>
+        <span class="card-title">5 樣本 inner% 與 Gap (raw data)</span>
+      </summary>
+      <div class="card-body">
+        <table>
+          <thead>
+            <tr>
+              <th>sample</th><th>n_TP</th><th>n_FP</th>
+              <th>TP-inner%</th><th>FP-inner%</th><th>Gap (pp)</th>
+              <th>AUC</th><th>Cohen's d</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>HCC1395</td><td class="num">30,490</td><td class="num">4,842</td>
+                <td class="num auc-strong">45.97%</td><td class="num">4.63%</td>
+                <td class="num"><strong>+41.34</strong></td>
+                <td class="num auc-strong">0.7067</td><td class="num">0.88</td></tr>
+            <tr><td>HCC1937</td><td class="num">13,910</td><td class="num">2,697</td>
+                <td class="num auc-strong">49.49%</td><td class="num">6.04%</td>
+                <td class="num"><strong>+43.45</strong></td>
+                <td class="num auc-strong">0.7172</td><td class="num">0.93</td></tr>
+            <tr><td>HCC1954</td><td class="num">19,449</td><td class="num">687</td>
+                <td class="num">9.97%</td><td class="num">1.46%</td>
+                <td class="num">+8.51</td>
+                <td class="num">0.5426</td><td class="num">0.29</td></tr>
+            <tr><td>H1437</td><td class="num">70,191</td><td class="num">773</td>
+                <td class="num">20.09%</td><td class="num">0.39%</td>
+                <td class="num">+19.70</td>
+                <td class="num auc-weak">0.5985</td><td class="num">0.49</td></tr>
+            <tr><td>H2009</td><td class="num">135,359</td><td class="num">1,342</td>
+                <td class="num auc-weak">28.07%</td><td class="num">4.92%</td>
+                <td class="num">+23.15</td>
+                <td class="num auc-weak">0.6157</td><td class="num">0.52</td></tr>
+          </tbody>
+        </table>
+        <p class="src">[source: assets/data/target3/A3_loh_inner_proportion_5sample.tsv]</p>
+        <p><strong>結論</strong>：5/5 sign-consistent (TP &gt; FP)；HCC1395 / HCC1937 為最強 anchor
+        (Gap ≥ +41 pp，AUC ≥ 0.71)；HCC1954 small-FP-pool (n=687) 為最弱但同向 — 與 §3A 中
+        loh_inner_flag 跨樣本最穩定 anchor 結論一致 (⭐3 可升)。</p>
+      </div>
+    </details>
+
+    <div class="controls">
+      <button id="toggleTable3" type="button">展開 loh_inner% raw data 表 (5 rows, DataTables)</button>
+    </div>
+
+    <details id="dt3Wrap" class="section-card">
+      <summary>
+        <span class="card-id">L3-T3</span>
+        <span class="card-title">loh_inner_flag TP/FP proportion (5 rows, DataTables 排序)</span>
+      </summary>
+      <div class="card-body">
+        <table id="dtLohInner" class="display compact">
+          <thead>
+            <tr>
+              <th>sample</th><th>n_TP</th><th>n_FP</th>
+              <th>n_TP_inner</th><th>n_FP_inner</th>
+              <th>TP_inner_pct</th><th>FP_inner_pct</th>
+              <th>Gap_pp</th><th>AUC</th><th>Cohen's d</th>
+            </tr>
+          </thead>
+          <tbody id="dtLohInnerBody"></tbody>
+        </table>
+        <p class="src">[source: assets/data/target3/A3_loh_inner_proportion_5sample.tsv]</p>
+      </div>
+    </details>
+
+    <h2 id="sec-3b"><span class="h-num">3B.</span>Methylation 5 sub-features detail</h2>
+    <p>5 methylation 衍生特徵 (HPMergedDelta / HPFineF / NME_imbalance / Epipoly_Delta / ClusterPermanovaF)
+    × 5 樣本 boxplot grid。</p>
+
+    <div class="static-fig">
+      <img src="assets/figures/target3/A3_methyl_5sub_boxplot.png"
+           alt="A3 methylation 5 sub-features x 5 sample TP/FP boxplot">
+      <div class="figure-caption">
+        Figure 3B · Methylation 5 sub-features × 5 樣本 TP/FP boxplot。
+        最強的 HPFineF AUC 仍 ≤ 0.63 — 邊際 discriminative。
+        <span class="src">[source: figures/A3_methyl_5sub_boxplot.png]</span>
+      </div>
+    </div>
+
+    <details class="section-card" open>
+      <summary>
+        <span class="card-id">L2-3B</span>
+        <span class="card-title">Methylation 5 sub-features 個別 AUC summary</span>
+      </summary>
+      <div class="card-body">
+        <table>
+          <thead>
+            <tr><th>Feature</th><th>HCC1395</th><th>HCC1937</th><th>HCC1954</th><th>H1437</th><th>H2009</th><th>sign_consistent</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>HPMergedDelta</td><td class="num">0.490</td><td class="num auc-weak">0.581</td><td class="num">0.434</td><td class="num">0.534</td><td class="num auc-weak">0.583</td><td>0 (3+/2-)</td></tr>
+            <tr><td>HPFineF</td><td class="num auc-strong">0.626</td><td class="num auc-weak">0.593</td><td class="num">0.477</td><td class="num auc-strong">0.603</td><td class="num auc-strong">0.616</td><td><strong>1 (4+/1-)</strong></td></tr>
+            <tr><td>NME_imbalance</td><td class="num">0.498</td><td class="num">0.513</td><td class="num">0.510</td><td class="num">0.533</td><td class="num">0.511</td><td>1 (1+/4-)</td></tr>
+            <tr><td>Epipoly_Delta</td><td class="num">0.450</td><td class="num">0.543</td><td class="num auc-weak">0.582</td><td class="num auc-bad">0.401</td><td class="num auc-bad">0.403</td><td>0 (2+/3-)</td></tr>
+            <tr><td>ClusterPermanovaF</td><td class="num auc-bad">0.436</td><td class="num">0.538</td><td class="num">0.462</td><td class="num">0.487</td><td class="num">0.509</td><td>1 (1+/4-)</td></tr>
+          </tbody>
+        </table>
+        <p class="src">[source: A3_per_feature_AUC_cohend_5sample.tsv lines 6-10,15-19,24-28,33-37,42-46]
+        · 綠 = AUC≥0.60；黃 = 0.55-0.60；紅 = AUC&lt;0.45 (反向)</p>
+        <p><strong>結論</strong>：HPFineF 為 methylation 內最強 (4/5 樣本 ≥ 0.59, sign-consistent positive)；
+        NME_imbalance / ClusterPermanovaF 雖 sign-consistent 但 AUC ~0.5 訊號弱；
+        建議 cycle3 filter ablation 移除 NME_imbalance / Epipoly_Delta / ClusterPermanovaF 後比較
+        ΔF1 量化邊際貢獻。</p>
+      </div>
+    </details>
+
+    <h2 id="sec-3c"><span class="h-num">3C.</span>9-cell heatmap (LOH × NG × AF)</h2>
+    <p>2 × 3 × 3 = 18 cells per sample (5 樣本 × 18 = 90 rows)；圖示為 2 LOH facet × 3×3 NG×AF heatmap
+    (9-cell per LOH facet)。互動版下拉切換樣本。</p>
+
+    <div class="controls">
+      <label for="heatmapSampleSelect">選擇樣本：</label>
+      <select id="heatmapSampleSelect">
+        <option value="HCC1395" selected>HCC1395 (5% purity, TP=30490 FP=4842)</option>
+        <option value="HCC1937">HCC1937 (high purity, TP=13910 FP=2697)</option>
+        <option value="HCC1954">HCC1954 (HER2-amp, TP=19449 FP=687)</option>
+        <option value="H1437">H1437 (TP=70191 FP=773)</option>
+        <option value="H2009">H2009 (TP=135359 FP=1342)</option>
+      </select>
+      <button id="heatmapShowStatic" type="button">切換靜態總覽 (5 樣本一次看)</button>
+    </div>
+
+    <div id="heatmapPlot" class="plot-container"></div>
+    <div class="figure-caption">
+      Figure 3C · 9-cell TP-rate heatmap (NG × AF, faceted by LOH)。
+      色軸 RdYlBu vmin=0/vmax=1；每 cell 標 TP-rate + n_total。
+      <span class="src">[source: A3_9cell_heatmap_data_5sample.tsv]</span>
+    </div>
+
+    <div class="callout-critical">
+      <strong>最強 FP-enrichment cell · HCC1395 outer × NG2 × AF_L</strong><br>
+      TP-rate = <strong>0.217</strong> (n_TP=657 / n_FP=2,377 / n_total=3,034) →
+      78% FP 集中於這個 cell。對應 cycle1 step0 已知 high-AF-FP / low-NG / outer-LOH 區 — Phase 2 filter 主目標。
+      <span class="src">[source: A3_9cell_heatmap_data_5sample.tsv:12]</span>
+    </div>
+
+    <details class="section-card">
+      <summary>
+        <span class="card-id">L2-3C.1</span>
+        <span class="card-title">為什麼 HCC1937 outer × NG2 × AF_H TP-rate=0.278？</span>
+      </summary>
+      <div class="card-body">
+        <p>HCC1937 high-purity FP germline 強烈集中 high-AF tail (median caller_af=0.99)。
+        outer × NG2 × AF_H cell n_TP=741 / n_FP=1,927 / n_total=2,668 → 72% FP enrich。
+        與 HCC1395 outer × NG2 × <strong>AF_L</strong> 為反向 — confirm caller_af direction
+        sample-dependent (§3E)。</p>
+        <p class="src">[source: A3_9cell_heatmap_data_5sample.tsv:29]</p>
+      </div>
+    </details>
+
+    <details class="section-card">
+      <summary>
+        <span class="card-id">L2-3C.2</span>
+        <span class="card-title">HCC1954 / H1437 / H2009 inner 多 cell TP-rate=1.00 — 統計意義？</span>
+      </summary>
+      <div class="card-body">
+        <p>因 inner-LOH n_FP 量極小 (HCC1954 inner 全 9 cells n_FP=10 only；H1437 inner n_FP=3 only)，
+        多 cell n_FP=0 → TP-rate=1.00 為 trivial。解讀時必看 n_total 欄。
+        cycle1 step5c 「inner-LOH 不要動」原則：inner 結構性 clean，filter 焦點應在 outer。</p>
+        <p class="src">[source: A3_9cell_heatmap_data_5sample.tsv lines 38-46 (HCC1954 inner), 56-64 (H1437 inner), 74-82 (H2009 inner)]</p>
+      </div>
+    </details>
+
+    <details class="section-card">
+      <summary>
+        <span class="card-id">L2-3C.3</span>
+        <span class="card-title">靜態總覽 (5 樣本 × 18 cells PNG)</span>
+      </summary>
+      <div class="card-body">
+        <div class="static-fig">
+          <img src="assets/figures/target3/A3_9cell_heatmap_5sample.png"
+               alt="A3 9-cell heatmap 5 sample static overview">
+          <div class="figure-caption">
+            5 樣本 × 2 LOH facets × 3×3 NG×AF heatmap。
+            <span class="src">[source: figures/A3_9cell_heatmap_5sample.png]</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <h2 id="sec-3d"><span class="h-num">3D.</span>AUC + Cohen's d bar chart (cross-sample direction)</h2>
+    <p>9 features × 5 樣本 AUC + Cohen's d 雙 panel 互動 bar chart。可切換 metric 與排序基準。</p>
+
+    <div class="controls">
+      <label for="barMetric">Metric：</label>
+      <select id="barMetric">
+        <option value="AUC" selected>AUC (with 0.50/0.58 reference lines)</option>
+        <option value="Cohens_d">Cohen's d (with 0 center, ±0.2/±0.5 thresholds)</option>
+      </select>
+      <label for="barSort">排序：</label>
+      <select id="barSort">
+        <option value="feature" selected>by feature (canonical)</option>
+        <option value="HCC1395">by HCC1395 magnitude</option>
+        <option value="H2009">by H2009 magnitude</option>
+      </select>
+    </div>
+
+    <div id="barPlot" class="plot-container"></div>
+    <div class="figure-caption">
+      Figure 3D · 9 features × 5 樣本 AUC / Cohen's d grouped bar。
+      AUC reference: 灰線 0.5 (random)、0.58 (cycle1 step0 「pure ISM ceiling」)。
+      Cohen's d reference: ±0.2 (small) / ±0.5 (medium) / ±0.8 (large)。
+      <span class="src">[source: A3_per_feature_AUC_cohend_5sample.tsv]</span>
+    </div>
+
+    <details class="section-card">
+      <summary>
+        <span class="card-id">L2-3D</span>
+        <span class="card-title">Cross-sample direction consistency heatmap (Cohen's d)</span>
+      </summary>
+      <div class="card-body">
+        <div class="static-fig">
+          <img src="assets/figures/target3/A3_direction_consistency_heatmap.png"
+               alt="A3 direction consistency Cohen's d heatmap">
+          <div class="figure-caption">
+            9 features × 5 樣本 Cohen's d heatmap (RdBu_r 雙向色，center=0)。
+            loh_inner_flag 5/5 positive (5 個藍色 cell) 為最強 anchor 視覺證據。
+            <span class="src">[source: figures/A3_direction_consistency_heatmap.png]</span>
+          </div>
+        </div>
+        <h4>Pairwise Spearman ρ on |Cohen's d| ranking (10 對)</h4>
+        <table>
+          <thead><tr><th>Pair</th><th class="num">ρ</th><th class="num">p</th></tr></thead>
+          <tbody>
+            <tr><td>H1437 × H2009</td><td class="num auc-strong">0.967</td><td class="num">0.000022</td></tr>
+            <tr><td>HCC1395 × HCC1937</td><td class="num">0.650</td><td class="num">0.058</td></tr>
+            <tr><td>HCC1937 × HCC1954</td><td class="num">0.550</td><td class="num">0.125</td></tr>
+            <tr><td>HCC1395 × HCC1954</td><td class="num">0.533</td><td class="num">0.139</td></tr>
+            <tr><td>HCC1395 × H1437</td><td class="num">0.467</td><td class="num">0.205</td></tr>
+            <tr><td>HCC1395 × H2009</td><td class="num">0.417</td><td class="num">0.265</td></tr>
+            <tr><td>HCC1937 × H1437</td><td class="num">0.417</td><td class="num">0.265</td></tr>
+            <tr><td>HCC1937 × H2009</td><td class="num">0.267</td><td class="num">0.488</td></tr>
+            <tr><td>HCC1954 × H1437</td><td class="num">0.050</td><td class="num">0.898</td></tr>
+            <tr><td>HCC1954 × H2009</td><td class="num auc-bad">-0.067</td><td class="num">0.865</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Median ρ = 0.44</strong> 中度跨樣本一致。H1437×H2009 ρ=0.97 同 lineage 鐵證；
+        HCC1954 與 H1437/H2009 ρ ≈ 0 → HCC1954 為 outlier，filter generalize 需單獨驗證。
+        <span class="src">[source: A3_direction_consistency_spearman.tsv lines 15-24]</span></p>
+      </div>
+    </details>
+
+    <h2 id="sec-3e"><span class="h-num">3E.</span>caller_af direction inconsistency · cycle 4 LOSO 證據</h2>
+    <p>caller_af 為 9 features 中跨樣本 direction 最不穩 (2 positive / 3 negative)；
+    Cohen's d range = <strong>2.79</strong> (最大 swing)。本節為 cycle 4 LOSO 「不可直接 pool」結論的
+    formal evidence。</p>
+
+    <table>
+      <thead>
+        <tr><th>Sample</th><th class="num">TP median</th><th class="num">FP median</th><th class="num">Cohen's d</th><th class="num">AUC</th><th>Direction</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>HCC1395</td><td class="num">0.4262</td><td class="num">0.1147</td><td class="num auc-strong">+1.331</td><td class="num auc-strong">0.924</td><td>TP &gt; FP (✓)</td></tr>
+        <tr><td>HCC1937</td><td class="num">0.3262</td><td class="num">0.9931</td><td class="num auc-bad">-1.457</td><td class="num auc-bad">0.200</td><td>TP &lt; FP (✗ 反向)</td></tr>
+        <tr><td>HCC1954</td><td class="num">0.2500</td><td class="num">0.3125</td><td class="num auc-bad">-0.895</td><td class="num">0.416</td><td>TP &lt; FP (✗ 反向)</td></tr>
+        <tr><td>H1437</td><td class="num">0.3944</td><td class="num">0.2000</td><td class="num auc-weak">+0.443</td><td class="num auc-weak">0.696</td><td>TP &gt; FP (✓)</td></tr>
+        <tr><td>H2009</td><td class="num">0.5059</td><td class="num">0.8750</td><td class="num">-0.314</td><td class="num">0.443</td><td>TP &lt; FP (✗ 反向)</td></tr>
+      </tbody>
+    </table>
+    <p class="src">[source: A3_per_feature_AUC_cohend_5sample.tsv lines 2,11,20,29,38]</p>
+
+    <div class="callout-critical">
+      <strong>結論 · caller_af 不可直接 pool 5 樣本作 filter feature</strong><br>
+      Direction 由 tumour purity × ClairS-TO model behaviour 結構性決定 (HCC1395 5% purity →
+      model boost AF；high-purity samples → FP germline tail occupies high-AF)。
+      <strong>cycle3 filter 必 per-purity stratify 或 per-sample LR fit</strong> (cycle 4 LOSO
+      已 confirm pool-LR 抹平訊號)。
+    </div>
+
+    <details class="section-card">
+      <summary>
+        <span class="card-id">L2-3E</span>
+        <span class="card-title">interactive · TP/FP caller_af median grouped bar per sample</span>
+      </summary>
+      <div class="card-body">
+        <p>下方 grouped bar 比較 5 樣本 TP_median vs FP_median caller_af — 視覺化方向反轉。</p>
+        <div id="callerAfPlot" class="plot-container" style="min-height: 400px;"></div>
+        <p class="figure-caption">
+          Figure 3E · caller_af TP/FP median per sample。HCC1395 (TP&gt;FP) vs others (TP&lt;FP except H1437)。
+          <span class="src">[source: A3_per_feature_AUC_cohend_5sample.tsv TP_median/FP_median cols]</span>
+        </p>
+      </div>
+    </details>
+
+    <h2 id="caveats"><span class="h-num">4.</span>Caveats / 已知 limitation</h2>
+    <ol>
+      <li><strong>Mann-Whitney p-value 全趨 0</strong> · 因 5 樣本 n&gt;1k 級別，p-value 普遍 &lt;0.001；
+        <strong>本報告以 Cohen's d magnitude (≥0.5 strong / ≥0.2 small) 為主要判讀依據</strong>，
+        不用 p-value 作 filter 設計依據。</li>
+      <li><strong>Methylation 5 sub-features individual AUC ≤ 0.63 marginal</strong> · confirm cycle1 step0
+        「pure ISM feature 上限 ~0.58 ceiling」；HPFineF 為 methylation 最強但仍邊際。
+        cycle3 ablation 需量化整合到 filter 後的 ΔF1 contribution。</li>
+      <li><strong>HCC1954 / H1437 / H2009 FP 量極小</strong> (687 / 773 / 1,342)，部分 9-cell n_FP=0 → TP-rate=1
+        為 trivial；解讀必看 n_total 欄。</li>
+      <li><strong>本分析無 within-LOH OLS residualization</strong> · AUC 為 unadjusted。
+        若要宣稱「feature X 獨立於 LOH/AF 之外仍有訊號」必續跑 <code>/auc-confound-guard</code>
+        (within-group OLS + AF-bin 交叉 + permutation)。本報告純 descriptive，不做 independence claim。</li>
+      <li><strong>NG bin NG≤2 合併 NG=2</strong> · NG=0/1 為 missing 表示，與 cycle1 step1 命名一致。</li>
+      <li><strong>caller_af direction 不可推廣</strong> · §3E 已 formal documented；
+        cycle3+ filter 設計需 per-purity stratify。</li>
+      <li><strong>Tier upgrade ≥ ⭐3 需求</strong> · 若要 claim「9-cell FP enrichment 為跨樣本 reproducible」
+        → 必跑 <code>/auc-confound-guard</code> 三關 + 引入 5 樣本以外 4 個 held-out (V3F/V5 paired)
+        + per-sample stratified LR fit 對 caller_af。</li>
+    </ol>
+
+    <h2 id="raw-data"><span class="h-num">5.</span>L3 Raw Data (DataTables)</h2>
+    <div class="controls">
+      <button id="toggleTable1" type="button">展開 per-feature AUC 表 (45 rows)</button>
+      <button id="toggleTable2" type="button">展開 9-cell heatmap 表 (90 rows)</button>
+    </div>
+
+    <details id="dt1Wrap" class="section-card">
+      <summary>
+        <span class="card-id">L3-T1</span>
+        <span class="card-title">per-feature AUC + Cohen's d (45 rows: 9 features × 5 samples)</span>
+      </summary>
+      <div class="card-body">
+        <table id="dtPerFeature" class="display compact">
+          <thead>
+            <tr>
+              <th>sample</th><th>feature</th><th>AUC</th><th>Cohen's d</th>
+              <th>p-value</th><th>n_TP</th><th>n_FP</th><th>TP_median</th><th>FP_median</th>
+            </tr>
+          </thead>
+          <tbody id="dtPerFeatureBody"></tbody>
+        </table>
+        <p class="src">[source: assets/data/target3/A3_per_feature_AUC_cohend_5sample.tsv]</p>
+      </div>
+    </details>
+
+    <details id="dt2Wrap" class="section-card">
+      <summary>
+        <span class="card-id">L3-T2</span>
+        <span class="card-title">9-cell heatmap raw (90 rows: 5 samples × 2 LOH × 3 NG × 3 AF)</span>
+      </summary>
+      <div class="card-body">
+        <table id="dt9cell" class="display compact">
+          <thead>
+            <tr>
+              <th>sample</th><th>LOH_bin</th><th>NG_bin</th><th>AF_bin</th>
+              <th>n_TP</th><th>n_FP</th><th>n_total</th><th>TP_rate</th>
+            </tr>
+          </thead>
+          <tbody id="dt9cellBody"></tbody>
+        </table>
+        <p class="src">[source: assets/data/target3/A3_9cell_heatmap_data_5sample.tsv]</p>
+      </div>
+    </details>
+
+    <section class="references" id="refs">
+      <h2>引用文件</h2>
+      <ol>
+        <li><code>InterSubMod/docs/experiments/in_progress/2026/05/20260521_A3_5features_distribution_combinatorial_01.md</code>
+          — Phase A3 source markdown (sections §1-§7 + frontmatter; commit 8fd6b6c)</li>
+        <li><code>InterSubMod/phase2_completeness_audit/A3_per_feature_AUC_cohend_5sample.tsv</code>
+          — 45 rows AUC / Cohen's d / Mann-Whitney p / TP_median / FP_median</li>
+        <li><code>InterSubMod/phase2_completeness_audit/A3_9cell_heatmap_data_5sample.tsv</code>
+          — 90 rows TP-rate by sample × LOH_bin × NG_bin × AF_bin</li>
+        <li><code>InterSubMod/phase2_completeness_audit/A3_direction_consistency_spearman.tsv</code>
+          — Sign-consistency table + Pairwise Spearman ρ (10 pairs)</li>
+        <li><code>InterSubMod/phase2_completeness_audit/A3_loh_inner_proportion_5sample.tsv</code>
+          — loh_inner_flag binary feature 的 TP/FP proportion (5 rows × 10 cols, §3A.1 source)</li>
+        <li><code>InterSubMod/phase2_completeness_audit/figures/A3_loh_inner_flag_grouped_bar_5sample.png</code>
+          · §3A.1 grouped bar (binary feature 的正確視覺化，取代 boxplot)</li>
+        <li><code>InterSubMod/phase2_completeness_audit/scripts/A3_loh_inner_replot.py</code>
+          · §3A.1 replot 腳本 (pandas + matplotlib)</li>
+        <li><code>InterSubMod/figures/A3_5features_boxplot_per_sample.png</code> · 4 core features × 5 sample boxplot grid</li>
+        <li><code>InterSubMod/figures/A3_methyl_5sub_boxplot.png</code> · methylation 5 sub-features × 5 sample boxplot grid</li>
+        <li><code>InterSubMod/figures/A3_9cell_heatmap_5sample.png</code> · 5 sample × 18 cells static heatmap</li>
+        <li><code>InterSubMod/figures/A3_AUC_cohend_bar_5sample.png</code> · AUC + Cohen's d bar (PNG static)</li>
+        <li><code>InterSubMod/figures/A3_direction_consistency_heatmap.png</code> · 9 features × 5 samples Cohen's d heatmap</li>
+        <li><code>InterSubMod/scripts/A3_5features_TP_FP_analysis.py</code> · 分析腳本 (Python pandas + sklearn + scipy)</li>
+        <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle1/cycle1_step1_l2_coefs.tsv</code>
+          · upstream 10-feature LR top10 coef ranking</li>
+      </ol>
+    </section>
+
+    <div class="provenance">
+      Provenance · commit <code>8fd6b6c</code> · branch <code>refactor/phase1-safety</code> ·
+      Phase A3 verified 2026-05-21 ·
+      HTML build 2026-05-22 by Phase C target3 HTML build agent ·
+      tier_used ⭐2 (descriptive; loh_inner_flag 5/5 sign-consistent 可升 ⭐3 但需 confound guard)
+    </div>
+
+    <!-- Static fallback container for heatmap -->
+    <template id="heatmapStaticTmpl">
+      <div class="static-fallback">
+        <img src="assets/figures/target3/A3_9cell_heatmap_5sample.png"
+             alt="A3 9-cell heatmap 5 sample static">
+        <p>靜態總覽 · 5 samples × 18 cells (PNG fallback)</p>
+      </div>
+    </template>
+  </main>
+</div>
+
+<!-- ====================================================================== -->
+<!-- ===== Inline JS · data + Plotly + DataTables wiring ================== -->
+<!-- ====================================================================== -->
+<script>
+"use strict";
+
+// ────────────────────────────────────────────────────────────────────────────
+// Raw data (embedded from TSV, no network fetch, all values literal/numeric)
+// ────────────────────────────────────────────────────────────────────────────
+const A3_perFeature = [
+  ["HCC1395","caller_af",0.9235,1.3305,0.0000,30490,4842,0.4262,0.1147],
+  ["HCC1395","loh_inner_flag",0.7067,0.8806,0.0000,30490,4842,0.0000,0.0000],
+  ["HCC1395","Coverage_Multiple",0.6094,0.3944,0.0000,29530,506,1.0780,1.0080],
+  ["HCC1395","NG",0.6865,0.7290,0.0000,30490,4842,3.0000,2.0000],
+  ["HCC1395","HPMergedDelta",0.4896,-0.3135,0.0099,30475,4820,0.0000,0.0000],
+  ["HCC1395","HPFineF",0.6264,0.1974,0.0000,30475,4820,5.1411,1.1180],
+  ["HCC1395","NME_imbalance",0.4977,-0.0835,0.3423,12501,1483,0.0000,0.0000],
+  ["HCC1395","Epipoly_Delta",0.4500,-0.2028,0.0000,12501,1482,0.0704,0.0870],
+  ["HCC1395","ClusterPermanovaF",0.4363,-0.1902,0.0000,30475,4820,0.0000,0.0000],
+  ["HCC1937","caller_af",0.2002,-1.4569,0.0000,13910,2697,0.3262,0.9931],
+  ["HCC1937","loh_inner_flag",0.7172,0.9292,0.0000,13910,2697,0.0000,0.0000],
+  ["HCC1937","Coverage_Multiple",0.6832,0.5977,0.0000,12393,195,1.0870,0.9450],
+  ["HCC1937","NG",0.4928,0.0146,0.1886,13910,2697,0.0000,1.0000],
+  ["HCC1937","HPMergedDelta",0.5814,0.2830,0.0000,13905,2474,0.0000,0.0000],
+  ["HCC1937","HPFineF",0.5930,0.1613,0.0000,13905,2474,0.0000,0.0000],
+  ["HCC1937","NME_imbalance",0.5134,-0.1115,0.2845,5377,324,0.0000,0.0000],
+  ["HCC1937","Epipoly_Delta",0.5433,0.1950,0.0087,5377,324,0.0634,0.0543],
+  ["HCC1937","ClusterPermanovaF",0.5381,-0.1260,0.0000,13905,2474,0.0000,0.0000],
+  ["HCC1954","caller_af",0.4163,-0.8950,0.0000,19449,687,0.2500,0.3125],
+  ["HCC1954","loh_inner_flag",0.5426,0.2883,0.0000,19449,687,0.0000,0.0000],
+  ["HCC1954","Coverage_Multiple",0.4147,-0.0470,0.1119,17909,29,0.8670,1.0270],
+  ["HCC1954","NG",0.4825,-0.0574,0.0844,19449,687,2.0000,2.0000],
+  ["HCC1954","HPMergedDelta",0.4343,-0.4457,0.0000,19445,684,0.0000,0.0000],
+  ["HCC1954","HPFineF",0.4774,-0.0513,0.0340,19445,684,0.3478,0.3759],
+  ["HCC1954","NME_imbalance",0.5105,-0.1858,0.3146,9924,331,0.0000,0.0000],
+  ["HCC1954","Epipoly_Delta",0.5817,0.2528,0.0000,9924,331,0.1072,0.0773],
+  ["HCC1954","ClusterPermanovaF",0.4621,0.0112,0.0000,19445,684,0.0000,0.0000],
+  ["H1437","caller_af",0.6964,0.4427,0.0000,70191,773,0.3944,0.2000],
+  ["H1437","loh_inner_flag",0.5985,0.4943,0.0000,70191,773,0.0000,0.0000],
+  ["H1437","Coverage_Multiple",0.0099,-3.8009,0.0000,67468,8,0.9930,1.6465],
+  ["H1437","NG",0.5888,0.3464,0.0000,70191,773,2.0000,2.0000],
+  ["H1437","HPMergedDelta",0.5342,0.0165,0.0016,70134,713,0.0147,0.0098],
+  ["H1437","HPFineF",0.6025,0.0436,0.0000,70134,713,6.0660,3.1952],
+  ["H1437","NME_imbalance",0.5330,0.1173,0.0000,55967,429,0.0000,0.0000],
+  ["H1437","Epipoly_Delta",0.4007,-0.5599,0.0000,55967,429,0.0566,0.0801],
+  ["H1437","ClusterPermanovaF",0.4871,-0.0174,0.1701,70134,713,0.0000,0.0000],
+  ["H2009","caller_af",0.4429,-0.3140,0.0000,135359,1342,0.5059,0.8750],
+  ["H2009","loh_inner_flag",0.6157,0.5171,0.0000,135359,1342,0.0000,0.0000],
+  ["H2009","Coverage_Multiple",0.1928,-0.9697,0.0000,132909,86,1.0830,1.5265],
+  ["H2009","NG",0.6307,0.4783,0.0000,135359,1342,3.0000,2.0000],
+  ["H2009","HPMergedDelta",0.5826,0.0238,0.0000,135353,1334,0.0045,0.0000],
+  ["H2009","HPFineF",0.6163,0.0479,0.0000,135353,1334,2.1914,1.1351],
+  ["H2009","NME_imbalance",0.5112,-0.1111,0.1357,107376,650,0.0000,0.0000],
+  ["H2009","Epipoly_Delta",0.4033,-0.5878,0.0000,107376,650,0.0436,0.0610],
+  ["H2009","ClusterPermanovaF",0.5094,-0.1080,0.0462,135353,1334,0.0000,0.0000]
+];
+
+const A3_9cell = [
+  ["HCC1395","inner","NG2","AF_H",4153,0,4153,1.0000],
+  ["HCC1395","inner","NG2","AF_L",626,48,674,0.9288],
+  ["HCC1395","inner","NG2","AF_M",1533,6,1539,0.9961],
+  ["HCC1395","inner","NG3","AF_H",2778,0,2778,1.0000],
+  ["HCC1395","inner","NG3","AF_L",981,130,1111,0.8830],
+  ["HCC1395","inner","NG3","AF_M",2180,2,2182,0.9991],
+  ["HCC1395","inner","NGge4","AF_H",655,0,655,1.0000],
+  ["HCC1395","inner","NGge4","AF_L",410,34,444,0.9234],
+  ["HCC1395","inner","NGge4","AF_M",700,4,704,0.9943],
+  ["HCC1395","outer","NG2","AF_H",811,86,897,0.9041],
+  ["HCC1395","outer","NG2","AF_L",657,2377,3034,0.2165],
+  ["HCC1395","outer","NG2","AF_M",904,151,1055,0.8569],
+  ["HCC1395","outer","NG3","AF_H",1555,28,1583,0.9823],
+  ["HCC1395","outer","NG3","AF_L",1744,1407,3151,0.5535],
+  ["HCC1395","outer","NG3","AF_M",2663,90,2753,0.9673],
+  ["HCC1395","outer","NGge4","AF_H",1688,16,1704,0.9906],
+  ["HCC1395","outer","NGge4","AF_L",2960,436,3396,0.8716],
+  ["HCC1395","outer","NGge4","AF_M",3492,27,3519,0.9923],
+  ["HCC1937","inner","NG2","AF_H",2504,151,2655,0.9431],
+  ["HCC1937","inner","NG2","AF_L",1756,0,1756,1.0000],
+  ["HCC1937","inner","NG2","AF_M",2432,0,2432,1.0000],
+  ["HCC1937","inner","NG3","AF_H",34,7,41,0.8293],
+  ["HCC1937","inner","NG3","AF_L",33,0,33,1.0000],
+  ["HCC1937","inner","NG3","AF_M",62,0,62,1.0000],
+  ["HCC1937","inner","NGge4","AF_H",9,5,14,0.6429],
+  ["HCC1937","inner","NGge4","AF_L",29,0,29,1.0000],
+  ["HCC1937","inner","NGge4","AF_M",25,0,25,1.0000],
+  ["HCC1937","outer","NG2","AF_H",741,1927,2668,0.2777],
+  ["HCC1937","outer","NG2","AF_L",3106,356,3462,0.8972],
+  ["HCC1937","outer","NG2","AF_M",2659,103,2762,0.9627],
+  ["HCC1937","outer","NG3","AF_H",27,85,112,0.2411],
+  ["HCC1937","outer","NG3","AF_L",127,7,134,0.9478],
+  ["HCC1937","outer","NG3","AF_M",162,18,180,0.9000],
+  ["HCC1937","outer","NGge4","AF_H",14,26,40,0.3500],
+  ["HCC1937","outer","NGge4","AF_L",119,10,129,0.9225],
+  ["HCC1937","outer","NGge4","AF_M",71,2,73,0.9726],
+  ["HCC1954","inner","NG2","AF_H",852,10,862,0.9884],
+  ["HCC1954","inner","NG2","AF_L",384,0,384,1.0000],
+  ["HCC1954","inner","NG2","AF_M",516,0,516,1.0000],
+  ["HCC1954","inner","NG3","AF_H",85,0,85,1.0000],
+  ["HCC1954","inner","NG3","AF_L",16,0,16,1.0000],
+  ["HCC1954","inner","NG3","AF_M",21,0,21,1.0000],
+  ["HCC1954","inner","NGge4","AF_H",38,0,38,1.0000],
+  ["HCC1954","inner","NGge4","AF_L",14,0,14,1.0000],
+  ["HCC1954","inner","NGge4","AF_M",13,0,13,1.0000],
+  ["HCC1954","outer","NG2","AF_H",4969,311,5280,0.9411],
+  ["HCC1954","outer","NG2","AF_L",5554,194,5748,0.9662],
+  ["HCC1954","outer","NG2","AF_M",5574,94,5668,0.9834],
+  ["HCC1954","outer","NG3","AF_H",298,17,315,0.9460],
+  ["HCC1954","outer","NG3","AF_L",297,36,333,0.8919],
+  ["HCC1954","outer","NG3","AF_M",320,8,328,0.9756],
+  ["HCC1954","outer","NGge4","AF_H",126,4,130,0.9692],
+  ["HCC1954","outer","NGge4","AF_L",210,8,218,0.9633],
+  ["HCC1954","outer","NGge4","AF_M",162,5,167,0.9701],
+  ["H1437","inner","NG2","AF_H",10008,0,10008,1.0000],
+  ["H1437","inner","NG2","AF_L",1290,1,1291,0.9992],
+  ["H1437","inner","NG2","AF_M",1498,2,1500,0.9987],
+  ["H1437","inner","NG3","AF_H",456,0,456,1.0000],
+  ["H1437","inner","NG3","AF_L",226,0,226,1.0000],
+  ["H1437","inner","NG3","AF_M",206,0,206,1.0000],
+  ["H1437","inner","NGge4","AF_H",146,0,146,1.0000],
+  ["H1437","inner","NGge4","AF_L",151,0,151,1.0000],
+  ["H1437","inner","NGge4","AF_M",118,0,118,1.0000],
+  ["H1437","outer","NG2","AF_H",8110,192,8302,0.9769],
+  ["H1437","outer","NG2","AF_L",13161,371,13532,0.9726],
+  ["H1437","outer","NG2","AF_M",13677,32,13709,0.9977],
+  ["H1437","outer","NG3","AF_H",3401,2,3403,0.9994],
+  ["H1437","outer","NG3","AF_L",5540,61,5601,0.9891],
+  ["H1437","outer","NG3","AF_M",5884,7,5891,0.9988],
+  ["H1437","outer","NGge4","AF_H",1325,0,1325,1.0000],
+  ["H1437","outer","NGge4","AF_L",2834,96,2930,0.9672],
+  ["H1437","outer","NGge4","AF_M",2160,9,2169,0.9959],
+  ["H2009","inner","NG2","AF_H",16890,36,16926,0.9979],
+  ["H2009","inner","NG2","AF_L",2167,0,2167,1.0000],
+  ["H2009","inner","NG2","AF_M",4826,2,4828,0.9996],
+  ["H2009","inner","NG3","AF_H",7121,15,7136,0.9979],
+  ["H2009","inner","NG3","AF_L",746,3,749,0.9960],
+  ["H2009","inner","NG3","AF_M",1502,0,1502,1.0000],
+  ["H2009","inner","NGge4","AF_H",2074,8,2082,0.9962],
+  ["H2009","inner","NGge4","AF_L",1041,2,1043,0.9981],
+  ["H2009","inner","NGge4","AF_M",1624,0,1624,1.0000],
+  ["H2009","outer","NG2","AF_H",3832,456,4288,0.8937],
+  ["H2009","outer","NG2","AF_L",8816,208,9024,0.9770],
+  ["H2009","outer","NG2","AF_M",13470,40,13510,0.9970],
+  ["H2009","outer","NG3","AF_H",6200,166,6366,0.9739],
+  ["H2009","outer","NG3","AF_L",11066,150,11216,0.9866],
+  ["H2009","outer","NG3","AF_M",12033,33,12066,0.9973],
+  ["H2009","outer","NGge4","AF_H",8701,64,8765,0.9927],
+  ["H2009","outer","NGge4","AF_L",21521,138,21659,0.9936],
+  ["H2009","outer","NGge4","AF_M",11729,21,11750,0.9982]
+];
+
+const A3_lohInner = [
+  // [sample, n_TP, n_FP, n_TP_inner, n_FP_inner, TP_inner_pct, FP_inner_pct, Gap_pp, AUC, Cohens_d]
+  ["HCC1395", 30490,   4842, 14016, 224, 45.969, 4.626, 41.343, 0.7067, 0.8806],
+  ["HCC1937", 13910,   2697,  6884, 163, 49.490, 6.044, 43.446, 0.7172, 0.9292],
+  ["HCC1954", 19449,    687,  1939,  10,  9.970, 1.456,  8.514, 0.5426, 0.2883],
+  ["H1437",   70191,    773, 14099,   3, 20.087, 0.388, 19.699, 0.5985, 0.4943],
+  ["H2009",  135359,   1342, 37991,  66, 28.067, 4.918, 23.149, 0.6157, 0.5171]
+];
+
+const SAMPLES = ["HCC1395","HCC1937","HCC1954","H1437","H2009"];
+const FEATURES = ["caller_af","loh_inner_flag","Coverage_Multiple","NG",
+                  "HPMergedDelta","HPFineF","NME_imbalance","Epipoly_Delta","ClusterPermanovaF"];
+const NG_BINS = ["NG2","NG3","NGge4"];
+const AF_BINS = ["AF_L","AF_M","AF_H"];
+
+// ────────────────────────────────────────────────────────────────────────────
+// Safe DOM helpers (no innerHTML for dynamic content)
+// ────────────────────────────────────────────────────────────────────────────
+function mkEl(tag, attrs, text) {
+  const el = document.createElement(tag);
+  if (attrs) {
+    for (const k in attrs) {
+      if (k === "className") el.className = attrs[k];
+      else el.setAttribute(k, attrs[k]);
+    }
+  }
+  if (text !== undefined && text !== null) el.textContent = String(text);
+  return el;
+}
+function mkTd(value, dp, className) {
+  const td = document.createElement("td");
+  if (className) td.className = className;
+  if (typeof value === "number" && dp !== undefined) td.textContent = value.toFixed(dp);
+  else td.textContent = String(value);
+  return td;
+}
+function fmtNum(v, dp) {
+  if (v === null || v === undefined) return "";
+  if (typeof v === "number") return v.toFixed(dp);
+  return String(v);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// §3C · 9-cell heatmap (per sample)
+// ────────────────────────────────────────────────────────────────────────────
+function buildHeatmap(sample) {
+  const innerRows = A3_9cell.filter(r => r[0] === sample && r[1] === "inner");
+  const outerRows = A3_9cell.filter(r => r[0] === sample && r[1] === "outer");
+
+  function mkGrid(rows) {
+    const z = NG_BINS.map(() => AF_BINS.map(() => null));
+    const text = NG_BINS.map(() => AF_BINS.map(() => ""));
+    const nMap = NG_BINS.map(() => AF_BINS.map(() => 0));
+    rows.forEach(r => {
+      const ngIdx = NG_BINS.indexOf(r[2]);
+      const afIdx = AF_BINS.indexOf(r[3]);
+      if (ngIdx >= 0 && afIdx >= 0) {
+        z[ngIdx][afIdx] = r[7];
+        text[ngIdx][afIdx] = "TP-rate=" + r[7].toFixed(3) + "<br>n=" + r[6] +
+                             "<br>(TP=" + r[4] + " / FP=" + r[5] + ")";
+        nMap[ngIdx][afIdx] = r[6];
+      }
+    });
+    return {z: z, text: text, nMap: nMap};
+  }
+  const inner = mkGrid(innerRows);
+  const outer = mkGrid(outerRows);
+
+  function mkAnnotations(g, xref, yref) {
+    const arr = [];
+    NG_BINS.forEach((ng, i) => AF_BINS.forEach((af, j) => {
+      if (g.z[i][j] !== null) {
+        arr.push({
+          x: af, y: ng, xref: xref, yref: yref,
+          text: "<b>" + g.z[i][j].toFixed(2) + "</b><br><span style='font-size:9px'>n=" + g.nMap[i][j] + "</span>",
+          showarrow: false,
+          font: {size: 11, color: g.z[i][j] < 0.5 ? "white" : "black"}
+        });
+      }
+    }));
+    return arr;
+  }
+
+  const data = [
+    {
+      z: inner.z, x: AF_BINS, y: NG_BINS, type: "heatmap",
+      colorscale: "RdYlBu", reversescale: false, zmin: 0, zmax: 1,
+      text: inner.text, hovertemplate: "%{text}<extra></extra>",
+      xaxis: "x1", yaxis: "y1", showscale: false, name: "inner"
+    },
+    {
+      z: outer.z, x: AF_BINS, y: NG_BINS, type: "heatmap",
+      colorscale: "RdYlBu", reversescale: false, zmin: 0, zmax: 1,
+      text: outer.text, hovertemplate: "%{text}<extra></extra>",
+      xaxis: "x2", yaxis: "y2", showscale: true, name: "outer",
+      colorbar: {title: "TP-rate", thickness: 12, len: 0.8, x: 1.05}
+    }
+  ];
+
+  const layout = {
+    title: {text: "9-cell TP-rate heatmap · " + sample, font: {size: 16}},
+    grid: {rows: 1, columns: 2, pattern: "independent"},
+    xaxis:  {domain: [0, 0.45], title: "AF bin", anchor: "y1"},
+    xaxis2: {domain: [0.55, 1.0], title: "AF bin", anchor: "y2"},
+    yaxis:  {title: "NG bin (LOH=inner)", anchor: "x1"},
+    yaxis2: {title: "NG bin (LOH=outer)", anchor: "x2"},
+    annotations: [
+      ...mkAnnotations(inner, "x1", "y1"),
+      ...mkAnnotations(outer, "x2", "y2"),
+      {text: "<b>LOH = inner</b>", xref: "paper", yref: "paper",
+       x: 0.18, y: 1.05, showarrow: false, font: {size: 13, color: "#1E3A8A"}},
+      {text: "<b>LOH = outer</b>", xref: "paper", yref: "paper",
+       x: 0.78, y: 1.05, showarrow: false, font: {size: 13, color: "#1E3A8A"}}
+    ],
+    margin: {l: 70, r: 90, t: 80, b: 60},
+    height: 450,
+    paper_bgcolor: "#FAF9F5", plot_bgcolor: "#FFFFFF"
+  };
+  Plotly.newPlot("heatmapPlot", data, layout, {responsive: true, displaylogo: false});
+}
+buildHeatmap("HCC1395");
+document.getElementById("heatmapSampleSelect").addEventListener("change", function(e) {
+  buildHeatmap(e.target.value);
+});
+document.getElementById("heatmapShowStatic").addEventListener("click", function() {
+  const plotDiv = document.getElementById("heatmapPlot");
+  // Clear via DOM (no innerHTML)
+  while (plotDiv.firstChild) plotDiv.removeChild(plotDiv.firstChild);
+  const tmpl = document.getElementById("heatmapStaticTmpl");
+  const clone = tmpl.content.cloneNode(true);
+  plotDiv.appendChild(clone);
+});
+
+// ────────────────────────────────────────────────────────────────────────────
+// §3D · AUC + Cohen's d bar chart
+// ────────────────────────────────────────────────────────────────────────────
+function buildBar(metric, sortBy) {
+  const metricCol = metric === "AUC" ? 2 : 3;
+  let featOrder = FEATURES.slice();
+  if (sortBy !== "feature") {
+    featOrder.sort(function(a, b) {
+      const ra = A3_perFeature.find(r => r[0] === sortBy && r[1] === a);
+      const rb = A3_perFeature.find(r => r[0] === sortBy && r[1] === b);
+      const va = Math.abs(ra[metricCol] - (metric === "AUC" ? 0.5 : 0));
+      const vb = Math.abs(rb[metricCol] - (metric === "AUC" ? 0.5 : 0));
+      return vb - va;
+    });
+  }
+  const sampleColors = {
+    "HCC1395": "#D97757", "HCC1937": "#1E3A8A", "HCC1954": "#15803D",
+    "H1437": "#A16207",   "H2009": "#7C3AED"
+  };
+  const traces = SAMPLES.map(function(s) {
+    return {
+      x: featOrder,
+      y: featOrder.map(f => A3_perFeature.find(r => r[0] === s && r[1] === f)[metricCol]),
+      name: s, type: "bar",
+      marker: {color: sampleColors[s]},
+      hovertemplate: "<b>" + s + "</b><br>%{x}: %{y:.3f}<extra></extra>"
+    };
+  });
+  const shapes = [];
+  if (metric === "AUC") {
+    shapes.push(
+      {type: "line", xref: "paper", yref: "y", x0: 0, x1: 1, y0: 0.5, y1: 0.5,
+       line: {color: "#6B6B66", width: 1.5, dash: "dash"}},
+      {type: "line", xref: "paper", yref: "y", x0: 0, x1: 1, y0: 0.58, y1: 0.58,
+       line: {color: "#C2410C", width: 1.5, dash: "dot"}}
+    );
+  } else {
+    [-0.5, -0.2, 0, 0.2, 0.5].forEach(function(y) {
+      shapes.push({type: "line", xref: "paper", yref: "y", x0: 0, x1: 1, y0: y, y1: y,
+        line: {color: y === 0 ? "#141413" : "#6B6B66", width: y === 0 ? 1.5 : 1, dash: y === 0 ? "solid" : "dot"}});
+    });
+  }
+  const annotations = [];
+  if (metric === "AUC") {
+    annotations.push({xref: "paper", yref: "y", x: 1, y: 0.5, text: "0.50 (random)",
+      showarrow: false, font: {size: 10, color: "#6B6B66"}, xanchor: "right", yanchor: "bottom"});
+    annotations.push({xref: "paper", yref: "y", x: 1, y: 0.58, text: "0.58 ceiling",
+      showarrow: false, font: {size: 10, color: "#C2410C"}, xanchor: "right", yanchor: "bottom"});
+  }
+  const layout = {
+    title: {text: metric + " per feature × 5 sample", font: {size: 16}},
+    barmode: "group",
+    xaxis: {title: "Feature", tickangle: -30},
+    yaxis: {title: metric, zeroline: metric === "Cohens_d"},
+    shapes: shapes, annotations: annotations,
+    height: 500,
+    margin: {l: 60, r: 30, t: 60, b: 100},
+    paper_bgcolor: "#FAF9F5", plot_bgcolor: "#FFFFFF",
+    legend: {orientation: "h", y: -0.25}
+  };
+  Plotly.newPlot("barPlot", traces, layout, {responsive: true, displaylogo: false});
+}
+buildBar("AUC", "feature");
+document.getElementById("barMetric").addEventListener("change", function(e) {
+  buildBar(e.target.value, document.getElementById("barSort").value);
+});
+document.getElementById("barSort").addEventListener("change", function(e) {
+  buildBar(document.getElementById("barMetric").value, e.target.value);
+});
+
+// ────────────────────────────────────────────────────────────────────────────
+// §3E · caller_af TP/FP median grouped bar
+// ────────────────────────────────────────────────────────────────────────────
+(function buildCallerAfBar() {
+  const rows = A3_perFeature.filter(r => r[1] === "caller_af");
+  const samples = rows.map(r => r[0]);
+  const tpMedians = rows.map(r => r[7]);
+  const fpMedians = rows.map(r => r[8]);
+  const aucs = rows.map(r => r[2]);
+
+  const traces = [
+    {x: samples, y: tpMedians, name: "TP median", type: "bar", marker: {color: "#1E3A8A"},
+     text: tpMedians.map(v => v.toFixed(3)), textposition: "outside",
+     hovertemplate: "<b>TP median</b><br>%{x}: %{y:.4f}<extra></extra>"},
+    {x: samples, y: fpMedians, name: "FP median", type: "bar", marker: {color: "#C2410C"},
+     text: fpMedians.map(v => v.toFixed(3)), textposition: "outside",
+     hovertemplate: "<b>FP median</b><br>%{x}: %{y:.4f}<extra></extra>"}
+  ];
+  const annotations = aucs.map(function(auc, i) {
+    return {
+      x: samples[i], y: Math.max(tpMedians[i], fpMedians[i]) + 0.18,
+      text: "AUC=" + auc.toFixed(3),
+      showarrow: false,
+      font: {size: 11, color: auc >= 0.58 ? "#15803D" : (auc <= 0.42 ? "#C2410C" : "#6B6B66")}
+    };
+  });
+  const layout = {
+    title: {text: "caller_af TP vs FP median per sample · direction reversal", font: {size: 15}},
+    barmode: "group",
+    xaxis: {title: "Sample"},
+    yaxis: {title: "caller_af median", range: [0, 1.2]},
+    annotations: annotations,
+    height: 380,
+    margin: {l: 60, r: 30, t: 60, b: 50},
+    paper_bgcolor: "#FAF9F5", plot_bgcolor: "#FFFFFF",
+    legend: {orientation: "h", y: -0.2}
+  };
+  Plotly.newPlot("callerAfPlot", traces, layout, {responsive: true, displaylogo: false});
+})();
+
+// ────────────────────────────────────────────────────────────────────────────
+// §5 · DataTables L3 raw data — built via createElement (no innerHTML)
+// ────────────────────────────────────────────────────────────────────────────
+(function buildDT() {
+  const tbody1 = document.getElementById("dtPerFeatureBody");
+  A3_perFeature.forEach(function(r) {
+    const tr = document.createElement("tr");
+    tr.appendChild(mkTd(r[0]));
+    tr.appendChild(mkTd(r[1]));
+    tr.appendChild(mkTd(r[2], 4, "num"));
+    tr.appendChild(mkTd(r[3], 4, "num"));
+    tr.appendChild(mkTd(r[4], 4, "num"));
+    tr.appendChild(mkTd(r[5], undefined, "num"));
+    tr.appendChild(mkTd(r[6], undefined, "num"));
+    tr.appendChild(mkTd(r[7], 4, "num"));
+    tr.appendChild(mkTd(r[8], 4, "num"));
+    tbody1.appendChild(tr);
+  });
+
+  const tbody2 = document.getElementById("dt9cellBody");
+  A3_9cell.forEach(function(r) {
+    const tr = document.createElement("tr");
+    tr.appendChild(mkTd(r[0]));
+    tr.appendChild(mkTd(r[1]));
+    tr.appendChild(mkTd(r[2]));
+    tr.appendChild(mkTd(r[3]));
+    tr.appendChild(mkTd(r[4], undefined, "num"));
+    tr.appendChild(mkTd(r[5], undefined, "num"));
+    tr.appendChild(mkTd(r[6], undefined, "num"));
+    tr.appendChild(mkTd(r[7], 4, "num"));
+    tbody2.appendChild(tr);
+  });
+
+  const tbody3 = document.getElementById("dtLohInnerBody");
+  A3_lohInner.forEach(function(r) {
+    const tr = document.createElement("tr");
+    tr.appendChild(mkTd(r[0]));                        // sample
+    tr.appendChild(mkTd(r[1], undefined, "num"));      // n_TP
+    tr.appendChild(mkTd(r[2], undefined, "num"));      // n_FP
+    tr.appendChild(mkTd(r[3], undefined, "num"));      // n_TP_inner
+    tr.appendChild(mkTd(r[4], undefined, "num"));      // n_FP_inner
+    tr.appendChild(mkTd(r[5], 2, "num"));              // TP_inner_pct
+    tr.appendChild(mkTd(r[6], 2, "num"));              // FP_inner_pct
+    tr.appendChild(mkTd(r[7], 2, "num"));              // Gap_pp
+    tr.appendChild(mkTd(r[8], 4, "num"));              // AUC
+    tr.appendChild(mkTd(r[9], 4, "num"));              // Cohen's d
+    tbody3.appendChild(tr);
+  });
+
+  let dt1 = null, dt2 = null, dt3 = null;
+  document.getElementById("toggleTable1").addEventListener("click", function() {
+    const wrap = document.getElementById("dt1Wrap");
+    wrap.open = !wrap.open;
+    if (wrap.open && !dt1) {
+      dt1 = $("#dtPerFeature").DataTable({
+        pageLength: 15, order: [[0, "asc"], [1, "asc"]],
+        scrollX: true, lengthMenu: [10, 15, 25, 50]
+      });
+    }
+  });
+  document.getElementById("toggleTable2").addEventListener("click", function() {
+    const wrap = document.getElementById("dt2Wrap");
+    wrap.open = !wrap.open;
+    if (wrap.open && !dt2) {
+      dt2 = $("#dt9cell").DataTable({
+        pageLength: 18, order: [[0, "asc"], [1, "asc"], [2, "asc"], [3, "asc"]],
+        scrollX: true, lengthMenu: [9, 18, 36, 90]
+      });
+    }
+  });
+  document.getElementById("toggleTable3").addEventListener("click", function() {
+    const wrap = document.getElementById("dt3Wrap");
+    wrap.open = !wrap.open;
+    if (wrap.open && !dt3) {
+      dt3 = $("#dtLohInner").DataTable({
+        pageLength: 5, order: [[7, "desc"]],
+        scrollX: true, lengthMenu: [5, 10]
+      });
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -307,7 +307,7 @@ tr.row-warn td { background: #FEF7E6; }
 <h2 id="s7"><span class="h-num">7</span>敘述腳本</h2>
 <div class="narrative">
 <div class="lead">60 秒版（給 PI）</div>
-<p>「ISM 不是甲基篩子，是一個 read-level epigenetic context 引擎。<b>同一工具、兩個答案</b>：問『甲基-單倍型一致事件存在嗎』——存在，BRCA2 用 normal 對照證明是真 cis-driven；問『能不能演算法式判別真假突變』——不能，全基因組稀有 0.34%、判別力 AUC 0.505 中性。<b>『做不出判別程式』不是工程失敗，是被數據證明的科學邊界</b>，這正是論文 characterization + tooling 的誠實定位。主軸 phasing 本週已到 Grade A 強度。」</p>
+<p>「ISM 不是甲基篩子，是一個 read-level epigenetic context 引擎。<b>同一工具、兩個答案</b>：問『甲基-單倍型一致事件存在嗎』——存在，但乾淨案稀少（BRCA2 表面強 ASM 經 copy-partition 後真 cis 僅邊際 −0.023，乾淨 cis exemplar 是 chr17/TBC1D16）；問『能不能演算法式判別真假突變』——不能，全基因組稀有 0.34%、判別力 AUC 0.505 中性。<b>『做不出判別程式』不是工程失敗，是被數據證明的科學邊界</b>，這正是論文 characterization + tooling 的誠實定位。主軸 phasing 本週已到 Grade A 強度。」</p>
 </div>
 <div class="narrative">
 <div class="lead">30 秒版（給協作者）</div>
@@ -320,7 +320,7 @@ tr.row-warn td { background: #FEF7E6; }
 <li>全 metric 沿用 <code>InterSubMod/docs/reports/validated/2026/06/20260602_研究週報…/master_draft.md</code>（本週 validated SoT；數字經 workflow wf_02d8afb0-e13 雙階段 grep 驗證）。</li>
 <li>母稿概念文件：<code>InterSubMod/docs/concepts/2026/06/20260603_目標概念整理_甲基haplotype論文_難度價值雙軸_01.md</code>。</li>
 <li>本看板 grounding：分類 workflow <code>wf_7b4d2561-1a4</code> / 盲點掃描 <code>wf_9c7e6ae4-c25</code> / 硬化對抗質疑 <code>wf_9dc061ba-7aa</code>（共 30 agents）。</li>
-<li>關鍵數字錨點：phasing W=28 p=0.0078125（n=7）；BRCA2 Δβ=−0.122 / cis d=−0.142；strong-ASM 172（0.34%）；AUC=0.5049；FP 富集 5× OR=0.194；CN partial ρ=−0.055；regime-A 15/23；LOSO held-out −0.00012。</li>
+<li>關鍵數字錨點：phasing W=28 p=0.0078125（n=7）；BRCA2 HP-axis Δβ=−0.122 / within-somatic 真 cis d_within=−0.023（表面 d_cis=−0.142 為 copy-partition 灌水前值，已 06-07 校正）；strong-ASM 172（0.34%）；AUC=0.5049；FP 富集 5× OR=0.194；CN partial ρ=−0.055；regime-A 15/23；LOSO held-out −0.00012。</li>
 <li>口徑提醒：ASM 全為 HCC1395 單樣本 ⭐3 Tier-A（⭐4 需 COLO829 ground-truth，off-goal）；read-instance vs unique、Tmode vs paired、FDR vs Bonferroni 不可並列。</li>
 </ol>
 </div>

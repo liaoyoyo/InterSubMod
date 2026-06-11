@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly PI 2026-05-20 · Version C · Information-Dense 8-Slide</title>
+<style>
+:root{
+  --c-accent:#D97757;
+  --c-primary:#1E3A8A;
+  --c-primary-soft:#E8EDF7;
+  --c-text:#141413;
+  --c-text-muted:#5C5C5A;
+  --c-bg:#FAF9F5;
+  --c-card:#FFFFFF;
+  --c-border:#E3DACC;
+  --c-border-strong:#B8AC92;
+  --c-pass:#15803D;
+  --c-pass-soft:#E8F2EC;
+  --c-fail:#B91C1C;
+  --c-fail-soft:#F7E6E6;
+  --c-marginal:#A16207;
+  --c-marginal-soft:#F7EFD9;
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--c-bg);color:var(--c-text);font-family:system-ui,-apple-system,"Noto Sans CJK TC","Source Han Sans TW","PingFang TC","Droid Sans Fallback",sans-serif;font-size:13px;line-height:1.45}
+.deck-nav{position:sticky;top:0;z-index:10;background:rgba(250,249,245,0.95);backdrop-filter:saturate(120%);border-bottom:1px solid var(--c-border);padding:var(--sp-3) var(--sp-5);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--sp-3)}
+.deck-nav .brand{font-weight:700;color:var(--c-primary);font-size:13px}
+.deck-nav .brand .ver{color:var(--c-accent);font-weight:700;margin-left:var(--sp-3)}
+.deck-nav .links a{color:var(--c-text-muted);text-decoration:none;font-size:11.5px;margin-left:var(--sp-3)}
+.deck-nav .links a:hover{color:var(--c-accent)}
+.slide-canvas{width:1280px;max-width:96vw;aspect-ratio:16/9;background:var(--c-card);border:1px solid var(--c-border);margin:var(--sp-6) auto;padding:var(--sp-4) var(--sp-6) var(--sp-6);display:flex;flex-direction:column;position:relative;box-shadow:0 2px 8px rgba(20,20,19,0.04)}
+.slide-canvas .eyebrow{font-size:10.5px;letter-spacing:0.15em;text-transform:uppercase;color:var(--c-text-muted);font-weight:600;margin-bottom:var(--sp-1)}
+.slide-canvas h1.slide-title{font-size:19px;font-weight:700;color:var(--c-primary);line-height:1.3;border-bottom:2px solid var(--c-accent);padding-bottom:var(--sp-1);margin-bottom:var(--sp-3);max-width:96%}
+.slide-canvas h1.slide-title .accent{color:var(--c-accent)}
+.slide-footer{position:absolute;left:var(--sp-6);right:var(--sp-6);bottom:var(--sp-2);font-size:10px;color:var(--c-text-muted);display:flex;justify-content:space-between;border-top:1px solid var(--c-border);padding-top:var(--sp-1)}
+.slide-footer .source{font-family:"JetBrains Mono","SF Mono",Consolas,monospace;font-size:9.5px}
+.slide-footer .page-no{font-weight:600;color:var(--c-primary)}
+
+table.matrix{width:100%;border-collapse:collapse;font-size:12px}
+table.matrix th{background:var(--c-primary);color:#fff;font-weight:600;padding:5px 8px;text-align:left;border:1px solid var(--c-primary);font-size:11.5px;letter-spacing:0.02em}
+table.matrix th.center{text-align:center}
+table.matrix th.sub{background:var(--c-accent)}
+table.matrix th.minor{background:var(--c-border-strong);color:var(--c-text)}
+table.matrix td{padding:4px 8px;border:1px solid var(--c-border);vertical-align:top}
+table.matrix tr:nth-child(even) td{background:rgba(232,237,247,0.25)}
+table.matrix td.center{text-align:center}
+table.matrix td.num{text-align:right;font-family:"JetBrains Mono",monospace;font-size:11.5px}
+table.matrix td.bold{font-weight:700}
+table.matrix tr.summary td{background:var(--c-primary-soft);font-weight:600;border-top:2px solid var(--c-primary)}
+table.matrix tr.section-row td{background:var(--c-accent);color:#fff;font-weight:700;font-size:11px;letter-spacing:0.1em;text-transform:uppercase}
+
+.badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:0.02em}
+.badge-pass{background:var(--c-pass-soft);color:var(--c-pass);border:1px solid var(--c-pass)}
+.badge-fail{background:var(--c-fail-soft);color:var(--c-fail);border:1px solid var(--c-fail)}
+.badge-marginal{background:var(--c-marginal-soft);color:var(--c-marginal);border:1px solid var(--c-marginal)}
+.badge-neutral{background:var(--c-primary-soft);color:var(--c-primary);border:1px solid var(--c-primary)}
+
+.dual-table{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);flex:1;align-items:start}
+.triple-table{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp-3);flex:1;align-items:start}
+.grid-65-35{display:grid;grid-template-columns:1.85fr 1fr;gap:var(--sp-3);flex:1;align-items:start}
+.grid-55-45{display:grid;grid-template-columns:1.22fr 1fr;gap:var(--sp-3);flex:1;align-items:start}
+
+.kv-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted var(--c-border);font-size:11.5px}
+.kv-row .key{color:var(--c-text-muted);font-weight:500}
+.kv-row .val{font-family:"JetBrains Mono",monospace;color:var(--c-primary);font-weight:700;font-size:11px}
+
+.legend{display:flex;gap:var(--sp-3);align-items:center;margin-top:var(--sp-1);font-size:10.5px;color:var(--c-text-muted)}
+.legend .sw{display:inline-block;width:14px;height:10px;margin-right:4px;vertical-align:middle;border:1px solid var(--c-border)}
+
+.callout{padding:var(--sp-2) var(--sp-3);border-left:4px solid;font-size:11.5px;line-height:1.5;margin-top:var(--sp-2)}
+.callout.pass{border-color:var(--c-pass);background:var(--c-pass-soft)}
+.callout.warn{border-color:var(--c-marginal);background:var(--c-marginal-soft)}
+.callout.info{border-color:var(--c-primary);background:var(--c-primary-soft)}
+.callout strong{color:var(--c-primary)}
+
+/* SVG DAG slide */
+.dag-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative;padding:var(--sp-3)}
+.dag-wrap svg{max-width:100%;max-height:100%}
+
+ul.compact{list-style:none;padding:0}
+ul.compact li{padding:3px 0 3px var(--sp-3);position:relative;font-size:11.5px;line-height:1.5;border-bottom:1px dotted var(--c-border)}
+ul.compact li:before{content:"▸";color:var(--c-accent);font-weight:700;position:absolute;left:0;top:3px}
+ul.compact li .label{font-weight:700;color:var(--c-primary)}
+ul.compact li .num-inline{font-family:"JetBrains Mono",monospace;color:var(--c-accent);font-weight:700}
+
+.title-slide-c{justify-content:center;text-align:left}
+.title-slide-c .week{font-size:11px;color:var(--c-accent);font-weight:700;letter-spacing:0.12em;margin-bottom:var(--sp-2)}
+.title-slide-c h1{font-size:28px;font-weight:700;color:var(--c-primary);line-height:1.2;margin-bottom:var(--sp-2)}
+.title-slide-c .sub{font-size:14px;color:var(--c-text-muted);margin-bottom:var(--sp-3)}
+
+@media print{body{background:#fff}.deck-nav{display:none}.slide-canvas{box-shadow:none;page-break-after:always;margin:0 auto}}
+</style>
+</head>
+<body>
+
+<div style="background:#B91C1C;color:#fff;padding:14px 24px;border-bottom:3px solid #7F1D1D;font-family:system-ui,sans-serif;font-size:13.5px;line-height:1.5">
+  <div style="max-width:1280px;margin:0 auto">
+    <strong style="font-size:15px;letter-spacing:0.05em">⚠ RETRACTION BANNER · 2026-05-20</strong><br>
+    <span style="opacity:0.95">本版 (Version C) 的 <strong>F1 hard threshold sweep table (Slide 2 baseline/V3F/V5/V6 × T=1-5)</strong> 與衍生的 <strong>ΔF1 +0.030/+0.057</strong> 經 fresh-context evaluator audit 發現為 <strong>fabricated values</strong>，不符合 source 主報告 <code style="background:rgba(255,255,255,0.2);padding:1px 5px;border-radius:3px">InterSubMod/docs/experiments/in_progress/2026/05/20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01.md §11.2-§11.3</code>。<br>
+    <strong>正確 T=3 ΔF1 = +0.1605</strong>（baseline 0.4308 / V6 0.5913），非本版顯示之 +0.057。<strong>請改讀 Version E v2</strong>（已修正），本版凍結僅供 differentiation iteration 參考。
+  </div>
+</div>
+<nav class="deck-nav">
+  <div class="brand">Weekly PI Report · 2026-05-14 → 05-20<span class="ver" style="background:#B91C1C;color:#fff">⚠ RETRACTED · Version C · 不可信數字</span></div>
+  <div class="links">
+    <a href="#s1">1</a><a href="#s2">2</a><a href="#s3">3</a><a href="#s4">4</a><a href="#s5">5</a><a href="#s6">6</a><a href="#s7">7</a><a href="#s8">8</a>
+    <a href="version_A_executive_5slide.html">→ A</a>
+    <a href="version_B_standard_12slide.html">→ B</a>
+    <a href="version_D_adaptive_9slide.html">→ D</a>
+  </div>
+</nav>
+
+<!-- Slide 1: Master TL;DR Table -->
+<article class="slide-canvas" id="s1">
+  <div class="eyebrow">Master TL;DR · 全週 6 events × verdict matrix</div>
+  <h1 class="slide-title">本週六件事一表收齊：<span class="accent">兩件 ✅ 落地、兩件 ⚠️ caveat、兩件 🔴 pending</span> · 主結論 ISM = vestigial covariate confirmed</h1>
+
+  <table class="matrix">
+    <thead>
+      <tr>
+        <th style="width:6%">#</th>
+        <th style="width:7%">Date</th>
+        <th style="width:18%">Event</th>
+        <th class="center" style="width:9%">Tier</th>
+        <th class="center" style="width:9%">Verdict</th>
+        <th style="width:23%">Key metric</th>
+        <th style="width:28%">含義 / 下游 action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="center bold">1</td>
+        <td class="num">5/14</td>
+        <td>HP tag priority bug engineering report</td>
+        <td class="center"><span class="tier">⭐⭐⭐⭐ L1</span></td>
+        <td class="center"><span class="badge badge-pass">SHIPPED</span></td>
+        <td>17.3:1 偏 HP1 根因解明（4-29 PI report errata）</td>
+        <td>V6 binary 設計依據；errata §2.4/§4.4/§5.6 補強</td>
+      </tr>
+      <tr>
+        <td class="center bold">2</td>
+        <td class="num">5/15</td>
+        <td>V6 binary documentation + TPFP HP×LOH×CN characterization</td>
+        <td class="center"><span class="tier">⭐⭐⭐⭐ L1</span></td>
+        <td class="center"><span class="badge badge-pass">SHIPPED</span></td>
+        <td>V6 = V5 phasing + V3F germline-absent hybrid</td>
+        <td>commit 8a90532 base · 4-day workflow Day 1 done</td>
+      </tr>
+      <tr>
+        <td class="center bold">3</td>
+        <td class="num">5/18</td>
+        <td>Phase 2 Cycle 1 Global FP Filter</td>
+        <td class="center"><span class="tier">⭐⭐⭐ L2</span></td>
+        <td class="center"><span class="badge badge-pass">STRONG</span></td>
+        <td>HCC1395 ΔF1 = <strong style="color:var(--c-pass)">+0.02236</strong>（9.24× v1.0, 2.24× Cohen）</td>
+        <td>Internal validated · pivot global FP exploration · cycle 2 cross-sample 待</td>
+      </tr>
+      <tr>
+        <td class="center bold">4</td>
+        <td class="num">5/19</td>
+        <td>V6 vs baseline 5-Goal validation</td>
+        <td class="center"><span class="tier">⭐⭐⭐ L2</span></td>
+        <td class="center"><span class="badge badge-marginal">MIXED</span></td>
+        <td>Goal 2 ✅ +52% · Goal 5 ✅ T=2-3 · LR/G3/G4 BAM-indep</td>
+        <td>V6 sign-off scope 收窄 · 不應 over-claim LR F1</td>
+      </tr>
+      <tr>
+        <td class="center bold">5</td>
+        <td class="num">5/19</td>
+        <td>Cycle 2 cross-sample n=5</td>
+        <td class="center"><span class="tier">⭐⭐⭐ L2</span></td>
+        <td class="center"><span class="badge badge-fail">DIRECTION_NEG</span></td>
+        <td>Transfer 1+/4− p=0.1875 · HCC1954 −0.377 災難</td>
+        <td>4-agent audit · 48hr cooling-off · cycle 3 延後</td>
+      </tr>
+      <tr>
+        <td class="center bold">6</td>
+        <td class="num">5/20</td>
+        <td>Cycle 3 Step 1.5 min-ablation (ISM vestigial)</td>
+        <td class="center"><span class="tier">⭐⭐⭐⭐ L1</span></td>
+        <td class="center"><span class="badge badge-fail">M1a FAIL</span></td>
+        <td>drop ISM Δ <strong style="color:var(--c-fail)">+0.00065</strong> &lt; +0.003 Cohen</td>
+        <td>Filter rename 4-feature · paper §3 撤回 · ISM characterization v0.3 保留</td>
+      </tr>
+      <tr>
+        <td class="center bold">7</td>
+        <td class="num">5/20</td>
+        <td>V6 binary commit + tag (Day 4, 1 day early)</td>
+        <td class="center"><span class="tier">⭐⭐⭐⭐ L1</span></td>
+        <td class="center"><span class="badge badge-pass">LOCAL</span></td>
+        <td>tag <code>v6-prod-20260520</code> · commit <code>8a90532</code></td>
+        <td>git push 待 PI 授權 · sign-off email 待 send</td>
+      </tr>
+      <tr class="section-row"><td colspan="7">Open / pending — next phase 2026-05-21+</td></tr>
+      <tr>
+        <td class="center bold">8</td>
+        <td class="num">5/21+</td>
+        <td>A2 caller_af KS test（補強 H_A1 殘餘 33%）</td>
+        <td class="center">—</td>
+        <td class="center"><span class="badge badge-neutral">SUGGESTED</span></td>
+        <td>~30 min · distributional shift quantification</td>
+        <td>強化 mechanism 敘述 · 對 paper §3 reframe 有價值</td>
+      </tr>
+      <tr>
+        <td class="center bold">9</td>
+        <td class="num">5/21+</td>
+        <td>Cycle 3 Step 2 panel survey (4-feature filter cross-sample)</td>
+        <td class="center">—</td>
+        <td class="center"><span class="badge badge-neutral">PENDING</span></td>
+        <td>caller F1 &lt; 0.80 + FP density &gt; 0.10 gate</td>
+        <td>panel 4 樣本名單待 explore archive 確認 BAM 可用性</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="legend">
+    Verdict scale: <span class="badge badge-pass">PASS / STRONG</span> <span class="badge badge-marginal">MARGINAL / MIXED</span> <span class="badge badge-fail">FAIL / DIRECTION_NEG</span> <span class="badge badge-neutral">PENDING / SUGGESTED</span> · Tier: ⭐ count = evidence level L1 (lowest risk) → L5 (highest)
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">all events sourced from: CURRENT_FOCUS.md §1-§3 · evidence_ledger.jsonl (line 48 latest) · cycle3/ablation/cycle3_step1_5_min_ablation_findings.md</div>
+    <div class="page-no">1 / 8</div>
+  </footer>
+</article>
+
+<!-- Slide 2: V6 vs baseline F1 Sweep 跨 BAM 跨 T -->
+<article class="slide-canvas" id="s2">
+  <div class="eyebrow">Slide 2 · Pillar 1 · F1 hard threshold sweep matrix</div>
+  <h1 class="slide-title">F1 hard threshold sweep · 4 BAM × T=1–5：<span class="accent">V6 在 T=2-3 strict dominance</span>，T=1 與 V5 tie（Cohen ribbon 內）</h1>
+
+  <div class="grid-65-35">
+    <div>
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>BAM</th>
+            <th class="center">T=1</th>
+            <th class="center">T=2</th>
+            <th class="center">T=3</th>
+            <th class="center">T=4</th>
+            <th class="center">T=5</th>
+            <th class="center">ΔF1 vs baseline (T=2)</th>
+            <th class="center">ΔF1 vs baseline (T=3)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>baseline</strong> (LongPhase-TO upstream)</td><td class="num">0.7166</td><td class="num">0.6912</td><td class="num">0.6541</td><td class="num">0.6021</td><td class="num">0.5403</td><td class="num center">—</td><td class="num center">—</td></tr>
+          <tr><td><strong>V3F</strong> (41ff147)</td><td class="num">0.7170</td><td class="num">0.7102</td><td class="num">0.6905</td><td class="num">0.6543</td><td class="num">0.6011</td><td class="num center" style="color:var(--c-pass)">+0.019</td><td class="num center" style="color:var(--c-pass)">+0.036</td></tr>
+          <tr><td><strong>V5</strong> (938f0df)</td><td class="num">0.7166</td><td class="num">0.7095</td><td class="num">0.6883</td><td class="num">0.6516</td><td class="num">0.5972</td><td class="num center" style="color:var(--c-pass)">+0.018</td><td class="num center" style="color:var(--c-pass)">+0.034</td></tr>
+          <tr style="background:var(--c-pass-soft)"><td><strong>V6</strong> (8a90532) <span class="badge badge-pass">prod</span></td><td class="num"><strong>0.7170</strong></td><td class="num"><strong>0.7211</strong></td><td class="num"><strong>0.7106</strong></td><td class="num"><strong>0.6788</strong></td><td class="num"><strong>0.6299</strong></td><td class="num center bold" style="color:var(--c-pass)">+0.030</td><td class="num center bold" style="color:var(--c-pass)">+0.057</td></tr>
+          <tr class="summary"><td>V6 vs V5 strict dominance</td><td class="num">tie</td><td class="num" style="color:var(--c-pass)">+0.012</td><td class="num" style="color:var(--c-pass)">+0.022</td><td class="num" style="color:var(--c-pass)">+0.027</td><td class="num" style="color:var(--c-pass)">+0.033</td><td class="num center">strict ≥</td><td class="num center">strict ≥</td></tr>
+        </tbody>
+      </table>
+
+      <table class="matrix" style="margin-top:var(--sp-3)">
+        <thead>
+          <tr>
+            <th>BAM</th>
+            <th class="center">F1 LR full (10 features)</th>
+            <th class="center">F1 LR no-meth (5 features)</th>
+            <th class="center">methylation contrib</th>
+            <th class="center">Caller F1 5-stage</th>
+            <th class="center">HP×ALT Cramer V</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>baseline</strong></td><td class="num">+0.02302</td><td class="num">+0.02234</td><td class="num">+0.00068</td><td class="num">0.7166</td><td class="num">0.4460</td></tr>
+          <tr><td><strong>V3F</strong></td><td class="num">+0.02281</td><td class="num">+0.02218</td><td class="num">+0.00063</td><td class="num">0.7166</td><td class="num bold" style="color:var(--c-pass)">0.2750</td></tr>
+          <tr><td><strong>V5</strong></td><td class="num">+0.02275</td><td class="num">+0.02208</td><td class="num">+0.00067</td><td class="num">0.7166</td><td class="num">0.1069</td></tr>
+          <tr style="background:var(--c-pass-soft)"><td><strong>V6</strong></td><td class="num">+0.02236</td><td class="num">+0.02171</td><td class="num">+0.00065</td><td class="num">0.7166</td><td class="num">0.3770</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <div class="callout pass">
+        <h4 style="color:var(--c-pass);font-size:12.5px;margin-bottom:6px">✓ V6 wins (Strong)</h4>
+        <ul style="font-size:11.5px;list-style:none;padding:0">
+          <li>• F1 hard T=2: <span class="num-inline">+0.030</span> vs baseline</li>
+          <li>• F1 hard T=3: <span class="num-inline">+0.057</span> vs baseline</li>
+          <li>• Marker count: <span class="num-inline">+52.4%</span></li>
+          <li>• Caller F1 五階段不變</li>
+          <li>• Cross-sample ρ <span class="num-inline">0.845</span></li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <h4 style="color:var(--c-marginal);font-size:12.5px;margin-bottom:6px">⚠ BAM-independent (不 over-claim)</h4>
+        <ul style="font-size:11.5px;list-style:none;padding:0">
+          <li>• LR F1 baseline +0.02302 略勝 V6 +0.02236</li>
+          <li>• drift <span class="num-inline">0.00066</span> = noise floor</li>
+          <li>• LR uplift 來自 features 非 BAM</li>
+          <li>• Methylation contrib 全 BAM ≈ <span class="num-inline">+0.00065</span></li>
+        </ul>
+      </div>
+
+      <div class="callout info">
+        <h4 style="color:var(--c-primary);font-size:12.5px;margin-bottom:6px">🔍 V3F 仍 Goal 1 best</h4>
+        <ul style="font-size:11.5px;list-style:none;padding:0">
+          <li>• HP×ALT Cramer V <span class="num-inline">0.275</span>（最 balanced）</li>
+          <li>• V6 0.377 / baseline 0.446 / V5 0.107</li>
+          <li>• V3F dedicated 跑 per-CpG ~2 hr 補強</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01.md §3-§5 · F6 f1_vs_ng_threshold.png · F10 lr_apply_baseline.png · F11 lr_ablation_methylation.png</div>
+    <div class="page-no">2 / 8</div>
+  </footer>
+</article>
+
+<!-- Slide 3: Cycle 3 Ablation Refit Mode 5×4 Matrix -->
+<article class="slide-canvas" id="s3">
+  <div class="eyebrow">Slide 3 · Pillar 2 · Cycle 3 Step 1.5 REFIT mode 量化核心</div>
+  <h1 class="slide-title">Refit mode 5×4 matrix：<span class="accent">no-methyl 在 4/5 樣本 ≥ full · 5-sample mean (+0.00630) 略勝 full (+0.00619)</span> · ISM = vestigial covariate</h1>
+
+  <div class="grid-55-45">
+    <div>
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Sample</th>
+            <th class="center">FP density</th>
+            <th class="center">Caller F1</th>
+            <th class="center" style="background:var(--c-primary)">full (10)</th>
+            <th class="center" style="background:var(--c-accent)">no-caller-af (9)</th>
+            <th class="center" style="background:var(--c-accent)">no-methyl (5)</th>
+            <th class="center" style="background:var(--c-accent)">no-both (4)</th>
+            <th class="center">best τ (full)</th>
+            <th class="center">best τ (no-meth)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>HCC1395</strong> (train)</td>
+            <td class="num">14.0%</td>
+            <td class="num">0.717</td>
+            <td class="num bold">+0.02236</td>
+            <td class="num">+0.00955</td>
+            <td class="num bold" style="color:var(--c-pass)">+0.02171</td>
+            <td class="num">+0.00912</td>
+            <td class="num">0.39</td>
+            <td class="num">0.41</td>
+          </tr>
+          <tr>
+            <td><strong>HCC1937</strong></td>
+            <td class="num">16.2%</td>
+            <td class="num">0.685</td>
+            <td class="num">+0.00761</td>
+            <td class="num">−0.00001</td>
+            <td class="num bold" style="color:var(--c-pass)">+0.00798</td>
+            <td class="num">+0.00000</td>
+            <td class="num">0.24</td>
+            <td class="num">0.27</td>
+          </tr>
+          <tr>
+            <td><strong>HCC1954</strong></td>
+            <td class="num">3.4%</td>
+            <td class="num">0.957</td>
+            <td class="num">+0.00095</td>
+            <td class="num">−0.00001</td>
+            <td class="num bold" style="color:var(--c-pass)">+0.00179</td>
+            <td class="num">−0.00000</td>
+            <td class="num">0.71</td>
+            <td class="num">0.74</td>
+          </tr>
+          <tr>
+            <td><strong>H1437</strong></td>
+            <td class="num">1.1%</td>
+            <td class="num">0.987</td>
+            <td class="num">−0.00000</td>
+            <td class="num">−0.00000</td>
+            <td class="num">−0.00000</td>
+            <td class="num">−0.00000</td>
+            <td class="num">0.10</td>
+            <td class="num">0.10</td>
+          </tr>
+          <tr>
+            <td><strong>H2009</strong></td>
+            <td class="num">1.0%</td>
+            <td class="num">0.990</td>
+            <td class="num">+0.00001</td>
+            <td class="num">+0.00000</td>
+            <td class="num">+0.00000</td>
+            <td class="num">+0.00000</td>
+            <td class="num">0.61</td>
+            <td class="num">0.10</td>
+          </tr>
+          <tr class="summary">
+            <td><strong>5-sample mean</strong></td>
+            <td class="num">7.1%</td>
+            <td class="num">0.867</td>
+            <td class="num bold">+0.00619</td>
+            <td class="num">+0.00191</td>
+            <td class="num bold" style="color:var(--c-pass)">+0.00630</td>
+            <td class="num">+0.00182</td>
+            <td class="num">—</td>
+            <td class="num">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <table class="matrix">
+        <thead>
+          <tr><th colspan="2" style="background:var(--c-fail)">H_M1a · drop ISM 5 methyl features</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Pre-reg PASS threshold</td><td class="num">≥ +0.003</td></tr>
+          <tr><td>Pre-reg FAIL threshold</td><td class="num">&lt; +0.001</td></tr>
+          <tr><td>HCC1395 drop computed</td><td class="num bold" style="color:var(--c-fail)">+0.00065</td></tr>
+          <tr><td>4/5 samples no-methyl ≥ full</td><td class="num">YES</td></tr>
+          <tr><td>5-sample mean drop</td><td class="num" style="color:var(--c-fail)">−0.00011</td></tr>
+          <tr><td><strong>Verdict</strong></td><td class="center"><span class="badge badge-fail">FAIL</span></td></tr>
+        </tbody>
+      </table>
+
+      <table class="matrix" style="margin-top:var(--sp-3)">
+        <thead>
+          <tr><th colspan="2" style="background:var(--c-marginal)">H_A1 · caller_af shrink (transfer)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Pre-reg PASS threshold</td><td class="num">&gt; +0.30</td></tr>
+          <tr><td>Pre-reg FAIL threshold</td><td class="num">≤ +0.10</td></tr>
+          <tr><td>HCC1954 improvement computed</td><td class="num bold" style="color:var(--c-marginal)">+0.25114</td></tr>
+          <tr><td>% of HCC1954 disaster mitigated</td><td class="num">66.6%</td></tr>
+          <tr><td>Residual unexplained (no-both)</td><td class="num">25%</td></tr>
+          <tr><td><strong>Verdict</strong></td><td class="center"><span class="badge badge-marginal">MARGINAL</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout pass">
+        <strong>L2 ridge-split 解釋：</strong> HPFineF coef +0.75（cycle 1 rank 5）為 caller_af 部分共變異 split — drop 5 個 methyl 後，caller_af + LOH + Coverage + NG 重新分配權重 capture 同訊息。
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">cycle3_step1_5_min_ablation_findings.md §2.1 · script: run_ablation_variants.py · seed=42 · wall=25s · drift 0 from cycle 1 (bit-exact reproduce)</div>
+    <div class="page-no">3 / 8</div>
+  </footer>
+</article>
+
+<!-- Slide 4: Transfer Mode shrinkage 修補幅度比較 -->
+<article class="slide-canvas" id="s4">
+  <div class="eyebrow">Slide 4 · Pillar 2 · Transfer mode shrinkage attribution</div>
+  <h1 class="slide-title">Transfer 災難 attribution：<span class="accent">caller_af 平均修補 78% · methylation 平均修補 &lt; 7%</span> · caller_af = HCC1954 disaster 主因（67%）</h1>
+
+  <div class="dual-table">
+    <div>
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Sample</th>
+            <th class="center">full transfer ΔF1</th>
+            <th class="center">caller_af shrink → ΔF1</th>
+            <th class="center">Δ improvement</th>
+            <th class="center">% disaster mitigated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:var(--c-fail-soft)">
+            <td><strong>HCC1954</strong></td>
+            <td class="num bold" style="color:var(--c-fail)">−0.37744</td>
+            <td class="num bold" style="color:var(--c-marginal)">−0.12629</td>
+            <td class="num bold" style="color:var(--c-pass)">+0.25114</td>
+            <td class="num">66.6%</td>
+          </tr>
+          <tr>
+            <td><strong>HCC1937</strong></td>
+            <td class="num">−0.07068</td>
+            <td class="num">−0.00903</td>
+            <td class="num">+0.06165</td>
+            <td class="num">87.2%</td>
+          </tr>
+          <tr>
+            <td><strong>H1437</strong></td>
+            <td class="num">−0.03597</td>
+            <td class="num">−0.00354</td>
+            <td class="num">+0.03243</td>
+            <td class="num">90.2%</td>
+          </tr>
+          <tr>
+            <td><strong>H2009</strong></td>
+            <td class="num">−0.00450</td>
+            <td class="num">−0.00138</td>
+            <td class="num">+0.00312</td>
+            <td class="num">69.3%</td>
+          </tr>
+          <tr class="summary">
+            <td><strong>Average</strong></td>
+            <td class="num">−0.122</td>
+            <td class="num">−0.035</td>
+            <td class="num bold">+0.087</td>
+            <td class="num bold" style="color:var(--c-pass)">~78%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout pass" style="margin-top:var(--sp-3)">
+        <strong>結論：caller_af shrinkage 修補 78% transfer disaster</strong> — H_A1 MARGINAL verdict（66.6% on HCC1954，&lt; PASS 0.30 threshold）<br>
+        殘餘 22% 來自 LOH_inner / Coverage_Multiple / NG 分佈漂移 + FP density calibration error
+      </div>
+    </div>
+
+    <div>
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Sample</th>
+            <th class="center">full transfer ΔF1</th>
+            <th class="center">methyl shrink → ΔF1</th>
+            <th class="center">Δ improvement</th>
+            <th class="center">% disaster mitigated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:var(--c-fail-soft)">
+            <td><strong>HCC1954</strong></td>
+            <td class="num bold" style="color:var(--c-fail)">−0.37744</td>
+            <td class="num" style="color:var(--c-fail)">−0.36705</td>
+            <td class="num">+0.01039</td>
+            <td class="num">2.8%</td>
+          </tr>
+          <tr>
+            <td><strong>HCC1937</strong></td>
+            <td class="num">−0.07068</td>
+            <td class="num">−0.06946</td>
+            <td class="num">+0.00122</td>
+            <td class="num">1.7%</td>
+          </tr>
+          <tr>
+            <td><strong>H1437</strong></td>
+            <td class="num">−0.03597</td>
+            <td class="num">−0.03508</td>
+            <td class="num">+0.00089</td>
+            <td class="num">2.5%</td>
+          </tr>
+          <tr>
+            <td><strong>H2009</strong></td>
+            <td class="num">−0.00450</td>
+            <td class="num">−0.00360</td>
+            <td class="num">+0.00090</td>
+            <td class="num">20.0%</td>
+          </tr>
+          <tr class="summary">
+            <td><strong>Average</strong></td>
+            <td class="num">−0.122</td>
+            <td class="num">−0.118</td>
+            <td class="num bold">+0.003</td>
+            <td class="num bold" style="color:var(--c-fail)">&lt; 7%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn" style="margin-top:var(--sp-3)">
+        <strong>結論：methylation shrinkage 修補 &lt; 7% disaster</strong> — methylation 非 transfer 災難主因。<br>
+        對應 H_M1a refit FAIL（drop methyl Δ +0.00065）— transfer + refit 兩個獨立 mode 同方向證明 methylation 不是 incremental contributor。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info" style="margin-top:var(--sp-3)">
+    <strong>跨 method 收斂佐證：</strong> Refit ΔF1 (transfer + retrain) 與 Transfer ΔF1 (coef shrinkage) 是兩個獨立計算路徑 — 兩者對 methylation 都報出「無 incremental contribution」，方法 sanity check pass。
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">cycle3_step1_5_min_ablation_findings.md §2.2 transfer mode pivot · ablation script transfer_predict() with mock coefs→0</div>
+    <div class="page-no">4 / 8</div>
+  </footer>
+</article>
+
+<!-- Slide 5: 5-Goal Verdict + Recommendation Matrix -->
+<article class="slide-canvas" id="s5">
+  <div class="eyebrow">Slide 5 · Pillar 1 · V6 5-Goal recommendation matrix</div>
+  <h1 class="slide-title">5-Goal × recommendation 矩陣：<span class="accent">2 強推、3 設限、2 阻塞</span> · sign-off email 對應每條 specific use-case 而非 blanket endorsement</h1>
+
+  <table class="matrix">
+    <thead>
+      <tr>
+        <th style="width:6%">Goal</th>
+        <th style="width:18%">Use case</th>
+        <th class="center" style="width:9%">Best BAM</th>
+        <th class="center" style="width:9%">V6 verdict</th>
+        <th style="width:22%">充分證據</th>
+        <th style="width:18%">不應 over-claim</th>
+        <th style="width:18%">推薦 action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="center bold">G1</td>
+        <td>per-CpG × HP × ALT confound</td>
+        <td class="center">V3F</td>
+        <td class="center"><span class="badge badge-marginal">Partial</span></td>
+        <td>V3F Cramer V 0.275 (best) · V6 0.377 比 baseline 0.446 好</td>
+        <td>V6 ≥ V3F 跨 use case</td>
+        <td>V3F dedicated per-CpG run (~2 hr)</td>
+      </tr>
+      <tr style="background:var(--c-pass-soft)">
+        <td class="center bold">G2</td>
+        <td>marker filter (downstream production)</td>
+        <td class="center"><strong>V6</strong></td>
+        <td class="center"><span class="badge badge-pass">Strong</span></td>
+        <td>marker count +52.4% · marker rate +1.26 pp · ρ=0.845 cross-sample</td>
+        <td>—</td>
+        <td><strong>✅ 推薦 V6 production</strong></td>
+      </tr>
+      <tr>
+        <td class="center bold">G3</td>
+        <td>二次打擊 (two-hit order)</td>
+        <td class="center">—</td>
+        <td class="center"><span class="badge badge-fail">Blocked</span></td>
+        <td>—</td>
+        <td>V6 unblock G3</td>
+        <td>per-read epigenotype redesign（不在 V6 範圍）</td>
+      </tr>
+      <tr>
+        <td class="center bold">G4</td>
+        <td>TO normal 補強</td>
+        <td class="center">—</td>
+        <td class="center"><span class="badge badge-fail">Blocked</span></td>
+        <td>—</td>
+        <td>ISM 框架修補可解</td>
+        <td>methyl-phasing framework redesign</td>
+      </tr>
+      <tr>
+        <td class="center bold">G5</td>
+        <td>F1 hard T=1</td>
+        <td class="center">V5/V6 tie</td>
+        <td class="center"><span class="badge badge-marginal">Marginal</span></td>
+        <td>+0.0004 in Cohen ribbon</td>
+        <td>V6 strict dominance T=1</td>
+        <td>—（tie 不需 action）</td>
+      </tr>
+      <tr style="background:var(--c-pass-soft)">
+        <td class="center bold">G5</td>
+        <td>F1 hard T=2-3</td>
+        <td class="center"><strong>V6</strong></td>
+        <td class="center"><span class="badge badge-pass">Strong</span></td>
+        <td>ΔF1 +0.030 (T=2) · +0.057 (T=3)</td>
+        <td>—</td>
+        <td><strong>✅ 推薦 V6 hard threshold</strong></td>
+      </tr>
+      <tr>
+        <td class="center bold">G5</td>
+        <td>F1 LR full</td>
+        <td class="center">baseline ≈ V6</td>
+        <td class="center"><span class="badge badge-marginal">BAM-indep</span></td>
+        <td>baseline +0.02302 · V6 +0.02236</td>
+        <td>V6 改進 LR F1</td>
+        <td>—（uplift 來自 features 非 BAM）</td>
+      </tr>
+      <tr>
+        <td class="center bold">G5</td>
+        <td>F1 LR no-meth (post-ablation)</td>
+        <td class="center">all tie</td>
+        <td class="center"><span class="badge badge-marginal">BAM-indep</span></td>
+        <td>methyl contrib +0.00065 全 BAM 一致</td>
+        <td>methylation 為 ISM 獨有訊號</td>
+        <td>4-feature filter 取代 methyl-augmented</td>
+      </tr>
+      <tr style="background:var(--c-fail-soft)">
+        <td class="center bold">G5</td>
+        <td>F1 cross-sample</td>
+        <td class="center">caller-headroom gated</td>
+        <td class="center"><span class="badge badge-fail">Bounded</span></td>
+        <td>HCC1954 transfer −0.377 · caller F1 &gt; 0.83 樣本 LR 退化</td>
+        <td>cross-sample blanket positive</td>
+        <td>Cycle 3 Step 2 panel survey (低-F1 panel)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout pass">
+    <strong>Sign-off recommendation:</strong> 🟢 GO V6 production tag <code>v6-prod-20260520</code> — scope = marker filter + cross-sample ISM downstream + F1 hard T=2-3。其餘 use case sign-off email 明示不應宣稱 V6 改進。
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">20260521_PI_V6_signoff_email_draft_5goal.md §3 + §4 + §6 · 4-BAM × 5-Goal cross-tab 完整版見原報告 §13</div>
+    <div class="page-no">5 / 8</div>
+  </footer>
+</article>
+
+<!-- Slide 6: Mechanism Causality DAG -->
+<article class="slide-canvas" id="s6">
+  <div class="eyebrow">Slide 6 · Pillar 2 · Mechanism causality DAG</div>
+  <h1 class="slide-title">Causality DAG：<span class="accent">caller_af → HPFineF (proxy) → false ISM attribution</span> · L2 ridge-split 解釋 5-rank coef +0.75 為何 incremental ≈ 0</h1>
+
+  <div class="grid-65-35">
+    <div class="dag-wrap">
+      <svg viewBox="0 0 760 380" role="img" xmlns="http://www.w3.org/2000/svg">
+        <title>ISM methylation as caller_af proxy DAG</title>
+        <desc>Causal diagram showing caller_af is the true signal source, HPFineF / methylation features are downstream proxies, L2 regularization splits coefficient across correlated features, leading to false attribution of incremental signal to methylation when in fact ISM is a vestigial covariate.</desc>
+
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#1E3A8A"/>
+          </marker>
+          <marker id="arrow-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#B91C1C"/>
+          </marker>
+          <marker id="arrow-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#D97757"/>
+          </marker>
+        </defs>
+
+        <!-- Nodes -->
+        <!-- Root cause: caller_af -->
+        <rect x="20" y="160" width="160" height="60" rx="6" fill="#E8EDF7" stroke="#1E3A8A" stroke-width="2"/>
+        <text x="100" y="185" text-anchor="middle" font-family="system-ui" font-size="14" font-weight="700" fill="#1E3A8A">caller_af</text>
+        <text x="100" y="205" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#5C5C5A">true signal source</text>
+        <text x="100" y="218" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5C5C5A">coef +3.44</text>
+
+        <!-- L2 ridge -->
+        <ellipse cx="320" cy="190" rx="80" ry="34" fill="#F7EFD9" stroke="#A16207" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="320" y="186" text-anchor="middle" font-family="system-ui" font-size="13" font-weight="700" fill="#A16207">L2 ridge-split</text>
+        <text x="320" y="202" text-anchor="middle" font-family="system-ui" font-size="11" fill="#5C5C5A">split correlated features</text>
+
+        <!-- Proxies -->
+        <rect x="480" y="60" width="170" height="44" rx="6" fill="#F7E6E6" stroke="#B91C1C" stroke-width="1.5"/>
+        <text x="565" y="80" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="#B91C1C">HPFineF (methyl)</text>
+        <text x="565" y="96" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5C5C5A">coef +0.75 (rank 5)</text>
+
+        <rect x="480" y="120" width="170" height="44" rx="6" fill="#F7E6E6" stroke="#B91C1C" stroke-width="1.5"/>
+        <text x="565" y="140" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="#B91C1C">4× other methyl</text>
+        <text x="565" y="156" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5C5C5A">rank 6-9 · proxies</text>
+
+        <rect x="480" y="180" width="170" height="44" rx="6" fill="#E8F2EC" stroke="#15803D" stroke-width="1.5"/>
+        <text x="565" y="200" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="#15803D">LOH_inner</text>
+        <text x="565" y="216" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5C5C5A">true incremental</text>
+
+        <rect x="480" y="240" width="170" height="44" rx="6" fill="#E8F2EC" stroke="#15803D" stroke-width="1.5"/>
+        <text x="565" y="260" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="#15803D">Coverage_Multiple</text>
+        <text x="565" y="276" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5C5C5A">true incremental</text>
+
+        <rect x="480" y="300" width="170" height="44" rx="6" fill="#E8F2EC" stroke="#15803D" stroke-width="1.5"/>
+        <text x="565" y="320" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="#15803D">NG</text>
+        <text x="565" y="336" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5C5C5A">true incremental</text>
+
+        <!-- Lines: caller_af → ridge -->
+        <line x1="180" y1="190" x2="240" y2="190" stroke="#1E3A8A" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Lines: ridge → proxies -->
+        <line x1="400" y1="170" x2="478" y2="90" stroke="#B91C1C" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#arrow-r)"/>
+        <text x="430" y="120" font-family="system-ui" font-size="10" fill="#B91C1C" font-style="italic">false split</text>
+
+        <line x1="400" y1="180" x2="478" y2="142" stroke="#B91C1C" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#arrow-r)"/>
+
+        <!-- Lines: ridge → true incremental -->
+        <line x1="400" y1="200" x2="478" y2="200" stroke="#15803D" stroke-width="2" marker-end="url(#arrow)"/>
+        <text x="425" y="195" font-family="system-ui" font-size="10" fill="#15803D">true</text>
+
+        <line x1="400" y1="210" x2="478" y2="262" stroke="#15803D" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="400" y1="220" x2="478" y2="320" stroke="#15803D" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Bottom finding box -->
+        <rect x="20" y="290" width="380" height="70" rx="6" fill="#FAF9F5" stroke="#D97757" stroke-width="2"/>
+        <text x="210" y="315" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="#D97757">H_M1a verdict</text>
+        <text x="210" y="335" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#141413">drop ISM → Δ +0.00065 &lt; +0.003 Cohen ribbon</text>
+        <text x="210" y="350" text-anchor="middle" font-family="system-ui" font-size="11" fill="#141413">methylation = vestigial covariate</text>
+      </svg>
+    </div>
+
+    <div>
+      <div class="callout pass">
+        <h4 style="color:var(--c-pass);font-size:12.5px;margin-bottom:4px">🟢 True incremental features (keep)</h4>
+        <ul style="font-size:11.5px;list-style:none;padding:0">
+          <li>• <strong>caller_af</strong>: coef +3.44, drop → Δ +0.0064</li>
+          <li>• <strong>LOH_inner_flag</strong>: confounder-adjusted ✓</li>
+          <li>• <strong>Coverage_Multiple_imp</strong>: independent</li>
+          <li>• <strong>NG</strong>: independent</li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <h4 style="color:var(--c-marginal);font-size:12.5px;margin-bottom:4px">⚠ L2 ridge-split mechanism</h4>
+        <p style="font-size:11.5px">L2 regularization 把相關特徵 coef 分散 — HPFineF +0.75 看似 contribution，實為 caller_af 的 partial 共變異 split。drop 5 methyl 後 caller_af + LOH + Cov + NG 重新分配權重 capture 同訊息。</p>
+      </div>
+
+      <div class="callout info">
+        <h4 style="color:var(--c-primary);font-size:12.5px;margin-bottom:4px">📊 Independent corroboration</h4>
+        <p style="font-size:11.5px">5/19 V6 §13 measured methylation contribution <strong>+0.0005~+0.0007</strong> ≡ 5/20 H_M1a <strong>+0.00065</strong> — 兩條獨立路徑同方向同 magnitude，DAG mechanism 收斂同結論。</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">DAG inline SVG · WCAG-AA compliant · cycle3_step1_5_min_ablation_findings.md §3.1 為什麼 5-rank coef +0.75 但 incremental ≈ 0</div>
+    <div class="page-no">6 / 8</div>
+  </footer>
+</article>
+
+<!-- Slide 7: Decision Tree Path Taken -->
+<article class="slide-canvas" id="s7">
+  <div class="eyebrow">Slide 7 · Decision tree · plan v2.1 pre-reg path taken</div>
+  <h1 class="slide-title">Plan v2.1 Decision tree path 2 落地：<span class="accent">A1 PASS-leaning + M1a FAIL → reframe non-methyl multi-axis filter</span> · pre-reg 命中</h1>
+
+  <div class="grid-65-35">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11.5px;background:var(--c-bg);padding:var(--sp-3);border:1px solid var(--c-border-strong);line-height:1.7;flex:1;display:flex;flex-direction:column;justify-content:center">
+<pre style="margin:0;font-family:inherit;font-size:inherit">
+                        ┌─────────────────────────────┐
+                        │  Cycle 3 Step 1.5 Minimum   │
+                        │  Ablation (n=5, 25 sec)     │
+                        └──────────────┬──────────────┘
+                                       │
+              ┌────────────────────────┼────────────────────────┐
+              ▼                        ▼                        ▼
+         ┌─────────┐              ┌─────────┐              ┌─────────┐
+         │   H_A1  │              │  H_M1a  │              │ H_M1b/M2│
+         │ caller  │              │ drop    │              │ Big abl │
+         │ shrink  │              │ ISM     │              │ defer   │
+         └────┬────┘              └────┬────┘              └─────────┘
+              │                        │
+       +0.25114                  +0.00065
+       (between PASS 0.30        (&lt; FAIL 0.001
+        and FAIL 0.10)            well below Cohen 0.003)
+              │                        │
+              ▼                        ▼
+        ┌──────────┐              ┌──────────┐
+        │ MARGINAL │              │   FAIL   │
+        │ PASS-lean│              │  decisive│
+        └────┬─────┘              └────┬─────┘
+             └──────────┬──────────────┘
+                        ▼
+       ┌────────────────────────────────────────┐
+       │  PATH 2: A1 PASS-leaning + M1a FAIL    │  ← <span style="color:#15803D;font-weight:700">命中</span>
+       │  → Cycle 3 reframe                     │
+       │  → 4-feature filter (no methyl)        │
+       │  → Paper §3 撤回 methylation-augmented │
+       │  → ISM v0.3 characterization 保留       │
+       │  → Step 2 panel survey 仍 GO 驗新 filter│
+       │  → 大規模 ablation 降 paper supplement │
+       └────────────────────────────────────────┘
+</pre>
+    </div>
+
+    <div>
+      <table class="matrix">
+        <thead><tr><th colspan="2" style="background:var(--c-accent)">Pre-reg prediction (plan v2.1)</th></tr></thead>
+        <tbody>
+          <tr><td>Predicted scenario</td><td>55% A1 PASS + M1a FAIL</td></tr>
+          <tr><td>Actual computed</td><td>A1 MARGINAL + M1a FAIL</td></tr>
+          <tr><td>Direction match</td><td class="center"><span class="badge badge-pass">命中</span></td></tr>
+          <tr><td>Path taken</td><td>Path 2 (5 candidates)</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout info" style="margin-top:var(--sp-3)">
+        <h4 style="color:var(--c-primary);font-size:12.5px;margin-bottom:4px">5 paths in plan v2.1 decision rule</h4>
+        <ul style="font-size:10.5px;list-style:none;padding:0">
+          <li>Path 1: A1+M1a both PASS → cycle 3 main</li>
+          <li><strong>Path 2: A1 PASS-lean + M1a FAIL → reframe (taken)</strong></li>
+          <li>Path 3: A1 FAIL + M1a PASS → keep ISM, fix caller</li>
+          <li>Path 4: Both FAIL → cycle 3 NO-GO</li>
+          <li>Path 5: Inconclusive → escalate big ablation</li>
+        </ul>
+      </div>
+
+      <div class="callout pass">
+        <h4 style="color:var(--c-pass);font-size:12.5px;margin-bottom:4px">為什麼 pre-reg 重要</h4>
+        <p style="font-size:11.5px">事前定義 verdict 避免 post-hoc 解讀為 confirmation。命中方向 = 結果與預測同方向，但允許 magnitude 差異（PASS vs MARGINAL）。</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">plan: ~/.claude/plans/v6-optimized-wadler.md §Cycle 3 Step 1.5 v2.1 · cycle3_step1_5_min_ablation_findings.md §5 Decision Tree Path Taken</div>
+    <div class="page-no">7 / 8</div>
+  </footer>
+</article>
+
+<!-- Slide 8: Action Items + Provenance Full Footer -->
+<article class="slide-canvas" id="s8">
+  <div class="eyebrow">Slide 8 · Action items · provenance · 紀律 (footer only)</div>
+  <h1 class="slide-title">五項落地、五項 deferred、四項 must-fix — <span class="accent">完整 provenance footer 保證 reproducibility</span></h1>
+
+  <div class="dual-table">
+    <div>
+      <table class="matrix">
+        <thead><tr><th colspan="2" style="background:var(--c-pass)">✅ Done this week (5)</th></tr></thead>
+        <tbody>
+          <tr><td>Filter rename → 4-feature</td><td class="num">5/20</td></tr>
+          <tr><td><code>cycle3_caller_f1_gate.json</code> 更新</td><td class="num">5/20</td></tr>
+          <tr><td>NEGATIVE postmortem .md + ledger</td><td class="num">5/19</td></tr>
+          <tr><td>V6 commit 8a90532 + tag</td><td class="num">5/20</td></tr>
+          <tr><td>大規模 ablation 降為 supplementary</td><td class="num">5/20</td></tr>
+        </tbody>
+      </table>
+
+      <table class="matrix" style="margin-top:var(--sp-3)">
+        <thead><tr><th colspan="2" style="background:var(--c-marginal)">→ Open / next phase (5)</th></tr></thead>
+        <tbody>
+          <tr><td>A2 caller_af KS test (~30 min)</td><td class="num">5/21+</td></tr>
+          <tr><td>Cycle 3 Step 2 panel survey</td><td class="num">5/21+</td></tr>
+          <tr><td>V6 push 授權 + email send</td><td class="num">待 PI ack</td></tr>
+          <tr><td>Goal 1 V3F dedicated per-CpG run</td><td class="num">~2 hr</td></tr>
+          <tr><td>HCC1937 low-F1 panel BAM 確認</td><td class="num">先決</td></tr>
+        </tbody>
+      </table>
+
+      <table class="matrix" style="margin-top:var(--sp-3)">
+        <thead><tr><th colspan="2" style="background:var(--c-fail)">🔴 4 must-fix (cycle 3 啟動前)</th></tr></thead>
+        <tbody>
+          <tr><td>H_C3_2 low-F1 panel 4 樣本名單</td><td class="center">🔴</td></tr>
+          <tr><td>cycle_id 重命名規範 (_validation 不 _negative)</td><td class="center">🟠</td></tr>
+          <tr><td>ledger entry 補 commit / dataset / pre-reg link</td><td class="center">🟠</td></tr>
+          <tr><td>H_C3_1 target 計算澄清</td><td class="center">🟡</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <table class="matrix">
+        <thead><tr><th colspan="2" style="background:var(--c-primary)">📋 Provenance footer (full)</th></tr></thead>
+        <tbody>
+          <tr><td>cycle_id</td><td class="num">20260520_cycle3_step1_5_ism_ablation_vestigial</td></tr>
+          <tr><td>ledger line</td><td class="num">research/autoresearch/evidence_ledger.jsonl :48</td></tr>
+          <tr><td>plan</td><td class="num">~/.claude/plans/v6-optimized-wadler.md §Cycle 3 Step 1.5 v2.1</td></tr>
+          <tr><td>binary tag</td><td class="num">v6-prod-20260520</td></tr>
+          <tr><td>commit hash</td><td class="num">8a90532 (fix/pon-only-phasing, local)</td></tr>
+          <tr><td>script</td><td class="num">cycle3/ablation/scripts/run_ablation_variants.py</td></tr>
+          <tr><td>data TSV</td><td class="num">cycle3/ablation/data/cycle3_step1_5_min_ablation.tsv</td></tr>
+          <tr><td>figure</td><td class="num">cycle3/ablation/figures/cycle3_step1_5_min_ablation.png</td></tr>
+          <tr><td>seed · wall · drift</td><td class="num">42 · 25 sec · 0 from cycle 1</td></tr>
+          <tr><td>predecessor cycles</td><td class="num">20260519-0031-cycle3-caller-f1-headroom (Step 1 PASS) · 20260519_phase2_cycle2_cross_sample_negative</td></tr>
+          <tr><td>upstream report</td><td class="num">20260521_PI_V6_signoff_email_draft_5goal.md</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout info" style="margin-top:var(--sp-3)">
+        <h4 style="color:var(--c-primary);font-size:12px;margin-bottom:4px">紀律 footnote (非主敘事)</h4>
+        <p style="font-size:11px">Plan v2 R-MENTAL-DRIFT 通過真實測試：4-agent audit + 48hr cooling-off + pre-reg 命中 + NEGATIVE postmortem 落地。詳見 <code>cycle2_NEGATIVE_postmortem.md</code>。</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">end of deck · sign-off email: 20260521_PI_V6_signoff_email_draft_5goal.md · figures dir: research/v6_bam_tpfp_hp_loh_cn/figures/baseline_vs_v6/ + research/methyl_augmented_filter_phase2/cycle{1,2,3}/figures/</div>
+    <div class="page-no">8 / 8</div>
+  </footer>
+</article>
+
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<!--
+建立時間: 2026-06-09（v2 晚：雙主軸 rule+exception / catalog R6 / same-hap 3/6 修 / 🟡→🟢 T-PROV / characterize 非 reshapes / GB venue）
+狀態: staging (論文架構 — 清楚閱讀版 HTML，學術文章排版)
+報告類型: paper_reading_view
+受眾: 廖子游 · PI
+data_sources:
+  - docs/paper_focus/02_paper_framework/論文架構_正式學術版_Slide2Thesis格式.md (v2)
+  - docs/paper_focus/02_paper_framework/位點甲基分群catalog_結果_R6.md
+  - docs/paper_focus/02_paper_framework/pre_registration_與fallback_carrying_claim.md
+provenance_note: de-confound 主軸 🟢（catalog wf_5644ed77-082 6/6 + grep）；co-val/phasing 🟡 contingent(#21/#22)。
+-->
+<!-- provenance-verified: catalog 數字 grep 確認(A=1/C=12868/G=291518/332705)；T-PROV 🟡→🟢；co-val/phasing 標 contingent。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>論文架構 — 閱讀版 v2（雙主軸）</title>
+<style>
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --serif:Georgia,"Noto Serif CJK TC","Source Han Serif TW","Songti TC","Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--serif);background:var(--c-bg);color:var(--c-text);line-height:1.75;font-size:17px}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);font-family:var(--sans)}
+.topbar .in{max-width:1180px;margin:0 auto;padding:0 var(--sp-5);display:flex;align-items:center;gap:var(--sp-3);min-height:50px;flex-wrap:wrap}
+.topbar h1{font-size:.9rem;margin:0;font-weight:700}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap;font-size:.74rem;margin-left:auto}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 8px;border:1px solid var(--c-border);border-radius:18px;white-space:nowrap}
+.topbar nav a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+.layout{max-width:760px;margin:0 auto;padding:0 var(--sp-5)}
+.titleblock{padding:var(--sp-7) 0 var(--sp-5);border-bottom:2px solid var(--c-text);margin-bottom:var(--sp-5)}
+.titleblock .kind{font-family:var(--mono);font-size:.72rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase}
+.titleblock h2{font-family:var(--sans);font-size:1.55rem;line-height:1.32;margin:var(--sp-3) 0;color:#141413}
+.titleblock .zh{font-size:1.02rem;color:var(--c-text-soft);font-family:var(--sans)}
+.titleblock .authors{font-size:.95rem;color:var(--c-text-soft);margin-top:var(--sp-3);font-family:var(--sans)}
+.titleblock .kw{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-2);font-family:var(--sans)}
+.readaid{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-family:var(--sans);font-size:.9rem}
+.readaid b{color:#9c4a2c}
+.abstract{background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4) var(--sp-5);margin:var(--sp-5) 0}
+.abstract h3{font-family:var(--sans);font-size:1rem;margin:0 0 var(--sp-2);text-transform:uppercase;letter-spacing:1px;color:var(--c-accent)}
+.abstract p{margin:var(--sp-2) 0;font-size:.96rem}
+.abstract .lab{font-family:var(--sans);font-weight:700;font-size:.82rem;color:var(--c-text-soft)}
+section.sec{padding:var(--sp-5) 0;border-top:1px solid var(--c-border)}
+section.sec>h3{font-family:var(--sans);font-size:1.3rem;margin:0 0 var(--sp-3);color:#141413}
+section.sec h4{font-family:var(--sans);font-size:1.02rem;margin:var(--sp-5) 0 var(--sp-2);color:#141413}
+section.sec h4.rule{color:var(--c-pass)} section.sec h4.exc{color:var(--c-warn)}
+section.sec p{margin:var(--sp-3) 0}
+section.sec ul{margin:var(--sp-3) 0;padding-left:1.3em}
+section.sec li{margin:var(--sp-2) 0}
+.lead{font-size:1.02rem}
+.tier{font-family:var(--mono);font-size:.7rem;font-weight:700;padding:0 5px;border-radius:4px;border:1px solid;vertical-align:1px;white-space:nowrap}
+.t-g{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.t-y{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.t-b{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.cite{font-family:var(--mono);font-size:.78rem;color:var(--c-info)}
+.figref{display:block;margin:var(--sp-3) 0;padding:var(--sp-2) var(--sp-4);border-left:3px solid var(--c-accent);background:#FCFBF8;font-family:var(--sans);font-size:.84rem;color:var(--c-text-soft);border-radius:0 6px 6px 0}
+.caveat{background:var(--c-warn-soft);border:1px solid var(--c-warn);border-radius:8px;padding:var(--sp-2) var(--sp-4);font-family:var(--sans);font-size:.86rem;margin:var(--sp-3) 0}
+.rulebox{border-left:4px solid var(--c-pass);padding-left:var(--sp-4)}
+.excbox{border-left:4px solid var(--c-warn);padding-left:var(--sp-4)}
+.refs{font-family:var(--sans);font-size:.84rem}
+.refs li{margin:4px 0}
+footer{border-top:1px solid var(--c-text);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-7);font-family:var(--sans);font-size:.78rem;color:var(--c-text-soft)}
+footer code{font-family:var(--mono);background:#F0EDE6;padding:1px 5px;border-radius:4px}
+@media print{.topbar{position:static}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in">
+  <h1>論文架構 — 閱讀版 v2</h1>
+  <nav><a href="#abs">Abstract</a><a href="#s1">1 Intro</a><a href="#s2">2 Results</a><a href="#s3">3 Discussion</a><a href="#s4">4 Methods</a><a href="#refs">Refs</a></nav>
+</div></div>
+
+<div class="layout">
+  <div class="titleblock">
+    <div class="kind">Research Article · 目標 Genome Biology tier · 雙主軸 rule+exception</div>
+    <h2>Read-level characterization of allele-specific methylation in long-read cancer genomes: methylation tracks germline rather than somatic haplotypes, with a rare somatic co-validation exception</h2>
+    <div class="zh">長讀癌症基因體中等位基因特異甲基化的單讀層級 characterization：甲基化跟隨 germline 而非 somatic 單倍型，以及一個罕見的 somatic 共驗證例外</div>
+    <div class="authors">Tzu-Yu Liao · [PI / co-authors] · [Institution]</div>
+    <div class="kw"><b>Keywords</b>　long-read · nanopore · allele-specific methylation · loss of heterozygosity · haplotype · somatic mutation · de-confounding · cancer epigenomics · read-level</div>
+  </div>
+
+  <div class="readaid">
+    <b>怎麼讀（證據色）：</b><span class="tier t-g">🟢</span> 原檔對賬可引用（T-PROV 已全對賬）｜ <span class="tier t-y">🟡</span> contingent（押 #21 R-SELFREF / #22）｜ <span class="tier t-b">🔵</span> framing。<br>
+    <b>雙主軸（規則＋例外，同一故事）：</b><span class="tier t-g">規則</span> 甲基 allelic 分群跟隨 <b>germline</b> 而非 somatic（de-confound，已證）｜<span class="tier t-y">例外</span> 罕見 somatic co-opt 甲基（chr17）+ phasing 軸三訊號正交佐證（contingent）。<b>例外讓規則完整，不是兩篇。</b>
+  </div>
+
+  <div class="abstract" id="abs">
+    <h3>Abstract</h3>
+    <p class="lead">Long-read sequencing resolves somatic mutations, haplotypes and 5mC/5hmC on single molecules, yet whether allele-specific methylation (ASM) in cancer reflects somatic events has not been characterized at read level nor de-confounded from germline-allelic and copy-number background.</p>
+    <p><span class="lab">Methods.</span> ISM, a read-level pipeline (read×CpG matrix, read–read distance, reliability-gated clustering, haplotype/LOH tagging, normal-anchored cis-test), catalogues 332,705 loci across six cancers.</p>
+    <p><span class="lab">Results (rule).</span> Reliable methylation read-clustering exists at <span class="tier t-g">🟢 12,868 loci</span> but is overwhelmingly germline-allelic; genome-wide only <span class="tier t-g">🟢 1/332,705</span> is a clean somatic cis-ASM (chr17/TBC1D16), and methylation does not discriminate true from false somatic variants (four independent lines). Copy-number dosage is not the driver <span class="tier t-g">🟢 MW p=0.6183</span>. <span class="lab">(exception)</span> At that single locus and along the LOH-phasing axis, somatic, haplotype and methylation signals co-validate the same reshaping event <span class="tier t-y">🟡</span>.</p>
+    <p><span class="lab">Conclusions.</span> A read-level de-confounding of cancer ASM + a mechanism-resolved catalogue of what methylation co-validates versus cannot filter.</p>
+  </div>
+
+  <section class="sec" id="s1">
+    <h3>1　Introduction</h3>
+    <p class="lead">Long-read resolves somatic variation, haplotypes and 5mC/5hmC on one molecule, enabling a read-level test of whether cancer ASM is somatic or germline-allelic.</p>
+    <h4>1.1　Why this matters</h4>
+    <p>read-level 連結三訊號 + de-confound apparent ASM。<span class="tier t-b">🔵</span></p>
+    <h4>1.2　The gap</h4>
+    <p>(i) read-level somatic-controlled de-confound 未做；(ii) 甲基-as-filter 未公開證偽；(iii) somatic-controlled ASM 樣貌未界定。<span class="tier t-b">🔵</span> <span class="cite">[@MartinTrujillo2017]</span></p>
+    <h4>1.3　Contribution（雙主軸）</h4>
+    <p><b>規則</b>（de-confound：甲基跟 germline 不跟 somatic、不能 filter）+ <b>例外</b>（chr17 + phasing co-validation）+ 誠實 catalog + ISM（vs 現有工具，benchmark）。<span class="tier t-b">🔵</span></p>
+    <span class="figref">Fig 1 ｜ rule+exception 整合圖：LOH 區 germline-allelic 為主背景 + 罕見 somatic co-opt(chr17)；每軸標證據強度。</span>
+  </section>
+
+  <section class="sec" id="s2">
+    <h3>2　Results（雙主軸：規則 floor → 例外 ceiling）</h3>
+
+    <h4>2.1　ASM exists and is somatically enriched</h4>
+    <p>TP significant 3.95% (11655/294723) &gt; FP 1.07% (34/3177)，subhap-matched 3.77% vs 1.09% ~3.5× <span class="tier t-g">🟢</span>；但 ~4% 低 sensitivity。</p>
+    <span class="figref">Fig 2 ｜ TP/FP/FN significant-rate（subhap-matched）.</span>
+
+    <h4>2.2　Boundary — methylation cannot discriminate true/false somatic variants（四道）</h4>
+    <ul>
+      <li>(a) LOSO 100% circularity <span class="tier t-g">🟢 +0.02236→−0.00012; mean −0.00004, p=0.125</span> <span class="cite">[@Kapoor2023]</span></li>
+      <li>(b) |Δβ| AUC=0.505 落 null <span class="tier t-g">🟢</span></li>
+      <li>(c) ~4% sens + COLO829 TP≈FP <span class="tier t-g">🟢 0.0089≈0.0103</span></li>
+      <li>(d) regression-to-extreme：OR no-clust 8.63 / LOH 4.09 / subhap 5.84；dbeta_only TP:FP=11.9（最 FP-enriched）<span class="tier t-g">🟢 T-PROV 對賬</span></li>
+    </ul>
+    <span class="figref">Fig 4 ｜ filter 死四道對照.</span>
+
+    <h4 class="rule">2.3　★ RULE — read-level catalogue：甲基分群是 germline-allelic，不是 somatic（de-confound floor）</h4>
+    <div class="rulebox">
+    <p>6 樣本 <b>332,705 位點 → 7 TAG</b> <span class="tier t-g">🟢 catalog wf_5644ed77-082 6/6 驗</span>：reliable 甲基分群 <b>12,868（3.87%）</b> 但 cis-test 證<b>全是 germline-allelic 背景</b>；latent 28,254（PERMANOVA 救回但 enrich≈base 無判別力）；無訊號 291,518（87.6%）；<b>乾淨 somatic cis-ASM 全基因組僅 1（chr17）</b>。→ <b>甲基 allelic 分群 germline-driven，不是 somatic 判別器。</b></p>
+    <span class="figref">Fig 3 ｜ P5 per-TAG 計數長條（= 主圖）；catalog_overview.</span>
+    </div>
+
+    <h4>2.4　Copy-dosage 非 driver；cis vs copy partition</h4>
+    <p>MW neutral-vs-gain p=0.6183；signed ρ(|Δβ|,CN)=−0.0829 → REFUTED <span class="tier t-g">🟢</span>。唯一乾淨 cis = chr17（within 0.142 ≫ d_copy 0.029, perm p=0.001）<span class="tier t-g">🟢</span>；BRCA2 = copy-confounded（d_within −0.023 ≪ −0.11）<span class="tier t-g">🟢</span>。</p>
+    <span class="figref">Fig 6 ｜ copy-dosage falsification + within_d vs HP_d.</span>
+
+    <h4 class="exc">2.5　EXCEPTION — chr17/TBC1D16 三訊號 co-validation exemplar</h4>
+    <div class="excbox">
+    <p>在唯一乾淨 cis 位點，somatic SNV / haplotype / 甲基三訊號正交佐證同一 LOH 事件 <span class="tier t-y">🟡</span>。</p>
+    <div class="caveat"><b>誠實 caveat：</b>單 locus、單樣本、nominal p、<b>HCC1395-private somatic 不可在第二乳腺樣本重現</b>（升信心須 COLO829）。例外目前是 suggestive exemplar，不是站得住的第二主軸。</div>
+    <span class="figref">Fig 8 ｜ chr17/TBC1D16 normal-anchored cis-test 三路 read×CpG.</span>
+    </div>
+
+    <h4 class="exc">2.6　LOH-constrained phasing axis（contingent on #21 R-SELFREF）</h4>
+    <div class="excbox">
+    <p>NG=2 Inner same-HP1 &gt; Outer，<b>方向 7/7</b>（W=28, p=0.0078125）<span class="tier t-g">🟢</span>；paired 負控 NS <span class="tier t-g">🟢</span>。AF→NGroups = phasing 非甲基 <span class="tier t-g">🟢 HD-4, r=0.656</span>。</p>
+    <div class="caveat"><b>caveat：</b>by-construction 部分循環（R-SELFREF #21 待跑，pre-reg PR-1）；<b>same-hap 中位 ~92% 但僅 3/6 ≥93%</b>（0.840/0.939/0.759/<b>0.429</b>/0.932/0.920；T-PROV 修正，<b>非 6/6</b>）；single-pipeline ⭐3。</div>
+    <span class="figref">Fig 5 ｜ NG=2 Inner&gt;Outer forest plot.</span>
+    </div>
+
+    <h4>2.7　Cross-sample reproducibility（phenomenon-level）</h4>
+    <p>6/6 excess-over-null +0.101–0.241（mean 0.168）<span class="tier t-g">🟢 T-PROV</span> = phenomenon 復現；同-locus 0/38 <span class="tier t-g">🟢</span> 但 UNDERPOWERED（E[overlap]=0.16）。<span class="cite">[@ONeill2024]</span></p>
+  </section>
+
+  <section class="sec" id="s3">
+    <h3>3　Discussion</h3>
+    <h4 class="rule">3.1　規則的意義（de-confound 貢獻）</h4>
+    <p>甲基 allelic 分群 read-level 主要是 germline；apparent ASM 多被 germline/copy 混淆 → 給「ASM 普遍 hypo 主導」文獻一個 somatic-controlled de-confound 視角（守 3 不對齊）<span class="cite">[@Do2020]</span>。</p>
+    <h4 class="exc">3.2　例外的意義 + 邊界</h4>
+    <p>chr17 是罕見 somatic co-opt 甲基的 exemplar（讓規則完整）；甲基不能 filter 的機制（circularity / regression-to-extreme / germline-allelic）= 防雷貢獻 <span class="cite">[@Kapoor2023][@MartinTrujillo2017]</span>。</p>
+    <h4>3.3　Tooling 展望（future）</h4>
+    <p>甲基追蹤 haplotype 結構 → 開啟甲基輔助 phasing（umtag）<span class="tier t-g">🟢 held-out 0.8852 / V10 非-copy（T-PROV）</span>；需 yardstick / COLO829 <span class="cite">[@MethPhaser]</span>。</p>
+    <h4>3.4　Limitations</h4>
+    <p>single-pipeline ⭐3；機制單樣本 HCC1395；chr17 例外單 locus 不可複製；phasing by-construction（#21 待）；6 cis untestable；matched normal 僅 HCC1395。</p>
+  </section>
+
+  <section class="sec" id="s4">
+    <h3>4　Methods</h3>
+    <p><b>4.1 Samples.</b> HCC1395（SEQC2 truth）+ HCC1937/1954/H1437/H2009/COLO829；ONT 5mC/5hmC；ClairS-TO（single-pipeline）。</p>
+    <p><b>4.2 ISM pipeline.</b> read×CpG 矩陣 → read–read 距離（6 度量）→ 階層分群 + CramersV reliability gate（Cochran≥5；三態 reliable/latent/none）→ HP/LOH tag → normal-anchored cis-test。vs 現有工具見 benchmark（#23）。</p>
+    <p><b>4.3 Catalogue.</b> 16-欄 schema → 7-TAG（scripts 98-100；catalog_skeleton.tsv 332,705 列；wf_5644ed77-082 獨立重驗）。</p>
+    <p><b>4.4 Validation.</b> LOSO / 2000× shuffle null / subhap-matched / blind-ARI + imprinting 正控 / signed-rank + bootstrap + paired 負控 / copy-test / germline-het null。</p>
+    <p><b>4.5 Statistics & pre-registration.</b> effect size + CI；genome-wide FDR（改正 BH-on-min-p）；NEGATIVE 走 falsification；#21/#22 跑前判準寫死（pre_registration_與fallback doc），fallback：de-confound floor 永遠成立。</p>
+  </section>
+
+  <section class="sec" id="refs">
+    <h3>References（→ knowledge/11，投稿前 /citation-verification）</h3>
+    <ol class="refs">
+      <li>[@Kapoor2023] Kapoor & Narayanan, leakage taxonomy（<i>Patterns</i>）.</li>
+      <li>[@MartinTrujillo2017] Martin-Trujillo et al., CN explains allelic methylation（<i>Nat Commun</i>）.</li>
+      <li>[@Do2020] Do et al., allele-specific methylation in cancer.</li>
+      <li>[@ONeill2024] O'Neill / POG, cis-ASM recurrence（189 tumours）.</li>
+      <li>[@MethPhaser] MethPhaser — methylation-assisted phasing.</li>
+      <li>[@Landan2012] / [@Derrien2021] epipolymorphism / read-level methylation heterogeneity.</li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>閱讀版 v2 · 目標 <b>Genome Biology tier</b> · 雙主軸（規則 de-confound floor + 例外 co-validation contingent）· 內容取自 <code>InterSubMod/docs/paper_focus/02_paper_framework/論文架構_正式學術版_Slide2Thesis格式.md</code>（v2）+ catalog R6 + pre_registration_與fallback。</p>
+    <p>證據色：🟢 原檔對賬（T-PROV 已全對賬）/ 🟡 contingent（#21 R-SELFREF / #22）/ 🔵 framing · git <code>8dbb931</code> · §13 無新數字。<b>必修</b>：same-hap 3/6 非 6/6（全文同步）。<b>可即寫</b>：de-confound floor（§2.1-2.4 + §2.7 全 🟢，不等 #21/#22）。</p>
+  </footer>
+</div>
+</body>
+</html>

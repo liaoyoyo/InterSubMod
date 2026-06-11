@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LongPhase-S Revision Response 3rd-Party Audit | 2026-05-27</title>
+<link rel="stylesheet" href="https://unpkg.com/mvp.css@1.16.0">
+<link rel="stylesheet" href="https://cdn.datatables.net/2.1.6/css/dataTables.dataTables.min.css">
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.1.6/js/dataTables.min.js"></script>
+<script defer src="https://unpkg.com/alpinejs@3.13.0/dist/cdn.min.js"></script>
+<style>
+:root {
+  --color-fatal: #c0392b;
+  --color-warn: #e67e22;
+  --color-medium: #f1c40f;
+  --color-good: #27ae60;
+  --color-info: #3498db;
+  --color-bg-card: #fafafa;
+  --color-border: #d0d0d0;
+}
+body { max-width: 1280px; margin: 0 auto; padding: 1rem 2rem; }
+header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: #fff; padding: 1.5rem 2rem; margin: -1rem -2rem 1.5rem; border-radius: 0 0 8px 8px; }
+header h1 { color: #fff; margin: 0 0 0.3rem; font-size: 1.6rem; }
+header .meta { color: #bdc3c7; font-size: 0.85rem; }
+nav.toc { position: sticky; top: 0; background: #fff; border-bottom: 2px solid var(--color-border); padding: 0.6rem 0; margin: -1rem -2rem 1.5rem; padding-left: 2rem; padding-right: 2rem; z-index: 100; font-size: 0.85rem; }
+nav.toc a { margin-right: 1rem; color: #2c3e50; text-decoration: none; }
+nav.toc a:hover { color: var(--color-info); text-decoration: underline; }
+.verdict-hero { background: linear-gradient(135deg, var(--color-fatal) 0%, #8e2818 100%); color: #fff; padding: 2rem; border-radius: 8px; text-align: center; margin-bottom: 1.5rem; }
+.verdict-hero .stars { font-size: 3rem; line-height: 1; }
+.verdict-hero h2 { color: #fff; margin: 0.5rem 0; font-size: 1.4rem; }
+.verdict-hero p { font-size: 1rem; margin: 0.3rem 0; }
+.fatal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.fatal-card { background: var(--color-bg-card); border-left: 5px solid var(--color-fatal); padding: 1rem; border-radius: 4px; }
+.fatal-card.warn { border-left-color: var(--color-warn); }
+.fatal-card.good { border-left-color: var(--color-good); }
+.fatal-card h4 { margin: 0 0 0.3rem; color: var(--color-fatal); font-size: 0.95rem; }
+.fatal-card.warn h4 { color: var(--color-warn); }
+.fatal-card.good h4 { color: var(--color-good); }
+.fatal-card .reject-rate { font-size: 1.6rem; font-weight: bold; }
+.tier-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.75rem; font-weight: bold; color: #fff; margin-right: 4px; }
+.tier-L1 { background: #27ae60; }
+.tier-L2 { background: #3498db; }
+.tier-L3 { background: #f1c40f; color: #333; }
+.tier-L4 { background: #e67e22; }
+.tier-L5 { background: #c0392b; }
+.verdict-cell { font-weight: bold; padding: 2px 6px; border-radius: 3px; display: inline-block; font-size: 0.8rem; }
+.verdict-FAIL, .verdict-致命 { background: #c0392b; color: #fff; }
+.verdict-WEAK, .verdict-PARTIAL, .verdict-EMPTY { background: #e67e22; color: #fff; }
+.verdict-PASS { background: #27ae60; color: #fff; }
+.verdict-STRONG_PASS { background: #16a085; color: #fff; }
+.verdict-EMPTY_RESPONSE { background: #95a5a6; color: #fff; }
+.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--color-border); margin-bottom: 1rem; }
+.tab-btn { padding: 0.5rem 1rem; cursor: pointer; background: none; border: none; font-size: 1rem; color: #666; border-bottom: 3px solid transparent; }
+.tab-btn.active { color: #2c3e50; border-bottom-color: var(--color-info); font-weight: bold; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+.vuln-card { background: #fff; border: 1px solid var(--color-border); border-left: 5px solid var(--color-warn); border-radius: 4px; margin-bottom: 1rem; padding: 0.8rem 1rem; }
+.vuln-card.fatal { border-left-color: var(--color-fatal); }
+.vuln-card h4 { margin: 0 0 0.4rem; }
+.vuln-card .vuln-tier { float: right; }
+.priority-bar { display: flex; align-items: center; padding: 0.5rem; margin-bottom: 0.3rem; background: var(--color-bg-card); border-radius: 4px; }
+.priority-tag { display: inline-block; min-width: 60px; padding: 4px 10px; text-align: center; color: #fff; font-weight: bold; border-radius: 4px; margin-right: 0.8rem; font-size: 0.85rem; }
+.p0 { background: #c0392b; }
+.p1 { background: #e67e22; }
+.p2 { background: #f1c40f; color: #333; }
+.p3 { background: #95a5a6; }
+.ism-stance-table td { vertical-align: middle; }
+.ism-stance { display: inline-block; padding: 2px 8px; border-radius: 3px; font-weight: bold; font-size: 0.85rem; }
+.ism-hero { background: #c0392b; color: #fff; }
+.ism-strong { background: #e67e22; color: #fff; }
+.ism-medium { background: #f1c40f; color: #333; }
+.ism-minimal { background: #95a5a6; color: #fff; }
+.ism-skip { background: #ecf0f1; color: #666; }
+details summary { cursor: pointer; padding: 0.5rem; background: var(--color-bg-card); border-radius: 4px; font-weight: bold; }
+details[open] summary { background: #e8e8e8; }
+details .content { padding: 0.8rem 1rem; border-left: 3px solid var(--color-info); margin-top: 0.5rem; }
+table { font-size: 0.85rem; }
+table th { background: #34495e; color: #fff; }
+.kpi-row { display: flex; gap: 1rem; justify-content: center; margin: 1rem 0; }
+.kpi-box { flex: 1; background: var(--color-bg-card); padding: 1rem; border-radius: 4px; text-align: center; border: 1px solid var(--color-border); }
+.kpi-num { font-size: 2rem; font-weight: bold; color: #2c3e50; line-height: 1; }
+.kpi-label { font-size: 0.8rem; color: #666; margin-top: 0.3rem; }
+.footnote { font-size: 0.8rem; color: #666; border-top: 1px solid var(--color-border); padding-top: 1rem; margin-top: 2rem; }
+.banner-warn { background: #fcf3cf; border: 1px solid #f1c40f; padding: 0.8rem; border-radius: 4px; margin: 1rem 0; }
+.banner-info { background: #d6eaf8; border: 1px solid #3498db; padding: 0.8rem; border-radius: 4px; margin: 1rem 0; }
+section { margin-bottom: 2.5rem; }
+h2 { color: #2c3e50; border-bottom: 2px solid var(--color-info); padding-bottom: 0.3rem; }
+h3 { color: #34495e; margin-top: 1.5rem; }
+.evidence-pill { display: inline-block; padding: 1px 6px; background: #ecf0f1; border-radius: 10px; font-size: 0.75rem; margin: 1px; }
+</style>
+</head>
+<body>
+
+<header>
+<h1>LongPhase-S Revision Response · 第三方稽核整合報告</h1>
+<div class="meta">
+  Tier 4 paper-scope · 2026-05-27 · Git HEAD <code>369e8f9</code> · <strong>3 agent fresh-context cross-validation</strong>
+  · 對齊 <code>/scientific-rigor</code> §2-§7 L1-L5 evidence ladder
+</div>
+</header>
+
+<nav class="toc">
+<a href="#s0">§0 TL;DR</a>
+<a href="#s1">§1 5/23 vs 現在</a>
+<a href="#s2">§2 Cross-Validation Matrix</a>
+<a href="#s3">§3 3 Vulnerability</a>
+<a href="#s4">§4 Action Items</a>
+<a href="#s5">§5 ISM 介入</a>
+<a href="#s6">§6 文獻佐證</a>
+<a href="#s7">§7 Provenance</a>
+<a href="#s8">§8 P0 Execution</a>
+</nav>
+
+<!-- ========================= §0 ========================= -->
+<section id="s0">
+<h2>§0 TL;DR — Verdict-Pyramid 頂層結論</h2>
+
+<div class="verdict-hero">
+  <div class="stars">⭐⭐<span style="opacity:0.3">⭐⭐⭐</span></div>
+  <h2>整體 Verdict 2/5 — Major Revision Required</h2>
+  <p>當前 rebuttal 結構不足以 secure acceptance · 3 個 fatal gap 必補</p>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi-box"><div class="kpi-num">35%</div><div class="kpi-label">Rebuttal 完整度</div></div>
+  <div class="kpi-box"><div class="kpi-num">3</div><div class="kpi-label">Fatal Gap</div></div>
+  <div class="kpi-box"><div class="kpi-num">23</div><div class="kpi-label">Reviewer Items 對照</div></div>
+  <div class="kpi-box"><div class="kpi-num">19</div><div class="kpi-label">業界文獻佐證</div></div>
+</div>
+
+<div id="verdict-chart" style="height:280px;"></div>
+
+<h3>3 個 Fatal Gap (跨 agent 一致排序)</h3>
+<div class="fatal-grid">
+  <div class="fatal-card">
+    <h4>① R3-M2 PacBio HiFi</h4>
+    <div class="reject-rate">~70%</div>
+    <p>COLO829 HiFi 已公開（SMaHT + Zenodo + DeepSomatic CASTLE），作者「promise to add」不可接受。</p>
+    <span class="tier-badge tier-L1">L1</span><span class="evidence-pill">verified public dataset</span>
+  </div>
+  <div class="fatal-card">
+    <h4>② R2-#2 Overfitting (LOSO 缺失)</h4>
+    <div class="reject-rate">必抓</div>
+    <p>作者「預估 parameters 不會差太多」+ 沒實際跑 leave-one-cell-line-out CV，是 vulnerable 句。</p>
+    <span class="tier-badge tier-L2">L2</span><span class="evidence-pill">industry best practice gap</span>
+  </div>
+  <div class="fatal-card">
+    <h4>③ R3-M5 HP3 量化</h4>
+    <div class="reject-rate">~60%</div>
+    <p>標準補表，response 空白 = 直接拒絕信號。8 datasets 都該報 HP3 fraction + TP rate。</p>
+    <span class="tier-badge tier-L1">L1</span><span class="evidence-pill">standard supplementary obligation</span>
+  </div>
+</div>
+
+<div class="banner-info">
+<strong>ISM 介入策略（跨 agent consensus）</strong>：minimal-to-targeted。
+主要切入點 = <strong>R1-Curiosity</strong> (TSG×methylation IGV) + <strong>R3-M5</strong> (HP3 bimodal forward-reference) + <strong>R3-M6</strong> (linear depth schema future-work)。
+R2 全 4 條 ISM 不應主導；LOSO catastrophe 可在 R2-#2/#3 作 limitation footnote 限 1-2 句。
+</div>
+</section>
+
+<!-- ========================= §1 ========================= -->
+<section id="s1">
+<h2>§1 5/23 paper-notes 整理 vs 現在 author response</h2>
+
+<table id="compare-table" class="display">
+<thead><tr>
+  <th>Reviewer</th>
+  <th>5/23 fact-check</th>
+  <th>現在 author response</th>
+  <th>Δ Verdict</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td><strong>R1</strong> (Yilei Fu)</td>
+  <td>「全部合理且建設性，沒要求重做實驗，主要是補論述+補 Supp 圖表」</td>
+  <td>7 條中 4 條 punt（M1 future / Curiosity 留白 / m1 文字 reframe / m2/m3 標 owner 待補）</td>
+  <td><span class="verdict-cell verdict-WEAK">5/23 過於樂觀</span>；fresh-context 升級 Curiosity 為 FAIL ⭐⭐⭐⭐⭐ unforced error</td>
+</tr>
+<tr>
+  <td><strong>R2</strong> (最嚴厲)</td>
+  <td>「主張 #2 事實錯誤直接糾正；其餘合理需補實驗」</td>
+  <td>改名 "tumor DNA fraction" + 提案 chr-subset 拆分 + 1-chr Battenberg + bundled PURPLE</td>
+  <td><span class="verdict-cell verdict-WEAK">5/23 對 #2 太硬</span>；即使 Methods 4.3.2 typo 是 paper 錯，作者「預估參數不差」+ 沒實際跑 LOSO 仍 vulnerable</td>
+</tr>
+<tr>
+  <td><strong>R3</strong> (使用者導向)</td>
+  <td>「全部偏補 Supp + 補 Discussion，沒要求重做核心模型」</td>
+  <td>11+ 條中<strong>僅 3-4 條有實質回應</strong>（PacBio bundled / WhatsHap comparison / DeepSomatic Venn 提及待補）</td>
+  <td><span class="verdict-cell verdict-致命">5/23 預期 acceptance 太樂觀</span>；fresh-context 升級 PacBio + HP3 + multi-subclone 為 fatal gap</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>對照差異主因</strong>：5/23 是「可達 acceptance 的 path map」；fresh-context audit 是「目前 response 是否已足夠」——後者標 35-40% completion。</p>
+</section>
+
+<!-- ========================= §2 ========================= -->
+<section id="s2">
+<h2>§2 三 Agent Cross-Validation Matrix</h2>
+
+<p>每格 = (Agent Verdict / Evidence Tier L1-L5 / 最關鍵漏洞)
+<br><span class="tier-badge tier-L1">L1</span> source-verified
+<span class="tier-badge tier-L2">L2</span> cross-sample 觀察
+<span class="tier-badge tier-L3">L3</span> 機制推測
+<span class="tier-badge tier-L4">L4</span> claim only
+<span class="tier-badge tier-L5">L5</span> 純設想</p>
+
+<div x-data="{tab:'r1'}">
+<div class="tabs">
+  <button class="tab-btn" :class="{active: tab==='r1'}" @click="tab='r1'">R1 (7 條, ⭐2)</button>
+  <button class="tab-btn" :class="{active: tab==='r2'}" @click="tab='r2'">R2 (4 條, ⭐2)</button>
+  <button class="tab-btn" :class="{active: tab==='r3'}" @click="tab='r3'">R3 (11+ 條, ⭐2.5)</button>
+</div>
+
+<!-- R1 panel -->
+<div class="tab-panel" :class="{active: tab==='r1'}" x-show="tab==='r1'">
+<table class="display">
+<thead><tr><th>ID</th><th>Agent</th><th>Tier</th><th>致命度</th><th>漏洞</th></tr></thead>
+<tbody>
+<tr><td><strong>R1-M1</strong> Subclonal/region GHIR</td><td><span class="verdict-cell verdict-WEAK">WEAK</span></td><td><span class="tier-badge tier-L4">L4</span></td><td>中</td><td>rename+future punt 不解決量化請求</td></tr>
+<tr><td><strong>R1-M2</strong> Read-level fraction</td><td><span class="verdict-cell verdict-PASS">PASS</span></td><td><span class="tier-badge tier-L1">L1</span></td><td>低</td><td>方法對需補 8-row table</td></tr>
+<tr><td><strong>R1-m1</strong> Hap-CNV × GHIR</td><td><span class="verdict-cell verdict-WEAK">WEAK</span></td><td><span class="tier-badge tier-L3">L3</span></td><td>中</td><td>一段文字 vs reviewer 要 figure</td></tr>
+<tr><td><strong>R1-m2</strong> Coverage range</td><td><span class="verdict-cell verdict-STRONG_PASS">STRONG_PASS</span></td><td><span class="tier-badge tier-L1">L1</span></td><td>—</td><td>done</td></tr>
+<tr><td><strong>R1-m3</strong> Block N50</td><td><span class="verdict-cell verdict-PASS">PASS</span></td><td><span class="tier-badge tier-L1">L1</span></td><td>低</td><td>標 owner 待補</td></tr>
+<tr><td><strong>R1-m4</strong> Fig 6 重疊</td><td><span class="verdict-cell verdict-STRONG_PASS">STRONG_PASS</span></td><td><span class="tier-badge tier-L1">L1</span></td><td>—</td><td>done</td></tr>
+<tr style="background:#fdecea;"><td><strong>R1-Curiosity</strong> TSG×methylation</td><td><span class="verdict-cell verdict-FAIL">FAIL</span></td><td><span class="tier-badge tier-L5">L5</span></td><td><strong>高</strong></td><td>完全留白 = unforced error；ISM hero asset 浪費</td></tr>
+</tbody>
+</table>
+<div class="banner-warn"><strong>R1 最弱條目</strong>：Curiosity。ISM 已有 <code>MatrixBuilder.cpp</code> + <code>DistanceMatrix.cpp</code> + 7-sample ΔNG=+0.787 [L1 量化]，作者完全沒用。R1 主動示好的 bonus 不接 = 最廉價失分。</div>
+</div>
+
+<!-- R2 panel -->
+<div class="tab-panel" :class="{active: tab==='r2'}" x-show="tab==='r2'">
+<table class="display">
+<thead><tr><th>ID</th><th>Agent</th><th>Tier</th><th>致命度</th><th>漏洞</th></tr></thead>
+<tbody>
+<tr><td><strong>R2-#1</strong> Cellular vs DNA fraction</td><td><span class="verdict-cell verdict-PARTIAL">PARTIAL</span></td><td><span class="tier-badge tier-L3">L3</span></td><td>中-高</td><td>WGD 對稱假設 hand-wave 無 numerical evidence；training-label systematic bias 沒修</td></tr>
+<tr style="background:#fdecea;"><td><strong>R2-#2</strong> Train/test overlap</td><td><span class="verdict-cell verdict-PARTIAL">PARTIAL</span></td><td><span class="tier-badge tier-L2">L2</span></td><td><strong>致命</strong></td><td>拆 chr-subset ≠ LOSO；R²=0.96 over-optimistic（6 cell line 同時在 train+test）</td></tr>
+<tr><td><strong>R2-#3</strong> Extreme samples</td><td><span class="verdict-cell verdict-PARTIAL">PARTIAL</span></td><td><span class="tier-badge tier-L2">L2</span></td><td>中</td><td>補低 CNA cancer 仍缺；pediatric/heme 缺席</td></tr>
+<tr><td><strong>R2-#4</strong> ASCAT/Battenberg/PURPLE</td><td><span class="verdict-cell verdict-PARTIAL">PARTIAL</span></td><td><span class="tier-badge tier-L2">L2</span></td><td>中-高</td><td>single-chr Battenberg underpowered；PURPLE long-read 弱應正面提及</td></tr>
+</tbody>
+</table>
+<div class="banner-warn"><strong>R2 最弱條目</strong>：#2。作者「<em>預估 parameters 不會差太多</em>」是 vulnerable 句，必抓。<strong>單一最高 ROI action = 跑 LOSO CV</strong> — 同時 address #2 + #3。</div>
+<div class="banner-info"><strong>ISM 鏡像警告 [L1]</strong>：<code>project_phase2_cycle1_global_fp_filter.md</code> HCC1395 in-distribution 5-fold +0.02236 → LOSO held-out <strong>−0.00012</strong>（100% effect 蒸發, HCC1954 transfer −0.377）。這支持 R2 擔憂而非反駁；ISM 應誠實在 Discussion 加 1-2 句 "common pitfall"。</div>
+</div>
+
+<!-- R3 panel -->
+<div class="tab-panel" :class="{active: tab==='r3'}" x-show="tab==='r3'">
+<table class="display">
+<thead><tr><th>ID</th><th>Agent</th><th>Tier</th><th>致命度</th><th>漏洞</th></tr></thead>
+<tbody>
+<tr><td><strong>R3-M1</strong> Rescued/removed class</td><td><span class="verdict-cell verdict-EMPTY_RESPONSE">EMPTY</span></td><td><span class="tier-badge tier-L4">L4</span></td><td><strong>高</strong></td><td>標準 supp 分類圖未提</td></tr>
+<tr style="background:#fdecea;"><td><strong>R3-M2</strong> PacBio HiFi</td><td><span class="verdict-cell verdict-致命">EMPTY/捆綁</span></td><td><span class="tier-badge tier-L1">L1</span></td><td><strong>致命 ~70%</strong></td><td>COLO829 HiFi 已公開可得，不可 skip</td></tr>
+<tr><td><strong>R3-M3</strong> SNV vs indel</td><td><span class="verdict-cell verdict-EMPTY_RESPONSE">EMPTY</span></td><td><span class="tier-badge tier-L3">L3</span></td><td>中</td><td>1 段 mechanism explanation</td></tr>
+<tr><td><strong>R3-M4</strong> Filter threshold</td><td><span class="verdict-cell verdict-EMPTY_RESPONSE">EMPTY</span></td><td><span class="tier-badge tier-L1">L1</span></td><td>中</td><td>Supp Table 5 purity bin × thresholds</td></tr>
+<tr style="background:#fdecea;"><td><strong>R3-M5</strong> HP3 fraction</td><td><span class="verdict-cell verdict-致命">EMPTY</span></td><td><span class="tier-badge tier-L1">L1</span></td><td><strong>致命 ~60%</strong></td><td>標準補表必需 8-dataset table</td></tr>
+<tr style="background:#fdecea;"><td><strong>R3-M6</strong> Multi-subclone</td><td><span class="verdict-cell verdict-致命">EMPTY</span></td><td><span class="tier-badge tier-L4">L4</span></td><td><strong>致命 ~50%</strong></td><td>必補 IGV + Discussion limitation</td></tr>
+<tr><td><strong>R3-M7</strong> Low VAF P/R</td><td><span class="verdict-cell verdict-EMPTY_RESPONSE">EMPTY</span></td><td><span class="tier-badge tier-L1">L1</span></td><td>中-高</td><td>VAF-bin stratified P/R</td></tr>
+<tr><td><strong>R3-Sp1</strong> ClairS vs DeepSomatic</td><td><span class="verdict-cell verdict-WEAK">薄弱</span></td><td><span class="tier-badge tier-L3">L3</span></td><td>低</td><td>「neural net + training data」太籠統</td></tr>
+<tr><td><strong>R3-Sp2</strong> Callset Venn</td><td><span class="verdict-cell verdict-EMPTY_RESPONSE">待補</span></td><td><span class="tier-badge tier-L1">L1</span></td><td>中</td><td>SNV/indel 各一張 Venn</td></tr>
+<tr><td><strong>R3-Sp3</strong> WhatsHap LOH 對比</td><td><span class="verdict-cell verdict-EMPTY_RESPONSE">待補</span></td><td><span class="tier-badge tier-L2">L2</span></td><td><strong>高</strong></td><td>業界文獻 gap；需自行 benchmark</td></tr>
+<tr><td><strong>R3-Sp4</strong> Typos / Figure</td><td><span class="verdict-cell verdict-EMPTY_RESPONSE">EMPTY</span></td><td><span class="tier-badge tier-L1">L1</span></td><td>低-中</td><td>不修 = unprofessional 信號</td></tr>
+</tbody>
+</table>
+<div class="banner-warn"><strong>R3 最弱條目</strong>：M2 (PacBio) + M5 (HP3 量化) + M6 (multi-subclone)。Rebuttal 完整度估計 ~35% (3-4/11 條有實質回應)。</div>
+</div>
+</div>
+</section>
+
+<!-- ========================= §3 ========================= -->
+<section id="s3">
+<h2>§3 Fresh-context 抓出 3 條 5/23 沒談到的 Vulnerability</h2>
+<p>業界文獻佐證 — 5/23 原稿是「作者立場可如何 spin」，但 fresh-context 用業界文獻找 dock points。</p>
+
+<div class="vuln-card">
+<h4>Vulnerability #1：「tumor DNA fraction」非業界主流 term <span class="vuln-tier"><span class="tier-badge tier-L2">L2 文獻</span></span></h4>
+<ul>
+<li><strong>業界 vocabulary survey</strong>：</li>
+<li>ASCAT (Van Loo Nat Comm 2020) 用 "<strong>Aberrant Cell Fraction (ACF)</strong>" — 定義即 "amount of tumor DNA in sample"，概念等同作者新詞但字面已被先佔</li>
+<li>PURPLE (Hartwig) 用 "purity" + "ploidy"</li>
+<li>DeCiFer / PyClone 用 "<strong>cancer cell fraction (CCF)</strong>" per-mutation</li>
+<li>ctDNA 領域（Adalsteinsson 2017 PMC8165771）已用 "<strong>tumor fraction (TF)</strong>" ← 對作者立場最有利</li>
+</ul>
+<p><strong>質疑</strong>：為何另立新詞而非對齊 ACF / TF? Reviewer 任一可問。</p>
+<p><strong>建議</strong>：rebuttal 加 1 句 "this aligns with 'tumor fraction (TF)' in ctDNA literature (Adalsteinsson 2017) and 'ACF' in ASCAT framework" 對齊既有 vocabulary。</p>
+</div>
+
+<div class="vuln-card fatal">
+<h4>Vulnerability #2：WGD 對稱假設未經 numerical validation <span class="vuln-tier"><span class="tier-badge tier-L2">L2 文獻</span></span></h4>
+<p><strong>作者立場</strong>：「WGD 兩 haplotype 同步加倍，HP1/HP2 ratio 不變，GHIR 反映 DNA fraction 而非 ploidy」</p>
+<p><strong>業界反例 (Bielski et al. Nat Genet 2018; Quinton et al. 2021)</strong>：WGD 常伴 post-WGD chromosome-specific loss → <strong>asymmetric HP retention</strong></p>
+<p><strong>HCC1954 即典型 post-WGD breast cancer</strong>（ploidy ~3.9 + extensive post-duplication LOH），HP1:HP2 在 chr17/chr8 已驗證非對稱</p>
+<p><strong>質疑</strong>：作者 hand-wave "都預測 0.8 是對的"，無 ploidy-controlled simulation；R2 大機率會要求 fix-ratio cross-ploidy experiment</p>
+</div>
+
+<div class="vuln-card">
+<h4>Vulnerability #3：PURPLE long-read 弱點是 motivation 而非 critique <span class="vuln-tier"><span class="tier-badge tier-L1">L1 文獻</span></span></h4>
+<p><strong>5/23 評估</strong>：「PURPLE 已能跑 long-read (PacBio 官方 pipeline)，補進來能直接堵 reviewer」</p>
+<p><strong>fresh-context 補充</strong>：</p>
+<ul>
+<li>Song et al. <em>Adv Sci</em> 2025 PMC12677682 明確 documented「all existing CNA tools (incl. PURPLE) performed poorly on long-read」</li>
+<li>nf-core/pacsomatic 整合 PURPLE+PacBio HiFi 但仍 dev branch</li>
+</ul>
+<p><strong>策略升級</strong>：作者不應只「補一份 PURPLE」，而應主動引用 Song 2025 強調 "long-read CNA tool gap is the motivation for LongPhase-S"——把 reviewer #4 的批評轉成支持立場。</p>
+</div>
+</section>
+
+<!-- ========================= §4 ========================= -->
+<section id="s4">
+<h2>§4 Action Items — ROI 優先排序</h2>
+
+<div class="priority-bar"><span class="priority-tag p0">P0 必做</span><strong>Leave-1-cell-line-out CV (LOSO)</strong> — R2-#2 + R2-#3 同時；2-3 天計算；不做必被 reject</div>
+<div class="priority-bar"><span class="priority-tag p0">P0 必做</span><strong>COLO829 HiFi pilot</strong> — R3-M2；SMaHT Data Portal / DeepSomatic CASTLE 公開資料，至少 1 chr；5-7 天</div>
+<div class="priority-bar"><span class="priority-tag p0">P0 必做</span><strong>HP3 fraction × TP rate table</strong> — R3-M5；8 datasets stratified；1-2 天</div>
+<div class="priority-bar"><span class="priority-tag p1">P1 重要</span><strong>Multi-subclone IGV figure + Discussion limitation</strong> — R3-M6；2-3 天；ISM linear depth schema 可作 future-work</div>
+<div class="priority-bar"><span class="priority-tag p1">P1 重要</span><strong>Rescued/removed variant stratified table</strong> — R3-M1 + R3-M7；LOH × GC × repeat × VAF bin；3-4 天</div>
+<div class="priority-bar"><span class="priority-tag p1">P1 重要</span><strong>Ploidy-controlled simulation</strong> — R2-#1；固定 DNA fraction=0.5 跨 ploidy 不同 cell line；1 天計算</div>
+<div class="priority-bar"><span class="priority-tag p2">P2 加分</span><strong>R1-Curiosity TSG IGV demo</strong> — ISM hero asset；3-5 天</div>
+<div class="priority-bar"><span class="priority-tag p2">P2 加分</span><strong>5-chr Battenberg + Song 2025 引用 reframe</strong> — R2-#4；3-5 天</div>
+<div class="priority-bar"><span class="priority-tag p3">P3 排版</span>typos / figure DPI / Purity scale / "Uknown" / 藍點 confusion — R3-Sp4 + R3-Fig；&lt; 1 天</div>
+<div class="priority-bar"><span class="priority-tag p3">P3 速贏</span>"tumor DNA fraction" footnote 對齊 ASCAT ACF + ctDNA TF — R1-M1 + R2-#1；&lt; 1 小時</div>
+</section>
+
+<!-- ========================= §5 ========================= -->
+<section id="s5">
+<h2>§5 ISM 介入策略</h2>
+
+<table class="ism-stance-table display">
+<thead><tr><th>ISM 動作</th><th>哪 reviewer</th><th>強度</th><th>5/24 matrix</th></tr></thead>
+<tbody>
+<tr><td>R1-Curiosity TSG×methylation IGV demo</td><td>R1</td><td><span class="ism-stance ism-hero">⭐⭐⭐⭐⭐ HERO 必做</span></td><td>✅ 強對應</td></tr>
+<tr><td>R3-M5 HP3 bimodal forward-reference</td><td>R3</td><td><span class="ism-stance ism-strong">⭐⭐⭐⭐</span></td><td>✅ 強對應 (T10)</td></tr>
+<tr><td>R3-M6 linear depth schema future-work</td><td>R3</td><td><span class="ism-stance ism-strong">⭐⭐⭐</span></td><td>✅ 強對應 (F4v2)</td></tr>
+<tr><td>R3-M1 rescued/removed single-region precedent</td><td>R3</td><td><span class="ism-stance ism-medium">⭐⭐⭐</span></td><td>✅ 強對應 (F7)</td></tr>
+<tr><td>R1-M1 region-level GHIR signature precedent</td><td>R1</td><td><span class="ism-stance ism-medium">⭐⭐⭐</span></td><td>✅ 強對應</td></tr>
+<tr><td>R2-#2/#3 LOSO failure disclosure</td><td>R2</td><td><span class="ism-stance ism-minimal">⭐⭐ 1-2 句 footnote</span></td><td>⚠ 部分</td></tr>
+<tr><td>R2-#1 cellular vs DNA fraction</td><td>R2</td><td><span class="ism-stance ism-skip">🚫 不介入</span></td><td>❌ skip</td></tr>
+<tr><td>R2-#4 ASCAT/PURPLE benchmark</td><td>R2</td><td><span class="ism-stance ism-skip">🚫 不介入</span></td><td>❌ skip</td></tr>
+<tr><td>R3-M2 PacBio HiFi</td><td>R3</td><td><span class="ism-stance ism-skip">🚫 ISM 全 ONT</span></td><td>❌ skip</td></tr>
+<tr><td>R3-M3/M4/Sp1/Sp2</td><td>R3</td><td><span class="ism-stance ism-skip">🚫 純 caller mechanism</span></td><td>❌ skip</td></tr>
+</tbody>
+</table>
+
+<div class="banner-warn"><strong>ISM 紅線</strong>：
+<ul>
+<li>ISM 是 separate work，<strong>不能取代</strong> LongPhase-S 端 native analysis</li>
+<li>T10 bimodal / F7 / linear schema 屬 [O]/[F]/[I] tier，措辭限「初步觀察 / 可推論 / future extension」<strong>不寫「證實」</strong></li>
+<li>Phase 2 Cycle 1 LR filter 已 LOSO 降為 NEGATIVE，<strong>禁止</strong>作正向引用</li>
+<li>ClairS-TO Verdict pilot 內部校準 POSITIVE 但 F1 增益 NEGATIVE — 不主動引用</li>
+</ul>
+</div>
+</section>
+
+<!-- ========================= §6 ========================= -->
+<section id="s6">
+<h2>§6 業界文獻佐證表</h2>
+
+<table id="sources-table" class="display">
+<thead><tr><th>Claim</th><th>Source</th><th>Tier</th></tr></thead>
+<tbody>
+<tr><td>"tumor DNA fraction" 業界已用 (ctDNA TF)</td><td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8165771/" target="_blank">Adalsteinsson PMC8165771</a> · <a href="https://ajp.amjpathol.org/article/S0002-9440(22)00211-5/fulltext" target="_blank">Am J Pathology 2022</a></td><td><span class="tier-badge tier-L2">L2</span></td></tr>
+<tr><td>ASCAT 用 ACF (Aberrant Cell Fraction)</td><td><a href="https://www.nature.com/articles/s41467-020-17967-y" target="_blank">Van Loo Nat Comm 2020</a></td><td><span class="tier-badge tier-L2">L2</span></td></tr>
+<tr><td>PURPLE 在 long-read documented weak</td><td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12677682/" target="_blank">Song Adv Sci 2025 PMC12677682</a></td><td><span class="tier-badge tier-L1">L1</span></td></tr>
+<tr><td>nf-core/pacsomatic 整合 PURPLE+PacBio</td><td><a href="https://nf-co.re/pacsomatic/dev/" target="_blank">nf-co.re/pacsomatic/dev</a></td><td><span class="tier-badge tier-L1">L1</span></td></tr>
+<tr><td>ClairS-TO 對 somatic VAF 連續性 + DNA-fraction-aware</td><td><a href="https://www.biorxiv.org/content/10.1101/2025.03.10.642523v1.full" target="_blank">Zheng bioRxiv 2025.03.10.642523</a></td><td><span class="tier-badge tier-L2">L2</span></td></tr>
+<tr><td>WGD asymmetric post-duplication losses</td><td><a href="https://www.nature.com/articles/s41588-018-0165-1" target="_blank">Bielski Nat Genet 2018</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6072608/" target="_blank">Dewhurst PMC6072608</a></td><td><span class="tier-badge tier-L2">L2</span></td></tr>
+<tr><td>Battenberg = ASCAT 後繼 (subclonal CNA)</td><td><a href="https://www.cell.com/cell/fulltext/S0092-8674(12)00527-2" target="_blank">Nik-Zainal Cell 2012</a> · <a href="https://www.crick.ac.uk/research/labs/peter-van-loo/software" target="_blank">Van Loo Software</a></td><td><span class="tier-badge tier-L2">L2</span></td></tr>
+<tr><td>Subclonal reconstruction benchmark</td><td><a href="https://www.nature.com/articles/s41587-024-02250-y" target="_blank">Nat Biotechnology 2024</a></td><td><span class="tier-badge tier-L1">L1</span></td></tr>
+<tr><td>DeepSomatic CASTLE 6 cell-line tumor-normal</td><td><a href="https://www.biorxiv.org/content/10.1101/2024.08.16.608331v1" target="_blank">Park biorxiv 2024.08.16</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11370364/" target="_blank">Nat Biotech 2025 PMC11370364</a></td><td><span class="tier-badge tier-L1">L1</span></td></tr>
+<tr><td>LRSomatic cross-platform HiFi+ONT</td><td><a href="https://www.biorxiv.org/content/10.64898/2026.02.26.707772v1.full" target="_blank">biorxiv 2026.02.26.707772</a></td><td><span class="tier-badge tier-L1">L1</span></td></tr>
+<tr><td>HiFi-somatic-WDL COLO829 Zenodo public</td><td><a href="https://github.com/PacificBiosciences/HiFi-somatic-WDL" target="_blank">PacificBiosciences/HiFi-somatic-WDL</a></td><td><span class="tier-badge tier-L1">L1</span></td></tr>
+<tr><td>SMaHT COLO829 FiberSeq HiFi public</td><td><a href="https://data.smaht.org/docs/additional-resources/pipeline-docs/long-read_pacbio_hifi" target="_blank">SMaHT Data Portal</a></td><td><span class="tier-badge tier-L1">L1</span></td></tr>
+<tr><td>LOSO / leave-profile-out best practice</td><td>Király J Chemom 2025 · <a href="https://link.springer.com/article/10.1186/1471-2105-7-91" target="_blank">Ambroise BMC Bioinf 2002</a></td><td><span class="tier-badge tier-L2">L2</span></td></tr>
+<tr><td>LongPhase 原版 (germline-only) Bioinformatics 2022</td><td><a href="https://academic.oup.com/bioinformatics/article/38/7/1816/6519151" target="_blank">Lin et al. 38(7):1816</a></td><td><span class="tier-badge tier-L1">L1</span></td></tr>
+<tr><td>WhatsHap --block-cut-sensitivity low-het cut</td><td><a href="https://whatshap.readthedocs.io/en/latest/guide.html" target="_blank">WhatsHap 2.8 docs</a></td><td><span class="tier-badge tier-L1">L1</span></td></tr>
+<tr><td>Distributional bias in LOOCV</td><td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12662204/" target="_blank">Tougui arxiv 2406.01652</a></td><td><span class="tier-badge tier-L2">L2</span></td></tr>
+<tr><td>ABSOLUTE cellular purity definition</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4383288/" target="_blank">Carter Nat Biotech 2012 PMC4383288</a></td><td><span class="tier-badge tier-L2">L2</span></td></tr>
+<tr><td>Comprehensive somatic SV benchmark</td><td><a href="https://www.biorxiv.org/content/10.1101/2025.09.18.677206v1.full" target="_blank">biorxiv 2025.09.18.677206</a></td><td><span class="tier-badge tier-L1">L1</span></td></tr>
+<tr><td>LongPhase-S preprint</td><td><a href="https://www.biorxiv.org/content/10.1101/2025.11.20.689492.full.pdf" target="_blank">bioRxiv 2025.11.20.689492</a></td><td><span class="tier-badge tier-L1">L1</span></td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ========================= §7 ========================= -->
+<section id="s7">
+<h2>§7 Provenance + 推論過程</h2>
+
+<details open>
+<summary>評估方法 4 階段</summary>
+<div class="content">
+<ol>
+<li><strong>5/23 原稿</strong> (291 lines) fact-checked 6 個共通定錨 — paper Methods 4.3.2 train/test split / <code>TumorPurityEstimator.cpp:65</code> 6-coef 多項式 / in silico mixing <code>samtools view -s</code> / SNV+4.5% indel+7.1% / HP3 設計 — 均屬 [L1] direct verification</li>
+<li><strong>5/24 ISM coverage matrix v6</strong> — 23 entries × {評論強度 ⭐1-5, 嚴重度, 對應狀態 ✅/⚠/❌, evidence tier [F/O/I/U]}</li>
+<li><strong>Fresh-context 3 agent</strong> — 每 agent 獨立讀 prompt + WebSearch 業界文獻 + ISM coverage matrix</li>
+<li><strong>Cross-validate</strong> — 比對 5/23 評估 vs fresh-context；標出 agreement (R2-#2 + R3-M2 + R1-Curiosity gap) + 升級 (5/23 樂觀 → fresh-context 升 vulnerability)</li>
+</ol>
+</div>
+</details>
+
+<details>
+<summary>Source 文件清單</summary>
+<div class="content">
+<ul>
+<li><strong>5/23 原稿</strong>: <code>/big8_disk/liaoyoyo2001/knowledge/raw/paper-notes/longphase-s-reviewer-response-2026-05-23/report.md</code> (Yao-Ting Huang lab)</li>
+<li><strong>5/24 整理</strong>: <code>InterSubMod/docs/concepts/2026/05/20260524_reviewer_coverage_matrix_01.md</code> v6 (T10 5/24 升級)</li>
+<li><strong>3 agent transcript</strong>:
+  <ul><li>R1 audit: aeb8958ec837687a1</li>
+  <li>R2 audit: a301565aaccc4657e</li>
+  <li>R3 audit: a1cd735f95e25165a</li></ul></li>
+<li><strong>LongPhase-S source</strong>: <code>/big8_disk/liaoyoyo2001/longphase-s/src/somatic_haplotag/TumorPurityEstimator.cpp:65</code></li>
+<li><strong>ISM evidence memories</strong>: <code>project_loh_constrained_phasing_discovery.md</code> · <code>project_loh_subclone_af_methylation_positive.md</code> · <code>project_hpfinengroups_subclone_marker.md</code> · <code>project_phase2_cycle1_global_fp_filter.md</code></li>
+</ul>
+</div>
+</details>
+
+<details>
+<summary>不過度宣稱原則</summary>
+<div class="content">
+<ul>
+<li>任何 [O]/[I] 統計都以「初步觀察 / 可推論」措辭引用，<strong>不寫「證實 / 確認」</strong></li>
+<li>LOH-constrained phasing discovery 已 reframe — Paired ΔNG=+0.787 加註「需獨立 phasing-vs-methylation 驗證」</li>
+<li>HPFineNGroups V6 phase B chr19 conditional POSITIVE 標 caveat「chr19 only = 2.16% genome, BAM=V3F binary」</li>
+<li>Phase 2 Cycle 1 LR filter 已 downgraded to NEGATIVE at sample-level（LOSO -0.00012），不引用作 positive evidence</li>
+</ul>
+</div>
+</details>
+</section>
+
+<!-- ========================= §8 ========================= -->
+<section id="s8">
+<h2>§8 P0 必做 3 項 Detailed Execution Plan</h2>
+
+<details>
+<summary>P0-1 · LOSO Cross-Validation (R2-#2 + #3) · 2-3 天</summary>
+<div class="content">
+<p><strong>動機</strong>：作者「預估 parameters 不會差太多」是 R2 必抓 vulnerable 句。leave-k-out (k=mixing ratio) 在同 cell line 內 split 不算真 cross-sample；必須跑 leave-1-cell-line-out。</p>
+<p><strong>步驟</strong>：</p>
+<ol>
+<li>重訓練 setup：6 cell line × 5 mixing ratio = 30 data points</li>
+<li>6 fold，每 fold hold out 1 cell line 全部 5 ratio</li>
+<li>Fit 6-coef polynomial on remaining 5 cell line × 5 ratio = 25 points</li>
+<li>Test on held-out 5 points，computed predicted-vs-true DNA fraction</li>
+<li>Report: per-fold R² + RMSE + bias；overall LOSO R² vs leave-k-out R²=0.96</li>
+<li>若 LOSO R² &lt; 0.8：reframe scope to "validated for cell-line panel similar to training set"</li>
+</ol>
+<p><strong>預期結果</strong>（cross-validate ISM LOSO experience）：R² 可能 drop 至 0.6-0.8；HCC1954 (WGD) fold 最 vulnerable。</p>
+</div>
+</details>
+
+<details>
+<summary>P0-2 · COLO829 HiFi Pilot (R3-M2) · 5-7 天</summary>
+<div class="content">
+<p><strong>動機</strong>：COLO829 HiFi 公開資料已可用，作者「promise to add」會被 R3 視為未盡義務。</p>
+<p><strong>Public data sources (verified 2026-05-27)</strong>:</p>
+<ul>
+<li><a href="https://data.smaht.org/docs/additional-resources/pipeline-docs/long-read_pacbio_hifi" target="_blank">SMaHT Data Portal</a> — COLO829 FiberSeq BAM</li>
+<li><a href="https://github.com/PacificBiosciences/HiFi-somatic-WDL" target="_blank">HiFi-somatic-WDL Zenodo</a> — COLO829.30X.SV_region.bam</li>
+<li><a href="https://www.biorxiv.org/content/10.1101/2024.08.16.608331v1" target="_blank">DeepSomatic CASTLE</a> — 6 cell-line tumor-normal HiFi benchmark</li>
+</ul>
+<p><strong>步驟</strong>：</p>
+<ol>
+<li>Download COLO829 HiFi tumor+normal pair（至少 1 chr 如 chr8）</li>
+<li>跑 ClairS HiFi mode → 跑 LongPhase-S → 跑 GHIR purity estimation</li>
+<li>對比 ONT COLO829_ONT (~33×) vs HiFi (~30×) 的 purity estimate consistency</li>
+<li>Report: 1 figure (ONT vs HiFi GHIR distribution side-by-side) + 1 table (purity estimate ± CI)</li>
+</ol>
+<p><strong>Caveat</strong>：若 HiFi 與 ONT estimate 不一致 → 需 Discussion 解釋 platform-specific phasing differences</p>
+</div>
+</details>
+
+<details>
+<summary>P0-3 · HP3 Fraction × TP Rate Table (R3-M5) · 1-2 天</summary>
+<div class="content">
+<p><strong>動機</strong>：屬編輯部標準補表，response 空白 = 拒絕信號。</p>
+<p><strong>步驟</strong>：</p>
+<ol>
+<li>對每個 dataset（8 個）of LongPhase-S 跑完 SomaticHaplotagProcess</li>
+<li>Count HP1-1 / HP2-1 / HP3 reads from output BAM (htslib aux field)</li>
+<li>Cross-reference with SEQC2 truth VCF (或 cell-line specific truth set) 計算 HP3 reads 中的 TP fraction</li>
+<li>Report: 8-row table {dataset, total reads, HP1-1 reads, HP2-1 reads, HP3 reads, HP3 fraction (%), HP3 TP rate (%)}</li>
+</ol>
+<p><strong>ISM forward-reference</strong> (~60% reviewer 接受度，limit Discussion 1 段)：</p>
+<blockquote>"Downstream analysis (InterSubMod follow-up [O]) suggests HP3 may exhibit bimodal behavior — well-phased regions show HP3 enrichment for somatic candidates (Type A, 20/23 chr in HCC1395, TP rate ~90%), while HLA/segdup/sex chromosomes (Type B, 3/23 chr) show HP3 as phasing-failure fallback (TP rate &lt;5%). This interpretation requires further cross-sample validation."</blockquote>
+</div>
+</details>
+</section>
+
+<div class="footnote">
+<strong>報告完。</strong> Tier 4 paper-scope · 對齊 <code>/scientific-rigor</code> §2-§7 + <code>/narrative-frame</code> Verdict-Pyramid · WCAG AA 對比 ·
+Standalone HTML 採 MVP.css + Plotly + DataTables + Alpine.js stack (per <code>feedback_pi_report_html_stack</code>)<br>
+路徑：<code>InterSubMod/docs/reports/in_progress/2026/05/20260527_LongPhase-S_revision_response_3rd_party_audit_01.standalone.html</code>
+</div>
+
+<script>
+// Verdict overview Plotly bar chart
+const verdictData = [{
+  x: ['R1 (Yilei Fu)', 'R2 (最嚴厲)', 'R3 (使用者導向)'],
+  y: [2, 2, 2.5],
+  type: 'bar',
+  text: ['⭐2/5', '⭐2/5', '⭐2.5/5'],
+  textposition: 'outside',
+  marker: {
+    color: ['#e67e22', '#c0392b', '#e67e22'],
+    line: {color: '#2c3e50', width: 1.5}
+  },
+  hovertemplate: '<b>%{x}</b><br>Verdict: %{y}/5<extra></extra>'
+}];
+const verdictLayout = {
+  title: {text: '三 Agent Fresh-Context Verdict (1-5 scale)', font: {size: 14}},
+  yaxis: {range: [0, 5], title: 'Verdict ⭐'},
+  margin: {t: 50, b: 50, l: 60, r: 30},
+  font: {family: 'system-ui', size: 12},
+  plot_bgcolor: '#fafafa',
+  paper_bgcolor: '#fff',
+  shapes: [{
+    type: 'line', x0: -0.5, x1: 2.5, y0: 3, y1: 3,
+    line: {color: '#27ae60', dash: 'dash', width: 2}
+  }],
+  annotations: [{
+    x: 2.4, y: 3.2, xref: 'x', yref: 'y',
+    text: 'Acceptance threshold ⭐3', showarrow: false,
+    font: {size: 10, color: '#27ae60'}
+  }]
+};
+Plotly.newPlot('verdict-chart', verdictData, verdictLayout, {displayModeBar: false, responsive: true});
+
+// DataTables init
+$(document).ready(function() {
+  $('#compare-table').DataTable({paging: false, searching: false, info: false, ordering: false});
+  $('#sources-table').DataTable({pageLength: 10, lengthChange: false});
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly PI 2026-05-20 · Version G · Minimal Visual-First 6-Slide</title>
+<style>
+:root{
+  --c-accent:#D97757;
+  --c-primary:#1E3A8A;
+  --c-primary-soft:#E8EDF7;
+  --c-text:#141413;
+  --c-text-muted:#5C5C5A;
+  --c-bg:#FAF9F5;
+  --c-card:#FFFFFF;
+  --c-border:#E3DACC;
+  --c-border-strong:#B8AC92;
+  --c-pass:#15803D;
+  --c-pass-soft:#E8F2EC;
+  --c-fail:#B91C1C;
+  --c-fail-soft:#F7E6E6;
+  --c-marginal:#A16207;
+  --c-marginal-soft:#F7EFD9;
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--c-bg);color:var(--c-text);font-family:system-ui,-apple-system,"Noto Sans CJK TC","Source Han Sans TW","PingFang TC","Droid Sans Fallback",sans-serif;font-size:14px;line-height:1.55}
+.deck-nav{position:sticky;top:0;z-index:10;background:rgba(250,249,245,0.95);backdrop-filter:saturate(120%);border-bottom:1px solid var(--c-border);padding:var(--sp-3) var(--sp-5);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--sp-3)}
+.deck-nav .brand{font-weight:700;color:var(--c-primary);font-size:13px}
+.deck-nav .brand .ver{color:var(--c-accent);font-weight:700;margin-left:var(--sp-3);background:var(--c-pass-soft);padding:2px 8px;border-radius:3px}
+.deck-nav .links a{color:var(--c-text-muted);text-decoration:none;font-size:11.5px;margin-left:var(--sp-3)}
+.deck-nav .links a:hover{color:var(--c-accent)}
+.deck-nav .links a.alt{color:var(--c-text-muted);font-size:10.5px;background:var(--c-bg);padding:2px 6px;border-radius:3px}
+.deck-nav .tip{font-size:11px;color:var(--c-text-muted);font-style:italic}
+
+.slide-canvas{width:1280px;max-width:96vw;aspect-ratio:16/9;background:var(--c-card);border:1px solid var(--c-border);margin:var(--sp-6) auto;padding:var(--sp-5) var(--sp-7) var(--sp-7);display:flex;flex-direction:column;position:relative;box-shadow:0 2px 8px rgba(20,20,19,0.04)}
+.slide-canvas .eyebrow{font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--c-text-muted);font-weight:600;margin-bottom:var(--sp-2)}
+.slide-canvas h1.slide-title{font-size:24px;font-weight:700;color:var(--c-primary);line-height:1.3;border-bottom:3px solid var(--c-accent);padding-bottom:var(--sp-2);margin-bottom:var(--sp-4);max-width:96%}
+.slide-canvas h1.slide-title .accent{color:var(--c-accent)}
+.slide-footer{position:absolute;left:var(--sp-7);right:var(--sp-7);bottom:var(--sp-3);font-size:10px;color:var(--c-text-muted);display:flex;justify-content:space-between;border-top:1px solid var(--c-border);padding-top:var(--sp-2)}
+.slide-footer .source{font-family:"JetBrains Mono","SF Mono",Consolas,monospace;font-size:9.5px}
+.slide-footer .page-no{font-weight:600;color:var(--c-primary)}
+
+/* Main visual area dominates */
+.main-visual{flex:1;display:flex;justify-content:center;align-items:center;min-height:0;padding:var(--sp-2) 0;gap:var(--sp-5)}
+.main-visual.split{align-items:stretch}
+.main-visual img.hero{max-width:100%;max-height:100%;object-fit:contain;border:1px solid var(--c-border);background:#fff;padding:6px}
+
+/* Single takeaway line */
+.takeaway{margin-top:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--c-primary-soft);border-left:5px solid var(--c-primary);font-size:14.5px;line-height:1.45;color:var(--c-text);font-weight:500;max-width:1100px}
+.takeaway .key{color:var(--c-primary);font-weight:700}
+.takeaway .accent{color:var(--c-accent);font-weight:700}
+.takeaway .num-inline{font-family:"JetBrains Mono",monospace;color:var(--c-accent);font-weight:700;font-size:14.5px}
+
+/* Speaker note (collapsed by default) */
+.speaker-note{margin-top:var(--sp-2);border:1px solid var(--c-border);background:var(--c-bg);font-size:12px;line-height:1.55}
+.speaker-note summary{padding:var(--sp-2) var(--sp-3);cursor:pointer;color:var(--c-text-muted);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.speaker-note summary::after{content:"▼";font-size:9px;color:var(--c-accent);transition:transform 0.15s}
+.speaker-note[open] summary::after{transform:rotate(180deg)}
+.speaker-note summary:hover{color:var(--c-primary)}
+.speaker-note .note-body{padding:var(--sp-2) var(--sp-4) var(--sp-3);border-top:1px solid var(--c-border);color:var(--c-text)}
+.speaker-note .note-body p{margin-bottom:var(--sp-2)}
+.speaker-note .note-body strong{color:var(--c-primary)}
+.speaker-note .note-body .num{font-family:"JetBrains Mono",monospace;color:var(--c-accent);font-weight:700}
+.speaker-note .note-body ul{list-style:none;padding:0;margin-bottom:var(--sp-2)}
+.speaker-note .note-body ul li{padding:2px 0 2px var(--sp-3);position:relative}
+.speaker-note .note-body ul li:before{content:"▸";color:var(--c-accent);position:absolute;left:0}
+.speaker-note .note-body .caveat{background:var(--c-fail-soft);border-left:3px solid var(--c-fail);padding:var(--sp-2) var(--sp-3);margin:var(--sp-2) 0}
+.speaker-note .note-body .caveat strong{color:var(--c-fail)}
+
+/* Tables */
+table.matrix{width:100%;border-collapse:collapse;font-size:12.5px}
+table.matrix th{background:var(--c-primary);color:#fff;font-weight:600;padding:5px 9px;text-align:left;border:1px solid var(--c-primary);font-size:11.5px}
+table.matrix th.center{text-align:center}
+table.matrix th.sub{background:var(--c-accent)}
+table.matrix td{padding:5px 9px;border:1px solid var(--c-border);vertical-align:top}
+table.matrix tr:nth-child(even) td{background:rgba(232,237,247,0.25)}
+table.matrix td.center{text-align:center}
+table.matrix td.num{text-align:right;font-family:"JetBrains Mono",monospace;font-size:12px}
+table.matrix td.bold{font-weight:700}
+table.matrix tr.summary td{background:var(--c-primary-soft);font-weight:600}
+
+.badge{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:0.02em;white-space:nowrap}
+.badge-pass{background:var(--c-pass-soft);color:var(--c-pass);border:1px solid var(--c-pass)}
+.badge-fail{background:var(--c-fail-soft);color:var(--c-fail);border:1px solid var(--c-fail)}
+.badge-marginal{background:var(--c-marginal-soft);color:var(--c-marginal);border:1px solid var(--c-marginal)}
+.badge-neutral{background:var(--c-primary-soft);color:var(--c-primary);border:1px solid var(--c-primary)}
+
+/* Cover slide */
+.cover-slide{justify-content:center;text-align:left}
+.cover-slide .week{font-size:13px;color:var(--c-accent);font-weight:700;letter-spacing:0.12em;margin-bottom:var(--sp-3)}
+.cover-slide h1{font-size:40px;color:var(--c-primary);line-height:1.18;margin-bottom:var(--sp-3);font-weight:700}
+.cover-slide .sub{font-size:18px;color:var(--c-text-muted);font-weight:500;margin-bottom:var(--sp-6)}
+.cover-slide .headline{padding:var(--sp-4) var(--sp-5);border-left:6px solid var(--c-accent);background:var(--c-bg);max-width:1100px}
+.cover-slide .headline .label{font-size:11px;color:var(--c-accent);font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:var(--sp-2)}
+.cover-slide .headline .text{font-size:19px;line-height:1.55;color:var(--c-text);font-weight:500}
+.cover-slide .headline .text .key{color:var(--c-primary);font-weight:700}
+.cover-slide .headline .text .accent{color:var(--c-accent);font-weight:700}
+.cover-slide .agenda{display:flex;gap:var(--sp-5);margin-top:var(--sp-5);font-size:13px;color:var(--c-text-muted)}
+.cover-slide .agenda span{font-family:"JetBrains Mono",monospace}
+.cover-slide .agenda strong{color:var(--c-primary);font-weight:700}
+
+/* S3: table left + figure right */
+.split-50{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);flex:1;align-items:center;min-height:0}
+.split-50 .pane{display:flex;flex-direction:column;height:100%;justify-content:center}
+.split-50 img.hero{max-width:100%;max-height:340px;object-fit:contain;border:1px solid var(--c-border);background:#fff;padding:4px}
+
+/* S4: figure + small badge table */
+.split-60-40{display:grid;grid-template-columns:1.5fr 1fr;gap:var(--sp-4);flex:1;align-items:center;min-height:0}
+.split-60-40 .pane{display:flex;flex-direction:column;justify-content:center;height:100%}
+.split-60-40 img.hero{max-width:100%;max-height:340px;object-fit:contain;border:1px solid var(--c-border);background:#fff;padding:4px}
+
+@media print{body{background:#fff}.deck-nav{display:none}.slide-canvas{box-shadow:none;page-break-after:always;margin:0 auto}.speaker-note{break-inside:avoid}.speaker-note[open]{}.speaker-note summary::after{display:none}}
+</style>
+</head>
+<body>
+
+<nav class="deck-nav">
+  <div class="brand">Weekly PI Report · 2026-05-14 → 05-20<span class="ver">Version G · Minimal Visual-First · 6-slide</span></div>
+  <div class="links">
+    <a href="#s1">1 Cover</a><a href="#s2">2 V6 提升</a><a href="#s3">3 過擬合？</a><a href="#s4">4 Ablation</a><a href="#s5">5 可驗證</a><a href="#s6">6 Provenance</a>
+    <span class="tip">每張底部「📝 講稿」可展開細節</span>
+    <a href="index.html" class="alt">↩ index</a>
+    <a href="version_F_research_narrative_7slide.html" class="alt">F</a>
+  </div>
+</nav>
+
+<!-- ============================================================ -->
+<!-- SLIDE 1: COVER · 1 句 headline + agenda -->
+<!-- ============================================================ -->
+<article class="slide-canvas cover-slide" id="s1">
+  <div class="week">Week of 2026-05-14 → 2026-05-20</div>
+  <h1>V6 binary 升級 + Phase 2 filter reframe</h1>
+  <div class="sub">本週兩件落地：V6 production sign-off · ISM = vestigial covariate confirmed</div>
+
+  <div class="headline">
+    <div class="label">Top message</div>
+    <p class="text">
+      V6 binary 在 <span class="accent">marker filter + hard threshold T=2-3</span> 嚴格優於 baseline；Phase 2 LR filter 經 pre-registered ablation 證實 <span class="accent">ISM methylation 為 vestigial covariate</span>（incremental ΔF1 僅 <span class="key">+0.00065</span>），filter rename "caller-F1-headroom-gated 4-feature"。
+    </p>
+  </div>
+
+  <div class="agenda">
+    <span><strong>2</strong> V6 提升</span>
+    <span><strong>3</strong> 過擬合？</span>
+    <span><strong>4</strong> Ablation</span>
+    <span><strong>5</strong> 可驗證</span>
+    <span><strong>6</strong> Provenance</span>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">cycle_id 20260520_cycle3_step1_5_ism_ablation_vestigial · binary v6-prod-20260520 (8a90532)</div>
+    <div class="page-no">1 / 6</div>
+  </footer>
+</article>
+
+<!-- ============================================================ -->
+<!-- SLIDE 2: V6 vs baseline 提升（主圖 F9）-->
+<!-- ============================================================ -->
+<article class="slide-canvas" id="s2">
+  <div class="eyebrow">Section 1 · V6 vs baseline 量化提升</div>
+  <h1 class="slide-title">V6 在 T=2-5 <span class="accent">strict dominance</span> · marker filter +52.4%</h1>
+
+  <div class="main-visual">
+    <img class="hero" src="../../../../../../research/v6_bam_tpfp_hp_loh_cn/figures/baseline_vs_v6/F9_delta_f1_v6_vs_others.png" alt="F9 delta F1 V6 vs baseline / V3F / V5 across T=1-5">
+  </div>
+
+  <div class="takeaway">
+    <span class="key">ΔF1 (V6 − baseline)</span>：T=2 <span class="num-inline">+0.0286</span> · T=3 <span class="num-inline">+0.1605</span> · T=4 +0.1972（max 但 F1=0.329 無實用）；marker count <span class="num-inline">+52.4%</span>，cross-sample ρ=<span class="num-inline">0.845</span>
+  </div>
+
+  <details class="speaker-note">
+    <summary>📝 講稿 · V6 升級設計 + scope-bounded sign-off</summary>
+    <div class="note-body">
+      <p><strong>V6 binary = V5 phasing layer + V3F-style germline-absent hp=33 保守處理 hybrid</strong>（commit 8a90532）。設計目標：兼顧 V5 marker coverage 與 V3F 的 HP balance。</p>
+
+      <p><strong>5-Goal verdict（scope-bounded sign-off）：</strong></p>
+      <ul>
+        <li><strong>G2 marker filter</strong> ✅ Strong — marker count +52.4%、rate +1.26pp、ρ=0.845（n=5 cross-sample）</li>
+        <li><strong>G5 F1 hard T=2-3</strong> ✅ Strong — ΔF1 +0.0286/+0.1605 strict dominance</li>
+        <li><strong>G1 per-CpG × HP × ALT</strong> ⚠ Partial — V6 Cramer V 0.377 比 baseline 0.446 好，但 V3F 0.275 仍 best</li>
+        <li><strong>G3 二次打擊 / G4 TO normal</strong> 🔴 Blocked — HP tag 改動不解決，需 per-read framework redesign</li>
+        <li><strong>G5 F1 LR full</strong> ⚠ BAM-independent — baseline LR +0.02302 ≈ V6 LR +0.02236（drift 0.00066 = noise）</li>
+      </ul>
+
+      <p><strong>三條不應 over-claim</strong>（sign-off email 明示）：(1) V6 改進 LR F1（BAM-indep）；(2) V6 ≥ V3F 跨所有 use case（G1 V3F 仍 best）；(3) G3+G4 unblock（需 framework redesign）。</p>
+
+      <p><strong>HCC1395 internal validation caveat</strong>：本頁所有量化基於 HCC1395 全基因組 internal。cross-sample 一致性見 slide 3。</p>
+
+      <p><strong>Caller F1 五階段不變</strong> 0.7166（baseline / V3F / V5 / V6 一致）— V6 不引入 caller-level regression 風險。</p>
+    </div>
+  </details>
+
+  <footer class="slide-footer">
+    <div class="source">F9 figure: InterSubMod/research/v6_bam_tpfp_hp_loh_cn/figures/baseline_vs_v6/F9_delta_f1_v6_vs_others.png · source InterSubMod/docs/experiments/in_progress/2026/05/20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01.md §11.3</div>
+    <div class="page-no">2 / 6</div>
+  </footer>
+</article>
+
+<!-- ============================================================ -->
+<!-- SLIDE 3: 過擬合 HCC1395？ Cycle 2 cross-sample（5 樣本表 + 圖）-->
+<!-- ============================================================ -->
+<article class="slide-canvas" id="s3">
+  <div class="eyebrow">Section 2 · 特徵 cross-binary 再驗證</div>
+  <h1 class="slide-title">Filter 過擬合 HCC1395？<span class="accent">跨 4 樣本只有 HCC1937 marginal 通過</span></h1>
+
+  <div class="split-50">
+    <div class="pane">
+      <table class="matrix">
+        <thead><tr><th colspan="4" style="background:var(--c-accent);text-align:center">5 樣本 cross-sample transfer ΔF1</th></tr></thead>
+        <tbody>
+          <tr><th>樣本</th><th class="center">FP density</th><th class="center">Caller F1</th><th class="center">Transfer ΔF1</th></tr>
+          <tr style="background:var(--c-pass-soft)"><td><strong>HCC1395</strong>(train)</td><td class="num">14.0%</td><td class="num">0.717</td><td class="num bold" style="color:var(--c-pass)">+0.02232 internal</td></tr>
+          <tr><td>HCC1937</td><td class="num">16.2%</td><td class="num">0.685</td><td class="num" style="color:var(--c-marginal)">+0.00037 marginal</td></tr>
+          <tr style="background:var(--c-fail-soft)"><td><strong>HCC1954</strong></td><td class="num">3.4%</td><td class="num">0.957</td><td class="num bold" style="color:var(--c-fail)">−0.37744 ⚠ 災難</td></tr>
+          <tr><td>H1437</td><td class="num">1.1%</td><td class="num">0.987</td><td class="num">−0.03597</td></tr>
+          <tr><td>H2009</td><td class="num">1.0%</td><td class="num">0.990</td><td class="num">−0.00450</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pane">
+      <img class="hero" src="../../../../../../research/methyl_augmented_filter_phase2/cycle2/figures/cycle2_b3_per_sample_delta_f1.png" alt="Cycle 2 b3 per-sample delta F1 cross-sample">
+    </div>
+  </div>
+
+  <div class="takeaway">
+    <span class="key">HCC1395 alone 不足以宣告 filter generally valid</span>：cycle 1 internal +0.02236（train＝test 同樣本）→ cycle 2 跨 4 新樣本 Wilcoxon p=0.1875 <span class="accent">DIRECTION_NEGATIVE</span>
+  </div>
+
+  <details class="speaker-note">
+    <summary>📝 講稿 · 過擬合 mechanism + cycle 2 must-fix</summary>
+    <div class="note-body">
+      <p><strong>Cycle 1 vs Cycle 2 設計差異：</strong></p>
+      <ul>
+        <li>Cycle 1（5/18）：HCC1395 全基因組 internal LR ⭐3 strong ΔF1 +0.02236（9.24× v1.0 marginal）</li>
+        <li>Cycle 2（5/19）：cycle 1 LR coefs 套到 4 個未見樣本 transfer + 各自 re-fit OOF</li>
+      </ul>
+
+      <p><strong>Mechanism: caller-F1-headroom-bounded</strong>：3/4 新樣本 caller F1 &gt; 0.83 + FP density &lt; 4% → 不留 filtering room，LR 找不到有意義的 threshold。HCC1954 transfer −0.377 災難來自 caller_af coef +3.44 overfit HCC1395 AF 分佈，套到 HCC1954 不同 AF 分佈時 over-aggressively filter TP。</p>
+
+      <div class="caveat">
+        <strong>⚠ HCC1395 self-train caveat：</strong>HCC1395 同時是 LR train + test set，cycle 1 +0.02236 屬 in-sample fit。需 Cycle 3 Step 2 panel survey 用獨立 panel 驗 4-feature filter 才能宣告 generally valid。
+      </div>
+
+      <p><strong>4-agent audit 揭露 cycle 2 must-fix（5/19 evening）：</strong></p>
+      <ul>
+        <li>🔴 P0：H_C3_2 low-F1 panel 4 樣本名單 + BAM 可用性</li>
+        <li>🟠 P1：cycle_id 命名 (_validation 不 _negative)、ledger entry 補 binary_commit/dataset_id/pre-reg link</li>
+        <li>🟡 P2：H_C3_1 target 計算澄清（cycle 2 re-fit vs cycle 3 重 re-fit baseline drift）</li>
+      </ul>
+
+      <p><strong>plan v2 R-MENTAL-DRIFT 紀律</strong>：5/19 cycle 2 NEGATIVE 後立刻啟動 cycle 3 屬 confirmation loop。經 4-agent audit + 用戶 explicit pause → 正式延後 48hr cooling-off，NEGATIVE postmortem .md + ledger entry 落地。</p>
+    </div>
+  </details>
+
+  <footer class="slide-footer">
+    <div class="source">cycle2_b3_per_sample_delta_f1.png · InterSubMod/research/methyl_augmented_filter_phase2/cycle2/cycle2_findings.md · cycle2_NEGATIVE_postmortem.md</div>
+    <div class="page-no">3 / 6</div>
+  </footer>
+</article>
+
+<!-- ============================================================ -->
+<!-- SLIDE 4: ISM Ablation = vestigial covariate -->
+<!-- ============================================================ -->
+<article class="slide-canvas" id="s4">
+  <div class="eyebrow">Section 2 · Cycle 3 Step 1.5 pre-registered ablation</div>
+  <h1 class="slide-title">ISM methylation = <span class="accent">vestigial covariate confirmed</span>（drop ISM 後 ΔF1 +0.00065）</h1>
+
+  <div class="split-60-40">
+    <div class="pane">
+      <img class="hero" src="../../../../../../research/methyl_augmented_filter_phase2/cycle3/ablation/figures/cycle3_step1_5_min_ablation.png" alt="Cycle 3 Step 1.5 min ablation refit-mode grouped bar">
+    </div>
+    <div class="pane">
+      <table class="matrix">
+        <thead><tr><th colspan="3" style="background:var(--c-accent);text-align:center">Pre-reg verdict</th></tr></thead>
+        <tbody>
+          <tr><th>Hypothesis</th><th class="center">Computed</th><th class="center">Verdict</th></tr>
+          <tr><td><strong>H_M1a</strong><br><span style="font-size:10px;color:var(--c-text-muted)">drop ISM 5 methyl</span></td><td class="num bold" style="color:var(--c-fail)">+0.00065</td><td class="center"><span class="badge badge-fail">FAIL</span></td></tr>
+          <tr><td><strong>H_A1</strong><br><span style="font-size:10px;color:var(--c-text-muted)">caller_af shrink</span></td><td class="num bold" style="color:var(--c-marginal)">+0.25114</td><td class="center"><span class="badge badge-marginal">MARGINAL</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    <span class="key">4/5 樣本 no-methyl ΔF1 ≥ full</span>，5-sample mean no-methyl <span class="num-inline">+0.00630</span> 略勝 full <span class="num-inline">+0.00619</span>；filter rename <span class="accent">"caller-F1-headroom-gated 4-feature"</span>
+  </div>
+
+  <details class="speaker-note">
+    <summary>📝 講稿 · L2 ridge-split mechanism + 跨方法 triangulation + reframe 影響</summary>
+    <div class="note-body">
+      <p><strong>為什麼 5-rank coef +0.75 但 incremental ≈ 0？</strong> L2 regularization 把高相關特徵 coef 分散 — HPFineF +0.75 是 caller_af 部分共變異的 ridge-split，並非獨立貢獻。drop 5 個 methylation 後，caller_af + LOH_inner + Coverage_Multiple + NG 4 個 features 重新分配權重就 capture 同訊息。</p>
+
+      <p><strong>跨方法 triangulation（強化結論信度）：</strong></p>
+      <ul>
+        <li>5/19 V6 §13 Day 3 measured methylation contribution → <span class="num">+0.0005~+0.0007</span></li>
+        <li>5/20 Cycle 3 H_M1a (refit-mode) → <span class="num">+0.00065</span></li>
+        <li>5/20 Cycle 3 transfer-mode methylation shrinkage → <span class="num">&lt; 7%</span> disaster mitigated</li>
+        <li>三條獨立路徑同方向同 magnitude — 教科書級 triangulation</li>
+      </ul>
+
+      <p><strong>Pre-reg prediction 命中：</strong>plan v2.1 預測「55% A1 PASS + M1a FAIL」→ 實際 A1 MARGINAL + M1a FAIL → 方向命中（避免 confirmation bias）。最小評估 25 sec wall clock，seed=42，drift 0 from cycle 1。</p>
+
+      <p><strong>Filter reframe 影響範圍：</strong></p>
+      <ul>
+        <li>✅ 落地：filter rename → "caller-F1-headroom-gated 4-feature"；cycle3_caller_f1_gate.json features_production=4</li>
+        <li>🟡 待 paper draft：paper §3 撤回 "methylation-augmented filter" 宣稱</li>
+        <li>✅ 保留：ISM characterization (v0.3 cycle ⭐3) zones × LRT 結論不變</li>
+        <li>降級 supplementary：大規模 ablation M2/M3/M0/LOFO（H_M1a FAIL 已 high-confidence）</li>
+      </ul>
+
+      <p><strong>Reframe ≠ retraction</strong>：uplift +0.02236 真實存在，只是來源改認 4-feature 非 methylation。ISM characterization (mechanistic understanding LOH×HP×CN×methylation 分布) 完全保留。</p>
+    </div>
+  </details>
+
+  <footer class="slide-footer">
+    <div class="source">cycle3_step1_5_min_ablation.png · InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/cycle3_step1_5_min_ablation_findings.md</div>
+    <div class="page-no">4 / 6</div>
+  </footer>
+</article>
+
+<!-- ============================================================ -->
+<!-- SLIDE 5: 5 大目標進度 + 還能驗證什麼（雙欄極簡）-->
+<!-- ============================================================ -->
+<article class="slide-canvas" id="s5">
+  <div class="eyebrow">Section 3 · 5 大目標進度 + 下個 phase 驗證計畫</div>
+  <h1 class="slide-title">5 大目標：<span class="accent">2 強推 / 1 設限 / 2 阻塞</span> · 下個 phase 4 條 verify thread</h1>
+
+  <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:var(--sp-4);flex:1;align-items:start">
+    <div>
+      <table class="matrix">
+        <thead><tr><th colspan="3" style="background:var(--c-accent);text-align:center">5 大目標 current state</th></tr></thead>
+        <tbody>
+          <tr><th>Goal</th><th>分類</th><th class="center">狀態</th></tr>
+          <tr><td><strong>G1</strong> per-CpG×HP×ALT</td><td>research confound</td><td class="center"><span class="badge badge-marginal">Partial · V3F best</span></td></tr>
+          <tr style="background:var(--c-pass-soft)"><td><strong>G2</strong> marker filter</td><td>production</td><td class="center"><span class="badge badge-pass">✅ Strong · +52.4%</span></td></tr>
+          <tr style="background:var(--c-fail-soft)"><td><strong>G3</strong> 二次打擊</td><td>future framework</td><td class="center"><span class="badge badge-fail">🔴 Blocked</span></td></tr>
+          <tr style="background:var(--c-fail-soft)"><td><strong>G4</strong> TO normal 補強</td><td>future framework</td><td class="center"><span class="badge badge-fail">🔴 Blocked</span></td></tr>
+          <tr><td><strong>G5</strong> F1 filter</td><td>filter</td><td class="center"><span class="badge badge-marginal">Mixed</span></td></tr>
+          <tr><td colspan="3" style="font-size:11px;color:var(--c-text-muted);background:var(--c-bg)">G5 細：hard T=2-3 ✅ / LR BAM-indep / cross-sample bounded → cycle 3 panel survey 驗</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <table class="matrix">
+        <thead><tr><th colspan="4" style="background:var(--c-primary);text-align:center">下個 phase 驗證計畫</th></tr></thead>
+        <tbody>
+          <tr><th>#</th><th>驗證項目</th><th class="center">優先</th><th class="center">時程</th></tr>
+          <tr style="background:var(--c-pass-soft)"><td class="center">1</td><td><strong>Cycle 3 Step 2 panel survey</strong> · 4-feature filter cross-sample</td><td class="center"><span class="badge badge-pass">P0</span></td><td class="center">5/21+</td></tr>
+          <tr><td class="center">2</td><td><strong>A2 caller_af KS test</strong> · 補強 H_A1 殘餘 33%</td><td class="center"><span class="badge badge-marginal">P1</span></td><td class="center">~30 min</td></tr>
+          <tr><td class="center">3</td><td>V3F dedicated per-CpG · G1 純研究路徑</td><td class="center"><span class="badge badge-marginal">P1</span></td><td class="center">~2 hr</td></tr>
+          <tr><td class="center">4</td><td>baseline LR vs V6 LR VIF 對比 · 為何 baseline 略勝</td><td class="center"><span class="badge badge-neutral">P2</span></td><td class="center">~1 hr</td></tr>
+          <tr><td class="center">5</td><td>ALT-only HP1:HP2 重現 PI 17.3:1</td><td class="center"><span class="badge badge-neutral">P2</span></td><td class="center">~2 hr</td></tr>
+          <tr><td class="center">6</td><td>COLO829 V6 全量 · truth-set permission 解後</td><td class="center"><span class="badge badge-neutral">P3</span></td><td class="center">後續</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="takeaway">
+    <span class="key">Hard Gate</span>：V6 git push 待 PI sign-off email <span class="accent">明示授權</span>；cycle 3 panel survey 待 5/21 cooling-off 完成 + 4 must-fix 解除
+  </div>
+
+  <details class="speaker-note">
+    <summary>📝 講稿 · 5 大目標細節 + 為何選此 thread 順序 + cycle 3 must-fix</summary>
+    <div class="note-body">
+      <p><strong>5 大目標分類邏輯：</strong></p>
+      <ul>
+        <li><strong>G1 research confound</strong> — per-CpG × HP × ALT；V3F Cramer V 0.275 best (V6 0.377 / baseline 0.446)；後續純研究 publication 路徑用 V3F</li>
+        <li><strong>G2 production</strong> — marker filter +52.4% count、cross-sample ρ=0.845；scope-bounded V6 sign-off 主軸</li>
+        <li><strong>G3 / G4 future framework</strong> — HP tag 改動不解決；需 per-read epigenotype redesign（不在 V6 範圍，6 月底後續課題）</li>
+        <li><strong>G5 filter</strong> — 三層：hard T=2-3 ✅ strict dominance / LR BAM-indep / cross-sample bounded → cycle 3 panel survey 決勝負</li>
+      </ul>
+
+      <p><strong>選 thread 1-2 為 P0/P1：</strong></p>
+      <ul>
+        <li>Thread 1 cycle 3 panel survey = cycle 2 NEGATIVE 後 logical next step — 不跑無法回答「4-feature filter 是否 generally valid」</li>
+        <li>Thread 2 A2 KS test 30 min ROI 最高 — 補強 H_A1 殘餘 33%，強化 paper §3 reframe mechanism 敘述</li>
+      </ul>
+
+      <p><strong>Cycle 3 啟動前 4 must-fix（5/19 audit）：</strong></p>
+      <ul>
+        <li>🔴 P0：H_C3_2 low-F1 panel 4 樣本名單 + BAM 可用性</li>
+        <li>🟠 P1：cycle_id 命名規範（_validation 不 _negative）</li>
+        <li>🟠 P1：ledger entry 補 binary_commit / dataset_id / pre-reg link</li>
+        <li>🟡 P2：H_C3_1 target 計算澄清</li>
+      </ul>
+
+      <p><strong>Cooling-off 紀律</strong>：5/19 → 5/21 cooling-off period enforced（48hr）。Plan v2 R-MENTAL-DRIFT 通過真實測試 — 4-agent audit + NEGATIVE postmortem + ledger entry 落地。</p>
+
+      <p><strong>降級項目</strong>：大規模 ablation (M2/M3/M0/LOFO) → paper supplementary；G3/G4 framework redesign → 6 月底後續課題。</p>
+
+      <p><strong>後續 milestone</strong>：5/21+ Cycle 3 啟動 → ~1 week panel survey → 5/28 reframe paper §3 draft → 6 月底 framework redesign 規劃啟動。</p>
+    </div>
+  </details>
+
+  <footer class="slide-footer">
+    <div class="source">InterSubMod/docs/reports/validated/2026/05/20260521_PI_V6_signoff_email_draft_5goal.md §5 · cycle2_NEGATIVE_postmortem.md · CURRENT_FOCUS.md §2 4 must-fix</div>
+    <div class="page-no">5 / 6</div>
+  </footer>
+</article>
+
+<!-- ============================================================ -->
+<!-- SLIDE 6: Provenance · 精簡 -->
+<!-- ============================================================ -->
+<article class="slide-canvas" id="s6">
+  <div class="eyebrow">Close · provenance + reproducibility</div>
+  <h1 class="slide-title">完整 provenance：<span class="accent">cycle_id · ledger :48 · commit 8a90532 · seed 42 · 25 sec 可重現</span></h1>
+
+  <div class="main-visual" style="flex-direction:column;justify-content:flex-start;gap:var(--sp-3)">
+    <table class="matrix" style="width:100%">
+      <thead><tr><th colspan="2" style="background:var(--c-primary);text-align:center">Core provenance（5 元組）</th></tr></thead>
+      <tbody>
+        <tr><td><strong>cycle_id</strong></td><td class="num">20260520_cycle3_step1_5_ism_ablation_vestigial</td></tr>
+        <tr><td><strong>ledger line</strong></td><td class="num">InterSubMod/research/autoresearch/evidence_ledger.jsonl :48</td></tr>
+        <tr><td><strong>binary tag · commit</strong></td><td class="num">v6-prod-20260520 · 8a90532 on fix/pon-only-phasing (longphase-to-mod)</td></tr>
+        <tr><td><strong>script · seed · wall · drift</strong></td><td class="num">cycle3/ablation/scripts/run_ablation_variants.py · seed=42 · 25 sec · drift 0 from cycle 1</td></tr>
+        <tr><td><strong>sign-off email draft</strong></td><td class="num">InterSubMod/docs/reports/validated/2026/05/20260521_PI_V6_signoff_email_draft_5goal.md</td></tr>
+      </tbody>
+    </table>
+
+    <pre style="font-size:11.5px;font-family:'JetBrains Mono',monospace;line-height:1.6;background:#fff;padding:var(--sp-3) var(--sp-4);border:1px solid var(--c-border);width:100%">cd /big7_disk/liaoyoyo2001/InterSubMod
+python3 research/methyl_augmented_filter_phase2/cycle3/ablation/scripts/run_ablation_variants.py
+# wall ~25s · seed=42 · sklearn lbfgs · HCC1395 full refit ΔF1 = +0.022358 (bit-exact match)</pre>
+  </div>
+
+  <details class="speaker-note">
+    <summary>📝 講稿 · predecessor cycles + upstream reports + Hard Gate</summary>
+    <div class="note-body">
+      <p><strong>Predecessor cycles（證據鏈）：</strong></p>
+      <ul>
+        <li>Cycle 1 (5/18) · 20260518_phase2_cycle1_global_fp_filter · ⭐3 STRONG · ΔF1 +0.02236</li>
+        <li>Cycle 2 (5/19) · 20260519_phase2_cycle2_cross_sample_negative · ⭐3 BOUNDED</li>
+        <li>Cycle 2 postmortem · 20260519_phase2_cycle2_negative_postmortem</li>
+        <li>Cycle 3 Step 1 (5/19) · 20260519-0031-cycle3-caller-f1-headroom · Step 1 PASS</li>
+        <li>Cycle 3 Step 1.5 (5/20) · 20260520_cycle3_step1_5_ism_ablation_vestigial · this deck</li>
+      </ul>
+
+      <p><strong>Upstream reports referenced：</strong></p>
+      <ul>
+        <li>InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md</li>
+        <li>InterSubMod/docs/reports/validated/2026/05/20260511_V6_binary_complete_documentation_01.md</li>
+        <li>InterSubMod/docs/reports/validated/2026/05/20260514_HP_tag_priority_bug_engineering_report_01.md</li>
+        <li>InterSubMod/docs/experiments/in_progress/2026/05/20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01.md</li>
+        <li>InterSubMod/docs/reports/validated/2026/05/20260521_PI_V6_signoff_email_draft_5goal.md</li>
+      </ul>
+
+      <p><strong>Hard Gate awaiting</strong>：本 deck 為 sign-off email 對應 visual aid。Day 5 (next): PI email send + <code>git push origin fix/pon-only-phasing v6-prod-20260520</code> 待用戶明示授權。</p>
+
+      <p><strong>Plan v2 R-MENTAL-DRIFT 紀律證明</strong>（footer only，非主敘事）：4-agent audit + 48hr cooling-off + Pre-reg 命中 + NEGATIVE postmortem ledger 落地 — 紀律保持 commitment 而非表演。</p>
+    </div>
+  </details>
+
+  <footer class="slide-footer">
+    <div class="source">end of deck · Version G · 6 slides · minimal visual-first · 配套 detailed deck 見 Version E v2 (10 slides) / Version F (7 slides)</div>
+    <div class="page-no">6 / 6</div>
+  </footer>
+</article>
+
+</body>
+</html>

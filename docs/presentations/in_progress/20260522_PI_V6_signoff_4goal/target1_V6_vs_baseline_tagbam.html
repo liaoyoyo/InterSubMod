@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Target 1 — V6 vs Baseline BAM 層比較 (PI Signoff)</title>
+<meta name="build_date" content="2026-05-22">
+<meta name="report_class" content="PI_signoff_4goal_target1">
+<meta name="audience" content="PI 1-on-1">
+<meta name="source_master_draft" content="InterSubMod/docs/reports/validated/2026/05/20260522_週報_V6_signoff_5goal_PI_report/master_draft.md">
+<meta name="commit_anchor" content="8a90532 (fix/pon-only-phasing)">
+<meta name="a0_audit" content="InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/A0_existing_artifacts_verification.md">
+
+<!-- ===== CDN dependencies (network or browser-cached for offline view) =====
+     standalone HTML 邏輯：依賴 CDN 但 data 全部 inline，
+     首次線上開啟後 browser cache 即可離線使用。
+-->
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+<script defer src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script defer src="https://unpkg.com/alpinejs@3.13.0/dist/cdn.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/mvp.css@1.14.0/mvp.css">
+
+<style>
+/* ===== CJK + base ===== */
+:root{
+  --tier-3:#d97706; --tier-4:#059669; --tier-5:#0ea5e9;
+  --neg:#dc2626; --warn:#f59e0b; --ok:#16a34a;
+  --pi-headline:#1e3a8a; --pi-evidence:#475569; --pi-caveat:#92400e;
+  --bg-card:#f8fafc; --border:#e2e8f0;
+  --hover:#fef3c7;
+}
+html,body{
+  font-family:"Droid Sans Fallback","Noto Sans CJK TC","Microsoft JhengHei",
+              -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  font-size:16px; line-height:1.65; color:#1e293b; background:#ffffff;
+}
+header{ background:linear-gradient(135deg,#1e3a8a 0%,#3730a3 100%); color:#ffffff;
+        padding:1rem 2rem; border-bottom:4px solid #fbbf24; }
+header h1{ color:#ffffff; font-size:1.4rem; margin:0; }
+header .meta{ font-size:0.85rem; opacity:0.9; margin-top:0.3rem; }
+main{ max-width:1280px; margin:0 auto; padding:1.5rem 2rem; }
+
+/* ===== Sticky TOC ===== */
+.toc-sticky{
+  position:sticky; top:0; z-index:50;
+  background:#ffffff; border-bottom:2px solid var(--border);
+  padding:0.5rem 0; margin:0 -2rem 1.5rem -2rem; padding-left:2rem;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+.toc-sticky a{
+  display:inline-block; margin-right:0.6rem; padding:0.2rem 0.6rem;
+  font-size:0.85rem; text-decoration:none; color:#1e40af;
+  border:1px solid #c7d2fe; border-radius:4px; background:#eff6ff;
+}
+.toc-sticky a:hover{ background:#dbeafe; }
+
+/* ===== L0 Headline ===== */
+.headline{
+  background:linear-gradient(90deg,#fef9c3 0%,#fde68a 100%);
+  border-left:6px solid #ca8a04; padding:1rem 1.2rem; margin:1rem 0 1.5rem 0;
+  border-radius:6px; font-size:1.05rem; font-weight:600;
+}
+.headline .label{ display:inline-block; background:#ca8a04; color:#fff;
+                  font-size:0.75rem; padding:0.1rem 0.5rem; border-radius:3px;
+                  margin-right:0.5rem; vertical-align:middle; }
+
+/* ===== Section ===== */
+section{ margin-bottom:2.5rem; }
+section h2{ font-size:1.3rem; color:#1e3a8a; border-bottom:3px solid #fbbf24;
+            padding-bottom:0.3rem; margin-top:2rem; }
+section h3{ font-size:1.05rem; color:#334155; margin-top:1.5rem; }
+
+/* ===== Tier badges ===== */
+.tier{ display:inline-block; padding:0.1rem 0.5rem; font-size:0.75rem;
+       border-radius:3px; font-weight:700; vertical-align:middle;
+       margin-left:0.3rem; }
+.tier.t3{ background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
+.tier.t4{ background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; }
+.tier.t5{ background:#dbeafe; color:#1e40af; border:1px solid #93c5fd; }
+.tier.warn{ background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+
+/* ===== L1 finding list ===== */
+.l1-findings{ list-style:none; padding:0; margin:1rem 0; }
+.l1-findings li{
+  background:var(--bg-card); border-left:4px solid var(--tier-4);
+  padding:0.7rem 1rem; margin-bottom:0.5rem; border-radius:4px;
+  font-size:0.97rem;
+}
+.l1-findings li.neg{ border-left-color:var(--neg); }
+.l1-findings li.warn{ border-left-color:var(--warn); }
+
+/* ===== L2 Evidence card (collapsible) ===== */
+.ev-card{
+  border:1px solid var(--border); border-radius:6px;
+  margin:0.8rem 0; background:#ffffff; overflow:hidden;
+}
+.ev-card-header{
+  background:#f1f5f9; padding:0.6rem 1rem; cursor:pointer;
+  font-weight:600; user-select:none; display:flex;
+  justify-content:space-between; align-items:center;
+}
+.ev-card-header:hover{ background:#e2e8f0; }
+.ev-card-header::after{ content:"▼"; font-size:0.8rem; opacity:0.5;
+                        transition:transform 0.2s; }
+.ev-card-header.collapsed::after{ transform:rotate(-90deg); }
+.ev-card-body{ padding:1rem 1.2rem; }
+.ev-card-body.hidden{ display:none; }
+
+/* ===== Source link ===== */
+.src{
+  font-size:0.78rem; color:#64748b; font-style:italic;
+  background:#f8fafc; padding:0.1rem 0.4rem; border-radius:3px;
+  border-left:2px solid #94a3b8; display:inline-block; margin:0.1rem 0;
+  word-break:break-all;
+}
+.src code{ background:transparent; color:#475569; font-size:0.78rem; }
+
+/* ===== Caveat callout ===== */
+.caveat{
+  background:#fff7ed; border-left:4px solid #ea580c;
+  padding:0.6rem 0.9rem; margin:0.6rem 0; border-radius:4px;
+  font-size:0.9rem;
+}
+.caveat strong{ color:#9a3412; }
+
+.note{
+  background:#eff6ff; border-left:4px solid #2563eb;
+  padding:0.5rem 0.9rem; margin:0.5rem 0; border-radius:4px;
+  font-size:0.88rem;
+}
+
+/* ===== Table ===== */
+table{ border-collapse:collapse; width:100%; font-size:0.9rem; margin:0.5rem 0;}
+th,td{ border:1px solid #e2e8f0; padding:0.4rem 0.6rem; text-align:left; }
+th{ background:#f1f5f9; font-weight:600; }
+tr:nth-child(even){ background:#fafbfc; }
+td.num{ text-align:right; font-variant-numeric:tabular-nums; }
+
+/* ===== priority bug diagram (CSS Grid) ===== */
+.bug-diagram{
+  display:grid; grid-template-columns: 1fr auto 1fr;
+  gap:1rem; align-items:center; margin:1rem 0;
+  background:linear-gradient(135deg,#fef2f2 0%,#fff7ed 100%);
+  border:1px solid #fed7aa; padding:1.2rem; border-radius:8px;
+}
+.bug-box{ background:#ffffff; padding:0.8rem 1rem; border-radius:6px;
+          border:1px solid #e2e8f0; }
+.bug-box h4{ margin:0 0 0.4rem 0; font-size:0.95rem; }
+.bug-box.before h4{ color:var(--neg); }
+.bug-box.after  h4{ color:var(--ok); }
+.bug-box .stat{ font-size:1.5rem; font-weight:700; }
+.bug-box.before .stat{ color:var(--neg); }
+.bug-box.after  .stat{ color:var(--ok); }
+.bug-arrow{ font-size:2rem; color:#ca8a04; text-align:center; font-weight:bold; }
+
+/* ===== Plotly responsive ===== */
+.plot-container{ width:100%; margin:0.8rem 0; }
+
+/* ===== Image ===== */
+img.figure{
+  max-width:100%; height:auto; display:block; margin:0.8rem auto;
+  border:1px solid var(--border); border-radius:4px;
+}
+.fig-caption{ text-align:center; font-size:0.85rem; color:#64748b;
+              font-style:italic; margin-top:-0.5rem; margin-bottom:1rem; }
+
+/* ===== Raw data toggle ===== */
+.raw-toggle{
+  background:#e0e7ff; border:1px solid #c7d2fe; color:#3730a3;
+  padding:0.3rem 0.8rem; border-radius:4px; cursor:pointer;
+  font-size:0.85rem; margin:0.5rem 0;
+}
+.raw-toggle:hover{ background:#c7d2fe; }
+.raw-data-block{ margin:0.5rem 0; padding:0.5rem; background:#f8fafc;
+                 border-radius:4px; }
+.raw-data-block.hidden{ display:none; }
+
+/* ===== Print friendly ===== */
+@media print{
+  .toc-sticky{ position:static; box-shadow:none; }
+  .ev-card-body.hidden{ display:block !important; }
+  .ev-card-header::after{ content:""; }
+  header{ break-inside:avoid; }
+  section{ break-inside:avoid-page; }
+  body{ font-size:11pt; }
+  .raw-data-block.hidden{ display:block; }
+}
+
+/* ===== Provenance footer ===== */
+footer.provenance{
+  margin-top:3rem; padding:1rem 1.2rem; background:#f1f5f9;
+  border-top:3px solid #94a3b8; font-size:0.82rem; color:#475569;
+}
+footer.provenance .pkey{ display:inline-block; min-width:180px;
+                          font-weight:600; color:#1e293b; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Target 1 — V6 vs Baseline BAM 層 HP 譜系比較</h1>
+  <div class="meta">
+    PI Signoff 4-goal Series ｜ commit <code>8a90532</code> on <code>fix/pon-only-phasing</code>
+    ｜ Build 2026-05-22 ｜ Audit 93% verified (0 fabrication)
+  </div>
+</header>
+
+<main>
+
+<!-- ===== Sticky TOC ===== -->
+<nav class="toc-sticky">
+  <a href="#headline">L0 Headline</a>
+  <a href="#l1">L1 Top Findings</a>
+  <a href="#sec-1a">1A · HP 6 值分佈</a>
+  <a href="#sec-1b">1B · SP1/2/3</a>
+  <a href="#sec-1c">1C · Priority Bug 修補</a>
+  <a href="#sec-1d">1D · germline-absent</a>
+  <a href="#sec-1e">1E · 跨樣本穩定性</a>
+</nav>
+
+<!-- ===== L0 Headline ===== -->
+<div id="headline" class="headline">
+  <span class="label">⭐⭐⭐ L0 Headline</span>
+  V6 BAM patch 跨 5 樣本一致修補 priority bug：ALT-only HP1:HP2 ratio 全 < 1 (range 0.37–0.79)；
+  HCC1395 baseline 4.41 → V6 0.43 = ~10× HP2 反轉；HP=33 conservative tag firing ×60 (baseline 0.03% → V6 1.68%)。
+</div>
+
+<!-- ===== L1 Top Findings ===== -->
+<section id="l1">
+<h2>L1 ⭐⭐ Top Findings</h2>
+
+<ul class="l1-findings">
+<li>
+  <span class="tier t4">⭐4</span>
+  <strong>[F] ALT-only ratio 跨 5 V6 樣本一致 < 1</strong> — HCC1395 0.43 / HCC1937 0.43 / HCC1954 0.37 / H1437 0.72 / H2009 0.79 (chr19)；HCC1395 baseline 4.41 → V6 0.43 = 10× HP2 reverse direction。
+  <div class="src">[source: <code>InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/A2_ALT_only_HP_ratio_5sample.tsv</code> rows 2–7]</div>
+</li>
+
+<li>
+  <span class="tier t4">⭐4</span>
+  <strong>[F] HP=33 (conservative ambiguous tag) firing ×60</strong> — HCC1395 baseline 630 reads (0.028%) → V6 37,656 reads (1.68%)；H2009 V6 49,360 reads (4.27%) = 跨 5 樣本最大 firing。
+  <div class="src">[source: <code>A1_HP_6values_5sample.tsv</code> col HP_33_count / HP33_pct]</div>
+</li>
+
+<li>
+  <span class="tier t5">⭐5</span>
+  <strong>[F] caller F1 cross-binary file-identity invariant = 0.7166</strong> — baseline / V3F / V5 / V6 同 caller F1，BAM 層差異不影響 caller VCF 內容。
+  <div class="src">[source: <code>InterSubMod/docs/reports/validated/2026/05/20260511_V6_binary_complete_documentation_01.md:587,597</code>]</div>
+</li>
+
+<li class="warn">
+  <span class="tier t3">⭐3</span>
+  <strong>[O] chr8+chr19 hotspot subset behavior ≠ 全 BAM</strong> — HCC1395 chr8+chr19 全 reads HP1:HP2 baseline 3.24 → V6 3.63 (更偏 HP1)；
+  但全 BAM baseline 1.696 → V6 1.609 (反向，改善偏置)。Hotspot 與 global 不同方向是 mechanism caveat。
+  <div class="src">[source: <code>A1_HP_6values_5sample.tsv</code> + <code>20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01.md §:86-88</code>]</div>
+</li>
+
+<li>
+  <span class="tier t5">⭐5</span>
+  <strong>[F] SP1/2/3 個案 baseline → V3F/V5 翻轉 paired 對齊 3/3</strong> — IGV 6-BAM 並列；baseline 113:0 / 109:1 / 108:0 完全失衡；V5 修正後對齊 paired truth；V6 在此 subset 與 V5 BAM 完全一致 (read-by-read 0 diff)。
+  <div class="src">[source: <code>InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md:44</code>]</div>
+</li>
+</ul>
+</section>
+
+<!-- ============================================ -->
+<!-- ===== Section 1A · HP 6 值分佈 ===== -->
+<!-- ============================================ -->
+<section id="sec-1a" x-data="{showRaw:false}">
+<h2>1A · HP 6 值分佈 (HP=0/1/2/11/21/33)</h2>
+
+<p>
+  分析 6 個 BAM (HCC1395 baseline / HCC1395 V6 / HCC1937 V6 / HCC1954 V6 / H1437 V6 / H2009 V6) 在 chr8+chr19 (H2009 = chr19 only) 上每條 tagged read 的 HP:i tag 值分佈。
+  HP 6 值意義：HP=1/2 = germline-only 單純 HP1/HP2；HP=11/21 = somatic 對應 HP1/HP2 family；HP=33 = V3F-style conservative ambiguous (V6 啟用 "no-promote" 邏輯)；HP=0 (此資料無)；untagged = 未分配。
+</p>
+
+<!-- Plotly stacked bar -->
+<div id="plot1a_stacked" class="plot-container"></div>
+<div class="fig-caption">圖 1A.1 — 6 BAM × HP 6 值 stacked percentage (hover 顯示 raw count)。靜態 PNG 參考下方。</div>
+
+<img class="figure" src="assets/figures/target1/A1_HP_distribution.png" alt="A1 HP distribution static figure" loading="lazy">
+<div class="fig-caption">圖 1A.2 — 靜態 fallback (matplotlib)。</div>
+
+<!-- L2 evidence cards -->
+<div class="ev-card" x-data="{open:false}">
+  <div class="ev-card-header" :class="{collapsed: !open}" @click="open=!open">
+    <span><span class="tier t4">⭐4 L2</span> Evidence: HP=33 firing 跨樣本不一致 (mechanism)</span>
+  </div>
+  <div class="ev-card-body" x-show="open" x-transition>
+    <table>
+    <thead><tr>
+      <th>Sample (V6)</th><th>HP=33 count</th><th>HP=33 %</th><th>vs baseline</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>HCC1395</td><td class="num">37,656</td><td class="num">1.68%</td><td>×60 firing (baseline 630 / 0.028%)</td></tr>
+      <tr><td>HCC1937</td><td class="num">1,630</td><td class="num">0.10%</td><td>(baseline BAM 不存在)</td></tr>
+      <tr><td>HCC1954</td><td class="num">559</td><td class="num">0.05%</td><td>(baseline BAM 不存在)</td></tr>
+      <tr><td>H1437</td><td class="num">4,138</td><td class="num">0.53%</td><td>(baseline BAM 不存在)</td></tr>
+      <tr><td><strong>H2009</strong></td><td class="num"><strong>49,360</strong></td><td class="num"><strong>4.27%</strong></td><td>跨樣本最大 firing</td></tr>
+    </tbody>
+    </table>
+    <div class="src">[source: A1_HP_6values_5sample.tsv col HP_33_count / HP33_pct]</div>
+    <p style="margin-top:0.8rem;"><strong>推論 [I]</strong>: HP=33 firing 與樣本特性 (purity / chr 偏好 / germline-absent 區域分佈) 相關，非 platform 一致。HCC1395 60× firing 來自 baseline 4.19:1 偏置區域被 V6 V3F-style hybrid 收編到 conservative bucket；H2009 4.27% 為 phasing-rich 樣本 (ploidy variation) 副作用。</p>
+  </div>
+</div>
+
+<div class="ev-card" x-data="{open:false}">
+  <div class="ev-card-header" :class="{collapsed: !open}" @click="open=!open">
+    <span><span class="tier t5">⭐5 L2</span> Evidence: HCC1395 全 BAM HP1:HP2 baseline 1.696 → V6 1.609 (改善)</span>
+  </div>
+  <div class="ev-card-body" x-show="open" x-transition>
+    <p>HCC1395 baseline (chr8+chr19 scan)：</p>
+    <ul>
+      <li>HP1 count = 863,065 / HP2 count = 266,191 → ratio = <strong>3.24</strong> (chr8+chr19 hotspot subset)</li>
+      <li>HP11 = 79,118 / HP21 = 23,007 / HP33 = 630 (priority bug 嚴重偏置)</li>
+    </ul>
+    <p>HCC1395 V6 (chr8+chr19 scan)：</p>
+    <ul>
+      <li>HP1 count = 848,419 / HP2 count = 233,839 → ratio = <strong>3.63</strong> (hotspot 反而更偏 HP1)</li>
+      <li>HP11 = 98,449 / HP21 = 25,075 / HP33 = 37,656 (×60 firing)</li>
+    </ul>
+    <div class="caveat">
+      <strong>Caveat 1A-c1</strong>: chr8+chr19 hotspot subset HP1:HP2 3.24→3.63 與全 BAM 1.696→1.609 方向相反；
+      全 BAM 來自既有報告 (priority bug eng), chr8+chr19 來自本次補測 A1。兩者不矛盾 — chr8+chr19 是 priority bug signal 富集區，
+      V6 patch 在這些區域對 hp=33 conservative tag 投入較多 reads (×60 firing)，但 hp=11/21 tag 仍受 LOH/germline 信號主導。
+    </div>
+    <div class="src">[source: A1_HP_6values_5sample.tsv rows 2-3 (HCC1395 baseline + V6) + 20260513_V6_Attribution_Errata_01.md §2 (全 BAM 1.696→1.609)]</div>
+  </div>
+</div>
+
+<!-- L3 Raw Data -->
+<button class="raw-toggle" @click="showRaw = !showRaw" x-text="showRaw ? '▾ 隱藏 L3 Raw Data' : '▸ 顯示 L3 Raw Data (A1 TSV)'">▸ 顯示 L3 Raw Data (A1 TSV)</button>
+<div class="raw-data-block" :class="{hidden: !showRaw}">
+  <table id="tbl_a1" class="display" style="width:100%">
+    <thead><tr>
+      <th>Sample</th><th>BAM version</th><th>Scope</th>
+      <th>HP=0</th><th>HP=1</th><th>HP=2</th><th>HP=11</th><th>HP=21</th><th>HP=33</th><th>Untagged</th>
+      <th>Total</th><th>HP1/HP2 ratio</th><th>HP=33 %</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>HCC1395</td><td>baseline</td><td>chr8+chr19</td><td class="num">0</td><td class="num">863,065</td><td class="num">266,191</td><td class="num">79,118</td><td class="num">23,007</td><td class="num">630</td><td class="num">1,008,152</td><td class="num">2,240,163</td><td class="num">3.242</td><td class="num">0.028%</td></tr>
+      <tr><td>HCC1395</td><td>V6</td><td>chr8+chr19</td><td class="num">0</td><td class="num">848,419</td><td class="num">233,839</td><td class="num">98,449</td><td class="num">25,075</td><td class="num">37,656</td><td class="num">996,725</td><td class="num">2,240,163</td><td class="num">3.628</td><td class="num">1.681%</td></tr>
+      <tr><td>HCC1937</td><td>V6</td><td>chr8+chr19</td><td class="num">0</td><td class="num">113,841</td><td class="num">52,634</td><td class="num">1,065</td><td class="num">962</td><td class="num">1,630</td><td class="num">1,458,674</td><td class="num">1,628,806</td><td class="num">2.163</td><td class="num">0.100%</td></tr>
+      <tr><td>HCC1954</td><td>V6</td><td>chr8+chr19</td><td class="num">0</td><td class="num">56,302</td><td class="num">20,590</td><td class="num">357</td><td class="num">593</td><td class="num">559</td><td class="num">988,703</td><td class="num">1,067,104</td><td class="num">2.734</td><td class="num">0.052%</td></tr>
+      <tr><td>H1437</td><td>V6</td><td>chr8+chr19</td><td class="num">0</td><td class="num">72,356</td><td class="num">67,226</td><td class="num">4,862</td><td class="num">5,637</td><td class="num">4,138</td><td class="num">621,498</td><td class="num">775,717</td><td class="num">1.076</td><td class="num">0.533%</td></tr>
+      <tr><td>H2009</td><td>V6</td><td><strong>chr19 only</strong></td><td class="num">0</td><td class="num">192,964</td><td class="num">177,037</td><td class="num">45,312</td><td class="num">41,923</td><td class="num">49,360</td><td class="num">648,121</td><td class="num">1,154,717</td><td class="num">1.090</td><td class="num">4.275%</td></tr>
+    </tbody>
+  </table>
+  <div class="src">[source: <code>InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/A1_HP_6values_5sample.tsv</code>]</div>
+  <div class="caveat" style="margin-top:0.5rem;">
+    <strong>H2009 scope caveat</strong>: H2009 因 background-kill timeout 縮為 chr19 only (2,963 SNV, 18 min run); 全 chr8+chr19 ratio 0.79 數字可能變動但不影響「V6 ALT-only ratio < 1」主結論。
+  </div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- ===== Section 1B · SP1/2/3 ===== -->
+<!-- ============================================ -->
+<section id="sec-1b" x-data="{showRaw:false}">
+<h2>1B · SP1/2/3 個案鐵證 (chr19 priority bug spotlights)</h2>
+
+<p>
+  選 3 個 chr19 priority bug 極端表現位點 (SP1/2/3)，比較 baseline TO / V3F / V5 / V6 / paired_T 五個 BAM 在同位點 ±50bp window 的 HP family 分佈與 paired truth 對齊情況。
+  <strong>個別位點層 IGV 截圖 deferred</strong> — 既有 PI Report 4-29 已 archive；本 HTML 只引用 4 個既驗證統計欄。
+</p>
+
+<div class="ev-card" x-data="{open:true}">
+  <div class="ev-card-header" :class="{collapsed: !open}" @click="open=!open">
+    <span><span class="tier t5">⭐5 L2</span> Evidence: SP1/2/3 完整統計表</span>
+  </div>
+  <div class="ev-card-body" x-show="open" x-transition>
+    <table>
+    <thead><tr>
+      <th>SP locus</th><th>chr:pos</th>
+      <th>baseline HP1:HP2</th><th>V3F/V5 HP1:HP2</th>
+      <th>paired truth (som_ratio)</th><th>對齊 paired?</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>SP1</strong></td>
+        <td>chr19:17,565,944</td>
+        <td class="num" style="color:var(--neg);"><strong>113 : 0</strong></td>
+        <td class="num" style="color:var(--ok);">HP2 主導 (翻轉)</td>
+        <td>som_ratio 0.500 (265:265 對稱)</td>
+        <td><strong style="color:var(--ok);">✅ 翻 HP2 對齊</strong></td>
+      </tr>
+      <tr>
+        <td><strong>SP2</strong></td>
+        <td>chr19:12,452,332</td>
+        <td class="num" style="color:var(--neg);"><strong>109 : 1</strong></td>
+        <td class="num" style="color:var(--ok);">HP2-1 偏向</td>
+        <td>HP2-1 主導</td>
+        <td><strong style="color:var(--ok);">✅ 翻 HP2 對齊</strong></td>
+      </tr>
+      <tr>
+        <td><strong>SP3</strong></td>
+        <td>chr19:12,467,180</td>
+        <td class="num" style="color:var(--neg);"><strong>108 : 0</strong></td>
+        <td class="num" style="color:var(--ok);">HP2 主導 (翻轉)</td>
+        <td>HP2 主導</td>
+        <td><strong style="color:var(--ok);">✅ 翻 HP2 對齊</strong></td>
+      </tr>
+    </tbody>
+    </table>
+    <div class="src">[source: <code>InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md:44</code>]</div>
+    <div class="src">[source: <code>InterSubMod/docs/reports/validated/2026/05/20260508_Self_Phasing_完整觀察整合報告_01.md:120,593,603</code>]</div>
+    <p style="margin-top:0.8rem;">
+      <strong>結論</strong>: baseline 全偏 HP1 (3/3 systematic bias)，paired truth 真實 LOH 方向都偏 HP2 (SP1 雙 sub-clone 共現對稱 / SP2/3 偏 HP2-1)。
+      V5 修正後 3/3 對齊 paired。<strong>V6 BAM 在此 17,404 V3F victim subset 與 V5 BAM read-by-read 0 diff</strong>，因此 V6 在 SP1/2/3 與 V5 一致。
+    </p>
+    <div class="note">
+      <strong>SP1/2/3 vs 4-Layer Synthesis memo</strong>: 既有筆記 <code>project_v5_v6_tradeoff_sp123.md</code> 指出 "V5 翻 HP2 對齊 paired ✓ / V6 偏 HP1 ❌" — 但 2026-05-14 PM 完成 BAM read-by-read 比較後修正為「V5 BAM = V6 BAM 完全相同 (0 diff after normalization)」。
+      因此 SP1/2/3 V5/V6 對齊 paired 的結論一致，先前 "V5 vs V6 SP1/2/3 反向" 觀察源自 phasing snapshot 階段差異，BAM 層已 normalize 為同。
+    </div>
+  </div>
+</div>
+
+<div class="ev-card" x-data="{open:false}">
+  <div class="ev-card-header" :class="{collapsed: !open}" @click="open=!open">
+    <span><span class="tier t4">⭐4 L2</span> Evidence: V3F BAM hp distribution (per-read forensic, 17,404 victim subset)</span>
+  </div>
+  <div class="ev-card-body" x-show="open" x-transition>
+    <p>從 V3F vote_dump 抽 17,404 unique victim reads (baseline 17.3:1 偏置區的 read names)，提取每個版本 BAM 上的 HP:i: tag 分佈：</p>
+    <table>
+    <thead><tr>
+      <th>HP tag</th>
+      <th>V3F BAM</th><th>V5 BAM</th><th>V6 BAM</th><th>V5/V6 vs V3F</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>hp=21 (HP2+somatic)</td>
+          <td class="num">7,222 (41.50%)</td><td class="num">7,769 (44.64%)</td><td class="num">7,769 (44.64%)</td><td class="num">+3.1 pp</td></tr>
+      <tr><td>hp=11 (HP1+somatic)</td>
+          <td class="num">2,517 (14.46%)</td><td class="num">5,510 (31.66%)</td><td class="num">5,510 (31.66%)</td><td class="num" style="color:var(--warn);"><strong>+17.2 pp ⚠</strong></td></tr>
+      <tr><td>hp=33 (ambiguous)</td>
+          <td class="num">1,353 (7.77%)</td><td class="num">2,458 (14.12%)</td><td class="num">2,458 (14.12%)</td><td class="num">+6.4 pp</td></tr>
+      <tr><td>empty (未 tag)</td>
+          <td class="num">2,652 (15.24%)</td><td class="num">1,667 (9.58%)</td><td class="num">1,667 (9.58%)</td><td class="num">-5.7 pp</td></tr>
+      <tr><td>hp=2 (HP2 germline)</td>
+          <td class="num">2,898 (16.65%)</td><td class="num">0 (0%)</td><td class="num">0 (0%)</td><td class="num" style="color:var(--warn);">-16.7 pp</td></tr>
+      <tr><td>hp=1 (HP1 germline)</td>
+          <td class="num">762 (4.38%)</td><td class="num">0 (0%)</td><td class="num">0 (0%)</td><td class="num">-4.4 pp</td></tr>
+    </tbody>
+    </table>
+    <p>
+      <strong>Key Finding</strong>: V5 BAM = V6 BAM read-by-read 100% 相同 (0 diff after normalization)；
+      V6 purity threshold patch (<code>938f0df</code>, 0.95→0.9) 對 HCC1395 5kHz priority bug victim subset 無 BAM 層差異。
+      V5 vs V3F 在此 subset 有 63% reads 重新指派 (3,198 direction flip = 18.4%)，
+      可能解讀為「命名顛倒」/「過度修正」/「修對更多」其中之一 — 需 ground truth paired HP:Z: 對齊驗證。
+    </p>
+    <div class="src">[source: <code>InterSubMod/docs/reports/validated/2026/05/20260513_V6_Attribution_Errata_01.md §3a.5b.7</code> table line 289-296]</div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- ===== Section 1C · Priority Bug 17.3:1 修補 + ALT-only ratio ===== -->
+<!-- ============================================ -->
+<section id="sec-1c" x-data="{showRaw:false}">
+<h2>1C · Priority Bug 17.3:1 修補 + ALT-only ratio 跨樣本</h2>
+
+<p>
+  baseline LongPhase-TO <code>HaplotagProcess.cpp::getVote</code> 的 priority order 把 somatic 倒置在 germline 之前，
+  導致在 chr19 SP-rich subset (HCC1395) 整體 HP1:HP2 = 17.3:1 (94.6% reads 系統性偏 HP1)。
+  V3F (commit <code>41ff147</code>) two-layer rewrite 修對 → V5/V6 BAM 繼承同一 haplotag binary。
+</p>
+
+<!-- Priority bug visual diagram -->
+<div class="bug-diagram">
+  <div class="bug-box before">
+    <h4>Baseline (priority bug)</h4>
+    <div class="stat">17.3 : 1</div>
+    <div style="font-size:0.85rem; color:#64748b;">HP1:HP2 (chr19 SP subset)</div>
+    <div style="font-size:0.85rem; margin-top:0.3rem;">94.6% reads ↗ HP1 (somatic priority 倒置)</div>
+  </div>
+  <div class="bug-arrow">→</div>
+  <div class="bug-box after">
+    <h4>V3F / V5 / V6 (two-layer fix)</h4>
+    <div class="stat">~1.84 : 1</div>
+    <div style="font-size:0.85rem; color:#64748b;">HP1:HP2 (chr19 SP subset)</div>
+    <div style="font-size:0.85rem; margin-top:0.3rem;">commit <code>41ff147</code> two-layer getVote</div>
+  </div>
+</div>
+
+<div class="note">
+  <strong>17.3:1 修對主力歸 V3F</strong>（commit <code>41ff147</code> tagging fix）; V5/V6 在此 metric 上繼承 V3F haplotag binary，
+  V5 phasing patch (<code>d0bcd8c</code> ploidyRatio) + V6 purity threshold (<code>938f0df</code>) 是不同階段的修補。
+  V5/V6 BAM ratio ~1.84:1 = V3F two-layer fix + PON-only assignment 2.03:1 略偏 HP1 的綜合結果。
+  <div class="src">[source: 20260513_V6_Attribution_Errata_01.md §0/§1 (E1) line 36, 49-75]</div>
+</div>
+
+<!-- ALT-only ratio diagram -->
+<h3>1C.2 · ALT-only HP1:HP2 ratio 跨 5 V6 樣本</h3>
+<p>
+  在 PASS SNV 位點只取攜帶 ALT allele 的 reads 統計 HP tag (cf. 全 reads ratio)；對 priority bug 最敏感的口徑。
+  5 V6 樣本 ALT-only ratio 全 < 1 = priority bug fix 跨樣本一致證據。
+</p>
+
+<div id="plot1c_alt_ratio" class="plot-container"></div>
+<div class="fig-caption">圖 1C.2.1 — ALT-only ratio vs all-reads ratio 跨樣本 (Plotly interactive)。</div>
+
+<img class="figure" src="assets/figures/target1/A2_ALT_only_vs_all_reads_ratio.png" alt="A2 ALT-only ratio static figure" loading="lazy">
+<div class="fig-caption">圖 1C.2.2 — 靜態 fallback。</div>
+
+<div class="ev-card" x-data="{open:true}">
+  <div class="ev-card-header" :class="{collapsed: !open}" @click="open=!open">
+    <span><span class="tier t4">⭐4 L2</span> Evidence: A2 ALT-only ratio 表 (5 V6 sample)</span>
+  </div>
+  <div class="ev-card-body" x-show="open" x-transition>
+    <table>
+    <thead><tr>
+      <th>Sample</th><th>BAM</th><th>Scope</th>
+      <th>n SNV</th>
+      <th>ALT reads HP1</th><th>ALT reads HP2</th>
+      <th><strong>ALT-only ratio</strong></th>
+      <th>All-reads ratio</th>
+    </tr></thead>
+    <tbody>
+      <tr style="background:#fee2e2;">
+        <td>HCC1395</td><td>baseline</td><td>chr8+chr19</td>
+        <td class="num">3,575</td>
+        <td class="num">39,732</td><td class="num">9,014</td>
+        <td class="num" style="color:var(--neg);"><strong>4.408</strong></td>
+        <td class="num">3.436</td>
+      </tr>
+      <tr style="background:#d1fae5;">
+        <td>HCC1395</td><td><strong>V6</strong></td><td>chr8+chr19</td>
+        <td class="num">3,575</td>
+        <td class="num">327</td><td class="num">769</td>
+        <td class="num" style="color:var(--ok);"><strong>0.425</strong> (10× reverse)</td>
+        <td class="num">3.363</td>
+      </tr>
+      <tr><td>HCC1937</td><td>V6</td><td>chr8+chr19</td>
+        <td class="num">1,934</td>
+        <td class="num">18,968</td><td class="num">43,614</td>
+        <td class="num" style="color:var(--ok);"><strong>0.435</strong></td>
+        <td class="num">2.028</td>
+      </tr>
+      <tr><td>HCC1954</td><td>V6</td><td>chr8+chr19</td>
+        <td class="num">2,031</td>
+        <td class="num">5,860</td><td class="num">15,745</td>
+        <td class="num" style="color:var(--ok);"><strong>0.372</strong> (lowest)</td>
+        <td class="num">2.901</td>
+      </tr>
+      <tr><td>H1437</td><td>V6</td><td>chr8+chr19</td>
+        <td class="num">4,152</td>
+        <td class="num">42,548</td><td class="num">58,984</td>
+        <td class="num" style="color:var(--ok);"><strong>0.721</strong></td>
+        <td class="num">1.058</td>
+      </tr>
+      <tr><td>H2009</td><td>V6</td><td><strong>chr19 only</strong></td>
+        <td class="num">2,963</td>
+        <td class="num">39,829</td><td class="num">50,230</td>
+        <td class="num" style="color:var(--ok);"><strong>0.793</strong></td>
+        <td class="num">1.066</td>
+      </tr>
+    </tbody>
+    </table>
+    <div class="src">[source: <code>InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/A2_ALT_only_HP_ratio_5sample.tsv</code>]</div>
+    <p style="margin-top:0.8rem;">
+      <strong>Effect size</strong>: HCC1395 baseline 4.41 → V6 0.43 (Δ=-3.98, ~10× HP2 reverse direction)；
+      5 V6 sample range 0.372-0.793 全 < 1 — strict cross-sample consistency 證實 priority bug fix 不是 HCC1395-specific artifact。
+    </p>
+    <div class="caveat">
+      <strong>Caveat 1C-c1</strong>: HCC1395 chr8+chr19 hotspot ALT-only ratio (V6 0.425) 與全 BAM 1.609 反向 — chr8+chr19 是 SP-rich locus，priority bug 富集區的修補幅度比全 BAM 更顯著。
+      ALT-only 是「priority bug-sensitive 子口徑」；all-reads 是「綜合 HP family 分配」。Two views consistent.
+    </div>
+  </div>
+</div>
+
+<button class="raw-toggle" @click="showRaw = !showRaw" x-text="showRaw ? '▾ 隱藏 L3 Raw Data' : '▸ 顯示 L3 Raw Data (A2 TSV)'">▸ 顯示 L3 Raw Data (A2 TSV)</button>
+<div class="raw-data-block" :class="{hidden: !showRaw}">
+  <table id="tbl_a2" class="display" style="width:100%">
+    <thead><tr>
+      <th>Sample</th><th>BAM version</th><th>Scope</th><th>n SNV positions</th>
+      <th>ALT HP1</th><th>ALT HP2</th><th>ALT HP11</th><th>ALT HP21</th><th>ALT HP33</th>
+      <th>All-reads HP1</th><th>All-reads HP2</th>
+      <th>ALT-only ratio</th><th>All-reads ratio</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>HCC1395</td><td>baseline</td><td>chr8+chr19</td><td class="num">3,575</td>
+          <td class="num">39,732</td><td class="num">9,014</td><td class="num">—</td><td class="num">—</td><td class="num">—</td>
+          <td class="num">—</td><td class="num">—</td><td class="num">4.408</td><td class="num">3.436</td></tr>
+      <tr><td>HCC1395</td><td>V6</td><td>chr8+chr19</td><td class="num">3,575</td>
+          <td class="num">327</td><td class="num">769</td><td class="num">—</td><td class="num">—</td><td class="num">—</td>
+          <td class="num">—</td><td class="num">—</td><td class="num">0.425</td><td class="num">3.363</td></tr>
+      <tr><td>HCC1937</td><td>V6</td><td>chr8+chr19</td><td class="num">1,934</td>
+          <td class="num">18,968</td><td class="num">43,614</td><td class="num">1,234</td><td class="num">1,800</td><td class="num">1,684</td>
+          <td class="num">153,799</td><td class="num">75,850</td><td class="num">0.435</td><td class="num">2.028</td></tr>
+      <tr><td>HCC1954</td><td>V6</td><td>chr8+chr19</td><td class="num">2,031</td>
+          <td class="num">5,860</td><td class="num">15,745</td><td class="num">364</td><td class="num">2,338</td><td class="num">598</td>
+          <td class="num">85,542</td><td class="num">29,489</td><td class="num">0.372</td><td class="num">2.901</td></tr>
+      <tr><td>H1437</td><td>V6</td><td>chr8+chr19</td><td class="num">4,152</td>
+          <td class="num">42,548</td><td class="num">58,984</td><td class="num">10,493</td><td class="num">12,369</td><td class="num">5,125</td>
+          <td class="num">123,659</td><td class="num">116,892</td><td class="num">0.721</td><td class="num">1.058</td></tr>
+      <tr><td>H2009</td><td>V6</td><td>chr19 only</td><td class="num">2,963</td>
+          <td class="num">39,829</td><td class="num">50,230</td><td class="num">23,468</td><td class="num">22,158</td><td class="num">7,291</td>
+          <td class="num">105,248</td><td class="num">98,735</td><td class="num">0.793</td><td class="num">1.066</td></tr>
+    </tbody>
+  </table>
+  <div class="src">[source: <code>A2_ALT_only_HP_ratio_5sample.tsv</code>]</div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- ===== Section 1D · germline-absent 區 baseline / V5 / V6 ===== -->
+<!-- ============================================ -->
+<section id="sec-1d">
+<h2>1D · germline-absent 區 baseline / V5 / V6 三方比較</h2>
+
+<p>
+  germline-absent (germline VCF 未涵蓋) 區域是 V5 Layer 1.5 設計改動的標的，
+  V6 patch 移除 V5 Layer 1.5 over-promote 並重用 V3F-style hp=33 保守處理。
+  比較 baseline / V5 / V6 在此區的 HP1:HP2 ratio + V3F (commit 41ff147 ratio 最佳) 為對照。
+</p>
+
+<div class="ev-card" x-data="{open:true}">
+  <div class="ev-card-header" :class="{collapsed: !open}" @click="open=!open">
+    <span><span class="tier t4">⭐4 L2</span> Evidence: 4 BAM version germline-absent + 全基因組 HP1:HP2 ratio</span>
+  </div>
+  <div class="ev-card-body" x-show="open" x-transition>
+    <table>
+    <thead><tr>
+      <th>BAM version</th>
+      <th>全基因組 HP1:HP2 (priority bug 主指標)</th>
+      <th>HP1 share</th>
+      <th>germline-absent 區行為</th>
+    </tr></thead>
+    <tbody>
+      <tr style="background:#fee2e2;">
+        <td><strong>baseline</strong></td>
+        <td class="num" style="color:var(--neg);"><strong>17.3 : 1</strong></td>
+        <td>94.6% ❌</td>
+        <td>4.19:1 偏 HP1 (5,789 chr19 germline-absent events)</td>
+      </tr>
+      <tr style="background:#d1fae5;">
+        <td><strong>V3F</strong></td>
+        <td class="num" style="color:var(--ok);"><strong>1.14 : 1</strong></td>
+        <td>53.3% ✓ ratio 最佳</td>
+        <td>標 hp=33 保守處理 (V3F-style)</td>
+      </tr>
+      <tr style="background:#fef3c7;">
+        <td><strong>V5</strong></td>
+        <td class="num">2.00 : 1</td>
+        <td>66.7% ⚠</td>
+        <td>Layer 1.5 over-promote 重新引入偏移</td>
+      </tr>
+      <tr style="background:#d1fae5;">
+        <td><strong>V6</strong></td>
+        <td class="num" style="color:var(--ok);"><strong>1.84 : 1</strong></td>
+        <td>64.8%</td>
+        <td>移除 V5 Layer 1.5，重用 V3F hp=33 保守 → 比 V5 改善</td>
+      </tr>
+    </tbody>
+    </table>
+    <div class="src">[source: <code>InterSubMod/docs/reports/validated/2026/05/20260513_V6_Attribution_Errata_01.md §1 table line 62-66</code>]</div>
+    <p style="margin-top:0.8rem;">
+      <strong>結論</strong>: V6 在 germline-absent 區行為 = V3F-style 保守 (hp=33 firing ×60 = +14.1 pp vs baseline)，
+      避免 V5 Layer 1.5 在 germline-absent 區的設計缺陷。V6 在 ratio 上是 trade-off：以 ratio 從 1.14 (V3F) 退步到 1.84 換取 marker coverage +9.0% / hp=33 +4.7% / Layer 1.5 缺陷修補。
+    </p>
+    <div class="caveat">
+      <strong>Attribution caveat</strong>: 不能單獨說「V6 修對 17.3:1」— 應標明「V3F (commit 41ff147) 主力修對；V6 在多維度價值 (marker eng + germline-absent 保守化) 改善 vs V5」。
+    </div>
+  </div>
+</div>
+
+<div class="ev-card" x-data="{open:false}">
+  <div class="ev-card-header" :class="{collapsed: !open}" @click="open=!open">
+    <span><span class="tier t3">⭐3 L2</span> Evidence: V5 Layer 1.5 設計缺陷 — germline-absent 區繼承 priority bug</span>
+  </div>
+  <div class="ev-card-body" x-show="open" x-transition>
+    <p>
+      2026-05-09 paired cross-ref Step D 發現：V5 在 germline-absent 區域 (5,789 chr19 events) 與 baseline 4.19:1 偏 HP1 完全相同 —
+      V5 Layer 1.5 設計在這些區域繼承 priority bug 偏置。V3F 標 hp=33 保守處理反而更穩健。
+      V6 移除 V5 Layer 1.5 + 重用 V3F hp=33 → 在 germline-absent 區行為與 V3F 趨同。
+    </p>
+    <div class="src">[source: MEMORY pending item <code>project_v5_layer15_design_caveat.md</code>; PI Errata E5 amended 2026-05-09]</div>
+    <div class="src">[source: 4-Layer Synthesis §1 line 488: 1.77:1 L1 ratio = 26,436/14,931 = 63.9% — baseline phased PASS altHaplotype assignment bias]</div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- ===== Section 1E · 跨樣本穩定性 ===== -->
+<!-- ============================================ -->
+<section id="sec-1e">
+<h2>1E · 跨樣本穩定性 (5 V6 sample summary)</h2>
+
+<p>
+  彙總 1A (HP 6 值) + 1C.2 (ALT-only ratio) 跨 5 V6 樣本：priority bug fix 在 production binary level 跨樣本是否一致。
+</p>
+
+<div class="ev-card" x-data="{open:true}">
+  <div class="ev-card-header" :class="{collapsed: !open}" @click="open=!open">
+    <span><span class="tier t4">⭐4 L2</span> Evidence: 跨樣本穩定性彙總表</span>
+  </div>
+  <div class="ev-card-body" x-show="open" x-transition>
+    <table>
+    <thead><tr>
+      <th>Sample (V6)</th><th>caller F1</th>
+      <th>ALT-only ratio</th><th>All-reads ratio</th>
+      <th>HP=33 firing %</th><th>priority bug fix 一致?</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>HCC1395</td><td class="num">0.7166</td>
+          <td class="num" style="color:var(--ok);"><strong>0.425</strong></td><td class="num">3.628</td>
+          <td class="num">1.681%</td>
+          <td><span style="color:var(--ok);">✅ baseline 4.41→V6 0.43 (10× reverse)</span></td></tr>
+      <tr><td>HCC1937</td><td class="num">~0.37 (low)</td>
+          <td class="num" style="color:var(--ok);"><strong>0.435</strong></td><td class="num">2.163</td>
+          <td class="num">0.100%</td>
+          <td><span style="color:var(--ok);">✅ ratio < 1 (no baseline ref)</span></td></tr>
+      <tr><td>HCC1954</td><td class="num">~0.84</td>
+          <td class="num" style="color:var(--ok);"><strong>0.372</strong></td><td class="num">2.734</td>
+          <td class="num">0.052%</td>
+          <td><span style="color:var(--ok);">✅ ratio < 1 (lowest)</span></td></tr>
+      <tr><td>H1437</td><td class="num">~0.87</td>
+          <td class="num" style="color:var(--ok);"><strong>0.721</strong></td><td class="num">1.076</td>
+          <td class="num">0.533%</td>
+          <td><span style="color:var(--ok);">✅ ratio < 1</span></td></tr>
+      <tr><td>H2009</td><td class="num">~0.89</td>
+          <td class="num" style="color:var(--ok);"><strong>0.793</strong></td><td class="num">1.090</td>
+          <td class="num">4.275%</td>
+          <td><span style="color:var(--ok);">✅ ratio < 1 (chr19 only, scope caveat)</span></td></tr>
+    </tbody>
+    </table>
+
+    <h3 style="margin-top:1rem;">5/5 Same-direction findings</h3>
+    <ul>
+      <li><strong>ALT-only ratio 全 < 1</strong>：5/5 V6 sample range 0.372–0.793，priority bug fix 跨樣本一致 ✓</li>
+      <li><strong>HP=33 firing 跨樣本不一致</strong>：0.05% (HCC1954) – 4.27% (H2009)，sample-specific (purity / chr 偏好驅動)</li>
+      <li><strong>caller F1 cross-binary invariant</strong>：baseline / V3F / V5 / V6 同 caller F1 = 0.7166 (HCC1395)</li>
+      <li><strong>chr8+chr19 hotspot subset behavior ≠ 全 BAM</strong>：HCC1395 chr8+chr19 V6 比 baseline 更偏 HP1 (3.24→3.63)，但全 BAM 改善 (1.696→1.609)</li>
+    </ul>
+
+    <div class="caveat">
+      <strong>Caveat 1E-c1 (scope unevenness)</strong>: H2009 scope = chr19 only (timeout dodge); 其他 4 sample = chr8+chr19。
+      HCC1395 baseline 為唯一有跨版本 baseline BAM 的樣本; HCC1937/HCC1954/H1437/H2009 baseline BAM 不存在 (Track B DEFERRED) → 4 sample ratio < 1 為 "V6 absolute" 結論非 "vs baseline" 結論。
+    </div>
+
+    <div class="src">[source: A1_HP_6values_5sample.tsv + A2_ALT_only_HP_ratio_5sample.tsv + 20260511_V6_binary_complete_documentation_01.md:587,597]</div>
+  </div>
+</div>
+</section>
+
+<!-- ============================================ -->
+<!-- ===== Provenance Footer ===== -->
+<!-- ============================================ -->
+<footer class="provenance">
+  <h3 style="margin-top:0;">Provenance / Source Anchors</h3>
+  <div><span class="pkey">Master draft</span> <code>InterSubMod/docs/reports/validated/2026/05/20260522_週報_V6_signoff_5goal_PI_report/master_draft.md</code></div>
+  <div><span class="pkey">A0 audit (93% verified)</span> <code>InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/A0_existing_artifacts_verification.md</code></div>
+  <div><span class="pkey">A1 TSV (HP 6 values)</span> <code>InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/A1_HP_6values_5sample.tsv</code></div>
+  <div><span class="pkey">A2 TSV (ALT-only ratio)</span> <code>InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/A2_ALT_only_HP_ratio_5sample.tsv</code></div>
+  <div><span class="pkey">SP1/2/3 IGV anchor</span> <code>InterSubMod/docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md:44</code></div>
+  <div><span class="pkey">germline-absent table</span> <code>InterSubMod/docs/reports/validated/2026/05/20260513_V6_Attribution_Errata_01.md §1 line 62-66</code></div>
+  <div><span class="pkey">V3F/V5/V6 BAM triple compare</span> <code>InterSubMod/docs/reports/validated/2026/05/20260513_V6_Attribution_Errata_01.md §3a.5b.7</code></div>
+  <div><span class="pkey">V6 binary spec</span> <code>InterSubMod/docs/reports/validated/2026/05/20260511_V6_binary_complete_documentation_01.md</code></div>
+  <div><span class="pkey">git commit anchor</span> <code>8a90532</code> on branch <code>fix/pon-only-phasing</code></div>
+  <div><span class="pkey">Build date</span> 2026-05-22</div>
+  <div style="margin-top:0.6rem; padding-top:0.6rem; border-top:1px solid #cbd5e1;">
+    <strong>A0 audit caveat compliance</strong>:
+    本 HTML 不引用 20260514 priority bug eng .md §8.2 (row-mislabel) ✓ ；
+    不引用 17to1 HTML §4 "~95% GT2 偏 1|." (pre-erratum framing) ✓ ；
+    N50 用 verified 8,109 (本 HTML 未提 N50) ✓ ；
+    master TSV col count = 112 (本 HTML 未提 col count) ✓ 。
+  </div>
+</footer>
+
+</main>
+
+<!-- ===== Plotly + DataTables init scripts ===== -->
+<script>
+// ===== A1 stacked bar (HP 6 values, 6 BAM) =====
+(function(){
+  if (typeof Plotly === 'undefined') return; // CDN load failure fallback (PNG remains visible)
+
+  const samples = ['HCC1395 baseline', 'HCC1395 V6', 'HCC1937 V6', 'HCC1954 V6', 'H1437 V6', 'H2009 V6 (chr19)'];
+  // pct of total tagged + untagged
+  const totals = [2240163, 2240163, 1628806, 1067104, 775717, 1154717];
+  const hp1   = [863065, 848419, 113841, 56302, 72356, 192964];
+  const hp2   = [266191, 233839, 52634, 20590, 67226, 177037];
+  const hp11  = [79118, 98449, 1065, 357, 4862, 45312];
+  const hp21  = [23007, 25075, 962, 593, 5637, 41923];
+  const hp33  = [630, 37656, 1630, 559, 4138, 49360];
+  const utag  = [1008152, 996725, 1458674, 988703, 621498, 648121];
+
+  // convert to pct
+  function pct(arr){ return arr.map((v,i) => 100*v/totals[i]); }
+
+  const traces = [
+    {x:samples, y:pct(hp1),  name:'HP=1 (germ HP1)',  type:'bar', marker:{color:'#fca5a5'}, customdata:hp1, hovertemplate:'%{x}<br>HP=1: %{y:.2f}% (%{customdata:,})<extra></extra>'},
+    {x:samples, y:pct(hp2),  name:'HP=2 (germ HP2)',  type:'bar', marker:{color:'#93c5fd'}, customdata:hp2, hovertemplate:'%{x}<br>HP=2: %{y:.2f}% (%{customdata:,})<extra></extra>'},
+    {x:samples, y:pct(hp11), name:'HP=11 (HP1+som)',  type:'bar', marker:{color:'#dc2626'}, customdata:hp11, hovertemplate:'%{x}<br>HP=11: %{y:.2f}% (%{customdata:,})<extra></extra>'},
+    {x:samples, y:pct(hp21), name:'HP=21 (HP2+som)',  type:'bar', marker:{color:'#2563eb'}, customdata:hp21, hovertemplate:'%{x}<br>HP=21: %{y:.2f}% (%{customdata:,})<extra></extra>'},
+    {x:samples, y:pct(hp33), name:'HP=33 (V6 amb.)',  type:'bar', marker:{color:'#ca8a04'}, customdata:hp33, hovertemplate:'%{x}<br>HP=33: %{y:.2f}% (%{customdata:,})<extra></extra>'},
+    {x:samples, y:pct(utag), name:'untagged',         type:'bar', marker:{color:'#cbd5e1'}, customdata:utag, hovertemplate:'%{x}<br>untagged: %{y:.2f}% (%{customdata:,})<extra></extra>'}
+  ];
+  const layout = {
+    barmode:'stack',
+    title:{text:'6 BAM × HP 6 values (% of total reads)', font:{size:14}},
+    yaxis:{title:'% of total tagged + untagged reads', range:[0,100]},
+    xaxis:{tickangle:-20},
+    height:480, margin:{l:60,r:20,t:50,b:120},
+    legend:{orientation:'h', y:-0.35},
+    font:{family:'Droid Sans Fallback, sans-serif'}
+  };
+  Plotly.newPlot('plot1a_stacked', traces, layout, {responsive:true, displayModeBar:false});
+})();
+
+// ===== A2 ALT-only ratio vs all-reads ratio =====
+(function(){
+  if (typeof Plotly === 'undefined') return;
+  const samples = ['HCC1395 base', 'HCC1395 V6', 'HCC1937 V6', 'HCC1954 V6', 'H1437 V6', 'H2009 V6 (chr19)'];
+  const altRatio  = [4.408, 0.425, 0.435, 0.372, 0.721, 0.793];
+  const allRatio  = [3.436, 3.363, 2.028, 2.901, 1.058, 1.066];
+
+  const traces = [
+    {x:samples, y:altRatio, type:'bar', name:'ALT-only HP1:HP2',
+     marker:{color:samples.map(s=>s.includes('base')?'#dc2626':'#059669')},
+     text:altRatio.map(v=>v.toFixed(2)), textposition:'outside',
+     hovertemplate:'%{x}<br>ALT-only ratio: %{y:.3f}<extra></extra>'},
+    {x:samples, y:allRatio, type:'bar', name:'All-reads HP1:HP2',
+     marker:{color:'#94a3b8'},
+     text:allRatio.map(v=>v.toFixed(2)), textposition:'outside',
+     hovertemplate:'%{x}<br>All-reads ratio: %{y:.3f}<extra></extra>'}
+  ];
+  const layout = {
+    title:{text:'ALT-only ratio (priority bug-sensitive) vs All-reads ratio', font:{size:14}},
+    yaxis:{title:'HP1 / HP2 ratio', type:'log'},
+    xaxis:{tickangle:-20},
+    barmode:'group',
+    height:460, margin:{l:60,r:20,t:50,b:120},
+    legend:{orientation:'h', y:-0.35},
+    shapes:[{type:'line', x0:-0.5, x1:samples.length-0.5, y0:1, y1:1,
+             line:{color:'#ca8a04', width:2, dash:'dash'}}],
+    annotations:[{x:samples.length-0.5, y:1, xanchor:'right', yanchor:'bottom',
+                  text:'y = 1 (balanced)', showarrow:false, font:{size:11, color:'#ca8a04'}}],
+    font:{family:'Droid Sans Fallback, sans-serif'}
+  };
+  Plotly.newPlot('plot1c_alt_ratio', traces, layout, {responsive:true, displayModeBar:false});
+})();
+
+// ===== DataTables init =====
+document.addEventListener('DOMContentLoaded', function(){
+  if (typeof jQuery === 'undefined' || typeof jQuery.fn.dataTable === 'undefined') return;
+  jQuery(function($){
+    ['tbl_a1','tbl_a2'].forEach(function(id){
+      if ($('#'+id).length){
+        $('#'+id).DataTable({
+          paging:false, info:false, searching:true, ordering:true,
+          dom:'ft',
+          language:{search:"搜尋:"}
+        });
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASM 調查現況 + H2/H3/H5 規劃 (2026-05-31)</title>
+<style>
+:root{--ac:#D97757;--acd:#B85A3F;--tx:#141413;--txs:#6B6B66;--bg:#FAF9F5;--sf:#FFFFFF;--bd:#E3DACC;--cb:#F4EFE6;
+--crit:#C2410C;--warn:#A16207;--ok:#15803D;--info:#1E3A8A;--ff:-apple-system,BlinkMacSystemFont,"PingFang TC","Microsoft JhengHei","Noto Sans CJK TC","Droid Sans Fallback",sans-serif;--mo:"JetBrains Mono","DejaVu Sans Mono",monospace;}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--ff);font-size:16px;line-height:1.6}
+.wrap{max-width:1060px;margin:0 auto;padding:26px 18px}
+main{background:var(--sf);border:1px solid var(--bd);border-radius:8px;box-shadow:0 2px 8px rgba(20,20,19,.08);padding:30px}
+.hero{border-bottom:2px solid var(--ac);padding-bottom:14px;margin-bottom:18px}
+.pretitle{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--acd);font-weight:700}
+h1{font-size:25px;margin:6px 0}.sub{color:var(--txs);font-size:15px}
+.verdict{color:#fff;padding:15px;margin-top:12px;border-radius:6px;line-height:1.55;background:linear-gradient(90deg,#1E3A8A,#3B82F6)}
+.verdict strong{font-weight:700}
+h2{font-size:21px;margin:30px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--bd)}
+h2 .n{font-family:var(--mo);color:var(--acd);font-size:.62em;margin-right:7px}
+table{border-collapse:collapse;width:100%;margin:11px 0;font-size:13.5px}
+th,td{border-bottom:1px solid var(--bd);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:var(--cb);font-weight:700;border-bottom:2px solid var(--ac)}
+td.num{text-align:right;font-family:var(--mo)}
+tr.clean td{background:#F0FDF4}tr.dirty td{background:#FEF2F0}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0;font-size:13px}
+.flow .step{background:var(--cb);border:1px solid var(--bd);border-radius:6px;padding:8px 12px}
+.flow .step b{display:block;font-size:14px}
+.flow .ar{color:var(--acd);font-weight:700}
+.callout{padding:11px 15px;margin:12px 0;border-radius:6px;border-left:4px solid}
+.c-ok{background:#F0FDF4;border-color:var(--ok);color:#166534}.c-fp{background:#FEF2F0;border-color:var(--crit);color:#7F1D1D}
+.c-info{background:#EFF6FF;border-color:var(--info);color:#1E40AF}.c-warn{background:#FEF7E6;border-color:var(--warn);color:#78350F}
+.callout strong{display:block;margin-bottom:4px}
+.hq{border:1px solid var(--bd);border-left:4px solid var(--info);border-radius:6px;padding:11px 15px;margin:11px 0;background:var(--sf)}
+.hq .hid{font-family:var(--mo);font-weight:700;color:var(--info);font-size:15px}
+.badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.b-run{background:#DBEAFE;color:#1E3A8A}.b-test{background:#FEF3C7;color:#78350F}.b-done{background:#DCFCE7;color:#166534}
+code{background:var(--cb);padding:1px 6px;border-radius:3px;font-family:var(--mo);font-size:.9em}
+.prov{background:var(--cb);border-top:2px solid var(--ac);margin-top:34px;padding:16px;border-radius:6px;font-size:12px;color:var(--txs);line-height:1.6}
+@media print{body{background:#fff}.wrap{padding:0}main{box-shadow:none;border:none;padding:0}}
+</style></head><body><div class="wrap"><main>
+<header class="hero">
+<div class="pretitle">ASM 調查現況 + H2/H3/H5 驗證規劃 · 2026-05-31 · workflow 執行中</div>
+<h1>甲基 ASM — 現況、混合結構、與三個待驗假設</h1>
+<p class="sub">給你確認：(1) ASM 故事走到哪 (2) 混合結構現況 (3) H2/H3/H5 要驗什麼 + 方法是否有依據 (4) 結果回來前先 review 方法</p>
+<div class="verdict"><strong>一句話：ASM 真實但「混合多種狀況」— 少量可信生物 + 大量 LOH/regression artifact。現在用 3 個假設 (H2/H3/H5) 確認「真 ASM 到底站不站得住」。</strong>
+workflow 正在 scout 每個 H 的資料存在性 + 方法學合理性, 再執行可行的。</div>
+</header>
+
+<h2><span class="n">§1</span>ASM 故事線 — 走到哪了</h2>
+<div class="flow">
+<div class="step"><b>① magnitude</b>修 dup-bug<br>BRCA2 Δβ=−0.122 <span class="badge b-done">定案</span></div>
+<span class="ar">→</span>
+<div class="step"><b>② B-discrimination</b>全基因組<br>anti-discriminative (FP 5×) <span class="badge b-done">定案</span></div>
+<span class="ar">→</span>
+<div class="step"><b>③ 混合分解</b>見樹也見林<br>3 regime, FP-rate 差 3-4× <span class="badge b-done">本日</span></div>
+<span class="ar">→</span>
+<div class="step"><b>④ H2/H3/H5</b>真 ASM 站得住?<br><span class="badge b-run">執行中</span></div>
+</div>
+<p style="font-size:13.5px;color:var(--txs)">從「BRCA2 有沒有 ASM」一路深入到「ASM 整體是什麼」。每步都親自重算驗證 (ledger 54-61)。結論越來越精細：ASM 真實 → 但不能 filter → 因為它是混合 → 現在要分離出「真 ASM」核心。</p>
+
+<h2><span class="n">§2</span>混合結構現況（已驗證）</h2>
+<table>
+<thead><tr><th>regime</th><th class="num">n</th><th class="num">FP-rate</th><th>是什麼</th><th>狀態</th></tr></thead>
+<tbody>
+<tr class="clean"><td>A 乾淨（hiCov+midBase+nonLOH）</td><td class="num">78</td><td class="num">3.8%</td><td>真 ASM 候選（BRCA2 屬此）</td><td>稀有但可信</td></tr>
+<tr class="clean"><td>D intermediate（nonLOH）</td><td class="num">1,221</td><td class="num">2.7%</td><td>可信（最低 FP）</td><td>可信</td></tr>
+<tr class="dirty"><td>C LOH-confound</td><td class="num">1,158</td><td class="num">11.1%</td><td>疑 CNV/allelic-loss 混入</td><td><b>→ H3 驗</b></td></tr>
+<tr class="dirty"><td>B regression（loCov+極端base）</td><td class="num">2,685</td><td class="num">10.5%</td><td>雜訊膨脹（占最多 52%）</td><td>artifact</td></tr>
+</tbody></table>
+<div class="callout c-info"><strong>確認的事實（Bonferroni-survived）</strong>
+FP-strong vs TP-strong 3 維顯著不同：coverage（TP 102 vs FP 50, p=6e-7）/ baseline（0.59 vs 0.82, p=4e-4）/ LOH（36% vs 92%, p=6e-7）。<b>已撤回</b>先前「FP \|Δβ\| 更大」（p=0.137 不顯著）。這 3 維機制互相關 = 同一 artifact regime。</div>
+
+<h2><span class="n">§3</span>三個待驗假設 — 要驗什麼 + 方法依據</h2>
+
+<div class="hq"><span class="hid">H2</span> <span class="badge b-run">scout 中</span> <b>濾掉 artifact 後，乾淨 regime（78 位點）的真 ASM 跨 7 樣本是否一致？</b><br>
+<span style="color:var(--txs);font-size:13.5px">→ 確認「真 ASM」是不是真現象（雖稀有）。<b>方法依據</b>：cross-sample 一致性是黃金標準。<b>關鍵風險</b>：其他 6 樣本可能<b>沒有 MSA 甲基 ASM 數據</b>（只有 phasing），若需 6 個 MSA rerun (~100GB BAM each) 則今晚 BLOCKED — scout 正在確認；若 blocked 改 within-sample bootstrap/chr-split proxy + 標 partial。</span></div>
+
+<div class="hq"><span class="hid">H3</span> <span class="badge b-run">scout 中</span> <b>LOH regime 的「ASM」是不是其實是 CNV？</b><br>
+<span style="color:var(--txs);font-size:13.5px">→ LOH 區物理上單 haplotype，HP1-vs-HP1-1 比較可能混入 copy-number/loss 而非甲基化。<b>方法依據</b>：充分 — 若 ASM 是 CNV artifact 則 Δβ 應隨 CN 系統性變化（Spearman + 分層 Kruskal-Wallis）；若真甲基則與 CN 無關。<b>資料</b>：HCC1395 有 SEQC2 CNV truth（gain/loss/cnLOH）。<b>可行性高</b>（既有單樣本數據）。</span></div>
+
+<div class="hq"><span class="hid">H5</span> <span class="badge b-run">scout 中</span> <b>「可信 ASM 篩選準則」能否把 ASM 從 anti-discriminative 救成 neutral？</b><br>
+<span style="color:var(--txs);font-size:13.5px">→ 用 \|Δβ\| 預測 is_TP 的 AUC：全部 vs 只 credible regime，看 AUC 是否從 &lt;0.5 升到 ~0.5+。<b>方法依據</b>：對齊 <code>auc-confound-guard</code>（permutation null + within-coverage-bin 控制）。<b>可行性高</b>（既有數據）。<b>風險</b>：credible regime n=78 算 AUC 樣本偏小 → 須報 CI/permutation。</span></div>
+
+<div class="callout c-warn"><strong>方法學自審（用戶要求的「是否有觀察依據 + 合理分析支持」）</strong>
+H3/H5 = 既有單樣本 HCC1395 數據可做，方法有充分依據（CN 分層 / AUC+confound-guard）。H2 跨樣本是黃金標準但<b>可能卡資料</b>（6 樣本 MSA ASM 是否存在）— 這是 workflow scout 階段優先確認的，避免盲目啟動 6×100GB BAM 重算。所有結論將標單樣本 partial flag（除非 H2 跨樣本資料齊）。</div>
+
+<h2><span class="n">§4</span>下一步</h2>
+<p>workflow（<code>wdvn0uhnl</code>）scout-then-execute 三 H 中。完成後我會建<b>互動 HTML</b>呈現每個 H 的：資料狀況 / 方法驗證 / 完整統計 / 視覺化圖 / verdict。本頁是執行前的方法 review，讓你先確認方向與方法合理性。</p>
+
+<div class="prov"><strong style="color:var(--acd)">Provenance</strong><br>
+2026-05-31 · Git HEAD 274f152 · HCC1395 paired_full 單樣本 · 親自重算（feedback_existing_artifacts_must_verify）<br>
+ASM 數據 <code>InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/</code> · 腳本 <code>scripts/20-23_*.py</code> · ledger 54-61<br>
+Tier [F] 全 first-hand。H2/H3/H5 結果待 workflow。regime 邊界為 heuristic。
+</div>
+</main></div></body></html>

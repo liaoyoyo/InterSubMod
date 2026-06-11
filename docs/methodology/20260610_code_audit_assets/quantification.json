@@ -1,0 +1,12 @@
+{
+  "_note": "本 session live 驗證真值; 由稽核 Bash 步驟讀回, 非估計",
+  "workflow": {"run_id":"wf_ea727f9a-ef5","reviewers":12,"agents":28,"total_findings":105,"high_crit":16,"confirmed":7,"refuted":3,"uncertain":6},
+  "PYTOOL_1_fill_report_null": {"fmt(None)":"None","fmt(nan)":"nan","resolve({auc:None},auc)":"(True, None)","verdict":"§13-A 構造防捏造有洞: null 值 found=True 不進 missing"},
+  "PYTOOL_3_queue_light": {"harness_health_counts":"status=='queued'","real_queue_statuses":{"rejected":7,"closed":6,"pending":5,"adopted_annotation":3,"adopted":2,"queued":0},"verdict":"queue 燈恆 0, 5 pending 不可見"},
+  "FISHER_2_chi_square_p": {"downstream_consumers_in_scripts_docs":0,"verdict":"placeholder 欄無下游消費 -> LOW"},
+  "HEADERS_4_min_common_coverage": {"Config.hpp:37":3,"DistanceMatrix.hpp:23":5,"DistanceMatrix.hpp:49":5,"ArgParser_default_text":3},
+  "DIST_3_use_binary_matrix": {"assigned_at":"RegionProcessor.cpp:427","read_in_DistanceMatrix.cpp":false,"verdict":"config 旗標 no-op"},
+  "FISHER_1_overdispersion_SYNTHETIC_ILLUSTRATIVE": {"n30":{"indep_FP@0.05":0.032,"od_rho0.3_FP":0.533,"inflation_x":16.7},"n60":{"indep_FP@0.05":0.033,"od_rho0.3_FP":0.676,"inflation_x":20.5},"_caveat":"合成示意非真資料; rho=0.3 假設值; 真量級需 methylation.csv read-level permutation"},
+  "ASM_5mC_only": {"MethylationParser_parses":"C+m? only","C+h?":"skipped(only delta-count for ml_offset)","verdict":"C++ binary 5mC-only, 忽略 5hmC"},
+  "already_fixed_or_sound": {"citation_Orjuela":"commit 891e04b 已修","KDE_wired":"RegionProcessor.cpp:687 estimate_diploid_coverage 已呼叫","CramersV_gate":"GlobalTest.cpp:112 Cochran expected>=5 規則 sound"}
+}

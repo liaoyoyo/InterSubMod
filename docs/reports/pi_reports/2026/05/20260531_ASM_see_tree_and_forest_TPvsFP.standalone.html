@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>甲基 ASM 見樹也見林 + TP vs FP 特殊現象 (2026-05-31)</title>
+<style>
+  :root{
+    --c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;
+    --c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;
+    --c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;--c-dead:#991B1B;
+    --c-tp:#15803D;--c-fp:#C2410C;
+    --ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;
+    --ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,Consolas,monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .layout{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:220px 1fr;gap:24px;padding:24px 16px}
+  aside.toc{position:sticky;top:16px;align-self:start;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;padding:14px 12px;box-shadow:0 1px 2px rgba(20,20,19,.05);max-height:calc(100vh - 48px);overflow-y:auto}
+  aside.toc h3{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-soft);margin:0 0 8px;font-weight:700}
+  aside.toc a{display:block;padding:5px 8px;border-radius:4px;color:var(--c-text);text-decoration:none;font-size:13px;border-left:3px solid transparent}
+  aside.toc a:hover{background:var(--c-code-bg);border-left-color:var(--c-accent)}
+  aside.toc a.active{background:var(--c-code-bg);border-left-color:var(--c-accent-deep);font-weight:600}
+  main{background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;box-shadow:0 2px 8px rgba(20,20,19,.08);padding:30px;min-width:0}
+  .hero{border-bottom:2px solid var(--c-accent);padding-bottom:14px;margin-bottom:20px}
+  .hero .pretitle{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--c-accent-deep);font-weight:700;margin-bottom:6px}
+  .hero h1{font-size:27px;margin:0 0 6px;line-height:1.25}
+  .hero .subtitle{color:var(--c-text-soft);font-size:15px;margin:0 0 12px}
+  .verdict{color:#fff;padding:15px;margin-top:12px;border-radius:6px;font-weight:500;line-height:1.55;background:linear-gradient(90deg,#1E3A8A,#3B82F6)}
+  .verdict strong{font-weight:700}
+  h2{font-size:22px;margin:34px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--c-border);scroll-margin-top:16px}
+  h2 .n{font-family:var(--ff-mono);color:var(--c-accent-deep);font-size:.62em;margin-right:8px;font-weight:600}
+  h3{font-size:16px;margin:18px 0 6px}
+  p,ul,ol{margin:9px 0}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13px}
+  th,td{border-bottom:1px solid var(--c-border);padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:var(--c-code-bg);font-weight:700;border-bottom:2px solid var(--c-accent)}
+  td.num,th.num{text-align:right;font-family:var(--ff-mono)}
+  td.mono{font-family:var(--ff-mono);font-size:.92em}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:11px;margin:12px 0}
+  .stat{background:var(--c-bg);border:1px solid var(--c-border);border-radius:6px;padding:11px;text-align:center}
+  .stat .v{font-size:24px;font-weight:700;color:var(--c-accent);line-height:1.1;font-family:var(--ff-mono)}
+  .stat .v.tp{color:var(--c-tp)}.stat .v.fp{color:var(--c-fp)}.stat .v.info{color:var(--c-info)}
+  .stat .l{font-size:11px;color:var(--c-text-soft);margin-top:4px;line-height:1.35}
+  .badge{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10.5px;font-weight:700;vertical-align:middle}
+  .b-tp{background:#DCFCE7;color:#166534}.b-fp{background:#FEE2E2;color:#991B1B}.b-tier{background:#EFF6FF;color:#1E40AF;font-family:var(--ff-mono)}.b-warn{background:#FEF3C7;color:#78350F}
+  .funnel{margin:14px 0}
+  .funnel-row{display:flex;align-items:center;gap:10px;margin:3px 0}
+  .funnel-bar{height:26px;background:linear-gradient(90deg,var(--c-info),#60A5FA);border-radius:4px;display:flex;align-items:center;padding:0 10px;color:#fff;font-weight:700;font-size:12.5px;font-family:var(--ff-mono);min-width:40px}
+  .funnel-row .lab{font-size:12.5px;color:var(--c-text-soft);width:170px;flex-shrink:0}
+  .callout{padding:11px 15px;margin:12px 0;border-radius:6px;border-left:4px solid}
+  .c-tp{background:#F0FDF4;border-color:var(--c-tp);color:#166534}
+  .c-fp{background:#FEF2F0;border-color:var(--c-fp);color:#7F1D1D}
+  .c-warn{background:#FEF7E6;border-color:var(--c-warning);color:#78350F}
+  .c-info{background:#EFF6FF;border-color:var(--c-info);color:#1E40AF}
+  .callout strong{display:block;margin-bottom:4px}
+  .tree-cat{font-weight:700;font-size:14px;margin:14px 0 4px;padding:3px 10px;border-radius:4px;display:inline-block}
+  .tc-well{background:#DCFCE7;color:#166534}.tc-ext{background:#DBEAFE;color:#1E3A8A}.tc-sig{background:#EDE9FE;color:#5B21B6}.tc-canon{background:#F4EFE6;color:#6B6B66}.tc-fp{background:#FEE2E2;color:#991B1B}
+  code{background:var(--c-code-bg);padding:1px 6px;border-radius:3px;font-family:var(--ff-mono);font-size:.9em}
+  .updown{font-weight:700}.up{color:var(--c-fp)}.down{color:var(--c-tp)}
+  .prov{background:var(--c-code-bg);border-top:2px solid var(--c-accent);margin-top:40px;padding:18px;border-radius:6px;font-size:12px;color:var(--c-text-soft);line-height:1.6}
+  .prov code{font-size:.9em}
+  @media (max-width:860px){.layout{grid-template-columns:1fr}aside.toc{position:static;max-height:none}}
+  @media print{body{background:#fff}.layout{display:block;max-width:100%;padding:0}aside.toc{display:none}main{box-shadow:none;border:none;padding:0}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="toc" aria-label="導航">
+    <h3>章節</h3>
+    <a href="#headline">摘要</a>
+    <a href="#sec1">§1 見林 漏斗</a>
+    <a href="#sec2">§2 見樹 排序個案</a>
+    <a href="#sec3">§3 TP vs FP 特殊現象 ★</a>
+    <a href="#sec4">§4 機制結論</a>
+    <a href="#prov">Provenance</a>
+  </aside>
+
+  <main>
+    <header class="hero" id="headline">
+      <div class="pretitle">甲基 ASM 軸 2 · 見樹也見林 + TP-vs-FP 剖析 · 2026-05-31</div>
+      <h1>甲基化 × HP × somatic — 個案排序 + 大規模統計 + FP 特殊現象</h1>
+      <p class="subtitle">全基因組 per-site ASM（genome_survey_v2, 51,171 TP + 5,150 FP records）。HP-axis（HP1 vs HP1-1，somatic-controlled 乾淨軸）為主結論；ALLELE-axis 因 baseline allelic 甲基化 confound 僅列不下結論。每數字本 session 親自重算。</p>
+      <div class="verdict">
+        <strong>核心：甲基差異 per-site 可清楚定位 + 排序，但「差異越清楚」常常是 FP 的 artifact。</strong>
+        HP-axis strong-ASM 僅 57/23,771（0.34%）。<strong>FP 的 strong-ASM 是低 coverage（½ n_cpg）+ 極端 baseline（2× extremity）+ 92% 在 LOH 的雜訊膨脹</strong> — 非真生物。這就是為何 ASM 真實卻 anti-discriminative（不能判別 TP/FP）。
+      </div>
+    </header>
+
+    <h2 id="sec1"><span class="n">§1</span>見林 — 全基因組漏斗（HP-axis）</h2>
+    <div class="funnel">
+      <div class="funnel-row"><span class="lab">HP-axis records</span><div class="funnel-bar" style="width:100%">23,771</div></div>
+      <div class="funnel-row"><span class="lab">→ p &lt; 0.05</span><div class="funnel-bar" style="width:20%">4,694</div></div>
+      <div class="funnel-row"><span class="lab">→ Bonferroni</span><div class="funnel-bar" style="width:5%">98</div></div>
+      <div class="funnel-row"><span class="lab">→ strong-ASM (Bonf ∧ |Δβ|≥0.1)</span><div class="funnel-bar" style="width:3%;background:linear-gradient(90deg,#15803D,#22C55E)">57</div></div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat"><div class="v info">0.34%</div><div class="l">strong-ASM 佔 TP（稀有事件）</div></div>
+      <div class="stat"><div class="v">40% / 60%</div><div class="l">hypo / hyper（無強方向偏好）</div></div>
+      <div class="stat"><div class="v info">0.173</div><div class="l">median |Δβ| (strong)</div></div>
+      <div class="stat"><div class="v info">108</div><div class="l">median n_cpg (strong)</div></div>
+      <div class="stat"><div class="v fp">~5–10×</div><div class="l">strong-ASM 在 FP 富集（anti-discriminative）</div></div>
+    </div>
+    <p style="font-size:13px;color:var(--c-text-soft)">既有 synthesis（<code>output/phase2_dataverify_synthesis.md</code>）已用 13 個 confound test 證實：在相同 n_cpg 下 strong-ASM |Δβ| = 7.64× matched background（168/168 位點，paired Wilcoxon p=2.5e-29）→ <strong>effect-size 核心非 coverage artifact</strong>；唯一被修正的是 spatial pseudo-replication（32→~26 獨立位點）。</p>
+
+    <h2 id="sec2"><span class="n">§2</span>見樹 — 排序的個案（HP-axis，32 位點完整於 TSV）</h2>
+
+    <div class="tree-cat tc-well">🟢 well-explained（anchor）</div>
+    <table>
+      <thead><tr><th>位點</th><th>基因</th><th class="num">Δβ</th><th class="num">germ→som</th><th class="num">n_cpg</th><th class="num">p</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">chr13:32,315,128</td><td>BRCA2/ZAR1L</td><td class="num down">−0.122</td><td class="num">0.234→0.112</td><td class="num">197</td><td class="num">6.6e-10</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tree-cat tc-ext">🔵 extreme |Δβ|（最強 ASM，多為 hyper = somatic 更甲基化）</div>
+    <table>
+      <thead><tr><th>位點</th><th>軸/LOH</th><th class="num">Δβ</th><th class="num">germ→som</th><th class="num">n_cpg</th><th class="num">p</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">chr9:42,376,881</td><td>HP2 / nonLOH</td><td class="num up">+0.665</td><td class="num">0.173→0.839</td><td class="num">26</td><td class="num">3.0e-08</td></tr>
+        <tr><td class="mono">chr17:9,577,080</td><td>HP2 / LOH</td><td class="num up">+0.584</td><td class="num">0.265→0.849</td><td class="num">114</td><td class="num">5.4e-19</td></tr>
+        <tr><td class="mono">chr12:31,601,630</td><td>HP2 / nonLOH</td><td class="num up">+0.581</td><td class="num">0.368→0.949</td><td class="num">103</td><td class="num">1.8e-17</td></tr>
+        <tr><td class="mono">chr20:55,084,626</td><td>HP1 / nonLOH</td><td class="num up">+0.532</td><td class="num">0.319→0.851</td><td class="num">66</td><td class="num">6.3e-11</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tree-cat tc-sig">🟣 top significance（最顯著，高 n_cpg）</div>
+    <table>
+      <thead><tr><th>位點</th><th>軸/LOH</th><th class="num">Δβ</th><th class="num">n_cpg</th><th class="num">p</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">chr11:72,822,508</td><td>HP2 / LOH</td><td class="num down">−0.142</td><td class="num">245</td><td class="num">9.2e-26</td></tr>
+        <tr><td class="mono">chr2:23,386,385</td><td>HP2 / LOH</td><td class="num down">−0.152</td><td class="num">412</td><td class="num">2.8e-24</td></tr>
+        <tr><td class="mono">chr17:79,991,714</td><td>HP1 / nonLOH</td><td class="num up">+0.138</td><td class="num">191</td><td class="num">2.5e-17</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tree-cat tc-fp">🔴 FP-enriched cautionary（最大 ASM 反而是 FALSE POSITIVE — 誠實的關鍵）</div>
+    <table>
+      <thead><tr><th>位點 (FP)</th><th>軸/LOH</th><th class="num">Δβ</th><th class="num">germ→som</th><th class="num">n_cpg</th><th class="num">p</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">chr8:120,343,636</td><td>HP1 / <strong>LOH</strong></td><td class="num down">−0.613</td><td class="num">0.954→0.342</td><td class="num"><strong>19</strong></td><td class="num">3.8e-06</td></tr>
+        <tr><td class="mono">chr8:81,351,760</td><td>HP2 / <strong>LOH</strong></td><td class="num down">−0.461</td><td class="num">0.938→0.477</td><td class="num"><strong>18</strong></td><td class="num">7.6e-06</td></tr>
+        <tr><td class="mono">chr8:81,432,622</td><td>HP2 / <strong>LOH</strong></td><td class="num down">−0.240</td><td class="num">0.772→0.532</td><td class="num">32</td><td class="num">1.2e-06</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;color:var(--c-fp)"><strong>注意 pattern</strong>：FP cautionary 樹全是 <strong>LOH + 極高 germline baseline（0.94-0.95）+ 低 n_cpg（18-19）+ hypo 大跳</strong> — 這正是 §3 量化的 FP 特徵。</p>
+
+    <h2 id="sec3"><span class="n">§3</span>TP vs FP 特殊現象 ★（你問的核心）</h2>
+    <p>把 TP-strong（n=66）與 FP-strong（n=26）逐維比較（HP-axis），FP 的 strong-ASM 有 <strong>4 個系統性特殊現象</strong>：</p>
+    <table>
+      <thead><tr><th>指標（HP-axis strong-ASM）</th><th class="num">TP-strong</th><th class="num">FP-strong</th><th>FP 特殊現象</th></tr></thead>
+      <tbody>
+        <tr><td>strong-ASM rate</td><td class="num">0.28%</td><td class="num">1.38%</td><td><span class="updown up">5× 富集</span> 於 FP</td></tr>
+        <tr><td>median n_cpg（coverage）</td><td class="num">102</td><td class="num">50.5</td><td><span class="updown down">½ coverage</span> → 估計噪</td></tr>
+        <tr><td>baseline extremity（離 0.5）</td><td class="num">0.159</td><td class="num">0.318</td><td><span class="updown up">2× 極端 baseline</span></td></tr>
+        <tr><td>% germ 極端（&gt;0.4 from .5）</td><td class="num">6.1%</td><td class="num">26.9%</td><td><span class="updown up">4.4× 在飽和甲基化</span></td></tr>
+        <tr><td>median |Δβ|</td><td class="num">0.170</td><td class="num">0.209</td><td><span class="updown up">表面更大</span>（噪膨脹）</td></tr>
+        <tr><td>hypo %</td><td class="num">42%</td><td class="num">61.5%</td><td>偏 hypo（從高 baseline regression）</td></tr>
+        <tr><td><strong>LOH %</strong></td><td class="num">36%</td><td class="num"><strong>92.3%</strong></td><td><span class="updown up">幾乎全在 LOH</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout c-fp">
+      <strong>FP 特殊現象 = 雜訊膨脹三連（低 coverage + 極端 baseline + LOH）</strong>
+      FP 的「清楚 ASM」不是真生物訊號，而是 <strong>regression-to-mean artifact</strong>：在 LOH 區（92%）+ germline 甲基化飽和（~0.82, 27% 極端）+ CpG 覆蓋只剩一半（n_cpg 50 vs 102）的情況下，somatic-haplotype reads 的甲基估計噪大且從極端值回歸 → 產生看似大的 \|Δβ\|（多為 hypo），但本質是測量噪 + 統計回歸，非 allele-specific 生物現象。
+    </div>
+    <div class="callout c-tp">
+      <strong>對照 — TP 的 ASM 較可信</strong>
+      TP-strong 有 <strong>2× coverage（n_cpg 102）+ 中段 baseline（0.586，非飽和）+ 多為 nonLOH（64%）</strong>。BRCA2（n_cpg 197, germ 0.234 中低, nonLOH）正是 TP-side 可信 ASM 的典範。
+    </div>
+
+    <h2 id="sec4"><span class="n">§4</span>機制結論 — 對你研究目標的回答</h2>
+    <ul>
+      <li><strong>能清楚定位 + 排序甲基差異</strong>（見樹）：✅ per-site Δβ 從 −0.61 到 +0.67 全可定位排序，BRCA2/extreme/canonical/FP 各類清楚。</li>
+      <li><strong>能大規模統計確認整體</strong>（見林）：✅ 漏斗 23,771→57 strong；方向無偏好；effect-size 核心抗 13-test confound。</li>
+      <li><strong>FP 有清楚可辨的特殊現象</strong>：✅ 低 coverage + 極端 baseline + 92% LOH + 表面大 \|Δβ\| → 是雜訊膨脹，非真生物。</li>
+      <li><strong>但「差異清楚」≠「位點有利」</strong>：最大的 ASM（−0.613）是 FP；strong-ASM 在 FP 富集 5×。所以 <strong>ASM 真實可定位，但不能當 somatic/TP 判據</strong>（anti-discriminative 已被機制解釋）。</li>
+    </ul>
+    <div class="callout c-warn">
+      <strong>可操作的「可信 ASM」篩選準則（從 TP vs FP 差異導出）</strong>
+      若未來要挑「可信的 per-site ASM」位點，應加門檻：<strong>n_cpg ≥ ~100（高 coverage）+ germline baseline 非極端（0.5±0.3 內）+ 優先 nonLOH</strong>，並對 LOH 位點標 caveat。BRCA2 符合全部 → 可信 anchor；chr8 FP 群全部不符 → 應排除。
+    </div>
+
+    <div class="prov" id="prov">
+      <strong style="color:var(--c-accent-deep)">Provenance · Reproducibility</strong><br>
+      建立 2026-05-31 · Git HEAD 274f152 (refactor/phase1-safety) · 樣本 HCC1395 paired_full（單樣本）· 所有數字本 session 親自從 TSV 重算（per <code>feedback_existing_artifacts_must_verify</code>）。<br>
+      數據：<code>InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/asm_dualaxis_{tp,fp}.tsv</code>（51,171 TP + 5,150 FP, MAX-collapse 修正口徑）<br>
+      腳本：<code>20_see_tree_and_forest.py</code>（見樹也見林）+ <code>21_tp_vs_fp_asm.py</code>（TP vs FP）· 輸出 <code>obs20_ranked_trees.tsv</code> + <code>obs20_forest_stats.json</code> + <code>obs21_tp_vs_fp_asm.json</code><br>
+      既有 forest：<code>output/phase2_dataverify_synthesis.md</code>（13-test confound battle）<br>
+      <strong>Tier 與限制</strong>：[F] 全部 first-hand 重算。HP-axis = somatic-controlled 主結論；ALLELE-axis confounded 僅列。單樣本 HCC1395，跨樣本 NOT verified。本分析屬 characterization（非 TP/FP filter — ASM 已確認 anti-discriminative）。設計準則 Tufte / CRAP / Assertion-Evidence / 5-sec / WCAG / CJK font。
+    </div>
+  </main>
+</div>
+<script>
+(function(){
+  var links=document.querySelectorAll('aside.toc a');
+  var secs=Array.from(links).map(function(a){return document.getElementById(a.getAttribute('href').slice(1))}).filter(Boolean);
+  function upd(){var y=window.scrollY+100,cur=secs[0];secs.forEach(function(s){if(s.offsetTop<=y)cur=s});
+    links.forEach(function(a){a.classList.remove('active')});
+    if(cur){var el=document.querySelector('aside.toc a[href="#'+cur.id+'"]');if(el)el.classList.add('active')}}
+  var t=false;window.addEventListener('scroll',function(){if(!t){requestAnimationFrame(function(){upd();t=false});t=true}});upd();
+})();
+</script>
+</body>
+</html>

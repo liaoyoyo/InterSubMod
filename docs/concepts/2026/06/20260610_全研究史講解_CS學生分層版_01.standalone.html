@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<!--
+建立時間: 2026-06-10
+狀態: concept (全研究史講解 — CS 學生分層版，整個專案 2026-03→06 的成果/機會/不可行 + 時間軸 + 依賴 + 認知負荷概念)
+報告類型: whole_research_explainer_cs_student
+受眾: 有點背景但不懂基因體細節的 CS 學生 · 廖子游 · PI
+data_sources:
+  - research/autoresearch/evidence_ledger.jsonl (95 entries, 2026-03-22→2026-06-09)
+  - docs/experiments/INDEX.md (324)
+  - memory/MEMORY.md + project_research_vision_five_goals.md
+  - docs/paper_focus/ (current G6 convergence)
+  - docs/reports/research_landscape/
+verification: workflow wf_00703788-94f (8 agents) 萃取分類；數字皆帶 ledger cycle_id source
+provenance_note: 全數字由 workflow 從上列檔萃取，每條附 ledger source；🟢 已驗 / 🟡 contingent/未跑 / 🔵 framing。本 HTML Write 與 workflow 萃取不同 batch（§13.0）。
+-->
+<!-- provenance-verified: 數字由 wf_00703788-94f 萃取自 evidence_ledger/INDEX/memory（各條附 cycle_id）；catalog 數字另經 wf_5644ed77-082 6/6 重驗 + 本 session grep。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InterSubMod 全研究史講解 — CS 學生分層版</title>
+<style>
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --c-cs:#5B3FA0; --c-cs-soft:#ECE6F6;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.7;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:0 var(--sp-5);display:flex;align-items:center;gap:var(--sp-3);min-height:52px;flex-wrap:wrap}
+.topbar h1{font-size:.9rem;margin:0;font-weight:700}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap;font-size:.74rem;margin-left:auto}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 8px;border:1px solid var(--c-border);border-radius:18px;white-space:nowrap}
+.topbar nav a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+header.hero{padding:var(--sp-7) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h2{font-size:1.85rem;line-height:1.3;margin:var(--sp-3) 0}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-4) var(--sp-5);margin:var(--sp-4) 0}
+.bluf b{color:#9c4a2c}
+.howto{background:var(--c-cs-soft);border:1px solid var(--c-cs);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);font-size:.86rem;margin:var(--sp-3) 0}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.4rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:700;font-size:.95rem}
+section .sub{color:var(--c-text-soft);font-size:.95rem;margin:0 0 var(--sp-5);max-width:880px}
+h4{font-size:1.05rem;margin:var(--sp-5) 0 var(--sp-2)}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.b-cs{color:var(--c-cs);background:var(--c-cs-soft);border-color:var(--c-cs)}
+.tier{color:var(--c-text-soft);background:#F0EDE6;border-color:var(--c-border)}
+/* overview cards */
+.three{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-4) 0}
+.three .col{flex:1;min-width:240px;border-radius:var(--radius);padding:var(--sp-4);border:1px solid}
+.three .ach{background:var(--c-pass-soft);border-color:var(--c-pass)}
+.three .opp{background:var(--c-warn-soft);border-color:var(--c-warn)}
+.three .inf{background:var(--c-dead-soft);border-color:var(--c-dead)}
+.three .col b{font-size:1.05rem;display:block;margin-bottom:4px}
+.three .col .n{font-family:var(--mono);font-size:1.6rem;font-weight:700}
+.three .col small{display:block;color:var(--c-text-soft);font-size:.82rem;margin-top:6px}
+/* collapsible cards */
+details.card{margin:var(--sp-2) 0;border:1px solid var(--c-border);border-radius:var(--radius);background:var(--c-card);overflow:hidden;box-shadow:0 1px 2px rgba(20,20,19,.05)}
+details.card>summary{cursor:pointer;list-style:none;padding:var(--sp-3) var(--sp-4);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--c-accent);font-weight:700}
+details.card[open]>summary::before{content:"▾"}
+details.card>summary .t{font-weight:700;flex:1;min-width:220px}
+details.card>summary .when{font-family:var(--mono);font-size:.74rem;color:var(--c-text-soft)}
+details.card.ach{border-left:4px solid var(--c-pass)} details.card.opp{border-left:4px solid var(--c-warn)} details.card.inf{border-left:4px solid var(--c-dead)} details.card.cs{border-left:4px solid var(--c-cs)}
+.body{padding:0 var(--sp-4) var(--sp-4);border-top:1px solid var(--c-border)}
+.kv{display:grid;grid-template-columns:88px 1fr;gap:3px var(--sp-3);font-size:.9rem;margin-top:var(--sp-3)}
+.kv dt{font-weight:700;color:var(--c-text-soft)}
+.kv dd{margin:0}
+.concl{background:var(--c-pass-soft);border-radius:6px;padding:var(--sp-2) var(--sp-3);font-size:.88rem;margin-top:var(--sp-3)}
+.inf .concl{background:var(--c-dead-soft)} .opp .concl{background:var(--c-warn-soft)}
+.why{font-size:.84rem;color:var(--c-text-soft);margin-top:var(--sp-2);font-style:normal}
+.src{font-family:var(--mono);font-size:.72rem;color:var(--c-text-soft);display:block;margin-top:6px;word-break:break-word}
+/* timeline */
+.tl{border-left:3px solid var(--c-accent);margin-left:8px;padding-left:var(--sp-4)}
+.tl .ph{position:relative;margin:var(--sp-4) 0}
+.tl .ph::before{content:"";position:absolute;left:calc(-1*var(--sp-4) - 9px);top:6px;width:11px;height:11px;border-radius:50%;background:var(--c-accent)}
+.tl .ph .per{font-family:var(--mono);font-weight:700;color:var(--c-accent);font-size:.85rem}
+.tl .ph .ti{font-weight:700}
+.tl .ph .pivot{background:var(--c-accent-soft);border-radius:6px;padding:6px 10px;font-size:.84rem;margin-top:6px}
+/* CS analogy box */
+.csbox{background:var(--c-cs-soft);border:1px solid var(--c-cs);border-radius:8px;padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;font-size:.9rem}
+.csbox b{color:var(--c-cs)}
+.csbox .lbl{font-family:var(--mono);font-size:.72rem;color:var(--c-cs);font-weight:700;text-transform:uppercase}
+.whybox{background:#FCFBF8;border:1px dashed var(--c-border);border-radius:6px;padding:var(--sp-2) var(--sp-3);font-size:.85rem;margin:var(--sp-2) 0}
+figure{margin:var(--sp-4) 0;text-align:center}
+figure svg{max-width:100%;height:auto;border:1px solid var(--c-border);border-radius:8px;background:#fff}
+figcaption{font-size:.8rem;color:var(--c-text-soft);margin-top:6px}
+.edges{font-size:.86rem}
+.edges .e{padding:6px 0;border-bottom:1px dotted var(--c-border)}
+.edges .e .ar{color:var(--c-accent);font-weight:700}
+footer{border-top:1px solid var(--c-text);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-7);font-size:.78rem;color:var(--c-text-soft)}
+footer code{font-family:var(--mono);background:#F0EDE6;padding:1px 5px;border-radius:4px}
+svg text{font-family:var(--sans)}
+@media (max-width:680px){.kv{grid-template-columns:1fr}}
+@media print{.topbar{position:static}details.card[open] .body{display:block}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in">
+  <h1>InterSubMod 全研究史講解（CS 學生版）</h1>
+  <nav>
+    <a href="#what">這是什麼</a><a href="#timeline">時間軸</a><a href="#overview">三分類</a>
+    <a href="#ach">成果10</a><a href="#opp">機會7</a><a href="#inf">不可行18</a><a href="#dep">依賴圖</a><a href="#concepts">CS概念10</a>
+  </nav>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <div class="kicker">Whole-research explainer · 2026-03 → 2026-06 · for a CS student</div>
+  <h2>一個癌症長讀甲基化研究的完整故事：<br>它證明了什麼、未來能做什麼、什麼此路不通（以及為什麼）</h2>
+  <div class="bluf"><b>一句話：</b>用「長讀定序」同時讀腫瘤的 <b>突變(somatic)</b>、<b>單倍型(haplotype)</b>、<b>甲基化(methylation)</b> 三種訊號，問「甲基化能不能幫忙判斷哪些突變是真的」。<b>答案是不能（甲基不是分類器），但它能 characterize（描述）腫瘤如何重塑表觀地景</b> —— 這個「誠實的負結果 + 一份描述目錄」就是研究的核心產出。</div>
+  <div class="howto">🎓 <b>怎麼讀（給 CS 學生）</b>：每個概念都配一個你熟的 <b>CS 類比</b>（LOH=RAID-1 鏡像、phasing=git-blame、循環依賴=train/test leakage、germline/somatic=base vs diff、FDR=多重比較…）。<b>細節都收在可展開的卡片裡（▸ 點開）</b>，讀到夠就停。證據色：🟢 已驗 / 🟡 未跑或 contingent / 🔵 立場。每個數字都附 ledger 來源。</div>
+</div></header>
+
+<main class="wrap">
+
+<!-- ============ 這是什麼 ============ -->
+<section id="what">
+  <h3><span class="num">0</span> 這研究到底在做什麼？（30 秒版）</h3>
+  <p class="sub">先給 CS 學生一個能掛東西的骨架，再展開。</p>
+  <p><b>問題設定：</b>癌症定序要找出腫瘤「後天獲得的突變」（somatic variants）。但工具（caller）會誤報一堆假突變（false positives, FP）。研究問：<b>能不能用「甲基化」這個額外訊號當特徵，把真突變(TP)和假突變(FP)分開、提升準確率(F1)？</b></p>
+  <p><b>三個訊號（都在同一條長讀 read 上同時讀到）：</b></p>
+  <ul>
+    <li><b>somatic 突變</b> = 腫瘤後天獲得的變異（要找的目標）。<span class="badge b-cs">CS 類比</span> 相對 germline baseline 的 <code>diff</code>。</li>
+    <li><b>haplotype / phasing</b> = 這條 read 來自父方還母方染色體。<span class="badge b-cs">CS 類比</span> git-blame：把交錯的行歸回各自分支。</li>
+    <li><b>methylation 甲基化</b> = CpG 位點上的化學標記（開/關）。<span class="badge b-cs">CS 類比</span> 一個 label-conditioned 特徵。</li>
+  </ul>
+  <div class="bluf"><b>六個月後的結論（一句）：</b>甲基化<b>不能</b>當分類器篩突變（試了至少 4 種方式全失敗，而且失敗都有乾淨的 confound 原因）；但甲基化訊號<b>真實存在</b>、跨癌種可復現，且在「LOH 區域 somatic 突變如何形成同一單倍型的子家族」這件事上提供了一個跨樣本一致的 phasing 訊號。→ 論文從「filter（分類器）」<b>轉向</b>「characterization（描述）+ tooling（工具）」。</div>
+</section>
+
+<!-- ============ 時間軸 ============ -->
+<section id="timeline">
+  <h3><span class="num">1</span> 時間軸 — 研究怎麼演化的（6 個階段 + 每階段的轉折）</h3>
+  <p class="sub">這研究不是一條直線，是「探索 filter → 撞牆 → 發現根因 → 轉向 characterization」的過程。每個 ▸ 可展開看那階段發生什麼。</p>
+  <div class="tl">
+    <div class="ph"><span class="per">2026-03</span> · <span class="ti">TO FP 規則掃描 + 揭露 self-phasing 根因</span>
+      <details class="card"><summary><span class="t">展開細節</span></summary><div class="body">
+        <p>起點：ClairS-TO caller 輸出 FP 率高。PoN（panel of normals）已移除 99.48% raw FP（2,717,339/2,731,541），剩下 ~80 個/樣本是 germline leak，且在甲基化上「長得像」真突變。掃 QS/GQ 單規則（H011 QS≥50 ΔF1=+0.0086），甲基新特徵 H003 AUROC=0.473（隨機）→ reject。同時揭露 self-phasing 循環依賴：somatic HP bias 17.3:1。</p>
+      </div></details>
+      <div class="pivot"><b>轉折：</b>能 filter 的已被 PoN 拿掉，剩的 FP 在甲基化上像 TP → 認知到 HP 特徵全失效不是設計問題，是 <b>self-phasing 循環污染</b>。</div>
+    </div>
+    <div class="ph"><span class="per">2026-04 上</span> · <span class="ti">KDE infra fix 推翻 baseline + LOH-phasing 主軸誕生</span>
+      <details class="card"><summary><span class="t">展開細節</span></summary><div class="body">
+        <p>修了一個 infra bug：CN 估計的 expected_coverage 被 hardcode 成 75×，實際 HCC1395 是 53.0×（SEQC2 真值 54×）→ 舊值是 +39% artifact。這個修復<b>推翻了多個 COLO829 結論</b>（2 個 CRITICAL claim RETRACT）。同期發現 LOH-constrained phasing：NG=2 Inner same-HP1 vs Outer gap 6/6 樣本皆正（Wilcoxon W=21 p=0.0156），Inner×NG=2 ≥93% same-haplotype。</p>
+      </div></details>
+      <div class="pivot"><b>轉折：</b>infra bug 證明多個結論是計算 artifact（2 RETRACT）；同時 NG=2 same-hap phasing signature 成為<b>論文主軸候選</b>（從 filter pivot 到 phasing）。</div>
+    </div>
+    <div class="ph"><span class="per">2026-05 上</span> · <span class="ti">self-phasing priority-bug audit（baseline→V3F→V5→V6 修補鏈）</span>
+      <details class="card"><summary><span class="t">展開細節</span></summary><div class="body">
+        <p>量化 priority bug：全基因組 34,855 個 read-level victims（chr19 僅占 2.16%，推翻 chr19 是 hotspot）。三層獨立證據鏈（17.3:1 bias + IGV + 34,855 victims）。V6 patch 移除 Layer 1.5 後 strictly dominates baseline（marker +52.4%），但 caller F1 三版完全相同 0.7166（修 phasing 不改 caller 結果）。PI 簽核 V6 4-goal PASS（254/273 verified，0 fabrication）。</p>
+      </div></details>
+      <div class="pivot"><b>轉折：</b>self-phasing 是「壓低真信號」非「製造假信號」→ V6 確立為 production baseline。</div>
+    </div>
+    <div class="ph"><span class="per">2026-05 中</span> · <span class="ti">甲基 filter Phase 2 — LOSO 揭露 100% 循環（filter 方向死）</span>
+      <details class="card"><summary><span class="t">展開細節</span></summary><div class="body">
+        <p>甲基 filter pilot：加 5 個甲基特徵的 LR，in-sample ΔF1=+0.02236 看似不錯。但<b>決定性的 LOSO（leave-one-sample-out）</b>：held-out −0.00012 = <b>100% sample-level circularity</b>；5 樣本 mean −0.00004 Wilcoxon p=0.125（方向為負）；HCC1954 transfer −0.377 災難性。drop 全 5 甲基特徵只掉 +0.00065（甲基是 vestigial，caller_af coef +3.44 主導）。</p>
+      </div></details>
+      <div class="pivot"><b>轉折：</b>LOSO 證明 in-sample gain 全是循環（held-out 歸零）→ filter 方向 <b>WITHDRAWN</b>，論文改寫為 characterization study。</div>
+    </div>
+    <div class="ph"><span class="per">2026-05 下</span> · <span class="ti">ISM ASM characterization 誕生 — 但 somatic-specificity NEGATIVE</span>
+      <details class="card"><summary><span class="t">展開細節</span></summary><div class="body">
+        <p>ASM 主軸啟動：BRCA2 somatic hypo p=6.09e-11。修了 MSA dup-emission bug（5mC+5hmC 雙列把 beta 砍半），全 39,447 TP 重跑 Δβ=−0.122。但 B-discrimination NEGATIVE 且 <b>anti-discriminative</b>（strong-ASM 在 FP enriched 5×, Fisher OR=0.194 p=1.8e-28）；apparent somatic-specificity 是 threshold artifact（Bonferroni 後 OR 1.79→0.81）。imprinting 正控（blind-ARI 0.758）反證方法有效 → 所以 NEGATIVE 是真 biology。</p>
+      </div></details>
+      <div class="pivot"><b>轉折：</b>ASM 真實存在但反覆證明非 somatic-特異、非判別器 → pivot 到 cis-test 深掘。</div>
+    </div>
+    <div class="ph"><span class="per">2026-06</span> · <span class="ti">de-confound 收斂 + 跨樣本復現 + 332,705 位點 catalog</span>
+      <details class="card"><summary><span class="t">展開細節</span></summary><div class="body">
+        <p>用 copy-partition 把「看起來像 cis 的 ASM」拆解：BRCA2 的 −0.122 為 subclone/copy-confounded（HP1-1=somatic subclone tag 非 copy、非 CN-dosage；焦點 cis d_within 只 −0.023，邊際；% split 不 robust）。copy dosage decisively NOT driver（MW p=0.62, signed ρ=−0.083 反向）。全基因組 816 個 HP-axis loci 中<b>只有 1 個乾淨 cis = chr17/TBC1D16</b>。跨樣本：同位點 0/38 復發（private），但 genome-wide 6/6 excess-over-null（mean 0.168, 3 癌種）= 現象復現。收斂成 332,705 位點 7-TAG catalog。</p>
+      </div></details>
+      <div class="pivot"><b>轉折（現況）：</b>收斂到 <b>read-level characterization + tooling catalog（非 filter）</b>；全基因組僅 chr17 唯一乾淨 cis exemplar。唯一卡關 = HD-1（phasing 循環對照，待用戶決定）。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 三分類總覽 ============ -->
+<section id="overview">
+  <h3><span class="num">2</span> 三分類總覽 — 哪些有成果 / 哪些是機會 / 哪些不可行</h3>
+  <p class="sub">研究的所有 thread（35 條）分三類。這是回答你「哪些可當目標、哪些未來有機會、哪些不可行」的核心。</p>
+  <div class="three">
+    <div class="col ach"><b>✅ 成果（可當目標/貢獻）</b><span class="n">10</span><small>已驗證、可寫進論文的紮實結果：LOH-phasing 脊柱、ASM 存在、chr17 cis、catalog、self-phasing 根因、KDE fix…</small></div>
+    <div class="col opp"><b>🟡 機會（未來有潛力）</b><span class="n">7</span><small>有潛力但未驗/受限：甲基輔助 phasing(umtag)、cis 大規模協議、FDR 校準、5mC 純化、Δβ 通道、latent 納回…</small></div>
+    <div class="col inf"><b>🔴 不可行（已死+原因）</b><span class="n">18</span><small>已 NEGATIVE/NO-GO，且死因明確（多為 confound）：甲基 filter、ASM 判別、subclone clustering、germline FP、O9/O11/O12/O13…</small></div>
+  </div>
+  <div class="howto">💡 <b>一個關鍵體會：</b>18 個「不可行」<b>不是浪費</b> —— 它們大多是「一個看似很強的訊號，其實是 confound 假象」的故事。<b>把它們嚴謹證死、講清楚死因，本身就是論文最可防守的貢獻（一份『甲基能/不能做什麼』的誠實目錄）。</b></div>
+</section>
+
+<!-- ============ 成果 ============ -->
+<section id="ach">
+  <h3><span class="num">3</span> ✅ 成果 ×10 — 可當論文目標/貢獻的紮實結果</h3>
+  <p class="sub">每條：目標 / 過程 / 結論(含數字) / tier / 證據 / 為何算成果。點 ▸ 展開。</p>
+
+  <details class="card ach" open><summary><span class="t">① LOH-constrained phasing（NG=2 同單倍型訊號）— 論文脊柱</span><span class="badge tier">⭐5 TO / Grade B+</span><span class="when">2026-04-22→05-30</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>LOH 區 NG=2 的 Inner reads ≥93% 屬同一單倍型（6/6, 0 reversal）；TP gap median +0.37；跨樣本 Wilcoxon W=28 p=0.0078（7/7 正向，exact 最小值）；paired 對照 p=0.578 NS → 現象是 TO-specific。</div>
+    <dl class="kv">
+      <dt>目標</dt><dd>證明 TO 模式下 LOH 區 Inner×NG=2 reads 屬同一 haplotype，作論文主軸</dd>
+      <dt>過程</dt><dd>Inner vs Outer gap 量化；6→7 樣本 Wilcoxon signed-rank；paired 負控；C++ 證據 LabelTest.cpp:265-302</dd>
+      <dt>tier</dt><dd>⭐5 (TO-layer) / Grade B+</dd>
+    </dl>
+    <p class="why"><b>為何算成果：</b>跨樣本顯著 + 0 reversal + TO-specific 機制控制 + C++ 源碼證據。<b>唯一限制</b> = 06-08 稽核標「by-construction 循環風險」（HD-1 待決），但結果本身紮實。</p>
+    <span class="src">ledger 20260530_loh_phasing_n7_cross_sample_wilcoxon (W=28 p=0.0078) · 20260423_B1 (6-sample p=0.0156) · 20260423_B3 (paired NS p=0.578)</span>
+  </div></details>
+
+  <details class="card ach"><summary><span class="t">② ASM 廣泛存在 + 跨癌種復現（characterization positive）</span><span class="badge tier">⭐3 單pipeline封頂</span><span class="when">2026-05-29→06-03</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>BRCA2 HP-axis Δβ=−0.122（純 5mC, 2 抽取器交叉驗證）；strong-ASM 172/51,171（~26 獨立位點, hypo/hyper 無偏好）；<b>6/6 樣本 excess-over-null&gt;0</b>（+0.101~+0.241, mean 0.168, 3 癌種）= 現象跨癌種復現。</div>
+    <dl class="kv"><dt>目標</dt><dd>刻畫 ASM 在 somatic TP 位點的存在性與跨樣本復現性</dd><dt>過程</dt><dd>全 39,447 TP 重跑；各樣本 N=2000 private somatic + HP-shuffle null 算 excess</dd><dt>tier</dt><dd>⭐3（升 ⭐4 需 COLO829/第二 pipeline）</dd></dl>
+    <p class="why"><b>為何算成果：</b>ASM 真實 + 跨 3 癌種復現是可防守的 characterization 貢獻。<b>必看 excess 非 raw rate</b>（median |Δβ|&lt;0.10）。</p>
+    <span class="src">ledger 20260530 + 20260602 (Δβ=−0.122 _pure_5mC) · 20260603_genomewide_asm_rate_crosssample (6/6 mean 0.168)</span>
+  </div></details>
+
+  <details class="card ach"><summary><span class="t">③ 唯一乾淨 somatic cis-ASM exemplar — chr17/TBC1D16</span><span class="badge tier">⭐4 L1</span><span class="when">2026-06-03→06-07</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>全基因組僅 chr17:79991120/TBC1D16 三訊號乾淨（d_within=0.142 survive copy-partition）；copy DOSAGE decisively NOT driver（MW p=0.62, ρ=−0.083 反向）；816→Bonferroni T3=10；BRCA2 等其餘為 subclone/copy-confounded（HP1-1=somatic subclone tag 非 copy、非 CN-dosage）。</div>
+    <dl class="kv"><dt>目標</dt><dd>找 somatic/haplotype/甲基三訊號 read-level 正交佐證的乾淨範例（co-validation 例外）</dd><dt>過程</dt><dd>816 loci scan；within-tag copy-partition 3-test；dosage falsification；adversarial review</dd><dt>tier</dt><dd>⭐4 (L1)</dd></dl>
+    <p class="why"><b>為何算成果：</b>作 co-validation 例外的唯一乾淨範例（catalog TAG-A），經多次 adversarial correction 存活。TBC1D16 有 web-verified 生物動機（hypo→EGFR 黑色素瘤轉移）。<b>限制</b>：單 locus 單樣本 nominal p，第二樣本無法直接重現（需 COLO829）。</p>
+    <span class="src">ledger 20260603_copy_partition_3test_quantified · 20260607_fast_cnv_validation_results (only chr17 triple_clean)</span>
+  </div></details>
+
+  <details class="card ach"><summary><span class="t">④ 位點甲基分群 catalog（332,705 位點 → 7-TAG）</span><span class="badge tier">⭐3 B-validation</span><span class="when">2026-06-09</span></summary><div class="body">
+    <div class="concl"><b>結論（7-TAG）：</b>A=1（chr17 唯一乾淨 cis）/ B=5（copy-confounded）/ <b>C=12,868（germline-allelic 3.87%）</b> / D=5 / E=28,254（latent）/ F=54 / <b>G=291,518（無訊號 87.6%）</b>。🔴 自我修正 over-claim：same-hap 93% 實際只 3/6 ≥93%。</div>
+    <dl class="kv"><dt>目標</dt><dd>把 6 樣本全基因組甲基分群結構化成可交付 characterization catalog</dd><dt>過程</dt><dd>332,705 位點 7-TAG（reliable/latent/none 三態）；wf_5644ed77-082 adversarial 6/6 重驗；scripts 98-100</dd><dt>tier</dt><dd>⭐3</dd></dl>
+    <p class="why"><b>為何算成果：</b>論文核心交付物，明確定位 characterization（甲基分群真實但壓倒性<b>非 somatic 判別器</b>），不是 filter。待 FDR/null 校準（#24）但 de-confound 結論不垮。</p>
+    <span class="src">ledger 20260609_catalog_skeleton_and_provenance_reconcile · docs/paper_focus/.../catalog_結果_R6.md</span>
+  </div></details>
+
+  <details class="card ach"><summary><span class="t">⑤ Self-phasing 循環依賴 + priority-bug 修補鏈（baseline→V6）</span><span class="badge tier">⭐4-5 L1-L2</span><span class="when">2026-04-02→05-21</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>self-phasing = TO 問題根因（somatic HP bias 17.3:1, 62% LOH 是 artifact, d=−1.20, 7/7 一致）；全基因組 34,855 victims；V6 移除 Layer 1.5 後 strictly dominates baseline（net +7693 TP : +549 FP = 14:1）；caller F1 三版相同 0.7166；PI sign-off（254/273 verified, 0 fabrication）。</div>
+    <p class="why"><b>為何算成果：</b>根因確認 + 三層獨立證據鏈 + V6 strictly dominates + PI 簽核。是解釋<b>所有 TO HP 特徵失效</b>的因果錨點。</p>
+    <span class="src">ledger 20260508_T1_2_F1_genome_wide_audit · 20260511 V6 · 20260522_PI_V6_4goal_signoff</span>
+  </div></details>
+
+  <details class="card ach"><summary><span class="t">⑥ ASM 定量存在性（SNV-甲基化關聯, 5 方法交叉）</span><span class="badge b-pass">POSITIVE characterization</span><span class="when">2026-04-01</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>32-66% SNV 有 ASM；ISM PERMANOVA 唯一捕捉 entropy imbalance；但 FP(germline) ASM 46.4% &gt; TP(somatic) 35.9%（7/7 一致, mQTL 機制）。</div>
+    <p class="why"><b>為何算成果（characterization）：</b>ASM 存在 + ISM 工具獨特能力確立。<b>注意</b>：此 thread 同時是 filter-DEAD 的根因之一（FP&gt;TP 重疊太大）→ positive 面屬 characterization，判別面歸不可行。</p>
+    <span class="src">INDEX 'SNV-甲基化關聯' · research_landscape 環4</span>
+  </div></details>
+
+  <details class="card ach"><summary><span class="t">⑦ PoN 跨樣本 FP 移除（infra baseline）</span><span class="badge b-pass">⭐4</span><span class="when">2026-03-22→04-11</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>PoN 移除 raw FP 99.48%（mean 97.77% 跨 7 樣本）；殘餘 ~80 FP/樣本, 98.6% 是 raw_absent germline leak。</div>
+    <p class="why"><b>為何算成果（infra）：</b>穩定 baseline 確立 + 刻畫殘餘 FP 本質=germline leak（後續 filter 失敗的生物學起點解釋）。</p>
+    <span class="src">research_landscape 環1 · INDEX · ledger 20260324_paired_persistent_fp_deep_dive</span>
+  </div></details>
+
+  <details class="card ach"><summary><span class="t">⑧ CN KDE 雙-pass 校準（expected_coverage 75.0 infra bug 修復）</span><span class="badge b-warn">PARTIAL POSITIVE</span><span class="when">2026-04-19→04-20</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>HCC1395 KDE=53.0×（真值 54×, bias −1.9%），舊 75× 是 +39% artifact；SEQC2 Gain recall 14.6%→45.8%, Spearman(CovM,CN)=0.845；unit test 202→203。</div>
+    <p class="why"><b>為何算成果：</b>infra bug 修復 + 下游 CN proxy 方向 POSITIVE。標 PARTIAL（Gain recall 未達 80%）。<b>連帶揭露多個 COLO829 結論是 baseline artifact → 2 RETRACT</b>（見不可行類）。</p>
+    <span class="src">ledger 20260423 CL-CN-KDE-001 · INDEX KDE downstream</span>
+  </div></details>
+
+  <details class="card ach"><summary><span class="t">⑨ LOH Subclone AF×Methylation（Paired 層保留）</span><span class="badge b-pass">POSITIVE (Paired)</span><span class="when">2026-04-14</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>Paired ΔNG=+0.787（7/7, p&lt;10⁻⁶⁵, median r=0.755）保留 POSITIVE；TO 層 ΔNG=+0.705 但 2026-04-23 機制 pivot 為 phasing-driven（非甲基）。</div>
+    <p class="why"><b>為何算成果（Paired 層）：</b>4/4 H POSITIVE 不撤回。<b>但加 caveat</b>：TO 層機制後續判為 phasing（NGroups=HP-tag count, HD-4 RESOLVED）→ Paired 正面需獨立 phasing-vs-methylation 驗證才能歸因甲基。</p>
+    <span class="src">INDEX LOH Subclone AF×Methylation · MEMORY project_loh_subclone_af_methylation_positive</span>
+  </div></details>
+
+  <details class="card ach"><summary><span class="t">⑩ Per-CpG ASM + Epiallele 指標 C++ 整合（characterization）</span><span class="badge b-warn">CONDITIONAL POSITIVE</span><span class="when">2026-04-15</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>Filter value=0（全 AUC 0.38-0.54）；Characterization 確認（PERMANOVA concordance 84%）；推薦 C++ 整合 10 欄位。</div>
+    <p class="why"><b>為何算成果（characterization）：</b>filter 用途為 0 但 characterization 確認。屬<b>有潛力但需工程投入</b>（也列在機會類）。</p>
+    <span class="src">INDEX 'Per-CpG ASM + Epiallele 指標'</span>
+  </div></details>
+</section>
+
+<!-- ============ 機會 ============ -->
+<section id="opp">
+  <h3><span class="num">4</span> 🟡 機會 ×7 — 未來有潛力但未驗/受限</h3>
+  <p class="sub">這些是「白地真實但缺驗證」或「有潛力但結構受限」的方向。</p>
+
+  <details class="card opp"><summary><span class="t">① 甲基輔助 phasing / 救 unphase（umtag）</span><span class="badge tier">⭐2-3 PROTOTYPE</span><span class="when">2026-06-08</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>白地真實（MethPhaser/HapBridge 在癌症/LOH defer）；held-out extrap acc 0.8852 vs null 0.5236（77% beat null）；V10 normal 0.979 &gt; tumor 0.866（非 copy）；機會 45.84% unphased。<b>但</b>無真實救援、單樣本、缺 switch-error/N50 標尺。</div>
+    <p class="why"><b>為何是機會：</b>外部已驗方向 + held-out 顯著 beat null，但目前模擬非真救援 → 列 future-work/Discussion，需 COLO829 + yardstick 才升級。</p>
+    <span class="src">ledger 20260608_methyl_assisted_phasing_umtag_registration (PROTOTYPE_NOT_READY)</span>
+  </div></details>
+
+  <details class="card opp"><summary><span class="t">② cis-candidate 大規模驗證（normal-anchored cis protocol）</span><span class="badge tier">⭐4 方法VALID</span><span class="when">2026-06-01→06-07</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>方法有效但規模受 testability 限制 —— 6 個最強位點是 pure-ALT CGI-desert <b>UNTESTABLE</b>（無 within-tag 真值），只 chr17 乾淨；subclone/copy 主導但精確 % split 不 robust → 改 qualitative。</div>
+    <p class="why"><b>為何是機會：</b>真正的開放方法題（cis-candidate scan 可發展），但<b>結構性阻塞</b>（最強位點測不了），需 matched-normal diffASE 或第二樣本。</p>
+    <span class="src">ledger 20260603_copy_partition_3test · 20260607_fast_cnv_validation · 20260607_capstone</span>
+  </div></details>
+
+  <details class="card opp"><summary><span class="t">③ FDR / null 校準（catalog 12,868 + chr17 多重檢定）★最該先做</span><span class="badge tier">未驗 #24</span><span class="when">2026-06-09</span></summary><div class="body">
+    <div class="concl"><b>結論（識別出，未跑）：</b>(a) 12,868 reliable = 3.87% &lt; 5% 噪音地板，須證非噪音；(b) chr17 perm p=0.001×816→Bonferroni≈0.82（NS）可能多重檢定 artifact。</div>
+    <p class="why"><b>為何是機會（也是必補）：</b>投稿前最該先做、可能改結論。<b>設計上任一結果 de-confound floor 都不垮</b>（chr17 不過→降 suggestive 靠生物動機+COLO829；12,868 不過→反而強化「甲基非 somatic 判別器」）。</p>
+    <span class="src">docs/paper_focus/01_focus_notes/09_完整性補強_FDR…md</span>
+  </div></details>
+
+  <details class="card opp"><summary><span class="t">④ 5mC vs 5hmC 分離（純 5mC 主線 + 5hmC observation）</span><span class="badge tier">⭐3</span><span class="when">2026-06-02→06-10</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>ASM 純 5mC 驅動（5hmC=−0.001 可忽略）；read-level 5hmC 太稀疏（5.9%, cluster-ARI 0.037 NOT viable）；用戶指示主結論用 5mC，5hmC 留 future observation。</div>
+    <p class="why"><b>為何是機會：</b>純 5mC 重跑是明確待執行補強（依賴 MSA dup-bug 修, #25）；5hmC read-level NOT viable 但 per-CpG Δ5hmC 保留觀察餘地。</p>
+    <span class="src">ledger 20260602_feature_fix_crossextractor_validation · 20260602_modtype_readrel_poc_chr4</span>
+  </div></details>
+
+  <details class="card opp"><summary><span class="t">⑤ latent 甲基分群（TAG-E 28,254 + CramersV gate audit）</span><span class="badge tier">⭐3 characterization-only</span><span class="when">2026-06-02→06-09</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>762 MISSED 中 487 latent（CramersV gate 歸零但 PERMANOVA 顯著=真分群）；regime-A blind-ARI 0.229 vs null 0.038（p=2.3e-4）；納回提升 characterization 但 minN&lt;15 FP-leaning。</div>
+    <p class="why"><b>為何是機會：</b>CramersV gate 偏嚴，latent 納回提升 characterization 分辨。🔴 <b>絕不可寫成 filter</b>（latent 集 enrich≈base 無判別力）。需 FDR/null 校準定論。</p>
+    <span class="src">MEMORY project_asm_locus_display_and_cramersv_reliability_gate · ledger 20260602</span>
+  </div></details>
+
+  <details class="card opp"><summary><span class="t">⑥ Δβ 合併發現通道（merge-dbeta, clustering-gated）</span><span class="badge tier">⭐ PROBE/code</span><span class="when">2026-06-07→06-09</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>dbeta_only 分支最 FP-enriched（TP:FP 11.9 vs base 0.13）；naive 加 dbeta 讓 TP:FP 3.7→1.0 collapse；best union=15391 loci 當 CHARACTERIZATION set <b>NOT filter</b>。</div>
+    <p class="why"><b>為何是機會：</b>可當互補發現通道（C++ 加 dbeta_max 欄, 走 /cpp-change），但<b>必 clustering-gated</b>（naive 加會崩）。有 code 潛力但用法受限。</p>
+    <span class="src">ledger 20260607_meaningful_ASM_filter_iteration · catalog R6 discovery_venn</span>
+  </div></details>
+
+  <details class="card opp"><summary><span class="t">⑦ Per-CpG ASM / Epiallele C++ 整合（characterization）</span><span class="badge tier">CONDITIONAL POSITIVE</span><span class="when">2026-04-15</span></summary><div class="body">
+    <div class="concl"><b>結論：</b>Filter value=0（AUC 0.38-0.54）；characterization 確認（concordance 84%）；待 C++ 整合 10 欄位。</div>
+    <p class="why"><b>為何是機會：</b>有 characterization 潛力但需工程投入才實現（也列在成果⑩，因 characterization 面已確認）。</p>
+    <span class="src">INDEX 'Per-CpG ASM + Epiallele 指標'</span>
+  </div></details>
+</section>
+
+<!-- ============ 不可行 ============ -->
+<section id="inf">
+  <h3><span class="num">5</span> 🔴 不可行 ×18 — 已死，且死因明確（大多是 confound 假象）</h3>
+  <p class="sub">這 18 條的價值在於「<b>把假象證死、講清楚為什麼</b>」。我按死因分組。每條 ▸ 展開看死因。</p>
+
+  <h4>A. filter / 判別方向（甲基當分類器）— 全鏈 DEAD</h4>
+  <details class="card inf"><summary><span class="t">甲基→TP/FP variant filter（原始 Goal 5, 全鏈 NEGATIVE）</span><span class="badge b-dead">DEAD ⭐4 L2</span></summary><div class="body">
+    <div class="concl"><b>死因 = 100% sample-level circularity：</b>in-dist +0.02236 vs held-out −0.00012；5 樣本 mean −0.00004 Wilcoxon p=0.125（方向負）；HCC1954 transfer −0.377 災難；甲基 vestigial（drop 全 5 只掉 +0.00065，caller_af 主導 coef +3.44）。</div>
+    <p class="why"><b>不可行：</b>filter 改善 100% 是循環（held-out 為負）。🔴 DO NOT re-open（用戶確認 Goal 5 關閉）。<span class="badge b-cs">CS 類比</span> train/test leakage。</p>
+    <span class="src">ledger 20260520_loso_sample_level_circularity_revealed · 20260519 (HCC1954 −0.377)</span>
+  </div></details>
+  <details class="card inf"><summary><span class="t">ASM 作 somatic-特異判別器（B-discrimination, anti-discriminative）</span><span class="badge b-dead">DEAD ⭐4</span></summary><div class="body">
+    <div class="concl"><b>死因：</b>strong-ASM 在 FP enriched 5-10×（Fisher OR=0.194 p=1.8e-28）= <b>反判別</b>；apparent somatic-specificity 是 threshold artifact（Bonferroni 反轉 OR 1.79→0.81）；germline-het null：TP 11.1% &lt; null 15.2%（baseline confounded）；6 樣本低 sensitivity ~4% + COLO829 TP≈FP。</div>
+    <p class="why"><b>不可行：</b>多重 corrects 後仍 robust NEGATIVE，甚至反判別。imprinting 正控（5× somatic）反證方法有效 → NEGATIVE 是真 biology。</p>
+    <span class="src">ledger 20260530_ism_meth_hp_somatic_full_tp · 20260530_ism_asm_threshold_artifact_negative · 20260604</span>
+  </div></details>
+  <details class="card inf"><summary><span class="t">純甲基特徵空間 TP/FP 區分（≤0.58 AUC ceiling, CL-008）</span><span class="badge b-dead">EXHAUSTED ⭐5</span></summary><div class="body">
+    <div class="concl"><b>死因：</b>pure methyl 全 AUC≤0.58；caller_af 單獨 AUC 0.654 <b>超越全部 ISM</b>；RF ceiling 0.69-0.77（甲基貢獻 0）；唯一正面 HPFineNGroups 0.72 後降級。</div>
+    <p class="why"><b>不可行：</b>≤0.58 是純甲基 TP/FP 區分的 consolidated hard ceiling（⭐5），Goal 5 dead 的最強根據。</p>
+    <span class="src">INDEX 'Beyond-AUC' · MEMORY project_beyond_auc_exhaustion_confirmed (CL-008 ⭐5)</span>
+  </div></details>
+  <details class="card inf"><summary><span class="t">R1-Global Sample ASM / TO-pure 建模 / Fine-Pairwise / Option C HP-free</span><span class="badge b-dead">NEGATIVE ×4</span></summary><div class="body">
+    <div class="concl"><b>死因（收斂同結論）：</b>R1 residualized AUC=0.527≈random；TO-pure HP-free AUC=0.53, caller_af 0.654 超越；Fine-Pairwise 全 AUC&lt;0.50（germline ASM&gt;somatic）；Option C HP-free 0.564（所有信號來自 HP tags，而 HP 受 self-phasing 污染）。</div>
+    <p class="why"><b>不可行：</b>甲基特徵在 TO 建模全無效，多 thread 收斂「甲基 vestigial + ISM 區分力完全依賴 HP」。</p>
+    <span class="src">MEMORY project_r1_global_sample_asm_negative · project_to_feature_deep_study · project_option_c_dual_path_negative</span>
+  </div></details>
+
+  <h4>B. confound 假象（看似很強的訊號 = 第三變數造成）— 永久否決</h4>
+  <details class="card inf"><summary><span class="t">O11 Within-Group Heterogeneity（epipolymorphism）</span><span class="badge b-dead">NEGATIVE</span></summary><div class="body">
+    <div class="concl"><b>死因：</b>AUC=0.845 <b>完全是 n_reads confound</b>（殘差化後 0.530）。</div>
+    <p class="why">confound（n_reads）即使 HP 修正也不變 → 永久有效否決。<span class="badge b-cs">CS 類比</span>「演算法 A 比較快」其實是「A 的 input 比較小」。</p>
+    <span class="src">INDEX 'O11' · MEMORY project_O11_heterogeneity_negative</span>
+  </div></details>
+  <details class="card inf"><summary><span class="t">O12 LOH 甲基 scenario（AlleleDelta / CramersV collider）</span><span class="badge b-dead">NEGATIVE</span></summary><div class="body">
+    <div class="concl"><b>死因：</b>AlleleDelta = AF confound；CramersV L2 AUC=0.80 是 <b>collider bias</b>（residualize on AF 製造虛假信號）。</div>
+    <p class="why">collider：殘差化 AF（同時被 cause 和 effect 指向）開了非因果路徑 → 製造信號。</p>
+    <span class="src">INDEX 'O12' · MEMORY project_O12_loh_methylation_scenarios</span>
+  </div></details>
+  <details class="card inf"><summary><span class="t">O13 跨區域甲基相關 / P3 Window Aggregation</span><span class="badge b-dead">NEGATIVE ×2</span></summary><div class="body">
+    <div class="concl"><b>死因：</b>O13 FP&gt;TP correlation 是 shared read-count confound（分層後消失）；P3 naive ΔAUC=+0.342 但 mid-TP-rate 校正後反轉 −0.346（全是空間 auto-correlation）。</div>
+    <p class="why">兩者皆 confound 不依賴 HP → 永久否決。chr+pos 聚合特徵必驗空間 autocorr。</p>
+    <span class="src">INDEX 'O13' / 'P3 Window Aggregation' · MEMORY project_O13_cross_region_negative</span>
+  </div></details>
+  <details class="card inf"><summary><span class="t">H3 ASM CNV-dosage 假說（REFUTED）/ Wave3 cnLOH（Simpson）</span><span class="badge b-dead">REFUTED / CLOSED</span></summary><div class="body">
+    <div class="concl"><b>死因：</b>H3 cnLOH |Δβ|=0.082 &gt; gainLOH 0.070（非 dosage）；copy dosage decisively NOT driver（MW p=0.62, ρ=−0.083 反向）。Wave3：LOH filter 10/10 FAIL；cnLOH = Simpson's Paradox。</div>
+    <p class="why">dosage 假說被 decisively refute。cnLOH 是 Simpson 反轉。</p>
+    <span class="src">ledger 20260531_asm_H2_H3_H5 · 20260607_fast_cnv · MEMORY project_wave3_loh_stratification_closure</span>
+  </div></details>
+
+  <h4>C. subclone / clustering 方向（甲基分群 = germline 非 somatic）</h4>
+  <details class="card inf"><summary><span class="t">甲基 read 分群作 somatic subclone（B2 clustering）</span><span class="badge b-dead">DEAD ⭐3-4</span></summary><div class="body">
+    <div class="concl"><b>死因：</b>TP ARI 0.135 &lt; het-NULL 0.177（MW p=0.922）= <b>germline-allelic 非 somatic</b>；FP median ARI 0.214 &gt;&gt; TP 0.069；T3 拆 plain H1 亞群 AUC 0.65 &lt; null 0.71。</div>
+    <p class="why">甲基 clustering 真實但是 germline-haplotype 層級（分不同 haplotype 強, 同 haplotype 內亞群弱）。🔴 勿再開 T3。</p>
+    <span class="src">ledger 20260530_b2_clustering_validated_ruler_negative · 20260531_clustering_source_attribution</span>
+  </div></details>
+  <details class="card inf"><summary><span class="t">AF↔NGroups 作 subclone 甲基 marker（HD-4 誤歸因）</span><span class="badge b-dead">RESOLVED phasing</span></summary><div class="body">
+    <div class="concl"><b>死因：</b>AF→NGroups = <b>PHASING_DRIVEN 非甲基</b>（NGroups = HP-tag subfamily COUNT）；控甲基幾乎不動（0.656→0.655 wrong-direction collider）。</div>
+    <p class="why">源碼確認 NGroups 是 HP-tag count 非甲基訊號。<b>死因 = feature 語意誤讀</b>（C++ 定義 ≠ 字面）。</p>
+    <span class="src">ledger 20260608_HD4_af_ngroups_attribution · C++ LabelTest.cpp:265-305</span>
+  </div></details>
+  <details class="card inf"><summary><span class="t">HPFineNGroups subclone marker（pipeline-dependent 降級）</span><span class="badge b-dead">⭐4→⭐3</span></summary><div class="body">
+    <div class="concl"><b>死因：</b>原 TP rate 0.9281 但 ClairS-TO raw split 無法重現 master 89.1%（Fisher odds 0.913 反向 p=3.5e-3）；flag=on NG≥3=0；機制是 phasing signature 非 epigenetic。</div>
+    <p class="why">pipeline-dependent 不可重現 + 機制是 phasing（與 HD-4 同根）。</p>
+    <span class="src">MEMORY project_hpfinengroups_subclone_marker · ledger 20260510_V6C_phaseB</span>
+  </div></details>
+
+  <h4>D. 其他關閉方向（NO-GO / RETRACTED / parked / 早期）</h4>
+  <details class="card inf"><summary><span class="t">TO Germline FP 鑑別（G1-G7）/ O9 FN rescue（NO-GO ×2）</span><span class="badge b-dead">NO-GO</span></summary><div class="body">
+    <div class="concl"><b>死因：</b>G1-G7：48 圖 60+ 特徵全 AUC&lt;0.64, TP loss≤2% 下 FP removal=0%（germline FP 在甲基空間像 somatic TP）；O9：FN HP-free AUC&lt;0.53, FN≡TP in methylation space。</div>
+    <p class="why">本質限制（germline FP / FN 在甲基空間與 somatic TP 不可分）。</p>
+    <span class="src">MEMORY project_germline_fp_identification_nogo · project_O9_fn_characterization_nogo</span>
+  </div></details>
+  <details class="card inf"><summary><span class="t">Zone-Aware QS（F1）/ ClairS-TO Verdict / Z3（F1 NEGATIVE ×3）</span><span class="badge b-dead">NEGATIVE (F1)</span></summary><div class="body">
+    <div class="concl"><b>死因：</b>Zone-QS：characterization POSITIVE 但 QS 模擬 max ΔF1=+0.001；Verdict：內部校準好但 Verdict_Germline 100% 落 LowQual ΔF1=0；Z3：12 特徵全 AUC&lt;0.61。</div>
+    <p class="why">characterization 面可能保留，但 filter/F1 方向關閉。</p>
+    <span class="src">INDEX 'Zone-Aware' · MEMORY project_clairs_to_verdict_pilot · project_z3_internal_exploration_negative</span>
+  </div></details>
+  <details class="card inf"><summary><span class="t">LOH×AF×CN Biology Filter（cross-sample RETRACTED）/ Purity-Aware（早期）</span><span class="badge b-dead">RETRACTED</span></summary><div class="body">
+    <div class="concl"><b>死因：</b>LOH×AF×CN：單樣本 S3 TP rate 95.5% 但跨樣本 1/6 達成 Wilcoxon p=1 → cross-sample filter 撤回（characterization 案例保留）；Purity-aware：subsample 無法模擬純度（組織差異混淆）。</div>
+    <p class="why">sample-specific 不可泛化（與 LOSO circularity 同根）。</p>
+    <span class="src">INDEX 'LOH×AF×CN [RETRACTED]' · MEMORY feedback_paired_f1_filter_abandoned</span>
+  </div></details>
+  <details class="card inf"><summary><span class="t">P4 Second-Hit Order（Goal 3, STALLED/parked）+ Self-phasing 假 LOH（cautionary）</span><span class="badge b-warn">parked / cautionary</span></summary><div class="body">
+    <div class="concl"><b>狀態：</b>P4：Bimodality mean|Δ|=0.043&lt;0.15 無 two-hit order 訊號，依賴 Goal 1 → parked（非永久死）。Self-phasing 假 LOH：62% TO LOH 是 artifact（不可直接用 self-phased LOH）—— 但作為「根因發現」本身是成果⑤。</div>
+    <p class="why">P4 是 blocked-on-Goal-1 而非永久死。Self-phasing LOH 歸不可行（直接用法）但根因發現歸成果。</p>
+    <span class="src">INDEX 'P4 Second-Hit' · MEMORY project_self_phasing_causal_chain_confirmed</span>
+  </div></details>
+</section>
+
+<!-- ============ 依賴圖 ============ -->
+<section id="dep">
+  <h3><span class="num">6</span> 邏輯依賴圖 — 一個發現怎麼導致下一個</h3>
+  <p class="sub">研究的因果骨架。下面 SVG 是主鏈，完整 22 條邊在 ▸ 裡。</p>
+  <figure>
+  <svg viewBox="0 0 820 360" role="img" aria-labelledby="depttl depdesc">
+    <title id="depttl">研究主依賴鏈</title>
+    <desc id="depdesc">從 self-phasing 循環依賴與 LOSO 循環，導向 phasing characterization 與 de-confound catalog 的主因果鏈。</desc>
+    <style>
+      .nx{fill:#fff;stroke:#E3DACC;stroke-width:1.5;rx:8}
+      .nt{font-size:12px;fill:#1c1b19}
+      .ng{fill:#E4F0EA;stroke:#2F7D5B} .nr{fill:#F3E2E2;stroke:#9A3B3B} .na{fill:#F2E4DC;stroke:#D97757}
+      .ar{stroke:#D97757;stroke-width:2;fill:none;marker-end:url(#ah)}
+    </style>
+    <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#D97757"/></marker></defs>
+    <rect class="nx nr" x="10" y="20" width="200" height="48"/><text class="nt" x="18" y="40">self-phasing 循環依賴</text><text class="nt" x="18" y="58">17.3:1 bias（根因）</text>
+    <rect class="nx nr" x="10" y="150" width="200" height="48"/><text class="nt" x="18" y="170">62% TO LOH 是 artifact</text><text class="nt" x="18" y="188">（不能當 filter）</text>
+    <rect class="nx na" x="10" y="280" width="200" height="48"/><text class="nt" x="18" y="300">LOH-phasing 當主軸</text><text class="nt" x="18" y="318">NG=2 same-hap 6/6 ✅</text>
+    <rect class="nx nr" x="300" y="20" width="210" height="48"/><text class="nt" x="308" y="40">甲基 filter in-sample</text><text class="nt" x="308" y="58">ΔF1=+0.0224 看似好</text>
+    <rect class="nx nr" x="300" y="150" width="210" height="48"/><text class="nt" x="308" y="170">LOSO held-out −0.0001</text><text class="nt" x="308" y="188">= 100% 循環（DEAD）</text>
+    <rect class="nx na" x="300" y="280" width="210" height="48"/><text class="nt" x="308" y="300">轉 ISM characterization</text><text class="nt" x="308" y="318">（filter 方向退場）</text>
+    <rect class="nx nr" x="600" y="20" width="210" height="48"/><text class="nt" x="608" y="40">ASM 真實存在</text><text class="nt" x="608" y="58">但 anti-discriminative</text>
+    <rect class="nx nr" x="600" y="150" width="210" height="48"/><text class="nt" x="608" y="170">copy-partition de-confound</text><text class="nt" x="608" y="188">只 chr17 乾淨 cis</text>
+    <rect class="nx ng" x="600" y="280" width="210" height="48"/><text class="nt" x="608" y="300">332,705 catalog（成果）</text><text class="nt" x="608" y="318">characterization 非 filter ✅</text>
+    <path class="ar" d="M110,68 L110,150"/><path class="ar" d="M110,198 L110,280"/>
+    <path class="ar" d="M405,68 L405,150"/><path class="ar" d="M405,198 L405,280"/>
+    <path class="ar" d="M705,68 L705,150"/><path class="ar" d="M705,198 L705,280"/>
+    <path class="ar" d="M210,304 L300,304"/><path class="ar" d="M510,304 L600,304"/>
+    <path class="ar" d="M210,44 L300,44"/><path class="ar" d="M510,44 L600,44"/>
+  </svg>
+  <figcaption>主因果鏈：左=phasing 線（循環→artifact→當 characterization 主軸）；中=filter 線（in-sample 好→LOSO 死→轉 characterization）；右=ASM 線（存在但不判別→de-confound→catalog）。三線匯流到「characterization 非 filter」。</figcaption>
+  </figure>
+  <details class="card"><summary><span class="t">展開完整 22 條依賴邊</span></summary><div class="body edges">
+    <div class="e">TO FP 殘餘=germline leak <span class="ar">→</span> 甲基特徵 H003 AUROC=0.473 隨機（殘餘 FP 在甲基空間像 TP）</div>
+    <div class="e">self-phasing 17.3:1 <span class="ar">→</span> HP 特徵在 TO 全失效（O1-O13/G1-G7 AUC&lt;0.64）：根因是污染非設計</div>
+    <div class="e">self-phasing CONFIRMED <span class="ar">→</span> 62% TO LOH 是 artifact（somatic 自己 phase 自己）</div>
+    <div class="e">62% LOH artifact <span class="ar">→</span> LOH-phasing 當 characterization 主軸（NG=2 same-hap 6/6）</div>
+    <div class="e">priority bug chr19 752 victims <span class="ar">→</span> 全基因組 34,855（chr19 僅 2.16%，推翻 hotspot）</div>
+    <div class="e">priority bug audit <span class="ar">→</span> V6 移除 Layer 1.5（strictly dominates, caller F1 不變）</div>
+    <div class="e">KDE hardcoded 75× artifact（實 53.0×）<span class="ar">→</span> RETRACT COLO829 M2/Depth 2 claims</div>
+    <div class="e">methyl pilot ΔF1=+0.0024（=caller_af proxy）<span class="ar">→</span> Global FP LR +0.0224 但甲基 5th-rank</div>
+    <div class="e">Global FP LR in-dist +0.0224 <span class="ar">→</span> LOSO held-out −0.0001 = 100% circularity</div>
+    <div class="e">LOSO circularity + 甲基 vestigial <span class="ar">→</span> filter WITHDRAWN → ISM characterization study</div>
+    <div class="e">BRCA2 Δβ −0.054 vs −0.122 不一致 <span class="ar">→</span> 全 TP 重跑修 MSA dup-bug → −0.122 定案</div>
+    <div class="e">ASM 真實存在（BRCA2 p=6.09e-11）<span class="ar">→</span> B-discrimination NEGATIVE/anti（OR=0.194）</div>
+    <div class="e">HP-axis OR=1.79 modest <span class="ar">→</span> somatic-specificity NEGATIVE（threshold artifact 反轉 0.81）</div>
+    <div class="e">TP ARI 0.135&lt;null 0.177 <span class="ar">→</span> imprinting 正控 0.758=5× somatic（ruler VALIDATED）</div>
+    <div class="e">BRCA2 cis d_cis=−0.142 <span class="ar">→</span> subclone/copy-confounded（HP1-1=somatic subclone tag 非 copy、非 CN-dosage；焦點 cis 只 d_within −0.023，邊際）</div>
+    <div class="e">subclone/copy % split 不 robust <span class="ar">→</span> HP1-1 tag 源碼確認=somatic subclone tag 非 copy、非 CN-dosage（量化撤回→qualitative）</div>
+    <div class="e">dosage NOT driver + Bonferroni T3=10 <span class="ar">→</span> 只 1 clean cis = chr17/TBC1D16</div>
+    <div class="e">同位點 0/38 復發（private）<span class="ar">→</span> genome-wide 6/6 excess 復現（必看 excess 非 raw rate）</div>
+    <div class="e">ASM exists（TP 3.95%&gt;FP 1.07%）<span class="ar">→</span> NOT usable filter（~4% sens + COLO829 TP≈FP）</div>
+    <div class="e">ASM 全鏈定案 <span class="ar">→</span> 332,705 7-TAG catalog（characterization deliverable）</div>
+    <div class="e">甲基→F1 filter DEAD <span class="ar">→</span> G6 統一 phasing 論文（phasing 主軸 + ASM 支撐 + LOSO-negative as methods）</div>
+  </div></details>
+</section>
+
+<!-- ============ CS 概念 ============ -->
+<section id="concepts">
+  <h3><span class="num">7</span> 給 CS 學生的 10 個關鍵概念（每個配 CS 類比 + 示意圖）</h3>
+  <p class="sub">這些是認知負荷最高的點。每個先給「為什麼難」，再給你熟的 <b>CS 類比</b>，必要時配示意圖。讀完這 10 個，整篇就懂了。</p>
+
+  <details class="card cs" open><summary><span class="t">① LOH（Loss of Heterozygosity）= 失去兩份拷貝之一</span><span class="badge b-cs">RAID-1 鏡像</span></summary><div class="body">
+    <p><b>為什麼難：</b>CS 學生沒有「每樣東西有兩份（二倍體）」的模型。更糟：本研究裡 LOH 同時是生物事件、是 artifact（62% 的 LOH 是 self-phasing 假象）、也是分層變數。cnLOH（copy-neutral：丟一份又複製另一份，總數還是 2 但多樣性歸零）特別反直覺。</p>
+    <div class="csbox"><span class="lbl">CS 類比</span> 每個人對每個基因有<b>兩份拷貝</b>（父母各一），像 <b>RAID-1 鏡像磁碟對</b>。LOH = 一面鏡子掉了，剩單份無冗餘（surviving copy 上的缺陷全暴露 → 這就是為何 LOH 對抑癌基因致命）。<b>cnLOH</b> = 陣列把存活的那片重新複製以維持「2 片」假象，所以 <code>df</code>（拷貝數）報「健康，2 片」但其實多樣性歸零 —— 就像一個 cache 回報滿載但每條 line 都是重複的。<b>而且這裡 62% 的 LOH 是測量 artifact</b>（phaser 吃自己的 output）。</div>
+    <figure><svg viewBox="0 0 760 200" role="img" aria-labelledby="loht lohd"><title id="loht">LOH 示意</title><desc id="lohd">heterozygous 兩份拷貝 vs LOH 刪除型 vs cnLOH 拷貝中性。</desc>
+      <text x="10" y="20" font-size="13" font-weight="700" fill="#1c1b19">heterozygous（正常：2 份不同）</text>
+      <rect x="10" y="32" width="180" height="22" fill="#E2ECF3" stroke="#2F6690"/><text x="18" y="48" font-size="12">母方 copy ● A</text>
+      <rect x="10" y="58" width="180" height="22" fill="#F6EBD8" stroke="#B06A16"/><text x="18" y="74" font-size="12">父方 copy ● B</text>
+      <text x="280" y="20" font-size="13" font-weight="700" fill="#1c1b19">deletion-LOH（剩 1 份）</text>
+      <rect x="280" y="32" width="180" height="22" fill="#E2ECF3" stroke="#2F6690"/><text x="288" y="48" font-size="12">母方 copy ● A</text>
+      <rect x="280" y="58" width="180" height="22" fill="#eee" stroke="#bbb" stroke-dasharray="4"/><text x="288" y="74" font-size="12" fill="#999">父方 deleted（總數=1）</text>
+      <text x="540" y="20" font-size="13" font-weight="700" fill="#1c1b19">cnLOH（總數=2 但同質）</text>
+      <rect x="540" y="32" width="180" height="22" fill="#E2ECF3" stroke="#2F6690"/><text x="548" y="48" font-size="12">母方 copy ● A</text>
+      <rect x="540" y="58" width="180" height="22" fill="#E2ECF3" stroke="#2F6690"/><text x="548" y="74" font-size="12">母方 複製 ● A（diversity=0）</text>
+      <rect x="10" y="110" width="710" height="60" fill="#F3E2E2" stroke="#9A3B3B" rx="6"/><text x="22" y="132" font-size="12" font-weight="700" fill="#9A3B3B">⚠ 本研究：~62% 偵測到的 LOH 是 self-phasing artifact（移除循環依賴後消失, d=−1.20）</text><text x="22" y="152" font-size="12" fill="#9A3B3B">→ LOH 在這裡是「真事件 + 漏抽象（leaky abstraction）」並存，必須當 confound 處理。</text>
+    </svg><figcaption>LOH = RAID-1 掉一面鏡；cnLOH = 重建成 2 片但同質（df 報滿但全重複）。</figcaption></figure>
+  </div></details>
+
+  <details class="card cs"><summary><span class="t">② Haplotype phasing = 把 read 歸回父/母染色體分支</span><span class="badge b-cs">git-blame + 循環依賴</span></summary><div class="body">
+    <p><b>為什麼難：</b>學生直覺把基因組想成一條字串。Phasing 強迫雙股模型 + 機率指派問題。最深的陷阱是 <b>self-phasing 循環依賴</b>：TO 模式下用 somatic 變異 phase reads，再用 phasing 判斷 somatic 變異 —— 工具吃自己的 output（17.3:1 bias，94.6% somatic→HP1）。還有術語爆炸：HP1/HP2、HP1-1（germline-H1 + somatic 子標記，<b>不是拷貝</b>）。</p>
+    <div class="csbox"><span class="lbl">CS 類比</span> 你有兩個 source branch（母/父）被逐行交錯成一個檔、branch 標籤被剝掉。Phasing = <b>git-blame 式重建</b>：用 SNP marker 當 commit 指紋把每行（read）歸回 branch。HP1/HP2=兩個重建的 branch；unphased=歸不了的行。<b>self-phasing bug = 從你要驗證的 commit 推 branch 成員，再用該 branch 成員驗證那些 commit</b> —— input 依賴自己 output 的 build system。17.3:1 collapse 是這個 feedback loop 的簽名，不是生物。HP1-1 = 子標籤（從 main fork 的 feature-branch），是 tag 不是實體拷貝。</div>
+  </div></details>
+
+  <details class="card cs"><summary><span class="t">③ ASM（Allele-Specific Methylation）= 真實但不判別的 label-conditioned 特徵</span><span class="badge b-cs">真實 ≠ 有用</span></summary><div class="body">
+    <p><b>為什麼難：</b>(1) 生物：甲基化是 CpG 上的化學標記。(2) 認識論（更難）：整個 6 個月在證 ASM <b>真實但不可用作判別器</b>。ASM 廣泛存在（~0.34% strong loci, 跨癌 6/6 復現）卻 (a) anti-discriminative（FP enriched 5×, OR=0.194 p=1.8e-28），(b) apparent somatic-specificity 是 threshold artifact（1.79→0.81），(c) ALLELE-axis 被 baseline allelic 甲基 confound（必跑 germline-het null）。</p>
+    <div class="csbox"><span class="lbl">CS 類比</span> ASM = label-conditioned 特徵：「依 allele/haplotype 標籤分組算甲基分布，看兩組差異」。經典 ML 教訓：一個特徵可以<b>統計上真實</b>（一致非零、跨資料復現）卻對你的目標類<b>幾乎零判別力</b>（兩類分布大量重疊），還可能被 confound（allele-axis 差異在 normal germline-het 位點也有，要當 null 減掉）。對映：高 prevalence + AUC 僅略高於 chance + Simpson 式 confound = 真實但無用的分類器 input。</div>
+  </div></details>
+
+  <details class="card cs"><summary><span class="t">④ read × CpG 甲基矩陣 = 每區域的稀疏特徵矩陣</span><span class="badge b-cs">term-document matrix</span></summary><div class="body">
+    <p><b>為什麼難：</b>這是核心原始資料結構，CS 學生其實最好懂 —— 但它是稀疏、ragged、領域特定地 noisy：不是每條 read 蓋每個 CpG（到處缺格），read 是不同欄範圍的片段，甲基 call 是機率的（BAM MM/ML），5hmC 太稀疏（5.9%）不能 cluster。下游的距離矩陣 + 階層分群全從這矩陣算。</p>
+    <div class="csbox"><span class="lbl">CS 類比</span> 一個 binary（其實 ternary：甲基/未甲基/未覆蓋）特徵矩陣 —— rows=reads（樣本）、columns=CpG（特徵）、cells=甲基狀態。像 NLP 的<b>稀疏 term-document matrix</b>：documents=reads, terms=CpG，但多一個「未觀測」狀態（每條 read 只蓋連續一段欄，像只含詞彙連續切片的 document）。下游全是標準非監督 ML：pairwise row distance → 階層分群 → 「reads 有沒有分 2+ 甲基子群」。<b>陷阱：缺格是結構性（覆蓋）非隨機 → naive 距離會把覆蓋當 confound 洩漏</b>（這就是 O11/O13 崩的原因）。</div>
+  </div></details>
+
+  <details class="card cs"><summary><span class="t">⑤ De-confounding = 控制造成假象的第三變數</span><span class="badge b-cs">Simpson + collider</span></summary><div class="body">
+    <p><b>為什麼難：</b>這是全研究最 load-bearing 的方法概念。幾乎每個 NEGATIVE 都是 de-confound 故事：epipolymorphism AUC 0.845→0.530（殘差化 n_reads）；cross-region 分層 shared read count 後消失；AlleleDelta 其實是 AF。還有兩個連老手都會錯的失敗模式：(1) collider bias（殘差化 ON collider 反而<b>製造</b>信號）、(2) 必須 within-group OLS 不是 pooled OLS。</p>
+    <div class="csbox"><span class="lbl">CS 類比</span> Confounding = Simpson 悖論 / lurking variable 造成的假相關，就像 benchmark 上「演算法 A 比較快」其實是「A 的 input 比較小」—— 比較前必須控制 input size。De-confound = 對 lurking variable（n_reads/AF/CN）partial-out/殘差化再測，相當於 A/B test 裡 hold 住一個變數。兩個陷阱對映 CS bug：<b>collider bias</b> = 條件在一個被 cause 和 effect 都指向的變數，開了非因果路徑（像用 outcome 選資料集 = selection bias 製造相關）；<b>pooled vs within-group OLS</b> = 忘了先 GROUP BY 再 regress，跨組變異洩進「within」估計（join/聚合粒度 bug）。<b>規則：任何 AUC&gt;0.58 都要過 within-group OLS + AF-bin 交叉 + permutation 三關才信。</b></div>
+    <figure><svg viewBox="0 0 720 210" role="img" aria-labelledby="dct dcd"><title id="dct">confounding DAG</title><desc id="dcd">naive 看 Feature→Outcome，真實結構有 confounder Z 分叉。</desc>
+      <text x="10" y="18" font-size="12" font-weight="700">naive view（看似 AUC=0.845）</text>
+      <rect x="20" y="30" width="90" height="34" fill="#fff" stroke="#E3DACC"/><text x="34" y="51" font-size="12">Feature</text>
+      <rect x="230" y="30" width="110" height="34" fill="#fff" stroke="#E3DACC"/><text x="244" y="51" font-size="12">Outcome TP/FP</text>
+      <path d="M110,47 L228,47" stroke="#D97757" stroke-width="3" fill="none" marker-end="url(#ah2)"/>
+      <defs><marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 z" fill="#D97757"/></marker></defs>
+      <text x="400" y="18" font-size="12" font-weight="700">true structure（控制後 AUC=0.530）</text>
+      <rect x="410" y="30" width="90" height="34" fill="#fff" stroke="#E3DACC"/><text x="424" y="51" font-size="12">Feature</text>
+      <rect x="620" y="30" width="90" height="34" fill="#fff" stroke="#E3DACC"/><text x="632" y="51" font-size="12">Outcome</text>
+      <rect x="510" y="120" width="110" height="34" fill="#F6EBD8" stroke="#B06A16"/><text x="518" y="141" font-size="11">Z: n_reads/AF/CN</text>
+      <path d="M500,47 L620,47" stroke="#ccc" stroke-width="2" stroke-dasharray="4" fill="none"/><text x="505" y="42" font-size="10" fill="#999">~0</text>
+      <path d="M540,120 L470,64" stroke="#B06A16" stroke-width="2" fill="none" marker-end="url(#ah2)"/>
+      <path d="M590,120 L660,64" stroke="#B06A16" stroke-width="2" fill="none" marker-end="url(#ah2)"/>
+      <rect x="10" y="170" width="700" height="32" fill="#FCFBF8" stroke="#E3DACC" rx="6"/><text x="20" y="190" font-size="11">例：O11 epipoly(n_reads 0.845→0.530) · O12 AlleleDelta(AF/collider) · O13 cross-region(shared-read)</text>
+    </svg><figcaption>confounder Z 同時影響 Feature 與 Outcome（back-door fork）；控制後 Feature→Outcome 幾乎歸零。</figcaption></figure>
+  </div></details>
+
+  <details class="card cs"><summary><span class="t">⑥ By-construction circularity = 自我驗證的 train/test leakage</span><span class="badge b-cs">train/test leakage</span></summary><div class="body">
+    <p><b>為什麼難：</b>全研究最精緻、最常見的失敗模式，且以兩種偽裝出現：(1) self-phasing（somatic phase reads，phasing 判 somatic）；(2) LOSO/filter（in-sample +0.0224 但 held-out −0.0001 = 100% 循環）；(3) copy-partition（BRCA2 用一個已編碼那個切分的 tag 去「發現」切分）。每次 in-sample 數字都很漂亮，循環在你 hold out 之前隱形。</p>
+    <div class="csbox"><span class="lbl">CS 類比</span> 這<b>就是 train/test leakage / data snooping</b> —— ML 評估的頭號大罪。self-phasing loop = 從模型算 label，再用同一 label「驗證」模型（test set 洩進 training）。<b>LOSO（Leave-One-Sample-Out）= 樣本層的 k-fold CV</b>：+0.0224 in-sample 蒸發到 ~0 held-out（transfer −0.377）是 overfit 到樣本特異 quirk 的教科書簽名（模型背了 HCC1395，沒學到可泛化的東西）。統一教訓：<b>漂亮的 in-distribution 數字在誠實 held-out 確認前一文不值</b>；held-out 崩 = in-sample 是洩漏不是學習。</div>
+    <figure><svg viewBox="0 0 720 200" role="img" aria-labelledby="cit cid"><title id="cit">circularity in-sample vs held-out</title><desc id="cid">in-sample 高、held-out 歸零或負的三個案例。</desc>
+      <text x="10" y="18" font-size="12" font-weight="700">in-sample（漂亮）vs held-out / LOSO（真相）</text>
+      <text x="20" y="50" font-size="11">FP filter</text>
+      <rect x="120" y="38" width="120" height="18" fill="#E4F0EA" stroke="#2F7D5B"/><text x="245" y="51" font-size="10">+0.0224 in-sample</text>
+      <rect x="120" y="60" width="4" height="18" fill="#9A3B3B"/><text x="130" y="73" font-size="10" fill="#9A3B3B">−0.00004 held-out (p=0.125)</text>
+      <rect x="430" y="60" width="60" height="18" fill="#9A3B3B"/><text x="495" y="73" font-size="10" fill="#9A3B3B">−0.377 transfer (HCC1954)</text>
+      <text x="20" y="105" font-size="11">self-phasing</text>
+      <rect x="120" y="95" width="200" height="18" fill="#F3E2E2" stroke="#9A3B3B"/><text x="325" y="108" font-size="10">62% 的 LOH 在打破 loop 後消失</text>
+      <text x="20" y="140" font-size="11">BRCA2 cis</text>
+      <rect x="120" y="130" width="160" height="18" fill="#F3E2E2" stroke="#9A3B3B"/><text x="285" y="143" font-size="10">subclone/copy-confounded（% split 不 robust）→ 改 qualitative</text>
+      <rect x="10" y="165" width="700" height="28" fill="#FCFBF8" stroke="#E3DACC" rx="6"/><text x="20" y="184" font-size="11" font-weight="700">By-construction circularity = train/test leakage；in-sample 數字在 LOSO（樣本層 k-fold）確認前無意義。</text>
+    </svg><figcaption>三個案例同一個 bug：in-sample 高，held-out 歸零/負。</figcaption></figure>
+  </div></details>
+
+  <details class="card cs"><summary><span class="t">⑦ FDR / null model = 全基因組規模的多重比較校正</span><span class="badge b-cs">多重比較 / look-elsewhere</span></summary><div class="body">
+    <p><b>為什麼難：</b>學生知道 p&lt;0.05 = null 下 5% 機率，但全基因組跳躍不直覺：測 ~33 萬個位點，raw 5% 假陽性 = ~16,000 個「顯著」純靠運氣。本研究生死繫於此：「strong-ASM」數隨校正大幅擺動（172→3018，但 null strong-rate ≥ TP strong-rate → 整個 effect correction-fragile）。chr17 p=0.001×816≈0.82（Bonferroni NS）。12,868 reliable（3.87%）就在 5% 噪音地板下緣 —— 可能全是噪音。</p>
+    <div class="csbox"><span class="lbl">CS 類比</span> 多重比較 = 每個 data engineer 跑幾千個 A/B test 都會撞的「p-hacking / look-elsewhere」：固定 5% per-test 錯誤率、跑 30 萬個 test，~15,000 個「贏」是純噪音。<b>Bonferroni</b> = alpha 除以 test 數（殘暴、近零容忍，像要求 6-sigma）。<b>BH-FDR</b> = 較實用的「我接受我 flag 的發現裡 ~5% 是假的」（控 false-discovery 比例）。<b>permutation null</b> = Monte-Carlo/bootstrap baseline：shuffle 標籤（破壞真結構）重算統計幾千次得「隨機長怎樣」分布，看觀察值是否在尾端離群 —— 像建隨機對照判斷 latency 改善是真的還是 jitter。<b>頭號陷阱：需要寬鬆閾值才存活的 effect（172→3018, null≥signal）= 只在你調過的 benchmark 上贏的最佳化。</b></div>
+  </div></details>
+
+  <details class="card cs"><summary><span class="t">⑧ Co-validation（正交佐證）vs filter（分類器）= 同資料兩種角色</span><span class="badge b-cs">checksum vs classifier</span></summary><div class="body">
+    <p><b>為什麼難：</b>全研究的中心 framing 區別，也最易混。同一份甲基/ASM 資料兩種用法：(A) 當 <b>FILTER</b>（分類器 input 決定 TP/FP 提升 F1）—— 這方向徹底 DEAD；(B) 當 <b>CO-VALIDATION</b>（獨立正交證據，在某一位點剛好與變異 call + haplotype 都同意時佐證一個故事）—— 唯一乾淨範例 chr17/TBC1D16，332,705 中的 1 個。要懂「真實但無用作 filter」和「有價值作佐證」<b>不矛盾</b>：太重疊無法 threshold 的 noisy 訊號（爛分類器）仍可在少數手選位點與兩個獨立 channel 同意（好佐證）。</p>
+    <div class="csbox"><span class="lbl">CS 類比</span> filter vs co-validation = <b>分類器 vs checksum/共識</b>。FILTER 是你信任去 auto-decide 每個 case 的學習判別器 —— 甲基在此失敗就像 AUC≈0.5 的特徵，撐不起決策邊界，用了還傷（FP-enriched）。CO-VALIDATION 是正交佐證，像把一個值跟獨立 checksum 對、或要求三個獨立 sensor/replica 同意才信一筆關鍵紀錄：你<b>不</b>在 30 萬筆全跑，只在「三個獨立 channel（somatic call / haplotype / methylation）剛好同意」的那一筆<b>提升信心</b>。關鍵直覺：<b>太弱不能當獨立分類器的證據源，仍可在單一手驗實例當有效獨立佐證 —— orthogonality（channel 獨立）比 per-instance accuracy 重要。</b>研究禁止的反 pattern：把「甲基在 TP enrich 3.95% vs FP 1.07%」包裝成 retrieval —— 那是 enrichment（characterization）不是 usable filter（4% sens, FP 非零, COLO829 TP≈FP）。</div>
+    <figure><svg viewBox="0 0 720 210" role="img" aria-labelledby="cvt cvd"><title id="cvt">filter vs co-validation</title><desc id="cvd">filter 對全 33 萬位點失敗 vs co-validation 在 chr17 單點三 channel 同意。</desc>
+      <text x="10" y="18" font-size="12" font-weight="700" fill="#9A3B3B">FILTER（分類器）— DEAD</text>
+      <text x="20" y="42" font-size="11">332,705 loci →</text>
+      <rect x="120" y="30" width="150" height="50" fill="#F3E2E2" stroke="#9A3B3B"/><text x="128" y="50" font-size="10">分類邊界試圖分 TP/FP</text><text x="128" y="68" font-size="10">重疊太大, AUC≈chance</text>
+      <text x="20" y="100" font-size="10" fill="#9A3B3B">OR=0.194（FP-enriched）→ 甲基 filter NEGATIVE</text>
+      <text x="400" y="18" font-size="12" font-weight="700" fill="#2F7D5B">CO-VALIDATION（正交佐證）— alive at N=1</text>
+      <rect x="430" y="30" width="60" height="18" fill="#fff" stroke="#E3DACC"/><text x="436" y="43" font-size="9">somatic call</text>
+      <rect x="430" y="55" width="60" height="18" fill="#fff" stroke="#E3DACC"/><text x="436" y="68" font-size="9">haplotype</text>
+      <rect x="430" y="80" width="60" height="18" fill="#fff" stroke="#E3DACC"/><text x="436" y="93" font-size="9">methylation</text>
+      <rect x="560" y="48" width="130" height="34" fill="#E4F0EA" stroke="#2F7D5B"/><text x="568" y="62" font-size="10">chr17/TBC1D16</text><text x="568" y="78" font-size="10">三 channel 同意 ✅</text>
+      <path d="M490,39 L558,60" stroke="#2F7D5B" stroke-width="1.5" fill="none"/><path d="M490,64 L558,65" stroke="#2F7D5B" stroke-width="1.5" fill="none"/><path d="M490,89 L558,70" stroke="#2F7D5B" stroke-width="1.5" fill="none"/>
+      <text x="410" y="115" font-size="10" fill="#2F7D5B">唯一乾淨範例：1 of 332,705（TAG-A）</text>
+      <rect x="10" y="170" width="700" height="32" fill="#FCFBF8" stroke="#E3DACC" rx="6"/><text x="20" y="190" font-size="11" font-weight="700">orthogonal corroboration ≠ mutual filtering；enrichment（characterization）≠ retrieval（filter）。</text>
+    </svg><figcaption>左：當分類器跑全部 → 失敗。右：當 checksum 在單點三獨立 channel 同意 → 有效佐證。</figcaption></figure>
+  </div></details>
+
+  <details class="card cs"><summary><span class="t">⑨ Germline vs somatic = 遺傳的(每個細胞) vs 後天的(腫瘤獨有)</span><span class="badge b-cs">base 檔 vs diff</span></summary><div class="body">
+    <p><b>為什麼難：</b>最基礎的二分，幾乎所有下游概念都依賴它，卻是純領域知識無日常類比。germline=你遺傳的，在<b>每個細胞</b>（含 matched normal）；somatic=腫瘤<b>後天獲得</b>，只在腫瘤細胞 —— caller 要找的就是它。後果串起整份研究：(1) TO 模式無 matched normal 可減，germline 漏進來當 FP（殘餘 FP 98.6% raw_absent germline leak）；(2) germline ASM(46.4%) &gt; somatic ASM(35.9%)，甲基<b>更像 germline</b>；(3) 必跑 germline-het null；(4) imprinted 區當<b>正控</b>（blind-ARI 0.758=5× somatic）。</p>
+    <div class="csbox"><span class="lbl">CS 類比</span> germline vs somatic = <b>base 檔 vs diff</b>。germline = 每個 checkout 都有的 committed baseline（每個細胞，含 matched-normal reference branch）；somatic = 只在腫瘤 working copy 的 uncommitted local diff。somatic caller 的工作本質是 <code>diff tumor normal</code> —— 只輸出不在 baseline 的行。<b>TO 模式 = 弄丟了 normal reference</b>，等於沒有 base 檔要重建 diff，遺傳的 baseline 行（germline）漏成假「change」（98.6% raw_absent FP = 沒 base 可減的 baseline 行）。germline-het null 控制 = 宣稱「這是腫瘤後天」前，先確認它不是已存在於普通遺傳雜合位點（別把 baseline 行當 diff）。imprinted 當正控 = test suite 裡的 known-good fixture。</div>
+    <figure><svg viewBox="0 0 720 220" role="img" aria-labelledby="gst gsd"><title id="gst">germline vs somatic base/diff</title><desc id="gsd">paired 模式有 base 檔可 diff，tumor-only 弄丟 base 導致 germline 漏成 FP。</desc>
+      <text x="10" y="18" font-size="12" font-weight="700">每個細胞（含 NORMAL）= baseline；TUMOR 多了後天 diff</text>
+      <rect x="20" y="28" width="14" height="14" fill="#2F6690"/><rect x="40" y="28" width="14" height="14" fill="#2F6690"/><text x="62" y="40" font-size="11">germline（藍, 遺傳, 每個細胞都有）</text>
+      <rect x="20" y="50" width="14" height="14" fill="#2F6690"/><rect x="40" y="50" width="14" height="14" fill="#2F6690"/><rect x="60" y="50" width="14" height="14" fill="#9A3B3B"/><text x="82" y="62" font-size="11">tumor = 藍 + 紅(somatic, 後天)</text>
+      <text x="10" y="100" font-size="12" font-weight="700" fill="#2F7D5B">paired（有 base 檔）：diff(tumor, normal) → 只剩紅 somatic ✅</text>
+      <rect x="20" y="108" width="200" height="20" fill="#E4F0EA" stroke="#2F7D5B"/><text x="28" y="123" font-size="11">乾淨輸出 somatic</text>
+      <text x="10" y="160" font-size="12" font-weight="700" fill="#9A3B3B">tumor-only（弄丟 base 檔）：無法相減 → 部分 germline 漏成 FP</text>
+      <rect x="20" y="168" width="260" height="20" fill="#F3E2E2" stroke="#9A3B3B"/><text x="28" y="183" font-size="11">somatic + 漏進的 germline（殘餘 FP 98.6% = germline leak）</text>
+      <rect x="420" y="100" width="290" height="92" fill="#FCFBF8" stroke="#E3DACC" rx="6"/><text x="430" y="120" font-size="11">必守：germline ASM 46.4% &gt; somatic 35.9%</text><text x="430" y="140" font-size="11" fill="#9A3B3B">MANDATORY: germline-het NULL 控制</text><text x="430" y="160" font-size="11" fill="#2F7D5B">imprinted DMR = 正控(blind-ARI 0.758=5×)</text><text x="430" y="180" font-size="10" fill="#5C5A54">藍=baseline, 紅=diff, 灰=丟失的 normal</text>
+    </svg><figcaption>somatic calling = <code>diff tumor normal</code>；tumor-only 弄丟 base 檔 → germline 漏成 FP（研究所有 FP 的根）。</figcaption></figure>
+  </div></details>
+
+  <details class="card cs"><summary><span class="t">⑩ Single-pipeline ceiling = 為何結論封頂 ⭐3（單一 oracle / 相關失效）</span><span class="badge b-cs">單一 primary DB 的 replica 共識</span></summary><div class="body">
+    <p><b>為什麼難：</b>學生看到很多強跨樣本復現（6/6, mean +0.168, CV 0.26）會以為結論鐵證。微妙的關鍵：所有 tier <b>封頂 ⭐3</b>，因為每個樣本的 somatic 真值都來自<b>同一個 caller（ClairS-TO）</b>。若這單一 oracle 有系統偏差，偏差在 6 樣本被同樣複製，「6/6 一致」<b>不能</b>排除「caller 一致地錯一樣」。共享 pipeline 的跨樣本復現量的是 pipeline 一致性，不是生物真值。</p>
+    <div class="csbox"><span class="lbl">CS 類比</span> 這是分散式系統/ML labeling 的<b>相關失效 / 單一真值源</b>問題。用一個 labeler（或一個上游服務）的 label 驗模型、跨 6 資料集都同意，就像 6 個 replica 都讀<b>同一個 primary DB</b>：primary 壞了，6 個 replica 完美同意<b>且</b>全錯 —— 共享來源的 replica 共識對真值毫無證明力（沒有獨立來源就沒有 Byzantine 容錯）。ClairS-TO 就是那個單一 oracle；「6/6 復現」= 高 test-retest reliability，不是 validity。打破天花板要<b>獨立 oracle</b>（COLO829 / 第二 caller / matched-normal truth set）—— 就像你不用同一個 parser 的 output 驗那個 parser，不用第二個一樣壞的時鐘量時鐘準度。tier 系統正編碼這個：⭐3=真實可復現但單 pipeline，⭐4+=被獨立來源佐證。</div>
+  </div></details>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  <p><b>Provenance（§13 / §8.4）</b></p>
+  <p>本 HTML 為全研究史講解，<b>非新分析</b>。內容由 workflow <code>wf_00703788-94f</code>（8 agents）從 <code>evidence_ledger.jsonl</code>(95) + <code>docs/experiments/INDEX.md</code>(324) + <code>MEMORY.md</code> + <code>docs/paper_focus/</code> + <code>research_landscape/</code> 萃取分類；每條結論附 ledger cycle_id source。catalog 數字另經 <code>wf_5644ed77-082</code> 6/6 adversarial 重驗 + 本 session grep。</p>
+  <p>證據色：🟢 已驗（原檔對賬）/ 🟡 未跑或 contingent / 🔵 framing 立場 · 生成 <code>2026-06-10</code> · git <code>8dbb931</code> · 內部 L1-L2 / 外部 L3。撰寫此 HTML 的 Write 與 workflow 萃取在不同 batch（§13.0）。</p>
+  <p class="src">合規聲明：本研究為已批准、無危害的癌症長讀甲基化生物資訊數據分析（ONT 公開細胞株 HCC1395 等 + SEQC2 公開 truth set 的計算分析）。</p>
+</div></div></footer>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capstone — 甲基分群驅動來源：完整整理 + 獨立驗證</title>
+<style>
+:root{
+  --c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;
+  --c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;
+  --c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;
+  --sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;
+  --ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;
+  --ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,Consolas,monospace;
+  --radius-md:6px;--radius-lg:8px;--shadow-sm:0 1px 2px rgba(20,20,19,.05);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);line-height:1.65;font-size:16px}
+.layout{display:grid;grid-template-columns:250px 1fr;max-width:1180px;margin:0 auto;gap:var(--sp-6)}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:var(--sp-5) var(--sp-3);border-right:1px solid var(--c-border);font-size:13.5px}
+nav.toc h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-soft);margin:0 0 var(--sp-3)}
+nav.toc a{display:block;padding:5px var(--sp-2);color:var(--c-text-soft);text-decoration:none;border-radius:var(--radius-md)}
+nav.toc a:hover{background:var(--c-code-bg);color:var(--c-text)}
+main{padding:var(--sp-6) var(--sp-5) var(--sp-7);min-width:0}
+h1{font-size:28px;line-height:1.25;margin:0 0 var(--sp-3)}
+h2{font-size:21px;margin:var(--sp-7) 0 var(--sp-4);padding-bottom:var(--sp-2);border-bottom:2px solid var(--c-border)}
+h3{font-size:17px;margin:var(--sp-5) 0 var(--sp-3)}
+p{margin:0 0 var(--sp-4)}
+code{font-family:var(--ff-mono);background:var(--c-code-bg);padding:1px 6px;border-radius:4px;font-size:.86em}
+.meta{color:var(--c-text-soft);font-size:14px;margin-bottom:var(--sp-5)}
+.tier{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--c-code-bg);border:1px solid var(--c-border);color:var(--c-accent-deep)}
+.card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-5);margin:var(--sp-4) 0;box-shadow:var(--shadow-sm)}
+.verdict{border-left:5px solid var(--c-accent);background:linear-gradient(90deg,#FBF1EC,var(--c-surface) 60%)}
+.callout{border:1px solid var(--c-border);border-left:5px solid var(--c-warning);background:#FCF8EE;border-radius:var(--radius-md);padding:var(--sp-4) var(--sp-5);margin:var(--sp-4) 0}
+.callout.crit{border-left-color:var(--c-critical);background:#FBF0EA}
+.callout.ok{border-left-color:var(--c-success);background:#F0F7F1}
+table{border-collapse:collapse;width:100%;margin:var(--sp-4) 0;font-size:13.5px}
+th,td{border:1px solid var(--c-border);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:var(--c-code-bg);font-weight:600}
+td.num{text-align:right;font-family:var(--ff-mono)}
+tr.good td{background:#F0F7F1}
+.mono{font-family:var(--ff-mono)}.soft{color:var(--c-text-soft)}
+.chk{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:4px;background:#E6F2E9;color:var(--c-success);border:1px solid #BfddC7}
+.nu{background:#FBF1EC;color:var(--c-accent-deep);border-color:#E8CFC2}
+.yes{color:var(--c-success);font-weight:700}.no{color:var(--c-critical);font-weight:700}.part{color:var(--c-warning);font-weight:700}
+footer{margin-top:var(--sp-7);padding-top:var(--sp-4);border-top:1px solid var(--c-border);font-size:13px;color:var(--c-text-soft)}
+@media(max-width:820px){.layout{grid-template-columns:1fr}nav.toc{position:static;height:auto;border-right:none;border-bottom:1px solid var(--c-border)}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc">
+  <h2>目錄</h2>
+  <a href="#v">0 一句話結論</a>
+  <a href="#arc">1 調查全弧</a>
+  <a href="#data">2 完整數據（驗證 ✓）</a>
+  <a href="#mech">3 HP1-1 機制</a>
+  <a href="#valid">4 d_within 有效性</a>
+  <a href="#lit">5 背景文獻佐證</a>
+  <a href="#final">6 對抗後最終敘述</a>
+  <a href="#paper">7 對論文</a>
+</nav>
+<main>
+
+<h1>Capstone：甲基分群驅動來源 — 完整整理 + 獨立驗證</h1>
+<p class="meta">HCC1395 單樣本 · 5 cycle 整合 · 2026-06-07 · <span class="tier">⭐3 multi-channel confound-controlled</span> · <span class="tier" style="color:var(--c-success)">4-agent 獨立驗證 wf_700971bc-309</span></p>
+
+<div class="callout ok" style="font-size:13.5px">
+<strong>驗證狀態</strong>：所有 load-bearing 數字經 <strong>4-agent 獨立驗證 workflow（從 raw read-level cache 重算，不信既有 JSON）</strong> → <span class="chk">✓ 數字全 CONFIRMED bit-for-bit</span> <span class="chk">✓ 源碼 CONFIRMED</span> <span class="chk">✓ 文獻 CONFIRMED 敘述合理</span> <span class="chk nu">對抗修 2 點（% 框架 + 有效性可重跑）</span>
+</div>
+
+<div class="card verdict" id="v">
+<p style="margin:0 0 8px"><strong style="font-size:18px">0 · 一句話結論（reconciled）</strong></p>
+<p style="margin:0;font-size:16px">甲基分群<strong>不是 CN 數量(dosage)、不是 alignment、不是純 artifact</strong>；主因是 <strong>somatic-subclone vs germline 的甲基差異</strong>（HP1-1 是 longphase-S 的 <strong>somatic subclone tag，非 copy</strong>）。<strong>焦點突變的 cis 效應在單樣本與 subclone 背景不可乾淨分離</strong>（文獻 CAMDAC 同此限制）。質性：<strong>BRCA2 = subclone 主導</strong>（焦點 cis 小）、<strong>chr17/TBC1D16 = allele 主導</strong>（唯一乾淨 cis 候選）。⚠ <strong>精確 % 量化不 robust，勿引用。</strong></p>
+</div>
+
+<h2 id="arc">1 · 調查全弧（時間線）</h2>
+<table>
+<thead><tr><th>cycle</th><th>結論</th><th>ledger</th></tr></thead>
+<tbody>
+<tr><td>copy_partition 三項量化（06-03）</td><td>HP-axis 量級多由「copy」撐起；chr17 vs BRCA2 差異</td><td>80→83</td></tr>
+<tr><td>CNV 三層驗證 FAST+alignment（06-07）</td><td>dosage REFUTED / alignment REFUTED / 決策表 816→10</td><td>84,86,87,88</td></tr>
+<tr><td>HP1-1 tag 審計（用戶質疑，06-07）</td><td>HP1-1 = somatic subclone tag；「copy」改「subclone/copy」</td><td>93</td></tr>
+<tr class="good"><td><strong>capstone 驗證 + reconcile（06-07）</strong></td><td>全數字 reproducible；% 不 robust → 質性框架</td><td><strong>94</strong></td></tr>
+</tbody>
+</table>
+
+<h2 id="data">2 · 完整數據（每數字獨立重算 <span class="chk">✓</span>）</h2>
+
+<h3>2a 四通道 confound 判定</h3>
+<table>
+<thead><tr><th>通道</th><th>判定</th><th>關鍵數字（獨立重算）</th></tr></thead>
+<tbody>
+<tr><td>copy-<strong>DOSAGE</strong></td><td class="no">❌ REFUTED</td><td>neutral 0.0811(n76) vs gain 0.0737(n2542) <strong>MW p=0.6183</strong>；signed ρ=<strong>−0.0829</strong> 反向 <span class="chk">✓</span></td></tr>
+<tr><td><strong>alignment</strong></td><td class="no">❌ REFUTED(5/6)</td><td>untestable softclip 0.027 / sec≈0 / HP1-1−HP1 −0.004；唯 chr11 NM/kb=87.8 <span class="chk">✓</span></td></tr>
+<tr><td><strong>subclone/copy-PARTITION</strong></td><td class="yes">✅ 主導量級</td><td>d_copy(subclone vs germline 同 REF) 撐 d_HP；質性主導 <span class="chk">✓</span></td></tr>
+<tr><td><strong>mechanical</strong></td><td class="part">81/816 排除</td><td>CREATES 52 + DESTROYS 29</td></tr>
+</tbody>
+</table>
+
+<h3>2b 焦點位點四量測（bit-for-bit 重算）</h3>
+<table>
+<thead><tr><th>位點</th><th>d_HP</th><th>d_copy</th><th>d_within</th><th>d_focal_CLEAN</th><th>質性判定</th></tr></thead>
+<tbody>
+<tr class="good"><td class="mono">chr17 (TBC1D16)</td><td class="num">0.122</td><td class="num">0.029</td><td class="num">0.142</td><td class="num">0.178</td><td><strong>allele 主導 = 乾淨 cis</strong></td></tr>
+<tr><td class="mono">BRCA2/ZAR1L</td><td class="num">−0.122</td><td class="num">−0.110</td><td class="num">−0.023</td><td class="num">−0.099</td><td>subclone 主導</td></tr>
+<tr><td class="mono">chr5</td><td class="num">0.129</td><td class="num">0.055</td><td class="num">0.059</td><td class="num">0.115</td><td>混合</td></tr>
+</tbody>
+</table>
+<div class="callout">⚠ <code>d_HP ≈ d_copy + d_within</code> <strong>僅近似</strong>（殘差 BRCA2 9% / chr17 <strong>40%</strong>；chr17 d_within&gt;d_HP）→ <strong>精確 % 不 robust</strong>。質性方向（chr17 allele / BRCA2 subclone）robust。</div>
+
+<h3>2c 全 816 決策表</h3>
+<p>not-cis(T0/T2) <strong>682</strong> · mechanical-artifact <strong>81</strong> · T3-nominal(過不了 Bonferroni) <strong>44</strong> · <strong>Bonferroni-clean T3 = 10</strong>（1 乾淨 cis chr17 / 2 subclone/copy-confounded BRCA2,chr5（HP1-1=somatic subclone tag 非 copy、非 CN-dosage）/ 1 mechanical chr19 / 6 untestable pure-ALT CGI-沙漠）。</p>
+
+<h2 id="mech">3 · HP1-1 機制（longphase-S 源碼，獨立複核 <span class="chk">✓ CONFIRMED</span>）</h2>
+<p><code>HaplotagStrategy.cpp:505-516</code>：read 判 <strong>H1_1 ⇔ maxNormalHP==GERMLINE_H1 AND maxTumorHP==SOMATIC_H3（tumorMaxHPcount≠0）</strong>。</p>
+<ul>
+<li><strong>HP1-1 = germline 單倍型1 + 帶 ≥1 somatic ALT = somatic SUBCLONE tag，非 copy。</strong>（用戶質疑成立）</li>
+<li><span class="chk nu">源碼新發現</span> <code>SOMATIC_H4</code>(REF phase) 是 <strong>dead code</strong>（hpCount[4] 從不 ++；hpCount[3]++ 僅在 <code>base==TumorAltBase</code>）→ tag 純「帶 somatic ALT」，無「ALT vs REF phase」之分。</li>
+<li>另有 gate：norHPsimilarity≥0.6 + tumHPsimilarity≥0.6 + 單 PS block。</li>
+<li><strong>HP1-1/ref reads 必帶其他 somatic ALT</strong>（code-mandated）；經驗證實 ALT reads <strong>只</strong>出現在 HP1-1 tag（HP1/HP2 alt=0）。</li>
+</ul>
+
+<h2 id="valid">4 · d_within 有效性（可重跑 <code>scripts/65</code>）</h2>
+<table>
+<thead><tr><th>BRCA2 HP1-1/ref 檢查</th><th>結果</th></tr></thead>
+<tbody>
+<tr><td>n reads</td><td class="num">19</td></tr>
+<tr><td>focal base</td><td>全 <strong>G(REF)</strong>，median BQ=26.0</td></tr>
+<tr><td>帶其他 somatic ALT</td><td><strong>19/19</strong>（chr13:32317522/32324831/32339132，平均 1.53）</td></tr>
+</tbody>
+</table>
+<div class="callout ok">→ <strong>d_within 質性有效</strong>（HP1-1/ref 是真 subclone reads；subclone-controlled 焦點 allele 估計）。⚠ <strong>但精確 % 不 robust</strong>（分解非閉合）。<br><span class="soft">（capstone 對抗抓出：原「19/19」是 script 64 hard-coded 字串，已改 <code>scripts/65</code> 可重跑落 <code>dwithin_validity.json</code>。）</span></div>
+
+<h2 id="lit">5 · 背景文獻佐證（敘述合理性，獨立查證 <span class="chk">✓ CONFIRMED</span>）</h2>
+<table>
+<thead><tr><th>主張</th><th>文獻</th><th></th></tr></thead>
+<tbody>
+<tr><td>longphase 把 somatic ALT reads 依 germline 相位分到 HP1-1</td><td>longphase-S preprint (biorxiv 2025.11.20.689492)</td><td class="yes">✅</td></tr>
+<tr><td>同 germline haplotype 的腫瘤 subclone 有不同甲基化</td><td>subclone-specific methylation (pubmed 25066126/24356097；prostate/CLL/myeloma/breast)</td><td class="yes">✅ 真實生物</td></tr>
+<tr><td>單一 somatic 點突變 cis 甲基效應小且難在 bulk 分離</td><td>cis-mQTL/ASM modest (PMC2893533/PMC7679001)</td><td class="yes">✅</td></tr>
+<tr><td>somatic-ALT=subclone reads → 單樣本 focal-cis vs subclone 不可分離</td><td>CAMDAC (biorxiv 2020.11.03.366252)；解法=matched-normal diffASE</td><td class="yes">✅</td></tr>
+</tbody>
+</table>
+<p>→ <strong>修正後敘述與領域常識一致，無文獻反對。</strong></p>
+
+<h2 id="final">6 · 對抗驗證後的最終敘述</h2>
+<div class="card">
+<p style="margin:0 0 6px"><strong>成立（reproducible + literature-backed）</strong></p>
+<ol style="margin:0 0 12px">
+<li>dosage NO（MW p=0.62 + signed ρ 反向）、alignment NO（5/6）。</li>
+<li>全域 NEGATIVE（甲基不能 filter TP/FP）。</li>
+<li>質性：<strong>chr17 allele 主導（乾淨 cis）&gt; BRCA2 subclone 主導</strong>。</li>
+<li>HP1-1 = somatic subclone tag（源碼 + 文獻 + 經驗三證）。</li>
+</ol>
+<p style="margin:0 0 6px"><strong>已修正（capstone 對抗抓出）</strong></p>
+<ul style="margin:0 0 12px">
+<li>「copy-partition」→「<strong>subclone/copy partition</strong>」。</li>
+<li><strong>% 量化（81%/64%）NOT robust</strong> → 質性框架（分解殘差 40%）。</li>
+<li>d_within 有效性證據 hard-coded 字串 → <strong>可重跑 <code>scripts/65</code></strong>。</li>
+</ul>
+<p style="margin:0 0 6px"><strong>reviewer 仍會挑（誠實未解）</strong></p>
+<ul style="margin:0">
+<li><strong>subclone vs copy（同細胞不同 amplicon copy）單樣本仍不可分</strong>——合併標誠實但未解。</li>
+<li><strong>chr17 cis 宣稱仍受 subclone confound</strong>（d_within 大可能 chr17 subclone 甲基差大，非真 focal cis）——需 COLO829 / matched-normal diffASE。</li>
+<li>單樣本天花板：最強 6 個 untestable 位點 copy-vs-cis 未定。</li>
+</ul>
+</div>
+
+<h2 id="paper">7 · 對論文（CURRENT_FOCUS + master_draft §2.2）</h2>
+<ul>
+<li><strong>chr17/TBC1D16 為最乾淨 cis 候選 — 不變且強化</strong>（d_within 質性有效）。</li>
+<li>BRCA2「~80% copy-artifact」（已 supersede）→「<strong>subclone/copy-confounded（HP1-1=somatic subclone tag 非 copy、非 CN-dosage）；焦點突變 cis 在單樣本不可分離（焦點 cis d_within=−0.023 邊際，perm p=0.024）</strong>」——<strong>% split 不 robust，不寫精確 %</strong>。</li>
+<li>「copy-partition」用語全面改「subclone/copy partition」。</li>
+<li>（由 paper session 落地；本 capstone 的 <code>affects:</code> 標記）</li>
+</ul>
+
+<footer>
+<p><strong>Provenance</strong> · branch <code>feat/cis-asm-pipeline</code>（scripts 37/62/63/64/65 + 本報告 uncommitted）· 驗證 workflow <code>wf_700971bc-309</code>（4-agent 獨立）</p>
+<p>數據（每數字可 grep）：<code>copy_partition_confirm</code>/<code>fast_cnv_validation</code>/<code>alignment_channel_test</code>/<code>subclone_tag_rederivation</code>/<code>dwithin_validity</code>/<code>cis_scan_full</code>.json</p>
+<p>cycle_id <code>20260607_capstone_verification_reconciliation</code> · evidence_ledger 80→94（append-only）<br>
+source companion：<code>InterSubMod/docs/experiments/in_progress/2026/06/20260607_methylation_clustering_capstone_synthesis_01.md</code></p>
+<p class="soft">characterization only — 無 TP/FP discriminator、無 F1 filter。單樣本 ⭐3，不可升 ⭐4（需 COLO829）。% 量化不 robust。</p>
+</footer>
+</main>
+</div>
+</body>
+</html>

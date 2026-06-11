@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cis-ASM 的 copy-partition confound — 三項量化驗證</title>
+<style>
+:root{
+  --c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;
+  --c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;
+  --c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;
+  --c-copy:#9C8B73;--c-allele:#D97757;
+  --sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;
+  --ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;
+  --ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,Consolas,monospace;
+  --radius-md:6px;--radius-lg:8px;--shadow-sm:0 1px 2px rgba(20,20,19,.05);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);line-height:1.65;font-size:16px}
+.layout{display:grid;grid-template-columns:248px 1fr;max-width:1200px;margin:0 auto;gap:var(--sp-6)}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:var(--sp-5) var(--sp-3);border-right:1px solid var(--c-border);font-size:14px}
+nav.toc h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-soft);margin:0 0 var(--sp-3)}
+nav.toc a{display:block;padding:5px var(--sp-2);color:var(--c-text-soft);text-decoration:none;border-radius:var(--radius-md);border-left:2px solid transparent}
+nav.toc a:hover{background:var(--c-code-bg);color:var(--c-text)}
+nav.toc a.sub{padding-left:var(--sp-5);font-size:13px}
+main{padding:var(--sp-6) var(--sp-5) var(--sp-7);min-width:0}
+h1{font-size:30px;line-height:1.25;margin:0 0 var(--sp-3)}
+h2{font-size:23px;margin:var(--sp-7) 0 var(--sp-4);padding-bottom:var(--sp-2);border-bottom:2px solid var(--c-border)}
+h3{font-size:18px;margin:var(--sp-6) 0 var(--sp-3)}
+p{margin:0 0 var(--sp-4)}
+code{font-family:var(--ff-mono);background:var(--c-code-bg);padding:1px 6px;border-radius:4px;font-size:.88em}
+.meta{color:var(--c-text-soft);font-size:14px;margin-bottom:var(--sp-5)}
+.tier{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--c-code-bg);border:1px solid var(--c-border);color:var(--c-accent-deep)}
+.card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-5);margin:var(--sp-4) 0;box-shadow:var(--shadow-sm)}
+.verdict{border-left:5px solid var(--c-accent);background:linear-gradient(90deg,#FBF1EC,var(--c-surface) 60%)}
+.callout{border:1px solid var(--c-border);border-left:5px solid var(--c-warning);background:#FCF8EE;border-radius:var(--radius-md);padding:var(--sp-4) var(--sp-5);margin:var(--sp-4) 0}
+.callout.crit{border-left-color:var(--c-critical);background:#FBF0EA}
+.callout.ok{border-left-color:var(--c-success);background:#F0F7F1}
+.callout strong{color:var(--c-accent-deep)}
+table{border-collapse:collapse;width:100%;margin:var(--sp-4) 0;font-size:14px}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left}
+th{background:var(--c-code-bg);font-weight:600}
+td.num{text-align:right;font-family:var(--ff-mono)}
+tr.hi td{background:#FBF1EC}
+.mono{font-family:var(--ff-mono)}
+.soft{color:var(--c-text-soft)}
+.big{font-size:34px;font-weight:700;font-family:var(--ff-mono);line-height:1}
+.stat-row{display:flex;gap:var(--sp-4);flex-wrap:wrap;margin:var(--sp-4) 0}
+.stat{flex:1;min-width:150px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-4);text-align:center}
+.stat .lbl{font-size:13px;color:var(--c-text-soft);margin-top:6px}
+.bar-row{display:flex;align-items:center;gap:var(--sp-3);margin:6px 0;font-size:13px}
+.bar-row .name{width:170px;flex-shrink:0;font-family:var(--ff-mono);font-size:12.5px}
+.bar-track{flex:1;display:flex;height:24px;background:#F4EFE6;border-radius:4px;overflow:hidden;border:1px solid var(--c-border)}
+.seg-copy{background:var(--c-copy);height:100%}
+.seg-allele{background:var(--c-allele);height:100%}
+.bar-row .val{width:130px;flex-shrink:0;text-align:right;font-family:var(--ff-mono);font-size:12px;color:var(--c-text-soft)}
+.legend{display:flex;gap:var(--sp-5);font-size:13px;margin:var(--sp-3) 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:14px;border-radius:3px;display:inline-block}
+footer{margin-top:var(--sp-7);padding-top:var(--sp-4);border-top:1px solid var(--c-border);font-size:13px;color:var(--c-text-soft)}
+.eq{font-family:var(--ff-mono);background:var(--c-code-bg);padding:var(--sp-3) var(--sp-4);border-radius:var(--radius-md);text-align:center;font-size:16px;margin:var(--sp-4) 0;border:1px solid var(--c-border)}
+@media(max-width:820px){.layout{grid-template-columns:1fr}nav.toc{position:static;height:auto;border-right:none;border-bottom:1px solid var(--c-border)}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc">
+  <h2>目錄</h2>
+  <a href="#q">① 問題</a>
+  <a href="#confound">② confound 機制</a>
+  <a href="#method">③ 4-量測拆解法</a>
+  <a href="#t1">④ Test 1 · 拆解</a>
+  <a href="#t2">⑤ Test 2 · ALLELE-axis</a>
+  <a href="#t3">⑥ Test 3 · permutation</a>
+  <a href="#verdict">⑦ 修正結論</a>
+  <a href="#survivors">⑧ 2 個乾淨真 cis</a>
+  <a href="#impl">⑨ 意涵與後續</a>
+  <a href="#limits">⑩ 限制</a>
+</nav>
+<main>
+
+<h1>cis-ASM candidate 的 copy-partition confound</h1>
+<p class="meta">三項量化驗證 · HCC1395 單樣本 · 2026-06-03 · <span class="tier">⭐3 · L1 decisive decomposition</span> · <span class="tier" style="color:var(--c-warning)">A pilot · subset 7/60</span></p>
+
+<div class="card verdict">
+<p style="margin:0 0 8px"><strong style="font-size:18px">一句話結論</strong></p>
+<p style="margin:0;font-size:17px">在 HCC1395 單樣本中，within-tag allele 效應於 4/4 測試位點顯著非零（<strong>3 強顯著 p≤0.006 + BRCA2 marginal p≈0.02</strong>）——<strong>somatic-cis-ASM 為真現象，但量級遠小於 HP-axis 表面值</strong>。多數 candidate 表面訊號主要來自 <strong>subclone/copy partition</strong>（HP1-1=somatic subclone tag 非 copy、非 CN-dosage；見修正 banner），而非 somatic allele 本身：BRCA2 焦點 cis d_within=−0.023 邊際（vs d_HP −0.122；% split 不 robust）。<strong>唯一乾淨的強 cis 是 chr17:79991120</strong>（mech NEUTRAL）；chr18:11741161 帶 CpG-creation 機械假象待釐清。尚需跨樣本複現。</p>
+</div>
+
+<div class="callout crit">
+<strong>⚠ 修正 banner（2026-06-07，longphase-S 源碼審計後）</strong>：「<strong>copy-partition</strong>」應讀作「<strong>subclone/copy partition</strong>」。源碼（<code>HaplotagStrategy.cpp:505-516</code>）確認 <strong>HP1-1 = germline 單倍型1 + somatic ALT = somatic SUBCLONE tag，不是「一個 copy」</strong>；故 <code>d_copy</code> 是 somatic-subclone vs germline 甲基差（已證非 CN-dosage）。<strong>數字成立</strong>（d_within 經三重證據驗為有效 subclone-control：HP1-1/ref 19/19 帶其他 somatic ALT + focal confident REF + 甲基歸 subclone 群）→ BRCA2 表面 ASM = <strong>subclone/copy 主導（焦點 cis d_within=−0.023 邊際；% split 不 robust）</strong>。「7/60 測不了」是 subclone CONTROL 限制；raw 焦點對比 <code>d_focal_CLEAN</code> 10/11 可算。完整：<code>InterSubMod/docs/experiments/in_progress/2026/06/20260607_HP11_tag_definition_correction_record_01.md</code>。
+</div>
+
+<h2 id="q">① 問題：60 個 T3「cis-candidate」是真的嗎？</h2>
+<p>P3 scan 用 <strong>HP-axis</strong>（HP1 germline vs HP1-1 somatic，同一條 haplotype、只差 somatic allele）掃 816 個 nonLOH ASM 位點，分出三層：</p>
+<div class="stat-row">
+  <div class="stat"><div class="big">816</div><div class="lbl">掃描位點</div></div>
+  <div class="stat"><div class="big" style="color:var(--c-accent)">60</div><div class="lbl">T3 cis-candidate</div></div>
+  <div class="stat"><div class="big soft">196</div><div class="lbl">T2</div></div>
+  <div class="stat"><div class="big soft">560</div><div class="lbl">T0 (no-ASM)</div></div>
+</div>
+<div class="callout crit">
+<strong>對抗 workflow 的 Angle 4 挑戰</strong>：在 <strong>CN-gain（擴增）區</strong>，HP1 與 HP1-1 兩個 tag 可能對應<strong>不同的 copy</strong>，各帶 copy-specific 甲基化。HP-axis 把「copy 之間的差異」誤當成「somatic allele 的 cis 效應」。<br>→ 那 60 個 T3 是真 cis，還是 <strong>copy-partition artifact</strong>？
+</div>
+
+<h2 id="confound">② confound 機制：為什麼 HP-axis 會混淆 copy 與 allele</h2>
+<p>關鍵：HP1-1 tag 是「phased 到 HP1 <em>且</em> 帶 somatic ALT」的 reads。在<strong>正常二倍體</strong>區，HP1 與 HP1-1 是同一條 haplotype、只差一個 somatic 鹼基 → 兩者甲基差 = 純 somatic 效應。但在<strong>擴增區</strong>，同一 haplotype 有多個 copy，HP1-1 可能來自某個特定擴增 copy，而該 copy 本身就帶不同甲基 → 差異混入了 copy 身分。</p>
+
+<div class="card">
+<svg viewBox="0 0 760 250" role="img" aria-labelledby="svgt svgd" style="width:100%;height:auto">
+  <title id="svgt">copy-partition confound 示意</title>
+  <desc id="svgd">正常二倍體區 HP1 與 HP1-1 只差 somatic allele；擴增區 HP1-1 來自不同 copy，混入 copy-specific 甲基。</desc>
+  <!-- left: diploid -->
+  <text x="20" y="24" font-size="14" font-weight="700" fill="#141413">正常二倍體（cis 乾淨）</text>
+  <rect x="20" y="40" width="200" height="26" rx="4" fill="#E3DACC"/>
+  <text x="28" y="58" font-size="12" font-family="monospace" fill="#141413">HP1  (germline ref)</text>
+  <rect x="20" y="74" width="200" height="26" rx="4" fill="#F2DDD3" stroke="#D97757"/>
+  <text x="28" y="92" font-size="12" font-family="monospace" fill="#141413">HP1-1 (somatic alt)</text>
+  <text x="20" y="128" font-size="12.5" fill="#15803D">差異 = 只有 allele ✓ 真 cis</text>
+  <!-- divider -->
+  <line x1="380" y1="14" x2="380" y2="230" stroke="#E3DACC" stroke-dasharray="4 4"/>
+  <!-- right: amplified -->
+  <text x="410" y="24" font-size="14" font-weight="700" fill="#141413">擴增區 CN-gain（confound）</text>
+  <rect x="410" y="40" width="150" height="22" rx="4" fill="#E3DACC"/>
+  <text x="416" y="56" font-size="11" font-family="monospace">copy A · HP1 (ref)</text>
+  <rect x="410" y="66" width="150" height="22" rx="4" fill="#EDE6D8"/>
+  <text x="416" y="82" font-size="11" font-family="monospace">copy B · HP1 (ref)</text>
+  <rect x="410" y="98" width="150" height="22" rx="4" fill="#F2DDD3" stroke="#D97757"/>
+  <text x="416" y="114" font-size="11" font-family="monospace">copy C · HP1-1 (alt)</text>
+  <text x="575" y="56" font-size="11" fill="#6B6B66">甲基 = m₁</text>
+  <text x="575" y="82" font-size="11" fill="#6B6B66">甲基 = m₂</text>
+  <text x="575" y="114" font-size="11" fill="#B85A3F">甲基 = m₃</text>
+  <text x="410" y="150" font-size="12.5" fill="#C2410C">HP1 vs HP1-1 差異 = (copy C − copy A) </text>
+  <text x="410" y="170" font-size="12.5" fill="#C2410C">= copy 差 ⊕ allele 差（混在一起）✗</text>
+  <text x="410" y="200" font-size="12" fill="#6B6B66">→ 需把 copy 與 allele 拆開才知真 cis 多大</text>
+</svg>
+</div>
+
+<h2 id="method">③ 方法：4 種量測把 copy 與 allele 拆開</h2>
+<p>對每個位點，用 longphase HP-tag × MSA per-read allele（ALT/REF 由 <strong>SNV 定義</strong>，非甲基），算 4 個 paired per-CpG Δβ：</p>
+<table>
+<thead><tr><th>量測</th><th>定義</th><th>held constant</th><th>捕捉什麼</th></tr></thead>
+<tbody>
+<tr><td class="mono">d_HP</td><td>HP1 vs HP1-1（all）</td><td>—</td><td><strong>copy + allele 混合</strong>（原始訊號）</td></tr>
+<tr class="hi"><td class="mono">d_within</td><td>HP1-1 內 alt vs ref</td><td>tag（→ copy）</td><td><strong>純 somatic-allele cis</strong> ★ 正確指標</td></tr>
+<tr><td class="mono">d_copy</td><td>HP1/ref vs HP1-1/ref</td><td>allele（皆 REF）</td><td>純 <strong>copy/tag</strong> 差異</td></tr>
+<tr><td class="mono">d_allele</td><td>全 tag ALT vs REF（pooled）</td><td>—</td><td>ALLELE-axis（檢查是否也 confound）</td></tr>
+</tbody>
+</table>
+<div class="eq">成分對照（<strong>非嚴格可加</strong>）：&nbsp; d_HP &nbsp;~&nbsp; <span style="color:var(--c-copy)">d_copy</span> &nbsp;⊕&nbsp; <span style="color:var(--c-allele)">d_within</span></div>
+<div class="callout"><strong>⚠ 這不是乾淨的加法分解</strong>：三量測在<strong>不同 read 子集與 CpG 集合</strong>上估計（d_HP=between-tag pooled、d_within=within-somatic-tag、d_copy=cross-tag-on-ref），故 <code>d_copy+d_within</code> 對 d_HP 的殘差達 <strong>6–40%</strong>。極端如 chr17：<code>d_within(0.142) &gt; d_HP(0.122)</code>（成分大於整體）——因 pooling 在 HP-axis 稀釋了真 within-tag 效應。下方 bar 是「成分大小對照」，<strong>非</strong>把 d_HP 切兩塊；用途是看哪一半主導，不是精確分帳。</div>
+<p class="soft" style="font-size:14px"><strong>殘餘 copy 控制（permutation）</strong>：在 somatic tag 內把 read 的 allele label 隨機重排 2000 次 → null 分布。觀測 d_within 落在 null <em>之外</em> = 真 allele-specific；落在 <em>之內</em> = 僅 within-tag 異質性。</p>
+
+<h2 id="t1">④ Test 1 — copy-aware 重量測（7/60 可算）</h2>
+<p class="soft" style="font-size:14px">可算 = somatic tag 內同時有 ALT 與 REF reads（各 ≥3/CpG）；其餘 53 個低覆蓋無法拆解。下圖每條 bar = <span style="color:var(--c-copy)">|d_copy|</span> + <span style="color:var(--c-allele)">|d_within|</span> 兩成分大小對照（≈d_HP 但非精確分帳，殘差 6–40%；bar 總長可超過 |d_HP|，如 chr17）。看的是<strong>哪一半主導</strong>。</p>
+<div class="legend">
+  <span><span class="sw" style="background:var(--c-copy)"></span> d_copy（copy-partition）</span>
+  <span><span class="sw" style="background:var(--c-allele)"></span> d_within（真 allele-cis）</span>
+</div>
+<div class="card">
+  <!-- bars: px = value*1600, scale max 0.25 -->
+  <div class="bar-row"><span class="name">chr17:79991120</span><div class="bar-track"><div class="seg-copy" style="width:46px"></div><div class="seg-allele" style="width:227px"></div></div><span class="val">copy .029 / cis .142</span></div>
+  <div class="bar-row"><span class="name">chr18:11741161</span><div class="bar-track"><div class="seg-copy" style="width:96px"></div><div class="seg-allele" style="width:214px"></div></div><span class="val">copy .060 / cis .134</span></div>
+  <div class="bar-row"><span class="name">chr20:7482356</span><div class="bar-track"><div class="seg-copy" style="width:221px"></div><div class="seg-allele" style="width:133px"></div></div><span class="val">copy .138 / cis .083</span></div>
+  <div class="bar-row"><span class="name">chr20:7482362</span><div class="bar-track"><div class="seg-copy" style="width:219px"></div><div class="seg-allele" style="width:138px"></div></div><span class="val">copy .137 / cis .086</span></div>
+  <div class="bar-row"><span class="name">chr5:6201328</span><div class="bar-track"><div class="seg-copy" style="width:88px"></div><div class="seg-allele" style="width:94px"></div></div><span class="val">copy .055 / cis .059</span></div>
+  <div class="bar-row"><span class="name">chr14:58041434</span><div class="bar-track"><div class="seg-copy" style="width:94px"></div><div class="seg-allele" style="width:93px"></div></div><span class="val">copy .059 / cis .058</span></div>
+  <div class="bar-row"><span class="name">chr13 (BRCA2)</span><div class="bar-track"><div class="seg-copy" style="width:176px"></div><div class="seg-allele" style="width:37px"></div></div><span class="val">copy .110 / cis .023</span></div>
+</div>
+<table>
+<thead><tr><th>locus</th><th>d_HP</th><th>d_copy</th><th>d_within</th><th>n_within (CpG)</th><th>主導</th></tr></thead>
+<tbody>
+<tr class="hi"><td class="mono">chr17:79991120</td><td class="num">0.122</td><td class="num">0.029</td><td class="num">0.142</td><td class="num">126</td><td>allele（真 cis）<sup>†</sup></td></tr>
+<tr class="hi"><td class="mono">chr18:11741161</td><td class="num">0.163</td><td class="num">0.060</td><td class="num">0.134</td><td class="num">27</td><td>allele，但 <strong>CpG-creation</strong> ⚠</td></tr>
+<tr><td class="mono">chr20:7482356</td><td class="num">0.178</td><td class="num">0.138</td><td class="num">0.083</td><td class="num">18</td><td>copy + 小 cis</td></tr>
+<tr><td class="mono">chr20:7482362</td><td class="num">0.178</td><td class="num">0.137</td><td class="num">0.086</td><td class="num">18</td><td>copy + 小 cis</td></tr>
+<tr><td class="mono">chr5:6201328</td><td class="num">0.129</td><td class="num">0.055</td><td class="num">0.059</td><td class="num">18</td><td>copy ≈ allele</td></tr>
+<tr><td class="mono">chr14:58041434</td><td class="num">0.125</td><td class="num">0.059</td><td class="num">0.058</td><td class="num">15</td><td>copy ≈ allele</td></tr>
+<tr><td class="mono">chr13:32315128 (BRCA2)</td><td class="num">−0.122</td><td class="num">−0.110</td><td class="num">−0.023</td><td class="num">197</td><td><strong>subclone/copy-confounded</strong>（HP1-1=somatic subclone tag 非 copy、非 CN-dosage；焦點 cis d_within=−0.023 邊際）</td></tr>
+</tbody>
+</table>
+<p class="soft" style="font-size:13px"><sup>†</sup> chr17：<code>d_within(0.142) &gt; d_HP(0.122)</code>——copy-removed cis 反而大於原始 HP 訊號，因 HP-axis 的 pooling 稀釋了 within-tag 真效應；佐證真 cis 不是 d_HP 的子集，加性分解僅近似。</p>
+<div class="callout"><strong>COLLAPSED ≈ 5/7</strong>（heuristic 閾值 |d_within| &lt; 0.5·|d_HP|，<em>post-hoc 非預先註冊</em>）：HP-axis 量級多由 subclone/copy partition 主導（含 BRCA2；HP1-1=somatic subclone tag 非 copy、非 CN-dosage）。⚠ 閾值敏感：chr20×2/chr5/chr14 的 d_within 貼近閾值，取 0.45 則 5/7→2/7，故改看連續 ratio 較穩。<br>連續比值：median <code>|d_HP|=0.129</code> vs <code>|d_within|=0.083</code> → <strong>ratio-of-medians 64%</strong>；per-locus 典型保留（median-of-ratios）<strong>47%</strong>。真 cis 量級普遍只剩 HP-axis 的約一半。</div>
+
+<h2 id="t2">⑤ Test 2 — ALLELE-axis 是否也被 copy 污染？（答案：locus-dependent）</h2>
+<p>我 2026-06-01 曾報「BRCA2 兩軸（HP-axis + ALLELE-axis）都通過 cis-test」。檢查方式：看 <code>d_allele</code> 較接近 <code>d_copy</code>（被 copy 污染）還是 <code>d_within</code>（乾淨）。<strong>逐一檢查 7 個位點 → 不是全稱，而是 locus-dependent：</strong></p>
+<table>
+<thead><tr><th>locus</th><th>d_allele</th><th>d_copy</th><th>d_within</th><th>d_allele 追誰</th></tr></thead>
+<tbody>
+<tr class="hi"><td class="mono">chr13 (BRCA2)</td><td class="num">−0.099</td><td class="num">−0.110</td><td class="num">−0.023</td><td style="color:var(--c-critical)">subclone/copy-confounded（HP1-1=subclone tag 非 copy、非 CN-dosage）</td></tr>
+<tr class="hi"><td class="mono">chr5:6201328</td><td class="num">0.024</td><td class="num">0.055</td><td class="num">0.059</td><td style="color:var(--c-critical)">copy（confound）</td></tr>
+<tr><td class="mono">chr17:79991120</td><td class="num">0.183</td><td class="num">0.029</td><td class="num">0.142</td><td style="color:var(--c-success)">within（乾淨）</td></tr>
+<tr><td class="mono">chr18:11741161</td><td class="num">0.104</td><td class="num">0.060</td><td class="num">0.134</td><td style="color:var(--c-success)">within（乾淨）</td></tr>
+<tr><td class="mono">chr20:7482356</td><td class="num">0.034</td><td class="num">0.138</td><td class="num">0.083</td><td style="color:var(--c-success)">within（乾淨）</td></tr>
+<tr><td class="mono">chr20:7482362</td><td class="num">0.030</td><td class="num">0.137</td><td class="num">0.086</td><td style="color:var(--c-success)">within（乾淨）</td></tr>
+<tr><td class="mono">chr14:58041434</td><td class="num">−0.000</td><td class="num">0.059</td><td class="num">0.058</td><td style="color:var(--c-success)">within（乾淨）</td></tr>
+</tbody>
+</table>
+<div class="callout"><strong>ALLELE-axis 的 copy-confound 是 locus-dependent，不是通則</strong>：<strong>5/7</strong> 位點 d_allele 追 d_within（乾淨），只有 <strong>BRCA2 + chr5</strong>（copy-dominated）追 d_copy。BRCA2 是<strong>例外</strong>：d_allele(−0.099) ≈ d_copy(−0.110)，遠離真 cis(−0.023)。<br>→ 修正口徑：<strong>copy-dominated 位點（BRCA2）ALLELE-axis 同樣被 copy 污染；allele-dominated 位點（chr17）ALLELE-axis 反而追真 cis。</strong>故 6/01「BRCA2 ALLELE-axis cis」那半確需撤回（BRCA2 屬 confounded 類），但<strong>不可泛化成「所有 ALLELE-axis 都不乾淨」</strong>——那會犯與 HP-axis 同樣的 n=1 過度推論。唯一<em>普遍</em>乾淨的指標仍是 <code>d_within</code>。</div>
+
+<h2 id="t3">⑥ Test 3 — per-read 殘餘 copy permutation（2000×）</h2>
+<p>把 somatic tag 內的 allele label 隨機重排，看真實 d_within 是否落在 null 之外（= 真 allele-specific，非 within-tag 雜訊）：</p>
+<table>
+<thead><tr><th>locus</th><th>within-tag obs</th><th>alt/ref reads</th><th>null 95% CI</th><th>p</th><th>判定</th></tr></thead>
+<tbody>
+<tr class="hi"><td class="mono">chr17:79991120</td><td class="num">0.142</td><td class="num">16/14</td><td class="mono">[−0.062, 0.066]</td><td class="num">0.001</td><td>強顯著 ✓</td></tr>
+<tr class="hi"><td class="mono">chr18:11741161</td><td class="num">0.134</td><td class="num">22/8</td><td class="mono">[−0.102, 0.099]</td><td class="num">0.006</td><td>強顯著 ✓ <span class="soft">(CpG-creation⚠)</span></td></tr>
+<tr class="hi"><td class="mono">chr20:7482356</td><td class="num">0.083</td><td class="num">28/18</td><td class="mono">[−0.045, 0.047]</td><td class="num">0.001</td><td>強顯著（小量級）✓</td></tr>
+<tr class="hi"><td class="mono">chr13 (BRCA2)</td><td class="num">−0.023</td><td class="num">19/19</td><td class="mono">[−0.021, 0.022]</td><td class="num">≈0.02</td><td style="color:var(--c-warning)"><strong>marginal</strong>（緊貼 0.05）</td></tr>
+</tbody>
+</table>
+<div class="callout"><strong>分級：3 個強顯著（p≤0.006）+ BRCA2 marginal</strong>。即使 copy 主導量級的 chr20，其 within-tag allele 效應仍強顯著非零（量級小但確立）。<br>⚠ <strong>BRCA2 是唯一 borderline</strong>：obs −0.0233 僅略超 null CI 下界（~0.002 β），n=19/19 小樣本，且兩次獨立 2000× perm 給 <strong>p=0.022 / 0.024</strong>（MC 抽樣噪音，皆 &lt;0.05）。BRCA2 殘餘 cis 應讀為「<strong>弱證據傾向非零、量級接近偵測下限</strong>」，需 COLO829 複現方能確認。</div>
+
+<h2 id="verdict">⑦ 修正結論（entry 80「overturned」過強 → 細緻化）</h2>
+<div class="card">
+<table>
+<thead><tr><th>主張</th><th>判定</th></tr></thead>
+<tbody>
+<tr><td>somatic-cis-ASM 為真現象</td><td style="color:var(--c-success)"><strong>✓ 是</strong>（4/4 顯著；惟 BRCA2 marginal、單樣本）</td></tr>
+<tr><td>HP-axis 量級可信</td><td style="color:var(--c-critical)"><strong>✗ 高估</strong>（subclone/copy partition 主導多數位點；BRCA2 焦點 cis d_within=−0.023 邊際，% split 不 robust）</td></tr>
+<tr><td>BRCA2 是最強 cis 例子</td><td style="color:var(--c-critical)"><strong>✗ 否</strong>（subclone/copy-confounded：HP1-1=somatic subclone tag 非 copy、非 CN-dosage；真 cis 僅 −0.023 marginal）</td></tr>
+<tr><td>有乾淨的強 cis 位點</td><td style="color:var(--c-success)"><strong>✓ 有</strong>（chr17 確定乾淨；chr18 帶 CpG-creation 待釐清）</td></tr>
+<tr><td>ALLELE-axis 是乾淨替代指標</td><td style="color:var(--c-warning)"><strong>～ locus-dependent</strong>（copy-dominated 位點 confounded；其餘追真 cis）</td></tr>
+<tr><td>普遍正確的 cis 指標</td><td><strong>d_within</strong>（within-tag/copy-aware）</td></tr>
+</tbody>
+</table>
+</div>
+<p>與最早的<strong>全域 NEGATIVE 自洽</strong>：沒有「方向一致、量級大」的全面 somatic-cis-ASM；有的是<strong>小而真的 cis</strong> + <strong>少數乾淨強位點</strong>，而多數 candidate 的表面大量級是 copy 假象。</p>
+
+<h2 id="survivors">⑧ 1 個乾淨真 cis + 1 個待釐清</h2>
+<div class="stat-row">
+  <div class="stat" style="text-align:left;border-left:4px solid var(--c-success)">
+    <div class="mono" style="font-size:16px;color:var(--c-accent-deep)">chr17:79991120 ✓ 乾淨</div>
+    <div class="lbl" style="text-align:left;margin-top:8px">d_within=<strong>0.142</strong> · d_copy=0.029 · n_cpg=126<br>permutation <strong>p=0.001</strong> · allele 主導<br><strong>mech=NEUTRAL</strong>（非機械造 CpG）· ALLELE-axis 同向(0.183)</div>
+  </div>
+  <div class="stat" style="text-align:left;border-left:4px solid var(--c-warning)">
+    <div class="mono" style="font-size:16px;color:var(--c-warning)">chr18:11741161 ⚠ 待釐清</div>
+    <div class="lbl" style="text-align:left;margin-top:8px">d_within=<strong>0.134</strong> · d_copy=0.060 · n_cpg=27<br>permutation <strong>p=0.006</strong> · allele 主導<br><strong style="color:var(--c-critical)">mech=CREATES_CpG</strong>（T&gt;C 造 CpG）</div>
+  </div>
+</div>
+<div class="callout"><strong>為何 chr18 要降級</strong>：它的 somatic SNV（T&gt;C）<strong>在 ALT allele 上創造一個新 CpG</strong>。當 ALT 有新 CpG、REF 沒有時，within-tag ALT-vs-REF 的甲基差會帶一個<strong>純機械性差異</strong>（非生物 allele-specific 調控），而本報告的 permutation（打亂 allele label）<strong>排不掉這個 confound</strong>——因帶新 CpG 的 read 永遠在 ALT 側。故 chr18 從「乾淨 cis」降為「<strong>需先排除 CpG-creation 才能確認</strong>」。<br><strong>chr17:79991120</strong>（mech=NEUTRAL、n_cpg=126、ALLELE-axis 同向）是<strong>7 個可做 copy-test 的位點中</strong>唯一三重乾淨者。基因/調控 context 與 COLO829 複現尚未做。</div>
+<div class="callout crit"><strong>⚠ 重大覆蓋偏差（勿讀成「chr17 是全域最強乾淨 cis」）</strong>：copy-test 只能在 somatic tag <strong>同時有 ALT+REF reads</strong>（leaky tagging）的位點算 → 僅 7/60 T3 可算。而**訊號最強的 6 個位點**（chr4:133868344 d_cis=<strong>0.706</strong>、chr20:59439285 ratio=10.9、chr7:79941963…）somatic tag 是<strong>純 ALT（ref=0）</strong>→ 結構上<strong>無法 copy-test</strong>，其 cis-vs-copy 狀態<strong>未知</strong>。chr17 排訊號強度僅第 6（ratio 2.1），它「乾淨」是因剛好可算。<strong>此法能 demote leaky/弱候選，但無法裁決最強的乾淨-tag 位點</strong>（需 per-read copy-phasing 或 COLO829）。多重檢定：60 T3 用未校正 p&lt;0.05；Bonferroni(0.05/816) 只剩 <strong>10</strong>（chr17 p_cis=0.0 自身 survive）。</div>
+
+<h2 id="impl">⑨ 意涵與後續</h2>
+<div class="card">
+<p style="margin:0 0 8px"><strong>pipeline 修正</strong></p>
+<ul style="margin:0 0 12px">
+<li>P3 <code>cis_test</code> 加 <code>d_within</code>（within-tag-allele）當<strong>主 cis 指標</strong>，<code>d_HP</code> 降為 screen-only。</li>
+<li>cis-ladder tier 改以 copy-control 後的 d_within + per-locus permutation 判定，而非 HP-axis 量級。</li>
+</ul>
+<p style="margin:0 0 8px"><strong>引用聲明（誠實口徑）</strong></p>
+<ul style="margin:0 0 12px">
+<li>引用 BRCA2 cis 必標：「HP-axis −0.122 中真 allele-cis 對 HP-axis 僅 19%（d_within ≈ −0.023，<strong>marginal</strong>，p≈0.02、兩次 perm 0.022/0.024、obs 僅略超 null CI、n=19/19，需 COLO829 確認非零）」。</li>
+<li>撤回 6/01「BRCA2 ALLELE-axis cis」（BRCA2 屬 copy-confounded 類）；<strong>但限定 BRCA2，勿泛化成所有 ALLELE-axis</strong>（5/7 位點 ALLELE-axis 其實追真 cis）。</li>
+</ul>
+<p style="margin:0 0 8px"><strong>值得做的後續</strong></p>
+<ul style="margin:0">
+<li><strong>chr17:79991120</strong>（唯一三重乾淨）優先 deep-dive：基因/調控 region、生物機制、COLO829 複現（升 ⭐4 必要條件）。</li>
+<li>chr18:11741161 先做 CpG-creation 控制（比較含/不含新 CpG 位點的 d_within），排除機械假象後才納入。</li>
+<li>低覆蓋 53/60 T3：需更深測序或 pooling 才能拆解，目前判定未定。</li>
+</ul>
+</div>
+
+<h2 id="limits">⑩ 限制</h2>
+<ul>
+<li><strong>單樣本</strong> HCC1395，結論需 COLO829 複現；BRCA2 殘餘 cis 為 marginal，尤須複現。</li>
+<li>僅 <strong>7/60</strong> 可做 copy/allele 拆解，且<strong>結構性偏向 leaky-tag（som tag 有 ALT+REF）</strong>位點；最強 6 個位點純 ALT tag 測不了（見 ⑧），不能宣稱「全部如何」。</li>
+<li><strong>證的是 association 非 causation</strong>：permutation 顯示「chr17 該 tag 內 ALT-read 甲基 ≠ REF-read」，<strong>不</strong>等於「somatic 突變 cis-驅動甲基化」（無機制、無 pre/post、無跨樣本）。本法明示 characterization-only、非 filter 非因果證明。</li>
+<li>存活者生物意義（基因、調控）未查；chr18 帶 CpG-creation 機械 confound 未排除。</li>
+<li>「<code>d_HP ≈ d_copy + d_within</code>」僅近似（三量測在不同 read 子集/CpG 集合估計，殘差 6–40%），非乾淨加法分解；勿據此做精確分帳。</li>
+<li><code>d_within</code> permutation 控制 within-tag 異質性，但若 somatic tag 內仍混多 copy，<strong>殘餘 copy 無法完全排除</strong>。機制：殘餘 copy 異質性會作為額外變異<strong>併入</strong> within-tag allele 對比、使 d_within <strong>偏向高估</strong> → 故真 cis ≤ d_within（<strong>上界</strong>）；逼近真值需 per-read copy-phasing 把 tag 再依 copy 細分（本樣本無直接 copy marker）。</li>
+</ul>
+
+<footer>
+<p><strong>Provenance</strong> · branch <code>feat/cis-asm-pipeline</code> @ <code>5518971</code>（分析腳本 37/38 + 本報告為 uncommitted 新增）</p>
+<p>數據來源（每個數字可 grep）：<br>
+<code>research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json</code>（Test 1/2 + BRCA2 perm）<br>
+<code>research/tsg_promoter_asm_reviewer/genome_survey_v2/survivor_permutation.json</code>（Test 3 四位點）<br>
+<code>research/tsg_promoter_asm_reviewer/genome_survey_v2/cis_scan_full.json</code>（816→T3=60）</p>
+<p>腳本：<code>scripts/37_copy_partition_confirm.py</code> · <code>scripts/38_survivor_permutation.py</code><br>
+cycle_id <code>20260603_copy_partition_3test_quantified</code>（corrects <code>20260603_cis_candidate_copy_partition_confound</code>）· evidence_ledger entry 81<br>
+source companion：<code>InterSubMod/docs/experiments/in_progress/2026/06/20260603_ISM_copy_partition_confound_verification_01.md</code></p>
+<p class="soft">characterization only — 無 TP/FP discriminator、無 F1 filter。單樣本 ⭐3，不可升 ⭐4。</p>
+</footer>
+
+</main>
+</div>
+</body>
+</html>

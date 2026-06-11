@@ -1,12 +1,12 @@
 <!--
 建立時間: 2026-05-18
-更新時間: 2026-05-18
+更新時間: 2026-05-20 (LOSO banner added)
 agent: Coordinator (main session) Phase 2 Cycle 1 synthesis
-status: in_progress
+status: in_progress (DOWNGRADED 2026-05-20 LOSO)
 report_class: cycle synthesis (HCC1395 single-sample, Track B deferred)
 audience: PI / lab member / 自己未來
 scope: HCC1395 clairs_to_ssrs single-sample global FP filter (V0.3 → V1.0 → Phase 2 Cycle 1 lineage)
-tier: ⭐3 strong (HCC1395-internal validated, multi-seed stable, 9.24× v1.0 ΔF1)
+tier: ⭐⭐ L4 (DOWNGRADED 2026-05-20 from ⭐⭐⭐⭐ L2 — see LOSO banner below)
 parent_plan: /bip7_disk/liaoyoyo2001/.claude/plans/v6-optimized-wadler.md v2.0
 predecessor_cycles:
   - v0.3 characterization (2026-05-15, ⭐3)
@@ -23,11 +23,24 @@ last_verified: 2026-05-18
 report_template: cycle-pilot v1.0
 -->
 
-# Phase 2 Cycle 1 — Global FP Filter (HCC1395) — ⭐3 strong
+# Phase 2 Cycle 1 — Global FP Filter (HCC1395) — ⭐⭐ L4 (DOWNGRADED 2026-05-20)
 
-> **Tier**: ⭐3 strong (HCC1395 single-sample verified, ΔF1 +0.02236 = 9.24× v1.0 baseline)
+> 🔴 **2026-05-20 LOSO Update — 本報告 tier 已 DOWNGRADE**:
+> 用戶 2026-05-20 質疑「LR filter 用 HCC1395 數據訓練,又用 HCC1395 數據驗證,這敘述合理嗎」直接觸發 LOSO 驗證。
+> - HCC1395 in-distribution 5-fold OOF: **+0.02236**
+> - HCC1395 LOSO held-out (4-sample combined train): **-0.00012**
+> - **Drop = +0.02248 = 100% effect size 來自 sample-level circularity bias**
+> 5 樣本 LOSO 全部 ≈ 0, Wilcoxon p=0.125, DIRECTION_NEGATIVE。Filter 在 sample-level 失效。
+>
+> **本報告 +0.02236 結論仍真實 (HCC1395 in-distribution case study)**，但 framing 從 "⭐3 strong cross-sample filter" 改為 "**⭐⭐ L4 HCC1395 in-distribution case study only**"。Production filter direction FAILED。
+>
+> 詳細 LOSO findings: `InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/loso_findings.md`
+> Updated PI Trust HTML Section 1.5: `InterSubMod/research/methyl_augmented_filter_phase2/phase2_pi_verification/phase2_pi_trust_framework.standalone.html`
+> Ledger: `cycle_id: 20260520_loso_sample_level_circularity_revealed` (line 50)
+
+> **Original Tier (2026-05-18)**: ⭐3 strong (HCC1395 single-sample verified, ΔF1 +0.02236 = 9.24× v1.0 baseline) — **SUPERSEDED by LOSO 2026-05-20**
 > **Predecessor**: v1.0 step5_methyl_filter_pilot ⭐3 marginal (+0.00242)
-> **Goal achieved**: ΔF1 從 v1.0 marginal +0.00242 → 提升至 +0.02236 (Cohen 小 effect ribbon 2.24×)
+> **Goal achieved (in-distribution only)**: ΔF1 從 v1.0 marginal +0.00242 → 提升至 +0.02236 (Cohen 小 effect ribbon 2.24×) — **sample-level 不 valid (LOSO -0.00012)**
 
 ---
 

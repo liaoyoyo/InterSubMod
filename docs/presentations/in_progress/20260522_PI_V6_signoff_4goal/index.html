@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PI V6 Signoff — 4 目標 Hybrid HTML Hub (2026-05-22)</title>
+<style>
+:root {
+  --c-accent: #D97757; --c-accent-deep: #B85A3F;
+  --c-text: #141413; --c-text-soft: #6B6B66;
+  --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+  --c-code-bg: #F4EFE6;
+  --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+  --c-info: #1E3A8A;
+  --c-tier4: #15803D; --c-tier3: #2563EB; --c-tier2: #A16207;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+  --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+             "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+  --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+  --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+  --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+  --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+  --shadow-lg: 0 4px 16px rgba(20,20,19,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--c-bg); color: var(--c-text);
+       font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.65; }
+.layout { max-width: 1320px; margin: 0 auto; display: grid;
+          grid-template-columns: 240px 1fr; gap: var(--sp-5);
+          padding: var(--sp-5) var(--sp-4); }
+aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+            background: var(--c-surface); border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+            box-shadow: var(--shadow-sm);
+            max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+              color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+              border-left: 3px solid transparent; }
+aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                      font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+aside.toc a.core { font-weight: 600; }
+aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px; font-size: 0.85em; }
+main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+              border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+              padding: var(--sp-6); min-width: 0; }
+.report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                  margin-bottom: var(--sp-5); }
+.report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                            letter-spacing: 1px; color: var(--c-accent-deep);
+                            font-weight: 700; margin-bottom: var(--sp-2); }
+.report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+.report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                        gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+.report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+.report-header .meta dd { margin: 0; }
+.report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                             border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                             font-size: 0.92em; }
+.verdict-banner { color: white; padding: var(--sp-4) var(--sp-5); margin-top: var(--sp-4);
+                   border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md);
+                   box-shadow: var(--shadow-md); }
+.verdict-banner.success-strong { background: linear-gradient(90deg, #15803D, #166534); }
+.verdict-banner .label { font-size: var(--fs-xs); text-transform: uppercase;
+                          letter-spacing: 1.5px; opacity: 0.85; margin-bottom: var(--sp-2);
+                          display: block; }
+.verdict-banner .text { font-size: var(--fs-lg); line-height: 1.5; }
+h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+      padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+      scroll-margin-top: var(--sp-4); }
+h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+            font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+p, ul, ol { margin: var(--sp-3) 0; }
+ul, ol { padding-left: var(--sp-5); }
+code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+        font-family: var(--ff-mono); font-size: 0.9em; word-break: break-all; }
+table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left;
+          vertical-align: top; }
+th { background: var(--c-code-bg); font-weight: 600; }
+td.num, .num { text-align: right; font-family: var(--ff-mono); }
+
+/* 4-card target grid */
+.target-grid { display: grid; grid-template-columns: repeat(2, 1fr);
+               gap: var(--sp-4); margin: var(--sp-5) 0; }
+.target-card { background: var(--c-surface); border: 1px solid var(--c-border);
+               border-radius: var(--radius-lg); padding: var(--sp-5);
+               box-shadow: var(--shadow-sm); display: flex; flex-direction: column;
+               transition: box-shadow 0.2s, transform 0.2s; position: relative; }
+.target-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+.target-card .target-num { font-family: var(--ff-mono); font-size: var(--fs-sm);
+                           color: var(--c-accent-deep); font-weight: 700;
+                           letter-spacing: 1px; text-transform: uppercase; }
+.target-card .target-name { font-size: var(--fs-xl); font-weight: 700;
+                            margin: var(--sp-2) 0 var(--sp-3); line-height: 1.3; }
+.target-card .badges { display: flex; gap: var(--sp-2); align-items: center;
+                       flex-wrap: wrap; margin-bottom: var(--sp-3); }
+.tier-badge { display: inline-block; padding: 3px 10px; border-radius: 12px;
+              font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.5px; color: white;
+              font-family: var(--ff-mono); }
+.tier-badge.t4 { background: var(--c-tier4); }
+.tier-badge.t3 { background: var(--c-tier3); }
+.tier-badge.t2 { background: var(--c-tier2); }
+.completeness { display: inline-flex; align-items: center; gap: 6px;
+                font-size: var(--fs-xs); font-family: var(--ff-mono);
+                color: var(--c-text-soft); font-weight: 600; }
+.completeness .bar { width: 80px; height: 8px; background: var(--c-code-bg);
+                     border-radius: 4px; overflow: hidden; display: inline-block; }
+.completeness .bar > span { display: block; height: 100%;
+                             background: linear-gradient(90deg, var(--c-success), #22C55E); }
+.target-card .headline { background: var(--c-bg); border-left: 4px solid var(--c-accent);
+                         padding: var(--sp-3); border-radius: var(--radius-sm);
+                         font-size: var(--fs-sm); line-height: 1.6; margin: var(--sp-2) 0 var(--sp-4);
+                         flex-grow: 1; }
+.target-card .headline strong { color: var(--c-accent-deep); }
+.target-card .detail-link { display: inline-block; padding: 8px 16px;
+                            background: var(--c-accent); color: white;
+                            text-decoration: none; border-radius: var(--radius-md);
+                            font-size: var(--fs-sm); font-weight: 600;
+                            transition: background 0.2s; align-self: flex-start; }
+.target-card .detail-link:hover { background: var(--c-accent-deep); }
+.target-card .detail-link::after { content: " →"; }
+
+.callout-info { background: #EFF6FF; border-left: 4px solid var(--c-info);
+                padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                border-radius: var(--radius-md); color: #1E3A8A; }
+.callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                     padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                     border-radius: var(--radius-md); color: #7F1D1D; }
+.callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                    padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                    border-radius: var(--radius-md); color: #166534; }
+
+.findings-list, .asks-list { list-style: none; padding: 0; counter-reset: item; }
+.findings-list li, .asks-list li { counter-increment: item;
+                                    background: var(--c-bg); border: 1px solid var(--c-border);
+                                    border-radius: var(--radius-md);
+                                    padding: var(--sp-3) var(--sp-4) var(--sp-3) var(--sp-7);
+                                    margin: var(--sp-3) 0; position: relative;
+                                    line-height: 1.6; }
+.findings-list li::before, .asks-list li::before {
+  content: counter(item); position: absolute; left: var(--sp-3); top: var(--sp-3);
+  background: var(--c-accent); color: white; width: 28px; height: 28px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-family: var(--ff-mono); font-size: var(--fs-sm); }
+.findings-list .tier-tag, .asks-list .tier-tag {
+  display: inline-block; background: var(--c-critical); color: white;
+  padding: 1px 6px; border-radius: var(--radius-sm); font-size: var(--fs-xs);
+  font-weight: 700; margin-right: 6px; font-family: var(--ff-mono); letter-spacing: 0.5px;
+}
+
+.source-link { font-family: var(--ff-mono); font-size: var(--fs-xs);
+               color: var(--c-text-soft); background: var(--c-code-bg);
+               padding: 1px 6px; border-radius: var(--radius-sm);
+               text-decoration: none; word-break: break-all; }
+.source-link:hover { color: var(--c-accent-deep); }
+
+.next-step { background: linear-gradient(135deg, #FEF7E6, #FFF8E1);
+             border: 2px solid var(--c-warning); border-radius: var(--radius-lg);
+             padding: var(--sp-5); margin: var(--sp-5) 0;
+             box-shadow: var(--shadow-sm); }
+.next-step .label { font-size: var(--fs-xs); text-transform: uppercase;
+                    letter-spacing: 1.5px; color: var(--c-warning);
+                    font-weight: 700; margin-bottom: var(--sp-2); }
+.next-step .text { font-size: var(--fs-md); line-height: 1.65; color: #78350F; }
+.next-step .text code { background: rgba(255,255,255,0.6); }
+
+.nav-grid { display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: var(--sp-3); margin: var(--sp-4) 0; }
+.nav-card { background: var(--c-bg); border: 1px solid var(--c-border);
+            border-radius: var(--radius-md); padding: var(--sp-3) var(--sp-4);
+            text-decoration: none; color: var(--c-text);
+            transition: background 0.2s, border-color 0.2s; }
+.nav-card:hover { background: var(--c-code-bg); border-color: var(--c-accent); }
+.nav-card .nav-title { font-weight: 600; font-size: var(--fs-md);
+                       color: var(--c-accent-deep); margin-bottom: var(--sp-1); }
+.nav-card .nav-meta { font-size: var(--fs-xs); color: var(--c-text-soft);
+                      font-family: var(--ff-mono); }
+.nav-card .nav-bar { display: flex; align-items: center; gap: 6px; margin-top: var(--sp-2); }
+.nav-card .nav-bar .bar { flex: 1; height: 6px; background: var(--c-code-bg);
+                          border-radius: 3px; overflow: hidden; }
+.nav-card .nav-bar .bar > span { display: block; height: 100%;
+                                 background: linear-gradient(90deg, var(--c-success), #22C55E); }
+.nav-card .nav-bar .pct { font-family: var(--ff-mono); font-size: var(--fs-xs);
+                          color: var(--c-text-soft); }
+
+.audit-stat { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+              gap: var(--sp-3); margin: var(--sp-4) 0; }
+.audit-stat .box { background: var(--c-bg); border: 1px solid var(--c-border);
+                   border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+.audit-stat .box .n { font-size: var(--fs-2xl); font-weight: 700;
+                      color: var(--c-accent); line-height: 1.1; font-family: var(--ff-mono); }
+.audit-stat .box .n.success { color: var(--c-success); }
+.audit-stat .box .n.warning { color: var(--c-warning); }
+.audit-stat .box .n.critical { color: var(--c-critical); }
+.audit-stat .box .label { font-size: var(--fs-xs); color: var(--c-text-soft);
+                          margin-top: var(--sp-1); line-height: 1.3; }
+
+.provenance { background: var(--c-bg); border-radius: var(--radius-md);
+               padding: var(--sp-4); margin-top: var(--sp-6); font-size: var(--fs-sm);
+               border: 1px dashed var(--c-border); }
+.provenance dt { color: var(--c-text-soft); font-weight: 600; font-family: var(--ff-mono);
+                  font-size: var(--fs-xs); }
+.provenance dd { margin: 0 0 var(--sp-2) 0; font-family: var(--ff-mono); word-break: break-all; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  aside.toc { position: static; max-height: none; }
+  .target-grid, .nav-grid { grid-template-columns: 1fr; }
+}
+
+/* print-friendly */
+@media print {
+  body { background: white; color: black; font-size: 11pt; line-height: 1.4; }
+  .layout { display: block; max-width: none; padding: 0; }
+  aside.toc { display: none; }
+  main.report { box-shadow: none; border: none; padding: 0; }
+  .target-card, .nav-card, .findings-list li, .asks-list li, .next-step {
+    page-break-inside: avoid; box-shadow: none; }
+  .target-card .detail-link { background: white; color: black;
+                              border: 1px solid #666; }
+  h2 { page-break-after: avoid; }
+  a { color: #1E3A8A; text-decoration: underline; }
+  .verdict-banner { background: #15803D !important;
+                    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<aside class="toc" aria-label="Table of contents">
+<h3>PI Signoff Hub</h3>
+<ol>
+  <li><a href="#sec0" class="core">本週決定性結論</a></li>
+  <li><a href="#sec1" class="core">4 目標總覽</a></li>
+  <li><a href="#sec2" class="core">Top 3 Findings</a></li>
+  <li><a href="#sec3" class="core">Top 3 PI Asks</a></li>
+  <li><a href="#sec4" class="core">下一步</a></li>
+  <li><a href="#sec5">子報告導航</a></li>
+  <li><a href="#sec6">Audit 透明度</a></li>
+  <li><a href="#refs">引用 / Provenance</a></li>
+</ol>
+</aside>
+
+<main class="report">
+
+<header class="report-header">
+  <div class="pretitle">PI Signoff · 4 Goal Hybrid HTML · Phase C Hub</div>
+  <h1>V6 Binary 5 樣本 Cross-Sample 確認 + Phase 2 LR Filter NO-GO</h1>
+  <dl class="meta">
+    <dt>建立日期</dt><dd>2026-05-22</dd>
+    <dt>受眾</dt><dd>PI (1-on-1 / Lab meeting)</dd>
+    <dt>狀態</dt><dd>in_progress · Phase C 完成</dd>
+    <dt>Tier</dt><dd>⭐⭐⭐⭐ L2 (multi-sample cross-validated)</dd>
+    <dt>A0 Audit</dt><dd>11 artifacts · 273 claims · 93% verified · 0 fabrication</dd>
+    <dt>Source SoT</dt><dd><code>research/methyl_augmented_filter_phase2/</code></dd>
+  </dl>
+  <div class="verdict-banner success-strong">
+    <span class="label">⭐⭐⭐ This Week's Verdict</span>
+    <div class="text">V6 binary 修補 priority bug 跨 5 樣本確認 ✓；LR cross-sample LOSO 失敗為 distribution shift 非 model class limitation；<code>loh_inner_flag</code> 5/5 cross-sample anchor。</div>
+  </div>
+</header>
+
+<!-- §0 covered by verdict-banner above -->
+<h2 id="sec0"><span class="h-num">§0</span>本週決定性結論</h2>
+<p>本週四個目標完備度全部達 85%，A0 audit 確認既有 PI-distributable artifacts 中 6/11 PASS 100% / 4/11 PASS minor / 1/11 row-mislabel / 0 fabrication。三個 L2 結論（V6 cross-sample / Phase 2 LR NO-GO / loh_inner_flag anchor）已可向 PI 報告並啟動 sign-off 流程。</p>
+
+<div class="callout-success">
+  <strong>核心三句話：</strong>
+  <ol style="margin: 8px 0 0;">
+    <li>V6 binary 在 5 樣本 ALT-only HP1:HP2 全 &lt; 1（0.37–0.79），HCC1395 baseline 4.41 → V6 0.43 完成 10× HP2 reverse。</li>
+    <li>Phase 2 LR filter 4-algorithm LOSO 100-fold 全 &lt; Cohen +0.005 ribbon → NOT deployable。</li>
+    <li><code>loh_inner_flag</code> 5/5 cross-sample sign-consistent，是最強 single-feature anchor。</li>
+  </ol>
+</div>
+
+<!-- §1 4 目標 grid -->
+<h2 id="sec1"><span class="h-num">§1</span>4 目標總覽</h2>
+<p>每張 card：完備度評分（A0 audit 後更新）+ ≤ 50 字決定性 verdict + tier badge + detail link。</p>
+
+<div class="target-grid">
+
+  <!-- Target 1 -->
+  <div class="target-card">
+    <div class="target-num">Target 1 · BAM 層</div>
+    <div class="target-name">V6 vs baseline tag.bam HP 譜系</div>
+    <div class="badges">
+      <span class="tier-badge t4">⭐⭐⭐⭐ L2</span>
+      <span class="completeness">完備度 85% <span class="bar"><span style="width:85%"></span></span></span>
+    </div>
+    <div class="headline">
+      5 V6 sample <strong>ALT-only HP1:HP2 全 &lt; 1 (0.37–0.79)</strong>；HCC1395 baseline 4.41 → V6 0.43 = <strong>10× HP2 reverse</strong>；HP=33 firing 跨樣本 unequal (0.05%–4.27%)。
+    </div>
+    <a class="detail-link" href="target1_V6_vs_baseline_tagbam.html">Go to detail</a>
+  </div>
+
+  <!-- Target 2 -->
+  <div class="target-card">
+    <div class="target-num">Target 2 · Region 層</div>
+    <div class="target-name">ISM V6 vs baseline region</div>
+    <div class="badges">
+      <span class="tier-badge t4">⭐⭐⭐⭐ L2</span>
+      <span class="completeness">完備度 85% <span class="bar"><span style="width:85%"></span></span></span>
+    </div>
+    <div class="headline">
+      HCC1395 4-way ISM <strong>110/110 metrics verified PASS</strong>；marker <strong>+52.4% / +1.26pp / hp=3 ×13.2</strong>；5 樣本 ISM 受 baseline BAM 限制。
+    </div>
+    <a class="detail-link" href="target2_ISM_V6_vs_baseline.html">Go to detail</a>
+  </div>
+
+  <!-- Target 3 -->
+  <div class="target-card">
+    <div class="target-num">Target 3 · Feature 層</div>
+    <div class="target-name">5 features 獨立 + 組合</div>
+    <div class="badges">
+      <span class="tier-badge t2">⭐⭐ L4 descriptive</span>
+      <span class="completeness">完備度 85% <span class="bar"><span style="width:85%"></span></span></span>
+    </div>
+    <div class="headline">
+      5/9 features <strong>sign-consistent ≥ 4/5</strong>（<code>loh_inner_flag</code> 5/5 ✓ 最強 anchor）；<code>caller_af</code> direction sample-dependent（HCC1395 AUC=0.92 vs HCC1937 0.20）。
+    </div>
+    <a class="detail-link" href="target3_5features_distributions.html">Go to detail</a>
+  </div>
+
+  <!-- Target 4 -->
+  <div class="target-card">
+    <div class="target-num">Target 4 · F1 + 方法論</div>
+    <div class="target-name">TO 純樣本 F1 + 方法論</div>
+    <div class="badges">
+      <span class="tier-badge t4">⭐⭐⭐⭐ L2</span>
+      <span class="completeness">完備度 85% <span class="bar"><span style="width:85%"></span></span></span>
+    </div>
+    <div class="headline">
+      4 algo (LR/DT/RF/XGB) LOSO 100-fold <strong>全 &lt; Cohen +0.005 ribbon</strong>；5/5 generalize 不存在 → filter <strong>NOT deployable</strong>；LR cycle 1 +0.02236 = 100% sample-level circularity。
+    </div>
+    <a class="detail-link" href="target4_TO_pure_F1_methodology.html">Go to detail</a>
+  </div>
+
+</div>
+
+<p class="footnote" style="font-size:0.85em;color:#666;margin-top:0.8em;padding-top:0.6em;border-top:1px dashed #ccc;">
+  <strong>✱</strong> 完備度 = Phase A1-A4 spec 達成 + A0 audit PASS 比例 (HCC1395 baseline-vs-V6 paired only; cross-sample baseline BAM gap 為 deferred Track B)
+</p>
+
+<!-- §2 Top 3 Findings -->
+<h2 id="sec2"><span class="h-num">§2</span>Top 3 Findings</h2>
+<p>合 4 目標 condensed 為 PI 5 秒 takeaway：</p>
+
+<ol class="findings-list">
+  <li>
+    <span class="tier-tag">⭐⭐⭐</span>
+    <strong>V6 priority bug fix 跨 5 樣本一致確認</strong> — A2 ALT-only HP1:HP2 ratio 全 5 樣本落在 <code>0.37–0.79</code>（全 &lt; 1，HP2 dominance reversed）；HCC1395 baseline 4.41 → V6 0.43 為 10× reverse；<code>HP=33</code> firing 跨樣本 0.05%–4.27% 不均但方向一致。
+    <br><a class="source-link" href="../../../../research/methyl_augmented_filter_phase2/phase2_completeness_audit/A2_ALT_only_HP_ratio_5sample.tsv">source: A2_ALT_only_HP_ratio_5sample.tsv</a>
+  </li>
+  <li>
+    <span class="tier-tag">⭐⭐⭐</span>
+    <strong>LR cross-sample LOSO 失敗 = distribution shift 非 model class limitation</strong> — A4 4 algo (LR/DT/RF/XGB) LOSO 100-fold 全 &lt; +0.005 Cohen ribbon；DT/RF HCC1395 in-distribution +0.013 指向 capacity 在 HCC1395 in-distribution 可被 tree-based capture；證據指向 sample-level distribution shift 而非 LR 線性假設不足。
+    <br><a class="source-link" href="../../../../research/methyl_augmented_filter_phase2/phase2_completeness_audit/A4_LR_DT_RF_XGBoost_LOSO_5sample.tsv">source: A4_LR_DT_RF_XGBoost_LOSO_5sample.tsv</a>
+  </li>
+  <li>
+    <span class="tier-tag">⭐⭐⭐</span>
+    <strong><code>loh_inner_flag</code> 5/5 cross-sample sign-consistent 是最強 single-feature anchor</strong> — Target 3 9-cell heatmap 顯示 5/9 features sign-consistent ≥ 4/5；<code>loh_inner_flag</code> 唯一達 5/5；<code>caller_af</code> 方向 sample-dependent（HCC1395 AUC=0.92 vs HCC1937 0.20）證實非通用 feature。
+    <br><a class="source-link" href="target3_5features_distributions.html">source: target3_5features_distributions.html §9-cell</a>
+  </li>
+</ol>
+
+<!-- §3 Top 3 PI Asks -->
+<h2 id="sec3"><span class="h-num">§3</span>Top 3 PI Asks</h2>
+<p>本週必須由 PI 判斷的決策點（≤ 3）：</p>
+
+<ol class="asks-list">
+  <li>
+    <span class="tier-tag">⭐⭐⭐</span>
+    <strong>是否確認 V6 binary 為 production tag?</strong> 5 樣本 cross-sample 證據已備（A1 + A2 + 20260519 110/110 metrics PASS）。若 GO → push <code>v6-prod-20260520</code> tag 至 remote。
+  </li>
+  <li>
+    <span class="tier-tag">⭐⭐⭐</span>
+    <strong>Phase 2 LR filter direction 是否 NO-GO?</strong> 4 algo LOSO 全失敗 + 100% sample-level circularity 已證；建議正式 close cycle 並寫 NEGATIVE postmortem。
+  </li>
+  <li>
+    <span class="tier-tag">⭐⭐⭐</span>
+    <strong>下一步 pivot direction?</strong> 候選：
+    <code>phase_block_3d</code> · <code>thread_d</code> · read-level filter · + low-F1 panel 補測。請 PI 排序優先級。
+  </li>
+</ol>
+
+<!-- §4 Decisive Next Step -->
+<h2 id="sec4"><span class="h-num">§4</span>下一步（Decisive Next Step）</h2>
+<div class="next-step">
+  <div class="label">📨 Action Item · 需明示授權</div>
+  <div class="text">
+    用戶親自 send <strong>V6 sign-off email</strong>（<code>InterSubMod/docs/reports/validated/2026/05/20260521_PI_V6_signoff_email_draft_5goal.md</code>，A0 audit PASS 100% · 22/22 claims verified）+ <code>git push origin fix/pon-only-phasing v6-prod-20260520</code>（需 PI 明示授權後執行）。
+  </div>
+</div>
+
+<!-- §5 子 HTML 導航 + 完備度 -->
+<h2 id="sec5"><span class="h-num">§5</span>子報告導航（完備度 progress bar）</h2>
+<div class="nav-grid">
+
+  <a class="nav-card" href="target1_V6_vs_baseline_tagbam.html">
+    <div class="nav-title">Target 1 — V6 vs baseline tag.bam</div>
+    <div class="nav-meta">BAM 層 HP 6 值 + SP1/2/3 + priority bug 17.3:1</div>
+    <div class="nav-bar"><div class="bar"><span style="width:85%"></span></div><span class="pct">85%</span></div>
+  </a>
+
+  <a class="nav-card" href="target2_ISM_V6_vs_baseline.html">
+    <div class="nav-title">Target 2 — ISM V6 vs baseline</div>
+    <div class="nav-meta">Region 層 HCC1395 4-way + 5 樣本 caveat</div>
+    <div class="nav-bar"><div class="bar"><span style="width:85%"></span></div><span class="pct">85%</span></div>
+  </a>
+
+  <a class="nav-card" href="target3_5features_distributions.html">
+    <div class="nav-title">Target 3 — 5 features 獨立 + 組合</div>
+    <div class="nav-meta">Boxplot + 9-cell heatmap + cross-sample direction</div>
+    <div class="nav-bar"><div class="bar"><span style="width:85%"></span></div><span class="pct">85%</span></div>
+  </a>
+
+  <a class="nav-card" href="target4_TO_pure_F1_methodology.html">
+    <div class="nav-title">Target 4 — TO 純樣本 F1 + 方法論</div>
+    <div class="nav-meta">4-algo LOSO + F1 step audit + circularity</div>
+    <div class="nav-bar"><div class="bar"><span style="width:85%"></span></div><span class="pct">85%</span></div>
+  </a>
+
+</div>
+
+<!-- §6 Audit 透明度 -->
+<h2 id="sec6"><span class="h-num">§6</span>A0 Audit 透明度</h2>
+<p>本 hub 數字全部 ground 在 A0 audit (2026-05-21 由 6 平行 agent fan-out 執行)：</p>
+
+<div class="audit-stat">
+  <div class="box"><div class="n">11</div><div class="label">artifacts audited</div></div>
+  <div class="box"><div class="n success">6</div><div class="label">PASS 100%</div></div>
+  <div class="box"><div class="n success">4</div><div class="label">PASS minor</div></div>
+  <div class="box"><div class="n warning">1</div><div class="label">row-mislabel</div></div>
+  <div class="box"><div class="n">273</div><div class="label">claims audited</div></div>
+  <div class="box"><div class="n success">254</div><div class="label">verified (93%)</div></div>
+  <div class="box"><div class="n warning">17</div><div class="label">suspect (6%)</div></div>
+  <div class="box"><div class="n">2</div><div class="label">unverifiable (1%)</div></div>
+  <div class="box"><div class="n success">0</div><div class="label">fabrication ✓</div></div>
+</div>
+
+<div class="callout-info">
+  <strong>引用 ground rules</strong>（基於 A0 audit）：避免引用 <code>20260514 priority bug eng .md §8.2</code>（row-mislabel）/ <code>20260514 17to1 HTML §4 "~95% GT2"</code>（framing 不準）/ "Phase N50 ~20,000+"（用 verified 8,109）。直接引用：PI signoff email (22/22) · phase2 trust framework HTML (LOSO 全 verified) · 20260519 V6 vs baseline HTML (110/110) · 20260515 V6 TPFP characterization HTML (14/14) · master TSV col count = <strong>112</strong>（非 116）。
+</div>
+
+<p>A0 audit 完整報告：<a class="source-link" href="../../../../research/methyl_augmented_filter_phase2/phase2_completeness_audit/A0_existing_artifacts_verification.md">research/methyl_augmented_filter_phase2/phase2_completeness_audit/A0_existing_artifacts_verification.md</a></p>
+
+<!-- Provenance -->
+<section class="provenance" id="refs">
+  <h3 style="margin-top:0">引用 / Provenance</h3>
+  <dl>
+    <dt>A0 Audit Total</dt>
+    <dd>InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/A0_existing_artifacts_verification.md</dd>
+    <dt>A1 HP 6-value 5-sample</dt>
+    <dd>InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/A1_HP_6values_5sample.tsv</dd>
+    <dt>A2 ALT-only HP ratio 5-sample</dt>
+    <dd>InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/A2_ALT_only_HP_ratio_5sample.tsv</dd>
+    <dt>A4 LR/DT/RF/XGBoost LOSO 5-sample</dt>
+    <dd>InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/A4_LR_DT_RF_XGBoost_LOSO_5sample.tsv</dd>
+    <dt>A4 F1 step audit trail</dt>
+    <dd>InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/A4_F1_step_audit_trail.tsv</dd>
+    <dt>Auto Decisions Log</dt>
+    <dd>InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/AUTO_DECISIONS_LOG.md</dd>
+    <dt>PI Signoff Email Draft (22/22 verified)</dt>
+    <dd>InterSubMod/docs/reports/validated/2026/05/20260521_PI_V6_signoff_email_draft_5goal.md</dd>
+    <dt>V6 vs baseline HCC1395 (110/110 PASS)</dt>
+    <dd>InterSubMod/docs/experiments/in_progress/2026/05/20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01.standalone.html</dd>
+    <dt>V6 TPFP Characterization (14/14 PASS)</dt>
+    <dd>InterSubMod/docs/experiments/in_progress/2026/05/20260515_V6_TPFP_HP_LOH_CN_Characterization_01.standalone.html</dd>
+    <dt>Phase 2 Engineering Completeness (LOSO methodology SoT)</dt>
+    <dd>InterSubMod/research/methyl_augmented_filter_phase2/phase2_completeness_audit/phase2_engineering_completeness.standalone.html</dd>
+    <dt>Hub 生成</dt>
+    <dd>Phase C index.html build agent · 2026-05-22 · branch refactor/phase1-safety</dd>
+  </dl>
+</section>
+
+</main>
+</div>
+
+</body>
+</html>

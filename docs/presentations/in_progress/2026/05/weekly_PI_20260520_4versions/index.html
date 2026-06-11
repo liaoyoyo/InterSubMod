@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly PI 2026-05-20 · 4-version 並排檢視</title>
+<style>
+:root{
+  --c-accent:#D97757;
+  --c-primary:#1E3A8A;
+  --c-primary-soft:#E8EDF7;
+  --c-text:#141413;
+  --c-text-muted:#5C5C5A;
+  --c-bg:#FAF9F5;
+  --c-card:#FFFFFF;
+  --c-border:#E3DACC;
+  --c-border-strong:#B8AC92;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--c-bg);color:var(--c-text);font-family:system-ui,-apple-system,"Noto Sans CJK TC","Source Han Sans TW",sans-serif;font-size:14px;line-height:1.55;min-height:100vh}
+header{padding:48px 56px 24px;border-bottom:1px solid var(--c-border)}
+header .week{font-size:13px;color:var(--c-accent);font-weight:700;letter-spacing:0.12em;margin-bottom:10px}
+header h1{font-size:34px;font-weight:700;color:var(--c-primary);line-height:1.2;margin-bottom:8px}
+header .sub{font-size:17px;color:var(--c-text-muted);font-weight:500}
+.headline-wrap{margin:24px 0 0;padding:18px 24px;background:var(--c-primary-soft);border-left:6px solid var(--c-accent)}
+.headline-wrap .label{font-size:11px;color:var(--c-accent);font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px}
+.headline-wrap .text{font-size:17px;line-height:1.6;max-width:1100px}
+.headline-wrap .text .key{color:var(--c-primary);font-weight:700}
+.headline-wrap .text .accent{color:var(--c-accent);font-weight:700}
+
+main{padding:32px 56px 48px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:24px;max-width:1700px;margin:0 auto}
+.card{background:var(--c-card);border:1px solid var(--c-border-strong);padding:24px 28px;transition:transform 0.15s,box-shadow 0.15s}
+.card:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(20,20,19,0.08)}
+.card .ver{font-size:11px;color:var(--c-accent);font-weight:700;letter-spacing:0.15em;text-transform:uppercase}
+.card h2{font-size:22px;color:var(--c-primary);font-weight:700;margin:6px 0 12px}
+.card .meta{display:flex;gap:12px;font-size:11.5px;color:var(--c-text-muted);font-family:"JetBrains Mono",monospace;margin-bottom:14px}
+.card .meta span{background:var(--c-bg);padding:3px 8px;border-radius:3px;border:1px solid var(--c-border)}
+.card .style-tag{display:inline-block;background:var(--c-primary);color:#fff;padding:3px 10px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px}
+.card .style-tag.mck{background:var(--c-accent)}
+.card .style-tag.hybrid{background:#5B21B6}
+.card .desc{font-size:13.5px;color:var(--c-text);margin-bottom:16px;line-height:1.55}
+.card .use-case{font-size:12px;color:var(--c-text-muted);padding:10px 14px;background:var(--c-bg);border-left:4px solid var(--c-border-strong);margin-bottom:18px}
+.card .use-case strong{color:var(--c-text);font-weight:600}
+.card .open-btn{display:block;text-align:center;padding:12px;background:var(--c-primary);color:#fff;text-decoration:none;font-weight:700;font-size:13.5px;letter-spacing:0.05em;border-radius:3px;transition:background 0.15s}
+.card .open-btn:hover{background:#152D6F}
+.card .slide-count{font-size:11px;color:var(--c-text-muted);text-align:center;margin-top:8px}
+
+.contrast-table{margin:40px 56px;max-width:1700px}
+.contrast-table h2{font-size:18px;color:var(--c-primary);font-weight:700;margin-bottom:14px}
+table.compare{width:100%;border-collapse:collapse;font-size:12.5px}
+table.compare th{background:var(--c-primary);color:#fff;padding:10px 12px;text-align:left;border:1px solid var(--c-primary);font-weight:600}
+table.compare td{padding:8px 12px;border:1px solid var(--c-border);vertical-align:top;background:var(--c-card)}
+table.compare tr:nth-child(even) td{background:rgba(232,237,247,0.25)}
+
+footer{padding:24px 56px;border-top:1px solid var(--c-border);font-size:11.5px;color:var(--c-text-muted)}
+footer code{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--c-primary)}
+.shortcut{margin-top:10px;font-size:11.5px;color:var(--c-text-muted)}
+.shortcut code{background:var(--c-bg);padding:2px 6px;border-radius:3px;color:var(--c-primary)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="week">Weekly PI Report · 2026-05-14 → 2026-05-20</div>
+  <h1>本週兩件落地、一條紀律 — 5 版 HTML 並排檢視（E 為終版）</h1>
+  <p class="sub">V6 binary production sign-off  ·  Phase 2 filter reframe (ISM vestigial confirmed)</p>
+
+  <div class="headline-wrap">
+    <div class="label">Top message · headline (4 版共用)</div>
+    <p class="text">
+      Pre-registered ablation 揭露 <span class="accent">ISM methylation = vestigial covariate</span>（incremental ΔF1 僅 <span class="key">+0.00065</span>）；Filter rename 為 <span class="key">caller-F1-headroom-gated 4-feature filter</span>；V6 binary <span class="accent">🟢 GO</span> 於 marker filter + hard threshold T=2-3，LR-based F1 與 Goal 3+4 不應 over-claim。
+    </p>
+  </div>
+</header>
+
+<main>
+  <div class="grid">
+    <div class="card" style="border:2px solid var(--c-pass);background:linear-gradient(180deg,var(--c-pass-soft) 0%,var(--c-card) 30%);grid-column:1/-1">
+      <div class="ver" style="color:var(--c-pass)">★ VERSION H · PI 1-ON-1 (5-10 MIN) · RECOMMENDED</div>
+      <h2 style="color:var(--c-pass)">PI 1-on-1 5-Slide（極簡 5-10 分鐘版）</h2>
+      <div class="style-tag" style="background:var(--c-pass)">≤ 250 chars/slide · ≤ 5 rows · 3-second test · 主圖 60-75%</div>
+      <div class="meta"><span>5 slides</span><span>~33 KB</span><span>3 hero figures</span><span>avg 358 chars/slide</span></div>
+      <p class="desc">PI 1-on-1（5-10 min 週報）場景連動版。從 G 的 6 張 lab meeting 版精簡為 5 張：拿掉獨立 provenance slide，inline footer + speaker note 補；S5 5 目標 + 下週兩條 P0/P1 thread 合一頁。每張主圖佔 60-75%。Takeaway ≤ 35 字。Speaker note 內補完整 mechanism + provenance。</p>
+      <div class="use-case"><strong>適用：</strong>PI 個別會議 5-10 分鐘簡報。下次給 PI 報告首選此版。若需 Lab meeting / Reviewer audit 詳細版見 G / E v2。</div>
+      <a class="open-btn" style="background:var(--c-pass)" href="version_H_pi1on1_5slide.html">開啟 Version H (推薦) →</a>
+      <div class="slide-count">cover · V6 提升 · 過擬合？ · ablation · 5 目標+下週</div>
+    </div>
+
+    <div class="card" style="border:1px solid var(--c-border-strong);background:var(--c-bg);grid-column:1/-1">
+      <div class="ver">VERSION G · LAB MEETING (15-30 MIN)</div>
+      <h2 style="color:var(--c-pass)">Minimal Visual-First 6-Slide（主圖優先 + 講稿 details 折疊）</h2>
+      <div class="style-tag" style="background:var(--c-pass)">極簡 PPT · slide 重點圖 · 細節進講稿</div>
+      <div class="meta"><span>6 slides</span><span>~32 KB</span><span>3 PNG 主圖</span><span>5 speaker note details</span></div>
+      <p class="desc">每張 slide 主圖 (50-70% 面積) + 1 行 takeaway + 「📝 講稿」<code>&lt;details&gt;</code> 折疊區。PPT 上極簡，PI 看圖即懂；展開講稿可看 mechanism / triangulation / must-fix 細節。Cycle 2 5-sample cross-sample table（您指定保留）為 S3 核心證據。5 大目標只列名稱+分類+狀態 badge。</p>
+      <div class="use-case"><strong>適用：</strong>對 PI 報告首選 — 極簡 PPT 不塞文字，視覺主導。可信驗證流程透過 speaker note + S6 provenance + 25 sec reproducibility cmd 解答。</div>
+      <a class="open-btn" style="background:var(--c-pass)" href="version_G_minimal_6slide.html">開啟 Version G (推薦) →</a>
+      <div class="slide-count">cover · V6 提升 · 過擬合？ · ablation · 5 目標+可驗證 · provenance</div>
+    </div>
+
+    <div class="card" style="border:1px solid var(--c-border-strong);background:var(--c-bg);grid-column:1/-1">
+      <div class="ver">VERSION F · 研究主線完整版（備用）</div>
+      <h2>Research Narrative 7-Slide</h2>
+      <div class="style-tag">三段式 · V6 驗證 → 特徵再驗 → 5 目標進度</div>
+      <div class="meta"><span>7 slides</span><span>~47 KB</span><span>6 PNG + SVG DAG</span></div>
+      <p class="desc">研究主線結構，比 G 多細節但比 E 精簡。若 PI 想看完整故事弧（含 DAG mechanism + 5 目標 7-row 詳細表）可開此版。</p>
+      <div class="use-case"><strong>適用：</strong>當 G 不夠詳，又不需要 E 完整故事弧時。</div>
+      <a class="open-btn" href="version_F_research_narrative_7slide.html">開啟 Version F (備用) →</a>
+      <div class="slide-count">cover · V6 量化 · 5-Goal · 特徵再驗 · ablation+DAG · 5 目標進度 · provenance</div>
+    </div>
+
+    <div class="card" style="border:1px solid var(--c-border-strong);background:var(--c-bg);grid-column:1/-1">
+      <div class="ver">VERSION E v2 · 完整版（備用）</div>
+      <h2>Final 10-Slide (B + C + D 整合)</h2>
+      <div class="style-tag">McKinsey + BCG Hybrid · 完整故事弧</div>
+      <div class="meta"><span>10 slides</span><span>~62 KB</span><span>9 PI callouts</span><span>evaluator PASS L1</span></div>
+      <p class="desc">事件導向完整版。S1-S10 涵蓋 cover + master TL;DR + story arc + ablation + DAG + reframe + V6 evolution + 5-Goal + action + provenance。已通過 evaluator audit L1 (T=3 +0.1605 修正後)。</p>
+      <div class="use-case"><strong>適用：</strong>當 PI 要求完整故事弧或 reviewer 深度 audit 時。F 為日常匯報主推，E 為深度版備用。</div>
+      <a class="open-btn" href="version_E_final_10slide.html">開啟 Version E v2 (備用) →</a>
+      <div class="slide-count">cover · master · arc · ablation · DAG · reframe · 4-BAM · 5-Goal · open Q · provenance</div>
+    </div>
+
+    <div class="card">
+      <div class="ver">VERSION A</div>
+      <h2>Executive 5-Slide</h2>
+      <div class="style-tag">BCG · Ultra-compact</div>
+      <div class="meta"><span>5 slides</span><span>~24 KB</span><span>2 pillars</span></div>
+      <p class="desc">每頁 1 headline + 1 主視覺 + 最大留白。BCG 高度濃縮風格，極簡 layout 強調 single take-away。</p>
+      <div class="use-case"><strong>適用：</strong>PI 開會 10 分鐘快報；走廊偶遇即時匯報；e-mail 附件預覽。</div>
+      <a class="open-btn" href="version_A_executive_5slide.html">開啟 Version A →</a>
+      <div class="slide-count">1 TL;DR · 2 V6 Matrix · 3 Arc · 4 Ablation · 5 Action</div>
+    </div>
+
+    <div class="card">
+      <div class="ver">VERSION B</div>
+      <h2>Standard 12-Slide</h2>
+      <div class="style-tag mck">McKinsey · Story arc</div>
+      <div class="meta"><span>12 slides</span><span>~40 KB</span><span>SCQA + 2 pillar divider</span></div>
+      <p class="desc">完整 McKinsey 故事弧 + SCQA executive summary + timeline + pillar divider slide + 完整 narrative 拆解。</p>
+      <div class="use-case"><strong>適用：</strong>PI 深度討論 30 分鐘 lab meeting；同行 reviewer 引導；新人 onboarding 故事完整理解。</div>
+      <a class="open-btn" href="version_B_standard_12slide.html">開啟 Version B →</a>
+      <div class="slide-count">cover · SCQA · timeline · pillar 1 (3) · pillar 2 (5) · close</div>
+    </div>
+
+    <div class="card">
+      <div class="ver">VERSION C</div>
+      <h2>Information-Dense 8-Slide</h2>
+      <div class="style-tag">BCG · Table density</div>
+      <div class="meta"><span>8 slides</span><span>~52 KB</span><span>+ SVG DAG</span></div>
+      <p class="desc">BCG 表格密度極致：master TL;DR table + F1 sweep + 5×4 ablation matrix + transfer attribution + 5-Goal matrix + SVG DAG + decision tree。</p>
+      <div class="use-case"><strong>適用：</strong>technical lab meeting；reviewer 數據 audit；自我 deck check；論文 §3 + §13 對應視覺。</div>
+      <a class="open-btn" href="version_C_dense_8slide.html">開啟 Version C →</a>
+      <div class="slide-count">master · F1 sweep · refit 5×4 · transfer · 5-Goal · DAG · decision tree · provenance</div>
+    </div>
+
+    <div class="card">
+      <div class="ver">VERSION D</div>
+      <h2>Content-Adaptive 9-Slide</h2>
+      <div class="style-tag hybrid">Hybrid · BCG + McKinsey</div>
+      <div class="meta"><span>9 slides</span><span>~47 KB</span><span>style chip per slide</span></div>
+      <p class="desc">內容自適應 — 每張 slide 標註風格 chip：開頭 BCG dense（cover + master table）→ 中段 McKinsey narrative + DAG → 結尾 BCG matrix + action + provenance。</p>
+      <div class="use-case"><strong>適用：</strong>30 分鐘 PI 報告但希望聚焦量化；推薦作為首選版本給 PI；style chip 教導讀者「為何此頁如此設計」。</div>
+      <a class="open-btn" href="version_D_adaptive_9slide.html">開啟 Version D →</a>
+      <div class="slide-count">cover · master · arc · ablation · DAG · reframe · 5-Goal · open Q · provenance</div>
+    </div>
+  </div>
+</main>
+
+<div class="contrast-table">
+  <h2>4 版差異對照表</h2>
+  <table class="compare">
+    <thead>
+      <tr>
+        <th style="width:11%">維度</th>
+        <th style="width:17%">A · Executive</th>
+        <th style="width:18%">B · Standard</th>
+        <th style="width:18%">C · Dense</th>
+        <th style="width:18%">D · Adaptive</th>
+        <th style="width:18%;background:var(--c-pass)">★ E · FINAL (推薦)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Slide 數</strong></td><td>5</td><td>12</td><td>8</td><td>9</td><td style="background:var(--c-pass-soft);font-weight:600">10</td></tr>
+      <tr><td><strong>主風格</strong></td><td>BCG 極簡</td><td>McKinsey 故事化</td><td>BCG 表格密度</td><td>BCG + McKinsey 混搭</td><td style="background:var(--c-pass-soft);font-weight:600">B 標題 + C 密度 + D style chip</td></tr>
+      <tr><td><strong>每頁字數</strong></td><td>≤ 80 字</td><td>120-200 字</td><td>200-400 字（表多）</td><td>150-300 字（混搭）</td><td style="background:var(--c-pass-soft);font-weight:600">180-280 字 + PI callout 60 字</td></tr>
+      <tr><td><strong>PI callout</strong></td><td>—</td><td>—</td><td>—</td><td>—</td><td style="background:var(--c-pass-soft);font-weight:600">✓ 9 張各 1 個</td></tr>
+      <tr><td><strong>Reading Guide cover</strong></td><td>—</td><td>✓ 4 cards</td><td>—</td><td>3 cards</td><td style="background:var(--c-pass-soft);font-weight:600">✓ 4 cards（B 風格）</td></tr>
+      <tr><td><strong>表格數</strong></td><td>3</td><td>8</td><td>14</td><td>10</td><td style="background:var(--c-pass-soft);font-weight:600">13</td></tr>
+      <tr><td><strong>圖表 / SVG</strong></td><td>2 PNG</td><td>4 PNG</td><td>SVG DAG</td><td>1 PNG + SVG DAG</td><td style="background:var(--c-pass-soft);font-weight:600">2 PNG + SVG DAG</td></tr>
+      <tr><td><strong>5-Goal verdict</strong></td><td>簡版 7 row</td><td>2 表</td><td>9 row 完整</td><td>8 row</td><td style="background:var(--c-pass-soft);font-weight:600">9 row + recommendation</td></tr>
+      <tr><td><strong>Provenance slide</strong></td><td>footer 單行</td><td>info box</td><td>完整 slide</td><td>4 table</td><td style="background:var(--c-pass-soft);font-weight:600">4 table + reproducibility cmd</td></tr>
+      <tr><td><strong>適合 PI 時長</strong></td><td>5-10 分鐘</td><td>20-30 分鐘</td><td>30+ 分鐘 deep dive</td><td>20 分鐘聚焦</td><td style="background:var(--c-pass-soft);font-weight:600">25-30 分鐘 · 雙讀者平衡</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<footer>
+  <strong>選版建議（updated 2026-05-20）</strong>：給 PI 報告首選 <strong>★ Version E</strong>（綜合 B 標題清晰 + C 資訊密度 + D 風格整合，每頁含 PI callout）。Version A-D 為 differentiation iteration，保留供參考。<br>
+  <div class="shortcut">
+    <strong>檔案位置：</strong><code>InterSubMod/docs/presentations/in_progress/2026/05/weekly_PI_20260520_4versions/</code> · 開啟瀏覽器讀 <code>index.html</code> 開始 · 列印模式（Cmd/Ctrl+P）將每張 slide 分頁。
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>甲基分群驅動來源完整驗證 — CNV vs mutation</title>
+<style>
+:root{
+  --c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;
+  --c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;
+  --c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;
+  --c-copy:#9C8B73;--c-allele:#D97757;
+  --sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;
+  --ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;
+  --ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,Consolas,monospace;
+  --radius-md:6px;--radius-lg:8px;--shadow-sm:0 1px 2px rgba(20,20,19,.05);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);line-height:1.65;font-size:16px}
+.layout{display:grid;grid-template-columns:250px 1fr;max-width:1180px;margin:0 auto;gap:var(--sp-6)}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:var(--sp-5) var(--sp-3);border-right:1px solid var(--c-border);font-size:13.5px}
+nav.toc h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-soft);margin:0 0 var(--sp-3)}
+nav.toc a{display:block;padding:5px var(--sp-2);color:var(--c-text-soft);text-decoration:none;border-radius:var(--radius-md)}
+nav.toc a:hover{background:var(--c-code-bg);color:var(--c-text)}
+main{padding:var(--sp-6) var(--sp-5) var(--sp-7);min-width:0}
+h1{font-size:29px;line-height:1.25;margin:0 0 var(--sp-3)}
+h2{font-size:22px;margin:var(--sp-7) 0 var(--sp-4);padding-bottom:var(--sp-2);border-bottom:2px solid var(--c-border)}
+p{margin:0 0 var(--sp-4)}
+code{font-family:var(--ff-mono);background:var(--c-code-bg);padding:1px 6px;border-radius:4px;font-size:.87em}
+.meta{color:var(--c-text-soft);font-size:14px;margin-bottom:var(--sp-5)}
+.tier{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--c-code-bg);border:1px solid var(--c-border);color:var(--c-accent-deep)}
+.card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-5);margin:var(--sp-4) 0;box-shadow:var(--shadow-sm)}
+.verdict{border-left:5px solid var(--c-accent);background:linear-gradient(90deg,#FBF1EC,var(--c-surface) 60%)}
+.callout{border:1px solid var(--c-border);border-left:5px solid var(--c-warning);background:#FCF8EE;border-radius:var(--radius-md);padding:var(--sp-4) var(--sp-5);margin:var(--sp-4) 0}
+.callout.crit{border-left-color:var(--c-critical);background:#FBF0EA}
+.callout.ok{border-left-color:var(--c-success);background:#F0F7F1}
+table{border-collapse:collapse;width:100%;margin:var(--sp-4) 0;font-size:13.5px}
+th,td{border:1px solid var(--c-border);padding:6px 9px;text-align:left}
+th{background:var(--c-code-bg);font-weight:600}
+td.num{text-align:right;font-family:var(--ff-mono)}
+tr.hi td{background:#FBF1EC}
+tr.good td{background:#F0F7F1}
+.mono{font-family:var(--ff-mono)}.soft{color:var(--c-text-soft)}
+.big{font-size:30px;font-weight:700;font-family:var(--ff-mono);line-height:1}
+.stat-row{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-4) 0}
+.stat{flex:1;min-width:130px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-4);text-align:center}
+.stat .lbl{font-size:12.5px;color:var(--c-text-soft);margin-top:6px}
+.yes{color:var(--c-success);font-weight:700}.no{color:var(--c-critical);font-weight:700}.part{color:var(--c-warning);font-weight:700}
+footer{margin-top:var(--sp-7);padding-top:var(--sp-4);border-top:1px solid var(--c-border);font-size:13px;color:var(--c-text-soft)}
+@media(max-width:820px){.layout{grid-template-columns:1fr}nav.toc{position:static;height:auto;border-right:none;border-bottom:1px solid var(--c-border)}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc">
+  <h2>目錄</h2>
+  <a href="#q">① 問題</a>
+  <a href="#framework">② 四通道框架</a>
+  <a href="#dosage">③ DOSAGE → REFUTED</a>
+  <a href="#partition">④ PARTITION → 主導</a>
+  <a href="#align">⑤ ALIGNMENT → REFUTED</a>
+  <a href="#cgi">⑥ CGI/gene</a>
+  <a href="#table">⑦ 816 決策表</a>
+  <a href="#verdict">⑧ 三層判定</a>
+  <a href="#ceiling">⑨ 硬天花板</a>
+  <a href="#limits">⑩ 限制 + 後續</a>
+</nav>
+<main>
+
+<h1>甲基分群驅動來源完整驗證</h1>
+<p class="meta">CNV / copy-partition vs somatic-mutation-cis · HCC1395 單樣本 · 2026-06-07 · <span class="tier">⭐3 multi-channel confound-controlled</span> · <span class="tier" style="color:var(--c-warning)">task B · partial（單樣本 + 7/60 leaky）</span></p>
+
+<div class="card verdict">
+<p style="margin:0 0 8px"><strong style="font-size:18px">一句話結論</strong></p>
+<p style="margin:0;font-size:16.5px">甲基分群<strong>不是 CN 數量(dosage)、不是 alignment、不是純 artifact</strong> 造成；其<strong>量級主因是 copy-PARTITION（擴增區「哪個 copy」帶的結構性甲基差）</strong>。跟 HP-tag 一致是因 HP1-1 在 amplicon 挑出特定 copy，跟突變一致是因突變定義那個 copy。全 <strong>816 位點過完所有 filter，只剩 1 個（chr17/TBC1D16）是 copy-control 後存活的乾淨真 cis</strong>。</p>
+</div>
+
+<div class="callout crit">
+<strong>⚠ 修正 banner（2026-06-07，longphase-S 源碼審計後）</strong>：本報告「<strong>copy-PARTITION</strong>」通道應讀作「<strong>subclone/copy partition</strong>」。源碼（<code>HaplotagStrategy.cpp:505-516</code>）確認 <strong>HP1-1 = germline 單倍型1 + somatic ALT = somatic SUBCLONE tag，非 copy</strong>。d_within 經三重證據驗為有效 subclone-control（HP1-1/ref 19/19 帶其他 somatic ALT）→ <strong>量化成立、僅 relabel</strong>：BRCA2 表面 ASM = <strong>subclone/copy 主導（焦點 cis d_within=−0.023 邊際；% split 不 robust）</strong>。raw 焦點對比 <code>d_focal_CLEAN</code> 10/11 可算。完整：<code>InterSubMod/docs/experiments/in_progress/2026/06/20260607_HP11_tag_definition_correction_record_01.md</code>。
+</div>
+
+<h2 id="q">① 問題</h2>
+<p>HCC1395 的「甲基分群 / Δβ」是 <strong>CNV / copy-partition / ploidy 驅動</strong>，還是 <strong>somatic-mutation-cis 驅動</strong>？跟 HP-tag + 突變一致，會不會只是 <strong>CNV 或 alignment 的副作用</strong>？這質疑 ASM 訊號的根本 validity，須逐通道排除。</p>
+
+<h2 id="framework">② 四個 confound 通道逐一測</h2>
+<table>
+<thead><tr><th>通道</th><th>若為真的預測</th><th>測量</th><th>判定</th></tr></thead>
+<tbody>
+<tr><td><strong>copy-DOSAGE</strong></td><td>\|Δβ\| 隨 CN 數量上升</td><td>CN-state class-contrast + signed ρ</td><td class="no">REFUTED</td></tr>
+<tr><td><strong>subclone/copy PARTITION</strong><br><span class="soft" style="font-size:12px">(原「copy-partition」)</span></td><td>HP1 vs HP1-1 = somatic-subclone vs germline 甲基差（HP1-1=subclone tag）</td><td>d_copy vs d_within (within-tag)</td><td class="yes">SUPPORTED（subclone/copy 主導；% split 不 robust）</td></tr>
+<tr><td><strong>alignment</strong></td><td>擴增/重複區 mismapping 造假分群</td><td>soft-clip / secondary / NM-per-kb</td><td class="no">REFUTED（5/6）</td></tr>
+<tr><td><strong>mechanical</strong></td><td>突變造/毀 CpG → 機械差異</td><td>ref-sequence CpG gain/loss</td><td class="part">81/816 排除</td></tr>
+</tbody>
+</table>
+
+<h2 id="dosage">③ copy-DOSAGE → 決定性 REFUTED</h2>
+<p>HP-axis sig \|Δβ\| 按 SEQC2 CN-state 分層（<code>master_o1_cn.tsv</code>）：</p>
+<table>
+<thead><tr><th>地層</th><th>n</th><th>median \|Δβ\|</th></tr></thead>
+<tbody>
+<tr class="hi"><td>neutral nonLOH (CN=2 平衡)</td><td class="num">76</td><td class="num">0.0811</td></tr>
+<tr><td>gain nonLOH</td><td class="num">2542</td><td class="num">0.0737</td></tr>
+<tr><td>cnLOH (CN=2+LOH)</td><td class="num">913</td><td class="num">0.0821</td></tr>
+<tr><td>gain LOH</td><td class="num">1580</td><td class="num">0.0701</td></tr>
+<tr><td>loss</td><td class="num">31</td><td class="num">0.0824</td></tr>
+</tbody>
+</table>
+<div class="callout ok">跨 CN-state 全部 <strong>0.070–0.082</strong>；neutral vs gain <strong>MW p=0.62 無法區分</strong>。Falsifier：signed ρ(\|Δβ\|,CN)=<strong>−0.083</strong>（p=2.6e-9），dosage artifact 應為<strong>正</strong> ρ → 反向 = <strong>REFUTED</strong>。cnLOH(0.082)≈平衡 neutral(0.081)：copy 結構改變不改分群量級。<strong>→ 甲基分群量級不是 CN 數量驅動。</strong></div>
+
+<h2 id="partition">④ copy-PARTITION → SUPPORTED（主導量級）</h2>
+<p>within-tag 拆解（7 個可算位點）：<code>d_copy</code>（HP1/ref vs HP1-1/ref，固定 allele 只變 tag = subclone/copy 對比）撐起 <code>d_HP</code> 量級 <strong>中位 ~64%</strong>（BRCA2 subclone/copy 主導；分解 NON-closing，精確 % split 不 robust）。即 HP-axis 報出的「分群量級」<strong>多數來自 subclone/copy partition（HP1-1=somatic subclone tag 非 copy、非 CN-dosage）</strong>，非 somatic allele。</p>
+<div class="callout">⚠ 只在 leaky-tag（somatic tag 同時有 ALT+REF reads）位點可算 → <strong>僅 7/60</strong>；最強 6 個純 ALT tag <strong>結構上測不了</strong>（見 ⑨ 硬天花板）。</div>
+
+<h2 id="align">⑤ alignment → REFUTED（5/6；chr11 旗標）</h2>
+<p>24 位點 BAM 對齊測試（6 untestable + 3 control + 15 neutral baseline），closes 6-02 MAPQ 盲點（MAPQ 恆=60）：</p>
+<table>
+<thead><tr><th>group</th><th>softclip</th><th>NM/kb</th><th>sec_rate</th><th>supp_rate</th><th>HP1-1−HP1 softclip</th></tr></thead>
+<tbody>
+<tr><td>untestable (6)</td><td class="num">0.027</td><td class="num">39.3</td><td class="num">0.0009</td><td class="num">0.028</td><td class="num">−0.004</td></tr>
+<tr><td>control (3)</td><td class="num">0.021</td><td class="num">28.2</td><td class="num">0.0</td><td class="num">0.042</td><td class="num">+0.030</td></tr>
+<tr><td>neutral baseline (15)</td><td class="num">0.025</td><td class="num">30.7</td><td class="num">0.39*</td><td class="num">0.053</td><td class="num">−0.018</td></tr>
+</tbody>
+</table>
+<div class="callout ok">untestable 的 <strong>soft-clip 不高、secondary≈0、supplementary 正常、HP1-1 不較差對齊（delta −0.004）</strong> → <strong>分群不是 alignment-driven</strong>。唯一紅旗：<strong>chr11:64557316 NM/kb=87.8</strong>（2-3× 偏高）= divergent 區，demote；其餘 5 個（含最強 chr4 d_cis=0.706）對齊正常。<br><span class="soft">* neutral sec_rate 高是少數 baseline 落在 repetitive 區（chr21:9924901 sec=3.6）；最強訊號反而不在 multi-mapping 區。</span></div>
+
+<h2 id="cgi">⑥ CGI/gene context（調控 vs 結構）</h2>
+<table>
+<thead><tr><th>位點</th><th>基因</th><th>差異 CpG vs CGI</th><th>MW p</th><th>意涵</th></tr></thead>
+<tbody>
+<tr class="good"><td>chr17:79991120</td><td><strong>TBC1D16</strong></td><td>富集 <strong>在 CGI</strong>（0.365 vs 0.129）</td><td class="num">1.8e-7</td><td>regulatory-cis 像</td></tr>
+<tr><td>chr13:32315128</td><td>ZAR1L(BRCA2)</td><td><strong>避開</strong> CGI（0.017 vs 0.232）</td><td class="num">9.6e-11</td><td>結構/copy</td></tr>
+<tr><td>chr4 / chr7 / chr20×3</td><td>intergenic</td><td>CGI 沙漠（離 35kb–716kb）</td><td>—</td><td>結構 prior</td></tr>
+</tbody>
+</table>
+
+<h2 id="table">⑦ 全 816 位點 copy-vs-cis 決策表</h2>
+<div class="stat-row">
+  <div class="stat"><div class="big soft">682</div><div class="lbl">not-cis (T0/T2)</div></div>
+  <div class="stat"><div class="big soft">81</div><div class="lbl">mechanical-artifact</div></div>
+  <div class="stat"><div class="big soft">44</div><div class="lbl">T3-nominal (過不了 Bonferroni)</div></div>
+  <div class="stat"><div class="big" style="color:var(--c-accent)">10</div><div class="lbl">Bonferroni-clean T3</div></div>
+</div>
+<p><strong>10 個 Bonferroni-clean T3 逐位點裁決</strong>：</p>
+<table>
+<thead><tr><th>位點</th><th>裁決</th><th>CN</th><th>mech</th><th>d_cis</th></tr></thead>
+<tbody>
+<tr class="good"><td class="mono">chr17:79991120 (TBC1D16)</td><td><strong>✅ CIS-CAND（allele 主導）</strong></td><td>5</td><td>NEUTRAL</td><td class="num">0.231</td></tr>
+<tr><td class="mono">chr13:32315128 (BRCA2/ZAR1L)</td><td>subclone/copy-confounded（HP1-1=somatic subclone tag 非 copy、非 CN-dosage）</td><td>5</td><td>NEUTRAL</td><td class="num">−0.142</td></tr>
+<tr><td class="mono">chr5:6201328</td><td>copy-artifact（copy 主導）</td><td>6</td><td>NEUTRAL</td><td class="num">0.249</td></tr>
+<tr><td class="mono">chr19:14434617</td><td>mechanical-artifact</td><td>4</td><td>DESTROYS_CpG</td><td class="num">0.254</td></tr>
+<tr class="hi"><td class="mono">chr4:133868344</td><td>⚠ 測不了（pure-ALT, 沙漠）</td><td>4</td><td>NEUTRAL</td><td class="num">0.706</td></tr>
+<tr class="hi"><td class="mono">chr7:79941963</td><td>⚠ 測不了（pure-ALT, 沙漠）</td><td>5</td><td>NEUTRAL</td><td class="num">0.591</td></tr>
+<tr class="hi"><td class="mono">chr20:59439285</td><td>⚠ 測不了（pure-ALT, 沙漠）</td><td>4</td><td>NEUTRAL</td><td class="num">0.331</td></tr>
+<tr class="hi"><td class="mono">chr20:61415690</td><td>⚠ 測不了（pure-ALT, 沙漠）</td><td>4</td><td>NEUTRAL</td><td class="num">0.309</td></tr>
+<tr class="hi"><td class="mono">chr11:64557316</td><td>⚠ 測不了 + 高 NM/kb 旗標</td><td>5</td><td>NEUTRAL</td><td class="num">0.276</td></tr>
+<tr class="hi"><td class="mono">chr20:61564264</td><td>⚠ 測不了（pure-ALT, 沙漠）</td><td>4</td><td>NEUTRAL</td><td class="num">0.218</td></tr>
+</tbody>
+</table>
+
+<h2 id="verdict">⑧ 你的假設 — 三層判定</h2>
+<div class="card">
+<table>
+<thead><tr><th>子主張</th><th>判定</th></tr></thead>
+<tbody>
+<tr><td>甲基分群 = copy-DOSAGE（CNV 數量）副作用</td><td class="no">❌ REFUTED（量級跨 CN-state 平、signed ρ 反向）</td></tr>
+<tr><td>甲基分群 = alignment 副作用</td><td class="no">❌ REFUTED（5/6 對齊正常；chr11 旗標）</td></tr>
+<tr><td>分群<strong>量級</strong> = copy-PARTITION（哪個 copy）</td><td class="yes">✅ SUPPORTED 主導（~64%）</td></tr>
+<tr><td>完全 artifact、無真訊號</td><td class="no">❌ REFUTED（within-tag permutation 4/4 顯著；chr17 乾淨）</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>綜合</strong>：甲基分群存在性與量級的主因是 <strong>copy-partition（結構性 copy 甲基差）</strong>，不是 CN 數量、不是 alignment、不是純 artifact。跟 HP-tag + 突變一致是 copy 中介的副作用——<strong>你的直覺在「結構/copy 是主因」這層對了</strong>，但更精確是 copy-PARTITION（哪個 copy）而非 dosage（幾個 copy）。全 816 只 <strong>1 個乾淨真 cis（chr17/TBC1D16）</strong>。</p>
+
+<h2 id="ceiling">⑨ 硬天花板（誠實）</h2>
+<div class="callout crit">單樣本 HCC1395 內，<strong>對最強訊號集 copy 與 mutation 近乎不可識別</strong>：純 ALT tag 測不了（7/60 才可算）；CN=2 乾淨地層只 76 位點且 75/76 是 TP（無 TP/FP 對比）。要裁決那 6 個最強訊號（d_cis 到 0.706）<strong>必須換 design</strong>（COLO829 跨樣本 / 實驗擾動）——但 COLO829 無 SEQC2-style CN truth，CN-disentanglement 那支綁死 HCC1395。這不是「多跑就好」，是單樣本的識別極限。</div>
+
+<h2 id="limits">⑩ 限制 + 後續</h2>
+<ul>
+<li>單樣本；read-level copy-partition 只 7/60 可算；alignment 測 24 位點；6 untestable 的 copy-vs-cis 未定（CGI-沙漠結構 prior 非證實）。</li>
+<li>「64%」與「chr17 唯一乾淨」是 7-leaky / 可測子集數字，引用須 scope-lock（非全域代表值）。</li>
+<li>業界對照：CN→甲基通道真實（dosage compensation；CAMDAC）但 CGI/promoter-localized + directional，與我們 CGI-沙漠最強訊號<strong>不符</strong> → desert 訊號非 dosage 簽名；field standard 去 confound = CAMDAC（ASCN+purity），HP-axis 是其 read-level 類比。</li>
+<li><strong>後續</strong>：chr17(TBC1D16) deep-dive + COLO829 複現（升 ⭐4 必要）；6 untestable 需 per-read copy-phasing 或 COLO829；chr11 排除 divergent-region 假象。</li>
+</ul>
+
+<footer>
+<p><strong>Provenance</strong> · branch <code>feat/cis-asm-pipeline</code>（scripts 62/63/39 + 本報告為 uncommitted 新增）</p>
+<p>數據來源（每數字可 grep）：<code>genome_survey_v2/fast_cnv_validation.json</code>（③①④ + 決策表）· <code>alignment_channel_test.json</code>（⑤）· <code>copy_partition_confirm.json</code>（④）· <code>cis_scan_full.json</code>（816）· <code>master_o1_cn.tsv</code>（CN-state）</p>
+<p>cycle_id <code>20260607_fast_cnv_validation_results</code> ← parent <code>20260602_asm_cn_confound_pilot</code> + <code>20260603_copy_partition_3test_quantified</code> · evidence_ledger 86-87<br>
+source companion：<code>InterSubMod/docs/experiments/in_progress/2026/06/20260607_methylation_clustering_CNV_vs_mutation_validation_01.md</code></p>
+<p class="soft">characterization only — 無 TP/FP discriminator、無 F1 filter。單樣本 ⭐3，不可升 ⭐4（需 COLO829）。</p>
+</footer>
+</main>
+</div>
+</body>
+</html>

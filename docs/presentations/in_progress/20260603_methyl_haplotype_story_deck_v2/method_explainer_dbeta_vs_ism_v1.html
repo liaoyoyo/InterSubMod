@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<!--
+建立時間: 2026-06-04
+狀態: in_progress (方法圖示化 explainer — Δβ 方法 + 舊 ISM vs 新 Δβ 差異；可嵌入 v3 C2/C3)
+受眾: 黃耀廷教授 (PI) / 論文 methods 圖
+data_sources:
+  - research/tsg_promoter_asm_reviewer/scripts/15_genome_asm_pivot.py (Δβ 聚合算法)
+  - research/tsg_promoter_asm_reviewer/genome_survey_v2/control_cohesion_cistest.json (β/cis 真值)
+  - research/tsg_promoter_asm_reviewer/genome_survey_v2/brca2_pertag_cohesion.json (silhouette)
+  - /big7_disk/.../bip8_output_archive/20260119_all-with-w5000_1/.../chr13_32315128/ (舊 ISM significance.json: Cramér's V)
+provenance_note: 聚合 β/Δβ/cis/silhouette/ARI/Cramér's V 全為已驗證真值；read-level 甲基標記為示意(schematic)放大顯示方向，非實際 read。
+-->
+<!-- provenance-verified: β(0.228/0.108)/Δβ(−0.122)/d_cis(−0.142)/d_drift(−0.022)/silhouette(0.267)/ARI(0.79)/Cramér's V(hp 0.80, alt 0.51) 皆 grep 自 control_cohesion_cistest.json + brca2_pertag_cohesion.json + 舊 significance.json。read 甲基標記=示意。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方法圖示：Δβ somatic-cis vs 舊 ISM Cramér's V</title>
+<style>
+:root{--bg:#FAF9F5;--ink:#141413;--soft:#6B6B66;--line:#E4E2DA;--accent:#D97757;--meth:#C0392B;--unmeth:#2D6CB5;--live:#2E7D52;--dead:#C0392B;--hold:#D98E04;--r:12px;--mono:"SFMono-Regular",Consolas,Menlo,monospace;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.7;font-family:"Noto Sans CJK TC","Noto Sans TC","PingFang TC",system-ui,sans-serif;}
+.wrap{max-width:1000px;margin:0 auto;padding:28px 26px 80px;}
+h1{font-size:23px;margin:0 0 4px;letter-spacing:-.01em;}
+.sub{color:var(--soft);font-size:14px;margin:0 0 18px;font-weight:600;}
+h2{font-size:18px;margin:34px 0 4px;padding-top:10px;border-top:2px solid var(--line);}
+h2 .n{color:var(--accent);font-family:var(--mono);font-size:14px;margin-right:8px;}
+p{font-size:14px;margin:8px 0;}
+.legend{display:flex;flex-wrap:wrap;gap:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:12.5px;margin:6px 0 14px;align-items:center;}
+.legend b{font-weight:700}
+.fig{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0;box-shadow:0 1px 6px rgba(20,20,19,.05);}
+.figcap{font-size:12px;color:var(--soft);margin-top:8px;line-height:1.5;}
+.eng{font-size:13.5px;background:#F3F6F3;border-left:3px solid var(--live);border-radius:0 8px 8px 0;padding:9px 13px;margin:10px 0;}
+.eng b{color:#1f6b3f}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:middle;margin:0 2px}
+.note{font-size:12px;color:#8a5a12;background:#FCF6EC;border-left:3px solid var(--hold);padding:8px 12px;border-radius:0 6px 6px 0;margin:14px 0;}
+svg{max-width:100%;height:auto;display:block;margin:0 auto}
+.mono{font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>BRCA2 promoter 是「怎麼被精準找出」的——以及舊 ISM 為何漏掉</h1>
+<div class="sub">chr13:32,315,128 G&gt;A · HCC1395 · 兩張圖：① Δβ somatic-cis 方法（生物示意）② 舊 ISM vs 新 Δβ 為何差這麼多</div>
+
+<div class="legend">
+  <span><span class="dot" style="background:var(--meth)"></span><b>5mC high</b>（甲基化 CpG）</span>
+  <span><span class="dot" style="background:#fff;border:2px solid var(--unmeth)"></span><b>5mC low</b>（去甲基 CpG）</span>
+  <span>━━ 一條 read（分子）</span>
+  <span>▲ somatic SNV（G&gt;A）</span>
+  <span><b>β</b>＝該位置甲基化比例</span>
+</div>
+
+<!-- ============ FIG 1: Δβ method ============ -->
+<h2><span class="n">圖1</span>Δβ = 把 read 收斂成「平均甲基值」——擅長方向型、漏掉「交叉型」</h2>
+<div class="fig">
+<svg viewBox="0 0 720 470" role="img" aria-label="Δβ 方法生物示意">
+  <!-- ===== read pileup ===== -->
+  <text x="10" y="20" font-size="13" font-weight="700" fill="#141413">情境 A（方向型・BRCA2 真實）：同 germline 單倍型依 somatic allele 分兩群，多數 CpG 一致地差</text>
+  <!-- genomic axis with CpG ticks -->
+  <line x1="120" y1="36" x2="430" y2="36" stroke="#bbb"/>
+  <g font-size="8" fill="#999" text-anchor="middle">
+    <line x1="150" y1="32" x2="150" y2="40" stroke="#999"/><text x="150" y="30">CpG</text>
+    <line x1="195" y1="32" x2="195" y2="40" stroke="#999"/><text x="195" y="30">CpG</text>
+    <line x1="240" y1="32" x2="240" y2="40" stroke="#999"/><text x="240" y="30">CpG</text>
+    <line x1="330" y1="32" x2="330" y2="40" stroke="#999"/><text x="330" y="30">CpG</text>
+    <line x1="375" y1="32" x2="375" y2="40" stroke="#999"/><text x="375" y="30">CpG</text>
+    <line x1="420" y1="32" x2="420" y2="40" stroke="#999"/><text x="420" y="30">CpG</text>
+  </g>
+  <!-- somatic SNV marker -->
+  <polygon points="285,28 279,18 291,18" fill="#C0392B"/><text x="285" y="14" font-size="9" fill="#C0392B" text-anchor="middle" font-weight="700">G&gt;A</text>
+  <line x1="285" y1="30" x2="285" y2="250" stroke="#C0392B" stroke-dasharray="2 3" opacity=".5"/>
+  <!-- HP1 group (germline, allele=G) : β=0.228, more methylated -->
+  <text x="112" y="74" font-size="10.5" font-weight="700" fill="#1f6b3f" text-anchor="end">HP1</text>
+  <text x="112" y="86" font-size="8.5" fill="#6B6B66" text-anchor="end">germline·G</text>
+  <g>
+    <!-- read 1: meth at cpg1,4 -->
+    <line x1="120" y1="60" x2="430" y2="60" stroke="#cfcabd" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="150" cy="60" r="5" fill="#C0392B"/><circle cx="195" cy="60" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="240" cy="60" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><rect x="281" y="56" width="8" height="8" fill="#1f6b3f"/><circle cx="330" cy="60" r="5" fill="#C0392B"/><circle cx="375" cy="60" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="420" cy="60" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/>
+    <line x1="120" y1="76" x2="430" y2="76" stroke="#cfcabd" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="150" cy="76" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="195" cy="76" r="5" fill="#C0392B"/><circle cx="240" cy="76" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><rect x="281" y="72" width="8" height="8" fill="#1f6b3f"/><circle cx="330" cy="76" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="375" cy="76" r="5" fill="#C0392B"/><circle cx="420" cy="76" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/>
+    <line x1="120" y1="92" x2="430" y2="92" stroke="#cfcabd" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="150" cy="92" r="5" fill="#C0392B"/><circle cx="195" cy="92" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="240" cy="92" r="5" fill="#C0392B"/><rect x="281" y="88" width="8" height="8" fill="#1f6b3f"/><circle cx="330" cy="92" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="375" cy="92" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="420" cy="92" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/>
+  </g>
+  <!-- HP1-1 group (somatic, allele=A) : β=0.108, less methylated -->
+  <text x="112" y="142" font-size="10.5" font-weight="700" fill="#b4451f" text-anchor="end">HP1-1</text>
+  <text x="112" y="154" font-size="8.5" fill="#6B6B66" text-anchor="end">somatic·A</text>
+  <g>
+    <line x1="120" y1="128" x2="430" y2="128" stroke="#cfcabd" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="150" cy="128" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="195" cy="128" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="240" cy="128" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><rect x="281" y="124" width="8" height="8" fill="#C0392B"/><circle cx="330" cy="128" r="5" fill="#C0392B"/><circle cx="375" cy="128" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="420" cy="128" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/>
+    <line x1="120" y1="144" x2="430" y2="144" stroke="#cfcabd" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="150" cy="144" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="195" cy="144" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="240" cy="144" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><rect x="281" y="140" width="8" height="8" fill="#C0392B"/><circle cx="330" cy="144" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="375" cy="144" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="420" cy="144" r="5" fill="#C0392B"/>
+    <line x1="120" y1="160" x2="430" y2="160" stroke="#cfcabd" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="150" cy="160" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="195" cy="160" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="240" cy="160" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><rect x="281" y="156" width="8" height="8" fill="#C0392B"/><circle cx="330" cy="160" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="375" cy="160" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="420" cy="160" r="5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/>
+  </g>
+  <text x="120" y="182" font-size="8.5" fill="#9a6212">（read 甲基標記為示意放大方向；實際 ~193 CpG）</text>
+
+  <!-- ===== step arrows ===== -->
+  <text x="10" y="218" font-size="12" font-weight="700" fill="#141413">① 每 CpG 把 reads 平均成群率 β（第1層平均）→ ② per-CpG Δ → ③ Δβ = 平均(Δ)（第2層平均）+ 跨 CpG Wilcoxon</text>
+  <!-- beta bars -->
+  <g transform="translate(120,230)">
+    <text x="-8" y="14" font-size="10" fill="#1f6b3f" text-anchor="end">HP1 β</text>
+    <rect x="0" y="6" width="228" height="14" rx="3" fill="#2E7D52" opacity=".55"/><text x="234" y="17" font-size="11" font-weight="800" fill="#1f6b3f">0.228</text>
+    <text x="-8" y="38" font-size="10" fill="#b4451f" text-anchor="end">HP1-1 β</text>
+    <rect x="0" y="30" width="108" height="14" rx="3" fill="#C0392B" opacity=".55"/><text x="114" y="41" font-size="11" font-weight="800" fill="#b4451f">0.108</text>
+    <text x="330" y="28" font-size="13" font-weight="800" fill="#C0392B">Δβ = −0.122</text>
+    <text x="330" y="44" font-size="10.5" fill="#3a3a35">paired Wilcoxon (~193 CpG) p&lt;0.001</text>
+  </g>
+
+  <!-- ===== normal-anchored cis 3-bar ===== -->
+  <line x1="10" y1="298" x2="710" y2="298" stroke="#eee"/>
+  <text x="10" y="318" font-size="12" font-weight="700" fill="#141413">④ normal-anchored cis-test：加 normal 當基線，分「真 cis」與「drift」</text>
+  <g transform="translate(120,330)" font-size="10">
+    <text x="-8" y="12" fill="#6B6B66" text-anchor="end">normal HP1</text><rect x="0" y="3" width="250" height="13" rx="3" fill="#999"/><text x="256" y="14" font-weight="800" fill="#555">0.25</text>
+    <text x="-8" y="34" fill="#1f6b3f" text-anchor="end">tumor HP1</text><rect x="0" y="25" width="228" height="13" rx="3" fill="#2E7D52" opacity=".5"/><text x="256" y="36" font-weight="800" fill="#1f6b3f">0.228</text>
+    <text x="-8" y="56" fill="#b4451f" text-anchor="end">tumor HP1-1</text><rect x="0" y="47" width="108" height="13" rx="3" fill="#C0392B" opacity=".55"/><text x="256" y="58" font-weight="800" fill="#b4451f">0.108</text>
+    <text x="330" y="20" font-size="10.5" fill="#3a3a35"><tspan font-weight="700">d_drift</tspan> = tumorHP1−normalHP1 = −0.022 (p=0.087, NS) ← 小</text>
+    <text x="330" y="40" font-size="10.5" fill="#b4451f"><tspan font-weight="700">d_cis</tspan> = tumorHP1-1−normalHP1 = −0.142 (p&lt;0.001) ← 大</text>
+    <text x="330" y="58" font-size="10.5" font-weight="700" fill="#1f6b3f">drift 小 + cis 大 → somatic-cis 特異（非全域 drift）</text>
+  </g>
+</svg>
+<div class="figcap">情境 A cohesion 佐證：HP1-1 silhouette <b>0.267</b>（群內最聚）；盲分群 <b>ARI=0.79</b>。【⚠ 上輪 copy-partition：此 −0.122 多由 copy 解釋，純 allele cis d_within=−0.023 small-but-real p=0.022】</div>
+<svg viewBox="0 0 720 250" role="img" aria-label="交叉型盲點：平均抵消">
+  <text x="10" y="18" font-size="13" font-weight="700" fill="#141413">情境 B（交叉型・合成示意，非 BRCA2）：前後反向 → 兩層平均把訊息抵消</text>
+  <text x="180" y="38" font-size="9" fill="#999" text-anchor="middle">前半段 CpG</text>
+  <text x="360" y="38" font-size="9" fill="#999" text-anchor="middle">後半段 CpG</text>
+  <line x1="262" y1="44" x2="262" y2="132" stroke="#ccc" stroke-dasharray="3 3"/>
+  <text x="100" y="62" font-size="10.5" font-weight="700" fill="#1f6b3f" text-anchor="end">HP1</text>
+  <line x1="110" y1="54" x2="410" y2="54" stroke="#cfcabd" stroke-width="6" stroke-linecap="round"/><circle cx="130" cy="54" r="4.5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="175" cy="54" r="4.5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="220" cy="54" r="4.5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="300" cy="54" r="4.5" fill="#C0392B"/><circle cx="345" cy="54" r="4.5" fill="#C0392B"/><circle cx="390" cy="54" r="4.5" fill="#C0392B"/>
+  <line x1="110" y1="70" x2="410" y2="70" stroke="#cfcabd" stroke-width="6" stroke-linecap="round"/><circle cx="130" cy="70" r="4.5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="175" cy="70" r="4.5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="220" cy="70" r="4.5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="300" cy="70" r="4.5" fill="#C0392B"/><circle cx="345" cy="70" r="4.5" fill="#C0392B"/><circle cx="390" cy="70" r="4.5" fill="#C0392B"/>
+  <text x="100" y="116" font-size="10.5" font-weight="700" fill="#b4451f" text-anchor="end">HP1-1</text>
+  <line x1="110" y1="104" x2="410" y2="104" stroke="#cfcabd" stroke-width="6" stroke-linecap="round"/><circle cx="130" cy="104" r="4.5" fill="#C0392B"/><circle cx="175" cy="104" r="4.5" fill="#C0392B"/><circle cx="220" cy="104" r="4.5" fill="#C0392B"/><circle cx="300" cy="104" r="4.5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="345" cy="104" r="4.5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="390" cy="104" r="4.5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/>
+  <line x1="110" y1="120" x2="410" y2="120" stroke="#cfcabd" stroke-width="6" stroke-linecap="round"/><circle cx="130" cy="120" r="4.5" fill="#C0392B"/><circle cx="175" cy="120" r="4.5" fill="#C0392B"/><circle cx="220" cy="120" r="4.5" fill="#C0392B"/><circle cx="300" cy="120" r="4.5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="345" cy="120" r="4.5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/><circle cx="390" cy="120" r="4.5" fill="#fff" stroke="#2D6CB5" stroke-width="2"/>
+  <text x="10" y="150" font-size="11" font-weight="700" fill="#141413">per-CpG Δ（HP1-1 − HP1）：</text>
+  <text x="185" y="150" font-size="13" font-weight="800" fill="#1f6b3f" text-anchor="middle">前半 + + +</text>
+  <text x="360" y="150" font-size="13" font-weight="800" fill="#b4451f" text-anchor="middle">後半 − − −</text>
+  <text x="470" y="150" font-size="11" fill="#3a3a35">→ 相加抵消</text>
+  <rect x="10" y="162" width="700" height="42" rx="6" fill="#FCF6EC" stroke="#f0d8b6"/>
+  <text x="20" y="181" font-size="12" font-weight="800" fill="#C0392B">✗ Δβ = 平均(Δ) ≈ 0 · paired Wilcoxon p=0.438 → 主排序「漏」</text>
+  <text x="20" y="198" font-size="11.5" font-weight="700" fill="#1f6b3f">✓ 但 max|Δ|=0.583 大、盲分群 ARI=0.544 → read pattern 明顯不同 → 分群層仍抓到（補救＝雙鍵）</text>
+  <text x="10" y="224" font-size="8.5" fill="#9a6212">合成模擬示意（非 BRCA2）；Δβ-mean≈0 / Wilcoxon p=0.438 / max|Δ|=0.583 / blind ARI=0.544（→ 雙鍵排序＝任務 #19）</text>
+</svg>
+<div class="figcap"><b>對照結論</b>：Δβ 是「兩層平均」→ 量的是「整段一致的<b>方向性</b>位移」。情境 A（方向型）平均後仍明顯 → 抓到；情境 B（交叉型）平均後抵消 → 漏，但 read pattern 明顯不同 → 分群(ARI)抓到。<b>「篩選平均」是優點也是盲點</b>，交叉/位置型需補分群(ARI)/max|Δ|/PERMANOVA 雙鍵。</div>
+</div>
+<div class="eng"><b>工程科學敘述</b>：Δβ 本質＝<b>兩層平均</b>——<b>(1)</b> 每個 CpG 把該群 reads 的甲基狀態平均成群率 β（消掉 read 數不均）→ <b>(2)</b> 取 shared CpG 算 per-CpG Δ → <b>(3) Δβ = 平均(Δ)</b>，對 ~193 個 CpG 做 <b>paired Wilcoxon</b>（跨位點是否一致差異）→ <b>(4)</b> normal 當基線拆 cis vs drift。<b>正因為是「篩選平均」，它量的是「整段一致的方向性位移」</b>：方向型（如 BRCA2 Δβ=−0.122）抓得到；但前後反向的<b>交叉型</b>會被平均抵消（Δβ≈0、Wilcoxon p=0.438 NS）→ 這是 Δβ-mean 主排序的系統性盲點，需補分群(ARI)/max|Δ|/PERMANOVA <b>雙鍵</b>（工程任務 #19）。</div>
+
+<!-- ============ FIG 2: old ISM vs new ============ -->
+<h2><span class="n">圖2</span>舊 ISM（Cramér's V）vs 新 Δβ：為何同樣有 tag，舊方法抓不到</h2>
+<div class="fig">
+<svg viewBox="0 0 720 400" role="img" aria-label="舊 ISM vs 新 Δβ">
+  <!-- LEFT: old ISM -->
+  <rect x="8" y="8" width="346" height="384" rx="10" fill="#FCEBE9" stroke="#eec2bc"/>
+  <text x="181" y="30" font-size="13" font-weight="800" fill="#a5281c" text-anchor="middle">舊 ISM binary（20260119）</text>
+  <text x="181" y="46" font-size="10" fill="#6B6B66" text-anchor="middle">10kb region · 56 reads 全混 · 無監督分群</text>
+  <!-- mixed reads -->
+  <g>
+    <line x1="40" y1="66" x2="320" y2="66" stroke="#2E7D52" stroke-width="4" opacity=".5"/><text x="326" y="69" font-size="8" fill="#1f6b3f">HP1</text>
+    <line x1="40" y1="80" x2="320" y2="80" stroke="#2D6CB5" stroke-width="4" opacity=".5"/><text x="326" y="83" font-size="8" fill="#2D6CB5">HP2</text>
+    <line x1="40" y1="94" x2="320" y2="94" stroke="#D98E04" stroke-width="4" opacity=".5"/><text x="326" y="97" font-size="8" fill="#9a6212">HP2-1</text>
+    <line x1="40" y1="108" x2="320" y2="108" stroke="#2D6CB5" stroke-width="4" opacity=".5"/>
+    <line x1="40" y1="122" x2="320" y2="122" stroke="#2E7D52" stroke-width="4" opacity=".5"/>
+  </g>
+  <text x="181" y="148" font-size="11" fill="#3a3a35" text-anchor="middle">↓ k=4 無監督甲基分群</text>
+  <text x="181" y="172" font-size="12" font-weight="800" fill="#a5281c" text-anchor="middle">指標＝Cramér's V（cluster ↔ hp）</text>
+  <rect x="60" y="184" width="242" height="20" rx="4" fill="#fff" stroke="#eec2bc"/><text x="181" y="199" font-size="11" font-weight="700" fill="#a5281c" text-anchor="middle">V=0.80 · p=0.0 · passed_gating ✓</text>
+  <text x="20" y="232" font-size="11" font-weight="700" fill="#a5281c">問題（為何抓不到 somatic-cis）：</text>
+  <g font-size="10.5" fill="#5a3a36">
+    <text x="22" y="252">✗ 混淆 germline-allelic(HP1↔HP2)＋copy</text>
+    <text x="22" y="272">✗ tumor-only，無 normal → 分不出 cis/drift</text>
+    <text x="22" y="292">✗ 類別關聯，非方向 Δβ → 無法排序/定方向</text>
+    <text x="22" y="312">✗ 高 V 在「常見的 germline-ASM」也成立</text>
+    <text x="22" y="334" font-weight="700" fill="#a5281c">→ BRCA2 淹沒在數千高-V 位點中，不突出</text>
+  </g>
+
+  <!-- arrow -->
+  <text x="368" y="200" font-size="20" fill="#D97757" text-anchor="middle">→</text>
+
+  <!-- RIGHT: new Δβ -->
+  <rect x="382" y="8" width="330" height="384" rx="10" fill="#EEF6F0" stroke="#bfe0cb"/>
+  <text x="547" y="30" font-size="13" font-weight="800" fill="#1f6b3f" text-anchor="middle">新 Δβ 方法（python 原型）</text>
+  <text x="547" y="46" font-size="10" fill="#6B6B66" text-anchor="middle">per-locus · 方向性 · somatic-controlled</text>
+  <g font-size="11" fill="#234">
+    <rect x="400" y="64" width="294" height="26" rx="5" fill="#fff" stroke="#bfe0cb"/><text x="412" y="81">① HP1 vs HP1-1 方向性 per-CpG Δβ = −0.122</text>
+    <text x="547" y="104" font-size="11" fill="#1f6b3f" text-anchor="middle">↓</text>
+    <rect x="400" y="110" width="294" height="26" rx="5" fill="#fff" stroke="#bfe0cb"/><text x="412" y="127">② + normal 對照：d_cis −0.142 vs d_drift −0.022</text>
+    <text x="547" y="150" font-size="11" fill="#1f6b3f" text-anchor="middle">↓</text>
+    <rect x="400" y="156" width="294" height="26" rx="5" fill="#fff" stroke="#bfe0cb"/><text x="412" y="173">③ + copy-partition：純 allele cis d_within −0.023</text>
+  </g>
+  <text x="402" y="210" font-size="11" font-weight="700" fill="#1f6b3f">為何抓得到 + 不過度宣稱：</text>
+  <g font-size="10.5" fill="#2a4a38">
+    <text x="404" y="230">✓ 同 germline 單倍型只差 somatic → 控住 germline</text>
+    <text x="404" y="250">✓ normal 基線 → 分 cis(−0.142) vs drift(−0.022 NS)</text>
+    <text x="404" y="270">✓ 方向性 Δβ → 可排序（BRCA2 全基因組 rank 25）</text>
+    <text x="404" y="290">✓ copy-partition → 拆掉 copy（誠實：真 cis 小）</text>
+    <text x="404" y="312" font-weight="700" fill="#9a6212">⚠ 代價：cis 小且只能在 7/60 leaky-tag 位點算</text>
+    <text x="404" y="334" font-weight="700" fill="#1f6b3f">→ somatic-cis 訊號被隔離出來且誠實標量</text>
+  </g>
+  <text x="547" y="362" font-size="9.5" fill="#6B6B66" text-anchor="middle">※ binary 已有 HP1-1 解析 + NormalBaseline 模組，</text>
+  <text x="547" y="376" font-size="9.5" fill="#6B6B66" text-anchor="middle">差在 significance 指標未換 → 工程任務 #19</text>
+</svg>
+<div class="figcap">同樣的 tag（含 somatic 子標）、同一個 locus——差別在 <b>分析指標的設計</b>：舊＝無監督分群的類別關聯（Cramér's V，混淆且 tumor-only）；新＝方向性、somatic-controlled、normal-anchored、copy-partitioned 的 Δβ。</div>
+</div>
+<div class="eng"><b>一句話結論</b>：這<b>不是缺資料（tag/normal 模組都在 binary 內），是方法學（指標設計）問題</b>。舊 ISM 用 <b>Cramér's V(cluster↔hp)</b> 量「甲基分群是否關聯單倍型」——高值但被 germline-allelic 與 copy 混淆、無 normal、無方向，所以 BRCA2 不突出；新方法把對比重新定義成 <b>HP1 vs HP1-1 方向性 Δβ ＋ normal-anchored cis ＋ copy-partition</b>，才把 somatic-cis 訊號隔離出來（並誠實標出它其實小）。<b>下一步工程＝把這指標接回 binary 的 SignificanceAnalyzer 重跑（任務 #19）。</b></div>
+
+<div class="note">⚠ 誠信標註：圖中 read 的甲基化圓點為<b>示意（放大顯示方向）</b>，非實際 read；所有<b>聚合數字</b>（β 0.228/0.108、Δβ −0.122、d_cis −0.142、d_drift −0.022、silhouette 0.267、ARI 0.79、Cramér's V 0.80/0.51、d_within −0.023）皆為<b>已驗證真值</b>，grep 自 <span class="mono">control_cohesion_cistest.json / brca2_pertag_cohesion.json / copy_partition_confirm.json / 舊 significance.json</span>。</div>
+</div>
+</body>
+</html>

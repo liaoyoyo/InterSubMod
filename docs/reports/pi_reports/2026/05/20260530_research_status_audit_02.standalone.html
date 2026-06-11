@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InterSubMod 研究現況 v2 — 濃縮重點 + 現狀分析 (2026-05-30)</title>
+<style>
+  :root{
+    --c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;
+    --c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;
+    --c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;--c-dead:#991B1B;
+    --ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;
+    --ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,Consolas,monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .layout{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:215px 1fr;gap:24px;padding:24px 16px}
+  aside.toc{position:sticky;top:16px;align-self:start;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;padding:14px 12px;box-shadow:0 1px 2px rgba(20,20,19,.05);max-height:calc(100vh - 48px);overflow-y:auto}
+  aside.toc h3{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--c-text-soft);margin:0 0 8px;font-weight:700}
+  aside.toc a{display:block;padding:5px 8px;border-radius:4px;color:var(--c-text);text-decoration:none;font-size:13px;border-left:3px solid transparent}
+  aside.toc a:hover{background:var(--c-code-bg);border-left-color:var(--c-accent)}
+  aside.toc a.active{background:var(--c-code-bg);border-left-color:var(--c-accent-deep);font-weight:600}
+  main{background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;box-shadow:0 2px 8px rgba(20,20,19,.08);padding:30px;min-width:0}
+  .hero{border-bottom:2px solid var(--c-accent);padding-bottom:14px;margin-bottom:20px}
+  .hero .pretitle{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--c-accent-deep);font-weight:700;margin-bottom:6px}
+  .hero h1{font-size:28px;margin:0 0 6px;line-height:1.25}
+  .hero .subtitle{color:var(--c-text-soft);font-size:16px;margin:0 0 12px}
+  .verdict{color:#fff;padding:15px;margin-top:12px;border-radius:6px;font-weight:500;line-height:1.55;background:linear-gradient(90deg,#15803D,#22C55E)}
+  .verdict strong{font-weight:700}
+  h2{font-size:23px;margin:34px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--c-border);scroll-margin-top:16px}
+  h2 .n{font-family:var(--ff-mono);color:var(--c-accent-deep);font-size:.62em;margin-right:8px;font-weight:600}
+  h3{font-size:17px;margin:18px 0 7px}
+  p,ul,ol{margin:9px 0}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13.5px}
+  th,td{border-bottom:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:var(--c-code-bg);font-weight:700;border-bottom:2px solid var(--c-accent)}
+  td.num{text-align:right;font-family:var(--ff-mono)}
+  tr.live td{background:#F0FDF4}tr.dead td{background:#FEF2F0}tr.warn td{background:#FEF7E6}
+  code{background:var(--c-code-bg);padding:1px 6px;border-radius:3px;font-family:var(--ff-mono);font-size:.9em}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px;margin:12px 0}
+  .stat{background:var(--c-bg);border:1px solid var(--c-border);border-radius:6px;padding:11px;text-align:center}
+  .stat .v{font-size:25px;font-weight:700;color:var(--c-accent);line-height:1.1;font-family:var(--ff-mono)}
+  .stat .v.live{color:var(--c-success)}.stat .v.dead{color:var(--c-dead)}.stat .v.info{color:var(--c-info)}.stat .v.warn{color:var(--c-warning)}
+  .stat .l{font-size:11px;color:var(--c-text-soft);margin-top:4px;line-height:1.35}
+  .badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;vertical-align:middle}
+  .b-live{background:#DCFCE7;color:#166534}.b-dead{background:#FEE2E2;color:#991B1B}.b-warn{background:#FEF3C7;color:#78350F}.b-tier{background:#EFF6FF;color:#1E40AF;font-family:var(--ff-mono)}.b-new{background:#15803D;color:#fff}
+  .callout{padding:11px 15px;margin:12px 0;border-radius:6px;border-left:4px solid}
+  .c-live{background:#F0FDF4;border-color:var(--c-success);color:#166534}
+  .c-dead{background:#FEF2F0;border-color:var(--c-critical);color:#7F1D1D}
+  .c-warn{background:#FEF7E6;border-color:var(--c-warning);color:#78350F}
+  .c-info{background:#EFF6FF;border-color:var(--c-info);color:#1E40AF}
+  .callout strong{display:block;margin-bottom:4px}
+  .tl{list-style:none;padding:0;margin:12px 0}
+  .tl li{padding:6px 0 6px 22px;position:relative;font-size:14px;border-left:2px solid var(--c-border);margin-left:8px;padding-bottom:10px}
+  .tl li::before{content:"";position:absolute;left:-7px;top:9px;width:11px;height:11px;border-radius:50%;background:var(--c-success);border:2px solid #fff}
+  .tl li.warn::before{background:var(--c-warning)}.tl li.dead::before{background:var(--c-dead)}
+  .prov{background:var(--c-code-bg);border-top:2px solid var(--c-accent);margin-top:40px;padding:18px;border-radius:6px;font-size:12.5px;color:var(--c-text-soft);line-height:1.6}
+  .prov code{font-size:.92em}
+  @media (max-width:860px){.layout{grid-template-columns:1fr}aside.toc{position:static;max-height:none}}
+  @media print{body{background:#fff}.layout{display:block;max-width:100%;padding:0}aside.toc{display:none}main{box-shadow:none;border:none;padding:0}}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="toc" aria-label="導航">
+    <h3>章節</h3>
+    <a href="#headline">摘要</a>
+    <a href="#sec1">§1 5 秒指標</a>
+    <a href="#sec2">§2 三主軸現況</a>
+    <a href="#sec3">§3 今日做了什麼</a>
+    <a href="#sec4">§4 Grade A 進度</a>
+    <a href="#sec5">§5 後續決策</a>
+    <a href="#prov">Provenance</a>
+  </aside>
+
+  <main>
+    <header class="hero" id="headline">
+      <div class="pretitle">Research Status v2 · 2026-05-30 · 接續 v1（已含 n=7 新進展）</div>
+      <h1>研究現況 — 濃縮重點 + 現狀分析</h1>
+      <p class="subtitle">所有數字本 session 親自驗證；每 claim 標 tier [F]/[O]/[I]。本版相對 v1 的最大更新 = phasing 主軸 n=7 達成。</p>
+      <div class="verdict">
+        <strong>一句話現況：phasing 主軸今天從「候選」變成「最接近發表」</strong>
+        LOH-constrained phasing 的 n=7 跨樣本驗證完成 — <strong>7/7 樣本一致正向，Wilcoxon p=0.0078</strong>（Grade A 兩要求達成第 1 個）。
+        甲基化當 filter 已死且正式收尾；ASM magnitude 定案但不能 filter。<strong>研究主線清楚收斂到 phasing。</strong>
+      </div>
+    </header>
+
+    <h2 id="sec1"><span class="n">§1</span>5 秒指標</h2>
+    <div class="stat-grid">
+      <div class="stat"><div class="v live">7/7</div><div class="l">phasing gap 樣本一致正向 <span class="badge b-new">NEW</span></div></div>
+      <div class="stat"><div class="v live">0.0078</div><div class="l">n=7 Wilcoxon p（n=6 是 0.0156）</div></div>
+      <div class="stat"><div class="v info">+0.104</div><div class="l">COLO829 gap（第 7 樣本）</div></div>
+      <div class="stat"><div class="v live">1/2</div><div class="l">Grade A 要求達成（剩 R-SELFREF）</div></div>
+      <div class="stat"><div class="v dead">−0.00004</div><div class="l">Phase2 filter LOSO（已收尾死）</div></div>
+      <div class="stat"><div class="v warn">−0.122</div><div class="l">BRCA2 ASM Δβ 定案</div></div>
+      <div class="stat"><div class="v warn">5×</div><div class="l">strong-ASM 在 FP（不能 filter）</div></div>
+      <div class="stat"><div class="v info">58</div><div class="l">ledger 條目（本日 +5）</div></div>
+    </div>
+
+    <h2 id="sec2"><span class="n">§2</span>三主軸現況 — 濃縮</h2>
+    <table>
+      <thead><tr><th>主軸</th><th>狀態</th><th>最關鍵事實（已驗證）</th><th>後續</th></tr></thead>
+      <tbody>
+        <tr class="live">
+          <td><strong>① LOH phasing</strong><br>論文主軸</td>
+          <td><span class="badge b-live">LIVE</span><br><span class="badge b-tier">B+→A</span></td>
+          <td>NG=2 Inner same-hap vs Outer cross-het TP gap <strong>7/7 正向，p=0.0078</strong>。機制純 phasing（LOH 區物理上只剩單 haplotype → somatic 必成 same-hap 子族）<span class="badge b-tier">[F]</span></td>
+          <td>R-SELFREF 全 7-sample flag-on 負控（~25-50hr）升 full A</td>
+        </tr>
+        <tr class="warn">
+          <td><strong>② ZAR1L/BRCA2 ASM</strong></td>
+          <td><span class="badge b-warn">方向真</span><br><span class="badge b-tier">⭐3</span></td>
+          <td>magnitude 定案 HP-axis <strong>Δβ=−0.122</strong>（修 MSA dup-emission bug 後與 script03 收斂）。但 strong-ASM <strong>集中在 FP 5×</strong>（OR=0.194）→ ASM 真實但<strong>不能判別 TP/FP</strong><span class="badge b-tier">[F]</span></td>
+          <td>⭐4 需 COLO829 跨樣本；非主線</td>
+        </tr>
+        <tr class="dead">
+          <td><strong>③ 甲基化 FP filter</strong></td>
+          <td><span class="badge b-dead">DEAD 已收尾</span><br><span class="badge b-tier">⭐2 L4</span></td>
+          <td>in-dist +0.02236 經 LOSO 證實 <strong>100% 循環假象</strong>（mean −0.00004）；methylation 第 5 rank vestigial。已正式 P6 NEGATIVE<span class="badge b-tier">[F]</span></td>
+          <td>勿再開（11 條 dead end 家族）</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout c-info">
+      <strong>研究敘事收斂（為什麼這對發表重要）</strong>
+      過去半年大量心力在「甲基化能不能提升 caller」全部碰壁（filter dead / ASM 不能 filter）。但這些 NEGATIVE 反而把訊號逼出來：<strong>真正能區分 somatic vs germline-like 的不是甲基化，是 phasing 結構</strong>（LOH 區的 same-hap NG=2）。論文主軸從「read-level methylation」乾淨 pivot 到「LOH-constrained phasing signature」，機制純粹、可重現、不需甲基化實驗驗證。
+    </div>
+
+    <h2 id="sec3"><span class="n">§3</span>今日做了什麼（時間線）</h2>
+    <ul class="tl">
+      <li><strong>16-agent 驗證後研究 audit</strong> — 跨 6 主軸盤點，所有數字對 raw TSV 重算驗證 <span class="badge b-tier">[F]</span></li>
+      <li><strong>SoT reconcile D1-D5</strong> — 修 5 處真理來源漂移（MEMORY/INDEX/cycle state/CURRENT_FOCUS 全對齊）</li>
+      <li><strong>ZAR1L/BRCA2 ASM magnitude 定案</strong> — 驗證 −0.122；發現 anti-discriminative（strong-ASM 在 FP 5×）</li>
+      <li class="dead"><strong>Phase 2 filter 正式 NEGATIVE 收尾</strong> — /conclude-research，DECLARE 7/7，cycle3 P6，active cycles 歸零</li>
+      <li><strong>phasing n=7 達成</strong> ⭐ — 驗證 COLO829 ISM 真實存在（先前誤判 blocked）→ 便宜 aggregation → 7/7 p=0.0078。順手修 provenance gap（commit 從未 commit 的 Wilcoxon 腳本）</li>
+      <li class="warn"><strong>R-SELFREF 評估</strong> — X3+V6C 機制已證；全 7-sample 版需 ~25-50hr C++ 重跑（未自動 launch，正確判斷）</li>
+    </ul>
+
+    <h2 id="sec4"><span class="n">§4</span>Grade A 進度 — 現狀分析</h2>
+    <table>
+      <thead><tr><th>要求</th><th>狀態</th><th>細節</th></tr></thead>
+      <tbody>
+        <tr class="live"><td><strong>#1 n=7 cross-sample Wilcoxon</strong></td><td><span class="badge b-live">✅ 達成</span></td><td>7/7 正向，W=28 p=0.0078（exact，= 1/2⁷ 理論最小）。cross-sample 軸已達 A-strength</td></tr>
+        <tr class="warn"><td><strong>#2 R-SELFREF 自參考負控</strong></td><td><span class="badge b-warn">⚠ 部分</span></td><td>Inner same_HP1 用 HP1-1 count（C++ 標 circular dependency）。X3(HCC1395 flag-on/off)+V6C(4-sample chr19) 機制已證；全 7-sample full-genome flag-on 需 ~25-50hr C++ 重跑（archive 無現成 flag-on 輸出）尚未做</td></tr>
+      </tbody>
+    </table>
+    <div class="callout c-warn">
+      <strong>為什麼 R-SELFREF 重要 + 為什麼今晚沒跑</strong>
+      R-SELFREF = 確認「Inner same-hap 高 TP rate」不是循環論證（同一個 HP1-1 tag 同時定義 bucket 又貢獻訊號）。負控做法 = 開 <code>--germline-hp-only</code> flag 把 HP1-1 降成 germline，看 bucket 會不會塌陷。X3 在 HCC1395 已證會塌陷（機制對）。但全 7 樣本 full-genome 版是 C++ 重跑 ~25-50hr，且 archive 沒有現成 flag-on 輸出可省 — 這是真正的長計算，不在「便宜跑到底」範圍，所以我沒自動啟動（避免無確認長 compute + 可能要清 97% 磁碟=刪檔 Hard Gate）。
+    </div>
+
+    <h2 id="sec5"><span class="n">§5</span>後續決策（你來定）</h2>
+    <table>
+      <thead><tr><th>選項</th><th>內容</th><th>成本</th><th>產出</th></tr></thead>
+      <tbody>
+        <tr><td><strong>A 升 full Grade A</strong></td><td>啟動 R-SELFREF 全 7-sample flag-on 負控</td><td>~25-50hr C++ 重跑（需確認磁碟，可能要清空間=刪檔需批准）</td><td>full Grade A，論文證據完整</td></tr>
+        <tr><td><strong>B 停在 Grade B+ 寫 paper</strong></td><td>cross-sample 已 A-strength，先寫 draft，R-SELFREF 列 limitation</td><td>低（寫作）</td><td>paper draft，後補 R-SELFREF</td></tr>
+        <tr><td><strong>C 正式 tier 判定</strong></td><td>跑 /run-evaluator 算 retraction risk + tier</td><td>低</td><td>客觀 tier ⭐ 判定</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;color:var(--c-text-soft)"><strong>我的建議</strong>：B + C — cross-sample 已夠強可開始寫，同時跑 run-evaluator 拿客觀 tier；R-SELFREF 全版（選項 A）等磁碟清理 + 你確認後再批次跑。</p>
+
+    <div class="prov" id="prov">
+      <strong style="color:var(--c-accent-deep)">Provenance · Reproducibility</strong><br>
+      建立 2026-05-30 · Git HEAD 274f152 (refactor/phase1-safety) · 所有數字本 session 親自驗證（per <code>feedback_existing_artifacts_must_verify</code>）。<br>
+      phasing n=7: <code>InterSubMod/research/tpfp_loh_af_kde_discrimination/data/obs18b_wilcoxon_ng2_gap_n7.json</code> + scripts <code>obs18b/obs18c</code> · findings <code>InterSubMod/docs/experiments/in_progress/2026/05/20260530_LOH_phasing_n7_cross_sample_Grade_A.md</code><br>
+      ASM: <code>genome_survey_v2/asm_dualaxis_tp.tsv</code>（51,171 records）· Phase2: cycle3 P6_COMMIT NEGATIVE · ledger 58 條（本日 +5：ZAR1L correction/full_tp/cycle3_conclude/n7_phasing 等）。<br>
+      Tier: [F] first-hand verified / [O] observation / [I] inference。未過度宣稱：phasing 標 Grade B+ 非 full A（R-SELFREF 全版未完）；ASM 標「真實但不能 filter」；filter 標 NEGATIVE。設計準則 Tufte/CRAP/Assertion-Evidence/5-sec/WCAG/CJK font。
+    </div>
+  </main>
+</div>
+<script>
+(function(){
+  var links=document.querySelectorAll('aside.toc a');
+  var secs=Array.from(links).map(function(a){return document.getElementById(a.getAttribute('href').slice(1))}).filter(Boolean);
+  function upd(){var y=window.scrollY+100,cur=secs[0];secs.forEach(function(s){if(s.offsetTop<=y)cur=s});
+    links.forEach(function(a){a.classList.remove('active')});
+    if(cur){var el=document.querySelector('aside.toc a[href="#'+cur.id+'"]');if(el)el.classList.add('active')}}
+  var t=false;window.addEventListener('scroll',function(){if(!t){requestAnimationFrame(function(){upd();t=false});t=true}});upd();
+})();
+</script>
+</body>
+</html>

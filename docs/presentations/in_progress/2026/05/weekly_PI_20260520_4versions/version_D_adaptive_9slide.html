@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly PI 2026-05-20 · Version D · Content-Adaptive 9-Slide</title>
+<style>
+:root{
+  --c-accent:#D97757;
+  --c-primary:#1E3A8A;
+  --c-primary-soft:#E8EDF7;
+  --c-text:#141413;
+  --c-text-muted:#5C5C5A;
+  --c-bg:#FAF9F5;
+  --c-card:#FFFFFF;
+  --c-border:#E3DACC;
+  --c-border-strong:#B8AC92;
+  --c-pass:#15803D;
+  --c-pass-soft:#E8F2EC;
+  --c-fail:#B91C1C;
+  --c-fail-soft:#F7E6E6;
+  --c-marginal:#A16207;
+  --c-marginal-soft:#F7EFD9;
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--sp-7:48px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--c-bg);color:var(--c-text);font-family:system-ui,-apple-system,"Noto Sans CJK TC","Source Han Sans TW","PingFang TC","Droid Sans Fallback",sans-serif;font-size:13.5px;line-height:1.5}
+.deck-nav{position:sticky;top:0;z-index:10;background:rgba(250,249,245,0.95);backdrop-filter:saturate(120%);border-bottom:1px solid var(--c-border);padding:var(--sp-3) var(--sp-5);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--sp-3)}
+.deck-nav .brand{font-weight:700;color:var(--c-primary);font-size:13px}
+.deck-nav .brand .ver{color:var(--c-accent);font-weight:700;margin-left:var(--sp-3)}
+.deck-nav .links a{color:var(--c-text-muted);text-decoration:none;font-size:11.5px;margin-left:var(--sp-3)}
+.deck-nav .links a.style-tag{font-size:10px;background:var(--c-primary-soft);padding:2px 5px;border-radius:3px;color:var(--c-primary)}
+.deck-nav .links a:hover{color:var(--c-accent)}
+.slide-canvas{width:1280px;max-width:96vw;aspect-ratio:16/9;background:var(--c-card);border:1px solid var(--c-border);margin:var(--sp-6) auto;padding:var(--sp-5) var(--sp-7) var(--sp-7);display:flex;flex-direction:column;position:relative;box-shadow:0 2px 8px rgba(20,20,19,0.04)}
+.slide-canvas .eyebrow{font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--c-text-muted);font-weight:600;margin-bottom:var(--sp-1);display:flex;justify-content:space-between;align-items:center}
+.slide-canvas .eyebrow .style-chip{background:var(--c-primary);color:#fff;padding:2px 8px;border-radius:3px;font-weight:700;letter-spacing:0.1em;font-size:9.5px;text-transform:uppercase}
+.slide-canvas .eyebrow .style-chip.bcg{background:var(--c-primary)}
+.slide-canvas .eyebrow .style-chip.mck{background:var(--c-accent)}
+.slide-canvas .eyebrow .style-chip.hybrid{background:#5B21B6}
+.slide-canvas h1.slide-title{font-size:22px;font-weight:700;color:var(--c-primary);line-height:1.3;border-bottom:3px solid var(--c-accent);padding-bottom:var(--sp-2);margin-bottom:var(--sp-4);max-width:96%}
+.slide-canvas h1.slide-title .accent{color:var(--c-accent)}
+.slide-footer{position:absolute;left:var(--sp-7);right:var(--sp-7);bottom:var(--sp-3);font-size:10.5px;color:var(--c-text-muted);display:flex;justify-content:space-between;border-top:1px solid var(--c-border);padding-top:var(--sp-2)}
+.slide-footer .source{font-family:"JetBrains Mono","SF Mono",Consolas,monospace;font-size:10px}
+.slide-footer .page-no{font-weight:600;color:var(--c-primary)}
+
+/* Cover slide (BCG style: minimal + 1 line headline) */
+.cover-slide{justify-content:space-between}
+.cover-slide .top-info .week{font-size:12px;color:var(--c-accent);font-weight:700;letter-spacing:0.12em;margin-bottom:var(--sp-3)}
+.cover-slide .top-info h1{font-size:32px;color:var(--c-primary);line-height:1.2;margin-bottom:var(--sp-2);font-weight:700}
+.cover-slide .top-info .sub{font-size:16px;color:var(--c-text-muted);font-weight:500}
+.cover-slide .center-statement{margin:var(--sp-5) 0;padding:var(--sp-5) var(--sp-6);background:var(--c-primary-soft);border-left:6px solid var(--c-accent)}
+.cover-slide .center-statement .label{font-size:11px;color:var(--c-accent);font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:var(--sp-2)}
+.cover-slide .center-statement .text{font-size:19px;line-height:1.55;color:var(--c-text);font-weight:500;max-width:1100px}
+.cover-slide .center-statement .text .key{color:var(--c-primary);font-weight:700}
+.cover-slide .center-statement .text .accent{color:var(--c-accent);font-weight:700}
+.cover-slide .bottom-style-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-4);margin-top:var(--sp-3);font-size:11px}
+.style-card{padding:var(--sp-2) var(--sp-3);background:var(--c-bg);border:1px solid var(--c-border-strong)}
+.style-card .tag{font-size:9.5px;color:var(--c-accent);font-weight:700;letter-spacing:0.12em}
+.style-card .desc{color:var(--c-text-muted);margin-top:2px}
+
+/* Tables */
+table.matrix{width:100%;border-collapse:collapse;font-size:12.5px}
+table.matrix th{background:var(--c-primary);color:#fff;font-weight:600;padding:var(--sp-2) var(--sp-3);text-align:left;border:1px solid var(--c-primary)}
+table.matrix th.center{text-align:center}
+table.matrix th.sub{background:var(--c-accent)}
+table.matrix td{padding:var(--sp-2) var(--sp-3);border:1px solid var(--c-border);vertical-align:top}
+table.matrix tr:nth-child(even) td{background:rgba(232,237,247,0.25)}
+table.matrix td.center{text-align:center}
+table.matrix td.num{text-align:right;font-family:"JetBrains Mono",monospace;font-size:12px}
+table.matrix tr.summary td{background:var(--c-primary-soft);font-weight:600}
+table.matrix tr.section-row td{background:var(--c-accent);color:#fff;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;font-size:11px}
+.badge{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10.5px;font-weight:700;letter-spacing:0.02em}
+.badge-pass{background:var(--c-pass-soft);color:var(--c-pass);border:1px solid var(--c-pass)}
+.badge-fail{background:var(--c-fail-soft);color:var(--c-fail);border:1px solid var(--c-fail)}
+.badge-marginal{background:var(--c-marginal-soft);color:var(--c-marginal);border:1px solid var(--c-marginal)}
+.badge-neutral{background:var(--c-primary-soft);color:var(--c-primary);border:1px solid var(--c-primary)}
+
+/* McKinsey narrative slide: large headline + bullet + figure */
+.narrative-grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:var(--sp-5);flex:1;align-items:start}
+.body-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);flex:1;align-items:start}
+.grid-55-45{display:grid;grid-template-columns:1.22fr 1fr;gap:var(--sp-4);flex:1;align-items:start}
+
+ul.kp{list-style:none;padding:0}
+ul.kp li{padding:var(--sp-2) 0;padding-left:var(--sp-4);position:relative;font-size:12.5px;line-height:1.55;border-bottom:1px dotted var(--c-border)}
+ul.kp li:before{content:"▸";color:var(--c-accent);font-weight:700;position:absolute;left:0;top:var(--sp-2)}
+ul.kp li:last-child{border-bottom:none}
+ul.kp li .label{font-weight:700;color:var(--c-primary)}
+ul.kp li .num-inline{font-family:"JetBrains Mono",monospace;color:var(--c-accent);font-weight:700}
+
+.figure-card{border:1px solid var(--c-border)}
+.figure-card img{width:100%;display:block;object-fit:contain;max-height:280px}
+.figure-card .cap{font-size:11px;color:var(--c-text-muted);padding:var(--sp-2) var(--sp-3);background:var(--c-bg);font-style:italic}
+
+.callout{padding:var(--sp-3) var(--sp-4);border-left:5px solid;margin-top:var(--sp-3)}
+.callout.pass{border-color:var(--c-pass);background:var(--c-pass-soft)}
+.callout.warn{border-color:var(--c-marginal);background:var(--c-marginal-soft)}
+.callout.info{border-color:var(--c-primary);background:var(--c-primary-soft)}
+.callout h4{font-size:12.5px;font-weight:700;margin-bottom:var(--sp-1)}
+.callout.pass h4{color:var(--c-pass)}
+.callout.warn h4{color:var(--c-marginal)}
+.callout.info h4{color:var(--c-primary)}
+.callout p{font-size:12px;color:var(--c-text);line-height:1.5}
+
+/* Arc trail */
+.trail{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:var(--sp-2);align-items:center;margin:var(--sp-3) 0}
+.trail-step{padding:var(--sp-3);border:1px solid var(--c-border-strong);background:var(--c-bg);text-align:center}
+.trail-step .cycle{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--c-accent);font-weight:700}
+.trail-step .verdict{font-size:14px;font-weight:700;color:var(--c-primary);margin:var(--sp-1) 0}
+.trail-step .num{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--c-text-muted)}
+.trail-arrow{color:var(--c-accent);font-size:22px;font-weight:700}
+
+/* Action grid */
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);flex:1}
+.action-col h3{font-size:13.5px;font-weight:700;color:var(--c-primary);border-bottom:2px solid var(--c-accent);padding-bottom:var(--sp-1);margin-bottom:var(--sp-2)}
+
+/* DAG slide */
+.dag-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative;padding:var(--sp-3)}
+.dag-wrap svg{max-width:100%;max-height:100%}
+
+@media print{body{background:#fff}.deck-nav{display:none}.slide-canvas{box-shadow:none;page-break-after:always;margin:0 auto}}
+</style>
+</head>
+<body>
+
+<nav class="deck-nav">
+  <div class="brand">Weekly PI Report · 2026-05-14 → 05-20<span class="ver">Version D · Content-Adaptive 9-slide</span></div>
+  <div class="links">
+    <a href="#s1">1</a><a href="#s2">2</a><a href="#s3">3</a><a href="#s4">4</a><a href="#s5">5</a><a href="#s6">6</a><a href="#s7">7</a><a href="#s8">8</a><a href="#s9">9</a>
+    <a href="version_A_executive_5slide.html">→ A</a>
+    <a href="version_B_standard_12slide.html">→ B</a>
+    <a href="version_C_dense_8slide.html">→ C</a>
+  </div>
+</nav>
+
+<!-- Slide 1: Cover with single-line headline (BCG cover style) -->
+<article class="slide-canvas cover-slide" id="s1">
+  <div class="eyebrow"><span>Cover · style guide</span><span class="style-chip bcg">BCG · Headline cover</span></div>
+
+  <div class="top-info">
+    <div class="week">Week of 2026-05-14 → 2026-05-20  ·  4-day V6 workflow + Phase 2 cycle 1–3</div>
+    <h1>本週兩件落地、一條紀律</h1>
+    <div class="sub">V6 binary production sign-off  ·  Phase 2 filter reframe（ISM vestigial confirmed）</div>
+  </div>
+
+  <div class="center-statement">
+    <div class="label">Single-line headline</div>
+    <p class="text">
+      Pre-registered ablation 揭露 <span class="accent">ISM methylation = vestigial covariate</span>（incremental ΔF1 僅 <span class="key">+0.00065</span>）；Filter rename 為 <span class="key">caller-F1-headroom-gated 4-feature</span>；V6 binary <span class="accent">🟢 GO</span> 於 marker filter + hard threshold T=2-3，LR-based F1 與 Goal 3+4 不應 over-claim。
+    </p>
+  </div>
+
+  <div class="bottom-style-guide">
+    <div class="style-card"><div class="tag">SECTION 1 · OPEN</div><div class="desc">Slides 1-2 · BCG dense (cover + master table)</div></div>
+    <div class="style-card"><div class="tag">SECTION 2 · NARRATIVE</div><div class="desc">Slides 3-6 · McKinsey explanatory + DAG</div></div>
+    <div class="style-card"><div class="tag">SECTION 3 · CLOSE</div><div class="desc">Slides 7-9 · BCG dense (matrix + action + provenance)</div></div>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">PI report · cycle_id 20260520_cycle3_step1_5_ism_ablation_vestigial · binary v6-prod-20260520 (8a90532)</div>
+    <div class="page-no">1 / 9</div>
+  </footer>
+</article>
+
+<!-- Slide 2: Master TL;DR Table (BCG dense) -->
+<article class="slide-canvas" id="s2">
+  <div class="eyebrow"><span>Slide 2 · Master events × verdict</span><span class="style-chip bcg">BCG · Dense table</span></div>
+  <h1 class="slide-title">本週六件事一表收齊：<span class="accent">兩件 ✅ shipped、兩件 ⚠️ caveat、兩件 🔴 pending</span></h1>
+
+  <table class="matrix">
+    <thead>
+      <tr>
+        <th style="width:6%">#</th>
+        <th style="width:8%">Date</th>
+        <th style="width:22%">Event</th>
+        <th class="center" style="width:9%">Tier</th>
+        <th class="center" style="width:11%">Verdict</th>
+        <th style="width:21%">Key metric</th>
+        <th style="width:23%">下游 action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="center">1</td><td class="num">5/14</td><td>HP tag priority bug engineering report</td><td class="center">⭐⭐⭐⭐ L1</td><td class="center"><span class="badge badge-pass">SHIPPED</span></td><td>17.3:1 偏 HP1 根因解明</td><td>V6 binary 設計依據</td></tr>
+      <tr><td class="center">2</td><td class="num">5/15</td><td>V6 binary documentation + characterization</td><td class="center">⭐⭐⭐⭐ L1</td><td class="center"><span class="badge badge-pass">SHIPPED</span></td><td>V6 = V5 phasing + V3F hybrid</td><td>commit 8a90532 base</td></tr>
+      <tr><td class="center">3</td><td class="num">5/18</td><td>Phase 2 Cycle 1 Global FP Filter</td><td class="center">⭐⭐⭐ L2</td><td class="center"><span class="badge badge-pass">STRONG</span></td><td>HCC1395 ΔF1 = <strong style="color:var(--c-pass)">+0.02236</strong> (9.24× v1.0)</td><td>Internal validated · cycle 2 待</td></tr>
+      <tr><td class="center">4</td><td class="num">5/19</td><td>V6 vs baseline 5-Goal validation</td><td class="center">⭐⭐⭐ L2</td><td class="center"><span class="badge badge-marginal">MIXED</span></td><td>G2 ✅ +52% · G5 ✅ T=2-3 · LR BAM-indep</td><td>sign-off scope 收窄</td></tr>
+      <tr><td class="center">5</td><td class="num">5/19</td><td>Cycle 2 cross-sample n=5 transfer</td><td class="center">⭐⭐⭐ L2</td><td class="center"><span class="badge badge-fail">DIRECTION_NEG</span></td><td>Wilcoxon p=0.1875 · HCC1954 −0.377</td><td>4-agent audit · 48hr cooling-off</td></tr>
+      <tr style="background:var(--c-primary-soft);font-weight:600"><td class="center">6</td><td class="num">5/20</td><td><strong>Cycle 3 Step 1.5 min-ablation (ISM vestigial)</strong></td><td class="center">⭐⭐⭐⭐ L1</td><td class="center"><span class="badge badge-fail">M1a FAIL</span></td><td>drop ISM Δ <strong style="color:var(--c-fail)">+0.00065</strong> &lt; +0.003 Cohen</td><td>Filter rename · paper §3 撤回</td></tr>
+      <tr><td class="center">7</td><td class="num">5/20</td><td>V6 binary commit + tag (Day 4, 1 day early)</td><td class="center">⭐⭐⭐⭐ L1</td><td class="center"><span class="badge badge-pass">LOCAL</span></td><td>tag <code>v6-prod-20260520</code></td><td>git push 待 PI 授權</td></tr>
+      <tr class="section-row"><td colspan="7">Open / pending (next phase 2026-05-21+)</td></tr>
+      <tr><td class="center">8</td><td class="num">5/21+</td><td>A2 caller_af KS test</td><td class="center">—</td><td class="center"><span class="badge badge-neutral">SUGGESTED</span></td><td>~30 min · distributional shift</td><td>強化 paper §3 reframe</td></tr>
+      <tr><td class="center">9</td><td class="num">5/21+</td><td>Cycle 3 Step 2 panel survey (4-feature cross-sample)</td><td class="center">—</td><td class="center"><span class="badge badge-neutral">PENDING</span></td><td>caller F1 &lt; 0.80 + FP &gt; 0.10 gate</td><td>panel 樣本名單先決</td></tr>
+    </tbody>
+  </table>
+
+  <footer class="slide-footer">
+    <div class="source">events sourced from: CURRENT_FOCUS.md §1-§3 · evidence_ledger.jsonl line 48 latest · cycle3_step1_5_min_ablation_findings.md</div>
+    <div class="page-no">2 / 9</div>
+  </footer>
+</article>
+
+<!-- Slide 3: Phase 2 三 Cycle 故事弧 (McKinsey narrative) -->
+<article class="slide-canvas" id="s3">
+  <div class="eyebrow"><span>Slide 3 · Pillar 2 · Phase 2 三 cycle story arc</span><span class="style-chip mck">McKinsey · Story arc</span></div>
+  <h1 class="slide-title">三個 cycle 證據鏈：<span class="accent">strong → bounded → vestigial</span> — 9.24× uplift 主因實為 caller_af proxy</h1>
+
+  <div class="trail">
+    <div class="trail-step">
+      <div class="cycle">Cycle 1 · 5/18</div>
+      <div class="verdict">⭐3 STRONG</div>
+      <div class="num">HCC1395 ΔF1 = <strong style="color:var(--c-pass)">+0.02236</strong></div>
+      <div class="num" style="font-size:10.5px;margin-top:4px">9.24× v1.0 · 2.24× Cohen · methylation rank 5-9</div>
+    </div>
+    <div class="trail-arrow">→</div>
+    <div class="trail-step">
+      <div class="cycle">Cycle 2 · 5/19</div>
+      <div class="verdict">⭐3 BOUNDED</div>
+      <div class="num">cross-sample <strong style="color:var(--c-marginal)">DIRECTION_NEG</strong></div>
+      <div class="num" style="font-size:10.5px;margin-top:4px">n=5 Wilcoxon p=0.1875 · HCC1954 −0.377 災難</div>
+    </div>
+    <div class="trail-arrow">→</div>
+    <div class="trail-step">
+      <div class="cycle">Cycle 3 Step 1.5 · 5/20</div>
+      <div class="verdict">M1a FAIL</div>
+      <div class="num">drop ISM Δ <strong style="color:var(--c-fail)">+0.00065</strong></div>
+      <div class="num" style="font-size:10.5px;margin-top:4px">4/5 樣本 no-methyl ≥ full · mean no-methyl 略勝</div>
+    </div>
+  </div>
+
+  <div class="narrative-grid">
+    <div>
+      <ul class="kp">
+        <li><span class="label">Why started: ·</span> v1.0 paired-pileup ΔF1 +0.00242 (marginal) → pivot 到 global FP exploration → Cycle 1 ΔF1 +0.02236 看似 strong methylation-augmented evidence</li>
+        <li><span class="label">Complication: ·</span> 用戶質疑「ISM 是否真貢獻 incremental signal？」+ Cycle 2 cross-sample transfer 災難（HCC1954 −0.377）</li>
+        <li><span class="label">Pivotal test: ·</span> plan v2.1 pre-register 4 ablation hypotheses · 最小評估（n=5×4 variants×2 modes，cycle 2 既有 master TSV reuse，~25 sec wall clock）</li>
+        <li><span class="label">Answer: ·</span> drop ISM 5 methylation features 後 HCC1395 refit incremental ΔF1 = <span class="num-inline">+0.00065</span>（&lt; +0.003 Cohen ribbon），<strong>4/5 樣本 no-methyl ≥ full</strong>，5-sample mean no-methyl <span class="num-inline">+0.00630</span> 略勝 full <span class="num-inline">+0.00619</span></li>
+        <li><span class="label">Independent corroboration: ·</span> 5/19 V6 §13 Day 3 measured methylation contribution <span class="num-inline">+0.0005~+0.0007</span> ≡ 5/20 H_M1a <span class="num-inline">+0.00065</span> — 兩條獨立路徑同方向同 magnitude，收斂同結論</li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="figure-card">
+        <img src="../../../../../../research/methyl_augmented_filter_phase2/cycle3/ablation/figures/cycle3_step1_5_min_ablation.png" alt="Cycle 3 Step 1.5 min ablation refit-mode grouped bar">
+        <div class="cap">Cycle 3 Step 1.5 · Refit-mode grouped bar (5 samples × 4 variants)。藍色 no-methyl 在 4/5 樣本 ≥ 橘色 full；唯一 HCC1395 marginal drop −0.00065（&lt; +0.003 Cohen ribbon）。</div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">cycle1/cycle1_findings.md · cycle2/cycle2_findings.md · cycle3/ablation/cycle3_step1_5_min_ablation_findings.md</div>
+    <div class="page-no">3 / 9</div>
+  </footer>
+</article>
+
+<!-- Slide 4: Cycle 3 Ablation Quant Deep-dive (BCG Dense + Verdict Box) -->
+<article class="slide-canvas" id="s4">
+  <div class="eyebrow"><span>Slide 4 · Ablation quant deep-dive</span><span class="style-chip hybrid">Hybrid · Table + verdict box</span></div>
+  <h1 class="slide-title">Refit mode 5×4 量化：<span class="accent">no-methyl 在 4/5 樣本 ≥ full</span>，pre-reg M1a FAIL + A1 MARGINAL 命中方向</h1>
+
+  <div class="grid-55-45">
+    <div>
+      <table class="matrix">
+        <thead><tr><th>Sample</th><th class="center">full (10)</th><th class="center">no-caller-af (9)</th><th class="center">no-methyl (5)</th><th class="center">no-both (4)</th></tr></thead>
+        <tbody>
+          <tr><td><strong>HCC1395</strong> (train)</td><td class="num bold">+0.02236</td><td class="num">+0.00955</td><td class="num" style="color:var(--c-pass)"><strong>+0.02171</strong></td><td class="num">+0.00912</td></tr>
+          <tr><td><strong>HCC1937</strong></td><td class="num">+0.00761</td><td class="num">−0.00001</td><td class="num" style="color:var(--c-pass)"><strong>+0.00798</strong></td><td class="num">+0.00000</td></tr>
+          <tr><td><strong>HCC1954</strong></td><td class="num">+0.00095</td><td class="num">−0.00001</td><td class="num" style="color:var(--c-pass)"><strong>+0.00179</strong></td><td class="num">−0.00000</td></tr>
+          <tr><td><strong>H1437</strong></td><td class="num">−0.00000</td><td class="num">−0.00000</td><td class="num">−0.00000</td><td class="num">−0.00000</td></tr>
+          <tr><td><strong>H2009</strong></td><td class="num">+0.00001</td><td class="num">+0.00000</td><td class="num">+0.00000</td><td class="num">+0.00000</td></tr>
+          <tr class="summary"><td><strong>5-sample mean</strong></td><td class="num bold">+0.00619</td><td class="num">+0.00191</td><td class="num" style="color:var(--c-pass)"><strong>+0.00630</strong></td><td class="num">+0.00182</td></tr>
+        </tbody>
+      </table>
+
+      <table class="matrix" style="margin-top:var(--sp-3)">
+        <thead><tr><th colspan="4" style="background:var(--c-accent);text-align:center">Transfer mode shrinkage attribution</th></tr></thead>
+        <tbody>
+          <tr><th>Source</th><th class="center">HCC1954</th><th class="center">Avg disaster mitigated</th><th class="center">Verdict</th></tr>
+          <tr><td>caller_af shrink</td><td class="num">+0.25114</td><td class="num">~78%</td><td class="center"><span class="badge badge-marginal">A1 MARGINAL</span></td></tr>
+          <tr><td>methylation shrink</td><td class="num">+0.01039</td><td class="num">&lt; 7%</td><td class="center"><span class="badge badge-fail">non-contrib</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <table class="matrix">
+        <thead><tr><th colspan="2" style="background:var(--c-fail);text-align:center">H_M1a · drop ISM</th></tr></thead>
+        <tbody>
+          <tr><td>Pre-reg PASS</td><td class="num">≥ +0.003</td></tr>
+          <tr><td>Pre-reg FAIL</td><td class="num">&lt; +0.001</td></tr>
+          <tr><td>HCC1395 computed</td><td class="num bold" style="color:var(--c-fail)">+0.00065</td></tr>
+          <tr><td>5-sample mean</td><td class="num" style="color:var(--c-fail)">−0.00011 (略升)</td></tr>
+          <tr><td><strong>Verdict</strong></td><td class="center"><span class="badge badge-fail">FAIL · 決定性</span></td></tr>
+        </tbody>
+      </table>
+
+      <table class="matrix" style="margin-top:var(--sp-3)">
+        <thead><tr><th colspan="2" style="background:var(--c-marginal);text-align:center">H_A1 · caller_af shrink</th></tr></thead>
+        <tbody>
+          <tr><td>Pre-reg PASS</td><td class="num">&gt; +0.30</td></tr>
+          <tr><td>Pre-reg FAIL</td><td class="num">≤ +0.10</td></tr>
+          <tr><td>HCC1954 computed</td><td class="num bold" style="color:var(--c-marginal)">+0.25114</td></tr>
+          <tr><td>% disaster mitigated</td><td class="num">66.6%</td></tr>
+          <tr><td><strong>Verdict</strong></td><td class="center"><span class="badge badge-marginal">MARGINAL · PASS-lean</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout pass">
+        <h4>Pre-reg prediction 命中</h4>
+        <p style="font-size:11.5px">plan v2.1 預測「55% A1 PASS + M1a FAIL」→ 實際 A1 MARGINAL + M1a FAIL → <strong>方向命中</strong>，避免 confirmation bias 解讀</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">cycle3/ablation/cycle3_step1_5_min_ablation_findings.md §2.1-§2.2 · script run_ablation_variants.py · seed=42 · wall=25s · drift 0</div>
+    <div class="page-no">4 / 9</div>
+  </footer>
+</article>
+
+<!-- Slide 5: ISM as caller_af proxy DAG (McKinsey explanatory + SVG) -->
+<article class="slide-canvas" id="s5">
+  <div class="eyebrow"><span>Slide 5 · Mechanism DAG · L2 ridge-split</span><span class="style-chip mck">McKinsey · Causal model</span></div>
+  <h1 class="slide-title">Causality DAG：<span class="accent">caller_af → HPFineF (proxy) → false ISM attribution</span> — L2 ridge 把相關特徵 split 造成假 contribution</h1>
+
+  <div class="narrative-grid">
+    <div class="dag-wrap">
+      <svg viewBox="0 0 700 380" role="img" xmlns="http://www.w3.org/2000/svg">
+        <title>ISM methylation as caller_af proxy DAG</title>
+        <desc>Causal diagram showing caller_af is the true signal source, HPFineF and other methylation features are downstream proxies via L2 ridge-split, leading to false attribution of incremental signal to methylation when ISM is in fact a vestigial covariate.</desc>
+
+        <defs>
+          <marker id="arr-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#1E3A8A"/>
+          </marker>
+          <marker id="arr-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#B91C1C"/>
+          </marker>
+          <marker id="arr-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#15803D"/>
+          </marker>
+        </defs>
+
+        <!-- Root cause -->
+        <rect x="20" y="150" width="160" height="68" rx="6" fill="#E8EDF7" stroke="#1E3A8A" stroke-width="2"/>
+        <text x="100" y="178" text-anchor="middle" font-family="system-ui" font-size="15" font-weight="700" fill="#1E3A8A">caller_af</text>
+        <text x="100" y="196" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#5C5C5A">true signal</text>
+        <text x="100" y="210" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5C5C5A">coef +3.44</text>
+
+        <!-- L2 -->
+        <ellipse cx="290" cy="184" rx="76" ry="36" fill="#F7EFD9" stroke="#A16207" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="290" y="180" text-anchor="middle" font-family="system-ui" font-size="13" font-weight="700" fill="#A16207">L2 ridge-split</text>
+        <text x="290" y="196" text-anchor="middle" font-family="system-ui" font-size="10" fill="#5C5C5A">split correlated</text>
+
+        <!-- Proxies (red - misleading) -->
+        <rect x="430" y="50" width="166" height="42" rx="6" fill="#F7E6E6" stroke="#B91C1C" stroke-width="1.5"/>
+        <text x="513" y="70" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="#B91C1C">HPFineF (methyl)</text>
+        <text x="513" y="84" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5C5C5A">coef +0.75 · vestigial</text>
+
+        <rect x="430" y="105" width="166" height="42" rx="6" fill="#F7E6E6" stroke="#B91C1C" stroke-width="1.5"/>
+        <text x="513" y="125" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="#B91C1C">4× other methyl</text>
+        <text x="513" y="139" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5C5C5A">rank 6-9 · proxies</text>
+
+        <!-- True incremental (green) -->
+        <rect x="430" y="170" width="166" height="42" rx="6" fill="#E8F2EC" stroke="#15803D" stroke-width="1.5"/>
+        <text x="513" y="190" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="#15803D">LOH_inner</text>
+        <text x="513" y="204" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5C5C5A">true incremental</text>
+
+        <rect x="430" y="225" width="166" height="42" rx="6" fill="#E8F2EC" stroke="#15803D" stroke-width="1.5"/>
+        <text x="513" y="245" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="#15803D">Coverage_Multiple</text>
+        <text x="513" y="259" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5C5C5A">true incremental</text>
+
+        <rect x="430" y="280" width="166" height="42" rx="6" fill="#E8F2EC" stroke="#15803D" stroke-width="1.5"/>
+        <text x="513" y="300" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="#15803D">NG</text>
+        <text x="513" y="314" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5C5C5A">true incremental</text>
+
+        <!-- caller → L2 -->
+        <line x1="180" y1="184" x2="214" y2="184" stroke="#1E3A8A" stroke-width="2.4" marker-end="url(#arr-p)"/>
+
+        <!-- L2 → proxies -->
+        <line x1="366" y1="160" x2="428" y2="80" stroke="#B91C1C" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#arr-r)"/>
+        <text x="380" y="118" font-family="system-ui" font-size="10" fill="#B91C1C" font-style="italic">false split</text>
+        <line x1="366" y1="170" x2="428" y2="130" stroke="#B91C1C" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#arr-r)"/>
+
+        <!-- L2 → true incremental -->
+        <line x1="366" y1="190" x2="428" y2="190" stroke="#15803D" stroke-width="2" marker-end="url(#arr-g)"/>
+        <text x="380" y="186" font-family="system-ui" font-size="10" fill="#15803D">true</text>
+        <line x1="366" y1="200" x2="428" y2="246" stroke="#15803D" stroke-width="2" marker-end="url(#arr-g)"/>
+        <line x1="366" y1="210" x2="428" y2="300" stroke="#15803D" stroke-width="2" marker-end="url(#arr-g)"/>
+
+        <!-- Bottom finding -->
+        <rect x="20" y="280" width="360" height="76" rx="6" fill="#FAF9F5" stroke="#D97757" stroke-width="2"/>
+        <text x="200" y="305" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="#D97757">H_M1a verdict</text>
+        <text x="200" y="324" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#141413">drop ISM → Δ +0.00065</text>
+        <text x="200" y="338" text-anchor="middle" font-family="JetBrains Mono" font-size="10.5" fill="#5C5C5A">&lt; +0.003 Cohen ribbon</text>
+        <text x="200" y="352" text-anchor="middle" font-family="system-ui" font-size="11" fill="#141413" font-style="italic">methylation = vestigial covariate</text>
+      </svg>
+    </div>
+
+    <div>
+      <div class="callout pass">
+        <h4>🟢 True incremental features (keep in 4-feature filter)</h4>
+        <p style="font-size:11.5px"><strong>caller_af</strong> (coef +3.44) · <strong>LOH_inner_flag</strong> (confounder-adjusted) · <strong>Coverage_Multiple_imp</strong> · <strong>NG</strong></p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠ L2 ridge-split 機制</h4>
+        <p style="font-size:11.5px">L2 regularization 把高相關特徵 coef 分散 — HPFineF +0.75 看似 contribution，實為 caller_af partial 共變異 split。drop 5 methyl 後 caller_af + LOH + Cov + NG 重新分配權重 capture 同訊息。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>📊 Independent corroboration</h4>
+        <p style="font-size:11.5px">5/19 V6 §13 measured methylation contribution <strong>+0.0005~+0.0007</strong> ≡ 5/20 H_M1a <strong>+0.00065</strong> — 兩條獨立路徑同方向同 magnitude，DAG mechanism 收斂同結論。</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">inline SVG DAG · WCAG-AA compliant · cycle3_step1_5_min_ablation_findings.md §3.1</div>
+    <div class="page-no">5 / 9</div>
+  </footer>
+</article>
+
+<!-- Slide 6: Filter Reframe Decision (McKinsey explanatory) -->
+<article class="slide-canvas" id="s6">
+  <div class="eyebrow"><span>Slide 6 · Reframe decision · 影響範圍</span><span class="style-chip mck">McKinsey · Decision rationale</span></div>
+  <h1 class="slide-title">Filter reframe 落地：<span class="accent">命名 + gate config + paper §3</span> — ISM characterization 結論保留作 mechanistic understanding</h1>
+
+  <div class="body-grid-2">
+    <div>
+      <table class="matrix">
+        <thead><tr><th colspan="2" style="background:var(--c-accent);text-align:center">Rename matrix</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Before</strong></td><td>"ISM methylation-augmented multi-axis FP filter"</td></tr>
+          <tr><td><strong>After</strong></td><td><strong>"caller-F1-headroom-gated 4-feature filter"</strong><br>(caller_af + LOH_inner + Coverage_Multiple + NG)</td></tr>
+        </tbody>
+      </table>
+
+      <table class="matrix" style="margin-top:var(--sp-3)">
+        <thead><tr><th colspan="3" style="background:var(--c-accent);text-align:center">Paper §3 rewrite scope</th></tr></thead>
+        <tbody>
+          <tr><th>Original claim</th><th>狀態</th><th>替代敘述</th></tr>
+          <tr><td>"Methylation-augmented filter ΔF1 +0.02236"</td><td class="center"><span class="badge badge-fail">撤回</span></td><td>"Multi-axis filter (caller_af + LOH + Cov + NG) ΔF1 +0.02236; ISM methylation as covariate 無 incremental value"</td></tr>
+          <tr><td>"5 ISM methyl features rank 5-9 in LR"</td><td class="center"><span class="badge badge-pass">保留</span></td><td>+ 加註「L2 ablation 證實為 caller_af proxy（drop 後 caller_af + LOH + Cov + NG 重新分配 capture 同訊息）」</td></tr>
+          <tr><td>"Methylation-aware filter"</td><td class="center"><span class="badge badge-fail">撤回</span></td><td>"caller-F1-headroom-gated 4-feature filter"</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <div class="callout pass">
+        <h4>✅ ISM 結論保留範圍</h4>
+        <ul style="font-size:11.5px;list-style:none;padding:0;margin-top:6px">
+          <li>✓ ISM characterization 5 zones × 7 samples LRT 16/30 cells q&lt;0.05 (v0.3 cycle 結論 ⭐3)</li>
+          <li>✓ 5-zone TP/FP discrimination AUC 觀察</li>
+          <li>✓ Mechanistic understanding（LOH × HP × CN × methylation 分布）— non-filter contribution</li>
+        </ul>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠ Cycle 3 Step 2 panel survey 是否仍 GO？</h4>
+        <p style="font-size:11.5px"><strong>YES</strong>（per plan v2.1 Decision rule Path 2）：Filter 本身效力（caller-F1-headroom gate + multi-axis LR）仍待 cross-sample validation。但 panel survey 不再是「驗 ISM-augmented filter」，而是「驗 4-feature filter (no methyl)」。大規模 ablation (M2/M3/M0/LOFO) 降為 supplementary（H_M1a FAIL 已 high-confidence）。</p>
+      </div>
+
+      <div class="callout info">
+        <h4>📌 為什麼 mean +0.00619 (full) 仍「不負」？</h4>
+        <p style="font-size:11.5px">4/5 樣本 ΔF1 ≈ 0（H1437/H2009 best τ→0.10 keep-everything；HCC1937/HCC1954 在 caller F1 ceiling 樣本上 LR 找不到有意義 threshold）；唯一 large positive = HCC1395 (+0.02236)。Refit mode 反映「filter on training-like samples works」非 cross-sample generalization。</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">cycle3_caller_f1_gate.json (features_production=4) · cycle3_step1_5_min_ablation_findings.md §4.1-§4.4</div>
+    <div class="page-no">6 / 9</div>
+  </footer>
+</article>
+
+<!-- Slide 7: V6 Sign-off Matrix (BCG dense) -->
+<article class="slide-canvas" id="s7">
+  <div class="eyebrow"><span>Slide 7 · Pillar 1 · V6 sign-off 5-Goal matrix</span><span class="style-chip bcg">BCG · Decision matrix</span></div>
+  <h1 class="slide-title">V6 5-Goal verdict matrix：<span class="accent">2 強推 (G2 marker + G5 hard T=2-3)、3 設限、2 阻塞</span> · scope-bounded sign-off</h1>
+
+  <div class="grid-55-45">
+    <div>
+      <table class="matrix">
+        <thead><tr><th style="width:6%">G</th><th style="width:24%">Use case</th><th class="center" style="width:11%">Best BAM</th><th class="center" style="width:13%">V6 verdict</th><th style="width:24%">充分證據</th><th style="width:22%">推薦 action</th></tr></thead>
+        <tbody>
+          <tr><td><strong>G1</strong></td><td>per-CpG × HP × ALT confound</td><td class="center">V3F</td><td class="center"><span class="badge badge-marginal">Partial</span></td><td>V6 Cramer V 0.377 比 baseline 0.446 好；V3F 0.275 仍 best</td><td>V3F dedicated per-CpG (~2 hr)</td></tr>
+          <tr style="background:var(--c-pass-soft)"><td><strong>G2</strong></td><td>marker filter (downstream production)</td><td class="center"><strong>V6</strong></td><td class="center"><span class="badge badge-pass">Strong</span></td><td>marker +52.4% · cross-sample ρ=0.845</td><td><strong>✅ V6 production tag</strong></td></tr>
+          <tr><td><strong>G3</strong></td><td>二次打擊 (two-hit order)</td><td class="center">—</td><td class="center"><span class="badge badge-fail">Blocked</span></td><td>—</td><td>per-read epigenotype redesign</td></tr>
+          <tr><td><strong>G4</strong></td><td>TO normal 補強</td><td class="center">—</td><td class="center"><span class="badge badge-fail">Blocked</span></td><td>—</td><td>methyl-phasing framework</td></tr>
+          <tr><td><strong>G5</strong></td><td>F1 hard T=1</td><td class="center">V5/V6 tie</td><td class="center"><span class="badge badge-marginal">Marginal</span></td><td>+0.0004 Cohen ribbon 內</td><td>—</td></tr>
+          <tr style="background:var(--c-pass-soft)"><td><strong>G5</strong></td><td>F1 hard T=2-3</td><td class="center"><strong>V6</strong></td><td class="center"><span class="badge badge-pass">Strong</span></td><td>ΔF1 +0.0286 (T=2) · +0.1605 (T=3) strict dominance</td><td><strong>✅ V6 hard threshold</strong></td></tr>
+          <tr><td><strong>G5</strong></td><td>F1 LR full</td><td class="center">tie</td><td class="center"><span class="badge badge-marginal">BAM-indep</span></td><td>baseline +0.02302 ≈ V6 +0.02236 · drift 0.00066</td><td>—（features 非 BAM）</td></tr>
+          <tr><td><strong>G5</strong></td><td>F1 cross-sample</td><td class="center">caller-headroom</td><td class="center"><span class="badge badge-fail">Bounded</span></td><td>HCC1954 −0.377 · caller F1 ceiling 樣本退化</td><td>Cycle 3 Step 2 panel</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <div class="callout pass">
+        <h4>✅ 推薦 sign-off</h4>
+        <p style="font-size:11.5px"><code>git tag v6-prod-20260521</code> 執行 — scope = marker filter + cross-sample ISM downstream production use + F1 hard threshold T=2-3</p>
+      </div>
+
+      <div class="callout warn">
+        <h4>⚠ 三條不應 over-claim（sign-off email 明示）</h4>
+        <ol style="font-size:11.5px;list-style:decimal;margin-left:18px;line-height:1.6">
+          <li>V6 改進 LR F1 — BAM-independent</li>
+          <li>V6 ≥ V3F 跨所有 use case — G1 per-CpG V3F 仍 best</li>
+          <li>G3+G4 unblock — 需 ISM framework redesign</li>
+        </ol>
+      </div>
+
+      <div class="callout info">
+        <h4>📌 4 sharp findings (5/19-20)</h4>
+        <ul style="font-size:11px;list-style:none;padding:0">
+          <li>• baseline ≈ V5 HP×ALT Cramer V 0.107 identical</li>
+          <li>• baseline LR +0.02302 略勝 V6 LR +0.02236</li>
+          <li>• Methylation contrib +0.0005~+0.0007 cross-BAM 一致</li>
+          <li>• Caller_af coef +3.44 = LR uplift 真實 leverage</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">20260521_PI_V6_signoff_email_draft_5goal.md §3-§4 · 20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01.md §13</div>
+    <div class="page-no">7 / 9</div>
+  </footer>
+</article>
+
+<!-- Slide 8: Open Questions (McKinsey explanatory) -->
+<article class="slide-canvas" id="s8">
+  <div class="eyebrow"><span>Slide 8 · Open questions · next phase</span><span class="style-chip mck">McKinsey · Path forward</span></div>
+  <h1 class="slide-title">五個 open question 分流到三條路徑：<span class="accent">cycle 3 panel · V3F dedicated · framework redesign</span></h1>
+
+  <div class="action-grid">
+    <div class="action-col">
+      <h3>🟢 Next phase (5/21+) · cycle 3 啟動前 4 must-fix</h3>
+      <table class="matrix">
+        <thead><tr><th>Open Question</th><th>規劃</th><th class="center">時程</th></tr></thead>
+        <tbody>
+          <tr><td>Cycle 3 Step 2 panel survey (4-feature filter cross-sample)</td><td>caller F1 &lt; 0.80 + FP density &gt; 0.10 gate</td><td class="center">5/21+</td></tr>
+          <tr><td>A2 caller_af KS test 補強 H_A1 殘餘 33%</td><td>distributional shift quantification</td><td class="center">~30 min</td></tr>
+          <tr><td>H_C3_2 low-F1 panel 4 樣本名單</td><td>explore archive / BAM 可用性確認</td><td class="center">先決</td></tr>
+          <tr><td>cycle_id 命名規範 (_validation 不 _negative)</td><td>verdict 在 entry 不在 name</td><td class="center">即時</td></tr>
+          <tr><td>ledger entry 補 binary / dataset / pre-reg link</td><td>provenance 完整性</td><td class="center">即時</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout pass">
+        <h4>📚 紀律 footnote (footer only, 非主敘事)</h4>
+        <p style="font-size:11.5px">Plan v2 R-MENTAL-DRIFT 通過真實測試 — 4-agent audit + 48hr cooling-off + Pre-reg 命中 + NEGATIVE postmortem ledger 落地。<br>詳見 <code>cycle2_NEGATIVE_postmortem.md</code> · cycle_id <code>20260519_phase2_cycle2_negative_postmortem</code>。</p>
+      </div>
+    </div>
+
+    <div class="action-col">
+      <h3>🟡 Side tracks (low-priority, deferred)</h3>
+      <table class="matrix">
+        <thead><tr><th>Open Question</th><th>規劃</th><th class="center">時程</th></tr></thead>
+        <tbody>
+          <tr><td>Goal 1 per-CpG × HP × ALT V3F vs V6 trade-off</td><td>V3F dedicated per-CpG run (lower confound)</td><td class="center">~2 hr</td></tr>
+          <tr><td>baseline LR &gt; V6 LR 原因（NG distribution / feature decoupling?）</td><td>VIF 對比 baseline vs V6 LR feature space</td><td class="center">後續</td></tr>
+          <tr><td>ALT-only HP1:HP2 ratio 重現 PI 4-29 17.3:1（本實驗 all-reads 1.696）</td><td>重跑 ISM with alt_support filter</td><td class="center">~2 hr</td></tr>
+          <tr><td>COLO829 V6 (本輪 skip · truth-set permission)</td><td>chmod 660 或替代 truth set</td><td class="center">phase 2</td></tr>
+          <tr><td>V6 push 授權 + sign-off email send</td><td>待 PI 明示授權 + email copy 到 mail client</td><td class="center">PI ack</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn">
+        <h4>🔴 Hard Gate awaiting</h4>
+        <p style="font-size:11.5px">Day 5 (next): <code>git push origin fix/pon-only-phasing v6-prod-20260520</code> 需用戶明示授權 + PI email send。<strong>本 deck 為 sign-off email 對應 visual aid。</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">20260521_PI_V6_signoff_email_draft_5goal.md §5 · cycle2_NEGATIVE_postmortem.md · CURRENT_FOCUS.md §2 (5/19 audit 4 must-fix)</div>
+    <div class="page-no">8 / 9</div>
+  </footer>
+</article>
+
+<!-- Slide 9: Appendix + Provenance Footer (BCG dense) -->
+<article class="slide-canvas" id="s9">
+  <div class="eyebrow"><span>Slide 9 · Appendix · provenance · reproducibility</span><span class="style-chip bcg">BCG · Provenance footer</span></div>
+  <h1 class="slide-title">完整 provenance footer：<span class="accent">cycle_id · ledger line · commit hash · script · seed</span> · 保證 bit-exact reproducibility</h1>
+
+  <div class="body-grid-2">
+    <div>
+      <table class="matrix">
+        <thead><tr><th colspan="2" style="background:var(--c-primary);text-align:center">📋 Cycle 3 Step 1.5 Ablation</th></tr></thead>
+        <tbody>
+          <tr><td>cycle_id</td><td class="num">20260520_cycle3_step1_5_ism_ablation_vestigial</td></tr>
+          <tr><td>ledger</td><td class="num">research/autoresearch/evidence_ledger.jsonl :48</td></tr>
+          <tr><td>plan</td><td class="num">~/.claude/plans/v6-optimized-wadler.md §Cycle 3 Step 1.5 v2.1</td></tr>
+          <tr><td>script</td><td class="num">cycle3/ablation/scripts/run_ablation_variants.py</td></tr>
+          <tr><td>data TSV</td><td class="num">cycle3/ablation/data/cycle3_step1_5_min_ablation.tsv</td></tr>
+          <tr><td>figure</td><td class="num">cycle3/ablation/figures/cycle3_step1_5_min_ablation.png</td></tr>
+          <tr><td>findings</td><td class="num">cycle3/ablation/cycle3_step1_5_min_ablation_findings.md</td></tr>
+          <tr><td>seed · wall · drift</td><td class="num">42 · 25 sec · 0 from cycle 1</td></tr>
+        </tbody>
+      </table>
+
+      <table class="matrix" style="margin-top:var(--sp-3)">
+        <thead><tr><th colspan="2" style="background:var(--c-primary);text-align:center">🔧 V6 Binary Provenance</th></tr></thead>
+        <tbody>
+          <tr><td>tag</td><td class="num">v6-prod-20260520</td></tr>
+          <tr><td>commit hash</td><td class="num">8a90532</td></tr>
+          <tr><td>branch</td><td class="num">fix/pon-only-phasing (longphase-to-mod)</td></tr>
+          <tr><td>status</td><td>local only · awaiting push authorization</td></tr>
+          <tr><td>sign-off email draft</td><td class="num">docs/reports/validated/2026/05/20260521_PI_V6_signoff_email_draft_5goal.md</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <table class="matrix">
+        <thead><tr><th colspan="2" style="background:var(--c-primary);text-align:center">🔗 Predecessor cycles</th></tr></thead>
+        <tbody>
+          <tr><td>Cycle 1 (5/18)</td><td class="num">methyl_augmented_filter_phase2 ⭐3 STRONG · ΔF1 +0.02236</td></tr>
+          <tr><td>Cycle 2 (5/19)</td><td class="num">20260519_phase2_cycle2_cross_sample_negative · ⭐3 BOUNDED</td></tr>
+          <tr><td>Cycle 2 postmortem</td><td class="num">20260519_phase2_cycle2_negative_postmortem</td></tr>
+          <tr><td>Cycle 3 Step 1 (5/19)</td><td class="num">20260519-0031-cycle3-caller-f1-headroom · Step 1 PASS</td></tr>
+          <tr><td>Cycle 3 Step 1.5 (5/20)</td><td class="num">M1a FAIL + A1 MARGINAL · this deck</td></tr>
+        </tbody>
+      </table>
+
+      <table class="matrix" style="margin-top:var(--sp-3)">
+        <thead><tr><th colspan="2" style="background:var(--c-primary);text-align:center">📚 Upstream reports referenced</th></tr></thead>
+        <tbody>
+          <tr><td>PI 4-29 errata</td><td class="num">docs/reports/validated/2026/05/20260509_PI_Report_4_29_Errata_01.md</td></tr>
+          <tr><td>V6 binary documentation</td><td class="num">20260511_V6_binary_complete_documentation_01.md</td></tr>
+          <tr><td>HP priority bug engineering report</td><td class="num">20260514_HP_tag_priority_bug_engineering_report_01.md</td></tr>
+          <tr><td>V6 vs baseline 5-Goal</td><td class="num">docs/experiments/in_progress/2026/05/20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01.md</td></tr>
+          <tr><td>Sign-off email draft</td><td class="num">20260521_PI_V6_signoff_email_draft_5goal.md</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout info">
+        <h4>🔬 Reproducibility</h4>
+        <p style="font-size:11px;font-family:'JetBrains Mono',monospace;line-height:1.6">
+        cd /big7_disk/liaoyoyo2001/InterSubMod<br>
+        python3 research/methyl_augmented_filter_phase2/cycle3/ablation/scripts/run_ablation_variants.py<br>
+        # wall ~25s · seed=42 · sklearn lbfgs<br>
+        # HCC1395 full refit ΔF1 = +0.022358<br>
+        # bit-exact match cycle 1 stored result (drift 0)
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="slide-footer">
+    <div class="source">end of deck · 4-version PI report parallel: A 5-slide / B 12-slide / C 8-slide / D 9-slide (this) · all rooted at cycle_id 20260520</div>
+    <div class="page-no">9 / 9</div>
+  </footer>
+</article>
+
+</body>
+</html>

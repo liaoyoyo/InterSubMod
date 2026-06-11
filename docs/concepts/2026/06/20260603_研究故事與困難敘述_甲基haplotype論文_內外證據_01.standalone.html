@@ -189,13 +189,13 @@ tr.row-bug td { background: #FEF2F0; } tr.row-safe td { background: #F0FDF4; } t
 
 <!-- S5 -->
 <h2 id="s5"><span class="h-num">5</span>錨點：BRCA2 promoter — 稀有但真實</h2>
-<p><b>內部（L1-L2）</b>：BRCA2 promoter（chr13:32,315,128）HP-axis <b>Δβ=−0.122</b>，抗 Bonferroni；normal-anchored cis-test 證<b>真 cis-driven</b>（d_cis=−0.142 vs d_drift≈−0.022）。</p>
+<p><b>內部（L1-L2）</b>：BRCA2 promoter（chr13:32,315,128）HP-axis <b>Δβ=−0.122</b>，抗 Bonferroni；6/01 normal-anchored cis-test 初判 d_cis=−0.142，<b>但 06-07 copy-partition 分解後 = subclone/copy 主導</b>（HP1-1=somatic subclone tag 非 copy、非 CN-dosage）——真 within-somatic cis 僅 <b>d_within=−0.023</b>（perm p=0.022，邊際但真）；乾淨 cis 改 chr17/TBC1D16（見下 C1/C8）。</p>
 <p><b>外部（L3）</b>：Fishchuk（Cancer Biomarkers 2024 <span class="rel sup">supports</span>）BRCA2 promoter 高甲基化→低表現；Evans（AJHG 2018 <span class="rel par">partial</span>）BRCA1 cis-ASM-silencing 先例；Esteller 2000 / Catteau 2002 領域共識。</p>
 <div class="callout-critical"><b>⚠ 三個必須誠實標的不對齊（reviewer 一查就破）</b><br>
 1. <b>方向相反</b>：canonical 文獻是 <b>hyper</b>→沉默；我們內部是 <b>hypo</b>（Δβ=−0.122）→ 外部佐證的是「此 locus 甲基化在癌症有意義」，<b>不是我們的方向</b>。<br>
 2. <b>基因特異性</b>：最強 cis-ASM 先例是 BRCA1 不是 BRCA2；BRCA2 promoter 甲基化文獻較薄（跨研究偵測率 0–69%）。<br>
 3. <b>未測表現</b>：我們只量甲基化、沒測 BRCA2 mRNA/蛋白 → 「→沉默→癌症」下游因果<b>內部未驗證</b>，外部提供 plausibility 非證實。</div>
-<div class="narrative"><div class="lead">這個錨點的正確講法</div><p>「我們在一個有明確癌症機制、外部文獻認證『其甲基化在乳腺癌有意義』的 TSG promoter 上，用 normal 對照證明了一個真實的 cis-driven somatic ASM 事件。它稀有，但真實——證明 ISM 能定位並驗證稀有但有價值的事件。下游表現後果是 future work。」</p></div>
+<div class="narrative"><div class="lead">這個錨點的正確講法（06-07 de-confound 後）</div><p>「我們在一個有明確癌症機制的 TSG promoter 上，先看到表面強 allelic 甲基差（−0.122），再用 normal 對照 + within-tag 分解揭露：這個表面差<b>大部分是 subclone/copy 混淆</b>，真正的 focal 等位 cis 只有邊際的 −0.023（p=0.022，小但真）。<b>能拆出這個真相、不被表面騙，正是 ISM 的獨有價值</b>；乾淨的 cis exemplar 是 chr17/TBC1D16。下游表現後果是 future work。」</p></div>
 
 <!-- S6 -->
 <h2 id="s6"><span class="h-num">6</span>現在的判斷</h2>
@@ -214,7 +214,7 @@ tr.row-bug td { background: #FEF2F0; } tr.row-safe td { background: #F0FDF4; } t
 <tr><td>C2</td><td>ASM in cancer</td><td>somatic-controlled HP-axis；稀有 0.34% 無方向</td><td>O'Neill24 <span class="rel par">par</span> · Do20 <span class="rel con">contradicts</span></td><td>⚠ 外部 ASM 增 5×、hypo 為主——口徑不同（germline/region vs 我們 somatic-controlled），不對齊正凸顯我們方法乾淨</td></tr>
 <tr><td>C4</td><td>ISM 工具定位</td><td>read-read 距離 + subclonal + LOH 耦合</td><td>MethPhaser24 <span class="rel par">par</span> · O'Neill24 <span class="rel sup">sup</span> · methclone/Epihet（量 disorder，見 §7B）</td><td>⚠ 工具因果相反（從甲基推 HP）或量 epipolymorphism（disorder）；ISM 的 haplotype-linked read-read 距離 niche 未被填</td></tr>
 <tr class="row-safe"><td>C7</td><td>甲基 filter 循環/無判別</td><td>LOSO 100% circularity（held-out −0.00012）+ O11 epipolymorphism AUC 0.845→0.530（n_reads 校正後崩）</td><td>Soneson14 <span class="rel sup">sup</span> · van de Mortel25 <span class="rel sup">sup</span></td><td>✅ <b>強 CONFIRM</b>：filter 循環有 ML 方法學文獻背書（混淆-CV 虛假完美）；O11 崩潰被 Kerr23 覆蓋/核小體機制解釋</td></tr>
-<tr><td>C8</td><td>多位點 cis-test（破 self-selection）</td><td>tsg @06-03 全基因組 cis-scan 816 位點 → T3 cis-candidate 60 / T2 196 / T0 560；survivor-permutation 4 genuine（chr17/18/20/BRCA2 perm p 0.001–0.024）</td><td>—（內部方法）</td><td>✅ <b>BRCA2 非孤例</b>（60 cis-candidate，多為 needs-causation；4 過 permutation）[src: tsg cis_scan_full]</td></tr>
+<tr><td>C8</td><td>多位點 cis-test（破 self-selection）</td><td>tsg @06-03 全基因組 cis-scan 816 位點 → T3 cis-candidate 60 / T2 196 / T0 560；copy-control 後 <b>唯一乾淨 cis survivor = chr17/TBC1D16</b>（chr18 次之）；BRCA2/chr20 過 permutation（p 0.022–0.024）但 copy-partition 主導 magnitude</td><td>—（內部方法）</td><td>✅ cis 現象非孤例（60 cis-candidate，多為 needs-causation）但<b>乾淨 cis 稀少</b>（copy-control 後僅 chr17/18 survive）[src: tsg cis_scan_full / ledger #81]</td></tr>
 </tbody>
 </table>
 <div class="callout-warning"><b>這張表怎麼用</b>：最硬的對外故事 = <b>C3 + C5 + C6</b>（外部強佐證困難真實、該分軌、CN de-confound 必要）；C1 講錨點必帶方向與表現的誠實 caveat；<b>C2 的反例（Do 2020）要主動講</b>——把「我們為何只看到稀有殘餘」歸因於 HP-axis 把 germline allelic methylation 與 CN held-constant。主動講反例 = 防守最硬的一招。</div>

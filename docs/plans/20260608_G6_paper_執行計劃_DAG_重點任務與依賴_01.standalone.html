@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<!-- companion to 20260608_G6_paper_執行計劃_DAG_重點任務與依賴_01.md (D11). 研究計劃秘書+檢核收集者 dashboard. data_sources: knowledge/11_external_literature/10_paper_readiness_convergence.md, evidence_ledger.jsonl -->
+<!-- provenance-verified: 任務/依賴/疑慮/數字取自 10_paper_readiness_convergence.md（wf_9e169112-573 auditor 實讀 landed 檔）+ ledger；計劃導航非新分析。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G6 論文執行計劃 — 秘書/檢核儀表板（DAG + 待辦 + 疑慮）2026-06-08</title>
+<style>
+:root{--c-accent:#D97757;--c-text:#141413;--c-soft:#6B6B66;--c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code:#F4EFE6;--c-crit:#C2410C;--c-warn:#A16207;--c-ok:#15803D;--c-info:#1E3A8A;--ff:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;--mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,Consolas,monospace;--r:8px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff);line-height:1.6;font-size:16px}
+.layout{display:grid;grid-template-columns:230px 1fr;max-width:1340px;margin:0 auto;gap:28px}
+nav{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:22px 14px;border-right:1px solid var(--c-border);font-size:14px}
+nav b{font-size:15px}nav a{display:block;color:var(--c-text);text-decoration:none;padding:5px 8px;border-radius:4px;border-left:2px solid transparent}
+nav a:hover{background:var(--c-code);border-left-color:var(--c-accent)}
+nav .h{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--c-soft);margin:18px 0 4px}
+main{padding:28px 22px 64px;min-width:0}
+h1{font-size:29px;margin:0 0 6px}h2{font-size:23px;margin:40px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--c-border)}
+.sub{color:var(--c-soft);font-size:15px;margin-top:0}
+code{font-family:var(--mono);background:var(--c-code);padding:1px 5px;border-radius:4px;font-size:.85em}
+.card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r);padding:22px;margin:14px 0;box-shadow:0 1px 2px rgba(20,20,19,.05)}
+.goal{border-left:4px solid var(--c-accent);background:#FFF9F4}
+.decision{border:2px solid var(--c-crit);background:#FBEAE3;border-radius:var(--r);padding:18px;margin:14px 0}
+.decision h3{margin-top:0;color:var(--c-crit)}
+.badge{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.b-done{background:#E7F4EC;color:var(--c-ok);border:1px solid #BFE3CC}.b-ready{background:#EAF0F7;color:var(--c-info);border:1px solid #C3D0EC}.b-work{background:#FBF3DF;color:var(--c-warn);border:1px solid #EAD9A6}.b-dec{background:#FBEAE3;color:var(--c-crit);border:1px solid #F0C9B6}.b-fut{background:#F1EEE8;color:var(--c-soft);border:1px solid var(--c-border)}
+svg .node rect{rx:7;stroke-width:1.5}
+svg text{font-family:var(--ff);font-size:13px;fill:var(--c-text)}
+svg a{cursor:pointer}
+svg a:hover rect{stroke:var(--c-accent);stroke-width:2.5}
+.legend{font-size:13px;color:var(--c-soft);margin:6px 0 0}.legend span{margin-right:14px;white-space:nowrap}
+.dotg{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle;border:1px solid}
+details{border:1px solid var(--c-border);border-radius:var(--r);margin:8px 0;background:var(--c-surface)}
+details>summary{cursor:pointer;padding:11px 18px;font-weight:600;font-size:16px;list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"▸";color:var(--c-accent);margin-right:9px;font-weight:700}
+details[open]>summary::before{content:"▾"}
+details[open]>summary{background:#FCFBF8}
+.db{padding:0 18px 14px;font-size:14.5px}
+.db .lbl{display:inline-block;min-width:42px;font-weight:700;color:var(--c-soft)}
+.db p{margin:6px 0}
+.concl{border-left:3px solid var(--c-ok);background:#F1F8F3;padding:6px 12px;border-radius:0 6px 6px 0;margin-top:8px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:10px 0}th,td{border:1px solid var(--c-border);padding:6px 9px;text-align:left;vertical-align:top}th{background:var(--c-code);font-weight:600}tr:nth-child(even) td{background:#FCFBF8}
+.t-true{color:var(--c-crit);font-weight:600}.t-trap{color:var(--c-warn);font-weight:600}.t-resolved{color:var(--c-ok);font-weight:600}.t-limit{color:var(--c-soft);font-weight:600}
+.chk{display:flex;align-items:flex-start;gap:9px;padding:7px 10px;border:1px solid var(--c-border);border-radius:6px;margin:6px 0;background:var(--c-surface);font-size:14.5px}
+.chk input{margin-top:3px;width:16px;height:16px;flex-shrink:0}
+.chk.crit{border-color:#F0C9B6;background:#FDF4F0}
+.chk .tag{font-size:11px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:auto;flex-shrink:0}
+.tag-now{background:#EAF0F7;color:var(--c-info)}.tag-dec{background:#FBEAE3;color:var(--c-crit)}.tag-fut{background:#F1EEE8;color:var(--c-soft)}.tag-obs{background:#FBF3DF;color:var(--c-warn)}
+footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--c-border);font-size:13px;color:var(--c-soft)}
+@media(max-width:900px){.layout{grid-template-columns:1fr}nav{position:static;height:auto;border-right:none;border-bottom:1px solid var(--c-border)}}
+</style></head>
+<body>
+<div class="layout">
+<nav>
+<b>計劃秘書 / 檢核台</b>
+<div class="h">整體</div>
+<a href="#whole">① 整體 + 決定性決策</a>
+<a href="#dag">② 有向任務圖 (DAG)</a>
+<a href="#cards">任務卡（重點/細節/結論）</a>
+<div class="h">檢核收集</div>
+<a href="#todo">③ 待觀察 / 待完成（可勾）</a>
+<a href="#doubt">④ 疑慮與矛盾 登記簿</a>
+<div class="h">參考</div>
+<a href="#files">權威文件地圖</a>
+</nav>
+<main>
+<h1>G6 論文執行計劃 — 秘書 / 檢核儀表板</h1>
+<p class="sub">研究整理計劃秘書 + 檢核收集者 ｜ 有向任務圖 + 待辦勾選 + 疑慮矛盾登記 ｜ 2026-06-08 ｜ 依 wf_9e169112-573 收斂稽核（grounded）</p>
+
+<section id="whole">
+<h2>① 整體 + 決定性決策</h2>
+<div class="card goal">
+<p style="margin-top:0"><strong>整體一句話</strong>：<strong>一篇能過 review 的論文今天就存在</strong> —— read-level LOH/haplotype + 甲基 <strong>characterization + tooling</strong> 論文：主體 = 三~四道防彈 NEGATIVE + phasing 脊柱(Grade B+) + ASM copy-confounded 支撐。卡關只在一個 GO/NO-GO 決定（HD-1）。</p>
+<p style="margin-bottom:0"><strong>你的 4 方向收成</strong>：找甲基差異+驗證 = characterization ✓ ｜ 甲基→TP/FP = 強 NEGATIVE ✓ ｜ subclone = 負結果包（AF→NGroups 已判 phasing 非甲基）｜ umtag = future-work；<strong>phasing 脊柱</strong>是唯一 positive（B+，受 HD-1 限制）。</p>
+</div>
+<div class="decision">
+<h3>🔴 決定性決策 HD-1（待你定）</h3>
+<p>phasing positive 是 <strong>by-construction 循環</strong>（Inner same-HP1 用 somatic-attributed HP1-1 定義）；R-SELFREF circularity 對照<strong>磁碟確認未跑</strong>。「加 caveat 保 Grade-A framing」methods reviewer 不接受 → 只有兩條路：<strong>(1) 跑 R-SELFREF 對照（~25-50hr C++）保 positive-spine</strong>，或 <strong>(2) 把 phasing 降為 characterization observation，讓三~四個 NEGATIVE 扛論文</strong>。決定論文是不是 positive 論文。</p>
+</div>
+</section>
+
+<section id="dag">
+<h2>② 有向任務圖（DAG）— 點節點展開細節</h2>
+<p class="legend">
+<span><span class="dotg" style="background:#E7F4EC;border-color:#15803D"></span>DONE</span>
+<span><span class="dotg" style="background:#EAF0F7;border-color:#1E3A8A"></span>READY 可立即</span>
+<span><span class="dotg" style="background:#FBF3DF;border-color:#A16207"></span>NEEDS-WORK</span>
+<span><span class="dotg" style="background:#FBEAE3;border-color:#C2410C"></span>決策閘</span>
+<span><span class="dotg" style="background:#FCFBF8;border-color:#B9B0A0"></span>future（非關鍵路徑）</span>
+<span>━ 粗線 = 關鍵路徑</span>
+</p>
+<div class="card" style="overflow-x:auto">
+<svg viewBox="0 0 980 600" width="100%" role="img" aria-label="G6 論文執行計劃有向任務圖">
+<title>G6 論文執行計劃有向任務圖（DAG）</title>
+<desc>節點為重點任務與決策閘，箭頭為依賴/feed，粗橙線為關鍵路徑。點節點展開任務卡。</desc>
+<defs>
+<marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 z" fill="#6B6B66"/></marker>
+<marker id="arc" markerWidth="10" markerHeight="10" refX="7.5" refY="3.2" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#D97757"/></marker>
+</defs>
+<!-- edges (drawn first, behind nodes) -->
+<path d="M490,64 L490,112" stroke="#D97757" stroke-width="2.5" fill="none" marker-end="url(#arc)"/>
+<path d="M410,64 C 210,120 150,185 150,250" stroke="#D97757" stroke-width="2.5" fill="none" marker-end="url(#arc)"/>
+<path d="M372,62 C 50,170 18,310 90,382" stroke="#6B6B66" stroke-width="1.6" fill="none" marker-end="url(#ar)"/>
+<path d="M620,138 L656,138" stroke="#6B6B66" stroke-width="1.6" fill="none" marker-end="url(#ar)"/>
+<text x="624" y="130" font-size="11" fill="#15803D">GO</text>
+<path d="M790,162 C 720,212 645,248 622,262" stroke="#6B6B66" stroke-width="1.6" fill="none" marker-end="url(#ar)"/>
+<path d="M490,166 L490,248" stroke="#C2410C" stroke-width="1.6" fill="none" stroke-dasharray="5,4" marker-end="url(#ar)"/>
+<text x="498" y="210" font-size="11" fill="#C2410C">NO-GO 降 char.</text>
+<path d="M160,304 C 235,420 320,470 360,494" stroke="#D97757" stroke-width="2.5" fill="none" marker-end="url(#arc)"/>
+<path d="M490,304 L490,488" stroke="#D97757" stroke-width="2.5" fill="none" marker-end="url(#arc)"/>
+<path d="M276,408 C 322,460 348,486 360,498" stroke="#D97757" stroke-width="2.5" fill="none" marker-end="url(#arc)"/>
+<path d="M648,332 C 460,372 320,398 278,404" stroke="#6B6B66" stroke-width="1.3" fill="none" stroke-dasharray="4,4" marker-end="url(#ar)"/>
+<text x="430" y="386" font-size="10.5" fill="#6B6B66">解鎖 ⭐4 / phase-truth</text>
+<!-- nodes -->
+<a href="#card-n1"><g class="node"><rect x="350" y="20" width="280" height="44" fill="#E7F4EC" stroke="#15803D"/><text x="490" y="40" text-anchor="middle" font-weight="600">N1 L0 長讀使能 ✅</text><text x="490" y="56" text-anchor="middle" font-size="11.5" fill="#6B6B66">ONT read×CpG 矩陣</text></g></a>
+<a href="#card-n11"><g class="node"><rect x="724" y="20" width="236" height="44" fill="#E7F4EC" stroke="#15803D"/><text x="842" y="40" text-anchor="middle" font-weight="600">N11 已完成決策 ✅</text><text x="842" y="56" text-anchor="middle" font-size="11" fill="#6B6B66">HD-3/4/5</text></g></a>
+<a href="#card-n3"><g class="node"><rect x="360" y="112" width="260" height="54" fill="#FBEAE3" stroke="#C2410C" stroke-width="2"/><text x="490" y="134" text-anchor="middle" font-weight="700" fill="#C2410C">🔴 N3 HD-1 決策閘</text><text x="490" y="152" text-anchor="middle" font-size="11.5" fill="#6B6B66">phasing 循環·對照未跑</text></g></a>
+<a href="#card-n4"><g class="node"><rect x="656" y="114" width="276" height="48" fill="#FBF3DF" stroke="#A16207"/><text x="794" y="135" text-anchor="middle" font-weight="600">N4 跑 R-SELFREF</text><text x="794" y="151" text-anchor="middle" font-size="11" fill="#6B6B66">~25-50hr C++（GO 才做）</text></g></a>
+<a href="#card-n2"><g class="node"><rect x="24" y="250" width="252" height="54" fill="#EAF0F7" stroke="#1E3A8A"/><text x="150" y="272" text-anchor="middle" font-weight="600">N2 寫 NEG 底座 🔵</text><text x="150" y="290" text-anchor="middle" font-size="11" fill="#6B6B66">filter 死四道·今天就能寫</text></g></a>
+<a href="#card-n5"><g class="node"><rect x="360" y="250" width="260" height="54" fill="#FBF3DF" stroke="#A16207"/><text x="490" y="272" text-anchor="middle" font-weight="600">N5 寫 phasing 脊柱 🟡</text><text x="490" y="290" text-anchor="middle" font-size="11" fill="#6B6B66">grade 依 HD-1</text></g></a>
+<a href="#card-n6"><g class="node"><rect x="24" y="380" width="252" height="54" fill="#FBF3DF" stroke="#A16207"/><text x="150" y="402" text-anchor="middle" font-weight="600">N6 寫 ASM 支撐 🟡</text><text x="150" y="420" text-anchor="middle" font-size="11" fill="#6B6B66">chr17/TBC1D16 唯一乾淨 cis</text></g></a>
+<a href="#card-n7"><g class="node"><rect x="350" y="490" width="280" height="56" fill="#FFF9F4" stroke="#D97757" stroke-width="2"/><text x="490" y="513" text-anchor="middle" font-weight="700">N7 投稿整合</text><text x="490" y="531" text-anchor="middle" font-size="11.5" fill="#6B6B66">characterization + tooling 論文</text></g></a>
+<rect x="648" y="240" width="312" height="220" fill="none" stroke="#B9B0A0" stroke-dasharray="6,4" rx="8"/>
+<text x="660" y="234" font-size="11.5" fill="#6B6B66">⚪ 未來 / 平行（非關鍵路徑）</text>
+<a href="#card-n8"><g class="node"><rect x="664" y="252" width="282" height="40" fill="#FCFBF8" stroke="#B9B0A0"/><text x="805" y="276" text-anchor="middle" font-size="13">N8 COLO829 → ⭐4（解兩天花板）</text></g></a>
+<a href="#card-n9"><g class="node"><rect x="664" y="314" width="282" height="40" fill="#FCFBF8" stroke="#B9B0A0"/><text x="805" y="338" text-anchor="middle" font-size="13">N9 ISM re-run（封 HD-4 knockout）</text></g></a>
+<a href="#card-n10"><g class="node"><rect x="664" y="376" width="282" height="40" fill="#FCFBF8" stroke="#B9B0A0"/><text x="805" y="400" text-anchor="middle" font-size="13">N10 umtag yardstick（T7 升級）</text></g></a>
+</svg>
+</div>
+</section>
+
+<section id="cards">
+<h2>任務卡（重點 / 細節 / 結論）</h2>
+<details id="card-n1"><summary>N1 L0 長讀使能 <span class="badge b-done">DONE</span></summary><div class="db"><p><span class="lbl">重點</span>ONT 長讀 read×CpG 矩陣使能 read-level haplotype-linked 甲基（array/WGBS 做不到）。</p><p><span class="lbl">細節</span>全鏈基礎；外部 CONFIRM（NanoMethPhase / POG / de Abreu）。</p><div class="concl"><strong>結論</strong>：REAL，無爭議，全鏈使能前提。</div></div></details>
+<details id="card-n2"><summary>N2 寫 NEG 底座 <span class="badge b-ready">READY 立即·不依賴 HD-1</span></summary><div class="db"><p><span class="lbl">重點</span>filter 死<strong>四</strong>道 = 論文最可防守質量，今天就能寫。</p><p><span class="lbl">細節</span>① LOSO 100% circularity（in-dist +0.0224→held-out −0.0001）② |Δβ| AUC=0.505 null ③ regression-to-extreme（no-clust OR=8.6/LOH OR=4.1, 9×）④ clustering=germline-allelic（ARI 0.135<null 0.177）+ Zone-aware QS / CNV-zone / V6-LR baseline-equivalence。草稿：<code>InterSubMod/docs/reports/in_progress/2026/06/20260608_G6_methods_negative_backbone_draft_01.md</code>。</p><div class="concl"><strong>結論</strong>：READY-AS-NEGATIVE；撰寫第①步；FT-1 守則（characterization-set 絕不寫成 filter）。</div></div></details>
+<details id="card-n3"><summary>🔴 N3 HD-1 決策閘 <span class="badge b-dec">DECISIVE·待你定</span></summary><div class="db"><p><span class="lbl">重點</span>phasing positive 是 by-construction 循環；R-SELFREF 對照未跑；「加 caveat 保 Grade-A」reviewer 不接受。</p><p><span class="lbl">細節</span>Inner same-HP1 用 somatic-attributed HP1-1 定義；p=0.0078 是方向一致性非 effect（W=28=n=7 最大 signed-rank）；n=7=bio-n=6（HCC1395 算兩次）。</p><div class="concl"><strong>結論</strong>：兩條路（跑對照 N4 / 降 characterization）；用戶 GO/NO-GO；決定論文是不是 positive 論文。</div></div></details>
+<details id="card-n4"><summary>N4 跑 R-SELFREF 對照 <span class="badge b-work">GO 才做</span></summary><div class="db"><p><span class="lbl">重點</span>全 7 樣本 flag-on circularity 對照 ~25-50hr C++。</p><p><span class="lbl">細節</span>跑完才能保 positive-spine framing；長 compute 主回合背景啟動（非 workflow step）。</p><div class="concl"><strong>結論</strong>：唯一讓 phasing 防彈；選 GO 才執行。</div></div></details>
+<details id="card-n5"><summary>N5 寫 phasing 脊柱 <span class="badge b-work">NEEDS-WORK</span></summary><div class="db"><p><span class="lbl">重點</span>NG=2 Inner>Outer 7/7（W=28, p=0.0078, median gap 0.345）；≥93% same-hap 6/6；paired 負控；C++ 機制（LabelTest.cpp:265-302）。</p><p><span class="lbl">細節</span>grade 依 HD-1（B+ characterization 或跑對照後 positive）。</p><div class="concl"><strong>結論</strong>：論文主軸；受 HD-1 限制。</div></div></details>
+<details id="card-n6"><summary>N6 寫 ASM 支撐 <span class="badge b-work">NEEDS-WORK</span></summary><div class="db"><p><span class="lbl">重點</span>ASM 真非判別；<strong>chr17/TBC1D16 唯一乾淨 cis</strong>；6/6 跨樣本 excess（3 癌種）。</p><p><span class="lbl">細節</span>BRCA2 已降 subclone/copy-confounded（HP1-1=somatic subclone tag 非 copy、非 CN-dosage；amend done）；AF→NGroups = phasing（HD-4）；single-sample HCC1395 ⭐3。</p><div class="concl"><strong>結論</strong>：characterization + supplement-null；非 positive discovery。</div></div></details>
+<details id="card-n7"><summary>N7 投稿整合 <span class="badge b-fut">待前置</span></summary><div class="db"><p><span class="lbl">重點</span>整合 NEG 底座 + phasing 脊柱 + ASM 支撐。</p><p><span class="lbl">細節</span>依賴 N2+N5+N6；HD-2/HD-6 投稿前 cleanup。</p><div class="concl"><strong>結論</strong>：characterization + tooling 論文；過 review 的論文今天就存在。</div></div></details>
+<details id="card-n8"><summary>N8 COLO829 → ⭐4 <span class="badge b-fut">future</span></summary><div class="db"><p><span class="lbl">重點</span>ground-truth 解鎖 ASM ⭐3→⭐4 + 給 umtag LOH 內 phase-truth。</p><div class="concl"><strong>結論</strong>：一投資解兩天花板；off 關鍵路徑。</div></div></details>
+<details id="card-n9"><summary>N9 ISM re-run（封 HD-4）<span class="badge b-fut">future</span></summary><div class="db"><p><span class="lbl">重點</span>匯出 fine_group_counts + n_clusters 乾淨封閉 AF→NGroups=phasing。</p><div class="concl"><strong>結論</strong>：精修 subclone 段；off 關鍵路徑（HD-4 已 definitional resolved）。</div></div></details>
+<details id="card-n10"><summary>N10 umtag yardstick <span class="badge b-fut">future</span></summary><div class="db"><p><span class="lbl">重點</span>switch-error/N50 vs MethPhaser/HapBridge + LOH 內 phase-truth。</p><div class="concl"><strong>結論</strong>：T7 升級需此；目前 Discussion/future-work。</div></div></details>
+<details id="card-n11"><summary>N11 已完成決策 <span class="badge b-done">DONE</span></summary><div class="db"><p><span class="lbl">重點</span>HD-3 BRCA2 amend ✅ / HD-4 AF→NGroups=phasing ✅ / HD-5 T7 註冊 ✅。</p><div class="concl"><strong>結論</strong>：HD-2（Grade A→B+ 統一）/ HD-6（15391 vs 15557）投稿前處理。</div></div></details>
+</section>
+
+<section id="todo">
+<h2>③ 待觀察 / 待完成（可勾選，瀏覽器記住）</h2>
+<p class="sub">🔵 NOW=可立即 ｜ 🔴 DEC=待你決策 ｜ 🟡 OBS=待觀察/分析 ｜ ⚪ FUT=未來</p>
+<label class="chk crit"><input type="checkbox" data-k="hd1"><span><strong>決 HD-1</strong>：跑 R-SELFREF 對照 or 降 phasing 為 characterization（決定論文是不是 positive 論文）</span><span class="tag tag-dec">DEC</span></label>
+<label class="chk"><input type="checkbox" data-k="neg"><span>寫 <strong>NEG 底座</strong>完整投稿文字（草稿已起，獨立於 HD-1）</span><span class="tag tag-now">NOW</span></label>
+<label class="chk"><input type="checkbox" data-k="phasing"><span>寫 <strong>phasing 脊柱</strong>段（依 HD-1 grade）</span><span class="tag tag-now">NOW*</span></label>
+<label class="chk"><input type="checkbox" data-k="asm"><span>寫 <strong>ASM 支撐</strong>段（chr17 exemplar + 6/6 現象 + BRCA2 小例）</span><span class="tag tag-now">NOW</span></label>
+<label class="chk"><input type="checkbox" data-k="hd2"><span><strong>HD-2</strong>：全文「Grade A」→「Grade B+」統一</span><span class="tag tag-now">NOW</span></label>
+<label class="chk"><input type="checkbox" data-k="hd6"><span><strong>HD-6</strong>：15391 vs 15557 對賬 + 永遠標 characterization-set</span><span class="tag tag-now">NOW</span></label>
+<label class="chk"><input type="checkbox" data-k="colo829"><span><strong>COLO829 → ⭐4</strong>：ground-truth 升 ASM tier + 給 umtag phase-truth（解兩天花板）</span><span class="tag tag-fut">FUT</span></label>
+<label class="chk"><input type="checkbox" data-k="ismrerun"><span><strong>ISM re-run 封 HD-4</strong>：匯出 fine_group_counts → 觀察 NGroups~AF 是否歸 0</span><span class="tag tag-obs">OBS</span></label>
+<label class="chk"><input type="checkbox" data-k="umtag"><span><strong>umtag yardstick</strong>：switch-error/N50 vs MethPhaser/HapBridge（T7 升級）</span><span class="tag tag-fut">FUT</span></label>
+<label class="chk"><input type="checkbox" data-k="6cis"><span><strong>6 個最強 cis untestable</strong>（pureALT CGI-desert）的處理 / 繞過設計</span><span class="tag tag-obs">OBS</span></label>
+<label class="chk"><input type="checkbox" data-k="bootstrap"><span><strong>bootstrap stability 重跑</strong>（§N3 regression-to-extreme 機制）</span><span class="tag tag-obs">OBS</span></label>
+<label class="chk"><input type="checkbox" data-k="tsgfinal"><span><strong>觀察 tsg 專案定稿</strong>（另一 session 06-07 仍在寫，T2/T3 數字可能再動）</span><span class="tag tag-obs">OBS</span></label>
+<label class="chk"><input type="checkbox" data-k="citverify"><span>投稿前 <strong>/citation-verification</strong> 核外部 PMID/DOI（POG 三 DOI / epihet 作者 / HiCancer venue）+ 補未覆蓋工具</span><span class="tag tag-fut">FUT</span></label>
+<label class="chk"><input type="checkbox" data-k="mixedcommit"><span>決定 <strong>混雜檔</strong>（ledger/CURRENT_FOCUS/INDEX 我的編輯）commit 方式</span><span class="tag tag-dec">DEC</span></label>
+<label class="chk"><input type="checkbox" data-k="push"><span>決定是否 <strong>push</strong>（branch 領先 origin）</span><span class="tag tag-dec">DEC</span></label>
+</section>
+
+<section id="doubt">
+<h2>④ 疑慮與矛盾 登記簿</h2>
+<table>
+<tr><th>項目</th><th>類型</th><th>狀態</th><th>細節 / 怎麼處理</th></tr>
+<tr><td>BRCA2 cis vs subclone/copy-confounded</td><td class="t-true">真矛盾</td><td>✅ 已 amend</td><td>06-07 重分析 = subclone/copy 主導（HP1-1=somatic subclone tag 非 copy、非 CN-dosage）；lit-07 banner + master_draft §2.2 已加 06-08 amendment（保留 audit trail）。誠實口徑「subclone/copy 主導；焦點 cis d_within=−0.023 邊際（perm p=0.024, n=19/19）；% split 不 robust」。</td></tr>
+<tr><td>「Grade A」vs「Grade B+」</td><td class="t-true">真矛盾</td><td>⏳ 投稿前統一</td><td>cycle title/§0 寫 A，body+Grade A doc 寫 B+（R-SELFREF 未跑）。裁決 B+。HD-2。</td></tr>
+<tr><td>AF→NGroups 甲基 vs phasing</td><td class="t-resolved">曾疑慮</td><td>✅ HD-4 resolved</td><td>= phasing 非甲基（NGroups=HP-tag count，C++ 確認）。T6 無正向甲基發現；改述 phasing signature。完整 knockout 待 ISM re-run。</td></tr>
+<tr><td>p=0.0078 by-construction circular</td><td class="t-true">疑慮（決定性）</td><td>🔴 HD-1</td><td>Inner same-HP1 用 somatic-attributed HP1-1 定義 → 部分循環。只有跑 R-SELFREF 對照或降 characterization 能解。</td></tr>
+<tr><td>FT-1 characterization-set 當 filter</td><td class="t-trap">overclaim 陷阱（最高頻）</td><td>⚠ 每節防</td><td>628/15391/strong-ASM 是 characterization tally；15391 TP/FP=1.0、strong-ASM anti-discriminative OR=0.194 → 絕不寫 filter 動詞。</td></tr>
+<tr><td>FT-2 cis-anchor vs subclone/copy</td><td class="t-trap">陷阱</td><td>⚠</td><td>BRCA2 subclone/copy 主導（% split 不 robust）；hypo≠canonical hyper → 勿當 TSG-silencing 證據。</td></tr>
+<tr><td>FT-3 private vs underpowered</td><td class="t-trap">陷阱</td><td>⚠</td><td>0/38 是 underpowered（E[overlap]=0.16）→ 「復發稀有」非「loci private」。</td></tr>
+<tr><td>FT-4 phenomenon vs cis recurrence</td><td class="t-trap">陷阱</td><td>⚠</td><td>6/6 是 allelic-methylation-difference 復現，非 cis-ASM 復現（只 chr17 乾淨 cis）。</td></tr>
+<tr><td>FT-5 held-out vs 真救援</td><td class="t-trap">陷阱</td><td>⚠</td><td>umtag 0.8852 是 held-out 模擬，非真-unphase read 救援。</td></tr>
+<tr><td>單樣本 HCC1395 / 單 pipeline ⭐3 天花板</td><td class="t-limit">限制（跨所有 ASM）</td><td>⚪ COLO829 解</td><td>⭐4 需 COLO829 ground-truth；跨樣本 6/6 是 single-pipeline ClairS-TO。</td></tr>
+<tr><td>6 強 cis untestable / bootstrap 未跑</td><td class="t-limit">needs-thought</td><td>🟡 OBS</td><td>pureALT CGI-desert（copy-test 只能算 7/60）；§N3 機制單樣本 bootstrap pending。</td></tr>
+</table>
+<p class="sub">真矛盾 = 數據對數據（必改）｜陷阱 = narrow 結果易被讀成 broad（每節防）｜限制 = 範圍天花板（誠實標）。完整見 <code>knowledge/11_external_literature/10_paper_readiness_convergence.md §5/§7</code>。</p>
+</section>
+
+<section id="files">
+<h2>權威文件地圖</h2>
+<table>
+<tr><th>要查</th><th>去哪</th></tr>
+<tr><td>本計劃（DAG + 任務 + 結論）</td><td>本檔 + <code>docs/plans/20260608_G6_paper_執行計劃_DAG_重點任務與依賴_01.md</code></td></tr>
+<tr><td>論文就緒/可寫/矛盾/GO-NO-GO（最完整）</td><td><code>knowledge/11_external_literature/10_paper_readiness_convergence.md</code></td></tr>
+<tr><td>NEG 底座草稿</td><td><code>docs/reports/in_progress/2026/06/20260608_G6_methods_negative_backbone_draft_01.md</code></td></tr>
+<tr><td>給其他 AI 的現況地圖</td><td><code>docs/concepts/2026/06/20260608_研究現況地圖_整體目標與流程_給其他AI_01.md</code></td></tr>
+<tr><td>7 角度外部文獻 / 跨 cycle 歷史真理</td><td><code>knowledge/11_external_literature/00-09</code> / <code>research/autoresearch/evidence_ledger.jsonl</code></td></tr>
+</table>
+</section>
+
+<footer>研究整理計劃秘書 + 檢核收集者 dashboard ｜ 數字取自收斂稽核 <code>wf_9e169112-573</code>（2026-06-08，7 線獨立 auditor 實讀 ledger/json）；計劃導航非新分析。內部 L1-L2。⚠ tsg 專案仍 active，T2/T3 數字可能再動；HD-1 待用戶決議。勾選狀態存於本機瀏覽器（localStorage）。companion of <code>docs/plans/20260608_G6_paper_執行計劃_DAG_重點任務與依賴_01.md</code>（D11）。</footer>
+</main>
+</div>
+<script>
+// open target details on click / hash
+function openCard(id){var d=document.getElementById(id);if(d&&d.tagName==='DETAILS'){d.open=true;d.scrollIntoView({behavior:'smooth',block:'center'});}}
+document.querySelectorAll('svg a').forEach(function(a){a.addEventListener('click',function(e){var h=a.getAttribute('href');if(h&&h.charAt(0)==='#'){e.preventDefault();openCard(h.slice(1));}});});
+if(location.hash)openCard(location.hash.slice(1));
+window.addEventListener('hashchange',function(){openCard(location.hash.slice(1));});
+// localStorage checkboxes
+document.querySelectorAll('.chk input[type=checkbox]').forEach(function(c){var k='g6plan_'+c.dataset.k;try{c.checked=localStorage.getItem(k)==='1';}catch(e){}c.addEventListener('change',function(){try{localStorage.setItem(k,c.checked?'1':'0');}catch(e){}});});
+</script>
+</body></html>

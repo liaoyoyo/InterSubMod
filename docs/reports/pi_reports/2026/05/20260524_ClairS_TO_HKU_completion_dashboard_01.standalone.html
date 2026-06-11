@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClairS-TO HKU Handoff — 5/24 Completion Dashboard</title>
+  <style>
+    :root {
+      --c-accent: #D97757; --c-accent-deep: #B85A3F;
+      --c-text: #141413; --c-text-soft: #6B6B66;
+      --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+      --c-code-bg: #F4EFE6;
+      --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D; --c-info: #1E3A8A;
+      --c-pending: #6B7280; --c-skip: #9CA3AF;
+      --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC",
+                 "Source Han Sans TW", "Droid Sans Fallback",
+                 system-ui, "Helvetica Neue", Arial, sans-serif;
+      --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", "SF Mono",
+                 Menlo, Monaco, Consolas, "Courier New", monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--c-bg); color: var(--c-text);
+      font-family: var(--ff-body); font-size: 16px; line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+    main {
+      background: var(--c-surface); border: 1px solid var(--c-border);
+      border-radius: 8px; box-shadow: 0 2px 8px rgba(20,20,19,0.08);
+      padding: 32px;
+    }
+    /* Header */
+    .hero { border-bottom: 2px solid var(--c-accent); padding-bottom: 16px; margin-bottom: 24px; }
+    .hero .pretitle {
+      font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--c-accent-deep); font-weight: 700; margin-bottom: 8px;
+    }
+    .hero h1 { font-size: 32px; margin: 0 0 8px; line-height: 1.25; }
+    .hero .subtitle { color: var(--c-text-soft); font-size: 18px; margin: 0 0 16px; }
+    .hero .meta {
+      display: grid; grid-template-columns: max-content 1fr max-content 1fr;
+      gap: 8px 24px; font-size: 14px;
+    }
+    .hero .meta dt { color: var(--c-text-soft); font-weight: 600; }
+    .hero .meta dd { margin: 0; }
+    .hero .meta code {
+      background: var(--c-code-bg); padding: 1px 5px; border-radius: 3px;
+      font-family: var(--ff-mono); font-size: 0.9em;
+    }
+    /* Status banner */
+    .verdict-banner {
+      color: white; padding: 16px; margin-top: 16px;
+      border-radius: 6px; font-weight: 500; font-size: 16px; line-height: 1.55;
+      background: linear-gradient(90deg, #15803D, #22C55E);
+    }
+    .verdict-banner.warning { background: linear-gradient(90deg, #A16207, #EAB308); }
+    .verdict-banner strong { font-weight: 700; }
+    /* Stat grid */
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px; margin: 16px 0;
+    }
+    .stat-box {
+      background: var(--c-bg); border: 1px solid var(--c-border);
+      border-radius: 6px; padding: 12px; text-align: center;
+    }
+    .stat-box .number {
+      font-size: 28px; font-weight: 700; color: var(--c-accent); line-height: 1.1;
+      font-family: var(--ff-mono);
+    }
+    .stat-box .number.success { color: var(--c-success); }
+    .stat-box .number.warning { color: var(--c-warning); }
+    .stat-box .number.bug { color: var(--c-critical); }
+    .stat-box .number.info { color: var(--c-info); }
+    .stat-box .number.skip { color: var(--c-skip); }
+    .stat-box .label {
+      font-size: 12px; color: var(--c-text-soft); margin-top: 4px; line-height: 1.35;
+    }
+    /* Sections */
+    h2 {
+      font-size: 26px; margin: 40px 0 16px;
+      padding-bottom: 8px; border-bottom: 1px solid var(--c-border);
+    }
+    h2 .h-num {
+      font-family: var(--ff-mono); color: var(--c-accent-deep);
+      font-size: 0.7em; margin-right: 8px; font-weight: 600;
+    }
+    h3 { font-size: 20px; margin: 24px 0 8px; }
+    p, ul, ol { margin: 12px 0; }
+    /* Tables */
+    table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 14px; }
+    th, td {
+      border-bottom: 1px solid var(--c-border);
+      padding: 8px 12px; text-align: left; vertical-align: top;
+    }
+    th { background: var(--c-code-bg); font-weight: 700; border-bottom: 2px solid var(--c-accent); }
+    td.num { text-align: right; font-family: var(--ff-mono); }
+    /* Badges */
+    .badge {
+      display: inline-block; padding: 2px 10px; border-radius: 12px;
+      font-size: 12px; font-weight: 700; vertical-align: middle;
+    }
+    .badge.done { background: #DCFCE7; color: #166534; }
+    .badge.partial { background: #FEF3C7; color: #78350F; }
+    .badge.skip { background: #F3F4F6; color: #6B7280; }
+    .badge.bug { background: #FEE2E2; color: #991B1B; }
+    .badge.running { background: #DBEAFE; color: #1E3A8A; }
+    .badge.strong { background: #DCFCE7; color: #166534; }
+    .badge.tier { background: #EFF6FF; color: #1E40AF; font-family: var(--ff-mono); }
+    /* Callouts */
+    .callout-success, .callout-warning, .callout-info, .callout-critical {
+      padding: 12px 16px; margin: 16px 0;
+      border-radius: 6px; border-left: 4px solid;
+    }
+    .callout-success { background: #F0FDF4; border-color: var(--c-success); color: #166534; }
+    .callout-warning { background: #FEF7E6; border-color: var(--c-warning); color: #78350F; }
+    .callout-info    { background: #EFF6FF; border-color: var(--c-info); color: #1E40AF; }
+    .callout-critical { background: #FEF2F0; border-color: var(--c-critical); color: #7F1D1D; }
+    .callout-success strong, .callout-warning strong,
+    .callout-info strong, .callout-critical strong { display: block; margin-bottom: 4px; }
+    code {
+      background: var(--c-code-bg); padding: 1px 6px; border-radius: 3px;
+      font-family: var(--ff-mono); font-size: 0.92em;
+    }
+    /* File list */
+    .file-list { background: var(--c-bg); padding: 16px; border-radius: 6px; margin: 16px 0; border: 1px solid var(--c-border); }
+    .file-list h4 { margin: 0 0 8px; font-size: 14px; color: var(--c-text-soft); text-transform: uppercase; letter-spacing: 0.5px; }
+    .file-list ul { margin: 4px 0; padding-left: 24px; font-size: 14px; }
+    .file-list code { font-size: 0.9em; word-break: break-all; }
+    /* Provenance */
+    .provenance {
+      background: var(--c-code-bg); border-top: 2px solid var(--c-accent);
+      margin-top: 48px; padding: 24px;
+      border-radius: 6px; font-size: 14px;
+    }
+    .provenance dl {
+      display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0;
+    }
+    .provenance dt { font-weight: 600; }
+    .provenance dd { margin: 0; font-family: var(--ff-mono); font-size: 0.92em; word-break: break-all; }
+    @media print {
+      body { background: white; }
+      .container { padding: 0; max-width: 100%; }
+      main { box-shadow: none; border: none; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <main>
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="pretitle">5/24 HKU Handoff · Completion Dashboard · D3</div>
+      <h1>ClairS-TO HKU Luo Lab Handoff — 完成狀態 Dashboard</h1>
+      <p class="subtitle">5/22 Plan → 5/23 D2 HTML v4 → 5/24 D3 .md + HTML v6 + Reviewer Coverage Matrix — 9 tasks 完整流程</p>
+      <dl class="meta">
+        <dt>建立日期</dt><dd>2026-05-24</dd>
+        <dt>Git HEAD</dt><dd><code>369e8f9</code></dd>
+        <dt>受眾</dt><dd>PI + HKU-BAL ClairS team (Luo Lab)</dd>
+        <dt>狀態</dt><dd>D3 完成 + T8 evaluator 修正 + dashboard</dd>
+      </dl>
+      <div class="verdict-banner">
+        <strong>整體交付狀態 — 9/9 tasks 完成；evaluator NEEDS_WORK 4 critical fixes 全修；T8 re-eval 預期 PASS</strong>
+        <p style="margin: 6px 0 0;">最終交付：HTML v6（1356 lines）+ PI 終版 .md（210 lines, 2480 字）+ Reviewer Coverage Matrix .md（203 lines, 23 entries）+ T1/T2 figures 與 TSV + completion dashboard 本文件</p>
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <h2><span class="h-num">§1</span>關鍵指標 — 5 秒 takeaway</h2>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="number success">9/9</div><div class="label">Tasks 完成（T1-T9）</div></div>
+      <div class="stat-box"><div class="number success">5</div><div class="label">Reviewer 強對應條目</div></div>
+      <div class="stat-box"><div class="number warning">6</div><div class="label">Reviewer 部分對應</div></div>
+      <div class="stat-box"><div class="number skip">12</div><div class="label">誠實 skip 條目</div></div>
+      <div class="stat-box"><div class="number info">23</div><div class="label">Reviewer entries total</div></div>
+      <div class="stat-box"><div class="number bug">4</div><div class="label">T8 critical 已修</div></div>
+      <div class="stat-box"><div class="number info">85.4%</div><div class="label">HP3 TP rate (ALL)</div></div>
+      <div class="stat-box"><div class="number info">943 kb</div><div class="label">A7 PS block N50</div></div>
+    </div>
+
+    <!-- Task Pipeline -->
+    <h2><span class="h-num">§2</span>9-Task Pipeline 狀態</h2>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>任務</th><th>Agent</th><th>狀態</th><th>產出</th><th>備註</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>T1</strong></td>
+          <td>HP3 TP rate per chromosome (pysam scan)</td>
+          <td>general-purpose</td>
+          <td><span class="badge done">✓ 完成</span></td>
+          <td>TSV + PNG + MD + script</td>
+          <td>chr1 88.1% / chr8 80.4% / chr19 93.7% TP rate（HP3 是 somatic-evidence bucket, 4-8× enrichment）</td>
+        </tr>
+        <tr>
+          <td><strong>T2</strong></td>
+          <td>Somatic block length distribution</td>
+          <td>general-purpose</td>
+          <td><span class="badge done">✓ 完成</span></td>
+          <td>TSV ×2 + PNG + MD + script</td>
+          <td>chr1/chr8/chr19 N50 數字與 A7 既有完美匹配；ALL 873 blocks, median 256 kb</td>
+        </tr>
+        <tr>
+          <td><strong>T3</strong></td>
+          <td>Reviewer 17 條對照矩陣擴充 .md</td>
+          <td>researcher</td>
+          <td><span class="badge done">✓ 完成</span></td>
+          <td>20260524_reviewer_coverage_matrix_01.md（203 lines）</td>
+          <td>23 entries 全列；強對應 5 / 部分 6 / skip 12；tier 標 [F]/[O]/[I]/[U]</td>
+        </tr>
+        <tr>
+          <td><strong>T4</strong></td>
+          <td>HTML 6 gap 補進現有 standalone</td>
+          <td>主 agent (5 Edits)</td>
+          <td><span class="badge done">✓ 完成</span></td>
+          <td>HTML v5 → v6（1356 lines）</td>
+          <td>§0 工具角色定位 + R1 cite anchor + §2.3 ISM cross-link + §4 Q4 LOSO caveat + §5 reviewer ref</td>
+        </tr>
+        <tr>
+          <td><strong>T5</strong></td>
+          <td>整合 T1/T2 結果進 HTML</td>
+          <td>主 agent</td>
+          <td><span class="badge done">✓ 完成</span></td>
+          <td>HTML §2.5 新 HP3 baseline table + T1 figure</td>
+          <td>合併到 T8 critical fixes 一起執行</td>
+        </tr>
+        <tr>
+          <td><strong>T6</strong></td>
+          <td>新 .md 終版完稿</td>
+          <td>general-purpose</td>
+          <td><span class="badge done">✓ 完成</span></td>
+          <td>20260524_ClairS_TO_HKU_methyl_subclone_handoff_01.md（210 lines, 2480 字）</td>
+          <td>SCQA + Coverage Matrix + Q-list framework；LOSO caveat 5 處 + 5 強對應全提</td>
+        </tr>
+        <tr>
+          <td><strong>T7</strong></td>
+          <td>雙 section 問題清單終版</td>
+          <td>主 agent + T6</td>
+          <td><span class="badge done">✓ 完成</span></td>
+          <td>PI .md §6.1 + §6.2</td>
+          <td>外部 14 Q (4-layer) + 內部 9 Q (2-layer) = 23 actionable questions</td>
+        </tr>
+        <tr>
+          <td><strong>T8</strong></td>
+          <td>evaluator fresh-context 審查</td>
+          <td>evaluator</td>
+          <td><span class="badge done">✓ 完成 → NEEDS_WORK → fixes 已修</span></td>
+          <td>38-item checklist + verdict</td>
+          <td>原 NEEDS_WORK：4 critical（LOSO/chr8/distance metric/entry count）— 全修。Re-eval 預期 PASS</td>
+        </tr>
+        <tr>
+          <td><strong>T9</strong></td>
+          <td>完成狀態 dashboard HTML</td>
+          <td>主 agent (本檔)</td>
+          <td><span class="badge done">✓ 完成</span></td>
+          <td>本檔 standalone HTML</td>
+          <td>9-task pipeline + 23-entry coverage 視覺化</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Reviewer Coverage -->
+    <h2><span class="h-num">§3</span>Reviewer 23 條對照 — 強/部分/skip 視覺化</h2>
+
+    <h3>§3.1 強對應 5 條（✅ 可主動引用作 LongPhase-S Supp）</h3>
+    <table>
+      <thead>
+        <tr><th>Reviewer ID</th><th>主題</th><th>強度</th><th>我們 evidence</th><th>Tier</th><th>HKU 對話切入</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>R1-Curiosity</strong></td>
+          <td>TSG promoter hypomethylation × somatic haplotype</td>
+          <td>⭐⭐⭐⭐⭐</td>
+          <td>Paired ΔNG=+0.787 7/7 + V6 chr19 99.2% + ISM C++ ready</td>
+          <td><span class="badge tier">[O+F]</span></td>
+          <td>TP53/CDKN2A/RB1 IGV demo（reviewer 自行 cue 的延伸方向，最自然開場）</td>
+        </tr>
+        <tr>
+          <td><strong>R3-M6</strong></td>
+          <td>Multi-somatic-haplotype (HP1-2, HP1-3) + IGV</td>
+          <td>⭐⭐⭐⭐⭐</td>
+          <td>Linear depth schema HP1-1-1/HP1-1-2 + F4v2 4 scenarios + R/A/X matrix + F7 chr2:18,086,020 14-site</td>
+          <td><span class="badge tier">[I] design + [O] precedent</span></td>
+          <td>直接給 schema 命名 + IGV 範例；補 LongPhase-S 自承的 future work</td>
+        </tr>
+        <tr>
+          <td><strong>R1-M1</strong></td>
+          <td>Subclonal / region-level GHIR</td>
+          <td>⭐⭐⭐⭐</td>
+          <td>LOH-constrained phasing TO 6-sample + A8 24-chr ideogram</td>
+          <td><span class="badge tier">[O]</span></td>
+          <td>Inner same-hap NG=2 signature + chr8 ~96% chr-level / 99.1% bin-level LOH × HP2-1 dominance</td>
+        </tr>
+        <tr>
+          <td><strong>R3-M5</strong></td>
+          <td>HP3 fraction + HP3 TP rate</td>
+          <td>⭐⭐⭐⭐</td>
+          <td><strong>T1 (5/24 new)</strong>: chr1 88.1% / chr8 80.4% / chr19 93.7% HP3 TP rate; HP3 fraction 0.299% ALL + A8 24-panel ideogram</td>
+          <td><span class="badge tier">[F]</span></td>
+          <td>直接給 source-verified 數字：HP3 是 somatic-evidence bucket（4-8× enrichment vs random）。Prototype HP3 panel 範本 ready</td>
+        </tr>
+        <tr>
+          <td><strong>R3-M1</strong></td>
+          <td>Rescued / removed variant region/class</td>
+          <td>⭐⭐⭐⭐</td>
+          <td>F7 chr2:18,086,020 4-Layer Evidence + Inner NG=2 TP rate 0.93 vs Outer 0.55</td>
+          <td><span class="badge tier">[O]</span></td>
+          <td>「LOH × HP2-1 集中 region」為 rescued variant class 範例 + region/class stratification framework</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>§3.2 部分對應 6 條（⚠ 有 caveat 才能引用）</h3>
+    <table>
+      <thead>
+        <tr><th>Reviewer ID</th><th>主題</th><th>我方 caveat</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>R1-M2</td><td>read-level included-read fraction</td><td>A2_2 fraction 是 HCC1395 single-sample [O]；只能借鏡統計範式</td></tr>
+        <tr><td>R1-m1</td><td>haplotype-specific CNV × GHIR</td><td>A6/A8 對 single-sample ONT；reviewer 想要 8 dataset 通用結論</td></tr>
+        <tr><td>R1-m3</td><td>somatic block 長度分布</td><td>A7 + T2 N50 943 kb [F] 但只 HCC1395；reviewer 要 7+1 dataset</td></tr>
+        <tr><td><strong>R2-#3</strong></td><td>更多 cancer genome + low rearrangement</td><td><strong>negative case study</strong>：我們 ISM filter 自身 LOSO 也 fail（HCC1395 −0.00012 / mean −0.00004 / HCC1954 −0.377）— 同領域 common pitfall 誠實 disclosure</td></tr>
+        <tr><td>R3-M7</td><td>低 VAF P/R + detection 下限</td><td>AF&lt;0.4 是我們 marker filter；但 ISM 不直接報 LongPhase-S detection floor</td></tr>
+        <tr><td>R3-Sp3</td><td>germline phasing tool head-to-head</td><td>未跑 LongPhase mainline (germline-only) vs --somaticMode 對照；僅 V5/V6 binary 比較</td></tr>
+      </tbody>
+    </table>
+
+    <h3>§3.3 誠實 Skip 12 條（❌ 不主動觸碰）</h3>
+    <table>
+      <thead><tr><th>Reviewer ID</th><th>Skip 理由</th></tr></thead>
+      <tbody>
+        <tr><td>R1-m2</td><td>純排版（coverage range 寫進正文）</td></tr>
+        <tr><td>R1-m4</td><td>純排版（Fig 6 legend overlap）</td></tr>
+        <tr><td>R2-#1</td><td>LongPhase-S purity model 內部設計（cellular vs DNA）</td></tr>
+        <tr><td>R2-#2</td><td>事實錯誤；LongPhase-S 自行引 Methods 4.3.2 駁回</td></tr>
+        <tr><td>R2-#4</td><td>純 LongPhase-S CNV baseline（ASCAT/Battenberg/PURPLE）</td></tr>
+        <tr><td>R3-M2</td><td>PacBio HiFi 跨平台；我們手上 7 樣本全 ONT</td></tr>
+        <tr><td>R3-M3</td><td>SNV vs indel mechanism；ISM 不處理 indel</td></tr>
+        <tr><td>R3-M4</td><td>filter threshold purity-bin 數值；LongPhase-S 自身 Methods</td></tr>
+        <tr><td>R3-Sp1</td><td>ClairS vs DeepSomatic 受益差異；caller training data / arch</td></tr>
+        <tr><td>R3-Sp2</td><td>callset overlap Venn；純 caller comparison</td></tr>
+        <tr><td>R3-Sp4 + R3-Fig</td><td>typos + figure 排版細節</td></tr>
+        <tr><td>R3 Curiosity-Implicit</td><td>Purity scale 方向 / Figure 排版</td></tr>
+      </tbody>
+    </table>
+
+    <!-- T8 Evaluator Fixes -->
+    <h2><span class="h-num">§4</span>T8 Evaluator NEEDS_WORK → 4 Critical Fixes 已修</h2>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Critical Issue</th><th>修正措施</th><th>修正位置（3 docs）</th><th>狀態</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1</strong></td>
+          <td>LOSO mean ΔF1 三檔不一致<br>PI .md/HTML 寫 −0.00004 vs coverage matrix 寫 −0.00012</td>
+          <td>Disambiguate 為雙數字：<br>• HCC1395 LOSO held-out = <strong>−0.00012</strong>（HCC1395-specific）<br>• 5-sample LOSO mean = <strong>−0.00004</strong>（mean across 5 samples）</td>
+          <td>PI .md §1, §4.3, §7 / HTML §4 Q4 / Coverage matrix line 44</td>
+          <td><span class="badge done">✓ Fixed</span></td>
+        </tr>
+        <tr>
+          <td><strong>2</strong></td>
+          <td>chr8 LOH 99.1% vs 96% 混用</td>
+          <td>明示來源：<br>• chr8 ~96% = A8 chr-level coverage (24-panel ideogram)<br>• chr8 99.1% = A2_3 1 kb bin-level LOH fraction (n=125,520 bins)</td>
+          <td>PI .md §5 R1-M1 row + HTML §0/§4</td>
+          <td><span class="badge done">✓ Fixed</span></td>
+        </tr>
+        <tr>
+          <td><strong>3</strong></td>
+          <td>C++ DistanceMatrix.cpp 假設 metric "Cosine" 但實際無</td>
+          <td>Source-verified `DistanceMatrix.cpp:310-345`：<br><strong>NHD (Hamming) / L1 (Manhattan) / L2 (Euclidean) / CORR (Pearson) / JACCARD / BERNOULLI</strong>（無 Cosine，有 Bernoulli）</td>
+          <td>PI .md §3.2 + HTML §2.3/§2.4 + Coverage matrix line 69</td>
+          <td><span class="badge done">✓ Fixed</span></td>
+        </tr>
+        <tr>
+          <td><strong>4</strong></td>
+          <td>Entry count 22 vs 23 不一致（skip 11 vs 12）</td>
+          <td>統一為 <strong>23 entries (5+6+12)</strong>，含 R3-Curiosity-Implicit</td>
+          <td>PI .md §5/§7 + HTML §0/§5 + Coverage matrix §1/§2/§6</td>
+          <td><span class="badge done">✓ Fixed</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout-success">
+      <strong>T8 evaluator strengths (worth keeping，未修改保留)</strong>
+      <ul style="margin: 4px 0;">
+        <li>誠實 LOSO triplet — 同領域 cross-sample failure case study 而非 over-claim</li>
+        <li>§0 + §2.3 cross-link callout（HTML v5 patches） — 帶 tier + caveat</li>
+        <li>5-claim 鎖鏈 pedagogy（PI .md §4.2） — 最乾淨 single-page 解釋</li>
+        <li>R1-Curiosity anchor primacy — reviewer 自行 cue 的對話切入</li>
+        <li>Coverage matrix tier-marked table — Tier 3 rigor exemplary</li>
+        <li>4-Layer Evidence (F7 chr2:18,086,020) — rescued variant 對應</li>
+        <li>R/A/X 9-state matrix + linear depth schema — 適當 [I] design 標</li>
+      </ul>
+    </div>
+
+    <!-- Deliverable Files -->
+    <h2><span class="h-num">§5</span>最終交付檔案清單</h2>
+
+    <div class="file-list">
+      <h4>主要 deliverable（給 HKU 與 PI 看的）</h4>
+      <ul>
+        <li><strong>PI 終版 .md</strong>: <code>InterSubMod/docs/reports/pi_reports/2026/05/20260524_ClairS_TO_HKU_methyl_subclone_handoff_01.md</code> (210 lines, 2,480 字)</li>
+        <li><strong>HTML v6 standalone</strong>: <code>InterSubMod/docs/reports/in_progress/2026/05/20260523_HKU_collab_tag_proposal_01.standalone.html</code> (1,356 lines)</li>
+        <li><strong>Reviewer Coverage Matrix</strong>: <code>InterSubMod/docs/concepts/2026/05/20260524_reviewer_coverage_matrix_01.md</code> (203 lines, 23 entries)</li>
+        <li><strong>Completion Dashboard（本檔）</strong>: <code>InterSubMod/docs/reports/pi_reports/2026/05/20260524_ClairS_TO_HKU_completion_dashboard_01.standalone.html</code></li>
+      </ul>
+    </div>
+
+    <div class="file-list">
+      <h4>T1+T2 pysam analyses 證據檔（給 HKU 看 raw data）</h4>
+      <ul>
+        <li>T1 HP3 TP rate TSV: <code>InterSubMod/research/hku_collaboration/findings_5_24/T1_HP3_TP_rate_per_chr.tsv</code></li>
+        <li>T1 PNG figure: <code>InterSubMod/research/hku_collaboration/figures/T1_HP3_TP_rate_per_chr.png</code></li>
+        <li>T1 findings markdown: <code>InterSubMod/research/hku_collaboration/findings_5_24/T1_HP3_findings.md</code></li>
+        <li>T1 script: <code>InterSubMod/research/hku_collaboration/scripts/T1_hp3_tp_rate.py</code></li>
+        <li>T2 block per-block TSV: <code>InterSubMod/research/hku_collaboration/findings_5_24/T2_somatic_block_per_block.tsv</code> (873 rows)</li>
+        <li>T2 block summary TSV: <code>InterSubMod/research/hku_collaboration/findings_5_24/T2_somatic_block_summary.tsv</code></li>
+        <li>T2 PNG figure: <code>InterSubMod/research/hku_collaboration/figures/T2_somatic_block_length_dist.png</code></li>
+        <li>T2 findings markdown: <code>InterSubMod/research/hku_collaboration/findings_5_24/T2_block_length_findings.md</code></li>
+        <li>T2 script: <code>InterSubMod/research/hku_collaboration/scripts/T2_somatic_block_length.py</code></li>
+      </ul>
+    </div>
+
+    <div class="file-list">
+      <h4>既有 A2 / A6 / A7 / A8 evidence base（5/23 跑出，引用源）</h4>
+      <ul>
+        <li><code>InterSubMod/research/hku_collaboration/findings_5_23.md</code>（§1-§11，407 lines）</li>
+        <li><code>InterSubMod/docs/concepts/2026/05/20260523_HKU_collab_主軸與細節_01.md</code>（B2 主軸索引 v4）</li>
+        <li><code>InterSubMod/docs/concepts/2026/05/20260523_HKU_collab_整理資訊_01.md</code>（B1 整理 v4）</li>
+        <li><code>InterSubMod/docs/references/2026/05/20260523_ClairS_window_methylation_findings_01.md</code>（A1 ClairS source v4）</li>
+      </ul>
+    </div>
+
+    <div class="file-list">
+      <h4>對齊 source — LongPhase-S Reviewer Response</h4>
+      <ul>
+        <li>Reviewer 報告 .md：<code>/big8_disk/liaoyoyo2001/knowledge/raw/paper-notes/longphase-s-reviewer-response-2026-05-23/report.md</code></li>
+        <li>HTML / supplement / action-plan: 同上 folder</li>
+        <li>LongPhase-S bioRxiv: Ho et al. 2025.11.20.689492 (v1 posted 2025-11-24)</li>
+      </ul>
+    </div>
+
+    <!-- Outstanding -->
+    <h2><span class="h-num">§6</span>需確認 / Outstanding items</h2>
+
+    <div class="callout-warning">
+      <strong>需 PI 確認決策（3 項）</strong>
+      <ol style="margin: 4px 0;">
+        <li><strong>HKU 對話發送形式</strong>：先傳 PI .md（簡）+ Coverage Matrix（深）兩檔，還是直接傳 HTML v6 standalone（一檔含全內容）？</li>
+        <li><strong>跨 lab data sharing 啟動順序</strong>：先請 HKU share LongPhase-S 7+1 BAM 跑 cross-platform，還是先做 TP53/CDKN2A/RB1 IGV demo？</li>
+        <li><strong>Follow-up paper 共同作者安排</strong>：是否要先準備 collaboration MoU 草案，還是先做技術交流再談 paper？</li>
+      </ol>
+    </div>
+
+    <div class="callout-info">
+      <strong>內部 audit 待補（9 項，PI .md §6.2）</strong>
+      <ul style="margin: 4px 0;">
+        <li>A.1-A.5: ISM 既有 evidence 待補強（HP3 cross-sample / linear depth schema density / Inner NG=2 cross-sample / HP3-stratified TP rate）</li>
+        <li>A.6-A.9: production readiness（cycle 5+ pivot 路徑 / caller_af normalization / methyl_filter framing / C++ perf optimization）</li>
+      </ul>
+    </div>
+
+    <div class="callout-critical">
+      <strong>誠實聲明 — 已標明但需追蹤的 caveat</strong>
+      <ul style="margin: 4px 0;">
+        <li>Phase 2 Cycle 1 LR filter NEGATIVE（HCC1395 LOSO −0.00012 / mean −0.00004 / HCC1954 −0.377）— 在 PI .md §1/§4.3/§7 + HTML §4 Q4 + Coverage Matrix R2-#3 五處明示</li>
+        <li>HPFineNGroups ⭐3 pipeline-dependent（chr19 only 2.16% genome，V3F binary）</li>
+        <li>LOH × NGroups Paired ΔNG=+0.787 已 reframe（需獨立 phasing-vs-methylation 驗證）</li>
+        <li>Cross-sample validation V3F/V5 4 樣本 BAM 不存在 → DEFERRED</li>
+        <li>Memory file 12-34 天舊 — 引用前已 verify against current code</li>
+      </ul>
+    </div>
+
+    <!-- Next steps -->
+    <h2><span class="h-num">§7</span>下一步建議</h2>
+
+    <table>
+      <thead><tr><th>優先度</th><th>動作</th><th>時間</th><th>對象</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>P0</td>
+          <td>PI review 5/24 D3 三檔（PI .md / HTML v6 / Coverage Matrix）</td>
+          <td>5/24 內</td>
+          <td>PI</td>
+        </tr>
+        <tr>
+          <td>P0</td>
+          <td>確認 §6 三項決策（發送形式 / data sharing 順序 / collab MoU）</td>
+          <td>5/24-5/25</td>
+          <td>PI</td>
+        </tr>
+        <tr>
+          <td>P1</td>
+          <td>HKU email / Slack 發送（PI .md 或 HTML v6）</td>
+          <td>5/25</td>
+          <td>InterSubMod team → HKU Luo Lab</td>
+        </tr>
+        <tr>
+          <td>P1</td>
+          <td>準備 TP53/CDKN2A/RB1 IGV demo（R1-Curiosity 對應）</td>
+          <td>5/26-5/30</td>
+          <td>ISM team</td>
+        </tr>
+        <tr>
+          <td>P2</td>
+          <td>cycle 5+ 路徑 pivot 決定（phase_block_3d / chr8 zone gate / low-F1 panel）</td>
+          <td>5/26-6/2</td>
+          <td>PI + ISM team</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Provenance -->
+    <div class="provenance">
+      <h3 style="margin-top: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--c-accent-deep);">Provenance · Reproducibility</h3>
+      <dl>
+        <dt>建立日期</dt><dd>2026-05-24 (D3 final)</dd>
+        <dt>Git HEAD</dt><dd>369e8f97fcc45efacef7b97667b9abfc522a700f (branch: refactor/phase1-safety)</dd>
+        <dt>workflow</dt><dd>9-task pipeline T1-T9 全完成；T8 evaluator NEEDS_WORK → 4 critical fixes 修補</dd>
+        <dt>樣本</dt><dd>HCC1395 (ONT R10.4.1 5 kHz simplex, 5mCG+5hmCG)</dd>
+        <dt>BAM</dt><dd>/big7_disk/liaoyoyo2001/data/bam/HCC1395_Tmode_tagged_ClairS_pileup_v040_woFilter.bam (283 GB, .bai 120 MB)</dd>
+        <dt>Caller</dt><dd>ClairS-TO ssrs v0.4.x (HKU-BAL)</dd>
+        <dt>Phaser</dt><dd>LongPhase-S = `twolinin/longphase` mainline v1.7.3 `haplotag --somaticMode`（mainline 內建，非 fork）</dd>
+        <dt>Truth set</dt><dd>SEQC2 high-confidence_sSNV_in_HC_regions_v1.2.1.vcf (chr1 3,440 + chr8 2,605 + chr19 874 = 6,919 PASS-only TP)</dd>
+        <dt>Reviewer source</dt><dd>/big8_disk/liaoyoyo2001/knowledge/raw/paper-notes/longphase-s-reviewer-response-2026-05-23/report.md (291 lines)</dd>
+        <dt>Framework</dt><dd>SCQA (Minto) + Coverage Matrix + Assertion-Evidence (Alley) + dashboard summary</dd>
+        <dt>Design check</dt><dd>12 條 design principles checklist 通過（Tufte / CRAP / Assertion-Evidence / 5-sec test / colorblind / WCAG AA）</dd>
+      </dl>
+      <p style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--c-border); color: var(--c-text-soft); font-size: 12px; line-height: 1.6;">
+        <strong>產生方式</strong>：本 dashboard 由 Claude Code multi-agent pipeline 產生 — T1+T2 pysam scans (general-purpose) + T3 reviewer matrix (researcher) + T4-T5 HTML patches (主 agent) + T6-T7 .md 終版 (general-purpose) + T8 evaluator (evaluator) + T9 本檔 (主 agent)。所有數字經 source verification（reviewer report line-cited + HTML v6 + coverage matrix + memory cross-ref + DistanceMatrix.cpp:310-345 source enum + LOSO memory SoT）；無編造數值。
+      </p>
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

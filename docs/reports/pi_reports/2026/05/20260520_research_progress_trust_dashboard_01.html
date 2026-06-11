@@ -1,0 +1,1047 @@
+<!--
+建立時間: 2026-05-20 13:12 Asia/Taipei
+目標: 將 2026-05-18 至 2026-05-20 的 InterSubMod 研究進度整理成可驗證 HTML 展示
+處理範圍: V6 production tag、Phase 2 Cycle 1-3、Cycle 3 Step 1.5 ablation、caller mode framing correction
+關聯檔案:
+  - InterSubMod/docs/CURRENT_FOCUS.md
+  - InterSubMod/docs/experiments/INDEX.md
+  - InterSubMod/research/autoresearch/evidence_ledger.jsonl
+  - InterSubMod/docs/experiments/in_progress/2026/05/20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01.md
+  - InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/cycle3_step1_5_min_ablation_findings.md
+-->
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>InterSubMod 本週研究進度與可信度儀表板 - 2026-05-20</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #171818;
+      --muted: #5d6662;
+      --subtle: #eef1ee;
+      --paper: #fbfbf7;
+      --panel: #ffffff;
+      --teal: #0f766e;
+      --green: #3f7d20;
+      --red: #b0442d;
+      --amber: #b7791f;
+      --blue: #2563a8;
+      --violet: #7651a6;
+      --line: #d8ded9;
+      --shadow: 0 12px 35px rgba(22, 24, 24, 0.08);
+      --mono: "SFMono-Regular", "Cascadia Mono", "Liberation Mono", Menlo, monospace;
+      --body: "Aptos", "Noto Sans TC", "Segoe UI", sans-serif;
+      --serif: "Georgia", "Noto Serif TC", serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(90deg, rgba(15, 118, 110, 0.05) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(63, 125, 32, 0.04) 1px, transparent 1px),
+        var(--paper);
+      background-size: 44px 44px;
+      color: var(--ink);
+      font-family: var(--body);
+      line-height: 1.55;
+      letter-spacing: 0;
+    }
+
+    a {
+      color: var(--teal);
+      text-decoration-color: rgba(15, 118, 110, 0.25);
+      text-underline-offset: 3px;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.92em;
+      background: #eef4f1;
+      border: 1px solid #dbe8e3;
+      border-radius: 4px;
+      padding: 0.08rem 0.28rem;
+    }
+
+    .page {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 28px 22px;
+      border-right: 1px solid var(--line);
+      background: rgba(251, 251, 247, 0.94);
+      backdrop-filter: blur(10px);
+      overflow-y: auto;
+    }
+
+    .brand {
+      font-family: var(--serif);
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .date {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-bottom: 24px;
+    }
+
+    .nav-title {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 18px 0 8px;
+    }
+
+    nav a {
+      display: block;
+      padding: 7px 0;
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(216, 222, 217, 0.65);
+      font-size: 0.92rem;
+    }
+
+    nav a:hover {
+      color: var(--teal);
+    }
+
+    .status-stack {
+      margin-top: 22px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .status-pill {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 6px;
+      padding: 9px 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .status-pill strong {
+      display: block;
+      color: var(--ink);
+      font-size: 0.95rem;
+    }
+
+    main {
+      padding: 42px min(5vw, 64px) 80px;
+      max-width: 1320px;
+    }
+
+    .hero {
+      min-height: 86vh;
+      display: grid;
+      align-content: center;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 34px;
+      padding-bottom: 28px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      gap: 8px;
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+      border-radius: 5px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(2.5rem, 6vw, 6.5rem);
+      line-height: 0.96;
+      max-width: 1050px;
+      margin: 22px 0 18px;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-family: var(--serif);
+      font-size: clamp(1.85rem, 3vw, 3.4rem);
+      line-height: 1.08;
+      margin: 0 0 18px;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 1.02rem;
+    }
+
+    .lead {
+      max-width: 900px;
+      color: #26302b;
+      font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+    }
+
+    .callout {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      min-height: 126px;
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .metric .value {
+      font-family: var(--serif);
+      font-size: clamp(1.55rem, 2.2vw, 2.35rem);
+      line-height: 1.1;
+      margin: 8px 0;
+    }
+
+    .metric .note {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    section {
+      margin: 56px 0;
+      scroll-margin-top: 28px;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 0.45fr);
+      gap: 28px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
+    .span-6 { grid-column: span 6; }
+    .span-7 { grid-column: span 7; }
+    .span-8 { grid-column: span 8; }
+    .span-12 { grid-column: span 12; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: 1px solid currentColor;
+    }
+
+    .pass { color: var(--green); background: rgba(63, 125, 32, 0.08); }
+    .fail { color: var(--red); background: rgba(176, 68, 45, 0.08); }
+    .pending { color: var(--amber); background: rgba(183, 121, 31, 0.10); }
+    .info { color: var(--blue); background: rgba(37, 99, 168, 0.09); }
+    .neutral { color: var(--muted); background: #f4f5f1; }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+      position: relative;
+    }
+
+    .event {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr);
+      gap: 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--teal);
+      border-radius: 8px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .event time {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: 0.82rem;
+      padding-top: 2px;
+    }
+
+    .event p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f3f6f2;
+      color: #2a322d;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    td.num, th.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-family: var(--mono);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .trust {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .trust:last-child {
+      border-bottom: 0;
+    }
+
+    .bars {
+      display: grid;
+      gap: 4px;
+    }
+
+    .bar {
+      height: 10px;
+      background: #e8ece8;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+    }
+
+    .bar-high { background: var(--green); width: 86%; }
+    .bar-med { background: var(--amber); width: 58%; }
+    .bar-low { background: var(--red); width: 28%; }
+
+    figure {
+      margin: 0;
+    }
+
+    figure img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+    }
+
+    figcaption {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 7px;
+    }
+
+    .quote {
+      border-left: 4px solid var(--teal);
+      background: #f1f8f5;
+      padding: 14px 16px;
+      border-radius: 0 7px 7px 0;
+      margin: 0;
+    }
+
+    .source-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .source-item {
+      padding: 10px 12px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    pre {
+      margin: 0;
+      padding: 14px;
+      overflow-x: auto;
+      background: #18201c;
+      color: #edf7f1;
+      border-radius: 7px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .risk-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .risk {
+      border-left: 4px solid var(--amber);
+      padding: 10px 12px;
+      background: #fff9ee;
+      border-radius: 0 7px 7px 0;
+    }
+
+    .risk strong {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    footer {
+      margin-top: 70px;
+      padding-top: 22px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      font-size: 0.86rem;
+    }
+
+    @media (max-width: 980px) {
+      .page {
+        display: block;
+      }
+
+      aside {
+        position: relative;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0 14px;
+      }
+
+      main {
+        padding: 30px 18px 60px;
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      .callout,
+      .section-head {
+        grid-template-columns: 1fr;
+      }
+
+      .span-4, .span-5, .span-6, .span-7, .span-8, .span-12 {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 620px) {
+      nav {
+        grid-template-columns: 1fr;
+      }
+
+      .callout {
+        display: block;
+      }
+
+      .metric {
+        margin-bottom: 10px;
+      }
+
+      .event {
+        grid-template-columns: 1fr;
+      }
+
+      .trust {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <aside>
+      <div class="brand">InterSubMod<br>Research Progress</div>
+      <div class="date">本週範圍：2026-05-18 至 2026-05-20 13:12 CST</div>
+      <div class="nav-title">Sections</div>
+      <nav>
+        <a href="#summary">研究總結</a>
+        <a href="#timeline">本週時間線</a>
+        <a href="#v6">V6 Production</a>
+        <a href="#filter">Phase 2 Filter</a>
+        <a href="#ablation">Ablation Verdict</a>
+        <a href="#trust">可信度分級</a>
+        <a href="#verify">驗證流程</a>
+        <a href="#risks">待補事項</a>
+        <a href="#sources">來源索引</a>
+      </nav>
+      <div class="status-stack">
+        <div class="status-pill"><strong>目前主軸</strong>Phase 2 filter reframe + V6 production tag</div>
+        <div class="status-pill"><strong>研究服務目標</strong>G2 / G3 / G4 / G5</div>
+        <div class="status-pill"><strong>結論成熟度</strong>強在 HCC1395 與 V6 marker；跨樣本仍需 panel</div>
+      </div>
+    </aside>
+
+    <main>
+      <header class="hero" id="summary">
+        <div class="eyebrow">Weekly research dashboard</div>
+        <h1>本週結論已經轉向：V6 可 production，F1 filter 不再是 methylation story。</h1>
+        <p class="lead">
+          2026-05-18 到 2026-05-20 的核心進展是兩件事。
+          第一，V6 tag 在 ISM downstream marker filter 上比 baseline 更好，可作 production tag，但不應宣稱它改善 multi-axis LR 的 F1 ceiling。
+          第二，Phase 2 filter 的 ablation 顯示 ISM methylation 對 F1 幾乎沒有實質增量，filter 應改寫為 caller-F1-headroom-gated 的 caller_af / LOH / coverage / NG filter。
+        </p>
+        <div class="callout">
+          <div class="metric">
+            <div class="label">V6 marker count</div>
+            <div class="value">+52.4%</div>
+            <div class="note">baseline 15,738 到 V6 23,980，HCC1395 4-way ISM</div>
+          </div>
+          <div class="metric">
+            <div class="label">Cycle 1 LR uplift</div>
+            <div class="value">+0.02236</div>
+            <div class="note">HCC1395 single-sample，multi-seed std = 5e-5</div>
+          </div>
+          <div class="metric">
+            <div class="label">Drop methyl effect</div>
+            <div class="value">+0.00065</div>
+            <div class="note">遠低於 +0.003 threshold，H_M1a FAIL</div>
+          </div>
+          <div class="metric">
+            <div class="label">Cycle 3 gate</div>
+            <div class="value">n=2</div>
+            <div class="note">qualifying mean +0.01499 PASS，但 panel expansion pending</div>
+          </div>
+        </div>
+      </header>
+
+      <section id="timeline">
+        <div class="section-head">
+          <div>
+            <h2>本週時間線</h2>
+            <p>依照 evidence ledger、CURRENT_FOCUS、Cycle 1-3 報告整理。這裡用決策節點而不是檔案更新順序呈現。</p>
+          </div>
+          <div class="quote">
+            一句話：本週不是單純「結果變好」，而是把哪些結果能宣稱、哪些必須撤回，重新用 ablation 和 cross-sample gate 定義清楚。
+          </div>
+        </div>
+        <div class="timeline">
+          <article class="event">
+            <time>05-18</time>
+            <div>
+              <h3><span class="badge pending">Marginal</span> V6 methyl filter pilot v1.0</h3>
+              <p>HCC1395 pilot 達 ΔF1 +0.00242，但低於 +0.005 Cohen ribbon。Step 5c 指出 lost TP 主要是 low-AF subclone，methylation 訊號像 caller_af proxy。</p>
+            </div>
+          </article>
+          <article class="event">
+            <time>05-18</time>
+            <div>
+              <h3><span class="badge pass">Strong</span> Phase 2 Cycle 1 global FP filter</h3>
+              <p>Global LR 在 HCC1395 達 ΔF1 +0.02236，FP removed 70.20%，TP loss 1.56%。但當時仍只成立於 HCC1395，cross-sample deferred。</p>
+            </div>
+          </article>
+          <article class="event">
+            <time>05-19</time>
+            <div>
+              <h3><span class="badge fail">Negative gate</span> Cycle 2 cross-sample</h3>
+              <p>Transfer mode 1+/4-，HCC1954 出現 -0.37744 災難；re-fit 只剩 HCC1937 有 +0.00761。結論改為 caller-F1-headroom-bounded。</p>
+            </div>
+          </article>
+          <article class="event">
+            <time>05-19</time>
+            <div>
+              <h3><span class="badge pass">PASS</span> Cycle 3 Step 1 gate reproduce</h3>
+              <p>Gate 規則：caller F1 &lt; 0.80 且 FP density &gt; 0.10 才 apply per-sample re-fit。HCC1395 + HCC1937 qualifying mean +0.01499，high-F1 samples skip 後 drift 0。</p>
+            </div>
+          </article>
+          <article class="event">
+            <time>05-20</time>
+            <div>
+              <h3><span class="badge fail">M1a FAIL</span> Cycle 3 Step 1.5 ablation</h3>
+              <p>Drop 5 methyl features 後 HCC1395 ΔF1 只掉 +0.00065，5-sample mean no-methyl 反而略勝 full。Filter story 從 methyl-augmented 改為 non-methyl multi-axis。</p>
+            </div>
+          </article>
+          <article class="event">
+            <time>05-20</time>
+            <div>
+              <h3><span class="badge info">Framing fix</span> Caller mode label correction</h3>
+              <p>早期文件把 Phase 2 標成 paired-pileup，5/20 校正為 ClairS-TO ssrs / LongPhase-TO / ISM pipeline。資料與數字 unchanged，但 paper framing 必須用 TO mode。</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="v6">
+        <div class="section-head">
+          <div>
+            <h2>V6 Production Tag：可以 GO，但用途要分層</h2>
+            <p>V6 的強項是 marker filter 與 hard NG threshold 層級；multi-axis LR 的 F1 boost 則主要由 BAM-independent features 驅動，不是 V6-specific。</p>
+          </div>
+          <div class="panel">
+            <h3>Production verdict</h3>
+            <p><span class="badge pass">GO</span> V6 production tag <code>v6-prod-20260520</code>，local commit <code>8a90532</code>。Remote push 仍需用戶授權。</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel span-6">
+            <h3>Baseline 到 V6 的主要 shift</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>指標</th><th class="num">baseline</th><th class="num">V6</th><th class="num">變化</th><th>解讀</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Marker count NG>=3</td><td class="num">15,738</td><td class="num">23,980</td><td class="num">+52.4%</td><td>下游 marker filter 候選顯著增加</td></tr>
+                  <tr><td>Marker rate</td><td class="num">0.8967</td><td class="num">0.9093</td><td class="num">+1.26pp</td><td>候選增加同時 TP purity 略升</td></tr>
+                  <tr><td>hp=3 ambig reads</td><td class="num">10,440</td><td class="num">138,317</td><td class="num">x13.2</td><td>germline-absent 區回到保守 ambiguous</td></tr>
+                  <tr><td>LOH-positive marker rate</td><td class="num">0.9710</td><td class="num">0.9801</td><td class="num">+0.91pp</td><td>LOH-positive zone 四 BAM 最高</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel span-6">
+            <h3>F1 層級的誠實分層</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>問題</th><th>答案</th><th>數字</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>V6 + ISM 是否勝 baseline + ISM？</td><td><span class="badge pass">Yes</span></td><td>hard NG threshold ΔF1 全 T 正向，T=2 +0.0286，T=3 +0.1605</td></tr>
+                  <tr><td>Hard NG threshold 是否勝 caller-alone？</td><td><span class="badge pending">Marginal</span></td><td>T=1 V6 F1 0.7169 vs caller 0.7165，僅 +0.0004</td></tr>
+                  <tr><td>Multi-axis LR 是否勝 caller-alone？</td><td><span class="badge pass">Yes</span></td><td>V6 LR +0.02236，baseline LR +0.02302</td></tr>
+                  <tr><td>LR boost 是否 V6-specific？</td><td><span class="badge fail">No</span></td><td>baseline LR 略勝 V6 LR +0.00066，機制 BAM-independent</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <figure class="span-6 panel">
+            <img src="../../../../../research/v6_bam_tpfp_hp_loh_cn/figures/baseline_vs_v6/F1_global_summary_4panel.png" alt="V6 versus baseline global summary with HP ratio, marker counts, ambiguous reads, and marker rate">
+            <figcaption>F1 global summary：V6 marker count 與 marker rate 同時優於 baseline；HP1:HP2 all-reads 改善較小，ALT-only 口徑尚未在本輪重測。</figcaption>
+          </figure>
+
+          <figure class="span-6 panel">
+            <img src="../../../../../research/v6_bam_tpfp_hp_loh_cn/figures/baseline_vs_v6/F10_lr_apply_baseline.png" alt="Baseline LR and V6 LR tau sweep showing near identical uplift">
+            <figcaption>F10 LR baseline substitution：baseline LR 與 V6 LR 曲線幾乎重合，支持「LR F1 uplift 不是 V6-specific」的 caveat。</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="filter">
+        <div class="section-head">
+          <div>
+            <h2>Phase 2 Filter：從 strong single-sample 到 gated candidate</h2>
+            <p>Cycle 1 的 HCC1395 結果很強，但 Cycle 2 清楚打掉 universal transfer claim。Cycle 3 的價值是把應用邊界寫成 gate，而不是硬把同一個 filter 套到所有樣本。</p>
+          </div>
+          <div class="panel">
+            <h3>Gate rule</h3>
+            <p><code>caller_F1 &lt; 0.80 AND FP_density &gt; 0.10</code>：apply per-sample re-fit；否則 skip filter 保留 caller baseline。</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel span-7">
+            <h3>Cycle 1 confusion matrix：HCC1395</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th></th><th class="num">Truth TP</th><th class="num">Truth FP</th><th>解讀</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Predicted keep</td><td class="num">30,015</td><td class="num">1,443</td><td>保留大多數 TP，同時留下部分 FP</td></tr>
+                  <tr><td>Predicted filter</td><td class="num">475</td><td class="num">3,399</td><td>TP loss 1.56%，FP removed 70.20%</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>Post-filter precision 0.9541，recall 0.6030，ΔF1 +0.02236。這是 HCC1395 single-sample strong evidence，不是跨樣本 production rule。</p>
+          </div>
+
+          <div class="panel span-5">
+            <h3>Cycle 2 cross-sample verdict</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Mode</th><th class="num">方向</th><th class="num">p</th><th>Verdict</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Transfer fixed</td><td class="num">1+/4-</td><td class="num">0.1875</td><td><span class="badge fail">DIRECTION_NEGATIVE</span></td></tr>
+                  <tr><td>Transfer swept</td><td class="num">1+/4-</td><td class="num">0.3125</td><td><span class="badge fail">DIRECTION_NEGATIVE</span></td></tr>
+                  <tr><td>Re-fit</td><td class="num">3+/0-/2≈0</td><td class="num">0.125</td><td><span class="badge pending">MIXED</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>最關鍵負例是 HCC1954 transfer ΔF1 -0.37744，說明單一 HCC1395-trained τ/coef 不可直接 transfer。</p>
+          </div>
+
+          <div class="panel span-12">
+            <h3>Cycle 3 Step 1 gate evaluation</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Sample</th><th class="num">Caller F1</th><th class="num">FP density</th><th>Gate</th><th class="num">Gated ΔF1</th><th>可信口徑</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>HCC1395</td><td class="num">0.7166</td><td class="num">14.0%</td><td><span class="badge pass">Apply</span></td><td class="num">+0.02236</td><td>training-like low-F1 / high-FP sample</td></tr>
+                  <tr><td>HCC1937</td><td class="num">0.3692</td><td class="num">16.2%</td><td><span class="badge pass">Apply</span></td><td class="num">+0.00761</td><td>唯一新樣本 low-F1 positive</td></tr>
+                  <tr><td>H1437</td><td class="num">0.8670</td><td class="num">1.1%</td><td><span class="badge neutral">Skip</span></td><td class="num">0.00000</td><td>caller near ceiling，避免誤傷</td></tr>
+                  <tr><td>H2009</td><td class="num">0.8863</td><td class="num">1.0%</td><td><span class="badge neutral">Skip</span></td><td class="num">0.00000</td><td>caller near ceiling</td></tr>
+                  <tr><td>HCC1954</td><td class="num">0.8385</td><td class="num">3.4%</td><td><span class="badge neutral">Skip</span></td><td class="num">0.00000</td><td>skip 修補 transfer 災難</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>H_C3_1 qualifying mean +0.01499 PASS；H_C3_3 non-qualifying drift 0 PASS；H_C3_2 仍 pending，因為 qualifying panel 只有 n=2。</p>
+          </div>
+
+          <figure class="span-12 panel">
+            <img src="../../../../../research/methyl_augmented_filter_phase2/cycle3/figures/cycle3_step1_gated_delta_f1.png" alt="Cycle 3 gated delta F1 bar chart across five samples">
+            <figcaption>Cycle 3 gated ΔF1：gate 把 high-F1 樣本歸零保護，保留 HCC1395 與 HCC1937 的 uplift。這是 production safety gate，不是 cross-sample proof。</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="ablation">
+        <div class="section-head">
+          <div>
+            <h2>Ablation Verdict：ISM methylation 不是 F1 contributor</h2>
+            <p>本週最重要的科學修正是 H_M1a FAIL。Cycle 1 看到 methylation coef rank 5，不等於它有 functional incremental value。</p>
+          </div>
+          <div class="panel">
+            <h3>Reframe action</h3>
+            <p>Paper §3 應撤回「methylation-augmented filter」說法，改為 caller-F1-headroom-gated multi-axis filter。ISM 保留為 characterization 工具。</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel span-6">
+            <h3>Refit mode：full vs no-methyl</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Sample</th><th class="num">Full ΔF1</th><th class="num">No-methyl ΔF1</th><th>結果</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>HCC1395</td><td class="num">+0.02236</td><td class="num">+0.02171</td><td>drop +0.00065，低於 threshold</td></tr>
+                  <tr><td>HCC1937</td><td class="num">+0.00761</td><td class="num">+0.00798</td><td>no-methyl 略勝</td></tr>
+                  <tr><td>HCC1954</td><td class="num">+0.00095</td><td class="num">+0.00179</td><td>no-methyl 略勝</td></tr>
+                  <tr><td>H1437</td><td class="num">~0</td><td class="num">~0</td><td>無差異</td></tr>
+                  <tr><td>H2009</td><td class="num">~0</td><td class="num">~0</td><td>無差異</td></tr>
+                  <tr><td><strong>5-sample mean</strong></td><td class="num"><strong>+0.00619</strong></td><td class="num"><strong>+0.00630</strong></td><td>no-methyl 反而略勝</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel span-6">
+            <h3>Transfer mode：caller_af 才是主要 confound</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Sample</th><th class="num">Full transfer</th><th class="num">No caller_af</th><th class="num">修補比例</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>HCC1954</td><td class="num">-0.37744</td><td class="num">-0.12629</td><td class="num">66.6%</td></tr>
+                  <tr><td>HCC1937</td><td class="num">-0.07068</td><td class="num">-0.00903</td><td class="num">87.2%</td></tr>
+                  <tr><td>H1437</td><td class="num">-0.03597</td><td class="num">-0.00354</td><td class="num">90.2%</td></tr>
+                  <tr><td>H2009</td><td class="num">-0.00450</td><td class="num">-0.00138</td><td class="num">69.3%</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>H_A1 computed +0.25114，介於 PASS +0.30 與 FAIL +0.10 間，所以是 MARGINAL，而不是完全證明。</p>
+          </div>
+
+          <figure class="span-7 panel">
+            <img src="../../../../../research/methyl_augmented_filter_phase2/cycle3/ablation/figures/cycle3_step1_5_min_ablation.png" alt="Cycle 3 Step 1.5 ablation grouped bar chart">
+            <figcaption>Cycle 3 Step 1.5 ablation：no-methyl 在多數樣本不輸 full，支持 ISM methylation vestigial covariate 結論。</figcaption>
+          </figure>
+
+          <figure class="span-5 panel">
+            <img src="../../../../../research/v6_bam_tpfp_hp_loh_cn/figures/baseline_vs_v6/F11_lr_ablation_methylation.png" alt="LR ablation methylation contribution across V6 and baseline">
+            <figcaption>F11 independent check：V6 methylation contribution +0.00066，baseline +0.00049，與 Cycle 3 H_M1a 同 magnitude。</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="trust">
+        <div class="section-head">
+          <div>
+            <h2>可信度分級</h2>
+            <p>把每個結論拆成「可相信什麼」和「不能外推什麼」。這是目前最適合給 PI 或下一輪 agent 接手的口徑。</p>
+          </div>
+          <div class="panel">
+            <h3>結論強度標準</h3>
+            <p>高：多來源或 pre-reg + 數值穩定。中：單樣本或 n 小但機制清楚。低：需補資料或存在 framing / provenance caveat。</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel span-6">
+            <h3>可信度雷達</h3>
+            <div class="trust">
+              <strong>V6 marker filter GO</strong>
+              <div class="bars"><div class="bar"><span class="bar-high"></span></div><small>高：HCC1395 4-way + 5-sample V6 manifest + local tag</small></div>
+            </div>
+            <div class="trust">
+              <strong>HCC1395 LR +0.02236</strong>
+              <div class="bars"><div class="bar"><span class="bar-high"></span></div><small>高：5-fold OOF + 5 seeds std 5e-5 + bit-exact reproduce</small></div>
+            </div>
+            <div class="trust">
+              <strong>ISM no F1 increment</strong>
+              <div class="bars"><div class="bar"><span class="bar-high"></span></div><small>高：Cycle 3 ablation + V6 §13 independent check 同方向</small></div>
+            </div>
+            <div class="trust">
+              <strong>Gate rule production candidate</strong>
+              <div class="bars"><div class="bar"><span class="bar-med"></span></div><small>中：n=2 qualifying，需 Step 2 panel</small></div>
+            </div>
+            <div class="trust">
+              <strong>Cross-sample universal filter</strong>
+              <div class="bars"><div class="bar"><span class="bar-low"></span></div><small>低：Cycle 2 transfer DIRECTION_NEGATIVE</small></div>
+            </div>
+          </div>
+
+          <div class="panel span-6">
+            <h3>結論分類</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>結論</th><th>屬性</th><th>限制</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>V6 production tag 可用於 marker filter downstream</td><td><span class="badge pass">可採用</span></td><td>不宣稱 Goal 3/4 或 LR F1 advantage</td></tr>
+                  <tr><td>Cycle 1 LR filter 在 HCC1395 有 strong uplift</td><td><span class="badge pass">單樣本成立</span></td><td>不可寫成跨樣本規則</td></tr>
+                  <tr><td>ISM methylation 對 F1 無實質增量</td><td><span class="badge pass">已修正主張</span></td><td>不代表 ISM characterization 無價值</td></tr>
+                  <tr><td>Gate rule 能避免 high-F1 sample regression</td><td><span class="badge pending">候選規則</span></td><td>H_C3_3 是 skip-by-construction，需要 panel 驗證</td></tr>
+                  <tr><td>Paper 可宣稱 methylation-augmented filter</td><td><span class="badge fail">撤回</span></td><td>應改成 caller-F1-headroom-gated multi-axis filter</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="verify">
+        <div class="section-head">
+          <div>
+            <h2>驗證確認流程</h2>
+            <p>本 HTML 沒有重跑長計算；它從既有報告、TSV、JSON 與 evidence ledger 抽取結果。下列命令是目前可重現同一批數字的流程。</p>
+          </div>
+          <div class="panel">
+            <h3>本次讀取輸入</h3>
+            <p><code>InterSubMod/docs/CURRENT_FOCUS.md</code>、<code>docs/experiments/INDEX.md</code>、<code>research/autoresearch/evidence_ledger.jsonl</code>、Cycle 1-3 原始報告與 TSV/JSON。</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel span-6">
+            <h3>Cycle 3 gate reproduce</h3>
+            <pre><code>cd /big7_disk/liaoyoyo2001/InterSubMod
+python3 research/methyl_augmented_filter_phase2/cycle3/scripts/apply_gated_filter.py
+
+Input:
+InterSubMod/research/methyl_augmented_filter_phase2/cycle2/data/cycle2_cross_sample_delta_f1.tsv
+
+Output:
+InterSubMod/research/methyl_augmented_filter_phase2/cycle3/intermediate/cycle3_step1_summary.json
+
+Observed snippet:
+H_C3_1 = +0.01498583297662185 PASS
+H_C3_3 = 0.0 PASS
+H_C3_2 = PENDING_STEP_2</code></pre>
+          </div>
+
+          <div class="panel span-6">
+            <h3>Cycle 3 Step 1.5 ablation</h3>
+            <pre><code>cd /big7_disk/liaoyoyo2001/InterSubMod
+python3 research/methyl_augmented_filter_phase2/cycle3/ablation/scripts/run_ablation_variants.py
+
+Input:
+InterSubMod/research/methyl_augmented_filter_phase2/cycle2/* master TSV
+
+Output:
+InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/data/cycle3_step1_5_min_ablation.tsv
+
+Observed snippet:
+H_M1a drop = +0.00065 FAIL
+H_A1 improvement = +0.25114 MARGINAL
+5-sample mean full +0.00619 vs no-methyl +0.00630</code></pre>
+          </div>
+
+          <div class="panel span-6">
+            <h3>V6 vs baseline F1</h3>
+            <pre><code>cd /big7_disk/liaoyoyo2001/InterSubMod
+python3 research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/scripts/baseline_vs_v6_f1_analysis.py
+
+Input:
+InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/step1_master_four_way.tsv
+
+Output:
+InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/step1_f1_analysis_*.tsv
+
+Observed snippet:
+caller-alone F1 = 0.7165
+V6 T=2 F1 = 0.7069 vs baseline 0.6783
+V6 T=3 F1 = 0.5913 vs baseline 0.4308</code></pre>
+          </div>
+
+          <div class="panel span-6">
+            <h3>LR baseline substitution</h3>
+            <pre><code>cd /big7_disk/liaoyoyo2001/InterSubMod
+python3 research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/scripts/apply_lr_to_baseline.py
+
+Input:
+InterSubMod/research/methyl_augmented_filter_phase2/cycle1/cycle1_track_a_filter.json
+InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/step1_master_four_way.tsv
+
+Output:
+InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/apply_lr_baseline_results.json
+
+Observed snippet:
+V6 LR +0.02236
+baseline LR +0.02302
+multi-seed std = 0.00005</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="risks">
+        <div class="section-head">
+          <div>
+            <h2>待補事項與可信度風險</h2>
+            <p>這些項目不否定目前結果，但會影響 paper claim、production gate、或下一輪實驗優先順序。</p>
+          </div>
+          <div class="panel">
+            <h3>最短下一步</h3>
+            <p>A2 caller_af KS test 約 30 分鐘，最能補強 H_A1 的殘餘 33% 機制；Cycle 3 Step 2 panel survey 則決定能否從 n=2 往 n>=4 推進。</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel span-6">
+            <h3>Scientific risks</h3>
+            <div class="risk-list">
+              <div class="risk"><strong>Cycle 3 panel n=2 不足以升級</strong>H_C3_1 PASS 只是 qualifying subset mean threshold，H_C3_2 n>=4 Wilcoxon 尚未完成。</div>
+              <div class="risk"><strong>4-feature vs 5-feature naming 需最後對齊</strong>Ablation no-methyl TSV 使用 5 個非 methyl features，含 <code>chr8_flag</code>；gate JSON production list 是 4 features，不含 chr8。Paper 或 production config 前需明確決定 chr8 是否保留為 sample-specific covariate。</div>
+              <div class="risk"><strong>Baseline 4-sample comparison 未做</strong>V6 vs baseline 的 head-to-head 是 HCC1395；四個新樣本尚未跑 baseline ISM 對照。</div>
+              <div class="risk"><strong>ALT-only ratio 未重測</strong>PI 4-29 的 17.3:1 是 ALT-supporting reads 口徑；本週 all-reads 指標只能說 mild improvement。</div>
+            </div>
+          </div>
+
+          <div class="panel span-6">
+            <h3>Engineering / provenance risks</h3>
+            <div class="risk-list">
+              <div class="risk"><strong>Caller mode framing 已修正但要持續同步</strong>5/20 已把 paired-pileup 改為 ClairS-TO ssrs / LongPhase-TO / ISM 口徑；舊報告與 slide 若仍殘留 paired-pileup 會污染 paper story。</div>
+              <div class="risk"><strong>V6 tag 是 local 狀態</strong><code>v6-prod-20260520</code> 與 commit <code>8a90532</code> 已寫入 manifest，但 remote push 仍 pending user authorization。</div>
+              <div class="risk"><strong>Evidence ledger 有一筆 5/20 20:00 時間戳</strong>本 HTML 生成時間為 5/20 13:12 CST；該 entry 已存在於檔案中但時間 metadata 晚於生成時間，建議後續做 timestamp sanity check。</div>
+              <div class="risk"><strong>Existing Version C HTML 有 fabricated warning</strong>已存在的 <code>version_C_dense_8slide.html</code> 自帶 fabricated value warning；本報告未採用該版本數字，改讀原始 markdown / TSV / JSON。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="sources">
+        <div class="section-head">
+          <div>
+            <h2>來源索引</h2>
+            <p>所有可追溯來源都列在這裡。路徑用 InterSubMod 前綴或從本 HTML 相對連結。</p>
+          </div>
+          <div class="panel">
+            <h3>報告生成聲明</h3>
+            <p>本 HTML 是 synthesis dashboard，不是新的實驗結果；沒有改寫 evidence ledger，也沒有重跑 BAM/ISM 長計算。</p>
+          </div>
+        </div>
+        <div class="source-list">
+          <div class="source-item"><a href="../../../../../docs/CURRENT_FOCUS.md">InterSubMod/docs/CURRENT_FOCUS.md</a>：live 主軸，含 5/18-5/20 cycle 狀態。</div>
+          <div class="source-item"><a href="../../../../../docs/experiments/INDEX.md">InterSubMod/docs/experiments/INDEX.md</a>：實驗歷史索引與本週新增條目。</div>
+          <div class="source-item"><a href="../../../../../research/autoresearch/evidence_ledger.jsonl">InterSubMod/research/autoresearch/evidence_ledger.jsonl</a>：append-only evidence SoT。</div>
+          <div class="source-item"><a href="../../../../../docs/experiments/in_progress/2026/05/20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01.md">InterSubMod/docs/experiments/in_progress/2026/05/20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01.md</a>：V6 vs baseline、F1、LR、5-goal cross-tab。</div>
+          <div class="source-item"><a href="../../../../../research/selfphasing_v6_production/manifest.yaml">InterSubMod/research/selfphasing_v6_production/manifest.yaml</a>：V6 production tag、commit、artifact manifest。</div>
+          <div class="source-item"><a href="../../../../../research/methyl_augmented_filter_phase2/cycle1/cycle1_findings.md">InterSubMod/research/methyl_augmented_filter_phase2/cycle1/cycle1_findings.md</a>：Cycle 1 HCC1395 global FP filter。</div>
+          <div class="source-item"><a href="../../../../../research/methyl_augmented_filter_phase2/cycle2/cycle2_findings.md">InterSubMod/research/methyl_augmented_filter_phase2/cycle2/cycle2_findings.md</a>：Cycle 2 cross-sample DIRECTION_NEGATIVE 與 H_C1_6 PASS。</div>
+          <div class="source-item"><a href="../../../../../research/methyl_augmented_filter_phase2/cycle3/cycle3_step1_findings.md">InterSubMod/research/methyl_augmented_filter_phase2/cycle3/cycle3_step1_findings.md</a>：Cycle 3 gate reproduce。</div>
+          <div class="source-item"><a href="../../../../../research/methyl_augmented_filter_phase2/cycle3/ablation/cycle3_step1_5_min_ablation_findings.md">InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/cycle3_step1_5_min_ablation_findings.md</a>：H_M1a / H_A1 ablation verdict。</div>
+        </div>
+      </section>
+
+      <footer>
+        Generated for InterSubMod weekly research understanding. File path:
+        <code>InterSubMod/docs/reports/pi_reports/2026/05/20260520_research_progress_trust_dashboard_01.html</code>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

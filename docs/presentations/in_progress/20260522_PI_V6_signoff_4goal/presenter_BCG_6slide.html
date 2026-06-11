@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>V6 Sign-off Presenter Deck · BCG-style · 6 slide (2026-05-22)</title>
+<style>
+:root{
+  --c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-text:#141413;--c-text-soft:#6B6B66;
+  --c-border:#D6CFC0;--c-rule:#E3DACC;--c-code-bg:#F4EFE6;
+  --c-primary:#1E3A8A;--c-accent:#D97757;--c-accent-deep:#B85A3F;
+  --c-ok:#15803D;--c-warn:#A16207;--c-neg:#C2410C;
+  --c-tier4:#15803D;--c-tier3:#2563EB;--c-tier2:#A16207;
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;
+  --ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","PingFang TC","Droid Sans Fallback",system-ui,sans-serif;
+  --ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,Monaco,monospace;
+  --fs-xs:13px;--fs-sm:15px;--fs-md:17px;--fs-lg:19px;--fs-xl:23px;--fs-2xl:28px;--fs-3xl:34px;
+  --radius:4px;
+  --shadow-md:0 2px 8px rgba(20,20,19,0.08);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#262626;color:var(--c-text);font-family:var(--ff-body);font-size:var(--fs-md);line-height:1.55}
+.deck-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:var(--sp-3) var(--sp-4)}
+
+/* Top control bar */
+.topbar{width:100%;max-width:1280px;display:flex;justify-content:space-between;align-items:center;color:#EEE;font-size:var(--fs-sm);padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-3)}
+.topbar .brand{font-weight:700;letter-spacing:0.5px;color:#FFF}
+.topbar .brand small{display:block;color:#BBB;font-weight:400;font-size:var(--fs-xs);margin-top:2px;letter-spacing:0}
+.topbar .controls{display:flex;gap:var(--sp-2);align-items:center}
+.topbar button{background:#3A3A3A;color:#FFF;border:1px solid #555;border-radius:var(--radius);padding:5px 12px;font-family:inherit;font-size:var(--fs-sm);cursor:pointer;transition:background .15s}
+.topbar button:hover{background:#4A4A4A}
+.topbar button:disabled{opacity:.35;cursor:not-allowed}
+.topbar .counter{font-family:var(--ff-mono);color:#FFF;background:#1A1A1A;padding:5px 12px;border-radius:var(--radius);min-width:50px;text-align:center}
+.topbar label.toggle{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:#DDD;user-select:none}
+.topbar label.toggle input{accent-color:var(--c-accent)}
+
+/* Slide canvas — 16:9 PPT mimic */
+.slide-canvas{width:100%;max-width:1280px;aspect-ratio:16/9;background:var(--c-surface);border:1px solid var(--c-border);box-shadow:var(--shadow-md);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.slide-canvas .slide{display:none;flex-direction:column;width:100%;height:100%;padding:24px 36px 18px}
+.slide-canvas .slide.active{display:flex}
+
+/* Slide header strip */
+.slide-head{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:8px;border-bottom:2px solid var(--c-primary);margin-bottom:12px;flex-shrink:0}
+.slide-eyebrow{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:1.2px;color:var(--c-accent-deep);font-weight:700}
+.slide-title{font-size:var(--fs-2xl);margin:2px 0 0;line-height:1.2;color:var(--c-text);font-weight:700}
+.slide-chip{font-family:var(--ff-mono);font-size:var(--fs-xs);color:var(--c-text-soft);background:var(--c-code-bg);padding:3px 8px;border-radius:var(--radius)}
+
+/* Slide body grid */
+.slide-body{flex:1;display:grid;gap:14px;min-height:0;align-items:stretch}
+.slide-body.split-13{grid-template-columns:1.25fr 1fr}
+.slide-body.split-11{grid-template-columns:1fr 1fr}
+.slide-body.split-31{grid-template-columns:1fr 3fr}
+.slide-body.single{grid-template-columns:1fr}
+.slide-body.split-rows{grid-template-rows:1fr auto;grid-template-columns:1fr}
+
+/* Hero figure */
+.hero{display:flex;align-items:center;justify-content:center;background:var(--c-bg);border:1px solid var(--c-rule);border-radius:var(--radius);padding:6px;min-height:0;overflow:hidden}
+.hero img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.hero-caption{font-size:var(--fs-xs);color:var(--c-text-soft);margin-top:4px;text-align:center;font-style:italic}
+
+/* Side panel */
+.side{display:flex;flex-direction:column;gap:8px;min-height:0;overflow:hidden}
+.side h3{font-size:var(--fs-md);margin:0;color:var(--c-primary);font-weight:700;padding-bottom:4px;border-bottom:1px dashed var(--c-rule)}
+.side ul{margin:0;padding-left:18px}
+.side li{font-size:var(--fs-sm);line-height:1.5;margin:3px 0}
+.side li strong{color:var(--c-accent-deep)}
+
+/* Verdict / takeaway box */
+.verdict{background:var(--c-bg);border-left:4px solid var(--c-primary);padding:10px 14px;font-size:var(--fs-md);line-height:1.55;border-radius:0 var(--radius) var(--radius) 0}
+.verdict.ok{border-color:var(--c-ok);background:#F0FDF4}
+.verdict.warn{border-color:var(--c-warn);background:#FEFCE8}
+.verdict.neg{border-color:var(--c-neg);background:#FEF2F0}
+.verdict strong{color:var(--c-primary)}
+.verdict.ok strong{color:var(--c-ok)}
+.verdict.warn strong{color:#78350F}
+.verdict.neg strong{color:#7F1D1D}
+
+/* Dense BCG table */
+table.bcg{border-collapse:collapse;width:100%;font-size:var(--fs-sm);font-family:var(--ff-body)}
+table.bcg th,table.bcg td{border-top:1px solid var(--c-rule);border-bottom:1px solid var(--c-rule);padding:7px 10px;text-align:left;vertical-align:middle}
+table.bcg th{background:var(--c-code-bg);font-weight:700;color:var(--c-text);letter-spacing:0.2px;border-top:2px solid var(--c-text);border-bottom:1px solid var(--c-text)}
+table.bcg td.num,table.bcg th.num{text-align:right;font-family:var(--ff-mono);font-variant-numeric:tabular-nums}
+table.bcg td.ok{color:var(--c-ok);font-weight:600}
+table.bcg td.neg{color:var(--c-neg);font-weight:600}
+table.bcg tr:last-child td{border-bottom:2px solid var(--c-text)}
+
+/* Tier badge */
+.badge{display:inline-block;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:700;color:white;letter-spacing:0.5px;font-family:var(--ff-mono);vertical-align:middle}
+.badge.t4{background:var(--c-tier4)}.badge.t3{background:var(--c-tier3)}.badge.t2{background:var(--c-tier2)}
+.badge.go{background:var(--c-ok)}.badge.nogo{background:var(--c-neg)}.badge.probe{background:var(--c-warn)}
+
+/* Footer bar */
+.slide-foot{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--c-text-soft);padding-top:6px;border-top:1px solid var(--c-rule);margin-top:8px;font-family:var(--ff-mono);flex-shrink:0}
+.slide-foot .src{word-break:break-all;max-width:70%}
+
+/* Inline terms strip (key glossary on slide) */
+.terms{font-size:12.5px;color:var(--c-text-soft);background:#FCFAF4;border:1px dashed var(--c-rule);border-radius:var(--radius);padding:6px 12px;margin-top:6px;line-height:1.5;flex-shrink:0}
+.terms strong{color:var(--c-primary);font-weight:700;letter-spacing:0.3px;margin-right:4px}
+.terms b{color:var(--c-accent-deep);font-weight:700;background:var(--c-code-bg);padding:1px 5px;border-radius:3px;font-family:var(--ff-mono);font-size:12px}
+.terms .sep{color:var(--c-border);margin:0 6px}
+
+/* Speaker note (collapsed) */
+.note-wrap{width:100%;max-width:1280px;margin-top:var(--sp-3)}
+.speaker-note{background:#1F1F1F;border:1px solid #444;color:#EEE;border-radius:var(--radius);font-size:var(--fs-sm)}
+.speaker-note summary{cursor:pointer;padding:10px 14px;font-weight:600;color:#FFF;letter-spacing:0.5px;list-style:none;display:flex;justify-content:space-between;align-items:center;background:#2A2A2A;border-radius:var(--radius)}
+.speaker-note[open] summary{border-radius:var(--radius) var(--radius) 0 0}
+.speaker-note summary::after{content:"▼";font-size:11px;transition:transform .15s}
+.speaker-note[open] summary::after{transform:rotate(180deg)}
+.speaker-note .note-body{padding:14px 18px;line-height:1.7;color:#DDD}
+.speaker-note .note-body h4{margin:8px 0 4px;color:#FFD089;font-size:var(--fs-sm);text-transform:uppercase;letter-spacing:0.8px;font-weight:700}
+.speaker-note .note-body p{margin:4px 0}
+.speaker-note .note-body ul{margin:4px 0;padding-left:20px}
+.speaker-note .note-body code{background:#3A3A3A;color:#FFD089;padding:1px 5px;border-radius:3px;font-size:0.92em}
+.speaker-note .note-body .pi-say{background:#2D2D45;border-left:3px solid #93C5FD;padding:6px 10px;margin:6px 0;border-radius:0 3px 3px 0;color:#E0E7FF}
+.speaker-note .note-body .caveat{background:#3A2415;border-left:3px solid #FB923C;padding:6px 10px;margin:6px 0;border-radius:0 3px 3px 0;color:#FED7AA}
+
+/* Cover slide */
+.cover{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;height:100%;padding:24px 56px}
+.cover .eyebrow{font-size:var(--fs-sm);text-transform:uppercase;letter-spacing:2px;color:var(--c-accent-deep);font-weight:700}
+.cover h1{font-size:var(--fs-3xl);margin:12px 0 8px;line-height:1.15;color:var(--c-text);font-weight:800;max-width:90%}
+.cover .subtitle{font-size:var(--fs-lg);color:var(--c-text-soft);max-width:80%;line-height:1.45;margin-bottom:14px}
+.cover .arc{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px;width:100%}
+.cover .arc .step{background:var(--c-bg);border:1px solid var(--c-rule);border-left:3px solid var(--c-accent);padding:8px 10px;border-radius:var(--radius);font-size:var(--fs-xs);line-height:1.4}
+.cover .arc .step .num{font-family:var(--ff-mono);color:var(--c-accent-deep);font-weight:700;font-size:11px;letter-spacing:0.5px}
+.cover .arc .step .lbl{display:block;margin-top:2px;color:var(--c-text);font-weight:600;font-size:12px}
+.cover .meta-row{display:flex;gap:24px;margin-top:18px;font-size:var(--fs-sm);color:var(--c-text-soft)}
+.cover .meta-row span strong{color:var(--c-text);font-weight:600;margin-right:4px}
+
+/* Headline strip (top of evidence slides) */
+.headline-strip{background:var(--c-primary);color:white;padding:10px 16px;font-size:var(--fs-md);line-height:1.55;border-radius:var(--radius);margin-bottom:10px;flex-shrink:0;font-weight:500}
+.headline-strip strong{color:#FED7AA;font-weight:700}
+.headline-strip.ok{background:var(--c-ok)}
+.headline-strip.neg{background:#7F1D1D}
+
+/* Closing slide */
+.closing-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;height:100%}
+.closing-col h3{font-size:var(--fs-lg);margin:0 0 8px;padding-bottom:4px;border-bottom:2px solid var(--c-primary);color:var(--c-primary)}
+.closing-col.go h3{border-color:var(--c-ok);color:var(--c-ok)}
+.closing-col.nogo h3{border-color:var(--c-neg);color:var(--c-neg)}
+.closing-col ul{margin:0;padding-left:20px;font-size:var(--fs-sm)}
+.closing-col li{margin:6px 0;line-height:1.5}
+.pivot-list{margin:0;padding-left:0;list-style:none}
+.pivot-list li{background:var(--c-bg);border:1px solid var(--c-rule);border-left:3px solid var(--c-accent);padding:6px 10px;margin:5px 0;border-radius:var(--radius);font-size:var(--fs-sm)}
+.pivot-list .roi{font-family:var(--ff-mono);font-size:10px;color:var(--c-text-soft);float:right}
+
+/* Reading mode: when not in presenter mode, hide speaker notes */
+body.proj-only .speaker-note{display:none}
+body.proj-only .topbar{background:transparent}
+
+/* Print all slides */
+@media print{
+  body{background:white}
+  .topbar{display:none}
+  .deck-wrap{padding:0}
+  .slide-canvas{aspect-ratio:auto;max-width:none;border:none;box-shadow:none;page-break-after:always;height:auto;min-height:auto}
+  .slide-canvas .slide{display:flex!important;page-break-after:always;height:auto;min-height:auto}
+  .speaker-note{display:none}
+}
+
+@media (max-width:800px){
+  .slide-body.split-13,.slide-body.split-11,.slide-body.split-31{grid-template-columns:1fr}
+  .cover .arc{grid-template-columns:1fr 1fr}
+  .closing-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="deck-wrap">
+
+<!-- Top control bar -->
+<header class="topbar" role="toolbar" aria-label="presentation controls">
+  <div class="brand">V6 Sign-off · 4-Goal Synthesis<small>2026-05-22 · PI report · BCG presenter mode</small></div>
+  <div class="controls">
+    <button id="btn-prev" type="button" aria-label="previous slide">← Prev</button>
+    <span class="counter" id="counter">1 / 8</span>
+    <button id="btn-next" type="button" aria-label="next slide">Next →</button>
+    <label class="toggle"><input id="proj-toggle" type="checkbox"> Projector only</label>
+  </div>
+</header>
+
+<!-- Slide canvas (16:9) -->
+<div class="slide-canvas" id="canvas">
+
+<!-- ─────────────── SLIDE 1 · COVER ─────────────── -->
+<section class="slide active" data-idx="1" aria-label="Slide 1 Cover">
+  <div class="cover">
+    <div class="eyebrow">PI Sign-off · Weekly Synthesis · 5–10 min</div>
+    <h1>V6 binary 跨 5 樣本驗證完成；<br>Phase 2 LR filter cross-sample 失敗</h1>
+    <div class="subtitle">本週要回答的問題：V6 是否 production-ready？特徵能否在 tumor-only 下超越 caller F1 且泛化？</div>
+    <div class="arc" aria-label="presentation arc">
+      <div class="step"><span class="num">S2 · BAM</span><span class="lbl">V6 vs baseline tag</span></div>
+      <div class="step"><span class="num">S3 · REGION</span><span class="lbl">ISM 端驗證有效</span></div>
+      <div class="step"><span class="num">S4 · FEATURE</span><span class="lbl">9 特徵 + anchor</span></div>
+      <div class="step"><span class="num">S4b · ZONE</span><span class="lbl">9-cell pivot 證據</span></div>
+      <div class="step"><span class="num">S5 · F1</span><span class="lbl">4-algo LOSO</span></div>
+      <div class="step"><span class="num">S6 · DECIDE</span><span class="lbl">GO / NO-GO / Pivot</span></div>
+      <div class="step" style="border-left-color:var(--c-primary)"><span class="num">S7 · 5-GOAL</span><span class="lbl">未來進度全景</span></div>
+    </div>
+    <div class="meta-row">
+      <span><strong>樣本:</strong> 5 (HCC1395 · HCC1937 · HCC1954 · H1437 · H2009)</span>
+      <span><strong>Tier:</strong> ⭐⭐⭐⭐ L2 multi-sample</span>
+      <span><strong>Audit:</strong> 11 artifacts · 273 claims · 93% verified · 0 fabrication</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── SLIDE 2 · V6 vs BASELINE BAM ─────────────── -->
+<section class="slide" data-idx="2" aria-label="Slide 2 V6 vs baseline BAM">
+  <div class="slide-head">
+    <div>
+      <div class="slide-eyebrow">Goal 1 · BAM 層 · Tier ⭐⭐⭐⭐ L2</div>
+      <h2 class="slide-title">V6 跨 5 樣本 ALT-only HP1:HP2 全 &lt; 1 — HCC1395 baseline 4.41 → V6 0.43（10× HP2 reverse）</h2>
+    </div>
+    <span class="slide-chip">5 sample · scope chr8+chr19 hotspot</span>
+  </div>
+
+  <div class="headline-strip ok">
+    <strong>Priority bug fix 5/5 一致</strong> · ALT-only ratio 全 &lt; 1 · HCC1395 <strong>4.41 → 0.43 (10× reverse)</strong> · <span style="opacity:0.85;font-size:0.92em">scope chr8 (HPSig+LOH 7.4× FP) + chr19 (752 victim)</span>
+  </div>
+
+  <div class="slide-body" style="grid-template-rows:1fr auto;grid-template-columns:1fr;gap:8px">
+    <div style="display:grid;grid-template-columns:1fr;gap:10px;min-height:0">
+      <div class="hero" style="flex-direction:column;align-items:stretch;padding:6px 6px 2px">
+        <img src="assets/figures/target1/S2_priority_bug_mechanism_plus_ALTonly.png" alt="Priority bug mechanism diagram + ALT-only HP1:HP2 ratio across baseline + 5 V6 samples" style="flex:1;min-height:0"/>
+        <div class="hero-caption">S2 · Priority bug 機制 + ALT-only ratio 跨 5 樣本 fingerprint reverse</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1.1fr 0.85fr 1.05fr;gap:10px">
+      <div class="verdict ok">
+        <strong>5 樣本 ALT-only (chr8+chr19)</strong><br>
+        HCC1395 <b>4.408 → 0.425</b><br>
+        HCC1937 0.435 · HCC1954 0.372<br>
+        H1437 0.721 · H2009 0.793*<br>
+        — 全 &lt; 1 ✓
+      </div>
+      <div class="verdict">
+        <strong>SP1/2/3 鐵證</strong><br>
+        baseline 113:0 · 109:1 · 108:0<br>
+        → V5=V6 <b>0 diff</b><br>
+        paired 對齊 3/3
+      </div>
+      <div class="verdict" style="border-color:var(--c-primary);background:#EFF6FF">
+        <strong>全基因組 confirm (HCC1395)</strong><br>
+        chr1-22+X/Y · <b>34,855</b> priority bug victims<br>
+        V3F+V5 修正率 <b>100%</b><br>
+        top enrich: chr20/Y/21/16<br>
+        <span style="font-size:0.9em;opacity:0.85">(chr8 僅 0.200‰，非 bug 集中區 — chr8 是 LOH+HPSig FP hotspot 不同軸)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="terms">
+    <strong>📖 terms</strong>
+    <b>priority bug</b>= germline-absent 區 default HP=1<span class="sep">·</span>
+    <b>ALT-only ratio</b>= 只算 ALT allele reads<span class="sep">·</span>
+    <b>scope chr8+chr19</b>= priority-bug 訊號 enrich hotspot（design choice 非 limitation）<span class="sep">·</span>
+    <b>HP=33</b>= V6 Layer 1.5 ambig bucket
+  </div>
+
+  <div class="slide-foot">
+    <span class="src">source: assets/figures/target1/S2_priority_bug_mechanism_plus_ALTonly.png · A2_ALT_only_HP_ratio_5sample.tsv</span>
+    <span>S2/8</span>
+  </div>
+</section>
+
+<!-- ─────────────── SLIDE 3 · V6 經 ISM 驗證 ─────────────── -->
+<section class="slide" data-idx="3" aria-label="Slide 3 V6 ISM region-level verification">
+  <div class="slide-head">
+    <div>
+      <div class="slide-eyebrow">Goal 2 · Region 層 · Tier ⭐⭐⭐⭐ L2</div>
+      <h2 class="slide-title">V6 ISM 端有效可驗證 — HCC1395 4-way region marker +52.4% · rate +1.26pp · hp=3 ×13.2</h2>
+    </div>
+    <span class="slide-chip">HCC1395 4-way · 110/110 PASS</span>
+  </div>
+
+  <div class="headline-strip">
+    <strong>Marker +52.4% × Rate +1.26pp = 量質同進 ✓</strong> · priority bug fix → HP=33 暴露 → 量質同步 · net TP:FP = 14:1 · 110/110 PASS
+  </div>
+
+  <div class="slide-body single">
+    <div class="hero" style="flex-direction:column;align-items:stretch;padding:6px">
+      <img src="assets/figures/target2/S3_marker_count_rate_quality_quadrant.png"
+           alt="Marker count × rate 4-quadrant + NG definition + counterexample"
+           style="flex:1;min-height:0;width:100%;object-fit:contain"/>
+      <div class="hero-caption">S3 · Marker count × rate 量質 2-axis + 機制可信度 + counterexample</div>
+    </div>
+  </div>
+
+  <div class="terms">
+    <strong>📖 terms</strong>
+    <b>ISM</b>= InterSubMod region 層分析框架<span class="sep">·</span>
+    <b>NG (NGroups)</b>= read 在 phasing-space 聚類群數<span class="sep">·</span>
+    <b>Marker</b>= region 計入 NG≥3<span class="sep">·</span>
+    <b>Rate</b>= NG≥3 region 中 TP 占比<span class="sep">·</span>
+    <b>4-way</b>= baseline/V3F/V5/V6 同表並列<span class="sep">·</span>
+    <b>net TP:FP</b>= 區段 marker 中 TP 對 FP 的淨比例
+  </div>
+
+  <div class="terms" style="border-top:1px dashed #555;margin-top:6px;padding-top:6px;font-size:11px;color:#aaa">
+    <strong>🔍 深度觀察</strong>
+    <a href="target2_ISM_V6_vs_baseline.html#sec-2F" target="_blank" style="color:#93C5FD;text-decoration:underline">全基因 per-chr (§2F C1)</a><span class="sep">·</span>
+    <a href="target2_ISM_V6_vs_baseline.html#sec-2G" target="_blank" style="color:#93C5FD;text-decoration:underline">TP/FP delta 拆分 (§2G C2)</a><span class="sep">·</span>
+    <a href="target2_ISM_V6_vs_baseline.html#sec-2H" target="_blank" style="color:#93C5FD;text-decoration:underline">AF 4-bin sweep (§2H C3)</a><span class="sep">·</span>
+    <a href="target2_ISM_V6_vs_baseline.html#sec-2I" target="_blank" style="color:#93C5FD;text-decoration:underline">counterexample 深挖 (§2I C4)</a><span class="sep">·</span>
+    <a href="target2_ISM_V6_vs_baseline.html#sec-2J" target="_blank" style="color:#93C5FD;text-decoration:underline">3 軸 cross-tab (§2J)</a>
+    <span class="sep">·</span> target2 §2F–§2J · 4 figures (C1–C4)
+  </div>
+
+  <div class="slide-foot">
+    <span class="src">source: assets/figures/target2/S3_marker_count_rate_quality_quadrant.png · target2_ISM_V6_vs_baseline.html · 20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01 (110/110 PASS)</span>
+    <span>S3/8</span>
+  </div>
+</section>
+
+<!-- ─────────────── SLIDE 4 · 特徵分析 ─────────────── -->
+<section class="slide" data-idx="4" aria-label="Slide 4 Feature direction consistency">
+  <div class="slide-head">
+    <div>
+      <div class="slide-eyebrow">Goal 3 · Feature 層 · Tier ⭐⭐ L4 descriptive</div>
+      <h2 class="slide-title">9 特徵跨樣本方向一致性 — 僅 <code style="background:var(--c-code-bg);padding:1px 6px;border-radius:3px;font-family:var(--ff-mono);font-size:0.85em">loh_inner_flag</code> 5/5；<code style="background:var(--c-code-bg);padding:1px 6px;border-radius:3px;font-family:var(--ff-mono);font-size:0.85em">caller_af</code> direction-flipping</h2>
+    </div>
+    <span class="slide-chip">Cohen's d · 9 feat × 5 sample</span>
+  </div>
+
+  <div class="headline-strip warn">
+    <code style="background:#FFF3;padding:1px 5px;border-radius:3px">loh_inner_flag</code> = <strong>唯一 5/5 anchor</strong> · Gap <strong>+8.5~+43.5pp</strong> · <code style="background:#FFF3;padding:1px 5px;border-radius:3px">caller_af</code> direction-flipping (d=+1.33 ↔ −1.46)
+  </div>
+
+  <div class="slide-body split-13">
+    <div class="hero">
+      <img src="assets/figures/target3/A3_loh_inner_flag_grouped_bar_5sample.png" alt="loh_inner_flag TP-inner% vs FP-inner% grouped bar across 5 samples"/>
+    </div>
+    <div class="side">
+      <h3>loh_inner_flag · 5/5 anchor (TSV verified)</h3>
+      <table class="bcg" aria-label="loh_inner_flag TP/FP inner% Gap per sample">
+        <thead><tr><th>Sample</th><th class="num">TP inner%</th><th class="num">FP inner%</th><th class="num">Gap (pp)</th><th class="num">AUC</th></tr></thead>
+        <tbody>
+          <tr><td>HCC1395</td><td class="num ok">45.97</td><td class="num">4.63</td><td class="num ok"><strong>+41.34</strong></td><td class="num">0.71</td></tr>
+          <tr><td>HCC1937</td><td class="num ok">49.49</td><td class="num">6.04</td><td class="num ok"><strong>+43.45</strong></td><td class="num">0.72</td></tr>
+          <tr><td>H2009</td><td class="num ok">28.07</td><td class="num">4.92</td><td class="num ok">+23.15</td><td class="num">0.62</td></tr>
+          <tr><td>H1437</td><td class="num">20.09</td><td class="num">0.39</td><td class="num">+19.70</td><td class="num">0.60</td></tr>
+          <tr><td>HCC1954</td><td class="num">9.97</td><td class="num">1.46</td><td class="num">+8.51</td><td class="num">0.54</td></tr>
+        </tbody>
+      </table>
+      <div class="verdict warn">
+        <strong>意涵</strong><br>
+        ✓ 5/5 sign-consistent · 3 strong (AUC ≥ 0.62)<br>
+        ✗ <code style="background:var(--c-code-bg);padding:1px 4px;border-radius:3px">caller_af</code> 2/5 flip → cross-sample LR 不可行
+      </div>
+    </div>
+  </div>
+
+  <div class="terms">
+    <strong>📖 terms</strong>
+    <b>Cohen's d</b>= effect size，0.2 small / 0.5 medium / 0.8 large<span class="sep">·</span>
+    <b>sign-consistent N/5</b>= 該 feature 跨 5 樣本 d 同號數<span class="sep">·</span>
+    <b>direction-flipping</b>= 不同 sample 上 d 反向（無法 cross-sample train）<span class="sep">·</span>
+    <b>loh_inner_flag</b>= region 是否在 LOH 內側 binary feat
+  </div>
+
+  <div class="slide-foot">
+    <span class="src">source: A3_loh_inner_flag_grouped_bar_5sample.png · A3_per_feature_AUC_cohend_5sample.tsv · A3_direction_consistency_spearman.tsv §1</span>
+    <span>S4/8</span>
+  </div>
+</section>
+
+<!-- ─────────────── SLIDE 4b · 9-cell heatmap zone discovery ─────────────── -->
+<section class="slide" data-idx="5" aria-label="Slide 4b 9-cell heatmap zone discovery">
+  <div class="slide-head">
+    <div>
+      <div class="slide-eyebrow">Goal 3 supplement · Zone Discovery · Tier ⭐⭐ L4 desc</div>
+      <h2 class="slide-title">9-cell zone gate — HCC1395 outer × NG2 × AF_L 是 FP 集中區（TP-rate 0.22, n=3,034）</h2>
+    </div>
+    <span class="slide-chip">LOH × NG × AF · 5 sample</span>
+  </div>
+
+  <div class="headline-strip warn">
+    <strong>HCC1395 outer × NG2 × AF_L = 78% FP zone</strong> (n=3,034) · boolean rule 證據 · 避 distribution shift
+  </div>
+
+  <div class="slide-body split-13">
+    <div class="hero">
+      <img src="assets/figures/target3/A3_9cell_heatmap_5sample.png" alt="9-cell heatmap of TP-rate by LOH × NG × AF bin across 5 samples"/>
+    </div>
+    <div class="side">
+      <h3>HCC1395 9-cell key zones</h3>
+      <table class="bcg" aria-label="9-cell HCC1395 key zones">
+        <thead><tr><th>Zone</th><th class="num">n</th><th class="num">TP-rate</th></tr></thead>
+        <tbody>
+          <tr><td>inner × NG2 × AF_H</td><td class="num">4,153</td><td class="num ok"><strong>1.000</strong></td></tr>
+          <tr><td>inner × NG3 × AF_M</td><td class="num">2,182</td><td class="num ok">0.999</td></tr>
+          <tr><td>outer × NG3 × AF_L</td><td class="num">3,151</td><td class="num warn">0.554</td></tr>
+          <tr><td><strong>outer × NG2 × AF_L</strong></td><td class="num"><strong>3,034</strong></td><td class="num neg"><strong>0.217</strong></td></tr>
+        </tbody>
+      </table>
+      <div class="verdict ok">
+        <strong>Discovery</strong><br>
+        drop <code style="background:var(--c-code-bg);padding:1px 4px;border-radius:3px">outer + NG2 + AF_L</code> → 清 ~2,377 FP / lost 657 TP<br>
+        ⇒ 不需 LR weight · 避 distribution shift
+      </div>
+    </div>
+  </div>
+
+  <div class="terms">
+    <strong>📖 terms</strong>
+    <b>9-cell binning</b>= LOH (inner/outer) × NG (2/3/≥4) × AF (H/M/L) 3D 分群<span class="sep">·</span>
+    <b>TP-rate</b>= zone 內 TP / (TP+FP) 比例<span class="sep">·</span>
+    <b>AF_L/M/H</b>= AF low (&lt;0.1) / medium (0.1-0.3) / high (≥0.3)<span class="sep">·</span>
+    <b>zone-aware boolean</b>= 不訓練 weight，用 binning 條件 drop FP zone
+  </div>
+
+  <div class="slide-foot">
+    <span class="src">source: assets/figures/target3/A3_9cell_heatmap_5sample.png · A3_9cell_heatmap_data_5sample.tsv (HCC1395 18 zones verified)</span>
+    <span>S4b/8</span>
+  </div>
+</section>
+
+<!-- ─────────────── SLIDE 5 · TO 純 F1 + 4-algorithm LOSO ─────────────── -->
+<section class="slide" data-idx="5" aria-label="Slide 5 TO pure F1 4-algorithm LOSO">
+  <div class="slide-head">
+    <div>
+      <div class="slide-eyebrow">Goal 4 · F1 + 方法論 · Tier ⭐⭐⭐⭐ L2 (negative)</div>
+      <h2 class="slide-title">4-algorithm LOSO 全部 &lt; Cohen +0.005 ribbon — cycle 1 的 +0.02236 = 100% sample-level circularity</h2>
+    </div>
+    <span class="slide-chip">LR · DT · RF · XGB · 5 seed × 100 fold</span>
+  </div>
+
+  <div class="headline-strip neg">
+    <strong>500 fold 全 &lt; Cohen +0.005 ribbon</strong> · 換 model class 救不回 · cycle 1 +0.02236 = <strong>100% sample-level circularity</strong>
+  </div>
+
+  <div class="slide-body split-13">
+    <div class="hero">
+      <img src="assets/figures/target4/A4_4algorithm_LOSO_dF1.png" alt="4-algorithm LOSO ΔF1 with Cohen ribbon overlay"/>
+    </div>
+    <div class="side" style="display:grid;grid-template-rows:1.1fr auto;gap:8px;min-height:0">
+      <div class="hero" style="padding:4px;background:#FAFAF6">
+        <img src="assets/figures/target4/A4_train_test_gap.png" alt="Train-test F1 gap per sample (sanity check)" style="max-height:100%"/>
+      </div>
+      <div class="verdict neg">
+        <strong>結論</strong><br>
+        LR <b>−0.00004</b> · DT <b>+0.00255</b> · RF <b>+0.00267</b> · XGB <b>+0.00102</b><br>
+        ✗ 全 &lt; +0.005 ribbon<br>
+        Sanity（右上）: train-test gap 一致 +0.48 = baseline shift · <strong>非 overfit</strong><br>
+        cycle 1 +0.02236 → LOSO −0.00012 · <strong>100% circularity</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="terms">
+    <strong>📖 terms</strong>
+    <b>LOSO</b>= Leave-One-Sample-Out CV（4 train + 1 hold-out）<span class="sep">·</span>
+    <b>ΔF1</b>= filter F1 − caller F1<span class="sep">·</span>
+    <b>Cohen ribbon</b>= ±0.005 small / ±0.01 medium effect size 閾<span class="sep">·</span>
+    <b>sample-level circularity</b>= 訓練與測試同 sample 的 leakage<span class="sep">·</span>
+    <b>distribution shift</b>= 樣本間特徵分布不同<span class="sep">·</span>
+    <b>in-distribution capacity</b>= 同樣本內 fit 能力（≠ generalize）
+  </div>
+
+  <div class="slide-foot">
+    <span class="src">source: A4_LR_DT_RF_XGBoost_LOSO_5sample.tsv (verified mean re-computed from raw TSV) · A4_summary.json · A4_4algorithm_LOSO_dF1.png</span>
+    <span>S5/8</span>
+  </div>
+</section>
+
+<!-- ─────────────── SLIDE 6 · CLOSING / DECISIONS / PIVOT ─────────────── -->
+<section class="slide" data-idx="6" aria-label="Slide 6 Decisions and pivot">
+  <div class="slide-head">
+    <div>
+      <div class="slide-eyebrow">PI Asks · Decisions · Next Cycle</div>
+      <h2 class="slide-title">V6 GO · Phase 2 LR NO-GO · Pivot 路徑請 PI 排序</h2>
+    </div>
+    <span class="slide-chip">3 PI decisions</span>
+  </div>
+
+  <div class="slide-body" style="grid-template-columns:1fr 1fr 1fr;gap:14px">
+
+    <div class="closing-col go" style="display:flex;flex-direction:column">
+      <h3><span class="badge go">GO</span> V6 production tag</h3>
+      <ul>
+        <li>5/5 ALT-only &lt; 1 · 10× reverse</li>
+        <li>ISM 110/110 PASS</li>
+        <li>signoff email 22/22 verified</li>
+      </ul>
+      <div class="verdict ok" style="margin-top:auto"><strong>Action</strong><br>push <code style="background:#FFF;padding:1px 4px;border-radius:3px">v6-prod-20260520</code></div>
+    </div>
+
+    <div class="closing-col nogo" style="display:flex;flex-direction:column">
+      <h3><span class="badge nogo">NO-GO</span> LR filter</h3>
+      <ul>
+        <li>500 fold 全 &lt; +0.005</li>
+        <li>100% sample-level circularity</li>
+        <li>3-path triangulation 收斂</li>
+      </ul>
+      <div class="verdict neg" style="margin-top:auto"><strong>Action</strong><br>close cycle · 寫 NEGATIVE postmortem</div>
+    </div>
+
+    <div class="closing-col" style="display:flex;flex-direction:column">
+      <h3><span class="badge probe">PROBE</span> Pivot（請排序）</h3>
+      <ul class="pivot-list">
+        <li><strong>A</strong> <code style="background:var(--c-code-bg);padding:1px 4px;border-radius:3px">phase_block_3d</code><span class="roi">high</span></li>
+        <li><strong>B</strong> read-level filter<span class="roi">med</span></li>
+        <li><strong>C</strong> low-F1 panel<span class="roi">med</span></li>
+        <li><strong>D</strong> zone-aware boolean<span class="roi">probe</span></li>
+      </ul>
+      <div class="verdict" style="margin-top:auto"><strong>建議</strong> A 優先 (LR exhausted)</div>
+    </div>
+  </div>
+
+  <div class="terms">
+    <strong>📖 terms</strong>
+    <b>phase_block_3d / thread_d</b>= phasing block 3D pilot 路線<span class="sep">·</span>
+    <b>zone-aware boolean filter</b>= 按 zone 分組布林規則（避 LR shift）<span class="sep">·</span>
+    <b>algorithm-space exhausted</b>= 4 model class 全試完無 generalize<span class="sep">·</span>
+    <b>NEGATIVE postmortem</b>= 結論 NO-GO 的正式收尾文件
+  </div>
+
+  <div class="slide-foot">
+    <span class="src">source: index.html §3 PI Asks · 20260521_PI_V6_signoff_email_draft_5goal.md (22/22 verified) · A0_existing_artifacts_verification.md</span>
+    <span>S6/8</span>
+  </div>
+</section>
+
+<!-- ─────────────── SLIDE 7 · 五大目標進度全景（精簡版）─────────────── -->
+<section class="slide" data-idx="7" aria-label="Slide 7 Five-goal progress dashboard">
+  <div class="slide-head">
+    <div>
+      <div class="slide-eyebrow">InterSubMod 整體五大目標 · 本週進度對應</div>
+      <h2 class="slide-title">研究定位：可解釋 epigenetic evidence 整合框架（非 somatic caller）</h2>
+    </div>
+    <span class="slide-chip">vision anchored 2026-03-27</span>
+  </div>
+
+  <style>
+    .goal-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;flex:1;min-height:0}
+    .goal-card{background:var(--c-surface);border:1px solid var(--c-border);border-top:4px solid var(--c-text-soft);border-radius:var(--radius);padding:10px 12px;display:flex;flex-direction:column;min-height:0}
+    .goal-card.done{border-top-color:var(--c-ok)}
+    .goal-card.partial{border-top-color:var(--c-warn)}
+    .goal-card.nogo{border-top-color:var(--c-neg)}
+    .goal-card.pending{border-top-color:var(--c-tier3)}
+    .goal-card .gnum{font-family:var(--ff-mono);font-size:10px;color:var(--c-text-soft);font-weight:700;letter-spacing:1px}
+    .goal-card .gname{font-size:13px;font-weight:700;color:var(--c-text);margin:3px 0 6px;line-height:1.25}
+    .goal-card .gstatus{margin-bottom:6px}
+    .goal-card .gpoint{font-size:11.5px;color:var(--c-text-soft);line-height:1.45;margin:0}
+    .goal-card .gpoint strong{color:var(--c-text);font-weight:600}
+    .goal-card .gnext{margin-top:auto;padding-top:8px;border-top:1px dashed var(--c-rule);font-size:11px;color:var(--c-accent-deep);font-weight:600;line-height:1.4}
+    .goal-card .gnext::before{content:"→ ";color:var(--c-accent)}
+    .roadmap{display:flex;align-items:stretch;background:var(--c-bg);border:1px solid var(--c-rule);border-radius:var(--radius);padding:8px 10px;gap:0;font-size:12px;margin-top:10px}
+    .roadmap .wk{flex:1;padding:0 10px;border-right:1px dashed var(--c-rule);line-height:1.4}
+    .roadmap .wk:last-child{border-right:none}
+    .roadmap .wk b{display:block;color:var(--c-primary);font-family:var(--ff-mono);font-size:10px;letter-spacing:0.5px}
+    .pi-decisions{background:#FEF7E6;border:1px solid var(--c-warn);border-radius:var(--radius);padding:8px 12px;font-size:12px;margin-top:8px;display:flex;align-items:center;gap:12px}
+    .pi-decisions strong{color:#78350F;font-weight:700}
+    .pi-decisions .d{flex:1;color:#78350F}
+    .pi-decisions .d b{color:var(--c-accent-deep);font-family:var(--ff-mono);font-size:11px;margin-right:4px}
+  </style>
+
+  <div class="slide-body" style="grid-template-rows:1fr auto auto;grid-template-columns:1fr">
+
+    <div class="goal-grid">
+      <div class="goal-card partial">
+        <div class="gnum">GOAL 1</div>
+        <div class="gname">per-CpG 甲基多標籤關聯</div>
+        <div class="gstatus"><span class="badge probe">進行中</span></div>
+        <p class="gpoint">CpG × ALT/REF × HP1/HP2 關聯；V6 修補 → 評分基礎穩。</p>
+        <div class="gnext">續推 Phase 1</div>
+      </div>
+
+      <div class="goal-card partial">
+        <div class="gnum">GOAL 2</div>
+        <div class="gname">clone 結構分析</div>
+        <div class="gstatus"><span class="badge probe">部分</span></div>
+        <p class="gpoint">sub-clone + 共演化；HCC1395 paired ✓。</p>
+        <div class="gnext">Track B 補測</div>
+      </div>
+
+      <div class="goal-card pending">
+        <div class="gnum">GOAL 3</div>
+        <div class="gname">二次打擊 + 事件順序</div>
+        <div class="gstatus"><span class="badge probe">待 G1/G2</span></div>
+        <p class="gpoint">LOH/CNV/HP 推論打擊順序；硬依賴 G1/G2。</p>
+        <div class="gnext">G1/G2 後啟動</div>
+      </div>
+
+      <div class="goal-card partial">
+        <div class="gnum">GOAL 4</div>
+        <div class="gname">TO normal 補強</div>
+        <div class="gstatus"><span class="badge probe">探索</span></div>
+        <p class="gpoint">甲基/germline SNP/HP；<code style="background:var(--c-code-bg);padding:0 3px">loh_inner_flag</code> partial 證據。</p>
+        <div class="gnext">擴 zone-aware</div>
+      </div>
+
+      <div class="goal-card nogo">
+        <div class="gnum">GOAL 5</div>
+        <div class="gname">evidence panel → F1</div>
+        <div class="gstatus"><span class="badge nogo">LR NO-GO</span></div>
+        <p class="gpoint">500 fold ribbon-null；algorithm 路線 exhausted。</p>
+        <div class="gnext">pivot zone-aware boolean</div>
+      </div>
+    </div>
+
+    <div class="roadmap" aria-label="success criteria + current phase">
+      <div class="wk"><b>軌 A · 可解釋性</b>case study 驗甲基↔HP/SNV (G1/G2) → 進行中</div>
+      <div class="wk"><b>軌 B · F1 提升</b>paired/TO benchmark (G4/G5) → LR fail / pivot</div>
+      <div class="wk"><b>當前 Phase</b>Phase 1 方向 E → 下階段 Phase 2 (A+D)</div>
+    </div>
+
+    <div class="pi-decisions">
+      <strong>PI Decisions</strong>
+      <span class="d"><b>①</b> v6-prod 授權</span>
+      <span class="d"><b>②</b> Track B 是否補</span>
+      <span class="d"><b>③</b> G5 pivot 方向</span>
+    </div>
+
+  </div>
+
+  <div class="terms">
+    <strong>📖 terms</strong>
+    <b>evidence panel</b>= 補充 caller 的可解釋證據集合（甲基/HP/LOH/CNV）<span class="sep">·</span>
+    <b>方向 E</b>= ML read classification（Phase 1 主軸）<span class="sep">·</span>
+    <b>方向 A+D</b>= normal methylation reference + CN/Purity-aware（Phase 2）<span class="sep">·</span>
+    <b>雙軌成功標準</b>= 可解釋性 + F1 提升（兩者都算成功，不混用）
+  </div>
+
+  <div class="slide-foot">
+    <span class="src">source: project_research_vision_five_goals.md (memory) · CURRENT_FOCUS.md §11.3 · index.html §5 子報告導航 · A0 audit</span>
+    <span>S7/8 · END</span>
+  </div>
+</section>
+
+</div><!-- /.slide-canvas -->
+
+<!-- Speaker notes (collapsed) — one per slide, swapped with slide -->
+<div class="note-wrap" id="note-wrap">
+  <details class="speaker-note" data-for="1">
+    <summary>📝 講稿 · S1 Cover · 開場 30–45 秒</summary>
+    <div class="note-body">
+      <h4>開場（30 秒）</h4>
+      <p class="pi-say">「教授，本週兩個結論：第一，V6 binary 已在 5 樣本確認 priority bug 修補成功，可以 sign off；第二，Phase 2 LR filter 跨樣本失敗，我們換了 4 個演算法都救不回來，要正式關掉這個方向。中間花 4 張投影片帶您看證據鏈。」</p>
+      <h4>敘事弧 5 步（S2→S6）</h4>
+      <ul>
+        <li>S2 — <strong>BAM 層</strong>：V6 修補有效，跨樣本一致</li>
+        <li>S3 — <strong>Region 層</strong>：ISM 端能驗證該訊號 propagate 到下游</li>
+        <li>S4 — <strong>特徵層</strong>：哪些特徵能 cross-sample 用、哪些不能</li>
+        <li>S5 — <strong>F1 層</strong>：算法+特徵組合是否能超過 caller F1（答案是 NO）</li>
+        <li>S6 — <strong>決策</strong>：GO / NO-GO / Pivot 候選</li>
+      </ul>
+      <div class="caveat"><strong>caveat 提醒（一次）:</strong> HCC1395 同時是「priority bug 個案來源」+「Phase 2 development sample」，所以對它的 in-distribution 結論要扣分；下面 S5 就會看到 +0.02236 全部從這裡來。</div>
+      <h4>Provenance（如 PI 問）</h4>
+      <p>11 artifacts audit · 273 claims · 93% verified · <strong>0 fabrication</strong>；hub 在 <code>InterSubMod/docs/presentations/in_progress/20260522_PI_V6_signoff_4goal/index.html</code>。</p>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="2">
+    <summary>📝 講稿 · S2 V6 vs baseline BAM · 90–120 秒</summary>
+    <div class="note-body">
+      <h4>Mechanism（30 秒）</h4>
+      <p>priority bug 是 baseline longphase-TO 在 germline-absent 區域對 HP1 systematic bias（17.3:1）。V6 把這個邏輯改成 V3F-style hybrid + conservative <code>HP=33</code> bucket，意思是「不確定就不標」而不是「不確定都偏 HP1」。</p>
+      <h4>圖怎麼看（45 秒）</h4>
+      <p class="pi-say">「圖上左邊是 ALT-only reads 的 HP1:HP2 ratio，右邊是 all-reads；每組 5 個樣本。重點看左邊 V6：5 個 bar 全部 &lt; 1（紅虛線）— 也就是 HP2 dominance，跟我們對 LOH 的預期方向一致。」</p>
+      <ul>
+        <li>HCC1395 baseline <code>4.408</code> → V6 <code>0.425</code>，<strong>10× HP2 reverse</strong></li>
+        <li>HCC1954 最低 <code>0.372</code>（高純度 + 強 LOH）</li>
+        <li>H2009 因 background-kill timeout 為 chr19-only 計算 <code>0.793</code>，但方向不變</li>
+      </ul>
+      <h4>SP1/2/3 鐵證（30 秒）</h4>
+      <p>HCC1395 chr19 上 3 個 priority-bug spotlight：baseline 113:0、109:1、108:0（全偏 HP1，與 paired truth 完全相反）。V5 修正後 3/3 對齊 paired；V6 BAM 在 V3F victim subset 與 V5 BAM <strong>read-by-read 0 diff</strong>。</p>
+      <div class="caveat"><strong>scope caveat:</strong> 主視覺 chr8+chr19 hotspot — 不是「只看部分樣本」，<strong>所有 5 樣本同 scope</strong>（H2009 因 background-kill timeout 縮 chr19 only）。理由：<br>
+      ① chr8 = HPSig+LOH 7.4× FP enrichment 區（HCC1395 已知 hotspot；注意 chr8 是 LOH hotspot，priority bug enrichment 反而只 0.200‰）<br>
+      ② chr19 = priority-bug 中等 enrich（0.703‰）+ SP1/2/3 三大 IGV 個案在此<br>
+      ③ cost envelope：5 × 250-472 GB BAM 全 scan 不可行（H2009 全 chr19 已 timeout）<br>
+      ④ V6 全基因組 BAM scan 為 Track B deferred；但 baseline 全基因組 vote audit 已驗證 priority bug 廣存（34,855 victims）+ V3F/V5 修正率 100% → V6 在 chr8+chr19 ALT-only ratio reverse 可推論到全基因組</div>
+
+      <h4>全基因組 confirmation（HCC1395 baseline audit · T1.2-F1）</h4>
+      <p>baseline HCC1395 5kHz 全 chr1-22+X/Y read-level vote audit 已執行（pre-V6 era），驗證 priority bug 為**全基因組 phenomenon**：</p>
+      <ul>
+        <li><strong>29,973,253 baseline rows</strong> · 雙向矛盾 reads (germline_maj ≠ somatic_maj) = <strong>34,855 priority bug victims</strong></li>
+        <li>V3F 修正率 <strong>100.00%</strong> · V5 修正率 <strong>100.00%</strong> (改向 germline_maj)</li>
+        <li>chr-wise top enrichment ‰: chr20 (1.306) · chrY (1.484) · chr21 (1.279) · chr16 (1.140) · chr7 (0.723) · chr14 (0.729)</li>
+        <li>chr19 = 752 victims · 0.703‰ rank 19 — 中等 enrich + SP1/2/3 IGV 個案集中</li>
+        <li>chr8 = 666 victims · <strong>0.200‰ (低)</strong> — 注意 chr8 是 LOH hotspot 不是 priority bug hotspot</li>
+        <li>Layer 1.5 (V5) 額外觸發 560,881 reads vs V3F = 0</li>
+      </ul>
+      <p class="pi-say">「教授，您可能會問為什麼用 chr8+chr19。chr8 是已知 LOH+HPSig FP enrichment 區，chr19 是 priority bug SP1/2/3 個案集中區，這兩條陳列 priority bug fix 效果最明顯。<strong>全基因組 audit 在 baseline 已驗（34,855 victims · V3F/V5 修正率 100%）</strong>，V6 全基因組 BAM scan 是 Track B 預定補。」</p>
+      <p><strong>source</strong>: <code>InterSubMod/research/v5_provenance_followup/T1_2_read_level_audit/T1_2_F1_genome_wide_audit.md</code></p>
+      <p><strong>PI 可能問:</strong> 「為什麼 HP=33 firing 跨樣本差到 0.05%–4.27%？」→ HP=33 是 conservative ambiguous bucket，firing 數量取決於樣本 phasing-rich 程度（H2009 ploidy variation 多 → 4.27%）。</p>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="3">
+    <summary>📝 講稿 · S3 V6 ISM 驗證 · 60–90 秒</summary>
+    <div class="note-body">
+      <h4>為什麼需要 Region 層驗證（20 秒）</h4>
+      <p>S2 是 BAM read-level 的 ratio 統計，那只是「修補本身有效」。但我們真正想知道的是：修補後的訊號能不能被 ISM region-level 方法 capture，下游 marker / rate / hp=3 ambig 是否同方向改善。</p>
+      <h4>表怎麼看（40 秒）</h4>
+      <p class="pi-say">「6 個 region metric，V6 全 5 個正向（marker count +52.4%、rate +1.26pp、hp=3 ×13.2、HP1:HP2 ratio offset 從 1.696 降到 1.609、LOH-positive marker rate rank #1/4、NG_on=2 purity offset 從 0.857 → 0.829 更靠近 0.5 的理想 LOH）。」</p>
+      <h4>Triangulation（30 秒）— 為什麼可信</h4>
+      <ul>
+        <li><strong>三條獨立路徑同方向:</strong> S2 BAM ratio (read-level) → S3 ISM region (segment-level) → 既有 HTML 110/110 metrics audit</li>
+        <li>4-way (baseline / V3F / V5 / V6) 同一份報告對照，V6 沒有 cherry-pick 的空間</li>
+        <li>20260519 standalone HTML A0 audit 6 平行 agent fan-out 全 PASS</li>
+      </ul>
+      <div class="caveat"><strong>caveat:</strong> 這 4-way 是 HCC1395 single-sample paired-vs-TO；跨 5 樣本的 ISM 比較受限於其他 4 樣本沒有同等 baseline BAM（Track B deferred）。但因為 BAM 層 (S2) 已展示 5/5 跨樣本一致，這個 region-level single-sample 結論可外推。</div>
+      <h4>下游意涵</h4>
+      <p>V6 在 region 端有效 → 下一步可以拿這個 V6.bam 做特徵分析（S4 開始）而不必擔心 BAM 訊號污染。</p>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="4">
+    <summary>📝 講稿 · S4 特徵分析 · 90 秒</summary>
+    <div class="note-body">
+      <h4>問題（20 秒）</h4>
+      <p>V6 BAM 上跑 ISM 產出 9 個 candidate feature。問題：哪些能跨 5 樣本一致預測 TP/FP？</p>
+      <h4>Direction consistency heatmap 怎麼看（40 秒）</h4>
+      <p class="pi-say">「heatmap 縱軸 9 個 feature，橫軸 5 個樣本，cell 顯示該樣本上的 Cohen's d (TP vs FP)。綠＝d&gt;0（TP 較高），紅＝d&lt;0（FP 較高）。我們找『一條 row 5 個 cell 同色』的 feature — 那才是 cross-sample 一致。」</p>
+      <ul>
+        <li><strong><code>loh_inner_flag</code> 5/5 (+)</strong> d ∈ [+0.29, +0.93] — <strong>唯一 ANCHOR 級</strong></li>
+        <li><code>NG</code> 4/5 (+) d ∈ [+0.01, +0.73] — strong direction</li>
+        <li><code>HPFineF</code> 4/5 (+) d ∈ [+0.04, +0.20] — direction 對但 |d| 偏小</li>
+        <li><code>NME_imbalance</code> 4/5 (−) / <code>ClusterPermanovaF</code> 4/5 (−) — descriptive only</li>
+        <li><code>caller_af</code> 2/5 — <strong>direction-flipping</strong>（HCC1395 d=+1.33 強 TP / HCC1937 d=−1.46 強 FP / HCC1954 d=−0.90 / H1437 d=+0.44 / H2009 d=−0.31）</li>
+        <li><code>Coverage_Multiple</code> 2/5 — H1437 上 d=−3.80 outlier-driven</li>
+      </ul>
+      <h4>意涵（30 秒）— 為什麼這預測了 S5 的失敗</h4>
+      <p>cross-sample-trained LR 含 <code>caller_af</code>，但 caller_af 在訓練集中 direction-flipping → 模型 weight 無法決定 sign → hold-out collapse。這是 S5 LOSO 全 null 的 mechanism root cause。同樣 <code>Coverage_Multiple</code> 因 H1437 outlier 拖累 → 預測力 sample-dependent。</p>
+      <div class="caveat"><strong>caveat:</strong> Tier ⭐⭐ descriptive，因為這是 univariate Cohen's d，沒控制 confounder。production filter 需要 interaction terms 或 zone-aware rules（S6 pivot D）。</div>
+      <p><strong>PI 可能問:</strong>「<code>HPFineF</code> 4/5 為何 tier 只 t2 而非 t3？」→ 因為 |d| 都 &lt; 0.21（4/5 中 3 sample d &lt; 0.10），direction 正確但 magnitude 不足，production filter 不夠強。</p>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="5">
+    <summary>📝 講稿 · S4b 9-cell zone discovery · 45 秒（pivot 證據）</summary>
+    <div class="note-body">
+      <h4>為什麼這頁存在（10 秒）</h4>
+      <p class="pi-say">「S5 我們會看到 cross-sample LR fail 是因為 caller_af direction-flipping；自然的問題：『既然 weight learning 不行，能不能用 boolean rule？』這頁就是 boolean rule 的證據基礎。」</p>
+      <h4>9-cell binning 怎麼看（20 秒）</h4>
+      <p>把每個 region 按 3 個 binary/categorical 切：</p>
+      <ul>
+        <li><strong>LOH</strong>: inner (在 LOH 內側) vs outer (邊界外)</li>
+        <li><strong>NG</strong>: 2 / 3 / ≥4 (NGroups 分群深度)</li>
+        <li><strong>AF</strong>: H (≥0.3) / M (0.1-0.3) / L (&lt;0.1)</li>
+      </ul>
+      <p>共 2×3×3 = 18 cells per sample；圖上 5 sample 並排。</p>
+      <h4>關鍵 zone discovery（15 秒）</h4>
+      <p class="pi-say">「HCC1395 outer × NG2 × AF_L 區域 n=3,034 region，TP-rate 只有 <strong>0.217</strong>（也就是 78% 都是 FP）。如果我們用一條 boolean rule『drop outer + NG2 + AF_L』，理論上可以清掉 ~2,377 FP，只損失 ~657 TP。」</p>
+      <h4>為何這比 S5 LR 路線可能成功</h4>
+      <ul>
+        <li>不依賴 weight 學習 → 避開 distribution shift trap</li>
+        <li>3 條件交叉 → 比單一 threshold 更具區辨力</li>
+        <li>9-cell heatmap 跨 sample 視覺檢驗 → PI 可肉眼判斷該 zone 是否在其他樣本也是 FP-rich</li>
+      </ul>
+      <div class="caveat"><strong>caveat:</strong> 這 18 zone 跨 5 sample TP-rate 模式是否一致還沒做 cross-sample audit。圖上左 HCC1395 是 cycle 1 development sample，其他 4 樣本的 outer×NG2×AF_L cell n_total 可能太小（rare zone）→ 統計不穩。Pivot Path D 第一個任務就是 verify zone-rule 跨樣本一致性。</div>
+      <h4>連到 S5 + S6</h4>
+      <p>S5 會告訴你 4 algo LR/DT/RF/XGB 全 fail；S6 pivot 候選 D「zone-aware boolean rule」就是基於這頁的 zone discovery。所以 PI 不用擔心「NO-GO 沒有 actionable next step」— Path D 是 actionable 的。</p>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="6">
+    <summary>📝 講稿 · S5 4-algorithm LOSO · 120 秒（最關鍵）</summary>
+    <div class="note-body">
+      <h4>問題 framing（20 秒）</h4>
+      <p>本週最重要的問題：能不能用算法（不限 LR）+ 特徵組合，在 tumor-only 設定下做出超過 caller F1 且能 generalize 到 5 樣本的 filter？</p>
+      <h4>實驗設計（30 秒）— 為什麼用 4 個 algorithm</h4>
+      <ul>
+        <li>原本 LR fail 大家會問「是不是 LR 線性假設不夠？」</li>
+        <li>所以我們跑了 <strong>LR / Decision Tree / Random Forest / XGBoost</strong> 4 種，覆蓋 linear → tree-based → ensemble</li>
+        <li>5 random seed（42, 7, 100, 999, 2026）排除 single-seed artifact</li>
+        <li>5-sample LOSO × 5 seed = <strong>100 fold per algo, 400 fold total</strong></li>
+      </ul>
+      <h4>結果（30 秒）— 真實數字（TSV 重算）</h4>
+      <p class="pi-say">「4 algo overall mean ΔF1：LR −0.00004 / DT +0.00255 / RF +0.00267 / XGB +0.00102。全 &lt; Cohen +0.005 small ribbon。500 fold 中只有 3 個 algo×sample cell 突破 +0.005：HCC1395 上 DT (+0.01378) 與 RF (+0.01269)，加上 HCC1937 上 XGB (+0.00562)；其他 17/20 cell 全 ribbon-null。」</p>
+      <h4>Mechanism: 100% sample-level circularity（30 秒）</h4>
+      <p>cycle 1 在 HCC1395 self-train 看到 +0.02236，LOSO 後 −0.00012 → drop +0.02248。<strong>100% of cycle 1 effect 來自 sample-level circularity</strong>，沒有任何成分來自 generalizable signal。</p>
+      <h4>Triangulation — 三條獨立路徑收斂（10 秒）</h4>
+      <ul>
+        <li>5/19 V6 §13: cross-sample LR mean +0.0005~+0.0007</li>
+        <li>5/20 H_M1a min-ablation: +0.00065</li>
+        <li>5/20 transfer shrinkage: &lt; 7%</li>
+        <li>三條獨立路徑都指向「LR cross-sample 不 deployable」</li>
+      </ul>
+      <div class="caveat"><strong>caveat: HCC1395 是 development sample。</strong>HCC1395 + DT/RF +0.013 是 in-distribution capacity，partial circularity（train pool 4 sample share batch effect）→ 不構成 production filter 依據。HCC1937 XGB +0.006 為 ribbon edge，5 seed CI 跨 ribbon (95% CI [−0.001, +0.012])。</div>
+      <h4>結論</h4>
+      <p>不是 model class 的問題，是 5 樣本 distribution shift。換 LR→DT→RF→XGB 救不回。S6 NO-GO 基於 mechanism level 證據（500 fold 全 ribbon-null + 100% circularity decomposition），不是表面 fit。</p>
+      <h4>A4-Ext · 其他 6 algorithm 為何不試（PI Q1）</h4>
+      <ul>
+        <li><strong>Ensemble (LR+RF voting):</strong> 0 + 0 voting lower bound ≈ 0 — 兩個 base 都 ribbon-null 投票不會翻</li>
+        <li><strong>Calibration (Platt / isotonic):</strong> F1 monotone re-mapping invariant — 不動 ranking 不改 F1</li>
+        <li><strong>Per-AF-bin LR:</strong> caller_af 是 collider bias — 切 bin 反而 condition on collider</li>
+        <li><strong>Boolean rule:</strong> cycle 3 已試 +0.01499 marginal — 同 in-distribution capacity 範圍</li>
+        <li><strong>Per-zone LR / Threshold-only:</strong> vote 3/5 — Cycle 5 optional probe（pivot Path D）</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="7">
+    <summary>📝 講稿 · S6 Decisions + Pivot · 60 秒收尾</summary>
+    <div class="note-body">
+      <h4>GO（15 秒）</h4>
+      <p class="pi-say">「V6 binary：證據 5/5 跨樣本一致 + ISM region 端 6 metric 全正向 + SP1/2/3 3/3 對齊 paired truth + PI signoff email 22/22 verified。請教授 sign off 後我 push <code>v6-prod-20260520</code> tag。」</p>
+      <h4>NO-GO（15 秒）</h4>
+      <p>Phase 2 LR filter direction：4 algo × 5 sample × 5 seed = 500 fold 全 fail，cycle 1 +0.02236 100% circularity，3 path triangulation 同方向。建議我寫 NEGATIVE postmortem 正式 close。</p>
+      <h4>Pivot 4 候選（25 秒）— 請 PI 排序</h4>
+      <ul>
+        <li><strong>A. <code>phase_block_3d</code> / <code>thread_d</code> Cycle 5</strong> — high ROI；LR direction 已 exhausted</li>
+        <li><strong>B. read-level filter</strong> — 用 <code>loh_inner_flag</code> 作 anchor + boolean rule；不依賴 LR threshold</li>
+        <li><strong>C. Low-F1 panel 補測</strong> — 驗證 HCC1395 +0.00699 在 caller-F1-ceiling 較低樣本是否 generalize</li>
+        <li><strong>D. Zone-aware non-LR boolean filter</strong> — 純 probe，但避開 LR distribution-shift trap</li>
+      </ul>
+      <h4>建議</h4>
+      <p>建議 A 優先；如果 PI 想保留特徵方向，B + D 並行 probe（2-week pilot）。</p>
+      <div class="caveat"><strong>不該做:</strong> 跑更多 algorithm（已驗證 model class 非問題）/ 跑更多 hyperparam（per-sample tune 會引入 leakage）/ 在 HCC1395 上加 feature（in-distribution circularity 仍存在）。</div>
+      <h4>結束</h4>
+      <p>本週 deliverables：4 個 target HTML + hub + 11 artifact audit + 本次 deck。準備好回答問題。</p>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="all" id="talk-outline" style="margin-top:8px;border-color:var(--c-primary)" open>
+    <summary>📋 演講大綱 + PI Q&A 速查（cross-slide reference）</summary>
+    <div class="note-body">
+      <table style="width:100%;border-collapse:collapse;color:#DDD;font-size:13px">
+        <thead>
+          <tr style="background:#2A2A2A">
+            <th style="padding:7px 9px;border:1px solid #444;text-align:left;color:#FFD089;font-size:12px;width:7%">Slide</th>
+            <th style="padding:7px 9px;border:1px solid #444;text-align:left;color:#FFD089;font-size:12px;width:30%">重點講（核心話術）</th>
+            <th style="padding:7px 9px;border:1px solid #444;text-align:left;color:#FFD089;font-size:12px;width:25%">PI 可能問</th>
+            <th style="padding:7px 9px;border:1px solid #444;text-align:left;color:#FFD089;font-size:12px;width:38%">標準答（含 source + 機制）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:7px 9px;border:1px solid #444;font-weight:700;color:#93C5FD;vertical-align:top">S1 Cover<br><span style="font-size:11px;color:#999">30 秒</span></td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">兩個結論：V6 ready / Phase 2 LR NO-GO · audit <b>0 fabrication</b></td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">audit 怎麼做到 0 fabrication？</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">11 artifact × 273 claim × <b>6 平行 agent fan-out</b> 對 source TSV row-by-row；對比 5/20 +0.057 事件後內建 audit gate</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 9px;border:1px solid #444;font-weight:700;color:#93C5FD;vertical-align:top">S2 BAM<br><span style="font-size:11px;color:#999">90 秒</span></td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">priority bug = default HP=1 · <b>5/5 ALT-only &lt; 1</b> · HCC1395 4.41 → 0.43 (10× reverse) · SP1/2/3 paired 3/3</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">① 為何用 ALT-only?<br>② HP=33 firing 跨樣本差這麼多?</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">① ALT 占 ~5% reads → bug 完全暴露於 ALT；all-reads 被 95% REF 稀釋（指紋差 +0.97）<br>② phasing-rich 樣本 firing 多 (H2009 ploidy 4.27%)；不影響「全 &lt; 1」主結論</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 9px;border:1px solid #444;font-weight:700;color:#93C5FD;vertical-align:top">S3 ISM<br><span style="font-size:11px;color:#999">60 秒</span></td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">BAM 修補 propagate 到 region 端 · marker <b>+52.4%</b> · hp=3 <b>×13.2</b> · net TP:FP <b>14:1</b> · chr12/AF&lt;0.1 trade-off 主動揭示</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">為何 chr12 / AF&lt;0.1 變差?</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">V6 conservative ambig 把 ~350 邊界 LOH=NA region 標 ambig → 局部 ΔF1 −0.016 ~ −0.030；net 仍 +14:1 正向</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 9px;border:1px solid #444;font-weight:700;color:#93C5FD;vertical-align:top">S4 anchor<br><span style="font-size:11px;color:#999">90 秒</span></td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">9 feat 中 <b>loh_inner_flag 5/5 唯一</b> · Gap +8.5–+43.5pp · caller_af d=+1.33↔−1.46 → 預測 S5 fail</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">caller_af 為何 sample-dependent?</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">purity-driven · HCC1395 high-AF cluster 接近 het；HCC1937 caller_af 估計受 LOH 影響顛倒方向 → 模型 weight 無法決定 sign → hold-out collapse</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 9px;border:1px solid #444;font-weight:700;color:#93C5FD;vertical-align:top">S4b zone<br><span style="font-size:11px;color:#999">45 秒</span></td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">HCC1395 outer × NG2 × AF_L = <b>78% FP zone</b> (n=3,034) · boolean rule 不需 weight</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">這 zone 跨樣本一致?</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">尚未驗 · 其他樣本該 cell n 可能 rare statistically 不穩；Pivot Path D 第一步就是 cross-sample 驗證 zone-rule</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 9px;border:1px solid #444;font-weight:700;color:#93C5FD;vertical-align:top">S5 LOSO<br><span style="font-size:11px;color:#999"><b>120 秒</b><br>最關鍵</span></td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">4 algo × 5 sample × 5 seed = <b>500 fold 全 &lt; +0.005</b> · sanity train-test gap 對稱 → <b>非 overfit</b> · cycle 1 drop +0.02248 = <b>100% circularity</b></td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">① 為何不試 ensemble / calibration / per-sample tune?<br>② 自訓 +0.02236 vs LOSO −0.00012 怎麼解釋?</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">① ensemble (0+0 voting); calibration F1 monotone invariant; per-sample tune leakage（A4-Ext 6 algo 全 dead-end）<br>② drop 100% by circularity = cycle 1 沒任何 generalizable signal，全部 row leakage</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 9px;border:1px solid #444;font-weight:700;color:#93C5FD;vertical-align:top">S6 Decision<br><span style="font-size:11px;color:#999">60 秒</span></td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">3 PI Asks：① v6-prod 授權 (22/22) ② close cycle 寫 postmortem ③ pivot A/B/C/D 排序 · 建議 A 優先</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">Pivot 4 path 哪個 ROI 最高?</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">A 高（跳出 LR-feat space）· B 中（loh_inner_flag 現成 substrate）· C 中（low-F1 panel 驗 +0.00699）· D probe（cross-sample 驗 risky 但 actionable）</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 9px;border:1px solid #444;font-weight:700;color:#93C5FD;vertical-align:top">S7 5-Goal<br><span style="font-size:11px;color:#999">60 秒收尾</span></td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">G1/G2 進行 · G3 待 G1/G2 · G4 探索 · G5 LR NO-GO · 雙軌（可解釋性 + F1）· Phase 1→2</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">① G3 何時做?<br>② G5 NO-GO 影響論文?</td>
+            <td style="padding:7px 9px;border:1px solid #444;vertical-align:top">① hard-depend G1/G2，不承諾時程<br>② <b>LR 路線</b> NO-GO ≠ G5 整體 NO-GO；pivot zone-aware boolean 仍在 G5；negative finding 本身有 publication value</td>
+          </tr>
+        </tbody>
+      </table>
+      <h4 style="color:#FFD089;margin-top:12px">⚡ 預期 2-3 高頻 cross-cutting questions（先想好）</h4>
+      <ul>
+        <li><strong>Q-X1: 「整個 cycle 1 是不是白做了？」</strong> — A: 不是。cycle 1 給的 +0.02236 是 in-distribution 上限，這數字本身**就是**「algorithm-space 已 saturate」的證明；省下後續 hyperparam tuning 的時間。</li>
+        <li><strong>Q-X2: 「下次該不該再花算力 train？」</strong> — A: 不該（在 algorithm-space）。Pivot 之後改 zone-rule / phase_block_3d / read-level epigenetic context，這些不需 LR-style train。</li>
+        <li><strong>Q-X3: 「HCC1395 在所有 slide 都最強，是不是 development sample bias？」</strong> — A: 是。HCC1395 同時是 cycle 1 dev sample + 4-way audit primary + zone discovery primary。**主動聲明已知 in-distribution capacity ≠ generalize**；S5 100% circularity decomposition 已扣分此 bias。</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="all" id="full-glossary" style="margin-top:8px;border-color:var(--c-accent)">
+    <summary>📚 完整名詞 / 概念解釋（cross-slide reference · 可隨時展開）</summary>
+    <div class="note-body">
+      <h4>非知識庫背景概念（PI 不一定知道）</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <h4 style="color:#FFD089">🔬 longphase-TO 機制相關</h4>
+          <ul>
+            <li><strong>priority bug</strong>: longphase-TO 在 read 上找不到 germline het 位點可投票時，hardcode 預設 HP=1（而非 HP=0 unphased）→ 在 germline-absent 區域形成 17.3:1 systematic bias</li>
+            <li><strong>HP tag 6 值</strong>: HP=0 (unphased) · HP=1/2 (paired-germline) · HP=11/21 (self-phasing somatic) · HP=33 (V6 Layer 1.5 ambig conservative bucket)</li>
+            <li><strong>V6 Layer 1.5</strong>: V3F-style hybrid + HP=33 conservative bucket，讓「不確定」位點不被偏 HP=1，而是落 ambig bin</li>
+            <li><strong>paired truth</strong>: paired-mode caller（normal + tumor 同時）提供的真實 haplotype label，作為 tumor-only 模式的 ground truth</li>
+            <li><strong>SP1/2/3</strong>: chr19 priority bug spotlight 三個 cherry-picked 個案 (IGV verified 113:0 / 109:1 / 108:0)，作為 17.3:1 bias 的視覺鐵證</li>
+            <li><strong>ALT-only ratio</strong>: 只計 ALT allele reads 的 HP1:HP2，比 all-reads ratio 對 priority bug 更敏感（ALT 只占 ~5% 但完全暴露 bug 訊號）</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:#FFD089">📊 ISM region-level 指標</h4>
+          <ul>
+            <li><strong>ISM</strong> = InterSubMod，本專案區段層 (region-level) 分析框架，把 BAM read 聚合成 marker / NGroups / methyl 等統計</li>
+            <li><strong>NGroups (NG)</strong>: read 在區段內被分成的 haplotype-like 群數（2 / 3 / ≥4），是 phasing 深度指標</li>
+            <li><strong>4-way comparison</strong>: baseline / V3F / V5 / V6 四個 BAM 版本同表並列，避免單一指標 cherry-pick</li>
+            <li><strong>marker count / rate</strong>: 區段是否有 phase-informative marker；rate 是 marker / region 比例</li>
+            <li><strong>HP1:HP2 ratio offset</strong>: region 端統計 HP1 vs HP2 reads 比，理想 LOH 為 1.5:1 左右</li>
+            <li><strong>LOH-positive marker rate</strong>: region 落在 LOH 區的 marker 比例</li>
+            <li><strong>net TP:FP</strong>: 區段所有 marker 中 TP 對 FP 的淨比（V6 14:1）</li>
+            <li><strong>hp=3 ambig reads</strong>: V6 Layer 1.5 在 region 端正確標 ambig 的 read 數（V6 firing 證據）</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:#FFD089">📈 Feature / statistics 概念</h4>
+          <ul>
+            <li><strong>Cohen's d</strong>: 標準化 effect size = (mean_TP − mean_FP) / pooled_SD；常用閾 0.2 (small) / 0.5 (medium) / 0.8 (large)</li>
+            <li><strong>sign-consistent N/5</strong>: feature 在 N 個樣本上 Cohen's d 同號（同向），5/5 為跨樣本通用</li>
+            <li><strong>direction-flipping</strong>: feature 在不同 sample 上 d 反向（e.g. caller_af HCC1395 +1.33 vs HCC1937 −1.46）→ 無法 cross-sample train</li>
+            <li><strong>loh_inner_flag</strong>: region 是否在 LOH 區域「內側」（不貼邊界）的 binary feature（0/1）</li>
+            <li><strong>caller_af</strong>: caller 自己估計的 allele frequency；本研究中 direction-flipping 主因</li>
+            <li><strong>HPFineF / NME_imbalance / ClusterPermanovaF</strong>: 9 個 ISM-derived features 中的細粒度 HP / methylation entropy / cluster PERMANOVA F 統計</li>
+            <li><strong>collider bias</strong>: 在因果鏈下游 condition 反而引入 spurious correlation（如 per-AF-bin LR）</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:#FFD089">🤖 ML / methodology 概念</h4>
+          <ul>
+            <li><strong>LOSO</strong> = Leave-One-Sample-Out cross-validation：4 樣本訓練 + 1 樣本 hold-out，重複 5 次每樣本當 test 一次</li>
+            <li><strong>ΔF1</strong> = filter F1 − caller F1，&gt; 0 表示 filter 有 net 改善</li>
+            <li><strong>Cohen ribbon</strong>: ±0.005 (small) / ±0.01 (medium) / ±0.02 (large) ΔF1 effect size 閾值，作為 production filter 標準</li>
+            <li><strong>sample-level circularity</strong>: 訓練與測試 row 來自同一 sample → 模型可學該 sample 特異 pattern → in-distribution 高 ΔF1 全部 collapse on LOSO</li>
+            <li><strong>distribution shift</strong>: 樣本間特徵分布不同（如 caller_af direction 反向），訓練樣本學的 weight 無法 generalize</li>
+            <li><strong>in-distribution capacity</strong>: 模型在訓練 distribution 內 fit 的能力，與 generalize ability 是兩件事</li>
+            <li><strong>LR / DT / RF / XGB</strong>: Logistic Regression / Decision Tree / Random Forest / XGBoost — 4 個常見 ML algorithm，本研究全 ribbon-null</li>
+            <li><strong>5 seed × 100 fold</strong>: 5 random seed × 5 sample LOSO × 4 algo = 500 fold total per experiment</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:#FFD089">🧭 Pivot direction（S6 候選）</h4>
+          <ul>
+            <li><strong>phase_block_3d / thread_d</strong>: phasing block 三維結構 pilot（read × position × allele），避開 LR 線性假設</li>
+            <li><strong>chr8 zone gate</strong>: HCC1395 chr8 hotspot 已知 LOH+HPSig 7.4× FP enrichment，做局部 boolean rule</li>
+            <li><strong>low-F1 panel</strong>: 找 caller F1 較低的樣本驗證 HCC1395 H_NEW_4 +0.00699 是否 generalize</li>
+            <li><strong>read-level epigenetic context</strong>: 從 read-level methylation pattern 篩 FP，避開 region 層 distribution shift</li>
+            <li><strong>zone-aware boolean filter</strong>: 按 LOH zone × NG bin × AF bin 分組（如 9-cell heatmap）給布林規則，避 LR weight learning</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:#FFD089">🗂 Roadmap / project state</h4>
+          <ul>
+            <li><strong>Track A / Track B</strong>: Phase 2 cycle 1 設計 — Track A = HCC1395 single-sample filter / Track B = 4 樣本 cross-sample 補測（baseline BAM 不存在 deferred）</li>
+            <li><strong>ρ=0.845</strong>: V6-only cross-sample HPFineN Spearman 相關，作為 Track B baseline BAM 缺的替代</li>
+            <li><strong>NEGATIVE postmortem</strong>: 研究結論 NO-GO 的正式收尾文件，記錄機制 + 三條 triangulation + 「不該再試」清單</li>
+            <li><strong>algorithm-space exhausted</strong>: 4 個 model class（linear / tree / ensemble / boosting）全試完仍無 generalize → 結束 algorithm 方向探索</li>
+            <li><strong>negative finding publication value</strong>: 「沒效應」也是論文價值 — 證明 cross-sample LR filter 在這個 setup 下不可行，給社群避坑</li>
+            <li><strong>W21-W24</strong>: 2026 calendar week 21-24（5/19 - 6/14），4 週 roadmap 視窗</li>
+          </ul>
+        </div>
+      </div>
+      <h4>需要在 PPT 顯示的核心術語（已 inline 在每張 slide 的 📖 terms strip）</h4>
+      <p>每張 slide footer 上方的 <code>📖 terms</code> strip 已內嵌該 slide 必懂的 3-6 個術語的單行解釋；本 glossary 提供完整 cross-slide 深度定義，PI 有疑問時隨時展開查閱。</p>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="8">
+    <summary>📝 講稿 · S7 整體五大目標進度 · 60 秒收尾</summary>
+    <div class="note-body">
+      <h4>開場（10 秒）</h4>
+      <p class="pi-say">「最後一頁回到 2026-03-27 定錨的整體五大研究目標，看本週兩個結論在研究全景中落在哪裡 — 而不只是本週 4 個 sub-target 的延伸。」</p>
+      <h4>整體研究定位</h4>
+      <p>InterSubMod 是 <strong>可解釋 epigenetic evidence 整合框架</strong>，不是另一個 somatic caller — 所以 G5 的 F1 提升只是雙軌成功標準之一，另一軌「可解釋性」（case study 驗證甲基↔HP/SNV 關聯）同等重要。</p>
+      <h4>5 目標逐條對應本週進度（40 秒）</h4>
+      <ul>
+        <li><strong>G1 per-CpG 甲基多標籤關聯（進行中）:</strong> 本週 V6 BAM 修補 → HP tag quality 改善 → 這是 G1 評分的基礎前置；尚未做 G1 主分析。</li>
+        <li><strong>G2 clone 結構分析（部分完成）:</strong> 本週 ISM HCC1395 paired 110/110 metric PASS 是 G2 sub-clone 證據的一部分；cross-sample baseline BAM 缺。</li>
+        <li><strong>G3 二次打擊 + 事件順序（pending）:</strong> 顯式依賴 G1/G2 完成 — 兩者未到位前不啟動。</li>
+        <li><strong>G4 TO normal 補強（探索中）:</strong> 本週 loh_inner_flag 5/5 sign-consistent 是 TO 端 evidence 的一個 anchor，但只是 partial evidence。完整 G4 需 normal methylation reference (Phase 2 方向 A+D)。</li>
+        <li><strong>G5 evidence panel → F1（本週 NO-GO）:</strong> 本週主要負面結論。LR/DT/RF/XGB 4 algorithm × 5 sample = 500 fold 全 ribbon-null → algorithm-space exhausted。但這是 LR 路線 NO-GO，不是 G5 整體 NO-GO — pivot 到 zone-aware boolean 仍在 G5 範圍內。</li>
+      </ul>
+      <h4>當前位置 + 下一步 Phase（10 秒）</h4>
+      <p>Phase 1（方向 E：ML read classification）即將收尾；下階段啟動 Phase 2（方向 A+D：normal methylation reference + CN/Purity-aware），同步推進 G1 評分 + G4 normal 補強。Phase 3/4（方向 B/C）排在更後。</p>
+      <div class="caveat"><strong>caveat:</strong> G3 二次打擊不要在 PI 面前承諾時程 — 它 hard-depend G1/G2 完成，timing 由前置決定。G5 講「LR NO-GO」不要簡化為「整個 G5 NO-GO」— pivot path 還在。</div>
+    </div>
+  </details>
+</div><!-- /.note-wrap -->
+
+</div><!-- /.deck-wrap -->
+
+<script>
+(function(){
+  'use strict';
+  const slides = document.querySelectorAll('.slide-canvas .slide');
+  const notes = document.querySelectorAll('.speaker-note');
+  const counter = document.getElementById('counter');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const projToggle = document.getElementById('proj-toggle');
+  let idx = 0;
+  const total = slides.length;
+
+  function show(n){
+    n = Math.max(0, Math.min(total - 1, n));
+    slides.forEach((s, i) => s.classList.toggle('active', i === n));
+    notes.forEach((d) => {
+      const target = d.getAttribute('data-for');
+      if (target === 'all') { d.style.display = 'block'; return; }
+      const matches = (parseInt(target, 10) - 1) === n;
+      d.style.display = matches ? 'block' : 'none';
+      if (!matches) d.removeAttribute('open');
+    });
+    counter.textContent = (n + 1) + ' / ' + total;
+    btnPrev.disabled = (n === 0);
+    btnNext.disabled = (n === total - 1);
+    idx = n;
+    try { history.replaceState(null, '', '#s' + (n + 1)); } catch(e) {}
+  }
+
+  btnPrev.addEventListener('click', () => show(idx - 1));
+  btnNext.addEventListener('click', () => show(idx + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); show(idx + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(idx - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); show(0); }
+    else if (e.key === 'End') { e.preventDefault(); show(total - 1); }
+    else if (/^[1-9]$/.test(e.key)) {
+      const n = parseInt(e.key, 10) - 1;
+      if (n < total) { e.preventDefault(); show(n); }
+    } else if (e.key === 'p' || e.key === 'P') {
+      e.preventDefault();
+      projToggle.checked = !projToggle.checked;
+      projToggle.dispatchEvent(new Event('change'));
+    }
+  });
+
+  projToggle.addEventListener('change', () => {
+    document.body.classList.toggle('proj-only', projToggle.checked);
+  });
+
+  // initial
+  const initIdx = (location.hash.match(/^#s(\d+)$/) || [])[1];
+  show(initIdx ? parseInt(initIdx, 10) - 1 : 0);
+
+  // touch swipe
+  let touchStart = null;
+  const canvas = document.getElementById('canvas');
+  canvas.addEventListener('touchstart', (e) => { touchStart = e.changedTouches[0].clientX; }, {passive:true});
+  canvas.addEventListener('touchend', (e) => {
+    if (touchStart === null) return;
+    const dx = e.changedTouches[0].clientX - touchStart;
+    if (Math.abs(dx) > 50) show(idx + (dx < 0 ? 1 : -1));
+    touchStart = null;
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<!--
+建立時間: 2026-06-09
+狀態: staging (論文框架 可確認互動 HTML — 給用戶檢視 + 勾選確認 + 寫回答)
+報告類型: paper_framework_interactive_confirm
+受眾: 廖子游（檢視確認）
+data_sources:
+  - docs/paper_focus/02_paper_framework/論文框架_逐節寫作重點與確認.md
+  - docs/paper_focus/01_focus_notes/*（方向卡/對應表/任務樹/目標）
+provenance_note: 數字沿用 session 已驗證集合（🟢P/🟡S/🔵framing，wf_a8ccbb34-3f7 原檔對賬）；無新數字。互動答案存瀏覽器 localStorage。
+-->
+<!-- provenance-verified: 內容取自 02_paper_framework + 01_focus_notes（沿用 wf_a8ccbb34-3f7 對賬集合）；本 HTML 為 .md 的互動 companion，Write 與驗證 batch 分離（§13.0）。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>論文框架 — 可確認互動（檢視 + 回答）</title>
+<style>
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC;
+  --c-text:#141413; --c-text-soft:#5C5A54; --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
+  --radius:10px; --font:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace; --shadow-sm:0 1px 2px rgba(20,20,19,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);background:var(--c-bg);color:var(--c-text);line-height:1.6;font-size:15.5px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.95);border-bottom:1px solid var(--c-border)}
+.topbar .wrap{display:flex;align-items:center;gap:var(--sp-3);min-height:52px;flex-wrap:wrap}
+.topbar h1{font-size:.95rem;margin:0;font-weight:700}
+.topbar .sp{margin-left:auto;display:flex;gap:var(--sp-2);flex-wrap:wrap}
+nav.toc{display:flex;gap:6px;flex-wrap:wrap;font-size:.76rem}
+nav.toc a{color:var(--c-text-soft);text-decoration:none;padding:2px 8px;border:1px solid var(--c-border);border-radius:20px;white-space:nowrap}
+nav.toc a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+.btn{font-family:var(--font);font-size:.8rem;font-weight:700;padding:5px 12px;border-radius:7px;border:1px solid var(--c-accent);background:var(--c-accent);color:#fff;cursor:pointer}
+.btn.ghost{background:#fff;color:var(--c-accent)}
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h2{font-size:1.6rem;line-height:1.3;margin:var(--sp-2) 0}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-4);margin:var(--sp-3) 0}
+.bluf b{color:#9c4a2c}
+.howto{background:var(--c-info-soft);border:1px solid var(--c-info);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);font-size:.86rem;margin:var(--sp-3) 0}
+section{padding:var(--sp-5) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.2rem;margin:0 0 var(--sp-2);display:flex;align-items:baseline;gap:var(--sp-3)}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:700;font-size:.9rem}
+.l0{background:#fff;border-left:4px solid var(--c-accent);border-radius:0 8px 8px 0;padding:var(--sp-2) var(--sp-4);margin:var(--sp-3) 0;font-size:.92rem}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.card{background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:var(--sp-4) var(--sp-5);margin:var(--sp-3) 0}
+.card h4{margin:0 0 var(--sp-2);font-size:1rem}
+.card ul{margin:var(--sp-2) 0;padding-left:1.1em;font-size:.88rem}
+.card li{margin:3px 0}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin:var(--sp-2) 0}
+/* confirm widget */
+.confirm{margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-3)}
+.confirm .q{font-size:.85rem;font-weight:700;color:var(--c-text-soft);margin-bottom:6px}
+.opts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.opts label{cursor:pointer;font-size:.82rem;padding:4px 12px;border:1px solid var(--c-border);border-radius:20px;background:#fff;user-select:none}
+.opts input{display:none}
+.opts input:checked+span{font-weight:700}
+.opts label:has(input[value="confirm"]:checked){background:var(--c-pass-soft);border-color:var(--c-pass);color:var(--c-pass)}
+.opts label:has(input[value="doubt"]:checked){background:var(--c-warn-soft);border-color:var(--c-warn);color:var(--c-warn)}
+.opts label:has(input[value="reject"]:checked){background:var(--c-dead-soft);border-color:var(--c-dead);color:var(--c-dead)}
+.confirm textarea{width:100%;min-height:46px;border:1px solid var(--c-border);border-radius:7px;padding:7px 9px;font-family:var(--font);font-size:.84rem;resize:vertical;background:#FCFBF8}
+.confirm textarea:focus{outline:2px solid var(--c-accent-soft);border-color:var(--c-accent)}
+.decision{border-color:var(--c-accent)}
+.decision.hd1{border-color:var(--c-dead);background:#fff}
+.status-saved{font-size:.74rem;color:var(--c-pass);font-family:var(--mono)}
+table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:var(--sp-2)}
+th,td{text-align:left;padding:6px 8px;border:1px solid var(--c-border);vertical-align:top}
+th{background:#F0EDE6;font-weight:700}
+.note-inline{font-size:.8rem;color:var(--c-text-soft)}
+footer{border-top:1px solid var(--c-border);padding:var(--sp-6) 0;font-size:.78rem;color:var(--c-text-soft)}
+footer code{font-family:var(--mono);background:#F0EDE6;padding:1px 5px;border-radius:4px}
+#exportBox{display:none;position:fixed;inset:5% 50% auto 50%;transform:translateX(-50%);width:min(720px,90vw);max-height:86vh;overflow:auto;background:#fff;border:2px solid var(--c-accent);border-radius:var(--radius);box-shadow:0 8px 30px rgba(20,20,19,.18);padding:var(--sp-4);z-index:100}
+#exportBox textarea{width:100%;min-height:360px;font-family:var(--mono);font-size:.78rem;border:1px solid var(--c-border);border-radius:7px;padding:9px}
+#overlay{display:none;position:fixed;inset:0;background:rgba(20,20,19,.35);z-index:90}
+@media print{nav.toc,.btn,.confirm textarea{display:none}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="wrap">
+  <h1>論文框架 — 可確認互動</h1>
+  <div class="sp">
+    <button class="btn ghost" onclick="resetAll()">清空</button>
+    <button class="btn" onclick="exportAnswers()">匯出我的回答 ▸</button>
+  </div>
+  <nav class="toc" style="flex-basis:100%">
+    <a href="#dec">🔴 待你拍板</a><a href="#intro">Intro</a><a href="#lit">文獻</a><a href="#methods">Methods</a><a href="#results">Results</a><a href="#disc">Discussion</a><a href="#concl">Conclusion</a>
+  </nav>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <div class="kicker">Paper Framework · Interactive Confirm · IMRaD</div>
+  <h2>檢視論文框架 → 每節/每決策選 ✅確認 ❓有疑問 ❌否決 + 寫回答</h2>
+  <div class="bluf"><b>L0：</b>六節都有料能寫，最強在 <b>Results（NEGATIVE 底座）+ Methods（驗證機制）</b>；一條主線串全篇＝<b>LOH 下三訊號正交共驗證 → 甲基能 characterize 不能 filter → 交付 catalog + tooling</b>。<b>最需要你拍板的在「🔴 待你拍板」區。</b></div>
+  <div class="howto">📝 <b>怎麼用</b>：每張卡下方有 <b>✅確認 / ❓有疑問 / ❌否決</b> 三選 + 筆記框，選了/打字即<b>自動存到你瀏覽器</b>（localStorage，重開不丟）。全部答完按右上 <b>「匯出我的回答」</b> → 複製貼回給我，我就照你的決定定稿。三色：🟢有證據 / 🟡待原檔對賬 / 🔵framing。</div>
+</div></header>
+
+<main class="wrap">
+
+<!-- ============ 待你拍板 ============ -->
+<section id="dec">
+  <h3><span class="num">🔴</span> 待你拍板（6 個決策 — 拍完我就能往下，多數不卡 HD-1）</h3>
+
+  <div class="card decision">
+    <h4>DEC-1 ｜「共驗證」定義 = 正交佐證（co-validation）<span class="badge b-info">framing 生死線</span></h4>
+    <p class="note-inline">論文標題 + Intro hook + Conclusion 收束都用「三訊號**正交佐證**同一事件」，不是「互相篩選/判別」（後者已死四道）。</p>
+    <div class="confirm" data-item="DEC-1">
+      <div class="q">你的決定：</div>
+      <div class="opts"><label><input type="radio" name="DEC-1" value="confirm"><span>✅ 確認（用正交佐證）</span></label><label><input type="radio" name="DEC-1" value="doubt"><span>❓ 有疑問</span></label><label><input type="radio" name="DEC-1" value="reject"><span>❌ 否決/改</span></label></div>
+      <textarea data-note="DEC-1" placeholder="想改的措辭 / 疑問…"></textarea>
+    </div>
+  </div>
+
+  <div class="card decision">
+    <h4>DEC-2 ｜ Results 倒序寫（NEGATIVE 先）<span class="badge b-pass">把最硬放最前</span></h4>
+    <p class="note-inline">Results 先擺 filter 死四道（最可防守 🟢）→ 再 phasing（Grade B+）→ 再 ASM characterization。</p>
+    <div class="confirm" data-item="DEC-2">
+      <div class="q">你的決定：</div>
+      <div class="opts"><label><input type="radio" name="DEC-2" value="confirm"><span>✅ 確認</span></label><label><input type="radio" name="DEC-2" value="doubt"><span>❓ 有疑問</span></label><label><input type="radio" name="DEC-2" value="reject"><span>❌ 否決</span></label></div>
+      <textarea data-note="DEC-2" placeholder="…"></textarea>
+    </div>
+  </div>
+
+  <div class="card decision">
+    <h4>DEC-3 ｜ 下一交付物 = 位點甲基分群標籤 catalog（ISM-4）<span class="badge b-pass">最高 ROI 不卡 HD-1</span></h4>
+    <p class="note-inline">把零散觀察收斂成「每位點：分群reliable? / Δβ / somatic-vs-germline / cis-vs-copy」的可發表表 = 你「哪些位點甲基分群明顯」的直接答案 + Results R6。</p>
+    <div class="confirm" data-item="DEC-3">
+      <div class="q">你的決定：</div>
+      <div class="opts"><label><input type="radio" name="DEC-3" value="confirm"><span>✅ 確認設為下一個動手</span></label><label><input type="radio" name="DEC-3" value="doubt"><span>❓ 先看別的</span></label><label><input type="radio" name="DEC-3" value="reject"><span>❌ 否決</span></label></div>
+      <textarea data-note="DEC-3" placeholder="…"></textarea>
+    </div>
+  </div>
+
+  <div class="card decision">
+    <h4>DEC-4 ｜ 四個方向 NO-GO 接受嗎 <span class="badge b-dead">否決區</span></h4>
+    <p class="note-inline">D4 AF↔NGroups當甲基marker（HD-4 已推翻=phasing）｜D5 strong-ASM特殊刪除（循環+冗餘）｜D6 甲基subclone原法（germline-allelic）｜困難-1 paired-FP（FP太少+死）。</p>
+    <div class="confirm" data-item="DEC-4">
+      <div class="q">你的決定：</div>
+      <div class="opts"><label><input type="radio" name="DEC-4" value="confirm"><span>✅ 接受四個 NO-GO</span></label><label><input type="radio" name="DEC-4" value="doubt"><span>❓ 部分有疑問</span></label><label><input type="radio" name="DEC-4" value="reject"><span>❌ 不接受</span></label></div>
+      <textarea data-note="DEC-4" placeholder="哪個不接受 / 為什麼…"></textarea>
+    </div>
+  </div>
+
+  <div class="card decision">
+    <h4>DEC-5 ｜ 方法精修要做嗎（ISM-2 過嚴審查 + ISM-3 合併 Δβ）<span class="badge b-warn">code 任務</span></h4>
+    <p class="note-inline">ISM-2：CramersV gate 偏嚴（487 latent 真分群被擋）→ audit RegionProcessor.cpp:1592｜ISM-3：加 Δβ 當互補發現通道（非取代 CramersV）。</p>
+    <div class="confirm" data-item="DEC-5">
+      <div class="q">你的決定：</div>
+      <div class="opts"><label><input type="radio" name="DEC-5" value="confirm"><span>✅ 兩個都做</span></label><label><input type="radio" name="DEC-5" value="doubt"><span>❓ 只做一個/再議</span></label><label><input type="radio" name="DEC-5" value="reject"><span>❌ 先不做</span></label></div>
+      <textarea data-note="DEC-5" placeholder="…"></textarea>
+    </div>
+  </div>
+
+  <div class="card decision hd1">
+    <h4>DEC-6 ｜ 🔴 HD-1（決定性 · 卡 phasing 主軸 grade）<span class="badge b-dead">AI 不代決</span></h4>
+    <p class="note-inline">phasing positive 是 by-construction 部分循環（Inner same-HP1 用 somatic-attributed HP1-1 定義），R-SELFREF 對照未跑。只有兩條路：(1) 跑全 7 樣本 flag-on 對照（~25-50hr C++）保 positive-spine；或 (2) 降 phasing 為 characterization observation 讓 NEGATIVE 扛論文。「加 caveat 保 Grade-A」reviewer 不接受。</p>
+    <div class="confirm" data-item="DEC-6">
+      <div class="q">你的決定：</div>
+      <div class="opts"><label><input type="radio" name="DEC-6" value="run"><span>🟢 跑 R-SELFREF 對照</span></label><label><input type="radio" name="DEC-6" value="demote"><span>🔵 降為 characterization</span></label><label><input type="radio" name="DEC-6" value="hold"><span>⏸ 暫緩/再討論</span></label></div>
+      <textarea data-note="DEC-6" placeholder="你的考量…"></textarea>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Introduction ============ -->
+<section id="intro">
+  <h3><span class="num">1</span> Introduction（緒論）</h3>
+  <div class="l0"><b>L0 寫什麼：</b>癌症長讀能同時讀 somatic/haplotype/甲基，但沒人在 read-level 把三者縫成「正交共驗證同一事件」，也沒人誠實界定甲基能/不能做什麼 —— 本研究補這個。</div>
+  <div class="card">
+    <h4>聚焦重點（三段）</h4>
+    <ul>
+      <li><b>主題為何重要</b>：long-read 單分子同時帶 somatic + phase + 5mC/5hmC；read-level 連結三訊號有真實需求。<span class="badge b-info">🔵</span></li>
+      <li><b>還沒解決</b>：(1) read-level 正交佐證未系統 characterize；(2) 甲基 filter 沒人公開證偽；(3) somatic-controlled ASM 未界定。<span class="badge b-info">🔵</span></li>
+      <li><b>如何補</b>：ISM read-level 共驗證 characterization + tooling + 誠實負結果目錄。</li>
+    </ul>
+    <p class="note-inline"><b>怎麼確認/聚焦</b>：Intro hook 用「共驗證=正交佐證」（= DEC-1）；不承諾任何 filter 能力。</p>
+    <div class="confirm" data-item="SEC-intro">
+      <div class="q">這節框架 OK 嗎？</div>
+      <div class="opts"><label><input type="radio" name="SEC-intro" value="confirm"><span>✅ 確認</span></label><label><input type="radio" name="SEC-intro" value="doubt"><span>❓ 有疑問</span></label><label><input type="radio" name="SEC-intro" value="reject"><span>❌ 要改</span></label></div>
+      <textarea data-note="SEC-intro" placeholder="想補的 hook / 缺口 / 措辭…"></textarea>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 文獻探討 ============ -->
+<section id="lit">
+  <h3><span class="num">2</span> 文獻探討</h3>
+  <div class="l0"><b>L0 寫什麼：</b>從「癌症甲基/ASM」收斂到「read-level haplotype-linked ASM 的 subclonal 結構沒人做、甲基 filter 沒人證偽」，導出研究問題。</div>
+  <div class="card">
+    <table>
+      <thead><tr><th>層</th><th>內容</th><th>→ knowledge/11</th></tr></thead>
+      <tbody>
+        <tr><td>大背景</td><td>癌症甲基失序 · ASM · long-read 表觀</td><td>lit-01</td></tr>
+        <tr><td>特定主題</td><td>haplotype-resolved ASM 工具：MethPhaser/NanoMethPhase/NANOME/modkit/O'Neill POG</td><td>lit-03 / 06</td></tr>
+        <tr><td>現有研究</td><td>ASM 增 5×/hypo（Do2020/O'Neill2024）· CN-confound（Martin-Trujillo2017）· epipolymorphism（Landan2012/Derrien2021）</td><td>lit-02 / 07</td></tr>
+        <tr><td>研究缺口</td><td>read-level 距離+subclonal 沒人做；somatic-controlled HP-axis 沒人做；甲基 filter 沒人證偽</td><td>lit-08 / 10</td></tr>
+        <tr><td>研究問題</td><td>RQ1 三訊號 LOH 下如何正交佐證？RQ2 甲基能 characterize 什麼/不能 filter 什麼？RQ3 ASM 跨樣本是否復現？</td><td>lit-10</td></tr>
+      </tbody>
+    </table>
+    <p class="note-inline"><b>怎麼確認</b>：🔴 守 3 不對齊（BRCA2 hypo≠hyper / Do20 口徑 / CNN-LOH）；/citation-verification 核 ~38 篇。</p>
+    <div class="confirm" data-item="SEC-lit">
+      <div class="q">這節框架 OK 嗎？</div>
+      <div class="opts"><label><input type="radio" name="SEC-lit" value="confirm"><span>✅ 確認</span></label><label><input type="radio" name="SEC-lit" value="doubt"><span>❓ 有疑問</span></label><label><input type="radio" name="SEC-lit" value="reject"><span>❌ 要改</span></label></div>
+      <textarea data-note="SEC-lit" placeholder="缺哪篇 / 研究問題要不要改…"></textarea>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Methods ============ -->
+<section id="methods">
+  <h3><span class="num">3</span> Methods（方法）</h3>
+  <div class="l0"><b>L0 寫什麼：</b>ISM read-level pipeline + 每個結論用的驗證機制（嚴謹度展示窗）。</div>
+  <div class="card">
+    <h4>聚焦重點</h4>
+    <ul>
+      <li><b>ISM pipeline</b>：read×CpG 矩陣 → read-read 距離（6 度量）→ 階層分群（CramersV gate）→ HP/LOH tag → normal-anchored cis-test。</li>
+      <li><b>樣本/caller</b>：HCC1395（SEQC2 truth）+ 5 樣本；ClairS-TO <span class="badge b-dead">single-pipeline → ⭐3 天花板</span>。</li>
+      <li><b>驗證機制</b>：LOSO / permutation null / subhap-matched / blind-ARI ruler+imprinting 正控 / signed-rank+paired 負控 / copy-test / germline-het null。<span class="badge b-pass">🟢 04 對應表</span></li>
+    </ul>
+    <p class="note-inline"><b>怎麼確認</b>：🟡 CramersV gate 過嚴（487 latent）誠實交代；⭐ 為何不含 Δβ / 是否合併（= DEC-5 ISM-2/3）決定後定稿。</p>
+    <div class="confirm" data-item="SEC-methods">
+      <div class="q">這節框架 OK 嗎？</div>
+      <div class="opts"><label><input type="radio" name="SEC-methods" value="confirm"><span>✅ 確認</span></label><label><input type="radio" name="SEC-methods" value="doubt"><span>❓ 有疑問</span></label><label><input type="radio" name="SEC-methods" value="reject"><span>❌ 要改</span></label></div>
+      <textarea data-note="SEC-methods" placeholder="方法要不要先修（過嚴/合併Δβ）…"></textarea>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Results ============ -->
+<section id="results">
+  <h3><span class="num">4</span> Results（結果）</h3>
+  <div class="l0"><b>L0 寫什麼：</b>先擺最硬 NEGATIVE → phasing positive（Grade B+）→ ASM characterization。全 characterization/negative，無 filter。</div>
+  <div class="card">
+    <table>
+      <thead><tr><th>段</th><th>一句 + 料</th></tr></thead>
+      <tbody>
+        <tr><td>R1（先寫·最硬）</td><td>甲基不能 filter 死四道：LOSO +0.0224→−0.0001 · AUC=0.505 · ~4%sens+COLO829 TP≈FP · clustering=germline-allelic <span class="badge b-pass">🟢</span></td></tr>
+        <tr><td>R2 phasing</td><td>NG=2 Inner>Outer 7/7 p=0.0078125 <span class="badge b-pass">🟢</span> <span class="badge b-warn">Grade B+ / HD-1</span></td></tr>
+        <tr><td>R3 ASM 存在</td><td>TP 3.95%>FP 1.07% 🟢 · copy-dosage REFUTED 🟢 · chr17 cis exemplar <span class="badge b-warn">🟡</span></td></tr>
+        <tr><td>R4 AF→NGroups</td><td>=phasing（r=0.656 控甲基不動 collider）<span class="badge b-pass">🟢</span></td></tr>
+        <tr><td>R5 跨樣本</td><td>6/6 excess <span class="badge b-warn">🟡</span> · 同-locus 0/38 underpowered <span class="badge b-pass">🟢</span></td></tr>
+        <tr><td>R6 交付物</td><td>位點甲基分群標籤 catalog <span class="badge b-info">⭐ 待做 ISM-4</span></td></tr>
+      </tbody>
+    </table>
+    <p class="note-inline"><b>怎麼確認</b>：每 claim 帶 tier + 守 characterization≠filter；🟡 投稿前補原檔（02 清單）；R6 先做（DEC-3）；R2 grade 依 HD-1（DEC-6）。</p>
+    <div class="confirm" data-item="SEC-results">
+      <div class="q">這節框架 + 倒序 OK 嗎？</div>
+      <div class="opts"><label><input type="radio" name="SEC-results" value="confirm"><span>✅ 確認</span></label><label><input type="radio" name="SEC-results" value="doubt"><span>❓ 有疑問</span></label><label><input type="radio" name="SEC-results" value="reject"><span>❌ 要改</span></label></div>
+      <textarea data-note="SEC-results" placeholder="哪段順序/內容要調…"></textarea>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Discussion ============ -->
+<section id="disc">
+  <h3><span class="num">5</span> Discussion（討論）</h3>
+  <div class="l0"><b>L0 寫什麼：</b>結果擴回意義 —— 共驗證的生物意義 + 「為何甲基不能 filter」的防雷貢獻 + 文獻對齊/不對齊 + tooling 展望 + 誠實 limitation。</div>
+  <div class="card">
+    <ul>
+      <li><b>生物意義</b>：LOH 重塑 haplotype-linked 甲基；ASM 真但小/非方向 → 給文獻「ASM 普遍 hypo 主導」一個 somatic-controlled 視角。</li>
+      <li><b>方法貢獻（防雷）</b>：甲基不能 filter 的機制（regression-to-extreme / germline-allelic / sample-circularity）對想用甲基 filter 的人有教育價值。</li>
+      <li><b>對齊/不對齊</b>：Martin-Trujillo (CN-DOSAGE 82-92%) 不 corroborate BRCA2 reclassification（copy-DOSAGE 已 REFUTED MW p=0.6183；confound 是 subclone 非 CN-dosage = category error；其正確角色是我們控掉的 confound 警告）；Do2020 口徑差異；BRCA2 hypo≠hyper。</li>
+      <li><b>limitation</b>：single-pipeline ⭐3 / single-sample / by-construction circular（HD-1）/ 6 untestable cis。</li>
+    </ul>
+    <p class="note-inline"><b>怎麼確認</b>：🔴 誠實 limitation 段不可輕描淡寫；守 FT-1~5 + OR-1~6。</p>
+    <div class="confirm" data-item="SEC-disc">
+      <div class="q">這節框架 OK 嗎？</div>
+      <div class="opts"><label><input type="radio" name="SEC-disc" value="confirm"><span>✅ 確認</span></label><label><input type="radio" name="SEC-disc" value="doubt"><span>❓ 有疑問</span></label><label><input type="radio" name="SEC-disc" value="reject"><span>❌ 要改</span></label></div>
+      <textarea data-note="SEC-disc" placeholder="意義/臨床擴展要不要加…"></textarea>
+    </div>
+  </div>
+</section>
+
+<!-- ============ Conclusion ============ -->
+<section id="concl">
+  <h3><span class="num">6</span> Conclusion（結論）</h3>
+  <div class="l0"><b>L0 一句：</b>在 LOH 約束下三訊號 read-level 正交共驗證 haplotype 重塑；甲基能佐證、不能篩選（機制解明）；交付 read-level characterization + 位點甲基分群 catalog + phasing tooling。</div>
+  <div class="card">
+    <p class="note-inline"><b>future</b>：COLO829 升 ⭐4 / umtag yardstick / cis 大規模協議。<b>怎麼確認</b>：與 Intro 1c 首尾呼應同一句共驗證 framing。</p>
+    <div class="confirm" data-item="SEC-concl">
+      <div class="q">這節框架 OK 嗎？</div>
+      <div class="opts"><label><input type="radio" name="SEC-concl" value="confirm"><span>✅ 確認</span></label><label><input type="radio" name="SEC-concl" value="doubt"><span>❓ 有疑問</span></label><label><input type="radio" name="SEC-concl" value="reject"><span>❌ 要改</span></label></div>
+      <textarea data-note="SEC-concl" placeholder="…"></textarea>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:var(--c-accent)">
+    <h4>📋 還想補充的（自由回答）</h4>
+    <div class="confirm" data-item="FREE" style="border-top:none;padding-top:0">
+      <textarea data-note="FREE" placeholder="任何想加的目標 / 疑問 / 我漏掉的點…"></textarea>
+    </div>
+    <p style="margin-top:var(--sp-3)"><button class="btn" onclick="exportAnswers()">匯出我的回答 ▸（複製貼回給 AI）</button></p>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="wrap">
+  <p>互動答案存你瀏覽器 localStorage（重開不丟）；按「匯出」把所有勾選+筆記整理成文字，複製貼回給 AI 即照你的決定定稿。</p>
+  <p>內容沿用 session 已驗證集合（🟢P 原檔對賬 / 🟡S 待對賬 / 🔵framing）· git <code>8dbb931</code> · 2026-06-09 · 來源 <code>InterSubMod/docs/paper_focus/02_paper_framework/</code> + <code>01_focus_notes/</code>。§13：本 HTML 無新數字，Write 與驗證 batch 分離。</p>
+</div></footer>
+
+<div id="overlay" onclick="closeExport()"></div>
+<div id="exportBox">
+  <h4 style="margin-top:0">你的回答（複製貼回給 AI）</h4>
+  <textarea id="exportText" readonly></textarea>
+  <p style="margin-bottom:0"><button class="btn" onclick="copyExport()">複製到剪貼簿</button> <button class="btn ghost" onclick="closeExport()">關閉</button></p>
+</div>
+
+<script>
+const KEY='paper_focus_confirm_v1';
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}}
+function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
+// restore
+(function(){const d=load();
+  document.querySelectorAll('input[type=radio]').forEach(r=>{if(d['r_'+r.name]===r.value)r.checked=true;});
+  document.querySelectorAll('textarea[data-note]').forEach(t=>{const k='n_'+t.getAttribute('data-note');if(d[k])t.value=d[k];});
+})();
+// save on change
+document.querySelectorAll('input[type=radio]').forEach(r=>r.addEventListener('change',()=>{const d=load();d['r_'+r.name]=r.value;save(d);}));
+document.querySelectorAll('textarea[data-note]').forEach(t=>t.addEventListener('input',()=>{const d=load();d['n_'+t.getAttribute('data-note')]=t.value;save(d);}));
+const LABELS={confirm:'✅確認',doubt:'❓有疑問',reject:'❌否決',run:'🟢跑R-SELFREF',demote:'🔵降characterization',hold:'⏸暫緩'};
+function exportAnswers(){
+  const d=load();let out='# 論文框架確認 — 我的回答 ('+new Date().toLocaleString()+')\n\n';
+  document.querySelectorAll('.confirm[data-item]').forEach(c=>{
+    const item=c.getAttribute('data-item');
+    const r=d['r_'+item];const n=d['n_'+item];
+    if(!r&&!n)return;
+    let title=item;const h=c.closest('.card')?.querySelector('h4');const sh=c.closest('section')?.querySelector('h3');
+    if(h)title=h.textContent.trim();else if(sh)title=sh.textContent.trim();
+    out+='## '+item+' — '+title+'\n';
+    out+='決定: '+(r?(LABELS[r]||r):'(未選)')+'\n';
+    if(n)out+='筆記: '+n+'\n';
+    out+='\n';
+  });
+  document.getElementById('exportText').value=out;
+  document.getElementById('overlay').style.display='block';
+  document.getElementById('exportBox').style.display='block';
+}
+function closeExport(){document.getElementById('overlay').style.display='none';document.getElementById('exportBox').style.display='none';}
+function copyExport(){const t=document.getElementById('exportText');t.select();try{navigator.clipboard.writeText(t.value);}catch(e){document.execCommand('copy');}}
+function resetAll(){if(confirm('清空所有勾選與筆記？')){localStorage.removeItem(KEY);location.reload();}}
+</script>
+</body>
+</html>

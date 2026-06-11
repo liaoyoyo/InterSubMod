@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Reviewer 1.5 答辯 v2 · BRCA2/ZAR1L Promoter ASM · Presenter Deck (2026-05-28)</title>
+<style>
+:root{
+  --c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-text:#141413;--c-text-soft:#57564F;
+  --c-border:#D6CFC0;--c-rule:#E3DACC;--c-code-bg:#F4EFE6;
+  --c-primary:#1E3A8A;--c-accent:#D97757;--c-accent-deep:#B85A3F;
+  --c-ok:#15803D;--c-warn:#A16207;--c-neg:#C2410C;
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;
+  --ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","PingFang TC","Droid Sans Fallback",system-ui,sans-serif;
+  --ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,Monaco,monospace;
+  --fs-xs:13px;--fs-sm:15px;--fs-md:17px;--fs-lg:19px;--fs-xl:23px;--fs-2xl:28px;--fs-3xl:33px;
+  --radius:4px;
+  --shadow-md:0 2px 8px rgba(20,20,19,0.08);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#262626;color:var(--c-text);font-family:var(--ff-body);font-size:var(--fs-md);line-height:1.55}
+.deck-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:var(--sp-3) var(--sp-4)}
+
+/* Top control bar */
+.topbar{width:100%;max-width:1280px;display:flex;justify-content:space-between;align-items:center;color:#EEE;font-size:var(--fs-sm);padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-3)}
+.topbar .brand{font-weight:700;letter-spacing:0.5px;color:#FFF}
+.topbar .brand small{display:block;color:#BBB;font-weight:400;font-size:var(--fs-xs);margin-top:2px;letter-spacing:0}
+.topbar .brand .vtag{display:inline-block;background:var(--c-accent);color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:3px;margin-left:8px;vertical-align:middle;letter-spacing:1px}
+.topbar .controls{display:flex;gap:var(--sp-2);align-items:center}
+.topbar button{background:#3A3A3A;color:#FFF;border:1px solid #555;border-radius:var(--radius);padding:5px 12px;font-family:inherit;font-size:var(--fs-sm);cursor:pointer;transition:background .15s}
+.topbar button:hover{background:#4A4A4A}
+.topbar button:disabled{opacity:.35;cursor:not-allowed}
+.topbar .counter{font-family:var(--ff-mono);color:#FFF;background:#1A1A1A;padding:5px 12px;border-radius:var(--radius);min-width:50px;text-align:center}
+.topbar label.toggle{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:#DDD;user-select:none}
+.topbar label.toggle input{accent-color:var(--c-accent)}
+
+/* Slide canvas — 16:9 PPT mimic */
+.slide-canvas{width:100%;max-width:1280px;aspect-ratio:16/9;background:var(--c-surface);border:1px solid var(--c-border);box-shadow:var(--shadow-md);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.slide-canvas .slide{display:none;flex-direction:column;width:100%;height:100%;padding:24px 36px 16px}
+.slide-canvas .slide.active{display:flex}
+
+/* Slide header strip */
+.slide-head{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:8px;border-bottom:2px solid var(--c-primary);margin-bottom:12px;flex-shrink:0}
+.slide-eyebrow{font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:1.2px;color:var(--c-accent-deep);font-weight:700}
+.slide-title{font-size:var(--fs-2xl);margin:2px 0 0;line-height:1.18;color:var(--c-text);font-weight:700}
+.slide-chip{font-family:var(--ff-mono);font-size:var(--fs-xs);color:var(--c-text-soft);background:var(--c-code-bg);padding:3px 8px;border-radius:var(--radius);white-space:nowrap}
+
+/* Slide body grid */
+.slide-body{flex:1;display:grid;gap:14px;min-height:0;align-items:stretch}
+.slide-body.split-13{grid-template-columns:1.4fr 1fr}
+.slide-body.split-11{grid-template-columns:1fr 1fr}
+.slide-body.single{grid-template-columns:1fr}
+
+/* Hero figure */
+.hero{display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--c-bg);border:1px solid var(--c-rule);border-radius:var(--radius);padding:6px;min-height:0;overflow:hidden}
+.hero img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.hero-caption{font-size:12.5px;color:var(--c-text-soft);margin-top:5px;text-align:center;line-height:1.4}
+.hero-caption b{color:var(--c-accent-deep);font-family:var(--ff-mono)}
+
+/* Side panel */
+.side{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:hidden}
+.side h3{font-size:var(--fs-md);margin:0;color:var(--c-primary);font-weight:700;padding-bottom:4px;border-bottom:1px dashed var(--c-rule)}
+.side ul{margin:0;padding-left:18px}
+.side li{font-size:var(--fs-sm);line-height:1.5;margin:3px 0}
+.side li strong{color:var(--c-accent-deep)}
+
+/* Verdict / takeaway box */
+.verdict{background:var(--c-bg);border-left:4px solid var(--c-primary);padding:10px 14px;font-size:var(--fs-md);line-height:1.5;border-radius:0 var(--radius) var(--radius) 0}
+.verdict.ok{border-color:var(--c-ok);background:#F0FDF4}
+.verdict.warn{border-color:var(--c-warn);background:#FEFCE8}
+.verdict strong{color:var(--c-primary)}
+.verdict.ok strong{color:var(--c-ok)}
+.verdict.warn strong{color:#78350F}
+
+/* Big metric callouts */
+.metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.metric{background:var(--c-bg);border:1px solid var(--c-rule);border-top:3px solid var(--c-accent);border-radius:var(--radius);padding:8px 10px;text-align:center}
+.metric .val{font-family:var(--ff-mono);font-size:var(--fs-xl);font-weight:700;color:var(--c-primary);line-height:1.1}
+.metric .lbl{font-size:12px;color:var(--c-text-soft);margin-top:3px;line-height:1.35}
+.metric.ok .val{color:var(--c-ok)}
+
+/* Dense BCG table */
+table.bcg{border-collapse:collapse;width:100%;font-size:var(--fs-sm);font-family:var(--ff-body)}
+table.bcg th,table.bcg td{border-top:1px solid var(--c-rule);border-bottom:1px solid var(--c-rule);padding:7px 9px;text-align:left;vertical-align:top}
+table.bcg th{background:var(--c-code-bg);font-weight:700;color:var(--c-text);letter-spacing:0.2px;border-top:2px solid var(--c-text);border-bottom:1px solid var(--c-text)}
+table.bcg td.num,table.bcg th.num{text-align:right;font-family:var(--ff-mono);font-variant-numeric:tabular-nums}
+table.bcg td.center,table.bcg th.center{text-align:center}
+table.bcg td.ok{color:var(--c-ok);font-weight:600}
+table.bcg td.neg{color:var(--c-neg);font-weight:600}
+table.bcg tr:last-child td{border-bottom:2px solid var(--c-text)}
+table.bcg td b{color:var(--c-accent-deep)}
+.stars{color:var(--c-accent);font-size:14px;letter-spacing:1px;white-space:nowrap}
+
+/* funnel */
+.funnel{display:flex;flex-direction:column;justify-content:space-between;gap:6px;height:100%}
+.funnel .fstep{display:flex;align-items:center;gap:10px;font-size:var(--fs-sm)}
+.funnel .fbar{background:var(--c-primary);color:#fff;font-family:var(--ff-mono);font-weight:700;padding:8px 14px;border-radius:var(--radius);text-align:center;white-space:nowrap;font-size:14px;min-width:104px}
+.funnel .fstep:nth-child(1) .fbar{width:100%}
+.funnel .fstep:nth-child(2) .fbar{width:60%;background:#2746a0}
+.funnel .fstep:nth-child(3) .fbar{width:32%;background:#3457b8}
+.funnel .fstep:nth-child(4) .fbar{width:19%;background:var(--c-warn)}
+.funnel .fstep:nth-child(5) .fbar{width:11%;background:var(--c-ok)}
+.funnel .fnote{font-size:12.5px;color:var(--c-text-soft)}
+
+/* Footer bar */
+.slide-foot{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--c-text-soft);padding-top:6px;border-top:1px solid var(--c-rule);margin-top:8px;font-family:var(--ff-mono);flex-shrink:0}
+.slide-foot .src{word-break:break-all;max-width:72%}
+
+/* Inline terms strip */
+.terms{font-size:12.5px;color:var(--c-text-soft);background:#FCFAF4;border:1px dashed var(--c-rule);border-radius:var(--radius);padding:6px 12px;margin-top:6px;line-height:1.5;flex-shrink:0}
+.terms strong{color:var(--c-primary);font-weight:700;letter-spacing:0.3px;margin-right:4px}
+.terms b{color:var(--c-accent-deep);font-weight:700;background:var(--c-code-bg);padding:1px 5px;border-radius:3px;font-family:var(--ff-mono);font-size:12px}
+.terms .sep{color:var(--c-border);margin:0 6px}
+.terms .chk{color:var(--c-ok);font-weight:700}
+
+/* Speaker note (collapsed) */
+.note-wrap{width:100%;max-width:1280px;margin-top:var(--sp-3)}
+.speaker-note{background:#1F1F1F;border:1px solid #444;color:#EEE;border-radius:var(--radius);font-size:var(--fs-sm)}
+.speaker-note summary{cursor:pointer;padding:10px 14px;font-weight:600;color:#FFF;letter-spacing:0.5px;list-style:none;display:flex;justify-content:space-between;align-items:center;background:#2A2A2A;border-radius:var(--radius)}
+.speaker-note[open] summary{border-radius:var(--radius) var(--radius) 0 0}
+.speaker-note summary::after{content:"▼";font-size:11px;transition:transform .15s}
+.speaker-note[open] summary::after{transform:rotate(180deg)}
+.speaker-note .note-body{padding:14px 18px;line-height:1.7;color:#DDD}
+.speaker-note .note-body h4{margin:8px 0 4px;color:#FFD089;font-size:var(--fs-sm);text-transform:uppercase;letter-spacing:0.8px;font-weight:700}
+.speaker-note .note-body p{margin:4px 0}
+.speaker-note .note-body ul{margin:4px 0;padding-left:20px}
+.speaker-note .note-body code{background:#3A3A3A;color:#FFD089;padding:1px 5px;border-radius:3px;font-size:0.92em}
+.speaker-note .note-body .pi-say{background:#2D2D45;border-left:3px solid #93C5FD;padding:6px 10px;margin:6px 0;border-radius:0 3px 3px 0;color:#E0E7FF}
+.speaker-note .note-body .caveat{background:#3A2415;border-left:3px solid #FB923C;padding:6px 10px;margin:6px 0;border-radius:0 3px 3px 0;color:#FED7AA}
+
+/* Cover slide */
+.cover{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;height:100%;padding:22px 56px}
+.cover .eyebrow{font-size:var(--fs-sm);text-transform:uppercase;letter-spacing:2px;color:var(--c-accent-deep);font-weight:700}
+.cover h1{font-size:var(--fs-3xl);margin:10px 0 10px;line-height:1.2;color:var(--c-text);font-weight:800;max-width:96%}
+.cover h1 .en{display:block;font-size:var(--fs-lg);color:var(--c-primary);font-weight:700;margin-top:6px;letter-spacing:0.2px}
+.cover .lead{font-size:var(--fs-md);color:var(--c-text);max-width:90%;line-height:1.5;margin-bottom:4px}
+.cover .lead b{color:var(--c-accent-deep);font-family:var(--ff-mono);font-weight:700}
+.cover .sample-line{font-size:var(--fs-sm);color:var(--c-text-soft);margin-bottom:12px}
+.cover .sample-line b{color:var(--c-text);font-weight:600}
+.cover .qbox{background:var(--c-bg);border:1px solid var(--c-rule);border-left:4px solid var(--c-accent);padding:9px 16px;border-radius:0 var(--radius) var(--radius) 0;font-size:13.5px;font-style:italic;color:var(--c-text);max-width:94%;line-height:1.5}
+.cover .qbox b{font-style:normal;color:var(--c-accent-deep)}
+.cover .arc{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:16px;width:100%}
+.cover .arc .step{background:var(--c-bg);border:1px solid var(--c-rule);border-top:3px solid var(--c-accent);padding:10px 12px;border-radius:var(--radius);line-height:1.3}
+.cover .arc .step .num{font-family:var(--ff-mono);color:var(--c-accent-deep);font-weight:700;font-size:13px;letter-spacing:0.5px}
+.cover .arc .step .lbl{display:block;margin-top:4px;color:var(--c-text);font-weight:700;font-size:14px}
+.cover .credits{display:flex;gap:0;margin-top:18px;width:100%;border-top:1px solid var(--c-rule);padding-top:12px;font-size:var(--fs-sm)}
+.cover .credits .cr{padding-right:20px;margin-right:20px;border-right:1px solid var(--c-rule)}
+.cover .credits .cr:last-child{border-right:none}
+.cover .credits .cr .k{font-size:11px;color:var(--c-text-soft);text-transform:uppercase;letter-spacing:1px;display:block}
+.cover .credits .cr .v{font-size:var(--fs-md);color:var(--c-text);font-weight:700;margin-top:2px;display:block}
+
+/* Headline strip */
+.headline-strip{background:var(--c-primary);color:white;padding:10px 16px;font-size:var(--fs-md);line-height:1.5;border-radius:var(--radius);margin-bottom:10px;flex-shrink:0;font-weight:500}
+.headline-strip strong{color:#FED7AA;font-weight:700}
+.headline-strip.ok{background:var(--c-ok)}
+
+/* engineering inference chain (S3) */
+.infer{display:flex;flex-direction:column;gap:0}
+.infer .inode{display:flex;gap:10px;align-items:flex-start;position:relative;padding-bottom:9px}
+.infer .inode .ic{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--c-primary);color:#fff;font-family:var(--ff-mono);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;z-index:1}
+.infer .inode:not(:last-child)::before{content:"";position:absolute;left:11px;top:24px;bottom:0;width:2px;background:var(--c-rule)}
+.infer .inode .itx{font-size:13.5px;line-height:1.45;color:var(--c-text);padding-top:2px}
+.infer .inode .itx b{color:var(--c-accent-deep)}
+.infer .inode.final .ic{background:var(--c-ok)}
+
+/* Pipeline phases (S4) — clearer */
+.phaseflow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.phase{background:var(--c-bg);border:1px solid var(--c-rule);border-top:4px solid var(--c-primary);border-radius:var(--radius);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.phase .ph-h{font-size:13px;font-weight:700;color:var(--c-primary);display:flex;align-items:center;gap:6px}
+.phase .ph-h .pn{font-family:var(--ff-mono);font-size:11px;background:var(--c-primary);color:#fff;border-radius:3px;padding:1px 6px}
+.phase ul{margin:0;padding-left:16px}
+.phase li{font-size:13px;line-height:1.5;color:var(--c-text);margin:3px 0}
+.phase li b{color:var(--c-accent-deep)}
+.phase.human{border-top-color:var(--c-warn)}
+.phase.human .ph-h{color:#92600A}
+.phase.human .ph-h .pn{background:var(--c-warn)}
+.phase.out{border-top-color:var(--c-ok)}
+.phase.out .ph-h{color:var(--c-ok)}
+.phase.out .ph-h .pn{background:var(--c-ok)}
+
+/* prompt block */
+.prompt-block{background:#1F2937;color:#F3F4F6;border-radius:var(--radius);padding:11px 15px;font-size:13.5px;line-height:1.6;border-left:4px solid var(--c-accent)}
+.prompt-block .ptag{color:#FBBF24;font-weight:700;font-family:var(--ff-mono);font-size:12px;letter-spacing:0.5px}
+
+/* learning strip */
+.learn-strip{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:8px;flex:1;min-height:0}
+.learn-strip .lc{background:#F0FDF4;border:1px solid #BBF7D0;border-left:3px solid var(--c-ok);border-radius:0 var(--radius) var(--radius) 0;padding:7px 11px;font-size:13px;line-height:1.4;display:flex;flex-direction:column;justify-content:center}
+.learn-strip .lc b{color:var(--c-ok)}
+
+/* future placeholder */
+.future-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;height:100%}
+.future-col h3{font-size:var(--fs-md);margin:0 0 6px;padding-bottom:4px;border-bottom:2px solid var(--c-primary);color:var(--c-primary)}
+.future-col ul{margin:0;padding-left:18px;font-size:var(--fs-sm)}
+.future-col li{margin:5px 0;line-height:1.45}
+.future-col .todo{color:var(--c-text-soft);font-style:italic}
+
+/* appendix */
+.appx-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;height:100%;min-height:0}
+.appx-col{display:flex;flex-direction:column;min-height:0;overflow:auto}
+.appx-col h3{font-size:var(--fs-md);margin:0 0 6px;padding-bottom:4px;border-bottom:2px solid var(--c-primary);color:var(--c-primary);position:sticky;top:0;background:var(--c-surface)}
+.path-list{list-style:none;margin:0;padding:0}
+.path-list li{font-family:var(--ff-mono);font-size:11.5px;line-height:1.4;padding:3px 0;border-bottom:1px dotted var(--c-rule);word-break:break-all}
+.path-list li .ptag{display:inline-block;background:var(--c-code-bg);color:var(--c-accent-deep);font-weight:700;padding:0 5px;border-radius:3px;margin-right:5px;font-size:10px}
+
+body.proj-only .speaker-note{display:none}
+body.proj-only .topbar{background:transparent}
+
+@media print{
+  body{background:white}
+  .topbar{display:none}
+  .deck-wrap{padding:0}
+  .slide-canvas{aspect-ratio:auto;max-width:none;border:none;box-shadow:none;page-break-after:always;height:auto;min-height:auto}
+  .slide-canvas .slide{display:flex!important;page-break-after:always;height:auto;min-height:auto}
+  .speaker-note{display:none}
+}
+@media (max-width:800px){
+  .slide-body.split-13,.slide-body.split-11{grid-template-columns:1fr}
+  .cover .arc{grid-template-columns:1fr 1fr}
+  .phaseflow{grid-template-columns:1fr 1fr}
+  .metric-row{grid-template-columns:1fr 1fr}
+  .future-grid,.appx-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="deck-wrap">
+
+<!-- Top control bar -->
+<header class="topbar" role="toolbar" aria-label="presentation controls">
+  <div class="brand">Reviewer 1.5 答辯 · BRCA2/ZAR1L Promoter ASM<span class="vtag">V2</span><small>2026-05-28 · HCC1395 HKU MOD · longphase-s paired ONT · BCG presenter mode</small></div>
+  <div class="controls">
+    <button id="btn-prev" type="button" aria-label="previous slide">← Prev</button>
+    <span class="counter" id="counter">1 / 6</span>
+    <button id="btn-next" type="button" aria-label="next slide">Next →</button>
+    <label class="toggle"><input id="proj-toggle" type="checkbox"> Projector only</label>
+  </div>
+</header>
+
+<!-- Slide canvas (16:9) -->
+<div class="slide-canvas" id="canvas">
+
+<!-- ─────────────── SLIDE 1 · COVER ─────────────── -->
+<section class="slide active" data-idx="1" aria-label="Slide 1 Cover">
+  <div class="cover">
+    <div class="eyebrow">Review Response · Reviewer Comment 1.5</div>
+    <h1>腫瘤抑制基因啟動子之 Somatic Haplotype 等位特異性低甲基化
+      <span class="en">Allele-specific hypomethylation on a reconstructed somatic haplotype at the BRCA2／ZAR1L bidirectional promoter</span>
+    </h1>
+    <div class="lead">於 95 個 curated TSG 啟動子中，找到通過嚴格條件的強例子：<b>chr13:32,315,128 G&gt;A</b></div>
+    <div class="sample-line">樣本　<b>HCC1395 HKU MOD</b>　·　tumor-normal paired ONT</div>
+    <div class="qbox">
+      <b>Reviewer 1.5：</b>"do you see any example with reconstructed somatic haplotype in tumor suppressor gene promoters that shows significant DNA methylation changes (hypomethylation) against the germline haplotype? Should be very easy to visualize on IGV."
+    </div>
+    <div class="arc" aria-label="presentation arc">
+      <div class="step"><span class="num">S2</span><span class="lbl">位點 IGV 圖示</span></div>
+      <div class="step"><span class="num">S3</span><span class="lbl">證據與機制</span></div>
+      <div class="step"><span class="num">S4</span><span class="lbl">方法與流程</span></div>
+      <div class="step"><span class="num">S5</span><span class="lbl">未來任務</span></div>
+      <div class="step" style="border-top-color:var(--c-primary)"><span class="num">附錄</span><span class="lbl">可驗證來源</span></div>
+    </div>
+    <div class="credits">
+      <div class="cr"><span class="k">作者 Author</span><span class="v">廖子游</span></div>
+      <div class="cr"><span class="k">指導教授 Advisor</span><span class="v">黃耀廷 教授</span></div>
+      <div class="cr"><span class="k">日期 Date</span><span class="v">2026-05-28</span></div>
+      <div class="cr"><span class="k">版本 Revision</span><span class="v">v2</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── SLIDE 2 · 位點 IGV ─────────────── -->
+<section class="slide" data-idx="2" aria-label="Slide 2 IGV 截圖">
+  <div class="slide-head">
+    <div>
+      <div class="slide-eyebrow">S2 · 位點 IGV 圖示 · 符合 reviewer "easy to visualize on IGV" 的直接截圖</div>
+      <h2 class="slide-title">IGV 截圖：Tumor somatic haplotype 甲基化明顯低於 germline，肉眼可辨</h2>
+    </div>
+    <span class="slide-chip">hg38 · ZAR1L_ASM_ex session</span>
+  </div>
+
+  <div class="slide-body split-13">
+    <div class="hero">
+      <img src="figures/20260527_ASM_ZAR1L_ex.png" alt="IGV session chr13:32315128 ZAR1L BRCA2 promoter ASM 甲基化 tumor vs normal HP-grouped">
+      <div class="hero-caption">變異 <b>chr13:32,315,128 G&gt;A</b>　·　視窗 <b>chr13:32,314,183–32,316,071</b>（~1.9 kb）　·　分析 window <b>±1 kb</b> 內 <b>412</b> 個 CpG（<b>197</b> paired）　·　紅 = 5mC high / 藍 = 5mC low</div>
+    </div>
+    <div class="side">
+      <h3>怎麼讀（兩條 BAM 對比）</h3>
+      <table class="bcg">
+        <thead>
+          <tr><th>BAM</th><th>HP tag</th><th>5mC 分群</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>Tumor.bam</b></td>
+            <td>HP1 / HP2 / <b>HP2-1</b></td>
+            <td class="neg">分群差異<b>明顯</b><br>HP2-1（somatic）紅點稀疏</td>
+          </tr>
+          <tr>
+            <td><b>Normal.bam</b></td>
+            <td>HP1 / HP2</td>
+            <td class="ok">兩群<b>大致一致</b><br>僅少部分差異</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="verdict ok"><strong>somatic 軸（HP2-1）低甲基</strong> = reviewer 要看的「somatic 比 germline 少甲基」，IGV 直接可見。</div>
+    </div>
+  </div>
+
+  <div class="terms">
+    <strong>📖 key terms</strong>
+    <b>HP2-1</b> longphase-s 重建的 somatic haplotype <span class="sep">|</span>
+    <b>5mC</b> CpG 甲基化（紅高/藍低） <span class="sep">|</span>
+    <b>germline 軸</b> HP1/HP2 為對照基準 <span class="sep">|</span>
+    三 caller（ClairS/DeepSomatic/LongPhaseS）皆 call 到此 variant
+  </div>
+
+  <div class="slide-foot">
+    <span class="src">src: figures/20260527_ASM_ZAR1L_ex.png · IGV session /big8_disk/.../ZAR1L_ASM_ex.xml</span>
+    <span>S2 / 6</span>
+  </div>
+</section>
+
+<!-- ─────────────── SLIDE 3 · 證據 + 機制 + 論文 ─────────────── -->
+<section class="slide" data-idx="3" aria-label="Slide 3 證據 機制 論文">
+  <div class="slide-head">
+    <div>
+      <div class="slide-eyebrow">S3 · 證據與機制 · 為何此位點足以回答 reviewer（工程視角推論）</div>
+      <h2 class="slide-title">不是孤立統計訊號 — 落在已發表機制區、有 analog、有通則框架支持的功能位點</h2>
+    </div>
+    <span class="slide-chip">p=6.1e-11 · vs null 2.3×</span>
+  </div>
+
+  <div class="metric-row" style="margin-bottom:11px">
+    <div class="metric"><div class="val">−0.122</div><div class="lbl">mean Δβ（197 paired CpG）<br>germline 0.215 → somatic 0.093</div></div>
+    <div class="metric ok"><div class="val">6.1e-11</div><div class="lbl">Wilcoxon p（d=−0.39）<br>統計上 ≈ 6 sigma</div></div>
+    <div class="metric"><div class="val">2.3×</div><div class="lbl">超出 null 分布<br>對照組 max |Δ|=0.054</div></div>
+    <div class="metric"><div class="val">NOT CpG</div><div class="lbl">AGA→AAA 非 CpG<br>排除「破壞 CpG」假象</div></div>
+  </div>
+
+  <div class="slide-body split-11" style="gap:18px">
+    <div class="side">
+      <h3>為何這個位點有意義（工程視角）</h3>
+      <div class="infer">
+        <div class="inode"><div class="ic">1</div><div class="itx"><b>BRCA2</b> = 細胞的「DNA 修復模組」；失效 → 突變累積 → 癌變</div></div>
+        <div class="inode"><div class="ic">2</div><div class="itx">promoter = 控制此模組的「設定開關」；<b>ZAR2</b> 蛋白像控制程序，會 bind 這個設定區把 BRCA2 轉錄調低</div></div>
+        <div class="inode"><div class="ic">3</div><div class="itx">我們的變異 <b>G&gt;A</b> 落在這個<b>共享設定區</b>內（非 CpG，不是直接破壞甲基位點）</div></div>
+        <div class="inode"><div class="ic">4</div><div class="itx">甲基化 = DNA 上的「封條」；<b>只有 somatic allele</b> 封條被改（少甲基），germline allele 不變 → allele 專一</div></div>
+        <div class="inode final"><div class="ic">✓</div><div class="itx"><b>推論</b>：變異破壞 ZAR2/TF 結合 → 觸發只發生在突變那條 allele 的甲基化重塑 → 正是「有功能意義」的位點</div></div>
+      </div>
+    </div>
+    <div class="side">
+      <h3>文獻解釋力對照（不同論文支持哪一環）</h3>
+      <table class="bcg">
+        <thead>
+          <tr><th>論文 (PMID)</th><th>證明什麼</th><th class="center">解釋力</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>Liu 2010</b><br>20202217</td><td>ZAR2 蛋白直接 bind 並 silence BRCA2（<b>同一段</b>雙向啟動子）</td><td class="center"><span class="stars">★★★</span><br>機制母體</td></tr>
+          <tr><td><b>Evans 2018</b><br>30075112</td><td>BRCA1 單鹼基 5'UTR → cis-ASM → silencing</td><td class="center"><span class="stars">★★★</span><br>最近 analog</td></tr>
+          <tr><td><b>Do &amp; Tycko 2020</b><br>32594908</td><td>癌症 6–17% somatic mut 伴 de novo cis-ASM</td><td class="center"><span class="stars">★★</span><br>通則框架</td></tr>
+          <tr><td><b>Fraile 2018</b><br>29766361</td><td>BRCA2 promoter 該區段具調控活性</td><td class="center"><span class="stars">★★</span><br>區域活性</td></tr>
+          <tr><td><b>O'Neill 2024</b><br>39406235</td><td>long-read phased ASM 為成熟方法</td><td class="center"><span class="stars">★</span><br>方法可信</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="terms">
+    <strong>📖 對 reviewer 5 條件</strong>
+    <span class="chk">✓</span> reconstructed somatic haplotype <span class="sep">|</span>
+    <span class="chk">✓</span> TSG promoter <span class="sep">|</span>
+    <span class="chk">✓</span> significant hypomethylation (p=6e-11) <span class="sep">|</span>
+    <span class="chk">✓</span> against germline <span class="sep">|</span>
+    <span class="chk">✓</span> IGV 可視化 → <b>五項全中</b>
+  </div>
+
+  <div class="slide-foot">
+    <span class="src">src: InterSubMod/docs/reports/in_progress/2026/05/20260527_HCC1395_TSG_promoter_ASM_reviewer_response_01.md §5 §9 §13</span>
+    <span>S3 / 6</span>
+  </div>
+</section>
+
+<!-- ─────────────── SLIDE 4 · AI Prompt + 方法流程 ─────────────── -->
+<section class="slide" data-idx="4" aria-label="Slide 4 AI Prompt 方法流程">
+  <div class="slide-head">
+    <div>
+      <div class="slide-eyebrow">S4 · 方法與流程 · AI Prompt → 自動 pipeline → 找到位點（可學習可複用）</div>
+      <h2 class="slide-title">95 TSG 自動漏斗至 BRCA2 — 12 步自動執行、1 個人類決策節點</h2>
+    </div>
+    <span class="slide-chip">funnel 95 → 6 → 2 → 1</span>
+  </div>
+
+  <div class="prompt-block" style="margin-bottom:11px">
+    <span class="ptag">[ 我給 AI 的 Prompt 意圖 ]</span>　在 HCC1395 paired ONT data 上，找出 reviewer 1.5 要的例子：TSG 啟動子內、reconstructed somatic haplotype 相對 germline 顯著 hypomethylation 的位點。<b style="color:#FCD34D">排除 LOH 區</b>（ASM 框架不適用），只用 SEQC2 truth TP variant，要有<b style="color:#FCD34D">統計檢定 + negative control + 機制 + IGV 視覺化</b>。
+  </div>
+
+  <div class="phaseflow" style="margin-bottom:11px">
+    <div class="phase">
+      <div class="ph-h"><span class="pn">P1 AUTO</span>準備</div>
+      <ul>
+        <li>KB query 定位 truth / LOH / BAM</li>
+        <li>文獻 scout 設 <b>priority + 機制錨點</b></li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="ph-h"><span class="pn">P2 AUTO</span>圈定範圍</div>
+      <ul>
+        <li>95 TSG → TSS ±2kb promoter</li>
+        <li><b>扣 LOH</b> → ∩ TP sSNV = 6 cand</li>
+      </ul>
+    </div>
+    <div class="phase human">
+      <div class="ph-h"><span class="pn">P3 ⏸ 人類</span>邊界決策</div>
+      <ul>
+        <li>yield 6 &lt; 門檻 10</li>
+        <li>含 <b>BRCA2 actionable</b> → 確認續跑</li>
+      </ul>
+    </div>
+    <div class="phase out">
+      <div class="ph-h"><span class="pn">P4 AUTO</span>篩選 · 檢定 · 佐證</div>
+      <ul>
+        <li>HP cov 過濾 → 2 pass</li>
+        <li>ISM Wilcoxon + <b>negative control</b></li>
+        <li>CpG guard + 文獻 + IGV 出圖</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="slide-body single" style="min-height:0">
+    <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:16px;min-height:0;height:100%">
+      <div class="funnel">
+        <div class="fstep"><div class="fbar">95 curated TSG</div><span class="fnote">COSMIC ∪ Vogelstein ∪ breast DDR</span></div>
+        <div class="fstep"><div class="fbar">44 non-LOH</div><span class="fnote">減 51 TSG（含 BRCA1 / TP53）</span></div>
+        <div class="fstep"><div class="fbar">6 candidate</div><span class="fnote">∩ SEQC2 TP sSNV (PASS)</span></div>
+        <div class="fstep"><div class="fbar">2 strict</div><span class="fnote">HP 覆蓋過濾（BRCA2 / KMT2C）</span></div>
+        <div class="fstep"><div class="fbar">1 strong</div><span class="fnote">BRCA2 Δβ=−0.122 ✓</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;height:100%;min-height:0">
+        <h3 style="font-size:var(--fs-md);margin:0;color:var(--c-primary);font-weight:700;padding-bottom:3px;border-bottom:1px dashed var(--c-rule)">可學習 · 可複用（對「輸出生物有用位點」終極目標）</h3>
+        <div class="learn-strip">
+          <div class="lc"><b>KB-first</b><br>不重做 inventory</div>
+          <div class="lc"><b>lit-scout 先行</b><br>大計算前設 target</div>
+          <div class="lc"><b>yield funnel 量化</b><br>每步損失透明可 audit</div>
+          <div class="lc"><b>negative control</b><br>排 pipeline 系統噪音</div>
+          <div class="lc"><b>artifact guard</b><br>CpG-destruction 檢查</div>
+          <div class="lc"><b>human-in-loop</b><br>邊界值人類決策</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-foot">
+    <span class="src">src: InterSubMod/docs/reports/in_progress/2026/05/20260527_..._reviewer_response_01.md §0.5 (13-step) · scripts/01-08</span>
+    <span>S4 / 6</span>
+  </div>
+</section>
+
+<!-- ─────────────── SLIDE 5 · 未來任務（待補） ─────────────── -->
+<section class="slide" data-idx="5" aria-label="Slide 5 未來任務">
+  <div class="slide-head">
+    <div>
+      <div class="slide-eyebrow">S5 · 未來任務進度 · roadmap（先列候選，細節待補）</div>
+      <h2 class="slide-title">後續延伸 — 從 sample-of-one 走向 generalizable 位點發現</h2>
+    </div>
+    <span class="slide-chip">placeholder · 待補</span>
+  </div>
+
+  <div class="slide-body single">
+    <div class="future-grid">
+      <div class="future-col">
+        <h3>近期可做（已有 substrate）</h3>
+        <ul>
+          <li>擴 negative control n=5 → n=50（~30 min，更 robust null）</li>
+          <li>BRCA2 跑 SEQC2 EpiQC bulk WGBS 對照（~1 hr，升 L2→L1）</li>
+          <li>Cross-sample 驗 BRCA2 在 HCC1937 / COLO829（2-4 hr，generalize）</li>
+          <li>JASPAR/HOMER motif 分析（chr13:32315128 ±100bp，驗 ZAR2/TF binding 破壞）</li>
+        </ul>
+        <p class="todo" style="margin-top:8px">⟶ 此區可由用戶填入確定排程與 owner</p>
+      </div>
+      <div class="future-col">
+        <h3>方法泛化（終極目標方向）</h3>
+        <ul>
+          <li>把 13-step pipeline 封裝為可複用 template（任意 gene panel）</li>
+          <li>LOH 區 classic TSG（BRCA1/TP53）改用 bulk methylation 補答</li>
+          <li>Relax TSS ±5kb 重跑，yield 預期 15-30 candidate</li>
+          <li>加 ENCODE enhancer / DHS overlap track（cis-regulatory 定位）</li>
+        </ul>
+        <p class="todo" style="margin-top:8px">⟶ 此區待用戶依研究主軸補優先順序</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="terms">
+    <strong>📖 注意</strong>
+    本頁為 <b>placeholder</b> — 候選任務取自報告 §11，待用戶確認後填入具體里程碑 / 時程 / 負責人。
+  </div>
+
+  <div class="slide-foot">
+    <span class="src">src: InterSubMod/docs/reports/in_progress/2026/05/20260527_..._reviewer_response_01.md §11</span>
+    <span>S5 / 6</span>
+  </div>
+</section>
+
+<!-- ─────────────── APPENDIX · 可驗證檔案路徑 ─────────────── -->
+<section class="slide" data-idx="6" aria-label="Appendix 可驗證檔案路徑">
+  <div class="slide-head">
+    <div>
+      <div class="slide-eyebrow">附錄 · 可驗證檔案路徑與資料來源（reproducibility）</div>
+      <h2 class="slide-title">每個 claim 可追溯 — 報告 / 資料 / 腳本 / IGV session</h2>
+    </div>
+    <span class="slide-chip">all paths verifiable</span>
+  </div>
+
+  <div class="slide-body single" style="min-height:0">
+    <div class="appx-grid">
+      <div class="appx-col">
+        <h3>📄 報告 + 圖 + IGV session</h3>
+        <ul class="path-list">
+          <li><span class="ptag">報告</span>InterSubMod/docs/reports/in_progress/2026/05/20260527_HCC1395_TSG_promoter_ASM_reviewer_response_01.md</li>
+          <li><span class="ptag">HTML</span>同上 .standalone.html</li>
+          <li><span class="ptag">本簡報</span>InterSubMod/docs/presentations/in_progress/20260528_BRCA2_ZAR1L_reviewer1.5_response/presenter_BRCA2_ZAR1L_5slide_v2.html</li>
+          <li><span class="ptag">主圖</span>InterSubMod/figures/ASM_ex/20260527_ASM_ZAR1L_ex.png</li>
+          <li><span class="ptag">IGV</span>/big8_disk/liaoyoyo2001/IGV_session/ZAR1L_ASM_ex.xml（patched: research/.../config/ZAR1L_ASM_ex_PATCHED.xml）</li>
+          <li><span class="ptag">分析圖</span>InterSubMod/research/tsg_promoter_asm_reviewer/figures/brca2_*.png</li>
+        </ul>
+        <h3 style="margin-top:10px">🔬 原始資料來源</h3>
+        <ul class="path-list">
+          <li><span class="ptag">TP VCF</span>/big8_disk/data/HCC1395/SEQC2/high-confidence_sSNV_in_HC_regions_v1.2.1.vcf.gz</li>
+          <li><span class="ptag">LOH bed</span>/big8_disk/data/HCC1395/SEQC2/CNV/ngs_benchmark_cnvs_gain_loss_loh.bed</li>
+          <li><span class="ptag">paired BAM</span>/big7_disk/.../longphase_s/HCC1395_tagged.bam（260 GB, MM/ML, HP:Z）</li>
+        </ul>
+      </div>
+      <div class="appx-col">
+        <h3>⚙ Pipeline 腳本（reproducible）</h3>
+        <ul class="path-list">
+          <li><span class="ptag">Step1-3</span>scripts/01_build_tsg_promoter_and_yield.py → output/tp_in_tsg_promoter_nonLOH.tsv</li>
+          <li><span class="ptag">Step3</span>scripts/02_step3_hp_coverage.py → output/step3_hp_coverage.json</li>
+          <li><span class="ptag">Step4</span>scripts/03_step4_ism_methylation_diff.py → output/step4_ism_results.json</li>
+          <li><span class="ptag">control</span>scripts/04_negative_control_random_regions.py</li>
+          <li><span class="ptag">viz</span>scripts/05_brca2_visualization.py + 06_brca2_read_level_viz.py</li>
+          <li><span class="ptag">IGV</span>scripts/08_igv_batch_v3.txt（headless JDK21）</li>
+          <li><span class="ptag">run all</span>cd InterSubMod/research/tsg_promoter_asm_reviewer &amp;&amp; for i in scripts/0*.py; do python3 $i; done</li>
+        </ul>
+        <h3 style="margin-top:10px">📚 關鍵文獻（PMID）</h3>
+        <ul class="path-list">
+          <li><span class="ptag">機制</span>Liu 2010 Mol Cancer · PMID 20202217（BRCA2/ZAR2 雙向啟動子）</li>
+          <li><span class="ptag">analog</span>Evans 2018 AJHG · PMID 30075112（BRCA1 c.-107A&gt;T cis-ASM）</li>
+          <li><span class="ptag">框架</span>Do &amp; Tycko 2020 Genome Biol · PMID 32594908</li>
+          <li><span class="ptag">方法</span>O'Neill 2024 Cell Genomics · PMID 39406235</li>
+          <li><span class="ptag">活性區</span>Fraile-Bethencourt 2018 · PMID 29766361</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-foot">
+    <span class="src">lit scout: research/tsg_promoter_asm_reviewer/output/literature_scout{,_chr13_32315128}.md · 273 claims / 254 verified / 0 fabrication</span>
+    <span>附錄 / 6</span>
+  </div>
+</section>
+
+</div><!-- /.slide-canvas -->
+
+<!-- ─────────────── SPEAKER NOTES ─────────────── -->
+<div class="note-wrap">
+
+  <details class="speaker-note" data-for="1">
+    <summary>📝 講稿 · S1 封面 · 開場 30 秒</summary>
+    <div class="note-body">
+      <h4>一句話開場</h4>
+      <p class="pi-say">「Reviewer 1.5 問我們有沒有看到 TSG 啟動子裡 somatic haplotype 相對 germline 顯著 hypomethylation 的例子 — 答案是有，而且它剛好落在一個已發表的 BRCA2／ZAR1L 雙向啟動子上，特別有説服力。」</p>
+      <h4>定錨（要先講清楚的框架）</h4>
+      <ul>
+        <li>這是 <strong>ASM（allele-specific methylation）框架</strong>的答案 — 比較同一 allele 的 germline-tag（HP1）vs 重建 somatic-tag（HP1-1）。</li>
+        <li>不是 bulk methylation silencing（那會是 BRCA1 那種）— 兩者領域不同，S3 會説明 boundary。</li>
+        <li>這是 95 個 curated TSG 裡 <strong>唯一</strong>通過嚴格條件的 strong example，要誠實講「sample of one」。</li>
+      </ul>
+      <div class="caveat"><strong>caveat:</strong> 不要宣稱「BRCA2 在 HCC1395 全 silencing」— 變異是 subclonal（TVAF≈0.19），正確説法是「一個帶此變異的 subclone 在 BRCA2 啟動子顯示 hypomethylation」。</div>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="2">
+    <summary>📝 講稿 · S2 IGV 截圖 · 90 秒（最直觀證據）</summary>
+    <div class="note-body">
+      <h4>引導看圖（一句帶過）</h4>
+      <p>「中間兩大塊是 Tumor.bam 和 Normal.bam 的 read，按 haplotype 分群；紅點是高甲基化 CpG、藍點是低甲基化。」</p>
+      <h4>關鍵指向（看表格三欄）</h4>
+      <ul>
+        <li><strong>Tumor.bam</strong> 被 tag 成 HP1 / HP2 / <strong>HP2-1</strong>，HP2-1（reconstructed somatic）紅點明顯比 HP1/HP2 稀疏 = somatic 軸 hypomethylated → reviewer 要看的東西。</li>
+        <li><strong>Normal.bam</strong> 只有 HP1 / HP2，兩群甲基化大致一致、少部分差異 → germline 對照。</li>
+      </ul>
+      <h4>可被考問的數據（caption 已列）</h4>
+      <p>變異 chr13:32,315,128；IGV 視窗 chr13:32,314,183–32,316,071（~1.9 kb）；分析 window ±1 kb 內 412 個 CpG（197 paired）；三 caller（ClairS / DeepSomatic / LongPhaseS）皆 call 到。</p>
+      <div class="pi-say"><strong>Q:</strong> 為何只有 HP2-1，沒有 HP2 的對照 somatic？<br><strong>A:</strong> somatic mutation 物理上只發生在一條 haplotype，必然單側出現，是 biology 不是 bug；我們做 same-allele 比較。</div>
+      <div class="caveat"><strong>caveat:</strong> IGV PNG 多 panel 細節若看不清，可開原始 session XML 互動，或指向報告 Figure 4（matplotlib read-level）。</div>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="3">
+    <summary>📝 講稿 · S3 證據與機制 · 120 秒（核心説服 · 工程視角）</summary>
+    <div class="note-body">
+      <h4>主軸：把生物翻成工程語言</h4>
+      <p>「我用工程比喻講清楚為什麼這個位點有意義 — 左邊是推論鏈，右邊是哪篇論文支持哪一環。」</p>
+      <h4>左：5 步推論（逐節念）</h4>
+      <ul>
+        <li>① BRCA2 是細胞的 <strong>DNA 修復模組</strong>；壞了 → 突變累積 → 癌變。</li>
+        <li>② promoter 是控制這個模組的<strong>設定開關</strong>；ZAR2 蛋白像一支控制程序，會 bind 設定區把 BRCA2 轉錄調低（Liu 2010 已證）。</li>
+        <li>③ 我們的變異 G&gt;A 落在這個<strong>共享設定區</strong>內，而且它<strong>不是 CpG</strong>（所以低甲基不是「直接打掉甲基位點」的假象）。</li>
+        <li>④ 甲基化像 DNA 上的封條；<strong>只有 somatic 那條 allele 封條被改</strong>（少甲基），germline 沒變 → allele 專一。</li>
+        <li>⑤ 推論：變異破壞 ZAR2/TF 結合 → 觸發只在突變 allele 的甲基化重塑 → 這正是「有功能意義」的位點。</li>
+      </ul>
+      <h4>右：文獻解釋力（為何可信）</h4>
+      <ul>
+        <li><strong>Liu 2010（★★★ 機制母體）</strong>：ChIP-PCR 證 ZAR2 直接 silence BRCA2，同一段啟動子。</li>
+        <li><strong>Evans 2018（★★★ analog）</strong>：BRCA1 單鹼基 → cis-ASM → silencing，最接近的已發表先例。</li>
+        <li><strong>Do &amp; Tycko 2020（★★ 框架）</strong>：癌症 6-17% somatic mut 伴 de novo cis-ASM，支持這類事件普遍存在。</li>
+        <li><strong>Fraile 2018 / O'Neill 2024（★★ / ★）</strong>：BRCA2 promoter 該區段有活性 + long-read phased ASM 是成熟方法。</li>
+      </ul>
+      <h4>收斂回 reviewer</h4>
+      <p class="pi-say">「所以這不是孤立的統計訊號 — 它落在已發表機制區、有 analog、有通則框架支持。對 reviewer 的五個條件五項全中。」</p>
+      <div class="caveat"><strong>必揭露:</strong> ① Δβ=0.122 未達 Lister 0.2 ribbon（但 p + max|Δ|0.93 + 超 null 三線支持）；② HCC1395 不在 Liu cohort，同 TNBC 子類，機制是合理 inference；③ 變異未在 ClinVar/dbSNP/Ensembl → novel private somatic。</div>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="4">
+    <summary>📝 講稿 · S4 方法與流程 · 90 秒（方法學價值）</summary>
+    <div class="note-body">
+      <h4>主軸</h4>
+      <p>「這頁回答 meta 問題 — 我怎麼找到這個位點？這套方法能不能複用到『輸出對生物學有用的位點』的目標。」</p>
+      <h4>四階段（看上方 P1-P4 卡）</h4>
+      <ul>
+        <li><strong>P1 準備</strong>：先 KB query + lit scout，在動 260 GB BAM 前就設好 priority target 跟機制錨點。</li>
+        <li><strong>P2 圈定</strong>：95 TSG → promoter → 扣 LOH → ∩ TP sSNV = 6 candidate。</li>
+        <li><strong>P3 人類節點</strong>：yield 6 低於門檻 10，但含 BRCA2 actionable → 由人決定續跑（唯一停下來問人的點）。</li>
+        <li><strong>P4 篩選+檢定+佐證</strong>：HP 覆蓋過濾 → ISM Wilcoxon + negative control → CpG guard + 文獻 + IGV 出圖。</li>
+      </ul>
+      <h4>漏斗透明 + 可複用</h4>
+      <p>95→44→6→2→1，每步損失量化、可 audit。這 13-step 是 <strong>reusable template</strong>：給定 gene panel + truth VCF + tagged BAM，自動產 candidate + 統計 + 機制 + 視覺化。</p>
+      <p>六個防錯設計值得保留（右下綠卡）：KB-first、lit-scout 先行、yield funnel 量化、negative control、artifact guard、human-in-loop。</p>
+      <div class="pi-say"><strong>若問「能 scale 嗎」：</strong>能。非-LOH 區 candidate 發現全自動；瓶頸在 LOH 區（classic TSG 都在裡面，ASM 不適用，須改 bulk）。</div>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="5">
+    <summary>📝 講稿 · S5 未來任務 · 30 秒（placeholder）</summary>
+    <div class="note-body">
+      <h4>説明</h4>
+      <p>「這頁是 roadmap placeholder — 候選任務取自報告 §11，分『近期可做』與『方法泛化』兩欄。具體里程碑、時程、負責人等我跟你確認後填。」</p>
+      <h4>優先級提示（口頭可補）</h4>
+      <ul>
+        <li>最快升 evidence：擴 negative control n=50（30 min）+ BRCA2 bulk WGBS 對照（升 L2→L1）。</li>
+        <li>最能回應「那 classic TSG 呢」：LOH 區 BRCA1/TP53 改用 bulk methylation 補答。</li>
+        <li>最能 generalize：cross-sample 驗 HCC1937 / COLO829。</li>
+      </ul>
+      <div class="caveat"><strong>caveat:</strong> 此頁刻意留白 — 等用戶（廖）依研究主軸排優先序後再定稿，不在 PI 面前承諾未確認的時程。</div>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="6">
+    <summary>📝 講稿 · 附錄 · reproducibility（被問才展開）</summary>
+    <div class="note-body">
+      <h4>用途</h4>
+      <p>「附錄列出所有可驗證路徑 — 報告、原始資料、pipeline 腳本、IGV session、關鍵文獻 PMID。任何一個 claim 都可獨立 audit。」</p>
+      <h4>一行重現指令</h4>
+      <p><code>cd InterSubMod/research/tsg_promoter_asm_reviewer &amp;&amp; for i in scripts/0*.py; do python3 $i; done</code></p>
+      <h4>數據完整性</h4>
+      <p>報告經 artifact verification：<strong>273 claims · 254 verified · 0 fabrication</strong>。reframe 歷史（v1→v4 TSS 距離更正）已在報告 §0 明確記錄。</p>
+      <div class="caveat"><strong>caveat:</strong> IGV session 原檔 owner 是 chenhan112（read-only），我們用 own copy 的 PATCHED.xml（panel height 加大修復 normal HP2 cut-off）。3 個 VCF 缺 .idx 載入會慢 10-30s，可 igvtools index 預建。</div>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="all" id="full-glossary" style="margin-top:8px;border-color:var(--c-accent)">
+    <summary>📚 完整名詞 / 概念解釋（cross-slide reference · 可隨時展開）</summary>
+    <div class="note-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <h4 style="color:#FFD089">🧬 ASM / haplotype 概念</h4>
+          <ul>
+            <li><strong>ASM (allele-specific methylation)</strong>：同一基因座兩條 allele 的甲基化程度不同</li>
+            <li><strong>HP:Z tag (longphase-s)</strong>：1/2 = germline-tagged · 1-1/2-1 = reconstructed-somatic-tagged · 3 = ambiguous</li>
+            <li><strong>reconstructed somatic haplotype</strong>：longphase-s 用 somatic SNV 重建出的 haplotype-tagged reads</li>
+            <li><strong>5mC / β (beta value)</strong>：單 CpG site 甲基化率（0=未甲基 / 1=全甲基）；IGV 中紅=高、藍=低</li>
+            <li><strong>Δβ</strong>：(somatic β) − (germline β)；負值 = somatic 比 germline 少甲基（hypomethylation）</li>
+            <li><strong>MM/ML tag</strong>：BAM 內甲基化 modification 機率編碼（ONT 5mCG calling）</li>
+          </ul>
+          <h4 style="color:#FFD089">📊 統計概念</h4>
+          <ul>
+            <li><strong>Wilcoxon signed-rank</strong>：paired non-parametric test，對同一 CpG 的 germline vs somatic 配對</li>
+            <li><strong>Cohen's d</strong>：標準化 effect size；|d|&lt;0.2 trivial / 0.2-0.5 small / 0.5-0.8 moderate / &gt;0.8 large</li>
+            <li><strong>Lister 2009 ribbon</strong>：DNA 甲基化生物學中 |Δβ|≥0.2 視為 biologically meaningful 的閾值</li>
+            <li><strong>negative control</strong>：隨機抽非-TSG 非-LOH 位點跑同 pipeline，建立 null 分布排除系統噪音</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:#FFD089">🔬 位點生物背景</h4>
+          <ul>
+            <li><strong>BRCA2</strong>：DNA 雙股斷裂修復、乳癌/卵巢癌 TSG（Vogelstein 138 driver）</li>
+            <li><strong>ZAR1L (alias ZAR2, LOC646799)</strong>：C4-type zinc finger TF；Liu 2010 證其直接 silence BRCA2 forward 轉錄</li>
+            <li><strong>bidirectional overlapping promoter</strong>：兩基因頭對頭共享的啟動子；BRCA2/ZAR2 有 111-nt antiparallel overlap</li>
+            <li><strong>TSS</strong>：transcription start site；promoter 通常定義為 TSS ±2kb</li>
+            <li><strong>CpG destruction artifact</strong>：變異剛好破壞 CpG dinucleotide → 看似 hypomethylation 但其實是 sequence-driven 假象（本例 AGA→AAA 非 CpG，已排除）</li>
+            <li><strong>cis-ASM cascade</strong>：cis-acting 變異破壞 TF binding → 觸發 allele-specific 甲基化變化</li>
+          </ul>
+          <h4 style="color:#FFD089">🗂 資料 / 框架邊界</h4>
+          <ul>
+            <li><strong>LOH (Loss of Heterozygosity)</strong>：一條 allele 完全失去，HP1+HP2 不會同時存在 → ASM 框架 by definition 不適用</li>
+            <li><strong>為何排除 LOH</strong>：HCC1395 hyper-diploid（ploidy 2.85），51/95 (53.7%) TSG 落 LOH（含 BRCA1/TP53/CDH1/RASSF1A/CDKN2A）→ 經典 TSG 須改用 bulk methylation 分析</li>
+            <li><strong>TVAF / NVAF</strong>：Tumor / Normal Variant Allele Frequency（本例 0.189 / 0.002）</li>
+            <li><strong>SEQC2</strong>：FDA-led Sequencing Quality Control Phase 2；提供 HCC1395 truth set</li>
+            <li><strong>curated 95 TSG</strong>：COSMIC CGC ∪ Vogelstein 138 ∪ breast DDR（因 COSMIC API / OncoKB 404 改 hardcode）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <details class="speaker-note" data-for="all" id="talk-outline" style="margin-top:8px;border-color:#93C5FD">
+    <summary>🗺 全場講稿大綱 + 預期問答總表（5-8 min 控時）</summary>
+    <div class="note-body">
+      <table style="border-collapse:collapse;width:100%;font-size:13px">
+        <thead><tr style="background:#2A2A2A">
+          <th style="padding:6px 9px;border:1px solid #444;color:#FFD089;text-align:left">頁</th>
+          <th style="padding:6px 9px;border:1px solid #444;color:#FFD089;text-align:left">一句話重點</th>
+          <th style="padding:6px 9px;border:1px solid #444;color:#FFD089;text-align:left">預期提問</th>
+          <th style="padding:6px 9px;border:1px solid #444;color:#FFD089;text-align:left">標準答案</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td style="padding:6px 9px;border:1px solid #444;font-weight:700;color:#93C5FD">S1<br><span style="font-size:11px;color:#999">30 秒</span></td>
+            <td style="padding:6px 9px;border:1px solid #444">有，BRCA2/ZAR1L 雙向啟動子；ASM 框架；sample of one</td>
+            <td style="padding:6px 9px;border:1px solid #444">這是 bulk silencing 嗎？</td>
+            <td style="padding:6px 9px;border:1px solid #444">不是，是 allele-level ASM；subclonal（TVAF 0.19）</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 9px;border:1px solid #444;font-weight:700;color:#93C5FD">S2<br><span style="font-size:11px;color:#999">90 秒</span></td>
+            <td style="padding:6px 9px;border:1px solid #444">IGV：HP2-1 somatic 軸紅點稀疏 = hypomethylation</td>
+            <td style="padding:6px 9px;border:1px solid #444">為何沒 HP2 somatic 對照？</td>
+            <td style="padding:6px 9px;border:1px solid #444">somatic 物理上單側，biology not bug；做 same-allele 比較</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 9px;border:1px solid #444;font-weight:700;color:#93C5FD">S3<br><span style="font-size:11px;color:#999"><b>120 秒</b><br>最關鍵</span></td>
+            <td style="padding:6px 9px;border:1px solid #444">工程推論鏈 + 文獻解釋力；p=6e-11；五條件全中</td>
+            <td style="padding:6px 9px;border:1px solid #444">① 達 biologically meaningful 嗎？<br>② HCC1395 有直接驗證嗎？</td>
+            <td style="padding:6px 9px;border:1px solid #444">① 未達 Lister 0.2 ribbon，但 p + max|Δ|0.93 + 超 null 三線支持<br>② HCC1395 不在 Liu cohort，同 TNBC 子類，inference 合理</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 9px;border:1px solid #444;font-weight:700;color:#93C5FD">S4<br><span style="font-size:11px;color:#999">90 秒</span></td>
+            <td style="padding:6px 9px;border:1px solid #444">95→6→2→1 漏斗；P1-P4 四階段；12 auto + 1 human；可複用 template</td>
+            <td style="padding:6px 9px;border:1px solid #444">這方法能 scale / generalize 嗎？</td>
+            <td style="padding:6px 9px;border:1px solid #444">非-LOH 區全自動可 scale；瓶頸在 LOH（classic TSG 須 bulk）</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 9px;border:1px solid #444;font-weight:700;color:#93C5FD">S5<br><span style="font-size:11px;color:#999">30 秒</span></td>
+            <td style="padding:6px 9px;border:1px solid #444">roadmap placeholder（待用戶補時程/owner）</td>
+            <td style="padding:6px 9px;border:1px solid #444">下一步最該做什麼？</td>
+            <td style="padding:6px 9px;border:1px solid #444">擴 control n=50 + bulk WGBS 對照（升 L2→L1）</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 9px;border:1px solid #444;font-weight:700;color:#93C5FD">附錄<br><span style="font-size:11px;color:#999">被問才開</span></td>
+            <td style="padding:6px 9px;border:1px solid #444">所有路徑可追溯 · 273 claims / 254 verified / 0 fabrication</td>
+            <td style="padding:6px 9px;border:1px solid #444">能重現嗎？</td>
+            <td style="padding:6px 9px;border:1px solid #444">一行指令跑全 pipeline；報告經 artifact 驗證</td>
+          </tr>
+        </tbody>
+      </table>
+      <h4 style="margin-top:12px">⚡ 高頻 cross-cutting 問題（先想好）</h4>
+      <ul>
+        <li><strong>Q-X1「為何不直接看 BRCA1 hypermethylation？」</strong> — A: BRCA1 在 HCC1395 17q LOH 區內，HP1+HP2 不共存，ASM 框架不適用；BRCA1 epi-silencing 須用 bulk WGBS（SEQC2 EpiQC 有現成資料）。</li>
+        <li><strong>Q-X2「只有一個例子夠嗎？」</strong> — A: 對 reviewer 的 "any example" 已足夠；要 generalize 我們有明確 cross-sample / relax-window 擴展計畫（S5）。</li>
+        <li><strong>Q-X3「會不會是 caller / phasing 假象？」</strong> — A: 三 caller 一致 call、SEQC2 truth TP、negative control 排 pipeline noise、CpG-destruction 已排除 — 多重防錯。</li>
+      </ul>
+    </div>
+  </details>
+
+</div><!-- /.note-wrap -->
+
+</div><!-- /.deck-wrap -->
+
+<script>
+(function(){
+  'use strict';
+  const slides = document.querySelectorAll('.slide-canvas .slide');
+  const notes = document.querySelectorAll('.speaker-note');
+  const counter = document.getElementById('counter');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const projToggle = document.getElementById('proj-toggle');
+  let idx = 0;
+  const total = slides.length;
+
+  function show(n){
+    n = Math.max(0, Math.min(total - 1, n));
+    slides.forEach((s, i) => s.classList.toggle('active', i === n));
+    notes.forEach((d) => {
+      const target = d.getAttribute('data-for');
+      if (target === 'all') { d.style.display = 'block'; return; }
+      const matches = (parseInt(target, 10) - 1) === n;
+      d.style.display = matches ? 'block' : 'none';
+      if (!matches) d.removeAttribute('open');
+    });
+    counter.textContent = (n + 1) + ' / ' + total;
+    btnPrev.disabled = (n === 0);
+    btnNext.disabled = (n === total - 1);
+    idx = n;
+    try { history.replaceState(null, '', '#s' + (n + 1)); } catch(e) {}
+  }
+
+  btnPrev.addEventListener('click', () => show(idx - 1));
+  btnNext.addEventListener('click', () => show(idx + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); show(idx + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(idx - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); show(0); }
+    else if (e.key === 'End') { e.preventDefault(); show(total - 1); }
+    else if (/^[1-9]$/.test(e.key)) {
+      const n = parseInt(e.key, 10) - 1;
+      if (n < total) { e.preventDefault(); show(n); }
+    } else if (e.key === 'p' || e.key === 'P') {
+      e.preventDefault();
+      projToggle.checked = !projToggle.checked;
+      projToggle.dispatchEvent(new Event('change'));
+    }
+  });
+
+  projToggle.addEventListener('change', () => {
+    document.body.classList.toggle('proj-only', projToggle.checked);
+  });
+
+  const initIdx = (location.hash.match(/^#s(\d+)$/) || [])[1];
+  show(initIdx ? parseInt(initIdx, 10) - 1 : 0);
+
+  let touchStart = null;
+  const canvas = document.getElementById('canvas');
+  canvas.addEventListener('touchstart', (e) => { touchStart = e.changedTouches[0].clientX; }, {passive:true});
+  canvas.addEventListener('touchend', (e) => {
+    if (touchStart === null) return;
+    const dx = e.changedTouches[0].clientX - touchStart;
+    if (Math.abs(dx) > 50) show(idx + (dx < 0 ? 1 : -1));
+    touchStart = null;
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>

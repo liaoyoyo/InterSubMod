@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>甲基化輔助 untag/HP3 二次分類與信心評分 — 可行性論證</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: "Noto Sans CJK TC", "Source Han Sans TW", "Droid Sans Fallback", "PingFang TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif; }
+  pre, code, .mono { font-family: "JetBrains Mono", Consolas, Menlo, monospace; }
+  .tier-2 { background: #fef3c7; color: #92400e; }
+  .tier-4 { background: #fee2e2; color: #991b1b; }
+  .trust-high { background: #d1fae5; color: #065f46; }
+  .trust-mid { background: #fef3c7; color: #92400e; }
+  .trust-low { background: #fee2e2; color: #991b1b; }
+  .scenario-pos { background: #d1fae5; }
+  .scenario-partial { background: #fef3c7; }
+  .scenario-neg { background: #fee2e2; }
+  .scenario-inc { background: #e5e7eb; }
+  .landscape-cell { min-height: 110px; }
+  details[open] summary { border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 0.75rem; }
+  summary { cursor: pointer; padding: 0.5rem; border-radius: 0.25rem; }
+  summary:hover { background: #f3f4f6; }
+  .toc-active { background: #dbeafe; color: #1e40af; font-weight: 600; }
+  h2 { scroll-margin-top: 80px; }
+  h3 { scroll-margin-top: 80px; }
+  .speaker-note { background: #f9fafb; border-left: 3px solid #9ca3af; padding: 0.75rem 1rem; font-size: 0.9em; color: #4b5563; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid #d1d5db; padding: 6px 10px; vertical-align: top; }
+  th { background: #f3f4f6; font-weight: 600; }
+  .cell-card { border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; background: #fafafa; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+  .glossary-term { font-weight: 600; color: #1e40af; }
+</style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+<!-- Sticky Header -->
+<header class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div>
+      <h1 class="text-lg font-bold text-gray-900">甲基化輔助 untag/HP3 二次分類與信心評分</h1>
+      <p class="text-xs text-gray-500">可行性論證報告 · 2026-05-26 · <span class="badge tier-2">⭐2 L4</span> · pipeline_track: paired_full</p>
+    </div>
+    <div class="flex gap-2 text-xs">
+      <span class="badge bg-blue-100 text-blue-800">純 literature + 既有實作</span>
+      <span class="badge bg-gray-100 text-gray-700">in_progress</span>
+    </div>
+  </div>
+</header>
+
+<div class="max-w-7xl mx-auto grid grid-cols-12 gap-4 px-4 py-6">
+
+  <!-- Sticky TOC -->
+  <nav class="col-span-12 lg:col-span-3">
+    <div class="sticky top-24 bg-white border border-gray-200 rounded-lg p-4 max-h-[calc(100vh-120px)] overflow-y-auto">
+      <h2 class="text-sm font-bold mb-3 text-gray-700">Table of Contents</h2>
+      <ul class="space-y-1 text-sm">
+        <li><a href="#tldr" class="block px-2 py-1 rounded hover:bg-blue-50">0. TL;DR</a></li>
+        <li><a href="#sec1" class="block px-2 py-1 rounded hover:bg-blue-50">1. 研究方向與動機</a></li>
+        <li><a href="#sec2" class="block px-2 py-1 rounded hover:bg-blue-50">2. Inventory (A-G)</a>
+          <ul class="ml-3 mt-1 space-y-1 text-xs text-gray-600">
+            <li><a href="#theme-a" class="block px-2 py-0.5 hover:text-blue-600">A. HP:Z 5 編碼</a></li>
+            <li><a href="#theme-b" class="block px-2 py-0.5 hover:text-blue-600">B. HCC1395 chr19 分布</a></li>
+            <li><a href="#theme-c" class="block px-2 py-0.5 hover:text-blue-600">C. HP3 子類細分</a></li>
+            <li><a href="#theme-d" class="block px-2 py-0.5 hover:text-blue-600">D. MSA architecture</a></li>
+            <li><a href="#theme-e" class="block px-2 py-0.5 hover:text-blue-600">E. 5 條 paired evidence</a></li>
+            <li><a href="#theme-f" class="block px-2 py-0.5 hover:text-blue-600">F. longphase-s 原生</a></li>
+            <li><a href="#theme-g" class="block px-2 py-0.5 hover:text-blue-600">G. MSA read matrix</a></li>
+          </ul>
+        </li>
+        <li><a href="#sec3" class="block px-2 py-1 rounded hover:bg-blue-50">3. 觀察設計 P2 v2</a></li>
+        <li><a href="#sec4" class="block px-2 py-1 rounded hover:bg-blue-50 font-semibold">4. Feasibility Landscape ⭐</a></li>
+        <li><a href="#sec5" class="block px-2 py-1 rounded hover:bg-blue-50">5. Pre-mortem 失敗模式</a></li>
+        <li><a href="#sec6" class="block px-2 py-1 rounded hover:bg-blue-50 font-semibold">6. 巨觀地圖 Verdict ⭐</a></li>
+        <li><a href="#sec7" class="block px-2 py-1 rounded hover:bg-blue-50">7. Glossary</a></li>
+        <li><a href="#sec8" class="block px-2 py-1 rounded hover:bg-blue-50">8. References</a></li>
+      </ul>
+      <hr class="my-3">
+      <div class="text-xs text-gray-500">
+        <p>📄 .md companion:</p>
+        <p class="mono break-all text-blue-600 mt-1">InterSubMod/docs/reports/in_progress/2026/05/20260526_methyl_assisted_untag_classification_feasibility_01.md</p>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="col-span-12 lg:col-span-9 space-y-6">
+
+    <!-- §0 TL;DR -->
+    <section id="tldr" class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-bold mb-4 border-l-4 border-blue-600 pl-3">0. TL;DR / Executive Summary</h2>
+
+      <div class="bg-blue-50 border border-blue-200 rounded p-4 mb-4">
+        <h3 class="font-bold mb-2">核心 idea（用戶 2026-05-26 提出）</h3>
+        <p>對 longphase-S paired-mode tagged BAM，用 <strong>甲基化 clustering</strong> 做三件事：</p>
+        <ol class="list-decimal list-inside mt-2 space-y-1">
+          <li><strong>Q1</strong>：把<strong>沒被標 tag 的 reads (untag)</strong> 重新歸類到 HP1 / HP2 / somatic</li>
+          <li><strong>Q2</strong>：對 <strong>HP3 (ambiguous somatic)</strong> 細分為兩子類並給不同 confidence</li>
+          <li><strong>Q3</strong>：對既有 tagged reads (HP1/HP2/HP1-1/HP2-1) 做<strong>二次驗證</strong>並輸出 confidence</li>
+        </ol>
+      </div>
+
+      <h3 class="font-bold mb-2 mt-4">關鍵盤點結論</h3>
+      <table class="w-full text-sm">
+        <thead><tr><th class="text-left">項目</th><th class="text-left">結論</th></tr></thead>
+        <tbody>
+          <tr><td>資料齊全度</td><td>7 樣本 paired tagged BAM <strong>全在 big7</strong>（修正用戶原認知「only HCC1395」）</td></tr>
+          <tr><td>HP3 二次分類 novelty</td><td>⚠️ longphase-S 原生已有 <code class="bg-gray-100 px-1">inheritHaplotype()</code> 做 HP3 confidence-based re-classification（用 somatic-variant derived HP, threshold 0.6）— 用戶 idea 差異化在「<strong>用 methylation 而非 somatic-variant 做 inheritance</strong>」（orthogonal signal）</td></tr>
+          <tr><td>Untag 二次分類 novelty</td><td>✅ longphase-S 完全不處理 untag — 真正的 gap，用戶 idea 集中 novelty 在這</td></tr>
+          <tr><td>MSA infrastructure</td><td>✅ read × CpG matrix + scipy linkage/DBSCAN/silhouette 已實作於 <code class="bg-gray-100 px-1">read_phylogeny_validator.py</code> — 可重用 base</td></tr>
+          <tr><td>Subclone framework 串接</td><td>✅ Phase BCD 4-group framework（Normal Diploid / Epi-Het / LOH / Tumor-Specific）可作為 ground truth</td></tr>
+          <tr><td>重要警示</td><td>🔴 Phase 2 LR ablation 證 methylation 5 features 在 multi-axis F1 filter 為 vestigial — 但本場景是 single-axis classifier，<strong>場景不同不可直接 transfer</strong>（用戶 5/26 ack）</td></tr>
+        </tbody>
+      </table>
+
+      <details class="mt-4">
+        <summary class="font-bold text-blue-700">📜 Speaker Note: 為什麼這份是純可行性論證</summary>
+        <div class="speaker-note mt-2">
+          用戶 2026-05-26 明示「純 literature review + 可行性論證」 — 因為：(1) 一旦進實測，前期 hypothesis register + cycle init + pre-reg + benchmark + ledger 開銷大；(2) 先做可行性論證可避免「做完才發現 longphase-S 原生已實作類似機制」這類重複造輪子；(3) 探索性研究在「見林」階段需保留多軸選擇空間，不應過早收斂為 GO/NO-GO。
+        </div>
+      </details>
+    </section>
+
+    <!-- §1 Problem Framing -->
+    <section id="sec1" class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-bold mb-4 border-l-4 border-blue-600 pl-3">1. 研究方向與動機 (Problem Framing)</h2>
+
+      <h3 class="font-bold mt-3 mb-2">1.1 longphase-S 6 個 read 分類</h3>
+      <table class="w-full text-sm">
+        <thead><tr><th>Tag</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">HP:Z:1 / HP:Z:2</td><td>Germline haplotype 1 / 2（純爸爸/媽媽來源）</td></tr>
+          <tr><td class="mono">HP:Z:1-1 / HP:Z:2-1</td><td>支持 somatic ALT，可追溯到 germline hap 1/2</td></tr>
+          <tr><td class="mono">HP:Z:3</td><td>支持 somatic ALT 但無法由既有 germline haplotype 唯一導出</td></tr>
+          <tr><td class="mono">no tag</td><td><strong>longphase-S 完全沒標</strong> — 線索不足（用戶想分類的對象）</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="font-bold mt-4 mb-2">1.2 HCC1395 chr19 paired tag 實證分布</h3>
+      <div class="bg-gray-50 border border-gray-300 rounded p-3 mono text-sm">
+chr19 primary reads total: 582,566<br>
+chr19 tagged (HP:Z: present): 354,919 (60.9%)<br>
+chr19 untagged:               227,647 (<strong class="text-red-700">39.1% ← 主戰場</strong>)
+      </div>
+      <table class="w-full text-sm mt-3">
+        <thead><tr><th>HP:Z:</th><th class="text-right">reads</th><th class="text-right">% of tagged</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">HP:Z:2</td><td class="text-right">183,309</td><td class="text-right">51.6%</td></tr>
+          <tr><td class="mono">HP:Z:1</td><td class="text-right">143,760</td><td class="text-right">40.5%</td></tr>
+          <tr><td class="mono">HP:Z:2-1</td><td class="text-right">14,504</td><td class="text-right">4.1%</td></tr>
+          <tr><td class="mono">HP:Z:1-1</td><td class="text-right">12,401</td><td class="text-right">3.5%</td></tr>
+          <tr><td class="mono">HP:Z:3 (ambig)</td><td class="text-right"><strong>1,145</strong></td><td class="text-right"><strong>0.3%</strong></td></tr>
+        </tbody>
+      </table>
+      <p class="mt-2 text-sm text-gray-600">📊 <strong>規模對比</strong>：untag (227K) : HP3 ambig (1.1K) = <strong>200 : 1</strong> — untag 是主戰場，HP3 細分是 polishing</p>
+
+      <h3 class="font-bold mt-4 mb-2">1.3 為什麼用甲基化作 orthogonal signal？</h3>
+      <ul class="list-disc list-inside text-sm space-y-1">
+        <li><strong>獨立於 SNV vote</strong>：甲基化是 read 上 epigenetic 標記，longphase-S 完全不用這資訊</li>
+        <li><strong>長度不依賴 informative SNV 數</strong>：即使 read 沒經過任何 germline het，仍可能有 CpG methylation 資訊</li>
+        <li><strong>同 hap reads 甲基 pattern 應相似</strong>：cell-of-origin 同 sub-population，cluster 後抱團</li>
+      </ul>
+      <div class="speaker-note mt-3">
+        💡 <strong>直白比喻</strong>：read 比作學生。SNV vote 像看學生的「姓」（爸爸或媽媽姓），有時看不清。甲基化像看學生的「穿著風格」— 同班同學（同 sub-clone）穿著風格相似，即使姓被遮住也能猜出班級。
+      </div>
+    </section>
+
+    <!-- §2 Inventory -->
+    <section id="sec2" class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-bold mb-4 border-l-4 border-blue-600 pl-3">2. 既有實作與資料盤點 (Inventory)</h2>
+      <p class="text-sm text-gray-600 mb-4">7 個主題（Theme A-G）— 每主題列「來源」「核心結論」「對用戶 idea 的 implication」。</p>
+
+      <details id="theme-a" class="cell-card" open>
+        <summary class="font-bold">Theme A: LongPhase-S HP:Z 5 編碼 <span class="badge tier-4">KB authoritative</span></summary>
+        <p class="text-sm mt-2"><strong>來源</strong>：<code class="bg-gray-100 px-1">/big8_disk/liaoyoyo2001/Knowledge/05_tools/longphase-s.md</code> v2.2 (2026-04-17)</p>
+        <p class="text-sm mt-1"><strong>核心</strong>：5 tag + 1 untag = 6 個 read 分類（見 §1.1）</p>
+        <div class="speaker-note mt-2">
+          <strong>KB 明文判讀邊界</strong>：<br>
+          • 「HP:z:3 是 ambiguous somatic haplotype，<strong>不是 LOH 標記</strong>」<br>
+          • 「Purity estimation 主要依賴 germline haplotype imbalance，<strong>不是用 HP:z:3 的數量直接判定 LOH 或 purity</strong>」
+        </div>
+      </details>
+
+      <details id="theme-b" class="cell-card">
+        <summary class="font-bold">Theme B: HCC1395 chr19 paired tag 實證分布</summary>
+        <p class="text-sm mt-2"><strong>來源</strong>：<code class="bg-gray-100 px-1">paired_priority_bug_audit/00_audit_report.md</code> §3.1 (2026-05-09)</p>
+        <p class="text-sm mt-1"><strong>核心</strong>：untag:HP3 = 200:1（見 §1.2 表）。untag 是主戰場。</p>
+      </details>
+
+      <details id="theme-c" class="cell-card">
+        <summary class="font-bold">Theme C: HP3 子類細分（germline-absent vs germline-inconsistent）</summary>
+        <p class="text-sm mt-2"><strong>來源</strong>：<code class="bg-gray-100 px-1">paired_priority_bug_audit/01_step_D_germline_absent_finding.md</code> (2026-05-09)</p>
+        <p class="text-sm mt-1"><strong>核心</strong>：InterSubMod 已有 event-level「germline-absent」實作（chr19 5,789 events）；read-level aggregation 需新加（不需新 C++，Python 後處理 vote dump 即可）</p>
+        <table class="w-full text-sm mt-3">
+          <thead><tr><th>區段</th><th>baseline HP1:HP2</th></tr></thead>
+          <tbody>
+            <tr><td>chr19 全 events（含 germline）</td><td>1.275:1（接近隨機）</td></tr>
+            <tr><td>chr19 <strong>germline-absent only</strong></td><td><strong class="text-red-700">4.19:1 偏 HP1</strong></td></tr>
+            <tr><td>TO mode 全基因組 baseline</td><td>17.3:1 偏 HP1（PI §3.3.2）</td></tr>
+          </tbody>
+        </table>
+      </details>
+
+      <details id="theme-d" class="cell-card">
+        <summary class="font-bold">Theme D: MSA architecture (Level 1/2/3 + AdvancedAnalyzer)</summary>
+        <p class="text-sm mt-2"><strong>來源</strong>：<code class="bg-gray-100 px-1">/big8_disk/.../Knowledge/05_tools/methyl-somatic-analysis.md</code> v1.2</p>
+        <table class="w-full text-sm mt-2">
+          <thead><tr><th>Level</th><th>粒度</th><th>內容</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>per-CpG × per-read</td><td>最細 — CpG 位置 / strand / read ID / methylation</td></tr>
+            <tr><td>2</td><td>per-variant window</td><td>variant 周圍甲基化統計</td></tr>
+            <tr><td>3</td><td>per-haplotype-group</td><td>每 hap group 甲基分佈</td></tr>
+          </tbody>
+        </table>
+        <p class="text-sm mt-2">Python <code>AdvancedAnalyzer.clustering_analysis()</code> input 是 <strong>feature_matrix（variant-level）</strong> — 不是 read-level（限制）。</p>
+      </details>
+
+      <details id="theme-e" class="cell-card">
+        <summary class="font-bold">Theme E: InterSubMod 5 條既有 paired-mode evidence</summary>
+        <table class="w-full text-sm mt-2">
+          <thead><tr><th>研究</th><th>結論</th><th>tier</th></tr></thead>
+          <tbody>
+            <tr><td>Phase BCD Dual BAM (2026-04-13)</td><td>4-group subclone (Normal Diploid 17.5% / Epi-Het 12.9% / LOH 2.6% / Tumor-Specific 67%); LOH BED 94.1% concordance with ISM hp_ratio</td><td>⭐3-4</td></tr>
+            <tr><td>LOH × AF × Methylation Paired</td><td>ΔNG=+0.787 (7/7 p&lt;10⁻⁶⁵), median |r|=0.755</td><td>⭐3</td></tr>
+            <tr><td>LOH-constrained phasing (TO)</td><td>NG=2 Inner ≥93% same-hap (6/6 sample)</td><td>⭐3-4</td></tr>
+            <tr><td>ASM PERMANOVA POSITIVE</td><td>ASM 32-66% 但 FP/TP 重疊大</td><td>⭐ characterization</td></tr>
+            <tr><td><strong class="text-red-700">Phase 2 cycle 3 ablation: ISM vestigial</strong></td><td>methylation 5 features drop 後 ΔF1 損 +0.00065 — <em>但場景不同不可直接 transfer</em></td><td>⭐4 ⚠️</td></tr>
+          </tbody>
+        </table>
+      </details>
+
+      <details id="theme-f" class="cell-card" open>
+        <summary class="font-bold text-red-700">⚠️ Theme F: longphase-s inheritHaplotype() 原生 confidence 設計（重要發現）</summary>
+        <p class="text-sm mt-2"><strong>來源</strong>：<code class="bg-gray-100 px-1">SomaticHaplotagProcess.cpp:371-527</code></p>
+        <p class="text-sm mt-1"><strong>核心</strong>：longphase-S 原生已有 HP3 confidence-based re-classification，<strong>但用 somatic-variant derived HP（非甲基化）</strong></p>
+
+        <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto mt-2"><code>if(hpResult == ReadHP::H3){
+    // Inherit haplotype information for H3 reads based on
+    // somatic variant derived haplotype
+    hpResult = inheritHaplotype(deriveByHpSimilarity,
+                                params.percentageThreshold,
+                                somaticVarDeriveHP, hpCount,
+                                hpResult, aln);
+}
+
+// inheritHaplotype() core:
+deriveByHpSimilarity = (max == 0) ? 0.0 :
+                       ((float)max / ((float)max + (float)min));
+
+if(deriveByHpSimilarity >= percentageThreshold){
+    // ≥ 0.6 → promote to H1_1 or H2_1
+    hpResult = (maxHp == GERMLINE_H1) ? H1_1 : H2_1;
+}</code></pre>
+
+        <table class="w-full text-sm mt-3">
+          <thead><tr><th>用戶 Q</th><th>對應 longphase-S 原生</th><th>用戶 idea 差異</th></tr></thead>
+          <tbody>
+            <tr class="scenario-pos"><td>Q1 untag</td><td>不處理</td><td>✅ 真正 gap</td></tr>
+            <tr class="scenario-partial"><td>Q2 HP3</td><td>已實作（用 somatic-var）</td><td>⚠️ 用 <strong>methylation</strong>（orthogonal signal）— 新角度但非新點子</td></tr>
+            <tr class="scenario-pos"><td>Q3 confidence</td><td>只對 HP3 有</td><td>✅ 擴展到所有 tagged reads</td></tr>
+          </tbody>
+        </table>
+
+        <div class="speaker-note mt-3">
+          🔑 <strong>為什麼 methylation 是真正 orthogonal signal？</strong><br>
+          longphase-S inheritance 邏輯有 inherent weakness：所有 somatic variants 在 self-phasing 機制下 100% 共現於同一 hap → vote 必然偏向一邊。這正是 <strong>V5 Layer 1.5 在 germline-absent 區繼承 priority bug 4.19:1 偏 HP1</strong> 的根因。甲基訊號不受 somatic phasing 共現影響 — 它是獨立記錄 read 自己 hap 的 epigenetic 狀態。
+        </div>
+      </details>
+
+      <details id="theme-g" class="cell-card">
+        <summary class="font-bold">Theme G: MSA read-level methylation matrix 既有實作</summary>
+        <p class="text-sm mt-2"><strong>來源</strong>：<code class="bg-gray-100 px-1">read_phylogeny_validator.py:41-49</code></p>
+        <pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto mt-2"><code>pivot_data = self.data.pivot_table(
+    index='read_id',
+    columns='methyl_pos',
+    values='meth_call',
+    fill_value=-1  # -1 表示無數據
+)</code></pre>
+        <ul class="list-disc list-inside text-sm mt-2 space-y-1">
+          <li>✅ Read × CpG matrix builder 已實作</li>
+          <li>✅ scipy linkage / DBSCAN / silhouette tooling 已有</li>
+          <li>⚠️ 缺：把 untag reads「project to nearest HP1/HP2 cluster centroid」分類器邏輯（估 +200-300 行 Python）</li>
+        </ul>
+      </details>
+    </section>
+
+    <!-- §3 觀察設計 -->
+    <section id="sec3" class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-bold mb-4 border-l-4 border-blue-600 pl-3">3. 觀察方法設計（P2 v2 完整版）</h2>
+
+      <h3 class="font-bold mt-3 mb-2">3.1 區域分類 3 軸</h3>
+      <table class="w-full text-sm">
+        <thead><tr><th>軸</th><th>分類</th><th>為什麼影響甲基訊號可信度</th></tr></thead>
+        <tbody>
+          <tr><td><strong>CN</strong></td><td>CN=1 (LOH) / CN=2 (diploid) / CN≥3 (gain/cnLOH)</td><td>物理上有幾條 hap 決定甲基 cluster 應分幾群</td></tr>
+          <tr><td><strong>ASM</strong></td><td>Known ASM / Non-ASM</td><td>ASM 區甲基天生不同（germline-origin 不是 somatic）</td></tr>
+          <tr><td><strong>CpG density</strong></td><td>Dense (≥20/2kb) / Sparse</td><td>條碼長度足夠不撞名</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="font-bold mt-4 mb-2">3.2 🛡️ 甲基訊號可信度 Framework（Trust Score）</h3>
+      <p class="text-sm mb-2">Trust Score = 4 binary 條件加總 per 2kb window：</p>
+      <table class="w-full text-sm">
+        <thead><tr><th>條件</th><th>加 1 分若...</th><th>理由</th></tr></thead>
+        <tbody>
+          <tr><td>CpG density</td><td>dense (≥20 CpG)</td><td>條碼長度足夠不撞名</td></tr>
+          <tr><td>Coverage</td><td>high (&gt;30x)</td><td>多次測量降低 noise</td></tr>
+          <tr><td>ASM</td><td>non-ASM</td><td>排除 germline-origin confound</td></tr>
+          <tr><td>CN</td><td>CN=2 diploid</td><td>期待 cluster 平衡</td></tr>
+        </tbody>
+      </table>
+      <div class="grid grid-cols-3 gap-2 mt-3">
+        <div class="trust-high p-3 rounded text-center"><strong>🟢 HIGH (4/4)</strong><br><span class="text-xs">核心可推論區</span></div>
+        <div class="trust-mid p-3 rounded text-center"><strong>🟡 MID (2-3/4)</strong><br><span class="text-xs">需加 caveat</span></div>
+        <div class="trust-low p-3 rounded text-center"><strong>🔴 LOW (0-1/4)</strong><br><span class="text-xs">排除</span></div>
+      </div>
+
+      <h3 class="font-bold mt-5 mb-2">3.3 6 main cells + 2 sanity cells</h3>
+      <table class="w-full text-sm">
+        <thead><tr><th>Cell</th><th>Read 類別</th><th>CN</th><th>ASM</th><th>Q</th><th>預期</th></tr></thead>
+        <tbody>
+          <tr><td><strong>C1</strong></td><td>Untag</td><td>CN=2</td><td>Non-ASM</td><td>Q1</td><td>對齊 HP1/HP2; recall 30-50%</td></tr>
+          <tr><td><strong>C2</strong></td><td>Untag</td><td><strong>CN=1 LOH</strong></td><td>Non-ASM</td><td>Q1 + sanity</td><td>單群；若分 2 群→ epi-mosaic bonus</td></tr>
+          <tr><td><strong>C3</strong></td><td>Untag</td><td><strong>CN≥3</strong></td><td>Non-ASM</td><td>Q1</td><td>可能 ≥2 群（subclonal hap）</td></tr>
+          <tr><td><strong>C4</strong></td><td>HP3-A germline-absent</td><td>CN=2</td><td>Non-ASM</td><td>Q2</td><td>甲基 confidence &gt; longphase-S 原生</td></tr>
+          <tr><td><strong>C5</strong></td><td>HP3-B germline-inconsistent</td><td>CN=2</td><td>Non-ASM</td><td>Q2</td><td>甲基解決 vote conflict</td></tr>
+          <tr><td><strong>C6</strong></td><td>Tagged HP1-1/HP2-1</td><td>CN=2</td><td>Non-ASM</td><td>Q3</td><td>甲基-tag 一致率為 confidence</td></tr>
+          <tr class="scenario-neg"><td><strong>Sa</strong></td><td>Tagged HP1</td><td>CN=2</td><td><strong>Known ASM</strong></td><td>control</td><td><strong>應 fail</strong>（germline confound）</td></tr>
+          <tr class="scenario-neg"><td><strong>Sb</strong></td><td>Tagged HP1</td><td><strong>CN=1 LOH</strong></td><td>—</td><td>control</td><td><strong>應 fail</strong>（overfit detection）</td></tr>
+        </tbody>
+      </table>
+
+      <details class="mt-4">
+        <summary class="font-bold">📚 §3.7 通用 Algorithmic Core（5 步驟 pseudocode）— 折疊查看</summary>
+        <div class="mt-3 text-sm">
+          <ol class="list-decimal list-inside space-y-1">
+            <li><strong>Step 1</strong>：Read × CpG matrix builder（含 missing handling, min CpG=5 filter）</li>
+            <li><strong>Step 2</strong>：Pairwise distance — Jaccard with missing-data handling（不用 Hamming 避背景 confound）</li>
+            <li><strong>Step 3</strong>：Hierarchical clustering Ward linkage（避 single/average）</li>
+            <li><strong>Step 4</strong>：Silhouette score（&gt;0.5 強 / 0.3-0.5 合理 / 0.1-0.3 弱 / &lt;0.1 noise）</li>
+            <li><strong>Step 5</strong>：Confidence score 仿 longphase-S <code>max/(sum)</code> 公式但用甲基相似度，threshold 0.6</li>
+          </ol>
+          <p class="text-gray-600 mt-3">📄 完整 pseudocode 見 .md companion §3.7</p>
+        </div>
+      </details>
+
+      <details class="mt-3">
+        <summary class="font-bold">📚 §3.8 Per-Cell YAML Spec（8 cells 詳細）— 折疊查看</summary>
+        <div class="mt-3 text-sm">
+          <p>每 cell 含 5 區段：<code>filter</code> / <code>algorithm</code> / <code>primary_metrics</code> / <code>pass_criteria</code> / <code>statistical_tests</code></p>
+          <ul class="list-disc list-inside mt-2 space-y-0.5">
+            <li><strong>C1</strong>: rescue_rate + held-out accuracy + Wilcoxon paired</li>
+            <li><strong>C2</strong>: silhouette&lt;0.1 sanity + Hartigan dip test</li>
+            <li><strong>C3</strong>: optimal_n_clusters (gap statistic) + permutation</li>
+            <li><strong>C4</strong>: methyl vs native deriveByHpSimilarity + McNemar test</li>
+            <li><strong>C5</strong>: bimodality + sequencing_error_rate</li>
+            <li><strong>C6</strong>: Fisher exact + ROC for FP prediction</li>
+            <li><strong>Sa</strong>: tumor-normal cluster concordance (Chi-square)</li>
+            <li><strong>Sb</strong>: gap statistic + bimodality</li>
+          </ul>
+          <p class="text-gray-600 mt-3">📄 完整 YAML spec 見 .md companion §3.8</p>
+        </div>
+      </details>
+
+      <details class="mt-3">
+        <summary class="font-bold">📚 §3.9 Threshold Sensitivity Analysis — 折疊查看</summary>
+        <div class="mt-3 text-sm">
+          <p>5 threshold × ±20% sensitivity → 標 robust (±25%) / fragile / overfit：</p>
+          <table class="w-full text-sm mt-2">
+            <thead><tr><th>Threshold</th><th>Default</th><th>Range</th></tr></thead>
+            <tbody>
+              <tr><td>confidence_threshold</td><td>0.6</td><td>{0.5, 0.6, 0.7, 0.8}</td></tr>
+              <tr><td>min_cpg_per_read</td><td>5</td><td>{3, 5, 10, 15}</td></tr>
+              <tr><td>silhouette_real_cluster</td><td>0.3</td><td>{0.2, 0.3, 0.4, 0.5}</td></tr>
+              <tr><td>window_size</td><td>2kb</td><td>{1kb, 2kb, 5kb}</td></tr>
+              <tr><td>cpg_density_dense_min</td><td>20</td><td>{10, 20, 30}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <h3 class="font-bold mt-5 mb-2">3.6 教學版直白比喻（核心 4 條）</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="bg-blue-50 border border-blue-200 rounded p-3">
+          <h4 class="font-bold text-sm">🛡️ LOH 區是 sanity？</h4>
+          <p class="text-sm mt-1">LOH 區好比一個房間只放了 <strong>1 條毛巾</strong>。若 cluster algorithm 在這分出 2 群 — 一定是雜訊或 mosaic。LOH 是天然 negative control，若這裡 fail，整套方法不可信。</p>
+        </div>
+        <div class="bg-purple-50 border border-purple-200 rounded p-3">
+          <h4 class="font-bold text-sm">🔬 CN≥3 為何更需要看？</h4>
+          <p class="text-sm mt-1">CN=2 是普通 diploid；CN=3 cnLOH 物理仍 2 hap 但 reads 數不均；CN=4 各 hap 都複製。<strong>真正「3 群以上」要看 subclonal 結構</strong> — 此時甲基 cluster ≥3 群但 longphase-S 仍標 2 群 → 甲基比 longphase-S 更精細。</p>
+        </div>
+        <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
+          <h4 class="font-bold text-sm">⚠️ ASM region 為何是 confound？</h4>
+          <p class="text-sm mt-1">ASM = 兩條 hap 甲基狀態天生不同。3 來源：(1) germline imprinting；(2) cis-mQTL；(3) subclonal ASM（我們要的）。區分方法：<strong>cross-ref with normal BAM</strong>（normal 也有 = germline；only tumor 才 = somatic）。</p>
+        </div>
+        <div class="bg-green-50 border border-green-200 rounded p-3">
+          <h4 class="font-bold text-sm">🎯 甲基為何比 inheritHaplotype 穩？</h4>
+          <p class="text-sm mt-1">longphase-S inheritance 用 somatic variants vote — self-phasing 機制下所有 somatic 100% 共現於同 hap，vote 必偏一邊（V5 Layer 1.5 priority bug 4.19:1 根因）。甲基訊號不受影響，是真 orthogonal。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- §4 Feasibility Landscape -->
+    <section id="sec4" class="bg-white rounded-lg shadow p-6 border-2 border-blue-300">
+      <h2 class="text-2xl font-bold mb-4 border-l-4 border-blue-600 pl-3">4. Feasibility Landscape（巨觀見林） ⭐</h2>
+      <p class="text-sm text-gray-600 mb-4">用戶指示「巨觀見林」 — 不用 binary GO/NO-GO 收斂；改用多軸 outlook landscape 列所有可能性。</p>
+
+      <h3 class="font-bold mt-3 mb-2">4.1 每 cell 4 種 scenario outcomes（per-cell 可能結果地圖）</h3>
+      <p class="text-sm text-gray-600 mb-3">每 cell 列出 4 種可能結局 + 機率，讓讀者見完整可能性而非單一預期。</p>
+
+      <details class="cell-card" open>
+        <summary class="font-bold">C1 Untag CN=2 — Q1 主軸</summary>
+        <table class="w-full text-sm mt-2">
+          <thead><tr><th>Scenario</th><th>Outcome</th><th>機率</th><th>Implication</th></tr></thead>
+          <tbody>
+            <tr class="scenario-pos"><td>S1.1 POSITIVE</td><td>cluster 對齊 HP1/HP2; recall 30-50%, silhouette ≥0.3</td><td>40%</td><td>方法核心可行</td></tr>
+            <tr class="scenario-partial"><td>S1.2 PARTIAL</td><td>recall 10-30%, silhouette 0.1-0.3</td><td>30%</td><td>部分可用，需提高 trust threshold</td></tr>
+            <tr class="scenario-neg"><td>S1.3 NEGATIVE</td><td>recall &lt;10%, silhouette &lt;0.1</td><td>20%</td><td>物理 unphasable dominant</td></tr>
+            <tr class="scenario-inc"><td>S1.4 INCONCLUSIVE</td><td>N&lt;100，power 不足</td><td>10%</td><td>樣本範圍擴展</td></tr>
+          </tbody>
+        </table>
+      </details>
+
+      <details class="cell-card">
+        <summary class="font-bold">C2 Untag CN=1 LOH — sanity</summary>
+        <table class="w-full text-sm mt-2">
+          <thead><tr><th>Scenario</th><th>Outcome</th><th>機率</th><th>Implication</th></tr></thead>
+          <tbody>
+            <tr class="scenario-pos"><td>S2.1 sanity pass</td><td>單群（silhouette near 0）</td><td>60%</td><td>方法物理正確；可信度提升</td></tr>
+            <tr class="scenario-partial"><td>S2.2 BONUS</td><td>分 2 群 → epi-mosaic bonus</td><td>20%</td><td>新發現需追深</td></tr>
+            <tr class="scenario-neg"><td>S2.3 sanity FAIL</td><td>分 2 群且對齊 tagged</td><td>15%</td><td>algorithm overfit, NO-GO</td></tr>
+            <tr class="scenario-inc"><td>S2.4 INCONCLUSIVE</td><td>LOH untag N&lt;50</td><td>5%</td><td>樣本擴展</td></tr>
+          </tbody>
+        </table>
+      </details>
+
+      <details class="cell-card">
+        <summary class="font-bold">C3 Untag CN≥3 — polyploid 探索</summary>
+        <table class="w-full text-sm mt-2">
+          <thead><tr><th>Scenario</th><th>Outcome</th><th>機率</th><th>Implication</th></tr></thead>
+          <tbody>
+            <tr class="scenario-pos"><td>S3.1 EXPECTED</td><td>2 群與 longphase-S 一致</td><td>35%</td><td>polyploid 行為一致</td></tr>
+            <tr class="scenario-pos"><td>S3.2 SUBCLONE BONUS</td><td>≥3 群（subclonal hap）</td><td>30%</td><td>甲基超越 longphase-S 精細度</td></tr>
+            <tr class="scenario-partial"><td>S3.3 CONFUSED</td><td>cluster 數不穩定</td><td>25%</td><td>algorithm 參數 tune</td></tr>
+            <tr class="scenario-neg"><td>S3.4 LOW SIGNAL</td><td>silhouette &lt;0.1</td><td>10%</td><td>polyploid 甲基弱</td></tr>
+          </tbody>
+        </table>
+      </details>
+
+      <details class="cell-card">
+        <summary class="font-bold">C4 HP3-A germline-absent — Q2</summary>
+        <table class="w-full text-sm mt-2">
+          <thead><tr><th>Scenario</th><th>Outcome</th><th>機率</th><th>Implication</th></tr></thead>
+          <tbody>
+            <tr class="scenario-pos"><td>S4.1 POSITIVE</td><td>甲基 confidence &gt; longphase-S 原生</td><td>50%</td><td>orthogonal signal 確認</td></tr>
+            <tr class="scenario-partial"><td>S4.2 PARTIAL</td><td>無顯著優勢</td><td>30%</td><td>orthogonal value 弱</td></tr>
+            <tr class="scenario-neg"><td>S4.3 WORSE</td><td>甲基比 longphase-S 差</td><td>15%</td><td>HP3-A CpG 太稀少</td></tr>
+            <tr class="scenario-inc"><td>S4.4 INCONCLUSIVE</td><td>HP3-A N&lt;30</td><td>5%</td><td>擴 sample</td></tr>
+          </tbody>
+        </table>
+      </details>
+
+      <details class="cell-card">
+        <summary class="font-bold">C5 HP3-B germline-inconsistent + C6 Tagged 二次驗證 + Sa/Sb 控制 — 折疊查看</summary>
+        <p class="text-sm mt-2">完整 4-scenario 表見 .md companion §4.1</p>
+        <table class="w-full text-sm mt-2">
+          <thead><tr><th>Cell</th><th>POSITIVE</th><th>PARTIAL</th><th>NEGATIVE</th><th>INCONCLUSIVE</th></tr></thead>
+          <tbody>
+            <tr><td>C5</td><td>40%</td><td>25%</td><td>30%</td><td>5%</td></tr>
+            <tr><td>C6</td><td>45%</td><td>20%</td><td>30%</td><td>5%</td></tr>
+            <tr><td>Sa (expected fail)</td><td>—</td><td>20% lucky</td><td>70% expected fail</td><td>10%</td></tr>
+            <tr><td>Sb (expected pass)</td><td>65% pass</td><td>15% mosaic</td><td>20% overfit</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </details>
+
+      <h3 class="font-bold mt-5 mb-2">4.2 機制可信度光譜（mechanism trust spectrum）</h3>
+      <div class="space-y-2">
+        <div class="trust-high p-3 rounded">
+          <strong>🟢 確定可用 (Trust ≥ 0.9)</strong>
+          <ol class="list-decimal list-inside text-sm mt-1 space-y-0.5">
+            <li>MSA read × CpG matrix 構建（Theme G 已實作）</li>
+            <li>scipy linkage / DBSCAN / silhouette tooling 已有</li>
+            <li>longphase-S deriveByHpSimilarity 公式可直接套甲基相似度</li>
+            <li>7 樣本 paired tagged BAM 可得（P0b 已驗證）</li>
+            <li>Phase BCD 4-group subclone framework 可作 ground truth</li>
+          </ol>
+        </div>
+        <div class="trust-mid p-3 rounded">
+          <strong>🟡 部分確定 (Trust 0.5-0.8)</strong>
+          <ol class="list-decimal list-inside text-sm mt-1 space-y-0.5" start="6">
+            <li>CpG-dense region 可分群（理論支持，需實測 silhouette）</li>
+            <li>Untag 30-50% 可分類（基於 chr19 39.1% untag 估算）</li>
+            <li>HP3-A 子類 confidence &gt; longphase-S 原生（基於 V5 priority bug 4.19:1，但 methylation 未實證）</li>
+            <li>CN≥3 區甲基 cluster ≥2 群（理論預期，subclonal hap 未直接量化）</li>
+          </ol>
+        </div>
+        <div class="bg-orange-50 text-orange-900 p-3 rounded border border-orange-200">
+          <strong>🟠 不確定 (Trust 0.3-0.5)</strong>
+          <ol class="list-decimal list-inside text-sm mt-1 space-y-0.5" start="10">
+            <li>HP3-B 能解決 vote conflict（conflict 可能 seq error dominant）</li>
+            <li>Tagged HP1-1/HP2-1 二次驗證一致率 &gt;85%（無 baseline）</li>
+            <li>Cross-sample 一致性（paired 模式只 HCC1395 既有深度觀察）</li>
+            <li>Subclone classifications 對齊 Phase BCD 4-group</li>
+          </ol>
+        </div>
+        <div class="trust-low p-3 rounded">
+          <strong>🔴 警示 (Trust &lt; 0.3)</strong>
+          <ol class="list-decimal list-inside text-sm mt-1 space-y-0.5" start="14">
+            <li>Phase 2 LR vestigial transferability（場景不同需驗）</li>
+            <li>HCC1937 BRCA1 outlier 可能破壞 cross-sample</li>
+            <li>物理 unphasable untag（沒 CpG / read 太短 / MQ 低）救不回</li>
+          </ol>
+        </div>
+      </div>
+
+      <h3 class="font-bold mt-5 mb-2">4.3 與 longphase-S inheritHaplotype 8 種 scenario 對照</h3>
+      <table class="w-full text-sm">
+        <thead><tr><th>#</th><th>longphase-S</th><th>methylation 介入</th><th>結果</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>HP3 inherit 為 H1_1</td><td>同意 H1_1</td><td>conflict-free，信度提升</td></tr>
+          <tr><td>2</td><td>HP3 inherit 為 H1_1</td><td>投 H2_1</td><td>conflict，保留 HP3 或標 low-confidence</td></tr>
+          <tr class="scenario-pos"><td>3</td><td>HP3 留 HP3</td><td>投 H1_1 (confidence ≥0.6)</td><td><strong>methylation rescue ⭐ Q2 use case</strong></td></tr>
+          <tr><td>4</td><td>HP3 留 HP3</td><td>分不出</td><td>誠實 unphasable</td></tr>
+          <tr class="scenario-pos"><td>5</td><td>untag 不處理</td><td>對齊 HP1</td><td><strong>untag rescue ⭐ Q1 use case</strong></td></tr>
+          <tr class="scenario-pos"><td>6</td><td>untag 不處理</td><td>對齊 HP2</td><td>同上 assign HP2</td></tr>
+          <tr><td>7</td><td>untag 不處理</td><td>不對齊任一 hap</td><td>誠實 unphasable</td></tr>
+          <tr class="scenario-pos"><td>8</td><td>tagged 不再評</td><td>與 tag 矛盾</td><td><strong>low-confidence flag ⭐ Q3 use case</strong></td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="font-bold mt-5 mb-2">4.4 multi-sample × multi-cell 理論期望表</h3>
+      <table class="w-full text-xs">
+        <thead><tr><th>Sample / Cell</th><th>C1</th><th>C2</th><th>C3</th><th>C4</th><th>C5</th><th>C6</th><th>Sa</th><th>Sb</th></tr></thead>
+        <tbody>
+          <tr><td>HCC1395</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-partial">🟡</td><td class="scenario-pos">🟢</td><td class="scenario-neg">🔴</td><td class="scenario-pos">🟢</td></tr>
+          <tr><td>HCC1395_DORADO</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-partial">🟡</td><td class="scenario-pos">🟢</td><td class="scenario-neg">🔴</td><td class="scenario-pos">🟢</td></tr>
+          <tr><td>HCC1937 ⚠️ outlier</td><td class="scenario-partial">🟡</td><td class="scenario-pos">🟢</td><td class="scenario-partial">🟡</td><td class="scenario-partial">🟡</td><td class="scenario-partial">🟡</td><td class="scenario-partial">🟡</td><td class="scenario-neg">🔴</td><td class="scenario-pos">🟢</td></tr>
+          <tr><td>HCC1954</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-partial">🟡</td><td class="scenario-pos">🟢</td><td class="scenario-neg">🔴</td><td class="scenario-pos">🟢</td></tr>
+          <tr><td>COLO829 ⚠️ ONT R10?</td><td class="scenario-inc">⚠️</td><td class="scenario-inc">⚠️</td><td class="scenario-inc">⚠️</td><td class="scenario-inc">⚠️</td><td class="scenario-inc">⚠️</td><td class="scenario-inc">⚠️</td><td class="scenario-inc">⚠️</td><td class="scenario-inc">⚠️</td></tr>
+          <tr><td>H1437</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-partial">🟡</td><td class="scenario-pos">🟢</td><td class="scenario-neg">🔴</td><td class="scenario-pos">🟢</td></tr>
+          <tr><td>H2009</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-pos">🟢</td><td class="scenario-partial">🟡</td><td class="scenario-pos">🟢</td><td class="scenario-neg">🔴</td><td class="scenario-pos">🟢</td></tr>
+        </tbody>
+      </table>
+      <p class="text-xs text-gray-600 mt-2">🟢 expected POSITIVE · 🟡 mixed/partial · 🔴 expected fail (sanity) · ⚠️ method 不適用 (待驗 BAM methylation calling)</p>
+    </section>
+
+    <!-- §5 Pre-mortem -->
+    <section id="sec5" class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-bold mb-4 border-l-4 border-red-600 pl-3">5. Pre-mortem 反例與失敗模式</h2>
+      <p class="text-sm text-gray-600 mb-3">反向假設「方法已失敗，what could have caused this?」</p>
+
+      <div class="space-y-3">
+        <div class="cell-card">
+          <h4 class="font-bold text-red-700">FM1: ASM 訊號來自 germline imprinting / cis-mQTL</h4>
+          <p class="text-sm mt-1"><strong>機制</strong>：Sa cell 內甲基差異本是 germline 設定 → cluster 誤把 germline ASM 當 somatic subclone</p>
+          <p class="text-sm"><strong>反例比例</strong>：32-66% of 甲基 differential CpG 為 germline-origin</p>
+          <p class="text-sm"><strong>Mitigation</strong>：cross-ref normal BAM + germline VCF imprinting region 排除 + 限定 cells C1/C4/C5/C6 在 non-ASM</p>
+        </div>
+        <div class="cell-card">
+          <h4 class="font-bold text-red-700">FM2: Untag 物理不可分</h4>
+          <p class="text-sm mt-1"><strong>機制</strong>：Untag 內 40-60% 物理 unphasable — read 沒經過 informative SNV、長度太短、MQ&lt;20 — 甲基化也面臨相同限制</p>
+          <p class="text-sm"><strong>Mitigation</strong>：Trust framework 排除 LOW + 報告 "rescue rate among phasable reads"</p>
+        </div>
+        <div class="cell-card">
+          <h4 class="font-bold text-red-700">FM3: HP:Z:3 太稀少（chr19 0.3%）</h4>
+          <p class="text-sm mt-1"><strong>機制</strong>：per 2kb window 多 &lt;10 HP3 reads — 統計 power 不足</p>
+          <p class="text-sm"><strong>Mitigation</strong>：aggregate per 1Mb window + 跨 sample pool HP3 + HP3 細分降級 secondary</p>
+        </div>
+        <div class="cell-card">
+          <h4 class="font-bold text-red-700">FM4: HCC1937 BRCA1 outlier</h4>
+          <p class="text-sm mt-1"><strong>機制</strong>：BRCA1 mutant + CNV-driven germline het sample，已知 FP/TP 0.194 vs 其他 0.01</p>
+          <p class="text-sm"><strong>Mitigation</strong>：per-sample 報告，不強行 pool + 用 median 不用 mean</p>
+        </div>
+        <div class="cell-card">
+          <h4 class="font-bold text-red-700">FM5: cluster centroid 偏向 majority hap</h4>
+          <p class="text-sm mt-1"><strong>機制</strong>：hap-imbalance 區（LOH-adjacent）centroid dominantly 反映 majority → untag 偏向被歸類為 majority</p>
+          <p class="text-sm"><strong>Mitigation</strong>：balanced subsample centroid + Z-score normalize</p>
+        </div>
+      </div>
+
+      <h3 class="font-bold mt-5 mb-2">止證項（falsification criteria）</h3>
+      <table class="w-full text-sm">
+        <thead><tr><th>條件</th><th>NO-GO 判斷</th></tr></thead>
+        <tbody>
+          <tr><td>Sb sanity fail 比例 &gt;30%</td><td>algorithm overfit dominant，不可信</td></tr>
+          <tr><td>C1 silhouette 中位數 &lt;0.1 跨 5+ 樣本</td><td>物理 unphasable dominant</td></tr>
+          <tr><td>Sa false positive 率 &gt;50% 且 mitigation 無效</td><td>germline confound 不可控</td></tr>
+          <tr><td>C2+Sb mosaic finding 跨 5+ 樣本一致</td><td>主目標轉向 epi-mosaic detector</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §6 Verdict -->
+    <section id="sec6" class="bg-white rounded-lg shadow p-6 border-2 border-blue-300">
+      <h2 class="text-2xl font-bold mb-4 border-l-4 border-blue-600 pl-3">6. 結論與探索建議 — 巨觀地圖 ⭐</h2>
+
+      <h3 class="font-bold mt-3 mb-3">6.1 Feasibility Landscape Verdict — ROI/Novelty 2x2</h3>
+      <div class="grid grid-cols-2 gap-2 bg-gray-100 p-3 rounded">
+        <div class="trust-high landscape-cell p-3 rounded">
+          <h4 class="font-bold text-sm">⭐ recommended（高 ROI / 高 Novelty）</h4>
+          <p class="text-xs mt-1"><strong>C4 (HP3-A) methyl orthogonal vs longphase-S priority bug</strong></p>
+          <p class="text-xs mt-1"><strong>C1 (untag CN=2) 主軸救回 untag 30-50% recall</strong></p>
+        </div>
+        <div class="trust-mid landscape-cell p-3 rounded">
+          <h4 class="font-bold text-sm">△ partial / exploratory</h4>
+          <p class="text-xs mt-1"><strong>C2 LOH sanity 物理正確性</strong></p>
+          <p class="text-xs mt-1"><strong>C3 polyploid subclonal hap 探索</strong></p>
+        </div>
+        <div class="bg-blue-50 landscape-cell p-3 rounded border border-blue-200">
+          <h4 class="font-bold text-sm">△ partial value</h4>
+          <p class="text-xs mt-1"><strong>C6 tag 二次驗證 FP filter 潛力</strong></p>
+          <p class="text-xs mt-1"><strong>C5 HP3-B confidence mixed</strong></p>
+        </div>
+        <div class="trust-low landscape-cell p-3 rounded">
+          <h4 class="font-bold text-sm">⛔ controls (expected fail)</h4>
+          <p class="text-xs mt-1"><strong>Sa ASM confound stress test</strong></p>
+          <p class="text-xs mt-1"><strong>Sb LOH overfit stress test</strong></p>
+        </div>
+      </div>
+
+      <h3 class="font-bold mt-5 mb-2">6.2 探索建議（按 ROI 排序）</h3>
+      <div class="space-y-3">
+        <div class="bg-green-50 border-l-4 border-green-600 p-3">
+          <h4 class="font-bold">Phase A（推薦先做，最低成本驗證 trust framework）</h4>
+          <p class="text-sm mt-1">Tooling MVP：移植 <code>read_phylogeny_validator.py</code> + 新增 untag classifier；在 HCC1395 chr19 only 跑 C1+C2+Sa+Sb</p>
+          <p class="text-sm">工程量 &lt;1 day，無需新 C++。Pass criterion：C2 sanity pass + Sa confound 確認 + C1 silhouette &gt;0.1</p>
+        </div>
+        <div class="bg-blue-50 border-l-4 border-blue-600 p-3">
+          <h4 class="font-bold">Phase B（Phase A 成功後）</h4>
+          <p class="text-sm mt-1">擴 C3 + C4 + C5 + C6；HCC1395 全基因組；工程量 ~2-3 day</p>
+        </div>
+        <div class="bg-purple-50 border-l-4 border-purple-600 p-3">
+          <h4 class="font-bold">Phase C（Phase A+B 成功後）</h4>
+          <p class="text-sm mt-1">Cross-sample 7 樣本（先檢查 COLO829 methylation calling）；Wilcoxon paired 跨樣本一致性；串接 Phase BCD 4-group framework；工程量 ~3-5 day</p>
+        </div>
+        <div class="bg-gray-50 border-l-4 border-gray-600 p-3">
+          <h4 class="font-bold">Phase D（NOT recommend immediately）</h4>
+          <p class="text-sm mt-1">整合進 MSA 或 longphase-S binary (C++ 改動)；待 Phase A-C 全 POSITIVE 後啟動；工程量 ~2-3 週</p>
+        </div>
+      </div>
+
+      <h3 class="font-bold mt-5 mb-2">6.3 主要不確定性 + 開放問題</h3>
+      <table class="w-full text-sm">
+        <thead><tr><th>不確定性</th><th>為什麼重要</th><th>解法路徑</th></tr></thead>
+        <tbody>
+          <tr><td>物理 unphasable untag 真實比例</td><td>決定 untag 救回 ceiling</td><td>Phase A C1 silhouette&lt;0.1 比例</td></tr>
+          <tr><td>HCC1937 在新方法下行為</td><td>BRCA1 outlier 是否破壞 cross-sample</td><td>Phase C 必含 HCC1937 sensitivity</td></tr>
+          <tr><td>COLO829 methylation calling</td><td>樣本 N 從 7 → 6?</td><td>Phase 0 額外驗證 BAM MM/ML tag</td></tr>
+          <tr><td>CN≥3 多倍體區甲基行為</td><td>是否真比 longphase-S 更精細</td><td>Phase B C3 cell 核心觀察</td></tr>
+          <tr><td>與 Phase 2 LR vestigial 教訓關係</td><td>場景不同但需驗 single-axis transferability</td><td>Phase B 加 LR baseline comparison</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="font-bold mt-5 mb-2">6.4 推薦不做的方向（pre-emptive scope control）</h3>
+      <table class="w-full text-sm">
+        <thead><tr><th>不推薦</th><th>理由</th></tr></thead>
+        <tbody>
+          <tr><td>直接整合 C++ binary</td><td>Phase A-C 未驗證前風險高（類似 Phase 2 cycle 1 +0.022 後 LOSO -0.00012 教訓）</td></tr>
+          <tr><td>HP3 細分為<strong>主軸</strong></td><td>longphase-S 原生已做（雖不用 methylation），novelty 集中 untag 才合理</td></tr>
+          <tr><td>跑全 7 樣本 immediately</td><td>Phase A 單樣本 chr19 沒過則 7 樣本浪費；按階段推進</td></tr>
+          <tr><td>投稿 paper 前先試</td><td>Phase 2 LR vestigial 教訓 — multi-axis filter context 已踩雷</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- §7 Glossary -->
+    <section id="sec7" class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-bold mb-4 border-l-4 border-blue-600 pl-3">7. Glossary / 教學專欄</h2>
+      <details>
+        <summary class="font-bold">📚 22 terms 直白比喻 — 折疊查看</summary>
+        <table class="w-full text-sm mt-3">
+          <thead><tr><th>Term</th><th>直白比喻</th></tr></thead>
+          <tbody>
+            <tr><td class="glossary-term">Haplotype (hap)</td><td>來自爸爸 / 媽媽各一條的染色體</td></tr>
+            <tr><td class="glossary-term">Phasing</td><td>把每個變異/read 標屬於爸爸 hap 還是媽媽 hap</td></tr>
+            <tr><td class="glossary-term">longphase-S</td><td>工具：tumor-normal paired ONT phasing + somatic tagging</td></tr>
+            <tr><td class="glossary-term">HP:Z: tag</td><td>longphase-S 寫在 BAM 上的字串 tag (1/2/1-1/2-1/3)</td></tr>
+            <tr><td class="glossary-term">HP:Z:3 (ambig)</td><td>有 somatic 訊號但分不出 hap</td></tr>
+            <tr><td class="glossary-term">untag</td><td>longphase-S 完全沒標（資訊不足）</td></tr>
+            <tr><td class="glossary-term">inheritHaplotype</td><td>longphase-S 對 HP3 用 somatic-variant derived HP 做二次判斷</td></tr>
+            <tr><td class="glossary-term">deriveByHpSimilarity</td><td>longphase-S confidence score = max-vote/total-vote ∈ [0,1]</td></tr>
+            <tr><td class="glossary-term">percentageThreshold</td><td>longphase-S confidence threshold, 預設 0.6</td></tr>
+            <tr><td class="glossary-term">LOH</td><td>某 hap 在 tumor 中遺失 — 物理只剩 1 hap</td></tr>
+            <tr><td class="glossary-term">cnLOH</td><td>LOH 但 CN 不變（另一 hap 複製補上）</td></tr>
+            <tr><td class="glossary-term">CN</td><td>該區域 hap 的份數（CN=1 缺一條、CN=2 正常、CN=3+ 多了）</td></tr>
+            <tr><td class="glossary-term">ASM</td><td>Allele-Specific Methylation — 兩條 hap 甲基狀態天生不同</td></tr>
+            <tr><td class="glossary-term">cis-mQTL</td><td>germline SNP 影響附近甲基化 (germline-origin ASM)</td></tr>
+            <tr><td class="glossary-term">Imprinting</td><td>父母來源決定基因/甲基狀態 (如 H19/IGF2)</td></tr>
+            <tr><td class="glossary-term">CpG density</td><td>區域內 CpG 密度 (dense ≥20/2kb / sparse &lt;20)</td></tr>
+            <tr><td class="glossary-term">Silhouette score</td><td>cluster 真實性 metric (&gt;0.3 真實，&lt;0.1 noise)</td></tr>
+            <tr><td class="glossary-term">MSA</td><td>MethylSomaticAnalysis tool (C++ + Python)</td></tr>
+            <tr><td class="glossary-term">Phase BCD 4-group</td><td>Normal Diploid / Epi-Het / LOH / Tumor-Specific framework</td></tr>
+            <tr><td class="glossary-term">Trust score</td><td>本報告新定義 — 4 條件加總評估甲基訊號可信度</td></tr>
+            <tr><td class="glossary-term">Priority bug</td><td>longphase-to/V5 早期 binary vector check 把 somatic 蓋過 germline 的 bug (4.19:1 偏 HP1)</td></tr>
+          </tbody>
+        </table>
+      </details>
+    </section>
+
+    <!-- §8 References -->
+    <section id="sec8" class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-bold mb-4 border-l-4 border-blue-600 pl-3">8. References / Source Provenance</h2>
+
+      <details open>
+        <summary class="font-bold">8.1 KB sources (authoritative)</summary>
+        <ul class="list-disc list-inside text-sm mt-2 mono space-y-1">
+          <li>/big8_disk/liaoyoyo2001/Knowledge/05_tools/longphase-s.md v2.2 (2026-04-17)</li>
+          <li>/big8_disk/liaoyoyo2001/Knowledge/05_tools/methyl-somatic-analysis.md v1.2 (2026-04-01)</li>
+          <li>/big8_disk/liaoyoyo2001/Knowledge/05_tools/longphase.md</li>
+          <li>/big8_disk/liaoyoyo2001/Knowledge/05_tools/longphase-to.md</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary class="font-bold">8.2 Primary source code</summary>
+        <ul class="list-disc list-inside text-sm mt-2 mono space-y-1">
+          <li>longphase-s/src/somatic_haplotag/SomaticHaplotagProcess.cpp:310-527</li>
+          <li>MethylSomaticAnalysis/tools/python/advanced_analysis.py:469</li>
+          <li>MethylSomaticAnalysis/tools/python/read_phylogeny_validator.py:41-49</li>
+          <li>InterSubMod/src/core/ReadParser.cpp:121-154</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary class="font-bold">8.3 InterSubMod previous reports</summary>
+        <ul class="list-disc list-inside text-sm mt-2 mono space-y-1">
+          <li>InterSubMod/research/paired_priority_bug_audit/00_audit_report.md</li>
+          <li>InterSubMod/research/paired_priority_bug_audit/01_step_D_germline_absent_finding.md</li>
+          <li>InterSubMod/docs/experiments/INDEX.md</li>
+          <li>InterSubMod/docs/experiments/in_progress/2026/05/20260518_Phase2_Cycle1_Global_FP_Filter_01.md</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary class="font-bold">8.4 Paired tagged BAM 7 樣本（big7 已驗證齊全）</summary>
+        <p class="text-sm mt-2 mono">/big7_disk/liaoyoyo2001/big7_disk_output/canonical/&lt;sample&gt;/paired_full/&lt;dated&gt;_complete_matrix/longphase_s/&lt;sample&gt;_tagged.bam</p>
+        <ul class="list-disc list-inside text-sm mt-2 space-y-0.5">
+          <li>HCC1395 (260 GB)</li>
+          <li>HCC1395_DORADO</li>
+          <li>HCC1937, HCC1954</li>
+          <li>COLO829 ⚠️ ONT R10 may lack methylation</li>
+          <li>H1437, H2009</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary class="font-bold">8.5 InterSubMod memory entries (cross-ref)</summary>
+        <ul class="list-disc list-inside text-sm mt-2 mono space-y-0.5">
+          <li>project_loh_subclone_af_methylation_positive.md</li>
+          <li>project_loh_constrained_phasing_discovery.md</li>
+          <li>project_methyl_filter_pilot_marginal_positive.md</li>
+          <li>project_snv_methylation_association.md</li>
+          <li>project_loh_research_status.md</li>
+          <li>project_hp_integer_tag_fix.md</li>
+          <li>project_pon_only_phasing_verification.md</li>
+          <li>project_v3_fixed_haplotag_verification.md</li>
+        </ul>
+      </details>
+
+      <hr class="my-4">
+      <div class="text-sm text-gray-600 bg-blue-50 p-3 rounded border border-blue-200">
+        <p><strong>📄 .md companion</strong>: <span class="mono break-all">InterSubMod/docs/reports/in_progress/2026/05/20260526_methyl_assisted_untag_classification_feasibility_01.md</span></p>
+        <p class="mt-2"><strong>報告版本</strong>：v1.0 (2026-05-26)</p>
+        <p><strong>作者</strong>：Claude Opus 4.7</p>
+        <p><strong>狀態</strong>：in_progress（純可行性論證；下一步啟動 Phase A MVP 需用戶 explicit go）</p>
+        <p><strong>Tier</strong>：<span class="badge tier-2">⭐2 L4</span> (literature + 既有實作 + 既有 evidence 串接；無實測)</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer class="bg-gray-800 text-gray-300 py-6 mt-8">
+  <div class="max-w-7xl mx-auto px-4 text-sm">
+    <p>InterSubMod 研究專案 · 2026-05-26 · Generated by Claude Opus 4.7</p>
+    <p class="text-xs text-gray-500 mt-2">本報告為純可行性論證 (literature review + 既有實作分析)，無實測數據。Tier ⭐2 L4。</p>
+  </div>
+</footer>
+
+<script>
+  // Scroll spy for TOC
+  const sections = document.querySelectorAll('section[id]');
+  const tocLinks = document.querySelectorAll('nav a[href^="#"]');
+  function updateTOC() {
+    let current = '';
+    sections.forEach(sec => {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top <= 100) current = sec.id;
+    });
+    tocLinks.forEach(link => {
+      link.classList.toggle('toc-active', link.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', updateTOC);
+  updateTOC();
+</script>
+</body>
+</html>

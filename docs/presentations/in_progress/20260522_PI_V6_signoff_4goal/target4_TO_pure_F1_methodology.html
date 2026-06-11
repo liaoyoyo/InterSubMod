@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>目標 4 — TO 純樣本 F1 4-algorithm LOSO + 方法論 (2026-05-22 PI V6 Signoff)</title>
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+
+<style>
+:root {
+  --c-accent: #D97757; --c-accent-deep: #B85A3F;
+  --c-text: #141413; --c-text-soft: #6B6B66;
+  --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+  --c-code-bg: #F4EFE6;
+  --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+  --c-info: #1E3A8A;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+  --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+             "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+  --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+  --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+  --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+  --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--c-bg); color: var(--c-text);
+       font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.65; }
+
+.layout { max-width: 1360px; margin: 0 auto; display: grid;
+          grid-template-columns: 250px 1fr; gap: var(--sp-5);
+          padding: var(--sp-5) var(--sp-4); }
+aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+            background: var(--c-surface); border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+            box-shadow: var(--shadow-sm);
+            max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+              color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+              border-left: 3px solid transparent; }
+aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                      font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+aside.toc a.core { font-weight: 600; }
+aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px; font-size: 0.85em; }
+
+main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+              border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+              padding: var(--sp-6); min-width: 0; }
+.report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                  margin-bottom: var(--sp-5); }
+.report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                            letter-spacing: 1px; color: var(--c-accent-deep);
+                            font-weight: 700; margin-bottom: var(--sp-2); }
+.report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+.report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                        gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+.report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+.report-header .meta dd { margin: 0; }
+.report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                             border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                             font-size: 0.92em; }
+.verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                   border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); }
+.verdict-banner.neutral  { background: linear-gradient(90deg, #1E3A8A, #3B82F6); }
+.verdict-banner.partial { background: linear-gradient(90deg, #7F1D1D, #C2410C); }
+
+h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+      padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+      scroll-margin-top: var(--sp-4); }
+h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+            font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2); color: var(--c-accent-deep); }
+
+p, ul, ol { margin: var(--sp-3) 0; }
+ul, ol { padding-left: var(--sp-5); }
+a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+        font-family: var(--ff-mono); font-size: 0.92em; }
+
+table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; }
+th { background: var(--c-code-bg); font-weight: 600; }
+td.num, .num { text-align: right; font-family: var(--ff-mono); }
+tr.row-safe td { background: #DCFCE7; color: #166534; }
+tr.row-warn td { background: #FEF3C7; }
+tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+tr.row-skip td { background: #F3F4F6; color: #4B5563; }
+tr.row-emphasis td { background: #DBEAFE; color: #1E3A8A; font-weight: 600; }
+tr.row-rescue td { background: #FEF7E6; color: #78350F; font-weight: 600; }
+
+.tier-badge { display: inline-block; padding: 2px 8px; border-radius: 10px;
+              font-size: var(--fs-xs); font-weight: 700; font-family: var(--ff-mono);
+              margin-left: var(--sp-2); vertical-align: middle; }
+.tier-l2 { background: #166534; color: white; }
+.tier-l3 { background: #A16207; color: white; }
+.tier-l4 { background: #1E3A8A; color: white; }
+.tier-marginal { background: #C2410C; color: white; }
+
+.callout-info { background: #EFF6FF; border-left: 4px solid var(--c-info);
+                padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                border-radius: var(--radius-md); color: #1E3A8A; }
+.callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                    padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                    border-radius: var(--radius-md); color: #78350F; }
+.callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                     padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                     border-radius: var(--radius-md); color: #7F1D1D; }
+.callout-success { background: #DCFCE7; border-left: 4px solid var(--c-success);
+                    padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                    border-radius: var(--radius-md); color: #166534; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+              gap: var(--sp-3); margin: var(--sp-4) 0; }
+.stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+             border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+.stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1;
+                    font-family: var(--ff-mono); }
+.stat-box .number.bug { color: var(--c-critical); }
+.stat-box .number.success { color: var(--c-success); }
+.stat-box .number.warning { color: var(--c-warning); }
+.stat-box .number.info { color: var(--c-info); }
+.stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+
+.figure { margin: var(--sp-5) 0; text-align: center;
+           background: var(--c-bg); border-radius: var(--radius-md);
+           padding: var(--sp-3); border: 1px solid var(--c-border); }
+.figure img { max-width: 100%; height: auto; display: block; margin: 0 auto;
+               border-radius: var(--radius-sm); background: white; }
+.figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                      margin-top: var(--sp-2); font-style: italic; text-align: left;
+                      padding: var(--sp-2) var(--sp-3); }
+
+.provenance { background: var(--c-bg); border-radius: var(--radius-md);
+               padding: var(--sp-4); margin-top: var(--sp-6); font-size: var(--fs-sm);
+               border: 1px dashed var(--c-border); }
+.provenance dt { color: var(--c-text-soft); font-weight: 600; font-family: var(--ff-mono);
+                  font-size: var(--fs-xs); }
+.provenance dd { margin: 0 0 var(--sp-2) 0; font-family: var(--ff-mono); }
+
+/* L0 Headline Banner */
+.l0-headline { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
+                color: white; padding: var(--sp-5) var(--sp-5);
+                border-radius: var(--radius-lg); margin: var(--sp-4) 0;
+                box-shadow: var(--shadow-md); }
+.l0-headline .label { font-size: var(--fs-xs); text-transform: uppercase;
+                      letter-spacing: 2px; opacity: 0.85; }
+.l0-headline .headline { font-size: var(--fs-xl); font-weight: 700; margin: var(--sp-2) 0; line-height: 1.4; }
+.l0-headline .sub { font-size: var(--fs-sm); opacity: 0.9; }
+
+/* L1 Top findings */
+.l1-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--sp-3); margin: var(--sp-4) 0; }
+.l1-card { background: var(--c-surface); border: 1px solid var(--c-border);
+            border-radius: var(--radius-md); padding: var(--sp-3); box-shadow: var(--shadow-sm); }
+.l1-card .title { font-weight: 700; font-size: var(--fs-md); color: var(--c-accent-deep);
+                   margin-bottom: var(--sp-2); }
+.l1-card .num-emph { font-size: var(--fs-xl); font-family: var(--ff-mono); font-weight: 700;
+                      color: var(--c-accent); margin: var(--sp-2) 0; }
+
+/* L2 Collapsible evidence cards */
+details.l2-card { background: var(--c-surface); border: 1px solid var(--c-border);
+                  border-radius: var(--radius-md); margin: var(--sp-3) 0;
+                  padding: 0; overflow: hidden; }
+details.l2-card[open] { box-shadow: var(--shadow-sm); }
+details.l2-card > summary { cursor: pointer; padding: var(--sp-3) var(--sp-4);
+                             font-weight: 600; background: var(--c-code-bg);
+                             user-select: none; list-style: none;
+                             display: flex; justify-content: space-between; align-items: center; }
+details.l2-card > summary::after { content: "▾"; font-family: var(--ff-mono);
+                                    color: var(--c-text-soft); transition: transform 0.2s; }
+details.l2-card[open] > summary::after { transform: rotate(180deg); }
+details.l2-card > summary::-webkit-details-marker { display: none; }
+details.l2-card > .card-body { padding: var(--sp-3) var(--sp-4); }
+
+/* Plotly container */
+.plot-container { width: 100%; height: 480px; margin: var(--sp-4) 0; }
+.plot-container-tall { width: 100%; height: 560px; margin: var(--sp-4) 0; }
+
+/* Stepper / pipeline */
+.stepper { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px;
+            margin: var(--sp-4) 0; }
+.step-cell { background: var(--c-bg); border: 1px solid var(--c-border);
+              padding: var(--sp-3); font-size: var(--fs-sm); position: relative; }
+.step-cell .step-num { font-family: var(--ff-mono); font-size: var(--fs-xs);
+                        color: var(--c-accent-deep); font-weight: 700; }
+.step-cell .step-title { font-weight: 600; margin: var(--sp-1) 0; }
+.step-cell .step-detail { font-size: var(--fs-xs); color: var(--c-text-soft); }
+.step-cell::after { content: "→"; position: absolute; right: -10px; top: 50%;
+                     transform: translateY(-50%); color: var(--c-accent);
+                     font-weight: 700; z-index: 1; background: var(--c-surface);
+                     padding: 0 3px; }
+.step-cell:last-child::after { content: ""; }
+
+/* Comparison split */
+.compare-split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4);
+                  margin: var(--sp-4) 0; }
+.compare-side { padding: var(--sp-4); border-radius: var(--radius-md);
+                 border: 2px solid var(--c-border); }
+.compare-side.indist { background: #FEF7E6; border-color: var(--c-warning); }
+.compare-side.loso { background: #FEF2F0; border-color: var(--c-critical); }
+.compare-side .label { font-size: var(--fs-xs); text-transform: uppercase;
+                        letter-spacing: 1px; font-weight: 700; }
+.compare-side .big-num { font-size: 36px; font-family: var(--ff-mono); font-weight: 700;
+                          margin: var(--sp-2) 0; }
+.compare-side.indist .big-num { color: var(--c-warning); }
+.compare-side.loso .big-num { color: var(--c-critical); }
+
+/* DataTables overrides */
+.dataTables_wrapper { font-size: var(--fs-sm); }
+table.dataTable thead th { background: var(--c-code-bg); }
+
+/* PI Q&A accordion */
+details.qa-card { background: #EFF6FF; border-left: 4px solid var(--c-info);
+                  border-radius: var(--radius-md); margin: var(--sp-3) 0;
+                  padding: 0; overflow: hidden; }
+details.qa-card > summary { cursor: pointer; padding: var(--sp-3) var(--sp-4);
+                            font-weight: 600; user-select: none; list-style: none;
+                            color: var(--c-info); display: flex;
+                            justify-content: space-between; align-items: center; }
+details.qa-card > summary::after { content: "▾"; font-family: var(--ff-mono);
+                                    transition: transform 0.2s; }
+details.qa-card[open] > summary::after { transform: rotate(180deg); }
+details.qa-card > summary::-webkit-details-marker { display: none; }
+details.qa-card > .qa-body { padding: var(--sp-3) var(--sp-4); background: var(--c-surface); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  aside.toc { position: static; max-height: none; }
+  .stepper { grid-template-columns: 1fr; }
+  .step-cell::after { content: "↓"; right: 50%; bottom: -12px; top: auto;
+                      transform: translateX(50%); }
+  .compare-split { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<aside class="toc" aria-label="Table of contents">
+<h3>目標 4 結構</h3>
+<ol>
+  <li><a href="#l0" class="core">L0 Headline (5 秒)</a></li>
+  <li><a href="#l1" class="core">L1 Top 5 Findings</a></li>
+  <li><a href="#sec4a" class="core">4A — 4-Algo LOSO Bar</a></li>
+  <li><a href="#sec4b" class="core">4B — 方法論 3-axis 表</a></li>
+  <li><a href="#sec4c" class="core">4C — F1 6-step Audit</a></li>
+  <li><a href="#sec4d">4D — 其他算法盤點</a></li>
+  <li><a href="#sec4e" class="core">4E — Circularity Reframe</a></li>
+  <li><a href="#qa">PI Q&amp;A (4 題)</a></li>
+  <li><a href="#raw">L3 Raw Data Tables</a></li>
+  <li><a href="#prov">Provenance</a></li>
+</ol>
+</aside>
+
+<main class="report">
+
+<header class="report-header">
+<div class="pretitle">PI V6 Signoff · 4 Goals Hybrid Report · Target 4</div>
+<h1>目標 4 — TO 純樣本 F1 4-Algorithm LOSO + 方法論完整性</h1>
+<dl class="meta">
+  <dt>Build date</dt>      <dd>2026-05-22</dd>
+  <dt>Audience</dt>        <dd>PI · 1-on-1 / Lab meeting</dd>
+  <dt>Data sources</dt>    <dd>A4 (100 fold) + A4-Ext (6 algo inventory) + A4-F1Audit (22-step trail)</dd>
+  <dt>Verdict</dt>         <dd>H_circularity overall <strong>MET</strong>; H_method <strong>PARTIAL (HCC1395 only)</strong></dd>
+  <dt>Sample-level circularity</dt><dd>cycle 1 +0.02236 → LOSO −0.00012; drop +0.02248 = <strong>100% by circularity</strong></dd>
+  <dt>Production filter</dt><dd><strong>NOT deployable</strong> across model class</dd>
+</dl>
+<div class="verdict-banner partial">
+  <strong>🟠 Nuanced Verdict (A4 最終)</strong>：4 algorithm × 5 sample × 5 seed = 100 fold LOSO 全測。
+  Overall mean ΔF1 — LR <code>−0.00004</code> / DT <code>+0.00255</code> / RF <code>+0.00267</code> / XGB <code>+0.00102</code>，
+  全部 &lt; Cohen +0.005 small ribbon。唯一 rescue: <strong>HCC1395 hold-out 上 DT/RF +0.013</strong>（in-distribution 局部 capacity 證據），
+  其餘 4 樣本全 algorithm 共通 ≈ 0。結論：<strong>filter design 須重新框架化</strong>，非換 model class 能解。
+</div>
+</header>
+
+<!-- ─── L0 Headline ─── -->
+<h2 id="l0"><span class="h-num">L0.</span>Headline (5 秒看完)</h2>
+
+<div class="l0-headline">
+  <div class="label">One-sentence verdict</div>
+  <div class="headline">換 model class（DT / RF / XGBoost）不是 filter 失敗的解 — 4 algo × 100 fold 全測 overall mean ΔF1 ribbon-null，唯 HCC1395 in-distribution +0.013 partial rescue（但同樣 1/5 sample）。</div>
+  <div class="sub">A4 100-fold LOSO（4 algo × 5 sample × 5 seed） · 2026-05-21 verified · ⭐⭐⭐⭐ L2 core claim · Phase 2 結論口徑更新</div>
+</div>
+
+<!-- ─── L1 Top Findings ─── -->
+<h2 id="l1"><span class="h-num">L1.</span>Top 5 Findings</h2>
+
+<div class="l1-cards">
+
+  <div class="l1-card">
+    <div class="title">F1 跨樣本 LOSO 全 ribbon-null<span class="tier-badge tier-l2">⭐⭐⭐⭐ L2</span></div>
+    <div class="num-emph" style="color: var(--c-critical);">≤ +0.005</div>
+    <div>4 algo overall mean ΔF1 全部低於 Cohen +0.005 small ribbon
+    [<code>source: A4_summary.json:220-256</code>]</div>
+  </div>
+
+  <div class="l1-card">
+    <div class="title">DT/RF HCC1395 Capacity Rescue<span class="tier-badge tier-l4">⭐⭐ L4</span></div>
+    <div class="num-emph" style="color: var(--c-warning);">+0.0137 / +0.0127</div>
+    <div>DT/RF 在 HCC1395 hold-out 比 LR 多 capture +0.013 ΔF1，但僅 1/5 sample；屬 in-distribution case study
+    [<code>source: A4_summary.json:60,150</code>]</div>
+  </div>
+
+  <div class="l1-card">
+    <div class="title">Train-Test Gap 跨 algo 等價<span class="tier-badge tier-l2">⭐⭐⭐⭐ L2</span></div>
+    <div class="num-emph" style="color: var(--c-info);">+0.48 ± 0.001</div>
+    <div>HCC1937 hold-out 4 algo gap 全 ≈ +0.48 → 證實非 model overfit，是 caller F1 baseline (0.37) artifact
+    [<code>source: A4_summary.json:116,161,206</code>]</div>
+  </div>
+
+  <div class="l1-card">
+    <div class="title">LR underfit 假說排除<span class="tier-badge tier-l2">⭐⭐⭐⭐ L2</span></div>
+    <div class="num-emph" style="color: var(--c-success);">差 &lt; 0.005</div>
+    <div>LR overall gap +0.0576 ≈ DT +0.0544 ≈ RF +0.0551；linear/tree-based 三者 train-side 等價
+    [<code>source: A4_summary.json:225,233,243</code>]</div>
+  </div>
+
+  <div class="l1-card">
+    <div class="title">Cycle 1 → LOSO 整體 effect drop<span class="tier-badge tier-l2">⭐⭐⭐⭐ L2</span></div>
+    <div class="num-emph" style="color: var(--c-critical);">−0.02248</div>
+    <div>HCC1395 in-dist +0.02236 → LOSO −0.00012；drop = 100% by sample-level circularity
+    [<code>source: A4_F1_step_audit_trail.tsv:12-13</code>]</div>
+  </div>
+
+</div>
+
+<!-- ─── 4A: 4-algo LOSO bar chart ─── -->
+<h2 id="sec4a"><span class="h-num">4A.</span>4-Algorithm LOSO ΔF1 (5 sample × 5 seed) <span class="tier-badge tier-l2">⭐⭐⭐⭐ L2</span></h2>
+
+<div class="callout-info">
+<strong>視覺重點</strong>：每組 4 條 bar (LR/DT/RF/XGB) 並列；HCC1395 上 DT/RF 高出 LR 約 +0.013（唯一突破），其餘 4 樣本 4 algo 全擠在 0 附近（< ±0.002）。Cohen ribbon 線 +0.005 / +0.01 / −0.005 / −0.01 用虛線標示。
+</div>
+
+<div id="plot_4algo_loso" class="plot-container-tall"></div>
+
+<details class="l2-card">
+  <summary>📈 對應 matplotlib 圖（A4_4algorithm_LOSO_dF1.png）</summary>
+  <div class="card-body">
+    <div class="figure">
+      <img src="assets/figures/target4/A4_4algorithm_LOSO_dF1.png" alt="A4 4-algorithm LOSO grouped bar chart">
+      <figcaption><strong>A4 圖 1</strong> — 5 樣本 × 4 algorithm grouped bar with seed std error bars。
+      只有 HCC1395 (DT/RF) + HCC1937 (XGB) 兩 cell 突破 Cohen +0.005 ribbon；其他 18/20 cell 全 ribbon-null。
+      Source: <code>research/methyl_augmented_filter_phase2/phase2_completeness_audit/figures/A4_4algorithm_LOSO_dF1.png</code></figcaption>
+    </div>
+  </div>
+</details>
+
+<h3>4A.1 Per-algorithm overall 數字表</h3>
+
+<table>
+<thead>
+<tr><th>Algorithm</th><th>Overall Mean ΔF1 ± std</th><th>95% CI (seed-bootstrap)</th><th>n_pos / n_total</th><th>Mean Gap</th><th>Cohen Ribbon Verdict</th></tr>
+</thead>
+<tbody>
+  <tr class="row-bug">
+    <td><strong>LR</strong></td>
+    <td class="num">−0.00004 ± 0.00005</td>
+    <td class="num">[−0.00004, −0.00004]<sup>†</sup></td>
+    <td class="num">0 / 25</td>
+    <td class="num">+0.0576</td>
+    <td>ribbon-null (< +0.005)</td>
+  </tr>
+  <tr class="row-warn">
+    <td><strong>DT</strong></td>
+    <td class="num">+0.00255 ± 0.00573</td>
+    <td class="num">[+0.00255, +0.00255]<sup>†</sup></td>
+    <td class="num">5 / 25</td>
+    <td class="num">+0.0544</td>
+    <td>ribbon-null overall; HCC1395 partial</td>
+  </tr>
+  <tr class="row-warn">
+    <td><strong>RF</strong></td>
+    <td class="num">+0.00267 ± 0.00512</td>
+    <td class="num">[+0.00251, +0.00283]</td>
+    <td class="num">15 / 25</td>
+    <td class="num">+0.0551</td>
+    <td>ribbon-null overall; HCC1395 partial</td>
+  </tr>
+  <tr class="row-warn">
+    <td><strong>XGB</strong></td>
+    <td class="num">+0.00102 ± 0.00235</td>
+    <td class="num">[+0.00102, +0.00102]<sup>†</sup></td>
+    <td class="num">5 / 25</td>
+    <td class="num">+0.0629</td>
+    <td>ribbon-null overall; HCC1937 partial</td>
+  </tr>
+</tbody>
+</table>
+<p style="font-size: var(--fs-xs); color: var(--c-text-soft);">
+[<code>source: A4_summary.json:220-256</code>] · 95% CI 為 5 seeds × 5 samples seed-bootstrap normal approx (mean ± 1.96 × seed_std / √25); RF: seed_std=0.00041 → ±0.00016。<br>
+<sup>†</sup> <strong>Caveat</strong>: seed variance 受 LR / DT / XGB deterministic constraint 限制（LR convex / DT greedy split tie-broken deterministically / XGB fixed seed），seed std ≈ 0 故 CI 退化為點估計；主要 variance 在 RF 的 bootstrap sampling。CI 為 normal approx，未做 BCa 修正。
+</p>
+
+<h3>4A.2 Per-sample 細節</h3>
+
+<table>
+<thead>
+<tr><th>Sample</th><th>caller F1</th><th>LR</th><th>DT</th><th>RF</th><th>XGB</th><th>觀察</th></tr>
+</thead>
+<tbody>
+  <tr class="row-rescue">
+    <td><strong>HCC1395</strong></td>
+    <td class="num">0.7166</td>
+    <td class="num">−0.00012</td>
+    <td class="num"><strong>+0.01378</strong> ✓</td>
+    <td class="num"><strong>+0.01269</strong> ✓</td>
+    <td class="num">−0.00016</td>
+    <td>tree-based capacity rescue</td>
+  </tr>
+  <tr class="row-warn">
+    <td><strong>HCC1937</strong></td>
+    <td class="num">0.3692</td>
+    <td class="num">+0.00000</td>
+    <td class="num">+0.00000</td>
+    <td class="num">+0.00000</td>
+    <td class="num"><strong>+0.00562</strong> ✓</td>
+    <td>XGB only; low-baseline artifact</td>
+  </tr>
+  <tr class="row-skip">
+    <td>HCC1954</td>
+    <td class="num">0.8385</td>
+    <td class="num">−0.00008</td>
+    <td class="num">−0.00030</td>
+    <td class="num">−0.00000</td>
+    <td class="num">−0.00020</td>
+    <td>ceiling-bound</td>
+  </tr>
+  <tr class="row-skip">
+    <td>H1437</td>
+    <td class="num">0.8670</td>
+    <td class="num">−0.00001</td>
+    <td class="num">−0.00030</td>
+    <td class="num">+0.00006</td>
+    <td class="num">−0.00009</td>
+    <td>ceiling-bound</td>
+  </tr>
+  <tr class="row-skip">
+    <td>H2009</td>
+    <td class="num">0.8863</td>
+    <td class="num">−0.00001</td>
+    <td class="num">−0.00045</td>
+    <td class="num">+0.00061</td>
+    <td class="num">−0.00008</td>
+    <td>ceiling-bound</td>
+  </tr>
+</tbody>
+</table>
+<p style="font-size: var(--fs-xs); color: var(--c-text-soft);">
+✓ = ΔF1 > Cohen +0.005 small ribbon · [<code>source: A4_summary.json:35-218</code>]
+</p>
+
+<div class="callout-warning">
+<strong>核心觀察</strong>：rescue 機會只出現在 <strong>caller F1 &lt; 0.75 的中低 baseline sample</strong>（HCC1395 / HCC1937）；
+caller F1 &gt; 0.83 的高 baseline sample（HCC1954 / H1437 / H2009）三條 ML 跑線全 ribbon-null —
+表示「天花板已近，filter 沒有 headroom」是 dominant constraint。
+</div>
+
+<!-- ─── 4B: Methodology Sanity Check Table ─── -->
+<h2 id="sec4b"><span class="h-num">4B.</span>方法論 Sanity Check (overfit / leakage / generalization 3-axis) <span class="tier-badge tier-l2">⭐⭐⭐⭐ L2</span></h2>
+
+<p>三個獨立 axis 的 method-level 檢核，全部 in-train。</p>
+
+<table>
+<thead>
+<tr><th>Axis</th><th>Check Question</th><th>Verdict</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+  <tr class="row-safe">
+    <td><strong>Data Leakage</strong></td>
+    <td>training pool 的統計量是否洩到 held-out test？</td>
+    <td>✅ <strong>NO leakage</strong></td>
+    <td>
+      <code>impute_with_medians</code> 第二 call 傳 <code>medians=train_medians</code> 而非重算
+      [<code>source: cycle4/loso_validation/scripts/run_loso_cv.py:104,120</code>]
+    </td>
+  </tr>
+  <tr class="row-warn">
+    <td><strong>Tau (τ) Oracle</strong></td>
+    <td>per-fold best τ* 是 in-test 求最大 ΔF1 (oracle)，過樂觀？</td>
+    <td>⚠ <strong>oracle upper bound</strong></td>
+    <td>
+      grid τ ∈ [0.10, 0.95] step 0.01，per-fold pick max；即使 oracle τ* LOSO mean −0.00004 仍無 signal
+      [<code>source: run_loso_cv.py:129</code>]
+    </td>
+  </tr>
+  <tr class="row-safe">
+    <td><strong>Feature Selection</strong></td>
+    <td>10 features 是 in-train 重選 (sample-conditioned)？</td>
+    <td>✅ <strong>fixed in cycle 1</strong></td>
+    <td>
+      drop NumReads VIF=217 為 cycle 1 step 1 全域決策；每 LOSO fold 使用同一 feature set
+      [<code>source: cycle1/cycle1_findings.md:82</code>]
+    </td>
+  </tr>
+  <tr class="row-emphasis">
+    <td><strong>Overfit (Model-specific)</strong></td>
+    <td>tree-based capacity 高 → gap 應顯著 > LR ？</td>
+    <td>❌ <strong>not model-specific</strong></td>
+    <td>
+      HCC1937 LR=+0.4841 ≈ DT=+0.4854 ≈ RF=+0.4845 ≈ XGB=+0.4852（差 < 0.002）
+      [<code>source: A4 §4.1, A4_summary.json gap_mean fields</code>]
+    </td>
+  </tr>
+  <tr class="row-warn">
+    <td><strong>Gap Artifact Source</strong></td>
+    <td>HCC1937 gap +0.48 來源？</td>
+    <td>⚠ <strong>caller F1 baseline asymmetry</strong></td>
+    <td>
+      HCC1937 caller F1=0.37 vs train pool 4-sample mean ≈0.83；train F1 weighted-by-row 反推 ≈ 0.85，test F1=0.37 → gap +0.48 自然產生
+      [<code>source: A4 §4.1; markdown line 182</code>]
+    </td>
+  </tr>
+  <tr class="row-bug">
+    <td><strong>Cross-sample Generalization</strong></td>
+    <td>filter 能跨 5 sample 一致 boost ?</td>
+    <td>❌ <strong>FAILED</strong></td>
+    <td>
+      4 algo overall ribbon-null + best τ 退化 0.10 (keep all) 4/5 sample
+      [<code>source: A4_summary.json:220-256</code>]
+    </td>
+  </tr>
+</tbody>
+</table>
+
+<div class="callout-success">
+<strong>三軸結論</strong>：
+<ul>
+<li><strong>方法論 clean</strong>：無 data leakage、feature selection 在 cycle 1 已 frozen、impute 用 train-only median</li>
+<li><strong>非 model-specific overfit</strong>：4 algo gap 跨 sample 完全一致 → gap 來源 = caller F1 baseline 跨樣本 asymmetry</li>
+<li><strong>失敗本質</strong>：sample-level distribution shift dominates，<strong>不是 capacity / regularization / leakage 問題</strong></li>
+</ul>
+</div>
+
+<details class="l2-card">
+  <summary>📈 對應 train-test gap 圖（A4_train_test_gap.png）</summary>
+  <div class="card-body">
+    <div class="figure">
+      <img src="assets/figures/target4/A4_train_test_gap.png" alt="A4 train-test gap box plot">
+      <figcaption><strong>A4 圖 2</strong> — 4 algo × 5 sample train-test F1 gap box plot (25 folds per algo)。
+      HCC1937 全 algo 落在 +0.48（4 條 box 重疊），H2009 全 algo 落在 −0.16；gap 跨 algo 等價，跨 sample 系統性差。
+      Source: <code>research/methyl_augmented_filter_phase2/phase2_completeness_audit/figures/A4_train_test_gap.png</code></figcaption>
+    </div>
+  </div>
+</details>
+
+<!-- ─── 4C: F1 6-step Audit Trail ─── -->
+<h2 id="sec4c"><span class="h-num">4C.</span>F1 6-step Audit Trail (caller VCF → tagging → ISM → predict → τ → F1) <span class="tier-badge tier-l2">⭐⭐⭐⭐ L2</span></h2>
+
+<p>每個步驟 PI 都能獨立 sanity check；total 22 row trail 在 §L3 raw table 可展開。</p>
+
+<div class="stepper">
+  <div class="step-cell">
+    <div class="step-num">Step 1</div>
+    <div class="step-title">Caller VCF</div>
+    <div class="step-detail">HCC1395 PASS=47,798<br>TP=30,490 / FP=4,842<br>caller F1=0.7166</div>
+  </div>
+  <div class="step-cell">
+    <div class="step-num">Step 2</div>
+    <div class="step-title">V6 BAM Tagging</div>
+    <div class="step-detail">HP1:HP2=1.609<br>(baseline 17.3)<br>hp_ambig ×13.2</div>
+  </div>
+  <div class="step-cell">
+    <div class="step-num">Step 3</div>
+    <div class="step-title">ISM Region</div>
+    <div class="step-detail">V6 marker=23,980<br>+52.4% over baseline<br>marker rate +1.26 pp</div>
+  </div>
+  <div class="step-cell">
+    <div class="step-num">Step 4</div>
+    <div class="step-title">LR Predict</div>
+    <div class="step-detail">5-fold OOF<br>10 features<br>L2 C=1.0</div>
+  </div>
+  <div class="step-cell">
+    <div class="step-num">Step 5</div>
+    <div class="step-title">τ Sweep</div>
+    <div class="step-detail">In-dist τ*=0.39<br>LOSO τ*=0.10<br>(=keep all)</div>
+  </div>
+  <div class="step-cell">
+    <div class="step-num">Step 6</div>
+    <div class="step-title">ΔF1 Compute</div>
+    <div class="step-detail">In-dist +0.02236<br>LOSO −0.00012<br>drop +0.02248</div>
+  </div>
+</div>
+
+<h3>4C.1 三向 file-identity 驗證（caller VCF unchanged across V3F/V5/V6）</h3>
+
+<div class="callout-info">
+<strong>關鍵驗證</strong>：47,798 PASS variants 在 V3F / V5 / V6 三條 longphase patch 完全一致 — 因 V6 patch 只動 HaplotagProcess.cpp:537-548 (tagging layer)，不改 phasing/calling layer。
+[<code>source: docs/reports/validated/2026/05/20260511_V6_binary_complete_documentation_01.md:587-589,597,624</code>]
+</div>
+
+<table>
+<thead><tr><th>Step</th><th>Input</th><th>Output (sanity check)</th><th>Source</th></tr></thead>
+<tbody>
+  <tr>
+    <td><strong>1. Caller VCF (HCC1395)</strong></td>
+    <td>ClairS-TO v0.3.0 ssrs phased VCF</td>
+    <td>PASS=47,798 / SNV TP=30,490 / SNV FP=4,842 / caller F1=0.7166 @ τ=0.93</td>
+    <td><code>20260511_V6_binary_complete_documentation_01.md:587-624</code></td>
+  </tr>
+  <tr>
+    <td><strong>2. V6 BAM Tagging</strong></td>
+    <td>V6 longphase-to-mod BAM</td>
+    <td>HP=1 87.8M reads / HP=2 80.7M reads / hp_ambig 138,317 (×13.2 baseline) / HP1:HP2=1.609</td>
+    <td><code>20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01.md:86-98</code></td>
+  </tr>
+  <tr>
+    <td><strong>3. ISM Region</strong></td>
+    <td>V6 BAM × CpG × NG≥3</td>
+    <td>V6 marker=23,980 (TP 21,806 / FP 2,174) / rate 0.9093 vs baseline 0.8967 / V3F 21,997</td>
+    <td><code>20260515_V6_TPFP_HP_LOH_CN_Characterization_01.md:128-130</code></td>
+  </tr>
+  <tr>
+    <td><strong>4a. Cycle 1 LR Predict (in-dist)</strong></td>
+    <td>HCC1395 35,332 rows × 10 features</td>
+    <td>OOF p̂(TP) len=35,332 / 5-seed std=5e-5 / 5-fold StratifiedKFold</td>
+    <td><code>cycle1/cycle1_findings.md:82-88</code></td>
+  </tr>
+  <tr>
+    <td><strong>4b. τ Sweep (in-dist)</strong></td>
+    <td>OOF p̂(TP) × grid τ ∈ [0.10, 0.95]</td>
+    <td>best τ*=0.39 / plateau 0.38-0.42 / multi-seed std=0.013</td>
+    <td><code>cycle1/cycle1_findings.md:82-88</code></td>
+  </tr>
+  <tr class="row-warn">
+    <td><strong>5a. ΔF1 (in-dist HCC1395)</strong></td>
+    <td>caller F1=0.7166 vs post-filter F1 @ τ*=0.39</td>
+    <td>post F1=0.7390 / precision=0.9541 / recall=0.6030 / ΔF1=<strong>+0.02236</strong></td>
+    <td><code>cycle1/cycle1_findings.md:90-99</code></td>
+  </tr>
+  <tr class="row-bug">
+    <td><strong>5b. LOSO HCC1395 held-out</strong></td>
+    <td>4-sample train (244,408 rows) / held-out test (35,332 rows)</td>
+    <td>HCC1395 ΔF1=<strong>−0.00012</strong> / best τ→0.10 / TP 30,490 + FP 4,842 全 kept (filter inactive)</td>
+    <td><code>cycle4/loso_validation/data/loso_cv_results.tsv:2</code></td>
+  </tr>
+  <tr class="row-bug">
+    <td><strong>6. LOSO 5-sample summary</strong></td>
+    <td>5 fold (each = 4-sample train + 1 held-out)</td>
+    <td>mean ΔF1=−0.00004 / median=−0.00001 / Wilcoxon p=0.125 / 0/4/1 (pos/neg/zero)</td>
+    <td><code>cycle4/loso_validation/loso_findings.md:84-99</code></td>
+  </tr>
+</tbody>
+</table>
+
+<div class="callout-warning">
+<strong>Circularity gap diagnostic</strong>: in-dist (step 5a) +0.02236 − LOSO (step 5b) −0.00012 = <strong>+0.02248</strong>
+= cycle 1 整個 effect size by sample-level circularity，無任何成分來自 generalizable signal。
+</div>
+
+<!-- ─── 4D: Other algorithms inventory ─── -->
+<h2 id="sec4d"><span class="h-num">4D.</span>其他算法盤點 (6 algo + vote ranking) <span class="tier-badge tier-l3">⭐⭐⭐ L3</span></h2>
+
+<p>對 PI Q1「為什麼不試 X？」的窮舉 inventory，每條都標 vote_score（1=skip / 2=defer / 3=worth quick test）+ expected outcome。</p>
+
+<table>
+<thead>
+<tr><th>Algorithm</th><th>Definition (1 句)</th><th>Expected ΔF1 Range</th><th>Vote Score</th><th>Followup</th></tr>
+</thead>
+<tbody>
+  <tr class="row-skip">
+    <td><strong>Boolean rule / zone-gate</strong></td>
+    <td>Per-LOH-zone hard rule (no ML); cycle 3 caller-F1 gate 已部分代表</td>
+    <td class="num">−0.005 ~ +0.003 (HCC1937 only +0.005~+0.020)</td>
+    <td class="num">2</td>
+    <td>Defer — cycle 3 已部分覆蓋</td>
+  </tr>
+  <tr class="row-warn">
+    <td><strong>Threshold-only optimization</strong></td>
+    <td>單 feature τ sweep (no model); LOSO best τ → keep-all 趨勢</td>
+    <td class="num">−0.002 ~ +0.005</td>
+    <td class="num"><strong>3</strong> ★</td>
+    <td>Worth 1hr addition for robustness anchor</td>
+  </tr>
+  <tr class="row-skip">
+    <td><strong>Ensemble (LR + RF voting)</strong></td>
+    <td>VotingClassifier(soft) averaging predict_proba</td>
+    <td class="num">−0.001 ~ +0.002</td>
+    <td class="num">1</td>
+    <td>Skip — both base ~0 cannot create signal</td>
+  </tr>
+  <tr class="row-skip">
+    <td><strong>Calibration (Platt / isotonic)</strong></td>
+    <td>Rescales p_pred to true probability</td>
+    <td class="num">−0.001 ~ +0.001</td>
+    <td class="num">1</td>
+    <td>Skip — F1 monotone-invariant under remapping</td>
+  </tr>
+  <tr class="row-warn">
+    <td><strong>Per-zone LR (LOH-in / LOH-out)</strong></td>
+    <td>Split features by loh_inner_flag; train 2 LR separately</td>
+    <td class="num">−0.003 ~ +0.008 (HCC1937 +0.005~+0.015 possible)</td>
+    <td class="num"><strong>3</strong> ★</td>
+    <td>Case-study supplement; not tier upgrade</td>
+  </tr>
+  <tr class="row-skip">
+    <td><strong>Per-AF-bin LR</strong></td>
+    <td>Bin caller_af [0,0.1)/[0.1,0.3)/[0.3,1]; train per bin</td>
+    <td class="num">−0.005 ~ +0.005</td>
+    <td class="num">2</td>
+    <td>Defer — collider bias risk; use ReadParser instead</td>
+  </tr>
+</tbody>
+</table>
+<p style="font-size: var(--fs-xs); color: var(--c-text-soft);">
+[<code>source: A4_Ext_algorithm_inventory.tsv</code> · <code>20260521_A4_Ext_other_algorithms_inventory_01.md</code>]
+</p>
+
+<div id="plot_vote_ranking" class="plot-container"></div>
+
+<details class="l2-card">
+  <summary>📈 對應 vote ranking 圖（A4_Ext_algorithm_vote_ranking.png）</summary>
+  <div class="card-body">
+    <div class="figure">
+      <img src="assets/figures/target4/A4_Ext_algorithm_vote_ranking.png" alt="A4-Ext algorithm vote ranking">
+      <figcaption><strong>A4-Ext 圖</strong> — 6 algorithm vote ranking horizontal bar。
+      Top: Threshold-only + Per-zone LR (3/5)；Bottom: Ensemble / Calibration (1/5 — 數學上不會翻轉)。
+      Source: <code>research/methyl_augmented_filter_phase2/phase2_completeness_audit/figures/A4_Ext_algorithm_vote_ranking.png</code></figcaption>
+    </div>
+  </div>
+</details>
+
+<div class="callout-info">
+<strong>盤點結論</strong>：6 個算法均不預期翻轉 LOSO sample-level ≈ 0 ΔF1 結論。Top vote 兩個（Threshold-only / Per-zone LR）做也只是 robustness anchor；
+<strong>不存在「換 X 算法就翻盤」的剩餘合理選項</strong>。Phase 2 結論口徑可定：filter design 需重新框架化（feature pivot / sample augmentation），非 model class 問題。
+</div>
+
+<!-- ─── 4E: Reframe ─── -->
+<h2 id="sec4e"><span class="h-num">4E.</span>Cycle 1 +0.02236 vs LOSO −0.00012 並列 Reframe <span class="tier-badge tier-l2">⭐⭐⭐⭐ L2 (LOSO) · ⭐⭐ L4 (in-dist)</span></h2>
+
+<p>同一個 HCC1395 樣本、同一個 LR 模型、同一組 10 features，僅 train/test split 不同 — ΔF1 差 +0.02248。</p>
+
+<div class="compare-split">
+  <div class="compare-side indist">
+    <div class="label">In-distribution (cycle 1)</div>
+    <div class="big-num">+0.02236</div>
+    <div><strong>5-fold OOF on HCC1395 only</strong></div>
+    <ul>
+      <li>Train: HCC1395 row 80%</li>
+      <li>Test: HCC1395 row 20% (held-out per fold)</li>
+      <li>Sample-level <strong>fully circular</strong></li>
+      <li>τ*=0.39 (sharp threshold)</li>
+      <li>Tier: <strong>⭐⭐ L4</strong> — in-distribution case study only</li>
+    </ul>
+    <p style="font-size: var(--fs-xs); color: var(--c-text-soft);">
+    [<code>source: cycle1_findings.md:90-99</code>]
+    </p>
+  </div>
+  <div class="compare-side loso">
+    <div class="label">Sample-level LOSO (cycle 4)</div>
+    <div class="big-num">−0.00012</div>
+    <div><strong>4-sample train → HCC1395 held-out</strong></div>
+    <ul>
+      <li>Train: HCC1937 + HCC1954 + H1437 + H2009 (244,408 rows)</li>
+      <li>Test: HCC1395 (35,332 rows, never seen in training)</li>
+      <li>Sample-level <strong>fully held-out</strong></li>
+      <li>τ* degenerate → 0.10 (= keep all)</li>
+      <li>Tier: <strong>⭐⭐⭐⭐ L2</strong> — core claim</li>
+    </ul>
+    <p style="font-size: var(--fs-xs); color: var(--c-text-soft);">
+    [<code>source: loso_cv_results.tsv:2</code>]
+    </p>
+  </div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-box"><div class="number warning">+0.02236</div><div class="label">In-dist OOF (HCC1395)</div></div>
+  <div class="stat-box"><div class="number bug">−0.00012</div><div class="label">LOSO held-out (HCC1395)</div></div>
+  <div class="stat-box"><div class="number bug">+0.02248</div><div class="label">Drop by circularity</div></div>
+  <div class="stat-box"><div class="number bug">100%</div><div class="label">Effect from circularity</div></div>
+  <div class="stat-box"><div class="number info">0.39 → 0.10</div><div class="label">τ* collapse to keep-all</div></div>
+  <div class="stat-box"><div class="number bug">0/5</div><div class="label">LOSO ΔF1 &gt; +0.005</div></div>
+</div>
+
+<div class="callout-critical">
+<strong>Reframe Statement</strong>：cycle 1 +0.02236 不是「Phase 2 找到的 filter signal」；
+是 LR 在 HCC1395 自身 row-level distribution 內找到的 in-sample fit。
+sample-level circularity = 100% effect 的解釋者；換 model class（DT/RF/XGB）也救不回（A4 100 fold 驗證）。
+<strong>結論口徑必須更新</strong>：production filter 在當前 sample/feature 設計下 NOT deployable。
+</div>
+
+<!-- ─── PI Q&A ─── -->
+<h2 id="qa">PI Q&amp;A (4 題預備) <span class="tier-badge tier-l3">⭐⭐⭐ L3</span></h2>
+
+<p>從 A4 報告 §A.2 (PI 必問問題標準答案) 抽取 4 題；點擊展開查看完整答案。</p>
+
+<details class="qa-card" open>
+  <summary>Q1 — 為什麼不用 Random Forest / XGBoost？</summary>
+  <div class="qa-body">
+    <p>A4 已測。100 fold (4 algo × 5 sample × 5 seed) overall mean ΔF1：</p>
+    <ul>
+      <li>LR: −0.00004 ± 0.00005</li>
+      <li>DT: +0.00255 ± 0.00573</li>
+      <li>RF: +0.00267 ± 0.00512</li>
+      <li>XGB: +0.00102 ± 0.00235</li>
+    </ul>
+    <p><strong>全部低於 Cohen +0.005 small ribbon</strong>。沒有 algorithm 達到「5/5 sample positive」的 production filter 條件。換 model class 不是這個問題的解。
+    [<code>source: A4_summary.json:220-256</code>]</p>
+  </div>
+</details>
+
+<details class="qa-card">
+  <summary>Q2 — 跨 algorithm 比較公平嗎？hyperparameter 有 tune 嗎？</summary>
+  <div class="qa-body">
+    <p>用文獻常用 default：</p>
+    <ul>
+      <li>DT: <code>max_depth=5, min_samples_leaf=100</code></li>
+      <li>RF: <code>n_estimators=200, max_depth=8, min_samples_leaf=50</code></li>
+      <li>XGB: <code>n_estimators=200, max_depth=6, lr=0.1</code></li>
+    </ul>
+    <p>未 per-sample tune（會引入 hyperparam leakage，因 held-out τ 已是 oracle）。<strong>5 random seed (42, 7, 100, 999, 2026)</strong> 排除 single-seed artifact。Cohen ±0.005 ribbon 保守設定下 4 algo 全 ribbon-null。
+    [<code>source: A4 markdown §2.2-§2.3</code>]</p>
+  </div>
+</details>
+
+<details class="qa-card">
+  <summary>Q3 — HCC1395 上 DT/RF +0.013 為何不算成功？</summary>
+  <div class="qa-body">
+    <p>該 +0.013 是 LR 無法 capture 但 tree-based model 能 capture 的 non-linear interaction，<strong>僅出現於 1/5 sample</strong>。</p>
+    <p>HCC1395 是 cycle 1 development sample — train pool 中 4 sample 可能 share 部分 batch effect（同一 lab pipeline，同 caller_af 分佈區段）。其餘 4 sample 全 algorithm 共通失敗 → 此 +0.013 也屬 partial circularity（in-distribution capacity, not generalize ability），不構成 production filter 依據。
+    [<code>source: A4 markdown §5.2 Layer B</code>]</p>
+  </div>
+</details>
+
+<details class="qa-card">
+  <summary>Q4 — train-test gap +0.48 看起來很大，是不是 overfit？</summary>
+  <div class="qa-body">
+    <p>表面看 LR HCC1937 gap = +0.4841 似 overfit；但 DT/RF/XGB HCC1937 gap 也都 ≈ +0.48：</p>
+    <ul>
+      <li>LR: +0.4841</li>
+      <li>DT: +0.4854</li>
+      <li>RF: +0.4845</li>
+      <li>XGB: +0.4852</li>
+    </ul>
+    <p>差距 < 0.002。如果是 model overfit，high-capacity model gap 應更大；實測四者等價 → gap 來源是 <strong>caller_F1 baseline asymmetry</strong>（HCC1937 = 0.37 vs 其餘平均 ≈ 0.83）的計算 artifact，<strong>非 model 變異</strong>。LR 並未 underfit。
+    [<code>source: A4 markdown §4.1-§4.2; A4_summary.json gap_mean fields</code>]</p>
+  </div>
+</details>
+
+<!-- ─── L3 Raw Data Tables ─── -->
+<h2 id="raw">L3 Raw Data Tables (DataTables)</h2>
+
+<h3>4-R.1 — A4 LOSO 100-fold raw results</h3>
+<p style="font-size: var(--fs-sm); color: var(--c-text-soft);">
+Source: <code>assets/data/target4/A4_LR_DT_RF_XGBoost_LOSO_5sample.tsv</code> · 100 row · 15 column
+</p>
+<table id="tbl_a4_raw" class="display compact" style="width:100%"></table>
+
+<h3>4-R.2 — F1 Step-by-Step Audit Trail (22 steps)</h3>
+<p style="font-size: var(--fs-sm); color: var(--c-text-soft);">
+Source: <code>assets/data/target4/A4_F1_step_audit_trail.tsv</code> · 22 row · 5 column
+</p>
+<table id="tbl_a4_audit" class="display compact" style="width:100%"></table>
+
+<h3>4-R.3 — Other-algorithm Inventory (6 algo panel)</h3>
+<p style="font-size: var(--fs-sm); color: var(--c-text-soft);">
+Source: <code>assets/data/target4/A4_Ext_algorithm_inventory.tsv</code> · 6 row · 7 column
+</p>
+<table id="tbl_a4_ext" class="display compact" style="width:100%"></table>
+
+<!-- ─── Provenance ─── -->
+<h2 id="prov">Provenance</h2>
+
+<div class="provenance">
+<dl>
+  <dt>Build date</dt>
+  <dd>2026-05-22</dd>
+
+  <dt>Build agent</dt>
+  <dd>Phase C target4 HTML build agent (Opus 4.7)</dd>
+
+  <dt>Audience</dt>
+  <dd>PI · 1-on-1 / Lab meeting · L0-L3 階梯閱讀</dd>
+
+  <dt>Source markdown</dt>
+  <dd>docs/experiments/in_progress/2026/05/20260521_A4_multi_algorithm_LOSO_methodology_completeness_01.md</dd>
+  <dd>docs/experiments/in_progress/2026/05/20260521_A4_Ext_other_algorithms_inventory_01.md</dd>
+  <dd>docs/experiments/in_progress/2026/05/20260521_A4_F1_step_by_step_audit_01.md</dd>
+
+  <dt>Source data</dt>
+  <dd>research/methyl_augmented_filter_phase2/phase2_completeness_audit/A4_LR_DT_RF_XGBoost_LOSO_5sample.tsv (100 row)</dd>
+  <dd>research/methyl_augmented_filter_phase2/phase2_completeness_audit/data/A4_summary.json</dd>
+  <dd>research/methyl_augmented_filter_phase2/phase2_completeness_audit/A4_F1_step_audit_trail.tsv (22 row)</dd>
+  <dd>research/methyl_augmented_filter_phase2/phase2_completeness_audit/A4_Ext_algorithm_inventory.tsv (6 row)</dd>
+
+  <dt>Source figures (matplotlib companion)</dt>
+  <dd>research/methyl_augmented_filter_phase2/phase2_completeness_audit/figures/A4_4algorithm_LOSO_dF1.png</dd>
+  <dd>research/methyl_augmented_filter_phase2/phase2_completeness_audit/figures/A4_train_test_gap.png</dd>
+  <dd>research/methyl_augmented_filter_phase2/phase2_completeness_audit/figures/A4_Ext_algorithm_vote_ranking.png</dd>
+
+  <dt>Upstream verification</dt>
+  <dd>phase2_pi_trust_framework.standalone.html (audit PASS) · 20260519 V6 vs baseline HCC1395 (110/110 verified)</dd>
+
+  <dt>JS stack (CDN)</dt>
+  <dd>Plotly 2.27.0 · DataTables 1.13.7 · jQuery 3.7.1</dd>
+
+  <dt>Design principles</dt>
+  <dd>4 級分層 (L0 headline / L1 cards / L2 details / L3 raw) · CRAP · Assertion-Evidence · WCAG AA</dd>
+
+  <dt>Tier badges</dt>
+  <dd>⭐⭐⭐⭐ L2 (LOSO core claim, 100 fold verified) · ⭐⭐ L4 (in-distribution case study) · ⭐⭐⭐ L3 (PI Q&amp;A, A4-Ext inventory)</dd>
+</dl>
+</div>
+
+</main>
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- DataTables -->
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<!-- Plotly -->
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+<script>
+// ─── 4A: 4-algorithm LOSO grouped bar chart ───
+(function plotMultiAlgoLOSO() {
+  // Per-algo per-sample mean ΔF1 (from A4_summary.json:35-218)
+  const samples = ['HCC1395', 'HCC1937', 'HCC1954', 'H1437', 'H2009'];
+  const lr   = [-0.00012, +0.00000, -0.00008, -0.00001, -0.00001];
+  const dt   = [+0.01378, +0.00000, -0.00030, -0.00030, -0.00045];
+  const rf   = [+0.01269, +0.00000, -0.00000, +0.00006, +0.00061];
+  const xgb  = [-0.00016, +0.00562, -0.00020, -0.00009, -0.00008];
+  // Multi-seed std (RF / DT for HCC1395 only non-zero per JSON line 151)
+  const dt_std  = [0, 0, 0, 0, 0];
+  const lr_std  = [0, 0, 0, 0, 0];
+  const rf_std  = [0.0004, 0, 0, 0.00006, 0.000016];
+  const xgb_std = [0, 0, 0, 0, 0];
+
+  const trace_lr = { x: samples, y: lr,  name: 'LR',  type: 'bar',
+                     error_y: { type: 'data', array: lr_std,  visible: true, color: '#555' },
+                     marker: { color: '#1E3A8A' },
+                     hovertemplate: '<b>LR · %{x}</b><br>ΔF1 = %{y:.5f}<extra></extra>' };
+  const trace_dt = { x: samples, y: dt,  name: 'DT',  type: 'bar',
+                     error_y: { type: 'data', array: dt_std,  visible: true, color: '#555' },
+                     marker: { color: '#15803D' },
+                     hovertemplate: '<b>DT · %{x}</b><br>ΔF1 = %{y:.5f}<extra></extra>' };
+  const trace_rf = { x: samples, y: rf,  name: 'RF',  type: 'bar',
+                     error_y: { type: 'data', array: rf_std,  visible: true, color: '#555' },
+                     marker: { color: '#A16207' },
+                     hovertemplate: '<b>RF · %{x}</b><br>ΔF1 = %{y:.5f}<extra></extra>' };
+  const trace_xgb = { x: samples, y: xgb, name: 'XGB', type: 'bar',
+                      error_y: { type: 'data', array: xgb_std, visible: true, color: '#555' },
+                      marker: { color: '#C2410C' },
+                      hovertemplate: '<b>XGB · %{x}</b><br>ΔF1 = %{y:.5f}<extra></extra>' };
+
+  const layout = {
+    title: { text: 'A4 LOSO ΔF1: 4 algo × 5 sample × 5 seed (100 fold)',
+              font: { size: 16 } },
+    barmode: 'group',
+    bargap: 0.25,
+    bargroupgap: 0.10,
+    xaxis: { title: 'Held-out test sample', tickfont: { size: 13 } },
+    yaxis: { title: 'ΔF1 (post-filter − caller)',
+              range: [-0.005, 0.018], zeroline: true, zerolinecolor: '#000',
+              zerolinewidth: 1.5, tickformat: '.4f' },
+    shapes: [
+      { type: 'line', xref: 'paper', x0: 0, x1: 1,
+        y0:  0.005, y1:  0.005, line: { color: '#15803D', width: 1.5, dash: 'dash' } },
+      { type: 'line', xref: 'paper', x0: 0, x1: 1,
+        y0:  0.010, y1:  0.010, line: { color: '#1E3A8A', width: 1.5, dash: 'dash' } },
+      { type: 'line', xref: 'paper', x0: 0, x1: 1,
+        y0: -0.005, y1: -0.005, line: { color: '#C2410C', width: 1.5, dash: 'dash' } }
+    ],
+    annotations: [
+      { xref: 'paper', x: 1.0, y: 0.005, text: 'Cohen +0.005 small', showarrow: false,
+        font: { color: '#15803D', size: 10 }, xanchor: 'right', yshift: 8 },
+      { xref: 'paper', x: 1.0, y: 0.010, text: 'Cohen +0.01 medium', showarrow: false,
+        font: { color: '#1E3A8A', size: 10 }, xanchor: 'right', yshift: 8 },
+      { xref: 'paper', x: 1.0, y: -0.005, text: 'Cohen −0.005', showarrow: false,
+        font: { color: '#C2410C', size: 10 }, xanchor: 'right', yshift: -8 }
+    ],
+    margin: { l: 70, r: 30, t: 60, b: 60 },
+    legend: { orientation: 'h', y: -0.18, x: 0.5, xanchor: 'center' },
+    plot_bgcolor: '#FAF9F5',
+    paper_bgcolor: '#FFFFFF'
+  };
+
+  Plotly.newPlot('plot_4algo_loso',
+    [trace_lr, trace_dt, trace_rf, trace_xgb],
+    layout, { displaylogo: false, responsive: true });
+})();
+
+// ─── 4D: Vote ranking horizontal bar ───
+(function plotVoteRanking() {
+  // From A4_Ext_algorithm_inventory.tsv vote_score column + 20260521_A4_Ext text
+  const algos = [
+    'Per-AF-bin LR',
+    'Ensemble (LR+RF voting)',
+    'Calibration (Platt/iso)',
+    'Boolean rule / zone-gate',
+    'Per-zone LR (LOH-in/out)',
+    'Threshold-only per-feature'
+  ];
+  const scores = [2, 1, 1, 2, 3, 3];
+  const colors = scores.map(s => s === 3 ? '#15803D' : s === 2 ? '#A16207' : '#C2410C');
+  const recommend = [
+    'Defer — collider bias',
+    'Skip — both base ~0',
+    'Skip — F1 monotone-invariant',
+    'Defer — cycle 3 covered',
+    'Worth quick test (1.5hr)',
+    'Worth quick test (1hr)'
+  ];
+
+  const trace = {
+    x: scores, y: algos, type: 'bar', orientation: 'h',
+    marker: { color: colors },
+    text: scores.map((s, i) => `${s}/5 · ${recommend[i]}`),
+    textposition: 'outside',
+    hovertemplate: '<b>%{y}</b><br>Vote: %{x}/5<br>%{text}<extra></extra>'
+  };
+
+  const layout = {
+    title: { text: '6 Algorithm Vote Ranking (3=worth test, 2=defer, 1=skip)',
+              font: { size: 15 } },
+    xaxis: { title: 'Vote Score', range: [0, 5], tickvals: [1, 2, 3, 4, 5] },
+    yaxis: { tickfont: { size: 12 } },
+    margin: { l: 200, r: 220, t: 60, b: 50 },
+    plot_bgcolor: '#FAF9F5',
+    paper_bgcolor: '#FFFFFF',
+    shapes: [
+      { type: 'line', x0: 3, x1: 3, yref: 'paper', y0: 0, y1: 1,
+        line: { color: '#15803D', width: 1, dash: 'dot' } }
+    ]
+  };
+
+  Plotly.newPlot('plot_vote_ranking', [trace], layout,
+    { displaylogo: false, responsive: true });
+})();
+
+// ─── DataTables: A4 raw, audit trail, A4-Ext ───
+$(function initTables() {
+  // 4-R.1 — A4 raw 100-fold
+  $.get('assets/data/target4/A4_LR_DT_RF_XGBoost_LOSO_5sample.tsv', function(tsv) {
+    const rows = tsv.trim().split('\n').map(line => line.split('\t'));
+    const header = rows[0];
+    const data = rows.slice(1);
+    $('#tbl_a4_raw').DataTable({
+      data: data,
+      columns: header.map(h => ({ title: h })),
+      pageLength: 10,
+      order: [[5, 'desc']],   // sort by delta_F1 desc
+      scrollX: true,
+      columnDefs: [
+        { targets: [5, 6, 7, 8], render: function(d) {
+          if (d === '' || d == null) return d;
+          const n = parseFloat(d);
+          return isNaN(n) ? d : n.toFixed(5);
+        }, className: 'num' }
+      ]
+    });
+  });
+
+  // 4-R.2 — Audit trail 22 step
+  $.get('assets/data/target4/A4_F1_step_audit_trail.tsv', function(tsv) {
+    const rows = tsv.trim().split('\n').map(line => line.split('\t'));
+    const header = rows[0];
+    const data = rows.slice(1);
+    $('#tbl_a4_audit').DataTable({
+      data: data,
+      columns: header.map(h => ({ title: h })),
+      pageLength: 10,
+      scrollX: true,
+      ordering: false
+    });
+  });
+
+  // 4-R.3 — A4-Ext inventory 6 row
+  $.get('assets/data/target4/A4_Ext_algorithm_inventory.tsv', function(tsv) {
+    const rows = tsv.trim().split('\n').map(line => line.split('\t'));
+    const header = rows[0];
+    const data = rows.slice(1);
+    $('#tbl_a4_ext').DataTable({
+      data: data,
+      columns: header.map(h => ({ title: h })),
+      pageLength: 6,
+      scrollX: true,
+      ordering: false
+    });
+  });
+});
+</script>
+
+</body>
+</html>

@@ -44,7 +44,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--c-border);fon
 <tr><th>線</th><th>狀態</th><th>可寫</th><th>已死/反例</th><th>數據在哪</th></tr>
 <tr><td><strong>T1 LOH-phasing</strong></td><td><span class="dot y"></span>NEEDS-WORK</td><td>NG=2 7/7；≥93% same-hap 6/6；paired 負控</td><td>filter DEAD；HPFineNGroups ⭐4→⭐3</td><td><code>tpfp_loh_af_kde_discrimination/</code></td></tr>
 <tr><td><strong>T2 ASM 存在</strong></td><td><span class="dot b"></span>READY-AS-NEG</td><td>ASM 真非 filter；628 consensus</td><td>somatic_specificity NEG；B2 NEG</td><td><code>tsg.../genome_survey_v2/</code> ⏳06-07 仍寫</td></tr>
-<tr><td><strong>T3 cis/copy-partition</strong></td><td><span class="dot b"></span>READY-AS-NEG</td><td>dosage falsified；chr17/TBC1D16 乾淨 cis</td><td><strong>BRCA2=copy-artifact</strong>；60T3→1</td><td>同上 <code>fast_cnv_validation.json</code></td></tr>
+<tr><td><strong>T3 cis/copy-partition</strong></td><td><span class="dot b"></span>READY-AS-NEG</td><td>dosage falsified；chr17/TBC1D16 乾淨 cis</td><td><strong>BRCA2=subclone/copy-confounded（HP1-1=somatic subclone tag 非 copy、非 CN-dosage）</strong>；60T3→1</td><td>同上 <code>fast_cnv_validation.json</code></td></tr>
 <tr><td><strong>T4 methyl→TP/FP</strong></td><td><span class="dot b"></span>READY-AS-NEG（強）</td><td>LOSO 100% circularity；AUC=0.505</td><td>整個 filter DEAD</td><td><code>methyl_augmented_filter_phase2/</code></td></tr>
 <tr><td><strong>T5 跨樣本 ASM</strong></td><td><span class="dot b"></span>READY-AS-NEG</td><td>6/6 excess (3 癌種)</td><td>同-locus 0/38（underpowered）</td><td><code>tsg.../cn_confound/cross_sample/</code></td></tr>
 <tr><td><strong>T6 subclone</strong></td><td><span class="dot y"></span>+1 IF 歸因解</td><td>AF→NGroups 7/7</td><td>B2 NEG；cis 1/816 clean</td><td><code>loh_subclone_af_paired/</code> ⏳HD-4 中</td></tr>
@@ -53,7 +53,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--c-border);fon
 
 <h2>L3 — 現在流程/分工 + 開放決策</h2>
 <div class="card">
-<p style="margin-top:0"><strong>並行（多 session）</strong>：<strong>tsg ASM/cis 線</strong>（另一 session，06-07 仍在寫）持續收緊 cis 分析（BRCA2→copy-artifact、chr17 唯一乾淨 cis、dosage refuted）→ T2/T3/T5/T6 數字可能再動。<strong>本 session</strong>：外部文獻地景 + 7 線收斂稽核 + HD-4 歸因（背景中）。<strong>active cycle</strong>：G6 LOH-phasing (P4 ⭐3) + G1 ASM (P3 ⭐3)。</p>
+<p style="margin-top:0"><strong>並行（多 session）</strong>：<strong>tsg ASM/cis 線</strong>（另一 session，06-07 仍在寫）持續收緊 cis 分析（BRCA2→subclone/copy-confounded（HP1-1=somatic subclone tag 非 copy、非 CN-dosage）、chr17 唯一乾淨 cis、dosage refuted）→ T2/T3/T5/T6 數字可能再動。<strong>本 session</strong>：外部文獻地景 + 7 線收斂稽核 + HD-4 歸因（背景中）。<strong>active cycle</strong>：G6 LOH-phasing (P4 ⭐3) + G1 ASM (P3 ⭐3)。</p>
 <p style="margin-bottom:0"><strong>開放決策</strong>：🔴 <strong>HD-1（用戶決定·hold）</strong> 跑 R-SELFREF 對照 or 降 phasing 為 characterization ｜ <strong>HD-3 ✅</strong> BRCA2 口徑已 amend ｜ <strong>HD-4 ✅</strong> AF→NGroups=phasing 非甲基 ｜ <strong>HD-5 ⏳</strong> T7 註冊 ｜ HD-2/HD-6 投稿前。</p>
 </div>
 
@@ -61,7 +61,7 @@ footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--c-border);fon
 <div class="warn"><ol>
 <li><strong>甲基→TP/FP filter 已 concluded NEGATIVE/死四道 — 勿重開</strong>（除非 C1 新數據/C2 新方法/C3 新前置）。</li>
 <li><strong>characterization-set（628/15391/strong-ASM）絕不寫成 filter</strong>（15391 TP/FP=1.0；strong-ASM anti-discriminative OR=0.194）。</li>
-<li><strong>BRCA2 ≠ 乾淨 cis 錨點</strong>（~80% copy-artifact）；乾淨 cis 改 <strong>chr17/TBC1D16</strong>；BRCA2 hypo≠canonical hyper，勿當 TSG-silencing 證據。</li>
+<li><strong>BRCA2 ≠ 乾淨 cis 錨點</strong>（subclone/copy 主導：HP1-1=somatic subclone tag 非 copy、非 CN-dosage；焦點 cis d_within=−0.023 邊際；% split 不 robust）；乾淨 cis 改 <strong>chr17/TBC1D16</strong>；BRCA2 hypo≠canonical hyper，勿當 TSG-silencing 證據。</li>
 <li><strong>「Grade A」是 Grade B+</strong>；p=0.0078 是方向一致性非 effect；n=7 = bio-n=6。</li>
 <li><strong>所有 ASM 單樣本 HCC1395 ⭐3 / 單 pipeline</strong>；⭐4 需 COLO829；跨樣本 6/6 是 phenomenon-level；private 0/38 是 underpowered。</li>
 <li><strong>改 validated 文件需用戶核准</strong>（加 amendment 不覆寫）；<strong>只 git add 自己的檔</strong>；<strong>長 compute 不放 workflow agent step</strong>（背景 Bash 落檔→Read 驗→才寫，§13.0）。</li>
