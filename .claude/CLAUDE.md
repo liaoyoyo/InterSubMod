@@ -2,6 +2,7 @@
 
 > **此檔職責**：僅約束 Claude Code 特定行為（確認矩陣、Skills/Hooks 機制、Opus 4.8 特性）。
 > **跨 agent governance（專案目標、研究主軸、Step→Verify、KB 義務、Output 規範等）→ `InterSubMod/AGENTS.md`**。
+> **🗺️ 任何任務的主工作流地圖（agentic-loop 四層 + git 多工/分支/commit/合併四決策表 + 鉤子機制）→ `InterSubMod/docs/references/20260611_master_workflow_architecture_01.md`**（2026-06-11 收斂為唯一 SoT；動 git 前查其 §3 四表）。
 > Claude Code 啟動時 concatenate 載入兩檔。
 
 ---
@@ -109,7 +110,7 @@
 
 ## §4 Hooks 概覽（Claude Code 特定 — 2026-05-18 P4 完整收尾）
 
-依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop / **PreCompact** 7 個 events；**41 hook scripts**，2026-06-09 實測 `ls scripts/hooks/*.sh | wc -l`；2026-06-09 +`health_drift_advisor.sh`〔C7〕 +`concurrent_session_advisor.sh`〔§G〕；2026-06-01 +`number_provenance_check.sh`）。
+依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop / **PreCompact** 7 個 events；**42 hook scripts**，2026-06-11 實測 `ls scripts/hooks/*.sh | wc -l`；2026-06-11 +`git_branch_commit_guard.sh`〔主線保護 exit-2 + 並行警告〕；2026-06-09 +`health_drift_advisor.sh`〔C7〕 +`concurrent_session_advisor.sh`〔§G〕；2026-06-01 +`number_provenance_check.sh`）。
 
 **2026-06-09 新增 2 個 hook**（loop-engineering ADR C7 + git governance §G — 修 invocation-dependence 漂移 + 並行 session 互撞）:
 - `health_drift_advisor.sh`（SessionStart — **變動觸發的唯讀漂移 advisor**：偵測 `.claude/{skills,agents,rules,hooks,workflows}` + settings/CLAUDE.md/AGENTS.md 自上次 marker 後是否變動 → nudge 跑 `/harness-health`；順帶提醒 active cycle >7d 未推進。**advisory-only 永遠 exit 0、不跑 harness_health.py 本體（零延遲/不 hang/不 spam snapshot）、marker debounce ~once/change-batch**。非 `/loop`/`/goal`/cron。設計依據：`InterSubMod/docs/plans/20260609_loop_engineering_research_cycle_architecture_review_01.md` §5）
@@ -132,6 +133,7 @@
 - `search_scope_guard.sh`（exit 2 阻擋 repo-root 遞迴搜尋；§12，亦 exit-2 但屬搜尋紀律類）
 - `pre_tier_upgrade_check.sh`（**2026-05-31 wired** — Edit/Write `state/cycles/*/state.json` 含 ⭐4/5 tier 但無 `evaluation.json`(verdict=approve_tier) 或 override 註解 → exit 2；INDEX/CURRENT_FOCUS 散文路徑降 advisory 不擋。研究誠信 gate）
 - `number_provenance_check.sh`（**2026-06-01 wired** — validated/pi_reports 報告含無來源 metric → exit 2；in_progress → advisory。數據誠信 gate，見上 + §13）
+- `git_branch_commit_guard.sh`（**2026-06-11 wired** — PreToolUse Bash，commit 前：直接 commit 到 `main`/`master`/`develop` → exit 2 阻擋（本 repo 一律 feature branch）；偵測並行 session → advisory warn。fail-OPEN〔非 commit/解析錯 → exit 0〕；只在 `commit` 為 git 子命令時觸發。落地主工作流 §3-C/§4③）
 
 > ⚠ **2026-05-31 校正 + 修復**：
 > - `kb_sot_guard.sh`（F1 SoT）與 `verify_gate.sh`（evidence gate）**本就是 advisory**（全 `exit 0` / 自宣告 SOFT），非 exit-2；文件曾誤列為 Hard Gate。
@@ -223,6 +225,8 @@
 **任務切割原則**：可切割且需要大量 context 處理 → 啟動 agent + **必須清楚回報主 agent** + **科學工程紀錄成文件**供檢核驗證。
 
 **Sub-agent return-contract（2026-05-30）**：subagent 回主 agent 時 — (a) full detail 落地成 OUTPUT_DIR 下 .md/.json；(b) 回 parent **只**回 `{status, key metrics/verdict, anomalies, path-to-landed-doc}`；(c) ~1-2K token soft target（**非 hard cap** — 勿截斷 parallel-benchmark 的多樣本 canonical 表）。`subagent_completion_logger.sh` 已捕 OUTPUT_TOKENS 可作 >3K advisory flag。
+
+**Concise-emit（2026-06-11 — 對抗 output-token 上限 session 丟失）**：任何單次回覆/工具輸出**勿超 output-token 上限**（曾整 session 只剩 error 訊息）；大量內容**寫檔回 path** 而非塞進回覆；長 analysis 切「每單元落檔→下一批」。此規則把上述「detail 落檔」明確綁到 output-token 錯誤類（主工作流 §5）。
 > **4-狀態 status enum（2026-06-02 借鑑 superpowers subagent-driven-development）**：`status` 用 `DONE` / `DONE_WITH_CONCERNS`（非阻擋疑慮，附說明）/ `NEEDS_CONTEXT`（缺資訊，parent 補後 re-dispatch）/ `BLOCKED`（需升級或重構任務）四值，取代模糊的 done/fail。多階段 review **spec-compliance 先過，才進 code-quality**（禁顛倒 — generator/evaluator 分離的明確排序）。
 
 ### Dynamic Workflow 路由規則（2026-05-30 落地 — Opus 4.8 Workflow 工具）

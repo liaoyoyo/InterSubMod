@@ -357,6 +357,30 @@ def light_doc_paths(cmd):
     return worst, rows
 
 
+def light_hook_wiring(settings, cmd):
+    """#9 — HOOK WIRING: CLAUDE.md §4「Hard Gate hooks」宣稱不可繞過的 hook，是否真的在 settings
+    出現。抓「宣稱 wired 但 settings 缺」的盲點 — #2 HARD-GATE TRUTH 只查 exit-2 被 '|| exit 0'
+    neuter，不查 non-wiring；number_provenance 曾因此靜默漏 9 天（2026-06-10 補）。read-only grep。"""
+    wired = set()
+    for _ev, blocks in (settings.get("hooks", {}) or {}).items():
+        for b in blocks:
+            for h in b.get("hooks", []):
+                m = re.search(r"hooks/(\w+\.sh)", h.get("command", ""))
+                if m:
+                    wired.add(m.group(1))
+    sec = re.search(r"Hard Gate hooks.*?(?=\n> |\n## |\Z)", cmd, re.S)
+    claimed = set(re.findall(r"`(\w+\.sh)`", sec.group(0))) if sec else set()
+    if not claimed:
+        return "GREY", ["CLAUDE.md §4 'Hard Gate hooks' 段不可解析"]
+    missing = sorted(h for h in claimed if h not in wired)
+    rows = [f"§4 宣稱 Hard Gate hooks={len(claimed)}；settings 實際 wired={len(wired)}"]
+    if missing:
+        rows.append(f"⚠ 宣稱 wired 但 settings 缺（false-capability，如 2026-06-10 number_provenance）: {missing}")
+        return "YELLOW", rows
+    rows.append("✓ 所有宣稱的 Hard Gate hook 都實際 wired 於 settings")
+    return "GREEN", rows
+
+
 def compile_marker_status():
     if os.path.exists(COMPILE_MARKER) and os.path.getsize(COMPILE_MARKER) > 0:
         try:
@@ -614,6 +638,7 @@ def main():
     l6 = light_queue(queue)
     l7 = light_memory_drift()
     l8 = light_doc_paths(cmd)
+    l9 = light_hook_wiring(settings, cmd)
     lights = [
         {"name": "COUNT DRIFT", "status": l1[0], "rows": l1[1]},
         {"name": "HARD-GATE TRUTH", "status": l2[0], "rows": l2[1]},
@@ -623,6 +648,7 @@ def main():
         {"name": "QUEUE HYGIENE", "status": l6[0], "rows": l6[1]},
         {"name": "MEMORY DRIFT", "status": l7[0], "rows": l7[1]},
         {"name": "DOC PATH CURRENCY", "status": l8[0], "rows": l8[1]},
+        {"name": "HOOK WIRING", "status": l9[0], "rows": l9[1]},
     ]
     mk = compile_marker_status()
     if mk.get("present"):

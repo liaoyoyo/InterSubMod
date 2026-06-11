@@ -15,7 +15,7 @@ Defensive layer; fires **before** long-running pipelines, **after** `disk_guard.
 
 ## Dependencies
 
-- **Uses**: existing `scripts/hooks/disk_guard.sh` (monitor) + `scripts/hooks/pipeline_block_check.sh` (pre-pipeline gate)
+- **Uses**: existing `scripts/infra/disk_guard.sh` (monitor) + `scripts/hooks/pipeline_block_check.sh` (pre-pipeline gate)
 - **Used by**: any long-pipeline workflow (`run_vcf_all_snv.sh`, `run_batch_vcf_analysis.sh`), `confirmation-protocol` Hard Gate for filesystem changes
 - **Reads**: `df -h`, `mount`, `.claude/state/disk_guard.alert` (if exists)
 - **Writes**: `.claude/state/infra_operations.jsonl` (append-only audit trail; NOT git-tracked)

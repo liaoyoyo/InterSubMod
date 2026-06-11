@@ -136,7 +136,6 @@ python3 scripts/analysis/collect_baseline_metrics.py
 
 - `methodology-reviewer` subagent：深度分析 C++ 實作細節
 - `cpp-change` skill：取得決策後的 6 步驟實作協議
-- `scripts/analysis/classify_boundary_analysis.py`：VerificationClass 邊界分析
 
 ---
 
