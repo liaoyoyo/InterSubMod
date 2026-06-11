@@ -1,0 +1,1101 @@
+{
+  "meta": {
+    "script": "55_modkit_gmm_retest.py",
+    "sample": "HCC1395",
+    "task_type": "A pilot",
+    "bam": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_full/20260314_HCC1395_paired_full_full_complete_matrix/longphase_s/HCC1395_tagged.bam",
+    "modkit_extract": "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/modkit_trial/modkit_extract.tsv",
+    "window": 600,
+    "measurement": "modkit extract full per-read CONTINUOUS mod_qual [0,1]; 5mC(m)/5hmC(h) SEPARATE; per-read mean over CpG within +/-WINDOW; somatic HP subgroup = right side of axis (gs)",
+    "hp_join": "read_id -> HP via pysam 'HP' aux tag over candidate windows (same convention as 49_meth_measurement_audit.py)",
+    "gmm": "1-vs-2 GMM BIC; bimodal iff dBIC>=10.0 & min_weight>=0.1 & sep>=0.1 (1D sep=|mean diff|, 2D sep=euclidean); identical thresholds to M2",
+    "m2_baseline": "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/m2_meth_measurement_audit.json (pysam-binarized MAX-collapse, ML>=128)",
+    "gate": "54_modkit_extract_crossval verdict=AGREE (modkit<->pysam 5mC Pearson=1.0)",
+    "note": "Single sample HCC1395 -> A pilot; NO cross-sample generalization claim"
+  },
+  "summary": {
+    "n_candidates_tested": 13,
+    "n_bimodal_modkit_continuous": 9,
+    "n_bimodal_changed_vs_pysam": 3,
+    "n_gained_bimodal": 0,
+    "n_lost_bimodal": 3,
+    "n_5hmC_new_structure": 0,
+    "brca2_modkit_verdict": "UNIMODAL (modkit-continuous; 5mC=False,5hmC=False,2D=False; M2-pysam-MAX=False)",
+    "top_confirmed_candidates": [
+      "chr15:94105522",
+      "chr17:69736115",
+      "chr14:86978441",
+      "chr1:66415340",
+      "chr22:30064792",
+      "chr8:117027962",
+      "chr8:121978175",
+      "chr9:80227092",
+      "chr8:52128513"
+    ],
+    "n_with_blind_ari": 1,
+    "blind_ari_crosscheck": [
+      {
+        "locus": "chr13:32315128",
+        "label": "BRCA2",
+        "blind_ari": 0.78972,
+        "modkit_bimodal": false,
+        "m2_bimodal": false
+      }
+    ]
+  },
+  "per_locus": [
+    {
+      "chrom": "chr2",
+      "pos": 4630990,
+      "locus": "chr2:4630990",
+      "label": null,
+      "axis": "HP1_vs_HP1-1",
+      "somatic_hp": "1-1",
+      "is_tp": 1,
+      "beta_cont": 0.4792,
+      "blind_ari": null,
+      "n_reads_somatic": 68,
+      "n_with_5mC": 68,
+      "n_with_5hmC": 68,
+      "n_with_both": 68,
+      "mean_5mC": 0.4508,
+      "mean_5hmC": 0.0599,
+      "gmm_5mC": {
+        "n": 68,
+        "is_bimodal": false,
+        "bic1": -36.10900274386631,
+        "bic2": -45.41282037263937,
+        "delta_bic": 9.30381762877306,
+        "comp_means": [
+          0.2941,
+          0.5981
+        ],
+        "comp_weights": [
+          0.4845,
+          0.5155
+        ],
+        "mean_sep": 0.3039,
+        "min_weight": 0.4845
+      },
+      "gmm_5hmC": {
+        "n": 68,
+        "is_bimodal": false,
+        "bic1": -212.95028968889795,
+        "bic2": -250.53421313475988,
+        "delta_bic": 37.58392344586193,
+        "comp_means": [
+          0.0354,
+          0.0916
+        ],
+        "comp_weights": [
+          0.4364,
+          0.5636
+        ],
+        "mean_sep": 0.0561,
+        "min_weight": 0.4364
+      },
+      "gmm_joint2d": {
+        "n": 68,
+        "is_bimodal": false,
+        "bic1": -246.88998620411084,
+        "bic2": -255.87567721975938,
+        "delta_bic": 8.985691015648541,
+        "comp_means": [
+          [
+            0.5962,
+            0.0588
+          ],
+          [
+            0.2889,
+            0.0612
+          ]
+        ],
+        "comp_weights": [
+          0.4733,
+          0.5267
+        ],
+        "mean_sep": 0.3073,
+        "min_weight": 0.4733
+      },
+      "modkit_continuous_bimodal": false,
+      "m2_pysam_binarized_bimodal": true,
+      "m2_delta_bic": 25.860050407669384,
+      "verdict_changed_vs_pysam": true,
+      "gained_bimodal": false,
+      "lost_bimodal": true,
+      "hmc_new_structure": false
+    },
+    {
+      "chrom": "chr7",
+      "pos": 155395399,
+      "locus": "chr7:155395399",
+      "label": null,
+      "axis": "HP2_vs_HP2-1",
+      "somatic_hp": "2-1",
+      "is_tp": 1,
+      "beta_cont": 0.4975,
+      "blind_ari": null,
+      "n_reads_somatic": 44,
+      "n_with_5mC": 44,
+      "n_with_5hmC": 44,
+      "n_with_both": 44,
+      "mean_5mC": 0.4723,
+      "mean_5hmC": 0.0862,
+      "gmm_5mC": {
+        "n": 44,
+        "is_bimodal": false,
+        "bic1": -55.87125479760622,
+        "bic2": -64.12372110526721,
+        "delta_bic": 8.252466307660988,
+        "comp_means": [
+          0.37,
+          0.5835
+        ],
+        "comp_weights": [
+          0.4792,
+          0.5208
+        ],
+        "mean_sep": 0.2135,
+        "min_weight": 0.4792
+      },
+      "gmm_5hmC": {
+        "n": 44,
+        "is_bimodal": false,
+        "bic1": -169.99252212315798,
+        "bic2": -160.8612334410669,
+        "delta_bic": -9.131288682091082,
+        "comp_means": [
+          0.075,
+          0.1293
+        ],
+        "comp_weights": [
+          0.2066,
+          0.7934
+        ],
+        "mean_sep": 0.0543,
+        "min_weight": 0.2066
+      },
+      "gmm_joint2d": {
+        "n": 44,
+        "is_bimodal": false,
+        "bic1": -222.5980526480846,
+        "bic2": -226.00844837769444,
+        "delta_bic": 3.4103957296098315,
+        "comp_means": [
+          [
+            0.5762,
+            0.0885
+          ],
+          [
+            0.3632,
+            0.0838
+          ]
+        ],
+        "comp_weights": [
+          0.4877,
+          0.5123
+        ],
+        "mean_sep": 0.2131,
+        "min_weight": 0.4877
+      },
+      "modkit_continuous_bimodal": false,
+      "m2_pysam_binarized_bimodal": true,
+      "m2_delta_bic": 21.3983093485258,
+      "verdict_changed_vs_pysam": true,
+      "gained_bimodal": false,
+      "lost_bimodal": true,
+      "hmc_new_structure": false
+    },
+    {
+      "chrom": "chr9",
+      "pos": 23071370,
+      "locus": "chr9:23071370",
+      "label": null,
+      "axis": "HP1_vs_HP1-1",
+      "somatic_hp": "1-1",
+      "is_tp": 1,
+      "beta_cont": 0.3827,
+      "blind_ari": null,
+      "n_reads_somatic": 28,
+      "n_with_5mC": 28,
+      "n_with_5hmC": 28,
+      "n_with_both": 28,
+      "mean_5mC": 0.3316,
+      "mean_5hmC": 0.0756,
+      "gmm_5mC": {
+        "n": 28,
+        "is_bimodal": false,
+        "bic1": -17.934342404899425,
+        "bic2": -25.33031243746911,
+        "delta_bic": 7.395970032569686,
+        "comp_means": [
+          0.107,
+          0.4218
+        ],
+        "comp_weights": [
+          0.2865,
+          0.7135
+        ],
+        "mean_sep": 0.3148,
+        "min_weight": 0.2865
+      },
+      "gmm_5hmC": {
+        "n": 28,
+        "is_bimodal": false,
+        "bic1": -84.80073417427305,
+        "bic2": -88.36308509872492,
+        "delta_bic": 3.562350924451877,
+        "comp_means": [
+          0.0446,
+          0.1248
+        ],
+        "comp_weights": [
+          0.3873,
+          0.6127
+        ],
+        "mean_sep": 0.0802,
+        "min_weight": 0.3873
+      },
+      "gmm_joint2d": {
+        "n": 28,
+        "is_bimodal": false,
+        "bic1": -99.91693968246284,
+        "bic2": -106.4904418439248,
+        "delta_bic": 6.57350216146196,
+        "comp_means": [
+          [
+            0.4218,
+            0.0845
+          ],
+          [
+            0.1062,
+            0.0534
+          ]
+        ],
+        "comp_weights": [
+          0.2859,
+          0.7141
+        ],
+        "mean_sep": 0.3171,
+        "min_weight": 0.2859
+      },
+      "modkit_continuous_bimodal": false,
+      "m2_pysam_binarized_bimodal": true,
+      "m2_delta_bic": 20.536066363635488,
+      "verdict_changed_vs_pysam": true,
+      "gained_bimodal": false,
+      "lost_bimodal": true,
+      "hmc_new_structure": false
+    },
+    {
+      "chrom": "chr15",
+      "pos": 94105522,
+      "locus": "chr15:94105522",
+      "label": null,
+      "axis": "HP2_vs_HP2-1",
+      "somatic_hp": "2-1",
+      "is_tp": 1,
+      "beta_cont": 0.2373,
+      "blind_ari": null,
+      "n_reads_somatic": 50,
+      "n_with_5mC": 50,
+      "n_with_5hmC": 50,
+      "n_with_both": 50,
+      "mean_5mC": 0.2441,
+      "mean_5hmC": 0.0618,
+      "gmm_5mC": {
+        "n": 50,
+        "is_bimodal": true,
+        "bic1": -36.76452366149066,
+        "bic2": -57.08582766185022,
+        "delta_bic": 20.32130400035956,
+        "comp_means": [
+          0.0428,
+          0.3193
+        ],
+        "comp_weights": [
+          0.2719,
+          0.7281
+        ],
+        "mean_sep": 0.2766,
+        "min_weight": 0.2719
+      },
+      "gmm_5hmC": {
+        "n": 50,
+        "is_bimodal": true,
+        "bic1": -118.95745525018559,
+        "bic2": -167.62113553255762,
+        "delta_bic": 48.66368028237203,
+        "comp_means": [
+          0.0352,
+          0.1686
+        ],
+        "comp_weights": [
+          0.1995,
+          0.8005
+        ],
+        "mean_sep": 0.1333,
+        "min_weight": 0.1995
+      },
+      "gmm_joint2d": {
+        "n": 50,
+        "is_bimodal": true,
+        "bic1": -154.61727468153293,
+        "bic2": -215.3858151402307,
+        "delta_bic": 60.76854045869777,
+        "comp_means": [
+          [
+            0.3144,
+            0.0708
+          ],
+          [
+            0.0413,
+            0.0359
+          ]
+        ],
+        "comp_weights": [
+          0.2574,
+          0.7426
+        ],
+        "mean_sep": 0.2754,
+        "min_weight": 0.2574
+      },
+      "modkit_continuous_bimodal": true,
+      "m2_pysam_binarized_bimodal": true,
+      "m2_delta_bic": 12.492400645018535,
+      "verdict_changed_vs_pysam": false,
+      "gained_bimodal": false,
+      "lost_bimodal": false,
+      "hmc_new_structure": false
+    },
+    {
+      "chrom": "chr17",
+      "pos": 69736115,
+      "locus": "chr17:69736115",
+      "label": null,
+      "axis": "HP2_vs_HP2-1",
+      "somatic_hp": "2-1",
+      "is_tp": 1,
+      "beta_cont": 0.8673,
+      "blind_ari": null,
+      "n_reads_somatic": 24,
+      "n_with_5mC": 24,
+      "n_with_5hmC": 24,
+      "n_with_both": 24,
+      "mean_5mC": 0.8351,
+      "mean_5hmC": 0.0645,
+      "gmm_5mC": {
+        "n": 24,
+        "is_bimodal": false,
+        "bic1": -24.3058818651463,
+        "bic2": -28.202476419925077,
+        "delta_bic": 3.896594554778776,
+        "comp_means": [
+          0.6714,
+          0.9157
+        ],
+        "comp_weights": [
+          0.3301,
+          0.6699
+        ],
+        "mean_sep": 0.2443,
+        "min_weight": 0.3301
+      },
+      "gmm_5hmC": {
+        "n": 24,
+        "is_bimodal": false,
+        "bic1": -71.75444579711485,
+        "bic2": -78.11384013070797,
+        "delta_bic": 6.359394333593116,
+        "comp_means": [
+          0.0362,
+          0.1311
+        ],
+        "comp_weights": [
+          0.2981,
+          0.7019
+        ],
+        "mean_sep": 0.0949,
+        "min_weight": 0.2981
+      },
+      "gmm_joint2d": {
+        "n": 24,
+        "is_bimodal": true,
+        "bic1": -101.34236780550823,
+        "bic2": -156.09610812534612,
+        "delta_bic": 54.75374031983789,
+        "comp_means": [
+          [
+            0.7572,
+            0.0824
+          ],
+          [
+            0.9653,
+            0.0346
+          ]
+        ],
+        "comp_weights": [
+          0.3739,
+          0.6261
+        ],
+        "mean_sep": 0.2135,
+        "min_weight": 0.3739
+      },
+      "modkit_continuous_bimodal": true,
+      "m2_pysam_binarized_bimodal": true,
+      "m2_delta_bic": 25.686198828189887,
+      "verdict_changed_vs_pysam": false,
+      "gained_bimodal": false,
+      "lost_bimodal": false,
+      "hmc_new_structure": false
+    },
+    {
+      "chrom": "chr14",
+      "pos": 86978441,
+      "locus": "chr14:86978441",
+      "label": null,
+      "axis": "HP1_vs_HP1-1",
+      "somatic_hp": "1-1",
+      "is_tp": 1,
+      "beta_cont": 0.3177,
+      "blind_ari": null,
+      "n_reads_somatic": 25,
+      "n_with_5mC": 25,
+      "n_with_5hmC": 25,
+      "n_with_both": 25,
+      "mean_5mC": 0.212,
+      "mean_5hmC": 0.0453,
+      "gmm_5mC": {
+        "n": 25,
+        "is_bimodal": true,
+        "bic1": -17.10058741146878,
+        "bic2": -35.92293324511304,
+        "delta_bic": 18.822345833644263,
+        "comp_means": [
+          0.0323,
+          0.3126
+        ],
+        "comp_weights": [
+          0.3589,
+          0.6411
+        ],
+        "mean_sep": 0.2803,
+        "min_weight": 0.3589
+      },
+      "gmm_5hmC": {
+        "n": 25,
+        "is_bimodal": true,
+        "bic1": -64.84538688568345,
+        "bic2": -88.01734510653907,
+        "delta_bic": 23.171958220855615,
+        "comp_means": [
+          0.0224,
+          0.1363
+        ],
+        "comp_weights": [
+          0.2011,
+          0.7989
+        ],
+        "mean_sep": 0.1138,
+        "min_weight": 0.2011
+      },
+      "gmm_joint2d": {
+        "n": 25,
+        "is_bimodal": true,
+        "bic1": -78.7508187033807,
+        "bic2": -102.73871767652201,
+        "delta_bic": 23.987898973141313,
+        "comp_means": [
+          [
+            0.0323,
+            0.0299
+          ],
+          [
+            0.3126,
+            0.054
+          ]
+        ],
+        "comp_weights": [
+          0.359,
+          0.641
+        ],
+        "mean_sep": 0.2814,
+        "min_weight": 0.359
+      },
+      "modkit_continuous_bimodal": true,
+      "m2_pysam_binarized_bimodal": true,
+      "m2_delta_bic": 26.53733787242742,
+      "verdict_changed_vs_pysam": false,
+      "gained_bimodal": false,
+      "lost_bimodal": false,
+      "hmc_new_structure": false
+    },
+    {
+      "chrom": "chr1",
+      "pos": 66415340,
+      "locus": "chr1:66415340",
+      "label": null,
+      "axis": "HP2_vs_HP2-1",
+      "somatic_hp": "2-1",
+      "is_tp": 1,
+      "beta_cont": 0.9199,
+      "blind_ari": null,
+      "n_reads_somatic": 21,
+      "n_with_5mC": 21,
+      "n_with_5hmC": 21,
+      "n_with_both": 21,
+      "mean_5mC": 0.8685,
+      "mean_5hmC": 0.0531,
+      "gmm_5mC": {
+        "n": 21,
+        "is_bimodal": true,
+        "bic1": -14.922291295133785,
+        "bic2": -51.8510234128567,
+        "delta_bic": 36.928732117722916,
+        "comp_means": [
+          0.7624,
+          0.9889
+        ],
+        "comp_weights": [
+          0.4686,
+          0.5314
+        ],
+        "mean_sep": 0.2265,
+        "min_weight": 0.4686
+      },
+      "gmm_5hmC": {
+        "n": 21,
+        "is_bimodal": false,
+        "bic1": -48.88821912777887,
+        "bic2": -78.85037731615706,
+        "delta_bic": 29.962158188378197,
+        "comp_means": [
+          0.0114,
+          0.1033
+        ],
+        "comp_weights": [
+          0.4537,
+          0.5463
+        ],
+        "mean_sep": 0.0919,
+        "min_weight": 0.4537
+      },
+      "gmm_joint2d": {
+        "n": 21,
+        "is_bimodal": true,
+        "bic1": -74.84725290029175,
+        "bic2": -160.09889198933644,
+        "delta_bic": 85.25163908904469,
+        "comp_means": [
+          [
+            0.9817,
+            0.0181
+          ],
+          [
+            0.7193,
+            0.0992
+          ]
+        ],
+        "comp_weights": [
+          0.4314,
+          0.5686
+        ],
+        "mean_sep": 0.2746,
+        "min_weight": 0.4314
+      },
+      "modkit_continuous_bimodal": true,
+      "m2_pysam_binarized_bimodal": true,
+      "m2_delta_bic": 26.33917796542071,
+      "verdict_changed_vs_pysam": false,
+      "gained_bimodal": false,
+      "lost_bimodal": false,
+      "hmc_new_structure": false
+    },
+    {
+      "chrom": "chr22",
+      "pos": 30064792,
+      "locus": "chr22:30064792",
+      "label": null,
+      "axis": "HP2_vs_HP2-1",
+      "somatic_hp": "2-1",
+      "is_tp": 1,
+      "beta_cont": 0.8585,
+      "blind_ari": null,
+      "n_reads_somatic": 67,
+      "n_with_5mC": 67,
+      "n_with_5hmC": 67,
+      "n_with_both": 67,
+      "mean_5mC": 0.8514,
+      "mean_5hmC": 0.0741,
+      "gmm_5mC": {
+        "n": 67,
+        "is_bimodal": true,
+        "bic1": -67.01082876592713,
+        "bic2": -106.4221384732913,
+        "delta_bic": 39.41130970736417,
+        "comp_means": [
+          0.7888,
+          0.9785
+        ],
+        "comp_weights": [
+          0.3298,
+          0.6702
+        ],
+        "mean_sep": 0.1896,
+        "min_weight": 0.3298
+      },
+      "gmm_5hmC": {
+        "n": 67,
+        "is_bimodal": true,
+        "bic1": -149.357626842273,
+        "bic2": -195.02617730912806,
+        "delta_bic": 45.668550466855066,
+        "comp_means": [
+          0.0255,
+          0.1304
+        ],
+        "comp_weights": [
+          0.4633,
+          0.5367
+        ],
+        "mean_sep": 0.1049,
+        "min_weight": 0.4633
+      },
+      "gmm_joint2d": {
+        "n": 67,
+        "is_bimodal": true,
+        "bic1": -229.8504590450365,
+        "bic2": -477.3801769077638,
+        "delta_bic": 247.52971786272732,
+        "comp_means": [
+          [
+            0.93,
+            0.0695
+          ],
+          [
+            0.7295,
+            0.0812
+          ]
+        ],
+        "comp_weights": [
+          0.392,
+          0.608
+        ],
+        "mean_sep": 0.2008,
+        "min_weight": 0.392
+      },
+      "modkit_continuous_bimodal": true,
+      "m2_pysam_binarized_bimodal": true,
+      "m2_delta_bic": 47.738908977199145,
+      "verdict_changed_vs_pysam": false,
+      "gained_bimodal": false,
+      "lost_bimodal": false,
+      "hmc_new_structure": false
+    },
+    {
+      "chrom": "chr8",
+      "pos": 117027962,
+      "locus": "chr8:117027962",
+      "label": null,
+      "axis": "HP1_vs_HP1-1",
+      "somatic_hp": "1-1",
+      "is_tp": 1,
+      "beta_cont": 0.922,
+      "blind_ari": null,
+      "n_reads_somatic": 30,
+      "n_with_5mC": 30,
+      "n_with_5hmC": 30,
+      "n_with_both": 30,
+      "mean_5mC": 0.92,
+      "mean_5hmC": 0.0401,
+      "gmm_5mC": {
+        "n": 30,
+        "is_bimodal": true,
+        "bic1": -41.83764462549973,
+        "bic2": -81.91663646218328,
+        "delta_bic": 40.07899183668355,
+        "comp_means": [
+          0.8328,
+          0.9876
+        ],
+        "comp_weights": [
+          0.4367,
+          0.5633
+        ],
+        "mean_sep": 0.1548,
+        "min_weight": 0.4367
+      },
+      "gmm_5hmC": {
+        "n": 30,
+        "is_bimodal": false,
+        "bic1": -87.44923656755971,
+        "bic2": -121.07528294639545,
+        "delta_bic": 33.62604637883574,
+        "comp_means": [
+          0.0083,
+          0.0681
+        ],
+        "comp_weights": [
+          0.4676,
+          0.5324
+        ],
+        "mean_sep": 0.0598,
+        "min_weight": 0.4676
+      },
+      "gmm_joint2d": {
+        "n": 30,
+        "is_bimodal": true,
+        "bic1": -139.5934130106809,
+        "bic2": -289.45360246936303,
+        "delta_bic": 149.86018945868213,
+        "comp_means": [
+          [
+            0.7891,
+            0.0807
+          ],
+          [
+            0.9775,
+            0.0223
+          ]
+        ],
+        "comp_weights": [
+          0.3051,
+          0.6949
+        ],
+        "mean_sep": 0.1972,
+        "min_weight": 0.3051
+      },
+      "modkit_continuous_bimodal": true,
+      "m2_pysam_binarized_bimodal": true,
+      "m2_delta_bic": 37.49896478941333,
+      "verdict_changed_vs_pysam": false,
+      "gained_bimodal": false,
+      "lost_bimodal": false,
+      "hmc_new_structure": false
+    },
+    {
+      "chrom": "chr8",
+      "pos": 121978175,
+      "locus": "chr8:121978175",
+      "label": null,
+      "axis": "HP2_vs_HP2-1",
+      "somatic_hp": "2-1",
+      "is_tp": 1,
+      "beta_cont": 0.9016,
+      "blind_ari": null,
+      "n_reads_somatic": 94,
+      "n_with_5mC": 94,
+      "n_with_5hmC": 94,
+      "n_with_both": 94,
+      "mean_5mC": 0.835,
+      "mean_5hmC": 0.1314,
+      "gmm_5mC": {
+        "n": 94,
+        "is_bimodal": true,
+        "bic1": -65.09320222154155,
+        "bic2": -91.31226225601682,
+        "delta_bic": 26.219060034475277,
+        "comp_means": [
+          0.6212,
+          0.9009
+        ],
+        "comp_weights": [
+          0.2357,
+          0.7643
+        ],
+        "mean_sep": 0.2797,
+        "min_weight": 0.2357
+      },
+      "gmm_5hmC": {
+        "n": 94,
+        "is_bimodal": true,
+        "bic1": -90.91563799444143,
+        "bic2": -130.64205678302838,
+        "delta_bic": 39.726418788586955,
+        "comp_means": [
+          0.0865,
+          0.3535
+        ],
+        "comp_weights": [
+          0.1685,
+          0.8315
+        ],
+        "mean_sep": 0.267,
+        "min_weight": 0.1685
+      },
+      "gmm_joint2d": {
+        "n": 94,
+        "is_bimodal": true,
+        "bic1": -347.43213315819804,
+        "bic2": -714.5448596796972,
+        "delta_bic": 367.11272652149916,
+        "comp_means": [
+          [
+            0.6775,
+            0.2295
+          ],
+          [
+            0.9228,
+            0.0767
+          ]
+        ],
+        "comp_weights": [
+          0.3582,
+          0.6418
+        ],
+        "mean_sep": 0.289,
+        "min_weight": 0.3582
+      },
+      "modkit_continuous_bimodal": true,
+      "m2_pysam_binarized_bimodal": true,
+      "m2_delta_bic": 29.02869667132964,
+      "verdict_changed_vs_pysam": false,
+      "gained_bimodal": false,
+      "lost_bimodal": false,
+      "hmc_new_structure": false
+    },
+    {
+      "chrom": "chr9",
+      "pos": 80227092,
+      "locus": "chr9:80227092",
+      "label": null,
+      "axis": "HP2_vs_HP2-1",
+      "somatic_hp": "2-1",
+      "is_tp": 1,
+      "beta_cont": 0.8647,
+      "blind_ari": null,
+      "n_reads_somatic": 38,
+      "n_with_5mC": 38,
+      "n_with_5hmC": 38,
+      "n_with_both": 38,
+      "mean_5mC": 0.8325,
+      "mean_5hmC": 0.0969,
+      "gmm_5mC": {
+        "n": 38,
+        "is_bimodal": false,
+        "bic1": -24.596092340652877,
+        "bic2": -32.138702902535044,
+        "delta_bic": 7.542610561882167,
+        "comp_means": [
+          0.6068,
+          0.8968
+        ],
+        "comp_weights": [
+          0.2219,
+          0.7781
+        ],
+        "mean_sep": 0.29,
+        "min_weight": 0.2219
+      },
+      "gmm_5hmC": {
+        "n": 38,
+        "is_bimodal": true,
+        "bic1": -73.35776014472555,
+        "bic2": -91.61640096786091,
+        "delta_bic": 18.258640823135366,
+        "comp_means": [
+          0.0232,
+          0.1401
+        ],
+        "comp_weights": [
+          0.3693,
+          0.6307
+        ],
+        "mean_sep": 0.1169,
+        "min_weight": 0.3693
+      },
+      "gmm_joint2d": {
+        "n": 38,
+        "is_bimodal": true,
+        "bic1": -120.1732565727099,
+        "bic2": -274.1648099484288,
+        "delta_bic": 153.9915533757189,
+        "comp_means": [
+          [
+            0.688,
+            0.1219
+          ],
+          [
+            0.9174,
+            0.0822
+          ]
+        ],
+        "comp_weights": [
+          0.3702,
+          0.6298
+        ],
+        "mean_sep": 0.2328,
+        "min_weight": 0.3702
+      },
+      "modkit_continuous_bimodal": true,
+      "m2_pysam_binarized_bimodal": true,
+      "m2_delta_bic": 20.715218112304804,
+      "verdict_changed_vs_pysam": false,
+      "gained_bimodal": false,
+      "lost_bimodal": false,
+      "hmc_new_structure": false
+    },
+    {
+      "chrom": "chr8",
+      "pos": 52128513,
+      "locus": "chr8:52128513",
+      "label": null,
+      "axis": "HP1_vs_HP1-1",
+      "somatic_hp": "1-1",
+      "is_tp": 1,
+      "beta_cont": 0.907,
+      "blind_ari": null,
+      "n_reads_somatic": 66,
+      "n_with_5mC": 66,
+      "n_with_5hmC": 66,
+      "n_with_both": 66,
+      "mean_5mC": 0.8834,
+      "mean_5hmC": 0.0708,
+      "gmm_5mC": {
+        "n": 66,
+        "is_bimodal": true,
+        "bic1": -101.63193012841158,
+        "bic2": -121.594308044565,
+        "delta_bic": 19.962377916153415,
+        "comp_means": [
+          0.789,
+          0.9401
+        ],
+        "comp_weights": [
+          0.3751,
+          0.6249
+        ],
+        "mean_sep": 0.1511,
+        "min_weight": 0.3751
+      },
+      "gmm_5hmC": {
+        "n": 66,
+        "is_bimodal": true,
+        "bic1": -165.79575549228883,
+        "bic2": -193.42325928105254,
+        "delta_bic": 27.627503788763704,
+        "comp_means": [
+          0.0426,
+          0.1618
+        ],
+        "comp_weights": [
+          0.236,
+          0.764
+        ],
+        "mean_sep": 0.1192,
+        "min_weight": 0.236
+      },
+      "gmm_joint2d": {
+        "n": 66,
+        "is_bimodal": true,
+        "bic1": -298.96389770521085,
+        "bic2": -492.00247914109366,
+        "delta_bic": 193.0385814358828,
+        "comp_means": [
+          [
+            0.9512,
+            0.0484
+          ],
+          [
+            0.8171,
+            0.0927
+          ]
+        ],
+        "comp_weights": [
+          0.4948,
+          0.5052
+        ],
+        "mean_sep": 0.1412,
+        "min_weight": 0.4948
+      },
+      "modkit_continuous_bimodal": true,
+      "m2_pysam_binarized_bimodal": true,
+      "m2_delta_bic": 29.299262874278526,
+      "verdict_changed_vs_pysam": false,
+      "gained_bimodal": false,
+      "lost_bimodal": false,
+      "hmc_new_structure": false
+    },
+    {
+      "chrom": "chr13",
+      "pos": 32315128,
+      "locus": "chr13:32315128",
+      "label": "BRCA2",
+      "axis": "HP1_vs_HP1-1",
+      "somatic_hp": "1-1",
+      "is_tp": 1,
+      "beta_cont": null,
+      "blind_ari": 0.78972,
+      "n_reads_somatic": 43,
+      "n_with_5mC": 43,
+      "n_with_5hmC": 43,
+      "n_with_both": 43,
+      "mean_5mC": 0.1381,
+      "mean_5hmC": 0.0976,
+      "gmm_5mC": {
+        "n": 43,
+        "is_bimodal": false,
+        "bic1": -166.97604178317442,
+        "bic2": -179.4372559674076,
+        "delta_bic": 12.461214184233171,
+        "comp_means": [
+          0.1347,
+          0.2787
+        ],
+        "comp_weights": [
+          0.0233,
+          0.9767
+        ],
+        "mean_sep": 0.144,
+        "min_weight": 0.0233
+      },
+      "gmm_5hmC": {
+        "n": 43,
+        "is_bimodal": false,
+        "bic1": -164.24851002018147,
+        "bic2": -170.6314244889033,
+        "delta_bic": 6.382914468721822,
+        "comp_means": [
+          0.0602,
+          0.1114
+        ],
+        "comp_weights": [
+          0.2693,
+          0.7307
+        ],
+        "mean_sep": 0.0513,
+        "min_weight": 0.2693
+      },
+      "gmm_joint2d": {
+        "n": 43,
+        "is_bimodal": false,
+        "bic1": -331.81920010984476,
+        "bic2": -343.3428703242922,
+        "delta_bic": 11.523670214447463,
+        "comp_means": [
+          [
+            0.1347,
+            0.0976
+          ],
+          [
+            0.2787,
+            0.1012
+          ]
+        ],
+        "comp_weights": [
+          0.0233,
+          0.9767
+        ],
+        "mean_sep": 0.144,
+        "min_weight": 0.0233
+      },
+      "modkit_continuous_bimodal": false,
+      "m2_pysam_binarized_bimodal": false,
+      "m2_delta_bic": -6.583993476867477,
+      "verdict_changed_vs_pysam": false,
+      "gained_bimodal": false,
+      "lost_bimodal": false,
+      "hmc_new_structure": false
+    }
+  ]
+}

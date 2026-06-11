@@ -1,0 +1,344 @@
+{
+  "meta": {
+    "script": "73_aggregate_ism.py",
+    "samples": [
+      "HCC1395",
+      "HCC1937",
+      "HCC1954",
+      "H1437",
+      "H2009",
+      "COLO829"
+    ],
+    "classes": [
+      "tp",
+      "fp",
+      "fn"
+    ],
+    "tool": "unmodified ISM (build/bin/inter_sub_mod) significance_summary.csv",
+    "note": "Existence = ISM native Significant gate (PassedGating AND global_p<=0.05 AND CramersV>=0.1 AND NumReads>=20). Cis = HCC1395 normal-anchored HP_Residual_Delta = tumor_HP_delta - normal_HP_delta (significant + |delta|>=0.10 = cis candidate). TP/FP/FN = caller-vs-truth classes."
+  },
+  "existence": {
+    "HCC1395": {
+      "tp": {
+        "n": 29723,
+        "n_with_subhap": 29026,
+        "n_significant": 1299,
+        "significant_rate": 0.0437,
+        "n_sig_in_subhap": 1277,
+        "sig_rate_in_subhap": 0.044,
+        "n_hpmerged_sig": 8697,
+        "hpmerged_sig_rate": 0.2926,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0015,
+        "median_NumReads": 66.0
+      },
+      "fp": {
+        "n": 627,
+        "n_with_subhap": 592,
+        "n_significant": 9,
+        "significant_rate": 0.0144,
+        "n_sig_in_subhap": 9,
+        "sig_rate_in_subhap": 0.0152,
+        "n_hpmerged_sig": 249,
+        "hpmerged_sig_rate": 0.3971,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0309,
+        "median_NumReads": 73.0
+      },
+      "fn": {
+        "n": 9680,
+        "n_with_subhap": 4652,
+        "n_significant": 239,
+        "significant_rate": 0.0247,
+        "n_sig_in_subhap": 133,
+        "sig_rate_in_subhap": 0.0286,
+        "n_hpmerged_sig": 2592,
+        "hpmerged_sig_rate": 0.2678,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0,
+        "median_NumReads": 64.0
+      }
+    },
+    "HCC1937": {
+      "tp": {
+        "n": 12379,
+        "n_with_subhap": 12255,
+        "n_significant": 513,
+        "significant_rate": 0.0414,
+        "n_sig_in_subhap": 512,
+        "sig_rate_in_subhap": 0.0418,
+        "n_hpmerged_sig": 2931,
+        "hpmerged_sig_rate": 0.2368,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0,
+        "median_NumReads": 103.0
+      },
+      "fp": {
+        "n": 195,
+        "n_with_subhap": 195,
+        "n_significant": 2,
+        "significant_rate": 0.0103,
+        "n_sig_in_subhap": 2,
+        "sig_rate_in_subhap": 0.0103,
+        "n_hpmerged_sig": 15,
+        "hpmerged_sig_rate": 0.0769,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0,
+        "median_NumReads": 93.0
+      },
+      "fn": {
+        "n": 3446,
+        "n_with_subhap": 1205,
+        "n_significant": 82,
+        "significant_rate": 0.0238,
+        "n_sig_in_subhap": 41,
+        "sig_rate_in_subhap": 0.034,
+        "n_hpmerged_sig": 777,
+        "hpmerged_sig_rate": 0.2255,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0,
+        "median_NumReads": 106.0
+      }
+    },
+    "HCC1954": {
+      "tp": {
+        "n": 17891,
+        "n_with_subhap": 17406,
+        "n_significant": 1075,
+        "significant_rate": 0.0601,
+        "n_sig_in_subhap": 1054,
+        "sig_rate_in_subhap": 0.0606,
+        "n_hpmerged_sig": 6631,
+        "hpmerged_sig_rate": 0.3706,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0161,
+        "median_NumReads": 65.0
+      },
+      "fp": {
+        "n": 29,
+        "n_with_subhap": 29,
+        "n_significant": 0,
+        "significant_rate": 0.0,
+        "n_sig_in_subhap": 0,
+        "sig_rate_in_subhap": 0.0,
+        "n_hpmerged_sig": 7,
+        "hpmerged_sig_rate": 0.2414,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0155,
+        "median_NumReads": 77.0
+      },
+      "fn": {
+        "n": 2743,
+        "n_with_subhap": 1039,
+        "n_significant": 176,
+        "significant_rate": 0.0642,
+        "n_sig_in_subhap": 82,
+        "sig_rate_in_subhap": 0.0789,
+        "n_hpmerged_sig": 972,
+        "hpmerged_sig_rate": 0.3544,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0169,
+        "median_NumReads": 80.0
+      }
+    },
+    "H1437": {
+      "tp": {
+        "n": 67093,
+        "n_with_subhap": 46101,
+        "n_significant": 4256,
+        "significant_rate": 0.0634,
+        "n_sig_in_subhap": 2888,
+        "sig_rate_in_subhap": 0.0626,
+        "n_hpmerged_sig": 16421,
+        "hpmerged_sig_rate": 0.2447,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0,
+        "median_NumReads": 70.0
+      },
+      "fp": {
+        "n": 8,
+        "n_with_subhap": 5,
+        "n_significant": 0,
+        "significant_rate": 0.0,
+        "n_sig_in_subhap": 0,
+        "sig_rate_in_subhap": 0.0,
+        "n_hpmerged_sig": 1,
+        "hpmerged_sig_rate": 0.125,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0,
+        "median_NumReads": 62.5
+      },
+      "fn": {
+        "n": 9387,
+        "n_with_subhap": 2877,
+        "n_significant": 537,
+        "significant_rate": 0.0572,
+        "n_sig_in_subhap": 157,
+        "sig_rate_in_subhap": 0.0546,
+        "n_hpmerged_sig": 1031,
+        "hpmerged_sig_rate": 0.1098,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0,
+        "median_NumReads": 66.0
+      }
+    },
+    "H2009": {
+      "tp": {
+        "n": 132759,
+        "n_with_subhap": 129862,
+        "n_significant": 4203,
+        "significant_rate": 0.0317,
+        "n_sig_in_subhap": 4043,
+        "sig_rate_in_subhap": 0.0311,
+        "n_hpmerged_sig": 30324,
+        "hpmerged_sig_rate": 0.2284,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0055,
+        "median_NumReads": 89.0
+      },
+      "fp": {
+        "n": 86,
+        "n_with_subhap": 86,
+        "n_significant": 0,
+        "significant_rate": 0.0,
+        "n_sig_in_subhap": 0,
+        "sig_rate_in_subhap": 0.0,
+        "n_hpmerged_sig": 12,
+        "hpmerged_sig_rate": 0.1395,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0,
+        "median_NumReads": 80.0
+      },
+      "fn": {
+        "n": 4384,
+        "n_with_subhap": 4009,
+        "n_significant": 113,
+        "significant_rate": 0.0258,
+        "n_sig_in_subhap": 105,
+        "sig_rate_in_subhap": 0.0262,
+        "n_hpmerged_sig": 863,
+        "hpmerged_sig_rate": 0.1969,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0068,
+        "median_NumReads": 81.0
+      }
+    },
+    "COLO829": {
+      "tp": {
+        "n": 34878,
+        "n_with_subhap": 32840,
+        "n_significant": 309,
+        "significant_rate": 0.0089,
+        "n_sig_in_subhap": 304,
+        "sig_rate_in_subhap": 0.0093,
+        "n_hpmerged_sig": 6305,
+        "hpmerged_sig_rate": 0.1808,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.0072,
+        "median_NumReads": 29.0
+      },
+      "fp": {
+        "n": 2232,
+        "n_with_subhap": 2112,
+        "n_significant": 23,
+        "significant_rate": 0.0103,
+        "n_sig_in_subhap": 22,
+        "sig_rate_in_subhap": 0.0104,
+        "n_hpmerged_sig": 376,
+        "hpmerged_sig_rate": 0.1685,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.006,
+        "median_NumReads": 29.0
+      },
+      "fn": {
+        "n": 5165,
+        "n_with_subhap": 2562,
+        "n_significant": 40,
+        "significant_rate": 0.0077,
+        "n_sig_in_subhap": 32,
+        "sig_rate_in_subhap": 0.0125,
+        "n_hpmerged_sig": 773,
+        "hpmerged_sig_rate": 0.1497,
+        "median_cramersV_HPFine": 0.0,
+        "median_abs_HPMergedDelta": 0.003,
+        "median_NumReads": 27.0
+      }
+    }
+  },
+  "discrimination": {
+    "tp": {
+      "pooled_significant_rate": 0.0395,
+      "pooled_n": 294723,
+      "pooled_n_sig": 11655,
+      "pooled_n_with_subhap": 267490,
+      "pooled_sig_rate_in_subhap": 0.0377,
+      "pooled_n_sig_in_subhap": 10078,
+      "per_sample_rates": {
+        "HCC1395": 0.0437,
+        "HCC1937": 0.0414,
+        "HCC1954": 0.0601,
+        "H1437": 0.0634,
+        "H2009": 0.0317,
+        "COLO829": 0.0089
+      }
+    },
+    "fp": {
+      "pooled_significant_rate": 0.0107,
+      "pooled_n": 3177,
+      "pooled_n_sig": 34,
+      "pooled_n_with_subhap": 3019,
+      "pooled_sig_rate_in_subhap": 0.0109,
+      "pooled_n_sig_in_subhap": 33,
+      "per_sample_rates": {
+        "HCC1395": 0.0144,
+        "HCC1937": 0.0103,
+        "HCC1954": 0.0,
+        "H1437": 0.0,
+        "H2009": 0.0,
+        "COLO829": 0.0103
+      }
+    },
+    "fn": {
+      "pooled_significant_rate": 0.0341,
+      "pooled_n": 34805,
+      "pooled_n_sig": 1187,
+      "pooled_n_with_subhap": 16344,
+      "pooled_sig_rate_in_subhap": 0.0337,
+      "pooled_n_sig_in_subhap": 550,
+      "per_sample_rates": {
+        "HCC1395": 0.0247,
+        "HCC1937": 0.0238,
+        "HCC1954": 0.0642,
+        "H1437": 0.0572,
+        "H2009": 0.0258,
+        "COLO829": 0.0077
+      }
+    }
+  },
+  "cis_hcc1395": {
+    "tp": {
+      "n": 29748,
+      "n_residual_computed": 29748,
+      "n_cis_candidate": 9356,
+      "cis_candidate_rate": 0.3145,
+      "median_abs_HP_Residual_Delta": 0.0812,
+      "n_sampleASM_sig": 28356
+    },
+    "fp": {
+      "n": 627,
+      "n_residual_computed": 627,
+      "n_cis_candidate": 229,
+      "cis_candidate_rate": 0.3652,
+      "median_abs_HP_Residual_Delta": 0.0946,
+      "n_sampleASM_sig": 605
+    },
+    "fn": {
+      "n": 9687,
+      "n_residual_computed": 9687,
+      "n_cis_candidate": 3261,
+      "cis_candidate_rate": 0.3366,
+      "median_abs_HP_Residual_Delta": 0.084,
+      "n_sampleASM_sig": 9282
+    }
+  }
+}

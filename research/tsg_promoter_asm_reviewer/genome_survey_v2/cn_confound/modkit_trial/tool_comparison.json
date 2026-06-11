@@ -1,0 +1,116 @@
+{
+  "meta": {
+    "task": "P2 - 3-way tool comparison: modkit vs MSA vs ISM (InterSubMod)",
+    "scope": "A pilot; HCC1395 single sample; methylation per-read measurement at candidate somatic loci for subclone GMM",
+    "date": "2026-06-02",
+    "modkit_version": "v0.6.3 (26c3f9e)",
+    "modkit_binary": "/big7_disk/liaoyoyo2001/modkit/dist_modkit_v0.6.3_26c3f9e/modkit",
+    "modkit_subcommands_enumerated": [
+      "pileup", "extract (full|calls|read-stats)", "dmr", "pileup-hemi", "validate",
+      "motif", "entropy", "localize", "stats", "bedmethyl", "modbam", "open-chromatin"
+    ],
+    "modkit_key_flags": {
+      "extract_full": "per-read table; cols read_id/forward_read_position/ref_position/mod_qual(continuous prob 0-1)/mod_code(m|h SEPARATE)/ref_kmer; --include-bed restricts to regions; --region; --reference for ref_kmer; --edge-filter; no thresholding (raw probs)",
+      "extract_calls": "thresholded per-read calls (same threshold algo as pileup); one row per call",
+      "pileup": "per-SITE bedMethyl aggregate; --phased -> hp1/hp2/combined.bedmethyl; --cpg / --motif CG 0; --combine-mods sums 5mC+5hmC (default SEPARATE); --filter-threshold / --mod-threshold h:0.8; --combine-strands",
+      "dmr": "differential methylation between two groups of regions (e.g. tumor vs normal bedMethyl); region-level, NOT per-read subclone clustering"
+    },
+    "sources": {
+      "msa_kb": "kb-05-tools-methylsomaticanalysis (05_tools/methyl-somatic-analysis.md, last_verified 2026-04-01)",
+      "ism_kb": "kb-05-tools-intersubmod (05_tools/intersubmod.md, last_verified 2026-04-17)",
+      "candidate_loci": "genome_survey_v2/cn_confound/s_subclone_assessment.json q3_top_candidates.top_candidate_loci (12 loci, all is_tp=1; axes HP1_vs_HP1-1 x5, HP2_vs_HP2-1 x7) + BRCA2 chr13:32315128",
+      "pysam_baseline": "scripts/49_meth_measurement_audit.py (pysam r.modified_bases; m=5mC h=5hmC; ML 0-255; MAX-collapse per read); results m2_meth_measurement_audit.json"
+    }
+  },
+
+  "dimensions": [
+    "input",
+    "computes (output)",
+    "5mC vs 5hmC handling",
+    "per-read vs per-site",
+    "continuous vs binarized",
+    "somatic-aware (germline-vs-somatic axis)",
+    "haplotype/phase-aware",
+    "subclone/clustering-aware",
+    "'?'/'.' modBAM mode handling",
+    "maintained + citable (reviewer trust)",
+    "speed / scale",
+    "FIT for our task"
+  ],
+
+  "tools": {
+    "modkit": {
+      "input": "modBAM (MM/ML); optional --reference FASTA; optional --include-bed loci",
+      "computes": "extract full = raw per-read continuous mod_qual table; extract calls = thresholded per-read calls; pileup = per-site bedMethyl frequency; dmr = region-level differential methylation; stats/entropy/localize = aggregates",
+      "5mc_vs_5hmc": "SEPARATE BY DEFAULT (distinct mod_code m vs h rows / separate bedMethyl). Collapse only if --combine-mods explicitly set. Per-mod threshold via --mod-threshold h:0.8. Best-in-class native 5mC/5hmC separation.",
+      "per_read_or_site": "BOTH. extract full/calls = per-read; pileup = per-site. ",
+      "continuous_or_binarized": "BOTH. extract full = continuous mod_qual (raw prob, no threshold). extract calls + pileup = thresholded/binarized.",
+      "somatic_aware": "NO. modkit has no concept of germline-vs-somatic ALT axis. dmr compares two arbitrary region/sample groups (e.g. tumor-vs-normal bedMethyl) but does NOT assign reads to somatic-ALT vs germline-REF supporting groups. This is an EXTRACTION/pileup layer.",
+      "haplotype_aware": "PARTIAL. pileup --phased splits HP1/HP2/combined (diploid only, integer HP). extract full passes through but does NOT itself split by HP (HP must be joined downstream from read_id). No HP=1-1/2-1/3 somatic-sub-state semantics.",
+      "subclone_aware": "NO. No per-read clustering / GMM / bimodality. entropy is windowed methylation entropy (not subclone resolution).",
+      "qmode_handling": "Honors MM/ML spec including skip-mode. With '?' mode, skipped C positions are UNKNOWN (not emitted as canonical). modkit reads MM/ML faithfully; extract full emits only positions with mod-prob info; pileup counts unmodified vs modified per spec. Robust, spec-compliant.",
+      "maintained_citable": "STRONG. Oxford Nanopore official tool, actively maintained, versioned (v0.6.3), documented README/online docs, widely cited (Nanopore modkit). Highest reviewer trust of the three for the EXTRACTION step.",
+      "speed_scale": "FAST + scalable: multithreaded (-t), indexed region/bed restriction, interval chunking, read sampling for threshold est. Rust binary. Genome-scale routine.",
+      "fit_for_task": "PARTIAL / FRONTEND ONLY. modkit extract full --include-bed <loci.bed> --reference ref gives EXACTLY the separated continuous per-read 5mC and 5hmC (mod_qual, m|h rows) at candidate loci with read_id -> can be the extraction frontend. But it does NOT do the somatic HP-axis grouping (HP1_vs_HP1-1), per-read collapse policy choice, or GMM subclone clustering. Those remain MSA/ISM/our-script logic."
+    },
+
+    "msa": {
+      "input": "Somatic VCF(.gz+.tbi) + REF FASTA + Tumor BAM (haplotagged) + Normal BAM; --window radius; --bed",
+      "computes": "Level1 raw per-read per-CpG methylation; Level2 per-variant window summary; Level3 haplotype-group methylation stats. Python suite: feature matrix + wavelet/KDE/GPR/clustering + HTML report.",
+      "5mc_vs_5hmc": "Produced our Level1/dualaxis data with per-read 5mC AND 5hmC. NOTE per MEMORY: MSA Level1 emitted 5mC+5hmC as separate rows and a naive MAX-collapse on those double rows halved beta (the buggy -0.054 BRCA2 artifact). So MSA CAN carry both but downstream collapse policy was an error source -> argues for modkit's clean separate emission.",
+      "per_read_or_site": "BOTH: Level1 per-read/per-CpG, Level2/3 aggregated.",
+      "continuous_or_binarized": "BOTH; thresholds --meth-high 0.8 / --meth-low 0.2; can keep continuous quality.",
+      "somatic_aware": "YES (core purpose). Takes somatic VCF + tumor/normal; computes ASM along germline-vs-somatic and HP/ALLELE axes (the HP-axis / ALLELE-axis dualaxis data is MSA-derived).",
+      "haplotype_aware": "YES. Level3 = haplotype-group stats; designed for haplotagged BAM; consumes HP=1-1/2-1/3 somatic sub-states.",
+      "subclone_aware": "PARTIAL. Python AdvancedAnalyzer has clustering/KDE/wavelet but is variant/window-centric ASM, not a dedicated per-read subclone GMM resolver.",
+      "qmode_handling": "Reads MM/ML; same modBAM dependency. Collapse policy is internal and was the source of the 5mC+5hmC double-row halving bug -> must be audited.",
+      "maintained_citable": "INTERNAL tool (liaoyoyo, GitHub). Not externally peer-cited. Lower standalone reviewer trust; trustworthy because cross-validated against modkit/pysam.",
+      "speed_scale": "C++17 core multithreaded (--threads, --max-read-depth downsample, --max-ram-gb). Designed genome-scale with tumor+normal.",
+      "fit_for_task": "GOOD for somatic ASM axis logic (it generated our dualaxis HP-axis data) but its collapse bug + internal-only status mean it should be FED by / cross-checked WITH modkit extraction rather than trusted as sole measurement source."
+    },
+
+    "ism": {
+      "input": "Haplotagged modBAM (MM/ML) + VCF (TP/FP SNV) + REF; window (w1000/w5000); modes baseline/all/chr19-verification/full-read.",
+      "computes": "Read-level CpG methylation pattern matrices; read-read distance matrices (L1 / NHD / Bernoulli); distance + cluster heatmaps; subclonal-structure report (hierarchical clustering of reads by 5mCG pattern). Indel-corrected CpG alignment.",
+      "5mc_vs_5hmc": "5mCG pattern oriented (MethylationParser from MM/ML). 5hmC handling not the focus; primary signal = 5mCG. (Our 49_meth audit MAX-collapses m+h per read.)",
+      "per_read_or_site": "PER-READ first-class (read x CpG matrix); subclone resolution operates on reads.",
+      "continuous_or_binarized": "Pattern/distance based (binarized CpG states for Hamming/Bernoulli; L1 on levels). Distance-metric centric rather than raw continuous prob.",
+      "somatic_aware": "PARTIAL/INDIRECT. Built around TP/FP somatic SNV context + HP tags (HP=1-1/2-1/3 read-level somatic-ALT semantics documented), but its native axis is subclonal pattern, not an explicit germline-REF vs somatic-ALT ASM delta.",
+      "haplotype_aware": "YES. Consumes LongPhase-S/TO HP tags (fixed 2026-03-30 integer-tag bug); HP_Ratio / Potential_LOH / hp_assign_rate.",
+      "subclone_aware": "YES (core purpose). Read-read distance + hierarchical clustering = subclonal methylation group resolution. The only one of the three built specifically for subclone structure.",
+      "qmode_handling": "Reads MM/ML via MethylationParser; honors haplotag formats. modBAM-dependent.",
+      "maintained_citable": "INTERNAL (this project, liaoyoyo). In development. Not externally cited; reviewer trust from internal validation + our provenance ledger.",
+      "speed_scale": "C++17 + OpenMP, 120-thread defaults, genome-scale batch (run_batch_vcf_analysis.sh). Heavier per-region (distance matrices O(reads^2)).",
+      "fit_for_task": "BEST for the subclone-CLUSTERING step (read-level pattern clustering is its purpose) but it is distance/pattern centric, not separated-continuous-5mC+5hmC centric. For our specific GMM-on-continuous-per-read-beta task it would also benefit from modkit-grade separated continuous extraction as input rather than its internal MM/ML parse."
+    }
+  },
+
+  "overlap_and_superiority": {
+    "modkit_superior": "Native separate 5mC/5hmC, raw continuous per-read mod_qual, spec-compliant '?'-mode handling, speed/scale, and EXTERNAL citability/reviewer-trust for the measurement step.",
+    "msa_superior": "Explicit somatic germline-vs-ALT + HP/ALLELE ASM axis logic with tumor+normal; Level1/2/3 hierarchy and the dualaxis data we already have.",
+    "ism_superior": "Per-read subclonal clustering (read-read distance + hierarchical clustering of 5mCG patterns) — the only dedicated subclone resolver.",
+    "overlap": "All three read MM/ML per-read methylation and all are HP-aware to some degree. modkit overlaps MSA/ISM ONLY at the extraction/pileup layer; it does NOT overlap their somatic-axis or subclone-clustering analysis logic.",
+    "key_caveat": "modkit does NOT do somatic-vs-germline ASM axis OR subclone clustering. It is an extraction/pileup layer. Realistic architecture = modkit-as-extraction-frontend feeding MSA/ISM (or our pysam-style script) analysis logic, NOT modkit replacing them."
+  },
+
+  "comparison_table_md": "| Dimension | modkit (v0.6.3) | MSA (MethylSomaticAnalysis) | ISM (InterSubMod, this project) |\n|---|---|---|---|\n| **Input** | modBAM (MM/ML) + ref + --include-bed | somatic VCF+tbi + ref + tumor & normal BAM | haplotagged modBAM + TP/FP VCF + ref |\n| **Computes (output)** | extract full: per-read continuous table; extract calls: thresholded calls; pileup: per-site bedMethyl; dmr: region diff | L1 per-read/CpG, L2 per-variant, L3 HP-group stats; Py feature matrix + KDE/GPR/wavelet | read x CpG matrix; read-read distance (L1/NHD/Bernoulli); cluster heatmap; subclone report |\n| **5mC vs 5hmC** | SEPARATE by default (m\\|h rows); collapse only with --combine-mods; per-mod --mod-threshold h:0.8 | both carried; downstream MAX-collapse on double rows caused beta-halving bug | 5mCG-pattern centric; our audit MAX-collapses m+h |\n| **Per-read vs per-site** | BOTH (extract=read, pileup=site) | BOTH (L1 read, L2/L3 agg) | PER-READ first-class |\n| **Continuous vs binarized** | BOTH (full=continuous prob, calls/pileup=thresholded) | BOTH (--meth-high/low) | distance/pattern (binarized for Hamming/Bernoulli) |\n| **Somatic-aware (germline-vs-somatic axis)** | NO (extraction layer; dmr = arbitrary group diff) | YES (core; HP-axis & ALLELE-axis ASM, tumor+normal) | PARTIAL (TP/FP + HP=1-1/2-1/3 context, not explicit ASM delta) |\n| **Haplotype/phase-aware** | PARTIAL (pileup --phased HP1/HP2, diploid int HP) | YES (L3 HP-group; somatic sub-states) | YES (HP tags, HP_Ratio, Potential_LOH) |\n| **Subclone/clustering-aware** | NO (entropy = windowed, not subclone) | PARTIAL (Py clustering, variant-centric) | YES (core: per-read pattern clustering) |\n| **'?'/'.' modBAM mode** | spec-compliant; '?' skipped C = UNKNOWN, not canonical | reads MM/ML (modBAM-dependent) | reads MM/ML via MethylationParser |\n| **Maintained + citable (reviewer trust)** | STRONG (ONT official, versioned, widely cited) | internal (liaoyoyo); trust via cross-val | internal (this project); trust via provenance ledger |\n| **Speed / scale** | FAST (Rust, multithread, indexed, sampling) | C++17 multithread + downsample | C++17+OpenMP; heavy O(reads^2) distance per region |\n| **FIT for our task** (separated continuous 5mC+5hmC per-read at loci for subclone GMM) | extraction FRONTEND: gives clean separated continuous per-read m & h at --include-bed loci; does NOT do somatic axis or GMM | somatic-axis logic source (generated dualaxis data) but collapse bug + internal-only | subclone-clustering logic home; pattern/distance centric, not separated-continuous centric |",
+
+  "modkit_role": "Extraction/pileup FRONTEND. Use `modkit extract full --include-bed <candidate_loci.bed> --reference <ref> <tumor_modBAM> out.tsv` to produce a spec-compliant per-read table with SEPARATE continuous 5mC (m) and 5hmC (h) mod_qual at the 12 candidate loci + BRCA2. Optionally `pileup --phased` for per-site HP1/HP2 sanity. modkit gives the trusted, citable, fast measurement layer but performs NO somatic-vs-germline ASM axis assignment and NO subclone clustering.",
+
+  "msa_role": "Somatic ASM AXIS logic. MSA (the C++ tool that already produced our Level1/dualaxis HP-axis + ALLELE-axis data) owns the germline-REF vs somatic-ALT and HP=1-1/2-1/3 grouping with tumor+normal context. Keep it for the somatic-axis definitions but AUDIT its 5mC+5hmC double-row MAX-collapse (the BRCA2 -0.054 halving artifact) -- prefer modkit's separate emission as the raw measurement and reconcile.",
+
+  "ism_role": "Subclone-CLUSTERING logic (this project). ISM owns per-read 5mCG pattern -> read-read distance (L1/NHD/Bernoulli) -> hierarchical clustering = subclonal-group resolution, plus HP-tag handling. It is the home for the actual subclone-resolution step; for the specific GMM-on-continuous-per-read-beta question it should consume modkit-grade separated continuous extraction rather than rely solely on its internal MM/ML parse.",
+
+  "recommended_architecture": "modkit-as-extraction-frontend -> MSA/ISM (and our pysam audit script) as analysis backends. Pipeline: (1) modkit extract full --include-bed loci.bed --reference ref tumor.bam -> per-read SEPARATE continuous m & h mod_qual table (trusted, citable, fast); (2) join read_id -> HP tag (pileup --phased or BAM HP) and to somatic-ALT vs germline-REF supporting groups using MSA's somatic-axis definitions (HP1_vs_HP1-1 / HP2_vs_HP2-1); (3) per-read collapse/aggregate to a continuous beta and run GMM bimodality (our 49_meth_audit logic) for subclone resolution, which is ISM's clustering domain. modkit does NOT replace MSA/ISM -- it replaces only their raw MM/ML measurement step, removing the MSA double-row collapse bug and adding reviewer-citable provenance. Cross-validate modkit extract vs our pysam r.modified_bases baseline (m2_meth_measurement_audit.json) before adopting.",
+
+  "notes": [
+    "modkit subcommands enumerated live from v0.6.3 help: pileup / extract(full|calls|read-stats) / dmr / pileup-hemi / validate / motif / entropy / localize / stats / bedmethyl / modbam / open-chromatin.",
+    "VERIFIED from help: pileup --combine-mods default OFF (5mC & 5hmC SEPARATE); pileup --phased -> hp1/hp2/combined.bedmethyl (diploid only); extract full = raw continuous mod_qual (no threshold); extract calls = thresholded (same algo as pileup); --include-bed restricts both; --mod-threshold h:0.8 sets per-mod pass threshold.",
+    "modkit dmr exists but is REGION-LEVEL differential methylation between two region/sample groups -- it is NOT a somatic-ALT-vs-germline-REF per-read ASM axis and NOT subclone clustering; do not overclaim it as somatic-aware.",
+    "Candidate loci (s_subclone_assessment.json) all use somatic-vs-germline HP-axis (HP1_vs_HP1-1 x5, HP2_vs_HP2-1 x7, all is_tp=1) with per-read continuous beta_cont + GMM bm_* fields -> the exact axis/clustering logic that lives in MSA/ISM, NOT modkit.",
+    "MEMORY (ASM allele-axis confound): only HP-axis (HP1 vs HP1-1) is somatic-controlled; ALLELE-axis is confounded by baseline het ASM. modkit cannot make this distinction -- it is purely measurement; the axis choice is MSA/ISM logic.",
+    "MSA 5mC+5hmC double-row MAX-collapse caused the buggy BRCA2 dB=-0.054 (vs corrected -0.122); modkit's clean separate m/h emission is a concrete reason to use it as the measurement frontend.",
+    "Reviewer trust: of the three, ONLY modkit is externally citable for the measurement step -- strongest argument for modkit-frontend in a paper-facing pipeline; MSA/ISM remain internal but provide the somatic-axis + subclone logic modkit lacks.",
+    "No extraction was run for this comparison (P2 = documentation deliverable). Flag-level facts confirmed from live --help; analysis-logic facts grounded in KB docs + s_subclone_assessment.json + 49_meth_measurement_audit.py."
+  ]
+}

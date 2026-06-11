@@ -1,0 +1,35 @@
+{
+ "base_TP_FP": {
+  "TP": 294723,
+  "FP": 3177
+ },
+ "base_ratio": 92.8,
+ "large_dbeta_cut": 0.2,
+ "cells": {
+  "both": {
+   "TP": 3379,
+   "FP": 85,
+   "TP_FP_ratio": 39.8,
+   "enrich_vs_base": 0.43
+  },
+  "ISM_only": {
+   "TP": 33656,
+   "FP": 228,
+   "TP_FP_ratio": 147.6,
+   "enrich_vs_base": 1.59
+  },
+  "dbeta_only": {
+   "TP": 1633,
+   "FP": 137,
+   "TP_FP_ratio": 11.9,
+   "enrich_vs_base": 0.13
+  },
+  "neither": {
+   "TP": 256055,
+   "FP": 2727,
+   "TP_FP_ratio": 93.9,
+   "enrich_vs_base": 1.01
+  }
+ },
+ "interpretation": "dbeta_only (large \u0394\u03b2, NO clustering) is the FP-enriched cell (enrich<1 vs base = MORE FP per TP) = D5 regression-to-extreme. ISM_only catches clustering-only loci (e.g. BRCA2: low per-position \u0394\u03b2, real clustering). The honest union discovery channel = ISM-clustered OR (large-\u0394\u03b2 AND clustering), i.e. excludes the dbeta_only FP cell. \u0394\u03b2 does NOT replace CramersV; it is a complementary channel that must be clustering-gated."
+}

@@ -1,0 +1,74 @@
+{
+  "pilot": "HCC1395 ASM x SEQC2 CN ground-truth confound disentanglement",
+  "anchor_commit": "8a5faa8",
+  "evaluator": "independent fresh-context evaluator agent (read-only)",
+  "written_by": "parent agent (evaluator has no Write tool)",
+  "date": "2026-06-02",
+  "q1_gate": {
+    "o1_beta_reproduces": true,
+    "o1_max_abs_diff": 0.0,
+    "n_checked": 20,
+    "o2_ruler_ok": true,
+    "ruler_pc1_ari": 0.5569,
+    "ruler_nc1_ari": -0.00485,
+    "overall_pass": true,
+    "provenance_caveat": "raw Level1 was disk-safe-deleted (19_full_tp_asm_batch.sh:63); audit REGENERATED 20 chr19 HP1 positions from the MSA binary deterministically and matched mean_delta + n_paired_cpg EXACTLY. Scope = ~0.04% of 51,172 TP rows, one chrom/axis."
+  },
+  "per_hypothesis": [
+    {
+      "id": "H-A",
+      "title": "HP-axis ASM |delta-beta| independent of ground-truth median CN (CN dose-response)",
+      "verdict": "CONFIRM (falsifier refuted; H-A supported: HP-axis ASM is NOT CN-driven)",
+      "rule_applied": "Falsifier = coverage-controlled partial Spearman rho(|db|, median_CN | n_cpg) > 0.2 AND positive direction p<0.05. Support = partial-rho <= 0.1 OR opposite sign.",
+      "numbers": "HP-axis partial-rho = -0.055 (p=7.7e-5, n=5142). |rho| << 0.2 falsifier bar AND sign NEGATIVE (opposite of dose-response). Within-cov strata all rho in [-0.073,-0.053] (consistent negative). Integer-CN median |db| ~flat 0.082->0.062 across CN1->8 (no monotone increase). ALLELE-axis (not the driver) partial-rho=-0.106.",
+      "overclaim_flag": false,
+      "notes": "CLEAN. Coverage genuinely controlled (partial Spearman + within-cov strata agree). Falsifier doubly missed (magnitude << 0.2 AND opposite sign). n well-powered. Significance reflects power, not magnitude."
+    },
+    {
+      "id": "H-B",
+      "title": "Methylation features cannot reverse-predict CN beyond coverage",
+      "verdict": "INCONCLUSIVE (gray zone 0.02-0.05; neither confirm nor falsifier threshold met)",
+      "rule_applied": "Falsifier = (full AUC - coverage-only AUC) > 0.05. Confirm = dAUC <= 0.02. Decisive block = pre-registered HP-sig primary 5-feature set.",
+      "numbers": "primary_HP_sig (n=5111): dAUC_max(RF)=0.0463, dAUC(logistic)=0.0086. 0.02 < 0.046 < 0.05 -> gray zone. All absolute AUCs < 0.58 (RF full=0.566, cov-only=0.520, meth-only=0.547). Within-cov-stratum RF AUC 0.539-0.571 (stable). meth-only perm AUC=0.549, perm p=0.001 (weak non-null). all-HP (n=25546) dAUC_max=0.029 (also gray). o2-augmented block (n=436) dAUC=0.144 -> would REFUTE but DISCARDED (non-preregistered O2 features, selection-biased tiny subset, overfit).",
+      "overclaim_flag": false,
+      "notes": "The Q3 agent escalated to CONFIRM via confound-guard interpretation; the independent evaluator labels it INCONCLUSIVE per the literal pre-reg rule. Methylation carries a weak-but-real CN trace (perm p=0.001) that is practically useless (AUC<0.58) but not a clean null. The ONE hypothesis that did not cleanly resolve. RF dAUC > logistic dAUC = mild nonlinear CN leakage worth flagging. Honest, not overclaimed."
+    },
+    {
+      "id": "H-C",
+      "title": "HP-axis and ALLELE-axis agree at matched loci (ALLELE excess not allele-dosage artifact)",
+      "verdict": "CONFIRM (falsifier refuted; two axes agree, ALLELE excess does NOT scale with CN)",
+      "rule_applied": "Falsifier = (ALLELE|db| - HP|db|) excess INCREASES with median_CN, slope p<0.05 in the POSITIVE direction. Support = no positive scaling.",
+      "numbers": "OLS excess~CN slope = -0.00196 (p=4.9e-8, r2=0.0015, n=19937): p<0.05 BUT slope NEGATIVE (opposite of falsifier). Mean-collapse sensitivity slope=-0.00103 p=0.003 (same negative sign). MW gain-vs-neutral excess p=0.967 (no class diff). HP-vs-ALLELE corr: Spearman 0.59 overall, 0.78 within cnLOH. pct ALLELE>HP=50.9%.",
+      "overclaim_flag": false,
+      "notes": "CLEAN. Significant p correctly NOT treated as falsification because falsifier specifies positive (growth) direction; observed slope negative. r2=0.0015 => CN->excess effectively flat. Agreement RISES to 0.78 within cnLOH (balanced CN=2) = opposite of dosage artifact. Well-powered."
+    },
+    {
+      "id": "H-D",
+      "title": "ASM signal not explained by error/alignment",
+      "verdict": "CONFIRM-PARTIAL (falsifier refuted on testable proxies; low-MAPQ untestable by construction)",
+      "rule_applied": "Falsifier = resid(|db| | n_cpg+median_CN) vs error proxy, rho > 0.2 AND p<0.05. Support = all live rho <= 0.1.",
+      "numbers": "All live proxies (n=596): median_nm rho=-0.008 (p=0.85), mean_nm_per_kb rho=0.052 (p=0.21), frac_supp rho=-0.042 (p=0.30). All |rho|<=0.052 << 0.2. resid model r2(cov+CN)=0.129 (87% of |db| variance residual, uncorrelated with error). ZERO falsifiers.",
+      "overclaim_flag": false,
+      "notes": "CONFIRM on tested proxies. BUT median_mapq=const 60 and frac_mapq_lt20=const 0 (zero variance) -> low-MAPQ/alignment-difficulty confound UNTESTABLE here (blind spot), not refuted. Scope conclusion to 'NM/supplementary error not main driver', NOT blanket 'no error confound'. n=596 modest, single-sample."
+    },
+    {
+      "id": "H-E",
+      "title": "Read-level clustering blind-ARI does not track CN/error (clustering = real methyl structure)",
+      "verdict": "CONFIRM (falsifier refuted; clustering null wrt CN/error at 0.2 bar) - weak residual",
+      "rule_applied": "Falsifier = blind-ARI ~ median_CN OR ~ error proxy with rho>0.2 AND p<0.05. Support = no proxy reaches |rho|>0.2.",
+      "numbers": "ari_vs_median_cn rho=0.116 (p=0.0046), ari_vs_mean_nm_per_kb rho=0.119 (p=0.0037) -- SIGNIFICANT but |rho|<0.2 (below falsifier bar). ari_vs_median_nm rho=0.043 (p=0.30), ari_vs_frac_supp rho=-0.055 (p=0.18). Blind-vs-placebo paired Wilcoxon p=1.8e-43, median blind 0.267 vs placebo 0.015 (+0.223). collider_flag=false. BRCA2 canonical blind_ari=0.790 (placebo 0.132). n=596 (placebo 258 NaN).",
+      "overclaim_flag": false,
+      "notes": "Defensible CONFIRM under literal 0.2 bar, but NOT a clean null: 2/4 proxies (CN, nm/kb) significant at p<0.005 with rho~0.12 = weak residual CN/error-correlated component. Load-bearing positive evidence = blind-vs-placebo Wilcoxon (p=1.8e-43). Foreground the placebo separation over a bare null claim."
+    }
+  ],
+  "overall_picture": "PASS-with-caveats. Methods sound (Q1 gate exact reproduce + valid clustering ruler), falsifiers honestly applied, no overclaim in any of 6 JSONs. Core question answered: the methylation / read-clustering grouping difference is mainly MUTATION-LINKED, not a CN/ploidy/LOH/error/alignment artifact, on the testable channels. The HP-axis (same locus, same haplotype, germline-read vs somatic-read) holds CN/ploidy/alignment/region constant by design and is the right estimator to lead on. Blocks any tier upgrade beyond single-sample exploratory: (a) single sample HCC1395 = the only sample with SEQC2 CN ground truth, so cross-sample generality is impossible here; (b) Q1 reproducibility narrow (regenerated 20 chr19 HP1 positions, ~0.04% of rows); (c) cross-platform caveat (SEQC2 CN is short-read NGS vs ONT long-read); (d) H-B gray zone + untestable low-MAPQ channel are residual confound risks. CONSISTENT with concluded ZAR1L/BRCA2 finding (ASM real but single-sample, needs COLO829). Does not conflict with any NEGATIVE conclusion.",
+  "recommendation": "Report as single-sample exploratory tier-3 'mutation-linked; CN/ploidy/error-confound largely excluded on testable channels'. Do NOT upgrade to tier-4+ or claim cross-sample generality until a 2nd ground-truth sample (COLO829) replicates. Carry H-B gray-zone + MAPQ-untestable caveats into any writeup.",
+  "needs_work": [
+    "H-B unresolved: methylation->CN dAUC=0.046 (RF) in gray zone; perm p=0.001 = weak non-null CN leakage. Replicate on COLO829 and/or test CN->coverage/region vs CN->methylation pathway before any 'methylation does not encode CN' claim.",
+    "H-D MAPQ blind spot: median_mapq const 60 (zero variance) -> low-MAPQ/alignment confound UNTESTABLE, not refuted. Scope to 'NM/supplementary error not main driver'.",
+    "Single-sample ceiling: every verdict HCC1395-only. Mark partial_flag in all downstream reports; no cross-sample generality.",
+    "Q1 reproducibility provenance narrow: raw Level1 disk-safe-deleted; re-audit regenerated 20 chr19 HP1 positions (~0.04% of rows, one chrom/axis). Consider broader multi-chrom/ALLELE-axis spot re-audit before any confirmatory upgrade.",
+    "H-E ARI not fully orthogonal: ari_vs_CN rho=0.116, ari_vs_nm/kb rho=0.119 (p<0.005, below 0.2 bar). Foreground blind-vs-placebo Wilcoxon (p=1.8e-43) as load-bearing evidence.",
+    "Cross-platform caveat: SEQC2 median CN is short-read NGS applied to ONT long-read; not gold-standard. Keep attached to all CN-based verdicts."
+  ]
+}

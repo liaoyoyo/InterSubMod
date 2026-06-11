@@ -1,0 +1,537 @@
+{
+  "task": "Q3_reverse_predict_CN_from_methylation",
+  "sample": "HCC1395",
+  "scope": "single_sample_A_pilot",
+  "hypothesis": "H-B: methylation features CANNOT predict CN beyond coverage",
+  "pre_reg": {
+    "falsifier": "(full-model AUC) - (coverage-only AUC) > 0.05",
+    "confirm_threshold": "dAUC <= 0.02 -> methylation does NOT encode CN",
+    "target": "binary neutral(CN=2) vs gain(CN>2); loss dropped (too few)",
+    "positive_class": "gain (CN>2) = 1",
+    "features_full": [
+      "mean_delta",
+      "abs_delta",
+      "mean_germ_beta",
+      "mean_som_beta",
+      "n_paired_cpg"
+    ],
+    "features_coverage_only": [
+      "n_paired_cpg"
+    ],
+    "features_meth_only_for_perm": [
+      "mean_delta",
+      "abs_delta",
+      "mean_germ_beta",
+      "mean_som_beta"
+    ],
+    "sig_site_def": "axis_type=='HP' & wilcoxon_p<0.05 (matches 40_cn_annotate.py:115)",
+    "cv": "5-fold stratified, OOF proba AUC",
+    "n_perm": 1000
+  },
+  "n_loss_dropped": {
+    "hp_sig": 31,
+    "all_hp": 184
+  },
+  "results": {
+    "primary_HP_sig": {
+      "label": "HP_sig_5feat",
+      "n": 5111,
+      "n_gain": 4122,
+      "n_neutral": 989,
+      "prevalence_gain": 0.8064957933868128,
+      "full_features": [
+        "mean_delta",
+        "abs_delta",
+        "mean_germ_beta",
+        "mean_som_beta",
+        "n_paired_cpg"
+      ],
+      "coverage_feature": [
+        "n_paired_cpg"
+      ],
+      "meth_only_features": [
+        "mean_delta",
+        "abs_delta",
+        "mean_germ_beta",
+        "mean_som_beta"
+      ],
+      "models": {
+        "logistic": {
+          "full_auc": 0.5276861586132562,
+          "coverage_only_auc": 0.5190385114473669,
+          "meth_only_auc": 0.5261878725171452,
+          "dAUC_full_minus_cov": 0.008647647165889283
+        },
+        "rf": {
+          "full_auc": 0.5659726668266016,
+          "coverage_only_auc": 0.5196653729599098,
+          "meth_only_auc": 0.5466293714115827,
+          "dAUC_full_minus_cov": 0.04630729386669186
+        }
+      },
+      "dAUC": {
+        "logistic": 0.008647647165889283,
+        "rf": 0.04630729386669186
+      },
+      "confound_guard": {
+        "within_coverage_stratum_auc_rf": [
+          {
+            "bin": 0,
+            "cov_lo": 6.0,
+            "cov_hi": 20.0,
+            "n": 1453,
+            "n_pos_gain": 1166,
+            "n_neg_neutral": 287,
+            "auc": 0.5578155162830727
+          },
+          {
+            "bin": 1,
+            "cov_lo": 20.0,
+            "cov_hi": 31.0,
+            "n": 1131,
+            "n_pos_gain": 887,
+            "n_neg_neutral": 244,
+            "auc": 0.5569981702921988
+          },
+          {
+            "bin": 2,
+            "cov_lo": 31.0,
+            "cov_hi": 52.0,
+            "n": 1315,
+            "n_pos_gain": 1061,
+            "n_neg_neutral": 254,
+            "auc": 0.5385166274573832
+          },
+          {
+            "bin": 3,
+            "cov_lo": 52.0,
+            "cov_hi": 625.0,
+            "n": 1212,
+            "n_pos_gain": 1008,
+            "n_neg_neutral": 204,
+            "auc": 0.5710006224712108
+          }
+        ],
+        "within_coverage_stratum_auc_logistic": [
+          {
+            "bin": 0,
+            "cov_lo": 6.0,
+            "cov_hi": 20.0,
+            "n": 1453,
+            "n_pos_gain": 1166,
+            "n_neg_neutral": 287,
+            "auc": 0.5147022788532223
+          },
+          {
+            "bin": 1,
+            "cov_lo": 20.0,
+            "cov_hi": 31.0,
+            "n": 1131,
+            "n_pos_gain": 887,
+            "n_neg_neutral": 244,
+            "auc": 0.5076099210823
+          },
+          {
+            "bin": 2,
+            "cov_lo": 31.0,
+            "cov_hi": 52.0,
+            "n": 1315,
+            "n_pos_gain": 1061,
+            "n_neg_neutral": 254,
+            "auc": 0.5275479231448567
+          },
+          {
+            "bin": 3,
+            "cov_lo": 52.0,
+            "cov_hi": 625.0,
+            "n": 1212,
+            "n_pos_gain": 1008,
+            "n_neg_neutral": 204,
+            "auc": 0.5075377373171491
+          }
+        ],
+        "permutation_meth_only": {
+          "logistic": {
+            "observed_auc": 0.5261878725171452,
+            "perm_auc_mean": 0.4975811468609827,
+            "perm_auc_std": 0.013066081994304635,
+            "perm_auc_p95": 0.5176878033428363,
+            "p_value": 0.01098901098901099,
+            "n_perm": 1000
+          },
+          "rf": {
+            "observed_auc": 0.5486842408659249,
+            "perm_auc_mean": 0.49872331073639237,
+            "perm_auc_std": 0.01363486028878646,
+            "perm_auc_p95": 0.5210861445821553,
+            "p_value": 0.000999000999000999,
+            "n_perm": 1000,
+            "note": "lean RF (60 trees, depth 10) single-threaded, joblib-parallel across perms"
+          }
+        }
+      },
+      "feature_importance_rf": {
+        "mean_germ_beta": 0.21543424469118985,
+        "mean_som_beta": 0.202345522412987,
+        "abs_delta": 0.2003967370663285,
+        "mean_delta": 0.1956325107220169,
+        "n_paired_cpg": 0.18619098510747775
+      },
+      "logistic_coef_std": {
+        "abs_delta": -0.09767866901149463,
+        "mean_delta": -0.05382083978693943,
+        "mean_som_beta": -0.022209926809297363,
+        "n_paired_cpg": 0.01947509466615642,
+        "mean_germ_beta": 0.007286954020988051
+      }
+    },
+    "robustness_all_HP": {
+      "label": "all_HP_5feat",
+      "n": 25546,
+      "n_gain": 20174,
+      "n_neutral": 5372,
+      "prevalence_gain": 0.7897126751741955,
+      "full_features": [
+        "mean_delta",
+        "abs_delta",
+        "mean_germ_beta",
+        "mean_som_beta",
+        "n_paired_cpg"
+      ],
+      "coverage_feature": [
+        "n_paired_cpg"
+      ],
+      "meth_only_features": [
+        "mean_delta",
+        "abs_delta",
+        "mean_germ_beta",
+        "mean_som_beta"
+      ],
+      "models": {
+        "logistic": {
+          "full_auc": 0.5205661277415156,
+          "coverage_only_auc": 0.5101574372578818,
+          "meth_only_auc": 0.5160050966863787,
+          "dAUC_full_minus_cov": 0.010408690483633798
+        },
+        "rf": {
+          "full_auc": 0.5312159814601795,
+          "coverage_only_auc": 0.5022546677118304,
+          "meth_only_auc": 0.517919043819884,
+          "dAUC_full_minus_cov": 0.028961313748349093
+        }
+      },
+      "dAUC": {
+        "logistic": 0.010408690483633798,
+        "rf": 0.028961313748349093
+      },
+      "confound_guard": {
+        "within_coverage_stratum_auc_rf": [
+          {
+            "bin": 0,
+            "cov_lo": 5.0,
+            "cov_hi": 16.0,
+            "n": 7216,
+            "n_pos_gain": 5686,
+            "n_neg_neutral": 1530,
+            "auc": 0.5181600146213956
+          },
+          {
+            "bin": 1,
+            "cov_lo": 16.0,
+            "cov_hi": 26.0,
+            "n": 6397,
+            "n_pos_gain": 5008,
+            "n_neg_neutral": 1389,
+            "auc": 0.5280037900482338
+          },
+          {
+            "bin": 2,
+            "cov_lo": 26.0,
+            "cov_hi": 42.0,
+            "n": 5670,
+            "n_pos_gain": 4428,
+            "n_neg_neutral": 1242,
+            "auc": 0.527022446821355
+          },
+          {
+            "bin": 3,
+            "cov_lo": 42.0,
+            "cov_hi": 625.0,
+            "n": 6263,
+            "n_pos_gain": 5052,
+            "n_neg_neutral": 1211,
+            "auc": 0.5269953834375182
+          }
+        ],
+        "within_coverage_stratum_auc_logistic": [
+          {
+            "bin": 0,
+            "cov_lo": 5.0,
+            "cov_hi": 16.0,
+            "n": 7216,
+            "n_pos_gain": 5686,
+            "n_neg_neutral": 1530,
+            "auc": 0.5028653682131782
+          },
+          {
+            "bin": 1,
+            "cov_lo": 16.0,
+            "cov_hi": 26.0,
+            "n": 6397,
+            "n_pos_gain": 5008,
+            "n_neg_neutral": 1389,
+            "auc": 0.5143524141071909
+          },
+          {
+            "bin": 2,
+            "cov_lo": 26.0,
+            "cov_hi": 42.0,
+            "n": 5670,
+            "n_pos_gain": 4428,
+            "n_neg_neutral": 1242,
+            "auc": 0.5193631290848604
+          },
+          {
+            "bin": 3,
+            "cov_lo": 42.0,
+            "cov_hi": 625.0,
+            "n": 6263,
+            "n_pos_gain": 5052,
+            "n_neg_neutral": 1211,
+            "auc": 0.5104065530211646
+          }
+        ],
+        "permutation_meth_only": {
+          "logistic": {
+            "observed_auc": 0.5160050966863787,
+            "p_value": null,
+            "note": "perm skipped (large-n robustness block)"
+          },
+          "rf": {
+            "observed_auc": 0.517919043819884,
+            "p_value": null,
+            "note": "perm skipped (large-n robustness block)"
+          }
+        }
+      },
+      "feature_importance_rf": {
+        "mean_germ_beta": 0.22282792480983013,
+        "mean_som_beta": 0.22278627970081655,
+        "mean_delta": 0.193655345432988,
+        "abs_delta": 0.19007974734639096,
+        "n_paired_cpg": 0.17065070270997432
+      },
+      "logistic_coef_std": {
+        "abs_delta": -0.04568269510226965,
+        "n_paired_cpg": 0.045022837083351155,
+        "mean_delta": -0.02265450653366011,
+        "mean_som_beta": -0.01836751181917689,
+        "mean_germ_beta": -0.011113183678129319
+      }
+    },
+    "robustness_HP_sig_with_o2": {
+      "label": "HP_sig_7feat_with_o2",
+      "n": 436,
+      "n_gain": 324,
+      "n_neutral": 112,
+      "prevalence_gain": 0.7431192660550459,
+      "full_features": [
+        "mean_delta",
+        "abs_delta",
+        "mean_germ_beta",
+        "mean_som_beta",
+        "n_paired_cpg",
+        "blind_ari",
+        "silhouette"
+      ],
+      "coverage_feature": [
+        "n_paired_cpg"
+      ],
+      "meth_only_features": [
+        "mean_delta",
+        "abs_delta",
+        "mean_germ_beta",
+        "mean_som_beta"
+      ],
+      "models": {
+        "logistic": {
+          "full_auc": 0.6256062610229277,
+          "coverage_only_auc": 0.48197751322751325,
+          "meth_only_auc": 0.5769951499118166,
+          "dAUC_full_minus_cov": 0.14362874779541446
+        },
+        "rf": {
+          "full_auc": 0.6351135361552027,
+          "coverage_only_auc": 0.5644427910052909,
+          "meth_only_auc": 0.6103119488536155,
+          "dAUC_full_minus_cov": 0.07067074514991178
+        }
+      },
+      "dAUC": {
+        "logistic": 0.14362874779541446,
+        "rf": 0.07067074514991178
+      },
+      "confound_guard": {
+        "within_coverage_stratum_auc_rf": [
+          {
+            "bin": 0,
+            "cov_lo": 8.0,
+            "cov_hi": 18.0,
+            "n": 127,
+            "n_pos_gain": 98,
+            "n_neg_neutral": 29,
+            "auc": 0.47853624208304013
+          },
+          {
+            "bin": 1,
+            "cov_lo": 18.0,
+            "cov_hi": 24.0,
+            "n": 94,
+            "n_pos_gain": 68,
+            "n_neg_neutral": 26,
+            "auc": 0.591628959276018
+          },
+          {
+            "bin": 2,
+            "cov_lo": 24.0,
+            "cov_hi": 36.0,
+            "n": 114,
+            "n_pos_gain": 86,
+            "n_neg_neutral": 28,
+            "auc": 0.39078073089701
+          },
+          {
+            "bin": 3,
+            "cov_lo": 36.0,
+            "cov_hi": 197.0,
+            "n": 101,
+            "n_pos_gain": 72,
+            "n_neg_neutral": 29,
+            "auc": 0.8117816091954022
+          }
+        ],
+        "within_coverage_stratum_auc_logistic": [
+          {
+            "bin": 0,
+            "cov_lo": 8.0,
+            "cov_hi": 18.0,
+            "n": 127,
+            "n_pos_gain": 98,
+            "n_neg_neutral": 29,
+            "auc": 0.5214637579169599
+          },
+          {
+            "bin": 1,
+            "cov_lo": 18.0,
+            "cov_hi": 24.0,
+            "n": 94,
+            "n_pos_gain": 68,
+            "n_neg_neutral": 26,
+            "auc": 0.6883484162895929
+          },
+          {
+            "bin": 2,
+            "cov_lo": 24.0,
+            "cov_hi": 36.0,
+            "n": 114,
+            "n_pos_gain": 86,
+            "n_neg_neutral": 28,
+            "auc": 0.4215116279069767
+          },
+          {
+            "bin": 3,
+            "cov_lo": 36.0,
+            "cov_hi": 197.0,
+            "n": 101,
+            "n_pos_gain": 72,
+            "n_neg_neutral": 29,
+            "auc": 0.7686781609195402
+          }
+        ],
+        "permutation_meth_only": {
+          "logistic": {
+            "observed_auc": 0.5769951499118166,
+            "perm_auc_mean": 0.49368504739858904,
+            "perm_auc_std": 0.04424192664052235,
+            "perm_auc_p95": 0.5612392526455026,
+            "p_value": 0.02097902097902098,
+            "n_perm": 1000
+          },
+          "rf": {
+            "observed_auc": 0.5904431216931216,
+            "perm_auc_mean": 0.49728283454585537,
+            "perm_auc_std": 0.045163955368440124,
+            "perm_auc_p95": 0.5695154045414462,
+            "p_value": 0.016983016983016984,
+            "n_perm": 1000,
+            "note": "lean RF (60 trees, depth 10) single-threaded, joblib-parallel across perms"
+          }
+        }
+      },
+      "feature_importance_rf": {
+        "silhouette": 0.17002647573849394,
+        "abs_delta": 0.16322339506749176,
+        "mean_som_beta": 0.15739384862159472,
+        "mean_delta": 0.14156778122901348,
+        "blind_ari": 0.12544561048362002,
+        "mean_germ_beta": 0.12182316154911679,
+        "n_paired_cpg": 0.1205197273106693
+      },
+      "logistic_coef_std": {
+        "abs_delta": 0.4756114002943545,
+        "silhouette": -0.4181522746143068,
+        "n_paired_cpg": 0.33918350552056337,
+        "mean_som_beta": -0.21794243566808486,
+        "mean_delta": -0.2147126142506908,
+        "blind_ari": 0.02429402551631707,
+        "mean_germ_beta": 0.0051875855035707135
+      }
+    }
+  },
+  "verdicts": {
+    "primary_HP_sig": {
+      "dAUC_logistic": 0.008647647165889283,
+      "dAUC_rf": 0.04630729386669186,
+      "dAUC_max": 0.04630729386669186,
+      "meth_only_auc_max": 0.5486842408659249,
+      "meth_only_perm_p_min": 0.000999000999000999,
+      "falsifier_threshold_gt": 0.05,
+      "confirm_threshold_le": 0.02,
+      "verdict": "INCONCLUSIVE_gray_zone_0.02_to_0.05"
+    },
+    "robustness_all_HP": {
+      "dAUC_logistic": 0.010408690483633798,
+      "dAUC_rf": 0.028961313748349093,
+      "dAUC_max": 0.028961313748349093,
+      "meth_only_auc_max": 0.517919043819884,
+      "meth_only_perm_p_min": null,
+      "falsifier_threshold_gt": 0.05,
+      "confirm_threshold_le": 0.02,
+      "verdict": "INCONCLUSIVE_gray_zone_0.02_to_0.05"
+    },
+    "robustness_HP_sig_with_o2": {
+      "dAUC_logistic": 0.14362874779541446,
+      "dAUC_rf": 0.07067074514991178,
+      "dAUC_max": 0.14362874779541446,
+      "meth_only_auc_max": 0.5904431216931216,
+      "meth_only_perm_p_min": 0.016983016983016984,
+      "falsifier_threshold_gt": 0.05,
+      "confirm_threshold_le": 0.02,
+      "verdict": "REFUTE_HB_methylation_encodes_CN"
+    }
+  },
+  "decision_rule_result": {
+    "decisive_block": "primary_HP_sig",
+    "dAUC_max": 0.04630729386669186,
+    "confirm_threshold_le": 0.02,
+    "falsifier_threshold_gt": 0.05,
+    "met": false,
+    "verdict": "INCONCLUSIVE_gray_zone_0.02_to_0.05",
+    "meth_only_perm_check": "meth-only AUC max=0.549, perm p_min=0.0010"
+  },
+  "outputs": {
+    "json": "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/q3_reverse_predict.json",
+    "figure": "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/figures/cn_confound/q3_reverse_predict.png"
+  }
+}

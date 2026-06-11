@@ -1,0 +1,137 @@
+{
+  "hypothesis": "H2",
+  "mode": "WITHIN-SAMPLE PROXY (cross-sample MSA data absent; see header)",
+  "partial_flag": true,
+  "claim_ceiling": "stability of credible-ASM signal WITHIN HCC1395; NOT cross-sample reproduction",
+  "data": {
+    "sample": "HCC1395 paired_full (single sample)",
+    "credible_filter": "HP-axis + n_cpg>=100 + |germ_beta-0.5|<=0.3 + nonLOH",
+    "n_credible_TP": 198,
+    "n_credible_TP_sig_p<0.05": 75,
+    "n_credible_FP": 7,
+    "n_credible_FP_sig_p<0.05": 3
+  },
+  "bootstrap_stability": {
+    "n_boot": 5000,
+    "median_abs_delta": {
+      "point": 0.027749999999999997,
+      "ci95": [
+        0.02065,
+        0.0318
+      ]
+    },
+    "median_signed_delta": {
+      "point": 0.00030000000000000003,
+      "ci95": [
+        -0.0051,
+        0.0072
+      ]
+    },
+    "mean_signed_delta": {
+      "point": 0.002123232323232326,
+      "ci95": [
+        -0.007508371212121213,
+        0.012592777777777774
+      ]
+    },
+    "frac_wilcoxon_sig": {
+      "point": 0.3787878787878788,
+      "ci95": [
+        0.31313131313131315,
+        0.4494949494949495
+      ]
+    },
+    "frac_hyper": {
+      "point": 0.5050505050505051,
+      "ci95": [
+        0.43434343434343436,
+        0.5707070707070707
+      ]
+    },
+    "sign_counts": {
+      "hyper_pos": 100,
+      "hypo_neg": 98,
+      "zero": 0
+    },
+    "binomial_sign_test_p": 0.9433683628047674,
+    "interpretation": "median_signed_delta CI straddles 0 => NO net directional ASM in credible regime; frac_hyper CI straddles 0.5 => symmetric hypo/hyper => signal is magnitude-only noise around baseline, stable but non-directional."
+  },
+  "chr_split_consistency": {
+    "split_method": "interleave 22 autosomes by descending credible-site count",
+    "halfA_chroms": [
+      "chr7",
+      "chr20",
+      "chr17",
+      "chr15",
+      "chr10",
+      "chr13",
+      "chr11",
+      "chr4",
+      "chr18",
+      "chr8"
+    ],
+    "halfB_chroms": [
+      "chr5",
+      "chr9",
+      "chr16",
+      "chr19",
+      "chr2",
+      "chr3",
+      "chr12",
+      "chr1",
+      "chr14",
+      "chr6",
+      "chr21"
+    ],
+    "nA": 99,
+    "nB": 99,
+    "median_abs_delta_A": {
+      "point": 0.031,
+      "ci95": [
+        0.0244,
+        0.03641249999999982
+      ]
+    },
+    "median_abs_delta_B": {
+      "point": 0.0207,
+      "ci95": [
+        0.0162,
+        0.0291
+      ]
+    },
+    "median_signed_delta_A": {
+      "point": 0.0005,
+      "ci95": [
+        -0.005,
+        0.0085
+      ]
+    },
+    "median_signed_delta_B": {
+      "point": 0.0001,
+      "ci95": [
+        -0.01,
+        0.0095
+      ]
+    },
+    "signed_median_CI_overlap": true,
+    "frac_hyper_A": 0.5050505050505051,
+    "frac_hyper_B": 0.5050505050505051,
+    "KS_2samp": {
+      "stat": 0.1414141414141414,
+      "p": 0.2764589464673859,
+      "verdict": "same dist"
+    },
+    "MannWhitneyU_absDelta": {
+      "stat": 5378.5,
+      "p": 0.23624461019033405,
+      "verdict": "same magnitude"
+    },
+    "interpretation": "halves agree (CI overlap + KS p>0.05 + MWU p>0.05) => credible-ASM Delta-beta distribution is INTERNALLY STABLE across disjoint genome partitions. This is a consistency PROXY only -- both halves share HCC1395 LOH/CN/purity confounds, so it does NOT generalize to independent biological samples."
+  },
+  "verdict": {
+    "within_sample_stability": "STABLE",
+    "net_direction": "ABSENT (symmetric)",
+    "cross_sample_claim": "NOT TESTABLE (data absent) -- proxy only",
+    "headline": "PROXY-CONSISTENT: credible-ASM Delta-beta is internally stable across chr-split (KS p=0.28, MWU p=0.24) AND directionless (mean Delta CI [-0.0075,0.0126] straddles 0; frac_hyper 0.51 ~ 0.5). The 'signal' is a stable but non-directional magnitude artifact, consistent with obs23 anti-discriminative finding. Cross-sample generalization UNVERIFIED."
+  }
+}

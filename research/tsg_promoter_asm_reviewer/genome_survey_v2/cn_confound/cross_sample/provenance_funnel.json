@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "script": "70_provenance_funnel.py",
+    "samples": [
+      "HCC1395",
+      "HCC1937",
+      "HCC1954",
+      "H1437",
+      "H2009",
+      "COLO829"
+    ],
+    "note": "credible loci are NOT a complete statistic of all longphase-S positions: TP-only (excludes FP/FN/all non-SNV/all non-benchmarked somatic_pass), then CpG-island-proximal only, then require somatic subhaplotype + >=100/30 paired CpG + ARI>=0.30 + placebo<0.10."
+  },
+  "per_sample": {
+    "HCC1395": {
+      "cancer": "breast",
+      "somatic_pass": 113997,
+      "truth": 39447,
+      "tp": 29754,
+      "fp": 627,
+      "fn": 9693,
+      "tp_used": 29754,
+      "island_prox": 1248,
+      "hp_survey": 1014,
+      "regimeA_relax": 127,
+      "regimeA_strict": 74,
+      "ari_eval": 94,
+      "credible_relax": 32,
+      "credible_strict": 24
+    },
+    "HCC1937": {
+      "cancer": "breast",
+      "somatic_pass": 49548,
+      "truth": 16867,
+      "tp": 12393,
+      "fp": 195,
+      "fn": 4474,
+      "tp_used": 12393,
+      "island_prox": 529,
+      "hp_survey": 460,
+      "regimeA_relax": 59,
+      "regimeA_strict": 39,
+      "ari_eval": 48,
+      "credible_relax": 3,
+      "credible_strict": 3
+    },
+    "HCC1954": {
+      "cancer": "breast",
+      "somatic_pass": 20969,
+      "truth": 23030,
+      "tp": 17909,
+      "fp": 29,
+      "fn": 5121,
+      "tp_used": 17909,
+      "island_prox": 543,
+      "hp_survey": 425,
+      "regimeA_relax": 73,
+      "regimeA_strict": 54,
+      "ari_eval": 52,
+      "credible_relax": 23,
+      "credible_strict": 19
+    },
+    "H1437": {
+      "cancer": "lung",
+      "somatic_pass": 75578,
+      "truth": 81016,
+      "tp": 67468,
+      "fp": 8,
+      "fn": 13548,
+      "tp_used": 67468,
+      "island_prox": 2123,
+      "hp_survey": 646,
+      "regimeA_relax": 85,
+      "regimeA_strict": 38,
+      "ari_eval": 43,
+      "credible_relax": 11,
+      "credible_strict": 6
+    },
+    "H2009": {
+      "cancer": "lung",
+      "somatic_pass": 157405,
+      "truth": 142091,
+      "tp": 132909,
+      "fp": 86,
+      "fn": 9182,
+      "tp_used": 132909,
+      "island_prox": 3596,
+      "hp_survey": 2641,
+      "regimeA_relax": 389,
+      "regimeA_strict": 226,
+      "ari_eval": 221,
+      "credible_relax": 31,
+      "credible_strict": 25
+    },
+    "COLO829": {
+      "cancer": "melanoma",
+      "somatic_pass": 38196,
+      "truth": 43192,
+      "tp": 35185,
+      "fp": 2273,
+      "fn": 8007,
+      "tp_used": 35185,
+      "island_prox": 878,
+      "hp_survey": 255,
+      "regimeA_relax": 29,
+      "regimeA_strict": 8,
+      "ari_eval": 3,
+      "credible_relax": 0,
+      "credible_strict": 0
+    }
+  }
+}

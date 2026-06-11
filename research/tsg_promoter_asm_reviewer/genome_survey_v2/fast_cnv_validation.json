@@ -1,0 +1,81 @@
+{
+ "analysis1_cn_class_contrast": {
+  "sig": {
+   "neutral_nonLOH": {
+    "n": 76,
+    "median_abs_delta": 0.0811
+   },
+   "gain_nonLOH": {
+    "n": 2542,
+    "median_abs_delta": 0.0737
+   },
+   "cnLOH": {
+    "n": 913,
+    "median_abs_delta": 0.0821
+   },
+   "gain_LOH": {
+    "n": 1580,
+    "median_abs_delta": 0.0701
+   },
+   "loss": {
+    "n": 31,
+    "median_abs_delta": 0.0824
+   }
+  },
+  "all": {
+   "neutral_nonLOH": {
+    "n": 513,
+    "median_abs_delta": 0.0272
+   },
+   "gain_nonLOH": {
+    "n": 13415,
+    "median_abs_delta": 0.028
+   },
+   "cnLOH": {
+    "n": 4839,
+    "median_abs_delta": 0.0309
+   },
+   "gain_LOH": {
+    "n": 6700,
+    "median_abs_delta": 0.0286
+   },
+   "loss": {
+    "n": 183,
+    "median_abs_delta": 0.0294
+   }
+  },
+  "decisive_MW_neutral_vs_gain_sig": {
+   "neutral_n": 76,
+   "neutral_median": 0.0811,
+   "gain_n": 2542,
+   "gain_median": 0.0737,
+   "MW_p": 0.6183,
+   "verdict": "INDISTINGUISHABLE -> dosage NOT driver"
+  }
+ },
+ "analysis2_falsifier": {
+  "signed_dose_rho_absdelta_vs_CN": {
+   "rho": -0.0829,
+   "p": 2.64e-09,
+   "n": 5142,
+   "verdict": "REVERSED/NULL -> dosage-artifact model REFUTED"
+  },
+  "cnLOH_consistency": {
+   "cnLOH_sig_median": 0.0821,
+   "cnLOH_sig_n": 913,
+   "neutral_sig_median": 0.0811,
+   "note": "cnLOH = copy-neutral (CN=2) + single parental copy; if copy-driven its clustering should differ systematically from balanced neutral"
+  }
+ },
+ "analysis3_decision_table": {
+  "verdict_counts": {
+   "T3-nominal (fails Bonferroni)": 44,
+   "cis-candidate-UNTESTABLE (pure-ALT tag; CGI-desert)": 6,
+   "mechanical-artifact": 81,
+   "copy-artifact (copy-test: copy-dominated)": 2,
+   "cis-candidate (copy-test: allele-dominated)": 1,
+   "not-cis (T0/T2)": 682
+  },
+  "bonferroni_T3_detail": []
+ }
+}

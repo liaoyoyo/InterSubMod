@@ -1,0 +1,136 @@
+{
+  "hypothesis_id": "H5",
+  "title": "ASM |Δβ| predicts is_TP — credible-regime rescue test",
+  "sample": "HCC1395 paired_full (single sample)",
+  "data_source": {
+    "tp_tsv": "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/asm_dualaxis_tp.tsv",
+    "fp_tsv": "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/asm_dualaxis_fp.tsv",
+    "tp_truth": "SEQC2 high-confidence_sSNV_in_HC_regions_v1.2.1.vcf.gz",
+    "fp_caller": "ClairS filtered_snv_fp.vcf.gz"
+  },
+  "method": {
+    "axis": "HP-axis only (HP1_vs_HP1-1, HP2_vs_HP2-1)",
+    "aggregation": "PER-POSITION (max|Δβ|, max n_cpg, min extremity, any LOH)",
+    "score": "|Δβ| = |mean_delta|",
+    "auc": "Mann-Whitney U / (n_pos*n_neg), two-sided",
+    "null": "label shuffle x2000, 95% CI + two-sided p",
+    "credible_regime": "obs23 regime(): n_cpg>=100 & extremity<=0.3 & nonLOH"
+  },
+  "position_level_label_check": {
+    "n_positions": 23444,
+    "n_conflict_tp_and_fp": 1,
+    "note": "TP/FP sites mutually exclusive (label clean)"
+  },
+  "results": {
+    "a_all_hp_axis": {
+      "name": "a_all_hp_axis",
+      "n": 23444,
+      "n_tp": 21633,
+      "n_fp": 1811,
+      "tp_base_rate": 0.9228,
+      "auc_abs_delta": 0.5049,
+      "perm_null_95ci": [
+        0.4861,
+        0.5141
+      ],
+      "perm_p_two_sided": 0.4958,
+      "in_null": true
+    },
+    "bp_all_significant_p05": {
+      "name": "bp_all_significant_p05",
+      "n": 5056,
+      "n_tp": 4614,
+      "n_fp": 442,
+      "tp_base_rate": 0.9126,
+      "auc_abs_delta": 0.5018,
+      "perm_null_95ci": [
+        0.4727,
+        0.5284
+      ],
+      "perm_p_two_sided": 0.8986,
+      "in_null": true
+    },
+    "b_credible_regime": {
+      "name": "b_credible_regime",
+      "n": 189,
+      "n_tp": 181,
+      "n_fp": 8,
+      "tp_base_rate": 0.9577,
+      "auc_abs_delta": 0.5701,
+      "perm_null_95ci": [
+        0.2914,
+        0.7082
+      ],
+      "perm_p_two_sided": 0.5092,
+      "in_null": true
+    }
+  },
+  "confound_guard": {
+    "auc_ncpg_to_tp": 0.5399,
+    "auc_absdelta_to_tp": 0.5049,
+    "spearman_absdelta_ncpg": -0.246,
+    "spearman_p": 0.0,
+    "within_coverage_bin_auc": {
+      "<25": {
+        "n": 11412,
+        "n_fp": 997,
+        "auc": 0.507
+      },
+      "25-50": {
+        "n": 7673,
+        "n_fp": 556,
+        "auc": 0.5388
+      },
+      "50-100": {
+        "n": 3485,
+        "n_fp": 196,
+        "auc": 0.4868
+      },
+      "100-200": {
+        "n": 698,
+        "n_fp": 54,
+        "auc": 0.5574
+      },
+      ">200": {
+        "n": 176,
+        "n_fp": 8,
+        "auc": 0.6053
+      }
+    },
+    "note": "n_cpg(coverage) is a stronger weak discriminator than |Δβ|; credible filter fixes n_cpg/LOH/baseline -> residual |Δβ| hollowed out. caller_af/AF column absent in TSV -> AF-bin + within-group OLS guards NOT runnable."
+  },
+  "regime_composition_per_position": [
+    {
+      "regime": "A_credible",
+      "n": 189,
+      "n_fp": 8,
+      "tp_rate": 0.9577,
+      "median_abs_dbeta": 0.0323,
+      "median_n_cpg": 138.0
+    },
+    {
+      "regime": "D_intermediate",
+      "n": 5395,
+      "n_fp": 164,
+      "tp_rate": 0.9696,
+      "median_abs_dbeta": 0.0476,
+      "median_n_cpg": 24.0
+    },
+    {
+      "regime": "C_LOH_confound",
+      "n": 5098,
+      "n_fp": 569,
+      "tp_rate": 0.8884,
+      "median_abs_dbeta": 0.0459,
+      "median_n_cpg": 26.0
+    },
+    {
+      "regime": "B_regression",
+      "n": 12762,
+      "n_fp": 1070,
+      "tp_rate": 0.9162,
+      "median_abs_dbeta": 0.0225,
+      "median_n_cpg": 26.0
+    }
+  ]
+}

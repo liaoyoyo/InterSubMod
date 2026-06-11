@@ -1,0 +1,263 @@
+{
+ "meta": {
+  "date": "2026-05-31",
+  "alpha_bonf": 9.78645945469848e-07,
+  "dthr": 0.1,
+  "n_tp": 51171,
+  "n_fp": 5149,
+  "n_gnull": 1334
+ },
+ "P1_fdr_vs_bonf": {
+  "bonf_strong": 172,
+  "bonf_pct": 0.336,
+  "fdr_strong": 3018,
+  "fdr_pct": 5.9,
+  "fold": 17.5,
+  "bh_threshold": 0.013765899566831032,
+  "sweep": {
+   "0.05": {
+    "bonf": 250,
+    "fdr": 4581
+   },
+   "0.075": {
+    "bonf": 202,
+    "fdr": 3731
+   },
+   "0.1": {
+    "bonf": 172,
+    "fdr": 3018
+   },
+   "0.125": {
+    "bonf": 144,
+    "fdr": 2380
+   },
+   "0.15": {
+    "bonf": 127,
+    "fdr": 1901
+   },
+   "0.2": {
+    "bonf": 93,
+    "fdr": 1208
+   },
+   "0.3": {
+    "bonf": 36,
+    "fdr": 440
+   }
+  },
+  "correction_robust_check": {
+   "TP_strong_rate_bonf": 0.336,
+   "FP_strong_rate_bonf": 1.709,
+   "gnull_strong_rate_bonf": 0.45,
+   "TP_strong_rate_fdr": 5.9,
+   "FP_strong_rate_fdr": 15.44,
+   "gnull_strong_rate_fdr": 6.52,
+   "note": "If null>=TP holds under BOTH Bonferroni AND FDR -> NEGATIVE is correction-robust."
+  }
+ },
+ "P2_chr8_jackknife": {
+  "OR_full": 5.156,
+  "OR_leave_one_chrom_out": {
+   "chr1": 5.348,
+   "chr2": 5.243,
+   "chr3": 5.292,
+   "chr4": 5.118,
+   "chr5": 5.081,
+   "chr6": 5.21,
+   "chr7": 5.506,
+   "chr8": 2.843,
+   "chr9": 5.317,
+   "chr10": 5.34,
+   "chr11": 5.178,
+   "chr12": 5.2,
+   "chr13": 5.088,
+   "chr14": 5.184,
+   "chr15": 5.253,
+   "chr16": 5.186,
+   "chr17": 5.747,
+   "chr18": 5.112,
+   "chr19": 5.196,
+   "chr20": 4.816,
+   "chr21": 5.343,
+   "chr22": 5.259
+  },
+  "OR_drop_chr8": 2.843,
+  "jackknife_min": 2.843,
+  "jackknife_max": 5.747,
+  "fp_strong_by_chrom": {
+   "chr8": 54,
+   "chr20": 11,
+   "chr2": 4,
+   "chr17": 4,
+   "chr5": 3,
+   "chr1": 2,
+   "chr4": 2,
+   "chr9": 2,
+   "chr13": 2,
+   "chr16": 2,
+   "chr11": 1,
+   "chr12": 1
+  },
+  "fp_strong_total": 88,
+  "chr8_share_of_fp_strong": 0.614
+ },
+ "P3_coverage_power": {
+  "n_universe_TP": 39447,
+  "n_tested_positions": 30511,
+  "n_excluded": 8936,
+  "excluded_pct": 22.7,
+  "exclusion_reason": "no testable axis (no nearby CpG OR <5 paired CpG in any read-group)",
+  "by_bin": [
+   {
+    "bin": "5-10",
+    "n": 3517,
+    "n_bonf_sig": 0,
+    "n_strong": 0,
+    "strong_pct": 0.0,
+    "min_strong_abs_dbeta": null,
+    "wilcoxon_floor_p_at_lo": 0.0625,
+    "can_reach_bonf": false
+   },
+   {
+    "bin": "10-15",
+    "n": 6698,
+    "n_bonf_sig": 0,
+    "n_strong": 0,
+    "strong_pct": 0.0,
+    "min_strong_abs_dbeta": null,
+    "wilcoxon_floor_p_at_lo": 0.002,
+    "can_reach_bonf": false
+   },
+   {
+    "bin": "15-25",
+    "n": 13273,
+    "n_bonf_sig": 2,
+    "n_strong": 2,
+    "strong_pct": 0.015,
+    "min_strong_abs_dbeta": 0.518,
+    "wilcoxon_floor_p_at_lo": 0.0001,
+    "can_reach_bonf": false
+   },
+   {
+    "bin": "25-50",
+    "n": 16986,
+    "n_bonf_sig": 31,
+    "n_strong": 25,
+    "strong_pct": 0.147,
+    "min_strong_abs_dbeta": 0.116,
+    "wilcoxon_floor_p_at_lo": 0.0,
+    "can_reach_bonf": true
+   },
+   {
+    "bin": "50-100",
+    "n": 8579,
+    "n_bonf_sig": 91,
+    "n_strong": 52,
+    "strong_pct": 0.606,
+    "min_strong_abs_dbeta": 0.104,
+    "wilcoxon_floor_p_at_lo": 0.0,
+    "can_reach_bonf": true
+   },
+   {
+    "bin": "100-200",
+    "n": 1668,
+    "n_bonf_sig": 123,
+    "n_strong": 72,
+    "strong_pct": 4.317,
+    "min_strong_abs_dbeta": 0.103,
+    "wilcoxon_floor_p_at_lo": 0.0,
+    "can_reach_bonf": true
+   },
+   {
+    "bin": "200-+",
+    "n": 450,
+    "n_bonf_sig": 66,
+    "n_strong": 21,
+    "strong_pct": 4.667,
+    "min_strong_abs_dbeta": 0.104,
+    "wilcoxon_floor_p_at_lo": 0.0,
+    "can_reach_bonf": true
+   }
+  ],
+  "interpretation": "Bins where wilcoxon_floor_p_at_lo > Bonferroni alpha CANNOT reach strong-ASM regardless of true effect -> ASM at sparse loci is undetectable, not absent."
+ },
+ "P4_rigorous_null": {
+  "pooled_null_n": 1334,
+  "negctrl_n": 243,
+  "negctrl_strong_pct": 0.0,
+  "negctrl2_n": 1091,
+  "negctrl2_strong_pct": 0.55,
+  "pooled_null_strong_pct": 0.45,
+  "tp_strong_pct": 0.336,
+  "coverage_matched": [
+   {
+    "cov_bin": "5-15",
+    "n_tp": 10215,
+    "n_null": 273,
+    "tp_strong_pct": 0.0,
+    "null_strong_pct": 0.0,
+    "tp_median_abs_dbeta": 0.0476,
+    "null_median_abs_dbeta": 0.0426
+   },
+   {
+    "cov_bin": "15-30",
+    "n_tp": 17747,
+    "n_null": 454,
+    "tp_strong_pct": 0.034,
+    "null_strong_pct": 0.22,
+    "tp_median_abs_dbeta": 0.0376,
+    "null_median_abs_dbeta": 0.0316
+   },
+   {
+    "cov_bin": "30-60",
+    "n_tp": 15844,
+    "n_null": 411,
+    "tp_strong_pct": 0.246,
+    "null_strong_pct": 0.73,
+    "tp_median_abs_dbeta": 0.0271,
+    "null_median_abs_dbeta": 0.0235
+   },
+   {
+    "cov_bin": "60-120",
+    "n_tp": 5955,
+    "n_null": 163,
+    "tp_strong_pct": 0.991,
+    "null_strong_pct": 0.613,
+    "tp_median_abs_dbeta": 0.0192,
+    "null_median_abs_dbeta": 0.0146
+   },
+   {
+    "cov_bin": "120-+",
+    "n_tp": 1410,
+    "n_null": 33,
+    "tp_strong_pct": 4.823,
+    "null_strong_pct": 3.03,
+    "tp_median_abs_dbeta": 0.0169,
+    "null_median_abs_dbeta": 0.0082
+   }
+  ],
+  "bootstrap_diff_TP_minus_null": {
+   "all_axis": {
+    "point": -0.114,
+    "ci95": [
+     -0.498,
+     0.21
+    ]
+   },
+   "HP_axis": {
+    "point": -0.056,
+    "ci95": [
+     -0.536,
+     0.268
+    ]
+   },
+   "ALLELE_axis": {
+    "point": -0.189,
+    "ci95": [
+     -0.828,
+     0.316
+    ]
+   }
+  },
+  "verdict": "If CI of (TP-null) includes 0 or is negative -> somatic strong-ASM NOT above germline baseline (NEGATIVE upgraded to L1)."
+ }
+}

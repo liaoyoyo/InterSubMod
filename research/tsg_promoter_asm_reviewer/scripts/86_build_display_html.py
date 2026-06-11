@@ -150,6 +150,8 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:12px}
     <span id="minnwrap" style="display:none">納回門檻 minHP≥<span class="v" id="vminn" style="color:var(--ac)">0</span><input type="range" id="minn" min="0" max="20" step="1" value="0" style="width:90px;vertical-align:middle"></span>
     <select id="glohf"><option value="all">LOH:全部</option><option value="non">排除 LOH</option><option value="loh">只看 LOH</option></select>
     <select id="clsf"><option value="all">TP+FP</option><option value="tp">只 TP</option><option value="fp">只 FP</option></select>
+    <select id="tierf"><option value="all">Tier:全部</option><option value="A">★只 Tier A 高信心</option><option value="B">只 Tier B 救回</option></select>
+    <select id="valf"><option value="all">驗證:全部</option><option value="1">✓只獨立驗證過</option><option value="0">⚠只複製失敗</option></select>
     <span id="gcount" style="color:var(--mut)"></span>
     <span id="judgesum" style="margin-left:auto"></span>
   </div>
@@ -163,6 +165,13 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:12px}
   <table id="rgtab" style="border-collapse:collapse;font-size:12.5px;width:100%"></table>
   <div class="note-warn" style="margin-top:12px">⚠ <b>誠實判讀</b>：原 gate 保留的是 <b>144:1 高度 TP-clean</b> 集（3× base 47:1）。納回的 latent 是 PERMANOVA 證實的<b>真 HP 分群結構</b>，但 TP-purity 較低（minN&lt;15 時甚至低於 base = FP-leaning）。<b>納回提升的是「ASM 結構 characterization 完整性」，不是 TP/FP 分辨力</b>（與已 concluded 的甲基→filter NEGATIVE 一致）。建議：以 characterization 為目的 → minN=10（納回 +2512 真結構位點、去除退化稀疏、納回集仍 35:1 TP-leaning）；以 cleanest gate 為目的 → 維持原始。</div>
 </div>
+
+<h2>⑤ 判別準則分析（為何 CramersV=0 過嚴格 / Δβ vs CramersV / Tier 分層）</h2>
+<div class="panel" id="anal"></div>
+
+<h2>⑥ TP/FP-free 獨立驗證（不用 SEQC2，5 層：統計 → 肉眼最後）</h2>
+<div class="panel" id="valbox"></div>
+
 </div>
 
 <div id="modal" onclick="if(event.target.id==='modal')closeM()"><div class="mc" id="mc"></div></div>
@@ -172,7 +181,40 @@ const CUR=__PAYLOAD__;
 const ALL=__ALLPAYLOAD__;
 const FN=__FNJ__;
 const RG=__REFINED_GATE__;
+const D89=__D89__, D90=__D90__, CAUSE=__CAUSE__, VAL3=__VAL3__;
 const $=id=>document.getElementById(id);
+
+// ---- analysis (section ⑤) ----
+(function(){const q1=D89.q1,q3=D89.q3,t=D90.tiers.find(x=>x.minN===10),o=D90.orig_significant,ct=CAUSE.tp;
+ const html=`
+ <div style="margin-bottom:14px"><b>Q1 — CramersV=0 是否過嚴格？</b><br>
+  <span class="sub">${q1.overstrict_tp} 個 TP（${q1.pct_of_tp}% 全 TP）有乾淨 HP-aligned PERMANOVA 結構卻被 gated CramersV&lt;0.1 篩掉 — 是通過篩選 ${q1.sig_tp} 個的 <b>${q1.ratio_overstrict_to_sig}×</b>。</span></div>
+ <div style="margin-bottom:14px"><b>根因（全基因組 raw 重跑確認，非臆測）</b><br>
+  <span class="sub">over-strict ${ct.n} 個中 <b>${ct.reliability_gated} (${ct.pct_reliability}%) 是 reliability-gated</b>（raw CramersV≥0.3、median=${ct.median_rawCV}，卡方其實很強），<b>partition-mismatch=${ct.partition_mismatch}</b>。即 <code>CramersV=reliable?v:0</code>，可靠性=列聯表最小期望格≥5（Cochran）；HP 子群不平衡→某格期望&lt;5→歸零。<b>數值對、但統計不可信任 → 對偵測過嚴格。</b></span></div>
+ <div style="margin-bottom:14px"><b>Q3 — 為何 Δβ 偵測到更多更清楚的結構？</b>
+  <table style="border-collapse:collapse;font-size:12px;margin-top:6px"><tr style="color:var(--mut)"><td style="padding:3px 12px 3px 0">度量</td><td>flag TP</td><td style="padding-left:14px">TP:FP</td><td style="padding-left:14px">vs base 47:1</td></tr>
+  <tr><td style="padding:3px 12px 3px 0">Δβ≥0.2</td><td>${q3.tp_dbeta}</td><td style="padding-left:14px">${q3.dbeta_ratio}:1</td><td style="padding-left:14px;color:var(--miss)">${q3.dbeta_enrich}× (FP-leaning)</td></tr>
+  <tr><td style="padding:3px 12px 3px 0">CramersV≥0.1</td><td>${q3.tp_cramersv}</td><td style="padding-left:14px">${q3.cramersv_ratio}:1</td><td style="padding-left:14px;color:var(--pass)">${q3.cramersv_enrich}×</td></tr>
+  <tr><td style="padding:3px 12px 3px 0">PERMANOVA</td><td>${q3.tp_permanova}</td><td style="padding-left:14px">${q3.permanova_ratio}:1</td><td style="padding-left:14px">0.57×</td></tr></table>
+  <span class="sub">Δβ-only=${q3.dbeta_only_tp} / CramersV-only=${q3.cramersv_only_tp} / 重疊僅 ${q3.both_tp} → <b>不同訊號</b>。Δβ 是 1 維平均位移：怕稀疏的問題不存在（3-read 群也有平均）+ read×CpG 圖呈清楚兩帶 → 肉眼「更清楚」。<b>但更敏感不等於更好</b>：${q3.dbeta_no_hp_structure_tp} 個 Δβ-TP 根本無 HP-aligned 結構（純位移），Δβ 集 ${q3.dbeta_ratio}:1 比隨機 47:1 還差。</span></div>
+ <div><b>Q4 — Tier 分層判別（minN=10；高一致 + 少誤判）</b>
+  <table style="border-collapse:collapse;font-size:12px;margin-top:6px"><tr style="color:var(--mut)"><td style="padding:3px 12px 3px 0">準則</td><td>TP</td><td style="padding-left:10px">FP</td><td style="padding-left:10px">TP:FP</td><td style="padding-left:10px">vs base</td></tr>
+  <tr><td style="padding:3px 12px 3px 0">原始 Significant</td><td>${o.tp}</td><td style="padding-left:10px">${o.fp}</td><td style="padding-left:10px">${o.ratio}:1</td><td style="padding-left:10px">${o.enrich}×</td></tr>
+  <tr style="color:#4ade80"><td style="padding:3px 12px 3px 0">★ Tier A（reliable CramersV ∩ PERMANOVA ∩ minHP≥10）</td><td>${t.tierA_tp}</td><td style="padding-left:10px">${t.tierA_fp}</td><td style="padding-left:10px">${t.tierA_ratio}:1</td><td style="padding-left:10px">${t.tierA_enrich}×</td></tr>
+  <tr style="color:#60a5fa"><td style="padding:3px 12px 3px 0">Tier B（PERMANOVA 真結構 + CramersV 不可靠）</td><td>${t.tierB_tp}</td><td style="padding-left:10px">${t.tierB_fp}</td><td style="padding-left:10px">${t.tierB_ratio}:1</td><td style="padding-left:10px;color:var(--miss)">${t.tierB_enrich}×</td></tr></table>
+  <span class="sub">要<b>最少誤判 + 最高 HP-tag 一致 → 用 Tier A（${t.tierA_tp} 個 TP 全基因組，匯出 tierA_high_confidence.tsv）</b>。Tier B 救回真結構但 FP-leaning（minN&lt;15）。🔴 皆為 characterization 信心，<b>無一可甲基判別 TP/FP variant</b>（該方向 concluded NEGATIVE）。圖庫可用上方「Tier:全部」下拉只看 Tier A/B。</span></div>`;
+ const el=document.getElementById('anal');if(el)el.innerHTML=html;})();
+
+// ---- section ⑥ independent validation ----
+(function(){const V=VAL3,bt=V.by_tier;
+ const row=(name,a,col)=>`<tr style="border-top:1px solid var(--line)${col?';color:'+col:''}"><td style="padding:4px 10px 4px 0">${name}</td><td style="text-align:right">${a.n}</td><td style="text-align:right">${a.validated}</td><td style="text-align:right">${(100*a.validated/Math.max(a.n,1)).toFixed(0)}%</td></tr>`;
+ const html=`
+ <div class="sub" style="margin-bottom:10px">不用 TP/FP 當真值，改問「甲基↔HP 關連是否<b>真實且可獨立複製</b>」。HP 標籤來自 SNV phasing（與甲基無關）→ 非循環。統計 F=組間/組內 read 距離（同時涵蓋位移+分群兩模式），用 <b>HP-permutation + CpG split-half + 雙股 + bootstrap</b> 獨立複製驗證（皆非定義 Tier 的統計）。判準：${V.criteria}</div>
+ <table style="border-collapse:collapse;font-size:13px;width:100%;max-width:560px"><tr style="color:var(--mut)"><td style="padding:4px 10px 4px 0">類別</td><td style="text-align:right">可測 n</td><td style="text-align:right">獨立驗證通過</td><td style="text-align:right">%</td></tr>
+ ${row('★ Tier A 高信心',bt.A,'#4ade80')}${row('Tier B 救回',bt.B,'#60a5fa')}${row('Tier none',bt.none)}${row('Δβ-only（純位移）',V.dbeta_only,'#67e8f9')}</table>
+ <div class="sub" style="margin-top:12px"><b>結論</b>：Tier A/B 用<b>完全獨立的複製</b>驗證達 <b>85-86%</b>（非循環）→ 確認準則抓到真實 HP-關連甲基；非 tier 僅 64-69% = 準則有富集力。<b>~14% Tier A 沒過 = gate 自信但複製不一致 → 正是 L5 肉眼該看的邊緣位點</b>（modal ④ 區顯示每位點的 F/偶/奇/正/反股/bootstrap；圖庫上方「驗證:⚠只複製失敗」可篩出）。</div>
+ <div class="sub" style="margin-top:10px"><b>5 層框架（統計優先 → 肉眼最後）</b>：L1 HP-permutation+MWU（超越巧合，BH-FDR q≤0.05）→ L2 split-half CpG + 雙股一致（非循環複製）→ L3 bootstrap≥90% + PERMDISP 離散控制 → L4 normal-cis + germline-het 負對照（生物特異性）→ <b>L5 肉眼：read×CpG 四格 panel（偶/奇 CpG·正/反股）只看邊緣</b>。範例圖：<code>figs_val/chr16_3444295_valpanel.png</code>(乾淨四格一致) vs <code>figs_val/chr20_22561507_valpanel.png</code>(邊緣不一致)。</div>`;
+ const el=document.getElementById('valbox');if(el)el.innerHTML=html;})();
 
 // ---- refined-gate sweep table ----
 (function(){let h=`<tr style="color:var(--mut);text-align:right"><th style="text-align:left;padding:5px 8px">minN（最小 HP group reads）</th><th>納回 TP</th><th>納回 FP</th><th>納回集 TP:FP</th><th>vs base 47:1</th><th>合併 PASS (TP/FP)</th><th>納回 LOH%</th></tr>`;
@@ -238,11 +280,17 @@ function filtered(){
   if(ol&&curG==='MISSED')a=a.filter(c=>c.lt&&c.mhn>=mn);
   if(lf==='non')a=a.filter(c=>!c.loh); if(lf==='loh')a=a.filter(c=>c.loh);
   if(cf!=='all')a=a.filter(c=>c.cl===cf);
+  const tf=$('tierf').value; if(tf!=='all')a=a.filter(c=>c.tier===tf);
+  const vf=$('valf').value; if(vf!=='all')a=a.filter(c=>String(c.val)===vf);
   a.sort(SORTS[$('sort').value]||SORTS['CramersV (gate) ↓']);
   return a;
 }
 function badges(c){let b='';
   b+=c.cat==='PASS'?'<span class="badge b-pass">PASS</span>':'<span class="badge b-miss">MISSED</span>';
+  if(c.tier==='A')b+='<span class="badge" style="background:#052e16;color:#4ade80">★TierA 高信心</span>';
+  else if(c.tier==='B')b+='<span class="badge" style="background:#0c2a4d;color:#60a5fa">TierB 救回</span>';
+  if(c.val===1)b+='<span class="badge" style="background:#052e16;color:#86efac">✓獨立驗證</span>';
+  else if(c.val===0)b+='<span class="badge" style="background:#3b1106;color:#fdba74">⚠複製失敗</span>';
   if(c.lt)b+='<span class="badge" style="background:#082f33;color:#67e8f9">⚡潛在結構</span>';
   if(c.cl==='fp')b+='<span class="badge b-fp">FP</span>';
   if(c.loh)b+='<span class="badge b-loh">LOH</span>';return b;}
@@ -273,7 +321,7 @@ function draw(){
   $('judgesum').innerHTML=`你的判斷：<span class="tp">應包含 ${ji}</span> ｜ 確認排除 ${je}`;
 }
 window.setJ=(k,v)=>{judge[k]=judge[k]===v?'':v;saveJ();draw();};
-['sort','onlyfig','onlylat','minn','glohf','clsf'].forEach(id=>$(id).addEventListener('input',()=>{page=0;draw();}));
+['sort','onlyfig','onlylat','minn','glohf','clsf','tierf','valf'].forEach(id=>$(id).addEventListener('input',()=>{page=0;draw();}));
 
 window.openM=k=>{const c=CUR.find(x=>x.k===k);if(!c)return;
   const meth=`figs/${c.k}_meth.png`, dist=`figs/${c.k}_dist.png`;
@@ -296,6 +344,7 @@ window.openM=k=>{const c=CUR.find(x=>x.k===k);if(!c)return;
     <div class="sub" style="margin:10px 0 3px;color:var(--ac)">① gate 採用值（閘控後，決定 PASS/MISSED）</div>${grid(gated)}
     <div class="sub" style="margin:10px 0 3px;color:#67e8f9">② 原始 CramersV（未經可靠性閘控；稀疏表時 ①會歸零但②保留）</div>${grid(raw)}
     <div class="sub" style="margin:10px 0 3px;color:#a5f3fc">③ 結構檢定（PERMANOVA 距離法，對稀疏穩健）+ 其他</div>${grid(struc)}${grid(meta)}
+    ${c.val===-1?'<div class="sub" style="margin:10px 0 3px;color:#fdba74">④ TP/FP-free 獨立驗證：未測（每 HP family reads &lt;4，稀疏）</div>':`<div class="sub" style="margin:10px 0 3px;color:${c.val===1?'#86efac':'#fdba74'}">④ TP/FP-free 獨立驗證（HP-permutation + split-half + 雙股 + bootstrap，非循環）：${c.val===1?'✓ 通過':'⚠ 複製失敗'}</div>${grid([['HP-分離 F (全CpG)',f3(c.vF)],['perm q (BH-FDR)',c.vq==null?'NA':c.vq],['F 偶CpG',f3(c.vfe)],['F 奇CpG',f3(c.vfo)],['F 正股',c.vff==null?'NA(reads不足)':f3(c.vff)],['F 反股',c.vfr==null?'NA(reads不足)':f3(c.vfr)],['bootstrap 穩定',c.vb==null?'NA':c.vb]])}`}
     <div class="sub" style="margin-top:12px">判讀：距離圖若沿對角線出現<b>暗色塊</b>且與 HP/ALT 側欄分界對齊 → 該位點 reads 確實按單倍型/等位基因分群。①與②落差大（②高①低）+ ③ PERMANOVA 顯著 = 有真結構但 CramersV 統計脆弱（稀疏），即「可能漏掉」的判斷點。若距離圖<b>均勻無塊</b>但甲基圖整體呈兩種深淺 → 只有平均位移（Δβ）、無分群 → 被 CramersV gate 篩掉是正確的。</div>`;
   $('modal').style.display='block';};
 window.closeM=()=>$('modal').style.display='none';
@@ -309,6 +358,12 @@ def main():
     manifest = json.load(open(f"{DV}/manifest.json"))
     fn = json.load(open(f"{DV}/funnel_numbers.json"))
     rg = json.load(open(f"{DV}/refined_gate.json"))
+    tier_assign = json.load(open(f"{DV}/tier_assignment.json"))
+    d89 = json.load(open(f"{DV}/diag89.json"))
+    d90 = json.load(open(f"{DV}/diag90.json"))
+    cause = json.load(open(f"{DV}/cause_genomewide.json"))
+    val3 = json.load(open(f"{DV}/validation3.json"))
+    vloci = val3["loci"]
     allrows = load_all()
 
     def cnt(cat, cls):
@@ -326,9 +381,21 @@ def main():
                 lt=1 if m.get("latent") else 0, rmx=m.get("raw_max", 0), mhn=m.get("minhpn", 0),
                 ra=m.get("raw_alt", 0), rh=m.get("raw_hp", 0), rhf=m.get("raw_hpfam", 0), rhfn=m.get("raw_hpfine", 0),
                 pf=m.get("perm_f"), pp=m.get("perm_p"), pv=1 if m.get("perm_valid") else 0,
-                hpf=m.get("hp_perm_f"), hpp=m.get("hp_perm_p"), ok=m.get("optimal_k"))
+                hpf=m.get("hp_perm_f"), hpp=m.get("hp_perm_p"), ok=m.get("optimal_k"),
+                tier=tier_assign.get(m["chr"] + "_" + str(m["pos"]), ""),
+                val=(1 if vloci.get(m["chr"] + "_" + str(m["pos"]), {}).get("validated")
+                     else (0 if vloci.get(m["chr"] + "_" + str(m["pos"]), {}).get("ok") else -1)),
+                vF=vloci.get(m["chr"] + "_" + str(m["pos"]), {}).get("F"),
+                vq=vloci.get(m["chr"] + "_" + str(m["pos"]), {}).get("perm_q"),
+                vfe=vloci.get(m["chr"] + "_" + str(m["pos"]), {}).get("F_even"),
+                vfo=vloci.get(m["chr"] + "_" + str(m["pos"]), {}).get("F_odd"),
+                vff=vloci.get(m["chr"] + "_" + str(m["pos"]), {}).get("F_fwd"),
+                vfr=vloci.get(m["chr"] + "_" + str(m["pos"]), {}).get("F_rev"),
+                vb=vloci.get(m["chr"] + "_" + str(m["pos"]), {}).get("boot"))
            for m in manifest]
     n_latent = sum(1 for m in manifest if m.get("latent"))
+    n_tierA = sum(1 for c in cur if c["tier"] == "A")
+    n_tierB = sum(1 for c in cur if c["tier"] == "B")
 
     h = TEMPLATE
     repl = {
@@ -340,6 +407,10 @@ def main():
         "__FP_PASS__": str(fp_pass), "__FP_MISSED__": str(fp_missed),
         "__N_LATENT__": str(n_latent), "__N_MISSED_NOTE__": str(tp_missed + fp_missed),
         "__REFINED_GATE__": json.dumps(rg, ensure_ascii=False),
+        "__D89__": json.dumps(d89, ensure_ascii=False), "__D90__": json.dumps(d90, ensure_ascii=False),
+        "__CAUSE__": json.dumps(cause, ensure_ascii=False),
+        "__VAL3__": json.dumps(val3["summary"], ensure_ascii=False),
+        "__N_TIERA__": str(n_tierA), "__N_TIERB__": str(n_tierB),
     }
     for k, v in repl.items():
         h = h.replace(k, v)

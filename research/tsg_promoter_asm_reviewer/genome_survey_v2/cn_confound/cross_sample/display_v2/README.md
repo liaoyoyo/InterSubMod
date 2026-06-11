@@ -49,3 +49,27 @@ python3 research/tsg_promoter_asm_reviewer/scripts/86_build_display_html.py
 - 單樣本 HCC1395、單一 pipeline → ⭐3 上限。
 - latent 納回提升 **characterization 完整性**，非 TP/FP 分辨力（甲基→filter 已 concluded NEGATIVE）。
 - 不可把任何子集寫成 variant filter。
+
+## TP/FP-free 獨立驗證（scripts 94-97）
+
+不用 SEQC2 TP/FP，改證「甲基↔HP 關連真實且可獨立複製」。HP 標籤=SNV phasing（非循環）。
+- 94 Δβ 軸（HP-perm + split-half + 雙股 + bootstrap）
+- 95 兩軸合併（位移 + 分群兩模式）
+- 96 非循環多變量 F（自建距離；Tier A/B 達 85-86% 獨立驗證）
+- 97 L5 肉眼 panel（偶/奇 CpG·正/反股四格 → figs_val/）
+顯示頁 section ⑥ + 卡片「✓獨立驗證 / ⚠複製失敗」徽章 + 「驗證」篩選 + modal ④區。
+重生：跑 94 → 95 → 96 → 97 → 86。
+
+## 全流程說明書（教授級，script 98）
+
+`20260609_pipeline_manual_for_professor_01.html`（standalone，無需 figs/）：從樣本→ClairS→LongPhase-S→ISM→
+gate→Δβ→Tier→驗證的逐層拆解。每參數/公式附程式碼出處(file:line)，每結果數字 build 時讀回真實 json(反捏造)。
+11 區段 + 構造圖 + 公式(直覺→式子) + 117 欄資料字典 + 術語表 + 邊界。重生：python3 scripts/98_build_pipeline_manual.py
+
+## 圖解版說明書（script 99）
+
+`20260609_pipeline_manual_ILLUSTRATED_01.html`（standalone）：文字版的圖解強化。8 張 inline SVG 方法示意圖
+（NHD/silhouette/Cramér's V+Cochran/PERMANOVA/Δβ/gate funnel/逐層分類流水圖/5 層驗證梯）+ 2 真實案例側欄
+（chr16 鐵證 / chr20 邊緣，嵌 valpanel）+ 主軸/配角/解釋/舉例 四區色帶分層。示意 toy 圖標「示意」浮水印，
+流水圖/funnel/案例為真實計數（讀回 json）。CJK 字型堆疊跨 OS。重生：python3 scripts/99_build_illustrated_manual.py
+（QC 用 cairosvg 轉 PNG；CJK 需瀏覽器或 CJK 字型）

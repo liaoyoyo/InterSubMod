@@ -1,0 +1,412 @@
+{
+ "n_loci": 332705,
+ "overall": {
+  "G": 291518,
+  "C": 12868,
+  "E": 28254,
+  "F": 54,
+  "B": 5,
+  "D": 5,
+  "A": 1
+ },
+ "tag_legend": {
+  "A": "clean cis somatic-ASM",
+  "B": "copy/subclone-confounded",
+  "C": "germline-allelic background",
+  "D": "high-dbeta FP-prone (ANNOTATE ONLY)",
+  "E": "latent (PERMANOVA-recovered)",
+  "F": "untestable (pure-ALT clonal)",
+  "G": "no signal"
+ },
+ "by_sample_class": {
+  "HCC1395_tp": {
+   "G": 25733,
+   "C": 1291,
+   "E": 2638,
+   "F": 54,
+   "B": 5,
+   "D": 1,
+   "A": 1
+  },
+  "HCC1395_fp": {
+   "G": 509,
+   "C": 9,
+   "E": 109
+  },
+  "HCC1395_fn": {
+   "G": 8630,
+   "C": 239,
+   "E": 811
+  },
+  "HCC1937_tp": {
+   "G": 11010,
+   "C": 513,
+   "E": 856
+  },
+  "HCC1937_fp": {
+   "G": 188,
+   "E": 5,
+   "C": 2
+  },
+  "HCC1937_fn": {
+   "G": 3119,
+   "C": 82,
+   "E": 245
+  },
+  "HCC1954_tp": {
+   "G": 13700,
+   "E": 3116,
+   "C": 1075
+  },
+  "HCC1954_fp": {
+   "G": 22,
+   "E": 7
+  },
+  "HCC1954_fn": {
+   "E": 493,
+   "G": 2074,
+   "C": 176
+  },
+  "H1437_tp": {
+   "G": 54965,
+   "C": 4256,
+   "E": 7872
+  },
+  "H1437_fp": {
+   "G": 8
+  },
+  "H1437_fn": {
+   "G": 8339,
+   "C": 537,
+   "E": 511
+  },
+  "H2009_tp": {
+   "G": 120351,
+   "E": 8205,
+   "C": 4203
+  },
+  "H2009_fp": {
+   "G": 82,
+   "E": 4
+  },
+  "H2009_fn": {
+   "G": 4003,
+   "E": 268,
+   "C": 113
+  },
+  "COLO829_tp": {
+   "G": 31897,
+   "E": 2670,
+   "C": 309,
+   "D": 2
+  },
+  "COLO829_fp": {
+   "G": 2054,
+   "E": 154,
+   "C": 23,
+   "D": 1
+  },
+  "COLO829_fn": {
+   "G": 4834,
+   "E": 290,
+   "C": 40,
+   "D": 1
+  }
+ },
+ "examples": {
+  "G": [
+   {
+    "locus": "chr1:877772",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.3632,
+    "cis_status": "NA",
+    "ari": null
+   },
+   {
+    "locus": "chr1:1004726",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.0019,
+    "cis_status": "NA",
+    "ari": null
+   },
+   {
+    "locus": "chr1:1049980",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0,
+    "cis_status": "NA",
+    "ari": null
+   },
+   {
+    "locus": "chr1:1212740",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0,
+    "cis_status": "NA",
+    "ari": null
+   },
+   {
+    "locus": "chr1:1263518",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.0186,
+    "cis_status": "NA",
+    "ari": null
+   }
+  ],
+  "C": [
+   {
+    "locus": "chr1:22634437",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.9589,
+    "dbeta_max": 0.1912,
+    "cis_status": "NA",
+    "ari": null
+   },
+   {
+    "locus": "chr1:44134367",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.3944,
+    "dbeta_max": 0.0488,
+    "cis_status": "NA",
+    "ari": null
+   },
+   {
+    "locus": "chr1:44616341",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 1.0,
+    "dbeta_max": 0.2515,
+    "cis_status": "NA",
+    "ari": null
+   },
+   {
+    "locus": "chr1:45782059",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.914,
+    "dbeta_max": 0.1732,
+    "cis_status": "NA",
+    "ari": null
+   },
+   {
+    "locus": "chr1:46939831",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.4113,
+    "dbeta_max": 0.0456,
+    "cis_status": "NA",
+    "ari": null
+   }
+  ],
+  "E": [
+   {
+    "locus": "chr1:110906076",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.251,
+    "cis_status": "NA",
+    "ari": null
+   },
+   {
+    "locus": "chr1:117744326",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.1862,
+    "cis_status": "NA",
+    "ari": null
+   },
+   {
+    "locus": "chr1:118225608",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.123,
+    "cis_status": "NA",
+    "ari": null
+   },
+   {
+    "locus": "chr1:118487551",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.0661,
+    "cis_status": "NA",
+    "ari": null
+   },
+   {
+    "locus": "chr1:118673985",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.0214,
+    "cis_status": "not-cis",
+    "ari": null
+   }
+  ],
+  "F": [
+   {
+    "locus": "chr1:213476706",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.3405,
+    "cis_status": "untestable",
+    "ari": null
+   },
+   {
+    "locus": "chr2:59591863",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.2155,
+    "cis_status": "untestable",
+    "ari": null
+   },
+   {
+    "locus": "chr2:176946417",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.1333,
+    "cis_status": "untestable",
+    "ari": null
+   },
+   {
+    "locus": "chr2:177633956",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.1594,
+    "cis_status": "untestable",
+    "ari": null
+   },
+   {
+    "locus": "chr2:182341131",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.1748,
+    "cis_status": "untestable",
+    "ari": null
+   }
+  ],
+  "B": [
+   {
+    "locus": "chr5:6201328",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.1102,
+    "cis_status": "copy",
+    "ari": null
+   },
+   {
+    "locus": "chr13:32315128",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "ZAR1L/BRCA2",
+    "cramersV": 0.5767,
+    "dbeta_max": 0.0192,
+    "cis_status": "copy",
+    "ari": null
+   },
+   {
+    "locus": "chr14:58041434",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.1031,
+    "cis_status": "copy",
+    "ari": null
+   },
+   {
+    "locus": "chr20:7482356",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.0942,
+    "cis_status": "copy",
+    "ari": null
+   },
+   {
+    "locus": "chr20:7482362",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.0947,
+    "cis_status": "copy",
+    "ari": null
+   }
+  ],
+  "D": [
+   {
+    "locus": "chr6:90251380",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.3289,
+    "cis_status": "NA",
+    "ari": null
+   },
+   {
+    "locus": "chr10:87470464",
+    "sample": "COLO829",
+    "class": "TP",
+    "gene": "NA",
+    "cramersV": 0.0,
+    "dbeta_max": 0.2707,
+    "cis_status": "NA",
+    "ari": null
+   }
+  ],
+  "A": [
+   {
+    "locus": "chr17:79991120",
+    "sample": "HCC1395",
+    "class": "TP",
+    "gene": "TBC1D16",
+    "cramersV": 0.0,
+    "dbeta_max": 0.0888,
+    "cis_status": "cis",
+    "ari": null
+   }
+  ]
+ }
+}

@@ -1,0 +1,594 @@
+{
+  "meta": {
+    "script": "52_subclone_assessment.py",
+    "sample": "HCC1395",
+    "task_type": "A pilot",
+    "axis_note": "HP-axis = somatic-controlled",
+    "inputs": [
+      "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/m2_meth_measurement_audit.json",
+      "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/c2_context_tpfp_clustering.json",
+      "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/master_o2_error.tsv"
+    ],
+    "bam": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_full/20260314_HCC1395_paired_full_full_complete_matrix/longphase_s/HCC1395_tagged.bam",
+    "hp_split_tol": 0.12,
+    "ari_hi_threshold": 0.25836000000000003,
+    "subclone_discriminator": "bimodal per-read beta where GMM minor-mode weight does NOT match germ-or-som read fraction (within HP_SPLIT_TOL) => structure beyond the 2 HP groups."
+  },
+  "q1_subclone_vs_hpsplit": {
+    "n_loci_bimodal_testable": 247,
+    "n_bimodal": 43,
+    "n_bimodal_hp_split_explained": 24,
+    "n_bimodal_subclone_like": 19,
+    "frac_bimodal_subclone_like": 0.442,
+    "bimodal_blind_ari_median": 0.17618,
+    "bimodal_placebo_ari_median": 0.09253,
+    "blind_vs_placebo_global": "blind_ari>>placebo (C2 H-E p=1.8e-43): clustering is real",
+    "bimodal_tp_vs_fp": {
+      "tp_frac": 0.1775,
+      "fp_frac": 0.125,
+      "fp_n_bimodal": 2,
+      "note": "FP n=16 testable -> bimodality cannot discriminate TP/FP (underpowered)"
+    },
+    "interpretation": "Most per-read bimodality (n=24 of 43) aligns with the germ-vs-som HP split; 19 loci show a minor mode whose weight deviates from the germ/som fraction (subclone-like sub-structure). blind_ari>>placebo confirms the clustering is real read structure (not length/coverage artifact), but the dominant structure IS the somatic HP subgroup, not a novel minor clone."
+  },
+  "q2_measurement_hides_subclone": {
+    "binarized_vs_continuous_corr": 0.9979,
+    "corr_db_max_vs_5hmC": 0.0331,
+    "frac_5hmC_gt_5mC": 0.1198,
+    "deadzone_frac": 0.1248,
+    "n_bimodal_with_high_intermediate": 2,
+    "top_divergent_loci_bimodal_overlap": [
+      {
+        "chrom": "chr22",
+        "pos": 23751344,
+        "label": null,
+        "beta_bin": 0.0553,
+        "beta_cont": 0.1825,
+        "div": 0.1272,
+        "frac_intermediate": 0.2399,
+        "key2": "chr22:23751344",
+        "is_bimodal": false,
+        "blind_ari": NaN,
+        "is_tp": 1
+      },
+      {
+        "chrom": "chr12",
+        "pos": 6867653,
+        "label": null,
+        "beta_bin": 0.0319,
+        "beta_cont": 0.1521,
+        "div": 0.1202,
+        "frac_intermediate": 0.2208,
+        "key2": "chr12:6867653",
+        "is_bimodal": false,
+        "blind_ari": NaN,
+        "is_tp": 1
+      },
+      {
+        "chrom": "chr13",
+        "pos": 32315128,
+        "label": "BRCA2",
+        "beta_bin": 0.0719,
+        "beta_cont": 0.1615,
+        "div": 0.0896,
+        "frac_intermediate": 0.1468,
+        "key2": "chr13:32315128",
+        "is_bimodal": false,
+        "blind_ari": 0.78972,
+        "is_tp": 1
+      },
+      {
+        "chrom": "chr20",
+        "pos": 50267392,
+        "label": "chr20_50267392",
+        "beta_bin": 0.089,
+        "beta_cont": 0.1776,
+        "div": 0.0886,
+        "frac_intermediate": 0.1514,
+        "key2": "chr20:50267392",
+        "is_bimodal": false,
+        "blind_ari": NaN,
+        "is_tp": 1
+      },
+      {
+        "chrom": "chr12",
+        "pos": 60397007,
+        "label": null,
+        "beta_bin": 0.9595,
+        "beta_cont": 0.8803,
+        "div": 0.0792,
+        "frac_intermediate": 0.1622,
+        "key2": "chr12:60397007",
+        "is_bimodal": true,
+        "blind_ari": NaN,
+        "is_tp": 1
+      },
+      {
+        "chrom": "chr2",
+        "pos": 61093979,
+        "label": null,
+        "beta_bin": 0.952,
+        "beta_cont": 0.8737,
+        "div": 0.0783,
+        "frac_intermediate": 0.2162,
+        "key2": "chr2:61093979",
+        "is_bimodal": false,
+        "blind_ari": NaN,
+        "is_tp": 1
+      },
+      {
+        "chrom": "chr16",
+        "pos": 21278464,
+        "label": null,
+        "beta_bin": 0.1139,
+        "beta_cont": 0.1919,
+        "div": 0.078,
+        "frac_intermediate": 0.1374,
+        "key2": "chr16:21278464",
+        "is_bimodal": false,
+        "blind_ari": NaN,
+        "is_tp": 1
+      },
+      {
+        "chrom": "chr5",
+        "pos": 3323034,
+        "label": null,
+        "beta_bin": 0.9744,
+        "beta_cont": 0.9038,
+        "div": 0.0706,
+        "frac_intermediate": 0.1709,
+        "key2": "chr5:3323034",
+        "is_bimodal": false,
+        "blind_ari": NaN,
+        "is_tp": 0
+      },
+      {
+        "chrom": "chr5",
+        "pos": 178141557,
+        "label": null,
+        "beta_bin": 0.9857,
+        "beta_cont": 0.9152,
+        "div": 0.0705,
+        "frac_intermediate": 0.1286,
+        "key2": "chr5:178141557",
+        "is_bimodal": false,
+        "blind_ari": NaN,
+        "is_tp": 1
+      },
+      {
+        "chrom": "chr11",
+        "pos": 97968772,
+        "label": null,
+        "beta_bin": 0.9527,
+        "beta_cont": 0.8823,
+        "div": 0.0704,
+        "frac_intermediate": 0.1149,
+        "key2": "chr11:97968772",
+        "is_bimodal": false,
+        "blind_ari": NaN,
+        "is_tp": 1
+      }
+    ],
+    "measurement_hides_subclone": true,
+    "why": "Two distinct hiding mechanisms: (1) BINARIZATION: global binarized~continuous corr is tight (0.998), so for the AVERAGE locus max-collapse is safe; BUT 2 bimodal loci carry a sizeable intermediate-methylation read fraction (>0.15) that binarization crushes to 0/1, and the top-divergent loci (div up to 0.13, incl BRCA2) are exactly where a partially-methylated subpopulation is flattened -> continuous beta DOES recover structure binarized hides at these specific loci. (2) MAX-COLLAPSE of 5mC|5hmC: corr(db_max, db_5hmC)=0.033 (orthogonal) with 5hmC>5mC in 12.0% of CpGs -> the max-collapse measurement is 5mC-dominated and DISCARDS the 5hmC channel entirely; any 5hmC-defined subpopulation is invisible to the current binarized-max measurement."
+  },
+  "q3_top_candidates": {
+    "n_candidates": 19,
+    "n_candidates_blind_ari_confirmed": 0,
+    "m2_c2_locus_overlap": {
+      "m2_testable": 260,
+      "c2_bam_pass": 596,
+      "n_with_blind_ari": 15,
+      "n_bimodal_with_blind_ari": 4,
+      "note": "M2 (bimodality) and C2 (blind_ari) sampled largely DISJOINT loci; only ~15 overlap, 4 of 43 bimodal loci have blind_ari. Candidates are ranked by the DIRECT per-read bimodality test and annotated with blind_ari where available -- NOT gated on the near-empty intersection."
+    },
+    "ranking_criteria": "TP & is_bimodal & subclone-like(minor mode NOT germ/som HP-split); score = bm_sep*minor_mode_w*ari_factor (1.5 if blind_ari>=median, 1.0 if absent, 0.6 if low)",
+    "top_candidate_loci": [
+      {
+        "locus": "chr2:4630990",
+        "axis": "HP1_vs_HP1-1",
+        "label": null,
+        "loh": "LOH",
+        "cn_class": "gain",
+        "median_cn": 3.0,
+        "is_tp": 1,
+        "blind_ari": null,
+        "blind_ari_available": false,
+        "placebo_ari": null,
+        "beta_cont": 0.4792,
+        "bm_dbic": 25.9,
+        "bm_sep": 0.2936,
+        "bm_means": [
+          0.3145,
+          0.608
+        ],
+        "bm_weights": [
+          0.4379,
+          0.5621
+        ],
+        "minor_mode_w": 0.4379,
+        "frac_som": 0.808,
+        "n_germ": 19,
+        "n_som": 80,
+        "hp_split_explained": false,
+        "frac_intermediate": 0.0556,
+        "subclone_score": 0.12857
+      },
+      {
+        "locus": "chr7:155395399",
+        "axis": "HP2_vs_HP2-1",
+        "label": null,
+        "loh": "nonLOH",
+        "cn_class": "gain",
+        "median_cn": 8.0,
+        "is_tp": 1,
+        "blind_ari": null,
+        "blind_ari_available": false,
+        "placebo_ari": null,
+        "beta_cont": 0.4975,
+        "bm_dbic": 21.4,
+        "bm_sep": 0.2115,
+        "bm_means": [
+          0.392,
+          0.6034
+        ],
+        "bm_weights": [
+          0.4914,
+          0.5086
+        ],
+        "minor_mode_w": 0.4914,
+        "frac_som": 0.212,
+        "n_germ": 204,
+        "n_som": 55,
+        "hp_split_explained": false,
+        "frac_intermediate": 0.1164,
+        "subclone_score": 0.10393
+      },
+      {
+        "locus": "chr9:23071370",
+        "axis": "HP1_vs_HP1-1",
+        "label": null,
+        "loh": "LOH",
+        "cn_class": "neutral",
+        "median_cn": 2.0,
+        "is_tp": 1,
+        "blind_ari": null,
+        "blind_ari_available": false,
+        "placebo_ari": null,
+        "beta_cont": 0.3827,
+        "bm_dbic": 20.5,
+        "bm_sep": 0.3298,
+        "bm_means": [
+          0.1227,
+          0.4526
+        ],
+        "bm_weights": [
+          0.2417,
+          0.7583
+        ],
+        "minor_mode_w": 0.2417,
+        "frac_som": 0.492,
+        "n_germ": 30,
+        "n_som": 29,
+        "hp_split_explained": false,
+        "frac_intermediate": 0.0567,
+        "subclone_score": 0.07971
+      },
+      {
+        "locus": "chr15:94105522",
+        "axis": "HP2_vs_HP2-1",
+        "label": null,
+        "loh": "nonLOH",
+        "cn_class": "gain",
+        "median_cn": 6.0,
+        "is_tp": 1,
+        "blind_ari": null,
+        "blind_ari_available": false,
+        "placebo_ari": null,
+        "beta_cont": 0.2373,
+        "bm_dbic": 12.5,
+        "bm_sep": 0.2593,
+        "bm_means": [
+          0.0448,
+          0.3041
+        ],
+        "bm_weights": [
+          0.2562,
+          0.7438
+        ],
+        "minor_mode_w": 0.2562,
+        "frac_som": 0.477,
+        "n_germ": 45,
+        "n_som": 41,
+        "hp_split_explained": false,
+        "frac_intermediate": 0.0581,
+        "subclone_score": 0.06643
+      },
+      {
+        "locus": "chr17:69736115",
+        "axis": "HP2_vs_HP2-1",
+        "label": null,
+        "loh": "LOH",
+        "cn_class": "gain",
+        "median_cn": 6.0,
+        "is_tp": 1,
+        "blind_ari": null,
+        "blind_ari_available": false,
+        "placebo_ari": null,
+        "beta_cont": 0.8673,
+        "bm_dbic": 25.7,
+        "bm_sep": 0.1714,
+        "bm_means": [
+          0.8032,
+          0.9746
+        ],
+        "bm_weights": [
+          0.379,
+          0.621
+        ],
+        "minor_mode_w": 0.379,
+        "frac_som": 0.211,
+        "n_germ": 105,
+        "n_som": 28,
+        "hp_split_explained": false,
+        "frac_intermediate": 0.0692,
+        "subclone_score": 0.06496
+      },
+      {
+        "locus": "chr14:86978441",
+        "axis": "HP1_vs_HP1-1",
+        "label": null,
+        "loh": "nonLOH",
+        "cn_class": "gain",
+        "median_cn": 7.0,
+        "is_tp": 1,
+        "blind_ari": null,
+        "blind_ari_available": false,
+        "placebo_ari": null,
+        "beta_cont": 0.3177,
+        "bm_dbic": 26.5,
+        "bm_sep": 0.2539,
+        "bm_means": [
+          0.2542,
+          0.5082
+        ],
+        "bm_weights": [
+          0.25,
+          0.75
+        ],
+        "minor_mode_w": 0.25,
+        "frac_som": 0.122,
+        "n_germ": 86,
+        "n_som": 12,
+        "hp_split_explained": false,
+        "frac_intermediate": 0.0208,
+        "subclone_score": 0.06348
+      },
+      {
+        "locus": "chr1:66415340",
+        "axis": "HP2_vs_HP2-1",
+        "label": null,
+        "loh": "LOH",
+        "cn_class": "neutral",
+        "median_cn": 2.0,
+        "is_tp": 1,
+        "blind_ari": null,
+        "blind_ari_available": false,
+        "placebo_ari": null,
+        "beta_cont": 0.9199,
+        "bm_dbic": 26.3,
+        "bm_sep": 0.2009,
+        "bm_means": [
+          0.7815,
+          0.9824
+        ],
+        "bm_weights": [
+          0.3047,
+          0.6953
+        ],
+        "minor_mode_w": 0.3047,
+        "frac_som": 0.426,
+        "n_germ": 31,
+        "n_som": 23,
+        "hp_split_explained": false,
+        "frac_intermediate": 0.045,
+        "subclone_score": 0.06121
+      },
+      {
+        "locus": "chr22:30064792",
+        "axis": "HP2_vs_HP2-1",
+        "label": null,
+        "loh": "nonLOH",
+        "cn_class": "gain",
+        "median_cn": 5.0,
+        "is_tp": 1,
+        "blind_ari": null,
+        "blind_ari_available": false,
+        "placebo_ari": null,
+        "beta_cont": 0.8585,
+        "bm_dbic": 47.7,
+        "bm_sep": 0.17,
+        "bm_means": [
+          0.8086,
+          0.9786
+        ],
+        "bm_weights": [
+          0.3449,
+          0.6551
+        ],
+        "minor_mode_w": 0.3449,
+        "frac_som": 0.811,
+        "n_germ": 18,
+        "n_som": 77,
+        "hp_split_explained": false,
+        "frac_intermediate": 0.0917,
+        "subclone_score": 0.05863
+      },
+      {
+        "locus": "chr8:117027962",
+        "axis": "HP1_vs_HP1-1",
+        "label": null,
+        "loh": "LOH",
+        "cn_class": "gain",
+        "median_cn": 5.0,
+        "is_tp": 1,
+        "blind_ari": null,
+        "blind_ari_available": false,
+        "placebo_ari": null,
+        "beta_cont": 0.922,
+        "bm_dbic": 37.5,
+        "bm_sep": 0.1209,
+        "bm_means": [
+          0.8711,
+          0.9921
+        ],
+        "bm_weights": [
+          0.4649,
+          0.5351
+        ],
+        "minor_mode_w": 0.4649,
+        "frac_som": 0.23,
+        "n_germ": 114,
+        "n_som": 34,
+        "hp_split_explained": false,
+        "frac_intermediate": 0.0824,
+        "subclone_score": 0.05621
+      },
+      {
+        "locus": "chr8:121978175",
+        "axis": "HP2_vs_HP2-1",
+        "label": null,
+        "loh": "LOH",
+        "cn_class": "gain",
+        "median_cn": 5.0,
+        "is_tp": 1,
+        "blind_ari": null,
+        "blind_ari_available": false,
+        "placebo_ari": null,
+        "beta_cont": 0.9016,
+        "bm_dbic": 29.0,
+        "bm_sep": 0.1341,
+        "bm_means": [
+          0.8256,
+          0.9597
+        ],
+        "bm_weights": [
+          0.4163,
+          0.5837
+        ],
+        "minor_mode_w": 0.4163,
+        "frac_som": 0.887,
+        "n_germ": 13,
+        "n_som": 102,
+        "hp_split_explained": false,
+        "frac_intermediate": 0.1223,
+        "subclone_score": 0.05583
+      },
+      {
+        "locus": "chr9:80227092",
+        "axis": "HP2_vs_HP2-1",
+        "label": null,
+        "loh": "nonLOH",
+        "cn_class": "gain",
+        "median_cn": 4.0,
+        "is_tp": 1,
+        "blind_ari": null,
+        "blind_ari_available": false,
+        "placebo_ari": null,
+        "beta_cont": 0.8647,
+        "bm_dbic": 20.7,
+        "bm_sep": 0.3092,
+        "bm_means": [
+          0.6074,
+          0.9166
+        ],
+        "bm_weights": [
+          0.1522,
+          0.8478
+        ],
+        "minor_mode_w": 0.1522,
+        "frac_som": 0.719,
+        "n_germ": 16,
+        "n_som": 41,
+        "hp_split_explained": false,
+        "frac_intermediate": 0.1144,
+        "subclone_score": 0.04706
+      },
+      {
+        "locus": "chr8:52128513",
+        "axis": "HP1_vs_HP1-1",
+        "label": null,
+        "loh": "LOH",
+        "cn_class": "gain",
+        "median_cn": 3.0,
+        "is_tp": 1,
+        "blind_ari": null,
+        "blind_ari_available": false,
+        "placebo_ari": null,
+        "beta_cont": 0.907,
+        "bm_dbic": 29.3,
+        "bm_sep": 0.1163,
+        "bm_means": [
+          0.8353,
+          0.9516
+        ],
+        "bm_weights": [
+          0.3784,
+          0.6216
+        ],
+        "minor_mode_w": 0.3784,
+        "frac_som": 0.83,
+        "n_germ": 16,
+        "n_som": 78,
+        "hp_split_explained": false,
+        "frac_intermediate": 0.0816,
+        "subclone_score": 0.04401
+      }
+    ],
+    "brca2": {
+      "locus": "chr13:32315128",
+      "label": "BRCA2",
+      "is_tp": 1,
+      "loh": "nonLOH",
+      "cn_class": "gain",
+      "median_cn": 4.0,
+      "blind_ari": 0.78972,
+      "abs_delta": 0.1218,
+      "beta_bin": 0.0719,
+      "beta_cont": 0.1615,
+      "binconti_div": 0.0896,
+      "frac_intermediate": 0.1468,
+      "is_bimodal": false,
+      "bm_delta_bic": -6.583993476867477,
+      "bm_means": [
+        0.1521,
+        0.1897
+      ],
+      "bm_weights": [
+        0.2322,
+        0.7678
+      ],
+      "bm_sep": 0.0376,
+      "qualifies_subclone_candidate": false,
+      "why": "BRCA2 is TP, nonLOH, CN-gain (4n), high blind_ari=0.790 (real read clustering: blind 0.79 vs placebo 0.13, permanova R2=0.70, silhouette 0.61) AND continuous beta (0.162) exceeds binarized beta (0.072) -> a partially-methylated/intermediate read subpopulation (frac_intermediate=0.147) is being crushed by MAX-collapse binarization. BUT per-read GMM is NOT bimodal (dBIC=-6.6 favours 1 component): the intermediate reads form a graded shoulder, not a cleanly separated minor mode. So BRCA2 shows the MEASUREMENT-HIDING signature (continuous reveals what binarized hides) but does NOT meet the strict per-read-bimodality bar for a discrete subclone."
+    }
+  },
+  "verdict": {
+    "subclone_evidence_verdict": "PREDOMINANTLY_HP_SPLIT: per-read bimodality is largely the germline-group vs somatic-subgroup HP split (24 of 43 bimodal loci); a minority (n=19 TP) show extra subclone-like sub-structure where the minor mode does not match the germ/som read fraction -- low-confidence (single-sample, only 0 of these have blind_ari clustering corroboration).",
+    "n_subclone_candidates": 19,
+    "n_subclone_candidates_blind_ari_confirmed": 0,
+    "measurement_hides_subclone": true,
+    "measurement_hides_why": "Binarized-max is safe on average (r=0.998) but (a) crushes intermediate-meth subpopulations at specific bimodal/high-frac_intermediate loci incl BRCA2, and (b) discards the orthogonal 5hmC channel (corr 0.033). Separated continuous 5mC + 5hmC would expose structure the current measurement hides at these loci.",
+    "brca2_qualifies": false,
+    "recommendation": "Do NOT claim a discrete methylation subclone from this single-sample HCC1395 pilot: the dominant read structure is the somatic HP subgroup (germ-vs-som split), bimodality does not discriminate TP/FP (FP underpowered, n=16 testable), and subclone-like loci are a minority. HOWEVER the measurement IS lossy at specific loci -> (1) switch from binarized-max to SEPARATED continuous 5mC and 5hmC beta for the 10 top-divergent / high-frac_intermediate loci (incl BRCA2); (2) treat the 19 subclone-like loci as hypotheses to confirm in a second sample (COLO829) with per-read GMM on continuous beta SEPARATED by mod-type, before any subclone claim."
+  },
+  "power_caveats": {
+    "single_sample": "HCC1395 only; subclone claims need >=2 samples",
+    "fp_power": "43 FP in 596 BAM-pass loci; 16 testable for bimodality -> no TP/FP claim",
+    "pseudoreplication": "per-position; HP1/HP2 records of same locus correlated"
+  },
+  "paths": {
+    "json": "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/s_subclone_assessment.json",
+    "figure": "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/figures/cn_confound/s_subclone_assessment.png"
+  }
+}

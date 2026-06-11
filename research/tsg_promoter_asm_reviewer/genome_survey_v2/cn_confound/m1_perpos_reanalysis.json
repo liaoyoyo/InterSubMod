@@ -1,0 +1,95 @@
+{
+  "task": "M1 per-position re-analysis (fix pseudoreplication) \u2014 H-A CN dose-response",
+  "data": {
+    "sample": "HCC1395 paired_full (single sample)",
+    "cn_ground_truth": "SEQC2 Masood 2024 (median CN; default 2 diploid/cnLOH)",
+    "master_records": "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/master_o1_cn.tsv",
+    "n_records_total": 56320,
+    "perpos_table": "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/master_perpos.tsv",
+    "sig_definition": "min HP wilcoxon_p < 0.05 (per position)"
+  },
+  "perpos_composition": {
+    "n_positions_total": 34154,
+    "n_positions_tp": 30511,
+    "n_positions_fp": 3643,
+    "n_with_hp_axis": 23502,
+    "n_with_allele_axis": 30589,
+    "n_with_both": 19937,
+    "n_hp_only": 3565,
+    "n_allele_only": 10652,
+    "note": "TP positions expected to carry up to 3 axes (HP1,HP2,ALLELE); FP fewer."
+  },
+  "hp_sig_positions": {
+    "n_hp_sig_positions": 5056,
+    "n_hp_sig_tp": 4614,
+    "n_hp_sig_fp": 442
+  },
+  "H_A_perposition_HP": {
+    "primary_effect": "hp_absdelta_max",
+    "raw_spearman_absdelta_vs_cn": {
+      "rho": -0.0732550727845593,
+      "p": 1.8425254061886633e-07,
+      "n": 5056,
+      "note": "raw Spearman(hp_absdelta_max, median_cn) per-position HP-sig"
+    },
+    "partial_spearman_absdelta_vs_cn_given_cov": {
+      "rho": -0.03932499928015792,
+      "p": 0.005164083156358792,
+      "n": 5056,
+      "note": "rank-OLS residualize hp_absdelta_max on hp_n_cpg_max, then Spearman vs median_cn"
+    },
+    "raw_spearman_signeddelta_vs_cn": {
+      "rho": -0.03199456800499868,
+      "p": 0.022905245846642813,
+      "note": "direction: negative=more hypomethylation at higher CN"
+    },
+    "sensitivity_hp_absdelta_mean": {
+      "raw_spearman": {
+        "rho": -0.11177946678685914,
+        "p": 1.5718317724084125e-15
+      },
+      "partial_spearman": {
+        "rho": -0.0827943351224946,
+        "p": 3.728573689748155e-09,
+        "n": 5056,
+        "note": "rank-OLS residualize hp_absdelta_mean on hp_n_cpg_max, then Spearman vs median_cn"
+      }
+    }
+  },
+  "H_A_perposition_ALLELE": {
+    "n_allele_sig_positions": 8433,
+    "raw_spearman_absdelta_vs_cn": {
+      "rho": -0.15297102774841026,
+      "p": 2.5283333973035685e-45
+    },
+    "partial_spearman_absdelta_vs_cn_given_cov": {
+      "rho": -0.1060488244217046,
+      "p": 1.595676627359766e-22,
+      "n": 8433,
+      "note": "rank-OLS residualize allele_absdelta on allele_n_cpg, then Spearman vs median_cn"
+    },
+    "caveat": "ALLELE axis is confounded by baseline allelic methylation (germline-het); not somatic-controlled. Reported for completeness only."
+  },
+  "pseudoreplication": {
+    "prior_record_rho": -0.05508654043226616,
+    "prior_record_n": 5142,
+    "perpos_partial_rho": -0.03932499928015792,
+    "perpos_partial_p": 0.005164083156358792,
+    "n_hp_sig_positions": 5056,
+    "inflation_factor": 1.017009493670886,
+    "inflation_note": "prior 5142 HP-sig RECORDS collapse to 5056 independent HP-sig POSITIONS; pseudoreplication inflated effective n by ~1.02x (HP1+HP2 of same locus are correlated)."
+  },
+  "pre_registration": {
+    "falsifier": "per-position coverage-controlled partial Spearman rho(|\u0394\u03b2|,CN) > 0.2 AND p<0.05",
+    "support_threshold": "|partial-rho| <= 0.1 OR opposite sign => NOT CN-driven (H-A holds)"
+  },
+  "verdict": "CONFIRM",
+  "verdict_holds": true,
+  "decision_rule_result": "per-position partial-rho=-0.0393 (|rho|<=0.1 or opposite sign) => NOT CN-driven; H-A HOLDS at per-position level",
+  "comparison_to_prior": "per-RECORD partial-rho=-0.0551 (n=5142) vs per-POSITION partial-rho=-0.0393 (n=5056); both |rho|<=0.1 => H-A 'NOT CN-driven' verdict robust to pseudoreplication correction.",
+  "outputs": {
+    "json": "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/m1_perpos_reanalysis.json",
+    "figure": "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/figures/cn_confound/m1_perpos_reanalysis.png",
+    "perpos_tsv": "/big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/master_perpos.tsv"
+  }
+}

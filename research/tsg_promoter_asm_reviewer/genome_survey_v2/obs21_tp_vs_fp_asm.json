@@ -1,0 +1,60 @@
+{
+  "analysis": "obs21_TP_vs_FP_strong_ASM_characterization",
+  "date": "2026-05-31",
+  "axis": "HP-axis (somatic-controlled)",
+  "strong_rate": {
+    "TP": 0.00278,
+    "FP": 0.01384,
+    "FP_over_TP": 4.98
+  },
+  "TP_strong": {
+    "label": "TP-strong",
+    "n": 66,
+    "median_n_cpg": 102.0,
+    "median_abs_dbeta": 0.1703,
+    "median_germ_beta": 0.58595,
+    "median_baseline_extremity": 0.15910000000000002,
+    "pct_germ_extreme(>0.4 from .5)": 6.0606060606060606,
+    "hypo_pct": 42.42424242424242,
+    "loh_pct": 36.36363636363637
+  },
+  "FP_strong": {
+    "label": "FP-strong",
+    "n": 26,
+    "median_n_cpg": 50.5,
+    "median_abs_dbeta": 0.2089,
+    "median_germ_beta": 0.8176000000000001,
+    "median_baseline_extremity": 0.31760000000000005,
+    "pct_germ_extreme(>0.4 from .5)": 26.923076923076923,
+    "hypo_pct": 61.53846153846154,
+    "loh_pct": 92.3076923076923
+  },
+  "TP_all": {
+    "label": "TP-all",
+    "n": 23771,
+    "median_n_cpg": 26.0,
+    "median_abs_dbeta": 0.0286,
+    "median_germ_beta": 0.8253,
+    "median_baseline_extremity": 0.33819999999999995,
+    "pct_germ_extreme(>0.4 from .5)": 36.80114425139877,
+    "hypo_pct": 46.720794245088555,
+    "loh_pct": 42.91784106684616
+  },
+  "FP_all": {
+    "label": "FP-all",
+    "n": 1879,
+    "median_n_cpg": 23.0,
+    "median_abs_dbeta": 0.0294,
+    "median_germ_beta": 0.8472,
+    "median_baseline_extremity": 0.3526,
+    "pct_germ_extreme(>0.4 from .5)": 37.04097924427887,
+    "hypo_pct": 46.780202235231506,
+    "loh_pct": 77.64768493879724
+  },
+  "interpretation": {
+    "FP_strong_lower_coverage": true,
+    "FP_strong_more_extreme_baseline": true,
+    "FP_strong_larger_dbeta": true,
+    "n_cpg_ratio_TP_over_FP": 2.02
+  }
+}

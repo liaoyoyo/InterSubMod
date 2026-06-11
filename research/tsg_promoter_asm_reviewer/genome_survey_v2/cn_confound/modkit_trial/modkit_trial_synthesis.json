@@ -1,0 +1,36 @@
+{
+  "trial": "modkit v0.6.3 applicability + cross-validation + GMM re-test + modkit-vs-MSA-vs-ISM comparison",
+  "workflow_run": "wf_5f8faad4-a08",
+  "date": "2026-06-02",
+  "sample": "HCC1395 paired_full (single sample, A pilot)",
+  "modkit_path": "/big7_disk/liaoyoyo2001/modkit/dist_modkit_v0.6.3_26c3f9e/modkit",
+  "evaluator": "independent fresh-context evaluator (read-only); persisted by parent agent",
+  "per_question": [
+    {
+      "q": "(1) install + run on our modBAM + cross-validate vs pysam (?-mode)?",
+      "verdict": "PASS (GATE = AGREE)",
+      "numbers": "modkit v0.6.3: 1657 reads, 45332 rows, 13 loci. BRCA2 per-read 5mC Pearson=1.0; aggregate Pearson=Spearman=1.0; n_shared=13805 modkit_only=0 pysam_only=0 calls_match_frac=1.0; per-call max_abs_diff=0.00195 (=ONT 8-bit ML quantization). '?'-mode: 0/45332 inferred rows -> modkit does NOT fabricate canonical at skipped/UNKNOWN positions. mod_qual is [0,1] float (no /255). BED must be BED6 (modkit rejects BED4). Flags: --include-bed --ref --threads 8 --mapped-only --force --suppress-progress.",
+      "overclaim_flag": false
+    },
+    {
+      "q": "(2) modkit vs MSA vs ISM pros/cons + application; replacement or complement?",
+      "verdict": "COMPLEMENTARY extraction frontend, NOT a replacement",
+      "numbers": "modkit: somatic-aware=NO, subclone-aware=NO (extraction/pileup; dmr=region-level diff not per-read somatic axis); 5mC/5hmC SEPARATE by default; external-citable=STRONG (ONT official). MSA: somatic HP/ALLELE-axis=YES (generated our dualaxis) but carries 5mC+5hmC double-row MAX-collapse bug (buggy BRCA2 -0.054 vs corrected -0.122); internal-only. ISM: per-read subclone clustering=YES (read-read distance + hierarchical, only dedicated resolver); internal-only.",
+      "overclaim_flag": false
+    },
+    {
+      "q": "(3) can modkit supply separated continuous 5mC+5hmC; did GMM re-test change any subclone verdict vs pysam-binarized M2?",
+      "verdict": "PASS supply; but GMM re-test = NEGATIVE/NULL (no verdict change)",
+      "numbers": "13 tested: 9 bimodal under modkit-continuous; 3 CHANGED (n_lost=3, n_gained=0, n_5hmC_new_structure=0). Lost = chr2:4630990(n=68), chr7:155395399(n=44), chr9:23071370(n=28) — all small-n borderline, 5mC dBIC slipped 9.30/8.25/7.40 below the >=10 cutoff. BRCA2 UNIMODAL both methods. Consistent with M2 (binarized-vs-continuous corr=0.9979; corr_db_max_vs_5hmC=0.0331). Cleaner measurement is MORE CONSERVATIVE not more sensitive; separating 5hmC revealed ZERO new structure -> rejects 'MAX-collapse hid 5hmC clones'.",
+      "overclaim_flag": false
+    }
+  ],
+  "synthesis": "modkit v0.6.3 installed to /big7_disk, ran on the actual HCC1395 modBAM, and cross-validated against the pysam r.modified_bases baseline with a clean PASS (per-read 5mC Pearson=1.0, 13805 shared calls, 0 modkit-only/0 pysam-only, verified-correct '?'-mode = 0/45332 inferred rows). modkit is a complementary, externally-citable extraction/pileup FRONTEND, not a replacement: no somatic-vs-germline ASM axis and no subclone clustering (those remain MSA and ISM territory). On the research question, GMM re-test on modkit separated-continuous beta produced essentially no verdict change vs pysam-binarized M2 (9/13 bimodal, 3 losses on small-n threshold-crossing, 0 gains, 0 new 5hmC structure), so the pysam MAX-collapse was not distorting the subclone picture and BRCA2 stays unimodal. The practical payoff of modkit is reviewer-grade provenance and elimination of the MSA double-row collapse bug at the measurement step, NOT a change to any subclone conclusion.",
+  "recommendation": "ADOPT modkit as the citable extraction frontend (`modkit extract full --include-bed loci.bed --reference ref tumor.bam`) to replace ONLY the raw MM/ML measurement step and retire the MSA 5mC+5hmC double-row MAX-collapse bug; KEEP MSA for somatic germline-vs-ALT / HP-axis definitions and KEEP ISM for per-read subclone clustering. Treat the GMM re-test as NEGATIVE/NULL: do not re-open or re-grade subclone candidates on measurement method alone. NEXT: (a) wire modkit-extract as documented frontend into pipeline manifest with the cross-val log for provenance; (b) validate on a SECOND sample (COLO829) and report dBIC bootstrap/CI around the >=10 cutoff (the 3 flips are n-driven, not biology).",
+  "needs_work": [
+    "Single-sample (HCC1395) only; replicate on COLO829 before tier upgrade or paper claim.",
+    "GMM verdict fragility: 3 changed loci all small-n (n=28-68) threshold-crossing at dBIC>=10; report bootstrap/CI on dBIC, not hard binary.",
+    "loci-count provenance: 19 = genome-wide subclone-like (M2, of 43 bimodal); 12 = top-ranked candidates persisted in s_subclone q3 array; 13 = 12 + BRCA2 tested. State explicitly; do not conflate.",
+    "modkit not yet in project KB (/big8_disk Knowledge is shared); recommend adding a KB tool doc after pipeline-manifest wiring."
+  ]
+}
