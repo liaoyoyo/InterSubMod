@@ -68,8 +68,29 @@ longphase-S 把 45.84% read 標成 unphase（無相位）。能否用 per-read �
 - **機制（一致）**：甲基訊號=germline-haplotype 層級(V10)→分不同 haplotype 強、分同 haplotype 內亞群弱；subclone 層級 ASM ≪ haplotype 層級。
 - **報告**：`20260609_methyl_assist_longphase_tag_3targets_01.standalone.html`（6-taboo PASS / 圖驗 / 18 數字全 grep-verified）。
 
+## V11b 開發紀錄（2026-06-09）— 三 target 嚴格反例驗證 + 4-agent 對抗審查（修正 V11）
+- **動機**：用戶質疑 T3 反駁是否成立 + 要求 T1/T2 信心/反例/邊緣處理 + 多 agent 詳細檢視。
+- **腳本**：`rigor_t1.py`(失敗特徵化)/`rigor_t2.py`(H3 germline 邊緣分類)/`rigor_t3.py`(Δβ+噪音地板+正控)+`aggregate_rigor.py`+`plot_rigor_corrected.py`。背景跑 run_rigor.sh(t1/t2/t3 × chr7/15/20/22)。
+- **4-agent workflow** wf_b5b391cf-ea4（3 審查+1 綜整，462k tokens）→ **所有反駁獨立從 per-chr JSON 重現**，我再第三次獨立重現（§13.7）。
+- **修正結論（取代 V11 T2/T3 措辭，見 VERIFIED_RESULTS V11b）**：
+  - **T1 = SUPPORTED+caveats(0 blocking)**：held-out 真無循環；誠實 headline=V6 全基因組 0.885 非 0.926(僅可分子集)；🔴 失敗=低 train_sep 非低覆蓋；237/240 窗 gain、LOH 基本未測；abstain gate chicken-egg。⭐3。
+  - **T2 = OVERSTATED(2 blocking)**：0.90 只在有真值 1-1/2-1；用甲基歸 H3 未驗證(H3 無 AUC/null、僅 15-18% 可指派、56% margin 無 null)；inconsistent germline 建議 unTag。⭐2-3。
+  - **T3 = NEGATIVE 維持**：我的「+0.022 excess」是 unmatched-window artifact(已撤)；正確 matched 同窗配對 亞群−噪音 median −0.0043 **p=0.924**(=噪音)、正控存活 +0.0425 **p=1.77e-49**。用戶必要條件不滿足。
+  - **機制天花板**：甲基=germline-haplotype 層級(V10)→分不同 haplotype 強(T1/T2)、within-haplotype 弱(T3)；LOH/subclone 救援情境恰是機制衰退處。
+- **報告**：`20260609_methyl_assist_3target_adversarial_review_01.standalone.html`（含 matched 檢定箱型圖 + verdict + 共通風險）。
+
+## V11c+V12 開發紀錄（2026-06-11）— T3 local-allele 窄翻案 + unphase/HP3 量清點
+- **V12 unphase/HP3 量**（`unphase_inventory.py`，chr15/19/20/22 實掃）：unphase 13,821,877 中**僅 ~6%(~80萬)可嘗試救援**（有甲基+本地HP1/HP2錨點），**94% 無本地錨點無法救**（88.5% 是可嘗試池內正確率）。HP3 76,738：90% no_germline、可嘗試指派~1萬但無真值。
+- **V11c T3 local-allele**（用戶質疑驅動）：改用該位點 ALT/REF 鹼基當亞群/母本(限同HP1)。`t3_local_allele.py`(GATE held-out AUC+噪音地板+farCpG+lean)+`t3_reconcile.py`(matched Δβ+覆蓋confound)。對抗 wf_5553cd83-ee9(2攻擊+1裁決,408k,雙重重現)→ **REVERSAL_OVERSTATED**：
+  - **存在性窄翻案**：亞群vs母本 farCpG AUC 0.85 vs 噪音0.50、matched Δβ+0.04(3/4chr sig)、無覆蓋confound、非somatic-CpG → 先前 HP-tag NEGATIVE 部分是標籤污染(亞群read多不蓋稀疏突變被標「1」)。
+  - **可用性NEGATIVE維持**：ambiguous lean 8/8 全<0.5(偏母本)、無ground truth。
+  - 未解：farCpG±100bp太窄(cohesion≠cis)、單樣本⭐3未達reopen；Attack2 germline_het_null「fatal」被裁決長否決(跨-hap對照軸錯)。
+- **housekeeping**：rigor_aggregate.json 的已撤 subclone_excess_over_noise 0.0224 標 RETRACTED。
+- 複驗(§13.7)：lean 8/8<0.5 + germline_het_null=HP1/HP2 + housekeeping 全自查確認。
+
 ## 待辦
 - LOH 純-LOH 分得開異常 IGV 深究（76% 分得開的 LOH 是 pureLOH，非 cnLOH）
+- 🔬 T3 reopen 前置：≥1 樣本(COLO829) + within-haplotype somatic-vs-baseline 對照 + 更寬空間控制
 - SEQC2 大染色體速度（預載甲基索引）
 - 跨樣本 COLO829（真驗證 ASM×LOH 富集需低背景樣本）
 - 評估回灌 longphase-S / ISM C++

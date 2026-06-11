@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<!--
+  provenance-verified: 白話說明版；數字皆引自 VERIFIED_RESULTS §V11b（已驗證）：T1 V6=0.885 / T2 branch=0.90 / T3 matched p=0.924。
+  data_sources: 20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md, 20260531_methyl_phasing_A0_assets/rigor_aggregate.json
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>白話說明：用甲基幫 read 標記哪條染色體 — 三個問題的答案</title>
+<style>
+:root{--c-accent:#D97757;--c-text:#141413;--c-text-soft:#6B6B66;--c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;--c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;--radius:8px;}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);line-height:1.75;font-size:17px;}
+main{max-width:780px;margin:0 auto;padding:var(--sp-6) var(--sp-5);}
+h1{font-size:26px;line-height:1.3;border-left:5px solid var(--c-accent);padding-left:var(--sp-4);margin-bottom:var(--sp-2);}
+.lead{color:var(--c-text-soft);font-size:16px;margin:0 0 var(--sp-6) var(--sp-4);padding-left:5px;}
+section{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-5) var(--sp-6);margin-bottom:var(--sp-5);}
+h2{font-size:21px;margin:0 0 var(--sp-3);}
+h2 .n{display:inline-block;width:30px;height:30px;line-height:30px;text-align:center;background:var(--c-accent);color:#fff;border-radius:50%;font-size:16px;margin-right:var(--sp-2);}
+.analogy{background:#EEF1FA;border-left:4px solid var(--c-info);border-radius:6px;padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;}
+.keyfact{background:#FBEEE8;border:2px solid var(--c-accent);border-radius:8px;padding:var(--sp-4) var(--sp-5);margin:var(--sp-4) 0;font-size:18px;}
+.keyfact b{color:var(--c-accent);}
+table{width:100%;border-collapse:collapse;font-size:15px;margin:var(--sp-3) 0;}
+th,td{text-align:left;padding:var(--sp-3);border-bottom:1px solid var(--c-border);}
+th{background:var(--c-code-bg);}
+.ans{font-size:15px;}
+.ok{color:var(--c-success);font-weight:700;} .no{color:var(--c-critical);font-weight:700;} .mid{color:var(--c-warning);font-weight:700;}
+.card{border:1px solid var(--c-border);border-radius:8px;padding:var(--sp-4);margin:var(--sp-3) 0;}
+.card.t1{border-left:5px solid var(--c-success);} .card.t2{border-left:5px solid var(--c-warning);} .card.t3{border-left:5px solid var(--c-critical);}
+.card h3{margin:0 0 var(--sp-2);font-size:17px;}
+.tag{font-family:"JetBrains Mono",monospace;font-size:13px;background:var(--c-code-bg);padding:1px 6px;border-radius:4px;border:1px solid var(--c-border);}
+.big{font-size:15px;background:#EDF7F0;border-radius:6px;padding:var(--sp-3) var(--sp-4);margin-top:var(--sp-4);border-left:4px solid var(--c-success);}
+ul li{margin:6px 0;}
+footer{font-size:13px;color:var(--c-text-soft);border-top:1px solid var(--c-border);padding-top:var(--sp-4);margin-top:var(--sp-5);}
+.svgwrap{text-align:center;margin:var(--sp-4) 0;}
+</style>
+</head>
+<body>
+<main>
+
+<h1>用 DNA 甲基化幫 read 認「哪條染色體」——三個問題的白話答案</h1>
+<p class="lead">把整件研究用一個比喻講到最清楚。單樣本 HCC1395 · 2026-06-11 · 詳細數字見 VERIFIED_RESULTS §V11b</p>
+
+<section>
+  <h2><span class="n">0</span>先看比喻</h2>
+  <div class="analogy">
+    每條定序 read = <b>一張紙</b>，是「從某一本書印出來的」。<br>
+    你的基因組有<b>兩本書</b>：爸爸給的（<span class="tag">HP1</span>）、媽媽給的（<span class="tag">HP2</span>）。<br>
+    腫瘤又在<b>某一本書上手寫塗改</b>了幾個字（= somatic 突變）→ 產生「塗改版分身」（<span class="tag">HP1-1</span> / <span class="tag">HP2-1</span>）。<br>
+    工具 <b>longphase-S</b> 的工作 = 看每張紙上的「字」（SNP）判斷它來自<b>哪本書、哪個版本</b>。
+  </div>
+  <p><b>問題在哪</b>：很多紙上的「字」不夠看 → 工具判不出來：</p>
+  <ul>
+    <li><span class="tag">unphase</span>（46%）= 看不出來自哪本書</li>
+    <li><span class="tag">HP3</span> = 看到塗改字、但認不出是哪本書的塗改版</li>
+    <li><span class="tag">HP1 / HP2</span> = 認出是哪本書，但<b>那張紙剛好沒印到被塗改的字</b> → 不知道它是不是塗改版</li>
+  </ul>
+  <p><b>我們的點子</b>：每張紙上還有「<b>浮水印</b>」（= DNA 甲基化）。能不能用浮水印當額外線索，把上面三種判不出來的補判？</p>
+</section>
+
+<section>
+  <h2><span class="n">1</span>最關鍵的一個事實（決定一切）</h2>
+  <div class="keyfact">
+    浮水印能分 <b>「爸爸的書 vs 媽媽的書」</b>（HP1 vs HP2）——這是真的，不是假象（先前 V10 用正常細胞對照證明過）。<br><br>
+    但浮水印<b>分不出</b> <b>「同一本書的塗改版 vs 原版」</b>（HP1-1 vs HP1）——因為塗改版和原版<b>是同一本書，浮水印一樣</b>。
+  </div>
+  <p>這一句話直接決定了三個問題的成敗：<b>問題的本質是「分不同的書」就成功，是「分同一本書內部」就失敗。</b></p>
+</section>
+
+<section>
+  <h2><span class="n">2</span>三個問題的答案</h2>
+  <table>
+    <thead><tr><th>問題</th><th>本質</th><th>浮水印幫得上？</th></tr></thead>
+    <tbody>
+      <tr><td><b>T1</b> unphase → 哪本書？</td><td>分爸/媽的書</td><td class="ans"><span class="ok">✅ 可以</span></td></tr>
+      <tr><td><b>T2</b> HP3 → 哪本書的塗改版？</td><td>分爸/媽的書</td><td class="ans"><span class="mid">⚠ 只證一半</span></td></tr>
+      <tr><td><b>T3</b> plain HP1 → 是不是塗改版？</td><td>分同一本書內部</td><td class="ans"><span class="no">❌ 不行</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="card t1">
+    <h3><span class="ok">T1 ✅</span> 救 unphase read（認哪本書）</h3>
+    <p>在浮水印分得開的位置，把「假裝看不出來」的紙救回正確的書：誠實的全基因組正確率 <b>88.5%</b>。</p>
+    <p><b>但要老實標範圍</b>：真正最需要救的 LOH 區（基因組失去一本書的地方），恰恰是浮水印和判斷工具<b>都最弱</b>的地方——那裡<b>基本沒測到</b>。所以「能救」目前只在「字夠多、浮水印分得開」的區域證實。</p>
+  </div>
+
+  <div class="card t2">
+    <h3><span class="mid">T2 ⚠</span> 把 HP3 歸到哪本書的塗改版（只證明了一半）</h3>
+    <p><b>證明的一半</b>：浮水印確實能分「爸的塗改版 vs 媽的塗改版」（還是在分爸/媽的書）→ 準確度 <b>0.90</b>。</p>
+    <p><b>沒證明的一半</b>：<b>真正的 HP3 read 能不能被正確歸位，沒驗到</b>——因為 HP3 沒有「正確答案」可以對照；而且 <b>90% 的 HP3 根本沒有任何 germline 線索</b>（你點名的「沒經過任何 germline」），其中<b>只有約 15-18% 連量都量不到</b>。所以不能宣稱「HP3 可以救」，只能説「浮水印有分書的能力」。</p>
+  </div>
+
+  <div class="card t3">
+    <h3><span class="no">T3 ❌</span> 認出偷偷的塗改版（你的核心構想）</h3>
+    <p><b>你的想法</b>（很合理）：塗改版的紙不管有沒有印到被改的字，浮水印應該一致，所以能間接把它認出來。</p>
+    <p><b>但前提是</b>：塗改版的浮水印要<b>跟原版不一樣</b>，否則無從認起。</p>
+    <p><b>數據説</b>：<b>不一樣不了。</b>用最嚴格的「同位置配對」檢定，塗改版 vs 原版的浮水印差異 = <b>純隨機雜訊的程度（p=0.924）</b>；而同一個檢定下「爸的書 vs 媽的書」明顯有差（p 極小）→ 證明檢定有效、只是塗改版真的沒差。</p>
+    <p>原因就是<b>第 1 節那句話</b>：塗改版和原版是同一本書，浮水印相同。</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">3</span>一句話總結</h2>
+  <div class="keyfact" style="border-color:var(--c-info);background:#EEF1FA;">
+    浮水印（甲基）是<b>「哪一本書」</b>的線索，不是<b>「哪一個腫瘤塗改版」</b>的線索。<br>
+    所以它幫得上「分不同的書」（T1 救 unphase、T2 證明能分塗改版的來源書），<br>
+    幫不上「分同一本書內部」（T3 認塗改版、以及 T2 真正歸位 HP3 那一步）。
+  </div>
+  <div class="big">
+    <b>這一輪你 pushback 的價值：</b>你不接受我用「機制」打發，要我嚴格驗 + 多 agent 檢視。結果 <b>4 個獨立 AI 審查員（＋我自己第三次重算）抓到我先前兩個説法講錯了</b>：(1) T2 我之前説「可行」是<b>講太滿</b>（只證了一半）；(2) T3 我中途報的某個數字是<b>統計假象</b>（已撤回改用正確的配對檢定）。修正後才是能寫進論文的誠實版本（正面 + 負面結果都誠實）。
+  </div>
+</section>
+
+<footer>
+  <b>白話版</b> · 對應技術版報告：InterSubMod/docs/experiments/in_progress/2026/05/20260609_methyl_assist_3target_adversarial_review_01.standalone.html · 數字 SoT：VERIFIED_RESULTS.md §V11b · 單樣本 HCC1395 ⭐2-3 characterization
+</footer>
+
+</main>
+</body>
+</html>

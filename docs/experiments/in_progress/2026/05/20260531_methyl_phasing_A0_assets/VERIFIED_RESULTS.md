@@ -106,8 +106,59 @@ null median 0.974 **高得可疑**，與文獻「somatic ASM Δβ≈0.12 偏弱�
 - 能否救 unphase：**仍未證** — (a) CpG-SNP 未排除（最大嫌疑）(b) null 區是 anchor 充足篩出（40/111），unphase read 住在稀疏區，外推未證 (c) 仍 2/40 無訊號。
 - 下一步：CpG-SNP 排除 → 若 95% 撐住，才是穩固「甲基帶真 ASM 訊號」。
 
-## V11. ⭐⭐ 甲基輔助 longphase-S tag 矯正三 target — T1/T2 可行、T3 NEGATIVE（機制：甲基是 haplotype 層級非 subclone）
+## V12. unphase / HP3 實際可救援量清點（2026-06-11，read 數）
 
+- **腳本**：`unphase_inventory.py`（單 pass 2kb bin 漏斗分類）→ `unphase_inventory_chr*.json`（chr15/19/20/22 實掃）。
+- **unphase 漏斗**（4 染色體實掃 981,701 → 比率套 V1 全基因組 13,821,877）：
+
+| 分類 | 比率 | 套全基因組估計 |
+|------|---:|---:|
+| unphase 總量 | 100% | 13,821,877（V1）|
+| 有甲基(≥5 CpG) | 88.0% | ~12,163,000 |
+| **有本地 HP1+HP2 錨點** | **7.2%** | ~995,000 |
+| **可嘗試救援（甲基+錨點皆備）** | **5.8%** | **~799,000** |
+| **無法區分** | **94.2%** | **~13,022,000** |
+
+- **關鍵**：88% 有甲基，但僅 ~6% 在有 HP1/HP2 錨點區（能建本地參考）→ 94% 在 germline 稀疏/LOH 區無參考可比 → 無法救。88.5%(V6) 是「可嘗試池內」正確率，可嘗試池僅佔全 unphase ~6%。
+- **HP3 統計**（V1 總量 76,738 × rigor_t2 抽樣分類率）：no_germline(case a) 90.4% (~69,400) / inconsistent(case b) 5.5% (~4,200) / weak 4.1% (~3,150)；甲基可嘗試指派 ~15-18%(~1萬) 但**無 ground truth**（T2 OVERSTATED）。
+
+---
+
+## V11c. ⭐⭐ T3 local-allele 再測 + 對抗驗證（2026-06-11 — 存在性「窄翻案」、可用性 NEGATIVE 維持）
+
+> 用戶質疑 T3：靠近但沒蓋到 somatic 位點的 plain HP1 read，甲基是否偏向 HP1-1(亞群)？改用**該位點實際 ALT/REF 鹼基**當亞群/母本標籤（比全域 HP-tag 1-1/1 乾淨，限定同一 HP1）。腳本 `t3_local_allele.py` + `t3_reconcile.py`；對抗 workflow wf_5553cd83-ee9（2 攻擊+1 裁決，408k tokens，數字雙重重現）。**裁決：REVERSAL_OVERSTATED。**
+
+- **GATE（必要條件：亞群 ALT vs 母本 REF 甲基可分）= 窄翻案 POSITIVE**：held-out farCpG AUC **H1=0.851 / H2=0.866**（全 CpG 0.906/0.872）vs 同-haplotype 噪音地板 **~0.50**；matched Δβ(ALT,REF) **+0.04** over noise（chr7 p=0.014 / chr15 p=3.6e-5 / chr22 p=3.4e-4 / chr20 p=0.053 NS）；farCpG≈全 CpG（**非 somatic-CpG artifact**）；nCpG/readlen ALT≈REF（**無覆蓋 confound**，4 染色體 chr7/15/20/22）。→ **V11b/rigor_t3 的 T3 NEGATIVE（HP-tag 1-1 vs 1, matched p=0.924）部分是標籤污染 artifact**：HP1 read ~20kb、somatic 突變稀疏 → 多數亞群 read 不蓋突變 → 被標「1」混進母本組沖掉訊號。**用戶存在性直覺成立。**
+- **USER GOAL（用甲基把 ambiguous near-site read 認成亞群）= NEGATIVE 維持**：ambiguous plain-HP1 偏向亞群質心 frac = **8/8 值 0.35-0.45 全 <0.5**（pooled H1=0.382 n=3184 / H2=0.428 n=2777）→ **偏向母本不是亞群**；且 ambiguous read 無 ground truth。**「可分」不等於「可用來矯正」。**
+- **2 個未解 MAJOR（對抗堅持）**：(1) farCpG 只排 ±4kb 窗的 ±100bp(2.5%) → 分不清「亞群全域甲基 program」vs「突變 >100bp cis 足跡」(cohesion≠cis)；(2) 單樣本 HCC1395 / 單 longphase-S pipeline / 4 染色體 / chr20 NS → ⭐3，**未達 reopen 已結案 NEGATIVE 門檻**。
+- **被否決的 confound**：Attack 2 指 germline_het_null median 0.974 為 fatal → 裁決長**否決**（germline_het_null 是 HP1-vs-HP2 跨-haplotype 對照；GATE 是 within-HP1 somatic-vs-ancestral，對照軸不同；GATE 正確 null = 同群 split-half ~0.50，已通過。已獨立確認 germline_het_null.py 用 HP1/HP2 anchor）。
+- **缺的對照（reopen 前必補）**：within-haplotype somatic-vs-baseline negative control（非 germline-het null）+ ≥1 樣本 + 更寬空間控制。
+
+### V11c 定論
+**存在性「窄翻案」（亞群有可區分甲基，我先前 HP-tag NEGATIVE 是標籤 artifact）；可用性 NEGATIVE 維持（救 ambiguous read 偏向反了、無真值）。勿無條件説「T3 翻案」。** tier ⭐3。
+
+---
+
+## V11b. ⭐⭐ 多 agent 對抗審查修正 V11（2026-06-09 — T2 OVERSTATED 降級 + T3 matched 修正 + T1 reframe）
+
+> ⚠ **V11 初版 framing 被 4-agent 對抗審查推翻部分結論**（workflow wf_b5b391cf-ea4，3 審查+1 綜整，462k tokens，**所有反駁獨立從 per-chr JSON 重現**）。本節為修正後定論，**取代 V11 的 T2/T3 措辭**。腳本：`rigor_t1.py`/`rigor_t2.py`/`rigor_t3.py`+`aggregate_rigor.py`→`rigor_aggregate.json`。
+
+- **T1（unphase→H1/H2）= SUPPORTED_WITH_CAVEATS（0 blocking）**：held-out 設計逐行確認**真無循環**。但 **0.926 是事後篩選的可分位點(56.4%) 條件值，不可當 headline**；誠實 headline = V6 全基因組外推 **0.885**（183 窗/20 chr/無分離度篩選/null 0.524）。🔴 critical：rigor_t1 **237/240 窗為 SEQC2 gain、僅 3 LOH** → LOH/imprinting（真正產生 unphase read 的區）**基本未測**；abstain gate 需 ≥8 germline anchor read，但 LOH/imprinting 區恰缺 anchor（chicken-egg）→ 對真實 unphase 母體適用性**未證**。失敗 window = 低 train_sep(0.63) 本質分不開，非低 CpG(71)。⭐3。
+- **T2（H3→H1-1/H2-1）= OVERSTATED / NOT-SUPPORTED（2 blocking）**：
+  - ✅ 證明的：甲基在**有 germline 真值的 1-1 vs 2-1 reads** 上 LOO AUC **0.90**（null 0.732）→ 甲基攜帶 germline 分支資訊。
+  - ❌ **未證的（V11 誤推）**：把 0.90 外推到 **H3**。H3 依定義**無 germline 真值**；rigor_t2 對 H3 **只算 margin、無 AUC、無 null**（grep 確認）。且 no_germline H3 **僅 15-18% 能與質心共享 ≥5 CpG 被指派**（chr22 54% 異常），>80% 連指派都不行；「56% 高信心」是 margin>0.1 **無 null 對照**（幾何上 ambient read 也產生 margin）。
+  - 修正結論：**「甲基可分有真值的 germline 分支」成立；「用甲基歸 H3」未驗證**，需 H3 外部真值(long-range linkage/trio) 或 margin null。⭐2-3。
+- **T3（拆 plain H1 是否亞群）= NEGATIVE 維持，但 V11 的「+0.022 excess」framing 是 artifact**：
+  - 🔴 **修正**：V11/中途的「亞群 Δβ 0.110 − 噪音 0.088 = +0.022」是 **unmatched-window artifact**（同窗噪音實為 0.0997 非池化 0.088）。
+  - **正確 matched within-window 配對檢定（已獨立重現）**：亞群−噪音 同窗配對差 median **−0.0043**，**Wilcoxon p=0.924**（Cohen dz 0.07）= 亞群甲基與同群抽樣噪音**統計上不可區分**；真-haplotype 正控通過 matching（+0.0425，**p=1.77e-49**）。
+  - 用戶必要條件（subclone-1-1 甲基須異於 ancestral-1）**不滿足**。誠實 caveat：random-split null 可能吸收被分割的 subclone 訊號 → 排除的是「**可用的 within-haplotype 甲基校正訊號**」，非「subclone 層 ASM 的存在」。
+- **Cross-cutting（5 條，全 target 共通）**：(1) 單樣本 HCC1395 + 單一 longphase-S pipeline（被矯正的 HP tag 本身是 longphase-S 產物 → T2/T3 self-reference）→ tier 硬上限 ⭐2-3；(2) 強數字都在**有真值的 read** 上量、外推到**無真值母體**（T2 blocking、T1 hedged）；(3) 母體偏 germline-het-rich/CN-gain，**高價值 LOH/imprinting 區恰是機制衰退處**；(4) centroid-LOO pat_auc 循環膨脹（random-split 噪音 pat_auc 0.86）→ headline 須用 held-out/matched/null-referenced；(5) **機制天花板**：甲基是 germline-haplotype 層級（V10）→ 分不同 haplotype 強(T1/T2)、within-haplotype 弱(T3)；同一 cis-甲基強度在 LOH/subclone 目標**預測失敗** → T1/T2 的正面結果**不外推**到激發此研究的 LOH/subclone 救援情境。
+
+---
+
+## V11. ⭐⭐ 甲基輔助 longphase-S tag 矯正三 target（初版 framing — T2/T3 措辭已被 V11b 修正，保留供對照）
+
+> ⚠ **本節 T2「可行 0.90」與 T3「+0.022」措辭已被 V11b（多 agent 審查）修正，引用以 V11b 為準。**
 > **回答用戶**：用甲基弱數據輔助矯正 longphase-S 三類 tag — T1 unphase→H1/H2 / T2 H3→H1-1/H2-1 / T3「沒踩 somatic 位點而被叫 H1/H2 的 read」拆成是否亞群（H1 vs H1-1）。
 
 - **背景（讀 longphase-S 原始碼確認）**：`HaplotagStrategy.cpp:452-600` judgeSomaticReadHap + `SomaticHaplotagProcess.cpp:461-527` inheritHaplotype，門檻 percentageThreshold=0.6。6-state：unTag(無證據) / H1·H2(germline-only) / H1-1·H2-1(帶 somatic 變異且歸 germline 分支) / H3(somatic 但 germline 未知)。
