@@ -1,0 +1,24 @@
+# Section 1: per-feature Cohen's d across 5 samples + sign-agreement
+feature	Cohens_d_HCC1395	Cohens_d_HCC1937	Cohens_d_HCC1954	Cohens_d_H1437	Cohens_d_H2009	n_positive_d	n_negative_d	n_zero_d	sign_majority	sign_consistent	d_range
+caller_af	1.3305	-1.4569	-0.8950	0.4427	-0.3140	2	3	0	3	0	2.7873
+loh_inner_flag	0.8806	0.9292	0.2883	0.4943	0.5171	5	0	0	5	1	0.6408
+Coverage_Multiple	0.3944	0.5977	-0.0470	-3.8009	-0.9697	2	3	0	3	0	4.3986
+NG	0.7290	0.0146	-0.0574	0.3464	0.4783	4	1	0	4	1	0.7864
+HPMergedDelta	-0.3135	0.2830	-0.4457	0.0165	0.0238	3	2	0	3	0	0.7287
+HPFineF	0.1974	0.1613	-0.0513	0.0436	0.0479	4	1	0	4	1	0.2487
+NME_imbalance	-0.0835	-0.1115	-0.1858	0.1173	-0.1111	1	4	0	4	1	0.3031
+Epipoly_Delta	-0.2028	0.1950	0.2528	-0.5599	-0.5878	2	3	0	3	0	0.8407
+ClusterPermanovaF	-0.1902	-0.1260	0.0112	-0.0174	-0.1080	1	4	0	4	1	0.2014
+
+# Section 2: pairwise Spearman rho on |Cohen's d| ranking across features
+sample_A	sample_B	spearman_rho_abs_d	pvalue
+HCC1395	HCC1937	0.6500	0.0581
+HCC1395	HCC1954	0.5333	0.1392
+HCC1395	H1437	0.4667	0.2054
+HCC1395	H2009	0.4167	0.2646
+HCC1937	HCC1954	0.5500	0.1250
+HCC1937	H1437	0.4167	0.2646
+HCC1937	H2009	0.2667	0.4879
+HCC1954	H1437	0.0500	0.8984
+HCC1954	H2009	-0.0667	0.8647
+H1437	H2009	0.9667	0.0000

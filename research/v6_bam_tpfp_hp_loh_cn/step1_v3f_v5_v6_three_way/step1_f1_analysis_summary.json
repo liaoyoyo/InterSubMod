@@ -1,0 +1,63 @@
+{
+  "data_source": "/big7_disk/liaoyoyo2001/InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/step1_master_four_way.tsv",
+  "tp_total_pileup_subset": 30490,
+  "fp_total_pileup_subset": 4842,
+  "caller_alone_F1_pileup_subset": 0.7164845494066502,
+  "canonical_caller_F1_vs_seqc2_truth": 0.7166,
+  "caller_alone_F1_at_purity_0_6": 0.6273,
+  "best_per_bam": {
+    "baseline": {
+      "best_NG_threshold": 1,
+      "best_F1": 0.7159101610321124
+    },
+    "V3F": {
+      "best_NG_threshold": 1,
+      "best_F1": 0.7159034726309594
+    },
+    "V5": {
+      "best_NG_threshold": 1,
+      "best_F1": 0.7168604582809175
+    },
+    "V6": {
+      "best_NG_threshold": 1,
+      "best_F1": 0.7168604582809175
+    }
+  },
+  "delta_v6_minus_baseline_by_threshold": [
+    {
+      "NG_threshold": 1,
+      "f1_v6": 0.7168604582809175,
+      "f1_baseline": 0.7159101610321124,
+      "delta": 0.000950297248805132
+    },
+    {
+      "NG_threshold": 2,
+      "f1_v6": 0.706862709680527,
+      "f1_baseline": 0.6782552552179689,
+      "delta": 0.02860745446255808
+    },
+    {
+      "NG_threshold": 3,
+      "f1_v6": 0.5912850131511158,
+      "f1_baseline": 0.4308260577568839,
+      "delta": 0.16045895539423194
+    },
+    {
+      "NG_threshold": 4,
+      "f1_v6": 0.32906976744186045,
+      "f1_baseline": 0.13190964170842995,
+      "delta": 0.1971601257334305
+    },
+    {
+      "NG_threshold": 5,
+      "f1_v6": 0.09152153110047846,
+      "f1_baseline": 0.004049556954412414,
+      "delta": 0.08747197414606604
+    }
+  ],
+  "verdict": {
+    "ISM_NG_filter_beats_caller_alone_on_pileup_subset": true,
+    "V6_dominates_baseline_at_all_thresholds": true,
+    "note": "F1 on pileup subset (master labels) is high because subset excludes caller FN. Canonical caller F1 vs SEQC2 truth = 0.7166 (includes 10,938 FN). To improve canonical F1, would need smarter filter (multi-axis LR like Phase 2 Cycle 1 +0.02236)."
+  }
+}

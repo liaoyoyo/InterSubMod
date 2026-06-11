@@ -1,0 +1,8 @@
+class	definition	count	label_total	rate_of_label_total_pct	favorable_to_v6
+TP_gained	baseline_NG<3 & V6_NG>=3 & label=TP	8043.0	30490.0	26.3791	True
+TP_lost	baseline_NG>=3 & V6_NG<3 & label=TP	350.0	30490.0	1.1479	False
+FP_removed	baseline_NG>=3 & V6_NG<3 & label=FP	11.0	4842.0	0.2272	True
+FP_added	baseline_NG<3 & V6_NG>=3 & label=FP	560.0	4842.0	11.5655	False
+Net_TP	TP_gained - TP_lost	7693.0	30490.0	25.2312	True
+Net_FP	FP_added - FP_removed	549.0	4842.0	11.3383	False
+Trade_Ratio	Net_TP / Net_FP	14.0128			True
