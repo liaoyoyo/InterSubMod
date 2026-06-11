@@ -24,7 +24,7 @@ purpose: 把新主軸的「軸 / 數據 / 知識 / 流程 / 決策」一頁串�
 ## L1 數據資產（已 spot-check ✓）
 
 6 cell line × 3 癌種，三要素齊（tagged BAM + somatic VCF + 5mCG）：HCC1395/1937/1954（乳腺）· H1437/H2009（肺）· COLO829（黑色素瘤）+ HCC1395_DORADO（basecaller 對照）。
-- 路徑型式：`big7.../canonical/{sample}/paired_full/{date}_..._complete_matrix/longphase_s/{sample}_tagged.bam` (+ `somatic_pass.vcf.gz`)。
+- 路徑型式（**完整路徑，勿縮寫**；2026-06-12 ls 驗證）：`/big7_disk/liaoyoyo2001/big7_disk_output/canonical/{sample}/paired_full/{date}_*_complete_matrix/longphase_s/{sample}_tagged.bam` (+ 同目錄 `somatic_pass.vcf.gz`)。⚠ 根 = `big7_disk_output/`（非 repo 內 `InterSubMod/canonical/`）。{date}：HCC1395=20260314、其餘=20260315。ISM 輸出：`intersubmod_tp/filtered_snv_tp/` + `intersubmod_fp/`。
 - normal 甲基（V10 用）：`/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395BL.bam`。
 - **意涵**：單樣本 ⭐3 上限可被打破 → 跨 6 樣本可達 ⭐4（但 single-pipeline longphase-S 自我參照 = tier 風險，需正交對照 G-E）。
 - 真值 SoT（V1-V12 全數字）：`InterSubMod/docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md`

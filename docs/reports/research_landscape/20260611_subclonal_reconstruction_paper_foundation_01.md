@@ -36,7 +36,7 @@ data_sources: docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_as
 | COLO829 | 黑色素瘤 | ✅ | ✅ | ✅ (100%) |
 | (HCC1395_DORADO) | 乳腺(另 basecaller) | ✅ | ✅ | ✅ | 可作 basecaller 穩健性對照 |
 
-- 路徑型式：`big7.../canonical/{sample}/paired_full/{date}_..._complete_matrix/longphase_s/{sample}_tagged.bam` (+ `somatic_pass.vcf.gz`)。
+- 路徑型式（**完整路徑，agent 勿縮寫**；2026-06-12 ls 驗證存在）：`/big7_disk/liaoyoyo2001/big7_disk_output/canonical/{sample}/paired_full/{date}_*_complete_matrix/longphase_s/{sample}_tagged.bam` (+ 同目錄 `somatic_pass.vcf.gz`)。⚠ 根是 `big7_disk_output/`（**非** repo 內 `InterSubMod/canonical/`，後者不存在）。{date}：HCC1395=`20260314`、其餘 5 樣本=`20260315`。ISM 輸出在同 complete_matrix 下 `intersubmod_tp/filtered_snv_tp/{24 chr}/` + `intersubmod_fp/`。
 - normal 甲基 BAM（**2026-06-12 samtools MM-tag 實測**，見 `InterSubMod/docs/data_specs/20260612_external_data_dependencies_01.md`）：**5/6 樣本 matched-normal 有甲基**（HCC1395 5mC+5hmC · HCC1937/HCC1954/H1437/H2009 5mC）→ V10 跨樣本可跑；**只 COLO829 R10 normal 無 MM tag**（查 ONT_PAO 或重 basecall）。⚠ 6 normal 全 `zhenyu112` 帳號 + 4/6 symlink = SPOF。
 - **意涵**：**單樣本 ⭐3 的硬上限可被打破** → 跨 6 樣本 × 3 癌種驗證可達 ⭐4。但全線**單一 pipeline（longphase-S，HP tag 自我參照）** 仍是 tier 風險（需正交對照）。
 
