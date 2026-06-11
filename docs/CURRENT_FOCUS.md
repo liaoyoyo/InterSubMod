@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-01-12 00:00
-更新時間: 2026-04-27 (Agent context governance / readiness 校準)
+更新時間: 2026-06-11 (🎯 主軸轉向：Subclonal reconstruction 取代 G6；G6/G1 降支撐；見固定焦點區塊 + foundation doc) | 2026-06-02 (固定焦點區塊 + G6/G1 cycle); 5/30: SoT reconcile
 狀態: validated
 資料來源:
   - docs/standards/20260228_文件命名與狀態管理規範_01.md
@@ -11,6 +11,267 @@
 -->
 
 # 當前目標
+
+## 2026-06-11 — 🎯 主軸轉向（用戶確認）：Subclonal reconstruction 取代 G6 ⭐ 最新
+
+> **新 session 先讀**：`InterSubMod/docs/reports/research_landscape/20260611_subclonal_reconstruction_paper_foundation_01.md`（新主軸基礎：6 樣本×3 癌種資產盤點 + V1-V12 成果 map + 誠實 gap + 交接清單）。
+>
+> **決策**：新論文主軸 = **Subclonal reconstruction using somatic haplotagging and methylation profiles with Nanopore sequencing**，**取代 G6 phasing**；G6 LOH-phasing / G1 ASM **降為支撐材料 park**。本 session 已「整理放緩」所有現有任務（甲基救 unphase/tag 矯正線 V1-V12 SoT 完整），論文細節由後續 session 完成（見 foundation §6 交接清單）。
+>
+> **資產（緩解單樣本限制）**：6 cell line × 3 癌種（HCC1395/1937/1954 乳腺 · H1437/H2009 肺 · COLO829 黑色素瘤）皆有 somatic-haplotag BAM + somatic VCF + 甲基 → 可衝 ⭐4。
+>
+> **誠實天花板（對外必守）**：甲基=germline-haplotype 層級；T3 存在性窄翻、可用性 NEGATIVE；T2 只證 1-1/2-1 可分非歸 H3；非 variant filter(DEAD)。詳見 foundation §4。
+>
+> ⬇ 以下 6/08 段為轉向前的 G6 主軸紀錄，保留供 audit；G6/G1 成果併入新主軸為支撐。
+
+---
+
+## 2026-06-08 — 論文就緒收斂（跨 7 線獨立稽核）〔轉向前 G6 主軸，已降支撐〕
+
+> **新 session 先讀**：`InterSubMod/docs/concepts/2026/06/20260608_研究現況地圖_整體目標與流程_給其他AI_01.md`（單頁現況地圖 + HTML）+ `InterSubMod/knowledge/11_external_literature/10_paper_readiness_convergence.md`（論文就緒收斂，最完整）。
+
+**論文主軸定稿**：read-level LOH/haplotype + 甲基 **characterization + tooling** 論文（非 variant filter）。主體 = **三~四道防彈 NEGATIVE** + phasing 脊柱(**Grade B+ 非 A**) + ASM copy-confounded 支撐。**一篇能過 review 的論文今天就存在**，卡關只在 HD-1。
+
+**🔴 別踩的雷（必讀）**：
+1. 甲基→TP/FP filter 已 concluded NEGATIVE/**死四道** — 勿重開。
+2. characterization-set（628/15391/strong-ASM）**絕不寫成 filter**（15391 TP/FP=1.0）。
+3. **BRCA2 ≠ 乾淨 cis 錨點**（06-07 重分析 = **subclone/copy-confounded 主導**，HP1-1 是 longphase-S 的 somatic subclone tag〔germline-H1+somatic-ALT〕**非 copy、非 CN-dosage**〔dosage 已 REFUTED〕；focal cis 殘餘 d_within=−0.023 邊際·單樣本不可分離；**% split 不 robust**）；乾淨 cis 改 **chr17/TBC1D16**；hypo≠canonical hyper，勿當 TSG-silencing 證據。已 amend lit-07 + master_draft §2.2（06-09 R1/R2/R3 統一口徑落地）。
+4. **「Grade A」是 Grade B+**（R-SELFREF circularity 對照未跑；p=0.0078 是方向一致性非 effect；n=7=bio-n=6）。
+5. 所有 ASM 單樣本 HCC1395 ⭐3 / 單 pipeline；跨樣本 6/6 是 phenomenon-level；private 0/38 是 underpowered。
+
+**開放決策**：🔴 **HD-1（用戶決定·hold）** phasing by-construction 循環 → 跑 R-SELFREF(~25-50hr C++) or 降為 characterization｜HD-3 ✅ BRCA2 已 amend｜HD-4 ✅ AF→NGroups=**phasing 非甲基**（NGroups=HP-tag count；ledger 20260608_HD4）→ T6 無正向甲基發現｜HD-5 ✅ T7 umtag 已註冊 ledger（FUTURE-WORK）｜HD-2/6 投稿前。
+
+**並行**：tsg ASM/cis 線（另一 session，06-07 仍在寫，T2/T3 數字可能再動）。active cycle = G6 LOH-phasing (P4 ⭐3) + G1 ASM (P3 ⭐3)。
+
+---
+
+<!-- ┌─ 固定焦點區塊（2026-06-02 起；SessionStart 注入最先看到；每次主軸/背景變動時更新此區，不新增日期段；機械態 SoT = state/active.json+cycles，本區為人讀鏡像）─┐ -->
+
+## ★ 當前焦點（pinned；2026-06-11 主軸轉向 — 用戶確認）
+
+> **🎯 新主軸（取代 G6）**：**Subclonal reconstruction using somatic haplotagging and methylation profiles with Nanopore sequencing**。
+> **兩個互補 SoT 面**：① 甲基-phasing-assist `InterSubMod/docs/reports/research_landscape/20260611_subclonal_reconstruction_paper_foundation_01.md`（V1-V12 + 6 樣本資產 + G-A~E gap）② ASM-characterization + 四道 NEGATIVE + LOH-phasing 脊柱 + HD-1 gate + cross-line reconcile `InterSubMod/docs/concepts/2026/06/20260611_Subclonal_Reconstruction_Paper_Focus_整合篇章_01.md`。
+> **2026-06-11 `/pivot-direction` 已正式記錄轉向**（research_direction.md）。本 session 整理放緩所有任務完成；論文細節由後續 session 完成。
+
+| 主軸 | tier | 狀態 | 下一步（後續 session）|
+|------|------|------|--------|
+| **🆕 Subclonal reconstruction（somatic haplotag + methylation）**（新論文主軸）| ⭐3→⭐4 候選 | 兩面 foundation 已立；**6 樣本×3 癌種資產齊全**；🔴 共享開放問題 **G-B**（subclone 甲基 somatic-specific vs germline-allelic）+ **HD-1**（R-SELFREF 跑 or 降 characterization）gate 論文強度 | ①定 HD-1 ②先寫四道 NEGATIVE methods（今天防彈）③G-A 跨 6 樣本重現 ④G-B 對照 → 論文 outline |
+| ~~G6 LOH-constrained phasing~~（**降為支撐材料**）| ⭐3 | ✅ park（=新主軸 phasing 脊柱，補充面詳述）| — |
+| ~~G1 ZAR1L/BRCA2 ASM~~（**降為支撐材料**）| ⭐3 | ✅ park（=新主軸 ASM characterization 層；本 session 工作站證據基座）| — |
+
+**甲基救 unphase / tag 矯正研究線（本 session 主體，已整理）**：V1-V12 SoT 完整（`20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md`）。誠實定論：甲基=germline-haplotype 層級；T1 unphase 救援 SUPPORTED+caveats(0.885，僅~6% unphase 可嘗試)；T2 OVERSTATED(只證1-1/2-1可分)；**T3 存在性窄翻案 + 可用性 NEGATIVE**（local-allele 亞群甲基可分 farCpG AUC 0.85，但救 ambiguous read lean<0.5）。memory `project_methyl_phasing_assist_line`。
+
+> ❌ **DEAD（勿再開）**：甲基化當 FP filter（⭐2 L4）；T3 subclone「可用性」（救 ambiguous read 偏向反了）。
+> 🔗 新主軸基礎 `docs/reports/research_landscape/20260611_subclonal_reconstruction_paper_foundation_01.md`｜真值 SoT `...A0_assets/VERIFIED_RESULTS.md`｜機械態 `/cycle-state`
+
+<!-- └─ 固定焦點區塊結束 ─┘ -->
+
+---
+
+## 2026-05-31 — Harness 全方位 audit + 自我稽核儀表板 + 任務 reconcile ⭐
+
+> **當前主軸（不變）**：兩條 LIVE 高價值方向 — **① LOH-constrained phasing ⭐3（Grade B+→A，論文主軸候選）** + **② ZAR1L/BRCA2 ASM ⭐3（characterization-only）**。甲基化當 FP filter ❌ DEAD（⭐2 L4，勿再開）。詳見下方 5/30 section。
+
+**本 session（harness 工程，非研究）**：業界 AI 工作流研究 + 全 harness 盤點 + restraint 對抗驗證（11-agent workflow）→ **0 個新外部工具**，價值全在修 latent bug + drift。完整報告：`InterSubMod/docs/references/migration/20260531_harness_audit_dashboard_design_01.md`。
+
+**已落地**：(1) 修 doc/agent drift（CLAUDE.md §4 Hard Gate 5→4、release co-author 4.8、research-orchestrator 路由、researcher MCP、cache_telemetry flat-rate 註解）；(2) agent 權限硬化（headless-research +isolation:worktree、reviewer 去 Write、literature-reviewer 標 deprecated、paper-miner Bash 收窄）；(3) **wire `pre_tier_upgrade_check` 成 Hard Gate**（state.json exit-2 / 散文 advisory）；(4) 新 `/harness-health` skill + `scripts/harness_health.py` 6-燈儀表板（45→46 skills）。
+
+**任務 reconcile（解決儀表板紅燈 4&5）**：
+- **cycle3 = 已 concluded**（active.json `recently_concluded` = Phase2 Cycle3 P6_COMMIT NEGATIVE @ 2026-05-30T07:40Z）→ 5/30 §D3「下一步跑 /conclude-research」**已完成**，非待辦。
+- **5/31 ASM tier 語意收斂回寫**（6 條 ledger entry，CURRENT_FOCUS 先前未反映）：ZAR1L/BRCA2 ASM **real but non-directional + non-discriminative + coverage-modulated**（連續 |Δβ| AUC=0.505 NEUTRAL；strong-ASM 5× FP enrichment = LOH→single-hap→low-cov→extreme baseline 的 regression-to-extreme artifact，ONE regime）；B2 clustering = germline allelic (Layer A)，somatic NEGATIVE 經 imprinting 正控（NORMAL GNAS/RB1 ARI=1.0）validated 為真 biology。**對外引用 ASM 必用此收斂口徑（勿用「方向 POSITIVE」over-claim）**。tier ⭐3 數字不變，語意收窄。
+
+**待用戶決定（本 session 新發現，未動）**：
+- 🔴 **`pre_commit_compile_check` + `kb_schema_check` 兩個 Hard Gate 被 settings `|| exit 0` neuter**（exit 2 被吃成 exit 0 → 實際不擋）+ `/tmp/ism_cpp_pending_compile.txt` 是 2026-05-10 的 **stale marker（32 檔）**。修法需同步清 marker（否則恢復 gate 會擋所有 commit）→ 涉 Hard Gate + 刪 /tmp 檔，待確認。
+- 🟡 **stale queue H013-018**（filter/caller-f1 已 DEAD 仍 queued）→ 待 `/pivot-direction` 降權。
+
+---
+
+## 2026-05-30 — 研究狀態 audit（驗證後）+ SoT reconcile + ASM magnitude rerun 啟動 ⭐
+
+> **當前主軸（2026-05-30 reconcile，用戶確認）**：兩條 LIVE 高價值方向 —
+> **① LOH-constrained phasing ⭐3（Grade B+→A，論文主軸候選）** + **② ZAR1L/BRCA2 ASM ⭐3**。
+> 此二者為**當前最有發表價值 + 最能成「說明報告」**的方向。
+> 甲基化當 FP filter ❌ DEAD（⭐2 L4，direction exhausted，勿再開）。HKU handoff 已交付降級（見下方 [CLOSED]）。
+
+**16-agent verified status audit 結論（見樹也見林）**：研究是「一條死路（FP filter）+ 兩條活路（LOH-phasing + ASM）」格局。
+
+### 三大結論
+
+| 主軸 | verdict | tier | 一句話 |
+|------|---------|------|--------|
+| **LOH-constrained phasing**（論文主軸候選）| ✅ LIVE / 最有發表潛力 | ⭐3 **Grade B+ 接近 A** | NG=2 Inner same-hap，TP gap **n=7 全 7/7 正向 Wilcoxon W=28 p=0.0078**（2026-05-30 加 COLO829 達成 Grade A 要求 #1）；剩 R-SELFREF 全 7-sample flag-on 負控（~25-50hr C++ 重跑）升 full A |
+| **甲基化當 FP filter** | ❌ DEAD | ⭐2 L4 | Phase 2 LOSO 證實 +0.02236 = 100% circularity；mean −0.00004；methylation 5th-rank vestigial；filter direction EXHAUSTED |
+| **ZAR1L/BRCA2 ASM** | ✅ 方向 POSITIVE + magnitude RESOLVED | ⭐3 (⭐4 需 COLO829) | BRCA2 HP-axis Δβ=**−0.122** / ALLELE −0.099（全 TP 重跑定案，與 script03 收斂）；全基因組 strong-ASM 172/51,171；**B-discrimination anti-discriminative**（strong-ASM 在 FP enriched 5×）= 真實但不能 filter |
+
+### 本 session 動作（2026-05-30）
+
+1. **SoT reconcile D1-D5**（修 5 處漂移）：
+   - ✅ D1 MEMORY.md Phase2 Cycle1 ⭐3→⭐2 L4 DOWNGRADED
+   - ✅ D2 ZAR1L magnitude 標 PROVISIONAL/superseded（memory + ledger correction entry 20260530）
+   - ✅ D3 cycle3 **已 concluded**（2026-05-31 reconcile 確認：active.json `recently_concluded` = Phase2 Cycle3 P6_COMMIT `NEGATIVE_filter_direction_failed` @ 2026-05-30T07:40Z）。先前標「下一步跑 /conclude-research」已完成，非待辦。
+   - ✅ D4 INDEX.md 補 5/21 PI signoff + 5/24 HKU + 5/29 ZAR1L + 修 header 日期
+   - ✅ D5 本段（CURRENT_FOCUS refresh，解 6.1 天 staleness）
+2. **ASM magnitude rerun — ✅ 完成定案（5/30）**：全 39,447 TP（51,171 records, 22 chr）max-collapse 修正口徑重跑完成。**BRCA2 HP-axis Δβ=−0.122 / ALLELE −0.099**（已驗證 v2 TSV，與 script03 收斂；buggy −0.054 = MSA Level1 5mC+5hmC 雙列砍半 artifact，修法在 Python `18_dual_axis_pivot.py` MAX-collapse，C++ 根因外部 repo 未動）。新發現 **B-discrimination anti-discriminative**（strong-ASM 在 FP enriched 5×, OR=0.194 p=1.8e-28）。MEMORY + INDEX + report banner 全對齊。
+
+### 勿再開（concluded NEGATIVE guardrail）
+
+pure-methylation TP/FP 判別 / TO germline-FP filter / TO QS post-hoc patch / ASM-as-discriminator / LR methylation-augmented filter — 全已 concluded dead，C1/C2/C3 productive-failure 條件未滿足前不 reopen。
+
+---
+
+## ✅ [CLOSED] 2026-05-22 ClairS-TO HKU Luo Lab 甲基 subclone handoff（per D4 已入 INDEX，5/24 產出）
+
+> **2026-05-30 降級**：此 P0 已過期，且 per 本日 audit D4「INDEX.md 補 5/24 HKU」= 已交付 → **不再是 active 主軸**（當前主軸見頂部 5/30 section = LOH-phasing + ASM）。以下保留原始 plan 供 audit / 若需後續重啟。
+
+**[原始 5/22 指派紀錄]**：5/24 結束前產出 standalone HTML 報告給香港 ClairS-TO Luo Lab，敘述 InterSubMod 既有「甲基 / phasing 相關 subclone-aware 功能」+ 列出兩 section 問題清單（對外 collaboration ask + 內部 audit list）。
+
+### Scope + deliverable
+
+- **目標受眾**：ClairS-TO Luo Lab (HKU) — caller 開發者
+- **目的**：(1) 説明既有功能 (2) 評估能否幫他們提升 ClairS-TO caller F1 (3) 釐清需要對方協助/補資訊的 ask
+- **格式**：standalone HTML (`html-report-build` standalone mode，sticky TOC + 折疊 cards + claim card tier badge)
+- **路徑**：`InterSubMod/docs/reports/pi_reports/2026/05/20260524_ClairS_TO_HKU_methyl_subclone_handoff_01.{md,standalone.html}`
+
+### 3 段時程 (D1 → D3)
+
+| 日 | 階段 | 產出 |
+|---|------|------|
+| 5/22 (今天) | D1 PLAN + outline | `docs/plans/20260522_ClairS-TO_HKU_methyl_subclone_handoff_01_plan.md` (本 plan) + narrative-frame N1-N6 + 大綱 ack |
+| 5/23 | D2 內容寫作 + evidence 引用驗證 | .md 完稿 (引用每條 claim 標 tier + commit hash) + 初版 standalone HTML |
+| 5/24 | D3 self-review + 5 秒測試 + PI 終版 | scientific-rigor §2-§7 對齊 + design_principles 12 條 checklist + 最終 HTML + 兩 section 問題清單定稿 |
+
+### 敘述地雷區（必避）
+
+1. **HPFineNGroups ≠ methylation 訊號** — 是 `{HP1, HP1-1, HP2, HP2-1}` 4-bucket phasing × variant occupancy count（5/22 記憶 `feedback_feature_name_vs_definition_rule` 已警示）
+2. **Phase 2 Cycle 1 +0.02236 是 in-distribution 結果** — 5/20 LOSO 證明 cross-sample ΔF1=-0.00004 (mean)，**不能對外宣稱 cross-sample 有效**
+3. **paired_full LOH × AF × NGroups ΔNG=+0.787** — 是 paired mode（normal+tumor）結論，TO mode (tumor-only) 已 pivot 為 LOH-constrained phasing
+4. **methylation 5 features 在 global LR 是 5th-rank** — 非 dominant signal；不可對 ClairS-TO 説「我們靠甲基」
+5. **外部 caller F1 數字必查 KB** — known-pitfalls P-14 outside-claim 規則；不可從本專案 report 推論 ClairS-TO 行為
+
+### 可 claim 的（已驗證 tier ≥ ⭐3）
+
+- **LOH-constrained phasing discovery (TO mode)** ⭐3：NG=2 Inner ≥93% same-hap, TP gap +0.37, 6/6 sample 一致 (`project_loh_constrained_phasing_discovery`)
+- **HPFineNGroups canonical filter** ⭐3 pipeline-dependent：NG=4+AF<0.4+NR≥80 NonLOH TP rate 92.8% (5/7 sample ≥0.85), master dataset+flag=off 條件
+- **LOH × AF × Methylation Paired POSITIVE** ⭐3 (paired mode only)：ΔNG=+0.787, 7/7 p<1e-65
+- **Phase 2 V3F→V5→V6 binary evolution**：V6 marker coverage +9.0% vs V3F, hp=33 ambiguous handling, caller F1 0.7166 不變
+
+### Skill 啟動序列
+
+- 立即：`/narrative-frame` (Tier 3 必跑 N1-N6 + 框架推薦 = Audience-Scenario-Pitch + Verdict-Pyramid 混合)
+- D2 寫作前：`/scientific-rigor` §2-§7 (claim tier 標記 + L1-L5)
+- D2 evidence 引用時：`/known-pitfalls` P-14 (外部 claim 必查 KB)
+- D2 HTML 生成：`/html-report-build` standalone mode
+- D3 self-review：`/scientific-rigor` §8.4 provenance footer + commit hash + 12 條 design_principles checklist
+
+### Plan 文件
+
+`InterSubMod/docs/plans/20260522_ClairS-TO_HKU_methyl_subclone_handoff_01_plan.md`
+
+---
+
+## 2026-05-20 (深夜) — H_NEW_2 FAIL + H_NEW_4 SANITY VIOLATED (Unexpected HCC1395 +0.00699) ⭐
+
+**Session anchor**: 用戶 5/20 立刻啟動 H_NEW_2 + H_NEW_4 LOSO 驗證 observation-driven hypotheses → 兩個結果，一 FAIL 一 partial positive
+
+### 3-Way LOSO Comparison
+
+| Sample | Baseline LOSO (10f) | H_NEW_2 (2f loh+HPFineF) | H_NEW_4 (9f drop caller_af) |
+|---|--:|--:|--:|
+| HCC1395 | -0.00012 | -0.00012 | **+0.00699** ★ |
+| HCC1937 | +0.00000 | +0.00000 | +0.00000 |
+| HCC1954 | -0.00008 | -0.00000 | -0.00008 |
+| H1437 | -0.00001 | -0.00000 | -0.00001 |
+| H2009 | -0.00001 | +0.00000 | -0.00001 |
+| **Mean** | -0.00004 | -0.00002 | **+0.00138** |
+
+### Pre-Reg 結果對照（HARKing 防護）
+
+| H | Prior | Observed | Match? |
+|---|---:|---|---|
+| H_NEW_2 ≥2/5 ΔF1 > +0.002 | 25% | 0/5 above threshold | ✅ consistent (conservative prior) |
+| H_NEW_4 HCC1395 ≈ 0 | 80% | HCC1395 = +0.00699 | ❌ **VIOLATED** (post-hoc unexpected) |
+
+### Mechanism 解讀
+
+- caller_af 在 cross-sample LR train 中是 **confusing signal** (HCC1395 d=+1.60 vs HCC1937 d=-1.41)
+- Drop caller_af 後 LR 純粹用 LOH + Coverage + NG + 5 methyl + chr8 train → 4 sample 的 weak coherent signal 對 HCC1395 marginal effective
+- 其他 4 樣本仍 caller-F1-ceiling 卡住 (best τ=0.10 keep all)
+
+### Verdict + Cycle 5+ Path
+
+| Confirmed | Unknown |
+|---|---|
+| caller_af direction-inconsistent 是 LOSO 災難主因 | HCC1395 +0.00699 是 single-sample artifact 還是真 cross-sample? |
+| 4 高 caller F1 sample 受 ceiling 限制 | 其他 low-F1 sample 在 H_NEW_4 設定下表現? |
+| 2-feature (loh + HPFineF) LR 不夠強 | Per-zone / RF / interaction terms 是否能改善? |
+| LR 在 universal production 設定下不 deployable | Non-LR framework (zone rules / boolean filter) 是否更適合? |
+
+**建議 Cycle 5 路徑** (按 ROI):
+1. 🟡 **Path A (推薦)**: Pivot phase_block_3d / thread_d — LR direction 已 exhausted, ROI 偏低
+2. 🟡 Path B: H_NEW_3 chr8-specific zone gate — 不依賴 LR threshold
+3. 🟡 Path C: 找 low-F1 panel 驗 HCC1395 +0.00699 generalize — 仍 caller_af-bounded
+
+### Artifacts (2026-05-20 深夜)
+
+- Findings: `InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/loso_hnew_findings.md`
+- Scripts: `InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/scripts/run_loso_hnew{2,4}.py` + `loso_3way_comparison.py`
+- Data: `InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/data/loso_hnew{2,4}_results.tsv`
+- Figures: `InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/figures/loso_3way_comparison.png` + `loso_hnew{2,4}_5sample.png`
+- Ledger: `cycle_id: 20260520_loso_hnew2_hnew4_observation_validation` (line 51)
+
+---
+
+## 2026-05-20 (晚) — 🔴 LOSO Sample-Level CV: Cycle 1 +0.02236 ≡ 100% Sample-Level Circularity Bias ⭐⭐
+
+**Session anchor**: 用戶 2026-05-20 直接質疑「LR filter 用 HCC1395 數據訓練,又用 HCC1395 數據驗證,這敘述合理嗎」 → 觸發 LOSO 真正 sample-level cross-validation → **Phase 2 結論需 major reframe**
+
+### LOSO 結果 (5 sample, 30 sec wall clock, reuse cycle 2 functions)
+
+| Test sample | LOSO ΔF1 | Best τ |
+|---|--:|--:|
+| HCC1395 | **-0.00012** (vs in-dist +0.02236) | 0.10 |
+| HCC1937 | +0.00000 | 0.10 |
+| HCC1954 | -0.00008 | 0.10 |
+| H1437 | -0.00001 | 0.10 |
+| H2009 | -0.00001 | 0.10 |
+| **Mean** | **-0.00004** | — |
+
+- HCC1395 in-distribution → LOSO drop = **+0.02248 (100% effect from sample-level circularity)**
+- 5/5 best τ → 0.10 (=keep everything) = LR 對任何 held-out sample 找不到 useful threshold
+- Wilcoxon p=0.125, **0/5 pos, 4/5 neg → DIRECTION_NEGATIVE**
+
+### Tier 重評（核心 reframe）
+
+| Claim | Before | After LOSO |
+|---|---|---|
+| HCC1395 +0.02236 | ⭐⭐⭐⭐ L2 | **⭐⭐ L4** (HCC1395 in-distribution case study only) |
+| BAM-invariant V3F/V5/V6 | ⭐⭐⭐⭐ L2 | ⭐⭐⭐⭐ L2 (unchanged) |
+| Cross-sample transfer NEGATIVE | ⭐⭐⭐ L3 | **⭐⭐⭐⭐ L2** (LOSO 強化) |
+| ISM vestigial in LR | ⭐⭐⭐⭐ L2 | ⭐⭐⭐ L3 (scope 變窄) |
+| Caller-F1-headroom mechanism | ⭐⭐⭐ L3 | **⭐⭐ L4** (filter 整體失效 → mechanism moot) |
+| **LOSO sample-level negative** | (new) | **⭐⭐⭐⭐ L2** (new core claim) |
+
+### Phase 2 Decision Reframe
+
+| 動作 | 狀態 |
+|---|---|
+| Cycle 1 +0.02236 ⭐⭐⭐⭐ → ⭐⭐ | ✅ 落地 ledger + memory + INDEX + PI Trust HTML |
+| Cycle 4 Trial A/B/C prior PASS 顯著下降 (75/30/35% → 15/10/10%) | 建議 deprioritize |
+| Paper §3 完全撤回 "ISM-augmented filter" 宣稱 | 待 paper draft 啟動 |
+| 改為 "ISM characterization study + LR sample-level negative finding" | framing 已 reframe |
+| **Pivot phase_block_3d 或 thread_d** | 🟠 等用戶確認方向 |
+| ISM characterization (v0.3 cycle ⭐3 不變) | ✅ 保留 (LOSO 不影響 mechanistic understanding) |
+
+### LOSO Artifacts
+
+- Findings: `InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/loso_findings.md`
+- Script: `InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/scripts/run_loso_cv.py`
+- Data TSV: `InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/data/loso_cv_results.tsv`
+- Figure: `InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/figures/loso_5sample_dF1.png`
+- Updated PI Trust HTML: `InterSubMod/research/methyl_augmented_filter_phase2/phase2_pi_verification/phase2_pi_trust_framework.standalone.html` (Section 1.5)
+- Ledger entry: `cycle_id: 20260520_loso_sample_level_circularity_revealed` (line 50)
+
+---
 
 ## 2026-05-20 — Cycle 3 Step 1.5 Ablation: ISM Vestigial Confirmed + Filter Reframe ⭐
 

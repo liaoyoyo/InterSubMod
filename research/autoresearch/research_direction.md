@@ -87,3 +87,27 @@
 - 若連續 3 輪 `|delta_f1| < 0.001`，自動建議切換策略
 - 每輪結束後，FEEDBACK 階段的用戶說法若改變方向，立即更新此文件
 - 文獻引導特徵使用 `/inject-hypothesis` 加入佇列時，同步記錄來源於此
+
+---
+## 轉向記錄 [2026-05-31] — direction_close (queue hygiene)
+
+**類型**: direction_close
+**原因**: H013-H018 全部追溯到 concluded-DEAD 方向（methyl filter / caller-F1-headroom / pure-methylation 判別），與 active.json cycle3 P6 NEGATIVE + guardrail 結論一致。
+**動作**: H013-H018 status queued → closed（保留 provenance，priority -40），非刪除。
+**新焦點**: 不變 — LOH-constrained phasing ⭐3（論文主軸候選）+ ZAR1L/BRCA2 ASM ⭐3（characterization-only）。
+**前一輪結果**: Phase2 Cycle3 caller-F1-headroom filter P6_COMMIT NEGATIVE_filter_direction_failed (2026-05-30)。
+**注**: 非新 NO-GO 判定（方向早已 concluded）；純 queue ↔ ledger/state 對齊。commit 標 [manual-queue-edit]。
+
+---
+## 轉向記錄 [2026-06-11] — focus_consolidation (論文主軸聚焦)
+
+**類型**: focus_consolidation（既有三軸 reframe，非新假設注入）
+**原因**: 用戶決定整理放緩所有任務，聚焦單一論文主軸。
+**新焦點**: **「Subclonal reconstruction using somatic haplotagging and methylation profiles with Nanopore sequencing」**
+  = 既有 G6 三軸的更聚焦 reframe：somatic haplotagging 重建 LOH-constrained 子克隆結構（脊柱，Grade B+ ⭐3）+ 甲基 characterization/誠實負結果（非重建驅動）。
+**新主軸 SoT**: `docs/reports/research_landscape/20260611_subclonal_reconstruction_paper_foundation_01.md`（另一 session 建立，甲基-phasing-assist 面）+ 本 session 補充面 `docs/concepts/2026/06/20260611_Subclonal_Reconstruction_Paper_Focus_整合篇章_01.md`（ASM-characterization + 四道 NEGATIVE + LOH-phasing 脊柱）
+**放緩/凍結**: ASM 顯示/工作站/驗證/SEQC2-CN（本 session 完成→凍結為 §Methods-Neg 證據基座）；G1 ASM survey chr5-22；甲基-filter 維持 DEAD。
+**決定性卡關**: HD-1（R-SELFREF circularity 跑 or 降 characterization）— GO/NO-GO 由用戶決定。
+**queue 對齊**: H019-H023（ASM funnel/CN/LOH）併入 characterization 軸，非新方向；DEAD filter 早已 closed。
+**前一輪結果**: 本 session ASM 工作站/驗證/SEQC2-CN 全落地（commit 8dbb931→5e69a99），支撐 characterization+負結果軸。
+**注**: paper-scope 聚焦決定（Tier 4），非 NO-GO 判定；commit 標 [manual-queue-edit] 不涉 queue 數值改動。
