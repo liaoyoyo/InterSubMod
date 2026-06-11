@@ -40,6 +40,7 @@ provenance_note: 本 INDEX 為導航/摘要; 數字皆引自子文件(已各標�
 | **09** | [`09_clustering_verification_illustrated.standalone.html`](09_clustering_verification_illustrated.standalone.html) | **分群驗證方法示意圖 HTML**：Fisher/CramersV/PERMANOVA/Δ/silhouette 圖解 + 487-latent | 想看圖學方法 |
 | **10** ⭐ | [`10_improvement_execution_plan.md`](10_improvement_execution_plan.md) | **改進執行計畫**：14 項（差別/為何有用/怎麼改 file:line）含 #13 normal-HP / #8b Fisher 敏感度 | 要動手改 ISM 時 |
 | **11** ⭐ | [`benchmark/11_largescale_methodology_verification.md`](benchmark/11_largescale_methodology_verification.md) | **816-loci 大規模驗證**：Fisher 敏感度 gap 8.5–17% + normal-HP 基線 0.237>tumor 0.181（值得加）| 問「normal-HP 值不值得 / Fisher 漏多少」|
+| **12** ⭐ | [`12_methyl_approaches_by_axis.md`](12_methyl_approaches_by_axis.md) ＋ [HTML](12_methyl_approaches_by_axis.standalone.html) | **業界 4 軸地景**：① tag 比平均 ② read 距離 ③ 位點差 ④ 判別；每軸 canonical/工具/ISM 差別/難點 + 8 共同難點 | 要懂「業界有哪些方向 + 大家難點」|
 | HTML | [`report.standalone.html`](report.standalone.html) | 清楚整理的單頁互動版（同內容，PI 閱讀版）| 要好讀的視覺版 |
 | 原始 | `_assets/workflow_raw_result.json` + `survey_digest.md` | 82 工具完整結構化資料 + 萃取 | 要查單一工具細節/引用 |
 

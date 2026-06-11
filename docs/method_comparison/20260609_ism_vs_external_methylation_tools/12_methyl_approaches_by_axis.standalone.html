@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<!-- provenance-verified: 外部事實引 workflow wf_22ba1b9b-db4 WebFetch 一手(_assets/axis_reconfirm_raw.json); ISM 引 01 源碼; 與同名 .md 一致; 撰寫與查證分批(§13.0)。 -->
+<html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>業界甲基數據處理 4 軸地景 + ISM 對照</title>
+<style>
+  :root{--bg:#f6f8fb;--card:#fff;--ink:#1a2330;--mut:#5b6b7d;--line:#dde4ec;--accent:#2563c9;
+    --a1:#e8590c;--a2:#2f9e44;--a3:#7048c9;--a4:#c2185b;--good:#2f9e44;--bad:#e03131;--warn:#e8a13a;}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","Noto Sans CJK TC","Microsoft JhengHei",sans-serif;line-height:1.6;font-size:14.5px}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
+  h1{font-size:24px;margin:0 0 3px} .sub{color:var(--mut);font-size:13.5px;margin-bottom:14px}
+  .bluf{background:linear-gradient(135deg,#eef4fc,#f3eefe);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:14px 18px;margin:14px 0}
+  .bluf ol{margin:6px 0;padding-left:20px}.bluf li{margin:6px 0}
+  h2{font-size:19px;margin:30px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  .axis{border:1px solid var(--line);border-radius:12px;margin:14px 0;overflow:hidden;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .ah{padding:11px 16px;color:#fff;font-weight:700;font-size:15.5px;display:flex;justify-content:space-between;align-items:center}
+  .a1{background:var(--a1)}.a2{background:var(--a2)}.a3{background:var(--a3)}.a4{background:var(--a4)}
+  .ab{padding:13px 16px}
+  .row{display:grid;grid-template-columns:90px 1fr;gap:8px;margin:7px 0;font-size:13.5px}
+  .k{color:var(--mut);font-weight:600}
+  .ismbox{background:#eafbf0;border:1px solid #b2e6c4;border-radius:8px;padding:9px 13px;margin:9px 0;font-size:13.5px}
+  .ismbox b{color:var(--good)}
+  .diff{background:#fff7ec;border-radius:7px;padding:7px 12px;margin:8px 0;font-size:12.8px;color:#7a4a10;border:1px solid #f0d4a0}
+  table{width:100%;border-collapse:collapse;font-size:12.8px;margin:10px 0;background:var(--card)}
+  th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}th{background:#eef3f9;color:var(--mut)}
+  .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;color:#fff}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px}.card h4{margin:0 0 7px;font-size:14px}
+  .card.add{border-left:4px solid var(--good)}.card.lack{border-left:4px solid var(--bad)}
+  .card li{margin:5px 0;font-size:13px} ul{margin:6px 0;padding-left:18px}
+  .foot{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);color:var(--mut);font-size:11.5px}
+  code{background:#eef3f9;padding:0 4px;border-radius:3px;font-size:12px}
+</style></head><body><div class="wrap">
+<h1>業界甲基數據處理「4 軸地景」+ ISM 對照</h1>
+<div class="sub">① tag 分群→比平均 · ② read 層距離 · ③ 位點層差異 · ④ 甲基判別 ｜ 全程 WebFetch 一手實證（wf_22ba1b9b-db4）</div>
+<div class="bluf"><b>L0 — 最關鍵 4 句</b><ol>
+<li><b>軸1（業界主流）有天花板</b>：比的是 <b>HP1 vs HP2 = germline 兩親本軸</b>（混 imprinting+隨機單等位+somatic），顯著 ≠ tumor-specific。</li>
+<li><b>ISM 結構性差異</b> = somatic <b>HP1-vs-HP1-1 軸</b> + read-level <b>PERMANOVA 結構檢定</b> + <b>normal-anchored cis-test</b>（量測而非只過濾 confound）—— 組合無人佔。</li>
+<li><b>ISM 明確欠缺</b>：無 spatial region-FDR、無 beta-binomial、無 phasing-free、<b>無 copy-number/purity 反卷積（CAMDAC 有）</b>、無 cohort/tissue-of-origin。</li>
+<li><b>8 個共同難點大家都卡</b>；ISM 對其中 2 個（somatic 軸 + cis-test）有獨特解法，其餘共卡。</li></ol></div>
+
+<h2>4 軸 × canonical / 工具 / ISM 差別 / 難點</h2>
+
+<div class="axis"><div class="ah a1">① tag 分群 → 比 tag 甲基平均差<span class="pill" style="background:#fff;color:#b54708">業界主流</span></div><div class="ab">
+<div class="row"><span class="k">canonical</span><span>phase SNV(Clair3)→haplotag(WhatsHap/longphase)→拆 per-HP 甲基→比 <b>HP1-mean vs HP2-mean</b>(DMR，gate |Δβ|≥0.1)</span></div>
+<div class="row"><span class="k">工具</span><span>NanoMethPhase+DSS · <b>modkit pileup --phased + dmr</b> · pycoMeth(MWU) · O'Neill-POG(cohort) · NANOME</span></div>
+<div class="ismbox">🔑 <b>ISM 差別</b>：下游消費 HP tag，但 ① 不塌 mean → 保留 read×CpG 做 PERMANOVA ② <b>用 HP1-vs-HP1-1 somatic 軸（非 HP1-vs-HP2 germline 軸）</b></div>
+<div class="diff">⚠ 難點：phasing 依賴 · <b>LOH 毀 het anchor</b>(CDKN2A 最難 phase) · HP1-vs-HP2 是 germline 軸 · 覆蓋減半 · 純度稀釋 · 單樣本 pseudo-replication · mean 塌掉異質性 · CN 偏 β · 5mC/5hmC 混 · region 邊界任意</div>
+</div></div>
+
+<div class="axis"><div class="ah a2">② read 層甲基距離<span class="pill" style="background:#fff;color:#1d7a35">ISM 主場</span></div><div class="ab">
+<div class="row"><span class="k">canonical</span><span>read×CpG 矩陣→(a) 顯式 read-read 距離(NHD)→分群，或 (b) model-EM 跳過矩陣(cvlr/ASMS)</span></div>
+<table><tr><th>工具</th><th>方法</th><th>有顯著性檢定?</th></tr>
+<tr><td><b>ISM</b></td><td>NHD 距離矩陣→UPGMA+silhouette→PERMANOVA+dispersion+cis-test</td><td style="color:#1d7a35"><b>✅ PERMANOVA</b></td></tr>
+<tr><td>cvlr</td><td>Bernoulli-mixture EM(無矩陣,K 固定)</td><td style="color:#b08000">⚠ perm+Fisher</td></tr>
+<tr><td>ASMS</td><td>EM 固定 2 群(無矩陣,phasing-free)</td><td style="color:#b08000">⚠</td></tr>
+<tr><td>modbamtools</td><td>HDBSCAN(探索/視覺化)</td><td style="color:#b03030">❌</td></tr>
+<tr><td>qFDRP/FDRP</td><td>read-pair Hamming→per-CpG scalar</td><td style="color:#b03030">❌</td></tr>
+<tr><td>MeConcord</td><td>read-read Hamming(不存矩陣)</td><td style="color:#b08000">⚠ binomial</td></tr>
+<tr><td>Metheor ⚠</td><td><b>within-read</b>(LPMD)，非 read-to-read</td><td style="color:#b03030">❌</td></tr></table>
+<div class="ismbox">🔑 <b>ISM 差別</b>：<b>唯一同時</b>具備 顯式距離矩陣 + 階層分群 + <b>真群間結構檢定(PERMANOVA)</b> + cancer confound 控。多數對手停在 per-CpG scalar，從不檢定「這裡有沒有真讀層結構」。</div>
+<div class="diff">⚠ 難點：多數<b>無原生顯著性檢定</b> · 覆蓋(FDRP 需~40x) · 距離度量敏感 · <b>compute O(N²~N³)</b> · 距離生物意義模糊(allele?subclone?copy?噪音?) · germline-somatic 無分 · 單樣本 · bisulfite-era 出身</div>
+</div></div>
+
+<div class="axis"><div class="ah a3">③ 位點層甲基差<span class="pill" style="background:#fff;color:#5b34b0">ISM 是子集</span></div><div class="ab">
+<div class="row"><span class="k">canonical</span><span>per-CpG count 模型檢定 + (smoothing) + genome-wide MT 校正 + spatial 聚合 → ranked DMR</span></div>
+<div class="row"><span class="k">工具</span><span><b>DSS</b>(beta-binom+shrink+Wald) · methylKit · metilene · BSmooth · <b>dmrseq</b>(GLS+AR1) · DMRcate · comb-p · MOABS(CDIF) · modkit dmr</span></div>
+<div class="ismbox">🔑 <b>ISM 差別(誠實)</b>：ISM 位點層(Fisher+BH-FDR / Cramér's V+Cochran gate / Δβ Wilcoxon+Cohen d)<b>是此軍火庫的子集且較弱</b>(≈methylKit-Fisher+effect-size)。ISM <b>不跟這軸比 machinery</b> —— 當保守 characterization 層(Cramér's V 被 Cochran gate 主動歸零)。</div>
+<div class="diff">⚠ 難點：<b>over-dispersion</b> · <b>genome-wide MT</b>(~28M CpG 相關) · spatial 自相關 · 低深 · beta 0/1 heteroscedastic · replicate vs 單樣本 · germline-somatic confound · <b>CN/purity/ploidy</b>(CNV 純算術造假 DMR) · 異質性塌掉</div>
+</div></div>
+
+<div class="axis"><div class="ah a4">④ 甲基判別方式<span class="pill" style="background:#fff;color:#a01050">4 個目標</span></div><div class="ab">
+<table><tr><th>判別目標</th><th>工具</th><th>判別什麼</th></tr>
+<tr><td>allele(ASM)</td><td>DAMEfinder · CGmapTools · amrfinder(Fang2012)</td><td>兩等位甲基差</td></tr>
+<tr><td>tissue-of-origin</td><td><b>MHB/MHL(Guo2017)</b> · CancerLocator</td><td>cfDNA 組織來源</td></tr>
+<tr><td>tumor-fraction</td><td>CancerLocator</td><td>腫瘤負荷 θ</td></tr>
+<tr><td>expression-driver</td><td>MethylMix · ELMER</td><td>甲基→表現驅動基因</td></tr></table>
+<div class="ismbox">🔑 <b>ISM 差別</b>：問了無人測的 target —— <b>甲基/ASM 能否判別「真 vs 假 somatic 變異」(variant-QC)</b>，給出<b>誠實 NEGATIVE</b>(四道：LOSO/AUC=0.505/strong-ASM 在 FP enriched ~5× OR=0.194/5th-rank)。<b>這 NEGATIVE 本身是貢獻</b>(ASM 真實但 anti-discriminative)。</div>
+<div class="diff">⚠ 難點：germline-somatic confound · 異質性 vs 真 ASM(DAMEfinder 明說難分) · CN/LOH · 單樣本 vs cohort(MethylMix 需~100) · 覆蓋/phasing · bisulfite 出身 · <b>能否判別=open question</b> · 純度地板</div>
+</div></div>
+
+<h2>🔴 8 個大家共同的難點（所有軸都卡）</h2>
+<table>
+<tr><th>難點</th><th>是什麼</th><th>業界怎麼處理</th><th>源</th></tr>
+<tr><td>1 覆蓋地板</td><td>read-level/ASM 有硬覆蓋下限；分 HP 後深度減半</td><td>per-metric floor；目標~30x 讓每 HP~15x</td><td>Scherer 2020</td></tr>
+<tr><td>2 異質性/epipolymorphism</td><td>subclone 混合 → 50% 甲基可能是半數細胞全甲基；<b>mean 法塌掉</b></td><td>read-level(非 pooled)統計 PDR/qFDRP</td><td>Landau 2014</td></tr>
+<tr><td><b>3 germline-somatic confound</b></td><td>ASM 三來源難分；<b>HP1-vs-HP2/REF-vs-ALT 本質 germline 軸</b></td><td>強制 matched-normal 扣基線 + 丟 imprinted 區</td><td>Do 2020</td></tr>
+<tr><td><b>4 copy-number(CNA)</b></td><td>CN 改等位比 → 純算術造 apparent ASM(零表觀改變)</td><td>CNA-predicted 回歸扣；<b>CAMDAC 聯合反卷 purity+allele-CN</b></td><td>Martin-Trujillo 2017</td></tr>
+<tr><td>5 單樣本 power</td><td>無 biological replicate → 只估 sampling 變異</td><td>鄰 CpG pseudo-replicate(DSS-single)；HP-shuffle null</td><td>Wu 2015</td></tr>
+<tr><td>6 純度</td><td>β=p·tumor+(1−p)·normal → 低純度拉向 50/50，Δβ<0.1 門檻下</td><td>purity+CN 混合反卷(<b>CAMDAC</b>)；matched-normal</td><td>CAMDAC 2020</td></tr>
+<tr><td>7 phasing+LOH</td><td>ASM 需 phase；LOH/SNP-desert 失 anchor(缺口在最關鍵 LOH 區)</td><td>長讀跨更多 SNV；甲基-bridging(<b>MethPhaser</b>)</td><td>Fu 2024</td></tr>
+<tr><td>8 5mC/5hmC 混</td><td>bisulfite 分不出；5hmC 在癌常相反意義</td><td>ONT basecaller 分軌(MM/ML)；oxBS/TAB-seq</td><td>Bohrer 2024</td></tr>
+</table>
+<div class="ismbox" style="margin-top:8px">🔑 <b>ISM 對其中 2 個有獨特解法</b>：難點 3(germline-somatic)→ somatic HP1-vs-HP1-1 軸 + normal-anchored cis-test；難點 2(異質性)→ read-level PERMANOVA(不塌 mean)。<b>其餘 6 個(覆蓋/CN/純度/單樣本/phasing/5hmC)與大家共卡</b> —— 尤其 CN+purity 的 <b>CAMDAC 有反卷積、ISM 只有 cis-test 部分控</b>。</div>
+
+<h2>ISM 獨有 vs 欠缺（誠實總結）</h2>
+<div class="grid2">
+<div class="card add"><h4 style="color:#1d7a35">✓ ISM 獨有（窄但真）</h4><ul>
+<li><b>somatic HP1-vs-HP1-1 軸</b>（非 germline HP1-vs-HP2）—— 唯一結構性新穎</li>
+<li><b>normal-anchored cis-test（量測 d_cis vs d_drift）</b>—— 操作化「異質性 vs 真 ASM」</li>
+<li>read-level <b>PERMANOVA 結構檢定</b>為 headline（多數對手停在 scalar）</li>
+<li><b>誠實 hard NEGATIVE</b>（甲基非 variant filter）本身是貢獻</li>
+<li>保守 gated 位點層（Cramér's V 被 Cochran gate 歸零，抑制稀疏假陽性）</li></ul></div>
+<div class="card lack"><h4 style="color:#b03030">✗ ISM 欠缺（業界較強）</h4><ul>
+<li>無原則性 <b>spatial region 聚合/region-FDR</b>（dmrseq AR1/comb-p/DMRcate/DSS）</li>
+<li>無更強 per-site 統計（Fisher+Δβ 是 DSS/MOABS 子集，無 beta-binomial）</li>
+<li>無 <b>phasing-free 模式</b>（cvlr/ASMS/modbamtools/qFDRP 都不需 HP tag）</li>
+<li>無 <b>copy-number/purity 反卷積</b>（<b>CAMDAC</b> 反推純 tumor allele-specific 甲基）</li>
+<li>無 cohort/tissue-of-origin/expression-driver（MethylMix/ELMER/MHB/CancerLocator）</li>
+<li>無 scale 優勢（O(N²~N³) + read-pair subsample 不可重現）</li></ul></div>
+</div>
+
+<div class="foot">
+外部事實：workflow <b>wf_22ba1b9b-db4</b>（7 agents：4 軸+cross-difficulties+canonical-pipeline+synth；WebFetch 一手 PMID/DOI；2026-06-11）。原始 <code>_assets/axis_reconfirm_raw.json</code>。<br>
+ISM：<code>01_ism_method_spec_from_source.md</code>（源碼）。完整 md：<code>InterSubMod/docs/method_comparison/20260609_ism_vs_external_methylation_tools/12_methyl_approaches_by_axis.md</code><br>
+新工具浮現待親讀：<b>CAMDAC</b>(purity+CN 反卷) · <b>MethPhaser</b>(甲基-bridging phasing)。ASMS/NANOME/CAMDAC 部分識別碼 preprint 未完全 fetch。撰寫與查證不同 batch(§13.0)。
+</div></div></body></html>
