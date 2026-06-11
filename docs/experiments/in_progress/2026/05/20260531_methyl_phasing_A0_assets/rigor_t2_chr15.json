@@ -1,0 +1,28 @@
+{
+ "chrom": "chr15",
+ "n_somatic_sites": 1098,
+ "n_sites_with_H3": 178,
+ "n_H3_reads": 2175,
+ "H3_germline_class": {
+  "no_germline": 2015,
+  "inconsistent_germline": 116,
+  "weak_or_consistent": 44
+ },
+ "H3_assignability_by_class": {
+  "no_germline": {
+   "n_with_centroid": 307,
+   "margin_median": 0.0921,
+   "frac_high_conf(margin>0.1)": 0.4886
+  },
+  "inconsistent_germline": {
+   "n_with_centroid": 42,
+   "margin_median": 0.0846,
+   "frac_high_conf(margin>0.1)": 0.4286
+  },
+  "weak_or_consistent": {
+   "n_with_centroid": 10,
+   "margin_median": 0.0864,
+   "frac_high_conf(margin>0.1)": 0.5
+  }
+ }
+}

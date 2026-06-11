@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<!--
+  provenance-verified: metric 來自本目錄 rigor_aggregate.json / assist_3targets_aggregate.json / rigor_t3_chr*.json（matched 檢定本輪獨立重現）
+  + workflow wf_b5b391cf-ea4 4-agent 對抗審查（findings 獨立重現確認）。figure=fig_rigor_corrected.png。
+  data_sources: 20260531_methyl_phasing_A0_assets/rigor_aggregate.json, 20260531_methyl_phasing_A0_assets/assist_3targets_aggregate.json, 20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>甲基輔助 longphase-S tag 矯正：3-target 對抗審查定論（V11b）</title>
+<style>
+:root{--c-accent:#D97757;--c-accent-deep:#B85A3F;--c-text:#141413;--c-text-soft:#6B6B66;--c-bg:#FAF9F5;--c-surface:#FFFFFF;--c-border:#E3DACC;--c-code-bg:#F4EFE6;--c-critical:#C2410C;--c-warning:#A16207;--c-success:#15803D;--c-info:#1E3A8A;--sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--ff-body:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback",system-ui,sans-serif;--ff-mono:"JetBrains Mono","DejaVu Sans Mono",Menlo,monospace;--radius-md:6px;--radius-lg:8px;--shadow-sm:0 1px 2px rgba(20,20,19,.05);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--ff-body);line-height:1.6;font-size:16px;}
+.wrap{display:grid;grid-template-columns:240px 1fr;max-width:1200px;margin:0 auto;gap:var(--sp-6);padding:var(--sp-5);}
+nav.toc{position:sticky;top:var(--sp-4);align-self:start;font-size:14px;border-right:1px solid var(--c-border);padding-right:var(--sp-4);}
+nav.toc h3{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--c-text-soft);margin:0 0 var(--sp-3);}
+nav.toc a{display:block;padding:var(--sp-1) 0;color:var(--c-text-soft);text-decoration:none;border-left:2px solid transparent;padding-left:var(--sp-3);}
+nav.toc a:hover{color:var(--c-accent);border-left-color:var(--c-accent);}
+main{min-width:0;}
+header.hero{border-left:4px solid var(--c-accent);padding:var(--sp-3) var(--sp-5);margin-bottom:var(--sp-6);}
+header.hero h1{font-size:25px;margin:0 0 var(--sp-2);line-height:1.25;}
+header.hero .sub{color:var(--c-text-soft);font-size:15px;}
+.badges{margin-top:var(--sp-3);display:flex;gap:var(--sp-2);flex-wrap:wrap;}
+.badge{font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--c-border);background:var(--c-surface);}
+.badge.tier{background:#FBEEE8;border-color:var(--c-accent);color:var(--c-accent-deep);}
+section{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:var(--sp-5) var(--sp-6);margin-bottom:var(--sp-5);box-shadow:var(--shadow-sm);}
+section h2{font-size:20px;margin:0 0 var(--sp-4);padding-bottom:var(--sp-2);border-bottom:1px solid var(--c-border);}
+section h3{font-size:16px;margin:var(--sp-5) 0 var(--sp-3);}
+.headline{font-size:17px;font-weight:600;line-height:1.5;}
+.yes{color:var(--c-success);} .no{color:var(--c-critical);} .mid{color:var(--c-warning);}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:var(--sp-3) 0;}
+th,td{text-align:left;padding:var(--sp-2) var(--sp-3);border-bottom:1px solid var(--c-border);vertical-align:top;}
+th{background:var(--c-code-bg);font-weight:600;}
+td.num{text-align:right;font-family:var(--ff-mono);}
+tr.ok td{background:#EDF7F0;} tr.bad td{background:#FEF1EC;} tr.mid td{background:#FEF9EC;}
+.callout{border-left:4px solid;border-radius:var(--radius-md);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:15px;}
+.callout.crit{border-color:var(--c-critical);background:#FEF1EC;}
+.callout.warn{border-color:var(--c-warning);background:#FEF9EC;}
+.callout.ok{border-color:var(--c-success);background:#EDF7F0;}
+.callout.info{border-color:var(--c-info);background:#EEF1FA;}
+figure{margin:var(--sp-4) 0;text-align:center;}
+figure img{max-width:100%;height:auto;border:1px solid var(--c-border);border-radius:var(--radius-md);}
+figcaption{font-size:13px;color:var(--c-text-soft);margin-top:var(--sp-2);text-align:left;}
+code{font-family:var(--ff-mono);font-size:12.5px;background:var(--c-code-bg);padding:1px 5px;border-radius:4px;}
+.tag{font-family:var(--ff-mono);font-size:12px;padding:1px 6px;border-radius:4px;background:var(--c-code-bg);border:1px solid var(--c-border);}
+ol li,ul li{margin:var(--sp-2) 0;}
+footer{font-size:12px;color:var(--c-text-soft);border-top:1px solid var(--c-border);padding-top:var(--sp-4);margin-top:var(--sp-6);}
+.prov{font-family:var(--ff-mono);font-size:12px;}
+.verdict{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:4px;}
+.v-ok{background:#15803D;color:#fff;} .v-mid{background:#A16207;color:#fff;} .v-bad{background:#C2410C;color:#fff;}
+@media(max-width:820px){.wrap{grid-template-columns:1fr;}nav.toc{position:static;border-right:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc">
+  <h3>目錄</h3>
+  <a href="#tldr">0 · 三挑戰定論</a>
+  <a href="#method">1 · 驗證方法 + 多 agent 審查</a>
+  <a href="#t3">2 · T3 反駁（你的核心質疑）</a>
+  <a href="#t1">3 · T1 信心 + 反例</a>
+  <a href="#t2">4 · T2 信心 + 反例</a>
+  <a href="#fig">5 · 決定性圖</a>
+  <a href="#cross">6 · 共通風險 + 機制天花板</a>
+  <a href="#prov">7 · 數據溯源</a>
+</nav>
+<main>
+
+<header class="hero">
+  <h1>甲基輔助 longphase-S tag 矯正：三類目標的對抗審查定論</h1>
+  <div class="sub">回應你對 T1/T2/T3 的三個質疑 · rigor 重分析 + 4-agent 對抗審查（462k tokens，反駁全獨立重現）· VERIFIED_RESULTS §V11b</div>
+  <div class="badges">
+    <span class="badge tier">⭐2-3 characterization（單樣本硬上限）</span>
+    <span class="badge">2026-06-09</span>
+    <span class="badge">4-agent review · 2 blocking</span>
+  </div>
+</header>
+
+<section id="tldr">
+  <h2>0 · 三個挑戰的定論</h2>
+  <table>
+    <thead><tr><th>你的挑戰</th><th>定論</th><th>關鍵證據</th></tr></thead>
+    <tbody>
+      <tr class="bad"><td><b>T3</b>：亞群 read 甲基應一致，為何反駁？</td><td><span class="verdict v-bad">NEGATIVE 維持</span></td><td>matched 同窗配對：亞群−噪音 median <b>−0.004 p=0.924</b>（= 噪音）；正控存活 +0.043 <b>p=2e-49</b>。你的必要條件**不滿足**。我先前「+0.022」是 unmatched artifact，已撤。</td></tr>
+      <tr class="ok"><td><b>T1</b>：多有信心？反例？</td><td><span class="verdict v-ok">SUPPORTED +caveats</span></td><td>held-out 真無循環（逐行確認）。誠實 headline = V6 全基因組 <b>0.885</b>；0.926 僅可分子集。反例：失敗=低 train_sep 非低覆蓋；<b>LOH 區基本未測</b>。</td></tr>
+      <tr class="mid"><td><b>T2</b>：多有信心？反例？</td><td><span class="verdict v-mid">OVERSTATED（2 blocking）</span></td><td>0.90 只在**有真值的 1-1/2-1**；**用甲基歸 H3 未驗證**（H3 無 AUC/null、僅 15-18% 可指派）。需降級。</td></tr>
+    </tbody>
+  </table>
+  <div class="callout info">
+    <b>一句話：</b>甲基能分<b>不同 germline haplotype</b>（T1 救 unphase、T2 證明分支可分），但<b>不能</b>解析<b>同一 haplotype 內</b>的事（T3 亞群、T2 的 H3 實際歸屬）。機制天花板：甲基是 germline-haplotype 層級訊號（V10），激發此研究的 LOH/subclone 救援情境**恰是機制衰退處**。
+  </div>
+</section>
+
+<section id="method">
+  <h2>1 · 驗證方法 + 多 agent 對抗審查</h2>
+  <p>每個挑戰用「不只看 AUC、加正確 null / 正控 / matched 檢定」嚴格重測（腳本 <code>rigor_t1.py</code>/<code>rigor_t2.py</code>/<code>rigor_t3.py</code>），再交 <b>4-agent workflow 對抗審查</b>（3 審查員各專攻一 target 找破綻 + 1 綜整長）。</p>
+  <div class="callout ok">
+    <b>多 agent 審查品質：</b>3 個審查員<b>獨立從 per-chr 原始 JSON 重現</b>了所有 load-bearing 反駁（T3 matched p=0.924 / T2 H3 無 AUC / T1 train-test 無循環）。我再<b>第三次獨立重現</b>確認（§13.7 不信 subagent 回報而不驗證）：T3 matched median −0.0043 p=0.9237、正控 +0.0425 p=1.77e-49、T2 可指派率 15-18%。<b>審查抓到我 V11 初版 T2 OVERSTATED + T3 framing 錯</b>，已修正。</div>
+</section>
+
+<section id="t3">
+  <h2>2 · T3 反駁：為何你的構想數據不支持（你的核心質疑）</h2>
+  <p><b>你的論點</b>：亞群細胞的 read（沒踩 somatic 位點的）甲基應與踩到的一致 → 可間接校正。<b>必要條件</b> = 亞群(1-1) 甲基須異於母本(1)，否則無從區分。</p>
+  <h3>我嚴格測了這個必要條件（含你會質疑的點）</h3>
+  <table>
+    <thead><tr><th>檢驗</th><th>結果</th><th>意義</th></tr></thead>
+    <tbody>
+      <tr class="bad"><td><b>matched 同窗配對</b>：亞群Δβ − 同窗噪音Δβ</td><td class="num">median −0.0043<br>p=0.924 (n=363)</td><td>亞群甲基與<b>同群抽樣噪音不可區分</b></td></tr>
+      <tr class="ok"><td>正控：H1vsH2Δβ − 同窗噪音Δβ</td><td class="num">+0.0425<br>p=1.77e-49 (n=554)</td><td>真 haplotype 訊號<b>通過 matching</b> → metric 有效</td></tr>
+      <tr class="bad"><td>獨立度量 methyl LOO-AUC</td><td class="num">0.65 &lt; null 0.71</td><td>佐證無判別</td></tr>
+    </tbody>
+  </table>
+  <div class="callout crit">
+    <b>我先前的錯（已撤）：</b>中途報的「亞群 Δβ 0.110 − 噪音 0.088 = +0.022 部分支持你」是 <b>unmatched-window artifact</b>——把「亞群在亞群窗的 Δβ」拿去比「噪音池化全窗」。同窗配對（亞群窗的噪音其實 0.0997）後，超出量歸 ~0（p=0.924）。多 agent 審查抓到並獨立重現。
+  </div>
+  <div class="callout warn">
+    <b>為何亞群沒有獨特甲基（機制）：</b>亞群與母本是<b>同一 germline haplotype</b>，共享該 haplotype 的甲基；亞群的定義特徵是 somatic 突變，不是甲基。V10 證明的 tumor-acquired ASM 發生在 <b>H1 vs H2 層級（clonal，所有 H1 細胞含亞群共享）</b>，不是亞群特異。<br>
+    <b>誠實 caveat（站你這邊）：</b>random-split null 可能吸收被分割的微弱亞群訊號 → 本結論排除的是「<b>可用來校正的 within-haplotype 甲基訊號</b>」，不是「亞群層 ASM 完全不存在」。要救 T3 需更強/正交訊號（讓 read 直接覆蓋 somatic 位點、或 long-range linkage），甲基此弱數據做不到。
+  </div>
+</section>
+
+<section id="t1">
+  <h2>3 · T1 信心 + 反例（unphase→H1/H2）</h2>
+  <p><span class="verdict v-ok">SUPPORTED_WITH_CAVEATS</span>（0 blocking）。held-out 設計逐行確認<b>真無循環</b>（train/test 不共享 read、train 量分離度、test 量 assist）。</p>
+  <table>
+    <thead><tr><th>指標</th><th class="num">值</th><th>說明</th></tr></thead>
+    <tbody>
+      <tr class="ok"><td><b>誠實 headline = V6 全基因組外推</b></td><td class="num">0.885</td><td>183 窗/20 chr/<b>無</b>分離度篩選（null 0.524）</td></tr>
+      <tr><td>可分位點 held-out（條件值）</td><td class="num">0.926</td><td>conf_yield 0.794 / conf_acc 0.974；僅 56.4% 位點</td></tr>
+      <tr><td>不可分位點</td><td class="num">0.682</td><td>43.6% 位點（abstain，不該救）</td></tr>
+    </tbody>
+  </table>
+  <h3>反例 / 邊緣（你問的）</h3>
+  <ul>
+    <li><b>失敗成因 = 低 train_sep（本質分不開）非低覆蓋</b>：失敗 window train_sep 0.628 / n_cpg 71；成功 0.99 / n_cpg 84。→ 失敗不是數據品質，是該位點甲基本來就分不開。</li>
+    <li>🔴 <b>最大 caveat（abstain gate 的 chicken-egg）</b>：可分位點靠「該位點 ≥8 個 germline-phased anchor read」判定，但<b>真正產生 unphase read 的 LOH/imprinting 區恰恰缺 germline anchor</b> → abstain gate 在最需要救援的地方不可用。對真實 unphase 母體適用性<b>未證</b>。</li>
+    <li><b>母體偏誤</b>：rigor 237/240 窗為 SEQC2 gain、僅 3 LOH、0 neutral/loss → LOH 使用情境基本未測。</li>
+    <li><b>pseudo-replication</b>：250 窗來自 ~43 個 PS-block；單樣本、無跨樣本複現 → tier ⭐3。</li>
+  </ul>
+</section>
+
+<section id="t2">
+  <h2>4 · T2 信心 + 反例（H3→H1-1/H2-1）</h2>
+  <p><span class="verdict v-mid">OVERSTATED / NOT-SUPPORTED</span>（2 blocking）— 不可當「H3 可指派」正面結果報。</p>
+  <table>
+    <thead><tr><th>區分</th><th class="num">值</th><th>狀態</th></tr></thead>
+    <tbody>
+      <tr class="ok"><td>1-1 vs 2-1（<b>有 germline 真值</b>）LOO AUC</td><td class="num">0.90</td><td>✅ 證明甲基攜帶 germline 分支資訊（null 0.732，n=436）</td></tr>
+      <tr class="bad"><td>外推到 <b>H3</b>（無真值）</td><td class="num">—</td><td>❌ blocking：rigor_t2 對 H3 <b>只算 margin、無 AUC/null/真值</b></td></tr>
+      <tr class="bad"><td>no_germline H3 可指派率</td><td class="num">15-18%</td><td>❌ blocking：>80% H3 連與質心共享 ≥5 CpG 都不行（chr22 54% 異常）</td></tr>
+      <tr><td>「56% 高信心」</td><td class="num">margin&gt;0.1</td><td>⚠ 無 null 對照；幾何上 ambient read 亦產生 margin → 非 56% 正確</td></tr>
+    </tbody>
+  </table>
+  <h3>H3 邊緣分類（你點名的 case a / case b）</h3>
+  <table>
+    <thead><tr><th>H3 類別</th><th class="num">佔比</th><th>處理建議</th></tr></thead>
+    <tbody>
+      <tr><td><b>no_germline</b>（沒經過任何 germline，case a）</td><td class="num">90.4%</td><td>甲基是唯一路徑，但僅 15-18% 可指派、且無真值驗證</td></tr>
+      <tr><td><b>inconsistent_germline</b>（經過不一致 germline，case b）</td><td class="num">5.5%</td><td>⚠ 建議直接 <b>unTag</b> 而非以更弱甲基救（germline 自相矛盾，可指派性 52% 與 no_germline 無異）</td></tr>
+      <tr><td>weak / consistent</td><td class="num">4.1%</td><td>少量</td></tr>
+    </tbody>
+  </table>
+  <div class="callout crit">
+    <b>修正結論：</b>「甲基可分<b>有真值</b>的 germline 分支」成立（AUC 0.90）；「用甲基把<b>實際 H3</b> 歸 H1-1/H2-1」<b>未被驗證</b>。要成立需 (a) H3 外部真值（long-range linkage / trio）或 (b) margin 的 null 對照。
+  </div>
+</section>
+
+<section id="fig">
+  <h2>5 · 決定性圖</h2>
+  <figure>
+    <img src="20260531_methyl_phasing_A0_assets/fig_rigor_corrected.png" alt="左:T3 matched 配對差箱型圖,亞群-噪音中位數約0(p=0.924),正控明顯>0(p=2e-49);右:3-target verdict T1綠SUPPORTED T2琥珀OVERSTATED T3紅NEGATIVE">
+    <figcaption>
+      <b>左（T3 修正）：</b>同窗配對差——亞群−噪音居中於 0（median −0.004，p=0.924，與抽樣噪音不可區分）；正控 H1vsH2−噪音明顯 >0（+0.043，p=2e-49，真訊號存活）。<br>
+      <b>右：</b>4-agent 審查後最終 verdict——T1 SUPPORTED+caveats（headline 0.885）、T2 OVERSTATED（2 blocking）、T3 NEGATIVE（必要條件不滿足）。
+    </figcaption>
+  </figure>
+</section>
+
+<section id="cross">
+  <h2>6 · 共通風險 + 機制天花板（5 條，多 agent 綜整）</h2>
+  <ol>
+    <li><b>單樣本 + 單一 pipeline self-reference</b>：全線 HCC1395 longphase-S；被矯正的 HP tag 本身是 longphase-S 產物（T2/T3 自我參照）→ tier 硬上限 <b>⭐2-3</b>。</li>
+    <li><b>真值 vs 生產目標錯配</b>：強數字都在<b>有真值的 read</b> 上量（T1 masked-phaseable / T2 1-1vs2-1），外推到<b>無真值母體</b>（真 unphase / H3）。T2 做了未支持的 leap（blocking）；T1 誠實 hedge（可接受）。</li>
+    <li><b>母體偏 easy case</b>：T1 98.75% CN-gain；高價值 LOH/imprinting 區恰是雜合度/anchor 流失、機制衰退處。</li>
+    <li><b>循環 metric 家族</b>：centroid-LOO pat_auc 把 random-split 噪音膨脹到 0.86 → headline 須用 held-out / matched / null-referenced，不可用 raw centroid-LOO AUC。</li>
+    <li><b>機制天花板（一致）</b>：甲基是 germline-haplotype 層級（V10 copy-independent，normal 0.979 > tumor 0.866）→ 分不同 haplotype 強(T1/T2)、within-haplotype 弱/無(T3)。<b>同一 cis-甲基強度在 LOH/subclone 目標預測失敗</b> → T1/T2 正面結果<b>不外推</b>到激發此研究的救援情境。</li>
+  </ol>
+  <div class="callout info">
+    <b>對研究主線的淨意義：</b>可寫進論文的是 <b>方法學 characterization</b> — 「甲基攜帶 germline-haplotype 資訊（T1 救 unphase 在 germline-rich 區可行 0.885；T2 證明分支可分 0.90），但 read-level 弱數據<b>無法</b>解析 within-haplotype 的 subclone（T3）或無真值的 H3 實際歸屬」。<b>非 variant filter（已 DEAD）；正負雙結果都誠實可報。</b>
+  </div>
+</section>
+
+<section id="prov">
+  <h2>7 · 數據溯源</h2>
+  <table>
+    <thead><tr><th>數字</th><th>來源（本目錄 20260531_methyl_phasing_A0_assets/）</th><th>tier</th></tr></thead>
+    <tbody>
+      <tr><td>T3 matched −0.0043/p=0.924；正控 +0.0425/p=1.77e-49</td><td class="prov">rigor_t3_chr*.json（本輪 3 次獨立重現）</td><td>P 原始可信</td></tr>
+      <tr><td>T1 0.885(V6)/0.926/0.682/失敗 sep 0.628</td><td class="prov">extrapolation_genome_aggregate.json + assist_3targets_aggregate.json + rigor_aggregate.json</td><td>P 原始可信</td></tr>
+      <tr><td>T2 0.90/null 0.732 + H3 90.4%/5.5% + 可指派 15-18%</td><td class="prov">assist_3targets_aggregate.json + rigor_t2_chr*.json</td><td>P 原始可信</td></tr>
+      <tr><td>4-agent verdict（T1 SUP+cav / T2 OVERSTATED 2-blocking / T3 NEG）</td><td class="prov">workflow wf_b5b391cf-ea4（findings 獨立重現）</td><td>P + 獨立驗證</td></tr>
+      <tr><td>機制（甲基=haplotype 層級）</td><td class="prov">VERIFIED_RESULTS §V10</td><td>P（cross-ref）</td></tr>
+      <tr><td>longphase-S cascade</td><td class="prov">longphase-s HaplotagStrategy.cpp:452 + SomaticHaplotagProcess.cpp:461</td><td>P（原始碼）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  <p><b>來源：</b> InterSubMod/docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md §V11b · <b>腳本：</b> rigor_t1/t2/t3.py + aggregate_rigor.py + plot_rigor_corrected.py · <b>審查：</b> workflow wf_b5b391cf-ea4（4 agent）· <b>生成：</b> 2026-06-09 · 單樣本 HCC1395 ⭐2-3</p>
+  <p>所有 metric 本輪 Read/重現後寫入，未與分析同批平行（§13.0）。多 agent 反駁經第三次獨立重現（§13.7 不信 subagent 回報而不驗證）。</p>
+</footer>
+
+</main>
+</div>
+</body>
+</html>
