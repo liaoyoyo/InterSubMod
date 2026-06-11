@@ -127,7 +127,7 @@ data_sources: workflow wf_a3a61cc0-5a1 結構化盤點輸出 + 主回合 fresh l
 ## 實作進度（2026-06-12，用戶選全做）
 
 - **③ ledger 對帳結果（已驗證，免 merge）**：MAIN(99 行) 對 4 個 side-worktree（49/15/43/15）跑 `grep -Fxvf`：**side-only 行數全 = 0**，MAIN 反多 50/84/56/84 行 → **MAIN 是乾淨 superset，無內容分叉**（side-worktree 只是較舊快照）。批判的「永久分叉」是過度推論。**動作 = 政策非 merge**：並行 session 不在自己 branch 維護 ledger SoT；merge-back 一律取 MAIN ledger。**未覆寫 ledger**（Hard Gate）。
-- **④ 外部依賴契約**：→ `InterSubMod/docs/data_specs/20260612_external_data_dependencies_01.md`。**新增研究級發現**：6 normal BAM 全 `zhenyu112` 擁有、**4/6 是 symlink 指到 `/big8_disk/Google_somatic_data/bams/`**、**只有 HCC1395 確認有甲基 normal** → 跨樣本 G-A（matched-normal 甲基 copy-clean）對 **5/6 樣本卡住**，須先驗 MM tag。**這是 tier ⭐3→⭐4 的隱藏資料 blocker**，foundation §5 G-A 應加此前置。
+- **④ 外部依賴契約**：→ `InterSubMod/docs/data_specs/20260612_external_data_dependencies_01.md`。**研究級發現**：6 normal BAM 全 `zhenyu112` 擁有、4/6 是 symlink 指到 `/big8_disk/Google_somatic_data/bams/`（SPOF）。**甲基狀態 2026-06-12 samtools MM-tag 實測矯正**：先前憑 dir-name 推論「只有 HCC1395 有甲基→5/6 卡」**是錯的（P-17 活案例）**；實測 **5/6 normal 有甲基**（HCC1395 5mC+5hmC · HCC1937/HCC1954/H1437/H2009 5mC），**只 COLO829 R10 normal 無 MM** → G-A 對 **1/6 卡（僅 COLO829）**，5 樣本（乳腺3+肺2）可直接跑衝 ⭐4。foundation §5 G-A 應更新此實測前置。
 - **①②⑤⑥⑦**：見下方各自落點（doc-standards / known-pitfalls P-17 / active.json+harness_health / redirect banner / frontmatter 欄位）。
 
 ## 待你確認
