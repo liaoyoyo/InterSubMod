@@ -1,0 +1,57 @@
+{
+  "_comment": "Fig 1 論文方法章開場圖：ISM C++ 核心 read-level 甲基化分析管線 5 階段。process schematic（無分析數值）。所有模組名與常數取自源碼盤點 wf_94ac4585-d43（file:line 見 meta.provenance），非捏造。",
+  "meta": {
+    "figure": "Fig 1 — ISM read-level methylation pipeline (5 stages)",
+    "scope": "ISM C++ binary inter_sub_mod 核心；不含上游 ONT 工具與下游 Python 後處理",
+    "provenance": {
+      "entry_pipeline": "src/main.cpp:10-82 → RegionProcessor::process_single_region src/core/RegionProcessor.cpp:740-1064",
+      "window_1000bp": "include/core/Config.hpp window_size_bp 預設 1000",
+      "read_filter": "include/core/ReadParser.hpp:49-144（FLAG/MAPQ>=20/readlen>=1000/MM+ML 存在）",
+      "hp_tag_parse": "src/core/ReadParser.cpp:134-154（HP:i:1/2/11/21/33 → '1'/'2'/'1-1'/'2-1'/'3'）",
+      "methyl_5mC_only": "src/core/MethylationParser.cpp:39-104（只取 C+m? 5mC；C+h? 5hmC 僅推進 offset 不取值）",
+      "binary_threshold": "include/core/MethylationMatrix.hpp / Config.hpp binary_methyl_high=0.8 low=0.2",
+      "distance_common_cpg": "src/core/DistanceMatrix.cpp:31-350（共同 CpG>=min_common_coverage=3；NanDistanceStrategy MAX_DIST=1.0；無 imputation）",
+      "distance_metric_default": "CLI ArgParser.hpp:86 預設 NHD；Config.hpp:40 結構預設 BERNOULLI（缺旗標時 BERNOULLI）",
+      "clustering": "UPGMA(hard-coded) + TreeCutter silhouette 選 k=2..min(6,N/2)",
+      "globaltest_gating": "src/core/GlobalTest.cpp:83-143（Fisher-Freeman-Halton p<=0.1 AND Cramér's V>=0.1）+ 可靠性閘控 RegionProcessor.cpp:1592（Cochran 期望格<5 → V 歸 0）",
+      "permanova_99perm": "src/core/StructureTest.cpp:30-198 + RegionProcessor.cpp:1573（production 99 置換，pseudo-F，無 R²）",
+      "significant_4cond": "src/core/RegionProcessor.cpp:1141-1149（passed_gating ∧ global_p<=0.05 ∧ cramers_v>=0.1 ∧ num_reads>=20）",
+      "verificationclass_4": "src/core/SignificanceAnalyzer.cpp:307-340（Strong/Subclone/Weak/Noise）",
+      "percpgasm": "src/core/PerCpgAsm.cpp（逐 CpG Fisher + BH-FDR；引用 Orjuela 2020）",
+      "summary_117cols": "output/<vcf>/significance_summary.csv 117 欄（手動清點與 memory 一致）"
+    }
+  },
+  "caveats": {
+    "flip": "HP1-1 ≡ HP1 germline 鏈上帶 somatic ALT 的子單倍型（非第三 haplotype）；圖／分析端標示須一致",
+    "axis": "預設 germline_hp_only=off → HP1-1 併入 HP-family 1（＝ALLELE 軸）；somatic 子單倍型軸需 hp_fine 4 群；cis-test／copy-partition 在下游 Python（非本 binary）；單樣本 HCC1395／⭐3"
+  },
+  "bands": [
+    { "label": "① 輸入 + Read 擷取", "note": "每個 somatic SNV 獨立並行", "color_key": "slate", "stages": [
+      { "label": "Somatic VCF", "sub": "SNV 位點" },
+      { "label": "取視窗", "sub": "±1000 bp" },
+      { "label": "抓 read", "sub": "BamReader" },
+      { "label": "ReadParser 過濾", "sub": "MAPQ≥20·len≥1000" },
+      { "label": "HP tag", "sub": "1/2/1-1/2-1/3" } ] },
+    { "label": "② 甲基矩陣建構", "note": "MM/ML → 矩陣 · 僅 5mC", "color_key": "teal", "stages": [
+      { "label": "解 MM/ML", "sub": "5mC-only" },
+      { "label": "CIGAR→ref", "sub": "定位 CpG" },
+      { "label": "Read×CpG 矩陣", "sub": "MatrixBuilder" },
+      { "label": "二值化", "sub": "閾 0.8 / 0.2" } ] },
+    { "label": "③ Read-to-read 距離矩陣", "note": "read×read · 無 imputation", "color_key": "blue", "stages": [
+      { "label": "共同 CpG", "sub": "≥3" },
+      { "label": "距離度量", "sub": "NHD / BERNOULLI" },
+      { "label": "N×N 矩陣", "sub": "DistanceMatrix" },
+      { "label": "NaN 策略", "sub": "MAX_DIST" } ] },
+    { "label": "④ UPGMA 階層聚類", "note": "silhouette 選 k=2..min(6,N/2)", "color_key": "green", "stages": [
+      { "label": "UPGMA", "sub": "linkage" },
+      { "label": "選 k", "sub": "silhouette" },
+      { "label": "群標籤", "sub": "TreeCutter" } ] },
+    { "label": "⑤ 顯著性檢定套件 → 輸出", "note": "雙路檢定 → 117 欄/位點", "color_key": "gold", "stages": [
+      { "label": "GlobalTest", "sub": "Fisher-FFH gating" },
+      { "label": "StructureTest", "sub": "PERMANOVA 99-perm" },
+      { "label": "LabelTest", "sub": "HP/allele 置換" },
+      { "label": "PerCpgAsm", "sub": "逐CpG Fisher+FDR" },
+      { "label": "判定類別", "sub": "4 值 + Significant" },
+      { "label": "輸出", "sub": "summary.csv 117欄" } ] }
+  ]
+}

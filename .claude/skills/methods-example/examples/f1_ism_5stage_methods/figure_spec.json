@@ -1,0 +1,25 @@
+{
+  "_comment": "Fig 1 論文方法章開場圖。pipeline_diagram banded swimlane：5 band = ISM C++ 核心 5 階段。process_schematic=true（footer 改印源碼 provenance，非甲基示意）。methyl_legend=false（非甲基矩陣圖）。",
+  "case_template_id": "Cx_custom",
+  "title": "圖 1. InterSubMod (ISM) read-level 甲基化分析管線：五階段架構",
+  "subtitle": "ISM C++ 核心五階段（模組名取自 src/core/*、常數取自源碼）· 每個 somatic SNV 由 OpenMP 獨立並行處理 · 不含上游 ONT 工具與下游 Python 後處理",
+  "data_file": "data.json",
+  "primitives": [
+    { "type": "pipeline_diagram", "params": { "bands_ref": "bands" } }
+  ],
+  "shared": {
+    "width": 1180,
+    "color_scale": {
+      "ink": "#141413", "soft": "#6B6B66", "line": "#E4E2DA", "synthetic": "#9a6212",
+      "slate": "#475569", "teal": "#1B8A86", "blue": "#2F5597", "green": "#2E7D52", "gold": "#B8860B",
+      "meth": "#C0392B", "unmeth": "#2D6CB5", "normal": "#7F7F7F"
+    },
+    "glyph": {}
+  },
+  "annotations": {
+    "methyl_legend": false,
+    "process_schematic": true,
+    "label_flip_ref": "caveats.flip",
+    "single_sample_caveat_ref": "caveats.axis"
+  }
+}

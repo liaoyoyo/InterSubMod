@@ -1,0 +1,37 @@
+<!--
+Component: speaker_note_details.html
+Purpose: Collapsed speaker note via <details> — PI 1-on-1 + Lab meeting 預設機制 (2026-05-20 Issue #5)
+Use case:
+  - PI 1-on-1 scenario: slide 字數受限，詳細 mechanism / triangulation / provenance 細節進 details 折疊
+  - Lab meeting scenario: 同 PI 1-on-1，但展開內容可較多
+  - Conference scenario: 不使用 details（用 visible note block），參考 components/speaker_note.html
+Required CSS (already in design_tokens.css):
+  .speaker-note { margin-top, border, background, font-size }
+  .speaker-note summary { padding, cursor, color, font-size, font-weight, letter-spacing, list-style }
+  .speaker-note summary::after { content "▼"; transition }
+  .speaker-note[open] summary::after { transform rotate(180deg) }
+  .speaker-note .note-body { padding, border-top, color }
+Slot: replace {{SUMMARY_LABEL}} + {{NOTE_BODY_HTML}}
+-->
+
+<details class="speaker-note">
+  <summary>📝 講稿 · {{SUMMARY_LABEL}}</summary>
+  <div class="note-body">
+    {{NOTE_BODY_HTML}}
+  </div>
+</details>
+
+<!--
+Recommended NOTE_BODY_HTML content (for PI 1-on-1 / Lab meeting):
+  1. Background context / mechanism explanation
+  2. Cross-method corroboration / triangulation evidence
+  3. Caveat (use <div class="caveat"><strong>caveat:</strong> ...</div>)
+  4. Pre-reg prediction match (if applicable)
+  5. Full provenance (cycle_id + commit + reproducibility cmd)
+  6. Predecessor / next-phase milestones
+
+Avoid in NOTE_BODY_HTML:
+  - Duplicating visible takeaway text (講稿 ≠ slide 重複)
+  - More than 1000 chars (split to multiple <details> if needed)
+  - Tables larger than visible slide content (講稿應更精煉)
+-->
