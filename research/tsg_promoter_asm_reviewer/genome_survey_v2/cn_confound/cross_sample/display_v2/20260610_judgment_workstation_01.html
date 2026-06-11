@@ -87,8 +87,17 @@ code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color
  </div>
 </div>
 
-<h2>① 涵蓋與一致性（真實計數）</h2>
-<div class="panel"><div class="stat4" id="cover"></div>
+<h2>① 樣本、突變來源與觀察範圍（provenance）</h2>
+<div class="panel">
+ <table style="font-size:12px;margin-bottom:10px">
+  <tr><th style="width:130px">樣本</th><td><b>HCC1395</b>（乳腺癌細胞株，腫瘤）+ <b>HCC1395BL</b>（同源配對正常）；ONT 長讀 5khz simplex，5mCG+5hmCG 甲基化。<b>單樣本</b>（非跨樣本）→ 證據上限 ⭐3</td></tr>
+  <tr><th>BAM</th><td><code>/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/{HCC1395,HCC1395BL}.bam</code>；參考 GRCh38_no_alt</td></tr>
+  <tr><th>突變來源</th><td>ClairS <b>paired</b>（腫瘤+配對正常）體細胞 SNV calls = <code>somatic_pass.vcf.gz</code>；HP tag 來自 germline SNP 定相 <code>germline_phased_merged.vcf.gz</code></td></tr>
+  <tr><th>TP/FP 定義</th><td>對 SEQC2 真集（<code>high-confidence_sSNV_in_HC_regions_v1.2.1.vcf.gz</code> + HC BED）比對：在真集=<b>TP</b>(真體細胞)、不在=<b>FP</b>(caller 誤判)。<b>FN（caller 漏掉的真變異）不在本工作站</b></td></tr>
+  <tr><th>觀察範圍</th><td><b>全基因組常染色體 chr1–chr22（22 條，無 chrX/Y）</b>；<b>SNV only</b>（非 indel）；每位點 = SNV ±1000bp 視窗的 read×CpG。TP/FP 裁定於 SEQC2 高信度區內</td></tr>
+  <tr><th>數量</th><td>caller→longphase-S 30,381 → ISM 分析 30,350（丟 31 reads太少）= TP 29,723 + FP 627。非 TSG-promoter 子集，是全 somatic call set</td></tr>
+ </table>
+ <div class="stat4" id="cover"></div>
  <div class="sub" id="covnote" style="margin-top:8px"></div></div>
 
 <h2>② 判斷紀錄 — 匯出 / 匯入 / 進度（PASS 也可記錄）</h2>
