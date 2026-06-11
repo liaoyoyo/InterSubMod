@@ -4,7 +4,7 @@
 Generates a single standalone HTML dashboard that lets a solo researcher, on every
 harness change, confirm BOTH the moving parts AND the whole architecture:
 
-  1. L0 health lights (8)  — count drift / Hard-Gate truth / tier-gate / state<->doc / ledger / queue / memory-drift / doc-path-currency
+  1. L0 health lights (10) — count drift / Hard-Gate truth / tier-gate / state<->doc / ledger / queue / memory-drift / doc-path-currency / hook-wiring / tier-format
   2. Architecture map      — 3 entrypoints · 7-Phase Waterfall · meta + 3-storey assurance ·
                              18 agents by role · 38 hooks by event · state machine · evidence chain · workflows
   3. Component detail       — skills by category · agent table (tools/model/isolation) · hooks by event
@@ -381,6 +381,29 @@ def light_hook_wiring(settings, cmd):
     return "GREEN", rows
 
 
+VALID_TIER = {"pending", "1", "2", "3", "4", "5", "NEGATIVE", "RETRACTED"}
+
+
+def light_tier_format(active):
+    """#10 — TIER FORMAT: active.json cycles[].tier + recently_concluded[].tier 必須 ∈ active.schema.json
+    enum (pending/1-5/NEGATIVE/RETRACTED)。混入 '⭐⭐ L4' 等格式會讓 grep-based pre_tier_upgrade_check
+    漏判 (2026-06-12 盤點稽核發現 + 修；改進 ⑤)。read-only。"""
+    if not isinstance(active, dict):
+        return "GREY", ["active.json 不可解析"]
+    bad = []
+    for sect in ("cycles", "recently_concluded"):
+        for c in active.get(sect, []) or []:
+            t = str(c.get("tier", ""))
+            if t and t not in VALID_TIER:
+                bad.append(f"{sect}:{c.get('cycle_id', '?')} tier={t!r}")
+    rows = [f"active.json tier 欄位 vs schema enum（{len(VALID_TIER)} 合法值）"]
+    if bad:
+        rows.append(f"⚠ {len(bad)} 髒格式（grep-based tier gate 會漏判）: {bad[:5]}")
+        return "YELLOW", rows
+    rows.append("✓ 全部 tier ∈ enum")
+    return "GREEN", rows
+
+
 def compile_marker_status():
     if os.path.exists(COMPILE_MARKER) and os.path.getsize(COMPILE_MARKER) > 0:
         try:
@@ -552,7 +575,7 @@ code{{background:#eef1f4;padding:1px 4px;border-radius:3px;font-size:11.5px}} ul
 <div class="bar"><b>OVERALL</b> {ov['green']} GREEN · {ov['yellow']} YELLOW · {ov['red']} RED
 <div class="diff" id="diff">vs last: (computing…)</div></div>
 
-<h2 id="health">① L0 健康燈（8）</h2><div class="grid">{lights_html}</div>
+<h2 id="health">① L0 健康燈（10）</h2><div class="grid">{lights_html}</div>
 
 <h2 id="arch">② 整體架構（一眼掌握）</h2>
 <div class="layer"><div class="lt">3 入口（context 載入）</div><div class="row">{ep}</div></div>
@@ -639,6 +662,7 @@ def main():
     l7 = light_memory_drift()
     l8 = light_doc_paths(cmd)
     l9 = light_hook_wiring(settings, cmd)
+    l10 = light_tier_format(active)
     lights = [
         {"name": "COUNT DRIFT", "status": l1[0], "rows": l1[1]},
         {"name": "HARD-GATE TRUTH", "status": l2[0], "rows": l2[1]},
@@ -649,6 +673,7 @@ def main():
         {"name": "MEMORY DRIFT", "status": l7[0], "rows": l7[1]},
         {"name": "DOC PATH CURRENCY", "status": l8[0], "rows": l8[1]},
         {"name": "HOOK WIRING", "status": l9[0], "rows": l9[1]},
+        {"name": "TIER FORMAT", "status": l10[0], "rows": l10[1]},
     ]
     mk = compile_marker_status()
     if mk.get("present"):

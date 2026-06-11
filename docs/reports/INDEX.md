@@ -8,6 +8,10 @@
   - docs/README.md
 -->
 
+<!-- STALE-REDIRECT-BANNER (scripts/stale_redirect_banner.sh) -->
+> ⚠ **此檔為 2026-05-05 前後快照，可能已過時** — 現役主軸/狀態以 `InterSubMod/docs/CURRENT_FOCUS.md` 為準（主軸已於 2026-06-11 pivot 至 Subclonal reconstruction（取代 G6））。本檔僅供歷史對照，勿據此判斷現況。
+
+
 # InterSubMod 報告索引
 
 > **最後更新**: 2026-04-11 | **報告總數**: ~110 份 | **涵蓋期間**: 2026-01 ~ 2026-04

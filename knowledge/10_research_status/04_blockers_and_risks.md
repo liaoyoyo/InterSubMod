@@ -18,6 +18,10 @@ canonical_paths: [10_research_status/04_blockers_and_risks.md]
 alias_paths: []
 ---
 
+<!-- STALE-REDIRECT-BANNER (scripts/stale_redirect_banner.sh) -->
+> ⚠ **此檔為 2026-05-18 前後快照，可能已過時** — 現役主軸/狀態以 `InterSubMod/docs/CURRENT_FOCUS.md` 為準（主軸已於 2026-06-11 pivot 至 Subclonal reconstruction（取代 G6））。本檔僅供歷史對照，勿據此判斷現況。
+
+
 # Blockers & Risks
 
 > ⚠️ **此為 2026-05-18 快照（基於 2026-05-17 plan tender-pondering-blossom）**

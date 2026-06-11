@@ -87,6 +87,26 @@ docs/architecture/{YYYYMMDD}_{專案主題}/
 -->
 ```
 
+## ⭐ 2026-06-12 新增 — Provenance Stamp + 口徑欄位（改進 ①⑦；落地盤點稽核 P-17）
+
+> **背景**：2026-06-12 盤點稽核發現「憑記憶寫 status、不標所在 branch」是準確度+可尋性的共同根因（5 worktree 並行讓 cross-branch 幻覺更嚴重）。對應 known-pitfalls **P-17** + §13.7。
+
+**(A) 盤點 / audit / status / 現況整理類報告**：metadata block **必加 provenance stamp**（助手 `bash scripts/provenance_stamp.sh` 一行貼上）：
+```markdown
+<!--
+建立時間: YYYY-MM-DD
+build_branch: <git rev-parse --abbrev-ref HEAD>      # 本報告的 current 相對哪個 branch
+build_commit: <git rev-parse --short HEAD>
+worktree: <pwd>                                       # 5 worktree 並行時定位用
+data_sources: <path>,<path>                           # 數字/事實來源檔（number_provenance_check.sh gate 用）
+驗證方式: <每個 status=current 的事實旁附驗證指令；未驗證標 unverified>
+-->
+```
+
+**(B) 涉及不同 build / 口徑的資料**（Tmode / Paired / TO、read-instance / unique、max-collapse / 5mC-only）：metadata 加 `build_mode:` + `build_date:` + `data_version:`，避免口徑混用（pitfalls P-12）。
+
+**(C) status 斷言鐵則（P-17）**：任何「某檔存在 / current / stale / N 個」斷言旁**必附驗證指令 + 一行輸出**；無附 → 降 `unverified`，禁寫 `current`。盤點「可尋性」卻不去 ls = 自我矛盾。
+
 ## ⭐ 2026-05-26 新增 — Partial-Scope Ribbon 強制規則（A5 落地，5/24 incident postmortem）
 
 **規則**：當文件涵蓋的 scope < 100%（如 3/24 chr, 1/7 sample, single-cycle subset），**必須在以下 3 個位置同步標註 partial flag**：

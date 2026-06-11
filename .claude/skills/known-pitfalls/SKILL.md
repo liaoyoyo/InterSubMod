@@ -190,6 +190,19 @@ user-invocable: true
 
 **來源**：2026-06-02 借鑑 superpowers systematic-debugging。
 
+### P-17: 盤點 / 狀態 / 索引類事實憑記憶寫 status（§13.0 非數字版）+ cross-branch 幻覺
+
+**錯誤**：做「盤點 / audit / 現況整理」時，把某檔「存在 / current / stale / 有 N 個 run」當已知直接寫進報告，**沒實際 ls/grep 驗證**；或不標自己所在 git branch/worktree → 把「只在某 branch / 某 worktree 看到的檔」當全域 current。
+
+**症狀**（2026-06-12 盤點稽核實例，連批判層都犯）：宣稱 HCC1395「7 個 complete_matrix run、版本混亂」實際 **1 個**；ISM region 路徑少一層（漏 `filtered_snv_tp/`）；`data_sources` 填充率「0%」實際 1 檔；批判反指「LAUNCH_READINESS 當前 branch 不存在」實際存在。**根因 = §13.0 同源：寫進去的事實沒回檔案 grep**，只是對象從「數字」換成「檔案/狀態/路徑」。
+
+**正確做法**：
+1. 任何 `status=current/stale` 或「某檔/路徑/數量」斷言，**旁邊必附「驗證指令 + 一行輸出摘要」**；無附 → 自動降 `status=unverified`，不可寫 current。
+2. 盤點/audit/status 報告**首行標 provenance stamp**（branch + 短 HEAD + worktree path + 驗證日期）；助手：`bash scripts/provenance_stamp.sh`。
+3. 跨 5 worktree 環境：宣稱「唯一 SoT」前先 `grep -Fxvf` 對帳，確認非各 branch 物理分叉（2026-06-12 實測 evidence_ledger MAIN=superset、無分叉，但 line 數 99/49/15/43/15 不同會誤導）。
+
+**來源**：2026-06-12 數據準確度×可尋性盤點稽核（`docs/data_specs/20260612_data_accuracy_findability_improvement_audit_01.md`）；§13.7 完成宣稱 gate 延伸到盤點類斷言。
+
 ---
 
 ## 與 /scientific-rigor 元方法論的關係
