@@ -37,7 +37,7 @@ data_sources: docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_as
 | (HCC1395_DORADO) | 乳腺(另 basecaller) | ✅ | ✅ | ✅ | 可作 basecaller 穩健性對照 |
 
 - 路徑型式：`big7.../canonical/{sample}/paired_full/{date}_..._complete_matrix/longphase_s/{sample}_tagged.bam` (+ `somatic_pass.vcf.gz`)。
-- normal 甲基 BAM：`/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395BL.bam`（V10 用；其他樣本 normal 待盤）。
+- normal 甲基 BAM（**2026-06-12 samtools MM-tag 實測**，見 `InterSubMod/docs/data_specs/20260612_external_data_dependencies_01.md`）：**5/6 樣本 matched-normal 有甲基**（HCC1395 5mC+5hmC · HCC1937/HCC1954/H1437/H2009 5mC）→ V10 跨樣本可跑；**只 COLO829 R10 normal 無 MM tag**（查 ONT_PAO 或重 basecall）。⚠ 6 normal 全 `zhenyu112` 帳號 + 4/6 symlink = SPOF。
 - **意涵**：**單樣本 ⭐3 的硬上限可被打破** → 跨 6 樣本 × 3 癌種驗證可達 ⭐4。但全線**單一 pipeline（longphase-S，HP tag 自我參照）** 仍是 tier 風險（需正交對照）。
 
 ---
@@ -74,7 +74,7 @@ data_sources: docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_as
 
 | Gap | 需要什麼 | 優先 |
 |-----|---------|------|
-| **G-A 多樣本驗證** | 把 V10/V11c 跑遍 6 樣本（資產已備，§2）→ 現象跨癌種復現？| P0（tier 解鎖）|
+| **G-A 多樣本驗證** | 把 V10/V11c 跑遍樣本（**normal 甲基實測 5/6 ready**，§2；COLO829 缺甲基 normal 需補）→ 現象跨癌種復現？| P0（tier 解鎖；5 樣本即可衝 ⭐4）|
 | **G-B within-haplotype somatic-vs-baseline 對照** | T3/subclone 甲基的正確 null（非 germline-het null，後者是跨-hap 錯對照）| P0（reopen T3 前置）|
 | **G-C subclone-program vs 突變 cis 足跡** | 更寬空間控制（排除突變 ±1-2kb）；normal-anchored cis-test | P1 |
 | **G-D 真正「重建」demo** | 從 somatic haplotag + 甲基實際輸出亞克隆結構（不只 read 分類）| P1（論文 figure 1 候選）|
