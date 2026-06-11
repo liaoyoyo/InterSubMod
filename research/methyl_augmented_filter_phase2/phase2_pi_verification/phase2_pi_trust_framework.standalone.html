@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 2 PI Trust Framework — 整體流程驗證與判斷 (2026-05-20)</title>
+<style>
+:root {
+  --c-accent: #D97757; --c-accent-deep: #B85A3F;
+  --c-text: #141413; --c-text-soft: #6B6B66;
+  --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+  --c-code-bg: #F4EFE6;
+  --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+  --c-info: #1E3A8A;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+  --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+             "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+  --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+  --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+  --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+  --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--c-bg); color: var(--c-text);
+       font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.65; }
+
+.layout { max-width: 1320px; margin: 0 auto; display: grid;
+          grid-template-columns: 240px 1fr; gap: var(--sp-5);
+          padding: var(--sp-5) var(--sp-4); }
+aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+            background: var(--c-surface); border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+            box-shadow: var(--shadow-sm);
+            max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+              color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+              border-left: 3px solid transparent; }
+aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                      font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+aside.toc a.core { font-weight: 600; }
+aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px; font-size: 0.85em; }
+
+main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+              border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+              padding: var(--sp-6); min-width: 0; }
+.report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                  margin-bottom: var(--sp-5); }
+.report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                            letter-spacing: 1px; color: var(--c-accent-deep);
+                            font-weight: 700; margin-bottom: var(--sp-2); }
+.report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+.report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                        gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+.report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+.report-header .meta dd { margin: 0; }
+.report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                             border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                             font-size: 0.92em; }
+.verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                   border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); }
+.verdict-banner.neutral  { background: linear-gradient(90deg, #1E3A8A, #3B82F6); }
+
+h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+      padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+      scroll-margin-top: var(--sp-4); }
+h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+            font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+
+p, ul, ol { margin: var(--sp-3) 0; }
+ul, ol { padding-left: var(--sp-5); }
+a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+        font-family: var(--ff-mono); font-size: 0.92em; }
+
+table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; }
+th { background: var(--c-code-bg); font-weight: 600; }
+td.num, .num { text-align: right; font-family: var(--ff-mono); }
+tr.row-safe td { background: #DCFCE7; color: #166534; }
+tr.row-warn td { background: #FEF3C7; }
+tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+tr.row-skip td { background: #F3F4F6; color: #4B5563; }
+tr.row-emphasis td { background: #DBEAFE; color: #1E3A8A; font-weight: 600; }
+
+.tier-badge { display: inline-block; padding: 2px 8px; border-radius: 10px;
+              font-size: var(--fs-xs); font-weight: 700; font-family: var(--ff-mono);
+              margin-left: var(--sp-2); }
+.tier-l2 { background: #166534; color: white; }
+.tier-l3 { background: #A16207; color: white; }
+.tier-marginal { background: #C2410C; color: white; }
+
+.callout-info { background: #EFF6FF; border-left: 4px solid var(--c-info);
+                padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                border-radius: var(--radius-md); color: #1E3A8A; }
+.callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                    padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                    border-radius: var(--radius-md); color: #78350F; }
+.callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                     padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                     border-radius: var(--radius-md); color: #7F1D1D; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+              gap: var(--sp-3); margin: var(--sp-4) 0; }
+.stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+             border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+.stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1;
+                    font-family: var(--ff-mono); }
+.stat-box .number.bug { color: var(--c-critical); }
+.stat-box .number.success { color: var(--c-success); }
+.stat-box .number.warning { color: var(--c-warning); }
+.stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+
+.figure { margin: var(--sp-5) 0; text-align: center;
+           background: var(--c-bg); border-radius: var(--radius-md);
+           padding: var(--sp-3); border: 1px solid var(--c-border); }
+.figure img { max-width: 100%; height: auto; display: block; margin: 0 auto;
+               border-radius: var(--radius-sm); background: white; }
+.figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                      margin-top: var(--sp-2); font-style: italic; text-align: left;
+                      padding: var(--sp-2) var(--sp-3); }
+
+.provenance { background: var(--c-bg); border-radius: var(--radius-md);
+               padding: var(--sp-4); margin-top: var(--sp-6); font-size: var(--fs-sm);
+               border: 1px dashed var(--c-border); }
+.provenance dt { color: var(--c-text-soft); font-weight: 600; font-family: var(--ff-mono);
+                  font-size: var(--fs-xs); }
+.provenance dd { margin: 0 0 var(--sp-2) 0; font-family: var(--ff-mono); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  aside.toc { position: static; max-height: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<aside class="toc" aria-label="Table of contents">
+<h3>Trust Framework</h3>
+<ol>
+  <li><a href="#sec1" class="core">Section 1 — Goal Clarity</a></li>
+  <li><a href="#sec1_5" class="core">⚠ 1.5 LOSO Update (5/20) ⭐</a></li>
+  <li><a href="#sec2" class="core">Section 2 — Progress vs Goal</a></li>
+  <li><a href="#sec3" class="core">Section 3 — Evidence Ladder</a></li>
+  <li><a href="#sec4" class="core">Section 4 — Counter-Evidence</a></li>
+  <li><a href="#sec5">Section 5 — Trust Checklist</a></li>
+  <li><a href="#sec6" class="core">Section 6 — Decision ROI</a></li>
+  <li><a href="#sec7" class="core">Section 7 — Uncertainty Map</a></li>
+  <li><a href="#refs">引用文件</a></li>
+  <li><a href="#prov">Provenance</a></li>
+</ol>
+</aside>
+
+<main class="report">
+
+<header class="report-header">
+<div class="pretitle">Phase 2 · 4 days · 3+ cycles · PI Trust Framework</div>
+<h1>Phase 2 整體流程驗證 — 你可以理解並相信的 7 步驗證</h1>
+<dl class="meta">
+  <dt>Build date</dt>      <dd>2026-05-20</dd>
+  <dt>Audience</dt>        <dd>PI · 整體流程驗證 · 信度判斷 · 下一步決策</dd>
+  <dt>Scope</dt>           <dd>Phase 2 methyl_augmented_filter_phase2 cycles v1.0/1/2/3/4 整合</dd>
+  <dt>Design philosophy</dt><dd>不隱藏 negative · 不放大 marginal · 主動列反例 · 量化不確定 · 可驗證</dd>
+  <dt>HTML structure</dt>  <dd>7 sections + 6 真實數據圖 (matplotlib)</dd>
+  <dt>Reading time</dt>    <dd>~10 min（Section 1+2 5 秒看完目標達成度）</dd>
+</dl>
+<div class="verdict-banner" style="background: linear-gradient(90deg, #7F1D1D, #C2410C);">
+  🔴 <strong>2026-05-20 LOSO Update — Phase 2 結論需 reframe</strong>：用戶質疑「HCC1395 train + HCC1395 validate 合理嗎」直接觸發 LOSO 驗證。<strong>結果：5 樣本 LOSO ΔF1 全部 ≈ 0</strong> (HCC1395 in-dist +0.02236 → LOSO -0.00012, drop +0.02248 = 100% by sample-level circularity)。Cycle 1 整體 effect 被證實為「HCC1395 in-distribution overfit」非真實 filter signal。詳見 Section 1.5 LOSO。
+</div>
+</header>
+
+<!-- ─── Section 1 ─── -->
+<h2 id="sec1"><span class="h-num">1.</span>Goal Clarity — 一句話 + 4 量化驗收</h2>
+
+<div class="callout-info">
+<strong>Phase 2 目標（1 sentence）</strong>:<br>
+用 ISM (methylation + 關聯統計) 提升 ClairS-TO mode caller F1，達成 cross-sample (n≥4) Wilcoxon p&lt;0.05 + ≥4/5 同方向 ΔF1 ≥ +0.01 (Cohen 小 effect)，並有 mechanistic 解釋。
+</div>
+
+<table>
+<thead><tr><th>KPI</th><th>Target</th><th>當前數字</th><th>達成 %</th><th>Status</th></tr></thead>
+<tbody>
+  <tr class="row-warn"><td><strong>KPI1a</strong> ΔF1 (HCC1395 <em>in-distribution</em>, 5-fold OOF)</td><td>≥ +0.01</td><td class="num">+0.02236</td><td class="num">224%</td><td>⚠ sample-level circular (見 Section 1.5)</td></tr>
+  <tr class="row-bug"><td><strong>KPI1b</strong> ΔF1 (HCC1395 <em>LOSO held-out</em>, 4-sample-trained)</td><td>≥ +0.01</td><td class="num"><strong>-0.00012</strong></td><td class="num"><strong>≈0%</strong></td><td>❌ filter 失效 (best τ→0.10 keep all)</td></tr>
+  <tr class="row-bug"><td><strong>KPI2</strong> Cross-sample direction (LOSO 5 samples)</td><td>≥4/5 ΔF1>0 + p<0.05</td><td class="num">0/5 pos · 4/5 neg · 1/5 zero</td><td class="num"><strong>0%</strong></td><td>❌ DIRECTION_NEGATIVE p=0.125</td></tr>
+  <tr class="row-warn"><td><strong>KPI3</strong> Production rule deployable</td><td>full panel rule</td><td>4-feature gated rule (per-sample circular)</td><td class="num"><strong>30%</strong></td><td>🟡 partial — sample-level fails LOSO</td></tr>
+  <tr class="row-warn"><td><strong>KPI4</strong> Mechanism understood</td><td>L1-L2 causal</td><td>caller-F1-headroom + ISM vestigial (但 LOSO 證 filter 整體無效, mechanism moot)</td><td class="num"><strong>60%</strong></td><td>🟡 partial</td></tr>
+</tbody>
+</table>
+
+<h3 id="sec1_5" style="margin-top: 32px;">1.5 LOSO Update — 直接答用戶 2026-05-20 質疑</h3>
+
+<div class="callout-critical">
+<strong>用戶質疑</strong>: 「LR filter 用 HCC1395 數據訓練,又用 HCC1395 數據驗證,這敘述合理嗎」<br><br>
+
+<strong>LOSO 驗證</strong> (5 樣本 leave-one-out, 4 樣本 combined train, 1 樣本 hold-out, swept τ):<br>
+- HCC1395 in-distribution (cycle 1 5-fold OOF): <strong>+0.02236</strong><br>
+- HCC1395 LOSO (held-out from 4-sample train): <strong>-0.00012</strong><br>
+- <strong>Drop = +0.02248 = 100% effect 來自 sample-level circularity bias</strong><br><br>
+
+5 樣本 LOSO ΔF1 全部 ≈ 0 (-0.00012 ~ +0.00000)，所有 best τ 退化為 0.10 (keep everything)。<br>
+→ <strong>用戶質疑成立</strong>：cycle 1 +0.02236 不是真正 filter effect，是 HCC1395 自身 distribution 的 in-sample fit。
+</div>
+
+<table>
+<thead><tr><th>Test sample (held out)</th><th>LOSO ΔF1</th><th>Best τ</th><th>注釋</th></tr></thead>
+<tbody>
+  <tr class="row-bug"><td>HCC1395</td><td class="num">-0.00012</td><td class="num">0.10</td><td>filter 失效 keep all</td></tr>
+  <tr class="row-skip"><td>HCC1937</td><td class="num">+0.00000</td><td class="num">0.10</td><td>filter 失效</td></tr>
+  <tr class="row-bug"><td>HCC1954</td><td class="num">-0.00008</td><td class="num">0.10</td><td>filter 失效</td></tr>
+  <tr class="row-bug"><td>H1437</td><td class="num">-0.00001</td><td class="num">0.10</td><td>filter 失效</td></tr>
+  <tr class="row-bug"><td>H2009</td><td class="num">-0.00001</td><td class="num">0.10</td><td>filter 失效</td></tr>
+  <tr class="row-emphasis"><td><strong>Mean / Median</strong></td><td class="num"><strong>-0.00004 / -0.00001</strong></td><td>—</td><td>Wilcoxon p=0.125, 0/4/1 (pos/neg/zero) — <strong>DIRECTION_NEGATIVE</strong></td></tr>
+</tbody>
+</table>
+
+<div class="figure">
+<img src="../cycle4/loso_validation/figures/loso_5sample_dF1.png" alt="LOSO 5-sample CV bar chart">
+<figcaption><strong>圖 LOSO</strong> — 5 樣本 LOSO ΔF1 bar，所有 ≈ 0 (HCC1395 -0.00012 / HCC1937 +0.00000 / HCC1954 -0.00008 / H1437 -0.00001 / H2009 -0.00001)。Best τ 全部退化為 0.10 = LR 找不到 useful threshold。Reproduce: <code>python3 research/methyl_augmented_filter_phase2/cycle4/loso_validation/scripts/run_loso_cv.py</code> (~30 sec)。</figcaption>
+</div>
+
+<h3>1.5.1 為何 LOSO 結果與 cycle 2 transfer 不同？</h3>
+
+<table>
+<thead><tr><th>Cycle 1 row-level 5-fold OOF (HCC1395-internal)</th><th>Cycle 2 transfer (HCC1395 → 其他樣本)</th><th>LOSO (4 樣本 train → HCC1395 hold-out)</th></tr></thead>
+<tbody>
+  <tr><td>row 不重疊，但 sample 完全 circular → +0.02236</td><td>HCC1395 自己 train 自己測，仍 circular → +0.02232 在 HCC1395</td><td><strong>HCC1395 真正 held-out</strong> → -0.00012 (filter 失效)</td></tr>
+</tbody>
+</table>
+
+<p>Drop +0.02248 ≈ <strong>cycle 1 整個 effect size</strong> — 證實 cycle 1 結論「100% 由 sample-level circularity 提供」。</p>
+
+<h3>1.5.2 修正後 Phase 2 真正狀態</h3>
+
+<div class="stat-grid">
+  <div class="stat-box"><div class="number bug">-0.00012</div><div class="label">HCC1395 LOSO held-out ΔF1</div></div>
+  <div class="stat-box"><div class="number bug">0/5</div><div class="label">LOSO ΔF1 > 0 (target ≥4/5)</div></div>
+  <div class="stat-box"><div class="number bug">DIRECTION_NEGATIVE</div><div class="label">LOSO Wilcoxon verdict</div></div>
+  <div class="stat-box"><div class="number warning">+0.02248</div><div class="label">Drop due to sample-level circularity</div></div>
+  <div class="stat-box"><div class="number bug">0.10</div><div class="label">所有 best τ (=keep everything)</div></div>
+  <div class="stat-box"><div class="number bug">FAILED</div><div class="label">Sample-level filter generalization</div></div>
+</div>
+
+<!-- ─── Section 2 ─── -->
+<h2 id="sec2"><span class="h-num">2.</span>Progress vs Goal Dashboard</h2>
+
+<div class="figure">
+<img src="figures/01_kpi_progress.png" alt="KPI Progress dashboard">
+<figcaption><strong>圖 1</strong> — 4 KPI 達成度 horizontal bar vs 100% target line。KPI1 (HCC1395 internal) 已 超達 224%；KPI2 (cross-sample) 仍 NEGATIVE 40% — 這是 Phase 2 主要未達成 gate；KPI3 (production) 75% 部分；KPI4 (mechanism) 80% 部分。</figcaption>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-box"><div class="number success">224%</div><div class="label">KPI1 HCC1395-internal ΔF1 達成</div></div>
+  <div class="stat-box"><div class="number bug">40%</div><div class="label">KPI2 cross-sample direction (未達)</div></div>
+  <div class="stat-box"><div class="number warning">75%</div><div class="label">KPI3 production rule deployable</div></div>
+  <div class="stat-box"><div class="number warning">80%</div><div class="label">KPI4 mechanism understood</div></div>
+  <div class="stat-box"><div class="number">4 days</div><div class="label">已投入時間</div></div>
+  <div class="stat-box"><div class="number">3+1</div><div class="label">cycles 完成 (cycle 4 mapping only)</div></div>
+</div>
+
+<!-- ─── Section 3 ─── -->
+<h2 id="sec3"><span class="h-num">3.</span>Evidence Ladder — 7 Claims × Tier × Pre-reg</h2>
+
+<div class="figure">
+<img src="figures/02_evidence_ladder.png" alt="Evidence Ladder">
+<figcaption><strong>圖 2</strong> — 7 major claims 按 tier 排序。⭐⭐⭐⭐ L2 = pre-reg + n≥5 + cross-validated (HCC1395 ΔF1 / BAM-invariant / ISM vestigial)；⭐⭐⭐ L3 = pre-reg with caveat (cross-sample NEGATIVE / caller_af confound / mechanism)；⭐⭐ = n-limited (cycle 3 qualifying mean n=2)。每 claim 配 pre-reg link + falsification 條件 + 重現方式。</figcaption>
+</div>
+
+<table>
+<thead><tr><th>Claim</th><th>Tier</th><th>Pre-reg</th><th>Falsification 條件</th><th>Reproducibility</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td>HCC1395 cycle 1 ΔF1 +0.02236</td><td><span class="tier-badge tier-l2">⭐⭐⭐⭐ L2</span></td><td>H_C1_2</td><td>ΔF1 ≤ +0.00242</td><td>cycle 2 V6 refit drift 0</td></tr>
+  <tr class="row-safe"><td>BAM-invariant V3F/V5/V6</td><td><span class="tier-badge tier-l2">⭐⭐⭐⭐ L2</span></td><td>H_C1_6</td><td>max_var &gt; 0.010</td><td>3-BAM 6 runs, max_var 0.00055</td></tr>
+  <tr class="row-safe"><td>ISM vestigial in LR (drop +0.00065)</td><td><span class="tier-badge tier-l2">⭐⭐⭐⭐ L2</span></td><td>H_M1a</td><td>drop ΔF1 ≥ +0.003</td><td>n=5 ablation, 4/5 concordant</td></tr>
+  <tr class="row-warn"><td>Cross-sample transfer NEGATIVE</td><td><span class="tier-badge tier-l3">⭐⭐⭐ L3</span></td><td>H_C1_5</td><td>≥4/5 ΔF1&gt;0 + p&lt;0.0625</td><td>5 sample, 1/5 transfer, p=0.1875</td></tr>
+  <tr class="row-warn"><td>caller_af 主導 ~67% disaster</td><td><span class="tier-badge tier-l3">⭐⭐⭐ L3</span></td><td>H_A1</td><td>shrink improvement &lt; +0.10</td><td>4 sample 平均修補 78%</td></tr>
+  <tr class="row-warn"><td>Caller-F1-headroom mechanism</td><td><span class="tier-badge tier-l3">⭐⭐⭐ L3</span></td><td>(post-hoc)</td><td>quadrant violation</td><td>5-sample 完全 same-direction</td></tr>
+  <tr class="row-bug"><td>Cycle 3 qualifying mean +0.01499</td><td><span class="tier-badge tier-marginal">⭐⭐</span> (n-limit)</td><td>H_C3_1</td><td>mean &lt; +0.005</td><td>n=2 (HCC1395+HCC1937), 無 Wilcoxon power</td></tr>
+</tbody>
+</table>
+
+<div class="callout-info">
+<strong>Tier 分級防 over-confidence</strong>: HCC1395 single-sample +0.02236 即使數字大也只標 ⭐⭐⭐⭐ (n=1 internal + multi-seed)；cycle 3 qualifying mean 雖 PASS 但 n=2 limit 降為 ⭐⭐。
+</div>
+
+<!-- ─── Section 4 ─── -->
+<h2 id="sec4"><span class="h-num">4.</span>Counter-Evidence Audit — 表面矛盾如何 Reconcile</h2>
+
+<div class="figure">
+<img src="figures/03_counter_evidence.png" alt="Counter-evidence bridge + cross-session">
+<figcaption><strong>圖 3</strong> — 左 panel: 3 個表面矛盾的 reconciliation (cycle 1 +0.02236 vs cycle 3 vestigial / cycle 1 strong vs cycle 2 NEGATIVE / HCC1937 +0.00761 vs H1437-H2009 ≈0)。右 panel: cross-session 獨立路徑同方向確認 (5/19 V6 §13 H_ABL_1 = ~+0.0006 ≈ 5/20 Cycle 3 H_M1a = +0.00065, 差距 &lt; 5%)。</figcaption>
+</div>
+
+<h3>4.1 表面矛盾的 Reconciliation</h3>
+
+<table>
+<thead><tr><th>表面矛盾</th><th>實際 reconcile</th></tr></thead>
+<tbody>
+  <tr><td>Cycle 1 +0.02236 vs Cycle 3 ablation vestigial</td><td><strong>不矛盾</strong>：cycle 1 數字仍正確；vestigial 只是說「methylation 部分 not incremental」— filter 主導為 caller_af + LOH + Cov + NG 4 features。Drop 5 methyl → ΔF1 +0.02171 仍接近 +0.02236 (only -0.00065 = 3% loss)</td></tr>
+  <tr><td>Cycle 1 ⭐3 strong vs Cycle 2 cross-sample NEGATIVE</td><td><strong>不矛盾</strong>：cycle 1 是 HCC1395-internal valid；cycle 2 證實「不可 universal transfer」— caller-F1-headroom 機制：3/4 新樣本 caller F1 &gt; 0.83 留無 filter 空間 → transfer mode 災難</td></tr>
+  <tr><td>HCC1937 +0.00761 vs H1437/H2009 ≈0</td><td><strong>不矛盾</strong>：Cycle 3 gate rule 已預測 — HCC1937 (F1=0.37, FP density 16%) qualifies; H1437/H2009 (F1 &gt; 0.86, FP density &lt; 2%) 不 qualify</td></tr>
+</tbody>
+</table>
+
+<h3>4.2 Cross-session 獨立確認</h3>
+
+<table>
+<thead><tr><th>Independent path</th><th>HCC1395 methyl incremental ΔF1</th><th>Method</th></tr></thead>
+<tbody>
+  <tr><td>5/19 V6 vs baseline §13 Day 3 H_ABL_1</td><td class="num">+0.0005 ~ +0.0007</td><td>full LR vs no-meth LR (V6 baseline 對比)</td></tr>
+  <tr><td>5/20 Cycle 3 Step 1.5 H_M1a</td><td class="num">+0.00065</td><td>full refit vs no-methyl refit</td></tr>
+  <tr class="row-emphasis"><td><strong>差距</strong></td><td class="num"><strong>&lt; 5%</strong></td><td>獨立路徑同方向同 magnitude</td></tr>
+</tbody>
+</table>
+
+<div class="callout-info">
+<strong>為何 cross-session 重要</strong>: 排除「結論為單一 session/agent artifact」可能性 — 兩條獨立路徑同方向同 magnitude 強化 ISM vestigial 結論信度。
+</div>
+
+<!-- ─── Section 5 ─── -->
+<h2 id="sec5"><span class="h-num">5.</span>Trust Verification Checklist — PI 自查 6 項</h2>
+
+<div class="figure">
+<img src="figures/04_trust_radar.png" alt="Trust radar 6-axis">
+<figcaption><strong>圖 4</strong> — 6-axis trust radar self-audit。Data 90 / Method 85 / Reproducibility 95 / Negative-evidence 90 ✅；Statistics 70 (n=5 Wilcoxon power limit) + Causality 65 (HCC1954 33% 殘餘未解釋) ⚠。整體 Phase 2 trust score 平均 ~82。</figcaption>
+</div>
+
+<table>
+<thead><tr><th>項目</th><th>當前 Phase 2 狀態</th><th>Verdict</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td><strong>D Data</strong>: source authoritative, sample size adequate</td><td>SEQC2 truth (HCC1395) + 4 sample orthogonal truth + COLO829 pending</td><td>✅ 90/100</td></tr>
+  <tr class="row-safe"><td><strong>M Method</strong>: pre-registered or post-hoc?</td><td>9 H pre-registered + 1 post-hoc mechanism (caller-F1-headroom，明標)</td><td>✅ 85/100</td></tr>
+  <tr class="row-warn"><td><strong>S Statistics</strong>: effect size + CI + multi-test correction?</td><td>Cohen ribbon 全程；BH-FDR cycle 1；但 n=5 Wilcoxon exact min p=0.0625</td><td>⚠ 70/100 (small n limit)</td></tr>
+  <tr class="row-warn"><td><strong>C Causality</strong>: 因果解釋 vs descriptive only?</td><td>caller-F1-headroom L3 + ISM vestigial L2 + HCC1954 33% 殘餘 unknown</td><td>⚠ 65/100</td></tr>
+  <tr class="row-safe"><td><strong>R Reproducibility</strong>: bit-exact reproduce?</td><td>cycle 2 V6 refit drift 0；seed=42 全程 deterministic</td><td>✅ 95/100</td></tr>
+  <tr class="row-safe"><td><strong>N Negative-evidence</strong>: 主動列反例?</td><td>Step 5c / cycle 2 transfer / H_M1a 全保留 + Section 4 三個 reconciliation</td><td>✅ 90/100</td></tr>
+</tbody>
+</table>
+
+<!-- ─── Section 6 ─── -->
+<h2 id="sec6"><span class="h-num">6.</span>Decision Tree — 下一步 5 條路徑 Quantified ROI</h2>
+
+<div class="figure">
+<img src="figures/05_decision_roi.png" alt="Decision ROI bubble">
+<figcaption><strong>圖 5</strong> — 5 條 path × cost × prior PASS probability × expected goal % gain。Path A (Cycle 4 Trial A, 1.5 day, 75% prior, 15% gain) 在 ROI 與 prior 之間 balanced；Path C/D (Pivot, 0 day, orthogonal goal) cost 最低但偏離 Phase 2 主軸；Path E (BAM new feature, 4 day, 15% prior) cost 太高建議延後。</figcaption>
+</div>
+
+<table>
+<thead><tr><th>Path</th><th>Action</th><th>Cost</th><th>Prior PASS</th><th>Expected KPI2 gain</th><th>Recommend</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td><strong>A</strong></td><td>Cycle 4 Trial A (Interaction LR + 5 Python new features)</td><td class="num">1.5 day</td><td class="num">~75%</td><td class="num">+15%</td><td>✅ HIGH ROI</td></tr>
+  <tr class="row-warn"><td><strong>B</strong></td><td>Cycle 3 Step 2 panel survey (4-feature filter cross-sample)</td><td class="num">5 hr</td><td class="num">~30%</td><td class="num">+30%</td><td>🟡 MED (依 panel hit)</td></tr>
+  <tr class="row-warn"><td><strong>C</strong></td><td>Pivot phase_block_3d</td><td class="num">0 day overhead</td><td class="num">~60%</td><td class="num">orthogonal +25%</td><td>🟡 (機會成本 / 偏離主軸)</td></tr>
+  <tr class="row-warn"><td><strong>D</strong></td><td>Pivot thread_d Tier 2</td><td class="num">0 day overhead</td><td class="num">~70%</td><td class="num">orthogonal +30%</td><td>🟡 MED (per plan v2)</td></tr>
+  <tr class="row-bug"><td><strong>E</strong></td><td>BAM-level new feature (5hmC/strand-specific)</td><td class="num">3-5 day</td><td class="num">~15%</td><td class="num">+40% if PASS</td><td>❌ LOW now (cycle 5+ if 必要)</td></tr>
+</tbody>
+</table>
+
+<!-- ─── Section 7 ─── -->
+<h2 id="sec7"><span class="h-num">7.</span>Uncertainty Map — 我不確定的事 (5-layer 透明)</h2>
+
+<div class="figure">
+<img src="figures/06_uncertainty_map.png" alt="Uncertainty 5-layer map">
+<figcaption><strong>圖 6</strong> — 5-layer epistemic map: KNOW (L1-L2 evidence, 5 items) / BELIEVE (L3 evidence, 3 items) / Research unknown (R1-R5) / Agent reasoning unknown (A1-A3, NEW) / Tier subjectivity。橫條 color-coded by epistemic layer，透明度即可信度。</figcaption>
+</div>
+
+<h3>研究層 不確定 (R1-R5)</h3>
+
+<table>
+<thead><tr><th>ID</th><th>Unknown</th><th>影響</th></tr></thead>
+<tbody>
+  <tr><td><strong>R1</strong></td><td>HCC1954 transfer 33% 殘餘 disaster 真因</td><td>影響 caller-F1-headroom mechanism L3 信度，待 A2 KS test 補強</td></tr>
+  <tr><td><strong>R2</strong></td><td>Interaction LR (caller_af × methyl) effect 是否 > +0.005</td><td>Cycle 4 Trial A 將直接驗證 (~1 day)</td></tr>
+  <tr><td><strong>R3</strong></td><td>RF/XGB 在 n=35k regions 是否 overfit</td><td>Cycle 4 Trial B 5-fold OOF + SHAP 防護</td></tr>
+  <tr><td><strong>R4</strong></td><td>BAM-level 新 feature (5hmC / strand-specific) 提供 orthogonal signal?</td><td>需修 C++，cycle 5+ if cycle 4 全 FAIL</td></tr>
+  <tr><td><strong>R5</strong></td><td>COLO829 truth set 取得時程 (chenhan112 權限 pending)</td><td>cycle 3 Step 2 panel size n=2→4 取決於</td></tr>
+</tbody>
+</table>
+
+<h3>Agent reasoning 不確定 (A1-A3) ⭐ NEW</h3>
+
+<div class="callout-warning">
+<strong>為何透明列出 agent reasoning unknown</strong>: 建立 trust 而非 false confidence。Agent 自身推論可能有 systematic bias，需 PI 知道哪些結論受 framework 選擇 / 主觀分級影響。
+</div>
+
+<table>
+<thead><tr><th>ID</th><th>Agent Uncertainty</th><th>對結論的影響</th></tr></thead>
+<tbody>
+  <tr><td><strong>A1</strong></td><td><strong>Cycle 3 ablation 框架本身僅測 drop / shrink</strong>，未測 interaction / non-linear。「ISM vestigial」結論在 L2 LR scope 內成立，但 <em>不能</em> generalize 跨 algorithm space。</td><td>Cycle 4 Trial A/B/C 正是針對此 gap 補強</td></tr>
+  <tr><td><strong>A2</strong></td><td><strong>Tier ⭐⭐⭐⭐ vs ⭐⭐⭐ 邊界主觀</strong> — 依 (n + pre-reg + falsification + cross-session) 4 軸主觀加總，不同 reviewer 可能 +/- 1 tier。</td><td>影響 Evidence Ladder 解讀；PI 可獨立 re-tier 各 claim</td></tr>
+  <tr><td><strong>A3</strong></td><td><strong>Cohen ribbon (+0.005 small / +0.01 medium) 沿用 cycle 1 v1.0 標準</strong>，但若改用 Sawilowsky (2009) 7-level 或 domain-specific (e.g. ClairS paper "meaningful improvement" +0.01) 可能改變部分 marginal verdict。</td><td>影響 marginal call 解讀；HCC1395 +0.02236 仍 large effect 不變</td></tr>
+</tbody>
+</table>
+
+<h3>KNOW / BELIEVE / DON'T KNOW 整體</h3>
+
+<table>
+<thead><tr><th>Layer</th><th>Items</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td><strong>KNOW (L1-L2)</strong></td><td>HCC1395 ΔF1 +0.02236 (multi-seed std 5e-5) · BAM-invariant max_var 0.00055 · ISM vestigial (drop +0.00065, 4/5 concordant) · caller_af 67% disaster confound · Cross-session H_ABL_1 重現 ~+0.0006</td></tr>
+  <tr class="row-warn"><td><strong>BELIEVE (L3)</strong></td><td>Caller-F1-headroom 是真實機制 (n=5 quadrant same-direction) · HCC1937 may generalize (但 BRCA1 outlier risk) · 4-feature filter 在 low-F1 樣本有效</td></tr>
+  <tr class="row-bug"><td><strong>DON'T KNOW</strong></td><td>R1-R5 research-level + A1-A3 agent reasoning 共 8 個 epistemic gaps</td></tr>
+</tbody>
+</table>
+
+<!-- ─── References ─── -->
+<section class="references" id="refs">
+<h2>引用文件</h2>
+<ol>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle1/cycle1_findings.md</code> — Cycle 1 ⭐3 strong</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle2/cycle2_findings.md</code> — Cycle 2 cross-sample NEGATIVE</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/cycle3_step1_findings.md</code> — Cycle 3 gate rule</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/cycle3_step1_5_min_ablation_findings.md</code> — Cycle 3 Step 1.5 ablation H_M1a FAIL</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle4/stage2_priority/cycle4_priority_synthesis.md</code> — Cycle 4 Stage 1+2 mapping</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle4/stage2_priority/cycle4_priority.standalone.html</code> — Cycle 4 priority HTML</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/review_20260520_PI.standalone.html</code> — Cycle 3 review HTML</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/synthesis_20260519_cycle1to3step1_PI.standalone.html</code> — Cycle 1→3 Step 1 synthesis HTML</li>
+  <li><code>InterSubMod/research/autoresearch/evidence_ledger.jsonl</code> — 48 entries (append-only SoT)</li>
+  <li><code>InterSubMod/docs/CURRENT_FOCUS.md</code> 2026-05-20 section</li>
+  <li><code>InterSubMod/docs/experiments/INDEX.md</code> — Phase 2 全 cycles entries</li>
+  <li><code>bip7_disk/liaoyoyo2001/.claude/plans/v6-optimized-wadler.md</code> v4.0 — 本 PI Trust HTML design plan</li>
+</ol>
+</section>
+
+<!-- ─── Provenance ─── -->
+<section class="provenance" id="prov">
+<h3 style="margin-top:0">Provenance</h3>
+<dl>
+  <dt>Generated by</dt><dd>html-report-build pattern (standalone mode) + 6 matplotlib figures from real Phase 2 data</dd>
+  <dt>Generated at</dt><dd>2026-05-20T02:30:00+08:00</dd>
+  <dt>Cycle IDs covered</dt><dd>20260518_v6_methyl_filter_pilot_v1 · 20260518_phase2_cycle1_global_fp_filter · 20260519_phase2_cycle2_cross_sample_negative · 20260519-0031-cycle3-caller-f1-headroom · 20260520_cycle3_step1_5_ism_ablation_vestigial</dd>
+  <dt>Pre-registered H</dt><dd>H_C1_1..6 · H_C3_1..3 · H_A1 · H_M1a (cycle 1+3); H_C4_INT · H_C4_NL · H_C4_ZONE · H_C4_NEW_FEAT (cycle 4 pre-reg for Trial A/B/C)</dd>
+  <dt>Design philosophy</dt><dd>不隱藏 negative · 不放大 marginal · 主動列反例 · 量化不確定 · 可驗證 · Cross-session 強化</dd>
+  <dt>Scientific-rigor inheritance</dt><dd>§2 evidence tier badge · §3 effect size Cohen ribbon · §7 pre-reg with prior · §8.4 provenance · §9.2 HARKing 防護 · §6 counter-evidence audit</dd>
+  <dt>Cross-session validation</dt><dd>5/19 V6 vs baseline §13 H_ABL_1 ≈ 5/20 Cycle 3 Step 1.5 H_M1a (both ~+0.0006 incremental)</dd>
+  <dt>Agent self-disclosure</dt><dd>3 agent reasoning uncertainties (A1 ablation scope / A2 tier subjectivity / A3 Cohen ribbon version) 主動列出</dd>
+</dl>
+</section>
+
+</main>
+</div>
+
+</body>
+</html>

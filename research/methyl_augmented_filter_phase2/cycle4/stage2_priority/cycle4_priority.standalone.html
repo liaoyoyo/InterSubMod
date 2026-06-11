@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cycle 4 Stage 1+2 — Methylation Feature Engineering 全面 Mapping + Priority (PI Review)</title>
+<style>
+:root {
+  --c-accent: #D97757; --c-accent-deep: #B85A3F;
+  --c-text: #141413; --c-text-soft: #6B6B66;
+  --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+  --c-code-bg: #F4EFE6;
+  --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+  --c-info: #1E3A8A;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+  --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+             "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+  --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+  --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+  --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+  --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--c-bg); color: var(--c-text);
+       font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.65; }
+
+.layout { max-width: 1320px; margin: 0 auto; display: grid;
+          grid-template-columns: 240px 1fr; gap: var(--sp-5);
+          padding: var(--sp-5) var(--sp-4); }
+aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+            background: var(--c-surface); border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+            box-shadow: var(--shadow-sm);
+            max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+              color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+              border-left: 3px solid transparent; }
+aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                      font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+aside.toc a.core { font-weight: 600; }
+aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px; font-size: 0.85em; }
+
+main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+              border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+              padding: var(--sp-6); min-width: 0; }
+.report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                  margin-bottom: var(--sp-5); }
+.report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                            letter-spacing: 1px; color: var(--c-accent-deep);
+                            font-weight: 700; margin-bottom: var(--sp-2); }
+.report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+.report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                        gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+.report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+.report-header .meta dd { margin: 0; }
+.report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                             border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                             font-size: 0.92em; }
+.verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                   border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); }
+.verdict-banner.neutral  { background: linear-gradient(90deg, #1E3A8A, #3B82F6); }
+
+h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+      padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+      scroll-margin-top: var(--sp-4); }
+h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+            font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+
+p, ul, ol { margin: var(--sp-3) 0; }
+ul, ol { padding-left: var(--sp-5); }
+a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+        font-family: var(--ff-mono); font-size: 0.92em; }
+
+table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; }
+th { background: var(--c-code-bg); font-weight: 600; }
+td.num, .num { text-align: right; font-family: var(--ff-mono); }
+tr.row-safe td { background: #DCFCE7; color: #166534; }
+tr.row-warn td { background: #FEF3C7; }
+tr.row-skip td { background: #F3F4F6; color: #4B5563; }
+tr.row-emphasis td { background: #DBEAFE; color: #1E3A8A; font-weight: 600; }
+
+.section-card { border: 1.5px solid var(--c-border); border-radius: var(--radius-lg);
+                 margin: var(--sp-4) 0; overflow: hidden; background: var(--c-surface); }
+.section-card.core { border-color: var(--c-warning); box-shadow: var(--shadow-sm); }
+.section-card > summary { cursor: pointer; padding: var(--sp-3) var(--sp-4);
+                           display: flex; align-items: center; gap: var(--sp-3);
+                           background: var(--c-code-bg); list-style: none; }
+.section-card > summary::-webkit-details-marker { display: none; }
+.section-card > summary::before { content: "▸"; transition: transform 0.2s;
+                                   color: var(--c-text-soft); font-size: var(--fs-sm); }
+.section-card[open] > summary::before { transform: rotate(90deg); }
+.section-card.core > summary { background: #FEF7E6; }
+.section-card .card-id { font-family: var(--ff-mono); font-weight: 700; font-size: var(--fs-md);
+                          color: var(--c-warning); background: var(--c-surface);
+                          padding: 3px 10px; border-radius: 12px; border: 1.5px solid var(--c-warning); }
+.section-card .card-title { flex: 1; font-weight: 600; font-size: var(--fs-md); }
+.section-card .card-body { padding: var(--sp-4); }
+
+.callout-info { background: #EFF6FF; border-left: 4px solid var(--c-info);
+                padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                border-radius: var(--radius-md); color: #1E3A8A; }
+.callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                    padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                    border-radius: var(--radius-md); color: #78350F; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+              gap: var(--sp-3); margin: var(--sp-4) 0; }
+.stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+             border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+.stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1;
+                    font-family: var(--ff-mono); }
+.stat-box .number.bug { color: var(--c-critical); }
+.stat-box .number.success { color: var(--c-success); }
+.stat-box .number.warning { color: var(--c-warning); }
+.stat-box .number.info { color: var(--c-info); }
+.stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+
+.figure { margin: var(--sp-5) 0; text-align: center;
+           background: var(--c-bg); border-radius: var(--radius-md);
+           padding: var(--sp-3); border: 1px solid var(--c-border); }
+.figure img { max-width: 100%; height: auto; display: block; margin: 0 auto;
+               border-radius: var(--radius-sm); background: white; }
+.figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                      margin-top: var(--sp-2); font-style: italic; text-align: left;
+                      padding: var(--sp-2) var(--sp-3); }
+
+.provenance { background: var(--c-bg); border-radius: var(--radius-md);
+               padding: var(--sp-4); margin-top: var(--sp-6); font-size: var(--fs-sm);
+               border: 1px dashed var(--c-border); }
+.provenance dt { color: var(--c-text-soft); font-weight: 600; font-family: var(--ff-mono);
+                  font-size: var(--fs-xs); }
+.provenance dd { margin: 0 0 var(--sp-2) 0; font-family: var(--ff-mono); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  aside.toc { position: static; max-height: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<aside class="toc" aria-label="Table of contents">
+<h3>章節導航</h3>
+<ol>
+  <li><a href="#tldr" class="core">TL;DR + 3 大 gap</a></li>
+  <li><a href="#stage1a" class="core">Stage 1a — 12 Features Inventory</a></li>
+  <li><a href="#stage1b">Stage 1b — 10 Algorithms Inventory</a></li>
+  <li><a href="#stage1c">Stage 1c — 13 Observations Inventory</a></li>
+  <li><a href="#stage1d" class="core">Stage 1d — Gap Matrix 3-panel</a></li>
+  <li><a href="#stage1_dist">Stage 1 — 12 Features Distribution</a></li>
+  <li><a href="#stage2a" class="core">Stage 2a — 13 Candidates ROI</a></li>
+  <li><a href="#stage2_ranking" class="core">Stage 2 — Ranking + Decision Tree</a></li>
+  <li><a href="#h_coverage">Stage 2 — H_C4 Coverage</a></li>
+  <li><a href="#stage2b" class="core">Stage 2b — Trial Scope 建議</a></li>
+  <li><a href="#refs">引用文件</a></li>
+  <li><a href="#prov">Provenance</a></li>
+</ol>
+</aside>
+
+<main class="report">
+
+<header class="report-header">
+<div class="pretitle">Cycle 4 Pre-Exploration · Stage 1+2 · PI Review</div>
+<h1>Methylation Feature Engineering + Algorithm Gap Mapping</h1>
+<dl class="meta">
+  <dt>Build date</dt>      <dd>2026-05-20</dd>
+  <dt>Audience</dt>        <dd>PI · 決定 Trial scope · 量化檢驗</dd>
+  <dt>Parent plan</dt>     <dd><code>~/.claude/plans/v6-optimized-wadler.md</code> v3.1</dd>
+  <dt>Predecessor cycle</dt><dd><code>20260520_cycle3_step1_5_ism_ablation_vestigial</code> (H_M1a FAIL)</dd>
+  <dt>Active scope</dt>    <dd>Stage 1+2 only (~3 hr active)</dd>
+  <dt>Reserve scope</dt>   <dd>Stage 3-5 Serial Trial A→B→C (~7 days, conditional)</dd>
+</dl>
+<div class="verdict-banner neutral">
+  ℹ Cycle 4 Stage 1+2 mapping 完成 — 30% 三維空間試過，70% 未探索。建議 4 個 highest-ROI candidates 進 Trial A (~1.5 day) 驗證 ISM 是否 conditional 有效。
+</div>
+</header>
+
+<!-- ─── TL;DR ─── -->
+<h2 id="tldr"><span class="h-num">0.</span>TL;DR + 三大 Gap</h2>
+
+<p>Cycle 3 Step 1.5 結論「ISM 在 cycle 1 LR vestigial」是 narrow window — 只測了 5/12 features + 3/10 algorithms + 5/13 observations。本 cycle 4 Stage 1+2 系統盤點剩下 70% 未試空間，並列 13 candidates ROI 排序。</p>
+
+<div class="stat-grid">
+  <div class="stat-box"><div class="number warning">5 / 12</div><div class="label">Methylation features 試過 (42%)</div></div>
+  <div class="stat-box"><div class="number warning">3 / 10</div><div class="label">Algorithms 試過 (30%)</div></div>
+  <div class="stat-box"><div class="number bug">5 / 13</div><div class="label">Observations 做過 (38%)</div></div>
+  <div class="stat-box"><div class="number info">5</div><div class="label">Python 新 features 規劃 (cheap, no C++)</div></div>
+  <div class="stat-box"><div class="number success">4</div><div class="label">Highest ROI candidates 建議 Trial A</div></div>
+  <div class="stat-box"><div class="number info">~75%</div><div class="label">事前估「至少 1 H_C4 PASS」機率</div></div>
+</div>
+
+<div class="callout-info">
+<strong>三大 gap</strong>: (1) 7 個既有 methylation features (F_B1-F_B7) 從未進 LR; (2) 7 個 algorithm (RF/XGB/Interaction LR/Spline/Per-zone/NN/Bayesian) 從未試; (3) 5 個 Python 新 features (entropy/χ²/density/variance/correlation) 從未抽取。
+</div>
+
+<!-- ─── Stage 1a Features ─── -->
+<h2 id="stage1a"><span class="h-num">1.</span>Stage 1a — 12 Methylation Features Inventory</h2>
+
+<table>
+<thead><tr><th>ID</th><th>Feature</th><th>用於 cycle 1 LR</th><th>Non-null %</th><th>Cycle 3 verdict</th></tr></thead>
+<tbody>
+  <tr class="row-warn"><td>F_A1</td><td>HPMergedDelta</td><td>YES</td><td class="num">98.4%</td><td>vestigial</td></tr>
+  <tr class="row-warn"><td>F_A2</td><td>HPFineF (coef +0.75 rank 5)</td><td>YES</td><td class="num">98.4%</td><td>caller_af L2 ridge-split</td></tr>
+  <tr class="row-warn"><td>F_A3</td><td>NME_imbalance</td><td>YES</td><td class="num">39.6%</td><td>vestigial (NaN heavy)</td></tr>
+  <tr class="row-warn"><td>F_A4</td><td>Epipoly_Delta</td><td>YES</td><td class="num">39.6%</td><td>vestigial</td></tr>
+  <tr class="row-warn"><td>F_A5</td><td>ClusterPermanovaF</td><td>YES</td><td class="num">72.8%</td><td>vestigial</td></tr>
+  <tr class="row-skip"><td>F_B1</td><td>HPMergedP</td><td>NO</td><td class="num">98.4%</td><td>未進 cycle 1 LR</td></tr>
+  <tr class="row-skip"><td>F_B2</td><td>HPFineSig</td><td>NO</td><td class="num">98.4%</td><td>Categorical, 未進</td></tr>
+  <tr class="row-skip"><td>F_B3</td><td>HPFineNGroups</td><td>NO</td><td class="num">98.4%</td><td>Integer count, 未進</td></tr>
+  <tr class="row-skip"><td>F_B4</td><td>AlleleP (ASM-like)</td><td>NO</td><td class="num">56.7%</td><td>未進 (ASM-like)</td></tr>
+  <tr class="row-skip"><td>F_B5</td><td>AlleleDelta</td><td>NO</td><td class="num">56.7%</td><td>O12 NEGATIVE caller_af proxy</td></tr>
+  <tr class="row-skip"><td>F_B6</td><td>Entropy_Imbalance</td><td>NO</td><td class="num">39.6%</td><td>NaN heavy 未進</td></tr>
+  <tr class="row-skip"><td>F_B7</td><td>Epipoly_HP1 + HP2</td><td>NO</td><td class="num">39.6%</td><td>NaN heavy 未進</td></tr>
+</tbody>
+</table>
+
+<p><strong>觀察</strong>: 7 個 F_B* unused features 主要因為 (a) NaN heavy &gt;40% (F_B6/F_B7) 或 (b) categorical/integer 不適合 LR (F_B2/F_B3) 或 (c) 已知 caller_af proxy (F_B5)。**只有 F_B1/F_B3/F_B4** 有 reasonably 高 non-null 且未進 LR — 可作 Stage 3 補充 features。</p>
+
+<!-- ─── Stage 1b Algorithms ─── -->
+<h2 id="stage1b"><span class="h-num">2.</span>Stage 1b — 10 Algorithms Inventory</h2>
+
+<table>
+<thead><tr><th>ID</th><th>Algorithm</th><th>Status</th><th>Cost (days)</th><th>Notes</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td>A_T1</td><td>L2 LR (Ridge)</td><td>tried</td><td>—</td><td>cycle 1 baseline; 主用</td></tr>
+  <tr class="row-safe"><td>A_T2</td><td>L1 LR (Lasso)</td><td>tried sanity</td><td>—</td><td>feature selection 驗證</td></tr>
+  <tr class="row-safe"><td>A_T3</td><td>Coef shrinkage transfer</td><td>tried</td><td>—</td><td>cycle 3 ablation</td></tr>
+  <tr class="row-skip"><td>A_U1</td><td>Random Forest</td><td>not tried</td><td class="num">1.5</td><td>non-linear ensemble</td></tr>
+  <tr class="row-skip"><td>A_U2</td><td>XGBoost / LightGBM</td><td>not tried</td><td class="num">1.5</td><td>gradient boost</td></tr>
+  <tr class="row-skip"><td>A_U3</td><td>Interaction LR</td><td>not tried</td><td class="num">1.0</td><td>caller_af × 5 methyl</td></tr>
+  <tr class="row-skip"><td>A_U4</td><td>Polynomial / Spline LR</td><td>not tried</td><td class="num">1.5</td><td>smooth non-linear</td></tr>
+  <tr class="row-skip"><td>A_U5</td><td>Per-zone heterogeneous LR</td><td>not tried</td><td class="num">2.0</td><td>cycle 1 plan §Path C 提過未做</td></tr>
+  <tr class="row-skip"><td>A_U6</td><td>Neural network MLP</td><td>not tried</td><td class="num">2.0</td><td>overfit risk</td></tr>
+  <tr class="row-skip"><td>A_U7</td><td>Bayesian shrinkage</td><td>not tried</td><td class="num">2.0</td><td>PyMC3/Stan</td></tr>
+</tbody>
+</table>
+
+<!-- ─── Stage 1c Observations ─── -->
+<h2 id="stage1c"><span class="h-num">3.</span>Stage 1c — 13 Observations Inventory</h2>
+
+<table>
+<thead><tr><th>ID</th><th>Observation</th><th>Status</th><th>Cost (days)</th><th>H</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td>B_T1</td><td>VIF collinearity heatmap</td><td>tried</td><td>—</td><td>—</td></tr>
+  <tr class="row-safe"><td>B_T2</td><td>Per-feature boxplot</td><td>tried</td><td>—</td><td>—</td></tr>
+  <tr class="row-safe"><td>B_T3</td><td>Ablation heatmap</td><td>tried</td><td>—</td><td>H_M1a</td></tr>
+  <tr class="row-safe"><td>B_T4</td><td>Per-sample ΔF1 timeline</td><td>tried</td><td>—</td><td>—</td></tr>
+  <tr class="row-safe"><td>B_T5</td><td>caller_F1 × FP_density 2D quadrant</td><td>tried</td><td>—</td><td>—</td></tr>
+  <tr class="row-skip"><td>O1</td><td>Methyl entropy histogram + AUC</td><td>not done</td><td class="num">0.5</td><td>H_C4_NEW_FEAT</td></tr>
+  <tr class="row-skip"><td>O2</td><td>Per-CpG × HP × ALT-base χ²</td><td>not done</td><td class="num">1.0</td><td>H_C4_NEW_FEAT</td></tr>
+  <tr class="row-skip"><td>O3</td><td>Interaction LR + LRT</td><td>not done</td><td class="num">1.0</td><td>H_C4_INT</td></tr>
+  <tr class="row-skip"><td>O4</td><td>Per-zone heterogeneous LR</td><td>not done</td><td class="num">2.0</td><td>H_C4_ZONE</td></tr>
+  <tr class="row-warn"><td>O5</td><td>Distance matrix eigenvector clustering</td><td>reserve</td><td class="num">1.5</td><td>—</td></tr>
+  <tr class="row-warn"><td>O6</td><td>Strand symmetry Wilcoxon</td><td>reserve</td><td class="num">1.0</td><td>—</td></tr>
+  <tr class="row-warn"><td>O7</td><td>Outlier read detection</td><td>reserve</td><td class="num">1.5</td><td>—</td></tr>
+  <tr class="row-warn"><td>O8</td><td>Per-CpG × caller_af correlation</td><td>reserve low ROI</td><td class="num">0.5</td><td>—</td></tr>
+</tbody>
+</table>
+
+<!-- ─── Stage 1d Gap Matrix ─── -->
+<h2 id="stage1d"><span class="h-num">4.</span>Stage 1d — Gap Matrix 3-panel</h2>
+
+<div class="figure">
+<img src="../figures/stage1_gap_matrix.png" alt="Gap matrix 3-panel">
+<figcaption><strong>圖 1</strong> — 三維 gap matrix: feature × algorithm × observation 各自試過 vs 未試 狀況。左 panel: 12 features 中 5 個進 cycle 1 LR + cycle 3 ablation (深綠), 其他 7 個未用 (灰)。中 panel: 10 algorithms 中 3 個試過 (綠), 7 個未試 (紅，按估時排序)。右 panel: 13 observations 中 5 個試過 (綠), 4 個 priority (紅), 4 個 reserve/low ROI (橘)。</figcaption>
+</div>
+
+<!-- ─── Stage 1 Distribution ─── -->
+<h2 id="stage1_dist"><span class="h-num">5.</span>Stage 1 — 12 Methylation Features 跨樣本 Distribution</h2>
+
+<div class="figure">
+<img src="../figures/stage1_features_boxplot.png" alt="12 features boxplot">
+<figcaption><strong>圖 2</strong> — 12 methylation features × 5 samples boxplot 真實數據。F_A1-F_A5 (cycle 1 LR 用過) 5 個 + F_B1-F_B7 (未用) 7 個。每 panel n 表 non-null count。觀察各樣本是否有 distribution shift (特別 HCC1937 BRCA1 outlier)、是否 F_B 系列 distribution 與 F_A 差異足以提供 new signal。</figcaption>
+</div>
+
+<!-- ─── Stage 2a ROI ─── -->
+<h2 id="stage2a"><span class="h-num">6.</span>Stage 2a — 13 Candidates ROI</h2>
+
+<p>包括 4 個 priority observations (O1-O4) + 5 個 Python 新 features (F1-F5) + 4 個 algorithm (A_U1/A_U2/A_U3/A_U8)。ROI = challenge × reward / cost。</p>
+
+<div class="figure">
+<img src="../figures/stage2_roi_bubble.png" alt="ROI bubble">
+<figcaption><strong>圖 3</strong> — 13 candidates ROI bubble chart。X 軸 = 估時 (cost), Y 軸 = 預期回報 (reward 1-5), bubble 大小 ∝ challenge power, color = Trial 分配 (綠 A / 藍 B / 橘 C / 灰 reserve)。Lower-left + 大 bubble = 最佳 ROI。F1/O3/F2/O1/F3 全在低成本 + 高回報 quadrant。</figcaption>
+</div>
+
+<h3>5 個 Python 新 features (user 5/20 確認納入)</h3>
+
+<table>
+<thead><tr><th>ID</th><th>Feature</th><th>計算邏輯</th><th>Cost</th><th>對應 H</th></tr></thead>
+<tbody>
+  <tr class="row-emphasis"><td>F1</td><td>Methylation entropy per region</td><td>Shannon entropy on per-CpG β values</td><td class="num">0.5 d</td><td>H_C4_NEW_FEAT</td></tr>
+  <tr class="row-emphasis"><td>F2</td><td>Per-CpG × HP χ² Fisher aggregation</td><td>Σ -log(p) per region</td><td class="num">0.5 d</td><td>H_C4_NEW_FEAT</td></tr>
+  <tr class="row-emphasis"><td>F3</td><td>CpG density per region</td><td>n_CpG / region length</td><td class="num">0.25 d</td><td>H_C4_NEW_FEAT</td></tr>
+  <tr class="row-emphasis"><td>F4</td><td>Methylation variance per region</td><td>Var(β) on pooled HP1+HP2 reads</td><td class="num">0.5 d</td><td>H_C4_NEW_FEAT</td></tr>
+  <tr class="row-emphasis"><td>F5</td><td>HP1/HP2 methylation correlation</td><td>mean Pearson r per region</td><td class="num">0.5 d</td><td>H_C4_NEW_FEAT</td></tr>
+</tbody>
+</table>
+
+<!-- ─── Ranking + Decision Tree ─── -->
+<h2 id="stage2_ranking"><span class="h-num">7.</span>Stage 2 — Ranking + Decision Tree</h2>
+
+<div class="figure">
+<img src="../figures/stage2_priority_ranking.png" alt="Priority ranking">
+<figcaption><strong>圖 4</strong> — 13 candidates 依 ROI 排序 horizontal bar。F1 (methyl entropy) ROI 最高 (32), 因為極 cheap (0.5 day) + 中度 reward + 中度 challenge。Top 5: F1 / F2 / O3 / O1 / F3 — 全部進 Trial A。Algorithm trials (A_U1/A_U2/O4) ROI 低於 Trial A 是因為 cost 較高 (1.5-2 days)。</figcaption>
+</div>
+
+<div class="figure">
+<img src="../figures/stage2_decision_tree.png" alt="Decision tree">
+<figcaption><strong>圖 5</strong> — Cycle 4 Serial Trial A→B→C decision tree (user 5/20 選擇)。Trial A 結果分 3 路: (a) 全 PASS → 進 Trial B; (b) 1 PASS only → Trial B optional; (c) 全 FAIL → cycle 4 結論 final NEGATIVE，archive methyl_filter_phase2 軌。</figcaption>
+</div>
+
+<!-- ─── H Coverage ─── -->
+<h2 id="h_coverage"><span class="h-num">8.</span>Stage 2 — H_C4 × Candidate Coverage</h2>
+
+<div class="figure">
+<img src="../figures/stage2_h_coverage_matrix.png" alt="H coverage matrix">
+<figcaption><strong>圖 6</strong> — H_C4 4 個 pre-reg hypothesis × 11 個 Trial-bound candidates 挑戰能力 heatmap。每格 = candidate 對該 H 的挑戰能力 (0-5)。H_C4_NEW_FEAT 由 7 個 candidates 同時 challenge (highest coverage); H_C4_INT 只 1 個 (O3); H_C4_NL 2 個 (A_U1, A_U2); H_C4_ZONE 1 個 (O4)。Coverage 越多 confidence 越強。</figcaption>
+</div>
+
+<!-- ─── Stage 2b Trial Scope ─── -->
+<h2 id="stage2b"><span class="h-num">9.</span>Stage 2b — Trial Scope 建議 + 4 H Pre-reg</h2>
+
+<details class="section-card core" open>
+<summary>
+  <span class="card-id">A</span>
+  <span class="card-title">Trial A — Interaction LR + 5 Python 新 features (~1.5 day) — 建議優先</span>
+</summary>
+<div class="card-body">
+
+<table>
+<thead><tr><th>內容</th><th>對應</th></tr></thead>
+<tbody>
+  <tr><td>Baseline LR (cycle 1 10-feature)</td><td>reference</td></tr>
+  <tr><td>Interaction terms: caller_af × 5 methyl (HPMergedDelta / HPFineF / NME_imbalance / Epipoly_Delta / ClusterPermanovaF)</td><td>O3 → H_C4_INT</td></tr>
+  <tr><td>5 Python 新 features (F1-F5) 加入 LR</td><td>F1/F2/F3/F4/F5 → H_C4_NEW_FEAT</td></tr>
+  <tr><td>LRT vs baseline LR</td><td>integral significance test</td></tr>
+  <tr><td>Per-feature AUC + Cohen's d</td><td>individual contribution</td></tr>
+</tbody>
+</table>
+
+<p><strong>Decision after Trial A</strong>:</p>
+<ul>
+  <li>H_C4_INT PASS AND H_C4_NEW_FEAT PASS → 進 Trial B</li>
+  <li>1 of 2 PASS only → Trial B optional</li>
+  <li>全 FAIL → cycle 4 結論 final NEGATIVE</li>
+</ul>
+
+</div>
+</details>
+
+<details class="section-card">
+<summary>
+  <span class="card-id">B</span>
+  <span class="card-title">Trial B — Random Forest + XGBoost + SHAP (~2 day) — Conditional on A</span>
+</summary>
+<div class="card-body">
+<ul>
+  <li>sklearn RandomForestClassifier (n_estimators=500)</li>
+  <li>xgboost.XGBClassifier (learning_rate=0.1, n_est=500)</li>
+  <li>5-fold StratifiedKFold OOF (seed=42)</li>
+  <li>SHAP per-feature contribution</li>
+  <li>對應 H_C4_NL: ΔF1 over L2 LR &gt; +0.005 = PASS</li>
+</ul>
+</div>
+</details>
+
+<details class="section-card">
+<summary>
+  <span class="card-id">C</span>
+  <span class="card-title">Trial C — Per-zone heterogeneous LR (~2 day) — Conditional on B</span>
+</summary>
+<div class="card-body">
+<ul>
+  <li>5 zones: Z-OCH / Z-GL / Z-AUTO / Z-CHR8 / Z-other</li>
+  <li>Per-zone L2 LR + swept τ (含 5 Python 新 features)</li>
+  <li>Aggregate ΔF1 + zone-stratified Wilcoxon</li>
+  <li>對應 H_C4_ZONE: ≥3 zones ΔF1 ≥ +0.005 = PASS</li>
+</ul>
+</div>
+</details>
+
+<h3>4 Pre-reg Hypotheses (Hard Gate)</h3>
+
+<table>
+<thead><tr><th>H</th><th>Prediction</th><th>Falsification</th><th>Prior PASS</th></tr></thead>
+<tbody>
+  <tr><td>H_C4_INT</td><td>Interaction LR LRT p &lt; 0.05</td><td>p ≥ 0.05</td><td class="num">~40%</td></tr>
+  <tr><td>H_C4_NL</td><td>RF/XGB OOF ΔF1 over LR &gt; +0.005</td><td>ΔF1 &lt; +0.001</td><td class="num">~30%</td></tr>
+  <tr><td>H_C4_ZONE</td><td>≥3 zones ΔF1 ≥ +0.005</td><td>≤1 zone PASS</td><td class="num">~35%</td></tr>
+  <tr><td>H_C4_NEW_FEAT</td><td>≥1 new feature AUC ≥ 0.60 AND LR ΔF1 ≥ +0.003</td><td>全 AUC &lt; 0.58</td><td class="num">~25%</td></tr>
+  <tr class="row-emphasis"><td><strong>至少 1 H PASS</strong></td><td colspan="2">— 防 confirmation bias prior</td><td class="num"><strong>~75%</strong></td></tr>
+</tbody>
+</table>
+
+<div class="callout-warning">
+<strong>Prior 紀錄目的</strong>: 防 HARKing — 若實際結果與 prior 嚴重背離（e.g. 全 PASS 或全 FAIL），需用 "expected vs observed" 對照分析確認非選擇性報告。
+</div>
+
+<!-- ─── References ─── -->
+<section class="references" id="refs">
+<h2>引用文件</h2>
+<ol>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle4/stage1_mapping/feature_inventory.tsv</code> — 12 features inventory</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle4/stage1_mapping/algorithm_inventory.tsv</code> — 10 algorithms inventory</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle4/stage1_mapping/observation_inventory.tsv</code> — 13 observations inventory</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle4/stage2_priority/cycle4_priority_synthesis.md</code> — Stage 2 ROI 排序 + Trial scope 建議</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle4/scripts/stage1_inventory_figures.py</code> — Stage 1 figures</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle4/scripts/stage2_priority_figures.py</code> — Stage 2 figures</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/cycle3_step1_5_min_ablation_findings.md</code> — Predecessor cycle 3 ablation 結論</li>
+  <li><code>InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step5_methyl_filter_pilot/step0_schema.md</code> — 既有 methyl feature 完整 schema</li>
+  <li><code>bip7_disk/liaoyoyo2001/.claude/plans/v6-optimized-wadler.md</code> v3.1 — Plan with H_C4 1-4 pre-reg</li>
+</ol>
+</section>
+
+<!-- ─── Provenance ─── -->
+<section class="provenance" id="prov">
+<h3 style="margin-top:0">Provenance</h3>
+<dl>
+  <dt>Generated by</dt><dd>html-report-build pattern (standalone mode) + 6 matplotlib figures</dd>
+  <dt>Generated at</dt><dd>2026-05-20T02:00:00+08:00</dd>
+  <dt>Figures (real data)</dt><dd>6 PNGs from cycle 4 inventory TSVs + cycle 1+2 master TSVs via matplotlib</dd>
+  <dt>Predecessor cycle</dt><dd>cycle_id: 20260520_cycle3_step1_5_ism_ablation_vestigial</dd>
+  <dt>Pre-registered H</dt><dd>H_C4_INT · H_C4_NL · H_C4_ZONE · H_C4_NEW_FEAT (4 H, Hard Gate per scientific-rigor §7.1)</dd>
+  <dt>Active scope</dt><dd>Stage 1+2 only (~3 hr)，Stage 3-5 Serial trial reserve (~7 days, conditional on user 確認)</dd>
+  <dt>Scientific-rigor inheritance</dt><dd>§2 evidence tier · §3 effect size threshold (Cohen +0.005) · §7 pre-reg with prior · §8.4 provenance · §9.2 HARKing 防護</dd>
+  <dt>User 5/20 三選</dt><dd>Stage 1+2 only / Serial A→B→C / 加 Python 新 features</dd>
+</dl>
+</section>
+
+</main>
+</div>
+
+</body>
+</html>

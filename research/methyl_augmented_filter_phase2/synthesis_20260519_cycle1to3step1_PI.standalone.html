@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 2 Methyl-Augmented FP Filter — Cycle 1→3 Step 1 整合報告 (PI 終版)</title>
+<style>
+/* ── Design tokens (Anthropic palette + 8-pt spacing) ── */
+:root {
+  --c-accent: #D97757; --c-accent-deep: #B85A3F;
+  --c-text: #141413; --c-text-soft: #6B6B66;
+  --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+  --c-code-bg: #F4EFE6;
+  --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+  --c-info: #1E3A8A;
+  --c-skip: #6B7280;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+  --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+             "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+  --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+  --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+  --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+  --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--c-bg); color: var(--c-text);
+       font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.65; }
+
+.layout { max-width: 1320px; margin: 0 auto; display: grid;
+          grid-template-columns: 240px 1fr; gap: var(--sp-5);
+          padding: var(--sp-5) var(--sp-4); }
+
+aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+            background: var(--c-surface); border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+            box-shadow: var(--shadow-sm);
+            max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+              color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+              border-left: 3px solid transparent; }
+aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                      font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+aside.toc a.core { font-weight: 600; }
+aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px;
+                          font-size: 0.85em; }
+
+main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+              border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+              padding: var(--sp-6) var(--sp-6); min-width: 0; }
+
+.report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                  margin-bottom: var(--sp-5); }
+.report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                            letter-spacing: 1px; color: var(--c-accent-deep);
+                            font-weight: 700; margin-bottom: var(--sp-2); }
+.report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+.report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                        gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+.report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+.report-header .meta dd { margin: 0; }
+.report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                             border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                             font-size: 0.92em; }
+
+.verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                   border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); }
+.verdict-banner.positive { background: linear-gradient(90deg, #15803D, #22C55E); }
+.verdict-banner.neutral  { background: linear-gradient(90deg, #1E3A8A, #3B82F6); }
+.verdict-banner.caution  { background: linear-gradient(90deg, #A16207, #CA8A04); }
+
+h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+      padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+      scroll-margin-top: var(--sp-4); }
+h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+            font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2); color: var(--c-text-soft); }
+
+p, ul, ol { margin: var(--sp-3) 0; }
+ul, ol { padding-left: var(--sp-5); }
+a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--c-accent-deep); }
+blockquote { border-left: 3px solid var(--c-accent); padding: var(--sp-3) var(--sp-4);
+              color: var(--c-text-soft); margin: var(--sp-3) 0;
+              background: var(--c-code-bg);
+              border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+        font-family: var(--ff-mono); font-size: 0.92em; }
+pre { background: var(--c-code-bg); padding: var(--sp-3); border-radius: var(--radius-md);
+       overflow-x: auto; font-family: var(--ff-mono); font-size: var(--fs-sm); }
+pre code { background: none; padding: 0; }
+
+table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; }
+th { background: var(--c-code-bg); font-weight: 600; }
+td.num { text-align: right; font-family: var(--ff-mono); }
+tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+tr.row-safe td { background: #DCFCE7; color: #166534; }
+tr.row-warn td { background: #FEF3C7; }
+tr.row-skip td { background: #F3F4F6; color: #4B5563; }
+
+/* ── Section cards ── */
+.section-card { border: 1.5px solid var(--c-border); border-radius: var(--radius-lg);
+                 margin: var(--sp-4) 0; overflow: hidden; background: var(--c-surface); }
+.section-card.core { border-color: var(--c-warning); box-shadow: var(--shadow-sm); }
+.section-card.fail { border-color: var(--c-critical); }
+.section-card.pass { border-color: var(--c-success); }
+.section-card > summary { cursor: pointer; padding: var(--sp-3) var(--sp-4);
+                           display: flex; align-items: center; gap: var(--sp-3);
+                           background: var(--c-code-bg); list-style: none; }
+.section-card > summary::-webkit-details-marker { display: none; }
+.section-card > summary::before { content: "▸"; transition: transform 0.2s;
+                                   color: var(--c-text-soft); font-size: var(--fs-sm); }
+.section-card[open] > summary::before { transform: rotate(90deg); }
+.section-card.core > summary { background: #FEF7E6; }
+.section-card.fail > summary { background: #FEF2F0; }
+.section-card.pass > summary { background: #F0FDF4; }
+.section-card .card-id { font-family: var(--ff-mono); font-weight: 700; font-size: var(--fs-md);
+                          color: var(--c-warning); background: var(--c-surface);
+                          padding: 3px 10px; border-radius: 12px; border: 1.5px solid var(--c-warning); }
+.section-card.fail .card-id { color: var(--c-critical); border-color: var(--c-critical); }
+.section-card.pass .card-id { color: var(--c-success); border-color: var(--c-success); }
+.section-card .card-title { flex: 1; font-weight: 600; font-size: var(--fs-md); }
+.section-card .card-badge { padding: 2px 8px; border-radius: 10px; font-size: var(--fs-xs); font-weight: 700; }
+.section-card .card-badge.core { background: #FCD34D; color: #78350F; }
+.section-card .card-badge.pending { background: #DBEAFE; color: #1E3A8A; }
+.section-card .card-body { padding: var(--sp-4); }
+
+/* ── Tier badges (scientific-rigor §2 inherit) ── */
+.tier-badge { display: inline-block; padding: 2px 8px; border-radius: 10px;
+              font-size: var(--fs-xs); font-weight: 700; font-family: var(--ff-mono);
+              margin-left: var(--sp-2); }
+.tier-l5 { background: #14532D; color: white; }
+.tier-l4 { background: #166534; color: white; }
+.tier-l3 { background: #A16207; color: white; }
+.tier-l2 { background: #C2410C; color: white; }
+.tier-l1 { background: #7F1D1D; color: white; }
+.tier-pending { background: #E5E7EB; color: #4B5563; }
+
+/* ── Callouts ── */
+.callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                     padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                     border-radius: var(--radius-md); color: #7F1D1D; }
+.callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                    padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                    border-radius: var(--radius-md); color: #78350F; }
+.callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                    padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                    border-radius: var(--radius-md); color: #166534; }
+.callout-info { background: #EFF6FF; border-left: 4px solid var(--c-info);
+                padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                border-radius: var(--radius-md); color: #1E3A8A; }
+
+/* ── Stat grid ── */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+              gap: var(--sp-3); margin: var(--sp-4) 0; }
+.stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+             border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+.stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1;
+                    font-family: var(--ff-mono); }
+.stat-box .number.bug { color: var(--c-critical); }
+.stat-box .number.success { color: var(--c-success); }
+.stat-box .number.warning { color: var(--c-warning); }
+.stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+
+/* ── SVG figure ── */
+.svg-figure { margin: var(--sp-5) 0; text-align: center; }
+.svg-figure svg { max-width: 100%; height: auto; display: block; margin: 0 auto;
+                   background: var(--c-bg); border-radius: var(--radius-md);
+                   padding: var(--sp-3); border: 1px solid var(--c-border); }
+.svg-figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                          margin-top: var(--sp-2); font-style: italic; }
+
+/* ── Provenance footer ── */
+.provenance { background: var(--c-bg); border-radius: var(--radius-md);
+               padding: var(--sp-4); margin-top: var(--sp-6); font-size: var(--fs-sm);
+               border: 1px dashed var(--c-border); }
+.provenance dt { color: var(--c-text-soft); font-weight: 600; font-family: var(--ff-mono);
+                  font-size: var(--fs-xs); }
+.provenance dd { margin: 0 0 var(--sp-2) 0; font-family: var(--ff-mono); }
+.provenance code { background: var(--c-surface); }
+
+.references { background: var(--c-bg); border-radius: var(--radius-md);
+               padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-5); }
+.references h2 { border-bottom: none; margin-top: 0; font-size: var(--fs-xl); padding-bottom: 0; }
+.references ol { list-style: decimal; padding-left: var(--sp-5); }
+.references li { margin: var(--sp-2) 0; font-size: var(--fs-sm); }
+.references li code { font-family: var(--ff-mono); }
+
+@media print {
+  body { background: white; }
+  .layout { display: block; max-width: 100%; padding: 0; }
+  aside.toc { display: none; }
+  main.report { box-shadow: none; border: none; padding: 0; }
+  .section-card { page-break-inside: avoid; border-color: #999; }
+  details[open] > summary, details > summary { list-style: none; }
+  details:not([open]) > * { display: block !important; }
+  details:not([open]) > summary { background: white !important; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #666; }
+  pre, table, blockquote, .section-card, svg { page-break-inside: avoid; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  aside.toc { position: static; max-height: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<aside class="toc" aria-label="Table of contents">
+<h3>章節導航</h3>
+<ol>
+  <li><a href="#tldr" class="core">TL;DR</a></li>
+  <li><a href="#story" class="core">三 Cycle 故事弧</a></li>
+  <li><a href="#cycle1">Cycle 1 HCC1395 internal</a></li>
+  <li><a href="#cycle2" class="core">Cycle 2 cross-sample</a></li>
+  <li><a href="#mechanism" class="core">Caller-F1-headroom 機制</a></li>
+  <li><a href="#cycle3">Cycle 3 Step 1 gate</a></li>
+  <li><a href="#fivesample" class="core">五樣本完整比較</a></li>
+  <li><a href="#prereg">Pre-registration 對照</a></li>
+  <li><a href="#decision">Cycle 3 決策路徑</a></li>
+  <li><a href="#refs">引用文件</a></li>
+  <li><a href="#prov">Provenance</a></li>
+</ol>
+</aside>
+
+<main class="report">
+
+<header class="report-header">
+<div class="pretitle">Phase 2 · methyl_augmented_filter_phase2 · 跨 cycle synthesis</div>
+<h1>Methyl-Augmented FP Filter — Cycle 1→3 Step 1 整合報告</h1>
+<dl class="meta">
+  <dt>Build date</dt>      <dd>2026-05-19</dd>
+  <dt>Audience</dt>        <dd>PI · lab review · 跨 cycle 整合理解</dd>
+  <dt>Parent project</dt>  <dd><code>InterSubMod/research/methyl_augmented_filter_phase2/</code></dd>
+  <dt>Status</dt>          <dd>cycle 1 ⭐3 + caveat · cycle 2 H_C1_5 NEGATIVE / H_C1_6 PASS · cycle 3 Step 1 PASS · Step 2 panel pending</dd>
+  <dt>Predecessor</dt>     <dd>v1.0 marginal pilot (ΔF1 +0.00242 HCC1395)</dd>
+  <dt>Commit</dt>          <dd><code>17c77ad</code> (refactor/phase1-safety)</dd>
+</dl>
+<div class="verdict-banner caution">
+  ⚠ HCC1395-internal 結論成立（ΔF1 +0.02236 = 2.24× Cohen），但 cross-sample DIRECTION_NEGATIVE 揭示 filter caller-F1-headroom-bounded；Cycle 3 gate rule 修補 cycle 2 cross-sample fail（避免 +0.418 F1 損失），卡在 n=2 panel 不足以升 ⭐4。
+</div>
+</header>
+
+<!-- ─── 0. TL;DR ─── -->
+<h2 id="tldr"><span class="h-num">0.</span>TL;DR</h2>
+
+<p>三個 cycle 連續驗證 methyl-augmented FP filter，依序回答三個問題：</p>
+
+<ol>
+  <li><strong>Cycle 1 (HCC1395 internal)</strong>：把 v1.0 cell-gated pilot (ΔF1 +0.00242 marginal) 改為 global LR 後，能否在 HCC1395 達到 Cohen 小 effect？ — <strong>YES, +0.02236 (9.24× v1.0)</strong></li>
+  <li><strong>Cycle 2 (cross-sample n=5)</strong>：cycle 1 filter 是否 generalize 到 4 個新樣本？ — <strong>NO, transfer 4/5 NEGATIVE, re-fit 3/5 ≈0</strong></li>
+  <li><strong>Cycle 3 Step 1 (gate rule)</strong>：能否寫出 production rule 避免在不適用樣本造成 F1 regression？ — <strong>YES, qualifying mean +0.01499 PASS / high-F1 skip drift=0 PASS</strong></li>
+</ol>
+
+<p><strong>核心機制發現</strong>：filter 不是 universal — 它 <em>caller-F1-headroom-bounded</em>。只在 <code>caller F1 &lt; 0.80 AND FP density &gt; 10%</code> 樣本 work。3/4 新樣本 caller F1 &gt; 0.83 + FP density &lt; 4%，filter 無 headroom；唯一 generalize-positive 是 HCC1937 (caller F1 = 0.37)。</p>
+
+<p><strong>方法學整體 verdict</strong>：</p>
+
+<div class="stat-grid">
+  <div class="stat-box">
+    <div class="number success">+0.02236</div>
+    <div class="label">HCC1395 cycle 1 ΔF1 (2.24× Cohen ribbon)</div>
+  </div>
+  <div class="stat-box">
+    <div class="number success">+0.00761</div>
+    <div class="label">HCC1937 cycle 2 re-fit ΔF1</div>
+  </div>
+  <div class="stat-box">
+    <div class="number success">+0.01499</div>
+    <div class="label">Cycle 3 qualifying mean ΔF1</div>
+  </div>
+  <div class="stat-box">
+    <div class="number bug">-0.37744</div>
+    <div class="label">HCC1954 cycle 2 transfer 災難</div>
+  </div>
+  <div class="stat-box">
+    <div class="number success">+0.418</div>
+    <div class="label">Gate rule 避免的 total F1 損失</div>
+  </div>
+  <div class="stat-box">
+    <div class="number warning">n=2</div>
+    <div class="label">Cycle 3 qualifying panel (需 ≥4)</div>
+  </div>
+</div>
+
+<!-- ─── 1. Story arc ─── -->
+<h2 id="story"><span class="h-num">1.</span>三 Cycle 故事弧</h2>
+
+<p>本報告整合三個短驗證 cycle 的證據鏈。每個 cycle 都從上一個 cycle 的 caveat 出發，逐步收斂到 production rule。</p>
+
+<figure class="svg-figure">
+<svg viewBox="0 0 800 280" role="img" aria-labelledby="story-title story-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="story-title">三個 cycle 證據鏈演進</title>
+  <desc id="story-desc">v1.0 pilot 到 cycle 1 internal 到 cycle 2 cross-sample 到 cycle 3 gate rule 的故事弧；每個 cycle 顯示主要 verdict 與下一個 cycle 啟動原因</desc>
+
+  <!-- baseline box: v1.0 -->
+  <rect x="20" y="60" width="150" height="110" rx="8" fill="#F4EFE6" stroke="#A16207" stroke-width="1.5"/>
+  <text x="95" y="85" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="700" fill="#A16207">v1.0 Pilot</text>
+  <text x="95" y="105" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#141413">cell-gated filter</text>
+  <text x="95" y="125" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#A16207">ΔF1 = +0.00242</text>
+  <text x="95" y="142" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">marginal · 7% FP 覆蓋</text>
+  <text x="95" y="158" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">2026-05-18 上</text>
+
+  <!-- arrow 1 -->
+  <line x1="170" y1="115" x2="200" y2="115" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#arrow-grey)"/>
+  <text x="185" y="105" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">pivot</text>
+  <text x="185" y="135" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">global LR</text>
+
+  <!-- cycle 1 box -->
+  <rect x="200" y="60" width="150" height="110" rx="8" fill="#DCFCE7" stroke="#15803D" stroke-width="1.5"/>
+  <text x="275" y="85" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="700" fill="#15803D">Cycle 1</text>
+  <text x="275" y="105" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#141413">HCC1395 global LR</text>
+  <text x="275" y="125" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#15803D">+0.02236 ⭐3</text>
+  <text x="275" y="142" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">9.24× v1.0 · 2.24× Cohen</text>
+  <text x="275" y="158" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">2026-05-18 晚</text>
+
+  <!-- arrow 2 -->
+  <line x1="350" y1="115" x2="380" y2="115" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#arrow-grey)"/>
+  <text x="365" y="105" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">cross-</text>
+  <text x="365" y="135" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">sample</text>
+
+  <!-- cycle 2 box -->
+  <rect x="380" y="60" width="150" height="110" rx="8" fill="#FEF2F0" stroke="#C2410C" stroke-width="1.5"/>
+  <text x="455" y="85" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="700" fill="#C2410C">Cycle 2</text>
+  <text x="455" y="105" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#141413">cross-sample n=5</text>
+  <text x="455" y="125" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#C2410C">1+/4- NEGATIVE</text>
+  <text x="455" y="142" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">H_C1_5 / H_C1_6 PASS</text>
+  <text x="455" y="158" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">2026-05-19 凌</text>
+
+  <!-- arrow 3 -->
+  <line x1="530" y1="115" x2="560" y2="115" stroke="#6B6B66" stroke-width="1.5" marker-end="url(#arrow-grey)"/>
+  <text x="545" y="105" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">F1-headroom</text>
+  <text x="545" y="135" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">aware gate</text>
+
+  <!-- cycle 3 box -->
+  <rect x="560" y="60" width="220" height="110" rx="8" fill="#DCFCE7" stroke="#15803D" stroke-width="2"/>
+  <text x="670" y="85" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="700" fill="#15803D">Cycle 3 Step 1</text>
+  <text x="670" y="105" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#141413">caller-F1 gate</text>
+  <text x="670" y="125" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#15803D">+0.01499 mean</text>
+  <text x="670" y="142" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">H_C3_1+H_C3_3 PASS</text>
+  <text x="670" y="158" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">2026-05-19 凌晨</text>
+
+  <!-- bottom annotation: pending -->
+  <rect x="610" y="200" width="140" height="50" rx="6" fill="#FEF7E6" stroke="#A16207" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="680" y="220" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" fill="#A16207">H_C3_2 PENDING</text>
+  <text x="680" y="237" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66">panel n=2 → 需 ≥4</text>
+  <line x1="670" y1="172" x2="680" y2="200" stroke="#A16207" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <defs>
+    <marker id="arrow-grey" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6B6B66"/>
+    </marker>
+  </defs>
+</svg>
+<figcaption>圖 1 — 三 cycle 證據鏈：v1.0 marginal → cycle 1 ⭐3 internal → cycle 2 cross-sample NEGATIVE → cycle 3 gate rule 修補；卡點 H_C3_2 panel 不足。</figcaption>
+</figure>
+
+<!-- ─── 2. Cycle 1 ─── -->
+<h2 id="cycle1"><span class="h-num">2.</span>Cycle 1 — HCC1395 Internal ⭐3 (+0.02236)</h2>
+
+<p>從 v1.0 cell-gated pilot 的 marginal 結果 pivot — 那次 4 個 powered cells 只覆蓋 7% all FP，filter 過嚴。Cycle 1 改 global LR + 10 features (drop NumReads VIF=217 collinearity, L2 C=1.0, swept τ)，達到 Cohen 小 effect 2.24×：</p>
+
+<table>
+<thead><tr><th>Pre-reg H</th><th>Prediction</th><th>Computed</th><th>Verdict</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td>H_C1_1</td><td>Top 10 FP-rich cells ≥70% FP</td><td>94.22%</td><td>✅ PASS</td></tr>
+  <tr class="row-safe"><td>H_C1_2</td><td>ΔF1 &gt; +0.00242 (v1.0 baseline)</td><td>+0.02236 = 9.24×</td><td>✅ PASS</td></tr>
+  <tr class="row-safe"><td>H_C1_3</td><td>ΔF1 ≥ +0.01 (Cohen small)</td><td>2.24× threshold</td><td>✅ PASS</td></tr>
+  <tr class="row-warn"><td>H_C1_4</td><td>High-AF zone +0.003</td><td>-0.00011</td><td>⚠ FAIL (marginal)</td></tr>
+  <tr class="row-skip"><td>H_C1_5</td><td>Cross-sample 4/5</td><td>—</td><td>DEFERRED → cycle 2</td></tr>
+  <tr class="row-skip"><td>H_C1_6</td><td>BAM-invariant V3F/V5/V6</td><td>—</td><td>DEFERRED → cycle 2</td></tr>
+</tbody>
+</table>
+
+<details class="section-card pass" open>
+<summary>
+  <span class="card-id">C1</span>
+  <span class="card-title">Cycle 1 主要發現 — HCC1395-internal valid <span class="tier-badge tier-l3">⭐3</span></span>
+  <span class="card-badge core">CORE</span>
+</summary>
+<div class="card-body">
+<ul>
+  <li><strong>10 features L2 LR</strong>: caller_af (+3.44) / loh_inner_flag (+1.46) / Coverage_Multiple_imp (+1.27) / NG (+1.07) / HPFineF (+0.75) top-5 by |coef|；methylation 為 5th-rank covariate。</li>
+  <li><strong>τ*=0.39, plateau [0.38-0.42]</strong>: TP loss 1.56% / FP removed 70.20% / Precision 0.9541 / Recall 0.6030 / F1_post 0.7390。</li>
+  <li><strong>Step 5c lost TP 81% rescued</strong> by cycle 1 (vs v1.0 cell-gated 0%) — 證明 v1.0 over-restrictive。</li>
+  <li><strong>Multi-seed std 5e-5</strong> (20× below 0.001 threshold) — intra-sample stable。</li>
+  <li><strong>5 R-Step0 caveats</strong>: 4 RESOLVED (NaN MNAR + VIF drop + lost TP rescue + methyl marginal acknowledged) + 1 OPEN (HCC1395-only)。</li>
+</ul>
+<p><em>引用</em>: <code>InterSubMod/research/methyl_augmented_filter_phase2/cycle1/cycle1_findings.md</code></p>
+</div>
+</details>
+
+<!-- ─── 3. Cycle 2 ─── -->
+<h2 id="cycle2"><span class="h-num">3.</span>Cycle 2 — Cross-Sample DIRECTION_NEGATIVE</h2>
+
+<p>Cycle 1 主報告明確 defer 兩個 cross-validation gate (H_C1_5 + H_C1_6) 到 cycle 2。Cycle 2 對 4 個新樣本（H1437/H2009/HCC1954/HCC1937）跑 V6 ISM (wall clock 2 hr, 8 runs)，並對 HCC1395 V3F/V5/V6 三向 cross-binary 跑 sanity。</p>
+
+<details class="section-card fail" open>
+<summary>
+  <span class="card-id">C2</span>
+  <span class="card-title">H_C1_5 cross-sample n=5 Wilcoxon — DIRECTION_NEGATIVE <span class="tier-badge tier-pending">FAIL</span></span>
+  <span class="card-badge core">CORE</span>
+</summary>
+<div class="card-body">
+
+<table>
+<thead><tr><th>Mode</th><th>n_pos</th><th>n_neg</th><th>n_zero</th><th>Direction</th><th>p (ΔF1)</th><th>p (ΔRecall)</th><th>Verdict</th></tr></thead>
+<tbody>
+  <tr class="row-bug"><td>Transfer τ=0.39 fixed</td><td>1</td><td>4</td><td>0</td><td>1+/4-</td><td>0.1875</td><td><strong>0.0625</strong></td><td>DIRECTION_NEGATIVE</td></tr>
+  <tr class="row-bug"><td>Transfer swept τ</td><td>1</td><td>4</td><td>0</td><td>1+/4-</td><td>0.3125</td><td>0.0625</td><td>DIRECTION_NEGATIVE</td></tr>
+  <tr class="row-warn"><td>Re-fit per-sample swept τ</td><td>3</td><td>0</td><td>2</td><td>3+/0-/2≈0</td><td>0.125</td><td>0.0679</td><td>MIXED (positive trend)</td></tr>
+</tbody>
+</table>
+
+<p class="callout-critical">
+<strong>關鍵災難</strong>：Transfer τ=0.39 在 HCC1954 上 ΔF1 = <code>-0.37744</code>。Filter 移除 11,480/19,449 = <strong>59% TP</strong> → Recall 0.74 → 0.30。機制：cycle 1 caller_af coef +3.44 對 HCC1395 AF 分布 overfit，HCC1954 AF 分布偏移後標準化 scaler 把 HCC1954 TP 推到「flag as FP」半平面。
+</p>
+
+<p>n=5 Wilcoxon exact min p = 0.0625（all-same-sign 才達到），所以即使 4/5 same direction p 仍 = 0.1875 — 不過 sign-imbalance 已 unambiguous。ΔRecall p = 0.0625（5/5 ΔRecall &lt; 0）證實 filter 在所有樣本一致降 recall — proximal mechanism of F1 collapse。</p>
+
+</div>
+</details>
+
+<details class="section-card pass" open>
+<summary>
+  <span class="card-id">C3</span>
+  <span class="card-title">H_C1_6 V3F/V5/V6 cross-binary sanity — PASS <span class="tier-badge tier-l3">⭐3</span></span>
+  <span class="card-badge core">CORE</span>
+</summary>
+<div class="card-body">
+
+<table>
+<thead><tr><th>BAM</th><th>Transfer ΔF1</th><th>Re-fit ΔF1</th><th>Re-fit τ</th></tr></thead>
+<tbody>
+  <tr><td>V3F</td><td>+0.02295 (best)</td><td>+0.02289</td><td>0.40</td></tr>
+  <tr><td>V5</td><td>+0.02222</td><td>+0.02234</td><td>0.42</td></tr>
+  <tr><td>V6 (production)</td><td>+0.02232</td><td>+0.02236</td><td>0.39</td></tr>
+  <tr class="row-safe"><td><strong>max − min</strong></td><td><strong>0.00073</strong></td><td><strong>0.00055</strong></td><td>—</td></tr>
+</tbody>
+</table>
+
+<p>Threshold rule: &lt; 0.005 PASS / 0.005-0.010 BORDERLINE / &gt; 0.010 FAIL → <strong>PASS 6.8-9.1× under threshold</strong>。</p>
+
+<p>Implication：</p>
+<ul>
+  <li>BAM 升級 V3F → V5 → V6 對 filter 結果 zero F1 regression — V6 可作 production BAM</li>
+  <li>V3F 名義最佳但 +0.063% 低於 multi-seed std × 10 噪音水準 — 不撤回 V6</li>
+  <li>V6 re-fit ΔF1 = +0.022358 與 cycle 1 stored bit-exact 對應（drift 0.000000）— pipeline 可重現</li>
+</ul>
+
+<p><em>引用</em>: <code>InterSubMod/research/methyl_augmented_filter_phase2/cycle2/cycle2_step_c1_h_c1_6_sanity.md</code></p>
+
+</div>
+</details>
+
+<!-- ─── 4. Mechanism ─── -->
+<h2 id="mechanism"><span class="h-num">4.</span>核心機制 — Caller-F1-headroom-bounded</h2>
+
+<p>Cycle 2 的 4/5 NEGATIVE 不是 methylation 失敗，而是 filter 在 caller F1 接近 ceiling 的樣本無 work room。下圖把 5 樣本投影到 (caller F1, FP density) 平面：</p>
+
+<figure class="svg-figure">
+<svg viewBox="0 0 760 420" role="img" aria-labelledby="mech-title mech-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="mech-title">Caller-F1-headroom mechanism scatter</title>
+  <desc id="mech-desc">5 樣本投影到 (caller F1, FP density)；qualifying quadrant (左上, F1 < 0.80 + FP density > 10%) 只有 HCC1395 + HCC1937；其餘三樣本落在 high-F1 + low-FP-density 不適用區</desc>
+
+  <!-- axes -->
+  <line x1="80" y1="360" x2="700" y2="360" stroke="#141413" stroke-width="1.5"/>
+  <line x1="80" y1="40" x2="80" y2="360" stroke="#141413" stroke-width="1.5"/>
+
+  <!-- x-axis labels (caller F1) -->
+  <text x="80" y="380" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6B6B66">0.3</text>
+  <text x="201.6" y="380" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6B6B66">0.45</text>
+  <text x="323.2" y="380" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6B6B66">0.60</text>
+  <text x="444.8" y="380" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6B6B66">0.75</text>
+  <text x="566.4" y="380" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6B6B66">0.90</text>
+  <text x="688" y="380" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6B6B66">1.05</text>
+  <text x="390" y="405" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="600" fill="#141413">Caller F1 (baseline)</text>
+
+  <!-- y-axis labels (FP density) -->
+  <text x="70" y="364" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#6B6B66">0%</text>
+  <text x="70" y="300" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#6B6B66">5%</text>
+  <text x="70" y="236" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#6B6B66">10%</text>
+  <text x="70" y="172" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#6B6B66">15%</text>
+  <text x="70" y="108" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#6B6B66">20%</text>
+  <text x="35" y="200" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="600" fill="#141413" transform="rotate(-90 35 200)">FP density</text>
+
+  <!-- gate region (qualifying: caller F1 < 0.80 AND FP density > 10%) -->
+  <!-- F1 = 0.80 → x = 80 + (0.80-0.30)/0.75 × 608 = 80 + 405.3 = 485.3 -->
+  <!-- FP density = 10% → y = 360 - 10/20 × 320 = 360 - 160 = 200 (above is qualifying) -->
+  <rect x="80" y="40" width="405.3" height="160" fill="#DCFCE7" fill-opacity="0.45" stroke="#15803D" stroke-width="1.5" stroke-dasharray="6 3"/>
+  <text x="282" y="60" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#15803D">Qualifying quadrant</text>
+  <text x="282" y="78" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#15803D">caller F1 &lt; 0.80 AND FP density &gt; 10%</text>
+
+  <!-- skip region annotations -->
+  <text x="600" y="280" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#6B6B66" font-style="italic">filter no headroom</text>
+  <text x="600" y="298" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#6B6B66" font-style="italic">(skip filter)</text>
+
+  <!-- threshold lines emphasized -->
+  <line x1="485.3" y1="40" x2="485.3" y2="360" stroke="#15803D" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="485.3" y="32" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#15803D">F1=0.80</text>
+
+  <line x1="80" y1="200" x2="700" y2="200" stroke="#15803D" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="730" y="204" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#15803D">FP=10%</text>
+
+  <!-- data points -->
+  <!-- HCC1395 (F1=0.7166, FP=14%) -->
+  <!-- x = 80 + (0.7166-0.30)/0.75 × 608 = 80 + 337.6 = 417.6 -->
+  <!-- y = 360 - 14/20 × 320 = 360 - 224 = 136 -->
+  <circle cx="417.6" cy="136" r="11" fill="#15803D" stroke="#FFFFFF" stroke-width="2"/>
+  <text x="417.6" y="120" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#15803D">HCC1395</text>
+  <text x="417.6" y="158" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#15803D">+0.02236</text>
+
+  <!-- HCC1937 (F1=0.3692, FP=16.2%) -->
+  <!-- x = 80 + (0.3692-0.30)/0.75 × 608 = 80 + 56.1 = 136.1 -->
+  <!-- y = 360 - 16.2/20 × 320 = 360 - 259.2 = 100.8 -->
+  <circle cx="136.1" cy="100.8" r="11" fill="#15803D" stroke="#FFFFFF" stroke-width="2"/>
+  <text x="136.1" y="85" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#15803D">HCC1937</text>
+  <text x="136.1" y="123" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#15803D">+0.00761</text>
+
+  <!-- HCC1954 (F1=0.8385, FP=3.4%) -->
+  <!-- x = 80 + (0.8385-0.30)/0.75 × 608 = 80 + 436.6 = 516.6 -->
+  <!-- y = 360 - 3.4/20 × 320 = 360 - 54.4 = 305.6 -->
+  <circle cx="516.6" cy="305.6" r="11" fill="#C2410C" stroke="#FFFFFF" stroke-width="2"/>
+  <text x="516.6" y="290" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#C2410C">HCC1954</text>
+  <text x="516.6" y="328" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#C2410C">-0.37744 ⚠</text>
+
+  <!-- H1437 (F1=0.867, FP=1.1%) -->
+  <!-- x = 80 + (0.867-0.30)/0.75 × 608 = 80 + 459.6 = 539.6 -->
+  <!-- y = 360 - 1.1/20 × 320 = 360 - 17.6 = 342.4 -->
+  <circle cx="539.6" cy="342.4" r="11" fill="#6B7280" stroke="#FFFFFF" stroke-width="2"/>
+  <text x="539.6" y="332" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#6B7280">H1437</text>
+
+  <!-- H2009 (F1=0.8863, FP=1.0%) -->
+  <!-- x = 80 + (0.8863-0.30)/0.75 × 608 = 80 + 475.3 = 555.3 -->
+  <!-- y = 360 - 1.0/20 × 320 = 360 - 16 = 344 -->
+  <circle cx="555.3" cy="344" r="11" fill="#6B7280" stroke="#FFFFFF" stroke-width="2"/>
+  <text x="570" y="362" text-anchor="start" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#6B7280">H2009</text>
+</svg>
+<figcaption>圖 2 — 5 樣本投影到 (caller F1, FP density) 平面。綠色 = qualifying（落入綠色虛線框）；橘色 = transfer 災難 sample；灰色 = high-F1 ceiling 樣本，skip filter 是正確選擇。</figcaption>
+</figure>
+
+<div class="callout-info">
+<strong>機制解讀</strong>：5 樣本 caller F1 與 FP density <em>完全同向</em>（高 F1 必伴隨低 FP density）。原因是 caller F1 = 2·TP / (2·TP + FP + FN)；F1 高 ⇒ FP / TP 比小。所以 AND gate（兩條件同時滿足）冗餘但保守正確 — 即使單一條件變動也不會把 high-F1 樣本誤套 filter。
+</div>
+
+<h3>為什麼 Methylation 不是 fail 的原因</h3>
+
+<ul>
+  <li>Cycle 1 LR 中 HPFineF coef +0.75 排第 5 位，主導為 caller_af (+3.44) / loh_inner_flag (+1.46) / Coverage_Multiple_imp (+1.27) / NG (+1.07)。</li>
+  <li>H_C1_6 證實 V3F/V5/V6 三 BAM 提取的 methylation 特徵跨版本一致 (max_var 0.00055)。</li>
+  <li>4 新樣本 NEGATIVE 主因 = caller_af coef +3.44 對 HCC1395 AF 分布 overfit（HCC1954 transfer 災難根因）+ 高 F1 樣本 LR 找不到 useful τ。</li>
+  <li>Methylation 訊號弱但 BAM-invariant + 跨樣本 effect 也對 — 不是 cycle 2 fail 的 driver。</li>
+</ul>
+
+<!-- ─── 5. Cycle 3 ─── -->
+<h2 id="cycle3"><span class="h-num">5.</span>Cycle 3 Step 1 — Gate Rule (Caller-F1-headroom-aware)</h2>
+
+<p>Cycle 2 機制揭示後，cycle 3 的設計目標是：<strong>寫一條 production rule 避免在不適用樣本造成 F1 regression，同時保留 qualifying subset 的 uplift</strong>。Rule 設計：</p>
+
+<pre><code>IF caller_F1 &lt; 0.80 AND FP_density &gt; 0.10:
+    apply per-sample re-fit (cycle 1 LR L2 C=1.0, 5-fold OOF, swept τ)
+ELSE:
+    skip filter (caller F1 preserved)</code></pre>
+
+<details class="section-card pass" open>
+<summary>
+  <span class="card-id">C4</span>
+  <span class="card-title">H_C3_1 qualifying mean ΔF1 ≥ +0.01 — PASS <span class="tier-badge tier-l3">PASS 1.50×</span></span>
+  <span class="card-badge core">CORE</span>
+</summary>
+<div class="card-body">
+
+<table>
+<thead><tr><th>Sample</th><th>Caller F1</th><th>FP density</th><th>Gate</th><th>Gated ΔF1</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td><strong>HCC1395</strong></td><td>0.7166</td><td>14.0%</td><td>✅ apply</td><td>+0.02236</td></tr>
+  <tr class="row-safe"><td><strong>HCC1937</strong></td><td>0.3692</td><td>16.2%</td><td>✅ apply</td><td>+0.00761</td></tr>
+</tbody>
+</table>
+
+<p><strong>n=2 qualifying mean ΔF1 = +0.01499</strong> ≥ +0.01 threshold (1.50× Cohen ribbon) → <strong>PASS</strong>。</p>
+
+<p class="callout-warning">
+<strong>Caveat</strong>: n=2 太小無 Wilcoxon power（exact min p=0.50）。Pre-reg 用 strict mean threshold 而非 statistical test；意味著 H_C3_1 不能單獨升 tier，需配 H_C3_2 panel expansion。
+</p>
+
+</div>
+</details>
+
+<details class="section-card pass" open>
+<summary>
+  <span class="card-id">C5</span>
+  <span class="card-title">H_C3_3 non-qualifying skip drift &lt; 0.001 — PASS <span class="tier-badge tier-l3">PASS</span></span>
+</summary>
+<div class="card-body">
+
+<table>
+<thead><tr><th>Sample</th><th>Caller F1</th><th>FP density</th><th>Gate</th><th>Gated ΔF1</th><th>Cycle 2 transfer (對比)</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td>H1437</td><td>0.8670</td><td>1.1%</td><td>❌ skip</td><td>0.00000</td><td>-0.03597 (避免)</td></tr>
+  <tr class="row-safe"><td>H2009</td><td>0.8863</td><td>1.0%</td><td>❌ skip</td><td>0.00000</td><td>-0.00450 (避免)</td></tr>
+  <tr class="row-safe"><td>HCC1954</td><td>0.8385</td><td>3.4%</td><td>❌ skip</td><td>0.00000</td><td><strong>-0.37744 (避免)</strong></td></tr>
+</tbody>
+</table>
+
+<p><strong>n=3 non-qualifying max |drift| = 0.000000</strong> ≪ 0.001 threshold → <strong>trivial PASS</strong>。</p>
+
+<p>Gate rule 在這 3 個樣本上正確選擇 skip，避免 cycle 2 transfer mode 累計 <strong>+0.418 total F1 損失</strong>（主要由 HCC1954 -0.377 + H1437 -0.036 + H2009 -0.005 組成）。</p>
+
+</div>
+</details>
+
+<details class="section-card core" open>
+<summary>
+  <span class="card-id">C6</span>
+  <span class="card-title">H_C3_2 panel n≥4 + Wilcoxon p&lt;0.05 — PENDING <span class="tier-badge tier-pending">PENDING</span></span>
+  <span class="card-badge pending">PENDING</span>
+</summary>
+<div class="card-body">
+
+<p>目前 qualifying samples 只有 HCC1395 + HCC1937 (n=2)。n=2 Wilcoxon exact min p = 0.50 — 無 statistical power。要達 ⭐4 cross-sample validated 必須擴 n≥4 (Wilcoxon n=4 same-direction exact min p = 0.0625)。</p>
+
+<p>候選 low-F1 panel：</p>
+<ul>
+  <li><strong>COLO829</strong> — Truth set 0600 chenhan112 權限 pending；V6 BAM 可能已在 <code>v6_5sample_extension/</code> archive</li>
+  <li><strong>SEQC2 derivatives</strong> — HCC1395 truth set 同源候選</li>
+  <li><strong>TCGA paired tumor/normal</strong> — InterSubMod archive 可能有 caller F1 &lt; 0.80 candidates</li>
+</ul>
+
+</div>
+</details>
+
+<!-- ─── 6. Five-sample comparison ─── -->
+<h2 id="fivesample"><span class="h-num">6.</span>五樣本完整比較 — Cycle 2 Transfer vs Cycle 3 Gated</h2>
+
+<figure class="svg-figure">
+<svg viewBox="0 0 760 360" role="img" aria-labelledby="bar-title bar-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="bar-title">5 樣本 cycle 2 transfer vs cycle 3 gated ΔF1 對比</title>
+  <desc id="bar-desc">每樣本兩個 bar：cycle 2 transfer τ=0.39 (depper color) 與 cycle 3 gated rule (lighter color)；橘色 negative，綠色 positive，灰色 skip(0)</desc>
+
+  <!-- y axis -->
+  <line x1="80" y1="40" x2="80" y2="300" stroke="#141413" stroke-width="1.5"/>
+  <line x1="80" y1="170" x2="720" y2="170" stroke="#141413" stroke-width="1"/>
+
+  <!-- y labels (scaled: -0.40 to +0.05; y=170 is 0) -->
+  <!-- range 0.45, height 260; scale = 260/0.45 = 577.78 -->
+  <!-- y(0) = 40 + 130 (because top is +0.05): y = 170 - val*577.78 -->
+  <text x="70" y="44" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="9" fill="#6B6B66">+0.05</text>
+  <text x="70" y="73" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="9" fill="#6B6B66">+0.00</text>
+  <line x1="78" y1="170" x2="82" y2="170" stroke="#141413" stroke-width="1.5"/>
+  <text x="70" y="174" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="9" fill="#6B6B66">0</text>
+  <text x="70" y="246" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="9" fill="#6B6B66">-0.13</text>
+  <text x="70" y="294" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="9" fill="#6B6B66">-0.38</text>
+  <text x="35" y="170" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" font-weight="600" fill="#141413" transform="rotate(-90 35 170)">ΔF1</text>
+
+  <!-- threshold lines -->
+  <line x1="80" y1="164" x2="720" y2="164" stroke="#15803D" stroke-width="0.8" stroke-dasharray="3 3"/>
+  <text x="725" y="167" text-anchor="start" font-family="JetBrains Mono, monospace" font-size="9" fill="#15803D">+0.01 Cohen</text>
+
+  <!-- bars data: 5 samples × 2 modes (transfer, gated). x positions: 130, 250, 370, 490, 610 -->
+  <!-- HCC1395 -->
+  <rect x="115" y="157" width="22" height="13" fill="#15803D"/>
+  <rect x="140" y="157" width="22" height="13" fill="#22C55E"/>
+  <text x="138" y="320" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#141413" font-weight="600">HCC1395</text>
+  <text x="138" y="335" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#15803D">+0.022 / +0.022</text>
+
+  <!-- H1437 transfer -0.03597, y = 170 + 0.03597*577.78 = 170 + 20.8 = 190.8 -->
+  <rect x="235" y="170" width="22" height="20.8" fill="#C2410C"/>
+  <!-- gated 0 -->
+  <rect x="260" y="168" width="22" height="4" fill="#9CA3AF"/>
+  <text x="258" y="320" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#141413" font-weight="600">H1437</text>
+  <text x="258" y="335" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#6B6B66">-0.036 / 0</text>
+
+  <!-- H2009 transfer -0.00450, y = 170 + 2.6 = 172.6 -->
+  <rect x="355" y="170" width="22" height="3" fill="#C2410C"/>
+  <rect x="380" y="168" width="22" height="4" fill="#9CA3AF"/>
+  <text x="378" y="320" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#141413" font-weight="600">H2009</text>
+  <text x="378" y="335" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#6B6B66">-0.005 / 0</text>
+
+  <!-- HCC1954 transfer -0.37744, y = 170 + 0.37744*577.78 = 170 + 218 = 388 (clipped to 290) -->
+  <rect x="475" y="170" width="22" height="120" fill="#7F1D1D"/>
+  <text x="486" y="284" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="white" font-weight="700">⚠</text>
+  <rect x="500" y="168" width="22" height="4" fill="#9CA3AF"/>
+  <text x="498" y="320" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#141413" font-weight="600">HCC1954</text>
+  <text x="498" y="335" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#C2410C">-0.377 / 0</text>
+
+  <!-- HCC1937 transfer -0.07068, y = 170 + 0.07068*577.78 = 170 + 40.8 = 210.8 -->
+  <rect x="595" y="170" width="22" height="40.8" fill="#C2410C"/>
+  <!-- gated +0.00761, y = 170 - 0.00761*577.78 = 170 - 4.4 = 165.6 -->
+  <rect x="620" y="165.6" width="22" height="4.4" fill="#22C55E"/>
+  <text x="618" y="320" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#141413" font-weight="600">HCC1937</text>
+  <text x="618" y="335" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#15803D">-0.071 / +0.008</text>
+
+  <!-- legend -->
+  <rect x="500" y="50" width="14" height="10" fill="#C2410C"/>
+  <text x="520" y="59" font-family="-apple-system, sans-serif" font-size="11" fill="#141413">Cycle 2 transfer τ=0.39</text>
+  <rect x="500" y="68" width="14" height="10" fill="#22C55E"/>
+  <text x="520" y="77" font-family="-apple-system, sans-serif" font-size="11" fill="#141413">Cycle 3 gated (apply / skip=0)</text>
+
+  <!-- title -->
+  <text x="380" y="22" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" font-weight="700" fill="#141413">5 樣本 ΔF1 — Cycle 2 transfer vs Cycle 3 gated</text>
+</svg>
+<figcaption>圖 3 — 5 樣本 ΔF1 對比。Cycle 2 transfer mode (橘紅) 在 HCC1954 上崩盤；Cycle 3 gated rule (綠/灰) 把不適用樣本歸零，保留 HCC1395+HCC1937 uplift。</figcaption>
+</figure>
+
+<table>
+<thead><tr><th>Sample</th><th>Caller F1</th><th>FP density</th><th>Cycle 2 transfer fixed</th><th>Cycle 2 re-fit</th><th>Cycle 3 gated</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td>HCC1395</td><td class="num">0.7166</td><td class="num">14.0%</td><td class="num">+0.02232</td><td class="num">+0.02236</td><td class="num"><strong>+0.02236</strong></td></tr>
+  <tr class="row-skip"><td>H1437</td><td class="num">0.8670</td><td class="num">1.1%</td><td class="num">-0.03597</td><td class="num">~0</td><td class="num"><strong>0.00000</strong></td></tr>
+  <tr class="row-skip"><td>H2009</td><td class="num">0.8863</td><td class="num">1.0%</td><td class="num">-0.00450</td><td class="num">~0</td><td class="num"><strong>0.00000</strong></td></tr>
+  <tr class="row-skip"><td>HCC1954</td><td class="num">0.8385</td><td class="num">3.4%</td><td class="num"><strong>-0.37744</strong></td><td class="num">+0.00095</td><td class="num"><strong>0.00000</strong></td></tr>
+  <tr class="row-safe"><td>HCC1937</td><td class="num">0.3692</td><td class="num">16.2%</td><td class="num">-0.07068</td><td class="num">+0.00761</td><td class="num"><strong>+0.00761</strong></td></tr>
+  <tr><td><strong>5-sample mean</strong></td><td class="num">—</td><td class="num">—</td><td class="num">-0.094</td><td class="num">+0.006</td><td class="num">+0.006</td></tr>
+</tbody>
+</table>
+
+<!-- ─── 7. Pre-reg ─── -->
+<h2 id="prereg"><span class="h-num">7.</span>Pre-registration 對照表 (scientific-rigor §7.1)</h2>
+
+<table>
+<thead><tr><th>Cycle</th><th>H</th><th>Prediction</th><th>Falsification</th><th>Computed</th><th>Verdict</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td>1</td><td>H_C1_1</td><td>Top 10 FP-rich cells ≥70% FP</td><td>&lt;70%</td><td>94.22%</td><td>✅ PASS</td></tr>
+  <tr class="row-safe"><td>1</td><td>H_C1_2</td><td>ΔF1 &gt; +0.00242 (v1.0)</td><td>≤+0.00242</td><td>+0.02236</td><td>✅ PASS 9.24×</td></tr>
+  <tr class="row-safe"><td>1</td><td>H_C1_3</td><td>ΔF1 ≥ +0.01 (Cohen)</td><td>&lt;+0.01</td><td>+0.02236</td><td>✅ PASS 2.24×</td></tr>
+  <tr class="row-warn"><td>1</td><td>H_C1_4</td><td>High-AF zone ≥+0.003</td><td>&lt;+0.003</td><td>-0.00011</td><td>⚠ FAIL marginal</td></tr>
+  <tr class="row-bug"><td>2</td><td>H_C1_5</td><td>≥4/5 ΔF1&gt;0 + Wilcoxon p&lt;0.0625</td><td>≤2/5 same direction</td><td>1+/4-, p=0.1875</td><td>❌ DIRECTION_NEGATIVE</td></tr>
+  <tr class="row-safe"><td>2</td><td>H_C1_6</td><td>max_var V3F/V5/V6 &lt; 0.005</td><td>&gt;0.010</td><td>0.00055</td><td>✅ PASS 9.1×</td></tr>
+  <tr class="row-safe"><td>3</td><td>H_C3_1</td><td>qualifying mean ΔF1 ≥ +0.01</td><td>&lt;+0.005</td><td>+0.01499</td><td>✅ PASS 1.50×</td></tr>
+  <tr class="row-warn"><td>3</td><td>H_C3_2</td><td>panel n≥4 + Wilcoxon p&lt;0.05</td><td>n&lt;4 OR p≥0.05</td><td>n=2 only</td><td>⏳ PENDING Step 2</td></tr>
+  <tr class="row-safe"><td>3</td><td>H_C3_3</td><td>non-qualifying |drift| &lt; 0.001</td><td>any |drift|≥0.001</td><td>0.000000</td><td>✅ PASS trivial</td></tr>
+</tbody>
+</table>
+
+<!-- ─── 8. Decision tree ─── -->
+<h2 id="decision"><span class="h-num">8.</span>Cycle 3 卡點與決策路徑</h2>
+
+<p>Cycle 3 Step 1 PASS 兩個 verdict，但只剩 H_C3_2 panel expansion 卡點。下圖列兩條決策路徑：</p>
+
+<figure class="svg-figure">
+<svg viewBox="0 0 760 380" role="img" aria-labelledby="dec-title dec-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="dec-title">Cycle 3 兩條決策路徑</title>
+  <desc id="dec-desc">當前狀態 PASS 2/3 H_C3，卡 H_C3_2 panel n=2 不足；Path A 跑 Step 2 panel survey，Path B 收 n=2 ⭐3 strict subset</desc>
+
+  <!-- current state box -->
+  <rect x="280" y="30" width="200" height="80" rx="8" fill="#FEF7E6" stroke="#A16207" stroke-width="2"/>
+  <text x="380" y="55" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="700" fill="#A16207">Cycle 3 Step 1 PASS</text>
+  <text x="380" y="73" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#141413">H_C3_1 ✅ / H_C3_3 ✅</text>
+  <text x="380" y="91" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#C2410C">H_C3_2 PENDING — n=2 only</text>
+
+  <!-- branching point -->
+  <line x1="380" y1="110" x2="380" y2="140" stroke="#141413" stroke-width="1.5"/>
+
+  <!-- left branch (Path A) -->
+  <line x1="380" y1="140" x2="180" y2="170" stroke="#141413" stroke-width="1.5"/>
+  <line x1="180" y1="170" x2="180" y2="200" stroke="#141413" stroke-width="1.5" marker-end="url(#arrow-blk)"/>
+
+  <rect x="50" y="200" width="280" height="155" rx="8" fill="#EFF6FF" stroke="#1E3A8A" stroke-width="2"/>
+  <text x="190" y="225" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="700" fill="#1E3A8A">Path A — Step 2 panel survey</text>
+  <text x="190" y="248" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#141413">尋找 ≥2 個新 low-F1 樣本</text>
+  <text x="190" y="265" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66" font-style="italic">候選: COLO829 / SEQC2 / TCGA</text>
+  <line x1="60" y1="280" x2="320" y2="280" stroke="#D1D5DB" stroke-width="0.5"/>
+  <text x="60" y="298" font-family="-apple-system, sans-serif" font-size="11" fill="#141413">⏱ 2-3 hr survey</text>
+  <text x="60" y="313" font-family="-apple-system, sans-serif" font-size="11" fill="#141413">⏱ +2-4 hr ISM rerun</text>
+  <text x="60" y="335" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#15803D">if n≥4 + Wilcoxon p&lt;0.05 → ⭐4</text>
+  <text x="60" y="350" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#A16207">if n&lt;4 → 仍 ⭐3 strict subset</text>
+
+  <!-- right branch (Path B) -->
+  <line x1="380" y1="140" x2="580" y2="170" stroke="#141413" stroke-width="1.5"/>
+  <line x1="580" y1="170" x2="580" y2="200" stroke="#141413" stroke-width="1.5" marker-end="url(#arrow-blk)"/>
+
+  <rect x="430" y="200" width="280" height="155" rx="8" fill="#FEF7E6" stroke="#A16207" stroke-width="2"/>
+  <text x="570" y="225" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="700" fill="#A16207">Path B — 收 n=2 ⭐3 結論</text>
+  <text x="570" y="248" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#141413">接受 ⭐3 strict subset</text>
+  <text x="570" y="265" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#6B6B66" font-style="italic">qualifying = HCC1395 + HCC1937</text>
+  <line x1="440" y1="280" x2="700" y2="280" stroke="#D1D5DB" stroke-width="0.5"/>
+  <text x="440" y="298" font-family="-apple-system, sans-serif" font-size="11" fill="#141413">⏱ ~1 hr verdict synthesis</text>
+  <text x="440" y="313" font-family="-apple-system, sans-serif" font-size="11" fill="#141413">→ pivot phase_block_3d</text>
+  <text x="440" y="335" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#A16207">最終: ⭐3 strict subset</text>
+  <text x="440" y="350" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#6B6B66">production: per-sample re-fit</text>
+
+  <defs>
+    <marker id="arrow-blk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#141413"/>
+    </marker>
+  </defs>
+</svg>
+<figcaption>圖 4 — Cycle 3 卡點與兩條決策路徑。Path A 投入 ~5 hr 換 ⭐4 機會（取決於 panel 找到的 candidate 數量）；Path B 接受 ⭐3 strict subset 並 pivot 其他軌。</figcaption>
+</figure>
+
+<h3>Path A 與 Path B 風險比較</h3>
+
+<table>
+<thead><tr><th>維度</th><th>Path A (Step 2 panel survey)</th><th>Path B (收 n=2 ⭐3)</th></tr></thead>
+<tbody>
+  <tr><td>時間投入</td><td>~5 hr (survey 2-3 hr + ISM rerun 2-4 hr if found)</td><td>~1 hr (verdict synthesis)</td></tr>
+  <tr><td>最佳結果</td><td>⭐4 cross-sample validated</td><td>⭐3 strict subset</td></tr>
+  <tr><td>最差結果</td><td>n&lt;4 仍 ⭐3 (時間浪費)</td><td>⭐3 (與 Path A 最差相同)</td></tr>
+  <tr><td>主要 risk</td><td>COLO829 truth set 權限 pending；其他 candidate 可能 caller F1 都 ≥ 0.80</td><td>低 — 已知結論，不退 NEGATIVE</td></tr>
+  <tr><td>後續 ROI</td><td>HIGH if PASS — production rule + paper section</td><td>MED — qualifying subset case study</td></tr>
+  <tr><td>對 plan v2 四軌</td><td>methyl_filter_phase2 延長 ~5 hr</td><td>pivot phase_block_3d 5/23 init schedule 不受影響</td></tr>
+</tbody>
+</table>
+
+<!-- ─── 9. References ─── -->
+<section class="references" id="refs">
+<h2>引用文件</h2>
+
+<h3>Cycle 1 (5/18 ⭐3 strong + caveat)</h3>
+<ol>
+  <li><code>InterSubMod/docs/experiments/in_progress/2026/05/20260518_Phase2_Cycle1_Global_FP_Filter_01.md</code> — 主報告</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle1/cycle1_findings.md</code> — Coordinator synthesis</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle1/cycle1_track_a_filter.json</code> — Deployable filter config</li>
+</ol>
+
+<h3>Cycle 2 (5/19 cross-sample NEGATIVE + cross-binary PASS)</h3>
+<ol start="4">
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle2/cycle2_findings.md</code> — Coordinator synthesis</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle2/cycle2_step_b3_b4_findings.md</code> — H_C1_5 cross-sample 詳細</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle2/cycle2_step_c1_h_c1_6_sanity.md</code> — H_C1_6 cross-binary 詳細</li>
+</ol>
+
+<h3>Cycle 3 (5/19 Step 1 gate rule)</h3>
+<ol start="7">
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/00_PLAN.md</code> — Cycle 3 plan v0.1</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/cycle3_caller_f1_gate.json</code> — Production gate rule</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/cycle3_step1_findings.md</code> — Step 1 verdicts</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/scripts/apply_gated_filter.py</code></li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/data/cycle3_step1_gated_delta_f1.tsv</code></li>
+</ol>
+
+<h3>SoT</h3>
+<ol start="12">
+  <li><code>InterSubMod/docs/CURRENT_FOCUS.md</code> — 2026-05-19 section（最新 status）</li>
+  <li><code>InterSubMod/docs/experiments/INDEX.md</code> — Cycle 1/2 entries</li>
+  <li><code>InterSubMod/research/autoresearch/evidence_ledger.jsonl</code> — Cycle 2 ledger entry (line 46) <code>cycle_id: 20260519_phase2_cycle2_cross_sample_negative</code></li>
+  <li><code>InterSubMod/research/autoresearch/hypothesis_queue.json</code> — H016/H017/H018 entries</li>
+  <li><code>InterSubMod/state/cycles/20260519-0031-cycle3-caller-f1-headroom/state.json</code> — Cycle 3 P0_REGISTER</li>
+</ol>
+
+</section>
+
+<!-- ─── Provenance footer (scientific-rigor §8.4) ─── -->
+<section class="provenance" id="prov">
+<h3 style="margin-top:0">Provenance</h3>
+<dl>
+  <dt>Generated by</dt><dd>html-report-build skill (standalone mode, LLM-direct)</dd>
+  <dt>Generated at</dt><dd>2026-05-19T00:45:00+08:00</dd>
+  <dt>Source reports</dt><dd>cycle1_findings.md · cycle2_findings.md · cycle2_step_b3_b4_findings.md · cycle2_step_c1_h_c1_6_sanity.md · cycle3_step1_findings.md</dd>
+  <dt>Git commit</dt><dd><code>17c77ad</code> (branch <code>refactor/phase1-safety</code>)</dd>
+  <dt>Cycle IDs</dt><dd>20260518_phase2_cycle1_global_fp_filter · 20260519_phase2_cycle2_cross_sample_negative · 20260519-0031-cycle3-caller-f1-headroom</dd>
+  <dt>Hypothesis IDs</dt><dd>H_C1_1..6 (cycle 1+2) · H016/H017/H018 = H_C3_1..3 (cycle 3)</dd>
+  <dt>Scientific-rigor inheritance</dt><dd>§2 tier badges ✓ · §3 effect size ✓ · §4 mechanism SVG DAG ✓ · §7 pre-reg table ✓ · §8.4 provenance ✓</dd>
+  <dt>Audit</dt><dd>6-taboo: 3 linear-gradient (verdict-banner positive/neutral/caution variants — single banner use); 0 backdrop-filter; 0 text-shadow; 0 0 0 glow</dd>
+  <dt>Companion source</dt><dd>This HTML is a delivery artifact; <code>.md</code> source reports are SoT for INDEX/ledger</dd>
+</dl>
+</section>
+
+</main>
+</div>
+
+</body>
+</html>

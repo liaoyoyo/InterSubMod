@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 2 Cycle 1→3 + Step 1.5 Ablation — 量化檢驗 PI Review (2026-05-20)</title>
+<style>
+:root {
+  --c-accent: #D97757; --c-accent-deep: #B85A3F;
+  --c-text: #141413; --c-text-soft: #6B6B66;
+  --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+  --c-code-bg: #F4EFE6;
+  --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+  --c-info: #1E3A8A;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+  --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+             "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+  --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+  --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+  --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+  --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--c-bg); color: var(--c-text);
+       font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.65; }
+
+.layout { max-width: 1320px; margin: 0 auto; display: grid;
+          grid-template-columns: 260px 1fr; gap: var(--sp-5);
+          padding: var(--sp-5) var(--sp-4); }
+aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+            background: var(--c-surface); border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+            box-shadow: var(--shadow-sm);
+            max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+              color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+              border-left: 3px solid transparent; }
+aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                      font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+aside.toc a.core { font-weight: 600; }
+aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px;
+                          font-size: 0.85em; }
+
+main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+              border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+              padding: var(--sp-6); min-width: 0; }
+.report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                  margin-bottom: var(--sp-5); }
+.report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                            letter-spacing: 1px; color: var(--c-accent-deep);
+                            font-weight: 700; margin-bottom: var(--sp-2); }
+.report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+.report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                        gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+.report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+.report-header .meta dd { margin: 0; }
+.report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                             border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                             font-size: 0.92em; }
+.verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                   border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); }
+.verdict-banner.caution  { background: linear-gradient(90deg, #A16207, #CA8A04); }
+
+h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+      padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+      scroll-margin-top: var(--sp-4); }
+h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+            font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+h4 { font-size: var(--fs-lg); margin: var(--sp-4) 0 var(--sp-2); color: var(--c-text-soft); }
+
+p, ul, ol { margin: var(--sp-3) 0; }
+ul, ol { padding-left: var(--sp-5); }
+a { color: var(--c-accent); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--c-accent-deep); }
+blockquote { border-left: 3px solid var(--c-accent); padding: var(--sp-3) var(--sp-4);
+              color: var(--c-text-soft); margin: var(--sp-3) 0;
+              background: var(--c-code-bg);
+              border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+        font-family: var(--ff-mono); font-size: 0.92em; }
+
+table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; }
+th { background: var(--c-code-bg); font-weight: 600; }
+td.num, .num { text-align: right; font-family: var(--ff-mono); }
+tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+tr.row-safe td { background: #DCFCE7; color: #166534; }
+tr.row-warn td { background: #FEF3C7; }
+tr.row-skip td { background: #F3F4F6; color: #4B5563; }
+tr.row-emphasis td { background: #DBEAFE; color: #1E3A8A; font-weight: 600; }
+
+/* Section card */
+.section-card { border: 1.5px solid var(--c-border); border-radius: var(--radius-lg);
+                 margin: var(--sp-4) 0; overflow: hidden; background: var(--c-surface); }
+.section-card.core { border-color: var(--c-warning); box-shadow: var(--shadow-sm); }
+.section-card.fail { border-color: var(--c-critical); }
+.section-card.pass { border-color: var(--c-success); }
+.section-card > summary { cursor: pointer; padding: var(--sp-3) var(--sp-4);
+                           display: flex; align-items: center; gap: var(--sp-3);
+                           background: var(--c-code-bg); list-style: none; }
+.section-card > summary::-webkit-details-marker { display: none; }
+.section-card > summary::before { content: "▸"; transition: transform 0.2s;
+                                   color: var(--c-text-soft); font-size: var(--fs-sm); }
+.section-card[open] > summary::before { transform: rotate(90deg); }
+.section-card.fail > summary { background: #FEF2F0; }
+.section-card.pass > summary { background: #F0FDF4; }
+.section-card.core > summary { background: #FEF7E6; }
+.section-card .card-id { font-family: var(--ff-mono); font-weight: 700; font-size: var(--fs-md);
+                          color: var(--c-warning); background: var(--c-surface);
+                          padding: 3px 10px; border-radius: 12px; border: 1.5px solid var(--c-warning); }
+.section-card.fail .card-id { color: var(--c-critical); border-color: var(--c-critical); }
+.section-card.pass .card-id { color: var(--c-success); border-color: var(--c-success); }
+.section-card .card-title { flex: 1; font-weight: 600; font-size: var(--fs-md); }
+.section-card .card-body { padding: var(--sp-4); }
+
+/* Tier badge */
+.tier-badge { display: inline-block; padding: 2px 8px; border-radius: 10px;
+              font-size: var(--fs-xs); font-weight: 700; font-family: var(--ff-mono);
+              margin-left: var(--sp-2); }
+.tier-l4 { background: #166534; color: white; }
+.tier-l3 { background: #A16207; color: white; }
+.tier-l2 { background: #C2410C; color: white; }
+.tier-pending { background: #E5E7EB; color: #4B5563; }
+
+/* Callouts */
+.callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                     padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                     border-radius: var(--radius-md); color: #7F1D1D; }
+.callout-warning { background: #FEF7E6; border-left: 4px solid var(--c-warning);
+                    padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                    border-radius: var(--radius-md); color: #78350F; }
+.callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                    padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                    border-radius: var(--radius-md); color: #166534; }
+.callout-info { background: #EFF6FF; border-left: 4px solid var(--c-info);
+                padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                border-radius: var(--radius-md); color: #1E3A8A; }
+
+/* Stat grid */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+              gap: var(--sp-3); margin: var(--sp-4) 0; }
+.stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+             border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+.stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1;
+                    font-family: var(--ff-mono); }
+.stat-box .number.bug { color: var(--c-critical); }
+.stat-box .number.success { color: var(--c-success); }
+.stat-box .number.warning { color: var(--c-warning); }
+.stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+
+/* Figure wrapper */
+.figure { margin: var(--sp-5) 0; text-align: center;
+           background: var(--c-bg); border-radius: var(--radius-md);
+           padding: var(--sp-3); border: 1px solid var(--c-border); }
+.figure img { max-width: 100%; height: auto; display: block; margin: 0 auto;
+               border-radius: var(--radius-sm); background: white; }
+.figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                      margin-top: var(--sp-2); font-style: italic; text-align: left;
+                      padding: var(--sp-2) var(--sp-3); }
+
+/* Provenance footer */
+.provenance { background: var(--c-bg); border-radius: var(--radius-md);
+               padding: var(--sp-4); margin-top: var(--sp-6); font-size: var(--fs-sm);
+               border: 1px dashed var(--c-border); }
+.provenance dt { color: var(--c-text-soft); font-weight: 600; font-family: var(--ff-mono);
+                  font-size: var(--fs-xs); }
+.provenance dd { margin: 0 0 var(--sp-2) 0; font-family: var(--ff-mono); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  aside.toc { position: static; max-height: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<aside class="toc" aria-label="Table of contents">
+<h3>章節導航</h3>
+<ol>
+  <li><a href="#step0" class="core">第 0 步 — TL;DR + 兩題核心</a></li>
+  <li><a href="#step1" class="core">第 1 步 — 整體 Timeline</a></li>
+  <li><a href="#step2">第 2 步 — Ablation 設計</a></li>
+  <li><a href="#step3" class="core">第 3 步 — Q1 ISM 有貢獻嗎</a></li>
+  <li><a href="#step4" class="core">第 4 步 — Q2 caller_af 是主因嗎</a></li>
+  <li><a href="#step5">第 5 步 — Coef 為何 +0.75 卻 vestigial</a></li>
+  <li><a href="#step6">第 6 步 — Mechanism Quadrant</a></li>
+  <li><a href="#step7">第 7 步 — Cross-Session 確認</a></li>
+  <li><a href="#step8" class="core">第 8 步 — Reframe Action 清單</a></li>
+  <li><a href="#step9">第 9 步 — 待補強 + 下一步</a></li>
+  <li><a href="#refs">引用文件</a></li>
+  <li><a href="#prov">Provenance</a></li>
+</ol>
+</aside>
+
+<main class="report">
+
+<header class="report-header">
+<div class="pretitle">Phase 2 · cycle 1→3 + Step 1.5 ablation · 量化檢驗 PI Review</div>
+<h1>Methyl-Augmented FP Filter — ISM 真的有貢獻嗎？(2026-05-20 review)</h1>
+<dl class="meta">
+  <dt>Build date</dt>      <dd>2026-05-20</dd>
+  <dt>Audience</dt>        <dd>PI · 自我檢核 · 量化驗證</dd>
+  <dt>Parent project</dt>  <dd><code>InterSubMod/research/methyl_augmented_filter_phase2/</code></dd>
+  <dt>Status</dt>          <dd>SoT 5 處同步完成；ISM vestigial 結論 confirmed；待 PI 確認 reframe action</dd>
+  <dt>Data source</dt>     <dd>cycle 2 master TSV (HCC1395+4 sample) + cycle 3 ablation 40-combination TSV</dd>
+  <dt>Commit</dt>          <dd><code>17c77ad</code> (refactor/phase1-safety)</dd>
+</dl>
+<div class="verdict-banner caution">
+  ⚠ ISM methylation 在 LR 框架下是 vestigial covariate；filter 真實主導為 caller_af + LOH + Coverage + NG；Cycle 1 ΔF1 +0.02236 仍成立但歸功 4-feature multi-axis 非 methylation
+</div>
+</header>
+
+<!-- ─── Step 0 ─── -->
+<h2 id="step0"><span class="h-num">0.</span>TL;DR + 兩題核心 (5 秒看完)</h2>
+
+<p>本次 review 想用 <strong>量化證據</strong> 答兩個問題：</p>
+
+<ol>
+  <li><strong>Q1 ISM 對 F1 有真實貢獻嗎？</strong>（用戶 5/19 ask）</li>
+  <li><strong>Q2 caller_af 是 HCC1954 transfer 災難 -0.377 的主因嗎？</strong>（mechanism 補強）</li>
+</ol>
+
+<p>跑 ablation: 5 樣本 × 4 variants (full / no-caller-af / no-methyl / no-both) × 2 modes (transfer / refit) = 40 combinations，純 cycle 2 既有資料 reuse（~25 sec）。</p>
+
+<div class="stat-grid">
+  <div class="stat-box"><div class="number bug">+0.00065</div><div class="label">Q1 ISM 對 HCC1395 ΔF1 incremental (3% of total)</div></div>
+  <div class="stat-box"><div class="number bug">4/5</div><div class="label">樣本 no-methyl ΔF1 ≥ full (ISM 沒幫助甚至略傷)</div></div>
+  <div class="stat-box"><div class="number success">+0.25114</div><div class="label">Q2 caller_af shrink 修補 HCC1954 災難 (67%)</div></div>
+  <div class="stat-box"><div class="number warning">~33%</div><div class="label">Q2 殘餘 disaster 未由 caller_af 解釋</div></div>
+  <div class="stat-box"><div class="number bug">H_M1a</div><div class="label">FAIL — ISM vestigial confirmed</div></div>
+  <div class="stat-box"><div class="number warning">H_A1</div><div class="label">MARGINAL — caller_af 主導但非唯一</div></div>
+</div>
+
+<!-- ─── Step 1 ─── -->
+<h2 id="step1"><span class="h-num">1.</span>整體 Timeline — 4 天 5 milestones</h2>
+
+<div class="figure">
+<img src="figures/review/05_phase2_timeline.png" alt="Phase 2 timeline">
+<figcaption><strong>圖 1</strong> — Phase 2 ΔF1 evolution timeline。從 v1.0 marginal (+0.00242) → cycle 1 internal valid (+0.02236) → cycle 2 cross-sample fail (-0.094 transfer mean) → cycle 3 gate rule (+0.01499 qualifying mean) → ablation reframe (no-methyl 5-sample mean +0.00630 略勝 full +0.00619)。</figcaption>
+</div>
+
+<table>
+<thead><tr><th>Milestone</th><th>Date</th><th>Sample(s)</th><th>ΔF1</th><th>Verdict</th></tr></thead>
+<tbody>
+  <tr><td>v1.0 cell-gated pilot</td><td>5/18 上</td><td>HCC1395</td><td class="num">+0.00242</td><td>marginal (cell-gate 過嚴)</td></tr>
+  <tr class="row-safe"><td>Cycle 1 global LR</td><td>5/18 晚</td><td>HCC1395</td><td class="num"><strong>+0.02236</strong></td><td>⭐3 strong (2.24× Cohen, 9.24× v1.0)</td></tr>
+  <tr class="row-bug"><td>Cycle 2 transfer 4 new</td><td>5/19 凌</td><td>4 new mean</td><td class="num">-0.094</td><td>NEGATIVE — caller_af overfit HCC1395</td></tr>
+  <tr class="row-warn"><td>Cycle 2 re-fit 4 new</td><td>5/19 凌</td><td>4 new mean</td><td class="num">+0.006</td><td>MIXED — 4/5 caller-F1-ceiling</td></tr>
+  <tr class="row-safe"><td>Cycle 3 gate rule</td><td>5/19 凌</td><td>2 qualifying mean</td><td class="num">+0.01499</td><td>PASS H_C3_1 (但 74.6% by HCC1395)</td></tr>
+  <tr class="row-emphasis"><td>Cycle 3 ablation no-methyl 5-sample</td><td>5/20</td><td>5 mean</td><td class="num">+0.00630</td><td><strong>ISM vestigial</strong> (no-methyl 略勝 full)</td></tr>
+</tbody>
+</table>
+
+<!-- ─── Step 2 ─── -->
+<h2 id="step2"><span class="h-num">2.</span>Ablation 設計 — 4 variants × 5 samples × 2 modes = 40 combinations</h2>
+
+<table>
+<thead><tr><th>Variant</th><th>Features 數</th><th>Drop</th><th>用途</th></tr></thead>
+<tbody>
+  <tr><td>full</td><td>10</td><td>(none, baseline)</td><td>對照組</td></tr>
+  <tr><td><strong>no-caller-af</strong></td><td>9</td><td>caller_af</td><td>檢驗 caller_af 主導 (H_A1)</td></tr>
+  <tr><td><strong>no-methyl</strong></td><td>5</td><td>5 ISM methyl features</td><td>檢驗 ISM 貢獻 (H_M1a)</td></tr>
+  <tr><td>no-both</td><td>4</td><td>caller_af + 5 methyl</td><td>joint baseline (LOH+Cov+NG+chr8)</td></tr>
+</tbody>
+</table>
+
+<p><strong>兩種 mode 互補</strong>:</p>
+<ul>
+  <li><strong>refit mode</strong>: 對每個 (sample, variant) 重新 train LR (5-fold OOF, swept τ) — 答「該 feature subset 在這個樣本上能達多少 ΔF1」</li>
+  <li><strong>transfer mode</strong>: 用 cycle 1 stored coefs，把 drop 的 feature coef 強制 → 0，τ=0.39 fixed — 答「如果 cycle 1 filter 忽略這 feature 會怎樣」</li>
+</ul>
+
+<!-- ─── Step 3 ─── -->
+<h2 id="step3"><span class="h-num">3.</span>Q1 — ISM 對 F1 有真實貢獻嗎？(H_M1a)</h2>
+
+<div class="figure">
+<img src="figures/review/01_ablation_heatmap.png" alt="Ablation heatmap">
+<figcaption><strong>圖 2</strong> — Refit OOF ΔF1 across 4 variants × 5 samples。比較 <code>full</code> 與 <code>no-methyl</code> 兩列數字非常接近（差距均 &lt; 0.001），證明 ISM 5 個 methylation features 在 refit 框架下無 incremental contribution。</figcaption>
+</div>
+
+<div class="figure">
+<img src="figures/review/02_vestigial_delta.png" alt="ISM incremental delta">
+<figcaption><strong>圖 3</strong> — 把 <code>full</code> 減去 <code>no-methyl</code>，每樣本獨立看 ISM 的「真實貢獻」。HCC1395 只 +0.00065（低於 Cohen +0.003 dashed line）；HCC1937/HCC1954 反而為負（no-methyl 略勝）；H1437/H2009 全 0。</figcaption>
+</div>
+
+<h3>數據表格：H_M1a 量化驗收</h3>
+
+<table>
+<thead><tr><th>Sample</th><th>full ΔF1</th><th>no-methyl ΔF1</th><th>Δ (full − no-methyl)</th><th>解讀</th></tr></thead>
+<tbody>
+  <tr class="row-warn"><td>HCC1395 (trained)</td><td class="num">+0.02236</td><td class="num">+0.02171</td><td class="num"><strong>+0.00065</strong></td><td>methylation 只貢獻 3% of total uplift</td></tr>
+  <tr class="row-bug"><td>HCC1937</td><td class="num">+0.00761</td><td class="num">+0.00798</td><td class="num">-0.00037</td><td>no-methyl 略勝</td></tr>
+  <tr class="row-bug"><td>HCC1954</td><td class="num">+0.00095</td><td class="num">+0.00179</td><td class="num">-0.00084</td><td>no-methyl 略勝</td></tr>
+  <tr class="row-skip"><td>H1437</td><td class="num">~0</td><td class="num">~0</td><td class="num">~0</td><td>filter 無 headroom</td></tr>
+  <tr class="row-skip"><td>H2009</td><td class="num">~0</td><td class="num">~0</td><td class="num">~0</td><td>filter 無 headroom</td></tr>
+  <tr class="row-emphasis"><td><strong>5-sample mean</strong></td><td class="num">+0.00619</td><td class="num"><strong>+0.00630</strong></td><td class="num"><strong>-0.00011</strong></td><td><strong>no-methyl 略勝（ISM vestigial 跨樣本一致）</strong></td></tr>
+</tbody>
+</table>
+
+<details class="section-card fail" open>
+<summary>
+  <span class="card-id">Q1</span>
+  <span class="card-title">H_M1a FAIL — ISM 在 LR 框架是 vestigial covariate <span class="tier-badge tier-l2">⭐⭐⭐⭐ L2</span></span>
+</summary>
+<div class="card-body">
+
+<p>Pre-reg 閾值：drop methylation 後 ΔF1 下降 ≥ +0.003 = PASS / &lt; +0.001 = FAIL。實際只 +0.00065 → <strong>FAIL</strong>。</p>
+
+<p><strong>三層證據</strong>:</p>
+<ol>
+  <li>HCC1395 incremental = 3% of total uplift，遠低於 Cohen 小 effect threshold</li>
+  <li>4/5 樣本 no-methyl ≥ full（跨樣本一致 pattern）</li>
+  <li>5-sample mean no-methyl 反而高於 full（雖差距小但方向確定）</li>
+</ol>
+
+<p><strong>含義</strong>：HPFineF coef +0.75（cycle 1 LR rank 5）是 caller_af L2 ridge-split 而非 incremental signal。Drop 5 個 methylation 後，caller_af + LOH + Coverage + NG 重新分配權重 capture 同訊息。</p>
+
+</div>
+</details>
+
+<!-- ─── Step 4 ─── -->
+<h2 id="step4"><span class="h-num">4.</span>Q2 — caller_af 是 HCC1954 transfer 災難主因嗎？(H_A1)</h2>
+
+<div class="figure">
+<img src="figures/review/03_transfer_mitigation.png" alt="Transfer disaster mitigation">
+<figcaption><strong>圖 4</strong> — Transfer mode coef shrinkage 5 樣本對比。Full (深紅) 在 HCC1954 上 -0.377 災難；no-caller-af (金色) 把它縮到 -0.126，improvement 0.25 — caller_af 解釋 67% disaster。methylation shrinkage (橘色) 對 HCC1954 災難幾乎無修補。</figcaption>
+</div>
+
+<h3>數據表格：caller_af 修補各樣本 transfer disaster</h3>
+
+<table>
+<thead><tr><th>Sample</th><th>full transfer ΔF1</th><th>no-caller-af transfer ΔF1</th><th>Improvement</th><th>% of disaster mitigated</th></tr></thead>
+<tbody>
+  <tr class="row-bug"><td><strong>HCC1954</strong></td><td class="num">-0.37744</td><td class="num">-0.12629</td><td class="num"><strong>+0.25114</strong></td><td class="num"><strong>66.6%</strong></td></tr>
+  <tr class="row-warn"><td>HCC1937</td><td class="num">-0.07068</td><td class="num">-0.00903</td><td class="num">+0.06165</td><td class="num">87.2%</td></tr>
+  <tr class="row-warn"><td>H1437</td><td class="num">-0.03597</td><td class="num">-0.00354</td><td class="num">+0.03243</td><td class="num">90.2%</td></tr>
+  <tr class="row-warn"><td>H2009</td><td class="num">-0.00450</td><td class="num">-0.00138</td><td class="num">+0.00312</td><td class="num">69.3%</td></tr>
+  <tr><td><strong>平均</strong></td><td class="num">-0.122</td><td class="num">-0.035</td><td class="num">+0.087</td><td class="num"><strong>~78%</strong></td></tr>
+</tbody>
+</table>
+
+<table>
+<thead><tr><th>Sample</th><th>full transfer ΔF1</th><th>no-methyl transfer ΔF1</th><th>Improvement</th><th>% mitigated</th></tr></thead>
+<tbody>
+  <tr class="row-skip"><td>HCC1954</td><td class="num">-0.37744</td><td class="num">-0.36705</td><td class="num">+0.01039</td><td class="num">2.8%</td></tr>
+  <tr class="row-skip"><td>HCC1937</td><td class="num">-0.07068</td><td class="num">-0.06946</td><td class="num">+0.00122</td><td class="num">1.7%</td></tr>
+  <tr class="row-skip"><td>H1437</td><td class="num">-0.03597</td><td class="num">-0.03508</td><td class="num">+0.00089</td><td class="num">2.5%</td></tr>
+  <tr class="row-skip"><td>H2009</td><td class="num">-0.00450</td><td class="num">-0.00360</td><td class="num">+0.00090</td><td class="num">20.0%</td></tr>
+  <tr><td><strong>平均</strong></td><td class="num">-0.122</td><td class="num">-0.119</td><td class="num">+0.003</td><td class="num"><strong>~7%</strong></td></tr>
+</tbody>
+</table>
+
+<details class="section-card core" open>
+<summary>
+  <span class="card-id">Q2</span>
+  <span class="card-title">H_A1 MARGINAL — caller_af 解釋 67% HCC1954 災難 (threshold 70%) <span class="tier-badge tier-l3">⭐⭐⭐ L3</span></span>
+</summary>
+<div class="card-body">
+
+<p>Pre-reg 閾值：caller_af shrink 後 HCC1954 改善 &gt; +0.30 = PASS / ≤ +0.10 = FAIL。實際 +0.25114 → <strong>MARGINAL</strong>（落在 PASS 邊緣）。</p>
+
+<p><strong>跨樣本一致 pattern</strong>: caller_af shrinkage 平均修補 ~78% transfer disaster（HCC1954 67% / HCC1937 87% / H1437 90% / H2009 69%）— 顯著高於 methylation shrinkage 修補 ~7%。</p>
+
+<p><strong>殘餘 33% 災難來源（待 A2 KS test 補強）</strong>:</p>
+<ul>
+  <li>LOH_inner_flag distribution shift</li>
+  <li>Coverage_Multiple_imp scaler shift</li>
+  <li>NG distributional shift</li>
+  <li>Sample-specific FP density shift (HCC1954 3.4% vs HCC1395 14%)</li>
+</ul>
+
+</div>
+</details>
+
+<!-- ─── Step 5 ─── -->
+<h2 id="step5"><span class="h-num">5.</span>為什麼 HPFineF coef +0.75 卻是 vestigial？</h2>
+
+<div class="figure">
+<img src="figures/review/04_refit_coef.png" alt="Refit LR coefficients">
+<figcaption><strong>圖 5</strong> — Refit LR 10-feature coef 跨 5 樣本（按 |mean| 排序）。caller_af 永遠 top（HCC1395 +3.44 最高）；LOH_inner_flag / Coverage_Multiple_imp / NG 中段；methylation features 全在底部（rank 5-9，coef ≤ +0.75）；chr8_flag 只在 HCC1395 +0.78（chr8 amplicon 特性）。</figcaption>
+</div>
+
+<h3>L2 ridge-split 機制（淺顯解釋）</h3>
+
+<blockquote>
+L2 regularization 在多個相關特徵之間「分攤」coefficient。如果 HPFineF 與 caller_af 有部分共變異（HPFineF ≈ f(caller_af) + ε），L2 會把 caller_af 的權重「拆」一部分給 HPFineF，讓兩者 coef 都不會太大。<br><br>
+這時 HPFineF 看起來「有 coef +0.75」但其實是 caller_af 的 echo — 把 5 個 methylation features 全 drop 後，caller_af + 其他 features 立刻重新分配權重 capture 同訊息（drop +0.00065 incremental 證明）。<br><br>
+這正是 cycle 1 step 5c 主報告早就觀察到的「methylation 訊號實為 caller_af proxy」現象。
+</blockquote>
+
+<p><strong>類比</strong>: 像是水池中接 5 條水管，其中 3 條共用同一個水源。看每條水管「流量」會以為都在貢獻，但拆掉那 3 條後，剩下 2 條水管自動加大流量，總水量幾乎不變。</p>
+
+<!-- ─── Step 6 ─── -->
+<h2 id="step6"><span class="h-num">6.</span>Mechanism Quadrant — 為什麼只 HCC1395 + HCC1937 work？</h2>
+
+<div class="figure">
+<img src="figures/review/06_mechanism_quadrant.png" alt="Caller F1 × FP density quadrant">
+<figcaption><strong>圖 6</strong> — 5 樣本投影到 (caller F1, FP density %) 平面。綠色框 = qualifying quadrant (caller F1 &lt; 0.80 + FP density &gt; 10%)；綠色 dot = HCC1395 (+0.02236) + HCC1937 (+0.00761) — filter 在這 quadrant work；橘紅 X = HCC1954 (transfer 災難 -0.377)；灰色 = H1437/H2009 (caller-F1-ceiling, filter 無 headroom)。</figcaption>
+</div>
+
+<p>5 樣本完全按「caller F1 與 FP density 同向」分布：高 F1 必伴隨低 FP density（這是因為 F1 = 2·TP / (2·TP+FP+FN)；F1 高 → FP/TP 比小）。所以 caller-F1 + FP-density 兩條件其實是 highly correlated，AND gate 冗餘但保守正確。</p>
+
+<!-- ─── Step 7 ─── -->
+<h2 id="step7"><span class="h-num">7.</span>跨 Session 獨立確認 — 強化信度</h2>
+
+<div class="callout-info">
+<p>5/19 並行 session 在 V6 vs baseline 報告 §13 Day 3 5-Goal validation 已獨立測過 <strong>H_ABL_1</strong>: methylation contribution to LR F1 = <strong>+0.0005 ~ +0.0007</strong>（HCC1395 V6 vs baseline 對比）。</p>
+<p>本 cycle 3 Step 1.5 在 5/20 獨立 ablation 跑出 HCC1395 incremental = <strong>+0.00065</strong>。</p>
+<p><strong>兩條獨立路徑收斂同方向同 magnitude</strong>（差距 &lt; 5%）→ ISM vestigial 結論非單一 session artifact。</p>
+</div>
+
+<table>
+<thead><tr><th>Source</th><th>Sample</th><th>Method</th><th>Methyl contribution</th></tr></thead>
+<tbody>
+  <tr><td>5/19 V6 vs baseline §13 Day 3</td><td>HCC1395</td><td>full LR vs no-meth LR (V6 / baseline)</td><td class="num">+0.0005 ~ +0.0007</td></tr>
+  <tr><td>5/20 cycle 3 Step 1.5 ablation</td><td>HCC1395</td><td>full refit vs no-methyl refit</td><td class="num">+0.00065</td></tr>
+  <tr class="row-emphasis"><td><strong>Cross-session consistency</strong></td><td colspan="2">Independent paths, same magnitude</td><td class="num"><strong>~0.0006</strong></td></tr>
+</tbody>
+</table>
+
+<!-- ─── Step 8 ─── -->
+<h2 id="step8"><span class="h-num">8.</span>Cycle 3 Reframe Action — 已落地 5/5 SoT 更新</h2>
+
+<table>
+<thead><tr><th>Artifact</th><th>變動內容</th><th>狀態</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td><code>InterSubMod/research/autoresearch/evidence_ledger.jsonl</code></td><td>append entry <code>20260520_cycle3_step1_5_ism_ablation_vestigial</code> (line 48)</td><td>✅</td></tr>
+  <tr class="row-safe"><td><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/cycle3_caller_f1_gate.json</code></td><td><code>features_production</code> 改 4-feature；scope_caveats 加 ISM vestigial</td><td>✅</td></tr>
+  <tr class="row-safe"><td><code>memory/project_phase2_cycle1_global_fp_filter.md</code></td><td>description + body 加 H_M1a FAIL caveat</td><td>✅</td></tr>
+  <tr class="row-safe"><td><code>InterSubMod/docs/experiments/INDEX.md</code></td><td>new entry "Phase 2 Cycle 3 Step 1.5"</td><td>✅</td></tr>
+  <tr class="row-safe"><td><code>InterSubMod/docs/CURRENT_FOCUS.md</code></td><td>2026-05-20 section prepended</td><td>✅</td></tr>
+</tbody>
+</table>
+
+<h3>Production filter 規格（更新後）</h3>
+
+<table>
+<thead><tr><th>項目</th><th>Before</th><th>After (5/20)</th></tr></thead>
+<tbody>
+  <tr><td>Filter 命名</td><td>methyl-augmented multi-axis FP filter</td><td><strong>caller-F1-headroom-gated 4-feature filter</strong></td></tr>
+  <tr><td>Features</td><td>10 (含 5 ISM methyl)</td><td>4 (caller_af + LOH_inner_flag + Coverage_Multiple_imp + NG)</td></tr>
+  <tr><td>Paper §3 claim</td><td>"Methylation-augmented filter +0.02236"</td><td>"4-feature multi-axis filter +0.02236; ISM as covariate adds no incremental F1 (n=5 ablation)"</td></tr>
+  <tr><td>ISM characterization</td><td>filter design + characterization</td><td><strong>characterization only</strong> (v0.3 cycle ⭐3 不變)</td></tr>
+</tbody>
+</table>
+
+<!-- ─── Step 9 ─── -->
+<h2 id="step9"><span class="h-num">9.</span>待補強 + 下一步</h2>
+
+<h3>大規模 ablation 降級表（plan v2.1）</h3>
+
+<table>
+<thead><tr><th>Stage</th><th>必要性</th><th>理由</th></tr></thead>
+<tbody>
+  <tr class="row-skip"><td>M2 ISM partial F-test (LRT)</td><td>LOW</td><td>H_M1a FAIL effect size dwarf 任何 p-value</td></tr>
+  <tr class="row-warn"><td>M3 Per-feature SHAP</td><td>MEDIUM</td><td>ISM characterization paper §3 supplement</td></tr>
+  <tr class="row-warn"><td>M0 Residualize HPFineF AUC</td><td>MEDIUM</td><td>confounder check, ISM cycle supplement</td></tr>
+  <tr class="row-safe"><td><strong>A2 caller_af KS test</strong></td><td><strong>HIGH</strong></td><td>量化 distributional shift 解釋 H_A1 殘餘 33%</td></tr>
+  <tr class="row-skip"><td>LOFO per-methyl</td><td>LOW</td><td>對結論無影響</td></tr>
+</tbody>
+</table>
+
+<h3>下一步推薦路徑</h3>
+
+<table>
+<thead><tr><th>Path</th><th>時間</th><th>推薦度</th><th>輸出</th></tr></thead>
+<tbody>
+  <tr class="row-warn"><td><strong>B+ A2 KS test</strong></td><td>~30 min</td><td>🟡 高 ROI</td><td>5 樣本 caller_af 分布 + KS distance + histogram overlay</td></tr>
+  <tr class="row-warn"><td><strong>C Cycle 3 Step 2 panel survey</strong></td><td>~5 hr</td><td>🟡 中</td><td>找 ≥2 個新 low-F1 sample 驗 4-feature filter cross-sample</td></tr>
+  <tr class="row-skip"><td>D PI preview HTML 更新</td><td>~1 hr</td><td>🟢 低</td><td>等 C 完成後做完整 PI 終版</td></tr>
+  <tr class="row-skip"><td>E Pivot 其他軌 (phase_block_3d / thread_d)</td><td>—</td><td>🟢</td><td>plan v2 5/22+ schedule，不與 methyl 軌衝突</td></tr>
+</tbody>
+</table>
+
+<!-- ─── References ─── -->
+<section class="references" id="refs">
+<h2>引用文件</h2>
+<ol>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/cycle3_step1_5_min_ablation_findings.md</code> — Min ablation 主報告</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/scripts/run_ablation_variants.py</code> — 40 combinations runner</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/scripts/generate_review_figures.py</code> — 本 review 6 圖生成腳本</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/data/cycle3_step1_5_min_ablation.tsv</code> — 40-combination data</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/cycle3_caller_f1_gate.json</code> — Production gate config (5/20 reframe)</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle2/data/cycle2_cross_sample_delta_f1.tsv</code> — Cross-sample baseline</li>
+  <li><code>InterSubMod/research/autoresearch/evidence_ledger.jsonl</code> line 48 — Cycle 3 Step 1.5 ablation ledger</li>
+  <li><code>InterSubMod/docs/CURRENT_FOCUS.md</code> 2026-05-20 section</li>
+  <li><code>InterSubMod/docs/experiments/INDEX.md</code> Phase 2 Cycle 3 Step 1.5 entry</li>
+  <li><code>bip7_disk/liaoyoyo2001/.claude/plans/v6-optimized-wadler.md</code> §Cycle 3 Step 1.5 v2.1 patch (plan with 4 pre-reg H)</li>
+</ol>
+</section>
+
+<!-- ─── Provenance ─── -->
+<section class="provenance" id="prov">
+<h3 style="margin-top:0">Provenance</h3>
+<dl>
+  <dt>Generated by</dt><dd>html-report-build skill (standalone mode, LLM-direct) + matplotlib Python figures</dd>
+  <dt>Generated at</dt><dd>2026-05-20T01:30:00+08:00</dd>
+  <dt>Figures (real data)</dt><dd>6 PNGs from cycle 2 + cycle 3 + ablation TSVs via matplotlib, ~520 KB total</dd>
+  <dt>Source data</dt><dd>cycle2_cross_sample_delta_f1.tsv (15 rows) + cycle3_step1_5_min_ablation.tsv (40 rows)</dd>
+  <dt>Git commit</dt><dd><code>17c77ad</code> (refactor/phase1-safety)</dd>
+  <dt>Cycle IDs</dt><dd>20260518_phase2_cycle1_global_fp_filter · 20260519_phase2_cycle2_cross_sample_negative · 20260519-0031-cycle3-caller-f1-headroom · 20260520_cycle3_step1_5_ism_ablation_vestigial</dd>
+  <dt>Pre-registered hypotheses</dt><dd>H_C1_1..6 · H_C3_1..3 · H_A1 · H_M1a · H_M2 (pending) · H_M0 (pending)</dd>
+  <dt>Scientific-rigor inheritance</dt><dd>§2 tier badges · §3 effect size + threshold · §7 pre-reg prediction + outcome · §8.4 provenance · §9.2 pre-reg prediction 命中防 HARKing</dd>
+  <dt>Cross-session validation</dt><dd>5/19 V6 vs baseline §13 H_ABL_1 ≈ 5/20 cycle 3 H_M1a (both ~+0.0006 incremental)</dd>
+</dl>
+</section>
+
+</main>
+</div>
+
+</body>
+</html>

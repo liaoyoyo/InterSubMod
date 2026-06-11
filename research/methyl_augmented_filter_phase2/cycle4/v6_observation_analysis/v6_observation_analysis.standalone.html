@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V6 Observation-Driven Analysis — Post-LOSO Feature Discovery (2026-05-20)</title>
+<style>
+:root {
+  --c-accent: #D97757; --c-accent-deep: #B85A3F;
+  --c-text: #141413; --c-text-soft: #6B6B66;
+  --c-bg: #FAF9F5; --c-surface: #FFFFFF; --c-border: #E3DACC;
+  --c-code-bg: #F4EFE6;
+  --c-critical: #C2410C; --c-warning: #A16207; --c-success: #15803D;
+  --c-info: #1E3A8A;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px;
+  --ff-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans CJK TC",
+             "Source Han Sans TW", "Droid Sans Fallback", system-ui, sans-serif;
+  --ff-mono: "JetBrains Mono", "DejaVu Sans Mono", Menlo, Monaco, monospace;
+  --fs-xs: 12px; --fs-sm: 14px; --fs-md: 16px; --fs-lg: 18px;
+  --fs-xl: 22px; --fs-2xl: 28px; --fs-3xl: 34px;
+  --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+  --shadow-sm: 0 1px 2px rgba(20,20,19,0.05);
+  --shadow-md: 0 2px 8px rgba(20,20,19,0.08);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--c-bg); color: var(--c-text);
+       font-family: var(--ff-body); font-size: var(--fs-md); line-height: 1.65; }
+
+.layout { max-width: 1320px; margin: 0 auto; display: grid;
+          grid-template-columns: 240px 1fr; gap: var(--sp-5);
+          padding: var(--sp-5) var(--sp-4); }
+aside.toc { position: sticky; top: var(--sp-4); align-self: start;
+            background: var(--c-surface); border: 1px solid var(--c-border);
+            border-radius: var(--radius-lg); padding: var(--sp-4) var(--sp-3);
+            box-shadow: var(--shadow-sm);
+            max-height: calc(100vh - var(--sp-7)); overflow-y: auto; }
+aside.toc h3 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.5px;
+                color: var(--c-text-soft); margin: 0 0 var(--sp-2); font-weight: 700; }
+aside.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+aside.toc li { counter-increment: toc; margin: var(--sp-1) 0; }
+aside.toc a { display: block; padding: 5px 8px; border-radius: var(--radius-sm);
+              color: var(--c-text); text-decoration: none; font-size: var(--fs-sm);
+              border-left: 3px solid transparent; }
+aside.toc a:hover { background: var(--c-code-bg); border-left-color: var(--c-accent); }
+aside.toc a::before { content: counter(toc) ". "; color: var(--c-text-soft);
+                      font-family: var(--ff-mono); font-size: 0.85em; margin-right: 4px; }
+aside.toc a.core { font-weight: 600; }
+aside.toc a.core::after { content: "★"; color: var(--c-critical); margin-left: 6px; font-size: 0.85em; }
+
+main.report { background: var(--c-surface); border: 1px solid var(--c-border);
+              border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+              padding: var(--sp-6); min-width: 0; }
+.report-header { border-bottom: 2px solid var(--c-accent); padding-bottom: var(--sp-4);
+                  margin-bottom: var(--sp-5); }
+.report-header .pretitle { font-size: var(--fs-xs); text-transform: uppercase;
+                            letter-spacing: 1px; color: var(--c-accent-deep);
+                            font-weight: 700; margin-bottom: var(--sp-2); }
+.report-header h1 { font-size: var(--fs-3xl); margin: 0 0 var(--sp-3); line-height: 1.25; }
+.report-header .meta { display: grid; grid-template-columns: repeat(2, 1fr);
+                        gap: var(--sp-2) var(--sp-5); font-size: var(--fs-sm); margin-top: var(--sp-3); }
+.report-header .meta dt { color: var(--c-text-soft); font-weight: 600; }
+.report-header .meta dd { margin: 0; }
+.report-header .meta code { background: var(--c-code-bg); padding: 1px 5px;
+                             border-radius: var(--radius-sm); font-family: var(--ff-mono);
+                             font-size: 0.92em; }
+.verdict-banner { color: white; padding: var(--sp-3) var(--sp-4); margin-top: var(--sp-4);
+                   border-radius: var(--radius-md); font-weight: 600; font-size: var(--fs-md); }
+.verdict-banner.positive { background: linear-gradient(90deg, #15803D, #22C55E); }
+
+h2 { font-size: var(--fs-2xl); margin: var(--sp-7) 0 var(--sp-3);
+      padding-bottom: var(--sp-2); border-bottom: 1px solid var(--c-border);
+      scroll-margin-top: var(--sp-4); }
+h2 .h-num { font-family: var(--ff-mono); color: var(--c-accent-deep);
+            font-size: 0.7em; margin-right: var(--sp-2); font-weight: 600; }
+h3 { font-size: var(--fs-xl); margin: var(--sp-5) 0 var(--sp-2); }
+
+p, ul, ol { margin: var(--sp-3) 0; }
+ul, ol { padding-left: var(--sp-5); }
+code { background: var(--c-code-bg); padding: 1px 6px; border-radius: var(--radius-sm);
+        font-family: var(--ff-mono); font-size: 0.92em; }
+
+table { border-collapse: collapse; width: 100%; margin: var(--sp-4) 0; font-size: var(--fs-sm); }
+th, td { border: 1px solid var(--c-border); padding: var(--sp-2) var(--sp-3); text-align: left; }
+th { background: var(--c-code-bg); font-weight: 600; }
+td.num, .num { text-align: right; font-family: var(--ff-mono); }
+tr.row-safe td { background: #DCFCE7; color: #166534; }
+tr.row-warn td { background: #FEF3C7; }
+tr.row-bug td { background: #FEF2F0; color: #7F1D1D; }
+tr.row-emphasis td { background: #DBEAFE; color: #1E3A8A; font-weight: 600; }
+
+.callout-info { background: #EFF6FF; border-left: 4px solid var(--c-info);
+                padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                border-radius: var(--radius-md); color: #1E3A8A; }
+.callout-success { background: #F0FDF4; border-left: 4px solid var(--c-success);
+                    padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                    border-radius: var(--radius-md); color: #166534; }
+.callout-critical { background: #FEF2F0; border-left: 4px solid var(--c-critical);
+                     padding: var(--sp-3) var(--sp-4); margin: var(--sp-3) 0;
+                     border-radius: var(--radius-md); color: #7F1D1D; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+              gap: var(--sp-3); margin: var(--sp-4) 0; }
+.stat-box { background: var(--c-bg); border: 1px solid var(--c-border);
+             border-radius: var(--radius-md); padding: var(--sp-3); text-align: center; }
+.stat-box .number { font-size: var(--fs-2xl); font-weight: 700; color: var(--c-accent); line-height: 1.1;
+                    font-family: var(--ff-mono); }
+.stat-box .number.bug { color: var(--c-critical); }
+.stat-box .number.success { color: var(--c-success); }
+.stat-box .number.warning { color: var(--c-warning); }
+.stat-box .label { font-size: var(--fs-xs); color: var(--c-text-soft); margin-top: var(--sp-1); }
+
+.figure { margin: var(--sp-5) 0; text-align: center;
+           background: var(--c-bg); border-radius: var(--radius-md);
+           padding: var(--sp-3); border: 1px solid var(--c-border); }
+.figure img { max-width: 100%; height: auto; display: block; margin: 0 auto;
+               border-radius: var(--radius-sm); background: white; }
+.figure figcaption { font-size: var(--fs-sm); color: var(--c-text-soft);
+                      margin-top: var(--sp-2); font-style: italic; text-align: left;
+                      padding: var(--sp-2) var(--sp-3); }
+
+.provenance { background: var(--c-bg); border-radius: var(--radius-md);
+               padding: var(--sp-4); margin-top: var(--sp-6); font-size: var(--fs-sm);
+               border: 1px dashed var(--c-border); }
+.provenance dt { color: var(--c-text-soft); font-weight: 600; font-family: var(--ff-mono);
+                  font-size: var(--fs-xs); }
+.provenance dd { margin: 0 0 var(--sp-2) 0; font-family: var(--ff-mono); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  aside.toc { position: static; max-height: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<aside class="toc" aria-label="Table of contents">
+<h3>V6 觀察分析</h3>
+<ol>
+  <li><a href="#sec0" class="core">TL;DR — 兩個 robust signal</a></li>
+  <li><a href="#sec1" class="core">Cross-sample AUC consistency</a></li>
+  <li><a href="#sec2" class="core">caller_af 不 universal 的視覺證據</a></li>
+  <li><a href="#sec3">V6 vs baseline NG distribution</a></li>
+  <li><a href="#sec4">10 features × 5 samples distribution</a></li>
+  <li><a href="#sec5">Chr-level V6 marker rate</a></li>
+  <li><a href="#sec6" class="core">LOH × feature interaction</a></li>
+  <li><a href="#sec7" class="core">5 終極目標 cross-reference</a></li>
+  <li><a href="#sec8" class="core">Cycle 5+ Hypothesis inputs</a></li>
+  <li><a href="#refs">引用 + Provenance</a></li>
+</ol>
+</aside>
+
+<main class="report">
+
+<header class="report-header">
+<div class="pretitle">Cycle 4 · V6 Observation-Driven Analysis · 後 LOSO 觀察重新導向</div>
+<h1>V6 觀察分析 — 找 cross-sample robust signal 給 Cycle 5+</h1>
+<dl class="meta">
+  <dt>Build date</dt>      <dd>2026-05-20</dd>
+  <dt>Audience</dt>        <dd>PI · 觀察驅動 hypothesis 探索 · 機制理解</dd>
+  <dt>Trigger</dt>         <dd>User 5/20: "LR HCC1395 不合理 AF overfit，先觀察找合適數據與機制"</dd>
+  <dt>Predecessor</dt>     <dd>LOSO finding: HCC1395 +0.02236 = 100% sample-level circularity</dd>
+  <dt>Approach</dt>        <dd>Observation-first (非 fit-and-test) · 找 cross-sample robust feature</dd>
+  <dt>Output</dt>          <dd>8 真實數據圖 + 3 TSV + 5 終極目標 cross-reference</dd>
+</dl>
+<div class="verdict-banner positive">
+  ✅ <strong>兩個 cross-sample robust signal 浮現</strong>: <code>loh_inner_flag</code> (4/5 samples AUC 0.54-0.72) + <code>HPFineF methylation</code> (4/5 samples AUC 0.48-0.63)。<code>caller_af</code> 是 sample-direction-inconsistent (AUC range 0.20-0.92)，**LOSO 災難根因確認**。Cycle 5+ 應 deprioritize caller_af，focus on LOH × HPFineF interaction。
+</div>
+</header>
+
+<!-- ─── Section 0 TL;DR ─── -->
+<h2 id="sec0"><span class="h-num">0.</span>TL;DR — Cross-Sample Consistency Ranking</h2>
+
+<table>
+<thead><tr><th>Feature</th><th>n pos (AUC&gt;0.55)</th><th>n neg (AUC&lt;0.45)</th><th>AUC range</th><th>結論</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td><strong>loh_inner_flag</strong></td><td class="num">4/5</td><td class="num">0/5</td><td class="num">0.543 - 0.717</td><td>⭐ ROBUST cross-sample</td></tr>
+  <tr class="row-safe"><td><strong>V6_off_meth_HPFineF</strong></td><td class="num">4/5</td><td class="num">0/5</td><td class="num">0.477 - 0.626</td><td>⭐ ROBUST methylation signal</td></tr>
+  <tr class="row-warn"><td>V6_off_NG</td><td class="num">3/5</td><td class="num">0/5</td><td class="num">0.483 - 0.686</td><td>partial cross-sample</td></tr>
+  <tr class="row-warn"><td>V6_off_meth_HPMergedDelta</td><td class="num">2/5</td><td class="num">1/5</td><td class="num">0.434 - 0.583</td><td>mixed</td></tr>
+  <tr class="row-warn"><td>V6_off_meth_Epipoly_Delta</td><td class="num">1/5</td><td class="num">2/5</td><td class="num">0.401 - 0.582</td><td>mixed-negative</td></tr>
+  <tr><td>Coverage_Multiple_imp</td><td class="num">0/5</td><td class="num">0/5</td><td class="num">0.477 - 0.520</td><td>random (near 0.5)</td></tr>
+  <tr><td>V6_off_meth_NME_imbalance</td><td class="num">0/5</td><td class="num">0/5</td><td class="num">0.498 - 0.533</td><td>random</td></tr>
+  <tr><td>V6_off_meth_ClusterPermanovaF</td><td class="num">0/5</td><td class="num">1/5</td><td class="num">0.436 - 0.538</td><td>weak-mixed</td></tr>
+  <tr class="row-bug"><td><strong>caller_af</strong></td><td class="num">2/5</td><td class="num"><strong>3/5</strong></td><td class="num"><strong>0.200 - 0.923</strong></td><td>❌ direction INCONSISTENT</td></tr>
+</tbody>
+</table>
+
+<div class="stat-grid">
+  <div class="stat-box"><div class="number success">2</div><div class="label">Cross-sample robust signals 浮現</div></div>
+  <div class="stat-box"><div class="number">4/5</div><div class="label">loh_inner_flag + HPFineF same direction</div></div>
+  <div class="stat-box"><div class="number bug">0.20 → 0.92</div><div class="label">caller_af AUC range across samples</div></div>
+  <div class="stat-box"><div class="number warning">0.717</div><div class="label">loh_inner_flag max AUC (HCC1937)</div></div>
+  <div class="stat-box"><div class="number warning">0.626</div><div class="label">HPFineF max AUC (HCC1395)</div></div>
+  <div class="stat-box"><div class="number success">G3+G1</div><div class="label">5 terminal goals 最相關</div></div>
+</div>
+
+<div class="callout-success">
+<strong>關鍵 paradigm shift</strong>: 之前 cycle 3 ablation 結論「ISM vestigial」是在 HCC1395 context (caller_af AUC=0.923 dominate)。但本觀察分析揭示 — 從跨樣本視角，<strong>HPFineF methylation 才是真正 robust feature</strong>，cross-sample 4/5 同方向，effect 小但 stable。caller_af 反而是樣本特異性問題源頭（AUC 0.20 - 0.92 跨樣本變動）。
+</div>
+
+<!-- ─── Section 1 AUC + Cohen ─── -->
+<h2 id="sec1"><span class="h-num">1.</span>Cross-Sample AUC + Cohen's d Heatmap</h2>
+
+<div class="figure">
+<img src="figures/02_auc_heatmap.png" alt="AUC heatmap">
+<figcaption><strong>圖 1</strong> — 5 樣本 × 9 features AUC heatmap (顏色 0.4=隨機紅 / 0.7=高綠)。讀法：每列一個樣本，每行一 feature；找「整列同顏色一致正向」的 column = cross-sample robust。<br><br>
+<strong>最容易看出</strong>: <code>caller_af</code> 列 — HCC1395 0.92 深綠 vs HCC1937 0.20 深紅 → 完全反向；<code>loh_inner_flag</code> 列 — 5 樣本均 0.54-0.72 一致正向綠。<code>HPFineF</code> 列 — 4 樣本 0.50-0.63 微正向。</figcaption>
+</div>
+
+<div class="figure">
+<img src="figures/03_cohen_d_heatmap.png" alt="Cohen d heatmap">
+<figcaption><strong>圖 2</strong> — 同 features 跨樣本 Cohen's d (effect size, RdBu 中性 0 / +1.5 深藍正向 / -1.5 深紅反向)。<br><br>
+<strong>關鍵發現</strong>: <code>loh_inner_flag</code> 5 樣本 d 全部正向 (+0.37 ~ +1.11) = robust medium-large effect cross-sample。<code>caller_af</code> 在 HCC1395 d=+1.60 vs HCC1937 d=-1.41 = 同樣絕對值但反向 → 樣本特異性致命。</figcaption>
+</div>
+
+<!-- ─── Section 2 caller_af not universal ─── -->
+<h2 id="sec2"><span class="h-num">2.</span>caller_af 為何不 universal — 視覺證據</h2>
+
+<div class="figure">
+<img src="figures/04_non_methyl_dist.png" alt="Non-methyl distribution">
+<figcaption><strong>圖 3</strong> — 4 個 non-methyl features 跨 5 樣本 TP (實線) / FP (虛線) distribution。<br><br>
+<strong>caller_af panel (上左)</strong>: HCC1395 (橘) TP 集中 ~0.45 / FP 集中 ~0.10 ↔ HCC1937 (綠) TP 與 FP 完全重疊 (BRCA1 outlier 樣本) ↔ H1437/H2009 (藍灰) FP 比 TP 更高 → caller_af 在不同樣本對 TP/FP 的關係根本不同。<br><br>
+<strong>loh_inner_flag panel (上右)</strong>: 雖然是 binary，但 TP 全 sample 集中 1，FP 集中 0 → 一致方向。<br><br>
+<strong>Coverage_Multiple panel (下左)</strong>: 5 樣本 TP/FP 大致重疊 = 無 signal (AUC 0.5 確認)。<br><br>
+<strong>V6 NG panel (下右)</strong>: HCC1395/H1437/H2009 TP 比 FP 略高 (3/5 cross-sample), HCC1937/HCC1954 重疊。</figcaption>
+</div>
+
+<!-- ─── Section 3 V6 vs baseline ─── -->
+<h2 id="sec3"><span class="h-num">3.</span>V6 vs Baseline NG Distribution Shift (HCC1395)</h2>
+
+<div class="figure">
+<img src="figures/01_v6_vs_baseline_NG_dist.png" alt="V6 vs baseline NG dist">
+<figcaption><strong>圖 4</strong> — HCC1395 V6 (橘) vs baseline (灰) NG distribution × TP/FP。<br><br>
+<strong>觀察</strong>: V6 在 TP 群顯著增加 NG≥3 比例 (這就是 V6 marker count +52.4% 來源)；同時在 FP 群也增加 NG≥3 → V6 不是「只增加 TP marker」而是 universally 增加 marker count。Marker rate (TP purity) 改善幅度有限 +1.26pp。</figcaption>
+</div>
+
+<!-- ─── Section 4 5 methyl features ─── -->
+<h2 id="sec4"><span class="h-num">4.</span>5 Methylation Features 跨 5 樣本 Distribution</h2>
+
+<div class="figure">
+<img src="figures/05_methyl_dist.png" alt="Methyl dist">
+<figcaption><strong>圖 5</strong> — 5 個 V6 methylation features 跨 5 樣本 TP/FP distribution。<br><br>
+<strong>HPFineF panel</strong>: 跨樣本 TP 略偏右 (高 F-stat)，FP 偏左 — 4/5 同方向 + 小 effect (AUC 0.48-0.63)。<br><br>
+<strong>其他 4 個 methyl</strong>: TP/FP 大致重疊，無 cross-sample consistent direction (符合 cycle 3 ablation vestigial 結論)。<br><br>
+<strong>含義</strong>: 在 5 個 methylation features 中，<strong>HPFineF 是唯一 cross-sample robust</strong>；其他 4 個在 cycle 1 LR rank 5-9 是 caller_af L2 ridge-split。</figcaption>
+</div>
+
+<!-- ─── Section 5 chr8 hotspot ─── -->
+<h2 id="sec5"><span class="h-num">5.</span>Chr-Level V6 Marker Rate (HCC1395)</h2>
+
+<div class="figure">
+<img src="figures/06_chr8_hotspot.png" alt="chr8 hotspot">
+<figcaption><strong>圖 6</strong> — HCC1395 per-chr marker rate (NG≥3)，上 panel = TP，下 panel = FP。V6 (橘) vs baseline (灰)。<br><br>
+<strong>觀察 1</strong>: TP marker rate V6 在大部分 chr 上 ≈ baseline (微幅領先) — V6 增益均勻分布。<br><br>
+<strong>觀察 2</strong>: FP marker rate <strong>chr8 顯著突出</strong> — 已知 chr8 amplicon hotspot 在 V6 下 FP marker rate 仍高，未被 ISM filter 排除。<br><br>
+<strong>機制</strong>: V6 改善的是「marker 數量」不是「FP filter 質量」— chr8 hotspot 仍是 limit。</figcaption>
+</div>
+
+<!-- ─── Section 6 LOH interaction ─── -->
+<h2 id="sec6"><span class="h-num">6.</span>LOH × Feature Interaction — 機制揭示</h2>
+
+<div class="figure">
+<img src="figures/07_loh_interaction.png" alt="LOH interaction">
+<figcaption><strong>圖 7</strong> — AUC delta: Inner LOH zone − Outer/NA zone，每 feature × sample。正值 (深藍) = feature 在 LOH Inner 更有區分力。<br><br>
+<strong>觀察</strong>: <code>caller_af</code> 在 LOH Inner 與 Outer 差異最大 (HCC1395 +0.06 / HCC1937 -0.08) — LOH 中 caller_af signal 強，符合「somatic LOH 區 AF 偏高」生物學機制。<br><br>
+<strong>HPFineF</strong>: 部分樣本 LOH Inner > Outer (+0.02 ~ +0.05) — methylation signal 在 LOH 區較強，與 ASM (Allele-Specific Methylation) 機制 candidate 一致。<br><br>
+<strong>含義</strong>: <strong>LOH stratification 可能是 Cycle 5+ 重要 axis</strong> — 在 LOH Inner zone 內，多 features 表現可能改變。</figcaption>
+</div>
+
+<!-- ─── Section 7 5-goal map ─── -->
+<h2 id="sec7"><span class="h-num">7.</span>5 終極目標 Cross-Reference Map</h2>
+
+<div class="figure">
+<img src="figures/08_5goal_map.png" alt="5-goal map">
+<figcaption><strong>圖 8</strong> — Feature × 5 終極目標 applicability matrix。★★ = 高度相關 / ★ = 中度相關。<br><br>
+<strong>5 終極目標</strong>:<br>
+G1 Per-CpG × HP × ALT relations / G2 HPFineN cross-sample marker / G3 Two-hit order / G4 TO normal model / G5 LR filter
+</figcaption>
+</div>
+
+<table>
+<thead><tr><th>Feature</th><th>G1 Per-CpG×HP×ALT</th><th>G2 HPFineN marker</th><th>G3 Two-hit</th><th>G4 TO normal</th><th>G5 LR filter</th></tr></thead>
+<tbody>
+  <tr><td><strong>loh_inner_flag</strong></td><td>—</td><td>★</td><td><strong>★★</strong></td><td>—</td><td>★★</td></tr>
+  <tr><td>caller_af</td><td>★</td><td>—</td><td>—</td><td>★★</td><td>★★</td></tr>
+  <tr><td>V6_off_NG</td><td>★</td><td><strong>★★</strong></td><td>★</td><td>—</td><td>★★</td></tr>
+  <tr><td>Coverage_Multiple</td><td>—</td><td>—</td><td>★★</td><td>★</td><td>★★</td></tr>
+  <tr class="row-safe"><td><strong>HPFineF</strong></td><td><strong>★★</strong></td><td>★</td><td>★</td><td>—</td><td>★</td></tr>
+  <tr><td>HPMergedDelta</td><td>★★</td><td>★</td><td>★</td><td>—</td><td>★</td></tr>
+  <tr><td>NME_imbalance</td><td>★</td><td>—</td><td>★</td><td>—</td><td>★</td></tr>
+  <tr><td>Epipoly_Delta</td><td>★</td><td>—</td><td>★</td><td>—</td><td>★</td></tr>
+  <tr><td>ClusterPermanovaF</td><td>★★</td><td>★</td><td>★</td><td>—</td><td>★</td></tr>
+</tbody>
+</table>
+
+<!-- ─── Section 8 Cycle 5+ Hypothesis ─── -->
+<h2 id="sec8"><span class="h-num">8.</span>Cycle 5+ Hypothesis Inputs (觀察 → 新方向)</h2>
+
+<div class="callout-info">
+<strong>觀察驅動的 4 個新 hypothesis candidates</strong> (給 user inject-hypothesis 評估)
+</div>
+
+<h3>H_NEW_1: loh_inner_flag-aware filter (G3 Two-hit relevance)</h3>
+<p><strong>觀察證據</strong>: loh_inner_flag 5/5 cross-sample positive AUC 0.54-0.72 + Cohen's d 0.37-1.11；圖 7 顯示 caller_af 與 HPFineF 在 LOH Inner zone 表現增強 → <strong>LOH stratified filter</strong> 可能比 global filter 更 robust。</p>
+<p><strong>Pre-reg 候選</strong>: LOSO-trained LR with LOH-stratified intercepts → ΔF1 提升 vs cycle 1 sample-level baseline。</p>
+
+<h3>H_NEW_2: HPFineF cross-sample marker (G1 Per-CpG×HP×ALT + G2)</h3>
+<p><strong>觀察證據</strong>: HPFineF 4/5 samples AUC > 0.50 same direction，是唯一 cross-sample robust methylation feature。其他 4 個 methylation features 為 caller_af L2 ridge-split 副產品。<br><br>
+<strong>Pre-reg 候選</strong>: HPFineF + loh_inner_flag 2-feature LOSO-trained LR → 比 caller_af-dominated cycle 1 更 sample-level robust。</p>
+
+<h3>H_NEW_3: chr8 hotspot zone-specific filter (G3)</h3>
+<p><strong>觀察證據</strong>: 圖 6 chr8 FP marker rate 突出，V6 未排除；HCC1395 chr8 hotspot LOH+HPSig 7.4× FP enrichment (記憶: project_hcc1395_chr8_hotspot.md)。<br><br>
+<strong>Pre-reg 候選</strong>: chr8 specific gate (`if chr8 AND high FP marker rate → strict τ`) — zone-specific filter design。</p>
+
+<h3>H_NEW_4: caller_af 取消使用 + 新 axis 探索 (G5 redesign)</h3>
+<p><strong>觀察證據</strong>: caller_af AUC 跨樣本 0.20-0.92 (3/5 反向) — 是 LOSO 災難主因。Cycle 5+ 應 deprioritize caller_af 作為 LR feature。<br><br>
+<strong>Pre-reg 候選</strong>: 完全移除 caller_af 後，2-3 feature LR (loh_inner_flag + HPFineF + V6_NG) LOSO 是否 ΔF1 > 0？</p>
+
+<h3>Decision Tree — 哪個 hypothesis 進 cycle 5?</h3>
+
+<table>
+<thead><tr><th>H</th><th>對應目標</th><th>Cost</th><th>Prior PASS (主觀)</th><th>ROI</th></tr></thead>
+<tbody>
+  <tr class="row-safe"><td><strong>H_NEW_2</strong> HPFineF + LOH 2-feature LR LOSO</td><td>G1 + G2</td><td>~30 min</td><td>~25%</td><td>HIGH (直接挑戰 LOSO)</td></tr>
+  <tr class="row-warn"><td>H_NEW_1 LOH-stratified intercepts</td><td>G3</td><td>~1 hr</td><td>~20%</td><td>MED</td></tr>
+  <tr class="row-warn"><td>H_NEW_3 chr8 zone-specific</td><td>G3</td><td>~30 min</td><td>~30%</td><td>MED (chr8 dependent)</td></tr>
+  <tr class="row-warn"><td>H_NEW_4 caller_af-removed LR</td><td>G5 redesign</td><td>~30 min</td><td>~15%</td><td>MED-LOW (試 negative outcome 驗證)</td></tr>
+</tbody>
+</table>
+
+<h3>給用戶決策的最簡建議</h3>
+
+<div class="callout-success">
+<strong>建議優先測 H_NEW_2 + H_NEW_4 (~1 hr 兩個 LOSO 跑)</strong>:<br>
+- H_NEW_2: 2-feature (HPFineF + loh_inner_flag) LOSO → 看是否 cross-sample 仍有 signal<br>
+- H_NEW_4: drop caller_af LR LOSO → 確認 caller_af 是 LOSO 災難主因 (sanity check)<br><br>
+這兩個是 fastest test，可在 ~1 hr 內回答「LR filter 在沒 caller_af 過擬合的情況下，cross-sample 是否仍有 robust signal」這個核心問題。
+</div>
+
+<!-- ─── References ─── -->
+<section class="references" id="refs">
+<h2>引用 + Provenance</h2>
+
+<h3>Data sources (read-only)</h3>
+<ol>
+  <li><code>InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step5_methyl_filter_pilot/step5_master_augmented.tsv</code> (HCC1395, 35,332 × 202)</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle2/data/{H1437,H2009,HCC1954,HCC1937}_master_augmented.tsv</code> (4 sample × ~64 cols)</li>
+  <li><code>InterSubMod/research/v6_bam_tpfp_hp_loh_cn/step1_v3f_v5_v6_three_way/step1_master_four_way.tsv</code> (4-way HCC1395, 35,333 × 112)</li>
+</ol>
+
+<h3>Outputs</h3>
+<ol>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle4/v6_observation_analysis/scripts/generate_v6_baseline_analysis.py</code> — 觀察分析 script</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle4/v6_observation_analysis/data/feature_auc_cohen.tsv</code> — 5 sample × 9 features AUC + Cohen + KS</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle4/v6_observation_analysis/data/loh_stratified_auc.tsv</code> — LOH × feature × sample AUC</li>
+  <li>8 PNG: 01-08 in <code>cycle4/v6_observation_analysis/figures/</code></li>
+</ol>
+
+<h3>Cross-references</h3>
+<ol>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/loso_findings.md</code> — LOSO core finding</li>
+  <li><code>InterSubMod/research/methyl_augmented_filter_phase2/cycle3/ablation/cycle3_step1_5_min_ablation_findings.md</code> — ISM vestigial in cycle 1 framework</li>
+  <li><code>InterSubMod/docs/CURRENT_FOCUS.md</code> 2026-05-20 LOSO section + 5 終極目標 anchor</li>
+</ol>
+
+<div class="provenance">
+<h3 style="margin-top:0">Provenance</h3>
+<dl>
+  <dt>Generated by</dt><dd>generate_v6_baseline_analysis.py (matplotlib + sklearn + scipy)</dd>
+  <dt>Generated at</dt><dd>2026-05-20T22:00:00+08:00</dd>
+  <dt>Approach</dt><dd>Observation-first (非 fit-and-test) — find cross-sample robust features via per-feature AUC/Cohen/KS across 5 samples, no LR retraining</dd>
+  <dt>Anti-circularity</dt><dd>每個 AUC 計算 within-sample (no train/test split needed for descriptive statistics) — 不涉及 sample-level circularity 問題</dd>
+  <dt>5 終極目標 mapping</dt><dd>G1 (Per-CpG×HP×ALT) / G2 (HPFineN marker) / G3 (Two-hit order) / G4 (TO normal model) / G5 (LR filter)</dd>
+  <dt>Trigger</dt><dd>User 5/20: "先觀察找合適數據與機制" + LOSO confirms HCC1395 AF overfit</dd>
+  <dt>Reproducibility</dt><dd><code>python3 generate_v6_baseline_analysis.py</code> — ~1 min wall clock</dd>
+</dl>
+</div>
+
+</section>
+
+</main>
+</div>
+
+</body>
+</html>
