@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Archive Batch 2 審查 — 舊日期 plain run</title>
+<style>
+:root{--fg:#1f2328;--mut:#636c76;--bd:#d8dee4;--bg:#f6f8fa;--card:#fff;--g:#1a7f37;--gb:#dafbe1;--a:#9a6700;--ab:#fff8c5;--r:#cf222e;--rb:#ffebe9;--b:#0969da}
+*{box-sizing:border-box}
+body{font-family:-apple-system,"Segoe UI",Roboto,"Droid Sans Fallback",sans-serif;color:var(--fg);background:var(--bg);margin:0;line-height:1.55}
+.wrap{max-width:1000px;margin:0 auto;padding:22px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:18px}
+.l0{background:var(--card);border:1px solid var(--bd);border-left:6px solid var(--g);border-radius:8px;padding:14px 18px;margin:14px 0;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.l0 b{font-size:15px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.stat{flex:1;min-width:120px;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;text-align:center}
+.stat .n{font-size:26px;font-weight:700}
+.stat .lab{font-size:11.5px;color:var(--mut);margin-top:2px}
+h2{font-size:15px;margin:24px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--bd)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card);border-radius:8px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+th{background:#f0f3f6;text-align:left;padding:8px 10px;font-size:11.5px;color:#444}
+td{padding:7px 10px;border-top:1px solid var(--bd);vertical-align:top}
+code{background:#eff1f3;padding:1px 5px;border-radius:4px;font-size:11px}
+.badge{display:inline-block;font-size:11px;font-weight:700;border-radius:5px;padding:2px 8px;white-space:nowrap}
+.archive{background:var(--gb);color:var(--g)}
+.hold{background:var(--ab);color:var(--a)}
+.note{background:var(--ab);border:1px solid #f0e3b8;border-radius:8px;padding:12px 16px;margin:14px 0;font-size:13px}
+.mech{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;margin:12px 0;font-size:13px}
+.foot{color:var(--mut);font-size:11.5px;margin-top:22px;border-top:1px solid var(--bd);padding-top:10px}
+.k{color:var(--r);font-weight:700}
+.col2{column-count:2;column-gap:18px}
+@media(max-width:680px){.col2{column-count:1}}
+.col2 div{break-inside:avoid;font-size:12px;padding:2px 0}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>🗂️ Archive Batch 2 審查 — 舊日期 plain run</h1>
+<div class="sub">2026-06-12 · 安全 stat + token-邊界 grep-check（未 du；避免誤匹配正典 complete_matrix）· <b>狀態：等你確認才搬，不刪</b></div>
+
+<div class="l0">
+<b>一眼結論：</b> 17 個舊 plain run（全 <b>0 大 BAM</b>）→ <span class="k">11 安全可 archive</span>（只有 stale catalog/歷史 doc 軟引用）+
+<span style="color:var(--a);font-weight:700">6 KEEP</span>（B3_obs18 腳本硬依賴，與 batch 1 同一 phasing 對照、一致 KEEP）。
+</div>
+
+<div class="stats">
+<div class="stat"><div class="n" style="color:var(--g)">17</div><div class="lab">batch 2 候選</div></div>
+<div class="stat"><div class="n" style="color:var(--g)">11</div><div class="lab">✅ 安全 archive</div></div>
+<div class="stat"><div class="n" style="color:var(--a)">6</div><div class="lab">⏸ KEEP（B3 硬依賴）</div></div>
+<div class="stat"><div class="n" style="color:var(--mut)">0 GB</div><div class="lab">大空間（無大 BAM）</div></div>
+</div>
+
+<h2>✅ 11 SAFE archive（軟引用 = 非腳本功能依賴）</h2>
+<table>
+<tr><th>run</th><th>mtime</th><th>軟引用</th></tr>
+<tr><td><code>20260211_HCC1395_…</code></td><td>03-14</td><td>path_inventory（stale catalog）</td></tr>
+<tr><td><code>20260307_HCC1395_…</code></td><td>03-14</td><td>path_inventory + 03-14 標準/手冊（歷史列表+範例）</td></tr>
+<tr><td><code>20260314_HCC1395_…</code>（plain）</td><td>03-14</td><td>無</td></tr>
+<tr><td><code>20260420_HCC1395_…</code>（plain）</td><td>04-20</td><td>無</td></tr>
+<tr><td><code>20260212_HCC1937_…</code></td><td>03-14</td><td>path_inventory</td></tr>
+<tr><td><code>20260212_HCC1954_…</code></td><td>03-14</td><td>path_inventory</td></tr>
+<tr><td><code>20260212_H1437_…</code></td><td>03-14</td><td>path_inventory</td></tr>
+<tr><td><code>20260212_H2009_…</code></td><td>03-14</td><td>path_inventory</td></tr>
+<tr><td><code>20260212_COLO829_…</code></td><td>03-14</td><td>path_inventory</td></tr>
+<tr><td><code>20260211_HCC1395_DORADO_…</code></td><td>03-14</td><td>path_inventory</td></tr>
+<tr><td><code>20260307_HCC1395_DORADO_…</code></td><td>03-14</td><td>path_inventory</td></tr>
+</table>
+<div class="note" style="background:#eef3fb;border-color:#cfe0f5">
+ℹ️ <b>軟引用為何 archive 安全</b>：<code>path_inventory.tsv</code>(04-11) 已 stale/不維護（memory 標危險）；0307 在 03-14 標準/手冊是 <b>pre-complete_matrix 歷史列表 + 範例指令</b>（current canonical = complete_matrix）。archive **不破壞任何腳本執行**。
+</div>
+
+<h2>⏸ 6 KEEP（B3_paired_obs18.py 硬編碼輸入 line 77-82）</h2>
+<div class="note">
+🔴 <b>B3 硬依賴（與 batch 1 KEEP 一致）</b>：<code>scripts/analysis/20260423_B3_paired_obs18.py</code> 硬編碼這 6 個當輸入 →
+<div class="col2" style="margin-top:6px">
+<div><span class="badge hold">KEEP</span> <code>20260421_HCC1937</code></div>
+<div><span class="badge hold">KEEP</span> <code>20260421_HCC1954</code></div>
+<div><span class="badge hold">KEEP</span> <code>20260421_H1437</code></div>
+<div><span class="badge hold">KEEP</span> <code>20260421_H2009</code></div>
+<div><span class="badge hold">KEEP</span> <code>20260421_COLO829</code></div>
+<div><span class="badge hold">KEEP</span> <code>20260420_HCC1395_DORADO</code></div>
+</div>
+B3 = obs18 LOH phasing paired 對照（降支撐但仍在新論文脊柱）；無大 BAM、留著成本低；HD-1 走 positive 可能重用。
+</div>
+
+<h2>搬移機制（你確認後執行）</h2>
+<div class="mech">
+<code>mv</code> 11 SAFE → <code>_ARCHIVE_pending_cleanup_202606/canonical/{sample}/paired_full/</code>（同 fs 瞬間、保留結構可還原）。
+<span class="k">刪除 = Hard Gate</span>：archive 後留 ≥1 週，你確認才 <code>rm</code>。
+</div>
+
+<div class="foot">
+紀錄：<code>InterSubMod/docs/data_specs/20260612_archive_batch2_manifest.md</code> · 接續 batch 1 · 數字皆 2026-06-12 ls/grep 驗證，無捏造。
+</div>
+
+</div></body></html>
