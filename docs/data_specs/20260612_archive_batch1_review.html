@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Archive Batch 1 審查 — 冗餘 canonical run</title>
+<style>
+:root{--fg:#1f2328;--mut:#636c76;--bd:#d8dee4;--bg:#f6f8fa;--card:#fff;--g:#1a7f37;--gb:#dafbe1;--a:#9a6700;--ab:#fff8c5;--r:#cf222e;--rb:#ffebe9;--b:#0969da}
+*{box-sizing:border-box}
+body{font-family:-apple-system,"Segoe UI",Roboto,"Droid Sans Fallback",sans-serif;color:var(--fg);background:var(--bg);margin:0;line-height:1.55}
+.wrap{max-width:1000px;margin:0 auto;padding:22px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:18px}
+.l0{background:var(--card);border:1px solid var(--bd);border-left:6px solid var(--g);border-radius:8px;padding:14px 18px;margin:14px 0;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.l0 b{font-size:15px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.stat{flex:1;min-width:130px;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;text-align:center}
+.stat .n{font-size:26px;font-weight:700}
+.stat .lab{font-size:11.5px;color:var(--mut);margin-top:2px}
+h2{font-size:15px;margin:24px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--bd)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card);border-radius:8px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+th{background:#f0f3f6;text-align:left;padding:8px 10px;font-size:11.5px;color:#444}
+td{padding:8px 10px;border-top:1px solid var(--bd);vertical-align:top}
+code{background:#eff1f3;padding:1px 5px;border-radius:4px;font-size:11.5px}
+.badge{display:inline-block;font-size:11px;font-weight:700;border-radius:5px;padding:2px 8px;white-space:nowrap}
+.archive{background:var(--gb);color:var(--g)}
+.hold{background:var(--ab);color:var(--a)}
+.note{background:var(--rb);border:1px solid #ffcecb;border-radius:8px;padding:12px 16px;margin:14px 0;font-size:13px}
+.mech{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;margin:12px 0;font-size:13px}
+.mech li{margin:4px 0}
+.foot{color:var(--mut);font-size:11.5px;margin-top:22px;border-top:1px solid var(--bd);padding-top:10px}
+.k{color:var(--r);font-weight:700}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>🗂️ Archive Batch 1 審查 — 冗餘 canonical run</h1>
+<div class="sub">2026-06-12 · 安全 stat + grep-check 驗證（未 du 遞迴）· 分支 research/subclonal-reconstruction-202606 · <b>狀態：等你確認才搬，不刪</b></div>
+
+<div class="l0">
+<b>一眼結論：</b> 6 個最明確的測試/重試 run → <span class="k">5 個安全可 archive</span>，<span style="color:var(--a);font-weight:700">1 個 HOLD</span>（被舊分析腳本硬編碼引用）。
+全部 <b>0 個大 BAM</b> → 搬移省的是 ISM 小檔/inode，<b>不省大空間</b>（1.7TB 正典 BAM 不在此批、必留）。
+</div>
+
+<div class="stats">
+<div class="stat"><div class="n" style="color:var(--g)">6</div><div class="lab">batch 1 候選</div></div>
+<div class="stat"><div class="n" style="color:var(--g)">5</div><div class="lab">✅ 安全 archive</div></div>
+<div class="stat"><div class="n" style="color:var(--a)">1</div><div class="lab">⏸ HOLD（有引用）</div></div>
+<div class="stat"><div class="n" style="color:var(--mut)">0 GB</div><div class="lab">大空間省（無大 BAM）</div></div>
+</div>
+
+<h2>候選清單（grep-check 後 verdict）</h2>
+<table>
+<tr><th>run（canonical/{樣本}/paired_full/…）</th><th>mtime</th><th>大BAM</th><th>引用檢查</th><th>verdict</th></tr>
+<tr><td><code>20260314_HCC1395_…_1</code></td><td>03-14</td><td>0</td><td>僅命名 catalog（清單，非功能）</td><td><span class="badge archive">✅ ARCHIVE</span></td></tr>
+<tr><td><code>20260314_HCC1395_…_2</code></td><td>03-14</td><td>0</td><td>無功能引用</td><td><span class="badge archive">✅ ARCHIVE</span></td></tr>
+<tr><td><code>20260420_HCC1395_…_1</code></td><td>04-20</td><td>0</td><td>無功能引用</td><td><span class="badge archive">✅ ARCHIVE</span></td></tr>
+<tr><td><code>20260314_COLO829_…_smokecheck</code></td><td>03-14</td><td>0</td><td>無（測試 run）</td><td><span class="badge archive">✅ ARCHIVE</span></td></tr>
+<tr><td><code>20260315_COLO829_…_parallel_test</code></td><td>03-15</td><td>0</td><td>無（測試 run）</td><td><span class="badge archive">✅ ARCHIVE</span></td></tr>
+<tr style="background:#fffdf5"><td><code>20260420_HCC1395_…_2</code></td><td>04-20</td><td>0</td><td class="k">B3_obs18 腳本硬編碼輸入</td><td><span class="badge hold">⏸ HOLD</span></td></tr>
+</table>
+
+<div class="note">
+🔴 <b>HOLD 理由（grep-check 抓到的真依賴）：</b><br>
+<code>scripts/analysis/20260423_B3_paired_obs18.py:76</code> → <code>"HCC1395": "20260420_HCC1395_paired_full_full_2"</code>（硬編碼當輸入）<br>
+<code>docs/experiments/in_progress/2026/04/20260423_B3_Paired_obs18_Control_01.md:41</code> 引用此 run<br>
+B3_obs18 = <b>舊軸 Paired obs18 Control 實驗</b>。搬移它會破壞該分析重現 → <b>需先確認 B3 已 concluded 且不重跑</b>，才能連同標記一起 archive。<br>
+<i>（這正是 OUTPUT_INDEX「早期 pilot 誤標 SAFE_DELETE 實為 LIVE」教訓 —— 一律先 grep-check 才搬。）</i>
+</div>
+
+<h2>搬移機制（你確認後執行）</h2>
+<div class="mech">
+<ol>
+<li>目標：<code>big7_disk_output/_ARCHIVE_pending_cleanup_202606/</code></li>
+<li><code>mv</code> 5 個安全 run（<b>同 fs 瞬間、不佔空間、不 du</b>）</li>
+<li>manifest 記錄搬移時間 + 來源路徑（可追溯/可還原）</li>
+<li><span class="k">刪除 = Hard Gate</span>：archive 後留 ≥1 週，確認新主軸不需 → 你確認才 <code>rm</code></li>
+</ol>
+</div>
+
+<div class="foot">
+紀錄（給 AI session）：<code>InterSubMod/docs/data_specs/20260612_archive_batch1_manifest.md</code> ·
+組織規則：<code>InterSubMod/docs/data_specs/20260612_output_organization_guide_subclonal_01.md</code> ·
+數字皆 2026-06-12 ls/grep 驗證，無捏造。
+</div>
+
+</div></body></html>
