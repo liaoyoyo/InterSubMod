@@ -116,3 +116,17 @@ data_sources:
 | window_size | **±5000bp** | CpG 充足（median 76, <10=0%）消除強制移除；辨別力不降（H006 1.07>0.98）|
 | C_min | **3** | 距離至少 4 級解析、避免隨機；排除 ~10% pair |
 | read 過濾 | MAPQ20/len1000/MM+ML/SNV | 標準 ONT somatic-anchored；`--output-filtered-reads` 可記錄 |
+
+## 5. 甲基讀取（MethylationParser.cpp:1-289）逐行檢核
+
+✅ **核心正確（親自逐行驗證 + modkit 外部對證 per-CpG r=0.976/0.993）**：MM/ML 解析、CIGAR seq→ref（M/=/X/I/S/D/N/H 全涵蓋）、**雙股摺疊座標**（forward C@X→X+1 與 reverse G@X+1,C@X→X+1 都摺疊到同一 genomic CpG 的 C 1-based 座標）、CpG context inline 篩選、ML/255、ml_offset 越界保護。
+
+🔴 **4 個待補強（會被嚴格 reviewer 質疑，非結論性錯誤）**：
+| # | 質疑 | 性質 | 影響後續 | 建議 |
+|---|---|---|---|---|
+| Q1 | MM 格式硬假設 `"C+m?"`（strstr），非標準 `C+m`/`C+m.` → 靜默回空無 warning | robustness | 🔴 非 dorado 標準 BAM 靜默漏甲基 | 加格式檢查 + log |
+| Q2 | 5hmC 丟棄隱含未標註，與 Python max-collapse 口徑不一 | 設計選擇 | 🔴 甲基率=5mC-only，下游 Δβ/距離全 5mC-based | 文檔明示 + 評估 any-mod 選項 |
+| Q3 | golden test 只覆蓋 perfect-match CIGAR+5mC；未測 indel seq→ref / 5hmC ml_offset / MatrixBuilder | 測試 | ⚠ 邏輯正確但無回歸守護 | 補 golden test（T1 follow-up）|
+| Q4 | `is_cpg_site`(:283) 似 dead code，parse_read 用 inline | 一致性 | ◽ inline 正確但應統一 | 統一 CpG 判斷或移除 dead 函式 |
+
+> 論文撰寫：甲基讀取核心可寫為「驗證正確（逐行+modkit對證）」；Q1/Q2 須在 Methods 誠實標明（5mC-only + MM 格式假設），Q3/Q4 是工程待補不入論文正文。
