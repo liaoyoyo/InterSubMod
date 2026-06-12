@@ -15,6 +15,17 @@ data_sources:
 
 > 目的：把 window_size / C_min / read 過濾的設定**用數據佐證理由**記錄下來，當作設定依據。
 
+## 0. 數據來源（論文方向 = tumor/normal paired，全部確認）
+
+本文所有數字基於 **HCC1395 HKU 5kHz paired tumor/normal**（ONT，5mCG_5hmCG）：
+- **tumor**: `data/bam/HCC1395/tumor.bam` → `HCC1395_Tmode_tagged_ClairS_pileup_v040_woFilter.bam`
+  - ⚠ **`Tmode` = longphase `--somaticMode`（paired somatic haplotag），不是 tumor-only**。@PG: `longphase haplotag --somaticMode -s HCC1395BL_methyl_phase -b HCC1395BL.bam --tumor-snp-file ClairS_pileup --tumor-bam-file HCC1395.bam`（用 normal germline phase + tumor BAM）。
+- **normal**: `data/bam/HCC1395/normal.bam` → `HCC1395BL_ONT_5khz_simplex_5mCG_5hmCG_tagged.bam`
+- **SNV VCF**: `pileup/filtered_snv_{tp,fp,fn}.vcf.gz`（**ClairS paired pileup**）
+- **ref**: GRCh38_no_alt_analysis_set
+
+⚠ caveat：本 session 用的 tumor BAM（Tmode_v040）與 canonical 20260420 run 的（`longphase_s/HCC1395_tagged.bam`，已清理）是**不同檔但都 longphase somatic paired**。**取樣層觀察（NumCpGs/共同CpG/NumReads）不依賴 haplotag**（read 物理覆蓋）→ window/C_min 結論成立。但 significance/clustering（依賴 haplotag）若要對齊 canonical 須用同一 BAM。
+
 ## 1. window_size = ±5000bp（為什麼不是 ±1000/±2000）
 
 ### 1.1 三 window 真實 CpG 數量（HCC1395 TP）
