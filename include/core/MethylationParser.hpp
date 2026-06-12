@@ -34,6 +34,17 @@ struct MethylCall {
  *   - "C+m?" indicates 5-methylcytosine modifications
  *   - Numbers are delta-encoded skip counts between modified bases
  *
+ * IMPORTANT — 5mC-only by design (clarified 2026-06-13):
+ *   This parser extracts ONLY 5mC ("C+m?"). 5hmC ("C+h?") probabilities are
+ *   intentionally discarded (its deltas are only counted to advance the ML offset
+ *   so the 5mC probabilities line up). Downstream methylation rate / Δβ / read-read
+ *   distances are therefore 5mC-based.
+ *   FUTURE WORK (configurable): the architecture can be extended to support
+ *   5mC/5hmC co-analysis (e.g. a "--include-5hmc" option with max-collapse, to match
+ *   the Python tsg layer). Not implemented here — listed as future research.
+ *   The "C+m?" code is a hard assumption (dorado standard); non-standard MM formats
+ *   (e.g. "C+m", "Cm") are unsupported and yield no calls (surfaced at DEBUG log).
+ *
  * ML Tag Format: Array of uint8 values [0-255]
  *   - Each value corresponds to a modification in MM
  *   - Probability = ML[i] / 255.0

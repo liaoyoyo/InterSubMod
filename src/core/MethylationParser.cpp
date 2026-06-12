@@ -4,6 +4,8 @@
 #include <charconv>
 #include <cstring>
 
+#include "utils/Logger.hpp"
+
 namespace InterSubMod {
 
 // Helper function to convert little-endian bytes to uint32
@@ -68,7 +70,11 @@ std::vector<MethylCall> MethylationParser::parse_read(const bam1_t* b, const std
             break;
         }
 
-        // Not our target: count deltas (commas after the first ',') to advance ml_offset.
+        // Not our target (e.g. "C+h?" 5hmC): 5mC-only by design. We only count this
+        // block's deltas to advance ml_offset so the 5mC ("C+m?") probabilities line up;
+        // the non-5mC modification probabilities themselves are intentionally discarded.
+        // FUTURE WORK (configurable): 5mC/5hmC co-analysis could parse these blocks too
+        // (e.g. "--include-5hmc" with max-collapse) — listed as future research, not done here.
         // Block format: "X+y?,d1,d2,...", so delta_count = comma_count_in_delta_part + 1.
         const char* comma =
             static_cast<const char*>(std::memchr(block_start, ',', static_cast<size_t>(block_end - block_start)));
@@ -83,7 +89,13 @@ std::vector<MethylCall> MethylationParser::parse_read(const bam1_t* b, const std
     }
 
     if (!found_target) {
-        return calls;  // C+m? not found
+        // Q1 (2026-06-13): MM tag is present (checked above) but no "C+m?" block found.
+        // dorado-standard MM uses "C+m?"; non-standard formats (e.g. "C+m", "Cm") are
+        // unsupported and yield no 5mC calls. Surface at DEBUG (not WARNING — avoids
+        // per-read log spam at INFO) so a fully non-standard BAM is diagnosable instead
+        // of failing silently.
+        LOG_DEBUG("MethylationParser: MM tag present but 'C+m?' not found (non-standard MM format?); read yields no 5mC calls");
+        return calls;
     }
 
     if (deltas.empty()) {
