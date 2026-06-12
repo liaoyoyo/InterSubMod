@@ -2,7 +2,7 @@
 建立時間: 2026-06-12
 報告類型: Archive batch 1 manifest（冗餘 canonical run 搬移紀錄，供其他 AI session 理解確認）
 任務類型: 輸出清理 batch 1（grep-check 後候選清單 + verdict）
-狀態: 5 安全 run 已 archive（2026-06-12 mv 完成）；HOLD 1 個待 B3 決策
+狀態: ✅ 完成 — 5 安全 run 已 archive；1 (B3 依賴) 用戶決定 KEEP（2026-06-12）
 data_sources: 主回合 2026-06-12 ls/grep-check（存在性+mtime+大BAM數+引用檢查）
 build_branch: research/subclonal-reconstruction-202606
 驗證方式: ls -dl mtime（不 du）；grep -rIl scoped docs/+scripts/（§12）；manifest 比對
@@ -64,4 +64,8 @@ build_branch: research/subclonal-reconstruction-202606
 `20260420_HCC1395_paired_full_full_2` 被 `scripts/analysis/20260423_B3_paired_obs18.py:76` 硬編碼當輸入。查 `experiments/INDEX.md`：
 - B3_paired_obs18 = **obs18 LOH-NG2 phasing 分析的 paired 對照**（INDEX line 251/296）。obs18 = G6 LOH-constrained phasing 主軸工作（NG=2 same-hap、Wilcoxon p=0.0078），**已降支撐但仍是新論文的 phasing 脊柱材料**。
 - 該 run **無大 BAM**（0）→ 留著幾乎不佔空間。
-- **建議：KEEP**（留著成本低 + 是仍在論文裡的 phasing 脊柱的 live 依賴；若 HD-1 走 phasing positive 路徑可能重用）。用戶最終決定。
+- **✅ 用戶決定 2026-06-12：KEEP**（留著成本低 + phasing 脊柱 live 依賴；HD-1 走 positive 路徑可能重用）。`20260420_HCC1395_paired_full_full_2` 保留在 canonical，不 archive。
+
+## Batch 1 結論
+
+✅ **完成**：5 安全 run 已 archive、1 (B3 依賴) KEEP。batch 1 收尾。後續 batch 2/3 見組織指南 §6（待另起）。
