@@ -28,10 +28,11 @@ data_sources:
 線性關係 ≈ **7.5 CpG/kb**（人類基因組 CpG 密度 ~9.3/kb，扣除覆蓋/共同因素）。
 - ±1000bp 真實 median 15 ↔ H006 理論估算 ~15 **完美驗證**。
 
-### 1.2 設定依據
-- 🔴 **±1000bp 有 25% 位點 CpG<10** → 距離矩陣/PERMANOVA 在這些位點不可靠或無法算 → 強制移除/被當噪訊。±5000bp 幾乎消除（0%）。
-- **辨別力不因大 window 變差**（H006 實測：±5000 的 TP/FP PassedGating 比值 1.07 > ±1000 的 0.98）——「大 window 稀釋 SNV-local 訊號」的疑慮**在數據上未成立**，因 ONT long read（15-50kb）覆蓋 SNV 的 read 數不隨 window 變，只是 CpG 分析範圍變大。
-- **判決（承襲 H006 + 本次真實驗證）**：**保持 ±5000bp**。±1000 大幅降覆蓋率（FN 7%→1.4%）且無辨別力提升。
+### 1.2 設定依據（⚠ track 分層：CpG 數量 = paired 真實 / 辨別力 = 僅 TO）
+- 🔴 **±1000bp 有 25% 位點 CpG<10** → 距離矩陣/PERMANOVA 在這些位點不可靠或無法算 → 強制移除/被當噪訊。±5000bp 幾乎消除（**0%**）。【本次 paired 真實數據】
+- **辨別力**：H006（⚠ **TO track 理論分析，非 paired**）顯示 ±5000 的 TP/FP PassedGating 比值 1.07 > ±1000 的 0.98。⚠ **paired track 的辨別力是否隨 window 變 → 本次未測（U5）**。理論支持（track 無關）：ONT long read（15-50kb）覆蓋 SNV 的 read 數不隨 window 變，只是 CpG 分析範圍變大。
+- **CpG 數量跨 track 一致驗證**：paired ±1000 真實 median **15** = H006 TO 估算 **15**（CpG 密度物理事實，與 track 無關）→ window→CpG 部分 paired/TO 通用。
+- **判決**：**保持 ±5000bp**——CpG 充足（paired median 76, <10=0%）+ 位點幾乎不因 CpG 不足被移除（paired 真實確認）；±1000 降覆蓋率（H006 TO：FN 7%→1.4%）。辨別力是否隨 window 變對 paired 待測（U5）。
 
 ### 1.3 外部做法 + 升級方向
 - 多數外部工具（modkit/DSS/methylKit）**無 SNV-anchored window 概念**（per-CpG 率差 / DMR region），ISM 的 SNV±window 是軸 C 路線特有。
@@ -77,6 +78,7 @@ data_sources:
 | U2 | C_min=3 是否「最佳」（非僅合理）| 理論 ≥4 級解析合理，未優化 | C_min vs 分群品質曲線 |
 | U3 | window=5000 vs 動態 LD-block | 5000 有據，LD-block 未測 | LD-block 實作 + 對比 |
 | U4 | 上述參數對 subclone clustering 的敏感度 | 未直接測 | 參數 × 分群品質 grid |
+| U5 | paired track 辨別力是否隨 window 變 | H006 只有 **TO**；paired 未測 | paired 多 window 完整 significance + TP/FP |
 
 > 寫論文/軟體框架時：window=5000 / C_min=3 理由 / 共同 CpG 影響分群 = **可直接寫（數據+理論支持）**；U1-U4 = **標為待驗證或需實測**，不可寫成定論。
 
