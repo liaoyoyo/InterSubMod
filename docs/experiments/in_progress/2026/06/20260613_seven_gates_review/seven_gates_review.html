@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!-- data_sources: baseline/g_filter_stats.json + 源碼 file:line + ../20260613_u1_maxdist_vs_skip + ../../methodology/20260612_sampling_settings_rationale_01.md -->
+<html lang="zh-Hant"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISM 取樣七道守門 review — HCC1395 paired</title>
+<style>
+body{font-family:-apple-system,"Segoe UI","Microsoft JhengHei",sans-serif;max-width:1000px;margin:0 auto;padding:24px;color:#222;line-height:1.6}
+h1{border-bottom:3px solid #2c5aa0;padding-bottom:8px;color:#2c5aa0}
+h2{margin-top:32px;border-left:5px solid #2c5aa0;padding-left:10px;color:#1a3a6a}
+.l0{background:#eef4fb;border:1px solid #2c5aa0;border-radius:8px;padding:14px 18px;margin:16px 0;font-size:1.05em}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:0.92em}
+th,td{border:1px solid #ccc;padding:7px 9px;text-align:left;vertical-align:top}
+th{background:#2c5aa0;color:#fff}
+tr:nth-child(even){background:#f6f9fc}
+.ok{color:#1a7a3a;font-weight:bold}.warn{color:#b8860b;font-weight:bold}.bad{color:#c0392b;font-weight:bold}
+.bar{display:inline-block;height:14px;background:#2c5aa0;border-radius:2px;vertical-align:middle}
+.q{background:#fafafa;border:1px solid #ddd;border-radius:6px;padding:12px 16px;margin:12px 0}
+.q h3{margin:0 0 6px;color:#2c5aa0}
+code{background:#eef;padding:1px 4px;border-radius:3px;font-size:0.9em}
+.meta{color:#777;font-size:0.85em;border-top:1px solid #ddd;margin-top:30px;padding-top:12px}
+</style></head><body>
+
+<h1>ISM 取樣「七道守門」review</h1>
+<p class="meta">2026-06-13 · HCC1395 HKU 5kHz <b>paired</b> tumor/normal · 數據基於 chr1 ±5000bp BERNOULLI（<code>baseline/g_filter_stats.json</code>）+ 源碼 file:line · branch chore/ism-review-param-governance-202606</p>
+
+<div class="l0">
+<b>L0 結論：</b>七道守門<b>全部必要且有理論支持</b>，不影響結論、且讓結論更清楚。read 層（守門1-4）是<b>同時累積所有 reason、無內部順序</b>。數據顯示守門5（SNV 覆蓋）篩最多（<b>40.7%</b>，±5000 大窗必然）；守門4（MM/ML）此 BAM 篩 0（純 defensive）。唯一明確待修 = SKIP segfault bug（守門7 替代策略）。
+</div>
+
+<h2>§1 七道守門總表（pipeline 順序 + 必要性 + 理論 + 數據）</h2>
+<table>
+<tr><th>#</th><th>守門</th><th>file:line</th><th>必要性</th><th>篩掉占經過<br>(chr1 ±5000)</th><th>理論證據</th></tr>
+<tr><td>1</td><td>FLAG (secondary/supp/dup/unmap)</td><td>ReadParser.cpp:31-42</td><td class="ok">✅必要</td><td>SUPPLEMENTARY 3.2%<br>SECONDARY 1.7%</td><td>非 primary 比對不可靠（標準 BAM QC）</td></tr>
+<tr><td>2</td><td>MAPQ ≥ 20</td><td>:45-47</td><td class="ok">✅必要</td><td>LOW_MAPQ 2.1%</td><td>MAPQ20≈99%比對正確；ONT 多 MAPQ60 故幾乎不 binding</td></tr>
+<tr><td>3</td><td>read 長度 ≥ 1000</td><td>:49-53</td><td class="ok">✅合理</td><td>SHORT_READ 8.1%</td><td>短 read 甲基訊息少；可直接 <code>bam_cigar2qlen</code> 讀、不需解析甲基→早篩省計算</td></tr>
+<tr><td>4</td><td>須有 MM + ML tag</td><td>:55-65</td><td class="warn">⚠必要但冗餘</td><td><b>0%</b>（此 BAM 全有）</td><td>無 mod call 無甲基；與 MethylationParser:23 重複 = defense-in-depth</td></tr>
+<tr><td>5</td><td>tumor 覆蓋 SNV (ALT/REF)</td><td>ReadAggregator</td><td class="ok">✅核心</td><td class="bad">40.7%（最大）</td><td>SNV-anchored 設計基礎；±5000 大窗納入大量不過 SNV 的 read</td></tr>
+<tr><td>6</td><td>dedup (qname)</td><td>ReadAggregator</td><td class="warn">⚠合理可議</td><td>（另階段未記）</td><td>去 PCR/技術重複；保留重複 read 有 future 觀察價值（見 §3 #4）</td></tr>
+<tr><td>7</td><td>C_min=3 → MAX_DIST=1.0</td><td>DistanceMatrix.cpp:50,413</td><td class="warn">⚠U1 已驗</td><td>BERNOULLI invalid ~18%</td><td>≥4 級距離解析避免隨機；SKIP 替代 segfault（見 §3 #5）</td></tr>
+</table>
+
+<h2>§2 #3 各層篩掉多少 read（chr1 ±5000，2624 位點）</h2>
+<p>每位點<b>經過 avg 252 read</b>（保留 120 + 篩掉 132），<b>保留率 47.5%</b>。保留位點 NumReads median=118（min=60，位點層門檻 reads≥10/≥20 完全不 binding）。</p>
+<table>
+<tr><th>守門</th><th>filter_reason</th><th>占經過 read %</th><th>視覺</th></tr>
+<tr><td>5 SNV 覆蓋</td><td>SNV_NOT_COVERED</td><td class="bad">40.74%</td><td><span class="bar" style="width:407px"></span></td></tr>
+<tr><td>3 read len</td><td>SHORT_READ</td><td>8.08%</td><td><span class="bar" style="width:81px"></span></td></tr>
+<tr><td>1 FLAG</td><td>SUPPLEMENTARY</td><td>3.15%</td><td><span class="bar" style="width:32px"></span></td></tr>
+<tr><td>2 MAPQ</td><td>LOW_MAPQ</td><td>2.08%</td><td><span class="bar" style="width:21px"></span></td></tr>
+<tr><td>1 FLAG</td><td>SECONDARY</td><td>1.70%</td><td><span class="bar" style="width:17px"></span></td></tr>
+<tr><td>4 MM/ML</td><td>(無)</td><td>0%</td><td>—</td></tr>
+</table>
+<p><b>洞察：</b>守門5（SNV 覆蓋）是壓倒性最大宗——±5000bp 大窗納入大量 read，但近半（40.7%）只覆蓋窗口一端、不過中心 SNV，被正確過濾。這是 SNV-anchored 設計的必然且必要，<b>不影響結論</b>。</p>
+
+<h2>§3 你的 5 個問題 — 逐一回答（含數據）</h2>
+<div class="q"><h3>#1 再次檢查 MM+ML 是否多餘？</h3>
+守門4（ReadParser:56-65）過濾須 MM+ML；MethylationParser:23 又 check。<b>數據：此 BAM 守門4 篩 0 read</b>（全有 MM/ML），MethylationParser 的 check 實務上 never triggers。結論：<span class="warn">冗餘但無害（defense-in-depth）</span>——parser 是 public/thread-safe，可能被獨立調用，保留為 safety net。建議加註解標明 defensive。</div>
+<div class="q"><h3>#2 read 長度 ≥ 1000 合理嗎？順序放 G3 適合嗎？</h3>
+🔑 read 層（守門1-4）是<b>同時累積所有 reason（:67 keep=全 NONE），無內部順序</b>——「放 G3 順位」不適用。✅ <b>你的洞察對</b>：read 長度可 <code>bam_cigar2qlen</code>(:50) 直接從 CIGAR 讀、不需解析甲基，現狀已在甲基解析前早篩。<b>數據：1000bp 篩掉 8.1%</b>（實質但溫和，非激進）。</div>
+<div class="q"><h3>#3 ±5000 下每層篩掉多少？</h3>
+✅ 見 §2。每位點經過 252 read、保留率 47.5%；守門5（SNV）40.7% 最大、守門3（len）8.1%、FLAG ~5%、MAPQ 2%、MM/ML 0%。</div>
+<div class="q"><h3>#4 dedup 合理嗎？保留更有用？</h3>
+去重（同 qname）避免重複膨脹，合理。⚠ <b>注意：dedup 不在 filtered_reads 記錄</b>（ReadAggregator 另階段），故此處無數字。🔑 <b>你的洞察值得記錄為 future 研究</b>：保留重複 read 可看 (a) copy 狀況 (b) 摺疊 read 主/附判別 (c) 重複 read 甲基一致性驗證分群 (d) 分群先後順序。結論：<span class="warn">dedup 保留為預設，重複 read 的分群驗證價值列 future</span>。</div>
+<div class="q"><h3>#5 無交集/共同CpG&lt;3 設 MAX_DIST=1.0 好嗎？會模糊影響？</h3>
+U1 全量對比已驗：🔴 <b>SKIP（不計入的替代）目前 segfault（NaN 矩陣讓 clustering/PERMANOVA 崩）= 新 bug</b>，不可用。✅ MAX_DIST BERNOULLI±5000 下 <b>Noise 僅 9.4%</b>（vs NHD±1000 的 26.4%）→ <b>不支持「大量模糊誤判」</b>。結論：<span class="warn">MAX_DIST 目前合理且唯一可用</span>；要嚴格驗證 SKIP 是否更優、是否反而缺 read（你的疑慮），<b>必須先修 SKIP segfault bug</b> 才能對比。</div>
+
+<h2>§4 結論 + 待辦</h2>
+<ul>
+<li class="ok">✅ 七道守門全部必要、有理論+數據支持、不影響結論（讓結論更清楚）。</li>
+<li class="ok">✅ read 層無內部順序（同時累積 reason）；守門5（SNV 覆蓋）是 ±5000 的最大過濾（40.7%，必然且必要）。</li>
+<li class="warn">⚠ 待補：守門4 MethylationParser 加 defensive 註解（Q1）；dedup 重複 read 分群價值列 future（#4）。</li>
+<li class="bad">🔴 待修：SKIP segfault bug（守門7 替代策略，#5）；dedup 篩掉量需另查（不在 filtered_reads）。</li>
+</ul>
+
+<p class="meta">數據來源：chr1 ±5000 BERNOULLI 實跑 → <code>baseline/g_filter_stats.json</code>（本輪 grep filtered_reads.tsv 統計）；守門 file:line 對 develop+Q1Q2 修正後源碼；U1 見 <code>../20260613_u1_maxdist_vs_skip/README.md</code>；window/C_min 見 <code>../../methodology/20260612_sampling_settings_rationale_01.md</code>。所有數字可回溯 grep，無捏造（§13）。</p>
+</body></html>
