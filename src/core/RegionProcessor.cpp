@@ -757,8 +757,18 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
         int32_t region_start = bounds.start;
         int32_t region_end   = bounds.end;
 
-        // Fetch reads from BAM
-        auto reads = bam_reader.fetch_reads(chr_name, region_start, region_end);
+        // Fetch reads from BAM.
+        // #3 (2026-06-13) tumor SNV-point fetch: only reads crossing the somatic SNV are
+        // useful for tumor (ALT/REF haplotyping); reads that merely overlap the ±window but
+        // do not cross the SNV are filtered out downstream anyway (SNV_NOT_COVERED, ~40% at
+        // ±5000). Fetching at the SNV point avoids fetching + alt-support-checking them.
+        // Methylation is still read over the full ref_seq window (region_start..region_end)
+        // since covering reads are long (ONT) and span the window. The alt_support filter is
+        // kept as a safety net (e.g. SNV at a deletion within a covering read).
+        // NOTE: normal reads (below) MUST keep the window fetch — they contribute the
+        // methylation baseline even when not covering the SNV.
+        int32_t snv_pos = static_cast<int32_t>(snv.pos);
+        auto reads = bam_reader.fetch_reads(chr_name, snv_pos, snv_pos + 1);
 
         // Expand window to cover full span of all reads (if enabled)
         if (use_full_read_span_ && !reads.empty()) {
