@@ -23,6 +23,11 @@ std::vector<MethylCall> MethylationParser::parse_read(const bam1_t* b, const std
     uint8_t* ml_aux = bam_aux_get(b, "ML");
 
     if (!mm_aux || !ml_aux) {
+        // NULL-GUARD (NOT redundant with ReadParser 守門4): this protects the
+        // bam_aux2Z(mm_aux) and ml_aux[0] accesses below — removing it would segfault
+        // on reads lacking MM/ML. ReadParser filters such reads upstream in the normal
+        // pipeline, but MethylationParser is public/thread-safe and may be called
+        // independently, so this guard MUST stay (defense-in-depth, not dead code).
         return calls;  // No methylation tags
     }
 
