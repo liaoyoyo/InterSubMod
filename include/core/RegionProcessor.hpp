@@ -466,6 +466,16 @@ private:
                                               RegionResult& result);
 
     /**
+     * @brief Retain reads forming a complete (NaN-free) distance sub-matrix.
+     *
+     * Greedily drops the read with the fewest non-NaN partners until no NaN pair
+     * remains. Mirrors StructureTest::filter_reads_for_complete_matrix so clustering
+     * and the downstream PERMANOVA use the same valid read subset. For NaN-free input
+     * (MAX_DIST) all reads are retained (no-op). Empty / size < 2 => region unclusterable.
+     */
+    static void extract_complete_submatrix_indices(const Eigen::MatrixXd& dist, std::vector<int>& out_indices);
+
+    /**
      * @brief Write strand-specific clustering trees
      *
      * @param forward_dist Forward strand distance matrix

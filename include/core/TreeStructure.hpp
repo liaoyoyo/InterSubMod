@@ -224,12 +224,14 @@ private:
      * @brief Recursively collect internal nodes
      */
     void collect_internal_nodes(const std::shared_ptr<TreeNode>& node,
-                                std::vector<std::shared_ptr<TreeNode>>& nodes) const;
+                                std::vector<std::shared_ptr<TreeNode>>& nodes,
+                                std::set<const TreeNode*>& visited) const;
 
     /**
      * @brief Recursively collect leaf nodes
      */
-    void collect_leaves(const std::shared_ptr<TreeNode>& node, std::vector<std::shared_ptr<TreeNode>>& leaves) const;
+    void collect_leaves(const std::shared_ptr<TreeNode>& node, std::vector<std::shared_ptr<TreeNode>>& leaves,
+                        std::set<const TreeNode*>& visited) const;
 
     /**
      * @brief Recursively collect all clades
