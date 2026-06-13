@@ -1085,7 +1085,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
     }
 
     // Header (updated with Multi-Stage HP verification and Quality Assessment columns)
-    csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,"
+    csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,NReadsValid,GlobalP,CramersV,"
                 "GlobalP_HPFamily,CramersV_HPFamily,GlobalP_HPFine,CramersV_HPFine,HPFine_NGroups_CF,"
                 "HeuristicScore,PassedGating,"
                 "PairwiseMeanDist,PairwiseMedianDist,"
@@ -1165,8 +1165,9 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
         chr_stats[chr_name].total++;
 
         csv_file << r.region_id << "," << chr_name << "," << snv.pos << "," << snv.ref_base << "," << snv.alt_base
-                 << "," << r.num_reads << "," << r.num_cpgs << "," << std::scientific << std::setprecision(6)
-                 << r.global_p_value << "," << std::fixed << std::setprecision(4) << r.cramers_v << ","
+                 << "," << r.num_reads << "," << r.num_cpgs << "," << r.num_reads_valid << ","
+                 << std::scientific << std::setprecision(6) << r.global_p_value << "," << std::fixed
+                 << std::setprecision(4) << r.cramers_v << ","
                  // Multi-layer HP (Cluster-First)
                  << std::scientific << std::setprecision(6) << r.global_hp_family_p << ","
                  << std::fixed << std::setprecision(4) << r.global_hp_family_v << ","
@@ -1554,6 +1555,7 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
     const int n_valid = static_cast<int>(valid_idx.size());
     if (n_valid < 2) return;  // not enough complete-overlap reads to cluster
     const bool is_subset = (n_valid != n_total);
+    result.num_reads_valid = n_valid;  // [gap1] reads used for clustering after NaN-pair drop (== num_reads under MAX_DIST)
 
     // Working distance matrix + read names in valid-read space (zero-copy when no drop).
     std::vector<std::string> read_names;

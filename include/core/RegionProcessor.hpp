@@ -35,6 +35,7 @@ struct RegionResult {
     int snv_id;
     int num_reads;
     int num_cpgs;
+    int num_reads_valid = 0;  ///< Reads used for clustering after NaN-pair filtering (SKIP); == num_reads under MAX_DIST
     int num_forward_reads;   ///< Forward strand reads
     int num_reverse_reads;   ///< Reverse strand reads
     int num_filtered_reads;  ///< Reads filtered out (debug mode)
