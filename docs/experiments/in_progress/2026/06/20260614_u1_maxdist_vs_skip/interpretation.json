@@ -1,0 +1,35 @@
+{
+  "experiment": "U1 MAX_DIST vs SKIP nan-distance-strategy (chr1 +-5000 BERNOULLI paired, fix 517ed90 binary)",
+  "headline": "SKIP 去 MAX_DIST 1.0 假距離污染後甲基分群訊號大幅浮現(Significant 91->1007, Strong 389->1767, CramersV_mean 0.017->0.230), 但 DominantLabel 主導 HP-axis germline(hp 83-90%) 非 somatic subclone — 與主軸 甲基=germline-haplotype 層級 一致",
+  "MAX_DIST_sig_axis": {
+    "Significant": 91,
+    "DominantLabel": {
+      "hp": 82,
+      "allele": 9
+    },
+    "hp_fraction": 0.901,
+    "HPMergedSig": 81,
+    "AlleleSig": 60,
+    "SampleASM_Sig": 90
+  },
+  "SKIP_sig_axis": {
+    "Significant": 1007,
+    "DominantLabel": {
+      "hp": 835,
+      "allele": 172
+    },
+    "hp_fraction": 0.829,
+    "HPMergedSig": 897,
+    "AlleleSig": 637,
+    "SampleASM_Sig": 1007
+  },
+  "confound_checks": {
+    "small_sample_artifact": "排除 — SKIP 新增 940 sig NumReads median=116 (≈全體118), 非小樣本",
+    "permanovaP_floor": "SKIP 新 sig PermanovaP median=0.01 = 99-perm 下限(1/100), 非邊緣; CramersV median=0.573 強關聯",
+    "germline_vs_subclone": "主導 HP-axis(germline haplotype); 需 normal-only HP 對照分離 tumor-specific subclone(本 run 未產)"
+  },
+  "record_gaps": {
+    "gap1_n_reads_valid": "summary 無 n_reads_valid 欄 — SKIP per-region 剔除數不可從 summary 取得(只全域 runlog: invalid pairs 3489658 / valid ratio 82%)",
+    "gap2_germline_subclone_separation": "需 normal-baseline HP 分群對照區分 1007 sig 中真 somatic subclone 比例"
+  }
+}
