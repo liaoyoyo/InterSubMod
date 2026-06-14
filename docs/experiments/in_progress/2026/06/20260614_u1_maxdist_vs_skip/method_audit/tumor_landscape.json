@@ -1,0 +1,38 @@
+{
+  "input": "/tmp/u1_wg_skip/significance_summary.csv",
+  "n_regions": 30490,
+  "tumor_hp": {
+    "has_tumor_hp": 30209,
+    "single_hp": 9760,
+    "single_hp_frac_of_has": 0.323,
+    "both_hp": 20449,
+    "both_hp_frac_of_has": 0.677,
+    "hp1_only": 5050,
+    "hp2_only": 4710
+  },
+  "loh": {
+    "potential_loh": 2605,
+    "potential_loh_frac": 0.085,
+    "loh_subtype": {
+      "None": 27885,
+      "LOH_Strong": 1674,
+      "LOH_Weak": 541,
+      "LOH_Noise": 246,
+      "LOH_Subclone": 144
+    },
+    "hp_ratio_median": 0.5
+  },
+  "cnv": {
+    "coverage_category": {
+      "Normal": 18054,
+      "Elevated": 7082,
+      "CNV_Gain": 2643,
+      "Low": 2420,
+      "High_Copy": 280,
+      "CNV_Loss": 11
+    },
+    "coverage_multiple_median": 1.078,
+    "amplification_gt1.5_frac": 0.096,
+    "deletion_lt0.7_frac": 0.023
+  }
+}
