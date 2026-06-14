@@ -1,0 +1,74 @@
+{
+  "input": "/tmp/wg_hpauc/significance_summary.csv",
+  "n_regions": 30490,
+  "HP_AUC_Normal": {
+    "n_valid": 29579,
+    "n_undefined": 911,
+    "median": 0.788,
+    "mean": 0.775,
+    "frac_ge0.7_strong": 0.764,
+    "frac_0.6_0.7_mod": 0.156,
+    "frac_0.5_0.6_weak": 0.065,
+    "frac_lt0.5_anti": 0.014
+  },
+  "HP_AUC_Tumor": {
+    "n_valid": 20444,
+    "n_undefined": 10046,
+    "median": 0.641,
+    "mean": 0.673,
+    "frac_ge0.7_strong": 0.396,
+    "frac_0.6_0.7_mod": 0.193,
+    "frac_0.5_0.6_weak": 0.304,
+    "frac_lt0.5_anti": 0.106
+  },
+  "HP_AUC_All": {
+    "n_valid": 29928,
+    "n_undefined": 562,
+    "median": 0.623,
+    "mean": 0.637,
+    "frac_ge0.7_strong": 0.245,
+    "frac_0.6_0.7_mod": 0.347,
+    "frac_0.5_0.6_weak": 0.378,
+    "frac_lt0.5_anti": 0.029
+  },
+  "tumor_both_hp": {
+    "n_both_hp": 20449,
+    "tumor_auc_in_both": {
+      "n_valid": 20444,
+      "n_undefined": 5,
+      "median": 0.641,
+      "mean": 0.673,
+      "frac_ge0.7_strong": 0.396,
+      "frac_0.6_0.7_mod": 0.193,
+      "frac_0.5_0.6_weak": 0.304,
+      "frac_lt0.5_anti": 0.106
+    },
+    "normal_auc_in_both": {
+      "n_valid": 20177,
+      "n_undefined": 272,
+      "median": 0.785,
+      "mean": 0.771,
+      "frac_ge0.7_strong": 0.753,
+      "frac_0.6_0.7_mod": 0.159,
+      "frac_0.5_0.6_weak": 0.071,
+      "frac_lt0.5_anti": 0.017
+    }
+  },
+  "sig_subset": {
+    "n_sig": 11912,
+    "normal_auc_in_sig": {
+      "n_valid": 11681,
+      "n_undefined": 231,
+      "median": 0.804,
+      "mean": 0.795,
+      "frac_ge0.7_strong": 0.847,
+      "frac_0.6_0.7_mod": 0.122,
+      "frac_0.5_0.6_weak": 0.026,
+      "frac_lt0.5_anti": 0.006
+    }
+  },
+  "normal_auc_vs_significant": {
+    "median_normal_auc_when_sig": 0.804,
+    "median_normal_auc_when_notsig": 0.775
+  }
+}
