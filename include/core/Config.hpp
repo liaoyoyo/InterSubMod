@@ -36,7 +36,7 @@ struct Config {
     int min_site_coverage = 5;    ///< Minimum reads covering a CpG site to keep it
     int min_common_coverage = 3;  ///< Minimum common CpG sites to calculate distance (C_min)
 
-    NanDistanceStrategy nan_distance_strategy = NanDistanceStrategy::MAX_DIST;     ///< Strategy for missing distances
+    NanDistanceStrategy nan_distance_strategy = NanDistanceStrategy::SKIP;  ///< Missing-distance strategy. Default SKIP since 2026-06-14 (去 1.0 污染; HP-AUC 0.64->0.835). MAX_DIST=legacy/experimental.
     std::vector<DistanceMetricType> distance_metrics = {DistanceMetricType::BERNOULLI};  ///< Distance metrics to use
 
     bool pmd_gating = true;  ///< Whether to exclude CpG sites in PMDs

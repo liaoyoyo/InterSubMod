@@ -93,9 +93,9 @@ public:
                        "Minimum common CpG sites to compute distance (C_min) (Default: 3)")
             ->check(CLI::PositiveNumber);
 
-        std::string nan_strategy_str = "MAX_DIST";
+        std::string nan_strategy_str = "SKIP";  // default SKIP since 2026-06-14 (HP-AUC 0.64->0.835)
         app.add_option("--nan-distance-strategy", nan_strategy_str,
-                       "Strategy for pairs with insufficient overlap: MAX_DIST, SKIP (Default: MAX_DIST)")
+                       "Strategy for pairs with insufficient overlap: SKIP, MAX_DIST (Default: SKIP)")
             ->check(CLI::IsMember({"MAX_DIST", "SKIP", "max_dist", "skip"}, CLI::ignore_case));
 
         app.add_option("--max-distance-value", config.max_distance_value, "Value for MAX_DIST strategy (Default: 1.0)")

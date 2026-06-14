@@ -36,6 +36,9 @@ struct RegionResult {
     int num_reads;
     int num_cpgs;
     int num_reads_valid = 0;  ///< Reads used for clustering after NaN-pair filtering (SKIP); == num_reads under MAX_DIST
+    double hp_auc_normal = -1.0;  ///< HP-AUC: distance recovers germline-HP on NORMAL reads, P(diff>same). -1=undefined
+    double hp_auc_tumor = -1.0;   ///< HP-AUC on TUMOR reads (-1 common: tumor single-HP at somatic site)
+    double hp_auc_all = -1.0;     ///< HP-AUC on ALL HP-labeled reads
     int num_forward_reads;   ///< Forward strand reads
     int num_reverse_reads;   ///< Reverse strand reads
     int num_filtered_reads;  ///< Reads filtered out (debug mode)
@@ -475,6 +478,18 @@ private:
      * (MAX_DIST) all reads are retained (no-op). Empty / size < 2 => region unclusterable.
      */
     static void extract_complete_submatrix_indices(const Eigen::MatrixXd& dist, std::vector<int>& out_indices);
+
+    /**
+     * @brief HP-AUC = P(dist(different-HP read pair) > dist(same-HP pair)) over a read subset.
+     *
+     * Ground truth = HP family label (germline haplotype from longphase). 1.0 = perfect HP
+     * separation, 0.5 = distance unrelated to HP, -1.0 = undefined (no same+diff pairs).
+     * NaN distances (SKIP invalid pairs) are skipped. Rank-based, O(P log P) over pair lists.
+     * @param hp_fam per-read HP family (0=HP1, 1=HP2, <0=excluded), indexed like the matrix.
+     * @param idx subset of read indices to evaluate (e.g. normal-only / tumor-only / all).
+     */
+    static double compute_hp_auc(const Eigen::MatrixXd& dist, const std::vector<int>& hp_fam,
+                                 const std::vector<int>& idx);
 
     /**
      * @brief Write strand-specific clustering trees
