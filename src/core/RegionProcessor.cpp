@@ -7,6 +7,7 @@
 #include <atomic>
 #include <chrono>
 #include <cmath>
+#include <random>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -1030,6 +1031,11 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                 if (!std::isnan(result.tumor_hp_signed_delta) && !std::isnan(result.normal_hp_signed_delta)) {
                     result.hp_signed_residual = result.tumor_hp_signed_delta - result.normal_hp_signed_delta;
                 }
+
+                // [Δβ module] read-level somatic residual Δβ + permutation test (#3 hp_residual 修法)
+                compute_somatic_residual_dbeta_test(meth_mat.raw_matrix, hp_merged_labels, is_tumor_mask, 999, 42,
+                                                    result.somatic_residual_dbeta, result.somatic_residual_dbeta_p,
+                                                    result.somatic_residual_dbeta_sig);
             }
 
             // Per-CpG ASM and epiallele metrics (Phase E)
@@ -1117,6 +1123,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 "Tumor_HP1,Tumor_HP2,Normal_HP1,Normal_HP2,"
                 // Signed HP methylation delta (direction-aware)
                 "Tumor_HP_Signed_Delta,Normal_HP_Signed_Delta,HP_Signed_Residual,Combined_HP_Signed_Delta,"
+                "SomaticResidualDbeta,SomaticResidualDbeta_P,SomaticResidualDbeta_Sig,"
                 // Phase C: LOH BED Annotation
                 "LOH_Bed_Overlap,LOH_Source,LOH_Bed_Annotation,"
                 // Phase D: Subclone Assignment
@@ -1256,6 +1263,9 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << (std::isnan(r.normal_hp_signed_delta) ? "NA" : std::to_string(r.normal_hp_signed_delta)) << ","
                  << (std::isnan(r.hp_signed_residual) ? "NA" : std::to_string(r.hp_signed_residual)) << ","
                  << (std::isnan(r.combined_hp_signed_delta) ? "NA" : std::to_string(r.combined_hp_signed_delta)) << ","
+                 // [Δβ module] somatic residual Δβ + permutation test
+                 << (std::isnan(r.somatic_residual_dbeta) ? "NA" : std::to_string(r.somatic_residual_dbeta)) << ","
+                 << r.somatic_residual_dbeta_p << "," << (r.somatic_residual_dbeta_sig ? "true" : "false") << ","
                  // Phase C: LOH BED Annotation
                  << (r.loh_bed_overlap ? "true" : "false") << ","
                  << r.loh_source << ","
@@ -1556,6 +1566,86 @@ double RegionProcessor::compute_hp_auc(const Eigen::MatrixXd& dist, const std::v
         wins += static_cast<double>(lo - same.begin()) + 0.5 * static_cast<double>(hi - lo);
     }
     return wins / (static_cast<double>(diff.size()) * static_cast<double>(same.size()));
+}
+
+void RegionProcessor::compute_somatic_residual_dbeta_test(const Eigen::MatrixXd& raw,
+                                                          const std::vector<int>& hp_fam,
+                                                          const std::vector<bool>& is_tumor, int n_perm,
+                                                          uint64_t seed, double& out_dbeta, double& out_p,
+                                                          bool& out_sig) {
+    out_dbeta = std::numeric_limits<double>::quiet_NaN();
+    out_p = 1.0;
+    out_sig = false;
+    const int n = static_cast<int>(raw.rows());
+
+    // Per-read mean β over valid (non-NaN) CpG. read-level so permutation is O(reads)/shuffle.
+    std::vector<double> read_mean(n, std::numeric_limits<double>::quiet_NaN());
+    for (int i = 0; i < n; ++i) {
+        double s = 0.0;
+        int c = 0;
+        for (int j = 0; j < raw.cols(); ++j) {
+            const double v = raw(i, j);
+            if (!std::isnan(v)) {
+                s += v;
+                ++c;
+            }
+        }
+        if (c > 0) read_mean[i] = s / c;
+    }
+
+    // Collect HP-labeled reads (0=HP1f, 1=HP2f) with valid mean + sample(T/N).
+    std::vector<double> mval;
+    std::vector<int> hp;
+    std::vector<char> tum;
+    for (int i = 0; i < n; ++i) {
+        if (hp_fam[i] < 0 || std::isnan(read_mean[i])) continue;
+        mval.push_back(read_mean[i]);
+        hp.push_back(hp_fam[i]);
+        tum.push_back(is_tumor[i] ? 1 : 0);
+    }
+
+    // residual = (tumor: mean β HP1 - mean β HP2) - (normal: mean β HP1 - mean β HP2)
+    auto residual = [&](const std::vector<char>& sample) -> double {
+        double t1 = 0, t2 = 0, nn1 = 0, nn2 = 0;
+        int ct1 = 0, ct2 = 0, cn1 = 0, cn2 = 0;
+        for (size_t k = 0; k < mval.size(); ++k) {
+            if (sample[k]) {
+                if (hp[k] == 0) {
+                    t1 += mval[k];
+                    ++ct1;
+                } else {
+                    t2 += mval[k];
+                    ++ct2;
+                }
+            } else {
+                if (hp[k] == 0) {
+                    nn1 += mval[k];
+                    ++cn1;
+                } else {
+                    nn2 += mval[k];
+                    ++cn2;
+                }
+            }
+        }
+        if (ct1 < 1 || ct2 < 1 || cn1 < 1 || cn2 < 1) return std::numeric_limits<double>::quiet_NaN();
+        return (t1 / ct1 - t2 / ct2) - (nn1 / cn1 - nn2 / cn2);
+    };
+
+    const double obs = residual(tum);
+    if (std::isnan(obs)) return;
+    out_dbeta = obs;
+
+    // Permutation: shuffle sample(T/N) label among HP-labeled reads (HP fixed). Null = tumor/normal share HP-ASM.
+    std::mt19937_64 rng(seed);
+    std::vector<char> perm = tum;
+    int n_extreme = 1;
+    for (int p = 0; p < n_perm; ++p) {
+        std::shuffle(perm.begin(), perm.end(), rng);
+        const double r = residual(perm);
+        if (!std::isnan(r) && std::abs(r) >= std::abs(obs)) ++n_extreme;
+    }
+    out_p = static_cast<double>(n_extreme) / static_cast<double>(n_perm + 1);
+    out_sig = out_p <= 0.05;
 }
 
 void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& all_dist,

@@ -166,6 +166,10 @@ struct RegionResult {
     double normal_hp_signed_delta;   ///< mean(normal_HP1_meth) - mean(normal_HP2_meth), NaN if invalid
     double hp_signed_residual;       ///< tumor_signed - normal_signed (somatic directional ASM change)
     double combined_hp_signed_delta; ///< mean(all_HP1_meth) - mean(all_HP2_meth) (full matrix)
+    // [Δβ module] somatic residual Δβ + permutation test (read-level; #3 修法, 取代有缺陷的 hp_residual_sig)
+    double somatic_residual_dbeta;    ///< (tumor: mean β HP1 - mean β HP2) - (normal: ...), read-level. NaN=invalid
+    double somatic_residual_dbeta_p;  ///< permutation p: shuffle T/N sample label (HP fixed), two-sided |perm|>=|obs|
+    bool somatic_residual_dbeta_sig;  ///< p <= 0.05 = tumor HP-ASM 顯著異於 normal germline baseline (somatic ASM)
 
     // LOH BED annotation (Phase C)
     bool loh_bed_overlap;        ///< Whether SNV position overlaps a LOH BED region
@@ -308,6 +312,9 @@ struct RegionResult {
           normal_hp_signed_delta(std::numeric_limits<double>::quiet_NaN()),
           hp_signed_residual(std::numeric_limits<double>::quiet_NaN()),
           combined_hp_signed_delta(std::numeric_limits<double>::quiet_NaN()),
+          somatic_residual_dbeta(std::numeric_limits<double>::quiet_NaN()),
+          somatic_residual_dbeta_p(1.0),
+          somatic_residual_dbeta_sig(false),
           loh_bed_overlap(false),
           loh_source("none"),
           per_cpg_asm_valid(false),
@@ -490,6 +497,18 @@ private:
      */
     static double compute_hp_auc(const Eigen::MatrixXd& dist, const std::vector<int>& hp_fam,
                                  const std::vector<int>& idx);
+
+    /**
+     * @brief somatic residual Δβ + permutation test (Δβ module, #3 hp_residual 修法).
+     *
+     * residual = (tumor: mean β(HP1) − mean β(HP2)) − (normal: same), read-level (per-read mean β).
+     * Tests somatic HP-ASM: does tumor's HP methylation difference exceed normal's germline baseline?
+     * Null: tumor & normal share HP-ASM → shuffle sample(T/N) label (HP fixed). Two-sided |perm|>=|obs|.
+     * Outputs dbeta / p / sig (NaN/1.0/false if any of the 4 (sample×HP) groups is empty).
+     */
+    static void compute_somatic_residual_dbeta_test(const Eigen::MatrixXd& raw, const std::vector<int>& hp_fam,
+                                                    const std::vector<bool>& is_tumor, int n_perm, uint64_t seed,
+                                                    double& out_dbeta, double& out_p, bool& out_sig);
 
     /**
      * @brief Write strand-specific clustering trees
