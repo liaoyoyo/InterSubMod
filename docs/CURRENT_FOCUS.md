@@ -12,7 +12,15 @@
 
 # 當前目標
 
-## 2026-06-11 — 🎯 主軸轉向（用戶確認）：Subclonal reconstruction 取代 G6 ⭐ 最新
+## 2026-06-14 — 📚 外部文獻驗證庫就緒（59 源親讀，稽核 CLEAN）⭐ 最新
+
+> **新 session / 論文撰寫先讀**：外部論文/程式碼實體驗證庫已建於 **repo 外** `/big7_disk/liaoyoyo2001/external_validation/`（**59 源** CONTEXT 卡 + 39 repo + 36 PDF；tier A×13·B×31·C×15；軸 10/12/11/14/6/6；57/59 親讀 + 2 cited_secondary〔mcf7/deamination〕）。**整體準確性對抗稽核（20 卡）= CLEAN**（0 MAJOR）；2026-06-15 5 cis-basis 卡親讀 PDF 升 fulltext_verified（並修出 Onuchic「NPD」捏造方法名 / Min heritability 二手數字 / Turcan citation 年份錯三處瑕疵）。repo 內橋接索引 = `InterSubMod/docs/method_comparison/20260613_external_validation_library_index_01.md`（含論文 Ch2 逐軸對應 + paper-critical 結論）；整體論文文獻地圖 = `external_validation/_landscape/08_paper_literature_map.md`。memory: `project_external_validation_library`。
+>
+> **3 個投稿必守口徑**：① 與 59 源 **0 真 CONFLICT**（最尖對比物皆 regime 差，EVOFLUx 自承 subclone 罕見反佐證弱-subclone）；② **ISM 創新點口徑 = 無監督 read×read 距離矩陣結構 PERMANOVA + normal-baseline cis-test + somatic-subclone 目標**（🔴**禁**用「對手二代定序」或「對手缺顯著性檢定」當差異 — cvlr/ASMS/MethylBERT 都 ONT-capable 且都有 randomization 檢定，會被 reviewer 打臉）；③ cancer 甲基-phasing 白地 source+全文雙證，**LongHap 2026=germline-only 不威脅**（Fig3C 強不對稱甲基反佐證 R2）。
+
+---
+
+## 2026-06-11 — 🎯 主軸轉向（用戶確認）：Subclonal reconstruction 取代 G6 ⭐
 
 > **新 session 先讀**：`InterSubMod/docs/reports/research_landscape/20260611_subclonal_reconstruction_paper_foundation_01.md`（新主軸基礎：6 樣本×3 癌種資產盤點 + V1-V12 成果 map + 誠實 gap + 交接清單）。
 >
@@ -47,15 +55,20 @@
 
 <!-- ┌─ 固定焦點區塊（2026-06-02 起；SessionStart 注入最先看到；每次主軸/背景變動時更新此區，不新增日期段；機械態 SoT = state/active.json+cycles，本區為人讀鏡像）─┐ -->
 
-## ★ 當前焦點（pinned；2026-06-11 主軸轉向 — 用戶確認）
+## ★ 當前焦點（pinned；2026-06-12 更新 — 資料驗證 + MEMORY 收斂；2026-06-11 主軸轉向）
 
 > **🎯 新主軸（取代 G6）**：**Subclonal reconstruction using somatic haplotagging and methylation profiles with Nanopore sequencing**。
 > **兩個互補 SoT 面**：① 甲基-phasing-assist `InterSubMod/docs/reports/research_landscape/20260611_subclonal_reconstruction_paper_foundation_01.md`（V1-V12 + 6 樣本資產 + G-A~E gap）② ASM-characterization + 四道 NEGATIVE + LOH-phasing 脊柱 + HD-1 gate + cross-line reconcile `InterSubMod/docs/concepts/2026/06/20260611_Subclonal_Reconstruction_Paper_Focus_整合篇章_01.md`。
-> **2026-06-11 `/pivot-direction` 已正式記錄轉向**（research_direction.md）。本 session 整理放緩所有任務完成；論文細節由後續 session 完成。
+> **2026-06-11 `/pivot-direction` 已正式記錄轉向**（research_direction.md）。論文細節由後續 session 完成。
 
-| 主軸 | tier | 狀態 | 下一步（後續 session）|
+> **🟢 2026-06-12 資料驗證 + 整理收斂（本 session）**：
+> - **G-A 資料 ready 升級**：6 樣本 tagged BAM+somatic VCF+ISM TP/FP 實測齊；**matched-normal 甲基實測 5/6 有**（HCC1395 5mC+5hmC · HCC1937/1954/H1437/H2009 5mC；**只 COLO829 缺**）→ V10 跨樣本對 **5 樣本（乳腺3+肺2）可直接跑衝 ⭐4**，G-A 非「全卡」。契約 `InterSubMod/docs/data_specs/20260612_external_data_dependencies_01.md`（6 normal 全 zhenyu112 帳號=SPOF）。
+> - **數據準確度/可尋性 7 改進**已 commit（3380681/805d66a/069cadb）：provenance stamp · P-17(盤點別憑記憶) · redirect banner · harness 10 燈 · 外部依賴契約。稽核 `InterSubMod/docs/data_specs/20260612_data_accuracy_findability_improvement_audit_01.md`。
+> - **MEMORY.md 收斂** 34KB→13.5KB、重組到新主軸（topic 檔全保留）。
+
+| 主軸 | tier | 狀態 | 下一步 |
 |------|------|------|--------|
-| **🆕 Subclonal reconstruction（somatic haplotag + methylation）**（新論文主軸）| ⭐3→⭐4 候選 | 兩面 foundation 已立；**6 樣本×3 癌種資產齊全**；🔴 共享開放問題 **G-B**（subclone 甲基 somatic-specific vs germline-allelic）+ **HD-1**（R-SELFREF 跑 or 降 characterization）gate 論文強度 | ①定 HD-1 ②先寫四道 NEGATIVE methods（今天防彈）③G-A 跨 6 樣本重現 ④G-B 對照 → 論文 outline |
+| **🆕 Subclonal reconstruction（somatic haplotag + methylation）**（新論文主軸）| ⭐3→⭐4 候選 | 兩面 foundation 已立；6 樣本資產齊 + **normal 甲基 5/6 ready**；🔴 gate = **HD-1**（R-SELFREF 跑 or 降 characterization）+ **G-B**（subclone 甲基 somatic-specific vs germline-allelic）| ①定 HD-1 ②先寫四道 NEGATIVE methods（HD-1 獨立、今天防彈）③**G-A 跨 5 樣本重現**（資料已 ready）④G-B 對照 ⑤COLO829 補甲基 normal → 論文 outline |
 | ~~G6 LOH-constrained phasing~~（**降為支撐材料**）| ⭐3 | ✅ park（=新主軸 phasing 脊柱，補充面詳述）| — |
 | ~~G1 ZAR1L/BRCA2 ASM~~（**降為支撐材料**）| ⭐3 | ✅ park（=新主軸 ASM characterization 層；本 session 工作站證據基座）| — |
 
@@ -81,7 +94,7 @@
 - **5/31 ASM tier 語意收斂回寫**（6 條 ledger entry，CURRENT_FOCUS 先前未反映）：ZAR1L/BRCA2 ASM **real but non-directional + non-discriminative + coverage-modulated**（連續 |Δβ| AUC=0.505 NEUTRAL；strong-ASM 5× FP enrichment = LOH→single-hap→low-cov→extreme baseline 的 regression-to-extreme artifact，ONE regime）；B2 clustering = germline allelic (Layer A)，somatic NEGATIVE 經 imprinting 正控（NORMAL GNAS/RB1 ARI=1.0）validated 為真 biology。**對外引用 ASM 必用此收斂口徑（勿用「方向 POSITIVE」over-claim）**。tier ⭐3 數字不變，語意收窄。
 
 **待用戶決定（本 session 新發現，未動）**：
-- 🔴 **`pre_commit_compile_check` + `kb_schema_check` 兩個 Hard Gate 被 settings `|| exit 0` neuter**（exit 2 被吃成 exit 0 → 實際不擋）+ `/tmp/ism_cpp_pending_compile.txt` 是 2026-05-10 的 **stale marker（32 檔）**。修法需同步清 marker（否則恢復 gate 會擋所有 commit）→ 涉 Hard Gate + 刪 /tmp 檔，待確認。
+- ✅ **[已解決，2026-06-12 fresh 驗證]** `pre_commit_compile_check` + `kb_schema_check` neuter **早已修復**（settings 現為 `1>&2`，2026-05-31 移除 `|| exit 0` mask）+ stale marker `/tmp/ism_cpp_pending_compile.txt` **已不存在**。harness_health 燈#2 HARD-GATE-TRUTH 持續監看 = GREEN。**勿再當 live 問題處理**（曾被就緒度稽核誤當 live 傳播）。
 - 🟡 **stale queue H013-018**（filter/caller-f1 已 DEAD 仍 queued）→ 待 `/pivot-direction` 降權。
 
 ---
