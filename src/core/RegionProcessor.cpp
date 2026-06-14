@@ -1085,7 +1085,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
     }
 
     // Header (updated with Multi-Stage HP verification and Quality Assessment columns)
-    csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,NReadsValid,GlobalP,CramersV,"
+    csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,NReadsValid,HP_AUC_Normal,HP_AUC_Tumor,HP_AUC_All,GlobalP,CramersV,"
                 "GlobalP_HPFamily,CramersV_HPFamily,GlobalP_HPFine,CramersV_HPFine,HPFine_NGroups_CF,"
                 "HeuristicScore,PassedGating,"
                 "PairwiseMeanDist,PairwiseMedianDist,"
@@ -1165,7 +1165,8 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
         chr_stats[chr_name].total++;
 
         csv_file << r.region_id << "," << chr_name << "," << snv.pos << "," << snv.ref_base << "," << snv.alt_base
-                 << "," << r.num_reads << "," << r.num_cpgs << "," << r.num_reads_valid << ","
+                 << "," << r.num_reads << "," << r.num_cpgs << "," << r.num_reads_valid << "," << std::fixed
+                 << std::setprecision(4) << r.hp_auc_normal << "," << r.hp_auc_tumor << "," << r.hp_auc_all << ","
                  << std::scientific << std::setprecision(6) << r.global_p_value << "," << std::fixed
                  << std::setprecision(4) << r.cramers_v << ","
                  // Multi-layer HP (Cluster-First)
@@ -1533,6 +1534,30 @@ void RegionProcessor::extract_complete_submatrix_indices(const Eigen::MatrixXd& 
     }
 }
 
+double RegionProcessor::compute_hp_auc(const Eigen::MatrixXd& dist, const std::vector<int>& hp_fam,
+                                       const std::vector<int>& idx) {
+    // Collect same-HP and diff-HP pairwise distances (skip NaN = SKIP invalid pairs).
+    std::vector<double> same, diff;
+    for (size_t a = 0; a < idx.size(); ++a) {
+        for (size_t b = a + 1; b < idx.size(); ++b) {
+            const int i = idx[a], j = idx[b];
+            const double d = dist(i, j);
+            if (std::isnan(d)) continue;
+            (hp_fam[i] == hp_fam[j] ? same : diff).push_back(d);
+        }
+    }
+    if (same.empty() || diff.empty()) return -1.0;
+    // Rank-based AUC = mean over diff of [#same<d + 0.5*#same==d] / n_same.
+    std::sort(same.begin(), same.end());
+    double wins = 0.0;
+    for (const double d : diff) {
+        const auto lo = std::lower_bound(same.begin(), same.end(), d);
+        const auto hi = std::upper_bound(same.begin(), same.end(), d);
+        wins += static_cast<double>(lo - same.begin()) + 0.5 * static_cast<double>(hi - lo);
+    }
+    return wins / (static_cast<double>(diff.size()) * static_cast<double>(same.size()));
+}
+
 void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& all_dist,
                                                            const std::vector<ReadInfo>& read_list,
                                                            const MethylationMatrix& meth_mat,
@@ -1540,6 +1565,29 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
                                                            const std::string& chr_name, const SomaticSnv& snv,
                                                            int region_id, RegionResult& result) {
     std::filesystem::create_directories(clustering_dir);
+
+    // [P1a] HP-AUC: does the read-read distance recover the germline-HP label?
+    // Ground truth = HP tag; computed on the full matrix (NaN pairs skipped under SKIP),
+    // per subset (normal-only cleanest germline truth; tumor often single-HP -> -1).
+    {
+        std::vector<int> hp_fam(read_list.size(), -1);
+        for (size_t i = 0; i < read_list.size(); ++i) {
+            const std::string& h = read_list[i].hp_tag;
+            if (!h.empty() && h[0] == '1')
+                hp_fam[i] = 0;
+            else if (!h.empty() && h[0] == '2')
+                hp_fam[i] = 1;
+        }
+        std::vector<int> idx_n, idx_t, idx_a;
+        for (size_t i = 0; i < read_list.size(); ++i) {
+            if (hp_fam[i] < 0) continue;
+            idx_a.push_back(static_cast<int>(i));
+            (read_list[i].is_tumor ? idx_t : idx_n).push_back(static_cast<int>(i));
+        }
+        result.hp_auc_normal = compute_hp_auc(all_dist.dist_matrix, hp_fam, idx_n);
+        result.hp_auc_tumor = compute_hp_auc(all_dist.dist_matrix, hp_fam, idx_t);
+        result.hp_auc_all = compute_hp_auc(all_dist.dist_matrix, hp_fam, idx_a);
+    }
 
     // [SKIP-fix] Filter reads to a complete (NaN-free) sub-matrix before clustering.
     // Hierarchical clustering / tree-cutting cannot consume NaN distances: a NaN pair is
