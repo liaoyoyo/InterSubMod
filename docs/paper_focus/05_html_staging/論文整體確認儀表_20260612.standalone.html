@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>論文整體確認儀表 — Subclonal Reconstruction (2026-06-12)</title>
+<!--
+  整體整理報告 = 碩論(docs/thesis/)的「驗證來源 + 確認層」。
+  所有數字來自已驗證底座（共識台帳 00_共識證據台帳 + master 表 §0），無新數字（§13-A）。
+  build_commit 069cadb / audit run wf_ba28f1e3-a85（51 agents / 606 claim / F=0）。
+-->
+<style>
+  :root{
+    --green:#1a7f37; --greenbg:#e6f4ea; --yellow:#9a6700; --yellowbg:#fff8e1;
+    --red:#cf222e; --redbg:#ffeef0; --star:#8250df; --starbg:#f3eefc;
+    --ink:#1c2128; --muted:#656d76; --line:#d0d7de; --card:#fff; --bg:#f6f8fa; --accent:#0969da;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,"PingFang TC","Microsoft JhengHei","Noto Sans CJK TC",sans-serif;
+       color:var(--ink);background:var(--bg);line-height:1.55;font-size:15px}
+  .wrap{display:grid;grid-template-columns:240px 1fr;max-width:1280px;margin:0 auto;gap:0}
+  nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:20px 14px;
+          border-right:1px solid var(--line);background:#fff;font-size:13.5px}
+  nav.toc h2{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px}
+  nav.toc a{display:block;padding:6px 10px;color:var(--ink);text-decoration:none;border-radius:6px;margin-bottom:2px}
+  nav.toc a:hover{background:var(--bg)}
+  nav.toc .prog{margin-top:14px;padding:10px;background:var(--bg);border-radius:8px;font-size:12.5px;color:var(--muted)}
+  nav.toc .prog b{color:var(--ink);font-size:15px}
+  main{padding:24px 30px;min-width:0}
+  header.hd{margin-bottom:8px}
+  header.hd h1{font-size:22px;margin:0 0 4px}
+  header.hd .sub{color:var(--muted);font-size:13.5px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+  section>h2{font-size:18px;margin:0 0 6px;display:flex;align-items:center;gap:8px;cursor:pointer}
+  section>h2 .tog{margin-left:auto;color:var(--muted);font-size:13px;font-weight:400}
+  .l0{background:var(--bg);border-left:4px solid var(--accent);padding:10px 14px;border-radius:6px;margin:8px 0}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:var(--bg);font-weight:600}
+  .badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .b-green{background:var(--greenbg);color:var(--green)} .b-yellow{background:var(--yellowbg);color:var(--yellow)}
+  .b-red{background:var(--redbg);color:var(--red)} .b-star{background:var(--starbg);color:var(--star)}
+  .b-grey{background:#eaeef2;color:var(--muted)}
+  .v-sur{color:var(--green);font-weight:600} .v-cha{color:var(--yellow);font-weight:600} .v-ref{color:var(--red);font-weight:600}
+  code{background:#eff1f3;padding:1px 5px;border-radius:4px;font-size:12px}
+  .stat{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}
+  .stat .box{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;text-align:center;flex:1;min-width:90px}
+  .stat .box b{display:block;font-size:20px}
+  .confirm{margin-top:10px;padding:10px 12px;background:var(--bg);border:1px dashed var(--line);border-radius:8px}
+  .confirm label{display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer}
+  .confirm textarea{width:100%;margin-top:6px;border:1px solid var(--line);border-radius:6px;padding:6px;font:inherit;font-size:13px;min-height:42px}
+  .pill{font-size:11.5px;color:var(--muted)}
+  details{margin:6px 0} summary{cursor:pointer;font-weight:600}
+  footer.pv{color:var(--muted);font-size:12.5px;margin:20px 0 40px;padding-top:12px;border-top:1px solid var(--line)}
+  .collapsed .body{display:none}
+  .note{color:var(--muted);font-size:12.5px}
+  @media(max-width:820px){.wrap{grid-template-columns:1fr}nav.toc{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line)}}
+  @media print{nav.toc{display:none}.wrap{grid-template-columns:1fr}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc">
+  <h2>確認儀表 TOC</h2>
+  <a href="#A">A · Headline 一眼</a>
+  <a href="#B">B · 驗證共識（硬底座）</a>
+  <a href="#C">C · 章節↔材料↔碩論</a>
+  <a href="#D">D · 校正與矛盾</a>
+  <a href="#E">E · 開放 gap + framing</a>
+  <a href="#F">F · 逐節確認 / 微調</a>
+  <div class="prog">
+    確認進度<br><b id="progN">0 / 6</b> 節已確認
+    <div style="margin-top:6px"><button onclick="resetAll()" style="font:inherit;font-size:12px;cursor:pointer">清除我的確認</button></div>
+  </div>
+</nav>
+<main>
+<header class="hd">
+  <h1>論文整體確認儀表 — Subclonal Reconstruction</h1>
+  <div class="sub">2026-06-12 · 碩論（<code>docs/thesis/</code>）的驗證來源 + 確認層 · build <code>069cadb</code> · 數字皆來自已驗證底座（無新數字）</div>
+</header>
+
+<!-- ===== A ===== -->
+<section id="A">
+  <h2>A · Headline 一眼 <span class="tog">▼</span></h2>
+  <div class="body">
+    <div class="l0"><b>論文 thesis：</b>用 longphase-S somatic haplotagging（genetic 引擎）重建 LOH-constrained 子克隆結構，並以 read-level 甲基化 <b>characterize</b> 子克隆內 ASM + 交付誠實「能做/不能做」目錄。<b>甲基 = characterization，非重建驅動</b>。</div>
+    <div class="stat">
+      <div class="box"><b>606</b>稽核 claim</div>
+      <div class="box"><b>45</b>✅ 可確認共識</div>
+      <div class="box"><b>13</b>🔴 矛盾（6 必修）</div>
+      <div class="box"><b>4</b>已校正（master §0）</div>
+      <div class="box"><b style="color:var(--green)">0</b>捏造（F=0）</div>
+    </div>
+    <p><b>framing 狀態（待你拍板）：</b>進取版「Subclonal reconstruction」headline 被紅隊 <span class="v-ref">REFUTED（as-stated）</span>（依賴單樣本 V11c + longphase-S 自我參照循環 + HD-1 OPEN）；保守版「ASM de-confound characterization」是硬底座（但 headline 須由 1/332,705 改 1/816）。<b>→ 決策建在 §B 驗證共識上。</b></p>
+    <details><summary>使用原則（你 2026-06-12 定，之後一律遵守）</summary>
+      <ol style="margin:6px 0">
+        <li><b>共識優先</b>：推理優先用本儀表 §B + master 表 §0 校正。</li>
+        <li><b>未知分級驗證</b>：有舊資料 → 可用但再次 grep 查驗；無資料 → 更嚴格（先小驗證、標 undetermined、勿填預期值）。</li>
+        <li><b>嚴謹敘述 + 來源佐證</b>：每數字附 primary 來源 + tier；有疑即質疑、追到影響源頭。</li>
+        <li><b>0 捏造</b>：grep 不到即標 <code>{{待填}}</code>/孤兒，絕不補。</li>
+      </ol>
+    </details>
+  </div>
+</section>
+
+<!-- ===== B ===== -->
+<section id="B">
+  <h2>B · 驗證共識（45 條硬底座 — 可直接寫進論文）<span class="tog">▼</span></h2>
+  <div class="body">
+    <div class="l0">篩選 = (D 數據 <b>或</b> 證據鏈) <b>且</b> 溯源 P <b>且</b> 紅隊 SURVIVES <b>且</b> 無矛盾。這 5 大塊集中在<b>負結果 + 溯源型事實</b>，是論文最防彈的地基。</div>
+    <table>
+      <tr><th>共識</th><th>關鍵數字</th><th>tier</th><th>來源</th></tr>
+      <tr><td><b>甲基不能 filter somatic TP/FP</b>（死四道）</td><td>LOSO +0.02236 → held-out −0.00012；5 樣本 mean −0.00004，p=0.125（sample-level circularity）</td><td><span class="badge b-green">🟢 P · 證據鏈</span> <span class="v-sur">SURVIVES</span></td><td><code>loso_findings.md:33/92/97</code></td></tr>
+      <tr><td><b>copy-dosage 非 driver / BRCA2 退役</b></td><td>MW p=0.6183；ρ(|Δβ|,CN)=−0.0829（REFUTED）；BRCA2 d_within=−0.023 ≪ d_copy=−0.11</td><td><span class="badge b-green">🟢 P · 證據鏈</span> <span class="v-sur">SURVIVES</span></td><td><code>fast_cnv_validation.json</code> / <code>copy_partition_confirm.json</code></td></tr>
+      <tr><td><b>跨樣本復現</b>（現象層）</td><td>同位點 somatic 復發 0/38（private）；6/6 excess-over-null +0.101–0.241（mean 0.168，3 癌種）</td><td><span class="badge b-green">🟢 P · 證據鏈</span> <span class="v-sur">SURVIVES</span></td><td><code>cross_sample_synthesis.json</code> / <code>*_gwasm.json</code></td></tr>
+      <tr><td><b>catalog 332,705 × 7-TAG 計數</b></td><td>A=1 / B=5 / C=12,868 / E=28,254 / G=291,518（精確加總 332,705）</td><td><span class="badge b-green">🟢 P · 證據鏈</span> <span class="v-sur">SURVIVES</span></td><td><code>catalog_tag_counts.json</code></td></tr>
+      <tr><td><b>AF↔NGroups = phasing 非甲基</b>（HD-4）</td><td>r=0.656；NGroups = HP-tag 計數（非甲基矩陣），99.5%≤2</td><td><span class="badge b-green">🟢 P · 證據鏈</span> <span class="v-sur">SURVIVES</span></td><td><code>LabelTest.cpp:265-305</code> / <code>hd4_attribution.json</code></td></tr>
+      <tr><td><b>same-hap occupancy</b>（✅ 本 session 親驗校正）</td><td>NG=2 Inner 同-haplotype 占用率 <b>6/6 ≥93%</b>：0.932/0.990/0.988/0.965/…（先前「3/6」是 TP-rate 誤標）</td><td><span class="badge b-green">🟢 P · 親驗</span></td><td><code>obs18_NG2_composition_by_sample.tsv</code>（親算 4/6 吻合）</td></tr>
+    </table>
+    <p class="note">註：ASM 真且 somatic-enriched（TP 3.95% > FP 1.07%）為 characterization 共識，但 sensitivity ~4%、COLO829 TP≈FP → 只 enrichment 不 retrieval（不可寫 filter）。</p>
+  </div>
+</section>
+
+<!-- ===== C ===== -->
+<section id="C">
+  <h2>C · 章節 ↔ 材料 ↔ 碩論章節對應 <span class="tog">▼</span></h2>
+  <div class="body">
+    <div class="l0">每節：重點句 → 材料/來源(tier) → 狀態 → <b>對應 <code>docs/thesis/chapters/</code> 章節</b>。本層餵養碩論正文，不重寫章節。</div>
+    <table>
+      <tr><th>論文節</th><th>重點句（assertion）</th><th>材料/來源(tier)</th><th>狀態</th><th>碩論章節</th></tr>
+      <tr><td><b>Introduction</b></td><td>long-read 單分子同讀三訊號；read-level 正交共驗證 + 誠實界定甲基能/不能 — 沒人做過</td><td><span class="badge b-grey">🔵 framing</span> 三訊號各有 read-level 證據</td><td><span class="badge b-green">✅ 可寫</span>（hook 措辭待框架）</td><td><code>ch1_introduction.md</code></td></tr>
+      <tr><td><b>Background</b></td><td>業界軸A（率差）vs 我們軸C（read-read 結構）；read-level subclonal 沒人做、甲基 filter 沒人證偽</td><td>~38 篇外部 + 4 軸地景 <span class="badge b-grey">L3</span></td><td><span class="badge b-yellow">🟡 守 3 不對齊 + 核引用</span></td><td>ch2（待建）</td></tr>
+      <tr><td><b>Methods</b></td><td>ISM pipeline（read×CpG→距離→CramersV gate→HP/LOH tag→normal-anchored cis）+ 9 驗證機制 + modkit r=0.98</td><td><span class="badge b-green">🟢</span> ISM 工具細節 + 04 對應表</td><td><span class="badge b-yellow">🟡 待 ISM-2/ISM-3/FDR</span></td><td><code>ch3_methods.md</code></td></tr>
+      <tr><td><b>Results</b></td><td>死四道 NEGATIVE🟢 / phasing 脊柱(押HD-1) / ASM characterization / 跨樣本 / catalog de-confound floor</td><td>見 §B + 校正後 floor 1/816</td><td><span class="badge b-green">✅ 多數可寫</span>，R2 卡 HD-1</td><td><code>ch4_results.md</code></td></tr>
+      <tr><td><b>Discussion</b></td><td>de-confound 貢獻 + chr17 例外 + 防雷（甲基不能 filter 機制）+ umtag future</td><td><span class="badge b-grey">🔵</span> + L3 文獻 + 🟢 結果</td><td><span class="badge b-green">✅ 可寫</span></td><td>ch5（待建）</td></tr>
+      <tr><td><b>Abstract / Conclusion</b></td><td>三訊號共驗證收束；甲基能佐證、不能篩選；交付 characterization + catalog + tooling</td><td><span class="badge b-grey">🔵 framing</span></td><td><span class="badge b-green">✅</span>（同框架拍板）</td><td><code>00_abstract.md</code></td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ===== D ===== -->
+<section id="D">
+  <h2>D · 校正與矛盾 <span class="tog">▼</span></h2>
+  <div class="body">
+    <p><b>✅ 已校正（master 表 §0，本 session 自有檔）：</b></p>
+    <table>
+      <tr><th>項</th><th>原 stale</th><th>校正後</th></tr>
+      <tr><td>same-hap</td><td>3/6 ≥93%</td><td><b>occupancy 6/6 ≥93%</b>（親驗 TSV；3/6 是 TP-rate 誤標）</td></tr>
+      <tr><td>cis floor</td><td>1/332,705</td><td><b>1/816 可測 loci</b>（~0.12%）；332,705 未全 cis-tested</td></tr>
+      <tr><td>chr17/TBC1D16</td><td>「乾淨/唯一」cis</td><td><b>最強 cis 候選</b>（copy 已控；殘餘 allele-axis 未解）</td></tr>
+      <tr><td>subclone-甲基</td><td>非 somatic-specific（已 NEGATIVE）</td><td><b>undetermined</b>（押 G-B null；germline-het 是錯對照）</td></tr>
+    </table>
+    <p><b>🔴 待修正（Hard-Gate / 他 session — 已做交辦單，不擅自改）：</b></p>
+    <div class="stat">
+      <div class="box"><b style="color:var(--red)">A</b>ledger:95（Hard-Gate）</div>
+      <div class="box"><b style="color:var(--red)">B</b>CURRENT_FOCUS:137</div>
+      <div class="box"><b style="color:var(--red)">C/D</b>整合篇章 / 正式學術版</div>
+      <div class="box"><b style="color:var(--yellow)">E</b>paper_focus 可即改</div>
+    </div>
+    <p class="note">完整逐檔逐行 → <code>InterSubMod/docs/paper_focus/00_待修正交辦單_HardGate他session_20260612_01.md</code>；對抗證據 → <code>_claim_audit_20260612/</code>。</p>
+  </div>
+</section>
+
+<!-- ===== E ===== -->
+<section id="E">
+  <h2>E · 開放 gap + framing 決策 <span class="tog">▼</span></h2>
+  <div class="body">
+    <table>
+      <tr><th>項</th><th>內容</th><th>影響</th><th>狀態</th></tr>
+      <tr><td><b>HD-1</b> 🔴</td><td>phasing by-construction 循環：跑 R-SELFREF（~25-50hr C++）or 降 characterization</td><td>R2 grade + framing</td><td><span class="badge b-red">你決策</span></td></tr>
+      <tr><td><b>G-A</b></td><td>V10/V11c 跨 6 樣本重現（normal 甲基 5/6 ready）</td><td>tier ⭐3→⭐4</td><td><span class="badge b-yellow">資產備齊未跑</span></td></tr>
+      <tr><td><b>G-B</b> 🔴</td><td>within-haplotype somatic-vs-baseline 正確 null</td><td>甲基-subclone 貢獻強度（押這）</td><td><span class="badge b-yellow">未跑</span></td></tr>
+    </table>
+    <div class="l0"><b>✅ 主軸已定（2026-06-12 拍板）= Subclonal reconstruction（case-demonstration）</b>；旗艦個案 chr2:18,086,020 grep-verified（PERMANOVA F=10.6 p=0.01，A 等位富集 HP1-1 子克隆，母本 HP1 全 G）→ <code>旗艦個案_chr2_18086020_subclone_20260612.standalone.html</code>。下表保留為脈絡：
+      <table style="margin-top:6px">
+        <tr><th></th><th>進取版</th><th>保守版</th></tr>
+        <tr><td>headline</td><td>Subclonal reconstruction（脊柱）</td><td>ASM de-confound characterization（catalog）</td></tr>
+        <tr><td>需 HD-1?</td><td><span class="badge b-red">需</span></td><td><span class="badge b-green">不需</span></td></tr>
+        <tr><td>稽核裁決</td><td><span class="v-ref">REFUTED（as-stated）</span></td><td><span class="v-sur">硬底座</span>（headline 改 1/816）</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== F ===== -->
+<section id="F">
+  <h2>F · 逐節確認 / 微調（你的勾選存在本機）<span class="tog">▼</span></h2>
+  <div class="body">
+    <p class="note">每節確認「重點對嗎 / 材料夠嗎 / 主軸聚焦對嗎」，勾選與留言存本機 localStorage（不上傳）。全勾完進度顯示 6/6。</p>
+    <div id="confirmHost"></div>
+  </div>
+</section>
+
+<footer class="pv">
+  <b>Provenance：</b> build_commit <code>069cadb</code> @ <code>research/subclonal-reconstruction-202606</code> ·
+  稽核 run <code>wf_ba28f1e3-a85</code>（51 agents / 606 claim / F=0）·
+  底座：<code>docs/paper_focus/00_共識證據台帳_20260612_01.md</code> + <code>00_論文章節材料對應總表_20260612_01.md</code> §0 ·
+  same-hap 親驗：<code>research/tpfp_loh_af_kde_discrimination/data/obs18_NG2_composition_by_sample.tsv</code> ·
+  所有數字來自已驗證底座，無新數字（§13-A 構造防捏造）。
+</footer>
+</main>
+</div>
+
+<script>
+// ---- collapsible sections ----
+document.querySelectorAll('section>h2').forEach(h=>{
+  h.addEventListener('click',e=>{ if(e.target.tagName==='A')return; h.parentElement.classList.toggle('collapsed');
+    h.querySelector('.tog').textContent = h.parentElement.classList.contains('collapsed')?'▶':'▼'; });
+});
+// ---- per-section confirm checklist (localStorage) ----
+const SECS=[
+  ['intro','Introduction（ch1）'],['background','Background（ch2）'],['methods','Methods（ch3）'],
+  ['results','Results（ch4）'],['discussion','Discussion（ch5）'],['framing','框架二選一 + HD-1']
+];
+const KEY='paper_confirm_20260612';
+function load(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return{}} }
+function save(s){ localStorage.setItem(KEY,JSON.stringify(s)); render(); }
+const host=document.getElementById('confirmHost');
+function render(){
+  const s=load();
+  host.innerHTML=SECS.map(([id,label])=>{
+    const c=s[id]||{}; const ck=c.ok?'checked':'';
+    return `<div class="confirm">
+      <label><input type="checkbox" data-id="${id}" ${ck}> ${label} <span class="pill">${c.ok?'已確認':'待確認'}</span></label>
+      <textarea data-note="${id}" placeholder="此節要微調/補的：重點？材料？聚焦？">${(c.note||'').replace(/</g,'&lt;')}</textarea>
+    </div>`;
+  }).join('');
+  host.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.addEventListener('change',e=>{
+    const st=load(); const id=e.target.dataset.id; st[id]=st[id]||{}; st[id].ok=e.target.checked; save(st);
+  }));
+  host.querySelectorAll('textarea').forEach(ta=>ta.addEventListener('input',e=>{
+    const st=load(); const id=e.target.dataset.note; st[id]=st[id]||{}; st[id].note=e.target.value;
+    localStorage.setItem(KEY,JSON.stringify(st)); updProg(st);
+  }));
+  updProg(s);
+}
+function updProg(s){ const n=SECS.filter(([id])=>(s[id]||{}).ok).length; document.getElementById('progN').textContent=n+' / 6'; }
+function resetAll(){ if(confirm('清除你在本機的所有確認與留言？')){localStorage.removeItem(KEY);render();} }
+render();
+</script>
+</body>
+</html>

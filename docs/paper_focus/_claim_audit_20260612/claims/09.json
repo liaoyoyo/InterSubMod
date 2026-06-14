@@ -1,0 +1,298 @@
+[
+  {
+    "id": "09-01",
+    "subject": "title_framing",
+    "claim": "每個結論都能回答三件事：用什麼方法驗的（驗證機制）、為什麼會這樣（研究機制）、證據多硬（tier）。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-02",
+    "subject": "filter_loso",
+    "claim": "filter 類結論用的是對抗性驗證（LOSO/null），所以最硬。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-03",
+    "subject": "cis_cross_sample",
+    "claim": "cis/跨樣本類用的是 copy/null 控制，所以多在 🟡 待原檔對賬。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "09-04",
+    "subject": "validation_decides_credibility",
+    "claim": "驗證機制決定可信度：LOSO 留一 + permutation null = 最對抗、最可防守（filter-DEAD 因此最硬）。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-05",
+    "subject": "research_mechanism_generality",
+    "claim": "研究機制決定能不能推廣：phasing/ASM 的研究機制是「LOH 單一 haplotype」——這是 single-pipeline + 單樣本天花板的根。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-06",
+    "subject": "external_corroboration_scope",
+    "claim": "外部佐證只在 characterization/negative 借得到力（Kapoor leakage、Martin-Trujillo CN-confound）；filter-positive 方向沒有外部可借（因為它本來就不成立）。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "09-07",
+    "subject": "filter_loso",
+    "claim": "甲基不能 filter somatic TP/FP；驗證機制 = LOSO 留一交叉 + permutation null + subhap-matched；研究機制 = sample-level circularity（in-dist 擬合 sample-specific noise，held-out 即崩）。",
+    "source_doc": "validation_map",
+    "cited_source": "loso_findings.md:33,87,92",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "09-08",
+    "subject": "filter_loso_external",
+    "claim": "甲基不能 filter somatic TP/FP 的外部佐證 = Kapoor & Narayanan 2023 leakage taxonomy L3.2/L1.3。",
+    "source_doc": "validation_map",
+    "cited_source": "Kapoor&Narayanan 2023 leakage taxonomy L3.2/L1.3",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "09-09",
+    "subject": "delta_beta_no_discrimination",
+    "claim": "|Δβ| 無直接判別力；驗證機制 = 2000× label-shuffle null AUC；研究機制 = 連續 |Δβ| 落在 null 分布內＝無訊號。",
+    "source_doc": "validation_map",
+    "cited_source": "funnel.md:39",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "09-10",
+    "subject": "asm_real_somatic_enriched",
+    "claim": "ASM 真且 somatic-enriched（非 filter）；驗證機制 = 6-sample significance-rate + subhap-matched 對照；研究機制 = somatic 突變於 LOH/single-haplotype 重塑 allelic 甲基。",
+    "source_doc": "validation_map",
+    "cited_source": "ledger:85",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "09-11",
+    "subject": "asm_real_somatic_enriched_external",
+    "claim": "ASM 真且 somatic-enriched 的外部佐證 = O'Neill/POG 2024 cis-ASM。",
+    "source_doc": "validation_map",
+    "cited_source": "O'Neill/POG 2024 cis-ASM",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "09-12",
+    "subject": "copy_dosage_not_driver",
+    "claim": "copy-dosage 非甲基分群 driver；驗證機制 = MW neutral-vs-gain + signed ρ(|Δβ|,CN) falsification；研究機制 = cnLOH（copy-neutral）分群≈neutral，改 copy 結構不改分群 magnitude。",
+    "source_doc": "validation_map",
+    "cited_source": "fast_cnv_validation.json:52,57",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "09-13",
+    "subject": "copy_dosage_not_driver_external",
+    "claim": "copy-dosage 非甲基分群 driver 的外部佐證 = Martin-Trujillo 2017（CN 解釋 82–92%）。",
+    "source_doc": "validation_map",
+    "cited_source": "Martin-Trujillo 2017（CN 解釋 82–92%）",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "09-14",
+    "subject": "high_deltabeta_fp_artifact",
+    "claim": "high-Δβ→FP 是 regression-to-extreme；驗證機制 = 條件 Fisher（覆蓋/clustering/LOH/subhap 分層）；研究機制 = LOH→single-haplotype→低覆蓋→極端 baseline 是 mechanistically 同一 regime。",
+    "source_doc": "validation_map",
+    "cited_source": "condition_fp_consensus.json（缺檔）",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "09-15",
+    "subject": "clustering_germline_allelic",
+    "claim": "甲基分群＝germline-allelic 非 somatic；驗證機制 = blind-ARI ruler + imprinting 正控 + germline-het null；研究機制 = read-level 甲基分群主要反映 germline allelic 基線。",
+    "source_doc": "validation_map",
+    "cited_source": "master_draft:111",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "09-16",
+    "subject": "clustering_germline_allelic_external",
+    "claim": "甲基分群＝germline-allelic 的外部佐證 = epipolymorphism Landan2012/Derrien2021。",
+    "source_doc": "validation_map",
+    "cited_source": "epipolymorphism Landan2012/Derrien2021",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "09-17",
+    "subject": "phasing_same_hap",
+    "claim": "phasing：somatic 同-HP1 子家族跨樣本一致；驗證機制 = n=7 signed-rank + bootstrap CI + paired 負控；研究機制 = LOH 物理只留單一 haplotype → somatic SNV 必形成同-HP1 子家族。",
+    "source_doc": "validation_map",
+    "cited_source": "master_draft:81",
+    "stated_tier": "🟢（but by-construction 部分循環）"
+  },
+  {
+    "id": "09-18",
+    "subject": "af_ngroups_phasing",
+    "claim": "AF↔NGroups＝phasing 非甲基；驗證機制 = control-for-methylation partial-r + C++ 定義溯源 + 分布 capped-count；研究機制 = NGroups=HP-tag sub-family count，LOH 區 1→2 是 AF 算術函數。",
+    "source_doc": "validation_map",
+    "cited_source": "hd4_attribution.json + ledger:92",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "09-19",
+    "subject": "cross_sample_phenomenon",
+    "claim": "跨樣本現象復現（非 cis 復現）；驗證機制 = 各樣本 private somatic + HP-shuffle null excess-over-null；研究機制 = 各癌種 somatic 都重塑 allelic 甲基（phenomenon-level）。",
+    "source_doc": "validation_map",
+    "cited_source": "*_gwasm.json",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "09-20",
+    "subject": "cross_sample_phenomenon_external",
+    "claim": "跨樣本現象復現的外部佐證 = O'Neill 189 tumors。",
+    "source_doc": "validation_map",
+    "cited_source": "O'Neill 189 tumors",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "09-21",
+    "subject": "same_locus_recurrence",
+    "claim": "同-locus 復發 absent/underpowered；驗證機制 = 38 keypos 復發計數 + E[overlap] 期望校正；研究機制 = private somatic mutation → 各癌不同位點；復發計數 0/38（🟢），E=0.16（🟡）。",
+    "source_doc": "validation_map",
+    "cited_source": "cross_sample_synthesis.json:47",
+    "stated_tier": "🟢(0/38) 🟡(E=0.16)"
+  },
+  {
+    "id": "09-22",
+    "subject": "chr17_clean_cis",
+    "claim": "chr17/TBC1D16 唯一乾淨 cis；驗證機制 = normal-anchored cis-test within>HP permutation；研究機制 = 真 allele 內甲基驅動（非 copy/drift）。",
+    "source_doc": "validation_map",
+    "cited_source": "tsg survey（另一檔）",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "09-23",
+    "subject": "brca2_role",
+    "claim": "BRCA2＝subclone/copy-confounded（非 cis 錨；HP1-1=somatic subclone tag 非 copy、非 CN-dosage）；驗證機制 = subclone/copy-partition d_copy vs d_within（+ copy-DOSAGE falsified）；研究機制 = HP-axis 在 amplified 區 conflate subclone/copy 與 allele；focal cis d_within=−0.023 邊際。",
+    "source_doc": "validation_map",
+    "cited_source": "tsg survey（copy_partition_confirm.json + fast_cnv_validation.json）",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "09-24",
+    "subject": "brca2_external_category_error",
+    "claim": "Martin-Trujillo 2017 是 CN-dosage 文獻 → 不 corroborate BRCA2（category error，dosage 已 REFUTED）；正確對照 = subclone-specific methylation + CAMDAC。",
+    "source_doc": "validation_map",
+    "cited_source": "Martin-Trujillo 2017",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "09-25",
+    "subject": "mechanism_loso",
+    "claim": "LOSO 留一交叉測「結論是否 sample-level 循環」；pass/fail 判準 = held-out 與 in-dist 落差大 → 循環 fail；用於任何「跨樣本 filter/predictor」claim。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-26",
+    "subject": "mechanism_permutation_null",
+    "claim": "permutation / label-shuffle null 測「訊號是否超過隨機」；判準 = 觀察值落在 null 內 → 無訊號；用於 AUC/excess/任何 effect 是否真。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-27",
+    "subject": "mechanism_subhap_matched",
+    "claim": "subhap-matched 對照測「是否『有無子單倍型』confound」；判準 = matched 後差異消失 → confound；用於 ASM somatic-enrichment。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-28",
+    "subject": "mechanism_mw_signed_rho",
+    "claim": "MW + signed ρ falsification 測「變因是否 driver（可證偽）」；判準 = 不可區分/反向 → driver 被 REFUTED；用於 copy-dosage、任何 dosage-artifact 假設。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-29",
+    "subject": "mechanism_condition_fisher",
+    "claim": "condition Fisher 分層測「FP 富集是訊號還是 regime」；判準 = OR 集中在 mechanistic 同一 regime → artifact；用於 high-Δβ→FP。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-30",
+    "subject": "mechanism_blind_ari",
+    "claim": "blind-ARI ruler + imprinting 正控測「分群是否 somatic-specific」；判準 = TP ARI < germline-het null → germline-allelic；用於 subclone/clustering specificity。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-31",
+    "subject": "mechanism_signed_rank_paired",
+    "claim": "n signed-rank + bootstrap + paired 負控測「方向是否跨樣本一致 + TO-specific」；判準 = paired 負控顯著 → 非 TO-specific；用於 phasing gap。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-32",
+    "subject": "mechanism_partial_r",
+    "claim": "control-for-methylation partial-r 測「關聯是甲基 mediator 還是別的」；判準 = 控甲基 r 幾乎不動 → 非甲基（collider）；用於 AF↔NGroups 歸因。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-33",
+    "subject": "mechanism_normal_anchored_cis",
+    "claim": "normal-anchored cis-test 測「真 cis vs copy vs drift」；判準 = within>HP perm 顯著 → cis，否則 copy/drift；用於每個 cis-candidate。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-34",
+    "subject": "mechanism_excess_over_null",
+    "claim": "excess-over-null（genome-wide）測「現象是否跨樣本復現」；判準 = 6/6 excess>0 → phenomenon 復現；用於跨樣本 generality。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "09-35",
+    "subject": "negative_is_hardest",
+    "claim": "最硬的是 NEGATIVE：①②③④⑥⑦⑧ 都 🟢；filter-DEAD 用的是最對抗的 LOSO+null，所以是論文最可防守的質量。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "09-36",
+    "subject": "cis_cross_sample_pending",
+    "claim": "cis/跨樣本還在 tsg 另一檔：⑤⑨⑪⑫ 待原檔對賬（投稿前定位）。",
+    "source_doc": "validation_map",
+    "cited_source": "02 文件庫 + 05 任務樹 P-provenance",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "09-37",
+    "subject": "no_filter_positive_row",
+    "claim": "沒有 filter-positive 列：任何「用甲基判別」的 claim 都進不了這張表（驗證機制一上就 fail）——這本身就是論文的結論。",
+    "source_doc": "validation_map",
+    "cited_source": "none",
+    "stated_tier": "🔵"
+  }
+]

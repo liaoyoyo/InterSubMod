@@ -1,0 +1,362 @@
+[
+  {
+    "id": "02-01",
+    "subject": "title_framing",
+    "claim": "本檔職責 = 補充另一個互補面：ASM-characterization + 四道 NEGATIVE methods + LOH-phasing 脊柱（即 foundation 文件所稱「G6/G1 降為支撐材料」的詳細證據映射）；新主軸 SoT = 20260611_subclonal_reconstruction_paper_foundation_01.md，本檔不是新主軸 SoT。",
+    "source_doc": "integ_chapter",
+    "cited_source": "InterSubMod/docs/reports/research_landscape/20260611_subclonal_reconstruction_paper_foundation_01.md",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-02",
+    "subject": "subclone_methyl_open_question",
+    "claim": "兩線共享的一個開放問題（必先解，gate 論文甲基貢獻）：subclone-discriminating 甲基（foundation V11c「亞群 ALT vs 母本 REF 可分」）到底是 somatic-specific 還是 germline-allelic baseline？",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "02-03",
+    "subject": "subclone_methyl_g_b_null",
+    "claim": "foundation 框：存在性窄翻（V11c ⭐3 核心候選），但 §5 G-B 正確 null 未跑（承認 germline-het null 是錯對照）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-04",
+    "subject": "subclone_methyl_germline_allelic",
+    "claim": "convergence 框：用 blind-ARI/germline-het null → germline-allelic 非 somatic-specific（Methods-Neg-4）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "InterSubMod/knowledge/11_external_literature/10_paper_readiness_convergence.md",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-05",
+    "subject": "subclone_methyl_writing_discipline",
+    "claim": "論文甲基-subclone 貢獻的強度押在 G-B 對照（within-haplotype somatic-vs-baseline，非跨-hap germline-het）；未跑 G-B 前，甲基-subclone 寫「存在性窄訊號 + 可用性負」，勿寫「甲基可重建子克隆」。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "02-06",
+    "subject": "title_framing",
+    "claim": "這篇論文今天就能開寫：用 ONT somatic haplotagging 重建 LOH-constrained 的 subclonal haplotype 結構（genetic 引擎，Grade B+ ⭐3），並以 read-level 甲基化 characterize 子克隆內的 allele-specific methylation + 交付一份機制解明的「甲基能做/不能做什麼」誠實目錄。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-07",
+    "subject": "hd1_gate",
+    "claim": "唯一決定性卡關 = HD-1（R-SELFREF 循環對照跑或不跑），由你決定。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "02-08",
+    "subject": "somatic_haplotagging",
+    "claim": "Somatic haplotagging：LongPhase-S 用 germline HP1/HP2 + somatic 子單倍型 HP1-1/HP2-1（HP1-1 = germline-H1 + somatic-ALT）；角色 = 重建引擎（genetic），證據級 L1-L2。",
+    "source_doc": "integ_chapter",
+    "cited_source": "HaplotagStrategy.cpp:505-516",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-09",
+    "subject": "phasing_same_hap",
+    "claim": "Subclonal reconstruction：NG=2 Inner same-HP1 > Outer 7/7（W=28, p=0.0078, gap 0.345）；Inner×NG=2 ≥93% same-hap 6/6；AF→NGroups 7/7（HD-4 確認 = phasing/occupancy 非甲基）；角色 = 主產品（Grade B+ ⭐3），證據級 L2（circularity caveat）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-10",
+    "subject": "methyl_role",
+    "claim": "Methylation profiles（read-level 5mCG/5hmCG）：ASM 真但 ~4% sens、非方向、copy-dosage-independent、不判別 TP/FP、subclone-甲基 = germline-allelic 非 somatic-specific；角色 = characterization + 誠實負結果（非重建驅動），證據級 L2。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-11",
+    "subject": "framing_discipline",
+    "claim": "最高優先框架紀律：subclonal reconstruction 由 haplotagging 驅動；甲基不獨立重建子克隆（甲基側 subclone 訊號是 germline-allelic、不 somatic-specific、不能 filter）；把甲基寫成「重建子克隆的判別力」= 與三~四道 NEGATIVE 直接矛盾，必撤。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "02-12",
+    "subject": "phasing_same_hap",
+    "claim": "T1 LOH-constrained phasing → §Result 1 脊柱：somatic haplotagging 重建 LOH-constrained 子克隆結構；可寫狀態 = POSITIVE（Grade B+，需 HD-1 caveat）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-13",
+    "subject": "af_ngroups_phasing",
+    "claim": "T6 AF→NGroups（HD-4 = phasing）→ §Result 1 支撐 — haplotype-occupancy signature（隨 AF 變）；可寫狀態 = POSITIVE（改述為 phasing 非甲基）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-14",
+    "subject": "asm_characterization",
+    "claim": "T2 ASM 存在 + T5 跨樣本 → §Result 2 子克隆內 ASM characterization（存在、小、非方向、跨 3 癌種現象復現）；可寫狀態 = READY-AS-CHARACTERIZATION。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-15",
+    "subject": "cis_test_chr17",
+    "claim": "T3 cis-test / copy-partition → §Result 2 支撐 — chr17/TBC1D16 唯一乾淨 cis exemplar；BRCA2 = 小 copy/subclone-confounded 例；可寫狀態 = READY-AS-METHODS。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-16",
+    "subject": "filter_negative",
+    "claim": "T4 methyl→TP/FP filter → §Methods-Neg 甲基不能 filter/判別子克隆（死四道）；可寫狀態 = READY-AS-NEGATIVE（最強）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-17",
+    "subject": "methyl_assist_future",
+    "claim": "T7 methyl-assist phasing (umtag) → §Discussion / future-work + 1 張 V10 copy-control 圖；可寫狀態 = NOT-READY（roadmap 非 result）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-18",
+    "subject": "phasing_same_hap",
+    "claim": "§R1 主：NG=2 Inner same-HP1 TP-rate > Outer cross-het，7/7，W=28 p=0.0078125, median gap 0.345 CI[0.104,0.459]；機制 LabelTest.cpp:265-302。",
+    "source_doc": "integ_chapter",
+    "cited_source": "LabelTest.cpp:265-302",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-19",
+    "subject": "phasing_same_hap_caveat",
+    "claim": "§R1 主 caveat：① Grade B+ 非 A；② p 量方向一致性非 effect（magnitude 跨樣本 11×）；③ n=7 生物上 n=6（HCC1395 算兩次）；④ single-pipeline ClairS-TO → ⭐3；⑤ R-SELFREF circularity 首段明說。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-20",
+    "subject": "phasing_negative_control",
+    "claim": "§R1 負控：paired gap median≈−0.0002, p=0.578 NS → 訊號 TO-specific、乾淨。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-21",
+    "subject": "filter_loso",
+    "claim": "甲基不能 filter 變異（死四道）之一：LOSO 100% circularity（in-dist +0.0224→held-out −0.0001）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-22",
+    "subject": "filter_auc_null",
+    "claim": "甲基不能 filter 變異（死四道）之二：|Δβ| AUC=0.505（null 內）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-23",
+    "subject": "filter_low_sensitivity",
+    "claim": "甲基不能 filter 變異（死四道）之三：powered 6-sample ~4% sens、COLO829 TP≈FP。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-24",
+    "subject": "filter_zone_aware_neg",
+    "claim": "甲基不能 filter 變異（死四道）之四：Zone-Aware QS NEG + CNV-zone filter（4 月關閉）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-25",
+    "subject": "copy_dosage_refuted",
+    "claim": "copy-dosage 非 driver：MW neutral-vs-gain p=0.6183、signed ρ(|Δβ|,CN)=−0.083 反向 → dosage REFUTED（全程式最乾淨單一結果）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-26",
+    "subject": "high_delta_beta_fp",
+    "claim": "high-Δβ→FP 因 regression-to-extreme：no-clustering OR=8.6 + LOH OR=4.1 + small-subhap OR=5.8（非低覆蓋 OR=0.87）；combo TP 0.86% vs FP 7.97%（~9×）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-27",
+    "subject": "subclone_methyl_germline_allelic",
+    "claim": "subclone-甲基 = germline-allelic 非 somatic-specific：blind-ARI（imprinting 正控 GNAS/RB1=1.000）somatic TP 0.135 < germline-het null 0.177, p=0.922。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-28",
+    "subject": "asm_cross_sample",
+    "claim": "CHARACTERIZATION：ASM 真、6/6 excess-over-null +0.101–0.241（3 癌種，現象層）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-29",
+    "subject": "cis_test_chr17",
+    "claim": "chr17/TBC1D16 唯一乾淨 cis（perm p=0.001）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-30",
+    "subject": "brca2_role",
+    "claim": "BRCA2 = 小 copy/subclone-confounded 例（勿寫精確 %、勿當 cis 錨）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-31",
+    "subject": "session_contribution",
+    "claim": "本 session 把 §Methods-Neg + §Confound-check 從「結論」升級為「有全位點證據 + 互動可檢視 + 獨立驗證 + 真值對照」（commit 8dbb931→5e69a99）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "commit 8dbb931→5e69a99",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-32",
+    "subject": "asm_locus_evidence_base",
+    "claim": "全 30,350 位點（chr1-22，TP 29,723/FP 627）逐位點雙圖（甲基 read×CpG + ISM 距離矩陣）+ 判斷/匯出工作站 → 子克隆內 ASM 的 read-level 證據基座。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-33",
+    "subject": "independent_validation",
+    "claim": "TP/FP-free 5 層獨立驗證（HP-permutation + split-half + 雙股 + bootstrap，非循環）：Tier A/B 85-86% 通過 → ASM 結構真實可複製（characterization 站得住）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-34",
+    "subject": "cramersv_gate",
+    "claim": "CramersV 可靠性閘控機制解明（Cochran 期望<5 歸零；2,788 over-strict 91% 為稀疏歸零）→ 「過嚴格」是統計安全閥非 bug。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-35",
+    "subject": "seqc2_cn_loh",
+    "claim": "SEQC2 CN 真值 × ISM 分類關連：ASM 在 SEQC2-LOH 最低（富集 0.46×）= 需兩條單倍型才可能有 ASM（生物學方向，非 CN 偽造）→ 直接 back-stop copy-confound 警告，強化 §Methods-Neg 2。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-36",
+    "subject": "session_contribution",
+    "claim": "本 session 落地全部支撐 ASM-characterization 軸 + 負結果軸，不新增任何「甲基正向重建子克隆」claim（與框架紀律一致）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-37",
+    "subject": "hd1_gate",
+    "claim": "HD-1（GO/NO-GO，你決定，AI 不代決）：subclonal reconstruction 的 headline（Inner same-HP1）by construction 部分循環（Inner 用 somatic-attributed HP1-1 定義）；只有兩條路：(1) 跑 R-SELFREF 全 7 樣本 flag-on 對照（~25-50hr C++）讓重建脊柱防彈、可寫成 positive 主結果；或 (2) 把 phasing/重建降為 characterization observation，讓三~四道 NEGATIVE 扛論文。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "02-38",
+    "subject": "paper_boundary",
+    "claim": "邊界（每節隨行）：① 單樣本 HCC1395（+ 配對正常）→ ⭐3；② single-pipeline ClairS-TO；③ chr1-22（無 X/Y）、SNV only；④ 甲基是 characterization 非重建驅動；⑤ 「重建」= LOH-constrained 同-haplotype 子家族分割，非完整 clonal phylogeny/CCF tree（勿 overclaim 成 full subclonal tree tool）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-39",
+    "subject": "framing_traps",
+    "claim": "5 大 framing trap：characterization-set 當 filter｜cis-anchor 當 subclone/copy-confound（BRCA2）｜private 當 underpowered（0/38）｜phenomenon-recurrence 當 cis-recurrence（6/6）｜held-out 當 true-rescue（umtag）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-40",
+    "subject": "filter_dead",
+    "claim": "甲基→TP/FP filter = DEAD（死四道）；勿重開；寫成最強 NEGATIVE。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-41",
+    "subject": "brca2_role",
+    "claim": "G6 三軸 framing → reframe 為本聚焦論文，標籤改：Grade B+、ASM=characterization、BRCA2 退役、umtag=future-work。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-42",
+    "subject": "g1_survey_paused",
+    "claim": "G1 ASM survey（chr5-22 dup-bug）暫緩；非關鍵路徑；characterization 已足夠寫。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-43",
+    "subject": "readiness_verdict",
+    "claim": "就緒度誠實評估：可以開寫 = YES，但有一個必須先做的決定（HD-1）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-44",
+    "subject": "readiness_verdict",
+    "claim": "有可寫的 positive 主結果 ✅（LOH-constrained 子克隆重建，Grade B+）— 但需 HD-1 決定寫成 positive-spine 還是 characterization；有可寫的 methods 主體 ✅（死四道 NEGATIVE，最 reviewer-proof，今天就防彈）；甲基角色清楚 ✅ characterization + 誠實負結果（非重建驅動）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "02-45",
+    "subject": "tier_upgrade_requirement",
+    "claim": "還缺什麼：🔴 HD-1 決定（跑 R-SELFREF or 降 characterization）；⭐4 需 COLO829（非必要）；clonal-tree 若要當 tool 需新建（建議不做、維持 characterization）。",
+    "source_doc": "integ_chapter",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  }
+]

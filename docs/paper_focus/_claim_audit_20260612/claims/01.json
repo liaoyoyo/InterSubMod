@@ -1,0 +1,226 @@
+[
+  {
+    "id": "01-01",
+    "subject": "title_framing",
+    "claim": "論文主軸標題：Subclonal reconstruction using somatic haplotagging and methylation profiles with Nanopore sequencing — 用 longphase-S somatic haplotagging（把 tumor read 分到 germline 單倍型 HP1/HP2 與體細胞子單倍型 HP1-1/HP2-1/HP3）＋ per-read 甲基化 profile（ONT 原生 5mCG），在 read 層級重建腫瘤的亞克隆結構。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-02",
+    "subject": "title_framing",
+    "claim": "決策（2026-06-11 用戶確認）：此題目取代 G6 phasing 成為新主軸；G6 LOH-phasing / G1 ASM 既有成果降為支撐材料。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-03",
+    "subject": "methyl_haplotype_level",
+    "claim": "誠實前提（本研究線反覆驗證的鐵律）：甲基訊號是 germline-haplotype 層級（強：分 HP1 vs HP2）、subclone 層級弱（分同一 haplotype 內亞群 vs 母本只有「存在性窄訊號」、不可用於 read 救援）。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-04",
+    "subject": "filter_dead",
+    "claim": "甲基貢獻絕非 variant TP/FP filter（該方向已 concluded DEAD）。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-05",
+    "subject": "catalog_count",
+    "claim": "跨樣本資產盤點（2026-06-11 實掃）：6 個 cell line × 3 癌種，三要素齊全（tagged BAM + somatic_pass.vcf.gz + 甲基 modified_bases）。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-06",
+    "subject": "catalog_count",
+    "claim": "6 樣本甲基(5mCG)覆蓋率：HCC1395 100%、HCC1937 ~70%、HCC1954 100%、H1437 100%、H2009 100%、COLO829 100%；另有 HCC1395_DORADO 作為 basecaller 穩健性對照。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-07",
+    "subject": "normal_methyl_assets",
+    "claim": "normal 甲基 BAM（2026-06-12 samtools MM-tag 實測）：5/6 樣本 matched-normal 有甲基（HCC1395 5mC+5hmC · HCC1937/HCC1954/H1437/H2009 5mC）→ V10 跨樣本可跑；只 COLO829 R10 normal 無 MM tag（查 ONT_PAO 或重 basecall）。",
+    "source_doc": "foundation",
+    "cited_source": "InterSubMod/docs/data_specs/20260612_external_data_dependencies_01.md",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-08",
+    "subject": "normal_methyl_assets",
+    "claim": "6 normal 全 zhenyu112 帳號 + 4/6 symlink = SPOF（single point of failure）。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-09",
+    "subject": "tier_ceiling",
+    "claim": "意涵：單樣本 ⭐3 的硬上限可被打破 → 跨 6 樣本 × 3 癌種驗證可達 ⭐4。但全線單一 pipeline（longphase-S，HP tag 自我參照）仍是 tier 風險（需正交對照）。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-10",
+    "subject": "longphase_s_cascade",
+    "claim": "背景：longphase-S tag cascade — 已讀通原始碼（HaplotagStrategy.cpp:452 + SomaticHaplotagProcess.cpp:461，門檻0.6）；6-state 語意明確；狀態完整。",
+    "source_doc": "foundation",
+    "cited_source": "HaplotagStrategy.cpp:452; SomaticHaplotagProcess.cpp:461",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-11",
+    "subject": "methyl_not_copy_v10",
+    "claim": "甲基真實性（非 copy）V10：matched normal copy-clean AUC 0.979 ≥ tumor 0.866，6/6 染色體；depth-matched 否證 P-06；imprinting GNAS 正控 Δβ=0.49；狀態決定性（單樣本對）。",
+    "source_doc": "foundation",
+    "cited_source": "VERIFIED_RESULTS.md (V10)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-12",
+    "subject": "tag_distribution_v1",
+    "claim": "tag 分布 / 救援 pool V1：unphase 45.84%(13.8M) / HP1-1+HP2-1 ~4% / HP3 0.25%(76,738)。",
+    "source_doc": "foundation",
+    "cited_source": "VERIFIED_RESULTS.md (V1)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-13",
+    "subject": "methyl_carries_haplotype_v6",
+    "claim": "甲基帶 haplotype 資訊 V6：held-out 外推 88.5%（可分位點內）；V12：但全 unphase 僅 ~6% 可嘗試（94% 無本地錨點）；狀態已驗但適用性窄。",
+    "source_doc": "foundation",
+    "cited_source": "VERIFIED_RESULTS.md (V6, V12)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-14",
+    "subject": "t1_unphase",
+    "claim": "T1 unphase→H1/H2：SUPPORTED+caveats；誠實 headline V6 0.885；LOH 區未測；abstain gate chicken-egg；tier ⭐3。",
+    "source_doc": "foundation",
+    "cited_source": "VERIFIED_RESULTS.md (V6)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-15",
+    "subject": "t2_h3_assign",
+    "claim": "T2 H3→H1-1/H2-1：OVERSTATED；只證有真值的 1-1/2-1 可分(0.90)；歸實際 H3 未驗(無真值/僅15-18%可指派)；tier ⭐2-3。",
+    "source_doc": "foundation",
+    "cited_source": "VERIFIED_RESULTS.md",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-16",
+    "subject": "t3_subgroup",
+    "claim": "T3 拆 plain H1 是否亞群：存在性窄翻案(local-allele farCpG AUC 0.85 vs 噪音0.50)；可用性 NEGATIVE(ambiguous lean<0.5)；tier ⭐3。",
+    "source_doc": "foundation",
+    "cited_source": "VERIFIED_RESULTS.md",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-17",
+    "subject": "subclone_methyl_existence_v11c",
+    "claim": "subclone 甲基存在性（V11c 關鍵）：亞群 ALT vs 母本 REF 甲基可分（非 copy、非 somatic-CpG、無覆蓋 confound）→ 甲基確帶 subclone-discriminating 訊號；tier ⭐3，論文核心候選。",
+    "source_doc": "foundation",
+    "cited_source": "VERIFIED_RESULTS.md (V11c)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-18",
+    "subject": "verdict_methyl_haplotype_level",
+    "claim": "誠實 verdict 紅線 1：甲基 = germline-haplotype 層級（V10）；分不同 haplotype 強、within-haplotype 弱。",
+    "source_doc": "foundation",
+    "cited_source": "VERIFIED_RESULTS.md (V10)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-19",
+    "subject": "verdict_t3_usability_negative",
+    "claim": "誠實 verdict 紅線 2：T3 = 存在性窄翻、可用性 NEGATIVE；勿無條件説「甲基能拆亞群」；亞群甲基「可分」≠「可救 ambiguous read」（lean 8/8 <0.5）。",
+    "source_doc": "foundation",
+    "cited_source": "VERIFIED_RESULTS.md",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-20",
+    "subject": "verdict_t2_no_h3_claim",
+    "claim": "誠實 verdict 紅線 3：T2 勿宣稱「可歸 H3」（只證 1-1/2-1 可分；H3 無真值）。",
+    "source_doc": "foundation",
+    "cited_source": "VERIFIED_RESULTS.md",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-21",
+    "subject": "filter_dead",
+    "claim": "誠實 verdict 紅線 4：絕非 variant filter（DEAD）；是 subclonal reconstruction / characterization。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-22",
+    "subject": "cohesion_not_cis",
+    "claim": "誠實 verdict 紅線 5：cohesion ≠ cis；farCpG ±100bp 太窄，subclone-program vs 突變 cis 足跡未分。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-23",
+    "subject": "cross_sample_tier_unlock",
+    "claim": "誠實 verdict 紅線 6：跨樣本是 tier 解鎖關鍵，但 single-pipeline 自我參照仍需正交對照。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-24",
+    "subject": "gap_multisample_GA",
+    "claim": "Gap G-A 多樣本驗證：把 V10/V11c 跑遍樣本（normal 甲基實測 5/6 ready；COLO829 缺甲基 normal 需補）→ 現象跨癌種復現？優先 P0（tier 解鎖；5 樣本即可衝 ⭐4）。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-25",
+    "subject": "gap_within_hap_null_GB",
+    "claim": "Gap G-B within-haplotype somatic-vs-baseline 對照：T3/subclone 甲基的正確 null（非 germline-het null，後者是跨-hap 錯對照）；優先 P0（reopen T3 前置）。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-26",
+    "subject": "gap_cis_footprint_GC",
+    "claim": "Gap G-C subclone-program vs 突變 cis 足跡：更寬空間控制（排除突變 ±1-2kb）；normal-anchored cis-test；優先 P1。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-27",
+    "subject": "gap_reconstruction_demo_GD",
+    "claim": "Gap G-D 真正「重建」demo：從 somatic haplotag + 甲基實際輸出亞克隆結構（不只 read 分類）；優先 P1（論文 figure 1 候選）。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "01-28",
+    "subject": "gap_orthogonal_pipeline_GE",
+    "claim": "Gap G-E 正交 pipeline 對照：非 longphase-S 的第二定相/calling，破自我參照；優先 P2。",
+    "source_doc": "foundation",
+    "cited_source": "none",
+    "stated_tier": "none"
+  }
+]

@@ -1,0 +1,295 @@
+{
+  "group_id": "G05",
+  "subject": "phasing / NG=2 Inner same-HP1 > Outer 7/7 (same-hap 口徑 6/6 vs 3/6 OVERSTATED 矛盾 + by-construction circularity caveat)",
+  "n_claims": 29,
+  "auditor_note": "Primary truths grep-confirmed in evidence_ledger.jsonl: (a) ledger:58 cycle 20260530_loh_phasing_n7_cross_sample_wilcoxon -> W=28 p=0.0078125 7/7 median_gap=0.34467 CI[0.10379,0.4589] n6_prior W=21 p=0.015625 6/6, per-sample gaps HCC1937+0.52/HCC1395+0.46/DORADO+0.39/HCC1954+0.34/H1437+0.23/COLO829+0.104/H2009+0.05; (b) ledger:22 cycle 20260423_B3_paired_obs18_control -> paired gap median 0.00003 W=10 p=0.578 NS; (c) ledger:92 cycle 20260608_HD4_af_ngroups_attribution -> HD-4 RESOLVED=phasing(NGroups=HP-tag count not methylation); (d) ledger:95 overstated_flag -> same-hap 0.840/0.939/0.759/0.429/0.932/0.920 = only 3/6>=93% NOT 6/6; (e) ledger:27 cycle 20260423_weekly_report CL-LCP-001 -> OLD same-hap 93.2/99.0/98.8/96.5/98.3/97.0 = 6/6>=93% (the contradicting framing); (f) src/core/LabelTest.cpp:265-302 hp_to_fine_labels() confirmed (HP1->0/HP1-1->1/HP2->2/HP2-1->3 4-bucket). CONTRADICTION CONFIRMED REAL IN PRIMARY RECORD: two different same-hap number sets exist (OLD 6/6 vs corrected 3/6); corrected口徑 accepted project-wide but its RAW recompute output file is NOT in PRIMARY list (only in synthesis docs + ledger overstated_flag text) -> P-caveat + defer. The original obs18_NG2_composition_by_sample.tsv (TP-rate per side, Apr22) shows neither set verbatim -> corrected set is a re-derived occupancy metric. CITATION-LINE BUG: 4 claims cite 'CURRENT_FOCUS:137' for the overstated string but :137 is the unrelated HKU-handoff plan; actual '≥93% same-hap 6/6' lives at CURRENT_FOCUS:158. longphase HaplotagStrategy.cpp:452/SomaticHaplotagProcess.cpp:461 NOT in repo scope (external longphase-to-mod) -> defer.",
+  "claims": [
+    {
+      "id": "02-09",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 (W=28 p=0.0078 7/7 gap0.345); ledger:92 (HD-4=phasing). Same-hap '6/6 >=93%' sub-clause is OLD framing (ledger:27) now corrected to 3/6 (ledger:95) -> CONFLICT inside this claim",
+      "note": "Composite claim. 7/7 W=28 p=0.0078 gap0.345 P-confirmed; AF->NGroups HD-4=phasing P-confirmed (ledger:92). BUT embedded 'Inner×NG=2 >=93% same-hap 6/6' is the OVERSTATED口徑 contradicted by 07-22/11-28 (corrected to 3/6). single-pipeline ClairS-TO + circularity caveat -> P-caveat. Grade B+ ⭐3 L2 self-consistent with ledger tier.",
+      "flag": "CONFLICT_internal: '6/6 same-hap' sub-clause contradicts corrected 3/6 (07-22,11-28,05-35)"
+    },
+    {
+      "id": "02-12",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 (POSITIVE cross-sample); Grade B+ + HD-1 caveat narrative",
+      "note": "Synthesis framing claim (T1 LOH-constrained phasing -> §Result 1 spine, POSITIVE writeable). Underlying POSITIVE verdict P-confirmed at ledger:58. HD-1 caveat (R-SELFREF) is a gating decision not a measured number. single-pipeline ⭐3 -> P-caveat."
+    },
+    {
+      "id": "02-18",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 (W=28 p=0.0078125 7/7 median_gap=0.34467 CI[0.10379,0.4589]); src/core/LabelTest.cpp:265-302 hp_to_fine_labels()",
+      "note": "Strongest data claim. W=28 / p=0.0078125 / 7/7 / median gap 0.345 / CI[0.104,0.459] ALL match ledger:58 to the digit. Mechanism cite LabelTest.cpp:265-302 verified = hp_to_fine_labels() 4-bucket HP1/HP1-1/HP2/HP2-1. P-caveat only for single-pipeline ClairS-TO + by-construction circularity (R-SELFREF not yet run)."
+    },
+    {
+      "id": "02-19",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 (n=7 biological n=6 HCC1395 counted twice via DORADO; single-pipeline; R-SELFREF partial); ledger:27 (magnitude spread)",
+      "note": "Caveat-enumeration claim, all 5 caveats grep-supported: (1) Grade B+ not A = ledger:58 tier string; (2) p tests direction-consistency not effect, magnitude spread = per-sample gaps 0.05~0.52 (~11x) at ledger:58; (3) n=7 incl HCC1395_DORADO (HCC1395 twice) = datasets_tested ledger:58; (4) single-pipeline ClairS-TO ⭐3 = ledger:58; (5) R-SELFREF circularity = ledger:58 confound_control. Honest caveat claim, well-grounded."
+    },
+    {
+      "id": "02-20",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:22 cycle 20260423_B3_paired_obs18_control (paired gap median 0.00003, Wilcoxon W=10 p=0.578 NS; TO-specific)",
+      "note": "Paired negative control. p=0.578 NS matches ledger:22 exactly. Claim states median '≈-0.0002'; ledger says median 0.00003 (+, ~0). Both ~0/NS so substantively equal but exact -0.0002 sign differs from primary (+0.00003) -> P-caveat (minor sign/value discrepancy, conclusion NS identical)."
+    },
+    {
+      "id": "03-09",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 (POSITIVE Grade B+); cited_source '整合篇章 §2-3' is synthesis doc not primary",
+      "note": "Launch-readiness spine restatement (POSITIVE Grade B+ ⭐3, HD-1 caveat). Cites another synthesis doc (整合篇章), but underlying verdict+tier P-confirmed at ledger:58. Restatement of 02-12/02-09 -> S knowledge type, P-caveat."
+    },
+    {
+      "id": "04-07",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 (phasing 7/7); ASM-exists + filter-dead are other-group conclusions",
+      "note": "Three-signal synthesis (phasing 7/7 / ASM exists / filter dead). phasing 7/7 component P-confirmed ledger:58. ASM-exists and filter-dead belong to other claim groups (not re-verified here). Aggregate synthesis -> S, P-caveat for the phasing component."
+    },
+    {
+      "id": "04-30",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 (W=28 p=0.0078125 7/7)",
+      "note": "R2 LOH-phasing signature NG=2 Inner>Outer 7/7 W=28 p=0.0078125, Grade B+ R-SELFREF caveat. Numbers match ledger:58 to digit. P-caveat for single-pipeline + by-construction caveat (which the claim itself flags)."
+    },
+    {
+      "id": "05-32",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 (W=28 p=0.0078125 7/7, direction). cited_source master_draft:81 = synthesis line, but values match primary ledger",
+      "note": "§2.6 formal-arch: NG=2 Inner same-HP1>Outer direction 7/7 W=28 p=0.0078125. Matches ledger:58. cited_source 'master_draft:81' is a synthesis draft line (not primary) but the values themselves trace to ledger. P-caveat (single-pipeline)."
+    },
+    {
+      "id": "05-33",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:22 (paired W=10 p=0.578 NS)",
+      "note": "§2.6 'paired 負控 NS'. Bare restatement of the NS negative control, P-confirmed at ledger:22. Clean low-claim, no overstatement -> P."
+    },
+    {
+      "id": "05-34",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 (R-SELFREF self-reference PARTIAL, full 7-sample flag-on negative control NOT yet run)",
+      "note": "§2.6 caveat: by-construction partial circularity (R-SELFREF #21 待跑, pre-reg PR-1). This is a forward-looking gating/hypothesis statement (未跑) -> Q knowledge type. The circularity status (PARTIAL, full negative control deferred) is P-confirmed at ledger:58. Honest open-item -> P-caveat."
+    },
+    {
+      "id": "05-35",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:95 overstated_flag (0.840/0.939/0.759/0.429/0.932/0.920 only 3/6>=93%); docs/paper_focus/01_focus_notes/08...md:51,55. cited_source 'T-PROV' = provenance-audit synthesis, raw recompute output NOT in primary list",
+      "note": "§2.6 CORRECTED口徑: same-hap median ~92% but only 3/6>=93% (0.840/0.939/0.759/0.429/0.932/0.920, T-PROV修正, non-6/6). The corrected value-set matches ledger:95 overstated_flag verbatim. This is the FIX-side of the contradiction (correct). P-caveat: the corrected values' RAW recompute source file is not in PRIMARY list (only synthesis+ledger-flag text); original obs18 TSV shows TP-rates not these occupancy fractions -> defer raw-source archaeology. CONFLICT(resolved) vs OLD 6/6 framing (02-09 sub-clause, ledger:27)."
+    },
+    {
+      "id": "06-25",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 (W=28 p=0.0078125 7/7 median_gap 0.345)",
+      "note": "master_map R2 spine: NG=2 Inner>Outer 7/7 W=28 p=0.0078125 median gap 0.345 + by-construction caveat. All numbers match ledger:58. cited_source master_draft:81 synthesis but values trace to primary. P-caveat (single-pipeline + circularity)."
+    },
+    {
+      "id": "06-26",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "no primary number; HD-1 decision is a governance/gating item in synthesis docs (master_map). defer 不全repo考古",
+      "note": "R2 spine grade押HD-1決策 — grade depends on whether R-SELFREF is run. Pure forward-looking decision/hypothesis statement (no measured value to verify) -> Q. Lives only in synthesis (master_map), no primary anchor -> S provenance. Consistent with ledger:58 R-SELFREF-gates-Grade-A but not itself a datum."
+    },
+    {
+      "id": "06-45",
+      "axisA": "D",
+      "axisB": "WEAK",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:27 (OLD 93-99% 6/6) vs ledger:95 (corrected 3/6). Claim mixes BOTH: '93-99% same-hap' (OLD) AND '3/6 >=93% (非 6/6)' (corrected)",
+      "note": "INTERNALLY INCONSISTENT claim: states 'NG=2 Inner 93-99% same-hap' (the OLD overstated range from ledger:27) in the SAME breath as 'same-hap 口徑修正 3/6 >=93% 非 6/6' (the correction). The '93-99%' range only holds for the OLD number set, NOT the corrected 0.840/.../0.429 set. WEAK: claim juxtaposes contradicting口徑 without resolving. P-caveat values both exist in primary.",
+      "flag": "CONFLICT_internal: '93-99% same-hap' (OLD) coexists with '3/6 非 6/6' (corrected) in one claim"
+    },
+    {
+      "id": "07-11",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 (phasing 7/7 W=28 p=0.0078125)",
+      "note": "doc_library bare stat: phasing 7/7 W=28 p=0.0078125. Exact match ledger:58. Minimal, no overstatement, no caveat needed for the stat itself -> P (single-pipeline caveat applies to interpretation, but the datum is clean)."
+    },
+    {
+      "id": "07-22",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:95 overstated_flag (verbatim 0.840/0.939/0.759/0.429/0.932/0.920 only 3/6>=93%); docs/paper_focus/01_focus_notes/08...md:51",
+      "note": "THE OVERSTATED-correction claim. '同-hap >=93% 6/6' overstated, actual 0.840/0.939/0.759/0.429/0.932/0.920 -> 3/6>=93% (direction right, magnitude wrong). Value-set matches ledger:95 + 08 provenance doc verbatim. cited_source 'CURRENT_FOCUS:137' is WRONG LINE (the overstated string is at CURRENT_FOCUS:158, line 137 is HKU handoff plan). P-caveat: correction itself correct + ledger-backed, but raw recompute output deferred.",
+      "flag": "CITATION-LINE BUG: cited CURRENT_FOCUS:137 but actual string at :158"
+    },
+    {
+      "id": "07-30",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:27 (OLD 6/6 same-hap 93.2/99.0/98.8/96.5/98.3/97.0 = source of '>=93% 6/6' framing); ledger:95 (06-02 draft uses corrected)",
+      "note": "Meta-claim: '6/6 >=93%' is OLD framing, 06-02 draft did not restate it, need to relocate original 6-sample same-hap source. CORRECT diagnosis: the OLD source IS ledger:27 (CL-LCP-001, 20260423 weekly_report) = 6/6 median 97%. So the '待定位' source is actually FOUND = ledger:27. P-caveat: interpretation correct, the '待定位' is now resolvable to ledger:27."
+    },
+    {
+      "id": "09-17",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 (n=7 signed-rank + bootstrap CI + paired neg control mechanism); ledger:22 (paired neg control)",
+      "note": "validation_map: somatic same-HP1 subfamily cross-sample consistent; mechanism = LOH retains single haplotype -> somatic SNV forms same-HP1 subfamily. Mechanism narrative matches ledger:58 key_observations verbatim. stated_tier '🟢 but by-construction 部分循環' is honest. cited_source master_draft:81 synthesis but mechanism+stats trace to primary. P-caveat (circularity self-flagged)."
+    },
+    {
+      "id": "09-31",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:22 (paired neg control significant=>not-TO-specific decision rule); ledger:58 (signed-rank+bootstrap)",
+      "note": "Methodology description: n signed-rank + bootstrap + paired neg control tests direction-consistency + TO-specificity; decision rule = paired NS=>TO-specific. This is an accurate description of the actual method used (ledger:22 confirms paired W=10 p=0.578 NS -> CONFIRMED_NEGATIVE_CONTROL -> TO-specific). Methodological, not a datum -> P (method correctly described)."
+    },
+    {
+      "id": "10-06",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 (phasing 7/7 somatic<->haplotype orthogonal co-verification)",
+      "note": "storyline G-A spine: read-level LOH-haplotype characterization + phasing tooling (somatic<->haplotype orthogonal, 🟢 7/7) as paper spine. High-level synthesis framing; the 7/7 anchor P-confirmed ledger:58. S knowledge type (spine narrative), P-caveat (single-pipeline ⭐3)."
+    },
+    {
+      "id": "01-10",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "longphase external repo source NOT in scope: /big7_disk/longphase-to-mod/HaplotagStrategy.cpp + SomaticHaplotagProcess.cpp not found at expected path. defer 不全repo考古",
+      "note": "Background: longphase-S tag cascade source read (HaplotagStrategy.cpp:452 + SomaticHaplotagProcess.cpp:461, threshold 0.6, 6-state). These source files are in the EXTERNAL longphase-to-mod repo, NOT in InterSubMod primary list, and not found at /big7_disk/longphase-to-mod/. Cannot grep-confirm line numbers in scope -> S provenance + defer. Memory project_methyl_phasing_assist_line corroborates 'read longphase-S source 6-state cascade' but is itself secondary."
+    },
+    {
+      "id": "10-15",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:58 + :27 (LOH retains single haplotype -> somatic SNV forms same-HP1 subfamily; phasing somatic<->haplotype 7/7)",
+      "note": "Mechanism claim: under LOH tumor retains single haplotype -> somatic SNV forms same-HP1 subfamily (phasing orthogonal corroboration 7/7). Mechanism matches ledger:58 + ledger:27 key_observations verbatim. 7/7 P-confirmed. P-caveat (single-pipeline)."
+    },
+    {
+      "id": "11-03",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:95 overstated_flag (same-hap 93% 6/6 OVERSTATED -> actual 3/6); cited CURRENT_FOCUS:137 vs Thread D 實測",
+      "note": "catalog_provenance T-PROV: 1 external number overstated (same-hap 93% 6/6 -> actual 3/6) 必修. Correct overstated-detection, ledger:95-backed. Same CITATION-LINE issue: cites CURRENT_FOCUS:137 but actual string at :158. P-caveat.",
+      "flag": "CITATION-LINE BUG: CURRENT_FOCUS:137 should be :158"
+    },
+    {
+      "id": "11-28",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:95 overstated_flag (verbatim 0.840/0.939/0.759/0.429/0.932/0.920 only 3/6>=93% non-6/6); docs/paper_focus/01_focus_notes/08...md:51",
+      "note": "Same as 07-22 (catalog_provenance copy). same-hap >=93% 6/6 OVERSTATED, actual 0.840/0.939/0.759/0.429/0.932/0.920, 3/6 non-6/6. Value-set verbatim match ledger:95 + 08 doc. cited 'CURRENT_FOCUS:137 (散文) vs Thread D 實測'. P-caveat (raw recompute source deferred; correction itself correct).",
+      "flag": "CITATION-LINE BUG: CURRENT_FOCUS:137 should be :158"
+    },
+    {
+      "id": "11-29",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:95 overstated_flag + ledger:27 (6/6 direction-consistent high same-hap); docs/paper_focus/01_focus_notes/08...md:55",
+      "note": "CORRECT口徑: NG=2 Inner same-hap median ~92%, 6/6 samples direction-consistent (all high same-hap) but only 3/6>=93% (0.840/0.939/0.759/0.429/0.932/0.920). This is the accurate replacement framing. Value-set ledger:95-backed; '6/6 direction-consistent' aligns with ledger:27 (all OLD values also high). cited 'Thread D 實測' synthesis. P-caveat (raw recompute deferred)."
+    },
+    {
+      "id": "11-30",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "docs/paper_focus/01_focus_notes/08...md:57 (影響: '6/6一致'對方向 '6/6>=93%'錯量級); ledger:95",
+      "note": "Impact statement: '6/6 consistent' right (direction) but '6/6>=93%' wrong (magnitude); fix CURRENT_FOCUS + any citing doc before submission. Accurate impact assessment, matches 08 provenance doc:57. cited CURRENT_FOCUS:137 (same line-bug). P-caveat.",
+      "flag": "CITATION-LINE BUG: CURRENT_FOCUS:137 should be :158"
+    },
+    {
+      "id": "11-36",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:95 overstated_flag (3/6 非 6/6); docs/paper_focus/01_focus_notes/08...md:55",
+      "note": "next-step 必修: same-hap口徑 (3/6 非 6/6) -> fix CURRENT_FOCUS + phasing narrative before submission. Action item restating the correction, ledger:95-backed. P-caveat."
+    },
+    {
+      "id": "14-33",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:95 overstated_flag (3/6 非 6/6, T-PROV)",
+      "note": "prereg_fallback 必修: same-hap口徑 3/6 非 6/6 (T-PROV) -> sync phasing section. Action item restating correction, ledger:95-backed. P-caveat."
+    }
+  ],
+  "counts": {
+    "D": 13,
+    "I": 9,
+    "S": 4,
+    "Q": 2,
+    "P": 4,
+    "P-caveat": 21,
+    "S_provenance": 2,
+    "F": 0,
+    "weak": 1,
+    "grep_confirmed": 27
+  },
+  "flags": [
+    "CONTRADICTION CONFIRMED REAL: two same-hap number sets coexist in primary record — OLD 6/6>=93% (93.2/99.0/98.8/96.5/98.3/97.0, ledger:27 CL-LCP-001 20260423) vs CORRECTED 3/6>=93% (0.840/0.939/0.759/0.429/0.932/0.920, ledger:95 overstated_flag). 12 claims correctly flag OVERSTATED+fix; claims 02-09 and 06-45 still carry the OLD '6/6'/'93-99%' framing internally (02-09 unresolved sub-clause, 06-45 juxtaposes both口徑 = WEAK).",
+    "CITATION-LINE BUG (5 claims: 07-22,11-03,11-28,11-30 + 02-09 indirectly): all cite 'CURRENT_FOCUS:137' as the overstated-string location, but :137 is the unrelated 2026-05-22 HKU ClairS-TO handoff plan; the actual '≥93% same-hap 6/6' string is at CURRENT_FOCUS:158. Provenance pointer must be repaired alongside the magnitude fix.",
+    "P-caveat-by-construction on the corrected same-hap value-set (05-35,07-22,11-28,11-29): values 0.840/.../0.920 match ledger:95 + synthesis doc 08 verbatim, but their RAW recompute output file is NOT in the PRIMARY list — only in synthesis docs + ledger overstated_flag text. Original obs18_NG2_composition_by_sample.tsv (Apr22) holds per-side TP-rates (e.g. HCC1395 Inner same_HP1=0.959), NOT these occupancy fractions -> corrected set is a re-derived metric; raw source deferred (不全repo考古).",
+    "ORPHAN/EXTERNAL (01-10, S provenance): longphase-S source cites HaplotagStrategy.cpp:452 + SomaticHaplotagProcess.cpp:461 (threshold 0.6, 6-state) — these live in external longphase-to-mod repo, NOT found at /big7_disk/longphase-to-mod/ and not in InterSubMod primary list -> cannot grep-confirm line numbers in scope, defer.",
+    "STRONG-P core stat (02-18,04-30,05-32,06-25,07-11): W=28 / p=0.0078125 / 7/7 / median gap 0.34467 / CI[0.10379,0.4589] + per-sample gaps all match evidence_ledger.jsonl:58 to the digit; mechanism LabelTest.cpp:265-302 hp_to_fine_labels() verified in source. Paired neg control p=0.578 NS (02-20,05-33,09-31) matches ledger:22. Tier ⭐3 single-pipeline ClairS-TO is the only standing caveat on otherwise clean evidence chain.",
+    "MINOR: 02-20 claims paired median ≈-0.0002 but primary ledger:22 says +0.00003 (sign flip, both ~0/NS) — conclusion unaffected but exact value not from primary -> P-caveat."
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "group_id": "G06",
+  "subject": "AF↔NGroups = phasing 非甲基 (HD-4 RESOLVED r=0.656 collider, NGroups=HP-tag count 非甲基, NGroups~coverage artifact) — D4 NO-GO",
+  "n_claims": 16,
+  "auditor_note": "Primary truth fully landed: hd4_attribution.json (baseline spearman_r=0.6560846, n=36854, verdict PHASING-DRIVEN) + ledger:92 (cycle 20260608_HD4_af_ngroups_attribution) + C++ LabelTest.cpp:265-305/607-633 (hp_to_fine_labels = HP-tag string count; fine_n_groups=unique_groups.size(); methyl dist_matrix only for fine_f PERMANOVA, NOT the count) + ReadParser.cpp:145-148 (somatic HP:i:11/21/33 circular-dependency comment) + clusterability_vs_cov_cn.json (rho(NGroups,coverage)=0.5079, definitions: NGroups=HPFineNGroups HP-tag sub-family count) + ledger:97. Group is internally consistent, no contradictions found. Caveat surfaced: 'control methylation barely moves' is true ONLY for single mediator controls (PairwiseMeanDist 0.655 / ClusterPermanovaF 0.656); the all-5-methylation control DROPS to 0.322 — the attribution explicitly argues those are mediators/colliders (wrong control), so the 'barely moves' framing depends on the wrong-control argument. This is documented in the primary file itself, not a fabrication.",
+  "counts": {
+    "D": 6,
+    "I": 6,
+    "S": 1,
+    "Q": 3,
+    "P": 12,
+    "weak": 0,
+    "grep_confirmed": 13
+  },
+  "claims": [
+    {
+      "id": "02-13",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/loh_subclone_af_paired/data/hd4_attribution.json:verdict.decision (PHASING-DRIVEN) + ledger:92 decision (T6 AF→NGroups report as PHASING/haplotype-occupancy signature)",
+      "note": "First-order interpretation: re-cast T6 AF→NGroups as phasing (haplotype-occupancy signature), writable=POSITIVE-as-phasing. Directly supported by attribution verdict + ledger:92 decision. cited_source=none but value/claim grep-confirmed in primary."
+    },
+    {
+      "id": "04-32",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "hd4_attribution.json:results.baseline_ngroups_vs_af_centrality.spearman_r=0.6560846 (≈0.656); control_for_methylation.all_methylation.r=0.3222; verdict caveat 'collider/mediator wrong control'",
+      "note": "r=0.656 confirmed. '控甲基不動 collider' — attribution shows single-feature methyl controls barely move (0.655-0.656) while all-5 drops to 0.322; the 'collider/wrong-control' interpretation is the attribution's own argument (mediators/colliders not confounders). Interpretation faithful to primary."
+    },
+    {
+      "id": "05-36",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "hd4_attribution.json:results.baseline...spearman_r=0.6560846; ngroups_definition (HP-tag count, methyl only for HPFineF); ledger:92",
+      "note": "cited_source=HD-4. r=0.656 + 'phasing 非甲基' both confirmed in attribution + ledger:92 verdict PHASING_DRIVEN."
+    },
+    {
+      "id": "06-30",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "hd4_attribution.json (r=0.6560846, control_for_methylation single-feature 0.655-0.656); ledger line 92 verdict PHASING_DRIVEN",
+      "note": "cited_source='hd4_attribution.json + ledger:92' — both exist and match. r=0.656 + collider interpretation grep-confirmed. Cited source is accurate (ledger line 92 is exactly the HD4 attribution entry)."
+    },
+    {
+      "id": "07-13",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/loh_subclone_af_paired/data/hd4_attribution.json:results.baseline_ngroups_vs_af_centrality.spearman_r=0.6560846513",
+      "note": "cited_source path exact-matches the file. r=0.656 = phasing grep-confirmed against the cited file directly."
+    },
+    {
+      "id": "08-25",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "hd4_attribution.json:verdict.decision (NOT a methylation-biology finding); ledger:92 decision (不當 positive 甲基發現; HD-4 RESOLVED phasing)",
+      "note": "D4 verdict NO-GO (former hypothesis 'AF↔NGroups = subclone 甲基 marker' overturned by own analysis). The overturning is the documented attribution verdict. First-order interpretation of the verdict. cited_source=none but grep-confirmed."
+    },
+    {
+      "id": "08-26",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "hd4_attribution.json: baseline spearman_r=0.6560846 (≈0.656), n=36854; control_for_methylation.PairwiseMeanDist_only.r=0.6551720 (≈0.655)",
+      "note": "Baseline r=0.656 and n=36854 EXACT match. '控甲基 r 幾乎不動（0.655）' — TRUE for single-feature controls (PairwiseMeanDist 0.655 / ClusterPermanovaF 0.656) but the all-5-methylation control drops to 0.322. P-caveat: the '0.655 barely moves' framing is correct only under the wrong-control argument (those features are mediators/colliders); attribution documents this explicitly. Number itself is real, caliber nuance flagged."
+    },
+    {
+      "id": "08-27",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "src/core/LabelTest.cpp:265-305 (hp_to_fine_labels: count of {HP1,HP1-1,HP2,HP2-1} from hp_tag strings); LabelTest.cpp:627-633 (fine_n_groups=unique_groups.size, methyl dist only for fine_f); hd4_attribution.json:ngroups_is_capped_count (99.5%<=2: 0:7.5/1:63.4/2:28.5/3:0.49/4:0.06); ledger:92 verdict PHASING_DRIVEN",
+      "note": "ALL components grep-confirmed: cited LabelTest.cpp:265-305 verbatim is hp_to_fine_labels (HP-tag string count, NOT methylation matrix); 99.5%<=2 capped count matches attribution distribution; ledger verdict PHASING_DRIVEN. Strongest claim in group — definitional + distributional both verified."
+    },
+    {
+      "id": "08-27b",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "LabelTest.cpp:265-305 (NGroups=HP-tag count); hd4_attribution.json:step_function_test.interpretation ('2nd populated sub-family IS the somatic ALT sub-family, arithmetic function of AF'); pointbiserial_NGroups_ge2_vs_af_centrality.r=0.8023",
+      "note": "Mechanism interpretation: NGroups=HP-tag count not methylation; AF high→LOH somatic ALT sub-family appears→NGroups 1→2 = AF arithmetic function. Directly matches attribution step_function_test interpretation (point-biserial 0.80). First-order reading of definitional + decomposition evidence."
+    },
+    {
+      "id": "08-28",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "ledger:92 research_potential ('AF→NGroups 改述為 phasing signature 反而支撐 phasing/LOH 主軸'); hd4_attribution.json:verdict",
+      "note": "Synthesis/rescue-value framing: D4 still useful re-cast as read-level evidence for AF→haplotype occupancy supporting phasing axis. This is a strategic re-interpretation (synthesis-of-interpretation) of the verdict for paper-positioning, but it IS explicitly stated in ledger:92 research_potential. cited_source=none but grep-confirmed in ledger."
+    },
+    {
+      "id": "09-18",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "hd4_attribution.json (verdict PHASING-DRIVEN, ngroups_definition, capped count); ledger:92 (validation: control-for-methylation partial-r + C++ definition + capped distribution)",
+      "note": "cited_source='hd4_attribution.json + ledger:92' — both verified. Describes validation mechanism (control-for-methylation partial-r + C++ definitional trace + capped-count distribution) and research mechanism (NGroups=HP-tag sub-family count, LOH 1→2 = AF arithmetic). All three legs grep-confirmed."
+    },
+    {
+      "id": "09-32",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "hd4_attribution.json:results.control_for_methylation (HPFineF_only 0.306, all_methylation 0.322 vs baseline 0.656) + verdict.quantitative_support ('controlling 5 methylation features only drops to 0.322 BUT those are mediators/colliders not confounders')",
+      "note": "Methodological description of control-for-methylation partial-r test (criterion: r barely moves → non-methylation/collider). Faithfully describes the attribution method. Note: the actual all-methylation control DID move (0.656→0.322); the 'barely moves' criterion applies to single-feature/wrong-control framing — the attribution itself notes the 0.322 drop is a wrong-control artifact. LOGIC_EVIDENCE: criterion description correct, but the simple 'r 幾乎不動' summary glosses the mediator nuance documented in primary."
+    },
+    {
+      "id": "11-15",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "ledger line 92 (r=0.656, RESOLVED); ledger:92 + hd4_attribution.json:verdict.what_would_fully_close_it (Re-run ISM exporting fine_group_counts / n_clusters)",
+      "note": "HD-4 RESOLVED (ledger 92, r=0.656) confirmed. The n_clusters re-run ~2.4hr is a forward-looking refinement claim (Q: future-conditional). The 2.4hr estimate not in primary (it is the standard ISM full re-run cost referenced elsewhere); the 'needs ISM re-run' need is confirmed in attribution what_would_fully_close_it. Off-path framing matches ledger."
+    },
+    {
+      "id": "11-31",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "hd4_attribution.json (baseline spearman_r=0.6560846, n=36854; ngroups_definition LabelTest.cpp:265-305 HP-tag count; verdict PHASING-DRIVEN); ledger line 92 verdict PHASING_DRIVEN",
+      "note": "cited_source='hd4_attribution.json + LabelTest.cpp:265-305 + ledger 92' — all three verified. r=0.6561 (n=36854), LabelTest.cpp:265-305 = HP-tag count, verdict PHASING_DRIVEN all exact-match. Note: claim says r=0.6561, primary=0.6560846 → rounds correctly to 0.6561. Highest-fidelity provenance claim in group."
+    },
+    {
+      "id": "11-32",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "hd4_attribution.json:verdict.what_would_fully_close_it (Re-run ISM exporting fine_group_counts + n_clusters); ledger:92 caveat (full knockout 待 ISM re-run)",
+      "note": "HD-4 ISM re-run ~2.4hr off critical path, 'three evidences consistent, this is 補刀'. The 'three evidences consistent' (definitional + mechanism-chain + capped-count) matches ledger:92 caveat. The ~2.4hr figure and 'off-path' are planning estimates not quantitative results. P-caveat: forward-looking, the full knockout is acknowledged-pending in primary (not yet done)."
+    },
+    {
+      "id": "15-35",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/clusterability_vs_cov_cn.json (rho=0.5079; definitions.NGroups='HPFineNGroups (HP-tag sub-family count, HD-4 phasing-driven caveat)'); ledger line 97 NGroups_caveat (rho(NGroups,coverage)=0.508 STRONG but NGroups=HP-tag count, HD-4 phasing non-methylation)",
+      "note": "ρ=0.51 confirmed (primary=0.5079, rounds to 0.51). Interpretation 'HP-tag occupancy 取樣非甲基分群' matches both JSON definitions and ledger:97 caveat verbatim. cited_source=none but fully grep-confirmed. ⚠ tier marker appropriate: value real, caveat that NGroups≠methylation correctly attached."
+    }
+  ],
+  "flags": [
+    "NO orphans/fabrications: all 16 claims trace to landed primary (hd4_attribution.json + ledger:92/97 + LabelTest.cpp:265-305/607-633 + ReadParser.cpp:145-148 + clusterability_vs_cov_cn.json). Group is unusually well-provenanced.",
+    "CALIBER NUANCE (08-26, 04-32, 09-32): the '控甲基 r 幾乎不動 0.655' framing is true ONLY for single mediator controls (PairwiseMeanDist 0.655 / ClusterPermanovaF 0.656); the all-5-methylation control DROPS 0.656→0.322. Primary explicitly argues those 5 are mediators/colliders (wrong control), so 'barely moves' is the wrong-control argument, NOT raw partial-r invariance. Reports should not state 'controlling methylation does not move r' without the mediator/collider qualifier.",
+    "P-CAVEAT pending (11-15, 11-32): HD-4 marked RESOLVED but verdict is tier_3 with full partial-correlation knockout PENDING (needs ISM re-run exporting fine_group_counts{HP1,HP1-1,HP2,HP2-1} + n_clusters methyl-only count). Current verdict rests on 4-leg consistency (definitional C++ + mechanism-chain + capped-count + within-class collapse), not a complete occupancy partial-out. Single-cohort (n=36854, paired LOH-bed-TP CN1).",
+    "STRONGEST claim = 08-27 (LabelTest.cpp:265-305 grep-confirmed verbatim as HP-tag string count + 99.5%<=2 capped distribution matches attribution) — definitional proof that NGroups is HP-tag count not methylation is airtight.",
+    "NO CONTRADICTIONS within group; consistent across all 9 source_docs. D4 NO-GO + phasing re-cast is coherent across integ_chapter/imrad/formal_arch/master_map/direction_cards/validation_map."
+  ]
+}

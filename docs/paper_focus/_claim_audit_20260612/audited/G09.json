@@ -1,0 +1,638 @@
+{
+ "group_id": "G09",
+ "subject": "catalog 332705 位點 × 7 TAG / de-confound floor",
+ "n_claims": 69,
+ "primary_files_checked": [
+  "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json",
+  "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json",
+  "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/discovery_venn.json",
+  "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv",
+  "research/tsg_promoter_asm_reviewer/scripts/98_build_catalog.py",
+  "src/core/RegionProcessor.cpp:1588-1591",
+  "research/autoresearch/evidence_ledger.jsonl (cycle 20260609_catalog_skeleton_and_provenance_reconcile)",
+  "ls research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/cross_sample/ (doc02 stale check)"
+ ],
+ "claims": [
+  {
+   "id": "01-05",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/scripts/98_build_catalog.py:40-41 (SAMPLES=6 cell lines: HCC1395/1937/1954/H1437/H2009/COLO829) + research/autoresearch/evidence_ledger.jsonl cycle 20260609_catalog (332705 loci 6 samples)",
+   "note": "6 cell line x 3 cancer 三要素齊全：SAMPLES list in script98 + ledger 6/6 confirms. 'tagged BAM+VCF+modified_bases 齊' 部分 by-construction (catalog built FROM these) → P-caveat. 實掃日期 spot-check 未獨立驗 BAM 存在。"
+  },
+  {
+   "id": "01-06",
+   "axisA": "D",
+   "axisB": "WEAK",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "no primary in PRIMARY list",
+   "note": "5mCG 覆蓋率具體 %（HCC1395 100% / HCC1937 ~70% 等）+ DORADO 對照 grep 不到 catalog/ledger/VERIFIED_RESULTS。defer 不全repo考古 → S。70% vs 100% 是斷言性數字無對到 primary。"
+  },
+  {
+   "id": "03-04",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/scripts/98_build_catalog.py:40-41 (6-sample SAMPLES) + research/autoresearch/evidence_ledger.jsonl (6/6 verified)",
+   "note": "重述 01-05 資產盤點 + DORADO 對照。cited 'ls 驗證 spot-check' = secondary record；6-sample 構成由 script98/ledger 證 → P-caveat（cell-line 名單 confirmed，三要素齊 by-construction）。"
+  },
+  {
+   "id": "04-25",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (interpretation: Cochran gate zeroes sparse-table CramersV; latent recovers; characterization-only)",
+   "note": "'487 latent / Cochran≥5' = HCC1395 762 MISSED 子集（見 08-48），487 來自 display 研究非 catalog primary（catalog latent genome-wide=28254/28277）。gate 過嚴的詮釋 confirmed by audit interpretation。487 具體數 defer（不在 PRIMARY catalog files）。"
+  },
+  {
+   "id": "04-34",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "planning statement, no metric",
+   "note": "R6 交付物規劃陳述（無數字）。catalog 實已 built（skeleton 存在）→ 此 '待做' 是 framework 文件當時狀態描述 = 二次紀錄 S。"
+  },
+  {
+   "id": "04-36",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "planning/ordering statement, no metric",
+   "note": "純執行排序規劃，無可驗數字 → S。"
+  },
+  {
+   "id": "05-02",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (overall A=1,C=12868,total n_loci=332705) + research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json",
+   "note": "332705 / C=12868(germline-allelic) / A=1(clean somatic cis) 全部 grep 命中 tag_counts.json。'甲基不能filter' = 一階解釋對齊 latent enrich≈base。CORE claim VERIFIED。single-pipeline → 仍 P（值精確相符）。"
+  },
+  {
+   "id": "05-08",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (A=1,C=12868,G=291518,n_loci=332705 all exact match)",
+   "note": "本 session grep 4 數字逐一 grep 命中 tag_counts.json：A=1✓ C=12868✓ G=291518✓ total=332705✓。T-PROV 🟡→🟢 升級 justified。"
+  },
+  {
+   "id": "05-11",
+   "axisA": "I",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (12868 reliable, 1/332705 somatic cis) + research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/discovery_venn.json (four-line de-confound)",
+   "note": "abstract 規則句：12868 reliable germline-allelic + 1/332705 clean somatic cis + methyl 不判別 TP/FP（four lines）。數字 grep 命中；'four independent lines' = 一階 synthesis 對齊 catalog+venn+filter-dead。一階解釋且鏈完整。"
+  },
+  {
+   "id": "05-21",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (C=12868/3.87%, E=28254/8.49%, G=291518/87.62%, A=1, BRCA2=B verified in skeleton) cited wf_5644ed77-082",
+   "note": "所有 TAG 計數+佔比 grep 命中：C=12868(3.87%✓) E=28254 G=291518(87.6%✓) A=1(chr17✓)。⚠ 口徑微混：此處把 'reliable 甲基分群 12868' 等同 TAG-C，但 catalog 另有 reliable-tristate=12876 與 reliable-TP+FP=11689；此句用 TAG-C caliber 自洽且 grep-confirmed。"
+  },
+  {
+   "id": "05-47",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (header=32 columns, 332705 data rows) + scripts 98/99/100 exist",
+   "note": "🔴 口徑錯：claim 說 '16-欄 schema' 但 catalog_skeleton.tsv 實為 32 欄（header grep）。332705 列✓、scripts 98-100 存在✓、7-TAG✓。欄數 16 vs 實 32 = stale/錯誤 caliber（其他 G09 claim 11-08/12-23 正確寫 32 欄）。"
+  },
+  {
+   "id": "06-33",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (C=12868/3.87%, E=28254, G=291518/87.62%, A=1=chr17) cited wf_5644ed77-082 + grep",
+   "note": "全數字 grep 命中 tag_counts.json。'1 chr17' confirmed (A example=chr17:79991120 TBC1D16, skeleton TAG=A)。cited workflow + grep。CORE de-confound floor VERIFIED。"
+  },
+  {
+   "id": "06-48",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (A=1, n_loci=332705)",
+   "note": "1/332705 clean somatic cis = TAG-A=1 grep 命中。'保守版 headline' 一階定位。VERIFIED。"
+  },
+  {
+   "id": "08-46",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json interpretation (gate over-strict, recommend 3-state) + src/core/RegionProcessor.cpp:1588-1591 (cramers_v_reliable?v:0)",
+   "note": "ISM-2 '過嚴疑慮值得 audit' = 裁決性一階判斷。gate over-strict 由 audit interpretation + RegionProcessor cramers_v_reliable gate 支持。verdict 本身是判斷非數據 → I/P-caveat。"
+  },
+  {
+   "id": "08-47",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "src/core/RegionProcessor.cpp:1588-1591 (cramers_v = cramers_v_reliable ? cramers_v : 0.0, three axes alt/hp/hp_family)",
+   "note": "RegionProcessor.cpp 確有 'cramers_v_reliable ? cramers_v : 0.0' 邏輯（alt:1588 hp:1589 hp_family:1591；:1592 是 hp_family 區塊內）。Cochran 最小期望格≥5 = gate 語意，audit reliability_definition 註 'CramersV Cochran-gated'。源碼引用 VERIFIED（行號±幾行）。"
+  },
+  {
+   "id": "08-48",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "not in PRIMARY catalog files (HCC1395 display_v2 study)",
+   "note": "762 MISSED / 487 latent 是 HCC1395 display/PERMANOVA-gate 研究的數字（memory project_asm_locus_display），不在 PRIMARY catalog files（catalog latent=28254 genome-wide 不同口徑）。機制詮釋對齊 audit gate-over-strict，但具體 762/487 defer 不全repo考古 → S。"
+  },
+  {
+   "id": "08-49",
+   "axisA": "I",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json latent_minN_sweep (minN=15 TP21033/FP82 ratio256 vs minN0 ratio83.8) + interpretation (characterization not filter)",
+   "note": "'minN<15 FP-leaning / 不可當 filter' = 一階解釋，由 minN sweep 直接支持（minN 越高 ratio 越高=低 minN 偏 FP）+ audit interpretation 'NOT a TP/FP filter'。VERIFIED。"
+  },
+  {
+   "id": "08-50",
+   "axisA": "Q",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "proposal/recommendation, no metric",
+   "note": "C++ 修改候選（審 gate 閾值 / 改三態）= 未執行的方向構想（須 /methodology-audit+/cpp-change）→ Q。對齊 audit 'Recommend 3-state'。"
+  },
+  {
+   "id": "08-55",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/autoresearch/evidence_ledger.jsonl (verdict CHARACTERIZATION_DELIVERABLE, catalog built)",
+   "note": "ISM-4 ⭐GO 裁決。catalog 實已 built（ledger verdict=CHARACTERIZATION_DELIVERABLE）→ GO 已落實。裁決性判斷 → I。"
+  },
+  {
+   "id": "08-56",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv header (has clustering_reliability, dbeta_magnitude, clustering_origin, cis_status, somatic_status, provenance_tier cols)",
+   "note": "建議 schema 6 欄（reliable/Δβ/origin/cis/somatic/tier）= 對 catalog 設計的 synthesis。實際 skeleton 已含這些欄（clustering_reliability/dbeta_magnitude/clustering_origin/cis_status/somatic_status/provenance_tier）→ proposal 已實現，P-caveat。"
+  },
+  {
+   "id": "08-57",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "framing/synthesis statement",
+   "note": "把 D2/D5/D6/ISM-2/3 收斂成一張表 = synthesis-of-synthesis 框架陳述，無新數據 → S/二次解釋。對齊主軸 characterization≠filter。"
+  },
+  {
+   "id": "08-58",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (n_loci=332705, 6 samples in by_sample_class) + genome_survey_v2 dir exists",
+   "note": "'6 樣本 ~280k loci' ≈ 332705 catalog loci（'~280k' 是粗估，TP-only≈294k 或 unique-locus 較少；catalog total=332705）。data ready confirmed（skeleton 存在）。~280k 為近似但同數量級 → P。"
+  },
+  {
+   "id": "10-08",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv + research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (catalog exists with per-locus reliability/dbeta/cis/somatic tags)",
+   "note": "G-C Tier1 目標：per-locus 標籤 catalog。實已存在（skeleton 含對應欄）→ 目標定位一階陳述，P-caveat（無單一數字宣稱）。"
+  },
+  {
+   "id": "11-02",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (332705 rows) + research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json",
+   "note": "332705 loci × 7 TAG = 最大交付。cited catalog_skeleton.tsv+catalog_tag_counts.json，兩檔皆 grep 命中（332705 rows, 7 TAG keys）。VERIFIED。"
+  },
+  {
+   "id": "11-04",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/cross_sample/ EXISTS (ls confirmed)",
+   "note": "doc02 '缺檔'是 stale：cited genome_survey_v2/cn_confound/cross_sample/ 路徑實存（ls 命中 cn_confound/cross_sample）。cn_confound 存在✓。stale 標記發現 VERIFIED。"
+  },
+  {
+   "id": "11-05",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "framing statement",
+   "note": "'零散觀察變可發表 R6 表' = synthesis 框架，無數字 → S。"
+  },
+  {
+   "id": "11-08",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (A=1,B=5,C=12868,D=5,E=28254,F=54,G=291518) + research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (332705 rows x 32 cols)",
+   "note": "完整 TAG 分佈 7 值逐一 grep 命中 tag_counts.json：A=1 B=5 C=12868 D=5 E=28254 F=54 G=291518 全✓。332705×32 欄✓（header 實 32 欄，與此 claim 一致；對比 05-47 誤寫 16 欄）。CORE VERIFIED。"
+  },
+  {
+   "id": "11-09",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (interpretation '~base 47:1'; minN sweep) cited catalog_audit.json",
+   "note": "'enrich≈base 47:1' grep 命中 audit interpretation 字面。⚠ 口徑：47:1 是 HCC1395-only base（computed 47.4），genome-wide base=92.8；audit 自身用 47:1 故 traceable。gate-strict + 三態建議 VERIFIED。"
+  },
+  {
+   "id": "11-10",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/discovery_venn.json (dbeta_only TP_FP_ratio=11.9 enrich0.13; ISM_only=147.6 enrich1.59)",
+   "note": "dbeta_only TP:FP=11.9(最 FP-enriched)✓ vs ISM_only=147.6✓ grep 命中 discovery_venn.json。'Δβ 必 clustering-gated' = venn interpretation 字面。VERIFIED。"
+  },
+  {
+   "id": "11-14",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "self-referential provenance reconcile + doc02 stale (cross_sample exists)",
+   "note": "對賬完成陳述：全🟡定位源檔 + 1 overstated 必修 + doc02 stale。doc02-stale 部分 VERIFIED（11-04/11-17）。'1 overstated' 具體未指明 → 過程性陳述 I/P-caveat。"
+  },
+  {
+   "id": "11-17",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/cross_sample/ EXISTS",
+   "note": "🔑 重大發現：doc02 標'磁碟不存在'的檔實在 genome_survey_v2/cn_confound/cross_sample/。ls 命中該路徑（cn_confound + 其下 cross_sample）。stale 標記應更新 VERIFIED。"
+  },
+  {
+   "id": "12-23",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (332705 data rows, 32 columns header)",
+   "note": "332705×32 欄 supplementary table。header grep=32 欄✓、wc=332706 行(=332705+header)✓。欄數正確（對比 05-47 誤 16 欄）。VERIFIED。"
+  },
+  {
+   "id": "14-01",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (A=1,C=12868,G=291518,n_loci=332705 exact)",
+   "note": "4 數字 grep 逐一命中 tag_counts.json，cited wf_5644ed77-082 + provenance-verified frontmatter 註。與 05-08/06-33 一致。VERIFIED。"
+  },
+  {
+   "id": "14-09",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/autoresearch/evidence_ledger.jsonl (6/6 verified, wf_5644ed77-082)",
+   "note": "'floor 已穩 catalog 🟢 6/6 驗' = robustness 判斷。6/6 由 ledger + claim 15-56 workflow 支持。'#21/#22 任一失敗不垮' = fallback 論證（一階）。判斷性 → I。"
+  },
+  {
+   "id": "14-11",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (C=12868, A=1, total 332705) + four-line de-confound",
+   "note": "C=12868 germline / A=1 somatic cis / total 332705 grep 命中。'filter 死四道 / dosage-refuted' = 一階 synthesis（dosage 部分非 catalog primary，對齊 SEQC2 CN confound memory）。核心數字 VERIFIED → P。"
+  },
+  {
+   "id": "14-22",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (catalog exists, 332705 verified)",
+   "note": "'de-confound floor 永遠成立論文不垮' = fallback-tree 判斷句。catalog 數字 robust（已證）支撐 → 判斷性 I/P-caveat。"
+  },
+  {
+   "id": "14-31",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json + filter-dead (memory) + dosage-refuted",
+   "note": "'de-confound 主文今天能寫' = writability 判斷。catalog R6 已備（skeleton 存在）→ 判斷性 I/P-caveat。"
+  },
+  {
+   "id": "15-01",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (cited research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv, 332705 rows)",
+   "note": "6 樣本 332705 位點各貼 1 TAG。cited path 精確命中（skeleton 332705 rows）。VERIFIED。"
+  },
+  {
+   "id": "15-06",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (reliable_TP_FP=11689 [tp11655+fp34]; latent minN-related) ",
+   "note": "⚠ 口徑混：'reliable 11,689' = reliable_TP_FP_genomewide(11655+34，EXCLUDES FN)；但同 claim 別處 reliable-tristate-full=12876（含FN reliable 1187）。'latent 28,254'=TAG-E count（latent-tristate=28277 略不同）。11689 grep 命中 audit (tp11655/fp34)✓。caliber 自洽但與 tristate-full 不同 → P-caveat。"
+  },
+  {
+   "id": "15-07",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (TAG col single value per row) + research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (7 mutually-exclusive tags sum=332705)",
+   "note": "每位點收斂 1 TAG（7 互斥，sum=332705 confirmed）→ 一階設計陳述，TAG 互斥性 grep 可驗（sum=n_loci）。P。"
+  },
+  {
+   "id": "15-08",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (cis_status non-NA only in HCC1395 rows: cis/copy/cis-mechanical/untestable all HCC1395) ",
+   "note": "A/B/F cis-TAG 只在 HCC1395 confirmed（cis_status 非-NA 全 HCC1395，verified by skeleton cis_status col）。'816 HP-axis loci' 具體數不在 PRIMARY catalog files → 該數 defer 不全repo考古。cis-TAG-HCC1395-only 結構 VERIFIED → P-caveat（816 未驗）。"
+  },
+  {
+   "id": "15-09",
+   "axisA": "I",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (interpretation: characterization NOT filter; latent ~base 47:1) + minN sweep",
+   "note": "TAG-D(FP-prone)+TAG-E(latent minN<15 FP-leaning) 只標註不 filter = 一階解釋，由 audit interpretation 'characterization gain NOT a filter' + 47:1 enrich 支持。47:1=HCC1395 base caliber → P-caveat。"
+  },
+  {
+   "id": "15-12",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (C=12868) computed pct=3.8677%",
+   "note": "TAG-C=12868 grep 命中✓，3.87% = 12868/332705=3.8677%✓。germline-allelic (B2 cis-test) 一階詮釋對齊 ledger findings。VERIFIED。"
+  },
+  {
+   "id": "15-13",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (D=5) computed pct=0.0015%",
+   "note": "TAG-D=5 grep 命中✓，0.0015%=5/332705✓。regression-to-extreme 詮釋。VERIFIED。"
+  },
+  {
+   "id": "15-14",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (E=28254) computed pct=8.4922%",
+   "note": "TAG-E=28254 grep 命中✓，8.49%✓。CramersV-gated 但 PERMANOVA 顯著 = latent 定義對齊 audit。VERIFIED。"
+  },
+  {
+   "id": "15-15",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (F=54) + research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (untestable=53, cis-mechanical chr18:11741161=1) + research/tsg_promoter_asm_reviewer/scripts/98_build_catalog.py:58 MECH_CAVEAT",
+   "note": "TAG-F=54✓ (53 untestable + 1 cis-mechanical chr18:11741161=54)；0.016%✓。chr18 CpG-creation = script98:58 MECH_CAVEAT 'CREATES a CpG'✓。VERIFIED。"
+  },
+  {
+   "id": "15-16",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (G=291518) computed pct=87.62%",
+   "note": "TAG-G=291518 grep 命中✓，87.62%✓。背景無訊號。VERIFIED。"
+  },
+  {
+   "id": "15-17",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (sum by class: TP=294723 FP=3177 FN=34805) + research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/discovery_venn.json (base_TP_FP TP294723 FP3177)",
+   "note": "7 TAG sum=332705✓。TP=294723✓ FP=3177✓ (venn base_TP_FP 完全相符) FN=34805✓ (computed from audit by-class sum)。VERIFIED 完整三類分解。"
+  },
+  {
+   "id": "15-19",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (reliability_definition reliable + reliable_TP_FP_genomewide tp11655 fp34)",
+   "note": "reliable 定義(Significant=PassedGating&GlobalP≤0.05&CramersV≥0.1&NumReads≥20 Cochran-gated) 字面命中 audit。11689=tp11655+fp34✓ grep。(注：此 11689 是 TP+FP-only，reliable-tristate-full=12876 含 FN1187 — 此 claim 明確標 'TP11655/FP34' 故正確 caliber)。VERIFIED。"
+  },
+  {
+   "id": "15-20",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (reliability_definition latent matches verbatim) + TAG-E=28254",
+   "note": "latent 定義(NOT Sig & PassedGating & NumReads≥20 & Cluster/LabelHP PermanovaValid&P≤0.05 & min(HPfamN)≥5) 字面命中 audit reliability_definition✓。'28254' = TAG-E count；latent-tristate-full=28277（diff23）→ caliber 用 TAG-E 而非 tristate → P-caveat。"
+  },
+  {
+   "id": "15-21",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (none tristate computed=291552; TAG-G=291518)",
+   "note": "🔴 口徑：claim 'none 292762' 對不上：tristate none=291552（computed from audit），TAG-G=291518。292762 = 332705 − reliable11689 − latent28254 = 292762（用 TP+FP-only reliable 與 TAG-E latent 混算的補數）。值由混 caliber 算出 → P-caveat，建議統一口徑。"
+  },
+  {
+   "id": "15-22",
+   "axisA": "I",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (interpretation: Cochran gate zeroes sparse-table CramersV; PERMANOVA recovers) + src/core/RegionProcessor.cpp:1588-1591",
+   "note": "Cochran gate 把稀疏表(如 3vs51) CramersV 歸零，PERMANOVA 救回 = 一階機制解釋，audit interpretation + RegionProcessor gate 邏輯支持。VERIFIED。"
+  },
+  {
+   "id": "15-23",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (latent_minN_sweep['0']: tp25980 fp310, ratio83.8)",
+   "note": "minN=0 救回 TP25980/FP310 grep 命中 audit✓，rec TP:FP=83.8(~84)✓ vs base 47(HCC1395)→ enrich~1.78 但 claim 寫 'enrich ~1' 偏保守。數字精確 VERIFIED。"
+  },
+  {
+   "id": "15-24",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (latent_minN_sweep['5']: tp25380 fp279, ratio91.0)",
+   "note": "minN=5 TP25380/FP279✓ ratio=91.0(~91)✓ grep 命中。VERIFIED。"
+  },
+  {
+   "id": "15-25",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (latent_minN_sweep['15']: tp21033 fp82, ratio256.5)",
+   "note": "minN=15 TP21033/FP82✓ ratio=256.5(~257)✓ grep 命中。'minN<15 FP-leaning' 對齊趨勢。VERIFIED。"
+  },
+  {
+   "id": "15-26",
+   "axisA": "Q",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "src/core/RegionProcessor.cpp:1588-1591 (cramers_v_reliable gate, binary 0/1) + research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (Recommend 3-state)",
+   "note": "建議改二元→三態(reliable/latent/unreliable)+若改 C++ 走 cpp-change Hard Gate = 未執行方向構想 → Q。RegionProcessor.cpp:1592 引用合理（gate 邏輯在 1588-1591）。對齊 audit 'Recommend 3-state'。"
+  },
+  {
+   "id": "15-27",
+   "axisA": "I",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (interpretation: enrich ~1 = characterization gain NOT filter) + minN sweep",
+   "note": "納回 latent 只提升 characterization 絕不當 filter（enrich≈base 無 TP/FP 判別）= 一階解釋，audit interpretation 直接支持，對齊甲基-filter NEGATIVE 主軸。VERIFIED。"
+  },
+  {
+   "id": "15-44",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (cis_status=copy count=5; BRCA2 chr13:32315128 copy_d=-0.11 within_d=-0.023 TAG=B; chr5:6201328 within_d=0.059 copy_d=0.055)",
+   "note": "cis_status=copy=5✓ (skeleton col19 uniq)。BRCA2 copy_d=-0.11(主導)✓ within_d=-0.023。chr5 邊際 0.059≈0.055✓ (within 0.059 vs copy 0.055)。TAG-B=5✓。全 VERIFIED 精確。"
+  },
+  {
+   "id": "15-45",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (cis_status=cis-mechanical count=1) + research/tsg_promoter_asm_reviewer/scripts/98_build_catalog.py:58 (MECH_CAVEAT chr18:11741161 CREATES CpG)",
+   "note": "cis-mechanical=1✓ (col19 uniq)。chr18:11741161 CREATES CpG = script98:58 MECH_CAVEAT✓。歸 TAG-F✓。VERIFIED。"
+  },
+  {
+   "id": "15-46",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (cis_status=untestable count=53)",
+   "note": "untestable=53✓ (col19 uniq)。pure-ALT clonal 詮釋。53+1(cis-mech)=54=TAG-F✓。VERIFIED。"
+  },
+  {
+   "id": "15-47",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (cis_status=NA count=331889; NA+not-cis 756 = 332645)",
+   "note": "cis_status NA=331889；但 '非 cis-tested' 含 not-cis(756) → 331889+756=332645✓ 完全符合 claim '~332645'。caliber 自洽。VERIFIED。"
+  },
+  {
+   "id": "15-51",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (mod_type col=22 all NA)",
+   "note": "mod_type 欄缺漏=NA：skeleton col22 mod_type 全 NA confirmed。依賴 MSA Level1 dup-bug 修復 = 一階因果(對齊 MSA memory)。骨架階段 NA VERIFIED。"
+  },
+  {
+   "id": "15-52",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (gene col=30 mostly NA, curated: TBC1D16 chr17, ZAR1L/BRCA2 chr13)",
+   "note": "gene/is_TSG_promoter 缺 genome-wide model → 僅 curated 有值：skeleton gene col 多 NA，TBC1D16(chr17:79991120)+ZAR1L/BRCA2(chr13:32315128) 有值✓。VERIFIED。"
+  },
+  {
+   "id": "15-53",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (ari_value col=18 mostly empty/null; clustering_origin col=17 default germline-allelic)",
+   "note": "clustering_origin ARI 欄 per-locus blind-ARI 僅 high-ARI 子集有值：skeleton ari_value 多 null（examples ari=null），clustering_origin 預設 germline-allelic(B2)✓。VERIFIED（subset 性質）。"
+  },
+  {
+   "id": "15-54",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (cis_status non-NA only HCC1395) ; 816 number NOT in PRIMARY",
+   "note": "cis_status 全基因組未鋪、僅 HCC1395 有真值 = skeleton confirmed（非-NA cis 全 HCC1395）。'816 HP-axis loci' 具體數不在 PRIMARY catalog files → defer 不全repo考古。結構 VERIFIED，816 未驗 → P-caveat。"
+  },
+  {
+   "id": "15-55",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/autoresearch/evidence_ledger.jsonl (tier ⭐3 single-pipeline ClairS-TO) + research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (recurrence col=23 'single')",
+   "note": "single-pipeline ClairS-TO → ⭐3 封頂：ledger tier 字面 '⭐3 (single-pipeline ClairS-TO)'✓；skeleton recurrence col='single'✓。by-construction tier cap → P-caveat。VERIFIED。"
+  },
+  {
+   "id": "15-56",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/autoresearch/evidence_ledger.jsonl (cycle 20260609 references wf, 332705 verified) ; wf detail not in PRIMARY",
+   "note": "wf_5644ed77-082 6/6 adversarial 重驗 PASS (332705列/A=chr17唯一/BRCA2=B/sum/Venn/reliable-latent)。ledger 確認 cycle+332705+verdict；workflow 逐項 PASS 細節是 secondary report（本稽核獨立 grep 已證 332705/A=1/BRCA2=B/sum=332705/Venn 全相符）→ 獨立交叉佐證。P-caveat。"
+  },
+  {
+   "id": "15-57",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/scripts/98_build_catalog.py:130 (p_cis 0.0 falsy MUST use is not None) :59 (CIS_MARGIN=1.5) :58 (chr18 CpG MECH_CAVEAT)",
+   "note": "(a) p_cis falsy-zero bug：script98:130 'p_cis can be 0.0(strongest) MUST use is not None never truthiness(0.0 falsy)'✓ → chr17 p_cis=0.0 曾誤判。(b) CIS_MARGIN=1.5✓(line59) + chr18 CpG-creation caveat✓(line58) → A=chr17 唯一。(c) CRLF→LF defer(未驗但低影響)。核心 bugfix VERIFIED。"
+  },
+  {
+   "id": "15-58",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (cis/copy HCC1395-only, mod_type/gene mostly NA) + research/autoresearch/evidence_ledger.jsonl (⭐3)",
+   "note": "partial_flag subset：cis/copy 僅 HCC1395 816✓(結構)、mod_type/gene 多 NA✓、single-pipeline ⭐3✓。816 具體數 defer。partial 標記 justified → P-caveat。"
+  }
+ ]
+}

@@ -1,0 +1,147 @@
+{
+  "group_id": "G03",
+  "subject": "ASM 存在且 somatic-enriched (TP 3.95%>FP 1.07%, subhap-matched ~3.5×, ~4% low sensitivity) — characterization 非 filter",
+  "auditor_note": "PRIMARY 真值核心 = evidence_ledger.jsonl line 85 (ISM_COMPLETE_TPFPFN cycle, 280k positions powered) 直接命中 TP 0.0395/FP 0.0107/subhap 0.0377 vs 0.0109/~4% sens/COLO829 TP≈FP/cis HP_Residual FP 最高。跨樣本 excess-over-null +0.101–0.241 命中 ledger line 77。copy-dosage REFUTED 命中 fast_cnv_validation.json:52,57 + ledger 87。VERIFIED_RESULTS.md 不含此群 ASM 數字 (它是 methyl-phasing assist 資產)，defer 不視為 F。",
+  "n_claims": 12,
+  "claims": [
+    {
+      "id": "02-14",
+      "subject": "asm_characterization",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/autoresearch/evidence_ledger.jsonl:85 (TP/FP rate + cross-sample) + :77 (跨3癌種)",
+      "note": "T2+T5 synthesis-of-synthesis ('存在/小/非方向/跨3癌種' 是對多 cycle 結論的再彙整 + READY-AS-CHARACTERIZATION 寫作狀態判斷)。底層數據真 (ledger 85/77) 但 single-pipeline ClairS-TO + cited_source=none。READY 狀態本身是 meta-judgment 無 primary。"
+    },
+    {
+      "id": "02-28",
+      "subject": "asm_cross_sample",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/autoresearch/evidence_ledger.jsonl:77 (6/6 excess-over-null range 0.101–0.241 mean 0.168 CV 0.26, 3 cancer types)",
+      "note": "數字逐項命中 ledger 77 (HCC1395 +0.241 ... COLO829 +0.101)。P-caveat: 6 樣本共用同一 ClairS-TO/longphase caller + 同 HP-axis 估計法 → tier 封頂 ⭐3 (ledger 77 caveat 明文)。cited_source=none 但數字完整溯得到。"
+    },
+    {
+      "id": "03-11",
+      "subject": "asm_characterization",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/autoresearch/evidence_ledger.jsonl:85 + :77 (存在/非方向/跨3癌種); tier ⭐3 對齊 ledger 77 stability=3",
+      "note": "launch_readiness 的 §R2 characterization 句 = 對 foundation §3 + ASM 工作站結論的二次摘要。⭐3 與 ledger single-pipeline cap 一致。cited_source 指 'foundation §3 + ASM 工作站' (非 primary 數據檔，是內部 synthesis 文件) → S 性質但底層數值 P-caveat。"
+    },
+    {
+      "id": "04-10",
+      "subject": "asm_hp_axis",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/autoresearch/evidence_ledger.jsonl:55 (HP-axis somatic-controlled estimator) + :69 (HP-axis held-constant CN/ploidy/alignment) + :87 (copy-partition confound)",
+      "note": "'ASM 在 somatic-controlled (HP-axis) 下真實樣貌未被界定' = 對方法現狀的一階詮釋/gap 陳述。HP-axis 設計 (held-constant CN) 在 ledger 55/69 有定義；'未被界定' 是 framing judgement 非可 grep 的數字。標 🔵 (探索性) 與其 gap-statement 性質一致。"
+    },
+    {
+      "id": "04-31",
+      "subject": "asm_existence",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/autoresearch/evidence_ledger.jsonl:85 (TP 0.0395>FP 0.0107) + fast_cnv_validation.json:47-61 (copy-dosage INDISTINGUISHABLE/REFUTED, MW_p=0.6183, signed_rho=-0.0829) + ledger:87 (chr17/TBC1D16 唯一乾淨cis)",
+      "note": "三段全可溯: TP3.95>FP1.07 (ledger85, 🟢)；copy-dosage REFUTED (fast_cnv_validation.json line53 'dosage NOT driver' + line61 'dosage-artifact model REFUTED', 🟢)；chr17/TBC1D16 cis exemplar (ledger87 'CIS-CAND ... 唯一乾淨', 標 🟡 = 正確降級，單樣本+需COLO829)。標記 tier 與 primary 不確定性對齊良好。P-caveat 因全 single-sample/single-pipeline。"
+    },
+    {
+      "id": "04-44",
+      "subject": "conclusion_framing",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/autoresearch/evidence_ledger.jsonl:85 (甲基不能篩選/filter DEAD 對齊) + :55 (B-discrimination NEGATIVE) + deliverable=characterization",
+      "note": "高層論文 framing (三訊號正交共驗 + 甲基佐證不篩選 + 交付 characterization+catalog+tooling) = synthesis-of-synthesis。'甲基不能篩選' 部分有 primary 支撐 (ledger 85 NOT_usable_filter / ledger 55 B-discrimination NEGATIVE)；'三訊號正交共驗 haplotype 重塑' 是論文敘事整合，無單一 primary 數字。cited_source=none。"
+    },
+    {
+      "id": "05-16",
+      "subject": "asm_enrichment",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/autoresearch/evidence_ledger.jsonl:85 (TP 0.0395 / FP 0.0107 / subhap-matched 0.0377 vs 0.0109 ~3.5x / ~4% low sensitivity)",
+      "note": "cited_source='ledger:85' 正確且全數字逐項命中 (TP 3.95%/FP 1.07%/subhap 3.77 vs 1.09/~4% sens)。最乾淨的一條。P-caveat 僅因 ledger 85 caveat 標 single caller + ISM Significant 是內建 gate 非單一 effect。標 🟢 恰當。"
+    },
+    {
+      "id": "06-27",
+      "subject": "asm_exists",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/autoresearch/evidence_ledger.jsonl:85 (TP/FP/subhap 全命中)；CITED fast_cnv_validation.json:52,57 為 copy-dosage 行 (MW_p=0.6183 / signed_dose_rho 起始) 非 TP/FP 率",
+      "note": "CITATION-TARGET MISMATCH (非捏造): TP3.95%>FP1.07%/subhap 3.77 vs 1.09 數字真實 (來自 ledger:85)，但 06-27 額外引 'fast_cnv_validation.json:52,57' — 該檔 grep 無任何 TP/FP/3.95/1.07 字串，line52=MW_p 0.6183、line57=signed_dose_rho (皆 copy-dosage 證據)。引用標的指錯檔/行，數值本身仍可溯。標 🟢，建議改引 ledger:85。"
+    },
+    {
+      "id": "07-10",
+      "subject": "asm_tp_vs_fp",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/autoresearch/evidence_ledger.jsonl:85 (TP significant 0.0395 > FP 0.0107)",
+      "note": "doc_library 精簡引用 'ASM TP 3.95% > FP 1.07%'，命中 ledger 85。cited_source=none 但數字唯一且 unambiguous。P-caveat single-pipeline。標 🟢 恰當。"
+    },
+    {
+      "id": "09-10",
+      "subject": "asm_real_somatic_enriched",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/autoresearch/evidence_ledger.jsonl:85 (6-sample significance-rate + subhap-matched 對照) + :77 (跨樣本復現) + :55 (somatic 突變於 LOH/single-haplotype 重塑機制)",
+      "note": "'ASM 真且 somatic-enriched (非 filter)' + 驗證機制 (6-sample sig-rate + subhap-matched) + 研究機制 (somatic 突變於 LOH 重塑 allelic 甲基) — 一階解釋，鏈完整: 數據 (ledger 85/77) → 機制詮釋 (ledger 55/80 copy-partition/LOH)。cited_source='ledger:85' 正確。P-caveat single-pipeline+機制部分 cis 已被 copy-partition 部分推翻 (ledger 80/94 — 機制宣稱宜謹慎)。"
+    },
+    {
+      "id": "09-11",
+      "subject": "asm_real_somatic_enriched_external",
+      "axisA": "S",
+      "axisB": "WEAK",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "不在 PRIMARY 真值清單 (ledger/VERIFIED_RESULTS 皆無 O'Neill/POG)；僅見於 KB 二次紀錄 knowledge/11_external_literature/06_methyl_assisted_phasing.md:37 (PMID 39406235, Cell Genomics 2024, POG 189 tumors)",
+      "note": "外部佐證 claim。KB 記載 POG aDMR 真實但 (a) ASM 經 SNV/CNV phasing 偵測、甲基不用來 phase；(b) allelic 甲基多 in-TRANS 與主表現等位 (KB:37/:55)。我們內部主打 cis-enriched somatic ASM → 用 POG 作 'somatic-enriched' 直接佐證是 PARTIAL/framing 對齊 (現象層 CONFIRM、cis/trans 方向不同)。標 S (二次紀錄未對到 primary 外部論文全文) + WEAK (過度宣稱風險: cis vs trans 口徑差異)。defer 外部論文原文核對，不全repo考古。"
+    },
+    {
+      "id": "10-16",
+      "subject": "asm_methyl_sensitivity",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/autoresearch/evidence_ledger.jsonl:85 (~4% TP sensitivity) + :87 (chr17/TBC1D16 唯一乾淨 cis exemplar, d_cis 0.231)",
+      "note": "'少數位點伴隨真實 allele-specific 甲基差異 (~4% sens; chr17/TBC1D16 乾淨 cis exemplar)' — ~4% sens 命中 ledger 85；chr17/TBC1D16 乾淨 cis 命中 ledger 87 (1/816 乾淨)。一階詮釋鏈完整。P-caveat: chr17 cis 仍受 subclone confound、需 COLO829 (ledger 94 caveat)，且 cited_source=none。'乾淨 cis exemplar' 措辭略強於 primary 的 '唯一乾淨但需 COLO829'。"
+    }
+  ],
+  "counts": {
+    "D": 6,
+    "I": 3,
+    "S": 3,
+    "Q": 0,
+    "P": 0,
+    "P_caveat": 11,
+    "S_tier": 1,
+    "F": 0,
+    "weak": 1,
+    "grep_confirmed": 11
+  },
+  "flags": [
+    "06-27 CITATION-TARGET MISMATCH: 引 fast_cnv_validation.json:52,57 佐證 TP3.95%>FP1.07%，但該檔/行其實是 copy-dosage 證據 (MW_p=0.6183/signed_rho)，無任何 TP/FP 率字串；數值真實源在 ledger:85，建議改引。",
+    "09-11 (O'Neill/POG 2024 外部佐證) 唯一 S/WEAK: 不在 PRIMARY 真值檔，僅 KB 二次紀錄；且 KB 明載 POG 甲基多 in-TRANS+經 SNV/CNV phasing 偵測，與我們 cis-enriched somatic framing 口徑不同 → 用作直接佐證有過度宣稱風險。",
+    "全 11 條有數字/陳述的 claim 一律 P-caveat (無一達 P)：核心證據 single-pipeline (共用 ClairS-TO/longphase caller) + cis/磁碟 single-sample (HCC1395 only SEQC2 truth)，tier 封頂 ⭐3 為 ledger 77/85/94 明文 caveat，群內 tier 標記 (🟢/🟡/🔵/⭐3) 與 primary 不確定性對齊良好、無 over-claim 升 tier。",
+    "機制宣稱注意 (09-10/10-16): 'somatic 突變於 LOH 重塑 allelic 甲基' 與 'chr17 乾淨 cis exemplar' 之 cis 機制在 ledger 80/94 已被 copy-partition confound 部分推翻 (BRCA2 ~80% copy/20% cis；chr17 仍受 subclone confound 需 COLO829)。characterization '存在/somatic-enriched/非 filter' 結論穩固，但 cis 機制細節宜質性 framing。",
+    "無孤兒/無 F：所有內部數字 (TP/FP 率、subhap-matched、6/6 excess-over-null、~4% sens、copy-dosage REFUTED、chr17 cis) 皆能在 ledger:85/:77/:87 或 fast_cnv_validation.json grep 命中且值相符。"
+  ]
+}

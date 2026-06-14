@@ -1,0 +1,69 @@
+{
+  "group_id": "G03",
+  "subject": "ASM 存在且 somatic-enriched (TP 3.95%>FP 1.07%, subhap-matched ~3.5×, ~4% low sensitivity) — characterization 非 filter",
+  "role": "adversarial_red_team_challenge",
+  "challenger_note": "獨立紅隊複核：直接讀 evidence_ledger.jsonl:85 (PRIMARY, 280k positions, per-sample 數字) + :77/:55/:80/:87/:94/:69。核心發現：群內 audited 已誠實降 11/12 為 P-caveat，但 audited 的 P-caveat 多停在『single-pipeline / single-sample』層；本紅隊進一步揭露 **pooled-rate 聚合掩蓋 per-sample 失敗** 與 **headline ratio 統計脆弱性** 兩個更深破綻。關鍵實證 (ledger:85 per-sample raw)：COLO829 TP0.0089≈FP0.0103(判別消失，FP>TP)；HCC1954/H1437/H2009 FP=0.0(使 ~3.5× ratio 在 3/6 樣本未定義/由 2 樣本主導)；HCC1954 TP0.0601/FN0.0642 + H1437 TP0.0634/FN0.0572 (FN≈TP→ASM 非 somatic-specific)；FP 分母僅 3177(significant 34) 極小。headline『somatic-enriched』在嚴格 per-sample/specificity 檢視下 CHALLENGED 而非 SURVIVES。",
+  "verdicts": [
+    {
+      "claim": "02-14: T2 ASM 存在 + T5 跨樣本 → §Result2 子克隆內 ASM characterization（存在·小·非方向·跨3癌種現象復現）；可寫狀態 = READY-AS-CHARACTERIZATION",
+      "verdict": "CHALLENGED",
+      "reason": "『跨3癌種現象復現』被 COLO829(melanoma) TP0.0089≈FP0.0103 判別消失打折：3 癌種中黑色素瘤無 enrichment，現象復現是『excess-over-null point estimate 6/6>0』(ledger:77 無 per-sample permutation p) 而非『TP>FP 判別 6/6』；READY 狀態本身為無 primary 的 meta-judgment，須標『characterization 限 breast+lung，melanoma 為陰性 outlier』caveat 才可寫。"
+    },
+    {
+      "claim": "02-28: CHARACTERIZATION：ASM 真、6/6 excess-over-null +0.101–0.241（3癌種，現象層）",
+      "verdict": "CHALLENGED",
+      "reason": "數字逐項命中 ledger:77，但 ledger:77 caveat 自陳『僅 point-estimate excess，未出 per-sample permutation p，建議補強』+『共用同一 ClairS-TO/longphase caller 與 HP-axis 估計法→共用系統性偏差未排除』；6/6 是同一管線同一估計法的重複，非獨立復現，CV=0.26 的低變異恰可由共用 pipeline bias 解釋，非僅由真生物訊號。需 per-sample p + 正交管線才升 ⭐4。"
+    },
+    {
+      "claim": "03-11: §R2 子克隆內 ASM characterization：存在·小·非方向·跨3癌種現象復現，⭐3",
+      "verdict": "SURVIVES",
+      "reason": "⭐3 tier 與 ledger:77/85 stability=3/single-pipeline cap 明文一致，未 over-claim 升 tier；『小·非方向』有 ledger:55(rare within-sample)/strong-ASM hypo44%/hyper56% 無偏好支撐；此條是最保守的 framing（已自帶 ⭐3 上限），caveat 已內建。"
+    },
+    {
+      "claim": "04-10: ASM 在 somatic-controlled（HP-axis）下的真實樣貌未被界定",
+      "verdict": "SURVIVES",
+      "reason": "gap-statement（標 🔵 探索性），不作正向 claim；ledger:55/69 確有 HP-axis somatic-controlled estimator 定義，且 ledger:80 證實 ALLELE-axis 受 baseline allelic confound、HP-axis 才 held-constant CN → 『真實樣貌未被界定』是對方法現狀的誠實陳述，無可證偽的過度宣稱。"
+    },
+    {
+      "claim": "04-31: R3 ASM 存在 characterization：TP3.95%>FP1.07% 🟢；copy-dosage REFUTED 🟢；chr17/TBC1D16 cis exemplar 🟡",
+      "verdict": "CHALLENGED",
+      "reason": "三段 tier 標記方向正確（cis 已降 🟡），但『TP3.95%>FP1.07% 🟢』標綠過自信：該率是 pooled-across-6-sample，掩蓋 COLO829 FP>TP 與 3 樣本 FP=0(分母崩潰)；嚴格應標 🟡 並註『pooled，per-sample 1/6 反向、3/6 FP=0』。copy-dosage REFUTED(MW_p0.62/signed_rho-0.083) 與 chr17 cis(需COLO829，ledger:94 仍受 subclone confound) 標記恰當。"
+    },
+    {
+      "claim": "04-44: LOH 約束下 somatic/haplotype/甲基三訊號正交共驗 haplotype 重塑；甲基佐證不篩選；交付 characterization+catalog+tooling",
+      "verdict": "CHALLENGED",
+      "reason": "『甲基不能篩選』有 primary 強支撐(ledger:85 NOT_usable_filter / ledger:55 B-discrimination NEGATIVE / Phase2 filter LOSO DOWNGRADED)，此半穩固；但『三訊號正交共驗 haplotype 重塑事件』是 synthesis-of-synthesis 無單一 primary 數字，且『正交』宣稱需證明三訊號互不 confound——而 ledger:80/94 顯示甲基 cis 與 copy/subclone 部分共線(BRCA2 ~80% copy)，三訊號未證正交。framing 句宜降為『互補佐證』非『正交共驗』。"
+    },
+    {
+      "claim": "05-16: §2.1 ASM exists and is somatically enriched：TP3.95%>FP1.07%（subhap-matched 3.77 vs 1.09 ~3.5×）；但 ~4% 低 sensitivity（cited ledger:85）",
+      "verdict": "CHALLENGED",
+      "reason": "cited_source 正確、數字逐項命中 ledger:85（最乾淨引用），但 headline『somatically enriched』本身需 caveat：(1)COLO829 TP0.0089≈FP0.0103 反向；(2)HCC1954/H1437/H2009 FP=0.0 使 ratio 由 2 樣本主導；(3)FP 分母僅 34 significant/3177 total 極小，~3.5× 統計脆弱；(4)FN≈TP(HCC1954 0.0601 vs 0.0642)顯示 ASM 非 somatic-specific。enriched 為 pooled 真但非 universal，須標『breast/lung enriched，melanoma 陰性』。"
+    },
+    {
+      "claim": "06-27: R3 ASM 存在且 somatic-enriched（非filter）：TP3.95%>FP1.07%（subhap 3.77 vs 1.09 ~3.5×）（cited ledger:85 + fast_cnv_validation.json:52,57）",
+      "verdict": "CHALLENGED",
+      "reason": "CITATION-TARGET MISMATCH（audited 已 flag）：fast_cnv_validation.json:52,57 是 copy-dosage 證據(MW_p0.6183/signed_rho)，grep 無任何 TP/FP/3.95/1.07 字串，引錯標的；數值真源在 ledger:85，須改引。疊加 05-16 同樣的 somatic-enriched per-sample 脆弱性 → 雙重 caveat。引用紀律是論文誠信問題，非僅筆誤。"
+    },
+    {
+      "claim": "07-10: ASM TP 3.95% > FP 1.07%",
+      "verdict": "CHALLENGED",
+      "reason": "doc_library 精簡引用，命中 ledger:85，數字真；但裸寫 pooled rate 不附 per-sample 分布與 FP 分母(34/3177)，讀者會誤推為穩健 universal enrichment。最小修正：附『6-sample pooled；COLO829 反向；3 樣本 FP=0』一行 caveat 即 SURVIVES，現狀裸數字 CHALLENGED。"
+    },
+    {
+      "claim": "09-10: ASM 真且 somatic-enriched（非filter）；驗證機制=6-sample sig-rate+subhap-matched；研究機制=somatic 突變於 LOH/single-haplotype 重塑 allelic 甲基（cited ledger:85）",
+      "verdict": "CHALLENGED",
+      "reason": "數據鏈(ledger:85/77)真，但『研究機制=somatic 突變於 LOH 重塑 allelic 甲基』把 cis 機制當已證——ledger:80 明文 cis_candidate_line_OVERTURNED_by_copy_partition_confound（HP-axis 把 copy 與 allele 混淆，BRCA2 true cis 小），ledger:94 chr17 cis 仍受 subclone confound。機制宣稱屬二次解釋且部分已被自家證據推翻，應降為質性 framing『可能伴隨 allelic 甲基差異，cis 因果未定』。"
+    },
+    {
+      "claim": "09-11: ASM 真且 somatic-enriched 的外部佐證 = O'Neill/POG 2024 cis-ASM",
+      "verdict": "REFUTED",
+      "reason": "口徑不對齊的過度宣稱：KB(knowledge/11_external_literature/06:37/55) 明載 POG aDMR 係經 SNV/CNV phasing 偵測、甲基不用來 phase，且 allelic 甲基多 in-TRANS 與主表現等位；我們內部主打 cis-enriched somatic ASM → 方向相反(trans vs cis)，且不在 PRIMARY 真值檔(僅 KB 二次紀錄，grep_confirmed=false)。用 trans-ASM 外部論文直接佐證 cis-framing 是邏輯站不住的 corroboration，須移除或改寫為『現象層存在性 CONFIRM，cis/trans 方向不同』。"
+    },
+    {
+      "claim": "10-16: 少數位點伴隨真實 allele-specific 甲基差異（~4% sens；chr17/TBC1D16 為乾淨 cis exemplar）",
+      "verdict": "CHALLENGED",
+      "reason": "~4% sens 命中 ledger:85；但『chr17/TBC1D16 乾淨 cis exemplar』措辭強於 primary：ledger:87 為 816→10 Bonferroni 後『唯一 1 clean cis』(1/816)，ledger:94 caveat 明文『chr17 cis 仍受 subclone confound(d_within 大可能 subclone 甲基差非 focal cis)，需 COLO829』。『乾淨 exemplar』暗示已排除 confound，與 primary『需 COLO829 才能證乾淨』矛盾，須降為『候選 cis exemplar(subclone confound 未排除)』。"
+    }
+  ],
+  "worst": "09-11 (O'Neill/POG 2024 外部佐證) — 唯一 REFUTED：用一篇 trans-ASM、且甲基不參與 phasing 的外部論文，直接佐證我們 cis-enriched somatic ASM 的 framing，cis/trans 方向相反、邏輯站不住；且不在 PRIMARY 真值檔(grep_confirmed=false)，僅 KB 二次紀錄。次惡為 headline 群(05-16/06-27/07-10)的『somatic-enriched』：pooled 3.95%>1.07% 為真但被 COLO829(FP>TP)+3 樣本 FP=0+FP 分母 34 的 per-sample 脆弱性掏空 universal 宣稱，須一律降為『breast/lung enriched，非全癌種、low-sensitivity characterization』。"
+}

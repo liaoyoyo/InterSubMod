@@ -1,0 +1,66 @@
+{
+  "group_id": "G06",
+  "subject": "AF↔NGroups = phasing 非甲基 (HD-4 RESOLVED r=0.656 collider, NGroups=HP-tag count 非甲基, NGroups~coverage artifact) — D4 NO-GO",
+  "red_team_role": "adversarial falsification (red team)",
+  "primary_sources_independently_verified": [
+    "research/loh_subclone_af_paired/data/hd4_attribution.json (baseline r=0.6560846 n=36854; control_for_methylation all_methylation r=0.3221965; control_for_phasing_occupancy all=0.6401; verdict PHASING-DRIVEN with documented confound)",
+    "src/core/LabelTest.cpp:265-305 (hp_to_fine_labels = HP-tag string count) + :607-633 (fine_n_groups=unique_groups.size; dist_matrix only for HPFineF F-stat)",
+    "src/core/ReadParser.cpp:145-148 (somatic HP:i:11/21/33 circular-dependency comment, germline_hp_only demotes to 0)",
+    "research/autoresearch/evidence_ledger.jsonl:92 (verdict PHASING_DRIVEN, tier_3, full knockout PENDING ISM re-run) + :97 (rho(NGroups,coverage)=0.508 STRONG, NGroups=HP-tag count caveat)",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/clusterability_vs_cov_cn.json (B_HCC1395 rho_NGroups_vs_coverage=0.5079; genomewide 6-sample 0.142–0.486)"
+  ],
+  "verdicts": [
+    {
+      "claim": "08-27 / 08-27b: NGroups=HP-tag {HP1,HP1-1,HP2,HP2-1} sub-family capped count (甲基矩陣不進 count, LabelTest.cpp:265-305); AF高→LOH somatic ALT sub-family出現→NGroups 1→2 是AF算術函數.",
+      "verdict": "SURVIVES",
+      "reason": "Definitional by-construction: I independently confirmed LabelTest.cpp:298 fine_n_groups=unique_groups.size() over hp_tag STRINGS (lines 274-285), dist_matrix only feeds HPFineF (line 607+). Methylation is structurally excluded from the count — this is the one airtight leg and the others lean on it."
+    },
+    {
+      "claim": "04-32 / 06-30 / 08-26: r=0.656 控甲基不動 collider 🟢 (改述支撐 phasing); 控甲基 r 幾乎不動 (0.655).",
+      "verdict": "CHALLENGED",
+      "reason": "'Barely moves' is true ONLY for single-feature controls; the all-5-methylation control DROPS 0.656→0.322 (~50% attenuation, verified in JSON). Reports stating 'controlling methylation does not move r' without the mediator/collider qualifier overstate — the headline depends entirely on relabeling the right control as 'wrong control'."
+    },
+    {
+      "claim": "09-32: control-for-methylation partial-r 判準 = 控甲基 r 幾乎不動 → 非甲基 (collider).",
+      "verdict": "CHALLENGED",
+      "reason": "Causal-graph equivocation: the primary alternately calls the 5 methyl features 'mediators/colliders' — opposite DAG roles (mediator-control attenuates a REAL effect; collider-control induces spurious assoc). No DAG/d-separation test distinguishes them. The 0.322 drop is equally consistent with methylation being a genuine mediator (methyl diversity tracks sub-family structure), which would NOT support 'non-methylation'."
+    },
+    {
+      "claim": "02-13 / 05-36 / 07-13 / 09-18: AF↔NGroups r=0.656 = phasing 非甲基 (HD-4); writable POSITIVE改述為phasing.",
+      "verdict": "CHALLENGED",
+      "reason": "The decisive phasing-occupancy partial-out is NOT computable on landed data (verdict's own caveat): the phasing proxies that 'barely move r' (0.656→0.640) are GERMLINE-family counts that explicitly DO NOT capture the somatic HP1-1/HP2-1 split constituting the NGroups increment. So neither the methyl control nor the phasing control is the correct knockout — 'phasing-driven' rests on 4-leg circumstantial consistency (definition+chain+capped+within-class), not a clean partial-out. Needs the qualifier that conclusive knockout is PENDING."
+    },
+    {
+      "claim": "08-25: D4 (AF↔NGroups = subclone 甲基 marker) 裁決 🔴 NO-GO (本週已被自己的分析推翻).",
+      "verdict": "SURVIVES",
+      "reason": "The NEGATIVE direction is well-supported: even if the precise mechanism (phasing vs partial methyl-mediation) is not fully nailed, the by-construction proof that NGroups is a tag count + within-class AF→NGroups collapse (Extreme r=0.13, Near-half r=-0.01) robustly kills the original 'subclone methylation marker' positive claim. Overturning one's own prior hypothesis is conservative and defensible."
+    },
+    {
+      "claim": "08-28: D4 rescue — 支撐 phasing 主軸 (AF→haplotype occupancy read-level 證據), 改述後仍有用.",
+      "verdict": "CHALLENGED",
+      "reason": "Strategic re-interpretation (secondary-interpretation-as-evidence): re-casting a NO-GO as paper-positive support for phasing is a synthesis move, not a new measurement. The 'AF→haplotype occupancy' signal is partly by-construction (AF arithmetically forces a 2nd sub-family in LOH per ReadParser:145-148 circular-dependency comment) — risks circular support for the phasing axis if presented as independent corroboration."
+    },
+    {
+      "claim": "08-28 (synthesis flag from auditor): D4 still useful re-cast as read-level evidence for phasing axis.",
+      "verdict": "CHALLENGED",
+      "reason": "Same circularity concern: ReadParser.cpp:145-148 explicitly flags HP:i:11/21/33 somatic sub-families as 'the somatic variant phasing itself (circular dependency)'. Using an AF-mechanical, circular-by-design signal as evidence FOR a phasing thesis must be caveated as descriptive/by-construction, not independent validation."
+    },
+    {
+      "claim": "11-15 / 11-31 / 11-32: HD-4 已 RESOLVED; n_clusters re-run 精修 ~2.4hr off關鍵路徑, 三證已一致此為補刀.",
+      "verdict": "CHALLENGED",
+      "reason": "'RESOLVED' overstates the verdict's own tier_3 with full partial-correlation knockout PENDING (ledger:92 caveat + what_would_fully_close_it: needs ISM re-run exporting fine_group_counts + methyl-only n_clusters). 'Off-path补刀' downgrades the ONE test (methyl-only cluster count vs AF) that could actually falsify the non-methylation claim. The ~2.4hr is a planning estimate absent from primary."
+    },
+    {
+      "claim": "15-35: NGroups (HPFineNGroups) 與 coverage 強相關 ρ=0.51 但那是 HP-tag occupancy 取樣非甲基分群 (⚠).",
+      "verdict": "CHALLENGED",
+      "reason": "ρ=0.5079 confirmed for HCC1395 single-sample (B block); but genome-wide the 6 samples scatter 0.142–0.486 (HCC1954 only 0.142) — the '強相關' headline is HCC1395-specific, not a stable cross-sample property. The 'occupancy sampling 非甲基' attribution inherits the same unresolved phasing-vs-methyl-mediation ambiguity above; correctly tier-flagged ⚠ but should not be cited as settled."
+    }
+  ],
+  "worst": "04-32/06-30/08-26 '控甲基 r 幾乎不動 collider' — the load-bearing headline. The all-5-methylation control actually DROPS 0.656→0.322 (~50%); the claim survives only by relabeling the correct control as the 'wrong control' (mediator/collider), a post-hoc interpretive move with no DAG/test distinguishing mediator from collider. Compounded by the verdict's own admission that the decisive phasing-occupancy partial-out is NOT computable on landed data — so the definitive knockout is PENDING, not RESOLVED. Any report must carry the mediator/collider qualifier and the 'full knockout pending ISM re-run' caveat, never the bare 'controlling methylation does not move r'.",
+  "summary": {
+    "SURVIVES": 2,
+    "CHALLENGED": 7,
+    "REFUTED": 0,
+    "note": "No claim is logically REFUTED — the by-construction definitional leg (08-27) is genuinely airtight and anchors the group. But 7 of 9 verdict-bundles need caveats: the headline 'control methylation barely moves' is a wrong-control relabeling (true drop 0.656→0.322), the conclusive phasing-occupancy knockout is admittedly un-computable on landed data (PENDING ISM re-run), 'RESOLVED' overstates tier_3, the ρ=0.51 coverage link is HCC1395-specific (6-sample 0.14–0.49), and the phasing rescue risks circular support per ReadParser:145-148."
+  }
+}

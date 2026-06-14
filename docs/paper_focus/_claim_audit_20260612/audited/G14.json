@@ -1,0 +1,1018 @@
+{
+  "group_id": "G14",
+  "subject": "provenance / 數據誠信 對賬 + Intro/RQ/SoT/Discussion 框架",
+  "n_claims": 111,
+  "counts": {
+    "D": 22,
+    "I": 13,
+    "S": 67,
+    "Q": 9,
+    "P": 17,
+    "P-caveat": 38,
+    "S_prov": 56,
+    "F": 0,
+    "weak": 1,
+    "grep_confirmed": 18
+  },
+  "claims": [
+    {
+      "id": "02-08",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "HaplotagStrategy.cpp:505-516 (not grepped; code path, defer)",
+      "note": "method-mechanism interpretation; cites C++ source not in PRIMARY list; defer code-archeology; single-pipeline by-construction caveat"
+    },
+    {
+      "id": "02-31",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "commit 8dbb931->5e69a99 (session meta, not data file)",
+      "note": "session-contribution meta narrative; describes process upgrade not a data value"
+    },
+    {
+      "id": "02-32",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "integ_chapter §74 (30,350=TP 29,723/FP 627)",
+      "note": "catalog count; matches integ_chapter source doc line 74; primary catalog json by-construction single-sample"
+    },
+    {
+      "id": "02-34",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "integ_chapter §76 (2,788 over-strict 91% sparse)",
+      "note": "CramersV gate interpretation; count grep-matches integ_chapter line 76"
+    },
+    {
+      "id": "02-36",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "framework-discipline meta (no primary)",
+      "note": "self-description of framework discipline; not a data claim"
+    },
+    {
+      "id": "02-38",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "paper-boundary statement (single-sample/single-pipeline caveats self-stated)",
+      "note": "boundary/scope statement; correctly self-flags ⭐3 single-sample, single-pipeline, chr1-22 SNV-only"
+    },
+    {
+      "id": "02-42",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "G1 survey paused status (no primary)",
+      "note": "process-status claim (G1 dup-bug paused); routing decision not data"
+    },
+    {
+      "id": "03-03",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "git develop=54b02ab (branch status, not paper data)",
+      "note": "git canonical-line status; meta"
+    },
+    {
+      "id": "03-05",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "/big7_disk/.../canonical/HCC1395/paired_full/20260314_..._complete_matrix (ls verified)",
+      "note": "data path form + HCC1395 date 20260314 grep/ls-confirmed; canonical dir + 7 samples present"
+    },
+    {
+      "id": "03-08",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md (exists)",
+      "note": "SoT pointer; VERIFIED_RESULTS.md confirmed present and is the V1-V12 truth file"
+    },
+    {
+      "id": "03-12",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "two foundation reconcile (framing, no number)",
+      "note": "methyl contribution framing = characterization+negative; L2 interpretation"
+    },
+    {
+      "id": "03-14",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "foundation §5 lines 77-81 (G-A..G-E)",
+      "note": "open-gap list; G-A..G-E grep-match foundation §5"
+    },
+    {
+      "id": "03-15",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "foundation_01.md + 整合篇章_01.md (both exist)",
+      "note": "authoritative SoT pointer; both docs confirmed present"
+    },
+    {
+      "id": "03-16",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "knowledge/11_external_literature/10_paper_readiness_convergence.md (exists)",
+      "note": "KB convergence pointer; file confirmed present"
+    },
+    {
+      "id": "03-18",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "docs/references/20260611_master_workflow_architecture_01.md (exists)",
+      "note": "workflow map pointer; file confirmed present"
+    },
+    {
+      "id": "03-19",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "research-cycle flow (skill chain description)",
+      "note": "process description of P0-P6 skill chain; meta"
+    },
+    {
+      "id": "03-20",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "paper-writing flow (skill chain description)",
+      "note": "process description; meta"
+    },
+    {
+      "id": "03-21",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "CLAUDE.md §13 (governance ref)",
+      "note": "data-integrity protocol pointer; meta-governance"
+    },
+    {
+      "id": "03-24",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "KB 01/02 snapshots stale 2026-05-18 (status self-flag)",
+      "note": "🟡 self-flagged staleness status; the named glob knowledge/0{1,2}_*.md did not resolve directly but is a status note not a data value"
+    },
+    {
+      "id": "03-25",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "main branch stale status (git meta)",
+      "note": "🟡 branch-status meta"
+    },
+    {
+      "id": "03-26",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "uncommitted shared-state status (git meta)",
+      "note": "🟡 git/workspace status meta"
+    },
+    {
+      "id": "03-27",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "deferred benchmark status (process meta)",
+      "note": "🟡 deferred-task status meta"
+    },
+    {
+      "id": "04-05",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "intro framing (gap-claim, no primary)",
+      "note": "intro framing/positioning; field-gap assertion, framing-intent"
+    },
+    {
+      "id": "04-06",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "intro framing 🔵 (no primary)",
+      "note": "intro background framing 🔵"
+    },
+    {
+      "id": "04-08",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "intro gap 🔵 (no primary)",
+      "note": "read-level gap framing 🔵"
+    },
+    {
+      "id": "04-09",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "filter-disproof gap 🔵 (no primary)",
+      "note": "field-gap framing 🔵"
+    },
+    {
+      "id": "04-11",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "external L3 (no production caller; lit claim)",
+      "note": "external-literature L3 claim 🔵; outside-claim, not internal data"
+    },
+    {
+      "id": "04-12",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "intro framing (contribution statement)",
+      "note": "contribution framing"
+    },
+    {
+      "id": "04-13",
+      "axisA": "Q",
+      "axisB": "WEAK",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "intro hook CONFIRM-1 pending (decision-pending)",
+      "note": "🔴 hook framing AWAITING user CONFIRM-1; framing-intent not yet ratified"
+    },
+    {
+      "id": "04-14",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "intro discipline (no filter promise)",
+      "note": "framing discipline statement"
+    },
+    {
+      "id": "04-15",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "knowledge/11_external_literature lit-02/lit-07 (Do2020/O'Neill2024)",
+      "note": "external lit claim 🔵 L3; ASM 5x/hypo; outside-claim cited to KB lit files (not grepped, defer)"
+    },
+    {
+      "id": "04-16",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "knowledge/11_external_literature lit-02/lit-07 (Martin-Trujillo2017)",
+      "note": "external lit CN-confound 🔵 L3"
+    },
+    {
+      "id": "04-17",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "knowledge/11_external_literature lit-02/lit-07 (Landan2012/Derrien2021)",
+      "note": "external lit epipolymorphism 🔵 L3"
+    },
+    {
+      "id": "04-18",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "knowledge/11_external_literature lit-08/lit-10 (gap framing)",
+      "note": "research-gap framing 🔵; cites KB lit"
+    },
+    {
+      "id": "04-19",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "knowledge/11_external_literature lit-10 (RQ statement)",
+      "note": "RQ1-3 framing; question constructs"
+    },
+    {
+      "id": "04-20",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "3-alignment-caveat discipline (~38 PMID via /citation-verification, pending)",
+      "note": "🔴 alignment-discipline; ~38 citations NOT yet verified (action item)"
+    },
+    {
+      "id": "04-21",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "knowledge/11_external_literature lit-07 (BRCA2 amend)",
+      "note": "external lit BRCA2 amend 🔵 L3"
+    },
+    {
+      "id": "04-23",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "sample/caller statement (HCC1395 SEQC2 + 5 samples; ClairS-TO single-pipeline)",
+      "note": "🔴 sample/caller scope; single-pipeline caveat self-stated -> tier cap ⭐3; canonical dir confirms 7 samples present"
+    },
+    {
+      "id": "04-37",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "biological-meaning framing 🔵 (no primary)",
+      "note": "LOH-remodel framing 🔵 interpretation-of-interpretation"
+    },
+    {
+      "id": "04-38",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "filter-mechanism (regression-to-extreme/germline-allelic/circularity; Kapoor2023/Martin-Trujillo2017)",
+      "note": "method-contribution mechanism framing 🔵; backed by NEGATIVE results + external lit"
+    },
+    {
+      "id": "04-45",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "future-work (COLO829/umtag/cis; no primary)",
+      "note": "future-work framing"
+    },
+    {
+      "id": "05-06",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "docs/paper_focus/02_paper_framework/pre_registration_與fallback_carrying_claim.md (exists)",
+      "note": "pre-reg+fallback design pointer; doc confirmed present"
+    },
+    {
+      "id": "05-07",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "catalog wf_5644ed77-082 (provenance-status note)",
+      "note": "🟢/🟡 provenance-status note; de-confound 🟢 (6/6 verified) vs co-validation 🟡 contingent"
+    },
+    {
+      "id": "05-22",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "§2.3 methyl germline-driven (no number; backed by ARI null elsewhere)",
+      "note": "🟢 methyl-allelic=germline-driven interpretation; cross-ref ARI 0.177 germline-het null"
+    },
+    {
+      "id": "05-39",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "§3.1 de-confound contribution (@Do2020); 3-alignment discipline",
+      "note": "de-confound contribution framing; external @Do2020 L3"
+    },
+    {
+      "id": "05-40",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "§3.2 chr17/TBC1D16 (@Vizoso2015/@Kapoor2023/@MartinTrujillo2017)",
+      "note": "chr17 exemplar interpretation + external lit; perm p=0.001 cross-ref integ §67 single-locus"
+    },
+    {
+      "id": "05-43",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "§3.4 Limitations (single-pipeline ⭐3/single-sample/chr17 single-locus/by-construction)",
+      "note": "honest limitations statement; self-flagged caveats"
+    },
+    {
+      "id": "05-44",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "§4.1 Samples (6 samples confirmed in canonical/ ls)",
+      "note": "sample list; HCC1395/1937/1954/H1437/H2009/COLO829 all present in canonical dir; ClairS-TO single-pipeline caveat"
+    },
+    {
+      "id": "06-13",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "foundation §1 / 整合篇章 §1 (intro framing 🔵)",
+      "note": "intro framing 🔵; 'phasing 7/7, ASM exists, filter dead' summary of internal results"
+    },
+    {
+      "id": "06-14",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "L3 [@MartinTrujillo2017] (gap framing)",
+      "note": "gap framing 🔵 + external L3"
+    },
+    {
+      "id": "06-16",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "knowledge/11_external_literature/00-10 (~38 lit)",
+      "note": "background->gap framing 🟡; external lit Do2020/O'Neill2024/Martin-Trujillo/Landan/Derrien"
+    },
+    {
+      "id": "06-20",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "正式學術版 §4.5 (#24); reliable 12,868 + chr17 p=0.001; FDR calibration PENDING",
+      "note": "🔴 FDR-calibration ACTION-ITEM; 12,868 reliable count + chr17 p=0.001 are real but null/FDR correction not yet done (O11 lesson)"
+    },
+    {
+      "id": "06-34",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "L3 [@Do2020] (discussion de-confound framing 🔵)",
+      "note": "discussion framing 🔵 + external L3"
+    },
+    {
+      "id": "06-36",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "L3 [@Kapoor2023][@Landan2012]; O11 AUC 0.845->0.530",
+      "note": "🟢 mechanism framing; O11 n_reads-correction lesson referenced"
+    },
+    {
+      "id": "06-38",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "整合篇章 §5 (limitations 🔵)",
+      "note": "limitations framing 🔵 self-flagged"
+    },
+    {
+      "id": "06-39",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "framing (conclusion bookend 🔵)",
+      "note": "conclusion framing 🔵 co-validation thesis"
+    },
+    {
+      "id": "06-40",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "future-work 🔵 (no primary)",
+      "note": "future-work framing 🔵"
+    },
+    {
+      "id": "06-44",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "four NEGATIVE 🟢 ⭐2 L4; 30,350 workstation + 5-layer 85-86%",
+      "note": "🟢 four-negative summary; 30,350 count matches integ §74; ⭐2 L4 self-stated; single-sample"
+    },
+    {
+      "id": "06-54",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "04_figures/ (P1-P6 + fig1/fig2/fig5/fig6 + catalog_overview all exist)",
+      "note": "figure-status manifest; P1-P6.png, fig1_ism_5stage.svg, fig2/fig5/fig6, catalog_overview.png, clusterability all confirmed on disk"
+    },
+    {
+      "id": "07-01",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "wf_a8ccbb34-3f7 (8-group grep-back); 11 reconciled",
+      "note": "🟢 provenance-count status: 11 headline numbers reconciled to source"
+    },
+    {
+      "id": "07-02",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "wf_a8ccbb34-3f7 (status: ~10 pending grep)",
+      "note": "🟡 provenance-status: ~10 conclusions' source files not grepped this round (self-flagged action item)"
+    },
+    {
+      "id": "07-03",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/autoresearch/evidence_ledger.jsonl (exists, SoT-priority rule)",
+      "note": "SoT-priority rule; ledger confirmed present (99 lines)"
+    },
+    {
+      "id": "07-04",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "tsg moving-target status (no primary)",
+      "note": "🟡 status: T2/T3/T5 moving target in tsg project; meta"
+    },
+    {
+      "id": "07-15",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "paired negative-control NS (no primary path cited)",
+      "note": "🟢 paired neg-control not-significant; no source file cited, defer not-full-repo-archeology"
+    },
+    {
+      "id": "07-16",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "filter reinforcement 3-extra (no primary path cited)",
+      "note": "🟢 3 extra reinforcing filter-DEAD; no source file cited, defer"
+    },
+    {
+      "id": "07-17",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "wf_5644ed77-082 + 01_focus_notes/08_任務執行回報_catalog建構與provenance.md (exists)",
+      "note": "🟡 T-PROV reconcile status; named focus-note doc confirmed present"
+    },
+    {
+      "id": "07-18",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/.../genome_survey_v2/cn_confound/cross_sample/ (condition_fp_consensus.json OR 8.631/4.085/5.837; cross_sample_synthesis.json excess 0.1011-0.2424)",
+      "note": "🟢 stale-marker correction: files DO exist; OR 8.631/4.085/5.837 grep-confirmed; 6/6 excess 0.101-0.241 grep-confirmed"
+    },
+    {
+      "id": "07-23",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "HCC1954 transfer -0.377 said pending; ACTUALLY at cycle3_step1_findings.md:102 (see 11-18)",
+      "note": "🟡 status-claim STALE: claims -0.377 ungrep'd, but sibling 11-18 + cycle3_step1_findings.md:102 (-0.37744) confirm it IS located; internal provenance-status reconcile gap"
+    },
+    {
+      "id": "07-27",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "germline-het null ARI 0.177 said pending; ACTUALLY at b2_broad_scan_results.json (see 11-19)",
+      "note": "🟡 status-claim STALE: claims ARI 0.177 needs upstream TSV, but sibling 11-19 + b2_broad_scan_results.json (0.177463) confirm located; internal provenance-status reconcile gap"
+    },
+    {
+      "id": "07-31",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "umtag 0.8852/V10 0.979-0.866/45.84% said pending; ACTUALLY in VERIFIED_RESULTS.md (327/329/199/19)",
+      "note": "🟡 status-claim STALE: claims these not in verified-set, but VERIFIED_RESULTS.md lines 327(0.8852)/329(0.5236)/199-212(0.979/0.866)/19(45.84%) confirm all present; single-sample/by-construction caveat"
+    },
+    {
+      "id": "07-32",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "citation-discipline rule (no primary)",
+      "note": "🟡-number discipline rule; meta-governance"
+    },
+    {
+      "id": "09-01",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "validation-framework principle (no primary)",
+      "note": "each-conclusion-3-things framing; meta-method"
+    },
+    {
+      "id": "09-03",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "cis/cross-sample provenance-status (🟡)",
+      "note": "🟡 status: cis/cross-sample use copy/null controls, mostly pending source-reconcile; meta"
+    },
+    {
+      "id": "09-06",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "external-corroboration scope 🔵 (Kapoor/Martin-Trujillo)",
+      "note": "external-corroboration scope framing 🔵; only characterization/negative borrows external force"
+    },
+    {
+      "id": "09-25",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "LOSO mechanism description (method explainer)",
+      "note": "method-explainer (LOSO); meta"
+    },
+    {
+      "id": "09-26",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "permutation-null mechanism description",
+      "note": "method-explainer (perm null); meta"
+    },
+    {
+      "id": "09-27",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "subhap-matched mechanism description",
+      "note": "method-explainer; meta"
+    },
+    {
+      "id": "09-28",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "MW+signed-rho mechanism description",
+      "note": "method-explainer; meta"
+    },
+    {
+      "id": "09-29",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "condition-Fisher mechanism description",
+      "note": "method-explainer; meta"
+    },
+    {
+      "id": "09-30",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "blind-ARI mechanism description",
+      "note": "method-explainer; meta. ARI null specifics in b2_broad_scan_results.json"
+    },
+    {
+      "id": "09-36",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "cis/cross-sample pending in tsg (status)",
+      "note": "🟡 status: items 5/9/11/12 pending source-reconcile in tsg project; meta"
+    },
+    {
+      "id": "10-01",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "value framing 🔵 (3 deliverables not filter)",
+      "note": "value/positioning framing 🔵"
+    },
+    {
+      "id": "10-02",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "co-validation one-liner 🔵",
+      "note": "story framing 🔵"
+    },
+    {
+      "id": "10-04",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "co-validation spine 🔵",
+      "note": "story framing 🔵"
+    },
+    {
+      "id": "10-05",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "narrative-layering rule 🔵",
+      "note": "narrative-layering framing 🔵"
+    },
+    {
+      "id": "10-07",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "G-B Tier1 'filter dead 4-ways' 🟢; backed by four-NEGATIVE (G02)",
+      "note": "🟢 G-B core deliverable; filter-DEAD four-ways = reviewer-proof; cross-ref four NEGATIVE"
+    },
+    {
+      "id": "10-10",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "G-E Tier2 cis-protocol 🟡 (chr17 only + 6 untestable)",
+      "note": "🟡 G-E potential-needs-validation; chr17 unique clean, 6 untestable"
+    },
+    {
+      "id": "10-11",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "Tier3 method-refinement (CramersV gate/Δβ merge)",
+      "note": "method-refinement framing; meta"
+    },
+    {
+      "id": "10-13",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "storyline gap 🔵",
+      "note": "gap framing 🔵"
+    },
+    {
+      "id": "10-14",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "ISM method description (read×CpG/distance/cluster/cis)",
+      "note": "method-description; meta"
+    },
+    {
+      "id": "10-18",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "ASM methyl limits (small/non-directional/copy-independent/non-discriminative)",
+      "note": "ASM-limits interpretation; backed by internal ASM results (G03/G07)"
+    },
+    {
+      "id": "10-19",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "contributions list (3 deliverables)",
+      "note": "contribution framing"
+    },
+    {
+      "id": "10-20",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "honest boundary one-liner 🔵",
+      "note": "co-validation≠filter framing 🔵"
+    },
+    {
+      "id": "10-21",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "PI 1-on-1 narrative (audience tactic)",
+      "note": "narrative-audience framing; meta"
+    },
+    {
+      "id": "10-22",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "lab-meeting narrative (audience tactic)",
+      "note": "narrative-audience framing; meta"
+    },
+    {
+      "id": "10-23",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "abstract narrative (audience tactic)",
+      "note": "narrative-audience framing; meta"
+    },
+    {
+      "id": "10-24",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "handoff narrative (00_INDEX)",
+      "note": "narrative-audience framing; meta"
+    },
+    {
+      "id": "10-25",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "narrative 3-rules (L0->L3 + color + co-validation)",
+      "note": "narrative-rules framing; meta"
+    },
+    {
+      "id": "10-27",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "wf_a8ccbb34-3f7 (provenance-note: framing 🔵, numbers from verified-set)",
+      "note": "🔵 provenance-note: ordering=framing, attached numbers reuse verified set"
+    },
+    {
+      "id": "11-01",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "workflow wf_5644ed77-082 (6/9 tasks done+verified; 2 off-path spec'd)",
+      "note": "task-completion-status meta; cites workflow id"
+    },
+    {
+      "id": "11-06",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "T-PROV 🟢 all metrics grep-able (status claim, partially verified this round)",
+      "note": "🟢 'all metrics now grep-able'; this round CONFIRMS several (OR, ARI, transfer, umtag) but ~10 still pending per 07-02 -> mildly over-stated"
+    },
+    {
+      "id": "11-11",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "04_figures/ P1-P6 + catalog_overview.png (all exist; P5=R6)",
+      "note": "T-OBS-1 6 distribution figs confirmed on disk; P5_per_tag_counts_R6.png present"
+    },
+    {
+      "id": "11-18",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/methyl_augmented_filter_phase2/cycle3/cycle3_step1_findings.md:102 (-0.37744)",
+      "note": "🟢 HCC1954 transfer -0.377 (actual -0.37744) grep-CONFIRMED at cited line 102"
+    },
+    {
+      "id": "11-19",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/.../genome_survey_v2/b2_broad_scan_results.json (het-NULL 0.177463 / TP 0.135091)",
+      "note": "🟢 germline-het null ARI 0.177463 + TP 0.135091 grep-CONFIRMED in cited json"
+    },
+    {
+      "id": "11-33",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "COLO829 ⭐4 requirement (needs normal BAM; existence scan present)",
+      "note": "future-requirement framing; COLO829_tp/fp/fn scan exists, normal-anchored cis pending"
+    },
+    {
+      "id": "11-37",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "C++ change optional (clustering_reliability 3-state + dbeta_max; not necessary)",
+      "note": "optional-engineering framing; meta"
+    },
+    {
+      "id": "12-20",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "de-confound reference-table (TAG-C/TAG-F; serves Martin-Trujillo confound warning)",
+      "note": "actionability framing; tag-based de-confound table interpretation"
+    },
+    {
+      "id": "12-21",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "caution-list (TAG-D high-Δβ FP-prone + TAG-F untestable)",
+      "note": "actionability caution-list interpretation"
+    },
+    {
+      "id": "12-22",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "sanity-check (TAG-A chr17 + TAG-C as positive/germline calibration)",
+      "note": "method sanity-check framing interpretation"
+    },
+    {
+      "id": "12-24",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "GB main-figure count (5 F1-F5 + supplementary)",
+      "note": "figure-plan framing; meta"
+    },
+    {
+      "id": "12-25",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "04_figures/ (F2 already / F4 within_d-vs-HP=P4 / others 待製); fig2/fig5/fig6 + P4 exist",
+      "note": "figure-status: F2/F4 'already' confirmed (P4_within_vs_hp_scatter.png, fig2_single_locus exist); F1/F3/F5/F6 待製/contingent self-stated"
+    }
+  ]
+}

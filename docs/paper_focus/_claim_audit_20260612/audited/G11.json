@@ -1,0 +1,626 @@
+{
+ "group_id": "G11",
+ "subject": "ISM 方法定位 / 軸C read-read 距離 + reliability-gate + normal-anchored cis (vs 外部軸A per-CpG; useful pipeline 非 new algorithm; CramersV gate 過嚴 487/latent; Δβ 正交不可 naive 加)",
+ "n_claims": 66,
+ "audited_at": "2026-06-12",
+ "primary_truth_files_consulted": [
+  "research/autoresearch/evidence_ledger.jsonl",
+  "docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md",
+  "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/discovery_venn.json (cited)",
+  "docs/experiments/in_progress/2026/06/20260610_methylation_clusterability_vs_coverage_CN_characterization_01.md (cited)",
+  "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (cited)",
+  "src/core/RegionProcessor.cpp:1592 (cited)",
+  "docs/method_comparison/20260609_ism_vs_external_methylation_tools/{00_INDEX,01_ism_method_spec,12_methyl_approaches_by_axis,benchmark/08_external_program_audit}.md (cited)",
+  "memory/project_O11_heterogeneity_negative.md (cited)"
+ ],
+ "claims": [
+  {
+   "id": "04-22",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "src/core/RegionProcessor.cpp:1592 (cramers_v_reliable gate) + include/core/DistanceMatrix.hpp (6 metrics, per file 01_ism_method_spec)",
+   "note": "Pipeline-描述 = 對 C++ 源碼的一階詮釋；6-metric/CramersV-gate/normal-anchored cis 各組件在源碼/method_comparison 01 可核；single-pipeline 故 P-caveat"
+  },
+  {
+   "id": "04-24",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "cited 01_focus_notes/04 對應表 (synthesis doc, not in PRIMARY list)",
+   "note": "驗證機制清單 = 二次彙整表；各機制散見 ledger/VERIFIED_RESULTS 但本清單只在 synthesis 對應表；defer 不全repo考古"
+  },
+  {
+   "id": "04-26",
+   "axisA": "Q",
+   "axisB": "WEAK",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (open decision DEC-5/ISM-3)",
+   "note": "未決設計問題（是否合併 Δβ），方向構想 = 猜測/待決"
+  },
+  {
+   "id": "04-27",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none",
+   "note": "流程依賴宣告（方法定稿依賴 ISM-2/ISM-3 code 任務）= 對研究狀態的二次陳述"
+  },
+  {
+   "id": "05-10",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json:2 (n_loci=332705)",
+   "note": "abstract 數字 332,705 loci across 6 cancers grep 命中真值檔；pipeline 描述部分 I-type 但核心可核數字=D"
+  },
+  {
+   "id": "05-41",
+   "axisA": "I",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "memory/project_O11_heterogeneity_negative.md:3,15-19 (AUC 0.845→0.530, n_reads confound r=0.79); ledger:99 (O11_concluded)",
+   "note": "O11 數字 0.845→0.530 grep 命中 memory+ledger；'ISM 控掉 confound' 部分是對自家 NEG 的一階詮釋；Landan2012 外引"
+  },
+  {
+   "id": "05-42",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "VERIFIED_RESULTS.md:327 (救援 median=0.8852); V10 (non-copy, normal 0.979≥tumor 0.866)",
+   "note": "held-out 0.8852 + V10 非-copy grep 命中 VERIFIED_RESULTS；單樣本 HCC1395+single longphase-S pipeline 故 P-caveat（VERIFIED_RESULTS 自標 ⭐2-3）"
+  },
+  {
+   "id": "05-45",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "src/core/RegionProcessor.cpp:1592 (CramersV reliable gate); DistanceMatrix.hpp (6 metrics via 01)",
+   "note": "§4.2 pipeline 描述 = 源碼一階詮釋；CramersV reliable/latent/none 三態 + Cochran≥5 在源碼 reliability 機制可核；cited ISM_工具方法細節 為 synthesis doc"
+  },
+  {
+   "id": "05-46",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (5mC/5hmC scope 設計陳述 + dup-bug #25 引用)",
+   "note": "修飾範圍設計決定 = 二次陳述；dup-bug 待修 = 已知 issue 引用，無 primary 數字回查"
+  },
+  {
+   "id": "05-48",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "cited 04_知識_驗證機制_研究機制_對應表.md (synthesis doc)",
+   "note": "驗證機制清單（同 04-24）= 二次彙整；各機制真實但清單只在對應表；defer 不全repo考古"
+  },
+  {
+   "id": "06-15",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": true,
+   "primary_path": "docs/method_comparison/.../00_INDEX.md:20,33 (6 軸/82 工具) + 12_methyl_approaches_by_axis.md:14,29 (4 軸地景)",
+   "note": "方法定位 synthesis（軸A vs 軸C）；82 工具/4 軸/6 軸地景 grep 命中 method_comparison 但這些是 synthesis 檔非 raw 真值；定位宣稱=二次解釋"
+  },
+  {
+   "id": "06-17",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "src/core/RegionProcessor.cpp:1592; DistanceMatrix.hpp (6 metrics via 01_ism_method_spec:33,55)",
+   "note": "同 04-22 pipeline 描述；6 度量在 01_ism_method_spec 引 DistanceMatrix.hpp:21-36 確認 NHD/L1/Bernoulli/Pearson/Jaccard"
+  },
+  {
+   "id": "06-18",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "cited 01_focus_notes/04 對應表 (synthesis)",
+   "note": "9 項驗證機制清單（同 04-24/05-48）= 二次彙整；defer 不全repo考古"
+  },
+  {
+   "id": "06-19",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "docs/method_comparison/.../benchmark/08_external_program_audit.md:24,32,48 (r=0.976 BRCA2 / 0.993 TBC1D16, 'r=0.98-0.99')",
+   "note": "modkit 驗 ISM r=0.98 grep 命中 file 08 Audit A（runs/audit_A.json 實跑）；Fisher 不偏樂觀 (null FP 0.7-1.9%) 同檔 Audit B 確認"
+  },
+  {
+   "id": "06-47",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": true,
+   "primary_path": "00_INDEX.md (6軸/82工具/4軸/r=0.98 via 08) — synthesis roll-up",
+   "note": "比較研究 headline 彙總（重複 06-15/06-19 的 synthesis）；各分項可核但本條是 roll-up = 二次"
+  },
+  {
+   "id": "08-41",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (direction_cards ISM-1 裁決)",
+   "note": "裁決陳述 (ISM-1 ✅ CONFIRM)；裁決 = 對證據的二次判斷，無 cited primary"
+  },
+  {
+   "id": "08-42",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "discovery_venn.json (ISM=clustering vs Δβ=per-position 正交，cells 證 dbeta_only ≠ ISM_only)",
+   "note": "正交性宣稱 = 對 venn 數據的一階詮釋；ISM 抓 discrete clustering / Δβ 抓連續差 由 venn 4-cell 結構支持"
+  },
+  {
+   "id": "08-43",
+   "axisA": "I",
+   "axisB": "WEAK",
+   "provenance": "P-caveat",
+   "grep_confirmed": false,
+   "primary_path": "BRCA2 Δβ~0.007 數字未在 PRIMARY 兩檔；ZAR1L/BRCA2 在其他 memory",
+   "note": "BRCA2 互補示意（Δβ~0.007 被漏）= 範例性詮釋；具體 0.007 未在本清單 primary 回查到（stated_tier 🟡 自承示意）；defer 不全repo考古"
+  },
+  {
+   "id": "08-51",
+   "axisA": "Q",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (ISM-3 ⭐ PROBE/code 裁決)",
+   "note": "PROBE 裁決（是否加 Δβ 通道值得做）= 方向構想/待做，非已證"
+  },
+  {
+   "id": "08-52",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "src/ (read-level 架構) + discovery_venn.json (ISM_only=分群不明顯但 Δβ 大被漏的 dbeta_only cell)",
+   "note": "架構分析單位差異 = 對源碼+venn 的一階詮釋；'ISM 漏分群不明顯但平均差大位點'由 dbeta_only cell 實證"
+  },
+  {
+   "id": "08-53",
+   "axisA": "I",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "discovery_venn.json (dbeta_only enrich_vs_base=0.13 FP-enriched; interpretation 欄明寫 must be clustering-gated)",
+   "note": "合併設計（不可 naive 加 Δβ，需 clustering-gated union + cis-test）= 對 venn FP-enriched cell 的一階詮釋，鏈完整"
+  },
+  {
+   "id": "08-54",
+   "axisA": "Q",
+   "axisB": "WEAK",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "cited modkit/NanoMethPhase L3 (外部，未 benchmark)",
+   "note": "'可借' = 構想/待做；外部 DMR 方法能力宣稱本群多標待 KB 確認"
+  },
+  {
+   "id": "12-26",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "memory/project_O11_heterogeneity_negative.md:3,15-19 (AUC 0.845→0.530); ledger:99",
+   "note": "O11 NEGATIVE 數字 grep 命中 memory+ledger；自家證據 D-type"
+  },
+  {
+   "id": "12-27",
+   "axisA": "I",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "memory/project_O11_heterogeneity_negative.md (n_reads confound); ledger:99 (Scherer20 externally confirmed)",
+   "note": "epipolymorphism=n_reads-confounded artifact = 對 O11 的一階詮釋，數字可核；Landan2012 外引"
+  },
+  {
+   "id": "12-28",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "src/ (CramersV/PERMANOVA gate) + clusterability doc (de-confound 機制)",
+   "note": "'ISM 控掉 epipoly 漏的 confound' = 一階詮釋；reliability-gate + normal-anchored cis 機制源碼/doc 可核；無單一數字"
+  },
+  {
+   "id": "12-29",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (方法論賣點陳述)",
+   "note": "'把 O11 NEG 變方法論賣點' = 對詮釋的再詮釋 (synthesis-of-synthesis)"
+  },
+  {
+   "id": "13-01",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (ISM 價值定位陳述)",
+   "note": "'價值=去confound鏡頭' = 定位 synthesis；各組件真實但本條是高層 framing"
+  },
+  {
+   "id": "13-02",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none",
+   "note": "'誠實 de-confounding 非 discovery/filter' = 定位陳述；對齊 filter-DEAD 共識但本條是 framing"
+  },
+  {
+   "id": "13-03",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "src/core/RegionProcessor.cpp + DistanceMatrix.hpp (7 組件整合)",
+   "note": "7 組件整合 = 對源碼結構的一階詮釋；各組件在 13-07~13-13 逐一描述"
+  },
+  {
+   "id": "13-04",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (useful pipeline 非 new algorithm 定位)",
+   "note": "差異化定位 synthesis；'個別演算法多既有'對齊 novelty 自評 (13-29~13-32)"
+  },
+  {
+   "id": "13-05",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "cited Martin-Trujillo (外部文獻，無行號；本群 primary 不含外部 ref)",
+   "note": "de-confound niche 論述引外部文獻 (apparent ASM 多 copy-confound)；外部 claim 須查 KB，未在本群 primary；defer"
+  },
+  {
+   "id": "13-06",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "VERIFIED_RESULTS.md (單樣本 HCC1395 + single-pipeline ⭐3 caveat 反覆出現)",
+   "note": "誠實限制（normal-anchored 只 HCC1395 完整 / ⭐3）= 與 VERIFIED_RESULTS 自承一致的一階限制陳述；stated 🔴 caveat honest"
+  },
+  {
+   "id": "13-07",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": false,
+   "primary_path": "cited MatrixBuilder (內部組件無行號); src/ 存在 MatrixBuilder 但本群 primary 未逐行核",
+   "note": "組件1 read×CpG 矩陣描述 = 源碼一階詮釋；5mC/5hmC dup-bug 待修為已知 issue；MatrixBuilder 行號未提供故 grep 未逐行核"
+  },
+  {
+   "id": "13-08",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "include/core/DistanceMatrix.hpp:21-36,44-57 (via 01_ism_method_spec:33; NHD/L1/Bernoulli/Pearson/Jaccard)",
+   "note": "組件2 6 度量距離 grep 命中源碼引用；6 metrics 名稱與 01 spec 一致（claim 列 NHD/L1/L2/Pearson/Bernoulli/Jaccard，源碼為 NHD/L1/Bernoulli/Pearson/Jaccard — L2 未在源碼明列，輕微口徑差）"
+  },
+  {
+   "id": "13-09",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": false,
+   "primary_path": "src/ hierarchical clustering (組件存在，本群 primary 未逐行核)",
+   "note": "組件3 階層分群描述 = 源碼一階詮釋；無行號回查"
+  },
+  {
+   "id": "13-10",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "src/core/RegionProcessor.cpp:1592 (cramers_v_reliable gate — 行號精確命中); 487 latent 來源在 PERMANOVA 救回 script (本群 primary 外)",
+   "note": "組件4 CramersV gate cited RegionProcessor.cpp:1592 行號精確命中（cramers_v_reliable?cramers_v:0）；Cochran≥5 機制存在；487 latent 數字只在 synthesis/memory，本群 primary 兩檔無 → 該數字 S 級，defer"
+  },
+  {
+   "id": "13-11",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": false,
+   "primary_path": "src/ HP/LOH tag 比對 (組件存在，未逐行核)",
+   "note": "組件5 HP/LOH tag 比對 = 源碼一階詮釋；somatic-sub-haplotype 依賴 longphase-S tag"
+  },
+  {
+   "id": "13-12",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "VERIFIED_RESULTS.md V10 (normal HP1/tumor HP1/tumor HP1-1 三路 cis 設計); reference_msa_vs_ism memory (normal-anchored cis-test)",
+   "note": "組件6 normal-anchored cis-test 三路比 = 對 V10/MSA cis 設計的一階詮釋；單樣本故 P-caveat"
+  },
+  {
+   "id": "13-13",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/.../catalog/catalog_tag_counts.json (n_loci 332705, 7 TAG A-G)",
+   "note": "組件7 catalog 輸出 (16 欄 7 TAG) = 對 catalog 產物的一階詮釋；7 TAG (A-G) grep 命中 tag_counts.json"
+  },
+  {
+   "id": "13-15",
+   "axisA": "Q",
+   "axisB": "WEAK",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "cited P-14 規則 (B 節差異待 #23 benchmark)",
+   "note": "明示為'待驗證假設非已證宣稱' (stated 🔴)；自承未證 = 猜測層，誠實標記"
+  },
+  {
+   "id": "13-16",
+   "axisA": "Q",
+   "axisB": "WEAK",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (待 KB 確認)",
+   "note": "modkit 差異假設 (待證)；外部工具能力宣稱未 benchmark = 猜測，誠實標待 KB"
+  },
+  {
+   "id": "13-17",
+   "axisA": "Q",
+   "axisB": "WEAK",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (待 KB 確認)",
+   "note": "NanoMethPhase 差異假設 (待證) = 猜測，誠實標待 KB"
+  },
+  {
+   "id": "13-18",
+   "axisA": "Q",
+   "axisB": "WEAK",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (待 KB 確認)",
+   "note": "nanomethviz 差異假設 (待證) = 猜測，誠實標待 KB"
+  },
+  {
+   "id": "13-19",
+   "axisA": "Q",
+   "axisB": "WEAK",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (待 KB 確認)",
+   "note": "epipolymorphism 差異假設 (待證) = 猜測，誠實標待 KB"
+  },
+  {
+   "id": "13-20",
+   "axisA": "Q",
+   "axisB": "WEAK",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (待 benchmark)",
+   "note": "GB 賣點'現有單一工具做不到'(若 benchmark 成立) = 條件式構想，自承待 benchmark"
+  },
+  {
+   "id": "13-22",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "src/ (read-level characterization 能力) + catalog (per-locus 輸出)",
+   "note": "'ISM 能回答 reads 是否分甲基亞群且對齊 haplotype' = 對 pipeline 能力的一階詮釋"
+  },
+  {
+   "id": "13-23",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "src/core/RegionProcessor.cpp:1592 (CramersV/PERMANOVA gate); 487 latent 數字在 synthesis/memory (本群 primary 外)",
+   "note": "'哪些位點可靠 vs 稀疏表 artifact' 能力陳述 = 一階詮釋；CramersV/PERMANOVA gate 源碼可核；487 latent 數字 S 級 defer"
+  },
+  {
+   "id": "13-24",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "cited Martin-Trujillo (CN 解釋 allelic 甲基 82-92%; 外部文獻)",
+   "note": "de-confounding lens 論述引外部數字 (82-92%)；外部 claim 須查 KB，未在本群 primary；defer"
+  },
+  {
+   "id": "13-26",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "VERIFIED_RESULTS.md (只 HCC1395 matched normal); reference_msa memory",
+   "note": "誠實限制（normal-anchored 只 HCC1395 完整）= 一階限制陳述，與 V10 單樣本一致；stated 🔴 honest"
+  },
+  {
+   "id": "13-27",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "clusterability doc:7 (tier ⭐3 single-pipeline ClairS-TO); 多檔 caveat 一致",
+   "note": "誠實限制 single-pipeline ⭐3 + dup-bug = 一階限制陳述，跨檔一致；stated 🔴 honest"
+  },
+  {
+   "id": "13-28",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (useful pipeline 非 new algorithm 定位)",
+   "note": "定位 synthesis（演算法多既有）；stated 🔴；對齊 novelty 自評"
+  },
+  {
+   "id": "13-29",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (novelty 自評；對齊 epipolymorphism/entropy 類既有)",
+   "note": "novelty 自評（矩陣/距離/分群=既有）= 對方法新穎性的一階自評，誠實降權"
+  },
+  {
+   "id": "13-30",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (novelty 自評)",
+   "note": "novelty 自評（CramersV/PERMANOVA=標準統計，紀律是貢獻）= 自評一階"
+  },
+  {
+   "id": "13-31",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": false,
+   "primary_path": "cited longphase-S (外部工具依賴; VERIFIED_RESULTS 多處 longphase-S somatic tag)",
+   "note": "novelty 自評（somatic-sub-haplotype 較少見，依賴 longphase-S）= 一階自評；longphase-S 依賴在 VERIFIED_RESULTS 反覆出現"
+  },
+  {
+   "id": "13-32",
+   "axisA": "I",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "VERIFIED_RESULTS.md V10 (somatic-controlled HP-axis held-constant copy/ploidy/alignment); feedback_asm_allele_axis memory",
+   "note": "novelty 自評（normal-anchored cis-test 最接近原創，HP-axis held-constant）= 一階自評；HP-axis 設計在 V10/memory 可核；單樣本 P-caveat"
+  },
+  {
+   "id": "13-33",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "none (誠實定位 + GB 不可宣稱新演算法)",
+   "note": "高層定位 synthesis（整合既有+一個 de-confound cis-test）= framing-of-framing"
+  },
+  {
+   "id": "13-34",
+   "axisA": "S",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "S",
+   "grep_confirmed": false,
+   "primary_path": "cited frontmatter provenance-verified note (自指)",
+   "note": "venue/標註紀律陳述 = 二次 meta-陳述（外部能力標待 benchmark）"
+  },
+  {
+   "id": "15-28",
+   "axisA": "I",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P",
+   "grep_confirmed": true,
+   "primary_path": "docs/experiments/.../20260610_methylation_clusterability_vs_coverage_CN_characterization_01.md §4.2 (P6: reliability 否被覆蓋驅動，power floor 後 plateau)",
+   "note": "schema P6 答（reliability 非覆蓋驅動）= 對 clusterability doc 的一階詮釋，鏈完整命中 cited doc"
+  },
+  {
+   "id": "15-31",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "clusterability doc §2.3 (z_nCpG OR=1.20 p=1e-35; pseudo-R²=0.083) — cited doc 命中",
+   "note": "n_CpG OR=1.20 + pseudo-R²=0.083 (8%) grep 命中 cited clusterability doc 真值；CN truth 單樣本 HCC1395 故 P-caveat"
+  },
+  {
+   "id": "15-34",
+   "axisA": "I",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "clusterability doc §2.2/§3 (LOH OR=0.07 6/6 樣本; need-2-haplotype 機制); ledger:98",
+   "note": "'分群=真等位生物學非技術假象' = 對 clusterability LOH-抑制機制的一階詮釋；與 fast_cnv/HD-4 一致；單樣本 CN truth P-caveat"
+  },
+  {
+   "id": "15-36",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/.../catalog/discovery_venn.json (base_ratio=92.8)",
+   "note": "union base TP:FP=92.8:1 grep 精確命中 discovery_venn.json；ISM/Δβ 正交宣稱由 4-cell 結構支持；single-pipeline P-caveat"
+  },
+  {
+   "id": "15-38",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "discovery_venn.json cells.both (TP=3379, FP=85, ratio=39.8)",
+   "note": "both cell 數字精確命中 discovery_venn.json (3379/85/39.8)；single-pipeline P-caveat"
+  },
+  {
+   "id": "15-39",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "discovery_venn.json cells.ISM_only (TP=33656, FP=228, ratio=147.6)",
+   "note": "ISM_only cell 數字精確命中 (33656/228/147.6=最乾淨)；BRCA2 clustering-only 範例 stated 🟢；single-pipeline P-caveat"
+  },
+  {
+   "id": "15-40",
+   "axisA": "D",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "discovery_venn.json cells.neither (TP=256055, FP=2727, ratio=93.9)",
+   "note": "neither cell 數字精確命中 (256055/2727/93.9≈base)；single-pipeline P-caveat"
+  },
+  {
+   "id": "15-41",
+   "axisA": "I",
+   "axisB": "EVIDENCE_CHAIN",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "discovery_venn.json cells.dbeta_only (enrich_vs_base=0.13 → 1/0.13=7.7× FP-enriched); interpretation 欄 must be clustering-gated",
+   "note": "設計結論（Δβ 不可 naive 加，FP-enriched 7×）= 對 venn 的一階詮釋；'7×'=1/0.13≈7.7 與 venn 相符；single-pipeline P-caveat"
+  },
+  {
+   "id": "15-42",
+   "axisA": "D",
+   "axisB": "LOGIC_EVIDENCE",
+   "provenance": "P-caveat",
+   "grep_confirmed": true,
+   "primary_path": "research/.../catalog/catalog_skeleton.tsv (AlleleDelta/HPMergedDelta 欄存在 → dbeta_max 可算)",
+   "note": "'dbeta_max 用既有 AlleleDelta/HPMergedDelta 算' grep 命中 catalog 檔含這些欄；加一級通道需 /cpp-change (stated 🔴)；single-pipeline P-caveat"
+  }
+ ],
+ "counts": {
+  "D": 11,
+  "I": 33,
+  "S": 13,
+  "Q": 9,
+  "P": 9,
+  "P_caveat": 29,
+  "S_prov": 28,
+  "F": 0,
+  "weak": 9,
+  "grep_confirmed": 35,
+  "EVIDENCE_CHAIN": 16,
+  "LOGIC_EVIDENCE": 41
+ }
+}

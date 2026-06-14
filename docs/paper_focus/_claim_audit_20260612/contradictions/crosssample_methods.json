@@ -1,0 +1,70 @@
+{
+  "domain": "crosssample_methods",
+  "scope": "跨樣本復現 (6/6 excess / 同-locus 0/38 / E[overlap]=0.16) + single-pipeline tier 封頂 (⭐3/⭐4) + FDR/null 校準 (de-confound floor) + ISM 方法定位 (軸C / reliability-gate / normal-anchored cis) + same-hap NG=2 phasing 口徑",
+  "auditor_note": "矛盾偵測員 = 跨文件不一致掃描。比對 14 audited group JSON + claims/*.json 全文 + PRIMARY 真值檔 (evidence_ledger.jsonl / catalog_tag_counts.json / catalog_audit.json / asm_landscape.json / catalog_skeleton.tsv / CURRENT_FOCUS.md)。核心跨樣本『值』(6/6 excess +0.101–0.241 mean 0.168 / 0/38 / E[overlap]=0.1636 / 6/6 LOH OR 0.01–0.107) 跨 formal_arch/master_map/imrad_framework/validation_map/catalog_provenance/storyline 全部數值一致 = 無數值矛盾。矛盾集中在: (1) same-hap NG=2 口徑 6/6 vs 3/6 (已知🔴); (2) E[overlap] 的 provenance 陳述 (file-stored vs 未存); (3) 'reliable' 一詞雙義 (12,868 TAG-C vs 11,689 三態); (4) catalog schema 欄數 16 vs 32; (5) 乾淨 somatic cis 分母 1/332,705 vs 1/816; (6) de-confound floor 狀態 '已穩🟢' vs '12,868/chr17 未過 FDR/null'。",
+  "primary_truth_files_used": [
+    "research/autoresearch/evidence_ledger.jsonl (L27 OLD 6/6 same-hap 93.2/99.0/98.8/96.5/98.3/97.0; L95 corrected 3/6 = 0.840/0.939/0.759/0.429/0.932/0.920; L58 phasing 7/7 W=28 p=0.0078125; single-pipeline tier_capped_3)",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (overall TAG-C=12868, A=1, n_loci=332705)",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (reliable_TP_FP_genomewide TP=11655 FP=34 => 11689)",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (header=32 columns, 332705 data rows)",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/cross_sample/asm_landscape.json:166 (sum_expected_overlap=0.1636)",
+    "docs/CURRENT_FOCUS.md:158 (live 'NG=2 Inner >=93% same-hap ... 6/6 sample 一致' OLD framing 仍存)"
+  ],
+  "n_contradictions": 6,
+  "contradictions": [
+    {
+      "subject": "same-hap NG=2 Inner 口徑 (6/6 ≥93% vs 3/6 ≥93%)",
+      "claim_a": "claim 02-09 (source_doc=integ_chapter): 'NG=2 Inner same-HP1 > Outer 7/7 ... Inner×NG=2 ≥93% same-hap 6/6'；並 claim 06-45 (source_doc=master_map): 'NG=2 Inner 93-99% same-hap'（同句又寫『口徑修正 3/6 非 6/6』= 自相矛盾）；live SoT docs/CURRENT_FOCUS.md:158 亦仍寫 'NG=2 Inner ≥93% same-hap ... 6/6 sample 一致'。",
+      "claim_b": "claim 05-35 (source_doc=formal_arch) / 07-22 (doc_library) / 11-28,11-29 (catalog_provenance) / 14-33 (prereg_fallback): 'same-hap 中位 ~92% 但僅 3/6 ≥93%（0.840/0.939/0.759/0.429/0.932/0.920，T-PROV 修正，非 6/6）'。",
+      "conflict": "同一 NG=2 Inner same-hap 占比指標，進取/舊 framing 文件報 '6/6 ≥93%'（或 93-99%），保守/已修正文件報 '3/6 ≥93%, 中位 ~92%'。",
+      "which_correct": "claim_b 正確。evidence_ledger.jsonl:95 overstated_flag verbatim = 0.840/0.939/0.759/0.429/0.932/0.920 → 只 3/6≥93%；L27 的 OLD 6/6 (93.2/99.0/...) 是被取代的舊量級。方向（6/6 皆 high same-hap）對，量級（6/6≥93%）錯。",
+      "correction_needed": "改 integ_chapter(02-09) 內 '≥93% same-hap 6/6' 為 '6/6 方向一致但僅 3/6≥93%（中位~92%）'；master_map(06-45) 移除並存的 '93-99% same-hap' 舊範圍只留修正口徑；🔴 修 docs/CURRENT_FOCUS.md:158 live SoT 字串。附帶修 CITATION-LINE bug：07-22/11-03/11-28/11-30 引 'CURRENT_FOCUS:137' 應為 :158（:137 是無關的 HKU handoff plan）。",
+      "severity": "🔴"
+    },
+    {
+      "subject": "E[overlap]=0.16 的 provenance 狀態（file-stored vs derived 未存）",
+      "claim_a": "claim 07-29 (source_doc=doc_library): 'E[overlap]=0.16 為 derived，未 file-stored，需補計算說明'（stated_tier 🟡，cited=none）。",
+      "claim_b": "claim 05-38 (formal_arch) / 06-32 (master_map) / 09-21 (validation_map, cited cross_sample_synthesis.json:47): 把 E[overlap]=0.16 當作已存在/可引用的 underpower 校正值與 0/38 並列，無『需補計算』caveat。",
+      "conflict": "對同一數字 E[overlap]=0.16 的可追溯狀態描述不一致：doc_library 宣稱『derived 且未落檔，需補』；formal_arch/master_map/validation_map 直接當既存值引用。",
+      "which_correct": "claim_b 對（數字本體已落檔）。PRIMARY: asm_landscape.json:166 sum_expected_overlap=0.1636 + ledger 20260603_cross_sample_ASM_landscape verdict 'expected_random_overlap_only_0.1636' 雙存。claim_a 的 provenance 陳述 FACTUALLY WRONG（G10 audit 07-29 flag 一致）。注意：07-29 數字本體 0.16 真實，只是它對 provenance 的『未 file-stored』陳述過時/錯誤。",
+      "correction_needed": "修 doc_library(07-29)：刪『未 file-stored，需補計算』，改指向 asm_landscape.json:166 (sum_expected_overlap=0.1636) + ledger。其餘文件無需改。",
+      "severity": "🟡"
+    },
+    {
+      "subject": "'reliable' 甲基分群計數一詞雙義（12,868 vs 11,689）",
+      "claim_a": "claim 05-21 (source_doc=formal_arch): 'reliable 甲基分群 12,868（3.87%, TAG-C）'；claim 11-08 (catalog_provenance) / 12-02 (completeness): 把 12,868 稱 'reliable'（'規則的 12,868 reliable'）。",
+      "claim_b": "claim 15-06 / 15-19 (source_doc=catalog_r6): 'clustering_reliability 三態 reliable 11,689 / latent 28,254 / none'，reliable 定義 = Significant（PassedGating & GlobalP≤0.05 & CramersV≥0.1 & NumReads≥20），全基因組 11,689（TP 11,655 / FP 34）。",
+      "conflict": "同一形容詞 'reliable 甲基分群' 在不同文件對應兩個不同數字：12,868（=TAG-C germline-allelic cis 分類）vs 11,689（=clustering_reliability 三態的 Significant 計數）。讀者會誤以為是同一量。",
+      "which_correct": "兩值各自正確但指不同量（非數值錯）。PRIMARY: catalog_tag_counts.json overall.C=12,868（germline-allelic TAG）；catalog_audit.json reliable_TP_FP_genomewide = 11,655+34 = 11,689（Significant 三態）。問題在『reliable』命名混用，非數字。",
+      "correction_needed": "統一命名：12,868 一律標 'TAG-C germline-allelic（cis-tag）'，11,689 一律標 'reliable clustering（三態 Significant，含 FN 則 12,876）'。formal_arch(05-21)/catalog_provenance(11-08)/completeness(12-02) 把 12,868 叫 reliable 處須加註『此處 reliable=TAG-C 口徑，非三態 reliable 11,689』。",
+      "severity": "🟡"
+    },
+    {
+      "subject": "catalog schema 欄數（16-欄 vs 32-欄）",
+      "claim_a": "claim 05-47 (source_doc=formal_arch): '§4.3 Catalogue：16-欄 schema → 7-TAG'。",
+      "claim_b": "claim 11-08 (catalog_provenance) / 12-23 (completeness): 'catalog_skeleton.tsv（332,705×32 欄）'。",
+      "conflict": "同一 catalog_skeleton.tsv 的欄位數，formal_arch 寫 16 欄，catalog_provenance/completeness 寫 32 欄。",
+      "which_correct": "claim_b 正確。PRIMARY: catalog_skeleton.tsv header 實測 = 32 columns。formal_arch(05-47) 的 '16-欄' 是 stale/錯誤口徑（G09 audit 05-47 同 flag 🔴 口徑錯）。",
+      "correction_needed": "修 formal_arch(05-47) '16-欄 schema' → '32-欄 schema'，與 11-08/12-23 對齊。",
+      "severity": "🟡"
+    },
+    {
+      "subject": "乾淨 somatic cis 分母（1/332,705 vs 1/816）",
+      "claim_a": "claim 05-11 (formal_arch) / 06-48 (master_map): 'genome-wide only 1/332,705 loci is a clean somatic cis-ASM'（全 catalog 分母）。",
+      "claim_b": "claim 08-39 (source_doc=direction_cards): 'single-sample 硬 confound 天花板還在（cis line 1/816 clean）'（HP-axis testable 分母）。",
+      "conflict": "同一『唯一乾淨 somatic cis = chr17/TBC1D16』的稀有度，用兩個不同分母表達：1/332,705（全 catalog 位點）vs 1/816（HP-axis 可測 cis 位點）。未交叉說明會被讀成兩個不同統計。",
+      "which_correct": "兩者皆真但分母口徑不同（非數值錯）。1=TAG-A（catalog_tag_counts.json A=1）為分子兩處共用；332,705=catalog 全位點，816=HP-axis 可 cis-test 子集（cis_status 非-NA 只在 HCC1395）。816 具體數未在 PRIMARY catalog 檔（defer），但兩分母概念明確不同。G13 audit 08-39 同標『CONFLICT-候選/口徑』。",
+      "correction_needed": "在 abstract/headline（05-11/06-48）與 direction_cards（08-39）交叉註明：'1/332,705（全 catalog）= 1/816（HP-axis 可測 cis 子集）'，避免讀者誤認兩個分子。建議統一以 1/332,705 當對外 headline、1/816 當 methods 限制說明。",
+      "severity": "🟡"
+    },
+    {
+      "subject": "de-confound floor 的成熟度狀態（'已穩🟢 6/6 驗' vs '12,868/chr17 未過 FDR/null'）",
+      "claim_a": "claim 14-09 / 14-22 / 14-31 (source_doc=prereg_fallback): 'floor 已穩：de-confound 用 catalog（🟢 6/6 驗），#21/#22 任一失敗論文不垮 / de-confound 主文今天就能寫'。",
+      "claim_b": "claim 12-01 / 12-02 / 12-03 (source_doc=completeness): '最該先做 = FDR/null 校準（#24）——它若失敗會同時砍掉「規則 12,868」和「例外 chr17」；12,868 reliable=3.87% 低於 p≤0.05 的 5% 噪音地板，沒 null 校準無法宣稱真訊號；chr17 perm p=0.001 跨 816 → Bonferroni 0.82 NS 可能多重檢定 artifact'。",
+      "conflict": "prereg_fallback 把 de-confound floor 框成『🟢 已證、今天可寫、不垮』；completeness 指出 floor 的兩根支柱（12,868 reliable 計數 + chr17 cis）都尚未做 FDR/null 校準，且 12,868 低於 5% 噪音地板、chr17 Bonferroni NS。對 floor 的『已驗證 vs 待校準』狀態評估不一致。",
+      "which_correct": "undetermined（屬 framing/狀態評估張力，非互斥事實）。completeness 12-08 自己給出 reconciliation：『若 12,868 不過 null → 規則改述「分群率不顯著高於噪音」反而強化 de-confound；任一結果 floor 不垮』，與 prereg_fallback 的『不垮』結論一致。但 prereg_fallback 的 '🟢 已穩/今天可寫' 措辭略過了 FDR/null 校準（#24）這個未跑前置 → 兩文件對『floor 是否已可宣稱真訊號』口徑不同。FDR/null 校準在 PRIMARY 中確為『待跑方法設計』（09 doc 自標 🔵 method design 未執行）。",
+      "correction_needed": "在 prereg_fallback(14-09/14-22/14-31) 的 'floor 已穩🟢' 加註：'de-confound floor 的論文不垮性成立，但 12,868 reliable 計數與 chr17 cis 的 FDR/null 校準(#24)尚未跑；對外宣稱「真訊號」前需補，或採 12-08 的條件式改述'。使兩文件對 floor 成熟度口徑一致。",
+      "severity": "🟡"
+    }
+  ]
+}

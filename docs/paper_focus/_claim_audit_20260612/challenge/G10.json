@@ -1,0 +1,148 @@
+{
+  "group_id": "G10",
+  "reviewer_role": "adversarial red-team (falsification, not concurrence)",
+  "subject": "跨樣本復現 (6/6 excess-over-null +0.101–0.241 現象層; 同-locus 0/38 underpowered E[overlap]=0.16; LOH 抑制分群 6/6 OR<1; clusterability vs cov/CN)",
+  "method_note": "獨立重算 primary 真值 (未只信 auditor grep): 6 *_gwasm.json rate_excess_over_null / strong / null 逐值重抽; cross_sample_synthesis.json headline; asm_landscape.json:166; clusterability_cov_cn_extended.json C_summary + per-sample OR. 核心數字全部對得上 — 故攻擊面從『數字真偽』轉向『推論結構/隱藏假設/口徑/泛化』。",
+  "independently_recomputed": {
+    "excess_over_null_6of6": {"HCC1395": 0.2413, "HCC1937": 0.1705, "HCC1954": 0.196, "H1437": 0.1503, "H2009": 0.1513, "COLO829": 0.101, "all_positive": true},
+    "strong_vs_null_ratio": {"HCC1395": "10.4x", "H1437": "5.5x", "H2009": "2.7x", "HCC1954": "~4.9x", "HCC1937": "~10.3x", "COLO829": "1.79x (null=56% of strong)"},
+    "n_evaluable_per_sample": {"HCC1395": 1749, "HCC1937": 1748, "HCC1954": 1658, "H2009": 1388, "H1437": 925, "COLO829": 802},
+    "same_locus": {"n_recurrent_somatic": 0, "of_total": 38, "E_overlap_file_stored": 0.1636},
+    "loh_OR_6of6": {"HCC1395": 0.1, "HCC1937": 0.095, "HCC1954": 0.079, "H1437": 0.067, "H2009": 0.107, "COLO829": 0.01, "all_lt_1": true, "proxy": "ISM Potential_LOH for 5/6; SEQC2 truth HCC1395-only; recall 0.961"}
+  },
+  "verdicts": [
+    {
+      "id": "05-37",
+      "claim": "§2.7: 6/6 excess-over-null +0.101–0.241 (mean 0.168) = phenomenon 復現",
+      "verdict": "CHALLENGED",
+      "reason": "數字真 (重算逐值相符) 但『6/6』二值化掩蓋強烈異質性: COLO829 strong/null 僅 1.79× (null=56% of strong, n_evaluable=802), vs HCC1395 10.4× — melanoma 復現是 borderline-positive 非 clean replication, headline 不應等量齊觀。"
+    },
+    {
+      "id": "04-33",
+      "claim": "R5 跨樣本: 6/6 excess 🟡(phenomenon-level); 同-locus 0/38 underpowered 🟢",
+      "verdict": "CHALLENGED",
+      "reason": "🟡 phenomenon-level 標記誠實, 但 excess-over-null 的 null = 同樣本 HP-shuffle, 只證『HP-軸 Δβ 非隨機洗牌可得』, 不排除 read-depth/CpG-density 等非-somatic 系統性結構也能產生 strong-asm; null 設計未控這些 → 『現象復現』成立但機制歸因 (somatic 重塑) 仍未獨立。"
+    },
+    {
+      "id": "06-31",
+      "claim": "R5 現象層復現: 6/6 excess +0.101–0.241 (mean 0.168, 3 癌種)",
+      "verdict": "CHALLENGED",
+      "reason": "與 05-37 同數據重述; 『3 癌種』給泛化感, 但 breast×3 同質性高、melanoma×1 即最弱 (COLO829), lung×2 中等 — 癌種覆蓋與訊號強度負相關, 跨癌『穩定』被均值 0.168 掩蓋 (CV=0.26 ledger 自承)。"
+    },
+    {
+      "id": "11-25",
+      "claim": "6/6 excess 逐值 0.101/0.150/0.151/0.241/0.171/0.196 mean 0.168 match",
+      "verdict": "SURVIVES",
+      "reason": "純數據逐值 claim, 我獨立重抽 6 檔 rate_excess_over_null 排序後完全一致 mean 0.1684, 無推論超載; 唯需附 single-pipeline⭐3 + n_sampled=2000 subset caveat。"
+    },
+    {
+      "id": "05-38",
+      "claim": "§2.7: 同-locus 0/38 但 UNDERPOWERED (E[overlap]=0.16)",
+      "verdict": "SURVIVES",
+      "reason": "0/38 + E[overlap]=0.1636 兩數 file-stored 且重算命中; 『underpowered』是對 0/38 的正確自我設限 (期望重疊本就 <1), 未過度宣稱 private-biology — 反而誠實阻止過度解讀, 邏輯穩。"
+    },
+    {
+      "id": "06-32",
+      "claim": "R5: 同-locus 0/38 (private, UNDERPOWERED E[overlap]=0.16)",
+      "verdict": "SURVIVES",
+      "reason": "同 05-38 數據, 『private』用詞由 E[overlap]<1 的 underpower 自限, 未升格為已證生物隱私 (asm_landscape ledger 明寫 cannot_establish_biological_privacy)。"
+    },
+    {
+      "id": "07-14",
+      "claim": "同-locus 0/38 somatic ASM 復發",
+      "verdict": "SURVIVES",
+      "reason": "synthesis headline n_recurrent_somatic=0 重算命中; 純計數無推論。"
+    },
+    {
+      "id": "09-21",
+      "claim": "同-locus 0/38 (🟢) + E=0.16 (🟡); private somatic mutation→各癌不同位點",
+      "verdict": "CHALLENGED",
+      "reason": "0/38 + E=0.16 數字穩, 但『private somatic mutation → 各癌不同位點』是二次因果詮釋 (S-tier): 0/38 同樣可由 underpower(E<1)+caller 假陰+38-locus 抽樣偏差解釋, 不唯一指向 somatic-privacy; 因果語句需降為 consistent-with 非 established。"
+    },
+    {
+      "id": "07-28",
+      "claim": "6/6 excess 不在 synthesis.json, 需去 *_gwasm.json 補",
+      "verdict": "SURVIVES",
+      "reason": "provenance-tracking claim, 我確認 synthesis.json 確無 excess 欄、6 檔 gwasm 各有 → claim 對自身 provenance 的陳述正確。"
+    },
+    {
+      "id": "07-29",
+      "claim": "E[overlap]=0.16 為 derived, 未 file-stored, 需補計算",
+      "verdict": "REFUTED",
+      "reason": "FACTUALLY WRONG: asm_landscape.json:166 sum_expected_overlap=0.1636 確 file-stored + ledger 雙存; claim 前提 (未 file-stored) 與 primary 直接矛盾, 結論 (需補) 因前提錯而失效 — stale/捏造 provenance 陳述。"
+    },
+    {
+      "id": "06-46",
+      "claim": "0/38 同位點 / 6/6 excess / LOH 抑制分群 6/6 OR 0.01–0.107",
+      "verdict": "CHALLENGED",
+      "reason": "三組數字全命中, 但 LOH 抑制 OR<1 用 ISM Potential_LOH proxy (5/6 樣本) — LOH proxy≈低覆蓋/單-haplotype, 而 clusterability 同樣由 ISM read-clustering 定義: 單 haplotype→可分群 read 機械變少→OR<1 近乎 by-construction, 非獨立生物結論 (見 worst)。"
+    },
+    {
+      "id": "15-32",
+      "claim": "LOH 抑制分群跨樣本 6/6 OR<1 (0.01–0.107); 機制=need ≥2 haplotype, LOH 移除第二 allele",
+      "verdict": "CHALLENGED",
+      "reason": "6/6 OR<1 重算命中, 但這是本群最該質疑的循環嫌疑: (a) 5/6 用 ISM Potential_LOH proxy = 覆蓋/HP-ratio 衍生, 與 clusterability 共用同一 ISM 機制; (b) LOH 區只剩單 haplotype → 可供 read-clustering 的等位變異本就消失 → 『不分群』是定義必然非發現。需 SEQC2 真值 (僅 HCC1395 有) + read-depth-matched control 才能脫離 by-construction。"
+    },
+    {
+      "id": "15-33",
+      "claim": "FP 不顯示 LOH 抑制 (OR=0.98) → FP 分群=noise",
+      "verdict": "CHALLENGED",
+      "reason": "claim 已自承 FP loh n=70 低 power → suggestive 非定論, 誠實; 但『FP=noise』推論受 n=70 限制且依賴上述 LOH-proxy 循環, 應維持 suggestive 並標 characterization-only。"
+    },
+    {
+      "id": "15-29",
+      "claim": "coverage 非 driver: ρ=0.109 / OR=0.91 / |ρ|<0.25 全6樣本",
+      "verdict": "CHALLENGED",
+      "reason": "ρ=0.109 等數命中且方向支持 coverage 非主驅動; 但 CN-truth 僅 HCC1395 (SEQC2), 其餘以 ISM 內部量界定 coverage↔clusterability, 存在共享測量管道; |ρ|<0.25 是弱相關非零相關, 不足以宣稱完全排除覆蓋 confound, 應標『弱殘餘 coverage 效應未盡除』。"
+    },
+    {
+      "id": "15-30",
+      "claim": "CN 強相關但反 dosage: neutral 0.222>gain 0.179≫loh 0.022; LOH OR=0.07",
+      "verdict": "SURVIVES",
+      "reason": "三 bin 值 + OR 重算命中, 且這是基於 SEQC2 真值 (HCC1395-only) 的最硬一條; 反 dosage 方向 (neutral>gain>loh) 與『需 ≥2 haplotype』機制自洽, 但限 single-sample (15-30 未宣稱跨樣本, 故不踩 15-32 的 proxy 循環) → 在其宣稱範圍內守得住, 唯不可外推。"
+    },
+    {
+      "id": "02-33",
+      "claim": "5 層獨立驗證 Tier A/B 85-86% 通過 → ASM 結構真實可複製",
+      "verdict": "CHALLENGED",
+      "reason": "85-86% pass-rate 在 PRIMARY 3 檔 grep 不到 (cited_source=none), 數字 provenance 未閉合; 且『非循環』之宣稱本身需檢驗 — HP-permutation/split-half 若都在同一 ISM-defined clustering 上做, 仍共享測量循環, 不等於方法獨立。標 CHALLENGED 待補來源 + 循環性自證。"
+    },
+    {
+      "id": "02-35",
+      "claim": "ASM 在 SEQC2-LOH 最低 (富集 0.46×) = 需兩 haplotype = back-stop copy-confound",
+      "verdict": "CHALLENGED",
+      "reason": "0.46× 量值 grep 不到 (cited_source=none); 方向 (LOH 最低) 被 clusterability LOH-rate=0.022 佐證, 但與 15-32 同屬『LOH→單 haplotype→必然低 ASM』的 by-construction 方向, 用它 back-stop copy-confound 有部分循環 (用低-copy 的結果去證低-copy 沒造假)。量值需補來源, 推論需標循環風險。"
+    },
+    {
+      "id": "09-19",
+      "claim": "跨樣本現象復現(非 cis); 機制=各癌 somatic 重塑 allelic 甲基",
+      "verdict": "CHALLENGED",
+      "reason": "『非 cis』自限誠實 (現象層而非 locus 復現); 但『各癌 somatic 重塑 allelic 甲基』是因果歸因, excess-over-null 的 HP-shuffle null 不能區分 somatic-driven vs germline-allelic baseline (見 memory feedback_asm_allele_axis_baseline_confound) → 機制句需降 consistent-with。"
+    },
+    {
+      "id": "09-34",
+      "claim": "判準 6/6 excess>0 → phenomenon 復現 (跨樣本 generality)",
+      "verdict": "CHALLENGED",
+      "reason": "判準『excess>0』門檻過寬 — COLO829 excess>0 但 ratio 僅 1.79× (null 吃掉 56%), 以 >0 作 generality 判準會把 borderline 算成 full replication; 應改用 effect-size/null-ratio 閾值而非二值 >0。"
+    },
+    {
+      "id": "10-17",
+      "claim": "甲基現象層跨 6 樣本/3 癌種復現",
+      "verdict": "CHALLENGED",
+      "reason": "高層 storyline 句, single-pipeline (共用 ClairS-TO caller) → caller 系統性偏好可在 6 樣本同向復現而非生物普遍性; ledger 自標 tier_capped_3, storyline 不應讀成 cross-platform generality。"
+    },
+    {
+      "id": "08-61",
+      "claim": "改用 genome-wide private somatic + HP-shuffle null (已做 6/6 excess) 取代 FP 篩選; 加 normal 甲基更難",
+      "verdict": "CHALLENGED",
+      "reason": "策略建議 (S/LOGIC); 引用的 6/6 excess 真, 但把它當『正確替代方案已驗證』有過度自信 — HP-shuffle null 不控 germline-allelic baseline (09-19 同病), 用未脫 confound 的方法當 endorsed alternative 需保留。"
+    },
+    {
+      "id": "09-20",
+      "claim": "外部佐證 = O'Neill 189 tumors",
+      "verdict": "CHALLENGED",
+      "reason": "外部引用未在本群 primary grep 範圍, 真偽 defer /citation-verification; 作為跨樣本現象的『佐證』前必先確認 O'Neill 測的是同一現象 (allelic methylation by somatic SNV) 而非泛 ASM, 否則為 loose corroboration。"
+    }
+  ],
+  "worst": "15-32 (LOH 抑制分群 6/6 OR<1, 0.01–0.107): 此群最該被質疑的一條 — 雙重 by-construction/循環嫌疑。(1) 5/6 樣本用 ISM Potential_LOH proxy (覆蓋/HP-ratio 衍生), 與 clusterability 共用同一 ISM read-clustering 機制, 非獨立測量; (2) 機制上 LOH 區只剩單 haplotype, 可供 read 分群的等位變異本就消失, 故『LOH 不分群』近乎定義必然而非生物發現。OR<1 在 6/6 一致, 正因為這是結構性恆等而非可證偽的跨樣本復現。唯一脫困路徑 = SEQC2 真值 (現僅 HCC1395) 全樣本化 + read-depth-matched negative control。連帶 02-35(0.46× back-stop)、06-46、15-33 共享此循環核心。次惡 = COLO829 borderline (excess ratio 僅 1.79×, null=56% of strong) 被『6/6』二值化掩蓋 (踩 05-37/06-31/09-34)。"
+}

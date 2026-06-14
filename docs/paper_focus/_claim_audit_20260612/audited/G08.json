@@ -1,0 +1,424 @@
+{
+  "group_id": "G08",
+  "subject": "cis-test / chr17/TBC1D16 唯一乾淨 somatic cis exemplar (perm p=0.001; Bonferroni/FDR caveat; single-locus single-sample private; TBC1D16 生物動機)",
+  "n_claims": 43,
+  "primary_files_checked": [
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/survivor_permutation.json",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/cis_scan_full.json",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/fast_cnv_validation.json",
+    "research/autoresearch/evidence_ledger.jsonl",
+    "research/.../cn_confound/cross_sample/cross_sample_synthesis.json",
+    "docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md (chr17 NOT mentioned — 此 primary 非 chr17 來源)"
+  ],
+  "claims": [
+    {
+      "id": "01-22",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json (n_t3=60, computable=7; copy_partition method); ledger CIS_ASM_COPY_PARTITION_CONFOUND",
+      "note": "Honest verdict 紅線:cohesion≠cis + farCpG±100bp too narrow = 一階方法學詮釋,有 primary 支撐(copy_partition 用 within>HP 區分 cohesion/cis);非可 grep 的單一數字故 interp."
+    },
+    {
+      "id": "02-15",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 (chr17 cis_status=cis TAG=A unique); research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json chr13 cis=copy; ledger fast_cnv_validation '1 clean cis(chr17) 2 copy_artifact(BRCA2,chr5)'",
+      "note": "chr17唯一乾淨cis + BRCA2=copy/subclone-confounded:primary 完全支撐(cat唯一cis row + copy_partition BRCA2). single-sample→P-caveat."
+    },
+    {
+      "id": "02-29",
+      "axisA_knowledge_type": "D",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/survivor_permutation.json chr17:79991120 p=0.001 genuine:true; research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 cis_perm_p=0.0",
+      "note": "perm p=0.001 grep 命中 survivor_permutation.json(catalog rounds 0.001→0.0). single-locus single-sample nominal→P-caveat."
+    },
+    {
+      "id": "05-12",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 chr17 somatic+HP-axis+cis+LOH_Strong; ledger co-validation",
+      "note": "abstract co-validation 措辭:somatic/haplotype/methyl 三訊號於 chr17 同 LOH 事件對齊=一階詮釋,有 cat 行(somatic+LOH+cis)支撐.單樣本 contingent→P-caveat."
+    },
+    {
+      "id": "05-24",
+      "axisA_knowledge_type": "D",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json chr17 d_within=0.142 d_copy=0.029; research/tsg_promoter_asm_reviewer/genome_survey_v2/survivor_permutation.json p=0.001; research/tsg_promoter_asm_reviewer/genome_survey_v2/cis_scan_full.json len=816",
+      "note": "816 HP-axis loci(cis_scan_full.json len=816 確認) + within 0.142≫copy 0.029(copy_partition_confirm.json) + p=0.001 全部 grep 命中. cited T-PROV. single-sample→P-caveat. 🟢 stated 合理."
+    },
+    {
+      "id": "05-26",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 (somatic+HP-axis+cis+LOH); ledger co-validation contingent",
+      "note": "EXCEPTION 三訊號正交佐證同 LOH 事件:一階詮釋,cat row 支撐 somatic+LOH+cis.單 locus 單樣本→P-caveat. 🟡 stated 合理."
+    },
+    {
+      "id": "05-27",
+      "axisA_knowledge_type": "S",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "external literature (Vizoso/Esteller Nat Med 2015; Cancer Discovery 2015; Clin Epigenetics 2019) — defer to KB, 不在 paper primary 清單",
+      "note": "TBC1D16 生物動機(L3) = 外部文獻二次詮釋,非 repo primary 數字. cited 文獻明確但須 KB/外部驗;標 S + defer 不全repo考古. 🔵 L3 stated 合理."
+    },
+    {
+      "id": "05-28",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 (sample=HCC1395 cancer=breast); 文獻=黑色素瘤(外部)",
+      "note": "caveat(a) 跨癌種+bulk-vs-ASM 措辭限制:HCC1395=breast 由 cat 確認;文獻黑色素瘤屬外部.誠實 caveat=正確一階詮釋."
+    },
+    {
+      "id": "05-29",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/cis_scan_full.json len=816 (跨 816 cis-test); ledger fast_cnv '816→10 Bonferroni'",
+      "note": "caveat(b) perm p=0.001 跨 816 Bonferroni 後可能不顯著:816 確認(cis_scan_full len=816);ledger 證 816→10 Bonferroni T3(chr17 自身 survive Bonferroni).誠實 FDR caveat=正確. 🔴 stated 合理."
+    },
+    {
+      "id": "05-30",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 sample=HCC1395 recurrence=single; ledger '6 samples no MSA / private somatic'",
+      "note": "caveat(c) 單 locus 單樣本 HCC1395-private 不可重現:recurrence=single 在 cat;private 由 cross_sample_synthesis(private_somatic:28)+memory 佐證.誠實 caveat."
+    },
+    {
+      "id": "05-31",
+      "axisA_knowledge_type": "Q",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "無 primary;COLO829 為 deferred validation 構想(T-VAL-3);ledger COLO829 cross_sample 存在但未跑 chr17 cis",
+      "note": "COLO829=理想驗證樣本=前瞻構想/假說(未執行).標 Q + S(僅 synthesis 層構想)."
+    },
+    {
+      "id": "06-29",
+      "axisA_knowledge_type": "D",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json chr17 d_within=0.142 d_copy=0.029; research/tsg_promoter_asm_reviewer/genome_survey_v2/survivor_permutation.json p=0.001; cited survivor_permutation.json ✓",
+      "note": "R3:within 0.142≫copy 0.029 + p=0.001,cited survivor_permutation.json 正確命中.single-sample→P-caveat. 🟡 stated 合理."
+    },
+    {
+      "id": "06-35",
+      "axisA_knowledge_type": "S",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "external [@Vizoso2015] — defer to KB;'措辭與已知生物學一致非證實' 為正確 hedge",
+      "note": "chr17 somatic co-opt 生物學意義=外部文獻二次詮釋(L3).標 S+defer. hedge 措辭正確. 🟡 stated 合理."
+    },
+    {
+      "id": "07-19",
+      "axisA_knowledge_type": "D",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/survivor_permutation.json chr17:79991120 p=0.001 (cited survivor_permutation.json 直接命中)",
+      "note": "純溯源宣稱:perm p=0.001 來源=survivor_permutation.json,直接 grep 命中且值符. 🟢 P 確認."
+    },
+    {
+      "id": "08-18",
+      "axisA_knowledge_type": "D",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json chr17 d_within=0.142 d_HP=0.122; research/tsg_promoter_asm_reviewer/genome_survey_v2/survivor_permutation.json p=0.001; research/tsg_promoter_asm_reviewer/genome_survey_v2/cis_scan_full.json len=816; ledger 'Bonferroni'",
+      "note": "816 + Bonferroni+copy-test 後唯一乾淨 cis + within 0.142>HP 0.122 全部 grep 命中(copy_partition chr17 d_HP=0.122 d_within=0.142). 🟡 stated 合理.single-sample→P-caveat."
+    },
+    {
+      "id": "08-20",
+      "axisA_knowledge_type": "D",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json computable=7,n_t3=60 (→leaky-tag 7/60); ledger 'leaky_tag_subset_7of60_strongest_6_loci_pure_ALT UNTESTABLE'",
+      "note": "6 最強 untestable(pure-ALT CGI-desert)+ leaky-tag 7/60:copy_partition computable=7/n_t3=60 + ledger 明確 '7/60' & '6 strongest pure-ALT UNTESTABLE' 含 6 位點 d_cis 值.grep 命中.單樣本→P-caveat."
+    },
+    {
+      "id": "08-21",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json computable=7/60; ledger 'partition 未 anchor SEQC2 CN';research/tsg_promoter_asm_reviewer/genome_survey_v2/cis_scan_full.json power_class UNDERPOWERED=321",
+      "note": "cis-test 對最強位點測不了+卡在怎麼測+未 anchor SEQC2:一階方法學詮釋,ledger caveat 直接支撐(SEQC2 CN truth/COLO829).正確."
+    },
+    {
+      "id": "08-22",
+      "axisA_knowledge_type": "S",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "external Martin-Trujillo2017 (L3) — defer to KB;背書一般方法學原則",
+      "note": "外部文獻背書 copy-confound 排除原則=二次詮釋(L3).標 S+defer 不全repo考古."
+    },
+    {
+      "id": "08-24",
+      "axisA_knowledge_type": "Q",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 recurrence=single; ledger private-somatic;memory project_cross_sample_asm_reproducibility 0/38",
+      "note": "D3 chr17 要第二樣本重現=未來工作構想/需求(nominal p 已知).有 single-sample primary 支撐其前提.方向構想故 Q."
+    },
+    {
+      "id": "09-22",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 chr17 cis; research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json within>HP permutation; cited 'tsg survey(另一檔)'=本 primary 集",
+      "note": "chr17 唯一乾淨 cis + 驗證機制 within>HP perm + 研究機制 allele 內甲基驅動:一階詮釋,primary(cat+copy_partition+survivor)全支撐. 🟡 合理.single-sample→P-caveat."
+    },
+    {
+      "id": "09-33",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json d_within/d_copy 4-measure; ledger scripts/37_copy_partition_confirm.py method",
+      "note": "normal-anchored cis-test 判準(within>HP perm→cis 否則 copy/drift):方法描述,copy_partition_confirm.json 4-measure(d_HP/d_within/d_allele/d_copy)實作支撐.一階方法詮釋."
+    },
+    {
+      "id": "11-12",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "cited 'catalog examples + R6 §5'; cross_sample_synthesis private_somatic:28; memory 0/38 同位點復發. chr17:79991120 NOT directly grep-confirmed absent in HCC1937/1954 variant set",
+      "note": "chr17 SNV=HCC1395 private(不在 HCC1937/1954)→cis 無法二樣本重現:一階詮釋,與 cross_sample_synthesis(28 private somatic)+memory(0/38)一致,但『chr17:79991120 不在 HCC1937/1954 variant set』此精確陳述未直接 grep 命中 primary(keypos 檔不含此 locus).LOGIC_EVIDENCE/P-caveat;grep_confirmed=False."
+    },
+    {
+      "id": "11-13",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 chr17=cis; chr13=copy(research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json); ledger fast_cnv '1 clean cis 2 copy 1 mechanical(chr19) 6 untestable'. ⚠ claim 寫 'chr18 mechanical' 但 primary=chr19:14434617",
+      "note": "cis 協議部分完成 chr17=cis/BRCA2=copy/untestable+mechanical:大部分 primary 支撐,但『chr18 mechanical』與 primary 不符(mechanical=chr19:14434617 TAG=F;chr18:11741161 反而是 genuine T3 perm p=0.006).口徑/locus 標錯→flag."
+    },
+    {
+      "id": "11-20",
+      "axisA_knowledge_type": "D",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/survivor_permutation.json chr17:79991120 obs=0.1418 p=0.001 genuine:true (cited path 命中,值完全符)",
+      "note": "obs 0.1418, p=0.001, genuine 🟢:survivor_permutation.json 逐欄精確命中(obs 0.1418/p 0.001/genuine true). 🟢 P 確認."
+    },
+    {
+      "id": "12-13",
+      "axisA_knowledge_type": "S",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "external Vizoso M et al. Nat Med 2015 (nm.3863/PMC4968631) — defer to KB",
+      "note": "TBC1D16 機制(Rab GAP/cryptic 轉錄本/RAB5C/EGFR)=外部文獻二次詮釋,cited 具體(PMC4968631).標 S+defer. 🔵 stated 合理."
+    },
+    {
+      "id": "12-14",
+      "axisA_knowledge_type": "S",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "external Cancer Discovery 2015 title — defer to KB",
+      "note": "標題引用 Cancer Discovery 2015,外部文獻.標 S+defer. 🔵."
+    },
+    {
+      "id": "12-15",
+      "axisA_knowledge_type": "S",
+      "axisB_support_strength": "WEAK",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "無 cited source;外部臨床 claim(PFS/OS/BRAF-MEK sensitivity)",
+      "note": "TBC1D16 hypo 關聯 PFS/OS + drug sensitivity:外部臨床宣稱但 cited_source=none.二次詮釋且無明確來源→WEAK+S,defer KB 驗證. 🔵 stated 但無 citation 支撐."
+    },
+    {
+      "id": "12-16",
+      "axisA_knowledge_type": "S",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "external Clinical Epigenetics 2019 (PMID 31383000/PMC6683458) — defer to KB",
+      "note": "EBF3+TBC1D16 多癌種,cited 具體 PMID.外部二次詮釋.標 S+defer. 🔵."
+    },
+    {
+      "id": "12-17",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 chr17 dbeta hypo 方向; chr13 BRCA2 d_HP=-0.122 hypo(research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json); memory 'hypo≠canonical hyper'",
+      "note": "例外有生物動機+方向 hypo 與 BRCA2 'hypo≠canonical hyper' 一致:一階詮釋,BRCA2 負 d_HP(hypo)由 copy_partition 確認,方向口徑內部一致."
+    },
+    {
+      "id": "12-18",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 sample=HCC1395 breast(我們);文獻=黑色素瘤 bulk(外部). hedge 措辭",
+      "note": "caveat(a)(b) 跨癌種+bulk-vs-ASM hedge 措辭:正確一階詮釋,HCC1395=breast 由 cat 確認. 🔴 stated 合理."
+    },
+    {
+      "id": "12-19",
+      "axisA_knowledge_type": "Q",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "COLO829 deferred validation 構想;ledger COLO829 cross_sample 存在但 chr17 cis 未驗",
+      "note": "COLO829=理想驗證樣本(TBC1D16 主場)=前瞻構想/假說.標 Q+S. ⭐ stated 屬願景非已驗."
+    },
+    {
+      "id": "13-21",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv chr17=cis BRCA2=copy; research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json normal-anchored within/copy decomposition",
+      "note": "ISM 最有價值問題 + normal-anchored cis-test 分離 copy/germline-allelic/drift(chr17 過/BRCA2 copy):一階方法詮釋,primary 支撐(cat cis_status + copy_partition). single-sample→P-caveat."
+    },
+    {
+      "id": "14-04",
+      "axisA_knowledge_type": "D",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv 332705 data rows, 唯一 cis_status=cis (chr17); 1/332705",
+      "note": "1/332,705 乾淨 somatic cis:catalog 332,705 data rows + 唯一 1 row cis_status=cis(awk 確認).精確 grep 命中. 🟢. single-pipeline single-sample→P-caveat."
+    },
+    {
+      "id": "14-06",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 chr17 somatic+HP-axis+LOH; co-validation contingent",
+      "note": "co-validation contingent:唯一位點三訊號正交佐證,cat row 支撐.contingent 措辭正確. 🔵."
+    },
+    {
+      "id": "14-18",
+      "axisA_knowledge_type": "Q",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv TAG=A:1(chr17 唯一三訊號); TAG=C:12868(germline-allelic 背景)",
+      "note": "PR-2 pre-reg 假說 H:chr17 唯一全三訊號對齊+其餘 germline-allelic 背景:假說陳述(pre-reg),但其前提數字已有 primary(TAG-A=1, TAG-C=12868 awk 確認).pre-reg→Q."
+    },
+    {
+      "id": "14-19",
+      "axisA_knowledge_type": "Q",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv TAG=C:12868 (germline-allelic 分群); TAG=A:1",
+      "note": "PR-2 成功判準:concordance 後 TAG-A=1 且 12,868 germline-allelic 可量化.12868=TAG=C 計數精確命中(awk).判準=前瞻 success criterion→Q. 🟢 stated 對應 primary."
+    },
+    {
+      "id": "14-20",
+      "axisA_knowledge_type": "Q",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "無 primary;pre-reg surprise criterion(TAG-A>1 升級)為前瞻設計",
+      "note": "PR-2 意外判準(若 TAG-A>1 則升級,非 HARKing):前瞻 pre-reg 設計條款.標 Q+S. 🟡."
+    },
+    {
+      "id": "15-03",
+      "axisA_knowledge_type": "D",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 TAG=A unique, cis_status=cis (cited catalog_skeleton.tsv 命中)",
+      "note": "全基因組只 1 位點(chr17 TAG-A)乾淨 somatic cis-ASM:cited catalog_skeleton.tsv,awk TAG=A:1 確認.single-pipeline→P-caveat."
+    },
+    {
+      "id": "15-10",
+      "axisA_knowledge_type": "D",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 TAG=A count=1, pos=79991120 gene=TBC1D16; 1/332705=0.0003%",
+      "note": "TAG-A 數量 1, 0.0003%(1/332705), chr17:79991120/TBC1D16:全部 awk/grep 命中精確.single-pipeline→P-caveat."
+    },
+    {
+      "id": "15-43",
+      "axisA_knowledge_type": "D",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 cis_status=cis within_d=0.142 copy_d=0.029 perm_p=0.0; research/tsg_promoter_asm_reviewer/genome_survey_v2/survivor_permutation.json p=0.001; cited survivor_permutation.json",
+      "note": "cis_status=cis 判準(within>1.5×copy & perm p≤0.05)數量 1, chr17 d_within 0.142≫d_copy 0.029 p=0.001:逐項 grep 命中(0.142/0.142=1× >1.5×0.029=0.0435 ✓).single-sample→P-caveat."
+    },
+    {
+      "id": "15-48",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "ledger hp11_tag_definition_audit 'HP1-1 is somatic subclone tag NOT copy; %split NOT ROBUST; but chr17 vs BRCA2 relative holds d_within 0.142 vs -0.023'; research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json chr13 d_within=-0.023",
+      "note": "誠實口徑:chr17 唯一乾淨 cis/BRCA2=subclone-tag 非 copy/%split 不 robust/6 最強 untestable:ledger hp11_tag_definition_audit 精確背書(USER_CORRECT + relative holds 0.142 vs -0.023).高品質誠實詮釋."
+    },
+    {
+      "id": "15-49",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "ledger '6 strongest UNTESTABLE pure-ALT CGI-desert'+'anchor SEQC2 CN+COLO829'; research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json computable=7/60",
+      "note": "大規模卡最強位點測不了+須 anchor SEQC2 CN+COLO829:一階方法學詮釋,ledger 直接支撐(pure-ALT/CGI-desert/SEQC2/COLO829)."
+    },
+    {
+      "id": "15-50",
+      "axisA_knowledge_type": "I",
+      "axisB_support_strength": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv:26472 recurrence=single sample=HCC1395; cross_sample_synthesis private_somatic:28; memory 0/38. 'chr17:79991120 不在 HCC1937/1954 variant set' 未直接 grep 命中",
+      "note": "chr17 第二樣本無法直接重現(SNV HCC1395-private)+天花板=COLO829/matched-normal:一階詮釋,private 概念與 cross_sample_synthesis+memory 一致,但精確 variant-set absence 未直接 grep primary→grep_confirmed=False, LOGIC_EVIDENCE. 🔴 caveat 措辭正確."
+    }
+  ],
+  "counts": {
+    "D": 11,
+    "I": 19,
+    "S": 7,
+    "Q": 6,
+    "P": 2,
+    "P_caveat": 31,
+    "S_prov": 10,
+    "F": 0,
+    "weak": 1,
+    "grep_confirmed": 31
+  },
+  "flags": [
+    "[口徑/locus 標錯] claim 11-13 寫 'chr18 mechanical' 但 primary(catalog chr19:14434617 TAG=F + ledger fast_cnv)顯示 mechanical=chr19;chr18:11741161 反而是 genuine T3(perm p=0.006).應改 chr19.",
+    "[未直接 grep 命中] claim 11-12 / 15-50 的『chr17:79991120 不在 HCC1937/HCC1954 variant set』精確陳述未在 primary keypos 檔命中(該 locus 不在 keypos);僅 cross_sample_synthesis(private_somatic:28)+memory(0/38)間接佐證 → 標 grep_confirmed=False,LOGIC_EVIDENCE/P-caveat,非孤兒但 variant-set 層 defer.",
+    "[外部文獻群,非 repo primary] 05-27/06-35/08-22/12-13/12-14/12-15/12-16 = TBC1D16/Martin-Trujillo 文獻 claim,不在 paper primary 清單 → 標 S + defer 不全repo考古,須 KB/外部 citation-verification;其中 12-15(PFS/OS+drug)cited_source=none → WEAK.",
+    "[前瞻構想/pre-reg,非已驗數據] 05-31/12-19(COLO829 驗證)/14-18/14-19/14-20(PR-2 pre-reg 判準)= Q 猜測/假說層,非已完成結果;COLO829 chr17 cis 尚未跑.",
+    "[核心錨點全 P 確認] chr17 cis 三大數字(perm p=0.001 / d_within 0.142 / d_copy 0.029 / obs 0.1418)+ TAG-A=1 + 1/332705 + 816 HP-axis + 12868 germline-allelic + 60 T3 + 7/60 leaky-tag 全部 grep 精確命中 survivor_permutation.json/copy_partition_confirm.json/catalog_skeleton.tsv/cis_scan_full.json. 無捏造/孤兒(F)數字.",
+    "[誠實 caveat 品質高] 05-29(FDR/Bonferroni)/05-30(single-locus)/15-48(HP1-1 非 copy %split 不 robust)/15-50(天花板)caveats 均有 ledger(hp11_tag_definition_audit)精確背書,屬模範誠實口徑."
+  ]
+}

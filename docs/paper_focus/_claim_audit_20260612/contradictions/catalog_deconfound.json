@@ -1,0 +1,77 @@
+{
+  "domain": "catalog_deconfound",
+  "scope": "catalog 計數(332,705 / 12,868 / 1 乾淨 somatic cis) · germline-allelic vs somatic-specific · G-B 未跑",
+  "primary_truth_files": [
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (n_loci=332705; overall A=1 B=5 C=12868 D=5 E=28254 F=54 G=291518; HCC1395 single-sample C=1291)",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_audit.json (tristate-full reliable=12876 latent=28277 none=291552; TP+FP-only reliable=11689[tp11655+fp34])",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_skeleton.tsv (332705 rows x 32 columns header)",
+    "research/autoresearch/evidence_ledger.jsonl (lines 60/62/64/85; B2 germline-allelic NEGATIVE TP 0.135<null 0.177 p=0.922; GNAS/RB1=1.000)",
+    "docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md (V11c subclone existence ⭐3; G-B within-hap null 未跑)"
+  ],
+  "n_contradictions": 7,
+  "contradictions": [
+    {
+      "subject": "catalog 'reliable methylation clustering' 計數口徑（多個 reliable 數字並列）",
+      "claim_a": "[G09 05-02/05-11/05-21 formal_arch + G09 14-03/15-02/14-10 prereg_fallback/catalog_r6 + G04 14-03/15-02 prereg_fallback/catalog_r6]『catalog 332,705 位點：12,868 reliable 全 germline-allelic』『reliable 甲基分群 12,868（3.87%, TAG-C）』『12,868 reliable 分群全 germline-allelic』",
+      "claim_b": "[G09 15-06 catalog_r6]『核心欄 clustering_reliability 三態（reliable 11,689 / latent 28,254 / none）』+ [G09 15-19 catalog_r6]『全基因組計數 11,689（TP 11,655 / FP 34）』",
+      "conflict": "同一概念『reliable 甲基 read-clustering』在不同 claim 給出三個不同計數：12,868（TAG-C，含 FN，且 TAG-C 是「reliable AND germline-allelic」的交集標籤）vs 11,689（reliable-tristate 但僅 TP+FP，排除 FN 1,187）vs 12,876（reliable-tristate-full 含 FN，未被任何 claim 寫出）。報告把『reliable 總數=12,868』與『reliable=11,689』並列會讓讀者誤以為矛盾或數字漂移。",
+      "severity": "🔴",
+      "which_correct": "三個值各自在 primary 都對，但口徑不同，並非同一量：catalog_tag_counts.json overall.C=12868 是『TAG-C＝既 reliable 又被 cis-test 判為 germline-allelic 的位點』（含 TP+FP+FN）；catalog_audit.json tristate TP+FP-only reliable=11689（tp11655+fp34）；tristate-full reliable=12876（含 FN reliable 1187）。混用根因＝把『reliable 總數』和『reliable∩germline-allelic（TAG-C）』和『reliable(TP+FP-only)』三個量都口語化成『reliable 12,868/11,689』。",
+      "correction_needed": "統一論文用詞：(1) 若指『reliable 甲基分群總數』用 12,876（tristate-full）或標明 11,689（TP+FP-only, 排除 FN）；(2) 12,868 應改寫為『TAG-C＝reliable 且 germline-allelic 的位點數』而非『reliable 總數』。建議在 formal_arch(05-02/05-11/05-21) 與 catalog_r6(15-02/15-06/15-19)、prereg_fallback(14-03) 加一句口徑註：『12,868=TAG-C(reliable∩germline-allelic, all classes); 11,689=reliable(TP+FP-only); 12,876=reliable(all classes)』。"
+    },
+    {
+      "subject": "catalog 'none / no-signal' 位點計數",
+      "claim_a": "[G09 15-21 catalog_r6]『none 態（皆非）全基因組計數 292,762』",
+      "claim_b": "[G09 05-21 formal_arch + 06-33 master_map + 15-16 catalog_r6]『無訊號 291,518（87.6%，TAG-G）』",
+      "conflict": "同一『none / 無訊號』類別兩個不同數：292,762（catalog_r6 15-21）vs 291,518（TAG-G，多處）。差 1,244。",
+      "which_correct": "兩者皆非單一 primary 直接值且口徑不一致。TAG-G(no signal)=291,518（tag_counts.json，精確）；tristate-none-full=291,552（audit 計算）。claim 15-21 的 292,762 = 332,705 − 11,689(reliable TP+FP-only) − 28,254(TAG-E latent)，是混用『reliable TP+FP-only』補數 與『TAG-E latent』算出的雜湊數，不對應任何單一 primary 類別。291,518（TAG-G）才是論文該用的『無訊號』數。",
+      "severity": "🔴",
+      "correction_needed": "改 catalog_r6 15-21 的 none=292,762：若指 TAG-G(no signal) 用 291,518；若指 tristate-none(含 FN) 用 291,552。禁止用『332,705 − 11,689 − 28,254』這種跨口徑補數。三 TAG/三態須同口徑相加=332,705。"
+    },
+    {
+      "subject": "catalog latent 位點計數（TAG-E vs tristate-latent）",
+      "claim_a": "[G09 15-14/15-20/05-21/06-33 catalog_r6/formal_arch/master_map + G09 15-06]『latent 28,254（TAG-E，8.49%）』",
+      "claim_b": "[primary catalog_audit.json] tristate-latent-full = 28,277（含 FN）",
+      "conflict": "latent 用 TAG-E=28,254，但 tristate reliability 定義下 latent-full=28,277（差 23）。15-06 把 latent=28,254 與 reliable=11,689（TP+FP-only）並列在同一『三態』敘述，口徑不一致（latent 用全類別 TAG，reliable 用 TP+FP-only）。",
+      "which_correct": "TAG-E=28,254 與 tristate-latent=28,277 是 TAG-mapping 與 tristate-classification 兩套定義下的同概念，差 23 屬 edge-case 歸類差。問題不是哪個錯，而是 15-06 在同句把『latent 28,254(TAG)』和『reliable 11,689(TP+FP-only)』混口徑並列。",
+      "severity": "🟡",
+      "correction_needed": "catalog_r6 15-06 三態計數統一口徑：要嘛全用 TAG（reliable 應寫 TAG-C 對應量）要嘛全用 tristate-full（reliable 12,876 / latent 28,277 / none 291,552）。目前 reliable 用 TP+FP-only(11,689)、latent 用 TAG(28,254) 混搭，須註明或統一。"
+    },
+    {
+      "subject": "catalog_skeleton.tsv schema 欄數",
+      "claim_a": "[G09 05-47 formal_arch]『§4.3 Catalogue：16-欄 schema → 7-TAG（catalog_skeleton.tsv 332,705 列）』",
+      "claim_b": "[G09 11-08 catalog_provenance + 12-23 completeness]『catalog_skeleton.tsv（332,705×32 欄）』",
+      "conflict": "同一檔 catalog_skeleton.tsv 的欄數：formal_arch 寫 16 欄，catalog_provenance/completeness 寫 32 欄。",
+      "which_correct": "32 欄正確。primary catalog_skeleton.tsv header grep = 32 columns（G09 audit 11-08/12-23 已 grep 確認 header 32 欄、wc 332,706 行=332,705+header）。05-47 的『16-欄』是 stale/錯誤口徑。",
+      "severity": "🟡",
+      "correction_needed": "改 formal_arch 05-47『16-欄 schema』→『32-欄 schema』，與 catalog_provenance/completeness 一致。"
+    },
+    {
+      "subject": "甲基-subclone 訊號是否 somatic-specific（V11c 存在性 vs B2 germline-allelic）的對照口徑",
+      "claim_a": "[G04 02-04 integ_chapter + 08-13/08-37 direction_cards + 09-15 validation_map]『subclone-甲基 = germline-allelic 非 somatic-specific：blind-ARI somatic TP 0.135 < germline-het null 0.177, p=0.922（Methods-Neg-4）』— 用 germline-het(跨-hap) null 下『非 somatic』結論",
+      "claim_b": "[G04 01-25/02-03/02-05/06-42 foundation/integ_chapter/master_map]『germline-het null 是跨-hap 錯對照；T3/subclone 甲基的正確 null = G-B within-haplotype somatic-vs-baseline，G-B 未跑；未跑 G-B 前甲基-subclone 寫『存在性窄訊號』，勿寫『非 somatic』定論」",
+      "conflict": "convergence/validation 線用 germline-het null 直接下『subclone-甲基非 somatic-specific（germline-allelic）』的 NEGATIVE 定論；但 foundation 線同時承認 germline-het 是『錯對照』、正確的 G-B(within-hap) null 還沒跑、所以只能寫『存在性窄訊號』。即同一 subject（甲基-subclone 是否 somatic-specific）兩個方向裁決：一邊已判 germline-allelic（NEGATIVE 定案），一邊判 undetermined（押在未跑的 G-B）。",
+      "which_correct": "undetermined（foundation 線方法上正確）。primary: germline-het null = ALT/REF allele-split（跨-hap 對照，ledger 60/62），無法隔離 within-haplotype 的 somatic 亞群 vs germline-allelic baseline；要判『subclone-甲基是否 somatic-specific』需 within-hap 的 G-B null，而 G-B 未跑（VERIFIED_RESULTS.md G-B gap）。V11c 只達『存在性窄翻 candidate ⭐3』。因此 02-04/08-13/09-15 用 germline-het null 下『非 somatic-specific』是過強——它證的是『甲基 read-clustering(跨-hap)主要反映 germline-allelic 背景』，不等於『subclone(within-hap)甲基非 somatic』。",
+      "severity": "🔴",
+      "correction_needed": "對齊 convergence/validation_map(02-04/08-13/09-15) 與 foundation(01-25/02-03/02-05) 的對照口徑：把 germline-het null 的結論限縮為『甲基 read-clustering 整體（跨-hap）壓倒性 germline-allelic』，而非『subclone(within-hap)甲基非 somatic-specific』。subclone-甲基 somatic-specificity 一律標 undetermined（押 G-B，未跑），勿在 Methods-Neg-4 寫成已 NEGATIVE 定案。group subject 已點明此張力，須在三份來源文件統一措辭。"
+    },
+    {
+      "subject": "甲基-subclone 寫作狀態（READY-AS-NEGATIVE 最強 vs open-question 必先解）",
+      "claim_a": "[G04 02-11 integ_chapter]『甲基不獨立重建子克隆（甲基側 subclone 訊號是 germline-allelic、不 somatic-specific、不能 filter）；寫成『重建子克隆的判別力』= 與三~四道 NEGATIVE 直接矛盾，必撤」（視為已定 NEGATIVE）",
+      "claim_b": "[G04 02-02 integ_chapter]『兩線共享的一個開放問題（必先解，gate 論文甲基貢獻）：subclone-discriminating 甲基到底是 somatic-specific 還是 germline-allelic baseline？』（標 open question 🔴）",
+      "conflict": "同一份 integ_chapter 內部：02-11 把『甲基-subclone 是 germline-allelic 非 somatic』當已定 NEGATIVE 紅線（必撤反例）；02-02 卻把同一命題標為『開放問題、必先解、gate 論文甲基貢獻』。同文件對同 subject 一處定案、一處未定。",
+      "which_correct": "02-02（open question）較貼 primary。02-11 的『不獨立重建子克隆/不能 filter』部分有 primary（filter-DEAD 死四道 ledger 85）；但『subclone 訊號是 germline-allelic 非 somatic-specific』這半句正是 02-02 標記的未解問題（押 G-B 未跑）。02-11 把未解的 somatic-specificity 與已證的 filter-DEAD 綁成同一條 NEGATIVE 是 over-claim。",
+      "severity": "🟡",
+      "correction_needed": "integ_chapter 內部對齊：02-11 拆成兩半——『甲基不能 filter / 不獨立驅動重建』（已 NEGATIVE，保留必撤紅線）與『subclone-甲基 somatic-specific?』（undetermined＝02-02 open question，不列入『必撤』NEGATIVE）。避免同文件對同命題既定案又開放。"
+    },
+    {
+      "subject": "'12,868 reliable germline-allelic' 是單樣本還是 6 樣本 overall（樣本範圍口徑）",
+      "claim_a": "[G04 14-03 prereg_fallback]『規則：read-level 甲基分群真實（12,868 reliable）但壓倒性是 germline-allelic』+ [G04 15-02 catalog_r6]『reliable 甲基分群有 12,868 個（TAG-C）...germline-allelic 背景』（未標樣本範圍，行文易讀成單樣本 HCC1395 結論）",
+      "claim_b": "[primary catalog_tag_counts.json by_sample_class]『HCC1395 單樣本 TAG-C 僅 1,291；12,868 = 6 cell line overall 合計』",
+      "conflict": "12,868 是 6 樣本(HCC1395/1937/1954/H1437/H2009/COLO829) overall 合計，但 14-03/15-02 行文未標範圍，且整群 B2 germline-allelic 機制證據是 HCC1395 single-sample（TP 0.135<null 0.177）；報告若把『12,868 reliable』讀成單樣本，或把單樣本機制結論直接套到 6 樣本 12,868 全體，會誤導。",
+      "which_correct": "12,868 = 6-sample overall（primary by_sample_class 加總；HCC1395 single = 1,291）。『全 germline-allelic』的 cis/ARI 機制驗證僅 HCC1395 有真值（VERIFIED_RESULTS/ledger single-sample），其餘 5 樣本的 germline-allelic 歸類是 reliability+axis 推定（catalog_r6 15-53 clustering_origin 預設 B2），非每樣本實證。",
+      "severity": "🟡",
+      "correction_needed": "在 prereg_fallback 14-03 / catalog_r6 15-02 標明『12,868 = 6 cell line overall（HCC1395 單樣本=1,291）；germline-allelic 判定的 cis/blind-ARI 真值僅 HCC1395，其餘樣本為 reliability+axis 推定預設』。partial/single-sample flag 須隨 12,868 出現。"
+    }
+  ]
+}

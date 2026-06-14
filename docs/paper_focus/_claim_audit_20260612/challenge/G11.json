@@ -1,0 +1,128 @@
+{
+  "group_id": "G11",
+  "subject": "ISM 方法定位 / 軸C read-read 距離 + reliability-gate + normal-anchored cis (vs 外部軸A per-CpG; useful pipeline 非 new algorithm; CramersV gate 過嚴 487/latent; Δβ 正交不可 naive 加)",
+  "red_team_role": "adversarial falsification (紅隊;目標證偽)",
+  "challenged_at": "2026-06-12",
+  "primary_evidence_independently_verified": [
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/discovery_venn.json (4-cell 數字逐格核對通過)",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (n_loci=332705; G=87.62% no-signal; A=1 clean-cis)",
+    "memory/project_O11_heterogeneity_negative.md (AUC 0.845→0.530; 原假說=germline/somatic 區分,結論 within-group het 不區分)",
+    "src/core/RegionProcessor.cpp:1592 (cramers_v_reliable?cramers_v:0 三態 gate 行號精確命中)",
+    "docs/experiments/.../20260610_methylation_clusterability_vs_coverage_CN_characterization_01.md (pseudo-R2=0.083; n_CpG OR=1.20; LOH OR=0.07 6/6 proxy)",
+    "docs/method_comparison/.../benchmark/08_external_program_audit.md (modkit r=0.976/0.993; Fisher null FP 0.7-1.9%)"
+  ],
+  "verdicts": [
+    {
+      "claim": "04-22 / 06-17 / 05-45 / 13-03 ISM pipeline = read×CpG 矩陣→read-read 距離(6度量)→分群+CramersV gate→HP/LOH tag→normal-anchored cis-test (7 組件整合描述)",
+      "verdict": "SURVIVES",
+      "reason": "純 pipeline 結構描述;RegionProcessor.cpp:1592 gate + DistanceMatrix.hpp 6 度量行號可核;描述性無因果/評價宣稱,紅隊找不到破綻。"
+    },
+    {
+      "claim": "13-08 read-read 距離以 6 度量計 (NHD/L1/L2/Pearson/Bernoulli/Jaccard)",
+      "verdict": "CHALLENGED",
+      "reason": "口徑不一致:claim 列 L2,但 01_ism_method_spec 引 DistanceMatrix.hpp 只列 NHD/L1/Bernoulli/Pearson/Jaccard(無 L2);需對齊源碼真實度量數,否則 Methods 圖表會被 reviewer 抓不符。"
+    },
+    {
+      "claim": "05-10 abstract: catalogue 332,705 loci across six cancers",
+      "verdict": "CHALLENGED",
+      "reason": "數字真實(catalog_tag_counts.json n_loci=332705),但 abstract 框架誤導:87.62%(291,518) 標 G=no-signal、僅 1 個 locus 標 A=clean-cis-somatic-ASM;『catalogue 332,705 loci』暗示已 characterize 33 萬 ASM 位點,實際絕大多數無訊號 → 必須明寫『其中 X% 有可靠分群訊號』避免選擇性數字過度宣稱。"
+    },
+    {
+      "claim": "15-31 真 driver=n_CpG;cov+nCpG+CN 僅解釋 8%(pseudo-R2=0.083),其餘 92% 來自真正的等位甲基生物學",
+      "verdict": "REFUTED",
+      "reason": "邏輯謬誤(非循環是 affirming-the-residual):低 explained-variance ≠ 殘差就是『真生物學』;pseudo-R2=0.083 的另外 92% 可能是隨機/雜訊/未建模技術 confound(read sampling/比對/MM-ML 噪音),不能直接等同等位甲基生物學。此句是把『我們的三個 covariate 解釋力低』反向宣稱成『所以是生物學』—— 站不住,須改為『未被這三項解釋,其來源未定』。"
+    },
+    {
+      "claim": "05-41 / 12-27 / 12-28 / 12-29 ISM 控掉 epipolymorphism 漏的 confound;把 O11 NEGATIVE 變成方法論賣點(de-confounded characterization)",
+      "verdict": "CHALLENGED",
+      "reason": "二次解釋當賣點 + 部分自利重述:O11 原假說是『within-group heterogeneity 區分 germline/somatic』,結論是該訊號=n_reads artifact 且 ISM 解析度下不區分(自家 feature 也 NEGATIVE)。把這重述成『ISM 控掉 epipoly 漏的 confound』把一個 NEGATIVE 轉成正向賣點;de-confound 機制(reliability-gate+cis-test)是不同 feature 故非全錯,但『證實 ISM 控掉』從未對 epipolymorphism 直接做 head-to-head benchmark(13-19 自承待證) → 須降為『機制上互補,benchmark 待補』,不可寫成已證優勢。"
+    },
+    {
+      "claim": "06-15 / 06-47 業界主流=軸A per-CpG 塌平比 HP1-vs-HP2;ISM 站軸C read-read 距離+PERMANOVA+normal-anchored cis = 本質不同 (4 軸地景/82 工具)",
+      "verdict": "CHALLENGED",
+      "reason": "定位 synthesis 取自 synthesis 檔(02/03/12),非 raw 真值;82 工具/軸分類是自家彙整的分類學,『本質不同』是定位宣稱非實證。13-15~13-20 自承所有與外部工具差異『待 #23 benchmark + KB 確認』—— 故此 headline 在 benchmark 前是構想層,須標 caveat 不可作為已證定位。"
+    },
+    {
+      "claim": "06-19 外部稽核:modkit 驗 ISM 甲基提取 r=0.98、Fisher per-CpG 不偏樂觀",
+      "verdict": "CHALLENGED",
+      "reason": "r=0.976/0.993 + Fisher null FP 0.7-1.9% 在 08 實跑檔可核(SURVIVES 數值),但 sample 極小:r 只在 2 個 loci(BRCA2/TBC1D16),且匹配率僅 98/285 CpG(2/3 ISM CpG 未對到 modkit,座標慣例未釐清);Fisher null 只 2 loci × 500 perm。結論方向對但 n=2 不足以泛化『ISM 甲基提取正確/Fisher 不偏樂觀』到全 catalog → 須標『2-locus spot-check,座標對齊待釐清』。"
+    },
+    {
+      "claim": "08-42 / 08-52 / 15-36 ISM 抓 discrete clustering(CramersV/PERMANOVA);Δβ 抓 per-position 連續平均差;兩者正交",
+      "verdict": "SURVIVES",
+      "reason": "discovery_venn.json 4-cell 結構(ISM_only TP=33656 vs dbeta_only TP=1633 vs both=3379)實證兩通道捕到不同位點集,正交宣稱有 cell-level 支持;分析單位差異(read-level vs position-level)由源碼架構確認。single-pipeline caveat 已 stated。"
+    },
+    {
+      "claim": "08-53 / 15-41 Δβ 不可 naive 加(dbeta_only cell FP-enriched 7×);正確 union=clustering-gated",
+      "verdict": "CHALLENGED",
+      "reason": "『7× FP-enriched』是相對 base 的誇張口徑:dbeta_only 的絕對 TP:FP_ratio=11.9(enrich_vs_base=0.13,1/0.13≈7.7 是相對 base 92.8 的劣化),但 11.9:1 絕對仍是高度 TP-skewed,不是『充滿 FP』。且整個對比建在 single-pipeline(共用 ClairS-TO truth)+ large_dbeta_cut=0.2 一個任意門檻;結論方向(clustering-gate 較乾淨)成立但『FP-enriched 7×』措辭會讓讀者誤以為 dbeta_only 多數是 FP(實際 ~92% 仍 TP)→ 須改用絕對比值表述。"
+    },
+    {
+      "claim": "15-39 ISM_only cell TP:FP=147.6 → 最乾淨(BRCA2 即此類);15-38 both=39.8;15-40 neither=93.9",
+      "verdict": "CHALLENGED",
+      "reason": "cell 數字逐格命中 discovery_venn.json(SURVIVES 數值),但『ISM_only 最乾淨』的因果解讀有 selection 風險:大 N(TP=33656)的高 ratio 可能部分由 ClairS-TO truth 與 ISM 共用上游 phasing 的 circularity 撐起(single-pipeline);且 both cell ratio(39.8)反而最低 → 『分群+大Δβ』未必更可信,此非線性需機制解釋而非僅引 ratio。須標 single-pipeline circularity caveat。"
+    },
+    {
+      "claim": "15-34 分群是真等位甲基生物學(需兩個 haplotype),非覆蓋/CN 技術假象;LOH 抑制分群 6/6 樣本 3 癌種重現",
+      "verdict": "SURVIVES",
+      "reason": "紅隊原以為 single-sample,但實測 clusterability doc §2.4:LOH-抑制 OR<1 在 6/6 樣本(ISM Potential_LOH proxy,recall 0.961)、跨 3 癌種重現;need-2-haplotype 機制 + LOH 移除第二 allele 的因果方向與 confound(dosage 灌大)相反 → 有效排除 dosage-artifact。比 audit 給的 P-caveat 更強(機制本身跨樣本,僅 SEQC2-CN-state 細分是 HCC1395-only)。"
+    },
+    {
+      "claim": "13-04 / 13-28 / 13-29~13-33 novelty 自評:個別演算法多既有,GB 定位 useful pipeline 非 new algorithm;normal-anchored cis-test 最接近原創",
+      "verdict": "SURVIVES",
+      "reason": "誠實降權的自評,主動承認 matrix/距離/分群/CramersV/PERMANOVA 皆既有,只主張整合+cis-test 紀律為貢獻;此 framing 對研究者不利方向(自我設限)故無 over-claim 動機,紅隊找不到反向破綻。"
+    },
+    {
+      "claim": "13-05 / 13-24 de-confound niche:文獻(Martin-Trujillo)證 apparent ASM 多被 copy confound(CN 解釋 allelic 甲基 82-92%),多數工具不去 confound → ISM 補這個",
+      "verdict": "CHALLENGED",
+      "reason": "外部數字 82-92% 引自 Martin-Trujillo 但無行號、未在本群 primary、未經 KB 查證(P-14 outside-claim 必查 KB 未執行);『多數工具不去 confound』是對整個外部工具生態的概括宣稱,未 benchmark 即斷言 → 須先 KB 驗證該文獻數字+口徑,否則屬未證的 niche 主張。"
+    },
+    {
+      "claim": "13-06 / 13-26 / 13-27 誠實限制:normal-anchored 只 HCC1395 完整;single-pipeline ClairS-TO ⭐3;5mC/5hmC dup-bug 待修",
+      "verdict": "SURVIVES",
+      "reason": "誠實限制陳述,與 VERIFIED_RESULTS 自承一致;主動縮小適用範圍=反 over-claim,stated 🔴 caveat。"
+    },
+    {
+      "claim": "05-42 甲基輔助 phasing(umtag) held-out 0.8852 / V10 非-copy;需 yardstick/COLO829",
+      "verdict": "CHALLENGED",
+      "reason": "0.8852 在 VERIFIED_RESULTS:327 可核但屬 G11 鄰群(phasing)主題;單樣本 HCC1395 + single longphase-S pipeline,且 VERIFIED_RESULTS 自標絕對 AUC 有方法樂觀(用相對 null);此處作為 ISM『開啟甲基輔助 phasing』展望須繼承該 caveat,不可單列 0.8852 當成熟能力。"
+    },
+    {
+      "claim": "13-10 / 13-23 組件4 CramersV gate(Cochran≥5,三態 reliable/latent/none);487 latent(ISM-2 待 audit)",
+      "verdict": "CHALLENGED",
+      "reason": "gate 源碼 RegionProcessor.cpp:1592 行號命中(SURVIVES);但 487 latent 數字只在 synthesis/memory,本群 primary 兩檔無此值,且自承『ISM-2 待 audit』=尚未驗證的 gate-過嚴主張。catalog_tag_counts 的 E(latent)=28,254 與『487』量級差 58× → 兩者口徑必須釐清(487 是某子集?),否則 gate 過嚴的核心論據數字不一致。"
+    },
+    {
+      "claim": "13-15~13-20 B 節:與 modkit/NanoMethPhase/nanomethviz/epipolymorphism 差異全待 #23 benchmark+KB;GB 賣點(若 benchmark 成立)現有單一工具做不到",
+      "verdict": "SURVIVES",
+      "reason": "明示標 🔴『待驗證假設非已證宣稱』,自承未 benchmark;誠實標記猜測層,符合 P-14 紀律,紅隊無法攻擊已自我降權的條件式陳述。"
+    },
+    {
+      "claim": "04-24 / 04-26 / 04-27 / 05-46 / 05-48 / 06-18 / 08-41 / 08-51 / 08-54 驗證機制清單 / Δβ 合併決定 / 流程依賴 / 裁決陳述(ISM-1 CONFIRM, ISM-3 PROBE)",
+      "verdict": "CHALLENGED",
+      "reason": "S/Q 級二次彙整與裁決:驗證機制清單只在 synthesis 對應表(各機制散見 ledger 但清單未獨立核);ISM-1『互補是真的』CONFIRM 是對證據的二次判斷,其底層(08-42 正交)SURVIVES 但 08-43 BRCA2 Δβ~0.007 範例數字未在 primary 回查到。裁決可保留但須標『synthesis 層,底層分項另核』。"
+    },
+    {
+      "claim": "13-07 / 13-09 / 13-11 / 13-12 / 13-13 / 13-22 組件1/3/5/6/7 描述(矩陣/分群/HP-LOH tag/cis-test/catalog 輸出)",
+      "verdict": "SURVIVES",
+      "reason": "組件結構描述,部分無行號但與整體 pipeline(04-22)一致;normal-anchored cis-test 三路比在 V10 設計可核;描述性無因果過度宣稱。single-pipeline caveat 已散見。"
+    },
+    {
+      "claim": "13-30 / 13-34 CramersV/PERMANOVA gate=標準統計,reliability-gating 紀律是貢獻;venue=GB,外部能力標待 benchmark",
+      "verdict": "SURVIVES",
+      "reason": "meta-陳述,主動承認 gate=既有統計、外部宣稱待證;誠實標註紀律,無 over-claim。"
+    },
+    {
+      "claim": "15-28 答 schema P6:reliability 非被覆蓋驅動(power floor 後 plateau,控制後負)",
+      "verdict": "SURVIVES",
+      "reason": "clusterability doc §4.2 命中:coverage 18 cells 全 |ρ|<0.25、多變量控制後 OR=0.91 轉負;power-floor 後 plateau 有分層證據支持『非覆蓋假象』。此條與 15-31 的謬誤句不同(15-28 只主張 non-coverage-driven,未跳到 92%=biology)。"
+    },
+    {
+      "claim": "15-42 dbeta_max 用既有 AlleleDelta/HPMergedDelta 算,做成一級通道需 /cpp-change",
+      "verdict": "SURVIVES",
+      "reason": "catalog_skeleton.tsv 含這些欄(可核),且明示 stated 🔴 需 /cpp-change;工程依賴陳述,無研究結論宣稱。"
+    }
+  ],
+  "worst": "15-31 (clusterability §2.3) — 『coverage+nCpG+CN 僅解釋 8%(pseudo-R2=0.083),其餘 92% 來自真正的等位甲基生物學』是 affirming-the-residual 邏輯謬誤:低 explained-variance 不蘊含殘差=真生物學(可能是雜訊/未建模 confound)。此句被用作『分群是真等位生物學非技術假象』的核心定量論據,若寫進 Methods/Results 會被 reviewer 直接擊破。須改為『未被這三項 covariate 解釋,來源未定』並改以 LOH-抑制機制(15-34,因果方向 + 6/6 重現)作為主論據——後者才是站得住的證據。",
+  "summary_note": "66 claims 紅隊抽樣裁決:多數 pipeline-描述/誠實限制/自評 SURVIVES;1 條 REFUTED(15-31 殘差謬誤);headline 定位(06-15/06-47)、O11-重述賣點(05-41 群)、外部稽核泛化(06-19)、abstract 數字框架(05-10)、Δβ FP-enriched 措辭(08-53/15-41) 均 CHALLENGED 需 caveat。最強自家證據實為 15-34 LOH-抑制(6/6 跨樣本 proxy,因果方向對),audit 低估其 tier。最大系統性風險=把 single-pipeline(ClairS-TO 共用 truth)的 venn 結構與定位 synthesis 當成已證跨工具優勢,而 B 節差異全待 #23 benchmark。"
+}

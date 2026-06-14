@@ -1,0 +1,274 @@
+[
+  {
+    "id": "13-01",
+    "subject": "ism_positioning",
+    "claim": "ISM 的價值不在單一新演算法，而在一條 read-level 的「去 confound 鏡頭」—— 把 somatic 子單倍型(HP1-1) 解析度 + reliability gating + normal-anchored cis-test 串起來。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-02",
+    "subject": "application_framing",
+    "claim": "應用意義 = 誠實的 de-confounding + characterization，不是 discovery/filter。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-03",
+    "subject": "method_components",
+    "claim": "方法 = 7 個組件的整合（read×CpG → 距離 → 分群 → reliability gate → HP/LOH 比對 → normal-anchored cis-test → catalog）。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-04",
+    "subject": "novelty_claim",
+    "claim": "差異化在「組合 + somatic-sub-haplotype + normal-anchoring」，個別演算法多為既有 → GB 定位為「useful pipeline / de-confounding lens」非「new algorithm」。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-05",
+    "subject": "cis_deconfound",
+    "claim": "應用意義 = de-confound：文獻（Martin-Trujillo）證 apparent ASM 多被 copy confound，多數工具不去 confound → ISM 的 normal-anchored cis-test 是真實 niche。",
+    "source_doc": "ism_method",
+    "cited_source": "Martin-Trujillo (ref, 無行號)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-06",
+    "subject": "normal_anchor_limit",
+    "claim": "誠實限制：normal-anchored 只在有 matched normal（目前只 HCC1395）才完整；single-pipeline ⭐3。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-07",
+    "subject": "read_cpg_matrix",
+    "claim": "組件 1 read×CpG 甲基矩陣：每 region 建 reads × CpG sites 的甲基狀態矩陣（5mC/5hmC 分軌），輸入 BAM MM/ML → matrix；MatrixBuilder；5mC/5hmC dup-bug 待修。",
+    "source_doc": "ism_method",
+    "cited_source": "MatrixBuilder (內部組件，無行號)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-08",
+    "subject": "distance_matrix",
+    "claim": "組件 2 read-read 距離矩陣：reads 間甲基 profile 距離以 6 度量計（NHD/L1/L2/Pearson/Bernoulli/Jaccard）；DistanceMatrix。",
+    "source_doc": "ism_method",
+    "cited_source": "DistanceMatrix (內部組件，無行號)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-09",
+    "subject": "hierarchical_cluster",
+    "claim": "組件 3 階層分群：依甲基相似度把 reads 分群，distance → clusters；hierarchical。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-10",
+    "subject": "cramersv_gate",
+    "claim": "組件 4 CramersV reliability gate：判分群是否統計可靠（非稀疏表 artifact）+ PERMANOVA 顯著性，輸出 reliable/latent/none；Cochran 最小期望格≥5；487 latent (ISM-2 待 audit)。",
+    "source_doc": "ism_method",
+    "cited_source": "RegionProcessor.cpp:1592",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-11",
+    "subject": "hp_loh_tag",
+    "claim": "組件 5 HP/LOH tag 比對：把 haplotype（HP1/HP2/HP1-1/HP2-1）+ LOH 疊到甲基分群上，clusters + tags → 對齊關係；somatic-sub-haplotype 解析度。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-12",
+    "subject": "cis_test_component",
+    "claim": "組件 6 normal-anchored cis-test：normal HP1 / tumor HP1 / tumor HP1-1 三路比 → 分真 cis vs drift vs copy，tumor+normal → cis_status；核心去 confound 步驟。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-13",
+    "subject": "catalog_output",
+    "claim": "組件 7 characterization 輸出：per-locus 統計 → catalog（16 欄 7 TAG），輸出 catalog.tsv + 分佈圖；ARI vs imprinting ruler；Δβ(ISM-3 待併)。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-14",
+    "subject": "clustering_level",
+    "claim": "方法層級的洞：甲基分群是 germline-haplotype 層級（分不同 haplotype 強、同 haplotype 內 somatic 亞群弱）—— 解釋為何 ISM 能 characterize haplotype 結構，但「同 haplotype 內 subclone 甲基」訊號弱（D6 NEG）。",
+    "source_doc": "ism_method",
+    "cited_source": "D6 NEG (內部結論引用，無行號)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-15",
+    "subject": "external_diff_hypothesis",
+    "claim": "B 節與現有工具的差異全部「待 #23 benchmark + KB 確認」— 不臆測；以下是待驗證的差異化假設，不是已證宣稱。",
+    "source_doc": "ism_method",
+    "cited_source": "P-14 (規則引用)",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "13-16",
+    "subject": "diff_modkit",
+    "claim": "modkit 一般定位為 per-position 甲基 calling / pileup / DMR；ISM 假設差異是 read-level 分群非 per-position 聚合（待證）。",
+    "source_doc": "ism_method",
+    "cited_source": "none (待 KB 確認)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-17",
+    "subject": "diff_nanomethphase",
+    "claim": "NanoMethPhase 一般定位為 haplotype-resolved 甲基（HP1 vs HP2 ASM）；ISM 假設差異多 somatic-sub-haplotype(HP1-1) + read-read 距離 + normal-anchored 三路 cis（待證）。",
+    "source_doc": "ism_method",
+    "cited_source": "none (待 KB 確認)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-18",
+    "subject": "diff_nanomethviz",
+    "claim": "nanomethviz 一般定位為甲基視覺化；ISM 假設差異是分析+統計 gate 非純視覺（待證）。",
+    "source_doc": "ism_method",
+    "cited_source": "none (待 KB 確認)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-19",
+    "subject": "diff_epipolymorphism",
+    "claim": "epipolymorphism 類一般定位為 read-level 甲基熵/異質性；ISM 假設差異多 HP/LOH 對齊 + cis de-confound（待證）。",
+    "source_doc": "ism_method",
+    "cited_source": "none (待 KB 確認)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-20",
+    "subject": "gb_selling_point",
+    "claim": "GB 賣點（若 benchmark 成立）：read-level read-read 距離 + 階層分群 + reliability gate + somatic-sub-haplotype 解析 + normal-anchored cis de-confound 的整合，是現有單一工具做不到的。",
+    "source_doc": "ism_method",
+    "cited_source": "none (待 benchmark)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-21",
+    "subject": "cis_application",
+    "claim": "ISM 最有價值的問題：「這個 allelic 甲基差異是真 cis 還是假象？」normal-anchored cis-test 把 copy / germline-allelic / drift 從 cis 分開（chr17 過、BRCA2 被判 copy）。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-22",
+    "subject": "characterization_application",
+    "claim": "ISM 能回答：「某位點 reads 是否分甲基亞群、且與 haplotype/somatic 結構對齊？」= read-level characterization。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-23",
+    "subject": "reliability_application",
+    "claim": "ISM 能回答：「哪些位點甲基分群統計可靠 vs 稀疏表 artifact？」CramersV/PERMANOVA gate（487 latent 發現）。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-24",
+    "subject": "deconfound_lens_use",
+    "claim": "當 de-confounding lens：文獻（Martin-Trujillo, CN 解釋 allelic 甲基 82–92%）證 apparent ASM 多被 copy confound，多數工具不去 confound → ISM 補這個。",
+    "source_doc": "ism_method",
+    "cited_source": "Martin-Trujillo (ref, 無行號)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-25",
+    "subject": "filter_dead",
+    "claim": "誠實限制：不做 variant filter（已證死四道）—— 是 characterization/de-confound 工具，非 discovery/filter。",
+    "source_doc": "ism_method",
+    "cited_source": "none (內部「已證死四道」結論引用)",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "13-26",
+    "subject": "normal_anchor_scope_limit",
+    "claim": "誠實限制：normal-anchored 只在有 matched normal 才完整 → 目前只 HCC1395（其他 5 樣本無法跑完整 cis-test）= 應用範圍窄。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "13-27",
+    "subject": "single_pipeline_tier",
+    "claim": "誠實限制：single-pipeline ClairS-TO ⭐3；5mC/5hmC 分軌待 dup-bug 修。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "13-28",
+    "subject": "novelty_assembly",
+    "claim": "誠實限制：演算法多為既有組裝（見 D）→ 定位 useful pipeline 非 new algorithm。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "13-29",
+    "subject": "novelty_existing_components",
+    "claim": "novelty 自評：read×CpG 矩陣 / read-read 距離 / 階層分群 = 既有（epipolymorphism/methylation entropy 類已有）。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-30",
+    "subject": "novelty_gate_discipline",
+    "claim": "novelty 自評：CramersV/PERMANOVA gate = 標準統計，應用於 reliability gating 的紀律是貢獻。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-31",
+    "subject": "novelty_subhaplotype",
+    "claim": "novelty 自評：somatic-sub-haplotype(HP1-1) 解析 = 較少見（依賴 longphase-S somatic tag）。",
+    "source_doc": "ism_method",
+    "cited_source": "longphase-S (外部工具引用，無行號)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-32",
+    "subject": "novelty_cis_test",
+    "claim": "novelty 自評：normal-anchored cis-test（de-confound）= 最接近原創貢獻 —— somatic-controlled HP-axis 設計 held-constant copy/ploidy/alignment。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-33",
+    "subject": "honest_positioning",
+    "claim": "誠實定位：ISM = 「整合既有 read-level 方法 + 一個 somatic-controlled de-confounding cis-test」的 pipeline。GB 接受 useful pipeline，但 Methods/Discussion 不可宣稱「新演算法」，賣點放整合 + de-confound 紀律 + 誠實 characterization。",
+    "source_doc": "ism_method",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "13-34",
+    "subject": "venue_target",
+    "claim": "目標 venue 為 Genome Biology（GB）；ISM 方法描述為自有設計，外部工具能力宣稱標「待 #23 benchmark + KB 確認」未臆測。",
+    "source_doc": "ism_method",
+    "cited_source": "frontmatter provenance-verified note (line 8)",
+    "stated_tier": "🔵"
+  }
+]

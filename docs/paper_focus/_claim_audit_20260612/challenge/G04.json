@@ -1,0 +1,176 @@
+{
+  "group_id": "G04",
+  "subject": "甲基=germline-haplotype 層級 / subclone-甲基 germline-allelic 非 somatic-specific (V11c 存在性窄翻 candidate vs B2 ARI null NEGATIVE — G-B 正確 null 未跑)",
+  "challenged_by": "red-team adversarial reviewer (falsification mandate)",
+  "challenge_date": "2026-06-12",
+  "primary_truth_independently_verified": [
+    "b2_broad_scan.out:64-71 (TP n=45 median_ARI=0.135 / het-NULL n=45 median=0.177 / MW p=0.922) — CONFIRMED",
+    "catalog_tag_counts.json (overall.C=12868; HCC1395_tp.C=1291; A=1; n_loci=332705) — CONFIRMED 12868 是 7-樣本 overall 非單 HCC1395",
+    "VERIFIED_RESULTS.md V10 (normal 0.979 ≥ tumor 0.866 6/6 chr; V10 caveat#4 自承絕對 AUC 樂觀) / V11c (held-out farCpG AUC H1=0.851/H2=0.866; usability 8/8<0.5) / V11b (self-reference + single-pipeline ⭐2-3 上限) — CONFIRMED",
+    "make_q3_perlocus_map.py + 103_entropy_method_feasibility.py:128-132 — het-NULL 定義 = germline reference / ALLELE-axis (ALT/REF or HP1/HP2) baseline, NOT within-haplotype somatic-vs-ancestral — CONFIRMED 這正是 01-25/02-03 承認的『錯對照』",
+    "ledger 62 (NORMAL imprinted GNAS A/B=1.000 RB1=1.000; tumor LOI) / convergence md:77 (Methods-Neg-4) — CONFIRMED"
+  ],
+  "verdicts": [
+    {
+      "claim": "01-03 誠實前提鐵律：甲基訊號是 germline-haplotype 層級（強）、subclone 層級弱（只有存在性窄訊號、不可用於 read 救援）",
+      "verdict": "CHALLENGED",
+      "reason": "『鐵律』為單樣本 HCC1395 + 單 longphase-S pipeline 的機制歸納；V11b 自承 self-reference + ⭐2-3 上限，措辭應降為『此樣本/此 pipeline 觀察』而非跨研究線鐵律。"
+    },
+    {
+      "claim": "01-17 V11c：亞群 ALT vs 母本 REF 甲基可分（非 copy/非 somatic-CpG/無覆蓋 confound）→ 帶 subclone-discriminating 訊號 ⭐3 論文核心候選",
+      "verdict": "CHALLENGED",
+      "reason": "存在性 GATE 有 primary 但 2 個未解 MAJOR 自承：farCpG 只排 ±100bp 分不清『亞群全域 program vs >100bp cis 足跡』(cohesion≠cis) + 單樣本/4 染色體/chr20 NS；『核心候選』定位押在尚未跑的 G-B → caveat 須隨行。"
+    },
+    {
+      "claim": "01-18 紅線1：甲基=germline-haplotype 層級（V10）分不同 haplotype 強、within-haplotype 弱",
+      "verdict": "CHALLENGED",
+      "reason": "V10 normal 0.979≥tumor 0.866 設計穩，但 V10 caveat#4 自承絕對 AUC 全基因組 ~0.98 生物上不合理（樂觀）；結論應引相對 null 非絕對值，且單一 tumor/normal cell-line 配對。"
+    },
+    {
+      "claim": "01-19 紅線2：T3 存在性窄翻、可用性 NEGATIVE；亞群甲基『可分』≠『可救 ambiguous read』（lean 8/8<0.5）",
+      "verdict": "SURVIVES",
+      "reason": "usability NEGATIVE 是『失敗方向』結論（8/8 frac<0.5 偏向母本），保守且逐字命中 V11c；對自身不利的負結論不易被證偽，防得住。"
+    },
+    {
+      "claim": "01-25 Gap G-B：T3/subclone 甲基的正確 null 是 within-haplotype somatic-vs-baseline（非 germline-het 跨-hap 錯對照）；P0 reopen 前置",
+      "verdict": "SURVIVES",
+      "reason": "這是誠實標記方法 gap 的 claim（承認既有 null 是錯對照、正確 null 未跑），不下實證結論故無從證偽；反而是全群最該被放大的紅旗。"
+    },
+    {
+      "claim": "02-02 開放問題：subclone-discriminating 甲基（V11c）到底是 somatic-specific 還是 germline-allelic？（gate 論文甲基貢獻）",
+      "verdict": "SURVIVES",
+      "reason": "明確自標 open question（🔴），未當數據用；正是正確的不確定性陳述。"
+    },
+    {
+      "claim": "02-03 foundation 框：存在性窄翻（V11c ⭐3）但 §5 G-B 正確 null 未跑（承認 germline-het 是錯對照）",
+      "verdict": "SURVIVES",
+      "reason": "誠實 framing，主動揭露對照缺陷，無過度宣稱。"
+    },
+    {
+      "claim": "02-04 convergence 框：用 blind-ARI/germline-het null → germline-allelic 非 somatic-specific（Methods-Neg-4）",
+      "verdict": "REFUTED",
+      "reason": "致命循環/錯對照：germline-het null 經獨立確認是 ALLELE/HP-axis 跨-allele baseline；用『跨-allele 對照』下『非 somatic-specific(=within-haplotype 無結構)』結論——而 01-25/02-03 同群已承認此 null 無法區分 somatic vs germline-allelic。test 不能分辨待答問題卻拿來下結論 = 站不住。"
+    },
+    {
+      "claim": "02-05 寫作紀律：未跑 G-B 前，甲基-subclone 寫『存在性窄訊號+可用性負』，勿寫『甲基可重建子克隆』",
+      "verdict": "SURVIVES",
+      "reason": "保守寫作邊界，正確把貢獻強度押在未跑的 G-B、且禁止超範圍宣稱重建。防得住。"
+    },
+    {
+      "claim": "02-11 最高優先框架紀律：甲基不獨立重建子克隆（甲基側 subclone 訊號是 germline-allelic、不 somatic-specific、不能 filter）；寫成判別力=與 NEGATIVE 矛盾必撤",
+      "verdict": "CHALLENGED",
+      "reason": "『不能 filter』(filter-DEAD) 與『不獨立重建』穩；但『subclone 訊號是 germline-allelic』這一斷言繼承 02-04 的錯對照——強形式（已證 germline-allelic）超出證據，應弱化為『尚未證 somatic-specific（正確 null 未跑）』。"
+    },
+    {
+      "claim": "02-27 subclone-甲基=germline-allelic 非 somatic-specific：blind-ARI(GNAS/RB1=1.000) somatic TP 0.135 < germline-het null 0.177 p=0.922",
+      "verdict": "REFUTED",
+      "reason": "三重問題：①p=0.922 是 MW『TP>het』單尾不顯著(n=45 underpowered)，『fail to reject』被當成『證實 germline-allelic』= 把無證據當證據；②het-null 是錯對照(同 02-04)；③0.135<0.177 反而暗示 somatic TP cluster 比 allele baseline 更弱，與『等同 germline-allelic』敘述不一致。"
+    },
+    {
+      "claim": "03-13 必守紅線聚合：germline-haplotype 層級·非 filter(DEAD)·T3 NEG·T2 勿歸 H3·BRCA2 非乾淨 cis(改 TBC1D16)·cohesion≠cis",
+      "verdict": "CHALLENGED",
+      "reason": "聚合多條子句多數穩（filter-DEAD/T3-NEG/T2/cohesion≠cis 防得住），但『germline-haplotype 層級』作為紅線繼承單樣本+self-reference 限制，須標 scope 而非絕對紅線。"
+    },
+    {
+      "claim": "06-07 honesty ceiling：甲基=germline-haplotype 層級（分不同 haplotype 強、within-haplotype 弱）",
+      "verdict": "CHALLENGED",
+      "reason": "同 01-18：機制複述穩但 single-sample/single-pipeline + V10 絕對 AUC 樂觀，須隨行 caveat。"
+    },
+    {
+      "claim": "06-09 T3 subclone 可用性 NEGATIVE（可分≠可救 ambiguous read）",
+      "verdict": "SURVIVES",
+      "reason": "與 01-19 同源負結論，保守且 8/8<0.5 直接支撐。"
+    },
+    {
+      "claim": "06-10 T2 勿宣稱『可歸 H3』（只證 1-1/2-1 可分；H3 無真值）",
+      "verdict": "SURVIVES",
+      "reason": "這是對抗審查（V11b）主動降級的修正，禁止外推到無真值的 H3——保守且抗證偽。"
+    },
+    {
+      "claim": "06-42 V11c ⭐3 候選；G-B 正確 null 未跑 → 押 G-B 決定 R3/R6 強度",
+      "verdict": "CHALLENGED",
+      "reason": "把論文方向(R3/R6)強度押在尚未執行的 G-B 對照=決策懸於未驗證前提；存在性 ⭐3 有 primary 但須明示『若 G-B 證 germline-allelic 則 R3/R6 撤回』的下行風險。"
+    },
+    {
+      "claim": "07-12 ARI 0.135 < null，且 GNAS/RB1=1.000",
+      "verdict": "CHALLENGED",
+      "reason": "兩數字 grep 精確命中（描述性無誤），但裸列無 n=45/p=0.922/het-null=錯對照的限定，易被讀成『已證 somatic clustering 不存在』。數字真、推論不可超載。"
+    },
+    {
+      "claim": "07-20 germline-het null ARI 0.177 來源 b2_broad_scan_results.json（0.177463）",
+      "verdict": "SURVIVES",
+      "reason": "純溯源 claim，檔名+數值逐位命中（median het-NULL=0.177463），最強 provenance。"
+    },
+    {
+      "claim": "08-02 D4/D6 否決＝本質用甲基判別 subclone；HD-4+B2 已證甲基側是 phasing/germline-allelic 不是 somatic",
+      "verdict": "CHALLENGED",
+      "reason": "『phasing-driven』部分穩（HD-4 AF↔NGroups），但『B2 已證 germline-allelic』繼承 02-27 錯對照+null 不顯著；『已證』應改『未證 somatic-specific』。"
+    },
+    {
+      "claim": "08-11 D2 裁決 🟡 PROBE（機制上 ISM 已做；要分清揭示什麼）",
+      "verdict": "SURVIVES",
+      "reason": "PROBE（非定論）+ 明示需釐清揭示內容，謹慎，無過度宣稱。"
+    },
+    {
+      "claim": "08-13 D2 分出的是 germline allelic 背景（ARI 0.135<het null 0.177 p=0.922）不是 somatic subclone；D2≈D6 方法面",
+      "verdict": "REFUTED",
+      "reason": "同 02-27 的決定性瑕疵：以錯對照+不顯著 p=0.922 斷言『不是 somatic subclone / 是 germline-allelic』；test 無法區分兩假設卻下定向結論。"
+    },
+    {
+      "claim": "08-14 epipolymorphism(Landan2012/Derrien2021 L3) 支持 read-level 甲基分群存在但 tumor 更混亂",
+      "verdict": "CHALLENGED",
+      "reason": "外部 L3 佐證未在本任務核驗真值；且僅支持『分群存在』，不支持『分群=germline-allelic』的核心斷言——supporting 角色須標清，勿借外部文獻撐起 germline-allelic 歸因。"
+    },
+    {
+      "claim": "08-15 D2 ARI vs imprinting 正控 GNAS/RB1=1.000",
+      "verdict": "SURVIVES",
+      "reason": "正控數值命中 ledger 62（NORMAL imprinted），證尺 sensitivity；正控 framing 正確（用 NORMAL 非 tumor，避 LOI）。"
+    },
+    {
+      "claim": "08-16 D2 方法需 normal-anchored（減 germline allelic 基線）才可能逼出 somatic subclone",
+      "verdict": "CHALLENGED",
+      "reason": "方法構想合理但未在 subclone 上執行（Q 成分）；隱含假設『germline-allelic 基線可乾淨減去』未驗，normal-anchored cis-test 僅在 BRCA2/少數 loci 用過，外推到全 subclone 分群為未證前提。"
+    },
+    {
+      "claim": "08-37 B2 clustering NEG：somatic TP median ARI 0.135<germline-het null 0.177 MW p=0.922（GNAS/RB1=1.000 證 ruler sound）",
+      "verdict": "CHALLENGED",
+      "reason": "數據+ruler-sound 穩（正控有效），但『NEG』的解讀同 02-27：p=0.922 不顯著只證『未檢出 TP>het』，配上錯對照=只能說 underpowered+wrong-null，不能升為 germline-allelic 定論。"
+    },
+    {
+      "claim": "08-38 甲基 read-clustering 主要是 germline allelic 背景非 somatic subclone；須先減 germline allelic 基線(normal-anchored)",
+      "verdict": "REFUTED",
+      "reason": "前半『主要是 germline allelic』是 08-13/02-27 的 unsupported 結論再陳述（錯對照+null 不顯著）；後半 normal-anchored 為未驗方法。強斷言『主要是』超出證據。"
+    },
+    {
+      "claim": "09-15 甲基分群=germline-allelic 非 somatic；驗證機制=blind-ARI ruler+imprinting 正控+germline-het null",
+      "verdict": "REFUTED",
+      "reason": "結論『=germline-allelic』直接依賴被列為驗證機制的 germline-het null——而該 null 經 01-25 承認是錯對照。驗證機制本身不能區分結論待答的兩假設 → 結論不成立。"
+    },
+    {
+      "claim": "09-16 甲基分群=germline-allelic 外部佐證=epipolymorphism Landan2012/Derrien2021",
+      "verdict": "CHALLENGED",
+      "reason": "外部文獻只佐證『分群存在/tumor 混亂』，不佐證『=germline-allelic』；用外部 L3 撐 germline-allelic 歸因屬借力過度，且未核驗。"
+    },
+    {
+      "claim": "13-14 方法洞：甲基分群=germline-haplotype 層級（分不同 haplotype 強、同-hap 內 somatic 亞群弱，D6 NEG）",
+      "verdict": "CHALLENGED",
+      "reason": "『分不同 haplotype 強』(V10/V11) 穩；『同-hap 內亞群弱(D6 NEG)』繼承 B2 錯對照+V11c 存在性窄翻的張力——D6 NEG 與 V11c POSITIVE 同群並存，不應單寫『弱』而隱去 V11c 存在性翻案。"
+    },
+    {
+      "claim": "14-03 規則：read-level 甲基分群真實（12,868 reliable）但壓倒性是 germline-allelic",
+      "verdict": "CHALLENGED",
+      "reason": "口徑誤導：12,868 是 catalog 7-樣本 overall.C（HCC1395 單樣本僅 1,291），規則句易被讀成單樣本數；且『germline-allelic』分類(TAG-C)依賴的 cis-test 僅少數 loci 驗證，外推到全 12,868 為未證。"
+    },
+    {
+      "claim": "14-10 整合 one-liner：12,868 全 germline-allelic / 僅 1/332,705 乾淨 somatic cis / 例外 chr17 TBC1D16 三訊號正交",
+      "verdict": "CHALLENGED",
+      "reason": "數字命中 catalog，但『1/332,705 乾淨 somatic cis』的極端稀有性高度依賴 TAG-A 嚴格定義+單一 cis-test pipeline；把『分類為 C』等同『生物上是 germline-allelic』= 二次解釋當數據，且 332,705/12,868 為 7-樣本口徑須明示。"
+    },
+    {
+      "claim": "15-02 reliable 甲基分群 12,868（TAG-C）但 cis-test 證它們是 germline-allelic 背景非 somatic-ASM",
+      "verdict": "CHALLENGED",
+      "reason": "『cis-test 證 12,868 全為 germline-allelic』超出實測範圍：cis-test 為 per-locus 設計、在全 12,868 上逐一執行的證據未見；TAG-C 多由分類規則指派而非每筆 cis 驗證 → 標籤≠已驗。口徑(7-樣本)同 14-03。"
+    }
+  ],
+  "worst": "02-04 / 02-27 / 08-13 / 08-38 / 09-15 共構的核心循環：『subclone-甲基=germline-allelic 非 somatic-specific』(B2 ARI 0.135<0.177 p=0.922) 是用 germline-het null 下的結論，而本群 01-25/02-03/02-05 已自承『germline-het 是跨-allele 錯對照、正確 within-haplotype G-B null 從未跑』。即用一個按定義無法區分 somatic-specific vs germline-allelic 的對照，去斷言『就是 germline-allelic』；再疊加 n=45 的 MW p=0.922（不顯著=無證據，被當成有證據）。最該被質疑：headline NEGATIVE 不是『證實 germline-allelic』，而是『正確 null 未跑 + underpowered』，須全面降為『尚未證 somatic-specific』而非『已證 germline-allelic』。"
+}

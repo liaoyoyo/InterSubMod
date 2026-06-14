@@ -1,0 +1,76 @@
+{
+  "domain": "phasing_samehap",
+  "scope": "phasing 脊柱 / same-hap 口徑 (6/6 vs 3/6) / NG=2 Inner>Outer / by-construction 循環 / Grade 標示 — 跨文件矛盾 (同 subject 不同文件給出不一致的值/口徑/角色/方向裁決/框架)",
+  "primary_truth_recompute": {
+    "raw_source": "research/tpfp_loh_af_kde_discrimination/data/obs18_NG2_composition_by_sample.tsv (Apr22 obs18, the source named in ledger:27 artifacts)",
+    "method": "Inner-side NG=2 reads, two distinct metrics recomputed from raw counts",
+    "same_hap_OCCUPANCY (phasing purity = (n_sameHP1+n_sameHP2)/total)": {
+      "HCC1395": 0.932, "HCC1395_DORADO": 0.990, "HCC1937": 0.988, "HCC1954": 0.965, "H2009": 0.983, "H1437": 0.970,
+      "ge93_count": "6/6",
+      "matches": "ledger:27 OLD set 0.932/0.990/0.988/0.965/0.983/0.970 to 3-4 decimals"
+    },
+    "same_HP1_TP_RATE (= n_tp/n within same_HP1 reads)": {
+      "HCC1395": 0.959, "HCC1395_DORADO": 0.939, "HCC1937": 0.759, "HCC1954": 0.429, "H2009": 0.932, "H1437": 0.920,
+      "ge93_count": "3/6",
+      "matches": "ledger:95 'corrected' set 0.939/0.759/0.429/0.932/0.920 for 5/6 (HCC1395 anomaly: 0.959 vs claimed 0.840)"
+    },
+    "verdict": "The two sets answer DIFFERENT questions (occupancy/phasing-purity vs same_HP1 TP-rate). 6/6>=93% OCCUPANCY is CORRECT and raw-confirmed; the '3/6 correction' substitutes a TP-rate, incl HCC1954's already-flagged 0.429 TP outlier (ledger:27 noted it as a separate quantity)."
+  },
+  "n_contradictions": 6,
+  "contradictions": [
+    {
+      "subject": "NG=2 Inner same-hap 口徑 (6/6 ≥93% vs 3/6 ≥93%)",
+      "claim_a": "OLD/進取版: 'NG=2 Inner same-hap ≥93%, 6/6 樣本' (0.932/0.990/0.988/0.965/0.983/0.970). Source: ledger:27 (CL-LCP-001 20260423 weekly_report) + CURRENT_FOCUS.md:158 + G05 claims 02-09(sub-clause)/06-45/07-30. = same-hap OCCUPANCY.",
+      "claim_b": "'修正版/OVERSTATED-correction': '同-hap ≥93% 6/6 是 OVERSTATED, 實測 0.840/0.939/0.759/0.429/0.932/0.920 = 僅 3/6 ≥93%, 必修'. Source: ledger:95 overstated_flag + docs/paper_focus/01_focus_notes/08...md:51,55 + G05 claims 07-22/11-28/11-03/11-29/11-30/11-36/14-33/05-35 (8+ docs, marked 🔴 must-fix). = same_HP1 TP-RATE (mislabeled).",
+      "conflict": "Two number sets coexist as the same 'same-hap' caliber across 8+ docs; recompute from raw obs18 TSV proves they are DIFFERENT metrics (occupancy vs TP-rate) — the '3/6 correction' is a metric-confusion error, not a provenance fix; docs that 'fixed' to 3/6 now UNDERSTATE the verified 6/6 occupancy result and mislabel a TP-rate as same-hap purity.",
+      "which_correct": "claim_a (6/6 ≥93% same-hap OCCUPANCY) is correct per primary recompute: occupancy = 0.932/0.990/0.988/0.965/0.983/0.970 matches ledger:27 + raw TSV to 3-4 decimals, all 6 ≥93%. The 3/6 set = same_HP1 TP-rate (0.959/0.939/0.759/0.429/0.932/0.920), a separate quantity (HCC1954 0.429 is its TP outlier, already flagged distinctly in ledger:27). HCC1395=0.840 in the 'corrected' set matches NEITHER occupancy(0.932) NOR TP-rate(0.959) → 'corrected' set not even internally consistent with its cited raw source.",
+      "correction_needed": "REVERT the '3/6 overstated-correction' in ledger:95 + 08...md + the 8 G05 claims (07-22/11-28/11-03/11-29/11-30/11-36/14-33/05-35) and the sub-clauses of 02-09/06-45. Restore 6/6 ≥93% but RELABEL the metric explicitly as 'same-hap OCCUPANCY / phasing-purity', distinct from 'same_HP1 TP-rate', so the two are not conflated downstream. The phasing-purity result is stronger (6/6), not weaker, than the erroneous correction stated.",
+      "severity": "🔴"
+    },
+    {
+      "subject": "single-claim internal same-hap caliber (6/6 OLD vs 3/6 corrected jammed together)",
+      "claim_a": "G05 claim 06-45 states 'NG=2 Inner 93-99% same-hap' (OLD occupancy range) in the same breath as 'same-hap 口徑修正 3/6 ≥93% (非 6/6)'. Source: master_map R2 spine claim.",
+      "claim_b": "G05 claim 02-09 carries 'Inner×NG=2 ≥93% same-hap 6/6' as a sub-clause while the rest of the group treats 6/6 as OVERSTATED→3/6. Source: composite headline claim.",
+      "conflict": "Within single claims, the OLD 6/6/93-99% framing and the 3/6 'correction' coexist unresolved — a claim simultaneously asserts a number set and its (erroneous) correction, so the claim is internally self-contradictory (auditor flagged 06-45 as WEAK / 02-09 CONFLICT_internal).",
+      "which_correct": "The '93-99% / 6/6' portion is the valid occupancy figure (per recompute); the '3/6 修正' portion is the spurious TP-rate mislabel. Resolution: keep the occupancy figure, drop the 3/6 'correction'.",
+      "correction_needed": "Rewrite 02-09 and 06-45 to carry ONLY the occupancy figure (6/6 ≥93% same-hap purity) with explicit metric label; remove the embedded '3/6 非 6/6 修正' clause. Do not juxtapose two metrics as if one corrects the other.",
+      "severity": "🔴"
+    },
+    {
+      "subject": "same-hap overstated-string provenance pointer (CURRENT_FOCUS line number)",
+      "claim_a": "G05 claims 07-22/11-03/11-28/11-30 (and 02-09 indirectly) cite 'CURRENT_FOCUS:137' as the location of the '≥93% same-hap 6/6' string.",
+      "claim_b": "Actual file: the '≥93% same-hap 6/6' string lives at CURRENT_FOCUS:158; line 137 is the unrelated 2026-05-22 HKU ClairS-TO handoff plan (per auditor grep).",
+      "conflict": "5 claims point to the wrong source line for the same same-hap string — a cross-doc provenance pointer that does not resolve to the cited line.",
+      "which_correct": "claim_b (:158) per auditor grep verification; :137 is a different topic (HKU handoff).",
+      "correction_needed": "Fix the citation line in all 5 claims and in CURRENT_FOCUS-citing docs: change CURRENT_FOCUS:137 → :158 (alongside, but independent of, the value/metric correction in contradiction #1).",
+      "severity": "🟡"
+    },
+    {
+      "subject": "phasing spine current status (firm positive vs 暫緩/Grade B+)",
+      "claim_a": "G13 claims 02-44/03-02: '有可寫 positive 主結果 (Grade B+)' and 'launch 就緒, 唯一 gate=HD-1' — phasing spine framed as a writeable positive main result now. Source: integ_chapter / launch_readiness.",
+      "claim_b": "G13 claim 04-51 (DEC-6): 'HD-1 暫緩 → phasing 維持 Grade B+, 先不跑 R-SELFREF' — DEC-6 explicitly suspends R-SELFREF, conceding phasing is NOT a firm positive while by-construction circularity (NG=2 Inner uses somatic-attributed HP1-1 definition) is unresolved. Source: 論文框架_逐節寫作重點與確認.md:138.",
+      "conflict": "One framing bills the phasing spine as a present positive main result; the other (DEC-6) suspends the very test (R-SELFREF) needed to make it bulletproof and holds it at Grade B+. Calling it a 'positive 主結果' before HD-1/R-SELFREF resolves the circularity pre-spends an unverified conclusion (billing-consistency tension, not a numeric error).",
+      "which_correct": "undetermined — DEC-6 (暫緩, Grade B+, contingent) is the more defensible state given the unresolved by-construction circularity (R-SELFREF/#21 未跑, self-flagged across G05/G12/G13); but 'P0 priority' vs 'currently 暫緩' are not strictly contradictory (priority vs current-choice). The over-statement is calling it a firm 'positive 主結果' rather than 'contingent / Grade B+ pending R-SELFREF'.",
+      "correction_needed": "Reconcile 02-44/03-02 with DEC-6: change 'positive 主結果' to 'contingent positive (Grade B+, pending R-SELFREF/HD-1)'; let the 14-13 誠實-billing / DEC-6 contingent language lead. Ensure the phasing spine is consistently described as contingent-until-HD-1 across integ_chapter / launch_readiness / 逐節框架.",
+      "severity": "🟡"
+    },
+    {
+      "subject": "launch gate count ('唯一 gate=HD-1' vs G-A/G-B as P0 未跑)",
+      "claim_a": "G13 claim 03-02: '就緒：6 樣本×3 癌種 + normal 5/6 + 流程 + git, 唯一啟動 gate = HD-1'. Source: launch_readiness.",
+      "claim_b": "G13 claims 06-50 (G-A P0 多樣本重現未跑) + 06-51 (G-B within-haplotype 正確 null 未跑, P0, reopen T3 前置). Source: master_map gap cards. CURRENT_FOCUS.md:63 lists both HD-1 and G-B gates.",
+      "conflict": "launch_readiness says HD-1 is the ONLY launch gate, but master_map + CURRENT_FOCUS list G-A and G-B as additional P0 unrun gates — '唯一' is contradicted by the other docs' P0 gate list.",
+      "which_correct": "claim_b — there are multiple P0 gates (HD-1 + G-A + G-B per master_map/CURRENT_FOCUS). '唯一 gate=HD-1' is launch-readiness rhetoric over-simplification (auditor's own G13 challenge flagged 03-02 CHALLENGED for this reason).",
+      "correction_needed": "Change launch_readiness '唯一啟動 gate=HD-1' to enumerate the actual P0 gate set (HD-1 for positive-spine + G-A multi-sample reproduction + G-B within-haplotype null), consistent with master_map gap cards and CURRENT_FOCUS:63.",
+      "severity": "🟡"
+    },
+    {
+      "subject": "phasing NG=2 7/7 evidential role (orthogonal/independent co-validation vs same-pipeline by-construction)",
+      "claim_a": "G05 claims 09-17/10-15/10-06/04-07 + G13 claim 14-12: somatic↔haplotype 'orthogonal co-verification' / 'three-signal co-validation 對齊' — phasing NG=2 7/7 framed as independent orthogonal corroboration of the ASM/somatic axis.",
+      "claim_b": "G05 claim 05-34 / G12 claim 02-37 / G01 systemic S1 + claim 04-02: the somatic call (ClairS-TO) and the haplotype tag (longphase-S) both flow from the SAME single pipeline, and NG=2 Inner same-hap is by-construction partly definitional (Inner uses somatic-attributed HP1-1) → R-SELFREF circularity unresolved; the signals are same-source, NOT orthogonal/independent.",
+      "conflict": "Same NG=2 7/7 result is framed both as 'orthogonal/independent co-validation' (a strength) and as 'by-construction same-pipeline circular' (a caveat) — the word 'orthogonal/co-validation' over-claims independence that the by-construction/single-pipeline structure denies.",
+      "which_correct": "claim_b — the somatic and haplotype tags are same-pipeline (longphase-S/ClairS-TO), so 'orthogonal independent verification' is overstated; 'consistent-with' / 'same-pipeline corroboration (circularity self-flagged, pending R-SELFREF)' is accurate. The circularity is self-flagged across multiple groups, confirming claim_b.",
+      "correction_needed": "Relabel 'orthogonal co-verification' / 'three-signal co-validation' (09-17/10-15/10-06/04-07/14-12) as 'same-pipeline consistent-with corroboration, by-construction circularity pending R-SELFREF'. Reserve 'orthogonal/independent' for when a non-longphase-S second pipeline (G-E) is run.",
+      "severity": "🟡"
+    }
+  ]
+}

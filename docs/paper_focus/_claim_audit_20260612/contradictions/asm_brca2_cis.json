@@ -1,0 +1,88 @@
+{
+  "domain": "asm_brca2_cis",
+  "scope": "ASM existence/direction · BRCA2 role (cis-anchor vs retired copy-confounded) · chr17/TBC1D16 unique clean cis · numeric/caliber consistency",
+  "groups_audited": ["G03", "G05", "G07", "G08", "G09", "G01", "G13"],
+  "primary_truth_anchors": {
+    "evidence_ledger.jsonl:85": "ASM TP 0.0395 > FP 0.0107; subhap-matched 0.0377 vs 0.0109 (~3.5x); ~4% sensitivity",
+    "evidence_ledger.jsonl:58/95/27": "phasing 7/7 W=28 p=0.0078125; same-hap CORRECTED 0.840/0.939/0.759/0.429/0.932/0.920 (3/6>=93%) vs OLD 93.2/99.0/98.8/96.5/98.3/97.0 (6/6)",
+    "copy_partition_confirm.json": "chr13/BRCA2 d_HP=-0.122 d_within=-0.023 d_copy=-0.11 d_allele=-0.099 brca2_perm.p=0.022; chr17 d_HP=0.122 d_within=0.142 d_allele=0.183 d_copy=0.029 perm p=0.001",
+    "catalog_tag_counts.json": "A=1 B=5 C=12868 D=5 E=28254 F=54 G=291518 n_loci=332705; cis-tested loci=816 all HCC1395",
+    "fast_cnv_validation.json": "copy-DOSAGE REFUTED MW p=0.6183 rho=-0.0829",
+    "credibility_patch_results.json": "P2_chr8_jackknife OR_full=5.156 OR_drop_chr8=2.843 chr8=61.4% of FP-strong; P4 bootstrap TP-minus-null HP-axis CI [-0.536,0.268] straddles 0"
+  },
+  "n_contradictions": 8,
+  "contradictions": [
+    {
+      "subject": "NG=2 Inner same-hap occupancy (phasing spine headline number)",
+      "claim_a": "[integ_chapter, G05 02-09] 'Inner×NG=2 ≥93% same-hap 6/6'. Also carried/juxtaposed in [master_map, G05 06-45] 'NG=2 Inner 93-99% same-hap'.",
+      "claim_b": "[formal_arch, G05 05-35] / [doc_library, G05 07-22] / [catalog_provenance, G05 11-28] 'same-hap median ~92% but only 3/6 ≥93% (0.840/0.939/0.759/0.429/0.932/0.920, T-PROV corrected, NON-6/6)'.",
+      "conflict": "Two incompatible same-hap number sets coexist across docs: OLD '6/6 ≥93% (93-99%)' vs CORRECTED '3/6 ≥93%'. integ_chapter (and master_map's leftover '93-99%' fragment) still carries the overstated 6/6 framing.",
+      "which_correct": "claim_b correct. Primary evidence_ledger.jsonl:95 overstated_flag holds the corrected set verbatim (0.840/0.939/0.759/0.429/0.932/0.920 → only 3 of 6 ≥93%); ledger:27 is the OLD CL-LCP-001 source of the 6/6 framing now superseded. Direction (6/6 all high same-hap) is right; magnitude (6/6 ≥93%) is wrong.",
+      "correction_needed": "Edit integ_chapter (claim 02-09) to drop '≥93% same-hap 6/6' → '~92% median, 3/6 ≥93%'; delete the residual '93-99% same-hap' fragment in master_map (06-45). NOTE adjacent citation-line bug: docs cite CURRENT_FOCUS:137 but the overstated string lives at CURRENT_FOCUS:158 — repair pointer alongside magnitude.",
+      "severity": "🔴"
+    },
+    {
+      "subject": "Clean somatic cis-ASM floor denominator (de-confound floor headline)",
+      "claim_a": "[formal_arch, G09 05-02/05-11/05-21] / [master_map, G09 06-33/06-48] / [prereg_fallback, G08 14-04] / [catalog_r6, G08 15-03, G01 15-18] / [integ_chapter via G04 14-10] headline: 'genome-wide only 1/332,705 clean somatic cis-ASM (de-confound floor)'.",
+      "claim_b": "[direction_cards, G13 08-39] honest caliber: 'cis line 1/816 clean'; [formal_arch G08 05-24/05-29] + [catalog_r6 G09 15-08/15-54/15-58] establish cis-testing ran on ONLY 816 HP-axis loci, ALL in HCC1395; 331,889 rows are cis_status=NA (never tested).",
+      "conflict": "Same quantity expressed with two denominators: 1/332,705 (full sample-locus catalog, implies 332,704 loci were cis-tested and excluded) vs 1/816 (loci actually cis-tested, all single-sample). The 332,705 framing is denominator inflation / absence-of-evidence-as-evidence-of-absence (~400x understatement of the floor rate).",
+      "which_correct": "claim_b is the honest caliber. catalog_tag_counts/skeleton show cis_status!=NA on only 816 rows (all HCC1395); the genome-wide 332,705 denominator was never cis-tested. The numerator (HCC1395-only) and denominator (6-sample genome-wide) come from different scopes — a scope mismatch, not a true genome-wide rate.",
+      "correction_needed": "Reframe the floor in formal_arch/master_map/prereg_fallback/catalog_r6/integ_chapter as 'in HCC1395, 1 of 816 cis-testable loci is a clean somatic cis-ASM (~0.12%)' with explicit 'cis-tested N=816, all HCC1395, single-pipeline ⭐3' caveat. Keep 1/332,705 only as a catalog-row count, never as the cis floor.",
+      "severity": "🔴"
+    },
+    {
+      "subject": "BRCA2 Δβ magnitude / caliber",
+      "claim_a": "[master_map, G07 06-43] 'BRCA2 Δβ=−0.122 HP-axis'. [direction_cards, G07 08-44] 'HP-axis −0.122 ≈ copy-partition −0.110 + within-tag true cis −0.023'.",
+      "claim_b": "[direction_cards, G07 08-45 + G11 08-43] 'BRCA2 Δβ~0.007 / high-Δβ FP (yellow, source pending)' (per-CpG mean-shift caliber); [completeness, G13 12-12] references a 'BRCA2 −0.054 artifact' (MSA Level1 5mC/5hmC dup-bug); [formal_arch G07 05-25 / doc_library G07 07-26] use 'd_within −0.023'.",
+      "conflict": "At least four BRCA2 Δβ numbers circulate without a unified caliber label: −0.122 (HP-axis), −0.023 (within-tag cis), ~0.007 (per-CpG mean-shift), and −0.054 (dup-bug artifact). Docs mix them as if interchangeable.",
+      "which_correct": "All four are real but are DIFFERENT measures, not contradictory values: copy_partition_confirm.json gives d_HP=-0.122 / d_within=-0.023 / d_copy=-0.11 / d_allele=-0.099; ~0.007 is a non-directional per-CpG mean-shift (obs24_H2 CI [-0.0075,0.0126] straddles 0); −0.054 is the buggy 5mC+5hmC double-count artifact (now corrected to −0.122 via max-collapse, ledger #53). The error is presenting them without caliber tags, not the numbers themselves.",
+      "correction_needed": "Tag every BRCA2 Δβ with its caliber (HP-axis −0.122 / within-tag cis −0.023 / per-CpG ~0.007 / DO-NOT-USE buggy −0.054). The headline magnitude should be HP-axis −0.122; the cis-relevant magnitude is within-tag −0.023 (marginal, n=19/19 single-sample). Resolve 08-45 'source pending' before submission.",
+      "severity": "🔴"
+    },
+    {
+      "subject": "chr17/TBC1D16 'clean cis' exemplar qualification",
+      "claim_a": "[formal_arch G08 05-24], [direction_cards G08 08-18], [catalog_r6 G08 15-03/15-43], [prereg_fallback G08 14-04], [validation_map G08 09-22] all label chr17 the 'unique CLEAN somatic cis' (d_within 0.142 ≫ d_copy 0.029, perm p=0.001), and 09-22/13-21 assert it 'separates germline-allelic from cis'.",
+      "claim_b": "chr17's own primary data (copy_partition_confirm.json) has d_allele=0.183 > d_within=0.142, plus cramersV_value=0.0 / clustering_reliability=none (fails the project's own Cochran gate); perm p=0.001 rests on n=30 reads (16 alt/14 ref) at one CpG-aggregated locus. [formal_arch G08 05-29] itself concedes Bonferroni×816≈0.82 may render it NS.",
+      "conflict": "The cross-doc 'clean cis' framing controls only the COPY axis (d_within vs d_copy) and ignores that the germline-allelic ALLELE axis (d_allele=0.183) is LARGER than the within signal — the exemplar's own data contradicts 'germline-allelic separated from cis'. 'Clean' also conflicts with cramersV=0/reliability=none and the doc's own Bonferroni caveat.",
+      "which_correct": "claim_b (primary) wins on rigor. chr17 is the BEST cis candidate and uniquely passes the within>copy test, but 'clean' is overstated: residual allele-axis (per memory feedback_asm_allele_axis_baseline_confound) is unexplained, it fails the Cochran reliability gate, and it is nominal/Bonferroni-marginal single-sample (n=30). The within>copy uniqueness (TAG-A=1) is real and survives.",
+      "correction_needed": "Soften 'clean cis' to 'best/strongest cis candidate, copy-axis controlled' across formal_arch/direction_cards/catalog_r6/prereg_fallback/validation_map; disclose d_allele=0.183>d_within, cramersV=0/reliability=none, n=30 reads, and Bonferroni-marginal single-sample. Reconcile 09-22's 'germline-allelic separated' claim with the allele-axis residual.",
+      "severity": "🔴"
+    },
+    {
+      "subject": "chr18:11741161 classification (cis-mechanical vs genuine T3)",
+      "claim_a": "[catalog_provenance, G08 11-13] 'cis protocol partial: chr17=cis / BRCA2=copy / 53 untestable + chr18 mechanical'.",
+      "claim_b": "[catalog_r6, G09 15-15/15-45] correctly assigns chr18:11741161 as the single cis-mechanical (CpG-creation) locus in TAG-F; BUT primary (survivor_permutation / catalog) shows chr18:11741161 is genuine=True T3 with perm p=0.006, and the genome-wide mechanical-artifact is an 81-locus class (mechanical exemplar=chr19:14434617 TAG=F).",
+      "conflict": "claim_a labels chr18 'mechanical' as the representative mechanical locus, but primary shows chr18:11741161 is a genuine T3 cis-survivor (p=0.006); the mechanical-artifact representative is chr19:14434617, not chr18. Locus-label factual error.",
+      "which_correct": "claim_b / primary. The MECH_CAVEAT (script98:58) flags chr18:11741161 as creating a CpG, but it is also a genuine permutation survivor (p=0.006) — labeling it the 'mechanical' exemplar is wrong; chr19:14434617 is the mechanical (TAG=F) representative.",
+      "correction_needed": "In catalog_provenance (11-13) change 'chr18 mechanical' → 'chr19 mechanical (chr19:14434617)'; if chr18 is meant, note it is a genuine T3 survivor with a CpG-creation caveat, not a mechanical artifact.",
+      "severity": "🟡"
+    },
+    {
+      "subject": "condition_fp_consensus.json existence (regression-to-extreme OR source)",
+      "claim_a": "[direction_cards, G07 07-24/08-30] states condition_fp_consensus.json 'does not exist on disk' / '源檔待對賬' (source pending reconcile) for OR 8.63/4.09/5.84 + combo TP 0.0086/FP 0.0797.",
+      "claim_b": "[catalog_r6, G07 11-22/11-23] cite the same file with all OR values EXACT-matched; independent check confirms it EXISTS at research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/cross_sample/condition_fp_consensus.json.",
+      "conflict": "One doc says the primary file is missing; another cites it with matching values. The file objectively exists (at the cn_confound/cross_sample/ path the 'missing' claim never checked).",
+      "which_correct": "claim_b correct — file exists, values match. claim_a's 'missing/pending' status is stale/wrong (looked at an abbreviated path omitting the cn_confound/ segment).",
+      "correction_needed": "Delete the 'file missing / 源檔待對賬' status in direction_cards (07-24/08-30); fix the cited path in catalog_r6 (11-22/11-23) to the full genome_survey_v2/cn_confound/cross_sample/ path; add single-sample HCC1395 scope caveat.",
+      "severity": "🟡"
+    },
+    {
+      "subject": "strong-ASM anti-discriminative effect size (OR=0.194 / '5x')",
+      "claim_a": "[direction_cards G07 08-31] + [catalog_r6 G07 15-37] narrate 'strong-ASM 5x anti-discriminative, OR=0.194, regression-to-extreme regime' as a general effect (15-37 marks it 🔴).",
+      "claim_b": "Primary credibility_patch_results.json: chr8-jackknife OR_full=5.156 → OR_drop_chr8=2.843 (61.4% of FP-strong loci from one chr8 hotspot); P4 rigorous-null bootstrap TP-minus-null HP-axis CI [-0.536,0.268] straddles 0; OR=0.194 is NOT emitted by any primary computation (obs20_forest_stats labels it literally 'per synthesis', ≈1/5.156 inverted+rounded).",
+      "conflict": "'5x / OR=0.194 / regression-to-extreme regime' overstates a hotspot-driven, CI-straddling, single-sample effect: the '5x' nearly halves when one chr8 hotspot is removed, the somatic-vs-germline-baseline CI includes 0, and the exact 0.194 has no primary source.",
+      "which_correct": "claim_b (primary). Direction (strong-ASM FP-enriched) is real, but the magnitude is fragile: OR=0.194 is synthesis/memory-derived (fabricated precision), the effect is 61% one-hotspot-driven (OR_drop_chr8=2.843), and the rigorous-null CI straddles 0. 'Regression-to-extreme regime' is S-interpretation, not a measured quantity.",
+      "correction_needed": "In direction_cards/catalog_r6, re-derive or recompute OR (do not quote 0.194 as 🟢/measured); add chr8-hotspot-robustness (OR_drop_chr8=2.843), the CI-straddles-0 caveat, and single-sample HCC1395 scope; downgrade 'regression-to-extreme regime' to a hypothesis-level S-interpretation.",
+      "severity": "🟡"
+    },
+    {
+      "subject": "catalog 'reliable' / 'none' tier counts (caliber chaos)",
+      "claim_a": "[formal_arch G09 05-02/05-11] / [master_map G09 06-33] / [catalog_r6 G01 15-18, G09 15-12] state 'reliable methylation clustering at 12,868 loci, all germline-allelic' and use TAG-G none=291,518.",
+      "claim_b": "[catalog_r6 G09 15-06/15-21] use 'reliable 11,689' (reliable TP+FP, excludes FN) and 'none 292,762'; catalog_audit.json tristate gives reliable=12,876 / latent=28,277 / none=291,552 — none of which equal the TAG-based 12,868/28,254/291,518.",
+      "conflict": "Three different 'reliable' counts (12,868 TAG-C / 12,876 tristate / 11,689 TP+FP) and three different 'none' counts (291,518 TAG-G / 291,552 tristate / 292,762 mixed-caliber) circulate across docs without one declared convention; a reader cannot reconcile them. Worse, '12,868 reliable all germline-allelic' is near-tautological: TAG-C is DEFINED as reliable AND germline-allelic, so it cannot evidence that reliable clustering is 'overwhelmingly germline'.",
+      "which_correct": "undetermined as a single 'correct' number — each caliber is internally valid (TAG-C=12,868 and TAG-G=291,518 are grep-exact; tristate 12,876/291,552 and TP+FP 11,689/292,762 are also real). The DEFECT is mixing calibers across docs and the by-construction tautology in the 'all germline-allelic' inference, not a wrong value.",
+      "correction_needed": "Declare ONE canonical caliber (recommend TAG-based: reliable=12,868 TAG-C, latent=28,254 TAG-E, none=291,518 TAG-G summing to 332,705) and use it consistently; report what fraction of reliable-clustering (tristate 12,876, which includes non-germline) is germline-allelic SEPARATELY rather than asserting '12,868 all germline' (tautological). Also fix formal_arch 05-47 '16-欄 schema' → 32 columns.",
+      "severity": "🟡"
+    }
+  ]
+}

@@ -1,0 +1,234 @@
+[
+  {
+    "id": "12-01",
+    "subject": "fdr_priority",
+    "claim": "最該先做 = FDR/null 校準（#24）——它若失敗會同時砍掉「規則 12,868」和「例外 chr17」。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-02",
+    "subject": "fdr_noise_floor",
+    "claim": "規則的 12,868 reliable = 3.87% 通過 gate，但低於 p≤0.05 的 5% 噪音地板 → 沒 null 校準無法宣稱是真訊號。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-03",
+    "subject": "chr17_bonferroni",
+    "claim": "例外 chr17 perm p=0.001 跨 816 cis-test → Bonferroni 0.001×816≈0.82 (NS)，可能是多重檢定 artifact。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-04",
+    "subject": "fdr_method_reliable",
+    "claim": "12,868 reliable 的 FDR 方法：label-shuffle null（permute HP/somatic 標籤重算 reliable count → 經驗 FDR = null_reliable/observed）；或 per-locus PERMANOVA p → BH-FDR across 332,705 → q<0.05 計數。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-05",
+    "subject": "fdr_method_chr17",
+    "claim": "chr17 cis 的 FDR 方法：Bonferroni + BH-FDR across 816；genome-wide permutation：shuffle 後整條 pipeline 產幾個「乾淨 cis」→ null 期望 vs observed=1。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-06",
+    "subject": "nreads_correction",
+    "claim": "FDR 校準必含 n_reads/coverage 校正（O11 教訓：epipolymorphism AUC 0.845→0.530 after n_reads correction；不校正會假陽性）。",
+    "source_doc": "completeness",
+    "cited_source": "memory project_O11_heterogeneity_negative",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "12-07",
+    "subject": "fdr_corroboration_methods",
+    "claim": "可佐證 FDR 的其他方法：統計（Storey q-value / local-FDR；empirical-Bayes limma-style on methylation difference）；外部佐證（chr17/TBC1D16 已知癌症甲基基因，文獻 orthogonal 但 bulk 非 ASM）；生物複製 > 統計（COLO829 重現 chr17 = 最強佐證）；bulk WGBS/array ASM cross-platform 一致性。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "12-08",
+    "subject": "fdr_honest_outcome",
+    "claim": "誠實後果：若 chr17 不過 FDR → 例外降為「suggestive，靠生物動機(TBC1D16)+COLO829 複製撐」非統計唯一；若 12,868 不過 null → 規則改述「reliable 分群率不顯著高於噪音，更強化甲基非 somatic 判別器」（反而強化 de-confound）。任一結果 de-confound floor 都不垮。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-09",
+    "subject": "5mc_scope_decision",
+    "claim": "決策（用戶 2026-06-10）：論文主結論以 5mC 為準（well-established、dup-bug 不影響純 5mC）；5hmC 只說「亦可輸入觀察、但未詳細驗證」（不納主結論）。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-10",
+    "subject": "5mc_purity_verify",
+    "claim": "要確認：catalog/de-confound 結論在純 5mC 上重跑確認（剝離 5hmC）→ 確保「甲基跟 germline」是 5mC 結論。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-11",
+    "subject": "5hmc_observational",
+    "claim": "5hmC：Methods 一句「ISM 亦接受 5hmC 輸入；5hmC 生物意義不同（常 active gene-body），本研究未詳細驗證，列為 future observation」。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-12",
+    "subject": "5mc_dup_bug_dependency",
+    "claim": "依賴：MSA Level1 5mC/5hmC dup-bug 修（否則 5mC 純度受污染，重演 BRCA2 −0.054 artifact）。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-13",
+    "subject": "tbc1d16_mechanism",
+    "claim": "TBC1D16 = Rab GTPase-activating protein；hypomethylation 重活化 cryptic 轉錄本 TBC1D16-47KD → 經 RAB5C → EGFR 驅動黑色素瘤生長/轉移（Vizoso/Esteller et al., Nature Medicine 2015）。",
+    "source_doc": "completeness",
+    "cited_source": "Vizoso M et al. Nat Med 2015, nm.3863 / PMC4968631",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "12-14",
+    "subject": "tbc1d16_metastasis",
+    "claim": "「Hypomethylation of TBC1D16 Drives Melanoma Metastasis」（Cancer Discovery 2015）。",
+    "source_doc": "completeness",
+    "cited_source": "Cancer Discovery 2015",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "12-15",
+    "subject": "tbc1d16_prognosis",
+    "claim": "TBC1D16 hypomethylation 關聯較短 PFS/OS，但賦予 BRAF/MEK 抑制劑敏感性。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "12-16",
+    "subject": "tbc1d16_multicancer",
+    "claim": "多癌種：EBF3 + TBC1D16 甲基變化關聯 tumour progression/metastasis（Clinical Epigenetics 2019, PMID 31383000）。",
+    "source_doc": "completeness",
+    "cited_source": "Clinical Epigenetics 2019, PMID 31383000 / PMC6683458",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "12-17",
+    "subject": "tbc1d16_biological_motivation",
+    "claim": "例外有生物動機：chr17/TBC1D16 不是隨機位點，是有名的癌症甲基化驅動基因；方向 hypo，與我們 BRCA2「hypo≠canonical hyper」口徑一致（cancer methylation 不全是 hyper-silencing）。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-18",
+    "subject": "tbc1d16_caveat",
+    "claim": "兩個 caveat（必寫）：(a) 發表是黑色素瘤 + bulk hypomethylation，我們是乳腺 HCC1395 + allele-specific cis-ASM → 跨癌種 + bulk-vs-ASM 不可直接等同；(b) 須說「我們的 read-level allele-specific cis 觀察與已知 TBC1D16 甲基-驅動生物學一致」而非「證實」。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "12-19",
+    "subject": "colo829_validation",
+    "claim": "COLO829 = 理想驗證樣本：COLO829 是黑色素瘤（TBC1D16 主場）→ deferred 的 COLO829 工作現在有強生物動機：在 TBC1D16 的原生癌種驗 chr17 cis-ASM = §1 的最強生物佐證。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "⭐"
+  },
+  {
+    "id": "12-20",
+    "subject": "actionability_deconfound_table",
+    "claim": "De-confounding 參考表：別人做 read-level ASM 時，可查某位點是 reliable-but-germline (TAG-C) 還 untestable (TAG-F)，避免把 germline/copy 當 cis（直接服務文獻 Martin-Trujillo confound 警告）。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-21",
+    "subject": "actionability_caution_list",
+    "claim": "負面 hotspot 清單：TAG-D（high-Δβ FP-prone）+ TAG-F（untestable）= 「別在這些位點宣稱 cis-ASM」的 caution list。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-22",
+    "subject": "actionability_sanity_check",
+    "claim": "方法 sanity-check：別的工具可拿 TAG-A（chr17）+ TAG-C 當已知 positive/germline 校準點。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-23",
+    "subject": "catalog_supplementary",
+    "claim": "釋出形式：catalog_skeleton.tsv（332,705×32 欄）當 supplementary table + 可查詢（建議附 schema 說明）。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-24",
+    "subject": "figure_main_count",
+    "claim": "GB 主圖鎖 5 張（F1-F5）：rule+exception / catalog / filter-dead / dosage-falsify / chr17。其餘 supplementary。GB ~4-6 主圖。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-25",
+    "subject": "figure_status",
+    "claim": "Figure 狀態：F1 rule+exception 整合圖（主，待製）；F2 catalog P5 per-TAG 計數（主，已有）；F3 filter 死四道對照（主，待製）；F4 copy-dosage falsification + within_d vs HP_d（主，已有）；F5 chr17/TBC1D16 cis-test 三路 + 生物機制 inset（主，待製）；F6 NG=2 phasing forest（補，contingent #21）；F7 ISM vs 工具 能力對照（補，#23）；P1/P2/P3/P6 分佈圖（補，supplementary）。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-26",
+    "subject": "epipoly_o11_negative",
+    "claim": "我們有自家證據：O11 epipolymorphism heterogeneity 假說已 NEGATIVE（AUC 0.845→0.530 after n_reads correction）。",
+    "source_doc": "completeness",
+    "cited_source": "memory/project_O11_heterogeneity_negative",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "12-27",
+    "subject": "epipoly_distinction",
+    "claim": "epipolymorphism/methylation-entropy（Landan2012 等）測 read-level 甲基異質性/熵 → 我們證實其判別力是 n_reads-confounded artifact（O11）。",
+    "source_doc": "completeness",
+    "cited_source": "Landan2012; memory O11",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "12-28",
+    "subject": "ism_distinction",
+    "claim": "ISM 不同：不靠熵/異質性判別，而是 reliability-gated 分群（CramersV Cochran + PERMANOVA，控稀疏表）+ normal-anchored cis-test（控 germline/copy）——正是 epipolymorphism 漏掉的 confound 控制。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "12-29",
+    "subject": "ism_contribution_framing",
+    "claim": "ISM 的貢獻是「把 read-level 甲基異質性從 confounded 描述，升級為 de-confounded characterization」。這條把 O11 的 NEGATIVE 變成方法論賣點。",
+    "source_doc": "completeness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  }
+]

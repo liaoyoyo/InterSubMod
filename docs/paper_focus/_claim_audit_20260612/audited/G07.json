@@ -1,0 +1,364 @@
+{
+  "group_id": "G07",
+  "subject": "copy-dosage 非 driver / BRCA2 角色 (BRCA2 退役為 copy/subclone-confounded vs 早期 cis-anchor 候選; high-Δβ→FP regression-to-extreme)",
+  "n_claims": 35,
+  "auditor_note": "Primary truth files located: fast_cnv_validation.json (MW p=0.6183 / signed rho=-0.0829 EXACT), copy_partition_confirm.json (BRCA2 d_within=-0.023 / d_copy=-0.11 / brca2_perm.p=0.022 EXACT), survivor_permutation.json (BRCA2 obs=-0.0233 p=0.024 n=19/19 EXACT), condition_fp_consensus.json (OR 8.631/4.085/5.837/0.87 + combo TP 0.0086/FP 0.0797 EXACT), discovery_venn.json (dbeta_only TP 1633/FP 137/ratio 11.9/enrich 0.13 EXACT), catalog_tag_counts.json (TAG-B=5 / TAG-A=1 / n_loci=332705), catalog_skeleton.tsv (5 TAG-B loci = chr5/chr13-BRCA2/chr14/chr20x2 EXACT). External: Martin-Trujillo CN 82-92% confirmed in knowledge/11_external_literature/07+08. KEY PROVENANCE BUGS: (1) condition_fp_consensus.json EXISTS but at genome_survey_v2/cn_confound/cross_sample/ NOT cited genome_survey_v2/cross_sample/ -- claims 07-24/07-25 wrongly say file missing, claims 11-22/11-23 cite wrong path. (2) strong-ASM OR=0.194 is labelled 'per synthesis' in obs20_forest_stats.json (primary has TP_strong_rate=0.00337/FP_strong_rate=0.03331); the 0.194 itself is synthesis-derived. (3) '61% from single chr8 hotspot' (08-31) not grep-confirmed in primary -> S.",
+  "claims": [
+    {
+      "id": "02-25",
+      "subject": "copy_dosage_refuted",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/fast_cnv_validation.json (decisive_MW_neutral_vs_gain_sig.MW_p=0.6183; analysis2_falsifier.signed_dose_rho_absdelta_vs_CN.rho=-0.0829)",
+      "note": "MW p=0.6183 EXACT, rho=-0.083 (file -0.0829) EXACT, verdict='INDISTINGUISHABLE -> dosage NOT driver'/'REFUTED'. cited_source none but values fully match primary. Corroborated by ledger #86."
+    },
+    {
+      "id": "02-26",
+      "subject": "high_delta_beta_fp",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/cross_sample/condition_fp_consensus.json (no_clustering OR=8.631; LOH OR=4.085; small_subhap OR=5.837; low_coverage OR=0.87; combo tp_rate=0.0086 fp_rate=0.0797)",
+      "note": "All OR values EXACT (8.6/4.1/5.8/0.87) and combo 0.86%/7.97% (~9x) EXACT. 'regression-to-extreme' is interpretation but data underpinning is D. P-caveat: single-sample HCC1395 + file at cn_confound/cross_sample/ (NOT the path some claims cite)."
+    },
+    {
+      "id": "02-30",
+      "subject": "brca2_role",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json (chr13:32315128 d_within=-0.023 d_copy=-0.11); catalog_skeleton.tsv TAG=B",
+      "note": "BRCA2='copy/subclone-confounded, do not write precise %, do not use as cis anchor' -- direct interpretation of d_within<<d_copy. Corroborated by ledger #95 CORRECTION_LANDED."
+    },
+    {
+      "id": "02-39",
+      "subject": "framing_traps",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "no single primary; synthesis-of-synthesis (5-trap list spans cross-question framing). BRCA2 cis->copy element traces to copy_partition_confirm.json + ledger #95; 0/38 to G10; 6/6 to G10; umtag held-out to VERIFIED_RESULTS.md V6/V11",
+      "note": "Meta-synthesis aggregating >=5 result-lines into a 'framing traps' rubric. Each component individually verifiable elsewhere; the list itself is S, cited_source none. Sound as a discipline checklist."
+    },
+    {
+      "id": "04-39",
+      "subject": "martin_trujillo_alignment",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "knowledge/11_external_literature/07_asm_cis_cancer_impact.md:26 (Martin-Trujillo CN-DOSAGE 82-92% does not corroborate BRCA2 reclassification = category error; dosage REFUTED via MW p=0.6183/rho=-0.083) + fast_cnv_validation.json",
+      "note": "External-corroboration reasoning EXACT match to KB lit-07. 'category error: confound is subclone not CN-dosage' = correct given dosage falsified. Tier blue (external). Strong."
+    },
+    {
+      "id": "04-40",
+      "subject": "brca2_role",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "knowledge/11_external_literature/07_asm_cis_cancer_impact.md (Do2020 caliber-diff not contradiction; BRCA2 hypo != canonical hyper) + 08_cross_question_correlation.md (HP1-1=subclone tag)",
+      "note": "Do2020 caliber-diff + BRCA2 hypo != canonical-hyper caveat fully in KB lit-07/08. 'HP1-1=subclone tag not copy' confirmed by ledger #95 (HaplotagStrategy.cpp:505-516 audit). P-caveat: hypo!=hyper is an honest flag, not a TSG-silencing claim."
+    },
+    {
+      "id": "05-13",
+      "subject": "copy_dosage",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/fast_cnv_validation.json (MW p=0.6183 / rho=-0.0829 supports 'CN dosage is not driver of clustering magnitude')",
+      "note": "Abstract sentence = direct interpretation of dosage-REFUTED primary. tier none but underlying data green."
+    },
+    {
+      "id": "05-14",
+      "subject": "copy_dosage",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/fast_cnv_validation.json (MW_p=0.6183)",
+      "note": "MW p=0.6183 EXACT, tier green self-declared and verified."
+    },
+    {
+      "id": "05-23",
+      "subject": "copy_dosage",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/fast_cnv_validation.json (MW_p=0.6183; signed rho=-0.0829)",
+      "note": "Both numbers EXACT (claim writes rho=-0.0829 full precision). green verified."
+    },
+    {
+      "id": "05-25",
+      "subject": "brca2_role",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json (chr13:32315128 d_within=-0.023, d_copy=-0.11)",
+      "note": "d_within=-0.023 EXACT, d_copy=-0.11 EXACT. 'BRCA2=copy-confounded (d_within << d_copy)' green verified directly."
+    },
+    {
+      "id": "06-11",
+      "subject": "brca2_role",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "catalog_tag_counts.json (TAG-A clean-cis=1) + catalog_skeleton.tsv (chr17:79991120=TAG-A; chr13:32315128=TAG-B); copy_partition_confirm.json",
+      "note": "'only clean cis = chr17/TBC1D16, BRCA2=copy/subclone-confounded' -- TAG-A count=1 (chr17), BRCA2 in TAG-B EXACT. cited_source 'foundation 4 + integ chapter 5' (synthesis pointer) but values trace to primary."
+    },
+    {
+      "id": "06-28",
+      "subject": "asm_exists",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/fast_cnv_validation.json:decisive_MW_neutral_vs_gain_sig + analysis2_falsifier (MW p=0.6183, rho=-0.0829)",
+      "note": "Cites 'ledger:85 + fast_cnv_validation.json:52,57'. Both numbers EXACT. NOTE: dosage-REFUTED landed in ledger idx86 (cycle 20260607_fast_cnv_validation_results) not #85; minor ledger-index slip but .json source correct and matches. green."
+    },
+    {
+      "id": "06-43",
+      "subject": "brca2_role",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "catalog_skeleton.tsv (chr13:32315128 HP-axis within_d=-0.023); copy_partition_confirm.json d_HP=-0.122; ledger idx52/53",
+      "note": "BRCA2 Delta-beta=-0.122 HP-axis EXACT (copy_partition_confirm d_HP=-0.122). 'BRCA2 retired as copy-confounded, chr17 replaces as cis anchor' consistent. tier 3-star. P-caveat: single-sample HCC1395; magnitude caliber went through dup-emission correction (ledger #53), now stable at -0.122 via max-collapse."
+    },
+    {
+      "id": "07-09",
+      "subject": "copy_dosage_refuted",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/fast_cnv_validation.json (MW p=0.6183, rho=-0.0829)",
+      "note": "cited_source path EXACT and correct. green verified."
+    },
+    {
+      "id": "07-24",
+      "subject": "regression_to_extreme_or",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/cross_sample/condition_fp_consensus.json (OR 8.631/4.085/5.837; combo TP 0.0086/FP 0.0797)",
+      "note": "CONTRADICTS its own claim: claim says condition_fp_consensus.json 'does not exist on disk'. IT DOES EXIST -- at genome_survey_v2/cn_confound/cross_sample/ (claim looked at wrong path). All OR values 8.63/4.09/5.84 + combo EXACT. The 'missing file' status is STALE/WRONG. CONFLICT vs 11-22/11-23 (mark same file green match). flag: file-location provenance error.",
+      "conflict": "11-22, 11-23"
+    },
+    {
+      "id": "07-25",
+      "subject": "strong_asm_or",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "obs20_forest_stats.json (TP_strong_rate=0.00337 / FP_strong_rate=0.03331; note 'OR=0.194 per synthesis'). condition_fp_consensus.json EXISTS at cn_confound/cross_sample/",
+      "note": "Claim says strong-ASM OR=0.194 file-missing (condition_fp_consensus.json). File EXISTS (wrong path cited). BUT OR=0.194 itself is NOT in condition_fp_consensus.json -- labelled 'per synthesis' in obs20_forest_stats.json; primary rates there 0.00337 vs 0.03331 (~9.9x rate ratio). So 0.194 is synthesis-derived; primary supports anti-discriminative direction strongly. P-caveat: OR value synthesis-derived.",
+      "conflict": "11-24"
+    },
+    {
+      "id": "07-26",
+      "subject": "brca2_d_within",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "copy_partition_confirm.json (chr13:32315128 d_within=-0.023, d_copy=-0.11; brca2_perm.p=0.022, alt_n=19/ref_n=19) + survivor_permutation.json (chr13 obs=-0.0233 p=0.024)",
+      "note": "d_within=-0.023 / d_copy=-0.11 EXACT. perm p=0.024 (survivor) AND p=0.022 (brca2_perm in copy_partition) -- claim cites survivor_permutation.json perm p=0.024, 19/19 EXACT. cited paths EXACT. 'do not write ~80%' guard sound. green strongest-evidenced claim in group."
+    },
+    {
+      "id": "08-19",
+      "subject": "brca2_role",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "copy_partition_confirm.json (d_within=-0.023) + ledger #95 (HP1-1=longphase-S somatic subclone tag not copy, HaplotagStrategy.cpp:505-516)",
+      "note": "'focal cis d_within=-0.023 marginal; % not robust' EXACT. 'HP1-1=somatic subclone tag not copy/CN-dosage' verified via ledger #95 source-code audit. tier yellow appropriate (single-sample). Strong interpretation."
+    },
+    {
+      "id": "08-23",
+      "subject": "brca2_dosage_refuted",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "fast_cnv_validation.json (MW p=0.6183 / rho=-0.083) -- dosage REFUTED",
+      "note": "Cites 'ledger #86/#87'. dosage-REFUTED (MW p=0.62/rho=-0.083) landed in ledger idx86 (cycle 20260607_fast_cnv_validation_results) + idx87 (alignment_channel). MW p=0.62 & rho=-0.083 EXACT. Ledger #86/#87 references VALID (verified idx86/87 contain exactly these). green underlying."
+    },
+    {
+      "id": "08-30",
+      "subject": "d5_combo_tp_fp",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "condition_fp_consensus.json:A_combo_highDb_noClust_LOH (tp_rate=0.0086, fp_rate=0.0797)",
+      "note": "combo TP 0.86% vs FP 7.97% (~9x) EXACT. cited_source none + claim says 'source pending reconcile' (STALE -- source IS found at cn_confound/cross_sample/condition_fp_consensus.json). tier yellow should upgrade to green. P-caveat: single-sample."
+    },
+    {
+      "id": "08-31",
+      "subject": "d5_anti_discriminative",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "obs20_forest_stats.json (FP-enriched direction confirmed: TP 0.00337 vs FP 0.03331; OR=0.194 'per synthesis'). '61% from single chr8 hotspot' NOT grep-confirmed in checked primary",
+      "note": "strong-ASM 5x anti-discriminative direction is data-backed (obs20). BUT OR=0.194 is synthesis-derived AND '61% from single chr8 hotspot' sub-claim NOT found in primary truth files (defer no-full-repo-archaeology). 'regression-to-extreme mechanism (LOH->low coverage->extreme baseline)' is S-interpretation. tier yellow. Mark S because the precise 61% attribution is uncorroborated here."
+    },
+    {
+      "id": "08-44",
+      "subject": "ism1_brca2_subclone_confound",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "copy_partition_confirm.json (d_HP=-0.122, d_copy=-0.110, d_within=-0.023, brca2_perm.p=0.022) + catalog_skeleton.tsv (chr13 cramersV=0.5767, chr17/TBC1D16=TAG-A)",
+      "note": "HP-axis -0.122 ~= copy-partition -0.110 + within -0.023 ALL EXACT. perm p=0.022 (brca2_perm) EXACT (note: survivor_permutation gives 0.024 -- two perm runs, both on disk; claim uses 0.022). 'CramersV captures surface clustering not clean cis' consistent (chr13 CramersV=0.5767 reliable but cis-status=copy). chr17/TBC1D16 complement EXACT. Strong, well-evidenced. cited_source none but fully traceable."
+    },
+    {
+      "id": "08-45",
+      "subject": "ism1_brca2_number_tier",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "no primary for 'BRCA2 Delta-beta ~0.007' (figure NOT found; differs from verified Delta-beta=-0.122 HP-axis / d_within=-0.023). This is a tier-flagging meta-claim flagging itself as yellow",
+      "note": "Self-aware honesty claim ('BRCA2 Delta-beta~0.007 / high-Delta-beta FP is yellow, source pending reconcile'). The '~0.007' figure is itself ambiguous/uncorroborated (different from -0.122 HP-axis or -0.023 d_within -- likely a per-CpG mean-shift caliber). Correctly tier yellow. S because it is a provenance-status note, not a verified datum."
+    },
+    {
+      "id": "09-12",
+      "subject": "copy_dosage_not_driver",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "fast_cnv_validation.json:52,57 (MW p=0.6183; rho=-0.0829; cnLOH_sig_median=0.0821 ~= neutral 0.0811 -- copy-neutral clustering ~= neutral)",
+      "note": "cited path EXACT (lines 52,57 = MW_p / signed_dose_rho). cnLOH ~= neutral mechanism EXACT in analysis2.cnLOH_consistency. 'copy-neutral clustering ~= neutral, changing copy structure does not change magnitude' = direct interpretation. green."
+    },
+    {
+      "id": "09-13",
+      "subject": "copy_dosage_not_driver_external",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "knowledge/11_external_literature/07_asm_cis_cancer_impact.md + 08_cross_question_correlation.md (Martin-Trujillo CN 82-92%)",
+      "note": "Martin-Trujillo 2017 'CN explains 82-92%' confirmed in KB lit-07/08. tier green. CAVEAT/CONFLICT: framed here as 'external corroboration = Martin-Trujillo' -- but claim 09-24 (same doc) correctly clarifies this is the CONFOUND we control (HP-axis held-constant), NOT a corroboration of BRCA2=copy. As stated 09-13 risks the same category-error 09-24 warns against. Internal tension within validation_map.",
+      "conflict": "09-24"
+    },
+    {
+      "id": "09-23",
+      "subject": "brca2_role",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "copy_partition_confirm.json (d_copy=-0.11 vs d_within=-0.023) + fast_cnv_validation.json (copy-DOSAGE falsified) + ledger #95 (HP1-1 tag def)",
+      "note": "'subclone/copy-partition d_copy vs d_within (+ copy-DOSAGE falsified); focal cis d_within=-0.023 marginal' ALL EXACT. 'HP-axis in amplified region conflates subclone/copy with allele' = sound mechanism. tier yellow (single-sample, cannot separate cis vs subclone -- CAMDAC same limit). Strong."
+    },
+    {
+      "id": "09-24",
+      "subject": "brca2_external_category_error",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "knowledge/11_external_literature/07_asm_cis_cancer_impact.md:26 (Martin-Trujillo CN-DOSAGE -> does not corroborate BRCA2 reclassification = category error; correct comparator = subclone-specific methylation + CAMDAC pubmed 25066126/24356097)",
+      "note": "Category-error logic EXACT match to KB lit-07:26. dosage REFUTED back-stops it. 'correct comparator = subclone-specific methylation + CAMDAC' verified in KB. tier yellow. This is the corrective claim -- CONFLICT: 09-13 (same validation_map doc) frames Martin-Trujillo as plain 'external corroboration' which 09-24 says is category error. Mild internal inconsistency in framing within validation_map.",
+      "conflict": "09-13"
+    },
+    {
+      "id": "11-07",
+      "subject": "cis_exemplar",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "catalog_tag_counts.json (TAG-A clean-cis=1) + catalog_skeleton.tsv (chr17:79991120=TAG-A clean cis; chr13=TAG-B copy)",
+      "note": "'only cis exemplar=chr17, BRCA2=copy' EXACT (TAG-A=1=chr17; BRCA2 in TAG-B). 'consistent with capstone' -- consistent with ledger #86/#93. green."
+    },
+    {
+      "id": "11-21",
+      "subject": "brca2_d_within",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/copy_partition_confirm.json (chr13:32315128 d_within=-0.023, d_copy=-0.11)",
+      "note": "cited path EXACT and correct. d_within=-0.023, d_copy=-0.11 EXACT. green match confirmed."
+    },
+    {
+      "id": "11-22",
+      "subject": "or_condition_fp",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/cross_sample/condition_fp_consensus.json (OR no_clustering=8.631, LOH=4.085; combo tp=0.0086/fp=0.0797)",
+      "note": "Values 8.631/4.085/0.0086/0.0797 ALL EXACT. CAVEAT: cited path 'research/.../cross_sample/condition_fp_consensus.json' is WRONG/abbreviated -- actual file at genome_survey_v2/cn_confound/cross_sample/. Values match so green on data, but path provenance imprecise. CONFLICT vs 07-24 which calls this file 'does not exist on disk'. 11-22 correct that data exists; 07-24 'missing' status is stale/wrong.",
+      "conflict": "07-24"
+    },
+    {
+      "id": "11-23",
+      "subject": "or_third_condition",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "condition_fp_consensus.json:A_condition_fp[2] (small somatic subhap <10 reads, fp_vs_tp_OR=5.837)",
+      "note": "OR=5.837 (~5.84) EXACT, condition 'small somatic subhap <10 reads' EXACT. Same path imprecision as 11-22 (actual at cn_confound/cross_sample/). green on data.",
+      "conflict": "07-25"
+    },
+    {
+      "id": "11-24",
+      "subject": "strong_asm_or",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "obs20_forest_stats.json (TP_strong_rate=0.00337/FP_strong_rate=0.03331; note 'per synthesis OR=0.194'); 0.194 also in regimeA_residual_controls.json (or_ari=0.19), credible_loci_annotation.tsv",
+      "note": "OR=0.194 found in obs20_forest_stats.json BUT explicitly labelled 'per synthesis'. cited_source = 'memory project_zar1l_brca2_asm_verification + method_audit(0.19 rounding)' -- the OR itself is synthesis/memory-derived, primary forest stats give rates 0.00337 vs 0.03331. P-caveat: exact OR=0.194 is derived/synthesis number not directly emitted by a primary computation file; direction (anti-discriminative) is primary-confirmed."
+    },
+    {
+      "id": "15-04",
+      "subject": "brca2_role",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "catalog_skeleton.tsv (chr13:32315128 TAG=B 'copy/subclone-confounded')",
+      "note": "BRCA2=TAG-B (copy/subclone-confounded) EXACT in catalog. green."
+    },
+    {
+      "id": "15-11",
+      "subject": "tag_b_count",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "catalog_tag_counts.json (overall.B=5; n_loci=332705 -> 5/332705=0.0015%) + catalog_skeleton.tsv (5 TAG-B = chr5:6201328/chr13:32315128-ZAR1L-BRCA2/chr14:58041434/chr20:7482356/chr20:7482362)",
+      "note": "TAG-B count=5 EXACT, 5/332705=0.0015% EXACT. Representative loci EXACT: BRCA2/ZAR1L + chr5 + chr14 + chr20x2 (chr20:7482356 & chr20:7482362). d_within=-0.023 << d_copy=-0.11 EXACT. Fully primary-verified. green strongest count claim."
+    },
+    {
+      "id": "15-37",
+      "subject": "venn_dbeta_only",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/discovery_venn.json (cells.dbeta_only.TP=1633, FP=137, TP_FP_ratio=11.9, enrich_vs_base=0.13; interpretation names 'D5 regression-to-extreme')",
+      "note": "cited path EXACT. TP=1633, FP=137, ratio=11.9, enrich_vs_base=0.13 ALL EXACT. 'vs base 0.13' refers to enrich_vs_base. Interpretation string in file literally names 'D5 regression-to-extreme'. tier self-declared red (claim flags it as most-FP-enriched warning) but data green. Excellent provenance."
+    }
+  ]
+}

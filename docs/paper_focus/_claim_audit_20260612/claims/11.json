@@ -1,0 +1,298 @@
+[
+  {
+    "id": "11-01",
+    "subject": "task_completion_count",
+    "claim": "9 個任務裡 6 個可執行的全部完成並獨立驗證（T-CODE-1/2/3 · T-OBS-1/2 · T-PROV · T-VAL-1 部分），2 個 off-path 已評估給規格（T-VAL-2/3）。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "workflow wf_5644ed77-082",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-02",
+    "subject": "catalog_count",
+    "claim": "最大交付 = catalog 骨架（332,705 loci × 7 TAG）證實「甲基分群真實但壓倒性非 somatic 判別器」。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "catalog/catalog_skeleton.tsv + catalog_tag_counts.json",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-03",
+    "subject": "same_hap_overstated",
+    "claim": "T-PROV 抓到 1 個對外數字 overstated（same-hap 93% 6/6 → 實際 3/6）必修。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "CURRENT_FOCUS:137 vs Thread D 實測",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "11-04",
+    "subject": "doc02_stale_missing",
+    "claim": "發現 doc 02「缺檔」標記是 stale（檔其實都在）。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "genome_survey_v2/cn_confound/cross_sample/",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-05",
+    "subject": "catalog_framing",
+    "claim": "catalog 把零散觀察變成可發表的 R6 分類表。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-06",
+    "subject": "provenance_grep",
+    "claim": "全部 metric 數字現在都 grep 得到（T-PROV 升 🟢）。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "11-07",
+    "subject": "cis_exemplar",
+    "claim": "唯一 cis exemplar = chr17，BRCA2=copy，與 capstone 一致——論文口徑不變且強化。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-08",
+    "subject": "catalog_tag_distribution",
+    "claim": "T-CODE-1 catalog 骨架完成，catalog_skeleton.tsv(332,705×32欄) + catalog_tag_counts.json，TAG 分佈：A=1(chr17) B=5 C=12,868 D=5 E=28,254 F=54 G=291,518。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "catalog/catalog_skeleton.tsv + catalog_tag_counts.json",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-09",
+    "subject": "cramersv_audit",
+    "claim": "T-CODE-2 CramersV audit 完成，gate 偏嚴；latent 救回 enrich≈base 47:1 = characterization-only；建議三態（不改碼）。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "catalog_audit.json + 結果 R6 §2",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-10",
+    "subject": "dbeta_venn",
+    "claim": "T-CODE-3 Δβ Venn 完成，dbeta_only TP:FP=11.9(最FP-enriched) vs ISM_only 147.6 → Δβ 必 clustering-gated。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "discovery_venn.{tsv,json}",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-11",
+    "subject": "distribution_figures",
+    "claim": "T-OBS-1 6 分佈圖完成，04_figures/P1-P6 + catalog_overview.png；CJK 正確；P5=R6 主圖。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "04_figures/P1-P6 + catalog_overview.png",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-12",
+    "subject": "chr17_two_sample",
+    "claim": "T-OBS-2 例 + chr17 二樣本完成（誠實負）：chr17 SNV=HCC1395 private（不在 HCC1937/1954）→ cis 無法二樣本直接重現。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "catalog examples + 結果 R6 §5",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-13",
+    "subject": "cis_protocol_partial",
+    "claim": "T-VAL-1 cis 協議部分完成：chr17=cis / BRCA2=copy / 53 untestable + chr18 mechanical；完整協議需 anchor SEQC2 CN。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "catalog cis_status 欄",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "11-14",
+    "subject": "prov_reconcile",
+    "claim": "T-PROV provenance 對賬完成：全 🟡 定位到源檔；1 個 overstated 必修；doc 02「缺檔」是 stale。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "下方對賬表",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-15",
+    "subject": "hd4_resolved",
+    "claim": "T-VAL-2 HD-4 closeout 評估（off-path）：HD-4 已 RESOLVED（ledger 92, r=0.656）；n_clusters re-run 是精修，需 ISM re-run ~2.4hr。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "ledger 92",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-16",
+    "subject": "colo829_star4",
+    "claim": "T-VAL-3 COLO829 ⭐4 + umtag 評估（off-path）：COLO829 existence scan 已有；⭐4 需 COLO829 normal BAM cis；umtag 需 MethPhaser 對標。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-17",
+    "subject": "doc02_missing_files_in_place",
+    "claim": "重大發現：doc 02 標「磁碟不存在」的檔其實都在 genome_survey_v2/cn_confound/cross_sample/。doc 02 的缺檔標記 stale，應更新。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "genome_survey_v2/cn_confound/cross_sample/",
+    "stated_tier": "🔑"
+  },
+  {
+    "id": "11-18",
+    "subject": "hcc1954_transfer",
+    "claim": "HCC1954 transfer −0.377（實值 −0.37744）🟢 match。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "research/methyl_augmented_filter_phase2/cycle3/cycle3_step1_findings.md:102",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "11-19",
+    "subject": "germline_het_null_ari",
+    "claim": "germline-het null ARI 0.177：het-NULL 0.177463 / TP 0.135091 🟢 match。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "research/.../genome_survey_v2/b2_broad_scan_results.json",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "11-20",
+    "subject": "chr17_perm_p",
+    "claim": "chr17 perm p=0.001：obs 0.1418, p=0.001, genuine 🟢 match。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "research/.../genome_survey_v2/survivor_permutation.json",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "11-21",
+    "subject": "brca2_d_within",
+    "claim": "BRCA2 d_within −0.023（d_copy −0.11）🟢 match。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "research/.../genome_survey_v2/copy_partition_confirm.json",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "11-22",
+    "subject": "or_condition_fp",
+    "claim": "OR 8.63/4.09 + combo 0.86%/7.97%：8.631 / 4.085 / TP 0.0086 vs FP 0.0797 🟢 match。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "research/.../cross_sample/condition_fp_consensus.json",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "11-23",
+    "subject": "or_third_condition",
+    "claim": "OR ~5.84（第3條件，small somatic subhap <10 reads）：5.837 🟢 match(~5.84)。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "research/.../cross_sample/condition_fp_consensus.json",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "11-24",
+    "subject": "strong_asm_or",
+    "claim": "strong-ASM OR=0.194 🟢 match。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "memory project_zar1l_brca2_asm_verification + method_audit(0.19 rounding)",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "11-25",
+    "subject": "excess_over_null_6of6",
+    "claim": "6/6 excess +0.101–0.241：rate_excess_over_null = 0.101/0.150/0.151/0.241/0.171/0.196 mean 0.168 🟢 6/6>0 match。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "research/.../cross_sample/*_gwasm.json rate_excess_over_null",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "11-26",
+    "subject": "umtag_null",
+    "claim": "umtag 0.8852 / null 0.5236：0.8852 / 0.5236 🟢 match。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/extrapolation_genome_aggregate.json",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "11-27",
+    "subject": "v10_normal_tumor",
+    "claim": "V10 normal 0.979 / tumor 0.866：0.979 / 0.866 🟢 match。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "docs/.../20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md:148",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "11-28",
+    "subject": "same_hap_overstated",
+    "claim": "same-hap ≥93% 6/6 OVERSTATED — 實際 0.840/0.939/0.759/0.429/0.932/0.920，只 3/6 ≥93%，非 6/6。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "CURRENT_FOCUS:137（散文）vs Thread D 實測",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "11-29",
+    "subject": "same_hap_correct_caliber",
+    "claim": "正確口徑：NG=2 Inner same-hap 中位 ~92%，6/6 樣本方向一致（皆 high same-hap）但僅 3/6 ≥93%（0.840/0.939/0.759/0.429/0.932/0.920）。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "Thread D 實測",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-30",
+    "subject": "same_hap_narrative_impact",
+    "claim": "影響：phasing 脊柱敘述——「6/6 一致」對（方向），但「6/6 ≥93%」錯（量級）。投稿前改 CURRENT_FOCUS:137 + 任何引此句的文件。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "CURRENT_FOCUS:137",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-31",
+    "subject": "hd4_attribution",
+    "claim": "HD-4 已 RESOLVED：hd4_attribution.json 已有 baseline Spearman r=0.6561(n=36854) + ngroups_definition（LabelTest.cpp:265-305 = HP-tag count 非甲基）+ verdict PHASING_DRIVEN（ledger 92）。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "research/loh_subclone_af_paired/data/hd4_attribution.json + LabelTest.cpp:265-305 + ledger 92",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-32",
+    "subject": "hd4_off_path",
+    "claim": "HD-4 ISM re-run ~2.4hr（背景 Bash，非 workflow），off 關鍵路徑——三證已一致，此為補刀。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-33",
+    "subject": "colo829_star4_requirement",
+    "claim": "COLO829 ⭐4：existence scan 已有（COLO829_tp/fp/fn）；升 ⭐4 需 COLO829 normal BAM 跑 normal-anchored cis（解 ASM 單樣本天花板 + 給 chr17 第二癌種 cis 重現）。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-34",
+    "subject": "umtag_yardstick",
+    "claim": "umtag：需算 switch-error/N50 vs MethPhaser/HapBridge（業界 yardstick）+ 真-unphase 救援實測（非 held-out）+ V10 非-copy 在 COLO829 重現。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-35",
+    "subject": "umtag_heldout_caveat",
+    "claim": "caveat：held-out 0.8852 ≠ 真救援；單樣本→COLO829 是關鍵。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-36",
+    "subject": "next_step_same_hap_fix",
+    "claim": "必修：same-hap 口徑（3/6 非 6/6）→ 改 CURRENT_FOCUS + phasing 敘述（投稿前）。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "11-37",
+    "subject": "cpp_change_optional",
+    "claim": "C++ 改動（需 /cpp-change）：clustering_reliability 三態 + ISM 加 dbeta_max 欄——非必要，catalog 已用既有欄達成 characterization。",
+    "source_doc": "catalog_provenance",
+    "cited_source": "none",
+    "stated_tier": "none"
+  }
+]

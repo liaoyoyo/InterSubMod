@@ -1,0 +1,81 @@
+{
+  "group_id": "G05",
+  "subject": "phasing / NG=2 Inner same-HP1 > Outer 7/7 (same-hap 口徑 6/6 vs 3/6 + by-construction circularity)",
+  "reviewer_role": "adversarial red-team (falsification, not concurrence)",
+  "headline_challenge": "The audit (audited/G05.json) treats the '3/6 OVERSTATED correction' as a confirmed fix and the 'OLD 6/6 ≥93%' as the error. INDEPENDENT RECOMPUTE FROM THE RAW TSV (obs18_NG2_composition_by_sample.tsv) REVERSES THIS: the OLD 6/6 set is a same-hap OCCUPANCY fraction (matches TSV to 3-4 decimals) and the 'corrected' 3/6 set is the same_HP1 TP-RATE (a different quantity). The 'correction' is a metric-confusion error, not a provenance fix. ~14 of 29 claims in this group inherit this inverted premise.",
+  "key_recompute_evidence": {
+    "raw_source": "research/tpfp_loh_af_kde_discrimination/data/obs18_NG2_composition_by_sample.tsv (the original Apr22 obs18 source named in ledger:27 artifacts)",
+    "OLD_6of6_set_is_occupancy": "same-hap occupancy = (n_sameHP1 + n_sameHP2)/(total NG=2 Inner reads): HCC1395 0.9320 / DORADO 0.9897 / HCC1937 0.9885 / HCC1954 0.9651 / H2009 0.9829 / H1437 0.9704 == ledger:27 OLD set 0.932/0.990/0.988/0.965/0.983/0.970 to 3-4 decimals. CONFIRMS the OLD 6/6 ≥93% number against raw data.",
+    "corrected_3of6_set_is_TPrate": "same_HP1 Inner TP-rate from TSV: DORADO 0.9385 / HCC1937 0.7586 / HCC1954 0.4289 / H2009 0.9318 / H1437 0.9196 == 'corrected' set 0.939/0.759/0.429/0.932/0.920 for 5/6 samples. The 0.429 'low' value is literally HCC1954's same_HP1 TP-rate, which ledger:27 ALREADY explicitly flagged as a SEPARATE quantity ('HCC1954 Inner TP 0.43 outlier ... phasing pattern still same-hap correct, but TP rate affected').",
+    "HCC1395_anomaly": "Corrected set has HCC1395=0.840 which matches neither TSV same_HP1 TP (0.959) nor occupancy (0.932); unexplained, likely a different build/run -> the 'corrected' set is not even internally consistent with the cited raw source.",
+    "semantic_proof": "ledger:27 hypothesis literally says '≥93% same-hap' and labels its numbers 'same-hap%' = phasing-purity fraction, NOT TP-rate. The two number sets answer different questions: (A) what % of NG=2 reads are single-haplotype (occupancy/phasing purity, OLD, 6/6≥93% TRUE) vs (B) what % of same-HP1 reads are true positives (TP-rate, 'corrected', 3/6≥93%)."
+  },
+  "verdicts": [
+    {
+      "claim": "07-22 / 11-28 / 11-03 / 11-30 / 11-36 / 14-33 (the OVERSTATED-correction cluster): 'same-hap ≥93% 6/6' is OVERSTATED, actual 0.840/0.939/0.759/0.429/0.932/0.920 = only 3/6 ≥93%, must fix.",
+      "verdict": "REFUTED",
+      "reason": "The 'correction' compares an occupancy metric (OLD, 6/6≥93%, matches raw TSV) against a TP-rate metric (the 0.84.../0.429 set = same_HP1 TP-rate, incl HCC1954's already-known 0.43 TP outlier). It is a metric-confusion error mislabeled as a provenance fix; the original 6/6 ≥93% same-hap figure is CORROBORATED by the raw TSV, not refuted."
+    },
+    {
+      "claim": "11-29 / 05-35: CORRECT口徑 = NG=2 Inner same-hap median ~92%, 6/6 direction-consistent but only 3/6 ≥93% (0.840/.../0.920).",
+      "verdict": "REFUTED",
+      "reason": "Same metric confusion: the '~92% median, 3/6 ≥93%' restatement substitutes TP-rate values for same-hap occupancy. The true same-hap occupancy median is ~98% (6/6 ≥93%). This 'corrected caliber' would understate the actual phasing-purity result by mislabeling TP-rate as same-hap."
+    },
+    {
+      "claim": "02-09 (composite headline): NG=2 Inner same-HP1 > Outer 7/7 (W=28 p=0.0078 gap0.345); Inner×NG=2 ≥93% same-hap 6/6; AF→NGroups 7/7 (HD-4=phasing); main product Grade B+ ⭐3 L2.",
+      "verdict": "CHALLENGED",
+      "reason": "The '6/6 ≥93% same-hap' sub-clause is actually DEFENSIBLE (occupancy, raw-TSV-confirmed) — the audit's CONFLICT_internal flag is mis-aimed. But the claim still needs a caveat: it must state the metric is same-hap OCCUPANCY (phasing purity), explicitly distinct from the same_HP1 TP-rate, or the two will keep being conflated downstream."
+    },
+    {
+      "claim": "06-45: NG=2 Inner 93-99% same-hap AND same-hap 口徑修正 3/6 ≥93% (非 6/6) -> R2 spine pins HD-1.",
+      "verdict": "CHALLENGED",
+      "reason": "Internally inconsistent (audit right that it is WEAK), but for a deeper reason: the '93-99% same-hap' (occupancy, correct) and the '3/6 修正' (TP-rate mislabeled) are different metrics jammed together. Resolution is NOT to drop the 93-99% — that figure is the valid one; drop the spurious 3/6 'correction'."
+    },
+    {
+      "claim": "07-30: 'same-hap ≥93% 6/6' is OLD framing, 06-02 draft did not restate it, need to relocate original 6-sample same-hap source.",
+      "verdict": "CHALLENGED",
+      "reason": "The diagnosis 'OLD framing, source待定位' is half-right (source IS ledger:27 obs18 TSV, now located + recomputed). But the implication that 6/6≥93% is wrong/abandonable is incorrect: it is the verified occupancy result. Re-label, do not retract."
+    },
+    {
+      "claim": "02-18 / 04-30 / 05-32 / 06-25 / 07-11: core stat NG=2 Inner same-HP1 > Outer 7/7, W=28, p=0.0078125, median gap 0.345, CI[0.104,0.459], mechanism LabelTest.cpp:265-302.",
+      "verdict": "CHALLENGED",
+      "reason": "Numbers match ledger:58 to the digit (verified). NOT refuted on data. Standing challenges: (1) by-construction circularity — NG=2 same-hap label and the HP-tag are derived from the SAME phasing, so 'Inner same-hap > Outer cross-het' is partly definitional (R-SELFREF full negative control NOT run; the claims self-flag this, good); (2) p=0.0078125 is the EXACT minimum for n=7 one-sided signed-rank — it only certifies 7/7 same-direction, it cannot distinguish a +0.05 gap (H2009) from a +0.52 gap (HCC1937); magnitude spans ~11x; (3) single-pipeline ClairS-TO caps at ⭐3. Survivable as characterization with all three caveats explicit."
+    },
+    {
+      "claim": "02-19: §R1 caveat enumeration (Grade B+ not A; p tests direction not effect, magnitude 11x; n=7 biologically n=6 HCC1395 twice; single-pipeline ⭐3; R-SELFREF circularity stated).",
+      "verdict": "SURVIVES",
+      "reason": "This is the honest caveat claim and it is the strongest item in the group — it pre-empts exactly the attacks (pseudo-replication via HCC1395_DORADO double-count, direction-only p, circularity, single-pipeline). Each caveat is grep-supported in ledger:58. Keep verbatim."
+    },
+    {
+      "claim": "02-20 / 05-33: paired negative control gap median ≈ -0.0002 (05-33: 'paired 負控 NS'), p=0.578 NS -> signal TO-specific, clean.",
+      "verdict": "CHALLENGED",
+      "reason": "Conclusion (NS, TO-specific) matches ledger:22. BUT 02-20 states median '≈-0.0002' while primary ledger:22 says +0.00003 (sign flip; both ~0). More importantly the control is WEAK by construction: paired TP-rate is saturated at 0.94-1.00 (ledger:22) so there is no headroom for any gap to appear — absence of a gap in a ceilinged metric is near-tautological, not a strong demonstration of TO-specificity."
+    },
+    {
+      "claim": "02-12 / 03-09 / 10-06: T1/spine LOH-constrained phasing reconstructs subclonal structure = POSITIVE Grade B+ ⭐3, needs HD-1 caveat; paper spine.",
+      "verdict": "CHALLENGED",
+      "reason": "Spine framing rests on a real cross-sample direction result (ledger:58) BUT 'reconstructs subclonal structure' over-reaches the evidence: what is shown is that Inner-LOH NG=2 reads are same-haplotype (a phasing-purity / occupancy characterization), not that distinct subclones were reconstructed and validated. Frame as characterization, not reconstruction, until HD-1 (R-SELFREF) resolves the circularity."
+    },
+    {
+      "claim": "09-17 / 10-15 / 04-07: mechanism — under LOH tumor retains single haplotype -> somatic SNV forms same-HP1 subfamily; somatic↔haplotype orthogonal co-verification 7/7.",
+      "verdict": "CHALLENGED",
+      "reason": "Mechanism narrative matches ledger:58/27. The word 'orthogonal' over-claims: the somatic call and the haplotype tag both flow from the same ClairS-TO + phasing pipeline, so the 'co-verification' is not independent (this is the by-construction circularity restated as a virtue). Survivable only if relabeled 'consistent-with' rather than 'orthogonal independent verification'."
+    },
+    {
+      "claim": "09-31: methodology — n signed-rank + bootstrap + paired neg control tests direction-consistency + TO-specificity; rule: paired NS => TO-specific.",
+      "verdict": "CHALLENGED",
+      "reason": "Accurate description of the method actually used. The decision rule 'paired NS => TO-specific' is logically weak: paired NS is also fully explained by TP-rate ceiling saturation (ledger:22), which is a confound, not evidence of true TO-specificity. The method is correctly described but the inference it licenses is overstated."
+    },
+    {
+      "claim": "02-09 / 02-18 (HD-4) / 06-26 / 05-34: AF→NGroups = phasing/occupancy not methylation (HD-4 RESOLVED); R-SELFREF #21 待跑; grade pins on HD-1.",
+      "verdict": "SURVIVES",
+      "reason": "HD-4 attribution to phasing (NGroups = HP-tag subfamily COUNT, C++ definitional, ledger:92) is well-supported by four converging lines (definitional + mechanism-chain + capped-count distribution + within-class collapse). The forward-looking gating items (R-SELFREF未跑, HD-1 pending) are honestly stated as open, not claimed as done. No overstatement."
+    },
+    {
+      "claim": "01-10: longphase-S tag cascade source read (HaplotagStrategy.cpp:452 + SomaticHaplotagProcess.cpp:461, threshold 0.6, 6-state); status complete.",
+      "verdict": "CHALLENGED",
+      "reason": "Cited source files are in the external longphase-to-mod repo, NOT in InterSubMod scope and not found at the expected path -> line numbers cannot be independently verified here. Claim of 'read source, status complete' rests on secondary memory only. Mark unverifiable-in-scope; do not cite line numbers as primary."
+    }
+  ],
+  "worst": "The OVERSTATED-correction cluster (07-22 / 11-28 / 11-03 / 11-29 / 11-30 / 11-36 / 14-33 / 05-35 and the embedded sub-clauses of 02-09 / 06-45). This is the single most-cited 'finding' in the group — appearing in 8+ source docs as a 🔴 must-fix provenance correction — and it is INVERTED. Independent recompute from the raw obs18 TSV proves the 'corrected' 3/6 set is the same_HP1 TP-RATE (incl HCC1954's 0.429 TP-rate that the original doc already flagged as a distinct quantity), while the 'overstated' OLD 6/6 ≥93% set is the same-hap OCCUPANCY fraction that MATCHES the raw data to 3-4 decimals. The project is poised to 'fix' a correct number with a mislabeled one before submission. Action: REVERT the correction, label the metric explicitly as same-hap occupancy/phasing-purity (distinct from same_HP1 TP-rate), and fix the well-known CURRENT_FOCUS citation line (:158 not :137) without altering the value."
+}

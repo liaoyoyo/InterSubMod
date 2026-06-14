@@ -1,0 +1,107 @@
+{
+  "group_id": "G12",
+  "subject": "umtag / 甲基-assist phasing (V1-V12; held-out 0.8852 vs null 0.5236; V10 非-copy 0.979≥0.866; unphase 45.84%) — future-work tooling 非 result; T1/T2/T3 verdict; normal 甲基資產",
+  "reviewer_role": "adversarial red-team (falsification)",
+  "audited_against": [
+    "docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md (V1/V6/V10/V11/V11b/V11c)",
+    "extrapolation_genome_aggregate.json (held-out 0.8852/null 0.5236, 183 win/20 chr)",
+    "allele_asm_aggregate.json (V10 normal 0.979 / tumor 0.866; loh tumor 0.782; shuffle null 0.79/0.67)",
+    "germline null_summary.txt (median 0.974; BRCA2 17.5 pct)",
+    "admr_aggregate.json (Fisher p=0.382, OR=1.462)",
+    "imprint_bimodality.json (GNAS Δ=0.487 TUMOR matrix)",
+    "research/autoresearch/evidence_ledger.jsonl:91 (PROTOTYPE_NOT_READY canonical)"
+  ],
+  "verdicts": [
+    {
+      "claim": "01-07 normal 甲基 5/6 樣本 matched-normal 有甲基 → V10 跨樣本可跑（4/6 為 5mC-only）",
+      "verdict": "CHALLENGED",
+      "reason": "'有 MM tag' ≠ 'V10 控可跑'：4/6 normal 只有 5mC，HCC1395 tumor V10 用 5mC+5hmC max-collapse → 口徑不對等；'跨樣本可跑'是資料存在性，非控制可比性，需先證 5mC-only 不偏移 AUC。"
+    },
+    {
+      "claim": "01-08 6 normal 全 zhenyu112 + 4/6 symlink = SPOF",
+      "verdict": "SURVIVES",
+      "reason": "純資料風險事實陳述（owner/symlink 逐檔命中 source doc），無因果/評價過度宣稱。"
+    },
+    {
+      "claim": "01-09 / 03-07 單樣本 ⭐3 上限可破 → 跨 6 樣本 × 3 癌種可達 ⭐4（single-pipeline 自我參照為 tier 風險）",
+      "verdict": "CHALLENGED",
+      "reason": "'可達 ⭐4' 是 forward 推測未驗；且決定性的 V10 非-copy 控 single-sample-locked（COLO829 normal 無 MM tag→不可重現），跨樣本恰缺最關鍵控制，自陳 caveat 後仍偏樂觀。"
+    },
+    {
+      "claim": "01-11 / 08-06 / 11-27 V10 非-copy：normal copy-clean 0.979 ≥ tumor 0.866 6/6 染色體 = 真 haplotype 甲基（非 copy）",
+      "verdict": "CHALLENGED",
+      "reason": "報告自陳 normal ~0.98 全基因組『生物上不合理為真 locus-specific ASM』(caveat#4, shuffle null 0.79≠0.5) → normal AUC 本身被非生物來源膨脹；'normal≥tumor' 只排除 copy-dosage 為驅動，無法排除 normal 與 tumor 共享同一膨脹源 → 『真 cis-methylation』結論強於數據所能支撐。"
+    },
+    {
+      "claim": "01-12 / 08-04 tag 分布 unphase 45.84%(13.8M) / HP1-1+HP2-1 ~4% / HP3 0.25%",
+      "verdict": "SURVIVES",
+      "reason": "純 V1 計數，逐格命中 per_chr tsv；機會空間描述非效能宣稱。"
+    },
+    {
+      "claim": "01-13 / 06-37 / 06-41 / 07-21 / 08-05 / 11-26 V6 held-out 救援 0.8852 vs null 0.5236（甲基帶 haplotype 資訊 / umtag headline）",
+      "verdict": "CHALLENGED",
+      "reason": "外部效度倒置：0.8852 量在『假裝 unphase』(有 germline 證據被遮) 的 read 上，但真實 unphase 母體 94.2% 住 germline-稀疏/LOH 區無本地錨點 → 可嘗試池僅 ~6%；測試母體≈部署母體的反集。當 headline 引用必綁 ~6% 適用窄性，否則過度宣稱。"
+    },
+    {
+      "claim": "01-14 T1 unphase→H1/H2 SUPPORTED+caveats；誠實 headline 0.885；LOH 區未測；⭐3",
+      "verdict": "SURVIVES",
+      "reason": "已正確降 0.926→0.885 headline、明標 LOH/imprinting 基本未測 + abstain chicken-egg + single-pipeline ⭐3；caveat 自陳到位，不過度。"
+    },
+    {
+      "claim": "01-15 / 01-20 T2 H3→H1-1/H2-1 OVERSTATED：只證有真值 1-1/2-1 可分(0.90)；歸 H3 未驗（無真值/15-18% 可指派）",
+      "verdict": "SURVIVES",
+      "reason": "這是自我否證式 caveat（紅線：勿宣稱可歸 H3），rigor_t2 對 H3 無 AUC/null 已 grep 確認；屬誠實降級非過度宣稱。"
+    },
+    {
+      "claim": "01-16 T3 拆 plain H1 亞群：存在性窄翻案(farCpG 0.85 vs 0.50)；可用性 NEGATIVE(lean<0.5)；⭐3",
+      "verdict": "CHALLENGED",
+      "reason": "'窄翻案 POSITIVE' 仍有 2 未解 MAJOR（farCpG 只排 ±100bp 2.5%→分不清亞群全域 program vs cis 足跡；單樣本/4 染色體/chr20 NS）；存在性宣稱本身落在 cohesion≠cis 的灰帶，'翻案'措辭較證據強，須維持已結案 NEGATIVE 門檻未達。"
+    },
+    {
+      "claim": "01-23 / 06-12 / 09-05 跨樣本是 tier 解鎖關鍵但 single-pipeline 自我參照需正交對照（cohesion≠cis；研究機制=LOH 單一 haplotype 是天花板的根）",
+      "verdict": "SURVIVES",
+      "reason": "正確指認 self-reference 結構性循環（被矯正的 HP tag 即 longphase-S 產物）+ single-pipeline 天花板；此為 caveat 而非 claim，防得住。"
+    },
+    {
+      "claim": "02-10 Methylation role：ASM 真但 ~4% sens、非方向、copy-independent、不判別 TP/FP、subclone=germline-allelic 非 somatic、L2 characterization+負結果",
+      "verdict": "CHALLENGED",
+      "reason": "'copy-independent' 一項繼承 01-11 的膨脹 AUC 弱點（見上）；其餘分項命中他群 primary。整體 framing 誠實（角色=characterization+負結果），但 copy-independent 證據級被高估。"
+    },
+    {
+      "claim": "02-17 / 04-41 / 08-03 / 08-10 / 10-09 / 11-34 / 11-35 umtag = future-work / NOT-READY / PROBE；held-out ≠ 真救援；需 yardstick(MethPhaser switch-error/N50) + COLO829 重現",
+      "verdict": "SURVIVES",
+      "reason": "與 ledger 91 canonical (PROTOTYPE_NOT_READY) 完全一致；明標 held-out≠true-unphase rescue(FT-5)、缺 yardstick、缺正交 phase-truth；自我設限到位，是本群最防彈的一組。"
+    },
+    {
+      "claim": "02-37 HD-1 GO/NO-GO：subclonal reconstruction headline (Inner same-HP1) by-construction 部分循環，兩路(R-SELFREF flag-on / 降 characterization)",
+      "verdict": "SURVIVES",
+      "reason": "主動承認 by-construction 循環（Inner 用 somatic-attributed HP1-1 定義）並給 gate，正是紅隊要找的循環論證已被自己標記為 🔴 未決 gate。"
+    },
+    {
+      "claim": "03-06 normal 甲基路徑 /big8_disk/.../HCC1395BL.bam",
+      "verdict": "SURVIVES",
+      "reason": "純路徑事實，逐字命中 source doc。"
+    },
+    {
+      "claim": "08-07 aDMR×LOH 非富集 Fisher p=0.382",
+      "verdict": "SURVIVES",
+      "reason": "命中 admr_aggregate (p=0.38165, OR=1.462)；且為負結果（無富集），方向保守不過度。"
+    },
+    {
+      "claim": "08-08 germline-het null 非判別 0.974",
+      "verdict": "SURVIVES",
+      "reason": "命中 null_summary median=0.974；作為對照（baseline allelic confound）誠實揭露，非當正面結果。"
+    },
+    {
+      "claim": "08-09 外部佐證強：MethPhaser/NanoMethPhase/HapBridge 都做過 methyl-assist phasing（外部已驗方向可行）",
+      "verdict": "CHALLENGED",
+      "reason": "外部工具驗的是 germline-only normal phasing；本研究的 LIVE 白地恰是 cancer/LOH（外部刻意 defer），故『外部已驗方向可行』不直接 transfer 到本研究主張的困難情境（ledger 91 自陳 defer cancer/LOH），借外部背書略誇張。"
+    },
+    {
+      "claim": "11-16 COLO829 ⭐4 + umtag off-path：⭐4 需 COLO829 normal BAM cis；umtag 需 MethPhaser 對標",
+      "verdict": "CHALLENGED",
+      "reason": "audit 自身 WEAK：COLO829 normal 無 MM tag（01-07）→『需 COLO829 normal BAM cis』的前提資料缺；'existence scan 已有' 未對到本群 primary，混 roadmap 與既有事實。"
+    }
+  ],
+  "worst": "01-11/08-06/11-27 V10 '非-copy' 控（normal 0.979 ≥ tumor 0.866）—— 此為本群最 load-bearing 的因果/機制 claim（『真 haplotype 甲基非 copy artifact』），但報告自陳 normal ~0.98 全基因組作為真 locus-specific ASM『生物上不合理』(shuffle null 0.79≠0.5)，代表 normal AUC 被非生物來源膨脹。控制只排除了 copy-dosage 為驅動，無法排除 tumor/normal 共享同一膨脹源 → 『copy-independent 真 cis-methylation』的決定性宣稱強於數據；且此唯一決定性控制 single-sample-locked（COLO829 normal 缺甲基不可重現），跨樣本升 ⭐4 之路恰繞不過它。"
+}

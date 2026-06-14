@@ -1,0 +1,220 @@
+{
+  "group_id": "G02",
+  "subject": "filter-DEAD / 甲基不能 filter somatic TP/FP — 死四道 (LOSO循環 / |Δβ|AUC=0.505 / ~4%sens+COLO829 TP≈FP / clustering=germline-allelic)",
+  "reviewer_role": "adversarial_red_team",
+  "stance": "falsify_not_affirm",
+  "method_note": "Provenance 已由 auditor grep-confirmed 四個核心數字。本紅隊不重複 provenance，專攻：① 隱藏假設 ② 循環論證 ③ confound 未控 ④ 過度宣稱 ⑤ 二次解釋當數據用。primary 已讀: loso_findings.md / funnel.md:15-45 / evidence_ledger.jsonl:60-95。",
+  "cross_cutting_weaknesses": [
+    "W1 single-pipeline 泛化: 死四道全部以 ClairS-TO 為唯一 variant caller 產生 TP/FP label (ledger:85/90/95 三處 caveat '單一caller')。'甲基不能 filter somatic TP/FP' 的 TP/FP 定義完全綁定一個 caller 的對錯。換 caller (DeepSomatic/ClairS-paired/SAVANA) TP/FP 邊界不同 → 死四道未在其上重測。結論該降為「對 ClairS-TO label 不能 filter」而非 universal。",
+    "W2 COLO829 唯一跨樣本但 coverage 最低 (cross-sample memory: 'COLO829 弱因覆蓋最低')。COLO829 TP≈FP (0.0089≈0.0103) 被當作『判別力消失』的跨樣本確認, 但低覆蓋同時壓 TP 與 FP 訊號 → TP≈FP 可能是 power-floor null 而非 biology null。'no signal' 與 'no power' 在唯一跨樣本點上未被分離。這是死四道唯一的跨樣本外推支點, 卻最脆弱。",
+    "W3 第四道定義不一致 (內部矛盾): canonical 死四道第四項 = 'clustering=germline-allelic', 但 integ_chapter(02-24) 偷換成 'Zone-Aware QS NEG + CNV-zone filter'。同一 claim set 對『第四道是什麼』不自洽 → 死四道作為一個 4-tuple 結構並非穩定 SoT。",
+    "W4 single-sample 證據基數: |Δβ| AUC=0.505 (funnel credible n=198, B2 n=45/class) + regression-to-extreme (HCC1395 only, '唯一 FP 夠多') 皆單樣本 HCC1395。死四道有兩道半 (AUC + regression + clustering) 的 effect-size 證據只在一個樣本上量測, 跨樣本只有 COLO829 一個弱點 (見 W2)。",
+    "W5 'characterization 非 filter' 的二分法把 NEGATIVE 包裝成 deliverable: filter-DEAD 用最強對抗驗證 (LOSO+null) 是真的, 但多條 synthesis claim 把『最硬/最可防守/reviewer-proof/論文最可防守的質量』當結論, 這是相對排序與 positioning, 無 primary, 易讀成 over-positive framing 一個 NEGATIVE。"
+  ],
+  "verdicts": [
+    {
+      "claim": "01-04 甲基貢獻絕非 variant TP/FP filter（concluded DEAD）",
+      "verdict": "CHALLENGED",
+      "reason": "結論方向由死四道 + LOSO 支撐穩固, 但 'variant TP/FP filter' 的 TP/FP 全由單一 ClairS-TO caller 定義 (W1) → 應加 caller-scope caveat, 不可寫 universal。"
+    },
+    {
+      "claim": "01-21 紅線4：絕非 variant filter（DEAD）；是 subclonal reconstruction / characterization",
+      "verdict": "CHALLENGED",
+      "reason": "'是 subclonal reconstruction' 是越界正向 claim — 同 funnel B2 已證 somatic-subclone clustering NEGATIVE (TP≈het p=0.922)；甲基既不能 filter 也未被證能驅動 subclonal reconstruction, 此 framing 暗示後者可行需 caveat。"
+    },
+    {
+      "claim": "02-16 T4 methyl→TP/FP filter READY-AS-NEGATIVE（最強）",
+      "verdict": "CHALLENGED",
+      "reason": "底層 NEGATIVE confirmed, 但 '最強' 為 synthesis-of-synthesis 主觀排序 (W5), 無 primary; 且 single-pipeline 泛化未標 (W1)。"
+    },
+    {
+      "claim": "02-21 LOSO 100% circularity（+0.0224→−0.0001）",
+      "verdict": "SURVIVES",
+      "reason": "loso_findings.md:33-34 五樣本 held-out 全塌 (-0.00012~+0.00000), best τ 全退化 keep-all, Wilcoxon p=0.125 DIRECTION_NEGATIVE — 跨樣本對抗驗證自洽, 是死四道中最硬一道。"
+    },
+    {
+      "claim": "02-22 |Δβ| AUC=0.505（null 內）",
+      "verdict": "CHALLENGED",
+      "reason": "AUC=0.505 perm-p=0.496 確在 null 內無疑, 但僅單樣本 HCC1395、credible n=198 (B2 n=45/class)。'無判別力' 在小 n + 單樣本下成立, 跨樣本可重複性未測 (W4)。"
+    },
+    {
+      "claim": "02-23 powered 6-sample ~4% sens、COLO829 TP≈FP",
+      "verdict": "CHALLENGED",
+      "reason": "'powered 6-sample' 措辭誇大: 6 樣本共用同一 ClairS-TO caller (W1), 非 caller-independent power; COLO829 TP≈FP 可能 coverage-floor 假 null (W2)。~4% sens 數字本身 confirmed。"
+    },
+    {
+      "claim": "02-24 死四道之四 = Zone-Aware QS NEG + CNV-zone filter（4月關閉）",
+      "verdict": "REFUTED",
+      "reason": "與 canonical 死四道第四項 (clustering=germline-allelic) 直接衝突 — integ_chapter 偷換第四道 (auditor 亦標 CONFLICT)。Zone-Aware 屬另一條舊 QS-zone characterization 線, grep miss 於四道 primary 檔, 不屬 filter-DEAD 四道。"
+    },
+    {
+      "claim": "02-40 甲基→TP/FP filter = DEAD；勿重開；最強 NEGATIVE",
+      "verdict": "CHALLENGED",
+      "reason": "'勿重開' 在 ledger:65 guardrail 有據, 但 C1/C2/C3 reopen 條件 (新數據/新方法/新前置) 中『新 caller』正是未測維度 (W1) → 'DEAD' 應限定 ClairS-TO label 範圍。"
+    },
+    {
+      "claim": "03-10 §Methods-Neg 最 reviewer-proof，今天防彈",
+      "verdict": "CHALLENGED",
+      "reason": "'reviewer-proof/防彈' 無 primary、純主觀 (W5)。真實 reviewer 會立刻問 single-pipeline 與 COLO829-power 兩點 (W1/W2) → 並非防彈。"
+    },
+    {
+      "claim": "03-17 DEAD 勿再開：甲基→TP/FP filter · T3 subclone 偏向反了",
+      "verdict": "SURVIVES",
+      "reason": "兩個 DEAD 皆有 primary (filter 死四道 + T3 0.65<null0.71 in memory/ledger:91); 引用正確, 屬保守的 do-not-reopen 紀錄。"
+    },
+    {
+      "claim": "04-29 R1 死四道完整列出（全🟢）",
+      "verdict": "CHALLENGED",
+      "reason": "四數字全 grep-confirmed 且為正確 canonical 定義 (對照 02-24 偷換), 但 '全🟢' 過度自信 — 三道半單樣本 + COLO829 弱跨樣本 (W2/W4), 至少 AUC/COLO829/regression 三項應 🟡 single-pipeline caveat。"
+    },
+    {
+      "claim": "05-15 chr17/TBC1D16 + phasing 三訊號 co-validate【🟡】",
+      "verdict": "SURVIVES",
+      "reason": "tier 自標 🟡 honest; ledger:84 已自承 'copy-test 結構偏差/不可宣稱全域最強乾淨', single-sample 需 COLO829 升⭐4 — caveat 已內建, 未過度宣稱。"
+    },
+    {
+      "claim": "05-17 LOSO +0.02236→−0.00012, mean −0.00004, p=0.125 [cite @Kapoor2023]",
+      "verdict": "CHALLENGED",
+      "reason": "三數字 grep-confirmed, 但 cited_source=@Kapoor2023 為 citation 錯位 — Kapoor 是 circularity 概念外部背書 (09-08), 非這些內部數字的來源檔 (loso_findings.md)。引用標籤誤導需修。"
+    },
+    {
+      "claim": "05-18 |Δβ| AUC=0.505 落 null",
+      "verdict": "CHALLENGED",
+      "reason": "同 02-22: 數字 confirmed (perm-p=0.496), 但單樣本 + 小 n, 跨樣本未測 (W4)。"
+    },
+    {
+      "claim": "05-19 ~4% sens + COLO829 TP≈FP（0.0089≈0.0103）",
+      "verdict": "CHALLENGED",
+      "reason": "逐字相符, 但 COLO829 為唯一跨樣本支點且 coverage 最低, TP≈FP 可能 power-floor 假 null 而非 biology null (W2)。"
+    },
+    {
+      "claim": "05-20 regression-to-extreme OR 8.63/4.09/5.84；dbeta_only 11.9 最 FP-enriched",
+      "verdict": "CHALLENGED",
+      "reason": "四個 OR 逐一 grep-confirmed, 但 (a) 全來自單樣本 HCC1395 ('唯一 FP 夠多', ledger:90); (b) auditor 自承這是『第5項 mechanism 補充非 canonical 四道之一』→ 把它列進 §2.2(d) 死四道有 framing slippage (W3)。"
+    },
+    {
+      "claim": "06-08 甲基絕非 variant TP/FP filter（DEAD）",
+      "verdict": "CHALLENGED",
+      "reason": "底層死四道 confirmed, 但 cited_source 為 synthesis 互引 (foundation/整合篇章) 非 primary; universal 措辭未標 single-pipeline (W1)。"
+    },
+    {
+      "claim": "06-21 R1 LOSO +0.02236→−0.00012, mean −0.00004 p=0.125",
+      "verdict": "SURVIVES",
+      "reason": "cited_source 正確指 loso_findings, 三數字 confirmed; LOSO 是死四道最硬一道, 跨樣本對抗驗證自洽。"
+    },
+    {
+      "claim": "06-22 |Δβ| AUC=0.505 落 null",
+      "verdict": "CHALLENGED",
+      "reason": "同 02-22/05-18: 數字硬, 但單樣本小 n 跨樣本未測 (W4)。"
+    },
+    {
+      "claim": "06-23 ~4% sens + COLO829 TP≈FP（0.0089≈0.0103）",
+      "verdict": "CHALLENGED",
+      "reason": "同 05-19: COLO829 coverage-floor 可能假 null (W2)。"
+    },
+    {
+      "claim": "06-24 regression-to-extreme OR 8.63/4.09/5.84",
+      "verdict": "CHALLENGED",
+      "reason": "檔實存 grep-confirmed (master_map 誤標待定位), 但單樣本 HCC1395 + 非 canonical 四道 framing slippage (W3)。"
+    },
+    {
+      "claim": "07-05 死四道之一：LOSO +0.02236→−0.00012",
+      "verdict": "SURVIVES",
+      "reason": "cited_source 精準指 loso_validation/, 數字 confirmed, LOSO 跨樣本硬。"
+    },
+    {
+      "claim": "07-06 死四道之一：mean −0.00004 p=0.125",
+      "verdict": "SURVIVES",
+      "reason": "loso_findings.md:92/97 兩數字 grep-confirmed, 屬 LOSO 同一硬證據。"
+    },
+    {
+      "claim": "07-07 死四道之一：|Δβ| AUC=0.505",
+      "verdict": "CHALLENGED",
+      "reason": "數字 confirmed, 單樣本小 n caveat (W4)。"
+    },
+    {
+      "claim": "07-08 死四道之一：COLO829 TP≈FP",
+      "verdict": "CHALLENGED",
+      "reason": "ledger:85 confirmed, 但 COLO829 coverage-floor 假 null 風險 + 無 cited_source (W2)。"
+    },
+    {
+      "claim": "08-12 ISM read×CpG→距離→分群穩定；somatic-subclone NEGATIVE",
+      "verdict": "SURVIVES",
+      "reason": "ISM 機制是 binary 既有設計 (output-structure.md); somatic-subclone NEGATIVE 由 B2 ruler-validated (TP≈het p=0.922) 支撐, 兩半皆有據, 措辭未越界。"
+    },
+    {
+      "claim": "08-32 整個 filter 方向 LOSO 證 100% sample-level circularity，held-out 會塌",
+      "verdict": "SURVIVES",
+      "reason": "loso_findings.md:11/17/19 五樣本 held-out 全塌 DIRECTION_NEGATIVE, 一階詮釋與數據一致, 是最防守得住的一道。"
+    },
+    {
+      "claim": "08-59 困難-1 裁決 🔴 NO-GO 當 filter（建議不投）",
+      "verdict": "CHALLENGED",
+      "reason": "'NO-GO 當 filter' 由死四道 + Phase2 LOSO 降級支撐, 但 'NO-GO' 應限 ClairS-TO label 範圍 (W1); 'decision-framing 建議不投' 屬主觀策略非數據。"
+    },
+    {
+      "claim": "08-60 死四道：LOSO / AUC=0.505 / ~4% sens / clustering=germline-allelic",
+      "verdict": "CHALLENGED",
+      "reason": "正確 canonical 四道 (對照 02-24), 四項 confirmed, 但 single-pipeline/single-sample 整體 caveat 未標 (W1/W4)。"
+    },
+    {
+      "claim": "09-02 filter 類用對抗性驗證（LOSO/null），所以最硬",
+      "verdict": "CHALLENGED",
+      "reason": "LOSO+null 機制確存在且硬, 但 '最硬' 為相對排序主觀判斷 (W5), 無 primary; LOSO 硬 ≠ AUC/COLO829/regression 三道也硬 (後三單樣本)。"
+    },
+    {
+      "claim": "09-04 LOSO+permutation null = 最對抗、最可防守（filter-DEAD 最硬）",
+      "verdict": "CHALLENGED",
+      "reason": "同 09-02: 機制 confirmed, '最可防守' 主觀; 把整個死四道的可防守性等同於最硬一道 (LOSO) 是以偏概全 (W5)。"
+    },
+    {
+      "claim": "09-07 甲基不能 filter；機制=sample-level circularity",
+      "verdict": "SURVIVES",
+      "reason": "cited loso_findings.md:33/87/92 逐行對得上 + subhap-matched ledger:85; mechanism (in-dist fit noise → held-out 崩) 由五樣本 held-out 實證, 此 claim scope 收斂在 LOSO 機制上未越界。"
+    },
+    {
+      "claim": "09-08 外部佐證 = Kapoor&Narayanan 2023 leakage taxonomy L3.2/L1.3",
+      "verdict": "SURVIVES",
+      "reason": "KB verified (PMID 37720327); L3.2 (train-test 非獨立)/L1.3 (select-then-train) 精確對應 LOSO 循環機制, 是 external-corroboration 而非 over-claim。"
+    },
+    {
+      "claim": "09-09 |Δβ| 無判別力；2000× label-shuffle null；落 null=無訊號",
+      "verdict": "CHALLENGED",
+      "reason": "cited funnel.md:39 精準, 機制成立; 但 'label-shuffle null' 仍在單樣本內 shuffle → 排除的是 within-sample 偶然性, 非跨樣本可重複性 (W4)。"
+    },
+    {
+      "claim": "09-14 high-Δβ→FP=regression-to-extreme；條件 Fisher；LOH→single-hap→低覆蓋→極端 baseline 同一 regime",
+      "verdict": "CHALLENGED",
+      "reason": "檔實存 (claim 自宣稱'缺檔'錯誤, ledger:95 已矯正); 機制 grep-confirmed, 但全程單樣本 HCC1395; '同一 regime' 是 mechanistic 詮釋 (ledger:61 3-dim correlated) 屬二次解釋, 跨樣本未驗 (W4)。"
+    },
+    {
+      "claim": "09-35 最硬的是 NEGATIVE：①②③④⑥⑦⑧ 都🟢；論文最可防守的質量",
+      "verdict": "CHALLENGED",
+      "reason": "synthesis-of-synthesis: ①-⑧ 為 validation_map 內部編號自評, 無法直接對 primary; '全🟢+最可防守' 是聚合主觀排序 (W5), 把單樣本各項與 LOSO 一視同仁。"
+    },
+    {
+      "claim": "09-37 沒有 filter-positive 列；驗證一上就 fail——這是論文結論",
+      "verdict": "SURVIVES",
+      "reason": "所有 filter-positive cycle (B1/B2/LOSO/AUC/iteration) 歷史全 NEGATIVE (ledger:60/63/65/85/89/90), 'no positive row' 是對歷史的忠實描述, 定論性陳述有據。"
+    },
+    {
+      "claim": "10-03 價值在 characterization 不在 filter；今天就能交",
+      "verdict": "CHALLENGED",
+      "reason": "filter-DEAD + characterization-deliverable (ledger:95) 兩端皆 confirmed, 但 'characterization 是真貢獻' 跨 6 樣本仍 single-pipeline ⭐3 (ledger:95 tier); '今天就能交' 是 readiness 判斷非數據。"
+    },
+    {
+      "claim": "13-25 不做 variant filter（已證死四道）—— characterization/de-confound 工具",
+      "verdict": "CHALLENGED",
+      "reason": "limitation framing 誠實方向正確, 但 'de-confound 工具' 是正向 capability claim, 需與 filter-DEAD 同等的跨樣本/跨caller 驗證才能寫進論文 (W1)。"
+    },
+    {
+      "claim": "14-05 甲基不能 filter（變異）",
+      "verdict": "CHALLENGED",
+      "reason": "pre-reg 一句定論方向穩, 但 universal 措辭應限定 ClairS-TO label scope (W1); 作為 pre-reg fallback 至少需標 single-pipeline 邊界。"
+    }
+  ],
+  "survives_count": 9,
+  "challenged_count": 29,
+  "refuted_count": 1,
+  "worst": "02-24 (死四道之四 = Zone-Aware QS NEG + CNV-zone filter) — REFUTED：integ_chapter 把 canonical 第四道『clustering=germline-allelic』偷換成另一條無關的舊 QS-zone characterization 線 (grep miss 於四道 primary 檔)，造成同一 claim set 對『第四道是什麼』自相矛盾。這不只是 caveat 問題而是邏輯不自洽——死四道作為論文 R1 的 4-tuple 骨幹若連成員都不穩定，reviewer 一眼可破。次嚴重者為跨切面 W1 (single-pipeline 當 universal) 與 W2 (COLO829 唯一跨樣本卻 coverage-floor 假 null 風險)，二者使『甲基普遍不能 filter』的外推超出單一 caller + 單一強樣本的實測範圍。"
+}

@@ -1,0 +1,43 @@
+{
+  "domain": "filter_negative",
+  "scope_note": "甲基 filter 死四道 / LOSO / |Δβ|AUC=0.505 / regression-to-extreme OR / COLO829 TP≈FP。跨文件矛盾 = 同一 subject 在不同 source_doc 給出不一致的值/數字/口徑/角色/方向/框架。Primary 真值來源: research/autoresearch/evidence_ledger.jsonl (lines 27/58/85/95) + research/.../cn_confound/cross_sample/condition_fp_consensus.json (磁碟實測存在, 7749 bytes) + loso_findings.md + funnel.md:39。",
+  "n_contradictions": 4,
+  "contradictions": [
+    {
+      "subject": "same-hap 口徑 (NG=2 Inner same-HP1 occupancy %)",
+      "claim_a": "[G05/02-09 integ_chapter] 「Inner×NG=2 ≥93% same-hap 6/6」(主產品敘述內仍帶舊口徑); 同源 [G05/06-45 master_map] 「NG=2 Inner 93-99% same-hap」(同句又寫『修正 3/6 ≥93% 非 6/6』, 自相矛盾並列舊+新)。",
+      "claim_b": "[G05/07-22 doc_library, 11-28 catalog_provenance, 11-29, 14-33 prereg_fallback, 05-35 formal_arch] 「same-hap ≥93% 6/6 OVERSTATED — 實測 0.840/0.939/0.759/0.429/0.932/0.920 → 只 3/6 ≥93%(方向一致對, 量級錯)」。",
+      "conflict": "同一 same-hap 指標存在兩套互斥數字: 舊集 93.2/99.0/98.8/96.5/98.3/97.0 (6/6≥93%) vs 矯正集 0.840/0.939/0.759/0.429/0.932/0.920 (只 3/6≥93%, range 42.9%-93.9%); integ_chapter/master_map 仍部分攜帶舊『6/6 / 93-99%』框架。",
+      "which_correct": "claim_b 正確。Primary: ledger:95 overstated_flag 明文『same-hap 93% 6/6 OVERSTATED; 實際 0.840/0.939/0.759/0.429/0.932/0.920 = 只 3/6>=93%; 方向一致對但量級錯』; 舊集源自 ledger:27 CL-LCP-001(20260423 週報, 已被矯正取代)。矯正集為 project-wide accepted 口徑。",
+      "correction_needed": "改 integ_chapter (02-09) 移除 sub-clause『Inner×NG=2 ≥93% same-hap 6/6』改為『6/6 方向一致, 但僅 3/6 ≥93% (median ~92%)』; 改 master_map (06-45) 刪除並列的舊『93-99% same-hap』只留矯正口徑。方向(6/6 一致)保留, 量級(6/6≥93%)必改 3/6。",
+      "severity": "🔴"
+    },
+    {
+      "subject": "甲基 filter 死四道之第四道 (canonical fourth death)",
+      "claim_a": "[G02/02-24 integ_chapter] 死四道之四 = 『Zone-Aware QS NEG + CNV-zone filter (4 月關閉)』。",
+      "claim_b": "[G02/04-29 imrad_framework, 08-60 direction_cards] 死四道規範定義之四 = 『clustering = germline-allelic』(LOSO / AUC=0.505 / ~4%sens+COLO829 / clustering=germline-allelic)。",
+      "conflict": "同一『死四道』第四項在 integ_chapter 被偷換為 Zone-Aware/CNV-zone, 但 canonical 死四道(subject 行 + 04-29 + 08-60 + 02-21/22/23)一致定第四道為 clustering=germline-allelic; integ_chapter 自身列 02-21/22/23 前三道與 canonical 同, 唯第四道不一致。",
+      "which_correct": "claim_b 正確。Primary: G02 canonical_four_deaths = [LOSO circularity / |Δβ|AUC=0.505 / ~4%sens+COLO829 TP≈FP / clustering=germline-allelic(B2 NEGATIVE funnel.md:20+ledger:60/64)]。Zone-Aware QS 是 MEMORY.md 另一條 concluded-NEGATIVE(characterization-only), grep 不在死四道 primary 數字檔(ledger/funnel/loso_findings/condition_fp_consensus), 非死四道成員。",
+      "correction_needed": "改 integ_chapter (02-24): 第四道由『Zone-Aware QS NEG + CNV-zone filter』改回 canonical『clustering=germline-allelic (B2 NEGATIVE, TP≈het p=0.922)』。Zone-Aware 可另列為 concluded-NEGATIVE 旁證, 但不可佔死四道第四席。",
+      "severity": "🟡"
+    },
+    {
+      "subject": "condition_fp_consensus.json 來源檔存在性 (regression-to-extreme OR 的證據檔)",
+      "claim_a": "[G07/07-24 doc_library] 『regression-to-extreme OR 8.63/4.09/5.84 + combo, condition_fp_consensus.json 磁碟不存在, 需定位正確 emitted 檔名』; [G07/07-25 doc_library] 『strong-ASM OR=0.194, 同樣缺檔(condition_fp_consensus.json)』; [G07/08-30 direction_cards] 『combo TP 0.86% vs FP 7.97%, 源檔待對賬』。",
+      "claim_b": "[G07/11-22 catalog_provenance] 『OR 8.63/4.09 + combo 0.86%/7.97%: 8.631/4.085/TP0.0086 vs FP0.0797 🟢 match』; [G07/11-23] 『OR ~5.84 第3條件: 5.837 🟢 match』; [G07/02-26 integ_chapter] 直接引同檔 OR 數字。",
+      "conflict": "同一檔 condition_fp_consensus.json 在 doc_library 被宣稱『磁碟不存在/缺檔』, 但 catalog_provenance/integ_chapter 宣稱該檔存在且 OR 值逐項 grep-match; 同一組 OR(8.631/4.085/5.837 + combo 0.0086/0.0797)兩說互斥。",
+      "which_correct": "claim_b 正確。磁碟實測 condition_fp_consensus.json 存在(7749 bytes, research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/cross_sample/), OR 值 8.631/4.085/5.837 + combo 0.0086/0.0797 全部 exact 命中。ledger:95 亦明文矯正『condition_fp_consensus 檔其實存在, doc02 缺檔標記 stale』。doc_library 看錯路徑(誤指 .../cross_sample/ 缺 cn_confound/ 中段)。",
+      "correction_needed": "改 doc_library (07-24/07-25): 移除『磁碟不存在/缺檔/待定位』標記, 路徑改正為 genome_survey_v2/cn_confound/cross_sample/condition_fp_consensus.json; tier 由 🟡 升 🟢(OR 已 file-stored 且 match)。08-30『源檔待對賬』同步移除。",
+      "severity": "🟡"
+    },
+    {
+      "subject": "strong-ASM OR=0.194 的 provenance tier (anti-discriminative 量級的證據級)",
+      "claim_a": "[G07/07-25 doc_library, 08-31 direction_cards, 11-24 catalog_provenance] 把 strong-ASM OR=0.194 當作 file-stored primary 數值引用(11-24 標 🟢 match)。",
+      "claim_b": "稽核實證: OR=0.194 在 primary 檔 obs20_forest_stats.json 內被明標『per synthesis』, primary 只直存 rate (TP_strong_rate=0.00337 / FP_strong_rate=0.03331); 0.194 為 synthesis/memory 衍生數, 非 primary 直接 emit。",
+      "conflict": "同一 strong-ASM OR=0.194 被部分文件當 primary 真值(🟢 match), 但其 primary 檔僅存 rate 並標『per synthesis』; OR=0.194 是衍生量而非原生 emit, tier 標記在文件間不一致(🟡 vs 🟢)。方向(anti-discriminative, FP-enriched)兩說一致, 僅該數字的 provenance 級別矛盾。",
+      "which_correct": "claim_b 正確(部分判定)。Primary obs20_forest_stats.json 標 OR=0.194『per synthesis』, 直存 rate 0.00337 vs 0.03331(~9.9× rate ratio); 方向 anti-discriminative 為 primary-backed, 但 0.194 標 🟢-primary 過強, 應標 P-caveat/S(synthesis-derived)。",
+      "correction_needed": "改 catalog_provenance (11-24) 把 OR=0.194 由 🟢 primary-match 降為『synthesis-derived (primary 只有 rate 0.00337/0.03331, OR per synthesis)』; doc_library (07-25) 兼修上條檔存在性。方向結論不變。",
+      "severity": "🟡"
+    }
+  ]
+}

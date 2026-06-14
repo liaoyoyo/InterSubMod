@@ -1,0 +1,434 @@
+[
+  {
+    "id": "06-01",
+    "subject": "title_framing",
+    "claim": "存在兩條尚未收斂的 carrying-claim 框架：進取版「Subclonal reconstruction using somatic haplotagging and methylation profiles with Nanopore sequencing」 vs 保守版「Read-level characterization of ASM…: methylation tracks germline rather than somatic haplotypes, with a rare somatic co-validation exception」。",
+    "source_doc": "master_map",
+    "cited_source": "00_PAPER_MASTER (06-11) + foundation + 整合篇章 + CURRENT_FOCUS (進取版) ; 02_paper_framework/論文架構_正式學術版_v2 (06-09, 保守版)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-02",
+    "subject": "title_framing",
+    "claim": "進取版 headline 主張：somatic haplotagging（genetic 引擎）重建 LOH-constrained 子克隆結構（Grade B+ ⭐3）；甲基 = characterization。",
+    "source_doc": "master_map",
+    "cited_source": "foundation + 整合篇章 + CURRENT_FOCUS",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-03",
+    "subject": "catalog_count",
+    "claim": "保守版 headline 主張：de-confound floor — read-level 甲基分群跟 germline 非 somatic（332,705 位點僅 1 乾淨 somatic cis）；甲基不能 filter。",
+    "source_doc": "master_map",
+    "cited_source": "02_paper_framework/論文架構_正式學術版_v2 (06-09)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-04",
+    "subject": "framework_decision",
+    "claim": "進取版需要 HD-1（R-SELFREF 解 by-construction 循環，否則脊柱不能當 positive headline）；保守版不需 HD-1（floor 全 🟢、今天可寫；phasing 降為 §2.6 支撐 observation）。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-05",
+    "subject": "framework_decision",
+    "claim": "進取版風險：「reconstruction」可能 overclaim — 整合篇章 §5 指出這是 LOH-同-haplotype 子家族分割，非完整 clonal phylogeny/CCF tree。",
+    "source_doc": "master_map",
+    "cited_source": "整合篇章 §5",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-06",
+    "subject": "framework_decision",
+    "claim": "兩版共享 ~80% 證據；差別只在「phasing 脊柱當 headline 還是支撐」；正式學術版 v2 標題完全不提 reconstruction，故兩版尚未在標題層收斂。",
+    "source_doc": "master_map",
+    "cited_source": "整合篇章 §7 + 正式學術版 checklist",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-07",
+    "subject": "honesty_ceiling",
+    "claim": "甲基 = germline-haplotype 層級（分不同 haplotype 強、within-haplotype 弱）。",
+    "source_doc": "master_map",
+    "cited_source": "foundation §4 + 整合篇章 §5",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-08",
+    "subject": "filter_dead",
+    "claim": "甲基絕非 variant TP/FP filter（DEAD，死四道）。",
+    "source_doc": "master_map",
+    "cited_source": "foundation §4 + 整合篇章 §5",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-09",
+    "subject": "subclone_usability",
+    "claim": "T3 subclone 可用性 NEGATIVE（亞群甲基「可分」≠「可救 ambiguous read」）；勿無條件説「甲基能拆亞群」。",
+    "source_doc": "master_map",
+    "cited_source": "foundation §4 + 整合篇章 §5",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-10",
+    "subject": "subclone_usability",
+    "claim": "T2 勿宣稱「可歸 H3」（只證 1-1/2-1 可分；H3 無真值）。",
+    "source_doc": "master_map",
+    "cited_source": "foundation §4 + 整合篇章 §5",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-11",
+    "subject": "brca2_role",
+    "claim": "BRCA2 = copy/subclone-confounded，非乾淨 cis 錨（唯一乾淨 cis = chr17/TBC1D16）；勿寫精確 %。",
+    "source_doc": "master_map",
+    "cited_source": "foundation §4 + 整合篇章 §5",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-12",
+    "subject": "cohesion_vs_cis",
+    "claim": "cohesion ≠ cis；single-pipeline（longphase-S / ClairS-TO）⭐3 上限，需正交對照才解。",
+    "source_doc": "master_map",
+    "cited_source": "foundation §4 + 整合篇章 §5",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-13",
+    "subject": "intro_framing",
+    "claim": "Long-read 單分子同讀 somatic+haplotype+5mC/5hmC；read-level 把三訊號縫成「正交共驗證同一事件」+ 誠實界定甲基能/不能 —— 沒人做過（三訊號各有 read-level 證據：phasing 7/7、ASM exists、filter dead）。",
+    "source_doc": "master_map",
+    "cited_source": "foundation §1 / 整合篇章 §1 / 逐節重點 §1",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "06-14",
+    "subject": "intro_gap",
+    "claim": "缺口：(i) read-level somatic-controlled de-confound 未做；(ii) 甲基-as-filter 未公開證偽；(iii) somatic-controlled ASM 樣貌未界定。",
+    "source_doc": "master_map",
+    "cited_source": "L3 [@MartinTrujillo2017]",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "06-15",
+    "subject": "method_positioning",
+    "claim": "業界甲基 haplotype 分析主流 = 軸A「per-CpG 塌平、比 HP1-vs-HP2」（germline 軸）；ISM 站軸C「read-read 距離 + PERMANOVA 結構 + normal-anchored cis」= 本質不同（4 軸地景 + 8 共同難點；82 工具）。",
+    "source_doc": "master_map",
+    "cited_source": "docs/method_comparison/20260609_ism_vs_external_methylation_tools/02,03,12",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "06-16",
+    "subject": "background_gap",
+    "claim": "大背景→缺口：ASM 癌症增/hypo（Do2020/O'Neill2024）· CN-confound（Martin-Trujillo2017）· epipolymorphism（Landan2012/Derrien2021）；read-level subclonal 結構 + 甲基 filter 證偽 = 缺口（~38 篇外部文獻）。",
+    "source_doc": "master_map",
+    "cited_source": "knowledge/11_external_literature/00-10",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "06-17",
+    "subject": "ism_pipeline",
+    "claim": "ISM read-level pipeline：read×CpG 甲基矩陣 → read-read 距離（6 度量）→ 階層分群（CramersV reliability gate, Cochran≥5）→ HP/LOH tag → normal-anchored cis-test。",
+    "source_doc": "master_map",
+    "cited_source": "02_paper_framework/ISM_工具方法細節與應用意義.md",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-18",
+    "subject": "validation_mechanisms",
+    "claim": "驗證機制清單 9 項：LOSO／permutation null／subhap-matched／blind-ARI+imprinting 正控／signed-rank+paired 負控／copy-test／germline-het null／normal-anchored cis。",
+    "source_doc": "master_map",
+    "cited_source": "01_focus_notes/04_知識_驗證機制_研究機制_對應表.md",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-19",
+    "subject": "external_audit",
+    "claim": "外部稽核：modkit 驗 ISM 甲基提取 r=0.98、Fisher per-CpG 不偏樂觀。",
+    "source_doc": "master_map",
+    "cited_source": "docs/method_comparison/.../08",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-20",
+    "subject": "fdr_calibration",
+    "claim": "FDR 校準（必補）：reliable 計數(12,868) + chr17(perm p=0.001 跨 816) 須 null/FDR 校準 + n_reads/coverage 校正（O11 教訓 epipoly AUC 0.845→0.530）。",
+    "source_doc": "master_map",
+    "cited_source": "正式學術版 §4.5 (#24)",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "06-21",
+    "subject": "filter_loso",
+    "claim": "R1 邊界：甲基不能 filter somatic TP/FP（死四道）— (a) LOSO +0.02236→−0.00012, mean −0.00004 p=0.125。",
+    "source_doc": "master_map",
+    "cited_source": "02文件庫 11條 + loso_findings / funnel.md:39 / ledger",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-22",
+    "subject": "filter_loso",
+    "claim": "R1 邊界證據 (b)：|Δβ| AUC=0.505 落 null。",
+    "source_doc": "master_map",
+    "cited_source": "02文件庫 11條 + loso_findings / funnel.md:39 / ledger",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-23",
+    "subject": "filter_loso",
+    "claim": "R1 邊界證據 (c)：~4% sens + COLO829 TP≈FP（0.0089≈0.0103）。",
+    "source_doc": "master_map",
+    "cited_source": "02文件庫 11條 + loso_findings / funnel.md:39 / ledger",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-24",
+    "subject": "filter_loso",
+    "claim": "R1 邊界證據 (d)：regression-to-extreme OR 8.63/4.09/5.84。",
+    "source_doc": "master_map",
+    "cited_source": "OR 待定位 emitted 檔",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "06-25",
+    "subject": "phasing_same_hap",
+    "claim": "R2 脊柱：LOH-constrained 子克隆重建：NG=2 Inner same-HP1 > Outer，7/7 W=28 p=0.0078125，median gap 0.345。",
+    "source_doc": "master_map",
+    "cited_source": "master_draft:81 (by-construction caveat)",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-26",
+    "subject": "phasing_same_hap",
+    "claim": "R2 脊柱 grade 押 HD-1 決策（§A）— grade 取決於是否跑 R-SELFREF。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "06-27",
+    "subject": "asm_exists",
+    "claim": "R3 ASM 存在且 somatic-enriched（非 filter）：TP 3.95% > FP 1.07%（subhap-matched 3.77 vs 1.09 ~3.5×）。",
+    "source_doc": "master_map",
+    "cited_source": "ledger:85 + fast_cnv_validation.json:52,57",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-28",
+    "subject": "asm_exists",
+    "claim": "R3：copy-dosage REFUTED（MW p=0.6183, ρ=−0.0829）。",
+    "source_doc": "master_map",
+    "cited_source": "ledger:85 + fast_cnv_validation.json:52,57",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-29",
+    "subject": "chr17_cis",
+    "claim": "R3：chr17/TBC1D16 唯一乾淨 cis（within 0.142 ≫ d_copy 0.029, perm p=0.001）。",
+    "source_doc": "master_map",
+    "cited_source": "chr17 survivor_permutation.json",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "06-30",
+    "subject": "af_ngroups",
+    "claim": "R4 AF→NGroups = phasing 非甲基（HD-4）：r=0.656，控甲基不動（collider）。",
+    "source_doc": "master_map",
+    "cited_source": "hd4_attribution.json + ledger:92",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-31",
+    "subject": "cross_sample",
+    "claim": "R5 跨樣本現象層復現：6/6 excess-over-null +0.101–0.241（mean 0.168，3 癌種）。",
+    "source_doc": "master_map",
+    "cited_source": "6/6 在 *_gwasm.json",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "06-32",
+    "subject": "cross_sample",
+    "claim": "R5：同-locus 0/38（private，UNDERPOWERED E[overlap]=0.16）。",
+    "source_doc": "master_map",
+    "cited_source": "0/38 來源",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-33",
+    "subject": "catalog_count",
+    "claim": "R6 catalog de-confound floor：6 樣本 332,705 位點 → 7 TAG；reliable 12,868（3.87%）但全 germline-allelic；latent 28,254；無訊號 291,518（87.6%）；乾淨 somatic cis 全基因組僅 1（chr17）。",
+    "source_doc": "master_map",
+    "cited_source": "catalog wf_5644ed77-082 6/6 驗 + grep（A=1/C=12868/total=332705）",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-34",
+    "subject": "discussion_deconfound",
+    "claim": "規則意義（de-confound 貢獻）：甲基 allelic 分群主要 germline → 對「ASM 普遍 hypo 主導」文獻提供 somatic-controlled 視角。",
+    "source_doc": "master_map",
+    "cited_source": "L3 [@Do2020]",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "06-35",
+    "subject": "chr17_cis",
+    "claim": "例外意義：chr17/TBC1D16 罕見 somatic co-opt（已知癌症甲基驅動基因 hypo→EGFR 黑色素瘤轉移）；措辭「與已知生物學一致」非「證實」。",
+    "source_doc": "master_map",
+    "cited_source": "L3 [@Vizoso2015]",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "06-36",
+    "subject": "discussion_mechanism",
+    "claim": "防雷貢獻：甲基不能 filter 的機制（circularity/regression-to-extreme/germline-allelic）；與 epipolymorphism 區隔（O11 證 AUC 0.845→0.530 n_reads 校正後）。",
+    "source_doc": "master_map",
+    "cited_source": "L3 [@Kapoor2023][@Landan2012]",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-37",
+    "subject": "phasing_tooling",
+    "claim": "tooling 展望（future）：甲基輔助 phasing（umtag）held-out 0.8852 / V10 非-copy 0.979 ≥ 0.866。",
+    "source_doc": "master_map",
+    "cited_source": "20260531_methyl_phasing_A0_assets/ (umtag)",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "06-38",
+    "subject": "limitations",
+    "claim": "Limitations：single-pipeline ⭐3 / 單樣本 HCC1395 / chr17 單 locus 不可複製 / phasing by-construction（HD-1）/ 6 cis untestable / matched normal 僅 5-6。",
+    "source_doc": "master_map",
+    "cited_source": "整合篇章 §5",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "06-39",
+    "subject": "conclusion_framing",
+    "claim": "結論：在 LOH 約束下，somatic/haplotype/甲基三訊號 read-level 正交共驗證 haplotype 重塑；甲基能佐證、不能篩選（機制解明）；交付 read-level characterization + 位點甲基分群 catalog + phasing tooling。",
+    "source_doc": "master_map",
+    "cited_source": "framing（與 Intro 1c 首尾呼應）",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "06-40",
+    "subject": "future_work",
+    "claim": "future：COLO829 升 ⭐4 / umtag yardstick / cis 大規模協議。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "06-41",
+    "subject": "phasing_tooling",
+    "claim": "V1-V12 甲基-phasing-assist：held-out 0.885 / V10 normal 非-copy 0.979 ≥ 0.866 / unphase 45.84%；normal 甲基 5/6 樣本 ready（06-12 實測）。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "⭐3"
+  },
+  {
+    "id": "06-42",
+    "subject": "subclone_usability",
+    "claim": "V11c subclone 甲基存在性（亞群 ALT vs 母本 REF 可分）⭐3 候選；G-B 正確 null 未跑 → 押 G-B 決定 R3/R6 強度。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "⭐3"
+  },
+  {
+    "id": "06-43",
+    "subject": "brca2_role",
+    "claim": "ZAR1L/BRCA2 ASM：BRCA2 Δβ=−0.122 HP-axis；BRCA2 退役為 copy-confounded 例（非 cis 錨），chr17 取代當 cis 錨。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "⭐3"
+  },
+  {
+    "id": "06-44",
+    "subject": "four_negative",
+    "claim": "四道 NEGATIVE（filter-DEAD / LOSO 循環 / B-discrimination / strong-ASM FP-enriched）🟢 ⭐2 L4；全位點 30,350 工作站 + 5 層獨立驗證 85-86% → R1 + Methods-Neg 最硬底座。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-45",
+    "subject": "phasing_same_hap",
+    "claim": "LOH-constrained phasing：NG=2 Inner 93-99% same-hap；same-hap 口徑修正 3/6 ≥93%（非 6/6）→ R2 脊柱押 HD-1。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "⭐3"
+  },
+  {
+    "id": "06-46",
+    "subject": "cross_sample",
+    "claim": "跨 6 樣本 ASM：0/38 同位點 / 6/6 excess；clusterability vs cov/CN（LOH 抑制分群 6/6 OR 0.01–0.107）。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "⭐3"
+  },
+  {
+    "id": "06-47",
+    "subject": "method_positioning",
+    "claim": "ISM vs 外部工具比較：6 軸分類 / modkit r=0.98 / 82 工具 / 4 軸地景 / Fisher 不偏樂觀。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-48",
+    "subject": "catalog_count",
+    "claim": "位點甲基分群 catalog R6（332,705 × 7 TAG）：1/332,705 乾淨 somatic cis（de-confound floor）→ R6 交付物（保守版 headline）。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "06-49",
+    "subject": "gap_hd1",
+    "claim": "Gap HD-1：phasing by-construction 循環 — 跑 R-SELFREF（~25-50hr C++）or 降 characterization；影響 R2 grade + §A 框架；狀態 ⏸ 暫緩（DEC-6 phasing 維持 Grade B+）。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "06-50",
+    "subject": "gap_open",
+    "claim": "Gap G-A：V10/V11c 跨 6 樣本重現（normal 甲基 5/6 ready）→ tier ⭐3→⭐4 解鎖；優先 P0；資產備齊，未跑。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-51",
+    "subject": "gap_open",
+    "claim": "Gap G-B：within-haplotype somatic-vs-baseline 正確 null（非 germline-het）→ 影響甲基-subclone 貢獻強度（R3/R6）；優先 P0；未跑（reopen T3 前置）。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "06-52",
+    "subject": "gap_open",
+    "claim": "Gap G-D：somatic haplotag + 甲基 → 實際輸出亞克隆結構 demo；唯一 paper-level blocker for 進取版；未做。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-53",
+    "subject": "gap_open",
+    "claim": "Gap G-E：非 longphase-S 第二定相/calling 破自我參照 → tier 風險（single-pipeline）；優先 P2；未做。",
+    "source_doc": "master_map",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "06-54",
+    "subject": "figures_status",
+    "claim": "已生成圖：P1-P6（dbeta_distribution / cramersv_reliability / ari_controls / within_vs_hp_scatter / per_tag_counts_R6 / coverage_vs_reliability）；fig1_ism_5stage.svg / fig2_single_locus_pipeline / fig4 / fig5_axisC_vs_axisA / fig6_significance_schematic；catalog_overview / clusterability_vs_cov_cn。",
+    "source_doc": "master_map",
+    "cited_source": "04_figures/README.md manifest",
+    "stated_tier": "none"
+  }
+]

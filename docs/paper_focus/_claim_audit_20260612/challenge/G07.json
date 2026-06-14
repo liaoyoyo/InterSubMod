@@ -1,0 +1,110 @@
+{
+  "group_id": "G07",
+  "subject": "copy-dosage 非 driver / BRCA2 角色 (BRCA2 退役為 copy/subclone-confounded vs 早期 cis-anchor 候選; high-Δβ→FP regression-to-extreme)",
+  "role": "adversarial_red_team",
+  "auditor_independent_checks": [
+    "fast_cnv_validation.json VERIFIED: MW_p=0.6183, signed rho=-0.0829 (p=2.64e-09, n=5142), cnLOH_sig_median=0.0821 ~= neutral 0.0811. dosage REFUTED holds on disk.",
+    "copy_partition_confirm.json VERIFIED: chr13:32315128 d_HP=-0.122/d_within=-0.023/d_copy=-0.11/d_allele=-0.099; brca2_perm.p=0.022 n=19/19; chr17:79991120 d_within=0.142>d_copy=0.029 (clean cis).",
+    "survivor_permutation.json VERIFIED: chr13 obs=-0.0233 p=0.024 n=19/19 (SECOND perm run, different p from brca2_perm 0.022).",
+    "condition_fp_consensus.json EXISTS at .../cn_confound/cross_sample/: OR 8.631/4.085/5.837/0.87 + combo tp=0.0086 fp=0.0797 ALL EXACT. (auditor 07-24 'file missing' is STALE/WRONG; 11-22/11-23 correct).",
+    "RED-TEAM KEY FIND: credibility_patch_results.json P2_chr8_jackknife: OR_full=5.156 BUT OR_drop_chr8=2.843; chr8 supplies 54/88=61.4% of FP-strong loci. The '5x anti-discriminative' nearly HALVES to ~2.8x when one chr8 hotspot is removed.",
+    "RED-TEAM KEY FIND: OR=0.194 is NOT in any primary computation file (grep across all tsg .json: only delta_cohesion=0.194 in feature_matrix_trial.json, unrelated). obs20_forest_stats.json gives rates 0.00337 vs 0.03331 + literal label 'per synthesis OR=0.194'. 0.194 ~= 1/5.156 inverted+rounded; synthesis/memory-derived, NOT a primary datum.",
+    "RED-TEAM KEY FIND: '61% chr8 hotspot' (08-31) IS grep-confirmed (chr8_share_of_fp_strong=0.614) -- auditor note 'NOT grep-confirmed' is STALE. But confirmation strengthens the CHALLENGE: the anti-discriminative effect is hotspot-concentrated, not a diffuse regime.",
+    "RED-TEAM KEY FIND: credibility_patch_results.json P4_rigorous_null bootstrap_diff_TP_minus_null HP_axis point=-0.056 ci95=[-0.536,0.268] INCLUDES 0; all_axis [-0.498,0.21] INCLUDES 0. Primary verdict: somatic strong-ASM NOT robustly above germline baseline. The strong-ASM/regression-to-extreme story rests on a CI that straddles zero.",
+    "BRCA2 0.007 (08-45): obs24_H2_stats.json mean Delta CI [-0.0075,0.0126] straddles 0, 'stable but non-directional magnitude artifact' -- the ~0.007 figure is a per-CpG mean-shift caliber, self-flagged yellow, correctly uncorroborated as a clean cis %.",
+    "ALL condition_fp / regression-to-extreme / combo / BRCA2 partition claims = SINGLE-SAMPLE HCC1395 (condition_fp_consensus.json meta.sample='HCC1395'). No cross-sample replication of the FP-enrichment regime."
+  ],
+  "verdicts": [
+    {
+      "claim": "02-25 / 05-13 / 05-14 / 05-23 / 06-28 / 07-09 / 09-12: copy-dosage 非 driver (MW p=0.6183, signed rho=-0.0829 -> REFUTED)",
+      "verdict": "SURVIVES",
+      "reason": "MW p=0.6183 + rho=-0.0829 (p=2.64e-09, n=5142) + cnLOH~=neutral all EXACT on disk; a genuine 3-way falsification (contrast + dose-response + copy-neutral control), genome-wide n>2500, robust to red-team."
+    },
+    {
+      "claim": "02-26: high-Δβ→FP regression-to-extreme: no-clust OR=8.6 + LOH OR=4.1 + small-subhap OR=5.8; combo TP 0.86% vs FP 7.97% (~9x)",
+      "verdict": "CHALLENGED",
+      "reason": "OR/combo values EXACT, BUT single-sample HCC1395 + the umbrella '5x anti-discriminative' partner-stat halves to OR_drop_chr8=2.843 (61% FP-strong from one chr8 hotspot); 'regression-to-extreme' is S-interpretation, not the measured quantity. Needs hotspot-robustness + cross-sample caveat."
+    },
+    {
+      "claim": "02-30 / 05-25 / 06-43 / 11-07 / 15-04: BRCA2 = copy/subclone-confounded, retire as cis anchor; chr17 only clean cis; do not write precise %",
+      "verdict": "SURVIVES",
+      "reason": "d_within=-0.023 << d_copy=-0.11 EXACT; chr17 d_within=0.142>d_copy=0.029 (clean cis) EXACT; TAG-A=1. The conservative reclassification + 'do not write %' guard is the SAFE direction and self-limiting; red-team finds no over-claim here (it removes a claim rather than adds one)."
+    },
+    {
+      "claim": "02-39: 5 framing-traps rubric (incl. BRCA2 cis->copy, 0/38 private, 6/6 recurrence, umtag held-out)",
+      "verdict": "CHALLENGED",
+      "reason": "Discipline checklist; each component verifiable elsewhere but the list is synthesis-of-synthesis (S, cited_source none) aggregating G10/VERIFIED_RESULTS cross-question lines not re-checked here. Sound as guidance, not a primary datum -- keep as methods caveat, not result."
+    },
+    {
+      "claim": "04-39 / 09-13 / 09-24: Martin-Trujillo CN 82-92% does not corroborate BRCA2=copy (category error: confound is subclone not CN-dosage)",
+      "verdict": "CHALLENGED",
+      "reason": "Category-error logic is correct (04-39/09-24) AND verified in KB lit-07/08, BUT 09-13 (same validation_map doc) frames Martin-Trujillo as plain 'external corroboration 🟢' -- the exact error 09-24 warns against. Internal contradiction within validation_map must be reconciled before submission."
+    },
+    {
+      "claim": "04-40: Do2020 caliber-diff not contradiction; BRCA2 hypo != canonical hyper; HP1-1=subclone tag not copy",
+      "verdict": "SURVIVES",
+      "reason": "Honest flag fully traceable to KB lit-07/08 + ledger #95 (HaplotagStrategy.cpp:505-516 source audit); a caveat, not a TSG-silencing claim; red-team finds it appropriately hedged."
+    },
+    {
+      "claim": "07-24: regression-to-extreme OR 8.63/4.09/5.84; condition_fp_consensus.json 磁碟不存在",
+      "verdict": "REFUTED",
+      "reason": "The 'file does not exist on disk' status is FALSE: file exists at genome_survey_v2/cn_confound/cross_sample/condition_fp_consensus.json with ALL cited OR values EXACT. Direct contradiction with 11-22/11-23 (which find it). The missing-file premise is stale and must be deleted."
+    },
+    {
+      "claim": "07-25 / 11-24: strong-ASM OR=0.194 (anti-discriminative)",
+      "verdict": "CHALLENGED",
+      "reason": "OR=0.194 is NOT emitted by any primary computation (grep-confirmed absent; obs20 labels it literally 'per synthesis', cited_source=memory). It is ~1/5.156 inverted+rounded. Direction (FP-enriched) is primary-real, but the exact 0.194 must be re-derived/recomputed or written as a synthesis estimate, not 🟢."
+    },
+    {
+      "claim": "07-26 / 11-21: BRCA2 d_within=-0.023 (d_copy=-0.11), perm p=0.024 19/19, do not write ~80%",
+      "verdict": "SURVIVES",
+      "reason": "d_within/d_copy EXACT, two independent perm runs both p<0.05 (0.022 & 0.024); the conservative '% not robust / do not write ~80%' framing is the safe direction. n=19/19 single-sample is acknowledged; survives because the claim is a guardrail, not a magnitude assertion."
+    },
+    {
+      "claim": "08-19 / 08-44 / 09-23: BRCA2 mostly subclone/copy-partition confound (HP-axis -0.122 ~= copy -0.110 + within-tag true cis -0.023, perm p=0.022 small-but-real); CramersV captures surface clustering not clean cis",
+      "verdict": "CHALLENGED",
+      "reason": "Decomposition arithmetic EXACT, BUT 'within-tag true cis -0.023 small-but-real' rests on n=19/19 single-sample HCC1395 with p barely <0.05; cannot separate cis vs subclone (acknowledged, CAMDAC same limit). Defensible only with explicit single-sample + n=19 + cannot-deconfound caveat; risks over-reading -0.023 as established cis."
+    },
+    {
+      "claim": "08-23: BRCA2 confound is copy-partition/subclone not CN-dosage (dosage separately REFUTED ledger #86/#87)",
+      "verdict": "SURVIVES",
+      "reason": "Dosage-REFUTED back-stop verified (MW p=0.62/rho=-0.083 in idx86/87); correctly separates the two confound channels; ledger refs valid; the strongest logical move in the group."
+    },
+    {
+      "claim": "08-30: combo high-Δβ+no-clust+LOH -> TP 0.86% vs FP 7.97% (~9x), 源檔待對賬",
+      "verdict": "CHALLENGED",
+      "reason": "tp=0.0086/fp=0.0797 EXACT and source IS found (cn_confound/cross_sample/condition_fp_consensus.json) -> '源檔待對賬' status is stale. But single-sample HCC1395 + combo built from the same chr8-hotspot-loaded strong set; upgrade tier yet retain single-sample + hotspot caveat."
+    },
+    {
+      "claim": "08-31: strong-ASM 5x anti-discriminative OR=0.194 (61% from single chr8 hotspot); mechanism = regression-to-extreme (LOH->low coverage->extreme baseline)",
+      "verdict": "CHALLENGED",
+      "reason": "61% chr8 share IS grep-confirmed (0.614) -- but that confirmation guts the headline: OR_drop_chr8=2.843 (vs 5.156) and P4 bootstrap TP-null HP-axis CI [-0.536,0.268] straddles 0, i.e. strong-ASM NOT robustly above germline baseline. '5x' and 'regression-to-extreme regime' over-state a hotspot-driven, CI-straddling effect."
+    },
+    {
+      "claim": "08-45: 'BRCA2 Δβ~0.007 / high-Δβ FP' number is yellow, source pending, fix before submission",
+      "verdict": "SURVIVES",
+      "reason": "Correctly self-flags as unverified yellow; obs24_H2 shows ~0.007 is a non-directional per-CpG mean-shift artifact (CI [-0.0075,0.0126] straddles 0), distinct from -0.122/-0.023. An honesty/provenance note, not a claimed result -> survives as a caveat."
+    },
+    {
+      "claim": "11-22 / 11-23: OR 8.631/4.085/5.837 + combo 0.0086/0.0797 🟢 match",
+      "verdict": "CHALLENGED",
+      "reason": "Values EXACT, file confirmed present -> data green. CHALLENGED only because cited path 'research/.../cross_sample/...' omits the cn_confound/ segment (actual cn_confound/cross_sample/) and 🟢 omits the single-sample HCC1395 scope. Fix path string + add scope caveat."
+    },
+    {
+      "claim": "15-11: TAG-B count=5 (0.0015%), reps BRCA2/ZAR1L + chr5/chr14/chr20x2 (d_within -0.023 << d_copy -0.11)",
+      "verdict": "SURVIVES",
+      "reason": "catalog_tag_counts.json overall.B=5, 5/332705=0.0015% EXACT; 5 loci enumerated EXACT; fully primary-verified count. Strongest count claim in group."
+    },
+    {
+      "claim": "15-37: dbeta_only cell TP 1633 / FP 137, ratio 11.9, vs base 0.13 -> most FP-enriched = D5 regression-to-extreme 🔴",
+      "verdict": "CHALLENGED",
+      "reason": "TP/FP/ratio/enrich EXACT and file literally names 'D5 regression-to-extreme'; data green. CHALLENGED because the same dbeta_only set is the chr8-hotspot-loaded strong-ASM population (single-sample); the 🔴 'FP-enriched warning' is sound but its causal label 'regression-to-extreme' is S-interpretation needing the hotspot + single-sample caveat to avoid over-generalization."
+    }
+  ],
+  "worst": "08-31 (strong-ASM 5x anti-discriminative OR=0.194, 61% chr8 hotspot, regression-to-extreme): the headline magnitude is triply weak -- (1) OR=0.194 exists in NO primary file (synthesis/memory-derived ~1/5.156 inverted), (2) the '5x' nearly halves to OR_drop_chr8=2.843 because 61% of FP-strong loci come from ONE chr8 hotspot, and (3) the primary rigorous-null bootstrap TP-minus-null CI [-0.536,0.268] STRADDLES ZERO, so 'somatic strong-ASM enriched in FP above germline baseline' is not even robustly established. A single-sample, single-hotspot, CI-crossing effect is being narrated as a general 'regression-to-extreme regime' with a fabricated-precision OR.",
+  "cross_claim_conflicts_found": [
+    "07-24 ('file missing') vs 11-22/11-23 ('file present, values match') -- 07-24 REFUTED; the file objectively exists at cn_confound/cross_sample/.",
+    "09-13 (Martin-Trujillo = plain external corroboration 🟢) vs 09-24 (Martin-Trujillo = category error, dosage REFUTED) -- both in validation_map; 09-13 commits the error 09-24 forbids.",
+    "perm p=0.022 (copy_partition_confirm brca2_perm) vs p=0.024 (survivor_permutation) for chr13 BRCA2 -- two runs; some docs cite the smaller 0.022, risking selective reporting; both are barely <0.05 at n=19/19."
+  ]
+}

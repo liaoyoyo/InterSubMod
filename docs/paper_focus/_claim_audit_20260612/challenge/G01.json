@@ -1,0 +1,197 @@
+{
+  "group_id": "G01",
+  "role": "adversarial_red_team",
+  "subject": "title_framing / carrying-claim 兩版未收斂 (進取版 Subclonal-reconstruction vs 保守版 Read-level ASM-characterization tracks-germline)",
+  "n_claims": 29,
+  "method_note": "紅隊立場=證偽。對每 claim 主動找 ①隱藏假設 ②循環論證(by-construction/self-reference) ③confound 未控(copy/coverage/germline-allelic/n_reads/single-pipeline) ④過度宣稱(單樣本→普遍 / 816-loci→全基因組 / single-pipeline→泛化) ⑤二次解釋當數據。primary 真值已逐項 grep 回查 (foundation §2-§5 / catalog_R6 L0-L2 / VERIFIED_RESULTS V10/V11b/V11c)。原 auditor 大量給 P/P-caveat，本紅隊在數據邊界與循環性上更嚴，多條由 P-caveat 提升為 CHALLENGED。",
+  "systemic_findings": [
+    "S1 [循環論證 — 全群最致命]: 進取版 'subclonal reconstruction' headline 的核心正面證據 V11c/V10 是『用 longphase-S 矯正後的 HP tag 去驗證 longphase-S HP tag 的甲基差異』(VERIFIED_RESULTS V11b cross-cutting #1+#4: 被矯正的 HP tag 本身是 longphase-S 產物→self-reference; centroid-LOO pat_auc 循環膨脹 random-split 噪音 pat_auc=0.86)。06-04 自承需 HD-1(R-SELFREF) 解此循環『否則脊柱不能當 positive headline』——而 HD-1 至今 OPEN(foundation §5 G-A/§4:69)。故進取版 headline 在循環性未解前不成立。",
+    "S2 [confound/過度宣稱 — '全基因組僅 1 乾淨 somatic cis' 的範圍謊言]: cis-test 只在 HCC1395 的 816 HP-axis loci 有真值 (catalog_R6:7,21,122 'cis_status 全基因組未鋪：只 HCC1395 816 HP-axis loci 有真值')。332,705 中其餘 ~331,889 位點 + 另 5 樣本從未 cis-tested。『全基因組僅 1』實為『HCC1395 816 可測 loci 中僅 1』。'全基因組(genome-wide)' 字面與 6-樣本 framing 製造了未測即陰性的假象。",
+    "S3 [數字內部不一致]: catalog_R6 L0/TAG-C 稱 reliable 甲基分群=12,868，但 L1①/L2 表稱 reliable=11,689(TP 11,655/FP 34)、latent=28,254。12,868=TAG-C(reliable∩germline-allelic∩已 cis-test)，11,689=raw reliability。06-03/15-18 把『~3.9%(12,868)』講成『reliable 甲基分群』時混用了兩種分母——投稿前須統一口徑否則被審稿抓。",
+    "S4 [單樣本→普遍 過度外推]: 進取版全部脊柱證據(V10 0.979/0.866、V11c 窄翻案、BRCA2 copy-partition)皆 HCC1395 單樣本單 longphase-S pipeline (foundation §3 全標『單樣本對』; V10/V11c caveat 明列)。跨樣本 G-A 是 OPEN P0 gate (foundation §5: 5/6 normal ready 但 V10/V11c 尚未實跑遍樣本)。任何『現象跨癌種復現/可達⭐4』語氣在 G-A 跑完前都是未來式被當完成式。",
+    "S5 [機制反指 — phasing 在最需要處失效]: V11b cross-cutting #5: 甲基=germline-haplotype 層級→分不同 haplotype 強、within-haplotype(subclone)弱; '高價值 LOH/imprinting 區恰是機制衰退處'; 'T1/T2 正面結果不外推到激發此研究的 LOH/subclone 救援情境'。即進取版命名的 reconstruction 能力恰在它最該發揮的 subclone/LOH 場景退化。06-05 自承 'reconstruction'=LOH-同-haplotype 子家族分割≠clonal phylogeny/CCF tree——這不只是 overclaim 風險，是命名與機制的方向錯位。"
+  ],
+  "verdicts": [
+    {
+      "id": "01-01",
+      "claim_short": "進取版論文標題 Subclonal reconstruction + read 層級重建亞克隆結構",
+      "verdict": "CHALLENGED",
+      "reason": "'重建亞克隆結構' 超出證據：核心 reconstruction 訊號(V11c)是單樣本⭐3窄翻案+self-reference循環(S1/S4)，且 06-05 自承=子家族分割非 clonal phylogeny→標題動詞 'reconstruction' 須降調或加邊界。"
+    },
+    {
+      "id": "01-02",
+      "claim_short": "決策 2026-06-11 此題取代 G6，G6/G1 降支撐",
+      "verdict": "SURVIVES",
+      "reason": "純 decision-record，foundation:13 逐字命中，可驗證、不含因果或數據外推，無破綻。"
+    },
+    {
+      "id": "02-01",
+      "claim_short": "本檔職責=補互補面，SoT=foundation 檔",
+      "verdict": "SURVIVES",
+      "reason": "doc-role 二階陳述，cited_source 路徑 ls 命中且檔存在；無因果/數據宣稱，僅 governance 分工。"
+    },
+    {
+      "id": "02-06",
+      "claim_short": "今天就能開寫：genetic 引擎重建 LOH-constrained subclonal haplotype (Grade B+ ⭐3)",
+      "verdict": "CHALLENGED",
+      "reason": "'genetic 引擎重建' 繼承 S1 循環(脊柱當 positive 需未解的 HD-1)；'今天就能開寫' 與『進取版需 HD-1 否則不能當 headline』(06-04)自相張力——能寫的是保守版 floor，進取版開寫前提未滿足。"
+    },
+    {
+      "id": "02-41",
+      "claim_short": "reframe 標籤集 Grade B+/ASM=characterization/BRCA2 退役/umtag=future",
+      "verdict": "SURVIVES",
+      "reason": "每子標籤 grep 命中(catalog_R6 TAG-B + ledger 96 relabel landed + foundation)；BRCA2 退役/characterization 是誠實降調方向，紅隊無從證偽。"
+    },
+    {
+      "id": "03-01",
+      "claim_short": "launch 主軸=Subclonal reconstruction (取代 G6)",
+      "verdict": "CHALLENGED",
+      "reason": "decision 複述本身可驗證，但複述的『主軸』即進取版 reconstruction framing，繼承 S1/S4 未解循環與單樣本上限——當作已就緒主軸宣傳屬範圍前置。"
+    },
+    {
+      "id": "04-01",
+      "claim_short": "六節都有料，最強在 Results(NEGATIVE 底座)+Methods，filter 不出現在能做敘述",
+      "verdict": "CHALLENGED",
+      "reason": "'filter 不出現' 與 ledger 強一致(SURVIVES 子項)，但 '六節都有料/最強在 Results' 是無 primary 真值檔的論文規劃 meta-judgment(grep_confirmed=false)，且 Results 之強依賴尚未跑的跨樣本 G-A(S4)→規劃樂觀。"
+    },
+    {
+      "id": "04-02",
+      "claim_short": "一條主線串六節：LOH 約束→三訊號正交共驗證→甲基 characterize 不 filter→catalog",
+      "verdict": "CHALLENGED",
+      "reason": "'三訊號正交共驗證' 隱含 somatic/haplotype/甲基 互相獨立佐證，但甲基訊號本身由 longphase-S HP tag 定義(S1)→甲基與 phasing 非正交而是同源，'正交' 一詞誇大獨立性。"
+    },
+    {
+      "id": "04-03",
+      "claim_short": "Results 建構式：...phasing signature(somatic↔haplotype Grade B+)...NEGATIVE 收進邊界不當開場",
+      "verdict": "CHALLENGED",
+      "reason": "敘事編排把 NEGATIVE(甲基不能 filter/subclone 弱)『收進邊界不當開場』有 spin 風險：真正最 robust 的結果正是 NEGATIVE/de-confound(🟢)，把它降為邊界、把單樣本⭐3 的 phasing signature 抬為正面弧，是與證據強度相反的編排(S4/S5)。"
+    },
+    {
+      "id": "04-04",
+      "claim_short": "每節守 FT-1(characterization≠filter)+每數字帶 🟢🟡🔵",
+      "verdict": "SURVIVES",
+      "reason": "方法論守則，characterization≠filter 是反覆驗證的 guardrail(ledger 85/87/89 多筆)；紅隊認同此為最誠實底線，無從證偽。"
+    },
+    {
+      "id": "04-28",
+      "claim_short": "Results L0 重述(同 04-03)",
+      "verdict": "CHALLENGED",
+      "reason": "同 04-03：NEGATIVE 收進邊界、單樣本 phasing signature 當正面弧的編排與證據強度倒置(S4/S5)。"
+    },
+    {
+      "id": "04-35",
+      "claim_short": "每 claim 帶 tier + 守 characterization≠filter；🟡 數字投稿前補原檔",
+      "verdict": "SURVIVES",
+      "reason": "誠實守則，自承 🟡 數字未定須補原檔；紅隊認同此正是防過度宣稱的機制。"
+    },
+    {
+      "id": "05-01",
+      "claim_short": "保守版 carrying claim=規則(de-confound🟢)+例外(co-validation🟡 contingent)",
+      "verdict": "SURVIVES",
+      "reason": "規則(甲基 allelic 跟 germline 非 somatic)有 catalog_R6 全基因組強支持+V10 0.979 floor；例外自承 🟡 contingent on #21/#22 未定。誠實標 contingent→紅隊無法證偽，這正是站得住的保守端。"
+    },
+    {
+      "id": "05-03",
+      "claim_short": "L1 動詞用 characterize/map 不用 reshapes(無功能資料)",
+      "verdict": "SURVIVES",
+      "reason": "寫作紀律守則，自承無功能資料而限制動詞，是主動避免 overclaim 的正確做法。"
+    },
+    {
+      "id": "05-04",
+      "claim_short": "目標 venue=Genome Biology / Bioinformatics tier",
+      "verdict": "SURVIVES",
+      "reason": "目標設定 decision，v2 framework 逐字命中；非數據宣稱。"
+    },
+    {
+      "id": "05-05",
+      "claim_short": "敘述弧=ASM 存在→邊界(不能filter)→catalog 規則→例外(chr17+phasing)→跨樣本",
+      "verdict": "CHALLENGED",
+      "reason": "弧末段『跨樣本』環節依賴 OPEN 的 G-A(V10/V11c 尚未實跑遍樣本，foundation §5)；弧把未完成的跨樣本當收束點→敘事完成度超前實際數據(S4)。"
+    },
+    {
+      "id": "05-09",
+      "claim_short": "保守版完整標題 (methylation tracks germline not somatic, rare somatic exception)",
+      "verdict": "SURVIVES",
+      "reason": "v2:21 逐字命中，標題本身把主結論誠實框為 germline-tracking + rare exception，未過度宣稱 somatic 重建；這是兩版中可防守的一端。"
+    },
+    {
+      "id": "06-01",
+      "claim_short": "★存在兩條未收斂 carrying-claim(進取版 reconstruction vs 保守版 characterization)",
+      "verdict": "SURVIVES",
+      "reason": "兩版 title 字串各自 grep 命中各自 primary(master/foundation:9 vs v2:21)，divergence 為事實，且 claim 誠實描述未收斂狀態非未察覺矛盾。紅隊認同此盤點本身無破綻——破綻在進取版那一端(見 06-02)，不在此 meta-claim。"
+    },
+    {
+      "id": "06-02",
+      "claim_short": "★進取版 headline：somatic haplotagging(genetic 引擎)重建 LOH-constrained 子克隆(Grade B+ ⭐3)",
+      "verdict": "REFUTED",
+      "reason": "作為 positive headline 邏輯站不住：其正面性依賴 V11c(單樣本⭐3 窄翻案,未達 reopen NEGATIVE 門檻)+ self-reference 循環(S1),且 06-04 自承未解的 HD-1 是當 headline 的必要前提。在 HD-1 未解前把它寫成 headline=由構造未證的循環當主張。降為保守版支撐 observation 才成立。"
+    },
+    {
+      "id": "06-03",
+      "claim_short": "★保守版 headline：de-confound floor(332,705 位點僅 1 乾淨 somatic cis)，甲基不能 filter",
+      "verdict": "CHALLENGED",
+      "reason": "332,705/12,868 加總自洽(三重命中)，但『全基因組僅 1 乾淨 somatic cis』範圍誤導(S2)：cis-test 只在 HCC1395 816 loci 有真值，其餘 ~331,889 位點+5 樣本未測。應改『HCC1395 816 可測 HP-axis loci 中僅 1』否則被讀成 genome-wide 陰性已證。"
+    },
+    {
+      "id": "06-04",
+      "claim_short": "★進取版需 HD-1(R-SELFREF 解 by-construction 循環)；保守版不需(floor🟢)",
+      "verdict": "SURVIVES",
+      "reason": "此 claim 本身正確診斷了循環(S1)並標明進取版需 HD-1、保守版不需——是全群最誠實的自我裁決。紅隊不僅無法證偽，反而引用它證偽 06-02。"
+    },
+    {
+      "id": "06-05",
+      "claim_short": "★進取版風險：reconstruction 可能 overclaim(子家族分割≠clonal phylogeny/CCF tree)",
+      "verdict": "SURVIVES",
+      "reason": "自我批判方向與 foundation 誠實前提一致；紅隊認同並強化(S5：命名與機制方向錯位)。cited '整合篇章§5' 是二次散文但結論正確，作為風險聲明成立。"
+    },
+    {
+      "id": "06-06",
+      "claim_short": "★兩版共享~80%證據，差別在 phasing 脊柱當 headline 還是支撐；標題層未收斂",
+      "verdict": "CHALLENGED",
+      "reason": "'標題層未收斂' 為事實(SURVIVES 子項)，但 '~80% 共享' 是無 primary 的估計，且把分歧講成『只在 headline vs 支撐』淡化了實質差異——進取版多出的正面主張恰是未證的循環脊柱(06-02 REFUTED),不是同證據的不同包裝。差異是『一端 overclaim 一端不』而非純 framing。"
+    },
+    {
+      "id": "14-02",
+      "claim_short": "carrying claim=規則(已證🟢)+例外(contingent) 同一故事",
+      "verdict": "SURVIVES",
+      "reason": "同 05-01，規則有強 primary、例外誠實標 contingent；prereg_fallback 版本一致無衝突。"
+    },
+    {
+      "id": "14-28",
+      "claim_short": "title 候選1(rule-led 推薦)：tracks germline not somatic + rare somatic exception",
+      "verdict": "SURVIVES",
+      "reason": "方向與已驗證 05-09 v2 title 一致且誠實(de-confounding + rare exception)；候選字串在 brainstorm 檔(溯源 S)但內容不過度宣稱，紅隊無破綻可攻。"
+    },
+    {
+      "id": "14-29",
+      "claim_short": "title 候選2：co-validates and cannot filter + LOH-driven structure + rarity of somatic cis",
+      "verdict": "CHALLENGED",
+      "reason": "'co-validates' 隱含三訊號獨立互證，但甲基訊號由 longphase-S HP tag 定義→與 phasing 同源非獨立(S1，同 04-02)；'co-validation' 在標題級別誇大訊號獨立性。'cannot filter'/'rarity' 部分誠實。"
+    },
+    {
+      "id": "14-30",
+      "claim_short": "title 候選3(co-val 並列，需#21/#22撐)：read-level co-validation and de-confounding",
+      "verdict": "CHALLENGED",
+      "reason": "自承 contingent(需 #21/#22 co-validation 證據)是誠實的，但把 'co-validation' 放進標題等於賭未完成的 contingent 證據；若 #21/#22 不成立則標題失據——標題不應 contingent on 未跑分析。"
+    },
+    {
+      "id": "15-05",
+      "claim_short": "甲基分群真實但壓倒性非 somatic 判別器→強化 characterization 非 filter",
+      "verdict": "SURVIVES",
+      "reason": "catalog_R6:16 + ledger 85/95 多重命中；這是 NEGATIVE/de-confound 方向的誠實一階解釋，與全部 filter-DEAD 證據一致，紅隊認同。"
+    },
+    {
+      "id": "15-18",
+      "claim_short": "★332,705 分7類；reliable~3.9%(12,868 TAG-C)cis 證 germline-allelic；全基因組僅1乾淨 somatic cis(chr17/TBC1D16)；BRCA2 copy/subclone-confounded",
+      "verdict": "CHALLENGED",
+      "reason": "數字三重命中且加總自洽，但兩處須加 caveat 才誠實：(a)'reliable~3.9%(12,868)' 混用分母——12,868=TAG-C(germline-allelic) 而 raw reliable=11,689(S3)；(b)'全基因組僅1乾淨 somatic cis' 實為 HCC1395 816 可測 loci 中僅1，非真 genome-wide×6 樣本(S2)。BRCA2 copy/subclone-confounded(d_within−0.023≪d_copy−0.11)+ single-pipeline⭐3 須隨行。"
+    }
+  ],
+  "verdict_counts": {
+    "SURVIVES": 15,
+    "CHALLENGED": 13,
+    "REFUTED": 1
+  },
+  "worst": "06-02",
+  "worst_reason": "進取版 headline『somatic haplotagging 重建 LOH-constrained 子克隆 (Grade B+ ⭐3)』最該被質疑：作為 positive headline 它依賴 (1) self-reference 循環論證——甲基差異用 longphase-S 矯正後的 HP tag 驗證 longphase-S 自身產物 (VERIFIED V11b cross-cutting #1/#4，centroid-LOO pat_auc 循環膨脹至 0.86); (2) 單樣本 HCC1395 單 pipeline 的 ⭐3 窄翻案 (V11c 自承未達 reopen 已結案 NEGATIVE 的門檻); (3) 06-04 自己承認需未解的 HD-1(R-SELFREF) 才能當 headline，G-A 跨樣本至今 OPEN。三者疊加=由構造未證的主張當論文 carrying-claim。保守版 06-03/05-09 (de-confound floor + germline-tracking) 才是站得住的一端。建議：reconstruction 降為 §2.6 支撐 observation，headline 採保守版，待 HD-1 解+跨樣本 G-A 跑完再評估是否升格。"
+}

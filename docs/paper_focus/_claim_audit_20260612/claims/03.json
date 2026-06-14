@@ -1,0 +1,218 @@
+[
+  {
+    "id": "03-01",
+    "subject": "title_framing",
+    "claim": "主軸 = Subclonal reconstruction using somatic haplotagging + methylation profiles, Nanopore（取代 G6；G6/G1 降為支撐）。",
+    "source_doc": "launch_readiness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-02",
+    "subject": "launch_readiness",
+    "claim": "就緒度：數據齊（6 樣本×3 癌種）· 知識整理（V1-V12 + 4 道 NEGATIVE + 紅線 + gaps）· 流程（master-workflow + cycle skills）· git 整合（develop=canonical）。唯一啟動 gate = HD-1。",
+    "source_doc": "launch_readiness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-03",
+    "subject": "git_canonical",
+    "claim": "所有散落工作已收斂到 develop（=活躍線 54b02ab）；本檔是「知識+數據+架構整理清楚、可開始研究」的確認頁。",
+    "source_doc": "launch_readiness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-04",
+    "subject": "data_assets",
+    "claim": "6 cell line × 3 癌種，三要素齊（tagged BAM + somatic VCF + 5mCG）：HCC1395/1937/1954（乳腺）· H1437/H2009（肺）· COLO829（黑色素瘤）+ HCC1395_DORADO（basecaller 對照）。",
+    "source_doc": "launch_readiness",
+    "cited_source": "ls 驗證 2026-06-12 (spot-check ✓)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-05",
+    "subject": "data_path",
+    "claim": "路徑型式（完整路徑，2026-06-12 ls 驗證）：/big7_disk/liaoyoyo2001/big7_disk_output/canonical/{sample}/paired_full/{date}_*_complete_matrix/longphase_s/{sample}_tagged.bam (+ 同目錄 somatic_pass.vcf.gz)。根 = big7_disk_output/（非 repo 內 InterSubMod/canonical/）。{date}：HCC1395=20260314、其餘=20260315。ISM 輸出：intersubmod_tp/filtered_snv_tp/ + intersubmod_fp/。",
+    "source_doc": "launch_readiness",
+    "cited_source": "ls 驗證 2026-06-12",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-06",
+    "subject": "normal_methyl_path",
+    "claim": "normal 甲基（V10 用）：/big8_disk/data/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/HCC1395BL.bam。",
+    "source_doc": "launch_readiness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-07",
+    "subject": "tier_ceiling",
+    "claim": "單樣本 ⭐3 上限可被打破 → 跨 6 樣本可達 ⭐4（但 single-pipeline longphase-S 自我參照 = tier 風險，需正交對照 G-E）。",
+    "source_doc": "launch_readiness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-08",
+    "subject": "verified_results_sot",
+    "claim": "真值 SoT（V1-V12 全數字）：InterSubMod/docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md。",
+    "source_doc": "launch_readiness",
+    "cited_source": "docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-09",
+    "subject": "spine_loh_reconstruction",
+    "claim": "脊柱 §R1 LOH-constrained 子克隆重建：POSITIVE（Grade B+，需 HD-1 caveat），⭐3。",
+    "source_doc": "launch_readiness",
+    "cited_source": "整合篇章 §2-3",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-10",
+    "subject": "methyl_negative_methods",
+    "claim": "§Methods-Neg 甲基不能 filter/判別（死四道）：最 reviewer-proof，今天防彈。",
+    "source_doc": "launch_readiness",
+    "cited_source": "整合篇章 §3 NEGATIVE",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-11",
+    "subject": "asm_characterization",
+    "claim": "§R2 子克隆內 ASM characterization：存在·小·非方向·跨 3 癌種現象復現，⭐3。",
+    "source_doc": "launch_readiness",
+    "cited_source": "foundation §3 + ASM 工作站",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-12",
+    "subject": "methyl_contribution",
+    "claim": "甲基貢獻 = characterization + 誠實負目錄（非重建驅動），L2。",
+    "source_doc": "launch_readiness",
+    "cited_source": "兩 foundation reconcile",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "03-13",
+    "subject": "red_line_constraints",
+    "claim": "必守紅線：甲基=germline-haplotype 層級·非 filter(DEAD)·T3 可用性 NEGATIVE·T2 勿宣稱歸 H3·BRCA2 非乾淨 cis(改 chr17/TBC1D16)·cohesion≠cis。",
+    "source_doc": "launch_readiness",
+    "cited_source": "foundation §4 + 整合篇章 §5",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-14",
+    "subject": "open_gaps",
+    "claim": "開放 gap：G-A 跨 6 樣本(tier 解鎖)·G-B within-hap somatic-vs-baseline null(gate 甲基貢獻)·G-C cis 足跡·G-D 重建 demo·G-E 正交 pipeline。",
+    "source_doc": "launch_readiness",
+    "cited_source": "foundation §5",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-15",
+    "subject": "authoritative_sot",
+    "claim": "權威 SoT 兩份（互補面）：① 甲基-assist 面 + V1-V12 + 資產 = InterSubMod/docs/reports/research_landscape/20260611_subclonal_reconstruction_paper_foundation_01.md；② ASM-characterization + 四道 NEGATIVE + 脊柱 + HD-1 = InterSubMod/docs/concepts/2026/06/20260611_Subclonal_Reconstruction_Paper_Focus_整合篇章_01.md。",
+    "source_doc": "launch_readiness",
+    "cited_source": "docs/reports/research_landscape/20260611_subclonal_reconstruction_paper_foundation_01.md ; docs/concepts/2026/06/20260611_Subclonal_Reconstruction_Paper_Focus_整合篇章_01.md",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-16",
+    "subject": "kb_convergence_sot",
+    "claim": "KB 結論層：knowledge/09_conclusions/ + knowledge/11_external_literature/10_paper_readiness_convergence.md（7-thread 稽核）。",
+    "source_doc": "launch_readiness",
+    "cited_source": "knowledge/11_external_literature/10_paper_readiness_convergence.md",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-17",
+    "subject": "dead_directions",
+    "claim": "DEAD 勿再開：甲基→TP/FP filter（死四道）· T3 subclone 可用性（救 ambiguous read 偏向反了）。",
+    "source_doc": "launch_readiness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-18",
+    "subject": "workflow_map",
+    "claim": "主工作流地圖：InterSubMod/docs/references/20260611_master_workflow_architecture_01.md（agentic-loop 四層 + git 四決策表 + 鉤子）。",
+    "source_doc": "launch_readiness",
+    "cited_source": "docs/references/20260611_master_workflow_architecture_01.md",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-19",
+    "subject": "research_cycle_flow",
+    "claim": "研究 cycle：P0 /cycle-init → P1 /research-loop(plan.json OSF 預註冊+stop_criteria) → P3 /feature-layered-observation → P4 /multi-sample-consistency → P5 /run-evaluator → P6 /conclude-research。",
+    "source_doc": "launch_readiness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-20",
+    "subject": "paper_writing_flow",
+    "claim": "論文撰寫：/narrative-frame 或 /structured-tech-report（title/abstract/figure 骨架）；對外宣稱必繼承 /scientific-rigor §2-§7（evidence tier + Cohen + DAG + pre-reg）。",
+    "source_doc": "launch_readiness",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-21",
+    "subject": "data_integrity_protocol",
+    "claim": "數字誠信：§13（產數字→落檔→Read→才寫報告；number_provenance gate 已 live）。",
+    "source_doc": "launch_readiness",
+    "cited_source": "CLAUDE.md §13",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-22",
+    "subject": "hd1_gate",
+    "claim": "HD-1（你 GO/NO-GO，AI 不代決）：phasing 重建脊柱 by-construction 部分循環。選 1：跑 R-SELFREF 全 7 樣本 flag-on（~25-50hr C++ 長計算，主回合背景 Bash 落檔）→ 脊柱寫成 positive 主結果；選 2：phasing 降 characterization observation → 四道 NEGATIVE 扛論文（methods/negative 定位，最快防彈）。",
+    "source_doc": "launch_readiness",
+    "cited_source": "整合篇章 §7",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-23",
+    "subject": "writing_critical_path",
+    "claim": "撰寫關鍵路徑（整合篇章 §7）：① 定 HD-1 → ② 先寫四道 NEGATIVE methods（今天防彈，HD-1 獨立）→ ③ 依 HD-1 grade 寫脊柱 → ④ ASM characterization + chr17 exemplar + 跨樣本現象 → ⑤ 改 stale 文件（BRCA2 已 amend）。平行可先做：G-A 跨 6 樣本重現（tier 解鎖）、G-B null 對照（gate 甲基貢獻）。",
+    "source_doc": "launch_readiness",
+    "cited_source": "整合篇章 §7",
+    "stated_tier": "none"
+  },
+  {
+    "id": "03-24",
+    "subject": "kb_stale_snapshots",
+    "claim": "KB 5 個 snapshot 仍 G6-era 過時（knowledge/0{1,2}_*.md 等 2026-05-18）→ 用 knowledge/scripts/refresh_last_verified.py 或人工更新到本軸（freshness hook 持續警告中）。",
+    "source_doc": "launch_readiness",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "03-25",
+    "subject": "main_branch_stale",
+    "claim": "main 仍舊 unrelated 快照（develop 已=活躍線）；redundant branch cis-asm/g6-paper-focus 可 archive。",
+    "source_doc": "launch_readiness",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "03-26",
+    "subject": "shared_state_uncommitted",
+    "claim": "shared-state（ledger/queue/active.json/CURRENT_FOCUS/postmortem logs）+ pre-existing 他 session 改 + settings hook wiring：未 commit，依 §C 留用戶。",
+    "source_doc": "launch_readiness",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "03-27",
+    "subject": "deferred_benchmark",
+    "claim": "deferred：cross_sample_benchmark fan-out cap + per-sample checkpoint（跑 benchmark 前套）。",
+    "source_doc": "launch_readiness",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  }
+]

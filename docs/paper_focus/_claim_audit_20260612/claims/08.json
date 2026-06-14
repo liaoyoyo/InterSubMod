@@ -1,0 +1,498 @@
+[
+  {
+    "id": "08-01",
+    "subject": "framing_judgment_criterion",
+    "claim": "判準只有一條：方向是「正交佐證（characterization）」→ 可做；是「互相篩選/判別（filter）」→ 已死。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-02",
+    "subject": "d4_d6_rejection",
+    "claim": "D4/D6 之所以否決＝它們本質是「用甲基判別 subclone」，而本週 HD-4 + B2 已證甲基側是 phasing/germline-allelic 不是 somatic 甲基訊號。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-03",
+    "subject": "d1_verdict",
+    "claim": "D1（umtag · methyl-assist phasing）裁決為 🟡 PROBE（值得做，但只能當 tooling / future-work，不能當現在的 result）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-04",
+    "subject": "d1_unphased_fraction",
+    "claim": "D1 機會空間真：45.84% unphased。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-05",
+    "subject": "d1_heldout_extrap",
+    "claim": "D1 held-out extrapolation 0.8852 vs null 0.5236。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-06",
+    "subject": "d1_non_copy_control",
+    "claim": "V10 depth-matched normal 0.979 > tumor 0.866 = 「非 copy」控存活。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-07",
+    "subject": "d1_admr_loh_enrichment",
+    "claim": "D1 aDMR×LOH 非富集（Fisher p=0.382）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-08",
+    "subject": "d1_germline_het_null",
+    "claim": "D1 germline-het null 非判別（0.974）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-09",
+    "subject": "d1_external_corroboration",
+    "claim": "D1 外部佐證強：MethPhaser / NanoMethPhase / HapBridge 等都做過 methyl-assist phasing（外部 L3 已驗此方向可行）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-10",
+    "subject": "d1_heldout_not_rescue",
+    "claim": "held-out extrapolation ≠ 真正去救一條 unphased read（FT-5）；D1 現在是有潛力的 tooling 原型，不是已驗證的方法。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-11",
+    "subject": "d2_verdict",
+    "claim": "D2（用甲基對 read 做分群）裁決為 🟡 PROBE（機制上 ISM 已做；但要分清它揭示什麼）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-12",
+    "subject": "d2_ism_mechanism",
+    "claim": "ISM 本來就是 read×CpG → read-read 距離 → 階層分群（這部分已穩定）；但 somatic-subclone 訊號 = NEGATIVE。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "◽"
+  },
+  {
+    "id": "08-13",
+    "subject": "d2_germline_allelic_background",
+    "claim": "D2 分出來的是 germline allelic 背景（ARI 0.135 < het null 0.177，p=0.922），不是 somatic subclone；所以 D2 ≈ D6 的方法面。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "08-14",
+    "subject": "d2_external_corroboration",
+    "claim": "epipolymorphism / read-level methylation heterogeneity（Landan2012 / Derrien2021 等 L3）支持「read-level 甲基分群存在」，但也說 tumor 更混亂、難找一致。",
+    "source_doc": "direction_cards",
+    "cited_source": "Landan2012 / Derrien2021 (L3)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-15",
+    "subject": "d2_imprinting_positive_control",
+    "claim": "D2 ARI vs imprinting 正控（GNAS/RB1=1.000）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "08-16",
+    "subject": "d2_normal_anchored_method_fix",
+    "claim": "D2 方法需 normal-anchored（減去 germline allelic 基線）才可能逼出 somatic subclone。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-17",
+    "subject": "d3_verdict",
+    "claim": "D3（cis-candidate 確認 + 大規模驗證所有位點）裁決為 🟡 PROBE（真正的開放方法問題，值得設計協議）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-18",
+    "subject": "d3_clean_cis_tbc1d16",
+    "claim": "816 HP-axis loci 經 Bonferroni+copy-test 後唯一乾淨 cis = chr17/TBC1D16（within 0.142 > HP 0.122, perm p=0.001）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-19",
+    "subject": "brca2_role",
+    "claim": "BRCA2 = subclone/copy-confounded（HP1-1 是 longphase-S somatic subclone tag 非 copy、非 CN-dosage；focal cis d_within=−0.023 邊際；% 不 robust）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-20",
+    "subject": "d3_strongest_untestable",
+    "claim": "6 個最強訊號 untestable（pure-ALT tag CGI-desert，copy-test 只能算 leaky-tag 7/60）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-21",
+    "subject": "d3_cis_test_limitation",
+    "claim": "現有 cis-test 對最強的位點（pure-ALT/CGI-desert）測不了；「大規模」目前卡在「怎麼測那些測不了的」，不是算力問題；partition 未 anchor SEQC2 CN ground-truth。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-22",
+    "subject": "d3_external_martin_trujillo",
+    "claim": "Martin-Trujillo2017（CN-dosage 解釋 imprinted allelic 甲基 82–92%，L3）背書「必須先排 copy 類混淆」的一般方法學原則。",
+    "source_doc": "direction_cards",
+    "cited_source": "Martin-Trujillo2017 (L3)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-23",
+    "subject": "brca2_dosage_refuted",
+    "claim": "BRCA2 的實際混淆是 copy-partition/subclone（非 CN-dosage — dosage 已於 ledger #86/#87 以 MW p=0.62 / ρ=−0.083 反向單獨 REFUTED）。",
+    "source_doc": "direction_cards",
+    "cited_source": "ledger #86/#87",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-24",
+    "subject": "d3_chr17_replication",
+    "claim": "D3 chr17 要第二樣本重現（單 locus 單樣本 nominal p）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-25",
+    "subject": "d4_verdict",
+    "claim": "D4（AF↔NGroups 正相關 = subclone 甲基 marker）裁決為 🔴 NO-GO（本週已被自己的分析推翻）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "08-26",
+    "subject": "d4_baseline_spearman",
+    "claim": "HD-4（06-08）baseline Spearman r=0.656（n=36854）；控甲基 r 幾乎不動（0.655 wrong-direction collider）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "08-27",
+    "subject": "d4_ngroups_capped",
+    "claim": "NGroups 99.5%≤2 是 HP-tag {HP1,HP1-1,HP2,HP2-1} sub-family capped count（甲基矩陣不進 count，LabelTest.cpp:265-305）；ledger verdict = PHASING_DRIVEN。",
+    "source_doc": "direction_cards",
+    "cited_source": "LabelTest.cpp:265-305",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "08-27b",
+    "subject": "d4_ngroups_not_methylation",
+    "claim": "NGroups 不是甲基量，是 HP-tag 數；AF 高 → LOH 區 somatic ALT sub-family 出現 → NGroups 1→2，是 AF 的算術函數，與甲基無關；「AF↔NGroups 是甲基 marker」為假，它是 phasing/haplotype-occupancy signature。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-28",
+    "subject": "d4_rescue_value",
+    "claim": "D4 可救援的價值：它支撐 phasing 主軸（AF→haplotype occupancy 的 read-level 證據），改述後仍有用。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-29",
+    "subject": "d5_verdict",
+    "claim": "D5（strong-ASM loci 在 FP 富集，是否可特殊刪除）裁決為 🔴 NO-GO 當 filter ｜ 🟡 可當 Discussion 觀察。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-30",
+    "subject": "d5_combo_tp_fp",
+    "claim": "combo high-Δβ+no-clust+LOH → TP 0.86% vs FP 7.97%（~9×，源檔待對賬）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-31",
+    "subject": "d5_anti_discriminative",
+    "claim": "strong-ASM 5× = 反判別 OR=0.194（61% 來自單一 chr8 hotspot）；機制 = regression-to-extreme（LOH→低覆蓋→極端 baseline 的同一 regime）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-32",
+    "subject": "d5_loso_circularity",
+    "claim": "整個 filter 方向 LOSO 證 100% sample-level circularity，這個刪除規則在 held-out 會塌。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "08-33",
+    "subject": "d5_redundancy",
+    "claim": "「LOH + 低覆蓋」本來就是 caller 已用的 alignment/coverage filter，D5 是在重新發現已知的低覆蓋 LOH 區 FP-prone，不是新的正交 filter。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-34",
+    "subject": "d5_no_external",
+    "claim": "D5 外部佐證無（這是內部 artifact 解釋，不是外部可借力的方向）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-35",
+    "subject": "d5_fp_dbeta_retracted",
+    "claim": "「FP |Δβ| 較大」已 RETRACTED（abs_dbeta MW p=0.137 NS）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-36",
+    "subject": "d6_verdict",
+    "claim": "D6（用甲基做 subclone 分析）裁決為 🔴 NO-GO（原作法）｜ 🟡 PROBE（normal-anchored 新作法）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-37",
+    "subject": "d6_clustering_negative",
+    "claim": "B2 clustering NEG：somatic TP median ARI 0.135 < germline-het null 0.177，MW p=0.922（imprinting 正控 GNAS/RB1=1.000 證 ruler sound）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "08-38",
+    "subject": "d6_germline_allelic_clustering",
+    "claim": "甲基 read-clustering 分出來的主要是 germline allelic 甲基背景，不是 somatic subclone；要逼出 somatic subclone 須先減掉 germline allelic 基線（normal-anchored）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-39",
+    "subject": "d6_single_sample_ceiling",
+    "claim": "即使做了 normal-anchored，single-sample 硬 confound 天花板還在（cis line 1/816 clean）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-40",
+    "subject": "d6_external_epipolymorphism",
+    "claim": "epipolymorphism 文獻（L3）說 tumor read-level 甲基更混亂 → 解釋為何難。",
+    "source_doc": "direction_cards",
+    "cited_source": "epipolymorphism 文獻 (L3)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-41",
+    "subject": "ism1_verdict",
+    "claim": "ISM-1（ISM 互補性 vs Δβ-only）裁決為 ✅ CONFIRM（framing 成立，互補是真的）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-42",
+    "subject": "ism1_orthogonal_framing",
+    "claim": "ISM 抓 discrete clustering（CramersV/PERMANOVA）；Δβ 抓 per-position 連續平均差。兩者正交。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🔵"
+  },
+  {
+    "id": "08-43",
+    "subject": "ism1_brca2_complementary_example",
+    "claim": "互補例：BRCA2 表面 HP-axis clustering 被 CramersV 抓、被 per-position Δβ~0.007 漏（兩方法正交的示意）；反之高-Δβ FP 被 CramersV 正確排除。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-44",
+    "subject": "ism1_brca2_subclone_confound",
+    "claim": "BRCA2 此 clustering 大部分是 subclone/copy-partition 混淆（HP-axis −0.122 ≈ copy-partition −0.110 + within-tag 真 cis −0.023, perm p=0.022 小但真）；CramersV 抓到的是表面分群非乾淨 cis；乾淨 cis 互補例見 chr17/TBC1D16。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-45",
+    "subject": "ism1_brca2_number_tier",
+    "claim": "「BRCA2 Δβ~0.007 / 高-Δβ FP」的具體數字是 🟡（源檔待對賬）→ 投稿前補。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-46",
+    "subject": "ism2_verdict",
+    "claim": "ISM-2（ISM read-level 過程是否過嚴/過鬆）裁決為 🟡 要確認（有真實「過嚴」疑慮，值得 methodology-audit）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "08-47",
+    "subject": "ism2_cramersv_gate",
+    "claim": "CramersV reliability gate 用 Cochran 最小期望格 ≥5（CramersV=reliable?v:0，RegionProcessor.cpp:1592）。",
+    "source_doc": "direction_cards",
+    "cited_source": "RegionProcessor.cpp:1592",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-48",
+    "subject": "ism2_latent_count",
+    "claim": "762 MISSED 中 487 latent（gated CV=0 但 PERMANOVA 顯著＝真 HP 分群被 gate 掉）→ CramersV gate 偏嚴，稀疏表被當不可靠。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-49",
+    "subject": "ism2_no_filter",
+    "claim": "不能直接放寬成 filter（納回集 minN<15 是 FP-leaning）；正確用途是「納回提升 characterization 分辨」不是「拿來 filter」。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-50",
+    "subject": "ism2_cpp_candidate",
+    "claim": "ISM-2 候選 C++ 修改：審查 gate 閾值，或改成「reliable / latent / unreliable」三態而非二元 0/1（須 /methodology-audit + /cpp-change）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-51",
+    "subject": "ism3_verdict",
+    "claim": "ISM-3（是否加入/合併 Δβ 找位點）裁決為 ⭐ PROBE/code（值得做，當「互補發現通道」不是取代）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-52",
+    "subject": "ism3_why_no_dbeta",
+    "claim": "ISM 架構是 read-level（read×CpG → read-read 距離 → 階層分群 → CramersV/PERMANOVA on HP labels）；Δβ 是 position-level allele 平均差（不同分析單位）；ISM 沒內建 per-position allele 對比，所以漏掉「分群不明顯但平均差大」的位點。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-53",
+    "subject": "ism3_no_naive_merge",
+    "claim": "合併不能 naive 加 Δβ（高-Δβ regime 是 FP-enriched，會引入 D5 的 FP）；正確設計：union 發現通道 = discrete-clustered（CramersV reliable）OR large-Δβ 且有 clustering 佐證，再用 normal-anchored cis-test 過濾 copy/drift。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-54",
+    "subject": "ism3_external",
+    "claim": "modkit / NanoMethPhase 的 per-position DMR 方法（L3）可借。",
+    "source_doc": "direction_cards",
+    "cited_source": "modkit / NanoMethPhase (L3)",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-55",
+    "subject": "ism4_verdict",
+    "claim": "ISM-4（位點甲基分群清楚標記 → 標籤分類 catalog）裁決為 ⭐ GO（高價值 characterization 交付物 = 核心需求，最該做）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-56",
+    "subject": "ism4_schema",
+    "claim": "ISM-4 建議標籤 schema（每位點一列）：① 甲基分群是否 reliable（CramersV reliable / latent / none）；② Δβ magnitude（大/中/小）；③ 分群來源（somatic-linked / germline-allelic / drift）；④ cis 判定（cis / copy / untestable）；⑤ somatic-ASM？（是/否）；⑥ tier（🟢🟡）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-57",
+    "subject": "ism4_convergence",
+    "claim": "ISM-4 把 D2/D5/D6/ISM-2/ISM-3 的觀察收斂成一張可發表的表——不做 filter，做目錄。完全對齊「characterization 不是 filter」主軸。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "none"
+  },
+  {
+    "id": "08-58",
+    "subject": "ism4_data_ready",
+    "claim": "ISM-4 已有 ISM native run（6 樣本 ~280k loci）+ genome_survey_v2 → 直接組表。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "08-59",
+    "subject": "difficulty1_verdict",
+    "claim": "困難-1（篩選 paired 的 TP/FP）裁決為 🔴 NO-GO 當 filter（誠實困難，建議不投）。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "08-60",
+    "subject": "filter_loso",
+    "claim": "filter 死四道：LOSO 循環 / AUC=0.505 / ~4% sens / clustering=germline-allelic。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "08-61",
+    "subject": "difficulty1_alternative",
+    "claim": "正確替代＝不用 paired-FP，改用 genome-wide private somatic + HP-shuffle null（已做，6/6 excess）；用「現象復現」取代「FP 篩選」；加 normal 甲基只會把問題變更難。",
+    "source_doc": "direction_cards",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  }
+]

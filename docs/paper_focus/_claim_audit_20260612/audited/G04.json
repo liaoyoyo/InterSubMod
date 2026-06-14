@@ -1,0 +1,327 @@
+{
+  "group_id": "G04",
+  "subject": "甲基=germline-haplotype 層級 / subclone-甲基 germline-allelic 非 somatic-specific (V11c 存在性窄翻 candidate vs B2 ARI null NEGATIVE — G-B 正確 null 未跑)",
+  "audited_by": "provenance-auditor (strict)",
+  "audit_date": "2026-06-12",
+  "primary_truth_files_consulted": [
+    "docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/b2_broad_scan_results.json",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/b2_broad_scan.out",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json",
+    "research/autoresearch/evidence_ledger.jsonl (lines 60/62/64/66)",
+    "knowledge/11_external_literature/10_paper_readiness_convergence.md"
+  ],
+  "n_claims": 32,
+  "claims": [
+    {
+      "id": "01-03",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "VERIFIED_RESULTS.md V10 (l.211-217 germline-haplotype 非 copy) + V11/V11c (l.180/138 within-hap 弱); single-sample HCC1395",
+      "note": "synthesis 'honest premise' 把 V10(haplotype 強)+V11/V11c(subclone 弱) 縮成一句鐵律。各分支機制有 primary 支撐但 single-sample/single-pipeline → P-caveat。'不可用於 read 救援' = V11c usability NEGATIVE(8/8<0.5)。"
+    },
+    {
+      "id": "01-17",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "VERIFIED_RESULTS.md:131,138 (V11c 窄翻案 GATE POSITIVE: held-out farCpG AUC H1=0.851/H2=0.866; 非 somatic-CpG/無覆蓋 confound; ⭐3)",
+      "note": "claim 直接複述 V11c GATE 結論。值與來源相符。tier ⭐3 對齊 primary(單樣本/單 longphase-S/4 染色體/chr20 NS → 未達 reopen 門檻)→ P-caveat。"
+    },
+    {
+      "id": "01-18",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "VERIFIED_RESULTS.md V10 結論 l.211-217 (normal 0.979 ≥ tumor 0.866, 6/6 chr; 非 copy = germline-haplotype-linked 甲基)",
+      "note": "V10 為決定性 normal-anchored 設計, primary→解釋→結論可追。single tumor/normal 配對(HCC1395) + V10 自承絕對 AUC 樂觀 → P-caveat。"
+    },
+    {
+      "id": "01-19",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "VERIFIED_RESULTS.md:132,138 (T3 usability NEGATIVE: ambiguous plain-HP1 偏向亞群 frac 8/8 全 <0.5, pooled H1=0.382/H2=0.428)",
+      "note": "claim 兩半('存在性窄翻 + 可用性 NEGATIVE' / '可分≠可救 lean 8/8<0.5') 與 V11c 定論逐字相符。值精確命中 → P。"
+    },
+    {
+      "id": "01-25",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "concept only — VERIFIED_RESULTS.md V11b caveat l.154 承認 random-split null 可能吸收 subclone 訊號(間接支持需正確 null), 但 'G-B within-haplotype somatic-vs-baseline null 未跑' 本身無 primary 數據(forward-looking gap)",
+      "note": "G-B 為未執行的方法構想(should-do)→ 軸A=Q。'germline-het null 是跨-hap 錯對照' 的判斷與 ledger 60/62 一致(het-NULL 是 ALT/REF allele split 非 within-hap)。defer 不全repo考古。"
+    },
+    {
+      "id": "02-02",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "open question — 無 primary 真值(待解問題本身); V11c(存在性 candidate)+ledger60(B2 germline-allelic) 框出張力但 G-B 正確 null 未跑",
+      "note": "明確標 open question + tier 🔴。是 synthesis 對兩線張力的提問,非已驗證數據 → Q/S。"
+    },
+    {
+      "id": "02-03",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "VERIFIED_RESULTS.md V11c(存在性窄翻 ⭐3) + claim 自承 'G-B 正確 null 未跑/germline-het 是錯對照'(對齊 ledger 60 het-NULL=allele-split)",
+      "note": "誠實 framing claim: V11c ⭐3 核心候選有 primary; 'G-B 未跑' 為 honest gap 陳述。"
+    },
+    {
+      "id": "02-04",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "convergence md:77 (Methods-Neg-4: blind-ARI somatic TP 0.135 < germline-het null 0.177 p=0.922 → germline-allelic) + ledger line 60 同值",
+      "note": "claim 引 convergence md, 該 md l.77 值與 b2_broad_scan(0.135/0.177/p=0.922)及 ledger 60 三方一致 → 強。single-sample → P-caveat。⚠ 用 germline-het(跨-hap) null, 與 02-03/01-25 標的 G-B(within-hap)正是不同對照 → 內部 framing 張力(非數值矛盾)。"
+    },
+    {
+      "id": "02-05",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "VERIFIED_RESULTS.md V11c(存在性窄訊號+可用性負) + ledger 60(germline-allelic NEGATIVE)；'勿寫甲基可重建子克隆' = writing discipline",
+      "note": "寫作紀律 claim, 直接從 V11c+B2 兩 primary 結論導出寫作邊界。tier 🔴。single-sample → P-caveat。"
+    },
+    {
+      "id": "02-11",
+      "axisA": "S",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "ledger 60(B2 germline-allelic NEGATIVE p=0.922) + filter-DEAD(跨群已證) + V10/V11(haplotag-driven); '把甲基寫成重建判別力=與 NEGATIVE 矛盾必撤'",
+      "note": "最高優先 framing 紀律, synthesis-of-syntheses 但每子句可追 primary NEGATIVE。tier 🔴。"
+    },
+    {
+      "id": "02-27",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "b2_broad_scan.out:70 (TP median=0.135 vs het-NULL=0.177 MW p=0.922) + b2_broad_scan_results.json(計算 TP median ari=0.135091, het-NULL=0.177463) + ledger 62(GNAS A/B=1.000, RB1 DMR=1.000) + convergence md:77",
+      "note": "核心數據 claim, 4 個數字(0.135/0.177/p=0.922/GNAS-RB1=1.000)全精確命中 primary。single-sample HCC1395 → P-caveat。"
+    },
+    {
+      "id": "03-13",
+      "axisA": "S",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "VERIFIED_RESULTS.md(germline-haplotype V10 / T3 NEG / T2 H3 無真值 V11b l.149) + ledger 66(BRCA2 非乾淨 cis→chr17/TBC1D16 cis A=1) + catalog_tag_counts.json(A=1 TBC1D16) + cohesion≠cis ledger 66",
+      "note": "紅線聚合 claim, 6 子句各有 primary(haplotype-level/filter-DEAD/T3-NEG/T2-H3/BRCA2→TBC1D16/cohesion≠cis)。所有 single-sample → P-caveat。"
+    },
+    {
+      "id": "06-07",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "VERIFIED_RESULTS.md V10 l.211-217 + V11 l.180 (分不同 haplotype 強 within-haplotype 弱)",
+      "note": "honesty ceiling 複述 V10/V11 機制。值相符。single-sample → P-caveat。"
+    },
+    {
+      "id": "06-09",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "VERIFIED_RESULTS.md:132,138 (T3 usability NEGATIVE; '可分'≠'可救 ambiguous read' lean 8/8<0.5)",
+      "note": "與 01-19 同源, T3 usability NEGATIVE 逐字命中 V11c 定論 → P。"
+    },
+    {
+      "id": "06-10",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "VERIFIED_RESULTS.md V11b:149 (T2 OVERSTATED 降級: H3 依定義無 germline 真值; rigor_t2 對 H3 只算 margin 無 AUC 無 null; '56% 高信心'無 null 對照)",
+      "note": "'T2 勿宣稱可歸 H3(只證 1-1/2-1 可分; H3 無真值)' 精確命中 V11b 對抗審查修正 → P。"
+    },
+    {
+      "id": "06-42",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "VERIFIED_RESULTS.md:131,138 (V11c 亞群 ALT vs 母本 REF 可分 ⭐3) ; 'G-B 正確 null 未跑→押 G-B 決定 R3/R6' = forward gap",
+      "note": "V11c ⭐3 存在性有 primary(P-caveat single-sample); '押 G-B' 部分為未跑構想(Q 成分)。整體以已驗證 ⭐3 為主 → I/LOGIC_EVIDENCE/P-caveat。"
+    },
+    {
+      "id": "07-12",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "b2_broad_scan.out:70 (TP ARI median=0.135 < null) + ledger 62 (GNAS A/B=1.000, RB1 DMR=1.000)",
+      "note": "'ARI 0.135 < null 且 GNAS/RB1=1.000' 兩數字精確命中。tier 🟢 對齊。single-sample → P-caveat。"
+    },
+    {
+      "id": "07-20",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/b2_broad_scan_results.json (het-NULL median ari = 0.17746295550782543; chr2:85568870 為精確匹配記錄)",
+      "note": "claim 宣稱 germline-het null ARI 0.177463 來源 b2_broad_scan_results.json — grep/計算精確命中(median het-NULL=0.177463)。⚠ claim 寫的檔名與實際路徑相符(檔在 genome_survey_v2/, 非頂層)。tier 🟢。最強溯源 → P。"
+    },
+    {
+      "id": "08-02",
+      "axisA": "S",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "ledger 60/64 (B2 clustering germline-allelic NEGATIVE p=0.922; HD-4=AF↔NGroups phasing) — D4/D6 否決理由=甲基側是 phasing/germline-allelic 非 somatic",
+      "note": "direction-card 裁決, 引 HD-4+B2 兩 primary NEGATIVE 否決 D4/D6。single-sample → P-caveat。"
+    },
+    {
+      "id": "08-11",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "ledger 60/64 (ISM 機制上已做 read-level clustering; 揭示 germline-allelic 非 somatic)",
+      "note": "D2 裁決 🟡 PROBE — 判斷型 claim, 機制有 primary 支撐(ISM clustering 真實), tier 🟡 對應 PROBE。single-sample → P-caveat。"
+    },
+    {
+      "id": "08-13",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "b2_broad_scan.out:70 (TP 0.135 < het null 0.177 MW p=0.922) + ledger 60",
+      "note": "'ARI 0.135 < het null 0.177 p=0.922' 三數字精確命中。tier 🟢。single-sample → P-caveat。"
+    },
+    {
+      "id": "08-14",
+      "axisA": "S",
+      "axisB": "WEAK",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "external L3 (Landan2012/Derrien2021 epipolymorphism) — 非本 PRIMARY 清單; claim 自標 L3。本任務不查外部文獻真值",
+      "note": "外部文獻佐證, 非可 grep 的本專案 primary 數字。claim 自承 L3+'tumor 更混亂難找一致'(hedge)→ 軸B WEAK(supporting 角色)。defer 不全repo考古/不查外部文獻。"
+    },
+    {
+      "id": "08-15",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "ledger line 62 (NORMAL imprinted: GNAS A/B=1.000 完美分群, RB1 DMR=1.000); convergence md:77 同述",
+      "note": "imprinting 正控 GNAS/RB1=1.000 精確命中 ledger 62。tier 🟢。NORMAL HCC1395BL single-sample → P-caveat。"
+    },
+    {
+      "id": "08-16",
+      "axisA": "Q",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": true,
+      "primary_path": "ledger 66 (normal-anchored cis-test 確立為判別 cis-driven 方法, cohesion/ARI 不足) — 支持 'normal-anchored 減基線' 方向; 但 D2 套用此法逼 somatic subclone 為未執行構想",
+      "note": "方法構想(method-fix should-do)→ 軸A=Q。normal-anchored 概念本身有 ledger 66 primary(已用於 BRCA2 cis), 但用它逼 D2 somatic subclone 未跑 → 溯源 S。"
+    },
+    {
+      "id": "08-37",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "b2_broad_scan.out:70 (TP median ARI 0.135 < germline-het null 0.177 MW p=0.922) + ledger 62 (GNAS/RB1=1.000 ruler sound)",
+      "note": "B2 clustering NEG 核心數據, 全數字精確命中(含 ruler GNAS/RB1=1.000)。tier 🟢。single-sample → P-caveat。"
+    },
+    {
+      "id": "08-38",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": true,
+      "primary_path": "ledger 60 (clustering 是 germline-allelic 背景非 somatic); ledger 66 (normal-anchored 為判別法)。'須先減 germline-allelic 基線' = 推論型方法建議",
+      "note": "前半(germline-allelic 非 somatic)有 ledger 60 primary; 後半(normal-anchored 才能逼出 somatic)為推論方法(未在 subclone 上驗)→ 溯源 S。"
+    },
+    {
+      "id": "09-15",
+      "axisA": "S",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "ledger 60/64 (甲基分群=germline-allelic; 驗證機制=blind-ARI ruler+imprinting 正控+germline-het null); claim 引 master_draft:111",
+      "note": "validation-map synthesis, 三段(結論/驗證機制/研究機制)各有 ledger primary。引 master_draft:111(二次紀錄)+底層 ledger → P-caveat single-sample。"
+    },
+    {
+      "id": "09-16",
+      "axisA": "S",
+      "axisB": "WEAK",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "external (Landan2012/Derrien2021) — 非本 PRIMARY 清單",
+      "note": "同 08-14, 外部佐證非可 grep primary 數字。defer 不查外部文獻。軸B WEAK(supporting)。"
+    },
+    {
+      "id": "13-14",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "ledger 60 (D6/B2 NEG: within-haplotype somatic 亞群弱) + VERIFIED_RESULTS V10/V11(haplotype-level)",
+      "note": "ism_method 機制洞: '甲基分群是 germline-haplotype 層級(分 haplotype 強, 同-hap 內 somatic 亞群弱, D6 NEG)' — 與 V10/V11+ledger 60 一致。claim 自承 '無行號' 引用內部結論。single-sample → P-caveat。"
+    },
+    {
+      "id": "14-03",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "catalog_tag_counts.json (overall C=12868 = 'germline-allelic background' tag) + ledger 60(壓倒性 germline-allelic)",
+      "note": "'12,868 reliable' 精確命中 catalog_tag_counts.json overall.C=12868。'壓倒性 germline-allelic' 對齊 tag_legend C 定義+ledger。tier 🟢。single-sample dominant(HCC1395 C=1291 但全樣本合計 12868)→ P-caveat(口徑: 12868 為 7-樣本 catalog overall, 非單 HCC1395)。"
+    },
+    {
+      "id": "14-10",
+      "axisA": "S",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "catalog_tag_counts.json (n_loci=332705; C=12868 germline-allelic; A=1 clean cis somatic = chr17:79991120 TBC1D16) + ledger 66(BRCA2 vs chr17/TBC1D16 cis)",
+      "note": "整合 one-liner: '12,868 全 germline-allelic / 1/332,705 乾淨 somatic cis / chr17/TBC1D16 例外' — 三數字(12868/332705/A=1=TBC1D16)全精確命中 catalog。synthesis-of-catalog → S 軸A但 EVIDENCE_CHAIN(可追)。single-sample-derived catalog → P-caveat。"
+    },
+    {
+      "id": "15-02",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/catalog_tag_counts.json (overall.C=12868; tag_legend C='germline-allelic background') + ledger 60(cis-test 證 germline-allelic 非 somatic-ASM)",
+      "note": "claim 宣稱 12868 reliable(TAG-C) 來源 catalog_tag_counts.json — 精確命中(overall.C=12868, legend C=germline-allelic background)。最強溯源(citation 精確)。single-sample-dominant catalog → P-caveat(口徑見 14-03)。"
+    }
+  ],
+  "counts": {
+    "D": 8,
+    "I": 12,
+    "S": 9,
+    "Q": 3,
+    "P": 4,
+    "P_caveat": 22,
+    "S_prov": 6,
+    "F": 0,
+    "weak": 2,
+    "grep_confirmed": 28,
+    "evidence_chain": 20,
+    "logic_evidence": 10
+  },
+  "flags": [
+    "0 個 F(無捏造/孤兒); 所有 grep_confirmed=true 的核心數字(0.135/0.177463/p=0.922/GNAS-RB1=1.000/12868/332705/A=1-TBC1D16)在 primary 檔精確命中",
+    "口徑注意(14-03/15-02): '12,868 reliable germline-allelic' 為 catalog_tag_counts.json **7-樣本 overall.C**(HCC1395 單樣本僅 C=1291); 報告若寫成單樣本數會誤導 → 標 P-caveat",
+    "framing 內部張力(非數值矛盾): 02-04 用 germline-het(跨-hap)null 下 germline-allelic 結論, 而 01-25/02-03/02-05/06-42 同時承認 'germline-het 是錯對照, G-B(within-hap)正確 null 未跑' → 甲基-subclone 貢獻押在未執行的 G-B; 整群已誠實標 'V11c 存在性窄翻 candidate vs B2 ARI null NEGATIVE'(group subject 即點明此張力)",
+    "citation 精確檔名命中: 07-20(b2_broad_scan_results.json 0.177463)+15-02(catalog_tag_counts.json 12868) 兩條宣稱檔名與磁碟實檔逐值相符 = 最強溯源(P/P-caveat)",
+    "2 條 WEAK(08-14/09-16)為外部文獻 L3 佐證(Landan2012/Derrien2021), 非本專案可 grep primary; 已 defer 不查外部文獻, 標 S/WEAK; 4 條 Q(01-25/02-02/08-16 + 02-04 內 G-B 部分)為未執行方法構想/open question",
+    "所有 D/I/S claim 機制收斂: 甲基=germline-haplotype 層級(V10 normal 0.979≥tumor 0.866)+ within-hap subclone 弱(B2 TP 0.135<null 0.177 p=0.922 / T3 AUC 0.65<null 0.71)一致; single-sample HCC1395 + single longphase-S pipeline = 整群天花板 ⭐3, 故全標 P-caveat(無 single-pipeline-free 復現)"
+  ]
+}

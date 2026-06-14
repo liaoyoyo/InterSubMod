@@ -1,0 +1,57 @@
+{
+  "domain": "title_framing",
+  "scope_note": "標題與 carrying-claim 框架（進取版 Subclonal-reconstruction vs 保守版 de-confound；共驗證/co-validation vs de-confound floor）。跨文件矛盾 = 同一 subject 不同文件給出不一致的 值/數字 / 口徑 / 角色定位 / 方向裁決 / 框架。Primary 真值來源：research/autoresearch/evidence_ledger.jsonl（L27/L58/L95）、research/tpfp_loh_af_kde_discrimination/data/obs18_NG2_composition_by_sample.tsv（本 session 獨立重算）、catalog_R6 + ledger:95。audited/ 與 challenge/ 兩套裁決在數個 subject 上互相矛盾，是本 domain 矛盾的主要來源。",
+  "n_contradictions": 5,
+  "contradictions": [
+    {
+      "subject": "phasing 脊柱 carrying-claim：NG=2 Inner same-hap 6/6 ≥93% vs 3/6 ≥93%（進取版 reconstruction 標題所靠的正面數字）",
+      "claim_a": "「same-hap ≥93% 6/6」為 OVERSTATED，實測 0.840/0.939/0.759/0.429/0.932/0.920 = 只 3/6 ≥93%（方向對量級錯，必修）。source_doc: ledger:95 overstated_flag + audited/G05.json（claims 07-22/11-28/11-03/11-30/11-36/14-33/05-35/11-29，~14 claim 採此「修正」）+ consolidated G05；散見 doc_library/catalog_provenance/formal_arch/prereg_fallback 8+ 文件標 🔴 必修。",
+      "claim_b": "「6/6 ≥93% same-hap」是正確的 same-hap OCCUPANCY（phasing 純度）；獨立從原始 TSV 重算得 0.9320/0.9897/0.9885/0.9651/0.9829/0.9704（對齊 ledger:27 OLD 集 93.2/99.0/98.8/96.5/98.3/97.0 到 3-4 位小數），6/6 ≥93% 為真。所謂「修正後 3/6」實為 same_HP1 TP-rate（另一個量），不該拿來取代 same-hap%。source_doc: challenge/G05.json（headline_challenge + key_recompute_evidence，verdict REFUTED）+ CURRENT_FOCUS:158（OLD 6/6 framing）+ ledger:27（自身已把 same-hap% 與 HCC1954 TP 0.43 分列為兩個量）。",
+      "conflict": "同一 subject 兩個不同 number-set 被當成『正確值』：audited 把 3/6 當修正、6/6 當錯誤；challenge 用 raw-TSV 證 6/6 才對、3/6 是 metric-confusion（混 occupancy 與 TP-rate）。",
+      "severity": "🔴",
+      "which_correct": "claim_b 正確。本 session 從 primary 原始檔 research/tpfp_loh_af_kde_discrimination/data/obs18_NG2_composition_by_sample.tsv 獨立重算：same-hap occupancy=(n_sameHP1+n_sameHP2)/total NG=2 Inner = 0.9320/0.9897/0.9885/0.9651/0.9829/0.9704（6/6 ≥93%，對齊 ledger:27 OLD 集到 3-4 位小數）；same_HP1 TP-rate = 0.9589/0.9385/0.7586/0.4289/0.9318/0.9196（其中 0.429=HCC1954 TP-rate，ledger:27 早已明列為『phasing 仍 same-hap correct，但 TP rate 受影響』的另一個量）。ledger:95 的 overstated_flag 把 same_HP1 TP-rate 誤標成 same-hap%，是 metric-confusion 而非 provenance fix。（HCC1395 在『修正集』為 0.840，TSV 兩個量皆不符〔TP 0.959 / occupancy 0.932〕→『修正集』連自身來源都不自洽，更弱。）",
+      "correction_needed": "撤回 ledger:95 overstated_flag 與所有採『3/6 修正』的 claim（audited/G05.json 07-22/11-28/11-03/11-30/11-36/14-33/05-35/11-29、consolidated 同步條目、formal_arch §2.6 05-35、doc_library 07-22/07-30、catalog_provenance 11-03/11-28/11-29/11-30/11-36、prereg_fallback 14-33）；保留 6/6 ≥93% same-hap 但明確標註度量 = same-hap OCCUPANCY（phasing 純度），與 same_HP1 TP-rate 顯式區分以免下游再混。並修正引用行號 bug：多條 cite CURRENT_FOCUS:137（實為 HKU handoff plan）應改 CURRENT_FOCUS:158。",
+      "additional_caveat": "即使 6/6 occupancy 為真，phasing 脊柱仍受 by-construction circularity（R-SELFREF #21 未跑）+ single-pipeline ClairS-TO ⭐3 限制（audited/G05 + challenge/G05 共識），這不改變本矛盾的裁決方向，但限制其作為進取版 positive headline 的強度。"
+    },
+    {
+      "subject": "保守版 carrying-claim 的 de-confound floor 數字：『全基因組僅 1 乾淨 somatic cis』的分母（1/332,705 全 catalog vs 1/816 HCC1395 可測 HP-axis loci）",
+      "claim_a": "de-confound floor / 保守版 headline：『332,705 位點僅 1 乾淨 somatic cis』『全基因組僅 1/332,705 乾淨 somatic cis』。source_doc: master_map 06-03 + catalog_r6 15-18/15-03/15-10 + formal_arch 05-11/05-02 + prereg_fallback 14-04 + consolidated G01/G09（全用 332,705 全 catalog 為分母講『genome-wide 僅 1』）。",
+      "claim_b": "cis-test 只在 HCC1395 的 816 HP-axis loci 有真值；其餘 ~331,889 位點 + 另 5 樣本從未 cis-tested。正確口徑是『HCC1395 816 可測 HP-axis loci 中僅 1』，非 genome-wide × 6 樣本。source_doc: direction_cards 08-39（single-sample 天花板 cis line『1/816 clean』）+ challenge/G01.json S2（範圍謊言）+ audited/G13.json 08-39 flag（CONFLICT-候選/口徑：R6+09 用 1/332,705 全 catalog 分母，此處 1/816 HP-axis testable 分母，兩者皆真但分母不同）+ catalog_r6 15-08（A/B/F 三 cis-based TAG 只在 HCC1395）。",
+      "conflict": "同一『乾淨 somatic cis 稀有性』結論被掛在兩個不同分母上：332,705（全 catalog，製造 genome-wide 已測陰性的假象）vs 816（HCC1395 唯一有 cis 真值的可測子集）。『全基因組（genome-wide）』字面與 6-樣本 framing 把『未測』讀成『已測陰性』。",
+      "severity": "🔴",
+      "which_correct": "兩個數字本身皆可溯（catalog_R6 TAG-A=1 + ledger:95；direction_cards 1/816），但作為 carrying-claim 的『稀有性宣稱』口徑須以 1/816（HCC1395 可測 HP-axis loci）為準：cis-test 的真值只在 816 loci 上存在（catalog_r6 15-08 + ledger:95『cis/copy 僅 HCC1395』）。『1/332,705 genome-wide』把未做 cis-test 的 ~331,889 位點 + 5 個未測樣本算進『已驗為非-cis』，是範圍外推。",
+      "correction_needed": "在保守版 headline / de-confound floor 敘述（master_map 06-03、catalog_r6 15-18/15-03、formal_arch §2.3 05-11/05-02 abstract、prereg_fallback 14-04）加範圍 caveat：『在 HCC1395 816 個有 cis 真值的 HP-axis loci 中僅 1 乾淨 somatic cis（chr17/TBC1D16）』，並把『332,705 位點 7-TAG』與『816 cis-testable』兩個分母在文中顯式分開；勿讓『genome-wide / 全基因組僅 1』被讀為 6 樣本全基因組已驗陰性。",
+      "additional_caveat": "此 caveat 是 challenge/G01 S2 與 audited/G13 08-39 的共識；它弱化但不推翻保守版 floor（floor 的核心是『甲基分群壓倒性 germline-allelic、不能 filter』，仍 🟢），只要求把稀有性的分母誠實標清楚。"
+    },
+    {
+      "subject": "carrying-claim 標題本身：進取版『Subclonal reconstruction using somatic haplotagging and methylation』 vs 保守版『Read-level characterization of ASM: methylation tracks germline not somatic』",
+      "claim_a": "兩版 carrying-claim 並存且尚未在標題層收斂，是『同 repo 兩文件刻意並列的未收斂狀態』，非互相矛盾的事實衝突；不標 CONFLICT（06-01/06-06 本身就誠實描述此並存）。進取版 headline（somatic haplotagging 重建 LOH-constrained 子克隆，Grade B+ ⭐3）有 foundation/ledger 佐證、可作為主軸候選。source_doc: audited/G01.json（auditor_note + 01-01/02-06/03-01/06-02 給 P/P-caveat、flags『非 CONFLICT』）+ foundation:9 + master:00_PAPER_MASTER title + consolidated G01 06-01/06-02。",
+      "claim_b": "進取版 headline 作為 positive carrying-claim『邏輯站不住』，應 REFUTED / 降為 §2.6 支撐 observation：其正面性依賴 (1) self-reference 循環（甲基差異用 longphase-S 矯正後 HP tag 驗證 longphase-S 自身產物，VERIFIED V11b cross-cutting #1/#4；centroid-LOO pat_auc 循環膨脹至 0.86）、(2) 單樣本 HCC1395 單 pipeline ⭐3 窄翻案（V11c 未達 reopen NEGATIVE 門檻）、(3) 06-04 自承未解的 HD-1（R-SELFREF）是當 headline 的必要前提，G-A 跨樣本至今 OPEN。保守版（de-confound + germline-tracking）才是站得住的一端。source_doc: challenge/G01.json（verdict REFUTED on 06-02、worst=06-02、systemic_findings S1/S4/S5）+ foundation §4:69（HD-1 OPEN）。",
+      "conflict": "對『進取版 reconstruction 標題能否作為 co-equal carrying-claim』的方向裁決不一致：audited 視為誠實未收斂、進取版可當主軸候選；challenge 判進取版 headline 為未證循環、必須降為支撐、headline 應採保守版。",
+      "severity": "🟡",
+      "which_correct": "部分可依 primary 判定，傾向 claim_b 的『進取版需降調』：(a) HD-1（R-SELFREF）OPEN 為事實（ledger:58 confound_control『full 7-sample flag-on negative control NOT yet run』；foundation §4:69）；(b) reconstruction 的核心正面證據 V10/V11c 為單樣本 HCC1395 單 longphase-S pipeline（ledger:95 tier『⭐3 single-pipeline；cis/copy 僅 HCC1395』）；(c) 06-04（兩文件共識）自承『進取版需 HD-1 否則脊柱不能當 positive headline』。故進取版在 HD-1 未解 + 跨樣本 G-A 未跑前不應作為已就緒 positive headline。但『標題層兩版並存』本身（06-01/06-06）是誠實盤點、非捏造——audited 對『盤點誠實』的判定正確，分歧只在『進取版那一端是否該被降調』。",
+      "correction_needed": "在 master_map / foundation / launch_readiness 的 carrying-claim 段落明確標註：進取版『Subclonal reconstruction』headline contingent on 未解的 HD-1（R-SELFREF）+ 跨樣本 G-A，當前不可作為已就緒 positive headline；開寫時 headline 採保守版（germline-tracking + rare exception，05-09/14-28），reconstruction 降為 §2.6 支撐 observation，待 HD-1 解 + G-A 跑完再評估升格。consolidated G01 應把 06-02 的 contradiction_candidate 升為 challenge 已判 REFUTED 的狀態。",
+      "additional_caveat": "此為『進取 vs 保守框架未收斂』的 carrying-claim 層分歧，是論文開寫前需用戶拍板的真實 blocker（DEC-6 現選暫緩 HD-1 → phasing 維持 Grade B+，audited/G13 04-51）。標 🟡 因兩版證據 ~80% 共享、且兩 auditor 對『盤點本身誠實』有共識；爭點僅在進取端的降調與否，不影響保守版 floor 可寫性。"
+    },
+    {
+      "subject": "保守版 abstract carrying-claim 用的 reliable methylation read-clustering 計數（12,868 vs 11,689）",
+      "claim_a": "abstract / rule：『reliable methylation read-clustering exists at 12,868 loci』『reliable 甲基分群 12,868（3.87%, TAG-C）但全 germline-allelic』。source_doc: formal_arch 05-11（abstract）+ 05-21 §2.3 + master_map 06-33 + catalog_r6 15-18/15-02 + prereg_fallback 14-03/14-11 + consolidated G01 06-03/15-18、G09 05-02。",
+      "claim_b": "raw reliable（Significant/CramersV Cochran gate）= 11,689；12,868 = TAG-C（reliable-clustering 中被 cis-tag 為 germline-allelic 的子集）；latent = 28,254。把 12,868 講成『reliable 甲基分群』混用了兩種分母。source_doc: ledger:95 findings（reliable=11689; latent=28254; C=12868）+ catalog_r6 15-06（reliable 11,689 / latent 28,254 / none 三態）+ challenge/G01.json S3 + audited/G13.json 12-02 flag（『12,868=TAG-C germline-allelic，R6 raw reliable=11,689』）。",
+      "conflict": "carrying-claim 的『reliable 甲基分群』數量在不同文件間用了兩個不同分母：12,868（TAG-C，reliable∩germline-allelic∩已 cis-test）vs 11,689（raw Significant-gate reliable）。同一形容詞『reliable』指向兩個量。",
+      "severity": "🟡",
+      "which_correct": "兩數皆可溯且皆真（ledger:95 + catalog_r6 15-06：reliable=11,689、TAG-C=12,868），矛盾在『reliable』一詞的雙義口徑。abstract 用『reliable read-clustering = 12,868』時，12,868 嚴格是 TAG-C（reliable 分群中經 cis-test 判為 germline-allelic 的子集，3.87%），而非 raw reliability gate 的 11,689。投稿前須統一名詞，否則被審稿抓口徑不一致。",
+      "correction_needed": "在 formal_arch abstract（05-11）+ §2.3（05-21）+ master_map 06-33 + catalog_r6 15-18 統一口徑：明確區分『CramersV Significant-gate reliable = 11,689』與『reliable 且 cis-test 判為 germline-allelic 的 TAG-C = 12,868（3.87%）』；carrying-claim 句若要講『reliable 分群壓倒性 germline-allelic』應用 TAG-C 12,868（因該句正是在描述 germline-allelic 子集），並在 Methods 標清 reliable gate 的原始計數 11,689。",
+      "additional_caveat": "此口徑混用主要落在 catalog_count 域（G09），但因 12,868 被直接寫進保守版 abstract carrying-claim（formal_arch 05-11『reliable methylation read-clustering exists at 12,868 loci』），在 title_framing 域顯化為 carrying-claim 用詞與分母不一致，故併入。不影響 floor 結論方向（germline-allelic、不能 filter 仍成立）。"
+    },
+    {
+      "subject": "三訊號『正交共驗證（orthogonal co-validation）』的框架措辭（carrying-claim 與標題候選用語）",
+      "claim_a": "carrying-claim / 標題候選用『三訊號正交共驗證（orthogonal co-validation）』：somatic／haplotype／甲基 read-level 正交共驗證同一 LOH 重塑事件；title 候選含『co-validation』『co-validates』。source_doc: imrad_framework 04-02/04-44 + storyline 10-15/10-06 + validation_map 09-17（『somatic↔haplotype orthogonal co-verification 7/7』）+ prereg_fallback 14-29/14-30 title 候選 + consolidated G05 09-17。",
+      "claim_b": "『正交/orthogonal』誇大訊號獨立性：甲基訊號由 longphase-S HP tag 定義、somatic call 與 haplotype tag 同出 ClairS-TO + phasing pipeline → 三訊號同源非獨立，是 by-construction circularity 被當作優點；應改『consistent-with』而非『orthogonal independent verification』。source_doc: challenge/G01.json（04-02 CHALLENGED、14-29/14-30 CHALLENGED、S1）+ challenge/G05.json（09-17/10-15/04-07 CHALLENGED：『orthogonal』over-claims，co-verification not independent）。",
+      "conflict": "對 carrying-claim 與標題候選中『co-validation/正交』一詞是否成立的裁決不一致：audited 接受『正交共驗證』作為敘述弧與標題候選用語（給 P-caveat）；challenge 判其誇大訊號獨立性、應降為『consistent-with』。",
+      "severity": "🟡",
+      "which_correct": "傾向 claim_b（措辭須降調）：primary 顯示甲基差異所依賴的 HP tag 與 phasing 同源（ledger:95 cis/copy 軸基於 HP-axis；VERIFIED V11b cross-cutting #1『被矯正的 HP tag 本身是 longphase-S 產物』），且 phasing 脊柱自身帶 R-SELFREF by-construction circularity（ledger:58）。因此『三訊號互相獨立佐證（orthogonal）』在 single-pipeline 下不成立；可保留『三訊號一致指向同一事件（consistent-with）』。屬措辭/框架層，不改變 chr17 例外存在與否。",
+      "correction_needed": "在 carrying-claim（imrad_framework 04-02/04-44、validation_map 09-17、storyline 10-15）與 title 候選（prereg_fallback 14-29/14-30）把『正交共驗證 / orthogonal co-validation / co-validates』改為『一致佐證 / consistent-with / mutually consistent』，並在文中標明三訊號 single-pipeline 同源、非獨立驗證；標題不宜把 contingent 的 co-validation（需 #21/#22）放進主標。",
+      "additional_caveat": "標 🟡 因屬措辭/獨立性誇大層，非數值或方向錯誤；chr17/TBC1D16 三訊號一致的事實本身在兩 auditor 間無爭議（perm p=0.001 single-locus single-sample，Bonferroni 後可能 NS 是另一獨立 caveat，G08）。"
+    }
+  ]
+}

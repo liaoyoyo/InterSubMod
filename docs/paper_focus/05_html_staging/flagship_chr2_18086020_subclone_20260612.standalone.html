@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>旗艦個案 chr2:18,086,020 — read-level 甲基 × somatic subclone 重建(grep-verified)</title>
+<!--
+  數據來源(全 grep-verified，無捏造):
+  ISM run research/flagship_chr2_18086020_20260612/ism_out/.../chr2_18071020_18101020/
+  significance.json + reads.tsv + metadata.txt（2026-06-12 補跑，binary build/bin/inter_sub_mod，v6 BAM，w=15000）
+  對照位點 18,096,269: .../V6_on_fp/.../chr2_18096269/chr2_18091269_18101269/clustering/significance.json
+  build_commit 069cadb。
+-->
+<style>
+  :root{--ink:#1c2128;--muted:#656d76;--line:#d0d7de;--bg:#f6f8fa;--card:#fff;--accent:#0969da;
+        --ref:#4dabf7;--alt:#ff6b6b;--hi:#fd7e14;--lo:#74c0fc;--hp1:#5c7cfa;--hp11:#9775fa;--hp2:#fa5252;
+        --green:#1a7f37;--greenbg:#e6f4ea;--yellow:#9a6700;--yellowbg:#fff8e1;--red:#cf222e;--redbg:#ffeef0;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,"PingFang TC","Microsoft JhengHei","Noto Sans CJK TC",sans-serif;
+       color:var(--ink);background:var(--bg);line-height:1.55;font-size:15px}
+  .wrap{max-width:1060px;margin:0 auto;padding:24px 26px}
+  h1{font-size:21px;margin:0 0 4px} .sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  h2{font-size:17px;margin:0 0 8px}
+  .l0{background:var(--bg);border-left:4px solid var(--accent);padding:10px 14px;border-radius:6px;margin:6px 0}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:var(--bg)}
+  .badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11.5px;font-weight:600}
+  .b-green{background:var(--greenbg);color:var(--green)} .b-yellow{background:var(--yellowbg);color:var(--yellow)}
+  .b-red{background:var(--redbg);color:var(--red)}
+  code{background:#eff1f3;padding:1px 5px;border-radius:4px;font-size:12px}
+  .note{color:var(--muted);font-size:12.5px} .verified{color:var(--green);font-weight:600}
+  figure{margin:0} figcaption{font-size:12.5px;color:var(--muted);margin-top:6px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;margin:8px 0}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .sw{width:13px;height:13px;border-radius:3px;display:inline-block;border:1px solid #00000022}
+  footer{color:var(--muted);font-size:12px;margin:18px 0 30px;border-top:1px solid var(--line);padding-top:10px}
+  @media print{body{background:#fff}section{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>旗艦個案 · chr2:18,086,020 — read-level 甲基化 × somatic subclone 重建</h1>
+<div class="sub">HCC1395 · ONT · 區段 chr2:18,071,020–18,101,020(30 kb,57 reads × 203 CpG)· <span class="verified">grep-verified（2026-06-12 ISM 補跑）</span> · build <code>069cadb</code></div>
+
+<section>
+  <h2>L0 — 一眼結論</h2>
+  <div class="l0">
+    在這個 LOH 區段,longphase-S 分出 <b>germline 母本 HP1</b> 與 <b>somatic 子克隆 HP1-1</b>;
+    位點 chr2:18,086,020 的 <b>A 等位專一富集在 HP1-1 子克隆</b>(母本 HP1 19 reads 全 G、子克隆 36 reads 中 28 個 A);
+    而 read-level <b>甲基化分群顯著</b>(PERMANOVA F=10.6, p=0.01)且<b>跟著 haplotype/子克隆結構</b>(Cramér's V=0.67)。
+    → <b>somatic 突變 + 甲基化 在 read 層級共同標示同一個子克隆重塑事件</b>(case-demonstration)。
+  </div>
+  <p class="note">⚠ 誠實邊界:18,086,020 <b>不在 somatic caller 的 VCF</b>(是「標記子克隆的 het」,A 富集 HP1-1),其甲基跟 haplotype → 此位點的甲基結構含 germline-allelic 成分;子克隆甲基的 <b>somatic 專一性</b>仍待 within-haplotype 對照(G-B,未跑)。單樣本 ⭐3。</p>
+</section>
+
+<section>
+  <h2>核心數據(全 grep-verified)</h2>
+  <table>
+    <tr><th>項目</th><th>值</th><th>來源</th></tr>
+    <tr><td>區段 / 錨點</td><td>chr2:18,071,020–18,101,020 / 錨 chr2:18,086,020 G→A</td><td><code>metadata.txt</code></td></tr>
+    <tr><td>reads × CpG</td><td>57 reads(32+/25−)× 203 CpG;距離 NHD,1596 對 100% 有效,平均共覆蓋 54.95 CpG</td><td><code>metadata</code> / <code>distance/NHD/stats.txt</code></td></tr>
+    <tr><td>甲基分群結構</td><td><b>PERMANOVA F=10.61, p=0.01</b>(dispersion_warning=false)· optimal_k=2</td><td><code>significance.json</code></td></tr>
+    <tr><td>分群 ↔ HP</td><td>Cramér's V=<b>0.669</b>(p=0.027)· hp_family 0.694(p=0.003)</td><td><code>significance.json</code></td></tr>
+    <tr><td>分群 ↔ het allele</td><td>Cramér's V=0.270(p=0.097)· allele PERMANOVA F=22.99(p=0.01)</td><td><code>significance.json</code></td></tr>
+    <tr><td>等位 × haplotype</td><td><b>HP1(母本)19 reads 全 REF(G)</b>;<b>HP1-1(子克隆)36 reads = 28 ALT(A)/ 8 REF</b>;HP2 2 reads REF</td><td><code>reads.tsv</code> 逐 read</td></tr>
+    <tr><td>全區等位比</td><td>28 A / 29 G ≈ 49/51 <span class="badge b-green">✅ 與圖上 IGV「A39/G40」吻合</span></td><td><code>reads.tsv</code> vs 用戶圖 #1</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>圖解 — read × haplotype × 等位 × 甲基(verified data schematic)</h2>
+  <div class="legend">
+    <span><span class="sw" style="background:var(--ref)"></span>REF 等位 (G)</span>
+    <span><span class="sw" style="background:var(--alt)"></span>ALT 等位 (A) = 子克隆標記</span>
+    <span><span class="sw" style="background:var(--hi)"></span>高甲基</span>
+    <span><span class="sw" style="background:var(--lo)"></span>低甲基</span>
+    <span><span class="sw" style="background:var(--hp1)"></span>HP1 母本</span>
+    <span><span class="sw" style="background:var(--hp11)"></span>HP1-1 子克隆</span>
+  </div>
+  <figure>
+  <svg viewBox="0 0 1000 470" width="100%" font-family="system-ui,sans-serif" role="img" aria-label="chr2:18,086,020 subclone schematic">
+    <!-- 座標軸 -->
+    <text x="20" y="26" font-size="14" font-weight="700">區段 chr2:18,071,020 – 18,101,020(30 kb)· 3 個關鍵位點</text>
+    <line x1="60" y1="48" x2="940" y2="48" stroke="#888" stroke-width="1.5"/>
+    <!-- 三個關鍵位點 -->
+    <g font-size="11" text-anchor="middle">
+      <line x1="170" y1="44" x2="170" y2="52" stroke="#888"/><text x="170" y="68">18,072,546</text><text x="170" y="82" fill="#1a7f37">somatic TP</text>
+      <line x1="520" y1="44" x2="520" y2="52" stroke="#888"/><text x="520" y="68" font-weight="700">18,086,020 ★</text><text x="520" y="82" fill="#9a6700">het→標記子克隆</text>
+      <line x1="830" y1="44" x2="830" y2="52" stroke="#888"/><text x="830" y="68">18,096,269</text><text x="830" y="82" fill="#cf222e">somatic FP(k=5)</text>
+    </g>
+
+    <!-- 系譜樹(左) -->
+    <g font-size="12">
+      <text x="20" y="120" font-weight="700">系譜(longphase-S tag)</text>
+      <circle cx="40" cy="150" r="6" fill="#adb5bd"/><text x="54" y="154">Normal = ref(G)</text>
+      <line x1="40" y1="156" x2="40" y2="200" stroke="#888"/>
+      <circle cx="40" cy="206" r="6" fill="var(--hp1)"/><text x="54" y="210">HP1 母本(germline,全 G)</text>
+      <line x1="40" y1="212" x2="40" y2="256" stroke="#888"/>
+      <circle cx="40" cy="262" r="6" fill="var(--hp11)"/><text x="54" y="266">HP1-1 子克隆(somatic,富集 A)</text>
+      <text x="20" y="300" font-size="11" fill="#656d76">＋甲基化分群(k=2)與此系譜結構顯著共變</text>
+    </g>
+
+    <!-- read 群塊(右):HP1 vs HP1-1 -->
+    <g>
+      <text x="600" y="120" font-size="12" font-weight="700">reads(依 HP / 等位 / 甲基)</text>
+      <!-- HP1 block: 19 reads 全 REF -->
+      <rect x="600" y="132" width="330" height="70" fill="none" stroke="var(--hp1)" stroke-width="2" rx="6"/>
+      <text x="608" y="148" font-size="11" fill="var(--hp1)" font-weight="700">HP1 母本 · 19 reads · 全 REF(G)</text>
+      <g>
+        <!-- 等位欄 -->
+        <g>
+          <rect x="608" y="156" width="150" height="38" fill="var(--ref)" opacity="0.85"/>
+          <text x="683" y="180" font-size="11" text-anchor="middle" fill="#fff">G × 19</text>
+        </g>
+        <!-- 甲基欄(代表:母本一種模式) -->
+        <rect x="766" y="156" width="78" height="18" fill="var(--hi)" opacity="0.8"/>
+        <rect x="766" y="176" width="78" height="18" fill="var(--lo)" opacity="0.8"/>
+        <text x="852" y="170" font-size="10">甲基模式 A</text>
+      </g>
+      <!-- HP1-1 block: 36 reads 28 ALT / 8 REF -->
+      <rect x="600" y="214" width="330" height="78" fill="none" stroke="var(--hp11)" stroke-width="2" rx="6"/>
+      <text x="608" y="230" font-size="11" fill="var(--hp11)" font-weight="700">HP1-1 子克隆 · 36 reads · 28 A / 8 G</text>
+      <g>
+        <rect x="608" y="238" width="117" height="46" fill="var(--alt)" opacity="0.85"/>
+        <text x="666" y="265" font-size="11" text-anchor="middle" fill="#fff">A × 28</text>
+        <rect x="725" y="238" width="33" height="46" fill="var(--ref)" opacity="0.85"/>
+        <text x="741" y="265" font-size="10" text-anchor="middle" fill="#fff">G×8</text>
+        <rect x="766" y="238" width="78" height="22" fill="var(--lo)" opacity="0.85"/>
+        <rect x="766" y="262" width="78" height="22" fill="var(--hi)" opacity="0.85"/>
+        <text x="852" y="254" font-size="10">甲基模式 B</text>
+      </g>
+      <!-- HP2 -->
+      <text x="600" y="312" font-size="11" fill="var(--hp2)">HP2 · 2 reads · REF(G)</text>
+    </g>
+
+    <!-- 顯著性標註 -->
+    <g font-size="12">
+      <rect x="60" y="340" width="880" height="58" fill="var(--greenbg)" stroke="#1a7f3744" rx="8"/>
+      <text x="74" y="362" font-weight="700" fill="#1a7f37">verified 統計</text>
+      <text x="74" y="382" font-size="12">甲基分群 PERMANOVA F=10.61, p=0.01(非噪音、非離散假象)· 分群↔HP Cramér's V=0.669(p=0.027)· 全區 A/G ≈ 49/51 與 IGV 吻合</text>
+    </g>
+    <text x="60" y="424" font-size="11" fill="#9a6700">⚠ schematic：群塊高度/數量按 verified 計數比例繪；甲基模式 A/B 為示意分群(實 203-CpG 矩陣見 methylation.csv)。</text>
+    <text x="60" y="444" font-size="11" fill="#9a6700">⚠ 18,086,020 不在 somatic VCF（het 標記子克隆）；甲基↔HP → 含 germline-allelic 成分，somatic-專一性待 G-B 對照。</text>
+  </svg>
+  <figcaption>圖:verified data schematic。read 群塊比例、等位計數、統計值皆來自 ISM 輸出(reads.tsv / significance.json);甲基模式為示意分組,真值為 57×203 機率矩陣。</figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>兩個互補的 read-level 甲基結構(同一區段)</h2>
+  <table>
+    <tr><th>位點</th><th>類型</th><th>甲基分群對齊</th><th>k</th><th>PERMANOVA</th><th>意義</th></tr>
+    <tr><td><b>chr2:18,086,020 ★</b></td><td>het(標記 HP1-1 子克隆)</td><td><b>HP/subclone</b>(V=0.67)</td><td>2</td><td>F=10.6, p=0.01</td><td>甲基跟 haplotype/子克隆譜系</td></tr>
+    <tr><td>chr2:18,096,269</td><td>somatic FP-candidate</td><td><b>somatic allele</b>(V=0.97, HP=0)</td><td>5</td><td>F=40.0, p=0.01</td><td>甲基跟 somatic 等位本身</td></tr>
+  </table>
+  <p class="note">兩種模式並存 → read-level 甲基化既能跟「haplotype/子克隆譜系」也能跟「somatic 等位」,正是「甲基 + 突變共同重建子克隆」的機制基礎。對照位點 18,096,269 真值見 <code>research/paired_priority_bug_audit/phaseC_genome_three_way_with_significance/V6_on_fp/.../chr2_18096269/.../significance.json</code>。</p>
+</section>
+
+<section>
+  <h2>誠實分層(這個個案能/不能宣稱什麼)</h2>
+  <table>
+    <tr><th>層</th><th>內容</th><th>tier</th></tr>
+    <tr><td>實際數據</td><td>57×203 ISM;k=2 顯著分群;A 富集 HP1-1(母本全 G);甲基↔HP V=0.67;對照 18,096,269 allele-linked</td><td><span class="badge b-green">✅ grep-verified</span></td></tr>
+    <tr><td>合理推論</td><td>「somatic 突變 + 甲基 read 層級共同標示子克隆重塑」(case-demonstration);系譜 Normal→HP1→HP1-1</td><td><span class="badge b-yellow">🟡 reasoned(數據支撐)</span></td></tr>
+    <tr><td>待驗 / 邊界</td><td>18,086,020 非 caller-somatic(het 標記);甲基 somatic-專一性需 within-HP 對照(G-B,未跑);更細亞群(圖的 2-1/2-2-x)需更多 somatic 位點 + cohort;單樣本單 pipeline ⭐3;大規模驗證數字與標準=進行中</td><td><span class="badge b-red">⚠ 需補</span></td></tr>
+  </table>
+</section>
+
+<footer>
+  <b>Provenance（全可追）：</b>
+  ISM 補跑 <code>research/flagship_chr2_18086020_20260612/ism_out/anchor_18086020/chr2/chr2_18086020/chr2_18071020_18101020/</code>
+  (binary <code>build/bin/inter_sub_mod</code>,v6 BAM <code>longphase-to-mod/output/v6_germline_absent_revert/tumor_tagged.bam</code>,ref GRCh38,window 15000,2026-06-12)·
+  對照位點 <code>...V6_on_fp/.../chr2_18096269/...</code>·
+  原始圖 <code>figures/甲基關聯位點狀況例子*.jpg</code>(2026-05-23)·
+  build_commit <code>069cadb</code> · 所有數字 grep-verified,無捏造（§13）。
+</footer>
+</div>
+</body>
+</html>

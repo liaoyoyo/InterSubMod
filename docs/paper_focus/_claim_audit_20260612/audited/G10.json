@@ -1,0 +1,242 @@
+{
+  "group_id": "G10",
+  "subject": "跨樣本復現 (6/6 excess-over-null +0.101–0.241 現象層; 同-locus 0/38 underpowered E[overlap]=0.16; LOH 抑制分群 6/6 OR<1; clusterability vs cov/CN)",
+  "auditor_note": "Auditor = strict provenance. grep 只查 PRIMARY 清單 (evidence_ledger.jsonl / VERIFIED_RESULTS.md) + 各 claim 自己宣稱的來源檔。核心跨樣本數字 (6/6 excess / 0/38 / E[overlap]=0.16 / 6/6 LOH OR<1) 全在 cross_sample/*_gwasm.json + asm_landscape.json + clusterability JSON + ledger 三處交叉命中且值相符。整 group 無捏造、無 CONFLICT。最大發現：claim 07-29 宣稱 'E[overlap]=0.16 未 file-stored' = FACTUALLY WRONG (asm_landscape.json:166 sum_expected_overlap=0.1636 + ledger 20260603_cross_sample_ASM_landscape 雙存)。",
+  "primary_truth_files_used": [
+    "research/autoresearch/evidence_ledger.jsonl",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/cross_sample/{HCC1395,HCC1937,HCC1954,H1437,H2009,COLO829}_gwasm.json (claim-cited *_gwasm.json)",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/cross_sample/cross_sample_synthesis.json (claim 09-21 cited :47)",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/cn_confound/cross_sample/asm_landscape.json (E[overlap] 真值)",
+    "research/tsg_promoter_asm_reviewer/genome_survey_v2/catalog/clusterability_vs_cov_cn.json + clusterability_cov_cn_extended.json (claim 15-xx cited report data_sources)"
+  ],
+  "claims": [
+    {
+      "id": "02-33",
+      "subject": "independent_validation",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "NOT in PRIMARY list at stated value (85-86% / Tier A/B). cited_source=none. ledger 0.85/0.86/85% hits scattered unrelated contexts — NOT a clean match, 不認列為命中。defer 不全repo考古 (可能 home: genome_survey_v2/analysis/agentB_robustness.py 或 independent-validation JSON 未在允許清單)。",
+      "note": "synthesis-of-synthesis 句 (integ_chapter 'characterization 站得住'). 5-layer 名目 (HP-perm+split-half+雙股+bootstrap) 合理但 85-86% pass-rate 在 PRIMARY 3 檔內 grep 不到。標 S。"
+    },
+    {
+      "id": "02-35",
+      "subject": "seqc2_cn_loh",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "provenance_caveat": "P-caveat方向佐證: 0.46× 具體值 grep 不到, 但 'SEQC2-LOH ASM 最低' 之方向被 clusterability_vs_cov_cn.json C_CN_HCC1395_TP (loh clustered_rate=0.0218 ≪ neutral 0.2223; LOH logistic OR=0.072) 強力佐證 → 機制方向真實.",
+      "grep_confirmed": false,
+      "primary_path": "0.46× enrichment 具體值 NOT found in PRIMARY 3 檔 (cited_source=none). 方向 (LOH 最低) 在 catalog/clusterability_vs_cov_cn.json:C_CN_HCC1395_TP 確認. defer 0.46× 確切來源 不全repo考古.",
+      "note": "一階解釋 (需兩 haplotype 才有 ASM = back-stop copy-confound). 機制方向 grep_confirmed via clusterability LOH-rate, 但 '0.46×' 量值本身在允許清單外 → 整 claim 標 S (量值未對到 primary)."
+    },
+    {
+      "id": "04-33",
+      "subject": "cross_sample",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "evidence_ledger.jsonl:cycle 20260603_genomewide_asm_rate_crosssample verdict='...REPRODUCES_6of6_samples...range_0.101_to_0.241_mean_0.168'; 同-locus 0/38 → 20260603_cross_sample_keypos_ASM_verification '0of38_cross_sample_somatic_recurrence'. 6 *_gwasm.json rate_excess_over_null 全>0.",
+      "note": "6/6 excess 🟡(phenomenon-level) + 0/38 underpowered 🟢 = IMRaD R5 一階詮釋. P-caveat: single-pipeline ClairS-TO → tier_capped_3 (ledger 自標)."
+    },
+    {
+      "id": "05-37",
+      "subject": "cross_sample_reproducibility",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "claim-cited 'T-PROV *_gwasm.json' → 6 檔 genomewide_somatic_asm.rate_excess_over_null = {0.2413,0.1705,0.196,0.1503,0.1513,0.101}; 6/6>0; min=0.101 max=0.2413 mean=0.1684; ledger 20260603_genomewide_asm_rate_crosssample 同值.",
+      "note": "純數據 claim (6/6 excess +0.101–0.241 mean 0.168). 值精確相符. P-caveat: single-pipeline → tier⭐3 封頂 (ledger CV=0.26)."
+    },
+    {
+      "id": "05-38",
+      "subject": "cross_sample_reproducibility",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "0/38: cross_sample_synthesis.json somatic_overlap (HCC1395 28 somatic_asm of_total 38; 其餘5樣本 n_somatic_at_keypos=0) + headline.n_recurrent_somatic=0 + ledger 20260603_cross_sample_keypos '0of38'. UNDERPOWERED/E[overlap]=0.16: asm_landscape.json:166 sum_expected_overlap=0.1636 + ledger 20260603_cross_sample_ASM_landscape 'expected_random_overlap_only_0.1636'.",
+      "note": "0/38 + E[overlap]=0.16 兩數皆 file-stored 且 ledger 雙存. @ONeill2024 外部引用屬 external corroboration (不在本群 primary grep 範圍, 數據本體已 P 命中)."
+    },
+    {
+      "id": "06-31",
+      "subject": "cross_sample",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "claim-cited '6/6 在 *_gwasm.json' → 6 檔 rate_excess_over_null 確認; 3 癌種 (breast×3 HCC1395/1937/1954 · lung×2 H1437/H2009 · melanoma×1 COLO829) 由各 *_gwasm.json meta.cancer_type 確認; ledger 同 (3of3_cancer_types).",
+      "note": "master_map R5 重述 05-37/04-33 同數據. mean 0.168 精確. P-caveat single-pipeline⭐3."
+    },
+    {
+      "id": "06-32",
+      "subject": "cross_sample",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "同 05-38: 0/38 (cross_sample_synthesis.json + ledger) + UNDERPOWERED E[overlap]=0.16 (asm_landscape.json:166 sum_expected_overlap=0.1636).",
+      "note": "private somatic → 0/38; E[overlap]=0.16 解釋 underpower. 兩數 file-stored + ledger 確認."
+    },
+    {
+      "id": "06-46",
+      "subject": "cross_sample",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "0/38 (synthesis+ledger) + 6/6 excess (6 gwasm) + LOH 抑制 6/6 OR 0.01–0.107: clusterability_cov_cn_extended.json C_summary{n_with_OR_lt_1_LOH_suppresses:6, OR_range:[0.01,0.107]} + C_ISM_LOH_proxy_per_sample_TP 6 值 {0.100,0.095,0.079,0.067,0.107,0.010}.",
+      "note": "⭐3 stated_tier 與 ledger single-pipeline cap 一致. 三組數字 (0/38 / 6/6 excess / 6/6 OR<1) 全 grep 命中. P-caveat: single-pipeline + CN-truth single-sample."
+    },
+    {
+      "id": "07-14",
+      "subject": "same_locus_recurrence",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "cross_sample_synthesis.json headline.n_recurrent_somatic=0 / recurrent_somatic_hits=[] / somatic_overlap of_total=38; ledger 20260603_cross_sample_keypos '0of38_cross_sample_somatic_recurrence'.",
+      "note": "doc_library 重述 0/38 同位點. cited_source=none 但值在 synthesis + ledger 雙命中 → P."
+    },
+    {
+      "id": "07-28",
+      "subject": "cross_sample_excess",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "claim 自承 'need 去 *_gwasm.json 補' → 已定位: 6 檔 cross_sample/*_gwasm.json genomewide_somatic_asm.rate_excess_over_null 確認 6/6 +0.101–0.241.",
+      "note": "doc_library provenance-tracking claim: 正確指出 6/6 excess 不在 cross_sample_synthesis.json (synthesis 只有 overlap/per_position, 無 excess) 而在 per-sample *_gwasm.json. 本稽核已補定位 → claim 自身 (數字在 gwasm) 正確. grep_confirmed."
+    },
+    {
+      "id": "07-29",
+      "subject": "overlap_expectation",
+      "axisA": "I",
+      "axisB": "WEAK",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "CLAIM-INTERNAL-ERROR: claim 宣稱 'E[overlap]=0.16 為 derived, 未 file-stored' — 實際 IS file-stored: asm_landscape.json:166 sum_expected_overlap=0.1636 (per-pair expected_overlap 完整列) + ledger 20260603_cross_sample_ASM_landscape verdict 'expected_random_overlap_only_0.1636'.",
+      "note": "🔴 此 provenance-tracking claim 本身 FACTUALLY WRONG: 數字 E[overlap]=0.16 確有 file-stored. claim 結論 ('需補計算說明') 因前提錯誤而失效. 標 WEAK + S (claim 內容不符 primary 真相). 數字本體真實 (0.1636) 但 claim 對其 provenance 的陳述捏造/過時."
+    },
+    {
+      "id": "08-61",
+      "subject": "difficulty1_alternative",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "策略性 synthesis 句 (改用 genome-wide private somatic + HP-shuffle null, '已做 6/6 excess'). 6/6 excess 本體已在 05-37 grep 命中; 但本 claim 是方法論建議 (用現象復現取代 FP 篩選 / normal 甲基更難) = synthesis-of-synthesis, 無獨立 primary 數字. defer 不全repo考古.",
+      "note": "direction_cards 方向建議. 引用的 6/6 excess 真實 (cross-ref 05-37), 但 claim 主體=研究策略詮釋 → S/LOGIC."
+    },
+    {
+      "id": "09-19",
+      "subject": "cross_sample_phenomenon",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "claim-cited '*_gwasm.json' → excess-over-null 機制確認 (各樣本 private somatic + HP-shuffle null, 6/6 excess>0); ledger 20260603_genomewide_asm_rate_crosssample 'each cancer somatic 重塑 allelic 甲基 phenomenon-level' 對應.",
+      "note": "validation_map 一階詮釋: phenomenon-level (非 cis) 復現. 驗證機制 (HP-shuffle null) 與 gwasm.json rate_strong_null 設計一致. P-caveat single-pipeline."
+    },
+    {
+      "id": "09-20",
+      "subject": "cross_sample_phenomenon_external",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "外部文獻 (O'Neill 189 tumors) — 不在 PRIMARY 內部 truth 清單. 屬 external corroboration, 非本 repo 數據. defer citation-verification (應走 /citation-verification 查 .bib, 非本群 primary grep).",
+      "note": "外部佐證 claim. 本稽核 scope=內部 primary, 外部引用標 S (本群不負責 external citation 真偽; 交 citation-verification)."
+    },
+    {
+      "id": "09-21",
+      "subject": "same_locus_recurrence",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "claim-cited 'cross_sample_synthesis.json:47' → 確認 line 47 = '\"n_recurrent_somatic\": 0' (即 0/38 來源, 精準命中行號). E[overlap]=0.16: asm_landscape.json:166 sum_expected_overlap=0.1636.",
+      "note": "✅ cited line:47 行號精確 (n_recurrent_somatic=0). 0/38 🟢 + E=0.16 🟡 雙數皆 file-stored. 最佳 provenance 之一 (有行號且命中)."
+    },
+    {
+      "id": "09-34",
+      "subject": "mechanism_excess_over_null",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "判準 '6/6 excess>0 → phenomenon 復現': 6 *_gwasm.json rate_excess_over_null 全>0 確認; ledger 20260603 'all_excess_over_null_positive'.",
+      "note": "validation_map 方法論詮釋 (excess-over-null 測跨樣本 generality). 判準與數據一致. P-caveat single-pipeline⭐3."
+    },
+    {
+      "id": "10-17",
+      "subject": "asm_cross_sample_replication",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "甲基現象層跨 6 樣本/3 癌種復現: ledger 20260603_genomewide_asm_rate_crosssample 'REPRODUCES_6of6_samples_3of3_cancer_types'; 6 *_gwasm.json meta.cancer_type {breast×3,lung×2,melanoma×1}.",
+      "note": "storyline 高層敘述 (6 樣本/3 癌種). 數據支撐確認. P-caveat single-pipeline."
+    },
+    {
+      "id": "11-25",
+      "subject": "excess_over_null_6of6",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "claim-cited 'cross_sample/*_gwasm.json rate_excess_over_null' → claim 列 0.101/0.150/0.151/0.241/0.171/0.196 mean 0.168; actual sorted {0.101,0.150,0.151,0.171,0.196,0.241} (rounded) 完全相符; 6/6>0; mean=0.1684.",
+      "note": "✅ catalog_provenance 最精確逐值 claim: 6 個值排序後與 primary 完全一致, mean 0.168 ✓. P-caveat single-pipeline⭐3 (CV=0.26 ledger)."
+    },
+    {
+      "id": "15-29",
+      "subject": "reliability_vs_coverage",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "claim-cited report 20260610_methylation_clusterability...md → data_sources clusterability_vs_cov_cn.json: A_coverage_genomewide_TP.HCC1395 rho=0.1091 (claim ρ=0.109 ✓); 全6樣本 rho_clustered_vs_coverage |ρ|<0.25 (−0.0092~0.1615 ✓ '18 cells'); D_logistic z_logCoverage OR=0.908 (claim OR=0.91 轉負 ✓).",
+      "note": "coverage 非 driver. ρ=0.109 / OR=0.91 / |ρ|<0.25 全命中. P-caveat: CN-truth single-sample HCC1395; single-pipeline⭐3 (report frontmatter 自標)."
+    },
+    {
+      "id": "15-30",
+      "subject": "reliability_vs_cn",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "clusterability_vs_cov_cn.json C_CN_HCC1395_TP.clustered_rate_by_CN: neutral=0.2223 (claim 0.222✓) gain=0.1794 (0.179✓) loh=0.0218 (0.022✓); D_logistic CN_loh OR=0.072 (claim 0.07✓); gain<neutral 固定覆蓋 (report §2.2 3/3 bins).",
+      "note": "CN 強相關但反 dosage 方向. neutral>gain≫loh 三值精確; LOH OR=0.07 命中. P-caveat CN-truth single-sample (SEQC2 HCC1395)."
+    },
+    {
+      "id": "15-32",
+      "subject": "loh_suppression_cross_sample",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "clusterability_cov_cn_extended.json C_summary{n_with_OR_lt_1_LOH_suppresses:6, OR_range:[0.01,0.107]} + C_ISM_LOH_proxy_per_sample_TP LOH_vs_nonLOH_OR = HCC1395 0.100 / HCC1937 0.095 / HCC1954 0.079 / H1437 0.067 / H2009 0.107 / COLO829 0.010; 3 癌種.",
+      "note": "✅ 6/6 OR<1 (0.01–0.107) 機制跨樣本. C_summary 直接 verdict + 6 逐值命中. 機制 (need ≥2 haplotype, LOH 移除第二 allele) 與數據方向一致. P-caveat: 5 樣本用 ISM Potential_LOH proxy (recall 0.961 驗證), 僅 HCC1395 SEQC2 真值; single-pipeline⭐3."
+    },
+    {
+      "id": "15-33",
+      "subject": "fp_exception_loh",
+      "axisA": "D",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "clusterability_cov_cn_extended.json B_CN_HCC1395_by_class FP OR=0.982 (claim OR=0.98 不抑制 ✓); TP OR=0.092 / FN OR=0.018 對照; report §2.5 FP loh n=70 低 power caveat.",
+      "note": "FP 不顯示 LOH 抑制 (OR=0.98) → FP 分群=noise 暗示. axisB=LOGIC (非 EVIDENCE_CHAIN): claim 自承 FP loh n=70 低 power → 'suggestive 非定論' + 'characterization-only 不可 filter'. OR=0.98 數字命中但推論 (FP=noise) 受 low-power 限制 → 誠實降為 suggestive. P-caveat single-sample + 稀疏FP."
+    }
+  ],
+  "flags": [
+    "🔴 ORPHAN/STALE-PROVENANCE (claim 07-29): 宣稱 'E[overlap]=0.16 未 file-stored, 需補計算' = FACTUALLY WRONG — 實際 asm_landscape.json:166 sum_expected_overlap=0.1636 + ledger 20260603_cross_sample_ASM_landscape 雙存. claim 對 provenance 的陳述過時/捏造 (數字本體 0.1636 真實). 建議修正 catalog: E[overlap] 已 file-stored.",
+    "🟡 02-33 (5層獨立驗證 85-86%) + 02-35 (SEQC2-LOH 富集 0.46×): cited_source=none, 在 PRIMARY 3 檔 (ledger/VERIFIED_RESULTS/cross_sample) grep 不到確切值 → 標 S. defer 不全repo考古 (疑似 home: genome_survey_v2/analysis/agentB_robustness.py 等允許清單外檔). 02-35 之方向 (LOH 最低) 已被 clusterability LOH-rate=0.022/OR=0.072 佐證, 但 '0.46×' 量值未對到 primary.",
+    "🟢 核心數字三重交叉確認 (無捏造): 6/6 excess +0.101–0.241 mean 0.168 = 6 *_gwasm.json + ledger; 0/38 = cross_sample_synthesis.json:47 (行號精確) + ledger; E[overlap]=0.16 = asm_landscape.json:166; 6/6 LOH OR<1 (0.01–0.107) = clusterability C_summary + 6 逐值. claim 11-25 逐值排序與 primary 完全一致.",
+    "🟡 口徑/tier caveat: 全 cross-sample 數據 single-pipeline (共用 ClairS-TO caller) → ledger 自標 tier_capped_3; CN ground-truth 僅 HCC1395 (SEQC2), 其餘5樣本用 ISM Potential_LOH proxy (recall 0.961). 所有 D/I claim 因此標 P-caveat 而非純 P. 無樣本可獨立升⭐4 (需 COLO829 外部 caller / orthogonal CN truth).",
+    "🟢 09-21 cited 'cross_sample_synthesis.json:47' 行號精確命中 (= n_recurrent_somatic:0); 11-25 + 15-32 為逐值最完整且全對 — 此群 provenance 整體品質高, 唯 07-29 的 provenance-陳述 與 02-33/02-35 兩個 none-cited 整 chapter claim 為弱點."
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "group_id": "G09",
+  "subject": "catalog 332,705 位點 × 7 TAG / de-confound floor (1/332,705 乾淨 somatic cis; reliable 12,868 全 germline-allelic; latent 28,254; TAG counts + 定義 + 缺漏欄)",
+  "reviewer_role": "adversarial red-team (falsification, not corroboration)",
+  "independent_checks_run": [
+    "catalog_tag_counts.json: A=1 B=5 C=12868 D=5 E=28254 F=54 G=291518 sum=332705 (CONFIRMED grep)",
+    "catalog_skeleton.tsv: 332705 data rows, 32 columns; per-row = (sample x locus x class) instance NOT unique locus",
+    "unique genomic positions = 332674 (~=332705; somatic variants mostly private per sample, so row=locus near 1:1)",
+    "cis_status != NA rows = ONLY 816, ALL in HCC1395 (cis: not-cis 756 / untestable 53 / copy 5 / cis 1 / cis-mechanical 1)",
+    "catalog_audit.json tristate: reliable=12876, latent=28277, none=291552 (DIFFERS from TAG-C=12868 / TAG-E=28254 / TAG-G=291518)",
+    "reliable_TP_FP_genomewide = 11689 (tp11655+fp34, EXCLUDES FN)",
+    "discovery_venn.json base_ratio (genome-wide) = 92.8, but HCC1395-only base = 47:1",
+    "latent_minN_sweep: minN=15 rec TP:FP=256.5 = 2.76x genome-wide base 92.8 (NOT enrich~1)"
+  ],
+  "verdicts": [
+    {
+      "claim": "05-02 / 05-11 / 06-33 / 06-48 / 14-11 headline: 全基因組僅 1/332,705 乾淨 somatic cis-ASM (de-confound floor)",
+      "verdict": "CHALLENGED",
+      "reason": "Denominator inflation / absence-of-evidence-as-evidence-of-absence: cis-testing ran on ONLY 816 loci (all HCC1395); 331,889 rows have cis_status=NA (never tested, not refuted). Honest floor is 1/816 cis-tested (~0.12%), not 1/332,705 (~400x understatement). Numerator (HCC1395-only) and denominator (6-sample genome-wide) come from different scopes. Needs explicit 'cis-tested N=816, all HCC1395' caveat — the 1/332,705 framing implies 332,704 loci were tested and excluded."
+    },
+    {
+      "claim": "05-11 abstract: reliable methylation read-clustering exists at 12,868 loci but is overwhelmingly germline-allelic",
+      "verdict": "CHALLENGED",
+      "reason": "Caliber conflation: 12,868 IS TAG-C (germline-allelic subset) BY CONSTRUCTION, not the count of 'reliable clustering'. Reliable-clustering tristate=12,876 (incl. some non-germline) and reliable TP+FP=11,689. Stating 'reliable clustering exists at 12,868 [=all germline-allelic]' is near-tautological since TAG-C is DEFINED as reliable AND germline-allelic — it cannot show reliable clustering is 'overwhelmingly germline' when the 12,868 figure already excludes any reliable-non-germline loci. Use 12,876 (reliable) and report what fraction is germline-allelic separately."
+    },
+    {
+      "claim": "05-21 / 15-09 / 15-27: latent 28,254 PERMANOVA 救回但 enrich≈base (無判別力) = characterization-only, 絕不可當 filter",
+      "verdict": "CHALLENGED",
+      "reason": "Enrich≈base uses HCC1395-only base (47:1). Against the CORRECT genome-wide base (92.8:1 from discovery_venn), latent recovery at minN=15 gives TP:FP=256.5 = 2.76x base — meaningfully TP-enriched, not flat. The 'no discrimination' verdict holds only at minN=0-5 (enrich 0.90-0.98); at minN>=10 latent IS enriched. Claim is defensible as 'low-minN latent ~base' but the blanket 'enrich≈base / no judgement power' overstates: characterization-vs-weak-filter boundary is minN-dependent and not honestly disclosed."
+    },
+    {
+      "claim": "05-21 / 06-33 §2.3 RULE headline: 6 樣本 332,705 → 7 TAG; reliable 12,868 全 germline-allelic; cleansomatic cis 全基因組僅 1",
+      "verdict": "CHALLENGED",
+      "reason": "Compound headline inherits both the cis-floor denominator inflation (816 tested not 332,705) and the 12,868=TAG-C tautology. '12,868 全 germline-allelic' is true by construction (TAG-C definition) and therefore carries no inferential weight about whether reliable clustering generally is germline. Survives as a descriptive catalog summary, but the de-confound RULE inference ('methylation is germline-allelic, not somatic') is not supported at the strength claimed from a single cis-tested sample."
+    },
+    {
+      "claim": "05-08 / 14-01 provenance: catalog numbers (A=1/C=12868/G=291518/total 332705) grep-confirmed, T-PROV 全 🟡→🟢",
+      "verdict": "SURVIVES",
+      "reason": "All four numbers independently grep-confirmed in catalog_tag_counts.json (A=1, C=12868, G=291518, n_loci=332705). Provenance upgrade justified — these are raw catalog counts, the LEAST contestable claims in the group. Tier-up is about traceability of the numbers, which holds; it does NOT bless the downstream interpretation."
+    },
+    {
+      "claim": "11-08 / 12-23 / 15-01 / 15-17: catalog skeleton 332,705 rows x 32 cols, 7 TAG sum=332705, = 6 samples x TP(294723)/FP(3177)/FN(34805)",
+      "verdict": "SURVIVES",
+      "reason": "wc=332706 (332705+header), 32-col header confirmed, TAG sum=332705, TP/FP from venn base_TP_FP exact (294723/3177). Structural facts fully verified. Note: rows are (sample x locus x class) instances; unique positions=332674. This is fine for a catalog but should be labeled 'sample-locus rows' not 'genome-wide loci' to avoid the floor-denominator confusion above."
+    },
+    {
+      "claim": "05-47: §4.3 Catalogue 16-欄 schema → 7-TAG",
+      "verdict": "REFUTED",
+      "reason": "Factually wrong caliber: catalog_skeleton.tsv has 32 columns (header grep), not 16. Sibling claims 11-08/12-23 correctly say 32. This is a stale/erroneous number that must be corrected in the source doc (formal_arch)."
+    },
+    {
+      "claim": "11-10: dbeta_only TP:FP=11.9 (most FP-enriched) vs ISM_only 147.6 → Δβ 必 clustering-gated",
+      "verdict": "SURVIVES",
+      "reason": "discovery_venn.json exact: dbeta_only ratio=11.9 (enrich 0.13, FP-enriched), ISM_only=147.6 (enrich 1.59). The 'Δβ must be clustering-gated' inference is directly supported by the venn interpretation. Solid internal-consistency claim."
+    },
+    {
+      "claim": "15-19 / 15-20 / 15-22: reliable/latent definitions (Cochran-gated CramersV; PERMANOVA recovery); Cochran gate zeroes sparse-table CramersV",
+      "verdict": "SURVIVES",
+      "reason": "Definitions match catalog_audit.json reliability_definition verbatim; RegionProcessor.cpp:1588-1591 gate logic confirmed (cramers_v_reliable ? cramers_v : 0.0). Mechanism (Cochran min-expected-cell>=5 zeroing sparse tables) is a real, well-described methodological choice, not a contested inference."
+    },
+    {
+      "claim": "15-06 / 15-21: reliable 11,689 全 germline-allelic; none 態 292,762",
+      "verdict": "CHALLENGED",
+      "reason": "Caliber mixing flagged by auditor stands: 11,689=reliable TP+FP (excludes 1187 reliable FN), while tristate-full reliable=12,876. none=292,762 is computed as 332705 - 11689(TP+FP reliable) - 28254(TAG-E latent) = mixing TP+FP-reliable caliber with TAG-E latent caliber; tristate none=291,552, TAG-G=291,518. Three different 'none' numbers (291518/291552/292762) circulate. Numbers traceable but the report mixes 3 calibers without a single declared convention — a reader cannot reconcile them. Needs one canonical caliber."
+    },
+    {
+      "claim": "15-23 / 15-24 / 15-25: latent minN sweep recovery TP:FP (minN=0 ~84, minN=5 ~91, minN=15 ~257)",
+      "verdict": "SURVIVES",
+      "reason": "All three ratios grep-confirmed exact in catalog_audit.json latent_minN_sweep. Raw numbers are clean. (Their INTERPRETATION as 'enrich≈base' is the contested part — see the latent-characterization verdict above — but the sweep numbers themselves survive.)"
+    },
+    {
+      "claim": "15-44 / 15-45 / 15-46 / 15-15: TAG-B copy=5 (BRCA2 copy_d=-0.11 dominant; chr5 marginal 0.059≈0.055); TAG-F=54 (53 untestable + chr18 CpG-creation)",
+      "verdict": "SURVIVES",
+      "reason": "cis_status uniq counts confirmed (copy=5, cis-mechanical=1, untestable=53); BRCA2 copy_d=-0.11 and chr5 marginal values match skeleton; chr18:11741161 CpG-creation = script98:58 MECH_CAVEAT confirmed. Precise per-locus facts hold. Caveat: all from HCC1395 (the only cis-tested sample), so these are single-sample mechanistic anecdotes, not genome-wide rates."
+    },
+    {
+      "claim": "15-55 / 15-58: single-pipeline (all somatic_status from ClairS-TO) → tier 封頂 ⭐3; partial_flag subset (cis/copy HCC1395-only)",
+      "verdict": "SURVIVES",
+      "reason": "Honest self-limitation, correctly stated. ledger tier='⭐3 single-pipeline ClairS-TO', skeleton recurrence='single'. This is the right caveat — and it directly UNDERCUTS the strength of the de-confound RULE headline (single caller + single cis-tested sample cannot support a genome-wide 'methylation is germline not somatic' rule at >⭐3). The partial_flag honesty is a point in the group's favor."
+    },
+    {
+      "claim": "11-04 / 11-17: doc02 '缺檔' is stale — files exist in genome_survey_v2/cn_confound/cross_sample/",
+      "verdict": "SURVIVES",
+      "reason": "ls confirms cn_confound/cross_sample/ exists. Low-stakes housekeeping finding, verified. No inferential overreach."
+    },
+    {
+      "claim": "01-06: 6-sample 5mCG coverage (HCC1395 100% / HCC1937 ~70% / others 100%) + DORADO control",
+      "verdict": "CHALLENGED",
+      "reason": "Not grep-confirmable in any PRIMARY catalog/ledger file (auditor marked S, grep_confirmed=false). The specific 70% vs 100% figures are asserted without a traceable source. If HCC1937 truly has ~70% 5mCG coverage, that ALSO weakens cross-sample comparability claims that lean on it. Either cite the coverage source or drop the specific percentages."
+    },
+    {
+      "claim": "14-09 / 14-22 / 14-31: de-confound floor (catalog 🟢) robust, 永遠成立論文不垮, 可即寫",
+      "verdict": "CHALLENGED",
+      "reason": "The 'floor永遠成立' robustness rests on the contested 1/332,705 framing and single-sample cis test. The RAW catalog counts are robust (survives), but the floor as an INFERENCE ('methylation does not yield clean somatic cis-ASM genome-wide') is fragile: it is one cis-tested sample, one caller, 816 tested loci. Reframe floor as 'in HCC1395, only 1 of 816 cis-testable loci is a clean somatic cis-ASM' — that survives; the genome-wide '1/332,705 不垮' framing is over-claimed."
+    },
+    {
+      "claim": "15-56: workflow wf_5644ed77-082 6/6 adversarial re-verify PASS",
+      "verdict": "CHALLENGED",
+      "reason": "by-self-reference risk: the '6/6 PASS' is a secondary record citing the same catalog files this audit checks. Independent grep here confirms the COUNTS (332705/A=1/BRCA2=B/sum), so the numeric verification corroborates — but '6/6 adversarial PASS' as a quality stamp re-verifies arithmetic, NOT the interpretive leaps (cis-floor denominator, latent base). A re-run that re-confirms numbers does not validate the framing."
+    }
+  ],
+  "worst": "05-02/05-11/06-33 de-confound floor headline '全基因組僅 1/332,705 乾淨 somatic cis-ASM': the denominator (332,705 sample-locus instances, 6 samples) is presented as if all were cis-tested, but cis-testing ran on ONLY 816 loci, ALL in HCC1395 (331,889 rows are cis_status=NA = never tested, not refuted). This is denominator inflation / absence-of-evidence-as-evidence-of-absence — the honest floor is 1/816 cis-tested (~0.12%), a ~400x understatement, and it leans on a single sample + single caller (⭐3). The catalog COUNTS survive; this INFERENCE does not at the strength claimed.",
+  "summary": {
+    "SURVIVES": 7,
+    "CHALLENGED": 8,
+    "REFUTED": 1,
+    "headline_status": "raw catalog counts robust and grep-confirmed; the two LOAD-BEARING inferences (1/332,705 de-confound floor + '12,868 reliable all germline-allelic') are both compromised — one by denominator-scope mismatch (816 cis-tested all-HCC1395 vs 332,705 denominator), one by by-construction tautology (TAG-C is defined as reliable AND germline). Latent 'characterization-only' is minN-dependent and overstated at high minN. Caliber chaos (3 different 'reliable' and 3 'none' numbers) needs one declared convention. 05-47 has a hard factual error (16 vs 32 cols)."
+  }
+}

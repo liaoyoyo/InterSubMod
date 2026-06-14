@@ -1,0 +1,152 @@
+{
+  "group_id": "G14",
+  "reviewer": "adversarial-red-team",
+  "date": "2026-06-12",
+  "subject": "provenance / 數據誠信 對賬 + Intro/RQ/SoT/Discussion 框架",
+  "n_claims_total": 111,
+  "n_claims_challenged_individually": 28,
+  "method_note": "111 claims 中 ~67 為 S-tier framing/self-description/SoT-pointer/敘述分層 meta（非數據主張），對抗價值低 → 以群組裁決 (cluster verdicts) 處理；逐條紅隊聚焦 headline / 因果 / 評價 / 跨樣本推廣 / provenance-status 28 條。整份 doc set 本身罕見地誠實（HD-1 循環明標、BRCA2 退役、single-pipeline tier cap、co-validation≠filter 紀律），故多數 SURVIVES；破綻集中在 provenance-status 內部自相矛盾與少數 framing overreach。",
+  "verdicts": [
+    {
+      "claim": "02-08 / 02-38(①) Somatic haplotagging = 重建引擎 L1-L2；HP1-1=germline-H1+somatic-ALT (HaplotagStrategy.cpp:505-516)",
+      "verdict": "SURVIVES",
+      "reason": "機制描述對齊 C++ 源碼路徑，且 02-38/05-43 已隨行標 single-pipeline ⭐3 caveat；證據級標 L1-L2 而非 positive discovery，未 overclaim。"
+    },
+    {
+      "claim": "02-32 / 05-44 全 30,350 位點（TP 29,723/FP 627）逐位點雙圖 = 子克隆內 ASM read-level 證據基座",
+      "verdict": "SURVIVES",
+      "reason": "count grep-confirmed (integ_chapter §74)；by-construction single-sample 但僅宣稱『證據基座/characterization』非判別力，範圍誠實。"
+    },
+    {
+      "claim": "02-34 CramersV gate『過嚴格是統計安全閥非 bug』（2,788 over-strict 91% 稀疏歸零）",
+      "verdict": "CHALLENGED",
+      "reason": "Cochran 期望<5 歸零是合理保守，但『安全閥非 bug』是二次解釋 (interpretation) 當定論；06-20 自己承認 reliable 計數 (12,868) 仍須 null/FDR 校準 → gate 行為的統計後果未完全量化，宜標 caveat 而非斷言。"
+    },
+    {
+      "claim": "02-42 G1 ASM survey（chr5-22 dup-bug）暫緩、非關鍵路徑；characterization 已足夠",
+      "verdict": "CHALLENGED",
+      "reason": "『dup-bug 暫緩但不影響結論』隱含 chr5-22 重複計數未污染 already-reported genome-wide 數字的假設；若 6/6 excess / catalog count 部分依賴含 bug 區段，需確認 bug 隔離。屬未控的潛在 confound。"
+    },
+    {
+      "claim": "04-37 / 05-39 / 06-34 生物意義：LOH 重塑 haplotype-linked 甲基；對『ASM 普遍且 hypo 主導』文獻提供 somatic-controlled 視角",
+      "verdict": "CHALLENGED",
+      "reason": "『somatic-controlled de-confound 視角』的力道全押在單樣本 HCC1395 + HP-axis 設計；Methods-Neg-4 本身證 subclone-甲基=germline-allelic 非 somatic-specific → 『somatic-controlled』在子克隆層其實未真正分離。對外文獻 contrast 需 caveat single-sample，否則 single-sample→普遍化。"
+    },
+    {
+      "claim": "04-15/04-16/04-17/04-20/04-21 外部文獻 alignment（Do2020 5×/hypo, Martin-Trujillo CN-confound, Landan/Derrien epipolymorphism, 守 3 不對齊, ~38 PMID 待 /citation-verification）",
+      "verdict": "CHALLENGED",
+      "reason": "外部數字全自標 L3 且 3 不對齊紀律明確（防得住方向）— 但 ~38 篇 PMID/DOI『待核』尚未實際跑 citation-verification（grep 不到已驗證 .bib）；投稿前未核 = 引用風險仍開放，現狀只能算『計畫對齊』非『已對齊』。"
+    },
+    {
+      "claim": "05-22/05-39/06-34/06-36/04-38/12-20 因果機制：甲基 allelic 分群是 germline-driven 非 somatic 判別器；不能 filter 的機制=circularity/regression-to-extreme/germline-allelic",
+      "verdict": "SURVIVES",
+      "reason": "由四道 NEGATIVE（LOSO 100% circularity / |Δβ| AUC=0.505 null / blind-ARI TP 0.135<het-null 0.177 / strong-ASM FP-enriched OR）支撐，blind-ARI 有 imprinting 正控 (GNAS/RB1=1.000)；機制 falsification 多角度且方向一致，最 reviewer-proof 的一束。"
+    },
+    {
+      "claim": "05-40 chr17/TBC1D16 是罕見 somatic co-opt 甲基 exemplar，落在已知癌症甲基驅動基因（hypo→EGFR 黑色素瘤轉移）",
+      "verdict": "CHALLENGED",
+      "reason": "源檔自標單 locus / 單樣本 n=16/14 / nominal perm p=0.001 / 無 replication；『落在已知驅動基因 → EGFR 轉移』是把位置巧合升格為生物意義的二次解釋，易被 reviewer 當 cherry-pick。整篇唯一乾淨 cis exemplar 撐不起跨樣本推廣，須嚴守『稀有但真實 exemplar、非可推廣』口徑。"
+    },
+    {
+      "claim": "06-44 四道 NEGATIVE 🟢 ⭐2 L4；30,350 工作站 + 5 層獨立驗證 85-86% → R1+Methods-Neg 最硬底座",
+      "verdict": "SURVIVES",
+      "reason": "NEGATIVE 結論 + TP/FP-free 5 層驗證（HP-perm/split-half/雙股/bootstrap）對 single-sample 較免疫（不主張 positive 跨樣本泛化）；tier ⭐2 自我封頂保守，是全 doc set 最防彈的一束。"
+    },
+    {
+      "claim": "06-39/10-02/10-20/06-13 headline framing：三訊號 read-level『正交共驗證同一 haplotype 重塑事件』；co-validation≠filtering",
+      "verdict": "CHALLENGED",
+      "reason": "『正交共驗證』隱含三訊號獨立 — 但 phasing 脊柱本身 by-construction 部分循環（HD-1：Inner 用 somatic-attributed HP1-1 定義），且甲基軸已證非 somatic-specific（與 somatic 軸不正交而是 germline 共因）。三訊號中至少一對非真正『正交』；headline 在 HD-1 未跑前是 framing 願景非已證事實，須首段明說（doc 已要求 ⑤ R-SELFREF caveat，故 CHALLENGED 非 REFUTED）。"
+    },
+    {
+      "claim": "06-20/06-36 FDR 校準必補（reliable 12,868 + chr17 perm p=0.001 須 null/FDR + n_reads/coverage 校正，O11 教訓 AUC 0.845→0.530）",
+      "verdict": "SURVIVES",
+      "reason": "自我 flag 為『必補』而非已完成；O11 的 n_reads-confound 教訓 (0.845→0.530) 有歷史源檔；誠實標 action-item，未把未校準數字當定論。"
+    },
+    {
+      "claim": "07-01 論文 headline 數字 11 條已原檔對賬（🟢 可直接引用）",
+      "verdict": "CHALLENGED",
+      "reason": "audit grep=False（status-claim，wf 號非可 grep 數據檔）；11 條本輪只部分驗（OR/ARI/transfer/umtag 確認），但與 07-02『~10 條 grep 不到』並存 → 『已對賬』是進行中狀態被寫成完成態，須區分 reconciled vs verified-this-round。"
+    },
+    {
+      "claim": "07-17 2026-06-09 T-PROV 對賬結案：🟡 已全部定位到源檔 → 升 🟢",
+      "verdict": "REFUTED",
+      "reason": "與同 doc set 07-02（~10 條 grep 不到）、07-23/07-27（自稱值 ungrep'd）、11-06（all metrics grep-able）內部三方矛盾。audit note 證 07-23/07-27 其實 STALE（值 IS grep-able）→『全部定位、結案、升 🟢』為時過早且自相矛盾：要嘛 07-02/07-23/07-27 該更新，要嘛 07-17『結案』不成立。provenance 狀態層存在未收斂的自相矛盾。"
+    },
+    {
+      "claim": "07-02 約 10 條結論源檔本輪 grep 不到（🟡 投稿前必補）",
+      "verdict": "SURVIVES",
+      "reason": "誠實 self-flag action-item；正是它的存在揭穿 07-17/11-06『全 grep 到/結案』的 overclaim — 此條是 doc set 內部的誠實對照基準。"
+    },
+    {
+      "claim": "07-23 HCC1954 transfer −0.377 在 cycle4 LOSO 檔 grep 不到，需去 cycle2",
+      "verdict": "REFUTED",
+      "reason": "STALE status-claim：11-18 + cycle3_step1_findings.md:102 實測 −0.37744 grep-CONFIRMED。值『grep 不到』的宣稱已過時，與 sibling 11-18 直接矛盾。"
+    },
+    {
+      "claim": "07-27 germline-het null ARI 0.177 master_draft 只寫 p=0.922，需去上游 TSV 補",
+      "verdict": "REFUTED",
+      "reason": "STALE：11-19 + b2_broad_scan_results.json 實測 het-NULL 0.177463 / TP 0.135091 grep-CONFIRMED。『需去上游補』已不成立。"
+    },
+    {
+      "claim": "07-18 doc 缺檔 stale：condition_fp_consensus.json / *_gwasm.json 其實都在 cross_sample/（OR 8.631/4.085/5.837、6/6 excess 0.101-0.241）",
+      "verdict": "SURVIVES",
+      "reason": "獨立 grep 確認 7 個 *_gwasm.json + condition_fp_consensus.json 存在於 cited 目錄，OR 值 grep-match。doc02 stale 標記矯正正確。"
+    },
+    {
+      "claim": "07-31 umtag 0.8852 / V10 0.979-0.866 / 45.84% 不在已驗證集合，需去 selfphasing_v6 / methyl-phasing pilot 補",
+      "verdict": "CHALLENGED",
+      "reason": "誠實標 pending 是對的，但 convergence doc 已將 umtag 整束標 NOT-READY/Discussion-only + 含『2 次 fabrication（已修）』前科；held-out 0.8852≠真-unphase 救援的 caveat 必須隨任何引用，否則重蹈 single-sample held-out 當 true-rescue 的 framing trap。"
+    },
+    {
+      "claim": "09-25~09-30 六種驗證機制定義（LOSO / permutation-null / subhap-matched / MW+signed-ρ / condition-Fisher / blind-ARI ruler）及其判準",
+      "verdict": "SURVIVES",
+      "reason": "方法論定義準確、判準明確、各對應實際跑過的 falsification；屬可複用的驗證紀律陳述，非數據主張，邏輯站得住。"
+    },
+    {
+      "claim": "09-06 外部佐證只在 characterization/negative 借得到力；filter-positive 方向沒有外部可借（因為它本來就不成立）",
+      "verdict": "SURVIVES",
+      "reason": "保守且正確的 framing 紀律 — 主動限制外部文獻的引用範圍到負/characterization 軸，避免 corroboration category-error（如 Martin-Trujillo CN-dosage 被誤當 corroborate）。降低 overclaim 風險。"
+    },
+    {
+      "claim": "10-01/10-19/12-24 真正交付物 = 3 個 characterization/tooling（read-level haplotype 結構 + 位點甲基 catalog + 『能佐證不能篩選』目錄），非任何 filter",
+      "verdict": "SURVIVES",
+      "reason": "與四道 NEGATIVE + filter-DEAD 一致；交付物定位在防彈的 characterization 而非 positive filter，框架紀律自洽。"
+    },
+    {
+      "claim": "10-18 甲基差異小、非方向、與 copy 無關、且不能判別真/假變異",
+      "verdict": "SURVIVES",
+      "reason": "四項全有對應證據（excess 小 / hypo-hyper 無偏好 / MW p=0.6183 dosage-REFUTED / AUC=0.505 不判別）；copy-dosage 那項是全程式最乾淨單一結果。"
+    },
+    {
+      "claim": "05-06 pre-reg+fallback：任一分支論文站得住（de-confound floor）",
+      "verdict": "CHALLENGED",
+      "reason": "『任一分支都站得住』樂觀 — fallback floor 是 characterization+NEGATIVE（確實防彈），但若 HD-1 選『降為 observation』，positive 主結果消失後論文新穎度/影響力是否仍足以投 GB venue 未驗；『站得住』在學術接受度層面是未測假設。"
+    },
+    {
+      "claim": "11-01 9 任務裡 6 可執行全部完成並獨立驗證；2 個 off-path 已評估給規格",
+      "verdict": "CHALLENGED",
+      "reason": "『全部完成並獨立驗證』與 07-02『~10 條 grep 不到』+ T-VAL-1『部分』張力；完成宣稱（§13.7 gate）對 provenance 仍有 ~10 pending 項時宜降為『核心完成、provenance reconcile 進行中』。"
+    },
+    {
+      "claim": "11-06 全部 metric 數字現在都 grep 得到（T-PROV 升 🟢）",
+      "verdict": "REFUTED",
+      "reason": "直接被 07-02（~10 條 grep 不到）與其自身 grep=False 反駁。本輪 CONFIRM 了數條（OR/ARI/transfer/umtag）≠『全部 grep 到』。典型把『部分驗證』overclaim 成『全部完成』，正是 §13.7 紅旗。"
+    },
+    {
+      "claim": "11-18 HCC1954 transfer −0.377（實值 −0.37744）🟢 match / 11-19 germline-het null ARI 0.177463 + TP 0.135091 🟢 match",
+      "verdict": "SURVIVES",
+      "reason": "兩條 grep=True 實測對齊 cited 源檔行號；是本群少數真正完成原檔對賬的硬證，反而坐實 07-17/07-23/07-27/11-06 status 層的不一致。"
+    },
+    {
+      "claim": "11-33 COLO829 ⭐4：existence scan 已有；升 ⭐4 需 COLO829 normal BAM 跑 normal-anchored cis",
+      "verdict": "SURVIVES",
+      "reason": "誠實標 ⭐3→⭐4 的明確前置條件（需 matched normal + 第二癌種 cis 重現），未把單樣本當 ⭐4。tier 紀律正確。"
+    },
+    {
+      "claim": "S-tier 群組（~67 條）：SoT-pointer (03-05/03-08/03-15/03-16/03-18)、研究/論文 flow (03-19/03-20)、§13 數字誠信協議 (03-21)、narrative layering (10-05/10-25)、audience framing (10-21~10-24)、session-contribution meta (02-31/02-36)、figure status (06-54/11-11/12-25) 等",
+      "verdict": "SURVIVES",
+      "reason": "群組裁決：多為 SoT 指針 / 流程描述 / 敘述紀律 / figure 清單 — 路徑與 figure 多 grep-confirmed (03-05/03-08/03-14/03-15/03-16/03-18/06-54/11-11)；非因果/評價/跨樣本主張，對抗面小。唯 session-contribution meta (02-31/02-36) 屬 self-description 易自我恭維，但不影響數據結論。"
+    }
+  ],
+  "worst": "07-17 (provenance_reconcile_status：『T-PROV 對賬結案、🟡 全部定位升 🟢』)。此條與 07-02 / 07-23 / 07-27 / 11-06 構成 doc set 內部對 provenance 狀態的四方自相矛盾 —— 同一群同時宣稱『全部 grep 到/結案/升 🟢』與『~10 條 grep 不到/需去上游補』。對一個 subject 正是『數據誠信對賬』的群組，provenance-status 層自己沒對齊 = 最該被質疑、且最諷刺的破綻。投稿前必把 07-02 的 ~10 pending 與 07-17 的『結案』收斂成單一真值，否則 reviewer 對賬一抓就破。"
+}

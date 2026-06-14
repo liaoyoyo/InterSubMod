@@ -1,0 +1,329 @@
+{
+  "group_id": "G01",
+  "subject": "title_framing / carrying-claim 兩版未收斂 (進取版 Subclonal-reconstruction vs 保守版 Read-level ASM-characterization tracks-germline)",
+  "n_claims": 29,
+  "auditor_note": "G01 多為 title/framing/decision/敘述弧 claim (一階/二階解釋為主)，少數嵌入 D 級數字 (332705 / 12868~3.9% / 1 clean somatic cis / 0.885 / Grade B+ ⭐3)，皆已對 primary 真值檔 grep 回查。兩版 carrying-claim 確實並存且未在標題層收斂 (進取版 master/foundation title vs 保守版 v2 framework title)，但這是『同 repo 兩文件刻意並列的未收斂狀態』非互相矛盾的事實衝突 → 不標 CONFLICT (06-01/06-06 本身就誠實描述此並存)。",
+  "primary_truth_files_used": [
+    "research/autoresearch/evidence_ledger.jsonl",
+    "docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md",
+    "docs/paper_focus/02_paper_framework/位點甲基分群catalog_結果_R6.md",
+    "docs/reports/research_landscape/20260611_subclonal_reconstruction_paper_foundation_01.md",
+    "docs/paper_focus/00_PAPER_MASTER_subclonal_reconstruction_haplotagging_methylation.md",
+    "docs/paper_focus/02_paper_framework/論文架構_正式學術版_Slide2Thesis格式.md"
+  ],
+  "claims": [
+    {
+      "id": "01-01",
+      "subject": "title_framing",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "docs/reports/research_landscape/20260611_subclonal_reconstruction_paper_foundation_01.md:9,17-21",
+      "note": "進取版論文標題+一句話定位。title 字面與 foundation §1 thesis 完全相符 (longphase-S 6-state HP1/HP2/HP1-1/HP2-1/HP3 + per-read 5mCG)。但『重建亞克隆結構』是 framing/解釋 (I)，非 primary 數據；且 foundation §1 自帶誠實前提=甲基 subclone 層級弱 → P-caveat (single-pipeline self-reference, 單樣本核心證據)。"
+    },
+    {
+      "id": "01-02",
+      "subject": "title_framing",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "docs/reports/research_landscape/20260611_subclonal_reconstruction_paper_foundation_01.md:13",
+      "note": "決策陳述 (2026-06-11 用戶確認取代 G6;G6/G1 降支撐)。foundation §決策段逐字相符。屬可驗證的 decision-record (非數據)，grep 命中原始決策檔 → P。"
+    },
+    {
+      "id": "02-01",
+      "subject": "title_framing",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "docs/reports/research_landscape/20260611_subclonal_reconstruction_paper_foundation_01.md:9 (cited_source 存在); integ_chapter self-describes 職責",
+      "note": "本檔職責=補互補面 + 宣告 SoT=foundation 檔。cited_source 指向 foundation 檔確實存在 (ls 驗證)。屬 doc-role 二階陳述 (對 foundation 文件再詮釋)=S 知識類型；但其 cited_source 路徑 grep 命中 → 溯源 P。"
+    },
+    {
+      "id": "02-06",
+      "subject": "title_framing",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "foundation:9,52-58 (Grade B+ ⭐3 + ASM=characterization); catalog_R6:16,39 (誠實目錄)",
+      "note": "『今天就能開寫』synthesis 陳述，含 Grade B+ ⭐3 標籤。Grade B+/⭐3 在 foundation §3 表 (T1/T3 ⭐3) + ledger 95 tier=⭐3 可佐證；characterization 主軸 catalog_R6 強支持。但『genetic 引擎 reconstruction』含 06-05 已警的 overclaim 風險 (LOH-同-hap 子家族分割非完整 phylogeny) → P-caveat。synthesis-of-synthesis=S。"
+    },
+    {
+      "id": "02-41",
+      "subject": "brca2_role",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "catalog_R6:16,31 (BRCA2=TAG-B copy/subclone-confounded); ledger:96 (BRCA2 relabel R1R2R3 landed); foundation:67 (umtag=future)",
+      "note": "reframe 標籤集 (Grade B+/ASM=characterization/BRCA2 退役/umtag=future-work)。每個子標籤都可在 primary 對到: BRCA2 copy/subclone-confounded=catalog_R6 TAG-B + ledger 96 CORRECTION_LANDED;Grade B+=foundation;umtag=future=foundation §3/§4。二階 framing 聚合=S，但全部子項 grep 命中 → P。"
+    },
+    {
+      "id": "03-01",
+      "subject": "title_framing",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "foundation:9,13; master:00_PAPER_MASTER title",
+      "note": "launch_readiness 複述進取版主軸 (取代 G6;G6/G1 降支撐)。與 foundation/master 完全一致的 decision 複述 → P。屬 framing 複述 (I)。"
+    },
+    {
+      "id": "04-01",
+      "subject": "title_framing",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "filter-not-able 對齊 ledger:85/87/89 (filter DEAD); 但『六節都有料』『最強在 Results NEGATIVE 底座』是 IMRAD 規劃判斷，無單一 primary 真值檔",
+      "note": "IMRAD 六節寫作策略判斷 (synthesis)。『filter 不出現在能做敘述』與 ledger (filter DEAD, characterization-only) 一致可佐證，但『六節都有料/最強在Results+Methods』是論文規劃層 meta-judgment，非可 grep 的數據陳述。defer 不全repo考古 (規劃判斷無 primary)。S + P-caveat (部分子陳述 filter-DEAD 有據)。"
+    },
+    {
+      "id": "04-02",
+      "subject": "title_framing",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "三訊號正交共驗證/甲基不能filter 對齊 catalog_R6 + ledger:85 (filter NOT usable); 但主線串接是敘述設計",
+      "note": "一條主線串六節 (LOH約束→三訊號正交→甲基characterize不filter→catalog+tooling)。各環節有 primary 支撐 (filter DEAD/characterization)，但『串成一條主線』是敘述弧設計 synthesis。S + P-caveat。"
+    },
+    {
+      "id": "04-03",
+      "subject": "results_narrative_arc",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "phasing signature Grade B+ 對齊 foundation; 甲基不能filter 對齊 ledger:85; 但 Results 敘事順序是用戶拍板的編排決策",
+      "note": "Results 建構式敘事順序 (用戶 06-09 拍板)。含 Grade B+ 標籤 (foundation 可佐) + 甲基不能filter (ledger 可佐)，但『NEGATIVE 不當開場/收進邊界』是敘事編排決策非數據。S + P-caveat。"
+    },
+    {
+      "id": "04-04",
+      "subject": "characterization_not_filter",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "catalog_R6:16,39 (characterization≠filter 主軸); ledger:85/87/89 (filter DEAD, characterization-only guardrail)",
+      "note": "守則 FT-1 (characterization≠filter) + 每數字帶 🟢🟡🔵。characterization≠filter 是反覆驗證的 guardrail，ledger 多筆 + catalog_R6 強支持 → P。屬方法論守則 (二階 meta-rule)=S。"
+    },
+    {
+      "id": "04-28",
+      "subject": "results_narrative_arc",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "與 04-03 同源 (Results L0 敘事順序); phasing Grade B+ foundation; 甲基不能filter ledger:85",
+      "note": "04-03 的 L0 重述版 (Results 敘事順序)。同 04-03 判定: 子項有 primary 支撐但整體是敘事編排 synthesis。S + P-caveat。"
+    },
+    {
+      "id": "04-35",
+      "subject": "characterization_not_filter",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "catalog_R6:16,39 (characterization≠filter); 🟡 補原檔=feedback_no_fabricated_numbers 原則",
+      "note": "每 claim 帶 tier + 守 characterization≠filter + 🟡數字投稿前補原檔。stated_tier=🔴 (此 claim 自標重要)。方法論守則 (S)，characterization≠filter 有 primary 強支持 → P。"
+    },
+    {
+      "id": "05-01",
+      "subject": "title_framing",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "規則(甲基跟germline非somatic)=catalog_R6:16,39 + V10 VERIFIED:52(0.979); 例外(chr17/TBC1D16+phasing)=catalog_R6 TAG-A + ledger:87/88",
+      "note": "保守版 carrying claim=雙主軸『規則+例外』。①規則(de-confound 🟢 floor)=甲基allelic跟germline非somatic → catalog_R6 全基因組僅1乾淨somatic cis 強支持 (🟢);②例外(co-validation 🟡 contingent on #21/#22)=chr17/TBC1D16+phasing三訊號 → chr17 有 primary，但『三訊號正交佐證』contingent 標 🟡 自承未定。stated_tier=🟢/🟡 誠實。synthesis=S;規則部分 P，例外 contingent → 整體 P-caveat。"
+    },
+    {
+      "id": "05-03",
+      "subject": "title_framing",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "foundation:9 title 用 'reconstruction/characterize'; v2 framework:15 'characterize/map 不用 reshapes(無功能資料)'",
+      "note": "L1 寫作守則: 動詞用 characterize/map 不用 reshapes (無功能資料)。v2 framework L1① 逐字相符。寫作紀律守則 (S meta-rule)，grep 命中 → P。誠實 (承認無功能資料)。"
+    },
+    {
+      "id": "05-04",
+      "subject": "venue",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "docs/paper_focus/02_paper_framework/論文架構_正式學術版_Slide2Thesis格式.md:7,15,28 (target_venue: Genome Biology / Bioinformatics tier, 用戶 2026-06-09 定)",
+      "note": "目標 venue=Genome Biology tier (用戶 06-09 定)。v2 framework frontmatter+L1② 逐字相符 → P。屬目標設定 decision (I)。"
+    },
+    {
+      "id": "05-05",
+      "subject": "narrative_arc",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "v2 framework:15 (敘述弧 = ASM存在→邊界(不能filter)→catalog規則(de-confound)→例外(chr17+phasing)→跨樣本)",
+      "note": "敘述弧 5 段，與 v2 framework L1④ 逐字相符。各環節 (ASM存在/不能filter/chr17例外) 有 catalog_R6 + ledger 支撐，但『弧』本身是敘事設計 synthesis。S;grep 命中弧定義檔 + 子項有據 → P-caveat (跨樣本環節 5/6 normal ready 但 V10/V11c 跨樣本未實跑=foundation §5 G-A open gap)。"
+    },
+    {
+      "id": "05-09",
+      "subject": "title_framing",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "docs/paper_focus/02_paper_framework/論文架構_正式學術版_Slide2Thesis格式.md:21 (title 逐字相符)",
+      "note": "保守版完整論文標題 (Read-level characterization of ASM...: methylation tracks germline rather than somatic haplotypes, with a rare somatic co-validation exception)。v2 framework title 欄逐字 100% 相符 → P。屬 title framing (I)。此即 06-01 contradiction 的保守版一端，已實檔確認存在。"
+    },
+    {
+      "id": "06-01",
+      "subject": "title_framing",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "進取版=master:7 + foundation:9; 保守版=v2 framework:21",
+      "note": "★ 核心 framing-divergence claim: 兩條未收斂 carrying-claim 並存。兩版 title 字串都各自 grep 命中各自 primary 檔 (進取版 master/foundation:9; 保守版 v2:21)，divergence 為真。cited_source 完整列出兩源檔。EVIDENCE_CHAIN (兩端可追) + P。【非 CONFLICT】=此 claim 本身誠實描述『兩版尚未收斂』的已知狀態，是 master_map 刻意盤點，非未察覺的矛盾。"
+    },
+    {
+      "id": "06-02",
+      "subject": "title_framing",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "foundation:9,40-41 (Grade B+/⭐3 + reconstruction); ledger:95 tier ⭐3",
+      "note": "進取版 headline: somatic haplotagging 重建 LOH-constrained 子克隆 (Grade B+ ⭐3);甲基=characterization。Grade B+ ⭐3 有 foundation/ledger 佐;但『reconstruct LOH-constrained 子克隆結構』含 06-05 已警 overclaim 風險 (子家族分割≠clonal phylogeny) → P-caveat。"
+    },
+    {
+      "id": "06-03",
+      "subject": "catalog_count",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "catalog_R6:16,32,39 (332,705 / 12,868=3.87%≈3.9% / 1 乾淨 somatic cis); ledger:95 (332705 7-TAG); ledger:85 (TPFPFN breakdown 294723+3177+34805=332705)",
+      "note": "★ 最 data-heavy claim: 保守版 headline=de-confound floor (332,705 位點僅1乾淨 somatic cis)。332,705 = catalog_R6 + ledger 95 + TPFPFN(294723+3177+34805) 三重命中且加總相符;『1乾淨somatic cis』=catalog_R6 TAG-A=1 + ledger 87/88 (816→1 chr17/TBC1D16) 一致。實際 D 數據 → EVIDENCE_CHAIN。P-caveat: cis/copy 結論僅 HCC1395 單樣本 + single-pipeline ClairS-TO (ledger 95 tier 註)。"
+    },
+    {
+      "id": "06-04",
+      "subject": "framework_decision",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "R-SELFREF/HD-1 在 paper_focus 多檔 (00_PAPER_MASTER / 01_focus_notes/05,06,10 / 00_INDEX); floor 🟢=catalog_R6; self-reference 風險=foundation:41,69 + VERIFIED V11b cross-cutting(1)",
+      "note": "進取版需 HD-1 (R-SELFREF 解 by-construction 循環) 否則脊柱不能當 positive headline;保守版不需 HD-1 (floor 全🟢今天可寫)。self-reference/by-construction 循環風險在 foundation §2(41)/§4(69) + VERIFIED V11b cross-cutting #1 (longphase-S HP tag 自我參照→tier 上限⭐2-3) 有 primary 佐證。stated_tier=🟢 (floor)。decision/framing (I);R-SELFREF 概念在 paper_focus 散文檔非 ledger primary → P-caveat。"
+    },
+    {
+      "id": "06-05",
+      "subject": "framework_decision",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": false,
+      "primary_path": "overclaim 風險與 foundation §1 誠實前提(21) + §4 紅線(64-69) 方向一致; 但 cited '整合篇章 §5' 為 paper_focus 散文，非 PRIMARY 清單檔",
+      "note": "進取版風險: 'reconstruction' 可能 overclaim — 是 LOH-同-haplotype 子家族分割非完整 clonal phylogeny/CCF tree。此自我批判與 foundation 誠實前提一致 (方向正確)。cited_source=整合篇章 §5 屬 paper_focus 二次散文，未對到 PRIMARY 真值檔 → defer 不全repo考古。判斷類 meta-claim (I)，方向有 foundation 佐 → P-caveat。"
+    },
+    {
+      "id": "06-06",
+      "subject": "framework_decision",
+      "axisA": "I",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "進取版 reconstruction title=master:7/foundation:9; 保守版 v2:21 標題完全不提 reconstruction → 兩版標題層確未收斂",
+      "note": "★ 兩版共享~80%證據，差別只在 phasing脊柱當headline還是支撐;v2標題完全不提reconstruction故標題層未收斂。可直接實檔驗證: master/foundation title 含 'Subclonal reconstruction'，v2:21 title 為 'Read-level characterization...' 不含 reconstruction → 標題層未收斂為事實 (兩端可追) → EVIDENCE_CHAIN + P。『~80%共享』是估計但核心斷言 (標題層未收斂) 已實檔證實。【非 CONFLICT】同 06-01: 誠實盤點未收斂狀態非未察覺矛盾。"
+    },
+    {
+      "id": "14-02",
+      "subject": "carrying_claim_framing",
+      "axisA": "S",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "與 05-01 同義 (規則+例外雙主軸); 規則🟢=catalog_R6:16,39; 例外 contingent",
+      "note": "14-02=05-01 的 prereg_fallback 版 (規則+例外同一故事)。stated_tier=🟢。規則(de-confound 已證🟢)有 catalog_R6 強支持;例外(co-validation contingent)自承未定。synthesis=S;規則 P 例外 contingent → P-caveat。與 05-01 內容一致無衝突。"
+    },
+    {
+      "id": "14-28",
+      "subject": "title_framing",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "title 候選 1 措辭與 05-09 保守版 title 同精神 (germline not somatic + rare exception); 但此具體候選字串只在 prereg_fallback 散文檔，未對到 PRIMARY 真值檔",
+      "note": "title 候選1 (rule-led, 推薦)。內容方向與已驗證的 05-09 v2 title 一致 (tracks germline not somatic + rare somatic exception)，但此『候選字串』本身是 prereg_fallback 內部 brainstorm，非 primary 真值檔的 canonical title → 標 S (只在 synthesis 檔)。title-option (I)。defer 不全repo考古 (候選非定稿)。"
+    },
+    {
+      "id": "14-29",
+      "subject": "title_framing",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "title 候選2 只在 prereg_fallback 散文; LOH-driven haplotype structure + rarity of somatic cis-ASM 方向與 catalog_R6 一致但候選字串無 primary 對應",
+      "note": "title 候選2 (co-validate/cannot filter + LOH-driven structure + rarity of somatic cis)。方向 (cannot filter + somatic cis 稀少) 與 catalog_R6/ledger 一致，但候選字串為內部 brainstorm 未對到 primary → S。title-option (I)。defer 不全repo考古。"
+    },
+    {
+      "id": "14-30",
+      "subject": "title_framing",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "S",
+      "grep_confirmed": false,
+      "primary_path": "title 候選3 (co-val 並列, 需#21/#22撐) 只在 prereg_fallback; 自承 contingent",
+      "note": "title 候選3 (co-validation 並列, 需 #21/#22 撐)。自承 contingent (需 co-validation 證據)。候選字串只在 prereg_fallback synthesis 檔 → S。title-option (I)。defer 不全repo考古。"
+    },
+    {
+      "id": "15-05",
+      "subject": "title_framing",
+      "axisA": "I",
+      "axisB": "LOGIC_EVIDENCE",
+      "provenance": "P",
+      "grep_confirmed": true,
+      "primary_path": "catalog_R6:16 (甲基分群真實但壓倒性地不是 somatic 判別器 → 強化 characterization 非 filter 主軸, 逐字相符); ledger:85/95 verdict",
+      "note": "甲基分群真實但壓倒性不是 somatic 判別器 → 強化 characterization≠filter。catalog_R6:16 L0 結論逐字相符 + ledger 85 verdict (ASM exists broadly but NOT usable filter) + ledger 95 verdict (甲基分群真實但壓倒性非 somatic 判別器) 多重命中 → P。一階解釋 (I)。"
+    },
+    {
+      "id": "15-18",
+      "subject": "title_framing",
+      "axisA": "D",
+      "axisB": "EVIDENCE_CHAIN",
+      "provenance": "P-caveat",
+      "grep_confirmed": true,
+      "primary_path": "catalog_R6:16,32,39 (332,705 / 7類 / ~3.9%(12,868)=TAG-C / 1乾淨somatic cis chr17/TBC1D16 / BRCA2 copy/subclone-confounded); ledger:95(332705 7-TAG A=1 B=5 BRCA2) + ledger:96(BRCA2 within-subclone copy-partition relabel)",
+      "note": "★ 最完整 data claim (stated_tier=🔑): 332,705 分7類;reliable 甲基分群~3.9%(TAG-C);全基因組僅1乾淨somatic cis(chr17/TBC1D16);BRCA2 within-subclone copy-partition=copy/subclone-confounded。每個數字三重命中: 332,705(catalog_R6+ledger95+TPFPFN加總)、3.9%/12,868(catalog_R6:32 TAG-C 3.87%)、1乾淨cis(catalog_R6 TAG-A + ledger 87/88 816→1)、BRCA2 copy/subclone(catalog_R6 TAG-B + ledger 96 relabel landed, d_within−0.023≪d_copy−0.11)。實際 D 數據完整鏈 → EVIDENCE_CHAIN。P-caveat: cis/copy 僅 HCC1395 單樣本 + single-pipeline (ledger 95 tier 註明確)。"
+    }
+  ],
+  "counts": {
+    "D": 3,
+    "I": 12,
+    "S": 12,
+    "Q": 0,
+    "P": 11,
+    "P_caveat": 13,
+    "S_provenance": 5,
+    "F": 0,
+    "weak": 0,
+    "grep_confirmed": 21,
+    "EVIDENCE_CHAIN": 4,
+    "LOGIC_EVIDENCE": 25,
+    "WEAK": 0
+  },
+  "flags": [
+    "兩版 carrying-claim 並存 (進取版 master/foundation:9 'Subclonal reconstruction...' vs 保守版 v2:21 'Read-level characterization...tracks germline') — 06-01/06-06 誠實盤點此未收斂，非未察覺矛盾，故不標 CONFLICT；但標題層確未收斂是論文開寫前需用戶拍板的真實 blocker。",
+    "進取版 framing claim (01-01/02-06/06-02) 共用 'reconstruction' 字眼帶 overclaim 風險，06-05 自己已警示=LOH-同-haplotype 子家族分割非完整 clonal phylogeny/CCF tree；06-04 進取版需 HD-1(R-SELFREF 解 by-construction 循環) 才能當 positive headline，此 gate 在 foundation §4(69)+VERIFIED V11b 有據但未解。",
+    "0 個 F (孤兒/捏造)、0 個 WEAK：G01 所有 framing 都可溯源；最強 data claim(06-03/15-18 的 332,705/12,868~3.9%/1乾淨cis/BRCA2 copy-confounded)三重 grep 命中(catalog_R6+ledger95/96+TPFPFN加總) 且加總自洽。",
+    "5 個溯源=S 全集中在 14-28/14-29/14-30 title 候選 (prereg_fallback brainstorm，非 primary 定稿 title) + 02-01/02-41(doc-role/reframe 二階聚合，但子項仍 grep 命中)；屬正常 brainstorm-tier，非問題孤兒。",
+    "13 個 P-caveat 主因一致: cis/copy/V10/V11c 核心證據單樣本 HCC1395 + single-pipeline longphase-S/ClairS-TO 自我參照 (foundation §2:41 明列 tier 風險;ledger 95 tier=⭐3 single-pipeline)。跨樣本 G-A(5/6 normal ready 但 V10/V11c 未實跑) 是升 ⭐4 與保守版 floor 之外升級的關鍵 open gap。",
+    "口徑一致性良好: 332,705 = 294,723 TP + 3,177 FP + 34,805 FN(ledger:85) 加總精確相符;BRCA2 已由 ledger:96 統一矯正口徑 (copy-NUMBER 是 category error → copy/subclone-confounded;~80% 精確% 不 robust 已改質性)，G01 claim 採用矯正後口徑無回退。"
+  ]
+}

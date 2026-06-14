@@ -1,0 +1,258 @@
+[
+  {
+    "id": "07-01",
+    "subject": "provenance_count",
+    "claim": "論文 headline 數字裡 11 條已原檔對賬（🟢 可直接引用）。",
+    "source_doc": "doc_library",
+    "cited_source": "wf_a8ccbb34-3f7（8 組原檔 grep-back）",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-02",
+    "subject": "provenance_count",
+    "claim": "約 10 條結論在但指定源檔本輪 grep 不到（🟡 投稿前必補）。",
+    "source_doc": "doc_library",
+    "cited_source": "wf_a8ccbb34-3f7",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "07-03",
+    "subject": "sot_priority",
+    "claim": "權威真值有順序，衝突時 evidence_ledger.jsonl 為準。",
+    "source_doc": "doc_library",
+    "cited_source": "InterSubMod/research/autoresearch/evidence_ledger.jsonl",
+    "stated_tier": "none"
+  },
+  {
+    "id": "07-04",
+    "subject": "tsg_moving_target",
+    "claim": "tsg 專案還在寫，故 T2/T3/T5 是 moving target；投稿前以該專案定稿為準（06-07 仍在寫）。",
+    "source_doc": "doc_library",
+    "cited_source": "none",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "07-05",
+    "subject": "filter_loso",
+    "claim": "filter 死四道之一：LOSO +0.02236→−0.00012。",
+    "source_doc": "doc_library",
+    "cited_source": "InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-06",
+    "subject": "filter_loso",
+    "claim": "filter 死四道之一：mean −0.00004 p=0.125。",
+    "source_doc": "doc_library",
+    "cited_source": "InterSubMod/research/methyl_augmented_filter_phase2/cycle4/loso_validation/",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-07",
+    "subject": "filter_deltabeta_auc",
+    "claim": "filter 死四道之一：|Δβ| AUC=0.505。",
+    "source_doc": "doc_library",
+    "cited_source": "InterSubMod/docs/experiments/in_progress/2026/05/20260531_ISM_aux_tag_observation_funnel_01.md",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-08",
+    "subject": "filter_colo829",
+    "claim": "filter 死四道之一：COLO829 TP≈FP。",
+    "source_doc": "doc_library",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-09",
+    "subject": "copy_dosage_refuted",
+    "claim": "copy-dosage REFUTED（MW p=0.6183, ρ=−0.0829）。",
+    "source_doc": "doc_library",
+    "cited_source": "InterSubMod/research/tsg_promoter_asm_reviewer/genome_survey_v2/fast_cnv_validation.json",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-10",
+    "subject": "asm_tp_vs_fp",
+    "claim": "ASM TP 3.95% > FP 1.07%。",
+    "source_doc": "doc_library",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-11",
+    "subject": "phasing_same_hap",
+    "claim": "phasing 7/7 W=28 p=0.0078125。",
+    "source_doc": "doc_library",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-12",
+    "subject": "ari_null",
+    "claim": "ARI 0.135 < null，且 GNAS/RB1 = 1.000。",
+    "source_doc": "doc_library",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-13",
+    "subject": "af_ngroups",
+    "claim": "AF↔NGroups r=0.656 = phasing。",
+    "source_doc": "doc_library",
+    "cited_source": "InterSubMod/research/loh_subclone_af_paired/data/hd4_attribution.json",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-14",
+    "subject": "same_locus_recurrence",
+    "claim": "同-locus 0/38（somatic ASM 同位點復發 0/38）。",
+    "source_doc": "doc_library",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-15",
+    "subject": "paired_negative_control",
+    "claim": "paired 負控 NS（not significant）。",
+    "source_doc": "doc_library",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-16",
+    "subject": "filter_reinforcement",
+    "claim": "filter 補強三道（額外三道補強 filter-DEAD 證據）。",
+    "source_doc": "doc_library",
+    "cited_source": "none",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-17",
+    "subject": "provenance_reconcile_status",
+    "claim": "2026-06-09 T-PROV 對賬結案：下表 🟡 已全部定位到源檔 → 升 🟢。",
+    "source_doc": "doc_library",
+    "cited_source": "wf_5644ed77-082 + 本地 grep；01_focus_notes/08_任務執行回報_catalog建構與provenance.md",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "07-18",
+    "subject": "doc_stale_marker",
+    "claim": "doc 缺檔標記 stale：condition_fp_consensus.json / *_gwasm.json 其實都在 research/.../genome_survey_v2/cn_confound/cross_sample/（OR 8.631/4.085/5.837、6/6 excess 0.101–0.241）。",
+    "source_doc": "doc_library",
+    "cited_source": "research/.../genome_survey_v2/cn_confound/cross_sample/",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-19",
+    "subject": "chr17_perm",
+    "claim": "chr17 perm p=0.001 來源為 survivor_permutation.json。",
+    "source_doc": "doc_library",
+    "cited_source": "survivor_permutation.json",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-20",
+    "subject": "germline_het_null_ari",
+    "claim": "germline-het null ARI 0.177 來源為 b2_broad_scan_results.json（0.177463）。",
+    "source_doc": "doc_library",
+    "cited_source": "b2_broad_scan_results.json",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-21",
+    "subject": "umtag_methyl_phasing",
+    "claim": "umtag 0.8852 / V10 0.979-0.866 來源為 20260531_methyl_phasing_A0_assets/。",
+    "source_doc": "doc_library",
+    "cited_source": "20260531_methyl_phasing_A0_assets/",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-22",
+    "subject": "same_hap_overstated",
+    "claim": "唯一 OVERSTATED 必修：『same-hap ≥93% 6/6』實測 = 0.840/0.939/0.759/0.429/0.932/0.920 → 只 3/6 ≥93%（方向一致對，量級錯）。",
+    "source_doc": "doc_library",
+    "cited_source": "CURRENT_FOCUS:137",
+    "stated_tier": "🔴"
+  },
+  {
+    "id": "07-23",
+    "subject": "hcc1954_transfer",
+    "claim": "HCC1954 transfer −0.377 在 cycle4 LOSO 檔 grep 不到（LOSO 值是 −8.24e-05），需去 cycle2 cross-sample transfer 輸出補。",
+    "source_doc": "doc_library",
+    "cited_source": "cycle2 cross-sample transfer 輸出（待定位）",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "07-24",
+    "subject": "regression_to_extreme_or",
+    "claim": "regression-to-extreme OR 8.63/4.09/5.84 + combo，condition_fp_consensus.json 磁碟不存在，需定位正確 emitted 檔名。",
+    "source_doc": "doc_library",
+    "cited_source": "condition_fp_consensus.json（磁碟不存在）",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "07-25",
+    "subject": "strong_asm_or",
+    "claim": "strong-ASM OR=0.194，同樣缺檔（condition_fp_consensus.json）。",
+    "source_doc": "doc_library",
+    "cited_source": "condition_fp_consensus.json（磁碟不存在）",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "07-26",
+    "subject": "brca2_d_within",
+    "claim": "BRCA2 d_within −0.023（subclone/copy 主導，% 不 robust，勿寫 ~80%），已在 copy_partition_confirm.json（d_copy −0.11/d_within −0.023）+ survivor_permutation.json（perm p=0.024, 19/19）對賬。",
+    "source_doc": "doc_library",
+    "cited_source": "copy_partition_confirm.json + survivor_permutation.json",
+    "stated_tier": "🟢"
+  },
+  {
+    "id": "07-27",
+    "subject": "germline_het_null_ari",
+    "claim": "germline-het null ARI 0.177，master_draft 只寫 p=0.922，需去上游 TSV 補。",
+    "source_doc": "doc_library",
+    "cited_source": "上游 TSV（待定位）",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "07-28",
+    "subject": "cross_sample_excess",
+    "claim": "6/6 excess +0.101–0.241，不在 cross_sample_synthesis.json，需去 *_gwasm.json 補。",
+    "source_doc": "doc_library",
+    "cited_source": "*_gwasm.json（待定位）",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "07-29",
+    "subject": "overlap_expectation",
+    "claim": "E[overlap]=0.16 為 derived，未 file-stored，需補計算說明。",
+    "source_doc": "doc_library",
+    "cited_source": "none（derived，未 file-stored）",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "07-30",
+    "subject": "phasing_same_hap",
+    "claim": "same-hap ≥93% 6/6 為舊 framing，06-02 draft 未重述，需去原 6-sample same-hap 源補。",
+    "source_doc": "doc_library",
+    "cited_source": "原 6-sample same-hap 源（待定位）",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "07-31",
+    "subject": "umtag_methyl_phasing",
+    "claim": "umtag 0.8852 / V10 0.979-0.866 / 45.84% 不在已驗證集合，需去 selfphasing_v6 / methyl-phasing pilot 補。",
+    "source_doc": "doc_library",
+    "cited_source": "selfphasing_v6 / methyl-phasing pilot（待定位）",
+    "stated_tier": "🟡"
+  },
+  {
+    "id": "07-32",
+    "subject": "citation_discipline",
+    "claim": "引用 🟡 數字前必標『待原檔對賬』，不可當 🟢 L1 用（否則 PI/reviewer 對賬會抓）。",
+    "source_doc": "doc_library",
+    "cited_source": "none",
+    "stated_tier": "none"
+  }
+]
