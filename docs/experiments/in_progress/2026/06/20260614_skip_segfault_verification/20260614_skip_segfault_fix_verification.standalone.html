@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SKIP segfault 修復驗證 — 改動步驟 + 數字 + 案例熱圖</title>
+<!--
+  doc_type: change_verification  created: 2026-06-14  scope: E hotfix + U1 pilot (HCC1395 單樣本)
+  cpp_commit: 517ed90 (fix) · 6da4de5 (methodology) · aa4b4a5 (U1) · e154934 (NReadsValid) · 7c341d2 (ledger)
+  branches: fix/clustering-nan-skip-segfault, feat/summary-nreadsvalid, develop
+  data_sources: docs/methodology/20260614_skip_nan_clustering_segfault_fix_01.md,
+                docs/experiments/.../20260614_u1_maxdist_vs_skip/{comparison_summary.json, wg/comparison_summary.json,
+                interpretation.json, vc_crosstab.tsv, README.md}, figures/case_chr1_*.png
+  provenance-verified: 所有數字 2026-06-14 從上列 commit 的 git 內容 + worktree 檔案親讀；
+                       測試結果(221/221, bit-identical, exit139→0)引自 methodology 報告的 fresh 驗證表；
+                       4 案例熱圖 = U1 plot_cases.py 產物親眼確認。無捏造。
+-->
+<style>
+:root{
+  --c-accent:#D97757;--c-accent-soft:#F2E4DC;--c-text:#1c1b19;--c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5;--c-card:#FFFFFF;--c-border:#E3DACC;
+  --c-pass:#2F7D5B;--c-pass-soft:#E4F0EA;--c-warn:#B06A16;--c-warn-soft:#F6EBD8;
+  --c-info:#2F6690;--c-info-soft:#E2ECF3;--c-dead:#9A3B3B;--c-dead-soft:#F3E2E2;
+  --sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.7;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:8px var(--sp-5);display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;font-size:.8rem}
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:1.9rem;margin:6px 0;line-height:1.22}
+header.hero .lede{color:var(--c-text-soft);max-width:850px;font-size:1.05rem}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.5rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.95rem;margin:0 0 var(--sp-4);max-width:870px}
+h4.mini{font-size:1.02rem;margin:var(--sp-4) 0 var(--sp-2);display:flex;align-items:center;gap:8px}
+h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-5);margin:var(--sp-4) 0}
+.bluf h2{margin:0 0 var(--sp-2);font-size:1.2rem}.bluf p{margin:var(--sp-2) 0}
+.ironclad{background:var(--c-dead-soft);border:1px solid var(--c-dead);border-left:6px solid var(--c-dead);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:.92rem}
+.ironclad b{color:var(--c-dead)}
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.08rem;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a}.takeaway.pass .lab{color:var(--c-pass)}
+.takeaway.warn{border-color:var(--c-warn);border-left-color:var(--c-warn);color:#6b4410}.takeaway.warn .lab{color:var(--c-warn)}
+.key{background:#fdf2c8;font-weight:700;padding:0 4px;border-radius:3px}
+.muted{color:var(--c-text-soft);font-size:.84rem}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.kpis{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-4) 0 0}
+.kpi{flex:1;min-width:170px;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4)}
+.kpi .v{font-family:var(--mono);font-size:1.4rem;font-weight:800;line-height:1.15}
+.kpi .k{font-size:.76rem;color:var(--c-text-soft);margin-top:5px}
+.kpi.pass{border-left:4px solid var(--c-pass)}.kpi.pass .v{color:var(--c-pass)}
+.kpi.dead{border-left:4px solid var(--c-dead)}.kpi.dead .v{color:var(--c-dead)}
+.kpi.info{border-left:4px solid var(--c-info)}.kpi.info .v{color:var(--c-info)}
+table{border-collapse:collapse;width:100%;font-size:.85rem;margin:var(--sp-3) 0;background:#fff}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}
+tbody tr:nth-child(even){background:#FBF9F4}
+td code,p code,li code{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}
+td.imp{font-weight:700}
+.ba{font-family:var(--mono);font-size:.82rem}.ba .b{color:var(--c-dead)}.ba .a{color:var(--c-pass);font-weight:700}.ba .arrow{color:var(--c-accent);font-weight:800}
+figure{margin:var(--sp-4) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto}
+figure .figtitle{font-size:.92rem;font-weight:700;margin:0 0 var(--sp-2)}
+figure img{display:block;max-width:100%;height:auto;border:1px solid var(--c-border);border-radius:6px}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}
+figcaption{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.55}
+figcaption b{color:var(--c-text)}
+.svgnote{font-size:9px;fill:#6B6B66}
+.timeline{list-style:none;padding:0;margin:var(--sp-3) 0}
+.timeline li{position:relative;padding:10px 0 10px 150px;border-bottom:1px dashed var(--c-border)}
+.timeline li .when{position:absolute;left:0;top:10px;width:136px;font-family:var(--mono);font-size:.74rem;color:var(--c-info);font-weight:700}
+.timeline li b{color:var(--c-text)}
+.confirm{background:#fff;border:2px dashed var(--c-accent);border-radius:var(--radius);padding:var(--sp-4);margin:var(--sp-4) 0}
+.confirm h4{margin:0 0 var(--sp-2);color:var(--c-accent)}.confirm ul{margin:var(--sp-2) 0;padding-left:1.2em}.confirm li{margin:6px 0}
+.code{font-family:var(--mono);font-size:.82rem;background:#2b2a27;color:#eee;border-radius:8px;padding:var(--sp-3) var(--sp-4);overflow-x:auto;margin:var(--sp-3) 0;line-height:1.5}
+.code .c{color:#9A7B5B}.code .r{color:#e6a3a3}.code .g{color:#9ad0b0}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-6);font-size:.8rem;color:var(--c-text-soft)}
+footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}footer.prov code{font-family:var(--mono)}footer.prov ul{padding-left:1.2em}
+.todo{color:var(--c-warn);font-family:var(--mono);font-size:.82em;font-weight:700}
+@media(max-width:760px){.cases{grid-template-columns:1fr!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brand">SKIP segfault 修復驗證</span>
+  <nav>
+    <a href="#timeline">改動步驟</a><a href="#bug">① bug 根因</a><a href="#fix">② 修法 A+C</a>
+    <a href="#verify">③ 三層驗證</a><a href="#u1">④ U1 數字</a><a href="#cases">⑤ 案例熱圖</a><a href="#confirm">請你確認</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">C++ bugfix 驗證 · commit 517ed90 + 後續 4 commit · HCC1395 單樣本</div>
+  <h1>SKIP segfault 修復 —— 改動步驟、數字、案例差異圖</h1>
+  <p class="lede">這幾天修了一個讓 ISM 在 <code>--nan-distance-strategy SKIP</code> 下<strong>一開跑就崩潰（SIGSEGV）</strong>的 bug。這頁把<strong>根因 → 修法 → 三層驗證 → 解鎖的 U1 比對 → 4 個案例熱圖</strong>攤出來，讓你確認改動有效、無副作用、且符合你的判斷。</p>
+</header>
+
+<div class="bluf">
+  <h2>L0 一眼看懂</h2>
+  <p><b>Bug：</b><code>SKIP</code> 策略把覆蓋不足的 read pair 距離設成 <code>NaN</code>，UPGMA 永遠選不到 NaN（<code>NaN&lt;x</code> 恆假）→ 建出<u>有環的樹</u> → 下游 <code>collect_internal_nodes</code> 沿環<u>無限遞迴</u> → <span class="key">堆疊溢位崩在第一個 region（exit 139）</span>。</p>
+  <p><b>修法：</b><b>A（治本）</b>＝clustering 前先 filter 掉 NaN，讓 clustering 與 PERMANOVA 用同一份乾淨 read 子集；<b>C（安全網）</b>＝遞迴加 cycle guard，再有環也不崩。</p>
+  <p><b>驗證：</b>✅ ctest <b>221/221</b>、✅ MAX_DIST 結果 <b>bit-identical</b>（零副作用）、✅ 原本崩的 input 現在 <b>exit 139 → exit 0</b>。</p>
+  <p class="muted">解鎖效果：SKIP 路徑現可用 → 完成 U1（MAX_DIST vs SKIP 分群品質比對），發現 MAX_DIST 的 1.0 假距離一直在稀釋甲基分群訊號。範圍：HCC1395 單樣本（chr1 + 全基因組）。</p>
+</div>
+
+<div class="ironclad">
+  <b>🔴 一句話判斷：</b>這是個<b>真 crash bug</b>（不是調參），修法 <b>A 治本 + C 安全網</b>雙保險，且 <b>MAX_DIST 預設路徑經 regression 證實逐位元不變</b> → 對既有結果<u>零風險</u>，純粹「修掉崩潰 + 解鎖一條本來跑不了的路」。
+</div>
+
+<!-- ============ 改動步驟 ============ -->
+<section id="timeline">
+  <h3><span class="num">⏱</span> 改動步驟（5 個 commit，2026-06-14）</h3>
+  <ul class="timeline">
+    <li><span class="when">517ed90 · 01:51</span><b>SKIP segfault 修復</b>：A（clustering 前 filter NaN）+ C（cycle guard）。5 檔 +215/−28，3 個新 TreeCycleGuard 測試。<span class="badge b-pass">ctest 221/221</span></li>
+    <li><span class="when">6da4de5 · 01:53</span><b>根因 methodology + evidence ledger</b>：gdb 根因鏈、A+C 設計、三層驗證紀錄 → <code>docs/methodology/20260614_skip_nan_clustering_segfault_fix_01.md</code></li>
+    <li><span class="when">aa4b4a5 · 03:05</span><b>U1 全基因組驗證</b>：MAX_DIST vs SKIP 分群比對，chr1(2624) + 全基因組(30490 位點) + 4 案例熱圖。</li>
+    <li><span class="when">e154934 · 03:11</span><b>gap1：NReadsValid 欄</b>：per-region 剔除量可追溯（NumReads − NReadsValid）。<span class="badge b-pass">ctest 221/221 + bit-identical</span></li>
+    <li><span class="when">7c341d2 · 03:11</span><b>gap1 evidence ledger</b> 紀錄。</li>
+  </ul>
+  <p class="muted">分支：<code>fix/clustering-nan-skip-segfault</code> → <code>feat/summary-nreadsvalid</code> → <code>develop</code>。目前主研究分支 <code>research/subclonal-reconstruction-202606</code> 尚未含這些（待你決定是否 merge）。</p>
+</section>
+
+<!-- ============ ① bug 根因 ============ -->
+<section id="bug">
+  <h3><span class="num">①</span> bug 根因鏈（gdb 重現確認）</h3>
+  <p class="sub">為什麼只有 SKIP 崩、MAX_DIST 不崩？關鍵在「NaN 距離」這顆地雷一路滾到 clustering。</p>
+
+  <figure>
+    <div class="figtitle">圖 1　SKIP NaN → 環狀樹 → 無限遞迴 → SIGSEGV（示意，行號為實際源碼）</div>
+    <svg viewBox="0 0 980 250" role="img" aria-label="segfault 根因鏈">
+      <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#9A3B3B"/></marker></defs>
+      <g font-family="-apple-system,sans-serif">
+        <rect x="10" y="40" width="170" height="64" rx="8" fill="#F3E2E2" stroke="#9A3B3B"/>
+        <text x="95" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#9A3B3B">① SKIP 設 NaN</text>
+        <text x="95" y="82" text-anchor="middle" font-size="9.5" fill="#5C5A54">共同 CpG &lt; C_min(3)</text>
+        <text x="95" y="96" text-anchor="middle" font-size="8.5" font-family="monospace" fill="#5C5A54">DistanceMatrix.cpp:413</text>
+        <rect x="206" y="40" width="180" height="64" rx="8" fill="#fff" stroke="#9A3B3B"/>
+        <text x="296" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#1c1b19">② NaN 矩陣餵進</text>
+        <text x="296" y="80" text-anchor="middle" font-size="10" fill="#1c1b19">clustering（修前）</text>
+        <text x="296" y="96" text-anchor="middle" font-size="8.5" font-family="monospace" fill="#5C5A54">RegionProcessor.cpp:1497</text>
+        <rect x="412" y="40" width="186" height="64" rx="8" fill="#fff" stroke="#9A3B3B"/>
+        <text x="505" y="62" text-anchor="middle" font-size="12" font-weight="700" fill="#1c1b19">③ UPGMA 退化</text>
+        <text x="505" y="78" text-anchor="middle" font-size="9" fill="#5C5A54">NaN&lt;x 恆假 → NaN pair</text>
+        <text x="505" y="90" text-anchor="middle" font-size="9" fill="#5C5A54">永不被選 → 建出環</text>
+        <text x="505" y="101" text-anchor="middle" font-size="8.5" font-family="monospace" fill="#5C5A54">build_upgma:100</text>
+        <rect x="624" y="40" width="166" height="64" rx="8" fill="#fff" stroke="#9A3B3B"/>
+        <text x="707" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#1c1b19">④ 沿環無限遞迴</text>
+        <text x="707" y="80" text-anchor="middle" font-size="9.5" fill="#5C5A54">collect_internal_nodes</text>
+        <text x="707" y="96" text-anchor="middle" font-size="8.5" font-family="monospace" fill="#5C5A54">TreeStructure.cpp:73</text>
+        <rect x="816" y="40" width="154" height="64" rx="8" fill="#9A3B3B" stroke="#9A3B3B"/>
+        <text x="893" y="66" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">💥 SIGSEGV</text>
+        <text x="893" y="86" text-anchor="middle" font-size="10" fill="#fff">exit 139（第一個 region）</text>
+        <line x1="182" y1="72" x2="204" y2="72" stroke="#9A3B3B" stroke-width="2" marker-end="url(#ar)"/>
+        <line x1="388" y1="72" x2="410" y2="72" stroke="#9A3B3B" stroke-width="2" marker-end="url(#ar)"/>
+        <line x1="600" y1="72" x2="622" y2="72" stroke="#9A3B3B" stroke-width="2" marker-end="url(#ar)"/>
+        <line x1="792" y1="72" x2="814" y2="72" stroke="#9A3B3B" stroke-width="2" marker-end="url(#ar)"/>
+        <!-- contrast -->
+        <rect x="206" y="150" width="584" height="58" rx="8" fill="#E4F0EA" stroke="#2F7D5B"/>
+        <text x="498" y="172" text-anchor="middle" font-size="11.5" font-weight="700" fill="#2F7D5B">為何 MAX_DIST 不崩：invalid pair 設「1.0」(有限值) → UPGMA 正常 merge 全 N read → 合法無環樹</text>
+        <text x="498" y="192" text-anchor="middle" font-size="10" fill="#5C5A54">下游 PERMANOVA 本有 NaN 防護，但 clustering 跑在它之前就崩了（防護不一致）</text>
+      </g>
+      <text class="svgnote" x="10" y="232">gdb 重現：崩在 Progress 1/2624 後，backtrace collect_internal_nodes 自我遞迴 PC 固定走 left = stack overflow。源碼行號見 methodology 報告 L1 表。</text>
+    </svg>
+    <figcaption><b>誠實標註（L2）：</b>gdb 確認是無限遞迴（reads 中位 118 &lt; 1000，正常樹遞迴不可能爆 8MB stack ~需 13 萬層 → 排除深度、必為環）；但「哪一次 merge 形成環」的精確序列<u>未經 Debug-build instrument 最終確認</u>（強推理）。<b>修法對此 robust</b>：A 讓 NaN 根本不進 clustering、C 即使有環也不崩，且用 gdb 重現的真實崩潰 input 驗證通過。</figcaption>
+  </figure>
+</section>
+
+<!-- ============ ② 修法 ============ -->
+<section id="fix">
+  <h3><span class="num">②</span> 修法：A 治本 + C 安全網</h3>
+  <p class="sub">兩層防護。A 解決「NaN 為什麼會害死 clustering」，C 是「就算還有環也不准崩」的兜底。</p>
+
+  <table>
+    <thead><tr><th>修法</th><th>在哪</th><th>做什麼</th><th>關鍵保證</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">A 治本</td><td><code>RegionProcessor</code><br>新 <code>extract_complete_submatrix_indices()</code></td><td>clustering 前先剔除「非-NaN 鄰居最少」的 read 直到子矩陣無 NaN；與 <code>StructureTest::filter_reads_for_complete_matrix</code> <b>同演算法</b> → clustering 與 PERMANOVA 用<b>同一份 valid read 子集</b></td><td class="imp">MAX_DIST（無 NaN）→ 子集＝全部 → zero-copy → <span class="badge b-pass">bit-identical</span></td></tr>
+      <tr><td class="imp">C 安全網</td><td><code>TreeStructure</code><br><code>collect_internal_nodes/leaves</code></td><td>加 <code>std::set&lt;TreeNode*&gt; visited</code>，節點第二次被訪問即 return</td><td>遞迴深度 ≤ 不同節點數 ≤ 2N−1 → <b>永不爆 stack</b>，且不誤傷正常深樹</td></tr>
+    </tbody>
+  </table>
+
+  <div class="takeaway">
+    <span class="lab">設計要點</span>
+    A 把 SKIP 的語意做對了 ——「共同 CpG 不足的 read 本來就無法可靠分群，剔除它」正是 SKIP 的設計意圖；而且讓 clustering 與顯著性檢定<b>看同一份 read</b>（先前不一致）。C 是與 bug 機制無關的通用防護，未來任何畸形樹都擋得住。
+  </div>
+</section>
+
+<!-- ============ ③ 三層驗證 ============ -->
+<section id="verify">
+  <h3><span class="num">③</span> 三層驗證（本輪 fresh，全綠）</h3>
+  <p class="sub">先寫測試見紅 → 修 → 見綠（TDD）；再證既有結果不變；再用真實崩潰 input 端到端跑通。</p>
+
+  <div class="kpis">
+    <div class="kpi pass"><div class="v">221 / 221</div><div class="k">ctest 全套通過（含 3 個新 TreeCycleGuard 測試，紅 139 → 綠）</div></div>
+    <div class="kpi pass"><div class="v">bit-identical</div><div class="k">MAX_DIST chr1 ±5000 BERNOULLI 2624 位點 vs golden 逐位元相同 → 零副作用</div></div>
+    <div class="kpi pass"><div class="v">139 → 0</div><div class="k">原本 gdb 重現崩潰的同一 input，現在 exit 0，產出 2624-region 結果（wall 51s）</div></div>
+  </div>
+
+  <table>
+    <thead><tr><th>層</th><th>指令</th><th>結果</th></tr></thead>
+    <tbody>
+      <tr><td>單元（C，TDD）</td><td><code>run_tests --gtest_filter=TreeCycleGuard.*</code></td><td class="ba"><span class="b">紅 exit 139</span> <span class="arrow">→</span> <span class="a">綠 3 PASS</span></td></tr>
+      <tr><td>全套回歸</td><td><code>ctest</code></td><td class="imp">221/221 pass, 0 failed</td></tr>
+      <tr><td>結果不變（A 安全核心）</td><td><code>regression_check.sh</code></td><td><b>MAX_DIST 2624 位點與 golden bit-identical</b></td></tr>
+      <tr><td>端到端（A+C 真修復）</td><td>chr1 SKIP -j16（gdb 同 input）</td><td class="ba"><span class="b">exit 139</span> <span class="arrow">→</span> <span class="a">exit 0</span>，2624-region significance</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ ④ U1 數字 ============ -->
+<section id="u1">
+  <h3><span class="num">④</span> 修復解鎖了什麼：U1（MAX_DIST vs SKIP）數字</h3>
+  <p class="sub">SKIP 能跑後，才發現 MAX_DIST 的「1.0 假距離」一直在<strong>稀釋</strong>甲基分群訊號。同配置只差 <code>--nan-distance-strategy</code>。</p>
+
+  <h4 class="mini">全基因組 30490 TP 位點（單樣本 HCC1395，← wg/comparison_summary.json）</h4>
+  <table>
+    <thead><tr><th>維度</th><th>MAX_DIST</th><th>SKIP</th><th>倍率</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">Significant</td><td>1,276</td><td class="imp">11,912</td><td>9.3×</td></tr>
+      <tr><td>VerificationClass Strong</td><td>5,133</td><td class="imp">21,015</td><td>4.1×</td></tr>
+      <tr><td>‧ Subclone</td><td>196</td><td>1,295</td><td>6.6×</td></tr>
+      <tr><td>‧ Weak / Noise</td><td>22,305 / 2,856</td><td>6,122 / 2,058</td><td>↓ / ↓</td></tr>
+      <tr><td>CramersV_mean</td><td>0.0213</td><td class="imp">0.2383</td><td>11×</td></tr>
+      <tr><td>VC 改變 / 任一改變</td><td colspan="2">19,961（65%）/ 21,901（72%）region</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">chr1 pilot（2624 位點）模式一致：Significant 91→1007（11×）、Strong 389→1767、CramersV 0.017→0.230；主流向 Weak(MAX_DIST)→Strong(SKIP)=1403 region（1.0 污染把真 Strong 壓成 Weak，SKIP 還原）。</p>
+
+  <h4 class="mini">這是真訊號嗎？— confound 已排除（← interpretation.json）</h4>
+  <table>
+    <thead><tr><th>疑慮</th><th>檢查</th><th>結論</th></tr></thead>
+    <tbody>
+      <tr><td>小樣本假象？</td><td>SKIP 新增 sig 的 NumReads median = <b>123</b>（≈全體 124）</td><td><span class="badge b-pass">排除</span></td></tr>
+      <tr><td>permutation 邊緣？</td><td>新 sig PermanovaP median = <b>0.01</b>（=99-perm 下限 1/100）、PermanovaP&lt;0.01 = <b>0</b>；CramersV median <b>0.578</b></td><td><span class="badge b-pass">排除（強分群）</span></td></tr>
+      <tr><td>lost by skip？</td><td>SKIP 新增 sig 10,946，因 skip 而 lost 僅 <b>310</b></td><td><span class="badge b-pass">淨大幅增加</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="takeaway warn">
+    <span class="lab">⚠ 本質判別（誠實天花板）</span>
+    浮現的訊號<b>主導是 germline-HP（DominantLabel hp 85%）</b>，<u>不是 somatic subclone</u> —— 與主軸「甲基＝germline-haplotype 層級」一致。所以 SKIP 是「更正確的 NaN 處理」，但對<b>somatic subclone 偵測力</b>的淨增益<u>尚未確立</u>（需 normal 對照，見 gap2）。
+  </div>
+</section>
+
+<!-- ============ ⑤ 案例熱圖 ============ -->
+<section id="cases">
+  <h3><span class="num">⑤</span> 案例差異圖：4 個 region 的 MAX_DIST vs SKIP 熱圖</h3>
+  <p class="sub">這就是你要看的「案例差異圖片」。每張三聯：左 = MAX_DIST 距離、中 = SKIP 距離、右 = 甲基（read×CpG，按 HP tag 排序）。看左右兩張距離圖的差別。</p>
+
+  <div class="ironclad" style="background:var(--c-info-soft);border-color:var(--c-info);border-left-color:var(--c-info)">
+    <b style="color:var(--c-info)">怎麼讀這些熱圖：</b>距離圖顏色 = read 兩兩距離（深紫 0 = 很像 / 黃 1.0 = 最遠）。<b>MAX_DIST（左）</b>滿屏<u>黃色直條 = 1.0 假距離污染</u>，把 HP block 淹沒；<b>SKIP（中）</b>把那些 pair 設 NaN（<u>灰色遮罩</u>）後，<b>HP1/HP2 兩個深紫對角 block（群內低距離）+ 跨群綠（高距離）清晰浮現</b>（黃虛線 = HP 邊界）。<b>甲基圖（右）</b>HP1 vs HP2 上下兩半甲基模式分層（藍低/紅高）→ 證實是 germline-haplotype 甲基差異。
+  </div>
+
+  <div class="cases" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)">
+    <figure>
+      <div class="figtitle">案例 A — chr1:56791672（n_reads=98，HP1=67/HP2=31）</div>
+      <img src="figures/case_chr1_56791672.png" alt="chr1 56791672 MAX_DIST 黃污染 vs SKIP 清晰 HP block">
+      <figcaption>左圖 ~25、45 列整條黃 = 該 read 與多數人「假最遠」；中圖灰掉後，下半 HP2(67–98) 對角 block 深紫清晰。</figcaption>
+    </figure>
+    <figure>
+      <div class="figtitle">案例 B — chr1:73791759（n_reads=92，HP1=38/HP2=53）</div>
+      <img src="figures/case_chr1_73791759.png" alt="chr1 73791759 MAX_DIST 黃污染 vs SKIP 兩 HP block">
+      <figcaption>左圖大片黃幾乎看不出結構；中圖灰掉後 HP1(0–38)/HP2(38–92) 兩個對角 block 分明；右圖甲基上下兩半明顯分層。</figcaption>
+    </figure>
+    <figure>
+      <div class="figtitle">案例 C — chr1:58306441</div>
+      <img src="figures/case_chr1_58306441.png" alt="chr1 58306441 MAX_DIST vs SKIP">
+      <figcaption>同樣模式：SKIP 還原被 1.0 污染掩蓋的 HP 分群結構。</figcaption>
+    </figure>
+    <figure>
+      <div class="figtitle">案例 D — chr1:67579144</div>
+      <img src="figures/case_chr1_67579144.png" alt="chr1 67579144 MAX_DIST vs SKIP">
+      <figcaption>同樣模式。4 案例皆 Weak→Strong / CramersV 0→高 / DominantLabel=hp（n_reads 83–98、SKIP NaN 剔除 16–38%）。</figcaption>
+    </figure>
+  </div>
+
+  <div class="takeaway pass">
+    <span class="lab">視覺結論</span>
+    4 個案例一致顯示：修復後用 SKIP，被 MAX_DIST「1.0 假距離」掩蓋的 <b>germline-HP 甲基分群結構清楚浮現</b>。這從視覺上確認了 ④ 的數字不是統計假象，而是真的有 block 結構（但是 germline-HP，非 somatic subclone）。
+  </div>
+</section>
+
+<!-- ============ ⑥ NReadsValid ============ -->
+<section id="gap1">
+  <h3><span class="num">⑥</span> gap1 補強：NReadsValid 欄（剔除量可追溯）</h3>
+  <p class="sub">U1 發現一個記錄缺口：SKIP 每個 region 到底剔掉多少 read，從 summary 看不到。e154934 補了這欄。</p>
+  <table>
+    <thead><tr><th>策略</th><th>NReadsValid（用於 clustering 的 read 數）</th><th>剔除量 = NumReads − NReadsValid</th></tr></thead>
+    <tbody>
+      <tr><td>MAX_DIST</td><td>== NumReads（filter 是 no-op，無 NaN）</td><td>0</td></tr>
+      <tr><td class="imp">SKIP</td><td>≤ NumReads（例：<b>98→68</b>、<b>92→50</b>）</td><td>剔除比例對得上 NaN 佔比</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">驗證：ctest 221/221；MAX_DIST regression 仍 bit-identical（新欄是附加，golden 9 欄按名抽取不受影響）。<b>gap2（germline vs somatic-subclone 分離，需 normal-only HP 對照）尚未補</b> → 列入下一步。</p>
+</section>
+
+<!-- ============ 淨結論 + 確認 ============ -->
+<section id="confirm">
+  <h3><span class="num">✓</span> 淨結論 + 請你確認</h3>
+
+  <div class="takeaway pass">
+    <span class="lab">總判定</span>
+    SKIP segfault 修復<b>有效、無副作用</b>：真 crash 修掉（exit 139→0）、既有 MAX_DIST 結果逐位元不變、ctest 全綠、且解鎖的 U1 比對確認 MAX_DIST 一直在稀釋甲基分群訊號。<b>沒有發現問題。</b>
+  </div>
+
+  <div class="confirm">
+    <h4>三個需要你拍板的點</h4>
+    <ul>
+      <li><b>① 改動本身 OK 嗎？</b> A（治本 filter）+ C（安全網）雙保險、MAX_DIST bit-identical 零風險。你同意這個修法、以及「SKIP 剔除覆蓋不足 read」符合語意嗎？</li>
+      <li><b>② 要不要 merge 進主分支？</b> 這 5 個 commit 在 <code>fix/clustering-nan-skip-segfault</code>/<code>feat/summary-nreadsvalid</code>/<code>develop</code>，主研究分支 <code>research/subclonal-reconstruction-202606</code> 還沒有。要我幫你規劃 merge 嗎？（merge 需你確認）</li>
+      <li><b>③ U1 的解讀符合你判斷嗎？</b> 我把「浮現訊號」定性為 <u>germline-HP（85%）非 somatic subclone</u>，故對 subclone 偵測的淨增益<u>未確立</u>，要補 gap2（normal-only HP 對照）。這符合你對「甲基=germline-haplotype 層級」的理解嗎？還是你認為 SKIP 已足以宣稱 subclone 改善？</li>
+    </ul>
+    <p class="muted">範圍誠實標註：<span class="todo">HCC1395 單樣本</span>；若 subclone 結論要寫論文需全基因組 + COLO829 等多樣本（主軸 6 樣本資產）。</p>
+  </div>
+</section>
+
+<footer class="prov"><div>
+  <h4>來源與可追溯性（所有數字 2026-06-14 grep-verified）</h4>
+  <ul>
+    <li><b>根因 + 修法 + 三層驗證：</b><code>docs/methodology/20260614_skip_nan_clustering_segfault_fix_01.md</code>（commit 6da4de5）+ fix commit <code>517ed90</code>（RegionProcessor / TreeStructure / test_hierarchical_clustering，+215/−28）。測試結果(221/221, bit-identical, exit139→0)為該報告 fresh 驗證表。</li>
+    <li><b>U1 數字：</b><code>.../20260614_u1_maxdist_vs_skip/wg/comparison_summary.json</code>（30490 位點：Significant 1276→11912、CramersV 0.0213→0.2383、sig_hp_fraction 0.851/0.853）+ <code>comparison_summary.json</code>（chr1 2624）+ <code>interpretation.json</code>（confound checks）+ <code>vc_crosstab.tsv</code>（流向）。commit aa4b4a5。</li>
+    <li><b>NReadsValid：</b>commit <code>e154934</code>（98→68、92→50 例；MAX_DIST no-op；ctest 221/221 + bit-identical）。</li>
+    <li><b>4 案例熱圖：</b><code>figures/case_chr1_{56791672,73791759,58306441,67579144}.png</code>（U1 <code>plot_cases.py</code> 產物，自 <code>ism-review-infra</code> worktree 複製；n_reads/HP-family 取自圖標題）。</li>
+  </ul>
+  <p><b>範圍：</b>HCC1395 單樣本（chr1 pilot + 全基因組 confirmed）· <span class="todo">未跨樣本（gap2 normal 對照未補）</span> · subclone 結論 tier 上限受單樣本限制。</p>
+  <p style="margin-top:var(--sp-3)">建立 2026-06-14 · C++ bugfix 驗證 · 分支 fix/clustering-nan-skip-segfault → develop</p>
+</div></footer>
+
+</div>
+</body>
+</html>

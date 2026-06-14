@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ISM 方法本體與作用位置 — 解釋中心</title>
+<!--
+  doc_type: explain_concept_page  concept: ism-core  version: v2
+  created: 2026-06-12  commit: a7ab2d3  branch: research/subclonal-reconstruction-202606
+  source_of_content: docs/explain/_planning/00_盤點..._01.md 線1 + 04_number_resolution.md
+  v2 改進（依用戶回饋）：①圖例加密（3→7 張）②資訊密集處改表格 ③強化視覺層級+重點提取盒
+  provenance_note: 每數字附 source_path；未實測標 {{待查}}；Write 與產數字 grep 不同 batch（§13.0）。
+-->
+<style>
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --c-cs:#5B3FA0; --c-cs-soft:#ECE6F6;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.72;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-5)}
+/* ---- topbar ---- */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:0 var(--sp-5);display:flex;align-items:center;gap:var(--sp-3);min-height:52px;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;white-space:nowrap;font-size:.82rem}
+.topbar nav a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+/* ---- hero ---- */
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:2.1rem;margin:6px 0 6px;line-height:1.22;letter-spacing:-.01em}
+header.hero .lede{color:var(--c-text-soft);max-width:860px;margin:0;font-size:1.07rem}
+/* ---- 視覺層級（v2 重點）---- */
+h1,h2,h3,h4{letter-spacing:-.005em}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.62rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;line-height:1.25}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.96rem;margin:0 0 var(--sp-5);max-width:880px}
+h4.mini{font-size:1.02rem;margin:var(--sp-4) 0 var(--sp-2);color:var(--c-text);display:flex;align-items:center;gap:8px}
+h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px;display:inline-block}
+p{margin:var(--sp-3) 0}
+/* 重點提取盒：每段最重要一句，最醒目 */
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.14rem;line-height:1.58;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.dead{border-color:var(--c-dead);border-left-color:var(--c-dead);color:#5e2424}
+.takeaway.dead .lab{color:var(--c-dead)}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a}
+.takeaway.pass .lab{color:var(--c-pass)}
+/* 行內重要性 */
+.key{background:#fdf2c8;font-weight:700;padding:0 4px;border-radius:3px}
+.muted{color:var(--c-text-soft);font-size:.85rem}
+em.q{font-style:normal;background:var(--c-cs-soft);color:#3f2c70;padding:0 4px;border-radius:3px;font-weight:600}
+/* ---- BLUF ---- */
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-5);margin:var(--sp-4) 0}
+.bluf h2{margin:0 0 var(--sp-2);font-size:1.2rem}
+.bluf>p:first-of-type{font-size:1.1rem;line-height:1.6}
+.bluf .pi{font-size:.95rem;color:#7a3c22;margin:var(--sp-3) 0;padding:var(--sp-2) var(--sp-3);background:rgba(255,255,255,.5);border-radius:8px}
+.howto{background:var(--c-cs-soft);border:1px solid var(--c-cs);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);font-size:.85rem;margin:var(--sp-3) 0;color:#3f2c70}
+.ironclad{background:var(--c-dead-soft);border:1px solid var(--c-dead);border-left:6px solid var(--c-dead);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:.9rem}
+.ironclad b{color:var(--c-dead)} .ironclad ol{margin:var(--sp-2) 0 0;padding-left:1.3em} .ironclad li{margin:4px 0}
+/* ---- badges ---- */
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.b-cs{color:var(--c-cs);background:var(--c-cs-soft);border-color:var(--c-cs)}
+.tier{color:var(--c-text-soft);background:#F0EDE6;border-color:var(--c-border)}
+/* ---- KPI ---- */
+.kpis{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-4) 0 0}
+.kpi{flex:1;min-width:200px;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4)}
+.kpi .v{font-family:var(--mono);font-size:1.6rem;font-weight:800;color:var(--c-text);line-height:1.1}
+.kpi .k{font-size:.78rem;color:var(--c-text-soft);margin-top:5px}
+.kpi.dead{border-left:4px solid var(--c-dead)} .kpi.pass{border-left:4px solid var(--c-pass)}
+/* ---- role ---- */
+.flow1{font-family:var(--mono);font-size:.92rem;background:#fff;border:1px dashed var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);text-align:center;margin:var(--sp-3) 0}
+table{border-collapse:collapse;width:100%;font-size:.86rem;margin:var(--sp-3) 0;background:#fff}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}
+tbody tr:nth-child(even){background:#FBF9F4}
+td code,p code,li code,summary code{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}
+td.imp{font-weight:700}
+/* ---- figures（v2：更醒目）---- */
+figure{margin:var(--sp-4) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto;box-shadow:0 1px 3px rgba(20,20,19,.06)}
+figure .figtitle{font-size:.92rem;font-weight:700;color:var(--c-text);margin:0 0 var(--sp-2)}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}
+figcaption{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.6}
+figcaption b{color:var(--c-text)}
+/* ---- details ---- */
+details.card{margin:var(--sp-2) 0;border:1px solid var(--c-border);border-radius:var(--radius);background:var(--c-card);overflow:hidden}
+details.card>summary{cursor:pointer;list-style:none;padding:var(--sp-3) var(--sp-4);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;font-weight:600;font-size:1rem}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--c-accent);font-weight:700;transition:transform .15s}
+details.card[open]>summary::before{transform:rotate(90deg)}
+details.card>summary .term{font-family:var(--mono);color:var(--c-cs);font-size:.95em}
+details.card .body{padding:0 var(--sp-4) var(--sp-3);font-size:.92rem}
+details.card.def{border-left:4px solid var(--c-cs)} details.card.hcl{border-left:4px solid var(--c-warn)}
+.intuition{background:var(--c-cs-soft);border-radius:8px;padding:var(--sp-2) var(--sp-3);font-size:.9rem;margin:var(--sp-2) 0}
+.intuition b{color:var(--c-cs)}
+.so{background:var(--c-pass-soft);border:1px solid var(--c-pass);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0}
+.so b{color:var(--c-pass)}
+.rel{display:flex;gap:8px;flex-wrap:wrap;margin:var(--sp-3) 0}
+.rel a{font-size:.82rem;text-decoration:none;color:var(--c-info);border:1px solid var(--c-info);border-radius:18px;padding:3px 11px;background:var(--c-info-soft)}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-7);font-size:.8rem;color:var(--c-text-soft)}
+footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)} footer.prov code{font-family:var(--mono);font-size:.92em}
+footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
+.todo{color:var(--c-warn);font-family:var(--mono);font-size:.82em;font-weight:700}
+mark{background:#fdf2c8;padding:0 2px}
+/* 統計算式 worked example（v2.1：用示意數字示範怎麼算）*/
+.worked{background:#F7F5EF;border:1px solid var(--c-border);border-left:4px solid var(--c-info);border-radius:8px;padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;font-size:.88rem}
+.worked .lab{font-family:var(--mono);font-size:.64rem;color:var(--c-info);letter-spacing:1px;text-transform:uppercase;font-weight:800;display:block;margin-bottom:5px}
+.worked .calc{font-family:var(--mono);font-size:.85rem;background:#fff;border:1px solid var(--c-border);border-radius:6px;padding:8px 10px;margin:7px 0;overflow-x:auto}
+.worked .res{font-weight:800;color:var(--c-info)}
+.svgnote{font-size:8.5px;fill:#6B6B66}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brand">解釋中心</span>
+  <nav>
+    <a href="#bluf">重點</a><a href="#terms">名詞</a><a href="#role">作用位置</a>
+    <a href="#story">為何/發現/結論</a><a href="#evo">新舊對照</a><a href="#hcl">難點拆解</a>
+    <a href="#evidence">數據</a><a href="#prov">溯源</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">解釋中心 · 方法本體 · ism-core</div>
+  <h1>ISM — read-level 甲基化結構分析引擎</h1>
+  <p class="lede">這頁回答：ISM 是什麼、坐在整條分析流程的哪裡、吃什麼吐什麼、跟業界做法差在哪、最容易誤讀的幾個點。<strong>讀到夠就停</strong>——L0 重點平鋪、細節折在 <code>▸</code> 內、重要概念都配圖。</p>
+</header>
+
+<!-- ============ L0 BLUF ============ -->
+<div class="bluf" id="bluf">
+  <h2>L0 一句話結論</h2>
+  <p><strong>ISM</strong>（InterSubMod）= 對每個 somatic 突變位點，把周圍 reads 的甲基化模式做成 <em class="q">read×read 距離矩陣 → 階層聚類 → PERMANOVA 結構檢定</em>，量「甲基亞群是否與某個單倍型／體細胞突變<span class="key">結構連結</span>」。它<strong>不是</strong> variant filter，也不是算「兩組平均甲基率差多少」的工具。</p>
+  <p class="pi">▸ <b>給 PI 一句話：</b>ISM 量的是 <b>between-molecule（分子間）結構</b>，核心貢獻 = <b>somatic sub-haplotype 解析度</b> + <b>normal-anchored cis-test</b>（去掉 copy／germline-allelic／drift 三種假象）。</p>
+  <div class="kpis">
+    <div class="kpi pass"><div class="v">59 欄</div><div class="k">主輸出 <code>significance_summary.csv</code>（實測 head -1）<span class="badge b-pass">🟢 P</span></div></div>
+    <div class="kpi"><div class="v">0.34%</div><div class="k">全基因組 strong-ASM 稀有率（hypo 44%/hyper 56% 無偏好）<span class="badge tier">⭐3</span></div></div>
+    <div class="kpi"><div class="v">−0.122</div><div class="k">BRCA2 promoter HP-axis Δβ <span class="badge b-pass">🟢 P</span></div></div>
+    <div class="kpi dead"><div class="v">DEAD</div><div class="k">甲基→TP/FP filter：OR=0.194, p=1.8e-28；LOSO 100% 循環 <span class="badge b-dead">🔴 L4</span></div></div>
+  </div>
+  <p class="howto" style="margin-top:var(--sp-4)">怎麼讀：<b>名詞</b>建直覺 → <b>作用位置</b>看流程圖 → <b>為何/發現/結論</b>看邏輯 → <b>難點拆解</b>是最會卡的 4 個點（都配圖）→ <b>數據/溯源</b>給嚴謹引用。</p>
+</div>
+
+<!-- 站級 4 鐵則 -->
+<div class="ironclad">
+  <b>🔴 全站 4 條鐵則（讀任何一頁都要記得）</b>
+  <ol>
+    <li>「<b>存在</b> ASM」≠「<b>能判別</b> TP/FP」——兩個 claim 永遠分開講。</li>
+    <li><b>HP-axis</b>（HP1 vs HP1-1）是 somatic-controlled；<b>ALLELE-axis</b>（ALT vs REF）被 germline het baseline 污染——宣稱 somatic ASM 必附 germline-het 對照。</li>
+    <li>絕對 AUC 在甲基-phasing 場景<b>系統性膨脹</b>（germline het null median 0.974）；引相對 null 或 held-out rescue rate，不引絕對 AUC。</li>
+    <li>甲基→TP/FP filter = <b>DEAD</b>，勿再開；同 haplotype 內拆亞群（T3）= NEGATIVE，勿再開。</li>
+  </ol>
+</div>
+
+<!-- ============ §1 名詞地基 ============ -->
+<section id="terms">
+  <h3><span class="num">§1</span> 名詞地基 <span class="badge b-cs">N-DEF</span></h3>
+  <p class="sub">這頁會用到的關鍵術語，每個給「一句白話 → 直覺類比 → （折疊）嚴謹定義 + 圖 + 來源」。<span class="todo">canonical home 之後移到「背景名詞地基頁」，本頁先就地定義。</span></p>
+
+  <details class="card def" id="term-delta-vs-dbeta" open>
+    <summary><span class="term">Δ（距離差）vs Δβ（甲基率差）</span> — 兩個完全不同的量 <span class="badge b-warn">🟡 最常混淆</span></summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>Δ 問「兩群 reads 的甲基<u>模式</u>距離多遠」（無方向、單位是距離）；Δβ 問「某 CpG 上甲基化<u>比例</u>差多少」（有方向、單位 0–1）。一個講「結構有沒有分開」，一個講「往哪邊偏」。</div>
+      <figure>
+        <div class="figtitle">圖：同一位點的兩個不同量</div>
+        <svg viewBox="0 0 720 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Δ 距離空間 vs Δβ 甲基率空間">
+          <!-- left: distance space -->
+          <text x="20" y="20" font-size="12" font-weight="700" fill="#2F5597">距離空間 → Δ（無方向）</text>
+          <!-- mini distance heatmap 2 groups -->
+          <g transform="translate(40,36)">
+            <rect x="0" y="0" width="40" height="40" fill="#2E7D52"/><rect x="42" y="0" width="40" height="40" fill="#9fcbb4"/><rect x="84" y="0" width="40" height="40" fill="#d99a6c"/>
+            <rect x="0" y="42" width="40" height="40" fill="#9fcbb4"/><rect x="42" y="42" width="40" height="40" fill="#2E7D52"/><rect x="84" y="42" width="40" height="40" fill="#d99a6c"/>
+            <rect x="0" y="84" width="40" height="40" fill="#d99a6c"/><rect x="42" y="84" width="40" height="40" fill="#d99a6c"/><rect x="84" y="84" width="40" height="40" fill="#2E7D52"/>
+            <text x="62" y="142" font-size="9" fill="#6B6B66" text-anchor="middle">read×read 距離</text>
+          </g>
+          <text x="190" y="70" font-size="10" fill="#1c1b19">群內近</text>
+          <text x="190" y="88" font-size="10" fill="#1c1b19">群間遠</text>
+          <text x="40" y="200" font-size="11" font-weight="700" fill="#2F5597">Δ = d_between − d_within</text>
+          <text x="40" y="216" font-size="9" fill="#6B6B66">例 HP-axis Δ=0.15 · 只說「分得開」不說往哪偏</text>
+          <!-- divider -->
+          <line x1="370" y1="20" x2="370" y2="220" stroke="#E3DACC" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <!-- right: beta rate space -->
+          <text x="400" y="20" font-size="12" font-weight="700" fill="#B06A16">甲基率空間 → Δβ（有方向）</text>
+          <!-- bars: HP1 high, HP1-1 low, per CpG -->
+          <g transform="translate(410,36)">
+            <text x="0" y="92" font-size="9" fill="#6B6B66">β</text>
+            <line x1="14" y1="0" x2="14" y2="86" stroke="#ccc"/>
+            <!-- HP1 bars (high ~0.8) blue -->
+            <rect x="22" y="18" width="16" height="68" fill="#2F5597"/><rect x="42" y="24" width="16" height="62" fill="#2F5597"/><rect x="62" y="14" width="16" height="72" fill="#2F5597"/>
+            <!-- HP1-1 bars (low ~0.55) dashed orange -->
+            <rect x="92" y="40" width="16" height="46" fill="#B06A16"/><rect x="112" y="46" width="16" height="40" fill="#B06A16"/><rect x="132" y="38" width="16" height="48" fill="#B06A16"/>
+            <text x="50" y="100" font-size="8.5" fill="#2F5597" text-anchor="middle">HP1（高）</text>
+            <text x="120" y="100" font-size="8.5" fill="#B06A16" text-anchor="middle">HP1-1（低）</text>
+            <!-- arrow showing the gap -->
+            <line x1="160" y1="30" x2="160" y2="60" stroke="#9A3B3B" stroke-width="1.5"/><path d="M157,57 L160,62 L163,57" fill="#9A3B3B"/>
+          </g>
+          <text x="410" y="200" font-size="11" font-weight="700" fill="#B06A16">Δβ = β(HP1-1) − β(HP1) = −0.122</text>
+          <text x="410" y="216" font-size="9" fill="#6B6B66">有正負 · 例 BRCA2：HP1-1 比 HP1 低甲基化</text>
+        </svg>
+        <figcaption><b>左 = 距離空間（Δ）</b>：read 兩兩距離，只說「亞群分不分得開」，無方向。<b>右 = 甲基率空間（Δβ）</b>：每 CpG 的甲基比例差，有正負方向。<b>混淆會把「結構有無」和「方向」混為一談。</b></figcaption>
+      </figure>
+      <p class="muted">嚴謹定義：Δ = read-read 距離空間 <code>d_between − d_within</code>（單位 NHD）；Δβ = 每 CpG <code>β_A − β_B</code>（有正負）。來源：盤點線1 high_cog_load。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-hp11">
+    <summary><span class="term">HP1-1</span> — somatic 子單倍型，<u>不是</u>第三條染色體 <span class="badge b-dead">🔴 易誤讀</span></summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>你有兩條染色體（父=HP1、母=HP2）。腫瘤在父那條上長出一個體細胞突變 → 帶這突變的 reads 被 longphase-S 標成 <b>HP1-1</b>。它仍是 HP1 那條，只是「帶了後天突變的那一份」。</div>
+      <figure>
+        <div class="figtitle">圖：HP1 如何分出帶突變的 HP1-1</div>
+        <svg viewBox="0 0 720 196" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="HP1 HP2 與 somatic HP1-1">
+          <text x="0" y="16" font-size="11" font-weight="700" fill="#141413">正常：兩條 germline 染色體</text>
+          <rect x="10" y="28" width="210" height="20" rx="10" fill="#2F5597"/><text x="115" y="42" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">HP1（父）</text>
+          <rect x="10" y="58" width="210" height="20" rx="10" fill="#B06A16"/><text x="115" y="72" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">HP2（母）</text>
+          <line x1="240" y1="53" x2="296" y2="53" stroke="#475569" stroke-width="2"/><path d="M296,48 L304,53 L296,58" fill="#475569"/>
+          <text x="244" y="42" font-size="8.5" fill="#9A3B3B">HP1 長 somatic ALT</text>
+          <text x="330" y="16" font-size="11" font-weight="700" fill="#141413">腫瘤：HP1 分出帶突變的 HP1-1</text>
+          <rect x="330" y="24" width="244" height="18" rx="9" fill="#2F5597"/><text x="452" y="37" font-size="9.5" fill="#fff" text-anchor="middle" font-weight="700">HP1（無突變 reads）</text>
+          <rect x="330" y="46" width="244" height="18" rx="9" fill="#5681bf" stroke="#9A3B3B" stroke-width="1.5" stroke-dasharray="3 2"/><text x="452" y="59" font-size="9.5" fill="#fff" text-anchor="middle" font-weight="700">HP1-1（同染色體 + somatic ALT★）</text>
+          <text x="569" y="40" font-size="14" fill="#9A3B3B" font-weight="900">★</text>
+          <rect x="330" y="72" width="244" height="18" rx="9" fill="#B06A16"/><text x="452" y="85" font-size="9.5" fill="#fff" text-anchor="middle" font-weight="700">HP2（母）</text>
+          <line x1="586" y1="24" x2="586" y2="64" stroke="#2E7D52" stroke-width="2"/><line x1="586" y1="24" x2="580" y2="24" stroke="#2E7D52" stroke-width="2"/><line x1="586" y1="64" x2="580" y2="64" stroke="#2E7D52" stroke-width="2"/>
+          <text x="594" y="40" font-size="9" font-weight="700" fill="#2E7D52">HP-axis</text><text x="594" y="53" font-size="8" fill="#6B6B66">HP1 vs HP1-1</text><text x="594" y="64" font-size="8" fill="#6B6B66">copy 固定</text>
+          <text x="10" y="116" font-size="9.5" fill="#1c1b19">▸ HP-axis 比<b>同一條染色體</b>的「無突變 vs 有突變」份 → copy 數 hold constant → 唯一 somatic-controlled 的軸。</text>
+          <text x="10" y="136" font-size="9.5" fill="#9A3B3B">▸ 對比：ALLELE-axis（ALT vs REF）會把 germline 基線等位甲基差混進來 → 被 confound（鐵則 2）。</text>
+          <text x="10" y="158" font-size="8.5" fill="#6B6B66">來源：HaplotagStrategy.cpp:505-516（盤點線 10）</text>
+        </svg>
+        <figcaption><b>HP1-1 = HP1 germline 鏈上帶 somatic ALT 的 reads</b>（非第三 haplotype）。因染色體身份固定，HP-axis 是唯一不被 copy 數混淆的比較軸。</figcaption>
+      </figure>
+    </div>
+  </details>
+
+  <details class="card def" id="term-permanova">
+    <summary><span class="term">PERMANOVA</span> — 置換檢定問「分群是真的、還是隨機」</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>把 reads 的 HP 標籤<u>隨機洗牌</u>很多次，看「真實標籤下的群間/群內距離比」有沒有比洗牌後明顯大。明顯大 = 分群是真結構，不是巧合。</div>
+      <p>嚴謹定義：以距離矩陣算 pseudo-F =（群間離散/群內離散），再用標籤置換建 null 算 p。<mark>生產 pipeline 實跑 99 次置換</mark>（<code>RegionProcessor.cpp:1573</code> 覆寫；函式庫預設 999，見 <code>StructureTest.hpp:26</code>）→ p 解析度下限 ≈ 1/100 = 0.01。<span class="badge b-pass">🟢 源碼實測</span></p>
+      <div class="worked"><span class="lab">算式 worked example · pseudo-F</span>
+        pseudo-F = (SS_between / (k−1)) / (SS_within / (n−k))（<code>StructureTest.cpp:150</code>）。
+        <div class="calc">k=2 群, n=6：假設 SS_between=0.50, SS_within=0.10<br>→ F = (0.50 / 1) / (0.10 / 4) = 0.50 / 0.025 = <span class="res">20</span></div>
+        F 大 = 群間散、群內緊。再把 HP 標籤洗牌 99 次重算 F，看觀測 F=20 在 null 分布多極端 → 得 p。<span class="muted">（輸入為示意；實際 SS 由距離矩陣算）</span>
+      </div>
+    </div>
+  </details>
+
+  <details class="card def" id="term-cis-test">
+    <summary><span class="term">normal-anchored cis-test</span> — 區分「真 cis」vs「copy 數假象」</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>某 haplotype copy 變多，平均甲基看起來「偏一邊」其實只是份數多。用 matched normal 當錨點，比 normal-HP1（基準）vs tumor-HP1-1（帶突變）—— copy 數相同，差異才是真 cis。</div>
+      <p>判準 <code>|d_cis| &gt; 1.8×|d_drift| + 0.02</code>（<code>scripts/34:149</code>）；copy 塌陷 <code>|d_within| &lt; 0.5×|d_HP|</code>（<code>scripts/37:64</code>）。文獻：apparent ASM 有 82–92% 可被 copy 數解釋（Martin-Trujillo 2017）。<span class="badge b-warn">🟡 僅 HCC1395 完整</span> <span class="muted">（圖見 §5 難點 3）</span></p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-cramersv-gate">
+    <summary><span class="term">Cramér's V reliability gate</span> 與「487 latent 位點」</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>表格太稀疏時，相關性指標不可信。ISM 用 Cochran 規則（最小期望格≥5）打 reliable 旗標；不可靠就 gate 成 0——不是「沒分群」，是「這指標在這張稀疏表上不可信」。</div>
+      <p><code>summary CramersV = reliable ? v : 0</code>（<code>GlobalTest.cpp:128-141</code>）。762 個 MISSED 中 <b>487 個</b>是「CramérV gated=0 但 PERMANOVA 顯著」= 真有 HP 分群但被稀疏表閘住。<span class="badge b-info">🔵 S</span> <span class="badge b-dead">🔴 不可寫成 filter</span> <span class="muted">（圖見 §5 難點 4）</span></p>
+      <div class="worked"><span class="lab">算式 worked example · Cramér's V</span>
+        2×2 時 V = √(χ² / n)（<code>MathUtils.hpp:85</code>，min(r,c)−1=1）。
+        <div class="calc">表 [[30, 8], [6, 25]], n=69 → χ² ≈ 24.3 → V = √(24.3 / 69) ≈ <span class="res">0.59</span></div>
+        V∈[0,1]，越大關聯越強。可靠性：需 ≥80% 格的期望值 ≥5（Cochran；<code>GlobalTest.cpp:111-119</code>）才採信，否則 gate 成 0。<span class="muted">（示意表）</span>
+      </div>
+    </div>
+  </details>
+</section>
+
+<!-- ============ §2 作用位置 ============ -->
+<section id="role">
+  <h3><span class="num">§2</span> 作用位置：ISM 坐在流程的哪裡 <span class="badge b-info">N-ROLE</span></h3>
+  <p class="sub">ISM 是一支核心 <b>C++ binary</b>，夾在上游 ONT 工具與下游 Python 後處理之間。</p>
+
+  <div class="flow1">上游 ONT 工具（Dorado MM/ML · longphase-S HP tag）&nbsp;→&nbsp;<b style="color:var(--c-accent)">【 ISM C++ binary 】</b>&nbsp;→&nbsp;下游 Python（Δβ · cis-test · copy-partition）</div>
+
+  <h4 class="mini">輸入 / 輸出（吃什麼、吐什麼）</h4>
+  <table>
+    <thead><tr><th style="width:8%">方向</th><th style="width:30%">項目</th><th>說明</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="4" class="imp" style="color:var(--c-text-soft)">輸入</td><td><code>Tumor BAM</code></td><td>含甲基 tag <code>MM/ML</code> + 單倍型 <code>HP</code> tag（1/2/11/21/33）</td></tr>
+      <tr><td><code>Normal BAM</code>（可選）</td><td>normal-anchored cis-test 需要</td></tr>
+      <tr><td><code>Reference FASTA</code></td><td>hg38，CIGAR→ref 定位 CpG 用</td></tr>
+      <tr><td><code>Somatic SNV VCF</code></td><td>ClairS-TO；決定要分析哪些位點</td></tr>
+      <tr><td rowspan="3" class="imp" style="color:var(--c-pass)">輸出</td><td class="imp"><code>significance_summary.csv</code>（<b>59 欄</b>）</td><td>全位點滙總主表 <span class="badge b-pass">🟢</span></td></tr>
+      <tr><td>per-region 資料夾</td><td><code>clustering/</code> · <code>distance/</code> · <code>methylation/</code> · <code>reads/</code> · <code>significance.json</code></td></tr>
+      <tr><td>下游量（Δβ / cis-test / copy-partition）</td><td>在 <b>Python 層</b>，<u>不在</u> binary 內</td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="mini">五階段內部流程</h4>
+  <figure>
+    <svg viewBox="0 0 1180 615" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ISM 五階段管線">
+    <rect width="1180" height="615" fill="#FAF9F5"/>
+    <text x="10" y="24" font-size="15" font-weight="800" fill="#141413">ISM 核心五階段（模組名／常數取自 src/core/*，可 grep file:line）</text>
+    <text x="10" y="43" font-size="11" fill="#6B6B66">每個 somatic SNV 由 OpenMP 獨立並行 · 不含上游 ONT 工具與下游 Python · 本圖 schematic 無分析數值</text>
+    <rect x="12" y="100" width="1156" height="64" rx="9" fill="#475569" opacity=".07"/>
+    <text x="22" y="120" font-size="11.5" font-weight="800" fill="#475569">① 輸入 + Read 擷取</text><text x="22" y="137" font-size="8.5" fill="#6B6B66">每 SNV 獨立並行</text>
+    <rect x="204" y="115" width="150" height="34" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/><text x="279" y="131" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">Somatic VCF</text><text x="279" y="143" font-size="8" fill="#6B6B66" text-anchor="middle">SNV 位點</text>
+    <rect x="380" y="115" width="150" height="34" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/><text x="455" y="131" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">取視窗 ±1000bp</text>
+    <line x1="354" y1="132" x2="376" y2="132" stroke="#475569" stroke-width="2.5"/><path d="M376,128.5 L380,132 L376,135.5" fill="#475569"/>
+    <rect x="556" y="115" width="150" height="34" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/><text x="631" y="131" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">抓 read · BamReader</text><text x="631" y="143" font-size="8" fill="#6B6B66" text-anchor="middle">MAPQ≥20·len≥1000</text>
+    <line x1="530" y1="132" x2="552" y2="132" stroke="#475569" stroke-width="2.5"/><path d="M552,128.5 L556,132 L552,135.5" fill="#475569"/>
+    <rect x="732" y="115" width="150" height="34" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/><text x="807" y="131" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">ReadParser 過濾</text>
+    <line x1="706" y1="132" x2="728" y2="132" stroke="#475569" stroke-width="2.5"/><path d="M728,128.5 L732,132 L728,135.5" fill="#475569"/>
+    <rect x="908" y="115" width="150" height="34" rx="6" fill="#fff" stroke="#475569" stroke-width="1.4"/><text x="983" y="131" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">HP tag</text><text x="983" y="143" font-size="8" fill="#6B6B66" text-anchor="middle">1/2/1-1/2-1/3</text>
+    <line x1="882" y1="132" x2="904" y2="132" stroke="#475569" stroke-width="2.5"/><path d="M904,128.5 L908,132 L904,135.5" fill="#475569"/>
+    <line x1="232" y1="164" x2="232" y2="181" stroke="#6B6B66" stroke-width="2"/><path d="M228.5,177 L232,181 L235.5,177" fill="#6B6B66"/>
+    <rect x="12" y="186" width="1156" height="64" rx="9" fill="#1B8A86" opacity=".07"/>
+    <text x="22" y="206" font-size="11.5" font-weight="800" fill="#1B8A86">② 甲基矩陣建構</text><text x="22" y="223" font-size="8.5" fill="#6B6B66">MM/ML → 矩陣 · 僅 5mC</text>
+    <rect x="204" y="201" width="150" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/><text x="279" y="217" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">解 MM/ML</text><text x="279" y="229" font-size="8" fill="#6B6B66" text-anchor="middle">5mC-only</text>
+    <rect x="380" y="201" width="150" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/><text x="455" y="217" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">CIGAR→ref 定位</text>
+    <line x1="354" y1="218" x2="376" y2="218" stroke="#1B8A86" stroke-width="2.5"/><path d="M376,214.5 L380,218 L376,221.5" fill="#1B8A86"/>
+    <rect x="556" y="201" width="150" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/><text x="631" y="217" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">Read×CpG 矩陣</text><text x="631" y="229" font-size="8" fill="#6B6B66" text-anchor="middle">MatrixBuilder</text>
+    <line x1="530" y1="218" x2="552" y2="218" stroke="#1B8A86" stroke-width="2.5"/><path d="M552,214.5 L556,218 L552,221.5" fill="#1B8A86"/>
+    <rect x="732" y="201" width="150" height="34" rx="6" fill="#fff" stroke="#1B8A86" stroke-width="1.4"/><text x="807" y="217" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">二值化 0.8/0.2</text>
+    <line x1="706" y1="218" x2="728" y2="218" stroke="#1B8A86" stroke-width="2.5"/><path d="M728,214.5 L732,218 L728,221.5" fill="#1B8A86"/>
+    <line x1="232" y1="250" x2="232" y2="267" stroke="#6B6B66" stroke-width="2"/><path d="M228.5,263 L232,267 L235.5,263" fill="#6B6B66"/>
+    <rect x="12" y="272" width="1156" height="64" rx="9" fill="#2F5597" opacity=".07"/>
+    <text x="22" y="292" font-size="11.5" font-weight="800" fill="#2F5597">③ Read-to-read 距離矩陣</text><text x="22" y="309" font-size="8.5" fill="#6B6B66">read×read · 無 imputation</text>
+    <rect x="204" y="287" width="150" height="34" rx="6" fill="#fff" stroke="#2F5597" stroke-width="1.4"/><text x="279" y="303" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">共同 CpG ≥5</text>
+    <rect x="380" y="287" width="150" height="34" rx="6" fill="#fff" stroke="#2F5597" stroke-width="1.4"/><text x="455" y="303" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">距離 NHD/BERNOULLI</text>
+    <line x1="354" y1="304" x2="376" y2="304" stroke="#2F5597" stroke-width="2.5"/><path d="M376,300.5 L380,304 L376,307.5" fill="#2F5597"/>
+    <rect x="556" y="287" width="150" height="34" rx="6" fill="#fff" stroke="#2F5597" stroke-width="1.4"/><text x="631" y="303" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">N×N 矩陣</text>
+    <line x1="530" y1="304" x2="552" y2="304" stroke="#2F5597" stroke-width="2.5"/><path d="M552,300.5 L556,304 L552,307.5" fill="#2F5597"/>
+    <rect x="732" y="287" width="150" height="34" rx="6" fill="#fff" stroke="#2F5597" stroke-width="1.4"/><text x="807" y="303" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">NaN→MAX_DIST</text>
+    <line x1="706" y1="304" x2="728" y2="304" stroke="#2F5597" stroke-width="2.5"/><path d="M728,300.5 L732,304 L728,307.5" fill="#2F5597"/>
+    <line x1="232" y1="336" x2="232" y2="353" stroke="#6B6B66" stroke-width="2"/><path d="M228.5,349 L232,353 L235.5,349" fill="#6B6B66"/>
+    <rect x="12" y="358" width="1156" height="64" rx="9" fill="#2E7D52" opacity=".07"/>
+    <text x="22" y="378" font-size="11.5" font-weight="800" fill="#2E7D52">④ UPGMA 階層聚類</text><text x="22" y="395" font-size="8.5" fill="#6B6B66">silhouette 選 k</text>
+    <rect x="204" y="373" width="150" height="34" rx="6" fill="#fff" stroke="#2E7D52" stroke-width="1.4"/><text x="279" y="392" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">UPGMA linkage</text>
+    <rect x="380" y="373" width="150" height="34" rx="6" fill="#fff" stroke="#2E7D52" stroke-width="1.4"/><text x="455" y="392" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">選 k · silhouette</text>
+    <line x1="354" y1="390" x2="376" y2="390" stroke="#2E7D52" stroke-width="2.5"/><path d="M376,386.5 L380,390 L376,393.5" fill="#2E7D52"/>
+    <rect x="556" y="373" width="150" height="34" rx="6" fill="#fff" stroke="#2E7D52" stroke-width="1.4"/><text x="631" y="392" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">群標籤 TreeCutter</text>
+    <line x1="530" y1="390" x2="552" y2="390" stroke="#2E7D52" stroke-width="2.5"/><path d="M552,386.5 L556,390 L552,393.5" fill="#2E7D52"/>
+    <line x1="232" y1="422" x2="232" y2="439" stroke="#6B6B66" stroke-width="2"/><path d="M228.5,435 L232,439 L235.5,435" fill="#6B6B66"/>
+    <rect x="12" y="444" width="1156" height="64" rx="9" fill="#B8860B" opacity=".07"/>
+    <text x="22" y="464" font-size="11.5" font-weight="800" fill="#B8860B">⑤ 顯著性檢定套件 → 輸出</text><text x="22" y="481" font-size="8.5" fill="#6B6B66">四路檢定 → significance_summary.csv 59 欄</text>
+    <rect x="204" y="459" width="138.3" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/><text x="273.2" y="475" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">GlobalTest</text><text x="273.2" y="487" font-size="8" fill="#6B6B66" text-anchor="middle">Fisher + CramérV gate</text>
+    <rect x="368.3" y="459" width="138.3" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/><text x="437.5" y="475" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">StructureTest</text><text x="437.5" y="487" font-size="8" fill="#6B6B66" text-anchor="middle">PERMANOVA 99-perm</text>
+    <line x1="342.3" y1="476" x2="364.3" y2="476" stroke="#B8860B" stroke-width="2.5"/><path d="M364.3,472.5 L368.3,476 L364.3,479.5" fill="#B8860B"/>
+    <rect x="532.7" y="459" width="138.3" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/><text x="601.8" y="475" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">LabelTest</text><text x="601.8" y="487" font-size="8" fill="#6B6B66" text-anchor="middle">HP/allele 置換</text>
+    <line x1="506.7" y1="476" x2="528.7" y2="476" stroke="#B8860B" stroke-width="2.5"/><path d="M528.7,472.5 L532.7,476 L528.7,479.5" fill="#B8860B"/>
+    <rect x="697" y="459" width="138.3" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/><text x="766.2" y="475" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">PerCpgAsm</text><text x="766.2" y="487" font-size="8" fill="#6B6B66" text-anchor="middle">逐CpG Fisher+FDR</text>
+    <line x1="671" y1="476" x2="693" y2="476" stroke="#B8860B" stroke-width="2.5"/><path d="M693,472.5 L697,476 L693,479.5" fill="#B8860B"/>
+    <rect x="861.3" y="459" width="138.3" height="34" rx="6" fill="#fff" stroke="#B8860B" stroke-width="1.4"/><text x="930.5" y="475" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">判定類別</text><text x="930.5" y="487" font-size="8" fill="#6B6B66" text-anchor="middle">4 值 + Significant</text>
+    <line x1="835.3" y1="476" x2="857.3" y2="476" stroke="#B8860B" stroke-width="2.5"/><path d="M857.3,472.5 L861.3,476 L857.3,479.5" fill="#B8860B"/>
+    <rect x="1025.7" y="459" width="138.3" height="34" rx="6" fill="#fff" stroke="#2E7D52" stroke-width="1.6"/><text x="1094.8" y="475" font-size="9.5" font-weight="700" fill="#141413" text-anchor="middle">輸出</text><text x="1094.8" y="487" font-size="8" fill="#2E7D52" text-anchor="middle">summary.csv 59 欄</text>
+    <line x1="999.7" y1="476" x2="1021.7" y2="476" stroke="#B8860B" stroke-width="2.5"/><path d="M1021.7,472.5 L1025.7,476 L1021.7,479.5" fill="#B8860B"/>
+    <line x1="10" y1="528" x2="1170" y2="528" stroke="#eee"/>
+    <text x="10" y="550" font-size="10.5" font-weight="700" fill="#7a4">▣ label-flip：HP1-1 ≡ HP1 germline 鏈上帶 somatic ALT 的子單倍型（非第三 haplotype）</text>
+    <text x="10" y="568" font-size="10" fill="#9a6212">⚠ 預設 germline_hp_only=off → HP1-1 併入 HP-family 1；somatic 子單倍型軸需 hp_fine 4 群；cis-test／copy-partition 在下游 Python；單樣本 HCC1395／⭐3</text>
+    </svg>
+    <figcaption><b>圖：ISM 五階段。</b>① 輸入+取 read → ② 甲基矩陣 → ③ read×read 距離 → ④ UPGMA 聚類 → ⑤ 四路顯著性檢定。<br>※ 改編自 <code>docs/paper_focus/04_figures/fig1_ism_5stage.svg</code>；原圖「117 欄」<b>已更正為實測 59 欄</b>（原圖待同步修）。</figcaption>
+  </figure>
+
+  <div class="takeaway"><span class="lab">記住這個</span>ISM 在流程裡的位置 = <span class="key">把「上游給的甲基+單倍型 reads」轉成「每位點的甲基結構統計」</span>，丟給下游 Python 去問「是不是真 cis」。它不碰 variant 對錯。</div>
+</section>
+
+<!-- ============ §3 主敘述 ============ -->
+<section id="story">
+  <h3><span class="num">§3</span> 為何做 / 發現什麼 / 結論</h3>
+  <p class="sub">研究邏輯三幕。</p>
+
+  <h4 class="mini">為何做（動機 + gap）</h4>
+  <p>ONT 長讀讓人第一次能在<u>單一 read</u> 上同時看甲基修飾（MM/ML）與單倍型（HP tag）。但傳統 per-position 聚合工具（modkit / pycoMeth）或 germline-only ASM 工具（NanoMethPhase）都<b>不處理癌症 somatic sub-haplotype 維度</b>，也沒有去 copy confound 的機制。這就是 ISM 想填的縫。</p>
+
+  <h4 class="mini">發現什麼（三點，由重到輕）</h4>
+  <table>
+    <thead><tr><th style="width:5%"></th><th style="width:26%">發現</th><th style="width:40%">證據 / 數字</th><th>意涵</th></tr></thead>
+    <tbody>
+      <tr><td>🔴</td><td class="imp">甲基當 TP/FP filter ＝ DEAD（最重要 NEGATIVE）</td><td>四道判死：LOSO 100% 循環 · AUC=0.505 · strong-ASM 在 FP 富集 5×（OR=0.194, p=1.8e-28）· LOSO held-out mean −0.00004（p=0.125，方向相反）<span class="badge b-dead">🔴 L4</span></td><td>勿再開此方向；但<u>不影響</u> ISM 作為 characterization 工具的價值</td></tr>
+      <tr><td>⭐</td><td class="imp">甲基分群是 germline-haplotype 層級</td><td>可靠分 HP1 vs HP2；同 haplotype 內 somatic 亞群信號弱（T3 AUC 0.65 &lt; null 0.71）</td><td>是<b>方法層級限制，非 bug</b>；別期待它拆同單倍型內亞群</td></tr>
+      <tr><td>⭐</td><td>全基因組 strong-ASM 極稀少</td><td>0.34%（hypo 44% / hyper 56% 無方向偏好）<span class="badge tier">⭐3</span></td><td>稀有率直接限制任何應用方向的<b>統計功效</b></td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="mini">「存在」≠「能判別」——本研究最核心的張力</h4>
+  <figure>
+    <div class="figtitle">圖：ASM 真實存在，但無法用來判別 TP/FP</div>
+    <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="存在不等於判別">
+      <!-- left: existence YES -->
+      <text x="20" y="18" font-size="12" font-weight="700" fill="#2E7D52">① ASM「存在」 ✓</text>
+      <text x="20" y="34" font-size="9" fill="#6B6B66">HP1 vs HP1-1 甲基明顯不同</text>
+      <g transform="translate(30,46)">
+        <!-- HP1 distribution (high) -->
+        <path d="M0,120 Q40,30 80,120" fill="#2F5597" opacity=".5"/><text x="40" y="135" font-size="9" fill="#2F5597" text-anchor="middle">HP1</text>
+        <!-- HP1-1 distribution (low, separated) -->
+        <path d="M110,120 Q150,40 190,120" fill="#B06A16" opacity=".5"/><text x="150" y="135" font-size="9" fill="#B06A16" text-anchor="middle">HP1-1</text>
+        <line x1="-5" y1="120" x2="200" y2="120" stroke="#999"/>
+        <text x="95" y="155" font-size="9" font-weight="700" fill="#2E7D52" text-anchor="middle">分得開 → Δβ=−0.122 真實</text>
+      </g>
+      <line x1="360" y1="14" x2="360" y2="206" stroke="#E3DACC" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <!-- right: discrimination NO -->
+      <text x="390" y="18" font-size="12" font-weight="700" fill="#9A3B3B">② 用它「判別」TP/FP ✗</text>
+      <text x="390" y="34" font-size="9" fill="#6B6B66">TP 與 FP 的 ASM 分數重疊</text>
+      <g transform="translate(400,46)">
+        <!-- TP distribution -->
+        <path d="M10,120 Q70,30 130,120" fill="#2F7D5B" opacity=".45"/><text x="40" y="60" font-size="9" fill="#2F7D5B">TP</text>
+        <!-- FP distribution overlapping, even more ASM -->
+        <path d="M40,120 Q105,20 170,120" fill="#9A3B3B" opacity=".45"/><text x="150" y="60" font-size="9" fill="#9A3B3B">FP</text>
+        <line x1="0" y1="120" x2="200" y2="120" stroke="#999"/>
+        <text x="95" y="138" font-size="8.5" fill="#6B6B66" text-anchor="middle">ASM 分數 →</text>
+        <text x="95" y="155" font-size="9" font-weight="700" fill="#9A3B3B" text-anchor="middle">重疊 → AUC=0.505 ≈ 隨機</text>
+      </g>
+    </svg>
+    <figcaption><b>左：</b>某位點 HP1 與 HP1-1 甲基明顯不同 →「ASM 存在」是真的。<b>右：</b>但把全基因組位點按 ASM 分數排，TP 與 FP 的分布<b>幾乎重疊</b>（FP 甚至更常出現 strong-ASM）→ <b>無法當判別器</b>。這就是「存在 ≠ 能判別」（鐵則 1）。</figcaption>
+  </figure>
+
+  <div class="takeaway pass"><span class="lab">結論 So-what</span>ISM 的正當定位 = 去 confound 的 <b>characterization 工具</b>，<u>不是</u> discovery / filter。它能可靠回答：① 等位甲基差是真 cis 還是 copy/drift ② reads 是否可靠分亞群且與 HP/somatic 對齊 ③ 哪些位點統計可靠 vs 稀疏 artifact。</div>
+  <p class="muted">誠實限制：normal-anchored cis-test 只在有 matched normal 的樣本完整（目前僅 HCC1395）；依賴單一 pipeline → tier 上限 ⭐3；原創性在「sub-haplotype 解析度 + normal-anchoring」的組合。</p>
+</section>
+
+<!-- ============ §4 old vs new ============ -->
+<section id="evo">
+  <h3><span class="num">§4</span> 當時做法 vs 新做法 <span class="badge b-info">N-EVO</span></h3>
+  <p class="sub">ISM 相對傳統/競品的三個關鍵差異。</p>
+  <table>
+    <thead><tr><th style="width:15%">面向</th><th style="width:29%">當時做法（傳統/競品）</th><th style="width:29%">新做法（ISM）</th><th>差別 / 數據</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">甲基信號表示層</td><td>modkit / pycoMeth：per-position 聚合，輸出每 CpG 的<u>全 read 平均率</u></td><td>per-read 表示，建 reads×CpG 矩陣，保留每 read 完整 pattern</td><td>矩陣代表 between-molecule 資訊；聚合<b>丟失 read 間共甲基化結構</b>。<span class="todo">數值 head-to-head {{待查}}</span></td></tr>
+      <tr><td class="imp">ASM 去 confound</td><td>多數工具直接比 HP1 vs HP2 率，<u>不去 copy/germline-allelic</u></td><td>normal-anchored cis-test 三路 + copy-partition</td><td>文獻：apparent ASM 有 <b>82–92% 被 copy 數解釋</b>（Martin-Trujillo）；判準 <code>|d_cis|&gt;1.8|d_drift|+0.02</code></td></tr>
+      <tr><td class="imp">單倍型解析度</td><td>NanoMethPhase 等：只到 HP1 vs HP2</td><td>HP1 / <b>HP1-1</b>（somatic 子單倍型）/ HP2 / HP2-1</td><td>HP1-1 依賴 longphase-S somatic tag，使 <b>somatic-controlled HP-axis</b> 可行</td></tr>
+    </tbody>
+  </table>
+  <div class="takeaway"><span class="lab">一句話差異</span>業界算「<span class="key">每個位點的平均甲基率</span>」；ISM 算「<span class="key">每對 read 之間的甲基結構距離</span>」，並用 normal 把 copy 假象扣掉。</div>
+</section>
+
+<!-- ============ §5 高認知負擔拆解 ============ -->
+<section id="hcl">
+  <h3><span class="num">§5</span> 難點拆解（最容易卡的點，都配圖） <span class="badge b-warn">N-SVG</span></h3>
+  <p class="sub">這幾個是新讀者最會卡的概念。難點 1-2 的圖在 §1 名詞卡內（Δ vs Δβ / HP1-1）；以下是 cis-test 與 Cramér's V gate。</p>
+
+  <details class="card hcl" open>
+    <summary>難點 1：為什麼做 <b>read×read 距離</b>，而不是比 per-CpG 平均？</summary>
+    <div class="body">
+      <p>per-CpG 平均會把「read 之間的共甲基化結構」抹平。下圖：4 條 read × 5 個 CpG，HP1 兩條 read 彼此模式一致、HP2 兩條也一致但跟 HP1 相反。<b>看每 CpG 平均</b>（最下列）幾乎都 50%，看不出分群；<b>看 read×read 距離</b>才浮現兩亞群。</p>
+      <div class="worked"><span class="lab">算式 worked example · NHD（read 間距離）</span>
+        NHD = 不一致數 / 共同有效 CpG 數（<code>DistanceMatrix.cpp:23</code>）。
+        <div class="calc">read i = [1, 0, 1, 0, 1] · read j = [1, 0, 1, <b>1</b>, 1] → 1 個不一致 / 5 共同 = <span class="res">0.2</span></div>
+        0 = 模式完全一致、1 = 完全相反。需共同覆蓋 ≥ C_min 個 CpG（DistanceMatrix 預設 5；不足記 MAX_DIST=1.0）。生產實際用 <b>BERNOULLI</b>＝NHD 的機率加權版（用 ML 甲基機率非二值，<code>DistanceMatrix.cpp:254</code>）。
+      </div>
+      <figure>
+        <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="read×CpG 矩陣 → 距離 → 兩群">
+          <text x="0" y="14" font-size="12" font-weight="700" fill="#141413">read × CpG 矩陣</text>
+          <text x="300" y="14" font-size="12" font-weight="700" fill="#141413">read×read 距離</text>
+          <text x="560" y="14" font-size="12" font-weight="700" fill="#141413">聚類 → 2 群</text>
+          <g font-size="8" fill="#6B6B66" text-anchor="middle"><text x="56" y="34">C1</text><text x="82" y="34">C2</text><text x="108" y="34">C3</text><text x="134" y="34">C4</text><text x="160" y="34">C5</text></g>
+          <text x="38" y="52" font-size="9" fill="#2F5597" text-anchor="end">r1·HP1</text>
+          <rect x="44" y="42" width="24" height="16" fill="#2F5597"/><rect x="70" y="42" width="24" height="16" fill="#fff" stroke="#ccc"/><rect x="96" y="42" width="24" height="16" fill="#2F5597"/><rect x="122" y="42" width="24" height="16" fill="#fff" stroke="#ccc"/><rect x="148" y="42" width="24" height="16" fill="#2F5597"/>
+          <text x="38" y="72" font-size="9" fill="#2F5597" text-anchor="end">r2·HP1</text>
+          <rect x="44" y="62" width="24" height="16" fill="#2F5597"/><rect x="70" y="62" width="24" height="16" fill="#fff" stroke="#ccc"/><rect x="96" y="62" width="24" height="16" fill="#2F5597"/><rect x="122" y="62" width="24" height="16" fill="#fff" stroke="#ccc"/><rect x="148" y="62" width="24" height="16" fill="#2F5597"/>
+          <text x="38" y="92" font-size="9" fill="#B06A16" text-anchor="end">r3·HP2</text>
+          <rect x="44" y="82" width="24" height="16" fill="#fff" stroke="#ccc"/><rect x="70" y="82" width="24" height="16" fill="#B06A16"/><rect x="96" y="82" width="24" height="16" fill="#fff" stroke="#ccc"/><rect x="122" y="82" width="24" height="16" fill="#B06A16"/><rect x="148" y="82" width="24" height="16" fill="#fff" stroke="#ccc"/>
+          <text x="38" y="112" font-size="9" fill="#B06A16" text-anchor="end">r4·HP2</text>
+          <rect x="44" y="102" width="24" height="16" fill="#fff" stroke="#ccc"/><rect x="70" y="102" width="24" height="16" fill="#B06A16"/><rect x="96" y="102" width="24" height="16" fill="#fff" stroke="#ccc"/><rect x="122" y="102" width="24" height="16" fill="#B06A16"/><rect x="148" y="102" width="24" height="16" fill="#fff" stroke="#ccc"/>
+          <text x="38" y="134" font-size="8" fill="#9A3B3B" text-anchor="end">每CpG均</text>
+          <g font-size="8.5" fill="#9A3B3B" text-anchor="middle"><text x="56" y="134">50%</text><text x="82" y="134">50%</text><text x="108" y="134">50%</text><text x="134" y="134">50%</text><text x="160" y="134">50%</text></g>
+          <text x="44" y="152" font-size="8.5" fill="#9A3B3B">↑ 平均看：全 50%，看不出分群</text>
+          <rect x="44" y="170" width="13" height="13" fill="#2F5597"/><text x="62" y="181" font-size="8.5" fill="#6B6B66">甲基化</text>
+          <rect x="120" y="170" width="13" height="13" fill="#fff" stroke="#ccc"/><text x="138" y="181" font-size="8.5" fill="#6B6B66">未甲基</text>
+          <line x1="200" y1="80" x2="288" y2="80" stroke="#475569" stroke-width="2"/><path d="M288,75 L296,80 L288,85" fill="#475569"/>
+          <g transform="translate(310,30)">
+            <g font-size="8" fill="#6B6B66" text-anchor="middle"><text x="22" y="-3">r1</text><text x="46" y="-3">r2</text><text x="70" y="-3">r3</text><text x="94" y="-3">r4</text></g>
+            <rect x="10" y="2" width="24" height="20" fill="#2E7D52"/><rect x="34" y="2" width="24" height="20" fill="#9fcbb4"/><rect x="58" y="2" width="24" height="20" fill="#e6b89a"/><rect x="82" y="2" width="24" height="20" fill="#d99a6c"/>
+            <rect x="10" y="22" width="24" height="20" fill="#9fcbb4"/><rect x="34" y="22" width="24" height="20" fill="#2E7D52"/><rect x="58" y="22" width="24" height="20" fill="#d99a6c"/><rect x="82" y="22" width="24" height="20" fill="#e6b89a"/>
+            <rect x="10" y="42" width="24" height="20" fill="#e6b89a"/><rect x="34" y="42" width="24" height="20" fill="#d99a6c"/><rect x="58" y="42" width="24" height="20" fill="#2E7D52"/><rect x="82" y="42" width="24" height="20" fill="#9fcbb4"/>
+            <rect x="10" y="62" width="24" height="20" fill="#d99a6c"/><rect x="34" y="62" width="24" height="20" fill="#e6b89a"/><rect x="58" y="62" width="24" height="20" fill="#9fcbb4"/><rect x="82" y="62" width="24" height="20" fill="#2E7D52"/>
+            <g font-size="8" fill="#6B6B66" text-anchor="end"><text x="6" y="16">r1</text><text x="6" y="36">r2</text><text x="6" y="56">r3</text><text x="6" y="76">r4</text></g>
+            <rect x="6" y="94" width="12" height="10" fill="#2E7D52"/><text x="22" y="103" font-size="7.5" fill="#6B6B66">近(0)</text>
+            <rect x="62" y="94" width="12" height="10" fill="#d99a6c"/><text x="78" y="103" font-size="7.5" fill="#6B6B66">遠(1)</text>
+          </g>
+          <line x1="430" y1="80" x2="548" y2="80" stroke="#475569" stroke-width="2"/><path d="M548,75 L556,80 L548,85" fill="#475569"/>
+          <g transform="translate(575,35)" stroke="#2E7D52" stroke-width="2" fill="none">
+            <line x1="10" y1="20" x2="40" y2="20"/><line x1="10" y1="40" x2="40" y2="40"/><line x1="40" y1="20" x2="40" y2="40"/><line x1="40" y1="30" x2="70" y2="30"/>
+            <line x1="10" y1="70" x2="40" y2="70"/><line x1="10" y1="90" x2="40" y2="90"/><line x1="40" y1="70" x2="40" y2="90"/><line x1="40" y1="80" x2="70" y2="80"/>
+            <line x1="70" y1="30" x2="70" y2="80"/><line x1="70" y1="55" x2="95" y2="55"/>
+          </g>
+          <g font-size="9" font-weight="700"><text x="588" y="60" fill="#2F5597">HP1 群</text><text x="588" y="130" fill="#B06A16">HP2 群</text></g>
+        </svg>
+        <figcaption><b>（schematic）</b>距離矩陣對角線=自己（近，深綠），r1-r2 / r3-r4 近，跨群遠（橘）→ 聚類分出兩群。<b>per-CpG 平均（最下列全 50%）完全看不出</b>——這就是 ISM 用 read×read 距離的理由。</figcaption>
+      </figure>
+    </div>
+  </details>
+
+  <details class="card hcl" open>
+    <summary>難點 2：<b>normal-anchored cis-test</b> 怎麼把「copy 假象」扣掉</summary>
+    <div class="body">
+      <p>copy number 變化讓某 haplotype 份數變多，平均甲基「看起來偏一邊」其實只是份數多。三路比較才能分開「真 cis」與「copy」。</p>
+      <figure>
+        <div class="figtitle">圖：normal 錨點三路比較</div>
+        <svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="normal-anchored cis-test 三路">
+          <!-- three boxes with beta level bars -->
+          <!-- normal-HP1 -->
+          <rect x="30" y="60" width="120" height="120" rx="8" fill="#E2ECF3" stroke="#2F6690"/>
+          <text x="90" y="50" font-size="10" font-weight="700" fill="#2F6690" text-anchor="middle">normal-HP1</text>
+          <text x="90" y="196" font-size="8.5" fill="#6B6B66" text-anchor="middle">基準（copy=正常）</text>
+          <rect x="70" y="100" width="40" height="60" fill="#2F6690" opacity=".6"/><text x="90" y="92" font-size="8.5" fill="#2F6690" text-anchor="middle">β≈基準</text>
+          <!-- tumor-HP1 -->
+          <rect x="290" y="60" width="120" height="120" rx="8" fill="#E4F0EA" stroke="#2F7D5B"/>
+          <text x="350" y="50" font-size="10" font-weight="700" fill="#2F7D5B" text-anchor="middle">tumor-HP1</text>
+          <text x="350" y="196" font-size="8.5" fill="#6B6B66" text-anchor="middle">copy 變多（dosage）</text>
+          <rect x="330" y="86" width="40" height="74" fill="#2F7D5B" opacity=".6"/><text x="350" y="78" font-size="8.5" fill="#2F7D5B" text-anchor="middle">β↑</text>
+          <!-- tumor-HP1-1 -->
+          <rect x="550" y="60" width="120" height="120" rx="8" fill="#F2E4DC" stroke="#D97757"/>
+          <text x="610" y="50" font-size="10" font-weight="700" fill="#9c4a2c" text-anchor="middle">tumor-HP1-1</text>
+          <text x="610" y="196" font-size="8.5" fill="#6B6B66" text-anchor="middle">帶 somatic ALT</text>
+          <rect x="590" y="118" width="40" height="42" fill="#D97757" opacity=".7"/><text x="610" y="110" font-size="8.5" fill="#9c4a2c" text-anchor="middle">β↓</text>
+          <!-- arrows -->
+          <line x1="150" y1="120" x2="288" y2="120" stroke="#2F7D5B" stroke-width="2"/><path d="M288,116 L294,120 L288,124" fill="#2F7D5B"/>
+          <text x="219" y="112" font-size="9" font-weight="700" fill="#2F7D5B" text-anchor="middle">d_copy（dosage）</text>
+          <line x1="410" y1="120" x2="548" y2="120" stroke="#D97757" stroke-width="2"/><path d="M548,116 L554,120 L548,124" fill="#D97757"/>
+          <text x="479" y="112" font-size="9" font-weight="700" fill="#9c4a2c" text-anchor="middle">d_within（cis 候選）</text>
+          <!-- verdict -->
+          <text x="30" y="226" font-size="9.5" fill="#1c1b19">▸ 判準 <tspan font-family="monospace">|d_cis| &gt; 1.8×|d_drift| + 0.02</tspan>。例 <tspan font-weight="700">BRCA2</tspan>：d_within=−0.023 小、d_copy=−0.11 大 → <tspan font-weight="700" fill="#9A3B3B">copy 主導（不算乾淨 cis）</tspan></text>
+          <text x="30" y="242" font-size="9.5" fill="#1c1b19">▸ 例 <tspan font-weight="700">chr17/TBC1D16</tspan>：d_within=0.142, perm p=0.001 → <tspan font-weight="700" fill="#2F7D5B">真 cis ✓</tspan></text>
+        </svg>
+        <figcaption><b>（schematic）</b>用 normal-HP1 當錨點：normal→tumor-HP1 的差是 <b>copy/dosage</b>（d_copy）；tumor-HP1→HP1-1 的差才是 <b>cis 候選</b>（d_within）。只有 d_within 夠大才算真 cis。<span class="badge b-warn">🟡 僅 HCC1395 有 matched normal</span></figcaption>
+      </figure>
+    </div>
+  </details>
+
+  <details class="card hcl">
+    <summary>難點 3：Cramér's V gate 與「<b>487 latent 位點</b>」為何不是矛盾</summary>
+    <div class="body">
+      <p>稀疏列聯表上 Cramér's V 不可信，ISM 用 Cochran 規則（最小期望格 ≥5）打 reliable 旗標，不可靠就 gate 成 0。所以「CramérV=0 但 PERMANOVA 顯著」= 真有分群、只是這個<u>指標</u>被閘住，不是沒分群。</p>
+      <figure>
+        <div class="figtitle">圖：稀疏表（gated）vs 密集表（可信）</div>
+        <svg viewBox="0 0 720 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cochran gate 稀疏 vs 密集">
+          <!-- sparse 2x2 -->
+          <text x="20" y="20" font-size="11" font-weight="700" fill="#9A3B3B">稀疏表：最小期望格 &lt; 5</text>
+          <g transform="translate(40,34)" font-size="11" text-anchor="middle">
+            <rect x="40" y="0" width="60" height="40" fill="#fff" stroke="#9A3B3B"/><text x="70" y="25">2</text>
+            <rect x="100" y="0" width="60" height="40" fill="#fff" stroke="#9A3B3B"/><text x="130" y="25">1</text>
+            <rect x="40" y="40" width="60" height="40" fill="#fff" stroke="#9A3B3B"/><text x="70" y="65">1</text>
+            <rect x="100" y="40" width="60" height="40" fill="#fff" stroke="#9A3B3B"/><text x="130" y="65">1</text>
+            <text x="20" y="25" font-size="8" fill="#6B6B66">HP1</text><text x="20" y="65" font-size="8" fill="#6B6B66">HP2</text>
+            <text x="70" y="-6" font-size="8" fill="#6B6B66">甲基</text><text x="130" y="-6" font-size="8" fill="#6B6B66">未甲</text>
+          </g>
+          <text x="40" y="135" font-size="9.5" fill="#9A3B3B">→ reliable = <b>false</b></text>
+          <text x="40" y="151" font-size="9.5" fill="#9A3B3B" font-weight="700">→ summary CramérV gated = 0</text>
+          <text x="40" y="170" font-size="9" fill="#6B6B66">（但 PERMANOVA 仍可能顯著 → latent）</text>
+          <line x1="360" y1="14" x2="360" y2="196" stroke="#E3DACC" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <!-- dense 2x2 -->
+          <text x="400" y="20" font-size="11" font-weight="700" fill="#2F7D5B">密集表：所有期望格 ≥ 5</text>
+          <g transform="translate(430,34)" font-size="11" text-anchor="middle">
+            <rect x="40" y="0" width="60" height="40" fill="#E4F0EA" stroke="#2F7D5B"/><text x="70" y="25">30</text>
+            <rect x="100" y="0" width="60" height="40" fill="#fff" stroke="#2F7D5B"/><text x="130" y="25">8</text>
+            <rect x="40" y="40" width="60" height="40" fill="#fff" stroke="#2F7D5B"/><text x="70" y="65">6</text>
+            <rect x="100" y="40" width="60" height="40" fill="#E4F0EA" stroke="#2F7D5B"/><text x="130" y="65">25</text>
+            <text x="20" y="25" font-size="8" fill="#6B6B66">HP1</text><text x="20" y="65" font-size="8" fill="#6B6B66">HP2</text>
+          </g>
+          <text x="430" y="135" font-size="9.5" fill="#2F7D5B">→ reliable = <b>true</b></text>
+          <text x="430" y="151" font-size="9.5" fill="#2F7D5B" font-weight="700">→ CramérV 保留（可信）</text>
+        </svg>
+        <figcaption><b>（schematic）</b>左稀疏表的 Cramér's V 不可信 → gate 成 0（不代表沒分群）；右密集表才保留。762 MISSED 中 <b>487 個</b>屬「gated=0 但 PERMANOVA 顯著」。<span class="badge b-dead">🔴 不可寫成 filter</span></figcaption>
+      </figure>
+    </div>
+  </details>
+</section>
+
+<!-- ============ §6 證據區 ============ -->
+<section id="evidence">
+  <h3><span class="num">§6</span> 數據（每筆附 tier + 來源） <span class="badge b-info">N-CMP</span></h3>
+  <p class="sub">本頁引用的關鍵數字。tier：<span class="badge b-pass">🟢 P 原檔對賬</span> <span class="badge b-warn">🟡 S/caveat</span> <span class="badge b-dead">🔴 DEAD/NEGATIVE</span>。</p>
+  <table>
+    <thead><tr><th>指標</th><th>值</th><th style="width:14%">tier</th><th style="width:30%">來源</th></tr></thead>
+    <tbody>
+      <tr><td>主輸出 significance_summary.csv 欄數</td><td class="imp">59 欄</td><td><span class="badge b-pass">🟢 P</span></td><td>實測 <code>head -1 ...csv</code>；字典 <code>data_specs/20260411_..._01.md</code></td></tr>
+      <tr><td>PERMANOVA 置換次數（生產）</td><td>99（庫預設 999）</td><td><span class="badge b-pass">🟢 P</span></td><td><code>RegionProcessor.cpp:1573</code></td></tr>
+      <tr><td>strong-ASM 全基因組稀有率</td><td>0.34%（hypo 44%/hyper 56%）</td><td><span class="badge tier">⭐3</span></td><td>盤點線1 <code>01_ism_method_spec_from_source.md</code> L3</td></tr>
+      <tr><td>BRCA2 promoter HP-axis Δβ</td><td class="imp">−0.122（copy 主導；focal cis d_within=−0.023, p=0.024）</td><td><span class="badge b-pass">🟢 P</span></td><td>同上 L3；<span class="todo">−0.054 為 buggy 砍半值，禁用</span></td></tr>
+      <tr><td>乾淨 cis exemplar chr17/TBC1D16</td><td>d_within=0.142, perm p=0.001</td><td><span class="badge tier">⭐3</span></td><td>同上 L3</td></tr>
+      <tr><td>跨樣本 excess-over-null（3 癌種）</td><td>6/6 正，mean 0.168；somatic private 0/38</td><td><span class="badge tier">⭐3</span></td><td>同上 L3</td></tr>
+      <tr><td class="imp">甲基→TP/FP filter</td><td class="imp">OR=0.194, p=1.8e-28；LOSO 100% circularity；AUC=0.505</td><td><span class="badge b-dead">🔴 L4 DEAD</span></td><td>同上 L3</td></tr>
+      <tr><td>LOH-constrained phasing（NG=2 same-HP）</td><td>93–99%，6/6 樣本；Wilcoxon p=0.0078</td><td><span class="badge tier">B+ ⭐3</span></td><td>同上 L3</td></tr>
+      <tr><td>O11 epipolymorphism（校正前→後）</td><td>AUC 0.845 → 0.530（校正後=artifact）</td><td><span class="badge b-dead">🔴 NEG</span></td><td>同上 L3</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ §7 關聯導覽 ============ -->
+<section id="related">
+  <h3><span class="num">§7</span> 關聯導覽</h3>
+  <p class="sub">這頁在全站的位置 + 相關概念（子頁建立後可跳轉）。</p>
+  <div class="rel">
+    <a href="#">ism-vs-external（軸 C vs 軸 A）<span class="todo"> 待建</span></a>
+    <a href="#">normal-anchored-cis-test<span class="todo"> 待建</span></a>
+    <a href="#">methyl-phasing-assist<span class="todo"> 待建</span></a>
+    <a href="#">asm-locus-display-cramersv<span class="todo"> 待建</span></a>
+    <a href="#">negatives（filter DEAD）<span class="todo"> 待建</span></a>
+  </div>
+  <p class="muted">▸ 本頁 = 解釋中心「方法本體」層。背景名詞、樣本/pipeline 速查在「背景名詞地基頁」（建置中）。</p>
+</section>
+
+<!-- ============ footer ============ -->
+<footer class="prov" id="prov"><div>
+  <h4>溯源 Provenance</h4>
+  <p><b>內容來源（source_paths）：</b></p>
+  <ul>
+    <li><code>/big7_disk/liaoyoyo2001/InterSubMod/docs/explain/_planning/00_盤點_各任務敘述與邏輯.md</code>（線 1 ism-core）</li>
+    <li><code>/big7_disk/liaoyoyo2001/InterSubMod/docs/explain/_planning/04_number_resolution.md</code>（59 欄 / PERMANOVA 99 定案）</li>
+    <li><code>/big7_disk/liaoyoyo2001/InterSubMod/docs/method_comparison/20260609_ism_vs_external_methylation_tools/01_ism_method_spec_from_source.md</code></li>
+    <li>源碼：<code>RegionProcessor.cpp:1573</code>·<code>StructureTest.hpp:26</code>·<code>GlobalTest.cpp:128-141</code>·<code>HaplotagStrategy.cpp:505-516</code></li>
+  </ul>
+  <p><b>未對賬 / 待查（{{待查}}）：</b></p>
+  <ul>
+    <li>ISM vs NanoMethPhase / modkit 同數據 head-to-head 定量（Phase B benchmark 待核准）</li>
+    <li>5mC/5hmC 分軌 dup-bug 影響範圍（提到待修，無量化）</li>
+    <li>原圖 fig1_ism_5stage.svg「117 欄」標籤待同步更正為 59（本頁已就地更正）</li>
+  </ul>
+  <p style="margin-top:var(--sp-3)">commit <code>a7ab2d3</code> · branch <code>research/subclonal-reconstruction-202606</code> · 生成 2026-06-12 · <b>本頁 Write 與產數字 grep 在不同 batch（§13.0）</b>；每個數字均可在上列 source_path grep 到，未對賬者標 {{待查}} 不補值。</p>
+  <p style="font-size:.78rem">STATUS：<b>風格探針 v2</b>（依用戶回饋加圖、表格化、強化層級）— 待再確認後鎖定全站風格、沉澱回模板。</p>
+</div></footer>
+
+</div>
+</body>
+</html>

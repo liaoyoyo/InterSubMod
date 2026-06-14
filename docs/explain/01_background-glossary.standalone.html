@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>背景名詞地基 — 解釋中心</title>
+<!--
+  doc_type: explain_glossary_page  concept: background-glossary  version: v1
+  created: 2026-06-12  commit: a7ab2d3  branch: research/subclonal-reconstruction-202606
+  SoT: docs/explain/_planning/02_名詞表_glossary.md（92 詞完整版）；本頁＝核心 ~28 詞的解釋層 + anchor 註冊
+  統計詞均附 worked example（算式 + 示意數字）；數字定案見 04_number_resolution.md
+-->
+<link rel="stylesheet" href="_assets/explain.css">
+<style>
+/* 名詞地基頁專用：快速索引 */
+.tindex{columns:3;column-gap:var(--sp-4);font-size:.85rem;margin:var(--sp-3) 0}
+.tindex a{display:block;text-decoration:none;color:var(--c-info);padding:2px 0;break-inside:avoid}
+.tindex a:hover{color:var(--c-accent)}
+.tindex .gp{font-weight:800;color:var(--c-text);margin-top:8px;break-inside:avoid}
+@media(max-width:680px){.tindex{columns:1}}
+.eg{background:#fff;border:1px dashed var(--c-pass);border-radius:6px;padding:6px 10px;margin:7px 0;font-size:.86rem}
+.eg b{color:var(--c-pass)}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brand">解釋中心</span>
+  <nav>
+    <a href="index.standalone.html">← INDEX</a>
+    <a href="#g1">①Haplotype</a><a href="#g2">②變異/CN</a><a href="#g3">③甲基化</a>
+    <a href="#g4">④統計</a><a href="#g5">⑤工具</a>
+    <a href="02_ism-core.standalone.html">ISM →</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">解釋中心 · 名詞地基 · background-glossary</div>
+  <h1>背景名詞地基</h1>
+  <p class="lede">整個研究的「語言」。每個術語給 <strong>一句白話 → 直覺類比 → （折疊）嚴謹定義 + 常見誤解</strong>；統計方法的詞另附 <strong>worked example（怎麼算）</strong>。其他頁的術語首次出現都連回這裡。</p>
+</header>
+
+<div class="bluf">
+  <h2>L0 這頁怎麼用</h2>
+  <p>這頁是<span class="key">全站名詞的單一真相來源（SoT）</span>。任何頁看到不懂的術語，點它連回這裡的對應卡片。<strong>讀到夠就停</strong>——L0 標題行 + 直覺類比通常就夠；要嚴謹定義／公式再展開 <code>▸</code>。</p>
+  <p class="pi">▸ <b>給 PI：</b>本研究最關鍵的語言是 <b>HP-axis（somatic-controlled）vs ALLELE-axis（被 germline 污染）</b>、<b>「ASM 存在 ≠ 能判別」</b>、以及 <b>excess-over-null（不能比 raw rate）</b>——這三個定義決定了所有結論能不能成立。</p>
+</div>
+
+<div class="ironclad">
+  <b>🔴 全站 4 條鐵則</b>
+  <ol>
+    <li>「<b>存在</b> ASM」≠「<b>能判別</b> TP/FP」——兩個 claim 永遠分開講。</li>
+    <li><b>HP-axis</b>（HP1 vs HP1-1）somatic-controlled；<b>ALLELE-axis</b>（ALT vs REF）被 germline het baseline 污染。</li>
+    <li>絕對 AUC 在甲基-phasing 場景<b>系統性膨脹</b>（germline het null median 0.974）；引相對 null 不引絕對 AUC。</li>
+    <li>甲基→TP/FP filter = <b>DEAD</b>；同 haplotype 內拆亞群（T3）= NEGATIVE。</li>
+  </ol>
+</div>
+
+<!-- 快速索引 -->
+<section style="border-top:none;padding-top:var(--sp-4)">
+  <h4 class="mini">快速索引（28 詞）</h4>
+  <div class="tindex">
+    <span class="gp">① Haplotype 與 Phasing</span>
+    <a href="#term-haplotype">Haplotype 單倍體型</a><a href="#term-hptag">HP-tag</a><a href="#term-hp11">HP1-1 子單倍型 🧩</a><a href="#term-phasing">Phasing 定相</a><a href="#term-unphase">unphase read</a><a href="#term-loh-phasing">LOH-constrained phasing</a><a href="#term-selfphasing">self-phasing 循環 🧩</a><a href="#term-hpfine">HPFineNGroups 🧩</a>
+    <span class="gp">② 變異與 CN</span>
+    <a href="#term-somatic">Somatic vs Germline</a><a href="#term-loh">LOH 雜合性缺失</a><a href="#term-cnloh">cnLOH</a><a href="#term-cn">Copy Number (CN)</a><a href="#term-asm">ASM 等位特異甲基化 🧩</a><a href="#term-tpfp">TP / FP</a>
+    <span class="gp">③ 甲基化</span>
+    <a href="#term-cpg">CpG</a><a href="#term-5mc">5mC vs 5hmC</a><a href="#term-beta">β 甲基率 / Δβ</a><a href="#term-mmml">MM/ML tag</a><a href="#term-readlevel">read-level</a>
+    <span class="gp">④ 統計與評估（含算式）</span>
+    <a href="#term-nhd">NHD 距離 🧮</a><a href="#term-permanova">PERMANOVA 🧮</a><a href="#term-cramersv">Cramér's V gate 🧮</a><a href="#term-fisher">Fisher + over-dispersion 🧮</a><a href="#term-fdr">BH-FDR 🧮</a><a href="#term-auc">AUC 🧮</a><a href="#term-excess">excess-over-null 🧮</a><a href="#term-loso">LOSO 🧩</a>
+    <span class="gp">⑤ 工具與 Pipeline</span>
+    <a href="#term-hpaxis">HP-axis vs ALLELE-axis 🧩</a><a href="#term-longphase">longphase-S vs -TO</a><a href="#term-cistest">normal-anchored cis-test</a>
+  </div>
+  <p class="muted">🧮 = 附 worked example · 🧩 = 高認知負荷 · 完整 92 詞 SoT：<code>InterSubMod/docs/explain/_planning/02_名詞表_glossary.md</code></p>
+</section>
+
+<!-- ============ ① Haplotype/Phasing ============ -->
+<section id="g1">
+  <h3><span class="num">①</span> Haplotype 與 Phasing</h3>
+  <p class="sub">「這條 read 來自哪一條染色體版本」這件事的詞彙。</p>
+
+  <details class="card def" id="term-haplotype" open>
+    <summary><span class="term">Haplotype（單倍體型）</span> — 同一條染色體上、來自單一親代的一組等位</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>你每對同源染色體一條來自父、一條來自母（HP1 / HP2）；用 germline 雜合 SNP 當路標就能判斷一段 DNA 屬哪一條。</div>
+      <div class="eg"><b>例：</b>一條 read 同時覆蓋 3 個 germline het SNP，等位組合一致指向 HP1 → 該 read 歸 HP1。</div>
+      <p class="muted"><b>常見誤解：</b>把 HP1/HP2 當「第幾號染色體」；它是「同一對同源染色體的父本 vs 母本版本」。關聯：HP-tag · HP1-1 · Phasing</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-hptag">
+    <summary><span class="term">HP-tag</span>（<code>HP:i:</code>）— BAM 裡每條 read 的單倍型標籤</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>每條 read 讀完貼標籤：「父本(HP1)」「母本(HP2)」「帶突變的腫瘤亞株(HP1-1)」「身份不明(unphase/HP0)」。</div>
+      <p>longphase-S（paired）下 HP=1/2 為 germline；somatic haplotagging 6-state 另有 HP=11（HP1-1）/21（HP2-1）/HP3/HP0。<b>常見誤解：</b>把 HP=11 當第三條染色體或 copy number 標記。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-hp11">
+    <summary><span class="term">HP1-1（somatic sub-haplotype）</span> 🧩 — HP1 鏈上帶 somatic 突變的子群，<u>非</u>第三條染色體</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>父親那條染色體（HP1）上後天突變的那些 reads 單獨標出來：HP1-1 = 父那條 + 突變、HP1 = 父那條 + 沒突變。</div>
+      <div class="eg"><b>例：</b>比 HP1（無 somatic）vs HP1-1（有 somatic ALT）的甲基差，染色體身份 hold constant，copy number 不是混淆。</div>
+      <p class="muted"><b>常見誤解：</b>(1) 誤為第三單倍型；(2) 誤為 copy loss / CN tag；(3) 誤為一定能乾淨偵測（依賴 longphase-S，LOH 區反而最難 phase）。圖見 <a href="02_ism-core.standalone.html#term-hp11">ISM 頁</a>。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-phasing">
+    <summary><span class="term">Phasing（定相）</span> — 用 germline het SNP 判斷片段屬 HP1 或 HP2</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>考古學家用「哪些陶片在同一層土」判斷屬同一罐子；phasing 用「哪些 SNP 在同一條 DNA 分子」判斷屬同一親代版本。長讀一條夠長、能跨多 SNP，精度遠勝短讀。</div>
+      <p class="muted"><b>常見誤解：</b>以為到處可 phase；<b>LOH 區 germline het SNP 消失 → 失去錨點</b>（這正是 methyl-assisted phasing 想救的白地）。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-unphase">
+    <summary><span class="term">unphase read</span> — longphase 未能分配 HP 的 read（缺本地 germline 錨點）</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>地圖上一條沒地址的路，因附近沒足夠路標，既沒標「北」也沒標「南」。</div>
+      <p class="muted"><b>常見誤解：</b>以為「救援 unphase」到處可行；多數 unphase read 落在 LOH/imprinting 區（germline SNP 稀疏）→ 無本地錨點建甲基參考 → 機制恰在最需要處失效（chicken-egg）。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-loh-phasing">
+    <summary><span class="term">LOH-constrained phasing</span> — LOH 區只剩單一 haplotype，somatic SNV 形成「同-hap 分裂」結構</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>LOH 把一個染色體副本刪掉，突變只能落在剩下那條，讀出的子族自然偏同一邊（Inner = HP1+HP1-1 同 hap；Outer = HP1+HP2-1 跨 hap）。</div>
+      <p class="muted"><b>常見誤解：</b>把此 phasing signature 當「甲基化雙峰」（HPFineNGroups 曾被誤解，實為 phasing×allele occupancy count）。⚠ 帶 <a href="#term-selfphasing">by-construction circularity</a>。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-selfphasing">
+    <summary><span class="term">self-phasing 循環依賴 / by-construction circularity</span> 🧩 — somatic 變異同時當「定位標誌」與「被定位對象」</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>讓嫌疑人自己當法官判自己有沒有罪，判決當然有利自己；somatic ALT reads 既是 phasing anchor 又是被評估對象 → 系統性偏同一 HP group → 虛假 LOH 訊號。</div>
+      <p>移除 self-phasing 後大量 TO-mode TP LOH 消失。決定性負控需 <code>--germline-hp-only</code> flag 關 somatic tagging 重觀察（R-SELFREF）；未跑前 phasing 脊柱證據封頂 <b>Grade B+</b> 非 Grade A。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-hpfine">
+    <summary><span class="term">HPFineNGroups</span> 🧩 — 四個 sub-haplotype bucket 有幾個被填滿（occupancy count，<u>非</u>甲基峰數）</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>reads 依 HP tag 分四抽屜（HP1/HP1-1/HP2/HP2-1），HPFineNGroups = 「幾個抽屜有 reads」的計數，不是甲基化有幾個峰。</div>
+      <p class="muted"><b>常見誤解：</b>因名字像「HP 細分 N 個甲基 group」而誤為甲基雙峰；C++ 原始碼（LabelTest.cpp hp_to_fine_labels）確認為 occupancy count。→ <b>feature name 必查源碼</b>的經典案例。</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============ ② 變異/CN ============ -->
+<section id="g2">
+  <h3><span class="num">②</span> 變異與 Copy Number</h3>
+  <p class="sub">somatic / germline、LOH、copy number — 決定 ASM 是真 cis 還是假象的關鍵。</p>
+
+  <details class="card def" id="term-somatic" open>
+    <summary><span class="term">Somatic vs Germline mutation</span> — 後天獲得（不遺傳，腫瘤目標）vs 出廠設定（所有細胞、會遺傳）</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>germline = 出廠設定（每個細胞都有）；somatic = 某細胞後天的小傷痕（只傳給它的子代細胞）。</div>
+      <p class="muted">paired caller（ClairS）有 normal 對照可精確分離；ClairS-TO（tumor-only）germline-somatic 分離不完全。<b>常見誤解：</b>以為 caller 報出都是 somatic。關聯：TP/FP · germline-het 對照</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-loh">
+    <summary><span class="term">LOH（雜合性缺失）</span> — 腫瘤失去一個等位，該區只剩單一 haplotype</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>本來父母各一份（雜合），腫瘤把其中一份弄丟（或被另一份取代）→ 該區 germline het SNP 消失 → phasing 失錨。</div>
+      <div class="eg"><b>對 phasing 的衝擊：</b>LOH 區是 methyl-assisted phasing 的「白地」（最需要、也最難）。</div>
+    </div>
+  </details>
+
+  <details class="card def" id="term-cnloh">
+    <summary><span class="term">cnLOH（copy-neutral LOH）</span> — 兩條都變成同一等位，但拷貝數仍 = 2</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>LOH 有兩種：CN loss（CN=1，少一條）或 cnLOH（CN=2，兩條都同一等位）。後者拷貝數沒變但雜合性沒了。</div>
+      <p class="muted">區分重要，因為 ASM 的 copy confound 要看實際 CN，cnLOH 與 CN-loss 對 dosage 假象的影響不同。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-cn">
+    <summary><span class="term">Copy Number (CN)</span> — 某染色體區段的拷貝數；CN 變化製造 ASM 假象</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>某 haplotype copy 變多，它的 reads 份數就多，平均甲基「看起來偏一邊」其實只是份數多 → 假的等位差異（dosage confound）。</div>
+      <p class="muted">文獻：apparent ASM 有 82–92% 可被 copy 數解釋（Martin-Trujillo 2017）→ 這就是 <a href="#term-cistest">normal-anchored cis-test</a> 要扣掉的。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-asm">
+    <summary><span class="term">ASM（allele-specific methylation）</span> 🧩 — 某 haplotype/allele 甲基系統性高/低於另一</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>同一個位點，來自父那條的 reads 普遍甲基化、母那條普遍不甲基 → 等位特異性甲基化。</div>
+      <div class="eg"><b>🔴 兩個軸別不可混：</b><b>HP-axis</b>（HP1 vs HP1-1，同染色體 somatic-controlled，乾淨）vs <b>ALLELE-axis</b>（ALT vs REF reads，被 germline 基線等位甲基差污染）。見 <a href="#term-hpaxis">HP-axis vs ALLELE-axis</a>。</div>
+      <p class="muted"><b>🔴 鐵則：</b>ASM「存在」≠「能判別 TP/FP」。本研究 strong-ASM 反而在 FP 富集（OR=0.194）。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-tpfp">
+    <summary><span class="term">TP / FP</span> — caller 報的 somatic SNV 對照真值的真陽性 / 假陽性</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>把 caller 報的突變跟「金標準真值」（SEQC2）對：真的有 = TP，誤報 = FP。</div>
+      <p class="muted">HCC1395 主 benchmark 真值 = SEQC2 v1.2.1 的 39,447 somatic SNV。ISM 多輪研究問「甲基特徵能否分 TP/FP」→ 答案 NEGATIVE。</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============ ③ 甲基化 ============ -->
+<section id="g3">
+  <h3><span class="num">③</span> 甲基化</h3>
+  <p class="sub">ISM 讀的訊號本身。</p>
+
+  <details class="card def" id="term-cpg" open>
+    <summary><span class="term">CpG</span> — 胞嘧啶接鳥嘌呤的二核苷酸，DNA 甲基化主要發生處</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>基因組裡 C 後面接 G 的位置（5'-CG-3'）；哺乳類 DNA 甲基化幾乎都在這種位置的 C 上。</div>
+      <p class="muted">ISM 對每位點 ±1000bp 視窗內的 CpG 建 read×CpG 矩陣。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-5mc">
+    <summary><span class="term">5mC vs 5hmC</span> — 5-甲基胞嘧啶 vs 5-羥甲基胞嘧啶（兩種修飾）</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>C 上掛甲基（5mC，常見、抑制基因）或羥甲基（5hmC，去甲基中間態）。ONT 可同時 call 兩者。</div>
+      <p class="muted">⚠ ISM 目前 <b>5mC-only</b>（max-collapse 把 5mC+5hmC 議題：盤點建議分軌處理，dup-bug 待修）。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-beta">
+    <summary><span class="term">β（甲基率）/ Δβ</span> — 某 CpG 甲基化 read 的比例 [0,1]；Δβ = 兩組差（有方向）</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>β = 這個 CpG 上「甲基化的 read 佔幾成」；Δβ = HP1-1 的 β 減 HP1 的 β（正負 = 往哪邊偏）。</div>
+      <div class="eg"><b>例：</b>BRCA2 HP-axis Δβ = <b>−0.122</b>（HP1-1 比 HP1 低甲基化）。⚠ −0.054 是 buggy 砍半值，禁用。</div>
+      <p class="muted">⚠ Δβ（甲基率差，有方向）≠ Δ（距離差，無方向）。見 <a href="02_ism-core.standalone.html#term-delta-vs-dbeta">ISM 頁圖</a>。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-mmml">
+    <summary><span class="term">MM/ML tag</span> — BAM 裡的甲基化標記（位置 + 機率）</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>MM = 哪些 C 有修飾（delta-encoded 位置）；ML = 每個修飾的機率（0–255，/255 得 0–1）。</div>
+      <p class="muted">ISM 的 MethylationParser 解這兩個 tag，CIGAR→ref 定位 CpG。⚠ MM/ML 解析目前零單元測試（盤點稽核 flag）。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-readlevel">
+    <summary><span class="term">read-level（單分子層）</span> — 保留每條 read 完整甲基 pattern，<u>非</u> per-position 聚合</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>不把同一位點所有 read 平均掉，而是看「每條 read 各自的甲基指紋」——這樣才看得出 read 之間的共甲基化結構。</div>
+      <p class="muted">這是 ISM 站「軸 C（between-read 距離）」對比業界「軸 A（per-position 率差）」的根本差異。</p>
+    </div>
+  </details>
+</section>
+
+<!-- ============ ④ 統計與評估（worked examples）============ -->
+<section id="g4">
+  <h3><span class="num">④</span> 統計與評估 <span class="badge b-info">含算式 worked example</span></h3>
+  <p class="sub">方法學的統計詞，每個附「怎麼從數字算出來」的 worked example（輸入為示意數字，算式取自源碼）。</p>
+
+  <details class="card def" id="term-nhd" open>
+    <summary><span class="term">NHD（標準化漢明距離）</span> 🧮 — 兩條 read 甲基 pattern 的差異比例</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>兩條 read 各自的甲基「指紋」有多少 CpG 位置不一樣，除以可比較的 CpG 數。0 = 一模一樣、1 = 完全相反。</div>
+      <div class="worked"><span class="lab">worked example · NHD</span>
+        NHD = 不一致數 / 共同有效 CpG 數（<code>DistanceMatrix.cpp:23</code>）。
+        <div class="calc">read i = [1, 0, 1, 0, 1]<br>read j = [1, 0, 1, <b>1</b>, 1] → 1 個不一致 / 5 共同 = <span class="res">0.2</span></div>
+        需共同覆蓋 ≥ C_min（DistanceMatrix 預設 5）；不足記 MAX_DIST=1.0（懲罰式，⚠ 可造假雙峰）。生產實際用 <b>BERNOULLI</b>＝NHD 的機率加權版（用 ML 機率非二值）。
+      </div>
+    </div>
+  </details>
+
+  <details class="card def" id="term-permanova">
+    <summary><span class="term">PERMANOVA（pseudo-F）</span> 🧮🧩 — 問「按 HP 分組後，組間甲基距離是否顯著大於組內」</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>把 reads 的 HP 標籤隨機洗牌很多次，看真實分群是否比 99% 的隨機洗牌都整齊；整齊才說明 HP 真的在解釋甲基差。問的是「<b>結構有無</b>」非「率差」。</div>
+      <div class="worked"><span class="lab">worked example · pseudo-F</span>
+        F = (SS_between / (k−1)) / (SS_within / (N−k))（<code>StructureTest.cpp:150</code>）。
+        <div class="calc">k=2 群, N=6：假設 SS_between=0.50, SS_within=0.10<br>→ F = (0.50 / 1) / (0.10 / 4) = 0.50 / 0.025 = <span class="res">20</span></div>
+        F 大 = 群間散、群內緊。再把標籤洗牌（生產 <b>99 次</b>，<code>RegionProcessor.cpp:1573</code>）重算 F，看觀測 F=20 多極端 → p（解析度下限 1/100=0.01）。<span class="muted">（SS 為示意；實際由距離矩陣算）</span>
+      </div>
+      <p class="muted"><b>常見誤解：</b>把它當「per-CpG 率差檢定」；它是多變量「結構有無」檢定。對稀疏表比 Cramér's V 穩健。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-cramersv">
+    <summary><span class="term">Cramér's V + Cochran gate</span> 🧮🧩 — 列聯表關聯強度 + 「表太稀疏就不算數」的閘</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>Cramér's V 是用卡方推導的關聯強度，需每格樣本夠多才近似成立；Cochran gate 像把關門說「你的表太稀疏，這個強度數字不算數」→ gate 成 0。</div>
+      <div class="worked"><span class="lab">worked example · Cramér's V</span>
+        2×2 時 V = √(χ² / n)（<code>MathUtils.hpp:85</code>，min(r,c)−1=1）。
+        <div class="calc">表 [[30, 8], [6, 25]], n=69 → χ² ≈ 24.3 → V = √(24.3 / 69) ≈ <span class="res">0.59</span></div>
+        可靠性：需 ≥80% 格的期望值 ≥5（Cochran；<code>GlobalTest.cpp:111-119</code>）才採信，否則 <code>summary CramersV = reliable ? v : 0</code>。
+      </div>
+      <div class="eg"><b>「latent 真結構」：</b>gated V=0 但 PERMANOVA 顯著 ＝ 真有分群、只是卡方在稀疏表不可靠被閘住（762 MISSED 中 487 個）。<b>不是矛盾、不可寫成 filter。</b></div>
+    </div>
+  </details>
+
+  <details class="card def" id="term-fisher">
+    <summary><span class="term">Fisher exact + over-dispersion 問題</span> 🧮🧩 — per-CpG ASM 檢定，但長讀違反獨立假設 → p 偏樂觀</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>擲 100 枚獨立硬幣會集中在平均附近；但同 clone 的長讀像「同一批受影響的硬幣」（彼此相關），實際方差更大。Fisher 假設獨立 → 低估 variance → p 偏小 → 顯著 CpG 偏多。</div>
+      <div class="worked"><span class="lab">worked example · Fisher 2×2</span>
+        對單一 CpG 建 2×2（HP1/HP2 × 甲基/未甲基），算「至少這麼極端」的精確機率 p。
+        <div class="calc">HP1: 8 甲基 / 1 未甲 · HP2: 1 甲基 / 7 未甲 → Fisher p ≈ 0.002（看似強）</div>
+        ⚠ 但若這 17 條 read 來自少數 clone（非獨立），真實不確定性更大 → 真 p 應更大。<span class="muted">建議改 beta-binomial 顯式吸收 over-dispersion，或保留 Fisher 但明標 anti-conservative。</span>
+      </div>
+    </div>
+  </details>
+
+  <details class="card def" id="term-fdr">
+    <summary><span class="term">BH-FDR（多重檢定校正）</span> 🧮 — 同時做很多檢定時，控制假陽性「比例」</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>同時做 1000 個檢定若都用 p&lt;0.05，平均 50 個假陽性；BH 依排名動態調小閾值，使假陽性比例控制在 5%。</div>
+      <div class="worked"><span class="lab">worked example · BH-FDR</span>
+        排序後 q_i = p_i × m / rank_i（m = 檢定總數）。
+        <div class="calc">m=1000：排第 1 的 p=0.00002 → q=0.00002×1000/1=0.02 ✓<br>排第 50 的 p=0.0025 → q=0.0025×1000/50=0.05（臨界）</div>
+        ⚠ ISM 有 within-region BH，但<b>跨 region / genome-wide 缺校正</b> → global_p 取多 p 最小值不校正會膨脹假陽性（建議 Sidak/Bonferroni）。
+      </div>
+    </div>
+  </details>
+
+  <details class="card def" id="term-auc">
+    <summary><span class="term">AUC（ROC 曲線下面積）</span> 🧮 — 二元分類器的區分力，0.5=隨機、1=完美</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>把一顆 TP 球與一顆 FP 球混抽，AUC = 「TP 球分數較高」的機率。0.5 就是瞎猜。</div>
+      <div class="worked"><span class="lab">worked example · AUC</span>
+        所有 (TP, FP) 配對中 TP 分數較高的比例。
+        <div class="calc">3 TP 分數 [0.9, 0.6, 0.4] · 3 FP [0.7, 0.5, 0.2]<br>9 配對中 TP&gt;FP 的有 6 個 → AUC = 6/9 ≈ <span class="res">0.67</span></div>
+        ⚠ 甲基 |Δβ| 預測 is_TP 的 AUC ≈ <b>0.505</b>（隨機）→ filter NEGATIVE。且絕對 AUC 在某些設計系統性膨脹（見 <a href="#term-excess">excess-over-null</a>）。
+      </div>
+    </div>
+  </details>
+
+  <details class="card def" id="term-excess">
+    <summary><span class="term">excess-over-null（超出隨機基準）</span> 🧮🧩 — 觀測指標 − permutation null，跨樣本只能比這個</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>賭博裡看「比莊家多贏的比例」，不是看總共贏多少。許多指標（anchor AUC、ASM rate）的 null 本身就遠離 0.5/0，只看絕對值會把「本來就高的 null」誤當訊號。</div>
+      <div class="worked"><span class="lab">worked example · excess-over-null</span>
+        excess = 觀測 − mean(HP-shuffle null)。
+        <div class="calc">某樣本觀測 strong-ASM rate = 0.30；HP 洗牌 null 平均 = 0.13<br>→ excess = 0.30 − 0.13 = <span class="res">+0.17</span></div>
+        跨樣本 ASM 復現要看 <b>6/6 樣本 excess&gt;0</b>（mean 0.168），<u>不是</u>比各樣本 raw |Δβ|（會被覆蓋/樣本大小污染）。
+      </div>
+    </div>
+  </details>
+
+  <details class="card def" id="term-loso">
+    <summary><span class="term">LOSO（留一樣本法）</span> 🧩 — N−1 個樣本訓練、預測留下的 1 個，測真實跨樣本泛化</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>用 A/B/C/D 四校的題訓練、去考 E 校；而非用 E 校 80% 題訓練再考 E 校剩 20%（後者作弊成分高 = within-sample k-fold）。</div>
+      <div class="eg"><b>關鍵教訓：</b>甲基 filter 在 in-distribution k-fold 看似 +ΔF1，但 LOSO held-out mean = <b>−0.00004</b>（p=0.125）、跨樣本 transfer 甚至大負（−0.377）→ 揭露效益 100% 來自 <b>sample-level circularity</b>。這是 filter DEAD 的決定性證據。</div>
+    </div>
+  </details>
+</section>
+
+<!-- ============ ⑤ 工具/pipeline ============ -->
+<section id="g5">
+  <h3><span class="num">⑤</span> 工具與 Pipeline</h3>
+  <p class="sub">最容易誤讀的軸別定義，與上下游工具。</p>
+
+  <details class="card def" id="term-hpaxis" open>
+    <summary><span class="term">HP-axis vs ALLELE-axis</span> 🧩 — 唯一 somatic-controlled 的軸 vs 被 germline 污染的軸 <span class="badge b-dead">🔴</span></summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b><b>HP-axis</b> 比 HP1（無突變）vs HP1-1（有突變）—— 同一條染色體，copy/germline 都 hold constant，差異才是 somatic 帶來的。<b>ALLELE-axis</b> 比 ALT reads vs REF reads —— 但 REF/ALT 本來就可能有 germline 基線等位甲基差，混進來污染。</div>
+      <div class="eg"><b>數據：</b>HP-axis somatic-controlled（TP 7.2% vs null 4.1%, OR=1.79）；ALLELE-axis 被 confound（TP 11.1% &lt; het null 15.2%）。<b>所有 LOH 位點只有 ALLELE-axis 可用 → 故都 confounded。</b></div>
+      <p class="muted">🔴 鐵則 2：宣稱 somatic ASM 必附 germline-het negative control。</p>
+    </div>
+  </details>
+
+  <details class="card def" id="term-longphase">
+    <summary><span class="term">longphase-S vs longphase-TO</span> — paired（有 normal 錨）vs tumor-only（self-phasing bias）</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>longphase-S 用 Normal BAM + germline SNP 當精確錨點；longphase-TO 無 normal，只用 tumor 自身 somatic SNV 推 → 帶 ALT 的 reads 被偏向同一 HP。</div>
+      <div class="eg"><b>數據：</b>TO 模式 <b>94.6% reads 偏 HP1</b>（已知 bias）；paired_full ΔF1=+0.0112（canonical），TO ΔF1=−0.0206（NEGATIVE，不可靠）。</div>
+    </div>
+  </details>
+
+  <details class="card def" id="term-cistest">
+    <summary><span class="term">normal-anchored cis-test</span> — 用 normal 當錨點，區分「真 cis」vs「copy 假象」</summary>
+    <div class="body">
+      <div class="intuition"><b>直覺：</b>normal-HP1（基準）→ tumor-HP1 的差是 copy/dosage（d_copy）；tumor-HP1 → HP1-1 的差才是 cis 候選（d_within）。</div>
+      <p>判準 <code>|d_cis| &gt; 1.8×|d_drift| + 0.02</code>。例 BRCA2 d_within 小、d_copy 大 → copy 主導；chr17/TBC1D16 d_within=0.142, p=0.001 → 真 cis。<span class="badge b-warn">🟡 僅 HCC1395 有 matched normal</span> 圖見 <a href="02_ism-core.standalone.html#hcl">ISM 頁難點 2</a>。</p>
+    </div>
+  </details>
+</section>
+
+<!-- footer -->
+<footer class="prov" id="prov"><div>
+  <h4>溯源 Provenance</h4>
+  <p><b>內容 SoT：</b><code>/big7_disk/liaoyoyo2001/InterSubMod/docs/explain/_planning/02_名詞表_glossary.md</code>（92 詞完整版）。本頁 = 核心 28 詞解釋層 + anchor 註冊。</p>
+  <p><b>統計算式來源：</b><code>DistanceMatrix.cpp:23</code>（NHD）·<code>StructureTest.cpp:150</code>（pseudo-F）·<code>MathUtils.hpp:85</code> + <code>GlobalTest.cpp:111-119</code>（Cramér's V + Cochran）。worked example 的<b>輸入數字為示意</b>（標示），算式與常數取自源碼。</p>
+  <p><b>數據定案：</b>significance.csv 59 欄 · PERMANOVA 99-perm · BRCA2 Δβ=−0.122 · phasing bio-n=6 → 見 <code>04_number_resolution.md</code>。</p>
+  <p style="margin-top:var(--sp-3)">commit <code>a7ab2d3</code> · branch <code>research/subclonal-reconstruction-202606</code> · 生成 2026-06-12 · 本頁 Write 與產數字 grep 不同 batch（§13.0）。</p>
+</div></footer>
+
+</div>
+</body>
+</html>
