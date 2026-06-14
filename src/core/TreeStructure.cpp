@@ -65,14 +65,24 @@ std::string Tree::newick_recursive(const std::shared_ptr<TreeNode>& node, bool i
 std::vector<std::shared_ptr<TreeNode>> Tree::get_internal_nodes() const {
     std::vector<std::shared_ptr<TreeNode>> nodes;
     if (root_ && !root_->is_leaf()) {
-        collect_internal_nodes(root_, nodes);
+        std::set<const TreeNode*> visited;
+        collect_internal_nodes(root_, nodes, visited);
     }
     return nodes;
 }
 
 void Tree::collect_internal_nodes(const std::shared_ptr<TreeNode>& node,
-                                  std::vector<std::shared_ptr<TreeNode>>& nodes) const {
+                                  std::vector<std::shared_ptr<TreeNode>>& nodes,
+                                  std::set<const TreeNode*>& visited) const {
     if (!node || node->is_leaf()) {
+        return;
+    }
+
+    // Cycle guard: a malformed (cyclic) tree would otherwise infinite-recurse here and
+    // stack-overflow. Degenerate/cyclic trees can arise from NaN distance matrices
+    // (--nan-distance-strategy SKIP); RegionProcessor filters those upstream and this is
+    // the defensive backstop. See fix/clustering-nan-skip-segfault (2026-06-14).
+    if (!visited.insert(node.get()).second) {
         return;
     }
 
@@ -81,36 +91,44 @@ void Tree::collect_internal_nodes(const std::shared_ptr<TreeNode>& node,
 
     // Recursively process child nodes
     if (node->left) {
-        collect_internal_nodes(node->left, nodes);
+        collect_internal_nodes(node->left, nodes, visited);
     }
     if (node->right) {
-        collect_internal_nodes(node->right, nodes);
+        collect_internal_nodes(node->right, nodes, visited);
     }
 }
 
 std::vector<std::shared_ptr<TreeNode>> Tree::get_leaves() const {
     std::vector<std::shared_ptr<TreeNode>> leaves;
     if (root_) {
-        collect_leaves(root_, leaves);
+        std::set<const TreeNode*> visited;
+        collect_leaves(root_, leaves, visited);
     }
     return leaves;
 }
 
-void Tree::collect_leaves(const std::shared_ptr<TreeNode>& node, std::vector<std::shared_ptr<TreeNode>>& leaves) const {
+void Tree::collect_leaves(const std::shared_ptr<TreeNode>& node, std::vector<std::shared_ptr<TreeNode>>& leaves,
+                          std::set<const TreeNode*>& visited) const {
     if (!node) {
         return;
     }
 
     if (node->is_leaf()) {
         leaves.push_back(node);
-    } else {
-        // In-order: left first, then right
-        if (node->left) {
-            collect_leaves(node->left, leaves);
-        }
-        if (node->right) {
-            collect_leaves(node->right, leaves);
-        }
+        return;
+    }
+
+    // Cycle guard (see collect_internal_nodes).
+    if (!visited.insert(node.get()).second) {
+        return;
+    }
+
+    // In-order: left first, then right
+    if (node->left) {
+        collect_leaves(node->left, leaves, visited);
+    }
+    if (node->right) {
+        collect_leaves(node->right, leaves, visited);
     }
 }
 

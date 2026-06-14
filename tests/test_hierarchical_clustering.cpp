@@ -18,6 +18,7 @@
 #include <cmath>
 #include <cstdio>
 #include <fstream>
+#include <limits>
 #include <set>
 #include <vector>
 
@@ -568,4 +569,67 @@ TEST(HierarchicalClusteringPerformance, LargerSizeMatrix_LanceWilliams) {
     EXPECT_LT(ms, 10000) << "UPGMA 500x500 should complete in <10s with Lance-Williams";
 
     std::cout << "  UPGMA 500x500 (Lance-Williams): " << ms << " ms\n";
+}
+
+// ============================================================================
+// Cycle-guard regression (fix/clustering-nan-skip-segfault, 2026-06-14)
+// Root cause: --nan-distance-strategy SKIP produced NaN distance matrices;
+// UPGMA built a degenerate/cyclic tree; Tree::collect_internal_nodes recursed
+// without bound -> stack overflow (SIGSEGV exit 139). These tests inject a
+// cycle directly to verify the defensive cycle guard, independent of how the
+// cycle arises in production.
+// ============================================================================
+
+TEST(TreeCycleGuard, GetInternalNodesTerminatesOnCyclicTree) {
+    auto leaf0 = TreeNode::create_leaf(0, "L0");
+    auto leaf1 = TreeNode::create_leaf(1, "L1");
+    auto root = TreeNode::create_internal(2, leaf0, leaf1, 1.0);
+    root->left = root;  // inject cycle: left child points back to the root
+
+    Tree tree;
+    tree.set_root(root);
+
+    // Without the cycle guard this infinite-recurses and stack-overflows.
+    auto internal = tree.get_internal_nodes();
+    EXPECT_LE(internal.size(), 4u);  // bounded by distinct nodes visited
+
+    root->left = leaf0;  // break cycle so shared_ptr can release (avoid leak)
+}
+
+TEST(TreeCycleGuard, GetLeavesTerminatesOnCyclicTree) {
+    auto leaf0 = TreeNode::create_leaf(0, "L0");
+    auto leaf1 = TreeNode::create_leaf(1, "L1");
+    auto inner = TreeNode::create_internal(2, leaf0, leaf1, 1.0);
+    auto root = TreeNode::create_internal(3, inner, leaf0, 2.0);
+    inner->right = root;  // inject cycle: inner's right points to ancestor root
+
+    Tree tree;
+    tree.set_root(root);
+
+    auto leaves = tree.get_leaves();  // must terminate
+    EXPECT_LE(leaves.size(), 8u);     // bounded (cycle guard)
+
+    inner->right = leaf1;  // break cycle (avoid leak)
+}
+
+TEST(TreeCycleGuard, NanDistanceMatrixClusteringDoesNotCrash) {
+    // Block-diagonal NaN distances (insufficient-overlap pairs under SKIP).
+    // Must pass through build_tree + find_optimal_clusters without crashing.
+    const double NN = std::numeric_limits<double>::quiet_NaN();
+    Eigen::MatrixXd d(6, 6);
+    d << 0.0, 0.2, NN, NN, NN, NN,
+         0.2, 0.0, NN, NN, NN, NN,
+         NN, NN, 0.0, 0.3, NN, NN,
+         NN, NN, 0.3, 0.0, NN, NN,
+         NN, NN, NN, NN, 0.0, 0.4,
+         NN, NN, NN, NN, 0.4, 0.0;
+    std::vector<std::string> names = {"R1", "R2", "R3", "R4", "R5", "R6"};
+
+    HierarchicalClustering clusterer(LinkageMethod::UPGMA);
+    Tree tree = clusterer.build_tree(d, names);
+    auto internal = tree.get_internal_nodes();  // must terminate
+    auto leaves = tree.get_leaves();             // must terminate
+    EXPECT_LE(leaves.size(), 6u);
+    auto result = TreeCutter::find_optimal_clusters(tree, d, 2, 3);
+    EXPECT_GE(result.first, 0);
 }

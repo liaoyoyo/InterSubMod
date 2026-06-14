@@ -35,6 +35,7 @@ struct RegionResult {
     int snv_id;
     int num_reads;
     int num_cpgs;
+    int num_reads_valid = 0;  ///< Reads used for clustering after NaN-pair filtering (SKIP); == num_reads under MAX_DIST
     int num_forward_reads;   ///< Forward strand reads
     int num_reverse_reads;   ///< Reverse strand reads
     int num_filtered_reads;  ///< Reads filtered out (debug mode)
@@ -464,6 +465,16 @@ private:
                                               const MethylationMatrix& meth_mat, const std::string& clustering_dir,
                                               const std::string& chr_name, const SomaticSnv& snv, int region_id,
                                               RegionResult& result);
+
+    /**
+     * @brief Retain reads forming a complete (NaN-free) distance sub-matrix.
+     *
+     * Greedily drops the read with the fewest non-NaN partners until no NaN pair
+     * remains. Mirrors StructureTest::filter_reads_for_complete_matrix so clustering
+     * and the downstream PERMANOVA use the same valid read subset. For NaN-free input
+     * (MAX_DIST) all reads are retained (no-op). Empty / size < 2 => region unclusterable.
+     */
+    static void extract_complete_submatrix_indices(const Eigen::MatrixXd& dist, std::vector<int>& out_indices);
 
     /**
      * @brief Write strand-specific clustering trees

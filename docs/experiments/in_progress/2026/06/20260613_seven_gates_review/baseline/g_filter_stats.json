@@ -1,0 +1,32 @@
+{
+  "sample": "HCC1395 paired ±5000 chr1 (BERNOULLI)",
+  "n_regions": 2624,
+  "total_kept": 314715,
+  "total_filtered": 347484,
+  "avg_passed_per_locus": 252.4,
+  "keep_rate_pct": 47.5,
+  "gate_filtered_single": {
+    "SNV_NOT_COVERED": 269784,
+    "SHORT_READ": 53476,
+    "SUPPLEMENTARY": 20852,
+    "LOW_MAPQ": 13765,
+    "SECONDARY": 11279
+  },
+  "gate_pct_of_passed": {
+    "SNV_NOT_COVERED": 40.74,
+    "SHORT_READ": 8.08,
+    "SUPPLEMENTARY": 3.15,
+    "LOW_MAPQ": 2.08,
+    "SECONDARY": 1.7
+  },
+  "kept_NumReads": {
+    "min": 60,
+    "median": 118,
+    "max": 408,
+    "lt20": 0
+  },
+  "kept_NumCpGs": {
+    "median": 78,
+    "lt10": 0
+  }
+}

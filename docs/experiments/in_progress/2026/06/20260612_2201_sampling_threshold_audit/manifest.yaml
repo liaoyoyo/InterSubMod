@@ -1,0 +1,86 @@
+# ============================================================================
+# ISM 參數實驗記錄 — 可複用框架實例 #1（dogfood 階段 A 參數治理）
+# ----------------------------------------------------------------------------
+# 框架用途（未來任何「為驗證/調整某參數而跑 ISM」都建一份這樣的 manifest）：
+#   1. 一個實驗 = 一個帶時間戳的目錄 + 這份 manifest（reproducibility 單位）
+#   2. parameters_under_test = 這次跑的參數值 → 未來改某參數重跑 = 新 manifest
+#   3. 新舊 manifest 的 results / exclusion_accounting diff = 「改動→結果差異」追溯
+#   4. artifacts 分類決定「哪些留作 baseline、哪些是臨時可刪」（省磁碟）
+#   5. cost 記錄讓未來可預估時間/磁碟
+# ============================================================================
+
+experiment_id: 20260612_2201_sampling_threshold_audit
+created: "2026-06-12T22:01"
+purpose: >
+  觀察取樣門檻參數（C_min / min_site_coverage / 位點前置 gate）對位點保留的影響；
+  用全量 HCC1395 TP+FP+FN 數據驗證 C_min=3 是否合適，並量化各層排除位點數。
+hypothesis: >
+  C_min=3 對絕大多數 read-pair 不 binding（同一位點 read 共同覆蓋的 CpG 通常 >>3）；
+  min_site_coverage=5 若啟用會砍掉低覆蓋 CpG column。待數據驗證。
+
+provenance:
+  git_branch: chore/ism-review-param-governance-202606
+  worktree_head: 9976a6c
+  binary: build/bin/inter_sub_mod
+  binary_commit: 891e04bce75d   # 2026-06-09, 最後改 PerCpgAsm.cpp
+  binary_built: "Jun 10 01:10"
+
+parameters_under_test:        # baseline 參數值（未來改這些重跑 → 對比）
+  window_size_bp: 1000
+  min_mapq: 20
+  min_read_length: 1000
+  min_base_quality: 20
+  clustering_min_reads: 10        # 位點前置：reads<此 → 不進分析、不進 summary
+  min_common_coverage_Cmin: 3     # read-pair：共同 CpG<此 → 距離=MAX_DIST(1.0)
+  min_site_coverage: 5            # CpG-column：死參數，目前未啟用
+  NumReads_retain_gate: 20        # 保留 gate depth 條件
+  binary_methyl_high: 0.8
+  binary_methyl_low: 0.2
+  nan_distance_strategy: MAX_DIST
+  max_distance_value: 1.0
+
+inputs:
+  tumor_bam: "data/bam/HCC1395/tumor.bam -> HCC1395_Tmode_tagged_ClairS_pileup_v040_woFilter.bam (264G)"
+  normal_bam: "data/bam/HCC1395/normal.bam -> HCC1395BL_ONT_5khz_simplex_5mCG_5hmCG_tagged.bam (136G)"
+  reference: "data/ref/hg38.fa -> GRCh38_no_alt_analysis_set.fasta (3.0G)"
+  vcf_tp: "filtered_snv_tp.vcf.gz (30490 位點)"
+  vcf_fp: "filtered_snv_fp.vcf.gz (4842 位點)"
+  vcf_fn: "filtered_snv_fn.vcf.gz (109 位點)"
+
+cost:
+  expected_runtime: "~3-5min 全量（用戶基準；開矩陣輸出可能更久）"
+  threads: 40
+  actual_runtime_sec: 1762   # TP 1592s + FP 163s + FN 7s（開矩陣輸出寫 ~60萬檔，比純彙總慢）
+  peak_disk_matrices: "9.6GB（實測，分析完已刪）"
+
+# 產物生命週期分類（你的 #3：哪些 baseline / 哪些臨時可刪）
+artifacts:
+  retain_baseline:            # 未來重複比對的主要 baseline（golden）
+    - baseline/cmin_common_cpg_scan.tsv        # C_min 掃描：各 C_min 值排除的 read-pair 比例
+    - baseline/site_coverage_distribution.tsv  # CpG-column 覆蓋分佈
+    - baseline/exclusion_accounting.tsv        # 各層排除位點數
+  retain_observation:         # 會重複觀察
+    - figures/*.png
+  retain_record:
+    - manifest.yaml
+    - README.md
+  ephemeral:                  # 執行完知道結果就移除（分析完刪）
+    - "output/_tmp_sampling_obs_20260612_2201/{tp,fp,fn}/  # per-region 矩陣 ~5.5GB"
+
+# 各層排除數（已算，不需重跑：VCF 總位點 − summary computed）
+# 來源: 20260420 run significance_summary.csv + VCF 位點數，本輪 grep + python 複核
+exclusion_accounting:
+  TP: {vcf_loci: 30490, computed: 29754, pre_gate_blocked: 736, blocked_pct: 2.4}
+  FP: {vcf_loci: 4842, computed: 627, pre_gate_blocked: 4215, blocked_pct: 87.0}
+  FN: {vcf_loci: 109, with_matrix: 109, note: "全 109 有矩陣（reads>=2）；C_min=3 排除 20.5% pair（三類最高，FN 覆蓋最差）"}
+
+# 分析後填（{{待填}} = §13.0 未驗證留白，絕不填預期值）
+results:
+  # 全量 35435 region / 2.04 億 read-pair（raw=從 methylation.csv 算；binary=binary 自報實際距離計算用）
+  cmin3_binding_rate: "raw: TP 9.7% / FP 11.4% / FN 17.8%; binary(含中間帶0.2-0.8丟失): TP 12.0% / FP 13.8% / FN 20.5%"
+  min_site_cov5_would_remove: "TP 0.27% / FP 0.32% / FN 0.27% column（幾乎無影響，median 覆蓋 77 reads）"
+  cmin_recommendation: "C_min=3 數值合理保留（掃描漸進無拐點: C_min 1→3.6% 3→9.7% 5→19.5%; median 共同CpG=10; 品質vs數量中間值）"
+  middle_band_loss: "raw 9.7% vs binary 12.0% 差 2.3% = 二值化中間帶丟失的額外排除（解 §① NEEDS_RUN）"
+  verdict: "C_min=3 KEEP（文檔改3對齊實跑）; min_site_coverage=5 啟用影響<0.32% → wire清死碼或刪(低優先); 🔴 真正待改=MAX_DIST→SKIP 對比（12-20% pair被設1.0當最遠=潛在 clustering artifact，你#3核心）"
+
+status: DONE   # SETUP -> RUNNING -> ANALYZING -> DONE

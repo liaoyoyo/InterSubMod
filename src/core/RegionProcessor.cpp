@@ -757,8 +757,18 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
         int32_t region_start = bounds.start;
         int32_t region_end   = bounds.end;
 
-        // Fetch reads from BAM
-        auto reads = bam_reader.fetch_reads(chr_name, region_start, region_end);
+        // Fetch reads from BAM.
+        // #3 (2026-06-13) tumor SNV-point fetch: only reads crossing the somatic SNV are
+        // useful for tumor (ALT/REF haplotyping); reads that merely overlap the ±window but
+        // do not cross the SNV are filtered out downstream anyway (SNV_NOT_COVERED, ~40% at
+        // ±5000). Fetching at the SNV point avoids fetching + alt-support-checking them.
+        // Methylation is still read over the full ref_seq window (region_start..region_end)
+        // since covering reads are long (ONT) and span the window. The alt_support filter is
+        // kept as a safety net (e.g. SNV at a deletion within a covering read).
+        // NOTE: normal reads (below) MUST keep the window fetch — they contribute the
+        // methylation baseline even when not covering the SNV.
+        int32_t snv_pos = static_cast<int32_t>(snv.pos);
+        auto reads = bam_reader.fetch_reads(chr_name, snv_pos, snv_pos + 1);
 
         // Expand window to cover full span of all reads (if enabled)
         if (use_full_read_span_ && !reads.empty()) {
@@ -1075,7 +1085,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
     }
 
     // Header (updated with Multi-Stage HP verification and Quality Assessment columns)
-    csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,GlobalP,CramersV,"
+    csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,NReadsValid,GlobalP,CramersV,"
                 "GlobalP_HPFamily,CramersV_HPFamily,GlobalP_HPFine,CramersV_HPFine,HPFine_NGroups_CF,"
                 "HeuristicScore,PassedGating,"
                 "PairwiseMeanDist,PairwiseMedianDist,"
@@ -1155,8 +1165,9 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
         chr_stats[chr_name].total++;
 
         csv_file << r.region_id << "," << chr_name << "," << snv.pos << "," << snv.ref_base << "," << snv.alt_base
-                 << "," << r.num_reads << "," << r.num_cpgs << "," << std::scientific << std::setprecision(6)
-                 << r.global_p_value << "," << std::fixed << std::setprecision(4) << r.cramers_v << ","
+                 << "," << r.num_reads << "," << r.num_cpgs << "," << r.num_reads_valid << ","
+                 << std::scientific << std::setprecision(6) << r.global_p_value << "," << std::fixed
+                 << std::setprecision(4) << r.cramers_v << ","
                  // Multi-layer HP (Cluster-First)
                  << std::scientific << std::setprecision(6) << r.global_hp_family_p << ","
                  << std::fixed << std::setprecision(4) << r.global_hp_family_v << ","
@@ -1468,6 +1479,60 @@ DistanceMatrix RegionProcessor::compute_and_write_distance_matrix(const Methylat
     return all_dist;
 }
 
+void RegionProcessor::extract_complete_submatrix_indices(const Eigen::MatrixXd& dist, std::vector<int>& out_indices) {
+    // Greedy peel-off: drop the read with the fewest non-NaN partners until the
+    // retained sub-matrix is NaN-free. Same algorithm as
+    // StructureTest::filter_reads_for_complete_matrix, so the clustering subset
+    // matches the subset PERMANOVA re-derives downstream.
+    out_indices.clear();
+    const int n = static_cast<int>(dist.rows());
+    if (n == 0) return;
+
+    std::vector<bool> keep(n, true);
+    int n_keep = n;
+
+    while (true) {
+        bool has_nan = false;
+        for (int i = 0; i < n && !has_nan; ++i) {
+            if (!keep[i]) continue;
+            for (int j = i + 1; j < n; ++j) {
+                if (!keep[j]) continue;
+                if (std::isnan(dist(i, j))) {
+                    has_nan = true;
+                    break;
+                }
+            }
+        }
+        if (!has_nan) break;
+        if (n_keep <= 2) {  // cannot form a clusterable complete sub-matrix
+            out_indices.clear();
+            return;
+        }
+
+        int worst = -1;
+        int min_degree = n_keep;
+        for (int i = 0; i < n; ++i) {
+            if (!keep[i]) continue;
+            int degree = 0;
+            for (int j = 0; j < n; ++j) {
+                if (i == j || !keep[j]) continue;
+                if (!std::isnan(dist(i, j))) ++degree;
+            }
+            if (degree < min_degree) {
+                min_degree = degree;
+                worst = i;
+            }
+        }
+        if (worst < 0) break;
+        keep[worst] = false;
+        --n_keep;
+    }
+
+    for (int i = 0; i < n; ++i) {
+        if (keep[i]) out_indices.push_back(i);
+    }
+}
+
 void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& all_dist,
                                                            const std::vector<ReadInfo>& read_list,
                                                            const MethylationMatrix& meth_mat,
@@ -1476,15 +1541,42 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
                                                            int region_id, RegionResult& result) {
     std::filesystem::create_directories(clustering_dir);
 
-    // Prepare read names
+    // [SKIP-fix] Filter reads to a complete (NaN-free) sub-matrix before clustering.
+    // Hierarchical clustering / tree-cutting cannot consume NaN distances: a NaN pair is
+    // never selected as the UPGMA minimum, producing a degenerate tree whose traversal
+    // stack-overflows (SIGSEGV). This mirrors the downstream PERMANOVA filter, so
+    // clustering and significance operate on the SAME valid read subset. For MAX_DIST
+    // (no NaN) the subset == all reads => identical to prior behavior (regression-safe).
+    // See fix/clustering-nan-skip-segfault (2026-06-14).
+    const Eigen::MatrixXd& full_dist = all_dist.dist_matrix;
+    const int n_total = static_cast<int>(read_list.size());
+    std::vector<int> valid_idx;
+    extract_complete_submatrix_indices(full_dist, valid_idx);
+    const int n_valid = static_cast<int>(valid_idx.size());
+    if (n_valid < 2) return;  // not enough complete-overlap reads to cluster
+    const bool is_subset = (n_valid != n_total);
+    result.num_reads_valid = n_valid;  // [gap1] reads used for clustering after NaN-pair drop (== num_reads under MAX_DIST)
+
+    // Working distance matrix + read names in valid-read space (zero-copy when no drop).
     std::vector<std::string> read_names;
-    for (const auto& r : read_list) {
-        read_names.push_back(r.read_name);
+    read_names.reserve(n_valid);
+    Eigen::MatrixXd sub_dist;
+    if (is_subset) {
+        sub_dist.resize(n_valid, n_valid);
+        for (int i = 0; i < n_valid; ++i) {
+            read_names.push_back(read_list[valid_idx[i]].read_name);
+            for (int j = 0; j < n_valid; ++j) {
+                sub_dist(i, j) = full_dist(valid_idx[i], valid_idx[j]);
+            }
+        }
+    } else {
+        for (const auto& r : read_list) read_names.push_back(r.read_name);
     }
+    const Eigen::MatrixXd& work_dist = is_subset ? sub_dist : full_dist;
 
     // Build hierarchical clustering tree
     HierarchicalClustering clusterer(linkage_method_);
-    Tree tree = clusterer.build_tree(all_dist, read_names);
+    Tree tree = clusterer.build_tree(work_dist, read_names);
 
     if (tree.empty()) return;
 
@@ -1514,15 +1606,16 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
 
     // Significance Analysis
     try {
-        auto [best_k, cluster_labels] = TreeCutter::find_optimal_clusters(
-            tree, all_dist.dist_matrix, 2, std::min(6, static_cast<int>(read_list.size()) / 2));
+        auto [best_k, cluster_labels] =
+            TreeCutter::find_optimal_clusters(tree, work_dist, 2, std::min(6, n_valid / 2));
 
-        if (best_k < 2 || cluster_labels.size() != read_list.size()) return;
+        if (best_k < 2 || static_cast<int>(cluster_labels.size()) != n_valid) return;
 
-        // Build FullLabel vector
+        // Build FullLabel vector (valid-read space, aligned with cluster_labels / work_dist)
         std::vector<FullLabel> full_labels;
-        full_labels.reserve(read_list.size());
-        for (const auto& read : read_list) {
+        full_labels.reserve(n_valid);
+        for (int k = 0; k < n_valid; ++k) {
+            const auto& read = read_list[valid_idx[k]];
             FullLabel label;
             label.allele = read.alt_support;
             label.hp_tag = read.hp_tag;
@@ -1537,7 +1630,7 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
             cluster_read_indices[cluster_labels[i]].push_back(i);
         }
 
-        int min_cluster_size = std::max(3, static_cast<int>(read_list.size()) / 20);
+        int min_cluster_size = std::max(3, n_valid / 20);
         bool unbalanced = false;
         for (const auto& [cid, indices] : cluster_read_indices) {
             if (static_cast<int>(indices.size()) < min_cluster_size) {
@@ -1579,8 +1672,20 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
 
         std::string anchor_key = chr_name + "_" + std::to_string(snv.pos);
         SignificanceAnalyzer analyzer(sig_config);
+
+        // Methylation matrix in valid-read space (rows aligned with cluster_labels / work_dist)
+        const Eigen::MatrixXd& full_meth = meth_mat.raw_matrix;
+        Eigen::MatrixXd sub_meth;
+        if (is_subset) {
+            sub_meth.resize(n_valid, full_meth.cols());
+            for (int i = 0; i < n_valid; ++i) {
+                sub_meth.row(i) = full_meth.row(valid_idx[i]);
+            }
+        }
+        const Eigen::MatrixXd& work_meth = is_subset ? sub_meth : full_meth;
+
         SignificanceResult sig_result =
-            analyzer.analyze(cluster_labels, full_labels, all_dist.dist_matrix, meth_mat.raw_matrix, region_id, anchor_key);
+            analyzer.analyze(cluster_labels, full_labels, work_dist, work_meth, region_id, anchor_key);
 
         // Store results
         result.significance_computed = true;

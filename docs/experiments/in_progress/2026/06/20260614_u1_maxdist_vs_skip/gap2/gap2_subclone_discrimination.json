@@ -1,0 +1,61 @@
+{
+  "input": "/tmp/u1_wg_skip/significance_summary.csv",
+  "n_sig": 11912,
+  "sig_signal_prevalence": {
+    "HPMergedSig": {
+      "count": 10518,
+      "frac": 0.883
+    },
+    "HP_Residual_Sig": {
+      "count": 5351,
+      "frac": 0.449
+    },
+    "Normal_HP_Valid": {
+      "count": 11539,
+      "frac": 0.969
+    },
+    "Tumor_HP_Valid": {
+      "count": 7051,
+      "frac": 0.592
+    },
+    "SampleASM_Sig": {
+      "count": 11893,
+      "frac": 0.998
+    },
+    "AlleleSig": {
+      "count": 7388,
+      "frac": 0.62
+    },
+    "Potential_LOH": {
+      "count": 570,
+      "frac": 0.048
+    }
+  },
+  "tumor_x_normal_valid": {
+    "both": 6934,
+    "tumor_only": 117,
+    "normal_only": 4605,
+    "neither": 256
+  },
+  "signed_residual": {
+    "available": 8302,
+    "nan_single_hp": 3610,
+    "abs_median": 0.0646,
+    "abs_mean": 0.1013,
+    "gt0.05": 4892,
+    "gt0.1": 2654,
+    "gt0.2": 999
+  },
+  "tumor_vs_normal_signed_corr": 0.01,
+  "abs_tumor_signed_median": 0.0316,
+  "abs_normal_signed_median": 0.0427,
+  "somatic_candidate_upper_bound": {
+    "rule": "tumorValid & |signed_residual|>0.1 (mean-axis proxy)",
+    "count": 1830,
+    "frac": 0.154
+  },
+  "germline_dominant": {
+    "rule": "normalValid & |signed_residual|<=0.05",
+    "count": 3374
+  }
+}
