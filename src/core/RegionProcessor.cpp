@@ -1163,6 +1163,32 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                                     result.combo_dbeta_sig_pairs);
             }
 
+            // [Stage② within-HP substructure] does a single germline-HP (tumor reads) split into >=2 clean
+            // methylation clusters? Pattern-based (per-CpG distance from all_dist), independent of normal.
+            {
+                std::vector<int> hp1_idx, hp2_idx;
+                for (size_t i = 0; i < read_list.size(); ++i) {
+                    if (!read_list[i].is_tumor) continue;
+                    const std::string& h = read_list[i].hp_tag;
+                    if (h == "1" || h == "HP1" || h == "1-1") {
+                        hp1_idx.push_back(static_cast<int>(i));
+                    } else if (h == "2" || h == "HP2" || h == "2-1") {
+                        hp2_idx.push_back(static_cast<int>(i));
+                    }
+                }
+                double sil1 = 0.0, sil2 = 0.0;
+                compute_within_hp_substructure(all_dist.dist_matrix, hp1_idx, result.within_hp1_ngroups, sil1);
+                compute_within_hp_substructure(all_dist.dist_matrix, hp2_idx, result.within_hp2_ngroups, sil2);
+                // [Stage② level axis] distance clustering above catches PATTERN substructure only; add the LEVEL
+                // axis (mean-β bimodality) which distance misses (chr1: distance 1.2% vs level 26.1%).
+                constexpr int kWithinHpMinGroup = 3;
+                result.within_hp_level_bimodal =
+                    within_hp_level_clean(meth_mat.raw_matrix, hp1_idx, kWithinHpMinGroup) ||
+                    within_hp_level_clean(meth_mat.raw_matrix, hp2_idx, kWithinHpMinGroup);
+                result.within_hp_clean_multigroup = (result.within_hp1_ngroups >= 2 || result.within_hp2_ngroups >= 2 ||
+                                                     result.within_hp_level_bimodal);
+            }
+
             // [Strength score] continuous association strength (replaces saturated HeuristicScore for ranking).
             // Computed here (after perform_clustering_and_significance set hp_auc/global_p/cramers_v AND the HP
             // block set germline_asm_dbeta) so all 4 inputs are final. 0.30*struct + 0.25*eff + 0.25*assoc + 0.20*sig.
@@ -1224,11 +1250,14 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
             const std::string& lvc = result.verification_class_legacy;
             const bool cluster_match = (lvc == "Strong" || lvc == "Subclone");  // GlobalTest matched a label
             const bool loh_struct = result.potential_loh && (hp_auc_struct || dbeta_sig);
-            if (dbeta_sig || hp_auc_struct || cluster_match || loh_struct) {
+            const bool within_hp = result.within_hp_clean_multigroup;  // Stage② within-HP clean substructure
+            if (dbeta_sig || hp_auc_struct || cluster_match || loh_struct || within_hp) {
                 if (cluster_match) {
                     result.verification_class = "Strong";
                 } else if (loh_struct) {
                     result.verification_class = "LOH-Structure";
+                } else if (within_hp) {
+                    result.verification_class = "MultiGroupNoLabel";  // S4/S6 within-HP clean multigroup
                 } else if (dbeta_sig) {
                     result.verification_class = "LabelShift";  // Δβ mean-shift signal (dominant rescue)
                 } else {
@@ -1291,6 +1320,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 "UnassignedAffinity,UnassignedAffinityP,UnassignedDir,NHP3,NHP0,"
                 // Summary
                 "DominantLabel,Stability,VerificationClass,VerificationClass_Legacy,"
+                "WithinHP1_NGroups,WithinHP2_NGroups,WithinHP_LevelBimodal,WithinHP_CleanMultigroup,"
                 // Multi-Layer Validation Quality Assessment (NEW)
                 "HP_Ratio,Potential_LOH,Coverage_Multiple,Diploid_Coverage_Used,Coverage_Category,LOH_Subtype,"
                 "Quality_Score,Quality_Tier,"
@@ -1427,6 +1457,9 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << r.dominant_label << ","
                  << std::fixed << std::setprecision(4) << r.cluster_stability << ","
                  << r.verification_class << "," << r.verification_class_legacy << ","
+                 << r.within_hp1_ngroups << "," << r.within_hp2_ngroups << ","
+                 << (r.within_hp_level_bimodal ? "true" : "false") << ","
+                 << (r.within_hp_clean_multigroup ? "true" : "false") << ","
                  // Multi-Layer Validation Quality Assessment (NEW)
                  << std::fixed << std::setprecision(4) << r.hp_ratio << ","
                  << (r.potential_loh ? "true" : "false") << ","
@@ -2024,6 +2057,137 @@ void RegionProcessor::compute_combo_dbeta(const Eigen::MatrixXd& raw, const std:
         }
     }
     out_sig_pairs = out;
+}
+
+void RegionProcessor::compute_within_hp_substructure(const Eigen::MatrixXd& all_dist, const std::vector<int>& hp_idx,
+                                                     int& out_ngroups, double& out_silhouette) const {
+    out_ngroups = 1;
+    out_silhouette = 0.0;
+    const int m = static_cast<int>(hp_idx.size());
+    if (m < 8) return;  // need enough reads for a meaningful within-HP split
+
+    // Extract the HP-family sub-distance-matrix from the already-computed all_dist (no recompute).
+    Eigen::MatrixXd sub(m, m);
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < m; ++j) sub(i, j) = all_dist(hp_idx[i], hp_idx[j]);
+    }
+    // NaN peel-off to a complete submatrix (mirrors the main clustering path).
+    std::vector<int> valid;
+    extract_complete_submatrix_indices(sub, valid);
+    const int n = static_cast<int>(valid.size());
+    if (n < 8) return;
+    Eigen::MatrixXd work(n, n);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) work(i, j) = sub(valid[i], valid[j]);
+    }
+
+    std::vector<std::string> names(n);
+    for (int i = 0; i < n; ++i) names[i] = std::to_string(i);
+    HierarchicalClustering clusterer(linkage_method_);
+    Tree tree = clusterer.build_tree(work, names);
+    if (tree.empty()) return;
+    auto kl = TreeCutter::find_optimal_clusters(tree, work, 2, std::min(6, n / 2));
+    std::vector<int> labels = kl.second;
+    if (static_cast<int>(labels.size()) != n) return;
+
+    // find_optimal_clusters returns best_k (kl.first) but its labels are NOT guaranteed to be the
+    // contiguous range [0, best_k): cut_by_num_clusters cuts to a height yielding >= k clusters, and
+    // tied merge heights (rife under MAX_DIST sentinel distances) make it overshoot to more clusters
+    // than requested. Indexing a best_k-sized array by a raw label is then an out-of-bounds write
+    // (heap corruption -> delayed SIGSEGV). Derive the real cluster count and remap to [0, K).
+    int max_label = -1;
+    for (int l : labels) max_label = std::max(max_label, l);
+    if (max_label < 0) return;
+    std::vector<int> remap(max_label + 1, -1);
+    int k = 0;
+    for (int l : labels) {
+        if (remap[l] < 0) remap[l] = k++;
+    }
+    if (k < 2) return;
+    for (int& l : labels) l = remap[l];
+
+    // Mean silhouette (1 read = 1 obs): a = mean dist to own cluster, b = min mean dist to another cluster.
+    double sil_sum = 0.0;
+    int sil_n = 0;
+    for (int i = 0; i < n; ++i) {
+        double a = 0.0;
+        int ca = 0;
+        std::vector<double> other_sum(k, 0.0);
+        std::vector<int> other_cnt(k, 0);
+        for (int j = 0; j < n; ++j) {
+            if (i == j) continue;
+            if (labels[j] == labels[i]) {
+                a += work(i, j);
+                ++ca;
+            } else {
+                other_sum[labels[j]] += work(i, j);
+                ++other_cnt[labels[j]];
+            }
+        }
+        if (ca == 0) continue;
+        a /= ca;
+        double b = std::numeric_limits<double>::max();
+        for (int c = 0; c < k; ++c) {
+            if (c != labels[i] && other_cnt[c] > 0) b = std::min(b, other_sum[c] / other_cnt[c]);
+        }
+        if (b == std::numeric_limits<double>::max()) continue;
+        const double denom = std::max(a, b);
+        if (denom > 0) {
+            sil_sum += (b - a) / denom;
+            ++sil_n;
+        }
+    }
+    out_silhouette = sil_n > 0 ? sil_sum / sil_n : 0.0;
+
+    // Clean multigroup = good silhouette + balanced (smallest cluster >= max(3, 20% of n)).
+    std::vector<int> sizes(k, 0);
+    for (int l : labels) ++sizes[l];
+    const int min_sz = *std::min_element(sizes.begin(), sizes.end());
+    if (out_silhouette >= 0.5 && min_sz >= std::max(3, n / 5)) out_ngroups = k;
+}
+
+bool RegionProcessor::within_hp_level_clean(const Eigen::MatrixXd& raw, const std::vector<int>& hp_idx,
+                                            int min_group) {
+    // Per-read mean β over valid CpG (level, not pattern).
+    std::vector<double> means;
+    for (int idx : hp_idx) {
+        double s = 0.0;
+        int c = 0;
+        for (int j = 0; j < raw.cols(); ++j) {
+            const double v = raw(idx, j);
+            if (!std::isnan(v)) {
+                s += v;
+                ++c;
+            }
+        }
+        if (c > 0) means.push_back(s / c);
+    }
+    const int n = static_cast<int>(means.size());
+    if (n < 2 * min_group) return false;
+    std::sort(means.begin(), means.end());
+    double total = 0.0, mean_all = 0.0;
+    for (double m : means) mean_all += m;
+    mean_all /= n;
+    for (double m : means) total += (m - mean_all) * (m - mean_all);
+    if (total <= 0) return false;
+    const int min_bal = std::max(min_group, n / 5);  // balanced: both groups >= max(min_group, 20%)
+    double best_within = total;
+    double best_gap = 0.0;
+    for (int s = min_bal; s <= n - min_bal; ++s) {
+        double ma = 0.0, mb = 0.0;
+        for (int i = 0; i < s; ++i) ma += means[i];
+        for (int i = s; i < n; ++i) mb += means[i];
+        ma /= s;
+        mb /= (n - s);
+        double wv = 0.0;
+        for (int i = 0; i < s; ++i) wv += (means[i] - ma) * (means[i] - ma);
+        for (int i = s; i < n; ++i) wv += (means[i] - mb) * (means[i] - mb);
+        if (wv < best_within) {
+            best_within = wv;
+            best_gap = mb - ma;
+        }
+    }
+    return best_gap > 0.15 && (1.0 - best_within / total) > 0.5;
 }
 
 void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& all_dist,

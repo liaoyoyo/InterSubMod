@@ -249,6 +249,12 @@ struct RegionResult {
     // Multi-Layer Validation Quality Metrics (NEW - Phase 5)
     double hp_ratio;                 ///< HP1/(HP1+HP2), range [0,1]
     bool potential_loh;              ///< True if HP ratio < 0.1 or > 0.9
+    // [Stage② within-HP substructure] does a single germline-HP split into >=2 clean methylation clusters?
+    // pattern-based (per-CpG distance clustering on the HP-family subset of all_dist) + silhouette + balance.
+    int within_hp1_ngroups;          ///< clean PATTERN cluster count within tumor HP1-family (distance; 1 = none)
+    int within_hp2_ngroups;          ///< clean PATTERN cluster count within tumor HP2-family
+    bool within_hp_level_bimodal;    ///< true if HP1 or HP2 has a clean balanced mean-β LEVEL bimodality (distance misses this)
+    bool within_hp_clean_multigroup; ///< true if within-HP PATTERN (distance) OR LEVEL (mean β) clean multigroup (S4/S6)
     double coverage_multiple;        ///< NumReads / diploid_coverage (auto-estimated per sample)
     double diploid_coverage_used;    ///< Actual diploid coverage baseline used for CovM (audit column)
     std::string coverage_category;   ///< "Normal", "Low", "High", "CNV_Loss", "CNV_Gain", "High_Copy"
@@ -412,6 +418,10 @@ struct RegionResult {
           n_clusters(0),
           verification_class("Noise"),
           verification_class_legacy("Noise"),
+          within_hp1_ngroups(1),
+          within_hp2_ngroups(1),
+          within_hp_level_bimodal(false),
+          within_hp_clean_multigroup(false),
           hp_ratio(0.5),
           potential_loh(false),
           coverage_multiple(1.0),
@@ -614,6 +624,22 @@ private:
     static void compute_combo_dbeta(const Eigen::MatrixXd& raw, const std::vector<ReadInfo>& read_list,
                                     int min_group, uint64_t seed, int& out_n_tested, int& out_n_sig,
                                     std::string& out_sig_pairs);
+
+    /**
+     * @brief within-HP substructure (Stage②): cluster a single HP-family's reads (sub-distance-matrix from
+     *        all_dist) and report a CLEAN cluster count (silhouette>=0.5 + balanced min cluster >= max(3,20%)).
+     * @param hp_idx read indices of one HP-family. out_ngroups = clean k (1 if no clean substructure).
+     */
+    void compute_within_hp_substructure(const Eigen::MatrixXd& all_dist, const std::vector<int>& hp_idx,
+                                        int& out_ngroups, double& out_silhouette) const;
+
+    /**
+     * @brief within-HP LEVEL substructure (Stage② level axis): clean balanced mean-β bimodality within one
+     *        HP-family. Catches uniform methylation-level sub-populations that DISTANCE clustering misses
+     *        (distance = per-CpG pattern; a level shift keeps the pattern). chr1: distance 1.2% vs level 26.1%.
+     * @return true if a clean 2-split exists (both groups >= max(3, 20%), mean gap > 0.15, var-reduction > 0.5).
+     */
+    static bool within_hp_level_clean(const Eigen::MatrixXd& raw, const std::vector<int>& hp_idx, int min_group);
 
     /**
      * @brief Write strand-specific clustering trees
