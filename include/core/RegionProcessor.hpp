@@ -170,6 +170,16 @@ struct RegionResult {
     double somatic_residual_dbeta;    ///< (tumor: mean β HP1 - mean β HP2) - (normal: ...), read-level. NaN=invalid
     double somatic_residual_dbeta_p;  ///< permutation p: shuffle T/N sample label (HP fixed), two-sided |perm|>=|obs|
     bool somatic_residual_dbeta_sig;  ///< p <= 0.05 = tumor HP-ASM 顯著異於 normal germline baseline (somatic ASM)
+    // [Δβ module stage 2] germline ASM Δβ (normal HP1f−HP2f) + fine same-hap subclone Δβ (tumor germline vs carrier)
+    double germline_asm_dbeta;     ///< normal: mean β(HP1f) − mean β(HP2f), read-level. goal1 germline ASM. NaN=invalid
+    double germline_asm_dbeta_p;   ///< perm p: shuffle HP label among normal reads, two-sided |perm|>=|obs|
+    bool germline_asm_dbeta_sig;   ///< p <= 0.05 = germline (parental) ASM 顯著 on normal baseline
+    double subclone_dbeta_hp1;     ///< tumor: mean β(HP1 germline) − mean β(HP1-1 carrier). goal3 subclone. NaN=invalid
+    double subclone_dbeta_hp1_p;   ///< perm p: shuffle germline/carrier label within tumor HP1, two-sided
+    bool subclone_dbeta_hp1_sig;   ///< p <= 0.05 = HP1 內 somatic-carrier 甲基顯著異於 germline (same-hap subclone)
+    double subclone_dbeta_hp2;     ///< tumor: mean β(HP2 germline) − mean β(HP2-1 carrier). goal3 subclone. NaN=invalid
+    double subclone_dbeta_hp2_p;   ///< perm p: shuffle germline/carrier label within tumor HP2, two-sided
+    bool subclone_dbeta_hp2_sig;   ///< p <= 0.05 = HP2 內 somatic-carrier 甲基顯著異於 germline (same-hap subclone)
 
     // LOH BED annotation (Phase C)
     bool loh_bed_overlap;        ///< Whether SNV position overlaps a LOH BED region
@@ -315,6 +325,15 @@ struct RegionResult {
           somatic_residual_dbeta(std::numeric_limits<double>::quiet_NaN()),
           somatic_residual_dbeta_p(1.0),
           somatic_residual_dbeta_sig(false),
+          germline_asm_dbeta(std::numeric_limits<double>::quiet_NaN()),
+          germline_asm_dbeta_p(1.0),
+          germline_asm_dbeta_sig(false),
+          subclone_dbeta_hp1(std::numeric_limits<double>::quiet_NaN()),
+          subclone_dbeta_hp1_p(1.0),
+          subclone_dbeta_hp1_sig(false),
+          subclone_dbeta_hp2(std::numeric_limits<double>::quiet_NaN()),
+          subclone_dbeta_hp2_p(1.0),
+          subclone_dbeta_hp2_sig(false),
           loh_bed_overlap(false),
           loh_source("none"),
           per_cpg_asm_valid(false),
@@ -509,6 +528,18 @@ private:
     static void compute_somatic_residual_dbeta_test(const Eigen::MatrixXd& raw, const std::vector<int>& hp_fam,
                                                     const std::vector<bool>& is_tumor, int n_perm, uint64_t seed,
                                                     double& out_dbeta, double& out_p, bool& out_sig);
+
+    /**
+     * @brief Generic two-group Δβ + label-shuffle permutation test (Δβ module stage 2 primitive).
+     *
+     * Δβ = mean β(group 0) − mean β(group 1), read-level (per-read mean β over valid CpG).
+     * Null: group label exchangeable → shuffle the 0/1 label among labeled reads. Two-sided |perm|>=|obs|.
+     * @param group per-read group id: 0 / 1 = the two compared groups, anything else = excluded.
+     * Used for: germline ASM (normal HP1f vs HP2f) and fine same-hap subclone (tumor germline vs somatic-carrier).
+     * Outputs dbeta / p / sig (NaN/1.0/false if either group is empty).
+     */
+    static void compute_group_dbeta_test(const Eigen::MatrixXd& raw, const std::vector<int>& group, int n_perm,
+                                         uint64_t seed, double& out_dbeta, double& out_p, bool& out_sig);
 
     /**
      * @brief Write strand-specific clustering trees
