@@ -2345,7 +2345,7 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
         sig_config.enable_permanova = true;
         sig_config.structure_config.n_permutations = 999;  // gap#5: unify with LabelTest 999 (p-floor 0.001)
         sig_config.seed = 42;  // Fixed top-level seed propagates to all components via init_analyzers()
-        sig_config.enable_dispersion = false;
+        sig_config.enable_dispersion = true;  // PERMDISP: flag dispersion-driven PERMANOVA hits (analytic F p)
         sig_config.enable_bootstrap = false;
         sig_config.run_id = vcf_filename_;
         sig_config.vcf_id = vcf_filename_;

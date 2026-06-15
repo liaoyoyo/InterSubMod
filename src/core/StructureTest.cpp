@@ -259,6 +259,61 @@ double StructureTest::anova_f_test(const std::vector<double>& values, const std:
     return (ss_between / (k - 1)) / (ss_within / (n - k));
 }
 
+namespace {
+// Regularized incomplete beta function I_x(a, b) (Numerical Recipes betacf/betai).
+// Used to evaluate the F-distribution upper-tail p-value analytically (replaces a crude
+// 3-bucket F-threshold lookup), so PERMDISP can screen dispersion-driven PERMANOVA hits.
+double betacf(double a, double b, double x) {
+    const int kMaxIt = 200;
+    const double kEps = 3.0e-12;
+    const double kFpMin = 1.0e-300;
+    const double qab = a + b, qap = a + 1.0, qam = a - 1.0;
+    double c = 1.0;
+    double d = 1.0 - qab * x / qap;
+    if (std::fabs(d) < kFpMin) d = kFpMin;
+    d = 1.0 / d;
+    double h = d;
+    for (int m = 1; m <= kMaxIt; ++m) {
+        const int m2 = 2 * m;
+        double aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+        d = 1.0 + aa * d;
+        if (std::fabs(d) < kFpMin) d = kFpMin;
+        c = 1.0 + aa / c;
+        if (std::fabs(c) < kFpMin) c = kFpMin;
+        d = 1.0 / d;
+        h *= d * c;
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+        d = 1.0 + aa * d;
+        if (std::fabs(d) < kFpMin) d = kFpMin;
+        c = 1.0 + aa / c;
+        if (std::fabs(c) < kFpMin) c = kFpMin;
+        d = 1.0 / d;
+        const double del = d * c;
+        h *= del;
+        if (std::fabs(del - 1.0) < kEps) break;
+    }
+    return h;
+}
+
+double betai(double a, double b, double x) {
+    if (x <= 0.0) return 0.0;
+    if (x >= 1.0) return 1.0;
+    const double ln_beta = std::lgamma(a + b) - std::lgamma(a) - std::lgamma(b);
+    const double bt = std::exp(ln_beta + a * std::log(x) + b * std::log(1.0 - x));
+    if (x < (a + 1.0) / (a + b + 2.0)) {
+        return bt * betacf(a, b, x) / a;
+    }
+    return 1.0 - bt * betacf(b, a, 1.0 - x) / b;
+}
+
+// Upper-tail p-value of the F-distribution: P(F_{d1,d2} >= f).
+double f_dist_sf(double f, double d1, double d2) {
+    if (f <= 0.0 || d1 <= 0.0 || d2 <= 0.0) return 1.0;
+    const double x = d2 / (d2 + d1 * f);
+    return betai(d2 / 2.0, d1 / 2.0, x);
+}
+}  // namespace
+
 DispersionResult StructureTest::check_dispersion(const Eigen::MatrixXd& dist_matrix,
                                                  const std::vector<int>& group_labels) {
     DispersionResult result;
@@ -289,7 +344,15 @@ DispersionResult StructureTest::check_dispersion(const Eigen::MatrixXd& dist_mat
     }
 
     result.anova_f = anova_f_test(all_distances, all_group_labels);
-    result.anova_p = result.anova_f > 4.0 ? 0.01 : (result.anova_f > 2.5 ? 0.05 : 0.1);
+    // Analytic F-distribution upper-tail p: df1 = (#groups with n_k>1) - 1, df2 = N_obs - #groups.
+    // all_distances/all_group_labels already exclude singleton groups (n_k<=1), so they define the
+    // ANOVA design. Replaces the prior 3-bucket F-threshold lookup with a real p-value.
+    const int n_obs = static_cast<int>(all_distances.size());
+    const std::set<int> distinct_groups(all_group_labels.begin(), all_group_labels.end());
+    const int k_groups = static_cast<int>(distinct_groups.size());
+    const int df1 = k_groups - 1;
+    const int df2 = n_obs - k_groups;
+    result.anova_p = (df1 >= 1 && df2 >= 1) ? f_dist_sf(result.anova_f, df1, df2) : 1.0;
     result.warning = (result.anova_p < config_.dispersion_alpha);
 
     return result;
