@@ -184,6 +184,32 @@ struct RegionResult {
     bool subclone_dbeta_hp2_sig;   ///< p<=0.05 AND min(germ,carrier)>=min_group (tiny-group guard). same-hap subclone
     int subclone_dbeta_hp2_n_germ;    ///< tumor HP2 germline read count
     int subclone_dbeta_hp2_n_carrier; ///< tumor HP2-1 somatic-carrier read count
+    // [Δβ module component A] alt-axis subclone: within tumor HP-family, split by the read's OWN
+    // alt_support (ALT vs REF) instead of the HP-tag carrier label — a phasing-independent somatic
+    // contrast (complements HP-tag subclone; chr1 pilot: 92% agree, alt-axis catches 81 HP-tag misses).
+    double alt_subclone_hp1_dbeta;   ///< tumor HP1-family: mean β(alt=ALT) − mean β(alt=REF). NaN=invalid
+    double alt_subclone_hp1_p;       ///< perm p: shuffle ALT/REF label within tumor HP1-family, two-sided
+    bool alt_subclone_hp1_sig;       ///< p<=0.05 AND min(nAlt,nRef)>=min_group
+    int alt_subclone_hp1_n_alt;      ///< tumor HP1-family reads with alt=ALT (carry somatic allele)
+    int alt_subclone_hp1_n_ref;      ///< tumor HP1-family reads with alt=REF
+    double alt_subclone_hp2_dbeta;   ///< tumor HP2-family: mean β(alt=ALT) − mean β(alt=REF). NaN=invalid
+    double alt_subclone_hp2_p;
+    bool alt_subclone_hp2_sig;
+    int alt_subclone_hp2_n_alt;
+    int alt_subclone_hp2_n_ref;
+    // [Δβ module component C] subclone per-CpG localization: which CpGs drive the germline-vs-carrier
+    // methylation difference (|per-CpG Δβ|>0.2 with both groups >=min_group at that CpG). chr1 pilot:
+    // ~14/70 CpG drive (subset, not single-site, not global) — localizable in 98.8% of sig regions.
+    int subclone_hp1_driver_cpg_n;      ///< # CpG driving HP1 germline-vs-carrier subclone difference
+    int subclone_hp1_driver_cpg_tested; ///< # CpG testable (both germline+carrier >=min_group at the CpG)
+    int subclone_hp2_driver_cpg_n;
+    int subclone_hp2_driver_cpg_tested;
+    // [Δβ module component B] full label-combination Δβ: enumerate (sample×HP-family×alt) groups with
+    // >=min_group reads, all pairwise read-level Δβ + perm, BH-FDR within region. Exploratory — catches
+    // differences the 4 targeted contrasts miss (e.g. cross-HP carrier, tumor-vs-normal per cell).
+    int combo_dbeta_n_tested;          ///< # pairwise combos tested this region
+    int combo_dbeta_n_sig;             ///< # combos BH-FDR(0.05) significant
+    std::string combo_dbeta_sig_pairs; ///< ';'-joined "g1~g2=Δβ(q)" for BH-sig combos (g=sample.HPfam.alt)
 
     // LOH BED annotation (Phase C)
     bool loh_bed_overlap;        ///< Whether SNV position overlaps a LOH BED region
@@ -342,6 +368,23 @@ struct RegionResult {
           subclone_dbeta_hp2_sig(false),
           subclone_dbeta_hp2_n_germ(0),
           subclone_dbeta_hp2_n_carrier(0),
+          alt_subclone_hp1_dbeta(std::numeric_limits<double>::quiet_NaN()),
+          alt_subclone_hp1_p(1.0),
+          alt_subclone_hp1_sig(false),
+          alt_subclone_hp1_n_alt(0),
+          alt_subclone_hp1_n_ref(0),
+          alt_subclone_hp2_dbeta(std::numeric_limits<double>::quiet_NaN()),
+          alt_subclone_hp2_p(1.0),
+          alt_subclone_hp2_sig(false),
+          alt_subclone_hp2_n_alt(0),
+          alt_subclone_hp2_n_ref(0),
+          subclone_hp1_driver_cpg_n(0),
+          subclone_hp1_driver_cpg_tested(0),
+          subclone_hp2_driver_cpg_n(0),
+          subclone_hp2_driver_cpg_tested(0),
+          combo_dbeta_n_tested(0),
+          combo_dbeta_n_sig(0),
+          combo_dbeta_sig_pairs(""),
           loh_bed_overlap(false),
           loh_source("none"),
           per_cpg_asm_valid(false),
@@ -553,6 +596,15 @@ private:
     static void compute_group_dbeta_test(const Eigen::MatrixXd& raw, const std::vector<int>& group, int n_perm,
                                          uint64_t seed, int min_group, double& out_dbeta, double& out_p, bool& out_sig,
                                          int& out_n0, int& out_n1);
+
+    /**
+     * @brief Full label-combination Δβ (component B): enumerate (sample×HP-family×alt) groups with
+     *        >= min_group reads, all pairwise read-level Δβ + permutation, BH-FDR within region.
+     * Outputs n_tested / n_sig and a ';'-joined "g1~g2=Δβ(q)" string of BH-significant combo pairs.
+     */
+    static void compute_combo_dbeta(const Eigen::MatrixXd& raw, const std::vector<ReadInfo>& read_list,
+                                    int min_group, uint64_t seed, int& out_n_tested, int& out_n_sig,
+                                    std::string& out_sig_pairs);
 
     /**
      * @brief Write strand-specific clustering trees

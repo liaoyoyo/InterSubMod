@@ -1096,6 +1096,71 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                                          result.subclone_dbeta_hp2, result.subclone_dbeta_hp2_p,
                                          result.subclone_dbeta_hp2_sig, result.subclone_dbeta_hp2_n_germ,
                                          result.subclone_dbeta_hp2_n_carrier);
+
+                // [Δβ component A] alt-axis subclone: within tumor HP-family, split by the read's OWN
+                // alt_support (ALT=0 / REF=1) — phasing-independent somatic contrast. HP-family membership
+                // uses the HP tag (1/1-1 = HP1-family), the group split uses alt_support.
+                auto build_alt_grp = [&](bool hp1_family) {
+                    std::vector<int> grp(read_list.size(), -1);
+                    for (size_t i = 0; i < read_list.size(); ++i) {
+                        if (!read_list[i].is_tumor) continue;
+                        const std::string& h = read_list[i].hp_tag;
+                        const bool in_family = hp1_family ? (h == "1" || h == "HP1" || h == "1-1")
+                                                          : (h == "2" || h == "HP2" || h == "2-1");
+                        if (!in_family) continue;
+                        if (read_list[i].alt_support == AltSupport::ALT) {
+                            grp[i] = 0;  // carries somatic allele
+                        } else if (read_list[i].alt_support == AltSupport::REF) {
+                            grp[i] = 1;
+                        }
+                    }
+                    return grp;
+                };
+                std::vector<int> alt1_grp = build_alt_grp(true);
+                compute_group_dbeta_test(meth_mat.raw_matrix, alt1_grp, 999, 42, kDbetaMinGroup,
+                                         result.alt_subclone_hp1_dbeta, result.alt_subclone_hp1_p,
+                                         result.alt_subclone_hp1_sig, result.alt_subclone_hp1_n_alt,
+                                         result.alt_subclone_hp1_n_ref);
+                std::vector<int> alt2_grp = build_alt_grp(false);
+                compute_group_dbeta_test(meth_mat.raw_matrix, alt2_grp, 999, 42, kDbetaMinGroup,
+                                         result.alt_subclone_hp2_dbeta, result.alt_subclone_hp2_p,
+                                         result.alt_subclone_hp2_sig, result.alt_subclone_hp2_n_alt,
+                                         result.alt_subclone_hp2_n_ref);
+
+                // [Δβ component C] subclone per-CpG localization: per CpG, tumor germline vs carrier mean β;
+                // a CpG is a "driver" if |Δβ_cpg|>0.2 with both groups >= min_group reads AT that CpG.
+                auto count_driver_cpgs = [&](int germ_fine, int carrier_fine, int& out_n, int& out_tested) {
+                    out_n = 0;
+                    out_tested = 0;
+                    const Eigen::MatrixXd& raw = meth_mat.raw_matrix;
+                    for (int c = 0; c < raw.cols(); ++c) {
+                        double gs = 0.0, cs = 0.0;
+                        int gc = 0, cc = 0;
+                        for (size_t i = 0; i < read_list.size(); ++i) {
+                            if (!read_list[i].is_tumor) continue;
+                            const double v = raw(static_cast<int>(i), c);
+                            if (std::isnan(v)) continue;
+                            if (hp_fine_labels[i] == germ_fine) {
+                                gs += v;
+                                ++gc;
+                            } else if (hp_fine_labels[i] == carrier_fine) {
+                                cs += v;
+                                ++cc;
+                            }
+                        }
+                        if (gc >= kDbetaMinGroup && cc >= kDbetaMinGroup) {
+                            ++out_tested;
+                            if (std::abs(gs / gc - cs / cc) > 0.2) ++out_n;
+                        }
+                    }
+                };
+                count_driver_cpgs(0, 1, result.subclone_hp1_driver_cpg_n, result.subclone_hp1_driver_cpg_tested);
+                count_driver_cpgs(2, 3, result.subclone_hp2_driver_cpg_n, result.subclone_hp2_driver_cpg_tested);
+
+                // [Δβ component B] full label-combination Δβ table (sample×HP-family×alt pairwise + BH-FDR).
+                compute_combo_dbeta(meth_mat.raw_matrix, read_list, kDbetaMinGroup, 42,
+                                    result.combo_dbeta_n_tested, result.combo_dbeta_n_sig,
+                                    result.combo_dbeta_sig_pairs);
             }
 
             // Per-CpG ASM and epiallele metrics (Phase E)
@@ -1189,6 +1254,16 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 "SubcloneDbeta_HP1_NCarrier,"
                 "SubcloneDbeta_HP2,SubcloneDbeta_HP2_P,SubcloneDbeta_HP2_Sig,SubcloneDbeta_HP2_NGerm,"
                 "SubcloneDbeta_HP2_NCarrier,"
+                // [Δβ component A] alt-axis subclone (within HP-family, ALT vs REF by read's own allele)
+                "AltSubcloneDbeta_HP1,AltSubcloneDbeta_HP1_P,AltSubcloneDbeta_HP1_Sig,"
+                "AltSubcloneDbeta_HP1_NAlt,AltSubcloneDbeta_HP1_NRef,"
+                "AltSubcloneDbeta_HP2,AltSubcloneDbeta_HP2_P,AltSubcloneDbeta_HP2_Sig,"
+                "AltSubcloneDbeta_HP2_NAlt,AltSubcloneDbeta_HP2_NRef,"
+                // [Δβ component C] subclone per-CpG driver localization
+                "SubcloneHP1_DriverCpG_N,SubcloneHP1_DriverCpG_Tested,"
+                "SubcloneHP2_DriverCpG_N,SubcloneHP2_DriverCpG_Tested,"
+                // [Δβ component B] full label-combination Δβ (pairwise + BH-FDR)
+                "ComboDbeta_NTested,ComboDbeta_NSig,ComboDbeta_SigPairs,"
                 // Phase C: LOH BED Annotation
                 "LOH_Bed_Overlap,LOH_Source,LOH_Bed_Annotation,"
                 // Phase D: Subclone Assignment
@@ -1340,6 +1415,19 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << (std::isnan(r.subclone_dbeta_hp2) ? "NA" : std::to_string(r.subclone_dbeta_hp2)) << ","
                  << r.subclone_dbeta_hp2_p << "," << (r.subclone_dbeta_hp2_sig ? "true" : "false") << ","
                  << r.subclone_dbeta_hp2_n_germ << "," << r.subclone_dbeta_hp2_n_carrier << ","
+                 // [Δβ component A] alt-axis subclone
+                 << (std::isnan(r.alt_subclone_hp1_dbeta) ? "NA" : std::to_string(r.alt_subclone_hp1_dbeta)) << ","
+                 << r.alt_subclone_hp1_p << "," << (r.alt_subclone_hp1_sig ? "true" : "false") << ","
+                 << r.alt_subclone_hp1_n_alt << "," << r.alt_subclone_hp1_n_ref << ","
+                 << (std::isnan(r.alt_subclone_hp2_dbeta) ? "NA" : std::to_string(r.alt_subclone_hp2_dbeta)) << ","
+                 << r.alt_subclone_hp2_p << "," << (r.alt_subclone_hp2_sig ? "true" : "false") << ","
+                 << r.alt_subclone_hp2_n_alt << "," << r.alt_subclone_hp2_n_ref << ","
+                 // [Δβ component C] subclone per-CpG driver localization
+                 << r.subclone_hp1_driver_cpg_n << "," << r.subclone_hp1_driver_cpg_tested << ","
+                 << r.subclone_hp2_driver_cpg_n << "," << r.subclone_hp2_driver_cpg_tested << ","
+                 // [Δβ component B] full label-combination Δβ (SigPairs quoted: contains ; ~ =)
+                 << r.combo_dbeta_n_tested << "," << r.combo_dbeta_n_sig << ","
+                 << "\"" << r.combo_dbeta_sig_pairs << "\","
                  // Phase C: LOH BED Annotation
                  << (r.loh_bed_overlap ? "true" : "false") << ","
                  << r.loh_source << ","
@@ -1796,6 +1884,90 @@ void RegionProcessor::compute_group_dbeta_test(const Eigen::MatrixXd& raw, const
     out_p = static_cast<double>(n_extreme) / static_cast<double>(n_perm + 1);
     // Tiny-group guard: require both groups >= min_group so a 1-read group cannot drive a "significant" subclone.
     out_sig = (out_p <= 0.05) && (std::min(out_n0, out_n1) >= min_group);
+}
+
+void RegionProcessor::compute_combo_dbeta(const Eigen::MatrixXd& raw, const std::vector<ReadInfo>& read_list,
+                                          int min_group, uint64_t seed, int& out_n_tested, int& out_n_sig,
+                                          std::string& out_sig_pairs) {
+    out_n_tested = 0;
+    out_n_sig = 0;
+    out_sig_pairs.clear();
+
+    // Build groups keyed by sample(N/T) × HP-family(HP1/HP2) × alt(REF/ALT); keep groups with >= min_group reads.
+    struct Group {
+        std::string name;
+        std::vector<int> idx;
+    };
+    std::vector<Group> groups;
+    const char* sample_name[2] = {"N", "T"};
+    const char* fam_name[2] = {"HP1", "HP2"};
+    const char* alt_name[2] = {"REF", "ALT"};
+    for (int s = 0; s < 2; ++s) {
+        for (int f = 0; f < 2; ++f) {
+            for (int a = 0; a < 2; ++a) {
+                Group g;
+                g.name = std::string(sample_name[s]) + "." + fam_name[f] + "." + alt_name[a];
+                for (size_t i = 0; i < read_list.size(); ++i) {
+                    if ((s == 1) != read_list[i].is_tumor) continue;
+                    const std::string& h = read_list[i].hp_tag;
+                    const bool in_family = (f == 0) ? (h == "1" || h == "HP1" || h == "1-1")
+                                                    : (h == "2" || h == "HP2" || h == "2-1");
+                    if (!in_family) continue;
+                    const AltSupport as = read_list[i].alt_support;
+                    if ((a == 1 && as != AltSupport::ALT) || (a == 0 && as != AltSupport::REF)) continue;
+                    g.idx.push_back(static_cast<int>(i));
+                }
+                if (static_cast<int>(g.idx.size()) >= min_group) groups.push_back(std::move(g));
+            }
+        }
+    }
+
+    // All pairwise read-level Δβ (reuse compute_group_dbeta_test).
+    const int n = static_cast<int>(raw.rows());
+    struct Pair {
+        std::string g1, g2;
+        double dbeta, p;
+    };
+    std::vector<Pair> pairs;
+    for (size_t i = 0; i < groups.size(); ++i) {
+        for (size_t j = i + 1; j < groups.size(); ++j) {
+            std::vector<int> grp(n, -1);
+            for (int k : groups[i].idx) grp[k] = 0;
+            for (int k : groups[j].idx) grp[k] = 1;
+            double db = 0, p = 1;
+            bool sig = false;
+            int n0 = 0, n1 = 0;
+            compute_group_dbeta_test(raw, grp, 999, seed, min_group, db, p, sig, n0, n1);
+            if (std::isnan(db)) continue;
+            pairs.push_back({groups[i].name, groups[j].name, db, p});
+        }
+    }
+    out_n_tested = static_cast<int>(pairs.size());
+    if (pairs.empty()) return;
+
+    // BH-FDR within region.
+    std::vector<int> order(pairs.size());
+    for (size_t i = 0; i < order.size(); ++i) order[i] = static_cast<int>(i);
+    std::sort(order.begin(), order.end(), [&](int a, int b) { return pairs[a].p < pairs[b].p; });
+    const int m = static_cast<int>(pairs.size());
+    std::vector<double> q(pairs.size());
+    double running_min = 1.0;
+    for (int rank = m; rank >= 1; --rank) {
+        const int idx = order[rank - 1];
+        running_min = std::min(running_min, pairs[idx].p * m / rank);
+        q[idx] = std::min(running_min, 1.0);
+    }
+
+    std::string out;
+    for (size_t i = 0; i < pairs.size(); ++i) {
+        if (q[i] <= 0.05) {
+            ++out_n_sig;
+            if (!out.empty()) out += ";";
+            out += pairs[i].g1 + "~" + pairs[i].g2 + "=" + std::to_string(pairs[i].dbeta) + "(" +
+                   std::to_string(q[i]) + ")";
+        }
+    }
+    out_sig_pairs = out;
 }
 
 void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& all_dist,
