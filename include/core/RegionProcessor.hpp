@@ -176,10 +176,14 @@ struct RegionResult {
     bool germline_asm_dbeta_sig;   ///< p <= 0.05 = germline (parental) ASM 顯著 on normal baseline
     double subclone_dbeta_hp1;     ///< tumor: mean β(HP1 germline) − mean β(HP1-1 carrier). goal3 subclone. NaN=invalid
     double subclone_dbeta_hp1_p;   ///< perm p: shuffle germline/carrier label within tumor HP1, two-sided
-    bool subclone_dbeta_hp1_sig;   ///< p <= 0.05 = HP1 內 somatic-carrier 甲基顯著異於 germline (same-hap subclone)
+    bool subclone_dbeta_hp1_sig;   ///< p<=0.05 AND min(germ,carrier)>=min_group (tiny-group guard). same-hap subclone
+    int subclone_dbeta_hp1_n_germ;    ///< tumor HP1 germline read count (transparency: small => fragile subclone call)
+    int subclone_dbeta_hp1_n_carrier; ///< tumor HP1-1 somatic-carrier read count
     double subclone_dbeta_hp2;     ///< tumor: mean β(HP2 germline) − mean β(HP2-1 carrier). goal3 subclone. NaN=invalid
     double subclone_dbeta_hp2_p;   ///< perm p: shuffle germline/carrier label within tumor HP2, two-sided
-    bool subclone_dbeta_hp2_sig;   ///< p <= 0.05 = HP2 內 somatic-carrier 甲基顯著異於 germline (same-hap subclone)
+    bool subclone_dbeta_hp2_sig;   ///< p<=0.05 AND min(germ,carrier)>=min_group (tiny-group guard). same-hap subclone
+    int subclone_dbeta_hp2_n_germ;    ///< tumor HP2 germline read count
+    int subclone_dbeta_hp2_n_carrier; ///< tumor HP2-1 somatic-carrier read count
 
     // LOH BED annotation (Phase C)
     bool loh_bed_overlap;        ///< Whether SNV position overlaps a LOH BED region
@@ -331,9 +335,13 @@ struct RegionResult {
           subclone_dbeta_hp1(std::numeric_limits<double>::quiet_NaN()),
           subclone_dbeta_hp1_p(1.0),
           subclone_dbeta_hp1_sig(false),
+          subclone_dbeta_hp1_n_germ(0),
+          subclone_dbeta_hp1_n_carrier(0),
           subclone_dbeta_hp2(std::numeric_limits<double>::quiet_NaN()),
           subclone_dbeta_hp2_p(1.0),
           subclone_dbeta_hp2_sig(false),
+          subclone_dbeta_hp2_n_germ(0),
+          subclone_dbeta_hp2_n_carrier(0),
           loh_bed_overlap(false),
           loh_source("none"),
           per_cpg_asm_valid(false),
@@ -524,10 +532,12 @@ private:
      * Tests somatic HP-ASM: does tumor's HP methylation difference exceed normal's germline baseline?
      * Null: tumor & normal share HP-ASM → shuffle sample(T/N) label (HP fixed). Two-sided |perm|>=|obs|.
      * Outputs dbeta / p / sig (NaN/1.0/false if any of the 4 (sample×HP) groups is empty).
+     * @param min_group sig requires every one of the 4 (sample×HP) groups to have >= min_group reads
+     *        (guards against 1-read groups driving a spurious "significant" residual).
      */
     static void compute_somatic_residual_dbeta_test(const Eigen::MatrixXd& raw, const std::vector<int>& hp_fam,
                                                     const std::vector<bool>& is_tumor, int n_perm, uint64_t seed,
-                                                    double& out_dbeta, double& out_p, bool& out_sig);
+                                                    int min_group, double& out_dbeta, double& out_p, bool& out_sig);
 
     /**
      * @brief Generic two-group Δβ + label-shuffle permutation test (Δβ module stage 2 primitive).
@@ -536,10 +546,13 @@ private:
      * Null: group label exchangeable → shuffle the 0/1 label among labeled reads. Two-sided |perm|>=|obs|.
      * @param group per-read group id: 0 / 1 = the two compared groups, anything else = excluded.
      * Used for: germline ASM (normal HP1f vs HP2f) and fine same-hap subclone (tumor germline vs somatic-carrier).
-     * Outputs dbeta / p / sig (NaN/1.0/false if either group is empty).
+     * @param min_group sig requires min(group0_n, group1_n) >= min_group (guards 1-read groups; subclone tiny-group
+     *        artifact: ~25% of raw subclone "sig" had a group <3 reads). out_n0/out_n1 report the two group sizes.
+     * Outputs dbeta / p / sig (NaN/1.0/false if either group is empty) + the two group read counts.
      */
     static void compute_group_dbeta_test(const Eigen::MatrixXd& raw, const std::vector<int>& group, int n_perm,
-                                         uint64_t seed, double& out_dbeta, double& out_p, bool& out_sig);
+                                         uint64_t seed, int min_group, double& out_dbeta, double& out_p, bool& out_sig,
+                                         int& out_n0, int& out_n1);
 
     /**
      * @brief Write strand-specific clustering trees

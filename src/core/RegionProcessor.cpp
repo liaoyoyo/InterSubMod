@@ -806,8 +806,10 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
         result.num_reverse_reads = agg.num_reverse_reads;
 
         // Fetch and merge normal reads (if normal BAM is provided)
-        // Normal reads: use same region bounds, skip alt-support filter,
-        // contribute methylation baseline but have hp_tag="0" (unphased).
+        // Normal reads: use same region bounds, skip alt-support filter. They KEEP their real
+        // germline HP tag from the normal BAM (NOT forced to "0") — the germline-baseline
+        // subtraction (germline ASM Δβ + tumor-vs-normal HP residual) depends on this; empirically
+        // Normal_HP_Valid=true in ~96% of regions. Do NOT "fix" normal HP to "0".
         std::vector<bam1_t*> normal_reads;
         if (normal_reader != nullptr) {
             normal_reads = normal_reader->fetch_reads(chr_name, region_start, region_end);
@@ -1033,9 +1035,11 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                 }
 
                 // [Δβ module] read-level somatic residual Δβ + permutation test (#3 hp_residual 修法)
+                // min_group=3: a (sample×HP) or (germline/carrier) cell must have >=3 reads for sig (tiny-group guard).
+                const int kDbetaMinGroup = 3;
                 compute_somatic_residual_dbeta_test(meth_mat.raw_matrix, hp_merged_labels, is_tumor_mask, 999, 42,
-                                                    result.somatic_residual_dbeta, result.somatic_residual_dbeta_p,
-                                                    result.somatic_residual_dbeta_sig);
+                                                    kDbetaMinGroup, result.somatic_residual_dbeta,
+                                                    result.somatic_residual_dbeta_p, result.somatic_residual_dbeta_sig);
 
                 // [Δβ module stage 2] germline ASM Δβ (normal) + fine same-hap subclone Δβ (tumor germline vs carrier).
                 // Fine HP labels: 0=HP1 germline, 1=HP1-1 carrier, 2=HP2 germline, 3=HP2-1 carrier, -1=unlabeled.
@@ -1058,8 +1062,10 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                 for (size_t i = 0; i < read_list.size(); ++i) {
                     if (!read_list[i].is_tumor && hp_merged_labels[i] >= 0) germ_grp[i] = hp_merged_labels[i];
                 }
-                compute_group_dbeta_test(meth_mat.raw_matrix, germ_grp, 999, 42, result.germline_asm_dbeta,
-                                         result.germline_asm_dbeta_p, result.germline_asm_dbeta_sig);
+                int germ_n0 = 0, germ_n1 = 0;  // normal HP1/HP2 counts also in Normal_HP1/HP2; throwaway here
+                compute_group_dbeta_test(meth_mat.raw_matrix, germ_grp, 999, 42, kDbetaMinGroup,
+                                         result.germline_asm_dbeta, result.germline_asm_dbeta_p,
+                                         result.germline_asm_dbeta_sig, germ_n0, germ_n1);
 
                 // Fine subclone HP1 Δβ (goal 3): tumor HP1 germline vs HP1-1 somatic-carrier (same-haplotype subclone).
                 std::vector<int> sub1_grp(read_list.size(), -1);
@@ -1071,8 +1077,10 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                         sub1_grp[i] = 1;
                     }
                 }
-                compute_group_dbeta_test(meth_mat.raw_matrix, sub1_grp, 999, 42, result.subclone_dbeta_hp1,
-                                         result.subclone_dbeta_hp1_p, result.subclone_dbeta_hp1_sig);
+                compute_group_dbeta_test(meth_mat.raw_matrix, sub1_grp, 999, 42, kDbetaMinGroup,
+                                         result.subclone_dbeta_hp1, result.subclone_dbeta_hp1_p,
+                                         result.subclone_dbeta_hp1_sig, result.subclone_dbeta_hp1_n_germ,
+                                         result.subclone_dbeta_hp1_n_carrier);
 
                 // Fine subclone HP2 Δβ (goal 3): tumor HP2 germline vs HP2-1 somatic-carrier (same-haplotype subclone).
                 std::vector<int> sub2_grp(read_list.size(), -1);
@@ -1084,8 +1092,10 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                         sub2_grp[i] = 1;
                     }
                 }
-                compute_group_dbeta_test(meth_mat.raw_matrix, sub2_grp, 999, 42, result.subclone_dbeta_hp2,
-                                         result.subclone_dbeta_hp2_p, result.subclone_dbeta_hp2_sig);
+                compute_group_dbeta_test(meth_mat.raw_matrix, sub2_grp, 999, 42, kDbetaMinGroup,
+                                         result.subclone_dbeta_hp2, result.subclone_dbeta_hp2_p,
+                                         result.subclone_dbeta_hp2_sig, result.subclone_dbeta_hp2_n_germ,
+                                         result.subclone_dbeta_hp2_n_carrier);
             }
 
             // Per-CpG ASM and epiallele metrics (Phase E)
@@ -1175,8 +1185,10 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 "Tumor_HP_Signed_Delta,Normal_HP_Signed_Delta,HP_Signed_Residual,Combined_HP_Signed_Delta,"
                 "SomaticResidualDbeta,SomaticResidualDbeta_P,SomaticResidualDbeta_Sig,"
                 "GermlineAsmDbeta,GermlineAsmDbeta_P,GermlineAsmDbeta_Sig,"
-                "SubcloneDbeta_HP1,SubcloneDbeta_HP1_P,SubcloneDbeta_HP1_Sig,"
-                "SubcloneDbeta_HP2,SubcloneDbeta_HP2_P,SubcloneDbeta_HP2_Sig,"
+                "SubcloneDbeta_HP1,SubcloneDbeta_HP1_P,SubcloneDbeta_HP1_Sig,SubcloneDbeta_HP1_NGerm,"
+                "SubcloneDbeta_HP1_NCarrier,"
+                "SubcloneDbeta_HP2,SubcloneDbeta_HP2_P,SubcloneDbeta_HP2_Sig,SubcloneDbeta_HP2_NGerm,"
+                "SubcloneDbeta_HP2_NCarrier,"
                 // Phase C: LOH BED Annotation
                 "LOH_Bed_Overlap,LOH_Source,LOH_Bed_Annotation,"
                 // Phase D: Subclone Assignment
@@ -1324,8 +1336,10 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << r.germline_asm_dbeta_p << "," << (r.germline_asm_dbeta_sig ? "true" : "false") << ","
                  << (std::isnan(r.subclone_dbeta_hp1) ? "NA" : std::to_string(r.subclone_dbeta_hp1)) << ","
                  << r.subclone_dbeta_hp1_p << "," << (r.subclone_dbeta_hp1_sig ? "true" : "false") << ","
+                 << r.subclone_dbeta_hp1_n_germ << "," << r.subclone_dbeta_hp1_n_carrier << ","
                  << (std::isnan(r.subclone_dbeta_hp2) ? "NA" : std::to_string(r.subclone_dbeta_hp2)) << ","
                  << r.subclone_dbeta_hp2_p << "," << (r.subclone_dbeta_hp2_sig ? "true" : "false") << ","
+                 << r.subclone_dbeta_hp2_n_germ << "," << r.subclone_dbeta_hp2_n_carrier << ","
                  // Phase C: LOH BED Annotation
                  << (r.loh_bed_overlap ? "true" : "false") << ","
                  << r.loh_source << ","
@@ -1631,8 +1645,8 @@ double RegionProcessor::compute_hp_auc(const Eigen::MatrixXd& dist, const std::v
 void RegionProcessor::compute_somatic_residual_dbeta_test(const Eigen::MatrixXd& raw,
                                                           const std::vector<int>& hp_fam,
                                                           const std::vector<bool>& is_tumor, int n_perm,
-                                                          uint64_t seed, double& out_dbeta, double& out_p,
-                                                          bool& out_sig) {
+                                                          uint64_t seed, int min_group, double& out_dbeta,
+                                                          double& out_p, bool& out_sig) {
     out_dbeta = std::numeric_limits<double>::quiet_NaN();
     out_p = 1.0;
     out_sig = false;
@@ -1695,6 +1709,16 @@ void RegionProcessor::compute_somatic_residual_dbeta_test(const Eigen::MatrixXd&
     if (std::isnan(obs)) return;
     out_dbeta = obs;
 
+    // Observed counts of the 4 (sample×HP) cells, for the tiny-group guard on sig.
+    int g_t1 = 0, g_t2 = 0, g_n1 = 0, g_n2 = 0;
+    for (size_t k = 0; k < mval.size(); ++k) {
+        if (tum[k]) {
+            (hp[k] == 0 ? g_t1 : g_t2)++;
+        } else {
+            (hp[k] == 0 ? g_n1 : g_n2)++;
+        }
+    }
+
     // Permutation: shuffle sample(T/N) label among HP-labeled reads (HP fixed). Null = tumor/normal share HP-ASM.
     std::mt19937_64 rng(seed);
     std::vector<char> perm = tum;
@@ -1705,14 +1729,18 @@ void RegionProcessor::compute_somatic_residual_dbeta_test(const Eigen::MatrixXd&
         if (!std::isnan(r) && std::abs(r) >= std::abs(obs)) ++n_extreme;
     }
     out_p = static_cast<double>(n_extreme) / static_cast<double>(n_perm + 1);
-    out_sig = out_p <= 0.05;
+    // Tiny-group guard: every (sample×HP) cell must have >= min_group reads.
+    out_sig = (out_p <= 0.05) && (std::min(std::min(g_t1, g_t2), std::min(g_n1, g_n2)) >= min_group);
 }
 
 void RegionProcessor::compute_group_dbeta_test(const Eigen::MatrixXd& raw, const std::vector<int>& group, int n_perm,
-                                               uint64_t seed, double& out_dbeta, double& out_p, bool& out_sig) {
+                                               uint64_t seed, int min_group, double& out_dbeta, double& out_p,
+                                               bool& out_sig, int& out_n0, int& out_n1) {
     out_dbeta = std::numeric_limits<double>::quiet_NaN();
     out_p = 1.0;
     out_sig = false;
+    out_n0 = 0;
+    out_n1 = 0;
     const int n = static_cast<int>(raw.rows());
 
     // Collect group-labeled reads (0/1) with valid per-read mean β. read-level → permutation O(reads)/shuffle.
@@ -1732,6 +1760,7 @@ void RegionProcessor::compute_group_dbeta_test(const Eigen::MatrixXd& raw, const
         if (c == 0) continue;
         mval.push_back(s / c);
         grp.push_back(static_cast<char>(group[i]));
+        (group[i] == 0 ? out_n0 : out_n1)++;
     }
 
     // Δβ = mean β(group 0) − mean β(group 1).
@@ -1765,7 +1794,8 @@ void RegionProcessor::compute_group_dbeta_test(const Eigen::MatrixXd& raw, const
         if (!std::isnan(r) && std::abs(r) >= std::abs(obs)) ++n_extreme;
     }
     out_p = static_cast<double>(n_extreme) / static_cast<double>(n_perm + 1);
-    out_sig = out_p <= 0.05;
+    // Tiny-group guard: require both groups >= min_group so a 1-read group cannot drive a "significant" subclone.
+    out_sig = (out_p <= 0.05) && (std::min(out_n0, out_n1) >= min_group);
 }
 
 void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& all_dist,
@@ -1921,7 +1951,7 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
         sig_config.enable_global_test = true;
         sig_config.enable_local_test = true;
         sig_config.enable_permanova = true;
-        sig_config.structure_config.n_permutations = 99;
+        sig_config.structure_config.n_permutations = 999;  // gap#5: unify with LabelTest 999 (p-floor 0.001)
         sig_config.seed = 42;  // Fixed top-level seed propagates to all components via init_analyzers()
         sig_config.enable_dispersion = false;
         sig_config.enable_bootstrap = false;

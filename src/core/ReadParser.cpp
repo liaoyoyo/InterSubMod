@@ -4,6 +4,8 @@
 
 #include <limits>
 
+#include "utils/Logger.hpp"
+
 namespace InterSubMod {
 
 ReadParser::ReadParser(const ReadFilterConfig& config) : config_(config) {
@@ -137,7 +139,13 @@ ReadInfo ReadParser::parse(const bam1_t* b, int read_id, bool is_tumor, const So
                 case 11: hp_raw = "1-1"; break;
                 case 21: hp_raw = "2-1"; break;
                 case 33: hp_raw = "3";   break;
-                default: hp_raw = std::to_string(hp_int); break;
+                default:
+                    // Unrecognized HP integer: kept verbatim but it maps to HP_OTHER downstream and is
+                    // silently dropped from all HP grouping. Surface it so unexpected phasing tags are visible.
+                    hp_raw = std::to_string(hp_int);
+                    LOG_DEBUG("ReadParser: unrecognized HP integer tag " + std::to_string(hp_int) +
+                              " (expected 1/2/11/21/33); read excluded from HP grouping");
+                    break;
             }
         }
     }
