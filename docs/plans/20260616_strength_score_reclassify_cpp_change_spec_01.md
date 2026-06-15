@@ -85,6 +85,12 @@ Noise_Uncorrelated: 其餘
 - **驗證（合理正確）**：① **C++ StrengthScore = Python 獨立重算 0/2624 不一致**（公式實作正確）② ctest **221/221** ③ regression 雙守護 **PASS**（StrengthScore/Grade 非 golden 9 欄，純加欄不動既有結果）④ StrengthGrade chr1 分佈 A53/B370/C849/D621/E731 合理（梯度，非飽和如 HeuristicScore）。
 - **git**：feat/summary-nreadsvalid 累積（不污染 develop）；commit 後 feat 領先 develop +1 C++。
 
+**Stage ④ 新 VerificationClass 判別（2026-06-16, 簡版完成）— 改動合理正確確認**：
+- **改動**：`process_single_region` try-block 末（Δβ+Per-CpG 後，所有證據 final）override verification_class，原值存 verification_class_legacy（+1 欄）。判別=用戶哲學「任一結構證據→保留」：valid = Δβ_sig OR HP_AUC>=0.7 OR cluster_match(legacy Strong/Subclone) OR (Potential_LOH+結構)；細類 Strong/LabelShift/StructureNoLabel/LOH-Structure；noise 子型 Uniform/Chaotic/Uncorrelated（Epipoly+PairwiseMeanDist；NME 飽和不用）。**within-HP multigroup + SEQC2-LOH 簡版略過（Stage②③ 補）**。
+- **為何 override 而非改 SignificanceAnalyzer**：legacy VC 在 SignificanceAnalyzer(:872 呼叫) 算，早於 Δβ(:897 後)→Δβ 不可用，故末段 override（同 strength 修法）。
+- **驗證（合理正確）**：① regression diff **只第 9 欄 VerificationClass 變**(前 8 欄 RegionID/NumReads/NumCpGs/GlobalP/CramersV/PassedGating/ClusterPermanovaValid/Significant byte-identical；Weak→LabelShift/Noise→Noise_Uniform 皆預期) ② **--update-golden**(新 VC 為基準, SKIP+MAX_DIST 各 2624 @fd856e7) + 重跑雙守護 **PASS** ③ ctest **221/221** ④ 全基因組：**救回 3321/8180=41%**(簡版; 全版 46.6%), **legacy Strong→非valid FP=0**(純加識別無副作用) ⑤ 新分佈 Strong22310/LabelShift2541/StructureNoLabel404/LOH-Structure376/Noise{Uniform1559/Chaotic829/Uncorrelated2471}。
+- **git**：feat 累積；commit 含更新 golden(text TSV 非 binary)。
+
 ## 7. 風險 / 決策
 - 🔴 改 VerificationClass = golden 欄大量變動 → **必更新 golden + 全基因組重驗**（pilot 已證 0 FP，但須 fresh 驗）
 - within-HP pattern clustering 增 compute（per-region 多一次 HP-subset clustering）→ 須計時（預期 <2x，perm 非瓶頸）

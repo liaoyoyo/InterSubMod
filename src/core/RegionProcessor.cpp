@@ -1211,6 +1211,42 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
             bam_destroy1(r);
         }
 
+        // [Stage④ 新 VerificationClass] override with evidence-based reclassification (user philosophy:
+        // retain if ANY structure). Computed HERE because Δβ/HP-AUC/Epipoly are only final after the HP +
+        // Per-CpG blocks (the legacy 2x2 in SignificanceAnalyzer ran earlier, before Δβ). Original kept in
+        // verification_class_legacy. within-HP multigroup + SEQC2-LOH deferred to Stage②③.
+        {
+            result.verification_class_legacy = result.verification_class;
+            const bool dbeta_sig = result.germline_asm_dbeta_sig || result.subclone_dbeta_hp1_sig ||
+                                   result.subclone_dbeta_hp2_sig || result.somatic_residual_dbeta_sig ||
+                                   result.alt_subclone_hp1_sig || result.alt_subclone_hp2_sig;
+            const bool hp_auc_struct = result.hp_auc_all >= 0.7;
+            const std::string& lvc = result.verification_class_legacy;
+            const bool cluster_match = (lvc == "Strong" || lvc == "Subclone");  // GlobalTest matched a label
+            const bool loh_struct = result.potential_loh && (hp_auc_struct || dbeta_sig);
+            if (dbeta_sig || hp_auc_struct || cluster_match || loh_struct) {
+                if (cluster_match) {
+                    result.verification_class = "Strong";
+                } else if (loh_struct) {
+                    result.verification_class = "LOH-Structure";
+                } else if (dbeta_sig) {
+                    result.verification_class = "LabelShift";  // Δβ mean-shift signal (dominant rescue)
+                } else {
+                    result.verification_class = "StructureNoLabel";  // HP-AUC structure, no label match
+                }
+            } else {
+                const double ep = result.per_cpg_epipoly_hp1;
+                const double pw = result.pairwise_mean_distance;
+                if ((pw < 0.15) || (!std::isnan(ep) && ep < 0.2)) {
+                    result.verification_class = "Noise_Uniform";  // 甲基均勻, 無可分
+                } else if ((!std::isnan(ep) && ep > 0.5) || (pw > 0.35)) {
+                    result.verification_class = "Noise_Chaotic";  // 高熵混亂無乾淨群
+                } else {
+                    result.verification_class = "Noise_Uncorrelated";
+                }
+            }
+        }
+
         result.success = true;
     } catch (const std::exception& e) {
         result.success = false;
@@ -1254,7 +1290,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 // Stage 4: Unassigned Affinity
                 "UnassignedAffinity,UnassignedAffinityP,UnassignedDir,NHP3,NHP0,"
                 // Summary
-                "DominantLabel,Stability,VerificationClass,"
+                "DominantLabel,Stability,VerificationClass,VerificationClass_Legacy,"
                 // Multi-Layer Validation Quality Assessment (NEW)
                 "HP_Ratio,Potential_LOH,Coverage_Multiple,Diploid_Coverage_Used,Coverage_Category,LOH_Subtype,"
                 "Quality_Score,Quality_Tier,"
@@ -1390,7 +1426,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  // Summary
                  << r.dominant_label << ","
                  << std::fixed << std::setprecision(4) << r.cluster_stability << ","
-                 << r.verification_class << ","
+                 << r.verification_class << "," << r.verification_class_legacy << ","
                  // Multi-Layer Validation Quality Assessment (NEW)
                  << std::fixed << std::setprecision(4) << r.hp_ratio << ","
                  << (r.potential_loh ? "true" : "false") << ","

@@ -243,7 +243,8 @@ struct RegionResult {
     int n_clusters;              ///< Number of clusters found
 
     // Bidirectional verification classification (NEW)
-    std::string verification_class;  ///< "Strong", "Subclone", "Weak", or "Noise"
+    std::string verification_class;  ///< [Stage④ overridden] Strong/LabelShift/StructureNoLabel/LOH-Structure/Noise_{Uniform,Chaotic,Uncorrelated}
+    std::string verification_class_legacy;  ///< original 2x2(label×cluster) class (Strong/Subclone/Weak/Noise) for audit
 
     // Multi-Layer Validation Quality Metrics (NEW - Phase 5)
     double hp_ratio;                 ///< HP1/(HP1+HP2), range [0,1]
@@ -410,6 +411,7 @@ struct RegionResult {
           has_outlier_cluster(false),
           n_clusters(0),
           verification_class("Noise"),
+          verification_class_legacy("Noise"),
           hp_ratio(0.5),
           potential_loh(false),
           coverage_multiple(1.0),
