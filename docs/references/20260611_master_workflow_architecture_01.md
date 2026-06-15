@@ -104,6 +104,22 @@ context 載入        plan mode(調查→         (§3 決策表 A/B)         su
 | **跨 session 污染**（commit 落錯 branch）| **不可在另一 session live 時 reset/rebase**；等持續安靜(others==0 + tip 跨區間不變 + 無 index.lock)→ 隔離 worktree cherry-pick stray 回原 branch → `git reset --mixed` 還原自己 branch（2026-06-10 實證流程）|
 | **push / merge 回主線** | **永遠需用戶確認**，不自動 |
 
+### E. 分支角色與生命週期（2026-06-15 audit 落地 — 補政策空白；prefix = 角色）
+
+| 前綴 / 名 | 角色 | 生命週期 / 規則 |
+|----------|------|----------------|
+| **`main`** | **release-snapshot**（非 working trunk）| 經 GitHub PR-merge 更新 → 與 develop **真分岔**（main 有獨立 PR-merge commit）；`develop→main` 需謹慎 merge + 用戶確認；落後 develop 數百 commit 是**預期**非 divergence 警訊 |
+| **`develop`** | **整合 trunk**（de-facto current）| feature/research branch 完成即小批 merge 回此；最新整合態看這裡，非 main |
+| **`research/<主軸>-<YYYYMM>`** | **多週主軸研究**（如 research/subclonal-reconstruction-202606）| 長壽；**定期 pull develop 防分岔擴大** + 階段落段小批 PR 回 develop；**只放該主軸研究 commit** |
+| **`chore/<topic>`** | **harness / infra / 治理**（hook/skill/script/docs governance）| 🔴 harness 工作**起手就開 chore/，勿混進 research/**（2026-06-15 audit D1-4：harness-audit/output-cleanup 曾混入 research branch）|
+| `docs/<topic>` · `feat/*` · `fix/*` · `refactor/*` | 文件 / 功能 / 修錯 / 重構 | merged 回 develop 後 → 清理候選 |
+| **`claude/*` · `worktree-*` · `+` 標記者** | **並行 session 的 worktree branch** | 🔴 **active，勿刪**（git 也擋刪 worktree-checked-out branch）|
+| `archive/*` | 凍結快照 | 永久保留參照 |
+
+**清理規則（Hard Gate）**：`git branch --merged develop` 列出的、**非 worktree-active、非 main/master/develop、非當前研究起點**的 stale branch → 可 `git branch -d`（merged 安全）；**刪除永遠需用戶逐一確認**（§1 Hard Gate）。
+
+**分岔防護**：research/* 對 develop 的 ahead/behind 用 `git rev-list --count develop..<branch>` / `<branch>..develop` 週期檢查；behind 累積 → pull develop；ahead 累積 → 小批 PR（皆需用戶確認 merge/push）。
+
 ---
 
 ## §4 鉤子與機制（把 §3 從「建議」變「機械」）
