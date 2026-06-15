@@ -77,6 +77,14 @@ Noise_Uncorrelated: 其餘
 6. build + ctest + **regression（VerificationClass/Significant 會變 → --update-golden 並文件記錄理由）** + 全基因組重驗新分佈
 7. evidence_ledger + memory
 
+## 7.5 實作驗證 log（分階段）
+
+**Stage ① 強度分數（2026-06-16, 完成）— 改動合理正確確認**：
+- **改動**：RegionProcessor `process_single_region` HP block 後加 strength_score 計算（hpp +2 欄 strength_score/strength_grade，emit +2 欄 StrengthScore/StrengthGrade）。保留 HeuristicScore（標 LEGACY）。
+- **🐛 修正的 bug**：初版把計算放 `perform_clustering_and_significance`(:872 呼叫)，但 Δβ 在 process_single_region :897 之後才算 → germline_asm_dbeta=NaN → eff 項漏（C++ vs Python diff≈0.25×eff）。**移到 HP block 後**修正。
+- **驗證（合理正確）**：① **C++ StrengthScore = Python 獨立重算 0/2624 不一致**（公式實作正確）② ctest **221/221** ③ regression 雙守護 **PASS**（StrengthScore/Grade 非 golden 9 欄，純加欄不動既有結果）④ StrengthGrade chr1 分佈 A53/B370/C849/D621/E731 合理（梯度，非飽和如 HeuristicScore）。
+- **git**：feat/summary-nreadsvalid 累積（不污染 develop）；commit 後 feat 領先 develop +1 C++。
+
 ## 7. 風險 / 決策
 - 🔴 改 VerificationClass = golden 欄大量變動 → **必更新 golden + 全基因組重驗**（pilot 已證 0 FP，但須 fresh 驗）
 - within-HP pattern clustering 增 compute（per-region 多一次 HP-subset clustering）→ 須計時（預期 <2x，perm 非瓶頸）

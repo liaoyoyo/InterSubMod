@@ -1163,6 +1163,25 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                                     result.combo_dbeta_sig_pairs);
             }
 
+            // [Strength score] continuous association strength (replaces saturated HeuristicScore for ranking).
+            // Computed here (after perform_clustering_and_significance set hp_auc/global_p/cramers_v AND the HP
+            // block set germline_asm_dbeta) so all 4 inputs are final. 0.30*struct + 0.25*eff + 0.25*assoc + 0.20*sig.
+            {
+                auto clamp01 = [](double v) { return std::max(0.0, std::min(1.0, v)); };
+                const double struct_s = clamp01((result.hp_auc_all - 0.5) / 0.5);  // -1 default -> 0
+                const double eff_s =
+                    std::isnan(result.germline_asm_dbeta) ? 0.0 : clamp01(std::abs(result.germline_asm_dbeta) / 0.3);
+                const double assoc_s = result.cramers_v;
+                const double gp = std::max(result.global_p_value, 1e-6);  // GlobalP==0 is most significant
+                const double sig_s = clamp01(-std::log10(gp) / 4.0);
+                result.strength_score = 0.30 * struct_s + 0.25 * eff_s + 0.25 * assoc_s + 0.20 * sig_s;
+                result.strength_grade = result.strength_score >= 0.65   ? "A"
+                                        : result.strength_score >= 0.50 ? "B"
+                                        : result.strength_score >= 0.35 ? "C"
+                                        : result.strength_score >= 0.20 ? "D"
+                                                                        : "E";
+            }
+
             // Per-CpG ASM and epiallele metrics (Phase E)
             // Compute after distance matrix and HP analysis are done.
             // Uses raw_matrix + binary_matrix + HP labels from read_list.
@@ -1218,7 +1237,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
     // Header (updated with Multi-Stage HP verification and Quality Assessment columns)
     csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,NReadsValid,HP_AUC_Normal,HP_AUC_Tumor,HP_AUC_All,GlobalP,CramersV,"
                 "GlobalP_HPFamily,CramersV_HPFamily,GlobalP_HPFine,CramersV_HPFine,HPFine_NGroups_CF,"
-                "HeuristicScore,PassedGating,"
+                "HeuristicScore,StrengthScore,StrengthGrade,PassedGating,"
                 "PairwiseMeanDist,PairwiseMedianDist,"
                 "ClusterPermanovaF,ClusterPermanovaP,ClusterPermanovaValid,ClusterDispersionP,ClusterDispersionWarn,"
                 // Stage 1: HP Merged
@@ -1323,6 +1342,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << std::fixed << std::setprecision(4) << r.global_hp_fine_v << ","
                  << r.global_hp_fine_n_groups << ","
                  << std::fixed << std::setprecision(4) << r.heuristic_score << ","
+                 << std::fixed << std::setprecision(4) << r.strength_score << "," << r.strength_grade << ","
                  << (r.passed_gating ? "true" : "false") << ","
                  << std::fixed << std::setprecision(4) << r.pairwise_mean_distance << ","
                  << std::fixed << std::setprecision(4) << r.pairwise_median_distance << ","

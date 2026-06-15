@@ -67,7 +67,12 @@ struct RegionResult {
     int global_hp_fine_n_groups; ///< Number of valid HP fine-grained groups
     double local_best_p_value;   ///< Best cluster's local p-value
     int local_best_cluster;      ///< Best cluster ID
-    double heuristic_score;      ///< Combined heuristic score [0-1]
+    double heuristic_score;      ///< Combined heuristic score [0-1] (LEGACY — saturated, not for ranking)
+    // [Strength score] continuous association strength for ranking/grading (replaces saturated HeuristicScore).
+    // 0.30*struct(HP-AUC) + 0.25*eff(|Δβ|) + 0.25*assoc(CramersV) + 0.20*sig(-log10 GlobalP). Validated:
+    // median 0.344/max 0.975, Top500 = 498 Strong (concords), finds 31 strong regions VC missed.
+    double strength_score;       ///< Association strength [0,1], continuous ranking
+    std::string strength_grade;  ///< 5-level: A>=0.65 / B>=0.5 / C>=0.35 / D>=0.2 / E<0.2
     bool passed_gating;          ///< Whether passed gating (global_p <= 0.1)
     double cluster_permanova_f;      ///< Cluster-based PERMANOVA pseudo-F
     double cluster_permanova_p;      ///< Cluster-based PERMANOVA p-value
@@ -279,6 +284,8 @@ struct RegionResult {
           local_best_p_value(1.0),
           local_best_cluster(-1),
           heuristic_score(0.0),
+          strength_score(0.0),
+          strength_grade("E"),
           passed_gating(false),
           cluster_permanova_f(0.0),
           cluster_permanova_p(1.0),
