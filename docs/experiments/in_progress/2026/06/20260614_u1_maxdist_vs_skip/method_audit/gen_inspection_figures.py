@@ -176,9 +176,10 @@ def gen_figure(pos, label, srow):
         return v if v not in ("", None) else "NA"
     title = (
         f"[{label}] chr1:{pos}  |  NumReads={gv('NumReads')} NReadsValid={gv('NReadsValid')}  "
-        f"Tumor HP1/HP2={gv('Tumor_HP1')}/{gv('Tumor_HP2')}  Normal HP1/HP2={gv('Normal_HP1')}/{gv('Normal_HP2')}\n"
+        f"Tumor HP1/HP2={gv('Tumor_HP1')}/{gv('Tumor_HP2')}  Normal HP1/HP2={gv('Normal_HP1')}/{gv('Normal_HP2')}  "
+        f"HP-AUC normal/tumor={gv('HP_AUC_Normal')}/{gv('HP_AUC_Tumor')}\n"
         f"CramersV={gv('CramersV')} GlobalP={gv('GlobalP')} PERMANOVA F={gv('ClusterPermanovaF')} p={gv('ClusterPermanovaP')}  "
-        f"VC={gv('VerificationClass')}  |  "
+        f"PassGate={gv('PassedGating')}  >>> VC={gv('VerificationClass')} <<<  |  "
         f"germΔβ={gv('GermlineAsmDbeta')}({gv('GermlineAsmDbeta_Sig')}) "
         f"subHP1={gv('SubcloneDbeta_HP1')}({gv('SubcloneDbeta_HP1_Sig')}) "
         f"subHP2={gv('SubcloneDbeta_HP2')}({gv('SubcloneDbeta_HP2_Sig')}) "
