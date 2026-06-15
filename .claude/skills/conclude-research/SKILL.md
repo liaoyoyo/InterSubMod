@@ -228,6 +228,14 @@ last_relevant: {today}
 **全自動模式**：DECLARE 7 字逐項 self-check；任一不過 → 暫停回報用戶；7 字全過 → 進 Phase B propagate。
 **互動模式**：列 7 字答覆給用戶，用戶 ack 後進 propagate。
 
+## Provenance 收尾（§13-C Layer C — 2026-06-15 audit D6-3 wired）
+
+> 報告含任何 metric（AUC / p / % / Δ / ≥2 位小數）→ 收尾必跑 provenance 溯源，否則「每個數字能 grep 到嗎」無紀錄依據。
+
+- **撰寫前（首選，§13-A Layer A）**：資料密集報告**用 `scripts/fill_report.py <template> <data.json> -o <out>` 注入**，缺 key 直接 refuse — 物理上無法捏造，勝過手打 + 事後抓。
+- **收尾時（§13-C Layer C）**：`python3 scripts/number_provenance.py audit <report_path>` → 產「metric→檔案:行+狀態」表貼進報告 provenance footer；任一 metric 無來源 → 回填真值或刪該數字（**不留無源數字**）。
+- validated / PI / handoff 路徑強制；in_progress 建議。與 Phase A Step 4「撰寫報告」綁定（寫完即 audit）。
+
 ## 注意事項
 
 1. **不重寫報告**：若報告已存在，只更新 manifest 和 propagate；不覆蓋已有報告

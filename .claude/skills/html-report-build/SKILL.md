@@ -296,6 +296,7 @@ HTML 報告（特別 standalone PI 終版）必繼承 `InterSubMod/.claude/skill
 - **§4 DAG**: standalone 模式必嵌 SVG DAG 圖（mermaid CDN 或 inline SVG）
 - **§7 Pre-registration**: validated 報告必含「Pre-registration 對照表」欄
 - **§8.4 Provenance**: standalone 報告必有 footer 含 commit hash + cycle_id + 生成時間
+  - **數字溯源（§13-C，2026-06-15 audit D6-3）**：含 metric 的 standalone/validated 報告，發佈前跑 `python3 scripts/number_provenance.py audit <report.html>` 把「metric→來源」表納入 footer；commit hash 用 `bash scripts/provenance_stamp.sh` 取（不手打 branch/commit）。資料密集表格優先用 `scripts/fill_report.py` template+data 注入（§13-A，缺值 refuse）而非手填。
 
 **最小可用子集**:
 - standalone PI 終版: §2 + §3 + §4 + §7 + §8.4 全跑

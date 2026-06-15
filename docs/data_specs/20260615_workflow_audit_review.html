@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>工作流稽核 — 最近研究流程/資料/運行（2026-06-15）</title>
+<style>
+:root{--fg:#1f2328;--mut:#636c76;--bd:#d8dee4;--bg:#f6f8fa;--card:#fff;--g:#1a7f37;--gb:#dafbe1;--a:#9a6700;--ab:#fff8c5;--r:#cf222e;--rb:#ffebe9;--b:#0969da;--bb:#ddf4ff}
+*{box-sizing:border-box}
+body{font-family:-apple-system,"Segoe UI",Roboto,"Droid Sans Fallback",sans-serif;color:var(--fg);background:var(--bg);margin:0;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding:22px}
+h1{font-size:23px;margin:0 0 4px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:16px}
+.l0{background:var(--card);border:1px solid var(--bd);border-left:6px solid var(--g);border-radius:8px;padding:14px 18px;margin:14px 0;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.l0 b{font-size:15px}
+.l0 ul{margin:8px 0 0;padding-left:20px}.l0 li{margin:4px 0;font-size:13.5px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.stat{flex:1;min-width:104px;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px 10px;text-align:center}
+.stat .n{font-size:24px;font-weight:700}
+.stat .lab{font-size:11px;color:var(--mut);margin-top:2px}
+h2{font-size:16px;margin:26px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--bd)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card);border-radius:8px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+th{background:#f0f3f6;text-align:left;padding:8px 10px;font-size:11.5px;color:#444}
+td{padding:8px 10px;border-top:1px solid var(--bd);vertical-align:top}
+code{background:#eff1f3;padding:1px 5px;border-radius:4px;font-size:11px}
+.badge{display:inline-block;font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 7px;white-space:nowrap}
+.hi{background:var(--rb);color:var(--r)}.me{background:var(--ab);color:var(--a)}.lo{background:var(--gb);color:var(--g)}
+.dim{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;margin:10px 0}
+.dim h3{margin:0 0 6px;font-size:14px}
+.dim .head{font-size:12.5px;color:var(--mut);margin-bottom:8px}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-left:6px}
+.ok{background:var(--gb);color:var(--g)}.warn{background:var(--ab);color:var(--a)}
+.f{font-size:12.5px;margin:5px 0;padding-left:14px;position:relative}
+.f::before{content:"▸";position:absolute;left:0;color:var(--mut)}
+.note{border-radius:8px;padding:12px 16px;margin:12px 0;font-size:13px}
+.crit{background:var(--rb);border:1px solid #ffcecb}
+.info{background:var(--bb);border:1px solid #b6e3ff}
+.scrow td{font-size:11.5px}
+.verdict{font-weight:700}
+.foot{color:var(--mut);font-size:11px;margin-top:22px;border-top:1px solid var(--bd);padding-top:10px}
+.k{color:var(--r);font-weight:700}.gr{color:var(--g);font-weight:700}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>🔍 工作流稽核 — 最近研究流程 / 資料整理 / 運行</h1>
+<div class="sub">2026-06-15 · 6-agent grounded workflow（每條附指令證據）+ 主回合獨立複核 7 點（§13.7）· branch <code>research/subclonal-reconstruction-202606</code> @ <code>1cf5116</code> · <b>數字皆真實指令輸出、無 du/find 遞迴</b></div>
+
+<div class="l0">
+<b>一眼結論：整體健康良好，但有 1 個你親身踩過的零覆蓋缺口 + 1 個立即風險（非我能修）。</b>
+<ul>
+<li><span class="gr">✅ 健康</span>：harness <b>8 GREEN / 2 YELLOW / 0 RED</b>；計數零漂移（47 skills / 18 agents / 42 hooks）；資料組織如實落地（archive 16 run、canonical 每樣本 2 run）；commit 嚴格 scoped 無 <code>-A</code> sweep。三大機械防線（數字捏造 / 跨 branch / injection）皆運作。</li>
+<li><span class="k">🔴 最高價值缺口</span>：<code>search_scope_guard.sh</code> 對 <code>big7_disk_output</code> 的 <code>du/find/ls -R/wc -l</code> <b>全部放行</b>（實測+源碼雙證）→「卡住」#1 主因零機械覆蓋。<b>本 session 那次卡住的 du 就是沒被擋。</b>修復便宜（擴充 ~15 行）。</li>
+<li><span class="k">🔴 立即風險</span>：並行 session 的 chr2-18M <b>2291 行</b>交付物未提交、共用 HEAD → loss risk。<b>我依 §C 不碰</b>，標示給你。</li>
+<li><span style="color:var(--a);font-weight:700">⚡ 可複利</span>：4 個 anti-drift 腳本已存在但 manual-only/零部署；archive 流程手做 2 次、≥3 批待做 → 值得腳本化。</li>
+</ul>
+</div>
+
+<div class="stats">
+<div class="stat"><div class="n gr">8/2/0</div><div class="lab">harness G/Y/R</div></div>
+<div class="stat"><div class="n gr">47·18·42</div><div class="lab">skills·agents·hooks（零漂移）</div></div>
+<div class="stat"><div class="n gr">16</div><div class="lab">archive run 落地</div></div>
+<div class="stat"><div class="n" style="color:var(--r)">1</div><div class="lab">零覆蓋 hang 缺口</div></div>
+<div class="stat"><div class="n" style="color:var(--r)">2291</div><div class="lab">行 at-risk（並行 session）</div></div>
+<div class="stat"><div class="n" style="color:var(--a)">7</div><div class="lab">session out&gt;3M（未告警）</div></div>
+</div>
+
+<h2>主回合獨立複核（不採信 agent 單方回報 · §13.7）</h2>
+<table>
+<tr><th>#</th><th>複核項</th><th>結果</th><th class="verdict">判定</th></tr>
+<tr class="scrow"><td>SC1</td><td>D1-1 shared-state 被 commit？</td><td>7/8 doc commit 含 CURRENT_FOCUS；check-ignore exit=1（未 ignore）</td><td>✅ 屬實＝規則矛盾，非活躍錯誤</td></tr>
+<tr class="scrow"><td>SC3</td><td>D2-1 chr2 是誰的？</td><td>?? 未提交、mtime 今天 05–17 點＝<b>並行 session</b></td><td class="k">🔴 修正 agent 建議：不可我 commit</td></tr>
+<tr class="scrow"><td>SC6</td><td>D3-1 hang guard 有擋？</td><td>灌 du/find/ls-R 進 hook 全 exit=0；源碼只擋 <code>find .</code>/<code>grep -r .</code>/<code>du */</code></td><td class="k">✅ 確認真缺口</td></tr>
+<tr class="scrow"><td>SC4</td><td>D5 harness</td><td>8G/2Y/0R、47/18/42/2</td><td class="gr">✅ 確認</td></tr>
+<tr class="scrow"><td>SC5</td><td>D4 archive 落地</td><td>16 archived；HCC1395/COLO829 各 2 run</td><td class="gr">✅ 確認</td></tr>
+<tr class="scrow"><td>SC7</td><td>D6-2 stamp 缺漏</td><td>audit 文件 build_branch=0；僅 3 manifest 有</td><td class="gr">✅ 確認</td></tr>
+</table>
+
+<div class="note crit">
+🔴 <b>必讀 — chr2 交付物我為何不碰：</b>chr2-18M（3 報告 + concept + 6 repro .py，共 2291 行）是<b>並行 session 今天的研究</b>，不在我這條輸出清理 arc。agent 建議「現在 commit 它」<b>違反 §C「只 stage 自己檔／other-session 留用戶」，且正是 D2-4 自己警告的跨 session 污染</b>。→ 我只標示風險：建議<b>原 session 或你</b>盡快 commit（或為該 arc 開 git worktree 隔離 HEAD）。
+</div>
+
+<h2>6 維度發現</h2>
+
+<div class="dim">
+<h3>D1 Git 衛生<span class="tag warn">DONE_WITH_CONCERNS</span></h3>
+<div class="head">commit 上 feature branch 正確、訊息品質高；但 shared-state 規則自相矛盾、main 久未更新。</div>
+<div class="f"><span class="badge hi">高</span> <b>D1-1/2 規則矛盾</b>：§C「絕不 commit shared-state」vs §6「CURRENT_FOCUS+ledger 是權威 SoT（應版控）」。實況版控+commit（多由別 session）。trunk guard 對 shared-state 零覆蓋。→ reconcile 文字（承認該版控、禁 <code>-A</code>），非加 exit-2。</div>
+<div class="f"><span class="badge me">中</span> <b>D1-3</b>：<code>main</code> 停 03-14、落後 479 commit；<code>develop</code>(06-14) 才是實質 trunk → 文件講清楚 main=release-snapshot。</div>
+<div class="f"><span class="badge me">中</span> <b>D1-4</b>：feature branch 多 develop 11 commit + 67 條 working tree → 大混合樹提高誤 <code>-A</code> 風險。</div>
+<div class="f"><span class="badge lo">低✓</span> <b>D1-5 優點</b>：commit 嚴格 scoped、conventional-commit、無 sweep。</div>
+</div>
+
+<div class="dim">
+<h3>D2 未提交風險<span class="tag warn">DONE_WITH_CONCERNS</span></h3>
+<div class="head">並行 session 大交付物 at-risk；harness shared-state + other-session churn 已正確留著不動。</div>
+<div class="f"><span class="badge hi">高</span> <b>D2-1/4</b>：chr2-18M 2291 行未提交、70 transcript 共用 HEAD → loss risk。<b>屬並行 session，我不 commit</b>（見上紅框）。</div>
+<div class="f"><span class="badge lo">低✓</span> <b>D2-6</b>：active.json/ledger/postmortem log + tsg_promoter/flagship_chr2 已正確識別「留著」。⚠ <code>flagship_chr2/.../ism_out</code> 未 gitignore + 大 → 防 <code>git add research/</code> 誤提交。</div>
+</div>
+
+<div class="dim">
+<h3>D3 常見錯誤（postmortem 挖掘）<span class="tag ok">DONE</span></h3>
+<div class="head">捏造/跨branch/injection 已守；2 個 live 缺口：output-dir hang + token 丟失未告警。</div>
+<div class="f"><span class="badge hi">高</span> <b>D3-1 🔴 真缺口</b>：output <code>du/find/ls -R/wc -l</code> 可 hang，guard 完全沒擋。→ 擴充既有 hook 擋打在 <code>big7_disk_output</code> 無 <code>-maxdepth</code> 者。</div>
+<div class="f"><span class="badge hi">高✓</span> <b>D3-2 已守</b>：數字捏造 → §13 三層皆 wired。維護 light#2 盯 neutering。</div>
+<div class="f"><span class="badge me">中</span> <b>D3-3 半守</b>：output-token session 丟失（friction#1）；logger 有捕但<b>從不告警</b>。實測 7 session out&gt;3M、最高 10.4M。→ wire threshold echo。</div>
+<div class="f"><span class="badge me">中</span> <b>D3-6 半守</b>：validated 報告 stale last_read 編輯有記不擋。→ number_provenance 順帶 flag。</div>
+<div class="f"><span class="badge lo">低✓</span> <b>D3-4/5 已守</b>：跨 branch（trunk guard+advisor）、injection（sanitizer 4 次皆 benign）。</div>
+</div>
+
+<div class="dim">
+<h3>D4 資料組織落地查驗<span class="tag ok">DONE — 全如實</span></h3>
+<div class="f"><span class="badge lo">✓</span> <b>D4-1/2/3</b>：archive 16 run（5+11）數學一致；canonical 每樣本 2 run（KEEP 皆真被 B3:76/82 引用）；data_specs 文件齊。</div>
+<div class="f"><span class="badge me">中</span> <b>D4-4</b>：新主軸輸出家 <code>research/subclonal_reconstruction/</code> 仍空骨架 → 第一 cycle 跑時 mkdir+backfill，否則 AI 找不到散落回 ad-hoc。</div>
+</div>
+
+<div class="dim">
+<h3>D5 Harness 漂移<span class="tag warn">DONE_WITH_CONCERNS</span></h3>
+<div class="f"><span class="badge lo">✓</span> <b>D5-1/6 優點</b>：計數零漂移；Hard-Gate/tier-gate/hook-wiring 全 GREEN（neutering 未復發）。</div>
+<div class="f"><span class="badge hi">高</span> <b>D5-2</b>：KB 研究狀態 5 檔 last_verified 凍 2026-05-18 = 28 天（2× gate）→ 每次都噴警示。<b>必先重核內容再 refresh</b>（直接 bump = 捏造）。</div>
+<div class="f"><span class="badge me">中</span> <b>D5-3/5</b>：snapshot 散文掩蓋 stale field；1 orphan memory 未進索引（不會被 recall，疑近重複 → /memory-consolidation 判合併）。</div>
+<div class="f"><span class="badge lo">低</span> <b>D5-4</b>：ledger 領先 CURRENT_FOCUS 1 天（append-lag，canary）。</div>
+</div>
+
+<div class="dim">
+<h3>D6 高重複 → 可複利自動化<span class="tag ok">DONE</span></h3>
+<div class="head">5 個重複序列；最高 payoff = archive 流程腳本化 + 4 個已存在但零部署的 anti-drift 腳本（擴充非重造）。</div>
+<div class="f"><span class="badge hi">高</span> <b>D6-1</b>：archive 流程手做 2 次、≥3 批待做 → <code>archive_candidate.sh</code> 自動產 manifest row + 印 mv（不自動跑，保 Hard-Gate）。</div>
+<div class="f"><span class="badge hi">高</span> <b>D6-2</b>：<code>provenance_stamp.sh</code> manual-only，連 audit 文件自己沒蓋 → wire PostToolUse Write advisory。</div>
+<div class="f"><span class="badge me">中</span> <b>D6-3/5</b>：<code>number_provenance.py audit</code> + <code>fill_report.py</code> 已建但零部署 → SKILL 收尾清單加一行 + 1 個範例。</div>
+<div class="f"><span class="badge me">中</span> <b>D6-4</b>：safe-ls 散文重述 6 份 → <code>safe_ls.sh</code> 把 §12 編碼一次（推廣 verify_output.sh 既有 idiom）。</div>
+</div>
+
+<h2>改進優先序（payoff / effort）</h2>
+<table>
+<tr><th>P</th><th>改進</th><th>維度</th><th>effort</th><th>類別</th><th>我的 scope</th></tr>
+<tr><td><b>P1</b></td><td>search_scope_guard 補 output-dir hang 防護</td><td>D3-1</td><td><span class="badge lo">S</span></td><td>風險↓ × 常見錯誤</td><td class="gr">✅</td></tr>
+<tr><td><b>P2</b></td><td>chr2 並行 session 未提交 at-risk</td><td>D2-1</td><td>—</td><td>風險↓</td><td class="k">❌ 留你</td></tr>
+<tr><td><b>P3</b></td><td>reconcile §C shared-state 規則矛盾</td><td>D1-1/2</td><td><span class="badge lo">S</span></td><td>風險↓</td><td class="me">⚠ 需定調</td></tr>
+<tr><td><b>P4</b></td><td>archive_candidate.sh + safe_ls.sh 腳本化</td><td>D6-1/4</td><td><span class="badge me">M</span></td><td>可複利 × 高重複</td><td class="gr">✅</td></tr>
+<tr><td><b>P5</b></td><td>provenance_stamp wire advisory</td><td>D6-2</td><td><span class="badge lo">S</span></td><td>防 P-17</td><td class="gr">✅</td></tr>
+<tr><td><b>P6</b></td><td>KB 5 檔 28d stale 重核 + refresh</td><td>D5-2/3</td><td><span class="badge me">M</span></td><td>風險↓</td><td class="me">⚠ 需重核</td></tr>
+<tr><td><b>P7</b></td><td>output-token &gt;3M advisory wire</td><td>D3-3</td><td><span class="badge lo">S</span></td><td>風險↓</td><td class="gr">✅</td></tr>
+<tr><td><b>P8</b></td><td>fill_report/number_provenance audit 部署範例</td><td>D6-3/5</td><td><span class="badge me">M</span></td><td>可複利</td><td class="gr">✅</td></tr>
+<tr><td><b>P9</b></td><td>MEMORY.md orphan 索引/合併</td><td>D5-5</td><td><span class="badge lo">S</span></td><td>風險↓</td><td class="gr">✅</td></tr>
+<tr><td><b>P10</b></td><td>新主軸輸出 final/ tree 建骨架</td><td>D4-4</td><td><span class="badge lo">S</span></td><td>高效率</td><td class="gr">✅</td></tr>
+</table>
+
+<div class="note info">
+ℹ️ <b>建議首批（最划算）</b>：<b>P1 + P5 + P7</b> 三件 effort S、全我 scope、全「機械防呆」——一次擋掉「卡住」「stamp 漏蓋」「token 丟失」三個本 session/近期實際發生過的痛點。其次 P4（高重複腳本化、複利）。P3/P6 需你先定調（規則 / 內容重核）。P2 永遠不由我 commit。
+</div>
+
+<div class="foot">
+紀錄（供 AI session）：<code>InterSubMod/docs/data_specs/20260615_workflow_audit_improvements_01.md</code> ·
+方法：6-agent workflow（grounded）+ 主回合 SC1-SC7 獨立複核 · 數字皆 2026-06-15 真實指令輸出（git/ls -d/harness_health/hook 源碼）· 無捏造、無 du/find 遞迴。
+</div>
+
+</div></body></html>

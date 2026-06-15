@@ -45,6 +45,28 @@ if echo "$CMD" | grep -qE '\bdu\b[^|]*\s\*/' || echo "$CMD" | grep -qE '\bdu\b\s
     reason="du 掃全 repo 目錄（research/output 達 GB 級，極慢）"
 fi
 
+# 4) walking commands (du / find / ls -R / wc -l) over the HEAVY OUTPUT roots.
+#    ISM region dirs (big7_disk_output/.../intersubmod_tp, filtered_snv_tp) hold >10,000
+#    subdirs each → these HANG. This is the documented "卡住" #1 cause (2026-06-15 audit
+#    D3-1: a du on a complete_matrix dir hung this very session; rules 1-3 above only catch
+#    repo-root `.`/`du */`, NOT an absolute big7_disk_output / output/ / data/ path).
+HEAVY='big7_disk_output|(^|[[:space:]/])output/|(^|[[:space:]/])data/'
+if echo "$CMD" | grep -qE "$HEAVY"; then
+    if echo "$CMD" | grep -qE '\bdu\b'; then
+        block=1
+        reason="du 掃 output/data 重目錄（ISM region 子目錄 >1 萬，會 hang）— 改 ls -la *.bam / ls -d ...*/ | wc -l"
+    elif echo "$CMD" | grep -qE '\bfind\b' && ! echo "$CMD" | grep -qE '\-maxdepth\s+[0-9]' && ! echo "$CMD" | grep -qE '\-(prune|path)\b'; then
+        block=1
+        reason="find 遞迴 output/data 重目錄（無 -maxdepth/-prune，會 hang）"
+    elif echo "$CMD" | grep -qE '\bls\b[^|]*\s-[A-Za-z]*R'; then
+        block=1
+        reason="ls -R output/data 重目錄（遞迴列 >1 萬子目錄，會 hang）— 改單層 ls -d .../*/"
+    elif echo "$CMD" | grep -qE '\bwc\b[^|]*\s-[a-z]*l' && echo "$CMD" | grep -qE '\*/'; then
+        block=1
+        reason="wc -l 對 output glob 展開 region 子目錄（會 hang）— 先 ls -d 一層再數"
+    fi
+fi
+
 if [ "$block" -eq 1 ]; then
     {
         echo "[search-scope-guard] ⛔ 阻擋大規模搜尋：${reason}"

@@ -174,6 +174,7 @@ The report must end with operational decisions, for example:
 - The report must include negative results when they matter.
 - The report must separate stable conclusion from tentative interpretation.
 - The report must say what changed in project belief and what should happen next.
+- **Provenance（§13-C，2026-06-15 audit D6-3）**：報告含 metric → 寫完跑 `python3 scripts/number_provenance.py audit <report.md>`，把「metric→來源檔:行」表納入；任一 metric 無源 → 回填真值或刪。資料密集表優先 `scripts/fill_report.py` template+data 注入（§13-A，缺值 refuse），不手打。
 
 ## 嚴謹度繼承（/scientific-rigor）
 

@@ -73,6 +73,13 @@ printf '%s\tagent=%s\tsession=%s\tcost=%s\tturns=%s\tcache_hit=%s%%\tin=%s\tcr=%
 # Notify
 echo "[SubAgent Logger] $SUBAGENT_TYPE done — cost=\$$COST turns=$TURN_COUNT cache_hit=${HIT_RATE}%"
 
+# Output-token advisory (2026-06-15 audit D3-3 — wire the >3K flag CLAUDE.md §8 promised but never echoed).
+# §8 return-contract soft target ~1-2K; >3K = ensure full detail was LANDED to an OUTPUT_DIR file
+# (concise-emit), not just returned inline where it risks the output-token cap (friction #1).
+if [ "${OUTPUT_TOKENS:-0}" -gt 3000 ]; then
+    echo "  ⚠ out=${OUTPUT_TOKENS} tokens >3K — confirm this agent's detail was written to a file & only a {status,metrics,path} summary returned (§8 concise-emit)"
+fi
+
 # Monthly recommendation
 ENTRY_COUNT=$(wc -l < "$LOG_FILE" 2>/dev/null || echo 0)
 if [ "$ENTRY_COUNT" -gt 50 ]; then

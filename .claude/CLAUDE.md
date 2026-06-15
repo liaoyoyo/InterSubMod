@@ -110,7 +110,7 @@
 
 ## §4 Hooks 概覽（Claude Code 特定 — 2026-05-18 P4 完整收尾）
 
-依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop / **PreCompact** 7 個 events；**42 hook scripts**，2026-06-11 實測 `ls scripts/hooks/*.sh | wc -l`；2026-06-11 +`git_branch_commit_guard.sh`〔主線保護 exit-2 + 並行警告〕；2026-06-09 +`health_drift_advisor.sh`〔C7〕 +`concurrent_session_advisor.sh`〔§G〕；2026-06-01 +`number_provenance_check.sh`）。
+依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop / **PreCompact** 7 個 events；**43 hook scripts**，2026-06-15 實測 `ls scripts/hooks/*.sh | wc -l`（2026-06-15 +`provenance_stamp_advisor.sh`）；2026-06-11 +`git_branch_commit_guard.sh`〔主線保護 exit-2 + 並行警告〕；2026-06-09 +`health_drift_advisor.sh`〔C7〕 +`concurrent_session_advisor.sh`〔§G〕；2026-06-01 +`number_provenance_check.sh`）。
 
 **2026-06-09 新增 2 個 hook**（loop-engineering ADR C7 + git governance §G — 修 invocation-dependence 漂移 + 並行 session 互撞）:
 - `health_drift_advisor.sh`（SessionStart — **變動觸發的唯讀漂移 advisor**：偵測 `.claude/{skills,agents,rules,hooks,workflows}` + settings/CLAUDE.md/AGENTS.md 自上次 marker 後是否變動 → nudge 跑 `/harness-health`；順帶提醒 active cycle >7d 未推進。**advisory-only 永遠 exit 0、不跑 harness_health.py 本體（零延遲/不 hang/不 spam snapshot）、marker debounce ~once/change-batch**。非 `/loop`/`/goal`/cron。設計依據：`InterSubMod/docs/plans/20260609_loop_engineering_research_cycle_architecture_review_01.md` §5）
@@ -124,6 +124,9 @@
 
 **2026-06-01 新增 1 個 hook**（數據捏造防呆 — 落地 `20260601_fabricated_metric_in_html_preview_postmortem` A4/A5/A7）:
 - `number_provenance_check.sh`（PreToolUse Edit|Write `*.md`/`*.html` — **分級 anti-fabrication gate**：抽報告內「metric 形數字」(`AUC=` `p=` `%` `Δ` `≥2 位小數`)，逐一去 bounded 來源（frontmatter `data_sources:` / 同層 `_assets/` / 同目錄 `.json|.tsv|.txt|.csv`）grep；**validated/pi_reports 路徑找不到來源 → exit 2 阻擋**；其他路徑 → advisory exit 0 提醒。fail-OPEN（python 缺/解析錯 → exit 0，絕不擋所有 Write — 與 neutering bug 本質不同）。override：內文含 `<!-- provenance-verified: 理由 -->`。三層防線見 §13。)
+
+**2026-06-15 新增 1 個 hook**（工作流稽核 D6-2 落地 — provenance stamp 自動 nudge）:
+- `provenance_stamp_advisor.sh`（PostToolUse Edit|Write — **advisory exit 0**：audit/status/盤點/manifest/稽核/inventory 類 `.md`/`.html` 缺 `build_branch:` stamp → 印 `scripts/provenance_stamp.sh` 可貼 stamp。窄 scope（只這幾類）+ fail-OPEN 永不擋 Write。把 provenance_stamp.sh 從 manual-only → 自動提醒，防 P-17 跨-worktree 幻覺。⚠ settings wiring 已加但因 settings.local.json 有 65 行未提交 churn（4 個已宣稱 wired hook 的 wiring）+ 並行 session，暫**不 commit settings**，live 生效；待 settings 乾淨時連同提交。)
 
 **Hard Gate hooks**（不可繞過 — 真 `exit 2` 阻擋；2026-06-01 audit = **4 核心** + search/tier/number-provenance 三個條件式 exit-2）:
 - `pre_commit_compile_check.sh`（C++ commit 必編譯）

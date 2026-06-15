@@ -93,6 +93,8 @@ context 載入        plan mode(調查→         (§3 決策表 A/B)         su
 
 **commit 紀律**：只 `git add <列檔>` 禁 `-A`；**shared live-state 檔不碰**（CURRENT_FOCUS/hypothesis_queue/evidence_ledger/active.json/*.log/state snapshots）留用戶；半成品/未驗證**不 commit**（§13.7）；message `type(scope): 摘要` + body + `Co-Authored-By:`。
 
+> ⚠ **澄清「不碰」≠「不版控」（2026-06-15 audit D1-1 — 消除與 §6 的表面矛盾）**：shared live-state **是被 git 版控的**（CURRENT_FOCUS.md / evidence_ledger.jsonl 即 §6 雙層 SoT 的「敘述層權威 SoT」，必須版控才有歷史）。「不碰、留用戶」的精確意思 = **AI（尤其並行 session）不把 shared-state sweep 進自己的主題 commit**，由**檔案的擁有 session / 用戶**自行決定何時 commit 它。所以「`git log` 看到 CURRENT_FOCUS 常被 commit」是**正常**（擁有者在做事），**不是違規**；違規是「我這條 arc 的主題 commit 裡夾帶了我沒在改的 shared-state」。無機械 gate（git_branch_commit_guard 只擋 trunk）——靠此紀律 + 只 `git add <列檔>`。
+
 ### D. 何時「矯正 / 合併」
 
 | 情境 | 動作 |
