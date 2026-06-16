@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ISM 方法現況解釋報告 — 在做什麼、哪些有效、有哪些 gap</title>
+<!--
+  doc_type: methods_landscape_explainer  created: 2026-06-15  scope: ISM 全方法盤點（HCC1395 數據佐證）
+  sources(feat e472760): TWO_DIRECTIONS_FRAMEWORK.md, COMPUTE_FLOW_ARCHITECTURE.md, METHODS_BY_GOAL.md, SIGNIFICANCE_INVENTORY.md
+  provenance-verified: 方法歸類/計算邏輯=L1（框架文件引源碼行號）；數據（HP-AUC 0.788 等）取自本 session wg_hpauc/gap2 已驗值；
+                       有效性/替代=L2（框架文件領域評估）。本報告為「消化框架→白話解釋」，未新增數字。
+-->
+<style>
+:root{--c-accent:#D97757;--c-accent-soft:#F2E4DC;--c-text:#1c1b19;--c-text-soft:#5C5A54;--c-bg:#FAF9F5;--c-card:#fff;--c-border:#E3DACC;
+--c-pass:#2F7D5B;--c-pass-soft:#E4F0EA;--c-warn:#B06A16;--c-warn-soft:#F6EBD8;--c-info:#2F6690;--c-info-soft:#E2ECF3;--c-dead:#9A3B3B;--c-dead-soft:#F3E2E2;--c-cs:#5B3FA0;--c-cs-soft:#ECE6F6;
+--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--radius:10px;--sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;}
+*{box-sizing:border-box}body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.7;font-size:16px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1120px;margin:0 auto;padding:8px var(--sp-5);display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;font-size:.8rem}
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:1.9rem;margin:6px 0;line-height:1.22}header.hero .lede{color:var(--c-text-soft);max-width:880px;font-size:1.04rem}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.5rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap}section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.95rem;margin:0 0 var(--sp-4);max-width:900px}
+h4.mini{font-size:1.04rem;margin:var(--sp-4) 0 var(--sp-2);display:flex;align-items:center;gap:8px}h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-5);margin:var(--sp-4) 0}.bluf h2{margin:0 0 var(--sp-2);font-size:1.2rem}.bluf p{margin:var(--sp-2) 0}
+.ironclad{background:var(--c-cs-soft);border:1px solid var(--c-cs);border-left:6px solid var(--c-cs);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:.92rem}.ironclad b{color:var(--c-cs)}
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.06rem;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a}.takeaway.pass .lab{color:var(--c-pass)}
+.key{background:#fdf2c8;font-weight:700;padding:0 4px;border-radius:3px}.muted{color:var(--c-text-soft);font-size:.84rem}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-A{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}.b-B{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-ok{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}.b-mid{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}.b-gap{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}.b-new{color:var(--c-cs);background:var(--c-cs-soft);border-color:var(--c-cs)}
+table{border-collapse:collapse;width:100%;font-size:.84rem;margin:var(--sp-3) 0;background:#fff}th,td{border:1px solid var(--c-border);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}tbody tr:nth-child(even){background:#FBF9F4}td code,p code,li code{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}td.imp{font-weight:700}
+figure{margin:var(--sp-4) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto}figure .figtitle{font-size:.92rem;font-weight:700;margin:0 0 var(--sp-2)}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}figcaption{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.55}figcaption b{color:var(--c-text)}
+.svgnote{font-size:9px;fill:#6B6B66}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:var(--sp-3);margin:var(--sp-4) 0}
+.gcard{background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);border-top:4px solid var(--c-border)}
+.gcard h4{margin:0 0 6px;font-size:1rem}.gcard .m{font-size:.84rem;margin:5px 0;padding-left:0}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-6);font-size:.8rem;color:var(--c-text-soft)}footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}footer.prov code{font-family:var(--mono)}footer.prov ul{padding-left:1.2em}
+.todo{color:var(--c-warn);font-family:var(--mono);font-size:.82em;font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brand">ISM 方法現況</span>
+  <nav><a href="#ab">①兩方向</a><a href="#flow">②計算流程</a><a href="#goals">③6目標×方法</a><a href="#dbeta">④Δβ配對</a><a href="#inv">⑤6方法6gap</a><a href="#verdict">⑥判定</a></nav>
+</div></div>
+
+<header class="hero">
+  <div class="kicker">方法盤點解釋 · 消化 4 份框架文件 · 給理解用</div>
+  <h1>ISM 在做什麼？哪些有效？有哪些 gap？</h1>
+  <p class="lede">把 ISM 「甲基 × 標籤」的所有顯著性方法，用 <strong>A/B 兩個方向</strong> 重新整理 → 看清<strong>每個方法對應什麼目標、是否有效、缺什麼</strong>。整體判定：<strong>核心計算合理、無致命錯誤，但有 6 個 gap 待補</strong>（最關鍵 = Δβ 缺檢定 + somatic 殘差缺檢定）。</p>
+</header>
+
+<div class="bluf">
+  <h2>L0 一眼看懂</h2>
+  <p>ISM 驗證「甲基和某個標籤（HP / 等位 / 腫瘤-正常）有沒有關係」其實有<b>兩種根本不同的方向</b>，現在混在一起講：</p>
+  <p>▸ <b class="key">方向 A（label-first 標籤驅動）</b>：先按<u>已知標籤</u>分組 → 算組間甲基差（Δβ）→ 檢定。問「這個標籤有沒有甲基效應？」= 確認 germline/somatic ASM。<br>▸ <b class="key">方向 B（structure-first 結構驅動）</b>：先按<u>甲基結構</u>（read 距離）分群 → 再看群對不對得上標籤。問「甲基自己分成幾群？是不是新結構？」= 唯一能找 subclone 的方向。</p>
+  <p>▸ <b>整體判定</b>：6 類方法、4 個目標層；Fisher-FH / PERMANOVA / BH-FDR / NME-Epipoly 都對標業界標準 ✅；但 <b>6 個 gap</b>，最高槓桿 = <b class="key">#1 Δβ 有值無檢定</b> + <b class="key">#3 somatic 殘差借 tumor 的 p（沒真檢定）</b>。</p>
+  <p class="muted">證據分級：方法歸類/計算邏輯 = L1（框架引源碼行號）；數據（HP-AUC normal 0.788 等）= 本 session 已驗；有效性/替代 = L2（領域評估，待逐一驗）。</p>
+</div>
+
+<!-- ① A/B 兩方向 -->
+<section id="ab">
+  <h3><span class="num">①</span> 核心觀念：A / B 兩個驗證方向</h3>
+  <p class="sub">這是看懂全部方法的鑰匙。兩個方向回答不同問題、各有 confound、各有驗證方式 —— 混用會誤判。</p>
+
+  <figure>
+    <div class="figtitle">圖 1　label-first（A）vs structure-first（B）兩條流程</div>
+    <svg viewBox="0 0 980 360" role="img" aria-label="A vs B 兩方向">
+      <defs><marker id="aA" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#2F6690"/></marker>
+            <marker id="aB" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#2F7D5B"/></marker></defs>
+      <!-- Lane A -->
+      <rect x="10" y="20" width="960" height="150" rx="10" fill="#E2ECF3" opacity=".45"/>
+      <text x="26" y="44" font-size="14" font-weight="800" fill="#2F6690">方向 A · label-first（標籤驅動 · 確認性 / supervised）</text>
+      <g font-size="11">
+        <rect x="26" y="60" width="150" height="56" rx="7" fill="#fff" stroke="#2F6690"/><text x="101" y="82" text-anchor="middle" font-weight="700">① 已知標籤</text><text x="101" y="100" text-anchor="middle" fill="#5C5A54">HP / 等位 / T-N</text>
+        <rect x="220" y="60" width="150" height="56" rx="7" fill="#fff" stroke="#2F6690"/><text x="295" y="82" text-anchor="middle" font-weight="700">② 按標籤分組</text><text x="295" y="100" text-anchor="middle" fill="#5C5A54">HP1 組 vs HP2 組</text>
+        <rect x="414" y="60" width="160" height="56" rx="7" fill="#fff" stroke="#2F6690"/><text x="494" y="82" text-anchor="middle" font-weight="700">③ 算組間甲基差</text><text x="494" y="100" text-anchor="middle" fill="#5C5A54">Δβ（率差）</text>
+        <rect x="618" y="60" width="140" height="56" rx="7" fill="#fff" stroke="#2F6690"/><text x="688" y="82" text-anchor="middle" font-weight="700">④ 檢定</text><text x="688" y="100" text-anchor="middle" fill="#5C5A54">permutation</text>
+        <rect x="802" y="60" width="158" height="56" rx="7" fill="#E2ECF3" stroke="#2F6690"/><text x="881" y="82" text-anchor="middle" font-weight="800" fill="#2F6690">標籤的甲基效應</text><text x="881" y="100" text-anchor="middle" fill="#5C5A54">germline/somatic ASM</text>
+        <line x1="176" y1="88" x2="218" y2="88" stroke="#2F6690" stroke-width="2" marker-end="url(#aA)"/>
+        <line x1="370" y1="88" x2="412" y2="88" stroke="#2F6690" stroke-width="2" marker-end="url(#aA)"/>
+        <line x1="574" y1="88" x2="616" y2="88" stroke="#2F6690" stroke-width="2" marker-end="url(#aA)"/>
+        <line x1="758" y1="88" x2="800" y2="88" stroke="#2F6690" stroke-width="2" marker-end="url(#aA)"/>
+      </g>
+      <text x="26" y="142" font-size="11" fill="#1c1b19">問：「這個<b>已知標籤</b>有沒有甲基差異？」　核心量 = <tspan font-weight="700">Δβ</tspan> 或 distance delta　</text>
+      <text x="26" y="160" font-size="11" fill="#9A3B3B">❌ 不能做 subclone（沒有 subclone 標籤可分組）</text>
+      <!-- Lane B -->
+      <rect x="10" y="186" width="960" height="160" rx="10" fill="#E4F0EA" opacity=".5"/>
+      <text x="26" y="210" font-size="14" font-weight="800" fill="#2F7D5B">方向 B · structure-first（結構驅動 · 探索性 / unsupervised）</text>
+      <g font-size="11">
+        <rect x="26" y="226" width="150" height="56" rx="7" fill="#fff" stroke="#2F7D5B"/><text x="101" y="248" text-anchor="middle" font-weight="700">① 甲基距離</text><text x="101" y="266" text-anchor="middle" fill="#5C5A54">read×read 矩陣</text>
+        <rect x="220" y="226" width="150" height="56" rx="7" fill="#fff" stroke="#2F7D5B"/><text x="295" y="248" text-anchor="middle" font-weight="700">② 分群</text><text x="295" y="266" text-anchor="middle" fill="#5C5A54">clustering（不看標籤）</text>
+        <rect x="414" y="226" width="160" height="56" rx="7" fill="#fff" stroke="#2F7D5B"/><text x="494" y="248" text-anchor="middle" font-weight="700">③ 群 vs 標籤關聯</text><text x="494" y="266" text-anchor="middle" fill="#5C5A54">CramersV / HP-AUC</text>
+        <rect x="618" y="226" width="342" height="56" rx="7" fill="#E4F0EA" stroke="#2F7D5B"/><text x="789" y="248" text-anchor="middle" font-weight="800" fill="#2F7D5B">甲基結構是否對應標籤 / 是不是新結構</text><text x="789" y="266" text-anchor="middle" fill="#5C5A54">✅ subclone 唯一正確方向</text>
+        <line x1="176" y1="254" x2="218" y2="254" stroke="#2F7D5B" stroke-width="2" marker-end="url(#aB)"/>
+        <line x1="370" y1="254" x2="412" y2="254" stroke="#2F7D5B" stroke-width="2" marker-end="url(#aB)"/>
+        <line x1="574" y1="254" x2="616" y2="254" stroke="#2F7D5B" stroke-width="2" marker-end="url(#aB)"/>
+      </g>
+      <text x="26" y="308" font-size="11" fill="#1c1b19">問：「甲基<b>自己</b>分成幾群？對應哪個標籤 / 是不是新結構？」　核心量 = cluster→標籤關聯</text>
+      <text x="26" y="326" font-size="11" fill="#5B3FA0">🔑 <tspan font-weight="700">HP-AUC</tspan> = B 最乾淨版（距離<u>直接</u> vs 標籤，跳過 clustering→cut→CramersV 的 overfit 那層）</text>
+    </svg>
+    <figcaption><b>為什麼重要：</b>A 量化「已知標籤的甲基效應」（germline ASM = HP 標籤的甲基差）；B 探索「甲基結構本身」（subclone <u>必須</u>走 B，因為沒有 subclone 標籤）。把 B 的 cluster 結果當 A 的標籤差異、或反之 = 誤判。</figcaption>
+  </figure>
+
+  <table>
+    <thead><tr><th></th><th>方向 A：label-first</th><th>方向 B：structure-first</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">流程</td><td>按<b>標籤</b>分組 → 組間甲基差 → 檢定</td><td>按<b>甲基結構</b>(距離)分群 → 驗證群 vs 標籤</td></tr>
+      <tr><td class="imp">問的問題</td><td>「已知標籤有甲基差異嗎？」</td><td>「甲基自己分幾群？對應誰 / 新結構？」</td></tr>
+      <tr><td class="imp">性質</td><td>確認性 / supervised</td><td>探索性 / unsupervised</td></tr>
+      <tr><td class="imp">核心量</td><td>Δβ（率差）/ distance delta</td><td>cluster→CramersV / HP-AUC</td></tr>
+      <tr><td class="imp">對 subclone</td><td><span class="badge b-gap">❌ 不行</span>（無 subclone 標籤）</td><td><span class="badge b-ok">✅ 正確方向</span></td></tr>
+      <tr><td class="imp">主 confound</td><td>標籤本身錯 / 需 baseline / over-dispersion</td><td>clustering overfit / k 敏感 / 關聯 artifact</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ② 計算流程 -->
+<section id="flow">
+  <h3><span class="num">②</span> 計算流程架構（5 階段 + 兩個共用中間量）</h3>
+  <p class="sub">所有方法掛在一條共用管線上。兩個「算一次、全下游共用」的大中間量是效率根基（ISM 現已共用）。</p>
+
+  <figure>
+    <div class="figtitle">圖 2　計算階段 0→4（distance + raw matrix 為共用中間量）</div>
+    <svg viewBox="0 0 980 320" role="img" aria-label="計算流程階段">
+      <defs><marker id="af" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#D97757"/></marker></defs>
+      <g font-size="11">
+        <rect x="20" y="30" width="170" height="60" rx="8" fill="#F0EDE6" stroke="#5C5A54"/><text x="105" y="52" text-anchor="middle" font-weight="800">階段 0 基礎</text><text x="105" y="70" text-anchor="middle" fill="#5C5A54">甲基矩陣(raw+binary)</text><text x="105" y="84" text-anchor="middle" fill="#5C5A54">+ labels(HP/sample/allele)</text>
+        <rect x="20" y="120" width="170" height="50" rx="8" fill="#F0EDE6" stroke="#5C5A54"/><text x="105" y="140" text-anchor="middle" font-weight="800">階段 1 距離</text><text x="105" y="157" text-anchor="middle" fill="#5C5A54">distance matrix (read×read)</text>
+        <!-- B branch -->
+        <rect x="250" y="20" width="330" height="120" rx="8" fill="#E4F0EA" stroke="#2F7D5B"/><text x="415" y="40" text-anchor="middle" font-weight="800" fill="#2F7D5B">階段 2 · 方向 B（用 distance）</text>
+        <text x="265" y="62" font-size="10.5">🔑 <tspan font-weight="700">HP-AUC</tspan>（距離直接 vs 標籤，最乾淨）</text>
+        <text x="265" y="80" font-size="10.5">clustering（UPGMA+cut）→ subclone 入口</text>
+        <text x="265" y="98" font-size="10.5">ClusterPERMANOVA（結構顯著）</text>
+        <text x="265" y="116" font-size="10.5">GlobalTest（cluster×label CramersV）</text>
+        <!-- A branch -->
+        <rect x="250" y="150" width="330" height="100" rx="8" fill="#E2ECF3" stroke="#2F6690"/><text x="415" y="170" text-anchor="middle" font-weight="800" fill="#2F6690">階段 3 · 方向 A（用 raw + labels）</text>
+        <text x="265" y="192" font-size="10.5">🔑 <tspan font-weight="700">Δβ 模組</tspan>：germline Δβ + somatic 殘差 Δβ + 檢定</text>
+        <text x="265" y="210" font-size="10.5">PerCpgAsm Fisher + BH-FDR（per-CpG 定位）</text>
+        <text x="265" y="228" font-size="10.5">NME / Epipoly（epiallele 異質性）</text>
+        <!-- 整合 -->
+        <rect x="640" y="80" width="170" height="120" rx="8" fill="#F2E4DC" stroke="#D97757"/><text x="725" y="120" text-anchor="middle" font-weight="800" fill="#D97757">階段 4 整合</text><text x="725" y="142" text-anchor="middle" fill="#5C5A54">VerificationClass</text><text x="725" y="160" text-anchor="middle" fill="#5C5A54">(綜合 A+B 判定)</text>
+        <line x1="105" y1="90" x2="105" y2="118" stroke="#D97757" stroke-width="2" marker-end="url(#af)"/>
+        <line x1="190" y1="145" x2="248" y2="120" stroke="#2F7D5B" stroke-width="2" marker-end="url(#af)"/>
+        <line x1="190" y1="60" x2="248" y2="80" stroke="#2F6690" stroke-width="2" marker-end="url(#af)"/>
+        <text x="200" y="250" font-size="9.5" fill="#9A3B3B">階段3 A 用「raw matrix」(階段0)，非 distance</text>
+        <line x1="580" y1="80" x2="638" y2="120" stroke="#D97757" stroke-width="2" marker-end="url(#af)"/>
+        <line x1="580" y1="200" x2="638" y2="160" stroke="#D97757" stroke-width="2" marker-end="url(#af)"/>
+      </g>
+      <rect x="830" y="30" width="140" height="80" rx="8" fill="#fff" stroke="#B06A16" stroke-dasharray="4 3"/>
+      <text x="900" y="50" text-anchor="middle" font-size="10.5" font-weight="700" fill="#B06A16">共用中間量</text>
+      <text x="900" y="70" text-anchor="middle" font-size="9.5" fill="#5C5A54">distance（B + A-dist）</text>
+      <text x="900" y="86" text-anchor="middle" font-size="9.5" fill="#5C5A54">raw matrix（A 的 Δβ）</text>
+      <text x="900" y="102" text-anchor="middle" font-size="9" fill="#2F7D5B">算一次, 全用 ✅</text>
+      <text class="svgnote" x="20" y="305">源碼：distance :843 / raw :844 已共用（效率基礎對）。建議 Δβ 模組集中 compute_dbeta_module()。← COMPUTE_FLOW_ARCHITECTURE.md</text>
+    </svg>
+    <figcaption><b>效率重點：</b>Δβ「值」其實已內建（<code>HP_Signed_Residual</code> = tumor signed − normal signed，零額外成本），缺的是<b>檢定</b>；而 Δβ 的 mean-permutation 比 distance permutation（O(reads²)）便宜一個量級 → 內建檢定可行。</figcaption>
+  </figure>
+</section>
+
+<!-- ③ 6 目標 × 方法 -->
+<section id="goals">
+  <h3><span class="num">③</span> 6 個目標 × 方法（每個目標：哪些方法、是否有效、缺什麼）</h3>
+  <p class="sub"><span class="badge b-A">A</span> label-first / <span class="badge b-B">B</span> structure-first · <span class="badge b-ok">✅有效</span> <span class="badge b-mid">🟡可用有限</span> <span class="badge b-gap">🔴缺陷</span> <span class="badge b-new">建議新增</span></p>
+  <div class="grid">
+    <div class="gcard" style="border-top-color:var(--c-pass)"><h4>目標 1 · germline ASM 存在嗎</h4>
+      <div class="m">HP1 vs HP2（parental）甲基有顯著差？</div>
+      <div class="m"><span class="badge b-A">A</span><span class="badge b-new">新</span> 1a Δβ family（mean 差+perm）— 缺 Δβ 版</div>
+      <div class="m"><span class="badge b-A">A</span><span class="badge b-mid">🟡</span> 1b LabelTest HP distance（與 PERMANOVA 冗餘）</div>
+      <div class="m"><span class="badge b-B">B</span><span class="badge b-ok">✅</span> 1c GlobalTest HP（cluster×HP）</div>
+    </div>
+    <div class="gcard" style="border-top-color:var(--c-dead)"><h4>目標 2 · somatic ASM（扣 germline baseline）</h4>
+      <div class="m">tumor 比 normal 多出的 HP 甲基差？</div>
+      <div class="m"><span class="badge b-A">A</span><span class="badge b-new">新</span> 2a somatic 殘差 Δβ+檢定 —<b>#3 修法核心</b></div>
+      <div class="m"><span class="badge b-A">A</span><span class="badge b-gap">🔴</span> 2b hp_residual（借 tumor p，44.9% sig 不可信）</div>
+      <div class="m"><span class="badge b-A">A</span><span class="badge b-mid">🟡</span> 2c SampleASM（太敏感 99.8% sig，非 HP-controlled）</div>
+    </div>
+    <div class="gcard" style="border-top-color:var(--c-warn)"><h4>目標 3 · subclone（同 HP 內 germline vs somatic）</h4>
+      <div class="m">HP1 內帶 somatic 的 read（1-1）甲基不同？</div>
+      <div class="m"><span class="badge b-A">A</span><span class="badge b-new">新</span> 3a fine same-hap Δβ+檢定 —<b>最直接</b></div>
+      <div class="m"><span class="badge b-B">B</span><span class="badge b-mid">🟡</span> 3b HP fine PERMANOVA（顯著但不指方向）</div>
+      <div class="m"><span class="badge b-B">B</span><span class="badge b-new">新</span> 3c clustering 子分群（未實作，缺 ground truth）</div>
+    </div>
+    <div class="gcard" style="border-top-color:var(--c-pass)"><h4>目標 4 · 甲基結構有效性</h4>
+      <div class="m">距離能還原已知標籤嗎（sanity floor）？</div>
+      <div class="m"><span class="badge b-B">B</span><span class="badge b-ok">✅</span> 4a HP-AUC（最乾淨）— <b class="key">normal median 0.788, 76% strong（地基確認）</b></div>
+      <div class="m"><span class="badge b-B">B</span><span class="badge b-ok">✅</span> 4b ClusterPERMANOVA + silhouette</div>
+    </div>
+    <div class="gcard" style="border-top-color:var(--c-warn)"><h4>目標 5 · CpG 定位</h4>
+      <div class="m">哪些單一 CpG 在 HP1/HP2 顯著？</div>
+      <div class="m"><span class="badge b-A">A</span><span class="badge b-mid">🟡</span> 5a PerCpgAsm Fisher + BH-FDR（忽略 over-dispersion）</div>
+      <div class="m muted">替代：DSS/methylKit beta-binomial per-CpG</div>
+    </div>
+    <div class="gcard" style="border-top-color:var(--c-pass)"><h4>目標 6 · epiallele 異質性</h4>
+      <div class="m">每 haplotype 的 read 甲基模式多亂（subclone 代理）？</div>
+      <div class="m"><span class="badge b-A">A</span><span class="badge b-ok">✅</span> 6a NME / Epipoly（標準指標 Jenkinson2020/Li2014）</div>
+    </div>
+  </div>
+</section>
+
+<!-- ④ Δβ 配對矩陣 -->
+<section id="dbeta">
+  <h3><span class="num">④</span> Δβ 配對矩陣（哪些 HP 配對必要、對什麼目標有用）</h3>
+  <p class="sub">標籤層次：<b>family</b>=HP1f(HP1+HP1-1) vs HP2f；<b>fine</b>=HP1/HP1-1/HP2/HP2-1（「1-1」「2-1」= 同 haplotype 內<u>帶 somatic 的 sub-haplotype</u>）；<b>sample</b>=tumor/normal。</p>
+
+  <figure>
+    <div class="figtitle">圖 3　fine 4 標籤的 Δβ 配對（紅=subclone 核心 / 綠=germline / 紫=somatic 殘差 / 灰=診斷）</div>
+    <svg viewBox="0 0 900 300" role="img" aria-label="Δβ 配對矩陣">
+      <!-- 4 nodes -->
+      <circle cx="200" cy="90" r="34" fill="#E2ECF3" stroke="#2F6690" stroke-width="2"/><text x="200" y="86" text-anchor="middle" font-size="12" font-weight="700">HP1</text><text x="200" y="102" text-anchor="middle" font-size="9" fill="#5C5A54">germline</text>
+      <circle cx="200" cy="220" r="34" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="2"/><text x="200" y="216" text-anchor="middle" font-size="12" font-weight="700">HP1-1</text><text x="200" y="232" text-anchor="middle" font-size="9" fill="#5C5A54">somatic</text>
+      <circle cx="640" cy="90" r="34" fill="#E2ECF3" stroke="#2F6690" stroke-width="2"/><text x="640" y="86" text-anchor="middle" font-size="12" font-weight="700">HP2</text><text x="640" y="102" text-anchor="middle" font-size="9" fill="#5C5A54">germline</text>
+      <circle cx="640" cy="220" r="34" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="2"/><text x="640" y="216" text-anchor="middle" font-size="12" font-weight="700">HP2-1</text><text x="640" y="232" text-anchor="middle" font-size="9" fill="#5C5A54">somatic</text>
+      <!-- edges -->
+      <line x1="234" y1="90" x2="606" y2="90" stroke="#2F7D5B" stroke-width="3"/><text x="420" y="80" text-anchor="middle" font-size="10.5" fill="#2F7D5B" font-weight="700">HP1−HP2 = germline ASM（純）</text>
+      <line x1="200" y1="124" x2="200" y2="186" stroke="#9A3B3B" stroke-width="4"/><text x="120" y="160" text-anchor="middle" font-size="10.5" fill="#9A3B3B" font-weight="800">🔑 HP1−HP1-1</text><text x="120" y="174" text-anchor="middle" font-size="9" fill="#9A3B3B">HP1 內 subclone</text>
+      <line x1="640" y1="124" x2="640" y2="186" stroke="#9A3B3B" stroke-width="4"/><text x="730" y="160" text-anchor="middle" font-size="10.5" fill="#9A3B3B" font-weight="800">🔑 HP2−HP2-1</text><text x="730" y="174" text-anchor="middle" font-size="9" fill="#9A3B3B">HP2 內 subclone</text>
+      <line x1="234" y1="220" x2="606" y2="220" stroke="#B06A16" stroke-width="2" stroke-dasharray="5 3"/><text x="420" y="240" text-anchor="middle" font-size="10" fill="#B06A16">HP1-1−HP2-1 somatic 跨-hap（🟡）</text>
+      <line x1="230" y1="116" x2="610" y2="196" stroke="#bbb" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <line x1="610" y1="116" x2="230" y2="196" stroke="#bbb" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <text x="420" y="150" text-anchor="middle" font-size="9" fill="#999">交叉配對 = 診斷/confound 對照（存值不檢定）</text>
+      <!-- family + somatic note -->
+      <rect x="320" y="262" width="500" height="30" rx="6" fill="#ECE6F6" stroke="#5B3FA0"/><text x="570" y="281" text-anchor="middle" font-size="10.5" fill="#5B3FA0">family: HP1f−HP2f = germline ASM 主指標（power 最高）· sample: tumor殘差−normal殘差 = somatic ASM</text>
+      <text class="svgnote" x="20" y="295">← COMPUTE_FLOW §3.5（Stats.hpp:324-326 已註解語意）。效率：掃 raw 一次算 ≤8 個 mean，任意配對 Δβ = 兩 mean 相減（零成本），只對必要配對做檢定。</text>
+    </svg>
+    <figcaption><b>核心結論：</b><b>family Δβ（HP1f−HP2f）= germline ASM 主指標</b>（power 最高）；<b>fine same-hap Δβ（HP1−HP1-1 / HP2−HP2-1）= 方向 A 偵測 subclone 的核心</b>（同 haplotype 內 germline vs somatic）；<b>somatic 殘差 Δβ（tumor−normal）= somatic ASM</b>。跨配對只當診斷。</figcaption>
+  </figure>
+
+  <table>
+    <thead><tr><th>Δβ 配對</th><th>層</th><th>意義</th><th>對目標</th><th>必要</th><th>檢定</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">HP1f − HP2f</td><td>family</td><td>germline parental（納 somatic-carrier，power 高）</td><td>germline ASM 主指標</td><td>✅</td><td>✅</td></tr>
+      <tr><td>HP1 − HP2</td><td>fine</td><td>germline parental（純）</td><td>germline ASM 純版</td><td>✅</td><td>✅</td></tr>
+      <tr style="background:var(--c-dead-soft)"><td class="imp">HP1 − HP1-1</td><td>fine same-hap</td><td>same haplotype, germline vs somatic</td><td class="imp">🔑 HP1 內 subclone</td><td>✅✅</td><td>✅</td></tr>
+      <tr style="background:var(--c-dead-soft)"><td class="imp">HP2 − HP2-1</td><td>fine same-hap</td><td>same haplotype, germline vs somatic</td><td class="imp">🔑 HP2 內 subclone</td><td>✅✅</td><td>✅</td></tr>
+      <tr><td class="imp">tumor殘差 − normal殘差</td><td>sample×HP</td><td>somatic 殘差 Δβ（=HP_Signed_Residual，值已有）</td><td>somatic ASM</td><td>✅</td><td>✅</td></tr>
+      <tr><td>HP1-1 − HP2-1</td><td>fine</td><td>兩 somatic-carrier 間</td><td>somatic 跨-hap 一致性</td><td>🟡</td><td>🟡</td></tr>
+      <tr><td>HP1−HP2-1 / HP2−HP1-1</td><td>fine cross</td><td>germline vs 異-hap somatic</td><td>診斷 / confound</td><td>🟢</td><td>✗</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ⑤ 6 方法 + 6 gap -->
+<section id="inv">
+  <h3><span class="num">⑤</span> 6 類顯著性方法 + 6 個 gap</h3>
+  <h4 class="mini">6 類方法（計算 → 目標 → permutation）</h4>
+  <table>
+    <thead><tr><th>方法</th><th>計算（L1 源碼）</th><th>目標</th><th>perm / p-floor</th><th>評估</th></tr></thead>
+    <tbody>
+      <tr><td>GlobalTest</td><td>cluster×label contingency → Fisher-Freeman-Halton + Cramér's V（Cochran gate）</td><td>cluster 是否重現標籤（gate）</td><td>Fisher MC</td><td><span class="badge b-ok">🟢 OK</span></td></tr>
+      <tr><td>LabelTest distance</td><td>between−within 距離 delta + perm</td><td>標籤是否解釋距離結構</td><td>999 / 0.001</td><td><span class="badge b-mid">🟡 與 PERMANOVA 冗餘</span></td></tr>
+      <tr><td class="imp">🔑 Δβ signed</td><td>mean(HP1)−mean(HP2) raw（<b>無 perm/p</b>）</td><td>ASM 方向+大小</td><td><b>無檢定</b></td><td><span class="badge b-gap">🔴 gap #1</span></td></tr>
+      <tr><td>PERMANOVA</td><td>Anderson SS 分解 + pseudo-F + shuffle</td><td>距離空間整體分群</td><td>99 / 0.01</td><td><span class="badge b-ok">🟢 OK</span></td></tr>
+      <tr><td>Dispersion</td><td>到群心距離 → ANOVA F → <b>查表 p</b></td><td>守衛：是否離散度差非位置差</td><td>查表(非 perm)</td><td><span class="badge b-gap">🔴 gap #2</span></td></tr>
+      <tr><td>PerCpgAsm</td><td>per-CpG 2×2 Fisher + BH-FDR；NME；Epipoly</td><td>哪些 CpG 顯著 + 異質性</td><td>Fisher exact</td><td><span class="badge b-mid">🟡 gap #4</span></td></tr>
+    </tbody>
+  </table>
+
+  <h4 class="mini">6 個 gap（嚴重度 + 修法）</h4>
+  <table>
+    <thead><tr><th>#</th><th>問題</th><th>嚴重</th><th>修法</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--c-dead-soft)"><td>1</td><td class="imp">🔑 Δβ 無顯著性檢定（signed delta 只描述）</td><td>🔴 高</td><td>加 beta-binomial / logistic 對 Δβ 檢定（DSS-like）</td></tr>
+      <tr style="background:var(--c-dead-soft)"><td>3</td><td class="imp">hp_residual_sig 借 tumor p（殘差未檢定；gap2 已揭，44.9% sig 不可信）</td><td>🔴 高</td><td>對 somatic 殘差做正規 permutation（= 2a）</td></tr>
+      <tr><td>2</td><td>Dispersion p 查表近似（非真分布）</td><td>🔴 中</td><td>改 PERMDISP2 真 permutation p</td></tr>
+      <tr><td>4</td><td>PerCpgAsm Fisher 忽略 over-dispersion（read 當獨立）</td><td>🟡 中</td><td>beta-binomial per-CpG</td></tr>
+      <tr><td>5</td><td>permutation 數不一致（PERMANOVA 99 / LabelTest 999）</td><td>🟡 中</td><td>統一或文檔明示理由</td></tr>
+      <tr><td>6</td><td>LabelTest delta + PERMANOVA 冗餘（同測 HP/allele 兩套）</td><td>🟢 低</td><td>擇一（PERMANOVA 更標準）</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ⑥ 判定 -->
+<section id="verdict">
+  <h3><span class="num">⑥</span> 整體判定 + 最高槓桿下一步</h3>
+  <div class="takeaway pass">
+    <span class="lab">整體判定</span>
+    ISM 核心顯著性計算<b>合理、無致命錯誤</b> —— Fisher-FH / PERMANOVA(Anderson) / BH-FDR / NME-Epipoly 都對標業界標準。問題在<b>「描述有了、檢定缺了」</b>：Δβ 有值無檢定（#1）、somatic 殘差借 tumor 的 p（#3）。
+  </div>
+  <div class="ironclad">
+    <b>最高槓桿（最上游 + 直接決定「ASM/somatic 能否可信判定」）：</b>
+    <b>#1（Δβ 檢定）</b> + <b>#3（somatic 殘差檢定）</b> 其實可<u>一次統一</u> —— 做一個方向 A 的 <code>Δβ 模組</code>：germline Δβ（family/fine same-hap）+ somatic 殘差 Δβ（tumor−normal）+ permutation 檢定，輸出 dbeta/p/sig，並<b>取代</b>有缺陷的 hp_residual。檢定成本低（mean-permutation ≪ distance permutation）。#2/#4 改善嚴謹度，#5/#6 釐清。
+  </div>
+  <table>
+    <thead><tr><th>下一步</th><th>內容</th><th>理論依據</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">(a) Δβ 檢定模組</td><td>somatic 殘差 Δβ + germline Δβ + permutation；先 perm(i)，beta-binomial(ii) 後對照</td><td>DSS/methylKit interaction = somatic ASM 標準</td></tr>
+      <tr><td>(b) 實際數據驗</td><td>Δβ sig 比例 vs 舊 hp_residual_sig；與 DSS-like 對齊</td><td>方法一致性</td></tr>
+      <tr><td>(c) 精簡冗餘</td><td>移除 LabelTest distance delta / hp_residual(distance)</td><td>#6/#3，雙守護 regression 保結果不變</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">⚠ 框架是<b>對齊工具</b>不是定論：A/B 二分法 + 歸類若與你構想有偏差，先校正再往下。有效性/替代為 L2，需逐一在實際數據 + 外部方法對齊驗證。</p>
+</section>
+
+<footer class="prov"><div>
+  <h4>來源（feat e472760 · 4 份框架文件，消化生成）</h4>
+  <ul>
+    <li><code>TWO_DIRECTIONS_FRAMEWORK.md</code> — A/B 二分法 + ISM 方法歸類（§1）+ #3 hp_residual 修法</li>
+    <li><code>COMPUTE_FLOW_ARCHITECTURE.md</code> — 5 階段流程 + 共用中間量 + Δβ 配對矩陣（§3.5）+ 效率</li>
+    <li><code>METHODS_BY_GOAL.md</code> — 6 目標 × 方法（7 欄：目標→方法→敘述→解釋→結果→有效→替代）</li>
+    <li><code>SIGNIFICANCE_INVENTORY.md</code> — 6 類方法計算細節 + 6 gap + 方法學評估</li>
+  </ul>
+  <p><b>數據佐證（本 session 已驗）：</b>HP-AUC normal median 0.788（wg_hpauc.json）· hp_residual 44.9% sig 不可信 / somatic 上限 15.4%（gap2）· SampleASM 99.8% sig（U1）。</p>
+  <p><b>分級：</b>方法歸類/計算=L1（框架引源碼行號）· 數據=本 session 驗證 · 有效性/替代=L2（領域評估待逐一驗）。本報告為「框架→白話解釋」，<u>未新增任何數字</u>。</p>
+  <p style="margin-top:var(--sp-3)">建立 2026-06-15 · ISM 方法現況解釋 · 4 解釋 SVG（A/B 兩方向 / 計算流程 / Δβ 配對 / 目標地圖）</p>
+</div></footer>
+
+</div>
+</body>
+</html>

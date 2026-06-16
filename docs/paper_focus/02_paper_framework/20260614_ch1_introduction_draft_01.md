@@ -85,7 +85,7 @@ DNA 甲基化與體細胞變異存在**雙向**生物學關聯，兩者皆為本
 ## 1.4 旗艦個案（詳見第四章）
 
 - **BRCA2 promoter（HCC1395 乳癌，TSG）**：ISM 同時偵到 HP-axis 甲基差（Δβ=−0.122）與 tumor-normal 甲基差，共定位於 BRCA2 promoter；normal-anchored 分解顯示此差**主要 track somatic 子克隆 tag（HP1-1）**、focal cis 效應 marginal（d_within=−0.023, perm p=0.024）。→ 示範 ISM **不只 flag「與突變共定位的甲基差」，更量化它屬子克隆結構 vs 直接 focal cis**（誠實：方向為 hypo，非典型 TSG promoter hyper-沉默）。
-- **chr2:18M（HCC1395，30 kb，57 reads×203 CpG）**：longphase-S 分出 Normal=G → HP1 母本（19 reads 全 G）→ HP1-1 子克隆（36 reads，28 A/8 G）；位點 18,086,020 的甲基分群顯著（PERMANOVA F=10.6, p=0.01）且跟隨 HP/子克隆結構（Cramér's V=0.67），同區 somatic 位點 18,096,269 的甲基則跟隨 somatic 等位本身（V=0.97）。→ 兩種互補模式構成「甲基+突變共同標示子克隆」的機制基礎，**個案示範** workflow 並推導 Normal→HP1→HP1-1 時序假說（時序為數據支撐之推論，非正交確認；18,086,020 為標記子克隆的 het，非 caller-somatic）。
+- **chr2:18M（HCC1395，~40 kb，6 sSNV；2026-06-15 cross-basecaller + 第二 AI 獨立 audit verified）**：在 SEQC2-confirmed LOH 區（HP2 母本 ~98–99% 保留、normal 6 點全 REF），6 個 somatic 變異的 read linkage（互斥 **0 違反**、HKU/DORADO 複製）定義 **≥3 個 regional molecular states**（α:(3)A / α-1:+(5)C / beta-like:(3)G+(4)+(6)，+ 以甲基 coherence 暫接的 beta-left (1)(2)）；多個 allele-CpG 甲基關聯跨兩 basecaller 同方向過 FDR，並以 **matched-normal HP ASM-control** 拆出**乾淨 tumor-acquired 子集（2.1/2.2/3.1/3.2/5.1/5.2，最強 3.1/3.2）** vs **既存 germline-ASM confounded（3.3/3.4/3.5/4.1）**。→ 個案示範「somatic 變異 + read-level 甲基」如何共同 characterize subclone 結構、ISM 並用 normal-anchor 把 subclone-甲基與既存 ASM **拆開**。可防守用語 = **「a regional, LOH-constrained, somatic-haplotag-conditioned subclonal structure with cross-basecaller methylation coherence」**（🔴 非 confirmed 5-subclone；演化順序僅 (3)→(5) nesting 有支持；甲基造成突變未證；pos4 G/T/DEL 為 20bp poly-T homopolymer artifact 非 3 subclone）。詳見 `20260615_chr2_subclone_case_and_method_concept_01.md`。
 
 ---
 

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StrengthScore + reclassify-v2 — C++ 改動白話解釋 + 量化分析</title>
+<!--
+  doc_type: explainer (cpp-change spec + quantitative pilot analysis)  id: strength_score_reclassify_explainer  version: v1  created: 2026-06-16
+  explains: docs/plans/20260616_strength_score_reclassify_cpp_change_spec_01.md (committed 50ec746 on develop/feat; NOT on current branch research/subclonal-reconstruction-202606)
+  data_sources: strength_score.json, reclassify_v2_pilot.json, within_hp_clean_pilot.json (committed pilots, method_audit/),
+                spec §7.5 implementation verification log
+  provenance-verified: 所有量化數字（StrengthScore median 0.3442 / grade A767..E7734 / rescue 3810-8179=46.58% / FP 0 / within-HP clean 14.18% / silhouette 分佈 / ctest 221 / C++=Python 0/2624）
+                       皆親讀上列已 commit pilot JSON（30490 region 全基因組）+ spec 實作 log。本頁=解釋渲染，不產新數字。
+  CSS: 內聯 explain.css v2.1。
+-->
+<style>
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --c-cs:#5B3FA0; --c-cs-soft:#ECE6F6;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.72;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:0 var(--sp-5);display:flex;align-items:center;gap:var(--sp-3);min-height:52px;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;white-space:nowrap;font-size:.82rem}
+.topbar nav a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:2.0rem;margin:6px 0 6px;line-height:1.22;letter-spacing:-.01em}
+header.hero .lede{color:var(--c-text-soft);max-width:880px;margin:0;font-size:1.07rem}
+h1,h2,h3,h4{letter-spacing:-.005em}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.52rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;line-height:1.25}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.96rem;margin:0 0 var(--sp-5);max-width:900px}
+h4.mini{font-size:1.02rem;margin:var(--sp-4) 0 var(--sp-2);color:var(--c-text);display:flex;align-items:center;gap:8px}
+h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px;display:inline-block}
+p{margin:var(--sp-3) 0}
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.08rem;line-height:1.58;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a} .takeaway.pass .lab{color:var(--c-pass)}
+.key{background:#fdf2c8;font-weight:700;padding:0 4px;border-radius:3px}
+.muted{color:var(--c-text-soft);font-size:.85rem}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-5);margin:var(--sp-4) 0}
+.bluf h2{margin:0 0 var(--sp-2);font-size:1.2rem}
+.bluf>p:first-of-type{font-size:1.06rem;line-height:1.6}
+.bluf .pi{font-size:.95rem;color:#7a3c22;margin:var(--sp-3) 0;padding:var(--sp-2) var(--sp-3);background:rgba(255,255,255,.5);border-radius:8px}
+.ironclad{background:var(--c-warn-soft);border:1px solid var(--c-warn);border-left:6px solid var(--c-warn);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:.9rem}
+.ironclad b{color:var(--c-warn)} .ironclad ol{margin:var(--sp-2) 0 0;padding-left:1.3em} .ironclad li{margin:4px 0}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.b-cs{color:var(--c-cs);background:var(--c-cs-soft);border-color:var(--c-cs)}
+.tier{color:var(--c-text-soft);background:#F0EDE6;border-color:var(--c-border)}
+.kpis{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-4) 0 0}
+.kpi{flex:1;min-width:160px;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4)}
+.kpi .v{font-family:var(--mono);font-size:1.5rem;font-weight:800;color:var(--c-text);line-height:1.1}
+.kpi .k{font-size:.78rem;color:var(--c-text-soft);margin-top:5px}
+.kpi.dead{border-left:4px solid var(--c-dead)} .kpi.pass{border-left:4px solid var(--c-pass)} .kpi.info{border-left:4px solid var(--c-info)} .kpi.warn{border-left:4px solid var(--c-warn)}
+table{border-collapse:collapse;width:100%;font-size:.85rem;margin:var(--sp-3) 0;background:#fff}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}
+tbody tr:nth-child(even){background:#FBF9F4}
+td code,p code,li code,summary code{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}
+td.imp{font-weight:700}
+.tablewrap{overflow-x:auto}
+figure{margin:var(--sp-4) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto;box-shadow:0 1px 3px rgba(20,20,19,.06)}
+figure .figtitle{font-size:.92rem;font-weight:700;color:var(--c-text);margin:0 0 var(--sp-2)}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}
+figcaption{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.6}
+figcaption b{color:var(--c-text)}
+.worked{background:#F7F5EF;border:1px solid var(--c-border);border-left:4px solid var(--c-info);border-radius:8px;padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;font-size:.88rem}
+.worked .lab{font-family:var(--mono);font-size:.64rem;color:var(--c-info);letter-spacing:1px;text-transform:uppercase;font-weight:800;display:block;margin-bottom:5px}
+.worked .calc{font-family:var(--mono);font-size:.85rem;background:#fff;border:1px solid var(--c-border);border-radius:6px;padding:8px 10px;margin:7px 0;overflow-x:auto;white-space:pre}
+.worked .res{font-weight:800;color:var(--c-info)}
+details.card{margin:var(--sp-2) 0;border:1px solid var(--c-border);border-radius:var(--radius);background:var(--c-card);overflow:hidden}
+details.card>summary{cursor:pointer;list-style:none;padding:var(--sp-3) var(--sp-4);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;font-weight:600;font-size:1rem}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--c-accent);font-weight:700;transition:transform .15s}
+details.card[open]>summary::before{transform:rotate(90deg)}
+details.card .body{padding:0 var(--sp-4) var(--sp-3);font-size:.92rem}
+details.card.def{border-left:4px solid var(--c-cs)}
+.intuition{background:var(--c-cs-soft);border-radius:8px;padding:var(--sp-2) var(--sp-3);font-size:.9rem;margin:var(--sp-2) 0}
+.intuition b{color:var(--c-cs)}
+.so{background:var(--c-pass-soft);border:1px solid var(--c-pass);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0}
+.so b{color:var(--c-pass)}
+.warnbox{background:var(--c-warn-soft);border:1px solid var(--c-warn);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0}
+.warnbox b{color:var(--c-warn)}
+.rel{display:flex;gap:8px;flex-wrap:wrap;margin:var(--sp-3) 0}
+.rel a{font-size:.82rem;text-decoration:none;color:var(--c-info);border:1px solid var(--c-info);border-radius:18px;padding:3px 11px;background:var(--c-info-soft)}
+.rel a:hover{background:var(--c-info);color:#fff}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-7);font-size:.8rem;color:var(--c-text-soft)}
+footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)} footer.prov code{font-family:var(--mono);font-size:.92em}
+footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
+.svgnote{font-size:8.5px;fill:#6B6B66}
+.formula{font-family:var(--mono);font-size:.9rem;background:#fff;border:1px solid var(--c-border);border-left:4px solid var(--c-accent);border-radius:8px;padding:10px 14px;margin:var(--sp-3) 0;overflow-x:auto;white-space:pre;line-height:1.7}
+@media(max-width:720px){.kpi{min-width:140px}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brand">cpp-change · StrengthScore + reclassify-v2</span>
+  <nav>
+    <a href="PART2_method_verification_explainer.standalone.html">← Part2 方法驗證</a>
+    <a href="#why">為何改</a><a href="#strength">強度分數</a><a href="#grade">分數分佈</a><a href="#reclass">reclassify-v2</a><a href="#within">within-HP</a><a href="#quant">量化總表</a><a href="#impl">實作驗證</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">cpp-change spec · 白話解釋 + 量化分析 · 給 PI / 自己回顧</div>
+  <h1>把「最終判別」從飽和的啟發分數，升級成<br>連續強度分數 + 救回假陰性的分類</h1>
+  <p class="lede">這個 C++ 改動做兩件事：① 用<strong>連續 StrengthScore（0–1）</strong>取代飽和、無梯度的 HeuristicScore；② 用 <strong>reclassify-v2</strong> 把原本「粗+標籤錨定」的 4 類判別，升級成能<strong>救回假陰性、且不誤判（0 FP）</strong>的細分類。全基因組 30,490 region pilot 驗證，C++ Stage ①④ 已實作。</p>
+</header>
+
+<div class="bluf">
+  <h2>L0 一眼看懂這個改動</h2>
+  <p><strong>問題：</strong>原本的「強度」是 <code>HeuristicScore</code>，它<span class="key">飽和（median 20 / max 22）= 沒有梯度</span>，無法排序強弱；而判別只認「離散 cluster × 標籤」，會把<u>有連續結構訊號（Δβ / HP-AUC 高）但不對標籤</u>的真訊號誤判成 Weak/Noise。<strong>改法：</strong>連續 StrengthScore + 「任一結構證據就保留」的 reclassify-v2。</p>
+  <p class="pi">▸ <b>給 PI 一句話：</b>全基因組 pilot 證實 reclassify-v2 <b>救回 3,810 / 8,179 = 46.58% 的 Weak+Noise</b>（這些是有 Δβ / HP-AUC 結構但被舊邏輯漏判的真訊號），<b>且 0 個原 Strong 被改掉（FP=0，純加識別無副作用）</b>。StrengthScore 從飽和變成漂亮梯度（median 0.344，A–E 五級分佈）。C++ 已實作 Stage ①（強度分數）+ Stage ④（新判別簡版），<b>ctest 221/221、C++=Python 0/2624 不一致、regression 雙守護 PASS</b>。</p>
+  <div class="kpis">
+    <div class="kpi pass"><div class="v">46.58%</div><div class="k">假陰性救回率（3,810 / 8,179 Weak+Noise）</div></div>
+    <div class="kpi pass"><div class="v">0</div><div class="k">FP（原 Strong 被改掉數 = 0）</div></div>
+    <div class="kpi info"><div class="v">0.344</div><div class="k">StrengthScore median（取代飽和的 HeuristicScore）</div></div>
+    <div class="kpi warn"><div class="v">Stage ①④</div><div class="k">C++ 已實作（②③ within-HP/SEQC2 BED 待補）</div></div>
+  </div>
+</div>
+
+<div class="ironclad">
+  <b>⚠ 狀態與範圍（誠實標註）</b>
+  <ol>
+    <li><b>spec 定稿、C++ Stage ①④ 已實作並驗證</b>；Stage ②③（within-HP pattern clustering + SEQC2 CN/LOH BED）<u>尚未進 C++</u>，故 C++ 簡版救回 41%、pilot 全版 46.58%。</li>
+    <li>數據 scope = <b>單樣本 HCC1395、全基因組 30,490 region</b>（pilot 驗證；跨樣本未做）。spec + pilot 在 <code>develop</code>/<code>feat</code> 分支（當前 branch 尚未 merge）。</li>
+    <li>改 VerificationClass = golden 欄大量變動 → 已 <code>--update-golden</code> + 全基因組重驗；pilot 已證 0 FP。</li>
+  </ol>
+</div>
+
+<!-- ============ §1 為何改 ============ -->
+<section id="why">
+  <h3><span class="num">①</span> 為何改：原方法三個不足</h3>
+  <p class="sub">改動不是憑感覺 —— 三個問題都有證據。</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th style="width:200px">原方法</th><th>問題</th><th>證據</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">HeuristicScore（強度）</td><td><b>飽和</b>（median 20 / max 22）</td><td>無梯度 → 無法排序強弱</td></tr>
+      <tr><td class="imp">VerificationClass 4 類</td><td><b>粗 + 標籤錨定</b></td><td>46.6% 假陰性可救（且 0 FP）</td></tr>
+      <tr><td class="imp">判別只認離散 cluster×標籤</td><td><b>漏 Δβ / HP-AUC</b></td><td>假陰性實例 <code>6202793</code>：HP-AUC=0.969（距離結構極強）卻被判 Weak</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="warnbox"><b>核心洞察：</b>「結構訊號」有<u>兩種</u> —— 離散的（cluster 對應某標籤）與連續的（Δβ level-shift、HP-AUC 距離結構）。舊判別只看離散那種，所以把「甲基整體位移、距離結構強、但不分成對應標籤的明顯兩群」的真訊號（= label-first 抓得到、structure-first clustering 漏掉的）誤判成噪音。reclassify-v2 把連續證據也納入「保留」條件。</div>
+</section>
+
+<!-- ============ §2 強度分數 ============ -->
+<section id="strength">
+  <h3><span class="num">②</span> StrengthScore：連續強度分數（取代 HeuristicScore）</h3>
+  <p class="sub">四個面向各取一個 0–1 的子分數，加權成一個 0–1 的總強度。</p>
+
+  <div class="formula">struct = clamp((HP_AUC_All − 0.5) / 0.5, 0, 1)        <span style="color:#5C5A54"># 距離結構（HP-AUC 0.5→0, 1.0→1）</span>
+eff    = clamp(|GermlineAsmDbeta| / 0.3, 0, 1)         <span style="color:#5C5A54"># Δβ effect size（甲基率差大小）</span>
+assoc  = CramersV                                      <span style="color:#5C5A54"># 標籤關聯（reliable-gated）</span>
+sig    = clamp(−log10(max(GlobalP, 1e-6)) / 4, 0, 1)   <span style="color:#5C5A54"># 顯著性（GlobalP=0 → 1）</span>
+
+<b style="color:#D97757">StrengthScore = 0.30·struct + 0.25·eff + 0.25·assoc + 0.20·sig   ∈ [0, 1]</b></div>
+
+  <figure>
+    <div class="figtitle">圖 1 · StrengthScore 的四個加權成分（+ 為何不用 ClusterPermanovaF）</div>
+    <svg viewBox="0 0 920 230" role="img" aria-label="StrengthScore 四成分權重">
+      <text x="20" y="26" font-size="12" font-weight="700">四成分加權（總和 = 1.00）</text>
+      <!-- weighted bars: struct 0.30, eff 0.25, assoc 0.25, sig 0.20 ; scale 600px = 0.30 -->
+      <g font-size="11">
+        <text x="30" y="62" font-weight="700" fill="#2F6690">struct · 距離結構</text>
+        <rect x="190" y="48" width="600" height="22" rx="4" fill="#2F6690"/><text x="800" y="64" font-weight="800" fill="#2F6690">0.30</text>
+        <text x="195" y="64" font-size="9.5" fill="#fff">HP-AUC_All</text>
+
+        <text x="30" y="96" font-weight="700" fill="#2F7D5B">eff · Δβ 效應</text>
+        <rect x="190" y="82" width="500" height="22" rx="4" fill="#2F7D5B"/><text x="700" y="98" font-weight="800" fill="#2F7D5B">0.25</text>
+        <text x="195" y="98" font-size="9.5" fill="#fff">|GermlineAsmDbeta|</text>
+
+        <text x="30" y="130" font-weight="700" fill="#5B3FA0">assoc · 標籤關聯</text>
+        <rect x="190" y="116" width="500" height="22" rx="4" fill="#5B3FA0"/><text x="700" y="132" font-weight="800" fill="#5B3FA0">0.25</text>
+        <text x="195" y="132" font-size="9.5" fill="#fff">CramersV (reliable-gated)</text>
+
+        <text x="30" y="164" font-weight="700" fill="#B06A16">sig · 顯著性</text>
+        <rect x="190" y="150" width="400" height="22" rx="4" fill="#B06A16"/><text x="600" y="166" font-weight="800" fill="#B06A16">0.20</text>
+        <text x="195" y="166" font-size="9.5" fill="#fff">−log10 GlobalP</text>
+      </g>
+      <line x1="190" y1="185" x2="790" y2="185" stroke="#E3DACC"/>
+      <text x="20" y="208" font-size="11" fill="#9A3B3B" font-weight="700">✗ 移除 ClusterPermanovaF：過敏 / 循環、always-high 不分辨（1916/1918 region 釘在 p=0.01）。</text>
+    </svg>
+    <figcaption><b>怎麼讀：</b>四成分覆蓋「距離結構（B 方向）+ Δβ 效應（A 方向）+ 標籤關聯 + 顯著性」四個正交面向。<b>刻意移除 ClusterPermanovaF</b>（它 always-high、無分辨力）。<b>來源：</b>spec §1。</figcaption>
+  </figure>
+
+  <div class="worked"><span class="lab">worked example · 假陰性 6202793</span>
+這個 region HP-AUC=0.969（距離結構極強）但被舊邏輯判 Weak。算 StrengthScore：
+<div class="calc">struct = (0.969 − 0.5)/0.5 = <span class="res">0.938</span>   ← 距離結構這一項就很高
+→ 即使 assoc(CramersV) 低（不對標籤），struct·0.30 ≈ 0.28 已把它推離「Noise/Weak」區
+→ StrengthScore 給出梯度，reclassify-v2 用「HP-AUC≥0.7」把它救回 StructureNoLabel</div>
+  </div>
+</section>
+
+<!-- ============ §3 分數分佈 ============ -->
+<section id="grade">
+  <h3><span class="num">③</span> 量化：StrengthScore 從「飽和」變成「梯度」</h3>
+  <p class="sub">全基因組 30,490 region 的實際分佈 —— 這是改動有效的直接證據。</p>
+
+  <figure>
+    <div class="figtitle">圖 2 · StrengthGrade 五級分佈（n=30,490，全基因組）vs 舊 HeuristicScore 飽和</div>
+    <svg viewBox="0 0 920 300" role="img" aria-label="StrengthGrade 分佈">
+      <!-- left: old saturated (illustrative) -->
+      <text x="20" y="24" font-size="12" font-weight="700" fill="#9A3B3B">舊 HeuristicScore：飽和</text>
+      <text x="20" y="40" font-size="10" fill="#5C5A54">median 20 / max 22 → 全擠在頂端，無梯度</text>
+      <rect x="30" y="60" width="60" height="180" fill="#F3E2E2" stroke="#9A3B3B"/>
+      <rect x="30" y="60" width="60" height="150" fill="#9A3B3B" opacity="0.55"/>
+      <text x="60" y="255" text-anchor="middle" font-size="10" fill="#9A3B3B">幾乎全頂格</text>
+      <line x1="130" y1="60" x2="130" y2="250" stroke="#E3DACC" stroke-dasharray="4 3"/>
+
+      <!-- right: new gradient bars A-E -->
+      <text x="180" y="24" font-size="12" font-weight="700" fill="#2F7D5B">新 StrengthScore：梯度分佈（A–E 五級）</text>
+      <!-- bars: A767 B4639 C9418 D7932 E7734 ; max 9418 -> 180px ; scale=180/9418 -->
+      <g font-family="JetBrains Mono,monospace" font-size="11" text-anchor="middle">
+        <!-- A -->
+        <rect x="200" y="225" width="90" height="15" fill="#2F7D5B"/><text x="245" y="218" fill="#2F7D5B" font-weight="700">767</text>
+        <text x="245" y="258" font-weight="700">A ≥0.65</text><text x="245" y="272" font-size="9" fill="#5C5A54">2.5%</text>
+        <!-- B 4639 -> 89px -->
+        <rect x="310" y="151" width="90" height="89" fill="#5B9E7A"/><text x="355" y="144" fill="#2F7D5B" font-weight="700">4639</text>
+        <text x="355" y="258" font-weight="700">B .50–.65</text><text x="355" y="272" font-size="9" fill="#5C5A54">15.2%</text>
+        <!-- C 9418 -> 180px -->
+        <rect x="420" y="60" width="90" height="180" fill="#B06A16"/><text x="465" y="53" fill="#B06A16" font-weight="700">9418</text>
+        <text x="465" y="258" font-weight="700">C .35–.50</text><text x="465" y="272" font-size="9" fill="#5C5A54">30.9%</text>
+        <!-- D 7932 -> 152px -->
+        <rect x="530" y="88" width="90" height="152" fill="#C77B63"/><text x="575" y="81" fill="#9A3B3B" font-weight="700">7932</text>
+        <text x="575" y="258" font-weight="700">D .20–.35</text><text x="575" y="272" font-size="9" fill="#5C5A54">26.0%</text>
+        <!-- E 7734 -> 148px -->
+        <rect x="640" y="92" width="90" height="148" fill="#9A3B3B"/><text x="685" y="85" fill="#9A3B3B" font-weight="700">7734</text>
+        <text x="685" y="258" font-weight="700">E &lt;0.20</text><text x="685" y="272" font-size="9" fill="#5C5A54">25.4%</text>
+      </g>
+      <text x="465" y="294" text-anchor="middle" font-size="10.5" fill="#2F7D5B" font-weight="700">median 0.344 · max 0.975 · 鐘形梯度（可排序強弱）</text>
+    </svg>
+    <figcaption><b>怎麼讀：</b>舊分數全擠頂端（無法分辨）；新分數呈鐘形梯度（C 級最多、兩端少），<b>可以排序「哪個 region 結構訊號最強」</b>。Top500 中 498 個 concordant Strong；Bottom500 = 358 Noise + 142 Weak。<b>來源：</b><code>strength_score.json</code>（median 0.3442 / max 0.9752 / grade A767 B4639 C9418 D7932 E7734）。</figcaption>
+  </figure>
+</section>
+
+<!-- ============ §4 reclassify-v2 ============ -->
+<section id="reclass">
+  <h3><span class="num">④</span> reclassify-v2：救回假陰性 + 細分類（量化）</h3>
+  <p class="sub">核心哲學（用戶定）：<strong>任一結構證據就保留（valid）</strong>。下面是 valid 條件 + 新細類 + 全基因組救回量化。</p>
+
+  <div class="formula">valid = Δβ_sig                          <span style="color:#5C5A54"># 任一 Δβ module 顯著（level-shift，主救回來源）</span>
+     OR HP_AUC_All ≥ 0.7                  <span style="color:#5C5A54"># 連續距離結構</span>
+     OR cluster_matches_label             <span style="color:#5C5A54"># 原 GlobalTest（離散）</span>
+     OR within_HP_clean_multigroup        <span style="color:#5C5A54"># §5 新指標（Stage② 待補）</span>
+     OR (SEQC2_LOH AND structure)         <span style="color:#5C5A54"># SEQC2 真值（Stage③ 待補）</span></div>
+
+  <figure>
+    <div class="figtitle">圖 3 · 原 4 類 → reclassify-v2 重分類（n=30,490；救回 46.58% / FP=0）</div>
+    <svg viewBox="0 0 940 360" role="img" aria-label="reclassify-v2 flow">
+      <!-- left: orig dist -->
+      <text x="20" y="22" font-size="12" font-weight="700">原 VerificationClass（4 類）</text>
+      <g font-size="11" font-family="JetBrains Mono,monospace">
+        <rect x="20" y="36" width="210" height="40" rx="6" fill="#E4F0EA" stroke="#2F7D5B"/>
+        <text x="32" y="54" font-family="var(--sans)" font-weight="700" fill="#1f4f3a">Strong</text><text x="200" y="54" text-anchor="end" font-weight="800">21016</text><text x="32" y="69" font-size="9" fill="#5C5A54">68.9%（保留不動 → 0 FP）</text>
+        <rect x="20" y="86" width="210" height="40" rx="6" fill="#F6EBD8" stroke="#B06A16"/>
+        <text x="32" y="104" font-family="var(--sans)" font-weight="700" fill="#7a3c22">Weak</text><text x="200" y="104" text-anchor="end" font-weight="800">6121</text><text x="32" y="119" font-size="9" fill="#5C5A54">20.1%</text>
+        <rect x="20" y="136" width="210" height="36" rx="6" fill="#ECE6F6" stroke="#5B3FA0"/>
+        <text x="32" y="153" font-family="var(--sans)" font-weight="700" fill="#3f2c70">Subclone</text><text x="200" y="153" text-anchor="end" font-weight="800">1295</text><text x="32" y="167" font-size="9" fill="#5C5A54">4.2%</text>
+        <rect x="20" y="182" width="210" height="40" rx="6" fill="#F3E2E2" stroke="#9A3B3B"/>
+        <text x="32" y="200" font-family="var(--sans)" font-weight="700" fill="#5e2424">Noise</text><text x="200" y="200" text-anchor="end" font-weight="800">2058</text><text x="32" y="215" font-size="9" fill="#5C5A54">6.7%</text>
+      </g>
+      <text x="20" y="246" font-size="10.5" fill="#B06A16" font-weight="700">Weak+Noise = 8,179（待檢查的「可能假陰性」池）</text>
+
+      <!-- arrow -->
+      <text x="280" y="120" font-size="11" font-weight="700" fill="#D97757">reclassify-v2</text>
+      <line x1="240" y1="135" x2="350" y2="135" stroke="#D97757" stroke-width="2.5" marker-end="url(#a)"/>
+      <defs><marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#D97757"/></marker></defs>
+
+      <!-- right: new細类 -->
+      <text x="370" y="22" font-size="12" font-weight="700">reclassify-v2 細類（9 類）</text>
+      <g font-size="10.5" font-family="JetBrains Mono,monospace">
+        <!-- valid (rescued/structure) -->
+        <rect x="370" y="34" width="250" height="22" rx="4" fill="#E4F0EA" stroke="#2F7D5B"/><text x="378" y="49" font-family="var(--sans)" font-weight="700" fill="#1f4f3a">Strong</text><text x="612" y="49" text-anchor="end" font-weight="800">22311</text>
+        <rect x="370" y="60" width="250" height="22" rx="4" fill="#FBF6EC" stroke="#B06A16"/><text x="378" y="75" font-family="var(--sans)" fill="#7a3c22">LabelShift（Δβ sig 無 distance）</text><text x="612" y="75" text-anchor="end" font-weight="800" fill="#2F7D5B">2131</text>
+        <rect x="370" y="86" width="250" height="22" rx="4" fill="#FBF6EC" stroke="#B06A16"/><text x="378" y="101" font-family="var(--sans)" fill="#7a3c22">CN-Substructure（within-HP+CN-gain）</text><text x="612" y="101" text-anchor="end" font-weight="800" fill="#2F7D5B">627</text>
+        <rect x="370" y="112" width="250" height="22" rx="4" fill="#FBF6EC" stroke="#B06A16"/><text x="378" y="127" font-family="var(--sans)" fill="#7a3c22">LOH-Structure（SEQC2-loh+結構）</text><text x="612" y="127" text-anchor="end" font-weight="800" fill="#2F7D5B">609</text>
+        <rect x="370" y="138" width="250" height="22" rx="4" fill="#FBF6EC" stroke="#B06A16"/><text x="378" y="153" font-family="var(--sans)" fill="#7a3c22">MultiGroupNoLabel（乾淨多群）</text><text x="612" y="153" text-anchor="end" font-weight="800" fill="#2F7D5B">323</text>
+        <rect x="370" y="164" width="250" height="22" rx="4" fill="#FBF6EC" stroke="#B06A16"/><text x="378" y="179" font-family="var(--sans)" fill="#7a3c22">StructureNoLabel（HP-AUC≥0.7）</text><text x="612" y="179" text-anchor="end" font-weight="800" fill="#2F7D5B">120</text>
+        <!-- noise subtypes -->
+        <rect x="370" y="194" width="250" height="22" rx="4" fill="#F3E2E2" stroke="#9A3B3B"/><text x="378" y="209" font-family="var(--sans)" fill="#5e2424">Noise_Uncorrelated</text><text x="612" y="209" text-anchor="end" font-weight="800">2257</text>
+        <rect x="370" y="220" width="250" height="22" rx="4" fill="#F3E2E2" stroke="#9A3B3B"/><text x="378" y="235" font-family="var(--sans)" fill="#5e2424">Noise_Uniform（均勻）</text><text x="612" y="235" text-anchor="end" font-weight="800">1407</text>
+        <rect x="370" y="246" width="250" height="22" rx="4" fill="#F3E2E2" stroke="#9A3B3B"/><text x="378" y="261" font-family="var(--sans)" fill="#5e2424">Noise_Chaotic（高熵無群）</text><text x="612" y="261" text-anchor="end" font-weight="800">705</text>
+      </g>
+
+      <!-- rescue callout -->
+      <rect x="650" y="60" width="280" height="120" rx="10" fill="#2F7D5B"/>
+      <text x="790" y="88" text-anchor="middle" fill="#fff" font-size="13" font-weight="800">救回 3,810</text>
+      <text x="790" y="108" text-anchor="middle" fill="#E4F0EA" font-size="11">/ 8,179 Weak+Noise</text>
+      <text x="790" y="132" text-anchor="middle" fill="#fff" font-size="20" font-weight="800">= 46.58%</text>
+      <text x="790" y="156" text-anchor="middle" fill="#E4F0EA" font-size="10">這些是有 Δβ/HP-AUC 結構</text>
+      <text x="790" y="170" text-anchor="middle" fill="#E4F0EA" font-size="10">但被舊邏輯漏判的真訊號</text>
+      <rect x="650" y="194" width="280" height="48" rx="10" fill="#fff" stroke="#2F7D5B" stroke-width="2"/>
+      <text x="790" y="214" text-anchor="middle" fill="#1f4f3a" font-size="13" font-weight="800">原 Strong 改掉 = 0</text>
+      <text x="790" y="232" text-anchor="middle" fill="#5C5A54" font-size="10">FP=0 · 純加識別、無副作用</text>
+    </svg>
+    <figcaption><b>怎麼讀：</b>原 Strong（21,016）<u>完全保留</u>（0 FP）；原 Weak+Noise（8,179）中 <b>46.58%（3,810）被救回</b>成有結構依據的細類（橘=救回的 valid 細類）；剩下的細分成 3 種 noise 子型。<b>來源：</b><code>reclassify_v2_pilot.json</code>（rescue 3810/8179、FP 0、各細類計數）。</figcaption>
+  </figure>
+
+  <h4 class="mini">三種 noise 子型怎麼分（用 Epipoly / PairwiseMeanDist，不用飽和的 NME）</h4>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th style="width:170px">noise 子型</th><th>判準</th><th>意思</th><th style="width:70px">計數</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">Noise_Uniform</td><td><code>PairwiseMeanDist&lt;0.15</code> 或 <code>Epipoly&lt;0.2</code></td><td>read 幾乎都一樣（均勻、無結構）</td><td>1,407</td></tr>
+      <tr><td class="imp">Noise_Chaotic</td><td><code>Epipoly&gt;0.5</code> 或 <code>PairwiseMeanDist&gt;0.35</code></td><td>高熵、混亂、無可辨群</td><td>705</td></tr>
+      <tr><td class="imp">Noise_Uncorrelated</td><td>其餘</td><td>有變異但不對任何標籤/結構</td><td>2,257</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ============ §5 within-HP ============ -->
+<section id="within">
+  <h3><span class="num">⑤</span> 新指標：within-HP clean multigroup + SEQC2 CN/LOH（Stage ②③ 待補）</h3>
+  <p class="sub">這兩個新指標讓「同一 haplotype 內再分群（CN substructure）」與「LOH 結構」能被正確歸類，而非當噪音。</p>
+
+  <figure>
+    <div class="figtitle">圖 4 · within-HP 子分群的 silhouette 分佈（n=30,490）+ clean multigroup 比例</div>
+    <svg viewBox="0 0 920 240" role="img" aria-label="within-HP silhouette 分佈">
+      <text x="20" y="22" font-size="12" font-weight="700">best silhouette 分佈（per-HP-family read 距離 clustering）</text>
+      <!-- bars: 0.0-0.2:535, 0.2-0.4:0, 0.4-0.6:102, 0.6-0.8:19229, 0.8-1.0:10624 ; max 19229 -> 150px -->
+      <g font-family="JetBrains Mono,monospace" font-size="10.5" text-anchor="middle">
+        <rect x="80" y="186" width="110" height="4" fill="#9A3B3B"/><text x="135" y="180" fill="#9A3B3B">535</text><text x="135" y="208" font-family="var(--sans)">0.0–0.2</text>
+        <rect x="210" y="189" width="110" height="1" fill="#bbb"/><text x="265" y="183" fill="#5C5A54">0</text><text x="265" y="208" font-family="var(--sans)">0.2–0.4</text>
+        <rect x="340" y="189" width="110" height="1" fill="#B06A16"/><text x="395" y="183" fill="#B06A16">102</text><text x="395" y="208" font-family="var(--sans)">0.4–0.6</text>
+        <rect x="470" y="40" width="110" height="150" fill="#2F7D5B"/><text x="525" y="33" fill="#2F7D5B" font-weight="700">19229</text><text x="525" y="208" font-family="var(--sans)">0.6–0.8</text>
+        <rect x="600" y="107" width="110" height="83" fill="#5B9E7A"/><text x="655" y="100" fill="#2F7D5B" font-weight="700">10624</text><text x="655" y="208" font-family="var(--sans)">0.8–1.0</text>
+      </g>
+      <!-- right callouts -->
+      <rect x="740" y="40" width="170" height="60" rx="8" fill="#E4F0EA" stroke="#2F7D5B"/>
+      <text x="825" y="62" text-anchor="middle" font-size="13" font-weight="800" fill="#1f4f3a">14.18%</text>
+      <text x="825" y="80" text-anchor="middle" font-size="9.5" fill="#5C5A54">clean multigroup (4322)</text>
+      <text x="825" y="93" text-anchor="middle" font-size="8.5" fill="#5C5A54">sil≥0.5 + balanced + gap&gt;0.15</text>
+      <rect x="740" y="110" width="170" height="50" rx="8" fill="#F6EBD8" stroke="#B06A16"/>
+      <text x="825" y="130" text-anchor="middle" font-size="11" font-weight="700" fill="#7a3c22">1853 CN-altered</text>
+      <text x="825" y="146" text-anchor="middle" font-size="9" fill="#5C5A54">333 是分類假陰性</text>
+    </svg>
+    <figcaption><b>怎麼讀：</b>對每個 HP-family 的 read 做距離 clustering，看子分群的分離度（silhouette）。<b>14.18%（4,322）是 clean multigroup</b>（嚴格：sil≥0.5 + 兩群平衡 + gap&gt;0.15），其中 1,853 落在 CN-altered 區、333 是被舊分類漏判的假陰性。🔴 C++ 應用 <b>pattern-based（per-CpG 距離 clustering）</b>而非 pilot 的 1-D mean β（更嚴謹，抓 pattern 異質非僅 level）。<b>來源：</b><code>within_hp_clean_pilot.json</code>。</figcaption>
+  </figure>
+
+  <details class="card def"><summary><span style="font-family:var(--mono);color:var(--c-cs)">SEQC2 CN/LOH BED（Stage ③）</span>為什麼用外部真值</summary><div class="body"><div class="intuition"><b>直覺：</b>ISM 自己的 <code>Potential_LOH</code> recall 只有 13%（漏很多）。所以 LOH-aware 改用 SEQC2 的 CNV/LOH BED 真值（<code>ngs_benchmark_cnvs_gain_loss_loh.bed</code>）：每 region overlap → <code>SEQC2_CN_Type</code> 欄。路徑設 CLI 參數（可選，無 BED 時退回 ISM Potential_LOH）。</div></div></details>
+</section>
+
+<!-- ============ §6 量化總表 ============ -->
+<section id="quant">
+  <h3><span class="num">⑥</span> 量化分析總表（全基因組 30,490 region）</h3>
+  <p class="sub">所有關鍵數字一處看齊，皆引自已 commit 的 pilot JSON。</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th style="width:240px">指標</th><th>數值</th><th>來源</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">StrengthScore median / p90 / p99 / max</td><td>0.344 / 0.562 / 0.701 / 0.975</td><td><code>strength_score.json</code></td></tr>
+      <tr><td class="imp">StrengthGrade 分佈 A/B/C/D/E</td><td>767 / 4,639 / 9,418 / 7,932 / 7,734</td><td><code>strength_score.json</code></td></tr>
+      <tr><td class="imp">reclassify-v2 救回率</td><td class="imp">3,810 / 8,179 = <b>46.58%</b></td><td><code>reclassify_v2_pilot.json</code></td></tr>
+      <tr><td class="imp">FP（原 Strong 被改掉）</td><td class="imp">0</td><td><code>reclassify_v2_pilot.json</code></td></tr>
+      <tr><td class="imp">救回細類（LabelShift 主力）</td><td>LabelShift 2,131 · CN-Sub 627 · LOH 609 · MultiGroup 323 · StructNoLabel 120</td><td><code>reclassify_v2_pilot.json</code></td></tr>
+      <tr><td class="imp">noise 子型 Uniform/Chaotic/Uncorr</td><td>1,407 / 705 / 2,257</td><td><code>reclassify_v2_pilot.json</code></td></tr>
+      <tr><td class="imp">within-HP clean multigroup</td><td>4,322 = 14.18%（CN-altered 1,853；分類 FN 333）</td><td><code>within_hp_clean_pilot.json</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ============ §7 實作驗證 ============ -->
+<section id="impl">
+  <h3><span class="num">⑦</span> C++ 實作驗證狀態（Stage ①④ 已完成）</h3>
+  <p class="sub">改動已分階段進 C++ 並驗證；每階段都「改動合理正確確認」。</p>
+
+  <h4 class="mini">Stage ① 強度分數（完成）</h4>
+  <ul>
+    <li><b>改動：</b><code>process_single_region</code> 的 HP block 後加 StrengthScore 計算（+2 欄 StrengthScore/StrengthGrade）；保留 HeuristicScore 標 LEGACY。</li>
+    <li>🐛 <b>修正的 bug：</b>初版放在 <code>perform_clustering_and_significance</code>，但 Δβ 在那之後才算 → <code>germline_asm_dbeta=NaN</code> → eff 項漏（C++ vs Python 差≈0.25×eff）。<b>移到 HP block 後</b>修正。</li>
+    <li>✅ <b>驗證：</b>C++ StrengthScore = Python 獨立重算 <b>0/2,624 不一致</b>；ctest <b>221/221</b>；regression 雙守護 PASS（純加欄不動既有結果）；StrengthGrade chr1 分佈 A53/B370/C849/D621/E731（梯度）。</li>
+  </ul>
+
+  <h4 class="mini">Stage ④ 新 VerificationClass（簡版完成）</h4>
+  <ul>
+    <li><b>改動：</b><code>process_single_region</code> try-block 末（所有 Δβ/Per-CpG 證據 final 後）override verification_class，原值存 <code>verification_class_legacy</code>。<b>為何 override 而非改 SignificanceAnalyzer</b>：legacy VC 算在 Δβ 之前，Δβ 不可用，故末段 override（同 strength 修法）。</li>
+    <li>✅ <b>驗證：</b>regression diff <b>只第 9 欄 VerificationClass 變</b>（前 8 欄 byte-identical）；<code>--update-golden</code> + 重跑雙守護 PASS；ctest <b>221/221</b>；全基因組救回 <b>3,321/8,180=41%</b>（簡版；全版 46.58%）；<b>legacy Strong→非 valid FP=0</b>。</li>
+    <li>⚠ <b>簡版略過</b> within-HP multigroup + SEQC2-LOH（= Stage ②③ 待補），故 C++ 41% &lt; pilot 全版 46.58%。</li>
+  </ul>
+
+  <div class="takeaway pass"><span class="lab">實作 verdict</span>
+    <b>Stage ①④ 已實作、合理正確、ctest 全過、regression 雙守護 PASS、C++=Python 一致、FP=0。</b>強度分數從飽和變梯度、判別救回 41%（簡版）/46.58%（全版設計）。剩 Stage ②③（within-HP pattern clustering + SEQC2 BED）待補可達全版。
+  </div>
+
+  <div class="warnbox"><b>風險 / 待決策（spec §7）：</b>① 改 VerificationClass = golden 欄大量變動 → 已更新 golden + 全基因組重驗（0 FP 已證）；② within-HP pattern clustering 增 compute（per-region 多一次 HP-subset clustering，預期 &lt;2×）；③ SEQC2 BED 路徑 → CLI 參數 + 缺檔 graceful；④ 細類粒度（6+3）若太細 → 可 config 合併。</div>
+
+  <div class="rel">
+    <a href="PART2_method_verification_explainer.standalone.html">Part 2 方法驗證（這改動的觸發來源）</a>
+    <a href="ism_methods_landscape_report.standalone.html">ISM 方法地景</a>
+  </div>
+</section>
+
+<footer class="prov">
+  <div class="wrap" style="padding:0">
+    <h4>來源與可重現性（provenance）</h4>
+    <p>本頁解釋 <strong>StrengthScore + reclassify-v2 cpp-change spec</strong> + 量化 pilot 分析。所有數字親讀已 commit 的 pilot JSON（全基因組 30,490 region），本頁不產新數字。</p>
+    <ul>
+      <li><b>spec（定稿，待 GO）：</b><code>InterSubMod/docs/plans/20260616_strength_score_reclassify_cpp_change_spec_01.md</code>（commit <code>50ec746</code>，在 <code>develop</code> / <code>feat/summary-nreadsvalid</code>；<b>當前 branch 尚未 merge</b>）</li>
+      <li><b>pilot 數據：</b><code>method_audit/strength_score.json</code>、<code>reclassify_v2_pilot.json</code>、<code>within_hp_clean_pilot.json</code>（+ <code>.py</code> 腳本）</li>
+      <li><b>實作驗證 log：</b>spec §7.5（Stage ① + ④；ctest 221/221、C++=Python 0/2624、regression --update-golden）；C++ 在 <code>feat/summary-nreadsvalid</code></li>
+      <li><b>相關設計：</b><code>20260616_cn_loh_aware_structure_classification_design_01.md</code>、<code>20260616_structure_label_verdict_false_negative_audit_01.md</code></li>
+    </ul>
+    <p class="muted">內聯 explain.css v2.1（暖色盤）使本頁可單獨開／寄。建立 2026-06-16 · 解釋 = StrengthScore + reclassify-v2 cpp-change。</p>
+  </div>
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<!--
+  06 chr2:18M subclone JUDGMENT WORKSTATION (generated, do not hand-edit)
+  build: b761336 / research/subclonal-reconstruction-202606 / 2026-06-15T12:34:16Z
+  regenerate: python3 .../verification_assets/scripts/build_workstation_html.py
+  data_sources: docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/independent_audit.json ; docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md ; docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/chr2_18M_seqc2_concordance.tsv
+  provenance-verified: 所有 metric 由 independent_audit.json/concordance.tsv 注入；§13-A refuse-on-missing
+-->
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>chr2:18M 亞克隆判讀工作站 · HCC1395 · L2</title>
+<style>
+:root{--bg:#0f0f14;--panel:#16161d;--panel2:#1c1c25;--ink:#e8e8ef;--mut:#9aa;--line:#2a2a36;
+--teal:#7fd1c4;--amber:#e0a96d;--red:#e07a7a;--green:#7fc98a;--blue:#6aa6d8;--gold:#f2c94c;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI",
+"Noto Sans CJK TC","PingFang TC",Roboto,sans-serif;line-height:1.6;font-size:15px}
+.wrap{display:grid;grid-template-columns:210px 1fr;max-width:1240px;margin:0 auto}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:18px 12px;
+border-right:1px solid var(--line);font-size:13px}
+nav.toc a{display:block;color:var(--mut);text-decoration:none;padding:5px 8px;border-radius:6px}
+nav.toc a:hover{background:var(--panel2);color:var(--ink)}
+nav.toc .lv2{padding-left:18px;font-size:12px}
+main{padding:24px 30px;min-width:0}
+header.hd{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:8px}
+h1{font-size:23px;margin:.2em 0}
+h2{font-size:19px;margin:1.5em 0 .5em;padding-top:8px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:1.1em 0 .4em;color:var(--teal)}
+.sub{color:var(--mut);font-size:13px}
+.badge{display:inline-block;padding:2px 9px;border-radius:11px;font-size:11.5px;font-weight:600;
+vertical-align:middle;margin:0 3px}
+.b-tier{background:#3a2d5a;color:#cdbfff}.b-partial{background:#5a4a1f;color:#f2d98a}
+.b-hc{background:#234a32;color:#9fe3b0}.b-med{background:#4a4423;color:#e8d98a}
+.b-gap{background:#4a2d2d;color:#f0aaaa}.b-loh{background:#23404a;color:#9fd6e3}
+.b-src{background:#22222c;color:#889;font-weight:500;font-size:10.5px;cursor:help;border:1px solid var(--line)}
+.verdict{background:linear-gradient(180deg,#1a1a24,#15151c);border:1px solid var(--line);
+border-radius:12px;padding:16px 18px;margin:10px 0}
+.vquote{border-left:3px solid var(--teal);padding:6px 12px;color:#cfeee7;background:#13201e;
+border-radius:0 8px 8px 0;margin:8px 0}
+.vnot{border-left:3px solid var(--red);padding:6px 12px;color:#f2cccc;background:#201313;
+border-radius:0 8px 8px 0;margin:8px 0}
+.grid{display:grid;gap:12px}
+.cards{grid-template-columns:repeat(auto-fill,minmax(330px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.card.gap{border-color:#5a3a3a}.card h4{margin:.1em 0 .4em;font-size:15px}
+.kv{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:2px 0;border-bottom:1px dotted #24242e}
+.kv .k{color:var(--mut)}.kv .v{text-align:right;font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+th,td{border:1px solid var(--line);padding:5px 8px;text-align:center;font-variant-numeric:tabular-nums}
+th{background:var(--panel2);color:var(--mut);font-weight:600}
+td.l,th.l{text-align:left}
+.conf{background:#2a1d1d}.clean{background:#1d2a20}.strong{outline:2px solid var(--gold);outline-offset:-2px}
+.fig{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}
+.fig figcaption{color:var(--mut);font-size:12px;margin-top:6px}
+details.cav{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 12px;margin:6px 0}
+details.cav summary{cursor:pointer;font-weight:600;color:var(--amber)}
+.judge{display:inline-flex;gap:4px;margin-top:8px}
+.judge button{background:var(--panel2);border:1px solid var(--line);color:var(--mut);border-radius:7px;
+padding:3px 9px;cursor:pointer;font-size:12px}
+.judge button.on-ok{background:#234a32;color:#9fe3b0;border-color:#3a6e4a}
+.judge button.on-doubt{background:#4a4423;color:#f2d98a;border-color:#6e6433}
+.judge button.on-no{background:#4a2d2d;color:#f0aaaa;border-color:#6e3a3a}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.bar button{background:var(--teal);color:#08110f;border:none;border-radius:7px;padding:6px 12px;
+font-weight:600;cursor:pointer}.bar button.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+.note{color:var(--mut);font-size:12.5px}
+footer{margin-top:30px;border-top:1px solid var(--line);padding-top:12px;color:var(--mut);font-size:12px}
+code{background:#22222c;padding:1px 5px;border-radius:4px;font-size:12.5px}
+@media(max-width:820px){.wrap{grid-template-columns:1fr}nav.toc{display:none}}
+</style></head>
+<body>
+<div class="wrap">
+<nav class="toc">
+  <div style="font-weight:700;color:var(--ink);padding:4px 8px">chr2:18M 工作站</div>
+  <div class="bar" style="padding:0 6px">
+    <button onclick="exportJSON()">⤓ JSON</button>
+    <button class="ghost" onclick="exportCSV()">⤓ CSV</button>
+  </div>
+  <a href="#snv">① 6 sSNV 證據卡</a>
+  <a href="#backbone">② α/β 骨幹</a>
+  <a href="#loh">③ LOH</a>
+  <a href="#methyl">④ 甲基三組</a>
+  <a href="#pos4">⑤ pos4 homopolymer</a>
+  <a href="#ccf">⑥ SEQC2 CCF 梯度</a>
+  <a href="#tree">⑦ 候選樹 + 裁決</a>
+  <a href="#limit">⑧ 限制 + 校正</a>
+  <div class="note" style="padding:10px 8px">tier L2 · PARTIAL<br>build b761336</div>
+</nav>
+<main>
+<header class="hd">
+  <h1>🔬 chr2:18M 亞克隆重建 — 判讀工作站 <span class="badge b-tier">tier L2</span> <span class="badge b-partial">PARTIAL</span></h1>
+  <div class="sub">HCC1395 · chr2:18066481-18110828 · 6 sSNV × 10 CpG · HKU(5mCG_5hmCG haplotag) + DORADO cross-basecaller ·
+  權威 SoT = <code>independent_audit.json</code> + <code>verdict_02</code> · build <code>b761336</code></div>
+  <div class="sub" style="margin-top:6px">
+    每個數字皆由 generator 從來源檔注入（§13-A 由構造防捏造，缺必填值即 refuse）；
+    hover <span class="b-src">⌖ 來源</span> 看出處。下方 sSNV 卡可記你的判讀，右上匯出 JSON/CSV。
+  </div>
+</header>
+
+<div class="verdict">
+  <h3 style="margin-top:0">最終可防守結論（verdict_02 §最終裁決）</h3>
+  <div class="vquote">在 SEQC2-confirmed LOH 區中，存在可重現、由多個 somatic allele linkage 定義、且帶一致局部 5mC 結構的 regional subclonal states。資料支持至少兩個主要分支與 (3)A → (5)C 的巢狀子分支；甲基可作 lineage coherence 與區域 characterization，但不能把 pos4 的 G/T/DEL 證成三個 subclone，也不能單獨確認完整演化順序。</div>
+  <div class="kv"><span class="k">適合論文用語</span><span class="v" style="color:var(--teal)">A regional, LOH-constrained, somatic-haplotag-conditioned subclonal structure with cross-basecaller methylation coherence.</span></div>
+  <div class="vnot">✗ 不適合：Confirmed five-subclone evolutionary reconstruction.</div>
+</div>
+
+<h2 id="snv">① 6 個 sSNV 證據卡</h2>
+<p class="note">tumor/normal allele 為 unique primary reads BQ20 count。pos3 落 HC 空隙＝truth 無法評估（<b>非 FP</b>）。
+來源 <span class="b-src">⌖ independent_audit.json: snvs/benchmark_context/allele_counts_bq20</span> + <span class="b-src">⌖ concordance.tsv</span>。</p>
+<div class="grid cards">
+<div class="card" data-snv="1">
+  <h4>(1) chr2:18,068,480 <span class="note">C&gt;G</span></h4>
+  <div><span class="badge b-med">truth_confirmed</span></div>
+  <div class="kv"><span class="k">譜系角色</span><span class="v">beta-left-block</span></div>
+  <div class="kv"><span class="k">SEQC2 TVAF / CCF</span><span class="v">0.403 / 0.814 <span class="note">subclonal-major</span></span></div>
+  <div class="kv"><span class="k">HKU tumor BQ20</span><span class="v">C:22, G:16</span></div>
+  <div class="kv"><span class="k">DORADO tumor BQ20</span><span class="v">C:22, G:18</span></div>
+  <div class="kv"><span class="k">HKU normal BQ20</span><span class="v">C:18, DEL:1</span></div>
+  <div class="judge" data-snv="1">
+    <span class="note" style="margin-right:4px">我的判讀:</span>
+    <button data-v="ok">同意</button><button data-v="doubt">存疑</button><button data-v="no">否定</button>
+  </div>
+</div>
+<div class="card" data-snv="2">
+  <h4>(2) chr2:18,072,546 <span class="note">G&gt;C</span></h4>
+  <div><span class="badge b-med">truth_confirmed</span></div>
+  <div class="kv"><span class="k">譜系角色</span><span class="v">beta-left-block</span></div>
+  <div class="kv"><span class="k">SEQC2 TVAF / CCF</span><span class="v">0.389 / 0.786 <span class="note">subclonal-major</span></span></div>
+  <div class="kv"><span class="k">HKU tumor BQ20</span><span class="v">G:25, C:21</span></div>
+  <div class="kv"><span class="k">DORADO tumor BQ20</span><span class="v">G:27, C:18, DEL:1</span></div>
+  <div class="kv"><span class="k">HKU normal BQ20</span><span class="v">G:21</span></div>
+  <div class="judge" data-snv="2">
+    <span class="note" style="margin-right:4px">我的判讀:</span>
+    <button data-v="ok">同意</button><button data-v="doubt">存疑</button><button data-v="no">否定</button>
+  </div>
+</div>
+<div class="card gap" data-snv="3">
+  <h4>(3) chr2:18,086,020 <span class="note">G&gt;A</span></h4>
+  <div><span class="badge b-gap">out-of-HC・truth-unevaluable（非 FP）</span></div>
+  <div class="kv"><span class="k">譜系角色</span><span class="v">alpha-branch(HCgap-pivot)</span></div>
+  <div class="kv"><span class="k">SEQC2 TVAF / CCF</span><span class="v">. / . <span class="note">n/a</span></span></div>
+  <div class="kv"><span class="k">HKU tumor BQ20</span><span class="v">G:30, A:29</span></div>
+  <div class="kv"><span class="k">DORADO tumor BQ20</span><span class="v">G:27, A:21</span></div>
+  <div class="kv"><span class="k">HKU normal BQ20</span><span class="v">G:18</span></div>
+  <div class="judge" data-snv="3">
+    <span class="note" style="margin-right:4px">我的判讀:</span>
+    <button data-v="ok">同意</button><button data-v="doubt">存疑</button><button data-v="no">否定</button>
+  </div>
+</div>
+<div class="card" data-snv="4">
+  <h4>(4) chr2:18,096,269 <span class="note">C&gt;G/T/DEL</span></h4>
+  <div><span class="badge b-med">truth_confirmed</span></div>
+  <div class="kv"><span class="k">譜系角色</span><span class="v">beta-right-block(homopolymer)</span></div>
+  <div class="kv"><span class="k">SEQC2 TVAF / CCF</span><span class="v">0.242 / 0.489 <span class="note">subclonal-major</span></span></div>
+  <div class="kv"><span class="k">HKU tumor BQ20</span><span class="v">C:21, T:13, DEL:10, G:4</span></div>
+  <div class="kv"><span class="k">DORADO tumor BQ20</span><span class="v">C:29, T:15, DEL:7, G:6</span></div>
+  <div class="kv"><span class="k">HKU normal BQ20</span><span class="v">C:21, T:1</span></div>
+  <div class="judge" data-snv="4">
+    <span class="note" style="margin-right:4px">我的判讀:</span>
+    <button data-v="ok">同意</button><button data-v="doubt">存疑</button><button data-v="no">否定</button>
+  </div>
+</div>
+<div class="card" data-snv="5">
+  <h4>(5) chr2:18,099,697 <span class="note">G&gt;C</span></h4>
+  <div><span class="badge b-med">truth_confirmed</span></div>
+  <div class="kv"><span class="k">譜系角色</span><span class="v">alpha-1(nested,low-VAF)</span></div>
+  <div class="kv"><span class="k">SEQC2 TVAF / CCF</span><span class="v">0.048 / 0.097 <span class="note">subclonal-minor</span></span></div>
+  <div class="kv"><span class="k">HKU tumor BQ20</span><span class="v">G:23, C:11, DEL:1</span></div>
+  <div class="kv"><span class="k">DORADO tumor BQ20</span><span class="v">G:22, C:18, DEL:1</span></div>
+  <div class="kv"><span class="k">HKU normal BQ20</span><span class="v">G:17</span></div>
+  <div class="judge" data-snv="5">
+    <span class="note" style="margin-right:4px">我的判讀:</span>
+    <button data-v="ok">同意</button><button data-v="doubt">存疑</button><button data-v="no">否定</button>
+  </div>
+</div>
+<div class="card" data-snv="6">
+  <h4>(6) chr2:18,108,828 <span class="note">C&gt;G</span></h4>
+  <div><span class="badge b-med">truth_confirmed</span></div>
+  <div class="kv"><span class="k">譜系角色</span><span class="v">beta-right-block</span></div>
+  <div class="kv"><span class="k">SEQC2 TVAF / CCF</span><span class="v">0.382 / 0.772 <span class="note">subclonal-major</span></span></div>
+  <div class="kv"><span class="k">HKU tumor BQ20</span><span class="v">C:20, G:9</span></div>
+  <div class="kv"><span class="k">DORADO tumor BQ20</span><span class="v">C:43, G:10, DEL:3</span></div>
+  <div class="kv"><span class="k">HKU normal BQ20</span><span class="v">C:19</span></div>
+  <div class="judge" data-snv="6">
+    <span class="note" style="margin-right:4px">我的判讀:</span>
+    <button data-v="ok">同意</button><button data-v="doubt">存疑</button><button data-v="no">否定</button>
+  </div>
+</div></div>
+
+<h2 id="backbone">② α / β 骨幹（互斥分叉）</h2>
+<div class="grid cards">
+  <div class="card"><h4>lineage anchor counts</h4>
+    <div class="kv"><span class="k">HKU α(pos3=A) / β-strict</span><span class="v">30 / 49</span></div>
+    <div class="kv"><span class="k">HKU α∧β 違反 read</span><span class="v" style="color:var(--green)">0</span></div>
+    <div class="kv"><span class="k">DORADO α / β-strict</span><span class="v">28 / 44</span></div>
+    <div class="kv"><span class="k">DORADO α∧β 違反 read</span><span class="v" style="color:var(--green)">0</span></div>
+    <div class="note">⌖ independent_audit.json: samples.*.lineage_anchor_counts</div>
+  </div>
+  <div class="card"><h4>判讀</h4>
+    <div class="note">α = (3)A；β-strict = (1)G∨(2)C∨(6)G。兩 basecaller <b>0 strict 違反</b>。
+    ⚠ 僅 strict 定義；broadened pos4-β 在 DORADO 有 1 discordant（見限制）。</div></div>
+</div>
+<h3>read-level linkage（00/10/01/11；11=兩事件同 read）</h3>
+<table><thead><tr><th class="l">事件組合</th><th>HKU</th><th>DORADO</th><th class="l">判讀</th></tr></thead>
+<tbody><tr><td class="l">(1)G vs (2)C</td><td>18/0/0/13 (n=31)</td><td>11/1/0/6 (n=18)</td><td class="l">同支 (co-occur)</td></tr><tr><td class="l">(1)G vs (3)A</td><td>3/3/7/0 (n=13)</td><td>0/0/0/0 (n=0)</td><td class="l">互斥</td></tr><tr><td class="l">(2)C vs (3)A</td><td>3/5/9/0 (n=17)</td><td>0/1/0/0 (n=1)</td><td class="l">互斥</td></tr><tr><td class="l">(3)A vs (5)C</td><td>8/1/0/4 (n=13)</td><td>1/2/0/2 (n=5)</td><td class="l">(5)C 巢狀於 (3)A</td></tr><tr><td class="l">(3)A vs (4)alt</td><td>0/9/13/0 (n=22)</td><td>0/7/5/1 (n=13)</td><td class="l">主要互斥</td></tr><tr><td class="l">(3)A vs (6)G</td><td>0/3/3/0 (n=6)</td><td>0/0/0/0 (n=0)</td><td class="l">互斥</td></tr><tr><td class="l">(4)alt vs (6)G</td><td>9/0/0/10 (n=19)</td><td>1/0/0/1 (n=2)</td><td class="l">同 state</td></tr><tr><td class="l">(5)C vs (6)G</td><td>3/7/11/0 (n=21)</td><td>1/7/0/0 (n=8)</td><td class="l">alpha-1 與 beta 互斥</td></tr></tbody></table>
+<p class="note">⌖ independent_audit.json: samples.{HKU_T,DORADO_TAGGED_T}.linkage_bq10 · 對照 verdict_02:140-147</p>
+
+<h2 id="loh">③ LOH（單親保留）</h2>
+<div class="grid cards">
+  <div class="card"><h4>HKU tumor HP</h4>
+    <div class="kv"><span class="k">HP2-parent</span><span class="v">232</span></div>
+    <div class="kv"><span class="k">HP1-parent</span><span class="v">4（1.7%）</span></div>
+    <div class="kv"><span class="k">HP2 佔 tagged</span><span class="v" style="color:var(--teal)">98.3%</span></div></div>
+  <div class="card"><h4>DORADO tumor HP</h4>
+    <div class="kv"><span class="k">HP2-parent</span><span class="v">279</span></div>
+    <div class="kv"><span class="k">HP1-parent</span><span class="v">1</span></div>
+    <div class="kv"><span class="k">HP2 佔 tagged</span><span class="v" style="color:var(--teal)">99.6%</span></div></div>
+  <div class="card"><h4>外部 / normal</h4>
+    <div class="kv"><span class="k">SEQC2 LOH BED</span><span class="v"><span class="badge b-loh">chr2:16,146,119-22,100,000</span></span></div>
+    <div class="kv"><span class="k">normal pos3 (A/G)</span><span class="v">0 / 18（100% REF）</span></div>
+    <div class="note">all-REF 短 linkage read 存在（HKU ≥2pt=17）→「HP2 突變到不見」否定</div></div>
+</div>
+
+<h2 id="methyl">④ 甲基化三組（這是最容易誤讀的地方）</h2>
+<p class="note">tumor α(pos3=A) vs β(pos3=G) 每 CpG meanM；右側 normal HP1/HP2 = matched-normal germline ASM。
+<b>分類由資料算出</b>：normal MW-FDR&lt;0.05 ⇒ <span style="color:var(--red)">germline-ASM confounded</span>；否則 <span style="color:var(--green)">CLEAN</span>。
+DORADO✓ = DORADO tumor α/β FDR&lt;0.05 且同方向。</p>
+<div class="grid" style="grid-template-columns:1.3fr 1fr">
+  <div class="fig"><figure><svg viewBox="0 0 896 426" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="甲基化三組熱圖"><rect width="896" height="426" fill="#16161d"/><text x="193" y="38" fill="#cfcfe0" font-size="13" font-weight="600" text-anchor="middle">HKU α</text><text x="279" y="38" fill="#9aa" font-size="13" font-weight="600" text-anchor="middle">HKU β</text><text x="365" y="38" fill="#cfcfe0" font-size="13" font-weight="600" text-anchor="middle">DOR α</text><text x="451" y="38" fill="#9aa" font-size="13" font-weight="600" text-anchor="middle">DOR β</text><text x="537" y="38" fill="#cfcfe0" font-size="13" font-weight="600" text-anchor="middle">N·HP1</text><text x="623" y="38" fill="#9aa" font-size="13" font-weight="600" text-anchor="middle">N·HP2</text><text x="14" y="38" fill="#cfcfe0" font-size="13" font-weight="600">CpG</text><text x="488" y="20" fill="#7fd1c4" font-size="11" text-anchor="middle">tumor α(=pos3 A) vs β(=pos3 G)</text><text x="580" y="20" fill="#e0a96d" font-size="11" text-anchor="middle">normal ASM</text><text x="14" y="77" fill="#dfe" font-size="12" font-weight="600">2.1</text><text x="52" y="77" fill="#666" font-size="9">18073987</text><rect x="150" y="58" width="83" height="30" fill="rgb(214,139,139)" rx="3"/><text x="192" y="77" fill="#111" font-size="11" text-anchor="middle">0.75 n9</text><rect x="236" y="58" width="83" height="30" fill="rgb(223,225,223)" rx="3"/><text x="278" y="77" fill="#111" font-size="11" text-anchor="middle">0.48 n8</text><rect x="322" y="58" width="83" height="30" fill="rgb(44,93,171)" rx="3"/><text x="364" y="77" fill="#fff" font-size="11" text-anchor="middle">0.01 n1</text><rect x="408" y="58" width="83" height="30" fill="rgb(45,94,171)" rx="3"/><text x="450" y="77" fill="#fff" font-size="11" text-anchor="middle">0.02 n1</text><rect x="494" y="58" width="83" height="30" fill="rgb(50,97,173)" rx="3"/><text x="536" y="77" fill="#fff" font-size="11" text-anchor="middle">0.03</text><rect x="580" y="58" width="83" height="30" fill="rgb(54,100,174)" rx="3"/><text x="622" y="77" fill="#fff" font-size="11" text-anchor="middle">0.04</text><rect x="674" y="61" width="96" height="22" fill="#2e5d44" rx="4"/><text x="722" y="77" fill="#cdebcf" font-size="10" text-anchor="middle" font-weight="600">CLEAN</text><circle cx="786" cy="73" r="6" fill="#555"><title>DORADO 複製 FDR&lt;0.05: False</title></circle><text x="798" y="77" fill="#789" font-size="9">DOR—</text><text x="14" y="111" fill="#dfe" font-size="12" font-weight="600">2.2</text><text x="52" y="111" fill="#666" font-size="9">18076408</text><rect x="150" y="92" width="83" height="30" fill="rgb(205,85,88)" rx="3"/><text x="192" y="111" fill="#fff" font-size="11" text-anchor="middle">0.90 n14</text><rect x="236" y="92" width="83" height="30" fill="rgb(124,152,194)" rx="3"/><text x="278" y="111" fill="#111" font-size="11" text-anchor="middle">0.22 n9</text><rect x="322" y="92" width="83" height="30" fill="rgb(211,121,122)" rx="3"/><text x="364" y="111" fill="#111" font-size="11" text-anchor="middle">0.80 n5</text><rect x="408" y="92" width="83" height="30" fill="rgb(42,92,170)" rx="3"/><text x="450" y="111" fill="#fff" font-size="11" text-anchor="middle">0.01 n2</text><rect x="494" y="92" width="83" height="30" fill="rgb(57,102,174)" rx="3"/><text x="536" y="111" fill="#fff" font-size="11" text-anchor="middle">0.04</text><rect x="580" y="92" width="83" height="30" fill="rgb(42,91,170)" rx="3"/><text x="622" y="111" fill="#fff" font-size="11" text-anchor="middle">0.01</text><rect x="674" y="95" width="96" height="22" fill="#2e5d44" rx="4"/><text x="722" y="111" fill="#cdebcf" font-size="10" text-anchor="middle" font-weight="600">CLEAN</text><circle cx="786" cy="107" r="6" fill="#555"><title>DORADO 複製 FDR&lt;0.05: False</title></circle><text x="798" y="111" fill="#789" font-size="9">DOR—</text><text x="14" y="145" fill="#f2c94c" font-size="12" font-weight="600">3.1</text><text x="52" y="145" fill="#666" font-size="9">18090947</text><rect x="150" y="126" width="83" height="30" fill="rgb(124,152,194)" rx="3"/><text x="192" y="145" fill="#111" font-size="11" text-anchor="middle">0.22 n20</text><rect x="236" y="126" width="83" height="30" fill="rgb(205,80,83)" rx="3"/><text x="278" y="145" fill="#fff" font-size="11" text-anchor="middle">0.92 n19</text><rect x="322" y="126" width="83" height="30" fill="rgb(68,110,178)" rx="3"/><text x="364" y="145" fill="#fff" font-size="11" text-anchor="middle">0.07 n15</text><rect x="408" y="126" width="83" height="30" fill="rgb(200,50,55)" rx="3"/><text x="450" y="145" fill="#fff" font-size="11" text-anchor="middle">1.00 n13</text><rect x="494" y="126" width="83" height="30" fill="rgb(60,105,175)" rx="3"/><text x="536" y="145" fill="#fff" font-size="11" text-anchor="middle">0.05</text><rect x="580" y="126" width="83" height="30" fill="rgb(54,100,174)" rx="3"/><text x="622" y="145" fill="#fff" font-size="11" text-anchor="middle">0.04</text><rect x="674" y="129" width="96" height="22" fill="#3a6e1f" rx="4"/><text x="722" y="145" fill="#cdebcf" font-size="10" text-anchor="middle" font-weight="600">CLEAN★</text><circle cx="786" cy="141" r="6" fill="#4ad"><title>DORADO 複製 FDR&lt;0.05: True</title></circle><text x="798" y="145" fill="#789" font-size="9">DOR✓</text><text x="14" y="179" fill="#f2c94c" font-size="12" font-weight="600">3.2</text><text x="52" y="179" fill="#666" font-size="9">18091583</text><rect x="150" y="160" width="83" height="30" fill="rgb(201,60,65)" rx="3"/><text x="192" y="179" fill="#fff" font-size="11" text-anchor="middle">0.97 n19</text><rect x="236" y="160" width="83" height="30" fill="rgb(94,130,185)" rx="3"/><text x="278" y="179" fill="#fff" font-size="11" text-anchor="middle">0.14 n17</text><rect x="322" y="160" width="83" height="30" fill="rgb(200,50,55)" rx="3"/><text x="364" y="179" fill="#fff" font-size="11" text-anchor="middle">1.00 n15</text><rect x="408" y="160" width="83" height="30" fill="rgb(42,91,170)" rx="3"/><text x="450" y="179" fill="#fff" font-size="11" text-anchor="middle">0.01 n9</text><rect x="494" y="160" width="83" height="30" fill="rgb(57,102,174)" rx="3"/><text x="536" y="179" fill="#fff" font-size="11" text-anchor="middle">0.05</text><rect x="580" y="160" width="83" height="30" fill="rgb(85,123,183)" rx="3"/><text x="622" y="179" fill="#fff" font-size="11" text-anchor="middle">0.12</text><rect x="674" y="163" width="96" height="22" fill="#3a6e1f" rx="4"/><text x="722" y="179" fill="#cdebcf" font-size="10" text-anchor="middle" font-weight="600">CLEAN★</text><circle cx="786" cy="175" r="6" fill="#4ad"><title>DORADO 複製 FDR&lt;0.05: True</title></circle><text x="798" y="179" fill="#789" font-size="9">DOR✓</text><text x="14" y="213" fill="#9aa" font-size="12" font-weight="600">3.3</text><text x="52" y="213" fill="#666" font-size="9">18093413</text><rect x="150" y="194" width="83" height="30" fill="rgb(197,206,215)" rx="3"/><text x="192" y="213" fill="#111" font-size="11" text-anchor="middle">0.42 n14</text><rect x="236" y="194" width="83" height="30" fill="rgb(209,106,108)" rx="3"/><text x="278" y="213" fill="#fff" font-size="11" text-anchor="middle">0.84 n16</text><rect x="322" y="194" width="83" height="30" fill="rgb(137,161,198)" rx="3"/><text x="364" y="213" fill="#111" font-size="11" text-anchor="middle">0.26 n12</text><rect x="408" y="194" width="83" height="30" fill="rgb(200,52,57)" rx="3"/><text x="450" y="213" fill="#fff" font-size="11" text-anchor="middle">0.99 n9</text><rect x="494" y="194" width="83" height="30" fill="rgb(211,116,118)" rx="3"/><text x="536" y="213" fill="#111" font-size="11" text-anchor="middle">0.81</text><rect x="580" y="194" width="83" height="30" fill="rgb(57,102,175)" rx="3"/><text x="622" y="213" fill="#fff" font-size="11" text-anchor="middle">0.05</text><rect x="674" y="197" width="96" height="22" fill="#5a2d2d" rx="4"/><text x="722" y="213" fill="#ffb3b3" font-size="10" text-anchor="middle" font-weight="600">germline-ASM</text><circle cx="786" cy="209" r="6" fill="#4ad"><title>DORADO 複製 FDR&lt;0.05: True</title></circle><text x="798" y="213" fill="#789" font-size="9">DOR✓</text><text x="14" y="247" fill="#9aa" font-size="12" font-weight="600">3.4</text><text x="52" y="247" fill="#666" font-size="9">18094113</text><rect x="150" y="228" width="83" height="30" fill="rgb(57,102,174)" rx="3"/><text x="192" y="247" fill="#fff" font-size="11" text-anchor="middle">0.04 n14</text><rect x="236" y="228" width="83" height="30" fill="rgb(207,95,97)" rx="3"/><text x="278" y="247" fill="#fff" font-size="11" text-anchor="middle">0.87 n15</text><rect x="322" y="228" width="83" height="30" fill="rgb(137,161,198)" rx="3"/><text x="364" y="247" fill="#111" font-size="11" text-anchor="middle">0.26 n8</text><rect x="408" y="228" width="83" height="30" fill="rgb(208,101,103)" rx="3"/><text x="450" y="247" fill="#fff" font-size="11" text-anchor="middle">0.86 n7</text><rect x="494" y="228" width="83" height="30" fill="rgb(52,99,173)" rx="3"/><text x="536" y="247" fill="#fff" font-size="11" text-anchor="middle">0.03</text><rect x="580" y="228" width="83" height="30" fill="rgb(208,103,105)" rx="3"/><text x="622" y="247" fill="#fff" font-size="11" text-anchor="middle">0.85</text><rect x="674" y="231" width="96" height="22" fill="#5a2d2d" rx="4"/><text x="722" y="247" fill="#ffb3b3" font-size="10" text-anchor="middle" font-weight="600">germline-ASM</text><circle cx="786" cy="243" r="6" fill="#555"><title>DORADO 複製 FDR&lt;0.05: False</title></circle><text x="798" y="247" fill="#789" font-size="9">DOR—</text><text x="14" y="281" fill="#9aa" font-size="12" font-weight="600">3.5</text><text x="52" y="281" fill="#666" font-size="9">18096032</text><rect x="150" y="262" width="83" height="30" fill="rgb(43,92,171)" rx="3"/><text x="192" y="281" fill="#fff" font-size="11" text-anchor="middle">0.01 n9</text><rect x="236" y="262" width="83" height="30" fill="rgb(208,98,100)" rx="3"/><text x="278" y="281" fill="#fff" font-size="11" text-anchor="middle">0.87 n13</text><rect x="322" y="262" width="83" height="30" fill="rgb(184,196,211)" rx="3"/><text x="364" y="281" fill="#111" font-size="11" text-anchor="middle">0.38 n8</text><rect x="408" y="262" width="83" height="30" fill="rgb(209,109,110)" rx="3"/><text x="450" y="281" fill="#fff" font-size="11" text-anchor="middle">0.84 n6</text><rect x="494" y="262" width="83" height="30" fill="rgb(225,200,196)" rx="3"/><text x="536" y="281" fill="#111" font-size="11" text-anchor="middle">0.58</text><rect x="580" y="262" width="83" height="30" fill="rgb(44,93,171)" rx="3"/><text x="622" y="281" fill="#fff" font-size="11" text-anchor="middle">0.01</text><rect x="674" y="265" width="96" height="22" fill="#5a2d2d" rx="4"/><text x="722" y="281" fill="#ffb3b3" font-size="10" text-anchor="middle" font-weight="600">germline-ASM</text><circle cx="786" cy="277" r="6" fill="#555"><title>DORADO 複製 FDR&lt;0.05: False</title></circle><text x="798" y="281" fill="#789" font-size="9">DOR—</text><text x="14" y="315" fill="#9aa" font-size="12" font-weight="600">4.1</text><text x="52" y="315" fill="#666" font-size="9">18096340</text><rect x="150" y="296" width="83" height="30" fill="rgb(201,57,61)" rx="3"/><text x="192" y="315" fill="#fff" font-size="11" text-anchor="middle">0.98 n9</text><rect x="236" y="296" width="83" height="30" fill="rgb(94,130,185)" rx="3"/><text x="278" y="315" fill="#fff" font-size="11" text-anchor="middle">0.14 n12</text><rect x="322" y="296" width="83" height="30" fill="rgb(201,60,65)" rx="3"/><text x="364" y="315" fill="#fff" font-size="11" text-anchor="middle">0.97 n8</text><rect x="408" y="296" width="83" height="30" fill="rgb(193,202,214)" rx="3"/><text x="450" y="315" fill="#111" font-size="11" text-anchor="middle">0.40 n5</text><rect x="494" y="296" width="83" height="30" fill="rgb(206,90,93)" rx="3"/><text x="536" y="315" fill="#fff" font-size="11" text-anchor="middle">0.89</text><rect x="580" y="296" width="83" height="30" fill="rgb(69,111,178)" rx="3"/><text x="622" y="315" fill="#fff" font-size="11" text-anchor="middle">0.08</text><rect x="674" y="299" width="96" height="22" fill="#5a2d2d" rx="4"/><text x="722" y="315" fill="#ffb3b3" font-size="10" text-anchor="middle" font-weight="600">germline-ASM</text><circle cx="786" cy="311" r="6" fill="#555"><title>DORADO 複製 FDR&lt;0.05: False</title></circle><text x="798" y="315" fill="#789" font-size="9">DOR—</text><text x="14" y="349" fill="#dfe" font-size="12" font-weight="600">5.1</text><text x="52" y="349" fill="#666" font-size="9">18100543</text><rect x="150" y="330" width="83" height="30" fill="rgb(51,98,173)" rx="3"/><text x="192" y="349" fill="#fff" font-size="11" text-anchor="middle">0.03 n5</text><rect x="236" y="330" width="83" height="30" fill="rgb(203,68,72)" rx="3"/><text x="278" y="349" fill="#fff" font-size="11" text-anchor="middle">0.95 n8</text><rect x="322" y="330" width="83" height="30" fill="rgb(229,229,224)" rx="3"/><text x="364" y="349" fill="#111" font-size="11" text-anchor="middle">0.50 n2</text><rect x="408" y="330" width="83" height="30" fill="rgb(200,50,55)" rx="3"/><text x="450" y="349" fill="#fff" font-size="11" text-anchor="middle">1.00 n1</text><rect x="494" y="330" width="83" height="30" fill="rgb(55,101,174)" rx="3"/><text x="536" y="349" fill="#fff" font-size="11" text-anchor="middle">0.04</text><rect x="580" y="330" width="83" height="30" fill="rgb(52,99,173)" rx="3"/><text x="622" y="349" fill="#fff" font-size="11" text-anchor="middle">0.03</text><rect x="674" y="333" width="96" height="22" fill="#2e5d44" rx="4"/><text x="722" y="349" fill="#cdebcf" font-size="10" text-anchor="middle" font-weight="600">CLEAN</text><circle cx="786" cy="345" r="6" fill="#555"><title>DORADO 複製 FDR&lt;0.05: False</title></circle><text x="798" y="349" fill="#789" font-size="9">DOR—</text><text x="14" y="383" fill="#dfe" font-size="12" font-weight="600">5.2</text><text x="52" y="383" fill="#666" font-size="9">18100682</text><rect x="150" y="364" width="83" height="30" fill="rgb(51,98,173)" rx="3"/><text x="192" y="383" fill="#fff" font-size="11" text-anchor="middle">0.03 n5</text><rect x="236" y="364" width="83" height="30" fill="rgb(200,52,57)" rx="3"/><text x="278" y="383" fill="#fff" font-size="11" text-anchor="middle">0.99 n7</text><rect x="322" y="364" width="83" height="30" fill="rgb(44,93,171)" rx="3"/><text x="364" y="383" fill="#fff" font-size="11" text-anchor="middle">0.01 n2</text><rect x="408" y="364" width="83" height="30" fill="rgb(200,50,55)" rx="3"/><text x="450" y="383" fill="#fff" font-size="11" text-anchor="middle">1.00 n1</text><rect x="494" y="364" width="83" height="30" fill="rgb(49,97,172)" rx="3"/><text x="536" y="383" fill="#fff" font-size="11" text-anchor="middle">0.03</text><rect x="580" y="364" width="83" height="30" fill="rgb(51,98,173)" rx="3"/><text x="622" y="383" fill="#fff" font-size="11" text-anchor="middle">0.03</text><rect x="674" y="367" width="96" height="22" fill="#2e5d44" rx="4"/><text x="722" y="383" fill="#cdebcf" font-size="10" text-anchor="middle" font-weight="600">CLEAN</text><circle cx="786" cy="379" r="6" fill="#555"><title>DORADO 複製 FDR&lt;0.05: False</title></circle><text x="798" y="383" fill="#789" font-size="9">DOR—</text></svg><figcaption>圖4 · 甲基三組熱圖（藍=低甲基→紅=高甲基）。
+  CLEAN★ = 乾淨且 DORADO 複製（3.1, 3.2）。資料源 ⌖ independent_audit.json methyl_alpha_vs_pos3_ref + methyl_normal_hp1_vs_hp2。
+  缺必填值會 refuse 而非顯示「—」（修掉舊 Fig4 的 v1/v2 漂移）。</figcaption></figure></div>
+  <div>
+    <div class="card"><h4>三組結論</h4>
+      <div class="kv"><span class="k clean" style="padding:1px 5px;border-radius:4px">CLEAN（tumor-associated）</span><span class="v">2.1, 2.2, 3.1, 3.2, 5.1, 5.2</span></div>
+      <div class="kv"><span class="k conf" style="padding:1px 5px;border-radius:4px">CONFOUNDED（germline-ASM）</span><span class="v">3.3, 3.4, 3.5, 4.1</span></div>
+      <div class="kv"><span class="k">DORADO 複製</span><span class="v">3.1, 3.2, 3.3</span></div>
+      <div class="kv"><span class="k">乾淨 ∩ DORADO 複製（最強）</span><span class="v" style="color:var(--gold)">3.1, 3.2</span></div>
+      <div class="note" style="margin-top:6px">⚠ 報告A 曾寫 DORADO 複製={2.1,2.2,3.1,3.2,3.3}，已修正（見限制末表）。</div>
+    </div>
+  </div>
+</div>
+<table><thead><tr><th class="l">CpG</th><th>HKU α/β</th><th>HKU FDR</th><th>DOR α/β</th><th>DOR FDR</th>
+<th>normal HP1/HP2</th><th>normal FDR</th><th>分類</th><th>DOR✓</th></tr></thead><tbody><tr class="clean"><td class="l">2.1</td><td>0.75/0.48</td><td>0.176</td><td>0.01/0.02</td><td>NA</td><td>0.03/0.04</td><td>0.412</td><td>CLEAN</td><td>—</td></tr><tr class="clean"><td class="l">2.2</td><td>0.90/0.22</td><td>0.003</td><td>0.80/0.01</td><td>0.135</td><td>0.04/0.01</td><td>0.055</td><td>CLEAN</td><td>—</td></tr><tr class="clean strong"><td class="l">3.1</td><td>0.22/0.92</td><td>3.3e-04</td><td>0.07/1.00</td><td>2.4e-05</td><td>0.05/0.04</td><td>0.412</td><td>CLEAN★</td><td>✓</td></tr><tr class="clean strong"><td class="l">3.2</td><td>0.97/0.14</td><td>4.1e-05</td><td>1.00/0.01</td><td>2.4e-05</td><td>0.05/0.12</td><td>0.496</td><td>CLEAN★</td><td>✓</td></tr><tr class="conf"><td class="l">3.3</td><td>0.42/0.84</td><td>0.025</td><td>0.26/0.99</td><td>0.006</td><td>0.81/0.05</td><td>0.007</td><td>germline-ASM</td><td>✓</td></tr><tr class="conf"><td class="l">3.4</td><td>0.04/0.87</td><td>4.1e-05</td><td>0.26/0.86</td><td>0.06</td><td>0.03/0.85</td><td>0.007</td><td>germline-ASM</td><td>—</td></tr><tr class="conf"><td class="l">3.5</td><td>0.01/0.87</td><td>0.002</td><td>0.38/0.84</td><td>0.084</td><td>0.58/0.01</td><td>0.05</td><td>germline-ASM</td><td>—</td></tr><tr class="conf"><td class="l">4.1</td><td>0.98/0.14</td><td>0.003</td><td>0.97/0.40</td><td>0.084</td><td>0.89/0.08</td><td>0.007</td><td>germline-ASM</td><td>—</td></tr><tr class="clean"><td class="l">5.1</td><td>0.03/0.95</td><td>0.006</td><td>0.50/1.00</td><td>NA</td><td>0.04/0.03</td><td>0.299</td><td>CLEAN</td><td>—</td></tr><tr class="clean"><td class="l">5.2</td><td>0.03/0.99</td><td>0.006</td><td>0.01/1.00</td><td>NA</td><td>0.03/0.03</td><td>0.412</td><td>CLEAN</td><td>—</td></tr></tbody></table>
+
+<h2 id="pos4">⑤ pos4 為何不是三個 subclone</h2>
+<p class="note">chr2:18,096,269 後接 ~20bp poly-T homopolymer → ONT 產生 G/T/DEL 混合 call（平台 jitter，非三 subclone）。</p>
+<table><thead><tr><th>Dataset</th><th>REF C</th><th>G</th><th>T</th><th>DEL</th></tr></thead><tbody>
+<tr><td class="l">HKU BQ20</td><td>21</td><td>4</td><td>14</td><td>10</td></tr>
+<tr><td class="l">DORADO BQ20</td><td>29</td><td>6</td><td>16</td><td>7</td></tr>
+</tbody></table>
+<p class="note">HKU 的 G 僅 4 條且全 reverse strand → 不可視為乾淨獨立群。⌖ independent_audit.json: pos4_subtype_summary（[推論6] 否定）。</p>
+
+<h2 id="ccf">⑥ SEQC2 CCF 梯度（外部佐證亞群結構）</h2>
+<div class="fig"><figure><svg viewBox="0 0 760 230" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="SEQC2 CCF 梯度"><rect width="760" height="230" fill="#16161d"/><line x1="52" y1="50" x2="740" y2="50" stroke="#f2994a" stroke-dasharray="5 4" stroke-width="1"/><text x="738" y="46" fill="#f2994a" font-size="10" text-anchor="end">CCF=0.85 (clonal 界)</text><rect x="60" y="163" width="84" height="15" fill="#6aa6d8" rx="3"/><text x="102" y="157" fill="#dfe" font-size="12" font-weight="600" text-anchor="middle">0.10</text><text x="102" y="194" fill="#9aa" font-size="10" text-anchor="middle">chr2:18,099,697</text><text x="102" y="208" fill="#789" font-size="9" text-anchor="middle">minor (VAF 0.048)</text><rect x="170" y="105" width="84" height="73" fill="#e0a96d" rx="3"/><text x="212" y="99" fill="#dfe" font-size="12" font-weight="600" text-anchor="middle">0.49</text><text x="212" y="194" fill="#9aa" font-size="10" text-anchor="middle">chr2:18,096,269</text><text x="212" y="208" fill="#789" font-size="9" text-anchor="middle">major (VAF 0.242)</text><rect x="280" y="62" width="84" height="116" fill="#e0a96d" rx="3"/><text x="322" y="56" fill="#dfe" font-size="12" font-weight="600" text-anchor="middle">0.77</text><text x="322" y="194" fill="#9aa" font-size="10" text-anchor="middle">chr2:18,108,828</text><text x="322" y="208" fill="#789" font-size="9" text-anchor="middle">major (VAF 0.382)</text><rect x="390" y="60" width="84" height="118" fill="#e0a96d" rx="3"/><text x="432" y="54" fill="#dfe" font-size="12" font-weight="600" text-anchor="middle">0.79</text><text x="432" y="194" fill="#9aa" font-size="10" text-anchor="middle">chr2:18,072,546</text><text x="432" y="208" fill="#789" font-size="9" text-anchor="middle">major (VAF 0.389)</text><rect x="500" y="56" width="84" height="122" fill="#e0a96d" rx="3"/><text x="542" y="50" fill="#dfe" font-size="12" font-weight="600" text-anchor="middle">0.81</text><text x="542" y="194" fill="#9aa" font-size="10" text-anchor="middle">chr2:18,068,480</text><text x="542" y="208" fill="#789" font-size="9" text-anchor="middle">major (VAF 0.403)</text><text x="52" y="208" fill="#c0504d" font-size="11">↑ CCF</text></svg><figcaption>圖5 · SEQC2 共識 TVAF 推得的 CCF。同區內 0.10(minor)→0.49→0.77-0.81(major) 梯度 ⇒ 非單一 clonal block。
+in_truth=5/6（pos3 無外部真值）。⌖ chr2_18M_seqc2_concordance.tsv。CCF≈TVAF×CN/(purity×mult) 近似。</figcaption></figure></div>
+
+<h2 id="tree">⑦ 可防守候選樹 + 6 推論裁決</h2>
+<div class="fig"><figure>
+<svg viewBox="0 0 760 300" width="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="可防守候選樹">
+<rect width="760" height="300" fill="#16161d"/>
+<text x="380" y="26" fill="#9aa" font-size="11" text-anchor="middle">root = parsimony / contamination-aware 假說（非完整 spanning read 觀測）</text>
+<circle cx="380" cy="48" r="7" fill="#888"/><text x="380" y="42" fill="#bbb" font-size="10" text-anchor="middle">all-REF ancestor</text>
+<line x1="380" y1="55" x2="200" y2="100" stroke="#7fd1c4" stroke-width="2"/>
+<line x1="380" y1="55" x2="560" y2="100" stroke="#e0a96d" stroke-width="2"/>
+<circle cx="200" cy="110" r="7" fill="#7fd1c4"/><text x="200" y="100" fill="#7fd1c4" font-size="12" text-anchor="middle" font-weight="600">alpha: (3) G&gt;A</text>
+<line x1="200" y1="117" x2="200" y2="165" stroke="#7fd1c4" stroke-width="2"/>
+<circle cx="200" cy="175" r="7" fill="#7fd1c4"/><text x="200" y="196" fill="#9fe3d6" font-size="11" text-anchor="middle">alpha-1: + (5) G&gt;C</text>
+<text x="200" y="210" fill="#789" font-size="9" text-anchor="middle">nested (3)A→(5)C 直接支持</text>
+<circle cx="560" cy="110" r="7" fill="#e0a96d"/><text x="560" y="100" fill="#e0a96d" font-size="12" text-anchor="middle" font-weight="600">beta-like program</text>
+<line x1="560" y1="117" x2="480" y2="160" stroke="#e0a96d" stroke-width="2"/>
+<line x1="560" y1="117" x2="640" y2="160" stroke="#e0a96d" stroke-width="2"/>
+<text x="470" y="178" fill="#f2d6ad" font-size="11" text-anchor="middle">left: (1)C&gt;G + (2)G&gt;C</text>
+<text x="650" y="178" fill="#f2d6ad" font-size="11" text-anchor="middle">right: (4) C&gt;G* + (6)C&gt;G</text>
+<line x1="470" y1="188" x2="650" y2="188" stroke="#b06ad8" stroke-width="2" stroke-dasharray="6 5"/>
+<text x="560" y="204" fill="#c79fe0" font-size="9" text-anchor="middle">left↔right：互斥 + 甲基 coherence（缺直接 genetic bridge → 虛線）</text>
+<text x="650" y="220" fill="#789" font-size="9" text-anchor="middle">(4) = G/T/DEL homopolymer-jitter，合併一 state</text>
+<text x="380" y="270" fill="#9aa" font-size="10" text-anchor="middle">(4)(6) 共現不可排序；完整六點單一路徑 read 幾乎不存在 → 不畫成確認 phylogeny</text>
+</svg>
+<figcaption>圖6 · 可防守候選樹（verdict_02 §九）。虛線=甲基 bridge（缺直接 genetic link）。</figcaption></figure></div>
+<table><thead><tr><th>#</th><th class="l">推論</th><th>裁決</th><th class="l">修正版 / 依據</th></tr></thead><tbody><tr><td>1</td><td class="l">發生 LOH</td><td style="background:#234a32;color:#9fe3b0;font-weight:600">確認</td><td class="l note">SEQC2 LOH BED + HKU/DORADO HP imbalance 一致 <span class="b-src" title="provenance: verdict_02:267">⌖ verdict_02:267</span></td></tr><tr><td>2</td><td class="l">發生 subclone</td><td style="background:#234a4a;color:#9fe3e0;font-weight:600">強支持・有界</td><td class="l note">可稱 regional operational subclonal states；非完整 biological clone truth <span class="b-src" title="provenance: verdict_02:268">⌖ verdict_02:268</span></td></tr><tr><td>3</td><td class="l">HP2 沒抽到／突變到不見</td><td style="background:#4a2d2d;color:#f0aaaa;font-weight:600">否定</td><td class="l note">HP2 是主體；all-REF 短 linkage reads 存在；完整 read 缺失是 coverage <span class="b-src" title="provenance: verdict_02:269">⌖ verdict_02:269</span></td></tr><tr><td>4</td><td class="l">(1)(2)(3)(6) 先突變</td><td style="background:#4a3a23;color:#f2d098;font-weight:600">不成立・需重寫</td><td class="l note">(3) 與 (1)(2)(6) 互斥，不能是同一 trunk；只可稱不同早期 branch-defining candidates <span class="b-src" title="provenance: verdict_02:270">⌖ verdict_02:270</span></td></tr><tr><td>5</td><td class="l">(5) 將群一群二分開</td><td style="background:#3a3a23;color:#e8e08a;font-weight:600">支持 (provisional)</td><td class="l note">(5)C 對 (3)A 呈 perfect nesting；direct support HKU 4 / DORADO 2 <span class="b-src" title="provenance: verdict_02:271">⌖ verdict_02:271</span></td></tr><tr><td>6</td><td class="l">(4) 多突變造成三群</td><td style="background:#4a2d2d;color:#f0aaaa;font-weight:600">否定</td><td class="l note">合併為 pos4-altered beta-like state；G/T/DEL 為 homopolymer-uncertain <span class="b-src" title="provenance: verdict_02:272">⌖ verdict_02:272</span></td></tr></tbody></table>
+<h3>3 處過度宣稱已撤回</h3><ul><li><b>「5 群 / 5 subclone」→ ~3 regional states</b> → (4) 的 G/T/DEL 應合併成一個 homopolymer-uncertain pos4-altered state；收斂為 alpha / alpha-1 / beta-like ≥3 個 regional molecular states <span class="b-src" title="provenance: verdict_02:49-59">⌖ verdict_02:49-59</span></li><li><b>「VAF 排序突變」撤回</b> → 局部 VAF 受 LOH 扭曲；alpha/beta 為 siblings，不能由 VAF 排 parent/child；(4)(6) 共現不可排序 <span class="b-src" title="provenance: verdict_02:154">⌖ verdict_02:154</span></li><li><b>「無 ancestral REF read / HP2 突變到不見」撤回</b> → HKU 有 17 條 reads 在 ≥2 已覆蓋 SNV 全為 REF；ancestral C-G-G reads 存在；root 是 parsimony 推論非觀測完整 read <span class="b-src" title="provenance: verdict_02:128-132">⌖ verdict_02:128-132</span></li></ul>
+
+<h2 id="limit">⑧ 限制 + 報告A vs 權威數字校正</h2>
+<details class="cav"><summary>整體 tier = L2</summary><div class="note">單位點 × 單樣本 × 單 pipeline；cross-basecaller (HKU vs DORADO) 是同細胞株的技術/資料重現，非獨立 biological replicate（升 ⭐4 需 COLO829 等第二樣本）。 <span class="b-src" title="provenance: verdict_02:314 / critical_audit_03">⌖ verdict_02:314 / critical_audit_03</span></div></details><details class="cav"><summary>pos3 (3) 落 SEQC2 HC 空隙</summary><div class="note">out-of-HC truth-unevaluable，非 SEQC2 FP；樹的 alpha-pivot 只能靠內部 read linkage，外部無真值可確認。 <span class="b-src" title="provenance: verdict_02:81-91">⌖ verdict_02:81-91</span></div></details><details class="cav"><summary>甲基 confound 未完全形式排除</summary><div class="note">3.3/3.4/3.5/4.1 在 matched-normal 已有顯著 germline ASM；乾淨 tumor-associated 子集限於 normal 無 HP 差異的 CpG。 <span class="b-src" title="provenance: verdict_02:205-225">⌖ verdict_02:205-225</span></div></details><details class="cav"><summary>「0 違反」僅 strict 定義</summary><div class="note">broadened pos4-beta 在 DORADO 有 1 條 discordant read；多組遠距 pair 無跨距 read，故「0 observed」非強 cross-data 複製。 <span class="b-src" title="provenance: critical_audit_03 High-2">⌖ critical_audit_03 High-2</span></div></details><details class="cav"><summary>DORADO normal 未 tag</summary><div class="note">germline-ASM confound 檢定僅靠 HKU normal；confound 側未跨 basecaller 複製。 <span class="b-src" title="provenance: independent_audit.md:244-257">⌖ independent_audit.md:244-257</span></div></details>
+<h3>報告A（草稿）↔ 權威值 校正表</h3>
+<table><thead><tr><th class="l">指標</th><th>報告A（已過時）</th><th>權威值</th><th class="l">來源</th></tr></thead><tbody><tr><td class="l">all-REF reads (≥2 clean pts)</td><td class="note">報告A: 22/17</td><td style="color:var(--green)">權威(audit): 17/15</td><td class="l"><span class="b-src" title="provenance: independent_audit.md:63,152">⌖ independent_audit.md:63,152</span></td></tr><tr><td class="l">pos3 tumor 分子數</td><td class="note">報告A: 30/28 (BQ10)</td><td style="color:var(--green)">權威 BQ20: HKU 29/30・DORADO 21/27</td><td class="l"><span class="b-src" title="provenance: independent_audit.md:36,125">⌖ independent_audit.md:36,125</span></td></tr><tr><td class="l">DORADO 複製的乾淨 CpG</td><td class="note">報告A: {2.1,2.2,3.1,3.2,3.3}</td><td style="color:var(--green)">權威: 乾淨∩DORADO複製 = {3.1,3.2}（3.3 屬 confound）</td><td class="l"><span class="b-src" title="provenance: verdict_02:221 / methyl table">⌖ verdict_02:221 / methyl table</span></td></tr><tr><td class="l">「乾淨 somatic 甲基案例」</td><td class="note">報告A: 乾淨案例</td><td style="color:var(--green)">權威: 混合 (normal ASM + tumor-acquired)；乾淨子集={2.1,2.2,3.1,3.2,5.1,5.2}</td><td class="l"><span class="b-src" title="provenance: verdict_02:215-225">⌖ verdict_02:215-225</span></td></tr><tr><td class="l">TVAF 口徑</td><td class="note">早期 bwaTVAF: .396/.297/.050/.389</td><td style="color:var(--green)">權威 consensus: .403/.389/.242/.048/.382</td><td class="l"><span class="b-src" title="provenance: concordance_demo:43">⌖ concordance_demo:43</span></td></tr></tbody></table>
+
+<footer>
+  <b>Provenance</b> · build commit <code>b761336</code> · branch <code>research/subclonal-reconstruction-202606</code> · 產生器
+  <code>build_workstation_html.py</code> · 資料 <code>workstation_data.json</code><br>
+  來源檔：<code>docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/independent_audit.json</code> · <code>docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md</code> · <code>docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/chr2_18M_seqc2_concordance.tsv</code><br>
+  scope: PARTIAL — chr2:18,066,481–18,110,828 單位點 × HCC1395 單樣本 × HKU+DORADO。所有 metric 由 JSON/TSV 注入；qualitative 裁決轉錄自 verdict_02 並標 file:line。
+  cross-basecaller = 技術重現非獨立 biological replicate（tier 封頂 L2）。
+</footer>
+</main>
+</div>
+<script id="wsdata" type="application/json">{"build": {"commit": "b761336", "branch": "research/subclonal-reconstruction-202606", "built_utc": "2026-06-15T12:34:16Z", "tier": "L2", "scope": "PARTIAL — chr2:18,066,481–18,110,828 單位點 × HCC1395 單樣本 × HKU+DORADO"}, "region": "chr2:18066481-18110828", "sources": {"audit_json": "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/independent_audit.json", "verdict_02": "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md", "concordance_tsv": "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/chr2_18M_seqc2_concordance.tsv"}, "snv_cards": [{"idx": "1", "pos": 18068480, "ref": "C", "alt": "G", "seqc2_status": "truth_confirmed", "in_hc": true, "truth_records": [{"ref": "C", "alts": ["G"], "filters": ["PASS", "HighConf"]}], "role": "beta-left-block", "tvaf": "0.403", "ccf": "0.814", "clonal_class": "subclonal-major", "hku_t_bq20": "C:22, G:16", "dor_t_bq20": "C:22, G:18", "hku_n_bq20": "C:18, DEL:1", "dor_n_bq20": "C:21"}, {"idx": "2", "pos": 18072546, "ref": "G", "alt": "C", "seqc2_status": "truth_confirmed", "in_hc": true, "truth_records": [{"ref": "G", "alts": ["C"], "filters": ["PASS", "HighConf"]}], "role": "beta-left-block", "tvaf": "0.389", "ccf": "0.786", "clonal_class": "subclonal-major", "hku_t_bq20": "G:25, C:21", "dor_t_bq20": "G:27, C:18, DEL:1", "hku_n_bq20": "G:21", "dor_n_bq20": "G:22, DEL:1"}, {"idx": "3", "pos": 18086020, "ref": "G", "alt": "A", "seqc2_status": "out_of_hc_truth_unevaluable", "in_hc": false, "truth_records": [], "role": "alpha-branch(HCgap-pivot)", "tvaf": ".", "ccf": ".", "clonal_class": "n/a", "hku_t_bq20": "G:30, A:29", "dor_t_bq20": "G:27, A:21", "hku_n_bq20": "G:18", "dor_n_bq20": "G:27"}, {"idx": "4", "pos": 18096269, "ref": "C", "alt": "G/T/DEL", "seqc2_status": "truth_confirmed", "in_hc": true, "truth_records": [{"ref": "C", "alts": ["G"], "filters": ["PASS", "MedConf"]}], "role": "beta-right-block(homopolymer)", "tvaf": "0.242", "ccf": "0.489", "clonal_class": "subclonal-major", "hku_t_bq20": "C:21, T:13, DEL:10, G:4", "dor_t_bq20": "C:29, T:15, DEL:7, G:6", "hku_n_bq20": "C:21, T:1", "dor_n_bq20": "C:27, DEL:1"}, {"idx": "5", "pos": 18099697, "ref": "G", "alt": "C", "seqc2_status": "truth_confirmed", "in_hc": true, "truth_records": [{"ref": "G", "alts": ["C"], "filters": ["PASS", "HighConf"]}], "role": "alpha-1(nested,low-VAF)", "tvaf": "0.048", "ccf": "0.097", "clonal_class": "subclonal-minor", "hku_t_bq20": "G:23, C:11, DEL:1", "dor_t_bq20": "G:22, C:18, DEL:1", "hku_n_bq20": "G:17", "dor_n_bq20": "G:24"}, {"idx": "6", "pos": 18108828, "ref": "C", "alt": "G", "seqc2_status": "truth_confirmed", "in_hc": true, "truth_records": [{"ref": "C", "alts": ["G"], "filters": ["PASS", "HighConf"]}], "role": "beta-right-block", "tvaf": "0.382", "ccf": "0.772", "clonal_class": "subclonal-major", "hku_t_bq20": "C:20, G:9", "dor_t_bq20": "C:43, G:10, DEL:3", "hku_n_bq20": "C:19", "dor_n_bq20": "C:16"}], "loh": {"hku": {"HP2": 232, "HP1": 4, "None": 44, "tagged": 236, "HP2_pct": 0.9830508474576272, "HP1_pct": 0.01694915254237288}, "dorado": {"HP2": 279, "HP1": 1, "None": 61, "tagged": 280, "HP2_pct": 0.9964285714285714, "HP1_pct": 0.0035714285714285713}, "loh_interval": "chr2:16,146,119-22,100,000", "hku_anchor": {"alpha_pos3_A": 30, "pos3_ref_G": 30, "beta_strict_E1_or_E2_or_E6": 49, "alpha_and_beta_strict_violation": 0}, "dor_anchor": {"alpha_pos3_A": 28, "pos3_ref_G": 27, "beta_strict_E1_or_E2_or_E6": 44, "alpha_and_beta_strict_violation": 0}, "hku_allref": {"2": {"checked": 76, "all_ref": 17}, "3": {"checked": 35, "all_ref": 4}, "4": {"checked": 9, "all_ref": 0}, "5": {"checked": 4, "all_ref": 0}, "6": {"checked": 1, "all_ref": 0}}, "dor_allref": {"2": {"checked": 60, "all_ref": 15}, "3": {"checked": 6, "all_ref": 0}, "4": {"checked": 0, "all_ref": 0}, "5": {"checked": 0, "all_ref": 0}, "6": {"checked": 0, "all_ref": 0}}}, "linkage": [{"pair": "(1)G vs (2)C", "hku": "18/0/0/13 (n=31)", "dor": "11/1/0/6 (n=18)", "read": "同支 (co-occur)"}, {"pair": "(1)G vs (3)A", "hku": "3/3/7/0 (n=13)", "dor": "0/0/0/0 (n=0)", "read": "互斥"}, {"pair": "(2)C vs (3)A", "hku": "3/5/9/0 (n=17)", "dor": "0/1/0/0 (n=1)", "read": "互斥"}, {"pair": "(3)A vs (5)C", "hku": "8/1/0/4 (n=13)", "dor": "1/2/0/2 (n=5)", "read": "(5)C 巢狀於 (3)A"}, {"pair": "(3)A vs (4)alt", "hku": "0/9/13/0 (n=22)", "dor": "0/7/5/1 (n=13)", "read": "主要互斥"}, {"pair": "(3)A vs (6)G", "hku": "0/3/3/0 (n=6)", "dor": "0/0/0/0 (n=0)", "read": "互斥"}, {"pair": "(4)alt vs (6)G", "hku": "9/0/0/10 (n=19)", "dor": "1/0/0/1 (n=2)", "read": "同 state"}, {"pair": "(5)C vs (6)G", "hku": "3/7/11/0 (n=21)", "dor": "1/7/0/0 (n=8)", "read": "alpha-1 與 beta 互斥"}], "methyl_rows": [{"cpg": "2.1", "c_pos": 18073987, "hku_a": 0.7507625272331154, "hku_b": 0.4833333333333333, "hku_an": 9, "hku_bn": 8, "hku_delta": 0.26742919389978215, "hku_fdr": 0.1755317114405085, "dor_a": 0.011764705882352941, "dor_b": 0.01568627450980392, "dor_an": 1, "dor_bn": 1, "dor_delta": -0.00392156862745098, "dor_fdr": null, "norm_hp1": 0.027450980392156866, "norm_hp2": 0.03747276688453159, "norm_fdr": 0.4119437058625073, "class": "CLEAN", "dorado_replicates": false, "strongest": false}, {"cpg": "2.2", "c_pos": 18076408, "hku_a": 0.9005602240896359, "hku_b": 0.22352941176470587, "hku_an": 14, "hku_bn": 9, "hku_delta": 0.67703081232493, "hku_fdr": 0.0031777680684828696, "dor_a": 0.8015686274509803, "dor_b": 0.00784313725490196, "dor_an": 5, "dor_bn": 2, "dor_delta": 0.7937254901960784, "dor_fdr": 0.13474596713590692, "norm_hp1": 0.04481792717086835, "norm_hp2": 0.005664488017429194, "norm_fdr": 0.054937677701793974, "class": "CLEAN", "dorado_replicates": false, "strongest": false}, {"cpg": "3.1", "c_pos": 18090947, "hku_a": 0.22156862745098035, "hku_b": 0.9166150670794635, "hku_an": 20, "hku_bn": 19, "hku_delta": -0.6950464396284831, "hku_fdr": 0.0003269764202880844, "dor_a": 0.07424836601307189, "dor_b": 0.9984917043740573, "dor_an": 15, "dor_bn": 13, "dor_delta": -0.9242433383609854, "dor_fdr": 2.4084971203710524e-05, "norm_hp1": 0.053832442067736186, "norm_hp2": 0.03725490196078431, "norm_fdr": 0.4119437058625073, "class": "CLEAN", "dorado_replicates": true, "strongest": true}, {"cpg": "3.2", "c_pos": 18091583, "hku_a": 0.970278637770898, "hku_b": 0.14394463667820068, "hku_an": 19, "hku_bn": 17, "hku_delta": 0.8263340010926973, "hku_fdr": 4.139481852994749e-05, "dor_a": 0.9997385620915032, "dor_b": 0.005664488017429194, "dor_an": 15, "dor_bn": 9, "dor_delta": 0.994074074074074, "dor_fdr": 2.4084971203710524e-05, "norm_hp1": 0.045424836601307195, "norm_hp2": 0.12014260249554365, "norm_fdr": 0.49648304727301984, "class": "CLEAN", "dorado_replicates": true, "strongest": true}, {"cpg": "3.3", "c_pos": 18093413, "hku_a": 0.41568627450980383, "hku_b": 0.8438725490196078, "hku_an": 14, "hku_bn": 16, "hku_delta": -0.428186274509804, "hku_fdr": 0.025045547277686916, "dor_a": 0.2565359477124183, "dor_b": 0.9925925925925926, "dor_an": 12, "dor_bn": 9, "dor_delta": -0.7360566448801743, "dor_fdr": 0.006093698033175786, "norm_hp1": 0.8142602495543673, "norm_hp2": 0.045989304812834225, "norm_fdr": 0.0070343769281450376, "class": "CONFOUNDED", "dorado_replicates": true, "strongest": false}, {"cpg": "3.4", "c_pos": 18094113, "hku_a": 0.04481792717086834, "hku_b": 0.874248366013072, "hku_an": 14, "hku_bn": 15, "hku_delta": -0.8294304388422037, "hku_fdr": 4.139481852994749e-05, "dor_a": 0.2563725490196078, "dor_b": 0.8582633053221288, "dor_an": 8, "dor_bn": 7, "dor_delta": -0.601890756302521, "dor_fdr": 0.060091455039257044, "norm_hp1": 0.03294117647058824, "norm_hp2": 0.8501960784313726, "norm_fdr": 0.0070343769281450376, "class": "CONFOUNDED", "dorado_replicates": false, "strongest": false}, {"cpg": "3.5", "c_pos": 18096032, "hku_a": 0.009586056644880174, "hku_b": 0.865158371040724, "hku_an": 9, "hku_bn": 13, "hku_delta": -0.8555723143958438, "hku_fdr": 0.0017316678972806017, "dor_a": 0.3799019607843137, "dor_b": 0.8352941176470589, "dor_an": 8, "dor_bn": 6, "dor_delta": -0.45539215686274515, "dor_fdr": 0.0839695291067006, "norm_hp1": 0.5831372549019608, "norm_hp2": 0.011764705882352941, "norm_fdr": 0.049585101078415746, "class": "CONFOUNDED", "dorado_replicates": false, "strongest": false}, {"cpg": "4.1", "c_pos": 18096340, "hku_a": 0.9803921568627452, "hku_b": 0.1431372549019608, "hku_an": 9, "hku_bn": 12, "hku_delta": 0.8372549019607843, "hku_fdr": 0.002727909541721771, "dor_a": 0.9705882352941176, "dor_b": 0.4031372549019608, "dor_an": 8, "dor_bn": 5, "dor_delta": 0.5674509803921568, "dor_fdr": 0.08392384709932163, "norm_hp1": 0.8866666666666667, "norm_hp2": 0.07799564270152505, "norm_fdr": 0.0070343769281450376, "class": "CONFOUNDED", "dorado_replicates": false, "strongest": false}, {"cpg": "5.1", "c_pos": 18100543, "hku_a": 0.02980392156862745, "hku_b": 0.9495098039215686, "hku_an": 5, "hku_bn": 8, "hku_delta": -0.9197058823529412, "hku_fdr": 0.005991731706177961, "dor_a": 0.5019607843137255, "dor_b": 1.0, "dor_an": 2, "dor_bn": 1, "dor_delta": -0.4980392156862745, "dor_fdr": null, "norm_hp1": 0.039705882352941174, "norm_hp2": 0.032492997198879554, "norm_fdr": 0.2988348303526163, "class": "CLEAN", "dorado_replicates": false, "strongest": false}, {"cpg": "5.2", "c_pos": 18100682, "hku_a": 0.02901960784313725, "hku_b": 0.9938375350140056, "hku_an": 5, "hku_bn": 7, "hku_delta": -0.9648179271708683, "hku_fdr": 0.005991731706177961, "dor_a": 0.011764705882352941, "dor_b": 1.0, "dor_an": 2, "dor_bn": 1, "dor_delta": -0.9882352941176471, "dor_fdr": null, "norm_hp1": 0.025490196078431372, "norm_hp2": 0.030065359477124187, "norm_fdr": 0.4119437058625073, "class": "CLEAN", "dorado_replicates": false, "strongest": false}], "methyl_sets": {"clean": ["2.1", "2.2", "3.1", "3.2", "5.1", "5.2"], "confounded": ["3.3", "3.4", "3.5", "4.1"], "dorado_replicate": ["3.1", "3.2", "3.3"], "strongest_clean_replicate": ["3.1", "3.2"]}, "pos4": {"hku": {"REF_C": 21, "G": 4, "T": 14, "DEL": 10, "G_strand": {"-": 4}}, "dor": {"REF_C": 29, "G": 6, "T": 16, "DEL": 7, "G_strand": {"+": 2, "-": 4}}}, "rulings": [{"id": "1", "claim": "發生 LOH", "verdict": "確認", "kind": "confirm", "fix": "SEQC2 LOH BED + HKU/DORADO HP imbalance 一致", "src": "verdict_02:267"}, {"id": "2", "claim": "發生 subclone", "verdict": "強支持・有界", "kind": "bounded", "fix": "可稱 regional operational subclonal states；非完整 biological clone truth", "src": "verdict_02:268"}, {"id": "3", "claim": "HP2 沒抽到／突變到不見", "verdict": "否定", "kind": "negated", "fix": "HP2 是主體；all-REF 短 linkage reads 存在；完整 read 缺失是 coverage", "src": "verdict_02:269"}, {"id": "4", "claim": "(1)(2)(3)(6) 先突變", "verdict": "不成立・需重寫", "kind": "rewrite", "fix": "(3) 與 (1)(2)(6) 互斥，不能是同一 trunk；只可稱不同早期 branch-defining candidates", "src": "verdict_02:270"}, {"id": "5", "claim": "(5) 將群一群二分開", "verdict": "支持 (provisional)", "kind": "provisional", "fix": "(5)C 對 (3)A 呈 perfect nesting；direct support HKU 4 / DORADO 2", "src": "verdict_02:271"}, {"id": "6", "claim": "(4) 多突變造成三群", "verdict": "否定", "kind": "negated", "fix": "合併為 pos4-altered beta-like state；G/T/DEL 為 homopolymer-uncertain", "src": "verdict_02:272"}], "retractions": [{"was": "「5 群 / 5 subclone」→ ~3 regional states", "now": "(4) 的 G/T/DEL 應合併成一個 homopolymer-uncertain pos4-altered state；收斂為 alpha / alpha-1 / beta-like ≥3 個 regional molecular states", "src": "verdict_02:49-59"}, {"was": "「VAF 排序突變」撤回", "now": "局部 VAF 受 LOH 扭曲；alpha/beta 為 siblings，不能由 VAF 排 parent/child；(4)(6) 共現不可排序", "src": "verdict_02:154"}, {"was": "「無 ancestral REF read / HP2 突變到不見」撤回", "now": "HKU 有 17 條 reads 在 ≥2 已覆蓋 SNV 全為 REF；ancestral C-G-G reads 存在；root 是 parsimony 推論非觀測完整 read", "src": "verdict_02:128-132"}], "final_defensible": "在 SEQC2-confirmed LOH 區中，存在可重現、由多個 somatic allele linkage 定義、且帶一致局部 5mC 結構的 regional subclonal states。資料支持至少兩個主要分支與 (3)A → (5)C 的巢狀子分支；甲基可作 lineage coherence 與區域 characterization，但不能把 pos4 的 G/T/DEL 證成三個 subclone，也不能單獨確認完整演化順序。", "final_paper": "A regional, LOH-constrained, somatic-haplotag-conditioned subclonal structure with cross-basecaller methylation coherence.", "final_not": "Confirmed five-subclone evolutionary reconstruction.", "caveats": [{"title": "整體 tier = L2", "body": "單位點 × 單樣本 × 單 pipeline；cross-basecaller (HKU vs DORADO) 是同細胞株的技術/資料重現，非獨立 biological replicate（升 ⭐4 需 COLO829 等第二樣本）。", "src": "verdict_02:314 / critical_audit_03"}, {"title": "pos3 (3) 落 SEQC2 HC 空隙", "body": "out-of-HC truth-unevaluable，非 SEQC2 FP；樹的 alpha-pivot 只能靠內部 read linkage，外部無真值可確認。", "src": "verdict_02:81-91"}, {"title": "甲基 confound 未完全形式排除", "body": "3.3/3.4/3.5/4.1 在 matched-normal 已有顯著 germline ASM；乾淨 tumor-associated 子集限於 normal 無 HP 差異的 CpG。", "src": "verdict_02:205-225"}, {"title": "「0 違反」僅 strict 定義", "body": "broadened pos4-beta 在 DORADO 有 1 條 discordant read；多組遠距 pair 無跨距 read，故「0 observed」非強 cross-data 複製。", "src": "critical_audit_03 High-2"}, {"title": "DORADO normal 未 tag", "body": "germline-ASM confound 檢定僅靠 HKU normal；confound 側未跨 basecaller 複製。", "src": "independent_audit.md:244-257"}], "conflicts": [{"metric": "all-REF reads (≥2 clean pts)", "reportA": "報告A: 22/17", "authoritative": "權威(audit): 17/15", "src": "independent_audit.md:63,152"}, {"metric": "pos3 tumor 分子數", "reportA": "報告A: 30/28 (BQ10)", "authoritative": "權威 BQ20: HKU 29/30・DORADO 21/27", "src": "independent_audit.md:36,125"}, {"metric": "DORADO 複製的乾淨 CpG", "reportA": "報告A: {2.1,2.2,3.1,3.2,3.3}", "authoritative": "權威: 乾淨∩DORADO複製 = {3.1,3.2}（3.3 屬 confound）", "src": "verdict_02:221 / methyl table"}, {"metric": "「乾淨 somatic 甲基案例」", "reportA": "報告A: 乾淨案例", "authoritative": "權威: 混合 (normal ASM + tumor-acquired)；乾淨子集={2.1,2.2,3.1,3.2,5.1,5.2}", "src": "verdict_02:215-225"}, {"metric": "TVAF 口徑", "reportA": "早期 bwaTVAF: .396/.297/.050/.389", "authoritative": "權威 consensus: .403/.389/.242/.048/.382", "src": "concordance_demo:43"}]}</script>
+<script>
+const DATA = JSON.parse(document.getElementById('wsdata').textContent);
+const LSKEY = 'ism_chr2_18m_ws_v1';
+function loadV(){try{return JSON.parse(localStorage.getItem(LSKEY))||{}}catch(e){return {}}}
+function saveV(v){localStorage.setItem(LSKEY, JSON.stringify(v))}
+function paint(){
+  const v = loadV();
+  document.querySelectorAll('.judge').forEach(j=>{
+    const id = j.dataset.snv;
+    j.querySelectorAll('button').forEach(b=>{
+      b.classList.remove('on-ok','on-doubt','on-no');
+      if(v[id]===b.dataset.v) b.classList.add('on-'+b.dataset.v);
+    });
+  });
+}
+document.querySelectorAll('.judge button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const id=b.parentElement.dataset.snv, v=loadV();
+    v[id] = (v[id]===b.dataset.v)? null : b.dataset.v;
+    saveV(v); paint();
+  });
+});
+paint();
+function snapshot(){
+  const v=loadV();
+  return DATA.snv_cards.map(c=>({snv:c.idx, pos:c.pos, ref:c.ref, alt:c.alt,
+    seqc2:c.seqc2_status, role:c.role, ccf:c.ccf, my_verdict:v[c.idx]||'(未判)'}));
+}
+function dl(name, text, mime){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([text],{type:mime})); a.download=name; a.click();
+}
+function exportJSON(){
+  dl('chr2_18M_my_verdicts.json', JSON.stringify({build:DATA.build, verdicts:snapshot()},null,2),'application/json');
+}
+function exportCSV(){
+  const rows=snapshot(); const hdr=Object.keys(rows[0]);
+  const csv=[hdr.join(',')].concat(rows.map(r=>hdr.map(h=>JSON.stringify(r[h]??'')).join(','))).join('\n');
+  dl('chr2_18M_my_verdicts.csv', csv, 'text/csv');
+}
+</script>
+</body></html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ISM subclone 分析 pipeline 構想 — 從 chr2:18M 案例萃取的 9 步方法</title>
+<!--
+  doc_type: explain_page (method-concept)  id: 06_ism-subclone-pipeline-concept  version: v1  created: 2026-06-15
+  branch: research/subclonal-reconstruction-202606
+  renders: Part B of InterSubMod/docs/paper_focus/02_paper_framework/20260615_chr2_subclone_case_and_method_concept_01.md
+  companion_to: 04_subclone-reconstruction-chr2-18M.standalone.html, 05_subclone-correction-audit-chr2-18M.standalone.html
+  AUTHORITATIVE SoT: 20260615_chr2_subclone_case_and_method_concept_01.md (Part B) + 20260615_chr2_18M_subclone_independent_verdict_02.md
+  data_sources: docs/paper_focus/02_paper_framework/20260615_chr2_subclone_case_and_method_concept_01.md,
+                docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md,
+                docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/independent_audit.md
+  provenance-verified: 本頁=Part B 方法構想；案例落地數字（340→280 dedup、HP imbalance 98.3%/99.6%、pos4 20bp poly-T、clean {2.1,2.2,3.1,3.2,5.1,5.2} vs confound {3.3,3.4,3.5,4.1}）
+                       全引自上列 verified 文件（前序 session 已親讀機器輸出 independent_audit.md 命中）。本頁不產新數字。
+  CSS: 內聯 explain.css v2.1。
+-->
+<style>
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --c-cs:#5B3FA0; --c-cs-soft:#ECE6F6;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.72;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:0 var(--sp-5);display:flex;align-items:center;gap:var(--sp-3);min-height:52px;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;white-space:nowrap;font-size:.82rem}
+.topbar nav a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:2.0rem;margin:6px 0 6px;line-height:1.22;letter-spacing:-.01em}
+header.hero .lede{color:var(--c-text-soft);max-width:880px;margin:0;font-size:1.07rem}
+h1,h2,h3,h4{letter-spacing:-.005em}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.52rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;line-height:1.25}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.96rem;margin:0 0 var(--sp-5);max-width:900px}
+h4.mini{font-size:1.02rem;margin:var(--sp-4) 0 var(--sp-2);color:var(--c-text);display:flex;align-items:center;gap:8px}
+h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px;display:inline-block}
+p{margin:var(--sp-3) 0}
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.08rem;line-height:1.58;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a} .takeaway.pass .lab{color:var(--c-pass)}
+.key{background:#fdf2c8;font-weight:700;padding:0 4px;border-radius:3px}
+.muted{color:var(--c-text-soft);font-size:.85rem}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-5);margin:var(--sp-4) 0}
+.bluf h2{margin:0 0 var(--sp-2);font-size:1.2rem}
+.bluf>p:first-of-type{font-size:1.06rem;line-height:1.6}
+.bluf .pi{font-size:.95rem;color:#7a3c22;margin:var(--sp-3) 0;padding:var(--sp-2) var(--sp-3);background:rgba(255,255,255,.5);border-radius:8px}
+.ironclad{background:var(--c-warn-soft);border:1px solid var(--c-warn);border-left:6px solid var(--c-warn);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:.9rem}
+.ironclad b{color:var(--c-warn)} .ironclad ol{margin:var(--sp-2) 0 0;padding-left:1.3em} .ironclad li{margin:4px 0}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.b-cs{color:var(--c-cs);background:var(--c-cs-soft);border-color:var(--c-cs)}
+.tier{color:var(--c-text-soft);background:#F0EDE6;border-color:var(--c-border)}
+table{border-collapse:collapse;width:100%;font-size:.85rem;margin:var(--sp-3) 0;background:#fff}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}
+tbody tr:nth-child(even){background:#FBF9F4}
+td code,p code,li code,summary code{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}
+td.imp{font-weight:700}
+.tablewrap{overflow-x:auto}
+figure{margin:var(--sp-4) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto;box-shadow:0 1px 3px rgba(20,20,19,.06)}
+figure .figtitle{font-size:.92rem;font-weight:700;color:var(--c-text);margin:0 0 var(--sp-2)}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}
+figcaption{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.6}
+figcaption b{color:var(--c-text)}
+.guard{border:1px solid var(--c-border);border-left:5px solid var(--c-dead);border-radius:var(--radius);background:#fff;margin:var(--sp-3) 0;padding:var(--sp-3) var(--sp-4)}
+.guard h4{margin:0 0 4px;font-size:1.02rem;color:#5e2424;display:flex;gap:8px;align-items:center}
+.guard .no{font-family:var(--mono);font-weight:800;font-size:.7rem;color:#fff;background:var(--c-dead);border-radius:6px;padding:2px 7px}
+.guard .case{font-size:.85rem;background:#F7F5EF;border:1px solid var(--c-border);border-radius:6px;padding:6px 9px;margin-top:6px}
+.so{background:var(--c-pass-soft);border:1px solid var(--c-pass);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0}
+.so b{color:var(--c-pass)}
+.rel{display:flex;gap:8px;flex-wrap:wrap;margin:var(--sp-3) 0}
+.rel a{font-size:.82rem;text-decoration:none;color:var(--c-info);border:1px solid var(--c-info);border-radius:18px;padding:3px 11px;background:var(--c-info-soft)}
+.rel a:hover{background:var(--c-info);color:#fff}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-7);font-size:.8rem;color:var(--c-text-soft)}
+footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)} footer.prov code{font-family:var(--mono);font-size:.92em}
+footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
+.phase{font-family:var(--mono);font-size:.7rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+@media(max-width:720px){}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brand">解釋中心</span>
+  <nav>
+    <a href="index.standalone.html">← INDEX</a>
+    <a href="04_subclone-reconstruction-chr2-18M.standalone.html">案例走查 04</a>
+    <a href="05_subclone-correction-audit-chr2-18M.standalone.html">案例 audit 05</a>
+    <a href="#flow">9 步流程</a><a href="#steps">各步判準</a><a href="#guards">3 防呆</a><a href="#asm">ASM 增值</a><a href="#path">系統化</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">解釋頁 06 · 方法構想 · 從案例萃取的 ISM subclone pipeline</div>
+  <h1>ISM 怎麼系統化地分析 subclone？</h1>
+  <p class="lede">把 chr2:18M 案例「手做能成立」的流程，萃取成<strong>可系統化的 ISM subclone 分析方法構想</strong> — 9 個步驟、每步的判準與護欄、3 條防呆、以及 ISM 真正的方法增值（<strong>用 matched-normal 把 subclone 甲基與既存 ASM 拆開</strong>）。<strong>這是構想基礎（proof-of-concept），不是已實作的自動化模組。</strong></p>
+</header>
+
+<div class="bluf">
+  <h2>L0 核心構想（B0）</h2>
+  <p>在同一條長 read 上<span class="key">聯合觀測 somatic allele + haplotag + native 5mC</span>，於 <strong>LOH-constrained + somatic-haplotag-conditioned</strong> 框架下，用<strong>多點 read linkage</strong> 定義 regional molecular states，再用 <strong>normal-anchored 甲基拆解</strong>把 tumor-acquired subclone 甲基與既存 germline ASM 分開 → 輸出<strong>有不確定性標記的 regional subclone characterization</strong>（非完整 phylogeny）。</p>
+  <p class="pi">▸ <b>給教授一句話：</b>這個 pipeline 不是「找到甲基差就宣稱 subclone」；它的<b>方法核心是誠實拆解</b> — 先用 read linkage 的<b>互斥/共現</b>定義 lineage（非 VAF）、用 <b>homopolymer guard</b> 擋定序假象、用 <b>matched-normal ASM 控制</b>把「既存 ASM」從「tumor-acquired subclone 甲基」中扣掉、最後只畫<b>有直接證據</b>的樹邊（其餘虛線標 inference）。</p>
+</div>
+
+<div class="ironclad">
+  <b>⚠ 定位：這是「構想基礎」，不是已交付的自動化模組</b>
+  <ol>
+    <li>9 步流程目前是<b>個案手做驗證可成立</b>（chr2 單位點 + BRCA2 單位點，L2）；系統化（自動化 + 標準化判準）是 <b>handoff B2</b> 的目標，屬 future work。</li>
+    <li>每步的「判準/閾值」來自<b>案例落地值</b>（如互斥 0 個 <code>11</code>、cross-basecaller 過 FDR、pos4 20bp poly-T mask），可作標準化起點，但須跨樣本再校準。</li>
+  </ol>
+</div>
+
+<!-- ============ §1 流程圖 ============ -->
+<section id="flow">
+  <h3><span class="num">①</span> 9 步 pipeline 一圖看懂（四個階段）</h3>
+  <p class="sub">輸入 → 譜系 → 甲基（含 ASM 控制）→ 輸出。紅框 = 防呆護欄所在步驟。</p>
+
+  <figure>
+    <div class="figtitle">圖 1 · ISM subclone 分析 pipeline（9 步 / 4 階段）</div>
+    <svg viewBox="0 0 960 560" role="img" aria-label="9 步 pipeline 流程圖">
+      <!-- phase bands -->
+      <rect x="10" y="40" width="230" height="500" rx="10" fill="#E2ECF3" opacity="0.4"/>
+      <rect x="248" y="40" width="230" height="500" rx="10" fill="#ECE6F6" opacity="0.4"/>
+      <rect x="486" y="40" width="230" height="500" rx="10" fill="#E4F0EA" opacity="0.4"/>
+      <rect x="724" y="40" width="226" height="500" rx="10" fill="#F6EBD8" opacity="0.4"/>
+      <text x="125" y="30" text-anchor="middle" class="phase" fill="#2F6690" font-size="12" font-weight="800">階段 I · 輸入</text>
+      <text x="363" y="30" text-anchor="middle" class="phase" fill="#5B3FA0" font-size="12" font-weight="800">階段 II · 譜系</text>
+      <text x="601" y="30" text-anchor="middle" class="phase" fill="#2F7D5B" font-size="12" font-weight="800">階段 III · 甲基</text>
+      <text x="837" y="30" text-anchor="middle" class="phase" fill="#B06A16" font-size="12" font-weight="800">階段 IV · 輸出</text>
+
+      <!-- step box helper: rendered manually -->
+      <!-- Phase I -->
+      <g font-size="11">
+        <rect x="28" y="64" width="194" height="74" rx="8" fill="#fff" stroke="#2F6690" stroke-width="1.5"/>
+        <circle cx="48" cy="84" r="11" fill="#2F6690"/><text x="48" y="88" text-anchor="middle" fill="#fff" font-weight="800">1</text>
+        <text x="66" y="82" font-weight="700">萃取矩陣</text>
+        <text x="36" y="104" font-size="9.5" fill="#5C5A54">read×sSNV×5mC（pysam）</text>
+        <text x="36" y="118" font-size="9.5" fill="#5C5A54">MAPQ≥20 · BQ≥10 · 先落 JSON</text>
+        <text x="36" y="132" font-size="9" fill="#2F6690">護欄：dedup（案例 340→280）</text>
+
+        <rect x="28" y="156" width="194" height="70" rx="8" fill="#fff" stroke="#2F6690" stroke-width="1.5"/>
+        <circle cx="48" cy="176" r="11" fill="#2F6690"/><text x="48" y="180" text-anchor="middle" fill="#fff" font-weight="800">2</text>
+        <text x="66" y="174" font-weight="700">LOH context</text>
+        <text x="36" y="196" font-size="9.5" fill="#5C5A54">CNV/LOH BED + HP imbalance</text>
+        <text x="36" y="210" font-size="9.5" fill="#5C5A54">案例 98.3% / 99.6% · normal ALT=0</text>
+        <text x="36" y="222" font-size="9" fill="#2F6690">前提：LOH（非 LOH 區另論）</text>
+      </g>
+
+      <!-- Phase II -->
+      <g font-size="11">
+        <rect x="266" y="64" width="194" height="74" rx="8" fill="#fff" stroke="#5B3FA0" stroke-width="1.5"/>
+        <circle cx="286" cy="84" r="11" fill="#5B3FA0"/><text x="286" y="88" text-anchor="middle" fill="#fff" font-weight="800">3</text>
+        <text x="304" y="82" font-weight="700">互斥 linkage 分群</text>
+        <text x="274" y="104" font-size="9.5" fill="#5C5A54">00/10/01/11；0 個「11」=分叉</text>
+        <text x="274" y="118" font-size="9.5" fill="#5C5A54">高「11」=同 state</text>
+        <text x="274" y="132" font-size="9" fill="#5B3FA0">護欄：跨距不足→標「不可判」</text>
+
+        <rect x="266" y="156" width="194" height="74" rx="8" fill="#fff" stroke="#9A3B3B" stroke-width="2.5"/>
+        <circle cx="286" cy="176" r="11" fill="#9A3B3B"/><text x="286" y="180" text-anchor="middle" fill="#fff" font-weight="800">4</text>
+        <text x="304" y="174" font-weight="700">artifact guard 🛡</text>
+        <text x="274" y="196" font-size="9.5" fill="#5C5A54">homopolymer context check</text>
+        <text x="274" y="210" font-size="9.5" fill="#5C5A54">案例 pos4 後 20bp poly-T</text>
+        <text x="274" y="224" font-size="9" fill="#9A3B3B">G/T/DEL 合併為單一 altered state</text>
+      </g>
+
+      <!-- Phase III -->
+      <g font-size="11">
+        <rect x="504" y="64" width="194" height="66" rx="8" fill="#fff" stroke="#2F7D5B" stroke-width="1.5"/>
+        <circle cx="524" cy="84" r="11" fill="#2F7D5B"/><text x="524" y="88" text-anchor="middle" fill="#fff" font-weight="800">5</text>
+        <text x="542" y="82" font-weight="700">甲基判別 per anchor</text>
+        <text x="512" y="102" font-size="9.5" fill="#5C5A54">Mann-Whitney + BH-FDR</text>
+        <text x="512" y="116" font-size="9" fill="#2F7D5B">要求 cross-basecaller 同向+過 FDR</text>
+
+        <rect x="504" y="146" width="194" height="78" rx="8" fill="#fff" stroke="#9A3B3B" stroke-width="2.5"/>
+        <circle cx="524" cy="166" r="11" fill="#9A3B3B"/><text x="524" y="170" text-anchor="middle" fill="#fff" font-weight="800">6</text>
+        <text x="542" y="164" font-weight="700">normal-HP ASM 控制 🛡</text>
+        <text x="512" y="184" font-size="9.5" fill="#5C5A54">normal HP1-vs-HP2 顯著→confounded</text>
+        <text x="512" y="198" font-size="9" fill="#9A3B3B">confound: 3.3/3.4/3.5/4.1</text>
+        <text x="512" y="212" font-size="9" fill="#2F7D5B">乾淨: 2.1/2.2/3.1/3.2/5.1/5.2</text>
+
+        <rect x="504" y="240" width="194" height="64" rx="8" fill="#fff" stroke="#2F7D5B" stroke-width="1.5"/>
+        <circle cx="524" cy="260" r="11" fill="#2F7D5B"/><text x="524" y="264" text-anchor="middle" fill="#fff" font-weight="800">7</text>
+        <text x="542" y="258" font-weight="700">tumor/normal diff</text>
+        <text x="512" y="278" font-size="9.5" fill="#5C5A54">all-read MW FDR 跨 basecaller</text>
+        <text x="512" y="292" font-size="9" fill="#B06A16">仍混 composition/LOH/ASM → 再拆</text>
+      </g>
+
+      <!-- Phase IV -->
+      <g font-size="11">
+        <rect x="742" y="64" width="190" height="78" rx="8" fill="#fff" stroke="#B06A16" stroke-width="1.5"/>
+        <circle cx="762" cy="84" r="11" fill="#B06A16"/><text x="762" y="88" text-anchor="middle" fill="#fff" font-weight="800">8</text>
+        <text x="780" y="82" font-weight="700">建可防守樹</text>
+        <text x="750" y="102" font-size="9.5" fill="#5C5A54">parsimony；direct nesting 才排序</text>
+        <text x="750" y="116" font-size="9.5" fill="#5C5A54">無 bridge→虛線 methylation-bridged</text>
+        <text x="750" y="132" font-size="9" fill="#9A3B3B">VAF 不可排 siblings（LOH 扭曲）</text>
+
+        <rect x="742" y="160" width="190" height="70" rx="8" fill="#fff" stroke="#B06A16" stroke-width="1.5"/>
+        <circle cx="762" cy="180" r="11" fill="#B06A16"/><text x="762" y="184" text-anchor="middle" fill="#fff" font-weight="800">9</text>
+        <text x="780" y="178" font-weight="700">誠實 tier</text>
+        <text x="750" y="198" font-size="9.5" fill="#5C5A54">regional/operational · L2 · 單位點</text>
+        <text x="750" y="212" font-size="9" fill="#9A3B3B">禁「confirmed N-subclone」</text>
+        <text x="750" y="225" font-size="9" fill="#B06A16">用 verdict_02 用語</text>
+
+        <!-- output -->
+        <rect x="742" y="250" width="190" height="60" rx="8" fill="#2F7D5B"/>
+        <text x="837" y="274" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">regional subclone</text>
+        <text x="837" y="292" text-anchor="middle" fill="#E4F0EA" font-size="10">characterization + 不確定性標記</text>
+      </g>
+
+      <!-- arrows between phases -->
+      <g stroke="#5C5A54" stroke-width="2" fill="none" marker-end="url(#ah)">
+        <line x1="222" y1="101" x2="264" y2="101"/>
+        <line x1="460" y1="101" x2="502" y2="101"/>
+        <line x1="698" y1="185" x2="740" y2="185"/>
+      </g>
+      <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5C5A54"/></marker></defs>
+
+      <!-- bottom: 3 guards callout -->
+      <rect x="28" y="340" width="904" height="190" rx="10" fill="#F3E2E2" stroke="#9A3B3B" stroke-width="1.5"/>
+      <text x="48" y="366" font-size="13" font-weight="800" fill="#9A3B3B">🛡 3 條防呆（案例抓出的過度宣稱根因 → 系統化必內建）</text>
+      <g font-size="11">
+        <text x="48" y="396" font-weight="700" fill="#5e2424">① homopolymer artifact（步 4）</text>
+        <text x="48" y="414" fill="#5C5A54">variant 後接 homopolymer → 多 allele call（G/T/DEL）是 ONT jitter 非多 subclone。</text>
+        <text x="48" y="430" fill="#5C5A54">案例 pos4 20bp poly-T → 「5 群」收斂為 ≥3 lineage。</text>
+        <text x="48" y="456" font-weight="700" fill="#5e2424">② VAF 不可排序 siblings（步 8）</text>
+        <text x="48" y="474" fill="#5C5A54">LOH 扭曲局部 VAF（案例 pos5 局部 0.31 vs 全基因組 0.05）；互斥 siblings 不可由 VAF 排 parent/child。</text>
+        <text x="48" y="490" fill="#5C5A54">→ 順序只在 nested genotype 觀察到時成立（案例僅 (3)→(5)）。</text>
+        <text x="48" y="514" font-weight="700" fill="#5e2424">③ coverage 假象（步 8）</text>
+        <text x="490" y="514" fill="#5C5A54">缺跨多點 all-REF read ≠ ancestral allele 消失（read-length 限制）；root 是 parsimony 推論非觀測。</text>
+      </g>
+    </svg>
+    <figcaption><b>怎麼讀：</b>四階段由左到右；<b>步 4 / 步 6 是兩個關鍵護欄</b>（紅框）— homopolymer guard 與 normal-HP ASM 控制。底部紅區 = 3 條防呆對應的步驟。<b>來源：</b>Part B B1/B2（<code>20260615_chr2_subclone_case_and_method_concept_01.md</code>）。</figcaption>
+  </figure>
+</section>
+
+<!-- ============ §2 各步判準 ============ -->
+<section id="steps">
+  <h3><span class="num">②</span> 9 步的判準與護欄（B1）</h3>
+  <p class="sub">每步附「案例落地的判準」與「護欄」。這是把個案手做變成可標準化判準的起點。</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th style="width:42px">步</th><th style="width:150px">做什麼</th><th>判準 / 閾值（案例落地）</th><th>護欄</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">1</td><td>萃取 read×sSNV×5mC 矩陣</td><td>unique primary、MAPQ≥20、BQ≥10；MM/ML 解碼 5mC 映回 ref；數字先落 JSON</td><td>dedup（案例 340→280）</td></tr>
+      <tr><td class="imp">2</td><td>LOH context</td><td>SEQC2 CNV/LOH BED + HP imbalance（案例 98.3%/99.6%）；matched-normal ALT=0</td><td>LOH 為前提；非 LOH 區另論</td></tr>
+      <tr><td class="imp">3</td><td>lineage by 互斥 linkage</td><td>00/10/01/11，要求跨位點 read；互斥（0 <code>11</code>）=分叉，共現（高 <code>11</code>）=同 state</td><td>跨距不足 → 標「不可判」非互斥</td></tr>
+      <tr style="background:#FBF1F1"><td class="imp">4 🛡</td><td>artifact guard</td><td>homopolymer context check（案例 pos4 後 20bp poly-T → G/T/DEL 合併為單一 altered state）</td><td>ONT homopolymer/strand-bias 必查；單 strand call 不算群</td></tr>
+      <tr><td class="imp">5</td><td>甲基判別 per allele anchor</td><td>Mann-Whitney + <b>BH-FDR</b>；<b>要求 cross-basecaller 同方向 + 過 FDR</b></td><td>單 basecaller n=1 不可解；distal 未複製 → 排除</td></tr>
+      <tr style="background:#FBF1F1"><td class="imp">6 🛡</td><td>normal-HP ASM control</td><td>normal HP1-vs-HP2 顯著者（案例 3.3/3.4/3.5/4.1）標 confounded；normal HP 無差異者（2.1/2.2/3.1/3.2/5.x）=乾淨 tumor-associated</td><td><b>不可把所有甲基差歸 subclone</b></td></tr>
+      <tr><td class="imp">7</td><td>tumor/normal differential cross-check</td><td>all-read tumor vs normal MW FDR；同方向跨 basecaller</td><td>all-read 差混 composition/LOH/ASM → 須 allele+normal-HP conditioned 再拆</td></tr>
+      <tr><td class="imp">8</td><td>建可防守樹</td><td>parsimony；direct nesting 才排序（案例 (3)→(5)）；無直接 bridge → 虛線 methylation-bridged；root=hypothesis</td><td>共現不可排序；VAF <b>不可</b>排 siblings</td></tr>
+      <tr><td class="imp">9</td><td>誠實 tier</td><td>regional/operational subclonal；標 L2/單位點；演化順序未證除非 nesting</td><td>用 verdict_02 語；禁「confirmed N-subclone」</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ============ §3 三防呆 ============ -->
+<section id="guards">
+  <h3><span class="num">③</span> 三條防呆（B2）— 為什麼這 pipeline 不會重蹈覆轍</h3>
+  <p class="sub">這三條正是 chr2 案例「早期過度宣稱」的根因；系統化時必須內建為硬性檢查。</p>
+
+  <div class="guard">
+    <h4><span class="no">防呆 1</span>homopolymer artifact</h4>
+    <p>variant 後接 homopolymer → 多 allele call（G/T/DEL）是 ONT jitter，<b>不是</b>多個 subclone。<b>必查 context</b>。</p>
+    <div class="case"><b>案例：</b>pos4(18,096,269) 後接 <code>20bp poly-T</code> → 原「5 群」收斂為 <b>≥3 lineage</b>（G/T/DEL 合併為單一 pos4-altered state；HKU G4/T13/DEL10/REF21、DORADO G6/T15/DEL7/REF29）。</div>
+  </div>
+
+  <div class="guard">
+    <h4><span class="no">防呆 2</span>VAF 不可排序 siblings</h4>
+    <p>LOH 區<u>局部 VAF 被扭曲</u>；互斥 siblings 不可由 VAF 排 parent/child → <b>順序只在 nested genotype 觀察到時成立</b>。</p>
+    <div class="case"><b>案例：</b>pos5 局部 VAF <code>0.31</code> vs 全基因組 <code>0.05</code> → VAF 排序撤回；演化順序只有 <code>(3)→(5)</code> 有 direct nesting 支持。</div>
+  </div>
+
+  <div class="guard">
+    <h4><span class="no">防呆 3</span>coverage 假象</h4>
+    <p>缺「跨多點 all-REF read」<b>≠</b> ancestral allele 消失（read-length 限制）；root 是 parsimony 推論<b>非觀測</b>。</p>
+    <div class="case"><b>案例：</b>「無 ancestral REF read」撤回 — ≥2 點全 REF 有 17 條、≥3 點 4 條，ancestral read 確實存在；缺跨 ≥4 點是覆蓋稀。</div>
+  </div>
+</section>
+
+<!-- ============ §4 ASM 增值 ============ -->
+<section id="asm">
+  <h3><span class="num">④</span> ASM 控制 = ISM 對此案例的關鍵方法增值（B3）</h3>
+  <p class="sub">這是整個 pipeline 最重要的一步，也是 ISM 區別於「只 flag 甲基差」的工具的地方。</p>
+
+  <figure>
+    <div class="figtitle">圖 2 · 為什麼需要 normal-anchored ASM 控制</div>
+    <svg viewBox="0 0 900 220" role="img" aria-label="ASM 控制概念">
+      <!-- problem -->
+      <rect x="20" y="24" width="400" height="80" rx="8" fill="#F3E2E2" stroke="#9A3B3B"/>
+      <text x="36" y="48" font-size="12" font-weight="700" fill="#5e2424">問題</text>
+      <text x="36" y="68" font-size="10.5" fill="#5C5A54">LOH 已丟 HP1 → 無「丟失 allele」可對照。</text>
+      <text x="36" y="84" font-size="10.5" fill="#5C5A54">「LOH 前既存 germline-ASM 被保留再被 somatic 切分」</text>
+      <text x="36" y="98" font-size="10.5" fill="#9A3B3B" font-weight="700">無法形式排除 → 甲基差不能直接當 subclone。</text>
+      <!-- arrow -->
+      <line x1="430" y1="64" x2="478" y2="64" stroke="#5C5A54" stroke-width="2" marker-end="url(#ah2)"/>
+      <defs><marker id="ah2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5C5A54"/></marker></defs>
+      <!-- solution -->
+      <rect x="486" y="24" width="394" height="80" rx="8" fill="#E4F0EA" stroke="#2F7D5B"/>
+      <text x="502" y="48" font-size="12" font-weight="700" fill="#1f4f3a">ISM 解法：matched-normal HP1-vs-HP2 當 filter</text>
+      <text x="502" y="68" font-size="10.5" fill="#5C5A54">normal 已有 ASM 的 CpG → 保守排除（confounded）</text>
+      <text x="502" y="84" font-size="10.5" fill="#5C5A54">normal 無 ASM 的 CpG → 留為乾淨 tumor-acquired</text>
+      <text x="502" y="98" font-size="10.5" fill="#2F7D5B" font-weight="700">= C2 normal-anchored cis/ASM control 的具體展現</text>
+      <!-- result split -->
+      <rect x="120" y="138" width="320" height="64" rx="8" fill="#F3E2E2" stroke="#9A3B3B"/>
+      <text x="280" y="160" text-anchor="middle" font-size="11" font-weight="700" fill="#5e2424">🔴 confounded（既存 germline ASM）</text>
+      <text x="280" y="182" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="13" fill="#9A3B3B">3.3 · 3.4 · 3.5 · 4.1</text>
+      <text x="280" y="196" text-anchor="middle" font-size="9" fill="#5C5A54">normal HP1/HP2 已顯著差 → 保守排除</text>
+      <rect x="460" y="138" width="320" height="64" rx="8" fill="#E4F0EA" stroke="#2F7D5B"/>
+      <text x="620" y="160" text-anchor="middle" font-size="11" font-weight="700" fill="#1f4f3a">✅ 乾淨 tumor-acquired subclone 甲基</text>
+      <text x="620" y="182" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="13" fill="#2F7D5B">2.1 · 2.2 · 3.1 · 3.2 · 5.1 · 5.2</text>
+      <text x="620" y="196" text-anchor="middle" font-size="9" fill="#5C5A54">normal 無 HP 差異 + 跨 basecaller 過 FDR（最強 3.1/3.2）</text>
+    </svg>
+    <figcaption><b>怎麼讀：</b>LOH 讓「既存 ASM vs 新生 subclone 甲基」無法靠丟失 allele 區分；ISM 改用 matched-normal 的 HP1-vs-HP2 把既存 ASM 標出來、保守排除。<b>來源：</b>Part B B3 + Part A A5（ASM-control 表，引自 <code>independent_audit.md</code>）。</figcaption>
+  </figure>
+
+  <div class="so"><b>核心訊息（這就是研究的方法價值）：</b>此區同時有 <b>normal haplotype ASM</b> 與 <b>tumor-acquired subclone 甲基</b> — ISM 的價值是<u>用 matched-normal 把兩者拆開</u>（normal 已有 ASM 的 CpG 保守排除，只留乾淨子集），<b>而非把所有甲基差都歸 subclone</b>。subclone-甲基真實存在，但僅限<b>無 germline-ASM 的 CpG 子集</b>。</div>
+</section>
+
+<!-- ============ §5 系統化路徑 ============ -->
+<section id="path">
+  <h3><span class="num">⑤</span> 從個案到系統化（B4）— 升 validated 的關鍵路徑</h3>
+  <p class="sub">目前是個案手做 L2；要升 validated 需要把 9 步自動化 + 標準化判準 + 跨樣本複製。</p>
+
+  <div class="takeaway pass"><span class="lab">現況 → 目標</span>
+    <b>現在：</b>個案手做 <span class="badge tier">L2</span>（chr2 單位點 + BRCA2 單位點）。<b>升 validated 需：</b>① B1 九步<b>自動化</b>成 ISM 模組（read→molecular-state assignment + ASM-control + tree-with-uncertainty）；② <b>標準化判準</b>（互斥閾值、FDR、cross-basecaller 複製、homopolymer mask、ASM-control gate）；③ 第二 LOH 位點/第二樣本（破單位點）；④ 第二 caller/pipeline（破 DORADO=同細胞株技術重現非獨立病人）。
+  </div>
+
+  <table>
+    <thead><tr><th style="width:120px">handoff</th><th>內容</th><th style="width:80px">狀態</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">B2</td><td>個案 → 系統化 + 標準化判準（9 步自動化）= 主軸升 validated 關鍵</td><td><span class="badge b-warn">future</span></td></tr>
+      <tr><td class="imp">B5</td><td>within-HP null / ASM-control</td><td><span class="badge b-info">已部分跑</span></td></tr>
+      <tr><td class="imp">B7</td><td>跨樣本複製</td><td><span class="badge tier">⭐4 目標</span></td></tr>
+      <tr><td class="imp">B4</td><td>第二 caller（破同細胞株技術重現）</td><td><span class="badge b-warn">future</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="rel">
+    <a href="04_subclone-reconstruction-chr2-18M.standalone.html">案例走查 04</a>
+    <a href="05_subclone-correction-audit-chr2-18M.standalone.html">案例 audit 05</a>
+    <a href="02_ism-core.standalone.html">ISM 方法本體</a>
+    <a href="index.standalone.html">← INDEX</a>
+  </div>
+</section>
+
+<footer class="prov">
+  <div class="wrap" style="padding:0">
+    <h4>來源與可重現性（provenance）</h4>
+    <p>本頁渲染 <strong>Part B（方法實作構想基礎）</strong>；定位 = <strong>構想基礎 / proof-of-concept，非已實作自動化模組</strong>。所有案例落地數字引自下列 verified 文件，本頁不產新數字。整體 <span class="badge tier">L2</span>。</p>
+    <ul>
+      <li><b>整合 SoT（Part A 案例 + Part B 方法）：</b><code>InterSubMod/docs/paper_focus/02_paper_framework/20260615_chr2_subclone_case_and_method_concept_01.md</code></li>
+      <li><b>權威裁決（數字來源）：</b><code>InterSubMod/docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md</code> + <code>…_assets/data/independent_audit.{json,md}</code></li>
+      <li><b>案例走查（教學）：</b><a href="04_subclone-reconstruction-chr2-18M.standalone.html">頁 04</a>；<b>案例 audit（裁決）：</b><a href="05_subclone-correction-audit-chr2-18M.standalone.html">頁 05</a></li>
+    </ul>
+    <p class="muted">內聯 explain.css v2.1。建立 2026-06-15 · branch research/subclonal-reconstruction-202606 · 解釋頁 06（方法 pipeline 構想 = Part B）。</p>
+  </div>
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>chr2:18M subclone — 獨立複核權威裁決（推論 1-6 + 甲基 ASM 控制）</title>
+<!--
+  doc_type: explain_page (authoritative correction-audit)  id: 05_subclone-correction-audit-chr2-18M  version: v2  created: 2026-06-15
+  branch: research/subclonal-reconstruction-202606
+  companion_to: 04_subclone-reconstruction-chr2-18M.standalone.html
+  AUTHORITATIVE SoT: docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md
+                     + data/independent_audit.{json,md}（第二 AI 獨立複核，本 session 驗 PASS：重跑 byte-identical + cross-AI code-path 一致）
+  data_sources: docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md,
+                docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/independent_audit.md,
+                docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/independent_audit.json,
+                docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/methyl_discrimination_pvalues.txt
+  provenance-verified: 所有 linkage 00/10/01/11、BQ20 allele、tumor pos3-anchored 甲基 MW-FDR、normal HP1-vs-HP2 ASM MW-FDR、LOH BED、HP imbalance
+                       皆親讀 independent_audit.md（機器輸出，py_compile+exit0+git-check 通過；本 session grep 核對命中）。無捏造、無預期值。
+  ⚠ 本 v2 取代 v1：v1 的「robust 子集 {3.1,3.2,3.3}」未做 normal ASM 控制；權威結論見 §4（clean {2.1,2.2,3.1,3.2,5.1,5.2} vs ASM-confounded {3.3,3.4,3.5,4.1}）。
+  CSS: 內聯 explain.css v2.1。
+-->
+<style>
+:root{
+  --c-accent:#D97757; --c-accent-soft:#F2E4DC; --c-text:#1c1b19; --c-text-soft:#5C5A54;
+  --c-bg:#FAF9F5; --c-card:#FFFFFF; --c-border:#E3DACC;
+  --c-pass:#2F7D5B; --c-pass-soft:#E4F0EA; --c-warn:#B06A16; --c-warn-soft:#F6EBD8;
+  --c-info:#2F6690; --c-info-soft:#E2ECF3; --c-dead:#9A3B3B; --c-dead-soft:#F3E2E2;
+  --c-cs:#5B3FA0; --c-cs-soft:#ECE6F6;
+  --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --radius:10px;
+  --sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.72;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1080px;margin:0 auto;padding:0 var(--sp-5);display:flex;align-items:center;gap:var(--sp-3);min-height:52px;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;white-space:nowrap;font-size:.82rem}
+.topbar nav a:hover{color:var(--c-accent);border-color:var(--c-accent)}
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}
+header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:2.0rem;margin:6px 0 6px;line-height:1.22;letter-spacing:-.01em}
+header.hero .lede{color:var(--c-text-soft);max-width:880px;margin:0;font-size:1.07rem}
+h1,h2,h3,h4{letter-spacing:-.005em}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.52rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;line-height:1.25}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.96rem;margin:0 0 var(--sp-5);max-width:900px}
+h4.mini{font-size:1.02rem;margin:var(--sp-4) 0 var(--sp-2);color:var(--c-text);display:flex;align-items:center;gap:8px}
+h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px;display:inline-block}
+p{margin:var(--sp-3) 0}
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.08rem;line-height:1.58;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a} .takeaway.pass .lab{color:var(--c-pass)}
+.key{background:#fdf2c8;font-weight:700;padding:0 4px;border-radius:3px}
+.muted{color:var(--c-text-soft);font-size:.85rem}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-5);margin:var(--sp-4) 0}
+.bluf h2{margin:0 0 var(--sp-2);font-size:1.2rem}
+.bluf>p:first-of-type{font-size:1.06rem;line-height:1.6}
+.bluf .pi{font-size:.95rem;color:#7a3c22;margin:var(--sp-3) 0;padding:var(--sp-2) var(--sp-3);background:rgba(255,255,255,.5);border-radius:8px}
+.verdict-quote{background:#fff;border:1px solid var(--c-pass);border-left:6px solid var(--c-pass);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0;font-size:1rem;font-style:italic;color:#1f4f3a}
+.ironclad{background:var(--c-dead-soft);border:1px solid var(--c-dead);border-left:6px solid var(--c-dead);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:.9rem}
+.ironclad b{color:var(--c-dead)} .ironclad ol{margin:var(--sp-2) 0 0;padding-left:1.3em} .ironclad li{margin:4px 0}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}
+.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}
+.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}
+.tier{color:var(--c-text-soft);background:#F0EDE6;border-color:var(--c-border)}
+.kpis{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-4) 0 0}
+.kpi{flex:1;min-width:170px;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4)}
+.kpi .v{font-family:var(--mono);font-size:1.5rem;font-weight:800;color:var(--c-text);line-height:1.1}
+.kpi .k{font-size:.78rem;color:var(--c-text-soft);margin-top:5px}
+.kpi.dead{border-left:4px solid var(--c-dead)} .kpi.pass{border-left:4px solid var(--c-pass)} .kpi.info{border-left:4px solid var(--c-info)} .kpi.warn{border-left:4px solid var(--c-warn)}
+table{border-collapse:collapse;width:100%;font-size:.85rem;margin:var(--sp-3) 0;background:#fff}
+th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}
+tbody tr:nth-child(even){background:#FBF9F4}
+td code,p code,li code,summary code{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}
+td.imp{font-weight:700}
+.tablewrap{overflow-x:auto}
+.v-ok{color:var(--c-pass);font-weight:800} .v-no{color:var(--c-dead);font-weight:800} .v-mid{color:var(--c-warn);font-weight:800}
+tr.clean{background:#E4F0EA !important} tr.conf{background:#F3E2E2 !important}
+figure{margin:var(--sp-4) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto;box-shadow:0 1px 3px rgba(20,20,19,.06)}
+figure .figtitle{font-size:.92rem;font-weight:700;color:var(--c-text);margin:0 0 var(--sp-2)}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}
+figcaption{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.6}
+figcaption b{color:var(--c-text)}
+details.card{margin:var(--sp-2) 0;border:1px solid var(--c-border);border-radius:var(--radius);background:var(--c-card);overflow:hidden}
+details.card>summary{cursor:pointer;list-style:none;padding:var(--sp-3) var(--sp-4);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap;font-weight:600;font-size:1rem}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--c-accent);font-weight:700;transition:transform .15s}
+details.card[open]>summary::before{transform:rotate(90deg)}
+details.card .body{padding:0 var(--sp-4) var(--sp-3);font-size:.92rem}
+details.card.cav{border-left:4px solid var(--c-warn)} details.card.method{border-left:4px solid var(--c-info)}
+.so{background:var(--c-pass-soft);border:1px solid var(--c-pass);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0}
+.so b{color:var(--c-pass)}
+.warnbox{background:var(--c-warn-soft);border:1px solid var(--c-warn);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-3) 0}
+.warnbox b{color:var(--c-warn)}
+.rel{display:flex;gap:8px;flex-wrap:wrap;margin:var(--sp-3) 0}
+.rel a{font-size:.82rem;text-decoration:none;color:var(--c-info);border:1px solid var(--c-info);border-radius:18px;padding:3px 11px;background:var(--c-info-soft)}
+.rel a:hover{background:var(--c-info);color:#fff}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-7);font-size:.8rem;color:var(--c-text-soft)}
+footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)} footer.prov code{font-family:var(--mono);font-size:.92em}
+footer.prov ul{padding-left:1.2em;margin:var(--sp-2) 0}
+.evi{font-family:var(--mono);font-size:.8rem;background:#F7F5EF;border:1px solid var(--c-border);border-radius:6px;padding:8px 10px;margin:var(--sp-2) 0;overflow-x:auto;white-space:pre;line-height:1.5}
+.svgnote{font-size:8.5px;fill:#6B6B66}
+@media(max-width:720px){.kpi{min-width:140px}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brand">解釋中心</span>
+  <nav>
+    <a href="index.standalone.html">← INDEX</a>
+    <a href="04_subclone-reconstruction-chr2-18M.standalone.html">← 案例走查 04</a>
+    <a href="06_ism-subclone-pipeline-concept.standalone.html">pipeline 構想 06 →</a>
+    <a href="#verdict">推論裁決</a><a href="#fix">資料口徑</a><a href="#link">read 連鎖</a><a href="#methyl">甲基+ASM</a><a href="#tree">可防守樹</a><a href="#pos3">pos3</a><a href="#bound">claim 邊界</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">解釋頁 05 · 獨立複核權威裁決 · 04 案例走查的審計姊妹篇</div>
+  <h1>第二輪獨立複核：每個推論的權威裁決</h1>
+  <p class="lede">頁 04 提出校正後，一個<strong>更嚴謹的第二輪獨立 audit</strong>（重算腳本 + matched-normal ASM 控制 + 跨 basecaller FDR）對推論 1-6 逐一裁決。本 session 已獨立驗證它 PASS（重跑 byte-identical、code-path 數字逐位吻合）。<strong>這頁是「矯正確認」的權威定案</strong> — 並修正頁 04 仍偏寬的兩處（推論 4、甲基子集）。</p>
+</header>
+
+<div class="bluf">
+  <h2>L0 一眼看懂權威裁決</h2>
+  <p>骨幹（LOH + somatic allele + read 連鎖）<span class="key">強</span>；regional subclonal 結構<span class="key">強支持但屬 operational/regional</span>；完整 clone identity / fraction / phylogeny <span class="key">未證</span>；甲基<span class="key">沿 lineage 一致（coherence）且跨 basecaller 複製</span>，但甲基造成突變<span class="key">完全未證</span>。</p>
+  <div class="verdict-quote">「A regional, LOH-constrained, somatic-haplotag-conditioned subclonal structure with cross-basecaller methylation coherence.」— <b>不是</b>「Confirmed five-subclone evolutionary reconstruction.」</div>
+  <p class="pi">▸ <b>給教授一句話：</b>原始 5 群收斂為 <b>≥3 regional molecular states</b>（alpha / alpha-1 / beta-like）；甲基沿譜系一致<b>但必須用 matched-normal 拆掉既存 ASM</b> — 乾淨的 tumor-associated 甲基子集 = <b>{2.1,2.2,3.1,3.2,5.1,5.2}</b>（normal 無 HP 差異），而 <b>{3.3,3.4,3.5,4.1} 被既存 germline ASM confound</b>，不可當 subclone 新生 epimutation。</p>
+  <div class="kpis">
+    <div class="kpi pass"><div class="v">確認</div><div class="k">推論 1 LOH（SEQC2 LOH BED + HP imbalance 98–99.6%）</div></div>
+    <div class="kpi dead"><div class="v">否定×2</div><div class="k">推論 3（HP2 消失）+ 推論 6（pos4 三群）</div></div>
+    <div class="kpi warn"><div class="v">重寫</div><div class="k">推論 4（pos3 與 1/2/6 互斥，不能同 trunk）</div></div>
+    <div class="kpi info"><div class="v">6 / 4</div><div class="k">甲基乾淨 CpG / 被既存 ASM confound 的 CpG</div></div>
+  </div>
+</div>
+
+<div class="ironclad">
+  <b>🔴 這個案例可以說什麼、不可以說什麼（claim 邊界）</b>
+  <ol>
+    <li><b>可以說</b>：LOH 區內、由多個 somatic allele 連鎖定義、帶一致局部 5mC 結構的 regional subclonal states；至少 2 主分支 + <code>(3)A→(5)C</code> 巢狀子分支；甲基跨 basecaller coherence。</li>
+    <li><b>不可以說</b>：5 個 subclone 已證實 / 完整演化順序已確認 / 甲基造成突變 / 甲基獨立重建完整 clone tree / DORADO 是獨立病人（它是同細胞株技術重現）。</li>
+    <li><b>關鍵紀律</b>：此區域<u>同時</u>有 normal haplotype ASM 與 tumor-associated allele-methylation — ISM 的價值是<b>把兩者拆開</b>，不是把所有甲基差異都歸給 subclone。</li>
+  </ol>
+</div>
+
+<!-- ============ §1 推論裁決 ============ -->
+<section id="verdict">
+  <h3><span class="num">①</span> 推論 1-6 權威裁決</h3>
+  <p class="sub">第二輪 audit 對使用者六個推論的逐一判定（重算腳本 + 跨 basecaller + FDR + normal 控制）。</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th style="width:160px">推論</th><th style="width:110px">裁決</th><th>修正版</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">1. 發生 LOH</td><td><span class="v-ok">確認</span></td><td>SEQC2 LOH BED <code>chr2:16,146,119–22,100,000</code> + HP imbalance（HKU HP2-parent 232/HP1 4 ≈98.3%；DORADO 279/1 ≈99.6%）一致。</td></tr>
+      <tr><td class="imp">2. 發生 subclone</td><td><span class="v-mid">強支持 · 有界</span></td><td>可稱 <b>regional operational subclonal states</b>；非完整 biological clone truth。</td></tr>
+      <tr><td class="imp">3. HP2 沒抽到/突變到不見</td><td><span class="v-no">否定</span></td><td>HP2 是主體 parent；all-REF 短連鎖 read 存在（≥2 點 17 條、≥3 點 4 條）；缺完整跨點 read 是 coverage 限制。</td></tr>
+      <tr><td class="imp">4. (1)(2)(3)(6) 先突變</td><td><span class="v-no">不成立 · 需重寫</span></td><td><b>(3) 與 (1)(2)(6) 互斥</b>，不能在同一 trunk；只可稱「不同的早期 branch-defining candidates」。</td></tr>
+      <tr><td class="imp">5. (5) 把群一、群二分開</td><td><span class="v-ok">支持 · provisional</span></td><td><code>(5)C</code> 對 <code>(3)A</code> perfect nesting；直接支持 read HKU 4 / DORADO 2 → provisional。</td></tr>
+      <tr><td class="imp">6. (4) 多突變造成三群</td><td><span class="v-no">否定</span></td><td>合併為 <b>pos4-altered beta-like state</b>；G/T/DEL 為 homopolymer-uncertain。</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="warnbox"><b>與頁 04 的差異（本頁修正）：</b>頁 04 把推論 4 寫成「骨幹共現獲證、僅順序 L3」— <u>偏寬</u>。權威裁決是<b>否定</b>：pos3 屬 alpha、pos1/2/6 屬 beta-like，兩者<b>互斥</b>，不可能是「一起先突變」的同一群。</div>
+</section>
+
+<!-- ============ §2 資料口徑修正 ============ -->
+<section id="fix">
+  <h3><span class="num">②</span> 三個資料口徑先修正</h3>
+  <p class="sub">在談結論前，audit 先修了三個會誤導的口徑。</p>
+
+  <details class="card method" open><summary><span style="font-family:var(--mono);color:var(--c-cs)">修正 1</span>(4.1) CpG 座標誤植</summary>
+    <div class="body">文字中的 <code>chr2:18,096,041</code> 在 GRCh38 是 <b>A，不是 CpG</b>。正確 (4.1) CpG = <code>chr2:18,096,340 C&gt;G dinucleotide</code>（圖上標的 18,096,341 是其 G 座標）。早期腳本因此漏掉真正的 4.1，已重算。</div></details>
+
+  <details class="card method" open><summary><span style="font-family:var(--mono);color:var(--c-cs)">修正 2</span>(3) 不是 SEQC2 FP，是 truth-unevaluable</summary>
+    <div class="body">(1)(2)(4)(5)(6) 都在 SEQC2 truth VCF（PASS）。(3) 落在 HC BED 空隙（上段止 <code>18,085,984</code>、下段起 <code>18,086,058</code>）→ <b>out-of-HC / truth-unevaluable</b>，不是可由 SEQC2 判定的 FP。兩套 tumor 都 <code>G&gt;A PASS</code> 且 matched normal 無 A（HKU 0/18、DORADO 0/27）→ 強 tumor-specific somatic candidate，只是不能升 truth-confirmed TP。</div></details>
+
+  <details class="card method"><summary><span style="font-family:var(--mono);color:var(--c-cs)">修正 3</span>Normal 並非「每個 call 都是 REF」</summary>
+    <div class="body">兩套 normal 都<u>沒有</u>六個預期 somatic ALT，但仍有少數 ONT error call（DEL/T）。正確說法：<b>matched normal 未觀察到預期 somatic ALT；但不是每個 normal base 都絕對等於 REF。</b></div></details>
+</section>
+
+<!-- ============ §3 read-level linkage ============ -->
+<section id="link">
+  <h3><span class="num">③</span> read-level 連鎖實際支持什麼（00/10/01/11）</h3>
+  <p class="sub">unique primary read、MAPQ≥20、BQ≥10 重算。<code>11</code> = 兩事件同時在同一 read。這是「哪些突變在同一譜系、哪些互斥」的直接證據。</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>事件組合</th><th>HKU 00/10/01/11</th><th>DORADO 00/10/01/11</th><th>判讀</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">(1)G vs (2)C</td><td>18 / 0 / 0 / <b>13</b></td><td>11 / 1 / 0 / <b>6</b></td><td><span class="v-ok">同支</span> (1)(2) 同 branch-defining</td></tr>
+      <tr><td class="imp">(1)G vs (3)A</td><td>3 / 3 / 7 / <b>0</b></td><td>跨距不足</td><td><span class="v-no">互斥</span></td></tr>
+      <tr><td class="imp">(2)C vs (3)A</td><td>3 / 5 / 9 / <b>0</b></td><td>0 / 1 / 0 / <b>0</b></td><td><span class="v-no">互斥</span></td></tr>
+      <tr class="clean"><td class="imp">(3)A vs (5)C</td><td>8 / 1 / 0 / <b>4</b></td><td>1 / 2 / 0 / <b>2</b></td><td><span class="v-ok">巢狀</span> (5)C nested 在 (3)A</td></tr>
+      <tr><td class="imp">(3)A vs (4)non-ref</td><td>0 / 9 / 13 / <b>0</b></td><td>0 / 7 / 5 / <b>1</b></td><td>主要互斥（DORADO 1 discordant）</td></tr>
+      <tr><td class="imp">(3)A vs (6)G</td><td>0 / 3 / 3 / <b>0</b></td><td>跨距不足</td><td><span class="v-no">互斥</span></td></tr>
+      <tr><td class="imp">(4)non-ref vs (6)G</td><td>9 / 0 / 0 / <b>10</b></td><td>1 / 0 / 0 / <b>1</b></td><td>同 state；<u>順序不可分</u></td></tr>
+      <tr><td class="imp">(5)C vs (6)G</td><td>3 / 7 / 11 / <b>0</b></td><td>1 / 7 / 0 / <b>0</b></td><td><span class="v-no">互斥</span> alpha-1 與 beta-like</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="so"><b>可直接推出：</b>① (1)(2) 同 branch；② (3) 與 (1)(2)/(4)/(6) 互斥 → alpha / beta-like 分叉；③ (5)C 只出現在帶 (3)A 的 read → <code>(3)A→(5)C</code>；④ (4) 與 (6) 在 HKU 完全共現 = 同 state，<u>但不能排序</u>。</div>
+  <div class="warnbox"><b>不能直接推出：</b>(1)(2) 與 (4)(6) <u>沒有</u>足夠直接跨 36–40 kb 的 genetic linkage read → 兩 block 只能以<b>互斥 + 甲基一致性</b>連成同一 broad beta-like program（須標 <code>methylation-bridged inference</code>，畫虛線）。六點單一路徑完整 read 幾乎不存在 → 不能畫成已確認完整 phylogeny。</div>
+</section>
+
+<!-- ============ §4 甲基 + ASM 控制 ============ -->
+<section id="methyl">
+  <h3><span class="num">④</span> 甲基化：哪些跨 basecaller 複製、哪些被既存 ASM confound</h3>
+  <p class="sub">這是本頁最關鍵的一節，也是 ISM 真正的價值所在 — <strong>用 matched-normal 把「subclone 新生甲基」與「LOH 前既存的 haplotype ASM」拆開</strong>。</p>
+
+  <h4 class="mini">(a) tumor lineage 甲基差異（pos3 A vs G）跨 basecaller 複製</h4>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>CpG</th><th>HKU A→G mean</th><th>HKU MW-FDR</th><th>跨 basecaller</th><th>normal ASM?</th><th>判定</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">2.1</td><td>0.75 → 0.48</td><td>0.176</td><td>方向一致</td><td>無 (FDR 0.41)</td><td><span class="v-mid">乾淨但弱</span></td></tr>
+      <tr class="clean"><td class="imp">2.2</td><td>0.90 → 0.22</td><td>0.0032</td><td>複製</td><td>無 (FDR 0.055)</td><td><span class="v-ok">乾淨</span></td></tr>
+      <tr class="clean"><td class="imp">3.1</td><td>0.22 → 0.92</td><td>3.3e-4</td><td>複製</td><td>無 (FDR 0.41)</td><td><span class="v-ok">乾淨 ★</span></td></tr>
+      <tr class="clean"><td class="imp">3.2</td><td>0.97 → 0.14</td><td>4.1e-5</td><td>複製</td><td>無 (FDR 0.50)</td><td><span class="v-ok">乾淨 ★</span></td></tr>
+      <tr class="conf"><td class="imp">3.3</td><td>0.42 → 0.84</td><td>0.025</td><td>複製</td><td><b>有 (FDR 0.007)</b></td><td><span class="v-no">ASM confound</span></td></tr>
+      <tr class="conf"><td class="imp">3.4</td><td>0.04 → 0.87</td><td>4.1e-5</td><td>方向(DORADO 未過 FDR)</td><td><b>有 (FDR 0.007)</b></td><td><span class="v-no">ASM confound</span></td></tr>
+      <tr class="conf"><td class="imp">3.5</td><td>0.01 → 0.87</td><td>0.0017</td><td>方向(DORADO 未過 FDR)</td><td><b>有 (FDR 0.050)</b></td><td><span class="v-no">ASM confound</span></td></tr>
+      <tr class="conf"><td class="imp">4.1<span class="muted">(校正座標)</span></td><td>0.98 → 0.14</td><td>0.0027</td><td>複製</td><td><b>有 (FDR 0.007)</b></td><td><span class="v-no">ASM confound</span></td></tr>
+      <tr class="clean"><td class="imp">5.1</td><td>0.03 → 0.95</td><td>0.0060</td><td>複製</td><td>無 (FDR 0.30)</td><td><span class="v-ok">乾淨</span></td></tr>
+      <tr class="clean"><td class="imp">5.2</td><td>0.03 → 0.99</td><td>0.0060</td><td>複製</td><td>無 (FDR 0.41)</td><td><span class="v-ok">乾淨</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="muted">tumor pos3-anchored A-vs-G + normal HP1-vs-HP2 ASM 皆親讀 <code>independent_audit.md</code>（機器輸出）。<span style="background:#E4F0EA;padding:0 3px">綠列</span>=乾淨 tumor-associated；<span style="background:#F3E2E2;padding:0 3px">紅列</span>=被既存 germline ASM confound。</p>
+
+  <h4 class="mini">(b) matched-normal 揭露的既存 ASM（為什麼必須扣）</h4>
+  <div class="evi">Normal HP1 vs HP2（已 LOH 前的 germline allele 甲基不對稱）顯著者：
+  3.3  HP1=0.814  HP2=0.046   MW-FDR 0.0070
+  3.4  HP1=0.033  HP2=0.850   MW-FDR 0.0070
+  3.5  HP1=0.583  HP2=0.012   MW-FDR 0.0496
+  4.1  HP1=0.887  HP2=0.078   MW-FDR 0.0070
+→ 這四個 CpG 的 tumor lineage 甲基差異，部分來自既存 germline ASM，不能算 subclone 新生 epimutation。
+  2.1/2.2、3.1/3.2、5.1/5.2 normal 無顯著 HP 差異 → 乾淨候選。</div>
+
+  <div class="so"><b>權威結論（取代頁 04 / v1 的「robust {3.1,3.2,3.3}」）：</b>乾淨且跨 basecaller 複製的 tumor-associated 甲基子集 = <b>{2.1, 2.2, 3.1, 3.2, 5.1, 5.2}</b>；其中 <b>3.1 / 3.2 最強（★，FDR≤3e-4、|Δ|≈0.7–0.83、normal 無 ASM）</b>。<b>{3.3, 3.4, 3.5, 4.1} 被既存 germline ASM confound，保守排除。</b>注意：3.3 雖跨 basecaller 複製，但 normal 也有 ASM → 不算乾淨（這正是 v1 的錯：把 3.3 當 robust）。</div>
+
+  <details class="card cav"><summary>nuance（這 session 加的銳化）：LOH 已丟 HP1，為何還說 ASM confound？</summary><div class="body">tumor 是 LOH、已丟 HP1，故 3.3/3.4 的 tumor 差異不可能是「簡單繼承 germline ASM」（HP1 已不在）。較準確的說法是：這些 CpG <b>本身 epigenetically labile</b>（在 normal 兩 allele 就差很大）→ 它們的 tumor 訊號可信度低，<b>保守排除</b>即可，不必宣稱機制。</div></details>
+
+  <h4 class="mini">(c) tumor vs normal 差異甲基也跨 basecaller 複製</h4>
+  <p>以所有 read 直接比 tumor vs matched normal，HKU 與 DORADO 在 <b>2.1/2.2、3.1/3.2、5.1/5.2</b> 都有同方向 + 過 FDR 的差異（例 2.1：HKU 0.525/0.030 q=7.7e-4、DORADO 0.497/0.016 q=3.5e-4）。但 all-read tumor/normal 差異仍混合 tumor composition + LOH + haplotype ASM，須再用 allele-conditioned 與 normal-HP-conditioned 拆解。</p>
+</section>
+
+<!-- ============ §5 可防守樹 ============ -->
+<section id="tree">
+  <h3><span class="num">⑤</span> 可防守的候選樹（observed 實線 / inferred 虛線）</h3>
+  <p class="sub">把所有連鎖 + 甲基證據套用後的誠實版樹。注意 beta-like 的 <strong>left / right 兩 block 沒有直接 genetic bridge</strong>，只用互斥 + 甲基一致性連接（虛線）。</p>
+
+  <figure>
+    <div class="figtitle">圖 1 · chr2:18M 可防守候選樹（verdict_02 §九）</div>
+    <svg viewBox="0 0 940 420" role="img" aria-label="可防守候選樹">
+      <!-- root -->
+      <rect x="360" y="16" width="220" height="48" rx="8" fill="#F0EDE6" stroke="#5C5A54" stroke-dasharray="6 4" stroke-width="2"/>
+      <text x="470" y="36" text-anchor="middle" font-size="12" font-weight="700">all-REF / unsampled 共同祖先</text>
+      <text x="470" y="53" text-anchor="middle" font-size="9.5" fill="#9A3B3B">parsimony / contamination-aware 假說 · 非觀測 read</text>
+      <!-- two main branches -->
+      <line x1="470" y1="64" x2="230" y2="120" stroke="#2F7D5B" stroke-width="2.5"/>
+      <line x1="470" y1="64" x2="660" y2="120" stroke="#2F7D5B" stroke-width="2.5"/>
+      <text x="320" y="96" font-size="10" fill="#2F7D5B" font-weight="700">(3) G&gt;A</text>
+      <text x="585" y="96" font-size="10" fill="#2F7D5B" font-weight="700">beta-like program</text>
+      <!-- alpha -->
+      <rect x="120" y="122" width="220" height="52" rx="8" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="2"/>
+      <text x="230" y="143" text-anchor="middle" font-size="13" font-weight="700" fill="#1f4f3a">alpha</text>
+      <text x="230" y="161" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11">(3)=A · (5)=G</text>
+      <!-- alpha-1 -->
+      <line x1="230" y1="174" x2="230" y2="224" stroke="#2F7D5B" stroke-width="2"/>
+      <text x="238" y="202" font-size="10" fill="#2F7D5B">+ (5) G&gt;C（nested, provisional）</text>
+      <rect x="120" y="226" width="220" height="50" rx="8" fill="#E4F0EA" stroke="#2F7D5B" stroke-width="1.5"/>
+      <text x="230" y="247" text-anchor="middle" font-size="12" font-weight="700" fill="#1f4f3a">alpha-1</text>
+      <text x="230" y="265" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11">(3)=A · (5)=C</text>
+      <!-- beta-like program node -->
+      <rect x="540" y="122" width="280" height="40" rx="8" fill="#F6EBD8" stroke="#B06A16" stroke-width="2"/>
+      <text x="680" y="146" text-anchor="middle" font-size="12" font-weight="700" fill="#7a3c22">beta-like program</text>
+      <!-- left/right blocks, methylation-bridged -->
+      <line x1="620" y1="162" x2="560" y2="210" stroke="#B06A16" stroke-width="2"/>
+      <line x1="740" y1="162" x2="800" y2="210" stroke="#B06A16" stroke-width="2"/>
+      <!-- methylation bridge dashed between blocks -->
+      <line x1="620" y1="250" x2="740" y2="250" stroke="#5B3FA0" stroke-width="2" stroke-dasharray="5 3"/>
+      <text x="680" y="244" text-anchor="middle" font-size="9" fill="#5B3FA0">甲基橋接（無直接 genetic link）</text>
+      <rect x="440" y="212" width="180" height="62" rx="8" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/>
+      <text x="530" y="232" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7a3c22">left block</text>
+      <text x="530" y="250" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5">(1) C&gt;G</text>
+      <text x="530" y="265" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5">(2) G&gt;C</text>
+      <rect x="740" y="212" width="180" height="62" rx="8" fill="#F6EBD8" stroke="#B06A16" stroke-width="1.5"/>
+      <text x="830" y="232" text-anchor="middle" font-size="11.5" font-weight="700" fill="#7a3c22">right block</text>
+      <text x="830" y="250" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5">(4) C&gt;G (G/T/DEL jitter)</text>
+      <text x="830" y="265" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5">(6) C&gt;G（共現,不可排序）</text>
+      <!-- legend -->
+      <line x1="60" y1="320" x2="880" y2="320" stroke="#E3DACC"/>
+      <g font-size="11">
+        <line x1="70" y1="340" x2="110" y2="340" stroke="#2F7D5B" stroke-width="2.5"/><text x="118" y="344">實線 = 直接互斥/巢狀觀測支持</text>
+        <line x1="360" y1="340" x2="400" y2="340" stroke="#5C5A54" stroke-width="2" stroke-dasharray="6 4"/><text x="408" y="344">虛線(灰) = parsimony 推論的 root</text>
+        <line x1="660" y1="340" x2="700" y2="340" stroke="#5B3FA0" stroke-width="2" stroke-dasharray="5 3"/><text x="708" y="344">虛線(紫) = 甲基橋接（無 genetic link）</text>
+      </g>
+      <text x="60" y="372" font-size="11" fill="#9A3B3B" font-weight="700">⛔ 不可寫：5 個 subclone、完整演化順序、(4)&amp;(6) 先後、把 left/right 當已確認直接連鎖。</text>
+      <text x="60" y="394" font-size="10.5" fill="#5C5A54">可寫：≥3 regional molecular states（alpha / alpha-1 / beta-like），beta-like 內含 left/right 兩 block。</text>
+    </svg>
+    <figcaption><b>來源：</b>verdict_02 §九 + linkage 表（<code>independent_audit.md</code>）。<b>tier：</b>分叉與巢狀 <span class="badge tier">L2</span>；root/順序/left-right 橋接 <span class="badge tier">L3 推論</span>。</figcaption>
+  </figure>
+</section>
+
+<!-- ============ §6 pos3 forensics ============ -->
+<section id="pos3">
+  <h3><span class="num">⑥</span> pos3 (3) — 強 tumor-specific somatic（被標 FP 其實是 truth-gap）</h3>
+  <p class="sub">使用者懷疑被標 FP 的 (3) 其實是真的 — audit 確認：它是強 somatic candidate，只是落在 SEQC2 HC 空隙不可被 truth 驗證。</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>資料</th><th>Tumor A / G (BQ20)</th><th>Normal A / G (BQ20)</th><th>truth 狀態</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">HKU</td><td>29 / 30</td><td>0 / 18</td><td rowspan="2"><code>out_of_hc_truth_unevaluable</code><br>HC 空隙 18,085,984–18,086,058</td></tr>
+      <tr><td class="imp">DORADO</td><td>21 / 27</td><td>0 / 27</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="so"><b>結論：</b>(3) 是強 tumor-specific somatic candidate（兩套 tumor 都 G&gt;A、兩 normal 0 A），但<u>因落 HC 空隙不能升 truth-confirmed TP</u>。使用者「可能是真的」直覺<b>方向正確</b>。教學重點：不能只看真值標籤判 TP/FP，要看變異本身的證據 + 真值集的覆蓋邊界。</div>
+</section>
+
+<!-- ============ §7 claim 邊界 + 外部對齊 ============ -->
+<section id="bound">
+  <h3><span class="num">⑦</span> claim 邊界 + 外部方法學對齊</h3>
+  <p class="sub">把這案例放回 ISM 研究定位，並用外部文獻劃 claim 邊界。</p>
+
+  <div class="takeaway pass"><span class="lab">ISM 在這案例的價值</span>
+    ① 同一長讀聯合觀測 somatic allele + haplotag + native 5mC；② 找跨 basecaller 重現的 allele-CpG association；③ 在 LongPhase-S fine tag 無法拆開時補 regional molecular-state characterization；④ <b>用 matched normal 揭露哪些甲基差異是既存 ASM confound</b>；⑤ 用多點 read linkage 提出帶不確定性標記的 regional subclone 假說。
+  </div>
+
+  <h4 class="mini">外部對齊（claim 邊界）</h4>
+  <table>
+    <thead><tr><th style="width:220px">文獻</th><th>對本案例的意涵</th></tr></thead>
+    <tbody>
+      <tr><td class="imp">Tarabichi et al., Nat Methods 2021</td><td>正式 subclonal reconstruction 需處理 genetic backbone / CN-purity / clustering / phylogeny / 不確定性 → 本案例只到 regional states，不宣稱完整 phylogeny。</td></tr>
+      <tr><td class="imp">Liu/Goretsky et al. 2025 preprint</td><td>最接近的 long-read subclone multi-omics：以 SNV 建樹、再把 methylation 掛到 lineage → 支持「genetic backbone + methylation characterization」框架。</td></tr>
+      <tr><td class="imp">LongPhase-S preprint</td><td>somatic haplotagging 是本案例 genetic backbone；ISM 差異化 = 加入<b>有界、normal-aware 的 read-level methylation interpretation</b>。</td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:var(--sp-4)">論文適合用語：<span class="badge b-pass">A regional, LOH-constrained, somatic-haplotag-conditioned subclonal structure with cross-basecaller methylation coherence.</span><br>不適合：<span class="badge b-dead">Confirmed five-subclone evolutionary reconstruction.</span></p>
+
+  <div class="rel">
+    <a href="04_subclone-reconstruction-chr2-18M.standalone.html">← 回案例走查 04</a>
+    <a href="02_ism-core.standalone.html">ISM 方法本體</a>
+    <a href="index.standalone.html">← INDEX</a>
+  </div>
+</section>
+
+<footer class="prov">
+  <div class="wrap" style="padding:0">
+    <h4>來源與可重現性（provenance）</h4>
+    <p>本頁 v2 忠實呈現<strong>第二輪獨立複核（verdict_02 + independent_audit）</strong>的權威裁決，本 session 已驗 PASS（重跑 byte-identical、code-path 數字逐位吻合）。所有 linkage / allele / 甲基 FDR / normal ASM 數字親讀機器輸出檔。無捏造、無預期值。整體 <span class="badge tier">L2</span>。</p>
+    <ul>
+      <li><b>權威裁決（人讀）：</b><code>InterSubMod/docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_independent_verdict_02.md</code></li>
+      <li><b>機器可讀完整結果：</b><code>…_assets/data/independent_audit.json</code> + 人讀摘要 <code>…/independent_audit.md</code></li>
+      <li><b>重算腳本：</b><code>…_assets/scripts/independent_subclone_audit.py</code>（py_compile + exit 0 + git-check 通過）</li>
+      <li><b>本 session 補充重跑（pos3-anchored MWU+perm）：</b><code>…_assets/data/methyl_discrimination_pvalues.txt</code>（與 audit 同向，audit 的 per-anchor + normal 控制為準）</li>
+      <li><b>第一輪報告（已被本頁 §1/§4 修正）：</b><code>…/20260615_chr2_18M_subclone_verification_HCC1395_01.md</code></li>
+    </ul>
+    <p class="muted">內聯 explain.css v2.1。v2 建立 2026-06-15（取代 v1 robust 子集 {3.1,3.2,3.3}）· branch research/subclonal-reconstruction-202606 · build commit <code>b761336</code> · 解釋頁 05（權威矯正 audit）。</p>
+  </div>
+</footer>
+
+</div>
+</body>
+</html>

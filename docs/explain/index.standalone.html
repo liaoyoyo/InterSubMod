@@ -32,6 +32,10 @@
     <a href="01_background-glossary.standalone.html">名詞地基</a>
     <a href="02_ism-core.standalone.html">ISM 方法</a>
     <a href="03_methylation-read-filter.standalone.html">甲基讀取/篩選</a>
+    <a href="04_subclone-reconstruction-chr2-18M.standalone.html">案例 chr2:18M</a>
+    <a href="05_subclone-correction-audit-chr2-18M.standalone.html">案例 audit</a>
+    <a href="07_subclone-judgment-workstation-chr2-18M.standalone.html">判讀工作站</a>
+    <a href="06_ism-subclone-pipeline-concept.standalone.html">pipeline 構想</a>
   </nav>
 </div></div>
 
@@ -66,6 +70,9 @@
     <span class="pchip done">✓ 背景名詞地基</span>
     <span class="pchip done">✓ ISM 方法本體</span>
     <span class="pchip done">✓ 甲基讀取與篩選</span>
+    <span class="pchip done">✓ 真實案例 chr2:18M subclone</span>
+    <span class="pchip done">✓ chr2:18M 矯正 audit（權威裁決）</span>
+    <span class="pchip done">✓ ISM subclone pipeline 構想（9 步）</span>
     <span class="pchip todo">○ ism-vs-external</span>
     <span class="pchip todo">○ 四道 NEGATIVE</span>
     <span class="pchip todo">○ LOH-phasing 脊柱</span>
@@ -147,6 +154,27 @@
       <a class="go dis">待建（論文框架）</a>
     </div>
 
+    <div class="lcard pos">
+      <h4>真實案例：chr2:18M subclone 重建 <span class="badge tier">案例 L2</span></h4>
+      <div class="oneline">HCC1395 一段 LOH 區的 6 sSNV + 甲基逐步重建走查。並陳「手動 IGV 直覺 → 實測校正」，給教授與同學看一個真實 subclone 怎麼被拼回來。</div>
+      <div class="pi">▸ PI：骨幹（LOH→α/β somatic 譜系→甲基追蹤）獲證且跨 basecaller 複製；3 處校正（5群→~3、順序=推論、operational≠germline ASM）。</div>
+      <a class="go" href="04_subclone-reconstruction-chr2-18M.standalone.html">看案例走查 →</a> &nbsp;<a class="go" href="05_subclone-correction-audit-chr2-18M.standalone.html">看權威 audit →</a> &nbsp;<a class="go" href="07_subclone-judgment-workstation-chr2-18M.standalone.html">看判讀工作站 →</a>
+    </div>
+
+    <div class="lcard method">
+      <h4>案例 audit：chr2:18M 權威裁決 <span class="badge tier">L2</span></h4>
+      <div class="oneline">第二輪獨立複核（matched-normal ASM 控制 + 跨 basecaller FDR）對推論 1-6 逐一裁決，並把甲基訊號拆成「乾淨 tumor-associated」vs「既存 germline ASM confound」。</div>
+      <div class="pi">▸ PI：≥3 regional states；甲基乾淨子集 {2.1,2.2,3.1,3.2,5.1,5.2}（最強 3.1/3.2）、confound {3.3,3.4,3.5,4.1}；用語=regional LOH-constrained somatic-haplotag-conditioned subclonal structure。</div>
+      <a class="go" href="05_subclone-correction-audit-chr2-18M.standalone.html">看權威 audit →</a>
+    </div>
+
+    <div class="lcard method">
+      <h4>ISM subclone pipeline 構想 <span class="badge tier">構想 · B2</span></h4>
+      <div class="oneline">從 chr2 案例萃取的 9 步 ISM subclone 分析方法（輸入→譜系→甲基+ASM控制→可防守樹）+ 3 防呆 + 系統化路徑。構想基礎，非已實作模組。</div>
+      <div class="pi">▸ PI：方法核心 = 互斥 linkage 定 lineage（非 VAF）+ homopolymer guard + matched-normal ASM 控制（拆 subclone 甲基 vs 既存 ASM）+ 只畫有證據的樹邊；升 validated = 自動化 + 標準化 + 跨樣本。</div>
+      <a class="go" href="06_ism-subclone-pipeline-concept.standalone.html">看 pipeline 構想 →</a>
+    </div>
+
     <div class="lcard method">
       <h4>ism-evolution（統計口徑稽核）<span class="badge tier">⭐3</span></h4>
       <div class="oneline">ISM 現行版有多個統計口徑問題（Fisher 假獨立 / 5mC-only / germline 軸 Δβ 污染 / 跨 region 無多重檢定），稽核後無翻轉結論但需補修。</div>
@@ -164,6 +192,10 @@
     <li><b>背景名詞地基</b> — 先建立語言（HP-axis / ASM / LOH / 統計詞）。<a href="01_background-glossary.standalone.html">→ 已建</a></li>
     <li><b>ISM 方法本體</b> — 主軸引擎：作用位置 + 五階段 + 為何用 read-read 距離。<a href="02_ism-core.standalone.html">→ 已建</a></li>
     <li><b>ISM 甲基讀取與篩選</b> — 細節層：MM/ML → 矩陣、二值化灰帶、七道守門、兩種「篩選」（給教授講細節）。<a href="03_methylation-read-filter.standalone.html">→ 已建</a></li>
+    <li><b>真實案例：chr2:18M subclone 重建</b> — 把方法用在一個真位點：6 sSNV + 甲基逐步重建，並陳手動直覺與實測校正（給教授與同學看具體案例）。<a href="04_subclone-reconstruction-chr2-18M.standalone.html">→ 已建</a></li>
+    <li><b>案例 audit：chr2:18M 權威裁決</b> — 第二輪獨立複核（ASM 控制 + 跨 basecaller FDR）逐一裁決推論 1-6，把甲基拆成乾淨 vs ASM-confound（給要看嚴謹度的人）。<a href="05_subclone-correction-audit-chr2-18M.standalone.html">→ 已建</a></li>
+    <li><b>判讀工作站：chr2:18M 互動檢視</b> — 把上面案例的權威數字（6 sSNV 卡 + 甲基三組 + LOH + CCF + 6 推論裁決）做成可逐項判讀（同意/存疑/否定 + JSON/CSV 匯出）的 data-bound 工作站；每個數字由 <code>independent_audit.json</code> 注入、附 file:line 來源。<a href="07_subclone-judgment-workstation-chr2-18M.standalone.html">→ 已建</a></li>
+    <li><b>ISM subclone pipeline 構想（9 步）</b> — 從案例萃取的方法構想：輸入→互斥 linkage 譜系→homopolymer guard→甲基 + normal-ASM 控制→可防守樹（給 Ch3 Methods / 系統化 handoff）。<a href="06_ism-subclone-pipeline-concept.standalone.html">→ 已建</a></li>
     <li><b>HP-axis vs ALLELE-axis</b> — 全專案最易誤讀的軸別 confound（暫在名詞地基 + ISM 頁，將獨立成頁）。</li>
     <li><b>ism-vs-external</b> — ISM 在業界的定位（軸 C vs 軸 A）。<span class="todo">待建</span></li>
     <li><b>四道 NEGATIVE</b> — 論文最強武器（防彈負結果）。<span class="todo">待建</span></li>

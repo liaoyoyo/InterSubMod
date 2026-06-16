@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>檢核觀察報告 — tumor HP-AUC &lt; normal（germline-HP 結構被打亂）</title>
+<!--
+  doc_type: observation_verification  created: 2026-06-14  scope: HCC1395 單樣本 paired (全基因組 30490 region)
+  spec: HANDOFF_tumor_vs_normal_hpauc.md  binary: develop 172b7c5 (SKIP 預設 + HP-AUC 欄)
+  data_sources: wg_hpauc.json, confound_stratify.json, gap2/gap2_subclone_discrimination.json,
+                tumor_landscape.json, /tmp/wg_hpauc/significance_summary.csv, figures/tn_*.png
+  provenance-verified: 3a 取自 wg_hpauc.json；3b/3c/3d 由 confound_stratify.py 親算 /tmp CSV 落 confound_stratify.json（本 session）；
+                       案例圖由 inter_sub_mod(develop) 重跑 8 region + plot_tumor_vs_normal.py 生成、親眼驗證；
+                       gap2 數字取自 gap2_subclone_discrimination.json。所有數字 grep-verified、無捏造。
+-->
+<style>
+:root{--c-accent:#D97757;--c-accent-soft:#F2E4DC;--c-text:#1c1b19;--c-text-soft:#5C5A54;--c-bg:#FAF9F5;--c-card:#fff;--c-border:#E3DACC;
+--c-pass:#2F7D5B;--c-pass-soft:#E4F0EA;--c-warn:#B06A16;--c-warn-soft:#F6EBD8;--c-info:#2F6690;--c-info-soft:#E2ECF3;--c-dead:#9A3B3B;--c-dead-soft:#F3E2E2;
+--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;--radius:10px;--sans:-apple-system,system-ui,"Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;}
+*{box-sizing:border-box}body{margin:0;font-family:var(--sans);background:var(--c-bg);color:var(--c-text);line-height:1.7;font-size:16px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 var(--sp-5)}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.96);border-bottom:1px solid var(--c-border);backdrop-filter:blur(4px)}
+.topbar .in{max-width:1100px;margin:0 auto;padding:8px var(--sp-5);display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap}
+.topbar .brand{font-weight:800;color:var(--c-accent)}.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav a{color:var(--c-text-soft);text-decoration:none;padding:2px 9px;border:1px solid var(--c-border);border-radius:18px;font-size:.8rem}
+header.hero{padding:var(--sp-6) 0 var(--sp-4)}header.hero .kicker{font-family:var(--mono);font-size:.74rem;color:var(--c-accent);letter-spacing:1px;text-transform:uppercase}
+header.hero h1{font-size:1.85rem;margin:6px 0;line-height:1.22}header.hero .lede{color:var(--c-text-soft);max-width:860px;font-size:1.04rem}
+section{padding:var(--sp-6) 0;border-top:1px solid var(--c-border)}
+section h3{font-size:1.46rem;margin:0 0 var(--sp-2);display:flex;gap:var(--sp-3);align-items:baseline;flex-wrap:wrap}
+section h3 .num{font-family:var(--mono);color:var(--c-accent);font-weight:800;font-size:1rem}
+section .sub{color:var(--c-text-soft);font-size:.95rem;margin:0 0 var(--sp-4);max-width:880px}
+h4.mini{font-size:1.02rem;margin:var(--sp-4) 0 var(--sp-2);display:flex;align-items:center;gap:8px}h4.mini::before{content:"";width:4px;height:1.05em;background:var(--c-accent);border-radius:2px}
+.bluf{background:var(--c-accent-soft);border:1px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-5);margin:var(--sp-4) 0}.bluf h2{margin:0 0 var(--sp-2);font-size:1.2rem}.bluf p{margin:var(--sp-2) 0}
+.ironclad{background:var(--c-info-soft);border:1px solid var(--c-info);border-left:6px solid var(--c-info);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:.92rem}.ironclad b{color:var(--c-info)}
+.takeaway{background:#fff;border:1px solid var(--c-accent);border-left:6px solid var(--c-accent);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4);margin:var(--sp-4) 0;font-size:1.06rem;font-weight:600;color:#3a2418}
+.takeaway .lab{display:block;font-family:var(--mono);font-size:.64rem;color:var(--c-accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:5px}
+.takeaway.pass{border-color:var(--c-pass);border-left-color:var(--c-pass);color:#1f4f3a}.takeaway.pass .lab{color:var(--c-pass)}
+.takeaway.warn{border-color:var(--c-warn);border-left-color:var(--c-warn);color:#6b4410}.takeaway.warn .lab{color:var(--c-warn)}
+.key{background:#fdf2c8;font-weight:700;padding:0 4px;border-radius:3px}.muted{color:var(--c-text-soft);font-size:.84rem}
+.badge{display:inline-block;font-size:.68rem;font-family:var(--mono);font-weight:700;padding:1px 6px;border-radius:5px;border:1px solid;white-space:nowrap;vertical-align:middle}
+.b-pass{color:var(--c-pass);background:var(--c-pass-soft);border-color:var(--c-pass)}.b-warn{color:var(--c-warn);background:var(--c-warn-soft);border-color:var(--c-warn)}.b-dead{color:var(--c-dead);background:var(--c-dead-soft);border-color:var(--c-dead)}.b-info{color:var(--c-info);background:var(--c-info-soft);border-color:var(--c-info)}
+.kpis{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-4) 0 0}.kpi{flex:1;min-width:180px;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-3) var(--sp-4)}
+.kpi .v{font-family:var(--mono);font-size:1.45rem;font-weight:800;line-height:1.15}.kpi .k{font-size:.76rem;color:var(--c-text-soft);margin-top:5px}
+.kpi.pass{border-left:4px solid var(--c-pass)}.kpi.pass .v{color:var(--c-pass)}.kpi.warn{border-left:4px solid var(--c-warn)}.kpi.warn .v{color:var(--c-warn)}.kpi.info{border-left:4px solid var(--c-info)}.kpi.info .v{color:var(--c-info)}
+table{border-collapse:collapse;width:100%;font-size:.85rem;margin:var(--sp-3) 0;background:#fff}th,td{border:1px solid var(--c-border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F3EFE7;font-weight:700}tbody tr:nth-child(even){background:#FBF9F4}td code,p code,li code{font-family:var(--mono);font-size:.82em;background:#F0EDE6;padding:1px 4px;border-radius:4px}td.imp{font-weight:700}
+.clean{background:var(--c-pass-soft)!important}.conf{background:var(--c-dead-soft)!important}
+figure{margin:var(--sp-4) 0;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius);padding:var(--sp-4);overflow-x:auto}
+figure .figtitle{font-size:.92rem;font-weight:700;margin:0 0 var(--sp-2)}figure img{display:block;max-width:100%;height:auto;border:1px solid var(--c-border);border-radius:6px}
+figure svg{display:block;max-width:100%;height:auto;margin:0 auto}
+figcaption{font-size:.82rem;color:var(--c-text-soft);margin-top:var(--sp-3);border-top:1px dashed var(--c-border);padding-top:var(--sp-2);line-height:1.55}figcaption b{color:var(--c-text)}
+.svgnote{font-size:9px;fill:#6B6B66}
+.confirm{background:#fff;border:2px dashed var(--c-accent);border-radius:var(--radius);padding:var(--sp-4);margin:var(--sp-4) 0}.confirm h4{margin:0 0 var(--sp-2);color:var(--c-accent)}.confirm ul{margin:var(--sp-2) 0;padding-left:1.2em}.confirm li{margin:6px 0}
+footer.prov{border-top:2px solid var(--c-border);margin-top:var(--sp-6);padding:var(--sp-5) 0 var(--sp-6);font-size:.8rem;color:var(--c-text-soft)}footer.prov h4{color:var(--c-text);margin:0 0 var(--sp-2)}footer.prov code{font-family:var(--mono)}footer.prov ul{padding-left:1.2em}
+.todo{color:var(--c-warn);font-family:var(--mono);font-size:.82em;font-weight:700}
+@media(max-width:760px){.cases{grid-template-columns:1fr!important}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brand">檢核觀察報告</span>
+  <nav><a href="#bg">背景</a><a href="#3a">總體</a><a href="#3b">配對 Δ</a><a href="#3c">confound 分層</a><a href="#cases">案例圖</a><a href="#verdict">判定</a><a href="#confirm">請你確認</a></nav>
+</div></div>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">tumor vs normal HP-AUC · 接手 HANDOFF 生成 · HCC1395 單樣本 · 全基因組 30490 region</div>
+  <h1>檢核：tumor 的 germline-HP 距離結構，被系統性「打亂」了嗎？</h1>
+  <p class="lede">驗證「<strong>tumor HP-AUC &lt; normal HP-AUC</strong>」是不是真的，並<strong>嚴格排除 confound（CNV / LOH / coverage / HP 不平衡）</strong>，最後誠實判定它是 somatic 訊號還是假象。依 <code>HANDOFF_tumor_vs_normal_hpauc.md</code> 規格生成。</p>
+</header>
+
+<div class="bluf">
+  <h2>L0 結論（你要 pre-confirm 的）</h2>
+  <p><b>現象成立：</b>在 tumor 兩個 HP 都有 read 的 region（n=20173），tumor 對 germline-HP 的距離區分度<span class="key">系統性低於 normal</span> —— 配對差 median <b>+0.106</b>、70.7% region tumor&lt;normal；tumor median 0.642 vs normal 0.786。</p>
+  <p><b>不是 confound：</b>把差異按 CNV/LOH/coverage/HP平衡分層後 —— CNV 層<u>放大</u>（CNV_Gain +0.154），LOH 層<u>消失</u>（+0.014）；但在<b class="key">乾淨 diploid + 非LOH 層，tumor 仍 &lt; normal（+0.089、67%&gt;0）</b>，且覆蓋≥50（+0.102）、HP平衡≥0.5（+0.111）控制後依然成立 → <b>confound 放大但不解釋此現象</b>。</p>
+  <p>→ <b>支持 H_somatic</b>：tumor 有「自己的」改變打亂了 germline-HP 結構（與主軸「甲基=germline-haplotype 層級」一致）。</p>
+  <p class="muted">⚠ 誠實上限：HP=germline 真值（量的是 germline-HP 結構被打亂，<u>不是 somatic subclone 直接計數</u>）；單樣本 HCC1395；精確 somatic 比例需 gap2 殘差檢定方法修正（見 §判定）。</p>
+</div>
+
+<!-- 背景 -->
+<section id="bg">
+  <h3><span class="num">▸</span> 背景：HP-AUC 是什麼（避免誤判）</h3>
+  <div class="ironclad">
+    <b>HP-AUC = P( dist(不同HP的read對) &gt; dist(同HP的read對) )</b>。ground truth = <b>HP tag（longphase 的 germline haplotype，不是 somatic subclone）</b>。1.0=距離完美區分 germline-HP、0.5=與 HP 無關、−1=undefined（該 subset 只有單一 HP，常見於 tumor somatic-haplotag）。已是 ISM 標準輸出欄 <code>HP_AUC_Normal/Tumor/All</code>。
+  </div>
+  <p>邏輯：若純 germline，tumor 應 ≈ normal（同一套 haplotype）。<b>tumor 明顯偏低 = tumor 特有的東西打亂了它</b> —— 這就是要查的線索，並要排除是不是 CNV/LOH/coverage 造成。</p>
+</section>
+
+<!-- 3a -->
+<section id="3a">
+  <h3><span class="num">3a</span> 總體分布（30490 region，← wg_hpauc.json）</h3>
+  <div class="kpis">
+    <div class="kpi pass"><div class="v">0.788</div><div class="k">HP_AUC_<b>Normal</b> median<br>strong(≥0.7) 76.4% / anti(&lt;0.5) 1.4% → 距離對 germline-HP <b>強有效（地基確認）</b></div></div>
+    <div class="kpi warn"><div class="v">0.641</div><div class="k">HP_AUC_<b>Tumor</b> median<br>strong 39.6% / anti 10.6% → 明顯低於 normal</div></div>
+    <div class="kpi info"><div class="v">0.623</div><div class="k">HP_AUC_All median<br>（tumor+normal 混合）</div></div>
+  </div>
+  <p class="muted">normal undefined 911（3%）/ tumor undefined 10046（33%，因 somatic 位點 tumor 常單一 HP — 見 tumor_landscape：single-HP 32.3%）。</p>
+</section>
+
+<!-- 3b -->
+<section id="3b">
+  <h3><span class="num">3b</span> 配對 delta（核心現象）— 同 region normal − tumor</h3>
+  <p class="sub">只取 tumor 兩 HP 都有 read 且兩個 AUC 都有效的 region（n=20173），算 <code>Δ = HP_AUC_Normal − HP_AUC_Tumor</code>。</p>
+  <table>
+    <thead><tr><th>指標</th><th>值</th><th>判讀</th></tr></thead>
+    <tbody>
+      <tr><td>median Δ</td><td class="imp">+0.106</td><td>tumor 中位數比 normal 低 0.106</td></tr>
+      <tr><td>% region Δ&gt;0（tumor&lt;normal）</td><td class="imp">70.7%</td><td>多數 region tumor 更差</td></tr>
+      <tr><td>% region Δ&gt;0.2（大幅低）</td><td>30.3%</td><td>近 1/3 大幅低</td></tr>
+      <tr><td>median tumor / normal AUC</td><td>0.642 / 0.786</td><td>—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 3c -->
+<section id="3c">
+  <h3><span class="num">3c</span> 🔴 confound 分層（決定是不是 somatic）</h3>
+  <p class="sub">把配對 Δ 按 confound 分層。問題：tumor&lt;normal 在「乾淨層」是否仍成立？仍成立＝排除 confound、支持 somatic。</p>
+
+  <figure>
+    <div class="figtitle">圖 0　配對 Δ（normal−tumor）依分層（&gt;0 = tumor 更差；綠=乾淨層 紅=confound 層）</div>
+    <svg viewBox="0 0 900 360" role="img" aria-label="delta by stratum">
+      <g font-family="-apple-system,sans-serif" font-size="11">
+        <!-- axis -->
+        <line x1="250" y1="20" x2="250" y2="320" stroke="#999" stroke-width="1"/>
+        <text x="250" y="338" text-anchor="middle" font-size="10" fill="#5C5A54">Δ=0</text>
+        <line x1="250" y1="20" x2="850" y2="20" stroke="#eee"/>
+        <!-- scale: Δ 0..0.20 → x 250..850 (600px for 0.20) => 3000 px per unit; tick every 0.05 -->
+        <g font-size="9" fill="#999">
+          <line x1="400" y1="20" x2="400" y2="320" stroke="#eee"/><text x="400" y="338" text-anchor="middle">0.05</text>
+          <line x1="550" y1="20" x2="550" y2="320" stroke="#eee"/><text x="550" y="338" text-anchor="middle">0.10</text>
+          <line x1="700" y1="20" x2="700" y2="320" stroke="#eee"/><text x="700" y="338" text-anchor="middle">0.15</text>
+          <line x1="850" y1="20" x2="850" y2="320" stroke="#eee"/><text x="850" y="338" text-anchor="middle">0.20</text>
+        </g>
+        <!-- bars: x width = delta*3000; label left -->
+        <!-- overall -->
+        <rect x="250" y="30" width="318" height="20" fill="#D97757"/><text x="245" y="44" text-anchor="end" font-weight="700">both-HP 全體</text><text x="576" y="44" font-size="10" fill="#3a2418">+0.106 (70.7%&gt;0)</text>
+        <!-- coverage -->
+        <rect x="250" y="62" width="266" height="18" fill="#2F7D5B"/><text x="245" y="75" text-anchor="end">Coverage=Normal(diploid)</text><text x="524" y="75" font-size="10" fill="#1f4f3a">+0.089 (67%)</text>
+        <rect x="250" y="84" width="395" height="18" fill="#9A3B3B"/><text x="245" y="97" text-anchor="end">Elevated</text><text x="653" y="97" font-size="10" fill="#5e2424">+0.132 (77%)</text>
+        <rect x="250" y="106" width="461" height="18" fill="#9A3B3B"/><text x="245" y="119" text-anchor="end">CNV_Gain</text><text x="719" y="119" font-size="10" fill="#5e2424">+0.154 (80%)</text>
+        <rect x="250" y="128" width="273" height="18" fill="#B06A16"/><text x="245" y="141" text-anchor="end">High_Copy</text><text x="531" y="141" font-size="10" fill="#6b4410">+0.091 (74%)</text>
+        <rect x="206" y="150" width="44" height="18" fill="#888"/><text x="245" y="163" text-anchor="end">Low(低覆蓋)</text><text x="200" y="163" text-anchor="end" font-size="10" fill="#888">−0.015 (47%)</text>
+        <!-- LOH -->
+        <rect x="250" y="178" width="322" height="18" fill="#2F7D5B"/><text x="245" y="191" text-anchor="end">非 LOH</text><text x="580" y="191" font-size="10" fill="#1f4f3a">+0.108 (71%)</text>
+        <rect x="250" y="200" width="43" height="18" fill="#9A3B3B"/><text x="245" y="213" text-anchor="end">LOH</text><text x="301" y="213" font-size="10" fill="#5e2424">+0.014 (52%) 消失</text>
+        <!-- clean layer -->
+        <rect x="250" y="228" width="268" height="20" fill="#2F7D5B" stroke="#1f4f3a" stroke-width="2"/><text x="245" y="242" text-anchor="end" font-weight="800">🔴 乾淨 diploid+非LOH</text><text x="526" y="242" font-size="10" font-weight="700" fill="#1f4f3a">+0.089 (67%&gt;0) n=10892</text>
+        <rect x="250" y="252" width="305" height="18" fill="#2F7D5B"/><text x="245" y="265" text-anchor="end">　└ +覆蓋≥50</text><text x="563" y="265" font-size="10" fill="#1f4f3a">+0.102 (71%)</text>
+        <rect x="250" y="274" width="333" height="18" fill="#2F7D5B"/><text x="245" y="287" text-anchor="end">　└ +HP平衡≥0.5</text><text x="591" y="287" font-size="10" fill="#1f4f3a">+0.111 (74%)</text>
+      </g>
+      <text class="svgnote" x="10" y="356">來源 confound_stratify.json（confound_stratify.py 算 /tmp/wg_hpauc CSV）。綠=乾淨層仍 tumor&lt;normal；紅=confound 層放大；灰=Low 覆蓋（null）。</text>
+    </svg>
+    <figcaption><b>怎麼讀：</b>所有綠色（乾淨層）的 Δ 都明顯 &gt;0 → tumor&lt;normal <b>不是 CNV/LOH/coverage 造成</b>。CNV 層（紅）更大 = CNV <u>額外</u>放大；LOH 層 Δ≈0 = LOH 自身打亂雙方、無 tumor 特有差；Low 覆蓋 Δ≈0 = 訊號需足夠 read。<b>關鍵：乾淨 diploid 層 +0.089，加覆蓋/平衡控制後 +0.10~0.11 → 殘留的 tumor 特有訊號穩健存在。</b></figcaption>
+  </figure>
+
+  <table>
+    <thead><tr><th>分層</th><th>n</th><th>median Δ</th><th>%Δ&gt;0</th><th>tumor / normal AUC</th><th>判讀</th></tr></thead>
+    <tbody>
+      <tr><td>both-HP 全體</td><td>20173</td><td class="imp">+0.106</td><td>70.7%</td><td>0.642 / 0.786</td><td>現象成立</td></tr>
+      <tr class="clean"><td>Coverage=Normal（diploid）</td><td>11075</td><td class="imp">+0.089</td><td>67.1%</td><td>0.672 / 0.787</td><td>✅ 乾淨層仍在</td></tr>
+      <tr class="conf"><td>CNV_Gain</td><td>2226</td><td>+0.154</td><td>80.4%</td><td>0.592 / 0.788</td><td>CNV 放大</td></tr>
+      <tr class="conf"><td>Elevated</td><td>5846</td><td>+0.132</td><td>76.9%</td><td>0.609 / 0.783</td><td>CNV 放大</td></tr>
+      <tr><td>Low（低覆蓋）</td><td>759</td><td>−0.015</td><td>47.0%</td><td>0.786 / 0.785</td><td>覆蓋不足→null</td></tr>
+      <tr class="conf"><td>LOH=true</td><td>532</td><td>+0.014</td><td>51.9%</td><td>0.754 / 0.790</td><td>LOH 自身 confound→消失</td></tr>
+      <tr><td>LOH=false</td><td>19641</td><td>+0.108</td><td>71.2%</td><td>0.640 / 0.785</td><td>—</td></tr>
+      <tr class="clean"><td class="imp">🔴 乾淨 diploid + 非LOH</td><td class="imp">10892</td><td class="imp">+0.089</td><td class="imp">67.3%</td><td>0.671 / 0.788</td><td class="imp">✅ 排除主 confound</td></tr>
+      <tr class="clean"><td>　└ + NTumorReads≥50</td><td>8625</td><td>+0.102</td><td>70.5%</td><td>0.656 / 0.788</td><td>✅ 非覆蓋假象</td></tr>
+      <tr class="clean"><td>　└ + HP平衡≥0.5</td><td>5502</td><td>+0.111</td><td>74.2%</td><td>0.641 / 0.786</td><td>✅ 非不平衡假象</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 案例圖 -->
+<section id="cases">
+  <h3><span class="num">▦</span> 案例差異圖（乾淨 diploid region：normal HP block 清晰 vs tumor 鬆散）</h3>
+  <p class="sub">每張三聯：<b>左=normal reads 距離</b>（HP排序）、<b>中=tumor reads 距離</b>（HP排序）、右=甲基（上 normal / 下 tumor）。看左右：normal 有清晰 HP1/HP2 對角 block（深紫=群內低距、跨群高距），tumor 一片均勻=結構被打亂。黃虛線=HP 邊界。</p>
+
+  <div class="cases" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)">
+    <figure><div class="figtitle">chr2:44942972（乾淨 · HP1=18/HP2=24 · 平衡）</div>
+      <img src="figures/tn_chr2_44942972.png" alt="chr2 normal HP block 清晰 vs tumor 鬆散">
+      <figcaption>normal AUC <b>0.993</b>（左：兩塊清楚）vs tumor <b>0.401</b>（中：均勻無塊）。diploid+非LOH+平衡 → 最強 somatic 候選。</figcaption></figure>
+    <figure><div class="figtitle">chr20:58822325（乾淨 · HP1=39/HP2=45 · 平衡）</div>
+      <img src="figures/tn_chr20_58822325.png" alt="chr20 normal 清晰 vs tumor 隨機">
+      <figcaption>normal <b>0.991</b>（左：教科書級兩塊）vs tumor <b>0.500</b>（中：完全隨機）。</figcaption></figure>
+    <figure><div class="figtitle">chr1:201317938（乾淨 · HP1=21/HP2=46）</div>
+      <img src="figures/tn_chr1_201317938.png" alt="chr1 normal vs tumor">
+      <figcaption>normal <b>0.983</b> vs tumor <b>0.473</b>。</figcaption></figure>
+    <figure><div class="figtitle">chr13:44126493（乾淨 · HP1=41/HP2=20）</div>
+      <img src="figures/tn_chr13_44126493.png" alt="chr13 normal vs tumor">
+      <figcaption>normal <b>0.951</b> vs tumor <b>0.463</b>。</figcaption></figure>
+  </div>
+
+  <h4 class="mini">對照案例（confound 版 — 同樣 tumor&lt;normal，但有 CNV/LOH）</h4>
+  <figure><div class="figtitle">chr1:84737071（對照：CNV_Gain + LOH）</div>
+    <img src="figures/tn_chr1_84737071.png" alt="chr1 CNV+LOH contrast">
+    <figcaption>normal <b>0.901</b> vs tumor <b>0.222</b>。這個 tumor 崩潰<b>有 CNV+LOH 加成</b>（Δ=0.679 比乾淨案例更大）→ 展示 confound 如何放大；但乾淨案例（上 4 張）<u>沒有</u> CNV/LOH 仍崩 = somatic 證據。</figcaption></figure>
+
+  <div class="takeaway pass">
+    <span class="lab">視覺判定</span>
+    乾淨 diploid 案例一致：<b>normal 的 germline-HP 距離 block 清晰、tumor 的同位點同 haplotype 卻散掉</b> —— 在沒有 CNV/LOH 的地方，只有「tumor 這個身分」能解釋差異 → 支持 somatic。
+  </div>
+</section>
+
+<!-- 3d + 判定 -->
+<section id="verdict">
+  <h3><span class="num">∑</span> 判定：H_somatic vs H_cnv + 誠實上限</h3>
+
+  <table>
+    <thead><tr><th>假說</th><th>證據</th><th>裁決</th></tr></thead>
+    <tbody>
+      <tr><td><b>H_cnv</b>（CNV/LOH 造成）</td><td>CNV_Gain 層 Δ 更大（+0.154）、LOH 層 Δ≈0；但<b>乾淨 diploid+非LOH 層仍 +0.089</b></td><td><span class="badge b-dead">部分排除</span> CNV 是放大器非主因</td></tr>
+      <tr><td><b>H_coverage/quality</b></td><td>乾淨層 +覆蓋≥50 → +0.102（不降反升）；Low 覆蓋層才 Δ≈0</td><td><span class="badge b-dead">排除</span></td></tr>
+      <tr><td>HP 不平衡假象</td><td>乾淨層 +HP平衡≥0.5 → +0.111</td><td><span class="badge b-dead">排除</span></td></tr>
+      <tr><td class="imp"><b>H_somatic</b>（tumor 特有打亂 germline-HP）</td><td>乾淨 diploid 殘留 +0.089、4 個乾淨案例視覺 confirm、跨染色體一致</td><td><span class="badge b-pass">支持（L2→L1 線索）</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="takeaway warn">
+    <span class="lab">🔴 誠實上限（必守，否則過度宣稱）</span>
+    ① <b>HP=germline 真值</b> → 本報告量的是「tumor 的 germline-HP 距離結構被打亂」，<u>不是 somatic subclone 直接計數</u>。② gap2 顯示 ISM 現有 somatic 判別（<code>hp_residual_sig</code> 借 tumor 自己的 p）有缺陷 → <b>精確 somatic 比例（gap2 粗估上限 15.4%）待殘差正規檢定方法修正</b>。③ <b>單樣本 HCC1395</b>，跨樣本（COLO829 等）未驗 → 結論標 <span class="todo">partial</span>。
+  </div>
+
+  <p class="muted"><b>3d 顯著性關係：</b>tumor AUC 低與顯著性無強耦合（sig 時 tumor median 0.655 vs notsig 0.631；CramersV median 兩組皆 0）→ HP-AUC 是獨立於 cluster 顯著性的 germline-結構度量。</p>
+</section>
+
+<!-- 請你確認 -->
+<section id="confirm">
+  <h3><span class="num">✓</span> 請你 pre-confirm</h3>
+  <div class="confirm">
+    <h4>結論是「對的」嗎？三個確認點</h4>
+    <ul>
+      <li><b>① 現象 + confound 排除認可嗎？</b> tumor germline-HP 結構系統性比 normal 鬆散（Δ+0.106），且在乾淨 diploid+非LOH+足覆蓋+平衡層仍 +0.09~0.11 → 我判定「非 confound、支持 somatic」。同意嗎？</li>
+      <li><b>② 誠實上限可接受嗎？</b> 我守住「HP=germline 結構、非 subclone 計數」「精確 somatic 比例待 gap2 方法修」「單樣本 partial」。這界線符合你的判斷嗎？</li>
+      <li><b>③ 下一步？</b> 要不要 (a) 修 gap2 殘差檢定方法（給可信 somatic 比例）、(b) COLO829 等跨樣本複現、(c) 先把這份升 validated？</li>
+    </ul>
+  </div>
+</section>
+
+<footer class="prov"><div>
+  <h4>來源與可追溯性（2026-06-14 全 grep-verified）</h4>
+  <ul>
+    <li><b>3a 總體：</b><code>method_audit/wg_hpauc.json</code>（HP_AUC_Normal median 0.788 / Tumor 0.641；← /tmp/wg_hpauc/significance_summary.csv 30490 region）</li>
+    <li><b>3b/3c/3d：</b><code>method_audit/confound_stratify.py</code> 親算 → <code>confound_stratify.json</code>（both-HP n=20173 Δ+0.106；乾淨 diploid+非LOH +0.089；+cov≥50 +0.102；+balance≥0.5 +0.111）</li>
+    <li><b>案例圖：</b><code>inter_sub_mod</code>(develop 172b7c5, SKIP 預設) 重跑 8 region（/tmp/u1case2_skip）→ <code>method_audit/plot_tumor_vs_normal.py</code> → <code>figures/tn_*.png</code>；AUC 標註取自 significance_summary HP_AUC 欄</li>
+    <li><b>誠實上限 / somatic 比例：</b><code>gap2/gap2_subclone_discrimination.json</code>（normal_HP_valid 96.9% / somatic 上限 1830=15.4% / tumor signed 0.032&lt;normal 0.043 / corr 0.01）+ gap2/README 方法質疑</li>
+    <li><b>規格：</b><code>method_audit/HANDOFF_tumor_vs_normal_hpauc.md</code>；上游 <code>../README.md</code>(U1) + SKIP 修復 <code>docs/methodology/20260614_skip_nan_clustering_segfault_fix_01.md</code></li>
+  </ul>
+  <p><b>範圍：</b>HCC1395 單樣本 paired · 全基因組 30490 region 統計 + 8 案例圖 · <span class="todo">跨樣本未驗 / 精確 somatic 比例待方法修</span> · binary develop 172b7c5。</p>
+  <p style="margin-top:var(--sp-3)">接手 HANDOFF 生成 · 2026-06-14 · 可重現 script：confound_stratify.py / plot_tumor_vs_normal.py（env 同 U1_SKIP 慣例）</p>
+</div></footer>
+
+</div>
+</body>
+</html>
