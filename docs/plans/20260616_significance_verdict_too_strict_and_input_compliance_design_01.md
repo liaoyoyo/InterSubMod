@@ -88,4 +88,52 @@ within-HP clean multigroup 是 **heuristic 幾何判準**（silhouette>=0.5 + �
 - **驗證（合理正確）**：① build OK、**ctest 221/221** ② **regression 雙守護 byte-identical PASS（未 --update-golden）** → 證 dispersion 對 9 golden 欄（含 Significant/VC）**純加無耦合** ③ **analytic F-p vs scipy.stats.f.sf 8 組 (F,df1,df2) max abs diff 1.1e-13** → 數學正確 ④ 全基因組 dispersion 分佈（30490 TP SNV, SKIP, 891s）：DispersionWarn 由**全 0 → 29695/30490(97.4%)** 有警告（dispersion p 範圍 **5.4e-43~0.9999**，非 bucket → analytic p live）；7476 顯著 PERMANOVA 中 **6507(87.0%) dispersion-WARNED（混淆，dispersion p 常 1e-10 級，非大-N 邊際）、僅 969(13.0%) clean location-shift**（HP 6484/allele 6658 重疊）。
 
 > 🔴 **D2 關鍵結論**：真正可認列的「顯著 location 結構」是 **969，非 7476**。若略過 D2 直接認列 7476，**6507(87%) 離散度異質假象會被誤標顯著** = 過嚴換過鬆。D2→D1 排序坐實必要。969 為 D1 認列保守候選；analytic-F 為 parametric（大-N 敏感），但本資料 dispersion p 極端(5e-43)故結論 robust（permutation PERMDISP 可作未來 refine）。
-- **git**：D2 自成一 commit（StructureTest.cpp + RegionProcessor.cpp；regression-safe 無需更新 golden）。
+- **git**：D2 自成一 commit（StructureTest.cpp + RegionProcessor.cpp；regression-safe 無需更新 golden）= **74eb2e2**。
+
+## 8. D1 spec — 統一結構判定（用戶定向 2026-06-16）
+
+**用戶定向**：F1-filter 已死 → **只要一個統一輸出判定**（用新方法，棄 F1-heritage `Significant` 語意）；**保留所有 per-axis 原始數值欄**（PERMANOVA p/F/valid、dispersion p/warn、Δβ、CramersV、HP-AUC）供驗證；**保留 StrengthScore**；**核心：把「可能有結構」與「真的無法處理(無訊號)」乾淨分開**；6507 dispersion → **獨立 `DispersionStructure` 旗標**（不混入 location 顯著）。
+
+**設計** — 統一判定 = `VerificationClass`（Stage④ override 擴充），三層：
+
+```
+# 取 D2 乾淨 PERMANOVA 訊號（欄位已存在）
+hp_perm_sig = label_hp_permanova_valid && label_hp_permanova_p < 0.05
+al_perm_sig = label_allele_permanova_valid && label_allele_permanova_p < 0.05
+clean_location_permanova = (hp_perm_sig && !label_hp_dispersion_warning)        # PERMDISP-passed
+                        || (al_perm_sig && !label_allele_dispersion_warning)    # = 969
+dispersion_structure     = (hp_perm_sig &&  label_hp_dispersion_warning)
+                        || (al_perm_sig &&  label_allele_dispersion_warning)    # = 6507
+
+# 第1層 clean location structure（可能有結構, 高信心）→ valid 細類
+valid_location = dbeta_sig OR hp_auc_struct(>=0.7) OR cluster_match
+              OR within_hp_clean_multigroup OR loh_struct
+              OR clean_location_permanova        # ← D1 NEW 軸（969）
+   細類: Strong / LOH-Structure / MultiGroupNoLabel / LabelShift /
+         PermanovaLocation(NEW, clean PERMANOVA-only) / StructureNoLabel
+
+# 第2層 DispersionStructure（結構存在但離散度型, 歸因模糊）→ 獨立 NEW class
+elif dispersion_structure: VC = "DispersionStructure"     # 6507；承認但與 location 分開
+
+# 第3層 truly-noise（無訊號/無法處理）
+else: VC = Noise_Uniform / Noise_Chaotic / Noise_Uncorrelated
+```
+
+**統一布林**：`Significant`（col8）**重定義 = (VC ∈ valid_location 細類)**，取代舊 F1 gate（`passed_gating && global_p && CramersV && reads`）。→ 一個統一判定，`Significant` 為其布林投影。
+**「可能有結構 vs 真無訊號」分線** = {valid_location 細類 ∪ DispersionStructure} vs {Noise_*}。
+**保留欄**：StrengthScore/Grade、所有 PERMANOVA/dispersion/Δβ/CramersV/HP-AUC/within-HP 原始數值不動。
+
+**影響 / 驗證計畫**：
+- 🔴 改 col8 `Significant`(重定義) + col9 `VerificationClass`(+PermanovaLocation +DispersionStructure) → **golden col8+9 變 → 必 --update-golden + 全基因組重驗**。
+- 驗證鏈：ctest → regression diff（確認只 col8+9 變、前 7 欄 byte-identical）→ --update-golden + 雙守護 PASS → 全基因組量化（valid/DispersionStructure/Noise 三層佔比、Significant 由舊 65→新數、clean PERMANOVA 認列 969、FP=legacy Strong 降級數）→ commit。
+- D1 完成後 cpp-change 進度：Stage①④②(b6dde2b) + D2(74eb2e2) + D1。剩 Stage③（coverage-peak CN + HP-ratio LOH，SEQC2 驗證腳本）+ within-HP permutation null（記錄用）。
+
+### 8.1 D1 實作 log（2026-06-16, 完成）— 改動合理正確確認
+
+- **改動（2 edits, RegionProcessor.cpp）**：① Stage④ VC override 加 `clean_location_permanova`（HP/allele PERMANOVA valid & p<0.05 & **非** dispersion-warned）為 valid 軸 → 新細類 `PermanovaLocation`；`dispersion_structure`（同顯著但 dispersion-warned）→ 新 tier `DispersionStructure`（valid 之後、noise 之前）。② `write_significance_summary` 的 `is_significant`（col8）由舊 F1 gate（`passed_gating && global_p && CramersV && reads`）**重定義 = VC ∈ valid-location 細類**（Strong/LOH-Structure/MultiGroupNoLabel/LabelShift/PermanovaLocation/StructureNoLabel）。per-axis 原始欄 + StrengthScore 全保留不動。
+- **驗證（合理正確）**：① **ctest 221/221** ② regression diff：**前 7 欄 byte-identical**（RegionID/NumReads/NumCpGs/GlobalP/CramersV/PassedGating/ClusterPermanovaValid），**只 col8 Significant + col9 VerificationClass 變**（符設計）③ chr1 col8 轉移：1401 F→T（救回結構顯著）/ 1004 T→T / 216 F→F / **3 T→F**（舊 global-p gate 過呼叫、無結構軸 → 棄 F1 gate 後合理）④ chr1 col9 D1 分佈：valid-location 2405（Strong1868/MultiGroupNoLabel183/**PermanovaLocation176**/LabelShift137/LOH27/StructureNoLabel14）+ **DispersionStructure165** + Noise54；former-Noise 正確拆成 PermanovaLocation(乾淨) vs DispersionStructure(離散度型) ⑤ **--update-golden**（SKIP+MAX_DIST 各 2624 @74eb2e2）+ 雙守護重驗 **PASS** ⑥ 全基因組（30490 TP SNV, SKIP, 896s, 無 crash）：
+  - **3 層分線（用戶要的可能有結構 vs 真無訊號）**：① valid-location(clean) **28327(92.9%)**、② DispersionStructure **1700(5.6%)**、③ Noise(truly-unhandleable) **463(1.5%)** → 可能有結構(①+②)=30027(98.5%) vs 真無訊號=463(1.5%)。
+  - VC 分佈：Strong22310/MultiGroupNoLabel1899/LabelShift1809/**PermanovaLocation1756**/**DispersionStructure1700**/LOH-Structure376/StructureNoLabel177/Noise{Uniform311/Uncorrelated122/Chaotic30}。
+  - **Significant 舊(F1 gate)39.1%(11912) → 新(統一)92.9%(28327)**，delta +16415。**FP=0**：legacy Strong 21015 全保 valid、降級 0（cluster_match→Strong 恆 valid，構造保證）。
+- 🟡 **誠實 caveat**：92.9% valid-location 偏高 = (a) TP somatic 多真有甲基結構（合理生物）+ (b) PERMANOVA 大-N 對微小 location 差也顯著（過敏）。D1 達成「分出 1.5% 真無訊號」目標，但**非 TP 內細判別器**（TP/FP filter 本就 DEAD）。未來細化：PERMANOVA effect-size 門檻（非僅 p<0.05）/ TP-vs-FP noise-rate 對照。
+- **git**：D1 自成一 commit（RegionProcessor.cpp + 更新 golden×2 + 本 spec）。

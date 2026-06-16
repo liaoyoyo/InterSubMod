@@ -1251,7 +1251,18 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
             const bool cluster_match = (lvc == "Strong" || lvc == "Subclone");  // GlobalTest matched a label
             const bool loh_struct = result.potential_loh && (hp_auc_struct || dbeta_sig);
             const bool within_hp = result.within_hp_clean_multigroup;  // Stage② within-HP clean substructure
-            if (dbeta_sig || hp_auc_struct || cluster_match || loh_struct || within_hp) {
+
+            // [D1] label-PERMANOVA significance split by PERMDISP (D2) into clean location-shift vs
+            // dispersion-confounded. clean_location_permanova adds a valid structural axis; dispersion-only
+            // significance gets its own DispersionStructure tier (structure exists but ambiguous attribution).
+            const bool hp_perm_sig = result.label_hp_permanova_valid && result.label_hp_permanova_p < 0.05;
+            const bool al_perm_sig = result.label_allele_permanova_valid && result.label_allele_permanova_p < 0.05;
+            const bool clean_location_permanova = (hp_perm_sig && !result.label_hp_dispersion_warning) ||
+                                                  (al_perm_sig && !result.label_allele_dispersion_warning);
+            const bool dispersion_structure = (hp_perm_sig && result.label_hp_dispersion_warning) ||
+                                              (al_perm_sig && result.label_allele_dispersion_warning);
+
+            if (dbeta_sig || hp_auc_struct || cluster_match || loh_struct || within_hp || clean_location_permanova) {
                 if (cluster_match) {
                     result.verification_class = "Strong";
                 } else if (loh_struct) {
@@ -1260,9 +1271,13 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                     result.verification_class = "MultiGroupNoLabel";  // S4/S6 within-HP clean multigroup
                 } else if (dbeta_sig) {
                     result.verification_class = "LabelShift";  // Δβ mean-shift signal (dominant rescue)
+                } else if (clean_location_permanova) {
+                    result.verification_class = "PermanovaLocation";  // [D1] clean (PERMDISP-passed) PERMANOVA
                 } else {
                     result.verification_class = "StructureNoLabel";  // HP-AUC structure, no label match
                 }
+            } else if (dispersion_structure) {
+                result.verification_class = "DispersionStructure";  // [D1] dispersion-type structure (ambiguous)
             } else {
                 const double ep = result.per_cpg_epipoly_hp1;
                 const double pw = result.pairwise_mean_distance;
@@ -1380,12 +1395,14 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
         std::string chr_name = chrom_index_.get_name(snv.chr_id);
 
         // Determine significance (Binary classification)
-        // Definition: Passed gating AND p-value <= 0.05 AND V >= 0.1 AND depth >= 20 (Round 7)
-        // Optimized based on depth analysis: Depth 20-30 has high TP/FP ratio (2.31)
-        bool is_significant = r.passed_gating && 
-                              (r.global_p_value <= 0.05) && 
-                              (r.cramers_v >= 0.1) &&
-                              (r.num_reads >= 20);
+        // [D1] Unified structural verdict: Significant = VerificationClass is a clean location-structure
+        // class. Replaces the obsolete F1-filter gate (passed_gating && p && CramersV && depth) — the
+        // methylation F1-filter direction is concluded DEAD, so there is one unified verdict and Significant
+        // is its boolean projection. DispersionStructure (dispersion-type, ambiguous) and Noise_* are NOT
+        // location-significant. Per-axis raw numbers (PERMANOVA/dispersion/Δβ/CramersV/HP-AUC/Strength) stay.
+        const std::string& vc = r.verification_class;
+        bool is_significant = (vc == "Strong" || vc == "LOH-Structure" || vc == "MultiGroupNoLabel" ||
+                               vc == "LabelShift" || vc == "PermanovaLocation" || vc == "StructureNoLabel");
         
         // Suggest filtering sites with LabelDelta > 0.3 (F1 optimization)
         bool suggest_filter = (r.label_delta > 0.3);
