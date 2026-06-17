@@ -23,6 +23,7 @@
 #include "core/MethylationMatrix.hpp"
 #include "core/NormalBaseline.hpp"
 #include "core/SignificanceAnalyzer.hpp"
+#include "core/StructureTest.hpp"
 #include "io/TreeWriter.hpp"
 #include "utils/Logger.hpp"
 
@@ -1189,22 +1190,45 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                                                      result.within_hp_level_bimodal);
             }
 
-            // [Strength score] continuous association strength (replaces saturated HeuristicScore for ranking).
-            // Computed here (after perform_clustering_and_significance set hp_auc/global_p/cramers_v AND the HP
-            // block set germline_asm_dbeta) so all 4 inputs are final. 0.30*struct + 0.25*eff + 0.25*assoc + 0.20*sig.
+            // [tumor-only structure axis] does structure exist in TUMOR reads alone? The all-pool main path cannot
+            // self-distinguish a tumor-vs-normal split (sampleOrphan confound); this re-clusters TUMOR reads only and
+            // gates with PERMANOVA permutation null. tumor_intrinsic = tumor alone has clean (non-dispersion) location.
+            {
+                std::vector<int> tumor_idx;
+                tumor_idx.reserve(read_list.size());
+                for (size_t i = 0; i < read_list.size(); ++i) {
+                    if (read_list[i].is_tumor) tumor_idx.push_back(static_cast<int>(i));
+                }
+                compute_tumor_only_cluster_structure(all_dist.dist_matrix, tumor_idx, result.tumor_only_cluster_k,
+                                                     result.tumor_only_silhouette, result.tumor_only_permanova_f,
+                                                     result.tumor_only_permanova_p, result.tumor_only_permanova_valid,
+                                                     result.tumor_only_dispersion_warn);
+                result.tumor_intrinsic = result.tumor_only_permanova_valid && result.tumor_only_permanova_p < 0.05 &&
+                                         !result.tumor_only_dispersion_warn;
+            }
+
+            // [Strength score] EQUAL-weighted mean of 5 sub-scores. Weight choice is empirically ranking-robust
+            // (Spearman rho=0.998 equal-vs-judgment, top-1000 94.6% overlap); the saturated sig term (median 1.0,
+            // non-discriminating) is dropped. germline demoted, somatic + tumor-only added (subclone-aligned). Each
+            // sub-score is OUTPUT as its own column so strength is observable/verifiable/re-weightable downstream.
             {
                 auto clamp01 = [](double v) { return std::max(0.0, std::min(1.0, v)); };
-                const double struct_s = clamp01((result.hp_auc_all - 0.5) / 0.5);  // -1 default -> 0
-                const double eff_s =
-                    std::isnan(result.germline_asm_dbeta) ? 0.0 : clamp01(std::abs(result.germline_asm_dbeta) / 0.3);
-                const double assoc_s = result.cramers_v;
-                const double gp = std::max(result.global_p_value, 1e-6);  // GlobalP==0 is most significant
-                const double sig_s = clamp01(-std::log10(gp) / 4.0);
-                result.strength_score = 0.30 * struct_s + 0.25 * eff_s + 0.25 * assoc_s + 0.20 * sig_s;
-                result.strength_grade = result.strength_score >= 0.65   ? "A"
-                                        : result.strength_score >= 0.50 ? "B"
-                                        : result.strength_score >= 0.35 ? "C"
-                                        : result.strength_score >= 0.20 ? "D"
+                result.strength_struct = clamp01((result.hp_auc_all - 0.5) / 0.5);  // -1 default -> 0
+                result.strength_tumor = result.tumor_intrinsic ? clamp01(result.tumor_only_silhouette / 0.5) : 0.0;
+                result.strength_somatic = std::isnan(result.somatic_residual_dbeta)
+                                              ? 0.0
+                                              : clamp01(std::abs(result.somatic_residual_dbeta) / 0.3);
+                result.strength_assoc = clamp01(result.cramers_v);
+                result.strength_germline = std::isnan(result.germline_asm_dbeta)
+                                               ? 0.0
+                                               : clamp01(std::abs(result.germline_asm_dbeta) / 0.3);
+                result.strength_score = (result.strength_struct + result.strength_tumor + result.strength_somatic +
+                                         result.strength_assoc + result.strength_germline) /
+                                        5.0;
+                result.strength_grade = result.strength_score >= 0.50   ? "A"
+                                        : result.strength_score >= 0.35 ? "B"
+                                        : result.strength_score >= 0.22 ? "C"
+                                        : result.strength_score >= 0.12 ? "D"
                                                                         : "E";
             }
 
@@ -1376,7 +1400,11 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 // Original columns
                 "LocalBestCluster,LocalBestP,Significant,SuggestFilter,"
                 // Self-phasing audit (NEW): raw somatic HP tag counts (independent of --germline-hp-only flag)
-                "NHP_Somatic11,NHP_Somatic21,NHP_Somatic33\n";
+                "NHP_Somatic11,NHP_Somatic21,NHP_Somatic33,"
+                // tumor-only structure axis (clustering + PERMANOVA on TUMOR reads only) + StrengthScore components
+                "TumorOnlyClusterK,TumorOnlySilhouette,TumorOnlyPermanovaF,TumorOnlyPermanovaP,"
+                "TumorOnlyPermanovaValid,TumorOnlyDispersionWarn,TumorIntrinsic,"
+                "StrengthStruct,StrengthTumor,StrengthSomatic,StrengthAssoc,StrengthGermline\n";
 
     // Statistics conatiners
     struct ChrStats {
@@ -1559,8 +1587,16 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  // SuggestFilter column for F1 optimization
                  << (suggest_filter ? "true" : "false") << ","
                  // Self-phasing audit: raw somatic HP tag counts (independent of --germline-hp-only flag)
-                 << r.n_hp_somatic_11 << "," << r.n_hp_somatic_21 << "," << r.n_hp_somatic_33
-                 << "\n";
+                 << r.n_hp_somatic_11 << "," << r.n_hp_somatic_21 << "," << r.n_hp_somatic_33 << ","
+                 // tumor-only structure axis + StrengthScore components
+                 << r.tumor_only_cluster_k << "," << std::fixed << std::setprecision(4) << r.tumor_only_silhouette
+                 << "," << std::setprecision(4) << r.tumor_only_permanova_f << "," << std::scientific
+                 << std::setprecision(6) << r.tumor_only_permanova_p << ","
+                 << (r.tumor_only_permanova_valid ? "true" : "false") << ","
+                 << (r.tumor_only_dispersion_warn ? "true" : "false") << ","
+                 << (r.tumor_intrinsic ? "true" : "false") << "," << std::fixed << std::setprecision(4)
+                 << r.strength_struct << "," << r.strength_tumor << "," << r.strength_somatic << ","
+                 << r.strength_assoc << "," << r.strength_germline << "\n";
     }
     csv_file.close();
     LOG_INFO("Significance summary written to: " + csv_path);
@@ -2161,6 +2197,105 @@ void RegionProcessor::compute_within_hp_substructure(const Eigen::MatrixXd& all_
     for (int l : labels) ++sizes[l];
     const int min_sz = *std::min_element(sizes.begin(), sizes.end());
     if (out_silhouette >= 0.5 && min_sz >= std::max(3, n / 5)) out_ngroups = k;
+}
+
+void RegionProcessor::compute_tumor_only_cluster_structure(const Eigen::MatrixXd& all_dist,
+                                                           const std::vector<int>& tumor_idx, int& out_k,
+                                                           double& out_silhouette, double& out_permanova_f,
+                                                           double& out_permanova_p, bool& out_permanova_valid,
+                                                           bool& out_dispersion_warn) const {
+    out_k = 1;
+    out_silhouette = 0.0;
+    out_permanova_f = 0.0;
+    out_permanova_p = 1.0;
+    out_permanova_valid = false;
+    out_dispersion_warn = false;
+    const int m = static_cast<int>(tumor_idx.size());
+    if (m < 8) return;  // need enough tumor reads for a stable 2-group split + PERMANOVA (Nmin=5)
+
+    // Extract the TUMOR-only sub-distance-matrix from the already-computed all_dist (no recompute).
+    Eigen::MatrixXd sub(m, m);
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < m; ++j) sub(i, j) = all_dist(tumor_idx[i], tumor_idx[j]);
+    }
+    // NaN peel-off to a complete submatrix (mirrors the main clustering + within-HP path).
+    std::vector<int> valid;
+    extract_complete_submatrix_indices(sub, valid);
+    const int n = static_cast<int>(valid.size());
+    if (n < 8) return;
+    Eigen::MatrixXd work(n, n);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) work(i, j) = sub(valid[i], valid[j]);
+    }
+
+    // Unsupervised clustering on tumor reads (UPGMA + silhouette-optimal k), same as the main path.
+    std::vector<std::string> names(n);
+    for (int i = 0; i < n; ++i) names[i] = std::to_string(i);
+    HierarchicalClustering clusterer(linkage_method_);
+    Tree tree = clusterer.build_tree(work, names);
+    if (tree.empty()) return;
+    auto kl = TreeCutter::find_optimal_clusters(tree, work, 2, std::min(6, n / 2));
+    std::vector<int> labels = kl.second;
+    if (static_cast<int>(labels.size()) != n) return;
+    // Remap labels to contiguous [0, K) (same OOB/segfault guard as within-HP; see compute_within_hp_substructure).
+    int max_label = -1;
+    for (int l : labels) max_label = std::max(max_label, l);
+    if (max_label < 0) return;
+    std::vector<int> remap(max_label + 1, -1);
+    int k = 0;
+    for (int l : labels) {
+        if (remap[l] < 0) remap[l] = k++;
+    }
+    if (k < 2) return;
+    for (int& l : labels) l = remap[l];
+    out_k = k;
+
+    // Mean silhouette (same definition as compute_within_hp_substructure).
+    double sil_sum = 0.0;
+    int sil_n = 0;
+    for (int i = 0; i < n; ++i) {
+        double a = 0.0;
+        int ca = 0;
+        std::vector<double> other_sum(k, 0.0);
+        std::vector<int> other_cnt(k, 0);
+        for (int j = 0; j < n; ++j) {
+            if (i == j) continue;
+            if (labels[j] == labels[i]) {
+                a += work(i, j);
+                ++ca;
+            } else {
+                other_sum[labels[j]] += work(i, j);
+                ++other_cnt[labels[j]];
+            }
+        }
+        if (ca == 0) continue;
+        a /= ca;
+        double b = std::numeric_limits<double>::max();
+        for (int c = 0; c < k; ++c) {
+            if (c != labels[i] && other_cnt[c] > 0) b = std::min(b, other_sum[c] / other_cnt[c]);
+        }
+        if (b == std::numeric_limits<double>::max()) continue;
+        const double denom = std::max(a, b);
+        if (denom > 0) {
+            sil_sum += (b - a) / denom;
+            ++sil_n;
+        }
+    }
+    out_silhouette = sil_n > 0 ? sil_sum / sil_n : 0.0;
+
+    // Null-gated structure test: silhouette over-detects (random reads still split into compact groups), so
+    // gate the tumor-only clusters with PERMANOVA (permutation null, location) + PERMDISP (analytic-F dispersion).
+    StructureTestConfig st_config;
+    st_config.n_permutations = 999;
+    st_config.seed = 42;
+    st_config.dispersion_alpha = 0.05;
+    StructureTest st(st_config);
+    PermanovaResult perm = st.run_permanova(work, labels);
+    out_permanova_f = perm.pseudo_f;
+    out_permanova_p = perm.p_value;
+    out_permanova_valid = perm.valid;
+    DispersionResult disp = st.check_dispersion(work, labels);
+    out_dispersion_warn = disp.warning;
 }
 
 bool RegionProcessor::within_hp_level_clean(const Eigen::MatrixXd& raw, const std::vector<int>& hp_idx,

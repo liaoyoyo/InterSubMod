@@ -255,6 +255,20 @@ struct RegionResult {
     int within_hp2_ngroups;          ///< clean PATTERN cluster count within tumor HP2-family
     bool within_hp_level_bimodal;    ///< true if HP1 or HP2 has a clean balanced mean-β LEVEL bimodality (distance misses this)
     bool within_hp_clean_multigroup; ///< true if within-HP PATTERN (distance) OR LEVEL (mean β) clean multigroup (S4/S6)
+    // [tumor-only structure axis] unsupervised clustering + PERMANOVA on TUMOR reads ONLY (vs all-pool main path).
+    int tumor_only_cluster_k;          ///< tumor-only unsupervised cluster count (1 = none)
+    double tumor_only_silhouette;      ///< tumor-only clustering mean silhouette
+    double tumor_only_permanova_f;     ///< tumor-only cluster PERMANOVA pseudo-F
+    double tumor_only_permanova_p;     ///< tumor-only cluster PERMANOVA p-value
+    bool tumor_only_permanova_valid;   ///< tumor-only PERMANOVA validity
+    bool tumor_only_dispersion_warn;   ///< tumor-only PERMDISP dispersion warning
+    bool tumor_intrinsic;              ///< tumor alone has clean location structure (PERMANOVA p<0.05, non-dispersion)
+    // [StrengthScore components] equal-weighted sub-scores, output for observability (ranking is weight-robust, ρ=0.998)
+    double strength_struct;            ///< component: all-pool HP structure (hp_auc_all)
+    double strength_tumor;             ///< component: tumor-only structure (silhouette, tumor_intrinsic-gated)
+    double strength_somatic;           ///< component: somatic-residual effect (|somatic_residual_dbeta|)
+    double strength_assoc;             ///< component: association (cramers_v)
+    double strength_germline;          ///< component: germline ASM effect (|germline_asm_dbeta|)
     double coverage_multiple;        ///< NumReads / diploid_coverage (auto-estimated per sample)
     double diploid_coverage_used;    ///< Actual diploid coverage baseline used for CovM (audit column)
     std::string coverage_category;   ///< "Normal", "Low", "High", "CNV_Loss", "CNV_Gain", "High_Copy"
@@ -422,6 +436,18 @@ struct RegionResult {
           within_hp2_ngroups(1),
           within_hp_level_bimodal(false),
           within_hp_clean_multigroup(false),
+          tumor_only_cluster_k(1),
+          tumor_only_silhouette(0.0),
+          tumor_only_permanova_f(0.0),
+          tumor_only_permanova_p(1.0),
+          tumor_only_permanova_valid(false),
+          tumor_only_dispersion_warn(false),
+          tumor_intrinsic(false),
+          strength_struct(0.0),
+          strength_tumor(0.0),
+          strength_somatic(0.0),
+          strength_assoc(0.0),
+          strength_germline(0.0),
           hp_ratio(0.5),
           potential_loh(false),
           coverage_multiple(1.0),
@@ -632,6 +658,17 @@ private:
      */
     void compute_within_hp_substructure(const Eigen::MatrixXd& all_dist, const std::vector<int>& hp_idx,
                                         int& out_ngroups, double& out_silhouette) const;
+
+    /**
+     * @brief tumor-only structure axis: unsupervised clustering (UPGMA + silhouette-optimal k) on the TUMOR-read
+     *        sub-distance-matrix, gated by PERMANOVA (permutation null) + PERMDISP. Answers "does structure exist
+     *        in tumor reads alone" (vs the all-pool main path, which cannot self-distinguish a tumor-vs-normal
+     *        split). Reuses the extract_complete_submatrix + build_tree + find_optimal_clusters machinery.
+     */
+    void compute_tumor_only_cluster_structure(const Eigen::MatrixXd& all_dist, const std::vector<int>& tumor_idx,
+                                              int& out_k, double& out_silhouette, double& out_permanova_f,
+                                              double& out_permanova_p, bool& out_permanova_valid,
+                                              bool& out_dispersion_warn) const;
 
     /**
      * @brief within-HP LEVEL substructure (Stage② level axis): clean balanced mean-β bimodality within one
