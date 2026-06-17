@@ -5,7 +5,7 @@
 狀態: pointer/index（指向 repo 外實體庫；本檔不複製內容，只導航 + 摘要 paper-critical 結論）
 data_sources:
   - /big7_disk/liaoyoyo2001/external_validation/REGISTRY.md
-  - /big7_disk/liaoyoyo2001/external_validation/_landscape/05_context_cards_index.md (59 源索引)
+  - /big7_disk/liaoyoyo2001/external_validation/_landscape/05_context_cards_index.md (61 源索引)
   - /big7_disk/liaoyoyo2001/external_validation/_landscape/08_paper_literature_map.md (整體論文文獻地圖)
   - /big7_disk/liaoyoyo2001/external_validation/_landscape/06_source_read_corrections.md (源碼校正+佐證)
 provenance_note: 摘要結論皆引自 external_validation 各源 CONTEXT 卡(一手親讀 repo 源碼/全文 PDF)；數字溯源見各卡 §7。
@@ -15,12 +15,12 @@ provenance_note: 摘要結論皆引自 external_validation 各源 CONTEXT 卡(�
 
 > **這是什麼**：把 ISM 論文相關的**外部論文/程式碼實體下載 + 親讀驗證庫**接進 InterSubMod。庫在 **repo 外**（git 不追蹤），本檔是 repo 內的導航 + paper-critical 結論摘要。
 > **庫位置**：`/big7_disk/liaoyoyo2001/external_validation/`
-> **入口**：`REGISTRY.md`（主索引）→ `_landscape/05_context_cards_index.md`（59 源卡索引）+ `_landscape/08_paper_literature_map.md`（整體論文文獻地圖, Ch1-Ch5 一站式導航）+ `_landscape/06_source_read_corrections.md`（源碼校正與佐證）+ `_landscape/07_cis_basis_synthesis.md`（cis-test 科學依據）。
+> **入口**：`REGISTRY.md`（主索引）→ `_landscape/05_context_cards_index.md`（61 源卡索引）+ `_landscape/08_paper_literature_map.md`（整體論文文獻地圖, Ch1-Ch5 一站式導航）+ `_landscape/06_source_read_corrections.md`（源碼校正與佐證）+ `_landscape/07_cis_basis_synthesis.md`（cis-test 科學依據）。
 > **單源細節**：`axis{1-6}_*/＜slug＞/CONTEXT.md`（每源完整驗證紀錄：可信度/scope/主軸/論點/方法對照/共識⇄矛盾/操作差別/結論差別/親讀 code 對照）。
 > **memory**：`project_external_validation_library`（其他 session 啟動可 recall）。
 
 ## 庫狀態（2026-06-14）
-- **59 源**；tier **A×13 · B×31 · C×15**；39 repo clone + 36 PDF（2026-06-14 磁碟實點）。**57/59 已親讀**（primary/source/fulltext）；2 cited_secondary（deamination + mcf7-subline，皆無可下載 PDF/preprint）。
+- **61 源**；tier **A×13 · B×33 · C×15**；39 repo clone + 36 PDF（repo/PDF 數不變）。**59/61 已親讀**（primary/source/fulltext）；2 cited_secondary（deamination + mcf7-subline，皆無可下載 PDF/preprint）。2026-06-18 +PDclust/scMelody（axis5，單細胞甲基距離分群驗證的細胞層先例，B；survey-WebFetch primary_fetched）。
 - **2026-06-15 cis-basis 全升級**：5 張 cis-basis 卡親讀 PDF 升 fulltext_verified（Onuchic2018/Min-GoDMC2021/Turcan2018/Shoemaker2010/Do2020，4 篇 C→B + Do2020 C→B）。fulltext 親讀同步抓出並修正 3 處原 web-二手瑕疵：① Onuchic 卡捏造的方法名「NPD」（PDF 無此詞 → 改 Fisher's exact + Shannon entropy）+ 誤稱「無 repo」（實有 github.com/BRL-BCM/allelic_epigenome）；② Min/GoDMC 卡 heritability 55%/12% 分層數字 PDF 查無（web-二手）→ 移除；③ Turcan 卡 citation 錯（卡寫 2012 Nature，磁碟 PDF 實為 2018 Nat Genet follow-up）→ primary_citation 改 2018、2012 降 related。每張卡均經對抗複查逐頁碼核對（含主 agent 圖面親驗 Turcan Fig 1c）。
 - **整體準確性對抗稽核（20 卡，wmnyd7ytw）= CLEAN**（0 MAJOR，15 MINOR「更誠實」修正已折入）；末次補卡 = CpelNano（axis5, B — ISM structure-vs-disorder 最近 ONT 對手，最後一個真 P0 gap）+ methylation-to-mutation-deamination（axis3, C — 甲基→突變 SBS1 反方向）。
 - 既有 **82-工具文獻 survey** 在 `InterSubMod/docs/method_comparison/20260609_ism_vs_external_methylation_tools/`（modkit/DSS/NanoMethPhase/MHB/Metheor… 文獻層，未建獨立卡）。
