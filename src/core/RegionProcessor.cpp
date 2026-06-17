@@ -1250,7 +1250,12 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
             {
                 auto clamp01 = [](double v) { return std::max(0.0, std::min(1.0, v)); };
                 result.strength_struct = clamp01((result.hp_auc_all - 0.5) / 0.5);  // -1 default -> 0
-                result.strength_tumor = result.tumor_intrinsic ? clamp01(result.tumor_only_silhouette / 0.5) : 0.0;
+                // [fix] strength_tumor now gated by C' (within-HP germline-vs-carrier a-priori PERMANOVA, DISCRIMINATIVE:
+                // noise 12.7% vs structure 28.4%) instead of tumor_intrinsic (unsupervised, double-dip: fires 91% on
+                // noise — see task#7 verify). Uses within_hp_best_sil as the strength magnitude. tumor_only emit columns
+                // kept as raw diagnostics (observability) but excluded from the StrengthScore verdict.
+                result.strength_tumor =
+                    result.within_hp_subclone_sig ? clamp01(result.within_hp_best_sil / 0.5) : 0.0;
                 result.strength_somatic = std::isnan(result.somatic_residual_dbeta)
                                               ? 0.0
                                               : clamp01(std::abs(result.somatic_residual_dbeta) / 0.3);
