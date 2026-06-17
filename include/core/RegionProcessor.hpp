@@ -257,6 +257,11 @@ struct RegionResult {
     bool within_hp_clean_multigroup; ///< true if within-HP PATTERN (distance) OR LEVEL (mean β) clean multigroup (S4/S6)
     double within_hp_best_sil;       ///< [D] best within-HP silhouette across HP1/HP2 (graded; exposes weak 0.3-0.5 splits the binary gate drops)
     double within_hp_min_frac;       ///< [D] smallest within-HP cluster fraction (minor-subclone indicator; <0.2 = low-CCF minor)
+    double within_hp_subclone_permanova_p;   ///< [C'] within-HP germline-vs-carrier a-priori PERMANOVA p (no double-dip)
+    double within_hp_subclone_permanova_f;   ///< [C'] within-HP subclone PERMANOVA pseudo-F
+    bool within_hp_subclone_valid;           ///< [C'] within-HP subclone PERMANOVA valid (both germline & carrier >=3)
+    bool within_hp_subclone_dispersion_warn; ///< [C'] within-HP subclone PERMDISP dispersion warning
+    bool within_hp_subclone_sig;             ///< [C'] clean confirm: valid & p<0.05 & non-dispersion (germline/carrier separates)
     // [tumor-only structure axis] unsupervised clustering + PERMANOVA on TUMOR reads ONLY (vs all-pool main path).
     int tumor_only_cluster_k;          ///< tumor-only unsupervised cluster count (1 = none)
     double tumor_only_silhouette;      ///< tumor-only clustering mean silhouette
@@ -440,6 +445,11 @@ struct RegionResult {
           within_hp_clean_multigroup(false),
           within_hp_best_sil(0.0),
           within_hp_min_frac(1.0),
+          within_hp_subclone_permanova_p(1.0),
+          within_hp_subclone_permanova_f(0.0),
+          within_hp_subclone_valid(false),
+          within_hp_subclone_dispersion_warn(false),
+          within_hp_subclone_sig(false),
           tumor_only_cluster_k(1),
           tumor_only_silhouette(0.0),
           tumor_only_permanova_f(0.0),
@@ -662,6 +672,14 @@ private:
      */
     void compute_within_hp_substructure(const Eigen::MatrixXd& all_dist, const std::vector<int>& hp_idx,
                                         int& out_ngroups, double& out_silhouette, double& out_min_frac) const;
+
+    /**
+     * @brief [C'] within-HP a-priori subclone PERMANOVA — does the within-HP distance separate germline-tag vs
+     * carrier-tag reads? a-priori labels (no double-dip). gc_labels: 0=germline, 1=carrier, parallel to hp_idx.
+     */
+    void compute_within_hp_subclone_permanova(const Eigen::MatrixXd& all_dist, const std::vector<int>& hp_idx,
+                                              const std::vector<int>& gc_labels, double& out_p, double& out_f,
+                                              bool& out_valid, bool& out_disp_warn) const;
 
     /**
      * @brief tumor-only structure axis: unsupervised clustering (UPGMA + silhouette-optimal k) on the TUMOR-read

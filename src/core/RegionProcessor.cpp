@@ -1197,6 +1197,33 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                     within_hp_level_clean(meth_mat.raw_matrix, hp2_idx, kWithinHpMinGroup);
                 result.within_hp_clean_multigroup = (result.within_hp1_ngroups >= 2 || result.within_hp2_ngroups >= 2 ||
                                                      result.within_hp_level_bimodal);
+                // [C'] a-priori germline-vs-carrier within-HP PERMANOVA — statistical "mark/confirm": does the
+                // within-HP distance separate germline(tag 1/2) vs somatic-carrier(tag 1-1/2-1) reads? a-priori
+                // labels => no double-dip (unlike unsupervised tumor_intrinsic which fires ~96% on noise).
+                std::vector<int> gc1, gc2;
+                gc1.reserve(hp1_idx.size());
+                gc2.reserve(hp2_idx.size());
+                for (int idx : hp1_idx) gc1.push_back(read_list[idx].hp_tag == "1-1" ? 1 : 0);
+                for (int idx : hp2_idx) gc2.push_back(read_list[idx].hp_tag == "2-1" ? 1 : 0);
+                double scp1 = 1.0, scf1 = 0.0, scp2 = 1.0, scf2 = 0.0;
+                bool scv1 = false, scv2 = false, scd1 = false, scd2 = false;
+                compute_within_hp_subclone_permanova(all_dist.dist_matrix, hp1_idx, gc1, scp1, scf1, scv1, scd1);
+                compute_within_hp_subclone_permanova(all_dist.dist_matrix, hp2_idx, gc2, scp2, scf2, scv2, scd2);
+                const bool sig1 = scv1 && scp1 < 0.05 && !scd1;
+                const bool sig2 = scv2 && scp2 < 0.05 && !scd2;
+                result.within_hp_subclone_sig = sig1 || sig2;
+                // report the more-significant valid HP
+                if (scv1 && (!scv2 || scp1 <= scp2)) {
+                    result.within_hp_subclone_permanova_p = scp1;
+                    result.within_hp_subclone_permanova_f = scf1;
+                    result.within_hp_subclone_valid = scv1;
+                    result.within_hp_subclone_dispersion_warn = scd1;
+                } else if (scv2) {
+                    result.within_hp_subclone_permanova_p = scp2;
+                    result.within_hp_subclone_permanova_f = scf2;
+                    result.within_hp_subclone_valid = scv2;
+                    result.within_hp_subclone_dispersion_warn = scd2;
+                }
             }
 
             // [tumor-only structure axis] does structure exist in TUMOR reads alone? The all-pool main path cannot
@@ -1370,6 +1397,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 "DominantLabel,Stability,VerificationClass,VerificationClass_Legacy,"
                 "WithinHP1_NGroups,WithinHP2_NGroups,WithinHP_LevelBimodal,WithinHP_CleanMultigroup,"
                 "WithinHP_BestSil,WithinHP_MinFrac,"
+                "WithinHP_SubclonePermanovaP,WithinHP_SubclonePermanovaF,WithinHP_SubcloneValid,WithinHP_SubcloneDispWarn,WithinHP_SubcloneSig,"
                 // Multi-Layer Validation Quality Assessment (NEW)
                 "HP_Ratio,Potential_LOH,Coverage_Multiple,Diploid_Coverage_Used,Coverage_Category,LOH_Subtype,"
                 "Quality_Score,Quality_Tier,"
@@ -1517,6 +1545,11 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << (r.within_hp_clean_multigroup ? "true" : "false") << ","
                  << std::fixed << std::setprecision(4) << r.within_hp_best_sil << ","
                  << r.within_hp_min_frac << ","
+                 << std::scientific << std::setprecision(6) << r.within_hp_subclone_permanova_p << ","
+                 << std::fixed << std::setprecision(4) << r.within_hp_subclone_permanova_f << ","
+                 << (r.within_hp_subclone_valid ? "true" : "false") << ","
+                 << (r.within_hp_subclone_dispersion_warn ? "true" : "false") << ","
+                 << (r.within_hp_subclone_sig ? "true" : "false") << ","
                  // Multi-Layer Validation Quality Assessment (NEW)
                  << std::fixed << std::setprecision(4) << r.hp_ratio << ","
                  << (r.potential_loh ? "true" : "false") << ","
@@ -2214,6 +2247,55 @@ void RegionProcessor::compute_within_hp_substructure(const Eigen::MatrixXd& all_
     const int min_sz = *std::min_element(sizes.begin(), sizes.end());
     out_min_frac = static_cast<double>(min_sz) / n;  // [D] expose smallest-cluster fraction (minor-subclone indicator)
     if (out_silhouette >= 0.5 && min_sz >= 3) out_ngroups = k;  // [B] relax balance: min_sz>=3 (was max(3, n/5))
+}
+
+// [Stage② C'] within-HP a-priori subclone PERMANOVA: does the within-HP methylation DISTANCE separate germline-tag
+// vs somatic-carrier-tag reads? Labels are A-PRIORI (read hp_tag), NOT derived from the distance — so this is a VALID
+// hypothesis test (no double-dip, unlike the unsupervised tumor_only axis). Statistical "mark/confirm" for within-HP
+// subclone structure: reuses StructureTest::run_permanova (location, permutation null) + check_dispersion (PERMDISP).
+void RegionProcessor::compute_within_hp_subclone_permanova(const Eigen::MatrixXd& all_dist,
+                                                           const std::vector<int>& hp_idx,
+                                                           const std::vector<int>& gc_labels, double& out_p,
+                                                           double& out_f, bool& out_valid, bool& out_disp_warn) const {
+    out_p = 1.0;
+    out_f = 0.0;
+    out_valid = false;
+    out_disp_warn = false;
+    const int m = static_cast<int>(hp_idx.size());
+    if (m < 8) return;
+    Eigen::MatrixXd sub(m, m);
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < m; ++j) sub(i, j) = all_dist(hp_idx[i], hp_idx[j]);
+    }
+    // NaN peel-off to a complete submatrix (mirrors the within-HP / tumor-only paths).
+    std::vector<int> valid;
+    extract_complete_submatrix_indices(sub, valid);
+    const int n = static_cast<int>(valid.size());
+    if (n < 8) return;
+    Eigen::MatrixXd work(n, n);
+    std::vector<int> labels(n);
+    int n0 = 0, n1 = 0;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) work(i, j) = sub(valid[i], valid[j]);
+        labels[i] = gc_labels[valid[i]];  // a-priori germline(0)/carrier(1) — independent of distance => no double-dip
+        if (labels[i] == 0) {
+            ++n0;
+        } else if (labels[i] == 1) {
+            ++n1;
+        }
+    }
+    if (n0 < 3 || n1 < 3) return;  // need both germline AND carrier present with enough reads for a valid test
+    StructureTestConfig st_config;
+    st_config.n_permutations = 999;
+    st_config.seed = 42;
+    st_config.dispersion_alpha = 0.05;
+    StructureTest st(st_config);
+    PermanovaResult perm = st.run_permanova(work, labels);
+    out_f = perm.pseudo_f;
+    out_p = perm.p_value;
+    out_valid = perm.valid;
+    DispersionResult disp = st.check_dispersion(work, labels);
+    out_disp_warn = disp.warning;
 }
 
 void RegionProcessor::compute_tumor_only_cluster_structure(const Eigen::MatrixXd& all_dist,
