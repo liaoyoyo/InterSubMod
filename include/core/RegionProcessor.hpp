@@ -255,6 +255,8 @@ struct RegionResult {
     int within_hp2_ngroups;          ///< clean PATTERN cluster count within tumor HP2-family
     bool within_hp_level_bimodal;    ///< true if HP1 or HP2 has a clean balanced mean-β LEVEL bimodality (distance misses this)
     bool within_hp_clean_multigroup; ///< true if within-HP PATTERN (distance) OR LEVEL (mean β) clean multigroup (S4/S6)
+    double within_hp_best_sil;       ///< [D] best within-HP silhouette across HP1/HP2 (graded; exposes weak 0.3-0.5 splits the binary gate drops)
+    double within_hp_min_frac;       ///< [D] smallest within-HP cluster fraction (minor-subclone indicator; <0.2 = low-CCF minor)
     // [tumor-only structure axis] unsupervised clustering + PERMANOVA on TUMOR reads ONLY (vs all-pool main path).
     int tumor_only_cluster_k;          ///< tumor-only unsupervised cluster count (1 = none)
     double tumor_only_silhouette;      ///< tumor-only clustering mean silhouette
@@ -436,6 +438,8 @@ struct RegionResult {
           within_hp2_ngroups(1),
           within_hp_level_bimodal(false),
           within_hp_clean_multigroup(false),
+          within_hp_best_sil(0.0),
+          within_hp_min_frac(1.0),
           tumor_only_cluster_k(1),
           tumor_only_silhouette(0.0),
           tumor_only_permanova_f(0.0),
@@ -657,7 +661,7 @@ private:
      * @param hp_idx read indices of one HP-family. out_ngroups = clean k (1 if no clean substructure).
      */
     void compute_within_hp_substructure(const Eigen::MatrixXd& all_dist, const std::vector<int>& hp_idx,
-                                        int& out_ngroups, double& out_silhouette) const;
+                                        int& out_ngroups, double& out_silhouette, double& out_min_frac) const;
 
     /**
      * @brief tumor-only structure axis: unsupervised clustering (UPGMA + silhouette-optimal k) on the TUMOR-read

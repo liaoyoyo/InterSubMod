@@ -1177,9 +1177,18 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                         hp2_idx.push_back(static_cast<int>(i));
                     }
                 }
-                double sil1 = 0.0, sil2 = 0.0;
-                compute_within_hp_substructure(all_dist.dist_matrix, hp1_idx, result.within_hp1_ngroups, sil1);
-                compute_within_hp_substructure(all_dist.dist_matrix, hp2_idx, result.within_hp2_ngroups, sil2);
+                double sil1 = 0.0, sil2 = 0.0, mf1 = 1.0, mf2 = 1.0;
+                compute_within_hp_substructure(all_dist.dist_matrix, hp1_idx, result.within_hp1_ngroups, sil1, mf1);
+                compute_within_hp_substructure(all_dist.dist_matrix, hp2_idx, result.within_hp2_ngroups, sil2, mf2);
+                // [D] graded output: best within-HP silhouette + its smallest-cluster fraction (exposes weak/minor
+                // splits the binary clean_multigroup gate drops; downstream/human can re-threshold).
+                if (sil1 >= sil2) {
+                    result.within_hp_best_sil = sil1;
+                    result.within_hp_min_frac = mf1;
+                } else {
+                    result.within_hp_best_sil = sil2;
+                    result.within_hp_min_frac = mf2;
+                }
                 // [Stage② level axis] distance clustering above catches PATTERN substructure only; add the LEVEL
                 // axis (mean-β bimodality) which distance misses (chr1: distance 1.2% vs level 26.1%).
                 constexpr int kWithinHpMinGroup = 3;
@@ -1360,6 +1369,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 // Summary
                 "DominantLabel,Stability,VerificationClass,VerificationClass_Legacy,"
                 "WithinHP1_NGroups,WithinHP2_NGroups,WithinHP_LevelBimodal,WithinHP_CleanMultigroup,"
+                "WithinHP_BestSil,WithinHP_MinFrac,"
                 // Multi-Layer Validation Quality Assessment (NEW)
                 "HP_Ratio,Potential_LOH,Coverage_Multiple,Diploid_Coverage_Used,Coverage_Category,LOH_Subtype,"
                 "Quality_Score,Quality_Tier,"
@@ -1505,6 +1515,8 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << r.within_hp1_ngroups << "," << r.within_hp2_ngroups << ","
                  << (r.within_hp_level_bimodal ? "true" : "false") << ","
                  << (r.within_hp_clean_multigroup ? "true" : "false") << ","
+                 << std::fixed << std::setprecision(4) << r.within_hp_best_sil << ","
+                 << r.within_hp_min_frac << ","
                  // Multi-Layer Validation Quality Assessment (NEW)
                  << std::fixed << std::setprecision(4) << r.hp_ratio << ","
                  << (r.potential_loh ? "true" : "false") << ","
@@ -2113,9 +2125,11 @@ void RegionProcessor::compute_combo_dbeta(const Eigen::MatrixXd& raw, const std:
 }
 
 void RegionProcessor::compute_within_hp_substructure(const Eigen::MatrixXd& all_dist, const std::vector<int>& hp_idx,
-                                                     int& out_ngroups, double& out_silhouette) const {
+                                                     int& out_ngroups, double& out_silhouette,
+                                                     double& out_min_frac) const {
     out_ngroups = 1;
     out_silhouette = 0.0;
+    out_min_frac = 1.0;  // [D] default = single group (no split)
     const int m = static_cast<int>(hp_idx.size());
     if (m < 8) return;  // need enough reads for a meaningful within-HP split
 
@@ -2192,11 +2206,14 @@ void RegionProcessor::compute_within_hp_substructure(const Eigen::MatrixXd& all_
     }
     out_silhouette = sil_n > 0 ? sil_sum / sil_n : 0.0;
 
-    // Clean multigroup = good silhouette + balanced (smallest cluster >= max(3, 20% of n)).
+    // Clean multigroup = good silhouette + minimum cluster size. [B] balance relaxed from max(3, n/5) to >=3:
+    // the 20% relative balance gate systematically blocked clean BUT MINOR (low-CCF) subclones — within_hp_rederive
+    // audit (N=113): 26.5% were sil>=0.5 clean splits rejected only by balance. silhouette>=0.5 still guards cleanness.
     std::vector<int> sizes(k, 0);
     for (int l : labels) ++sizes[l];
     const int min_sz = *std::min_element(sizes.begin(), sizes.end());
-    if (out_silhouette >= 0.5 && min_sz >= std::max(3, n / 5)) out_ngroups = k;
+    out_min_frac = static_cast<double>(min_sz) / n;  // [D] expose smallest-cluster fraction (minor-subclone indicator)
+    if (out_silhouette >= 0.5 && min_sz >= 3) out_ngroups = k;  // [B] relax balance: min_sz>=3 (was max(3, n/5))
 }
 
 void RegionProcessor::compute_tumor_only_cluster_structure(const Eigen::MatrixXd& all_dist,
