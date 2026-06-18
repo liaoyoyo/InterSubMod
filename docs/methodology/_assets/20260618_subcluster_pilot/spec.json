@@ -1,0 +1,4194 @@
+{
+ "meta": {
+  "title": "標籤內(HP1-1)子分群偵測 — 逐項肉眼判讀",
+  "subtitle": "chr1 pilot · carrier-only + HP-level · 偵測候選非驗證子克隆",
+  "lskey": "vw_subcluster_chr1_v1",
+  "tier": "PILOT ⭐2(描述性)",
+  "scope": "chr1 PARTIAL (2624 TP SNV)",
+  "build_commit": "5c39051",
+  "build_branch": "feat/summary-nreadsvalid"
+ },
+ "changelog": {
+  "data_status": {
+   "summary": "chr1 描述性 pilot,二進位 5c39051;reads/距離由 pipeline 輸出,子群與 metrics 由 Python(UPGMA+silhouette,min_sz≥3,掃k≥2)算,落 cases.json/records.json。"
+  },
+  "phase": {
+   "summary": "偵測+肉眼判讀階段。外部軸驗證(第二somatic marker/normal cis-control/DMR連貫)為下一步,本工作站不做。"
+  },
+  "corrections": [
+   {
+    "id": "K1",
+    "what": "切的子集從 HP1(germ+carrier 混) 改為 carrier-only(1-1),問 somatic lineage 自己再分",
+    "status": "in-HEAD",
+    "effect": "排掉 germline-vs-carrier 那條線",
+    "src": "/tmp/subcluster_pilot.py"
+   },
+   {
+    "id": "K2",
+    "what": "口徑:標記為『候選 apparent 子分群』非『子克隆』(含 epiallele/技術)",
+    "status": "authoritative",
+    "effect": "守 double-dip 紅線",
+    "src": "memory project_tumor_only_axis_negative_subclone_classification"
+   }
+  ],
+  "audit_conclusion": {
+   "summary": "方法找得到(高sil肉眼可見兩群)、strand 已排除、明顯候選罕見(carrier1-1 sil≥0.5 僅0.5%)。高sil差異多為 level(整體高低)→真有兩群但是否子克隆未證。"
+  }
+ },
+ "sections": [
+  {
+   "id": "dist",
+   "title": "① 數據分布 + 覆蓋漏斗 (數量與比例)",
+   "html": "<p class='sub'>chr1 pilot · 標準: min_sz≥3 · 掃 k≥2 取最佳 silhouette(=群內聚集 vs 群外差異) · <b>偵測</b>『候選 apparent 子分群』非驗證子克隆(含 epiallele/技術假象,需另驗)。</p><table class='dist'><thead><tr><th>子集</th><th>標籤總數</th><th>夠read可問(n≥6)</th><th>算出split</th><th>sil≥0.4</th><th>sil≥0.5(明顯)</th><th>sil≥0.6</th></tr></thead><tbody><tr><td>carrier 1-1 (主目標)</td><td class='num'>2624</td><td class='num'>1438 (54.8%)</td><td class='num'>162</td><td class='num'>41 (1.6%)</td><td class='num'><strong>14 (0.5%)</strong></td><td class='num'>3</td></tr><tr><td>carrier 2-1</td><td class='num'>2624</td><td class='num'>1457 (55.5%)</td><td class='num'>141</td><td class='num'>34 (1.3%)</td><td class='num'><strong>4 (0.2%)</strong></td><td class='num'>1</td></tr><tr><td>HP1 germ+carrier (對照)</td><td class='num'>2624</td><td class='num'>1981 (75.5%)</td><td class='num'>258</td><td class='num'>111 (4.2%)</td><td class='num'><strong>43 (1.6%)</strong></td><td class='num'>13</td></tr><tr><td>HP2 germ+carrier (對照)</td><td class='num'>2624</td><td class='num'>1950 (74.3%)</td><td class='num'>231</td><td class='num'>63 (2.4%)</td><td class='num'><strong>14 (0.5%)</strong></td><td class='num'>6</td></tr></tbody></table><p class='sub'>🔴 <b>明顯 carrier-內子分群罕見</b>: carrier 1-1 在 sil≥0.5 僅 14 個(全chr1 0.5%)。carrier-only(0.5%) &lt; HP-level(1.6%) → 差的部分多是 germline-vs-carrier 本身,carrier-only 已排掉。</p>"
+  }
+ ],
+ "item_config": {
+  "verdict_states": [
+   {
+    "key": "yes",
+    "label": "同意有兩群"
+   },
+   {
+    "key": "doubt",
+    "label": "存疑"
+   },
+   {
+    "key": "no",
+    "label": "否定"
+   }
+  ],
+  "required_metrics": [
+   "silhouette",
+   "k(群數)"
+  ],
+  "per_page": 24
+ },
+ "items": [
+  {
+   "id": "chr1_192692479",
+   "title": "chr1:192692479",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.725",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "24/24",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.167",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.567",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.894/0.327",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.974",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "39",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.75",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/192692479_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_243621449",
+   "title": "chr1:243621449",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.684",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "23/21",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.143",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.369",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.412/0.781",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.986",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "22",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.67",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/243621449_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_49774816",
+   "title": "chr1:49774816",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "⚠strand純",
+     "kind": "warn"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.606",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "16/16",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.188",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.109",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.347/0.238",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.972",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "11",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "1.0",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/49774816_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_57521711",
+   "title": "chr1:57521711",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.583",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "49/49",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.429",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.023",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.404/0.428",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.929",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "25",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.57",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/57521711_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_57501374",
+   "title": "chr1:57501374",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "⚠strand純",
+     "kind": "warn"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.573",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "24/24",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.458",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.133",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.514/0.381",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.946",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "26",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.92",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/57501374_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_57332674",
+   "title": "chr1:57332674",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.566",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "21/21",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.19",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.011",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.403/0.392",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.962",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "18",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.65",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/57332674_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_48158346",
+   "title": "chr1:48158346",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.553",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "35/33",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.485",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.010",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.335/0.325",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.976",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "20",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.65",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/48158346_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_56869731",
+   "title": "chr1:56869731",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.518",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "46/44",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.318",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.031",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.318/0.287",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.947",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "10",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.79",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/56869731_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_49580674",
+   "title": "chr1:49580674",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.514",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "22/21",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.286",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.087",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.255/0.342",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.969",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "15",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.53",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/49580674_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_119389546",
+   "title": "chr1:119389546",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.509",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "21/21",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.143",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.154",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.656/0.503",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.965",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "23",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.72",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/119389546_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_160556465",
+   "title": "chr1:160556465",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.506",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "55/51",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.431",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.111",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.412/0.523",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.952",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "19",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.59",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/160556465_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_78800276",
+   "title": "chr1:78800276",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.505",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "25/23",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.13",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.094",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.791/0.885",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.976",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "6",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.67",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/78800276_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_56867776",
+   "title": "chr1:56867776",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.504",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "49/49",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.469",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.072",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.291/0.22",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.906",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "7",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.65",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/56867776_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_49866394",
+   "title": "chr1:49866394",
+   "subtitle": "明顯(≥0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "明顯 ≥0.5",
+     "kind": "ok"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.503",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "18/18",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.389",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.085",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.335/0.25",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.953",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "16",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.64",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/49866394_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_68690488",
+   "title": "chr1:68690488",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.499",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "21/19",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.158",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.014",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.281/0.295",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.928",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "16",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.67",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/68690488_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_57483998",
+   "title": "chr1:57483998",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.483",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "38/38",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.368",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.093",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.658/0.751",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.927",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "29",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.58",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/57483998_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_111963950",
+   "title": "chr1:111963950",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.473",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "32/31",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.29",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.005",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.381/0.375",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.947",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "26",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.68",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/111963950_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_38349190",
+   "title": "chr1:38349190",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.468",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "11/11",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.273",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.007",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.23/0.237",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.969",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "15",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.67",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/38349190_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_110584633",
+   "title": "chr1:110584633",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.456",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "29/29",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.345",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.034",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.45/0.416",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.944",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "31",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.7",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/110584633_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_49583594",
+   "title": "chr1:49583594",
+   "subtitle": "邊際(0.4-0.5) · DispersionStructure · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.456",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "22/22",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.409",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.061",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.303/0.242",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.97",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "11",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.56",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "DispersionStructure",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/49583594_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_221986106",
+   "title": "chr1:221986106",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.451",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "9/9",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.444",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.100",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.71/0.61",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.96",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "19",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.75",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/221986106_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_38748531",
+   "title": "chr1:38748531",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.447",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "24/23",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.435",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.050",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.497/0.447",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.95",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "35",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.62",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/38748531_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_111980737",
+   "title": "chr1:111980737",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.446",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "22/22",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.364",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.120",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.688/0.569",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.949",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "44",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.75",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/111980737_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_160059164",
+   "title": "chr1:160059164",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.443",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "18/18",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.444",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.003",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.638/0.64",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.954",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "28",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.6",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/160059164_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_87535957",
+   "title": "chr1:87535957",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.442",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "18/18",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.167",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.114",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.913/0.798",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.871",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "9",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.8",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/87535957_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_48723826",
+   "title": "chr1:48723826",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.441",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "47/47",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.468",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.008",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.479/0.486",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.895",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "14",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.6",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/48723826_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_101916322",
+   "title": "chr1:101916322",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "⚠strand純",
+     "kind": "warn"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.432",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "26/25",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.12",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.109",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.717/0.825",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.967",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "10",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "1.0",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/101916322_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_247630695",
+   "title": "chr1:247630695",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=3",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "⚠strand純",
+     "kind": "warn"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.425",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "3",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "21/19",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.158",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.115",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.297/0.412",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.976",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "13",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.92",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/247630695_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_78090009",
+   "title": "chr1:78090009",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.424",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "25/25",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.12",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.042",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.795/0.837",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.74",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "8",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.67",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/78090009_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_157621945",
+   "title": "chr1:157621945",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.423",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "21/21",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.143",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.113",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.374/0.486",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.909",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "5",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.67",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/157621945_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_166201554",
+   "title": "chr1:166201554",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "⚠strand純",
+     "kind": "warn"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.421",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "12/12",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.25",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.035",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.37/0.335",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.982",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "18",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "1.0",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/166201554_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_221882749",
+   "title": "chr1:221882749",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.418",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "17/15",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.4",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.116",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.569/0.685",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.975",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "9",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.83",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/221882749_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_77371743",
+   "title": "chr1:77371743",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.417",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "18/18",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.167",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.070",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.805/0.874",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.99",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "6",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.67",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/77371743_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_48149137",
+   "title": "chr1:48149137",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.414",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "54/52",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.192",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.025",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.518/0.493",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.928",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "22",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.6",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/48149137_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_175083132",
+   "title": "chr1:175083132",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.411",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "18/18",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.333",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.001",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.609/0.609",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.973",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "31",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.58",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/175083132_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_117740955",
+   "title": "chr1:117740955",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.408",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "42/41",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.488",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.001",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.54/0.539",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.795",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "13",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.67",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/117740955_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_177753999",
+   "title": "chr1:177753999",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.407",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "25/25",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.12",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.154",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.642/0.489",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.894",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "13",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.67",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/177753999_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_160654392",
+   "title": "chr1:160654392",
+   "subtitle": "邊際(0.4-0.5) · LabelShift · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.406",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "34/34",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.441",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.028",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.46/0.432",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.9",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "19",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.79",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "LabelShift",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/160654392_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_162030289",
+   "title": "chr1:162030289",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.401",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "20/20",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.15",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.121",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.778/0.9",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.915",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "14",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.67",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/162030289_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_110574471",
+   "title": "chr1:110574471",
+   "subtitle": "邊際(0.4-0.5) · StructureNoLabel · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.401",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "18/18",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.389",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.006",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.4/0.394",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.955",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "12",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.71",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "StructureNoLabel",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/110574471_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_117744326",
+   "title": "chr1:117744326",
+   "subtitle": "邊際(0.4-0.5) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "邊際",
+     "kind": "warn"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.400",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "51/49",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.347",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "-0.029",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.486/0.515",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.881",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "18",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.66",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/117744326_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_11476972",
+   "title": "chr1:11476972",
+   "subtitle": "低/控制(<0.25) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "低/控制",
+     "kind": "no"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.178",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "69/66",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.303",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.001",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.235/0.234",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.852",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "27",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.57",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/11476972_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_214377399",
+   "title": "chr1:214377399",
+   "subtitle": "低/控制(<0.25) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "低/控制",
+     "kind": "no"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "⚠strand純",
+     "kind": "warn"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.188",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "9/9",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.333",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.015",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.907/0.892",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.816",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "11",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "1.0",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/214377399_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_178303065",
+   "title": "chr1:178303065",
+   "subtitle": "低/控制(<0.25) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "低/控制",
+     "kind": "no"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.193",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "16/16",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.438",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.029",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.853/0.825",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.831",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "6",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.67",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/178303065_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  },
+  {
+   "id": "chr1_56722507",
+   "title": "chr1:56722507",
+   "subtitle": "低/控制(<0.25) · Strong · pattern-含",
+   "badges": [
+    {
+     "label": "低/控制",
+     "kind": "no"
+    },
+    {
+     "label": "k=2",
+     "kind": "info"
+    },
+    {
+     "label": "結構-VC",
+     "kind": "info"
+    },
+    {
+     "label": "平衡",
+     "kind": "info"
+    },
+    {
+     "label": "strand混(非假象)",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "silhouette",
+    "balance",
+    "Δβ(level)"
+   ],
+   "metrics": [
+    {
+     "k": "silhouette",
+     "v": "0.204",
+     "src": "cases.json"
+    },
+    {
+     "k": "k(群數)",
+     "v": "2",
+     "src": "cases.json"
+    },
+    {
+     "k": "n(raw/complete)",
+     "v": "33/32",
+     "src": "cases.json"
+    },
+    {
+     "k": "balance(min_frac)",
+     "v": "0.406",
+     "src": "cases.json"
+    },
+    {
+     "k": "Δβ(level)",
+     "v": "+0.056",
+     "src": "cases.json"
+    },
+    {
+     "k": "clusterμ",
+     "v": "0.655/0.599",
+     "src": "cases.json"
+    },
+    {
+     "k": "max|Δβ|(pattern)",
+     "v": "0.782",
+     "src": "cases.json"
+    },
+    {
+     "k": "#CpG|Δβ|>0.3",
+     "v": "10",
+     "src": "cases.json"
+    },
+    {
+     "k": "strand純度max",
+     "v": "0.69",
+     "src": "cases.json"
+    },
+    {
+     "k": "VerificationClass",
+     "v": "Strong",
+     "src": "_chr1_strength_verify"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "carrier-1-1 reads×CpG 依子群排序 (clu|str 側欄)",
+      "path": "figs/56722507_meth.png"
+     }
+    ]
+   },
+   "reading_guide": "看黑線分隔的上下群甲基是否明顯不同。str 欄混色=非 strand 假象。level-主=整體高低差(epiallele 也會);pattern=特定CpG差。判『同意有兩群/存疑/否定』。"
+  }
+ ],
+ "provenance": {
+  "sources": [
+   "docs/methodology/_assets/20260618_subcluster_pilot/cases.json",
+   "records.json",
+   "output/_chr1_subcluster_pilot"
+  ],
+  "note": "chr1 pilot;偵測非驗證;commit 5c39051"
+ }
+}
