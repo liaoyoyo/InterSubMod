@@ -1,4 +1,20 @@
+# 大型可重生中間檔（從 binary→records→analyze 重生，見 README）
 figs/
+figs_fdr/
+figs_kprofile/
 records.json
 records_wg.json
 records_wg2.json
+ksweep_wg_records.json
+ksweep_records_tumor.json
+ksweep_records_merged.json
+kprofile_loci_tumor.json
+kprofile_loci_merged.json
+# logs / 重生中間檔
+*.log
+*.vcf
+*.vcf.gz
+*.vcf.gz.tbi
+qc_*.png
+# full self-contained workstation (dual-panel 後 ~9MB 過大；用 _lite 版 + figs_fdr/)
+20260618_ksweep_fdr_confirmation_workstation_01.standalone.html
