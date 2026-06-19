@@ -11,7 +11,7 @@ scope: 全基因組單樣本（partial: single-sample, cross-sample 未做）
 build_commit: 7789f4a
 branch: feat/summary-nreadsvalid
 binary_commit: 5c39051
-data_sources: docs/methodology/_assets/20260618_subcluster_pilot/ksweep_wg_summary.json,docs/methodology/_assets/20260618_subcluster_pilot/ksweep_wg_records.json,docs/methodology/_assets/20260618_subcluster_pilot/split_accounting.json,docs/methodology/_assets/20260618_subcluster_pilot/cantsplit_reasons.json,docs/methodology/_assets/20260618_subcluster_pilot/cantsplit_apriori_rescue.json,docs/methodology/_assets/20260618_subcluster_pilot/ksweep_summary_tumor.json,docs/methodology/_assets/20260618_subcluster_pilot/ksweep_summary_merged.json,docs/methodology/_assets/20260618_subcluster_pilot/kprofile_summary.json
+data_sources: docs/methodology/_assets/20260618_subcluster_pilot/ksweep_wg_summary.json,docs/methodology/_assets/20260618_subcluster_pilot/ksweep_wg_records.json,docs/methodology/_assets/20260618_subcluster_pilot/split_accounting.json,docs/methodology/_assets/20260618_subcluster_pilot/cantsplit_reasons.json,docs/methodology/_assets/20260618_subcluster_pilot/cantsplit_apriori_rescue.json,docs/methodology/_assets/20260618_subcluster_pilot/ksweep_summary_tumor.json,docs/methodology/_assets/20260618_subcluster_pilot/ksweep_summary_merged.json,docs/methodology/_assets/20260618_subcluster_pilot/kprofile_summary.json,docs/methodology/_assets/20260618_subcluster_pilot/method_comparison.json,docs/methodology/_assets/20260618_subcluster_pilot/cantsplit_validation.json,docs/methodology/_assets/20260618_subcluster_pilot/permanova_clean_4group.json
 memory: project_subcluster_cluster_count_determination, feedback_verification_table_per_data_answer
 ---
 
@@ -148,6 +148,36 @@ memory: project_subcluster_cluster_count_determination, feedback_verification_ta
 - **multi-resolution 是真階層**：代表位點不同 k 對齊不同軸（如 chr14:97275848 k2→allele(.96)/k3→HP(1.0)/k4→carrier(.82)）→ **k=2 切成 k=3 確實也有意義**（捕捉不同生物結構）。
 - **🔴 紅線**：multi-resolution ≠ subclone（跨軸多含 HP/allele=germline-cis，需 normal cis-control）；ambiguous ≠ 無結構（是 k-歧義）；單樣本 ⭐2；margin 門檻(0.05/0.15)是約定。
 - 產物：`kprofile_summary.json` + `kprofile_loci_{tumor,merged}.json` + `20260618_kprofile_explainer_01.standalone.html`（11 代表熱圖）+ `figs_kprofile/`(29)。
+
+---
+
+## 觀察 E — Fisher+V vs PERMANOVA 方法對照 + 「切不出≠沒訊號」校正
+
+**問題**：(1)「切不出/不顯著」是真無法處理還是門檻太嚴？(2) PERMANOVA 分軸/多組怎麼測？(3) PERMANOVA 與 Fisher+V 的位點 Venn？(4) PERMANOVA vs Δβ 差別？
+**方法**：source-read（`SignificanceAnalyzer.cpp:288-304` / `StructureTest.cpp` run_permanova+check_dispersion）+ 全基因組 significance_csv 統計 + Python PERMANOVA 實作（chr21+22 4組驗證）+ 置換 null 門檻校準（chr21+22）。
+
+### 驗證表 V5（全 L1，源碼 + 全基因組數據）
+
+| # | 數字 | 值 | 來源:key | 狀態 |
+|---|---|---|---|---|
+| 1 | Fisher+V cansplit | 5997 (19.7%) | records best_k≥2 | ✓ |
+| 2 | PERMANOVA raw HP/Allele/任一 | 85.7% / 93.4% / 97.5% | `LabelHP/AllelePermanovaP<.05` | ✓ |
+| 3 | **HP dispersion 混淆** | 18896 (72.3% of sig) | `LabelHPDispersionWarn` | ✓ |
+| 4 | **HP clean-location** | 7245 (27.7% of sig = 23.8% 全) | sig & !disp | ✓ |
+| 5 | **Venn clean Jaccard** | **0.118**（A∩C 1560=5.1%）| cansplit ∩ clean-location | ✓ |
+| 6 | Δβ by class clean/disp/nonsig | 0.043 / 0.048 / 0.041 | `GermlineAsmDbeta` | ✓ |
+| 7 | 4組 HP-fine PERMANOVA | testable 802 / sig 674（62 真4組）| Python PERMANOVA chr21+22 | ✓ |
+| 8 | 門檻校準 V≥0.3 真實率 | 97.2%（V≥0.1 仍 82%）| 置換 null chr21+22 | ✓ |
+| 9 | MIN_SZ 3→2 救回真結構 | 22/101 (21.8% >> 5% null) | 同上 | ✓ |
+
+### 結論 E
+- **Q1 門檻**：V-alignment 校準良好非太嚴（V≥0.3=97.2% 真）；MIN_SZ=3 稍嚴（擋 ~22% 有 2-read 小群的真結構，放寬 MIN_SZ=2 加 78% 噪音）= precision/recall 取捨。
+- **Q2 軸/多組**：PERMANOVA 分軸測（HP/Allele 各一），HP 合併 2 組（family）、omnibus 非兩兩；4組 HP-fine 用 Fisher-FH。PERMANOVA omnibus 技術上能跑 4 組（實測 802 testable），瓶頸=子標籤稀疏。
+- **Q3 🔴 dispersion 校正**：PERMANOVA「85%」**~72% 是 dispersion**，扣掉後 HP clean-location 只 23.8%（Allele 93% dispersion）。
+- **Q3 🔴 Venn 更正**：Fisher+V(20%) 與 clean-location PERMANOVA(29%) 數量近但**位點大不同**（Jaccard 0.118）= 正交兩鏡頭。**更正先前「24%≈20% 同位點」誤述**。
+- **Q4**：PERMANOVA(距離 per-CpG 多變量) ≠ Δβ(整體平均純量)；Δβ 三類 ~0.045 均一 → PERMANOVA 抓非整體平均差，是 per-CpG 模式 + dispersion。
+- **🔴 整合校正「切不出≠沒訊號」**：仍成立（neither 2.4%），但乾淨「平均差/可分群」訊號只 ~20-29%；85% 多是 dispersion + per-CpG 模式，非整體平均差/離散群。
+- 產物：`method_comparison.json` + `permanova_clean_4group.json` + `threshold_calibration.json` + `cantsplit_validation.json` + `20260620_method_comparison_fisher_v_vs_permanova_01.standalone.html` + `20260620_cantsplit_signal_validation_01.standalone.html` + `figs_cantsplit/`(20 dual-panel)。
 
 ---
 
