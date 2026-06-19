@@ -1,0 +1,104 @@
+{
+  "source_csv": "/big7_disk/liaoyoyo2001/c2_ari_run_hcc1395_tp/significance_summary.csv",
+  "n": 30486,
+  "ari_hp": {
+    "computed": 28764,
+    "sentinel": 1722,
+    "mean": 0.2121,
+    "median": 0.1454,
+    "buckets": {
+      "[-0.2,0.2)": 16067,
+      "[-1,-0.2)": 3,
+      "[0.2,0.5)": 8818,
+      "[0.5,0.8)": 3503,
+      "[0.8,1.0]": 373,
+      "sentinel(-2)": 1722
+    }
+  },
+  "ari_allele": {
+    "computed": 29740,
+    "sentinel": 746,
+    "mean": 0.1632,
+    "median": 0.0055,
+    "buckets": {
+      "[-0.2,0.2)": 20935,
+      "[0.2,0.5)": 3980,
+      "[0.5,0.8)": 2045,
+      "[0.8,1.0]": 2780,
+      "sentinel(-2)": 746
+    }
+  },
+  "typology_by_ARImax": {
+    "aligned_ge_0.5": {
+      "n": 7290,
+      "frac": 0.2391
+    },
+    "partial_0.2_0.5": {
+      "n": 7910,
+      "frac": 0.2595
+    },
+    "noalign_lt_0.2_computed": {
+      "n": 15026,
+      "frac": 0.4929
+    },
+    "no_label_axis_both_sentinel": {
+      "n": 260,
+      "frac": 0.0085
+    }
+  },
+  "typology_x_verificationclass": {
+    "aligned_ge_0.5": {
+      "Strong": 7284,
+      "LOH-Structure": 3,
+      "StructureNoLabel": 2,
+      "DispersionStructure": 1
+    },
+    "partial_0.2_0.5": {
+      "Strong": 7857,
+      "LOH-Structure": 21,
+      "StructureNoLabel": 4,
+      "PermanovaLocation": 9,
+      "MultiGroupNoLabel": 7,
+      "DispersionStructure": 6,
+      "Noise_Uniform": 3,
+      "LabelShift": 2,
+      "Noise_Chaotic": 1
+    },
+    "noalign_lt_0.2_computed": {
+      "LabelShift": 1352,
+      "DispersionStructure": 1473,
+      "MultiGroupNoLabel": 1647,
+      "Strong": 8384,
+      "LOH-Structure": 294,
+      "PermanovaLocation": 1188,
+      "Noise_Uniform": 497,
+      "StructureNoLabel": 118,
+      "Noise_Chaotic": 32,
+      "Noise_Uncorrelated": 41
+    },
+    "no_label_axis_both_sentinel": {
+      "LabelShift": 51,
+      "PermanovaLocation": 62,
+      "DispersionStructure": 58,
+      "Noise_Uncorrelated": 2,
+      "MultiGroupNoLabel": 39,
+      "Noise_Uniform": 30,
+      "LOH-Structure": 16,
+      "StructureNoLabel": 2
+    }
+  },
+  "within_hp_substructure": {
+    "clean_multigroup_true": 9424,
+    "frac": 0.3091,
+    "by_typology": {
+      "aligned_ge_0.5": 1935,
+      "partial_0.2_0.5": 2909,
+      "noalign_lt_0.2_computed": 4536,
+      "no_label_axis_both_sentinel": 44
+    }
+  },
+  "thresholds": {
+    "TAU_HIGH": 0.5,
+    "TAU_LOW": 0.2
+  }
+}
