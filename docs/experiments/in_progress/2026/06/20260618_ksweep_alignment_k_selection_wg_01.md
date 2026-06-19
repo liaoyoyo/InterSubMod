@@ -11,7 +11,7 @@ scope: 全基因組單樣本（partial: single-sample, cross-sample 未做）
 build_commit: 7789f4a
 branch: feat/summary-nreadsvalid
 binary_commit: 5c39051
-data_sources: docs/methodology/_assets/20260618_subcluster_pilot/ksweep_wg_summary.json,docs/methodology/_assets/20260618_subcluster_pilot/ksweep_wg_records.json,docs/methodology/_assets/20260618_subcluster_pilot/split_accounting.json,docs/methodology/_assets/20260618_subcluster_pilot/cantsplit_reasons.json,docs/methodology/_assets/20260618_subcluster_pilot/cantsplit_apriori_rescue.json,docs/methodology/_assets/20260618_subcluster_pilot/ksweep_summary_tumor.json,docs/methodology/_assets/20260618_subcluster_pilot/ksweep_summary_merged.json,docs/methodology/_assets/20260618_subcluster_pilot/kprofile_summary.json,docs/methodology/_assets/20260618_subcluster_pilot/method_comparison.json,docs/methodology/_assets/20260618_subcluster_pilot/cantsplit_validation.json,docs/methodology/_assets/20260618_subcluster_pilot/permanova_clean_4group.json
+data_sources: docs/methodology/_assets/20260618_subcluster_pilot/ksweep_wg_summary.json,docs/methodology/_assets/20260618_subcluster_pilot/ksweep_wg_records.json,docs/methodology/_assets/20260618_subcluster_pilot/split_accounting.json,docs/methodology/_assets/20260618_subcluster_pilot/cantsplit_reasons.json,docs/methodology/_assets/20260618_subcluster_pilot/cantsplit_apriori_rescue.json,docs/methodology/_assets/20260618_subcluster_pilot/ksweep_summary_tumor.json,docs/methodology/_assets/20260618_subcluster_pilot/ksweep_summary_merged.json,docs/methodology/_assets/20260618_subcluster_pilot/kprofile_summary.json,docs/methodology/_assets/20260618_subcluster_pilot/method_comparison.json,docs/methodology/_assets/20260618_subcluster_pilot/cantsplit_validation.json,docs/methodology/_assets/20260618_subcluster_pilot/permanova_clean_4group.json,docs/methodology/_assets/20260618_subcluster_pilot/precondition_coverage.json
 memory: project_subcluster_cluster_count_determination, feedback_verification_table_per_data_answer
 ---
 
@@ -178,6 +178,33 @@ memory: project_subcluster_cluster_count_determination, feedback_verification_ta
 - **Q4**：PERMANOVA(距離 per-CpG 多變量) ≠ Δβ(整體平均純量)；Δβ 三類 ~0.045 均一 → PERMANOVA 抓非整體平均差，是 per-CpG 模式 + dispersion。
 - **🔴 整合校正「切不出≠沒訊號」**：仍成立（neither 2.4%），但乾淨「平均差/可分群」訊號只 ~20-29%；85% 多是 dispersion + per-CpG 模式，非整體平均差/離散群。
 - 產物：`method_comparison.json` + `permanova_clean_4group.json` + `threshold_calibration.json` + `cantsplit_validation.json` + `20260620_method_comparison_fisher_v_vs_permanova_01.standalone.html` + `20260620_cantsplit_signal_validation_01.standalone.html` + `figs_cantsplit/`(20 dual-panel)。
+
+---
+
+## 觀察 F — 基準前提覆蓋率（驗證分母基準，🔴 重要參考數據）
+
+> **此節是「基準數據」**：標籤檢定要能跑，位點必須有 **≥2 種不同標籤(各≥3 reads)**。任何「% 顯著」都要配對應的**可驗證分母**，**不能用全 30490**。這是本資料（HCC1395 tumor，**這次穩定狀態**）的標籤結構基準，供所有後續分析引用比對。
+> **方法**：從 `records_wg2.json` 的 `all.labels`（tumor 標籤計數 1/1-1/2/2-1）直接算 + significance_csv allele valid。前提 = 該軸 ≥2 組各 ≥3 reads。
+
+### 驗證表 V6（基準前提覆蓋，全 L1）
+
+| # | 量 | 值 | 來源:key | 狀態 |
+|---|---|---|---|---|
+| 1 | 單一標籤（無法驗證） | 2817 (9.2%) | n_distinct=1 | ✓ |
+| 2 | ≥2 標籤（可驗證） | 27673 (90.8%) | — | ✓ |
+| 3 | 標籤種類 1/2/3/4 種 | 9.2 / 36.3 / 36.1 / 17.4% | n_distinct_pct | sum=100 ✓ |
+| 4 | HP 軸 (tumor) both≥3 | 16538 (54.2%) | `HP_axis.both_ge3` | ✓ |
+| 5 | **CARRIER 軸 (tumor, subclone) both≥3** | **24235 (79.5%)** | `carrier_axis.both_ge3` | ✓ |
+| 6 | ALLELE 軸 valid | 30474 (99.9%) | `allele_axis.csv_valid` | ✓ |
+| 7 | HP-fine 全4組各≥3 | 2281 (7.5%)（≥3組 34.0%） | `hpfine.all4` | ✓ |
+| 8 | 🔴 HP paired(C++ csv) vs tumor-only | 96.6% vs 54.2% | `LabelHPPermanovaValid` | ✓ |
+
+### 結論 F（基準觀察）
+- **前提覆蓋非瓶頸**：90.8% 有 ≥2 標籤；subclone（CARRIER tumor）軸 **79.5% 可測**。
+- **各軸前提差很大（基準排序）**：ALLELE 99.9% > CARRIER 79.5% > HP-tumor 54.2% > HP-fine-4 7.5% → **報任何 % 顯著必配對應分母**（這解釋了各軸 sig 率差異主因之一 = 分母不同）。
+- 🔴 **tumor-only vs paired 分母差很大**：HP 軸 paired 96.6%（含 normal reads）vs tumor-only 54.2% → 報 HP-ASM 須註明是哪個分母。
+- HP-fine 4 組稀疏（全有僅 7.5%）→ 再次印證「多組細分受限於子標籤資料稀疏、非 PERMANOVA 方法限制」（呼應觀察 E Q-4組）。
+- 產物：`precondition_coverage.json` + `20260620_precondition_coverage_01.standalone.html`。
 
 ---
 

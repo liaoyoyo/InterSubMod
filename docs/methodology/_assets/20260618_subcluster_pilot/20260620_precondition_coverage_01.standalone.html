@@ -1,0 +1,43 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>驗證前提覆蓋率</title><style>
+:root{--bg:#15171c;--card:#1e2128;--txt:#e6e6e6;--mut:#9aa0aa;--acc:#D97757;--bd:#2c3038;--grn:#7ee787}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.6 system-ui,'Noto Sans CJK TC',sans-serif}
+.wrap{max-width:920px;margin:0 auto;padding:24px}h1{font-size:20px}h2{font-size:16px;border-left:3px solid var(--acc);padding-left:9px;margin-top:26px}
+.banner{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:13px 17px;margin:10px 0}
+.key{background:#1a2520;border:1px solid #2c4a38;border-radius:8px;padding:12px 16px;margin:12px 0}.key b{color:var(--grn)}
+.warn{background:#231f12;border:1px solid #4a432c;border-left:3px solid #cc5;border-radius:6px;padding:10px 14px;margin:10px 0}
+.brow{display:flex;align-items:center;margin:6px 0;font-size:13px}.bl{width:330px;color:var(--mut)}
+.bt{flex:1;background:#262a32;border-radius:4px;height:22px;overflow:hidden}.bf{display:block;height:22px;line-height:22px;color:#111;font-weight:700;text-align:right;padding-right:6px;font-size:11px;min-width:30px}
+.bv{width:150px;text-align:right;font-family:ui-monospace,monospace;font-size:12px;color:#cdd}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0}th,td{border:1px solid var(--bd);padding:5px 9px;text-align:left}th{background:#22262e;color:var(--mut)}
+.foot{color:var(--mut);font-size:11px;margin-top:24px;border-top:1px solid var(--bd);padding-top:10px}code{color:#9ecbff;font-size:12px}
+</style></head><body><div class="wrap">
+<h1>驗證前提覆蓋率 — 多少位點有 ≥2 種標籤可驗證</h1>
+<div class="banner"><b>HCC1395 全基因組 N=30490 · tumor 標籤 · ⭐2</b><br>
+標籤檢定(Fisher+V / PERMANOVA / Δβ)要能跑，位點必須有 <b>≥2 種不同標籤(各≥3 reads)</b>。本頁量化前提覆蓋。</div>
+
+<h2>① 標籤種類分佈（會不會很多全是 1 種？）</h2>
+<div class="brow"><span class="bl">1 種標籤 (無法驗證)</span><span class="bt"><span class="bf" style="width:9.2%;background:#6a6f78">9.2%</span></span><span class="bv">2817</span></div><div class="brow"><span class="bl">2 種標籤</span><span class="bt"><span class="bf" style="width:36.3%;background:#4C9EE0">36.3%</span></span><span class="bv">11062</span></div><div class="brow"><span class="bl">3 種標籤</span><span class="bt"><span class="bf" style="width:36.1%;background:#5FB85F">36.1%</span></span><span class="bv">11021</span></div><div class="brow"><span class="bl">4 種標籤</span><span class="bt"><span class="bf" style="width:17.4%;background:#D97757">17.4%</span></span><span class="bv">5309</span></div>
+<div class="key"><b>不會 —— 單一標籤只 9.2%</b>（2817 個）。<b>90.8% 有 ≥2 種標籤</b>、前提多數成立。</div>
+
+<h2>② 各軸可驗證覆蓋（both ≥3 reads）</h2>
+<div class="brow"><span class="bl">HP 軸 (HP1-fam vs HP2-fam, tumor)</span><span class="bt"><span class="bf" style="width:54.2%;background:#4C9EE0">54.2%</span></span><span class="bv">16538 ·45.8%只單側HP測不了</span></div><div class="brow"><span class="bl">CARRIER 軸 (germline vs carrier, tumor) ★subclone</span><span class="bt"><span class="bf" style="width:79.5%;background:#5FB85F">79.5%</span></span><span class="bv">24235</span></div><div class="brow"><span class="bl">ALLELE 軸 (REF vs ALT)</span><span class="bt"><span class="bf" style="width:99.9%;background:#B05FA8">99.9%</span></span><span class="bv">30474</span></div><div class="brow"><span class="bl">HP-fine 全4組各≥3</span><span class="bt"><span class="bf" style="width:7.5%;background:#caa05a">7.5%</span></span><span class="bv">2281 ·子標籤稀疏</span></div>
+<table><tr><th>軸</th><th>可驗證</th><th>佔比</th><th>意義</th></tr>
+<tr><td>HP 軸 (tumor)</td><td>16538</td><td>54.2%</td><td>45.8% 只單側 HP(LOH/主導)→測不了</td></tr>
+<tr><td><b>CARRIER 軸 (tumor)★</b></td><td>24235</td><td><b>79.5%</b></td><td>subclone 前提(germline+carrier 都在)</td></tr>
+<tr><td>ALLELE 軸</td><td>30474</td><td>99.9%</td><td>somatic 位點幾乎都兩等位</td></tr>
+<tr><td>HP-fine 全4組</td><td>2281</td><td>7.5%</td><td>子標籤稀疏(≥3組僅 34.0%)</td></tr></table>
+
+<h2>🔴 ③ 重要釐清：tumor-only vs paired</h2>
+<div class="warn">C++ 的 <code>LabelHPPermanovaValid</code> = <b>96.6%</b>，但 tumor-only 算 HP 軸只 <b>54.2%</b>。差別在 <b>C++ PERMANOVA 是 paired(含 normal reads，normal 補滿 HP1/HP2)</b>。<br>
+→ <b>「85% PERMANOVA sig」的分母是 paired 全集；只看 tumor-only，HP 軸前提只 54.2%。</b> subclone(CARRIER 軸 tumor-only)前提 79.5%。</div>
+
+<h2>④ 整合觀察</h2>
+<div class="key">
+• 前提覆蓋**不是問題**：90.8% 有 ≥2 標籤、CARRIER(subclone)軸 79.5% tumor-only 可測。<br>
+• **HP 軸 tumor-only 只 54%**(45.8% LOH/單側)→ 報 HP-ASM 時分母要講清楚。<br>
+• **4 組 HP-fine 全有的只 7.5%**→ 多組細分受限子標籤稀疏(呼應前面 PERMANOVA 4 組瓶頸)。<br>
+• ALLELE 軸幾乎全覆蓋(99.9%)→ 等位軸前提最寬。</div>
+
+<div class="foot">build_commit 2d5692f · 數字注入自 precondition_coverage.json(§13-A) · tumor 標籤計數自 records_wg2.json·all.labels / allele valid 自 significance_csv(paired) · 單樣本 ⭐2</div>
+</div></body></html>
