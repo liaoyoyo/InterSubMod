@@ -12,11 +12,11 @@
 
 # 當前目標
 
-## 2026-06-18 — 📚 外部文獻驗證庫就緒（61 源親讀，稽核 CLEAN）⭐ 最新
+## 2026-06-19 — 📚 外部文獻驗證庫就緒（69 源親讀，稽核 CLEAN）⭐ 最新
 
-> **新 session / 論文撰寫先讀**：外部論文/程式碼實體驗證庫已建於 **repo 外** `/big7_disk/liaoyoyo2001/external_validation/`（**61 源** CONTEXT 卡 + 39 repo + 36 PDF；tier A×13·B×33·C×15；軸 10/12/11/14/8/6；59/61 親讀 + 2 cited_secondary〔mcf7/deamination〕）。**整體準確性對抗稽核（20 卡）= CLEAN**（0 MAJOR）；2026-06-15 5 cis-basis 卡親讀 PDF 升 fulltext_verified（並修出 Onuchic「NPD」捏造方法名 / Min heritability 二手數字 / Turcan citation 年份錯三處瑕疵）。repo 內橋接索引 = `InterSubMod/docs/method_comparison/20260613_external_validation_library_index_01.md`（含論文 Ch2 逐軸對應 + paper-critical 結論）；整體論文文獻地圖 = `external_validation/_landscape/08_paper_literature_map.md`。memory: `project_external_validation_library`。
+> **新 session / 論文撰寫先讀**：外部論文/程式碼實體驗證庫已建於 **repo 外** `/big7_disk/liaoyoyo2001/external_validation/`（**69 源** CONTEXT 卡 + 39 repo + 36 PDF；tier A×13·B×34·C×22；軸 18/12/11/14/8/6；61/69 親讀 + 8 cited_secondary〔mcf7/deamination + 6 why-hard L3-abstract〕；2026-06-19 +8 why-hard axis1 問題陳述卡=SNV-only/CNV 困難一手源，doc `docs/method_comparison/20260619_subclone_analysis_interpretation_full_framework_01.md`）。**整體準確性對抗稽核（20 卡）= CLEAN**（0 MAJOR）；2026-06-15 5 cis-basis 卡親讀 PDF 升 fulltext_verified（並修出 Onuchic「NPD」捏造方法名 / Min heritability 二手數字 / Turcan citation 年份錯三處瑕疵）。repo 內橋接索引 = `InterSubMod/docs/method_comparison/20260613_external_validation_library_index_01.md`（含論文 Ch2 逐軸對應 + paper-critical 結論）；整體論文文獻地圖 = `external_validation/_landscape/08_paper_literature_map.md`。memory: `project_external_validation_library`。
 >
-> **3 個投稿必守口徑**：① 與 61 源 **0 真 CONFLICT**（最尖對比物皆 regime 差，EVOFLUx 自承 subclone 罕見反佐證弱-subclone）；② **ISM 創新點口徑 = 無監督 read×read 距離矩陣結構 PERMANOVA + normal-baseline cis-test + somatic-subclone 目標**（🔴**禁**用「對手二代定序」或「對手缺顯著性檢定」當差異 — cvlr/ASMS/MethylBERT 都 ONT-capable 且都有 randomization 檢定，會被 reviewer 打臉）；③ cancer 甲基-phasing 白地 source+全文雙證，**LongHap 2026=germline-only 不威脅**（Fig3C 強不對稱甲基反佐證 R2）。
+> **3 個投稿必守口徑**：① 與 69 源 **0 真 CONFLICT**（最尖對比物皆 regime 差，EVOFLUx 自承 subclone 罕見反佐證弱-subclone）；② **ISM 創新點口徑 = 無監督 read×read 距離矩陣結構 PERMANOVA + normal-baseline cis-test + somatic-subclone 目標**（🔴**禁**用「對手二代定序」或「對手缺顯著性檢定」當差異 — cvlr/ASMS/MethylBERT 都 ONT-capable 且都有 randomization 檢定，會被 reviewer 打臉）；③ cancer 甲基-phasing 白地 source+全文雙證，**LongHap 2026=germline-only 不威脅**（Fig3C 強不對稱甲基反佐證 R2）。
 
 ---
 
