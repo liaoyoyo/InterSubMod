@@ -77,7 +77,7 @@
 
 ---
 
-## §3 Skills 分類索引（47 個 SKILL.md，Claude Code 特定 — 2026-06-05 +methods-example）
+## §3 Skills 分類索引（49 個 SKILL.md，Claude Code 特定 — 2026-06-19 +task-graph）
 
 > **drift 修正紀錄**：
 > - 2026-05-20：原寫 45 → 一度改 44（誤判 `grill-me/` 為 phantom +1）。
@@ -86,6 +86,7 @@
 > - 新增 12 個未分類 skills 進對應類別（2026-05-20）。
 > - **2026-05-31**：新增 `/harness-health`（元方法論 9→10）→ 45→**46**。磁碟現有 **2** 個 Dynamic Workflow（`cross_sample_benchmark.js` + 新增 `harness_audit_2026.js`；§8 未硬編碼計數，故無數字需改）。`harness_health.py` 燈 #1 持續監看此計數 drift。
 > - **2026-06-05**：新增 `/methods-example`（視覺化 3→4）→ 46→**47**。方法解釋圖 generate+verify 整體 skill（物件庫 primitive + 案例模板 case + data_ref 注入 renderer〔缺 verified 真值 refuse〕+ 圖例細節 verify loop）；C1 BRCA2 Δβ pilot 已驗證可跑。
+> - **2026-06-19**：新增 `/task-graph`（視覺化 5→6）→ 48→**49**（49 = 47 + verify-workstation〔2026-06-15〕+ task-graph）。研究任務有向圖層：`state/tasks/graph.json` 機械真值 → 自動產生 `TASKS.md`（留底）+ `tasks_board.html`（確認+顯示驗證主介面）。補 §盤點出的唯一大洞 D2（跨任務有向依賴）+ 程式流程圖（CWL-style 必需/可選 I/O）+ 主任務 `<details>` 階層；HTML 複用 `build_workstation.py`（§13-A 反捏造）、流程圖為純手刻 SVG 零依賴。`scripts/tasks/task_graph.py` = validate/check/ready/render/render-html。
 > **重複交叉位置**：`/feature-layered-observation`（P3 + 研究專用）/ `/multi-sample-consistency`（P4 + 研究專用）/ `/pre-decision-audit`（元方法論 + 三層樓 pre）/ `/run-evaluator`（P5 + 三層樓 post）— 在多分類列出表示同 skill 多角色。
 
 - **元方法論（10）**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor` `/pre-decision-audit` `/problem-framing-ideation` `/provenance-tier-audit` `/harness-health` ⭐ 新（2026-05-31；harness 自我稽核 8 燈儀表板，read-only `scripts/harness_health.py`；2026-06-03 +燈#7 memory-drift +燈#8 doc-path-currency）
@@ -93,7 +94,7 @@
 - **程式開發（4）**: `/cpp-change` `/methodology-audit` `/infra-ops` `/verification-loop`
 - **文件管理（5）**: `/doc-standards` `/data-audit` `/memory-consolidation` `/citation-verification` `/pipeline-manifest` ⭐ 新（reproducibility provenance DAG；與 data-audit 分工：data-audit 查組織、pipeline-manifest 查 script→figure 因果鏈）
 - **報告生成 retrospective（7）**: `/weekly-report` → `/pptx-build` / `/html-report-build` / `/results-report` / `/structured-tech-report` / `/report` / `/myPPT`
-- **視覺化（4）**: `/image-gen` `/image-vision-check` `/research-dashboard` `/methods-example` ⭐ 新（2026-06-05；方法解釋圖物件組合 generate+verify，data_ref 注入防捏造，圖例細節迭代）（html-preview 2026-05-30 移除，取代為 /html-report-build）
+- **視覺化（6）**: `/image-gen` `/image-vision-check` `/research-dashboard` `/methods-example` `/verify-workstation` `/task-graph` ⭐ 新（2026-06-19；研究任務有向圖層 — `state/tasks/graph.json` 機械真值 → 自動產生 TASKS.md 留底 + tasks_board.html 確認介面；主任務 `<details>` 階層 + 程式流程圖〔CWL-style 必需/可選 I/O，純手刻 SVG〕+ 完整依賴 DAG + 細節缺資訊清單；複用 build_workstation.py；driver `scripts/tasks/task_graph.py`；補盤點出的唯一大洞 D2 跨任務有向依賴；是人工分派地圖非自動執行器）（verify-workstation 2026-06-15；觀察驗證介面 — 一批結果生成互動逐項判讀工作站：人工判讀 localStorage + JSON/CSV 匯出 + 嵌觀察圖 + 修正過程紀錄 changelog + §13-A 注入/refuse-on-missing；通用 generator `tools/build_workstation.py`，worked 實例 chr2:18M〔inline SVG〕+ HCC1395 ASM〔30,350 位點外部 PNG，script 102〕）（methods-example 2026-06-05；html-preview 2026-05-30 移除→/html-report-build）
 - **研究專用（8）**: `/auc-confound-guard` `/feature-layered-observation` `/multi-sample-consistency` `/pivot-direction` `/inject-hypothesis` `/init-research` `/review-evidence` `/observation-analysis`
 - **資料分析 / 驗證（2）**: `/results-analysis` `/validation-protocol`
 - **假說驗證三層樓（pre → process → post）⭐ 2026-05-19**:

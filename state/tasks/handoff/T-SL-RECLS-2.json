@@ -1,0 +1,39 @@
+{
+  "task_id": "T-SL-RECLS-2",
+  "title": "Stage② within-HP 結構軸（pattern + level bimodality）",
+  "headline": "Stage② within-HP 結構軸（pattern + level bimodality）",
+  "status": "done",
+  "kind": "compute",
+  "owner": "claude",
+  "contract": {
+    "status": "DONE",
+    "key_metrics": {},
+    "anomalies": [],
+    "path_to_landed_doc": null
+  },
+  "inputs": [
+    {
+      "name": "within-HP pattern 距離 + mean-β",
+      "required": true,
+      "ref": null,
+      "ready": null
+    }
+  ],
+  "outputs": [
+    "within-HP reclassify (commit b6dde2b)",
+    "全基因組救回 4407/8180=53.9%/FP=0"
+  ],
+  "verify": null,
+  "links": {
+    "memory": [
+      "project_ism_verdict_false_negative_audit_2026_06_16"
+    ],
+    "branch": "feat/summary-nreadsvalid"
+  },
+  "branch": "feat/summary-nreadsvalid",
+  "worktree": null,
+  "next_unlocked": [],
+  "missing_info": [],
+  "generated_at": "2026-06-20T01:47:32",
+  "note": "AI handoff (CLAUDE.md §8 return-contract)；唯一真值在 graph，本檔為交接快照。"
+}

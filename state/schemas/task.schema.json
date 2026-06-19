@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intersubmod.local/schemas/task.schema.json",
+  "title": "Research Task DAG (v3: nested WBS tree + focus + CWL-style I/O)",
+  "description": "Directed task tree + dataflow layer. Lives at state/tasks/graph*.json. ONLY machine truth; TASKS*.md and *board*.html are auto-generated mirrors (never hand-edit). v3 additive over v2 (schema_version 2.0|3.0, new fields optional → v2 files stay valid). Owns: containment (parent), directed deps (depends_on), dispatch (owner), status, missing_info, grouping (component, optional), CWL-style I/O (optional). verdict/evidence/narrative stay in cycle/ledger/memory via links. Validated by scripts/tasks/task_graph.py (no external jsonschema dep).",
+  "type": "object",
+  "required": ["schema_version", "updated_at", "nodes"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "enum": ["2.0", "3.0"] },
+    "updated_at": { "type": "string", "format": "date" },
+    "note": { "type": "string" },
+    "focus": { "type": ["string", "null"], "description": "v3: id of the task currently being solved. UI auto-expands the path to it and collapses other branches." },
+    "components": {
+      "type": "array",
+      "description": "v2 main-task layer (optional in v3; v3 uses the parent tree instead).",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "owner"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "desc": { "type": "string" },
+          "owner": { "enum": ["claude", "user", "claude+user", null] },
+          "is_main": { "type": "boolean" }
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "kind", "status", "owner"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^T-[A-Z0-9-]+$" },
+          "title": { "type": "string" },
+          "parent": { "type": ["string", "null"], "description": "v3: containment parent (X is a subtask of parent). null/absent = root. Builds the WBS tree. Distinct from depends_on (sequence)." },
+          "component": { "type": "string", "description": "v2 grouping (optional in v3)." },
+          "kind": {
+            "enum": ["data", "compute", "analysis", "writing", "milestone"],
+            "description": "milestone = container/parent task (no I/O, excluded from program-flowchart). data/compute appear in the program-flowchart."
+          },
+          "status": { "enum": ["todo", "in_progress", "blocked", "done", "dropped"] },
+          "depends_on": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "REQUIRED predecessor task ids (sequence; drive ready/blocked). NOT containment. Optional task inputs go in io.inputs required:false and are NOT here."
+          },
+          "owner": { "enum": ["claude", "user", "claude+user", null] },
+          "io": {
+            "type": "object",
+            "description": "Optional CWL-style dataflow. Omit for milestone/container nodes.",
+            "required": ["inputs", "outputs"],
+            "additionalProperties": false,
+            "properties": {
+              "inputs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["name", "required"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": { "type": "string" },
+                    "required": { "type": "boolean" },
+                    "ref": { "type": ["string", "null"], "description": "Upstream task id producing this input, or null for external/raw data." }
+                  }
+                }
+              },
+              "outputs": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "links": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cycle_id": { "type": ["string", "null"] },
+              "ledger_entries": { "type": "array", "items": { "type": "string" } },
+              "memory": { "type": "array", "items": { "type": "string" } },
+              "reports": { "type": "array", "items": { "type": "string" } },
+              "worktree": { "type": ["string", "null"], "description": "v3.3 F1: which git worktree this task is worked in (path)." },
+              "branch": { "type": ["string", "null"], "description": "v3.3 F1: which git branch this task is worked in (isolation; reuses git_branch_commit_guard governance)." }
+            }
+          },
+          "missing_info": { "type": "array", "items": { "type": "string" } },
+          "observe": { "type": "array", "items": { "type": "string" }, "description": "v3.1: what to look at to observe/verify this task (figures / files / materials)." },
+          "headline": { "type": "string", "description": "v3.2 L0: one-line 重點結論 (always shown). Fallback = title." },
+          "summary": { "type": "string", "description": "v3.2 L1: 2-3 sentence 摘要 (always shown). Fallback = notes." },
+          "problem": {
+            "type": ["object", "null"],
+            "description": "v3.1: if this task hit a problem. LINK to existing machinery — do not reinvent. ref = path to a postmortem / NEGATIVE ledger entry.",
+            "additionalProperties": false,
+            "properties": {
+              "summary": { "type": "string" },
+              "cause": { "type": "string" },
+              "options": { "type": "array", "items": { "type": "string" } },
+              "ref": { "type": ["string", "null"], "description": "InterSubMod/-prefixed postmortem path or ledger entry id" },
+              "fix_child": { "type": ["string", "null"], "description": "id of the child task created to fix it" },
+              "reopen_threshold": { "type": ["string", "null"], "description": "v3.3 F5: condition under which this can be retried (aligns feedback_productive_failure_reopen_threshold)." }
+            }
+          },
+          "verify": {
+            "type": ["object", "null"],
+            "description": "v3.1/3.3: how this task's output is verified + the recorded result. LINK to run-evaluator / cycle eval — do not reinvent the verification algorithm.",
+            "additionalProperties": false,
+            "properties": {
+              "how": { "type": "string" },
+              "ref": { "type": ["string", "null"], "description": "cycle eval path / run-evaluator artifact / skill name" },
+              "result": { "enum": ["pass", "fail", "pending", null], "description": "v3.3 F4: recorded outcome (set by verify-result helper)." },
+              "evidence": { "type": ["string", "null"], "description": "v3.3 F4: path to evaluation.json / report supporting the result." },
+              "verified_at": { "type": ["string", "null"], "description": "v3.3 F4: when result was recorded." }
+            }
+          },
+          "on_fail": { "type": ["string", "null"], "description": "v3.1: verification-failure feedback (usually: add a child fix task + link a postmortem)." },
+          "handoff": {
+            "type": ["object", "null"],
+            "description": "v3.3 F2: AI handoff package (CLAUDE.md §8 return-contract). Lets another AI confirm & continue.",
+            "additionalProperties": false,
+            "properties": {
+              "status": { "enum": ["DONE", "DONE_WITH_CONCERNS", "NEEDS_CONTEXT", "BLOCKED", null] },
+              "key_metrics": { "type": ["object", "string", "null"] },
+              "anomalies": { "type": "array", "items": { "type": "string" } },
+              "path_to_landed_doc": { "type": ["string", "null"] }
+            }
+          },
+          "verdict_ref": { "type": ["string", "null"] },
+          "added_at": { "type": "string", "format": "date" },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}
