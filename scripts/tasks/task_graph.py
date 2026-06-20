@@ -626,6 +626,9 @@ def detail_panel_html(nid, data, by, kids):
     P.append(f'<div class="tg-l0">▍{html.escape(headline)}</div>')
     if summary and summary != headline:
         P.append(f'<div class="tg-l1">{html.escape(summary)}</div>')
+    goal = n.get("goal")
+    goal_v = html.escape(goal) if goal else '<span style="color:#64748b">（待確認填入）</span>'
+    P.append(f'<div class="kv"><span class="k">🎯 目標/完成判準</span><span class="v">{goal_v}</span></div>')
     # core visual: neighborhood (always)
     P.append('<div class="tg-h">聚焦流程（輸入 → 任務 → 後續）</div>' + neighborhood_html(nid, data, by, kids))
     # key facts (always = 重點)

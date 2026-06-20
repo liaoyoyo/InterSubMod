@@ -87,6 +87,7 @@
           "observe": { "type": "array", "items": { "type": "string" }, "description": "v3.1: what to look at to observe/verify this task (figures / files / materials)." },
           "headline": { "type": "string", "description": "v3.2 L0: one-line 重點結論 (always shown). Fallback = title." },
           "summary": { "type": "string", "description": "v3.2 L1: 2-3 sentence 摘要 (always shown). Fallback = notes." },
+          "goal": { "type": "string", "description": "v3.4: 目標/完成判準 (done-criteria) — 做完長什麼樣、怎判定 (6 維確認用)." },
           "problem": {
             "type": ["object", "null"],
             "description": "v3.1: if this task hit a problem. LINK to existing machinery — do not reinvent. ref = path to a postmortem / NEGATIVE ledger entry.",

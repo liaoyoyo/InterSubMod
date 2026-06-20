@@ -17,6 +17,24 @@ ismn = {n["id"]: n for n in ism["nodes"]}
 TODAY = "2026-06-20"
 nodes = []
 
+# confirmed goals (chat confirmation batch 1: T-ISM / T-SL — user 視為確認)
+ismn["T-ISM"]["goal"] = "結構×標籤驗證(T-SL)落地 + a-priori 分類可信 + V-2 系統掃描定 R5 → ISM 方法可寫進 ch3 且結果經得起 reviewer"
+ismn["T-SL"]["goal"] = "PERMANOVA/ARI/reclassify(已done) + within-HP 選k去循環(C1) + HP-fine組合(C3) + tumor-only重跑(RO) + Stage③(S3) 做完 → 結構↔標籤關聯有 FDR 校準的可信判定；allele≫HP 用 cis-control 分清 cis-ASM vs subclone"
+# batch-2 confirmed goals (T-SL 直接子)
+ismn["T-SL-PERM"]["goal"] = "（已達）顯著判定不過嚴/鬆，valid 92.9%/Noise 1.5%，dispersion 混淆排除"
+ismn["T-SL-ARI"]["goal"] = "（已達）ARI 讓「幾何群是否對齊標籤」可見（median HP0.145/allele0.005）"
+ismn["T-SL-RECLS"]["goal"] = "（已達）Noise/Weak→valid 救回 53.9%，orig Strong 降級 FP=0"
+ismn["T-SL-C1"]["goal"] = "enable_bootstrap=true + consensus 重抽只留穩定群，去 raw silhouette 過切循環"
+ismn["T-SL-C3"]["goal"] = "C3 C++ emit「組合對齊測試欄 + 一群含多標籤 flag」"
+ismn["T-SL-RO"]["goal"] = "tumor-only 獨立重跑 + 兩層事實表（只記「tumor顯著/normal不顯著」不判別）"
+ismn["T-SL-S3"]["goal"] = "coverage-peak CN 自估 + SEQC2 只驗證後觀察不當輸入"
+ismn["T-CSC"]["goal"] = "ISM 完成後把分類結果判讀到 clone/subclone 層（a-priori 條件軸 + 6 樣本外部真值對照）"
+# batch-3 confirmed goals (T-S 系列, v2-sourced)
+v2n["T-S1"]["goal"] = "a-priori 4-pop 分類定案(ADOPT_WITH_CORRECTIONS)；甲基用於 A 刻畫(B排序illustrative/C drop)；somatic 歸屬待 G-B；within_clean≠subclone(Jaccard 0.123)"
+v2n["T-S5"]["goal"] = "收斂 Path B model-based；確認≥2群須對齊 a-priori 軸(CramérV≥0.7+Fisher)非循環；無監督抽象幾群無乾淨解"
+v2n["T-S6"]["goal"] = "（已達）對齊=paired 非 tumor-only 完整盤點，verify 53/53"
+v2n["T-S2"]["goal"] = "（結案/勿再開）tumor-only 非監督=double-dip NEGATIVE"
+
 
 def reparent(nid, parent):
     n = dict(v2n[nid]); n.pop("component", None); n["parent"] = parent; return n
@@ -28,10 +46,11 @@ def C(cid, title, headline, owner="claude", status="in_progress"):  # container 
 
 
 def N(nid, title, parent, kind, status, owner="claude", depends_on=None, headline=None,
-      io=None, links=None, missing=None, notes=None, verify=None):
+      io=None, links=None, missing=None, notes=None, verify=None, goal=None):
     n = {"id": nid, "title": title, "parent": parent, "kind": kind, "status": status,
          "depends_on": depends_on or [], "owner": owner, "added_at": TODAY}
     if headline: n["headline"] = headline
+    if goal: n["goal"] = goal
     if io: n["io"] = io
     if links: n["links"] = links
     if missing: n["missing_info"] = missing
@@ -133,6 +152,65 @@ nodes.append(N("T-W-TABS", "Table1-3（樣本統計/工具對照/NEGATIVE 摘要
 # 整合篇章 + 共識底座 (from v2 W3/W4)
 w3 = reparent("T-W3", "T-WRITE"); nodes.append(w3)
 w4 = reparent("T-W4", "T-WRITE"); nodes.append(w4)
+
+# ---- v6.1 audit gaps (workflow wabzbk7hf；8 驗證過缺漏) ----
+nodes.append(N("T-A4", "驗證 6 樣本 DeepVariant/DeepSomatic 可用性（兩-caller 前置）+ 修 landscape05 CASTLE-COLO829 過度宣稱", "T-ASSET", "data", "todo", "claude+user",
+               depends_on=["T-A1"], headline="6/6 canonical 皆無 DeepVariant/DeepSomatic VCF（只 ClairS）→ 兩-caller 判準/Fig2 阻塞",
+               goal="確認/補齊第二 caller（ClairS∩DeepVariant）或明標範圍 + 修 landscape05 provenance（COLO829 只在 HCC1395 repo）",
+               missing=["6/6 無 DeepVariant；landscape05 CASTLE-COLO829 provenance 錯"], links={"memory": ["project_external_validation_library"]}))
+nodes.append(N("T-C-CISEXP", "V-1 乾淨 somatic-cis 真稀有性擴測（normal-anchored × 全合格位點 × 6 樣本）", "T-ASM", "compute", "todo", "claude",
+               headline="cis-test 擴到 TAG-C 12,868 + TAG-E 28,254 ×6 樣本算真分母 → 定『稀有』是生物現象 vs under-test artifact",
+               goal="全合格位點 normal-anchored cis-test 完成、得真分母、定 headline 措辭 + de-confound R3 + chr17 例外意義",
+               missing=["catalog 全位點從未全 cis-tested（稽核校正#2）"], links={"memory": ["project_paper_claim_audit_consensus_base_2026_06_12"]}))
+nodes.append(N("T-C7", "V-4 BRCA2 exemplar copy-partition 重驗（illustrative vs partial-cis 口徑）", "T-ASM", "analysis", "todo", "claude",
+               depends_on=["T-C1"], headline="BRCA2 疑 copy-confounded(d_within −0.023≪d_copy −0.11) → 37_copy_partition 定有無乾淨 somatic-cis",
+               goal="copy-partition null 跑完、裁決 BRCA2 是 illustrative(標caveat,cis錨改chr17) 或部分乾淨 cis；決 copy caveat 能否解除",
+               links={"memory": ["project_zar1l_brca2_asm_verification"]}))
+nodes.append(N("T-ISM-V2-RECON", "V-2 重建支持位點 pre-reg 判準 + 全基因組×6 掃描 + 頻率/位點 catalog", "T-ISM", "compute", "todo", "claude",
+               depends_on=["T-A4"], headline="把 reconstruction 從個案(chr2)升 systematic：pre-reg 判準→genome×6 掃描→位點+頻率+每點假想樹/ARI",
+               goal="pre-register『重建支持位點』判準(≥N somatic 兩-caller + 甲基↔突變 ARI 一致 + LOH 脈絡)→全掃→catalog；定 R5 EXEMPLAR climax",
+               missing=["依賴 T-A4 第二 caller"], links={"memory": ["project_chr2_18m_subclone_locus_verification"]}))
+nodes.append(N("T-METHOD-FDR", "V-7 FDR / 多重檢定校準：跨位點 null + BH-FDR + n_reads 校正", "T-METHOD", "compute", "todo", "claude",
+               headline="跨位點 label-shuffle null + BH-FDR + chr17 Bonferroni(×816)/genome-perm + n_reads 回歸校正（投稿前必補）",
+               goal="FDR/BH/Bonferroni across loci 算完 + n_reads 校正 epipolymorphism(O11 0.845→0.530)；ch3_methods 補上",
+               missing=["投稿前必補 🔴"], links={"memory": ["project_code_methodology_audit_2026_06_10"]}))
+nodes.append(N("T-GATE-GC", "G-C：cis vs 突變足跡 ±1-2kb 空間分離（normal-anchored 寬空間控制）", "T-GATE", "analysis", "todo", "claude",
+               headline="±1-2kb 系統空間尺度控制 → 決個案能否寫『重建』而非單純 cis（R5 精確度）",
+               goal="±1-2kb 空間分離方法跑完，定 chr2/chr17 個案的 cis vs footprint 區辨",
+               links={"memory": ["project_apriori_subclone_classification_model"]}))
+nodes.append(N("T-GATE-REDLINE", "誠實護欄紅線注入 writing 節點 verify gate + 成稿前跨章節術語掃描", "T-GATE", "writing", "todo", "claude+user",
+               headline="6 護欄(含4校正)落地：每 T-W-* 加 verify 引用此 gate + on_fail=拒收/{{待填}}；成稿前禁語掃描",
+               goal="14 writing 節點都有 verify gate + 成稿前跑完跨章節禁語掃描（甲基非判別/非重建驅動/守線①-④）",
+               missing=["紅線目前只在 memory"], links={"memory": ["project_thesis_writing_architecture"]}))
+nodes.append(N("T-W-ISMDEDUP", "去重 graph_ism.json 子樹 + 標 deprecated（唯一真值=graph.json）", "T-WRITE", "analysis", "todo", "claude",
+               headline="graph_ism 26 節點全在 graph.json；雙 SoT 矛盾 → 標 deprecated 指回主 graph 或刪",
+               goal="graph_ism/TASKS_ism/board_ism 標 deprecated 或刪，消除雙 SoT 矛盾"))
+
+# ---- v6.2 audit-resume gaps (workflow wtb1nzrfa；grep-自驗 9 真新缺漏) ----
+nodes.append(N("T-L3", "chr8 全-LOH 第二 exemplar locus 驗證", "T-LOCUS", "analysis", "todo", "claude",
+               depends_on=["T-A1"], headline="除 chr2:18M 外的第二旗艦位點（chr8 全-LOH 熱點）→ 加厚 R5 EXEMPLAR",
+               goal="chr8 熱點完成 sSNV+甲基分群實測，成為 chr2:18M 之外第二個可寫的 exemplar", links={"memory": ["project_hcc1395_chr8_hotspot"]}))
+nodes.append(N("T-C-UNMASK", "LOH-unmask ASM confound（Martin-Trujillo）寫入限制", "T-ASM", "analysis", "todo", "claude",
+               headline="LOH 揭露原本沉默的 ASM = 強 confound（Martin-Trujillo）→ 須在限制段明確處理",
+               goal="LOH-unmask confound 在 Ch5 限制段明確敘述 + 對 cis 主張的影響界定", links={"memory": ["project_O12_loh_methylation_scenarios"]}))
+nodes.append(N("T-METHOD-PSLIMIT", "phase-set 跨 block 無 read/cell 連結（限制）", "T-METHOD", "analysis", "todo", "claude",
+               headline="phase-set 跨 block 無 read/cell 連結 → 重建解析度上限的方法限制",
+               goal="phase-set 跨 block 限制寫進方法/討論，界定重建解析度天花板", links={"memory": ["project_O12_loh_methylation_scenarios"]}))
+nodes.append(N("T-METHOD-TESTS", "Methylation MM/ML parsing 單元測試（零測試補）", "T-METHOD", "compute", "todo", "claude",
+               headline="MM/ML 甲基解析目前零單元測試（全碼稽核 3 必修之一）→ 補測試",
+               goal="MM/ML parsing 加單元測試覆蓋（含 edge case），ctest 綠", links={"memory": ["project_code_methodology_audit_2026_06_10"]}))
+nodes.append(N("T-METHOD-BINVER", "binary_version 一致性檢核", "T-METHOD", "compute", "todo", "claude",
+               headline="跨 worktree/結果的 binary 版本一致性（避免混不同 build 口徑）",
+               goal="binary_versions 紀錄齊 + 結果標 build SHA，無 merge-blind 漂移", links={"memory": ["project_new_data_integrity_audit_2026_06_17"]}))
+nodes.append(N("T-W-DATACODE", "Data & Code availability 聲明", "T-WRITE", "writing", "todo", "claude+user",
+               headline="投稿/繳交必備：資料與程式碼可得性聲明", goal="Data & Code availability 段寫完（含 repo/資料存取說明）"))
+nodes.append(N("T-W-FRONT", "論文前件 / 系所模板合規（封面/致謝/格式）", "T-WRITE", "writing", "todo", "claude+user",
+               headline="碩論前件：封面/書名頁/致謝/目錄/系所格式合規", goal="前件齊全 + 系所模板格式檢查通過"))
+nodes.append(N("T-W-SUPP", "Supplementary 材料封裝", "T-WRITE", "writing", "todo", "claude+user",
+               headline="補充材料（額外圖表/方法細節/資料表）封裝", goal="Supplementary 封裝完成、正文引用對應"))
+nodes.append(N("T-RETIRE", "退役/封存 active.json g1/g6 stale cycle（harness hygiene）", "T-GATE", "analysis", "todo", "claude+user",
+               headline="g1/g6 在 active.json stale 18 天（T-C1 DRIFT）→ 走 /conclude-research 正規退役",
+               goal="g1/g6 cycle 經 /conclude-research 退役/封存，active.json 無 stale、T-C1 DRIFT 消除", links={"memory": ["project_loop_engineering_harness_review"]}))
 
 # dependency edges: gates / writing flow
 for n in nodes:
