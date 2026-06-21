@@ -24,8 +24,8 @@ ismn["T-SL"]["goal"] = "PERMANOVA/ARI/reclassify(已done) + within-HP 選k去循
 ismn["T-SL-PERM"]["goal"] = "（已達）顯著判定不過嚴/鬆，valid 92.9%/Noise 1.5%，dispersion 混淆排除"
 ismn["T-SL-ARI"]["goal"] = "（已達）ARI 讓「幾何群是否對齊標籤」可見（median HP0.145/allele0.005）"
 ismn["T-SL-RECLS"]["goal"] = "（已達）Noise/Weak→valid 救回 53.9%，orig Strong 降級 FP=0"
-ismn["T-SL-C1"]["goal"] = "enable_bootstrap=true + consensus 重抽只留穩定群，去 raw silhouette 過切循環"
-ismn["T-SL-C3"]["goal"] = "C3 C++ emit「組合對齊測試欄 + 一群含多標籤 flag」"
+ismn["T-SL-C1"]["goal"] = "（決策3 reframe）不追無監督群數：silhouette 一定會切、不可當群數真值 → 改以「切法對齊獨立 a-priori 軸(CramérV≥0.7+Fisher)」確認 ≥2 群；bootstrap 降 optional"
+ismn["T-SL-C3"]["goal"] = "C3 C++ emit 分類註解欄：對齊哪軸 / 在哪 HP 組合區域 / 是否在 LOH / 在 CNV 範圍 / 一標籤多群(哪幾標籤) / 一群多標籤(哪幾標籤)"
 ismn["T-SL-RO"]["goal"] = "tumor-only 獨立重跑 + 兩層事實表（只記「tumor顯著/normal不顯著」不判別）"
 ismn["T-SL-S3"]["goal"] = "coverage-peak CN 自估 + SEQC2 只驗證後觀察不當輸入"
 ismn["T-CSC"]["goal"] = "ISM 完成後把分類結果判讀到 clone/subclone 層（a-priori 條件軸 + 6 樣本外部真值對照）"
@@ -48,6 +48,15 @@ if "project_allsample_subcluster_split_accounting" not in _ro["links"]["memory"]
 _ro["links"].setdefault("reports", [])
 _ro["links"]["reports"].append("InterSubMod/docs/experiments/in_progress/2026/06/20260620_allsample_subcluster_split/README.md")
 _ro["goal"] = "tumor-only 獨立重跑 + 兩層事實表（全7樣本切割總帳已完成，Jaccard 0.091-0.161；只記「tumor顯著/normal不顯著」不判別）；殘留 RO-1/RO-2"
+
+
+# ---- 06-22 認知校正 reconcile（WS-0；連 docs/methodology/20260622_ism_method_cognition_and_open_questions_01.md）----
+_COG = "InterSubMod/docs/methodology/20260622_ism_method_cognition_and_open_questions_01.md"
+v2n["T-V3"]["headline"] = "per-CpG 甲基層 Fisher over-dispersion → beta-binomial（非 cluster×標籤 Fisher，兩層勿混）"
+v2n["T-V3"]["goal"] = "per-CpG 甲基 Fisher 換 beta-binomial、過離散校正；投稿前必補（走 /cpp-change）"
+v2n["T-V1"].setdefault("observe", []).append("大-N 過敏 caveat：主 verdict 用 Fisher+label-PERMANOVA；cluster-PERMANOVA valid 率偏高 → 見 T-METHOD-EFFECTSIZE")
+v2n["T-V1"].setdefault("links", {}).setdefault("reports", []).append(_COG)
+ismn["T-SL"].setdefault("links", {}).setdefault("reports", []).append(_COG)
 
 
 def reparent(nid, parent):
@@ -278,6 +287,17 @@ nodes.append(N("T-SIT-VER", "subclone 狀況推論整理 + 驗證設計（pre-ve
                goal="各狀況逐一驗證設計實施完（chr2:18M + chr8 全LOH 子窗 + BRCA2 pilot）",
                links={"memory": ["project_subclone_situation_verification_methods"],
                       "reports": ["InterSubMod/docs/plans/20260620_subclone_situation_verification_reasoning_01.md"]}))
+
+# ---- 06-22 認知校正：新節點（WS-A3 + WS-B1）----
+nodes.append(N("T-Q1-COVERAGE", "Q1 sSNV 間距 × ONT 讀長覆蓋計算（論文 motivation 基石）", "T-METHOD", "compute", "todo", "claude",
+               headline="HCC1395 ~30,490 sSNV 全基因組兩兩間距 + ONT 讀長分佈 + 單讀跨 ≥2 sSNV 比例 + ±5000 window 覆蓋率",
+               goal="算出 sSNV 間距/讀長/跨 ≥2 sSNV 覆蓋真值 → 量化證『為何只用 sSNV 建 subclone 難』+ 正當化甲基補位",
+               missing=["全新計算，無現成產物；待寫 scripts/analysis/ssnv_spacing_coverage.py"],
+               links={"reports": [_COG], "memory": ["project_subclone_snv_difficulty_methylation_framework"]}))
+nodes.append(N("T-METHOD-EFFECTSIZE", "PERMANOVA 大-N 過敏 guard（effect-size / TP-vs-FP 門檻）", "T-METHOD", "compute", "todo", "claude",
+               headline="主 verdict 的 PERMANOVA valid 率偏高（大-N liberal）→ 加 effect-size(R²/F) 門檻或 TP-vs-FP 對照",
+               goal="PERMANOVA 加 effect-size 門檻或 TP-vs-FP 校準，使顯著=有意義非僅 N 大",
+               links={"reports": [_COG], "memory": ["project_ism_method_soundness_validation"]}))
 
 # 補齊新任務缺的 goal（提議；待使用者較驗）
 GOALS = {

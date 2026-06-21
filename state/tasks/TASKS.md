@@ -1,12 +1,12 @@
 # 研究任務樹（WBS） — TASKS.md
 
 > **自動產生，請勿手改。** 唯一真值 = `state/tasks/graph.json`；改後重跑 `python3 scripts/tasks/task_graph.py --graph state/tasks/graph.json render`。
-> 生成 2026-06-21 · build `3912250` @ `research/subclonal-reconstruction-202606` · 節點 108（✅39 ◐25 ⛔1 ☐42 ✗1） · focus = `T-SL`
+> 生成 2026-06-22 · build `e8e3f43` @ `research/subclonal-reconstruction-202606` · 節點 110（✅39 ◐25 ⛔1 ☐44 ✗1） · focus = `T-SL`
 
 ## ⓪ 驗證（validate + check）
 - validate: ✅ PASS
-- check: 9 findings
-  - DRIFT `T-C1`: 指向的 cycle 20260602-1521-g1-zar1l-brca2-asm-survey 在 active.json 已 stale 19 天
+- check: 11 findings
+  - DRIFT `T-C1`: 指向的 cycle 20260602-1521-g1-zar1l-brca2-asm-survey 在 active.json 已 stale 20 天
   - DETAIL `T-GATE-GD`: compute 任務缺 I/O 規格
   - DETAIL `T-GATE-GE`: compute 任務缺 I/O 規格
   - DETAIL `T-C-CISEXP`: compute 任務缺 I/O 規格
@@ -15,6 +15,8 @@
   - DETAIL `T-METHOD-TESTS`: compute 任務缺 I/O 規格
   - DETAIL `T-METHOD-BINVER`: compute 任務缺 I/O 規格
   - DETAIL `T-ONT-CNV`: compute 任務缺 I/O 規格
+  - DETAIL `T-Q1-COVERAGE`: compute 任務缺 I/O 規格
+  - DETAIL `T-METHOD-EFFECTSIZE`: compute 任務缺 I/O 規格
 
 ## 聚焦路徑　論文（碩論：Subclonal reconstruction） ＞ 完成 ISM 程式 ＞ 修正「結構驅動切區塊 × 標籤驗證」
 
@@ -87,11 +89,13 @@
   - ◐ `T-METHOD` 方法健全性 [里程碑/進行中]
     - ☐ `T-GATE-GE` G-E：正交第二定相 pipeline（破 single-pipeline 自我參照） [程式/待辦]　缺:長期 roadmap；與 HD-1 相關　↳project_subclonal_reconstruction_paper_focus
     - ☐ `T-METHOD-BINVER` binary_version 一致性檢核 [程式/待辦]　↳project_new_data_integrity_audit_2026_06_17
+    - ☐ `T-METHOD-EFFECTSIZE` PERMANOVA 大-N 過敏 guard（effect-size / TP-vs-FP 門檻） [程式/待辦]　↳project_ism_method_soundness_validation
     - ☐ `T-METHOD-FDR` V-7 FDR / 多重檢定校準：跨位點 null + BH-FDR + n_reads 校正 [程式/待辦]　缺:投稿前必補 🔴　↳project_code_methodology_audit_2026_06_10
     - ✅ `T-METHOD-LANDSCAPE` clone/subclone 重建全景（6 學派）+ ISM 可行性裁決 + 競品白地 [分析/已完成]　↳project_clone_subclone_landscape_and_ism_feasibility
     - ☐ `T-METHOD-PSLIMIT` phase-set 跨 block 無 read/cell 連結（限制） [分析/待辦]　↳project_O12_loh_methylation_scenarios
     - ☐ `T-METHOD-TESTS` Methylation MM/ML parsing 單元測試（零測試補） [程式/待辦]　↳project_code_methodology_audit_2026_06_10
     - ✅ `T-METHOD-VERIFY` subclone 確認黃金標準 + 建構 5 家族 + single-cell→ONT 移植裁決 + Tarabichi LEARN [分析/已完成]　↳project_subclone_confirmation_construction_ont_transferability
+    - ☐ `T-Q1-COVERAGE` Q1 sSNV 間距 × ONT 讀長覆蓋計算（論文 motivation 基石） [程式/待辦]　缺:全新計算，無現成產物；待寫 scripts/analysis/ssnv_spacing_coverage.py　↳project_subclone_snv_difficulty_methylation_framework
     - ◐ `T-SIT-VER` subclone 狀況推論整理 + 驗證設計（pre-verification SoT） [分析/進行中]　↳project_subclone_situation_verification_methods
     - ✅ `T-SUP-CLUST` clusterability vs coverage/CN（支撐 ⭐3） [分析/已完成]　↳project_subclonal_reconstruction_paper_focus
     - ✅ `T-SUP-COPY` 甲基×copy confound（SEQC2，支撐 ⭐3） [分析/已完成]　↳project_asm_cn_confound_pilot
@@ -128,7 +132,7 @@
     - ☐ `T-W3` 整合篇章（ASM-char + 4 道 NEGATIVE + LOH 脊柱） [撰寫/待辦]　in:●COLO829 pair…,●Stage③ 結果　缺:待上游 COLO829 / Stage③ / 外部真值補齊　↳project_subclonal_reconstruction_paper_focus
     - ✅ `T-W4` 論文敘述對抗稽核共識底座（51 agents / 606 claim / F=0） [撰寫/已完成]　in:●論文 spec,●606 claim 集　缺:Hard-Gate 待修正 ledger:95 / CURRENT_FOCUS:137　↳project_paper_claim_audit_consensus_base_2026_06_12
 
-## Ready — 可立即開跑（33）
+## Ready — 可立即開跑（35）
 - `T-A3` 6 normal 甲基帳號 SPOF 備份　owner: user
 - `T-A4` 驗證 6 樣本 DeepVariant/DeepSomatic 可用性（兩-caller 前置）+ 修 landscape05 CASTLE-COLO829 過度宣稱　owner: claude+user
 - `T-C-CISEXP` V-1 乾淨 somatic-cis 真稀有性擴測（normal-anchored × 全合格位點 × 6 樣本）　owner: claude
@@ -143,10 +147,12 @@
 - `T-GATE-REDLINE` 誠實護欄紅線注入 writing 節點 verify gate + 成稿前跨章節術語掃描　owner: claude+user
 - `T-L3` chr8 全-LOH 第二 exemplar locus 驗證　owner: claude
 - `T-METHOD-BINVER` binary_version 一致性檢核　owner: claude
+- `T-METHOD-EFFECTSIZE` PERMANOVA 大-N 過敏 guard（effect-size / TP-vs-FP 門檻）　owner: claude
 - `T-METHOD-FDR` V-7 FDR / 多重檢定校準：跨位點 null + BH-FDR + n_reads 校正　owner: claude
 - `T-METHOD-PSLIMIT` phase-set 跨 block 無 read/cell 連結（限制）　owner: claude
 - `T-METHOD-TESTS` Methylation MM/ML parsing 單元測試（零測試補）　owner: claude
 - `T-P2` 修正 T2 OVERSTATED 口徑（1-1/2-1 可分歸 H3 未證）　owner: claude
+- `T-Q1-COVERAGE` Q1 sSNV 間距 × ONT 讀長覆蓋計算（論文 motivation 基石）　owner: claude
 - `T-RETIRE` 退役/封存 active.json g1/g6 stale cycle（harness hygiene）　owner: claude+user
 - `T-SL-C1-F` 修：enable_bootstrap=true + within-HP 用 bootstrap　owner: claude
 - `T-SL-C3` ④ C3 HP-fine 組合對齊測試 emit　owner: claude
@@ -172,6 +178,8 @@
 - `T-METHOD-TESTS`: compute 任務缺 I/O 規格
 - `T-METHOD-BINVER`: compute 任務缺 I/O 規格
 - `T-ONT-CNV`: compute 任務缺 I/O 規格
+- `T-Q1-COVERAGE`: compute 任務缺 I/O 規格
+- `T-METHOD-EFFECTSIZE`: compute 任務缺 I/O 規格
 **各任務 missing_info：**
 - `T-SL`: 救回主軸 allele≫HP 需 cis-control 分 cis-ASM vs subclone
 - `T-SL-C1-F`: C1 spec 20260618_within_hp_bootstrap_and_cluster_label_ari_cpp_change_spec_01.md pending_approval
@@ -208,6 +216,7 @@
 - `T-METHOD-FDR`: 投稿前必補 🔴
 - `T-GATE-REDLINE`: 紅線目前只在 memory
 - `T-ONT-CNV`: 全基因組 job 有 normal-het 汙染，待修正版
+- `T-Q1-COVERAGE`: 全新計算，無現成產物；待寫 scripts/analysis/ssnv_spacing_coverage.py
 
 ---
 單一所有權：本層只擁含括/依賴/分派/狀態/缺漏/io；verdict・證據・敘述歸 cycle/ledger/memory。
