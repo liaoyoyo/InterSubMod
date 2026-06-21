@@ -1,0 +1,125 @@
+% ============================================================================
+% 20260622_thesis_references_skeleton.bib
+% T-E3 scaffold — 投稿前 citation-verification 用骨架（非完整 bib）
+%
+% ⚠ 本檔由「無 web 工具」的文件軌 session 建立 → 不驗證任何 citation。
+%    識別碼來源：knowledge/11_external_literature/09_references_and_provenance.md
+%    （該檔 ~38 篇曾經 WebFetch；本檔只是接續，未重驗）。
+%
+% STATUS 欄定義：
+%   VERIFIED_PROVENANCE_SOT = 識別碼來自檔 09（已 WebFetch），投稿前仍須 web 複核一次。
+%   NEEDS_WEB_VERIFY        = L3 二手錨 / UNVERIFIED-PMID / §B 衝突 → web-enabled session 必核。
+% 缺值一律寫 {NEEDS_WEB_VERIFY} 佔位，不編造數字（§13 反捏造）。
+%
+% 範圍：只含本批草稿（T-C-UNMASK / T-METHOD-PSLIMIT / T-P2）直接用到的條目
+%       + 檔 09 §B 三個識別碼衝突項。全論文 bib 須投稿前一次性生成。
+% ============================================================================
+
+% ---------- T-C-UNMASK：LOH-unmask ASM confound ----------
+
+% STATUS=VERIFIED_PROVENANCE_SOT（檔 09 #34；⚠ scope=imprinted DMR，泛化須標）
+@article{martintrujillo2017,
+  author  = {Martin-Trujillo, Alex and Vidal, Enrique and Monteagudo-S{\'a}nchez, Ana and Sanchez-Delgado, Marta and Moran, Sebastian and Hernandez Mora, Jose Ramon and Heyn, Holger and Guitart, Miriam and Esteller, Manel and Monk, David},
+  title   = {Copy number rather than epigenetic alterations are the major dictator of imprinted methylation in tumors},
+  journal = {Nature Communications},
+  year    = {2017}, volume = {8}, pages = {467},
+  doi     = {10.1038/s41467-017-00639-9}, pmid = {28883545},
+  note    = {STATUS=VERIFIED_PROVENANCE_SOT; SCOPE=imprinted DMR; CN-dependent 82-91%, CN-independent 8.1-17.6%; 投稿前 web 複核}
+}
+
+% STATUS=NEEDS_WEB_VERIFY（L3 二手錨；不在檔 09 清單）
+@article{chase2015,
+  author  = {Chase, NEEDS_WEB_VERIFY},
+  title   = {NEEDS_WEB_VERIFY — methylation co-varies with acquired UPD scale (r approx 0.76)},
+  journal = {NEEDS_WEB_VERIFY},
+  year    = {2015},
+  pmid    = {26114957}, doi = {NEEDS_WEB_VERIFY},
+  note    = {STATUS=NEEDS_WEB_VERIFY; L3 anchor from memory project_somatic_locus_methylation_combination_interpretation; 全 4 欄須 web 核}
+}
+
+% STATUS=NEEDS_WEB_VERIFY（L3 二手錨；不在檔 09 清單；blocklist 工具）
+@article{rosenski2025,
+  author  = {Rosenski, NEEDS_WEB_VERIFY},
+  title   = {NEEDS_WEB_VERIFY — parental-ASM + segmental-duplication-ASM coordinates (blocklist)},
+  journal = {NEEDS_WEB_VERIFY},
+  year    = {2025},
+  pmid    = {40069157}, doi = {NEEDS_WEB_VERIFY},
+  note    = {STATUS=NEEDS_WEB_VERIFY; 460 parental-ASM + 34426 SD-ASM coords; 全 4 欄須 web 核}
+}
+
+% STATUS=VERIFIED_PROVENANCE_SOT（檔 09 #33；cis 口徑差非矛盾）
+@article{do2020asm,
+  author  = {Do, Catherine and Dumont, Emmanuel L. P. and Salas, Martha and Castano, Angela and Mujahed, Huda and Maldonado, Leonel and Greally, John M. and Tycko, Benjamin},
+  title   = {Allele-specific {DNA} methylation is increased in cancers and its dense mapping in normal plus neoplastic cells increases the yield of disease-associated regulatory {SNPs}},
+  journal = {Genome Biology},
+  year    = {2020}, volume = {21}, pages = {153},
+  doi     = {10.1186/s13059-020-02059-3}, pmid = {32594908},
+  note    = {STATUS=VERIFIED_PROVENANCE_SOT; +5x hypo-dominant; 口徑差非矛盾; 投稿前 web 複核}
+}
+
+% ---------- T-METHOD-PSLIMIT：phase-set 跨 block 無連結 ----------
+
+% STATUS=VERIFIED_PROVENANCE_SOT（檔 09 #2 PMID 38909018；⚠ 與 refs_v2.bib fu2024methphaser 身分核對）
+@article{methphaser2024,
+  author  = {Fu, Yilei and Aganezov, Sergey and Mahmoud, Medhat and Beaulaurier, John and Juul, Sissel and Treangen, Todd J. and Sedlazeck, Fritz J.},
+  title   = {{MethPhaser}: methylation-based long-read haplotype phasing of human genomes},
+  journal = {Nature Communications},
+  year    = {2024}, volume = {15}, number = {1}, pages = {5327},
+  doi     = {10.1038/s41467-024-49588-0}, pmid = {38909018},
+  note    = {STATUS=VERIFIED_PROVENANCE_SOT; refs_v2.bib fu2024methphaser 缺 pmid 欄, web-verify session 須確認同一篇後合併; 此處用於 'phase block 間無連結資訊' 論點; 投稿前 web 複核}
+}
+
+% STATUS=VERIFIED_PROVENANCE_SOT（檔 09 #1；phasing 骨幹）
+@article{nanomethphase2021,
+  author  = {Akbari, Vahid and Garant, Jean-Michel and O'Neill, Kieran and Pandoh, Pawan and Moore, Richard and Marra, Marco A. and Hirst, Martin and Jones, Steven J. M.},
+  title   = {Megabase-scale methylation phasing using nanopore long reads and {NanoMethPhase}},
+  journal = {Genome Biology},
+  year    = {2021}, volume = {22}, number = {1}, pages = {68},
+  doi     = {10.1186/s13059-021-02283-5}, pmid = {33618748},
+  note    = {STATUS=VERIFIED_PROVENANCE_SOT; 投稿前 web 複核}
+}
+
+% ---------- Reconstruction 用詞 / Q2 motivation（投稿前必核原句）----------
+
+% STATUS=NEEDS_WEB_VERIFY（memory 標「投稿前核 Tarabichi 原句」；識別碼待補）
+@article{tarabichi2021,
+  author  = {Tarabichi, Maxime and NEEDS_WEB_VERIFY},
+  title   = {NEEDS_WEB_VERIFY — practical guide to subclonal reconstruction (multiplicity ambiguity; single-sample = characterization not confirmation)},
+  journal = {Nature Methods},
+  year    = {2021},
+  doi     = {NEEDS_WEB_VERIFY}, pmid = {NEEDS_WEB_VERIFY},
+  note    = {STATUS=NEEDS_WEB_VERIFY; cite 用於 reconstruction 用詞界定; 須取原句; external_validation 標刊年 2021}
+}
+
+% ---------- 檔 09 §B 三個識別碼衝突（投稿前必解，不並列衝突）----------
+
+% STATUS=NEEDS_WEB_VERIFY（§B1：article-number + 作者署名衝突）
+@article{oneill2024pog,
+  author  = {O'Neill, Kieran and Pleasance, Erin and NEEDS_WEB_VERIFY},
+  title   = {Long-read sequencing of an advanced cancer cohort resolves rearrangements, unravels haplotypes, and reveals methylation landscapes},
+  journal = {Cell Genomics},
+  year    = {2024}, volume = {4}, number = {11},
+  pages   = {NEEDS_WEB_VERIFY},
+  doi     = {10.1016/j.xgen.2024.100674}, pmid = {39406235},
+  note    = {STATUS=NEEDS_WEB_VERIFY; B1 conflict: article-number 100674/100693/100538 + author O'Neill/Lin; anchor=PMID 39406235 + PMC11605692; web 核確切 article number + 第一作者}
+}
+
+% STATUS=NEEDS_WEB_VERIFY（§B2：作者 + PMID 衝突）
+@article{epihet2021,
+  author  = {NEEDS_WEB_VERIFY},
+  title   = {{epihet} — intratumor epigenetic heterogeneity},
+  journal = {Scientific Reports},
+  year    = {2021},
+  doi     = {10.1038/s41598-020-79627-x}, pmid = {NEEDS_WEB_VERIFY},
+  note    = {STATUS=NEEDS_WEB_VERIFY; B2 conflict: author (Chen X / Pan? / Ashoor) + PMID; anchor PMC7801679; web 取 canonical PMID + author list}
+}
+
+% STATUS=NEEDS_WEB_VERIFY（§B3：venue 存疑）
+@article{hicancer2021,
+  author  = {Mao, Qi and NEEDS_WEB_VERIFY},
+  title   = {{HiCancer} — haplotype + CNV/LOH from Hi-C in cancer},
+  journal = {Scientific Reports},
+  year    = {2021},
+  doi     = {10.1038/s41598-021-86104-6}, pmid = {33758310},
+  note    = {STATUS=NEEDS_WEB_VERIFY; B3 conflict: venue 存疑; web 確認 venue + author list}
+}
