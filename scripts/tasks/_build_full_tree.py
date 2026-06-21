@@ -35,6 +35,20 @@ v2n["T-S5"]["goal"] = "收斂 Path B model-based；確認≥2群須對齊 a-prio
 v2n["T-S6"]["goal"] = "（已達）對齊=paired 非 tumor-only 完整盤點，verify 53/53"
 v2n["T-S2"]["goal"] = "（結案/勿再開）tumor-only 非監督=double-dip NEGATIVE"
 
+# ---- 06-21 progress reconcile: status changes (全部 grep 驗證過) ----
+v2n["T-S1"]["status"] = "done"                       # 06-17 ADOPT_WITH_CORRECTIONS 裁決完成；殘留歸 G-B
+v2n["T-E1"]["title"] = "外部文獻驗證庫（74 源親讀，稽核 CLEAN）"  # 61→74 + 5 卡 fulltext 升級
+ismn["T-SL-RO"]["status"] = "in_progress"            # allsample 全7樣本 tumor-only 重跑完成
+ismn["T-SL-RO-1"]["status"] = "in_progress"          # tumor-only 參數組合已實證可跑
+# D 第二項：全7樣本切割總帳折入 T-SL-RO（不另開節點）
+_ro = ismn["T-SL-RO"]; _ro.setdefault("links", {})
+_ro["links"].setdefault("memory", [])
+if "project_allsample_subcluster_split_accounting" not in _ro["links"]["memory"]:
+    _ro["links"]["memory"].append("project_allsample_subcluster_split_accounting")
+_ro["links"].setdefault("reports", [])
+_ro["links"]["reports"].append("InterSubMod/docs/experiments/in_progress/2026/06/20260620_allsample_subcluster_split/README.md")
+_ro["goal"] = "tumor-only 獨立重跑 + 兩層事實表（全7樣本切割總帳已完成，Jaccard 0.091-0.161；只記「tumor顯著/normal不顯著」不判別）；殘留 RO-1/RO-2"
+
 
 def reparent(nid, parent):
     n = dict(v2n[nid]); n.pop("component", None); n["parent"] = parent; return n
@@ -118,7 +132,9 @@ nodes.append(N("T-SUP-CLUST", "clusterability vs coverage/CN（支撐 ⭐3）", 
 nodes.append(N("T-SUP-COPY", "甲基×copy confound（SEQC2，支撐 ⭐3）", "T-METHOD", "analysis", "done", "claude",
                headline="CN vs AUC 無相關(ρ=0.035)；copy 非 driver；副產品可偵 LOH", links={"memory": ["project_asm_cn_confound_pilot"]}))
 nodes.append(N("T-SUP-LOCUS", "單位點甲基組合詮釋窮舉（支撐 ⭐3）", "T-METHOD", "analysis", "done", "claude",
-               headline="D1-D7×I1-I8 窮舉；最像 subclone 組合 undecidable", links={"memory": ["project_O12_loh_methylation_scenarios"]}))
+               headline="D1-D7×I1-I8 窮舉；最像 subclone 組合 undecidable；新錨 LOH-unmask 82-91%（Martin-Trujillo）",
+               links={"memory": ["project_O12_loh_methylation_scenarios", "project_somatic_locus_methylation_combination_interpretation"],
+                      "reports": ["InterSubMod/docs/methodology/20260620_somatic_locus_methylation_combination_enumeration_01.md"]}))
 # NEGATIVE 四道
 nodes.append(N("T-NEG-D1", "D1 乾淨 somatic-cis 稀有", "T-NEG", "analysis", "done", "claude",
                headline="HCC1395 816 可測位點僅 1（chr17, perm p=0.001）", links={"memory": ["project_paper_claim_audit_consensus_base_2026_06_12"]}))
@@ -151,8 +167,8 @@ nodes.append(N("T-GATE-GE", "G-E：正交第二定相 pipeline（破 single-pipe
                goal="正交第二定相 pipeline 跑出獨立 haplotag → 對照 longphase-S → 解 single-pipeline 循環 + 衝 ⭐4",
                missing=["長期 roadmap；與 HD-1 相關"], links={"memory": ["project_subclonal_reconstruction_paper_focus"]}))
 # 論文撰寫 細化
-nodes.append(N("T-W-CH1", "Ch1 緒論", "T-WRITE", "writing", "todo", "claude+user", headline="廣→gap（甲基加值未量化/解析度天花板）→三解析度目標", links={"memory": ["project_thesis_writing_architecture"]}))
-nodes.append(N("T-W-CH2", "Ch2 文獻探討", "T-WRITE", "writing", "todo", "claude+user", headline="重建骨幹→ONT 甲基→ASM→演化邊界→分群 4 軸地景→ISM 定位", links={"memory": ["project_ism_vs_external_methylation_tools_comparison"]}))
+nodes.append(N("T-W-CH1", "Ch1 緒論", "T-WRITE", "writing", "in_progress", "claude+user", headline="廣→gap（甲基加值未量化/解析度天花板）→三解析度目標（草稿已存在）", links={"memory": ["project_thesis_writing_architecture"], "reports": ["InterSubMod/docs/thesis/chapters/ch1_introduction.md"]}))
+nodes.append(N("T-W-CH2", "Ch2 文獻探討", "T-WRITE", "writing", "in_progress", "claude+user", headline="重建骨幹→ONT 甲基→ASM→演化邊界→分群 4 軸地景→ISM 定位（草稿已存在）", links={"memory": ["project_ism_vs_external_methylation_tools_comparison"], "reports": ["InterSubMod/docs/thesis/chapters/ch2_related_works.md"]}))
 nodes.append(N("T-W-CH3", "Ch3 材料與方法（骨架已有）", "T-WRITE", "writing", "in_progress", "claude+user", headline="6 cell line×3 癌種→haplotag 6-state→5mCG→ISM 6 核心→null 設計", links={"memory": ["project_thesis_writing_architecture"], "reports": ["InterSubMod/docs/thesis/"]}))
 nodes.append(N("T-W-CH4", "Ch4 結果（骨架已有/填數中）", "T-WRITE", "writing", "in_progress", "claude+user", headline="R1 骨幹→R2 germline 強→R3 救援88.5%→R4 subclone 僅存在→R5 LOH 無confound→R6 跨樣本→R7 owned NEGATIVE", links={"memory": ["project_thesis_writing_architecture"]}, missing=["R6 待 G-A；數字待真值"]))
 nodes.append(N("T-W-CH5", "Ch5 討論", "T-WRITE", "writing", "todo", "claude+user", headline="最強 takeaway→subclone 天花板 bound→對齊文獻→bounded-claims 專段", links={"memory": ["project_g6_paper_framing_external_corroboration"]}))
@@ -228,6 +244,40 @@ nodes.append(N("T-RETIRE", "退役/封存 active.json g1/g6 stale cycle（harnes
 for n in nodes:
     if n["id"] == "T-W-CH4":
         n["depends_on"] = ["T-C-CROSS"]  # R6 needs cross-sample
+
+# ---- 06-21 progress reconcile: new milestone nodes (workflow 稽核 + grep 驗證；文件皆實存) ----
+nodes.append(N("T-DECISIONFLOW", "全基因組 5 態判別流程分類（N=30490）", "T-ISM", "analysis", "done", "claude",
+               depends_on=["T-SL-RECLS"],
+               headline="tumor ②16.6/③18.1/④43.9/⑤20.0%；state③=label-first 非循環（破 tumor-only NEGATIVE 迷思）；對抗驗證 VERIFIED_MATCH",
+               goal="（已達）30490 region 5 態分類 + L1 逐數字重算 + 對抗驗證；門檻 valid≥4；allele 軸最 confounded → normal cis-control next",
+               links={"memory": ["project_decisionflow_5state_classification_wg"],
+                      "reports": ["InterSubMod/docs/experiments/in_progress/2026/06/20260620_decisionflow_5state_classification_wg_01.md"]}))
+nodes.append(N("T-ONT-CNV", "SAVANA ONT CNV/SV 全基因組驗證可行性（PROBE⭐3）", "T-EXT", "compute", "in_progress", "claude",
+               headline="SAVANA per-segment CN + SV anchor；CN↔甲基非獨立(LOH-unmask 耦合)；SV 軸=唯一非循環 anchor；直攻 G-B",
+               goal="SAVANA CN + SV anchor 跑出 → 找 CN-neutral 區仍對齊 somatic label 的非循環路徑（解 G-B）",
+               missing=["全基因組 job 有 normal-het 汙染，待修正版"],
+               links={"memory": ["project_ont_cnv_sv_subclone_verification_feasibility"],
+                      "reports": ["InterSubMod/docs/plans/20260620_ont_cnv_sv_subclone_verification_feasibility_01.md"]}))
+nodes.append(N("T-SL-CPG-ATTR", "BRCA2 pilot 三想法甲基↔標籤驗證（per-CpG/modkit/per-label Δβ+Venn）", "T-SL", "analysis", "done", "claude",
+               headline="BRCA2 RegionID22305 三方法 granularity ladder；想法1 Δβ=−0.106 符真值；皆 characterization 非判別",
+               goal="（已達）BRCA2 三想法全做；想法3 cross-check 揪出 CSV 欄 vs region-mean 定義不符（新發現）",
+               links={"memory": ["project_subclone_situation_verification_methods"],
+                      "reports": ["InterSubMod/docs/experiments/in_progress/2026/06/20260620_per_cpg_multiaxis_attribution_brca2_pilot_01.md"]}))
+nodes.append(N("T-METHOD-VERIFY", "subclone 確認黃金標準 + 建構 5 家族 + single-cell→ONT 移植裁決 + Tarabichi LEARN", "T-METHOD", "analysis", "done", "claude",
+               headline="確認黃金標準=single-cell/multi-region/longitudinal（單 bulk 只能 characterize→正當化 ⭐3）；移植 5/5；丟棄『first read-level methylation lineage on long-read』",
+               goal="（已達）6-agent workflow PASS；正當化 ⭐3 proof-of-concept + reconstruction=regional LOH-constrained partition 非 tree 界定",
+               links={"memory": ["project_subclone_confirmation_construction_ont_transferability"],
+                      "reports": ["InterSubMod/docs/method_comparison/20260621_subclone_confirmation_construction_and_ONT_transferability_01.md"]}))
+nodes.append(N("T-METHOD-LANDSCAPE", "clone/subclone 重建全景（6 學派）+ ISM 可行性裁決 + 競品白地", "T-METHOD", "analysis", "done", "claude",
+               headline="ISM=先驗元件新整合（proof-of-concept⭐3）；禁 overclaim 清單；2025-26 競品 ROCIT/TumorLens/MethPhaser-Cancer/DPClust-on-LR（L3 未全文核 head-to-head 必做）",
+               goal="（已達）6 學派定位 + ISM 增量界定 + 禁區清單；競品 head-to-head 全文核待做",
+               links={"memory": ["project_clone_subclone_landscape_and_ism_feasibility"],
+                      "reports": ["InterSubMod/docs/method_comparison/20260621_clone_subclone_reconstruction_landscape_and_ism_feasibility_01.md"]}))
+nodes.append(N("T-SIT-VER", "subclone 狀況推論整理 + 驗證設計（pre-verification SoT）", "T-METHOD", "analysis", "in_progress", "claude",
+               headline="推論 PARTIALLY_SOUND（5 修正：互斥 partition / 狀況②收斂 PATTERN354 / 抽樣 / 單樣本⭐3）；chr2/chr8 驗證單元待跑",
+               goal="各狀況逐一驗證設計實施完（chr2:18M + chr8 全LOH 子窗 + BRCA2 pilot）",
+               links={"memory": ["project_subclone_situation_verification_methods"],
+                      "reports": ["InterSubMod/docs/plans/20260620_subclone_situation_verification_reasoning_01.md"]}))
 
 # 補齊新任務缺的 goal（提議；待使用者較驗）
 GOALS = {
