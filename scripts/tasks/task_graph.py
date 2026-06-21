@@ -1120,6 +1120,7 @@ def cmd_handoff(data, a):
     io, lk = n.get("io") or {}, n.get("links") or {}
     contract = n.get("handoff") or {"status": _status_to_contract(n.get("status")), "key_metrics": {}, "anomalies": [], "path_to_landed_doc": (lk.get("reports") or [None])[0]}
     pkg = {"task_id": n["id"], "title": n["title"], "headline": n.get("headline") or n["title"],
+           "goal": n.get("goal"),
            "status": n.get("status"), "kind": n.get("kind"), "owner": n.get("owner"), "contract": contract,
            "inputs": [{"name": i.get("name"), "required": i.get("required"), "ref": i.get("ref"),
                        "ready": (by.get(i["ref"], {}).get("status") == "done") if i.get("ref") else None} for i in io.get("inputs", [])],
@@ -1137,6 +1138,7 @@ def cmd_handoff(data, a):
     md = [f"# 交接包 — {n['id']} {n['title']}", "",
           f"- **狀態**: {n.get('status')} / contract `{contract.get('status')}`",
           f"- **重點(headline)**: {n.get('headline') or n['title']}",
+          f"- **目標(goal/完成判準)**: {n.get('goal') or '—'}",
           f"- **分支/worktree**: {lk.get('branch') or '—'} / {lk.get('worktree') or '—'}",
           f"- **已驗證輸出(交接)**: {'；'.join(io.get('outputs', [])) or '—'}",
           f"- **驗證**: {v.get('how','—')} → result `{v.get('result','—')}` ↳ {v.get('evidence','—')}",

@@ -1,0 +1,33 @@
+{
+  "task_id": "T-METHOD-FDR",
+  "title": "V-7 FDR / 多重檢定校準：跨位點 null + BH-FDR + n_reads 校正",
+  "headline": "跨位點 label-shuffle null + BH-FDR + chr17 Bonferroni(×816)/genome-perm + n_reads 回歸校正（投稿前必補）",
+  "goal": "FDR/BH/Bonferroni across loci 算完 + n_reads 校正 epipolymorphism(O11 0.845→0.530)；ch3_methods 補上",
+  "status": "todo",
+  "kind": "compute",
+  "owner": "claude",
+  "contract": {
+    "status": "NEEDS_CONTEXT",
+    "key_metrics": {},
+    "anomalies": [],
+    "path_to_landed_doc": null
+  },
+  "inputs": [],
+  "outputs": [],
+  "verify": null,
+  "links": {
+    "memory": [
+      "project_code_methodology_audit_2026_06_10"
+    ],
+    "branch": "feat/analysis-ext",
+    "worktree": "../wt-analysis-ext"
+  },
+  "branch": "feat/analysis-ext",
+  "worktree": "../wt-analysis-ext",
+  "next_unlocked": [],
+  "missing_info": [
+    "投稿前必補 🔴"
+  ],
+  "generated_at": "2026-06-22T04:49:27",
+  "note": "AI handoff (CLAUDE.md §8 return-contract)；唯一真值在 graph，本檔為交接快照。"
+}

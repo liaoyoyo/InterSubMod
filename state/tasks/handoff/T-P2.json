@@ -1,0 +1,40 @@
+{
+  "task_id": "T-P2",
+  "title": "修正 T2 OVERSTATED 口徑（1-1/2-1 可分歸 H3 未證）",
+  "headline": "修正 T2 OVERSTATED 口徑（1-1/2-1 可分歸 H3 未證）",
+  "goal": null,
+  "status": "todo",
+  "kind": "writing",
+  "owner": "claude",
+  "contract": {
+    "status": "NEEDS_CONTEXT",
+    "key_metrics": {},
+    "anomalies": [],
+    "path_to_landed_doc": null
+  },
+  "inputs": [
+    {
+      "name": "V1-V12 結果",
+      "required": true,
+      "ref": "T-P1",
+      "ready": true
+    }
+  ],
+  "outputs": [
+    "修正後 T2 口徑說明"
+  ],
+  "verify": null,
+  "links": {
+    "memory": [
+      "project_methyl_phasing_assist_line"
+    ],
+    "branch": "docs/limitations",
+    "worktree": "../wt-docs-limitations"
+  },
+  "branch": "docs/limitations",
+  "worktree": "../wt-docs-limitations",
+  "next_unlocked": [],
+  "missing_info": [],
+  "generated_at": "2026-06-22T04:49:27",
+  "note": "AI handoff (CLAUDE.md §8 return-contract)；唯一真值在 graph，本檔為交接快照。"
+}

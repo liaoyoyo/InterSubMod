@@ -1,0 +1,48 @@
+{
+  "task_id": "T-V5",
+  "title": "ISM vs 外部甲基法比較 Phase B",
+  "headline": "ISM vs 外部甲基法比較 Phase B",
+  "goal": null,
+  "status": "todo",
+  "kind": "analysis",
+  "owner": "claude",
+  "contract": {
+    "status": "NEEDS_CONTEXT",
+    "key_metrics": {},
+    "anomalies": [],
+    "path_to_landed_doc": null
+  },
+  "inputs": [
+    {
+      "name": "ISM 方法定位",
+      "required": true,
+      "ref": "T-V1",
+      "ready": true
+    },
+    {
+      "name": "外部工具 (modkit/DSS/cvlr)",
+      "required": true,
+      "ref": null,
+      "ready": null
+    }
+  ],
+  "outputs": [
+    "ISM vs 外部甲基法 Phase B 比較"
+  ],
+  "verify": null,
+  "links": {
+    "memory": [
+      "project_ism_vs_external_methylation_tools_comparison"
+    ],
+    "branch": "feat/analysis-ext",
+    "worktree": "../wt-analysis-ext"
+  },
+  "branch": "feat/analysis-ext",
+  "worktree": "../wt-analysis-ext",
+  "next_unlocked": [],
+  "missing_info": [
+    "Phase B 待核准"
+  ],
+  "generated_at": "2026-06-22T04:49:27",
+  "note": "AI handoff (CLAUDE.md §8 return-contract)；唯一真值在 graph，本檔為交接快照。"
+}

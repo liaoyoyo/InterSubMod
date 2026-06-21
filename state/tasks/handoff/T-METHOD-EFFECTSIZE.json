@@ -1,0 +1,34 @@
+{
+  "task_id": "T-METHOD-EFFECTSIZE",
+  "title": "PERMANOVA 大-N 過敏 guard（effect-size / TP-vs-FP 門檻）",
+  "headline": "主 verdict 的 PERMANOVA valid 率偏高（大-N liberal）→ 加 effect-size(R²/F) 門檻或 TP-vs-FP 對照",
+  "goal": "PERMANOVA 加 effect-size 門檻或 TP-vs-FP 校準，使顯著=有意義非僅 N 大",
+  "status": "todo",
+  "kind": "compute",
+  "owner": "claude",
+  "contract": {
+    "status": "NEEDS_CONTEXT",
+    "key_metrics": {},
+    "anomalies": [],
+    "path_to_landed_doc": "InterSubMod/docs/methodology/20260622_ism_method_cognition_and_open_questions_01.md"
+  },
+  "inputs": [],
+  "outputs": [],
+  "verify": null,
+  "links": {
+    "reports": [
+      "InterSubMod/docs/methodology/20260622_ism_method_cognition_and_open_questions_01.md"
+    ],
+    "memory": [
+      "project_ism_method_soundness_validation"
+    ],
+    "branch": "feat/method-verify-cpp",
+    "worktree": "../wt-method-verify-cpp"
+  },
+  "branch": "feat/method-verify-cpp",
+  "worktree": "../wt-method-verify-cpp",
+  "next_unlocked": [],
+  "missing_info": [],
+  "generated_at": "2026-06-22T04:49:26",
+  "note": "AI handoff (CLAUDE.md §8 return-contract)；唯一真值在 graph，本檔為交接快照。"
+}

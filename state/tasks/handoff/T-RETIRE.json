@@ -1,0 +1,31 @@
+{
+  "task_id": "T-RETIRE",
+  "title": "退役/封存 active.json g1/g6 stale cycle（harness hygiene）",
+  "headline": "g1/g6 在 active.json stale 18 天（T-C1 DRIFT）→ 走 /conclude-research 正規退役",
+  "goal": "g1/g6 cycle 經 /conclude-research 退役/封存，active.json 無 stale、T-C1 DRIFT 消除",
+  "status": "todo",
+  "kind": "analysis",
+  "owner": "claude+user",
+  "contract": {
+    "status": "NEEDS_CONTEXT",
+    "key_metrics": {},
+    "anomalies": [],
+    "path_to_landed_doc": null
+  },
+  "inputs": [],
+  "outputs": [],
+  "verify": null,
+  "links": {
+    "memory": [
+      "project_loop_engineering_harness_review"
+    ],
+    "branch": "chore/hygiene",
+    "worktree": "../wt-hygiene"
+  },
+  "branch": "chore/hygiene",
+  "worktree": "../wt-hygiene",
+  "next_unlocked": [],
+  "missing_info": [],
+  "generated_at": "2026-06-22T04:49:27",
+  "note": "AI handoff (CLAUDE.md §8 return-contract)；唯一真值在 graph，本檔為交接快照。"
+}

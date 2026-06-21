@@ -1,0 +1,36 @@
+{
+  "task_id": "T-Q1-COVERAGE",
+  "title": "Q1 sSNV 間距 × ONT 讀長覆蓋計算（論文 motivation 基石）",
+  "headline": "HCC1395 ~30,490 sSNV 全基因組兩兩間距 + ONT 讀長分佈 + 單讀跨 ≥2 sSNV 比例 + ±5000 window 覆蓋率",
+  "goal": "算出 sSNV 間距/讀長/跨 ≥2 sSNV 覆蓋真值 → 量化證『為何只用 sSNV 建 subclone 難』+ 正當化甲基補位",
+  "status": "todo",
+  "kind": "compute",
+  "owner": "claude",
+  "contract": {
+    "status": "NEEDS_CONTEXT",
+    "key_metrics": {},
+    "anomalies": [],
+    "path_to_landed_doc": "InterSubMod/docs/methodology/20260622_ism_method_cognition_and_open_questions_01.md"
+  },
+  "inputs": [],
+  "outputs": [],
+  "verify": null,
+  "links": {
+    "reports": [
+      "InterSubMod/docs/methodology/20260622_ism_method_cognition_and_open_questions_01.md"
+    ],
+    "memory": [
+      "project_subclone_snv_difficulty_methylation_framework"
+    ],
+    "branch": "feat/q1-coverage",
+    "worktree": "../wt-q1-coverage"
+  },
+  "branch": "feat/q1-coverage",
+  "worktree": "../wt-q1-coverage",
+  "next_unlocked": [],
+  "missing_info": [
+    "全新計算，無現成產物；待寫 scripts/analysis/ssnv_spacing_coverage.py"
+  ],
+  "generated_at": "2026-06-22T04:49:26",
+  "note": "AI handoff (CLAUDE.md §8 return-contract)；唯一真值在 graph，本檔為交接快照。"
+}

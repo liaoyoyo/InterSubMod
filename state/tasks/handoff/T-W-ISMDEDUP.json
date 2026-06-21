@@ -1,0 +1,28 @@
+{
+  "task_id": "T-W-ISMDEDUP",
+  "title": "去重 graph_ism.json 子樹 + 標 deprecated（唯一真值=graph.json）",
+  "headline": "graph_ism 26 節點全在 graph.json；雙 SoT 矛盾 → 標 deprecated 指回主 graph 或刪",
+  "goal": "graph_ism/TASKS_ism/board_ism 標 deprecated 或刪，消除雙 SoT 矛盾",
+  "status": "todo",
+  "kind": "analysis",
+  "owner": "claude",
+  "contract": {
+    "status": "NEEDS_CONTEXT",
+    "key_metrics": {},
+    "anomalies": [],
+    "path_to_landed_doc": null
+  },
+  "inputs": [],
+  "outputs": [],
+  "verify": null,
+  "links": {
+    "branch": "chore/hygiene",
+    "worktree": "../wt-hygiene"
+  },
+  "branch": "chore/hygiene",
+  "worktree": "../wt-hygiene",
+  "next_unlocked": [],
+  "missing_info": [],
+  "generated_at": "2026-06-22T04:49:27",
+  "note": "AI handoff (CLAUDE.md §8 return-contract)；唯一真值在 graph，本檔為交接快照。"
+}

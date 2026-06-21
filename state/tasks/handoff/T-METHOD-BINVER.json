@@ -1,0 +1,31 @@
+{
+  "task_id": "T-METHOD-BINVER",
+  "title": "binary_version 一致性檢核",
+  "headline": "跨 worktree/結果的 binary 版本一致性（避免混不同 build 口徑）",
+  "goal": "binary_versions 紀錄齊 + 結果標 build SHA，無 merge-blind 漂移",
+  "status": "todo",
+  "kind": "compute",
+  "owner": "claude",
+  "contract": {
+    "status": "NEEDS_CONTEXT",
+    "key_metrics": {},
+    "anomalies": [],
+    "path_to_landed_doc": null
+  },
+  "inputs": [],
+  "outputs": [],
+  "verify": null,
+  "links": {
+    "memory": [
+      "project_new_data_integrity_audit_2026_06_17"
+    ],
+    "branch": "chore/hygiene",
+    "worktree": "../wt-hygiene"
+  },
+  "branch": "chore/hygiene",
+  "worktree": "../wt-hygiene",
+  "next_unlocked": [],
+  "missing_info": [],
+  "generated_at": "2026-06-22T04:49:27",
+  "note": "AI handoff (CLAUDE.md §8 return-contract)；唯一真值在 graph，本檔為交接快照。"
+}

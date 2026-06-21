@@ -1,0 +1,50 @@
+{
+  "task_id": "T-SL-C1-F",
+  "title": "修：enable_bootstrap=true + within-HP 用 bootstrap",
+  "headline": "開 within-HP bootstrap-stability 選 k（去 raw silhouette 過切）",
+  "goal": null,
+  "status": "todo",
+  "kind": "compute",
+  "owner": "claude",
+  "contract": {
+    "status": "NEEDS_CONTEXT",
+    "key_metrics": {},
+    "anomalies": [],
+    "path_to_landed_doc": null
+  },
+  "inputs": [
+    {
+      "name": "RegionProcessor.cpp:1717 enable_bootstrap",
+      "required": true,
+      "ref": null,
+      "ready": null
+    },
+    {
+      "name": "Bootstrap class (已存在)",
+      "required": true,
+      "ref": null,
+      "ready": null
+    }
+  ],
+  "outputs": [
+    "within-HP bootstrap-stability 選 k"
+  ],
+  "verify": null,
+  "links": {
+    "memory": [
+      "project_ism_verdict_false_negative_audit_2026_06_16"
+    ],
+    "branch": "feat/method-verify-cpp",
+    "worktree": "../wt-method-verify-cpp"
+  },
+  "branch": "feat/method-verify-cpp",
+  "worktree": "../wt-method-verify-cpp",
+  "next_unlocked": [
+    "T-SL-C1-V"
+  ],
+  "missing_info": [
+    "C1 spec 20260618_within_hp_bootstrap_and_cluster_label_ari_cpp_change_spec_01.md pending_approval"
+  ],
+  "generated_at": "2026-06-22T04:49:26",
+  "note": "AI handoff (CLAUDE.md §8 return-contract)；唯一真值在 graph，本檔為交接快照。"
+}
