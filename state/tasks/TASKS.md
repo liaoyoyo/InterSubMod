@@ -1,12 +1,13 @@
 # 研究任務樹（WBS） — TASKS.md
 
 > **自動產生，請勿手改。** 唯一真值 = `state/tasks/graph.json`；改後重跑 `python3 scripts/tasks/task_graph.py --graph state/tasks/graph.json render`。
-> 生成 2026-06-22 · build `7bf2ed3` @ `research/subclonal-reconstruction-202606` · 節點 110（✅39 ◐25 ⛔1 ☐44 ✗1） · focus = `T-SL`
+> 生成 2026-06-22 · build `c6e37c1` @ `research/subclonal-reconstruction-202606` · 節點 110（✅40 ◐29 ⛔1 ☐39 ✗1） · focus = `T-SL`
 
 ## ⓪ 驗證（validate + check）
 - validate: ✅ PASS
-- check: 11 findings
+- check: 12 findings
   - DRIFT `T-C1`: 指向的 cycle 20260602-1521-g1-zar1l-brca2-asm-survey 在 active.json 已 stale 20 天
+  - WARN `docs/limitations`: 分支碰撞：T-P2, T-E3, T-C-UNMASK, T-METHOD-PSLIMIT 同時 in_progress 同分支（各開 worktree）
   - DETAIL `T-GATE-GD`: compute 任務缺 I/O 規格
   - DETAIL `T-GATE-GE`: compute 任務缺 I/O 規格
   - DETAIL `T-C-CISEXP`: compute 任務缺 I/O 規格
@@ -25,7 +26,7 @@
   - ◐ `T-ASM` ASM characterization [里程碑/進行中]
     - ☐ `T-C-CISEXP` V-1 乾淨 somatic-cis 真稀有性擴測（normal-anchored × 全合格位點 × 6 樣本） [程式/待辦]　缺:catalog 全位點從未全 cis-tested（稽核校正#2）　↳project_paper_claim_audit_consensus_base_2026_06_12
     - ☐ `T-C-CROSS` 跨樣本 ASM 正式圖表（R6） [分析/待辦]　in:●6 樣本 excess …　缺:待 G-A 跨樣本統計　↳project_cross_sample_asm_reproducibility
-    - ☐ `T-C-UNMASK` LOH-unmask ASM confound（Martin-Trujillo）寫入限制 [分析/待辦]　↳project_O12_loh_methylation_scenarios
+    - ◐ `T-C-UNMASK` LOH-unmask ASM confound（Martin-Trujillo）寫入限制 [分析/進行中]　↳project_O12_loh_methylation_scenarios
     - ✅ `T-C1` ZAR1L/BRCA2 ASM 驗證 ⭐3 POSITIVE [程式/已完成]　in:●tagged BAM,●somatic VCF　↳20260602-1521-g1-zar1l-brca2-asm-survey
     - ✅ `T-C2` 跨 6 樣本 ASM 復現 ⭐3 [程式/已完成]　in:●ISM TP/FP re…　↳project_cross_sample_asm_reproducibility
     - ✅ `T-C3` ISM 完整 TP/FP/FN + cis 存在性 ⭐4 [程式/已完成]　in:●tagged BAM,●somatic VCF　↳project_ism_complete_tpfpfn_existence_cis
@@ -43,7 +44,7 @@
   - ◐ `T-EXT` 外部驗證 [里程碑/進行中]
     - ✅ `T-E1` 外部文獻驗證庫（74 源親讀，稽核 CLEAN） [資料/已完成]　in:●文獻 PDF/repo …　↳project_external_validation_library
     - ◐ `T-E2` 6 樣本 clone/subclone 外部真值盤點 [分析/進行中]　in:●6 樣本清單,●外部 truth (Fa…　缺:H1437/H2009/HCC1937/HCC1954 缺專門解答（需自證）　↳project_six_sample_clone_subclone_external_truth
-    - ☐ `T-E3` citation-verification（投稿前） [撰寫/待辦]　↳project_external_validation_library
+    - ◐ `T-E3` citation-verification（投稿前） [撰寫/進行中]　缺:scaffold 完成；3 識別碼衝突 + 8 UNVERIFIED-PMID + 3 L3 錨待 web-enabled session 跑 /citation-verification　↳project_external_validation_library
     - ◐ `T-ONT-CNV` SAVANA ONT CNV/SV 全基因組驗證可行性（PROBE⭐3） [程式/進行中]　缺:全基因組 job 有 normal-het 汙染，待修正版　↳project_ont_cnv_sv_subclone_verification_feasibility
   - ◐ `T-GATE` 決策 gates（OPEN） [里程碑/進行中]
     - ☐ `T-GATE-HD1` HD-1：R-SELFREF → 定論文 Grade [分析/待辦]　缺:未決；影響論文主張強度　↳project_subclonal_reconstruction_paper_focus
@@ -92,10 +93,10 @@
     - ☐ `T-METHOD-EFFECTSIZE` PERMANOVA 大-N 過敏 guard（effect-size / TP-vs-FP 門檻） [程式/待辦]　↳project_ism_method_soundness_validation
     - ☐ `T-METHOD-FDR` V-7 FDR / 多重檢定校準：跨位點 null + BH-FDR + n_reads 校正 [程式/待辦]　缺:投稿前必補 🔴　↳project_code_methodology_audit_2026_06_10
     - ✅ `T-METHOD-LANDSCAPE` clone/subclone 重建全景（6 學派）+ ISM 可行性裁決 + 競品白地 [分析/已完成]　↳project_clone_subclone_landscape_and_ism_feasibility
-    - ☐ `T-METHOD-PSLIMIT` phase-set 跨 block 無 read/cell 連結（限制） [分析/待辦]　↳project_O12_loh_methylation_scenarios
+    - ◐ `T-METHOD-PSLIMIT` phase-set 跨 block 無 read/cell 連結（限制） [分析/進行中]　↳project_O12_loh_methylation_scenarios
     - ☐ `T-METHOD-TESTS` Methylation MM/ML parsing 單元測試（零測試補） [程式/待辦]　↳project_code_methodology_audit_2026_06_10
     - ✅ `T-METHOD-VERIFY` subclone 確認黃金標準 + 建構 5 家族 + single-cell→ONT 移植裁決 + Tarabichi LEARN [分析/已完成]　↳project_subclone_confirmation_construction_ont_transferability
-    - ☐ `T-Q1-COVERAGE` Q1 sSNV 間距 × ONT 讀長覆蓋計算（論文 motivation 基石） [程式/待辦]　缺:全新計算，無現成產物；待寫 scripts/analysis/ssnv_spacing_coverage.py　↳project_subclone_snv_difficulty_methylation_framework
+    - ✅ `T-Q1-COVERAGE` Q1 sSNV 間距 × ONT 讀長覆蓋計算（論文 motivation 基石） [程式/已完成]　缺:全新計算，無現成產物；待寫 scripts/analysis/ssnv_spacing_coverage.py；PARTIAL：單樣本 HCC1395 + 取樣 genome-ordered（chr1起非均勻）；論文版須均勻重抽 + 跨樣本　↳project_subclone_snv_difficulty_methylation_framework
     - ◐ `T-SIT-VER` subclone 狀況推論整理 + 驗證設計（pre-verification SoT） [分析/進行中]　↳project_subclone_situation_verification_methods
     - ✅ `T-SUP-CLUST` clusterability vs coverage/CN（支撐 ⭐3） [分析/已完成]　↳project_subclonal_reconstruction_paper_focus
     - ✅ `T-SUP-COPY` 甲基×copy confound（SEQC2，支撐 ⭐3） [分析/已完成]　↳project_asm_cn_confound_pilot
@@ -113,7 +114,7 @@
   - ◐ `T-PHASE` 甲基-assist phasing [里程碑/進行中]
     - ☐ `T-GATE-GA` G-A：跨 6 樣本 → 定單樣本 ⭐3 vs ⭐4 [分析/待辦]　缺:待 COLO829 normal 甲基；G-A 統計未跑　↳project_methyl_phasing_assist_line
     - ✅ `T-P1` 甲基救 unphase / haplotag assist V1-V12 [程式/已完成]　in:●tagged BAM,●longphase-S …　↳project_methyl_phasing_assist_line
-    - ☐ `T-P2` 修正 T2 OVERSTATED 口徑（1-1/2-1 可分歸 H3 未證） [撰寫/待辦]　in:●V1-V12 結果　↳project_methyl_phasing_assist_line
+    - ◐ `T-P2` 修正 T2 OVERSTATED 口徑（1-1/2-1 可分歸 H3 未證） [撰寫/進行中]　in:●V1-V12 結果　↳project_methyl_phasing_assist_line
   - ◐ `T-WRITE` 論文撰寫 [里程碑/進行中]
     - ☐ `T-W-ABS` 摘要（首段點明分工） [撰寫/待辦]　缺:🔴 須點明分工；待 G-A 數字　↳project_thesis_writing_architecture
     - ◐ `T-W-CH1` Ch1 緒論 [撰寫/進行中]　↳project_thesis_writing_architecture
@@ -132,14 +133,12 @@
     - ☐ `T-W3` 整合篇章（ASM-char + 4 道 NEGATIVE + LOH 脊柱） [撰寫/待辦]　in:●COLO829 pair…,●Stage③ 結果　缺:待上游 COLO829 / Stage③ / 外部真值補齊　↳project_subclonal_reconstruction_paper_focus
     - ✅ `T-W4` 論文敘述對抗稽核共識底座（51 agents / 606 claim / F=0） [撰寫/已完成]　in:●論文 spec,●606 claim 集　缺:Hard-Gate 待修正 ledger:95 / CURRENT_FOCUS:137　↳project_paper_claim_audit_consensus_base_2026_06_12
 
-## Ready — 可立即開跑（35）
+## Ready — 可立即開跑（30）
 - `T-A3` 6 normal 甲基帳號 SPOF 備份　owner: user
 - `T-A4` 驗證 6 樣本 DeepVariant/DeepSomatic 可用性（兩-caller 前置）+ 修 landscape05 CASTLE-COLO829 過度宣稱　owner: claude+user
 - `T-C-CISEXP` V-1 乾淨 somatic-cis 真稀有性擴測（normal-anchored × 全合格位點 × 6 樣本）　owner: claude
 - `T-C-CROSS` 跨樣本 ASM 正式圖表（R6）　owner: claude
-- `T-C-UNMASK` LOH-unmask ASM confound（Martin-Trujillo）寫入限制　owner: claude
 - `T-C7` V-4 BRCA2 exemplar copy-partition 重驗（illustrative vs partial-cis 口徑）　owner: claude
-- `T-E3` citation-verification（投稿前）　owner: claude
 - `T-GATE-GB` G-B：within-hap somatic null → 定甲基-subclone 故事　owner: claude+user
 - `T-GATE-GC` G-C：cis vs 突變足跡 ±1-2kb 空間分離（normal-anchored 寬空間控制）　owner: claude
 - `T-GATE-GE` G-E：正交第二定相 pipeline（破 single-pipeline 自我參照）　owner: claude+user
@@ -149,10 +148,7 @@
 - `T-METHOD-BINVER` binary_version 一致性檢核　owner: claude
 - `T-METHOD-EFFECTSIZE` PERMANOVA 大-N 過敏 guard（effect-size / TP-vs-FP 門檻）　owner: claude
 - `T-METHOD-FDR` V-7 FDR / 多重檢定校準：跨位點 null + BH-FDR + n_reads 校正　owner: claude
-- `T-METHOD-PSLIMIT` phase-set 跨 block 無 read/cell 連結（限制）　owner: claude
 - `T-METHOD-TESTS` Methylation MM/ML parsing 單元測試（零測試補）　owner: claude
-- `T-P2` 修正 T2 OVERSTATED 口徑（1-1/2-1 可分歸 H3 未證）　owner: claude
-- `T-Q1-COVERAGE` Q1 sSNV 間距 × ONT 讀長覆蓋計算（論文 motivation 基石）　owner: claude
 - `T-RETIRE` 退役/封存 active.json g1/g6 stale cycle（harness hygiene）　owner: claude+user
 - `T-SL-C1-F` 修：enable_bootstrap=true + within-HP 用 bootstrap　owner: claude
 - `T-SL-C3` ④ C3 HP-fine 組合對齊測試 emit　owner: claude
@@ -199,6 +195,7 @@
 - `T-E2`: H1437/H2009/HCC1937/HCC1954 缺專門解答（需自證）
 - `T-A3`: 6 normal 全 zhenyu112 帳號 = 單點失效
 - `T-C-CROSS`: 待 G-A 跨樣本統計
+- `T-E3`: scaffold 完成；3 識別碼衝突 + 8 UNVERIFIED-PMID + 3 L3 錨待 web-enabled session 跑 /citation-verification
 - `T-GATE-HD1`: 未決；影響論文主張強度
 - `T-GATE-GA`: 待 COLO829 normal 甲基；G-A 統計未跑
 - `T-GATE-GB`: 未跑前甲基-subclone 只能寫存在性窄+負
@@ -216,7 +213,7 @@
 - `T-METHOD-FDR`: 投稿前必補 🔴
 - `T-GATE-REDLINE`: 紅線目前只在 memory
 - `T-ONT-CNV`: 全基因組 job 有 normal-het 汙染，待修正版
-- `T-Q1-COVERAGE`: 全新計算，無現成產物；待寫 scripts/analysis/ssnv_spacing_coverage.py
+- `T-Q1-COVERAGE`: 全新計算，無現成產物；待寫 scripts/analysis/ssnv_spacing_coverage.py；PARTIAL：單樣本 HCC1395 + 取樣 genome-ordered（chr1起非均勻）；論文版須均勻重抽 + 跨樣本
 
 ---
 單一所有權：本層只擁含括/依賴/分派/狀態/缺漏/io；verdict・證據・敘述歸 cycle/ledger/memory。

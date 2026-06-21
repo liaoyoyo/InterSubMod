@@ -344,6 +344,34 @@ for _branch, _wt, _ids in SESSIONS:
         _n["links"]["branch"] = _branch
         _n["links"]["worktree"] = _wt
 
+# ---- 06-22 S1/S3 subagent 回報整合（主回合 §13.7 驗證後）----
+_LD = "InterSubMod/docs/thesis/limitations_drafts"
+_nmap["T-Q1-COVERAGE"]["status"] = "done"
+_nmap["T-Q1-COVERAGE"].setdefault("links", {}).setdefault("reports", [])
+for _r in ["InterSubMod/docs/experiments/in_progress/2026/06/20260622_ssnv_spacing_coverage_01.md",
+           "state/analysis_outputs/ssnv_spacing_coverage.json"]:
+    if _r not in _nmap["T-Q1-COVERAGE"]["links"]["reports"]:
+        _nmap["T-Q1-COVERAGE"]["links"]["reports"].append(_r)
+_nmap["T-Q1-COVERAGE"]["verify"] = {"how": "主回合讀回 .json 真值 + 算術自洽核對（hist 加總=50000、P(≥2)=370/50000）",
+                                    "ref": "state/analysis_outputs/ssnv_spacing_coverage.json", "result": "pass", "verified_at": "2026-06-22"}
+_nmap["T-Q1-COVERAGE"].setdefault("missing_info", []).append("PARTIAL：單樣本 HCC1395 + 取樣 genome-ordered（chr1起非均勻）；論文版須均勻重抽 + 跨樣本")
+_S3_DRAFTS = {
+    "T-C-UNMASK": f"{_LD}/20260622_T-C-UNMASK_loh_unmask_asm_confound_limitation_draft_01.md",
+    "T-METHOD-PSLIMIT": f"{_LD}/20260622_T-METHOD-PSLIMIT_phaseset_crossblock_resolution_ceiling_draft_01.md",
+    "T-P2": f"{_LD}/20260622_T-P2_T2_overstated_caliber_correction_draft_01.md",
+    "T-E3": f"{_LD}/20260622_T-E3_citation_verification_scaffold_01.md",
+}
+for _tid, _rep in _S3_DRAFTS.items():
+    _n = _nmap.get(_tid)
+    if not _n:
+        continue
+    if _n.get("status") == "todo":
+        _n["status"] = "in_progress"   # 草稿已落、整合進正文/web 驗證待續
+    _n.setdefault("links", {}).setdefault("reports", [])
+    if _rep not in _n["links"]["reports"]:
+        _n["links"]["reports"].append(_rep)
+_nmap["T-E3"].setdefault("missing_info", []).append("scaffold 完成；3 識別碼衝突 + 8 UNVERIFIED-PMID + 3 L3 錨待 web-enabled session 跑 /citation-verification")
+
 # sanitize: drop dangling depends_on / external-ify dangling io refs (dropped T-S3/T-S4 etc.)
 idset = {n["id"] for n in nodes}
 for n in nodes:
