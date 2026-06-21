@@ -3,6 +3,8 @@ figs/
 figs_fdr/
 figs_kprofile/
 figs_cantsplit/
+figs_decisionflow/
+figs_outlier/
 records.json
 records_wg.json
 records_wg2.json
@@ -11,6 +13,9 @@ ksweep_records_tumor.json
 ksweep_records_merged.json
 kprofile_loci_tumor.json
 kprofile_loci_merged.json
+decisionflow_records_tumor.json
+decisionflow_records_merged.json
+decisionflow_cls_T4.json
 # logs / 重生中間檔
 *.log
 *.vcf
@@ -19,3 +24,12 @@ kprofile_loci_merged.json
 qc_*.png
 # full self-contained workstation (dual-panel 後 ~9MB 過大；用 _lite 版 + figs_fdr/)
 20260618_ksweep_fdr_confirmation_workstation_01.standalone.html
+figs_brca2/
+brca2_multiaxis_out.json
+20260620_brca2_percpg_observation_01.standalone.html
+percpg.log
+percpg_records.json
+20260620_ism_vs_modkit_percpg_comparison_01.standalone.html
+figs_s3/
+20260620_s3_percpg0_joint_observation_01.standalone.html
+20260620_*.standalone.html
