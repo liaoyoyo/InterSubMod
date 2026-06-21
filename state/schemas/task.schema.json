@@ -88,6 +88,7 @@
           "headline": { "type": "string", "description": "v3.2 L0: one-line 重點結論 (always shown). Fallback = title." },
           "summary": { "type": "string", "description": "v3.2 L1: 2-3 sentence 摘要 (always shown). Fallback = notes." },
           "goal": { "type": "string", "description": "v3.4: 目標/完成判準 (done-criteria) — 做完長什麼樣、怎判定 (6 維確認用)." },
+          "is_gate": { "type": "boolean", "description": "v3.5: 標記為 OPEN 決策 gate（即使掛在 topic 領域下，仍會被『決策 gates 彙整』跨切視圖列出）." },
           "problem": {
             "type": ["object", "null"],
             "description": "v3.1: if this task hit a problem. LINK to existing machinery — do not reinvent. ref = path to a postmortem / NEGATIVE ledger entry.",

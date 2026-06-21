@@ -993,8 +993,16 @@ def build_spec(data):
             ph += "<b>驗證規格（無問題的任務）：</b><ul>" + "".join(
                 f'<li><code>{html.escape(n["id"])}</code> {html.escape(n["verify"].get("how",""))} ↳<code>{html.escape(n["verify"].get("ref") or "")}</code>'
                 + (f'　<span class="sub">失敗回饋：{html.escape(n["on_fail"])}</span>' if n.get("on_fail") else "") + "</li>" for n in vonly) + "</ul>"
+        gate_nodes = [n for n in nodes if n.get("is_gate")]
+        gh = '<div class="sub">OPEN 決策 gate 跨切彙整（掛在各領域下，但影響論文 Grade/tier/故事/精確度）：</div><table><tr><th>gate</th><th>狀態</th><th>領域</th><th>目標/完成判準</th></tr>'
+        for gn in sorted(gate_nodes, key=lambda x: x["id"]):
+            gh += (f'<tr><td><code style="cursor:pointer;color:#60a5fa" onclick="focusFlow(\'{gn["id"]}\')">{html.escape(gn["id"])}</code> {html.escape(gn["title"][:28])}</td>'
+                   f'<td style="color:{STATUS_COLOR.get(gn.get("status"),"#94a3b8")}">{STATUS_MARK.get(gn.get("status"),"·")} {STATUS_LABEL.get(gn.get("status"),"")}</td>'
+                   f'<td>{html.escape(gn.get("parent",""))}</td><td class="sub">{html.escape((gn.get("goal") or "")[:50])}</td></tr>')
+        gh += "</table>"
         folded = (
-            f'<details><summary style="cursor:pointer">驗證結果（validate + check）</summary><div style="padding:8px 0">{vrows}</div></details>'
+            (f'<details open><summary style="cursor:pointer;color:#f2c94c">🚩 決策 gates 彙整（{len(gate_nodes)} 個 OPEN 決策，跨領域）</summary><div style="padding:8px 0">{gh}</div></details>' if gate_nodes else "")
+            + f'<details><summary style="cursor:pointer">驗證結果（validate + check）</summary><div style="padding:8px 0">{vrows}</div></details>'
             f'<details><summary style="cursor:pointer">Ready — 可立即開跑</summary><div style="padding:8px 0">{rb}</div></details>'
             f'<details><summary style="cursor:pointer">細節不清楚 / 缺資訊</summary><div style="padding:8px 0">{dg}</div></details>'
             f'<details><summary style="cursor:pointer">問題與驗證回饋彙整（連既有 postmortem/run-evaluator/ledger）</summary><div style="padding:8px 0">{ph}</div></details>'

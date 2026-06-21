@@ -1,12 +1,14 @@
 # 研究任務樹（WBS） — TASKS.md
 
 > **自動產生，請勿手改。** 唯一真值 = `state/tasks/graph.json`；改後重跑 `python3 scripts/tasks/task_graph.py --graph state/tasks/graph.json render`。
-> 生成 2026-06-20 · build `a4f563a` @ `research/subclonal-reconstruction-202606` · 節點 100（✅34 ◐20 ⛔1 ☐44 ✗1） · focus = `T-SL`
+> 生成 2026-06-20 · build `f8212f6` @ `research/subclonal-reconstruction-202606` · 節點 102（✅34 ◐20 ⛔1 ☐46 ✗1） · focus = `T-SL`
 
 ## ⓪ 驗證（validate + check）
 - validate: ✅ PASS
-- check: 6 findings
+- check: 8 findings
   - DRIFT `T-C1`: 指向的 cycle 20260602-1521-g1-zar1l-brca2-asm-survey 在 active.json 已 stale 18 天
+  - DETAIL `T-GATE-GD`: compute 任務缺 I/O 規格
+  - DETAIL `T-GATE-GE`: compute 任務缺 I/O 規格
   - DETAIL `T-C-CISEXP`: compute 任務缺 I/O 規格
   - DETAIL `T-ISM-V2-RECON`: compute 任務缺 I/O 規格
   - DETAIL `T-METHOD-FDR`: compute 任務缺 I/O 規格
@@ -28,6 +30,7 @@
     - ✅ `T-C5` ASM 位點顯示頁 + CramersV 閘控 [分析/已完成]　in:●significance…　↳project_asm_locus_display_and_cramersv_reliability_gate
     - ☐ `T-C6` COLO829 單樣本 ASM 補強（解單樣本上限） [程式/待辦]　in:●normal 甲基 ba…,●COLO829 tagg…　缺:COLO829 normal 甲基缺　↳project_zar1l_brca2_asm_verification
     - ☐ `T-C7` V-4 BRCA2 exemplar copy-partition 重驗（illustrative vs partial-cis 口徑） [分析/待辦]　↳project_zar1l_brca2_asm_verification
+    - ☐ `T-GATE-GC` G-C：cis vs 突變足跡 ±1-2kb 空間分離（normal-anchored 寬空間控制） [分析/待辦]　↳project_apriori_subclone_classification_model
   - ◐ `T-ASSET` 資料資產 [里程碑/進行中]
     - ✅ `T-A1` 6 樣本 tagged BAM + somatic VCF + ISM TP/FP 齊備 [資料/已完成]　in:●HKU/DORADO O…　↳project_subclonal_reconstruction_paper_focus
     - ◐ `T-A2` 6 樣本 normal 甲基（5/6 ready，COLO829 缺） [資料/進行中]　in:●tagged BAM,●normal BAM (…　缺:COLO829 normal 甲基缺；6 normal 全 zhenyu112 帳號 = SPOF　↳project_subclonal_reconstruction_paper_focus
@@ -39,14 +42,13 @@
     - ◐ `T-E2` 6 樣本 clone/subclone 外部真值盤點 [分析/進行中]　in:●6 樣本清單,●外部 truth (Fa…　缺:H1437/H2009/HCC1937/HCC1954 缺專門解答（需自證）　↳project_six_sample_clone_subclone_external_truth
     - ☐ `T-E3` citation-verification（投稿前） [撰寫/待辦]　↳project_external_validation_library
   - ◐ `T-GATE` 決策 gates（OPEN） [里程碑/進行中]
-    - ☐ `T-GATE-GA` G-A：跨 6 樣本 → 定單樣本 ⭐3 vs ⭐4 [分析/待辦]　缺:待 COLO829 normal 甲基；G-A 統計未跑　↳project_methyl_phasing_assist_line
-    - ☐ `T-GATE-GB` G-B：within-hap somatic null → 定甲基-subclone 故事 [分析/待辦]　缺:未跑前甲基-subclone 只能寫存在性窄+負　↳project_apriori_subclone_classification_model
-    - ☐ `T-GATE-GC` G-C：cis vs 突變足跡 ±1-2kb 空間分離（normal-anchored 寬空間控制） [分析/待辦]　↳project_apriori_subclone_classification_model
     - ☐ `T-GATE-HD1` HD-1：R-SELFREF → 定論文 Grade [分析/待辦]　缺:未決；影響論文主張強度　↳project_subclonal_reconstruction_paper_focus
     - ☐ `T-GATE-REDLINE` 誠實護欄紅線注入 writing 節點 verify gate + 成稿前跨章節術語掃描 [撰寫/待辦]　缺:紅線目前只在 memory　↳project_thesis_writing_architecture
     - ☐ `T-RETIRE` 退役/封存 active.json g1/g6 stale cycle（harness hygiene） [分析/待辦]　↳project_loop_engineering_harness_review
   - ◐ `T-ISM` 完成 ISM 程式 [里程碑/進行中]　↳project_ism_method_soundness_validation
     - ☐ `T-CSC` 驗證判讀確認 → clone / subclone [分析/待辦]　缺:ISM 完成才開跑；六層框架 ⑥ subclone 下游　↳project_apriori_subclone_classification_model
+    - ☐ `T-GATE-GB` G-B：within-hap somatic null → 定甲基-subclone 故事 [分析/待辦]　缺:未跑前甲基-subclone 只能寫存在性窄+負　↳project_apriori_subclone_classification_model
+    - ☐ `T-GATE-GD` G-D：真實重建 demo（從 ISM verdict 實際重建一棵樹） [程式/待辦]　缺:長期 roadmap；依賴 V-2 系統掃描　↳project_six_sample_clone_subclone_external_truth
     - ☐ `T-ISM-V2-RECON` V-2 重建支持位點 pre-reg 判準 + 全基因組×6 掃描 + 頻率/位點 catalog [程式/待辦]　缺:依賴 T-A4 第二 caller　↳project_chr2_18m_subclone_locus_verification
     - ◐ `T-S1` a-priori 4-pop subclone 分類模型 ADOPT_WITH_CORRECTIONS [分析/進行中]　in:●TP/FP/FN+cis…,●haplotag 1-1…　缺:B 排序 illustrative / somatic 未定待 G-B　↳20260617_keep_remove_classification_conditioned_axes
     - ✗ `T-S2` tumor-only 非監督軸 NEGATIVE（勿再開） [分析/已放棄]　in:●a-priori 分類　↳20260617_tumor_only_unsupervised_axis_negative
@@ -79,6 +81,7 @@
     - ✅ `T-L2` chr2:18M × SEQC2 外部驗證 + AI 解釋指南 [分析/已完成]　in:●chr2:18M L2 …,●SEQC2 truth　↳project_hcc1395_chr2_18M_subclone_external_validation
     - ☐ `T-L3` chr8 全-LOH 第二 exemplar locus 驗證 [分析/待辦]　↳project_hcc1395_chr8_hotspot
   - ◐ `T-METHOD` 方法健全性 [里程碑/進行中]
+    - ☐ `T-GATE-GE` G-E：正交第二定相 pipeline（破 single-pipeline 自我參照） [程式/待辦]　缺:長期 roadmap；與 HD-1 相關　↳project_subclonal_reconstruction_paper_focus
     - ☐ `T-METHOD-BINVER` binary_version 一致性檢核 [程式/待辦]　↳project_new_data_integrity_audit_2026_06_17
     - ☐ `T-METHOD-FDR` V-7 FDR / 多重檢定校準：跨位點 null + BH-FDR + n_reads 校正 [程式/待辦]　缺:投稿前必補 🔴　↳project_code_methodology_audit_2026_06_10
     - ☐ `T-METHOD-PSLIMIT` phase-set 跨 block 無 read/cell 連結（限制） [分析/待辦]　↳project_O12_loh_methylation_scenarios
@@ -97,6 +100,7 @@
     - ✅ `T-NEG-D3` D3 甲基分群=germline 非 somatic 驅動 [分析/已完成]　↳project_tumor_only_axis_negative_subclone_classification
     - ✅ `T-NEG-D4` D4 NGroups=phasing 非甲基訊號 [分析/已完成]　↳project_hpfinengroups_subclone_marker
   - ◐ `T-PHASE` 甲基-assist phasing [里程碑/進行中]
+    - ☐ `T-GATE-GA` G-A：跨 6 樣本 → 定單樣本 ⭐3 vs ⭐4 [分析/待辦]　缺:待 COLO829 normal 甲基；G-A 統計未跑　↳project_methyl_phasing_assist_line
     - ✅ `T-P1` 甲基救 unphase / haplotag assist V1-V12 [程式/已完成]　in:●tagged BAM,●longphase-S …　↳project_methyl_phasing_assist_line
     - ☐ `T-P2` 修正 T2 OVERSTATED 口徑（1-1/2-1 可分歸 H3 未證） [撰寫/待辦]　in:●V1-V12 結果　↳project_methyl_phasing_assist_line
   - ◐ `T-WRITE` 論文撰寫 [里程碑/進行中]
@@ -117,7 +121,7 @@
     - ☐ `T-W3` 整合篇章（ASM-char + 4 道 NEGATIVE + LOH 脊柱） [撰寫/待辦]　in:●COLO829 pair…,●Stage③ 結果　缺:待上游 COLO829 / Stage③ / 外部真值補齊　↳project_subclonal_reconstruction_paper_focus
     - ✅ `T-W4` 論文敘述對抗稽核共識底座（51 agents / 606 claim / F=0） [撰寫/已完成]　in:●論文 spec,●606 claim 集　缺:Hard-Gate 待修正 ledger:95 / CURRENT_FOCUS:137　↳project_paper_claim_audit_consensus_base_2026_06_12
 
-## Ready — 可立即開跑（35）
+## Ready — 可立即開跑（36）
 - `T-A3` 6 normal 甲基帳號 SPOF 備份　owner: user
 - `T-A4` 驗證 6 樣本 DeepVariant/DeepSomatic 可用性（兩-caller 前置）+ 修 landscape05 CASTLE-COLO829 過度宣稱　owner: claude+user
 - `T-C-CISEXP` V-1 乾淨 somatic-cis 真稀有性擴測（normal-anchored × 全合格位點 × 6 樣本）　owner: claude
@@ -127,6 +131,7 @@
 - `T-E3` citation-verification（投稿前）　owner: claude
 - `T-GATE-GB` G-B：within-hap somatic null → 定甲基-subclone 故事　owner: claude+user
 - `T-GATE-GC` G-C：cis vs 突變足跡 ±1-2kb 空間分離（normal-anchored 寬空間控制）　owner: claude
+- `T-GATE-GE` G-E：正交第二定相 pipeline（破 single-pipeline 自我參照）　owner: claude+user
 - `T-GATE-HD1` HD-1：R-SELFREF → 定論文 Grade　owner: claude+user
 - `T-GATE-REDLINE` 誠實護欄紅線注入 writing 節點 verify gate + 成稿前跨章節術語掃描　owner: claude+user
 - `T-L3` chr8 全-LOH 第二 exemplar locus 驗證　owner: claude
@@ -155,6 +160,8 @@
 - `T-W-TABS` Table1-3（樣本統計/工具對照/NEGATIVE 摘要）　owner: claude+user
 
 ## 細節不清楚 / 缺資訊
+- `T-GATE-GD`: compute 任務缺 I/O 規格
+- `T-GATE-GE`: compute 任務缺 I/O 規格
 - `T-C-CISEXP`: compute 任務缺 I/O 規格
 - `T-ISM-V2-RECON`: compute 任務缺 I/O 規格
 - `T-METHOD-FDR`: compute 任務缺 I/O 規格
@@ -182,6 +189,8 @@
 - `T-GATE-HD1`: 未決；影響論文主張強度
 - `T-GATE-GA`: 待 COLO829 normal 甲基；G-A 統計未跑
 - `T-GATE-GB`: 未跑前甲基-subclone 只能寫存在性窄+負
+- `T-GATE-GD`: 長期 roadmap；依賴 V-2 系統掃描
+- `T-GATE-GE`: 長期 roadmap；與 HD-1 相關
 - `T-W-CH4`: R6 待 G-A；數字待真值
 - `T-W-ABS`: 🔴 須點明分工；待 G-A 數字
 - `T-W-FIGS`: 5/6 Fig 物理不存在

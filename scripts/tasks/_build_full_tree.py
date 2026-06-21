@@ -46,11 +46,12 @@ def C(cid, title, headline, owner="claude", status="in_progress"):  # container 
 
 
 def N(nid, title, parent, kind, status, owner="claude", depends_on=None, headline=None,
-      io=None, links=None, missing=None, notes=None, verify=None, goal=None):
+      io=None, links=None, missing=None, notes=None, verify=None, goal=None, is_gate=False):
     n = {"id": nid, "title": title, "parent": parent, "kind": kind, "status": status,
          "depends_on": depends_on or [], "owner": owner, "added_at": TODAY}
     if headline: n["headline"] = headline
     if goal: n["goal"] = goal
+    if is_gate: n["is_gate"] = True
     if io: n["io"] = io
     if links: n["links"] = links
     if missing: n["missing_info"] = missing
@@ -128,16 +129,27 @@ nodes.append(N("T-NEG-D3", "D3 甲基分群=germline 非 somatic 驅動", "T-NEG
 nodes.append(N("T-NEG-D4", "D4 NGroups=phasing 非甲基訊號", "T-NEG", "analysis", "done", "claude",
                headline="NGroups 由 HP-tag 數決定（LabelTest.cpp:265），甲基未參與；HD-4 RESOLVED", links={"memory": ["project_hpfinengroups_subclone_marker"]}))
 # 決策 gates (OPEN)
-nodes.append(N("T-GATE-HD1", "HD-1：R-SELFREF → 定論文 Grade", "T-GATE", "analysis", "todo", "claude+user",
+nodes.append(N("T-GATE-HD1", "HD-1：R-SELFREF → 定論文 Grade", "T-GATE", "analysis", "todo", "claude+user", is_gate=True,
                headline="phasing 脊柱 by-construction 循環 → 跑 R-SELFREF(~25-50hr) 對照 positive-spine 或降 characterization",
+               goal="R-SELFREF 對照 positive-spine 跑完 → 裁決脊柱循環是否成立 → 論文 Grade 與主張強度定案",
                missing=["未決；影響論文主張強度"], links={"memory": ["project_subclonal_reconstruction_paper_focus"]},
                verify={"how": "R-SELFREF C++ 對照", "ref": "/run-evaluator"}))
-nodes.append(N("T-GATE-GA", "G-A：跨 6 樣本 → 定單樣本 ⭐3 vs ⭐4", "T-GATE", "analysis", "todo", "claude+user",
+nodes.append(N("T-GATE-GA", "G-A：跨 6 樣本 → 定單樣本 ⭐3 vs ⭐4", "T-PHASE", "analysis", "todo", "claude+user", is_gate=True,
                depends_on=["T-M1"], headline="V1-V12 跨 6 樣本重跑（normal 甲基 5/6 ready）→ 決定 phasing tier",
+               goal="V1-V12 跨 6 樣本重跑、救援數字跨樣本復現 → 定 phasing 單樣本 ⭐3 vs ⭐4",
                missing=["待 COLO829 normal 甲基；G-A 統計未跑"], links={"memory": ["project_methyl_phasing_assist_line"]}))
-nodes.append(N("T-GATE-GB", "G-B：within-hap somatic null → 定甲基-subclone 故事", "T-GATE", "analysis", "todo", "claude+user",
+nodes.append(N("T-GATE-GB", "G-B：within-hap somatic null → 定甲基-subclone 故事", "T-ISM", "analysis", "todo", "claude+user", is_gate=True,
                headline="within-hap somatic-vs-baseline 對照（非 germline-het null）→ 甲基-subclone 是 somatic 還 germline",
+               goal="within-hap somatic-vs-baseline 對照跑完 → 定甲基-subclone 是 somatic 還 germline → 決故事寫存在性窄+負 還是更強",
                missing=["未跑前甲基-subclone 只能寫存在性窄+負"], links={"memory": ["project_apriori_subclone_classification_model"]}))
+nodes.append(N("T-GATE-GD", "G-D：真實重建 demo（從 ISM verdict 實際重建一棵樹）", "T-ISM", "compute", "todo", "claude+user", is_gate=True,
+               depends_on=["T-ISM-V2-RECON"], headline="用重建支持位點實際重建 subclone 樹 → 證 reconstruction 非僅 proof-of-concept",
+               goal="從 ISM verdict + 重建支持位點實際重建一棵 subclone 樹（與外部真值對照）→ reconstruction 說服力升級",
+               missing=["長期 roadmap；依賴 V-2 系統掃描"], links={"memory": ["project_six_sample_clone_subclone_external_truth"]}))
+nodes.append(N("T-GATE-GE", "G-E：正交第二定相 pipeline（破 single-pipeline 自我參照）", "T-METHOD", "compute", "todo", "claude+user", is_gate=True,
+               headline="第二條正交 haplotag/phasing pipeline → 破 longphase-S 單 pipeline 自我參照、解 HD-1 循環、升 tier 天花板",
+               goal="正交第二定相 pipeline 跑出獨立 haplotag → 對照 longphase-S → 解 single-pipeline 循環 + 衝 ⭐4",
+               missing=["長期 roadmap；與 HD-1 相關"], links={"memory": ["project_subclonal_reconstruction_paper_focus"]}))
 # 論文撰寫 細化
 nodes.append(N("T-W-CH1", "Ch1 緒論", "T-WRITE", "writing", "todo", "claude+user", headline="廣→gap（甲基加值未量化/解析度天花板）→三解析度目標", links={"memory": ["project_thesis_writing_architecture"]}))
 nodes.append(N("T-W-CH2", "Ch2 文獻探討", "T-WRITE", "writing", "todo", "claude+user", headline="重建骨幹→ONT 甲基→ASM→演化邊界→分群 4 軸地景→ISM 定位", links={"memory": ["project_ism_vs_external_methylation_tools_comparison"]}))
@@ -174,7 +186,7 @@ nodes.append(N("T-METHOD-FDR", "V-7 FDR / 多重檢定校準：跨位點 null + 
                headline="跨位點 label-shuffle null + BH-FDR + chr17 Bonferroni(×816)/genome-perm + n_reads 回歸校正（投稿前必補）",
                goal="FDR/BH/Bonferroni across loci 算完 + n_reads 校正 epipolymorphism(O11 0.845→0.530)；ch3_methods 補上",
                missing=["投稿前必補 🔴"], links={"memory": ["project_code_methodology_audit_2026_06_10"]}))
-nodes.append(N("T-GATE-GC", "G-C：cis vs 突變足跡 ±1-2kb 空間分離（normal-anchored 寬空間控制）", "T-GATE", "analysis", "todo", "claude",
+nodes.append(N("T-GATE-GC", "G-C：cis vs 突變足跡 ±1-2kb 空間分離（normal-anchored 寬空間控制）", "T-ASM", "analysis", "todo", "claude", is_gate=True,
                headline="±1-2kb 系統空間尺度控制 → 決個案能否寫『重建』而非單純 cis（R5 精確度）",
                goal="±1-2kb 空間分離方法跑完，定 chr2/chr17 個案的 cis vs footprint 區辨",
                links={"memory": ["project_apriori_subclone_classification_model"]}))
@@ -216,6 +228,33 @@ nodes.append(N("T-RETIRE", "退役/封存 active.json g1/g6 stale cycle（harnes
 for n in nodes:
     if n["id"] == "T-W-CH4":
         n["depends_on"] = ["T-C-CROSS"]  # R6 needs cross-sample
+
+# 補齊新任務缺的 goal（提議；待使用者較驗）
+GOALS = {
+    "T-A3": "6 normal 甲基/BAM 異地備份完成，解除 zhenyu112 單帳號 SPOF",
+    "T-C-CROSS": "6/6 excess-over-null 做成 R6 正式圖 + Table（含 effect size / CI），非僅計算",
+    "T-SUP-CLUST": "（已達）clusterability 驅動=n_CpG 非 depth/CN；LOH 抑制分群 6/6",
+    "T-SUP-COPY": "（已達）CN vs AUC 無相關(ρ=0.035)；copy 非 driver；副產品可偵 LOH",
+    "T-SUP-LOCUS": "（已達）D1-D7×I1-I8 窮舉；最像 subclone 的組合 undecidable",
+    "T-E3": "每 citation WebSearch+Scholar 驗證後才入 .bib；.bib 完整、無假引用",
+    "T-W-CH1": "Ch1 緒論寫完：廣→gap（甲基加值未量化/解析度天花板）→三解析度目標",
+    "T-W-CH2": "Ch2 文獻寫完：重建骨幹→ONT甲基→ASM→演化邊界→分群4軸地景→ISM定位",
+    "T-W-CH3": "Ch3 材料方法寫完：6 cell line×3癌種→haplotag 6-state→5mCG→ISM 6核心→null設計",
+    "T-W-CH4": "Ch4 結果寫完：R1-R7 全填真值（R6 跨樣本待 G-A；數字經 §13 溯源）",
+    "T-W-CH5": "Ch5 討論寫完：最強 takeaway→subclone 天花板 bound→對齊文獻→bounded-claims 專段",
+    "T-W-CH6": "Ch6 結論寫完：甲基加了什麼（germline救援/分支）+ 沒加什麼（subclone判別/filter）",
+    "T-W-ABS": "摘要寫完，首段點明分工（haplotag 骨幹 / 甲基 characterize 有界），數字待 G-A",
+    "T-W-FIG1": "Fig1 方法總覽 schematic 實圖完成（非僅 spec），可放正文",
+    "T-W-FIGS": "Fig2-6 完成、真值驗證；Fig6 跨樣本待 G-A/T-C-CROSS",
+    "T-W-TABS": "Table1 樣本統計 / Table2 工具對照 / Table3 NEGATIVE 摘要 完成",
+    "T-NEG-D1": "（已達 NEGATIVE）816 可測位點僅 1 乾淨 somatic-cis → 論文『乾淨 cis-ASM 極稀有、甲基非 TP/FP filter』脊柱",
+    "T-NEG-D2": "（已達 NEGATIVE）甲基主驅動=germline haplotype 差非 somatic（normal HP1/HP2 固定）→ ASM characterization 邊界",
+    "T-NEG-D3": "（已達 NEGATIVE）無監督分群對齊 germline 載體 85% → tumor-only subclone 軸 NEGATIVE，勿再開",
+    "T-NEG-D4": "（已達 NEGATIVE）NGroups 由 HP-tag 數決定、甲基未參與 → NGroups=phasing signature 非 subclone marker",
+}
+for _n in nodes:
+    if _n["id"] in GOALS and "goal" not in _n:
+        _n["goal"] = GOALS[_n["id"]]
 
 # sanitize: drop dangling depends_on / external-ify dangling io refs (dropped T-S3/T-S4 etc.)
 idset = {n["id"] for n in nodes}
