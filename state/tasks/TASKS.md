@@ -1,7 +1,7 @@
 # 研究任務樹（WBS） — TASKS.md
 
 > **自動產生，請勿手改。** 唯一真值 = `state/tasks/graph.json`；改後重跑 `python3 scripts/tasks/task_graph.py --graph state/tasks/graph.json render`。
-> 生成 2026-06-22 · build `e8e3f43` @ `research/subclonal-reconstruction-202606` · 節點 110（✅39 ◐25 ⛔1 ☐44 ✗1） · focus = `T-SL`
+> 生成 2026-06-22 · build `7bf2ed3` @ `research/subclonal-reconstruction-202606` · 節點 110（✅39 ◐25 ⛔1 ☐44 ✗1） · focus = `T-SL`
 
 ## ⓪ 驗證（validate + check）
 - validate: ✅ PASS

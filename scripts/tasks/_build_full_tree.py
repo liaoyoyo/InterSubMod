@@ -326,6 +326,24 @@ for _n in nodes:
     if _n["id"] in GOALS and "goal" not in _n:
         _n["goal"] = GOALS[_n["id"]]
 
+# ---- 06-22 session 分派（links.branch/worktree；D3 暫緩→不派 COLO829 鏈；D2/D4 未決→S4 案例層不派）----
+SESSIONS = [
+    ("feat/q1-coverage",        "../wt-q1-coverage",        ["T-Q1-COVERAGE"]),
+    ("feat/method-verify-cpp",  "../wt-method-verify-cpp",  ["T-V3", "T-METHOD-EFFECTSIZE", "T-SL-C3", "T-SL-C1-F"]),
+    ("docs/limitations",        "../wt-docs-limitations",   ["T-C-UNMASK", "T-METHOD-PSLIMIT", "T-E3", "T-P2"]),
+    ("feat/analysis-ext",       "../wt-analysis-ext",       ["T-METHOD-FDR", "T-C-CISEXP", "T-V5"]),
+    ("chore/hygiene",           "../wt-hygiene",            ["T-W-ISMDEDUP", "T-RETIRE", "T-METHOD-BINVER", "T-METHOD-TESTS"]),
+]
+_nmap = {n["id"]: n for n in nodes}
+for _branch, _wt, _ids in SESSIONS:
+    for _tid in _ids:
+        _n = _nmap.get(_tid)
+        if not _n:
+            continue
+        _n.setdefault("links", {})
+        _n["links"]["branch"] = _branch
+        _n["links"]["worktree"] = _wt
+
 # sanitize: drop dangling depends_on / external-ify dangling io refs (dropped T-S3/T-S4 etc.)
 idset = {n["id"] for n in nodes}
 for n in nodes:
