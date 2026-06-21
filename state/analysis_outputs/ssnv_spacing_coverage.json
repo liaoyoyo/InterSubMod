@@ -1,0 +1,129 @@
+{
+  "task": "T-Q1-COVERAGE",
+  "generated_utc": "2026-06-21T21:00:51.429225+00:00",
+  "inputs": {
+    "tp_vcf": "/big8_disk/liaoyoyo2001/data/vcf/ClairS_ssrs/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/pileup/filtered_snv_tp.vcf.gz",
+    "fp_vcf": "/big8_disk/liaoyoyo2001/data/vcf/ClairS_ssrs/HCC1395/ONT_5khz_simplex_5mCG_5hmCG/pileup/filtered_snv_fp.vcf.gz",
+    "bam": "/big8_disk/liaoyoyo2001/data/bam/HCC1395_Tmode_tagged_ClairS_pileup_v040_woFilter.bam",
+    "bam_symlink": "/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam"
+  },
+  "scope": {
+    "ssnv_set_primary": "TP (ClairS pileup confirmed vs SEQC2 truth)",
+    "chromosomes": "autosomes chr1-22 only",
+    "read_length_metric": "reference-consumed span (reference_end - reference_start)",
+    "window_bp": 5000
+  },
+  "ssnv_totals": {
+    "tp_n_total_records": 30490,
+    "tp_n_pass": 30490,
+    "tp_n_nonpass": 0,
+    "tp_n_autosome_used": 30490,
+    "tp_n_nonautosome": 0,
+    "tp_filters_seen": {
+      "PASS": 30490
+    },
+    "fp_n_total_records": 4842,
+    "fp_n_autosome_used": 4842
+  },
+  "genome": {
+    "autosome_total_bp": 2875001522,
+    "n_autosomes": 22,
+    "missing_autosomes": []
+  },
+  "spacing": {
+    "n_ssnv": 30490,
+    "n_adjacent_pairs": 30468,
+    "gap_median_bp": 51425.0,
+    "gap_mean_bp": 87809.48523040567,
+    "gap_min_bp": 1,
+    "gap_max_bp": 18567723,
+    "gap_percentiles_bp": {
+      "p1": 1.0,
+      "p5": 1893.7500000000007,
+      "p10": 5466.0,
+      "p25": 18983.0,
+      "p50": 51425.0,
+      "p75": 112361.0,
+      "p90": 202543.19999999995,
+      "p95": 281444.0499999999,
+      "p99": 484603.44999999966
+    },
+    "mean_density_ssnv_per_mb": 10.605211776997452,
+    "expected_uniform_spacing_bp": 94293.26080682191,
+    "frac_gaps_le_50kb": 0.49192595510043324,
+    "frac_gaps_le_window_2x": 0.15429302875147696,
+    "per_chrom_ssnv_counts": {
+      "chr1": 2624,
+      "chr10": 1304,
+      "chr11": 1191,
+      "chr12": 1388,
+      "chr13": 895,
+      "chr14": 1196,
+      "chr15": 1009,
+      "chr16": 635,
+      "chr17": 844,
+      "chr18": 876,
+      "chr19": 672,
+      "chr2": 2672,
+      "chr20": 859,
+      "chr21": 376,
+      "chr22": 471,
+      "chr3": 2104,
+      "chr4": 2257,
+      "chr5": 2047,
+      "chr6": 1239,
+      "chr7": 2433,
+      "chr8": 2094,
+      "chr9": 1304
+    }
+  },
+  "read_length": {
+    "n_reads_sampled": 200000,
+    "note": "first N mapped primary reads via fetch() (genome-ordered, chr1-start onward)",
+    "ref_span_median_bp": 4898.0,
+    "ref_span_mean_bp": 9624.51234,
+    "ref_span_percentiles_bp": {
+      "p1": 262.0,
+      "p5": 508.0,
+      "p10": 700.0,
+      "p25": 1555.0,
+      "p50": 4898.0,
+      "p75": 13864.0,
+      "p90": 25877.20000000001,
+      "p95": 33985.149999999965,
+      "p99": 49251.090000000084
+    },
+    "query_len_median_bp": 5016.0,
+    "query_len_mean_bp": 9841.390645
+  },
+  "span_analytic_poisson": {
+    "ssnv_density_per_bp": 1.0605211776997453e-05,
+    "ssnv_density_per_kb": 0.010605211776997452,
+    "lambda_at_median_read": 0.05194432728373352,
+    "P_ge1_ssnv_read_weighted": 0.09098503652211448,
+    "P_ge2_ssnv_read_weighted": 0.009921408469119182,
+    "method": "Poisson with lambda=density*ref_span, averaged over sampled read-span distribution"
+  },
+  "span_empirical": {
+    "n_reads_intersected": 50000,
+    "note": "reads overlapping sSNV coords by genomic interval; spans gap if read covers >=2 sSNV positions",
+    "P_ge1_ssnv": 0.05838,
+    "P_ge2_ssnv": 0.0074,
+    "frac_reads_0_ssnv": 0.94162,
+    "ssnv_per_read_hist": {
+      "0": 47081,
+      "1": 2549,
+      "2": 322,
+      "3": 45,
+      "4": 3
+    },
+    "max_ssnv_on_single_read": 4
+  },
+  "window_coverage": {
+    "window_full_width_bp": 10000,
+    "frac_reads_span_ge_full_window": 0.331705,
+    "frac_reads_span_ge_half_window": 0.495265,
+    "median_windows_covered_per_read": 0.4898,
+    "note": "a read of ref span L can in principle inform the +/-5kb methylation context of a sSNV near its center; ratio L/window indicates how many full windows a read spans"
+  }
+}
