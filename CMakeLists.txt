@@ -94,6 +94,7 @@ add_library(inter_sub_mod_core
     src/core/DistanceMatrix.cpp
     src/core/TreeStructure.cpp
     src/core/HierarchicalClustering.cpp
+    src/core/PhyloLabeler.cpp
     src/core/MathUtils.cpp
     src/core/FisherExact.cpp
     src/core/GlobalTest.cpp
@@ -158,6 +159,7 @@ add_executable(run_tests
     tests/test_bam_reader.cpp
     tests/test_distance_matrix.cpp
     tests/test_hierarchical_clustering.cpp
+    tests/test_phylo_labeler.cpp
     tests/test_significance_stats.cpp
     tests/test_global_local.cpp
     tests/test_structure_bootstrap.cpp

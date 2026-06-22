@@ -606,6 +606,16 @@ private:
                                               RegionResult& result);
 
     /**
+     * @brief phylo-v4.1 native cluster labeling -> phylo_groups.tsv + summary.json.
+     *
+     * Tumor + HP-tagged filter, peel, PhyloLabeler modal-coarse (K=10 null95) + fine (null90) +
+     * "other" residual group. Replaces silhouette for the subclone-oriented partition; the binary
+     * emits labels so Python only reads + plots. Mirrors scripts/phylo_v4.py analyze_v4.
+     */
+    void compute_phylo_groups(const DistanceMatrix& all_dist, const std::vector<ReadInfo>& read_list,
+                              const MethylationMatrix& meth_mat, const std::string& clustering_dir) const;
+
+    /**
      * @brief Retain reads forming a complete (NaN-free) distance sub-matrix.
      *
      * Greedily drops the read with the fewest non-NaN partners until no NaN pair

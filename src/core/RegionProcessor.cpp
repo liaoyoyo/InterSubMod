@@ -20,6 +20,7 @@
 #include <unordered_set>
 
 #include "core/HierarchicalClustering.hpp"
+#include "core/PhyloLabeler.hpp"
 #include "core/MethylationMatrix.hpp"
 #include "core/NormalBaseline.hpp"
 #include "core/SignificanceAnalyzer.hpp"
@@ -2448,6 +2449,110 @@ bool RegionProcessor::within_hp_level_clean(const Eigen::MatrixXd& raw, const st
     return best_gap > 0.15 && (1.0 - best_within / total) > 0.5;
 }
 
+// phylo-v4.1 native labeling (replaces silhouette for the subclone-oriented tumor-only partition).
+// Filters tumor + germline-HP-tagged reads, peels to a complete sub-matrix, runs PhyloLabeler with
+// modal instability (K=10 null95) + fine (null90) + "other" residual group, writes phylo_groups.tsv.
+// Mirrors phylo_v4.py analyze_v4; the binary emits labels so Python only reads + plots.
+void RegionProcessor::compute_phylo_groups(const DistanceMatrix& all_dist, const std::vector<ReadInfo>& read_list,
+                                           const MethylationMatrix& meth_mat,
+                                           const std::string& clustering_dir) const {
+    static const std::set<std::string> kHpLabmap = {"1", "HP1", "1-1", "2", "HP2", "2-1"};
+    const int MINSZ = 3;
+    // 1. Filter: tumor + HP-tagged (matches Python is_tumor + hp in LABMAP).
+    std::vector<int> sel;
+    for (size_t i = 0; i < read_list.size(); ++i) {
+        if (read_list[i].is_tumor && kHpLabmap.count(read_list[i].hp_tag)) sel.push_back(static_cast<int>(i));
+    }
+    if (static_cast<int>(sel.size()) < 2 * MINSZ) return;
+    // 2. Extract tumor sub-distance + peel to a complete sub-matrix.
+    const int ns = static_cast<int>(sel.size());
+    Eigen::MatrixXd sub(ns, ns);
+    for (int i = 0; i < ns; ++i)
+        for (int j = 0; j < ns; ++j) sub(i, j) = all_dist.dist_matrix(sel[i], sel[j]);
+    std::vector<int> valid;
+    extract_complete_submatrix_indices(sub, valid);
+    const int n = static_cast<int>(valid.size());
+    if (n < 2 * MINSZ) return;
+    Eigen::MatrixXd dist(n, n);
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j) dist(i, j) = sub(valid[i], valid[j]);
+    Eigen::MatrixXd meth(n, meth_mat.raw_matrix.cols());
+    for (int i = 0; i < n; ++i) meth.row(i) = meth_mat.raw_matrix.row(sel[valid[i]]);
+
+    // 3. modal coarse (K=10 null95) — robust verdict + modal_frac + unstable (matches analyze_v4).
+    const int K = 10;
+    std::vector<PhyloResult> coarse_runs;
+    std::map<int, int> ng_count;
+    for (int k = 0; k < K; ++k) {
+        PhyloConfig cfg;
+        cfg.null_pct = 95.0;
+        cfg.seed = 20260622ull + static_cast<uint64_t>(k) * 101ull;
+        PhyloLabeler lab(cfg);
+        PhyloResult r = lab.label(dist, meth);
+        coarse_runs.push_back(r);
+        ng_count[r.n_groups]++;
+    }
+    int modal_ng = 0, modal_cnt = 0;
+    for (auto& kv : ng_count)
+        if (kv.second > modal_cnt) {
+            modal_cnt = kv.second;
+            modal_ng = kv.first;
+        }
+    double modal_frac = static_cast<double>(modal_cnt) / K;
+    bool unstable = modal_frac < 0.7;
+    int ng_min = 1 << 30, ng_max = 0;
+    for (auto& kv : ng_count) {
+        ng_min = std::min(ng_min, kv.first);
+        ng_max = std::max(ng_max, kv.first);
+    }
+    // representative coarse labeling = first run that produced modal_ng
+    PhyloResult coarse = coarse_runs.front();
+    for (auto& r : coarse_runs)
+        if (r.n_groups == modal_ng) {
+            coarse = r;
+            break;
+        }
+    // 4. fine (null90 candidate, low confidence).
+    PhyloConfig fcfg;
+    fcfg.null_pct = 90.0;
+    fcfg.seed = 20260622ull;
+    PhyloResult fine = PhyloLabeler(fcfg).label(dist, meth);
+
+    // 5. "other" residual group: coarse outliers >= MINSZ -> "other".
+    std::vector<std::string> clab = coarse.labels;
+    int n_out = static_cast<int>(std::count(clab.begin(), clab.end(), std::string("outlier")));
+    if (n_out >= MINSZ)
+        for (auto& l : clab)
+            if (l == "outlier") l = "other";
+    int n_other = static_cast<int>(std::count(clab.begin(), clab.end(), std::string("other")));
+    bool hidden_het = n > 0 && (static_cast<double>(n_other) / n > 0.30);
+
+    // 6. write phylo_groups.tsv (read_id/coarse/fine/is_other/is_outlier) + summary.
+    std::ofstream tsv(clustering_dir + "/phylo_groups.tsv");
+    if (tsv.is_open()) {
+        tsv << "read_id\tread_name\thp\talt_support\tcoarse_label\tfine_label\tis_other\tis_outlier\n";
+        for (int i = 0; i < n; ++i) {
+            const ReadInfo& r = read_list[sel[valid[i]]];
+            const std::string& cl = clab[i];
+            const std::string& fl = fine.valid ? fine.labels[i] : std::string("NA");
+            std::string al = (r.alt_support == AltSupport::REF)   ? "REF"
+                             : (r.alt_support == AltSupport::ALT) ? "ALT"
+                                                                  : "UNKNOWN";
+            tsv << r.read_id << "\t" << r.read_name << "\t" << r.hp_tag << "\t" << al << "\t" << cl << "\t" << fl
+                << "\t" << (cl == "other" ? 1 : 0) << "\t" << (cl == "outlier" ? 1 : 0) << "\n";
+        }
+        tsv.close();
+    }
+    std::ofstream js(clustering_dir + "/phylo_groups_summary.json");
+    if (js.is_open()) {
+        js << "{\"n\":" << n << ",\"coarse_ng\":" << modal_ng << ",\"modal_frac\":" << modal_frac
+           << ",\"fine_ng\":" << (fine.valid ? fine.n_groups : 0) << ",\"n_other\":" << n_other
+           << ",\"unstable\":" << (unstable ? "true" : "false") << ",\"ng_range\":[" << ng_min << "," << ng_max
+           << "],\"hidden_het\":" << (hidden_het ? "true" : "false") << ",\"seed\":20260622,\"rnull\":40}\n";
+        js.close();
+    }
+}
+
 void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& all_dist,
                                                            const std::vector<ReadInfo>& read_list,
                                                            const MethylationMatrix& meth_mat,
@@ -2455,6 +2560,9 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
                                                            const std::string& chr_name, const SomaticSnv& snv,
                                                            int region_id, RegionResult& result) {
     std::filesystem::create_directories(clustering_dir);
+
+    // phylo-v4.1 native cluster labeling (binary emits labels; Python only reads+plots).
+    compute_phylo_groups(all_dist, read_list, meth_mat, clustering_dir);
 
     // [P1a] HP-AUC: does the read-read distance recover the germline-HP label?
     // Ground truth = HP tag; computed on the full matrix (NaN pairs skipped under SKIP),
