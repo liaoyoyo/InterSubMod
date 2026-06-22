@@ -116,6 +116,7 @@ def new_cut(sub, min_sz=MIN_SZ, max_out_frac=MAX_OUT_FRAC, kmax=KMAX, sil_min=SI
     n=sub.shape[0]; Z,s=linkZ(sub); gm=grp_min(n)
     heights=np.sort(Z[:,2]); gaps=np.diff(heights)
     pos=gaps[gaps>0]; med=float(np.median(pos)) if pos.size else 0.0
+    maxg=float(gaps.max()) if gaps.size else 1.0
     res={}  # k_core -> best (by core silhouette)
     for i in range(len(gaps)):
         if med>0 and gaps[i] < gap_mult*med: continue          # 只在顯著 gap 切
@@ -131,11 +132,15 @@ def new_cut(sub, min_sz=MIN_SZ, max_out_frac=MAX_OUT_FRAC, kmax=KMAX, sil_min=SI
         try: sep=float(silhouette_score(s[np.ix_(ci,ci)],cl[cm],metric="precomputed"))
         except Exception: continue
         if sep<sil_min: continue                               # 分離度閘
+        gr=round(gaps[i]/med,1) if med>0 else None       # gap-ratio: 此切點分支跳躍 ÷ 中位 gap
+        # big_gap: scale-invariant — 絕對(≥GAP_TH×中位) 且 相對(≥GAP_FRAC×該樹最大 gap)
+        big=bool(med>0 and gaps[i]>=GAP_TH*med and gaps[i]>=GAP_FRAC*maxg)
         prev=res.get(kc)
         if prev is None or sep>prev["sep"]:
             res[kc]={"k_core":kc,"t":round(t,6),"labels":cl.tolist(),"out_idx":out_idx,
                      "core_sizes":sorted([cnt[c] for c in core_lbls],reverse=True),
-                     "n_out":len(out_idx),"sep":sep}
+                     "n_out":len(out_idx),"sep":sep,"gap_ratio":gr,"big_gap":big,
+                     "gap_frac":round(gaps[i]/maxg,2) if maxg>0 else None}
     return Z,res
 
 def align_resolution(labels, out_idx, axis_lab):
@@ -147,6 +152,9 @@ def align_resolution(labels, out_idx, axis_lab):
     return cramerv(g,c)
 
 EXC_MIN=0.10   # null-excess 門檻（真實結構 = 扣 within-1-group null 後）
+GAP_TH=8.0     # gap 絕對地板（≥GAP_TH×中位 gap，確保樹有真結構）
+GAP_FRAC=0.40  # gap 相對門檻（≥GAP_FRAC×該樹最大 gap，scale-invariant：防大樹 n 大時中位 gap 極小→過切）
+# big_gap = gap ≥ max(GAP_TH×median, GAP_FRAC×max_gap)；精細度天花板用 big_gap 而非單純 ×median
 
 def analyze_locus(sub, P, hp_lab, alle_lab, rng):
     """三閘切群: balance(new_cut 內) + null-excess(真實?) + alignment(歸因?)。
@@ -166,18 +174,25 @@ def analyze_locus(sub, P, hp_lab, alle_lab, rng):
             al[ax]={"V":round(V,3) if V is not None else None,"p":round(p,4) if p is not None else None,
                     "e":round(e,1) if e is not None else None,"reliable":rel}
             if rel: reliable_axes.append(ax)
-        exc=stab_excess(sub,P,kc,rng)
+        # excess 評估實際 gap-cut 的「核心群」(去離群)，非 maxclust proxy(避免單離群讓 excess=None)
+        core=[i for i in range(n) if i not in set(r["out_idx"])]
+        exc=stab_excess(sub[np.ix_(core,core)], P[core], kc, rng) if len(core)>=2*MIN_SZ else None
         real=(exc is not None and exc>=EXC_MIN)
+        gr=r.get("gap_ratio"); big=bool(r.get("big_gap"))
+        # supported = 真實 且(big_gap[scale-invariant] 或 可靠對齊)→ 精細度天花板,防 excess 無限上升過切
+        supported=bool(real and (big or reliable_axes))
         conf=("CONFIRMED" if (real and reliable_axes) else
-              "REAL_NOVEL" if real else "NOT_REAL")
+              "REAL_NOVEL" if (real and big) else
+              "REAL_WEAKGAP" if real else "NOT_REAL")   # real 但 gap 弱且不對齊 → 不納精細度
         n_out=r["n_out"]; edge=bool(n_out>=gm)   # 邊緣群: 離群夠多→成一組
         resolutions.append({"k_core":kc,"core_sizes":r["core_sizes"],"n_outliers":n_out,
                             "edge_group":edge,"separation":round(r["sep"],3) if r["sep"] is not None else None,
-                            "stab_excess":exc,"real":real,"confidence":conf,
+                            "stab_excess":exc,"gap_ratio":gr,"gap_frac":r.get("gap_frac"),"big_gap":big,
+                            "real":real,"supported":supported,"confidence":conf,
                             "aligned_axes":reliable_axes,"align":al,"labels":r["labels"],"out_idx":r["out_idx"]})
     confirmed=[r for r in resolutions if r["confidence"]=="CONFIRMED"]
     novel=[r for r in resolutions if r["confidence"]=="REAL_NOVEL"]
-    real_res=confirmed+novel
+    real_res=[r for r in resolutions if r["supported"]]   # 精細度只納 supported(大跳或對齊)
     def perread_of(res):
         if not res: return None
         lbl=res["labels"]; out=set(res["out_idx"]); gtype=res["confidence"]; cmap={}; cid=0
@@ -189,19 +204,26 @@ def analyze_locus(sub, P, hp_lab, alle_lab, rng):
             if i in out: pr.append({"grp":"edge" if res["edge_group"] else "outlier","type":"edge" if res["edge_group"] else "outlier"})
             else: pr.append({"grp":cmap[lbl[i]],"type":"core_confirmed" if gtype=="CONFIRMED" else "core_novel"})
         return pr
-    # 雙輸出: coarse=最粗 CONFIRMED 骨幹; fine=最細全真實結構(confirmed∪novel)
+    # 雙輸出: coarse=最粗 CONFIRMED 骨幹; fine=最細「supported(大跳或對齊)」結構
+    # NO_CLEAR 只保留給「全無真實(excess<0.10)」; 有真實但無 supported → REAL_DIFFUSE(真實但 diffuse/單樣本無法歸因)
+    real_any=[r for r in resolutions if r["real"]]
     coarse=min(confirmed,key=lambda r:r["k_core"]) if confirmed else None
-    fine=max(real_res,key=lambda r:r["k_core"]) if real_res else None
+    if real_res:                        # 有 supported(大跳 or 可靠對齊)
+        fine=max(real_res,key=lambda r:r["k_core"]); fine_conf=fine["confidence"]
+    elif real_any:                      # 有真實但無 supported = 真實但 diffuse/無法歸因
+        fine=max(real_any,key=lambda r:(r["stab_excess"] or 0)); fine_conf="REAL_DIFFUSE"
+    else:                               # 全無真實 = 真的無法切
+        fine=None; fine_conf="NO_CLEAR_SPLIT"
     old_k=old["k_groups"] if old["status"]=="SPLIT" else 0
     delta=[]
-    if old["status"]=="CANT_SPLIT" and real_res: delta.append("RESCUED_cant_split→split")
     if len(confirmed)>=2: delta.append(f"MULTIRES_confirmed={[r['k_core'] for r in confirmed]}")
     if novel: delta.append(f"NOVEL_k={[r['k_core'] for r in novel]}(subclone候選)")
+    if fine_conf=="REAL_DIFFUSE": delta.append(f"REAL_DIFFUSE_k{fine['k_core']}(真實但diffuse/無法歸因)")
     return {"old":old,
             "coarse_k":(coarse["k_core"] if coarse else 0),"coarse_confidence":(coarse["confidence"] if coarse else "NONE"),
-            "fine_k":(fine["k_core"] if fine else 0),"fine_confidence":(fine["confidence"] if fine else "NO_CLEAR_SPLIT"),
-            "primary_k":(fine["k_core"] if fine else 0),"primary_confidence":(fine["confidence"] if fine else "NO_CLEAR_SPLIT"),
-            "n_confirmed":len(confirmed),"n_novel":len(novel),
+            "fine_k":(fine["k_core"] if fine else 0),"fine_confidence":fine_conf,
+            "primary_k":(fine["k_core"] if fine else 0),"primary_confidence":fine_conf,
+            "n_confirmed":len(confirmed),"n_novel":len(novel),"n_real":len(real_any),
             "confirmed_ks":[r["k_core"] for r in confirmed],"novel_ks":[r["k_core"] for r in novel],
             "new_resolutions":resolutions,"perread_coarse":perread_of(coarse),"perread_fine":perread_of(fine),
             "perread":perread_of(fine),"delta":delta}

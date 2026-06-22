@@ -7,17 +7,20 @@ A="/big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/docs/m
 d=json.load(open(f"{A}/cluster_redesign.json")); loci=d["loci"]; P=d["params"]
 try: figidx=json.load(open(f"{A}/cluster_redesign_figindex.json"))["figs"]
 except Exception: figidx=[]
+try: dendro=json.load(open(f"{A}/dendro_figindex.json"))["gaps"]
+except Exception: dendro={}
 def b64(rel):
     p=os.path.join(A,rel)
     return "data:image/png;base64,"+base64.b64encode(open(p,"rb").read()).decode() if os.path.exists(p) else None
 def cls_of(r):
     cf=r["coarse_confidence"]; ff=r["fine_confidence"]; nov=r["n_novel"]
-    if cf=="CONFIRMED" and nov==0: return "A"
-    if cf=="CONFIRMED" and nov>=1: return "B"
-    if cf=="NONE" and ff=="REAL_NOVEL": return "C"
+    if ff=="NO_CLEAR_SPLIT": return "D"
+    if cf=="CONFIRMED" and ff=="CONFIRMED" and nov==0: return "A"
+    if cf=="CONFIRMED": return "B"                       # 骨幹 + novel/diffuse 候選
+    if cf=="NONE" and ff in("REAL_NOVEL","REAL_DIFFUSE"): return "C"
     return "—"
 CC={"A":("#0891b2","germline-cis(非subclone)"),"B":("#7c3aed","骨幹+subclone候選"),
-    "C":("#db2777","純novel(subclone候選/需cis-control)"),"—":("#888","其他")}
+    "C":("#db2777","純novel/diffuse(候選/需cis-control)"),"D":("#6b7280","真無法切(全無真實)"),"—":("#888","其他")}
 clscnt=Counter(cls_of(r) for r in loci)
 n=d["n_loci"]; novn=d.get("has_REAL_NOVEL(subclone候選)"); edn=d.get("has_edge_group"); mrn=d.get("FM3_multiresolution_confirmed(≥2)")
 
@@ -43,6 +46,27 @@ for r in sorted(loci,key=lambda r:(cls_of(r),r["key"])):
            f"<td>{r['confirmed_ks']}</td><td>{r['novel_ks']}</td>"
            f"<td>{nfine.get('core_confirmed',0)+nfine.get('core_novel',0)}核/{nfine.get('edge',0)}邊/{nfine.get('outlier',0)}離</td></tr>")
 
+# dendrogram 區（gap 階梯表 + 12 樹圖）
+GAP_TH=8.0
+grows=""
+for key,g in sorted(dendro.items(),key=lambda kv:kv[1].get("group","")):
+    gr=g.get("gap_ratio",{})
+    cells="".join(f"<td style='{'background:#d1fae5;font-weight:700' if (gr.get(str(k)) or gr.get(k) or 0)>=GAP_TH else ''}'>{gr.get(str(k),gr.get(k,'-'))}</td>" for k in range(2,7))
+    grows+=(f"<tr><td style='text-align:left'>{html.escape(g.get('group',''))}</td><td>{html.escape(key)}</td><td>{g['n']}</td>"
+            f"<td>{g.get('coarse_k')}</td><td>{g.get('fine_k')}</td>{cells}</tr>")
+dimgs=""
+for key,g in dendro.items():
+    img=b64(g["png"])
+    if img: dimgs+=f"""<div class="card"><div class="ch"><b>{html.escape(key)}</b> <span class="mut">{html.escape(g.get('group',''))} n={g['n']} · coarse k={g.get('coarse_k')} / fine k={g.get('fine_k')} · gap 大跳 k={[k for k in range(2,7) if (g.get('gap_ratio',{}).get(str(k)) or 0)>=GAP_TH]}</span></div><img src="{img}"></div>"""
+dendro_section=f"""<h2>4. UPGMA 距離樹圖 + gap 階梯（精細度天花板候選標準）</h2>
+<div class="box key"><b>問題</b>:excess(扣 null)在高覆蓋位點隨 k 自動上升、定不出天花板(修 stab_excess bug 後 REAL_NOVEL 衝 27/29)。
+<b>解</b>:樹的<b>「分支跳躍 gap」</b>才是客觀訊號 — 大跳=真分界、≈1×=非真分界。下表 gap-ratio(×中位 gap),<b>≥{GAP_TH}×</b> 標綠=結構支持的切點;搭配 excess(真實)+ alignment(歸因)。
+例 chr4:k2={dendro.get('chr4_190112507',{}).get('gap_ratio',{}).get('2','?')}× + k5={dendro.get('chr4_190112507',{}).get('gap_ratio',{}).get('5','?')}× 兩大跳 → ALT 子群在 k=5,該切;k3/4/6 中等。chr2_44798355(NO_CLEAR)全 ≤5× → 無清楚切。⚠ loose 但對齊者 gap 小仍可能有意義 → 標準 = <b>gap 大 OR 可靠對齊</b>。</div>
+<table><tr><th>group</th><th>locus</th><th>n</th><th>coarse k</th><th>fine k</th><th>gap k2</th><th>k3</th><th>k4</th><th>k5</th><th>k6</th></tr>{grows}</table>
+<div class="sub">每張:左=UPGMA 樹(分支色=fine k cut,橙虛線=k2/3/4 cut 高度)+ allele/hp/carrier 葉色帶 + 右距離熱圖</div>
+{dimgs}
+"""
+
 HTML=f"""<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>切群重設計觀察 — 三閘 + coarse/fine</title><style>
 :root{{--ac:#D97757;--tx:#141413;--bg:#FAF9F5;--bd:#E3DACC}}
@@ -63,10 +87,11 @@ table{{border-collapse:collapse;width:100%;font-size:12px;margin:10px 0}} th,td{
 <h1>切群重設計觀察 — 三閘 + coarse/fine 雙輸出</h1>
 <div class="sub">HCC1395 tumor-only · n={n} 代表位點 · 單樣本 ⭐2-3 characterization · 純分析(未改 C++)</div>
 
-<div class="box key"><b>三閘「切更細」標準</b>:
-<b>① balance</b> 群≥3(業界 caller 最低,非雜訊) · <b>② null-excess</b> 扣 within-1-group null ≥{P['exc_min']}(「明顯」=真實,非過切/丟read湊) · <b>③ alignment</b> 可靠對齊 germline 軸。
-每群標 <b>CONFIRMED</b>(對齊 germline)/ <b>REAL_NOVEL</b>(真實但不對齊=<b>subclone 候選</b>)/ <b>edge</b>(≥3 離群成一組)/ outlier。
-<b>雙輸出</b>:coarse=最粗 germline 骨幹 · fine=最細全真實結構。</div>
+<div class="box key"><b>四閘「切更細」標準</b>:
+<b>① balance</b> 群≥3(業界 caller 最低) · <b>② null-excess</b> 扣 within-1-group null ≥{P['exc_min']}(「明顯」=真實) · <b>③ gap-significance</b> 分支跳躍 ≥max(8×中位, 0.4×最大gap)(scale-invariant,定精細度天花板) · <b>④ alignment</b> 可靠對齊 germline。
+每群標 <b>CONFIRMED</b>(真實+對齊)/ <b>REAL_NOVEL</b>(真實+大跳不對齊=<b>subclone候選</b>)/ <b>REAL_DIFFUSE</b>(真實但無大跳+無對齊,低信心候選)/ <b>NO_CLEAR</b>(全無真實=真無法切)/ edge(≥3離群)/ outlier。
+<b>雙輸出</b>:coarse=最粗 CONFIRMED 骨幹 · fine=最細 supported。</div>
+{f'<div class="card"><div class="ch"><b>方法流程圖(workflow 確認)</b></div><img src="{b64("figs_dendro/method_flowchart.png")}"></div>' if b64("figs_dendro/method_flowchart.png") else ""}
 
 <h2>0. 三類位點(對 subclone 目標)</h2>
 <div>{"".join(f'<span class="chip" style="background:{CC[k][0]}">類{k} {CC[k][1]}: {clscnt.get(k,0)}</span>' for k in ["A","B","C","—"])}</div>
@@ -84,7 +109,8 @@ table{{border-collapse:collapse;width:100%;font-size:12px;margin:10px 0}} th,td{
 <h2>3. 全 {n} 位點表</h2>
 <table><tr><th>類</th><th>group</th><th>locus</th><th>n</th><th>OLD k</th><th>coarse</th><th>fine</th><th>confirmed_ks</th><th>novel_ks</th><th>per-read(核/邊/離)</th></tr>{rows}</table>
 
-<h2>4. 限制</h2>
+{dendro_section}
+<h2>5. 限制</h2>
 <ul>
 <li>代表位點皆已 splittable(無純無訊號);<b>FM1 的 CANT_SPLIT→可切 rescue 要全基因組才看得到</b>。</li>
 <li>單樣本 HCC1395 ⭐2-3:REAL_NOVEL=subclone <b>候選</b>,需 normal cis-control 排 cis-ASM 才能確認為 subclone。</li>
