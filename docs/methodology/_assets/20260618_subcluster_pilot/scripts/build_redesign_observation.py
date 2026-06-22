@@ -110,7 +110,13 @@ table{{border-collapse:collapse;width:100%;font-size:12px;margin:10px 0}} th,td{
 <table><tr><th>類</th><th>group</th><th>locus</th><th>n</th><th>OLD k</th><th>coarse</th><th>fine</th><th>confirmed_ks</th><th>novel_ks</th><th>per-read(核/邊/離)</th></tr>{rows}</table>
 
 {dendro_section}
-<h2>5. 限制</h2>
+<h2>5. 觀察儀表板 — 全 29 + S2 無結構(原始甲基 + 距離 + 樹 + 側欄, tumor-only)</h2>
+<div class="sub">標準 ISM 格式(ism_heatmap_std):UPGMA 樹 + 原始甲基 read×CpG + 距離 read×read + fine|coarse|HP|ALT|Strand 側欄。圖在 <code>figs_dashboard/</code>(可重生)。</div>
+{"".join(f'<div class="card"><div class="ch"><b>{html.escape(r["key"])}</b> <span class="mut">{html.escape(r["group"])} coarse k={r["coarse_k"]}({r["coarse_confidence"]}) / fine k={r["fine_k"]}({r["fine_confidence"]})</span></div><img src="figs_dashboard/dash_{r["key"]}.png" loading="lazy"></div>' for r in sorted(loci,key=lambda r:cls_of(r)) if os.path.exists(os.path.join(A,f"figs_dashboard/dash_{r['key']}.png")))}
+<h3>極端 S2 真無結構(big7 binary 新跑;驗證方法不誤切)</h3>
+{"".join(f'<div class="card"><div class="ch"><b>{html.escape(d["key"])}</b> <span class="mut">S2 無訊號 n={d["n"]} → {d["verdict"]}</span></div><img src="{d["png"]}" loading="lazy"></div>' for d in (json.load(open(f"{A}/nostructure_probe.json")) if os.path.exists(f"{A}/nostructure_probe.json") else []))}
+
+<h2>6. 限制</h2>
 <ul>
 <li>代表位點皆已 splittable(無純無訊號);<b>FM1 的 CANT_SPLIT→可切 rescue 要全基因組才看得到</b>。</li>
 <li>單樣本 HCC1395 ⭐2-3:REAL_NOVEL=subclone <b>候選</b>,需 normal cis-control 排 cis-ASM 才能確認為 subclone。</li>

@@ -42,7 +42,9 @@ observation_standard: true
 ## 2. 結果（29 例，全 L1 from json；gap scale-invariant 收斂後）
 | 指標 | 值 | 來源 key |
 |---|---|---|
-| fine confidence | CONFIRMED 14 / REAL_NOVEL 11 / REAL_DIFFUSE 4 / NO_CLEAR 0 | loci[].fine_confidence |
+| fine confidence | CONFIRMED 14 / REAL_NOVEL 11 / NEAR_CONFIRMED 1 / REAL_DIFFUSE 3 / NO_CLEAR 0 | loci[].fine_confidence |
+| 5 類定義 | CONFIRMED(真實+對齊) / NEAR_CONFIRMED(excess 0.08-0.10+對齊) / REAL_NOVEL(真實+大跳不對齊) / REAL_DIFFUSE(真實但 diffuse) / NO_CLEAR(真無結構) | — |
+| 極端 S2 驗證(big7 新跑) | 4 個無訊號 S2: 3 NO_CLEAR(正確不誤切)+1 REAL_DIFFUSE(新法較 PERMANOVA 敏感) | nostructure_probe.json |
 | 邊緣群位點 | 25 | has_edge_group |
 | 多解析度 confirmed（≥2） | 10 | FM3_multiresolution_confirmed(≥2) |
 

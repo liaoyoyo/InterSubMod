@@ -152,6 +152,7 @@ def align_resolution(labels, out_idx, axis_lab):
     return cramerv(g,c)
 
 EXC_MIN=0.10   # null-excess 門檻（真實結構 = 扣 within-1-group null 後）
+NEAR_EXC=0.08  # near-confirmed 帶：excess 0.08-0.10 且可靠對齊 → NEAR_CONFIRMED（介於 CONFIRMED 與 REAL_DIFFUSE，避免 over-claim）
 GAP_TH=8.0     # gap 絕對地板（≥GAP_TH×中位 gap，確保樹有真結構）
 GAP_FRAC=0.40  # gap 相對門檻（≥GAP_FRAC×該樹最大 gap，scale-invariant：防大樹 n 大時中位 gap 極小→過切）
 # big_gap = gap ≥ max(GAP_TH×median, GAP_FRAC×max_gap)；精細度天花板用 big_gap 而非單純 ×median
@@ -178,12 +179,14 @@ def analyze_locus(sub, P, hp_lab, alle_lab, rng):
         core=[i for i in range(n) if i not in set(r["out_idx"])]
         exc=stab_excess(sub[np.ix_(core,core)], P[core], kc, rng) if len(core)>=2*MIN_SZ else None
         real=(exc is not None and exc>=EXC_MIN)
+        near=(exc is not None and NEAR_EXC<=exc<EXC_MIN)   # near-confirmed 帶
         gr=r.get("gap_ratio"); big=bool(r.get("big_gap"))
-        # supported = 真實 且(big_gap[scale-invariant] 或 可靠對齊)→ 精細度天花板,防 excess 無限上升過切
-        supported=bool(real and (big or reliable_axes))
+        # supported = (真實 且(big_gap 或 對齊)) 或 (near 且 可靠對齊)→ 精細度天花板,防 excess 無限上升過切
+        supported=bool((real and (big or reliable_axes)) or (near and reliable_axes))
         conf=("CONFIRMED" if (real and reliable_axes) else
               "REAL_NOVEL" if (real and big) else
-              "REAL_WEAKGAP" if real else "NOT_REAL")   # real 但 gap 弱且不對齊 → 不納精細度
+              "NEAR_CONFIRMED" if (near and reliable_axes) else   # excess 0.08-0.10 + 可靠對齊
+              "REAL_WEAKGAP" if real else "NOT_REAL")
         n_out=r["n_out"]; edge=bool(n_out>=gm)   # 邊緣群: 離群夠多→成一組
         resolutions.append({"k_core":kc,"core_sizes":r["core_sizes"],"n_outliers":n_out,
                             "edge_group":edge,"separation":round(r["sep"],3) if r["sep"] is not None else None,
@@ -207,7 +210,8 @@ def analyze_locus(sub, P, hp_lab, alle_lab, rng):
     # 雙輸出: coarse=最粗 CONFIRMED 骨幹; fine=最細「supported(大跳或對齊)」結構
     # NO_CLEAR 只保留給「全無真實(excess<0.10)」; 有真實但無 supported → REAL_DIFFUSE(真實但 diffuse/單樣本無法歸因)
     real_any=[r for r in resolutions if r["real"]]
-    coarse=min(confirmed,key=lambda r:r["k_core"]) if confirmed else None
+    backbone=[r for r in resolutions if r["confidence"] in("CONFIRMED","NEAR_CONFIRMED")]  # 骨幹含 near
+    coarse=min(backbone,key=lambda r:r["k_core"]) if backbone else None
     if real_res:                        # 有 supported(大跳 or 可靠對齊)
         fine=max(real_res,key=lambda r:r["k_core"]); fine_conf=fine["confidence"]
     elif real_any:                      # 有真實但無 supported = 真實但 diffuse/無法歸因
