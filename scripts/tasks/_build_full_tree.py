@@ -4,9 +4,25 @@
 into a single complete v3 WBS tree (state/tasks/graph.json) + add 盤點缺漏 nodes.
 Pulls real node content from the existing graphs (no re-typing / no fabrication); new nodes
 are memory-sourced. Writes via task_graph.dump_graph (one-node-per-line). Throwaway after run."""
-import json, os, datetime, importlib.util
+import json, os, sys, datetime, importlib.util
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+# ---- builder-vs-helper double-write guard (2026-06-23 governance audit) ----
+# graph.json is now CANONICAL, maintained incrementally by task_graph.py helpers
+# (claim / verify-result / add-task — each dump_graph()). This one-off migration builder
+# REGENERATES graph.json from scratch, which would CLOBBER any helper writes. Refuse to run
+# (the two writers have no lock) unless --force is given for a deliberate re-migration.
+_GRAPH_OUT = os.path.join(ROOT, "state/tasks/graph.json")
+if os.path.exists(_GRAPH_OUT) and "--force" not in sys.argv:
+    sys.stderr.write(
+        "⛔ REFUSE: state/tasks/graph.json 已存在且為 canonical（由 task_graph.py helper 維護）。\n"
+        "   _build_full_tree.py 是一次性 migration builder；重跑會整檔重生、覆蓋 helper 增量寫入\n"
+        "   （builder-vs-helper 雙寫 hazard，2026-06-23 治理稽核）。\n"
+        "   日常改任務 → 用 task_graph.py 的 claim/verify-result/add-task helper。\n"
+        "   確需 re-migrate（會覆蓋 graph.json 所有 helper 變更）→ 加 --force。\n")
+    sys.exit(2)
+
 spec = importlib.util.spec_from_file_location("tg", os.path.join(ROOT, "scripts/tasks/task_graph.py"))
 tg = importlib.util.module_from_spec(spec); spec.loader.exec_module(tg)
 
