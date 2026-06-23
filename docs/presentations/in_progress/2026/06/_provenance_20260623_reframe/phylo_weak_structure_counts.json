@@ -1,0 +1,127 @@
+{
+  "source": "phylo_cpp_wg_records.json (C++ native phylo-v4.1, genome-wide HCC1395)",
+  "n_total": 34736,
+  "states_def": {
+    "S1_CONFIRMED_MULTI_ALIGNED": "coarse>=2 & stable & aligned",
+    "S2_CONFIRMED_MULTI_UNALIGNED": "coarse>=2 & stable & !aligned",
+    "S3_UNSTABLE_MULTI": "coarse>=2 & unstable(modal<0.7)",
+    "S4_WEAK_FINE_ONLY": "coarse<2 & fine>=2 (ONLY looser null90 passed; TP/FP ratio 1.15 = chance-level, statistically indistinguishable from noise -> sub-threshold candidates pending validation, NOT retained real structure)",
+    "S5_WEAK_RESIDUAL": "coarse<2 & fine<2 & (n_other>0 or hidden_het) -- STRUCTURALLY UNREACHABLE: both triggers require a passed coarse split (coarse>=2), contradicting coarse<2; count always 0 by construction, not a bug",
+    "S6_NO_STRUCTURE_CLEAN": "coarse<2 & fine<2 & no residual = truly single group (but ~21852 with n>=12 would flat-cut >=2 groups = geometry-vs-null divergence, no geometry_ng column = invisible)"
+  },
+  "caveats": {
+    "S4_not_real_structure": "S4 (null90-only) is NOT validated weak structure; TP/FP enrichment 1.15 (chance). Reframe as sub-threshold candidates pending validation.",
+    "S5_unreachable": "S5 structurally empty (n_other/hidden_het require coarse>=2). Effectively a 5-state partition presented as 6.",
+    "aligned_NA_for_coarse_lt2": "'aligned'/V_hp/V_allele only computed when coarse>=2 (8104/8104 aligned have coarse>=2; 0/24180 coarse==1). For S4/S6 aligned=False is NOT empirical -> treat as NA/untested.",
+    "confident_multi_anti_discriminative": "S1+S2 confident-multi is FP-enriched (FP 35.65% > TP 24.66%); 'aligned'=cis-ASM fingerprint (max(V_hp,V_allele)>=0.3), NOT a subclone test. Observation/characterization layer only, NOT a TP/FP filter.",
+    "multiple_testing": "No FDR across 34736 loci nor recursive within-locus split tests; RNULL=40 gives high-SE percentile -> null90 vs null95 distinction is coarse.",
+    "geometry_gap": "No geometry_ng (flat-cut) column exists; ~21852 S6 loci with n>=12 would flat-cut into >=2 groups (geometry-vs-null divergence) and are invisible. Needs subset rerun; cannot be backfilled (matrices deleted).",
+    "scope": "single-sample HCC1395, exploratory tier 2-3, no external truth; resolving cis-ASM vs subclone needs normal cis-control / multi-sSNV CCF / single-cell."
+  },
+  "weak_buckets": [
+    "S3_UNSTABLE_MULTI",
+    "S4_WEAK_FINE_ONLY",
+    "S5_WEAK_RESIDUAL"
+  ],
+  "TP": {
+    "n": 30077,
+    "states": {
+      "S1_CONFIRMED_MULTI_ALIGNED": {
+        "n": 5538,
+        "pct": 18.41
+      },
+      "S2_CONFIRMED_MULTI_UNALIGNED": {
+        "n": 1878,
+        "pct": 6.24
+      },
+      "S3_UNSTABLE_MULTI": {
+        "n": 1302,
+        "pct": 4.33
+      },
+      "S4_WEAK_FINE_ONLY": {
+        "n": 1796,
+        "pct": 5.97
+      },
+      "S5_WEAK_RESIDUAL": {
+        "n": 0,
+        "pct": 0.0
+      },
+      "S6_NO_STRUCTURE_CLEAN": {
+        "n": 19563,
+        "pct": 65.04
+      }
+    },
+    "multi_confident_pct": 24.66,
+    "weak_candidate_pct": 10.3,
+    "truly_clean_pct": 65.04,
+    "old_no_structure_n": 21359,
+    "old_no_structure_pct": 71.01,
+    "weak_hidden_inside_old_no_structure_n": 1796,
+    "weak_hidden_inside_old_no_structure_pct": 5.97,
+    "sum_check": true
+  },
+  "FP": {
+    "n": 4659,
+    "states": {
+      "S1_CONFIRMED_MULTI_ALIGNED": {
+        "n": 1349,
+        "pct": 28.95
+      },
+      "S2_CONFIRMED_MULTI_UNALIGNED": {
+        "n": 312,
+        "pct": 6.7
+      },
+      "S3_UNSTABLE_MULTI": {
+        "n": 177,
+        "pct": 3.8
+      },
+      "S4_WEAK_FINE_ONLY": {
+        "n": 242,
+        "pct": 5.19
+      },
+      "S5_WEAK_RESIDUAL": {
+        "n": 0,
+        "pct": 0.0
+      },
+      "S6_NO_STRUCTURE_CLEAN": {
+        "n": 2579,
+        "pct": 55.36
+      }
+    },
+    "multi_confident_pct": 35.65,
+    "weak_candidate_pct": 8.99,
+    "truly_clean_pct": 55.36,
+    "old_no_structure_n": 2821,
+    "old_no_structure_pct": 60.55,
+    "weak_hidden_inside_old_no_structure_n": 242,
+    "weak_hidden_inside_old_no_structure_pct": 5.19,
+    "sum_check": true
+  },
+  "ALL": {
+    "S1_CONFIRMED_MULTI_ALIGNED": {
+      "n": 6887,
+      "pct": 19.83
+    },
+    "S2_CONFIRMED_MULTI_UNALIGNED": {
+      "n": 2190,
+      "pct": 6.3
+    },
+    "S3_UNSTABLE_MULTI": {
+      "n": 1479,
+      "pct": 4.26
+    },
+    "S4_WEAK_FINE_ONLY": {
+      "n": 2038,
+      "pct": 5.87
+    },
+    "S5_WEAK_RESIDUAL": {
+      "n": 0,
+      "pct": 0.0
+    },
+    "S6_NO_STRUCTURE_CLEAN": {
+      "n": 22142,
+      "pct": 63.74
+    }
+  },
+  "ALL_sum_check": true
+}

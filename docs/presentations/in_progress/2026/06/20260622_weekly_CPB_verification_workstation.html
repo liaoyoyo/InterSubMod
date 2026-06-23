@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<!--
+  title: CP-B 驗證判讀工作站 — 週報 5 主線數字查驗 + 一致性稽核結果
+  purpose: checkpoint CP-B（必停）— 讓用戶逐條判讀驗證結果 + 排主線重點 + 圈解釋圖
+  date: 2026-06-22
+  build_branch: research/subclonal-reconstruction-202606
+  source: workflow wc1v407en（6 agent：5 主線 domain 查驗 + 1 一致性稽核，read-only）
+  status: 全 5 主線 PASS_WITH_NOTES · 0 blocking · 需用戶決策 2 點 + 已採建議修正 3 點
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CP-B 驗證判讀工作站 · 週報 5 主線</title>
+<style>
+:root{
+  --ink:#111;--navy:#021442;--ice:#DBEFF9;--hp1:#4188C7;--hp2:#1F3A93;--som:#E97B3C;
+  --err:#E0352B;--ok:#2E8B57;--fg2:#262626;--fg3:#595959;--fg4:#8a8a8a;
+  --bg2:#F7F9FC;--bg3:#EEF3F8;--bd:#D9D9D9;
+  --font:'Inter','Noto Sans TC','PingFang TC','微軟正黑體',sans-serif;--mono:'JetBrains Mono','Menlo',monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#eef2f7;color:var(--ink);font-family:var(--font);line-height:1.5;font-size:14px}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 24px 80px}
+header.top{background:var(--navy);color:#fff;border-radius:12px;padding:24px 30px;margin-bottom:18px}
+header.top h1{font-weight:400;font-size:26px;margin:0 0 6px}
+header.top .sub{color:#bcd4ef;font-size:14px}
+.scoreboard{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.sb{background:#0c1f4d;border:1px solid #2d4a8a;border-radius:8px;padding:8px 14px;font-size:13px;color:#dbeeff}
+.sb b{color:#fff;font-size:16px;display:block}
+.sb.green b{color:#7be0a0}.sb.amber b{color:#ffce82}.sb.red b{color:#ff9b8a}
+
+h2.sec{font-size:16px;color:var(--navy);margin:26px 0 12px;border-bottom:2px solid var(--bd);padding-bottom:6px}
+.decision{background:#fff;border:1px solid var(--bd);border-left:5px solid var(--err);border-radius:10px;padding:14px 18px;margin:0 0 12px}
+.decision.amber{border-left-color:var(--som)}
+.decision.fixed{border-left-color:var(--ok)}
+.decision .lab{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--err)}
+.decision.amber .lab{color:var(--som)}.decision.fixed .lab{color:var(--ok)}
+.decision h3{margin:4px 0 6px;font-size:16px}
+.decision p{margin:4px 0;font-size:13.5px;color:var(--fg2)}
+.decision .opt{background:var(--bg3);border-radius:6px;padding:6px 12px;margin:6px 0;font-size:13px}
+
+details.ml{background:#fff;border:1px solid var(--bd);border-radius:10px;margin:0 0 10px;overflow:hidden}
+details.ml>summary{cursor:pointer;padding:12px 18px;background:var(--bg2);font-size:15px;font-weight:600;display:flex;align-items:center;gap:10px;list-style:none}
+details.ml>summary::-webkit-details-marker{display:none}
+details.ml>summary::before{content:"▸";color:var(--hp2);font-size:13px}
+details.ml[open]>summary::before{content:"▾"}
+.vbadge{font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:5px;margin-left:auto}
+.vbadge.pass{background:#fff3df;color:#9a6512}
+.mlbody{padding:14px 18px}
+table.v{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0}
+table.v th,table.v td{border:1px solid var(--bd);padding:5px 9px;text-align:left;vertical-align:top}
+table.v th{background:var(--bg3);color:var(--navy);font-weight:600}
+table.v code{font-family:var(--mono);font-size:11px;color:var(--fg3)}
+.st{font-family:var(--mono);font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px}
+.st.m{background:#e3f2e8;color:#1e6b3c}
+.st.x{background:#fde6e0;color:#b3331f}
+.st.n{background:#f0e6f6;color:#6a3a9a}
+.sub{font-size:13px;color:var(--fg3);margin:10px 0 4px;font-weight:600}
+ul.tight{margin:4px 0;padding-left:18px}
+ul.tight li{margin:3px 0;font-size:12.8px;color:var(--fg2)}
+.redline{background:#fde6e0;border:1px solid #f3b8ab;border-radius:6px;padding:8px 12px;font-size:12.8px;color:#7a1e10;margin:4px 0}
+.viz{background:#fafcff;border:1px dashed #b9c8da;border-radius:5px;padding:3px 9px;font-size:12px;color:var(--hp2);display:inline-block;margin:2px 3px 2px 0}
+.crossrule{background:var(--ice);border:1px solid #BBD6EE;border-radius:8px;padding:12px 16px;margin:6px 0;font-size:13px}
+.crossrule b{color:var(--navy)}
+.conflict{border:1px solid var(--bd);border-radius:8px;padding:10px 14px;margin:6px 0;font-size:13px}
+.sev{font-family:var(--mono);font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:4px;text-transform:uppercase}
+.sev.caveat{background:#fff3df;color:#9a6512}.sev.minor{background:#eef0f2;color:#666}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>CP-B 驗證判讀工作站 — 週報 5 主線</h1>
+  <div class="sub">workflow wc1v407en · 6 agent（5 主線 domain 查驗 + 1 跨主線一致性稽核，read-only）· 你在這裡：判讀數字 + 排主線重點 + 圈解釋圖</div>
+  <div class="scoreboard">
+    <div class="sb green"><b>5 / 5</b>主線 PASS_WITH_NOTES</div>
+    <div class="sb green"><b>0</b>blocking 衝突</div>
+    <div class="sb green"><b>M3 9/9 · M5 11/11</b>機械重算全 MATCH</div>
+    <div class="sb red"><b>2 點</b>需你決策</div>
+    <div class="sb amber"><b>3 點</b>已採建議修正</div>
+    <div class="sb amber"><b>P-17</b>跨-worktree 量化值</div>
+  </div>
+</header>
+
+<h2 class="sec">🔴 需你決策（2 點）</h2>
+
+<div class="decision">
+  <span class="lab">決策 D1 · reclassify-v2 救回率「兩版本陷阱」</span>
+  <h3>M1 的救回率要用哪個數字？</h3>
+  <p>驗證發現大綱用的 <b>53.9%（4407/8180）</b>只記在 MEMORY、docs/ 內<b>無 committed JSON</b> 可 grep（report_claim 級，且來自 <code>feat/summary-nreadsvalid</code> branch）。而 committed 可驗證的是另一版 <b>46.6%（3810/8179）</b>（Python pilot，pattern-only，commit 4ec339b 有 JSON）。兩者是<b>不同 build/軸</b>（C++ 加 level 軸 vs Python pattern-only），不可並列當同一口徑。FP=0 兩版一致。</p>
+  <div class="opt"><b>選項 A</b>：週報只用 committed 可驗證的 46.6%（最保守、可 grep，符合 §13.0）</div>
+  <div class="opt"><b>選項 B</b>：用 53.9% 但明標「report_claim 級 + branch/HEAD provenance」，並補落檔成 docs JSON</div>
+  <div class="opt"><b>選項 C</b>：兩版都呈現（46.6% committed pilot / 53.9% C++ 全基因組），各標 build/軸</div>
+</div>
+
+<div class="decision">
+  <span class="lab">決策 D2 · 主線重點排序（你的主導權）</span>
+  <h3>教授這次要聽哪幾條主線當 Tier 1？</h3>
+  <p>5 主線都驗證過了，但 deck 不該每條等重。哪幾條是這週的「主菜」（進 deck 核心頁），哪些降為備註/一頁帶過？這是你對教授視角的判斷，不是我的——我用下方 AskUserQuestion 收。</p>
+  <p style="color:var(--fg3)">參考：M1（方法修正）· M2（判別軸）· M3（切群≠subclone，數字最硬）· M4（文獻定位+天花板）· M5（論文基石 motivation）</p>
+</div>
+
+<h2 class="sec">🟢 已採建議修正（3 點，無爭議，我直接改）</h2>
+<div class="decision fixed">
+  <span class="lab">FIX 1 · 切群閘數</span>
+  <p>週報一律用 <b>「三閘」</b>（balance 群≥3 + null-excess 扣 within-1-group null≥0.10 + alignment 歸因）。源碼 <code>cluster_redesign.py:274</code> 自述為證；gap-significance 是「精細度天花板」子條件、Rnull=15/Pool24 是計算提速旋鈕，<b>皆非第四閘</b>。「四閘」是 3 處衍生文件 drift。</p>
+</div>
+<div class="decision fixed">
+  <span class="lab">FIX 2 · Martin-Trujillo 比例</span>
+  <p>大綱「82–91%」改為 <b>「82–92%（CN-可解釋；原文直陳 CN-獨立 8.1–17.6%，限 37 印記 DMR，array-bulk）」</b>。上界少了 colon 的 91.9%。</p>
+</div>
+<div class="decision fixed">
+  <span class="lab">FIX 3 · 文獻庫源數</span>
+  <p>一律用 <b>74 源</b>（CURRENT_FOCUS + index frontmatter 一致），不引 index 正文 §22 的舊數「59」。</p>
+</div>
+
+<h2 class="sec">5 主線逐條判讀（展開看數字 MATCH/MISMATCH + 認知門檻 + overclaim）</h2>
+
+<details class="ml"><summary>M1 · ISM 方法健全性 + 假陰性修正<span class="vbadge pass">PASS_WITH_NOTES</span></summary>
+<div class="mlbody">
+  <table class="v"><tr><th>claim</th><th>大綱值</th><th>查驗真值</th><th>狀態</th></tr>
+  <tr><td>親讀 TP region</td><td>29,754</td><td>JSON TP.n_rows=29754</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>Weak/Noise %</td><td>91.7%</td><td>(19435+7840)/29754=0.9167</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>FN1 Noise/Weak 帶顯著 PERMANOVA</td><td>74.3%/98%</td><td>0.7429 / 0.9795</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>VC 2×2 不引用 PERMANOVA</td><td>cpp:309-339</td><td>親讀坐實</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>reclassify 救回率（大綱版）</td><td>53.9%(4407/8180)</td><td>僅 MEMORY，無 committed JSON</td><td><span class="st x">見 D1</span></td></tr>
+  <tr><td>reclassify（committed 可驗證版）</td><td>—</td><td>46.6%(3810/8179) pilot JSON</td><td><span class="st n">另版</span></td></tr>
+  <tr><td>FP=0</td><td>FP=0</td><td>orig_Strong_demoted=0</td><td><span class="st m">MATCH</span></td></tr></table>
+  <div class="redline">🔴 overclaim 紅線：①「救回」≠ 判別力提升（純加 orig Strong 不降、FP 對照同比例有結構=filter-DEAD）②「91.7% 假陰性」措辭過強，根因是定義過嚴非 bug、Noise≠無結構 ③allele 軸未做 cis-control 不能稱 subclone。</div>
+  <div class="sub">認知門檻高（需解釋圖）：</div>
+  <span class="viz">VerificationClass 2×2 矩陣（PERMANOVA 算了卻棄用）</span>
+  <span class="viz">D1/D2/D3 三定義對照</span>
+  <span class="viz">double-dip 循環圈</span>
+  <span class="viz">location vs dispersion（13% vs 87%）</span>
+  <span class="viz">救回≠判別 並排條</span>
+</div></details>
+
+<details class="ml"><summary>M2 · tumor-only NEGATIVE → a-priori 判別軸<span class="vbadge pass">PASS_WITH_NOTES</span></summary>
+<div class="mlbody">
+  <p style="font-size:13px;color:var(--fg2)"><b>概念層全 MATCH</b>（committed <code>20260618_within_hp_multigroup_underdetection_audit_01.md:43/107/111/113</code> 一手背書 double-dip 循環 + a-priori 非循環）。<b>但量化數字 NOT_FOUND</b>：sil 0.564 / permF 8.94 / Noise 83%·97%·100% / 五類分類 30490→28327 的原始 json 在未提交的 <code>feat/summary-nreadsvalid</code> worktree，當前 branch grep 不到。</p>
+  <div class="redline">🔴 overclaim 紅線（最易踩）：① a-priori「0% noise」是 <b>tautology</b>（reclassify cascade 定義使然）<b>非判別力</b>——真正非循環判別率僅 <b>7.6%</b>（≈unsupervised-clean）② 禁「more discriminative」「獨有檢定」③ within-HP 甲基分離 = cis-ASM 候選非已確認 subclone（5,473=18% 為上界，標 mark-for-confirmation）。a-priori 真正優勢=合法 permutation null + 免 collider + 可解釋，非偵測率更高。</div>
+  <div class="sub">認知門檻高（需解釋圖）：</div>
+  <span class="viz">double-dip vs a-priori 對照流程（紅循環 vs 綠獨立）</span>
+  <span class="viz">tautology 0% vs 非循環 7.6% 分層卡</span>
+</div></details>
+
+<details class="ml"><summary>M3 · 切群 ≠ subclone（數字最硬，9/9 MATCH）<span class="vbadge pass">PASS_WITH_NOTES</span></summary>
+<div class="mlbody">
+  <table class="v"><tr><th>claim</th><th>大綱值</th><th>查驗真值</th><th>狀態</th></tr>
+  <tr><td>全 7 樣本 Jaccard</td><td>0.091–0.161</td><td>min 0.091(HCC1937) max 0.161(H2009)</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>5-態分類 N</td><td>30,490</td><td>413+5051+5525+13390+6111=30490</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>state③ 切不出有訊號</td><td>52.2%</td><td>52.24%=5525/10576</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>CONFIRMED(對齊germline) TP富集</td><td>3.29×</td><td>TP20.6%/FP6.3%</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>REAL_NOVEL(subclone候選) TP貧化</td><td>0.65×</td><td>TP10.7%/FP16.3%（FP反更多）</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>WG 規模 / 時間</td><td>34736 / 50min</td><td>30077+4659 / 3031s</td><td><span class="st m">MATCH</span></td></tr></table>
+  <p style="font-size:13px;color:var(--ok)"><b>核心論點機械成立</b>：「subclone 候選」（不對齊 germline）TP 貧化 0.65×、FP 反更多 → 結構非 somatic 特異 = cis-ASM 假象。</p>
+  <div class="redline">🔴 overclaim 紅線：① REAL_NOVEL 引用須保留「候選/非 somatic 特異」限定詞 ② state③ 52% 必配「真關聯≠subclone，主導軸 germline cis-ASM」③ CONFIRMED 3.29× 是 cis-ASM characterization 訊號，<b>非</b> subclone reconstruction 證據 ④ phylo_v3(chr1-18/RNULL25) 與 cluster_wg(chr1-22/Rnull15) 不同 scope 不可混引。</div>
+  <div class="sub">認知門檻高（需解釋圖）：</div>
+  <span class="viz">Jaccard-Venn（兩 read-set 不相交）</span>
+  <span class="viz">cis-ASM vs subclone 對照（需 normal cis-control）</span>
+  <span class="viz">三閘決策樹</span>
+</div></details>
+
+<details class="ml"><summary>M4 · 方法論定位 + 誠實天花板<span class="vbadge pass">PASS_WITH_NOTES</span></summary>
+<div class="mlbody">
+  <table class="v"><tr><th>claim</th><th>大綱值</th><th>查驗真值</th><th>狀態</th></tr>
+  <tr><td>文獻庫源數</td><td>74 源</td><td>74（frontmatter 一致；正文§22 舊59 drift）</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>0 真 CONFLICT</td><td>0 真</td><td>regime 差→DIFFERENT-VIEW</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>LOH-unmask CN-可解釋</td><td>82–91%</td><td>82–92%（少 colon 91.9%）</td><td><span class="st x">FIX 2</span></td></tr>
+  <tr><td>ISM 三件式創新口徑</td><td>三件式</td><td>逐字 MATCH</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>CN↔甲基 REFUTED / SV 唯一非循環</td><td>—</td><td>逐字 MATCH</td><td><span class="st m">MATCH</span></td></tr></table>
+  <div class="redline">🔴 overclaim 紅線（reviewer 第一打點）：① 82–92% 分母必標「37 印記 DMR」，<b>不可</b>簡寫「所有腫瘤 ASM 82–91% 是 CN 假象」（反傷我方 ASM 存在性）② Martin-Trujillo 是 array-bulk/印記 DMR，CALIBER 差非同軸驗證 ③ 2026 PCDH 已逼近 → <b>停止</b>主張「first read-level methylation lineage on long-read」（doc:97 裁決 FALSE）④「0 衝突」須配 regime-差/framing-tension 限定。</div>
+  <div class="sub">認知門檻高（需解釋圖）：</div>
+  <span class="viz">LOH-unmask 三欄機制（dosage artifact 非 epimutation）</span>
+  <span class="viz">CN↔甲基耦合 DAG（為何對齊反而是壞消息）</span>
+</div></details>
+
+<details class="ml"><summary>M5 · 論文基石 Q1 coverage（11/11 MATCH，0 誤）<span class="vbadge pass">PASS_WITH_NOTES</span></summary>
+<div class="mlbody">
+  <table class="v"><tr><th>claim</th><th>大綱值</th><th>JSON 真值</th><th>狀態</th></tr>
+  <tr><td>sSNV 密度</td><td>10.6/Mb</td><td>10.6052</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>中位相鄰間距</td><td>51.4 kb</td><td>51425</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>read ref-span 中位</td><td>4.9 kb</td><td>4898</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>P(≥2 sSNV/read) 經驗</td><td>0.74%</td><td>0.0074</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>read 跨 0 sSNV</td><td>94.2%</td><td>0.94162</td><td><span class="st m">MATCH</span></td></tr>
+  <tr><td>±5kb window 跨完整</td><td>33.2%</td><td>0.331705</td><td><span class="st m">MATCH</span></td></tr></table>
+  <p style="font-size:13px;color:var(--ok)"><b>provenance 紀律最佳</b>：所有數字可溯 JSON key（commit 114200e），報告 §6/§9 自帶溯源表，§13.0 完全合規。</p>
+  <div class="redline">🔴 overclaim 紅線：① 單樣本 PARTIAL（partial_flag 已標）② §7.2 只論「sSNV 稀疏→需補位訊號」，<b>不可</b>滑向「甲基驅動偵測/filter/tree」③ 兩種 P(≥2)（Poisson 0.99% vs 經驗 0.74%）須框為交叉驗證非不一致。</div>
+  <div class="sub">認知門檻高（需解釋圖）：</div>
+  <span class="viz">sSNV 稀疏 × read 跨度 motivation 軸圖</span>
+  <span class="viz">兩種 P(≥2) 交叉驗證框</span>
+</div></details>
+
+<h2 class="sec">跨主線一致性稽核（6 衝突全 minor/caveat，0 blocking）</h2>
+<div class="conflict"><span class="sev caveat">caveat</span> <b>跨-worktree provenance（P-17）</b>：M1 53.9% / M2 全套量化 / M3 wg_summary.json 都在當前 branch 之外的 worktree（feat/summary-nreadsvalid + ism-review-infra）→ 引用須標 branch+HEAD 或補落檔，否則 number_provenance gate 在主 tree 找不到來源。</div>
+<div class="conflict"><span class="sev caveat">caveat</span> <b>救回≠判別力</b>：M1+M2+M3 紅線一致（filter-DEAD / cis-ASM≠subclone / tautology 0%）→ 週報須全篇貫徹，不可只在單主線標。</div>
+<div class="conflict"><span class="sev minor">minor</span> 三閘 vs 四閘（FIX 1 已處理）· Martin-Trujillo 82-92%（FIX 2）· 文獻 59→74（FIX 3）。</div>
+
+<h2 class="sec">跨主線必守 3 紅線（五主線一致背書，無矛盾）</h2>
+<div class="crossrule"><b>① proof-of-concept ⭐3</b>：全篇維持，不可任一處寫成跨樣本/genome-wide/病人層定論（M3 Jaccard 全 7 樣本是唯一跨樣本一致點）。</div>
+<div class="crossrule"><b>② 甲基 = corroborate/characterize 非 driver</b>：骨幹 = somatic haplotag；標題 reconstruction 須界定為 regional LOH-constrained partition 非 tree。</div>
+<div class="crossrule"><b>③ 單樣本 PARTIAL</b>：除 M3 Jaccard 外，其餘量化結論一律單樣本 HCC1395 PARTIAL。</div>
+
+<p style="color:var(--fg4);font-size:12px;margin-top:24px">CP-B workstation · 2026-06-22 · source workflow wc1v407en（6 agent / 567k token / 12min）· 確認後進階段3 deck</p>
+
+</div>
+</body>
+</html>

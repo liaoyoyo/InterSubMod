@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<!--
+  title: 週報新主軸敘事大綱（reframe）— 位點分類方法 pipeline + 解釋架構
+  purpose: reframe 後的大綱（OUTLINE，非 deck）— 確認流程型敘事邏輯後才做新 deck
+  date: 2026-06-23
+  build_branch: research/subclonal-reconstruction-202606
+  narrative: 流程型（方法確認→流程→分類→判別機制→chr2 解釋→誠實邊界）+ ABT
+  classification_backbone: 5桶 phylo（S1-S6）· 數字來源 ism-review-infra worktree（跨 worktree provenance）
+  scope: HCC1395 為主 · 全基因組 34,736 位點 · proof-of-concept ⭐2-3 · 單樣本 PARTIAL
+  status: DRAFT 大綱 — 確認後做新 deck
+  honest_redline: 對齊多為 cis-ASM（tumor-only 不判別）· subclone = 候選需確認 · method-insensitive 非獨立
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>週報新主軸大綱 · 位點分類 pipeline（reframe）</title>
+<style>
+:root{--ink:#111;--navy:#021442;--ice:#DBEFF9;--hp1:#4188C7;--hp2:#1F3A93;--som:#E97B3C;--err:#E0352B;--ok:#2E8B57;--neutral:#6B7280;
+--fg2:#262626;--fg3:#595959;--fg4:#8a8a8a;--bg2:#F7F9FC;--bg3:#EEF3F8;--bd:#D9D9D9;
+--font:'Inter','Noto Sans TC','PingFang TC','微軟正黑體',sans-serif;--mono:'JetBrains Mono','Menlo',monospace;}
+*{box-sizing:border-box}
+body{margin:0;background:#eef2f7;color:var(--ink);font-family:var(--font);line-height:1.55;font-size:15px}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 28px 80px}
+header.top{background:var(--navy);color:#fff;border-radius:12px;padding:28px 32px;margin-bottom:8px}
+header.top h1{font-weight:400;font-size:28px;margin:0 0 6px}
+header.top .sub{color:#bcd4ef;font-size:15px;margin-bottom:12px}
+.chip{display:inline-block;border:1px solid #3a5a9a;border-radius:5px;padding:3px 12px;font-size:13px;color:#dbeeff;margin:3px 4px 0 0}
+.chip.warn{border-color:var(--som);color:#ffd9c2}
+.arc{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:18px 24px;margin:18px 0 22px}
+.arc h3{margin:0 0 12px;font-size:14px;color:var(--fg3);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.arcflow{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.arcstep{flex:1;min-width:120px;background:var(--bg3);border:1px solid #cfe0f0;border-radius:8px;padding:10px 12px}
+.arcstep b{display:block;font-size:13px;color:var(--hp2)}
+.arcstep span{font-size:12px;color:var(--fg3)}
+.arcarrow{color:#4472C4;font-size:18px;font-weight:700}
+.abt{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:22px}
+.abt .box{border-radius:10px;padding:15px 18px;border:1px solid var(--bd);background:#fff}
+.abt .A{border-top:4px solid var(--hp1)}.abt .B{border-top:4px solid var(--som)}.abt .T{border-top:4px solid var(--ok)}
+.abt .lab{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--fg4);text-transform:uppercase}
+.abt p{margin:6px 0 0;font-size:13px;color:var(--fg2)}
+h2.sec{font-size:15px;color:var(--fg3);margin:28px 0 12px;border-bottom:2px solid var(--bd);padding-bottom:6px}
+.slide{background:#fff;border:1px solid var(--bd);border-radius:12px;margin:0 0 14px;overflow:hidden}
+.slide .hd{display:flex;align-items:center;gap:14px;padding:13px 20px;background:var(--bg2);border-bottom:1px solid var(--bd)}
+.slide .num{flex:0 0 auto;width:36px;height:36px;border-radius:9px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:15px;font-weight:600}
+.slide.core .num{background:var(--som)}
+.slide .ttl{font-size:17px;font-weight:600;margin:0}
+.slide .ttl .ms{display:block;font-size:12.5px;color:var(--fg3);font-weight:400;margin-top:2px}
+.slide .body{padding:14px 20px 16px}
+.kmsg{background:var(--ice);border-left:4px solid var(--hp1);border-radius:6px;padding:9px 13px;font-size:14px;margin:0 0 11px;color:var(--navy)}
+ul.pts{margin:0;padding-left:19px}ul.pts li{margin:4px 0;font-size:13.5px;color:var(--fg2)}
+.vis{margin-top:10px;border:1px dashed #b9c8da;border-radius:8px;padding:9px 13px;background:#fafcff;font-size:12.5px;color:var(--fg3)}
+.vis b{color:var(--hp2)}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:1px 7px;border-radius:4px;margin-left:3px}
+.t-f{background:#e3f2e8;color:#1e6b3c}.t-o{background:#fff3df;color:#9a6512}.t-new{background:#fde6e0;color:#b3331f}.t-reuse{background:#e0eefb;color:#1f5a9a}
+.src{font-family:var(--mono);font-size:11px;color:var(--fg4)}
+.note{background:#fff8dd;border:1px solid #eed892;border-radius:6px;padding:3px 9px;font-size:12px;color:#7a5a12;display:inline-block;margin-top:6px}
+table.v{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+table.v th,table.v td{border:1px solid var(--bd);padding:6px 10px;text-align:left;vertical-align:top}
+table.v th{background:var(--bg3);font-weight:600;color:var(--navy)}
+table.v code{font-family:var(--mono);font-size:11px}
+.redline{background:#fdecea;border:1px solid #f3b8ab;border-radius:8px;padding:11px 16px;font-size:13px;color:#7a1e10;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>建立位點分類方法 — 從甲基距離樹到 read / clone 解釋</h1>
+  <div class="sub">週報新主軸大綱（reframe · 流程型）· 分類骨架 = 5桶 phylo · 2026-06-23</div>
+  <div>
+    <span class="chip">方法確認有效</span>
+    <span class="chip">分類比例（~20% 對齊）</span>
+    <span class="chip">流程 + 判別機制</span>
+    <span class="chip">chr2:18M 例</span>
+    <span class="chip warn">proof-of-concept ⭐2-3 · 5桶數字跨 worktree</span>
+  </div>
+</header>
+
+<div class="arc">
+  <h3>流程型敘事弧（方法 pipeline → 分類 → 解釋）</h3>
+  <div class="arcflow">
+    <div class="arcstep"><b>方法有效</b><span>距離樹+切群 validated、分割圖合理</span></div>
+    <span class="arcarrow">→</span>
+    <div class="arcstep"><b>流程</b><span>甲基距離→UPGMA 樹→閘→分類</span></div>
+    <span class="arcarrow">→</span>
+    <div class="arcstep"><b>分類比例</b><span>~20% 對齊 / 不對齊 / 其他</span></div>
+    <span class="arcarrow">→</span>
+    <div class="arcstep"><b>判別機制</b><span>交叉標籤+特徵定義</span></div>
+    <span class="arcarrow">→</span>
+    <div class="arcstep"><b>解釋</b><span>chr2 例：read 狀況+clone 候選</span></div>
+  </div>
+</div>
+
+<div class="abt">
+  <div class="box A"><span class="lab">And</span><p>建立甲基 read-level 距離樹 + 切群方法，要把全基因組位點清楚分類。</p></div>
+  <div class="box B"><span class="lab">But</span><p>「切得出結構」只是第一步——要判別「對齊 vs 不對齊」、配合特徵定義，才能解釋。</p></div>
+  <div class="box T"><span class="lab">Therefore</span><p>一套 validated pipeline：分類 → 交叉標籤+特徵 → 解釋 read/clone 候選（chr2 例），誠實標 cis-ASM/候選。</p></div>
+</div>
+
+<h2 class="sec">頁面流（9 頁 · 流程型）</h2>
+
+<div class="slide"><div class="hd"><div class="num">1</div><div><p class="ttl">封面<span class="ms">定調：方法建立 + 解釋架構</span></p></div></div>
+<div class="body"><div class="kmsg">建立位點分類方法 — 從甲基距離樹到 read / clone 解釋</div>
+<ul class="pts"><li>副標：一套 validated 方法，把每個位點清楚分類、用來解釋 read 狀況與 clone 候選</li><li>scope：HCC1395 · 全基因組 34,736 位點 · proof-of-concept ⭐2-3</li></ul></div></div>
+
+<div class="slide"><div class="hd"><div class="num">2</div><div><p class="ttl">本週一句話（BLUF）<span class="ms">正面建構定調</span></p></div></div>
+<div class="body"><div class="kmsg">建成一套 validated 的位點分類 pipeline——能把位點分類、並用來解釋 read 與 clone 候選。</div>
+<ul class="pts"><li>4 步 pipeline：甲基距離樹 → 切群 → 交叉標籤+特徵 → 分類+解釋</li><li>誠實定調：對齊多為 cis-ASM；subclone = 候選需確認（不 overclaim）</li></ul>
+<div class="vis"><b>圖位</b> <span class="tag t-new">新SVG</span>：4 步 pipeline pill 橫排</div></div></div>
+
+<div class="slide"><div class="hd"><div class="num">3</div><div><p class="ttl">方法流程圖<span class="ms">pipeline 怎麼運作</span></p></div></div>
+<div class="body"><div class="kmsg">read×read 甲基距離 → UPGMA 分支樹 → 顯著性閘切群 → 每位點分類。</div>
+<ul class="pts">
+<li>取材：每 sSNV 取 ±5000 window tumor reads（帶 HP）→ peel 成矩陣 <span class="tag t-f">F</span></li>
+<li>建樹：BERNOULLI read×read 距離 → UPGMA 分支樹 <span class="tag t-f">F</span></li>
+<li>切群：嚴閘 null95（主 verdict）/ 寬閘 null90（候選）<span class="tag t-f">F</span></li>
+<li>分類：每位點走互斥決策流 → 落 5 桶之一 <span class="tag t-f">F</span></li></ul>
+<div class="vis"><b>圖位 ★核心</b> <span class="tag t-new">新SVG</span>：pipeline 流程圖（距離矩陣 → 樹 → 閘 → 5桶），箭頭串接</div></div></div>
+
+<div class="slide"><div class="hd"><div class="num">4</div><div><p class="ttl">方法確認有效<span class="ms">validated + 分割圖合理</span></p></div></div>
+<div class="body"><div class="kmsg">方法 SOUND_WITH_CAVEATS、分割圖合理、且對方法不敏感。</div>
+<ul class="pts">
+<li>read×read 距離→分群→PERMANOVA 是成熟框架（Legendre/Anderson），非 ad-hoc <span class="tag t-f">F</span> <span class="src">src:ism_soundness_01</span></li>
+<li>對方法不敏感：三閘 / 5桶 null95-90 / 純幾何 結論一致（同距離多視角、非獨立）<span class="tag t-f">F</span></li>
+<li>假陰性已修：舊 verdict 漏報顯著 PERMANOVA → reclassify 救回 46.6%（committed）、FP=0 <span class="tag t-f">F</span></li></ul>
+<div class="vis"><b>圖位</b> <span class="tag t-reuse">複製</span>：救回≠判別並排條（沿用前版）</div></div></div>
+
+<div class="slide core"><div class="hd"><div class="num">5</div><div><p class="ttl">分類結果 + 比例（5桶）<span class="ms">★核心數字頁 — 你要的分類比例</span></p></div></div>
+<div class="body"><div class="kmsg">全基因組 34,736 位點清楚分成 5 類，~20% 有結構且對齊。</div>
+<table class="v"><tr><th>桶</th><th>類別</th><th>TP 數</th><th>TP %</th></tr>
+<tr><td>S1</td><td><b>有結構 · 對齊</b></td><td>5,538</td><td><b>18.41%（~20%）</b></td></tr>
+<tr><td>S2</td><td>有結構 · 不對齊</td><td>1,878</td><td>6.24%</td></tr>
+<tr><td>S3</td><td>不穩定多群</td><td>1,302</td><td>4.33%</td></tr>
+<tr><td>S4</td><td>次閾值候選</td><td>1,796</td><td>5.97%</td></tr>
+<tr><td>S6</td><td>乾淨單群（無結構）</td><td>19,563</td><td>65.04%</td></tr></table>
+<ul class="pts"><li>confident-multi（S1+S2）= 24.66%；弱候選（S3+S4）= 10.30%；乾淨 65.04% <span class="tag t-f">F</span> <span class="src">src:phylo_weak_structure_counts.json @ism-review-infra</span></li></ul>
+<div class="note">⚠ 跨 worktree（ism-review-infra）引用標 provenance · S4 TP/FP=1.15 chance-level 須標「候選」</div>
+<div class="vis"><b>圖位 ★</b> <span class="tag t-new">新SVG</span>：5桶分類漏斗/長條（S1 對齊最大塊標 ~20%）</div></div></div>
+
+<div class="slide core"><div class="hd"><div class="num">6</div><div><p class="ttl">判別機制<span class="ms">怎麼判「對齊」+ 配合特徵定義</span></p></div></div>
+<div class="body"><div class="kmsg">對齊 = 切群 read-set 與獨立標籤（HP/allele）顯著重合；再配合其他特徵給定義。</div>
+<ul class="pts">
+<li>對齊判定：CramérV ≥ 0.7 + Fisher（與 HP/allele 標籤交叉，a-priori 非循環）<span class="tag t-f">F</span></li>
+<li>配合特徵：AF / CN / coverage / LOH → 區分 cis-ASM vs subclone 候選 <span class="tag t-i">I</span></li>
+<li>歸因：對齊 germline → cis-ASM（多數）；不對齊 + 特徵支持 → subclone 候選</li></ul>
+<div class="vis"><b>圖位</b> <span class="tag t-new">新SVG</span>：判別決策（切群 → 交叉標籤 → 對齊? → 配特徵 → 定義）</div></div></div>
+
+<div class="slide core"><div class="hd"><div class="num">7</div><div><p class="ttl">chr2:18M 例子<span class="ms">★一個位點走完整 pipeline</span></p></div></div>
+<div class="body"><div class="kmsg">chr2:18M：6 sSNV + 甲基分群 → 距離樹 → ~3 lineage → 解釋 read 狀況。</div>
+<ul class="pts">
+<li>6 sSNV α/β 互斥（0 違反）+ 甲基 robust CpG 分群 → 距離樹切出 ~3 lineage <span class="tag t-f">F</span> <span class="src">src:project_chr2_18m_subclone_locus_verification</span></li>
+<li>CCF 梯度 demo 0.10→0.81（sample-subclone YES, Fang2021 PhyloWGS 10）<span class="tag t-o">O</span></li>
+<li>🔴 誠實：locus-subclone 未證實 / 18,086,020 落 HC 空隙 unevaluable / 「5群」修正為 ~3 lineage（pos4 poly-T）</li></ul>
+<div class="vis"><b>圖位</b> <span class="tag t-reuse">複製/新</span>：chr2 read×CpG 熱圖（現成）或 6 sSNV+lineage 示意 SVG</div></div></div>
+
+<div class="slide"><div class="hd"><div class="num">8</div><div><p class="ttl">誠實邊界<span class="ms">分類≠confirmation</span></p></div></div>
+<div class="body"><div class="kmsg">對齊多為 cis-ASM（tumor-only 不判別）；subclone 是候選、需外部確認。</div>
+<ul class="pts">
+<li>FP（germline）confident-multi 35.65% &gt; TP 24.66% = 對齊多為 cis-ASM 指紋，非 subclone <span class="tag t-f">F</span></li>
+<li>tumor-only 不判別 → normal cis-control = 判別力決定性 gate（未測）<span class="tag t-i">I</span></li>
+<li>單樣本 ⭐2-3 PARTIAL · 無 FDR · 不可當 filter/subclone caller</li></ul>
+<div class="vis"><b>圖位</b> <span class="tag t-reuse">複製</span>：cis-ASM vs subclone 對照（沿用前版 S5 SVG）</div></div></div>
+
+<div class="slide"><div class="hd"><div class="num">9</div><div><p class="ttl">收束 + 下一步<span class="ms">方法框架貢獻</span></p></div></div>
+<div class="body"><div class="kmsg">正面貢獻：建立分類+解釋 pipeline；下一步 normal cis-control 把候選變確認。</div>
+<ul class="pts"><li>貢獻：validated 分類方法 + 解釋架構 + 把判別問題變 well-posed</li><li>下一步：normal cis-control（gate）→ chr2 多 sSNV CCF → single-cell</li></ul>
+<div class="vis"><b>圖位</b> <span class="tag t-reuse">表</span>：下一步 ROI</div></div></div>
+
+<h2 class="sec">與前版 deck 的關係</h2>
+<table class="v">
+<tr><th>面向</th><th>前版（雙核心 M2+M3）</th><th>新版（流程 pipeline）</th></tr>
+<tr><td>重心</td><td>辨別力/侷限</td><td><b>方法 pipeline + 分類 + 解釋</b></td></tr>
+<tr><td>分類數字</td><td>三閘 3.29×/0.65×</td><td><b>5桶 S1-S6 比例</b></td></tr>
+<tr><td>chr2</td><td>無</td><td><b>S7 完整例子</b></td></tr>
+<tr><td>誠實邊界</td><td>主軸</td><td>收尾（S8）</td></tr>
+<tr><td>可複用</td><td colspan="2">救回≠判別 SVG / cis-ASM-vs-subclone SVG / 講稿紅線 / 三紅線 / 設計系統</td></tr>
+</table>
+
+<h2 class="sec">Deck 前數字驗證清單</h2>
+<table class="v">
+<tr><th>數字</th><th>值</th><th>來源</th><th>狀態</th></tr>
+<tr><td>5桶 S1-S6 TP %</td><td>18.41/6.24/4.33/5.97/65.04</td><td><code>phylo_weak_structure_counts.json @ism-review-infra</code></td><td>✅ grep MATCH</td></tr>
+<tr><td>confident-multi TP/FP</td><td>24.66 / 35.65</td><td>同上</td><td>✅</td></tr>
+<tr><td>chr2:18M 6 sSNV / ~3 lineage</td><td>—</td><td><code>memory project_chr2_18m + 案例 doc</code></td><td>⚠ deck 前讀回案例 doc</td></tr>
+<tr><td>reclassify 46.6%</td><td>3810/8179</td><td><code>reclassify_v2_pilot.json</code></td><td>✅ CP-B 驗</td></tr>
+</table>
+
+<p style="color:var(--fg4);font-size:12px;margin-top:24px">新主軸大綱 v0 · 2026-06-23 · 流程型 reframe · 5桶骨架 · 確認此邏輯後做新 deck（複用前版設計系統+可複用 SVG）</p>
+
+</div>
+</body>
+</html>

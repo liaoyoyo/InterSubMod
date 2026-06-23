@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<!--
+  title: 週報 — Subclonal Reconstruction 判別方法論建立（6/15–6/22）
+  template: Lab Report Deck System（複用 20260618 deck tokens + slide.css 慣例 + JS nav）
+  date: 2026-06-22
+  build_branch: research/subclonal-reconstruction-202606
+  narrative: 進展型 + 辨別力雙核心（M2 a-priori 判別軸 + M3 切群≠subclone）+ M1/M4/M5 支撐
+  scope: HCC1395 為主 + 全 7 樣本切割總帳（M3 Jaccard）· 全基因組 · proof-of-concept ⭐3 · 單樣本 PARTIAL
+  data_sources: 20260616_structure_label_verdict_false_negative_audit_01.md, 20260618_within_hp_multigroup_underdetection_audit_01.md, 20260620_decisionflow_5state_classification_wg_01.md, 20260622_cluster_redesign_genomewide_tpfp_01.md, 20260613_external_validation_library_index_01.md, ssnv_spacing_coverage.json, martin-trujillo-2017 CONTEXT.md
+  verified_by: workflow wc1v407en（5 主線查驗）+ w9456xpig（CP-D 雙審：overclaim 三紅線全 consistent + 可理解性）
+  brand: 細標題(400) · HP1 #4188C7 / HP2 #1F3A93 / somatic #E97B3C · 紅=循環/confound 綠=非循環/獨立 · 無 emoji 無漸層 · 箭頭為主要繪製形狀 · 頁碼 < N >
+  status: CP-D 修訂 + 06-23 討論精確化（method-insensitive 口徑 / tumor-only 不判別 / characterization 正面價值）→ 待 CP-E 定稿
+  reclassify: 兩版並陳 — 定論引 46.6%(3810/8179 committed Python pilot, 4ec339b)；53.9%(4407/8180 C++ 全基因組 b6dde2b) report_claim 待落檔升級
+  martin_trujillo: 用原文口徑 CN-獨立 8.1–17.6%（補數 82–92% 僅敘述方便；限 37 印記 DMR · array-bulk）
+  speaker_notes: 按 's' 鍵切換 deck 內講稿；完整逐頁講稿見同名 _speaker_notes.md
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>週報 · Subclonal Reconstruction 判別方法論（6/15–6/22）</title>
+<style>
+:root{
+  --ink:#000;--paper:#fff;--navy:#021442;--ice:#DBEFF9;
+  --accent-1:#4188C7;--accent-2:#7BBFEA;--accent-3:#92DCD9;--accent-4:#FFF8DD;--accent-6:#FFAC27;
+  --germline-hp1:#4188C7;--germline-hp2:#1F3A93;--germline-light:#BDD7EE;--maternal-light:#C6E0B4;
+  --somatic-warm:#E97B3C;--error-red:#E0352B;--indep:#2E8B57;--neutral:#6B7280;--reference-gray:#A6A6A6;
+  --fg-1:#000;--fg-2:#262626;--fg-3:#595959;--fg-4:#A6A6A6;--fg-5:#D9D9D9;
+  --bg-2:#F7F9FC;--bg-3:#EEF3F8;--bg-4:#DBEFF9;
+  --border-1:#D9D9D9;--border-2:#A6A6A6;
+  --font-display:'Noto Sans TC','PingFang TC','微軟正黑體','Microsoft JhengHei',Inter,sans-serif;
+  --font-body:'Inter','Noto Sans TC','Calibri','PingFang TC','微軟正黑體',sans-serif;
+  --font-mono:'JetBrains Mono','Menlo','Consolas',monospace;
+  --arrow-color:#4472C4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:#15171c;font-family:var(--font-body);color:var(--fg-1)}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:14px;
+  background:#0b1220;color:#cbd5e1;padding:7px 16px;font-size:13px;font-family:var(--font-display);border-bottom:1px solid #1e293b}
+.nav b{color:#fff}.nav .sp{flex:1}
+.nav button{background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-family:var(--font-display)}
+.nav button:hover{background:#334155}.nav .cnt{font-family:var(--font-mono)}.nav .hint{font-size:11px;color:#64748b}
+.deck{position:fixed;inset:0;top:38px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:1920px;height:1080px;position:relative;transform-origin:center center;background:#fff;box-shadow:0 12px 48px rgba(0,0,0,.5);flex:0 0 auto}
+section.slide{position:absolute;inset:0;background:#fff;overflow:hidden;display:none}
+section.slide.active{display:block}
+.slide-pad{padding:72px 96px 88px;height:100%;box-sizing:border-box;display:flex;flex-direction:column}
+.slide-title{font-family:var(--font-display);font-weight:400;font-size:72px;line-height:1.1;letter-spacing:-0.005em;color:var(--fg-1);margin:0 0 24px}
+.slide-title .cont{color:var(--fg-3);font-size:46px}
+.slide-subtitle{font-family:var(--font-display);font-weight:400;font-size:32px;color:var(--fg-3);margin:0 0 32px}
+.eyebrow{font-family:var(--font-display);font-size:24px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-1);font-weight:600;margin-bottom:18px}
+.page-n{position:absolute;right:64px;bottom:36px;font-family:var(--font-display);font-size:24px;color:var(--fg-3);letter-spacing:.06em}
+.pill{display:inline-flex;align-items:center;padding:10px 24px;border:1.5px solid var(--border-1);border-radius:6px;background:#fff;font-family:var(--font-display);font-weight:500;font-size:24px;color:var(--fg-1);white-space:nowrap}
+.pill--lg{font-size:30px;padding:12px 28px}.pill--sm{font-size:20px;padding:6px 16px}
+.pill--core{border-color:var(--navy);border-width:2px;color:var(--navy)}
+.panel{background:#fff;border:1px solid var(--border-1);border-radius:8px;padding:24px 28px}
+.panel--ice{background:var(--ice);border-color:#BBD6EE}
+.panel--cream{background:var(--accent-4);border-color:#EED892}
+.panel--muted{background:var(--bg-3);border-color:var(--border-1)}
+.bullet{display:flex;gap:16px;align-items:flex-start;font-size:28px;line-height:1.5;color:var(--fg-2)}
+.bullet::before{content:"";flex:0 0 auto;width:12px;height:12px;background:var(--accent-1);border-radius:2px;margin-top:16px}
+.bullet.red::before{background:var(--error-red)}
+.data-flag{font-family:var(--font-display);font-weight:600;color:var(--error-red);font-size:24px}
+.kpi .v{font-family:var(--font-display);font-size:72px;font-weight:300;color:var(--navy);line-height:1}
+.kpi .v.som{color:var(--somatic-warm)}.kpi .v.blue{color:var(--accent-1)}.kpi .v.red{color:var(--error-red)}.kpi .v.ind{color:var(--indep)}
+.kpi .l{font-family:var(--font-body);font-size:22px;color:var(--fg-3);margin-top:10px;max-width:300px}
+.step{display:flex;align-items:baseline;gap:14px;font-family:var(--font-display)}
+.step .n{font-weight:600;font-size:28px;color:var(--accent-1);min-width:130px}
+.step .t{font-size:28px;color:var(--fg-2)}
+.mono{font-family:var(--font-mono)}
+.flow-row{display:flex;align-items:center;gap:14px}
+.ncard{background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:20px 24px;flex:1}
+.ncard .h{font-family:var(--font-display);font-weight:700;font-size:26px;color:var(--navy);margin:0 0 8px;display:flex;align-items:center;gap:12px}
+.ncard .num{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--accent-1);color:#fff;font-size:22px;font-weight:700;flex:0 0 auto}
+.ncard.c2 .num{background:var(--accent-3);color:var(--navy)}.ncard.c3 .num{background:var(--somatic-warm)}.ncard.c4 .num{background:var(--navy)}
+.ncard p{margin:0;font-size:22px;line-height:1.45;color:var(--fg-2)}
+.tl{display:flex;gap:0;align-items:stretch}
+.tl .stop{flex:1;position:relative;padding:0 28px}
+.tl .stop .dot{width:22px;height:22px;border-radius:50%;background:var(--accent-1)}
+.tl .stop.s2 .dot{background:var(--somatic-warm)}
+.tl .line{position:absolute;top:10px;left:0;right:0;height:2px;background:var(--border-2)}
+.tl .when{font-family:var(--font-display);font-weight:700;font-size:26px;color:var(--navy);margin:18px 0 8px}
+.tl .what{font-size:24px;color:var(--fg-2);line-height:1.45}
+table.mt{border-collapse:collapse;font-size:24px;font-family:var(--font-display)}
+table.mt th,table.mt td{border:1px solid var(--border-1);padding:10px 20px;text-align:left}
+table.mt th{background:var(--bg-3);font-weight:700;color:var(--navy)}
+table.mt td.r{text-align:right;font-family:var(--font-mono)}
+table.mt tr.hi td{background:var(--accent-4)}
+.foot{position:absolute;left:96px;bottom:36px;font-family:var(--font-body);font-size:20px;color:var(--fg-4);max-width:1500px}
+.tag-cap{font-family:var(--font-display);font-size:22px;font-weight:600}
+.tag-cap.red{color:var(--error-red)}.tag-cap.ind{color:var(--indep)}
+.cp-ribbon{position:absolute;top:0;left:0;background:var(--accent-6);color:#000;font-family:var(--font-display);font-size:18px;font-weight:600;padding:4px 16px;z-index:5}
+/* speaker notes（按 s 切換）*/
+.snote{display:none;position:absolute;left:72px;right:72px;bottom:24px;background:rgba(2,20,66,.96);color:#fff;padding:16px 26px;border-radius:10px;font-family:var(--font-body);font-size:23px;line-height:1.5;z-index:20;border-left:5px solid var(--accent-6)}
+.snote b{color:var(--accent-6)}
+body.notes .slide.active .snote{display:block}
+@media print{
+  body{background:#fff}.nav{display:none}.cp-ribbon{display:none}.snote{display:none!important}
+  .deck{position:static;display:block;overflow:visible}
+  .stage{transform:none!important;box-shadow:none;page-break-after:always;margin:0 auto}
+  section.slide{display:block!important;position:relative}
+  @page{size:1920px 1080px;margin:0}
+}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <b>週報 · Subclonal Reconstruction 判別方法論</b>
+  <span style="color:#64748b">6/15–6/22 · 雙核心 M2+M3</span>
+  <span class="sp"></span>
+  <span class="hint">s = 講稿</span>
+  <button onclick="window.print()">列印 / PDF</button>
+  <span class="cnt" id="cnt">1 / 10</span>
+  <button id="prev">◀</button>
+  <button id="next">▶</button>
+</div>
+
+<div class="deck"><div class="stage" id="stage">
+
+<!-- ===== S1 封面 ===== -->
+<section class="slide active">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">計算基因體實驗室 · 週報 2026-06-15 ~ 06-22</div>
+    <h1 style="font-family:var(--font-display);font-weight:400;font-size:96px;line-height:1.08;letter-spacing:-0.01em;margin:0 0 24px;color:var(--ink)">Subclonal Reconstruction<br>判別方法論<span style="color:var(--accent-1)">建立</span></h1>
+    <div class="slide-subtitle" style="margin:0 0 40px">從 ISM 方法審查 → subclone 判別軸收斂｜骨幹 = somatic haplotag、甲基 = <span style="color:var(--somatic-warm)">corroborate</span>（非 driver）</div>
+    <div class="flow-row" style="gap:16px">
+      <span class="pill pill--lg">報告人：廖子游</span>
+      <span class="pill pill--lg">指導教授：黃耀廷</span>
+      <span class="pill pill--lg pill--core">proof-of-concept ⭐3</span>
+    </div>
+    <div style="margin-top:26px;font-size:24px;color:var(--fg-3)">HCC1395 為主 + 全 7 樣本切割總帳 · 全基因組 · <span class="mono">單樣本 PARTIAL</span></div>
+  </div>
+  <div class="snote">本週主軸：把「<b>辨別真假 subclone</b>」的方法論建成完整鏈條。一句定調：<b>骨幹是 somatic haplotag、甲基只做 corroborate</b>，現在是 proof-of-concept ⭐3、單樣本。過場：「我先講這週為什麼是個方法論收斂的一週。」</div>
+</section>
+
+<!-- ===== S2 本週一句話 BLUF ===== -->
+<section class="slide">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">本週一句話</div>
+    <h1 class="slide-title">把「<span style="color:var(--accent-1)">辨別真假 subclone</span>」的方法論建成完整鏈條</h1>
+    <div class="flow-row" style="gap:18px;margin:6px 0 30px;align-items:stretch">
+      <div class="ncard"><div class="h"><span class="num">1</span>修正 ISM 假陰性</div><p>reclassify-v2 救回被誤判的有結構 region（FP=0）</p></div>
+      <div class="ncard c2"><div class="h"><span class="num">2</span>確立 a-priori 判別軸</div><p>無監督切群 NEGATIVE → 改用條件化軸（核心）</p></div>
+      <div class="ncard c3"><div class="h"><span class="num">3</span>切群三閘重設計</div><p>分離 cis-ASM 骨幹 vs subclone 候選</p></div>
+      <div class="ncard c4"><div class="h"><span class="num">4</span>文獻定位 + 論文基石</div><p>74 源 0 真衝突 + Q1 coverage motivation</p></div>
+    </div>
+    <div class="panel panel--cream">
+      <div class="data-flag" style="margin-bottom:8px">誠實邊界（全篇貫徹）</div>
+      <div style="font-size:27px;line-height:1.5;color:var(--fg-2)">骨幹 = <b>somatic haplotag</b>；甲基 = <b>corroborate / characterize</b>（非 driver）；單 bulk 只能 characterize，<b>確認 subclone 需外部 ground truth</b>（single-cell / multi-region）。</div>
+    </div>
+    <div class="page-n">&lt; 2 &gt;</div>
+  </div>
+  <div class="snote">四個能力一句話帶過，重點放<b>能力 2（a-priori 判別軸）和能力 3（切群三閘）= 今天的雙核心</b>。底部誠實邊界一定要念出來：<b>「甲基是 corroborate 不是 driver，確認需要外部 ground truth」</b>——這句先講，後面就不會被質疑 overclaim。</div>
+</section>
+
+<!-- ===== S3 背景 + 上週接點 ===== -->
+<section class="slide">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">背景與接點</div>
+    <h1 class="slide-title">上週證明「切得出結構」，本週問「<span style="color:var(--somatic-warm)">是不是真 subclone</span>」</h1>
+    <div class="tl" style="margin:20px 0 36px">
+      <div class="stop"><div class="line"></div><div class="dot"></div><div class="when">上週 6/16–18</div><div class="what">方法五步 · 無監督 UPGMA → PERMANOVA 配 PERMDISP → 狀況分類。<b>證明「有結構」存在。</b></div></div>
+      <div class="stop s2"><div class="line"></div><div class="dot"></div><div class="when">本週 6/19–22</div><div class="what">把「存在性檢定」升級成「<b>能判別 subclone vs 假象</b>」的方法 + 文獻定位 + 論文基石。</div></div>
+    </div>
+    <div class="flow-row" style="gap:32px;align-items:stretch">
+      <div class="panel panel--ice" style="flex:1.2">
+        <div style="font-family:var(--font-display);font-weight:600;font-size:28px;color:var(--navy);margin-bottom:12px">核心張力</div>
+        <div style="font-size:27px;line-height:1.5;color:var(--fg-2)">「有結構」很普遍 —— 全基因組約 <b>91.7%</b> region 落 Weak/Noise，但其中多數其實帶顯著 PERMANOVA。<b>結構存在 ≠ 是 subclone。</b></div>
+      </div>
+      <div class="panel panel--cream" style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div class="data-flag" style="margin-bottom:8px">本週要回答</div>
+        <div style="font-size:25px;line-height:1.5;color:var(--fg-2)">哪些「切出來的群」是真 subclone、哪些是 <b>cis-ASM 假象</b>？怎麼用<b>非循環</b>的方法判別？</div>
+      </div>
+    </div>
+    <div class="foot">來源：FN_audit_01.md · within_hp_audit_01.md（91.7% 經 wc1v407en 查驗 MATCH）</div>
+    <div class="page-n">&lt; 3 &gt;</div>
+  </div>
+  <div class="snote">關鍵口白：<b>「有結構不等於是 subclone」</b>。91.7% 念法要小心——說「落在 Weak/Noise」<b>不要</b>說「91.7% 假陰性率」（那是定義過嚴、不是 bug）。這頁建立全場的核心問題，後面 M2/M3 就是回答它。</div>
+</section>
+
+<!-- ===== S4 核心1 M2 a-priori 判別軸 + SVG double-dip（CP-D 重繪）===== -->
+<section class="slide">
+  <div class="slide-pad">
+    <div class="eyebrow">核心 1 · 判別軸（方法論貢獻）</div>
+    <h1 class="slide-title" style="margin-bottom:10px">無監督切群<span style="color:var(--error-red)">不能判別</span> → 改用 <span style="color:var(--indep)">a-priori 條件化軸</span></h1>
+    <div style="display:flex;gap:36px;align-items:flex-start;flex:1">
+      <svg width="1080" height="600" viewBox="0 0 1080 600" style="flex:0 0 auto">
+        <!-- 頂部 takeaway 橫幅 -->
+        <rect x="100" y="0" width="400" height="76" rx="8" fill="#fdecea" stroke="var(--error-red)" stroke-width="1.5"/>
+        <text x="132" y="50" font-family="var(--font-display)" font-size="46" font-weight="700" fill="var(--error-red)">✗</text>
+        <text x="300" y="30" text-anchor="middle" font-family="var(--font-display)" font-size="21" fill="var(--fg-2)">同一份資料「選分群」又「測顯著」</text>
+        <text x="300" y="58" text-anchor="middle" font-family="var(--font-display)" font-size="22" font-weight="700" fill="var(--error-red)">→ 必然顯著（假訊號）</text>
+        <rect x="600" y="0" width="400" height="76" rx="8" fill="#e9f5ee" stroke="var(--indep)" stroke-width="1.5"/>
+        <text x="632" y="50" font-family="var(--font-display)" font-size="46" font-weight="700" fill="var(--indep)">✓</text>
+        <text x="800" y="30" text-anchor="middle" font-family="var(--font-display)" font-size="21" fill="var(--fg-2)">群來自獨立外部標籤</text>
+        <text x="800" y="58" text-anchor="middle" font-family="var(--font-display)" font-size="22" font-weight="700" fill="var(--indep)">→ 檢定才合法</text>
+        <!-- 左：無監督 double-dip -->
+        <text x="300" y="120" text-anchor="middle" font-family="var(--font-display)" font-size="28" font-weight="700" fill="var(--error-red)">無監督（double-dip）</text>
+        <rect x="150" y="140" width="320" height="64" rx="8" fill="var(--bg-3)" stroke="var(--border-2)" stroke-width="1.5"/>
+        <text x="310" y="178" text-anchor="middle" font-family="var(--font-display)" font-size="24" fill="var(--fg-2)">read×read 距離矩陣</text>
+        <line x1="310" y1="204" x2="310" y2="236" stroke="var(--arrow-color)" stroke-width="2.5"/><polygon points="303,236 317,236 310,248" fill="var(--arrow-color)"/>
+        <rect x="150" y="250" width="320" height="72" rx="8" fill="#fdecea" stroke="var(--error-red)" stroke-width="1.5"/>
+        <text x="310" y="282" text-anchor="middle" font-family="var(--font-display)" font-size="23" fill="var(--fg-2)">silhouette 選最分離的 k</text>
+        <text x="310" y="308" text-anchor="middle" font-family="var(--font-mono)" font-size="17" fill="var(--fg-3)">(挑最像兩群的切法)</text>
+        <line x1="310" y1="322" x2="310" y2="354" stroke="var(--arrow-color)" stroke-width="2.5"/><polygon points="303,354 317,354 310,366" fill="var(--arrow-color)"/>
+        <rect x="150" y="368" width="320" height="64" rx="8" fill="#fdecea" stroke="var(--error-red)" stroke-width="1.5"/>
+        <text x="310" y="406" text-anchor="middle" font-family="var(--font-display)" font-size="24" fill="var(--fg-2)">同距離做 PERMANOVA</text>
+        <!-- 循環回箭頭 + ↺ -->
+        <path d="M 150 400 C 78 318, 78 220, 150 174" fill="none" stroke="var(--error-red)" stroke-width="3.5" stroke-dasharray="9 5"/><polygon points="143,180 157,180 150,162" fill="var(--error-red)"/>
+        <circle cx="84" cy="288" r="30" fill="#fff" stroke="var(--error-red)" stroke-width="3"/>
+        <text x="84" y="301" text-anchor="middle" font-size="38" fill="var(--error-red)">&#8634;</text>
+        <text x="84" y="350" text-anchor="middle" font-family="var(--font-display)" font-size="19" font-weight="700" fill="var(--error-red)">資料被</text>
+        <text x="84" y="373" text-anchor="middle" font-family="var(--font-display)" font-size="19" font-weight="700" fill="var(--error-red)">用兩次</text>
+        <rect x="150" y="486" width="320" height="76" rx="8" fill="var(--error-red)"/>
+        <text x="310" y="520" text-anchor="middle" font-family="var(--font-display)" font-size="24" font-weight="700" fill="#fff">所以一定顯著（假的）</text>
+        <text x="310" y="548" text-anchor="middle" font-family="var(--font-mono)" font-size="20" fill="#fff">Noise 97–100%</text>
+        <!-- 右：a-priori -->
+        <text x="800" y="120" text-anchor="middle" font-family="var(--font-display)" font-size="28" font-weight="700" fill="var(--indep)">a-priori 條件化</text>
+        <rect x="640" y="140" width="320" height="72" rx="8" fill="#e9f5ee" stroke="var(--indep)" stroke-width="1.5"/>
+        <text x="800" y="172" text-anchor="middle" font-family="var(--font-display)" font-size="23" fill="var(--fg-2)">外部標籤（獨立來源）</text>
+        <text x="800" y="198" text-anchor="middle" font-family="var(--font-mono)" font-size="18" fill="var(--indep)">haplotag · allele · 扣 normal</text>
+        <line x1="800" y1="212" x2="800" y2="244" stroke="var(--indep)" stroke-width="2.5"/><polygon points="793,244 807,244 800,256" fill="var(--indep)"/>
+        <rect x="640" y="258" width="320" height="64" rx="8" fill="var(--bg-3)" stroke="var(--border-2)" stroke-width="1.5"/>
+        <text x="800" y="296" text-anchor="middle" font-family="var(--font-display)" font-size="24" fill="var(--fg-2)">標籤定義群（免選 k）</text>
+        <line x1="800" y1="322" x2="800" y2="354" stroke="var(--indep)" stroke-width="2.5"/><polygon points="793,354 807,354 800,366" fill="var(--indep)"/>
+        <rect x="640" y="368" width="320" height="64" rx="8" fill="var(--bg-3)" stroke="var(--border-2)" stroke-width="1.5"/>
+        <text x="800" y="406" text-anchor="middle" font-family="var(--font-display)" font-size="24" fill="var(--fg-2)">PERMANOVA（合法 null）</text>
+        <line x1="800" y1="432" x2="800" y2="478" stroke="var(--indep)" stroke-width="2.5"/><polygon points="793,478 807,478 800,490" fill="var(--indep)"/>
+        <rect x="640" y="486" width="320" height="76" rx="8" fill="var(--indep)"/>
+        <text x="800" y="520" text-anchor="middle" font-family="var(--font-display)" font-size="24" font-weight="700" fill="#fff">所以顯著才可信</text>
+        <text x="800" y="548" text-anchor="middle" font-family="var(--font-mono)" font-size="19" fill="#fff">免 collider · 可解釋</text>
+      </svg>
+      <div style="flex:1;display:flex;flex-direction:column;gap:18px">
+        <div class="panel panel--muted">
+          <div class="tag-cap ind" style="margin-bottom:6px">a-priori 真正的優勢</div>
+          <div style="font-size:25px;line-height:1.45;color:var(--fg-2)">合法 permutation null + 免 collider + 可解釋 —— <b>不是</b>偵測率更高。</div>
+        </div>
+        <div class="panel panel--cream">
+          <div class="tag-cap red" style="margin-bottom:6px">口徑紅線</div>
+          <div style="font-size:23px;line-height:1.45;color:var(--fg-2)">「0% noise」是定義使然（<b>tautology</b>），非判別力；真正非循環判別率 ≈ <b>7.6%</b>（≈unsupervised-clean）。within-HP 甲基分離 = <b>cis-ASM 候選</b>，非已確認 subclone（5,473 = 18% 上界）。</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot">來源：within_hp_multigroup_underdetection_audit_01.md:43/107/111/113（概念層 committed 一手）· 量化值在 feat/summary-nreadsvalid worktree</div>
+    <div class="page-n">&lt; 4 &gt;</div>
+  </div>
+  <div class="snote"><b>核心 1。</b>左圖一句話：<b>「同一份距離資料先拿來選分群、又拿來測它顯不顯著 → 等於作弊，一定顯著」</b>（指 ↺「資料被用兩次」）。右圖：<b>「群的定義改用獨立外部標籤（haplotag/allele），檢定才合法」</b>。最重要的防線：a-priori 的優勢是<b>「合法的 null、可解釋」不是「偵測率更高」</b>；「0% noise」是定義使然不是判別力，真判別率約 7.6%。</div>
+</section>
+
+<!-- ===== S5 核心2 M3 切群≠subclone + SVG cis-ASM vs subclone（CP-D 修）===== -->
+<section class="slide">
+  <div class="slide-pad">
+    <div class="eyebrow">核心 2 · 切群 ≠ subclone</div>
+    <h1 class="slide-title" style="margin-bottom:8px">多數「切出來的群」是 <span style="color:var(--somatic-warm)">cis-ASM 假象</span>，不是 subclone（tumor-only）</h1>
+    <div class="slide-subtitle" style="font-size:23px;margin:0 0 16px">對方法不敏感：換三閘 / 5桶 null95-90 / 純幾何，FP（germline）結構都不少於 TP（5桶 FP <b style="color:var(--error-red)">35.65%</b> &gt; TP 24.66%）── 真正跨樣本獨立性來自下方 Jaccard 全 7 樣本</div>
+    <div style="display:flex;gap:36px;align-items:flex-start;flex:1">
+      <svg width="1010" height="560" viewBox="0 0 1010 560" style="flex:0 0 auto">
+        <!-- 中：單 bulk 看到的甲基分群 -->
+        <rect x="360" y="16" width="290" height="86" rx="8" fill="var(--bg-3)" stroke="var(--border-2)" stroke-width="1.5"/>
+        <text x="505" y="50" text-anchor="middle" font-family="var(--font-display)" font-size="24" fill="var(--fg-2)">單 bulk tumor 看到</text>
+        <text x="505" y="84" text-anchor="middle" font-family="var(--font-display)" font-size="25" font-weight="700" fill="var(--navy)">「甲基可分成兩群」</text>
+        <!-- 判讀規則 -->
+        <rect x="290" y="116" width="430" height="40" rx="20" fill="#fff" stroke="var(--navy)" stroke-width="1.5"/>
+        <text x="505" y="143" text-anchor="middle" font-family="var(--font-display)" font-size="21" font-weight="700" fill="var(--navy)">判讀規則：看 normal 有沒有 →</text>
+        <!-- 分岔箭頭 -->
+        <line x1="430" y1="156" x2="250" y2="200" stroke="var(--arrow-color)" stroke-width="2.5"/><polygon points="247,188 261,196 244,206" fill="var(--arrow-color)"/>
+        <line x1="580" y1="156" x2="760" y2="200" stroke="var(--arrow-color)" stroke-width="2.5"/><polygon points="763,188 749,196 766,206" fill="var(--arrow-color)"/>
+        <!-- 左：cis-ASM -->
+        <rect x="40" y="206" width="420" height="300" rx="10" fill="#fdf0e8" stroke="var(--somatic-warm)" stroke-width="2"/>
+        <text x="250" y="244" text-anchor="middle" font-family="var(--font-display)" font-size="27" font-weight="700" fill="var(--somatic-warm)">normal 也有 → cis-ASM</text>
+        <text x="250" y="280" text-anchor="middle" font-family="var(--font-display)" font-size="22" fill="var(--fg-2)">甲基綁 germline haplotype（等位效應）</text>
+        <line x1="120" y1="322" x2="380" y2="322" stroke="var(--germline-hp1)" stroke-width="14" stroke-linecap="round"/>
+        <text x="250" y="318" text-anchor="middle" font-family="var(--font-mono)" font-size="18" fill="#fff">HP1</text>
+        <line x1="120" y1="360" x2="380" y2="360" stroke="var(--germline-hp2)" stroke-width="14" stroke-linecap="round"/>
+        <text x="250" y="356" text-anchor="middle" font-family="var(--font-mono)" font-size="18" fill="#fff">HP2</text>
+        <text x="250" y="416" text-anchor="middle" font-family="var(--font-display)" font-size="22" fill="var(--fg-2)">= 正常等位現象（<b>多數</b>）</text>
+        <rect x="110" y="436" width="280" height="48" rx="6" fill="var(--somatic-warm)"/>
+        <text x="250" y="467" text-anchor="middle" font-family="var(--font-display)" font-size="21" font-weight="700" fill="#fff">CONFIRMED · TP 富集 3.29×</text>
+        <!-- 右：subclone（中性色，候選未證實）-->
+        <rect x="550" y="206" width="420" height="300" rx="10" fill="#f1f2f4" stroke="var(--neutral)" stroke-width="2"/>
+        <text x="760" y="244" text-anchor="middle" font-family="var(--font-display)" font-size="27" font-weight="700" fill="var(--neutral)">normal 沒有 → subclone</text>
+        <text x="760" y="280" text-anchor="middle" font-family="var(--font-display)" font-size="22" fill="var(--fg-2)">甲基綁 tumor lineage（演化譜系）</text>
+        <circle cx="690" cy="340" r="26" fill="var(--accent-1)"/><text x="690" y="348" text-anchor="middle" font-family="var(--font-mono)" font-size="20" fill="#fff">A</text>
+        <circle cx="830" cy="340" r="26" fill="var(--navy)"/><text x="830" y="348" text-anchor="middle" font-family="var(--font-mono)" font-size="20" fill="#fff">B</text>
+        <text x="760" y="416" text-anchor="middle" font-family="var(--font-display)" font-size="22" fill="var(--error-red)">候選 ≠ 已確認</text>
+        <rect x="620" y="436" width="280" height="48" rx="6" fill="#fff" stroke="var(--neutral)" stroke-width="1.5"/>
+        <text x="760" y="467" text-anchor="middle" font-family="var(--font-display)" font-size="20" font-weight="700" fill="var(--neutral)">候選 · TP 貧化 0.65×（FP 反更多）</text>
+        <!-- 底部 -->
+        <text x="505" y="540" text-anchor="middle" font-family="var(--font-display)" font-size="24" font-weight="700" fill="var(--error-red)">單樣本無法分離 → 需 normal cis-control</text>
+      </svg>
+      <div style="flex:1;display:flex;flex-direction:column;gap:22px">
+        <div class="kpi"><div class="v blue">0.091–0.161</div><div class="l">全 7 樣本 Jaccard（無監督切群 ↔ 標籤）一律低 = 兩 read-set 幾乎不相交</div></div>
+        <div class="kpi"><div class="v som">3.29×</div><div class="l">CONFIRMED（對齊 germline）TP 富集 <span class="mono">vs 隨機 baseline</span> = cis-ASM characterization</div></div>
+        <div class="kpi"><div class="v red">0.65×</div><div class="l">subclone 候選（不對齊 germline）TP <b>貧化</b>、FP 反更多 → 結構非 somatic 特異</div></div>
+      </div>
+    </div>
+    <div class="foot">來源：allsample_subcluster_split/SUMMARY · decisionflow_5state · cluster_redesign_genomewide_tpfp（9/9 數字 wc1v407en 機械重算 MATCH）· 三閘 = balance + null-excess + alignment</div>
+    <div class="page-n">&lt; 5 &gt;</div>
+  </div>
+  <div class="snote"><b>核心 2，數字最硬。</b>講法：<b>「同一個甲基分群圖，有兩種解釋——normal 也有就是 cis-ASM 等位效應（多數）、normal 沒有才可能是 subclone」</b>。關鍵數字：全 7 樣本 Jaccard 都低（0.09–0.16）；對齊 germline TP 富集 3.29×、不對齊「候選」TP 貧化 0.65× FP 更多。<b>對方法不敏感</b>：換三閘、5桶、純幾何，FP 結構都不少於 TP——但要講清楚這些是<b>同一份距離的多視角、非獨立證據</b>，真獨立性是 Jaccard 跨 7 樣本。收尾：<b>tumor-only 下單 bulk 分不開，要 normal cis-control。</b></div>
+</section>
+
+<!-- ===== S6 支撐 M1 假陰性修正 + SVG 救回≠判別 ===== -->
+<section class="slide">
+  <div class="slide-pad">
+    <div class="eyebrow">支撐 · 方法健全性</div>
+    <h1 class="slide-title" style="margin-bottom:14px">ISM 方法 <span style="color:var(--indep)">SOUND</span>，但 verdict 漏報結構 → 已修正</h1>
+    <div style="display:flex;gap:40px;align-items:flex-start;flex:1">
+      <div style="flex:0 0 auto;display:flex;flex-direction:column;gap:20px">
+        <div class="panel panel--ice" style="width:760px">
+          <div style="font-family:var(--font-display);font-weight:600;font-size:26px;color:var(--navy);margin-bottom:10px">假陰性根因（非 bug，是定義過嚴）</div>
+          <div style="font-size:24px;line-height:1.45;color:var(--fg-2)">全基因組 <b>91.7%</b> region 判 Weak/Noise，但 Noise 中 <b>74.3%</b>、Weak 中 <b>98%</b> 早已帶顯著 PERMANOVA —— 只是最終判定<b>從不引用它</b>。</div>
+        </div>
+        <svg width="760" height="300" viewBox="0 0 760 300">
+          <text x="380" y="30" text-anchor="middle" font-family="var(--font-display)" font-size="26" font-weight="700" fill="var(--navy)">救回 ≠ 判別力</text>
+          <text x="120" y="78" text-anchor="middle" font-family="var(--font-display)" font-size="24" fill="var(--fg-2)">TP 救回</text>
+          <rect x="60" y="92" width="280" height="56" rx="6" fill="var(--accent-1)"/>
+          <text x="200" y="128" text-anchor="middle" font-family="var(--font-display)" font-size="26" font-weight="700" fill="#fff">有結構 ✓</text>
+          <text x="120" y="186" text-anchor="middle" font-family="var(--font-display)" font-size="24" fill="var(--fg-2)">FP 對照</text>
+          <rect x="60" y="200" width="266" height="56" rx="6" fill="var(--reference-gray)"/>
+          <text x="193" y="236" text-anchor="middle" font-family="var(--font-display)" font-size="26" font-weight="700" fill="#fff">同比例有結構</text>
+          <line x1="420" y1="120" x2="420" y2="228" stroke="var(--error-red)" stroke-width="2.5"/>
+          <text x="600" y="140" text-anchor="middle" font-family="var(--font-display)" font-size="25" font-weight="700" fill="var(--indep)">結構存在性 ✓</text>
+          <text x="600" y="180" text-anchor="middle" font-family="var(--font-display)" font-size="25" font-weight="700" fill="var(--error-red)">TP-FP 判別 ✗</text>
+          <text x="600" y="220" text-anchor="middle" font-family="var(--font-display)" font-size="22" fill="var(--error-red)">這不是 filter</text>
+        </svg>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:16px">
+        <div class="panel panel--muted">
+          <div class="tag-cap" style="color:var(--navy);margin-bottom:10px">reclassify-v2 救回率（兩版·不同 build）</div>
+          <table class="mt" style="font-size:22px;width:100%">
+            <tr><th>版本</th><th>救回率</th><th>provenance</th></tr>
+            <tr class="hi"><td>Python pilot（<b>定論引此版</b>）</td><td class="r">46.6%<br>3810/8179</td><td>committed 4ec339b ✓</td></tr>
+            <tr><td>C++ 全基因組（加 level 軸）</td><td class="r">53.9%<br>4407/8180</td><td>report_claim<br>待落檔升級</td></tr>
+            <tr><td>FP（orig Strong 降級）</td><td class="r">0</td><td>兩版一致</td></tr>
+          </table>
+        </div>
+        <div class="panel panel--cream">
+          <div class="tag-cap red" style="margin-bottom:6px">口徑紅線</div>
+          <div style="font-size:22px;line-height:1.4;color:var(--fg-2)">「救回」= 把誤判的有結構 region 標回 valid（純加、Strong 不降），<b>非</b> TP/FP 判別力提升；allele 軸未做 cis-control 不能稱 subclone。</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot">來源：FN_audit_01.md（29,754 region·committed JSON 背書）· reclassify_v2_pilot.json（46.6% committed）· 53.9% 為 report_claim（feat/summary-nreadsvalid，待補落檔）</div>
+    <div class="page-n">&lt; 6 &gt;</div>
+  </div>
+  <div class="snote"><b>支撐 1。</b>一句：<b>「ISM 方法本身是 SOUND 的，問題是舊 verdict 把 91.7% 判成 Weak/Noise，但它們其實帶顯著 PERMANOVA——只是判定沒去引用它」</b>。reclassify 修了這個。<b>數字念 46.6%（committed 那版）</b>，53.9% 是 C++ 全基因組待落檔、別當 headline。右下紅線必講：<b>救回是「結構存在性」不是「TP/FP 判別力」，這不是 filter。</b></div>
+</section>
+
+<!-- ===== S7 支撐 M4 方法論定位 + SVG CN↔甲基 DAG（CP-D 重繪 + 82% 原文口徑）===== -->
+<section class="slide">
+  <div class="slide-pad">
+    <div class="eyebrow">支撐 · 方法論定位</div>
+    <h1 class="slide-title" style="margin-bottom:10px">文獻定位完成（<span style="color:var(--indep)">74 源 · 0 真衝突</span>），畫清誠實天花板</h1>
+    <div style="display:flex;gap:36px;align-items:flex-start;flex:1">
+      <svg width="1000" height="580" viewBox="0 0 1000 580" style="flex:0 0 auto">
+        <!-- 前提橫幅 -->
+        <rect x="40" y="0" width="920" height="64" rx="8" fill="var(--bg-3)" stroke="var(--border-2)" stroke-width="1.5"/>
+        <text x="500" y="28" text-anchor="middle" font-family="var(--font-display)" font-size="22" fill="var(--fg-2)">原本的盤算：CN 分群 和 甲基分群「對齊」 → 想當 subclone 證據</text>
+        <text x="500" y="54" text-anchor="middle" font-family="var(--font-display)" font-size="23" font-weight="700" fill="var(--error-red)">問題：這個「對齊」是被共同上游製造出來的假象</text>
+        <!-- 共同上游 -->
+        <rect x="350" y="88" width="300" height="72" rx="8" fill="#fdecea" stroke="var(--error-red)" stroke-width="2"/>
+        <text x="500" y="122" text-anchor="middle" font-family="var(--font-display)" font-size="23" fill="var(--fg-2)">共同上游：哪條 allele 存活</text>
+        <text x="500" y="148" text-anchor="middle" font-family="var(--font-mono)" font-size="19" fill="var(--error-red)">CN / LOH 事件</text>
+        <!-- 因果線（實線實心箭頭=驅動）-->
+        <line x1="430" y1="160" x2="250" y2="230" stroke="var(--error-red)" stroke-width="3"/><polygon points="247,217 262,225 244,235" fill="var(--error-red)"/>
+        <line x1="570" y1="160" x2="750" y2="230" stroke="var(--error-red)" stroke-width="3"/><polygon points="753,217 738,225 756,235" fill="var(--error-red)"/>
+        <text x="318" y="196" font-family="var(--font-display)" font-size="18" fill="var(--error-red)">驅動</text>
+        <text x="648" y="196" font-family="var(--font-display)" font-size="18" fill="var(--error-red)">驅動</text>
+        <rect x="100" y="238" width="300" height="64" rx="8" fill="var(--bg-3)" stroke="var(--border-2)" stroke-width="1.5"/>
+        <text x="250" y="278" text-anchor="middle" font-family="var(--font-display)" font-size="23" fill="var(--fg-2)">CN 軸標籤</text>
+        <rect x="600" y="238" width="300" height="64" rx="8" fill="var(--bg-3)" stroke="var(--border-2)" stroke-width="1.5"/>
+        <text x="750" y="278" text-anchor="middle" font-family="var(--font-display)" font-size="23" fill="var(--fg-2)">甲基 β</text>
+        <!-- 偽相關（灰波浪線）-->
+        <path d="M 400 270 q 25 -16 50 0 q 25 16 50 0 q 25 -16 50 0 q 25 16 50 0" fill="none" stroke="var(--neutral)" stroke-width="3"/>
+        <text x="500" y="250" text-anchor="middle" font-family="var(--font-display)" font-size="19" fill="var(--neutral)">看似相關（其實是假的 · spurious）</text>
+        <!-- 鏡子比喻（大字錨點）-->
+        <rect x="200" y="330" width="600" height="78" rx="10" fill="#fdecea" stroke="var(--error-red)" stroke-width="2"/>
+        <line x1="500" y1="338" x2="500" y2="400" stroke="var(--error-red)" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <text x="500" y="380" text-anchor="middle" font-family="var(--font-display)" font-size="30" font-weight="700" fill="var(--error-red)">甲基只是 CN 的「鏡子」</text>
+        <!-- SV 軸 = 唯一非循環（縮成一句）-->
+        <rect x="100" y="436" width="800" height="120" rx="10" fill="#e9f5ee" stroke="var(--indep)" stroke-width="2"/>
+        <text x="500" y="476" text-anchor="middle" font-family="var(--font-display)" font-size="25" font-weight="700" fill="var(--indep)">唯一乾淨 anchor：SV split-read（對甲基 β 無因果）</text>
+        <text x="500" y="516" text-anchor="middle" font-family="var(--font-display)" font-size="22" fill="var(--fg-2)">read 是否物理跨斷點，與它的甲基值無關</text>
+        <text x="500" y="544" text-anchor="middle" font-family="var(--font-mono)" font-size="19" fill="var(--indep)">→ CN-neutral 區仍對齊 somatic label 才非循環</text>
+      </svg>
+      <div style="flex:1;display:flex;flex-direction:column;gap:16px">
+        <div class="panel panel--muted">
+          <div class="tag-cap" style="color:var(--navy);margin-bottom:6px">誠實天花板</div>
+          <div style="font-size:23px;line-height:1.45;color:var(--fg-2)">確認黃金標準 = <b>single-cell / multi-region / longitudinal</b>；單 bulk 只能 characterize。</div>
+        </div>
+        <div class="panel panel--cream">
+          <div class="tag-cap red" style="margin-bottom:6px">口徑紅線</div>
+          <div style="font-size:21px;line-height:1.4;color:var(--fg-2)">I2 LOH-unmask：印記 DMR <b>CN-獨立真表觀僅 8.1–17.6%</b>（即逾八成由 CN/LOH 解釋；<b>限 37 印記 DMR · array-bulk</b>，不可外推「所有 ASM」）。停止主張「first read-level methylation lineage」（2026 PCDH 已逼近）。</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot">來源：external_validation_library_index_01.md（74 源 0 衝突）· Martin-Trujillo PMID28883545（原文直陳 CN-獨立 8.1–17.6%）· ont_cnv_sv_feasibility_01.md</div>
+    <div class="page-n">&lt; 7 &gt;</div>
+  </div>
+  <div class="snote"><b>支撐 2，最容易被打臉的一頁。</b>講法先給前提：<b>「本來想用『CN 分群和甲基分群對齊』當 subclone 證據，但發現這個對齊是共同上游（哪條 allele 存活）製造的假象——甲基只是 CN 的鏡子」</b>。數字念<b>原文口徑：「CN-獨立真表觀只有 8.1–17.6%，逾八成由 CN/LOH 解釋」</b>，一定要補「<b>限 37 個印記 DMR、array 資料</b>」不可外推所有 ASM。收尾：SV 軸是唯一乾淨 anchor；確認還是要 single-cell。</div>
+</section>
+
+<!-- ===== S8 支撐 M5 論文基石 + SVG sSNV 稀疏（CP-D 修：真實比例）===== -->
+<section class="slide">
+  <div class="slide-pad">
+    <div class="eyebrow">支撐 · 論文基石（motivation）</div>
+    <h1 class="slide-title" style="margin-bottom:14px">sSNV 太稀疏，單 read 幾乎跨不到 2 個 → <span style="color:var(--somatic-warm)">需甲基補位</span></h1>
+    <div style="display:flex;gap:40px;align-items:flex-start;flex:1">
+      <svg width="1020" height="480" viewBox="0 0 1020 480" style="flex:0 0 auto">
+        <text x="510" y="34" text-anchor="middle" font-family="var(--font-display)" font-size="26" font-weight="700" fill="var(--navy)">基因組軸（相鄰 sSNV 中位間距 51.4 kb）</text>
+        <line x1="40" y1="120" x2="980" y2="120" stroke="var(--border-2)" stroke-width="2"/>
+        <!-- 稀疏 sSNV 散點（間距 ~280px 代表 51kb）-->
+        <circle cx="120" cy="120" r="9" fill="var(--somatic-warm)"/><circle cx="400" cy="120" r="9" fill="var(--somatic-warm)"/><circle cx="680" cy="120" r="9" fill="var(--somatic-warm)"/><circle cx="960" cy="120" r="9" fill="var(--somatic-warm)"/>
+        <text x="510" y="158" text-anchor="middle" font-family="var(--font-display)" font-size="21" fill="var(--somatic-warm)">sSNV（密度僅 10.6/Mb）</text>
+        <!-- read 跨度：4.9/51.4≈1/10，間距 280px → read ≈ 28px -->
+        <rect x="120" y="206" width="28" height="30" rx="15" fill="var(--accent-1)"/>
+        <rect x="400" y="206" width="28" height="30" rx="15" fill="var(--accent-1)"/>
+        <rect x="680" y="206" width="28" height="30" rx="15" fill="var(--accent-1)"/>
+        <text x="180" y="228" font-family="var(--font-mono)" font-size="17" fill="var(--accent-1)">read 4.9 kb（≈ 間距的 1/10，每條同寬）</text>
+        <text x="510" y="276" text-anchor="middle" font-family="var(--font-display)" font-size="22" fill="var(--fg-2)">read 短到塞不滿兩個 sSNV 之間 → 幾乎只蓋 0–1 個</text>
+        <!-- CpG 密集對照 -->
+        <line x1="120" y1="346" x2="320" y2="346" stroke="var(--border-2)" stroke-width="1.5"/>
+        <g fill="var(--indep)"><circle cx="135" cy="346" r="4"/><circle cx="155" cy="346" r="4"/><circle cx="175" cy="346" r="4"/><circle cx="195" cy="346" r="4"/><circle cx="215" cy="346" r="4"/><circle cx="235" cy="346" r="4"/><circle cx="255" cy="346" r="4"/><circle cx="275" cy="346" r="4"/><circle cx="295" cy="346" r="4"/></g>
+        <text x="210" y="386" text-anchor="middle" font-family="var(--font-display)" font-size="20" fill="var(--indep)">同 read 上 CpG 處處有</text>
+        <rect x="430" y="326" width="520" height="92" rx="10" fill="#fdf0e8" stroke="var(--somatic-warm)" stroke-width="1.5"/>
+        <text x="690" y="362" text-anchor="middle" font-family="var(--font-display)" font-size="24" font-weight="700" fill="var(--somatic-warm)">P(≥2 sSNV / read) = 0.74%</text>
+        <text x="690" y="396" text-anchor="middle" font-family="var(--font-display)" font-size="22" fill="var(--fg-2)">94.2% read 跨 0 個 sSNV</text>
+      </svg>
+      <div style="flex:1;display:flex;flex-direction:column;gap:18px">
+        <div class="kpi" style="border-left:4px solid var(--accent-1);padding-left:18px"><div class="v blue">10.6<span style="font-size:34px">/Mb</span></div><div class="l">sSNV 密度（密度=平均）</div></div>
+        <div class="kpi" style="border-left:4px solid var(--somatic-warm);padding-left:18px"><div class="v som">94.2%</div><div class="l">read 跨 0 個 sSNV（間距=中位 51.4kb，故與密度非精確倒數）</div></div>
+        <div class="panel panel--cream">
+          <div class="tag-cap red" style="margin-bottom:6px">口徑紅線</div>
+          <div style="font-size:21px;line-height:1.4;color:var(--fg-2)">單樣本 HCC1395 <b>PARTIAL</b>；只論「sSNV 稀疏 → 需補位訊號」，<b>不</b>滑向甲基驅動偵測 / filter / tree。</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot">來源：ssnv_spacing_coverage.json（commit 114200e，11/11 數字 wc1v407en 全 MATCH，0 誤）</div>
+    <div class="page-n">&lt; 8 &gt;</div>
+  </div>
+  <div class="snote"><b>支撐 3，論文 motivation。</b>一句：<b>「somatic SNV 在基因組上太稀疏（10 萬鹼基才一個量級），一條 read 中位才 4.9 kb，所以單 read 幾乎跨不到 2 個 sSNV——0.74%、94.2% 連一個都跨不到」</b>（指圖：藍 read 條只有間距的 1/10）。所以才<b>需要每條 read 都有的甲基當補位訊號</b>。紅線：<b>單樣本 PARTIAL，只講「需要補位」不講「甲基驅動」。</b></div>
+</section>
+
+<!-- ===== S9 收束 + 下一步 ===== -->
+<section class="slide">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">收束 · 誠實定位</div>
+    <h1 class="slide-title">proof-of-concept <span style="color:var(--accent-1)">⭐3</span> —— 骨幹 haplotag，甲基 corroborate</h1>
+    <div class="flow-row" style="gap:32px;align-items:stretch;margin:14px 0 30px">
+      <div class="panel panel--cream" style="flex:1">
+        <div class="data-flag" style="margin-bottom:12px">禁 overclaim（投稿前必守）</div>
+        <div class="bullet red" style="font-size:25px;margin-bottom:10px">甲基驅動 genome-wide 重建 / 完整 phylogeny-CCF tree</div>
+        <div class="bullet red" style="font-size:25px;margin-bottom:10px">tumor-only 無監督偵測 subclone</div>
+        <div class="bullet red" style="font-size:25px">「first read-level methylation lineage」首創措辭</div>
+      </div>
+      <div class="panel panel--ice" style="flex:1.1">
+        <div style="font-family:var(--font-display);font-weight:600;font-size:28px;color:var(--navy);margin-bottom:14px">下一步（ROI 排序）</div>
+        <table class="mt" style="font-size:23px;width:100%">
+          <tr><th>動作</th><th>解決什麼</th></tr>
+          <tr class="hi"><td>normal cis-control</td><td><b>判別力決定性 gate</b>（目前未測）</td></tr>
+          <tr><td>多 sSNV CCF（chr2:18M）</td><td>非循環確認 subclone</td></tr>
+          <tr><td>single-cell 驗證</td><td>terminal ground truth</td></tr>
+          <tr><td>COLO829 補甲基 normal</td><td>解鎖跨樣本（具備後評估 ⭐4）</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="panel panel--muted">
+      <div style="font-size:23px;line-height:1.45;color:var(--fg-2)"><b style="color:var(--indep)">本週正面貢獻</b>：建立「bulk ONT 上 無監督結構 + normal-baseline cis-test 分類 cis-ASM vs subclone 候選」的方法框架；把「需 normal 才能判別」定位成 well-posed 的決定性測試；證明「tumor-only 無監督不能直接當 subclone caller」防後人踩坑。<br><b>標題界定</b>：reconstruction = <span class="mono">regional LOH-constrained partition</span>，非 full tree；骨幹 = somatic haplotag、甲基 = corroborate（非 driver）。</div>
+    </div>
+    <div class="foot">三紅線全篇一致（wc1v407en + w9456xpig 雙審 0 blocking）：⭐3 · 甲基 corroborate · 單樣本 PARTIAL</div>
+    <div class="page-n">&lt; 9 &gt;</div>
+  </div>
+  <div class="snote"><b>收束。</b>定調：<b>「proof-of-concept ⭐3，骨幹 somatic haplotag、甲基 corroborate」</b>。先正面講貢獻：<b>建立了分類 cis-ASM vs subclone 候選的方法框架、把判別問題變 well-posed</b>，再講不宣稱什麼（禁 overclaim 三條）。關鍵：<b>normal cis-control 不只下一步，是「判別力成立與否」的決定性測試、目前未測</b>——現在的「不判別」是 tumor-only 下的結論。COLO829 = 解鎖跨樣本後才談 ⭐4。</div>
+</section>
+
+<!-- ===== S10 教授問答備 ===== -->
+<section class="slide">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">教授問答預備（speaker note）</div>
+    <h1 class="slide-title">三個最可能的追問</h1>
+    <div style="display:flex;flex-direction:column;gap:24px;margin-top:14px">
+      <div class="panel panel--muted"><div style="font-size:30px;font-weight:700;color:var(--navy);margin-bottom:8px">Q1 · 論文還站得住嗎？</div><div style="font-size:26px;color:var(--fg-2);line-height:1.45">站得住，但須嚴格 frame 為 proof-of-concept；不宣稱完整 tree，骨幹是 somatic haplotag、甲基是 corroborate。</div></div>
+      <div class="panel panel--muted"><div style="font-size:30px;font-weight:700;color:var(--navy);margin-bottom:8px">Q2 · 真 subclone 訊號還在嗎？</div><div style="font-size:26px;color:var(--fg-2);line-height:1.45">在 a-priori 條件化軸有（within-HP cis-ASM 候選 ≤18%），但確認需外部 ground truth；單 bulk 無法自我確認。</div></div>
+      <div class="panel panel--muted"><div style="font-size:30px;font-weight:700;color:var(--navy);margin-bottom:8px">Q3 · 下一步怎麼確認？</div><div style="font-size:26px;color:var(--fg-2);line-height:1.45">normal cis-control 分離 cis-ASM、多 sSNV CCF（chr2:18M）非循環確認、single-cell 當 terminal arbiter。</div></div>
+    </div>
+    <div class="page-n">&lt; 10 &gt;</div>
+  </div>
+  <div class="snote"><b>問答備頁。</b>三個追問的回答都已寫在頁面上；口頭補一句心法：<b>遇到任何「你是不是找到 subclone 了」的問題，一律回到「我們 characterize 了候選，確認需要外部 ground truth」</b>，不鬆口。完整講稿見 _speaker_notes.md。</div>
+</section>
+
+</div></div>
+
+<div class="cp-ribbon">CP-D 修訂 · 待 CP-E 定稿</div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var i=0,N=slides.length,stage=document.getElementById('stage'),cnt=document.getElementById('cnt');
+  function fit(){var s=Math.min((window.innerWidth-40)/1920,(window.innerHeight-78)/1080);stage.style.transform='scale('+s+')';}
+  function show(n){i=Math.max(0,Math.min(N-1,n));slides.forEach(function(s,k){s.classList.toggle('active',k===i);});cnt.textContent=(i+1)+' / '+N;}
+  document.getElementById('next').onclick=function(){show(i+1);};
+  document.getElementById('prev').onclick=function(){show(i-1);};
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){show(i+1);e.preventDefault();}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){show(i-1);}
+    else if(e.key==='Home'){show(0);} else if(e.key==='End'){show(N-1);}
+    else if(e.key==='s'||e.key==='S'){document.body.classList.toggle('notes');}
+  });
+  window.addEventListener('resize',fit);
+  fit();show(0);
+})();
+</script>
+</body>
+</html>

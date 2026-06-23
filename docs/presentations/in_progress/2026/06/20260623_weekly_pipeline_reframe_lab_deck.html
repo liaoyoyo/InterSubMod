@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<!--
+  title: 週報（reframe）— 位點分類方法 pipeline：從甲基距離樹到 read/clone 解釋
+  template: Lab Report Deck System（複用 20260618/0622 deck tokens + slide.css + JS nav）
+  date: 2026-06-23
+  build_branch: research/subclonal-reconstruction-202606
+  narrative: 流程型（方法學說明 → 驗證 → 分類 → 判別機制 → chr2 解釋 → 誠實邊界）
+  order_principle: 方法學說明 → 驗證（gate）→ 才能分類（用戶 2026-06-23 指定）
+  classification_backbone: 5桶 phylo（S1-S6）· phylo_weak_structure_counts.json（2026-06-23 已落檔主 tree _provenance_20260623_reframe/，數字 grep MATCH）
+  chr2_svg: 複用 docs/explain/04_subclone-reconstruction-chr2-18M §⑤ 重建樹（誠實版，~3 lineage / L2 / 不可寫 5 subclone）
+  scope: HCC1395 · 全基因組 34,736 位點 · proof-of-concept ⭐2-3 · 單樣本 PARTIAL
+  verified: 5桶 doc §8 溯源表 grep MATCH · chr2 explain/04（committed d0f23c8 誠實版）
+  brand: 細標題(400) · HP1 #4188C7 / HP2 #1F3A93 / somatic #E97B3C · 紅=循環/confound 綠=非循環/獨立 · 無 emoji 無漸層 · 箭頭為主要繪製形狀 · 頁碼 < N >
+  status: 定稿（reframe 新版）— 三輪 CP-D 雙審 0 BLOCKING / 三紅線 consistent / 措辭統一 SOUND_WITH_CAVEATS·判別力未測
+  speaker_notes: 按 s 切換
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>週報 · 位點分類方法 pipeline（reframe · 6/15–6/23）</title>
+<style>
+:root{
+  --ink:#000;--paper:#fff;--navy:#021442;--ice:#DBEFF9;
+  --accent-1:#4188C7;--accent-2:#7BBFEA;--accent-3:#92DCD9;--accent-4:#FFF8DD;--accent-6:#FFAC27;
+  --germline-hp1:#4188C7;--germline-hp2:#1F3A93;--germline-light:#BDD7EE;--maternal-light:#C6E0B4;
+  --somatic-warm:#E97B3C;--error-red:#E0352B;--indep:#2E8B57;--neutral:#6B7280;--reference-gray:#A6A6A6;
+  --fg-1:#000;--fg-2:#262626;--fg-3:#595959;--fg-4:#A6A6A6;--fg-5:#D9D9D9;
+  --bg-2:#F7F9FC;--bg-3:#EEF3F8;--bg-4:#DBEFF9;
+  --border-1:#D9D9D9;--border-2:#A6A6A6;
+  --font-display:'Noto Sans TC','PingFang TC','微軟正黑體','Microsoft JhengHei',Inter,sans-serif;
+  --font-body:'Inter','Noto Sans TC','Calibri','PingFang TC','微軟正黑體',sans-serif;
+  --font-mono:'JetBrains Mono','Menlo','Consolas',monospace;
+  --arrow-color:#4472C4;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:#15171c;font-family:var(--font-body);color:var(--fg-1)}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:14px;
+  background:#0b1220;color:#cbd5e1;padding:7px 16px;font-size:13px;font-family:var(--font-display);border-bottom:1px solid #1e293b}
+.nav b{color:#fff}.nav .sp{flex:1}
+.nav button{background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-family:var(--font-display)}
+.nav button:hover{background:#334155}.nav .cnt{font-family:var(--font-mono)}.nav .hint{font-size:11px;color:#64748b}
+.deck{position:fixed;inset:0;top:38px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.stage{width:1920px;height:1080px;position:relative;transform-origin:center center;background:#fff;box-shadow:0 12px 48px rgba(0,0,0,.5);flex:0 0 auto}
+section.slide{position:absolute;inset:0;background:#fff;overflow:hidden;display:none}
+section.slide.active{display:block}
+.slide-pad{padding:72px 96px 88px;height:100%;box-sizing:border-box;display:flex;flex-direction:column}
+.slide-title{font-family:var(--font-display);font-weight:400;font-size:70px;line-height:1.1;letter-spacing:-0.005em;color:var(--fg-1);margin:0 0 20px}
+.slide-subtitle{font-family:var(--font-display);font-weight:400;font-size:30px;color:var(--fg-3);margin:0 0 28px}
+.eyebrow{font-family:var(--font-display);font-size:24px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-1);font-weight:600;margin-bottom:16px}
+.page-n{position:absolute;right:64px;bottom:36px;font-family:var(--font-display);font-size:24px;color:var(--fg-3);letter-spacing:.06em}
+.pill{display:inline-flex;align-items:center;padding:10px 24px;border:1.5px solid var(--border-1);border-radius:6px;background:#fff;font-family:var(--font-display);font-weight:500;font-size:24px;color:var(--fg-1);white-space:nowrap}
+.pill--lg{font-size:30px;padding:12px 28px}
+.pill--core{border-color:var(--navy);border-width:2px;color:var(--navy)}
+.pill--gate{border-color:var(--indep);color:var(--indep);font-weight:700}
+.panel{background:#fff;border:1px solid var(--border-1);border-radius:8px;padding:22px 26px}
+.panel--ice{background:var(--ice);border-color:#BBD6EE}
+.panel--cream{background:var(--accent-4);border-color:#EED892}
+.panel--muted{background:var(--bg-3);border-color:var(--border-1)}
+.panel--green{background:#e9f5ee;border-color:#b6dcc4}
+.bullet{display:flex;gap:14px;align-items:flex-start;font-size:27px;line-height:1.5;color:var(--fg-2)}
+.bullet::before{content:"";flex:0 0 auto;width:12px;height:12px;background:var(--accent-1);border-radius:2px;margin-top:15px}
+.bullet.red::before{background:var(--error-red)}.bullet.ind::before{background:var(--indep)}
+.data-flag{font-family:var(--font-display);font-weight:600;color:var(--error-red);font-size:24px}
+.kpi .v{font-family:var(--font-display);font-size:70px;font-weight:300;color:var(--navy);line-height:1}
+.kpi .v.som{color:var(--somatic-warm)}.kpi .v.blue{color:var(--accent-1)}.kpi .v.red{color:var(--error-red)}.kpi .v.ind{color:var(--indep)}
+.kpi .l{font-family:var(--font-body);font-size:22px;color:var(--fg-3);margin-top:8px;max-width:320px}
+.flow-row{display:flex;align-items:center;gap:14px}
+.ncard{background:var(--bg-2);border:1px solid var(--border-1);border-radius:10px;padding:18px 22px;flex:1}
+.ncard .h{font-family:var(--font-display);font-weight:700;font-size:24px;color:var(--navy);margin:0 0 8px;display:flex;align-items:center;gap:10px}
+.ncard .num{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:var(--accent-1);color:#fff;font-size:21px;font-weight:700;flex:0 0 auto}
+.ncard.c2 .num{background:var(--accent-3);color:var(--navy)}.ncard.c3 .num{background:var(--somatic-warm)}.ncard.c4 .num{background:var(--navy)}
+.ncard p{margin:0;font-size:21px;line-height:1.4;color:var(--fg-2)}
+.mono{font-family:var(--font-mono)}
+table.mt{border-collapse:collapse;font-size:25px;font-family:var(--font-display)}
+table.mt th,table.mt td{border:1px solid var(--border-1);padding:11px 22px;text-align:left}
+table.mt th{background:var(--bg-3);font-weight:700;color:var(--navy)}
+table.mt td.r{text-align:right;font-family:var(--font-mono)}
+table.mt tr.hi td{background:var(--accent-4)}
+.foot{position:absolute;left:96px;bottom:36px;font-family:var(--font-body);font-size:20px;color:var(--fg-4);max-width:1500px}
+.tag-cap{font-family:var(--font-display);font-size:22px;font-weight:600}
+.tag-cap.red{color:var(--error-red)}.tag-cap.ind{color:var(--indep)}
+.gate-banner{display:inline-flex;align-items:center;gap:12px;background:#e9f5ee;border:2px solid var(--indep);border-radius:8px;padding:10px 22px;font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--indep)}
+.cp-ribbon{position:absolute;top:0;left:0;background:var(--accent-6);color:#000;font-family:var(--font-display);font-size:18px;font-weight:600;padding:4px 16px;z-index:5}
+.snote{display:none;position:absolute;left:72px;right:72px;bottom:24px;background:rgba(2,20,66,.96);color:#fff;padding:16px 26px;border-radius:10px;font-family:var(--font-body);font-size:23px;line-height:1.5;z-index:20;border-left:5px solid var(--accent-6)}
+.snote b{color:var(--accent-6)}
+body.notes .slide.active .snote{display:block}
+@media print{body{background:#fff}.nav{display:none}.cp-ribbon{display:none}.snote{display:none!important}
+  .deck{position:static;display:block;overflow:visible}
+  .stage{transform:none!important;box-shadow:none;page-break-after:always;margin:0 auto}
+  section.slide{display:block!important;position:relative}@page{size:1920px 1080px;margin:0}}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <b>週報 · 位點分類方法 pipeline</b>
+  <span style="color:#64748b">reframe · 方法學→驗證→分類→chr2</span>
+  <span class="sp"></span>
+  <span class="hint">s = 講稿</span>
+  <button onclick="window.print()">列印 / PDF</button>
+  <span class="cnt" id="cnt">1 / 9</span>
+  <button id="prev">◀</button>
+  <button id="next">▶</button>
+</div>
+
+<div class="deck"><div class="stage" id="stage">
+
+<!-- ===== S1 封面 ===== -->
+<section class="slide active">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">計算基因體實驗室 · 週報 2026-06-15 ~ 06-23</div>
+    <h1 style="font-family:var(--font-display);font-weight:400;font-size:90px;line-height:1.08;letter-spacing:-0.01em;margin:0 0 22px;color:var(--ink)">建立位點分類方法<br>從甲基<span style="color:var(--accent-1)">距離樹</span>到 read / clone <span style="color:var(--somatic-warm)">解釋</span></h1>
+    <div class="slide-subtitle" style="margin:0 0 34px">一套方法學健全（SOUND_WITH_CAVEATS · <span style="color:var(--error-red)">判別力待 normal cis-control</span>）的位點分類方法：把位點清楚分類、解釋 read 與 clone 候選</div>
+    <div class="flow-row" style="gap:16px">
+      <span class="pill pill--lg">報告人：廖子游</span>
+      <span class="pill pill--lg">指導教授：黃耀廷</span>
+      <span class="pill pill--lg pill--core">proof-of-concept ⭐2-3</span>
+    </div>
+    <div style="margin-top:24px;font-size:24px;color:var(--fg-3)">HCC1395 · 全基因組 <span class="mono">34,736 位點</span> · 單樣本 PARTIAL</div>
+  </div>
+  <div class="snote">本週主軸 reframe：<b>不是講「方法揭示了什麼侷限」，而是「我建立了一套方法學健全的位點分類方法、能用來解釋 read 與 clone」</b>。一句定調：SOUND（with caveats）pipeline → 分類 → 解釋。注意：SOUND 是「方法非 ad-hoc」，<b>判別力（能不能分 subclone）還沒測</b>。過場：「我先用一頁講這套方法做了什麼。」</div>
+</section>
+
+<!-- ===== S2 BLUF ===== -->
+<section class="slide">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">本週一句話</div>
+    <h1 class="slide-title">建成一套 <span style="color:var(--accent-1)">方法學健全的位點分類 pipeline</span></h1>
+    <div class="flow-row" style="gap:16px;margin:6px 0 28px;align-items:stretch">
+      <div class="ncard"><div class="h"><span class="num">1</span>建甲基距離樹</div><p>read×read 距離 → UPGMA 分支樹</p></div>
+      <div class="ncard c2"><div class="h"><span class="num">2</span>驗證方法學健全</div><p>SOUND_WITH_CAVEATS · <b>判別力未測</b>（對切法不敏感）</p></div>
+      <div class="ncard c3"><div class="h"><span class="num">3</span>分類每位點</div><p>5 類：對齊 / 不對齊 / 其他</p></div>
+      <div class="ncard c4"><div class="h"><span class="num">4</span>交叉特徵解釋</div><p>chr2 例：read 狀況 + clone 候選</p></div>
+    </div>
+    <div class="panel panel--cream">
+      <div class="data-flag" style="margin-bottom:8px">誠實定調（全篇貫徹）</div>
+      <div style="font-size:25px;line-height:1.5;color:var(--fg-2)">方法 <b>SOUND（非 ad-hoc）但判別力（分 subclone）尚未測</b>，需 normal cis-control。對齊的位點<b>多為 cis-ASM</b>（tumor-only 分不開）；subclone 是 <b>候選、需外部確認</b>。方法價值在<b>分類 + 解釋 + 把判別問題變 well-posed</b>，不在「找到 subclone」。</div>
+    </div>
+    <div class="page-n">&lt; 2 &gt;</div>
+  </div>
+  <div class="snote"><b>四步 pipeline。</b>重點是這是一條<b>「先建方法 → 驗證 → 才分類 → 再解釋」</b>的鏈。底部誠實定調先講：<b>對齊多為 cis-ASM、subclone 是候選</b>——先畫線，後面講分類就不會被當 overclaim。</div>
+</section>
+
+<!-- ===== S3 方法學說明：流程圖 ===== -->
+<section class="slide">
+  <div class="slide-pad">
+    <div class="eyebrow">① 方法學說明</div>
+    <h1 class="slide-title" style="margin-bottom:8px">方法流程：甲基距離 → 分支樹 → 切群 → 分類</h1>
+    <div style="display:flex;gap:40px;align-items:center;flex:1">
+      <svg width="1180" height="620" viewBox="0 0 1180 620" style="flex:0 0 auto">
+        <!-- step 1 取材 -->
+        <rect x="40" y="40" width="240" height="150" rx="10" fill="var(--bg-3)" stroke="var(--border-2)" stroke-width="1.5"/>
+        <text x="160" y="78" text-anchor="middle" font-family="var(--font-display)" font-size="26" font-weight="700" fill="var(--navy)">① 取材</text>
+        <text x="160" y="116" text-anchor="middle" font-family="var(--font-display)" font-size="21" fill="var(--fg-2)">每 sSNV ±5000 window</text>
+        <text x="160" y="146" text-anchor="middle" font-family="var(--font-display)" font-size="21" fill="var(--fg-2)">tumor reads（帶 HP）</text>
+        <text x="160" y="174" text-anchor="middle" font-family="var(--font-mono)" font-size="18" fill="var(--fg-3)">→ read×CpG 矩陣</text>
+        <line x1="280" y1="115" x2="332" y2="115" stroke="var(--arrow-color)" stroke-width="3"/><polygon points="332,107 346,115 332,123" fill="var(--arrow-color)"/>
+        <!-- step 2 距離樹 -->
+        <rect x="350" y="40" width="240" height="150" rx="10" fill="#e8f1fb" stroke="var(--accent-1)" stroke-width="1.5"/>
+        <text x="470" y="78" text-anchor="middle" font-family="var(--font-display)" font-size="26" font-weight="700" fill="var(--accent-1)">② 距離樹</text>
+        <text x="470" y="114" text-anchor="middle" font-family="var(--font-display)" font-size="21" fill="var(--fg-2)">BERNOULLI read×read</text>
+        <text x="470" y="142" text-anchor="middle" font-family="var(--font-display)" font-size="21" fill="var(--fg-2)">距離 → UPGMA</text>
+        <!-- mini tree -->
+        <g stroke="var(--accent-1)" stroke-width="2" fill="none"><line x1="420" y1="172" x2="520" y2="172"/><line x1="420" y1="172" x2="420" y2="160"/><line x1="520" y1="172" x2="520" y2="160"/><line x1="470" y1="172" x2="470" y2="180"/></g>
+        <line x1="590" y1="115" x2="642" y2="115" stroke="var(--arrow-color)" stroke-width="3"/><polygon points="642,107 656,115 642,123" fill="var(--arrow-color)"/>
+        <!-- step 3 切群 -->
+        <rect x="660" y="40" width="240" height="150" rx="10" fill="#fff3df" stroke="var(--accent-6)" stroke-width="1.5"/>
+        <text x="780" y="78" text-anchor="middle" font-family="var(--font-display)" font-size="26" font-weight="700" fill="#9a6512">③ 切群</text>
+        <text x="780" y="114" text-anchor="middle" font-family="var(--font-display)" font-size="20" fill="var(--fg-2)">嚴閘（不易誤切）· null95</text>
+        <text x="780" y="142" text-anchor="middle" font-family="var(--font-display)" font-size="20" fill="var(--fg-2)">寬閘（多撈候選）· null90</text>
+        <text x="780" y="172" text-anchor="middle" font-family="var(--font-mono)" font-size="18" fill="var(--fg-3)">顯著性閘</text>
+        <line x1="900" y1="115" x2="952" y2="115" stroke="var(--arrow-color)" stroke-width="3"/><polygon points="952,107 966,115 952,123" fill="var(--arrow-color)"/>
+        <!-- step 4 分類 -->
+        <rect x="970" y="40" width="180" height="150" rx="10" fill="#fdf0e8" stroke="var(--somatic-warm)" stroke-width="1.5"/>
+        <text x="1060" y="78" text-anchor="middle" font-family="var(--font-display)" font-size="26" font-weight="700" fill="var(--somatic-warm)">④ 分類</text>
+        <text x="1060" y="116" text-anchor="middle" font-family="var(--font-display)" font-size="21" fill="var(--fg-2)">互斥決策流</text>
+        <text x="1060" y="146" text-anchor="middle" font-family="var(--font-display)" font-size="21" fill="var(--fg-2)">→ 5 桶之一</text>
+        <!-- 往下到驗證 gate -->
+        <line x1="1060" y1="190" x2="1060" y2="226" stroke="var(--indep)" stroke-width="3"/><line x1="1060" y1="226" x2="590" y2="226" stroke="var(--indep)" stroke-width="3"/><line x1="590" y1="226" x2="590" y2="250" stroke="var(--indep)" stroke-width="3"/><polygon points="582,250 598,250 590,262" fill="var(--indep)"/>
+        <text x="1075" y="212" font-family="var(--font-display)" font-size="17" fill="var(--indep)">四步做完↓</text>
+        <rect x="250" y="270" width="680" height="80" rx="10" fill="#e9f5ee" stroke="var(--indep)" stroke-width="2.5"/>
+        <text x="590" y="305" text-anchor="middle" font-family="var(--font-display)" font-size="25" font-weight="700" fill="var(--indep)">⚑ 四步做完 → 先過驗證 gate（下一頁）→ 分類才可信</text>
+        <text x="590" y="335" text-anchor="middle" font-family="var(--font-display)" font-size="20" fill="var(--fg-2)">SOUND_WITH_CAVEATS + 對切法不敏感 + 假陰性修正 → 分類(characterization)才站得住</text>
+        <line x1="590" y1="350" x2="590" y2="410" stroke="var(--indep)" stroke-width="3"/><polygon points="582,410 598,410 590,422" fill="var(--indep)"/>
+        <!-- 分類交叉標籤 -->
+        <rect x="250" y="430" width="680" height="150" rx="10" fill="var(--bg-2)" stroke="var(--border-1)" stroke-width="1.5"/>
+        <text x="590" y="466" text-anchor="middle" font-family="var(--font-display)" font-size="22" font-weight="700" fill="var(--fg-3)">⑤ 分類 → 交叉標籤 + 配特徵 → 解釋（預告 · 見後頁 S6/S7）</text>
+        <text x="590" y="502" text-anchor="middle" font-family="var(--font-display)" font-size="21" fill="var(--fg-2)">與 HP/allele 標籤交叉（對齊?）+ 配 AF/CN/LOH 定義</text>
+        <text x="590" y="536" text-anchor="middle" font-family="var(--font-display)" font-size="21" fill="var(--fg-2)">→ 解釋 read 狀況 + clone/subclone 候選（chr2 例）</text>
+        <text x="590" y="566" text-anchor="middle" font-family="var(--font-mono)" font-size="18" fill="var(--somatic-warm)">對齊 germline → cis-ASM（多數）｜不對齊 + 特徵 → subclone 候選</text>
+      </svg>
+    </div>
+    <div class="foot">參數：MINSZ=3 · SEP_MIN=1.3 · 距離=BERNOULLI(min_common=3) · 樹=UPGMA(average) · null95/90（來源 phylo doc §1）</div>
+    <div class="page-n">&lt; 3 &gt;</div>
+  </div>
+  <div class="snote"><b>方法學說明（流程）。</b>從左到右講四步：<b>取材（每位點周圍 reads）→ 建甲基距離樹（UPGMA）→ 顯著性閘切群 → 分類成 5 桶</b>。最重要：<b>中間綠色 gate「方法要先驗證有效，分類才可信」</b>——這就是下一頁。最後一排：分類完還要交叉標籤+特徵才能解釋。</div>
+</section>
+
+<!-- ===== S4 驗證（gate）===== -->
+<section class="slide">
+  <div class="slide-pad">
+    <div class="eyebrow">② 驗證（分類的前提 gate）</div>
+    <h1 class="slide-title" style="margin-bottom:10px">先確認方法 <span style="color:var(--indep)">SOUND（非 ad-hoc）</span> —— 分類才站得住</h1>
+    <div class="gate-banner" style="margin:0 0 24px">⚑ 三項驗證全過 → 才進分類</div>
+    <div class="flow-row" style="gap:24px;align-items:stretch;flex:1">
+      <div class="panel panel--green" style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div class="tag-cap ind" style="margin-bottom:10px">驗證 1 · 方法 SOUND</div>
+        <div style="font-size:24px;line-height:1.45;color:var(--fg-2)">read×read 距離→分群→PERMANOVA 是成熟框架（Legendre/Anderson），<b>非 ad-hoc</b>。SOUND_WITH_CAVEATS。</div>
+      </div>
+      <div class="panel panel--green" style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div class="tag-cap ind" style="margin-bottom:10px">驗證 2 · 分割穩定（對切法不敏感 · robustness 非獨立佐證）</div>
+        <div style="font-size:24px;line-height:1.45;color:var(--fg-2)">換 <b>三閘 / 5桶 null95-90 / 純幾何</b> 結論一致 —— 結論對方法/閘值<b>不敏感</b>（同距離多視角、非獨立；真獨立性 = Jaccard 跨 7 樣本）。</div>
+      </div>
+      <div class="panel panel--green" style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div class="tag-cap ind" style="margin-bottom:10px">驗證 3 · 假陰性已修</div>
+        <div style="font-size:24px;line-height:1.45;color:var(--fg-2)">舊 verdict 漏報顯著 PERMANOVA → reclassify-v2 <b>Python pilot</b> 救回 <b>46.6%</b>（<span style="color:var(--error-red)">report_claim · 未落 C++</span>）、Strong 不降=0；C++ 版 53.9% 待落檔。</div>
+      </div>
+    </div>
+    <div class="panel panel--cream" style="margin-top:22px">
+      <div style="font-size:23px;line-height:1.4;color:var(--fg-2)"><b style="color:var(--indep)">驗證的意義</b>：這三項過了，下一頁的「分類比例」才站得住 —— <b>分類建立在 SOUND（已驗證健全）的方法上，不是憑單一切法的 artifact</b>。</div>
+    </div>
+    <div class="foot">來源：ism_soundness_01.md · within_hp_audit · FN_audit_01.md（reclassify 46.6% = Python pilot report_claim @4ec339b；C++版 53.9% 待落檔）· method-insensitive</div>
+    <div class="page-n">&lt; 4 &gt;</div>
+  </div>
+  <div class="snote"><b>驗證 = 分類的前提 gate（你指定的順序核心）。</b>講法：<b>「在我給分類數字之前，先證明這個方法有效」</b>——三項：① 方法是成熟框架不是 ad-hoc ② 換哪套切法結論都一樣（對方法不敏感，但講清楚是同距離多視角、非獨立）③ 假陰性已修（Python pilot 46.6%、report_claim，C++ 版待落檔）。收尾那句最關鍵：<b>「這三項過了，下一頁的分類才站得住」</b>。</div>
+</section>
+
+<!-- ===== S5 分類比例 5桶 ===== -->
+<section class="slide">
+  <div class="slide-pad">
+    <div class="eyebrow">③ 分類結果（方法 SOUND 後 → 才分類）</div>
+    <h1 class="slide-title" style="margin-bottom:8px">HCC1395 全基因組分 5 類 —— 三分之二無結構，<span style="color:var(--somatic-warm)">有結構且對齊僅 ~18%</span><span style="font-size:27px;color:var(--error-red)">（多為 cis-ASM）</span></h1>
+    <div style="display:flex;gap:44px;align-items:center;flex:1">
+      <svg width="980" height="560" viewBox="0 0 980 560" style="flex:0 0 auto">
+        <text x="490" y="32" text-anchor="middle" font-family="var(--font-display)" font-size="22" fill="var(--fg-3)">N = 34,736 位點（TP 30,077）· 條長 = TP %（<b>同一尺度</b>）</text>
+        <!-- S1 對齊 18.41% width 156 -->
+        <text x="20" y="94" font-family="var(--font-display)" font-size="23" font-weight="700" fill="var(--somatic-warm)">S1 有結構·對齊</text>
+        <rect x="340" y="70" width="156" height="44" rx="5" fill="var(--somatic-warm)"/>
+        <text x="508" y="100" font-family="var(--font-display)" font-size="24" font-weight="700" fill="var(--somatic-warm)">18.41%</text>
+        <text x="612" y="100" font-family="var(--font-mono)" font-size="16" fill="var(--fg-3)">5,538 ·</text>
+        <text x="700" y="100" font-family="var(--font-display)" font-size="16" font-weight="700" fill="var(--error-red)">多為 cis-ASM</text>
+        <!-- S2 不對齊 6.24% width 53 -->
+        <text x="20" y="162" font-family="var(--font-display)" font-size="23" font-weight="700" fill="var(--accent-1)">S2 有結構·不對齊</text>
+        <rect x="340" y="138" width="53" height="44" rx="5" fill="var(--accent-1)"/>
+        <text x="405" y="168" font-family="var(--font-display)" font-size="22" font-weight="700" fill="var(--accent-1)">6.24%</text>
+        <text x="500" y="168" font-family="var(--font-mono)" font-size="16" fill="var(--fg-3)">1,878</text>
+        <!-- S3 不穩定 4.33% width 37 -->
+        <text x="20" y="230" font-family="var(--font-display)" font-size="23" fill="var(--fg-3)">S3 不穩定多群</text>
+        <rect x="340" y="206" width="37" height="44" rx="5" fill="var(--neutral)"/>
+        <text x="389" y="236" font-family="var(--font-display)" font-size="22" fill="var(--fg-3)">4.33%</text>
+        <!-- S4 次閾值 5.97% width 51 -->
+        <text x="20" y="298" font-family="var(--font-display)" font-size="23" fill="var(--fg-3)">S4 次閾值候選</text>
+        <rect x="340" y="274" width="51" height="44" rx="5" fill="var(--neutral)" opacity="0.7"/>
+        <text x="403" y="304" font-family="var(--font-display)" font-size="22" fill="var(--fg-3)">5.97%</text>
+        <text x="500" y="304" font-family="var(--font-mono)" font-size="15" fill="var(--error-red)">chance-level</text>
+        <!-- S6 乾淨 65.04% width 553（最長）-->
+        <text x="20" y="386" font-family="var(--font-display)" font-size="23" font-weight="700" fill="var(--reference-gray)">S6 乾淨單群（無結構）</text>
+        <rect x="340" y="362" width="553" height="44" rx="5" fill="var(--reference-gray)"/>
+        <text x="903" y="392" font-family="var(--font-display)" font-size="26" font-weight="700" fill="var(--fg-3)">65.04%</text>
+        <text x="358" y="392" font-family="var(--font-mono)" font-size="19" fill="#fff">19,563 ── 三分之二位點無結構</text>
+        <!-- 分組括號 -->
+        <line x1="320" y1="70" x2="320" y2="182" stroke="var(--somatic-warm)" stroke-width="3"/>
+        <text x="305" y="130" text-anchor="end" font-family="var(--font-display)" font-size="17" font-weight="700" fill="var(--somatic-warm)" transform="rotate(-90 305 130)">有結構 24.66%</text>
+        <line x1="320" y1="206" x2="320" y2="318" stroke="var(--neutral)" stroke-width="3"/>
+        <text x="305" y="262" text-anchor="end" font-family="var(--font-display)" font-size="16" fill="var(--neutral)" transform="rotate(-90 305 262)">弱候選 10.3%</text>
+        <text x="490" y="452" text-anchor="middle" font-family="var(--font-display)" font-size="22" fill="var(--fg-2)">confident-multi（S1+S2）24.66% · 弱候選（S3+S4）10.3% · 乾淨 65.04%</text>
+        <text x="490" y="486" text-anchor="middle" font-family="var(--font-display)" font-size="20" font-weight="700" fill="var(--error-red)">對齊 18.41% 不是最大塊 —— 乾淨單群 65% 才是多數</text>
+        <text x="490" y="516" text-anchor="middle" font-family="var(--font-display)" font-size="18" fill="var(--error-red)">⚠ S4 chance-level（候選）· S5 殘留=0（故跳號）· 5桶 @ism-review-infra worktree</text>
+      </svg>
+      <div style="flex:1;display:flex;flex-direction:column;gap:20px">
+        <div class="kpi"><div class="v som" style="font-size:54px">18.41%</div><div class="l"><b style="color:var(--error-red);font-size:23px">多為 cis-ASM、非 subclone</b><br>有結構且對齊（S1）· FP 對齊 35.65% &gt; TP 24.66%</div></div>
+        <div class="panel panel--muted">
+          <div style="font-size:23px;line-height:1.45;color:var(--fg-2)"><b>清楚可數</b>：每個位點落進唯一一桶，比例加總 100%。對齊 = 切群與獨立標籤顯著重合（下一頁判別機制）。</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot">來源：phylo_weak_structure_counts.json（已落檔主 tree _provenance_20260623_reframe/，S1-S6 數字 grep MATCH）· 5 態互斥分桶</div>
+    <div class="page-n">&lt; 5 &gt;</div>
+  </div>
+  <div class="snote"><b>分類結果（你要的核心數字頁）。</b>講「方法 SOUND（驗證健全）後，把 34,736 個位點清楚分成 5 類，每個位點落唯一一桶」。<b>headline = S1 有結構且對齊 ~18.41%（約 20%）</b>；S2 不對齊 6.24%；其他是不穩定/次閾值/乾淨單群 65%。<b>誠實補</b>：S4 是 chance-level 候選、5桶數字在另一個 worktree（標來源）。下一頁講「對齊」怎麼判。</div>
+</section>
+
+<!-- ===== S6 判別機制 ===== -->
+<section class="slide">
+  <div class="slide-pad">
+    <div class="eyebrow">④ 判別機制</div>
+    <h1 class="slide-title" style="margin-bottom:10px">「對齊」怎麼判 + 配合特徵<span style="color:var(--accent-1)">給定義</span></h1>
+    <div style="display:flex;gap:40px;align-items:flex-start;flex:1">
+      <svg width="1080" height="540" viewBox="0 0 1080 540" style="flex:0 0 auto">
+        <rect x="380" y="20" width="320" height="70" rx="8" fill="var(--bg-3)" stroke="var(--border-2)" stroke-width="1.5"/>
+        <text x="540" y="52" text-anchor="middle" font-family="var(--font-display)" font-size="24" fill="var(--fg-2)">切群結果（read 群）</text>
+        <text x="540" y="78" text-anchor="middle" font-family="var(--font-mono)" font-size="18" fill="var(--fg-3)">來自 SOUND 的方法</text>
+        <line x1="540" y1="90" x2="540" y2="130" stroke="var(--arrow-color)" stroke-width="2.5"/><polygon points="533,130 547,130 540,142" fill="var(--arrow-color)"/>
+        <rect x="340" y="146" width="400" height="78" rx="8" fill="#e9f5ee" stroke="var(--indep)" stroke-width="2"/>
+        <text x="540" y="180" text-anchor="middle" font-family="var(--font-display)" font-size="23" fill="var(--fg-2)">與獨立標籤交叉（HP / allele）</text>
+        <text x="540" y="204" text-anchor="middle" font-family="var(--font-display)" font-size="18" fill="var(--indep)">看 read 群是否與「事先已知、與甲基無關」的標籤重合</text>
+        <text x="540" y="222" text-anchor="middle" font-family="var(--font-mono)" font-size="14" fill="var(--fg-3)">CramérV ≥ 0.7 + Fisher（a-priori）</text>
+        <!-- 分岔 對齊/不對齊 -->
+        <line x1="440" y1="224" x2="280" y2="280" stroke="var(--arrow-color)" stroke-width="2.5"/><polygon points="277,268 291,276 274,286" fill="var(--arrow-color)"/>
+        <line x1="640" y1="224" x2="800" y2="280" stroke="var(--arrow-color)" stroke-width="2.5"/><polygon points="803,268 789,276 806,286" fill="var(--arrow-color)"/>
+        <text x="360" y="262" font-family="var(--font-display)" font-size="20" font-weight="700" fill="var(--somatic-warm)">對齊</text>
+        <text x="700" y="262" font-family="var(--font-display)" font-size="20" font-weight="700" fill="var(--accent-1)">不對齊</text>
+        <!-- 對齊 → cis-ASM -->
+        <rect x="80" y="288" width="400" height="150" rx="10" fill="#fdf0e8" stroke="var(--somatic-warm)" stroke-width="2"/>
+        <text x="280" y="324" text-anchor="middle" font-family="var(--font-display)" font-size="24" font-weight="700" fill="var(--somatic-warm)">對齊 germline → cis-ASM</text>
+        <text x="280" y="360" text-anchor="middle" font-family="var(--font-display)" font-size="20" fill="var(--fg-2)">甲基綁 germline haplotype（多數）</text>
+        <text x="280" y="392" text-anchor="middle" font-family="var(--font-display)" font-size="20" fill="var(--fg-2)">配特徵確認：normal 也有 / LOH</text>
+        <text x="280" y="420" text-anchor="middle" font-family="var(--font-mono)" font-size="17" fill="var(--somatic-warm)">= 等位效應，非 subclone</text>
+        <!-- 不對齊 → subclone 候選 -->
+        <rect x="600" y="288" width="400" height="150" rx="10" fill="#f1f2f4" stroke="var(--neutral)" stroke-width="2"/>
+        <text x="800" y="324" text-anchor="middle" font-family="var(--font-display)" font-size="24" font-weight="700" fill="var(--neutral)">不對齊 + 特徵 → subclone 候選</text>
+        <text x="800" y="360" text-anchor="middle" font-family="var(--font-display)" font-size="20" fill="var(--fg-2)">配特徵：AF / CN / coverage</text>
+        <text x="800" y="392" text-anchor="middle" font-family="var(--font-display)" font-size="20" fill="var(--fg-2)">normal 沒有 + tumor-specific</text>
+        <text x="800" y="420" text-anchor="middle" font-family="var(--font-mono)" font-size="17" fill="var(--error-red)">候選 ≠ 已確認（需 cis-control）</text>
+        <text x="540" y="490" text-anchor="middle" font-family="var(--font-display)" font-size="22" font-weight="700" fill="var(--navy)">分類 + 特徵 = 給每個位點一個可解釋的定義</text>
+      </svg>
+      <div style="flex:1;display:flex;flex-direction:column;gap:18px">
+        <div class="panel panel--ice">
+          <div class="tag-cap" style="color:var(--navy);margin-bottom:6px">判別 = 非循環</div>
+          <div style="font-size:23px;line-height:1.4;color:var(--fg-2)">「對齊」用<b>獨立 a-priori 標籤</b>（HP/allele）判，不是從距離自己挑 → 非 double-dip。</div>
+        </div>
+        <div class="panel panel--cream">
+          <div class="tag-cap red" style="margin-bottom:6px">配特徵的角色</div>
+          <div style="font-size:22px;line-height:1.4;color:var(--fg-2)">AF/CN/LOH 不是用來「找」subclone，是用來<b>排除 cis-ASM、給候選一個定義</b>。</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot">對齊判定 = CramérV≥0.7 + Fisher（a-priori 軸）· 配特徵 AF/CN/LOH 區分 cis-ASM vs subclone 候選</div>
+    <div class="page-n">&lt; 6 &gt;</div>
+  </div>
+  <div class="snote"><b>判別機制（怎麼給定義）。</b>講：<b>「切群只給『有沒有結構』，要判它是什麼，得跟獨立標籤交叉」</b>。對齊 germline → cis-ASM（多數、等位效應）；不對齊 + 特徵支持 → subclone 候選。強調兩點：① 用獨立標籤判 = 非循環 ② 配 AF/CN/LOH 是<b>用來排除 cis-ASM、給定義</b>，不是用來「找」subclone。</div>
+</section>
+
+<!-- ===== S7 chr2:18M 例（複用 explain/04 §⑤ 重建樹）===== -->
+<section class="slide">
+  <div class="slide-pad">
+    <div class="eyebrow">⑤ 解釋 · chr2:18,086,020 例子</div>
+    <h1 class="slide-title" style="margin-bottom:6px">一個位點走完整 pipeline → 看甲基訊號的<span style="color:var(--indep)">可解釋性</span>（乾淨候選 vs confound）</h1>
+    <div style="display:flex;gap:36px;align-items:flex-start;flex:1">
+      <svg width="1080" height="510" viewBox="0 0 880 416" style="flex:0 0 auto" aria-label="chr2:18M 甲基翻轉熱圖（data-bound）"><g font-size="11"><rect x="600" y="14" width="16" height="16" fill="rgb(200,50,55)"/><text x="622" y="27">高甲基 (meanM→1)</text><rect x="600" y="34" width="16" height="16" fill="rgb(230,230,225)" stroke="#E3DACC"/><text x="622" y="47">中</text><rect x="600" y="54" width="16" height="16" fill="rgb(40,90,170)"/><text x="622" y="67">低甲基 (meanM→0)</text></g><g font-size="12" text-anchor="middle" font-weight="700"><text x="250" y="34">HKU · α</text><text x="330" y="34">HKU · β</text><text x="470" y="34">DORADO · α</text><text x="550" y="34">DORADO · β</text></g><g font-family="monospace" font-size="11" text-anchor="middle"><text x="150" y="74" text-anchor="start" font-weight="700" fill="#1c1b19">CpG 2.1</text><rect x="215" y="58" width="70" height="24" fill="rgb(214,139,139)"/><text x="250" y="74" fill="#111">0.75</text><rect x="295" y="58" width="70" height="24" fill="rgb(223,225,223)"/><text x="330" y="74" fill="#111">0.48</text><rect x="435" y="58" width="70" height="24" fill="rgb(44,93,171)"/><text x="470" y="74" fill="#fff">0.01</text><rect x="515" y="58" width="70" height="24" fill="rgb(45,94,171)"/><text x="550" y="74" fill="#fff">0.02</text><text x="600" y="74" text-anchor="start" font-size="10" fill="#2F7D5B">乾淨・DORADO未過FDR/小n</text><text x="150" y="104" text-anchor="start" font-weight="700" fill="#1c1b19">CpG 2.2</text><rect x="215" y="88" width="70" height="24" fill="rgb(205,85,88)"/><text x="250" y="104" fill="#fff">0.90</text><rect x="295" y="88" width="70" height="24" fill="rgb(124,152,194)"/><text x="330" y="104" fill="#111">0.22</text><rect x="435" y="88" width="70" height="24" fill="rgb(211,121,122)"/><text x="470" y="104" fill="#111">0.80</text><rect x="515" y="88" width="70" height="24" fill="rgb(42,92,170)"/><text x="550" y="104" fill="#fff">0.01</text><text x="600" y="104" text-anchor="start" font-size="10" fill="#2F7D5B">乾淨・DORADO未過FDR/小n</text><text x="150" y="134" text-anchor="start" font-weight="700" fill="#2F7D5B">CpG 3.1</text><rect x="215" y="118" width="70" height="24" fill="rgb(124,152,194)"/><text x="250" y="134" fill="#111">0.22</text><rect x="295" y="118" width="70" height="24" fill="rgb(205,80,83)"/><text x="330" y="134" fill="#fff">0.92</text><rect x="435" y="118" width="70" height="24" fill="rgb(68,110,178)"/><text x="470" y="134" fill="#fff">0.07</text><rect x="515" y="118" width="70" height="24" fill="rgb(200,50,55)"/><text x="550" y="134" fill="#fff">1.00</text><text x="600" y="134" text-anchor="start" font-size="10" fill="#2F7D5B">乾淨+DORADO複製（最強）</text><text x="150" y="164" text-anchor="start" font-weight="700" fill="#2F7D5B">CpG 3.2</text><rect x="215" y="148" width="70" height="24" fill="rgb(201,60,65)"/><text x="250" y="164" fill="#fff">0.97</text><rect x="295" y="148" width="70" height="24" fill="rgb(94,130,185)"/><text x="330" y="164" fill="#fff">0.14</text><rect x="435" y="148" width="70" height="24" fill="rgb(200,50,55)"/><text x="470" y="164" fill="#fff">1.00</text><rect x="515" y="148" width="70" height="24" fill="rgb(42,91,170)"/><text x="550" y="164" fill="#fff">0.01</text><text x="600" y="164" text-anchor="start" font-size="10" fill="#2F7D5B">乾淨+DORADO複製（最強）</text><text x="150" y="194" text-anchor="start" font-weight="700" fill="#8a8a83">CpG 3.3</text><rect x="215" y="178" width="70" height="24" fill="rgb(197,206,215)"/><text x="250" y="194" fill="#111">0.42</text><rect x="295" y="178" width="70" height="24" fill="rgb(209,106,108)"/><text x="330" y="194" fill="#fff">0.84</text><rect x="435" y="178" width="70" height="24" fill="rgb(137,161,198)"/><text x="470" y="194" fill="#111">0.26</text><rect x="515" y="178" width="70" height="24" fill="rgb(200,52,57)"/><text x="550" y="194" fill="#fff">0.99</text><text x="600" y="194" text-anchor="start" font-size="10" fill="#9A3B3B">germline-ASM confound（normal FDR 0.007）</text><text x="150" y="224" text-anchor="start" font-weight="700" fill="#8a8a83">CpG 3.4</text><rect x="215" y="208" width="70" height="24" fill="rgb(57,102,174)"/><text x="250" y="224" fill="#fff">0.04</text><rect x="295" y="208" width="70" height="24" fill="rgb(207,95,97)"/><text x="330" y="224" fill="#fff">0.87</text><rect x="435" y="208" width="70" height="24" fill="rgb(137,161,198)"/><text x="470" y="224" fill="#111">0.26</text><rect x="515" y="208" width="70" height="24" fill="rgb(208,101,103)"/><text x="550" y="224" fill="#fff">0.86</text><text x="600" y="224" text-anchor="start" font-size="10" fill="#9A3B3B">germline-ASM confound（normal FDR 0.007）</text><text x="150" y="254" text-anchor="start" font-weight="700" fill="#8a8a83">CpG 3.5</text><rect x="215" y="238" width="70" height="24" fill="rgb(43,92,171)"/><text x="250" y="254" fill="#fff">0.01</text><rect x="295" y="238" width="70" height="24" fill="rgb(208,98,100)"/><text x="330" y="254" fill="#fff">0.87</text><rect x="435" y="238" width="70" height="24" fill="rgb(184,196,211)"/><text x="470" y="254" fill="#111">0.38</text><rect x="515" y="238" width="70" height="24" fill="rgb(209,109,110)"/><text x="550" y="254" fill="#fff">0.84</text><text x="600" y="254" text-anchor="start" font-size="10" fill="#9A3B3B">germline-ASM confound（normal FDR 0.05）</text><text x="150" y="284" text-anchor="start" font-weight="700" fill="#8a8a83">CpG 4.1</text><rect x="215" y="268" width="70" height="24" fill="rgb(201,57,61)"/><text x="250" y="284" fill="#fff">0.98</text><rect x="295" y="268" width="70" height="24" fill="rgb(94,130,185)"/><text x="330" y="284" fill="#fff">0.14</text><rect x="435" y="268" width="70" height="24" fill="rgb(201,60,65)"/><text x="470" y="284" fill="#fff">0.97</text><rect x="515" y="268" width="70" height="24" fill="rgb(193,202,214)"/><text x="550" y="284" fill="#111">0.40</text><text x="600" y="284" text-anchor="start" font-size="10" fill="#9A3B3B">germline-ASM confound（normal FDR 0.007）</text><text x="150" y="314" text-anchor="start" font-weight="700" fill="#1c1b19">CpG 5.1</text><rect x="215" y="298" width="70" height="24" fill="rgb(51,98,173)"/><text x="250" y="314" fill="#fff">0.03</text><rect x="295" y="298" width="70" height="24" fill="rgb(203,68,72)"/><text x="330" y="314" fill="#fff">0.95</text><rect x="435" y="298" width="70" height="24" fill="rgb(229,229,224)"/><text x="470" y="314" fill="#111">0.50</text><rect x="515" y="298" width="70" height="24" fill="rgb(200,50,55)"/><text x="550" y="314" fill="#fff">1.00</text><text x="600" y="314" text-anchor="start" font-size="10" fill="#2F7D5B">乾淨・DORADO未過FDR/小n</text><text x="150" y="344" text-anchor="start" font-weight="700" fill="#1c1b19">CpG 5.2</text><rect x="215" y="328" width="70" height="24" fill="rgb(51,98,173)"/><text x="250" y="344" fill="#fff">0.03</text><rect x="295" y="328" width="70" height="24" fill="rgb(200,52,57)"/><text x="330" y="344" fill="#fff">0.99</text><rect x="435" y="328" width="70" height="24" fill="rgb(44,93,171)"/><text x="470" y="344" fill="#fff">0.01</text><rect x="515" y="328" width="70" height="24" fill="rgb(200,50,55)"/><text x="550" y="344" fill="#fff">1.00</text><text x="600" y="344" text-anchor="start" font-size="10" fill="#2F7D5B">乾淨・DORADO未過FDR/小n</text><rect x="210" y="116" width="380" height="60" fill="none" stroke="#2F7D5B" stroke-width="2.5" rx="6"/></g><text x="400" y="380" text-anchor="middle" font-size="11" fill="#2F7D5B" font-weight="700">乾淨且跨 basecaller 複製（normal 無 ASM + DORADO FDR&lt;0.05）= {3.1, 3.2}</text><text x="400" y="398" text-anchor="middle" font-size="11" fill="#9A3B3B" font-weight="700">被既存 germline ASM confound = {3.3, 3.4, 3.5, 4.1} → 不可當 subclone 新生甲基</text></svg>
+      <div style="flex:1;display:flex;flex-direction:column;gap:16px">
+        <div class="panel panel--green">
+          <div class="tag-cap ind" style="margin-bottom:6px">甲基訊號的可解釋性</div>
+          <div style="font-size:20px;line-height:1.4;color:var(--fg-2)">11 個 CpG × 2 basecaller（HKU/DORADO）× α/β。<b>跨 basecaller 最強複製 = {3.1, 3.2}</b>；{2.1,2.2,5.1,5.2} 乾淨但 DORADO 未達 FDR → <b>支持 ~3 條 regional states（候選，L2）</b>。</div>
+        </div>
+        <div class="panel panel--cream">
+          <div class="tag-cap red" style="margin-bottom:6px">誠實邊界（複用案例頁裁決）</div>
+          <div style="font-size:20px;line-height:1.35;color:var(--fg-2)">locus-subclone <b>未證實</b>；18,086,020 落 SEQC2 HC 空隙 <b>unevaluable</b>；甲基最強候選 {3.1,3.2}、被 germline-ASM confound <b>{3.3,3.4,3.5,4.1}</b>；證據天花板 <b>L2</b>。</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot">圖複用 docs/explain/04_subclone-reconstruction-chr2-18M §④ 甲基翻轉熱圖（data-bound 誠實版）· 重建樹見 docs/explain/04 §⑤</div>
+    <div class="page-n">&lt; 7 &gt;</div>
+  </div>
+  <div class="snote"><b>chr2 例子（解釋的展示）。</b>講：<b>「拿 chr2:18M 走完整 pipeline，看甲基訊號能不能被解釋」</b>——熱圖每格是 CpG 在 HKU/DORADO×α/β 的甲基值，紅高藍低。重點（指綠框）：<b>只有 {3.1,3.2} 是跨 basecaller 最強複製候選、{3.3,3.4,3.5,4.1} 被既存 germline-ASM confound → 不可當 subclone 新生甲基</b>。誠實：locus-subclone 未證實、落 SEQC2 HC 空隙、天花板 L2。⛔ 絕不講「5 個 subclone」。</div>
+</section>
+
+<!-- ===== S8 誠實邊界 ===== -->
+<section class="slide">
+  <div class="slide-pad">
+    <div class="eyebrow">⑥ 誠實邊界</div>
+    <h1 class="slide-title" style="margin-bottom:14px">分類 ≠ 確認 —— 對齊多為 <span style="color:var(--somatic-warm)">cis-ASM</span>，subclone 是候選</h1>
+    <div class="flow-row" style="gap:32px;align-items:stretch;flex:1">
+      <div class="panel panel--cream" style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div class="data-flag" style="margin-bottom:12px">為什麼對齊多為 cis-ASM</div>
+        <div class="bullet" style="font-size:24px;margin-bottom:12px">FP（= germline 假陽性位點）confident-multi <b>35.65%</b> &gt; TP <b>24.66%</b> → 對齊多是 germline cis-ASM 指紋</div>
+        <div class="bullet red" style="font-size:25px;margin-bottom:12px">tumor-only 下分不開 cis-ASM 與 subclone</div>
+        <div class="bullet ind" style="font-size:25px"><b>normal cis-control = 判別力決定性 gate（未測）</b></div>
+      </div>
+      <div class="panel panel--muted" style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div class="tag-cap" style="color:var(--navy);margin-bottom:12px">分類的正當定位</div>
+        <div style="font-size:24px;line-height:1.5;color:var(--fg-2)">分類 = <b>characterization 觀察層</b>，把 cis-ASM 乾淨刻畫、把 subclone 候選標出、為下游確認鋪路。<br><br><b>不是</b> filter、<b>不是</b> 自動 subclone caller。單樣本 ⭐2-3 PARTIAL、無 FDR。</div>
+      </div>
+    </div>
+    <div class="foot">FP 反判別來源 5桶 phylo @ism-review-infra · 三紅線：⭐2-3 · 甲基 corroborate · 單樣本 PARTIAL</div>
+    <div class="page-n">&lt; 8 &gt;</div>
+  </div>
+  <div class="snote"><b>誠實邊界（從主軸降為收尾，但仍必講）。</b>一句：<b>「方法能把位點分類，但分類不等於確認」</b>。為什麼對齊多是 cis-ASM：FP(germline) 反而結構更多（35.65%>24.66%）；tumor-only 分不開。<b>normal cis-control 是判別力的決定性測試、還沒做</b>。右邊講正當定位：這是 characterization 觀察層，不是 filter/caller。</div>
+</section>
+
+<!-- ===== S9 收束 ===== -->
+<section class="slide">
+  <div class="slide-pad" style="justify-content:center">
+    <div class="eyebrow">收束 · 方法框架貢獻</div>
+    <h1 class="slide-title">一套方法學健全的分類方法 + 把判別問題變 <span style="color:var(--indep)">well-posed</span></h1>
+    <div class="flow-row" style="gap:32px;align-items:stretch;margin:14px 0 28px">
+      <div class="panel panel--green" style="flex:1">
+        <div class="tag-cap ind" style="margin-bottom:12px">本週正面貢獻</div>
+        <div class="bullet ind" style="font-size:24px;margin-bottom:10px">方法學健全（SOUND_WITH_CAVEATS）的分類 pipeline（距離樹→切群→分類）</div>
+        <div class="bullet ind" style="font-size:24px;margin-bottom:10px">交叉標籤+特徵的解釋架構（chr2 例）</div>
+        <div class="bullet ind" style="font-size:24px">把「需 normal 才能判別」變成 well-posed 的明確測試</div>
+      </div>
+      <div class="panel panel--ice" style="flex:1.05">
+        <div style="font-family:var(--font-display);font-weight:600;font-size:26px;color:var(--navy);margin-bottom:12px">下一步（ROI 排序）</div>
+        <table class="mt" style="font-size:22px;width:100%">
+          <tr><th>動作</th><th>解決什麼</th></tr>
+          <tr class="hi"><td>normal cis-control</td><td><b>判別力決定性 gate</b></td></tr>
+          <tr><td>chr2 多 sSNV CCF</td><td>非循環確認候選</td></tr>
+          <tr><td>single-cell 驗證</td><td>terminal ground truth</td></tr>
+          <tr><td>COLO829 補甲基 normal</td><td>解鎖跨樣本（後評估 ⭐4）</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="panel panel--muted">
+      <div style="font-size:24px;line-height:1.45;color:var(--fg-2)"><b>標題界定</b>：reconstruction = <span class="mono">regional LOH-constrained partition</span>，非 full tree；骨幹 = somatic haplotag、甲基 = corroborate（非 driver）。</div>
+    </div>
+    <div class="foot">三紅線一致（wc1v407en + w9456xpig 雙審 0 blocking）：⭐2-3 · 甲基 corroborate · 單樣本 PARTIAL</div>
+    <div class="page-n">&lt; 9 &gt;</div>
+  </div>
+  <div class="snote"><b>收束。</b>正面定調：<b>「這週建立了一套方法學健全的分類方法 + 解釋架構，並把判別問題變 well-posed」</b>。下一步 normal cis-control 是判別力 gate（最優先、<b>判別力尚未建立</b>）、chr2 CCF、single-cell。標題界定：regional partition 非 tree、甲基 corroborate。COLO829 = 解鎖跨樣本後才談 ⭐4。</div>
+</section>
+
+</div></div>
+
+<!-- 定稿 reframe 新版 · 2026-06-23 · 三輪 CP-D 雙審 0 BLOCKING · 三紅線 consistent -->
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var i=0,N=slides.length,stage=document.getElementById('stage'),cnt=document.getElementById('cnt');
+  function fit(){var s=Math.min((window.innerWidth-40)/1920,(window.innerHeight-78)/1080);stage.style.transform='scale('+s+')';}
+  function show(n){i=Math.max(0,Math.min(N-1,n));slides.forEach(function(s,k){s.classList.toggle('active',k===i);});cnt.textContent=(i+1)+' / '+N;}
+  document.getElementById('next').onclick=function(){show(i+1);};
+  document.getElementById('prev').onclick=function(){show(i-1);};
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){show(i+1);e.preventDefault();}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){show(i-1);}
+    else if(e.key==='Home'){show(0);} else if(e.key==='End'){show(N-1);}
+    else if(e.key==='s'||e.key==='S'){document.body.classList.toggle('notes');}
+  });
+  window.addEventListener('resize',fit);
+  fit();show(0);
+})();
+</script>
+</body>
+</html>

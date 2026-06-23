@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<!--
+  title: 週報敘事大綱 — Subclonal Reconstruction 判別方法論建立（6/15–6/22）
+  purpose: HTML 敘事大綱（OUTLINE，非最終 deck）— 確認敘事邏輯/每頁要點/圖位佔位後，才產完整 lab deck
+  date: 2026-06-22
+  build_branch: research/subclonal-reconstruction-202606
+  narrative_arc: 進展型（背景→處理→結果→分析→下週）+ ABT 貫穿 + BLUF 頂
+  scope: HCC1395 為主 + 全 7 樣本切割總帳 · 全基因組 · proof-of-concept ⭐3（single-sample 主、single-pipeline）
+  brand: 沿用 6/18 Lab Report Deck System tokens（HP1 #4188C7 / HP2 #1F3A93 / somatic #E97B3C，無 emoji 無漸層，箭頭為唯一繪製形狀）
+  status: DRAFT — 數字為「來源指針 + 證據層」規劃用途；deck 前依末尾清單逐一 grep 驗真值（§13.0）
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>週報大綱 · Subclone 判別方法論建立（6/15–6/22）</title>
+<style>
+:root{
+  --ink:#111; --paper:#fff; --navy:#021442; --ice:#DBEFF9;
+  --hp1:#4188C7; --hp2:#1F3A93; --som:#E97B3C; --err:#E0352B; --ok:#2E8B57;
+  --fg2:#262626; --fg3:#595959; --fg4:#8a8a8a;
+  --bg2:#F7F9FC; --bg3:#EEF3F8; --bd:#D9D9D9;
+  --font:'Inter','Noto Sans TC','PingFang TC','微軟正黑體',sans-serif;
+  --mono:'JetBrains Mono','Menlo','Consolas',monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#eef2f7;color:var(--ink);font-family:var(--font);line-height:1.55;font-size:15px}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 28px 80px}
+header.top{background:var(--navy);color:#fff;border-radius:12px;padding:28px 32px;margin-bottom:8px}
+header.top h1{font-weight:400;font-size:30px;margin:0 0 6px;letter-spacing:-.01em}
+header.top .sub{color:#bcd4ef;font-size:16px;margin-bottom:14px}
+header.top .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{display:inline-block;border:1px solid #3a5a9a;border-radius:5px;padding:3px 12px;font-size:13px;color:#dbeeff}
+.chip.warn{border-color:var(--som);color:#ffd9c2}
+
+/* 敘事弧 */
+.arc{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:18px 24px;margin:18px 0 24px}
+.arc h3{margin:0 0 12px;font-size:14px;color:var(--fg3);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.arcflow{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.arcstep{flex:1;min-width:150px;background:var(--bg3);border:1px solid #cfe0f0;border-radius:8px;padding:10px 14px}
+.arcstep b{display:block;font-size:13px;color:var(--hp2)}
+.arcstep span{font-size:12.5px;color:var(--fg3)}
+.arcarrow{color:#4472C4;font-size:20px;font-weight:700}
+
+/* 主訊息（ABT）*/
+.abt{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px}
+.abt .box{border-radius:10px;padding:16px 18px;border:1px solid var(--bd);background:#fff}
+.abt .A{border-top:4px solid var(--hp1)}
+.abt .B{border-top:4px solid var(--som)}
+.abt .T{border-top:4px solid var(--ok)}
+.abt .lab{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--fg4);text-transform:uppercase}
+.abt p{margin:6px 0 0;font-size:13.5px;color:var(--fg2)}
+
+/* slide cards */
+.slide{background:#fff;border:1px solid var(--bd);border-radius:12px;margin:0 0 16px;overflow:hidden}
+.slide .hd{display:flex;align-items:center;gap:14px;padding:14px 22px;background:var(--bg2);border-bottom:1px solid var(--bd)}
+.slide .num{flex:0 0 auto;width:38px;height:38px;border-radius:9px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:16px;font-weight:600}
+.slide .ttl{font-size:18px;font-weight:600;margin:0}
+.slide .ttl .ms{display:block;font-size:13px;color:var(--fg3);font-weight:400;margin-top:2px}
+.slide .body{padding:16px 22px 18px}
+.kmsg{background:var(--ice);border-left:4px solid var(--hp1);border-radius:6px;padding:10px 14px;font-size:14.5px;margin:0 0 12px;color:var(--navy)}
+ul.pts{margin:0;padding-left:20px}
+ul.pts li{margin:4px 0;font-size:13.8px;color:var(--fg2)}
+.vis{margin-top:12px;border:1px dashed #b9c8da;border-radius:8px;padding:10px 14px;background:#fafcff;font-size:13px;color:var(--fg3)}
+.vis b{color:var(--hp2)}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:1px 7px;border-radius:4px;margin-left:4px;vertical-align:middle}
+.t-f{background:#e3f2e8;color:#1e6b3c}      /* Fact */
+.t-o{background:#fff3df;color:#9a6512}      /* Observation */
+.t-i{background:#ede7f6;color:#5a3a8a}      /* Inference */
+.t-new{background:#fde6e0;color:#b3331f}    /* 新做 SVG */
+.t-reuse{background:#e0eefb;color:#1f5a9a}  /* 現成可複製 */
+.src{font-family:var(--mono);font-size:11px;color:var(--fg4)}
+.note{background:#fff8dd;border:1px solid #eed892;border-radius:6px;padding:4px 10px;font-size:12.5px;color:#7a5a12;display:inline-block;margin-top:8px}
+
+h2.sec{font-size:15px;color:var(--fg3);margin:30px 0 12px;border-bottom:2px solid var(--bd);padding-bottom:6px;letter-spacing:.03em}
+table.v{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+table.v th,table.v td{border:1px solid var(--bd);padding:6px 10px;text-align:left;vertical-align:top}
+table.v th{background:var(--bg3);font-weight:600;color:var(--navy)}
+table.v code{font-family:var(--mono);font-size:11.5px;color:var(--fg2)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--fg3);margin:8px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>Subclonal Reconstruction — 判別方法論建立</h1>
+  <div class="sub">本週週報敘事大綱（6/15 – 6/22）· 進展型敘事弧 · 先確認邏輯 → 再產 lab deck</div>
+  <div class="meta">
+    <span class="chip">HCC1395 為主 + 全 7 樣本切割總帳</span>
+    <span class="chip">全基因組</span>
+    <span class="chip">proof-of-concept ⭐3</span>
+    <span class="chip warn">OUTLINE（非最終 deck）· 數字 deck 前驗真值</span>
+  </div>
+</header>
+
+<!-- 敘事弧 -->
+<div class="arc">
+  <h3>進展型敘事弧（教授一眼看到「建了什麼能力」）</h3>
+  <div class="arcflow">
+    <div class="arcstep"><b>背景</b><span>甲基 read-level 距離切群找 subclone；上週已做結構檢定</span></div>
+    <span class="arcarrow">→</span>
+    <div class="arcstep"><b>處理</b><span>審查 ISM verdict + 確立判別軸 + 切群重設計 + 文獻定位</span></div>
+    <span class="arcarrow">→</span>
+    <div class="arcstep"><b>結果</b><span>能辨別「真 subclone vs cis-ASM 假象」的完整方法鏈</span></div>
+    <span class="arcarrow">→</span>
+    <div class="arcstep"><b>分析</b><span>誠實定位 ⭐3：骨幹=haplotag、甲基=corroborate</span></div>
+    <span class="arcarrow">→</span>
+    <div class="arcstep"><b>下週</b><span>cis-control / 多 sSNV CCF / single-cell 確認</span></div>
+  </div>
+</div>
+
+<!-- ABT 一句話 -->
+<div class="abt">
+  <div class="box A"><span class="lab">And 背景</span><p>延續 subclonal reconstruction，用甲基 read-level 距離切群辨識 subclone，並全面審查 ISM 方法。</p></div>
+  <div class="box B"><span class="lab">But 轉折</span><p>嚴謹審查揭示三個假象來源：verdict 漏報顯著結構、tumor-only 無監督切群 double-dip、單 bulk 無法自我確認。</p></div>
+  <div class="box T"><span class="lab">Therefore 收斂</span><p>建成可信邊界：reclassify-v2 修假陰性、a-priori 條件化軸真判別、誠實定位 ⭐3、論文基石就位。</p></div>
+</div>
+
+<div class="legend">
+  證據層：<span><span class="tag t-f">F</span>已驗證事實</span>
+  <span><span class="tag t-o">O</span>初步觀察</span>
+  <span><span class="tag t-i">I</span>合理推論</span>
+  ｜視覺：<span><span class="tag t-reuse">複製</span>現成圖可引用</span>
+  <span><span class="tag t-new">新SVG</span>需手刻</span>
+</div>
+
+<h2 class="sec">簡報頁面流（11 頁 · 每頁＝核心訊息 + 要點 + 圖位）</h2>
+
+<!-- S1 -->
+<div class="slide"><div class="hd"><div class="num">1</div><div><p class="ttl">封面<span class="ms">標題頁 · 定調 + 誠實 scope</span></p></div></div>
+<div class="body">
+  <div class="kmsg">Subclonal Reconstruction — 判別方法論建立（本週 6/15–6/22）</div>
+  <ul class="pts">
+    <li>副標：從 ISM 方法審查到 subclone 判別軸收斂</li>
+    <li>scope 標註：HCC1395 為主 + 全 7 樣本切割總帳 · 全基因組 · <b>proof-of-concept ⭐3</b></li>
+  </ul>
+  <div class="vis"><b>圖位</b>：純標題頁，無圖。底部置 provenance（branch + 日期）。</div>
+</div></div>
+
+<!-- S2 -->
+<div class="slide"><div class="hd"><div class="num">2</div><div><p class="ttl">本週一句話（BLUF 結論先行）<span class="ms">教授若只看一頁就看這頁</span></p></div></div>
+<div class="body">
+  <div class="kmsg">本週把「辨別真假 subclone」的方法論建成完整鏈條 ── 並誠實畫出能力邊界。</div>
+  <ul class="pts">
+    <li>建成 4 個能力：① 修正 ISM 假陰性（reclassify-v2）② 確立 a-priori 判別軸 ③ 切群多閘重設計 ④ 文獻定位 + 論文基石</li>
+    <li>誠實邊界：骨幹 = somatic haplotag；甲基 = corroborate（<b>非</b> driver）；確認需外部 ground truth</li>
+  </ul>
+  <div class="vis"><b>圖位</b> <span class="tag t-new">新SVG</span>：4 能力 pill 橫排（outlined，無填色）。</div>
+</div></div>
+
+<!-- S3 -->
+<div class="slide"><div class="hd"><div class="num">3</div><div><p class="ttl">背景 + 上週接點<span class="ms">把 6/16–6/18 壓縮成背景，建立「有結構 ≠ 是 subclone」問題</span></p></div></div>
+<div class="body">
+  <div class="kmsg">上週證明「切得出結構」；本週的問題是「結構是不是真 subclone」。</div>
+  <ul class="pts">
+    <li>主軸：subclonal reconstruction（somatic haplotag + methylation, ONT）</li>
+    <li>方法：甲基 read-level 距離 → 切群 → PERMANOVA 找結構（配 PERMDISP 防假象） <span class="tag t-f">F</span></li>
+    <li>上週(6/16–18)成果壓縮：方法五步、PERMANOVA+PERMDISP、狀況分類 <span class="src">src:20260618 lab deck</span></li>
+    <li>本週任務：把「存在性檢定」升級成「能判別 subclone vs 假象」的方法</li>
+  </ul>
+  <div class="vis"><b>圖位</b> <span class="tag t-new">新SVG</span>：時間軸（上週「結構檢定」→ 本週「判別方法」），箭頭連接。</div>
+</div></div>
+
+<!-- S4 -->
+<div class="slide"><div class="hd"><div class="num">4</div><div><p class="ttl">M1 · ISM 方法健全性 + 假陰性修正<span class="ms">方法本身可信，但 verdict 漏報 → 已修</span></p></div></div>
+<div class="body">
+  <div class="kmsg">ISM 方法 SOUND_WITH_CAVEATS；發現 91.7% 假陰性 → reclassify-v2 救回 53.9%、FP=0。</div>
+  <ul class="pts">
+    <li>親讀 TP <b>29,754</b> region → <b>91.7%</b>（27,275）判 Weak/Noise <span class="tag t-f">F</span> <span class="src">src:20260616_FN_audit §2.1</span></li>
+    <li>FN1：其中 Noise 74.3% / Weak 98% 帶<b>顯著 PERMANOVA</b>，但 verdict 從不引用（SignificanceAnalyzer.cpp:309-339）<span class="tag t-f">F</span></li>
+    <li>處理：reclassify-v2 落 C++（Stage① 強度 + ④ 新 VC + ② within-HP，commit b6dde2b）</li>
+    <li>結果：全基因組救回 <b>53.9%</b>（4407/8180）、<b>FP=0</b> <span class="tag t-f">F</span> <span class="note">⚠ deck 前驗 53.9%/4407 真值</span></li>
+    <li>健全性：read×read 距離→分群→PERMANOVA 是成熟框架（Legendre/Anderson），非 ad-hoc；7 guardrails <span class="tag t-f">F</span></li>
+  </ul>
+  <div class="vis"><b>圖位</b> <span class="tag t-reuse">複製</span>：reclassify 前後桶分布表（取自 FN audit 報告）。</div>
+</div></div>
+
+<!-- S5 -->
+<div class="slide"><div class="hd"><div class="num">5</div><div><p class="ttl">M2 · 正確的判別軸（核心方法論貢獻）<span class="ms">無監督 NEGATIVE → a-priori 條件化軸</span></p></div></div>
+<div class="body">
+  <div class="kmsg">判別力來自「對齊獨立 a-priori 軸」，不是「無監督切得出來」。</div>
+  <ul class="pts">
+    <li>tumor-only 無監督 clustering + PERMANOVA = <b>NEGATIVE</b>（double-dip：Noise a-priori 0% → TI 100%）<span class="tag t-f">F</span> <span class="src">src:project_tumor_only_axis_negative</span></li>
+    <li>正解：a-priori 條件化軸（haplotag 1-1/ALT-REF、扣 normal）→ Noise 0% <b>真判別</b> <span class="tag t-f">F</span></li>
+    <li>含義：HP tag 1-1/2-1 = somatic haplotype；1-2/2-2 = 多 subclone（longphase-S，HCC1395 缺）</li>
+  </ul>
+  <div class="vis"><b>圖位 ★關鍵教學圖</b> <span class="tag t-new">新SVG</span>：左「無監督 double-dip」(同資料訓練+驗證的循環箭頭) vs 右「a-priori 軸」(獨立標籤→判別，非循環) 對比。<b>← 用例子講解最有力的一張</b></div>
+</div></div>
+
+<!-- S6 -->
+<div class="slide"><div class="hd"><div class="num">6</div><div><p class="ttl">M3 · 切群 ≠ subclone（最重要的辨別）<span class="ms">多數切群是 cis-ASM 假象</span></p></div></div>
+<div class="body">
+  <div class="kmsg">無監督切群與標籤幾乎不相交；「subclone 候選」多為 cis-ASM。</div>
+  <ul class="pts">
+    <li>全 7 樣本 Jaccard(無監督, 標籤) = <b>0.091–0.161</b> 一律低（跨 3 癌種）<span class="tag t-f">F</span> <span class="src">src:allsample_subcluster_split/SUMMARY</span></li>
+    <li>5-態分類（全基因組 <b>N=30,490</b>）：state③ label-first 真關聯但 <b>cis-ASM 非 subclone</b> <span class="tag t-f">F</span> <span class="src">src:20260620_decisionflow_5state</span></li>
+    <li>phylo v1「subclone 候選」<b>全假象</b> → cis-ASM 零 subclone（double-dip 修正）<span class="tag t-o">O</span></li>
+    <li>切群多閘重設計（balance + null-excess + alignment）+ coarse/fine 雙輸出 <span class="note">⚠ deck 前確認「三閘」vs「四閘+Rnull=15」口徑</span></li>
+  </ul>
+  <div class="vis"><b>圖位</b> <span class="tag t-reuse">複製</span>：5-態分類桶狀圖（現成 4 圖）＋ <span class="tag t-new">新SVG</span> 多閘判別流程。</div>
+</div></div>
+
+<!-- S7 -->
+<div class="slide"><div class="hd"><div class="num">7</div><div><p class="ttl">M4 · 方法論定位（外部對照）<span class="ms">74 源親讀 · 0 真 CONFLICT · 白地確立</span></p></div></div>
+<div class="body">
+  <div class="kmsg">ISM 創新點在「無監督 read×read 距離 PERMANOVA + normal cis-test + somatic-subclone 目標」的新整合。</div>
+  <ul class="pts">
+    <li>文獻庫 74 源親讀，整體稽核 CLEAN，<b>0 真 CONFLICT</b> <span class="tag t-f">F</span> <span class="src">src:project_external_validation_library</span></li>
+    <li>口徑紀律：<b>禁</b>用「對手二代定序」或「對手缺顯著性檢定」當差異（cvlr/ASMS/MethylBERT 都 ONT-capable 且有檢定）</li>
+    <li>6 學派定位：遺傳骨幹 / single-cell 甲基 lineage / long-read read-level 甲基（ISM 屬最近鄰）<span class="tag t-i">I</span></li>
+  </ul>
+  <div class="vis"><b>圖位</b> <span class="tag t-new">新SVG</span>：方法定位地圖（觀測單元 cell vs read × 訊號軸 genetics vs methylation），ISM 標位置。</div>
+</div></div>
+
+<!-- S8 -->
+<div class="slide"><div class="hd"><div class="num">8</div><div><p class="ttl">M4b · 誠實天花板（confound 與限制）<span class="ms">單 bulk 的物理邊界</span></p></div></div>
+<div class="body">
+  <div class="kmsg">單 bulk 只能 characterize，不能 confirm subclone；confound 已逐一定位。</div>
+  <ul class="pts">
+    <li>確認黃金標準 = single-cell / multi-region / longitudinal；單 bulk 無法自我確認 <span class="tag t-f">F</span> <span class="src">src:project_subclone_confirmation_construction</span></li>
+    <li>I2 <b>LOH-unmask ASM</b> 強 confound（Martin-Trujillo：tumor imprinted-DMR 82–91% 由 CN/LOH 非 epimutation）<span class="tag t-f">F</span></li>
+    <li>CN ↔ 甲基對齊 <b>REFUTED standalone</b>（非獨立）；<b>SV 軸 = 唯一非循環 anchor</b> <span class="tag t-i">I</span></li>
+  </ul>
+  <div class="vis"><b>圖位</b> <span class="tag t-new">新SVG</span>：confound 通道圖（LOH/CN → ASM → 看似 subclone 的假路徑，標 ✗）。</div>
+</div></div>
+
+<!-- S9 -->
+<div class="slide"><div class="hd"><div class="num">9</div><div><p class="ttl">M5 · 論文基石就位<span class="ms">為什麼需要甲基補強：sSNV 太稀疏</span></p></div></div>
+<div class="body">
+  <div class="kmsg">sSNV 在基因組上太稀疏，單 read 幾乎跨不到 2 個 → motivation：需甲基提供 read 內共現訊號。</div>
+  <ul class="pts">
+    <li>Q1 coverage（HCC1395）：sSNV 密度 <b>10.6/Mb</b>、中位相鄰間距 <b>51.4 kb</b>、read ref-span 中位 <b>4.9 kb</b> <span class="tag t-f">F</span> <span class="src">src:ssnv_spacing_coverage.json @114200e</span></li>
+    <li>P(≥2 sSNV / read) = <b>0.74%</b>；94.2% read 跨 0 sSNV；±5kb window 33.2% read 跨完整 <span class="tag t-f">F</span></li>
+    <li>S3 limitations 草稿就位：LOH-unmask confound / phase-set 天花板 / T2 口徑修正 <span class="tag t-o">O</span></li>
+  </ul>
+  <div class="vis"><b>圖位</b> <span class="tag t-new">新SVG</span>：基因組刻度上 sSNV 稀疏散點 + 一條 read 跨度（示意單 read 罕跨 2 sSNV）。</div>
+</div></div>
+
+<!-- S10 -->
+<div class="slide"><div class="hd"><div class="num">10</div><div><p class="ttl">收束 · 誠實定位 + 下一步<span class="ms">論文站得住，但須嚴格 frame</span></p></div></div>
+<div class="body">
+  <div class="kmsg">proof-of-concept ⭐3：骨幹 = somatic haplotag，甲基 = corroborate；標題界定 regional partition 非 full tree。</div>
+  <ul class="pts">
+    <li>禁 overclaim：甲基驅動 genome-wide 重建 / 完整 phylogeny-CCF tree / tumor-only 無監督偵測</li>
+    <li>下一步（ROI 排序）：normal cis-control → 多 sSNV CCF（chr2:18M）→ single-cell 驗證 → COLO829 補甲基 normal</li>
+  </ul>
+  <div class="vis"><b>圖位</b> <span class="tag t-reuse">複製/表</span>：下一步 ROI 表（4 項 × 解決什麼 confound）。</div>
+</div></div>
+
+<!-- S11 -->
+<div class="slide"><div class="hd"><div class="num">11</div><div><p class="ttl">備註 · 教授問答預備<span class="ms">speaker note，不一定上頁</span></p></div></div>
+<div class="body">
+  <ul class="pts">
+    <li><b>Q 論文還站得住嗎？</b> → 站得住，但須嚴格 frame 為 proof-of-concept；不宣稱完整 tree。</li>
+    <li><b>Q 真 subclone 訊號還在嗎？</b> → 在 a-priori 條件化軸有，但確認需外部 ground truth。</li>
+    <li><b>Q 下一步怎麼確認？</b> → normal cis-control / 多 sSNV CCF / single-cell。</li>
+  </ul>
+</div></div>
+
+<!-- 視覺需求總表 -->
+<h2 class="sec">視覺需求總表（呼應「正確重用圖 + SVG 說明 + 省 token」）</h2>
+<table class="v">
+  <tr><th>頁</th><th>視覺</th><th>類型</th><th>來源 / 作法</th></tr>
+  <tr><td>S5 ★</td><td>無監督 double-dip vs a-priori 軸 對比</td><td><span class="tag t-new">新SVG</span></td><td>methods-example primitive 庫手刻；用例子講解最關鍵</td></tr>
+  <tr><td>S6</td><td>5-態分類桶狀圖</td><td><span class="tag t-reuse">複製</span></td><td>20260620_decisionflow_5state 既有 4 圖，帶 provenance 引用</td></tr>
+  <tr><td>S8</td><td>confound 通道圖（LOH→ASM→假 subclone）</td><td><span class="tag t-new">新SVG</span></td><td>箭頭為唯一形狀，假路徑標 ✗</td></tr>
+  <tr><td>S9</td><td>sSNV 稀疏 × read 跨度示意</td><td><span class="tag t-new">新SVG</span></td><td>基因組刻度散點，數字取自 coverage JSON</td></tr>
+  <tr><td>S4 / S6 / S10</td><td>桶分布表 / ROI 表</td><td><span class="tag t-reuse">複製/表</span></td><td>純 HTML 表，重用 6/18 deck 的 .panel/.pill 物件</td></tr>
+  <tr><td>全 deck</td><td>版型 CSS（slide/pill/panel/bullet/hbar/legend）</td><td><span class="tag t-reuse">複製</span></td><td>直接沿用 6/18 lab deck 已驗證 CSS → 省 token + 一致</td></tr>
+</table>
+
+<!-- 數字驗證清單 -->
+<h2 class="sec">Deck 前數字驗證清單（§13.0 ── 產 deck 時逐一 grep 讀回真值才寫入）</h2>
+<table class="v">
+  <tr><th>數字</th><th>大綱暫用值</th><th>驗證來源（grep 目標）</th><th>狀態</th></tr>
+  <tr><td>TP region 數 / Weak-Noise %</td><td>29,754 / 91.7%</td><td><code>20260616_..._FN_audit_01.md §2.1</code></td><td>✅ 已核對</td></tr>
+  <tr><td>reclassify-v2 救回率 / FP</td><td>53.9%(4407/8180) / 0</td><td><code>memory project_ism_verdict_false_negative_audit</code> → 原始 TSV</td><td>⚠ deck 前讀回</td></tr>
+  <tr><td>5-態分類 N</td><td>30,490</td><td><code>20260620_decisionflow_5state_classification_wg_01.md</code></td><td>✅ 已核對</td></tr>
+  <tr><td>全 7 樣本 Jaccard 範圍</td><td>0.091–0.161</td><td><code>allsample_subcluster_split/results/SUMMARY_all_samples.md</code></td><td>⚠ deck 前讀回</td></tr>
+  <tr><td>切群閘數口徑</td><td>三閘 / 四閘?</td><td><code>20260622_cluster_redesign_genomewide_tpfp_01.md</code> vs memory</td><td>🔴 drift 待定</td></tr>
+  <tr><td>Q1 coverage 全套</td><td>10.6/Mb · 51.4kb · 4.9kb · 0.74% · 94.2%</td><td><code>state/analysis_outputs/ssnv_spacing_coverage.json @114200e</code></td><td>✅ 已核對(commit)</td></tr>
+  <tr><td>LOH-unmask 82–91%</td><td>82–91%</td><td><code>external_validation Martin-Trujillo PMID28883545</code></td><td>⚠ deck 前讀回</td></tr>
+  <tr><td>文獻源數 / CONFLICT</td><td>74 源 / 0 真</td><td><code>CURRENT_FOCUS 2026-06-19 段 + external_validation index</code></td><td>✅ 已核對</td></tr>
+</table>
+
+<p style="color:var(--fg4);font-size:12.5px;margin-top:28px">
+OUTLINE v0 · 2026-06-22 · branch research/subclonal-reconstruction-202606 · 進展型 + ABT + BLUF · 確認此邏輯後才產完整 lab deck（重用 6/18 設計系統）
+</p>
+
+</div>
+</body>
+</html>

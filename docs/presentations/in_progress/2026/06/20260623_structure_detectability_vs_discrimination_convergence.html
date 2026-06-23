@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!--
+  title: 「結構可檢測 ≠ 可判別」跨方法收斂確認 — 確認主線數據基礎是否一致 robust
+  purpose: 回應用戶 — 確認「可檢測結構 vs 判別」在所有方法下的結果是否一致 + 新 5桶數據是否改變主線
+  date: 2026-06-23
+  build_branch: research/subclonal-reconstruction-202606
+  verified: deck 數字經 wc1v407en/w9456xpig；5桶 phylo 經 20260623 doc §8 溯源表 + workflow wmgsefb9d 對抗驗證（本檔親查 grep MATCH）
+  status: 確認頁（非 deck）— 確認後決定是否把 FP 翻轉 robustness 加進 deck + 綜合 review 主線
+  cross_worktree: 5桶 phylo 來自 ism-review-infra worktree（標 provenance）
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>結構可檢測 ≠ 可判別 · 跨方法收斂確認</title>
+<style>
+:root{--ink:#111;--navy:#021442;--ice:#DBEFF9;--hp1:#4188C7;--som:#E97B3C;--err:#E0352B;--ok:#2E8B57;--neutral:#6B7280;
+--fg2:#262626;--fg3:#595959;--fg4:#8a8a8a;--bg2:#F7F9FC;--bg3:#EEF3F8;--bd:#D9D9D9;
+--font:'Inter','Noto Sans TC','PingFang TC','微軟正黑體',sans-serif;--mono:'JetBrains Mono','Menlo',monospace;}
+*{box-sizing:border-box}
+body{margin:0;background:#eef2f7;color:var(--ink);font-family:var(--font);line-height:1.55;font-size:14.5px}
+.wrap{max-width:1100px;margin:0 auto;padding:30px 26px 80px}
+header.top{background:var(--navy);color:#fff;border-radius:12px;padding:26px 32px;margin-bottom:18px}
+header.top h1{font-weight:400;font-size:27px;margin:0 0 8px}
+header.top .sub{color:#bcd4ef;font-size:15px}
+.prop{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:20px 26px;margin:0 0 22px;display:flex;gap:24px;align-items:stretch}
+.prop .half{flex:1;border-radius:10px;padding:16px 20px}
+.prop .det{background:var(--ice);border:1px solid #BBD6EE}
+.prop .dis{background:#fdecea;border:1px solid #f3b8ab}
+.prop h3{margin:0 0 8px;font-size:18px}
+.prop .det h3{color:var(--navy)}.prop .dis h3{color:var(--err)}
+.prop p{margin:4px 0;font-size:14px;color:var(--fg2)}
+.prop .vs{display:flex;align-items:center;font-size:26px;color:var(--fg4);font-weight:700}
+h2.sec{font-size:16px;color:var(--navy);margin:26px 0 12px;border-bottom:2px solid var(--bd);padding-bottom:6px}
+table.v{width:100%;border-collapse:collapse;font-size:13px}
+table.v th,table.v td{border:1px solid var(--bd);padding:8px 11px;text-align:left;vertical-align:top}
+table.v th{background:var(--bg3);color:var(--navy);font-weight:600}
+table.v code{font-family:var(--mono);font-size:11px;color:var(--fg3)}
+.dir{font-family:var(--mono);font-size:11px;font-weight:700;padding:1px 7px;border-radius:4px;white-space:nowrap}
+.dir.same{background:#e3f2e8;color:#1e6b3c}
+.new{background:#fff3df;color:#9a6512;font-family:var(--mono);font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:4px}
+.conv{background:#e9f5ee;border:1px solid #b6dcc4;border-radius:10px;padding:16px 22px;margin:8px 0;font-size:15px}
+.conv b{color:var(--ok)}
+.callout{background:#fff8dd;border:1px solid #eed892;border-radius:8px;padding:12px 18px;margin:8px 0;font-size:13.5px;color:#7a5a12}
+.redline{background:#fdecea;border:1px solid #f3b8ab;border-radius:8px;padding:12px 18px;margin:8px 0;font-size:13.5px;color:#7a1e10}
+.verdict{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 12px;border-radius:6px;background:var(--ok);color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>「結構可檢測」 ≠ 「可判別」 — 跨方法收斂確認</h1>
+  <div class="sub">確認 deck 主線的數據基礎是否一致 robust · 新 5桶 phylo 數據是否改變主線 · 2026-06-23</div>
+</header>
+
+<h2 class="sec">一、兩個常被混淆的概念（先釐清）</h2>
+<div class="prop">
+  <div class="half det">
+    <h3>① 可檢測（detectability）</h3>
+    <p>能不能在甲基資料上「看到結構」——切得出 ≥2 群、PERMANOVA 顯著。</p>
+    <p style="color:var(--navy);font-weight:600">答案：✅ 可以，而且很普遍。</p>
+  </div>
+  <div class="vs">≠</div>
+  <div class="half dis">
+    <h3>② 可判別（discrimination）</h3>
+    <p>看到的結構能不能分「somatic subclone vs germline cis-ASM」、能不能分 TP/FP。</p>
+    <p style="color:var(--err);font-weight:600">答案：✗ 不能（FP 反而更多）。</p>
+  </div>
+</div>
+<div class="callout">這就是 deck M2（無監督不判別）+ M3（切群≠subclone）的核心。<b>新數據要確認的，就是「②不可判別」這條結論在多套方法下是否一致</b>。</div>
+
+<h2 class="sec">二、跨方法收斂表（5 套方法都測「可檢測 / 可判別」）</h2>
+<table class="v">
+  <tr><th>方法</th><th>測什麼</th><th>可檢測？</th><th>可判別？（關鍵）</th><th>方向</th></tr>
+  <tr>
+    <td><b>三閘 cluster_redesign</b><br><code>deck S5 · CP-B 驗</code></td>
+    <td>切群 + 對齊歸因（balance/null-excess/alignment）</td>
+    <td>✅ 切得出群</td>
+    <td>對齊 germline = CONFIRMED <b>3.29×</b>（cis-ASM）；不對齊「候選」TP <b>貧化 0.65×</b>、FP 更多</td>
+    <td><span class="dir same">不判別</span></td>
+  </tr>
+  <tr>
+    <td><b>5態 decisionflow</b><br><code>deck M3 · CP-B 驗</code></td>
+    <td>label-first PERMANOVA 關聯（N=30,490）</td>
+    <td>✅ state③ 52.2% 有關聯</td>
+    <td>真關聯但主導軸 = germline cis-ASM/allele，<b>非 subclone</b></td>
+    <td><span class="dir same">不判別</span></td>
+  </tr>
+  <tr>
+    <td><b>Jaccard 全 7 樣本</b><br><code>deck S5 · CP-B 驗</code></td>
+    <td>無監督切群 read-set ↔ 標籤 read-set 重疊</td>
+    <td>—</td>
+    <td>Jaccard <b>0.091–0.161</b> 一律低 → 無監督切群<b>不重現</b>標籤軸（跨 3 癌種）</td>
+    <td><span class="dir same">不判別</span></td>
+  </tr>
+  <tr style="background:#fffaf0">
+    <td><b>5桶 phylo null95/90</b> <span class="new">新 06-23</span><br><code>ism-review-infra worktree</code></td>
+    <td>結構強度分桶 + TP/FP 對照</td>
+    <td>✅ confident-multi 24.66%</td>
+    <td>🔴 <b>FP confident-multi 35.65% &gt; TP 24.66%</b>（FP 反更多）；S4 弱候選 TP/FP=<b>1.15 chance-level</b></td>
+    <td><span class="dir same">不判別</span></td>
+  </tr>
+  <tr style="background:#fffaf0">
+    <td><b>geometry 分歧</b> <span class="new">新 06-23 · ⭐2-3</span><br><code>~400 抽樣</code></td>
+    <td>純幾何 0.7×max 平切 vs null 閘</td>
+    <td>幾何切更多</td>
+    <td>31% 分歧，但 doc 自標「幾何<b>本就過切單一 clone</b>，是 null 閘保守度<b>診斷非 subclone 宣稱</b>」</td>
+    <td><span class="dir same">診斷</span></td>
+  </tr>
+  <tr>
+    <td><b>reclassify-v2（M1）</b><br><code>deck S6 · CP-B 驗</code></td>
+    <td>救回被誤判的有結構 region</td>
+    <td>✅ 救回 46.6%</td>
+    <td>救回 = 結構存在性；FP 對照同比例有結構 → <b>非 TP/FP 判別</b>（filter-DEAD）</td>
+    <td><span class="dir same">不判別</span></td>
+  </tr>
+</table>
+
+<h2 class="sec">三、收斂結論</h2>
+<div class="conv">
+  <span class="verdict">CONVERGENT · 主線不變、被強化</span>
+  <p style="margin:10px 0 0;font-size:15px;color:var(--fg2)"><b>6 套方法（同一份距離的多視角、非統計獨立）一致指向同一結論</b>：結構<b>可檢測</b>（多處、多切法都切得出 ≥2 群、PERMANOVA 顯著），但 <b>tumor-only 下不可判別 somatic subclone vs germline cis-ASM</b> —— FP（germline）反而結構更多或同等。即結論<b>對方法/閘值不敏感</b>；真正跨樣本獨立性 = Jaccard 全 7 樣本。所以這是 <b>characterization 觀察層，不是 filter、不是 subclone caller</b>。</p>
+</div>
+<div class="callout"><b>新 5桶數據的價值 = method-insensitive（非統計獨立）</b>：deck 用三閘、新的 phylo 用 null95/90，但兩者<b>共享同一份 HCC1395 甲基距離矩陣</b>，是同家族的閘值變體、<b>非獨立證據</b>。價值在「<b>換哪套切法結論都一樣（對方法/閘值不敏感）</b>」。<b>真正的獨立性</b>來自 ① FP(germline) vs TP(somatic) 對照 ② 全 7 樣本 Jaccard 跨 3 癌種。</div>
+
+<h2 class="sec">四、新數據的邊界（加進 deck 前必守）</h2>
+<div class="redline">
+  🔴 <b>只有「FP 反判別」這個 robustness 點適合進對教授的 deck</b>。其餘不適合：<br>
+  ① 整套 5桶 vs 三閘是<b>兩套方法</b>，數字不可混用同一頁（口徑）。<br>
+  ② <b>S4 弱候選 TP/FP=1.15 chance-level</b>、與噪音不可分 → 不可當「保留的真結構」。<br>
+  ③ <b>geometry_ng「本就過切、診斷非宣稱」</b>，放進簡報易誤導成「找到更多 subclone」。<br>
+  ④ 跨 worktree（ism-review-infra），引用須標 provenance。⑤ 單樣本 ⭐2-3、無 FDR。
+</div>
+
+<h2 class="sec">五、對「整個主線與敘述」的影響（你要綜合確認的）</h2>
+<table class="v">
+  <tr><th>主線</th><th>新數據是否改變？</th></tr>
+  <tr><td>M2 無監督切群不判別 → a-priori 軸</td><td>✅ <b>強化</b>（geometry 31% 分歧 + S4 chance-level = 無監督幾何過切、不判別）</td></tr>
+  <tr><td>M3 切群 ≠ subclone（多數 cis-ASM）</td><td>✅ <b>強化</b>（FP confident 35.65% &gt; TP 24.66% = 更直接的「對齊=cis-ASM」）</td></tr>
+  <tr><td>三紅線（⭐3 / 甲基 corroborate / 單樣本 PARTIAL）</td><td>✅ <b>一致</b>（doc 自標 ⭐2-3 / characterization / 單樣本）</td></tr>
+  <tr><td>敘事重心、頁序、其餘 4 主線</td><td>⭕ <b>不需改</b></td></tr>
+</table>
+<div class="conv" style="background:var(--ice);border-color:#BBD6EE">
+  <p style="margin:0;font-size:15px;color:var(--navy)"><b>一句話</b>：新數據<b>不改變主線、強化 M2+M3 的 method-insensitivity</b>（換切法結論不變）。已把「對方法不敏感 + FP 反判別」加進 deck S5；「不判別」精確成 tumor-only 不判別、normal cis-control 升為判別力 gate；整套 5桶/geometry 留作補充材料。</p>
+</div>
+
+<p style="color:var(--fg4);font-size:12px;margin-top:24px">確認頁 · 2026-06-23 · 數字經 deck 驗證足跡 + 20260623 doc §8 溯源表（本檔 grep MATCH）· 5桶 phylo 在 ism-review-infra worktree</p>
+
+</div>
+</body>
+</html>
