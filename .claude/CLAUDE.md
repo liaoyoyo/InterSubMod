@@ -111,7 +111,7 @@
 
 ## §4 Hooks 概覽（Claude Code 特定 — 2026-05-18 P4 完整收尾）
 
-依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop / **PreCompact** 7 個 events；**43 hook scripts**，2026-06-15 實測 `ls scripts/hooks/*.sh | wc -l`（2026-06-15 +`provenance_stamp_advisor.sh`）；2026-06-11 +`git_branch_commit_guard.sh`〔主線保護 exit-2 + 並行警告〕；2026-06-09 +`health_drift_advisor.sh`〔C7〕 +`concurrent_session_advisor.sh`〔§G〕；2026-06-01 +`number_provenance_check.sh`）。
+依 `InterSubMod/.claude/settings.local.json` 完整定義（含 SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / SubagentStop / Stop / **PreCompact** 7 個 events；**45 hook scripts**，2026-06-23 實測 `ls scripts/hooks/*.sh | wc -l`（2026-06-23 +`script_lint_advisor.sh`〔.py/.sh post-edit advisory lint，治理稽核補〕 +`palette_drift_advisor.sh`〔ISM renderer 色盤漂移 advisory〕；2026-06-15 +`provenance_stamp_advisor.sh`）；2026-06-11 +`git_branch_commit_guard.sh`〔主線保護 exit-2 + 並行警告〕；2026-06-09 +`health_drift_advisor.sh`〔C7〕 +`concurrent_session_advisor.sh`〔§G〕；2026-06-01 +`number_provenance_check.sh`）。
 
 **2026-06-09 新增 2 個 hook**（loop-engineering ADR C7 + git governance §G — 修 invocation-dependence 漂移 + 並行 session 互撞）:
 - `health_drift_advisor.sh`（SessionStart — **變動觸發的唯讀漂移 advisor**：偵測 `.claude/{skills,agents,rules,hooks,workflows}` + settings/CLAUDE.md/AGENTS.md 自上次 marker 後是否變動 → nudge 跑 `/harness-health`；順帶提醒 active cycle >7d 未推進。**advisory-only 永遠 exit 0、不跑 harness_health.py 本體（零延遲/不 hang/不 spam snapshot）、marker debounce ~once/change-batch**。非 `/loop`/`/goal`/cron。設計依據：`InterSubMod/docs/plans/20260609_loop_engineering_research_cycle_architecture_review_01.md` §5）
