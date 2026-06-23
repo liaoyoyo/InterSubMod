@@ -183,7 +183,55 @@
       "Bash([ -f \"$CWD/$REL\" ])",
       "Bash(bash scripts/hooks/compile_success_clear.sh)",
       "Bash(python3 -c \"import json; json.load\\(open\\('.claude/settings.local.json'\\)\\); print\\('VALID'\\)\")",
-      "Bash(python3 scripts/harness_health.py)"
+      "Bash(python3 scripts/harness_health.py)",
+      "Bash(git status *)",
+      "Bash(git --no-pager diff --numstat docs/postmortems/20260601_fabricated_metric_in_html_preview_postmortem.md)",
+      "Bash(git --no-pager diff docs/postmortems/20260601_fabricated_metric_in_html_preview_postmortem.md)",
+      "Bash(exit 1)",
+      "Bash(git branch *)",
+      "Bash(cd /big7_disk/liaoyoyo2001/InterSubMod/research/tsg_promoter_asm_reviewer)",
+      "Bash(export TMPDIR=/big7_disk)",
+      "Bash(timeout 590000 python3 scripts/54_modkit_extract_crossval.py)",
+      "Bash(git check-ignore *)",
+      "Workflow(deep-research)",
+      "Bash(nohup ./run_assist_tag.sh)",
+      "Bash(THREADS=16 bash research/tsg_promoter_asm_reviewer/scripts/84_run_ism_curated.sh)",
+      "Read(//big7_disk/liaoyoyo2001/tmp/**)",
+      "Bash(./run_methyl_assist.sh)",
+      "Bash(THREADS=16 bash research/tsg_promoter_asm_reviewer/scripts/92_run_overstrict_raw.sh)",
+      "Bash(mkdir -p /big7_disk/liaoyoyo2001/InterSubMod/docs/paper_focus/01_focus_notes /big7_disk/liaoyoyo2001/InterSubMod/docs/paper_focus/02_paper_framework /big7_disk/liaoyoyo2001/InterSubMod/docs/paper_focus/03_references /big7_disk/liaoyoyo2001/InterSubMod/docs/paper_focus/04_figures /big7_disk/liaoyoyo2001/InterSubMod/docs/paper_focus/05_html_staging)",
+      "Bash(./run_rigor.sh)",
+      "Bash(git --no-pager log --oneline 065d9bc..chore/harness-loop-governance-202606)",
+      "Bash(git --no-pager log --oneline -1 --format='%h parent=%p' 12c5d54)",
+      "Bash(git worktree *)",
+      "Bash(git -C /tmp/ism_untangle cherry-pick 12c5d54..chore/harness-loop-governance-202606)",
+      "Bash(git -C /tmp/ism_untangle log --oneline 065d9bc..HEAD)",
+      "Bash(git -C /tmp/ism_untangle status --short)",
+      "Bash(THREADS=24 bash research/tsg_promoter_asm_reviewer/scripts/100_run_ism_full.sh)",
+      "Bash(./run_inventory.sh)",
+      "Bash(./run_t3local.sh)",
+      "Bash(./run_recon.sh)",
+      "Bash(mkdir -p /big7_disk/liaoyoyo2001/big7_disk_output/_ARCHIVE_pending_cleanup_202606/canonical/HCC1395/paired_full /big7_disk/liaoyoyo2001/big7_disk_output/_ARCHIVE_pending_cleanup_202606/canonical/COLO829/paired_full)",
+      "Bash(mkdir canopy_extract)",
+      "Bash(tar -tzf /big7_disk/liaoyoyo2001/external_validation/axis1_subclonal_reconstruction/jiang-canopy-2016/repo/Canopy_archive.tar.gz)",
+      "Read(//big7_disk/liaoyoyo2001/external_validation/axis2_longread_phasing_haplotag/hapbridge-2025/**)",
+      "Bash(make -C /big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/build -j40)",
+      "Read(//big7_disk/liaoyoyo2001/wt-harness-loop-202606/docs/plans/**)",
+      "Read(//big7_disk/liaoyoyo2001/ism_phase2/**)",
+      "Bash(ISM_FORCE=1 nohup python3 render_tn_all.py)",
+      "Bash(OBS_PER=1 python3 obs_ws_render.py)",
+      "Bash(OBS_PER=6 python3 obs_ws_render.py)",
+      "Bash(mkdir -p docs/experiments/in_progress/2026/06/20260620_allsample_subcluster_split/results)",
+      "Bash(kill 654873)",
+      "Bash(pkill -f \"_df_tmp_chr1\")",
+      "Bash(kill 682293)",
+      "Bash(pkill -f \"_df_tmp\")",
+      "Bash(kill 3612220)",
+      "Bash(pkill -f \"_pv3wg\")",
+      "Bash(pkill -f \"phylo_v3_wg\")",
+      "Bash(xargs -r kill)",
+      "Bash(cp __TRACKED_VAR__/scripts/hooks/palette_drift_advisor.sh scripts/hooks/palette_drift_advisor.sh)",
+      "Bash(cp __TRACKED_VAR__/scripts/palette_drift_check.py scripts/palette_drift_check.py)"
     ],
     "deny": [
       "Bash(rm -rf /:*)",
@@ -239,6 +287,22 @@
           {
             "type": "command",
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/session_start_inject_focus.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/health_drift_advisor.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/concurrent_session_advisor.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       }
@@ -317,6 +381,15 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/git_branch_commit_guard.sh 1>&2"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/kb_schema_check.sh 1>&2"
           }
         ]
@@ -381,15 +454,29 @@
           {
             "type": "command",
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/pre_tier_upgrade_check.sh"
-          },
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
           {
             "type": "command",
-            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/number_provenance_check.sh"
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/number_provenance_check.sh 1>&2"
           }
         ]
       }
     ],
     "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/script_lint_advisor.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
       {
         "matcher": "Edit|Write",
         "hooks": [
@@ -495,6 +582,24 @@
           {
             "type": "command",
             "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/skill_registry_sync.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/provenance_stamp_advisor.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /big7_disk/liaoyoyo2001/InterSubMod/scripts/hooks/palette_drift_advisor.sh 2>>/big7_disk/liaoyoyo2001/InterSubMod/docs/postmortems/hook_failures.log || true"
           }
         ]
       },
