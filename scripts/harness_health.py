@@ -321,8 +321,16 @@ def light_queue(queue):
 def light_memory_drift():
     """#7 — memory index↔files drift（升 /memory-consolidation Step-4 手動 grep 為持續偵測；read-only）。"""
     idx = _read(os.path.join(MEM_DIR, "MEMORY.md"))
-    files = [os.path.basename(f) for f in glob.glob(os.path.join(MEM_DIR, "*.md"))
-             if os.path.basename(f) != "MEMORY.md"]
+    # exclude MEMORY.md itself + archived memories (status: archived = 故意 de-index，由 /memory-consolidation
+    # 合併降級；不該被當 orphan，2026-06-23 治理稽核補)。
+    files = []
+    for f in glob.glob(os.path.join(MEM_DIR, "*.md")):
+        b = os.path.basename(f)
+        if b == "MEMORY.md":
+            continue
+        if "status: archived" in (_read(f) or ""):
+            continue
+        files.append(b)
     if not idx or not files:
         return "GREY", ["MEMORY.md / memory/ 不可讀（外部路徑）"]
     fileset = set(files)
