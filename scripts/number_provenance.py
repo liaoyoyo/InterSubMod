@@ -56,6 +56,36 @@ _P3 = re.compile(r"(\d+(?:\.\d+)?)\s*%")
 _DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
 _YEAR = re.compile(r"^(?:19|20)\d{2}$")
 
+# range sanity: metrics physically bounded to [0,1] — out-of-range = definitely wrong/fabricated.
+# Zero-false-positive subset only: % skipped (increases can exceed 100%), r skipped (ambiguous radius/count).
+# Word-boundary before name prevents "step=3"->p, "fp=5"/"hp=1"->p false matches. 2026-06-25 架構稽核 §13 第4道.
+_RANGE = re.compile(
+    r"(?<![A-Za-z0-9])(AUC|Jaccard|Cramér'?s?\s*V|CramérV|Cramer\s*V|p-value|p)\s*[=<>:]\s*"
+    r"([-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)"
+)
+
+
+def range_sanity(text):
+    """Return [(snippet, metric_label, value)] for metrics whose value is impossible:
+    AUC / p / Jaccard / Cramér's V must be in [0,1]. Never throws (used inside fail-open gate)."""
+    bad = []
+    try:
+        for m in _RANGE.finditer(_DATE.sub(" ", text)):
+            name, raw = m.group(1), m.group(2)
+            try:
+                val = float(raw)
+            except ValueError:
+                continue
+            if 0.0 <= val <= 1.0:
+                continue
+            n = name.replace("'", "").replace(" ", "").lower()
+            label = ("AUC" if n.startswith("auc") else "Jaccard" if n.startswith("jaccard")
+                     else "Cramér's V" if "v" in n else "p-value")
+            bad.append((m.group(0).strip(), label, val))
+    except Exception:
+        return []
+    return bad
+
 SOURCE_EXT = (".json", ".tsv", ".txt", ".csv", ".t.txt", ".log", ".jsonl")
 MAX_SOURCE_FILES = 80
 MAX_SCAN_BYTES = 20 * 1024 * 1024  # per-file cap
@@ -185,33 +215,40 @@ def cmd_gate():
         declared = [s.strip().strip("[]\"' ") for s in fm["data_sources"].split(",") if s.strip()]
 
     metrics = extract_metrics(content)
-    if not metrics:
+    rng = range_sanity(content)  # range-impossible values (AUC/p/Jaccard/V ∉ [0,1]) = definitely wrong
+    if not metrics and not rng:
         return 0
 
     sources = gather_sources(fpath, declared)
-    unsourced = [m for m in metrics if find_token(m, sources) is None]
+    unsourced = [m for m in metrics if find_token(m, sources) is None] if metrics else []
 
     strict = is_strict_path(fpath)
-    if not unsourced:
+    if not unsourced and not rng:
         return 0
 
     base = os.path.basename(fpath)
+    rng_block = ""
+    if rng:
+        rng_block = ("\n  🔴 RANGE-IMPOSSIBLE（定義上不可能，必為錯/捏造）: "
+                     + "; ".join(f"{s}（{lbl} 須∈[0,1]）" for s, lbl, _v in rng[:6]))
     if strict:
-        msg = (f"[number_provenance] 🔴 BLOCK Write to validated/PI path: {base}\n"
-               f"  {len(unsourced)} metric(s) found NO source file: "
-               f"{', '.join(unsourced[:12])}{' ...' if len(unsourced) > 12 else ''}\n"
-               f"  → Every number in a validated/PI report must trace to a file you Read.\n"
-               f"  → Fix: write the value to .json/.tsv first, then paste the read-back value;\n"
-               f"         or declare `data_sources:` in frontmatter; or render via fill_report.py.\n"
-               f"  → Override (only if genuinely sourced elsewhere): add an HTML comment\n"
-               f"         <!-- provenance-verified: <where each number came from> -->")
+        unsourced_block = ""
+        if unsourced:
+            unsourced_block = (f"\n  {len(unsourced)} metric(s) found NO source file: "
+                               f"{', '.join(unsourced[:12])}{' ...' if len(unsourced) > 12 else ''}")
+        msg = (f"[number_provenance] 🔴 BLOCK Write to validated/PI path: {base}"
+               f"{unsourced_block}{rng_block}\n"
+               f"  → 數字須溯源且範圍合理。Fix: 寫檔→讀回→貼真值；或 frontmatter `data_sources:`；或 fill_report.py。\n"
+               f"  → Override (genuinely sourced elsewhere): <!-- provenance-verified: <來源> -->")
         print(msg, file=sys.stderr)
         return 2
     # advisory tier
-    msg = (f"[number_provenance] ⚠ {base}: {len(unsourced)} metric(s) not found in nearby "
-           f"sources: {', '.join(unsourced[:8])}{' ...' if len(unsourced) > 8 else ''}\n"
-           f"  → Confirm each was Read from a file (not typed from expectation). "
-           f"grep-able? then OK. Postmortem 2026-06-01.")
+    unsourced_block = ""
+    if unsourced:
+        unsourced_block = (f" {len(unsourced)} metric(s) not found in nearby sources: "
+                           f"{', '.join(unsourced[:8])}{' ...' if len(unsourced) > 8 else ''}")
+    msg = (f"[number_provenance] ⚠ {base}:{unsourced_block}{rng_block}\n"
+           f"  → 確認每數字 Read 自檔(非預期) + 範圍合理。Postmortem 2026-06-01.")
     print(msg)
     return 0
 
@@ -250,6 +287,13 @@ def cmd_audit(report, extra_sources):
     print(f"\n**{n_ok}/{len(metrics)} sourced; {n_bad} unsourced.** "
           + ("✅ all numbers traceable." if n_bad == 0
              else "🔴 unsourced numbers must be verified or removed before validated/PI."))
+    rng = range_sanity(content)
+    if rng:
+        print("\n**🔴 RANGE-IMPOSSIBLE（必為錯，AUC/p/Jaccard/V 須 ∈ [0,1]）:**")
+        for s, lbl, v in rng:
+            print(f"- `{s}` — {lbl} 實為 {v}，超出 [0,1]")
+    else:
+        print("\n✅ range sanity: no impossible AUC/p/Jaccard/V values.")
     return 0  # audit is a reporting tool — always exits 0, never blocks
 
 
