@@ -388,6 +388,54 @@ for _tid, _rep in _S3_DRAFTS.items():
         _n["links"]["reports"].append(_rep)
 _nmap["T-E3"].setdefault("missing_info", []).append("scaffold 完成；3 識別碼衝突 + 8 UNVERIFIED-PMID + 3 L3 錨待 web-enabled session 跑 /citation-verification")
 
+# ---- 06-25 補 8 個 compute 節點 I/O 規格（task check DETAIL 收尾；ref=None=external raw，required-ref 須對齊 depends_on）----
+IO_SPECS = {
+    "T-Q1-COVERAGE": {"inputs": [
+        {"name": "HCC1395 somatic sSNV VCF (ClairS TP)", "required": True, "ref": None},
+        {"name": "tumor ONT BAM (讀長分布)", "required": True, "ref": None}],
+        "outputs": ["state/analysis_outputs/ssnv_spacing_coverage.json", "sSNV 間距/讀長/跨≥2 sSNV 覆蓋真值"]},
+    "T-METHOD-EFFECTSIZE": {"inputs": [
+        {"name": "ISM per-region 距離矩陣 + cluster labels", "required": True, "ref": None},
+        {"name": "TP/FP 標籤 (HCC1395)", "required": False, "ref": None}],
+        "outputs": ["PERMANOVA effect-size(R²/pseudo-F) 門檻", "TP-vs-FP 校準表"]},
+    "T-METHOD-FDR": {"inputs": [
+        {"name": "跨位點 per-region PERMANOVA/Fisher p", "required": True, "ref": None},
+        {"name": "n_reads per region (epipolymorphism)", "required": True, "ref": None}],
+        "outputs": ["BH-FDR / Bonferroni across-loci 校正 p", "n_reads 校正後顯著位點集"]},
+    "T-METHOD-TESTS": {"inputs": [
+        {"name": "MethylationParser/MatrixBuilder 原始碼", "required": True, "ref": None},
+        {"name": "MM/ML edge-case BAM fixtures", "required": True, "ref": None}],
+        "outputs": ["tests/test_methylation_parsing.cpp", "ctest 綠 (含 edge case)"]},
+    "T-METHOD-BINVER": {"inputs": [
+        {"name": "state/invalidation/binary_versions.jsonl", "required": True, "ref": None},
+        {"name": "canonical 結果目錄 build SHA", "required": False, "ref": None}],
+        "outputs": ["binary_versions 一致性報告 (無 merge-blind 漂移)", "結果標 build SHA"]},
+    "T-C-CISEXP": {"inputs": [
+        {"name": "6 樣本全合格 somatic 位點 (tagged BAM+VCF)", "required": True, "ref": None},
+        {"name": "normal cis baseline (扣 germline-ASM)", "required": False, "ref": None}],
+        "outputs": ["normal-anchored cis 真分母", "headline 措辭 + de-confound"]},
+    "T-ISM-V2-RECON": {"inputs": [
+        {"name": "6 樣本 ISM 全基因組 verdict", "required": True, "ref": None},
+        {"name": "第二 caller ClairS∩DeepVariant", "required": True, "ref": "T-A4"}],
+        "outputs": ["『重建支持位點』pre-reg 判準", "全基因組×6 掃描頻率/位點表"]},
+    "T-ONT-CNV": {"inputs": [
+        {"name": "SAVANA per-segment CN + SV (read_support.tsv)", "required": True, "ref": None},
+        {"name": "SEQC2 truth (gain/loss/loh 方向)", "required": False, "ref": None}],
+        "outputs": ["CN-neutral 區仍對齊 somatic label 的非循環路徑", "全基因組 CN/SV 參考層 (修 normal-het 汙染)"]},
+    "T-GATE-GD": {"inputs": [
+        {"name": "ISM verdict + 重建支持位點", "required": True, "ref": "T-ISM-V2-RECON"},
+        {"name": "外部真值 (Fang2021 / COLO829)", "required": False, "ref": None}],
+        "outputs": ["實際重建的 subclone 樹", "與外部真值對照結果 (reconstruction 說服力)"]},
+    "T-GATE-GE": {"inputs": [
+        {"name": "6 樣本 tagged BAM", "required": True, "ref": None},
+        {"name": "正交 phasing 工具 (非 longphase-S)", "required": True, "ref": None}],
+        "outputs": ["獨立 haplotag", "對照 longphase-S → 解 single-pipeline 循環 + 衝 ⭐4"]},
+}
+for _tid, _io in IO_SPECS.items():
+    _n = _nmap.get(_tid)
+    if _n:
+        _n["io"] = _io
+
 # sanitize: drop dangling depends_on / external-ify dangling io refs (dropped T-S3/T-S4 etc.)
 idset = {n["id"] for n in nodes}
 for n in nodes:

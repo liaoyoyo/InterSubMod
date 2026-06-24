@@ -1,30 +1,19 @@
 # 研究任務樹（WBS） — TASKS.md
 
 > **自動產生，請勿手改。** 唯一真值 = `state/tasks/graph.json`；改後重跑 `python3 scripts/tasks/task_graph.py --graph state/tasks/graph.json render`。
-> 生成 2026-06-22 · build `c6e37c1` @ `research/subclonal-reconstruction-202606` · 節點 110（✅40 ◐29 ⛔1 ☐39 ✗1） · focus = `T-SL`
+> 生成 2026-06-25 · build `9098f11` @ `research/subclonal-reconstruction-202606` · 節點 110（✅40 ◐29 ⛔1 ☐39 ✗1） · focus = `T-SL`
 
 ## ⓪ 驗證（validate + check）
 - validate: ✅ PASS
-- check: 12 findings
-  - DRIFT `T-C1`: 指向的 cycle 20260602-1521-g1-zar1l-brca2-asm-survey 在 active.json 已 stale 20 天
+- check: 1 findings
   - WARN `docs/limitations`: 分支碰撞：T-P2, T-E3, T-C-UNMASK, T-METHOD-PSLIMIT 同時 in_progress 同分支（各開 worktree）
-  - DETAIL `T-GATE-GD`: compute 任務缺 I/O 規格
-  - DETAIL `T-GATE-GE`: compute 任務缺 I/O 規格
-  - DETAIL `T-C-CISEXP`: compute 任務缺 I/O 規格
-  - DETAIL `T-ISM-V2-RECON`: compute 任務缺 I/O 規格
-  - DETAIL `T-METHOD-FDR`: compute 任務缺 I/O 規格
-  - DETAIL `T-METHOD-TESTS`: compute 任務缺 I/O 規格
-  - DETAIL `T-METHOD-BINVER`: compute 任務缺 I/O 規格
-  - DETAIL `T-ONT-CNV`: compute 任務缺 I/O 規格
-  - DETAIL `T-Q1-COVERAGE`: compute 任務缺 I/O 規格
-  - DETAIL `T-METHOD-EFFECTSIZE`: compute 任務缺 I/O 規格
 
 ## 聚焦路徑　論文（碩論：Subclonal reconstruction） ＞ 完成 ISM 程式 ＞ 修正「結構驅動切區塊 × 標籤驗證」
 
 ## 任務樹（含括 parent；縮排=層級）
 - ◐ `T-PAPER` 論文（碩論：Subclonal reconstruction） [里程碑/進行中]　↳project_thesis_writing_architecture
   - ◐ `T-ASM` ASM characterization [里程碑/進行中]
-    - ☐ `T-C-CISEXP` V-1 乾淨 somatic-cis 真稀有性擴測（normal-anchored × 全合格位點 × 6 樣本） [程式/待辦]　缺:catalog 全位點從未全 cis-tested（稽核校正#2）　↳project_paper_claim_audit_consensus_base_2026_06_12
+    - ☐ `T-C-CISEXP` V-1 乾淨 somatic-cis 真稀有性擴測（normal-anchored × 全合格位點 × 6 樣本） [程式/待辦]　in:●6 樣本全合格 soma…,●normal cis b…　缺:catalog 全位點從未全 cis-tested（稽核校正#2）　↳project_paper_claim_audit_consensus_base_2026_06_12
     - ☐ `T-C-CROSS` 跨樣本 ASM 正式圖表（R6） [分析/待辦]　in:●6 樣本 excess …　缺:待 G-A 跨樣本統計　↳project_cross_sample_asm_reproducibility
     - ◐ `T-C-UNMASK` LOH-unmask ASM confound（Martin-Trujillo）寫入限制 [分析/進行中]　↳project_O12_loh_methylation_scenarios
     - ✅ `T-C1` ZAR1L/BRCA2 ASM 驗證 ⭐3 POSITIVE [程式/已完成]　in:●tagged BAM,●somatic VCF　↳20260602-1521-g1-zar1l-brca2-asm-survey
@@ -45,7 +34,7 @@
     - ✅ `T-E1` 外部文獻驗證庫（74 源親讀，稽核 CLEAN） [資料/已完成]　in:●文獻 PDF/repo …　↳project_external_validation_library
     - ◐ `T-E2` 6 樣本 clone/subclone 外部真值盤點 [分析/進行中]　in:●6 樣本清單,●外部 truth (Fa…　缺:H1437/H2009/HCC1937/HCC1954 缺專門解答（需自證）　↳project_six_sample_clone_subclone_external_truth
     - ◐ `T-E3` citation-verification（投稿前） [撰寫/進行中]　缺:scaffold 完成；3 識別碼衝突 + 8 UNVERIFIED-PMID + 3 L3 錨待 web-enabled session 跑 /citation-verification　↳project_external_validation_library
-    - ◐ `T-ONT-CNV` SAVANA ONT CNV/SV 全基因組驗證可行性（PROBE⭐3） [程式/進行中]　缺:全基因組 job 有 normal-het 汙染，待修正版　↳project_ont_cnv_sv_subclone_verification_feasibility
+    - ◐ `T-ONT-CNV` SAVANA ONT CNV/SV 全基因組驗證可行性（PROBE⭐3） [程式/進行中]　in:●SAVANA per-s…,●SEQC2 truth …　缺:全基因組 job 有 normal-het 汙染，待修正版　↳project_ont_cnv_sv_subclone_verification_feasibility
   - ◐ `T-GATE` 決策 gates（OPEN） [里程碑/進行中]
     - ☐ `T-GATE-HD1` HD-1：R-SELFREF → 定論文 Grade [分析/待辦]　缺:未決；影響論文主張強度　↳project_subclonal_reconstruction_paper_focus
     - ☐ `T-GATE-REDLINE` 誠實護欄紅線注入 writing 節點 verify gate + 成稿前跨章節術語掃描 [撰寫/待辦]　缺:紅線目前只在 memory　↳project_thesis_writing_architecture
@@ -54,8 +43,8 @@
     - ☐ `T-CSC` 驗證判讀確認 → clone / subclone [分析/待辦]　缺:ISM 完成才開跑；六層框架 ⑥ subclone 下游　↳project_apriori_subclone_classification_model
     - ✅ `T-DECISIONFLOW` 全基因組 5 態判別流程分類（N=30490） [分析/已完成]　↳project_decisionflow_5state_classification_wg
     - ☐ `T-GATE-GB` G-B：within-hap somatic null → 定甲基-subclone 故事 [分析/待辦]　缺:未跑前甲基-subclone 只能寫存在性窄+負　↳project_apriori_subclone_classification_model
-    - ☐ `T-GATE-GD` G-D：真實重建 demo（從 ISM verdict 實際重建一棵樹） [程式/待辦]　缺:長期 roadmap；依賴 V-2 系統掃描　↳project_six_sample_clone_subclone_external_truth
-    - ☐ `T-ISM-V2-RECON` V-2 重建支持位點 pre-reg 判準 + 全基因組×6 掃描 + 頻率/位點 catalog [程式/待辦]　缺:依賴 T-A4 第二 caller　↳project_chr2_18m_subclone_locus_verification
+    - ☐ `T-GATE-GD` G-D：真實重建 demo（從 ISM verdict 實際重建一棵樹） [程式/待辦]　in:●ISM verdict …,●外部真值 (Fang20…　缺:長期 roadmap；依賴 V-2 系統掃描　↳project_six_sample_clone_subclone_external_truth
+    - ☐ `T-ISM-V2-RECON` V-2 重建支持位點 pre-reg 判準 + 全基因組×6 掃描 + 頻率/位點 catalog [程式/待辦]　in:●6 樣本 ISM 全基因…,●第二 caller Cl…　缺:依賴 T-A4 第二 caller　↳project_chr2_18m_subclone_locus_verification
     - ✅ `T-S1` a-priori 4-pop subclone 分類模型 ADOPT_WITH_CORRECTIONS [分析/已完成]　in:●TP/FP/FN+cis…,●haplotag 1-1…　缺:B 排序 illustrative / somatic 未定待 G-B　↳20260617_keep_remove_classification_conditioned_axes
     - ✗ `T-S2` tumor-only 非監督軸 NEGATIVE（勿再開） [分析/已放棄]　in:●a-priori 分類　↳20260617_tumor_only_unsupervised_axis_negative
     - ◐ `T-S5` 甲基『幾群』判定 — 收斂 Path B model-based [分析/進行中]　in:●a-priori 軸　缺:A 路相關感知 null 真實資料失敗 81% → 需 model-based 大改　↳project_subcluster_cluster_count_determination
@@ -88,15 +77,15 @@
     - ✅ `T-L2` chr2:18M × SEQC2 外部驗證 + AI 解釋指南 [分析/已完成]　in:●chr2:18M L2 …,●SEQC2 truth　↳project_hcc1395_chr2_18M_subclone_external_validation
     - ☐ `T-L3` chr8 全-LOH 第二 exemplar locus 驗證 [分析/待辦]　↳project_hcc1395_chr8_hotspot
   - ◐ `T-METHOD` 方法健全性 [里程碑/進行中]
-    - ☐ `T-GATE-GE` G-E：正交第二定相 pipeline（破 single-pipeline 自我參照） [程式/待辦]　缺:長期 roadmap；與 HD-1 相關　↳project_subclonal_reconstruction_paper_focus
-    - ☐ `T-METHOD-BINVER` binary_version 一致性檢核 [程式/待辦]　↳project_new_data_integrity_audit_2026_06_17
-    - ☐ `T-METHOD-EFFECTSIZE` PERMANOVA 大-N 過敏 guard（effect-size / TP-vs-FP 門檻） [程式/待辦]　↳project_ism_method_soundness_validation
-    - ☐ `T-METHOD-FDR` V-7 FDR / 多重檢定校準：跨位點 null + BH-FDR + n_reads 校正 [程式/待辦]　缺:投稿前必補 🔴　↳project_code_methodology_audit_2026_06_10
+    - ☐ `T-GATE-GE` G-E：正交第二定相 pipeline（破 single-pipeline 自我參照） [程式/待辦]　in:●6 樣本 tagged …,●正交 phasing 工…　缺:長期 roadmap；與 HD-1 相關　↳project_subclonal_reconstruction_paper_focus
+    - ☐ `T-METHOD-BINVER` binary_version 一致性檢核 [程式/待辦]　in:●state/invali…,●canonical 結果…　↳project_new_data_integrity_audit_2026_06_17
+    - ☐ `T-METHOD-EFFECTSIZE` PERMANOVA 大-N 過敏 guard（effect-size / TP-vs-FP 門檻） [程式/待辦]　in:●ISM per-regi…,●TP/FP 標籤 (HC…　↳project_ism_method_soundness_validation
+    - ☐ `T-METHOD-FDR` V-7 FDR / 多重檢定校準：跨位點 null + BH-FDR + n_reads 校正 [程式/待辦]　in:●跨位點 per-regi…,●n_reads per …　缺:投稿前必補 🔴　↳project_code_methodology_audit_2026_06_10
     - ✅ `T-METHOD-LANDSCAPE` clone/subclone 重建全景（6 學派）+ ISM 可行性裁決 + 競品白地 [分析/已完成]　↳project_clone_subclone_landscape_and_ism_feasibility
     - ◐ `T-METHOD-PSLIMIT` phase-set 跨 block 無 read/cell 連結（限制） [分析/進行中]　↳project_O12_loh_methylation_scenarios
-    - ☐ `T-METHOD-TESTS` Methylation MM/ML parsing 單元測試（零測試補） [程式/待辦]　↳project_code_methodology_audit_2026_06_10
+    - ☐ `T-METHOD-TESTS` Methylation MM/ML parsing 單元測試（零測試補） [程式/待辦]　in:●MethylationP…,●MM/ML edge-c…　↳project_code_methodology_audit_2026_06_10
     - ✅ `T-METHOD-VERIFY` subclone 確認黃金標準 + 建構 5 家族 + single-cell→ONT 移植裁決 + Tarabichi LEARN [分析/已完成]　↳project_subclone_confirmation_construction_ont_transferability
-    - ✅ `T-Q1-COVERAGE` Q1 sSNV 間距 × ONT 讀長覆蓋計算（論文 motivation 基石） [程式/已完成]　缺:全新計算，無現成產物；待寫 scripts/analysis/ssnv_spacing_coverage.py；PARTIAL：單樣本 HCC1395 + 取樣 genome-ordered（chr1起非均勻）；論文版須均勻重抽 + 跨樣本　↳project_subclone_snv_difficulty_methylation_framework
+    - ✅ `T-Q1-COVERAGE` Q1 sSNV 間距 × ONT 讀長覆蓋計算（論文 motivation 基石） [程式/已完成]　in:●HCC1395 soma…,●tumor ONT BA…　缺:全新計算，無現成產物；待寫 scripts/analysis/ssnv_spacing_coverage.py；PARTIAL：單樣本 HCC1395 + 取樣 genome-ordered（chr1起非均勻）；論文版須均勻重抽 + 跨樣本　↳project_subclone_snv_difficulty_methylation_framework
     - ◐ `T-SIT-VER` subclone 狀況推論整理 + 驗證設計（pre-verification SoT） [分析/進行中]　↳project_subclone_situation_verification_methods
     - ✅ `T-SUP-CLUST` clusterability vs coverage/CN（支撐 ⭐3） [分析/已完成]　↳project_subclonal_reconstruction_paper_focus
     - ✅ `T-SUP-COPY` 甲基×copy confound（SEQC2，支撐 ⭐3） [分析/已完成]　↳project_asm_cn_confound_pilot
@@ -166,16 +155,7 @@
 - `T-W-TABS` Table1-3（樣本統計/工具對照/NEGATIVE 摘要）　owner: claude+user
 
 ## 細節不清楚 / 缺資訊
-- `T-GATE-GD`: compute 任務缺 I/O 規格
-- `T-GATE-GE`: compute 任務缺 I/O 規格
-- `T-C-CISEXP`: compute 任務缺 I/O 規格
-- `T-ISM-V2-RECON`: compute 任務缺 I/O 規格
-- `T-METHOD-FDR`: compute 任務缺 I/O 規格
-- `T-METHOD-TESTS`: compute 任務缺 I/O 規格
-- `T-METHOD-BINVER`: compute 任務缺 I/O 規格
-- `T-ONT-CNV`: compute 任務缺 I/O 規格
-- `T-Q1-COVERAGE`: compute 任務缺 I/O 規格
-- `T-METHOD-EFFECTSIZE`: compute 任務缺 I/O 規格
+- ✅ 無結構性細節缺口
 **各任務 missing_info：**
 - `T-SL`: 救回主軸 allele≫HP 需 cis-control 分 cis-ASM vs subclone
 - `T-SL-C1-F`: C1 spec 20260618_within_hp_bootstrap_and_cluster_label_ari_cpp_change_spec_01.md pending_approval
