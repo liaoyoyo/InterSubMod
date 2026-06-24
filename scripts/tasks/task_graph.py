@@ -170,6 +170,9 @@ def validate(data):
             if dep not in idset:
                 errors.append(f"{nid}: depends_on missing node {dep!r}")
         io = n.get("io")
+        # compute 節點必須宣告非空 io.inputs+outputs（2026-06-25 架構稽核 D1-2：從 check() advisory 升 validate error）
+        if n.get("kind") == "compute" and not (io and io.get("inputs") and io.get("outputs")):
+            errors.append(f"{nid}: compute 節點必須宣告非空 io.inputs+outputs")
         if io is not None:
             if "inputs" not in io or "outputs" not in io:
                 errors.append(f"{nid}: io must have inputs+outputs")
