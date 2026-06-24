@@ -6,8 +6,17 @@ import json, os
 
 A = "/big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/docs/methodology/_assets/20260618_subcluster_pilot"
 OUTD = f"{A}/obs_ws/cpp_wg"; os.makedirs(OUTD, exist_ok=True)
-rec = json.load(open(f"{A}/phylo_cpp_wg_full_records_v5.json"))
+rec = json.load(open(f"{A}/phylo_cpp_wg_full_records_v6.json"))
+def pcv_idx(v):
+    return 0 if v == "no_cluster" else 1 if str(v).startswith("cis-ASM") else 2 if v == "subclone_novel" else 3 if v == "cluster_no_sigCpG" else 4 if v == "weak_scattered" else 5
+def ls_idx(p, disp):
+    return 0 if (p is None or p >= 0.05) else (2 if disp else 1)
+PCV = ["no_cluster", "cis-ASM", "⭐subclone_novel", "no_sigCpG", "weak_scattered", "no_meth"]
 S = json.load(open(f"{A}/dashboard_stats_v4.json"))
+# 差異甲基定位點 量化(④b, aggregate only, 不加 per-locus 欄控 size)
+QPL = json.load(open(f"{A}/percpg_per_locus.json")) if os.path.exists(f"{A}/percpg_per_locus.json") else {}
+QCLS = json.load(open(f"{A}/percpg_cpg_classification.json")) if os.path.exists(f"{A}/percpg_cpg_classification.json") else {"axes": {}}
+QATTR = json.load(open(f"{A}/fptp_attribution.json")) if os.path.exists(f"{A}/fptp_attribution.json") else {}
 CHRS = [f"chr{c}" for c in range(1, 23)]; ck = {c: i for i, c in enumerate(CHRS)}
 CNS = ["gain", "loss", "loh", "neutral"]; cni = {s: i for i, s in enumerate(CNS)}
 WST = ["S1", "S2", "S3", "S4", "S6"]; wi = {s: i for i, s in enumerate(WST)}
@@ -57,7 +66,8 @@ for r in rec:
               r.get("m_n_cpg") if r.get("m_n_cpg") is not None else -1,
               cat8i.get(r.get("cat8", "D"), 7), cti.get(r.get("ctype", "single_cluster"), 4),
               1 if (r.get("cat8") == "A" or (str(r.get("ctype", "")).startswith("many1") and r.get("axis") in ("single_label_somatic", "somatic_one_family"))) else 0,
-              1 if (r.get("cn_state") == "loh" and r["coarse_ng"] >= 2 and r.get("has_som")) else 0])
+              1 if (r.get("cn_state") == "loh" and r["coarse_ng"] >= 2 and r.get("has_som")) else 0,
+              pcv_idx(r.get("pc_verdict")), ls_idx(r.get("ls_hp_p"), r.get("ls_hp_disp"))])
 
 
 # ================= SVG 生成器 (數字由 stats 注入) =================
@@ -272,11 +282,31 @@ L3 = '<div class="xgrid">' + "".join([
     xbox("甲基(β) by 狀況", xt_meth_situation(), "Δβ群: FP>TP=甲基異質性非判別; baseline-dependent"),
 ], ) + '</div>'
 
+# ====== ④b 差異甲基定位點（aggregate） ======
+def _qax():
+    h = '<table><tr><th>軸</th><th>有差異位點</th><th>差異CpG總數</th><th>hyper%(增甲基)</th></tr>'
+    for ax, d in QCLS.get("axes", {}).items():
+        h += f'<tr><td class="l">{ax.replace("_vs_","/")}</td><td>{d["n_loci"]:,}</td><td>{d["n_sig"]:,}</td><td>{d["hyper_pct"]}</td></tr>'
+    return h + '</table>'
+def _qattr():
+    h = '<table><tr><th>軸/狀況</th><th>TP</th><th>FP</th><th>FP/TP</th><th>%位點</th><th>研究可用</th></tr>'
+    for k, d in QATTR.items():
+        use = '✅TP專一' if d["fp_tp_ratio"] < 0.6 else ('⚠不專一' if d["fp_tp_ratio"] <= 1.2 else '✗FP富集')
+        cls = ' class="hl"' if d["fp_tp_ratio"] < 0.6 else ''
+        h += f'<tr{cls}><td class="l">{k}</td><td>{d["TP"]:,}</td><td>{d["FP"]:,}</td><td>{d["fp_tp_ratio"]}</td><td>{d["pct_loci"]}</td><td>{use}</td></tr>'
+    return h + '</table>'
+_ut = sum(1 for v in QPL.values() if v.get("set") == "TP" and v.get("union", 0) >= 3); _uf = sum(1 for v in QPL.values() if v.get("set") == "FP" and v.get("union", 0) >= 3)
+L4b = (f'<div class="note">⚠ <b>「有差異甲基」普遍({100*(_ut+_uf)/max(1,len(QPL)):.0f}% 有 ≥3 差異 CpG)→ 不判別</b>；真正 somatic 定位點 = <b>HP1/HP1-1 軸(TP 專一)</b>；subclone-marker FP 富集非 somatic-specific。完整 9 張圖（直方/分類/CDF/歸因）: '
+       f'<a href="20260624_differential_methylation_marker_charts.standalone.html" style="color:#7fb4e8">→ 差異甲基定位點圖庫</a></div>'
+       f'<div class="xgrid"><div class="xbox"><b>各軸差異 CpG（數量 + 方向）</b>{_qax()}<div class="sx">差異 CpG 總 {QCLS.get("total_sig_cpg",0):,}；somatic 軸(T/N・HP-1) hyper 偏高=somatic 多為增甲基</div></div>'
+       f'<div class="xbox"><b>🔴 FP/TP 歸因 + 研究可用性</b>{_qattr()}<div class="sx">FP/TP&lt;0.6=TP 專一(可做研究)；&gt;1.2=FP 富集(非 somatic)。機制見方法文件 §7</div></div></div>')
+
 SECTIONS = f"""
 <details open><summary>⓪ 原始數據盤點（TP/FP 總量・覆蓋・per-chrom）</summary>{L0}</details>
 <details open><summary>① 摘要 + 紅線（每行可展開）</summary>{L1}</details>
 <details open><summary>② 整體統計觀察（SVG ＋ 數字＋比例）</summary>{L2}</details>
 <details><summary>③ 分類交叉表（切群/分類各參數 ＋ 甲基 by 狀況）</summary>{L3}</details>
+<details><summary>④b 差異甲基定位點（site-first 量化 ＋ FP/TP 歸因 ＋ 研究可用性）</summary>{L4b}</details>
 """
 
 TPL = r"""<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -327,6 +357,7 @@ __SECTIONS__
 <label>列聯型 <select id="fct"><option value="">全</option><option value="1">①many:1(subclone-like)</option><option value="2">②1:many(跨標籤)</option><option value="0">1:1對齊</option><option value="3">mixed</option></select></label>
 <label><input type="checkbox" id="fsc"> ⭐subclone候選</label>
 <label><input type="checkbox" id="flhs"> LOH+somatic結構</label>
+<label>逐CpG驗 <select id="fpcv"><option value="">全</option><option value="2">⭐subclone_novel</option><option value="1">cis-ASM(cluster=label)</option><option value="3">no_sigCpG</option><option value="4">weak</option><option value="0">no_cluster</option></select></label>
 <label>CN <select id="fcn"><option value="">全</option><option value="0">gain</option><option value="1">loss</option><option value="2">loh</option><option value="3">neutral</option></select></label>
 <label>CN值 <input type="number" id="cnmin" placeholder="min" style="width:50px" step="0.5">-<input type="number" id="cnmax" placeholder="max" style="width:50px" step="0.5"></label>
 <label><input type="checkbox" id="floh"> LOH</label>
@@ -345,14 +376,16 @@ __SECTIONS__
 判別 = weak-structure 5 態(S1 確認多群對齊=cis-ASM 候選 / S2 不對齊 / S3 不穩定 / S4 次閾值 chance-level / S6 乾淨單群)。對齊=cis-ASM 跡象只敘述不歸類。切群數三法: null95(嚴主判)/null90(寬候選)/幾何0.7cut(肉眼過切)。<br>
 甲基欄: mean β=全 read×CpG 平均(0 未甲基→1 全甲基); Δβ群=coarse leaf 群間 mean β max−min(驅動切群的甲基差); Δβ(T−N)=tumor−normal; Δβ(HP)=HP1−HP2; hypo β&lt;0.3 / hyper β&gt;0.7 佔比。<b>Δβ baseline-dependent, 扣 cis-ASM 前非獨立 subclone 證據</b>。<br>
 8 類分類(修正決策樹): A subclone候選(單標籤+多結構)⭐ / B 無法區分(LOH主因, 測不了) / C-S1 cis-ASM / C-S2 未對齊 / C-S3 不穩定 / D 可測無結構。列聯型: ①many:1(結構>標籤=subclone訊號) / ②1:many(跨標籤=無ASM/trans) / 1:1(對齊) / mixed。⭐subclone候選=A或①many:1×somatic; LOH-som=LOH+somatic軸+結構。完整定義+各類數量比例: docs/methodology/20260624_subclone_classification_decision_tree_corrected_01.md。<br>
-來源: phylo_cpp_wg_full_records_v5.json + dashboard_stats_v4.json + label_composition.json + contingency_type.json + phylo_cpp_wg_full_methylation.json + SEQC2 CNV ngs_benchmark(hg38) + reads.tsv。§13 數字注入不手打。單樣本 HCC1395 ⭐2-3。
+逐CpG 判別(site-first MWU + cluster×label CpG-set overlap): ⭐subclone_novel(523, coherent CpG 不被標籤解釋, 但 FP 富集 1.78× 非 somatic-specific) / cis-ASM(cluster=label CpG) / no_sigCpG / weak。HP label PERMANOVA(significance.json, ✓sig/⚠sig+disp)。完整方法: docs/methodology/20260624_per_cpg_differential_and_subclone_validation_01.md。<br>
+來源: phylo_cpp_wg_full_records_v6.json + dashboard_stats_v4.json + phylo_cpp_wg_full_percpg.json + label_composition.json + contingency_type.json + phylo_cpp_wg_full_methylation.json + significance.json(label_structure) + SEQC2 CNV(hg38) + reads.tsv。§13 數字注入不手打。單樣本 HCC1395 ⭐2-3。
 </div></details>
 </div>
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="mc" id="mc"></div></div>
 <script>
 const D=__D__, CHRS=__CHRS__, CNS=['gain','loss','loh','neutral'], WST=['S1','S2','S3','S4','S6'];
-const C={ck:0,ps:1,set:2,n:3,cg:4,fg:5,oth:6,uns:7,hh:8,vhp:9,val:10,cns:11,cnv:12,loh:13,fig:14,nt:15,nn:16,geom:17,wst:18,tier:19,gdiv:20,als:21,mb:22,dbg:23,dtn:24,dhp:25,ncpg:26,cat:27,ct:28,sc:29,lhs:30};
+const C={ck:0,ps:1,set:2,n:3,cg:4,fg:5,oth:6,uns:7,hh:8,vhp:9,val:10,cns:11,cnv:12,loh:13,fig:14,nt:15,nn:16,geom:17,wst:18,tier:19,gdiv:20,als:21,mb:22,dbg:23,dtn:24,dhp:25,ncpg:26,cat:27,ct:28,sc:29,lhs:30,pcv:31,lshp:32};
 const CAT8=['A','B1','B2','B3','C-S1','C-S2','C-S3','D'],CTYPE=['1:1','①many:1','②1:many','mixed','單群'];
+const PCV=['no_cluster','cis-ASM','⭐subclone_novel','no_sigCpG','weak_scattered','no_meth'],LSL=['—','✓sig','⚠sig+disp'];
 const $=id=>document.getElementById(id);
 const figName=r=>'cpp_'+CHRS[r[C.ck]]+'_'+(r[C.ps]-5000)+'_'+(r[C.ps]+5000)+'.png';
 const tnFigName=r=>'cpp_'+CHRS[r[C.ck]]+'_'+(r[C.ps]-5000)+'_'+(r[C.ps]+5000)+'_tn.png';
@@ -368,6 +401,7 @@ function filt(){let a=D.slice();
  const fcat=$('fcat').value;if(fcat==='B')a=a.filter(r=>r[C.cat]>=1&&r[C.cat]<=3);else if(fcat!=='')a=a.filter(r=>r[C.cat]==fcat);
  const fct=$('fct').value;if(fct!=='')a=a.filter(r=>r[C.ct]==fct);
  if($('fsc').checked)a=a.filter(r=>r[C.sc]);if($('flhs').checked)a=a.filter(r=>r[C.lhs]);
+ const fpcv=$('fpcv').value;if(fpcv!=='')a=a.filter(r=>r[C.pcv]==fpcv);
  const fc=$('fcn').value;if(fc!=='')a=a.filter(r=>r[C.cns]==fc);
  if($('cnmin').value!=='')a=a.filter(r=>r[C.cnv]>=0&&r[C.cnv]>=+$('cnmin').value);if($('cnmax').value!=='')a=a.filter(r=>r[C.cnv]>=0&&r[C.cnv]<=+$('cnmax').value);
  if($('floh').checked)a=a.filter(r=>r[C.loh]);
@@ -381,6 +415,7 @@ function cnBadge(r){const st=CNS[r[C.cns]];const cls={0:'b-gain',1:'b-loss',2:'b
 function tierBadge(r){const t=r[C.tier];return `<span class="badge b-t${t}">${WST[r[C.wst]]}·tier${t}</span>`;}
 function methBadge(r){return r[C.dbg]>=0?`<span class="badge b-meth">Δβ群 ${r[C.dbg]}</span>`:'';}
 function catBadge(r){const c=CAT8[r[C.cat]];const cls=c==='A'?'b-sc':(c[0]==='B'?'b-un':(c[0]==='C'?'b-cstr':'b-neu'));const ct=r[C.ct]<4?' '+CTYPE[r[C.ct]]:'';return `<span class="badge ${cls}">${c}${r[C.sc]?'⭐':''}${ct}</span>`+(r[C.lhs]?'<span class="badge b-loh">LOH-som</span>':'');}
+function pcvBadge(r){const v=r[C.pcv];if(v===0||v===5)return '';return `<span class="badge ${v===2?'b-sc':(v===1?'b-cstr':'b-un')}">逐CpG ${PCV[v]}</span>`;}
 function alignDesc(r){const vh=r[C.vhp],va=r[C.val];return Math.max(vh,va)>=0.3?`對齊 ${va>=vh?'allele':'hp'} 軸 (V_hp ${vh}/V_al ${va}) — cis-ASM 跡象，非 subclone`:`未對齊 germline 軸 (V_hp ${vh}/V_al ${va})`;}
 function structText(r){return {0:'確認多群·對齊 germline（cis-ASM 候選，非 subclone）',1:'確認多群·不對齊（結構但無標籤對應）',2:'不穩定多群（seed 分歧 borderline）',3:'次閾值候選（僅 null90 過，chance-level）',4:'乾淨單群（無監督切不出≥2）'}[r[C.wst]];}
 function clusterText(r){const cg=r[C.cg],fg=r[C.fg],g=r[C.geom];const v=(g>=2&&cg<2)?`<span style="color:#ffba80">幾何 ${g} 群但嚴閘判單群=可疑漏切</span>`:(fg>cg?`寬閘多切（${cg}→${fg}）`:'各法一致');return `null95 <b>${cg}</b> ｜ null90 <b>${fg}</b> ｜ 幾何 <b>${g>=0?g:'?'}</b> → ${v}`;}
@@ -394,14 +429,15 @@ function kvg(r){return `<div class="kvg">
   <div class="h">結構 / 切群</div>
   <span class="k">歸類</span><span class="v" style="font-weight:500">${structText(r)}</span><span class="k">coarse/fine/幾何</span><span class="v">${r[C.cg]}/${r[C.fg]}/${r[C.geom]>=0?r[C.geom]:'?'}</span>
   <span class="k">unstable</span><span class="v">${r[C.uns]?'是':'否'}</span><span class="k">hidden-het / other</span><span class="v">${r[C.hh]?'是':'否'} / ${r[C.oth]}</span>
-  <div class="h">對齊 (cis-ASM 跡象, 非 subclone)</div>
+  <div class="h">對齊 / label PERMANOVA / 逐CpG (cis-ASM 跡象, 非 subclone)</div>
   <span class="k">V_hp / V_allele</span><span class="v">${r[C.vhp]} / ${r[C.val]}</span><span class="k">主導軸</span><span class="v">${Math.max(r[C.vhp],r[C.val])>=0.3?(r[C.val]>=r[C.vhp]?'allele':'hp'):'皆弱'}</span>
+  <span class="k">HP label PERMANOVA</span><span class="v">${LSL[r[C.lshp]]}</span><span class="k">逐CpG 判別</span><span class="v" style="font-weight:500">${PCV[r[C.pcv]]}</span>
   <div class="h">覆蓋 / CN</div>
   <span class="k">reads (T/N)</span><span class="v">${r[C.n]} (T${r[C.nt]>=0?r[C.nt]:'?'}/N${r[C.nn]>=0?r[C.nn]:'?'})</span><span class="k">SEQC2 CN</span><span class="v">${CNS[r[C.cns]]}${r[C.cnv]>=0?' '+r[C.cnv]:''}${r[C.loh]?' LOH':''}</span>
  </div>`;}
 function card(r){const k=key(r),fn=r[C.fig]?figName(r):null;const j=(J[k]||{}).c;
  return `<div class="card${j?' j-'+j:''}"><div class="hd"><div class="ttl" onclick="openM('${k}')">${k}</div>
-  <div class="badges">${r[C.set]===0?'<span class="badge b-tp">TP</span>':'<span class="badge b-fp">FP</span>'}${catBadge(r)}${tierBadge(r)}${cnBadge(r)}<span class="badge b-tn">T${r[C.nt]>=0?r[C.nt]:'?'}/N${r[C.nn]>=0?r[C.nn]:'?'}</span><span class="badge ${r[C.gdiv]?'b-div':'b-al'}">切群 ${r[C.cg]}/${r[C.fg]}/${r[C.geom]>=0?r[C.geom]:'?'}${r[C.gdiv]?' ⚠':''}</span>${methBadge(r)}${r[C.loh]?'<span class="badge b-loh">LOH</span>':''}</div>
+  <div class="badges">${r[C.set]===0?'<span class="badge b-tp">TP</span>':'<span class="badge b-fp">FP</span>'}${catBadge(r)}${pcvBadge(r)}${tierBadge(r)}${cnBadge(r)}<span class="badge b-tn">T${r[C.nt]>=0?r[C.nt]:'?'}/N${r[C.nn]>=0?r[C.nn]:'?'}</span><span class="badge ${r[C.gdiv]?'b-div':'b-al'}">切群 ${r[C.cg]}/${r[C.fg]}/${r[C.geom]>=0?r[C.geom]:'?'}${r[C.gdiv]?' ⚠':''}</span>${methBadge(r)}${r[C.loh]?'<span class="badge b-loh">LOH</span>':''}</div>
   <div class="desc">${alignDesc(r)}</div></div>
   ${fn?`<div class="figs" onclick="openM('${k}')"><img loading="lazy" src="figs/${fn}"></div>`:'<div class="nofig">無圖（reads 過少）</div>'}
   <details class="exp"><summary>完整觀察數據（甲基・結構・對齊・覆蓋・CN）</summary>${kvg(r)}</details>
@@ -410,7 +446,7 @@ function draw(){const a=filt();const pages=Math.max(1,Math.ceil(a.length/PER));p
  $('cnt').textContent=a.length.toLocaleString()+' 個';
  $('grid').innerHTML=a.slice(page*PER,page*PER+PER).map(card).join('')||'<div class="sub">無符合</div>';
  $('pager').innerHTML=`<button class="btn" ${page<=0?'disabled':''} onclick="page--;draw()">‹</button> 第 ${page+1}/${pages} 頁 <button class="btn" ${page>=pages-1?'disabled':''} onclick="page++;draw()">›</button>`;}
-['q','fws','ftier','fset','fcat','fct','fsc','flhs','fcn','cnmin','cnmax','floh','gmin','gmax','nmin','dbmin','funs','ffc','fdiv','sort'].forEach(id=>$(id).addEventListener('input',()=>{page=0;draw();}));
+['q','fws','ftier','fset','fcat','fct','fsc','flhs','fpcv','fcn','cnmin','cnmax','floh','gmin','gmax','nmin','dbmin','funs','ffc','fdiv','sort'].forEach(id=>$(id).addEventListener('input',()=>{page=0;draw();}));
 $('sdir').onclick=()=>{sdir*=-1;$('sdir').textContent=sdir===-1?'▼':'▲';page=0;draw();};
 window.setJ=(k,c)=>{J[k]=J[k]||{};J[k].c=(J[k].c===c?null:c);localStorage.setItem('phylo_v4_judge',JSON.stringify(J));draw();};
 window.openM=k=>{const r=D.find(x=>key(x)===k);if(!r)return;const fn=r[C.fig]?figName(r):null;
