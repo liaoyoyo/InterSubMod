@@ -216,6 +216,12 @@
 
 ## §8 Subagent 觸發 + Dynamic Workflow 路由（2026-05-30 更新）
 
+> **🔴 並行 session = git worktree 標準作業（2026-06-25 架構稽核落地；原「建議」升「標準」）**：多個 Claude Code session 同時開時，**每個 session 各開自己的 git worktree**，否則共用 HEAD → commit 交錯落錯 branch + settings.local.json live 編輯互相 clobber（2026-06-25 in-the-wild：另一 session 移除本 session 的 hook wiring + palette_drift 重工）。
+> - **官方原生機制**（`https://code.claude.com/docs/en/worktrees`）：CLI `claude --worktree <name>`（worktree 落 `.claude/worktrees/worktree-<name>/`）；對話中用 `EnterWorktree` 工具；`worktree.baseRef:"head"` 帶未推 commit；無變更自動清理；desktop app **每 session 自動開 worktree**。gitignored config 用 `.worktreeinclude` 自動複製（tracked 檔如 settings.local.json 本就在每 worktree 各一份、不互撞）。
+> - `concurrent_session_advisor.sh`（§4，SessionStart）偵測 >1 活躍 .jsonl 時提醒；**advisory 不強制**（fail-OPEN 故意不擋單人多視窗）。
+>
+> **並行度上限（外部實證；Augment Code 2026 multi-agent fail 研究）**：並行 subagent/session **建議 ≤2-4**（再多 overhead>benefit，~37% 失敗為協調類）；**dependent task 串行 merge 非同時 merge**（pipeline() 的 barrier 紀律）。
+
 **預設不 spawn**（單回合優先）。**明示觸發語**才啟動：
 - 跨樣本平行 benchmark → `parallel-benchmark`
 - 大範圍探索（>3 query）→ `Explore`
