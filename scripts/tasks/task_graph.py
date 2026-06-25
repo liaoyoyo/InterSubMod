@@ -1265,11 +1265,57 @@ def cmd_new_problem(data, a):
 
 
 # ----------------------------------------------------------------- main
+def cmd_reverse_index(data):
+    """Phase-0 統一關聯索引（2026-06-26 資訊架構稽核）：純衍生現有 forward links →
+    state/tasks/reverse_index.json 的 reverse 圖 {memory/report/io-input → [task_ids]}。
+    答『給定檔案/topic X，哪些任務用它？』+ surface orphan 實驗文件 + 多被引用的權威 topic。
+    零新 schema、零 DB、零 migration（只讀 graph.json 已有的 links/io）。"""
+    import glob
+    nodes = data["nodes"]
+    mem_map, rep_map, io_map = {}, {}, {}
+    for n in nodes:
+        nid = n["id"]
+        lk = n.get("links") or {}
+        for m in lk.get("memory", []):
+            mem_map.setdefault(m, []).append(nid)
+        for r in lk.get("reports", []):
+            rep_map.setdefault(os.path.basename(r), []).append(nid)
+        for inp in (n.get("io") or {}).get("inputs", []):
+            key = inp.get("ref") or inp.get("name")
+            if key:
+                io_map.setdefault(key, []).append(nid)
+    referenced = set(rep_map.keys())
+    all_exp = glob.glob(os.path.join(ROOT, "docs/experiments/**/*.md"), recursive=True)
+    orphans = sorted(os.path.relpath(f, ROOT) for f in all_exp if os.path.basename(f) not in referenced)
+    multi_cited = {k: v for k, v in mem_map.items() if len(v) > 1}
+    out = {
+        "generated_from": "state/tasks/graph.json forward links (derived, do not hand-edit)",
+        "memory_topic_to_tasks": dict(sorted(mem_map.items())),
+        "report_to_tasks": dict(sorted(rep_map.items())),
+        "io_input_to_tasks": dict(sorted(io_map.items())),
+        "multi_cited_memory": dict(sorted(multi_cited.items())),
+        "orphan_experiment_docs": orphans,
+        "stats": {"memory_topics": len(mem_map), "reports": len(rep_map), "io_inputs": len(io_map),
+                  "multi_cited_memory": len(multi_cited),
+                  "experiment_docs_total": len(all_exp), "experiment_docs_orphan": len(orphans)},
+    }
+    outp = os.path.join(os.path.dirname(GRAPH), "reverse_index.json")
+    with open(outp, "w", encoding="utf-8") as fh:
+        json.dump(out, fh, ensure_ascii=False, indent=2)
+    s = out["stats"]
+    print(f"[ok] reverse-index → {os.path.relpath(outp, ROOT)}")
+    print(f"  memory→task: {s['memory_topics']} topics ｜ report→task: {s['reports']} ｜ io→task: {s['io_inputs']}")
+    print(f"  多被引用的權威 topic (>1 任務): {s['multi_cited_memory']}")
+    print(f"  ⚠ orphan 實驗文件（無任務 links.reports 引用）: {s['experiment_docs_orphan']}/{s['experiment_docs_total']}"
+          f" ({100 * s['experiment_docs_orphan'] // max(s['experiment_docs_total'], 1)}%)")
+
+
 def main():
     global GRAPH, TASKS_MD, BOARD_HTML
     ap = argparse.ArgumentParser(description="research task DAG/WBS layer driver")
     ap.add_argument("--graph", default=GRAPH, help="path to graph JSON (default state/tasks/graph.json)")
     ap.add_argument("cmd", choices=["validate", "check", "ready", "render", "render-html", "all",
+                                    "reverse-index",
                                     "claim", "handoff", "add-task", "verify-result", "new-problem"])
     ap.add_argument("--task")
     ap.add_argument("--branch")
@@ -1304,6 +1350,9 @@ def main():
                  "verify-result": cmd_verify_result, "new-problem": cmd_new_problem}
     if a.cmd in lifecycle:
         lifecycle[a.cmd](data, a)
+        return
+    if a.cmd == "reverse-index":
+        cmd_reverse_index(data)
         return
     if a.cmd in ("validate", "all"):
         errs = validate(data)
