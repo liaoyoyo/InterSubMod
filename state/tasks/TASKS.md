@@ -1,12 +1,13 @@
 # 研究任務樹（WBS） — TASKS.md
 
 > **自動產生，請勿手改。** 唯一真值 = `state/tasks/graph.json`；改後重跑 `python3 scripts/tasks/task_graph.py --graph state/tasks/graph.json render`。
-> 生成 2026-06-25 · build `9098f11` @ `research/subclonal-reconstruction-202606` · 節點 110（✅40 ◐29 ⛔1 ☐39 ✗1） · focus = `T-SL`
+> 生成 2026-06-26 · build `8d3e4ee` @ `research/subclonal-reconstruction-202606` · 節點 110（✅40 ◐29 ⛔1 ☐39 ✗1） · focus = `T-SL`
 
 ## ⓪ 驗證（validate + check）
 - validate: ✅ PASS
-- check: 1 findings
+- check: 2 findings
   - WARN `docs/limitations`: 分支碰撞：T-P2, T-E3, T-C-UNMASK, T-METHOD-PSLIMIT 同時 in_progress 同分支（各開 worktree）
+  - DETAIL `docs/experiments`: 162/180 實驗文件無任務 links.reports 引用（舊資料未複用，pain#2）；例 INDEX.md; INDEX_DETAIL_ARCHIVE.md; 20251218_optimization_log_01.md …；全清單→`task_graph.py reverse-index` 產 reverse_index.json
 
 ## 聚焦路徑　論文（碩論：Subclonal reconstruction） ＞ 完成 ISM 程式 ＞ 修正「結構驅動切區塊 × 標籤驗證」
 

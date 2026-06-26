@@ -436,6 +436,27 @@ for _tid, _io in IO_SPECS.items():
     if _n:
         _n["io"] = _io
 
+# ---- 06-26 orphan 回填（reverse-index Phase 0 揭露的近期實驗 → 對應任務 links.reports，解 pain#2 複用）----
+_EXP = "InterSubMod/docs/experiments/in_progress/2026/06"
+_BACKFILL = {
+    "T-C4": [f"{_EXP}/20260602_ASM_CN_confound_disentanglement_pilot_01.md"],
+    "T-L2": [f"{_EXP}/20260615_chr2_18M_seqc2_concordance_demo_01.md",
+             f"{_EXP}/20260615_chr2_18M_subclone_independent_verdict_02.md"],
+    "T-L1": [f"{_EXP}/20260615_chr2_18M_subclone_verification_HCC1395_01.md"],
+    "T-V5": [f"{_EXP}/20260620_ism_vs_modkit_percpg_comparison_wg_01.md"],
+    "T-ONT-CNV": [f"{_EXP}/20260620_savana_hcc1395_cnv_sv_feasibility_result_01.md",
+                  f"{_EXP}/20260622_wakhan_hcc1395_3way_cn_comparison_01.md"],
+    "T-SL-RO": [f"{_EXP}/20260620_allsample_subcluster_split/results/SUMMARY_all_samples.md"],
+}
+for _tid, _reps in _BACKFILL.items():
+    _n = _nmap.get(_tid)
+    if not _n:
+        continue
+    _n.setdefault("links", {}).setdefault("reports", [])
+    for _r in _reps:
+        if _r not in _n["links"]["reports"]:
+            _n["links"]["reports"].append(_r)
+
 # sanitize: drop dangling depends_on / external-ify dangling io refs (dropped T-S3/T-S4 etc.)
 idset = {n["id"] for n in nodes}
 for n in nodes:
