@@ -29,8 +29,15 @@ ccf = J("sm_ccf_tiers.json")
 psx = J("sm_phaseset_extension.json")
 me = J("sm_methyl_corroboration.json")
 mr = J("sm_methyl_reextract_merged.json")
-rst = J("sm_region_stats.json")
-br = J("sm_branch_analysis.json")
+# region 形狀計數從已載入的 psx 衍生（§13-A，非手打）：full_tree 677 / structured 4678
+_bs = (psx.get("ps_reliability_per_region", {}) if isinstance(psx, dict) else {}).get(
+    "by_shape_reliable_vs_uncertain", {}
+)
+def _shape_total(name):
+    v = _bs.get(name, {}) if isinstance(_bs, dict) else {}
+    return sum(x for x in v.values() if isinstance(x, int)) if isinstance(v, dict) else 0
+FULL_TREE_N = _shape_total("full_tree")                                  # 677 (596 reliable + 81 uncertain)
+STRUCTURED_N = sum(_shape_total(k) for k in _bs) if isinstance(_bs, dict) else 0  # 4678 (4 結構形狀)
 
 
 def g(d, *keys, default="—"):
@@ -78,7 +85,7 @@ footer{{margin-top:28px;padding-top:12px;border-top:1px solid {BD};font-size:12p
 {img('01_locus_master_overview.png')}
 
 <h2 id="l1">L1 — HP tag 貢獻（單變量 ablation）</h2>
-<div class="box ok"><b>HP = sibling 判別不可或缺</b>：ablation 無 HP gate {g(hp_ab,'without_HP_gate_called_subclone',default='—'):,} 對全當 sibling；有 HP 只留 {g(hp_ab,'with_HP_gate_true_subclone(same-HP)',default='—'):,} → <b>移除 {g(hp_ab,'removed_as_allelic(diff-HP)',default='—'):,} allelic（{g(hp_ab,'false_subclone_removed_pct')}%）</b>。nested/co_linked same-HP 85–91%（~2× chance {g(hp,'chance_same_hp_baseline')}）= 真同單倍型克隆連鎖。</div>
+<div class="box ok"><b>HP = sibling 判別不可或缺</b>：ablation 無 HP gate {g(hp_ab,'without_HP_gate_called_subclone',default='—'):,} 對全當 sibling；有 HP 只留 {g(hp_ab,'with_HP_gate_true_subclone(same-HP)',default='—'):,} → <b>移除 {g(hp_ab,'removed_as_allelic(diff-HP)',default='—'):,} allelic（{g(hp_ab,'false_subclone_removed_pct')}%）</b>。⚠ nested/co_linked/independent same-HP 85–94%（~1.7–1.87× baseline {g(hp,'chance_same_hp_baseline')}，<b>independent 最高</b>）= <b>區域背景屬性，非克隆連鎖特異證據</b>（克隆連鎖證據 = sSNV 共現結構本身）。HP 的診斷力在 <b>mutual_excl（DEPLETED 0.86×）= sibling vs allelic 鑑別器</b>，非確認 nested/co_linked。</div>
 {img('02_hp_contribution.png')}
 
 <h2 id="l2">L2 — CCF tier + 克隆階層梯度（單變量）</h2>
@@ -89,11 +96,11 @@ footer{{margin-top:28px;padding-top:12px;border-top:1px solid {BD};font-size:12p
 <div class="box"><b>PS-reliable 區域 = {g(ps_rel,'single_ps_reliable',default='—'):,} / uncertain {g(ps_rel,'multi_ps_uncertain',default='—'):,}（rate {g(ps_rel,'reliable_rate')}）</b>。多 PS region = phase-switch 風險，HP 判別不可信（最乾淨 sibling 結論排除之）。Tier-PS（同 PS >50kb）= germline 單倍型 context，<b>非克隆連鎖</b>（同 PS ≠ 同克隆）。{img('04_phaseset.png')}</div>
 
 <h2 id="l4">L4 — 甲基 corroboration（單變量；已從 BAM 重抽補完 genome-wide）</h2>
-<div class="box red">既有 ISM 甲基輸出只覆蓋 0.19%（9/4678）→ <b>已直接從 tumor BAM MM/ML 重抽（驗證 corr=1.000 vs ISM）</b>。genome-wide CN-clean：<b>{g(mr,'n_tested',default='—')} 區測試，{g(mr,'n_corroborated',default='—')}（{g(mr,'corroboration_rate')}）甲基 corroborate 遺傳群，全部 subclone-specific（cis-ASM-explained {g(mr,'cis_explained_rate')}）</b>。median sig CpG=0 → <b>93% 區域甲基不區分遺傳 subclone</b>。🔴 甲基 = <b>弱 corroborator 非 detector</b>（6.6% 區域有獨立表觀支持；其餘無）。</div>
+<div class="box red">既有 ISM 甲基輸出只覆蓋 0.19%（9/4678）→ <b>已直接從 tumor BAM MM/ML 重抽（驗證 corr=1.000 vs ISM）</b>。genome-wide CN-clean：<b>{g(mr,'n_tested',default='—')} 區測試，{g(mr,'n_corroborated',default='—')}（{g(mr,'corroboration_rate')}）甲基 corroborate 遺傳群，全部 subclone-specific（cis-ASM-explained {g(mr,'cis_explained_rate')}，HP-axis proxy cis-control，完整 normal-baseline NACT 為精煉項）</b>。median sig CpG=0 → <b>93% 區域甲基不區分遺傳 subclone</b>。🔴 甲基 = <b>弱 corroborator 非 detector</b>（6.6% 區域有獨立表觀支持；其餘無）。</div>
 {img('05_methylation_corroboration.png')}
 
 <h2 id="narr">整合敘述（sSNV + read → clone/subclone）</h2>
-<div class="box"><b>骨幹</b>：ONT long read 同分子讀多 sSNV → 共現 2×2 → 局部克隆樹（7,143 區域，full_tree {g(rst,'tree_shape','full_tree',default='—')}）。<br>
+<div class="box"><b>骨幹</b>：ONT long read 同分子讀多 sSNV → 共現 2×2 → 局部克隆樹（7,143 區域：{STRUCTURED_N:,} 有確認結構〔含 {FULL_TREE_N:,} full_tree〕，其餘 {7143-STRUCTURED_N:,} sparse/single-pair）。<br>
 <b>HP 加值</b>：把 read 級互斥轉成細胞層 sibling（移除 {g(hp_ab,'false_subclone_removed_pct')}% allelic）。<br>
 <b>CCF 加值</b>：祖先≥後代 VAF {ccf_grad.get('data_support_rate','—')} 獨立驗證樹方向 + 離散 subclone CCF 層級。<br>
 <b>PS</b>：reliability 旗標（排除 phase-uncertain 區）；不延伸克隆連鎖。<br>

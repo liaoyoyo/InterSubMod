@@ -46,6 +46,14 @@
 - ✅ **#5/#6**：04 殘留「94%」→92.7%；05「~3%」→0.19%（既有輸出）/ 6.6%（重抽結果）。
 - ✅ **A1 甲基重抽**：n=8 anecdotal → genome-wide 740 區、6.6% corroborate、驗證 corr=1.000。
 
+**對抗稽核 round 3（final confirm）= NEEDS_WORK → 修**（fix #2 框架層未同步 = 與 round-2 同根因，只是發生在 HP 框架而非數字）：
+- ✅ **F1**：HTML L1 box + `sm_hp_contribution.json` verdict 仍留 round-1 已駁回的「same-HP 高 = 真同單倍型克隆連鎖」→ 改正為「same-HP 高（含 independent 最高）= 區域背景屬性、非克隆特異；HP 診斷力在 mutual_excl DEPLETED = sibling vs allelic 鑑別器」；HTML 從修正後重生。
+- ✅ **F2**：HTML 骨幹 box `full_tree —`（未注入的 placeholder，因 generator 引用不存在的 `sm_region_stats.json`）→ 改從已載入 `sm_phaseset_extension.json` 的 `by_shape_reliable_vs_uncertain` 衍生 full_tree **677**（596+81）+ structured **4,678**。
+- ✅ **F3**：partition 用詞改「4,678 有確認結構（含 677 full_tree）/ 其餘 2,465 sparse」杜絕 677+4,678 雙重計數誤讀。
+- ✅ **F4**：L4「0% cis」headline 加「HP-axis proxy cis-control，完整 normal-baseline NACT 為精煉項」限定詞。
+
+**三輪共通根因（已內化）**：修正若只落在 prose 而 JSON/HTML 未同步 = §13-A 違規；每輪修正必 prose+JSON+HTML 三處一致（grep 三方驗證）。
+
 **對抗稽核認定 solid（兩輪未被推翻）**：HP code/BERNOULLI 公式源碼逐字驗證；HP 對 mutual_excl 的 allelic 移除（57%）為真（5238/9187）；VAF 梯度違反率極低（5.7%）；chr17 canonical 對 TSV 逐行驗證；35,332=30,490+4,842；甲基 corroborate-not-detect 兩輪一致；單樣本紀律無跨樣本/genome-wide-tree overclaim。
 
 ## §5 🔴 限制（無可被質疑的未佐證推論）
