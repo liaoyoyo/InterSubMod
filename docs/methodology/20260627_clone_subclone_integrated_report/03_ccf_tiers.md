@@ -43,7 +43,7 @@ data_sources: data/sm_ccf_tiers.json
 
 ## §4 限制
 - **CCF 僅在 CN-clean（LOH/neutral）可估**；gain/loss 因 multiplicity 歧義不估（purity-ploidy 不可識別，Tarabichi 2021）。
-- 205 違反（7.5%）+ 890 tie：多數支持但非全部（量測噪聲/局部 CN/真實複雜度）。clean 96% 為論文級數字。
+- 205 違反（= **5.7% 全邊**，或 7.5% 若以決定性邊為分母；統一以 **5.7% 全邊**為 headline）+ 890 tie：多數支持但非全部（量測噪聲/局部 CN/真實複雜度）。clean 決定性 96% 為論文級數字。
 - 🔴 CCF tier = **分層**（跨區一致的 CCF 層級），**非 phase-linked genome-wide tree**（守紅線）。
 
 ## §5 對論文的意義

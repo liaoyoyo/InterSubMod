@@ -35,7 +35,7 @@ data_sources: data/sm_hp_contribution.json
 - ⚠ 此「57%」是對比「**完全無 HP/allele 資訊**」的 baseline；非對比某個更聰明的方法。意義 = HP 提供的「同細胞 vs 不同染色體」資訊不可由共現結構單獨取得。
 
 ## §4 限制
-- **HP3 = 1,317 linked-somatic（gateable 中 6.3%）無 germline 錨** → 無法 HP-gate，這群不判 sibling/allelic。
+- **HP3 = 1,317 linked-somatic（占全 linked-somatic 6.3%；HP3 定義上即 ungateable，無 germline 錨）** → 無法 HP-gate，這群不判 sibling/allelic。
 - HP=germline-somatic 軸（HP1 vs HP1-1 = 是否帶 phased somatic），非「同單倍型兩拷貝」。同-HP = 同 germline 單倍型，**必要非充分**於同克隆（見 `00b` §3）。
 - HP tag 本身有 longphase phasing 誤差 + problem PS block（L3 已標記排除）。
 

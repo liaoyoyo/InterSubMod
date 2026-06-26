@@ -77,6 +77,16 @@ def main():
                 ccf_clean.append(ce)
     hist, edges = np.histogram(ccf_clean, bins=20, range=(0, 1))
     peaks = sorted([(round(edges[i], 2), int(hist[i])) for i in range(20)], key=lambda x: -x[1])[:6]
+    # GMM BIC multimodality test (修對抗稽核 #4: discreteness 須有檢定非目視峰)
+    gmm_bic = None
+    gmm_best_n = None
+    try:
+        from sklearn.mixture import GaussianMixture
+        X = np.array(ccf_clean).reshape(-1, 1)
+        gmm_bic = [round(GaussianMixture(n, random_state=0).fit(X).bic(X)) for n in (1, 2, 3, 4)]
+        gmm_best_n = 1 + int(np.argmin(gmm_bic))
+    except Exception as e:
+        gmm_bic = f"sklearn_unavailable:{e}"
 
     out = {
         "ancestor_ge_descendant_VAF_gradient": {
@@ -91,7 +101,8 @@ def main():
         "ccf_tier_distribution_clean": dict(tier_c),
         "ccf_conversion": "neutral→min(1,2*VAF)（diploid het, purity~1, mult=1）; loh→VAF; gain/loss→undet(multiplicity 歧義)",
         "ccf_peaks_clean(bin,count)": peaks,
-        "verdict": "祖先>=後代 VAF 梯度成立率 = clonal hierarchy 的 data-support; CCF 峰離散 = 離散 subclone 層級",
+        "gmm_bic_1to4": gmm_bic, "gmm_best_n": gmm_best_n,
+        "verdict": "祖先>=後代 VAF 梯度成立率 = clonal hierarchy 的 data-support; GMM BIC best_n>1 = 離散 subclone 層級",
     }
     json.dump(out, open(f"{RPT}/data/sm_ccf_tiers.json", "w"), ensure_ascii=False, indent=1)
     g = out["ancestor_ge_descendant_VAF_gradient"]

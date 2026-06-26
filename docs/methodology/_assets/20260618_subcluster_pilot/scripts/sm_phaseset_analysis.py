@@ -26,6 +26,7 @@ def main():
     # 2. PS-reliability per region: distinct PS among region's somatic sSNV
     reg_reliable = 0
     reg_uncertain = 0
+    reg_no_ps = 0
     shape_reliable = defaultdict(lambda: [0, 0])  # shape -> [reliable, uncertain]
     region_ps_flag = {}
     for r in regions:
@@ -37,6 +38,7 @@ def main():
                 pss.add(ps[k]["ps"])
         if not pss:
             flag = "no_ps"
+            reg_no_ps += 1
         elif len(pss) == 1:
             flag = "single_ps_reliable"
             reg_reliable += 1
@@ -90,8 +92,9 @@ def main():
     out = {
         "n_somatic_with_ps": n_with_ps,
         "ps_reliability_per_region": {
-            "single_ps_reliable": reg_reliable, "multi_ps_uncertain": reg_uncertain,
-            "reliable_rate": round(reg_reliable / (reg_reliable + reg_uncertain), 3) if (reg_reliable + reg_uncertain) else None,
+            "single_ps_reliable": reg_reliable, "multi_ps_uncertain": reg_uncertain, "no_ps": reg_no_ps,
+            "total_regions": reg_reliable + reg_uncertain + reg_no_ps,
+            "reliable_rate": round(reg_reliable / (reg_reliable + reg_uncertain + reg_no_ps), 3) if (reg_reliable + reg_uncertain + reg_no_ps) else None,
             "by_shape_reliable_vs_uncertain": {k: {"reliable": v[0], "uncertain": v[1]} for k, v in shape_reliable.items()},
         },
         "tier_ps_extension": {

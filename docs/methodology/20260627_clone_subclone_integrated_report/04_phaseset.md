@@ -25,7 +25,7 @@ data_sources: data/sm_phaseset_extension.json, data/region_ps_flag.json
 
 **結構區（reliable / uncertain）**：full_tree 596/81 · sibling_only 1,130/105 · linear_nested 1,784/124 · co_linked 812/46。
 
-→ 🔑 **94% 區域在單一 phase block，HP 判別可信**；**6%（449）跨 PS = HP 不可信，最乾淨的 sibling subclone 結論應排除之**（逐區旗標在 `region_ps_flag.json`）。這正是 `00b` grounding 要求的「problem-PS 排除」credibility 保護。
+→ 🔑 **92.7% 區域在單一 phase block，HP 判別可信**；**6%（449）跨 PS = HP 不可信，最乾淨的 sibling subclone 結論應排除之**（逐區旗標在 `region_ps_flag.json`）。這正是 `00b` grounding 要求的「problem-PS 排除」credibility 保護。
 
 ## §2 Tier-PS 是否延伸克隆連鎖？— 不延伸（data-supported）
 
@@ -41,7 +41,7 @@ same-PS 但 >50kb apart 的 somatic sSNV 對（跨 Tier-R region，**非同分�
 → **PS（germline phasing）不建立克隆共現**：same-PS ≠ same clone。Tier-PS 只給「germline 單倍型 context」，**不延伸克隆連鎖**（符合 `00b` precedence：phasing 是 germline 層級，非 clonal）。
 
 ## §3 data-supported 結論
-1. **PS 的價值 = reliability 旗標**：94% region HP 可信、6% 需排除 → 提升 sibling subclone 結論的可信度。
+1. **PS 的價值 = reliability 旗標**：92.7% region HP 可信、6% 需排除 → 提升 sibling subclone 結論的可信度。
 2. **PS 不延伸克隆連鎖**：CCF 一致率僅 42.4% → 同單倍型 ≠ 同克隆。故克隆連鎖**只認 Tier-R（same-read 同分子）**，PS 不升級成 clonal linkage。
 
 ## §4 限制

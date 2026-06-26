@@ -28,6 +28,7 @@ hp = J("sm_hp_contribution.json")
 ccf = J("sm_ccf_tiers.json")
 psx = J("sm_phaseset_extension.json")
 me = J("sm_methyl_corroboration.json")
+mr = J("sm_methyl_reextract_merged.json")
 rst = J("sm_region_stats.json")
 br = J("sm_branch_analysis.json")
 
@@ -87,8 +88,8 @@ footer{{margin-top:28px;padding-top:12px;border-top:1px solid {BD};font-size:12p
 <h2 id="l3">L3 — phase-set（單變量 PS）</h2>
 <div class="box"><b>PS-reliable 區域 = {g(ps_rel,'single_ps_reliable',default='—'):,} / uncertain {g(ps_rel,'multi_ps_uncertain',default='—'):,}（rate {g(ps_rel,'reliable_rate')}）</b>。多 PS region = phase-switch 風險，HP 判別不可信（最乾淨 sibling 結論排除之）。Tier-PS（同 PS >50kb）= germline 單倍型 context，<b>非克隆連鎖</b>（同 PS ≠ 同克隆）。{img('04_phaseset.png')}</div>
 
-<h2 id="l4">L4 — ISM 甲基 corroboration（單變量；🔴 既有輸出覆蓋不足）</h2>
-<div class="box red"><b>既有 ISM 甲基只覆蓋 9/323 結構區</b>（anchor 窗稀疏）→ genome-wide 甲基 corroboration <b>需從 BAM 重抽（後補）</b>。小樣本 {g(me,'n_methyl_corroborated(>=1 sig CpG, |db|>=0.2 q<0.05)',default='—')}/{g(me,'n_tested',default='—')} corroborate（subclone-specific），但 n 過小不下定論。🔴 甲基 = corroborate 非 detect（genotype-anchored 才非循環）。</div>
+<h2 id="l4">L4 — 甲基 corroboration（單變量；已從 BAM 重抽補完 genome-wide）</h2>
+<div class="box red">既有 ISM 甲基輸出只覆蓋 0.19%（9/4678）→ <b>已直接從 tumor BAM MM/ML 重抽（驗證 corr=1.000 vs ISM）</b>。genome-wide CN-clean：<b>{g(mr,'n_tested',default='—')} 區測試，{g(mr,'n_corroborated',default='—')}（{g(mr,'corroboration_rate')}）甲基 corroborate 遺傳群，全部 subclone-specific（cis-ASM-explained {g(mr,'cis_explained_rate')}）</b>。median sig CpG=0 → <b>93% 區域甲基不區分遺傳 subclone</b>。🔴 甲基 = <b>弱 corroborator 非 detector</b>（6.6% 區域有獨立表觀支持；其餘無）。</div>
 {img('05_methylation_corroboration.png')}
 
 <h2 id="narr">整合敘述（sSNV + read → clone/subclone）</h2>
@@ -96,11 +97,11 @@ footer{{margin-top:28px;padding-top:12px;border-top:1px solid {BD};font-size:12p
 <b>HP 加值</b>：把 read 級互斥轉成細胞層 sibling（移除 {g(hp_ab,'false_subclone_removed_pct')}% allelic）。<br>
 <b>CCF 加值</b>：祖先≥後代 VAF {ccf_grad.get('data_support_rate','—')} 獨立驗證樹方向 + 離散 subclone CCF 層級。<br>
 <b>PS</b>：reliability 旗標（排除 phase-uncertain 區）；不延伸克隆連鎖。<br>
-<b>甲基</b>：corroborate（既有輸出不足，待重抽）。<br>
-→ <b>結論</b>：sSNV+HP+CCF 三軸一致支撐局部克隆階層（單樣本 ⭐3 分子證據）；甲基為佐證（待補）。</div>
+<b>甲基</b>：已從 BAM 重抽 genome-wide（{g(mr,'n_tested',default='—')} 區）→ 僅 {g(mr,'corroboration_rate')} 區域 corroborate（弱 corroborator，全 subclone-specific）。<br>
+→ <b>結論</b>：sSNV+HP+CCF 三軸一致支撐局部克隆階層（單樣本 ⭐3 分子證據）；甲基為**弱**佐證（6.6% 區域有獨立表觀支持）。</div>
 
 <h2 id="lim">🔴 限制（誠實，無可被質疑的未佐證推論）</h2>
-<div class="box red">⭐3 單樣本；regional（≤read-span）<b>非 genome-wide tree</b>；HP 有 ~85-90% phasing 誤差 + problem PS block（已標記排除）；甲基 corroborate 非 detect + 既有輸出覆蓋 ~3%（需重抽）；CCF 僅 CN-clean 可估（gain multiplicity 歧義）；64% sSNV 在 CN-gain 混淆（乾淨集=LOH/neutral）；分子證據非 single-cell confirmation。對外勿稱「甲基偵測 subclone / genome-wide tree / 對手缺檢定」。</div>
+<div class="box red">⭐3 單樣本；regional（≤read-span）<b>非 genome-wide tree</b>；HP 有 ~85-90% phasing 誤差 + problem PS block（已標記排除）；甲基 corroborate 非 detect（既有輸出覆蓋 0.19% → 已重抽 740 區，僅 6.6% 弱 corroborate）；CCF 僅 CN-clean 可估（gain multiplicity 歧義）；64% sSNV 在 CN-gain 混淆（乾淨集=LOH/neutral）；分子證據非 single-cell confirmation。對外勿稱「甲基偵測 subclone / genome-wide tree / 對手缺檢定」。</div>
 
 <h2 id="idx">檔案索引（可驗證 + 可查詢）</h2>
 <table><tr><th>檔</th><th>內容</th></tr>

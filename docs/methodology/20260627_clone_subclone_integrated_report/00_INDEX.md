@@ -53,4 +53,5 @@ build_branch: feat/summary-nreadsvalid
 4. 對抗稽核紀錄見 `06_integrated_narrative.md`（L5 fresh-context evaluator verdict）。
 
 ## §5 層狀態
-L0 ✅ · L1 ✅ · L2 ✅ · L3 ✅ · L4 ✅(覆蓋限制) · L5 進行中(對抗稽核) · L6 ✅ · L7 進行中(HTML)。
+L0 ✅ · L1 ✅ · L2 ✅(GMM BIC n=3) · L3 ✅(PS-reliable 92.7%) · L4 ✅(**已從 BAM 重抽 genome-wide 740 區，6.6% 弱 corroborate**) · L5 ✅(對抗稽核 2 輪，修正全套用) · L6 ✅ · L7 ✅(整合 HTML)。
+全部 data-supported；JSON=prose=HTML 一致（§13-A）。詳見 `06_integrated_narrative.md` §4 兩輪對抗稽核紀錄。
