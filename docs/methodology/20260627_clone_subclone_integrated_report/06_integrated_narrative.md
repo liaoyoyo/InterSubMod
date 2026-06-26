@@ -54,7 +54,11 @@
 
 **三輪共通根因（已內化）**：修正若只落在 prose 而 JSON/HTML 未同步 = §13-A 違規；每輪修正必 prose+JSON+HTML 三處一致（grep 三方驗證）。
 
+**對抗稽核 round 4（final confirm）= NEEDS_WORK → 修**（F1-F4 全 confirmed CLOSED；新發現非層同步類，而是 own-data 矛盾）：
+- ✅ **限制段「64% sSNV 在 CN-gain」無法從本報告 data/ grep**（為骨幹 commit 0a8658d 不同 CN 分段的 stale 值，prose+HTML 彼此一致但都與 master TSV 矛盾 ~11pp）→ 從 `data/sm_locus_master.tsv` 重算（獨立 verify）並落 `sm_locus_master_summary.json` cn_somatic_pct：**somatic gain 52.8%（12,569/23,810）/ CN-confounded 53.2% / 乾淨集 LOH+neutral 46.8%**；HTML 注入 + 06 §5 改正。⚠ 04 §3 的 64% 是另一個合法值（Tier-PS same-HP 80,980/127,183），不動。
+- ✅ **（minor）L2 HTML headline 0.925** 加「決定性邊；含 tie 全邊 69.8% 支持/違反 5.7%」對齊 prose 誠實口徑。
+
 **對抗稽核認定 solid（兩輪未被推翻）**：HP code/BERNOULLI 公式源碼逐字驗證；HP 對 mutual_excl 的 allelic 移除（57%）為真（5238/9187）；VAF 梯度違反率極低（5.7%）；chr17 canonical 對 TSV 逐行驗證；35,332=30,490+4,842；甲基 corroborate-not-detect 兩輪一致；單樣本紀律無跨樣本/genome-wide-tree overclaim。
 
 ## §5 🔴 限制（無可被質疑的未佐證推論）
-⭐3 單樣本；**regional（≤read-span）非 genome-wide tree**；HP ~85-90% phasing 誤差 + 34 problem PS block（已標排除）；CCF 僅 CN-clean 可估（gain multiplicity 歧義）+ CN-mixture 構造；甲基 corroborate 非 detect + 既有覆蓋 0.19%（待重抽）；64% sSNV 在 CN-gain 混淆（乾淨集 = LOH/neutral）；precedence「genetic 勝」僅 1 個實證衝突 + n=8 甲基測試（未大規模壓測）；分子證據非 single-cell confirmation。**對外勿稱「甲基偵測 subclone / genome-wide tree / 對手缺檢定」。**
+⭐3 單樣本；**regional（≤read-span）非 genome-wide tree**；HP ~85-90% phasing 誤差 + 34 problem PS block（已標排除）；CCF 僅 CN-clean 可估（gain multiplicity 歧義）+ CN-mixture 構造；甲基 corroborate 非 detect + 既有覆蓋 0.19%（待重抽）；**52.8% somatic sSNV 在 CN-gain（CN-confounded 53.2%；乾淨集 LOH/neutral 46.8%；來源 `data/sm_locus_master_summary.json` cn_somatic_pct）**；precedence「genetic 勝」僅 1 個實證衝突 + n=8 甲基測試（未大規模壓測）；分子證據非 single-cell confirmation。**對外勿稱「甲基偵測 subclone / genome-wide tree / 對手缺檢定」。**

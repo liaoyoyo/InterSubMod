@@ -89,7 +89,7 @@ footer{{margin-top:28px;padding-top:12px;border-top:1px solid {BD};font-size:12p
 {img('02_hp_contribution.png')}
 
 <h2 id="l2">L2 — CCF tier + 克隆階層梯度（單變量）</h2>
-<div class="box ok"><b>祖先≥後代 VAF 梯度 = {ccf_grad.get('data_support_rate','—')}（CN-clean {g(ccf_grad,'clean_only(loh+neutral)','rate')}）</b> vs null 0.5 → read-樹方向被 VAF <b>獨立驗證</b>。離散 CCF 峰 ~0.9 clonal / ~0.45 major / ~0.05 rare = 一致 subclone 層級。</div>
+<div class="box ok"><b>祖先≥後代 VAF 梯度（決定性邊）= {ccf_grad.get('data_support_rate','—')}（CN-clean {g(ccf_grad,'clean_only(loh+neutral)','rate')}）</b> vs null 0.5 → read-樹方向被 VAF <b>獨立驗證</b>（含 tie 全邊 69.8% 支持 / 違反僅 5.7%）。離散 CCF 峰 ~0.9 clonal / ~0.45 major / ~0.05 rare = 一致 subclone 層級。</div>
 {img('03_ccf_tiers.png')}
 
 <h2 id="l3">L3 — phase-set（單變量 PS）</h2>
@@ -108,7 +108,7 @@ footer{{margin-top:28px;padding-top:12px;border-top:1px solid {BD};font-size:12p
 → <b>結論</b>：sSNV+HP+CCF 三軸一致支撐局部克隆階層（單樣本 ⭐3 分子證據）；甲基為**弱**佐證（6.6% 區域有獨立表觀支持）。</div>
 
 <h2 id="lim">🔴 限制（誠實，無可被質疑的未佐證推論）</h2>
-<div class="box red">⭐3 單樣本；regional（≤read-span）<b>非 genome-wide tree</b>；HP 有 ~85-90% phasing 誤差 + problem PS block（已標記排除）；甲基 corroborate 非 detect（既有輸出覆蓋 0.19% → 已重抽 740 區，僅 6.6% 弱 corroborate）；CCF 僅 CN-clean 可估（gain multiplicity 歧義）；64% sSNV 在 CN-gain 混淆（乾淨集=LOH/neutral）；分子證據非 single-cell confirmation。對外勿稱「甲基偵測 subclone / genome-wide tree / 對手缺檢定」。</div>
+<div class="box red">⭐3 單樣本；regional（≤read-span）<b>非 genome-wide tree</b>；HP 有 ~85-90% phasing 誤差 + problem PS block（已標記排除）；甲基 corroborate 非 detect（既有輸出覆蓋 0.19% → 已重抽 740 區，僅 6.6% 弱 corroborate）；CCF 僅 CN-clean 可估（gain multiplicity 歧義）；{g(m,'cn_somatic_pct','gain')}% somatic sSNV 在 CN-gain（CN-confounded {g(m,'cn_somatic_pct','confounded_non_clean')}%；乾淨集 LOH/neutral {g(m,'cn_somatic_pct','clean_loh_neutral')}%）；分子證據非 single-cell confirmation。對外勿稱「甲基偵測 subclone / genome-wide tree / 對手缺檢定」。</div>
 
 <h2 id="idx">檔案索引（可驗證 + 可查詢）</h2>
 <table><tr><th>檔</th><th>內容</th></tr>
