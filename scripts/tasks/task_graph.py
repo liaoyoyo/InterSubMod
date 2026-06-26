@@ -264,6 +264,31 @@ def check(data):
             findings.append(("WARN", n["id"], "verify=fail 但無修任務（跑 new-problem 建子修任務）"))
     for nid, why in detail_gaps(nodes):
         findings.append(("DETAIL", nid, why))
+    # F6 (2026-06-26 資訊架構 Phase 1): orphan 實驗文件 — 無任務 links.reports 引用 = 舊資料沒被任務複用 (pain#2)
+    import glob as _glob
+    _ref = set()
+    for n in nodes:
+        for r in (n.get("links") or {}).get("reports", []):
+            _ref.add(os.path.basename(r))
+    _exp = _glob.glob(os.path.join(ROOT, "docs/experiments/**/*.md"), recursive=True)
+    _orph = [os.path.relpath(f, ROOT) for f in _exp if os.path.basename(f) not in _ref]
+    if _exp and len(_orph) > 0.5 * len(_exp):  # only flag when the majority are orphan (the real pain, not noise)
+        _ex = "; ".join(os.path.basename(o) for o in sorted(_orph)[:3])
+        findings.append(("DETAIL", "docs/experiments",
+                         f"{len(_orph)}/{len(_exp)} 實驗文件無任務 links.reports 引用（舊資料未複用，pain#2）；"
+                         f"例 {_ex} …；全清單→`task_graph.py reverse-index` 產 reverse_index.json"))
+    # F7: CURRENT_FOCUS 最新日期 vs graph updated_at 漂移 >7d = 敘述層/機械層 SoT 脫節 (pain#3)
+    try:
+        with open(os.path.join(ROOT, "docs/CURRENT_FOCUS.md"), encoding="utf-8") as _fh:
+            _cf = re.findall(r"20\d{2}-\d{2}-\d{2}", _fh.read())
+        _g = (data.get("updated_at") or "")[:10]
+        if _cf and _g:
+            _skew = abs((datetime.date.fromisoformat(_g) - datetime.date.fromisoformat(max(_cf))).days)
+            if _skew > 7:
+                findings.append(("DRIFT", "CURRENT_FOCUS",
+                                 f"CURRENT_FOCUS 最新 {max(_cf)} vs graph updated_at {_g} 差 {_skew} 天（敘述/機械層漂移 >7d，pain#3）"))
+    except Exception:
+        pass
     return findings, stale
 
 
