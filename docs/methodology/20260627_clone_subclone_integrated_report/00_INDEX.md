@@ -23,6 +23,7 @@ build_branch: feat/summary-nreadsvalid
 | `05_methylation_corroboration.md` | L4 | 甲基既有輸出覆蓋不足 + 小樣本 | `05_*.png` | `sm_methyl_corroboration.json` |
 | `06_integrated_narrative.md` | L5 | 整合敘述（對抗稽核後）| — | — |
 | `07_cross_sample_capability.md` | L6 | 跨樣本能力（只 HCC1395 ready）| — | — |
+| `08_methylation_sufficiency_audit.md` | L8 | **甲基輔助有效性審查**（per-region 漏斗 + power dose-response + cis-control）| `08_*.png` | `sm_methyl_sufficiency_audit.json`, `sm_methyl_reextract_ALL_perregion.tsv` |
 | `index.standalone.html` | L7 | **整合 HTML**（嵌圖 + 全層 §13-A 注入）| — | — |
 
 ## §2 定義詞典（meaning）
@@ -53,5 +54,5 @@ build_branch: feat/summary-nreadsvalid
 4. 對抗稽核紀錄見 `06_integrated_narrative.md`（L5 fresh-context evaluator verdict）。
 
 ## §5 層狀態
-L0 ✅ · L1 ✅(HP=鑑別器非確認器) · L2 ✅(GMM BIC n=3) · L3 ✅(PS-reliable 92.7%) · L4 ✅(**已從 BAM 重抽 genome-wide 740 區，6.6% 弱 corroborate**) · L5 ✅(**對抗稽核 5 輪 → PASS**，修正全套用) · L6 ✅ · L7 ✅(整合 HTML)。
+L0 ✅ · L1 ✅(HP=鑑別器非確認器) · L2 ✅(GMM BIC n=3) · L3 ✅(PS-reliable 92.7%) · L4 ✅(**已從 BAM 重抽 genome-wide 740 區，6.6% 弱 corroborate**) · L5 ✅(**對抗稽核 5 輪 → PASS**，修正全套用) · L6 ✅ · L7 ✅(整合 HTML) · **L8 ✅(甲基輔助有效性審查 — BOUNDED_AUXILIARY；power-gated 高功率 54.9%／cis-control 0/740 不可評估→「subclone-specific」撤回；對抗稽核 1 輪修正初版誤判)**。
 全部 data-supported；**每個數字皆可從 `data/*.json`/`*.tsv` grep（§13-A，5 輪 fresh-context 稽核三方驗證 prose=JSON=HTML 一致）**。詳見 `06_integrated_narrative.md` §4 五輪對抗稽核紀錄。

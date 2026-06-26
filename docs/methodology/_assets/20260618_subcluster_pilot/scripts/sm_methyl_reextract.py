@@ -74,6 +74,7 @@ def main(chroms, out_path):
     cis_explained = 0
     sig_counts = []
     examples = []
+    records = []  # per-region effectiveness audit (sufficiency funnel)
     for idx, r in enumerate(tgt):
         chrom = r["chrom"]
         som = [(p, cen[f"{chrom}:{p}"]["ref"], cen[f"{chrom}:{p}"]["alt"])
@@ -103,6 +104,11 @@ def main(chroms, out_path):
         pops.sort(key=lambda x: -len(x[1]))
         idsA = set(pops[0][1]); idsB = set(pops[1][1])
         n_tested += 1
+        rec = {"region": r["region"], "chrom": chrom, "shape": r["tree_shape"], "cn": r["cn"],
+               "n_reads": len(reads), "n_pop": len(pops),
+               "popA": pops[0][0], "popA_n": len(idsA), "popB": pops[1][0], "popB_n": len(idsB),
+               "n_cpg_tested": 0, "n_sig_cpg": 0, "max_dbeta": 0.0, "min_q": 1.0,
+               "corroborated": 0, "hp_control_eval": 0, "cis_hit": 0, "cis_explained": 0}
         # all CpG ref positions seen
         allcpg = set()
         for rn in (idsA | idsB):
@@ -117,18 +123,25 @@ def main(chroms, out_path):
                 except ValueError:
                     continue
                 pv.append(p); cps.append(cp); dbs.append(abs(np.mean(a_) - np.mean(b_)))
+        rec["n_cpg_tested"] = len(pv)
         if not pv:
+            records.append(rec)
             continue
         q = bh(pv)
+        rec["min_q"] = round(float(min(q)), 4)
+        rec["max_dbeta"] = round(float(max(dbs)), 3)
         sig = [(cps[k], dbs[k]) for k in range(len(pv)) if q[k] < 0.05 and dbs[k] >= DBETA_MIN]
         sig_counts.append(len(sig))
+        rec["n_sig_cpg"] = len(sig)
         if sig:
             n_corrob += 1
+            rec["corroborated"] = 1
             # cis control: HP1({1,1-1}) vs HP2({2,2-1}) at sig CpGs
             hp1 = [rn for rn in (idsA | idsB) if reads[rn][2] in (1, 11)]
             hp2 = [rn for rn in (idsA | idsB) if reads[rn][2] in (2, 21)]
             cis = 0
             if len(hp1) >= 3 and len(hp2) >= 3:
+                rec["hp_control_eval"] = 1
                 for cp, _ in sig:
                     a_ = [reads[rn][0][cp] for rn in hp1 if cp in reads[rn][0]]
                     b_ = [reads[rn][0][cp] for rn in hp2 if cp in reads[rn][0]]
@@ -139,11 +152,14 @@ def main(chroms, out_path):
                                 cis += 1
                         except ValueError:
                             pass
+            rec["cis_hit"] = cis
             if cis >= max(1, len(sig) // 2):
                 cis_explained += 1
+                rec["cis_explained"] = 1
             if len(examples) < 25:
                 examples.append({"region": r["region"], "shape": r["tree_shape"], "n_sig_cpg": len(sig),
                                  "popA": f"{pops[0][0]}({len(idsA)})", "popB": f"{pops[1][0]}({len(idsB)})", "cis_hit": cis})
+        records.append(rec)
         if idx % 100 == 0:
             print(f"[{chroms[0]}..] {idx}/{len(tgt)} tested={n_tested} corrob={n_corrob}", flush=True)
     tb.close()
@@ -151,8 +167,23 @@ def main(chroms, out_path):
            "n_corroborated": n_corrob, "n_cis_explained": cis_explained,
            "sig_cpg_counts": sig_counts, "examples": examples}
     json.dump(out, open(out_path, "w"), ensure_ascii=False)
+    # per-region effectiveness TSV (sufficiency audit)
+    if records:
+        tsv_path = out_path.replace(".json", "_perregion.tsv")
+        cols = list(records[0].keys())
+        with open(tsv_path, "w") as f:
+            f.write("\t".join(cols) + "\n")
+            for rc in records:
+                f.write("\t".join(str(rc[c]) for c in cols) + "\n")
+        print(f"  per-region TSV: {len(records)} rows -> {tsv_path}", flush=True)
     print(f"DONE {chroms}: target={len(tgt)} tested={n_tested} corrob={n_corrob} cis_expl={cis_explained} -> {out_path}", flush=True)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1].split(","), sys.argv[2])
+    # argv[1]="ALL" → 取 region integration 內所有 chrom 單進程跑（產一份 merged JSON + per-region TSV）
+    if sys.argv[1] == "ALL":
+        regs = json.load(open(f"{A}/sm_region_integration.json"))["regions"]
+        chroms = sorted({r["chrom"] for r in regs}, key=lambda c: (len(c), c))
+        main(chroms, sys.argv[2])
+    else:
+        main(sys.argv[1].split(","), sys.argv[2])

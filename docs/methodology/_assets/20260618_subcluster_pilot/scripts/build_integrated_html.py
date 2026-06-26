@@ -29,6 +29,7 @@ ccf = J("sm_ccf_tiers.json")
 psx = J("sm_phaseset_extension.json")
 me = J("sm_methyl_corroboration.json")
 mr = J("sm_methyl_reextract_merged.json")
+suf = J("sm_methyl_sufficiency_audit.json")
 # region 形狀計數從已載入的 psx 衍生（§13-A，非手打）：full_tree 677 / structured 4678
 _bs = (psx.get("ps_reliability_per_region", {}) if isinstance(psx, dict) else {}).get(
     "by_shape_reliable_vs_uncertain", {}
@@ -96,15 +97,24 @@ footer{{margin-top:28px;padding-top:12px;border-top:1px solid {BD};font-size:12p
 <div class="box"><b>PS-reliable 區域 = {g(ps_rel,'single_ps_reliable',default='—'):,} / uncertain {g(ps_rel,'multi_ps_uncertain',default='—'):,}（rate {g(ps_rel,'reliable_rate')}）</b>。多 PS region = phase-switch 風險，HP 判別不可信（最乾淨 sibling 結論排除之）。Tier-PS（同 PS >50kb）= germline 單倍型 context，<b>非克隆連鎖</b>（同 PS ≠ 同克隆）。{img('04_phaseset.png')}</div>
 
 <h2 id="l4">L4 — 甲基 corroboration（單變量；已從 BAM 重抽補完 genome-wide）</h2>
-<div class="box red">既有 ISM 甲基輸出只覆蓋 0.19%（9/4678）→ <b>已直接從 tumor BAM MM/ML 重抽（驗證 corr=1.000 vs ISM）</b>。genome-wide CN-clean：<b>{g(mr,'n_tested',default='—')} 區測試，{g(mr,'n_corroborated',default='—')}（{g(mr,'corroboration_rate')}）甲基 corroborate 遺傳群，全部 subclone-specific（cis-ASM-explained {g(mr,'cis_explained_rate')}，HP-axis proxy cis-control，完整 normal-baseline NACT 為精煉項）</b>。median sig CpG=0 → <b>93% 區域甲基不區分遺傳 subclone</b>。🔴 甲基 = <b>弱 corroborator 非 detector</b>（6.6% 區域有獨立表觀支持；其餘無）。</div>
+<div class="box red">既有 ISM 甲基輸出只覆蓋 0.19%（9/4678）→ <b>已直接從 tumor BAM MM/ML 重抽（驗證 corr=1.000 vs ISM）</b>。genome-wide CN-clean：<b>{g(mr,'n_tested',default='—')} 區測試，{g(mr,'n_corroborated',default='—')}（{g(mr,'corroboration_rate')}）甲基 corroborate 遺傳群</b>。<br>🔑 <b>有效性審查（L8）</b>：訊號**存在但 power-gated** — 高功率區（popB_n≥20）corroboration 達 <b>{g(suf,'power_audit','dose_response','popB_n>=20','rate')}</b>，但僅 {g(suf,'power_audit','dose_response','popB_n>=20','n')} 區達此功率（{g(suf,'power_audit','dose_response','power_starved[5,12)_share_of_powered')} 的 powered 落在功率飢餓帶）。🔴 <b>cis-control 0/740 不可評估</b>（hp_control_eval=0）→ <b>撤回「subclone-specific」</b>：corroborated 的 all-or-nothing Δβ（median {g(suf,'corroborated_signal_strength','max_dbeta','median')}）= cis-ASM 特徵，無法與 germline cis 分離。median sig CpG=0、0 新 partition → 甲基 = <b>有界弱 corroborator 非 detector</b>（見 08_methylation_sufficiency_audit）。</div>
 {img('05_methylation_corroboration.png')}
+
+<h2 id="l8">L8 — 甲基輔助有效性審查（per-region 漏斗 + power dose-response + cis-control）</h2>
+<div class="box"><b>問題</b>：甲基（分群結構/差異對齊位點）能否提升 clone/subclone 準確度？標記/輔助是否足夠有效？<b>方法</b>：把 6.6% 終點數字拆成 740 區 per-region 有效性漏斗。</div>
+<div class="box red"><b>裁決 = BOUNDED_AUXILIARY（不足以作獨立/主要 subclone 標記）</b>。三條 data-supported：<br>
+① <b>覆蓋瓶頸</b>：740 測試區中 {g(suf,'funnel','n_no_testable_cpg(0 CpG with>=3/3)',default='—')} 區（26%）連可測 CpG 都 0；powered 僅 {g(suf,'funnel','n_powered(cpg>=10 & popB>=5)',default='—')}。<br>
+② 🔑 <b>訊號 power-gated（非無訊號）</b>：corroboration 隨覆蓋陡升 — popB_n 5–7={g(suf,'power_audit','dose_response','popB_n[5,8)','rate')} → 12–19={g(suf,'power_audit','dose_response','popB_n[12,20)','rate')} → ≥20=<b>{g(suf,'power_audit','dose_response','popB_n>=20','rate')}</b>；但僅 {g(suf,'power_audit','dose_response','popB_n>=20','n')} 區達 popB_n≥20。<br>
+③ 🔴 <b>cis-control 不可評估 + 0 偵測</b>：hp_control_eval=0/740 → 「subclone-specific」撤回；甲基偵測 <b>0 個新 partition</b>；full_tree（subclone 最多）corroboration 反而最低（{g(suf,'by_tree_shape','full_tree','rate')}）。</div>
+{img('08_methyl_sufficiency.png')}
+<div class="box"><b>誠實回答</b>：甲基<b>不能</b>當偵測器/主要標記（0 新發現）；只在少數高覆蓋區提供<b>未經 cis 校正</b>的弱佐證；要稱「甲基支持 subclone」須先補 matched-normal cis-control。符合 ⭐3 / auxiliary-not-driver。詳見 <code>08_methylation_sufficiency_audit.md</code>。</div>
 
 <h2 id="narr">整合敘述（sSNV + read → clone/subclone）</h2>
 <div class="box"><b>骨幹</b>：ONT long read 同分子讀多 sSNV → 共現 2×2 → 局部克隆樹（7,143 區域：{STRUCTURED_N:,} 有確認結構〔含 {FULL_TREE_N:,} full_tree〕，其餘 {7143-STRUCTURED_N:,} sparse/single-pair）。<br>
 <b>HP 加值</b>：把 read 級互斥轉成細胞層 sibling（移除 {g(hp_ab,'false_subclone_removed_pct')}% allelic）。<br>
 <b>CCF 加值</b>：祖先≥後代 VAF {ccf_grad.get('data_support_rate','—')} 獨立驗證樹方向 + 離散 subclone CCF 層級。<br>
 <b>PS</b>：reliability 旗標（排除 phase-uncertain 區）；不延伸克隆連鎖。<br>
-<b>甲基</b>：已從 BAM 重抽 genome-wide（{g(mr,'n_tested',default='—')} 區）→ 僅 {g(mr,'corroboration_rate')} 區域 corroborate（弱 corroborator，全 subclone-specific）。<br>
+<b>甲基</b>：已從 BAM 重抽 genome-wide（{g(mr,'n_tested',default='—')} 區）→ 僅 {g(mr,'corroboration_rate')} corroborate；power-gated（高功率 {g(suf,'power_audit','dose_response','popB_n>=20','rate')}）；cis-control 不可評估 → 有界弱 corroborator（非 subclone-specific）。<br>
 → <b>結論</b>：sSNV+HP+CCF 三軸一致支撐局部克隆階層（單樣本 ⭐3 分子證據）；甲基為**弱**佐證（6.6% 區域有獨立表觀支持）。</div>
 
 <h2 id="lim">🔴 限制（誠實，無可被質疑的未佐證推論）</h2>

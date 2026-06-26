@@ -28,18 +28,20 @@ data_sources: data/sm_methyl_corroboration.json, data/sm_methyl_reextract_merged
 | 目標區（CN-clean 結構區 ≥2 population）| 754 |
 | 可測（≥2 population 有甲基）| 740 |
 | **甲基 corroborate（≥1 sig CpG）** | **49（6.6%）** |
-| **cis-ASM 可解釋的** | **0 / 49（0%）→ 全 49 為 subclone-specific** |
+| **cis-ASM 控制（HP1 vs HP2）** | 🔴 **0 / 49 可評估**（hp_control_eval=0/740）→ cis vs subclone **UNVERIFIED** |
 | median sig CpG / 測試區 | **0** |
 
-→ 🔑 **genome-wide-clean：只有 6.6%（49/740）區域的甲基能區分遺傳定義的 subclone group；93% 區域不能**（median sig CpG=0）。但那 49 區**全部 subclone-specific（0% germline cis）**。
-→ **甲基 = 弱 corroborator**：在少數區域提供獨立表觀支持，**多數 subclone 結構不反映在甲基差異上** —— 完全符合「characterize 非 detect」。
+→ 🔑 **genome-wide-clean：6.6%（49/740）區域甲基能區分遺傳定義的 group**（median sig CpG=0）。**⚠ 詳細有效性審查見 `08_methylation_sufficiency_audit.md`**，兩項對抗稽核修正：
+- **power dose-response**：6.6% 偏低主因是**覆蓋不足非無訊號** —— 高功率區（popB_n≥20）corroboration 達 **54.9%**，但僅 51 區達此功率（58.8% 的「powered」落在功率飢餓帶）。
+- 🔴 **「全 subclone-specific（0% cis）」已撤回**：cis-ASM 控制（HP1 vs HP2 各≥3 reads）在 **0/740 區可評估**（corroborated 區多為 LOH 單倍型）→ `cis_explained=0` 是 structural zero（從未檢測）非排除；corroborated 的 all-or-nothing Δβ（median 0.974）= **cis-ASM 特徵** → 無法與 germline cis-ASM 分離。
+→ **甲基 = 有界弱 corroborator**：少數高覆蓋區提供（未經 cis 校正的）佐證，多數區不區分 —— 符合「characterize 非 detect」。
 
 ## §3 chr17 canonical（已驗證，established）
 chr17:48360161（有窗）先前完整分析：甲基 BERNOULLI/UPGMA **只切得出「有無 somatic」（L0/γ vs L1+L2），切不出 L1↔L2 fine subclone**；per-CpG 可歸因（23 CpG→α 祖先 ASM / 6→L1-L2）。→ 甲基 = **corroborate（刻畫已驗群）非 detect**，且細分 subclone 需遺傳錨。
 
 ## §4 data-supported 結論（誠實）
 1. **既有 ISM 甲基輸出 = 稀疏 anchor 窗，覆蓋 0.19%（9/4678）結構區** → 故**已直接從 BAM 重抽**（驗證 corr=1.000），不靠既有輸出。
-2. **genome-wide-clean 結果（740 區）：甲基只在 6.6%（49）區域 corroborate 遺傳 subclone，且全 subclone-specific（0% cis）**；多數（93%）區域甲基不區分 subclone。→ 甲基 = **弱 corroborator**，不下「強佐證」定論。
+2. **genome-wide-clean 結果（740 區）：甲基只在 6.6%（49）區域 corroborate 遺傳 subclone**（power-gated：高功率區 54.9%，但僅 51 區達此功率）；🔴 **cis-control 0/740 不可評估 → 不能稱「subclone-specific」**（可能為 cis-ASM）；多數（93%）區域甲基不區分。→ 甲基 = **有界弱 corroborator**，不下「強佐證 / 獨立 subclone 表觀證據」定論（見 `08`）。
 3. 🔴 甲基 corroborate 非 detect；細分 subclone 必須靠遺傳（sSNV 連鎖 + HP）。
 
 ## §5 後補流程（✅ 已執行 — `sm_methyl_reextract.py`）
