@@ -32,6 +32,16 @@ gate_exit() {
     if [ "${WATCH_KIND:-}" = "state_json" ]; then
         exit 2
     fi
+    if [ "${WATCH_KIND:-}" = "validated_report" ]; then
+        # 2026-06-16 L3 (port to live 2026-06-26): a ⭐4-5 claim published WITHOUT a fresh-context
+        # evaluator run gets a nudge (maker≠checker is the strongest anti-fabrication safeguard but
+        # Opus 4.8 defaults to NOT spawning it). Stays exit 0 — a Hard Gate on reports would kill <2hr pilots.
+        echo "  ↑ ADVISORY (validated/PI report): no fresh-context evaluator run detected for this ⭐4-5 claim." >&2
+        echo "    maker≠checker is the strongest anti-fabrication safeguard; Opus 4.8 defaults to NOT spawning it." >&2
+        echo "    → Consider dispatching the evaluator agent (or /run-evaluator <cycle_id>) before publishing." >&2
+        echo "    (advisory only, exit 0 — the ENFORCED exit-2 gate is on state/cycles/*/state.json.)" >&2
+        exit 0
+    fi
     echo "  ↑ ADVISORY only (prose doc); the ENFORCED exit-2 gate is on state/cycles/*/state.json." >&2
     echo "    For INDEX.md / CURRENT_FOCUS.md tier consistency, run /provenance-tier-audit." >&2
     exit 0
@@ -55,6 +65,10 @@ case "$FILE_PATH" in
         ;;
     *"/docs/CURRENT_FOCUS.md")
         WATCH_KIND="current_focus"
+        ;;
+    *"/docs/reports/validated/"*|*"/docs/reports/pi_reports/"*|*"/docs/experiments/validated/"*|*"/pi_reports/"*)
+        # 2026-06-16 L3 (port to live 2026-06-26): published validated/PI reports → ADVISORY only
+        WATCH_KIND="validated_report"
         ;;
     *)
         exit 0

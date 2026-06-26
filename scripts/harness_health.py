@@ -4,7 +4,7 @@
 Generates a single standalone HTML dashboard that lets a solo researcher, on every
 harness change, confirm BOTH the moving parts AND the whole architecture:
 
-  1. L0 health lights (10) — count drift / Hard-Gate truth / tier-gate / state<->doc / ledger / queue / memory-drift / doc-path-currency / hook-wiring / tier-format
+  1. L0 health lights (11) — count drift / Hard-Gate truth / tier-gate / state<->doc / ledger / queue / memory-drift / doc-path-currency / hook-wiring / tier-format / phase-staleness
   2. Architecture map      — 3 entrypoints · 7-Phase Waterfall · meta + 3-storey assurance ·
                              18 agents by role · 38 hooks by event · state machine · evidence chain · workflows
   3. Component detail       — skills by category · agent table (tools/model/isolation) · hooks by event
@@ -642,6 +642,41 @@ try{{
 </script></body></html>"""
 
 
+def light_phase_staleness(active):
+    """#11 — PHASE STALENESS: 逐 active cycle 算 days-since-last_advanced_at + 標 phase，
+    一次回答「哪個 cycle 卡在哪一 phase」(dual-SoT 漂移盲點；#4 STATE<->DOC 不查 phase 時齡)。
+    ⚠ active.json 的多週主軸 cycle 多為 backfill placeholder（stale-by-design，見 CLAUDE.md §6
+    雙層 SoT 分工）→ 標註而非當真卡住，故 >7d 為 advisory YELLOW 非 RED。read-only。
+    依據: 20260616_loop_engineering_broad_survey_review_02.md L1（port to live 2026-06-26）。"""
+    if not isinstance(active, dict):
+        return "GREY", ["active.json 不可解析"]
+    cycles = active.get("cycles", []) or []
+    if not cycles:
+        return "GREEN", ["無 active cycle（state 機空；多週主軸進度看 CURRENT_FOCUS）"]
+    today = datetime.date.today()
+    stale, fresh = [], 0
+    for c in cycles:
+        cid = c.get("cycle_id", "?")
+        phase = c.get("phase", "?")
+        ts = c.get("last_advanced_at") or c.get("started_at") or ""
+        m = re.match(r"(\d{4}-\d{2}-\d{2})", ts)
+        if not m:
+            stale.append(f"{cid} @ {phase}：無時間戳（無法判齡）")
+            continue
+        age = (today - datetime.date.fromisoformat(m.group(1))).days
+        if age > 7:
+            stale.append(f"{cid} @ {phase}：{age}d 未推進")
+        else:
+            fresh += 1
+    rows = [f"active cycles={len(cycles)}（fresh ≤7d={fresh}）"]
+    if stale:
+        rows.append(f"⚠ {len(stale)} cycle >7d 未推進: " + "; ".join(stale[:5]))
+        rows.append("※ 多週主軸 cycle 多為 backfill placeholder（stale-by-design）→ 真實進度看 CURRENT_FOCUS，非真卡住；可考慮 archive 或 /cycle-state 檢視")
+        return "YELLOW", rows
+    rows.append("✓ 所有 active cycle ≤7d 內有推進")
+    return "GREEN", rows
+
+
 def main():
     os.makedirs(SNAP_DIR, exist_ok=True)
     cmd = _read(CLAUDE_MD)
@@ -671,6 +706,7 @@ def main():
     l8 = light_doc_paths(cmd)
     l9 = light_hook_wiring(settings, cmd)
     l10 = light_tier_format(active)
+    l11 = light_phase_staleness(active)  # 2026-06-16 L1（port to live 2026-06-26）
     lights = [
         {"name": "COUNT DRIFT", "status": l1[0], "rows": l1[1]},
         {"name": "HARD-GATE TRUTH", "status": l2[0], "rows": l2[1]},
@@ -682,6 +718,7 @@ def main():
         {"name": "DOC PATH CURRENCY", "status": l8[0], "rows": l8[1]},
         {"name": "HOOK WIRING", "status": l9[0], "rows": l9[1]},
         {"name": "TIER FORMAT", "status": l10[0], "rows": l10[1]},
+        {"name": "PHASE STALENESS", "status": l11[0], "rows": l11[1]},
     ]
     mk = compile_marker_status()
     if mk.get("present"):

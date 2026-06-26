@@ -51,6 +51,12 @@ _P2 = re.compile(
 )
 # P3: percentages               -> 44.89%, 5%
 _P3 = re.compile(r"(\d+(?:\.\d+)?)\s*%")
+# P4: standalone scientific notation  -> 1.23e-4, 3.2e-5 (2026-06-16 L4, port to live 2026-06-26)
+_P4 = re.compile(r"(?<![\w.])([-+]?\d+(?:\.\d+)?[eE][-+]?\d+)(?![\w])")
+# P5: ratio/fold PREFIX phrasing       -> "fold change of 2.3", "ratio 0.7", "fold: 1.5"
+_P5 = re.compile(r"(?:fold[-\s]?change|ratio|fold)\s*(?:of\s+)?[:=]?\s*([-+]?\d+(?:\.\d+)?)", re.IGNORECASE)
+# P6: ratio/fold SUFFIX phrasing       -> "5.1×", "17×", "2.3-fold", "5 fold"
+_P6 = re.compile(r"([-+]?\d+(?:\.\d+)?)\s*(?:×|[-\s]?fold\b)", re.IGNORECASE)
 
 # tokens to ignore even if they match (low information / structural)
 _DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
@@ -98,6 +104,9 @@ def extract_metrics(text):
     toks.update(_P1.findall(text_nodate))
     toks.update(_P2.findall(text_nodate))
     toks.update(_P3.findall(text_nodate))
+    toks.update(_P4.findall(text_nodate))
+    toks.update(_P5.findall(text_nodate))
+    toks.update(_P6.findall(text_nodate))
     out = set()
     for t in toks:
         t = t.strip()
