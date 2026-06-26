@@ -41,7 +41,7 @@ def main():
 
     # 1. 祖先>=後代 VAF 梯度 (nested edges; vaf is per-node in region rec)
     grad_ok = grad_viol = grad_tie = 0
-    grad_ok_clean = grad_viol_clean = 0
+    grad_ok_clean = grad_viol_clean = grad_tie_clean = 0
     deltas = []
     for r in reg:
         vaf = r.get("vaf", {})
@@ -60,6 +60,8 @@ def main():
                         grad_viol_clean += 1
                 else:
                     grad_tie += 1
+                    if clean:
+                        grad_tie_clean += 1
     n_edge = grad_ok + grad_viol + grad_tie
     # null: shuffle ancestor/descendant direction → 50% expected
     grad_support = grad_ok / (grad_ok + grad_viol) if (grad_ok + grad_viol) else None
@@ -95,6 +97,7 @@ def main():
             "ancestor_higher": grad_ok, "descendant_higher(violation)": grad_viol, "tie": grad_tie,
             "data_support_rate": round(grad_support, 3) if grad_support else None,
             "clean_only(loh+neutral)": {"ancestor_higher": grad_ok_clean, "violation": grad_viol_clean,
+                                        "tie": grad_tie_clean,
                                         "rate": round(grad_ok_clean / (grad_ok_clean + grad_viol_clean), 3) if (grad_ok_clean + grad_viol_clean) else None},
             "median_delta_vaf": round(float(np.median(deltas)), 3) if deltas else None,
         },
