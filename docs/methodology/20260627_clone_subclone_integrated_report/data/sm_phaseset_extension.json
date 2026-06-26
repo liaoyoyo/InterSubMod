@@ -1,0 +1,35 @@
+{
+ "n_somatic_with_ps": 23099,
+ "ps_reliability_per_region": {
+  "single_ps_reliable": 6623,
+  "multi_ps_uncertain": 449,
+  "reliable_rate": 0.937,
+  "by_shape_reliable_vs_uncertain": {
+   "full_tree": {
+    "reliable": 596,
+    "uncertain": 81
+   },
+   "sibling_only": {
+    "reliable": 1130,
+    "uncertain": 105
+   },
+   "linear_nested": {
+    "reliable": 1784,
+    "uncertain": 124
+   },
+   "co_linked_lineage": {
+    "reliable": 812,
+    "uncertain": 46
+   }
+  }
+ },
+ "tier_ps_extension": {
+  "same_ps_pairs_gt50kb(Tier-PS candidates)": 127183,
+  "of_which_same_HP": 80980,
+  "ccf_pairs_checked": 127183,
+  "ccf_consistent(|dVAF|<=0.1)": 53939,
+  "ccf_consistent_rate": 0.424,
+  "interpretation": "same-PS = 同 germline phase block(非同克隆); 若 CCF 不一致 = 同單倍型上的不同 subclone → PS 不建立克隆共現, 只給 germline 單倍型 context"
+ },
+ "verdict": "PS 的用途 = (a) reliability 旗標(多 PS region = phase-switch 風險, HP 判別不可信) (b) Tier-PS 延伸 germline 單倍型 context 但非克隆連鎖(germline phasing != clonal)"
+}
