@@ -289,6 +289,19 @@ def check(data):
                                  f"CURRENT_FOCUS 最新 {max(_cf)} vs graph updated_at {_g} 差 {_skew} 天（敘述/機械層漂移 >7d，pain#3）"))
     except Exception:
         pass
+    # F8 (Phase 3): task 連到 archived-status memory = 複用已降級結論 (stale reuse guard, pain#2/#3)
+    try:
+        _MEM = "/bip7_disk/liaoyoyo2001/.claude/projects/-big7-disk-liaoyoyo2001-InterSubMod/memory"
+        _arch = set()
+        for _f in _glob.glob(os.path.join(_MEM, "*.md")):
+            if os.path.basename(_f) != "MEMORY.md" and "status: archived" in open(_f, encoding="utf-8").read():
+                _arch.add(os.path.basename(_f)[:-3])
+        for n in nodes:
+            for m in (n.get("links") or {}).get("memory", []):
+                if m in _arch:
+                    findings.append(("WARN", n["id"], f"links.memory={m} 已 archived（複用已降級結論，改連取代它的 topic）"))
+    except Exception:
+        pass
     return findings, stale
 
 
@@ -1313,15 +1326,62 @@ def cmd_reverse_index(data):
     all_exp = glob.glob(os.path.join(ROOT, "docs/experiments/**/*.md"), recursive=True)
     orphans = sorted(os.path.relpath(f, ROOT) for f in all_exp if os.path.basename(f) not in referenced)
     multi_cited = {k: v for k, v in mem_map.items() if len(v) > 1}
+    # Phase 2 (2026-06-26): linked-topic 自述 meta — type/status 從 frontmatter、tier 從 MEMORY.md ⭐ 衍生（零 mass-edit）
+    MEM_DIR = "/bip7_disk/liaoyoyo2001/.claude/projects/-big7-disk-liaoyoyo2001-InterSubMod/memory"
+    try:
+        idx_txt = open(os.path.join(MEM_DIR, "MEMORY.md"), encoding="utf-8").read()
+    except OSError:
+        idx_txt = ""
+    idx_lines = idx_txt.splitlines()
+    topic_meta = {}
+    for topic in mem_map:  # only topics actually linked by a task
+        meta = {"type": None, "status": None, "tier": None}
+        try:
+            for line in open(os.path.join(MEM_DIR, topic + ".md"), encoding="utf-8").read()[:800].splitlines():
+                ls = line.strip()
+                if ls.startswith("status:"):
+                    meta["status"] = ls.split(":", 1)[1].strip()
+                elif ls.startswith("type:"):
+                    meta["type"] = ls.split(":", 1)[1].strip()
+        except OSError:
+            pass
+        for line in idx_lines:  # tier ⭐N lives in the [**title ⭐3**] of the index line (not after the link)
+            if "(" + topic + ".md)" in line:
+                tm = re.search(r"⭐([0-9])", line)
+                if tm:
+                    meta["tier"] = "⭐" + tm.group(1)
+                break
+        topic_meta[topic] = meta
+    # Phase 3 (2026-06-26): ledger cycle_id ↔ task join（task.links.cycle_id ∩ evidence_ledger；claim→evidence 單一視圖）
+    task_cyc = {}
+    for n in nodes:
+        c = (n.get("links") or {}).get("cycle_id")
+        if c:
+            task_cyc.setdefault(c, []).append(n["id"])
+    ledger_join = {}
+    try:
+        for ln in open(os.path.join(ROOT, "research/autoresearch/evidence_ledger.jsonl"), encoding="utf-8"):
+            try:
+                e = json.loads(ln)
+            except ValueError:
+                continue
+            cid = e.get("cycle_id")
+            if cid in task_cyc:
+                ledger_join[cid] = {"tasks": task_cyc[cid], "verdict": e.get("verdict"),
+                                    "tier_used": e.get("tier_used"), "methodology_doc": e.get("methodology_doc")}
+    except OSError:
+        pass
     out = {
-        "generated_from": "state/tasks/graph.json forward links (derived, do not hand-edit)",
+        "generated_from": "state/tasks/graph.json forward links + memory frontmatter + ledger (derived, do not hand-edit)",
         "memory_topic_to_tasks": dict(sorted(mem_map.items())),
         "report_to_tasks": dict(sorted(rep_map.items())),
         "io_input_to_tasks": dict(sorted(io_map.items())),
         "multi_cited_memory": dict(sorted(multi_cited.items())),
+        "linked_topic_meta": dict(sorted(topic_meta.items())),
+        "ledger_cycle_to_tasks": dict(sorted(ledger_join.items())),
         "orphan_experiment_docs": orphans,
         "stats": {"memory_topics": len(mem_map), "reports": len(rep_map), "io_inputs": len(io_map),
-                  "multi_cited_memory": len(multi_cited),
+                  "multi_cited_memory": len(multi_cited), "ledger_joins": len(ledger_join),
                   "experiment_docs_total": len(all_exp), "experiment_docs_orphan": len(orphans)},
     }
     outp = os.path.join(os.path.dirname(GRAPH), "reverse_index.json")
@@ -1331,6 +1391,8 @@ def cmd_reverse_index(data):
     print(f"[ok] reverse-index → {os.path.relpath(outp, ROOT)}")
     print(f"  memory→task: {s['memory_topics']} topics ｜ report→task: {s['reports']} ｜ io→task: {s['io_inputs']}")
     print(f"  多被引用的權威 topic (>1 任務): {s['multi_cited_memory']}")
+    _tiered = sum(1 for v in topic_meta.values() if v.get("tier"))
+    print(f"  linked-topic meta: {len(topic_meta)} topics（{_tiered} 有 tier）｜ledger cycle↔task join: {s['ledger_joins']}")
     print(f"  ⚠ orphan 實驗文件（無任務 links.reports 引用）: {s['experiment_docs_orphan']}/{s['experiment_docs_total']}"
           f" ({100 * s['experiment_docs_orphan'] // max(s['experiment_docs_total'], 1)}%)")
 
