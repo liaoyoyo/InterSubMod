@@ -108,7 +108,7 @@ nodes.append(C("T-PHASE", "甲基-assist phasing", "甲基救 unphase / haplotag
 nodes.append(C("T-ASM", "ASM characterization", "等位基因特異甲基化刻畫（⭐3-4；真實但非 filter）"))
 nodes.append(ismn["T-ISM"])  # 完成 ISM 程式 (container, keeps headline/summary)
 nodes.append(C("T-METHOD", "方法健全性", "ISM 方法合理性 + 分群驗證 + 已結支撐研究"))
-nodes.append(C("T-LOCUS", "位點層驗證", "chr2:18M 等具體位點的 subclone 結構驗證"))
+nodes.append(C("T-LOCUS", "位點層驗證", "chr2:18M + chr17:48360161 等具體位點的 subclone 結構驗證（chr17=完整 4-subclone 連鎖例）"))
 nodes.append(C("T-EXT", "外部驗證", "文獻/工具/真值比對庫 + 引用驗證"))
 nodes.append(C("T-NEG", "filter-NEGATIVE 四道脊柱", "甲基非 filter 的 4 道獨立負證（論文 Methods-Negative）", "claude"))
 nodes.append(C("T-GATE", "決策 gates（OPEN）", "定論文 Grade / tier / 甲基-subclone 故事的 3 個未決", "claude+user"))
@@ -120,6 +120,12 @@ for nid, n in ismn.items():
         nodes.append(n)
 # clone/subclone judgment (ism T-CSC) under T-ISM
 csc = dict(ismn["T-CSC"]); csc["parent"] = "T-ISM"; nodes.append(csc)
+# three-gate cluster redesign (06-22) — new T-SL leaf (not in ismn)
+nodes.append(N("T-SL-3GATE", "三閘 cluster redesign（coarse/fine 分類）", "T-SL", "analysis", "in_progress", "claude",
+               headline="三閘（balance群≥3／null-excess≥0.10 扣 within-1-group／alignment 歸因 germline）+ coarse/fine/per-read 三輸出；每群標 CONFIRMED/REAL_NOVEL/edge/outlier",
+               goal="切群重設計：三閘把每群標 CONFIRMED／REAL_NOVEL(subclone候選)／edge／outlier；29 例 B+C=17 有候選；純分析待全基因組",
+               links={"memory": ["project_cluster_redesign_three_gate", "project_phylo_subcluster_labeling_doubledip_fix"]},
+               notes="v1 null 沿用樹=double-dip 假象（cis-ASM 零 subclone）→ v2 per-subgroup null + v3.1 修單離群吃群位；C++ deferred 先 Python 定稿"))
 
 # ---- re-parent v2 flat nodes into containers ----
 for nid in ("T-A1", "T-A2", "T-M1"):
@@ -186,7 +192,8 @@ nodes.append(N("T-GATE-GB", "G-B：within-hap somatic null → 定甲基-subclon
 nodes.append(N("T-GATE-GD", "G-D：真實重建 demo（從 ISM verdict 實際重建一棵樹）", "T-ISM", "compute", "todo", "claude+user", is_gate=True,
                depends_on=["T-ISM-V2-RECON"], headline="用重建支持位點實際重建 subclone 樹 → 證 reconstruction 非僅 proof-of-concept",
                goal="從 ISM verdict + 重建支持位點實際重建一棵 subclone 樹（與外部真值對照）→ reconstruction 說服力升級",
-               missing=["長期 roadmap；依賴 V-2 系統掃描"], links={"memory": ["project_six_sample_clone_subclone_external_truth"]}))
+               missing=["長期 roadmap；依賴 V-2 系統掃描"], links={"memory": ["project_six_sample_clone_subclone_external_truth"]},
+               notes="chr17:48360161 已是 regional 4-subclone 重建例（T-L4，連鎖錨）→ 本 gate 的 genome-wide tree demo 仍待 V-2 系統掃描。"))
 nodes.append(N("T-GATE-GE", "G-E：正交第二定相 pipeline（破 single-pipeline 自我參照）", "T-METHOD", "compute", "todo", "claude+user", is_gate=True,
                headline="第二條正交 haplotag/phasing pipeline → 破 longphase-S 單 pipeline 自我參照、解 HD-1 循環、升 tier 天花板",
                goal="正交第二定相 pipeline 跑出獨立 haplotag → 對照 longphase-S → 解 single-pipeline 循環 + 衝 ⭐4",
@@ -243,6 +250,13 @@ nodes.append(N("T-W-ISMDEDUP", "去重 graph_ism.json 子樹 + 標 deprecated（
 nodes.append(N("T-L3", "chr8 全-LOH 第二 exemplar locus 驗證", "T-LOCUS", "analysis", "todo", "claude",
                depends_on=["T-A1"], headline="除 chr2:18M 外的第二旗艦位點（chr8 全-LOH 熱點）→ 加厚 R5 EXEMPLAR",
                goal="chr8 熱點完成 sSNV+甲基分群實測，成為 chr2:18M 之外第二個可寫的 exemplar", links={"memory": ["project_hcc1395_chr8_hotspot"]}))
+# chr17 sSNV linkage (06-25) — complete 4-subclone exemplar;唯一非循環確認錨
+nodes.append(N("T-L4", "chr17 sSNV 連鎖驗證 — 完整 4-subclone 例（單樣本確認錨）", "T-LOCUS", "analysis", "done", "claude",
+               depends_on=["T-L1", "T-NEG-D1"],
+               headline="chr17:48360161 完整 4-細胞群 phylogeny（γ∥α sibling + α→L1+L2 nested，全同-HP，normal=REF）",
+               goal="確立唯一非循環 subclone 確認錨＝同 germline-HP 上 ≥2 somatic SNV 的 read-level 共現（互斥=sibling／嵌套=ancestor-descendant）；甲基=characterize 非偵測。⭐3 regional 非 genome-wide tree",
+               links={"memory": ["project_subclone_snv_linkage_verification_pipeline", "project_chr2_18m_subclone_locus_verification"]},
+               notes="🔴 pending-merge：產物在 worktree ism-review-infra／branch docs/method-comparison-ism-external-202606，未合併進本主軸 branch。方法學警訊：γ 被 SEQC2 判 FP 但 normal=REF=真 somatic → 只用 filtered-TP 集會漏真克隆分支，須用 methyl_PASS VCF + per-pair normal 確認"))
 nodes.append(N("T-C-UNMASK", "LOH-unmask ASM confound（Martin-Trujillo）寫入限制", "T-ASM", "analysis", "todo", "claude",
                headline="LOH 揭露原本沉默的 ASM = 強 confound（Martin-Trujillo）→ 須在限制段明確處理",
                goal="LOH-unmask confound 在 Ch5 限制段明確敘述 + 對 cis 主張的影響界定", links={"memory": ["project_O12_loh_methylation_scenarios"]}))

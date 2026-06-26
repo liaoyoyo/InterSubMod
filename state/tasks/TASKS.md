@@ -1,7 +1,7 @@
 # 研究任務樹（WBS） — TASKS.md
 
 > **自動產生，請勿手改。** 唯一真值 = `state/tasks/graph.json`；改後重跑 `python3 scripts/tasks/task_graph.py --graph state/tasks/graph.json render`。
-> 生成 2026-06-26 · build `8d3e4ee` @ `research/subclonal-reconstruction-202606` · 節點 110（✅40 ◐29 ⛔1 ☐39 ✗1） · focus = `T-SL`
+> 生成 2026-06-26 · build `502e95a` @ `research/subclonal-reconstruction-202606` · 節點 112（✅41 ◐30 ⛔1 ☐39 ✗1） · focus = `T-SL`
 
 ## ⓪ 驗證（validate + check）
 - validate: ✅ PASS
@@ -51,6 +51,7 @@
     - ◐ `T-S5` 甲基『幾群』判定 — 收斂 Path B model-based [分析/進行中]　in:●a-priori 軸　缺:A 路相關感知 null 真實資料失敗 81% → 需 model-based 大改　↳project_subcluster_cluster_count_determination
     - ✅ `T-S6` cluster×label 對齊 = paired 非 tumor-only（盤點） [分析/已完成]　in:●a-priori 分類　↳project_cluster_label_alignment_readset_paired
     - ★ `T-SL` 修正「結構驅動切區塊 × 標籤驗證」 [里程碑/進行中]　缺:救回主軸 allele≫HP 需 cis-control 分 cis-ASM vs subclone　↳20260617_keep_remove_classification_conditioned_axes
+      - ◐ `T-SL-3GATE` 三閘 cluster redesign（coarse/fine 分類） [分析/進行中]　↳project_cluster_redesign_three_gate
       - ✅ `T-SL-ARI` 觀察：C2 ARI（幾何群×標籤）genome-wide [里程碑/已完成]
         - ✅ `T-SL-ARI-F` 修：emit ARI_Cluster_HP / ARI_Cluster_Allele C++ [程式/已完成]　in:●幾何群 labels +…,●Bootstrap::a…　↳project_ism_verdict_false_negative_audit_2026_06_16
         - ✅ `T-SL-ARI-O` 觀察：ARI median HP0.145/allele0.005；對齊23.9%/沒對齊49.3% [分析/已完成]　↳project_ism_verdict_false_negative_audit_2026_06_16
@@ -77,6 +78,7 @@
     - ✅ `T-L1` chr2:18M subclone 位點驗證 L2 [分析/已完成]　in:●tagged BAM (…,●6 sSNV 候選　↳20260615_chr2_18M_subclone_independent_validation
     - ✅ `T-L2` chr2:18M × SEQC2 外部驗證 + AI 解釋指南 [分析/已完成]　in:●chr2:18M L2 …,●SEQC2 truth　↳project_hcc1395_chr2_18M_subclone_external_validation
     - ☐ `T-L3` chr8 全-LOH 第二 exemplar locus 驗證 [分析/待辦]　↳project_hcc1395_chr8_hotspot
+    - ✅ `T-L4` chr17 sSNV 連鎖驗證 — 完整 4-subclone 例（單樣本確認錨） [分析/已完成]　↳project_subclone_snv_linkage_verification_pipeline
   - ◐ `T-METHOD` 方法健全性 [里程碑/進行中]
     - ☐ `T-GATE-GE` G-E：正交第二定相 pipeline（破 single-pipeline 自我參照） [程式/待辦]　in:●6 樣本 tagged …,●正交 phasing 工…　缺:長期 roadmap；與 HD-1 相關　↳project_subclonal_reconstruction_paper_focus
     - ☐ `T-METHOD-BINVER` binary_version 一致性檢核 [程式/待辦]　in:●state/invali…,●canonical 結果…　↳project_new_data_integrity_audit_2026_06_17
