@@ -13,7 +13,8 @@
       "T-CSC",
       "T-S1",
       "T-GATE-GB",
-      "T-GATE-GC"
+      "T-GATE-GC",
+      "T-METHYL-REEXTRACT"
     ],
     "project_asm_cn_confound_pilot": [
       "T-C4",
@@ -138,7 +139,8 @@
       "T-SUP-CLUST",
       "T-GATE-HD1",
       "T-GATE-GE",
-      "T-W3"
+      "T-W3",
+      "T-DORADO"
     ],
     "project_subclone_confirmation_construction_ont_transferability": [
       "T-METHOD-VERIFY"
@@ -151,7 +153,13 @@
       "T-Q1-COVERAGE"
     ],
     "project_subclone_snv_linkage_verification_pipeline": [
-      "T-L4"
+      "T-ISM-V2-RECON",
+      "T-L4",
+      "T-GW-RECON",
+      "T-CCF",
+      "T-INTEG",
+      "T-METHYL-REEXTRACT",
+      "T-DORADO"
     ],
     "project_subcluster_cluster_count_determination": [
       "T-SL-C1-V",
@@ -180,8 +188,41 @@
     "": [
       "T-W-CH3"
     ],
+    "20260601_ISM_aux_tag_figure_review_interactive_01.md": [
+      "T-ISM"
+    ],
     "20260602_ASM_CN_confound_disentanglement_pilot_01.md": [
       "T-C4"
+    ],
+    "20260602_ASM_cluster_characterization_regimeA_LOH_diagnostic_01.md": [
+      "T-ASM"
+    ],
+    "20260602_feature_matrix_trial_appropriateness_record_01.md": [
+      "T-METHOD"
+    ],
+    "20260603_ISM_copy_partition_confound_verification_01.md": [
+      "T-SUP-COPY"
+    ],
+    "20260603_cross_sample_keypos_ASM_verification_01.md": [
+      "T-C-CROSS"
+    ],
+    "20260607_HP11_tag_definition_correction_record_01.md": [
+      "T-ISM"
+    ],
+    "20260607_methylation_clustering_CNV_vs_mutation_validation_01.md": [
+      "T-SUP-COPY"
+    ],
+    "20260607_methylation_clustering_capstone_synthesis_01.md": [
+      "T-SL"
+    ],
+    "20260607_paper_session_handoff_BRCA2_subclone_relabel_01.md": [
+      "T-ASM"
+    ],
+    "20260608_methylation_necessity_F1_crosssample_QUESTIONS_for_handoff.md": [
+      "T-NEG"
+    ],
+    "20260610_methylation_clusterability_vs_coverage_CN_characterization_01.md": [
+      "T-SUP-CLUST"
     ],
     "20260615_chr2_18M_seqc2_concordance_demo_01.md": [
       "T-L2"
@@ -189,11 +230,20 @@
     "20260615_chr2_18M_subclone_independent_verdict_02.md": [
       "T-L2"
     ],
+    "20260615_chr2_18M_subclone_report01_critical_audit_03.md": [
+      "T-L2"
+    ],
     "20260615_chr2_18M_subclone_verification_HCC1395_01.md": [
       "T-L1"
     ],
     "20260616_structure_label_verdict_false_negative_audit_01.md": [
       "T-SL"
+    ],
+    "20260619_tp_fp_structure_label_association_HCC1395_01.md": [
+      "T-SL"
+    ],
+    "20260620_cnv_sv_work_assets_manifest_01.md": [
+      "T-ONT-CNV"
     ],
     "20260620_decisionflow_5state_classification_wg_01.md": [
       "T-DECISIONFLOW"
@@ -213,11 +263,17 @@
     "20260620_somatic_locus_methylation_combination_enumeration_01.md": [
       "T-SUP-LOCUS"
     ],
+    "20260620_subclone_label_methods_pilot_report_01.md": [
+      "T-SIT-VER"
+    ],
     "20260620_subclone_situation_verification_reasoning_01.md": [
       "T-SIT-VER"
     ],
     "20260621_clone_subclone_reconstruction_landscape_and_ism_feasibility_01.md": [
       "T-METHOD-LANDSCAPE"
+    ],
+    "20260621_kism_vs_cn_perread_result_01.md": [
+      "T-ONT-CNV"
     ],
     "20260621_subclone_confirmation_construction_and_ONT_transferability_01.md": [
       "T-METHOD-VERIFY"
@@ -234,6 +290,15 @@
     "20260622_T-P2_T2_overstated_caliber_correction_draft_01.md": [
       "T-P2"
     ],
+    "20260622_cluster_redesign_genomewide_tpfp_01.md": [
+      "T-SL-3GATE"
+    ],
+    "20260622_cluster_redesign_three_gate_wg_01.md": [
+      "T-SL-3GATE"
+    ],
+    "20260622_clustering_stability_validation_wg_01.md": [
+      "T-SL-C1"
+    ],
     "20260622_ism_method_cognition_and_open_questions_01.md": [
       "T-SL",
       "T-V1",
@@ -246,10 +311,16 @@
     "20260622_wakhan_hcc1395_3way_cn_comparison_01.md": [
       "T-ONT-CNV"
     ],
+    "HANDOFF_tumor_vs_normal_hpauc.md": [
+      "T-V4"
+    ],
     "README.md": [
       "T-SL-RO"
     ],
     "SUMMARY_all_samples.md": [
+      "T-SL-RO"
+    ],
+    "TP_FP_comparison.md": [
       "T-SL-RO"
     ],
     "ch1_introduction.md": [
@@ -257,6 +328,12 @@
     ],
     "ch2_related_works.md": [
       "T-W-CH2"
+    ],
+    "chr2_18M_seqc2_concordance.md": [
+      "T-L2"
+    ],
+    "independent_audit.md": [
+      "T-L2"
     ],
     "ssnv_spacing_coverage.json": [
       "T-Q1-COVERAGE"
@@ -290,8 +367,14 @@
     "CN call": [
       "T-C4"
     ],
+    "CN/SEQC2 truth（可選）": [
+      "T-GW-RECON"
+    ],
     "COLO829 tagged BAM": [
       "T-C6"
+    ],
+    "HCC1395 Dorado/5khz BAM（未 tag）": [
+      "T-DORADO"
     ],
     "HCC1395 somatic sSNV VCF (ClairS TP)": [
       "T-Q1-COVERAGE"
@@ -371,6 +454,9 @@
     "T-E2": [
       "T-W3"
     ],
+    "T-GW-RECON": [
+      "T-METHYL-REEXTRACT"
+    ],
     "T-ISM-V2-RECON": [
       "T-GATE-GD"
     ],
@@ -412,11 +498,17 @@
     "haplotag 1-1/2-1 標籤": [
       "T-S1"
     ],
+    "longphase-S": [
+      "T-DORADO"
+    ],
     "longphase-S tag": [
       "T-P1"
     ],
     "n_reads per region (epipolymorphism)": [
       "T-METHOD-FDR"
+    ],
+    "normal BAM": [
+      "T-GW-RECON"
     ],
     "normal BAM (cis-control)": [
       "T-C1"
@@ -436,11 +528,20 @@
     "state/invalidation/binary_versions.jsonl": [
       "T-METHOD-BINVER"
     ],
+    "tumor BAM（5mCG haplotag）": [
+      "T-METHYL-REEXTRACT"
+    ],
+    "tumor BAM（longphase-S HP/PS tagged）": [
+      "T-GW-RECON"
+    ],
     "tumor ONT BAM (讀長分布)": [
       "T-Q1-COVERAGE"
     ],
     "tumor reads only": [
       "T-SL-RO-1"
+    ],
+    "union TP∪FP somatic VCF（35,332 sSNV）": [
+      "T-GW-RECON"
     ],
     "within-HP pattern 距離 + mean-β": [
       "T-SL-RECLS-2"
@@ -456,6 +557,9 @@
     ],
     "外部真值 (Fang2021 / COLO829)": [
       "T-GATE-GD"
+    ],
+    "對應 TP/FP somatic VCF": [
+      "T-DORADO"
     ],
     "幾何群 labels + HP/allele 標籤": [
       "T-SL-ARI-F"
@@ -486,7 +590,8 @@
       "T-CSC",
       "T-S1",
       "T-GATE-GB",
-      "T-GATE-GC"
+      "T-GATE-GC",
+      "T-METHYL-REEXTRACT"
     ],
     "project_asm_cn_confound_pilot": [
       "T-C4",
@@ -563,11 +668,21 @@
       "T-SUP-CLUST",
       "T-GATE-HD1",
       "T-GATE-GE",
-      "T-W3"
+      "T-W3",
+      "T-DORADO"
     ],
     "project_subclone_situation_verification_methods": [
       "T-SL-CPG-ATTR",
       "T-SIT-VER"
+    ],
+    "project_subclone_snv_linkage_verification_pipeline": [
+      "T-ISM-V2-RECON",
+      "T-L4",
+      "T-GW-RECON",
+      "T-CCF",
+      "T-INTEG",
+      "T-METHYL-REEXTRACT",
+      "T-DORADO"
     ],
     "project_subcluster_cluster_count_determination": [
       "T-SL-C1-V",
@@ -821,7 +936,8 @@
       "methodology_doc": "docs/methodology/20260616_tumor_only_structure_axis_cpp_change_audit_01.md"
     }
   },
-  "orphan_experiment_docs": [
+  "orphan_experiment_docs": [],
+  "concluded_era_excluded": [
     "docs/experiments/INDEX.md",
     "docs/experiments/INDEX_DETAIL_ARCHIVE.md",
     "docs/experiments/finalized/2025/12/20251218_optimization_log_01.md",
@@ -943,29 +1059,6 @@
     "docs/experiments/in_progress/2026/05/20260531_methyl_phasing_A0_assets/VERIFIED_RESULTS.md",
     "docs/experiments/in_progress/2026/05/20260531_methyl_unphase_HP3_phasing_rescue_design_02.md",
     "docs/experiments/in_progress/2026/05/20260531_methyl_unphase_HP3_phasing_rescue_scoping_01.md",
-    "docs/experiments/in_progress/2026/06/20260601_ISM_aux_tag_figure_review_interactive_01.md",
-    "docs/experiments/in_progress/2026/06/20260602_ASM_cluster_characterization_regimeA_LOH_diagnostic_01.md",
-    "docs/experiments/in_progress/2026/06/20260602_feature_matrix_trial_appropriateness_record_01.md",
-    "docs/experiments/in_progress/2026/06/20260603_ISM_copy_partition_confound_verification_01.md",
-    "docs/experiments/in_progress/2026/06/20260603_cross_sample_keypos_ASM_verification_01.md",
-    "docs/experiments/in_progress/2026/06/20260607_HP11_tag_definition_correction_record_01.md",
-    "docs/experiments/in_progress/2026/06/20260607_methylation_clustering_CNV_vs_mutation_validation_01.md",
-    "docs/experiments/in_progress/2026/06/20260607_methylation_clustering_capstone_synthesis_01.md",
-    "docs/experiments/in_progress/2026/06/20260607_paper_session_handoff_BRCA2_subclone_relabel_01.md",
-    "docs/experiments/in_progress/2026/06/20260608_methylation_necessity_F1_crosssample_QUESTIONS_for_handoff.md",
-    "docs/experiments/in_progress/2026/06/20260610_methylation_clusterability_vs_coverage_CN_characterization_01.md",
-    "docs/experiments/in_progress/2026/06/20260614_u1_maxdist_vs_skip/method_audit/HANDOFF_tumor_vs_normal_hpauc.md",
-    "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_report01_critical_audit_03.md",
-    "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/chr2_18M_seqc2_concordance.md",
-    "docs/experiments/in_progress/2026/06/20260615_chr2_18M_subclone_verification_assets/data/independent_audit.md",
-    "docs/experiments/in_progress/2026/06/20260619_tp_fp_structure_association_HCC1395/20260619_tp_fp_structure_label_association_HCC1395_01.md",
-    "docs/experiments/in_progress/2026/06/20260620_allsample_subcluster_split/results/TP_FP_comparison.md",
-    "docs/experiments/in_progress/2026/06/20260620_cnv_sv_work_assets_manifest_01.md",
-    "docs/experiments/in_progress/2026/06/20260620_subclone_label_methods_pilot/20260620_subclone_label_methods_pilot_report_01.md",
-    "docs/experiments/in_progress/2026/06/20260621_kism_vs_cn_perread/20260621_kism_vs_cn_perread_result_01.md",
-    "docs/experiments/in_progress/2026/06/20260622_cluster_redesign_genomewide_tpfp_01.md",
-    "docs/experiments/in_progress/2026/06/20260622_cluster_redesign_three_gate_wg_01.md",
-    "docs/experiments/in_progress/2026/06/20260622_clustering_stability_validation_wg_01.md",
     "docs/experiments/validated/2025_ARCHIVED.md",
     "docs/experiments/validated/2026/01/20260106_TP_FP_分析_01.md",
     "docs/experiments/validated/2026/01/20260106_analysis_report_01.md",
@@ -987,11 +1080,12 @@
   ],
   "stats": {
     "memory_topics": 40,
-    "reports": 27,
-    "io_inputs": 66,
-    "multi_cited_memory": 20,
+    "reports": 50,
+    "io_inputs": 75,
+    "multi_cited_memory": 21,
     "ledger_joins": 3,
     "experiment_docs_total": 180,
-    "experiment_docs_orphan": 162
+    "experiment_docs_orphan": 0,
+    "concluded_era_excluded": 139
   }
 }

@@ -226,10 +226,11 @@ nodes.append(N("T-C7", "V-4 BRCA2 exemplar copy-partition 重驗（illustrative 
                depends_on=["T-C1"], headline="BRCA2 疑 copy-confounded(d_within −0.023≪d_copy −0.11) → 37_copy_partition 定有無乾淨 somatic-cis",
                goal="copy-partition null 跑完、裁決 BRCA2 是 illustrative(標caveat,cis錨改chr17) 或部分乾淨 cis；決 copy caveat 能否解除",
                links={"memory": ["project_zar1l_brca2_asm_verification"]}))
-nodes.append(N("T-ISM-V2-RECON", "V-2 重建支持位點 pre-reg 判準 + 全基因組×6 掃描 + 頻率/位點 catalog", "T-ISM", "compute", "todo", "claude",
+nodes.append(N("T-ISM-V2-RECON", "V-2 重建支持位點 pre-reg 判準 + 全基因組×6 掃描 + 頻率/位點 catalog", "T-ISM", "compute", "in_progress", "claude",
                depends_on=["T-A4"], headline="把 reconstruction 從個案(chr2)升 systematic：pre-reg 判準→genome×6 掃描→位點+頻率+每點假想樹/ARI",
                goal="pre-register『重建支持位點』判準(≥N somatic 兩-caller + 甲基↔突變 ARI 一致 + LOH 脈絡)→全掃→catalog；定 R5 EXEMPLAR climax",
-               missing=["依賴 T-A4 第二 caller"], links={"memory": ["project_chr2_18m_subclone_locus_verification"]}))
+               missing=["依賴 T-A4 第二 caller"], links={"memory": ["project_chr2_18m_subclone_locus_verification", "project_subclone_snv_linkage_verification_pipeline"]},
+               notes="genome-wide×1(HCC1395) 已由 T-GW-RECON 實現（7,143 區域 catalog）；×6 跨樣本 + 完整 pre-reg 判準待（T-DORADO=最近起點）。"))
 nodes.append(N("T-METHOD-FDR", "V-7 FDR / 多重檢定校準：跨位點 null + BH-FDR + n_reads 校正", "T-METHOD", "compute", "todo", "claude",
                headline="跨位點 label-shuffle null + BH-FDR + chr17 Bonferroni(×816)/genome-perm + n_reads 回歸校正（投稿前必補）",
                goal="FDR/BH/Bonferroni across loci 算完 + n_reads 校正 epipolymorphism(O11 0.845→0.530)；ch3_methods 補上",
@@ -257,6 +258,49 @@ nodes.append(N("T-L4", "chr17 sSNV 連鎖驗證 — 完整 4-subclone 例（單�
                goal="確立唯一非循環 subclone 確認錨＝同 germline-HP 上 ≥2 somatic SNV 的 read-level 共現（互斥=sibling／嵌套=ancestor-descendant）；甲基=characterize 非偵測。⭐3 regional 非 genome-wide tree",
                links={"memory": ["project_subclone_snv_linkage_verification_pipeline", "project_chr2_18m_subclone_locus_verification"]},
                notes="🔴 pending-merge：產物在 worktree ism-review-infra／branch docs/method-comparison-ism-external-202606，未合併進本主軸 branch。方法學警訊：γ 被 SEQC2 判 FP 但 normal=REF=真 somatic → 只用 filtered-TP 集會漏真克隆分支，須用 methyl_PASS VCF + per-pair normal 確認"))
+# ---- genome-wide clone/subclone (06-26~27, branch feat/summary-nreadsvalid, pending-merge) ----
+_PM = "🔴 pending-merge：產物在 branch feat/summary-nreadsvalid（worktree ism-review-infra），未合併進本主軸。"
+nodes.append(N("T-GW-RECON", "全基因組 sSNV 單分子連鎖 → 每區域克隆樹重建 pipeline", "T-ISM", "compute", "done", "claude",
+               depends_on=["T-L4"],
+               headline="35,332 sSNV → 7,143 區域 → 677 full_tree（乾淨 CN 205）；53% 區域有確認克隆分支；chr17 被自動重建",
+               goal="把 reconstruction 從個案推到全基因組 exhaustive：union TP∪FP 單分子 2×2 共現 → 每最大可關聯區域局部克隆樹（⭐3 Tier-R）",
+               io={"inputs": [{"name": "union TP∪FP somatic VCF（35,332 sSNV）", "required": True, "ref": None},
+                              {"name": "tumor BAM（longphase-S HP/PS tagged）", "required": True, "ref": None},
+                              {"name": "normal BAM", "required": False, "ref": None},
+                              {"name": "CN/SEQC2 truth（可選）", "required": False, "ref": None}],
+                   "outputs": ["per-sSNV census TSV（35,332）", "per-region 克隆樹（7,143 區域）", "完整性帳本（Tier-R sum-check）", "樹形分布表（full_tree 677 等）"]},
+               links={"memory": ["project_subclone_snv_linkage_verification_pipeline"]},
+               notes=_PM + " 過 fresh-context evaluator 對抗稽核 NEEDS_WORK→5 修正已套。🔴 限制：~69% 訊號在 CN-gain 混淆區（乾淨集=LOH+neutral）；偽影 mask 未清（chr8:81-83M 等 segdup 簇 816 sSNV，F2/F3→需 mappability/segdup mask + CN context，連 T-ONT-CNV）；Tier-R only；regional 非 genome-wide tree、分子非 single-cell。"))
+nodes.append(N("T-CCF", "CCF tier — VAF 階層獨立驗證（祖先≥後代）", "T-ISM", "analysis", "done", "claude",
+               depends_on=["T-GW-RECON"],
+               headline="祖先 VAF≥後代違反僅 5.7%（決定性 92.5%／clean 96%）；GMM BIC n=3 CCF 群（離散 subclone 層級）",
+               goal="用 CN-corrected VAF 這條獨立軸驗證 read-樹方向 + 統計確認離散 subclone 層級（僅 CN-clean 可估）",
+               links={"memory": ["project_subclone_snv_linkage_verification_pipeline"]},
+               notes=_PM + " 限制：僅 CN-clean 可估（gain multiplicity 歧義）+ CN-mixture 構造警告。誠實報含 tie（69.8% support／5.7% violate／24.5% tie）。"))
+nodes.append(N("T-INTEG", "clone/subclone 多層整合報告（sSNV+HP+CCF+PS+甲基 L0-L7）", "T-ISM", "writing", "in_progress", "claude",
+               depends_on=["T-GW-RECON", "T-CCF"],
+               headline="逐層單變量驗證各資訊源 data-supported 貢獻（HP 移 57% allelic／CCF 5.7%／PS 92.7%單一／甲基 0.19%覆蓋）→ 論文 Ch4 重建結果素材",
+               goal="用 sSNV+ONT read 建構整體 clone/subclone，逐層(HP→CCF→PS→甲基)單變量驗證 + 統整可驗證敘述（precedence: sSNV連鎖>HP>甲基）",
+               links={"memory": ["project_subclone_snv_linkage_verification_pipeline"]},
+               notes=_PM + " 過 7-agent Workflow 對抗稽核 NEEDS_WORK→8 修正已套。L0-L4✅/L5-L7 進行中。🔴 紅線：甲基 corroborate 非 detect。"))
+nodes.append(N("T-METHYL-REEXTRACT", "甲基從 BAM 重抽（補 genotype-anchored corroboration）", "T-ASM", "compute", "todo", "claude",
+               depends_on=["T-GW-RECON"],
+               headline="既有甲基輸出僅覆蓋 0.19%（9/4678 region）→ 須從 BAM 重抽才能真正 corroborate genotype-anchored 克隆群",
+               goal="對 sSNV 定好的 genotype-anchored 群從 BAM 重抽甲基 → 看甲基是否區分（corroborate 非 detect）；解整合報告 L4 覆蓋不足",
+               io={"inputs": [{"name": "tumor BAM（5mCG haplotag）", "required": True, "ref": None},
+                              {"name": "genotype-anchored 克隆群定義（per-region）", "required": True, "ref": "T-GW-RECON"}],
+                   "outputs": ["per-region genotype-anchored 甲基矩陣", "corroborate vs detect 對照表（覆蓋率修正）"]},
+               links={"memory": ["project_subclone_snv_linkage_verification_pipeline", "project_apriori_subclone_classification_model"]},
+               notes="整合報告 L4 揭露 gap（n=8 小樣本 4/8 corroborate）→ 此為 T-GATE-GB 甲基-subclone 故事的具體前置。"))
+nodes.append(N("T-DORADO", "HCC1395 Dorado 跨化學 within-sample 復現", "T-EXT", "compute", "todo", "claude",
+               headline="Dorado/5khz 化學資料已存在 → 需先 longphase-tag → 同 pipeline 驗骨幹/HP/CCF 化學間一致（V2-RECON ×6 最近起點）",
+               goal="對 HCC1395 Dorado 化學跑 longphase-tag + 同 VCF + 同 pipeline → within-sample 復現骨幹/HP/CCF 化學一致性（跨樣本 ⭐4 的第一步）",
+               io={"inputs": [{"name": "HCC1395 Dorado/5khz BAM（未 tag）", "required": True, "ref": None},
+                              {"name": "對應 TP/FP somatic VCF", "required": True, "ref": None},
+                              {"name": "longphase-S", "required": True, "ref": None}],
+                   "outputs": ["tagged Dorado BAM", "Dorado per-region 克隆樹", "化學一致性對照表"]},
+               links={"memory": ["project_subclone_snv_linkage_verification_pipeline", "project_subclonal_reconstruction_paper_focus"]},
+               notes="資料就緒實測：/big8_disk/data/HCC1395/ONT_Dorado、ONT_5khz 原始存在但需 tag。COLO829/4 細胞株另案（缺 BAM/VCF）。"))
 nodes.append(N("T-C-UNMASK", "LOH-unmask ASM confound（Martin-Trujillo）寫入限制", "T-ASM", "analysis", "todo", "claude",
                headline="LOH 揭露原本沉默的 ASM = 強 confound（Martin-Trujillo）→ 須在限制段明確處理",
                goal="LOH-unmask confound 在 Ch5 限制段明確敘述 + 對 cis 主張的影響界定", links={"memory": ["project_O12_loh_methylation_scenarios"]}))

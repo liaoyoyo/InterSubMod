@@ -37,6 +37,37 @@ GRAPH = os.path.join(ROOT, "state/tasks/graph.json")
 TASKS_MD = os.path.join(ROOT, "state/tasks/TASKS.md")
 BOARD_HTML = os.path.join(ROOT, "state/tasks/tasks_board.html")
 
+ORPHAN_EXCLUDE = os.path.join(ROOT, "state/tasks/orphan_exclude.txt")
+
+
+def _orphan_excluded(relpath, _cache=[]):
+    """True if relpath matches a concluded-era exclusion (state/tasks/orphan_exclude.txt).
+    Lines ending '/' = dir prefix; lines with '*' = fnmatch glob; else substring. See file header."""
+    import fnmatch
+    if not _cache:
+        pats = []
+        try:
+            for line in open(ORPHAN_EXCLUDE, encoding="utf-8"):
+                line = line.strip()
+                if line and not line.startswith("#"):
+                    pats.append(line)
+        except OSError:
+            pass
+        _cache.append(pats)
+    rp = relpath.replace("\\", "/")
+    for p in _cache[0]:
+        if p.startswith("re:"):
+            if re.search(p[3:], rp):
+                return True
+        elif p.endswith("/") and rp.startswith(p):
+            return True
+        elif "*" in p and (fnmatch.fnmatch(rp, p) or fnmatch.fnmatch(os.path.basename(rp), p)):
+            return True
+        elif "*" not in p and not p.endswith("/") and p in rp:
+            return True
+    return False
+
+
 VALID_STATUS = ["todo", "in_progress", "blocked", "done", "dropped"]
 VALID_KIND = ["data", "compute", "analysis", "writing", "milestone"]
 VALID_OWNER = ["claude", "user", "claude+user", None]
@@ -271,11 +302,13 @@ def check(data):
         for r in (n.get("links") or {}).get("reports", []):
             _ref.add(os.path.basename(r))
     _exp = _glob.glob(os.path.join(ROOT, "docs/experiments/**/*.md"), recursive=True)
-    _orph = [os.path.relpath(f, ROOT) for f in _exp if os.path.basename(f) not in _ref]
-    if _exp and len(_orph) > 0.5 * len(_exp):  # only flag when the majority are orphan (the real pain, not noise)
+    _orph_all = [os.path.relpath(f, ROOT) for f in _exp if os.path.basename(f) not in _ref]
+    _orph = [o for o in _orph_all if not _orphan_excluded(o)]          # actionable = recent, unlinked
+    _excl = len(_orph_all) - len(_orph)                                 # concluded-era (intentionally unlinked)
+    if _orph:  # flag only actionable orphans (concluded-era excluded via orphan_exclude.txt)
         _ex = "; ".join(os.path.basename(o) for o in sorted(_orph)[:3])
         findings.append(("DETAIL", "docs/experiments",
-                         f"{len(_orph)}/{len(_exp)} 實驗文件無任務 links.reports 引用（舊資料未複用，pain#2）；"
+                         f"{len(_orph)}/{len(_exp)} 實驗文件無任務 links.reports（近期該回填；另 {_excl} 個 concluded-era 已排除）；"
                          f"例 {_ex} …；全清單→`task_graph.py reverse-index` 產 reverse_index.json"))
     # F7: CURRENT_FOCUS 最新日期 vs graph updated_at 漂移 >7d = 敘述層/機械層 SoT 脫節 (pain#3)
     try:
@@ -1324,7 +1357,9 @@ def cmd_reverse_index(data):
                 io_map.setdefault(key, []).append(nid)
     referenced = set(rep_map.keys())
     all_exp = glob.glob(os.path.join(ROOT, "docs/experiments/**/*.md"), recursive=True)
-    orphans = sorted(os.path.relpath(f, ROOT) for f in all_exp if os.path.basename(f) not in referenced)
+    _orph_all = sorted(os.path.relpath(f, ROOT) for f in all_exp if os.path.basename(f) not in referenced)
+    orphans = [o for o in _orph_all if not _orphan_excluded(o)]          # actionable (recent, unlinked)
+    concluded_era_excluded = [o for o in _orph_all if _orphan_excluded(o)]  # concluded-era (intentionally unlinked)
     multi_cited = {k: v for k, v in mem_map.items() if len(v) > 1}
     # Phase 2 (2026-06-26): linked-topic 自述 meta — type/status 從 frontmatter、tier 從 MEMORY.md ⭐ 衍生（零 mass-edit）
     MEM_DIR = "/bip7_disk/liaoyoyo2001/.claude/projects/-big7-disk-liaoyoyo2001-InterSubMod/memory"
@@ -1380,9 +1415,11 @@ def cmd_reverse_index(data):
         "linked_topic_meta": dict(sorted(topic_meta.items())),
         "ledger_cycle_to_tasks": dict(sorted(ledger_join.items())),
         "orphan_experiment_docs": orphans,
+        "concluded_era_excluded": concluded_era_excluded,
         "stats": {"memory_topics": len(mem_map), "reports": len(rep_map), "io_inputs": len(io_map),
                   "multi_cited_memory": len(multi_cited), "ledger_joins": len(ledger_join),
-                  "experiment_docs_total": len(all_exp), "experiment_docs_orphan": len(orphans)},
+                  "experiment_docs_total": len(all_exp), "experiment_docs_orphan": len(orphans),
+                  "concluded_era_excluded": len(concluded_era_excluded)},
     }
     outp = os.path.join(os.path.dirname(GRAPH), "reverse_index.json")
     with open(outp, "w", encoding="utf-8") as fh:
@@ -1393,8 +1430,8 @@ def cmd_reverse_index(data):
     print(f"  多被引用的權威 topic (>1 任務): {s['multi_cited_memory']}")
     _tiered = sum(1 for v in topic_meta.values() if v.get("tier"))
     print(f"  linked-topic meta: {len(topic_meta)} topics（{_tiered} 有 tier）｜ledger cycle↔task join: {s['ledger_joins']}")
-    print(f"  ⚠ orphan 實驗文件（無任務 links.reports 引用）: {s['experiment_docs_orphan']}/{s['experiment_docs_total']}"
-          f" ({100 * s['experiment_docs_orphan'] // max(s['experiment_docs_total'], 1)}%)")
+    print(f"  ⚠ 近期該回填 orphan（無任務 links.reports）: {s['experiment_docs_orphan']}/{s['experiment_docs_total']}"
+          f"｜concluded-era 已排除: {s['concluded_era_excluded']}")
 
 
 def main():

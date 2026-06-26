@@ -1,0 +1,26 @@
+# orphan_exclude — concluded-era 實驗排除清單（2026-06-27 資訊架構 Job 2b）
+#
+# 用途：reverse-index / check() 的「orphan 實驗文件（無任務 links.reports）」指標，
+#   排除這些「pre-subclonal-pivot（2026-06-11 前）concluded-era」實驗。
+#
+# 為何排除而非強連 live 任務：
+#   這些是舊 TO-pipeline filter-DEAD / 甲基-rescue NEGATIVE / Phase1A-ML 等已 concluded
+#   研究線的詳細紀錄。它們的「複用」= 重開該方向時找到 prior NEGATIVE（productive-failure
+#   reopen），這由 CONCLUDED memories（已連到 T-S2 dropped / T-NEG 等 concluded 節點）服務。
+#   強連到 live 任務 = 製造假複用訊號。故標 concluded-era 排除，使 orphan 指標只反映
+#   「近期該回填卻未連」的真痛點。
+#
+# 格式：每行一個 prefix（相對 repo root；以 `/` 結尾＝目錄前綴比對）、含 `*` 的 fnmatch glob、
+#   或 `re:<regex>`（對相對路徑做 re.search）。`#` 開頭為註解。空行忽略。
+#
+# 復原：若某 concluded 方向重開、其舊實驗變 live-relevant → 把對應實驗 links.reports
+#   連到新 live 任務即可（連上後本就不算 orphan，無需改本檔）。
+
+# --- pre-subclonal-pivot（2026-06 前）concluded-era：涵蓋 in_progress/finalized/validated 三子樹 ---
+# 比對任一 /2025/ 或 /2026/0[1-5]/ 路徑日期段（2026/06 起＝當前主軸，不排除）
+re:/(2025|2026/0[1-5])/
+
+# --- 非實驗結果的索引/封存檔（本就不該有任務 links） ---
+*INDEX.md
+*INDEX_DETAIL_ARCHIVE.md
+*ARCHIVED*.md
