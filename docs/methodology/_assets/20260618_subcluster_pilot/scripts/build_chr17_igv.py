@@ -65,17 +65,19 @@ W = 1080; XPAD = 150; PW = W - XPAD - 20
 
 
 def X(pos):
-    return XPAD + (pos - VIEW_LO) / (VIEW_HI - VIEW_LO) * PW
+    return round(XPAD + (pos - VIEW_LO) / (VIEW_HI - VIEW_LO) * PW, 1)  # 1-decimal: 縮小 inline SVG 體積
 
 
-def betacol(b):
+def betacol(b):  # hex（比 rgb() 短 ~半）：縮小 inline SVG 體積
     if b is None:
         return "#e3ded4"
     if b < 0.5:
         t = b / 0.5
-        return f"rgb({int(74+t*150)},{int(110+t*120)},{int(170+t*60)})"  # blue→light
-    t = (b - 0.5) / 0.5
-    return f"rgb({int(224-t*32)},{int(220-t*130)},{int(200-t*150)})"  # light→red
+        r, g, bl = int(74 + t * 150), int(110 + t * 120), int(170 + t * 60)  # blue→light
+    else:
+        t = (b - 0.5) / 0.5
+        r, g, bl = int(224 - t * 32), int(220 - t * 130), int(200 - t * 150)  # light→red
+    return f"#{r:02x}{g:02x}{bl:02x}"
 
 
 def svg_igv():
@@ -159,7 +161,7 @@ def fig_tree():
     for k, (x, y, c, l) in N.items():
         ax.add_patch(plt.Circle((x, y), 0.9, color=c, alpha=0.85)); ax.text(x, y, l, ha="center", va="center", fontsize=7, color="white")
     ax.text(3.6, 5.8, "sibling 互斥", fontsize=8, color=PUR); ax.text(10.6, 3.1, "nested", fontsize=8, color=AC)
-    buf = io.BytesIO(); fig.savefig(buf, format="png", dpi=115, bbox_inches="tight"); plt.close(fig)
+    buf = io.BytesIO(); fig.savefig(buf, format="png", dpi=100, bbox_inches="tight"); plt.close(fig)
     return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
@@ -175,7 +177,7 @@ def fig_dist():
         axs.add_patch(plt.Rectangle((x - 0.5, 0), 1, 1, color=LC[DLIN[i]]))
     axs.set_xlim(-0.5, len(order) - 0.5); axs.set_ylim(0, 1); axs.axis("off")
     axs.set_title("BERNOULLI 距離熱圖（stored ISM）· 上條=lineage 色", fontsize=9)
-    buf = io.BytesIO(); fig.savefig(buf, format="png", dpi=115, bbox_inches="tight"); plt.close(fig)
+    buf = io.BytesIO(); fig.savefig(buf, format="png", dpi=100, bbox_inches="tight"); plt.close(fig)
     return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
@@ -186,7 +188,7 @@ def fig_dendro():
     for x, idx in enumerate(dn["leaves"]):
         ax.plot(5 + 10 * x, 0, marker="s", color=LC[DLIN[idx]], ms=5, clip_on=False)
     ax.set_ylabel("BERNOULLI dist", fontsize=9); ax.set_xticks([]); ax.set_title("UPGMA 樹（葉=lineage 色）", fontsize=9)
-    buf = io.BytesIO(); fig.savefig(buf, format="png", dpi=115, bbox_inches="tight"); plt.close(fig)
+    buf = io.BytesIO(); fig.savefig(buf, format="png", dpi=100, bbox_inches="tight"); plt.close(fig)
     return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 

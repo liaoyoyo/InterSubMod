@@ -27,13 +27,12 @@ def cat(r):
 
 
 # [ck,pos(SNV),set,n,g,fine,other,unstable,aligned,hidden,hasfig,cat,vhp,valle]
-D = []; figmap = {}
+D = []  # figmap 移除: figname 由 chrom+pos 決定式, JS 端即算(省 ~1.8MB)
 for r in rec:
-    fn = figname(r); k = f"{r['chrom']}:{int(r['pos'])+5000}"
+    fn = figname(r)
     D.append([ck.get(r["chrom"], 0), int(r["pos"]) + 5000, 0 if r["set"] == "TP" else 1, r["n"], r["coarse_ng"],
               r["fine_ng"], r["n_other"], 1 if r["unstable"] else 0, 1 if r["aligned"] else 0,
               1 if r["hidden_het"] else 0, 1 if fn else 0, cat(r), r.get("V_hp", 0), r.get("V_allele", 0)])
-    if fn: figmap[k] = fn
 CATN = ["aligned cis-ASM", "unaligned subclone候選", "no_structure(無結構)"]
 n_fig = sum(d[10] for d in D)
 
@@ -124,10 +123,11 @@ table{border-collapse:collapse;font-size:11.5px}th,td{border:1px solid var(--lin
  <div id="jprog" style="margin-top:10px"></div></div>
 </div><div id="modal" onclick="if(event.target.id==='modal')closeM()"><div class="mc" id="mc"></div></div>
 <script>
-const D=__D__, CHRS=__CHRS__, CATN=__CATN__, FIGMAP=__FIGMAP__, TPN=__TPN__,FPN=__FPN__,NFIG=__NFIG__;
+const D=__D__, CHRS=__CHRS__, CATN=__CATN__, TPN=__TPN__,FPN=__FPN__,NFIG=__NFIG__;
 const C={ck:0,ps:1,set:2,n:3,g:4,fine:5,oth:6,uns:7,al:8,hh:9,fig:10,cat:11,vhp:12,va:13};
 const LS='phylo_cpp_full_v2';let J={};try{J=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
 const $=id=>document.getElementById(id);const key=r=>CHRS[r[C.ck]]+':'+r[C.ps];
+const figName=r=>'cpp_'+CHRS[r[C.ck]]+'_'+(r[C.ps]-5000)+'_'+(r[C.ps]+5000)+'.png';
 function setJ(k,c){J[k]=J[k]||{};J[k].c=c;J[k].t=new Date().toISOString();localStorage.setItem(LS,JSON.stringify(J));draw();prog();}
 $('stats').innerHTML=[['TP',TPN.toLocaleString(),''],['FP',FPN.toLocaleString(),''],
  ['aligned cis-ASM(TP)',D.filter(r=>r[C.set]===0&&r[C.cat]===0).length.toLocaleString(),'kg'],
@@ -162,7 +162,7 @@ function badges(r){let b=['<span class="badge b-al">aligned</span>','<span class
  if(r[C.uns])b+='<span class="badge b-uns">unstable</span>';if(r[C.oth])b+='<span class="badge b-oth">other'+r[C.oth]+'</span>';
  if(r[C.hh])b+='<span class="badge b-hh">hidden-het</span>';if(r[C.fine]>r[C.g])b+='<span class="badge b-fn">fine'+r[C.fine]+'</span>';return b;}
 function jbtn(k,c,lab){const on=((J[k]||{}).c===c)?(' on-'+c):'';return `<button class="jb${on}" onclick="event.stopPropagation();setJ('${k}','${c}')">${lab}</button>`;}
-function card(r){const k=key(r),fn=FIGMAP[k];
+function card(r){const k=key(r),fn=r[C.fig]?figName(r):null;
  const fig=fn?`<div class="figs" onclick="openM('${k}')"><img loading="lazy" src="figs/${fn}"></div>`:'<div class="nofig">無圖（reads 過少）｜ n='+r[C.n]+' coarse '+r[C.g]+'群</div>';
  const cc=(J[k]||{}).c;const cls=cc==='in'?' j-in':cc==='ex'?' j-ex':cc==='mb'?' j-mb':'';
  return `<div class="card${cls}"><div class="hd" onclick="openM('${k}')"><div class="ttl">${k} ${badges(r)}</div>
@@ -174,7 +174,7 @@ function draw(){const a=filtered();
  const pages=Math.max(1,Math.ceil(a.length/PER));page=Math.min(page,pages-1);
  $('grid').innerHTML=a.slice(page*PER,page*PER+PER).map(card).join('')||'<div class="sub">無符合</div>';
  $('pager').innerHTML=`<button ${page<=0?'disabled':''} onclick="page--;draw()">‹</button> 第 ${page+1}/${pages} 頁 <button ${page>=pages-1?'disabled':''} onclick="page++;draw()">›</button>`;}
-window.openM=k=>{const r=D.find(x=>key(x)===k);if(!r)return;const fn=FIGMAP[k];
+window.openM=k=>{const r=D.find(x=>key(x)===k);if(!r)return;const fn=r[C.fig]?figName(r):null;
  const fig=fn?`<img src="figs/${fn}">`:'<div class="nofig">無圖（此位點 reads 過少未渲染）</div>';
  const st=[['分類',CATN[r[C.cat]]],['set',r[C.set]===0?'TP':'FP'],['n reads',r[C.n]],['coarse群',r[C.g]],['fine群',r[C.fine]],['other',r[C.oth]],['V_allele',r[C.va]],['V_hp',r[C.vhp]],['unstable',r[C.uns]?'是':'否'],['aligned',r[C.al]?'是(cis-ASM)':'否'],['hidden-het',r[C.hh]?'是':'否']];
  $('mc').innerHTML=`<div style="display:flex;justify-content:space-between"><h2 style="border:none;margin:0">${k} ${badges(r)}</h2><button onclick="closeM()">關閉✕</button></div>
@@ -196,7 +196,7 @@ $('imp').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileRe
 thlive();draw();prog();
 </script></body></html>"""
 T = (T.replace("__D__", json.dumps(D, separators=(",", ":"))).replace("__CHRS__", json.dumps(CHRS))
-     .replace("__CATN__", json.dumps(CATN, ensure_ascii=False)).replace("__FIGMAP__", json.dumps(figmap, separators=(",", ":")))
+     .replace("__CATN__", json.dumps(CATN, ensure_ascii=False))
      .replace("__TPN__", str(tp["n"])).replace("__FPN__", str(fp["n"])).replace("__NTOTAL__", f"{len(D):,}")
      .replace("__NFIG__", str(n_fig)).replace("__STAMP__", "2026-06-23 C++ native")
      .replace("__TPU__", str(tp["unaligned_pct"])).replace("__FPU__", str(fp["unaligned_pct"]))

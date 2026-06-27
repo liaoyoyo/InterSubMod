@@ -48,6 +48,15 @@ for chrom in chrs:
     print(f"  {chrom}: binary done, {len([1 for p in picks if p['chrom']==chrom])} picks",flush=True)
 
 def grpcol(g): return EDGE if g=="edge" else OUTL if g=="outlier" else H.CLUSTER_COL[int(g)%len(H.CLUSTER_COL)]
+def link_cf(Z,n,leaf_lab):
+    """分支依 flat 分類(leaf_lab,-1=離群)著色:子樹同類→該色,混雜→灰。與 fine 側欄一致。"""
+    co={i:leaf_lab[i] for i in range(n)}
+    for i in range(len(Z)):
+        a2,b2=int(Z[i,0]),int(Z[i,1]); ca,cb=co.get(a2),co.get(b2)
+        co[n+i]=ca if (ca is not None and ca==cb and ca>=0) else None
+    def f(k):
+        c=co.get(k); return "#c9c9c9" if (c is None or c<0) else H.CLUSTER_COL[int(c)%len(H.CLUSTER_COL)]
+    return f
 def render(key,sub,P,reads,ids,a,cpgs,pos,cl):
     fine={x:g for x,g in zip(ids,[p["grp"] for p in (a["perread_fine"] or [{"grp":"outlier"}]*len(ids))])}
     coarse={x:g for x,g in zip(ids,[p["grp"] for p in (a["perread_coarse"] or [{"grp":"outlier"}]*len(ids))])}
@@ -60,8 +69,14 @@ def render(key,sub,P,reads,ids,a,cpgs,pos,cl):
     wr=[1.3]+[0.05]*nsb+[1.0,0.16]+[0.05]*nsb+[1.0]
     fig=plt.figure(figsize=(11,5.0)); gs=fig.add_gridspec(2,len(wr),width_ratios=wr,height_ratios=[1,0.4],wspace=0.04,hspace=0.02)
     c=0; axdn=fig.add_subplot(gs[0,c]); c+=1
-    dendrogram(Z,orientation="left",above_threshold_color="#999",ax=axdn,no_labels=True)
-    axdn.set_xticks([]); axdn.set_yticks([]); axdn.set_title("UPGMA 樹",fontsize=8); [axdn.spines[s].set_visible(False) for s in axdn.spines]
+    # 樹分支依 fine 分類著色(與 fine 側欄一致;離群=灰)
+    leaf_lab=[(g if isinstance(g,int) else -1) for g in (fine.get(x,-1) for x in ids)]
+    dendrogram(Z,orientation="left",link_color_func=link_cf(Z,n,leaf_lab),ax=axdn,no_labels=True)
+    # coarse 切高度參考線(粗骨幹)
+    hh=np.sort(Z[:,2]); ck=a.get("coarse_k",0) or 0
+    if 2<=ck<=len(hh):
+        tc=(hh[-(ck-1)]+hh[-ck])/2; axdn.axvline(tc,ls="--",c="#444",lw=0.9); axdn.text(tc,n*1.01,f"coarse k{ck}",fontsize=6.5,color="#444",ha="center")
+    axdn.set_xticks([]); axdn.set_yticks([]); axdn.set_title("UPGMA 樹(分支色=fine 分類)",fontsize=8); [axdn.spines[s].set_visible(False) for s in axdn.spines]
     for lab,hx in sb: H._sb(fig.add_subplot(gs[0,c]),hx,lab); c+=1
     axm=fig.add_subplot(gs[0,c]); c+=1; axm.imshow(meth,aspect="auto",cmap=mc,vmin=0,vmax=1,interpolation="nearest")
     sx=H.snv_fractional_x(cpgs,int(pos))
@@ -113,5 +128,5 @@ for cl in CLASSES:
             "png":png})
         print(f"  {cl:16s} {key} n={len(ids)} fine={a['fine_confidence']} exc={fres['stab_excess'] if fres else None} V={bestax[1]} e={bestax[2]}",flush=True)
 json.dump(items,open(f"{A}/ws_items.json","w"),indent=1)
-shutil.rmtree(OUTD,ignore_errors=True)
+# shutil.rmtree(OUTD,ignore_errors=True)  # 保留供 re-render
 print(f"DONE {len(items)} items → ws_items.json")
