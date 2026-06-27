@@ -16,6 +16,20 @@ data_sources: docs/methodology/_assets/20260618_subcluster_pilot/sm_summary.json
 
 從 chr17 單一 worked example（n=1）擴展到**全基因組 exhaustive**：union TP∪FP 35,332 sSNV → 單分子 2×2 共現 → 每「最大可關聯區域」重建局部克隆樹。**7,143 個區域中 677（9.5%）有完整分支樹（sibling+nested）、205 在乾淨 CN 區**。方法可行、chr17 被自動重建；但**~69% 訊號在 CN-gain 混淆區、Fisher-sig 不分 subclone/allelic** — 乾淨可信集 = LOH+neutral，且為分子證據非 single-cell confirmation（⭐3）。
 
+## §0.5 核心機制：ONT long read 如何用 sSNV 找到關連（這是整個方法的根）
+
+**問題**：要知道兩個 somatic 突變是否屬於同一克隆，需確認它們是否在**同一條 DNA 分子**上。短讀（~150bp）跨不過相距 >150bp 的兩個 sSNV → 無法直接觀測共現，只能靠統計 phasing 間接推斷（需 het 位點橋接、易斷、有歧義）。
+
+**ONT 解法（為什麼是 ONT）**：ONT long read 中位數 ~5kb、最長 76kb → **一條 read 可同時跨過多個 sSNV 位置**，在這條 read 上直接讀出每個 sSNV 的鹼基（REF/ALT）= **直接物理觀測「這些突變是否在同一條分子上」，不需 phasing/assembly、read 內無歧義**。這是 ONT 對 subclone 重建的獨特價值。
+
+**具體如何找關連（4 步）**：
+1. **每個 sSNV → pysam pileup tumor BAM 該位置**（MAPQ≥20）→ 每條覆蓋的 read 讀出鹼基 → `==REF→REF` / `==ALT→ALT`，同時抓 read 的 `HP` tag（longphase germline 單倍型）與 `PS`（phase-set）。
+2. **同一條 read（同 read_name）在多個 sSNV 的等位 → 該分子的 multi-locus 基因型向量**（如 chr17 一條 read = γ-REF/β1-ALT/α-ALT/β2-ALT = L2 細胞）。
+3. **兩 sSNV：數同時覆蓋兩者的 read 的 (REF/ALT)×(REF/ALT) → 2×2 共現表**（RR/RA/AR/AA）。例 chr17 α(48365089) 與 β2(48365161) 相距 **72bp** → read 輕鬆同跨 → **62 條同覆蓋**：AA=29(α+β2)、AR=22(只α)、RR=11、**RA=0(從無只β2)** → β2 嵌套在 α 內。
+4. **共現模式 → 關連類型**：AA=0=互斥（不同細胞）、單向=0=巢狀（祖先-後代）、兩 off-diag=0=共連（同事件）。**`HP` tag 再判同/異單倍型**：同 HP=克隆(subclone)、異 HP=allelic(兩條染色體，非 subclone)。
+
+**一句話**：ONT read 夠長 → 一條分子同時讀到多個 somatic 突變的等位 → 直接看到哪些突變「物理上在一起」→ 共現 2×2 + HP 判出克隆關連。這是非循環的遺傳證據（不靠甲基、不靠統計 phasing）。**限制**：超過 read 長（~50-76kb）的 sSNV 對無法同分子觀測（Tier-PS phase-set 可延伸但依賴 phasing、較弱）。
+
 ## §1 方法三層遞進（2-locus → multi-locus → region）
 
 | 層 | 單位 | 做什麼 | 輸出 |

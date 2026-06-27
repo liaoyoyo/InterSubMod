@@ -94,5 +94,27 @@ cell: RR/RA/AR/AA（a/b 的 REF/ALT）。同HP=克隆相關，異HP=allelic。
 - **逐區域可查**：`_assets/20260618_subcluster_pilot/lists/regions.tsv`（每區域一列）+ `sm_region_integration.json`（含 nested_edges / sibling_pairs / populations）。
 - **可重現**：`README_sm_linkage_pipeline.md`（pipeline DAG + 重現指令 + 數字→檔案對照）。
 
+## §7b 分支型態 + 相鄰區域一致性（data_source: sm_branch_analysis.json）
+
+**分支型態 taxonomy（4,678 有結構區域）**：
+| 型態 | 區域數 | 比例 |
+|---|---|---|
+| **linear_chain（線性祖先→後代鏈，無分支）** | **1,908** | **40.8%** |
+| sibling_only（單一 2-way 分支）| 1,003 | 21.4% |
+| co_linked_single_lineage（單 lineage）| 858 | 18.3% |
+| full_tree（分支+深度）| 677 | 14.5% |
+| sibling_multi（≥3 分支）| 232 | 5.0% |
+
+- **最常見結構 = 線性鏈（40.8%）**，多數區域是 ancestor→descendant 無分支；**有分支（sibling≥1）= 1,923 區域（26.9%）**，其中 1,235 純平行分支、688 分支+深度。
+- **分支型態 = 簡單二分支主導**：sibling 數 1=1,310 / 2=344 / 3=126 / 4=56 / 5=28 → 絕大多數只 1 個 sibling 對（2-way split），深/多分支稀少。
+
+**相鄰區域 shape 一致性（7,121 相鄰對，中位 gap 213kb）**：
+- observed same-shape = **0.279** vs shuffle-null **0.252±0.005**，**z=5.7** → **統計顯著但效應小（僅 +2.7pp）** = 弱空間自相關。相鄰區域的樹形主要由「該區域剛好有哪些 sSNV」決定（局部），非強烈受全基因組克隆結構壓印。
+
+**CN-clean VAF 峰（subclone CCF 一致性，6,138 clean VAF 值）**：
+- 主峰 VAF≈**0.95(987) / 0.90(721) / 0.45(504) / 0.40(464) / 0.05(624)** → **有少數一致 CCF 層級**（高≈truncal、中≈0.4-0.45 主 subclone、低≈0.05 罕見/偽影）= 跨區域 subclone CCF 有一致性（即使各區樹形不同，因每區只取樣到部分 subclone）。
+
+🔑 **結論**：HCC1395 的局部克隆結構以**線性鏈**為主、分支多為**簡單二分支**；相鄰區域樹形**弱一致**（z=5.7 但小），但 CN-clean 的 **VAF/CCF 層級有一致峰** → 真克隆的固定 subclone 集存在、但被各區域局部取樣稀釋成不同樹形。
+
 ## §8 🔴 限制
 ⭐3 單樣本；Tier-R only；64% 在 CN-gain；偽影未清（缺 mappability）；Fisher-sig 不分 subclone/allelic（HP-gate 才分）；regional（≤read-span）非 genome-wide tree；分子證據非 single-cell confirmation。
