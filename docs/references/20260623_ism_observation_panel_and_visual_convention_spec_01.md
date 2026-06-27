@@ -67,6 +67,28 @@ authority: 本檔不取代以下權威源, 而是「索引+定義+合規」彙�
 
 **複用路徑（避免重刻）**：`ism_heatmap_std.mpl_dual_panel()` / `sidebar_specs()` / `grouped_legend()` 已提供整套渲染；通用面板 generator = `tools/build_workstation.py`。**新 renderer 先呼叫這些，不要新寫色盤或側欄。**
 
+## 規約 5 — 資料盤點 → 顯示映射（每個分析輸出該畫哪種圖）⭐ 本次新增
+
+> **目的**：消除「這個數據要不要畫圖、畫哪種」每次重想。**先盤點每個分析輸出的性質 → 查下表 → 直接知道呈現方式。** 對齊 `/verify-workstation references/section_modules.md` 的決策表（skill 端 SoT，本檔同步索引）。
+
+**核心啟發**：**精確/多欄/逐項 → 表；比例/分佈/流程/比較 → inline-SVG；真實點陣（熱圖/散點）→ 外部 PNG。**
+
+| 分析輸出性質 | 呈現 | 圖型 | 數字來源 |
+|---|---|---|---|
+| 每項精確值（座標 / n / 群數 / V / cn_value） | quick-compute | card kv + 展開 `<table>` | per-item 陣列 |
+| 總量 / TP-FP / 各態 N | quick-compute | `.statgrid` 數字卡 | stats JSON |
+| 類別比例（CN 4 態 / structure 5 態 / tier 3 態） | **SVG** | 水平 stacked 比例條 | stats JSON（每段 count）|
+| 兩組成比例（tumor vs normal、TP vs FP 指標） | **SVG** | 比例條 / 比較條 | stats JSON |
+| 數值分佈（coarse/fine/geometry 切群數計數） | **SVG** | 離散直方 | stats JSON（`{群數:位點數}`）|
+| 階段流失（全位點→有結構→對齊→候選） | **SVG** | funnel | stats JSON（`[{stage,n}]`）|
+| 每項真實點陣（甲基熱圖 / 距離矩陣） | **外部 PNG** | path-based lazy（規約 3） | per-region 巢狀輸出 |
+
+**aggregate（看林）vs per-item（看樹）兩層**：SVG 比例/分佈/流程屬 aggregate（整份一張、數字來自 stats JSON、§13-A 注入不手打）；真實熱圖屬 per-item（每項一張、量大走 path）。**禁把 per-item 真實熱圖塞 inline、禁把 aggregate 比例硬畫 PNG。**
+
+**aggregate-chart 配色**：規約 1 的色盤是 **per-read 熱圖側欄**用；aggregate 比例圖帶 legend label、無相鄰 HP 側欄 → collision 不適用，但仍守：① **T/N 比例條必用 canonical** `#f97316`/`#22c55e`；② 其餘軸（CN/structure/tier）用有 label 區別色。理想集中到 `ism_heatmap_std.AGG_*`（目前 dashboard generator 因 branch 未合併暫硬編 = 已知小債）。
+
+**worked 實例（全鏈）**：`docs/methodology/_assets/20260618_subcluster_pilot/scripts/` → `dashboard_aggregate.py`（算 stats JSON + sum-check）→ `build_phylo_cpp_dashboard_v3.py`（SVG 注入 + 5 層 collapsible，34,736 位點/22 欄/9 張 aggregate SVG）→ `obs_ws/cpp_wg/20260623_phylo_cpp_observation_dashboard_v3.html`。
+
 ---
 
 ## 合規狀態（2026-06-23 稽核，pilot scripts = 104 個 .py）
@@ -78,11 +100,13 @@ authority: 本檔不取代以下權威源, 而是「索引+定義+合規」彙�
 | 乾淨 import | ~19 | 合規 |
 | HTML 嵌死色圖例 | **2**：`20260620_decisionflow_5state_..._01.standalone.html` + `obs_ws/cpp_wg/...FULL.html` | regen（須先重畫圖）|
 | **已修（本 session）** | `geom_render.py` ✅ / `phylo_cpp_render.py` ✅ / `build_phylo_cpp_full_dashboard.py` 圖例 ✅ | 圖待重跑重畫 |
-| **強制層（hook/audit）** | **0** | 🔴 待建（見下）|
+| **強制層（hook/audit）** | **已建** ✅ | `scripts/palette_drift_check.py`（AST 稽核）+ `scripts/hooks/palette_drift_advisor.sh`（PostToolUse advisory）|
 
-## 缺的機械層（為何規約有紀錄卻仍漂移）
+## 機械層（已落地 — 為何規約有紀錄卻仍漂移 → 補強制層）
 
-紀錄自 2026-06-18 已存在（module + memory），但**無 enforcement + 寫時不 surface** → 靠 copy-paste 在 104 個 ad-hoc renderer 間繁殖。**待建**：`palette_drift_check`（掃 renderer，flag 本地語意色 dict / HTML 嵌死 `fill="#dc2626"` 當 HP；可選接 PostToolUse hook，比照 `skill_registry_sync` / `number_provenance`）。這對齊本專案 §13 教訓：**純文字規則失效，需機械防線**。
+紀錄自 2026-06-18 已存在（module + memory），但先前**無 enforcement + 寫時不 surface** → 靠 copy-paste 在 ad-hoc renderer 間繁殖。**2026-06-23 已建兩件**（對齊本專案 §13 教訓「純文字規則失效，需機械防線」）：
+1. **`scripts/palette_drift_check.py`** — AST 稽核：import `ism_heatmap_std` 取 canonical，偵測本地 HP/ALT **hex** 色 dict（要求 hex 值以避開 LABMAP label-remap 假陽性）+ HTML 嵌死圖例漂移。本 session 實測 6 WRONG → 修後 0。
+2. **`scripts/hooks/palette_drift_advisor.sh`** — PostToolUse Edit|Write advisory（exit 0）：grep 本地語意色 dict（quote-agnostic），排除 `ism_heatmap_std.py` + `palette_drift_check.py` 本身。比照 `skill_registry_sync` / `number_provenance` 的 advisory 模式。
 
 ---
 > 關聯：`ism_heatmap_std.py`（規約1-2程式SoT）、`/verify-workstation`（規約4面板SoT）、memory `feedback_ism_case_heatmap_standard_sidebars`、`20260623_weak_structure_classification_and_geometry_divergence_01.md`（消費此規約的最新面板）。
