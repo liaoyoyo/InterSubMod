@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>phylo-v4 改善重驗工作站</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--mut:#94a3b8;--fg:#e2e8f0;--ac:#38bdf8;
+--ok:#22c55e;--warn:#f59e0b;--no:#ef4444;--line:#334155;--gold:#f2c94c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);
+font:14px/1.6 system-ui,-apple-system,'Segoe UI','Noto Sans CJK TC','Microsoft JhengHei',sans-serif}
+header{padding:16px 24px;border-bottom:1px solid var(--line);background:#0b1222;position:sticky;top:0;z-index:40}
+h1{margin:0 0 3px;font-size:19px}h2{font-size:16px;margin:24px 0 8px;border-left:3px solid var(--ac);padding-left:9px}
+.sub{color:var(--mut);font-size:12px}.wrap{max-width:1320px;margin:0 auto;padding:0 20px 90px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
+.banner{margin-top:8px;background:#3a1d05;border:1px solid #92400e;border-radius:7px;padding:7px 12px;font-size:12px;color:#fcd34d}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+button,select,input[type=file]{background:#0b1222;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12.5px;cursor:pointer}
+.stat4{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.sb{background:#0b1222;border:1px solid var(--line);border-radius:8px;padding:9px 12px}.sb .n{font-size:20px;font-weight:800}.sb .l{font-size:11px;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.card.j-in{border-color:var(--ok)}.card.j-ex{border-color:var(--no)}.card.j-doubt{border-color:var(--warn)}
+.card .hd{padding:8px 11px;border-bottom:1px solid var(--line);cursor:pointer}
+.card .ttl{font-weight:700;font-size:13px}.card .meta{font-size:10.5px;color:var(--mut);margin-top:3px}
+.kv{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;padding:1px 11px}
+.kv .k{color:var(--mut)}.kv .v{font-variant-numeric:tabular-nums}
+.figs{display:flex;gap:2px;background:#0b1222;cursor:pointer}.figs img{width:50%;display:block;background:#fff;min-height:40px}
+.figsvg{background:#11161f;padding:4px;cursor:pointer}.figsvg svg{width:100%;display:block}
+.nofig{padding:12px;color:#64748b;font-size:11px;text-align:center}
+.badge{display:inline-block;font-size:9.5px;padding:1px 7px;border-radius:9px;font-weight:700;margin-left:3px}
+.b-ok{background:#14532d;color:#86efac}.b-warn{background:#78350f;color:#fcd34d}.b-no{background:#450a0a;color:#fca5a5}
+.b-info{background:#0c2a4d;color:#60a5fa}.b-mut{background:#1e293b;color:#cbd5e1}.b-gold{background:#3a300a;color:#f2c94c}
+.b-src{background:#0b1222;color:#7c8aa0;font-weight:500;font-size:10px;border:1px solid var(--line);cursor:help}
+.jrow{display:flex;gap:4px;padding:6px 8px;border-top:1px solid var(--line)}
+.jrow button{flex:1;font-size:10.5px;padding:4px 2px}
+.jb.on-in{background:#14532d;color:#86efac;border-color:#22c55e}.jb.on-doubt{background:#78350f;color:#fcd34d;border-color:#f59e0b}.jb.on-ex{background:#450a0a;color:#fca5a5;border-color:#ef4444}
+.rsel{width:100%;padding:5px 8px;font-size:10.5px;border-top:1px solid var(--line);border-radius:0}
+table{border-collapse:collapse;width:100%;font-size:11.5px;margin:4px 0}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left}th{background:#0b1222;color:var(--mut)}
+.note{background:#1c1407;border:1px solid #78350f;border-radius:8px;padding:9px 13px;font-size:12px;color:#fcd34d;margin:10px 0}
+code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color:#fcd34d}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.86);display:none;z-index:100;overflow:auto;padding:22px}
+#modal .mc{max-width:1040px;margin:0 auto;background:var(--card);border:1px solid var(--ac);border-radius:12px;padding:18px}
+#modal img{width:100%;background:#fff;border-radius:6px}.mfigs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.statg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px}
+.st{background:#0b1222;border:1px solid var(--line);border-radius:6px;padding:6px 9px}.st .l{font-size:10px;color:var(--mut)}.st .n{font-size:14px;font-weight:700}
+footer{margin-top:30px;border-top:1px solid var(--line);padding-top:12px;color:var(--mut);font-size:12px}
+.pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:14px 0}
+</style></head><body>
+<header>
+ <h1>phylo-v4 改善重驗工作站</h1>
+ <div class="sub">v4=v3.1+3改善(①other群 ②instability flag ③coarse/fine) · 對應你逐項回饋 · 點卡片開大圖 · coarse==v3不變(主verdict)</div>
+ <div class="banner">⚠ 資料狀態：v4 標籤 phylo_v4_edge.json(coarse/fine/other/unstable); 圖 DPI155 figs_v4edge; pilot快取+genome-wide binary　build <code>fd02077</code></div>
+</header>
+<div class="wrap">
+<h2>⓪b 修正過程紀錄 / changelog</h2><div class="panel"><div class="sub" style="line-height:1.9;margin-bottom:8px"><div><b style="color:var(--warn)">資料狀態：</b>v4 標籤 phylo_v4_edge.json(coarse/fine/other/unstable); 圖 DPI155 figs_v4edge; pilot快取+genome-wide binary</div></div><table><tr><th>ID</th><th>內容</th><th>狀態</th><th>影響</th><th>來源(已驗證)</th></tr><tr><td><b>v4-1</b></td><td>① other群(殘離群≥MINSZ記錄)</td><td><span class="badge" style="background:#052e16;color:#4ade80">✓ 已落地</span></td><td>chr8 40殘離群→other</td><td><code>phylo_v4.py</code></td></tr><tr><td><b>v4-2</b></td><td>② instability(K=5 seeds群數不一致→ambiguous+範圍)</td><td><span class="badge" style="background:#052e16;color:#4ade80">✓ 已落地</span></td><td>chr20 unstable[1,3]/chr4[3,4][4,5]</td><td><code>phylo_v4.py</code></td></tr><tr><td><b>v4-3</b></td><td>③ coarse(null95主verdict)/fine(null90候選)</td><td><span class="badge" style="background:#052e16;color:#4ade80">✓ 已落地</span></td><td>chr4 fine3→4/4→5;coarse==v3 30/30</td><td><code>phylo_v4.py</code></td></tr></table><div class="note"><b>結論：</b>3改善全生效,coarse主verdict不變(==v3 30/30),純加值。確認後進C++內建定稿版。</div></div>
+<h2>① v4 改善 = 你的逐項回饋落地</h2><div class="panel"><p class='sub'><b>v4 = v3.1 + 3改善</b>(coarse主verdict==v3不變,純加值):<br><b>① other群</b>(chr8 40殘離群→記錄)· <b>② instability flag</b>(chr20應3-4→報unstable[1,3]; chr4[3,4]/[4,5])· <b>③ coarse/fine</b>(chr4「大群可分更多」→fine 3→4/4→5低信心候選,coarse嚴不冒FP)。<br><b>👆點卡片開大圖</b>確認: 灰色=other殘群、coarse群上色是否合理、fine候選/unstable是否對應你看到的潛在更多群。每項記『合理/存疑/不合理』。</p></div>
+<h2>判讀紀錄 — 匯出 / 匯入 / 進度</h2>
+<div class="panel">
+ <div class="row">
+  <button onclick="exportJ()">⬇ 匯出 JSON</button>
+  <button onclick="exportCSV()">⬇ 匯出 CSV</button>
+  <label class="row" style="gap:5px"><span class="sub">⬆ 匯入再校正</span><input type="file" accept=".json" onchange="importJ(event)"></label>
+  <button onclick="clearJ()">✕ 清空</button>
+ </div>
+ <div class="stat4" id="prog" style="margin-top:12px"></div>
+</div>
+<h2>逐項判讀（每項可記 合理/存疑/不合理 + 原因）</h2>
+<div class="panel">
+ <div class="row"><span class="sub">篩選判讀</span><select id="jf"><option value="all">全部</option><option value="ok">合理</option><option value="doubt">存疑</option><option value="no">不合理</option><option value="un">未判讀</option></select><span id="gcount" class="sub"></span></div>
+ <div class="grid" id="grid"></div>
+ <div class="pager" id="pager"></div>
+</div>
+<footer><b>Provenance</b> · build <code>fd02077</code> · branch <code>feat/summary-nreadsvalid</code> · 生成 2026-06-22 · tier ⭐2-3 · scope 6 回饋邊界<br>v4重驗<ul><li><code>phylo_v4_edge.json</code></li><li><code>phylo_v4_pilot.json</code></li></ul>所有 metric 由 spec 注入（§13-A req()-refuse），人工判讀存 localStorage 並可匯出。</footer>
+</div>
+<div id="modal" onclick="if(event.target.id==='modal')closeM()"><div class="mc" id="mc"></div></div>
+<script id="wsspec" type="application/json">{"meta": {"title": "phylo-v4 改善重驗工作站", "subtitle": "v4=v3.1+3改善(①other群 ②instability flag ③coarse/fine) · 對應你逐項回饋 · 點卡片開大圖 · coarse==v3不變(主verdict)", "lskey": "phylo_v4_verify_v1", "tier": "⭐2-3", "scope": "6 回饋邊界", "build_commit": "fd02077", "build_branch": "feat/summary-nreadsvalid"}, "changelog": {"data_status": {"summary": "v4 標籤 phylo_v4_edge.json(coarse/fine/other/unstable); 圖 DPI155 figs_v4edge; pilot快取+genome-wide binary"}, "phase": "改善重驗(C++前最後Python定稿)", "corrections": [{"id": "v4-1", "what": "① other群(殘離群≥MINSZ記錄)", "status": "in-HEAD", "effect": "chr8 40殘離群→other", "src": "phylo_v4.py"}, {"id": "v4-2", "what": "② instability(K=5 seeds群數不一致→ambiguous+範圍)", "status": "in-HEAD", "effect": "chr20 unstable[1,3]/chr4[3,4][4,5]", "src": "phylo_v4.py"}, {"id": "v4-3", "what": "③ coarse(null95主verdict)/fine(null90候選)", "status": "in-HEAD", "effect": "chr4 fine3→4/4→5;coarse==v3 30/30", "src": "phylo_v4.py"}], "audit_conclusion": {"summary": "3改善全生效,coarse主verdict不變(==v3 30/30),純加值。確認後進C++內建定稿版。"}}, "sections": [{"id": "intro", "title": "① v4 改善 = 你的逐項回饋落地", "html": "<p class='sub'><b>v4 = v3.1 + 3改善</b>(coarse主verdict==v3不變,純加值):<br><b>① other群</b>(chr8 40殘離群→記錄)· <b>② instability flag</b>(chr20應3-4→報unstable[1,3]; chr4[3,4]/[4,5])· <b>③ coarse/fine</b>(chr4「大群可分更多」→fine 3→4/4→5低信心候選,coarse嚴不冒FP)。<br><b>👆點卡片開大圖</b>確認: 灰色=other殘群、coarse群上色是否合理、fine候選/unstable是否對應你看到的潛在更多群。每項記『合理/存疑/不合理』。</p>"}], "item_config": {"verdict_states": [{"key": "ok", "label": "合理"}, {"key": "doubt", "label": "存疑"}, {"key": "no", "label": "不合理"}], "reason_options": ["other群不對", "fine過切", "unstable誤判", "coarse該變", "其他"], "required_metrics": ["n", "CpG", "coarse群"], "per_page": 20}, "items": [{"id": "chr20_42981498", "title": "[F1 instability] chr20:42981498", "badges": [{"label": "coarse 1", "kind": "info"}, {"label": "fine 2", "kind": "ok"}, {"label": "unstable 1-3", "kind": "warn"}], "meta_metrics": ["n", "CpG", "coarse群"], "metrics": [{"k": "n", "v": "80", "src": "phylo_v4_edge.json"}, {"k": "CpG", "v": "97", "src": "phylo_v4_edge.json"}, {"k": "coarse群", "v": "1", "src": "phylo_v4_edge.json"}, {"k": "fine群", "v": "2", "src": "phylo_v4_edge.json"}, {"k": "other殘群", "v": "0", "src": "phylo_v4_edge.json"}, {"k": "unstable範圍", "v": "1-3", "src": "phylo_v4_edge.json"}], "figures": {"mode": "png", "imgs": [{"caption": "點圖放大: coarse群上色+灰=other殘群+甲基read×CpG", "path": "figs_v4edge/v4_chr20_42981498.png"}]}, "reading_guide": "② instability: coarse 1→fine 2 + unstable[1,3]=報ambiguous, 對應你「應3-4群」(不強切免FP)"}, {"id": "chr22_30454004", "title": "[other已生效] chr22:30454004", "badges": [{"label": "coarse 4", "kind": "info"}, {"label": "other 3", "kind": "warn"}], "meta_metrics": ["n", "CpG", "coarse群"], "metrics": [{"k": "n", "v": "95", "src": "phylo_v4_edge.json"}, {"k": "CpG", "v": "128", "src": "phylo_v4_edge.json"}, {"k": "coarse群", "v": "4", "src": "phylo_v4_edge.json"}, {"k": "fine群", "v": "4", "src": "phylo_v4_edge.json"}, {"k": "other殘群", "v": "3", "src": "phylo_v4_edge.json"}, {"k": "unstable範圍", "v": "穩定", "src": "phylo_v4_edge.json"}], "figures": {"mode": "png", "imgs": [{"caption": "點圖放大: coarse群上色+灰=other殘群+甲基read×CpG", "path": "figs_v4edge/v4_chr22_30454004.png"}]}, "reading_guide": "清楚4群(你說很清楚的好)+other 3殘群"}, {"id": "chr8_144597485", "title": "[E4 other(殘離群)] chr8:144597485", "badges": [{"label": "coarse 3", "kind": "info"}, {"label": "other 40", "kind": "warn"}], "meta_metrics": ["n", "CpG", "coarse群"], "metrics": [{"k": "n", "v": "138", "src": "phylo_v4_edge.json"}, {"k": "CpG", "v": "419", "src": "phylo_v4_edge.json"}, {"k": "coarse群", "v": "3", "src": "phylo_v4_edge.json"}, {"k": "fine群", "v": "3", "src": "phylo_v4_edge.json"}, {"k": "other殘群", "v": "40", "src": "phylo_v4_edge.json"}, {"k": "unstable範圍", "v": "穩定", "src": "phylo_v4_edge.json"}], "figures": {"mode": "png", "imgs": [{"caption": "點圖放大: coarse群上色+灰=other殘群+甲基read×CpG", "path": "figs_v4edge/v4_chr8_144597485.png"}]}, "reading_guide": "① other群: 40 殘離群→記錄成 'other'(深灰), 對應你「離群夠多可組other群」"}, {"id": "chr7_155610406", "title": "[E4 fine候選] chr7:155610406", "badges": [{"label": "coarse 3", "kind": "info"}, {"label": "unstable 1-3", "kind": "warn"}], "meta_metrics": ["n", "CpG", "coarse群"], "metrics": [{"k": "n", "v": "192", "src": "phylo_v4_edge.json"}, {"k": "CpG", "v": "146", "src": "phylo_v4_edge.json"}, {"k": "coarse群", "v": "3", "src": "phylo_v4_edge.json"}, {"k": "fine群", "v": "3", "src": "phylo_v4_edge.json"}, {"k": "other殘群", "v": "0", "src": "phylo_v4_edge.json"}, {"k": "unstable範圍", "v": "1-3", "src": "phylo_v4_edge.json"}], "figures": {"mode": "png", "imgs": [{"caption": "點圖放大: coarse群上色+灰=other殘群+甲基read×CpG", "path": "figs_v4edge/v4_chr7_155610406.png"}]}, "reading_guide": "② unstable[1,3] surfacing不確定, 對應你「最高7組但難」(fine止於null90不冒FP)"}, {"id": "chr4_190105905", "title": "[E6 fine候選] chr4:190105905", "badges": [{"label": "coarse 3", "kind": "info"}, {"label": "fine 4", "kind": "ok"}, {"label": "unstable 3-4", "kind": "warn"}], "meta_metrics": ["n", "CpG", "coarse群"], "metrics": [{"k": "n", "v": "360", "src": "phylo_v4_edge.json"}, {"k": "CpG", "v": "66", "src": "phylo_v4_edge.json"}, {"k": "coarse群", "v": "3", "src": "phylo_v4_edge.json"}, {"k": "fine群", "v": "4", "src": "phylo_v4_edge.json"}, {"k": "other殘群", "v": "0", "src": "phylo_v4_edge.json"}, {"k": "unstable範圍", "v": "3-4", "src": "phylo_v4_edge.json"}], "figures": {"mode": "png", "imgs": [{"caption": "點圖放大: coarse群上色+灰=other殘群+甲基read×CpG", "path": "figs_v4edge/v4_chr4_190105905.png"}]}, "reading_guide": "③ fine: coarse 3→fine 4(候選第4群,低信心) + unstable[3,4], 對應你「第1大群可分更多」"}, {"id": "chr4_190103740", "title": "[E6 fine候選] chr4:190103740", "badges": [{"label": "coarse 4", "kind": "info"}, {"label": "fine 5", "kind": "ok"}, {"label": "unstable 4-5", "kind": "warn"}], "meta_metrics": ["n", "CpG", "coarse群"], "metrics": [{"k": "n", "v": "351", "src": "phylo_v4_edge.json"}, {"k": "CpG", "v": "69", "src": "phylo_v4_edge.json"}, {"k": "coarse群", "v": "4", "src": "phylo_v4_edge.json"}, {"k": "fine群", "v": "5", "src": "phylo_v4_edge.json"}, {"k": "other殘群", "v": "0", "src": "phylo_v4_edge.json"}, {"k": "unstable範圍", "v": "4-5", "src": "phylo_v4_edge.json"}], "figures": {"mode": "png", "imgs": [{"caption": "點圖放大: coarse群上色+灰=other殘群+甲基read×CpG", "path": "figs_v4edge/v4_chr4_190103740.png"}]}, "reading_guide": "③ fine: coarse 4→fine 5 + unstable[4,5], 對應你「第1大群可分更多」"}], "provenance": {"sources": ["phylo_v4_edge.json", "phylo_v4_pilot.json"], "note": "v4重驗"}}</script>
+<script>
+const SPEC=JSON.parse(document.getElementById('wsspec').textContent);
+const $=id=>document.getElementById(id);
+const ITEMS=SPEC.items, IC=SPEC.item_config||{};
+const LSKEY=SPEC.meta.lskey||'verify_ws_v1';
+let J=JSON.parse(localStorage.getItem(LSKEY)||'{}');
+function saveJ(){localStorage.setItem(LSKEY,JSON.stringify(J));}
+const VSTATES=IC.verdict_states||[{key:'in',label:'同意'},{key:'doubt',label:'存疑'},{key:'ex',label:'否定'}];
+const REASONS=IC.reason_options||[{key:'',label:'— 原因（可選）—'},{key:'criteria',label:'標準不好'},{key:'method',label:'方法問題'},{key:'visual',label:'沒看清楚'},{key:'other',label:'其他'}];
+function setJ(id,c){const cur=J[id]||{};cur.c=(cur.c===c?'un':c);cur.t=new Date().toISOString().slice(0,19);J[id]=cur;saveJ();draw();prog();}
+function setR(id,r){const cur=J[id]||{c:'un'};cur.r=r;cur.t=new Date().toISOString().slice(0,19);J[id]=cur;saveJ();}
+window.setJ=setJ;window.setR=setR;
+
+function prog(){const v=Object.values(J);const n={};for(const s of VSTATES)n[s.key]=v.filter(x=>x.c===s.key).length;
+ const un=ITEMS.length-Object.values(n).reduce((a,b)=>a+b,0);
+ const cells=VSTATES.map(s=>`<div class="sb"><div class="n">${n[s.key]||0}</div><div class="l">${s.label}</div></div>`).join('')+
+  `<div class="sb"><div class="n">${un}</div><div class="l">未判讀</div></div>`;
+ $('prog').innerHTML=cells;}
+
+function badge(b){const cls={ok:'b-ok',warn:'b-warn',no:'b-no',info:'b-info',mut:'b-mut',gold:'b-gold'}[b.kind||'mut']||'b-mut';
+ return `<span class="badge ${cls}"${b.title?` title="${b.title}"`:''}>${b.label}</span>`;}
+function srcBadge(src){return src?`<span class="b-src badge" title="provenance: ${src}">⌖</span>`:'';}
+function figHTML(it,big){
+ const f=it.figures;if(!f)return '<div class="nofig">無圖</div>';
+ if(f.mode==='svg')return `<div class="figsvg" onclick="openM('${it.id}')">${f.svg}</div>`;
+ if(f.mode==='png'){const imgs=f.imgs||[];if(!imgs.length)return '<div class="nofig">無圖</div>';
+  if(big)return `<div class="mfigs">`+imgs.map(g=>`<div><div class="sub" style="text-align:center">${g.caption||''}</div><img src="${g.path}"></div>`).join('')+`</div>`;
+  return `<div class="figs" onclick="openM('${it.id}')">`+imgs.map(g=>`<img loading="lazy" src="${g.path}">`).join('')+`</div>`;}
+ return '<div class="nofig">無圖</div>';}
+function metaLine(it){return (it.meta_metrics||[]).map(k=>{const m=(it.metrics||[]).find(x=>x.k===k);return m?`${m.k}=${m.v}`:'';}).filter(Boolean).join(' ｜ ');}
+function jbtn(id,c,lab){const on=((J[id]||{}).c===c)?(' on-'+c):'';return `<button class="jb${on}" onclick="event.stopPropagation();setJ('${id}','${c}')">${lab}</button>`;}
+function card(it){const j=J[it.id]||{};const cc=j.c==='in'?' j-in':j.c==='ex'?' j-ex':j.c==='doubt'?' j-doubt':'';
+ const badges=(it.badges||[]).map(badge).join('');
+ const kv=(it.metrics||[]).filter(m=>m.show!==false).map(m=>`<div class="kv"><span class="k">${m.k} ${srcBadge(m.src)}</span><span class="v">${m.v}</span></div>`).join('');
+ const reasons=REASONS.map(r=>`<option value="${r.key}"${(j.r||'')===r.key?' selected':''}>${r.label}</option>`).join('');
+ return `<div class="card${cc}" data-id="${it.id}">
+   <div class="hd" onclick="openM('${it.id}')"><div class="ttl">${it.title} ${badges}</div>${it.subtitle?`<div class="meta">${it.subtitle}</div>`:''}${metaLine(it)?`<div class="meta">${metaLine(it)}</div>`:''}</div>
+   ${figHTML(it,false)}
+   <div style="padding:4px 0">${kv}</div>
+   <div class="jrow">${VSTATES.map(s=>jbtn(it.id,s.key,s.label)).join('')}<button class="jb${(J[it.id]||{}).c==='un'?' on-mut':''}" onclick="event.stopPropagation();setJ('${it.id}','un')">清除</button></div>
+   <select class="rsel" onchange="event.stopPropagation();setR('${it.id}',this.value)">${reasons}</select>
+ </div>`;}
+
+let page=0;const PER=IC.per_page||24;
+function items(){let a=ITEMS.slice();const jf=$('jf')?$('jf').value:'all';
+ if(jf!=='all')a=a.filter(it=>{const c=(J[it.id]||{}).c||'un';return c===jf;});
+ return a;}
+function draw(){const a=items();const pages=Math.max(1,Math.ceil(a.length/PER));page=Math.min(page,pages-1);
+ $('grid').innerHTML=a.slice(page*PER,page*PER+PER).map(card).join('')||'<div class="sub">無符合</div>';
+ $('gcount').textContent=a.length+' 個';
+ $('pager').innerHTML=`<button ${page<=0?'disabled':''} onclick="page--;draw()">‹</button><span>第 ${page+1}/${pages} 頁</span><button ${page>=pages-1?'disabled':''} onclick="page++;draw()">›</button>`;}
+if($('jf'))$('jf').addEventListener('input',()=>{page=0;draw();});
+
+window.openM=id=>{const it=ITEMS.find(x=>x.id===id);if(!it)return;
+ const stats=(it.modal_stats||it.metrics||[]).map(m=>`<div class="st"><div class="l">${m.k} ${srcBadge(m.src)}</div><div class="n">${m.v}</div></div>`).join('');
+ $('mc').innerHTML=`<div class="row" style="justify-content:space-between"><h2 style="border:none;margin:0">${it.title} ${(it.badges||[]).map(badge).join('')}</h2><button onclick="closeM()">關閉 ✕</button></div>
+  ${figHTML(it,true)}<div class="statg">${stats}</div>
+  <div class="jrow" style="margin-top:10px">${VSTATES.map(s=>jbtn(it.id,s.key,s.label)).join('')}</div>
+  ${it.reading_guide?`<div class="sub" style="margin-top:8px">${it.reading_guide}</div>`:''}`;
+ $('modal').style.display='block';};
+window.closeM=()=>$('modal').style.display='none';
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+
+function rows4export(){return ITEMS.filter(it=>{const c=(J[it.id]||{}).c;return c&&c!=='un';}).map(it=>{const j=J[it.id];
+ return {id:it.id,title:it.title,verdict:j.c,reason:j.r||'',ts:j.t||''};});}
+window.exportJ=()=>{const o={spec:SPEC.meta.title,build:SPEC.meta.build_commit,generated:new Date().toISOString(),judgments:rows4export()};
+ dl((SPEC.meta.lskey||'verdicts')+'_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(o,null,1),'application/json');};
+window.exportCSV=()=>{const r=rows4export(),h=['id','title','verdict','reason','ts'];
+ const csv=[h.join(',')].concat(r.map(x=>h.map(k=>JSON.stringify(x[k]??'')).join(','))).join('\n');
+ dl((SPEC.meta.lskey||'verdicts')+'_'+new Date().toISOString().slice(0,10)+'.csv',csv,'text/csv');};
+function dl(n,t,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;a.click();}
+window.importJ=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+ rd.onload=()=>{try{const o=JSON.parse(rd.result),arr=o.judgments||o;let n=0;
+  for(const x of arr){if(x.id&&x.verdict){J[x.id]={c:x.verdict,r:x.reason||'',t:x.ts||''};n++;}}
+  saveJ();draw();prog();alert('匯入 '+n+' 筆');}catch(err){alert('匯入失敗：'+err);}};rd.readAsText(f);};
+window.clearJ=()=>{if(confirm('清空所有判讀？')){J={};saveJ();draw();prog();}};
+prog();draw();
+</script>
+
+</body></html>

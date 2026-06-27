@@ -1,0 +1,189 @@
+{
+  "meta": {
+    "sample": "HCC1395",
+    "pairing": "paired (tumor+normal)",
+    "window_bp": 5000,
+    "source_file": "output/_wg_d1_unified/significance_summary.csv",
+    "total_rows": 30490,
+    "commit": "990175d (feat/summary-nreadsvalid)",
+    "analysis_date": "2026-06-16",
+    "normal_cov_median": 58,
+    "numcpgs_median": 76
+  },
+  "tier3": {
+    "valid": 28327,
+    "valid_pct": 92.91,
+    "dispersion": 1700,
+    "dispersion_pct": 5.58,
+    "noise": 463,
+    "noise_pct": 1.52
+  },
+  "significant_total": 28327,
+  "axes": {
+    "A_tumor_only": [
+      {
+        "name": "within-HP multigroup",
+        "count": 8077,
+        "pct": 28.5
+      },
+      {
+        "name": "HP_AUC_Tumor>=0.7",
+        "count": 7871,
+        "pct": 27.8
+      },
+      {
+        "name": "Tumor_HP_Delta>=0.1",
+        "count": 2513,
+        "pct": 8.9
+      }
+    ],
+    "B_all_pool": [
+      {
+        "name": "cluster_match (Strong)",
+        "count": 22310,
+        "pct": 78.8
+      },
+      {
+        "name": "label-allele PERMANOVA",
+        "count": 27009,
+        "pct": 95.3
+      },
+      {
+        "name": "label-HP PERMANOVA",
+        "count": 24875,
+        "pct": 87.8
+      },
+      {
+        "name": "AlleleSig",
+        "count": 16339,
+        "pct": 57.7
+      },
+      {
+        "name": "HP_AUC_All>=0.7",
+        "count": 7345,
+        "pct": 25.9
+      }
+    ],
+    "C_contrast": [
+      {
+        "name": "HP_Residual_Sig (somatic)",
+        "count": 11106,
+        "pct": 39.2
+      },
+      {
+        "name": "GermlineAsmDbeta_Sig (germline)",
+        "count": 7733,
+        "pct": 27.3
+      },
+      {
+        "name": "SomaticResidualDbeta_Sig (somatic)",
+        "count": 3031,
+        "pct": 10.7
+      }
+    ]
+  },
+  "decision": {
+    "tumor_only_any": 13605,
+    "tumor_only_any_pct": 48.0,
+    "contrast_any": 15722,
+    "contrast_any_pct": 55.5,
+    "only_pool": 8103,
+    "only_pool_pct": 28.6,
+    "partition": {
+      "both": 9103,
+      "both_pct": 32.1,
+      "tumor_only_excl": 4502,
+      "tumor_only_excl_pct": 15.9,
+      "contrast_excl": 6619,
+      "contrast_excl_pct": 23.4,
+      "neither": 8103,
+      "neither_pct": 28.6
+    }
+  },
+  "per_vc": [
+    {
+      "vc": "Strong",
+      "n": 22310,
+      "tumor_only_n": 10868,
+      "tumor_only_pct": 48.7,
+      "contrast_n": 12529,
+      "contrast_pct": 56.2,
+      "somatic_n": 9091,
+      "somatic_pct": 40.7,
+      "germline_n": 3438,
+      "germline_pct": 15.4,
+      "only_pool_n": 6386,
+      "only_pool_pct": 28.6
+    },
+    {
+      "vc": "MultiGroupNoLabel",
+      "n": 1899,
+      "tumor_only_n": 1899,
+      "tumor_only_pct": 100.0,
+      "contrast_n": 1088,
+      "contrast_pct": 57.3,
+      "somatic_n": 966,
+      "somatic_pct": 50.9,
+      "germline_n": 122,
+      "germline_pct": 6.4,
+      "only_pool_n": 0,
+      "only_pool_pct": 0.0
+    },
+    {
+      "vc": "LabelShift",
+      "n": 1809,
+      "tumor_only_n": 407,
+      "tumor_only_pct": 22.5,
+      "contrast_n": 1476,
+      "contrast_pct": 81.6,
+      "somatic_n": 979,
+      "somatic_pct": 54.1,
+      "germline_n": 497,
+      "germline_pct": 27.5,
+      "only_pool_n": 283,
+      "only_pool_pct": 15.6
+    },
+    {
+      "vc": "PermanovaLocation",
+      "n": 1756,
+      "tumor_only_n": 252,
+      "tumor_only_pct": 14.4,
+      "contrast_n": 479,
+      "contrast_pct": 27.3,
+      "somatic_n": 479,
+      "somatic_pct": 27.3,
+      "germline_n": 0,
+      "germline_pct": 0.0,
+      "only_pool_n": 1143,
+      "only_pool_pct": 65.1
+    },
+    {
+      "vc": "LOH-Structure",
+      "n": 376,
+      "tumor_only_n": 126,
+      "tumor_only_pct": 33.5,
+      "contrast_n": 124,
+      "contrast_pct": 33.0,
+      "somatic_n": 26,
+      "somatic_pct": 6.9,
+      "germline_n": 98,
+      "germline_pct": 26.1,
+      "only_pool_n": 169,
+      "only_pool_pct": 44.9
+    },
+    {
+      "vc": "StructureNoLabel",
+      "n": 177,
+      "tumor_only_n": 53,
+      "tumor_only_pct": 29.9,
+      "contrast_n": 26,
+      "contrast_pct": 14.7,
+      "somatic_n": 26,
+      "somatic_pct": 14.7,
+      "germline_n": 0,
+      "germline_pct": 0.0,
+      "only_pool_n": 122,
+      "only_pool_pct": 68.9
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "N": 30490,
+  "note": "只用 tumor reads 可算的純 tumor 軸 (RegionProcessor.cpp !is_tumor continue 證實). 對齊/基礎聚類是 PAIRED 故不算在此(見主報告 §6).",
+  "axes_used": [
+    "WithinHP PATTERN (WithinHP1/2_NGroups>=2)",
+    "WithinHP LEVEL (WithinHP_CleanMultigroup)",
+    "SubcloneDbeta HP1/HP2 sig",
+    "AltSubcloneDbeta HP1/HP2 sig"
+  ],
+  "tiers_strict_to_loose": {
+    "T1_嚴格_WithinHP_PATTERN(silhouette驗)": {
+      "has": {
+        "n": 354,
+        "pct": 1.16
+      },
+      "no": {
+        "n": 30136,
+        "pct": 98.84
+      }
+    },
+    "T2_WithinHP_CleanMultigroup(PATTERN∪LEVEL)": {
+      "has": {
+        "n": 8077,
+        "pct": 26.49
+      },
+      "no": {
+        "n": 22413,
+        "pct": 73.51
+      }
+    },
+    "T3_+Subclone_Δβ(germline vs carrier)": {
+      "has": {
+        "n": 11123,
+        "pct": 36.48
+      },
+      "no": {
+        "n": 19367,
+        "pct": 63.52
+      }
+    },
+    "T4_寬_任一tumor軸(+AltSubclone)": {
+      "has": {
+        "n": 11764,
+        "pct": 38.58
+      },
+      "no": {
+        "n": 18726,
+        "pct": 61.42
+      }
+    }
+  },
+  "nested_monotone": true,
+  "axis_raw(overlapping)": {
+    "WithinHP_PATTERN": {
+      "n": 354,
+      "pct": 1.16
+    },
+    "WithinHP_CleanMultigroup": {
+      "n": 8077,
+      "pct": 26.49
+    },
+    "Subclone_Δβ_sig": {
+      "n": 4596,
+      "pct": 15.07
+    },
+    "AltSubclone_Δβ_sig": {
+      "n": 4454,
+      "pct": 14.61
+    }
+  },
+  "no_tumor_signal_breakdown(T4補集)": {
+    "tumor極少_untestable(<10)": {
+      "n": 12,
+      "pct_of_no": 0.06,
+      "pct_total": 0.04
+    },
+    "tumor偏少(10-19)": {
+      "n": 108,
+      "pct_of_no": 0.58,
+      "pct_total": 0.35
+    },
+    "tumor足夠但無tumor訊號(>=20)": {
+      "n": 18606,
+      "pct_of_no": 99.36,
+      "pct_total": 61.02
+    }
+  },
+  "subclone_carrier_limited(NCarrier<3 兩HP)": {
+    "n": 414,
+    "pct": 1.36,
+    "note": "低VAF→carrier(somatic ALT) reads 太少→subclone Δβ 軸根本測不了; tumor-only 無訊號多受此限"
+  },
+  "crosscheck_vs_tn_dependency": {
+    "tn_T_only_signal_total": {
+      "n": 11764,
+      "pct": 38.58
+    },
+    "my_T4": 11764,
+    "match": true
+  }
+}

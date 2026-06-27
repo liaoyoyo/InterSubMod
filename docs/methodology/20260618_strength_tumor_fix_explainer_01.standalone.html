@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>strength_tumor 修正 — 理解確認</title>
+<!-- data_sources: docs/methodology/_assets/20260618_strength_tumor_report/data.json -->
+<!-- provenance-verified: 所有數字由 data.json 注入(data-lock §13.0); 來源 output/_wg_bdcprime_verify + _chr1_strength_verify + _case_deep + wymplni99.output -->
+<style>
+:root{
+  --c-accent:#D97757; --c-text:#141413; --c-bg:#FAF9F5; --c-border:#E3DACC;
+  --c-card:#FFFFFF; --c-muted:#6B6862; --c-good:#3F7E5B; --c-bad:#C0432F; --c-warn:#B8862F;
+  --c-old:#B07B6B; --c-new:#3F7E5B;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --sans:system-ui,-apple-system,"Noto Sans CJK TC","Source Han Sans TW","Segoe UI",sans-serif;
+  --shadow-sm:0 1px 2px rgba(20,20,19,.06); --shadow-md:0 2px 8px rgba(20,20,19,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--c-bg);color:var(--c-text);font-family:var(--sans);line-height:1.65;font-size:15.5px}
+.wrap{display:grid;grid-template-columns:240px 1fr;max-width:1180px;margin:0 auto;gap:var(--sp-6)}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:var(--sp-5) var(--sp-3);border-right:1px solid var(--c-border);font-size:13.5px}
+nav.toc h4{margin:0 0 var(--sp-3);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--c-muted)}
+nav.toc a{display:block;padding:5px var(--sp-2);color:var(--c-muted);text-decoration:none;border-radius:5px;margin-bottom:2px}
+nav.toc a:hover{background:#F0EBE0;color:var(--c-text)}
+nav.toc a.lead{color:var(--c-accent);font-weight:600}
+main{padding:var(--sp-6) var(--sp-5) var(--sp-7) 0;min-width:0}
+h1{font-size:27px;margin:0 0 var(--sp-2);line-height:1.25}
+.sub{color:var(--c-muted);font-size:14px;margin-bottom:var(--sp-5)}
+h2{font-size:20px;margin:var(--sp-7) 0 var(--sp-3);padding-bottom:var(--sp-2);border-bottom:2px solid var(--c-border)}
+h3{font-size:16px;margin:var(--sp-5) 0 var(--sp-2)}
+section{scroll-margin-top:var(--sp-4)}
+.card{background:var(--c-card);border:1px solid var(--c-border);border-radius:10px;padding:var(--sp-5);margin:var(--sp-4) 0;box-shadow:var(--shadow-sm)}
+.verdict{border-left:5px solid var(--c-good);background:linear-gradient(90deg,#F1F7F3,#FFFFFF 60%)}
+.verdict .big{font-size:18px;font-weight:600;margin-bottom:var(--sp-2)}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600;font-family:var(--mono)}
+.b-good{background:#E4F0E9;color:var(--c-good)} .b-bad{background:#F7E4E0;color:var(--c-bad)}
+.b-warn{background:#F6EFDD;color:var(--c-warn)} .b-tier{background:#F6E8E2;color:var(--c-accent)}
+.b-mut{background:#EEEAE0;color:var(--c-muted)}
+code,.mono{font-family:var(--mono);font-size:13px}
+.codeblock{background:#F4F0E7;border:1px solid var(--c-border);border-radius:8px;padding:var(--sp-3) var(--sp-4);overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.5;white-space:pre}
+.del{color:var(--c-bad)} .ins{color:var(--c-good);font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:var(--sp-3) 0}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--c-border)}
+th{background:#F4F0E7;font-weight:600;font-size:12.5px}
+td.num,th.num{text-align:right;font-family:var(--mono)}
+.flip{background:#F1F7F3;color:var(--c-good);font-weight:600}
+.pollute{background:#F9F0EE;color:var(--c-bad)}
+.callout{border:1px solid;border-radius:9px;padding:var(--sp-4);margin:var(--sp-4) 0}
+.callout.warn{border-color:#E0CDA0;background:#FBF6E9}
+.callout.key{border-color:#D6B5A8;background:#FBF1EC}
+.callout h3{margin-top:0}
+.muted{color:var(--c-muted)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px var(--sp-4);font-size:13.5px}
+.kv .k{color:var(--c-muted)}
+ul.tight{margin:var(--sp-2) 0;padding-left:var(--sp-5)} ul.tight li{margin:3px 0}
+details{margin:var(--sp-3) 0;border:1px solid var(--c-border);border-radius:8px;background:#FCFAF5}
+details>summary{cursor:pointer;padding:var(--sp-3) var(--sp-4);font-weight:600;font-size:14px;list-style:none}
+details>summary::before{content:"▸ ";color:var(--c-accent)}
+details[open]>summary::before{content:"▾ "}
+details .body{padding:0 var(--sp-4) var(--sp-4)}
+footer{margin-top:var(--sp-7);padding-top:var(--sp-5);border-top:1px solid var(--c-border);font-size:12.5px;color:var(--c-muted)}
+.svgwrap{margin:var(--sp-3) 0;text-align:center}
+.legend{font-size:12.5px;color:var(--c-muted);text-align:center;margin-top:var(--sp-1)}
+.tag{font-family:var(--mono);font-size:11.5px;padding:1px 6px;border-radius:4px;background:#EEEAE0;color:var(--c-muted)}
+@media(max-width:840px){.wrap{grid-template-columns:1fr}nav.toc{position:static;height:auto;border-right:none;border-bottom:1px solid var(--c-border)}main{padding-right:var(--sp-4)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc">
+  <h4>導覽</h4>
+  <a class="lead" href="#verdict">★ 一句話結論</a>
+  <a href="#problem">1 · 問題：double-dip 污染</a>
+  <a href="#fix">2 · 改動：一行 gate 換軸</a>
+  <a href="#flip">3 · 噪音富集翻轉（核心證據）</a>
+  <a href="#case">4 · 個案親驗（抓對訊號）</a>
+  <a href="#adv">5 · 對抗驗證 6/6</a>
+  <a href="#caveat">6 · 誠實 caveat（口徑）</a>
+  <a href="#ledger">7 · 改動清單 + 來源</a>
+</nav>
+
+<main>
+<h1>strength_tumor 修正 — 讓你確認理解</h1>
+<div class="sub">D3 within-HP cpp-change · HCC1395 paired · branch <code>feat/summary-nreadsvalid</code> · 2026-06-18</div>
+
+<!-- ===== VERDICT ===== -->
+<section id="verdict">
+<div class="card verdict">
+  <div class="big">把 <code>strength_tumor</code> 的 gate 從「會 double-dip 的無監督軸」換成「依事前 haplotag 標籤分組的軸（C′）」，<span style="color:var(--c-good)">double-dip 污染移除、legacy-VC 噪音富集翻轉（OLD 噪音反富集 → NEW ~2.4× 富集於結構）</span>，且不動任何核心分類欄。</div>
+  <div class="muted">一行程式碼改動，4 commit 收尾。全基因組 30,490 + chr1 2,624 fresh 驗證 + 個案甲基親看 + 6-agent 對抗驗證全 CONFIRMED。</div>
+  <div style="margin-top:var(--sp-3)">
+    <span class="badge b-good">對抗 6/6 CONFIRMED</span>
+    <span class="badge b-good">0 REFUTED · 0 blocking</span>
+    <span class="badge b-good">ctest 221/221</span>
+    <span class="badge b-good">regression 雙守護 PASS</span>
+    <span class="badge b-tier">⭐3 mark-for-confirmation</span>
+  </div>
+</div>
+<div class="callout key">
+<strong>一張圖看懂這次在修什麼：</strong> <code>strength_tumor</code> 是 5 元件「結構強度分數」(StrengthScore) 的其中一格。它原本問「這位點的 tumor reads 無監督分群有多明顯？」——但那個問法<strong>對純噪音也幾乎一定說 yes</strong>（double-dip）。改成問「這位點的 tumor reads 依<strong>事前標籤</strong>（germline vs somatic-carrier）分開後甲基有沒有差？」——這才是真正的 subclone 訊號。
+</div>
+</section>
+
+<!-- ===== PROBLEM ===== -->
+<section id="problem">
+<h2>1 · 問題：strength_tumor 吃了會 double-dip 的軸</h2>
+<p>舊版 <code>strength_tumor = tumor_intrinsic ? …</code>。<code>tumor_intrinsic</code> 是<strong>無監督</strong> tumor-only 結構偵測：<em>先</em>用距離矩陣把 reads 分成 2 群，<em>再</em>用同一個距離矩陣測這 2 群是否分離 → 循環推論（double-dip），對隨機噪音也幾乎一定顯著。</p>
+<div class="card">
+<h3>double-dip 的證據（全基因組 30,490 位點）</h3>
+<p><code>strength_tumor &gt; 0</code> 的比例，照位點是「有結構」還是「噪音」分組：</p>
+<table>
+<thead><tr><th>分組</th><th class="num">位點數</th><th class="num">OLD 開火率<br><span class="muted">tumor_intrinsic</span></th><th class="num">OLD 平均值</th></tr></thead>
+<tbody>
+<tr><td>有結構 VC</td><td class="num">28,333</td><td class="num">70.2%</td><td class="num">0.602</td></tr>
+<tr class="pollute"><td>噪音 VC</td><td class="num">461</td><td class="num">91.5%</td><td class="num">0.879</td></tr>
+</tbody>
+</table>
+<p class="muted">🔴 噪音開火率 <strong>91.5% &gt; 有結構 70.2%</strong>（gap −21.3pp）—— 噪音比真結構還更常開火，這是<strong>反判別</strong>。等於把雜訊灌進 StrengthScore。</p>
+</div>
+</section>
+
+<!-- ===== FIX ===== -->
+<section id="fix">
+<h2>2 · 改動：一行，把 gate 換成 a-priori 軸 C′</h2>
+<div class="codeblock"><span class="del">- result.strength_tumor = result.tumor_intrinsic ? clamp01(result.tumor_only_silhouette / 0.5) : 0.0;</span>
+<span class="ins">+ result.strength_tumor = result.within_hp_subclone_sig ? clamp01(result.within_hp_best_sil / 0.5) : 0.0;</span>
+<span class="muted">  // src/core/RegionProcessor.cpp:1257  (commit 44f434b)</span></div>
+<div class="kv" style="margin-top:var(--sp-4)">
+  <div class="k">新 gate</div><div><code>within_hp_subclone_sig</code> = C′：single germline-HP 內，tumor reads 依 <span class="tag">hp_tag</span> 分 germline(<code>"1"</code>) vs somatic-carrier(<code>"1-1"</code>) 兩組 → 對距離矩陣跑 PERMANOVA(999-perm)+PERMDISP。</div>
+  <div class="k">關鍵</div><div>標籤是<strong>事前 haplotag</strong>（不是從距離矩陣分出來的群）→ <strong>結構上無法 double-dip</strong>（源碼 <code>:1206-1207</code> 親證）。</div>
+  <div class="k">強度</div><div><code>within_hp_best_sil</code>（within-HP 最佳分裂的 silhouette）當 0–1 magnitude。</div>
+  <div class="k">保留</div><div><code>tumor_only</code> 那組 emit 欄留作 raw 診斷觀察，只把它<strong>剔出評分</strong>。</div>
+</div>
+<details><summary>為什麼用 C′ 而不是「無監督再分群配 null」？</summary>
+<div class="body muted">原計畫 C（降 silhouette 閾值 + 打亂甲基值 gap-null）已被 memory 證實對 tumor-only 軸 NEGATIVE——ONT read 內甲基本身相關，隨機 reads 也會產生假結構，permute 破壞相關使 null 太易被打敗。唯一合法路徑＝<strong>a-priori 子標籤 PERMANOVA</strong>（監督式），即 C′。對齊「結構偵測(silhouette) + a-priori 標記確認(PERMANOVA)」雙軌。</div>
+</details>
+</section>
+
+<!-- ===== FLIP ===== -->
+<section id="flip">
+<h2>3 · 噪音富集翻轉（double-dip 移除後 ~2.4×；核心證據，非只數字變）</h2>
+<p>同樣的 <code>strength_tumor &gt; 0</code> 開火率，OLD vs NEW 並排。<strong>看「噪音條」相對「結構條」是長還是短</strong>：</p>
+
+<div class="card">
+<div class="svgwrap">
+<svg viewBox="0 0 760 220" role="img" width="100%" style="max-width:760px">
+  <title>strength_tumor 開火率 OLD vs NEW，噪音 vs 結構</title>
+  <desc>OLD: 噪音 91.5% 富集超過結構 70.2%(反富集/double-dip); NEW: 噪音 7.2% 縮回結構 17.2% 之下(~2.4× 富集於結構)</desc>
+  <!-- axis -->
+  <line x1="150" y1="20" x2="150" y2="200" stroke="#E3DACC" stroke-width="1"/>
+  <text x="150" y="214" font-size="11" fill="#6B6862" text-anchor="middle">0%</text>
+  <text x="430" y="214" font-size="11" fill="#6B6862" text-anchor="middle">50%</text>
+  <text x="710" y="214" font-size="11" fill="#6B6862" text-anchor="middle">100%</text>
+  <line x1="430" y1="20" x2="430" y2="200" stroke="#F0EBE0" stroke-width="1"/>
+  <line x1="710" y1="20" x2="710" y2="200" stroke="#F0EBE0" stroke-width="1"/>
+  <!-- OLD group -->
+  <text x="10" y="50" font-size="12.5" fill="#141413" font-weight="600">OLD</text>
+  <text x="10" y="66" font-size="10.5" fill="#6B6862">tumor_intrinsic</text>
+  <text x="60" y="50" font-size="11" fill="#6B6862">結構</text>
+  <rect x="150" y="40" width="393.1" height="16" rx="3" fill="#B07B6B"/>
+  <text x="549" y="53" font-size="11" fill="#141413" font-family="monospace">70.2%</text>
+  <text x="60" y="78" font-size="11" fill="#C0432F">噪音</text>
+  <rect x="150" y="68" width="512.4" height="16" rx="3" fill="#C0432F"/>
+  <text x="668" y="81" font-size="11" fill="#C0432F" font-family="monospace" font-weight="700">91.5%</text>
+  <text x="150" y="104" font-size="10.5" fill="#C0432F">↑ OLD 噪音富集 &gt; 結構 = double-dip (gap −21.3pp)</text>
+  <!-- NEW group -->
+  <text x="10" y="146" font-size="12.5" fill="#141413" font-weight="600">NEW</text>
+  <text x="10" y="162" font-size="10.5" fill="#6B6862">C′ a-priori</text>
+  <text x="60" y="146" font-size="11" fill="#6B6862">結構</text>
+  <rect x="150" y="136" width="96.3" height="16" rx="3" fill="#3F7E5B"/>
+  <text x="252" y="149" font-size="11" fill="#141413" font-family="monospace">17.2%</text>
+  <text x="60" y="174" font-size="11" fill="#3F7E5B">噪音</text>
+  <rect x="150" y="164" width="40.3" height="16" rx="3" fill="#9CC2AC"/>
+  <text x="196" y="177" font-size="11" fill="#3F7E5B" font-family="monospace" font-weight="700">7.2%</text>
+  <text x="150" y="196" font-size="10.5" fill="#3F7E5B">↓ NEW 噪音縮回結構之下，~2.4× 富集於結構 (gap +10.0pp)</text>
+</svg>
+</div>
+<div class="legend"><strong>讀法</strong>：每組看「噪音(下)」相對「結構(上)」—— OLD 噪音<em>超過</em>結構＝double-dip；NEW 噪音<em>縮回</em>結構之下。NEW 整體開火率本就較低，重點是<strong>組內相對關係</strong>非絕對長度。<br>全基因組 30,490 位點 · 來源 <code>output/_wg_bdcprime_verify</code></div>
+</div>
+
+<table>
+<thead><tr><th>指標</th><th class="num">OLD（tumor_intrinsic）</th><th class="num">NEW（C′）</th></tr></thead>
+<tbody>
+<tr><td>噪音開火率</td><td class="num">91.5%（422/461）</td><td class="num flip">7.2%（33/461）</td></tr>
+<tr><td>結構開火率</td><td class="num">70.2%（19,892/28,333）</td><td class="num">17.2%（4,868/28,333）</td></tr>
+<tr><td>結構−噪音 gap</td><td class="num pollute">−21.3pp（噪音反富集）</td><td class="num flip">+10.0pp（~2.4× 富集）</td></tr>
+<tr><td>噪音平均強度</td><td class="num">0.879</td><td class="num flip">0.064</td></tr>
+<tr><td>StrengthGrade 被降級的噪音位點</td><td class="num" colspan="2" style="text-align:center">392（污染從評分移除）</td></tr>
+</tbody>
+</table>
+
+<details><summary>chr1 fresh ground-truth 交叉確認（新 binary 真的 emit 新行為）</summary>
+<div class="body">
+<table>
+<thead><tr><th>分組</th><th class="num">n</th><th class="num">開火率</th><th class="num">gate 一致</th></tr></thead>
+<tbody>
+<tr><td>結構</td><td class="num">2,405</td><td class="num">17.3%</td><td class="num">2,405/2,405</td></tr>
+<tr><td>噪音</td><td class="num">54</td><td class="num">7.4%</td><td class="num">54/54</td></tr>
+</tbody></table>
+<p class="muted">chr1 重跑（commit 44f434b）數字與全基因組一致（17.3% / 7.4%），且 emit 值與 <code>within_hp_subclone_sig</code> gate 100% 一致（2,459/2,459）→ binary 確實 emit 新公式。三路交叉（WG OLD 欄 / chr1 native NEW 欄 / 公式重 derive 2624/2624 zero-mismatch）排除拷貝/分組假象。</p>
+</div></details>
+</section>
+
+<!-- ===== CASE ===== -->
+<section id="case">
+<h2>4 · 個案親驗：證明 C′ 抓的是「對的訊號」</h2>
+<p>數字翻轉只證「方向對」。要證「抓對訊號」，得親看甲基矩陣。挑最會被質疑的案：一個被全域判為 <code>Noise_Uniform</code>、卻拿到 <code>strength_tumor=1.0</code> 的位點——這是 bug 還是 feature？</p>
+
+<div class="card">
+<h3>個案 A · <code>chr1:220099749</code>（最極端：Noise_Uniform 但 strength=1.0）</h3>
+<div class="kv">
+  <div class="k">within-HP1 分組</div><div>germline-tag 5 reads vs somatic-carrier-tag 25 reads（C′ 有效）</div>
+  <div class="k">全域平均甲基</div><div>germline <strong>0.869</strong> ≈ carrier <strong>0.891</strong>（<strong>全域 Δ=−0.022</strong>，幾乎一樣 → 故被判 Noise_Uniform）</div>
+  <div class="k">逐 CpG 差異</div><div><strong>BUT 局部 Δ 可達 0.925</strong>：142 個 CpG 中 9 個 |Δβ|&gt;0.3 → germline 與 carrier 在<strong>特定位點</strong>甲基大不同</div>
+</div>
+<div class="callout key" style="margin-top:var(--sp-3)">
+<strong>判讀＝feature 非 bug：</strong> 這是「全域均值看不到、但<strong>依事前 somatic-carrier 標籤條件後才浮現</strong>的 per-CpG 子結構」。C′ 是多變量距離檢定，抓得到這種 pattern；全域均值/無監督抓不到。<code>Noise_Uniform</code> 是「全域軸」的判定，<code>strength_tumor</code> 是「a-priori 條件軸」——兩者<strong>本來就該不同</strong>，這個差異正是「位點光看 tumor 資訊就有的」候選 within-HP germline/carrier 甲基分離標記（<span class="badge b-tier">⭐3 mark-for-confirmation</span>，非 multi-subclone 重建）。
+</div>
+</div>
+
+<details><summary>個案 B · chr1:182893799（Strong 正控，確認梯度合理）</summary>
+<div class="body">
+<div class="kv">
+  <div class="k">within-HP1 分組</div><div>germline 20 vs carrier 18 reads（平衡）</div>
+  <div class="k">全域平均甲基</div><div>germline 0.904 vs carrier 0.878（Δ +0.025，cohen-d +0.64）</div>
+  <div class="k">逐 CpG 差異</div><div>5 個 CpG |Δβ|&gt;0.3、最大 0.838；C′ F=13.74（比個案 A 的 F=2.57 強）</div>
+</div>
+<p class="muted">Strong 案 n 更平衡、F 更高、效應更大 → 與「Strong」標籤相符。個案 A 是邊際但真實的 a-priori 訊號。兩案都有真實 germline/carrier per-CpG 甲基差異。</p>
+</div></details>
+
+<div class="card">
+<h3>去污染檢查（移除的是真噪音嗎？）+ magnitude 健康度</h3>
+<ul class="tight">
+<li><strong>去污染 48 例</strong>（Noise + OLD 開火 + NEW 歸零）：<strong>0/48</strong> 帶任何 a-priori Δβ 標記 → 移除的確實是真噪音。<span class="badge b-warn">⚠ 此乾淨僅 scope 到 VC=Noise</span>（全 VC 範圍見 §6：1,582 個非-Noise 去污染位點中 502 仍帶標記）。</li>
+<li><strong>magnitude 非退化</strong>：best_sil 分布 最小 0.117 → 中位 0.421 → 最大 0.843；<strong>無退化堆積在 0</strong>（無一為零），29.9% 飽和到 1.0 → 有梯度非一刀切。</li>
+<li><strong>交叉佐證</strong>：442 個 C′-sig 位點中 <strong>199（45%）</strong>同時帶獨立 a-priori Δβ 標記 → C′ 非憑空，與其他軸互相佐證。</li>
+<li><strong>Noise+sig 很罕見</strong>：chr1 僅 <strong>4/2,624（0.15%）</strong>，3/4 是 p&lt;0.01 強顯著（非邊際）。</li>
+</ul>
+</div>
+</section>
+
+<!-- ===== ADVERSARIAL ===== -->
+<section id="adv">
+<h2>5 · 對抗驗證：6 個 agent 各自嘗試「推翻」</h2>
+<p>啟動 6-agent Workflow，每個 agent 預設立場是<strong>反駁</strong>，各讀已落檔 CSV / 源碼 / memory 去 refute 一個核心主張。結果：</p>
+<table>
+<thead><tr><th>主張</th><th>內容</th><th>裁決</th></tr></thead>
+<tbody>
+<tr><td class="mono">C1</td><td>C′ 標籤是 a-priori、無 double-dip（源碼層）</td><td><span class="badge b-good">CONFIRMED</span></td></tr>
+<tr><td class="mono">C2</td><td>NEW strength_tumor double-dip 移除、~2.4× enriched on legacy VC</td><td><span class="badge b-good">CONFIRMED</span></td></tr>
+<tr><td class="mono">C3</td><td>去污染正確（移除的是真噪音）</td><td><span class="badge b-good">CONFIRMED</span></td></tr>
+<tr><td class="mono">C4</td><td>Noise+sig 是 feature 非 spurious</td><td><span class="badge b-good">CONFIRMED</span></td></tr>
+<tr><td class="mono">C5</td><td>不回流核心欄（VerificationClass）</td><td><span class="badge b-good">CONFIRMED</span></td></tr>
+<tr><td class="mono">C6</td><td>與 memory 框架口徑一致</td><td><span class="badge b-good">CONFIRMED</span></td></tr>
+</tbody>
+</table>
+<p><span class="badge b-good">6/6 CONFIRMED</span> <span class="badge b-good">0 REFUTED</span> <span class="badge b-good">0 blocking</span> <span class="badge b-mut">7 agents · 273s</span> ——裁決者另用 <code>git diff</code> 獨立重驗源碼。唯一具體缺陷＝一行 stale 註解數字，已修（commit 01bc9d3）。</p>
+</section>
+
+<!-- ===== CAVEAT ===== -->
+<section id="caveat">
+<h2>6 · 誠實 caveat（對論文口徑很重要）</h2>
+<div class="callout warn">
+<h3>🔴 口徑紅線（對抗驗證強制 · 守 memory 非循環性）</h3>
+<p>成果寫成「<strong>double-dip removed / ~2.4× enriched on legacy VC</strong>」，<strong>絕不</strong>寫「more discriminative」或「0% noise」（後者是循環論證，memory 明禁）。</p>
+</div>
+<ul class="tight">
+<li><strong>低 recall，不是靈敏偵測器</strong>：C′ 只在 ~17% 真結構位點開火，且 ~40–44% 位點因 germline/carrier 各 &lt;3 reads 而 abstain。所謂富集講的是「噪音 vs 結構開火率的<strong>比例</strong>」(~2.4×)，不是高 sensitivity 的偵測力。</li>
+<li><strong>非完美乾淨</strong>：仍在 ~7% 真噪音位點開火（不是零）。</li>
+<li><strong>去污染 0/48 只在 VC=Noise 成立</strong>：跨全 VC 的去污染中，~502/1,582 非-Noise 位點其實帶標記 → 「去污染不丟訊號」這句話必須加 VC=Noise 限定。</li>
+<li><strong>「subclone」是 within-HP germline-tag vs somatic-carrier-tag 甲基分離</strong>，不是 multi-subclone 重建；維持 <span class="badge b-tier">⭐3 mark-for-confirmation</span>，不升 hard verdict。</li>
+<li><strong>單樣本</strong>：跨生物樣本（COLO829 / H1437）復現 deferred（原始 BAM/VCF 不可及）。</li>
+</ul>
+</section>
+
+<!-- ===== LEDGER ===== -->
+<section id="ledger">
+<h2>7 · 改動清單 + 來源</h2>
+<table>
+<thead><tr><th>commit</th><th>內容</th></tr></thead>
+<tbody>
+<tr><td class="mono">081a556</td><td>B 放寬 within-HP balance（救 minor subclone）+ D 分級輸出 BestSil/MinFrac</td></tr>
+<tr><td class="mono">49a806a</td><td>C′ <code>compute_within_hp_subclone_permanova</code>（a-priori germline/carrier PERMANOVA）</td></tr>
+<tr><td class="mono">44f434b</td><td><strong>核心</strong>：strength_tumor 改用 C′ gate（移除 double-dip 污染）</td></tr>
+<tr><td class="mono">01bc9d3</td><td>修 stale 註解數字 + 對齊口徑（對抗驗證唯一缺陷）</td></tr>
+<tr><td class="mono">5c39051</td><td>methodology doc + evidence_ledger 收尾</td></tr>
+</tbody>
+</table>
+<div class="kv" style="margin-top:var(--sp-4)">
+  <div class="k">驗證</div><div>ctest 221/221 · regression 雙守護 PASS（9 核心欄 byte-identical）· strength_tumor 不進 VerificationClass</div>
+  <div class="k">文件</div><div><code>InterSubMod/docs/methodology/20260618_within_hp_multigroup_underdetection_audit_01.md</code></div>
+  <div class="k">memory</div><div><code>project_tumor_only_axis_negative_subclone_classification</code>（已更新）</div>
+</div>
+
+<footer>
+<strong>數據溯源（§13 data-lock）</strong>：本頁所有數字由 <code>InterSubMod/docs/methodology/_assets/20260618_strength_tumor_report/data.json</code> 注入（先落檔→讀回→才寫頁，與分析不同批）。<br>
+來源：<code>output/_wg_bdcprime_verify/significance_summary.csv</code>（30,490）· <code>output/_chr1_strength_verify/significance_summary.csv</code>（2,624 fresh @44f434b）· <code>output/_case_deep/</code>（個案甲基矩陣）· 對抗 Workflow <code>wymplni99</code>。<br>
+build commit <code>5c39051</code> · branch <code>feat/summary-nreadsvalid</code> · HCC1395 paired ±5000 BERNOULLI · 2026-06-18 · ⭐3 single-sample。
+</footer>
+</section>
+</main>
+</div>
+</body>
+</html>

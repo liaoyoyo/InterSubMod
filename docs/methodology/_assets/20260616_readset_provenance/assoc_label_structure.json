@@ -1,0 +1,225 @@
+{
+  "N": 30490,
+  "source": "output/_wg_d1_unified/significance_summary.csv",
+  "semantics": {
+    "GlobalP": "min(Fisher p over cluster×allele, cluster×HP, cluster×HP-family)",
+    "CramersV": "max(reliable Cramer's V over the 3 contingency tables); Cochran-unreliable -> 0",
+    "ClusterPermanovaP": "PERMANOVA on UNSUPERVISED cluster labels (double-dip axis)",
+    "LabelHPPermanovaP": "PERMANOVA on a-priori HP labels (valid)",
+    "LabelAllelePermanovaP": "PERMANOVA on a-priori ALT/REF labels (valid)"
+  },
+  "A_contingency_fisher_significant": {
+    "any_label(GlobalP)": {
+      "sig_n": 22632,
+      "sig_pct": 74.23
+    },
+    "HP_family(GlobalP_HPFamily)": {
+      "sig_n": 16503,
+      "sig_pct": 54.13
+    },
+    "HP_fine(GlobalP_HPFine)": {
+      "sig_n": 22170,
+      "sig_pct": 72.71
+    }
+  },
+  "B_cramersv_strength": {
+    "base_CramersV(max reliable)": {
+      "gated_to_zero_n": 17879,
+      "gated_to_zero_pct": 58.64,
+      "reliable_nonzero_n": 12611,
+      "reliable_nonzero_pct": 41.36,
+      "nonzero_median": 0.5615,
+      "nonzero_max": 1.0,
+      "tiers": {
+        "negligible(0,0.1)": {
+          "n": 457,
+          "pct_total": 1.5
+        },
+        "weak[0.1,0.3)": {
+          "n": 1680,
+          "pct_total": 5.51
+        },
+        "moderate[0.3,0.5)": {
+          "n": 3062,
+          "pct_total": 10.04
+        },
+        "strong[>=0.5]": {
+          "n": 7412,
+          "pct_total": 24.31
+        }
+      }
+    },
+    "CramersV_HPFamily": {
+      "gated_to_zero_n": 21994,
+      "gated_to_zero_pct": 72.14,
+      "reliable_nonzero_n": 8496,
+      "reliable_nonzero_pct": 27.86,
+      "nonzero_median": 0.2755,
+      "nonzero_max": 1.0,
+      "tiers": {
+        "negligible(0,0.1)": {
+          "n": 2053,
+          "pct_total": 6.73
+        },
+        "weak[0.1,0.3)": {
+          "n": 2363,
+          "pct_total": 7.75
+        },
+        "moderate[0.3,0.5)": {
+          "n": 1008,
+          "pct_total": 3.31
+        },
+        "strong[>=0.5]": {
+          "n": 3072,
+          "pct_total": 10.08
+        }
+      }
+    },
+    "CramersV_HPFine": {
+      "gated_to_zero_n": 23800,
+      "gated_to_zero_pct": 78.06,
+      "reliable_nonzero_n": 6690,
+      "reliable_nonzero_pct": 21.94,
+      "nonzero_median": 0.6941,
+      "nonzero_max": 1.0,
+      "tiers": {
+        "negligible(0,0.1)": {
+          "n": 2,
+          "pct_total": 0.01
+        },
+        "weak[0.1,0.3)": {
+          "n": 274,
+          "pct_total": 0.9
+        },
+        "moderate[0.3,0.5)": {
+          "n": 1017,
+          "pct_total": 3.34
+        },
+        "strong[>=0.5]": {
+          "n": 5397,
+          "pct_total": 17.7
+        }
+      }
+    }
+  },
+  "C_gate_tension": {
+    "fisher_significant_n": 22632,
+    "fisher_significant_pct": 74.23,
+    "among_sig__cramersv_gated_to_0_n": 10324,
+    "among_sig__cramersv_gated_to_0_pct": 45.62,
+    "among_sig__cramersv_reliable_pos_n": 12308,
+    "among_sig__cramersv_reliable_pos_pct": 54.38,
+    "note": "Fisher exact 對小樣本仍有效，故顯著；Cramer's V 走 Cochran reliability gate，小期望數→壓 0。兩者落差 = 強度不可讀的位點。"
+  },
+  "D_permanova": {
+    "cluster(unsupervised,double-dip)": {
+      "valid_n": 23007,
+      "valid_pct": 75.46,
+      "sig_n": 23007,
+      "sig_pct": 75.46,
+      "dispersion_warn_n": 18870,
+      "dispersion_warn_pct": 61.89
+    },
+    "label_HP(a-priori)": {
+      "valid_n": 29439,
+      "valid_pct": 96.55,
+      "sig_n": 26160,
+      "sig_pct": 85.8,
+      "dispersion_warn_n": 20486,
+      "dispersion_warn_pct": 67.19
+    },
+    "label_allele(a-priori)": {
+      "valid_n": 30474,
+      "valid_pct": 99.95,
+      "sig_n": 28488,
+      "sig_pct": 93.43,
+      "dispersion_warn_n": 28009,
+      "dispersion_warn_pct": 91.86
+    }
+  },
+  "E_gating": {
+    "passed_gating_n": 23007,
+    "passed_gating_pct": 75.46
+  },
+  "F_verification_class": {
+    "Strong": {
+      "n": 22310,
+      "pct_total": 73.17
+    },
+    "MultiGroupNoLabel": {
+      "n": 1899,
+      "pct_total": 6.23
+    },
+    "LabelShift": {
+      "n": 1809,
+      "pct_total": 5.93
+    },
+    "PermanovaLocation": {
+      "n": 1756,
+      "pct_total": 5.76
+    },
+    "DispersionStructure": {
+      "n": 1700,
+      "pct_total": 5.58
+    },
+    "LOH-Structure": {
+      "n": 376,
+      "pct_total": 1.23
+    },
+    "Noise_Uniform": {
+      "n": 311,
+      "pct_total": 1.02
+    },
+    "StructureNoLabel": {
+      "n": 177,
+      "pct_total": 0.58
+    },
+    "Noise_Uncorrelated": {
+      "n": 122,
+      "pct_total": 0.4
+    },
+    "Noise_Chaotic": {
+      "n": 30,
+      "pct_total": 0.1
+    }
+  },
+  "F_significant_projection": {
+    "significant_n": 28327,
+    "significant_pct": 92.91
+  },
+  "F_verification_class_legacy": {
+    "Strong": {
+      "n": 21015,
+      "pct_total": 68.92
+    },
+    "Weak": {
+      "n": 6122,
+      "pct_total": 20.08
+    },
+    "Noise": {
+      "n": 2058,
+      "pct_total": 6.75
+    },
+    "Subclone": {
+      "n": 1295,
+      "pct_total": 4.25
+    }
+  },
+  "G_contingency_direction": {
+    "WithinHP1_NGroups_dist": {
+      "1": 30299,
+      "2": 180,
+      "3": 11
+    },
+    "WithinHP2_NGroups_dist": {
+      "1": 30323,
+      "2": 158,
+      "3": 9
+    },
+    "one_label_multi_cluster_n(WithinHP1>=2 or WithinHP2>=2)": 354,
+    "one_label_multi_cluster_pct": 1.16,
+    "clean_multigroup_n": 8077,
+    "clean_multigroup_pct": 26.49,
+    "note": "一標籤多群 = 在單一 HP 內甲基再分≥2 群 (subclone 方向)。clean_multigroup = 乾淨多群旗標。"
+  }
+}

@@ -1,0 +1,294 @@
+{
+ "meta": {
+  "title": "phylo-v4.1 C++ 內建成果 + C++輸出渲染",
+  "subtitle": "binary 原生 phylo_groups.tsv → Python只讀畫 · stable 94%等價Python · commit fd02077",
+  "lskey": "phylo_cpp_v1",
+  "tier": "⭐2-3",
+  "scope": "6 C++輸出圖",
+  "build_commit": "fd02077",
+  "build_branch": "feat/summary-nreadsvalid"
+ },
+ "changelog": {
+  "data_status": {
+   "summary": "C++ binary 原生輸出 phylo_groups.tsv(45 chr22 loci); 圖由 phylo_cpp_render.py Pool平行讀tsv渲染"
+  },
+  "phase": "C++內建(cpp-change Step1-5)",
+  "corrections": [
+   {
+    "id": "B1",
+    "what": "PhyloLabeler.cpp核心(peel+descend+per-subgroup null+遞迴coarse)",
+    "status": "in-HEAD",
+    "effect": "7/7單元測試,BERNOULLI對齊Python",
+    "src": "PhyloLabeler.cpp"
+   },
+   {
+    "id": "B2",
+    "what": "compute_phylo_groups(modal K=10+fine+other)整合",
+    "status": "in-HEAD",
+    "effect": "binary原生phylo_groups.tsv",
+    "src": "RegionProcessor.cpp"
+   },
+   {
+    "id": "B3",
+    "what": "C++vs Python統計等價驗證",
+    "status": "in-HEAD",
+    "effect": "stable 94%一致,分歧僅borderline",
+    "src": "phylo_cpp validation"
+   }
+  ],
+  "audit_conclusion": {
+   "summary": "C++內建PASS:編譯+7/7測試+stable 94%等價Python。剩餘:全基因組C++跑+全位點儀表板。"
+  }
+ },
+ "sections": [
+  {
+   "id": "intro",
+   "title": "① C++內建成果 + 驗證 — 點圖放大",
+   "html": "<p class='sub'><b>C++ 內建 phylo-v4.1 成果</b>(cpp-change Step1-5): <b>PhyloLabeler.cpp</b>(BERNOULLI逐字對齊Python,7/7單元測試) + <b>RegionProcessor::compute_phylo_groups</b>(tumor+hp過濾→peel→modal K=10/fine null90/other) → binary 原生輸出 <code>phylo_groups.tsv</code>。<br>\n<b>C++ vs Python 統計等價驗證</b>(chr22 45 loci): <b>STABLE 位點 94% 一致</b>(>90%驗收✓); 分歧 7/9 集中在 unstable(borderline,本質RNG-敏感,instability flag正在抓的)。<br>\n<b>達成最初目標</b>: binary→tsv→Python只讀畫圖(本頁6圖由Pool平行 renderer 讀 C++ tsv 渲染, 零重算)。</p>"
+  }
+ ],
+ "item_config": {
+  "verdict_states": [
+   {
+    "key": "ok",
+    "label": "合理"
+   },
+   {
+    "key": "doubt",
+    "label": "存疑"
+   },
+   {
+    "key": "no",
+    "label": "不合理"
+   }
+  ],
+  "reason_options": [
+   "標籤錯",
+   "對齊錯",
+   "其他"
+  ],
+  "required_metrics": [
+   "coarse群"
+  ],
+  "per_page": 10
+ },
+ "items": [
+  {
+   "id": "chr22_11344897_11354897",
+   "title": "chr22:11344897:11354897",
+   "badges": [
+    {
+     "label": "C++ coarse 2群",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "coarse群"
+   ],
+   "metrics": [
+    {
+     "k": "coarse群",
+     "v": "2",
+     "src": "phylo_cpp_render.json"
+    },
+    {
+     "k": "來源",
+     "v": "C++ phylo_groups.tsv",
+     "src": "binary"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "點圖放大: C++標籤著色(Python只讀tsv不重算)",
+      "path": "figs_cpp/cpp_chr22_11344897_11354897.png"
+     }
+    ]
+   },
+   "reading_guide": "圖由 binary 原生 phylo_groups.tsv 標籤渲染, Python 只讀+畫(達成目標)。看 C++ coarse 側欄群是否對齊 HP/ALT。"
+  },
+  {
+   "id": "chr22_22707094_22717094",
+   "title": "chr22:22707094:22717094",
+   "badges": [
+    {
+     "label": "C++ coarse 2群",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "coarse群"
+   ],
+   "metrics": [
+    {
+     "k": "coarse群",
+     "v": "2",
+     "src": "phylo_cpp_render.json"
+    },
+    {
+     "k": "來源",
+     "v": "C++ phylo_groups.tsv",
+     "src": "binary"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "點圖放大: C++標籤著色(Python只讀tsv不重算)",
+      "path": "figs_cpp/cpp_chr22_22707094_22717094.png"
+     }
+    ]
+   },
+   "reading_guide": "圖由 binary 原生 phylo_groups.tsv 標籤渲染, Python 只讀+畫(達成目標)。看 C++ coarse 側欄群是否對齊 HP/ALT。"
+  },
+  {
+   "id": "chr22_22718993_22728993",
+   "title": "chr22:22718993:22728993",
+   "badges": [
+    {
+     "label": "C++ coarse 3群",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "coarse群"
+   ],
+   "metrics": [
+    {
+     "k": "coarse群",
+     "v": "3",
+     "src": "phylo_cpp_render.json"
+    },
+    {
+     "k": "來源",
+     "v": "C++ phylo_groups.tsv",
+     "src": "binary"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "點圖放大: C++標籤著色(Python只讀tsv不重算)",
+      "path": "figs_cpp/cpp_chr22_22718993_22728993.png"
+     }
+    ]
+   },
+   "reading_guide": "圖由 binary 原生 phylo_groups.tsv 標籤渲染, Python 只讀+畫(達成目標)。看 C++ coarse 側欄群是否對齊 HP/ALT。"
+  },
+  {
+   "id": "chr22_22811187_22821187",
+   "title": "chr22:22811187:22821187",
+   "badges": [
+    {
+     "label": "C++ coarse 4群",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "coarse群"
+   ],
+   "metrics": [
+    {
+     "k": "coarse群",
+     "v": "4",
+     "src": "phylo_cpp_render.json"
+    },
+    {
+     "k": "來源",
+     "v": "C++ phylo_groups.tsv",
+     "src": "binary"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "點圖放大: C++標籤著色(Python只讀tsv不重算)",
+      "path": "figs_cpp/cpp_chr22_22811187_22821187.png"
+     }
+    ]
+   },
+   "reading_guide": "圖由 binary 原生 phylo_groups.tsv 標籤渲染, Python 只讀+畫(達成目標)。看 C++ coarse 側欄群是否對齊 HP/ALT。"
+  },
+  {
+   "id": "chr22_22811392_22821392",
+   "title": "chr22:22811392:22821392",
+   "badges": [
+    {
+     "label": "C++ coarse 5群",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "coarse群"
+   ],
+   "metrics": [
+    {
+     "k": "coarse群",
+     "v": "5",
+     "src": "phylo_cpp_render.json"
+    },
+    {
+     "k": "來源",
+     "v": "C++ phylo_groups.tsv",
+     "src": "binary"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "點圖放大: C++標籤著色(Python只讀tsv不重算)",
+      "path": "figs_cpp/cpp_chr22_22811392_22821392.png"
+     }
+    ]
+   },
+   "reading_guide": "圖由 binary 原生 phylo_groups.tsv 標籤渲染, Python 只讀+畫(達成目標)。看 C++ coarse 側欄群是否對齊 HP/ALT。"
+  },
+  {
+   "id": "chr22_22811444_22821444",
+   "title": "chr22:22811444:22821444",
+   "badges": [
+    {
+     "label": "C++ coarse 4群",
+     "kind": "ok"
+    }
+   ],
+   "meta_metrics": [
+    "coarse群"
+   ],
+   "metrics": [
+    {
+     "k": "coarse群",
+     "v": "4",
+     "src": "phylo_cpp_render.json"
+    },
+    {
+     "k": "來源",
+     "v": "C++ phylo_groups.tsv",
+     "src": "binary"
+    }
+   ],
+   "figures": {
+    "mode": "png",
+    "imgs": [
+     {
+      "caption": "點圖放大: C++標籤著色(Python只讀tsv不重算)",
+      "path": "figs_cpp/cpp_chr22_22811444_22821444.png"
+     }
+    ]
+   },
+   "reading_guide": "圖由 binary 原生 phylo_groups.tsv 標籤渲染, Python 只讀+畫(達成目標)。看 C++ coarse 側欄群是否對齊 HP/ALT。"
+  }
+ ],
+ "provenance": {
+  "sources": [
+   "phylo_cpp_render.json",
+   "C++ phylo_groups.tsv"
+  ],
+  "note": "C++內建成果"
+ }
+}

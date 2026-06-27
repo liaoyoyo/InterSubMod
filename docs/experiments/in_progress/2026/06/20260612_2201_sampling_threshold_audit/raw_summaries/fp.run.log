@@ -1,0 +1,442 @@
+--- Configuration ---
+Tumor BAM: /big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam
+Normal BAM: /big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam
+Reference: /big8_disk/liaoyoyo2001/InterSubMod/data/ref/hg38.fa
+Somatic VCF: /big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_fp.vcf.gz
+Output Dir: /big7_disk/liaoyoyo2001/InterSubMod/output/_tmp_sampling_obs_20260612_2201/fp
+Window Size: 1000 bp
+Min MapQ: 20
+Min Read Length: 1000
+Methylation Thresholds: Low=0.2, High=0.8
+Threads: 40
+Distance Metrics: NHD
+Full Read Span: Disabled
+---------------------
+[32m[2026-06-12 22:33:27.630][T0][INFO ] Configuration valid. Starting analysis...
+[0m[32m[2026-06-12 22:33:27.630][T0][INFO ] RegionProcessor initialized:
+  Threads: 40
+  Window size: ±1000 bp
+  Log level: 2
+  Distance metrics: NHD
+  Min common coverage (C_min): 3
+  Distance matrix: enabled
+  Strand-specific matrices: enabled
+  Hierarchical clustering: enabled
+  Linkage method: UPGMA
+  Clustering min reads: 10
+[0m[32m[2026-06-12 22:33:27.630][T0][INFO ] START: Main Execution
+[0m[32m[2026-06-12 22:33:27.630][T0][INFO ] [1] Loading SNVs from VCF...
+[0m[32m[2026-06-12 22:33:27.630][T0][INFO ] Starting to load SNVs from VCF: /big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_fp.vcf.gz
+[0m[32m[2026-06-12 22:33:27.638][T0][INFO ] Loaded 195 contigs from header.
+[0m[32m[2026-06-12 22:33:27.669][T0][INFO ] Finished loading VCF. Loaded: 4842, Skipped: 0
+[0m[32m[2026-06-12 22:33:27.670][T0][INFO ] Loaded 4842 SNVs from VCF: /big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup/filtered_snv_fp.vcf.gz
+[0m[32m[2026-06-12 22:33:27.670][T0][INFO ] [2] Processing 4842 regions...
+[0mProcessing 4842 regions with 40 threads...
+[32m[2026-06-12 22:33:27.671][T0][INFO ] Processing 4842 regions with 40 threads...
+[0m[32m[2026-06-12 22:33:30.978][T23][INFO ] Progress: 1/4842 (0%) | chr1 | Avg: 3307 ms/region | ETA: 4.4 hr
+[0m[32m[2026-06-12 22:33:41.528][T39][INFO ] Progress: 243/4842 (5%) | chr1 | Avg: 57 ms/region | ETA: 4.4 min
+[0m[32m[2026-06-12 22:33:43.645][T30][INFO ] Progress: 290/4842 (5%) | chr10 | Avg: 55 ms/region | ETA: 4.2 min
+[0m[32m[2026-06-12 22:33:43.654][T27][INFO ] Progress: 291/4842 (6%) | chr1 | Avg: 55 ms/region | ETA: 4.2 min
+[0m[32m[2026-06-12 22:33:43.855][T24][INFO ] Progress: 293/4842 (6%) | chr10 | Avg: 55 ms/region | ETA: 4.2 min
+[0m[32m[2026-06-12 22:33:44.123][T25][INFO ] Progress: 298/4842 (6%) | chr1 | Avg: 55 ms/region | ETA: 4.2 min
+[0m[32m[2026-06-12 22:33:44.192][T36][INFO ] Progress: 300/4842 (6%) | chr10 | Avg: 55 ms/region | ETA: 4.2 min
+[0m[32m[2026-06-12 22:33:44.199][T0][INFO ] Progress: 301/4842 (6%) | chr1 | Avg: 55 ms/region | ETA: 4.2 min
+[0m[32m[2026-06-12 22:33:44.239][T26][INFO ] Progress: 303/4842 (6%) | chr10 | Avg: 55 ms/region | ETA: 4.1 min
+[0m[32m[2026-06-12 22:33:44.410][T23][INFO ] Progress: 312/4842 (6%) | chr1 | Avg: 54 ms/region | ETA: 4.1 min
+[0m[32m[2026-06-12 22:33:44.435][T4][INFO ] Progress: 313/4842 (6%) | chr10 | Avg: 54 ms/region | ETA: 4.0 min
+[0m[32m[2026-06-12 22:33:44.471][T1][INFO ] Progress: 314/4842 (6%) | chr1 | Avg: 54 ms/region | ETA: 4.0 min
+[0m[32m[2026-06-12 22:33:44.559][T12][INFO ] Progress: 315/4842 (6%) | chr10 | Avg: 54 ms/region | ETA: 4.0 min
+[0m[32m[2026-06-12 22:33:45.407][T5][INFO ] Progress: 326/4842 (6%) | chr1 | Avg: 54 ms/region | ETA: 4.1 min
+[0m[32m[2026-06-12 22:33:45.465][T16][INFO ] Progress: 327/4842 (6%) | chr10 | Avg: 54 ms/region | ETA: 4.1 min
+[0m[32m[2026-06-12 22:33:52.650][T27][INFO ] Progress: 498/4842 (10%) | chr11 | Avg: 50 ms/region | ETA: 3.6 min
+[0m[32m[2026-06-12 22:33:52.740][T14][INFO ] Progress: 500/4842 (10%) | chr10 | Avg: 50 ms/region | ETA: 3.6 min
+[0m[32m[2026-06-12 22:33:52.799][T15][INFO ] Progress: 501/4842 (10%) | chr11 | Avg: 50 ms/region | ETA: 3.6 min
+[0m[32m[2026-06-12 22:33:52.808][T8][INFO ] Progress: 502/4842 (10%) | chr10 | Avg: 50 ms/region | ETA: 3.6 min
+[0m[32m[2026-06-12 22:33:52.831][T19][INFO ] Progress: 503/4842 (10%) | chr11 | Avg: 50 ms/region | ETA: 3.6 min
+[0m[32m[2026-06-12 22:33:52.922][T5][INFO ] Progress: 508/4842 (10%) | chr10 | Avg: 50 ms/region | ETA: 3.6 min
+[0m[32m[2026-06-12 22:33:52.935][T17][INFO ] Progress: 509/4842 (10%) | chr11 | Avg: 50 ms/region | ETA: 3.6 min
+[0m[32m[2026-06-12 22:33:53.070][T30][INFO ] Progress: 514/4842 (10%) | chr10 | Avg: 49 ms/region | ETA: 3.6 min
+[0m[32m[2026-06-12 22:33:53.080][T32][INFO ] Progress: 515/4842 (10%) | chr11 | Avg: 49 ms/region | ETA: 3.6 min
+[0m[32m[2026-06-12 22:33:53.265][T31][INFO ] Progress: 519/4842 (10%) | chr10 | Avg: 49 ms/region | ETA: 3.6 min
+[0m[32m[2026-06-12 22:33:53.389][T22][INFO ] Progress: 522/4842 (10%) | chr11 | Avg: 49 ms/region | ETA: 3.5 min
+[0m[32m[2026-06-12 22:33:53.524][T4][INFO ] Progress: 524/4842 (10%) | chr10 | Avg: 49 ms/region | ETA: 3.6 min
+[0m[32m[2026-06-12 22:33:53.802][T26][INFO ] Progress: 527/4842 (10%) | chr11 | Avg: 50 ms/region | ETA: 3.6 min
+[0m[32m[2026-06-12 22:33:53.844][T6][INFO ] Progress: 531/4842 (10%) | chr10 | Avg: 49 ms/region | ETA: 3.5 min
+[0m[32m[2026-06-12 22:33:53.857][T25][INFO ] Progress: 532/4842 (10%) | chr11 | Avg: 49 ms/region | ETA: 3.5 min
+[0m[32m[2026-06-12 22:33:53.884][T13][INFO ] Progress: 535/4842 (11%) | chr10 | Avg: 49 ms/region | ETA: 3.5 min
+[0m[32m[2026-06-12 22:33:53.960][T27][INFO ] Progress: 536/4842 (11%) | chr11 | Avg: 49 ms/region | ETA: 3.5 min
+[0m[32m[2026-06-12 22:33:54.298][T20][INFO ] Progress: 542/4842 (11%) | chr10 | Avg: 49 ms/region | ETA: 3.5 min
+[0m[32m[2026-06-12 22:33:54.300][T7][INFO ] Progress: 543/4842 (11%) | chr11 | Avg: 49 ms/region | ETA: 3.5 min
+[0m[32m[2026-06-12 22:34:01.874][T25][INFO ] Progress: 707/4842 (14%) | chr12 | Avg: 48 ms/region | ETA: 3.3 min
+[0m[32m[2026-06-12 22:34:01.968][T27][INFO ] Progress: 708/4842 (14%) | chr11 | Avg: 48 ms/region | ETA: 3.3 min
+[0m[32m[2026-06-12 22:34:02.567][T2][INFO ] Progress: 709/4842 (14%) | chr12 | Avg: 49 ms/region | ETA: 3.4 min
+[0m[32m[2026-06-12 22:34:11.262][T22][INFO ] Progress: 920/4842 (19%) | chr12 | Avg: 47 ms/region | ETA: 3.1 min
+[0m[32m[2026-06-12 22:34:14.010][T37][INFO ] Progress: 990/4842 (20%) | chr13 | Avg: 47 ms/region | ETA: 3.0 min
+[0m[32m[2026-06-12 22:34:14.018][T9][INFO ] Progress: 991/4842 (20%) | chr12 | Avg: 47 ms/region | ETA: 3.0 min
+[0m[32m[2026-06-12 22:34:14.414][T30][INFO ] Progress: 992/4842 (20%) | chr13 | Avg: 47 ms/region | ETA: 3.0 min
+[0m[32m[2026-06-12 22:34:15.498][T0][INFO ] Progress: 1016/4842 (20%) | chr12 | Avg: 47 ms/region | ETA: 3.0 min
+[0m[32m[2026-06-12 22:34:15.574][T38][INFO ] Progress: 1017/4842 (21%) | chr13 | Avg: 47 ms/region | ETA: 3.0 min
+[0m[32m[2026-06-12 22:34:21.372][T14][INFO ] Progress: 1164/4842 (24%) | chr14 | Avg: 46 ms/region | ETA: 2.8 min
+[0m[32m[2026-06-12 22:34:25.163][T22][INFO ] Progress: 1276/4842 (26%) | chr15 | Avg: 45 ms/region | ETA: 2.7 min
+[0m[32m[2026-06-12 22:34:25.486][T31][INFO ] Progress: 1284/4842 (26%) | chr14 | Avg: 45 ms/region | ETA: 2.7 min
+[0m[32m[2026-06-12 22:34:25.488][T28][INFO ] Progress: 1285/4842 (26%) | chr15 | Avg: 45 ms/region | ETA: 2.7 min
+[0m[32m[2026-06-12 22:34:25.587][T11][INFO ] Progress: 1291/4842 (26%) | chr14 | Avg: 45 ms/region | ETA: 2.7 min
+[0m[32m[2026-06-12 22:34:25.601][T15][INFO ] Progress: 1292/4842 (26%) | chr15 | Avg: 45 ms/region | ETA: 2.7 min
+[0m[32m[2026-06-12 22:34:25.774][T14][INFO ] Progress: 1304/4842 (26%) | chr14 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:25.867][T30][INFO ] Progress: 1305/4842 (26%) | chr15 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:27.160][T26][INFO ] Progress: 1330/4842 (27%) | chr14 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:27.178][T32][INFO ] Progress: 1331/4842 (27%) | chr15 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:27.307][T4][INFO ] Progress: 1333/4842 (27%) | chr14 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:27.315][T10][INFO ] Progress: 1335/4842 (27%) | chr15 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:27.356][T13][INFO ] Progress: 1338/4842 (27%) | chr14 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:27.373][T11][INFO ] Progress: 1339/4842 (27%) | chr15 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:27.402][T33][INFO ] Progress: 1344/4842 (27%) | chr14 | Avg: 44 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:27.471][T36][INFO ] Progress: 1345/4842 (27%) | chr15 | Avg: 44 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:29.632][T17][INFO ] Progress: 1377/4842 (28%) | chr16 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:29.682][T24][INFO ] Progress: 1381/4842 (28%) | chr15 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:29.740][T29][INFO ] Progress: 1388/4842 (28%) | chr16 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:29.748][T26][INFO ] Progress: 1389/4842 (28%) | chr15 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:30.144][T21][INFO ] Progress: 1400/4842 (28%) | chr16 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:30.190][T5][INFO ] Progress: 1402/4842 (28%) | chr15 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:30.306][T3][INFO ] Progress: 1404/4842 (28%) | chr16 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:30.453][T18][INFO ] Progress: 1405/4842 (29%) | chr15 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:30.489][T20][INFO ] Progress: 1406/4842 (29%) | chr16 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:30.854][T37][INFO ] Progress: 1408/4842 (29%) | chr15 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:30.855][T22][INFO ] Progress: 1409/4842 (29%) | chr16 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:30.912][T1][INFO ] Progress: 1410/4842 (29%) | chr15 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:31.016][T4][INFO ] Progress: 1411/4842 (29%) | chr17 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:31.235][T8][INFO ] Progress: 1412/4842 (29%) | chr16 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:31.239][T10][INFO ] Progress: 1413/4842 (29%) | chr17 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:31.302][T31][INFO ] Progress: 1414/4842 (29%) | chr16 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:31.306][T26][INFO ] Progress: 1415/4842 (29%) | chr17 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:31.508][T14][INFO ] Progress: 1418/4842 (29%) | chr16 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:31.604][T13][INFO ] Progress: 1419/4842 (29%) | chr17 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:31.856][T34][INFO ] Progress: 1424/4842 (29%) | chr16 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:31.886][T25][INFO ] Progress: 1425/4842 (29%) | chr17 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:31.943][T7][INFO ] Progress: 1427/4842 (29%) | chr16 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:32.009][T15][INFO ] Progress: 1429/4842 (29%) | chr17 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:32.040][T6][INFO ] Progress: 1430/4842 (29%) | chr16 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:32.050][T30][INFO ] Progress: 1431/4842 (29%) | chr17 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:32.104][T27][INFO ] Progress: 1433/4842 (29%) | chr16 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:32.107][T5][INFO ] Progress: 1434/4842 (29%) | chr17 | Avg: 45 ms/region | ETA: 2.6 min
+[0m[32m[2026-06-12 22:34:32.110][T0][INFO ] Progress: 1435/4842 (29%) | chr16 | Avg: 45 ms/region | ETA: 2.5 min
+[0m[32m[2026-06-12 22:34:32.119][T18][INFO ] Progress: 1436/4842 (29%) | chr17 | Avg: 45 ms/region | ETA: 2.5 min
+[0m[32m[2026-06-12 22:34:32.280][T17][INFO ] Progress: 1438/4842 (29%) | chr16 | Avg: 45 ms/region | ETA: 2.5 min
+[0m[32m[2026-06-12 22:34:32.315][T36][INFO ] Progress: 1439/4842 (29%) | chr17 | Avg: 45 ms/region | ETA: 2.5 min
+[0m[32m[2026-06-12 22:34:32.874][T19][INFO ] Progress: 1454/4842 (30%) | chr16 | Avg: 45 ms/region | ETA: 2.5 min
+[0m[32m[2026-06-12 22:34:32.880][T22][INFO ] Progress: 1455/4842 (30%) | chr17 | Avg: 45 ms/region | ETA: 2.5 min
+[0m[32m[2026-06-12 22:34:33.121][T9][INFO ] Progress: 1456/4842 (30%) | chr16 | Avg: 45 ms/region | ETA: 2.5 min
+[0m[32m[2026-06-12 22:34:33.295][T38][INFO ] Progress: 1458/4842 (30%) | chr17 | Avg: 45 ms/region | ETA: 2.5 min
+[0m[32m[2026-06-12 22:34:33.908][T35][INFO ] Progress: 1471/4842 (30%) | chr16 | Avg: 45 ms/region | ETA: 2.5 min
+[0m[32m[2026-06-12 22:34:33.985][T2][INFO ] Progress: 1472/4842 (30%) | chr17 | Avg: 45 ms/region | ETA: 2.5 min
+[0m[32m[2026-06-12 22:34:39.151][T16][INFO ] Progress: 1617/4842 (33%) | chr18 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:39.214][T26][INFO ] Progress: 1620/4842 (33%) | chr17 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:39.282][T11][INFO ] Progress: 1621/4842 (33%) | chr18 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:39.606][T18][INFO ] Progress: 1624/4842 (33%) | chr17 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:39.618][T14][INFO ] Progress: 1625/4842 (33%) | chr18 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:39.991][T9][INFO ] Progress: 1631/4842 (33%) | chr17 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:39.991][T7][INFO ] Progress: 1632/4842 (33%) | chr18 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:40.241][T6][INFO ] Progress: 1636/4842 (33%) | chr17 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:40.370][T10][INFO ] Progress: 1638/4842 (33%) | chr18 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:40.619][T0][INFO ] Progress: 1641/4842 (33%) | chr17 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:40.866][T31][INFO ] Progress: 1645/4842 (33%) | chr18 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:41.024][T29][INFO ] Progress: 1646/4842 (33%) | chr17 | Avg: 45 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:41.105][T23][INFO ] Progress: 1649/4842 (34%) | chr18 | Avg: 45 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:41.228][T2][INFO ] Progress: 1650/4842 (34%) | chr17 | Avg: 45 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:41.253][T35][INFO ] Progress: 1651/4842 (34%) | chr18 | Avg: 45 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:41.428][T34][INFO ] Progress: 1661/4842 (34%) | chr17 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:41.487][T20][INFO ] Progress: 1662/4842 (34%) | chr18 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:41.541][T15][INFO ] Progress: 1664/4842 (34%) | chr17 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:41.598][T13][INFO ] Progress: 1665/4842 (34%) | chr18 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:41.645][T4][INFO ] Progress: 1666/4842 (34%) | chr17 | Avg: 44 ms/region | ETA: 2.4 min
+[0m[32m[2026-06-12 22:34:41.708][T3][INFO ] Progress: 1668/4842 (34%) | chr18 | Avg: 44 ms/region | ETA: 2.3 min
+[0m[32m[2026-06-12 22:34:43.895][T30][INFO ] Progress: 1728/4842 (35%) | chr19 | Avg: 44 ms/region | ETA: 2.3 min
+[0m[32m[2026-06-12 22:34:43.918][T23][INFO ] Progress: 1730/4842 (35%) | chr18 | Avg: 44 ms/region | ETA: 2.3 min
+[0m[32m[2026-06-12 22:34:43.928][T33][INFO ] Progress: 1731/4842 (35%) | chr19 | Avg: 44 ms/region | ETA: 2.3 min
+[0m[32m[2026-06-12 22:34:43.972][T16][INFO ] Progress: 1732/4842 (35%) | chr18 | Avg: 44 ms/region | ETA: 2.3 min
+[0m[32m[2026-06-12 22:34:44.068][T11][INFO ] Progress: 1733/4842 (35%) | chr19 | Avg: 44 ms/region | ETA: 2.3 min
+[0m[32m[2026-06-12 22:34:44.354][T14][INFO ] Progress: 1739/4842 (35%) | chr18 | Avg: 44 ms/region | ETA: 2.3 min
+[0m[32m[2026-06-12 22:34:44.396][T9][INFO ] Progress: 1740/4842 (35%) | chr19 | Avg: 44 ms/region | ETA: 2.3 min
+[0m[32m[2026-06-12 22:34:44.701][T37][INFO ] Progress: 1751/4842 (36%) | chr18 | Avg: 44 ms/region | ETA: 2.3 min
+[0m[32m[2026-06-12 22:34:44.703][T12][INFO ] Progress: 1752/4842 (36%) | chr19 | Avg: 44 ms/region | ETA: 2.3 min
+[0m[32m[2026-06-12 22:34:48.933][T32][INFO ] Progress: 1825/4842 (37%) | chr2 | Avg: 45 ms/region | ETA: 2.2 min
+[0m[32m[2026-06-12 22:34:49.008][T36][INFO ] Progress: 1826/4842 (37%) | chr19 | Avg: 45 ms/region | ETA: 2.2 min
+[0m[32m[2026-06-12 22:34:49.025][T35][INFO ] Progress: 1827/4842 (37%) | chr2 | Avg: 45 ms/region | ETA: 2.2 min
+[0m[32m[2026-06-12 22:34:49.079][T17][INFO ] Progress: 1829/4842 (37%) | chr19 | Avg: 45 ms/region | ETA: 2.2 min
+[0m[32m[2026-06-12 22:34:49.117][T4][INFO ] Progress: 1830/4842 (37%) | chr2 | Avg: 45 ms/region | ETA: 2.2 min
+[0m[32m[2026-06-12 22:34:50.075][T11][INFO ] Progress: 1857/4842 (38%) | chr19 | Avg: 44 ms/region | ETA: 2.2 min
+[0m[32m[2026-06-12 22:34:50.227][T26][INFO ] Progress: 1858/4842 (38%) | chr2 | Avg: 44 ms/region | ETA: 2.2 min
+[0m[32m[2026-06-12 22:34:57.552][T37][INFO ] Progress: 2083/4842 (43%) | chr2 | Avg: 43 ms/region | ETA: 2.0 min
+[0m[32m[2026-06-12 22:35:00.804][T11][INFO ] Progress: 2153/4842 (44%) | chr20 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:00.810][T9][INFO ] Progress: 2154/4842 (44%) | chr2 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:00.821][T2][INFO ] Progress: 2155/4842 (44%) | chr20 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:00.885][T19][INFO ] Progress: 2172/4842 (44%) | chr2 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:00.901][T12][INFO ] Progress: 2173/4842 (44%) | chr20 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:00.945][T36][INFO ] Progress: 2178/4842 (44%) | chr2 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:00.947][T29][INFO ] Progress: 2180/4842 (45%) | chr20 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:00.985][T38][INFO ] Progress: 2184/4842 (45%) | chr2 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:01.108][T18][INFO ] Progress: 2185/4842 (45%) | chr20 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:01.120][T7][INFO ] Progress: 2186/4842 (45%) | chr2 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:01.206][T0][INFO ] Progress: 2187/4842 (45%) | chr20 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:01.445][T26][INFO ] Progress: 2192/4842 (45%) | chr2 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:01.534][T3][INFO ] Progress: 2194/4842 (45%) | chr20 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:04.810][T10][INFO ] Progress: 2256/4842 (46%) | chr2 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:04.850][T36][INFO ] Progress: 2257/4842 (46%) | chr20 | Avg: 43 ms/region | ETA: 1.9 min
+[0m[32m[2026-06-12 22:35:05.673][T26][INFO ] Progress: 2284/4842 (47%) | chr21 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:05.676][T34][INFO ] Progress: 2285/4842 (47%) | chr20 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:05.677][T24][INFO ] Progress: 2286/4842 (47%) | chr21 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:05.687][T19][INFO ] Progress: 2287/4842 (47%) | chr20 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:06.448][T15][INFO ] Progress: 2307/4842 (47%) | chr21 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:06.451][T8][INFO ] Progress: 2308/4842 (47%) | chr20 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:06.681][T4][INFO ] Progress: 2310/4842 (47%) | chr21 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:06.681][T23][INFO ] Progress: 2311/4842 (47%) | chr20 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:06.687][T10][INFO ] Progress: 2312/4842 (47%) | chr21 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:07.092][T35][INFO ] Progress: 2317/4842 (47%) | chr20 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:07.094][T18][INFO ] Progress: 2318/4842 (47%) | chr21 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:08.061][T10][INFO ] Progress: 2348/4842 (48%) | chr22 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:08.101][T27][INFO ] Progress: 2349/4842 (48%) | chr21 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:09.084][T9][INFO ] Progress: 2372/4842 (48%) | chr22 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:09.215][T26][INFO ] Progress: 2375/4842 (49%) | chr3 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:09.270][T15][INFO ] Progress: 2376/4842 (49%) | chr22 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:09.479][T34][INFO ] Progress: 2379/4842 (49%) | chr3 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:09.607][T27][INFO ] Progress: 2381/4842 (49%) | chr22 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:09.675][T25][INFO ] Progress: 2382/4842 (49%) | chr3 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:09.852][T10][INFO ] Progress: 2384/4842 (49%) | chr22 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:09.903][T39][INFO ] Progress: 2385/4842 (49%) | chr3 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:10.316][T31][INFO ] Progress: 2388/4842 (49%) | chr22 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:10.328][T15][INFO ] Progress: 2389/4842 (49%) | chr3 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:10.362][T38][INFO ] Progress: 2390/4842 (49%) | chr22 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:10.395][T9][INFO ] Progress: 2391/4842 (49%) | chr3 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:10.458][T4][INFO ] Progress: 2393/4842 (49%) | chr22 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:10.471][T35][INFO ] Progress: 2394/4842 (49%) | chr3 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:10.480][T37][INFO ] Progress: 2395/4842 (49%) | chr22 | Avg: 43 ms/region | ETA: 1.8 min
+[0m[32m[2026-06-12 22:35:10.510][T19][INFO ] Progress: 2396/4842 (49%) | chr3 | Avg: 43 ms/region | ETA: 1.7 min
+[0m[32m[2026-06-12 22:35:10.655][T30][INFO ] Progress: 2398/4842 (49%) | chr21 | Avg: 43 ms/region | ETA: 1.7 min
+[0m[32m[2026-06-12 22:35:10.677][T2][INFO ] Progress: 2399/4842 (49%) | chr3 | Avg: 43 ms/region | ETA: 1.7 min
+[0m[32m[2026-06-12 22:35:10.766][T0][INFO ] Progress: 2400/4842 (49%) | chr21 | Avg: 43 ms/region | ETA: 1.7 min
+[0m[32m[2026-06-12 22:35:10.775][T6][INFO ] Progress: 2401/4842 (49%) | chr3 | Avg: 43 ms/region | ETA: 1.7 min
+[0m[32m[2026-06-12 22:35:11.009][T33][INFO ] Progress: 2408/4842 (49%) | chr21 | Avg: 43 ms/region | ETA: 1.7 min
+[0m[32m[2026-06-12 22:35:11.031][T18][INFO ] Progress: 2409/4842 (49%) | chr3 | Avg: 43 ms/region | ETA: 1.7 min
+[0m[32m[2026-06-12 22:35:11.267][T16][INFO ] Progress: 2419/4842 (49%) | chr21 | Avg: 43 ms/region | ETA: 1.7 min
+[0m[32m[2026-06-12 22:35:11.269][T15][INFO ] Progress: 2420/4842 (49%) | chr3 | Avg: 43 ms/region | ETA: 1.7 min
+[0m[32m[2026-06-12 22:35:11.420][T13][INFO ] Progress: 2423/4842 (50%) | chr21 | Avg: 43 ms/region | ETA: 1.7 min
+[0m[32m[2026-06-12 22:35:11.440][T8][INFO ] Progress: 2424/4842 (50%) | chr3 | Avg: 43 ms/region | ETA: 1.7 min
+[0m[32m[2026-06-12 22:35:12.890][T21][INFO ] Progress: 2468/4842 (50%) | chr21 | Avg: 43 ms/region | ETA: 1.7 min
+[0m[32m[2026-06-12 22:35:12.963][T30][INFO ] Progress: 2469/4842 (50%) | chr3 | Avg: 43 ms/region | ETA: 1.7 min
+[0m[32m[2026-06-12 22:35:14.274][T22][INFO ] Progress: 2511/4842 (51%) | chr21 | Avg: 42 ms/region | ETA: 1.6 min
+[0m[32m[2026-06-12 22:35:14.347][T21][INFO ] Progress: 2512/4842 (51%) | chr3 | Avg: 42 ms/region | ETA: 1.6 min
+[0m[32m[2026-06-12 22:35:14.377][T32][INFO ] Progress: 2516/4842 (51%) | chr21 | Avg: 42 ms/region | ETA: 1.6 min
+[0m[32m[2026-06-12 22:35:14.434][T39][INFO ] Progress: 2517/4842 (51%) | chr3 | Avg: 42 ms/region | ETA: 1.6 min
+[0m[32m[2026-06-12 22:35:16.901][T27][INFO ] Progress: 2599/4842 (53%) | chr4 | Avg: 42 ms/region | ETA: 1.6 min
+[0m[32m[2026-06-12 22:35:16.920][T34][INFO ] Progress: 2600/4842 (53%) | chr3 | Avg: 42 ms/region | ETA: 1.6 min
+[0m[32m[2026-06-12 22:35:17.421][T20][INFO ] Progress: 2618/4842 (54%) | chr4 | Avg: 42 ms/region | ETA: 1.6 min
+[0m[32m[2026-06-12 22:35:17.432][T4][INFO ] Progress: 2619/4842 (54%) | chr3 | Avg: 42 ms/region | ETA: 1.6 min
+[0m[32m[2026-06-12 22:35:17.554][T19][INFO ] Progress: 2622/4842 (54%) | chr4 | Avg: 42 ms/region | ETA: 1.6 min
+[0m[32m[2026-06-12 22:35:17.609][T30][INFO ] Progress: 2624/4842 (54%) | chr3 | Avg: 42 ms/region | ETA: 1.5 min
+[0m[32m[2026-06-12 22:35:17.615][T32][INFO ] Progress: 2626/4842 (54%) | chr4 | Avg: 42 ms/region | ETA: 1.5 min
+[0m[32m[2026-06-12 22:35:17.655][T29][INFO ] Progress: 2630/4842 (54%) | chr3 | Avg: 42 ms/region | ETA: 1.5 min
+[0m[32m[2026-06-12 22:35:17.800][T14][INFO ] Progress: 2633/4842 (54%) | chr4 | Avg: 42 ms/region | ETA: 1.5 min
+[0m[32m[2026-06-12 22:35:17.864][T8][INFO ] Progress: 2635/4842 (54%) | chr3 | Avg: 42 ms/region | ETA: 1.5 min
+[0m[32m[2026-06-12 22:35:17.884][T22][INFO ] Progress: 2636/4842 (54%) | chr4 | Avg: 42 ms/region | ETA: 1.5 min
+[0m[32m[2026-06-12 22:35:18.003][T18][INFO ] Progress: 2637/4842 (54%) | chr3 | Avg: 42 ms/region | ETA: 1.5 min
+[0m[32m[2026-06-12 22:35:18.089][T1][INFO ] Progress: 2639/4842 (54%) | chr4 | Avg: 42 ms/region | ETA: 1.5 min
+[0m[32m[2026-06-12 22:35:18.144][T25][INFO ] Progress: 2643/4842 (54%) | chr3 | Avg: 42 ms/region | ETA: 1.5 min
+[0m[32m[2026-06-12 22:35:18.178][T39][INFO ] Progress: 2645/4842 (54%) | chr4 | Avg: 42 ms/region | ETA: 1.5 min
+[0m[32m[2026-06-12 22:35:18.194][T26][INFO ] Progress: 2647/4842 (54%) | chr3 | Avg: 42 ms/region | ETA: 1.5 min
+[0m[32m[2026-06-12 22:35:18.301][T11][INFO ] Progress: 2649/4842 (54%) | chr4 | Avg: 42 ms/region | ETA: 1.5 min
+[0m[32m[2026-06-12 22:35:23.764][T26][INFO ] Progress: 2857/4842 (59%) | chr4 | Avg: 41 ms/region | ETA: 1.3 min
+[0m[32m[2026-06-12 22:35:28.866][T17][INFO ] Progress: 3050/4842 (62%) | chr5 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:28.968][T26][INFO ] Progress: 3051/4842 (63%) | chr4 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:28.993][T24][INFO ] Progress: 3052/4842 (63%) | chr5 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.039][T33][INFO ] Progress: 3054/4842 (63%) | chr4 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.053][T2][INFO ] Progress: 3055/4842 (63%) | chr5 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.108][T11][INFO ] Progress: 3056/4842 (63%) | chr4 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.138][T21][INFO ] Progress: 3057/4842 (63%) | chr5 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.159][T1][INFO ] Progress: 3058/4842 (63%) | chr4 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.195][T33][INFO ] Progress: 3059/4842 (63%) | chr5 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.200][T34][INFO ] Progress: 3060/4842 (63%) | chr4 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.204][T9][INFO ] Progress: 3061/4842 (63%) | chr5 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.212][T23][INFO ] Progress: 3062/4842 (63%) | chr4 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.214][T38][INFO ] Progress: 3063/4842 (63%) | chr5 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.296][T7][INFO ] Progress: 3068/4842 (63%) | chr4 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.365][T3][INFO ] Progress: 3070/4842 (63%) | chr5 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.870][T28][INFO ] Progress: 3079/4842 (63%) | chr4 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.870][T0][INFO ] Progress: 3080/4842 (63%) | chr5 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.871][T31][INFO ] Progress: 3081/4842 (63%) | chr4 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:29.966][T18][INFO ] Progress: 3082/4842 (63%) | chr5 | Avg: 40 ms/region | ETA: 1.2 min
+[0m[32m[2026-06-12 22:35:34.846][T22][INFO ] Progress: 3240/4842 (66%) | chr6 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:34.921][T29][INFO ] Progress: 3243/4842 (66%) | chr5 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:34.952][T31][INFO ] Progress: 3244/4842 (66%) | chr6 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:34.980][T26][INFO ] Progress: 3245/4842 (67%) | chr5 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:35.693][T15][INFO ] Progress: 3255/4842 (67%) | chr6 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:35.755][T24][INFO ] Progress: 3257/4842 (67%) | chr5 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:35.795][T9][INFO ] Progress: 3258/4842 (67%) | chr6 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:35.800][T0][INFO ] Progress: 3259/4842 (67%) | chr5 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:35.849][T19][INFO ] Progress: 3260/4842 (67%) | chr6 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:35.923][T28][INFO ] Progress: 3262/4842 (67%) | chr5 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:35.936][T24][INFO ] Progress: 3263/4842 (67%) | chr6 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:35.965][T30][INFO ] Progress: 3265/4842 (67%) | chr5 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:35.968][T5][INFO ] Progress: 3266/4842 (67%) | chr6 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:36.076][T6][INFO ] Progress: 3267/4842 (67%) | chr5 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:36.081][T5][INFO ] Progress: 3268/4842 (67%) | chr6 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:36.087][T7][INFO ] Progress: 3269/4842 (67%) | chr5 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:36.090][T15][INFO ] Progress: 3270/4842 (67%) | chr6 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:36.265][T17][INFO ] Progress: 3279/4842 (67%) | chr5 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:36.280][T22][INFO ] Progress: 3281/4842 (67%) | chr6 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:36.296][T39][INFO ] Progress: 3282/4842 (67%) | chr5 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:36.338][T0][INFO ] Progress: 3283/4842 (67%) | chr6 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:36.396][T21][INFO ] Progress: 3285/4842 (67%) | chr5 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:36.438][T19][INFO ] Progress: 3286/4842 (67%) | chr6 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:36.456][T27][INFO ] Progress: 3289/4842 (67%) | chr5 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:36.543][T30][INFO ] Progress: 3291/4842 (67%) | chr6 | Avg: 39 ms/region | ETA: 1.0 min
+[0m[32m[2026-06-12 22:35:37.159][T4][INFO ] Progress: 3345/4842 (69%) | chr5 | Avg: 39 ms/region | ETA: 58s
+[0m[32m[2026-06-12 22:35:37.211][T11][INFO ] Progress: 3347/4842 (69%) | chr6 | Avg: 39 ms/region | ETA: 58s
+[0m[32m[2026-06-12 22:35:37.248][T36][INFO ] Progress: 3349/4842 (69%) | chr5 | Avg: 39 ms/region | ETA: 58s
+[0m[32m[2026-06-12 22:35:37.305][T7][INFO ] Progress: 3352/4842 (69%) | chr6 | Avg: 39 ms/region | ETA: 58s
+[0m[32m[2026-06-12 22:35:37.331][T10][INFO ] Progress: 3356/4842 (69%) | chr5 | Avg: 39 ms/region | ETA: 57s
+[0m[32m[2026-06-12 22:35:37.343][T30][INFO ] Progress: 3357/4842 (69%) | chr6 | Avg: 39 ms/region | ETA: 57s
+[0m[32m[2026-06-12 22:35:37.407][T25][INFO ] Progress: 3367/4842 (69%) | chr5 | Avg: 39 ms/region | ETA: 57s
+[0m[32m[2026-06-12 22:35:37.458][T21][INFO ] Progress: 3368/4842 (69%) | chr6 | Avg: 39 ms/region | ETA: 57s
+[0m[32m[2026-06-12 22:35:37.496][T37][INFO ] Progress: 3376/4842 (69%) | chr5 | Avg: 38 ms/region | ETA: 56s
+[0m[32m[2026-06-12 22:35:37.501][T3][INFO ] Progress: 3377/4842 (69%) | chr6 | Avg: 38 ms/region | ETA: 56s
+[0m[32m[2026-06-12 22:35:39.693][T14][INFO ] Progress: 3466/4842 (71%) | chr7 | Avg: 38 ms/region | ETA: 52s
+[0m[32m[2026-06-12 22:35:39.760][T11][INFO ] Progress: 3468/4842 (71%) | chr6 | Avg: 38 ms/region | ETA: 52s
+[0m[32m[2026-06-12 22:35:39.813][T22][INFO ] Progress: 3473/4842 (71%) | chr7 | Avg: 38 ms/region | ETA: 52s
+[0m[32m[2026-06-12 22:35:39.937][T29][INFO ] Progress: 3474/4842 (71%) | chr6 | Avg: 38 ms/region | ETA: 52s
+[0m[32m[2026-06-12 22:35:39.951][T31][INFO ] Progress: 3475/4842 (71%) | chr7 | Avg: 38 ms/region | ETA: 52s
+[0m[32m[2026-06-12 22:35:39.971][T26][INFO ] Progress: 3476/4842 (71%) | chr6 | Avg: 38 ms/region | ETA: 52s
+[0m[32m[2026-06-12 22:35:40.152][T31][INFO ] Progress: 3483/4842 (71%) | chr7 | Avg: 38 ms/region | ETA: 52s
+[0m[32m[2026-06-12 22:35:40.163][T2][INFO ] Progress: 3484/4842 (71%) | chr6 | Avg: 38 ms/region | ETA: 52s
+[0m[32m[2026-06-12 22:35:40.205][T22][INFO ] Progress: 3487/4842 (72%) | chr7 | Avg: 38 ms/region | ETA: 52s
+[0m[32m[2026-06-12 22:35:40.254][T24][INFO ] Progress: 3488/4842 (72%) | chr6 | Avg: 38 ms/region | ETA: 51s
+[0m[32m[2026-06-12 22:35:40.307][T18][INFO ] Progress: 3490/4842 (72%) | chr7 | Avg: 38 ms/region | ETA: 51s
+[0m[32m[2026-06-12 22:35:40.593][T12][INFO ] Progress: 3493/4842 (72%) | chr6 | Avg: 38 ms/region | ETA: 51s
+[0m[32m[2026-06-12 22:35:40.639][T6][INFO ] Progress: 3495/4842 (72%) | chr7 | Avg: 38 ms/region | ETA: 51s
+[0m[32m[2026-06-12 22:35:40.950][T7][INFO ] Progress: 3500/4842 (72%) | chr6 | Avg: 38 ms/region | ETA: 51s
+[0m[32m[2026-06-12 22:35:40.997][T19][INFO ] Progress: 3501/4842 (72%) | chr7 | Avg: 38 ms/region | ETA: 51s
+[0m[32m[2026-06-12 22:35:41.385][T1][INFO ] Progress: 3513/4842 (72%) | chr6 | Avg: 38 ms/region | ETA: 51s
+[0m[32m[2026-06-12 22:35:41.527][T1][INFO ] Progress: 3515/4842 (72%) | chr7 | Avg: 38 ms/region | ETA: 51s
+[0m[32m[2026-06-12 22:35:45.628][T14][INFO ] Progress: 3608/4842 (74%) | chr8 | Avg: 38 ms/region | ETA: 47s
+[0m[32m[2026-06-12 22:35:45.633][T16][INFO ] Progress: 3609/4842 (74%) | chr7 | Avg: 38 ms/region | ETA: 47s
+[0m[32m[2026-06-12 22:35:45.791][T2][INFO ] Progress: 3612/4842 (74%) | chr8 | Avg: 38 ms/region | ETA: 47s
+[0m[32m[2026-06-12 22:35:45.858][T3][INFO ] Progress: 3614/4842 (74%) | chr7 | Avg: 38 ms/region | ETA: 47s
+[0m[32m[2026-06-12 22:35:45.980][T0][INFO ] Progress: 3619/4842 (74%) | chr8 | Avg: 38 ms/region | ETA: 47s
+[0m[32m[2026-06-12 22:35:46.017][T21][INFO ] Progress: 3621/4842 (74%) | chr7 | Avg: 38 ms/region | ETA: 47s
+[0m[32m[2026-06-12 22:35:46.140][T3][INFO ] Progress: 3627/4842 (74%) | chr8 | Avg: 38 ms/region | ETA: 46s
+[0m[32m[2026-06-12 22:35:46.155][T29][INFO ] Progress: 3628/4842 (74%) | chr7 | Avg: 38 ms/region | ETA: 46s
+[0m[32m[2026-06-12 22:35:46.595][T31][INFO ] Progress: 3630/4842 (74%) | chr8 | Avg: 38 ms/region | ETA: 46s
+[0m[32m[2026-06-12 22:35:46.638][T22][INFO ] Progress: 3633/4842 (75%) | chr7 | Avg: 38 ms/region | ETA: 46s
+[0m[32m[2026-06-12 22:35:46.759][T39][INFO ] Progress: 3634/4842 (75%) | chr8 | Avg: 38 ms/region | ETA: 46s
+[0m[32m[2026-06-12 22:35:47.317][T6][INFO ] Progress: 3647/4842 (75%) | chr7 | Avg: 38 ms/region | ETA: 46s
+[0m[32m[2026-06-12 22:35:47.378][T22][INFO ] Progress: 3649/4842 (75%) | chr8 | Avg: 38 ms/region | ETA: 46s
+[0m[32m[2026-06-12 22:35:47.562][T7][INFO ] Progress: 3650/4842 (75%) | chr7 | Avg: 38 ms/region | ETA: 46s
+[0m[32m[2026-06-12 22:35:47.584][T37][INFO ] Progress: 3651/4842 (75%) | chr8 | Avg: 38 ms/region | ETA: 46s
+[0m[32m[2026-06-12 22:35:47.644][T32][INFO ] Progress: 3653/4842 (75%) | chr7 | Avg: 38 ms/region | ETA: 46s
+[0m[32m[2026-06-12 22:35:47.664][T31][INFO ] Progress: 3654/4842 (75%) | chr8 | Avg: 38 ms/region | ETA: 46s
+[0m[32m[2026-06-12 22:35:47.830][T36][INFO ] Progress: 3658/4842 (75%) | chr7 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:47.937][T13][INFO ] Progress: 3659/4842 (75%) | chr8 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:47.972][T23][INFO ] Progress: 3661/4842 (75%) | chr7 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:47.972][T1][INFO ] Progress: 3662/4842 (75%) | chr8 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:48.063][T27][INFO ] Progress: 3663/4842 (75%) | chr7 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:48.074][T32][INFO ] Progress: 3664/4842 (75%) | chr8 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:48.100][T30][INFO ] Progress: 3665/4842 (75%) | chr7 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:48.175][T13][INFO ] Progress: 3666/4842 (75%) | chr8 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:48.178][T10][INFO ] Progress: 3667/4842 (75%) | chr7 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:48.233][T9][INFO ] Progress: 3668/4842 (75%) | chr8 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:48.275][T20][INFO ] Progress: 3671/4842 (75%) | chr7 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:48.279][T39][INFO ] Progress: 3672/4842 (75%) | chr8 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:48.283][T15][INFO ] Progress: 3673/4842 (75%) | chr7 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:48.288][T26][INFO ] Progress: 3674/4842 (75%) | chr8 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:48.346][T17][INFO ] Progress: 3676/4842 (75%) | chr7 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:48.585][T13][INFO ] Progress: 3677/4842 (75%) | chr8 | Avg: 38 ms/region | ETA: 45s
+[0m[32m[2026-06-12 22:35:49.487][T19][INFO ] Progress: 3709/4842 (76%) | chr7 | Avg: 38 ms/region | ETA: 43s
+[0m[32m[2026-06-12 22:35:49.506][T34][INFO ] Progress: 3710/4842 (76%) | chr8 | Avg: 38 ms/region | ETA: 43s
+[0m[32m[2026-06-12 22:35:50.051][T33][INFO ] Progress: 3712/4842 (76%) | chr7 | Avg: 38 ms/region | ETA: 43s
+[0m[32m[2026-06-12 22:35:50.088][T39][INFO ] Progress: 3713/4842 (76%) | chr8 | Avg: 38 ms/region | ETA: 43s
+[0m[32m[2026-06-12 22:35:51.021][T35][INFO ] Progress: 3767/4842 (77%) | chr4 | Avg: 38 ms/region | ETA: 41s
+[0m[32m[2026-06-12 22:35:51.107][T20][INFO ] Progress: 3768/4842 (77%) | chr8 | Avg: 38 ms/region | ETA: 41s
+[0m[32m[2026-06-12 22:35:51.590][T8][INFO ] Progress: 3821/4842 (78%) | chr4 | Avg: 38 ms/region | ETA: 38s
+[0m[32m[2026-06-12 22:35:51.636][T18][INFO ] Progress: 3822/4842 (78%) | chr8 | Avg: 38 ms/region | ETA: 38s
+[0m[32m[2026-06-12 22:35:53.731][T14][INFO ] Progress: 4019/4842 (83%) | chr8 | Avg: 36 ms/region | ETA: 30s
+[0m[32m[2026-06-12 22:35:56.501][T32][INFO ] Progress: 4261/4842 (88%) | chr8 | Avg: 35 ms/region | ETA: 20s
+[0m[32m[2026-06-12 22:35:59.428][T3][INFO ] Progress: 4504/4842 (93%) | chr8 | Avg: 34 ms/region | ETA: 11s
+[0m[32m[2026-06-12 22:36:00.879][T15][INFO ] Progress: 4587/4842 (94%) | chr9 | Avg: 33 ms/region | ETA: 9s
+[0m[32m[2026-06-12 22:36:00.915][T26][INFO ] Progress: 4588/4842 (94%) | chr8 | Avg: 33 ms/region | ETA: 8s
+[0m[32m[2026-06-12 22:36:00.966][T34][INFO ] Progress: 4593/4842 (94%) | chr9 | Avg: 33 ms/region | ETA: 8s
+[0m[32m[2026-06-12 22:36:01.067][T17][INFO ] Progress: 4596/4842 (94%) | chr8 | Avg: 33 ms/region | ETA: 8s
+[0m[32m[2026-06-12 22:36:01.159][T8][INFO ] Progress: 4600/4842 (95%) | chr9 | Avg: 33 ms/region | ETA: 8s
+[0m[32m[2026-06-12 22:36:01.628][T7][INFO ] Progress: 4607/4842 (95%) | chr8 | Avg: 33 ms/region | ETA: 8s
+[0m[32m[2026-06-12 22:36:01.638][T33][INFO ] Progress: 4608/4842 (95%) | chr9 | Avg: 33 ms/region | ETA: 8s
+[0m[32m[2026-06-12 22:36:01.680][T12][INFO ] Progress: 4610/4842 (95%) | chr8 | Avg: 33 ms/region | ETA: 8s
+[0m[32m[2026-06-12 22:36:01.748][T22][INFO ] Progress: 4611/4842 (95%) | chr9 | Avg: 33 ms/region | ETA: 8s
+[0m[32m[2026-06-12 22:36:01.792][T19][INFO ] Progress: 4612/4842 (95%) | chr8 | Avg: 33 ms/region | ETA: 8s
+[0m[32m[2026-06-12 22:36:01.792][T20][INFO ] Progress: 4613/4842 (95%) | chr9 | Avg: 33 ms/region | ETA: 8s
+[0m[32m[2026-06-12 22:36:01.936][T24][INFO ] Progress: 4618/4842 (95%) | chr8 | Avg: 33 ms/region | ETA: 7s
+[0m[32m[2026-06-12 22:36:01.947][T16][INFO ] Progress: 4619/4842 (95%) | chr9 | Avg: 33 ms/region | ETA: 7s
+[0m[32m[2026-06-12 22:36:01.989][T0][INFO ] Progress: 4625/4842 (95%) | chr8 | Avg: 33 ms/region | ETA: 7s
+[0m[32m[2026-06-12 22:36:02.011][T35][INFO ] Progress: 4626/4842 (95%) | chr9 | Avg: 33 ms/region | ETA: 7s
+[0m[32m[2026-06-12 22:36:02.030][T13][INFO ] Progress: 4627/4842 (95%) | chr8 | Avg: 33 ms/region | ETA: 7s
+[0m[32m[2026-06-12 22:36:02.240][T6][INFO ] Progress: 4631/4842 (95%) | chr9 | Avg: 33 ms/region | ETA: 7s
+[0m[32m[2026-06-12 22:36:02.249][T30][INFO ] Progress: 4633/4842 (95%) | chr8 | Avg: 33 ms/region | ETA: 7s
+[0m[32m[2026-06-12 22:36:02.253][T32][INFO ] Progress: 4634/4842 (95%) | chr9 | Avg: 33 ms/region | ETA: 7s
+[0m[32m[2026-06-12 22:36:02.260][T37][INFO ] Progress: 4635/4842 (95%) | chr8 | Avg: 33 ms/region | ETA: 7s
+[0m[32m[2026-06-12 22:36:02.261][T1][INFO ] Progress: 4636/4842 (95%) | chr9 | Avg: 33 ms/region | ETA: 7s
+[0m[32m[2026-06-12 22:36:02.267][T10][INFO ] Progress: 4637/4842 (95%) | chr8 | Avg: 33 ms/region | ETA: 7s
+[0m[32m[2026-06-12 22:36:02.270][T19][INFO ] Progress: 4638/4842 (95%) | chr9 | Avg: 33 ms/region | ETA: 7s
+[0m[32m[2026-06-12 22:36:07.468][T24][INFO ] Progress: 4842/4842 (100%) | chr9 | Avg: 33 ms/region | ETA: 0s
+[0m[32m[2026-06-12 22:36:07.783][T0][INFO ] Completed 4842 regions in 160.1s (avg: 33.1 ms/region)
+[0m[32m[2026-06-12 22:36:07.786][T0][INFO ] [CovM] Pass 2 diploid_coverage=79.000000x source=auto_kde (KDE mode of NumReads distribution)
+[0m[32m[2026-06-12 22:36:07.791][T0][INFO ] Subclone analysis complete: 4 groups from 4811 regions
+[0m[32m[2026-06-12 22:36:07.977][T0][INFO ] Significance summary written to: /big7_disk/liaoyoyo2001/InterSubMod/output/_tmp_sampling_obs_20260612_2201/fp/significance_summary.csv
+[0m[32m[2026-06-12 22:36:07.977][T0][INFO ] Significance statistics summary written to: /big7_disk/liaoyoyo2001/InterSubMod/output/_tmp_sampling_obs_20260612_2201/fp/significance_statistics.txt
+[0m[32m[2026-06-12 22:36:07.983][T0][INFO ] 
+=== Processing Summary ===
+Total regions: 4842
+Successful: 4842
+Failed: 0
+Total reads processed: 450277
+  Forward strand (+): 145659
+  Reverse strand (-): 142979
+Total CpG sites found: 97567
+Total processing time: 6.29954e+06 ms
+Average time per region: 1301.02 ms
+Average reads per region: 92.994
+Average CpGs per region: 20.1501
+
+=== Distance Matrix Summary (First Metric) ===
+Metric: NHD
+Min common coverage (C_min): 3
+Regions with distance matrices: 4842
+Total valid read pairs: 20642611
+Total invalid pairs (insufficient overlap): 3298178
+Valid pair ratio: 86.2%
+Average common CpG coverage: 12.97
+
+[0m[3] Analysis Complete.
+[32m[2026-06-12 22:36:07.983][T0][INFO ] 
+=== Processing Summary ===
+Total regions: 4842
+Successful: 4842
+Failed: 0
+Total reads processed: 450277
+  Forward strand (+): 145659
+  Reverse strand (-): 142979
+Total CpG sites found: 97567
+Total processing time: 6.29954e+06 ms
+Average time per region: 1301.02 ms
+Average reads per region: 92.994
+Average CpGs per region: 20.1501
+
+=== Distance Matrix Summary (First Metric) ===
+Metric: NHD
+Min common coverage (C_min): 3
+Regions with distance matrices: 4842
+Total valid read pairs: 20642611
+Total invalid pairs (insufficient overlap): 3298178
+Valid pair ratio: 86.2%
+Average common CpG coverage: 12.97
+
+[0m[32m[2026-06-12 22:36:07.983][T0][INFO ] Total Wall-clock time: 160313.315124 ms
+[0m[32m[2026-06-12 22:36:07.983][T0][INFO ] Output directory: /big7_disk/liaoyoyo2001/InterSubMod/output/_tmp_sampling_obs_20260612_2201/fp
+[0m[32m[2026-06-12 22:36:07.983][T0][INFO ] DONE : Main Execution (160353 ms)
+[0m[Total Execution] Time: 162.1799 s, Memory: 57.20 MB

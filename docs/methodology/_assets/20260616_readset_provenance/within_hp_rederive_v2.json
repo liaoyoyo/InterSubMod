@@ -1,0 +1,94 @@
+{
+  "seed": 11,
+  "min_cov": 3,
+  "groups": {
+    "A_對齊-單群(CleanMG=False,看漏判)": {
+      "tested": 113,
+      "rederive_gate_pass(C++應flag卻False=矛盾)": 0,
+      "strong_but_imbalanced(sil>=.5,minor subclone被balance擋)": 30,
+      "weak_split(sil .3-.5,被sil閾值擋)": 64,
+      "noise(sil<.3,正確不flag)": 19,
+      "median_best_sil": 0.413,
+      "examples_missed": [
+        {
+          "loc": "chr1:65637992",
+          "best": {
+            "n": 52,
+            "best_k": 2,
+            "best_sil": 0.687,
+            "min_frac": 0.058,
+            "balanced": false,
+            "gate_pass": false
+          },
+          "csv_NG": "1/1"
+        },
+        {
+          "loc": "chr1:76907616",
+          "best": {
+            "n": 47,
+            "best_k": 2,
+            "best_sil": 0.538,
+            "min_frac": 0.043,
+            "balanced": false,
+            "gate_pass": false
+          },
+          "csv_NG": "1/1"
+        },
+        {
+          "loc": "chr1:115776450",
+          "best": {
+            "n": 37,
+            "best_k": 3,
+            "best_sil": 0.47,
+            "min_frac": 0.027,
+            "balanced": false,
+            "gate_pass": false
+          },
+          "csv_NG": "1/1"
+        },
+        {
+          "loc": "chr1:177291137",
+          "best": {
+            "n": 31,
+            "best_k": 2,
+            "best_sil": 0.41,
+            "min_frac": 0.032,
+            "balanced": false,
+            "gate_pass": false
+          },
+          "csv_NG": "1/1"
+        },
+        {
+          "loc": "chr1:182893799",
+          "best": {
+            "n": 20,
+            "best_k": 2,
+            "best_sil": 0.753,
+            "min_frac": 0.05,
+            "balanced": false,
+            "gate_pass": false
+          },
+          "csv_NG": "1/1"
+        },
+        {
+          "loc": "chr1:191289887",
+          "best": {
+            "n": 21,
+            "best_k": 2,
+            "best_sil": 0.681,
+            "min_frac": 0.048,
+            "balanced": false,
+            "gate_pass": false
+          },
+          "csv_NG": "1/1"
+        }
+      ]
+    },
+    "B_PATTERN控制(NG>=2,驗重現)": {
+      "tested": 50,
+      "rederive_gate_pass": 49,
+      "rederive_sil>=.5": 50,
+      "median_best_sil": 0.54
+    }
+  }
+}
