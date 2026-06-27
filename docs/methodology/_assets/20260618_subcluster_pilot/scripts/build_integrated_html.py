@@ -30,6 +30,8 @@ psx = J("sm_phaseset_extension.json")
 me = J("sm_methyl_corroboration.json")
 mr = J("sm_methyl_reextract_merged.json")
 suf = J("sm_methyl_sufficiency_audit.json")
+slc = J("sm_single_locus_methyl.json")
+cal = J("sm_methyl_genetic_concordance.json")
 # region 形狀計數從已載入的 psx 衍生（§13-A，非手打）：full_tree 677 / structured 4678
 _bs = (psx.get("ps_reliability_per_region", {}) if isinstance(psx, dict) else {}).get(
     "by_shape_reliable_vs_uncertain", {}
@@ -108,6 +110,19 @@ footer{{margin-top:28px;padding-top:12px;border-top:1px solid {BD};font-size:12p
 ③ 🔴 <b>cis-control 不可評估 + 0 偵測</b>：hp_control_eval=0/740 → 「subclone-specific」撤回；甲基偵測 <b>0 個新 partition</b>；full_tree（subclone 最多）corroboration 反而最低（{g(suf,'by_tree_shape','full_tree','rate')}）。</div>
 {img('08_methyl_sufficiency.png')}
 <div class="box"><b>誠實回答</b>：甲基<b>不能</b>當偵測器/主要標記（0 新發現）；只在少數高覆蓋區提供<b>未經 cis 校正</b>的弱佐證；要稱「甲基支持 subclone」須先補 matched-normal cis-control。符合 ⭐3 / auxiliary-not-driver。詳見 <code>08_methylation_sufficiency_audit.md</code>。</div>
+
+<h2 id="l9">L9 — 單 sSNV 外推 / HP 排解 cis-ASM / 多→單校正（數據驗證 7 問）</h2>
+<div class="box"><b>使用者連續 7 問的數據答案</b>（單位點 {g(slc,'n_testable',default='—')} 可測 + 多-sSNV 校正 {g(cal,'n_target_multi_sSNV',default='—')} 區）。</div>
+<div class="box red">
+① <b>資訊不夠非零</b>：high-power recover 54.9% / powered 10.68%。<br>
+② <b>能 characterize 已確認 clone</b>（6.6%+chr17 歸因）；獨立偵測=0。<br>
+③ <b>單 sSNV 外推</b>：單位點 ASM <b>{g(slc,'n_asm_positive',default='—')}/{g(slc,'n_testable',default='—')}（{g(slc,'asm_rate_of_testable')}）</b> — 5× 多-sSNV，但<b>最不可解釋</b>（無錨 + C>T 破壞 CpG 假象 + cis/subclone 混）。<br>
+④ <b>ALT 多群=subclone？</b> 🔴 read×read 甲基分群 <b>僅 {g(cal,'n_testable_permanova',default='—')}/{g(cal,'n_target_multi_sSNV',default='—')} 可測</b>（其餘 CpG 重疊太稀疏）→ 無監督 read-clustering <b>data-starved</b>，非「分不出」。<br>
+⑤ <b>HP 排解 cis-ASM？</b> 🔴 hp_control_eval <b>0/740 + 0/{g(slc,'n_testable',default='—')}</b> — LOH 同質無 germline 雜合→無 HP tag→不可行。<br>
+⑥ <b>LOH 無 germline ASM？</b> ✅ 正確（{g(suf,'cis_confound_by_cn','corroborated_LOH')}/49 LOH，germline 等位 ASM 結構不可能）。<br>
+⑦ <b>多→單校正門檻？</b> 🔴 read-clustering data-starved + per-CpG 由覆蓋驅動非乾淨門檻 → <b>無可轉移門檻</b>。
+</div>
+<div class="box"><b>結論</b>：甲基 = <b>對已確認結構的有界表觀註解，非偵測器</b>；單 sSNV/read-clustering/HP-排解/跨尺度校正在此單樣本資料**均不足以獨立判定 subclone**，需 matched-normal cis-control + 更深覆蓋。詳見 <code>09_single_sSNV_and_calibration.md</code>。</div>
 
 <h2 id="narr">整合敘述（sSNV + read → clone/subclone）</h2>
 <div class="box"><b>骨幹</b>：ONT long read 同分子讀多 sSNV → 共現 2×2 → 局部克隆樹（7,143 區域：{STRUCTURED_N:,} 有確認結構〔含 {FULL_TREE_N:,} full_tree〕，其餘 {7143-STRUCTURED_N:,} sparse/single-pair）。<br>
