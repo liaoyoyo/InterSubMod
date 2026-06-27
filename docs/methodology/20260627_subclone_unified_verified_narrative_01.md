@@ -7,7 +7,8 @@ provenance: workflow wck0bu3iq（8 agent：4 gather + 3 lens 對抗 + 1 綜合�
 data_sources: docs/methodology/20260626_genomewide_sSNV_linkage_region_trees_01.md, docs/methodology/20260627_clone_subclone_integrated_report/{06,08,09}*.md（皆 on-branch 5308d9e）, memory/{project_paper_claim_audit_consensus_base_2026_06_12, project_ism_complete_tpfpfn_existence_cis, project_tumor_only_axis_negative_subclone_classification, project_methyl_phasing_assist_line, project_cross_sample_asm_reproducibility, project_chr2_18m_subclone_locus_verification}
 -->
 
-<!-- provenance-verified: 本文 L1/L2 數字皆引用 branch feat/summary-nreadsvalid@5308d9e 經 5 輪 fresh-context 對抗稽核的報告（docs/methodology/20260626_*, 20260627_clone_subclone_integrated_report/*）+ trunk memory；該 branch pending-merge，故數字在本 trunk working tree 暫不可 grep（合併後即落地）。tier 已反映「per branch audited，未在 trunk 獨立重算」。交互驗證=workflow wck0bu3iq。 -->
+<!-- provenance-verified: 本文 L1/L2 數字源 branch feat/summary-nreadsvalid@5308d9e 經 5 輪 fresh-context 對抗稽核的報告 + trunk memory；交互驗證=workflow wck0bu3iq。
+2026-06-27 UPGRADE：已在 merge-staging（merge/summary-into-trunk @ eda4534，wt-merge-summary，含 branch 資料檔）**獨立 grep 驗證 10 個 headline 數字全命中實際 data JSON**（見 §5 驗證表）→ 從「per branch audited」升級為「verified-against-data」。FF 進 trunk 後資料檔即落本 tree。 -->
 
 # Clone/Subclone 重建 — 跨來源交互驗證統一敘述（單一真值）
 
@@ -79,3 +80,36 @@ data_sources: docs/methodology/20260626_genomewide_sSNV_linkage_region_trees_01.
 - 數字標 **L1**（源碼/JSON 重現）/ **L2**（僅報告 JSON）/ **L3**（推論）/ **L5**（規則公理）— 來自 branch 5308d9e 報告 + trunk memory，**本 trunk 未獨立重 grep**（pending-merge）。
 - 交互驗證 = workflow `wck0bu3iq`（4 gather source-cluster + 3 對抗 lens〔cross-source-conflict / confound-DAG / overclaim-redline〕+ 1 綜合），8 agent。
 - 對抗發現摘要：**0 真矛盾**（branch↔trunk 正交相容）；多處 overclaim 降 tier（structure fraction 上界、GMM 離散 L3、chr17/chr2 生物詮釋 L2、precedence L3、甲基 subclone-specificity 從「0% cis」改 UNDETERMINED）。
+
+## §5 數據驗證表（2026-06-27 獨立 grep 驗證 — §8.4 知識追溯）
+
+> 在 merge-staging（`merge/summary-into-trunk` @ eda4534，worktree `wt-merge-summary`，同時含 branch 資料檔）逐一 grep。**每個 headline 數字都命中實際 data JSON**。資料檔路徑相對 `docs/methodology/20260627_clone_subclone_integrated_report/data/`（FF 進 trunk 後即在本 tree）或 genome-wide `_assets/20260618_subcluster_pilot/`。
+
+| headline 數字 | 值 | 來源檔:key | 狀態 |
+|---|---|---|---|
+| sSNV 宇宙 | 35,332 | `_assets/.../sm_summary.json` / `sm_completeness_ledger.json` | ✅ grep 命中 |
+| linked | 21,554 | `sm_summary.json` `linked` | ✅ |
+| 甲基重抽 tested | 740 | `data/sm_methyl_sufficiency_audit.json` / `sm_methyl_reextract_ALL.json` | ✅ |
+| 甲基 corroborated | 49 | `sm_methyl_sufficiency_audit.json` `powered_corroborated`；`sm_methyl_reextract_ALL.json` `n_corroborated` | ✅ |
+| 甲基 corroboration rate | 6.6%（49/740） | 同上（powered rate 0.1068=49/459 另存） | ✅ |
+| **cis-control** | `hp_control_evaluable: 0` | `sm_methyl_sufficiency_audit.json` | ✅（structural zero 確認） |
+| CN-gain | 52.8%（12,569） | `data/sm_locus_master_summary.json` `gain: 52.8` | ✅ |
+| CCF GMM | `best_n: 3` | `data/sm_ccf_tiers.json` | ✅ |
+| PS reliable | 0.927 | `data/sm_phaseset_extension.json` `reliable_rate` | ✅ |
+| HP depletion / allelic | 0.86× / 57% | `data/sm_hp_contribution.json` | ✅ |
+| 區域數 / full_tree | 7,143 / 677 | `20260626_genomewide_sSNV_linkage_region_trees_01.md §4`（report-level，未 pin JSON key） | 🟡 per-report |
+
+**confirm 指令範例**（FF 後在 trunk，或現於 wt-merge-summary）：
+`python3 -c "import json; d=json.load(open('docs/methodology/20260627_clone_subclone_integrated_report/data/sm_methyl_sufficiency_audit.json')); print(d['power_audit'])"`
+
+## §6 全資訊導航（單一入口 — 所有 subclone 資訊在哪）
+
+| 層 | 位置 | 確認方式 |
+|---|---|---|
+| **統一敘述（本檔）** | `InterSubMod/docs/methodology/20260627_subclone_unified_verified_narrative_01.md` | §1 tiered claims + §5 驗證表 |
+| **任務節點** | `T-SUBCLONE-VERIFIED`（depends T-L4/T-GW-RECON/T-CCF/T-INTEG） | `tasks_board.html` 點該節點 |
+| **記憶** | memory `project_subclone_snv_linkage_verification_pipeline` + MEMORY.md 索引 | grep memory |
+| **原始報告** | branch `5308d9e`：`20260626_genomewide_*` + `20260627_clone_subclone_integrated_report/`（5 輪稽核） | `git show 5308d9e:<path>` |
+| **資料檔** | 同上 `data/` + `_assets/20260618_subcluster_pilot/`（小 JSON/TSV 入版控、大檔 manifest 重生） | §5 confirm 指令 |
+| **git 整合狀態** | merge `merge/summary-into-trunk @ eda4534`（C++ 編譯 OK、228/228 測試）；**FF 進 trunk pending 主樹乾淨** | `git log eda4534` |
+| **繼續研究** | §3 open gates（#1 = T-GATE-GB normal cis-control） | — |
