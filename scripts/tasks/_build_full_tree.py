@@ -270,7 +270,7 @@ nodes.append(N("T-GW-RECON", "全基因組 sSNV 單分子連鎖 → 每區域克
                               {"name": "CN/SEQC2 truth（可選）", "required": False, "ref": None}],
                    "outputs": ["per-sSNV census TSV（35,332）", "per-region 克隆樹（7,143 區域）", "完整性帳本（Tier-R sum-check）", "樹形分布表（full_tree 677 等）"]},
                links={"memory": ["project_subclone_snv_linkage_verification_pipeline"]},
-               notes=_PM + " 過 fresh-context evaluator 對抗稽核 NEEDS_WORK→5 修正已套。🔴 限制：~69% 訊號在 CN-gain 混淆區（乾淨集=LOH+neutral）；偽影 mask 未清（chr8:81-83M 等 segdup 簇 816 sSNV，F2/F3→需 mappability/segdup mask + CN context，連 T-ONT-CNV）；Tier-R only；regional 非 genome-wide tree、分子非 single-cell。"))
+               notes=_PM + " 過 fresh-context evaluator 對抗稽核 NEEDS_WORK→5 修正已套。🔴 限制：52.8% somatic sSNV 落 CN-gain（舊 ~69%/64% stale，master TSV 重算）→ 乾淨集 LOH+neutral 46.8%（full_tree 乾淨集 205/677）；偽影 mask 未清（chr8:81-83M 等 segdup 簇 816 sSNV，F2/F3→需 mappability/segdup mask + CN context，連 T-ONT-CNV）；Tier-R only；regional 非 genome-wide tree、分子非 single-cell。"))
 nodes.append(N("T-CCF", "CCF tier — VAF 階層獨立驗證（祖先≥後代）", "T-ISM", "analysis", "done", "claude",
                depends_on=["T-GW-RECON"],
                headline="祖先 VAF≥後代違反僅 5.7%（決定性 92.5%／clean 96%）；GMM BIC n=3 CCF 群（離散 subclone 層級）",
@@ -283,15 +283,23 @@ nodes.append(N("T-INTEG", "clone/subclone 多層整合報告（sSNV+HP+CCF+PS+�
                goal="用 sSNV+ONT read 建構整體 clone/subclone，逐層(HP→CCF→PS→甲基)單變量驗證 + 統整可驗證敘述（precedence: sSNV連鎖>HP>甲基）",
                links={"memory": ["project_subclone_snv_linkage_verification_pipeline"]},
                notes=_PM + " 過 7-agent Workflow 對抗稽核 NEEDS_WORK→8 修正已套。L0-L4✅/L5-L7 進行中。🔴 紅線：甲基 corroborate 非 detect。"))
-nodes.append(N("T-METHYL-REEXTRACT", "甲基從 BAM 重抽（補 genotype-anchored corroboration）", "T-ASM", "compute", "todo", "claude",
+nodes.append(N("T-METHYL-REEXTRACT", "甲基從 BAM 重抽（補 genotype-anchored corroboration）", "T-ASM", "compute", "done", "claude",
                depends_on=["T-GW-RECON"],
-               headline="既有甲基輸出僅覆蓋 0.19%（9/4678 region）→ 須從 BAM 重抽才能真正 corroborate genotype-anchored 克隆群",
+               headline="branch 已 genome-wide 重抽 740 區（6.6% corroborate）→ 重抽完成；揭露 cis-control 0/740 → subclone-specificity UNDETERMINED",
                goal="對 sSNV 定好的 genotype-anchored 群從 BAM 重抽甲基 → 看甲基是否區分（corroborate 非 detect）；解整合報告 L4 覆蓋不足",
                io={"inputs": [{"name": "tumor BAM（5mCG haplotag）", "required": True, "ref": None},
                               {"name": "genotype-anchored 克隆群定義（per-region）", "required": True, "ref": "T-GW-RECON"}],
-                   "outputs": ["per-region genotype-anchored 甲基矩陣", "corroborate vs detect 對照表（覆蓋率修正）"]},
+                   "outputs": ["per-region genotype-anchored 甲基矩陣（740 區）", "corroborate vs detect 對照表（6.6%、cis-control 0/740）"]},
                links={"memory": ["project_subclone_snv_linkage_verification_pipeline", "project_apriori_subclone_classification_model"]},
-               notes="整合報告 L4 揭露 gap（n=8 小樣本 4/8 corroborate）→ 此為 T-GATE-GB 甲基-subclone 故事的具體前置。"))
+               notes="branch 已重抽 740 區（驗證 corr=1.000）→ 重抽本身完成。揭露：cis-control 0/740=structural zero → 甲基 subclone-specificity UNDETERMINED；下一步=T-GATE-GB matched-normal cis-control（非再重抽）。"))
+# ---- unified verified narrative (cross-source reconcile, workflow wck0bu3iq) ----
+nodes.append(N("T-SUBCLONE-VERIFIED", "Subclone 重建 — 跨來源交互驗證統一敘述（單一真值）", "T-ISM", "analysis", "in_progress", "claude+user",
+               depends_on=["T-L4", "T-GW-RECON", "T-CCF", "T-INTEG"],
+               headline="genetic sSNV 共現=唯一非循環重建骨幹（regional ⭐3）；甲基全程 bounded-auxiliary（corroborate 非 detect、0 新 partition、cis-control 0/740 → subclone-specificity UNDETERMINED）",
+               goal="把跨 branch/trunk 散落 clone/subclone 結論交互驗證收斂成單一 evidence-graded 敘述 + 據此繼續研究（load-bearing gate=matched-normal cis-control）",
+               links={"reports": ["InterSubMod/docs/methodology/20260627_subclone_unified_verified_narrative_01.md"],
+                      "memory": ["project_subclone_snv_linkage_verification_pipeline"]},
+               notes="跨來源裁決=COMPATIBLE（branch genetic 重建 ↔ trunk 甲基-NEGATIVE 正交相容，0 真矛盾；branch 0 新 partition 反佐證 trunk NEGATIVE）。交互驗證=workflow wck0bu3iq（4 gather+3 對抗 lens+1 綜合）。對抗降 tier：structure fraction 上界/GMM 離散 L3/chr17·chr2 生物詮釋 L2/precedence L3/甲基 subclone-specificity 由「0% cis」改 UNDETERMINED。🔴 #1 open gate=T-GATE-GB（normal cis-control）。來源 branch 5308d9e pending-merge。"))
 nodes.append(N("T-DORADO", "HCC1395 Dorado 跨化學 within-sample 復現", "T-EXT", "compute", "todo", "claude",
                headline="Dorado/5khz 化學資料已存在 → 需先 longphase-tag → 同 pipeline 驗骨幹/HP/CCF 化學間一致（V2-RECON ×6 最近起點）",
                goal="對 HCC1395 Dorado 化學跑 longphase-tag + 同 VCF + 同 pipeline → within-sample 復現骨幹/HP/CCF 化學一致性（跨樣本 ⭐4 的第一步）",

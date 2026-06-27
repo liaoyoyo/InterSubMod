@@ -1,7 +1,7 @@
 # 研究任務樹（WBS） — TASKS.md
 
 > **自動產生，請勿手改。** 唯一真值 = `state/tasks/graph.json`；改後重跑 `python3 scripts/tasks/task_graph.py --graph state/tasks/graph.json render`。
-> 生成 2026-06-27 · build `c48e66c` @ `research/subclonal-reconstruction-202606` · 節點 117（✅43 ◐32 ⛔1 ☐40 ✗1） · focus = `T-SL`
+> 生成 2026-06-27 · build `f8e776b` @ `research/subclonal-reconstruction-202606` · 節點 118（✅44 ◐33 ⛔1 ☐39 ✗1） · focus = `T-SL`
 
 ## ⓪ 驗證（validate + check）
 - validate: ✅ PASS
@@ -25,7 +25,7 @@
     - ☐ `T-C6` COLO829 單樣本 ASM 補強（解單樣本上限） [程式/待辦]　in:●normal 甲基 ba…,●COLO829 tagg…　缺:COLO829 normal 甲基缺　↳project_zar1l_brca2_asm_verification
     - ☐ `T-C7` V-4 BRCA2 exemplar copy-partition 重驗（illustrative vs partial-cis 口徑） [分析/待辦]　↳project_zar1l_brca2_asm_verification
     - ☐ `T-GATE-GC` G-C：cis vs 突變足跡 ±1-2kb 空間分離（normal-anchored 寬空間控制） [分析/待辦]　↳project_apriori_subclone_classification_model
-    - ☐ `T-METHYL-REEXTRACT` 甲基從 BAM 重抽（補 genotype-anchored corroboration） [程式/待辦]　in:●tumor BAM（5m…,●genotype-anc…　↳project_subclone_snv_linkage_verification_pipeline
+    - ✅ `T-METHYL-REEXTRACT` 甲基從 BAM 重抽（補 genotype-anchored corroboration） [程式/已完成]　in:●tumor BAM（5m…,●genotype-anc…　↳project_subclone_snv_linkage_verification_pipeline
   - ◐ `T-ASSET` 資料資產 [里程碑/進行中]
     - ✅ `T-A1` 6 樣本 tagged BAM + somatic VCF + ISM TP/FP 齊備 [資料/已完成]　in:●HKU/DORADO O…　↳project_subclonal_reconstruction_paper_focus
     - ◐ `T-A2` 6 樣本 normal 甲基（5/6 ready，COLO829 缺） [資料/進行中]　in:●tagged BAM,●normal BAM (…　缺:COLO829 normal 甲基缺；6 normal 全 zhenyu112 帳號 = SPOF　↳project_subclonal_reconstruction_paper_focus
@@ -79,6 +79,7 @@
         - ◐ `T-SL-RO-1` P-readset：--normal-bam 是否 optional → tumor-only rerun [程式/進行中]　in:●tumor reads …,●--normal-bam　缺:先驗 --normal-bam 是否 optional（可能零改碼）
         - ☐ `T-SL-RO-2` P-facttable：tumor+normal 兩層事實表（只記不判） [分析/待辦]　缺:待 P-readset
       - ☐ `T-SL-S3` Stage③ coverage-peak CN 自估 + SEQC2 驗證腳本 [程式/待辦]　in:●coverage pea…,●SEQC2 BED（只驗…　缺:🔴 SEQC2 不可當分類輸入（用戶定）；原載 SEQC2 BED 當輸入作廢重設計　↳project_ism_verdict_false_negative_audit_2026_06_16
+    - ◐ `T-SUBCLONE-VERIFIED` Subclone 重建 — 跨來源交互驗證統一敘述（單一真值） [分析/進行中]　↳project_subclone_snv_linkage_verification_pipeline
   - ◐ `T-LOCUS` 位點層驗證 [里程碑/進行中]
     - ✅ `T-L1` chr2:18M subclone 位點驗證 L2 [分析/已完成]　in:●tagged BAM (…,●6 sSNV 候選　↳20260615_chr2_18M_subclone_independent_validation
     - ✅ `T-L2` chr2:18M × SEQC2 外部驗證 + AI 解釋指南 [分析/已完成]　in:●chr2:18M L2 …,●SEQC2 truth　↳project_hcc1395_chr2_18M_subclone_external_validation
@@ -130,7 +131,7 @@
     - ☐ `T-W3` 整合篇章（ASM-char + 4 道 NEGATIVE + LOH 脊柱） [撰寫/待辦]　in:●COLO829 pair…,●Stage③ 結果　缺:待上游 COLO829 / Stage③ / 外部真值補齊　↳project_subclonal_reconstruction_paper_focus
     - ✅ `T-W4` 論文敘述對抗稽核共識底座（51 agents / 606 claim / F=0） [撰寫/已完成]　in:●論文 spec,●606 claim 集　缺:Hard-Gate 待修正 ledger:95 / CURRENT_FOCUS:137　↳project_paper_claim_audit_consensus_base_2026_06_12
 
-## Ready — 可立即開跑（32）
+## Ready — 可立即開跑（31）
 - `T-A3` 6 normal 甲基帳號 SPOF 備份　owner: user
 - `T-A4` 驗證 6 樣本 DeepVariant/DeepSomatic 可用性（兩-caller 前置）+ 修 landscape05 CASTLE-COLO829 過度宣稱　owner: claude+user
 - `T-C-CISEXP` V-1 乾淨 somatic-cis 真稀有性擴測（normal-anchored × 全合格位點 × 6 樣本）　owner: claude
@@ -147,7 +148,6 @@
 - `T-METHOD-EFFECTSIZE` PERMANOVA 大-N 過敏 guard（effect-size / TP-vs-FP 門檻）　owner: claude
 - `T-METHOD-FDR` V-7 FDR / 多重檢定校準：跨位點 null + BH-FDR + n_reads 校正　owner: claude
 - `T-METHOD-TESTS` Methylation MM/ML parsing 單元測試（零測試補）　owner: claude
-- `T-METHYL-REEXTRACT` 甲基從 BAM 重抽（補 genotype-anchored corroboration）　owner: claude
 - `T-RETIRE` 退役/封存 active.json g1/g6 stale cycle（harness hygiene）　owner: claude+user
 - `T-SL-C1-F` 修：enable_bootstrap=true + within-HP 用 bootstrap　owner: claude
 - `T-SL-C3` ④ C3 HP-fine 組合對齊測試 emit　owner: claude
