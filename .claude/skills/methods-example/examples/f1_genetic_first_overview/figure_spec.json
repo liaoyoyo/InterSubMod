@@ -1,0 +1,39 @@
+{
+ "_comment": "Fig 1 genetic-first reframe。pipeline_diagram banded swimlane：4 band = 輸入 / genetic 骨幹（驅動）/ 甲基 bounded-corroborate / 裁決。process_schematic=true（footer 印源碼 provenance）。methyl_legend=false。對齊統一敘述 T-SUBCLONE-VERIFIED。",
+ "case_template_id": "Cx_custom",
+ "title": "圖 1. Clone/Subclone 重建：genetic sSNV 骨幹（驅動）+ 甲基化 bounded-corroborate",
+ "subtitle": "genetic sSNV 單分子共現 = 唯一非循環重建驅動 · 甲基化 = corroborate 非 detect · HCC1395 單樣本 ⭐3 regional（非 genome-wide tree）· 結果數字見統一敘述 §5",
+ "data_file": "data.json",
+ "primitives": [
+  {
+   "type": "pipeline_diagram",
+   "params": {
+    "bands_ref": "bands"
+   }
+  }
+ ],
+ "shared": {
+  "width": 1180,
+  "color_scale": {
+   "ink": "#141413",
+   "soft": "#6B6B66",
+   "line": "#E4E2DA",
+   "synthetic": "#9a6212",
+   "slate": "#475569",
+   "teal": "#1B8A86",
+   "blue": "#2F5597",
+   "green": "#2E7D52",
+   "gold": "#B8860B",
+   "meth": "#C0392B",
+   "unmeth": "#2D6CB5",
+   "normal": "#7F7F7F"
+  },
+  "glyph": {}
+ },
+ "annotations": {
+  "methyl_legend": false,
+  "process_schematic": true,
+  "label_flip_ref": "caveats.flip",
+  "single_sample_caveat_ref": "caveats.axis"
+ }
+}

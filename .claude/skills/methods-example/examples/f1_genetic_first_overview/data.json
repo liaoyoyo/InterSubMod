@@ -1,0 +1,68 @@
+{
+ "_comment": "Fig 1（genetic-first reframe）。pipeline_diagram banded swimlane：① 輸入 → ② genetic 骨幹（驅動重建）→ ③ 甲基（bounded auxiliary, corroborate 非 detect）→ ④ 裁決框架。對齊統一敘述 docs/methodology/20260627_subclone_unified_verified_narrative_01.md。結果數字（35,332/7,143/677/6.6%）走統一敘述 §5（branch pending-merge），本圖只畫方法步驟（method-flow schematic，無結果數字注入）。",
+ "meta": {
+  "figure": "Fig 1 — clone/subclone 重建：genetic 骨幹 + 甲基 bounded-corroborate",
+  "scope": "整體方法邏輯（genetic 驅動 ‖ 甲基刻畫）；HCC1395 單樣本 ⭐3 regional",
+  "provenance": {
+   "genetic_backbone": "sSNV 單分子共現 → 區域克隆樹：PhyloLabeler.cpp/.hpp + genome-wide pipeline（branch feat/summary-nreadsvalid，pending-merge；報告 docs/methodology/20260626_genomewide_sSNV_linkage_region_trees_01.md）",
+   "tier_R": "same-read ≤50kb 局部可關聯區域（Tier-R；same-PS>50kb deferred）",
+   "methyl_distance": "src/core/DistanceMatrix.cpp:31-350（共同 CpG≥min_common_coverage=3；Config.hpp:40 結構預設 BERNOULLI；CLI ArgParser.hpp:86 預設 NHD）",
+   "clustering": "UPGMA(hard-coded) + TreeCutter silhouette 選 k=2..min(6,N/2)",
+   "permanova_permdisp": "src/core/StructureTest.cpp:30-198（PERMANOVA 99 置換 pseudo-F）+ PERMDISP check_dispersion",
+   "verdict_4state": "src/core/SignificanceAnalyzer.cpp:307-340（Strong/Subclone/Weak/Noise）",
+   "methyl_corroborate": "genotype-anchored 重抽 740 區 corroborate（非 detect）；cis-control 0/740=structural zero（統一敘述 §1 甲基層）",
+   "results_SoT": "結果數字見 docs/methodology/20260627_subclone_unified_verified_narrative_01.md §5（已 grep 驗證；FF 後資料檔落 trunk）"
+  }
+ },
+ "caveats": {
+  "flip": "HP1-1 ≡ germline HP1 鏈上帶 somatic ALT 的子單倍型（非第三 haplotype）；圖／分析端標示須一致",
+  "axis": "🔴 genetic sSNV 共現=唯一非循環重建驅動；甲基=bounded corroborate 非 detect（0 新 partition、cis-control 0/740 → subclone-specificity UNDETERMINED）；⭐3 單樣本 regional 非 genome-wide clone tree；結果數字見統一敘述 §5"
+ },
+ "bands": [
+  {
+   "label": "① 輸入",
+   "note": "ONT long read · 每 somatic SNV 獨立並行",
+   "color_key": "slate",
+   "stages": [
+    {"label": "ONT long read", "sub": "5mCG (MM/ML)"},
+    {"label": "somatic sSNV", "sub": "VCF (TP∪FP)"},
+    {"label": "HP / PS tag", "sub": "longphase-S"},
+    {"label": "取 read", "sub": "MAPQ≥20·len≥1000"}
+   ]
+  },
+  {
+   "label": "② 骨幹 — genetic 重建（驅動，非循環）",
+   "note": "sSNV 單分子共現 = 唯一非循環克隆證據",
+   "color_key": "gold",
+   "stages": [
+    {"label": "單分子 sSNV 共現", "sub": "per-read 同細胞"},
+    {"label": "2×2 分類", "sub": "互斥/巢狀/共連"},
+    {"label": "同-HP gate", "sub": "sibling vs allelic"},
+    {"label": "區域局部克隆樹", "sub": "Tier-R ≤50kb"}
+   ]
+  },
+  {
+   "label": "③ 甲基 — bounded auxiliary（corroborate 非 detect）",
+   "note": "read×read 結構，genotype-anchored 佐證",
+   "color_key": "teal",
+   "stages": [
+    {"label": "read×CpG 矩陣", "sub": "僅 5mC"},
+    {"label": "BERNOULLI 距離", "sub": "共同 CpG≥3"},
+    {"label": "UPGMA + silhouette", "sub": "k=2..min(6,N/2)"},
+    {"label": "PERMANOVA + PERMDISP", "sub": "99 置換·location vs dispersion"},
+    {"label": "genotype-anchored corroborate", "sub": "非 detect·0 新 partition"}
+   ]
+  },
+  {
+   "label": "④ 裁決框架",
+   "note": "genetic 驅動 ‖ 甲基刻畫 ‖ 誠實邊界",
+   "color_key": "blue",
+   "stages": [
+    {"label": "genetic 驅動重建", "sub": "區域克隆樹"},
+    {"label": "甲基 corroborate", "sub": "cis-control 待 normal=UNDETERMINED"},
+    {"label": "4-state verdict", "sub": "Strong/Subclone/Weak/Noise"},
+    {"label": "⭐3 regional", "sub": "非 genome-wide tree"}
+   ]
+  }
+ ]
+}

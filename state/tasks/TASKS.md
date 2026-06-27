@@ -1,13 +1,13 @@
 # 研究任務樹（WBS） — TASKS.md
 
 > **自動產生，請勿手改。** 唯一真值 = `state/tasks/graph.json`；改後重跑 `python3 scripts/tasks/task_graph.py --graph state/tasks/graph.json render`。
-> 生成 2026-06-27 · build `f8e776b` @ `research/subclonal-reconstruction-202606` · 節點 118（✅44 ◐33 ⛔1 ☐39 ✗1） · focus = `T-SL`
+> 生成 2026-06-28 · build `0697200` @ `research/subclonal-reconstruction-202606` · 節點 118（✅44 ◐34 ⛔1 ☐38 ✗1） · focus = `T-SL`
 
 ## ⓪ 驗證（validate + check）
 - validate: ✅ PASS
 - check: 2 findings
   - WARN `docs/limitations`: 分支碰撞：T-P2, T-E3, T-C-UNMASK, T-METHOD-PSLIMIT 同時 in_progress 同分支（各開 worktree）
-  - DRIFT `CURRENT_FOCUS`: CURRENT_FOCUS 最新 2026-06-19 vs graph updated_at 2026-06-27 差 8 天（敘述/機械層漂移 >7d，pain#3）
+  - DRIFT `CURRENT_FOCUS`: CURRENT_FOCUS 最新 2026-06-19 vs graph updated_at 2026-06-28 差 9 天（敘述/機械層漂移 >7d，pain#3）
 
 ## 聚焦路徑　論文（碩論：Subclonal reconstruction） ＞ 完成 ISM 程式 ＞ 修正「結構驅動切區塊 × 標籤驗證」
 
@@ -122,7 +122,7 @@
     - ☐ `T-W-CH5` Ch5 討論 [撰寫/待辦]　↳project_g6_paper_framing_external_corroboration
     - ☐ `T-W-CH6` Ch6 結論 [撰寫/待辦]
     - ☐ `T-W-DATACODE` Data & Code availability 聲明 [撰寫/待辦]
-    - ☐ `T-W-FIG1` Fig1 方法總覽 schematic ⭐最高優先 [撰寫/待辦]　↳project_thesis_writing_architecture
+    - ◐ `T-W-FIG1` Fig1 方法總覽 schematic ⭐最高優先 [撰寫/進行中]　↳project_thesis_writing_architecture
     - ☐ `T-W-FIGS` Fig2-6 其餘圖（含跨樣本 R6） [撰寫/待辦]　缺:5/6 Fig 物理不存在
     - ☐ `T-W-FRONT` 論文前件 / 系所模板合規（封面/致謝/格式） [撰寫/待辦]
     - ☐ `T-W-ISMDEDUP` 去重 graph_ism.json 子樹 + 標 deprecated（唯一真值=graph.json） [分析/待辦]
@@ -131,7 +131,7 @@
     - ☐ `T-W3` 整合篇章（ASM-char + 4 道 NEGATIVE + LOH 脊柱） [撰寫/待辦]　in:●COLO829 pair…,●Stage③ 結果　缺:待上游 COLO829 / Stage③ / 外部真值補齊　↳project_subclonal_reconstruction_paper_focus
     - ✅ `T-W4` 論文敘述對抗稽核共識底座（51 agents / 606 claim / F=0） [撰寫/已完成]　in:●論文 spec,●606 claim 集　缺:Hard-Gate 待修正 ledger:95 / CURRENT_FOCUS:137　↳project_paper_claim_audit_consensus_base_2026_06_12
 
-## Ready — 可立即開跑（31）
+## Ready — 可立即開跑（30）
 - `T-A3` 6 normal 甲基帳號 SPOF 備份　owner: user
 - `T-A4` 驗證 6 樣本 DeepVariant/DeepSomatic 可用性（兩-caller 前置）+ 修 landscape05 CASTLE-COLO829 過度宣稱　owner: claude+user
 - `T-C-CISEXP` V-1 乾淨 somatic-cis 真稀有性擴測（normal-anchored × 全合格位點 × 6 樣本）　owner: claude
@@ -158,7 +158,6 @@
 - `T-W-CH5` Ch5 討論　owner: claude+user
 - `T-W-CH6` Ch6 結論　owner: claude+user
 - `T-W-DATACODE` Data & Code availability 聲明　owner: claude+user
-- `T-W-FIG1` Fig1 方法總覽 schematic ⭐最高優先　owner: claude+user
 - `T-W-FRONT` 論文前件 / 系所模板合規（封面/致謝/格式）　owner: claude+user
 - `T-W-ISMDEDUP` 去重 graph_ism.json 子樹 + 標 deprecated（唯一真值=graph.json）　owner: claude
 - `T-W-SUPP` Supplementary 材料封裝　owner: claude+user
