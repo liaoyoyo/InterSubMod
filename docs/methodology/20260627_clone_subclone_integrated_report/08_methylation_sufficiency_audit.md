@@ -14,7 +14,7 @@ data_sources: data/sm_methyl_sufficiency_audit.json, data/sm_methyl_reextract_AL
 
 ## §0 一句話裁決（頂層）
 
-🔴 **BOUNDED_AUXILIARY — 甲基不足以作為獨立或主要的 subclone 標記/偵測器。** 甲基差異**確實存在且強烈受覆蓋度閘控（power-gated）**：高功率區（popB_n≥20）corroboration 達 **54.9%**；但 (1) ONT 覆蓋度使**僅 51 區達此功率**，(2) 甲基**從未獨立偵測任何新 partition**（0；corroborate≠detect），(3) **cis-control 在 0/740 區可評估** → 這些 corroboration **無法與 germline cis-ASM 分離**。→ 對應既有 **auxiliary-not-driver / ⭐3** 上限。**［L1 源碼/數據重現］**
+🔴 **BOUNDED_AUXILIARY — 甲基不足以作為獨立或主要的 subclone 標記/偵測器。** 甲基差異**確實存在且強烈受覆蓋度閘控（power-gated）**：高功率區（popB_n≥20）corroboration 達 **54.9%**；但 (1) ONT 覆蓋度使**僅 51 區達此功率**，(2) 甲基**從未獨立偵測任何新 partition**（0；corroborate≠detect），(3) **cis-control 在 0/740 區可評估**；按 CN 分層（使用者校正）：**41/49 corroborated 是 LOH** → germline 等位 ASM 結構上不可能（只剩一個等位）→ 是 **subclone/somatic-cis 候選**（仍需排 double-dip + somatic-cis），**8/49 neutral** 才可能 germline cis-ASM。→ 對應既有 **auxiliary-not-driver / ⭐3** 上限。**［L1 源碼/數據重現］**
 
 ## §1 三軸方法
 
@@ -56,16 +56,21 @@ data_sources: data/sm_methyl_sufficiency_audit.json, data/sm_methyl_reextract_AL
 
 > **意涵（雙面）**：① 正面 — 若覆蓋夠深，甲基**能**區分基因型 population（非雜訊）；② 限制 — HCC1395 ONT 覆蓋使**絕大多數結構區達不到該功率**，故「實際可用」的比例仍小。
 
-## §4 🔴 cis-control 不可評估 → 「subclone-specific」UNVERIFIED（最關鍵修正）
+## §4 🔴 cis-control 不可評估 + CN 分層重判（最關鍵修正；含使用者 LOH 校正）
 
-**hp_control_eval = 0 / 740**（含 **0 / 49 corroborated**）。
+**hp_control_eval = 0 / 740**（含 **0 / 49 corroborated**）。HP1{1,1-1}-vs-HP2{2,2-1} cis-control 需「兩 germline 單倍型各 ≥3 reads」，**全 740 區從未滿足**（corroborated 區以 LOH 為主＝單一單倍型 + somatic sSNV phased 到單一 HP）。**［L1 `sm_methyl_reextract.py:143` + 740 行 TSV 重算］**
 
-cis-ASM 控制（在 sig CpG 上比 HP1{1,1-1} vs HP2{2,2-1}）需「兩 germline 單倍型各 ≥3 reads」——此門檻在**全 740 區從未滿足過一次**。原因：corroborated 區以 **LOH 為主**（單一單倍型），且 genotype-population 本身被單倍型分離（somatic sSNV phased 到單一 HP）→ 結構上無法在 tumor 內做 HP1-vs-HP2 對照。**［L1 源碼 `sm_methyl_reextract.py:143` + 740 行 TSV 重算］**
+🔴 **故 `cis_explained=0` 是 structural zero（測試從未執行），非「排除 cis」**。但**「cis-ASM 特徵」須依 CN 分層重判**（使用者校正：LOH 單一單倍型→germline 等位 ASM 結構上不可能）：
 
-🔴 **故 `cis_explained=0` 是「測試迴圈從未執行的 structural zero」，非「檢查後排除 cis」。** 推論：
-- **「全 49 subclone-specific（0% germline cis）」UNVERIFIED** —— 精度為零（n_evaluable=0，true cis fraction CI=[0,1] 無資訊）。
-- corroborated 的 **max_dbeta median=0.974、全 ≥0.857（all-or-nothing）= 正是 cis-ASM 特徵**（allele-linked methylation 跟隨基因型）。因 somatic sSNV phased 到單倍型，**任何 germline-haplotype-linked 甲基差異都會自動對齊 genotype 切割** → 在單樣本資料中**無法分離 subclone vs cis-ASM**。
-- 與既有 memory 一致：`within_clean≠subclone`（Jaccard 0.123）、cis-ASM/double-dip confound。
+| CN | corroborated | germline 等位 ASM？ | REF-vs-ALT 甲基差異的真正解釋 |
+|---|---|---|---|
+| **LOH** | **41 / 49（84%）** | ❌ **不可能**（只剩一個等位）| **subclone 或 somatic-mutation-cis 候選 — 非 germline-cis-ASM** |
+| **neutral** | **8 / 49（16%）** | ✅ 可能（兩單倍型）| germline cis-ASM（需 normal 對照）或 subclone |
+
+→ 🔑 **重大重判**：先前「all-or-nothing Δβ（median 0.974）= cis-ASM 特徵」**僅適用 8 個 neutral 區**，**不適用 41 個 LOH 區**（germline ASM 在 LOH 結構上不可能）。LOH 的 hp_control_eval=0 **不是「沒能排除 cis」，是「germline cis-ASM 本就不可能、HP1-vs-HP2 對照 moot」**。
+- **「全 49 subclone-specific（0% germline cis）」**仍 UNVERIFIED，但**修正理由**：8 neutral 缺 normal 對照；41 LOH 雖排除 germline ASM，仍需排除 **somatic-mutation-cis 直接效應 + double-dip**（非 germline cis）。
+- 即 **41 LOH corroborated = germline-ASM-已排除的 subclone 候選**（比初版框架乾淨），**8 neutral = germline-cis-可能**。
+- 與既有 memory 一致：`within_clean≠subclone`（Jaccard 0.123）、double-dip confound（**LOH 仍受 double-dip + somatic-cis，非 germline-cis**）。
 
 ## §5 邊際效用 — 0 新 partition + 反向趨勢
 

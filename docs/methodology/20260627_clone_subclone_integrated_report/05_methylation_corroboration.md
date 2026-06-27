@@ -33,7 +33,7 @@ data_sources: data/sm_methyl_corroboration.json, data/sm_methyl_reextract_merged
 
 → 🔑 **genome-wide-clean：6.6%（49/740）區域甲基能區分遺傳定義的 group**（median sig CpG=0）。**⚠ 詳細有效性審查見 `08_methylation_sufficiency_audit.md`**，兩項對抗稽核修正：
 - **power dose-response**：6.6% 偏低主因是**覆蓋不足非無訊號** —— 高功率區（popB_n≥20）corroboration 達 **54.9%**，但僅 51 區達此功率（58.8% 的「powered」落在功率飢餓帶）。
-- 🔴 **「全 subclone-specific（0% cis）」已撤回**：cis-ASM 控制（HP1 vs HP2 各≥3 reads）在 **0/740 區可評估**（corroborated 區多為 LOH 單倍型）→ `cis_explained=0` 是 structural zero（從未檢測）非排除；corroborated 的 all-or-nothing Δβ（median 0.974）= **cis-ASM 特徵** → 無法與 germline cis-ASM 分離。
+- 🔴 **「全 subclone-specific（0% cis）」已撤回**：cis-ASM 控制（HP1 vs HP2 各≥3 reads）在 **0/740 區可評估** → `cis_explained=0` 是 structural zero（從未檢測）非排除。**CN 分層重判（使用者校正）**：**41/49 corroborated 是 LOH** → germline 等位 ASM 結構上不可能（單一單倍型）→ all-or-nothing Δβ **非 germline-cis** 而是 subclone/somatic-cis 候選；僅 **8/49 neutral** 才可能 germline cis-ASM。
 → **甲基 = 有界弱 corroborator**：少數高覆蓋區提供（未經 cis 校正的）佐證，多數區不區分 —— 符合「characterize 非 detect」。
 
 ## §3 chr17 canonical（已驗證，established）

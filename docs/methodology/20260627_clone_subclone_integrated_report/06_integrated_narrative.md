@@ -26,7 +26,7 @@
 2. **HP 加值（修正框架）**：same-HP 高在「正共現」關係（nested/co_linked/independent 1.7–1.87×）是**區域背景**（能共讀分析的 sSNV 對本就同單倍型），**非克隆特異證據**；HP 的真價值在**互斥**：互斥 same-HP **低於背景（0.86×）**，因為它混了 sibling（同 HP）與 allelic（異 HP）→ **HP 移除 57% allelic**，把 read 級互斥轉成細胞層 sibling。
 3. **CCF 加值**：祖先 VAF ≥ 後代（違反僅 5.7%）= 用 VAF 這條**獨立軸**驗證 read-樹方向；CCF 統計多峰（n=3）= 離散 subclone 層級。
 4. **PS**：標記 phase-uncertain 區（排除以提升可信度）；不升級成克隆連鎖（germline phasing ≠ clonal）。
-5. **甲基（已重抽 genome-wide + L8 有效性審查）**：corroborate 非 detect；從 BAM 重抽 740 區，僅 **6.6%（49）corroborate**；🔑 訊號**存在但 power-gated**（popB_n≥20 達 54.9%，僅 51 區達）；🔴 **cis-control 0/740 不可評估 → 撤回「subclone-specific」**（all-or-nothing Δβ=cis-ASM 特徵，無法與 germline cis 分離）；0 新 partition → **有界弱 corroborator**，詳見 `08_methylation_sufficiency_audit.md`。
+5. **甲基（已重抽 genome-wide + L8 有效性審查）**：corroborate 非 detect；從 BAM 重抽 740 區，僅 **6.6%（49）corroborate**；🔑 訊號**存在但 power-gated**（popB_n≥20 達 54.9%，僅 51 區達）；🔴 **cis-control 0/740 不可評估 → 撤回「subclone-specific」**；CN 分層（使用者校正）：41/49 LOH（germline ASM 結構不可能→subclone/somatic-cis 候選）vs 8/49 neutral（germline cis 可能）；0 新 partition → **有界弱 corroborator**，詳見 `08_methylation_sufficiency_audit.md`。
 6. **precedence**：sSNV 連鎖 > HP > 甲基；衝突 genetic 勝。
 
 ## §4 對抗稽核 verdict + 修正（誠實留底）

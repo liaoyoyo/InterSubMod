@@ -126,6 +126,17 @@ def main(tsv_path, agg_path, out_path):
     else:
         corrob_strength = {}
 
+    # ---- cis-ASM confound 依 CN 分層 (LOH→germline ASM 結構不可能, user 校正) ----
+    corrob_cn = Counter(r["cn"] for r in corrob)
+    cis_confound_by_cn = {
+        "corroborated_LOH": corrob_cn.get("loh", 0),
+        "corroborated_neutral": corrob_cn.get("neutral", 0),
+        "interpretation": ("LOH(單一保留單倍型)→germline 等位 ASM 結構上不可能(只剩一個等位)→該批 REF-vs-ALT 甲基差異 "
+                           "= subclone 或 somatic-mutation-cis 候選, 非 germline-cis-ASM; "
+                           "neutral(雜合,兩單倍型)→germline cis-ASM 才可能→需 matched-normal 對照。"
+                           "故先前『all-or-nothing Δβ=cis-ASM 特徵』僅適用 neutral 8 區, 不適用 LOH 多數。"),
+    }
+
     # ---- by shape ----
     by_shape = {}
     sh_tested = Counter(r["shape"] for r in rows)
@@ -141,6 +152,7 @@ def main(tsv_path, agg_path, out_path):
         "power_audit": power_audit,
         "data_sufficiency_distrib": distrib,
         "corroborated_signal_strength": corrob_strength,
+        "cis_confound_by_cn": cis_confound_by_cn,
         "by_tree_shape": by_shape,
         "marginal_utility": {
             "new_partitions_detected_by_methylation": 0,
