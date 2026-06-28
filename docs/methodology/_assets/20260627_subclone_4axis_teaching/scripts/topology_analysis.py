@@ -136,7 +136,7 @@ RI = json.load(open(os.path.join(DATA, "sm_region_integration.json"), encoding="
 regs = [r for r in RI["regions"] if r["n_sSNV"] >= 2]
 
 stats = {"n_roots": Counter(), "n_clusters": Counter(), "topology_type": Counter(),
-         "determinacy": Counter(), "with_genotype_vectors": 0}
+         "determinacy": Counter(), "with_genotype_vectors": 0, "region_coverage": Counter()}
 detail = []
 for r in regs:
     pops = r.get("populations") or {}
@@ -165,10 +165,15 @@ for r in regs:
     elif r["tree_shape"] == "no_confirmed_structure": det = "C_underdetermined"
     else: det = "other"
     if ambig>0 and det.startswith('A'): det='A_ambiguous_order(缺中間群)'
-    stats["determinacy"][det] += 1
+    # G1 修(2026-06-29):determinacy 是「單分子建樹」分類,只對有 genotype 向量的區有意義
+    # → canonical denominator = with-vector(3885)。無向量區改記 region_coverage(避免 7143/3885 混引)。
+    has_vec = len(alt_vecs) >= 1 and len(pops) >= 1
+    stats["region_coverage"]["with_genotype_vector" if has_vec else
+                              ("germline_only" if ttype == "germline_only" else "no_genotype_vector")] += 1
     # detail：有 genotype 向量(可畫樹)的區
-    if len(alt_vecs) >= 1 and len(pops) >= 1:
+    if has_vec:
         stats["with_genotype_vectors"] += 1
+        stats["determinacy"][det] += 1  # G1: 只在此計數 → stats.determinacy == detail 分布(3885)
         tpfp = Counter(locus_src.get((r["chrom"], int(p.split(":")[1])), "?") for p in posset)
         node_hp = {p: hpL.get(locus_hp.get((r["chrom"], int(p.split(":")[1])))) for p in sorted(posset)}
         germ_groot = set(v for v in node_hp.values() if v in ("H1", "H2"))
@@ -182,6 +187,9 @@ for r in regs:
                        "haplotypes": hap_str, "node_paths": node_paths, "undefined": undefined,
                        "n_roots": len(germ_groot), "germline_reads": germline_reads,
                        "n_clusters": nclust, "topology_type": ttype, "determinacy": det,
+                       "has_cycle": bool(r.get("has_cycle")),
+                       "cycle_cause": ("CN-gain-multiplicity(同突變多拷貝→pairwise 矛盾)" if r.get("has_cycle") and r["cn"] == "gain"
+                                       else ("other-pairwise-cycle" if r.get("has_cycle") else None)),
                        "drop_noise_frac": drop_frac, "ambig_nodes": ambig,
                        "genome_ctx": genome_ctx(r["chrom"], r["start"], r["end"]),
                        "tp": tpfp.get("TP", 0), "fp": tpfp.get("FP", 0),

@@ -22,7 +22,7 @@ provenance: HCC1395 ⭐3 單樣本;凍結 topology @ feat/summary-nreadsvalid@53
 
 | # | 問題 | 成因（數據）| 解法 / 裁決 |
 |---|---|---|---|
-| **1** | 衝突/成環 | 12 區;**verified incompatible = 0**（10/12 npop≤2 不可能真違反、8/12 genotype 截斷、9/12 CN-gain）| ✅ **無真樹衝突訊號**（reassuring）→ 標 artifact 不建樹 + 修截斷/分類邏輯（`backbone_stability_audit.json`）|
+| **1** | 衝突/成環 | **上游 has_cycle = 22 真 cycle**（全 sSNV pairwise 圖,如雙向 nesting;12 有向量+10 無向量;**77% CN-gain**）;stored 截斷(cap=8)查不到（≠「0 真 cycle」,前述「verified=0」是測錯截斷資料的誤判,已修 G2）| ✅ cycle 真實但 **77% = CN multiplicity artifact 非真演化衝突** → 標 likely-CN-multiplicity-artifact 不建樹;真驗證須提高 cap + CN-aware 模型（`backbone_stability_audit.json`）|
 | **2** | ε/min-read 減資訊? | MINREAD=3 每區丟 0.48 ALT 群;singleton 1230 中 **76% 與大群差 1-Hamming = 定序錯誤**;coherent 933(可能真稀有)| ✅ 合理 specificity/sensitivity 取捨（移除多數噪聲）;933 coherent 為已知邊界（`eps_minread_sensitivity.json`）|
 | **3** | 多樹相容欠定 有無方法? | **550 區全只有單一 ALT 群**（非「多樹歧義」是「只觀測到一群」）;parsimony resolvable=0 | ⚠️ **需深覆蓋**觀測中間群（非演算法可解）;甲基串接=ordering=L3 弱不可靠 |
 | **4** | 未定/缺中間群 用最小突變定序? | A_ambiguous 76;parsimony 第一順位中位機率 **0.5、0 高信心、55 缺中間群** | ✅ parsimony(最大簡約)是**正確原則**但**信心低**（跳步太不確定）→ 給第一順位+標 L3（`backbone_resolution.json`）|
@@ -72,18 +72,18 @@ provenance: HCC1395 ⭐3 單樣本;凍結 topology @ feat/summary-nreadsvalid@53
 
 **CN-gain inflation = 最大威脅**：determinacy rate 在 CN-gain **最高（53.9%** vs loh 36% / neutral 44.5% / loss 10.8%）→ multiplicity 可能製造假共現→假 determined。任何 tree-level claim 前應 mask/控制 CN-gain。
 
-**denominator**：47% = 1812/3885（有向量區）= **25%/7143（全區）**。引用必標分母。
+**denominator（G1 已修 canonical）**：determinacy 一律以 **3885（有向量區）**為分母 → 47%=1812/3885（精確 46.6%）= **25.4%/7143（全區覆蓋脈絡）**；全 7143 區覆蓋改看 `region_coverage`（with_vector 3885 / germline_only 371 / no_vector 2887）。stats.determinacy 現 == detail（sum 一致），不再有 7143-混算的 incompatible 22/B 2760/C 1658。
 
 **穩 vs 上界**：
 - **穩（reproducible）**：incompatible=0(真衝突)、B1 max-prob 0.5/0 高信心、B2=550 覆蓋限制、topology byte-可重現（已修 tie）、A-framing 質性。
 - **上界（會縮）**：47% determined、把 2-位點區當「subclone tree」、CN-gain determined 計數、任何用 3885 而非 7143 的 %。
 
-## §4 待定義 gap（9 個，優先序）
+## §4 待定義 gap（G1+G2 已修 06-29，其餘 7 個優先序）
 
-| Gap | 級 | 問題 | 必做 |
+| Gap | 級 | 問題 | 狀態 |
 |---|---|---|---|
-| G1 denominator | 🔴 | stats(7143) vs detail(3885) 兩套矛盾數 | 定**單一 canonical 分母**;對齊 incompatible 22vs12 等 |
-| G2 incompatible 重算 | 🔴 | 12 全 artifact（verified 0）| 改判準 npop≥3 + 有違反對;報 verified=0 |
+| G1 denominator | ✅ **已修** | stats(7143) vs detail(3885) 兩套矛盾數 | **determinacy canonical=3885**（stats==detail，sum 一致）;全區覆蓋改 region_coverage（3885/371/2887）;master spec §6 已更（棄用舊 B2760/C1658/incomp22）|
+| G2 incompatible 重算 | ✅ **已修** | 「12 全 artifact/verified 0」誤判 | 真相 = 上游 has_cycle **22**（12 有向量+10 無）真 cycle、**77% CN-gain**=multiplicity artifact;stored 截斷查不到非「0 真 cycle」;detail 加 `cycle_cause` 註記 |
 | G3 genotype 截斷 | 🟠 | cap=8 截斷 **42 區**（31 帶 TP、8 incompatible）| 提高 cap 或標 `truncated` 排除 |
 | G4 isolated 計數 | 🟠 | 8320/11520/266 三套、不在 topology output | 定單一定義 + 加呈現列 |
 | G5 覆蓋功率 | 🟡 | 「深覆蓋可解」未量化 | 算 per-region 目標深度 + 2x/4x 預期 resolved |
@@ -100,7 +100,7 @@ provenance: HCC1395 ⭐3 單樣本;凍結 topology @ feat/summary-nreadsvalid@53
 ├ A_ambiguous(76)：parsimony 第一順位 + 機率(中位 0.5,L3)
 ├ B_pairwise(958)：拼接結構,標非單分子
 ├ C_underdetermined(550,全單群)：相容集合 + 標「需深覆蓋」
-├ incompatible(0 verified)：artifact,不建樹
+├ incompatible(has_cycle 22,77% CN-gain)：likely CN-multiplicity artifact,不建樹
 ├ isolated(待定義單一計數)：Tier-PS 放上單倍型(非巢狀)
 └ H3-unphased(93)：germline-ASM 在→甲基定相(10/10);否→標 unresolved
 附 CN-gain mask 警示 + 甲基軟標(負篩/HP定相,L3)
@@ -111,7 +111,9 @@ provenance: HCC1395 ⭐3 單樣本;凍結 topology @ feat/summary-nreadsvalid@53
 |---|---|---|
 | robustness ladder L1/L2/L3/L4 | 1812/931/260/57 | `backbone_stability_audit.json` |
 | core 組成 n2/gain/notruth | 79%/69.3%/43.5% | 同上 |
-| verified incompatible | 0 | 同上 |
+| incompatible has_cycle(全/有向量/CN-gain%) | 22 / 12 / 77% | 同上 incompatible_recompute |
+| determinacy canonical sum(==detail) | 3885 | 同上 denominators |
+| region_coverage(向量/germline/無向量) | 3885/371/2887 | 同上 |
 | determinacy rate by CN | gain53.9/loh36/neu44.5/loss10.8 | 同上 |
 | 截斷 | 42(31 TP) | 同上 |
 | 成環/npop≤2 | 12/10 | `backbone_resolution.json` |

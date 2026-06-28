@@ -20,10 +20,11 @@ det = T["detail"]; stats = T.get("stats", {})
 DET = lambda r: r.get("determinacy", "?")
 isdet = lambda r: "A_determined" in DET(r)
 
-# 雙 denominator
+# 雙 denominator(G1 修後:stats.determinacy 已 canonical=3885;7143 全區看 region_coverage)
 n_detail = len(det)
-stats_det = stats.get("determinacy", {})
-n_full = sum(stats_det.values()) if stats_det else None
+cov = stats.get("region_coverage", {})
+n_full = sum(cov.values()) if cov else None
+stats_det_sum = sum(stats.get("determinacy", {}).values())
 
 # robustness ladder
 core = [r for r in det if isdet(r)]
@@ -32,7 +33,8 @@ L2 = [r for r in core if r["fp"] == 0 and r["tp"] > 0]
 L3 = [r for r in L2 if r["n_sSNV"] >= 3]
 L4 = [r for r in L3 if r["cn"] != "gain"]
 
-# verified incompatible: npop≥3 AND 有 stored 4-gamete 違反
+# incompatible 真相(G2 修):has_cycle 是上游 sm_region_integration 在「全 sSNV pairwise 關係圖」算的真 cycle,
+# 非 stored 截斷 populations 可重現。stored 查 4-gamete = 截斷後查不到(非「0 真 cycle」)。
 def four_gamete(pops):
     if not pops: return 0
     k = len(next(iter(pops))); v = 0
@@ -41,7 +43,11 @@ def four_gamete(pops):
         if {"RR", "RA", "AR", "AA"} <= gam: v += 1
     return v
 incomp = [r for r in det if DET(r) == "incompatible"]
-verified_incomp = [r for r in incomp if len(r["populations"]) >= 3 and four_gamete(r["populations"]) > 0]
+verified_stored = [r for r in incomp if len(r["populations"]) >= 3 and four_gamete(r["populations"]) > 0]
+RI = json.load(open(f"{DATA}/sm_region_integration.json"))
+has_cycle_all = [r for r in RI["regions"] if r.get("has_cycle")]
+hc_cn = Counter(r.get("cn") for r in has_cycle_all)
+hc_gain = sum(1 for r in has_cycle_all if r.get("cn") == "gain")
 
 # core composition
 def pct(sub, tot): return round(100 * len(sub) / tot, 1) if tot else 0
@@ -62,8 +68,13 @@ trunc_tp = [r for r in trunc if r["tp"] > 0]
 trunc_incomp = [r for r in trunc if DET(r) == "incompatible"]
 
 out = {
-    "denominators": {"detail_somatic_vector": n_detail, "stats_all_regions": n_full,
-        "note": "determinacy % 必標分母:47% determined = 1812/3885(有向量) = 25%/7143(全區)。stats.determinacy(7143) 與 detail(3885) 不同集,勿混引。"},
+    "denominators": {"detail_somatic_vector": n_detail, "all_regions(region_coverage)": n_full,
+        "region_coverage": dict(cov), "stats_determinacy_sum(now canonical)": stats_det_sum,
+        "consistent(stats==detail)": stats_det_sum == n_detail,
+        "note": "G1 修(2026-06-29):stats.determinacy 現 canonical = 有向量 3885(== detail,sum 一致);"
+                "全 7143 區的覆蓋看 region_coverage(with_vector 3885 / germline_only 371 / no_vector 2887)。"
+                "determinacy % 一律以 3885(有向量)為分母;對外提全區時用 region_coverage,勿再混引 7143-determinacy。"
+                "47% determined = 1812/3885(canonical) = 25.4%/7143(全區覆蓋脈絡)。"},
     "robustness_ladder": {
         "L1_A_determined": {"n": L1, "pct_of_3885": pct(core, n_detail)},
         "L2_+TP_backed(fp=0,tp>0)": {"n": len(L2), "pct_of_3885": pct(L2, n_detail)},
@@ -74,9 +85,16 @@ out = {
         "pct_n_sSNV==2(僅2位點非多節點樹)": pct(core_n2, L1),
         "pct_CN_gain(multiplicity artifact 區)": pct(core_gain, L1),
         "pct_no_truth_label": pct(core_notruth, L1)},
-    "incompatible_recompute": {"raw": len(incomp), "verified(npop>=3 AND stored違反)": len(verified_incomp),
-        "verified_regions": [r["region"] for r in verified_incomp],
-        "note": "現 incompatible 多為 genotype 截斷(8/12)+npop≤2(10/12) artifact;嚴格驗證後幾乎為 0=骨幹無真樹衝突訊號(reassuring)。"},
+    "incompatible_recompute": {
+        "has_cycle_all_regions(upstream pairwise graph)": len(has_cycle_all),
+        "with_genotype_vector(in detail)": len(incomp),
+        "no_vector(not in detail)": len(has_cycle_all) - len(incomp),
+        "cn_dist": dict(hc_cn), "cn_gain_frac": round(hc_gain / len(has_cycle_all), 2) if has_cycle_all else 0,
+        "verifiable_from_stored_capped": len(verified_stored),
+        "note": "has_cycle = 上游在全 sSNV pairwise 關係圖(nested_edges+sibling_pairs)算的真 cycle(如雙向 nesting),"
+                "非 stored 截斷(cap=8)populations 可重現 → verifiable_from_stored=0 是『截斷查不到』非『0 真 cycle』。"
+                "22 真 cycle 中 77% CN-gain → 最可能 = CN multiplicity(同突變多拷貝)製造 pairwise 矛盾,非真演化樹衝突。"
+                "處置:標 likely-CN-multiplicity-artifact、不建樹;若要真驗證須提高 genotype cap + CN-aware multiplicity 模型。"},
     "determinacy_rate_by_cn": bycn,
     "cn_gain_inflation_note": "determinacy RATE 在 CN-gain 最高 → multiplicity 可能製造假共現→假 determined;tree-level claim 前應 mask/控制 CN-gain。",
     "genotype_truncation": {"n_truncated(n_sSNV>8)": len(trunc), "with_tp": len(trunc_tp),

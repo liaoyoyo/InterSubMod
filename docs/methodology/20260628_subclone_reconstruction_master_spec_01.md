@@ -75,8 +75,10 @@ P(拓樸 T) ∝ P(sSNV共現|T) × 1[HP-root 相容] × P(甲基|T,normal-baseli
 
 ## §6 驗證狀態 + 統計
 
-- **拓樸型態**（7143 區）：single 2018 / branched 1113 / linear 754 / germline 371 / no-vec 2887。
-- **determinacy**：A_determined 1812 / A_ambiguous 76 / B_pairwise 2760 / C_underdetermined 1658 / incompatible 22。
+- **拓樸型態 / structure**（7143 全區，pairwise）：single 2018 / branched 1113 / linear 754 / germline 371 / no-vec 2887。
+- **🔴 determinacy（canonical 分母 = 有 genotype 向量 3885 區；G1 修 06-29）**：A_determined 1812 / A_ambiguous 76 / B_pairwise 958 / C_underdetermined 550 / incompatible 12 / other 477（sum=3885）。**region_coverage**（7143）= with_vector 3885 / germline_only 371 / no_vector 2887。⚠ **舊「B_pairwise 2760 / C 1658 / incompatible 22」是 7143-混算（含無向量區用 tree_shape fallback），已棄用**；determinacy % 一律以 3885 為分母（47%=1812/3885=46.6%；=25.4%/7143 覆蓋脈絡）。
+- **🔴 incompatible 真相（G2 修 06-29）**：=上游 `has_cycle`（全 sSNV pairwise 圖的真 cycle，如雙向 nesting）共 **22**（12 有向量在 detail + 10 無向量）；**77% CN-gain** → 最可能 = CN multiplicity 製造 pairwise 矛盾、非真演化樹衝突；stored 截斷(cap=8)查不到（非「0 真 cycle」）。處置：標 likely-CN-multiplicity-artifact 不建樹。
+- **真正穩固核心**（robustness ladder）：L1 A_determined 1812(47%) → +TP-backed 931 → +多位點 260 → **+非CN-gain = 57 區(1.5%)**；core 79% 僅2位點/69% CN-gain/43.5% 無truth → 「47%」是軟上界。詳 `20260629_backbone_resolution_and_methyl_roles_final_01.md`。
 - **可辨識度**（Q1/Q2）：穿越充分 12.3% / 拓樸可辨識 10.9%；欠定根因 跨HP 36%/幾何 32%/功率 26%/HP3 6%。
 - **chr17 worked**：S2(α,VAF0.82,TP,H1) 祖先 → S1+S3(β,co_linked) 後代；linear；dropped 2 noise；16 sig CpG。
 - **驗證抓修 2 bug**：population 噪聲過濾（chr17 假 incompatible）+ ambiguous-parentage（chr14 缺中間群）。

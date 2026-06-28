@@ -1,8 +1,15 @@
 {
  "denominators": {
   "detail_somatic_vector": 3885,
-  "stats_all_regions": 7143,
-  "note": "determinacy % 必標分母:47% determined = 1812/3885(有向量) = 25%/7143(全區)。stats.determinacy(7143) 與 detail(3885) 不同集,勿混引。"
+  "all_regions(region_coverage)": 7143,
+  "region_coverage": {
+   "with_genotype_vector": 3885,
+   "germline_only": 371,
+   "no_genotype_vector": 2887
+  },
+  "stats_determinacy_sum(now canonical)": 3885,
+  "consistent(stats==detail)": true,
+  "note": "G1 修(2026-06-29):stats.determinacy 現 canonical = 有向量 3885(== detail,sum 一致);全 7143 區的覆蓋看 region_coverage(with_vector 3885 / germline_only 371 / no_vector 2887)。determinacy % 一律以 3885(有向量)為分母;對外提全區時用 region_coverage,勿再混引 7143-determinacy。47% determined = 1812/3885(canonical) = 25.4%/7143(全區覆蓋脈絡)。"
  },
  "robustness_ladder": {
   "L1_A_determined": {
@@ -30,10 +37,16 @@
   "pct_no_truth_label": 43.5
  },
  "incompatible_recompute": {
-  "raw": 12,
-  "verified(npop>=3 AND stored違反)": 0,
-  "verified_regions": [],
-  "note": "現 incompatible 多為 genotype 截斷(8/12)+npop≤2(10/12) artifact;嚴格驗證後幾乎為 0=骨幹無真樹衝突訊號(reassuring)。"
+  "has_cycle_all_regions(upstream pairwise graph)": 22,
+  "with_genotype_vector(in detail)": 12,
+  "no_vector(not in detail)": 10,
+  "cn_dist": {
+   "gain": 17,
+   "loh": 5
+  },
+  "cn_gain_frac": 0.77,
+  "verifiable_from_stored_capped": 0,
+  "note": "has_cycle = 上游在全 sSNV pairwise 關係圖(nested_edges+sibling_pairs)算的真 cycle(如雙向 nesting),非 stored 截斷(cap=8)populations 可重現 → verifiable_from_stored=0 是『截斷查不到』非『0 真 cycle』。22 真 cycle 中 77% CN-gain → 最可能 = CN multiplicity(同突變多拷貝)製造 pairwise 矛盾,非真演化樹衝突。處置:標 likely-CN-multiplicity-artifact、不建樹;若要真驗證須提高 genotype cap + CN-aware multiplicity 模型。"
  },
  "determinacy_rate_by_cn": {
   "gain": {
