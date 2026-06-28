@@ -1,0 +1,67 @@
+{
+ "denominators": {
+  "detail_somatic_vector": 3885,
+  "stats_all_regions": 7143,
+  "note": "determinacy % 必標分母:47% determined = 1812/3885(有向量) = 25%/7143(全區)。stats.determinacy(7143) 與 detail(3885) 不同集,勿混引。"
+ },
+ "robustness_ladder": {
+  "L1_A_determined": {
+   "n": 1812,
+   "pct_of_3885": 46.6
+  },
+  "L2_+TP_backed(fp=0,tp>0)": {
+   "n": 931,
+   "pct_of_3885": 24.0
+  },
+  "L3_+multisite(n_sSNV>=3)": {
+   "n": 260,
+   "pct_of_3885": 6.7
+  },
+  "L4_+non_CN_gain(truly_robust)": {
+   "n": 57,
+   "pct_of_3885": 1.5
+  },
+  "interpretation": "L1 47% 是軟上界;同時非循環+TP-backed+多位點+非CN-gain 的真正穩固核心 = L4。"
+ },
+ "determined_core_fragility": {
+  "n_core": 1812,
+  "pct_n_sSNV==2(僅2位點非多節點樹)": 79.0,
+  "pct_CN_gain(multiplicity artifact 區)": 69.3,
+  "pct_no_truth_label": 43.5
+ },
+ "incompatible_recompute": {
+  "raw": 12,
+  "verified(npop>=3 AND stored違反)": 0,
+  "verified_regions": [],
+  "note": "現 incompatible 多為 genotype 截斷(8/12)+npop≤2(10/12) artifact;嚴格驗證後幾乎為 0=骨幹無真樹衝突訊號(reassuring)。"
+ },
+ "determinacy_rate_by_cn": {
+  "gain": {
+   "n": 2331,
+   "determined": 1256,
+   "rate": 53.9
+  },
+  "loh": {
+   "n": 1343,
+   "determined": 484,
+   "rate": 36.0
+  },
+  "neutral": {
+   "n": 146,
+   "determined": 65,
+   "rate": 44.5
+  },
+  "loss": {
+   "n": 65,
+   "determined": 7,
+   "rate": 10.8
+  }
+ },
+ "cn_gain_inflation_note": "determinacy RATE 在 CN-gain 最高 → multiplicity 可能製造假共現→假 determined;tree-level claim 前應 mask/控制 CN-gain。",
+ "genotype_truncation": {
+  "n_truncated(n_sSNV>8)": 42,
+  "with_tp": 31,
+  "incompatible_among_trunc": 8,
+  "note": "正解=42(n_sSNV>8),非43(43=n_sSNV>=8,含 1 個 n_sSNV==8 剛好不截斷)。core 中僅 3 區受影響→主結論穩。"
+ }
+}
