@@ -13,7 +13,9 @@ provenance: 凍結資料 @ branch feat/summary-nreadsvalid@5308d9e;甲基裁決�
 
 ## §0 一句話定義
 
-**每條 read / 每個克隆節點標 `HP{h}` + Dewey 路徑 `-{b1}-{b2}-…`**：h = germline haplotype 根（H1/H2/H3-unphased）；路徑 = 該 read 在 haplotype h 的 somatic 樹上從根往下的 lineage（nested=往下加層、sibling=同層新分支、co_linked=同節點；分支編號 = VAF 遞減）。
+**每條 read / 每個克隆節點標 `HP{h}` + Dewey 路徑 `-{b1}-{b2}-…`**：h = germline haplotype 根（H1/H2/H3-unphased）；路徑 = 該 read 在 haplotype h 的 somatic 樹上從根往下的 lineage（nested=往下加層、sibling=同層新分支、co_linked=同節點）。**姊妹分支編號 = 子樹總 read 數遞減**（= 自己 + 所有子孫，代表該 lineage 分支整體佔比/CCF proxy；**多者=?-1、少者=?-2**；tiebreak: 自己 read 數 → genotype 字串）。
+
+> **2026-06-29 修正**：姊妹編號由「只算自己這群」改為「**子樹總和（含所有子孫）**」。理由：祖先 clone 的細胞 = 自己 + 後來又突變的後代，故 lineage 分支真實佔比須含子孫。例：父下兩姊妹 A（自己 5、子孫 30 → 子樹 35）vs B（自己 20、無子孫 → 子樹 20），舊規則 B=?-1（錯），新規則 **A=?-1**。此為**標籤慣例**（誰叫 -1/-2），**不改樹結構**；落 `topology_analysis.py::dewey_paths` + `build_lineage_labels.py::assign_paths`；全資料 70/3885（1.8%）區標籤更正。同輪修 solve_topology 兩處 tie 非決定性（victim/nodes 排序加 genotype tiebreak）→ topology_per_region.json **byte-完全可重現**。⚠ read 數為 CCF proxy，CN-gain 受 multiplicity 膨脹，相對排序仍可用但須註記。
 
 ## §1 理論依據（為何 pairwise 合法）[L1 理論]
 
@@ -29,7 +31,7 @@ sSNV = 二元字元（REF=祖先/ALT）。**Four-Gamete / Perfect-Phylogeny 定�
 | AA only | co_linked | — | 同節點（同 lineage）|
 | 單側零格(AR=0 或 RA=0) | nested | same-HP | 祖先→後代（往下加層）|
 | 互斥(AA=0, RA+AR>0) | sibling/allelic | **diff-HP → allelic** | `H1 vs H2`（**非 subclone**）|
-| 互斥 | sibling/allelic | **same-HP → sibling subclone** | `H{h}-1 / H{h}-2`（VAF 高=1）|
+| 互斥 | sibling/allelic | **same-HP → sibling subclone** | `H{h}-1 / H{h}-2`（**子樹總 read 多=1**，§0 修正）|
 
 - diff-HP 互斥佔 mutual_excl **59.1%**（其中 88.2% 乾淨 H1-vs-H2、11.8% 涉 HP3）；same-HP 互斥 H1 1322 / H2 1318 / H3 185。
 - VAF 排序可分 **72%**（CN-clean 才可信）；28% tie 標 `?`。
@@ -39,7 +41,7 @@ sSNV = 二元字元（REF=祖先/ALT）。**Four-Gamete / Perfect-Phylogeny 定�
 **Label(node) = `H{h}` + `-{b1}-{b2}-…-{bk}`**
 - **h**：germline haplotype 根。正常人 = 2 根 H1、H2（HP tag："1-1"→H1、"2-1"→H2、"3"→H3-unphased）。
 - **路徑**：somatic 樹從根往下：
-  - level-1 somatic 事件（nested DAG 的根、無入邊）= `H{h}-1, H{h}-2, …`（VAF 遞減編號）
+  - level-1 somatic 事件（nested DAG 的根、無入邊）= `H{h}-1, H{h}-2, …`（**子樹總 read 數遞減編號**，§0 修正；含所有子孫）
   - nested 後代 = 在父路徑後接新數字 `…-j`
   - sibling = 同層另一分支（同位新數字）
   - co_linked = 同一節點（同標籤）

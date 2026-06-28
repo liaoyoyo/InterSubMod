@@ -31,17 +31,24 @@ for c in ("co_linked", "nested_a_in_b", "nested_b_in_a", "mutual_excl", "indepen
             locus_hp[(d["chrom"], int(d["pos_b"]))] = d["hp_b"]
 
 def assign_paths(nodes, nested_edges, sibling_pairs, vafd, hletter):
-    """回 {node_pos: 'H{h}-b1-b2...'}。nested_edges=(ancestor,descendant)。"""
+    """回 {node_pos: 'H{h}-b1-b2...'}。nested_edges=(ancestor,descendant)。
+    姊妹編號 = **子樹 VAF 總和遞減**(自己+所有子孫=該 lineage 分支 CCF;多者=?-1);
+    tiebreak: 自己 VAF。與 topology_analysis.dewey_paths 一致(subtree 而非 self)。"""
     children = defaultdict(list); has_parent = set()
     for a, dsc in nested_edges:
         children[a].append(dsc); has_parent.add(dsc)
     def vof(n): return vafd.get(n, -1.0)
-    roots = sorted([n for n in nodes if n not in has_parent], key=lambda n: -vof(n))
+    _sub = {}
+    def subv(n):  # 子樹 VAF 總和(CCF proxy);樹結構,memoized
+        if n not in _sub:
+            _sub[n] = max(vof(n), 0.0) + sum(subv(c) for c in children.get(n, []))
+        return _sub[n]
+    skey = lambda n: (-subv(n), -vof(n), n)
+    roots = sorted([n for n in nodes if n not in has_parent], key=skey)
     label = {}
     def walk(n, path):
         label[n] = f"{hletter}-" + "-".join(map(str, path))
-        kids = sorted(children.get(n, []), key=lambda k: -vof(k))
-        for j, k in enumerate(kids, 1):
+        for j, k in enumerate(sorted(children.get(n, []), key=skey), 1):
             if k not in label:  # 防多親 DAG 重入
                 walk(k, path + [j])
     for i, r in enumerate(roots, 1):

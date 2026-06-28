@@ -54,8 +54,8 @@ GLOSSARY = [
  ("cluster-count (c, k+1 上界)", "區內 distinct population 數;perfect-phylogeny 下 ≤ k+1(非 2^k)。", "實測 99.9% n_pop≤k+1、中位 2 → 拓樸搜尋空間極小。先定 c 再縮限拓樸。"),
  ("ambiguous-parentage 缺中間群", "節點突變集跳>1(中間 population 沒觀察到)→累積順序未定。", "76 區。如 {0,3,4} 缺 {0,3} 等中間群 → 0,3,4 哪個先未定。"),
  ("linked / underpowered / isolated", "全 sSNV 三桶:可建樹 / 有 partner 無共讀(可救) / 無 partner(Tier-R 樹外)。", "61% / 15.4% / 23.5%。單位點非全無法處理:underpowered 有 CCF、isolated 有 caller VAF+可能 Tier-PS。"),
- ("cis-ASM / double-dip", "甲基隨突變的 cis 局部效應 / 用同量定群又驗群的循環。", "chr17 證甲基分群對齊突變 genotype 軸(cis)非獨立 lineage → 甲基不能當獨立驗證器,待 normal cis-control。"),
- ("bounded-auxiliary 甲基定位", "甲基=corroborate 非 detect 的有界輔助(Tier-3 機率層)。", "排序:genetic 共現>HP 定根>甲基。甲基 validation 待 T-GATE-GB cis-control。"),
+ ("cis-ASM / double-dip", "甲基隨突變的 cis 局部效應 / 用同量定群又驗群的循環。", "chr17 證甲基分群對齊突變 genotype 軸(cis)非獨立 lineage → 甲基不能當獨立驗證器。06-28 normal cis-control 已測:CROSS-HP 35.4% 可控、SAME-HP 多數區 normal 無對應 within-HP 軸=結構性無法 control(需 single-cell)。"),
+ ("bounded-auxiliary 甲基定位", "甲基=corroborate 非 detect 的有界輔助(Tier-3 機率層)。", "排序:genetic 共現>HP 定根>甲基。🔴 06-28 cis-control pilot 已測定案:cis-control 只對 CROSS-HP 區有效(35.4%)、SAME-HP 59% 結構性無解→甲基不能升 resolver;最終角色=cluster-count sanity + 43 區 CROSS-HP 弱排序 PoC。"),
  ("⭐3 / single-pipeline", "單樣本 HCC1395 單一 pipeline 的證據上限。", "升 ⭐4 需 ≥5/7 樣本+COLO829+single-cell 正交確認。"),
 ]
 GLOSSARY_HTML = '<details style="background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:10px 14px;margin:10px 0"><summary style="cursor:pointer;font-weight:600;color:#1971c2">📖 名詞與概念解釋（點開；每項可再展開細節）</summary><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:6px;margin-top:8px">' + "".join(f'<details style="border:1px solid #f1f3f5;border-radius:6px;padding:5px 9px;font-size:12px"><summary style="cursor:pointer"><b>{t}</b></summary><div style="margin-top:4px;color:#343a40">{s}</div><div style="margin-top:3px;color:#868e96;font-size:11px">{dd}</div></details>' for t, s, dd in GLOSSARY) + '</div></details>'
@@ -160,7 +160,7 @@ function show(i,row){el('list').querySelectorAll('.row').forEach(x=>x.classList.
  let pt=Object.entries(r.populations).sort((a,b)=>b[1]-a[1]).map(([g,c])=>{let tot=Object.values(r.populations).reduce((a,b)=>a+b,0);return `<tr><td class="mono" style="color:#1971c2;font-weight:600">${np[g]||(g.includes('A')?'—(未定)':'germline')}</td><td class="mono">${g}</td><td>${sLabels(g)}</td><td>${c}</td><td>${(100*c/tot).toFixed(0)}%</td></tr>`}).join('');
  el('detail').innerHTML=`<h3>${r.region} <span class="tag ${TT[r.topology_type]||'t_single'}">${r.topology_type}</span> <span class="tag ctx_${r.genome_ctx}">${r.genome_ctx}</span></h3>
   <div class="kv"><div class="b">${r.n_sSNV} sSNV</div><div class="b">span ${(r.span/1000).toFixed(1)}kb</div><div class="b">c=${r.n_clusters} 群</div><div class="b">HP: ${r.haplotypes}</div><div class="b">CN: ${r.cn}</div><div class="b">TP ${r.tp} / FP ${r.fp}</div><div class="b">${r.determinacy}</div>${r.drop_noise_frac>0?`<div class="b">噪聲過濾 ${(r.drop_noise_frac*100).toFixed(0)}%</div>`:''}${r.ambig_nodes>0?`<div class="b" style="background:#fff3bf">⚠ 順序未定 ${r.ambig_nodes}(缺中間群)</div>`:''}</div>
-  ${r.undefined?`<div style="background:#ffe3e3;border:1px solid #ffc9c9;border-radius:6px;padding:8px;margin:6px 0"><b>⚠ 此區有無法定義的分支（順序未定/不相容）</b>→ 下方標籤為可能位置；需<b>甲基輔助確認</b>（待 T-GATE-GB normal cis-control 解鎖）。</div>`:''}
+  ${r.undefined?`<div style="background:#ffe3e3;border:1px solid #ffc9c9;border-radius:6px;padding:8px;margin:6px 0"><b>⚠ 此區有無法定義的分支（順序未定/不相容）</b>→ 下方標籤為可能位置。<br>🔴 曾標『需甲基輔助確認』,但 06-28 normal cis-control pilot 裁決:此類區甲基<b>乾淨可用≈0</b>(SAME-HP 在同一 germline HP 內分化、normal 無對應 within-HP 軸=結構性無解)→ 需 single-cell/multi-region 或加深覆蓋,<b>甲基無法解鎖此區</b>。</div>`:''}
   <b>克隆樹（germline→…；節點=lineage標籤(藍)·S-mut-set·reads·%；座標=向量）</b>${tree(r.edges,r.populations,r.n_clusters,r.haplotypes,r.germline_reads,r.node_paths)}
   ${r.n_roots>=2?`<div style="background:#fff4e6;border:1px solid #ffd8a8;border-radius:6px;padding:8px;margin-top:8px"><b>⚠ 此區跨 H1/H2（${r.n_roots} 棵樹）→ 分開看的兩棵 HP 樹（上方 genotype-向量樹混合 HP 僅參考）：</b>${posTree(r)}</div>`:''}
   <div class="note">S1..S${r.n_sSNV}=區內排序 sSNV；直系=往下、姊妹=同層分叉；germline 根標 reads·%。tree_shape(pairwise)=${r.tree_shape}。genome_ctx 為近似(±3Mb)。</div>
@@ -170,7 +170,7 @@ function show(i,row){el('list').querySelectorAll('.row').forEach(x=>x.classList.
 render();
 // ===== 確認佇列(評分 + 左右判讀) =====
 const SC=D.scoring;
-el('scoresum').innerHTML=`需確認 <b>${SC.summary.n_need_confirm}</b>/${SC.summary.n_total} 區 · 評分桶 ${JSON.stringify(SC.summary.score_buckets)} · situation ${JSON.stringify(SC.summary.situation_dist)} · 需甲基輔助 ${SC.summary.needs_methyl_n} · 公式: ${SC.summary.score_formula}`;
+el('scoresum').innerHTML=`需確認 <b>${SC.summary.n_need_confirm}</b>/${SC.summary.n_total} 區 · 評分桶 ${JSON.stringify(SC.summary.score_buckets)} · situation ${JSON.stringify(SC.summary.situation_dist)} · <span title="06-28 cis-control 已否決:乾淨可用≈0">曾標需甲基 ${SC.summary.needs_methyl_n}(已否決·非真可用)</span> · 公式: ${SC.summary.score_formula}`;
 let Q=SC.queue;
 [...new Set(Q.map(q=>q.situation))].sort().forEach(s=>{let o=document.createElement('option');o.value=s;o.textContent=s;el('q_sit').appendChild(o)});
 const QSORT={score:(a,b)=>a.confidence_score-b.confidence_score,scoreD:(a,b)=>b.confidence_score-a.confidence_score,coord:(a,b)=>a.chrom.localeCompare(b.chrom,undefined,{numeric:true})||a.start-b.start};
@@ -201,6 +201,12 @@ el('q_exp').onclick=()=>{let j={};Q.forEach(q=>{let v=localStorage.getItem(jkey(
 renderQ();
 """
 
+PROVENANCE_FOOTER = ('<p class="note" style="margin-top:8px;color:#888">'
+                     'build_branch: research/subclonal-reconstruction-202606 · '
+                     '資料 topology_per_region.json（凍結 @ feat/summary-nreadsvalid@5308d9e）· '
+                     '姊妹編號 = 子樹總 read 數遞減（?-1=該 lineage 分支佔比較大，含所有子孫；?-2=較小）· '
+                     '甲基 = bounded-auxiliary（見 20260628_cis_control_scope_pilot_verdict_01.md）</p>')
+
 HTML = f"""<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>克隆樹拓樸工作站 v2 — sSNV 重建（HCC1395 ⭐3）</title><style>{CSS}</style></head><body><div class="wrap">
 <h1>克隆樹拓樸互動工作站 v2（cluster-first 算法 + S/r/m 標籤 + 篩選排序）</h1>
@@ -218,7 +224,7 @@ chr<select id="f_chr"><option value="">全</option></select>
 最少群數<input id="f_minc" type="number" value="0" min="0" max="6" style="width:52px">
 <label><input id="f_fp" type="checkbox">僅含FP</label>
 <label title="LOH 區且單一 HP 標籤(LOH-unmask 觀察)"><input id="f_loh" type="checkbox">僅 LOH 單HP</label>
-<label title="分支順序未定/不相容→需甲基輔助確認"><input id="f_undef" type="checkbox">僅無法定義(需甲基)</label>
+<label title="分支順序未定/不相容;曾標『需甲基輔助』,06-28 cis-control 已否決(乾淨可用≈0)"><input id="f_undef" type="checkbox">僅無法定義(曾標需甲基·已否決)</label>
 搜尋<input id="f_q" placeholder="chr17:" style="width:120px">
 <span id="cnt" class="note"></span>
 </div>
@@ -231,11 +237,12 @@ chr<select id="f_chr"><option value="">全</option></select>
 <div class="ctrl">
 排序<select id="q_sort"><option value="score">評分(低→高,最需關注)</option><option value="scoreD">評分(高→低)</option><option value="coord">座標</option></select>
 situation<select id="q_sit"><option value="">全</option></select>
-<label><input id="q_methyl" type="checkbox">僅需甲基輔助</label>
+<label title="06-28 cis-control 裁決:這些區甲基乾淨可用≈0,非真能用甲基解"><input id="q_methyl" type="checkbox">曾標需甲基(已否決)</label>
 <button id="q_exp">匯出判讀 JSON</button><span id="qcnt" class="note"></span>
 </div>
 <div class="list" id="queue" style="max-height:62vh"></div>
-<p class="note" style="margin-top:12px">⚠ 證據層級：A_determined=單分子向量；A_ambiguous=缺中間群順序未定；B_pairwise=拼接非單分子整樹；C_underdetermined=多樹相容。TP/FP=SEQC2 僅觀察不進前處理。genome_ctx 為近似(±3Mb)。甲基不參與拓樸裁決(cis-confounded)。⭐3 單樣本。</p>
+<p class="note" style="margin-top:12px">⚠ 證據層級：A_determined=單分子向量唯一可辨識(≠對 single-cell 驗證為真)；A_ambiguous=缺中間群順序未定；B_pairwise=拼接非單分子整樹；C_underdetermined=多樹相容。TP/FP=SEQC2 僅觀察不進前處理。genome_ctx 為近似(±3Mb)。甲基不參與拓樸裁決(cis-confounded;06-28 cis-control 已測→bounded-auxiliary,非 resolver)。⭐3 單樣本·regional(≤read-span)非 genome-wide tree·分子共現≠single-cell。</p>
+{PROVENANCE_FOOTER}
 </div>
 <script>window.__DATA__={DJ};</script><script>{JS}</script></body></html>"""
 with open(OUT, "w", encoding="utf-8") as f: f.write(HTML)

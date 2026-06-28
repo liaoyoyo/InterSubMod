@@ -72,13 +72,13 @@ def solve_topology(pops):
             a, b = work[g1], work[g2]
             if a & b and not (a <= b or b <= a): conf.add(g1); conf.add(g2)
         if not conf: break
-        victim = min(conf, key=lambda g: cnt[g])
+        victim = min(conf, key=lambda g: (cnt[g], g))  # tiebreak: genotype 字串 → 決定性可重現
         dropped += cnt[victim]; del work[victim]
     if len(work) >= 2 and not _laminar(list(work.values())):
         return ("incompatible", [], list(alt), dropped, 0)
     alt = work  # 過濾後
     # 建樹：每節點父=最大的真子集(否則 germline 根);偵測 ambiguous parentage(缺中間群→順序未定)
-    nodes = sorted(alt, key=lambda g: len(alt[g]))
+    nodes = sorted(alt, key=lambda g: (len(alt[g]), g))  # tiebreak: genotype 字串 → 父選擇決定性
     edges = []; ambig = 0
     for g in nodes:
         cand = [h for h in nodes if alt[h] < alt[g]]
@@ -108,19 +108,27 @@ def solve_topology(pops):
     return (t, edges, nodes, dropped, ambig)
 
 def dewey_paths(edges, pops, hdigit):
-    """每節點(genotype 向量)的 lineage path 標籤 HP{h}-{b1}-{b2}…(分支編號=read 數遞減)。"""
+    """每節點(genotype 向量)的 lineage path 標籤 HP{h}-{b1}-{b2}…
+    姊妹編號 = **子樹總 read 數遞減**(自己+所有子孫=該 lineage 分支佔比/CCF proxy;
+    多者=?-1、少者=?-2);tiebreak: 自己 read 數 → genotype 字串(穩定)。"""
     from collections import defaultdict as dd
     ch = dd(list); haspar = set()
     for p, c in edges:
         ch[p].append(c)
         if p != "ROOT": haspar.add(c)
     cnt = lambda g: pops.get(g, 0)
+    _sub = {}
+    def subtree(n):  # 自己 + 所有子孫 read 數(樹結構無環,memoized 遞迴)
+        if n not in _sub:
+            _sub[n] = cnt(n) + sum(subtree(c) for c in ch.get(n, []))
+        return _sub[n]
+    skey = lambda x: (-subtree(x), -cnt(x), x)  # 子樹總和遞減 → self → 穩定
     paths = {}
     def walk(n, path):
         paths[n] = f"H{hdigit}-" + "-".join(map(str, path))
-        for j, k in enumerate(sorted(ch.get(n, []), key=lambda x: -cnt(x)), 1):
+        for j, k in enumerate(sorted(ch.get(n, []), key=skey), 1):
             if k not in paths: walk(k, path + [j])
-    for i, rt in enumerate(sorted(ch.get("ROOT", []), key=lambda x: -cnt(x)), 1):
+    for i, rt in enumerate(sorted(ch.get("ROOT", []), key=skey), 1):
         walk(rt, [i])
     return paths
 
@@ -162,7 +170,7 @@ for r in regs:
     if len(alt_vecs) >= 1 and len(pops) >= 1:
         stats["with_genotype_vectors"] += 1
         tpfp = Counter(locus_src.get((r["chrom"], int(p.split(":")[1])), "?") for p in posset)
-        node_hp = {p: hpL.get(locus_hp.get((r["chrom"], int(p.split(":")[1])))) for p in posset}
+        node_hp = {p: hpL.get(locus_hp.get((r["chrom"], int(p.split(":")[1])))) for p in sorted(posset)}
         germ_groot = set(v for v in node_hp.values() if v in ("H1", "H2"))
         germline_reads = pops.get("R" * r["n_sSNV"], 0)
         hap_str = "".join(sorted(set(h for h in hps if h))) or "?"
