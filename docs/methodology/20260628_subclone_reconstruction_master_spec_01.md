@@ -99,4 +99,22 @@ P(拓樸 T) ∝ P(sSNV共現|T) × 1[HP-root 相容] × P(甲基|T,normal-baseli
 - `scripts/`：topology_analysis.py · build_topology_workstation.py · single_snv_accounting.py · apply_eps2_canonical.py · build_lineage_labels.py · 等（皆可重跑複算）
 - `PROVENANCE.md`：每數字→來源 + branch 凍結紀錄
 
-> 一句話：本研究 = 在 HCC1395 ONT 上，用 **sSNV 單分子共現（非循環骨幹）+ HP 定根 + 甲基有界輔助** 重建區域級克隆樹；35,332 sSNV 中 61% 可建樹、~11% 拓樸可辨識；單位點非全無法處理（有 CCF/Tier-PS）；甲基 cis-confounded 待 cis-control；⭐3 單樣本。
+## §9 候選評分 + 確認佇列（衝突/2-3 順位/需輔助驗證）
+
+對每區算 **confidence_score(0-100)** = base(determinacy) + 覆蓋 + CN-clean + 單HP − FP主導 − 順序未定 − 偽影區(centromere/telomere)；並標 **resolution_path**（需什麼資訊定先後/驗證）：
+
+| situation | 區數 | 評分傾向 | resolution（需哪些資訊）|
+|---|--:|---|---|
+| 已確定 | 2,245 | 高 | genetic 足夠（單分子向量）|
+| pairwise 拼接 | 903 | 中 | 需更長 read / 單分子整跨 |
+| 多樹相容(欠定) | 550 | 低 | 加深覆蓋 / Tier-PS 連遠 partner |
+| 跨HP(兩棵樹) | 99 | 中 | HP 已拆，各樹獨立 |
+| **順序 2-3 順位待定** | 76 | 中低 | **VAF/CCF(CN-clean) 定先後；VAF tie→甲基輔助(cis-control 後)** |
+| 衝突(成環) | 12 | 極低 | likely-artifact（補 mappability mask、不強建樹）|
+
+- **需確認佇列 2,118 區**（非已確定或 <70 分），最低分為 chr9:41.8M/chr14:16M/chr16（已知 dense/centromere 偽影，自動排前）。
+- **需甲基輔助 624 區**（VAF tie 或欠定）→ 這正是甲基 Tier-3 機率層的適用處，但**待 T-GATE-GB cis-control 才可信**。
+- 互動確認：`topology_workstation` 下方「確認佇列」可**左右選項判讀**（✓同意rank1 / ⇄偏好其他 / ?需更多資訊）+ 觀察評分，存 localStorage、可匯出 JSON。
+- 產物：`scripts/candidate_scoring.py` + `data/candidate_scoring.json`。
+
+> 一句話：本研究 = 在 HCC1395 ONT 上，用 **sSNV 單分子共現（非循環骨幹）+ HP 定根 + 甲基有界輔助** 重建區域級克隆樹；35,332 sSNV 中 61% 可建樹、~11% 拓樸可辨識、2,118 區待確認（624 區可能需甲基輔助、待 cis-control）；單位點非全無法處理（有 CCF/Tier-PS）；甲基 cis-confounded 待 cis-control；⭐3 單樣本。工作站自帶 28 詞名詞解釋 + 左右確認評分。

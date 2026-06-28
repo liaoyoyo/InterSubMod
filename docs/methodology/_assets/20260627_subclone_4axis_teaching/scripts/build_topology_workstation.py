@@ -16,7 +16,10 @@ DATA = os.path.normpath(os.path.join(HERE, "..", "data"))
 OUT = os.path.normpath(os.path.join(HERE, "..", "..", "..", "20260628_topology_workstation.standalone.html"))
 d = json.load(open(os.path.join(DATA, "topology_per_region.json"), encoding="utf-8"))
 acc = json.load(open(os.path.join(DATA, "single_snv_accounting.json"), encoding="utf-8"))
-DJ = json.dumps({"stats": d["stats"], "detail": d["detail"], "chr17": d["chr17_worked"], "chroms": d["chroms"]}, ensure_ascii=False)
+cs = json.load(open(os.path.join(DATA, "candidate_scoring.json"), encoding="utf-8"))
+DJ = json.dumps({"stats": d["stats"], "detail": d["detail"], "chr17": d["chr17_worked"], "chroms": d["chroms"],
+                 "scoring": {"summary": {k: cs[k] for k in ("n_total","n_need_confirm","score_formula","situation_dist","resolution_dist","score_buckets","needs_methyl_n")},
+                             "queue": cs["queue"]}}, ensure_ascii=False)
 B = acc["buckets"]
 UNIVERSE_BANNER = f"""<div style="background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:11px 14px;margin:10px 0;font-size:12.5px">
 <b>全 sSNV 宇宙帳本（{acc['universe_total']:,} = TP {acc['tp']:,} + FP {acc['fp']:,}；無遺漏 sum-check ✓）</b><br>
@@ -26,6 +29,36 @@ UNIVERSE_BANNER = f"""<div style="background:#fff;border:1px solid #dee2e6;borde
 <span>⚪ <b>isolated {B['isolated']['n']:,}（{B['isolated']['pct']}%）</b> read-span 內無 partner（Tier-R 樹外）；<b>有 caller VAF 可刻畫 + 可能 Tier-PS partner</b></span>
 </div>
 <div class="note" style="margin-top:6px">🔑 單位點<b>非「全無法處理」</b>：underpowered 有 CCF+可深覆蓋救；isolated 有 caller VAF 可放 clonal 譜 + 可能 same-PS(&gt;50kb) 連鎖(Tier-PS 未做)。真正拓樸-dead = isolated 中無 same-PS partner 者（待 Tier-PS 量化）。</div></div>"""
+
+GLOSSARY = [
+ ("sSNV / S1·S2·S3", "體細胞單核苷酸變異；S1..Sk = 區內依座標排序的 sSNV（基因型向量第 i 位 = Si）。", "癌細胞才有、正常細胞沒有的點突變。一個區域有 k 個就標 S1..Sk，順序按基因座位置。"),
+ ("read 群 / r / population", "同一基因型向量(如 RAR)的 read 集合 = 一種『細胞狀態』。", "一條 read=一條 DNA 分子=一個細胞的一條染色體。攜帶相同突變組合的 read 歸為同一群（population），代表一個 lineage 節點。"),
+ ("m / 甲基位點", "顯著差異的 CpG 甲基化位點（chr17: m1..m16）。", "DNA 甲基化標記；m 是 L1 vs L2 lineage 間 |Δβ| 大的 CpG。⚠ 實測對齊 cis-genotype 軸，非獨立 lineage。"),
+ ("HP / H1·H2·H3", "germline 單倍型（哪條親代染色體）。H1/H2=兩條;H3?=未定相(somatic-ALT read)。", "由 longphase-S haplotag 決定。正常人 2 條 haplotype 根 H1、H2。HP tag『1-1』→H1、『2-1』→H2、『3』→H3?。"),
+ ("HP{h}-path", "lineage 標籤 = HP{根}-{分支1}-{分支2}…（Dewey 路徑）。", "如 H1-1=H1 上第一個 somatic 事件;H1-1-1=其後代;H1-2=姊妹分支。分支編號=VAF 遞減。"),
+ ("vertical 直系 / nested", "祖先→後代（一個細胞先後累積兩突變）。", "2×2 有 AA 格(兩突變同 read) + 一側零格 → 巢狀。樹上往下一層。"),
+ ("horizontal 姊妹 / sibling", "兩突變從不共現但同 haplotype → 不同 subclone 平行分支。", "2×2 的 AA=0(兩 ALT 從不同 read) + same-HP。樹上同層分叉。"),
+ ("co_linked", "兩突變完美共現(只見 AA) → 同一 lineage 事件(同節點)。", "RA=AR=0、AA≥2。兩突變永遠同進退，無法內部排序。"),
+ ("mutual_excl 互斥", "兩 ALT 從不共現(AA=0)。", "diff-HP→allelic(兩條染色體各自突變,非 subclone);same-HP→sibling subclone。"),
+ ("independent / four-gamete 違反", "RR/RA/AR/AA 四格全有 → 不相容單一樹。", "違反無限位點假設(回復/重複突變/CNV multiplicity/偽影)。"),
+ ("perfect-phylogeny 完美系統發生樹", "二元字元(REF/ALT)的樹:每位點只突變一次。", "古典定理:二元字元『每對相容』即足以保證整棵樹存在 → pairwise 拼接合法，不需單分子整跨。"),
+ ("2×2 共現 (RR/RA/AR/AA)", "對每對 sSNV 數共讀 read 在兩位點的 REF/ALT 組合。", "RR=都不帶、AA=都帶、RA/AR=只一帶。哪格為零決定關係(co_linked/nested/互斥)。"),
+ ("ε=2% 噪聲底線", "cell 為真 ⟺ count > coread×2%（ONT 錯誤率）。", "保留最低 1 條(低 coread);高 coread 單讀(1≤coread×2%)判噪聲。經 FP 裁判+結構穩定+塌陷集中三路定案。"),
+ ("coread 共讀", "同時覆蓋兩個位點的 read 數。", "≥6 才算 powered。決定一個零格是否可信。"),
+ ("VAF / CCF", "VAF=變異等位基因頻率;CCF=癌細胞比例(clonal prevalence)。", "高 VAF=clonal(早/大);低=subclonal(晚/小)。只在 CN-clean 可信。用於分支編號 + 單位點刻畫。"),
+ ("determinacy", "拓樸能否唯一辨識:A_determined(單分子向量) / A_ambiguous(缺中間群順序未定) / B_pairwise(拼接非單分子) / C_underdetermined(多樹相容) / incompatible(成環)。", "『樹存在』(99.4%相容)≠『能辨識是哪棵』(僅~11%)。"),
+ ("situation tier", "A 單分子整跨 / B 可整跨pairwise / C 必鏈接(span>read)。", "≥3 位點先分 situation 再處理:有沒有一條 read 穿過全部決定證據強度。"),
+ ("genome_ctx", "telomere(端粒,≤3Mb 端)/ centromere(著絲點±3Mb)/ arm(染色體臂)。", "hg38 染色體長度+centromere 近似。centromere/telomere 區偽影風險高。"),
+ ("TP / FP", "SEQC2 truth set 標的真/假陽性。", "🔴 只用於觀察評估,絕不進前處理/定義(build 用 TP∪FP union + normal 比對定 somatic)。"),
+ ("Tier-R / Tier-PS", "Tier-R=same-read(≤50kb,同分子);Tier-PS=same phase-set(>50kb,統計相位,未做)。", "克隆連鎖只認 Tier-R;isolated 區可能有 Tier-PS partner 待救。"),
+ ("cluster-count (c, k+1 上界)", "區內 distinct population 數;perfect-phylogeny 下 ≤ k+1(非 2^k)。", "實測 99.9% n_pop≤k+1、中位 2 → 拓樸搜尋空間極小。先定 c 再縮限拓樸。"),
+ ("ambiguous-parentage 缺中間群", "節點突變集跳>1(中間 population 沒觀察到)→累積順序未定。", "76 區。如 {0,3,4} 缺 {0,3} 等中間群 → 0,3,4 哪個先未定。"),
+ ("linked / underpowered / isolated", "全 sSNV 三桶:可建樹 / 有 partner 無共讀(可救) / 無 partner(Tier-R 樹外)。", "61% / 15.4% / 23.5%。單位點非全無法處理:underpowered 有 CCF、isolated 有 caller VAF+可能 Tier-PS。"),
+ ("cis-ASM / double-dip", "甲基隨突變的 cis 局部效應 / 用同量定群又驗群的循環。", "chr17 證甲基分群對齊突變 genotype 軸(cis)非獨立 lineage → 甲基不能當獨立驗證器,待 normal cis-control。"),
+ ("bounded-auxiliary 甲基定位", "甲基=corroborate 非 detect 的有界輔助(Tier-3 機率層)。", "排序:genetic 共現>HP 定根>甲基。甲基 validation 待 T-GATE-GB cis-control。"),
+ ("⭐3 / single-pipeline", "單樣本 HCC1395 單一 pipeline 的證據上限。", "升 ⭐4 需 ≥5/7 樣本+COLO829+single-cell 正交確認。"),
+]
+GLOSSARY_HTML = '<details style="background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:10px 14px;margin:10px 0"><summary style="cursor:pointer;font-weight:600;color:#1971c2">📖 名詞與概念解釋（點開；每項可再展開細節）</summary><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:6px;margin-top:8px">' + "".join(f'<details style="border:1px solid #f1f3f5;border-radius:6px;padding:5px 9px;font-size:12px"><summary style="cursor:pointer"><b>{t}</b></summary><div style="margin-top:4px;color:#343a40">{s}</div><div style="margin-top:3px;color:#868e96;font-size:11px">{dd}</div></details>' for t, s, dd in GLOSSARY) + '</div></details>'
 
 CSS = """
 *{box-sizing:border-box}body{margin:0;font-family:-apple-system,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;color:#212529;background:#f8f9fa}
@@ -108,6 +141,37 @@ function show(i,row){el('list').querySelectorAll('.row').forEach(x=>x.classList.
 }
 ['f_chr','f_topology_type','f_determinacy','f_genome_ctx','f_minc','f_fp','f_q','f_sort'].forEach(id=>{let e=el(id);e.oninput=render;e.onchange=render});
 render();
+// ===== 確認佇列(評分 + 左右判讀) =====
+const SC=D.scoring;
+el('scoresum').innerHTML=`需確認 <b>${SC.summary.n_need_confirm}</b>/${SC.summary.n_total} 區 · 評分桶 ${JSON.stringify(SC.summary.score_buckets)} · situation ${JSON.stringify(SC.summary.situation_dist)} · 需甲基輔助 ${SC.summary.needs_methyl_n} · 公式: ${SC.summary.score_formula}`;
+let Q=SC.queue;
+[...new Set(Q.map(q=>q.situation))].sort().forEach(s=>{let o=document.createElement('option');o.value=s;o.textContent=s;el('q_sit').appendChild(o)});
+const QSORT={score:(a,b)=>a.confidence_score-b.confidence_score,scoreD:(a,b)=>b.confidence_score-a.confidence_score,coord:(a,b)=>a.chrom.localeCompare(b.chrom,undefined,{numeric:true})||a.start-b.start};
+const jkey=r=>'topo_judge_'+r;
+window.setJ=(r,v)=>{let cur=localStorage.getItem(jkey(r));localStorage.setItem(jkey(r),cur==v?'':v);renderQ()};
+const scolor=s=>s>=80?'#2b8a3e':s>=60?'#1971c2':s>=40?'#e8590c':'#c92a2a';
+function renderQ(){let sit=el('q_sit').value,mo=el('q_methyl').checked,so=el('q_sort').value;
+ let f=Q.filter(q=>(!sit||q.situation==sit)&&(!mo||q.needs_methyl));f.sort(QSORT[so]||QSORT.score);
+ el('qcnt').textContent=f.length+' 區';
+ el('queue').innerHTML=f.slice(0,500).map(q=>{let j=localStorage.getItem(jkey(q.region))||'';
+  return `<div class="row" style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+   <span style="width:140px"><b>${q.region}</b></span>
+   <span style="width:58px;color:${scolor(q.confidence_score)};font-weight:700" title="confidence 0-100">▮${q.confidence_score}</span>
+   <span class="tag ctx_${q.genome_ctx}">${q.genome_ctx}</span>
+   <span style="width:112px;font-size:11px">${q.situation}</span>
+   <span style="width:96px;font-size:10.5px" class="note">候選 ${q.n_candidates}</span>
+   <span style="flex:1;min-width:170px;font-size:10.5px" class="note">${q.resolution_path}</span>
+   <span style="white-space:nowrap">
+     <button onclick="setJ('${q.region}','agree')" style="font-size:11px;background:${j=='agree'?'#d3f9d8':'#fff'}">✓同意rank1</button>
+     <button onclick="setJ('${q.region}','alt')" style="font-size:11px;background:${j=='alt'?'#fff3bf':'#fff'}">⇄偏好其他</button>
+     <button onclick="setJ('${q.region}','more')" style="font-size:11px;background:${j=='more'?'#ffe3e3':'#fff'}">?需更多資訊</button>
+   </span></div>`}).join('')+(f.length>500?`<div class="note" style="padding:8px">...前 500（共 ${f.length}，可篩選縮小）</div>`:'');
+}
+['q_sort','q_sit','q_methyl'].forEach(id=>{el(id).onchange=renderQ;el(id).oninput=renderQ});
+el('q_exp').onclick=()=>{let j={};Q.forEach(q=>{let v=localStorage.getItem(jkey(q.region));if(v)j[q.region]={judgment:v,score:q.confidence_score,situation:q.situation}});
+ let b=new Blob([JSON.stringify({n:Object.keys(j).length,judgments:j},null,1)],{type:'application/json'});
+ let a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='topology_judgments.json';a.click()};
+renderQ();
 """
 
 HTML = f"""<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -115,6 +179,7 @@ HTML = f"""<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta
 <h1>克隆樹拓樸互動工作站 v2（cluster-first 算法 + S/r/m 標籤 + 篩選排序）</h1>
 <p class="sub">HCC1395 ⭐3 · 每區 genotype 向量→拓樸(perfect-phylogeny+噪聲過濾) · S=sSNV/r=read群/m=甲基位點 · 數字由 JSON 注入 · {len(d['detail']):,} 區可畫樹</p>
 {UNIVERSE_BANNER}
+{GLOSSARY_HTML}
 <div class="stats">
 <div class="scard"><h4>拓樸型態</h4><div id="s_topo"></div></div><div class="scard"><h4>群數 c</h4><div id="s_clust"></div></div>
 <div class="scard"><h4>determinacy</h4><div id="s_det"></div></div><div class="scard"><h4>HP 根數</h4><div id="s_root"></div></div>
@@ -132,6 +197,16 @@ determinacy<select id="f_determinacy"><option value="">全</option></select>
 <span id="cnt" class="note"></span>
 </div>
 <div class="main"><div class="list" id="list"></div><div class="detail" id="detail"><div class="note">← 左側點選一個區查看克隆樹（或點上方 chr17 worked example）</div></div></div>
+
+<h3 style="margin-top:20px">✓ 候選評分確認佇列（左右選項判讀 + 觀察評分；存瀏覽器 localStorage、可匯出）</h3>
+<div id="scoresum" class="note"></div>
+<div class="ctrl">
+排序<select id="q_sort"><option value="score">評分(低→高,最需關注)</option><option value="scoreD">評分(高→低)</option><option value="coord">座標</option></select>
+situation<select id="q_sit"><option value="">全</option></select>
+<label><input id="q_methyl" type="checkbox">僅需甲基輔助</label>
+<button id="q_exp">匯出判讀 JSON</button><span id="qcnt" class="note"></span>
+</div>
+<div class="list" id="queue" style="max-height:62vh"></div>
 <p class="note" style="margin-top:12px">⚠ 證據層級：A_determined=單分子向量；A_ambiguous=缺中間群順序未定；B_pairwise=拼接非單分子整樹；C_underdetermined=多樹相容。TP/FP=SEQC2 僅觀察不進前處理。genome_ctx 為近似(±3Mb)。甲基不參與拓樸裁決(cis-confounded)。⭐3 單樣本。</p>
 </div>
 <script>window.__DATA__={DJ};</script><script>{JS}</script></body></html>"""
