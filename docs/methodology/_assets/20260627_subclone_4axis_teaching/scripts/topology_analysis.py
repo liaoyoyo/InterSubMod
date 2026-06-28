@@ -145,14 +145,20 @@ for r in regs:
     if len(alt_vecs) >= 1 and len(pops) >= 1:
         stats["with_genotype_vectors"] += 1
         tpfp = Counter(locus_src.get((r["chrom"], int(p.split(":")[1])), "?") for p in posset)
+        node_hp = {p: hpL.get(locus_hp.get((r["chrom"], int(p.split(":")[1])))) for p in posset}
+        germ_groot = set(v for v in node_hp.values() if v in ("H1", "H2"))
+        germline_reads = pops.get("R" * r["n_sSNV"], 0)
         detail.append({"region": r["region"], "chrom": r["chrom"], "start": r["start"], "span": r["span"],
                        "n_sSNV": r["n_sSNV"], "cn": r["cn"],
                        "haplotypes": "".join(sorted(set(h for h in hps if h))) or "?",
+                       "n_roots": len(germ_groot), "germline_reads": germline_reads,
                        "n_clusters": nclust, "topology_type": ttype, "determinacy": det,
                        "drop_noise_frac": drop_frac, "ambig_nodes": ambig,
                        "genome_ctx": genome_ctx(r["chrom"], r["start"], r["end"]),
                        "tp": tpfp.get("TP", 0), "fp": tpfp.get("FP", 0),
-                       "tree_shape": r["tree_shape"], "populations": pops, "edges": edges})
+                       "tree_shape": r["tree_shape"], "populations": pops, "edges": edges,
+                       "node_hp": node_hp, "pos_nested": r.get("nested_edges", []),
+                       "pos_sibling": r.get("sibling_pairs", []), "pos_vaf": r.get("vaf", {})})
 
 detail.sort(key=lambda d: (-d["n_clusters"], -d["n_sSNV"]))
 

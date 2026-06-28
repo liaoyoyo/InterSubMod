@@ -85,7 +85,7 @@ JS = r"""
 const D=window.__DATA__;
 const TT={'linear(全直系)':'t_linear','branched(直系+姊妹)':'t_branched','star(全姊妹)':'t_star','single':'t_single','germline_only':'t_single'};
 const el=id=>document.getElementById(id);
-function bars(o,m){let mx=Math.max(...Object.values(o),1);return Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,m||6).map(([k,v])=>`<div class="bar"><i style="width:${Math.max(3,84*v/mx)}px"></i>${k}: <b>${v}</b></div>`).join('')}
+function bars(o,m){let vs=Object.values(o),tot=vs.reduce((a,b)=>a+b,0)||1,mx=Math.max(...vs,1);return Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,m||9).map(([k,v])=>`<div class="bar"><i style="width:${Math.max(3,78*v/mx)}px"></i>${k}: <b>${v}</b> (${(100*v/tot).toFixed(1)}%)</div>`).join('')+`<div class="bar" style="color:#868e96">— 合計 ${tot} (100%)</div>`}
 el('s_topo').innerHTML=bars(D.stats.topology_type);el('s_clust').innerHTML=bars(Object.fromEntries(Object.entries(D.stats.n_clusters).map(([k,v])=>['c='+k,v])));
 el('s_det').innerHTML=bars(D.stats.determinacy);el('s_root').innerHTML=bars(D.stats.n_roots);
 // chr17 worked panel
@@ -95,36 +95,60 @@ el('s_det').innerHTML=bars(D.stats.determinacy);el('s_root').innerHTML=bars(D.st
  let mm=c.sig_cpg.slice(0,16).map(x=>`<tr><td class="mono">${x.m}</td><td>${x.cpg}</td><td>${x.L1}</td><td>${x.L2}</td><td>${x.dbeta}</td></tr>`).join('');
  el('c17').innerHTML=`<div class="kv"><div class="b">locus ${c.locus}</div><div class="b">ctx ${c.genome_ctx}</div><div class="b">拓樸 ${c.topology_type}</div><div class="b">噪聲 dropped ${c.dropped_noise} reads</div></div>
   <b>S 位點(somatic sSNV)</b><table><tr><th>S</th><th>pos</th><th>變異</th><th>角色</th><th>VAF</th><th>HP</th><th>TP/FP</th><th>somatic</th></tr>${st}</table>
-  <b>克隆樹</b> ${tree(c.edges,Object.fromEntries(c.populations.map(p=>[p.vec,p.reads])),c.populations.length,'H1')}
+  <b>克隆樹</b> ${tree(c.edges,Object.fromEntries(c.populations.map(p=>[p.vec,p.reads])),c.populations.length,'H1',(c.populations.find(p=>p.muts=='germline')||{}).reads||0)}
   <b>細胞群(r 分群;基因型向量·reads·佔比)</b><table><tr><th>向量</th><th>突變(S)</th><th>reads(r)</th><th>佔比</th></tr>${pp}</table>
   <b>甲基差異位點 m1..m${c.n_sig_diff_cpg}(L1 α-only vs L2 α+β;⚠ 經實測對齊 cis-genotype 軸非獨立 lineage)</b><table><tr><th>m</th><th>CpG</th><th>L1 β</th><th>L2 β</th><th>Δβ</th></tr>${mm}</table>`;
 })();
 // S-label 化基因型向量
 function sLabels(g){let s=[...g].map((c,i)=>c=='A'?('S'+(i+1)):null).filter(Boolean);return s.length?s.join('+'):'germline'}
-function tree(edges,popcount,nc,hp){
+function tree(edges,popcount,nc,hp,germR){
  let ch={},all=new Set();(edges||[]).forEach(([p,c])=>{(ch[p]=ch[p]||[]).push(c);all.add(c);if(p!='ROOT')all.add(p)});
- if(!all.size)return '<div class="note">單群/germline-only，無分支樹</div>';
+ if(!all.size)return `<div class="note">單群/germline-only（germline ${germR||0} reads），無分支樹</div>`;
  let depth={},pos={},leaf=0;
  function lay(n,dp){depth[n]=dp;let k=(ch[n]||[]).sort();if(!k.length){pos[n]=leaf++;return pos[n]}let xs=k.map(x=>lay(x,dp+1));pos[n]=(Math.min(...xs)+Math.max(...xs))/2;return pos[n]}
  let roots=ch['ROOT']||[];roots.forEach(r=>lay(r,1));let gx=roots.length?(Math.min(...roots.map(r=>pos[r]))+Math.max(...roots.map(r=>pos[r])))/2:0;
  let nodes=[...all],md=Math.max(...nodes.map(n=>depth[n]),1),W=Math.max(300,(leaf||1)*150),H=70+md*84;
  let X=p=>50+p*150,Y=dp=>32+dp*84,tot=Object.values(popcount).reduce((a,b)=>a+b,0)||1;
  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">`;
- s+=`<circle cx="${X(gx)}" cy="${Y(0)}" r="17" fill="#fff" stroke="#495057"/><text x="${X(gx)}" y="${Y(0)-2}" text-anchor="middle" font-size="9">germline</text><text x="${X(gx)}" y="${Y(0)+9}" text-anchor="middle" font-size="8" fill="#868e96">${hp||''}根</text>`;
+ let totR=Object.values(popcount).reduce((a,b)=>a+b,0)+(germR||0)||1;
+ s+=`<circle cx="${X(gx)}" cy="${Y(0)}" r="19" fill="#fff" stroke="#495057"/><text x="${X(gx)}" y="${Y(0)-3}" text-anchor="middle" font-size="9">germline ${hp||''}根</text><text x="${X(gx)}" y="${Y(0)+8}" text-anchor="middle" font-size="8" fill="#868e96">${germR||0}r·${(100*(germR||0)/totR).toFixed(0)}%</text>`;
  roots.forEach(r=>s+=`<line x1="${X(gx)}" y1="${Y(0)+17}" x2="${X(pos[r])}" y2="${Y(1)-24}" stroke="#adb5bd"/>`);
  (edges||[]).forEach(([p,c])=>{if(p!='ROOT')s+=`<line x1="${X(pos[p])}" y1="${Y(depth[p])+24}" x2="${X(pos[c])}" y2="${Y(depth[c])-24}" stroke="#adb5bd"/>`});
  nodes.forEach(n=>{let cnt=popcount[n]||0,pct=(100*cnt/tot).toFixed(0);s+=`<rect x="${X(pos[n])-52}" y="${Y(depth[n])-22}" width="104" height="44" rx="6" fill="#e7f5ff" stroke="#1c7ed6"/><text x="${X(pos[n])}" y="${Y(depth[n])-6}" text-anchor="middle" font-size="11" class="mono" font-weight="600">${sLabels(n)}</text><text x="${X(pos[n])}" y="${Y(depth[n])+8}" text-anchor="middle" font-size="9" fill="#495057">${cnt} reads · ${pct}%</text><text x="${X(pos[n])}" y="${Y(depth[n])+18}" text-anchor="middle" font-size="8" fill="#868e96">${n}</text>`});
  s+='</svg>';return s;
 }
+// 2-root: 位置樹按 HP 分兩棵
+function posTree(r){
+ let byhp={};Object.entries(r.node_hp||{}).forEach(([p,h])=>{if(h=='H1'||h=='H2')(byhp[h]=byhp[h]||[]).push(p)});
+ let hps=Object.keys(byhp).sort();if(hps.length<2)return '';
+ return '<div style="display:flex;gap:24px;flex-wrap:wrap">'+hps.map(h=>{
+  let ns=new Set(byhp[h]);let ned=(r.pos_nested||[]).filter(e=>ns.has(e[0])&&ns.has(e[1]));
+  let hasp=new Set(ned.map(e=>e[1]));let edges=ned.map(e=>[e[0],e[1]]);[...ns].forEach(n=>{if(!hasp.has(n))edges.unshift(['ROOT',n])});
+  return `<div><b style="color:#d9480f">${h} 樹（${ns.size} 位點）</b>${posSVG(edges,ns,r.pos_vaf||{},h)}</div>`;
+ }).join('')+'</div>';
+}
+function posSVG(edges,ns,vaf,hp){
+ let ch={},all=new Set();edges.forEach(([p,c])=>{(ch[p]=ch[p]||[]).push(c);all.add(c);if(p!='ROOT')all.add(p)});
+ if(!all.size)return '<div class="note">無結構</div>';
+ let depth={},pos={},leaf=0;function lay(n,dp){depth[n]=dp;let k=(ch[n]||[]).sort();if(!k.length){pos[n]=leaf++;return pos[n]}let xs=k.map(x=>lay(x,dp+1));pos[n]=(Math.min(...xs)+Math.max(...xs))/2;return pos[n]}
+ let roots=ch['ROOT']||[];roots.forEach(r=>lay(r,1));let gx=roots.length?(Math.min(...roots.map(r=>pos[r]))+Math.max(...roots.map(r=>pos[r])))/2:0;
+ let nodes=[...all],md=Math.max(...nodes.map(n=>depth[n]),1),W=Math.max(200,(leaf||1)*108),H=64+md*70,X=p=>40+p*108,Y=dp=>26+dp*70;
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}"><circle cx="${X(gx)}" cy="${Y(0)}" r="15" fill="#fff" stroke="#495057"/><text x="${X(gx)}" y="${Y(0)+3}" text-anchor="middle" font-size="9">${hp} germ</text>`;
+ roots.forEach(rt=>s+=`<line x1="${X(gx)}" y1="${Y(0)+15}" x2="${X(pos[rt])}" y2="${Y(1)-20}" stroke="#adb5bd"/>`);
+ edges.forEach(([p,c])=>{if(p!='ROOT')s+=`<line x1="${X(pos[p])}" y1="${Y(depth[p])+20}" x2="${X(pos[c])}" y2="${Y(depth[c])-20}" stroke="#adb5bd"/>`});
+ nodes.forEach(n=>{let v=vaf[n];s+=`<rect x="${X(pos[n])-46}" y="${Y(depth[n])-18}" width="92" height="36" rx="5" fill="#fff4e6" stroke="#e8590c"/><text x="${X(pos[n])}" y="${Y(depth[n])-2}" text-anchor="middle" font-size="9" class="mono">${n.split(':')[1]}</text><text x="${X(pos[n])}" y="${Y(depth[n])+11}" text-anchor="middle" font-size="8" fill="#495057">VAF ${v!=null?v:'?'}</text>`});
+ return s+'</svg>';
+}
 // filters + sort
 let det=D.detail;
 let chrsel=el('f_chr');D.chroms.forEach(c=>{let o=document.createElement('option');o.value=c;o.textContent=c;chrsel.appendChild(o)});
-['topology_type','determinacy','genome_ctx'].forEach(k=>{let s=el('f_'+k);[...new Set(det.map(r=>r[k]))].sort().forEach(o=>{let op=document.createElement('option');op.value=o;op.textContent=o;s.appendChild(op)})});
+['topology_type','determinacy','genome_ctx'].forEach(k=>{let c=el('cb_'+k);[...new Set(det.map(r=>r[k]))].sort().forEach(o=>{let l=document.createElement('label');l.style.cssText='margin:0 5px;white-space:nowrap';l.innerHTML='<input type="checkbox" value="'+o+'"> '+o;c.appendChild(l)});c.addEventListener('change',render)});
+function cset(k){return new Set([...el('cb_'+k).querySelectorAll('input:checked')].map(x=>x.value))}
 const SORT={coord:(a,b)=>a.chrom.localeCompare(b.chrom,undefined,{numeric:true})||a.start-b.start,nsnv:(a,b)=>b.n_sSNV-a.n_sSNV,nclust:(a,b)=>b.n_clusters-a.n_clusters||b.n_sSNV-a.n_sSNV,region:(a,b)=>a.region.localeCompare(b.region)};
 function render(){
- let ch=el('f_chr').value,tt=el('f_topology_type').value,dd=el('f_determinacy').value,gc=el('f_genome_ctx').value,
-  mc=+el('f_minc').value,fp=el('f_fp').checked,q=el('f_q').value.trim(),so=el('f_sort').value;
- let f=det.filter(r=>(!ch||r.chrom==ch)&&(!tt||r.topology_type==tt)&&(!dd||r.determinacy==dd)&&(!gc||r.genome_ctx==gc)&&r.n_clusters>=mc&&(!fp||r.fp>0)&&(!q||r.region.includes(q)));
+ let ch=el('f_chr').value,mc=+el('f_minc').value,fp=el('f_fp').checked,loh=el('f_loh').checked,q=el('f_q').value.trim(),so=el('f_sort').value;
+ let tt=cset('topology_type'),dd=cset('determinacy'),gc=cset('genome_ctx');
+ let f=det.filter(r=>(!ch||r.chrom==ch)&&(!tt.size||tt.has(r.topology_type))&&(!dd.size||dd.has(r.determinacy))&&(!gc.size||gc.has(r.genome_ctx))&&r.n_clusters>=mc&&(!fp||r.fp>0)&&(!loh||(r.cn=='loh'&&(r.haplotypes=='H1'||r.haplotypes=='H2')))&&(!q||r.region.includes(q)));
  f.sort(SORT[so]||SORT.coord);
  el('cnt').textContent=f.length+' 區';
  el('list').innerHTML=f.slice(0,700).map(r=>`<div class="row" data-i="${det.indexOf(r)}"><b>${r.region}</b> <span class="tag ${TT[r.topology_type]||'t_single'}">${r.topology_type.split('(')[0]}</span><span class="tag ctx_${r.genome_ctx}">${r.genome_ctx}</span><br><span class="note">${r.n_sSNV}sSNV·c=${r.n_clusters}·${r.haplotypes}·${r.cn}·TP${r.tp}/FP${r.fp}${r.ambig_nodes>0?'·⚠序未定':''}</span></div>`).join('')+(f.length>700?`<div class="note" style="padding:8px">...前 700（共 ${f.length}）</div>`:'');
@@ -135,11 +159,12 @@ function show(i,row){el('list').querySelectorAll('.row').forEach(x=>x.classList.
  let pt=Object.entries(r.populations).sort((a,b)=>b[1]-a[1]).map(([g,c])=>{let tot=Object.values(r.populations).reduce((a,b)=>a+b,0);return `<tr><td class="mono">${g}</td><td>${sLabels(g)}</td><td>${c}</td><td>${(100*c/tot).toFixed(0)}%</td></tr>`}).join('');
  el('detail').innerHTML=`<h3>${r.region} <span class="tag ${TT[r.topology_type]||'t_single'}">${r.topology_type}</span> <span class="tag ctx_${r.genome_ctx}">${r.genome_ctx}</span></h3>
   <div class="kv"><div class="b">${r.n_sSNV} sSNV</div><div class="b">span ${(r.span/1000).toFixed(1)}kb</div><div class="b">c=${r.n_clusters} 群</div><div class="b">HP: ${r.haplotypes}</div><div class="b">CN: ${r.cn}</div><div class="b">TP ${r.tp} / FP ${r.fp}</div><div class="b">${r.determinacy}</div>${r.drop_noise_frac>0?`<div class="b">噪聲過濾 ${(r.drop_noise_frac*100).toFixed(0)}%</div>`:''}${r.ambig_nodes>0?`<div class="b" style="background:#fff3bf">⚠ 順序未定 ${r.ambig_nodes}(缺中間群)</div>`:''}</div>
-  <b>克隆樹（germline→…；節點=S-mut-set·reads·%；座標=向量）</b>${tree(r.edges,r.populations,r.n_clusters,r.haplotypes)}
-  <div class="note">S1..S${r.n_sSNV}=區內排序 sSNV；直系=往下、姊妹=同層分叉。tree_shape(pairwise)=${r.tree_shape}。genome_ctx 為近似(±3Mb)。</div>
+  <b>克隆樹（germline→…；節點=S-mut-set·reads·%；座標=向量）</b>${tree(r.edges,r.populations,r.n_clusters,r.haplotypes,r.germline_reads)}
+  ${r.n_roots>=2?`<div style="background:#fff4e6;border:1px solid #ffd8a8;border-radius:6px;padding:8px;margin-top:8px"><b>⚠ 此區跨 H1/H2（${r.n_roots} 棵樹）→ 分開看的兩棵 HP 樹（上方 genotype-向量樹混合 HP 僅參考）：</b>${posTree(r)}</div>`:''}
+  <div class="note">S1..S${r.n_sSNV}=區內排序 sSNV；直系=往下、姊妹=同層分叉；germline 根標 reads·%。tree_shape(pairwise)=${r.tree_shape}。genome_ctx 為近似(±3Mb)。</div>
   <b>細胞群(基因型向量 → S 突變 → reads → 佔比)</b><table><tr><th>向量</th><th>突變(S)</th><th>reads</th><th>佔比</th></tr>${pt}</table>`;
 }
-['f_chr','f_topology_type','f_determinacy','f_genome_ctx','f_minc','f_fp','f_q','f_sort'].forEach(id=>{let e=el(id);e.oninput=render;e.onchange=render});
+['f_chr','f_minc','f_fp','f_loh','f_q','f_sort'].forEach(id=>{let e=el(id);e.oninput=render;e.onchange=render});
 render();
 // ===== 確認佇列(評分 + 左右判讀) =====
 const SC=D.scoring;
@@ -187,15 +212,15 @@ HTML = f"""<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta
 <details class="c17"><summary>▶ chr17:48360161 完整 worked example（S/r/m 一致標籤 + 樹 + 甲基；點開）</summary><div id="c17"></div></details>
 <div class="ctrl">
 chr<select id="f_chr"><option value="">全</option></select>
-拓樸<select id="f_topology_type"><option value="">全</option></select>
-determinacy<select id="f_determinacy"><option value="">全</option></select>
-位置<select id="f_genome_ctx"><option value="">全</option></select>
 排序<select id="f_sort"><option value="coord">座標</option><option value="nsnv">複雜度(sSNV)</option><option value="nclust">群數</option><option value="region">region名</option></select>
 最少群數<input id="f_minc" type="number" value="0" min="0" max="6" style="width:52px">
 <label><input id="f_fp" type="checkbox">僅含FP</label>
+<label title="LOH 區且單一 HP 標籤(LOH-unmask 觀察)"><input id="f_loh" type="checkbox">僅 LOH 單HP</label>
 搜尋<input id="f_q" placeholder="chr17:" style="width:120px">
 <span id="cnt" class="note"></span>
 </div>
+<div class="ctrl" style="font-size:11.5px"><span class="note">勾選要觀察的狀況(可複選;不勾=全):</span>
+<span>拓樸 <span id="cb_topology_type"></span></span> ｜ <span>determinacy <span id="cb_determinacy"></span></span> ｜ <span>位置 <span id="cb_genome_ctx"></span></span></div>
 <div class="main"><div class="list" id="list"></div><div class="detail" id="detail"><div class="note">← 左側點選一個區查看克隆樹（或點上方 chr17 worked example）</div></div></div>
 
 <h3 style="margin-top:20px">✓ 候選評分確認佇列（左右選項判讀 + 觀察評分；存瀏覽器 localStorage、可匯出）</h3>
