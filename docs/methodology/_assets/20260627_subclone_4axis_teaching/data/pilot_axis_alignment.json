@@ -1,0 +1,143 @@
+{
+ "scatter_png": "pilot_cis_control_scatter.png",
+ "corr_tumor_vs_normal_dbeta": -0.026,
+ "n_regions_checked": 6,
+ "alignment_dist": {
+  "SAME-HP": 6
+ },
+ "regions": [
+  {
+   "region": "chr5:74347988-74348136",
+   "popA": "AA",
+   "popA_hp": {
+    "H1": 0.0,
+    "H2": 1.0,
+    "H3": 0.0,
+    "unphased": 0.0,
+    "n": 78
+   },
+   "popB": "AR",
+   "popB_hp": {
+    "H1": 0.0,
+    "H2": 1.0,
+    "H3": 0.0,
+    "unphased": 0.0,
+    "n": 5
+   },
+   "domA": "H2",
+   "domB": "H2",
+   "alignment": "SAME-HP(subclone 在同一 germline HP 內→normal-HP 不對齊)"
+  },
+  {
+   "region": "chr1:64969029-64973186",
+   "popA": "AR",
+   "popA_hp": {
+    "H1": 0.0,
+    "H2": 0.71,
+    "H3": 0.29,
+    "unphased": 0.0,
+    "n": 14
+   },
+   "popB": "RR",
+   "popB_hp": {
+    "H1": 0.08,
+    "H2": 0.77,
+    "H3": 0.0,
+    "unphased": 0.15,
+    "n": 13
+   },
+   "domA": "H2",
+   "domB": "H2",
+   "alignment": "SAME-HP(subclone 在同一 germline HP 內→normal-HP 不對齊)"
+  },
+  {
+   "region": "chr12:132557304-132563011",
+   "popA": "AAAR",
+   "popA_hp": {
+    "H1": 1.0,
+    "H2": 0.0,
+    "H3": 0.0,
+    "unphased": 0.0,
+    "n": 20
+   },
+   "popB": "ARRR",
+   "popB_hp": {
+    "H1": 1.0,
+    "H2": 0.0,
+    "H3": 0.0,
+    "unphased": 0.0,
+    "n": 13
+   },
+   "domA": "H1",
+   "domB": "H1",
+   "alignment": "SAME-HP(subclone 在同一 germline HP 內→normal-HP 不對齊)"
+  },
+  {
+   "region": "chr10:80273375-80278393",
+   "popA": "AA",
+   "popA_hp": {
+    "H1": 0.0,
+    "H2": 1.0,
+    "H3": 0.0,
+    "unphased": 0.0,
+    "n": 18
+   },
+   "popB": "RA",
+   "popB_hp": {
+    "H1": 0.0,
+    "H2": 1.0,
+    "H3": 0.0,
+    "unphased": 0.0,
+    "n": 14
+   },
+   "domA": "H2",
+   "domB": "H2",
+   "alignment": "SAME-HP(subclone 在同一 germline HP 內→normal-HP 不對齊)"
+  },
+  {
+   "region": "chr11:128968555-128973678",
+   "popA": "AA",
+   "popA_hp": {
+    "H1": 1.0,
+    "H2": 0.0,
+    "H3": 0.0,
+    "unphased": 0.0,
+    "n": 9
+   },
+   "popB": "RA",
+   "popB_hp": {
+    "H1": 1.0,
+    "H2": 0.0,
+    "H3": 0.0,
+    "unphased": 0.0,
+    "n": 6
+   },
+   "domA": "H1",
+   "domB": "H1",
+   "alignment": "SAME-HP(subclone 在同一 germline HP 內→normal-HP 不對齊)"
+  },
+  {
+   "region": "chr6:89339042-89340766",
+   "popA": "RR",
+   "popA_hp": {
+    "H1": 1.0,
+    "H2": 0.0,
+    "H3": 0.0,
+    "unphased": 0.0,
+    "n": 44
+   },
+   "popB": "AR",
+   "popB_hp": {
+    "H1": 1.0,
+    "H2": 0.0,
+    "H3": 0.0,
+    "unphased": 0.0,
+    "n": 19
+   },
+   "domA": "H1",
+   "domB": "H1",
+   "alignment": "SAME-HP(subclone 在同一 germline HP 內→normal-HP 不對齊)"
+  }
+ ],
+ "interpretation": "corr≈0 + SAME-HP/MIXED 主導 → normal-HP 基線與 tumor genotype 軸不對齊,故 corr≈0 非『無 cis-confound』而是『比錯軸』;subclone-specificity 對 genotype 軸仍 UNDETERMINED。"
+}

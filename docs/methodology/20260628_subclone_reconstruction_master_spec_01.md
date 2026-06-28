@@ -63,9 +63,13 @@ P(拓樸 T) ∝ P(sSNV共現|T) × 1[HP-root 相容] × P(甲基|T,normal-baseli
 - **Tier2** HP tag 定根（跨-HP 拆獨立樹）。
 - **Tier3** 甲基（normal-baseline）= 機率輔助，**validation 待 T-GATE-GB**。
 
-## §5 甲基裁決（chr17 實測）
+## §5 甲基裁決（chr17 實測 + cis-control pilot 06-28）
 
 甲基 read 分群對齊 **cis-genotype 軸（α 23 ≫ lineage 6）** → **不能當 HP3 定相 / 分叉的獨立驗證器**（cis-confounded）→ 維持 bounded-auxiliary / off-ladder。最佳角色 = cluster-count sanity（甲基群數 > genetic → cis 過切警示）。詳 `20260628_methylation_probabilistic_auxiliary_framework_01.md`。
+
+**🔴 cis-control pilot 裁決（06-28，`20260628_cis_control_scope_pilot_verdict_01.md`）**：matched-normal HP cis-control **僅對 CROSS-HP 區有效**（全資料 663/1874 = 35.4%；其中乾淨 CN-neutral+loss 僅 43 區）。SAME-HP 59%（subclone 在同一 germline HP 內，somatic-cis 主型）→ normal-HP 軸**正交、無法 control**（germline-ASM 因共用單倍型自動抵消、本非 confound）。**對接 624 needs_methyl：可分類 72、CROSS-HP 12（全 CN-gain multiplicity 混淆）、乾淨 CN-neutral = 0** → 「cis-control 解鎖甲基 Tier-3 給 624 區」**原假設不成立**。subclone-specificity 對 SAME-HP 多數區 = 結構性 UNDETERMINED（normal 無對應 within-HP 軸 = structural zero）。4-角度對抗驗證（workflow，全 high-conf）證實 + 新發現 **tumor/normal HP 標籤指向同一實體染色體**（同 phased VCF、240 het 98.85% 一致）。
+
+**🔴 甲基拓樸「排序」pilot（06-28，verdict doc §11）**：分群❌/specificity❌ 後唯一可能用途 = 對基因型已定群提供排序/距離。實測（A_determined+SAME-HP+CN-clean，326→55 區）：甲基離 root 距離 vs 譜系深度 Spearman ρ≈0.18、permutation **p≈0.06-0.08 未達顯著**；distal(0.636)≥near(0.588) 非純 cis 痕跡但太弱；功率不足（淺樹為主）。→ **甲基不能當可信拓樸 resolver（L3 弱提示）**，僅可標軟提示。ISM = 存在性偵測器非排序器（read 無 genotype 標籤），但有 `compute_group_distances` + read-level BERNOULLI 距離；接骨幹 genotype 標籤可產群間距離原料，惟底層訊號弱、上限有限。
 
 ## §6 驗證狀態 + 統計
 
@@ -80,7 +84,7 @@ P(拓樸 T) ∝ P(sSNV共現|T) × 1[HP-root 相容] × P(甲基|T,normal-baseli
 1. ⭐3 單樣本 single-pipeline 封頂；升 ⭐4 需 ≥5/7 + COLO829。
 2. regional(≤read-span) 非 genome-wide tree；分子共現 ≠ single-cell。
 3. 拓樸可信僅 ~11%（determined）；其餘相容但欠定。
-4. **#1 load-bearing：T-GATE-GB matched-normal cis-control** → 解鎖甲基 Tier-3 + HP3 定相 + subclone-specificity。
+4. ~~**#1 load-bearing：T-GATE-GB matched-normal cis-control** → 解鎖甲基 Tier-3 + HP3 定相 + subclone-specificity。~~ **✅ 06-28 已測 → 結論：條件式適用（僅 CROSS-HP 35.4%），對 624 needs_methyl 乾淨可用 ≈ 0**（§5 + `20260628_cis_control_scope_pilot_verdict_01.md`）。甲基維持 bounded-auxiliary；subclone-specificity 對 SAME-HP 59% 為結構性 UNDETERMINED（需 single-cell/multi-region）。**殘餘可做 = 43 個乾淨 CROSS-HP 區的 PoC**（非解 needs_methyl）。
 5. 其他 gate：T-METHYL-REEXTRACT 深覆蓋（救 underpowered）/ Tier-PS（救 isolated same-PS）/ mappability mask（清偽影）。
 
 ## §8 檔案 / 格式索引
@@ -90,6 +94,7 @@ P(拓樸 T) ∝ P(sSNV共現|T) × 1[HP-root 相容] × P(甲基|T,normal-baseli
 - 20260628_lineage_label_definition_01.md（HP{h}-path 定義）
 - 20260628_sSNV_linkage_threshold_decision_eps2_01.md（ε=2% ADR）
 - 20260628_methylation_probabilistic_auxiliary_framework_01.md（甲基 Tier-3）
+- 20260628_cis_control_scope_pilot_verdict_01.md ⭐（cis-control pilot 結果 + 適用 scope 裁決；甲基 bounded-auxiliary 機制證據）
 - 20260628_reconstruction_model_verification_01.md（模型驗證）
 - 20260627_subclone_4axis_teaching.standalone.html（4 軸教學）
 - 20260628_topology_workstation.standalone.html（互動工作站：篩選/排序/樹/chr17/宇宙帳本）
@@ -113,7 +118,7 @@ P(拓樸 T) ∝ P(sSNV共現|T) × 1[HP-root 相容] × P(甲基|T,normal-baseli
 | 衝突(成環) | 12 | 極低 | likely-artifact（補 mappability mask、不強建樹）|
 
 - **需確認佇列 2,118 區**（非已確定或 <70 分），最低分為 chr9:41.8M/chr14:16M/chr16（已知 dense/centromere 偽影，自動排前）。
-- **需甲基輔助 624 區**（VAF tie 或欠定）→ 這正是甲基 Tier-3 機率層的適用處，但**待 T-GATE-GB cis-control 才可信**。
+- **需甲基輔助 624 區**（VAF tie 或欠定）→ 原以為是甲基 Tier-3 適用處，但 **06-28 cis-control pilot 證實乾淨可用 ≈ 0**（72 可分類中 CROSS-HP 12 全 CN-gain、neutral 0）→ 甲基**無法**作這些區的 resolver（§5）。
 - 互動確認：`topology_workstation` 下方「確認佇列」可**左右選項判讀**（✓同意rank1 / ⇄偏好其他 / ?需更多資訊）+ 觀察評分，存 localStorage、可匯出 JSON。
 - 產物：`scripts/candidate_scoring.py` + `data/candidate_scoring.json`。
 

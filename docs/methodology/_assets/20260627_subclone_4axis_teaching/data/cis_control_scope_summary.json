@@ -1,0 +1,131 @@
+{
+ "pilot_summary": {
+  "n_pilot_regions": 8,
+  "n_regions_with_cpg": 6,
+  "n_cpg_pairs_total": 2073,
+  "tumor_dbeta_abs": {
+   "median": 0.047,
+   "p90": 0.229,
+   "max": 0.966
+  },
+  "normal_dbeta_abs": {
+   "median": 0.044,
+   "p90": 0.501,
+   "max": 0.979
+  },
+  "observation": "tumor 高+normal 高=germline-ASM(非subclone);tumor 高+normal≈0=候選 subclone-specific。門檻待看分布散點後定。"
+ },
+ "pilot_regions_with_cpg": [
+  {
+   "region": "chr11:128968555-128973678",
+   "cn": "loh",
+   "n_cpg_both": 109
+  },
+  {
+   "region": "chr12:132557304-132563011",
+   "cn": "loh",
+   "n_cpg_both": 1563
+  },
+  {
+   "region": "chr1:64969029-64973186",
+   "cn": "loh",
+   "n_cpg_both": 72
+  },
+  {
+   "region": "chr5:74347988-74348136",
+   "cn": "loh",
+   "n_cpg_both": 33
+  },
+  {
+   "region": "chr6:89339042-89340766",
+   "cn": "loh",
+   "n_cpg_both": 239
+  },
+  {
+   "region": "chr10:80273375-80278393",
+   "cn": "loh",
+   "n_cpg_both": 57
+  }
+ ],
+ "joint_distribution": {
+  "n_cpg_total": 2073,
+  "n_tumor_sig": 256,
+  "tumor_sig_pct": 12.3,
+  "of_sig_germline_asm": 68,
+  "of_sig_germline_asm_pct": 27,
+  "of_sig_graybard": 50,
+  "of_sig_graybard_pct": 20,
+  "of_sig_subclone_candidate_if_axes_aligned": 138,
+  "of_sig_candidate_pct": 54,
+  "corr_tumor_vs_normal_dbeta": -0.026
+ },
+ "fullscan_scope": {
+  "n_classified": 1874,
+  "n_targets": 1890,
+  "n_skipped": 16,
+  "CROSS_HP": 663,
+  "CROSS_HP_pct": 35.4,
+  "SAME_HP": 1105,
+  "SAME_HP_pct": 59.0,
+  "MIXED": 106,
+  "MIXED_pct": 5.7,
+  "by_cn": {
+   "gain": {
+    "CROSS-HP": 610,
+    "SAME-HP": 615,
+    "MIXED": 75
+   },
+   "loh": {
+    "SAME-HP": 467,
+    "MIXED": 27,
+    "CROSS-HP": 10
+   },
+   "neutral": {
+    "CROSS-HP": 42,
+    "SAME-HP": 17,
+    "MIXED": 4
+   },
+   "loss": {
+    "SAME-HP": 6,
+    "CROSS-HP": 1
+   }
+  }
+ },
+ "cleanest_applicable_set": {
+  "n": 43,
+  "definition": "cn in (neutral,loss) AND CROSS-HP",
+  "examples": [
+   "chr2:197152546-197167619",
+   "chr2:199690690-199705268",
+   "chr2:204644837-204648404",
+   "chr21:22306211-22315240",
+   "chr2:210712468-210724165",
+   "chr2:224749654-224771004",
+   "chr18:78004110-78016840",
+   "chr21:42325490-42333073"
+  ]
+ },
+ "needs_methyl_intersection": {
+  "n_needs_methyl_total": 624,
+  "n_with_ge2_altpop_classified": 72,
+  "hp_alignment_dist": {
+   "SAME-HP": 54,
+   "CROSS-HP": 12,
+   "MIXED": 6
+  },
+  "cn_dist": {
+   "gain": 48,
+   "loh": 24
+  },
+  "n_cross_hp_cis_applicable": 12,
+  "n_cross_hp_AND_neutral_clean": 0
+ },
+ "neutral_pilot_axis": {
+  "n": 10,
+  "dist": {
+   "CROSS-HP": 5,
+   "SAME-HP": 5
+  }
+ },
+ "verdict": "matched-normal HP cis-control 僅對 CROSS-HP 區有效(全資料 35.4%);needs_methyl ∩ 乾淨可用 ≈ 0。甲基維持 bounded-auxiliary;subclone-specificity 對 SAME-HP 多數區為 structural UNDETERMINED。"
+}
