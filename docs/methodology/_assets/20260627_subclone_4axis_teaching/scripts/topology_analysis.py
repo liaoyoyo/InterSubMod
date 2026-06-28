@@ -107,6 +107,23 @@ def solve_topology(pops):
     else: t = "mixed"
     return (t, edges, nodes, dropped, ambig)
 
+def dewey_paths(edges, pops, hdigit):
+    """每節點(genotype 向量)的 lineage path 標籤 HP{h}-{b1}-{b2}…(分支編號=read 數遞減)。"""
+    from collections import defaultdict as dd
+    ch = dd(list); haspar = set()
+    for p, c in edges:
+        ch[p].append(c)
+        if p != "ROOT": haspar.add(c)
+    cnt = lambda g: pops.get(g, 0)
+    paths = {}
+    def walk(n, path):
+        paths[n] = f"H{hdigit}-" + "-".join(map(str, path))
+        for j, k in enumerate(sorted(ch.get(n, []), key=lambda x: -cnt(x)), 1):
+            if k not in paths: walk(k, path + [j])
+    for i, rt in enumerate(sorted(ch.get("ROOT", []), key=lambda x: -cnt(x)), 1):
+        walk(rt, [i])
+    return paths
+
 RI = json.load(open(os.path.join(DATA, "sm_region_integration.json"), encoding="utf-8"))
 regs = [r for r in RI["regions"] if r["n_sSNV"] >= 2]
 
@@ -148,9 +165,13 @@ for r in regs:
         node_hp = {p: hpL.get(locus_hp.get((r["chrom"], int(p.split(":")[1])))) for p in posset}
         germ_groot = set(v for v in node_hp.values() if v in ("H1", "H2"))
         germline_reads = pops.get("R" * r["n_sSNV"], 0)
+        hap_str = "".join(sorted(set(h for h in hps if h))) or "?"
+        hdig = "1" if hap_str == "H1" else ("2" if hap_str == "H2" else "?")
+        node_paths = dewey_paths(edges, pops, hdig)
+        undefined = (ttype == "incompatible") or (ambig > 0)
         detail.append({"region": r["region"], "chrom": r["chrom"], "start": r["start"], "span": r["span"],
                        "n_sSNV": r["n_sSNV"], "cn": r["cn"],
-                       "haplotypes": "".join(sorted(set(h for h in hps if h))) or "?",
+                       "haplotypes": hap_str, "node_paths": node_paths, "undefined": undefined,
                        "n_roots": len(germ_groot), "germline_reads": germline_reads,
                        "n_clusters": nclust, "topology_type": ttype, "determinacy": det,
                        "drop_noise_frac": drop_frac, "ambig_nodes": ambig,
