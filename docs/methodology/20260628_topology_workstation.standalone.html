@@ -81,21 +81,60 @@ el('s_det').innerHTML=bars(D.stats.determinacy);el('s_root').innerHTML=bars(D.st
 })();
 // S-label 化基因型向量
 function sLabels(g){let s=[...g].map((c,i)=>c=='A'?('S'+(i+1)):null).filter(Boolean);return s.length?s.join('+'):'germline'}
+function gainedS(parent,child){let g=[];for(let i=0;i<child.length;i++){if(child[i]=='A'&&(!parent||parent[i]!='A'))g.push('S'+(i+1))}return g}
 function tree(edges,popcount,nc,hp,germR,np){np=np||{};
- let ch={},all=new Set();(edges||[]).forEach(([p,c])=>{(ch[p]=ch[p]||[]).push(c);all.add(c);if(p!='ROOT')all.add(p)});
- if(!all.size)return `<div class="note">單群/germline-only（germline ${germR||0} reads），無分支樹</div>`;
+ let ch={},par={},all=new Set();
+ (edges||[]).forEach(([p,c])=>{(ch[p]=ch[p]||[]).push(c);all.add(c);if(p!='ROOT'){all.add(p);par[c]=p}});
+ if(!all.size)return `<div class="note">單群／germline-only（germline ${germR||0} reads），無分支樹</div>`;
+ let sib={};Object.keys(ch).forEach(p=>{(ch[p]||[]).forEach(c=>{sib[c]=(ch[p].length>=2)})});
  let depth={},pos={},leaf=0;
  function lay(n,dp){depth[n]=dp;let k=(ch[n]||[]).sort();if(!k.length){pos[n]=leaf++;return pos[n]}let xs=k.map(x=>lay(x,dp+1));pos[n]=(Math.min(...xs)+Math.max(...xs))/2;return pos[n]}
- let roots=ch['ROOT']||[];roots.forEach(r=>lay(r,1));let gx=roots.length?(Math.min(...roots.map(r=>pos[r]))+Math.max(...roots.map(r=>pos[r])))/2:0;
- let nodes=[...all],md=Math.max(...nodes.map(n=>depth[n]),1),W=Math.max(300,(leaf||1)*150),H=70+md*84;
- let X=p=>50+p*150,Y=dp=>32+dp*84,tot=Object.values(popcount).reduce((a,b)=>a+b,0)||1;
- let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">`;
+ let roots=ch['ROOT']||[];roots.forEach(r=>lay(r,1));
+ let gx=roots.length?(Math.min(...roots.map(r=>pos[r]))+Math.max(...roots.map(r=>pos[r])))/2:0;
+ let nodes=[...all],md=Math.max(...nodes.map(n=>depth[n]),1);
+ let NW=204,NH=80,GX=50,GY=128;
+ let W=Math.max(450,(leaf||1)*(NW+GX)),H=108+md*GY;
+ let X=p=>34+p*(NW+GX)+NW/2,Y=dp=>56+dp*GY;
  let totR=Object.values(popcount).reduce((a,b)=>a+b,0)+(germR||0)||1;
- s+=`<circle cx="${X(gx)}" cy="${Y(0)}" r="19" fill="#fff" stroke="#495057"/><text x="${X(gx)}" y="${Y(0)-3}" text-anchor="middle" font-size="9">germline ${hp||''}根</text><text x="${X(gx)}" y="${Y(0)+8}" text-anchor="middle" font-size="8" fill="#868e96">${germR||0}r·${(100*(germR||0)/totR).toFixed(0)}%</text>`;
- roots.forEach(r=>s+=`<line x1="${X(gx)}" y1="${Y(0)+17}" x2="${X(pos[r])}" y2="${Y(1)-24}" stroke="#adb5bd"/>`);
- (edges||[]).forEach(([p,c])=>{if(p!='ROOT')s+=`<line x1="${X(pos[p])}" y1="${Y(depth[p])+24}" x2="${X(pos[c])}" y2="${Y(depth[c])-24}" stroke="#adb5bd"/>`});
- nodes.forEach(n=>{let cnt=popcount[n]||0,pct=(100*cnt/tot).toFixed(0),lab=np[n]||'';s+=`<rect x="${X(pos[n])-54}" y="${Y(depth[n])-25}" width="108" height="50" rx="6" fill="#e7f5ff" stroke="#1c7ed6"/><text x="${X(pos[n])}" y="${Y(depth[n])-11}" text-anchor="middle" font-size="11" class="mono" font-weight="700" fill="#1971c2">${lab}</text><text x="${X(pos[n])}" y="${Y(depth[n])+1}" text-anchor="middle" font-size="9.5" class="mono">${sLabels(n)}</text><text x="${X(pos[n])}" y="${Y(depth[n])+12}" text-anchor="middle" font-size="8.5" fill="#495057">${cnt}r · ${pct}%</text><text x="${X(pos[n])}" y="${Y(depth[n])+21}" text-anchor="middle" font-size="7.5" fill="#adb5bd">${n}</text>`});
- s+='</svg>';return s;
+ let relSet=new Set();
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="font-family:ui-monospace,Menlo,monospace">`;
+ roots.forEach(r=>s+=`<line x1="${X(gx)}" y1="${Y(0)+NH/2}" x2="${X(pos[r])}" y2="${Y(1)-NH/2}" stroke="#ced4da" stroke-width="1.6"/>`);
+ (edges||[]).forEach(([p,c])=>{if(p!='ROOT'){
+  let g=gainedS(p,c),mx=(X(pos[p])+X(pos[c]))/2,my=(Y(depth[p])+Y(depth[c]))/2;
+  s+=`<line x1="${X(pos[p])}" y1="${Y(depth[p])+NH/2}" x2="${X(pos[c])}" y2="${Y(depth[c])-NH/2}" stroke="#ced4da" stroke-width="1.6"/>`;
+  if(g.length)s+=`<rect x="${mx-24}" y="${my-10}" width="48" height="19" rx="9" fill="#ebfbee" stroke="#2f9e44"/><text x="${mx}" y="${my+4}" text-anchor="middle" font-size="11" fill="#2b8a3e" font-weight="700">+${g.join('+')}</text>`;
+ }});
+ let gp=(100*(germR||0)/totR).toFixed(0);
+ s+=`<rect x="${X(gx)-NW/2}" y="${Y(0)-NH/2}" width="${NW}" height="${NH}" rx="12" fill="#f1f3f5" stroke="#868e96" stroke-width="2.5"/>`;
+ s+=`<text x="${X(gx)}" y="${Y(0)-NH/2+24}" text-anchor="middle" font-size="14" font-weight="700" fill="#495057">⌂ germline（${hp||'根'}）</text>`;
+ s+=`<text x="${X(gx)}" y="${Y(0)-NH/2+44}" text-anchor="middle" font-size="11" fill="#868e96">無 somatic 變異 · 起點</text>`;
+ s+=`<text x="${X(gx)}" y="${Y(0)-NH/2+66}" text-anchor="middle" font-size="12.5" font-weight="600" fill="#212529">${germR||0} reads · ${gp}%</text>`;
+ nodes.forEach(n=>{
+  let cnt=popcount[n]||0,pct=(100*cnt/totR).toFixed(0),lab=np[n]||'—';
+  let g=gainedS(par[n],n);
+  let isSib=sib[n], isCo=g.length>=2;
+  if(isSib)relSet.add('姊妹(sibling)'); else if(g.length)relSet.add('直系(vertical)');
+  if(isCo)relSet.add('co_linked');
+  let rel=g.length?((isSib?'姊妹分支(sibling)':'直系(vertical)')+(isCo?' · co_linked':'')):'（與父同型）';
+  let gtxt=g.length?('獲得 +'+g.join('+')):'';
+  let x=X(pos[n]),y=Y(depth[n]);
+  let fill=isSib?'#fff4e6':'#e7f5ff', stroke=isSib?'#e8590c':'#1c7ed6';
+  s+=`<rect x="${x-NW/2}" y="${y-NH/2}" width="${NW}" height="${NH}" rx="12" fill="${fill}" stroke="${stroke}" stroke-width="2.5"/>`;
+  s+=`<text x="${x}" y="${y-NH/2+22}" text-anchor="middle" font-size="16" font-weight="800" fill="#1565c0">${lab}</text>`;
+  s+=`<text x="${x}" y="${y-NH/2+39}" text-anchor="middle" font-size="10.5" font-weight="700" fill="${isSib?'#d9480f':'#2b8a3e'}">${rel}</text>`;
+  s+=`<text x="${x}" y="${y-NH/2+53}" text-anchor="middle" font-size="10.5" font-weight="600" fill="#2b8a3e">${gtxt}</text>`;
+  s+=`<text x="${x}" y="${y-NH/2+66}" text-anchor="middle" font-size="9.5" fill="#495057">基因型 ${n}（=${sLabels(n)}）</text>`;
+  s+=`<text x="${x}" y="${y-NH/2+78}" text-anchor="middle" font-size="12" font-weight="600" fill="#212529">${cnt} reads · ${pct}%</text>`;
+ });
+ s+='</svg>';
+ let leg=`<div style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:6px;padding:7px 11px;margin-top:5px;font-size:11px;line-height:1.6">
+ <b>🔖 SNV 關係圖例</b>（怎麼讀這棵樹）：
+ <span style="color:#1565c0;font-weight:700">●直系 vertical</span> 往下一層、後代多帶 1 變異(+S，藍框) ｜
+ <span style="color:#d9480f;font-weight:700">●姊妹分支 sibling</span> 同一父不同分支、平行 subclone(橙框) ｜
+ <span style="color:#5f3dc4;font-weight:700">co_linked</span> 一節點同時獲≥2 變異、綁同一事件 ｜
+ <span style="color:#2b8a3e;font-weight:700">+S</span> 該分支新增 somatic 變異
+ ${relSet.size?'<br><b>此樹實際出現</b>：'+[...relSet].join('、'):''}</div>`;
+ return s+leg;
 }
 // 2-root: 位置樹按 HP 分兩棵
 function posTree(r){
