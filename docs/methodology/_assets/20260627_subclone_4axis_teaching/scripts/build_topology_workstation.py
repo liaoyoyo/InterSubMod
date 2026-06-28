@@ -186,8 +186,10 @@ function renderQ(){let sit=el('q_sit').value,mo=el('q_methyl').checked,so=el('q_
    <span style="width:58px;color:${scolor(q.confidence_score)};font-weight:700" title="confidence 0-100">▮${q.confidence_score}</span>
    <span class="tag ctx_${q.genome_ctx}">${q.genome_ctx}</span>
    <span style="width:112px;font-size:11px">${q.situation}</span>
-   <span style="width:96px;font-size:10.5px" class="note">候選 ${q.n_candidates}</span>
+   <span style="width:96px;font-size:10.5px" class="note">候選 ${q.n_candidates}${q.parsimony_first_rank_prob!=null?` · P1=${q.parsimony_first_rank_prob}`:''}</span>
    <span style="flex:1;min-width:170px;font-size:10.5px" class="note">${q.resolution_path}</span>
+   <span style="width:100%;font-size:10px;color:#a33" class="note">🔎 為何: ${q.why_conflict||''}${q.truncated?' ⚠截斷':''}</span>
+   <span style="width:100%;font-size:10px;color:#268" class="note">🧬 甲基: ${q.methyl_applicability||''}</span>
    <span style="white-space:nowrap">
      <button onclick="setJ('${q.region}','agree')" style="font-size:11px;background:${j=='agree'?'#d3f9d8':'#fff'}">✓同意rank1</button>
      <button onclick="setJ('${q.region}','alt')" style="font-size:11px;background:${j=='alt'?'#fff3bf':'#fff'}">⇄偏好其他</button>

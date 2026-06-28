@@ -47,6 +47,37 @@ def situation(r):
     if r["determinacy"] == "B_pairwise_structure": return "pairwise 拼接"
     return "已確定"
 
+# 加 3 欄資料源(2026-06-29):backbone_resolution(parsimony 第一順位) + detail cycle_cause(why-conflict)
+import os as _os
+_br_path = _os.path.join(DATA, "backbone_resolution.json")
+prob1 = {}
+if _os.path.exists(_br_path):
+    _br = json.load(open(_br_path, encoding="utf-8"))
+    for x in _br.get("B1_ambiguous", []): prob1[x["region"]] = x.get("first_rank_prob")
+    for x in _br.get("B2_underdetermined", []):
+        if x.get("first_rank_prob") is not None: prob1[x["region"]] = x["first_rank_prob"]
+
+def why_conflict(r):
+    """這區為何無法乾淨定樹(逐 situation 解釋)。"""
+    det = r["determinacy"]
+    if det == "incompatible":
+        return r.get("cycle_cause") or "pairwise 成環(上游 has_cycle)"
+    if r["ambig_nodes"] > 0:
+        return "缺中間群(跳>1突變→順序未定)" + ("+截斷" if r.get("truncated") else "")
+    if det == "C_underdetermined":
+        return "只觀測到單一 ALT 群(缺連接 read)→需深覆蓋"
+    if r["haplotypes"] not in ("H1", "H2", "?"):
+        return "跨 germline HP(已拆兩棵獨立樹)"
+    if det == "B_pairwise_structure":
+        return "pairwise 拼接(無單分子整跨)"
+    return "已確定(單分子向量唯一)"
+
+def methyl_applic(r):
+    """甲基對這區能否幫(基於 bounded-auxiliary 全測結論)。"""
+    if "3" in r.get("haplotypes", ""):  # 有 H3-unphased
+        return "HP定相: germline-ASM 在→可定相 H3(否則不可);排序 L3 弱;specificity 不可"
+    return "負篩可用(確認無次結構);排序 L3 弱;specificity/定群 不可"
+
 queue = []
 for r in d["detail"]:
     sc = score_region(r); sit = situation(r)
@@ -61,6 +92,10 @@ for r in d["detail"]:
            "determinacy": r["determinacy"], "ambig_nodes": r["ambig_nodes"],
            "confidence_score": sc, "situation": sit, "n_candidates": ncand,
            "resolution_path": resolution(r), "needs_methyl": "VAF tie" in resolution(r) or r["determinacy"] == "C_underdetermined",
+           "why_conflict": why_conflict(r),                       # 新欄1: 為何無法乾淨定樹
+           "parsimony_first_rank_prob": prob1.get(r["region"]),    # 新欄2: parsimony 第一順位機率(ambiguous/underdetermined)
+           "methyl_applicability": methyl_applic(r),               # 新欄3: 甲基能否幫(bounded)
+           "truncated": r.get("truncated", False),
            "edges": r["edges"], "populations": r["populations"]}
     queue.append(rec)
 
