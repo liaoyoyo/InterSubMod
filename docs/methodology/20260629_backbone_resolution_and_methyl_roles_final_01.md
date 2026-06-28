@@ -78,19 +78,19 @@ provenance: HCC1395 ⭐3 單樣本;凍結 topology @ feat/summary-nreadsvalid@53
 - **穩（reproducible）**：incompatible=0(真衝突)、B1 max-prob 0.5/0 高信心、B2=550 覆蓋限制、topology byte-可重現（已修 tie）、A-framing 質性。
 - **上界（會縮）**：47% determined、把 2-位點區當「subclone tree」、CN-gain determined 計數、任何用 3885 而非 7143 的 %。
 
-## §4 待定義 gap（G1+G2 已修 06-29，其餘 7 個優先序）
+## §4 待定義 gap（G1-G9 全處理完畢 06-29）
 
 | Gap | 級 | 問題 | 狀態 |
 |---|---|---|---|
 | G1 denominator | ✅ **已修** | stats(7143) vs detail(3885) 兩套矛盾數 | **determinacy canonical=3885**（stats==detail，sum 一致）;全區覆蓋改 region_coverage（3885/371/2887）;master spec §6 已更（棄用舊 B2760/C1658/incomp22）|
 | G2 incompatible 重算 | ✅ **已修** | 「12 全 artifact/verified 0」誤判 | 真相 = 上游 has_cycle **22**（12 有向量+10 無）真 cycle、**77% CN-gain**=multiplicity artifact;stored 截斷查不到非「0 真 cycle」;detail 加 `cycle_cause` 註記 |
-| G3 genotype 截斷 | 🟠 | cap=8 截斷 **42 區**（31 帶 TP、8 incompatible）| 提高 cap 或標 `truncated` 排除 |
-| G4 isolated 計數 | 🟠 | 8320/11520/266 三套、不在 topology output | 定單一定義 + 加呈現列 |
-| G5 覆蓋功率 | 🟡 | 「深覆蓋可解」未量化 | 算 per-region 目標深度 + 2x/4x 預期 resolved |
-| G6 輸出格式 | 🟡 | 無最終呈現 contract | 定各類(determined/ambiguous/…/H3/isolated)圖表呈現 |
-| G7 inconsistent 計數 | 🟡 | 22/12/5 跨檔不一 + CN-clean subset 未宣告 | 宣告報告 subset |
-| G8 B1 set-vs-tree | 🟢 | 76 全 coin-flip 無呈現規則 | 定「相容集合 vs 單樹」呈現 |
-| G9 provenance stamp | 🟢 | 計數未標 (ε,MINREAD) | output 加 ε=0.02/MINREAD=3 + 敏感度帶 |
+| G3 genotype 截斷 | ✅ **已處理** | cap=8 截斷 42 區 | detail 加 `truncated`/`genotype_len` 旗標;42 區(31 TP/8 incompat/僅 3 在 core)→ core 標 determined-on-subset,主結論穩（§7）|
+| G4 isolated 計數 | ✅ **已收斂** | 8320/11520/266/13778 四套 | 測不同東西,定 **canonical=8320**（n_partners=0）+ 各定義（§7,`gaps_g4_g5_resolution.json`）|
+| G5 覆蓋功率 | ✅ **已量化** | 「深覆蓋可解」未量化 | underpowered 5458;2x 救 39.4%/4x 56.7%;但 43%(2364)幾何需長 read（§7）|
+| G6 輸出格式 | ✅ **已定義** | 無呈現 contract | 各類呈現表（§5+§7 G6 表）|
+| G7 count 宣告 | ✅ **已宣告** | 計數跨檔不一 | incompatible 22(全)/12(有向量);骨幹錨 CN-clean full_tree 205/677;determinacy 錨 3885（§7）|
+| G8 B1 set-vs-tree | ✅ **已定規則** | 76 coin-flip 呈現 | parsimony 第一順位 + 標「≥2 相容樹、機率≈0.5」（§7）|
+| G9 provenance stamp | ✅ **已加** | 計數未標參數 | topology output 加 `provenance`（cap8/eps0.02/min3/coread6/分母3885/byte-repro）（§7）|
 
 ## §5 最終輸出結構定義（誠實分層機率）
 
@@ -105,6 +105,51 @@ provenance: HCC1395 ⭐3 單樣本;凍結 topology @ feat/summary-nreadsvalid@53
 └ H3-unphased(93)：germline-ASM 在→甲基定相(10/10);否→標 unresolved
 附 CN-gain mask 警示 + 甲基軟標(負篩/HP定相,L3)
 ```
+
+## §7 Gap 解決（G3-G9，2026-06-29 全處理）
+
+### G3 genotype 截斷（cap=8）✅ 已加旗標
+- detail 每區加 `truncated`（n_sSNV>genotype_len）+ `genotype_len`;**42 區截斷**（31 帶 TP、8 為 incompatible、**僅 3 在 A_determined core**）。
+- 處置：core 的 3 區標「determined-on-subset(8 位點)」;incompatible 8 區的 cycle 落在 >8 位點（與 G2 一致）。**主結論穩**（core 僅 3/1812 受影響）。真解須提高 upstream cap（需重跑 pipeline,非本層）。
+
+### G4 isolated 計數收斂 ✅（`gaps_g4_g5_resolution.json`）
+四套數字測**不同東西**（非矛盾,是混用未標基底）：
+
+| 數字 | 基底 | 角色 |
+|--:|---|---|
+| **8,320** | per-sSNV;`n_partners_le50k==0`（read-span 內無 partner）| 🔵 **CANONICAL isolated**（骨幹連鎖本義;TP 7555/FP 765）|
+| 11,520 | 全 loci tree_role（含 germline,廣基底）| 不同分母,非 isolation 本義 |
+| 266 | 只 somatic-confirmed loci tree_role | somatic 子集 |
+| 13,778 | 只含 1 sSNV 的**區**（區層級）| 與 isolation 正交 |
+
+→ 對外一律用 **8,320**;isolated loci **不在 topology detail**（無 tree）→ 需獨立「isolated 表」（caller VAF + 可能 Tier-PS 放單倍型,非巢狀）。
+
+### G5 覆蓋功率（量化「深覆蓋可解」）✅
+- underpowered（有 partner 無 co-read link）= **5,458**。
+- 線性估救回：**2x = 2,151（39.4%）/ 4x = 3,094（56.7%）**。
+- 🔴 **但 2,364（43%）max_coread=0 = 幾何限制（span>read）→ 覆蓋救不了、需更長 read**（非深度問題）。
+- → 「深覆蓋可解」精確版：**~57% 區 4x 可救（depth-limited）;~43% 是幾何（需長 read）**。C_underdetermined 550 單群亦受此限。
+
+### G6 最終輸出格式 contract ✅（定義見 §5;每類呈現）
+| 類別 | 呈現 | 標註 |
+|---|---|---|
+| A_determined 1812（穩固 57）| 單一樹 + lineage 標籤 | 標 robustness tier(L1-L4)+truncated flag |
+| A_ambiguous 76 | 單樹 + parsimony 第一順位 | 標機率(中位 0.5,L3)|
+| B_pairwise 958 | 拼接結構 | 標非單分子 |
+| C_underdetermined 550 | 「需深覆蓋」+ 救回估 | 標 depth vs 幾何 |
+| incompatible 12(has_cycle 22) | 不建樹 | 標 likely-CN-multiplicity-artifact |
+| isolated 8320 | 獨立表(無 tree)| caller VAF + Tier-PS 單倍型 |
+| H3 93 | germline-ASM 在→甲基定相 | 否則標 unresolved |
+
+### G7 count 宣告 ✅
+- **incompatible**：has_cycle 全 22 / 有向量 12（report 對外用「22 真 cycle、12 在 tree-detail」,勿混）。
+- **structure / CN-clean subset**：對外引「reconstruction 骨幹」錨定 **CN-clean full_tree 205 / 全 full_tree 677**（master spec §6）;determinacy % 錨 3885（G1）。
+
+### G8 B1 set-vs-single-tree 規則 ✅
+A_ambiguous 76 全 first_rank_prob≤0.5（0 高信心）→ **呈現規則：給 parsimony 第一順位樹但標「≥2 相容樹、機率≈0.5」**，不呈現為單一定論。
+
+### G9 provenance stamp ✅
+topology_per_region.json 加 `provenance`：genotype_cap=8 / eps=0.02 / min_read=3 / coread≥6 / canonical 分母 3885 / byte_reproducible=true / tiebreak 紀錄。→ determinacy 計數現可重現且綁定參數。
 
 ## §6 數字溯源（§13-C）
 | 數字 | 值 | 來源 |
@@ -123,3 +168,6 @@ provenance: HCC1395 ⭐3 單樣本;凍結 topology @ feat/summary-nreadsvalid@53
 | Q6-ext unimodal/coherent/單HP | 63/0-of-80/13 | `h3_unresolved_grouping.json` |
 | eps 多救/1-Hamming% | 1863/76% | `eps_minread_sensitivity.json` |
 | Tier-PS CCF 一致 | 42.4% | `sm_phaseset_extension.json` |
+| G3 截斷區/在core/帶TP | 42/3/31 | topology detail truncated |
+| G4 isolated canonical | 8320(TP7555/FP765) | `gaps_g4_g5_resolution.json` |
+| G5 underpowered/2x救/4x救/幾何 | 5458/2151/3094/2364 | 同上 G5 |

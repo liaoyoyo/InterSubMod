@@ -187,6 +187,8 @@ for r in regs:
                        "haplotypes": hap_str, "node_paths": node_paths, "undefined": undefined,
                        "n_roots": len(germ_groot), "germline_reads": germline_reads,
                        "n_clusters": nclust, "topology_type": ttype, "determinacy": det,
+                       "genotype_len": len(next(iter(pops))) if pops else 0,
+                       "truncated": r["n_sSNV"] > (len(next(iter(pops))) if pops else 0),  # G3: genotype 向量截斷(cap=8)
                        "has_cycle": bool(r.get("has_cycle")),
                        "cycle_cause": ("CN-gain-multiplicity(同突變多拷貝→pairwise 矛盾)" if r.get("has_cycle") and r["cn"] == "gain"
                                        else ("other-pairwise-cycle" if r.get("has_cycle") else None)),
@@ -228,7 +230,15 @@ chr17_worked = {
     "sig_cpg": [{"m": f"m{i+1}", "cpg": x["cpg"], "L1": x["L1"], "L2": x["L2"], "dbeta": x["dbeta"]}
                 for i, x in enumerate(c17["sig_diff_cpg"])],
 }
+# G9 provenance stamp:讓 determinacy 計數可重現(綁定參數)
+provenance = {"genotype_cap": 8, "genotype_cap_note": "上游 sm_region_integration populations 每區最多 8 sSNV 位點;n_sSNV>8 截斷(detail.truncated=true)",
+              "eps_noise_floor": 0.02, "min_read": 3, "min_coread_for_link": 6,
+              "params_note": "eps=2%(ONT 錯誤率)/MINREAD=3/coread≥6 為分析層參數;determinacy 計數=f(這些參數)",
+              "canonical_determinacy_denominator": 3885, "all_region_denominator": 7143,
+              "byte_reproducible": True, "tiebreak": "victim/nodes/sibling 排序皆加 genotype 字串 tiebreak"}
+n_trunc = sum(1 for d in detail if d["truncated"])
 out = {"stats": {k: dict(v) if isinstance(v, Counter) else v for k, v in stats.items()},
+       "provenance": provenance, "n_truncated": n_trunc,
        "n_detail": len(detail), "detail": detail, "chr17_worked": chr17_worked,
        "chroms": sorted(set(d["chrom"] for d in detail), key=lambda c: int(c[3:]))}
 with open(os.path.join(DATA, "topology_per_region.json"), "w", encoding="utf-8") as f:

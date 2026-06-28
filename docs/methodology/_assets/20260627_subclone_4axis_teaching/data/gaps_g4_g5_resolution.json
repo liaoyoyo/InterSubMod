@@ -1,0 +1,52 @@
+{
+ "G4_isolated_reconciliation": {
+  "definitions": {
+   "isolated_singleton_8320": {
+    "value": 8320,
+    "basis": "per-sSNV;n_partners_le50k==0(read-span≤50kb 內無任何 partner)",
+    "denominator": 35332,
+    "role": "🔵 CANONICAL『isolated』(骨幹連鎖本義:無法被 read 連)"
+   },
+   "tree_role_all_isolated_11520": {
+    "value": 11520,
+    "basis": "全 loci 的 tree_role 分類(含 germline/未過濾,基底更廣)",
+    "role": "不同分母,非 isolation 本義"
+   },
+   "tree_role_somatic_isolated_266": {
+    "value": 266,
+    "basis": "只 somatic-confirmed loci 的 tree_role isolated",
+    "role": "somatic 子集 tree-role"
+   },
+   "single_sSNV_region_13778": {
+    "value": 13778,
+    "basis": "區層級:只含 1 個 sSNV 的『區』(非 per-sSNV isolation)",
+    "denominator": 35332,
+    "role": "區計數,與 isolation 正交"
+   }
+  },
+  "canonical": "isolated = 8,320 sSNV(n_partners_le50k==0);TP|isolated 7555 / FP|isolated 765",
+  "why_not_conflict": "四數測不同東西:8320=per-sSNV 無 partner(本義);11520=tree_role 全 loci(廣基底);266=somatic tree_role;13778=單-sSNV 區。非矛盾,是混用未標基底。",
+  "presentation_gap": "isolated 8320 loci 無 tree(不在 topology detail 3885)→ 最終輸出需獨立『isolated 表』:每 sSNV 有 caller VAF(可放 clonal 譜)+ 可能 same-PS partner(Tier-PS 放單倍型,非巢狀)。"
+ },
+ "G5_coverage_power": {
+  "underpowered_definition": "n_partners_le50k>0 AND n_realized_links==0(有 partner 但 max_coread<6 無 link)",
+  "n_underpowered": 5458,
+  "min_coread_for_link": 6,
+  "current_max_coread_dist": {
+   "0": 2364,
+   "2": 943,
+   "3": 804,
+   "4": 708,
+   "5": 639
+  },
+  "rescued_estimate": {
+   "at_2x": 2151,
+   "at_3x": 3094,
+   "at_4x": 3094,
+   "at_2x_pct": 39.4,
+   "at_4x_pct": 56.7
+  },
+  "model_note": "線性近似:coread ∝ 覆蓋;m 倍後 max_coread×m≥6 即可建 ≥1 link(救回為樹可用)。保守(忽略 read 長/取樣分散);僅給數量級,非精確功率。C_underdetermined(550 單群)亦受此限。",
+  "caveat": "此為『可建 link』的上界估計;實際還需該 link 落在能定樹的位置 + 非 CN-gain multiplicity 假象。"
+ }
+}
