@@ -3,7 +3,7 @@
 類型: methodology verdict — T-GATE-GB matched-normal cis-control pilot 結果 + 全資料集適用 scope 裁決
 狀態: concluded(pilot 設計驗證完成;結論 = 條件式適用 + needs_methyl ∩ 乾淨可用 ≈ 0)
 build_branch: research/subclonal-reconstruction-202606
-data_sources: docs/methodology/_assets/20260627_subclone_4axis_teaching/data/cis_control_scope_summary.json,docs/methodology/_assets/20260627_subclone_4axis_teaching/data/pilot_cis_control.json,docs/methodology/_assets/20260627_subclone_4axis_teaching/data/hp_alignment_fullscan.json,docs/methodology/_assets/20260627_subclone_4axis_teaching/data/methyl_ordering_pilot.json
+data_sources: docs/methodology/_assets/20260627_subclone_4axis_teaching/data/cis_control_scope_summary.json,docs/methodology/_assets/20260627_subclone_4axis_teaching/data/pilot_cis_control.json,docs/methodology/_assets/20260627_subclone_4axis_teaching/data/hp_alignment_fullscan.json,docs/methodology/_assets/20260627_subclone_4axis_teaching/data/methyl_ordering_pilot.json,docs/methodology/_assets/20260627_subclone_4axis_teaching/data/methyl_auxiliary_annotation.json
 provenance: HCC1395 tumor.bam+normal.bam(big8) + 凍結 topology_per_region.json @ branch feat/summary-nreadsvalid@5308d9e;每數字 grep-able 於 _assets/.../data/*.json
 -->
 
@@ -204,6 +204,44 @@ cis-control 原本要解鎖的是 **624 個 needs_methyl 區**（candidate_scori
 
 **架構備註（ISM 連接，源碼驗證）**：ISM 是**存在性偵測器**非拓樸排序器（per-region 對 HP/allele/tumor-normal 軸測甲基結構，read 無 genotype 標籤）。但 ISM 已有 `LabelTest.compute_group_distances`（輸出 6 條 HP-fine 群間距離 `HPFineD_*`，RegionProcessor.cpp:1098-1203），且 read-level BERNOULLI 距離（DistanceMatrix.cpp:254-302）比平均 Δβ 更有力。**若**外掛骨幹的 multi-SNV 共現分群給 read 貼 genotype 群標籤，ISM **能**產出 subclone 群間甲基距離原料——但本 pilot 顯示底層排序訊號本身太弱，換更強度量上限有限。⚠ ISM 內 `verification_class=="Subclone"` = `cluster_significant && !label_sig`（非監督 cluster ≠ HP/allele 軸），是 double-dip confounded 軸，**非基因型驗證的 subclone**，對外勿引。
 
+## §12 甲基有界軟標記 — (b) 隱藏次結構旗標 + (a) ambiguous 軟提示
+
+> 用途：分群❌/specificity❌/排序⚠️L3 後，把甲基當**有界軟標記**——(b) 標記「某基因型群內可能藏 ≥2 次群」、(a) 給欠定區排序軟提示。腳本 `methyl_auxiliary_annotation.py`（4 路平行）。
+
+### (b) 隱藏次結構旗標（每群測甲基雙峰 + 扣 HP/CN，保守判準 GMM BIC + 峰差≥0.2 + 小組件≥4）
+
+**漏斗**（`methyl_auxiliary_annotation.json` → b_hidden_substructure）：
+
+| 階段 | 數 | 說明 |
+|---|--:|---|
+| 測試群數（≥12 reads + 甲基）| 3,416 | — |
+| **unimodal（無次結構）** | 3,272（95.8%）| ✅ 信心說「無隱藏次結構」|
+| bimodal | 144（4.2%）| 進去混淆 |
+| ↳ cn-flagged（CN-gain multiplicity）| 96 | 排除（一群可能是拷貝）|
+| ↳ hp-explained（雙峰沿 HP=germline）| 2 | 排除 |
+| ↳ **residual-candidate（扣完仍雙峰）** | **46（1.35%）** | 全 CN-clean |
+
+**residual 再嚴格過濾（critical sanity）**：
+- **12/46 = 區域內在雙穩態**：同區 ≥2 群皆雙峰且**峰均值相近**（如 chr2:207617973 的 AR(HP1) 與 RR(HP2) 都 ~0.59/0.88）→ 與基因型/HP 皆無關 = 區域 epigenetic 雙穩，**非 subclone** → 排除。
+- 剩 34 solo → 30 same-HP → **22 為 ALT 群**（只 ALT 群可能是 somatic subclone；RR 祖先群雙峰 definitionally 非 somatic）= **0.64% of tested**。
+
+**🔴 誠實邊界（22 候選的真義）**：這 22 個 = 「基因型看不到、只有甲基看到的次分群」→ **正是已知 NEGATIVE 的『無監督甲基分群』路徑（double-dip）**：群內無第二個 sSNV 可佐證該甲基切分 → **無遺傳 corroboration** → 不能確認是 subclone，可能是 intrinsic epi-heterogeneity。故 = **L3 候選旗標（待 single-cell/orthogonal 驗證）**，非確認。
+
+### (a) A_ambiguous 軟提示
+
+76 個 A_ambiguous 區（缺中間群、nested vs sibling 待定）：**35 產生 L3 軟提示**（甲基離 root 距離排序）、41 無資料（缺 RR root 或 <2 群覆蓋）。⚠ 全域 ordering ρ≈0.18（§11）→ 這 35 個提示**低信心**，僅供人工複核起點，不可自動定案。
+
+### 裁決：資訊是否有效可用？
+
+| 用途 | 有效性 | 說明 |
+|---|---|---|
+| **負向篩選**（確認「無隱藏次結構」）| ✅ **可用** | 95.8% 群乾淨 unimodal，可信地排除 |
+| **候選旗標**（標「可能藏次群」供跟進）| ✅ 有限可用（L3）| 22 區（0.64%）候選，但需 orthogonal 驗證、多數可能 intrinsic |
+| **確認 subclone/群數** | ❌ **不可** | 無遺傳佐證 = double-dip 路徑；甲基自己定的群數不可信 |
+| **ambiguous 排序** | ⚠️ L3 軟提示 | 低信心人工複核起點 |
+
+**一句話**：甲基有界軟標記**能當保守的負向篩選 + 候選旗標（L3）**，但**不能確認**——與全研究一致：甲基 = bounded-auxiliary。22 個 ALT 候選 + 35 個 ambiguous 提示已落 `methyl_auxiliary_annotation.json`，供未來多樣本/單細胞優先檢視。
+
 ## §10 數字溯源表（§13-C）
 
 | 數字 | 值 | 來源檔（grep-able）|
@@ -224,5 +262,9 @@ cis-control 原本要解鎖的是 **624 個 needs_methyl 區**（candidate_scori
 | ordering ρ (all/distal/near) | 0.182 / 0.177 / 0.164 | 同上 → pooled |
 | ordering perm p (all/distal/near) | 0.080 / 0.060 / 0.070 | 同上 → pooled |
 | nested 深>淺 (all/distal/near) | 0.794 / 0.636 / 0.588 | 同上 → nested_pair_frac |
+| aux 測試群數 / unimodal | 3416 / 3272 | `methyl_auxiliary_annotation.json` → b_hidden_substructure |
+| bimodal / residual-candidate | 144 / 46 | 同上 |
+| residual 漏斗 (內在雙穩態/ALT候選) | 12 / 22 | 同上 hidden_candidates(過濾) |
+| A_ambiguous 區/產生提示 | 76 / 35 | 同上 → a_ambiguous_hint |
 
 **腳本**（皆可重跑複算）：`scripts/pilot_cis_control.py`、`analyze_pilot_distribution.py`、`axis_alignment_neutral.py`、`classify_hp_alignment_all.py`、`finalize_cis_control_scope.py`（皆於 `_assets/20260627_subclone_4axis_teaching/scripts/`）。

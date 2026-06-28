@@ -71,6 +71,8 @@ P(拓樸 T) ∝ P(sSNV共現|T) × 1[HP-root 相容] × P(甲基|T,normal-baseli
 
 **🔴 甲基拓樸「排序」pilot（06-28，verdict doc §11）**：分群❌/specificity❌ 後唯一可能用途 = 對基因型已定群提供排序/距離。實測（A_determined+SAME-HP+CN-clean，326→55 區）：甲基離 root 距離 vs 譜系深度 Spearman ρ≈0.18、permutation **p≈0.06-0.08 未達顯著**；distal(0.636)≥near(0.588) 非純 cis 痕跡但太弱；功率不足（淺樹為主）。→ **甲基不能當可信拓樸 resolver（L3 弱提示）**，僅可標軟提示。ISM = 存在性偵測器非排序器（read 無 genotype 標籤），但有 `compute_group_distances` + read-level BERNOULLI 距離；接骨幹 genotype 標籤可產群間距離原料，惟底層訊號弱、上限有限。
 
+**🔴 甲基有界軟標記 pilot（06-29，verdict doc §12）**：(b) 隱藏次結構旗標——3,416 群測甲基雙峰+扣 HP/CN：unimodal 95.8%（可信負向篩選）、residual-candidate 46（1.35%），再排「區域內在雙穩態」12 + 只留 ALT 群 → **22 候選（0.64%）**；但這 22 = 無遺傳佐證的無監督甲基切分 = double-dip 路徑 → **L3 候選非確認**。(a) A_ambiguous 76 區→35 個 L3 軟提示。**裁決：甲基軟標記可當保守負向篩選+候選旗標（L3），不能確認群數/subclone**。產物 `methyl_auxiliary_annotation.json`。
+
 ## §6 驗證狀態 + 統計
 
 - **拓樸型態**（7143 區）：single 2018 / branched 1113 / linear 754 / germline 371 / no-vec 2887。
