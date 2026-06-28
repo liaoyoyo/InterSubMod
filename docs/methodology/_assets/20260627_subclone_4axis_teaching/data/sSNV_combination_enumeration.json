@@ -1,0 +1,142 @@
+{
+ "source": "sm_region_integration.json + lists/*.tsv (frozen @ branch feat/summary-nreadsvalid 5308d9e)",
+ "total_regions": 7143,
+ "A_by_n_sSNV_exact_le10": {
+  "2": 3707,
+  "3": 1581,
+  "4": 789,
+  "5": 426,
+  "6": 233,
+  "7": 137,
+  "8": 92,
+  "9": 59,
+  "10": 29
+ },
+ "A_by_n_sSNV_bucket": {
+  "50+": 9,
+  "10-49": 110,
+  "5-9": 947,
+  "4": 789,
+  "3": 1581,
+  "2": 3707
+ },
+ "B_by_tree_shape": {
+  "inconsistent": 22,
+  "full_tree": 677,
+  "sibling_only": 1235,
+  "linear_nested": 1908,
+  "co_linked_lineage": 858,
+  "no_confirmed_structure": 2443
+ },
+ "B_shape_x_nSSNV_bucket": {
+  "inconsistent": {
+   "50+": 5,
+   "10-49": 7,
+   "5-9": 4,
+   "4": 1,
+   "3": 5
+  },
+  "full_tree": {
+   "50+": 4,
+   "10-49": 70,
+   "5-9": 316,
+   "4": 141,
+   "3": 146
+  },
+  "sibling_only": {
+   "10-49": 8,
+   "5-9": 191,
+   "4": 176,
+   "3": 292,
+   "2": 568
+  },
+  "linear_nested": {
+   "10-49": 20,
+   "5-9": 293,
+   "4": 255,
+   "3": 498,
+   "2": 842
+  },
+  "co_linked_lineage": {
+   "10-49": 5,
+   "5-9": 94,
+   "4": 103,
+   "3": 241,
+   "2": 415
+  },
+  "no_confirmed_structure": {
+   "5-9": 49,
+   "4": 113,
+   "3": 399,
+   "2": 1882
+  }
+ },
+ "C_by_n_populations": {
+  "0": 380,
+  "1": 1336,
+  "2": 1790,
+  "3": 1050,
+  "4": 77,
+  "5": 1,
+  "6": 1,
+  "7": 1,
+  "None": 2507
+ },
+ "D_combos_2sSNV(populations_keyset -> regions)": {
+  "AA|RR": 593,
+  "AR|RA|RR": 547,
+  "": 501,
+  "AA": 359,
+  "AR|RA": 261,
+  "RR": 247,
+  "AA|AR": 182,
+  "RA": 158,
+  "AR": 156,
+  "AA|RA": 148,
+  "AA|AR|RR": 147,
+  "AA|RA|RR": 146,
+  "AR|RR": 114,
+  "RA|RR": 112,
+  "AA|AR|RA|RR": 29,
+  "AA|AR|RA": 7
+ },
+ "D_combos_3sSNV_top15": {
+  "": 792,
+  "RRR": 83,
+  "AAA|RRR": 73,
+  "AAA": 55,
+  "RRA": 42,
+  "ARR": 30,
+  "AAR": 26,
+  "RAR": 26,
+  "ARR|RAA|RRR": 25,
+  "AAR|RRA": 25,
+  "ARA": 23,
+  "AAR|RRA|RRR": 21,
+  "RAA": 20,
+  "ARA|RAR|RRR": 19,
+  "ARR|RRR": 19
+ },
+ "D_n_distinct_3sSNV_combos": 79,
+ "E_reads_per_region": {
+  "min": 0,
+  "p25": 0,
+  "median": 5,
+  "p75": 25,
+  "max": 363,
+  "ge20_regions": 2102,
+  "ge50_regions": 803
+ },
+ "F_classify_asymmetry": {
+  "co_linked_total": 11750,
+  "nested_total": 13113,
+  "independent_total": 6281,
+  "mutual_excl_total": 6905,
+  "nested_with_offdiag_eq1(could_be_colinked)": 6637,
+  "nested_offdiag1_pct_of_nested": 50.61,
+  "independent_with_minoffdiag_eq1(could_be_nested)": 3633,
+  "independent_minoff1_pct_of_independent": 57.84,
+  "mutual_excl_with_AA_eq1(existing_tolerance_benefit)": 0,
+  "mutual_excl_AA1_pct": 0.0
+ }
+}

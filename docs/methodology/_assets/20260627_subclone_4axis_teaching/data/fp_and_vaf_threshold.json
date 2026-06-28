@@ -1,0 +1,64 @@
+{
+ "A_FP_enrichment": {
+  "all_decided_pairs": 19394,
+  "all_any_FP_pct": 55.0,
+  "all_both_FP_pct": 44.8,
+  "weak_any_FP_pct": 60.3,
+  "weak_both_FP_pct": 57.9,
+  "strong_any_FP_pct": 49.1,
+  "strong_both_FP_pct": 30.1,
+  "co_linked_any_FP_pct": 70.9
+ },
+ "B_noise_vs_real_expectation": {
+  "eps_grid": [
+   0.01,
+   0.02,
+   0.03
+  ],
+  "weak_n": 10270,
+  "weak_real_expect(coread*minVAF)_median": 9.13,
+  "weak_observed_is_1_but_real_expect_ge3": 9059,
+  "weak_observed_is_1_but_real_expect_ge5": 7671,
+  "weak_rejected_as_noise@eps0.01": 1200,
+  "weak_rejected_pct@eps0.01": 11.7,
+  "coread_cutoff@eps0.01(單讀需coread<此值才保留)": 100.0,
+  "weak_rejected_as_noise@eps0.02": 5111,
+  "weak_rejected_pct@eps0.02": 49.8,
+  "coread_cutoff@eps0.02(單讀需coread<此值才保留)": 50.0,
+  "weak_rejected_as_noise@eps0.03": 6971,
+  "weak_rejected_pct@eps0.03": 67.9,
+  "coread_cutoff@eps0.03(單讀需coread<此值才保留)": 33.3
+ },
+ "C_band_by_eps": {
+  "orig": {
+   "co_linked": 11750,
+   "nested_a_in_b": 6774,
+   "nested_b_in_a": 6339,
+   "mutual_excl": 6905,
+   "independent": 6281
+  },
+  "eps0.01": {
+   "co_linked": 12484,
+   "nested_a_in_b": 6755,
+   "nested_b_in_a": 6338,
+   "mutual_excl": 6968,
+   "independent": 5504
+  },
+  "eps0.02": {
+   "co_linked": 16048,
+   "nested_a_in_b": 5940,
+   "mutual_excl": 7223,
+   "nested_b_in_a": 5412,
+   "sparse": 1,
+   "independent": 3425
+  },
+  "eps0.03": {
+   "co_linked": 18738,
+   "sparse": 18,
+   "nested_a_in_b": 5024,
+   "mutual_excl": 7388,
+   "nested_b_in_a": 4490,
+   "independent": 2391
+  }
+ }
+}

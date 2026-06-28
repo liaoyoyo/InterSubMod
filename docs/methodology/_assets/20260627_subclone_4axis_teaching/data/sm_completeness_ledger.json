@@ -1,0 +1,334 @@
+{
+ "universe_total": 35332,
+ "universe_tp": 30490,
+ "universe_fp": 4842,
+ "buckets": {
+  "isolated_singleton": 8320,
+  "underpowered": 5458,
+  "linked": 21554
+ },
+ "bucket_sum_check": {
+  "sum": 35332,
+  "total": 35332,
+  "ok": true
+ },
+ "by_source_bucket": {
+  "TP|isolated_singleton": 7555,
+  "TP|underpowered": 4952,
+  "TP|linked": 17983,
+  "FP|linked": 3571,
+  "FP|underpowered": 506,
+  "FP|isolated_singleton": 765
+ },
+ "linked_somatic_by_source": {
+  "TP": 17611,
+  "FP": 3204
+ },
+ "union_recovered_fp_somatic_linked": {
+  "count": 3204,
+  "note": "FP-source somatic-confirmed & single-molecule-linked = TP-only 會漏的 clonally-informative (γ 類)",
+  "examples": [
+   {
+    "locus": "chr14:16095686",
+    "vaf": 0.027,
+    "normal": [
+     366,
+     7
+    ],
+    "n_links": 18,
+    "max_coread": 423
+   },
+   {
+    "locus": "chr14:16095934",
+    "vaf": 0.042,
+    "normal": [
+     356,
+     2
+    ],
+    "n_links": 18,
+    "max_coread": 423
+   },
+   {
+    "locus": "chr14:16096448",
+    "vaf": 0.032,
+    "normal": [
+     371,
+     6
+    ],
+    "n_links": 18,
+    "max_coread": 417
+   },
+   {
+    "locus": "chr14:16095766",
+    "vaf": 0.039,
+    "normal": [
+     354,
+     4
+    ],
+    "n_links": 18,
+    "max_coread": 407
+   },
+   {
+    "locus": "chr14:16096495",
+    "vaf": 0.027,
+    "normal": [
+     346,
+     6
+    ],
+    "n_links": 18,
+    "max_coread": 400
+   },
+   {
+    "locus": "chr14:16093807",
+    "vaf": 0.034,
+    "normal": [
+     341,
+     13
+    ],
+    "n_links": 18,
+    "max_coread": 393
+   },
+   {
+    "locus": "chr21:10357137",
+    "vaf": 0.249,
+    "normal": [
+     328,
+     14
+    ],
+    "n_links": 6,
+    "max_coread": 296
+   },
+   {
+    "locus": "chr21:10358257",
+    "vaf": 0.233,
+    "normal": [
+     320,
+     16
+    ],
+    "n_links": 6,
+    "max_coread": 296
+   },
+   {
+    "locus": "chr21:10341682",
+    "vaf": 0.218,
+    "normal": [
+     254,
+     10
+    ],
+    "n_links": 6,
+    "max_coread": 285
+   },
+   {
+    "locus": "chr21:10342450",
+    "vaf": 0.211,
+    "normal": [
+     284,
+     12
+    ],
+    "n_links": 6,
+    "max_coread": 285
+   },
+   {
+    "locus": "chr21:10352179",
+    "vaf": 0.202,
+    "normal": [
+     274,
+     14
+    ],
+    "n_links": 6,
+    "max_coread": 282
+   },
+   {
+    "locus": "chr9:41802610",
+    "vaf": 0.146,
+    "normal": [
+     92,
+     2
+    ],
+    "n_links": 84,
+    "max_coread": 211
+   },
+   {
+    "locus": "chr9:41802627",
+    "vaf": 0.156,
+    "normal": [
+     86,
+     4
+    ],
+    "n_links": 84,
+    "max_coread": 211
+   },
+   {
+    "locus": "chr9:41802466",
+    "vaf": 0.127,
+    "normal": [
+     92,
+     2
+    ],
+    "n_links": 84,
+    "max_coread": 210
+   },
+   {
+    "locus": "chr9:41802547",
+    "vaf": 0.123,
+    "normal": [
+     90,
+     4
+    ],
+    "n_links": 84,
+    "max_coread": 210
+   },
+   {
+    "locus": "chr9:41802377",
+    "vaf": 0.137,
+    "normal": [
+     92,
+     4
+    ],
+    "n_links": 84,
+    "max_coread": 209
+   },
+   {
+    "locus": "chr9:41802249",
+    "vaf": 0.131,
+    "normal": [
+     90,
+     2
+    ],
+    "n_links": 84,
+    "max_coread": 208
+   },
+   {
+    "locus": "chr9:41802280",
+    "vaf": 0.156,
+    "normal": [
+     88,
+     4
+    ],
+    "n_links": 84,
+    "max_coread": 208
+   },
+   {
+    "locus": "chr9:41801692",
+    "vaf": 0.132,
+    "normal": [
+     96,
+     2
+    ],
+    "n_links": 84,
+    "max_coread": 207
+   },
+   {
+    "locus": "chr9:41801701",
+    "vaf": 0.13,
+    "normal": [
+     96,
+     2
+    ],
+    "n_links": 84,
+    "max_coread": 207
+   },
+   {
+    "locus": "chr9:41802512",
+    "vaf": 0.13,
+    "normal": [
+     94,
+     2
+    ],
+    "n_links": 84,
+    "max_coread": 206
+   },
+   {
+    "locus": "chr9:41802977",
+    "vaf": 0.139,
+    "normal": [
+     90,
+     2
+    ],
+    "n_links": 84,
+    "max_coread": 205
+   },
+   {
+    "locus": "chr9:41803018",
+    "vaf": 0.135,
+    "normal": [
+     86,
+     4
+    ],
+    "n_links": 84,
+    "max_coread": 205
+   },
+   {
+    "locus": "chr9:41803710",
+    "vaf": 0.127,
+    "normal": [
+     82,
+     2
+    ],
+    "n_links": 84,
+    "max_coread": 205
+   },
+   {
+    "locus": "chr9:41803728",
+    "vaf": 0.132,
+    "normal": [
+     82,
+     2
+    ],
+    "n_links": 84,
+    "max_coread": 205
+   },
+   {
+    "locus": "chr9:41801129",
+    "vaf": 0.139,
+    "normal": [
+     98,
+     4
+    ],
+    "n_links": 84,
+    "max_coread": 204
+   },
+   {
+    "locus": "chr9:41801288",
+    "vaf": 0.137,
+    "normal": [
+     100,
+     2
+    ],
+    "n_links": 84,
+    "max_coread": 204
+   },
+   {
+    "locus": "chr9:41802059",
+    "vaf": 0.12,
+    "normal": [
+     86,
+     4
+    ],
+    "n_links": 84,
+    "max_coread": 204
+   },
+   {
+    "locus": "chr9:41802757",
+    "vaf": 0.136,
+    "normal": [
+     90,
+     2
+    ],
+    "n_links": 84,
+    "max_coread": 202
+   },
+   {
+    "locus": "chr9:41804276",
+    "vaf": 0.142,
+    "normal": [
+     78,
+     2
+    ],
+    "n_links": 84,
+    "max_coread": 202
+   }
+  ]
+ },
+ "phase_gap_candidates_note": "isolated_singleton 中可能有 same-PS 遠 partner → 待 sm_linkage_phaseset.py(Tier-PS) 細分"
+}

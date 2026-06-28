@@ -1,0 +1,62 @@
+{
+ "source": "derived from regions.tsv (frozen @ branch feat/summary-nreadsvalid)",
+ "total_regions": 7143,
+ "by_shape": {
+  "full_tree": {
+   "n": 677,
+   "clean_loh_neutral": 205,
+   "pct_of_regions": 9.5
+  },
+  "linear_nested": {
+   "n": 1908,
+   "clean_loh_neutral": 763,
+   "pct_of_regions": 26.7
+  },
+  "sibling_only": {
+   "n": 1235,
+   "clean_loh_neutral": 408,
+   "pct_of_regions": 17.3
+  },
+  "co_linked_lineage": {
+   "n": 858,
+   "clean_loh_neutral": 357,
+   "pct_of_regions": 12.0
+  },
+  "no_confirmed_structure": {
+   "n": 2443,
+   "clean_loh_neutral": 702,
+   "pct_of_regions": 34.2
+  },
+  "inconsistent": {
+   "n": 22,
+   "clean_loh_neutral": 5,
+   "pct_of_regions": 0.3
+  }
+ },
+ "structured_3shape(full+linear+sibling)": 3820,
+ "structured_plus_colinked": 4678,
+ "no_confirmed_structure": 2443,
+ "inconsistent": 22,
+ "cn_distribution": {
+  "gain": 4580,
+  "loh": 2188,
+  "neutral": 252,
+  "loss": 123
+ },
+ "clean_loh_neutral_total": 2440,
+ "has_cycle_regions": 22,
+ "n_populations_dist": {
+  "0": 380,
+  "1": 1336,
+  "2": 1790,
+  "3": 1050,
+  "4": 77,
+  "5": 1,
+  "6": 1,
+  "7": 1
+ },
+ "n_sSNV": {
+  "max": 150,
+  "n_regions_ge3_sSNV": 3436
+ }
+}

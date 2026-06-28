@@ -1,0 +1,91 @@
+{
+ "weak_n": 10270,
+ "calibration_on_weak": {
+  "絕對≥2(flat)": {
+   "reject_n": 10270,
+   "reject_pct": 100.0,
+   "reject_bothFP%": 57.9,
+   "keep_n": 0,
+   "keep_bothFP%": null,
+   "separation(rejFP-keepFP)": null
+  },
+  "ε=1%(coread×.01)": {
+   "reject_n": 1200,
+   "reject_pct": 11.7,
+   "reject_bothFP%": 71.0,
+   "keep_n": 9070,
+   "keep_bothFP%": 56.2,
+   "separation(rejFP-keepFP)": 14.8
+  },
+  "ε=2%(coread×.02)": {
+   "reject_n": 5111,
+   "reject_pct": 49.8,
+   "reject_bothFP%": 66.9,
+   "keep_n": 5159,
+   "keep_bothFP%": 49.0,
+   "separation(rejFP-keepFP)": 17.9
+  },
+  "ε=3%(coread×.03)": {
+   "reject_n": 6971,
+   "reject_pct": 67.9,
+   "reject_bothFP%": 65.8,
+   "keep_n": 3299,
+   "keep_bothFP%": 41.2,
+   "separation(rejFP-keepFP)": 24.6
+  },
+  "VAF期望≥3則拒": {
+   "reject_n": 9059,
+   "reject_pct": 88.2,
+   "reject_bothFP%": 56.7,
+   "keep_n": 1211,
+   "keep_bothFP%": 67.0,
+   "separation(rejFP-keepFP)": -10.3
+  },
+  "VAF期望≥5則拒": {
+   "reject_n": 7671,
+   "reject_pct": 74.7,
+   "reject_bothFP%": 54.3,
+   "keep_n": 2599,
+   "keep_bothFP%": 68.6,
+   "separation(rejFP-keepFP)": -14.3
+  },
+  "組合(ε2% 或 VAF≥3)": {
+   "reject_n": 9072,
+   "reject_pct": 88.3,
+   "reject_bothFP%": 56.7,
+   "keep_n": 1198,
+   "keep_bothFP%": 66.8,
+   "separation(rejFP-keepFP)": -10.1
+  }
+ },
+ "structure_band": {
+  "現行(≥1)": {
+   "co_linked": 11750,
+   "nested": 13113,
+   "independent": 6281,
+   "mutual_excl": 6905,
+   "sparse": 0
+  },
+  "絕對≥2": {
+   "co_linked": 18328,
+   "nested": 8138,
+   "independent": 2010,
+   "mutual_excl": 8071,
+   "sparse": 1502
+  },
+  "ε=2%": {
+   "co_linked": 16048,
+   "nested": 11352,
+   "independent": 3425,
+   "mutual_excl": 7223,
+   "sparse": 1
+  },
+  "組合(ε2% 且 單讀需VAF期望<3)": {
+   "co_linked": 19299,
+   "nested": 8782,
+   "independent": 2046,
+   "mutual_excl": 7856,
+   "sparse": 66
+  }
+ }
+}

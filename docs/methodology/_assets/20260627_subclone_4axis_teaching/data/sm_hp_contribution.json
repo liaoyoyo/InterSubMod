@@ -1,0 +1,60 @@
+{
+ "hp_distribution_linked_somatic": {
+  "2-1": 9491,
+  "1-1": 10006,
+  "3": 1317,
+  "1": 1
+ },
+ "chance_same_hp_baseline": 0.5,
+ "per_relationship_same_hp": {
+  "mutual_excl": {
+   "same": 3949,
+   "diff": 5238,
+   "same_hp_rate": 0.43,
+   "enrichment_vs_chance": 0.86
+  },
+  "nested_a_in_b": {
+   "same": 5334,
+   "diff": 924,
+   "same_hp_rate": 0.852,
+   "enrichment_vs_chance": 1.7
+  },
+  "co_linked": {
+   "same": 9376,
+   "diff": 1265,
+   "same_hp_rate": 0.881,
+   "enrichment_vs_chance": 1.76
+  },
+  "independent": {
+   "same": 5198,
+   "diff": 352,
+   "same_hp_rate": 0.937,
+   "enrichment_vs_chance": 1.87
+  },
+  "nested_b_in_a": {
+   "same": 5509,
+   "diff": 518,
+   "same_hp_rate": 0.914,
+   "enrichment_vs_chance": 1.83
+  },
+  "sparse": {
+   "same": 1659,
+   "diff": 679,
+   "same_hp_rate": 0.71,
+   "enrichment_vs_chance": 1.42
+  }
+ },
+ "mutual_excl_ablation": {
+  "without_HP_gate_called_subclone": 9187,
+  "with_HP_gate_true_subclone(same-HP)": 3949,
+  "removed_as_allelic(diff-HP)": 5238,
+  "false_subclone_removed_pct": 57.0
+ },
+ "hp_gateable_somatic(1-1/2-1)": 19497,
+ "hp3_ungateable_somatic": 1317,
+ "verdict": {
+  "discrimination": "same-HP 高在 nested/co_linked/independent (85-94%, 1.7-1.87x baseline, independent 最高) = 區域背景屬性, 非克隆連鎖特異證據; 克隆連鎖證據 = sSNV 2x2 共現結構本身; HP 的鑑別力在 mutual_excl (DEPLETED 0.86x) = sibling(same-HP) vs allelic(diff-HP) 分離",
+  "hp_contribution": "HP gate 對 mutual_excl 移除 57.0% allelic (diff-HP, 異染色體) = sibling vs allelic 鑑別器; 對 nested/co_linked 不提供額外確認 (same-HP 高是背景非克隆特異)",
+  "limit": "HP3 1317 linked-somatic 無 germline 錨, 無法 HP-gate"
+ }
+}

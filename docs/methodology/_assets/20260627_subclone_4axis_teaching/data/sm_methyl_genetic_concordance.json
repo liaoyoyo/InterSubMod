@@ -1,0 +1,36 @@
+{
+ "question": "甲基能否 recover 多-sSNV 遺傳 partition → 校正門檻給單 sSNV",
+ "design": "geno-string 群 = 遺傳 partition (LOH 區 = subclone 真值, germline ASM 已被 LOH 排除); PERMANOVA 甲基距離~遺傳label + shuffle null; region>80kb 跳(單分子跨不完)",
+ "params": {
+  "max_reads": 160,
+  "min_shared_cpg": 5,
+  "n_perm": 199
+ },
+ "n_target_multi_sSNV": 754,
+ "n_too_wide_skipped": 7,
+ "n_with_genetic_partition(>=2 geno grp)": 740,
+ "n_testable_permanova": 1,
+ "n_methyl_recovers_genetic(p<0.05)": 0,
+ "recover_rate_of_testable": 0.0,
+ "recover_by_cn": {
+  "loh": {
+   "tested": 1,
+   "recover_sig": 0,
+   "rate": 0.0,
+   "R2_median": 0.1745
+  },
+  "neutral": {
+   "tested": 0,
+   "recover_sig": 0,
+   "rate": null,
+   "R2_median": null
+  }
+ },
+ "R2_distribution": {
+  "median": 0.1745,
+  "p75": 0.1745,
+  "max": 0.1745,
+  "median_sig": null
+ },
+ "calibration_verdict": "若 recover_rate 高+R2 顯著 → 甲基 track 遺傳 subclone → 可設門檻轉移單 sSNV; 若 recover_rate 低/R2~null → 甲基子結構 = double-dip, 不能外推單 sSNV 偵測 subclone"
+}

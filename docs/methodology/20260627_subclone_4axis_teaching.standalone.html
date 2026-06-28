@@ -1,0 +1,207 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>clone/subclone 重建 — 骨幹軸深化教學 v2（HCC1395 ⭐3）</title><style>
+:root{--ink:#212529;--mut:#868e96;--line:#dee2e6;--bg:#f8f9fa;--card:#fff;--green:#2f9e44;--red:#e03131;--amber:#e8590c}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:var(--bg);line-height:1.72}
+.wrap{max-width:980px;margin:0 auto;padding:26px 22px 90px}
+h1{font-size:24px;margin:.2em 0 .1em;line-height:1.35}h2{font-size:20px;margin:1.7em 0 .5em;padding-bottom:.25em;border-bottom:2px solid var(--line)}
+h3{font-size:15.5px;margin:1.25em 0 .35em;color:#343a40}p{margin:.55em 0}.sub{color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:15px 18px;margin:13px 0;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.bb{border-left:5px solid var(--green)}.aux{border-left:5px solid #7048e8}.cf{border-left:5px solid var(--amber)}.me{border-left:5px solid #0c8599}
+.ribbon{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.tag{font-size:12px;padding:3px 10px;border-radius:20px;background:#e7f5ff;color:#1971c2;border:1px solid #a5d8ff}
+.tag.warn{background:#fff4e6;color:#d9480f;border-color:#ffd8a8}.tag.star{background:#fff9db;color:#e67700;border-color:#ffe066}
+.prov{background:#fff9db;border:1px solid #ffe066;border-radius:10px;padding:12px 16px;font-size:13px}
+.tier{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:5px;margin-right:4px}
+.L1{background:#d3f9d8;color:#2b8a3e}.L2{background:#e5dbff;color:#5f3dc4}.L3{background:#fff3bf;color:#b08900}.L5{background:#ffe3e3;color:#c92a2a}
+.chart{margin:10px 0}.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;font-size:12px;color:#495057}.lg i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.kv{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0}.kv .b{background:#f1f3f5;border-radius:8px;padding:8px 13px;font-size:12.5px;min-width:108px}.kv .b b{display:block;font-size:20px;color:#1c7ed6}
+table{border-collapse:collapse;width:100%;font-size:12.5px;margin:10px 0}th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}th{background:#f1f3f5}
+.red{color:var(--red);font-weight:600}.grn{color:var(--green);font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:13px}@media(max-width:680px){.two{grid-template-columns:1fr}}
+.redline{background:#fff5f5;border:1px solid #ffc9c9;border-radius:10px;padding:13px 18px}.redline li{margin:5px 0}
+.note{font-size:12px;color:var(--mut)}.eg{background:#f8f9fa;border:1px dashed #ced4da;border-radius:8px;padding:11px 14px;margin:9px 0}
+.vd{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:5px}
+.vSOUND{background:#d3f9d8;color:#2b8a3e}.vCARE{background:#fff3bf;color:#b08900}.vRISKY{background:#ffe8cc;color:#d9480f}.vINVALID{background:#ffe3e3;color:#c92a2a}
+footer{margin-top:38px;padding-top:16px;border-top:2px solid var(--line);font-size:12px;color:var(--mut)}
+</style></head><body><div class="wrap">
+
+<h1>用 ONT long-read 重建 clone/subclone — 骨幹軸深化 + 對抗驗證修正版</h1>
+<p class="sub">HCC1395 單樣本 ⭐3 · Tier-R(same-read ≤50kb) · 每數字標 L1-L5 + 由凍結 JSON 注入(非手打) · 經 2 個對抗 workflow 修正</p>
+<div class="ribbon"><span class="tag star">⭐3 單樣本上限</span><span class="tag">TP∪FP union build · SEQC2 僅觀察</span><span class="tag warn">數字源 branch 5308d9e(已凍結)</span></div>
+
+<div class="prov"><b>📌 Provenance + 方法學原則</b><br>
+數字原始 JSON 來自<b>未 merge branch <code>feat/summary-nreadsvalid@5308d9e</code></b>,已凍結到 trunk <code>_assets/20260627_subclone_4axis_teaching/{data,scripts}</code>(對照 <code>PROVENANCE.md</code>)。
+<b>建構原則</b>:build 用 ClairS→longphase-S 的 <b>TP∪FP union</b>,somatic 由 <b>normal 比對</b>定,<b>SEQC2 的 TP/FP 只用於觀察、不進前處理</b>。
+本頁由 <code>build_4axis_teaching.py</code> 從凍結 JSON 注入;region 數字由 <code>derive_region_buckets.py</code> 從 regions.tsv derive(clean full_tree 205 已非硬編)。</div>
+
+<h2>§0 結論金字塔</h2>
+<div class="card">
+<p><span class="tier L1">L1</span>體細胞 sSNV 的<b>單分子共現</b>是唯一非循環的克隆重建骨幹,在 read 跨度內重建<b>區域級局部克隆樹</b>;HP/VAF 只<b>鑑別與一致性檢查</b>、不獨立偵測;CNV/LOH 是<b>須先扣除的 confound(兼區域刻畫)</b>非證據;甲基<b>off-ladder bounded-auxiliary</b>(cis-control 0/740 未測→subclone-specificity UNDETERMINED)。</p>
+<div class="kv"><div class="b"><b>35,332</b>sSNV(TP 30,490+FP 4,842)</div><div class="b"><b>7,143</b>區域</div><div class="b"><b>677</b>full_tree</div><div class="b"><b>205</b>乾淨CN可信子集</div><div class="b"><b>6.6%</b>甲基弱佐證</div></div>
+</div>
+
+<h2>§1 核心觀念：非循環性是「有條件的」</h2>
+<div class="card bb">
+<p><b>一條 ONT read = 一條 DNA 分子 = 一個細胞的一條單倍型。</b>兩 sSNV 同 read 共現 = 物理 cis 連鎖 = 同 lineage,是<b>直接觀測</b>不需統計指派——這是非循環的根。</p>
+<p><span class="tier L1">L1</span><b>對 phase-switch 免疫(真強項)</b>:相位切換是跨 read 統計拼接的假象,單分子內部不可能切換單倍型。</p>
+<p><span class="tier L1">L1</span>🔴 <b>但最強反駁=比對偽影(paralog/segdup/amplicon mis-map)</b>:錯比 read 帶「其實不在此處」的 ALT→分子層級偽造 cis 共現;somatic-confirmed 修不了(錯比 read 在 normal 也一致缺席)、MAPQ 擋不住 segdup、本輪缺 mappability track。</p>
+<div class="eg"><b>∴ 條件化核心主張(對外一律用此版)</b>:在 <b>uniquely-mappable ∩ CN-clean(LOH+neutral) ∩ somatic-confirmed ∩ coread≥6</b> 的位點對下,同 read 共現=cis=同 lineage。整體骨幹 <b class="red">68.9% 落 CN-gain</b>(vs genome-wide 52.8%)→ 含 gain 區的「方向」標 UNDETERMINED,structure fraction 為上界。</div>
+<p class="note">對比:甲基分群是循環的(double-dip)——用甲基分群再檢定群間甲基差異,同量算兩次,故甲基只能事後佐證。</p>
+</div>
+
+<h2 id="bb">§2 骨幹軸深掘（6 小節）</h2>
+
+<div class="card bb"><h3>2.1 直接性 vs 短讀 — 為何不需 phasing</h3>
+<p>短讀要「統計 phasing 架橋」才知道兩變異是否 cis;long-read 直接讀出。骨幹**不依賴**甲基/頻率推估/下游分群 → 非循環。前置 gate(2.1 條件)是把「read=cell」這個載重前提守住的代價。</p></div>
+
+<div class="card bb"><h3>2.2 2×2 共現 census — read-level four-gamete 檢定</h3>
+<p>對每對 sSNV,只看同跨兩位點的 read 填 RR/RA/AR/AA。<b>這是 read-level four-gamete / perfect-phylogeny 相容性檢定</b>(infinite-sites 下每位點只突變一次,不該見四種 gamete)。實際 <code>classify()</code> 門檻(已驗碼):</p>
+<table><tr><th>config</th><th>零格規則(實碼)</th><th>意義</th></tr>
+<tr><td class="grn">co_linked</td><td>ra==0 <b>and</b> ar==0 (嚴格)</td><td>完美共現=同 lineage</td></tr>
+<tr><td class="teal">nested_a_in_b</td><td>ar==0</td><td>a-ALT 必伴 b-ALT→b 祖先 a 後代</td></tr>
+<tr><td>nested_b_in_a</td><td>ra==0</td><td>對稱反向</td></tr>
+<tr><td class="red">mutual_excl</td><td><b>aa&lt;2</b>(容忍1個AA)且 ra+ar≥2</td><td>兩 ALT 幾不共現=sibling/allelic</td></tr>
+<tr><td>independent</td><td>四格皆&gt;0</td><td>four-gamete 違反、無乾淨結構</td></tr></table>
+<p class="note">⚠ 碼層發現(CODE_DISCREPANCY):AA 用 aa&lt;2(容忍1)、off-diagonal 用嚴格==0(不對稱)→ 單一雜訊/嵌合 read 會把真 co_linked 降 nested、把 nested 降 independent=<b>系統性低估 lineage</b>;建議改 Fisher/binomial over-dispersion(對稱容忍)。</p>
+<p>canonical 子集(coread≥6+兩端 somatic,n=40,001)的 same/diff HP:</p>
+<div class="chart"><svg viewBox="0 0 620 138" width="100%" height="138"><text x="168" y="29" text-anchor="end" font-size="12" fill="#343a40">co_linked 共連</text><rect x="176" y="16" width="326.3" height="19" rx="3" fill="#2f9e44"/><text x="508.3" y="30" font-size="11.5" fill="#495057">10,254  異HP 1,496</text><text x="168" y="61" text-anchor="end" font-size="12" fill="#343a40">nested 巢狀(合計)</text><rect x="176" y="48" width="360.5" height="19" rx="3" fill="#0c8599"/><text x="542.5" y="62" font-size="11.5" fill="#495057">11,326  異HP 1,787</text><text x="168" y="93" text-anchor="end" font-size="12" fill="#343a40">independent 無結構</text><rect x="176" y="80" width="176.5" height="19" rx="3" fill="#868e96"/><text x="358.5" y="94" font-size="11.5" fill="#495057">5,547  異HP 734</text><text x="168" y="125" text-anchor="end" font-size="12" fill="#343a40">mutual_excl 互斥</text><rect x="176" y="112" width="89.9" height="19" rx="3" fill="#e03131"/><text x="271.9" y="126" font-size="11.5" fill="#495057">2,825  異HP 4,080 ←異HP多=allelic</text></svg></div>
+<p>🔑 <b>巢狀 same-HP 11,326 ≫ 異-HP 1,787</b>(克隆階層幾乎全同單倍型);<b>互斥反而異-HP 4,080 &gt; same-HP 2,825</b>(互斥多為 allelic 非 subclone)——這就是為何需 HP 鑑別(見 §4)。
+<span class="note">filter 兩道閘:53,094(coread≥2)→44,122(coread≥6,保零格可信)→40,001(兩端 somatic,除 germline allelic)。</span></p></div>
+
+<div class="card bb"><h3>2.3 L1→L2→L3 組裝 + 為何 component≠subclone</h3>
+<p>L1 pairwise 2×2 → L2 multi-locus 基因型向量(局部 population) → L3 整合成區域樹。連通圖散成 <b>6,146 個 component</b>(局部連鎖區域),含環 <b>23</b> 個(0.37%,必丟)。</p>
+<p>🔴 <b>component ≠ subclone</b>:① 由可觀測性+距離定義非細胞身份;② 混 same-HP(克隆)與 diff-HP(allelic)須再 HP-gate;③ 真 subclone 突變散全基因組會被切進數千 component;④ Fisher 顯著只證連鎖存在不分 subclone/allelic。
+<span class="note">誠實橋接:6,146 components ≠ 7,143 regions(不同 pipeline 階段,環 23≠inconsistent 22)。</span></p>
+<p>7,143 區的樹形(全由 regions.tsv derive,grep-able):</p>
+<div class="chart"><svg viewBox="0 0 620 202" width="100%" height="202"><text x="168" y="29" text-anchor="end" font-size="12" fill="#343a40">full_tree 完整樹</text><rect x="176" y="16" width="90.6" height="19" rx="3" fill="#2f9e44"/><text x="272.6" y="30" font-size="11.5" fill="#495057">677  乾淨CN 205</text><text x="168" y="61" text-anchor="end" font-size="12" fill="#343a40">linear_nested 階層鏈</text><rect x="176" y="48" width="255.2" height="19" rx="3" fill="#0c8599"/><text x="437.2" y="62" font-size="11.5" fill="#495057">1,908  乾淨CN 763</text><text x="168" y="93" text-anchor="end" font-size="12" fill="#343a40">sibling_only 平行分支</text><rect x="176" y="80" width="165.2" height="19" rx="3" fill="#1c7ed6"/><text x="347.2" y="94" font-size="11.5" fill="#495057">1,235  乾淨CN 408</text><text x="168" y="125" text-anchor="end" font-size="12" fill="#343a40">co_linked 單lineage</text><rect x="176" y="112" width="114.8" height="19" rx="3" fill="#6741d9"/><text x="296.8" y="126" font-size="11.5" fill="#495057">858  計入4678不計3820</text><text x="168" y="157" text-anchor="end" font-size="12" fill="#343a40">no_confirmed 無結構</text><rect x="176" y="144" width="326.8" height="19" rx="3" fill="#868e96"/><text x="508.8" y="158" font-size="11.5" fill="#495057">2,443</text><text x="168" y="189" text-anchor="end" font-size="12" fill="#343a40">inconsistent 成環</text><rect x="176" y="176" width="2.9" height="19" rx="3" fill="#e03131"/><text x="184.9" y="190" font-size="11.5" fill="#495057">22  丟棄</text></svg></div>
+<p><span class="grn">structured 3,820(full+linear+sibling)</span> / +單lineage 4,678;🔴 是<b>上界</b>(含 FP+偽影);論文級=<b>乾淨 CN full_tree 205</b>。</p></div>
+
+<div class="card bb"><h3>2.4 統計 null 與 power-gate — 存在性≠鑑別性</h3>
+<p>null=Fisher exact(2×2 條件檢定)。Fisher vs free-margin MC 一致 <b>258/264=97.7%</b>(穩健)。power-gate:sparse 類僅 <b>2.2%</b> 顯著≈機率底線(不從噪聲造結構)。</p>
+<p>🔴 <b>diff-HP 負對照(物理不可能同克隆)仍 50.3% 顯著</b> → Fisher 顯著只回答「共現存在嗎」,<b>「是 subclone 還是 allelic」全靠 HP-gate</b>。這是骨幹(存在性)交棒 HP(鑑別性)的分工。</p></div>
+
+<div class="card bb"><h3>2.5 γ 類 FP-source 與偽影 — TP∪FP union 的誠實框架</h3>
+<p>骨幹 linked-somatic 按來源:TP 17,611 + FP-source 3,204。<b>依建構原則,build 用 TP∪FP union、somatic 由 normal 定;SEQC2 的 TP/FP 是觀察疊層不是 filter</b>。所以 FP-source 3,204 是「SEQC2 標 FP 但流程 normal 判 somatic-like」的<b>觀察</b>,不可當「漏掉的確證 somatic」(F3 自承 convergence tautological)。</p>
+<p>🔴 偽影:<b>1,163</b> 個 linked-somatic 落 <b>80</b> 個 dense-uniform cluster(≥5 in ≤5kb);chr9:41777788-41804669 區 78 sSNV 擠 26.9kb(n_links 逼近上限)=偽影最像處(連鎖越多≠越可信)。→ structure fraction 為單向上界。</p></div>
+
+<div class="card bb"><h3>2.6 chr17:48360161 worked example(機器真值 3-sSNV)</h3>
+<svg viewBox="0 0 660 250" width="100%" height="250" role="img">
+<style>.nd{fill:#fff;stroke:#495057;stroke-width:1.5}.lb{font-size:11.5px;fill:#212529}.vf{font-size:11px;fill:#0c8599;font-weight:600}.ed{stroke:#868e96;stroke-width:2;fill:none}</style>
+<line class="ed" x1="330" y1="48" x2="330" y2="110"/>
+<line class="ed" x1="330" y1="150" x2="200" y2="195"/><line class="ed" x1="330" y1="150" x2="460" y2="195"/>
+<circle class="nd" cx="330" cy="34" r="20"/><text class="lb" x="330" y="38" text-anchor="middle">germline</text>
+<rect class="nd" x="250" y="110" width="160" height="40" rx="6"/><text class="lb" x="330" y="127" text-anchor="middle">α 祖先 (48365089)</text><text class="lb" x="330" y="142" text-anchor="middle">RAR · 20 reads · VAF 0.82</text>
+<rect class="nd" x="120" y="195" width="160" height="42" rx="6"/><text class="lb" x="200" y="212" text-anchor="middle">β1 後代 (48362515)</text><text class="lb" x="200" y="227" text-anchor="middle">VAF 0.47 · normal 1/29 (3.4%)</text>
+<rect class="nd" x="380" y="195" width="160" height="42" rx="6"/><text class="lb" x="460" y="212" text-anchor="middle">β2 後代 (48365161)</text><text class="lb" x="460" y="227" text-anchor="middle">VAF 0.48 · normal 0</text>
+<text class="vf" x="330" y="180" text-anchor="middle">β1 ≡ β2 共連(同後代事件)</text>
+<text x="14" y="246" font-size="10.5" fill="#868e96">機器真值 chr17_subclone_data.json：3 sSNV、群數 L0=9/α-only=20/α+β=19；線性巢狀(無 γ sibling)。方向由零格定、非 VAF。</text>
+</svg>
+<p>三對 2×2 的零格直接定拓樸(全 same-HP 1-1):</p>
+<table><tr><th>配對</th><th>coread</th><th>RR/RA/AR/AA</th><th>零格→推論</th></tr>
+<tr><td>α×β2</td><td>62</td><td>11/0/22/29</td><td>RA=0→β2 巢狀於 α</td></tr>
+<tr><td>β1×α</td><td>44</td><td>10/14/0/20</td><td>AR=0→β1 巢狀於 α</td></tr>
+<tr><td>β1×β2</td><td>46</td><td>24/0/0/22</td><td>RA=AR=0→β1≡β2 同事件</td></tr></table>
+<p><span class="tier L1">L1</span>方向<b>純由零格定、不看 VAF</b>(α⊃β)。<span class="tier L2">L2</span>VAF 0.82&gt;0.47/0.48 只是<b>一致性檢查非獨立驗證</b>(nested 對近定義性)。
+<span class="note">🔴 校正:舊 build 的「4 sSNV、γ sibling、7/10/15」不被機器源支持(γ=48357368 零命中);此為線性巢狀非 full_tree。β1 normal 1/29=3.4%,在統一 &lt;5% 定義下算 somatic(嚴格==0 則否)→ 此即待修的 somatic 雙定義。</span></p></div>
+
+<h2>§2.7 sSNV 關聯結果統計 + 單讀脆弱性與 ε=2% 門檻定案</h2>
+<div class="card bb">
+<h3>每區 sSNV 數量分布（7,143 區，1-sSNV=0 因單點不可連鎖）</h3>
+<div class="chart"><svg viewBox="0 0 620 202" width="100%" height="202"><text x="168" y="29" text-anchor="end" font-size="12" fill="#343a40">2 個 sSNV</text><rect x="176" y="16" width="332.7" height="19" rx="3" fill="#2f9e44"/><text x="514.7" y="30" font-size="11.5" fill="#495057">3,707</text><text x="168" y="61" text-anchor="end" font-size="12" fill="#343a40">3 個 sSNV</text><rect x="176" y="48" width="141.9" height="19" rx="3" fill="#2f9e44"/><text x="323.9" y="62" font-size="11.5" fill="#495057">1,581</text><text x="168" y="93" text-anchor="end" font-size="12" fill="#343a40">4 個 sSNV</text><rect x="176" y="80" width="70.8" height="19" rx="3" fill="#0c8599"/><text x="252.8" y="94" font-size="11.5" fill="#495057">789</text><text x="168" y="125" text-anchor="end" font-size="12" fill="#343a40">5-9 個 sSNV</text><rect x="176" y="112" width="85.0" height="19" rx="3" fill="#0c8599"/><text x="267.0" y="126" font-size="11.5" fill="#495057">947</text><text x="168" y="157" text-anchor="end" font-size="12" fill="#343a40">10-49 個 sSNV</text><rect x="176" y="144" width="9.9" height="19" rx="3" fill="#0c8599"/><text x="191.9" y="158" font-size="11.5" fill="#495057">110</text><text x="168" y="189" text-anchor="end" font-size="12" fill="#343a40">50+ 個 sSNV</text><rect x="176" y="176" width="1.0" height="19" rx="3" fill="#0c8599"/><text x="183.0" y="190" font-size="11.5" fill="#495057">9</text></svg></div>
+<p class="note">超過一半的區只有 2 個 sSNV（3,707）→ 主張「更多位點」被 power 封頂的實證。</p>
+<h3>🔴 單讀脆弱性 → ε=2% 噪聲底線定案</h3>
+<p>分類靠零格定拓樸,但一條定序錯誤 read 能把真 co_linked 讀成 nested(假階層)。決定格只有 1 條 read 的比例:nested 50.6% / independent 57.8%。觀察發現這些**不是低覆蓋**(coread 中位 42-64),而是**off-diagonal 佔比落在 ONT 噪聲底線(1/42≈2.4%)**。</p>
+<div class="eg"><b>定案規則</b>:cell 為真 ⟺ <b>count &gt; coread × 2%</b>(ONT 噪聲底線)。保留最低 1 條(低 coread 單讀仍算),高 coread 單讀(1 ≤ coread×2%,coread≥50)判 noise。<br>
+逐筆可驗:<code>data/pairs_eps2_annotated.tsv</code>(每對附 floor_2pct + 強/弱/noise)。例:RA=1/coread=60/floor=1.2 → noise;RA=1/coread=20/floor=0.4 → 保留;RA=18/coread=22 → strong。</div>
+<h3>方向 3 路印證 + 值錨 ONT（🔴 非「3 路收斂於同一數」）</h3>
+<p class="note">對抗稽核校正：A 定<b>方向</b>(ε 對/VAF 錯)、B 封<b>上限</b>、值 2% 錨在 <b>ONT 錯誤率</b>。三路不獨立收斂於「2」。</p>
+<table><tr><th>路徑</th><th>結果</th><th>角色</th></tr>
+<tr><td>A. FP 裁判(觀察)</td><td>弱 both-FP 57.9% vs 強 30.1%;分離度單調 +14.8/+17.9/+24.6;VAF 調整 <b>−10.3 backwards</b></td><td>定<b>方向</b>(ε對 VAF錯);單調故不指定值</td></tr>
+<tr><td>B. 結構穩定+零單讀</td><td>full_tree 677→616(−9%);零單讀(off≥2)仍存 <b>520</b>(77%);相鄰 ε 僅 197/177 區動</td><td>封<b>上限</b>;headline 非單讀假象(post-hoc edge 重推)</td></tr>
+<tr><td>C. 塌陷集中度</td><td>塌陷 234 區 edge coread <b>74 vs 27</b>;CN-gain <b>74%</b></td><td>印證打對地方(偽影區)</td></tr>
+<tr><td>值錨</td><td>ONT R10/Dorado substitution ~1-2% + min_base_quality=0 推高 → 2% 中央/1-3% band</td><td>定<b>值</b></td></tr></table>
+<p class="note">⚠ scope：ε=2% 為 HCC1395 單樣本 + SEQC2 校準值(⭐3);跨樣本須重校 ε。</p>
+<h3>最終 band（ε=2% 套用 38,049 pairs，重分類 15.7%）</h3>
+<table><tr><th>config</th><th>現行(≥1)</th><th>ε2%</th></tr>
+<tr><td class="grn">co_linked</td><td>11,750</td><td><b>16,048</b></td></tr>
+<tr><td>nested(合)</td><td>13,113</td><td>11,352</td></tr>
+<tr><td>independent</td><td>6,281</td><td>3,425</td></tr>
+<tr><td>mutual_excl</td><td>6,905</td><td>7,223</td></tr></table>
+<p class="note">⚠ 否決:純絕對 ≥2(太鈍、生 sparse)、VAF 調整(FP 裁判 backwards)、binomial/Fisher(小樣本 underpowered+需假設,不可驗)。決策全文 → 20260628_sSNV_linkage_threshold_decision_eps2_01.md。VAF 只當描述欄不當 cutoff。源頭另改 min_base_quality≥10 降 ε。</p>
+</div>
+
+<h2>§3 證據階層重構（你的 7-rung → 修正結構）</h2>
+<div class="card">
+<p>你原本的線性 7-rung,驗證後重構為「<b>骨幹 ladder + 正交軸 + precondition</b>」:</p>
+<table><tr><th>類</th><th>內容</th><th>角色</th></tr>
+<tr><td class="grn"><b>A 非循環骨幹</b></td><td>A1 同-read 多點 sSNV(最強,限 CN-clean∩non-segdup) &gt; A2 跨-read 交集(cross-PS&gt;50kb=GAP) &gt; A3 nesting topology</td><td>genetic 共現(A3 是輸出非獨立證據)</td></tr>
+<tr><td>B 條件式一致性</td><td>VAF magnitude</td><td><span class="tier L2">L2</span>非獨立、必先 condition on CNV、只 CN-clean、連報 69.8/5.7/24.5</td></tr>
+<tr><td>C 鑑別/rule-out</td><td>HP tag</td><td><span class="tier L1">L1</span>sibling-vs-allelic 鑑別器,診斷力只在互斥(0.86×)</td></tr>
+<tr><td class="cf"><b>precondition</b></td><td><b>CNV + LOH</b></td><td>🔴 <b>condition-on confound + 區域刻畫資訊</b>(非刪除、非獨立證據 rung);LOH 與 CNV 同類非 HP 子類</td></tr>
+<tr><td class="me">D off-ladder 佐證</td><td>甲基</td><td>bounded-auxiliary;subclone-specificity UNDETERMINED</td></tr></table>
+<p class="note">你的關鍵更正已採納:<b>CNV/LOH 不刪除</b>(對解釋區域突變狀況有資訊),但改列「先 condition、兼輔助刻畫」而非「lineage 投票證據」。precedence「衝突時 genetic 勝甲基」是<b>設計立場非已驗階層</b>(壓測僅 n=1)。</p></div>
+
+<h2>§4 鑑別軸：HP（只在互斥有診斷力）</h2>
+<div class="card aux">
+<p>same-HP 高在巢狀/共連是<b>區域背景</b>(同分子必同 HP tag,1.7-1.87×),非克隆特異。HP 真正診斷力在<b>互斥 DEPLETED</b>:</p>
+<div class="chart"><svg viewBox="0 0 620 138" width="100%" height="138"><line x1="350.3" y1="0" x2="350.3" y2="128" stroke="#adb5bd" stroke-dasharray="4 3"/><text x="350.3" y="9" text-anchor="middle" font-size="10" fill="#868e96">baseline 1.0</text><text x="168" y="29" text-anchor="end" font-size="12" fill="#343a40">獨立 independent</text><rect x="176" y="16" width="325.9" height="19" rx="3" fill="#868e96"/><text x="507.9" y="30" font-size="11.5" fill="#495057">1.87×  背景最高</text><text x="168" y="61" text-anchor="end" font-size="12" fill="#343a40">巢狀 nested b⊂a</text><rect x="176" y="48" width="318.9" height="19" rx="3" fill="#868e96"/><text x="500.9" y="62" font-size="11.5" fill="#495057">1.83×</text><text x="168" y="93" text-anchor="end" font-size="12" fill="#343a40">共連 co_linked</text><rect x="176" y="80" width="306.7" height="19" rx="3" fill="#868e96"/><text x="488.7" y="94" font-size="11.5" fill="#495057">1.76×</text><text x="168" y="125" text-anchor="end" font-size="12" fill="#343a40">互斥 mutual_excl</text><rect x="176" y="112" width="149.9" height="19" rx="3" fill="#e03131"/><text x="331.9" y="126" font-size="11.5" fill="#495057">0.86×  ←DEPLETED=鑑別力所在</text></svg></div>
+<p><span class="tier L1">L1</span>9,187 個 read 級互斥→HP 移除 <span class="red">5,238(57.0%)異-HP allelic</span>→剩 <span class="grn">3,949 細胞層 sibling</span>。<b>HP=鑑別器,不新增 call。</b>
+<span class="note">⚠ 碼:HP3('3')未排除→偽 same_hp 污染 sibling ~6.3%(1317/20815,待修);PS 單一可信 92.7%。</span></p></div>
+
+<h2>§5 一致性軸：VAF/CCF（條件式、非獨立）</h2>
+<div class="card aux">
+<p>方向已由零格定,VAF 只順驗量級。誠實口徑:支持 <b>69.8%</b>/違反 5.7%/tie 24.5%(禁只報 5.7%),只在 CN-clean(46.8%)可估。</p>
+<div class="chart"><svg viewBox="0 0 620 44" width="100%" height="44"><rect x="0.0" y="0" width="432.8" height="44" fill="#2f9e44"/><text x="216.4" y="27" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">70%</text><rect x="432.8" y="0" width="152.1" height="44" fill="#868e96"/><text x="508.9" y="27" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">25%</text><rect x="585.0" y="0" width="35.0" height="44" fill="#e03131"/></svg><div class="legend"><span class="lg"><i style="background:#2f9e44"></i>支持階層 <b>2,532</b> (69.8%)</span><span class="lg"><i style="background:#868e96"></i>tie 平手 <b>890</b> (24.5%)</span><span class="lg"><i style="background:#e03131"></i>違反 <b>205</b> (5.7%)</span></div></div>
+<p><span class="tier L3">L3</span>GMM best_n=3 但 ΔBIC(vs n=4)僅 <b>17</b>(邊際)+CN-gain 污染→離散 subclone 層級降 L3。</p></div>
+
+<h2>§6 precondition：CNV / LOH（confound + 區域刻畫，非證據）</h2>
+<div class="card cf">
+<p><span class="tier L1">L1</span>somatic sSNV <b>52.8%</b> 落 CN-gain;骨幹更高達 <b>68.9%</b>。CN-gain multiplicity 讓「AA=二代」失效(AA 可能是同突變被擴增)→破壞 VAF→CCF。</p>
+<div class="chart"><svg viewBox="0 0 620 44" width="100%" height="44"><rect x="0.0" y="0" width="327.3" height="44" fill="#e03131"/><text x="163.6" y="27" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">53%</text><rect x="327.3" y="0" width="226.5" height="44" fill="#2f9e44"/><text x="440.5" y="27" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">37%</text><rect x="553.8" y="0" width="63.8" height="44" fill="#0c8599"/><text x="585.6" y="27" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">10%</text><rect x="617.5" y="0" width="2.5" height="44" fill="#868e96"/></svg><div class="legend"><span class="lg"><i style="background:#e03131"></i>CN-gain(multiplicity混淆) <b>12,569</b> (52.8%)</span><span class="lg"><i style="background:#2f9e44"></i>LOH <b>8,697</b> (36.5%)</span><span class="lg"><i style="background:#0c8599"></i>neutral <b>2,449</b> (10.3%)</span><span class="lg"><i style="background:#868e96"></i>loss <b>95</b> (0.4%)</span></div></div>
+<p>🔴 <b>LOH 不是「能乾淨定義 subclone 處」,反而是假陽最高發處</b>:HP 標籤塌陷(diff-HP→偽 same-HP)+imprinting-unmask(82-91%,Martin-Trujillo 文獻 L3);甲基 corroborated 49 區的 per-CN 拆分待補(本 bundle 凍結 JSON 無)。
+<b>採納你的觀點</b>:CNV/LOH <b>不刪除</b>——它們刻畫區域狀態、是修正與輔助驗證資訊;但**先 condition(限 CN-clean 才讀 VAF)**,不當 lineage 投票。</p></div>
+
+<h2>§7 甲基：off-ladder bounded-auxiliary</h2>
+<div class="card me">
+<div class="two"><div class="eg"><b class="red">50% 別當 headline</b><br>既有 ISM CN-clean≤8kb:8 測 4=50.0%(cherry-pick)</div><div class="eg"><b class="grn">6.6% 誠實口徑</b><br>全基因組重抽 740 測 49=6.6%</div></div>
+<p><span class="tier L1">L1</span>甲基<b>不能獨立偵測</b>:PERMANOVA 全 754 區只 1 可算、recover 0=0 新 partition。<span class="tier L1">L1</span>cis-control <b>0/740=structural zero</b>→subclone-specificity <b>UNDETERMINED</b>(非已驗陰性,可能近全 cis-ASM)。</p>
+<div class="eg"><b>🔴 主張 3（甲基判突變先後時序）= INVALID</b>:同基因型 read(都 AAA/都 RRR)<b>遺傳上零 ordering 訊號</b>;甲基<b>非分子鐘</b>無時序映射;且是 double-dip。連有遺傳訊號的 740 區甲基都 recover 0,零訊號處更不可能。無未來救贖路徑。<br>
+<b>🔴 主張 5（甲基定義 clone→外推單位點）= RISKY</b>:前提「甲基能定義 subclone」<b>未成立而非已成立</b>(待 T-GATE-GB cis-control);是高風險待驗證方向非死路。</div></div>
+
+<h2>§8 6 主張裁決表</h2>
+<table>
+<tr><th>主張</th><th>裁決</th><th>核心理由</th></tr>
+<tr><td>1 二代含一代(nesting)</td><td><span class="vd vSOUND">SOUND</span></td><td>=infinite-sites/perfect-phylogeny;但 het→hom 主機制是 LOH→改稱「二代<b>事件</b>」;記號 1-1/1-1-1 與 HP tag 正交須標軸別</td></tr>
+<tr><td>2 互斥解析(diff-HP/same-HP)</td><td><span class="vd vCARE">NEEDS_CARE</span></td><td>鑑別方向對;但 LOH 區是假陽最高發(非乾淨)、用甲基距離定 1-1=double-dip</td></tr>
+<tr><td>3 甲基判突變時序</td><td><span class="vd vINVALID">INVALID</span></td><td>同基因型零 ordering+甲基非分子鐘+double-dip;無救贖路徑</td></tr>
+<tr><td>4 更多位點→更多群→更完整演化</td><td><span class="vd vCARE">NEEDS_CARE</span></td><td>「更多群」power 內成立(n_pop 實測見下);「更完整」被 read-span 封頂 regional;sSNV 稀疏(多數區僅 2 sSNV=3,707)是瓶頸非計算量</td></tr>
+<tr><td>5 甲基→單位點外推</td><td><span class="vd vRISKY">RISKY</span></td><td>前提未成立(recover 0、cis-control 未跑)+層級轉移;待 T-GATE-GB</td></tr>
+<tr><td>6 還有哪些衝突/細節</td><td><span class="vd vCARE">已修多項</span></td><td>somatic 雙定義、classify 不對稱容忍、chr17 3vs4、孤兒檔、硬編 205→本版已修/標</td></tr>
+</table>
+<p>主張 4 的 n_populations 實測分布(regions.tsv derive):</p>
+<div class="chart"><svg viewBox="0 0 620 234" width="100%" height="234"><text x="168" y="29" text-anchor="end" font-size="12" fill="#343a40">1 群</text><rect x="176" y="16" width="248.3" height="19" rx="3" fill="#868e96"/><text x="430.3" y="30" font-size="11.5" fill="#495057">1,336</text><text x="168" y="61" text-anchor="end" font-size="12" fill="#343a40">2 群</text><rect x="176" y="48" width="332.7" height="19" rx="3" fill="#2f9e44"/><text x="514.7" y="62" font-size="11.5" fill="#495057">1,790</text><text x="168" y="93" text-anchor="end" font-size="12" fill="#343a40">3 群</text><rect x="176" y="80" width="195.2" height="19" rx="3" fill="#2f9e44"/><text x="377.2" y="94" font-size="11.5" fill="#495057">1,050</text><text x="168" y="125" text-anchor="end" font-size="12" fill="#343a40">4 群</text><rect x="176" y="112" width="14.3" height="19" rx="3" fill="#2f9e44"/><text x="196.3" y="126" font-size="11.5" fill="#495057">77</text><text x="168" y="157" text-anchor="end" font-size="12" fill="#343a40">5 群</text><rect x="176" y="144" width="1.0" height="19" rx="3" fill="#868e96"/><text x="183.0" y="158" font-size="11.5" fill="#495057">1</text><text x="168" y="189" text-anchor="end" font-size="12" fill="#343a40">6 群</text><rect x="176" y="176" width="1.0" height="19" rx="3" fill="#868e96"/><text x="183.0" y="190" font-size="11.5" fill="#495057">1</text><text x="168" y="221" text-anchor="end" font-size="12" fill="#343a40">7 群</text><rect x="176" y="208" width="1.0" height="19" rx="3" fill="#868e96"/><text x="183.0" y="222" font-size="11.5" fill="#495057">1</text></svg></div>
+<p class="note">2 群 1790 / 3 群 1050 為主;≥5 群各僅 1 區(極可能 dense-cluster 偽影)。</p>
+
+<h2>§9 誠實邊界 / 紅線</h2>
+<div class="redline"><ul>
+<li>🔴 ⭐3 單樣本 single-pipeline 封頂;regional(≤read-span)非 genome-wide tree;分子共現≠single-cell confirmation。</li>
+<li>🔴 核心共現主張須條件化(uniquely-mappable∩CN-clean∩somatic∩coread≥6);CN-gain 區方向 UNDETERMINED;structure fraction 為上界(對外用 CN-clean full_tree 205)。</li>
+<li>🔴 CNV/LOH=condition-on confound+區域刻畫(非證據 rung);VAF=一致性檢查(非獨立);HP=鑑別器(只在互斥)。</li>
+<li>🔴 甲基 corroborate 非 detect、0 新 partition、cis-control 0/740→subclone-specificity UNDETERMINED;主張 3 INVALID、主張 5 RISKY。</li>
+<li>🔴 SEQC2 TP/FP 只觀察不進前處理;成環=資料不支持單樹的誠實訊號(four-gamete 違反)→丟非強解。</li>
+<li>🔴 對外丟「first read-level methyl lineage」(Foltz 2024 已有 single-molecule primitive);novelty=native ONT+read×read PERMANOVA+normal-anchored cis-test+有界甲基。</li>
+</ul></div>
+
+<h2>§10 下一步（load-bearing 排序）</h2>
+<table>
+<tr><th>步驟</th><th>理由</th><th>節點</th></tr>
+<tr><td>① matched-normal cis-control</td><td>解 cis-control 0/740 structural zero;唯此把甲基從候選推進到佐證,並驗主張 5 前提</td><td class="grn">T-GATE-GB(#1)</td></tr>
+<tr><td>② 統一 somatic 定義 + classify over-dispersion</td><td>消 somatic 雙定義(chr17 3-sSNV 定案)+ 修不對稱容忍(系統性低估 lineage)</td><td>code-fix</td></tr>
+<tr><td>③ 補 mappability/segdup mask</td><td>分離 CN-gain 環/dense-cluster 偽影,把 structure 上界往真值收</td><td>T-ONT-CNV</td></tr>
+<tr><td>④ COLO829+≥5/7 跨樣本</td><td>single-pipeline 封頂;升 ⭐3→⭐4</td><td>T-DORADO</td></tr>
+<tr><td>⑤ single-cell/multi-region 正交確認</td><td>分子共現≠single-cell;L2 生物詮釋轉 confirmed</td><td>T-GATE-GD</td></tr>
+</table>
+
+<footer>數字源 branch 5308d9e(pending-merge),凍結於 _assets/20260627_subclone_4axis_teaching/{data,scripts},對照 PROVENANCE.md。本頁 build_4axis_teaching.py 從凍結 JSON 注入+derive_region_buckets.py derive(缺 key refuse)。
+模型驗證裁決全文:InterSubMod/docs/methodology/20260628_reconstruction_model_verification_01.md(workflow wf_f2b070ea-64c 15 agent)。單一真值結論:InterSubMod/docs/methodology/20260627_subclone_unified_verified_narrative_01.md。
+證據層級:L1 源碼/JSON 重現·L2 報告 JSON·L3 推論·L5 公理。</footer>
+</div></body></html>
