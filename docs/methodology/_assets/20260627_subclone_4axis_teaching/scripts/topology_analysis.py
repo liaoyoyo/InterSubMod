@@ -26,6 +26,32 @@ for c in ("co_linked", "nested_a_in_b", "nested_b_in_a", "mutual_excl", "indepen
             locus_hp[(d["chrom"], int(d["pos_b"]))] = d["hp_b"]
 hpL = {"1-1": "H1", "2-1": "H2", "3": "H3?"}
 
+# locus -> src(TP/FP, SEQC2 觀察)
+locus_src = {}
+for c in ("co_linked", "nested_a_in_b", "nested_b_in_a", "mutual_excl", "independent"):
+    for hp in ("sameHP", "diffHP"):
+        p = os.path.join(DATA, "lists", f"{c}_{hp}.tsv")
+        if not os.path.exists(p): continue
+        for d in csv.DictReader(open(p, encoding="utf-8"), delimiter="\t"):
+            locus_src[(d["chrom"], int(d["pos_a"]))] = d.get("src_a", "?")
+            locus_src[(d["chrom"], int(d["pos_b"]))] = d.get("src_b", "?")
+
+# hg38 染色體長度(.fai) + centromere 中點(approx) → genome context(telomere/centromere/arm)
+CHRLEN = {"chr1":248956422,"chr2":242193529,"chr3":198295559,"chr4":190214555,"chr5":181538259,
+"chr6":170805979,"chr7":159345973,"chr8":145138636,"chr9":138394717,"chr10":133797422,"chr11":135086622,
+"chr12":133275309,"chr13":114364328,"chr14":107043718,"chr15":101991189,"chr16":90338345,"chr17":83257441,
+"chr18":80373285,"chr19":58617616,"chr20":64444167,"chr21":46709983,"chr22":50818468}
+CENTRO = {"chr1":123400000,"chr2":93900000,"chr3":90900000,"chr4":50000000,"chr5":48800000,"chr6":59800000,
+"chr7":60100000,"chr8":45200000,"chr9":43000000,"chr10":39800000,"chr11":53400000,"chr12":35500000,
+"chr13":17700000,"chr14":17200000,"chr15":19000000,"chr16":36800000,"chr17":25100000,"chr18":18500000,
+"chr19":26200000,"chr20":28100000,"chr21":12000000,"chr22":15000000}
+def genome_ctx(chrom, start, end, pad=3000000):
+    L = CHRLEN.get(chrom); ce = CENTRO.get(chrom)
+    if L is None: return "?"
+    if start < pad or end > L - pad: return "telomere"
+    if ce and not (end < ce - pad or start > ce + pad): return "centromere"
+    return "arm"
+
 def altset(g): return frozenset(i for i, ch in enumerate(g) if ch == "A")
 
 def _laminar(sets):
@@ -118,15 +144,50 @@ for r in regs:
     # detail：有 genotype 向量(可畫樹)的區
     if len(alt_vecs) >= 1 and len(pops) >= 1:
         stats["with_genotype_vectors"] += 1
-        detail.append({"region": r["region"], "chrom": r["chrom"], "span": r["span"], "n_sSNV": r["n_sSNV"],
-                       "cn": r["cn"], "haplotypes": "".join(sorted(set(h for h in hps if h))) or "?",
+        tpfp = Counter(locus_src.get((r["chrom"], int(p.split(":")[1])), "?") for p in posset)
+        detail.append({"region": r["region"], "chrom": r["chrom"], "start": r["start"], "span": r["span"],
+                       "n_sSNV": r["n_sSNV"], "cn": r["cn"],
+                       "haplotypes": "".join(sorted(set(h for h in hps if h))) or "?",
                        "n_clusters": nclust, "topology_type": ttype, "determinacy": det,
                        "drop_noise_frac": drop_frac, "ambig_nodes": ambig,
+                       "genome_ctx": genome_ctx(r["chrom"], r["start"], r["end"]),
+                       "tp": tpfp.get("TP", 0), "fp": tpfp.get("FP", 0),
                        "tree_shape": r["tree_shape"], "populations": pops, "edges": edges})
 
 detail.sort(key=lambda d: (-d["n_clusters"], -d["n_sSNV"]))
+
+# chr17 worked example 完整資料(S/r/m 一致標籤)
+c17 = json.load(open(os.path.join(DATA, "chr17_subclone_data.json"), encoding="utf-8"))
+c17_snvs = sorted(c17["snvs"], key=lambda s: s["pos"])  # 依座標 S1<S2<S3
+slabel = {str(s["pos"]): f"S{i+1}" for i, s in enumerate(c17_snvs)}
+ALPHA = "48365089"
+def sstat(pos):
+    st = c17["snv_stat"][str(pos)]; tot = st["tumor_REF"] + st["tumor_ALT"]
+    return {"S": slabel[str(pos)], "pos": pos, "change": f'{st["ref"]}>{st["alt"]}',
+            "vaf": round(st["tumor_ALT"]/tot, 2) if tot else 0, "hp": "H1",
+            "src": locus_src.get(("chr17", pos), "?"),
+            "somatic_confirmed": st["somatic_confirmed"],
+            "role": "α祖先" if str(pos) == ALPHA else "β後代"}
+vp17 = Counter()
+ordpos = [str(s["pos"]) for s in c17_snvs]
+for rd in c17["reads"]:
+    g = rd["geno"]; vp17["".join("A" if g.get(p) == "ALT" else "R" for p in ordpos)] += 1
+tt17, ed17, nd17, dr17, am17 = solve_topology(dict(vp17))
+tot17 = sum(vp17.values())
+chr17_worked = {
+    "locus": "chr17:48360161", "genome_ctx": genome_ctx("chr17", 48360161, 48365161),
+    "snvs": [sstat(s["pos"]) for s in c17_snvs],
+    "populations": [{"vec": k, "reads": v, "pct": round(100*v/tot17, 1),
+                     "muts": ",".join(slabel[ordpos[i]] for i, ch in enumerate(k) if ch == "A") or "germline"}
+                    for k, v in sorted(vp17.items(), key=lambda x: -x[1])],
+    "edges": ed17, "topology_type": tt17, "dropped_noise": dr17,
+    "n_cpg": c17["n_cpg"], "n_sig_diff_cpg": c17["n_sig_diff_cpg"],
+    "sig_cpg": [{"m": f"m{i+1}", "cpg": x["cpg"], "L1": x["L1"], "L2": x["L2"], "dbeta": x["dbeta"]}
+                for i, x in enumerate(c17["sig_diff_cpg"])],
+}
 out = {"stats": {k: dict(v) if isinstance(v, Counter) else v for k, v in stats.items()},
-       "n_detail": len(detail), "detail": detail}
+       "n_detail": len(detail), "detail": detail, "chr17_worked": chr17_worked,
+       "chroms": sorted(set(d["chrom"] for d in detail), key=lambda c: int(c[3:]))}
 with open(os.path.join(DATA, "topology_per_region.json"), "w", encoding="utf-8") as f:
     json.dump(out, f, ensure_ascii=False)
 
