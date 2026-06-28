@@ -171,3 +171,24 @@ topology_per_region.json 加 `provenance`：genotype_cap=8 / eps=0.02 / min_read
 | G3 截斷區/在core/帶TP | 42/3/31 | topology detail truncated |
 | G4 isolated canonical | 8320(TP7555/FP765) | `gaps_g4_g5_resolution.json` |
 | G5 underpowered/2x救/4x救/幾何 | 5458/2151/3094/2364 | 同上 G5 |
+
+## §8 補充交付（Tier-R 刻畫 + 4-gamete AA 歸屬 + 佇列 3 欄；06-29）
+
+### §8.1 Tier-R 刻畫（#3 underpowered + #4 isolated）`tier_r_characterization.json`
+- **underpowered 5,458**：100% 有 CCF（census VAF）→ clonal 2,992 / mid 2,174 / low 292；depth 2x 救 2,151(39.4%)/4x 3,094(56.7%)；**2,364(43%) max_coread=0=幾何(span>read)覆蓋救不了需長 read**。
+- **isolated 8,320**：census 無共讀 VAF → 補 **caller VCF AF（FORMAT.AF）→ 100% 可刻畫**：clonal 4,702 / mid 3,218 / low 400（TP 7,555/FP 765）。
+- 結論：兩類**非無法處理**，有 CCF/caller VAF 可放 clonal 譜；差別僅能否建樹。
+
+### §8.2 4-gamete AA 歸屬（用戶提議：AA 屬 AR 還是 RA 譜系？）`four_gamete_aa_resolution.json`
+- 51 incompatible/noise 區 → 37 個 4-gamete pair。**same-HP 前提**：14 成立 / **23(62%) 跨HP失敗**（AA=doublet/CN artifact 非譜系後代）→ **前提檢查必要**。
+- same-HP ∩ CN-clean = **0**（14 個 same-HP **全 CN-gain**，13/14 AA 膨脹=CN multiplicity 訊號）→ VAF 不可靠。
+- 裁決：方法在 same-HP+CN-clean 時可行，但 **4-gamete 本身壓倒性是 CN-gain artifact**（呼應 G2），此單樣本 0 例乾淨可用。
+
+### §8.3 確認佇列 3 欄（#1）`candidate_scoring.json` + 工作站顯示
+- **why_conflict**：成環=cycle_cause(9 CN-gain/3 other)、550 單群缺連接、76 缺中間群、99 跨HP、903 pairwise。
+- **parsimony_first_rank_prob**：76 ambiguous 區。**methyl_applicability**：負篩可用/排序 L3 弱/specificity 不可；H3 區標 germline-ASM 定相。
+- 工作站佇列顯示這 3 欄（commit 7d95436）。
+
+### §8.4 樹節點歸類驗證（#2）
+✅ **1,851/1,867（99.1%）樹形區所有 ALT 群正確歸節點**；16 區 drop 噪聲群（17 群）；HP 兩樹 20 區正確拆；甲基分支定位 L3 弱。
+> commits: 7d95436（#1/#3/#4）+ 7958406（AA 歸屬）。
