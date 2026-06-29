@@ -202,36 +202,41 @@ for r in regs:
 
 detail.sort(key=lambda d: (-d["n_clusters"], -d["n_sSNV"]))
 
-# chr17 worked example 完整資料(S/r/m 一致標籤)。per-sample 化:其他樣本無此檔 → chr17_worked=None。
+# chr17 worked example：直接綁 production 真實區(chr17:48357368-48365161, 4-SNV)，避免手算與 pipeline drift。
+# 2026-06-30 修：原版以 "A" if g.get(p)=="ALT" else "R" 把『未覆蓋』缺值 impute 成 REF → 造假中間群(RAA)+假 linear。
+# 改：樹/向量直接取 production detail(sm_multilocus full-coverage,無 impute)；甲基沿用 chr17_subclone_data 的 L1/L2 對比(仍有效)。
 _c17path = os.path.join(DATA, "chr17_subclone_data.json")
-if os.path.exists(_c17path):
+_c17reg = next((r for r in detail if r["region"] == "chr17:48357368-48365161"), None)
+if os.path.exists(_c17path) and _c17reg:
   c17 = json.load(open(_c17path, encoding="utf-8"))
-  c17_snvs = sorted(c17["snvs"], key=lambda s: s["pos"])  # 依座標 S1<S2<S3
-  slabel = {str(s["pos"]): f"S{i+1}" for i, s in enumerate(c17_snvs)}
-  ALPHA = "48365089"
-  def sstat(pos):
-    st = c17["snv_stat"][str(pos)]; tot = st["tumor_REF"] + st["tumor_ALT"]
-    return {"S": slabel[str(pos)], "pos": pos, "change": f'{st["ref"]}>{st["alt"]}',
-            "vaf": round(st["tumor_ALT"]/tot, 2) if tot else 0, "hp": "H1",
-            "src": locus_src.get(("chr17", pos), "?"),
-            "somatic_confirmed": st["somatic_confirmed"],
-            "role": "α祖先" if str(pos) == ALPHA else "β後代"}
-  vp17 = Counter()
-  ordpos = [str(s["pos"]) for s in c17_snvs]
-  for rd in c17["reads"]:
-    g = rd["geno"]; vp17["".join("A" if g.get(p) == "ALT" else "R" for p in ordpos)] += 1
-  tt17, ed17, nd17, dr17, am17 = solve_topology(dict(vp17))
-  tot17 = sum(vp17.values())
+  POSLIST = [48357368, 48362515, 48365089, 48365161]  # 依座標(=向量位序 vec[0..3])
+  slabel = {p: f"S{i+1}" for i, p in enumerate(POSLIST)}
+  ALPHA = 48365089
+  CHANGE = {48357368: "C>T", 48362515: "G>A", 48365089: "G>C", 48365161: "T>C"}
+  SRC = {48357368: "FP", 48362515: "TP", 48365089: "TP", 48365161: "TP"}  # 48357368=ClairS FP(filtered_snv_fp)
+  pops = _c17reg["populations"]; tot = sum(pops.values()) or 1
+  def _vaf(i): return round(sum(v for vec, v in pops.items() if vec[i] == "A") / tot, 2)
+  def _role(p):
+    if SRC[p] == "FP": return "FP-sibling(ClairS偽陽→獨立分支)"
+    if p == ALPHA: return "α祖先"
+    return "β後代(與另一β co_linked)"
+  def _som(p):
+    st = c17.get("snv_stat", {}).get(str(p)); return bool(st and st.get("somatic_confirmed"))
   chr17_worked = {
-    "locus": "chr17:48360161", "genome_ctx": genome_ctx("chr17", 48360161, 48365161),
-    "snvs": [sstat(s["pos"]) for s in c17_snvs],
-    "populations": [{"vec": k, "reads": v, "pct": round(100*v/tot17, 1),
-                     "muts": ",".join(slabel[ordpos[i]] for i, ch in enumerate(k) if ch == "A") or "germline"}
-                    for k, v in sorted(vp17.items(), key=lambda x: -x[1])],
-    "edges": ed17, "topology_type": tt17, "dropped_noise": dr17,
+    "locus": "chr17:48357368-48365161", "genome_ctx": genome_ctx("chr17", 48357368, 48365161),
+    "bound_to_production": True,
+    "snvs": [{"S": slabel[p], "pos": p, "change": CHANGE[p], "vaf": _vaf(i), "hp": "H1",
+              "src": SRC[p], "somatic_confirmed": _som(p), "role": _role(p)}
+             for i, p in enumerate(POSLIST)],
+    "populations": [{"vec": k, "reads": v, "pct": round(100*v/tot, 1),
+                     "muts": ",".join(slabel[POSLIST[i]] for i, ch in enumerate(k) if ch == "A") or "germline"}
+                    for k, v in sorted(pops.items(), key=lambda x: -x[1])],
+    "edges": _c17reg["edges"], "topology_type": _c17reg["topology_type"],
+    "determinacy": _c17reg["determinacy"], "dropped_noise": _c17reg.get("dropped_noise", 0),
     "n_cpg": c17["n_cpg"], "n_sig_diff_cpg": c17["n_sig_diff_cpg"],
     "sig_cpg": [{"m": f"m{i+1}", "cpg": x["cpg"], "L1": x["L1"], "L2": x["L2"], "dbeta": x["dbeta"]}
                 for i, x in enumerate(c17["sig_diff_cpg"])],
+    "methyl_note": "L1=α-only(RRAR) vs L2=α+β(RAAA);S1(48357368)=ClairS FP 獨立 sibling,不在此甲基對比",
   }
 else:
   chr17_worked = None
@@ -255,14 +260,9 @@ print(f"n_clusters: {dict(sorted(stats['n_clusters'].items()))}")
 print(f"topology_type: {dict(stats['topology_type'])}")
 print(f"determinacy: {dict(stats['determinacy'])}")
 print(f"有 genotype 向量可畫樹的區(detail): {len(detail)}")
-# chr17 驗證(per-read 向量) — per-sample 化:只 HCC1395 有此檔
-if os.path.exists(_c17path):
-    c17 = json.load(open(_c17path, encoding="utf-8"))
-    A,B1,B2="48365089","48362515","48365161"
-    vp=Counter()
-    for rd in c17["reads"]:
-        g=rd["geno"]; s=("A" if g.get(B1)=="ALT" else "R")+("A" if g.get(A)=="ALT" else "R")+("A" if g.get(B2)=="ALT" else "R")
-        vp[s]+=1
-    t,e,n,dr,amb=solve_topology(dict(vp))
-    print(f"=== chr17 驗證: 向量{dict(vp)} → topology={t}, dropped={dr}, ambig={amb}, edges={e} (應 linear: α祖先→β後代) ===")
+# chr17 驗證 — 對照已綁定的 production 真實區(無 impute;2026-06-30 改:原版 impute 缺值→REF 故移除)
+if _c17reg:
+    print(f"=== chr17 驗證(綁 production {_c17reg['region']}): populations={_c17reg['populations']} "
+          f"topology={_c17reg['topology_type']} determinacy={_c17reg['determinacy']} edges={_c17reg['edges']} "
+          f"(α祖先 RRAR→RAAA[β co_linked] + ARRR[48357368=ClairS FP] sibling) ===")
 print("OK wrote topology_per_region.json")

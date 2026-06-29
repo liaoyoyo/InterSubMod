@@ -83,7 +83,8 @@ footer{margin-top:38px;padding-top:16px;border-top:2px solid var(--line);font-si
 <p>骨幹 linked-somatic 按來源:TP 17,611 + FP-source 3,204。<b>依建構原則,build 用 TP∪FP union、somatic 由 normal 定;SEQC2 的 TP/FP 是觀察疊層不是 filter</b>。所以 FP-source 3,204 是「SEQC2 標 FP 但流程 normal 判 somatic-like」的<b>觀察</b>,不可當「漏掉的確證 somatic」(F3 自承 convergence tautological)。</p>
 <p>🔴 偽影:<b>1,163</b> 個 linked-somatic 落 <b>80</b> 個 dense-uniform cluster(≥5 in ≤5kb);chr9:41777788-41804669 區 78 sSNV 擠 26.9kb(n_links 逼近上限)=偽影最像處(連鎖越多≠越可信)。→ structure fraction 為單向上界。</p></div>
 
-<div class="card bb"><h3>2.6 chr17:48360161 worked example(機器真值 3-sSNV)</h3>
+<div class="card bb"><h3>2.6 chr17:48357368-48365161 worked example（4-sSNV，綁 production 真值）</h3>
+<div style="background:#fff3bf;border:1px solid #ffe066;border-radius:6px;padding:8px 11px;margin:6px 0;font-size:12px">⚠ <b>2026-06-30 修正</b>：下方手繪 3-sSNV 線性圖為舊版——曾把「未覆蓋」缺值 impute 成 REF，灌出假中間群、虛增 RAR=20（真全覆蓋僅 13）。<b>機器真值是 4-sSNV 分支區 chr17:48357368-48365161</b>：α祖先(48365089) <b>RRAR→RAAA</b>（+48362515/48365161 為 β 後代、co_linked 同步加、順序未定），另 <b>48357368=ClairS FP</b> 被演算法正確隔離成獨立 sibling（ARRR），未塞進真鏈。權威互動版見 <code>20260629_multisample_topology_workstation.standalone.html</code> 的 chr17 面板（直接綁 production 輸出、永不 drift）。</div>
 <svg viewBox="0 0 660 250" width="100%" height="250" role="img">
 <style>.nd{fill:#fff;stroke:#495057;stroke-width:1.5}.lb{font-size:11.5px;fill:#212529}.vf{font-size:11px;fill:#0c8599;font-weight:600}.ed{stroke:#868e96;stroke-width:2;fill:none}</style>
 <line class="ed" x1="330" y1="48" x2="330" y2="110"/>
