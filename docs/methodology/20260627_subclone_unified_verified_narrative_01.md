@@ -10,6 +10,13 @@ data_sources: docs/methodology/20260626_genomewide_sSNV_linkage_region_trees_01.
 <!-- provenance-verified: 本文 L1/L2 數字源 branch feat/summary-nreadsvalid@5308d9e 經 5 輪 fresh-context 對抗稽核的報告 + trunk memory；交互驗證=workflow wck0bu3iq。
 2026-06-27 UPGRADE：已在 merge-staging（merge/summary-into-trunk @ eda4534，wt-merge-summary，含 branch 資料檔）**獨立 grep 驗證 10 個 headline 數字全命中實際 data JSON**（見 §5 驗證表）→ 從「per branch audited」升級為「verified-against-data」。FF 進 trunk 後資料檔即落本 tree。 -->
 
+> 🔴 **2026-06-29 校正 + 部分降級 — 最新真值改以 addendum 為準**：本 06-27 doc 經並行 session **06-28 第三方獨立重驗**（`InterSubMod/docs/methodology/20260628_subclone_unified_narrative_reverify_addendum_01.md`，9-agent 唯讀重算，verdict=**SUPPORTED_WITH_CAVEATS**＝框架信心高/個別數字中）+ **cis-control pilot 做完**（`20260628_cis_control_scope_pilot_verdict_01.md`）後，下列已過時：
+> 1. 🔴 **chr17 VAF「0.18」= 硬編捏造** → 實 **0.47/0.48**；不存在的 γ 第 4 sibling 一併移除（`sm_summary.py:156`）。成環應 **18/23**（非 19/23）。
+> 2. 🟡 **chr17 canonical sSNV = 3（data）非 4（硬編）** → 待 somatic 定義統一（`==0` vs `<5%` 差 2,230 sSNV/9.05%）前不寫死。
+> 3. ✅ **structure 對外口徑 = 4,678（65%，含 858 單 lineage）**（非 06-27 防禦版 3,820/53%）。
+> 4. ✅ **cis-control「#1 open gate」已 CLOSED（06-28）**：原假設「解鎖甲基 Tier-3」**不成立**（tumor genotype 軸 ⟂ normal HP 軸 corr−0.026；SAME-HP 59% 結構性 UNDETERMINED 需 single-cell，非覆蓋問題）→ **甲基用途窮盡＝bounded-auxiliary**（memory `project_methylation_use_exhausted_bounded_auxiliary`）。
+> **框架結論（genetic 驅動 / 甲基 bounded / COMPATIBLE）仍 CONFIRMED**；僅上列個別數字/gate 狀態以 addendum + verdict doc 為最新。
+
 # Clone/Subclone 重建 — 跨來源交互驗證統一敘述（單一真值）
 
 > **敘述框架**：Verdict-Pyramid + scientific-rigor §2 證據分級（每 claim 標 L1-L5）。
@@ -27,7 +34,7 @@ data_sources: docs/methodology/20260626_genomewide_sSNV_linkage_region_trees_01.
 - **[L1] 唯一非循環重建軸 = somatic sSNV 單分子共現**（per-read 2×2 共現分類，read=同細胞）。統計底層 Fisher exact ≈ free-margin permutation（agree 258/264=97.7%，median|Δp|=0.009），power-gate 不從噪聲造結構。
 - **[L1] Genome-wide 掃描 → 區域級局部克隆樹**：宇宙 35,332 = TP 30,490 + FP 4,842（sum✓）→ 7,143 區、full_tree 677（9.5%）、linked 61%；isolated 24% 為上界（same-PS>50kb deferred + cross-PS 無 read/cell 連結 = GAP）。**「為生物克隆樹」可信子集限 CN-clean（full_tree ≈205/677），regional 非 genome-wide tree。**
 - **[L2] 有確認共現結構區數對外採防禦口徑 = 3,820 區（53%）**；4,678（65%）含 858 單 lineage 不應作 headline。此 fraction 為**上界**（含 4,842 FP-label + γ FP-source 3,204 + 未移除 dense-mapping/segdup 偽影）。
-- **[L2] chr17:48360161 canonical full_tree**（4 sSNV；ARRR γ7/RRAR α10/RAAA α+β15；VAF 0.82>0.48>0.18；0 violations；LOH）：計數可重現=L1；**克隆樹「生物詮釋」=L2**（單例×單樣本×單 pipeline、無 single-cell、γ 來自 FP-source 未確證）。
+- **[L2] chr17:48360161 canonical full_tree**（🔴 06-29 修正：sSNV **3 非 4**〔待 somatic 定義統一〕；VAF **0.82>0.47/0.48**〔第三值「0.18」為硬編捏造，已移除不存在的 γ 第 4 sibling〕；3 對 off-diagonal 乾淨 0 violations；LOH）：計數待定義統一；**克隆樹「生物詮釋」=L2**（單例×單樣本×單 pipeline、無 single-cell）。詳見 addendum。
 
 ### 輔助軸（鑑別/驗證，非偵測）
 - **[L1] HP = sibling-vs-allelic 鑑別器（非確認器）**：same-HP 正共現 1.7–1.87× 是區域背景屬性非克隆特異；診斷力在互斥（same-HP DEPLETED 0.86×）；HP 移除 allelic 57%（5,238/9,187）。源碼逐字驗 + 兩輪未翻。
@@ -67,7 +74,7 @@ data_sources: docs/methodology/20260626_genomewide_sSNV_linkage_region_trees_01.
 
 | 下一步 | 理由 | 對應任務節點 |
 |---|---|---|
-| **① matched-normal cis-control / G-B within-hap null**（normal-anchored cis-test + 遠端位點扣 cis，NACT 拆 cis-ASM） | 4 來源最一致的 load-bearing 缺口 — cis-control 0/740 structural zero 使甲基 subclone-specificity 從未被測；唯此把甲基 corroboration 從「候選」推進到「獨立 lineage 佐證」 | `T-GATE-GB` |
+| ~~① matched-normal cis-control~~ ✅ **已 CLOSED（06-28）** | cis-control pilot 做完：假設「解鎖甲基 Tier-3」**不成立**（tumor genotype 軸 ⟂ normal HP 軸 corr−0.026；SAME-HP 59% 結構性 UNDETERMINED 需 single-cell 非覆蓋）→ 甲基窮盡＝bounded-auxiliary。詳 `20260628_cis_control_scope_pilot_verdict_01.md` | `T-GATE-GB` ✅done |
 | **② 加深 ONT 覆蓋解 power-gate**（現 popB_n≥20 僅 51 區→54.9%） | 6.6% 是覆蓋限制非訊號缺如，但須與 cis-control 配對（更高 power 同樣 surface cis-ASM） | `T-METHYL-REEXTRACT`(後續) |
 | **③ 跨樣本/跨化學復現（COLO829 + ≥5/7）** | single-pipeline 自我參照封頂；升 ⭐3→⭐4 | `T-DORADO` / `T-GATE-GA` / `T-M1` |
 | **④ single-cell / multi-region 正交確認**（chr17、chr2:18M） | 分子共現≠single-cell；把 L2 生物詮釋轉 confirmed（Tarabichi LEARN） | `T-GATE-GD` |
