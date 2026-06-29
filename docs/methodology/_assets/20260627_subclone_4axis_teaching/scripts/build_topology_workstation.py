@@ -13,14 +13,49 @@
 import json, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.normpath(os.path.join(HERE, "..", "data"))
+MULTI_OUT = os.path.normpath(os.path.join(HERE, "..", "..", "20260629_multisample_topology_workstation.standalone.html"))
 OUT = os.path.normpath(os.path.join(HERE, "..", "..", "..", "20260628_topology_workstation.standalone.html"))
-d = json.load(open(os.path.join(DATA, "topology_per_region.json"), encoding="utf-8"))
-acc = json.load(open(os.path.join(DATA, "single_snv_accounting.json"), encoding="utf-8"))
-cs = json.load(open(os.path.join(DATA, "candidate_scoring.json"), encoding="utf-8"))
-DJ = json.dumps({"stats": d["stats"], "detail": d["detail"], "chr17": d["chr17_worked"], "chroms": d["chroms"],
-                 "scoring": {"summary": {k: cs[k] for k in ("n_total","n_need_confirm","score_formula","situation_dist","resolution_dist","score_buckets","needs_methyl_n")},
-                             "queue": cs["queue"]}}, ensure_ascii=False)
-B = acc["buckets"]
+
+# 多樣本(2026-06-29):SM_SAMPLES="name:dir,name:dir" → 多分頁;預設納入已完成樣本(HCC1395 凍結 + multisample_subclone 下有 topology 的)。
+MSROOT = "/big7_disk/liaoyoyo2001/big7_disk_output/multisample_subclone"
+def _sample_dirs():
+    env = os.environ.get("SM_SAMPLES", "")
+    if env:
+        return [tuple(x.split(":", 1)) for x in env.split(",") if ":" in x]
+    pairs = [("HCC1395", DATA)]  # 凍結主樣本
+    if os.path.isdir(MSROOT):
+        for s in sorted(os.listdir(MSROOT)):
+            tp = os.path.join(MSROOT, s, "topology_per_region.json")
+            if os.path.exists(tp):
+                pairs.append((s, os.path.join(MSROOT, s)))
+    return pairs
+
+def _load_sample(dr):
+    d = json.load(open(os.path.join(dr, "topology_per_region.json"), encoding="utf-8"))
+    rec = {"stats": d["stats"], "detail": d["detail"], "chr17": d.get("chr17_worked"),
+           "chroms": d.get("chroms", []), "provenance": d.get("provenance", {})}
+    csp = os.path.join(dr, "candidate_scoring.json")
+    if os.path.exists(csp):
+        cs = json.load(open(csp, encoding="utf-8"))
+        rec["scoring"] = {"summary": {k: cs.get(k) for k in ("n_total","n_need_confirm","score_formula","situation_dist","resolution_dist","score_buckets","needs_methyl_n")},
+                          "queue": cs.get("queue", [])}
+    else:
+        rec["scoring"] = {"summary": {}, "queue": []}
+    gp = os.path.join(dr, "region_gene_annotation.json")
+    rec["gene"] = json.load(open(gp, encoding="utf-8")).get("regions", {}) if os.path.exists(gp) else {}
+    accp = os.path.join(dr, "single_snv_accounting.json")
+    rec["accounting"] = json.load(open(accp, encoding="utf-8")) if os.path.exists(accp) else None
+    return rec
+
+SAMPLES = {name: _load_sample(dr) for name, dr in _sample_dirs()}
+SAMPLE_NAMES = list(SAMPLES.keys())
+SAMPLES_JSON = json.dumps(SAMPLES, ensure_ascii=False)
+FIRST = SAMPLE_NAMES[0]
+# 相容:DJ/B 供舊單樣本變數(UNIVERSE_BANNER 等)用 FIRST 樣本
+d = json.load(open(os.path.join(_sample_dirs()[0][1], "topology_per_region.json"), encoding="utf-8"))
+acc = SAMPLES[FIRST].get("accounting")
+B = acc["buckets"] if acc else {"linked": {"n": 0, "pct": 0}, "underpowered": {"n": 0, "pct": 0, "ccf_tendency": {}}, "isolated": {"n": 0, "pct": 0}}
+DJ = SAMPLES_JSON
 UNIVERSE_BANNER = f"""<div style="background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:11px 14px;margin:10px 0;font-size:12.5px">
 <b>全 sSNV 宇宙帳本（{acc['universe_total']:,} = TP {acc['tp']:,} + FP {acc['fp']:,}；無遺漏 sum-check ✓）</b><br>
 <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:6px">
@@ -82,6 +117,7 @@ table{border-collapse:collapse;font-size:11.5px;margin:7px 0}th,td{border:1px so
 """
 
 JS = r"""
+function bootWS(){
 const D=window.__DATA__;
 const TT={'linear(全直系)':'t_linear','branched(直系+姊妹)':'t_branched','star(全姊妹)':'t_star','single':'t_single','germline_only':'t_single'};
 const el=id=>document.getElementById(id);
@@ -89,7 +125,7 @@ function bars(o,m){let vs=Object.values(o),tot=vs.reduce((a,b)=>a+b,0)||1,mx=Mat
 el('s_topo').innerHTML=bars(D.stats.topology_type);el('s_clust').innerHTML=bars(Object.fromEntries(Object.entries(D.stats.n_clusters).map(([k,v])=>['c='+k,v])));
 el('s_det').innerHTML=bars(D.stats.determinacy);el('s_root').innerHTML=bars(D.stats.n_roots);
 // chr17 worked panel
-(function(){let c=D.chr17;
+(function(){let c=D.chr17; let cw=el('chr17wrap'); if(!c){if(cw)cw.style.display='none';return;} if(cw)cw.style.display='';
  let st=c.snvs.map(s=>`<tr><td class="mono"><b>${s.S}</b></td><td class="mono">${s.pos}</td><td>${s.change}</td><td>${s.role}</td><td>VAF ${s.vaf}</td><td>${s.hp}</td><td>${s.src}</td><td>${s.somatic_confirmed?'✓':'✗(normal有ALT)'}</td></tr>`).join('');
  let pp=c.populations.map(p=>`<tr><td class="mono">${p.vec}</td><td>${p.muts}</td><td>${p.reads}</td><td>${p.pct}%</td></tr>`).join('');
  let mm=c.sig_cpg.slice(0,16).map(x=>`<tr><td class="mono">${x.m}</td><td>${x.cpg}</td><td>${x.L1}</td><td>${x.L2}</td><td>${x.dbeta}</td></tr>`).join('');
@@ -203,7 +239,19 @@ function show(i,row){el('list').querySelectorAll('.row').forEach(x=>x.classList.
   <b>克隆樹（germline→…；節點=lineage標籤(藍)·S-mut-set·reads·%；座標=向量）</b>${tree(r.edges,r.populations,r.n_clusters,r.haplotypes,r.germline_reads,r.node_paths)}
   ${r.n_roots>=2?`<div style="background:#fff4e6;border:1px solid #ffd8a8;border-radius:6px;padding:8px;margin-top:8px"><b>⚠ 此區跨 H1/H2（${r.n_roots} 棵樹）→ 分開看的兩棵 HP 樹（上方 genotype-向量樹混合 HP 僅參考）：</b>${posTree(r)}</div>`:''}
   <div class="note">S1..S${r.n_sSNV}=區內排序 sSNV；直系=往下、姊妹=同層分叉；germline 根標 reads·%。tree_shape(pairwise)=${r.tree_shape}。genome_ctx 為近似(±3Mb)。</div>
-  <b>細胞群(lineage 標籤 → 向量 → S 突變 → reads → 佔比)</b><table><tr><th>lineage</th><th>向量</th><th>突變(S)</th><th>reads</th><th>佔比</th></tr>${pt}</table>`;
+  <b>細胞群(lineage 標籤 → 向量 → S 突變 → reads → 佔比)</b><table><tr><th>lineage</th><th>向量</th><th>突變(S)</th><th>reads</th><th>佔比</th></tr>${pt}</table>${geneBlock(r.region)}`;
+}
+function geneBlock(region){
+  let g=(D.gene||{})[region]; if(!g) return '';
+  let cg=Object.entries(g.cancer_genes||{}).map(([n,o])=>`<span style="background:#ffe3e3;border-radius:3px;padding:1px 4px">${n}${o.role?'('+o.role+')':''}${o.tier?' T'+o.tier:''}</span>`).join(' ');
+  let dr=Object.entries(g.druggable_genes||{}).map(([n,ds])=>`<span style="background:#d3f9d8;border-radius:3px;padding:1px 4px" title="${ds.join(', ')}">${n}💊</span>`).join(' ');
+  let names=(g.protein_coding||g.genes||[]).slice(0,12);
+  return `<div style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:6px;padding:8px;margin-top:8px">
+    <b>🧬 基因註釋(GENCODE+DGIdb${cg?'+COSMIC':''})</b>
+    <div class="note">基因(${g.n_genes}): ${names.join(', ')||'(無 protein-coding)'}${g.has_promoter?` · <b style="color:#1971c2">含啟動子</b>(${(g.promoter_genes||[]).slice(0,5).join(',')})`:''}</div>
+    ${cg?`<div style="margin-top:4px">🔴 癌症基因(COSMIC): ${cg}</div>`:''}
+    ${dr?`<div style="margin-top:4px">💊 可用藥(DGIdb): ${dr}</div>`:'<div class="note" style="margin-top:4px">此區無 DGIdb 可用藥基因</div>'}
+  </div>`;
 }
 ['f_chr','f_minc','f_fp','f_loh','f_undef','f_q','f_sort'].forEach(id=>{let e=el(id);e.oninput=render;e.onchange=render});
 render();
@@ -240,6 +288,18 @@ el('q_exp').onclick=()=>{let j={};Q.forEach(q=>{let v=localStorage.getItem(jkey(
  let b=new Blob([JSON.stringify({n:Object.keys(j).length,judgments:j},null,1)],{type:'application/json'});
  let a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='topology_judgments.json';a.click()};
 renderQ();
+}  // end bootWS — 每分頁切換時用新樣本資料重跑(function scope,無重宣告衝突)
+function selectSample(s){
+  window.__DATA__ = window.__SAMPLES__[s];
+  document.querySelectorAll('.stab').forEach(t=>t.classList.toggle('active', t.dataset.s===s));
+  try{ bootWS(); }catch(e){ document.getElementById('detail').innerHTML='<b style="color:#c00">分頁載入錯誤: '+e.message+'</b>'; }
+}
+(function(){
+  let names=Object.keys(window.__SAMPLES__||{});
+  let bar=document.getElementById('sampletabs');
+  if(bar){ bar.innerHTML = names.map(n=>`<button class="stab" data-s="${n}" onclick="selectSample('${n}')">${n}</button>`).join(''); }
+  if(names.length) selectSample(names[0]);
+})();
 """
 
 PROVENANCE_FOOTER = ('<p class="note" style="margin-top:8px;color:#888">'
@@ -249,16 +309,21 @@ PROVENANCE_FOOTER = ('<p class="note" style="margin-top:8px;color:#888">'
                      '甲基 = bounded-auxiliary（見 20260628_cis_control_scope_pilot_verdict_01.md）</p>')
 
 HTML = f"""<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>克隆樹拓樸工作站 v2 — sSNV 重建（HCC1395 ⭐3）</title><style>{CSS}</style></head><body><div class="wrap">
-<h1>克隆樹拓樸互動工作站 v2（cluster-first 算法 + S/r/m 標籤 + 篩選排序）</h1>
-<p class="sub">HCC1395 ⭐3 · 每區 genotype 向量→拓樸(perfect-phylogeny+噪聲過濾) · S=sSNV/r=read群/m=甲基位點 · 數字由 JSON 注入 · {len(d['detail']):,} 區可畫樹</p>
+<title>多樣本克隆樹拓樸工作站 — {len(SAMPLE_NAMES)} ONT 樣本 sSNV 重建</title><style>{CSS}
+.tabs{{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;border-bottom:2px solid #dee2e6;padding-bottom:0}}
+.stab{{padding:7px 14px;border:1px solid #dee2e6;border-bottom:none;border-radius:7px 7px 0 0;background:#f1f3f5;cursor:pointer;font-size:13px;font-weight:600;color:#495057}}
+.stab.active{{background:#1971c2;color:#fff}}
+</style></head><body><div class="wrap">
+<h1>多樣本克隆樹拓樸互動工作站（cluster-first + S/r/m 標籤 + 基因註釋）</h1>
+<p class="sub">{len(SAMPLE_NAMES)} ONT 樣本（{", ".join(SAMPLE_NAMES)}）· 每區 genotype 向量→拓樸(perfect-phylogeny+噪聲過濾) · 分頁切換樣本 · S=sSNV/r=read群/m=甲基位點 · 數字由 JSON 注入</p>
+<div id="sampletabs" class="tabs"></div>
 {UNIVERSE_BANNER}
 {GLOSSARY_HTML}
 <div class="stats">
 <div class="scard"><h4>拓樸型態</h4><div id="s_topo"></div></div><div class="scard"><h4>群數 c</h4><div id="s_clust"></div></div>
 <div class="scard"><h4>determinacy</h4><div id="s_det"></div></div><div class="scard"><h4>HP 根數</h4><div id="s_root"></div></div>
 </div>
-<details class="c17"><summary>▶ chr17:48360161 完整 worked example（S/r/m 一致標籤 + 樹 + 甲基；點開）</summary><div id="c17"></div></details>
+<details class="c17" id="chr17wrap"><summary>▶ chr17:48360161 完整 worked example（HCC1395 only；S/r/m 一致標籤 + 樹 + 甲基；點開）</summary><div id="c17"></div></details>
 <div class="ctrl">
 chr<select id="f_chr"><option value="">全</option></select>
 排序<select id="f_sort"><option value="coord">座標</option><option value="nsnv">複雜度(sSNV)</option><option value="nclust">群數</option><option value="region">region名</option></select>
@@ -285,6 +350,6 @@ situation<select id="q_sit"><option value="">全</option></select>
 <p class="note" style="margin-top:12px">⚠ 證據層級：A_determined=單分子向量唯一可辨識(≠對 single-cell 驗證為真)；A_ambiguous=缺中間群順序未定；B_pairwise=拼接非單分子整樹；C_underdetermined=多樹相容。TP/FP=SEQC2 僅觀察不進前處理。genome_ctx 為近似(±3Mb)。甲基不參與拓樸裁決(cis-confounded;06-28 cis-control 已測→bounded-auxiliary,非 resolver)。⭐3 單樣本·regional(≤read-span)非 genome-wide tree·分子共現≠single-cell。</p>
 {PROVENANCE_FOOTER}
 </div>
-<script>window.__DATA__={DJ};</script><script>{JS}</script></body></html>"""
-with open(OUT, "w", encoding="utf-8") as f: f.write(HTML)
-print(f"OK wrote {OUT} ({len(HTML):,} bytes; detail {len(d['detail'])})")
+<script>window.__SAMPLES__={SAMPLES_JSON};</script><script>{JS}</script></body></html>"""
+with open(MULTI_OUT, "w", encoding="utf-8") as f: f.write(HTML)
+print(f"OK wrote {MULTI_OUT} ({len(HTML):,} bytes; samples {SAMPLE_NAMES})")
