@@ -8,8 +8,9 @@ import glob
 import os
 from collections import defaultdict, Counter
 
-A = "/big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/docs/methodology/_assets/20260618_subcluster_pilot"
-CNBED = "/big8_disk/data/HCC1395/SEQC2/CNV/ngs_benchmark_cnvs_gain_loss_loh.bed"
+A = os.environ.get("SM_WORKDIR", "/big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/docs/methodology/_assets/20260618_subcluster_pilot")
+CNBED = os.environ.get("SM_CNBED", "/big8_disk/data/HCC1395/SEQC2/CNV/ngs_benchmark_cnvs_gain_loss_loh.bed")
+HAS_CN = bool(CNBED) and os.path.exists(CNBED)  # 無 CN → cn_state 回 'unknown'(誠實,非假設 neutral)
 LD = f"{A}/lists"
 os.makedirs(LD, exist_ok=True)
 TIER_R = 50000
@@ -17,6 +18,8 @@ TIER_R = 50000
 
 def load_cn():
     iv = defaultdict(list)
+    if not HAS_CN:
+        return iv
     for ln in open(CNBED):
         p = ln.split()
         if len(p) < 4 or not p[1].isdigit():
@@ -28,6 +31,8 @@ def load_cn():
 
 
 def cn_state(cn, chrom, pos):
+    if not HAS_CN:
+        return "unknown"
     for s, e, lab in cn.get(chrom, []):
         if s <= pos <= e:
             return lab

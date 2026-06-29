@@ -10,7 +10,7 @@
 import json, os
 from collections import Counter
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.normpath(os.path.join(HERE, "..", "data"))
+DATA = os.environ.get("SM_DATA", os.path.normpath(os.path.join(HERE, "..", "data")))  # per-sample 化
 d = json.load(open(os.path.join(DATA, "topology_per_region.json"), encoding="utf-8"))
 
 BASE = {"A_determined(單分子向量)": 80, "A_ambiguous_order(缺中間群)": 55,

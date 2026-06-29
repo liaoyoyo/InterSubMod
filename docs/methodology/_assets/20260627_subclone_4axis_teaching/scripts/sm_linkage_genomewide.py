@@ -12,6 +12,7 @@ S2 共現分類 : per-group per-read 等位向量 → 每對 2×2 (RR/RA/AR/AA) 
 數字全落 sm_linkage_genomewide.json，下游 §13-A 注入，不手打。Tier-PS(same-PS) 由 sm_linkage_phaseset.py 另算。
 """
 import sys
+import os
 import json
 import gzip
 import time
@@ -19,11 +20,14 @@ from collections import Counter, defaultdict
 from bisect import bisect_right
 import pysam
 
-VD = "/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup"
-TBAM = "/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam"
-NBAM = "/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam"
-A = "/big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/docs/methodology/_assets/20260618_subcluster_pilot"
-OUT = f"{A}/sm_linkage_genomewide.json"
+# per-sample 化(2026-06-29):env var 覆寫,預設 HCC1395(regression-safe)。
+# SM_VCF_MODE=perchrom(預設,filtered_snv_{src}_{chrom}.vcf.gz) 或 single(filtered_snv_{src}.vcf.gz,tabix fetch)
+VD = os.environ.get("SM_VD", "/big8_disk/liaoyoyo2001/InterSubMod/data/vcf/HCC1395/pileup")
+TBAM = os.environ.get("SM_TBAM", "/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/tumor.bam")
+NBAM = os.environ.get("SM_NBAM", "/big8_disk/liaoyoyo2001/InterSubMod/data/bam/HCC1395/normal.bam")
+A = os.environ.get("SM_WORKDIR", "/big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/docs/methodology/_assets/20260618_subcluster_pilot")
+OUT = os.environ.get("SM_OUT", f"{A}/sm_linkage_genomewide.json")
+VCF_MODE = os.environ.get("SM_VCF_MODE", "perchrom")
 
 TIER_R = 50000      # same-read 枚舉上限 (read aligned-span p95~34kb, max~76kb → 50kb 涵蓋, 由 co-read 過濾)
 COREAD_MIN = 6      # 連鎖「confirmed」最低共讀 (記錄 >=2 的所有對, powered = coread>=6)
@@ -40,23 +44,38 @@ def is_somatic(nref, nalt):
     return tot > 0 and (nalt / tot) < NORM_VAF_MAX
 
 
+def _vcf_lines(src, chrom):
+    """yield VCF 資料行。perchrom: 整檔讀;single: tabix fetch 該 chrom。"""
+    if VCF_MODE == "single":
+        path = f"{VD}/filtered_snv_{src}.vcf.gz"
+        if not os.path.exists(path):
+            return
+        idx = path + ".tbi" if os.path.exists(path + ".tbi") else (path + ".csi" if os.path.exists(path + ".csi") else None)
+        try:
+            tb = pysam.TabixFile(path, index=idx) if idx else pysam.TabixFile(path)
+            for ln in tb.fetch(chrom):
+                yield ln
+        except (ValueError, OSError):
+            return  # 該 chrom 不在 VCF
+    else:
+        path = f"{VD}/filtered_snv_{src}_{chrom}.vcf.gz"
+        if not os.path.exists(path):
+            return
+        with gzip.open(path, "rt") as fh:
+            for ln in fh:
+                if not ln.startswith("#"):
+                    yield ln
+
+
 def load_union(chrom):
     """回 sorted list of (pos, ref, alt, source). TP 優先 (同 pos 不覆蓋)。"""
     snvs = {}
     for src in ("tp", "fp"):
-        path = f"{VD}/filtered_snv_{src}_{chrom}.vcf.gz"
-        try:
-            fh = gzip.open(path, "rt")
-        except FileNotFoundError:
-            continue
-        with fh:
-            for ln in fh:
-                if ln.startswith("#"):
-                    continue
-                p = ln.split("\t")
-                pos = int(p[1])
-                if pos not in snvs:
-                    snvs[pos] = (p[3].upper(), p[4].strip().upper(), src.upper())
+        for ln in _vcf_lines(src, chrom):
+            p = ln.split("\t")
+            pos = int(p[1])
+            if pos not in snvs:
+                snvs[pos] = (p[3].upper(), p[4].strip().upper(), src.upper())
     return sorted((pos, v[0], v[1], v[2]) for pos, v in snvs.items())
 
 

@@ -13,7 +13,8 @@ from collections import Counter, defaultdict
 from itertools import combinations
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.normpath(os.path.join(HERE, "..", "data"))
+# DATA per-sample 化(2026-06-29):SM_DATA 指 per-sample workdir(含 sm_region_integration.json + lists/);預設 HCC1395 data/
+DATA = os.environ.get("SM_DATA", os.path.normpath(os.path.join(HERE, "..", "data")))
 
 # locus -> HP
 locus_hp = {}
@@ -201,25 +202,27 @@ for r in regs:
 
 detail.sort(key=lambda d: (-d["n_clusters"], -d["n_sSNV"]))
 
-# chr17 worked example 完整資料(S/r/m 一致標籤)
-c17 = json.load(open(os.path.join(DATA, "chr17_subclone_data.json"), encoding="utf-8"))
-c17_snvs = sorted(c17["snvs"], key=lambda s: s["pos"])  # 依座標 S1<S2<S3
-slabel = {str(s["pos"]): f"S{i+1}" for i, s in enumerate(c17_snvs)}
-ALPHA = "48365089"
-def sstat(pos):
+# chr17 worked example 完整資料(S/r/m 一致標籤)。per-sample 化:其他樣本無此檔 → chr17_worked=None。
+_c17path = os.path.join(DATA, "chr17_subclone_data.json")
+if os.path.exists(_c17path):
+  c17 = json.load(open(_c17path, encoding="utf-8"))
+  c17_snvs = sorted(c17["snvs"], key=lambda s: s["pos"])  # 依座標 S1<S2<S3
+  slabel = {str(s["pos"]): f"S{i+1}" for i, s in enumerate(c17_snvs)}
+  ALPHA = "48365089"
+  def sstat(pos):
     st = c17["snv_stat"][str(pos)]; tot = st["tumor_REF"] + st["tumor_ALT"]
     return {"S": slabel[str(pos)], "pos": pos, "change": f'{st["ref"]}>{st["alt"]}',
             "vaf": round(st["tumor_ALT"]/tot, 2) if tot else 0, "hp": "H1",
             "src": locus_src.get(("chr17", pos), "?"),
             "somatic_confirmed": st["somatic_confirmed"],
             "role": "α祖先" if str(pos) == ALPHA else "β後代"}
-vp17 = Counter()
-ordpos = [str(s["pos"]) for s in c17_snvs]
-for rd in c17["reads"]:
+  vp17 = Counter()
+  ordpos = [str(s["pos"]) for s in c17_snvs]
+  for rd in c17["reads"]:
     g = rd["geno"]; vp17["".join("A" if g.get(p) == "ALT" else "R" for p in ordpos)] += 1
-tt17, ed17, nd17, dr17, am17 = solve_topology(dict(vp17))
-tot17 = sum(vp17.values())
-chr17_worked = {
+  tt17, ed17, nd17, dr17, am17 = solve_topology(dict(vp17))
+  tot17 = sum(vp17.values())
+  chr17_worked = {
     "locus": "chr17:48360161", "genome_ctx": genome_ctx("chr17", 48360161, 48365161),
     "snvs": [sstat(s["pos"]) for s in c17_snvs],
     "populations": [{"vec": k, "reads": v, "pct": round(100*v/tot17, 1),
@@ -229,7 +232,9 @@ chr17_worked = {
     "n_cpg": c17["n_cpg"], "n_sig_diff_cpg": c17["n_sig_diff_cpg"],
     "sig_cpg": [{"m": f"m{i+1}", "cpg": x["cpg"], "L1": x["L1"], "L2": x["L2"], "dbeta": x["dbeta"]}
                 for i, x in enumerate(c17["sig_diff_cpg"])],
-}
+  }
+else:
+  chr17_worked = None
 # G9 provenance stamp:讓 determinacy 計數可重現(綁定參數)
 provenance = {"genotype_cap": 8, "genotype_cap_note": "上游 sm_region_integration populations 每區最多 8 sSNV 位點;n_sSNV>8 截斷(detail.truncated=true)",
               "eps_noise_floor": 0.02, "min_read": 3, "min_coread_for_link": 6,
@@ -250,13 +255,14 @@ print(f"n_clusters: {dict(sorted(stats['n_clusters'].items()))}")
 print(f"topology_type: {dict(stats['topology_type'])}")
 print(f"determinacy: {dict(stats['determinacy'])}")
 print(f"有 genotype 向量可畫樹的區(detail): {len(detail)}")
-# chr17 驗證(per-read 向量)
-c17 = json.load(open(os.path.join(DATA, "chr17_subclone_data.json"), encoding="utf-8"))
-A,B1,B2="48365089","48362515","48365161"
-vp=Counter()
-for rd in c17["reads"]:
-    g=rd["geno"]; s=("A" if g.get(B1)=="ALT" else "R")+("A" if g.get(A)=="ALT" else "R")+("A" if g.get(B2)=="ALT" else "R")
-    vp[s]+=1
-t,e,n,dr,amb=solve_topology(dict(vp))
-print(f"=== chr17 驗證: 向量{dict(vp)} → topology={t}, dropped={dr}, ambig={amb}, edges={e} (應 linear: α祖先→β後代) ===")
+# chr17 驗證(per-read 向量) — per-sample 化:只 HCC1395 有此檔
+if os.path.exists(_c17path):
+    c17 = json.load(open(_c17path, encoding="utf-8"))
+    A,B1,B2="48365089","48362515","48365161"
+    vp=Counter()
+    for rd in c17["reads"]:
+        g=rd["geno"]; s=("A" if g.get(B1)=="ALT" else "R")+("A" if g.get(A)=="ALT" else "R")+("A" if g.get(B2)=="ALT" else "R")
+        vp[s]+=1
+    t,e,n,dr,amb=solve_topology(dict(vp))
+    print(f"=== chr17 驗證: 向量{dict(vp)} → topology={t}, dropped={dr}, ambig={amb}, edges={e} (應 linear: α祖先→β後代) ===")
 print("OK wrote topology_per_region.json")
