@@ -3,7 +3,7 @@
 title: 論文背景敘述（verified）— Subclonal reconstruction using somatic haplotagging and methylation profiles with Nanopore sequencing
 date: 2026-06-29
 type: methodology / thesis-background
-status: draft（背景段定稿前的 verified 整合；引用待 /citation-verification）
+status: draft（背景段 verified 整合；引用 17 筆已過 /citation-verification 2026-06-30，2 修正已落地）
 task_type: D-handoff-prep（碩論背景段 + 口試講稿）
 tier: ⭐3（單樣本 characterization；對外口徑同 SoT）
 data_sources: docs/methodology/_assets/20260627_subclone_4axis_teaching/data/sm_summary.json, docs/methodology/_assets/20260627_subclone_4axis_teaching/data/single_snv_accounting.json, docs/methodology/_assets/20260627_subclone_4axis_teaching/data/sm_locus_master_summary.json, docs/methodology/_assets/20260627_subclone_4axis_teaching/data/region_shape_distribution.json, docs/experiments/in_progress/2026/05/20260529_ISM_ZAR1L_BRCA2_ASM_verification_01.md
@@ -212,17 +212,32 @@ epi-drift 作為 null **合理**（與 dispersion 主導一致）；它是 **Gai
 - **Dentro/PCAWG-11 2021**, Cell 184(8):2239-2254【C】；**BitPhylogeny 2015**, PMID 25786108【C】
 - ONT **Dorado / Modkit**（工具，引 repo URL + 版本 + dorado model id）
 
-### 6b. WebSearch 候選，**須過 /citation-verification 才可進 .bib**
-- BRCA1 啟動子甲基化：JNCI 92(7):564, PMID 10749912；PMC10550062（10–15% 乳）；PMC3961372（35.2% 卵巢）
-- BRCA2 罕見：PMID 19340607
-- MLH1：PMC3612054（PLOS One）；PMC2375277, PMID 11433526
-- CDKN2A：PMC4919535；PMC3618325（NSCLC）；PMC4383544（HNSCC）
+### 6b. 經 /citation-verification 已驗（2026-06-30；3 路 agent × WebSearch+Scholar 雙核；17 筆全 VERIFIED，0 NOT_FOUND）
 
-### 6c. 作者須補的基礎/臨床經典（庫內無，須 /citation-verification）
-- Knudson 1971（two-hit）；Wooster 1995（BRCA2）；Miki 1994（BRCA1）
-- Nowell 1976（clonal evolution）；Greaves & Maley 2012；McGranahan & Swanton 2017（ITH 臨床）；Gerlinger 2012（NEJM）
-- Jamal-Hanjani 2017（TRACERx 基因組 subclone 重建，庫內僅 CAMDAC≠tree）
-- NEBNext EM-seq（短讀甲基替代技術）
+**基礎/遺傳經典（4，候選值全對無需修正）**
+- Knudson AG 1971. Mutation and cancer: statistical study of retinoblastoma. PNAS 68(4):820-823. DOI 10.1073/pnas.68.4.820, PMID 5279523.（two-hit）
+- Nowell PC 1976. The clonal evolution of tumor cell populations. Science 194(4260):23-28. DOI 10.1126/science.959840, PMID 959840.
+- Wooster R et al. 1995. Identification of the breast cancer susceptibility gene BRCA2. Nature 378(6559):789-792. DOI 10.1038/378789a0, PMID 8524414.
+- Miki Y et al. 1994. A strong candidate for the breast and ovarian cancer susceptibility gene BRCA1. Science 266(5182):66-71. DOI 10.1126/science.7545954, PMID 7545954.
+
+**ITH 臨床/演化（4）**
+- Greaves M & Maley CC 2012. Clonal evolution in cancer. Nature 481(7381):306-313. DOI 10.1038/nature10762.
+- McGranahan N & Swanton C 2017. Clonal Heterogeneity and Tumor Evolution: Past, Present, and the Future. Cell 168(4):613-628. DOI 10.1016/j.cell.2017.01.018.
+- Gerlinger M et al. 2012. Intratumor heterogeneity and branched evolution revealed by multiregion sequencing. NEJM 366(10):883-892. DOI 10.1056/NEJMoa1113205, PMID 22397650.
+- Jamal-Hanjani M et al. 2017. Tracking the Evolution of Non-Small-Cell Lung Cancer (TRACERx). NEJM 376(22):2109-2121. DOI 10.1056/NEJMoa1616288, PMID 28445112.
+
+**甲基沉默流病 + EM-seq（含 2 修正）**
+- 🔴 BRCA1 ~13% 散發乳癌沉默 → **Esteller M et al. 2000. JNCI 92(7):564-569. DOI 10.1093/jnci/92.7.564, PMID 10749912**（原文「11 (13%) of 84」）。**勿用 PMC10550062（Jagtap 2023）撐「~10-15%」**——其文為 5.2-65.2% 範圍，claim↔source 不符。
+- BRCA1 卵巢 35.2%：Bai X et al. 2014. Oncol Lett. PMID 24944674, PMC3961372（原文「35.2% (50/142)」）。
+- BRCA2 甲基化罕見：Dworkin AM et al. 2009. Methylation not a frequent "second hit" in tumors with germline BRCA mutations. Fam Cancer 8(4):339-346. DOI 10.1007/s10689-009-9240-1, PMID 19340607.
+- MLH1 CRC 20.3%：Li X et al. 2013. PLoS One. PMID 23555617, PMC3612054.
+- 🔴 MLH1 region-specific 沉默（原候選 PMC2375277/PMID 11433526 = **兩篇不同論文被併**）：**PMC2375277 = Deng G et al. 2002, Br J Cancer, PMID 11870540**（非 11433526）；**PMID 11433526 = Menigatti M et al. 2001, Genes Chromosomes Cancer**（86% MSI）。依文中陳述擇一。
+- CDKN2A/p16 機制綜述：Zhao R et al. 2016. EBioMedicine. PMID 27428416, PMC4919535.
+- CDKN2A NSCLC meta：Gu J et al. 2013. PLoS One. PMID 23577085, PMC3618325. / HNSCC meta：Shi H et al. 2015. PLoS One. PMID 25835498, PMC4383544.
+- EM-seq：Vaisvila R et al. 2021. Enzymatic methyl sequencing detects DNA methylation at single-base resolution from picograms of DNA. Genome Res 31(7):1280-1289. DOI 10.1101/gr.266551.120, PMID 34140313.
+
+> ✅ 17 筆全 VERIFIED（含 2 CORRECTED：① ~13% 改掛 Esteller 2000；② MLH1 PMC↔PMID 拆 Deng 2002 + Menigatti 2001）。BibTeX 已由 agent 回傳，建 .bib 時直接用。
+> ⚠ 仍待：Jamal-Hanjani 2017 是 TRACERx 基因組 subclone 重建一手源（庫內原僅 CAMDAC≠tree，現已補真值）。
 
 ---
 
