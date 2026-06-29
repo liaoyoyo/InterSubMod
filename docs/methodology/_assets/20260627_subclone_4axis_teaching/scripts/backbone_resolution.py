@@ -12,7 +12,7 @@ from itertools import combinations
 from collections import Counter, defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.normpath(os.path.join(HERE, "..", "data"))
+DATA = os.environ.get("SM_DATA", os.path.normpath(os.path.join(HERE, "..", "data")))  # per-sample 化(對齊 candidate_scoring.py)
 det = json.load(open(f"{DATA}/topology_per_region.json"))["detail"]
 DET = lambda r: r.get("determinacy", "?")
 
@@ -143,4 +143,4 @@ json.dump({"summary": summary, "A1_incompatible": a1, "B1_ambiguous": b1, "B2_un
 print("BACKBONE RESOLUTION DONE")
 print(json.dumps(summary, ensure_ascii=False, indent=1))
 print("\n=== A1 成環例(前3) ===")
-for x in a1[:3]: print(f"  {x['region']} cn={x['cn']} 違反對={x['n_violating_pairs']} 例={x['violations'][:1]} → {x['cause']}")
+for x in a1[:3]: print(f"  {x['region']} cn={x['cn']} 違反對={x['n_violating_pairs_in_stored']} 例={x['violations'][:1]} → {x['cause']}")
