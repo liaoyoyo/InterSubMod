@@ -15,7 +15,7 @@ DATA = os.environ.get("SM_DATA", os.path.normpath(os.path.join(HERE, "..", "data
 ANN = os.environ.get("SM_ANNOT_DIR", "/big7_disk/liaoyoyo2001/gene_annotation")
 GTF = f"{ANN}/gencode.v46.basic.annotation.gtf.gz"
 DGIDB = f"{ANN}/dgidb_interactions.tsv"
-COSMIC = os.environ.get("SM_COSMIC", f"{ANN}/cosmic_cgc.tsv")  # optional
+COSMIC = os.environ.get("SM_COSMIC", f"{ANN}/Cosmic_CancerGeneCensus_v104_GRCh38.tsv.gz")  # optional; gz/tsv 皆可
 PROMOTER_BP = 2000
 
 
@@ -60,19 +60,20 @@ def load_dgidb():
 
 
 def load_cosmic():
-    """gene → {role, tier, tumour}。CGC TSV(欄含 Gene Symbol/Role in Cancer/Tier/Tumour Types)。optional。"""
+    """gene → {role, tier, tumour}。COSMIC CGC v104(欄 GENE_SYMBOL/ROLE_IN_CANCER/TIER/TUMOUR_TYPES_SOMATIC,tab-sep,可 gz)。optional。"""
     c = {}
     if not os.path.exists(COSMIC):
         return c
-    with open(COSMIC) as f:
-        rd = csv.DictReader(f)
+    op = gzip.open(COSMIC, "rt") if COSMIC.endswith(".gz") else open(COSMIC)
+    with op as f:
+        rd = csv.DictReader(f, delimiter="\t")  # CGC v104 = TSV
         for r in rd:
-            g = (r.get("Gene Symbol") or r.get("GENE_SYMBOL") or r.get("gene_symbol") or "").strip().upper()
+            g = (r.get("GENE_SYMBOL") or r.get("Gene Symbol") or r.get("gene_symbol") or "").strip().upper()
             if not g:
                 continue
-            c[g] = {"role": (r.get("Role in Cancer") or r.get("ROLE_IN_CANCER") or "").strip(),
-                    "tier": (r.get("Tier") or r.get("TIER") or "").strip(),
-                    "tumour": (r.get("Tumour Types(Somatic)") or "").strip()[:80]}
+            c[g] = {"role": (r.get("ROLE_IN_CANCER") or r.get("Role in Cancer") or "").strip(),
+                    "tier": (r.get("TIER") or r.get("Tier") or "").strip(),
+                    "tumour": (r.get("TUMOUR_TYPES_SOMATIC") or r.get("Tumour Types(Somatic)") or "").strip()[:80]}
     return c
 
 
