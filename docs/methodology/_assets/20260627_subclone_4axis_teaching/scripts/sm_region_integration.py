@@ -11,6 +11,9 @@ from collections import defaultdict, Counter
 A = os.environ.get("SM_WORKDIR", "/big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/docs/methodology/_assets/20260618_subcluster_pilot")
 CNBED = os.environ.get("SM_CNBED", "/big8_disk/data/HCC1395/SEQC2/CNV/ngs_benchmark_cnvs_gain_loss_loh.bed")
 HAS_CN = bool(CNBED) and os.path.exists(CNBED)  # 無 CN → cn_state 回 'unknown'(誠實,非假設 neutral)
+# 稀疏 CN 模式(2026-06-29):CLP gene-level CN 非全基因組 segment → 無重疊應回 'unknown' 非 'neutral'。
+# 預設 0(全基因組 BED 如 SEQC2,無重疊=neutral 合法,HCC1395 行為不變)。SM_CN_SPARSE=1 → 無重疊回 unknown。
+CN_SPARSE = os.environ.get("SM_CN_SPARSE", "0") == "1"
 LD = f"{A}/lists"
 os.makedirs(LD, exist_ok=True)
 TIER_R = 50000
@@ -36,7 +39,7 @@ def cn_state(cn, chrom, pos):
     for s, e, lab in cn.get(chrom, []):
         if s <= pos <= e:
             return lab
-    return "neutral"
+    return "unknown" if CN_SPARSE else "neutral"
 
 
 class UF:
