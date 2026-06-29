@@ -101,7 +101,7 @@ P(拓樸 T) ∝ P(sSNV共現|T) × 1[HP-root 相容] × P(甲基|T,normal-baseli
 - 20260628_cis_control_scope_pilot_verdict_01.md ⭐（cis-control pilot 結果 + 適用 scope 裁決；甲基 bounded-auxiliary 機制證據）
 - 20260628_reconstruction_model_verification_01.md（模型驗證）
 - 20260627_subclone_4axis_teaching.standalone.html（4 軸教學）
-- 20260628_topology_workstation.standalone.html（互動工作站：篩選/排序/樹/chr17/宇宙帳本）
+- _assets/20260629_multisample_topology_workstation.standalone.html（**多樣本互動工作站＝主結果**：7 樣本分頁/篩選/排序/克隆樹/chr17/宇宙帳本/四配子衝突框/逐區 SAME-CROSS-HP 甲基判定。**取代**舊單樣本 20260628_topology_workstation.standalone.html〔已 deprecated，build script 不再產生〕）
 
 **_assets/20260627_subclone_4axis_teaching/**:
 - `data/`：sm_*.json(凍結真值) · regions.tsv · per_sSNV_census.tsv · lists/*.tsv(per-pair) · topology_per_region.json · single_snv_accounting.json · 各分析 JSON
