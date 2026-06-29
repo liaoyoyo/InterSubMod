@@ -55,5 +55,5 @@ build_branch: feat/summary-nreadsvalid
 4. 對抗稽核紀錄見 `06_integrated_narrative.md`（L5 fresh-context evaluator verdict）。
 
 ## §5 層狀態
-L0 ✅ · L1 ✅(HP=鑑別器非確認器) · L2 ✅(GMM BIC n=3) · L3 ✅(PS-reliable 92.7%) · L4 ✅(**已從 BAM 重抽 genome-wide 740 區，6.6% 弱 corroborate**) · L5 ✅(**對抗稽核 5 輪 → PASS**，修正全套用) · L6 ✅ · L7 ✅(整合 HTML) · **L8 ✅(甲基輔助有效性審查 — BOUNDED_AUXILIARY；power-gated 高功率 54.9%／cis-control 0/740 不可評估→「subclone-specific」撤回)** · **L9 ✅(單 sSNV 外推 32% 但最不可解釋／read×read 分群 data-starved 1/754／HP 排解 0/740+0/1267 不可行／LOH 無 germline ASM 41/49／多→單無可轉移門檻)**。
+L0 ✅ · L1 ✅(HP=鑑別器非確認器) · L2 ✅(GMM BIC n=3) · L3 ✅(PS-reliable 92.7%) · L4 ✅(**已從 BAM 重抽 genome-wide 740 區，6.6% 弱 corroborate**) · L5 ✅(**對抗稽核 5 輪 → PASS**，修正全套用) · L6 ✅ · L7 ✅(整合 HTML) · **L8 ✅(甲基輔助有效性審查 — BOUNDED_AUXILIARY；power-gated 高功率 54.9%／🔴 cis-control str/int bug 修正 2026-06-29：14/49 可評估・11 germline-cis〔甲基多為 allele-specific 非 subclone〕・3 候選)** · **L9 ✅(單 sSNV 外推 32% 但最不可解釋／read×read 分群 data-starved 1/754／🔴 HP 排解 cis-ASM 可行〔14/49〕非「不可行」〔bug 修正〕／LOH 無 germline ASM 41/49／多→單無可轉移門檻)**。
 全部 data-supported；**每個數字皆可從 `data/*.json`/`*.tsv` grep（§13-A，5 輪 fresh-context 稽核三方驗證 prose=JSON=HTML 一致）**。詳見 `06_integrated_narrative.md` §4 五輪對抗稽核紀錄。

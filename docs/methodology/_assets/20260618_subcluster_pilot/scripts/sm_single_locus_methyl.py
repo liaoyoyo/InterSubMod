@@ -100,8 +100,9 @@ def main(chroms, out_path):
         sig_counts.append(len(sig)); rec["n_sig_cpg"] = len(sig)
         if sig:
             n_asm += 1; rec["asm"] = 1
-            hp1 = [rn for rn in idsA + idsR if reads[rn][2] in (1, 11)]
-            hp2 = [rn for rn in idsA + idsR if reads[rn][2] in (2, 21)]
+            # FIX(2026-06-29): HP:Z 回 str → 字串比對（原 int 比對恆 False）
+            hp1 = [rn for rn in idsA + idsR if str(reads[rn][2]) in ("1", "1-1", "11")]
+            hp2 = [rn for rn in idsA + idsR if str(reads[rn][2]) in ("2", "2-1", "21")]
             if len(hp1) >= 3 and len(hp2) >= 3:
                 hp_eval += 1; rec["hp_control_eval"] = 1
                 cis = 0

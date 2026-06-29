@@ -47,7 +47,8 @@ def read_meth_geno_hp(a, som):
         b = seq[q].upper()
         g.append("A" if b == alt else ("R" if b == ref else "-"))
     hp = a.get_tag("HP") if a.has_tag("HP") else None
-    hpc = "HP1" if hp in (1, 11) else ("HP2" if hp in (2, 21) else "other")
+    # FIX(2026-06-29): HP:Z 回 str → 字串比對（原 int 比對 in (1,11) 恆 False）。str() 兼容 longphase-to 整數。
+    hpc = "HP1" if str(hp) in ("1", "1-1", "11") else ("HP2" if str(hp) in ("2", "2-1", "21") else "other")
     return meth, "".join(g), hpc
 
 

@@ -137,8 +137,9 @@ def main(chroms, out_path):
             n_corrob += 1
             rec["corroborated"] = 1
             # cis control: HP1({1,1-1}) vs HP2({2,2-1}) at sig CpGs
-            hp1 = [rn for rn in (idsA | idsB) if reads[rn][2] in (1, 11)]
-            hp2 = [rn for rn in (idsA | idsB) if reads[rn][2] in (2, 21)]
+            # FIX(2026-06-29): pysam 對 HP:Z 字串 tag 回 str，須字串比對（原 int 比對 in (1,11) 恆 False → hp_control_eval 假象 0）。str() 同時兼容 longphase-to 整數 11/21。
+            hp1 = [rn for rn in (idsA | idsB) if str(reads[rn][2]) in ("1", "1-1", "11")]
+            hp2 = [rn for rn in (idsA | idsB) if str(reads[rn][2]) in ("2", "2-1", "21")]
             cis = 0
             if len(hp1) >= 3 and len(hp2) >= 3:
                 rec["hp_control_eval"] = 1

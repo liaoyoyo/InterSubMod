@@ -27,9 +27,11 @@ def bh(p):
 
 
 def hpclass(hp):
-    if hp in (1, 11):
+    # FIX(2026-06-29): pysam 對 HP:Z 回 str → 字串比對（原 int 比對恆 False）。str() 兼容 longphase-to 整數 11/21。
+    s = str(hp)
+    if s in ("1", "1-1", "11"):
         return "HP1"
-    if hp in (2, 21):
+    if s in ("2", "2-1", "21"):
         return "HP2"
     return "other"
 

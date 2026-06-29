@@ -19,14 +19,14 @@
 | **L1 HP** | **sibling vs allelic 鑑別器**（非「確認」）| mutual_excl same-HP **0.86× DEPLETED**（baseline 0.500）→ HP 移除 5,238 allelic（57%）| L1 |
 | **L2 CCF** | 階層方向**獨立驗證** + 離散層級 | 祖先≥後代：違反僅 **5.7%**（決定性 92.5%/clean 96%）；GMM BIC **n=3** CCF 群 | L1/L2 |
 | **L3 PS** | **reliability 旗標** | 92.7% 區域單一 PS（HP 可信）；Tier-PS 不延伸克隆（同 PS CCF 僅 42% 一致）| L1 |
-| **L4 甲基** | **有界弱** corroborate（已重抽 + 有效性審查）| 重抽 740 區：**49（6.6%）corroborate**；🔑 power-gated（高功率區 54.9%，僅 51 區達）；🔴 cis-control **0/740 不可評估** → **非** subclone-specific（可能 cis-ASM）；0 新 partition；非 detect（見 `08`）| L1/L2 |
+| **L4 甲基** | **有界弱** corroborate（已重抽 + 有效性審查）| 重抽 740 區：**49（6.6%）corroborate**；🔑 power-gated（高功率區 54.9%，僅 51 區達）；🔴 cis-control **14/49 可評估、11 germline-cis**（str/int bug 修正）→ 甲基多為 allele-specific **非** subclone；0 新 partition；非 detect（見 `08`）| L1/L2 |
 
 ## §3 整合敘述（中層）
 1. **骨幹**：ONT read 夠長 → 同分子讀多 sSNV → 共現 2×2 → classify（互斥/巢狀/共連）→ 局部克隆樹。這是**唯一非循環**的克隆共現證據。
 2. **HP 加值（修正框架）**：same-HP 高在「正共現」關係（nested/co_linked/independent 1.7–1.87×）是**區域背景**（能共讀分析的 sSNV 對本就同單倍型），**非克隆特異證據**；HP 的真價值在**互斥**：互斥 same-HP **低於背景（0.86×）**，因為它混了 sibling（同 HP）與 allelic（異 HP）→ **HP 移除 57% allelic**，把 read 級互斥轉成細胞層 sibling。
 3. **CCF 加值**：祖先 VAF ≥ 後代（違反僅 5.7%）= 用 VAF 這條**獨立軸**驗證 read-樹方向；CCF 統計多峰（n=3）= 離散 subclone 層級。
 4. **PS**：標記 phase-uncertain 區（排除以提升可信度）；不升級成克隆連鎖（germline phasing ≠ clonal）。
-5. **甲基（已重抽 genome-wide + L8 有效性審查）**：corroborate 非 detect；從 BAM 重抽 740 區，僅 **6.6%（49）corroborate**；🔑 訊號**存在但 power-gated**（popB_n≥20 達 54.9%，僅 51 區達）；🔴 **cis-control 0/740 不可評估 → 撤回「subclone-specific」**；CN 分層（使用者校正）：41/49 LOH（germline ASM 結構不可能→subclone/somatic-cis 候選）vs 8/49 neutral（germline cis 可能）；0 新 partition → **有界弱 corroborator**，詳見 `08_methylation_sufficiency_audit.md`。
+5. **甲基（已重抽 genome-wide + L8 有效性審查）**：corroborate 非 detect；從 BAM 重抽 740 區，僅 **6.6%（49）corroborate**；🔑 訊號**存在但 power-gated**（popB_n≥20 達 54.9%，僅 51 區達）；🔴 **cis-control 14/49 可評估、11 germline-cis（甲基非 subclone）、3 候選**（2026-06-29 str/int bug 修正；先前「0/740 不可評估」為型別 bug 假象）；CN 分層（使用者校正）：neutral 8/8 可評估・7 germline-cis；LOH 35/41 單倍型不可評估；0 新 partition → **有界弱 corroborator（where testable 多為 allele-specific 非 subclone）**，詳見 `08_methylation_sufficiency_audit.md`。
 6. **precedence**：sSNV 連鎖 > HP > 甲基；衝突 genetic 勝。
 
 ## §4 對抗稽核 verdict + 修正（誠實留底）

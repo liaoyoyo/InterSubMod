@@ -28,12 +28,12 @@ data_sources: data/sm_methyl_corroboration.json, data/sm_methyl_reextract_merged
 | 目標區（CN-clean 結構區 ≥2 population）| 754 |
 | 可測（≥2 population 有甲基）| 740 |
 | **甲基 corroborate（≥1 sig CpG）** | **49（6.6%）** |
-| **cis-ASM 控制（HP1 vs HP2）** | 🔴 **0 / 49 可評估**（hp_control_eval=0/740）→ cis vs subclone **UNVERIFIED** |
+| **cis-ASM 控制（HP1 vs HP2）** | **14 / 49 可評估**（str/int bug 修正 2026-06-29）→ **11 germline-cis（甲基非 subclone）**、3 候選 |
 | median sig CpG / 測試區 | **0** |
 
 → 🔑 **genome-wide-clean：6.6%（49/740）區域甲基能區分遺傳定義的 group**（median sig CpG=0）。**⚠ 詳細有效性審查見 `08_methylation_sufficiency_audit.md`**，兩項對抗稽核修正：
 - **power dose-response**：6.6% 偏低主因是**覆蓋不足非無訊號** —— 高功率區（popB_n≥20）corroboration 達 **54.9%**，但僅 51 區達此功率（58.8% 的「powered」落在功率飢餓帶）。
-- 🔴 **「全 subclone-specific（0% cis）」已撤回**：cis-ASM 控制（HP1 vs HP2 各≥3 reads）在 **0/740 區可評估** → `cis_explained=0` 是 structural zero（從未檢測）非排除。**CN 分層重判（使用者校正）**：**41/49 corroborated 是 LOH** → germline 等位 ASM 結構上不可能（單一單倍型）→ all-or-nothing Δβ **非 germline-cis** 而是 subclone/somatic-cis 候選；僅 **8/49 neutral** 才可能 germline cis-ASM。
+- 🔴 **「全 subclone-specific（0% cis）」已否決（2026-06-29 str/int bug 修正）**：先前「0/740 不可評估」是型別 bug 假象（腳本以整數比對 `HP:Z` 字串 tag 恆 False）；修正後 cis-ASM 控制 **14/49 可評估**，**11 解析為 germline-cis（HP1≠HP2 → 等位特異甲基化、非 subclone）**、僅 **3 候選**。**CN 分層（使用者校正）**：**neutral 8/8 可評估、7 germline-cis**；**LOH 41 區 35 為單倍型不可評估**（germline ASM 結構不可能），6 可評估屬 annotation/tagging 邊界效應。→ where testable，甲基 corroboration 多為 germline allele-specific 非 subclone。
 → **甲基 = 有界弱 corroborator**：少數高覆蓋區提供（未經 cis 校正的）佐證，多數區不區分 —— 符合「characterize 非 detect」。
 
 ## §3 chr17 canonical（已驗證，established）
@@ -41,7 +41,7 @@ chr17:48360161（有窗）先前完整分析：甲基 BERNOULLI/UPGMA **只切�
 
 ## §4 data-supported 結論（誠實）
 1. **既有 ISM 甲基輸出 = 稀疏 anchor 窗，覆蓋 0.19%（9/4678）結構區** → 故**已直接從 BAM 重抽**（驗證 corr=1.000），不靠既有輸出。
-2. **genome-wide-clean 結果（740 區）：甲基只在 6.6%（49）區域 corroborate 遺傳 subclone**（power-gated：高功率區 54.9%，但僅 51 區達此功率）；🔴 **cis-control 0/740 不可評估 → 不能稱「subclone-specific」**（可能為 cis-ASM）；多數（93%）區域甲基不區分。→ 甲基 = **有界弱 corroborator**，不下「強佐證 / 獨立 subclone 表觀證據」定論（見 `08`）。
+2. **genome-wide-clean 結果（740 區）：甲基只在 6.6%（49）區域 corroborate 遺傳 subclone**（power-gated：高功率區 54.9%，但僅 51 區達此功率）；🔴 **cis-control 14/49 可評估、11 germline-cis（str/int bug 修正）→ 甲基多為 allele-specific 非 subclone**；多數（93%）區域甲基不區分。→ 甲基 = **有界弱 corroborator**，不下「強佐證 / 獨立 subclone 表觀證據」定論（見 `08`）。
 3. 🔴 甲基 corroborate 非 detect；細分 subclone 必須靠遺傳（sSNV 連鎖 + HP）。
 
 ## §5 後補流程（✅ 已執行 — `sm_methyl_reextract.py`）
