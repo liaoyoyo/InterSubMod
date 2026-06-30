@@ -291,20 +291,24 @@ function tree(edges,popcount,nc,hp,germR,np,ambig){np=np||{};ambig=ambig||0;
  return s+leg;
 }
 // 2-root: 位置樹按 HP 分兩棵
+function hasCycleEdges(edges){let ch={};edges.forEach(([p,c])=>{(ch[p]=ch[p]||[]).push(c)});let col={},cyc=false;function dfs(u){col[u]=1;for(let v of (ch[u]||[])){if(col[v]==1){cyc=true;return}if(!col[v])dfs(v);if(cyc)return}col[u]=2}for(let n of Object.keys(ch)){if(!col[n])dfs(n);if(cyc)break}return cyc}
+function posTable(ns,vaf,hp,nested){let parent={};nested.forEach(([a,b])=>{(parent[b]=parent[b]||[]).push(a.split(':')[1])});let rows=[...ns].sort().map(n=>{let v=vaf[n],par=(parent[n]||[]).join('、');return `<tr><td class="mono">${n.split(':')[1]}</td><td>${v!=null?v:'?'}</td><td class="note">${par?'巢狀於 '+par:'—(根/無上游)'}</td></tr>`}).join('');return `<table style="font-size:10.5px"><tr><th>${hp} 位點</th><th>VAF</th><th>巢狀於</th></tr>${rows}</table>`}
 function posTree(r){
  let byhp={};Object.entries(r.node_hp||{}).forEach(([p,h])=>{if(h=='H1'||h=='H2')(byhp[h]=byhp[h]||[]).push(p)});
  let hps=Object.keys(byhp).sort();if(hps.length<2)return '';
- return '<div style="display:flex;gap:24px;flex-wrap:wrap">'+hps.map(h=>{
+ return '<div style="display:flex;gap:20px;flex-wrap:wrap">'+hps.map(h=>{
   let ns=new Set(byhp[h]);let ned=(r.pos_nested||[]).filter(e=>ns.has(e[0])&&ns.has(e[1]));
-  let hasp=new Set(ned.map(e=>e[1]));let edges=ned.map(e=>[e[0],e[1]]);[...ns].forEach(n=>{if(!hasp.has(n))edges.unshift(['ROOT',n])});
-  return `<div><b style="color:#d9480f">${h} 樹（${ns.size} 位點）</b>${posSVG(edges,ns,r.pos_vaf||{},h)}</div>`;
+  let body;
+  if(hasCycleEdges(ned)){body='<div class="note" style="color:#c2255c;margin:3px 0">⚠ 此 '+h+' 位點 pairwise nested <b>成環/互指(incompatible)</b>→ 無法成單一樹,改列位點+VAF 表:</div>'+posTable(ns,r.pos_vaf||{},h,ned);}
+  else{let hasp=new Set(ned.map(e=>e[1]));let edges=ned.map(e=>[e[0],e[1]]);[...ns].forEach(n=>{if(!hasp.has(n))edges.unshift(['ROOT',n])});body=posSVG(edges,ns,r.pos_vaf||{},h);}
+  return '<div style="min-width:0;max-width:100%;overflow-x:auto"><b style="color:#d9480f">'+h+' 樹（'+ns.size+' 位點）</b>'+body+'</div>';
  }).join('')+'</div>';
 }
 function posSVG(edges,ns,vaf,hp){
  let ch={},all=new Set();edges.forEach(([p,c])=>{(ch[p]=ch[p]||[]).push(c);all.add(c);if(p!='ROOT')all.add(p)});
  if(!all.size)return '<div class="note">無結構</div>';
  let depth={},pos={},leaf=0,seen={};function lay(n,dp){if(seen[n])return pos[n]!=null?pos[n]:0;seen[n]=1;depth[n]=dp;let k=(ch[n]||[]).filter(x=>!seen[x]).sort();if(!k.length){pos[n]=leaf++;return pos[n]}let xs=k.map(x=>lay(x,dp+1));pos[n]=(Math.min(...xs)+Math.max(...xs))/2;return pos[n]} // seen 防護:pos_nested 成環(incompatible)時跳過,避免 stack overflow
- let roots=ch['ROOT']||[];roots.forEach(r=>lay(r,1));let gx=roots.length?(Math.min(...roots.map(r=>pos[r]))+Math.max(...roots.map(r=>pos[r])))/2:0;
+ let roots=ch['ROOT']||[];roots.forEach(r=>lay(r,1));[...all].forEach(n=>{if(pos[n]==null)lay(n,1)});let gx=roots.length?(Math.min(...roots.map(r=>pos[r]))+Math.max(...roots.map(r=>pos[r])))/2:0;
  let nodes=[...all],md=Math.max(...nodes.map(n=>depth[n]),1),W=Math.max(200,(leaf||1)*108),H=64+md*70,X=p=>40+p*108,Y=dp=>26+dp*70;
  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}"><circle cx="${X(gx)}" cy="${Y(0)}" r="15" fill="#fff" stroke="#495057"/><text x="${X(gx)}" y="${Y(0)+3}" text-anchor="middle" font-size="9">${hp} germ</text>`;
  roots.forEach(rt=>s+=`<line x1="${X(gx)}" y1="${Y(0)+15}" x2="${X(pos[rt])}" y2="${Y(1)-20}" stroke="#adb5bd"/>`);
