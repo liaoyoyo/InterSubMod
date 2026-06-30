@@ -409,7 +409,7 @@ renderQ();
 function selectSample(s){
   window.__DATA__ = window.__SAMPLES__[s];
   document.querySelectorAll('.stab').forEach(t=>t.classList.toggle('active', t.dataset.s===s));
-  try{ bootWS(); }catch(e){ document.getElementById('detail').innerHTML='<b style="color:#c00">分頁載入錯誤: '+e.message+'</b>'; }
+  try{ bootWS(); }catch(e){ ['universe','s_topo','s_clust','s_det','s_root','s_nsnv','unlocatable','list','queue','scoresum'].forEach(id=>{let el2=document.getElementById(id);if(el2)el2.innerHTML='';}); document.getElementById('detail').innerHTML='<b style="color:#c00">⚠ 本樣本('+s+')載入失敗: '+e.message+'。其餘面板已清空避免混樣本誤讀。</b>'; }
 }
 (function(){
   let names=Object.keys(window.__SAMPLES__||{});
