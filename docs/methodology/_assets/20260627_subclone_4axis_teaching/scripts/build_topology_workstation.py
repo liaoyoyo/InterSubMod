@@ -372,13 +372,14 @@ el('q_sit').innerHTML='<option value="">全</option>';[...new Set(Q.map(q=>q.sit
 const QSORT={score:(a,b)=>a.confidence_score-b.confidence_score,scoreD:(a,b)=>b.confidence_score-a.confidence_score,coord:(a,b)=>a.chrom.localeCompare(b.chrom,undefined,{numeric:true})||a.start-b.start};
 const jkey=r=>'topo_judge_'+r;
 window.setJ=(r,v)=>{let cur=localStorage.getItem(jkey(r));localStorage.setItem(jkey(r),cur==v?'':v);renderQ()};
+window.showByRegion=function(reg){let i=det.findIndex(r=>r.region==reg);if(i>=0){show(i,null);el('detail').scrollIntoView({behavior:'smooth',block:'start'});}else{alert('此佇列區不在拓樸明細中(n_sSNV<2 或未載):'+reg);}};
 const scolor=s=>s>=80?'#2b8a3e':s>=60?'#1971c2':s>=40?'#e8590c':'#c92a2a';
 function renderQ(){let sit=el('q_sit').value,mo=el('q_methyl').checked,so=el('q_sort').value;
  let f=Q.filter(q=>(!sit||q.situation==sit)&&(!mo||q.needs_methyl));f.sort(QSORT[so]||QSORT.score);
  el('qcnt').textContent=f.length+' 區';
  el('queue').innerHTML=f.slice(0,500).map(q=>{let j=localStorage.getItem(jkey(q.region))||'';
   return `<div class="row" style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
-   <span style="width:140px"><b>${q.region}</b></span>
+   <span style="width:140px;cursor:pointer" onclick="showByRegion('${q.region}')" title="點看上方 clone 樹"><b style="color:#1971c2;text-decoration:underline">${q.region}</b></span>
    <span style="width:58px;color:${scolor(q.confidence_score)};font-weight:700" title="confidence 0-100">▮${q.confidence_score}</span>
    <span class="tag ctx_${q.genome_ctx}">${q.genome_ctx}</span>
    <span style="width:112px;font-size:11px">${q.situation}</span>
