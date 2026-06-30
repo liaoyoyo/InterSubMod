@@ -49,18 +49,22 @@ def _load_sample(dr):
     rec["candtrees"] = {x["region"]: x for x in json.load(open(ctp, encoding="utf-8")).get("candidate_trees", [])} if os.path.exists(ctp) else {}
     rdp = os.path.join(dr, "rd_perregion.json")  # read-driven per-region 交叉確認(22-way 平行遍歷 read)
     rec["rd"] = json.load(open(rdp, encoding="utf-8")) if os.path.exists(rdp) else {}
+    idp = os.path.join(dr, "ideogram_data.json")  # per-sample HG38 ideogram(census+topology 衍生,免BAM)
+    rec["ideogram"] = json.load(open(idp, encoding="utf-8")) if os.path.exists(idp) else None
     return rec
 
 SAMPLES = {name: _load_sample(dr) for name, dr in _sample_dirs()}
 SAMPLE_NAMES = list(SAMPLES.keys())
+# HCC1395 凍結樣本 ideogram 在 20260630_perregion_workstation/data(非其 frozen dir)→ 補上(per-sample 接線)
+_ideo = os.path.normpath(os.path.join(HERE, "..", "..", "20260630_perregion_workstation", "data", "ideogram_data.json"))
+if "HCC1395" in SAMPLES and SAMPLES["HCC1395"].get("ideogram") is None and os.path.exists(_ideo):
+    SAMPLES["HCC1395"]["ideogram"] = json.load(open(_ideo, encoding="utf-8"))
 SAMPLES_JSON = json.dumps(SAMPLES, ensure_ascii=False)
 # R3+R7: chr17 read×read 距離矩陣 + 分群×lineage 交叉表(HCC1395 worked;固定教學甲基展板用)
 _c17t = os.path.join(DATA, "chr17_tree_data.json")
 CHR17TREE_JSON = json.dumps(json.load(open(_c17t, encoding="utf-8")), ensure_ascii=False) if os.path.exists(_c17t) else "null"
 # (死碼移除 2026-07-01 審查 p2:FIRST/d/acc/B/DJ/UNIVERSE_BANNER 從不被 HTML 引用;宇宙帳本由 JS renderUniverse 逐樣本 runtime 渲染。rebuild byte-identical 已證移除無影響)
-# HG38 ideogram 資料(merge feat/perregion-rd-enhance 2026-07-01):全基因組樹/iso/und 分布,JS render 用
-_ideo = os.path.normpath(os.path.join(HERE, "..", "..", "20260630_perregion_workstation", "data", "ideogram_data.json"))
-IDEOGRAM_JSON = json.dumps(json.load(open(_ideo, encoding="utf-8")), ensure_ascii=False) if os.path.exists(_ideo) else "null"
+# HG38 ideogram 改為 per-sample 嵌入 __SAMPLES__[s].ideogram(見上 SAMPLES 補丁);舊全域 __IDEOGRAM__ 已移除(merge 2026-07-01)
 
 GLOSSARY = [
  ("sSNV / S1·S2·S3", "體細胞單核苷酸變異；S1..Sk = 區內依座標排序的 sSNV（基因型向量第 i 位 = Si）。", "癌細胞才有、正常細胞沒有的點突變。一個區域有 k 個就標 S1..Sk，順序按基因座位置。"),
@@ -161,7 +165,7 @@ el('s_det').innerHTML=pieBars(D.stats.determinacy);el('s_root').innerHTML=pieBar
  html+='</div><div class="note" style="margin-top:2px">藍=2-3 sSNV·綠=≥4(較豐富樹)·紅=>8 截斷</div>';
  el('s_nsnv').innerHTML=html;})();
 // HG38 ideogram: 每棵樹位點(依 shape 上色) + underpowered/isolated 密度(census-based)
-(function(){var ID=window.__IDEOGRAM__;var host=el('ideogram');if(!host)return;if(!ID){host.innerHTML='';return;}
+(function(){var ID=D.ideogram;var host=el('ideogram');if(!host)return;if(!ID){host.innerHTML='';return;}
  var chroms=Object.keys(ID.per_chrom);if(!chroms.length){host.innerHTML='';return;}
  var maxlen=Math.max.apply(null,chroms.map(function(c){return ID.per_chrom[c].len;}));
  var PXW=860,shapeCol={F:'#2f9e44',S:'#1c7ed6',I:'#e03131',N:'#adb5bd'},t=ID.totals||{};
@@ -497,6 +501,6 @@ situation<select id="q_sit"><option value="">全</option></select>
 <p class="note" style="margin-top:12px">⚠ 證據層級：A_determined=單分子向量唯一可辨識(≠對 single-cell 驗證為真)；A_ambiguous=缺中間群順序未定；B_pairwise=拼接非單分子整樹；C_underdetermined=多樹相容。TP/FP=SEQC2 僅觀察不進前處理。genome_ctx 為近似(±3Mb)。甲基不參與拓樸裁決(cis-confounded;06-28 cis-control 已測→bounded-auxiliary,非 resolver)。⭐3 單樣本·regional(≤read-span)非 genome-wide tree·分子共現≠single-cell。</p>
 {PROVENANCE_FOOTER}
 </div>
-<script>window.__SAMPLES__={SAMPLES_JSON};window.__CHR17TREE__={CHR17TREE_JSON};window.__IDEOGRAM__={IDEOGRAM_JSON};</script><script>{JS}</script></body></html>"""
+<script>window.__SAMPLES__={SAMPLES_JSON};window.__CHR17TREE__={CHR17TREE_JSON};</script><script>{JS}</script></body></html>"""
 with open(MULTI_OUT, "w", encoding="utf-8") as f: f.write(HTML)
 print(f"OK wrote {MULTI_OUT} ({len(HTML):,} bytes; samples {SAMPLE_NAMES})")
