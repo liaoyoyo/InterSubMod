@@ -1,0 +1,59 @@
+{
+ "universe": 35332,
+ "underpowered": {
+  "n": 5458,
+  "vaf_available": 5458,
+  "vaf_avail_pct": 100.0,
+  "ccf_tier": {
+   "clonal(≥0.4)": 2992,
+   "mid(0.1-0.4)": 2174,
+   "low(<0.1,subclonal/noise)": 292
+  },
+  "by_source": {
+   "TP": 4952,
+   "FP": 506
+  },
+  "by_cn": {
+   "loh": 2103,
+   "gain": 2917,
+   "loss": 216,
+   "neutral": 222
+  },
+  "depth_rescuable_2x": 2151,
+  "depth_rescuable_4x": 3094,
+  "geometric(max_coread=0,需長read)": 2364,
+  "note": "有 partner 但無共讀 link(coread<6);CCF 可刻畫;~57% 深覆蓋(4x)可救成 link、~43% 幾何需長 read。"
+ },
+ "isolated": {
+  "n": 8320,
+  "vaf_available": 8320,
+  "vaf_avail_pct": 100.0,
+  "ccf_tier": {
+   "clonal(≥0.4)": 4702,
+   "mid(0.1-0.4)": 3218,
+   "low(<0.1,subclonal/noise)": 400
+  },
+  "by_source": {
+   "TP": 7555,
+   "FP": 765
+  },
+  "by_cn": {
+   "neutral": 263,
+   "loh": 3525,
+   "gain": 4314,
+   "loss": 218
+  },
+  "depth_rescuable_2x": 0,
+  "depth_rescuable_4x": 0,
+  "geometric(max_coread=0,需長read)": 8320,
+  "note": "read-span≤50kb 內無 partner(樹外);caller VAF 可放 clonal 譜刻畫;可能 same-PS>50kb partner(Tier-PS 放單倍型非巢狀)。geometric/depth 對無-partner 不適用。"
+ },
+ "linked_ref": {
+  "n": 21554,
+  "note": "對照:可建樹(進拓樸)"
+ },
+ "handling": {
+  "underpowered": "① caller CCF 刻畫放 clonal 譜(現可) ② depth-limited 加深覆蓋救 link(~57%@4x) ③ geometric 需長 read",
+  "isolated": "① caller VAF 刻畫(clonal 譜) ② Tier-PS 放單倍型(非巢狀) ③ 單樣本無法建樹但非永久 dead"
+ }
+}
