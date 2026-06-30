@@ -10,7 +10,7 @@
 §13-A: 數字由 topology_per_region.json 注入。
 用法: python3 build_topology_workstation.py
 """
-import json, os
+import json, os, glob
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.normpath(os.path.join(HERE, "..", "data"))
 MULTI_OUT = os.environ.get("SM_OUT") or os.path.normpath(os.path.join(HERE, "..", "..", "20260629_multisample_topology_workstation.standalone.html"))
@@ -51,6 +51,21 @@ def _load_sample(dr):
     rec["rd"] = json.load(open(rdp, encoding="utf-8")) if os.path.exists(rdp) else {}
     idp = os.path.join(dr, "ideogram_data.json")  # per-sample HG38 ideogram(census+topology 衍生,免BAM)
     rec["ideogram"] = json.load(open(idp, encoding="utf-8")) if os.path.exists(idp) else None
+    # LOH 底帶(per-sample):multisample 樣本用 {dr}/{S}_clp_cn.bed 篩 loh;HCC1395 在 SAMPLES 後 patch 用 longphase-TO(SEQC2-validated)
+    rec["loh"], rec["loh_source"] = [], None
+    _beds = glob.glob(os.path.join(dr, "*_clp_cn.bed"))
+    if _beds:
+        rec["loh_source"] = "clp_cn (CLP CN caller)"
+        seen = set()
+        for _ln in open(_beds[0], encoding="utf-8"):
+            _p = _ln.split()
+            if len(_p) >= 4 and _p[3].lower() == "loh":
+                try:
+                    iv = (_p[0], int(_p[1]), int(_p[2]))
+                    if iv not in seen:
+                        seen.add(iv); rec["loh"].append([iv[0], iv[1], iv[2]])
+                except ValueError:
+                    pass
     return rec
 
 SAMPLES = {name: _load_sample(dr) for name, dr in _sample_dirs()}
@@ -59,6 +74,20 @@ SAMPLE_NAMES = list(SAMPLES.keys())
 _ideo = os.path.normpath(os.path.join(HERE, "..", "..", "20260630_perregion_workstation", "data", "ideogram_data.json"))
 if "HCC1395" in SAMPLES and SAMPLES["HCC1395"].get("ideogram") is None and os.path.exists(_ideo):
     SAMPLES["HCC1395"]["ideogram"] = json.load(open(_ideo, encoding="utf-8"))
+# HCC1395 LOH 用 longphase-TO(SEQC2-validated,1094 seg)取代 clp_cn(凍結 dir 無 clp bed)
+_LP_LOH = "/big7_disk/liaoyoyo2001/longphase-to-mod/output/baseline/tumor_phased_LOH.bed"
+if "HCC1395" in SAMPLES and os.path.exists(_LP_LOH):
+    _loh, _seen = [], set()
+    for _ln in open(_LP_LOH, encoding="utf-8"):
+        _p = _ln.split()
+        if len(_p) >= 3:
+            try:
+                _iv = (_p[0], int(_p[1]), int(_p[2]))
+                if _iv not in _seen:
+                    _seen.add(_iv); _loh.append([_iv[0], _iv[1], _iv[2]])
+            except ValueError:
+                pass
+    SAMPLES["HCC1395"]["loh"], SAMPLES["HCC1395"]["loh_source"] = _loh, "longphase-TO (SEQC2-validated)"
 SAMPLES_JSON = json.dumps(SAMPLES, ensure_ascii=False)
 # R3+R7: chr17 read×read 距離矩陣 + 分群×lineage 交叉表(HCC1395 worked;固定教學甲基展板用)
 _c17t = os.path.join(DATA, "chr17_tree_data.json")
@@ -82,7 +111,7 @@ GLOSSARY = [
  ("ε=2% 噪聲底線", "cell 為真 ⟺ count > coread×2%（ONT 錯誤率）。", "保留最低 1 條(低 coread);高 coread 單讀(1≤coread×2%)判噪聲。經 FP 裁判+結構穩定+塌陷集中三路定案。"),
  ("coread 共讀", "同時覆蓋兩個位點的 read 數。", "≥6 才算 powered。決定一個零格是否可信。"),
  ("VAF / CCF", "VAF=變異等位基因頻率;CCF=癌細胞比例(clonal prevalence)。", "高 VAF=clonal(早/大);低=subclonal(晚/小)。只在 CN-clean 可信。用於分支編號 + 單位點刻畫。"),
- ("determinacy", "拓樸能否唯一辨識:A_determined(單分子向量) / A_ambiguous(缺中間群順序未定) / B_pairwise(拼接非單分子) / C_underdetermined(多樹相容) / incompatible(成環)。", "🔴『樹存在』(絕大多數位點相容)≠『能辨識是哪一棵』(僅約半數 A_determined;其餘 B拼接/C欠定/缺中間群/成環)。實際比例見上方 determinacy 圓餅(隨樣本變)。"),
+ ("determinacy", "拓樸能否唯一辨識:A_determined(單分子向量) / A_ambiguous(缺中間群順序未定) / B_pairwise(拼接非單分子) / C_underdetermined(單ALT群·缺連接read·只觀測到一個 ALT 群無第二群可定序;非「多棵樹相容」之意) / incompatible(成環)。", "🔴『樹存在』(絕大多數位點相容)≠『能辨識是哪一棵』(僅約半數 A_determined;其餘 B拼接/C欠定/缺中間群/成環)。實際比例見上方 determinacy 圓餅(隨樣本變)。"),
  ("situation tier", "A 單分子整跨 / B 可整跨pairwise / C 必鏈接(span>read)。", "≥3 位點先分 situation 再處理:有沒有一條 read 穿過全部決定證據強度。"),
  ("genome_ctx", "telomere(端粒,≤3Mb 端)/ centromere(著絲點±3Mb)/ arm(染色體臂)。", "hg38 染色體長度+centromere 近似。centromere/telomere 區偽影風險高。"),
  ("TP / FP", "真/假陽性標籤(來源隨樣本)。🔴 HCC1395=SEQC2 truth set;其餘樣本=per_sSNV_census 衍生(無外部 truth set、標籤弱、勿當判別力佐證,見宇宙帳本 caveat)。", "🔴 只用於觀察評估,絕不進前處理/定義(build 用 TP∪FP union + normal 比對定 somatic)。"),
@@ -164,26 +193,68 @@ el('s_det').innerHTML=pieBars(D.stats.determinacy);el('s_root').innerHTML=pieBar
  if(a){html+='　/　全宇宙 <b>'+(a.universe_total||0).toLocaleString()+'</b>（linked <b>'+a.buckets.linked.pct+'%</b> 可建樹·單位點 <b>'+a.single_pct+'%</b>·其餘 isolated/underpowered）';}
  html+='</div><div class="note" style="margin-top:2px">藍=2-3 sSNV·綠=≥4(較豐富樹)·紅=>8 截斷</div>';
  el('s_nsnv').innerHTML=html;})();
-// HG38 ideogram: 每棵樹位點(依 shape 上色) + underpowered/isolated 密度(census-based)
-(function(){var ID=D.ideogram;var host=el('ideogram');if(!host)return;if(!ID){host.innerHTML='';return;}
+// situation 分類 — 🔴 完全複製 candidate_scoring.py situation()(L42-48)保證計數與評分佇列一致;Level1+Level2 共用
+function regSit(r){ if(r.determinacy=='incompatible')return['衝突(成環)','#f03e3e'];
+ if((r.ambig_nodes||0)>0)return['順序 2-3 順位待定','#ffd43b'];
+ if(r.determinacy=='C_underdetermined')return['多樹相容(欠定)','#adb5bd'];
+ var hp=r.haplotypes; if(hp!='H1'&&hp!='H2'&&hp!='?')return['跨HP(兩棵樹)','#f59f00'];
+ if(r.determinacy=='B_pairwise_structure')return['pairwise 拼接','#74c0fc'];
+ return['已確定','#37b24d']; }
+// situation 顯示正名(#8):regSit/JSON key 不動(計數與評分一致),只改給人看的字
+var SIT_LABEL={'多樹相容(欠定)':'單ALT群·缺連接read(欠定)','跨HP(兩棵樹)':'跨HP·兩棵樹(allelic)'};
+function sitDisp(n){return SIT_LABEL[n]||n;}
+// HG38 ideogram: 結果(situation)+LOH 整合單圖(預設) / 樹形(次) + LOH 半透明底帶
+window.__ideoMode=window.__ideoMode||'situation';
+window.toggleIdeo=function(m){window.__ideoMode=m;renderIdeo();};
+function renderIdeo(){var ID=D.ideogram;var host=el('ideogram');if(!host)return;if(!ID){host.innerHTML='';return;}
  var chroms=Object.keys(ID.per_chrom);if(!chroms.length){host.innerHTML='';return;}
+ var mode=window.__ideoMode||'situation';
  var maxlen=Math.max.apply(null,chroms.map(function(c){return ID.per_chrom[c].len;}));
  var PXW=860,shapeCol={F:'#2f9e44',S:'#1c7ed6',I:'#e03131',N:'#adb5bd'},t=ID.totals||{};
  var X0=64,X=function(p){return X0+PXW*p/maxlen;};
+ var rowOf={};chroms.forEach(function(c,i){rowOf[c]=i;});
+ var lohBy={},lohN=(D.loh||[]).length;(D.loh||[]).forEach(function(iv){(lohBy[iv[0]]=lohBy[iv[0]]||[]).push(iv);});
+ var sitByChrom={},sitCnt={};
+ if(mode=='situation'){(D.detail||[]).forEach(function(r,idx){var c=r.chrom;if(rowOf[c]==null)return;var sv=regSit(r);if(!sv)return;
+   var st=(r.start!=null?r.start:parseInt(((r.region||'').split(':')[1]||'0').split('-')[0])||0);
+   (sitByChrom[c]=sitByChrom[c]||[]).push([st,sv[0],sv[1],idx,r.region,r.cn]);sitCnt[sv[0]]=(sitCnt[sv[0]]||0)+1;});}
+ var bt=function(m,lab){return '<button onclick="toggleIdeo(\''+m+'\')" style="font-size:11px;padding:2px 10px;border:1px solid #1971c2;cursor:pointer;background:'+(mode==m?'#1971c2':'#fff')+';color:'+(mode==m?'#fff':'#1971c2')+'">'+lab+'</button>';};
+ var toggle='<span style="margin-left:8px;display:inline-flex">'+bt('situation','結果+LOH')+bt('shape','樹形')+'</span>';
+ var lohLeg=lohN?'　<span style="background:#d0bfff;padding:0 6px;border-radius:2px">▬ LOH '+lohN+' 段</span>('+(D.loh_source||'?')+')':'　<span class="note">LOH:無資料</span>';
+ var legend = mode=='shape'
+   ? '樹位點 <span style="color:#2f9e44">▏full_tree</span> <span style="color:#1c7ed6">▏結構(linear/sibling/co_linked)</span> <span style="color:#e03131">▏成環</span>　密度軌 <span style="color:#fa8c16">▮underpowered '+(t.underpowered||0)+'</span> <span style="color:#868e96">▮isolated '+(t.isolated||0)+'</span>'+lohLeg
+   : '每區依結果上色(點 tick→跳 detail)：<span style="color:#37b24d">▏已確定 '+(sitCnt['已確定']||0)+'</span> <span style="color:#74c0fc">▏pairwise '+(sitCnt['pairwise 拼接']||0)+'</span> <span style="color:#adb5bd">▏單群欠定 '+(sitCnt['多樹相容(欠定)']||0)+'</span> <span style="color:#f59f00">▏跨HP '+(sitCnt['跨HP(兩棵樹)']||0)+'</span> <span style="color:#ffd43b">▏順序待定 '+(sitCnt['順序 2-3 順位待定']||0)+'</span> <span style="color:#f03e3e">▏衝突 '+(sitCnt['衝突(成環)']||0)+'</span>'+lohLeg;
  var s='<div style="background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:10px 14px;margin:10px 0;font-size:12px">';
- s+='<b>🗺️ HG38 全基因組分布</b>：樹位點 <span style="color:#2f9e44">▏full_tree</span> <span style="color:#1c7ed6">▏結構(linear/sibling/co_linked)</span> <span style="color:#e03131">▏成環</span>　密度軌 <span style="color:#fa8c16">▮underpowered '+(t.underpowered||0)+'</span> <span style="color:#868e96">▮isolated '+(t.isolated||0)+'</span>　linked '+(t.linked||0)+'。<span class="note">(每染色體比例為 GRCh38 真實長度;density bin 2Mb;hover 看數)</span>';
+ s+='<b>🗺️ HG38 全基因組分布</b>'+toggle+'<br><span style="line-height:1.95">'+legend+'</span><span class="note">(染色體比例=GRCh38 真實長度;LOH=半透明紫底帶;hover 看數)</span>';
  s+='<svg viewBox="0 0 '+(PXW+90)+' '+(chroms.length*24+16)+'" width="100%" style="margin-top:6px;font-family:ui-monospace,monospace">';
  chroms.forEach(function(c,i){var pc=ID.per_chrom[c],y=14+i*24,w=PXW*pc.len/maxlen,bin=pc.bin;
    s+='<text x="'+(X0-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" font-weight="600">'+c+'</text>';
    s+='<rect x="'+X0+'" y="'+(y-5)+'" width="'+w+'" height="10" rx="2" fill="#f8f9fa" stroke="#dee2e6"/>';
-   var bw=Math.max(1,PXW*bin/maxlen);
-   (pc.und_bins||[]).forEach(function(v,bi){if(v>0)s+='<rect x="'+X(bi*bin)+'" y="'+(y+6)+'" width="'+bw+'" height="'+Math.min(6,1+v/2)+'" fill="#fa8c16" opacity="0.75"><title>'+c+' ~'+(bi*2)+'Mb underpowered '+v+'</title></rect>';});
-   (pc.iso_bins||[]).forEach(function(v,bi){if(v>0)s+='<rect x="'+X(bi*bin)+'" y="'+(y+13)+'" width="'+bw+'" height="'+Math.min(5,1+v/4)+'" fill="#868e96" opacity="0.5"><title>'+c+' ~'+(bi*2)+'Mb isolated '+v+'</title></rect>';});
-   (pc.trees||[]).forEach(function(tr){var x=X(tr[0]);s+='<line x1="'+x+'" y1="'+(y-8)+'" x2="'+x+'" y2="'+(y-1)+'" stroke="'+(shapeCol[tr[1]]||'#adb5bd')+'" stroke-width="1.1"><title>'+c+':'+tr[0]+' '+tr[1]+'</title></line>';});
+   (lohBy[c]||[]).forEach(function(iv){var x1=X(iv[1]),x2=X(iv[2]);if(x2-x1<0.4)x2=x1+0.4;s+='<rect x="'+x1.toFixed(1)+'" y="'+(y-5)+'" width="'+(x2-x1).toFixed(1)+'" height="10" fill="#9775fa" opacity="0.35"><title>'+c+' LOH '+iv[1]+'-'+iv[2]+'</title></rect>';});
+   if(mode=='shape'){var bw=Math.max(1,PXW*bin/maxlen);
+     (pc.und_bins||[]).forEach(function(v,bi){if(v>0)s+='<rect x="'+X(bi*bin)+'" y="'+(y+6)+'" width="'+bw+'" height="'+Math.min(6,1+v/2)+'" fill="#fa8c16" opacity="0.75"><title>'+c+' ~'+(bi*2)+'Mb underpowered '+v+'</title></rect>';});
+     (pc.iso_bins||[]).forEach(function(v,bi){if(v>0)s+='<rect x="'+X(bi*bin)+'" y="'+(y+13)+'" width="'+bw+'" height="'+Math.min(5,1+v/4)+'" fill="#868e96" opacity="0.5"><title>'+c+' ~'+(bi*2)+'Mb isolated '+v+'</title></rect>';});
+     (pc.trees||[]).forEach(function(tr){var x=X(tr[0]);s+='<line x1="'+x+'" y1="'+(y-8)+'" x2="'+x+'" y2="'+(y-1)+'" stroke="'+(shapeCol[tr[1]]||'#adb5bd')+'" stroke-width="1.1"><title>'+c+':'+tr[0]+' '+tr[1]+'</title></line>';});}
+   else{(sitByChrom[c]||[]).sort(function(a,b){var o={'已確定':0,'pairwise 拼接':1,'多樹相容(欠定)':2,'順序 2-3 順位待定':3,'跨HP(兩棵樹)':4,'衝突(成環)':5};return (o[a[1]]||0)-(o[b[1]]||0);}).forEach(function(g){var x=X(g[0]);s+='<line x1="'+x+'" y1="'+(y-9)+'" x2="'+x+'" y2="'+(y-1)+'" stroke="'+g[2]+'" stroke-width="1.5" style="cursor:pointer" data-i="'+g[3]+'"><title>'+g[4]+' · '+sitDisp(g[1])+(g[5]&&g[5]!='unknown'?' · CN '+g[5]:'')+'</title></line>';});}
  });
- s+='</svg></div>';host.innerHTML=s;})();
+ s+='</svg></div>';host.innerHTML=s;
+ if(mode=='situation')host.onclick=function(e){var ln=e.target.closest('line[data-i]');if(!ln)return;show(+ln.dataset.i,null);var d=el('detail');if(d)d.scrollIntoView({behavior:'smooth',block:'center'});};
+ else host.onclick=null;
+}
+renderIdeo();
+// #10 每樣本記分卡:結果分類(同 regSit→與評分一致) + 截斷 + LOH + 癌基因命中
+(function(){var sc=el('scorecard');if(!sc)return;var dt=D.detail||[];var tot=dt.length||1;
+ var cnt={};dt.forEach(function(r){var sv=regSit(r);if(sv)cnt[sv[0]]=(cnt[sv[0]]||0)+1;});
+ var trunc=dt.filter(function(r){return r.truncated}).length;
+ var lohIv={};(D.loh||[]).forEach(function(iv){(lohIv[iv[0]]=lohIv[iv[0]]||[]).push(iv);});
+ var lohN=dt.filter(function(r){if(r.cn=='loh')return true;var a=r.start,b=r.start+(r.span||0),L=lohIv[r.chrom];return !!(L&&L.some(function(iv){return iv[1]<b&&iv[2]>a}))}).length;
+ var geneN=Object.keys(D.gene||{}).filter(function(rg){var g=(D.gene||{})[rg];return g&&g.cancer_genes&&Object.keys(g.cancer_genes).length}).length;
+ var card=function(lab,n,col){return '<div style="flex:1 1 86px;text-align:center;background:#fff;border:1px solid #dee2e6;border-top:3px solid '+col+';border-radius:6px;padding:6px 4px"><div style="font-size:18px;font-weight:700;color:'+col+'">'+n.toLocaleString()+'</div><div style="font-size:10px;color:#666">'+lab+'</div><div style="font-size:9px;color:#aaa">'+(100*n/tot).toFixed(0)+'%</div></div>'};
+ sc.innerHTML='<div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0">'
+  +card('已確定',cnt['已確定']||0,'#37b24d')+card('pairwise',cnt['pairwise 拼接']||0,'#74c0fc')+card('單群欠定',cnt['多樹相容(欠定)']||0,'#adb5bd')+card('跨HP',cnt['跨HP(兩棵樹)']||0,'#f59f00')+card('順序待定',cnt['順序 2-3 順位待定']||0,'#ffd43b')+card('衝突',cnt['衝突(成環)']||0,'#f03e3e')+card('截斷>8',trunc,'#e8590c')+card('LOH 區',lohN,'#9775fa')+card('癌基因命中',geneN,'#e64980')
+  +'</div><div class="note" style="margin:-2px 0 6px">📋 <b>每樣本記分卡</b>（共 '+tot+' 區）：結果分類數(與評分佇列同 regSit) + 截斷 + LOH('+(D.loh_source||'無資料')+') + 癌基因命中。</div>';})();
 // R4: 統計卡 popup(放大 pie+全 bin+名詞字典),onclick 在 bootWS 閉包內→永遠對應當前 D(per-sample)
-const STAT_DICT={topology_type:{title:'拓樸型態',desc:'每區 read 群在系統發生樹上的形狀(只計 n_sSNV≥2 區)。',items:{'single':'單群:reads 全塌成一個基因型,無分支','linear(全直系)':'全直系鏈 germline→A→AB→…','branched(直系+姊妹)':'有姊妹分支(同層平行 subclone)','star(全姊妹)':'全姊妹:多條從 germline 各自分出','germline_only':'只有 germline'}},n_clusters:{title:'群數 c',desc:'區內 distinct population(細胞狀態)數;perfect-phylogeny 下 ≤ k+1。',items:{}},determinacy:{title:'determinacy 可辨識性',desc:'樹「存在」≠「能辨識是哪棵」。',items:{'A_determined(單分子向量)':'單分子向量唯一可辨識','A_ambiguous_order(缺中間群)':'缺中間群→累積順序未定','B_pairwise_structure':'pairwise 拼接,非單分子整跨','C_underdetermined':'多樹相容,欠定','incompatible':'四配子違反→成環,無法成單一樹','other':'單群無分支'}},n_roots:{title:'HP 根數',desc:'somatic 事件散在幾條 germline 單倍型。≥2 = 跨 HP(allelic,非 subclone)。',items:{}}};
+const STAT_DICT={topology_type:{title:'拓樸型態',desc:'每區 read 群在系統發生樹上的形狀(只計 n_sSNV≥2 區)。',items:{'single':'單群:reads 全塌成一個基因型,無分支','linear(全直系)':'全直系鏈 germline→A→AB→…','branched(直系+姊妹)':'有姊妹分支(同層平行 subclone)','star(全姊妹)':'全姊妹:多條從 germline 各自分出','germline_only':'只有 germline'}},n_clusters:{title:'群數 c（=觀測到的不同 ALT 細胞群數）',desc:'c = 該區內「含 ≥1 個 somatic 突變的不同 genotype 向量」數 = 觀測到的不同 ALT 細胞群 / lineage 狀態（germline 全-R 向量不計）。c=1 即只觀測到單一 ALT 群（無第二群可比較定序→易落 single/欠定）；c=2 是最乾淨的兩 lineage 分離；c 越大分支越複雜。perfect-phylogeny 下 c ≤ k+1（k=該區 sSNV 數），實測中位 2，故拓樸搜尋空間極小。',items:{}},determinacy:{title:'determinacy 可辨識性',desc:'樹「存在」≠「能辨識是哪棵」。',items:{'A_determined(單分子向量)':'單分子向量唯一可辨識','A_ambiguous_order(缺中間群)':'缺中間群→累積順序未定','B_pairwise_structure':'pairwise 拼接,非單分子整跨','C_underdetermined':'單ALT群·缺連接read(只觀測到單一 ALT 群、無第二群可定序→需深覆蓋;非「多棵樹相容」之意)','incompatible':'四配子違反→成環,無法成單一樹','other':'單群無分支'}},n_roots:{title:'HP 根數',desc:'somatic 事件散在幾條 germline 單倍型。≥2 = 跨 HP(allelic,非 subclone)。',items:{}}};
 window.openStatModal=function(which){let o=D.stats[which];if(which==='n_clusters')o=Object.fromEntries(Object.entries(o).map(([k,v])=>['c='+k,v]));let d=STAT_DICT[which]||{title:which,desc:'',items:{}};let tot=Object.values(o).reduce((a,b)=>a+b,0)||1;let dict=Object.entries(d.items||{}).filter(([k])=>o[k]!=null).map(([k,v])=>`<div style="font-size:11.5px;margin:3px 0"><b class="mono">${k}</b> — ${v}</div>`).join('');el('statmodal_body').innerHTML=`<h3 style="margin-top:0">${d.title}（${(window.__DATA__&&document.querySelector('.stab.active')?document.querySelector('.stab.active').dataset.s:'')}；合計 ${tot}）</h3><div class="note" style="margin-bottom:10px">${d.desc}</div><div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap"><div style="transform:scale(1.7);transform-origin:top left;margin:18px 40px 40px 8px">${pie(o)}</div><div style="flex:1;min-width:280px">${bars(o,99)}</div></div>${dict?`<div style="margin-top:12px;border-top:1px solid #f1f3f5;padding-top:9px"><b style="font-size:12.5px">類別說明</b><div style="margin-top:5px">${dict}</div></div>`:''}`;el('statmodal').style.display='flex'};
 window.closeStatModal=function(){el('statmodal').style.display='none'};
 [['s_topo','topology_type'],['s_clust','n_clusters'],['s_det','determinacy'],['s_root','n_roots']].forEach(([id,key])=>{let sc=el(id).closest('.scard');if(sc)sc.onclick=()=>openStatModal(key)});
@@ -226,8 +297,8 @@ function renderTeaching(){
  let tot=Object.values(sd).reduce((a,b)=>a+b,0)||1;
  let order=[['已確定','#37b24d'],['pairwise 拼接','#74c0fc'],['多樹相容(欠定)','#adb5bd'],['跨HP(兩棵樹)','#f59f00'],['順序 2-3 順位待定','#ffd43b'],['衝突(成環)','#f03e3e']];
  let seg=order.filter(([k])=>sd[k]).map(([k,c])=>`<div title="${k}: ${sd[k]}（${(100*sd[k]/tot).toFixed(1)}%）" style="width:${100*sd[k]/tot}%;background:${c}"></div>`).join('');
- let unloc=[['衝突(成環)','#f03e3e','四配子違反 → 無單一樹'],['跨HP(兩棵樹)','#f59f00','突變散在 H1/H2 → 非單一譜系、是兩棵樹'],['多樹相容(欠定)','#adb5bd','群存在但無 ≥2 ALT 群/缺對 → 無法排序(需深覆蓋)　←「某群存在卻定不出位置」正典'],['順序 2-3 順位待定','#ffd43b','缺中間群 → 累積順序未定']];
- let rows=unloc.filter(([k])=>sd[k]!=null).map(([k,c,d])=>`<div onclick="filterSituation('${k}')" style="display:flex;gap:8px;align-items:baseline;margin:3px 0;font-size:11.5px;cursor:pointer;border-radius:4px;padding:2px 6px" onmouseover="this.style.background='#fff0f6'" onmouseout="this.style.background=''"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:${c};flex:0 0 auto"></span><b style="width:120px;flex:0 0 auto">${k}</b><b style="color:${c};width:46px;flex:0 0 auto">${sd[k]}</b><span class="note">${d}</span><span class="note" style="margin-left:auto;color:#1971c2;flex:0 0 auto;white-space:nowrap">▸ 篩選佇列</span></div>`).join('');
+ let unloc=[['衝突(成環)','#f03e3e','四配子違反 → 無單一樹(多為 CN-gain 假環)'],['跨HP(兩棵樹)','#f59f00','突變散在 H1/H2 → 非單一譜系、是兩棵樹(allelic)'],['多樹相容(欠定)','#adb5bd','只觀測到單一 ALT 群(無第二群可定序;非「多棵樹相容」之意)→需深覆蓋'],['順序 2-3 順位待定','#ffd43b','缺中間群 → 累積順序未定']];
+ let rows=unloc.filter(([k])=>sd[k]!=null).map(([k,c,d])=>`<div onclick="filterSituation('${k}')" style="display:flex;gap:8px;align-items:baseline;margin:3px 0;font-size:11.5px;cursor:pointer;border-radius:4px;padding:2px 6px" onmouseover="this.style.background='#fff0f6'" onmouseout="this.style.background=''"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:${c};flex:0 0 auto"></span><b style="width:150px;flex:0 0 auto">${sitDisp(k)}</b><b style="color:${c};width:46px;flex:0 0 auto">${sd[k]}</b><span class="note">${d}</span><span class="note" style="margin-left:auto;color:#1971c2;flex:0 0 auto;white-space:nowrap">▸ 篩選佇列</span></div>`).join('');
  window.filterSituation=function(sit){let s=el('q_sit');if(!s)return;if([...s.options].some(o=>o.value===sit)){s.value=sit;if(typeof renderQ==='function')renderQ();}let qq=el('queue');if(qq)qq.scrollIntoView({behavior:'smooth',block:'center'});};
  let q=(D.scoring.queue||[]),withp=q.filter(x=>x.parsimony_first_rank_prob!=null),hi=withp.filter(x=>x.parsimony_first_rank_prob>=0.7).length;
  let nunloc=(sd['衝突(成環)']||0)+(sd['跨HP(兩棵樹)']||0)+(sd['多樹相容(欠定)']||0)+(sd['順序 2-3 順位待定']||0);
@@ -236,7 +307,7 @@ function renderTeaching(){
   <div style="display:flex;height:16px;border-radius:5px;overflow:hidden;margin-bottom:7px">${seg}</div>
   <div class="note" style="margin-bottom:6px">合計 ${tot} 區｜🟢已確定 ${sd['已確定']||0}｜🔵pairwise 拼接 ${sd['pairwise 拼接']||0}(可建樹非單分子)｜<b style="color:#c2255c">↓ 4 種無法定位</b></div>${rows}
   <div style="margin-top:8px;border-top:1px solid #f1f3f5;padding-top:7px;font-size:11.5px"><b>機率(誠實兩軌)</b>：遺傳 parsimony 高信度(≥0.7)= <b>${withp.length?hi:'未回填'}</b>${withp.length?` 區 / ${withp.length} 個有 parsimony 值(順序待定類·非全 ${nunloc} 無法定位區) → ${hi?'':'連遺傳都信心不足'}`:'（此樣本待上游回填）'}　｜　🧬 甲基：SAME-HP <b>不給機率</b>(cis-ASM double-dip)、CROSS-HP 弱(~35%)、乾淨可用≈0（06-28）</div>
-  <div class="note" style="margin-top:5px;color:#a37200">⚠ 「不同的樹」全列舉(ranked 替代整樹)需上游 <b>enumerate_candidate_trees</b>（未實作）→ 此面板誠實顯示「什麼定不出來」,不假裝在列舉答案。</div></div>`;})();
+  <div class="note" style="margin-top:5px;color:#a37200">⚠ 「不同的樹」全列舉(替代整樹)= 上游 <b>enumerate_candidate_trees</b>(已實作;B1 缺中間群區 detail 有候選樹 carousel·等機率);成環區 detail 另有「可能固定樹」carousel(假環示意)。此面板誠實顯示「什麼定不出來」,不假裝在列舉答案。</div></div>`;})();
 if(!window.__teachDone){renderTeaching();window.__teachDone=true;}
 // S-label 化基因型向量
 function sLabels(g){let s=[...g].map((c,i)=>c=='A'?('S'+(i+1)):null).filter(Boolean);return s.length?s.join('+'):'germline'}
@@ -328,22 +399,86 @@ function posTree(r){
   return '<div style="min-width:0;max-width:100%;overflow-x:auto"><b style="color:#d9480f">'+h+' 樹（'+ns.size+' 位點）</b>'+body+'</div>';
  }).join('')+(dropH3?'<div class="note" style="color:#a37200;width:100%;margin-top:3px">⚠ 另有 '+dropH3+' 個未定相(H3?/somatic-ALT)位置未納入上面 HP 樹</div>':'')+'</div>';
 }
-function posSVG(edges,ns,vaf,hp){
+// 位置層克隆樹(豐富樣式)。hpLabel=整棵 HP(posTree 單HP用);hpMap=node→HP(allPosTree/成環候選 多HP上色用)
+function posSVG(edges,ns,vaf,hpLabel,hpMap){
+ let HPC={H1:'#1c7ed6',H2:'#7048e8'},rootCol=HPC[hpLabel]||'#495057';
  let ch={},all=new Set();edges.forEach(([p,c])=>{(ch[p]=ch[p]||[]).push(c);all.add(c);if(p!='ROOT')all.add(p)});
  if(!all.size)return '<div class="note">無結構</div>';
  let depth={},pos={},leaf=0,seen={};function lay(n,dp){if(seen[n])return pos[n]!=null?pos[n]:0;seen[n]=1;depth[n]=dp;let k=(ch[n]||[]).filter(x=>!seen[x]).sort();if(!k.length){pos[n]=leaf++;return pos[n]}let xs=k.map(x=>lay(x,dp+1));pos[n]=(Math.min(...xs)+Math.max(...xs))/2;return pos[n]} // seen 防護:pos_nested 成環(incompatible)時跳過,避免 stack overflow
  let roots=ch['ROOT']||[];roots.forEach(r=>lay(r,1));[...all].forEach(n=>{if(pos[n]==null)lay(n,1)});let gx=roots.length?(Math.min(...roots.map(r=>pos[r]))+Math.max(...roots.map(r=>pos[r])))/2:0;
- let nodes=[...all],md=Math.max(...nodes.map(n=>depth[n]),1),W=Math.max(200,(leaf||1)*108),H=64+md*70,X=p=>40+p*108,Y=dp=>26+dp*70;
- let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}"><circle cx="${X(gx)}" cy="${Y(0)}" r="15" fill="#fff" stroke="#495057"/><text x="${X(gx)}" y="${Y(0)+3}" text-anchor="middle" font-size="9">${hp} germ</text>`;
- roots.forEach(rt=>s+=`<line x1="${X(gx)}" y1="${Y(0)+15}" x2="${X(pos[rt])}" y2="${Y(1)-20}" stroke="#adb5bd"/>`);
- edges.forEach(([p,c])=>{if(p!='ROOT')s+=`<line x1="${X(pos[p])}" y1="${Y(depth[p])+20}" x2="${X(pos[c])}" y2="${Y(depth[c])-20}" stroke="#adb5bd"/>`});
- nodes.forEach(n=>{let v=vaf[n];s+=`<rect x="${X(pos[n])-46}" y="${Y(depth[n])-18}" width="92" height="36" rx="5" fill="#fff4e6" stroke="#e8590c"/><text x="${X(pos[n])}" y="${Y(depth[n])-2}" text-anchor="middle" font-size="9" class="mono">${n.split(':')[1]}</text><text x="${X(pos[n])}" y="${Y(depth[n])+11}" text-anchor="middle" font-size="8" fill="#495057">VAF ${v!=null?v:'?'}</text>`});
+ let nodes=[...all],md=Math.max(...nodes.map(n=>depth[n]),1),NW=128,NH=50,GX=22,GY=78;
+ let W=Math.max(220,(leaf||1)*(NW+GX)),H=70+md*GY,X=p=>22+p*(NW+GX)+NW/2,Y=dp=>30+dp*GY;
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="font-family:ui-monospace,monospace;max-width:${W}px">`;
+ s+=`<rect x="${X(gx)-48}" y="${Y(0)-16}" width="96" height="32" rx="8" fill="#f1f3f5" stroke="${rootCol}" stroke-width="2"/><text x="${X(gx)}" y="${Y(0)-2}" text-anchor="middle" font-size="11" font-weight="700" fill="${rootCol}">${hpLabel||'germ'} germline</text><text x="${X(gx)}" y="${Y(0)+11}" text-anchor="middle" font-size="8" fill="#868e96">起點·無 somatic</text>`;
+ roots.forEach(rt=>s+=`<line x1="${X(gx)}" y1="${Y(0)+16}" x2="${X(pos[rt])}" y2="${Y(1)-NH/2}" stroke="#ced4da" stroke-width="1.6"/>`);
+ edges.forEach(([p,c])=>{if(p!='ROOT')s+=`<line x1="${X(pos[p])}" y1="${Y(depth[p])+NH/2}" x2="${X(pos[c])}" y2="${Y(depth[c])-NH/2}" stroke="#ced4da" stroke-width="1.6"/>`});
+ nodes.forEach(n=>{let v=vaf[n],hp=(hpMap&&hpMap[n])||hpLabel,col=HPC[hp]||'#e8590c',fill=hp=='H1'?'#dbe9f7':hp=='H2'?'#ece0f5':'#fff4e6',x=X(pos[n]),y=Y(depth[n]);
+  s+=`<rect x="${x-NW/2}" y="${y-NH/2}" width="${NW}" height="${NH}" rx="8" fill="${fill}" stroke="${col}" stroke-width="2"/>`;
+  s+=`<text x="${x}" y="${y-12}" text-anchor="middle" font-size="10.5" font-weight="700" fill="${col}">${hpMap?(hp||'?')+'·':''}${n.split(':')[1]}</text>`;
+  s+=`<text x="${x}" y="${y+2}" text-anchor="middle" font-size="9" fill="#495057">VAF ${v!=null?v:'?'}</text>`;
+  s+=`<text x="${x}" y="${y+14}" text-anchor="middle" font-size="7.5" fill="#aaa">${n.split(':')[0]}</text>`;});
  return s+'</svg>';
+}
+// #5 截斷區全位點分群樹(位點層 pos_nested,突破 8 向量上限;只已定相位點) + #4 成環候選固定樹(移除最小衝突邊)
+function allPosTree(r){
+ let nh=r.node_hp||{},ns=Object.keys(nh);if(ns.length<2)return '';
+ let nsSet=new Set(ns),ned=(r.pos_nested||[]).filter(e=>nsSet.has(e[0])&&nsSet.has(e[1]));
+ let body,note='';
+ if(ns.length>28){body=posBarStrip(nsSet,r.pos_vaf||{});note='位點過多→VAF bar(基因組順序)';}
+ else if(hasCycleEdges(ned)){body=posTable(nsSet,r.pos_vaf||{},'全',ned);note='位點層亦成環→位點+VAF 表(可能樹見下方 carousel)';}
+ else{let hasp=new Set(ned.map(e=>e[1])),edges=ned.map(e=>[e[0],e[1]]);[...nsSet].forEach(n=>{if(!hasp.has(n))edges.unshift(['ROOT',n])});body=posSVG(edges,nsSet,r.pos_vaf||{},null,nh);}
+ let dropHP=Object.values(nh).filter(h=>h!='H1'&&h!='H2').length;
+ return `<details open style="background:#fff;border:1px solid #ffd8a8;border-radius:6px;padding:8px;margin:6px 0"><summary style="cursor:pointer;font-weight:700;color:#e8590c">🧬 全位點分群樹（截斷區·突破前8上限·${ns.length} 已定相位點${note?'·'+note:''}）</summary><div class="note" style="margin:4px 0">genotype 向量截斷在 8 位點;此樹改用<b>位點層 pos_nested 巢狀</b>畫出全 <b>${ns.length}</b> 個<b>已定相</b> sSNV(色=HP·藍H1/紫H2/灰H3?)。共 ${r.n_sSNV} sSNV,未定相 <b>${r.n_sSNV-ns.length}</b> 個無座標不納入(caveat)。</div>${body}${dropHP?'<div class="note" style="color:#a37200">⚠ 含 '+dropHP+' 個未定相(H3?)位點(灰)</div>':''}</details>`;
+}
+function cycleCandidates(r){
+ let nh=r.node_hp||{},nsSet=new Set(Object.keys(nh));
+ let ned=(r.pos_nested||[]).filter(e=>nsSet.has(e[0])&&nsSet.has(e[1]));
+ if(ned.length<2||!hasCycleEdges(ned))return null;
+ let cands=[],seen={};
+ function addCand(sub,label){let hasp=new Set(sub.map(e=>e[1])),edges=sub.map(e=>[e[0],e[1]]);[...nsSet].forEach(n=>{if(!hasp.has(n))edges.unshift(['ROOT',n])});
+  let key=JSON.stringify(sub.slice().map(e=>e.join('>')).sort());if(!seen[key]&&cands.length<6){seen[key]=1;cands.push({edges:edges,label:label});}}
+ // 1) 移除單一最小衝突邊 → 乾淨候選
+ for(let i=0;i<ned.length&&cands.length<6;i++){let sub=ned.filter((e,j)=>j!=i);if(!hasCycleEdges(sub))addCand(sub,'移除 '+ned[i][0].split(':')[1]+'↔'+ned[i][1].split(':')[1]);}
+ // 2) fallback(多環區):貪婪生成樹(輪轉起始序)→ 多環也能給固定樹示意
+ if(!cands.length){for(let s=0;s<Math.min(ned.length,4);s++){let order=ned.slice(s).concat(ned.slice(0,s)),keep=[];order.forEach(e=>{if(!hasCycleEdges(keep.concat([e])))keep.push(e)});if(keep.length)addCand(keep,'貪婪生成樹 #'+(s+1)+'(多環→需移除多邊)');}}
+ return cands.length?cands:null;
+}
+function cycleCard(cs,idx,r){let c=cs[idx],nh=r.node_hp||{};let th=posSVG(c.edges,new Set(Object.keys(nh)),r.pos_vaf||{},null,nh);
+ return `<div style="display:flex;align-items:flex-start;gap:8px"><button onclick="cycNav(-1)" style="font-size:15px;padding:3px 11px;cursor:pointer;border-radius:5px;margin-top:40px">◀</button><div style="flex:1;min-width:0">${th}<div class="note" style="margin-top:4px">候選固定樹 <b>${idx+1} / ${cs.length}</b>（${c.label}）</div></div><button onclick="cycNav(1)" style="font-size:15px;padding:3px 11px;cursor:pointer;border-radius:5px;margin-top:40px">▶</button></div>`}
+window.cycNav=function(d){let s=window.__cyc;if(!s)return;s.idx=(s.idx+d+s.cs.length)%s.cs.length;let box=document.getElementById('cycbox');if(box)box.innerHTML=cycleCard(s.cs,s.idx,s.r)};
+// #7 甲基裁決(cis-control)收斂成單一函式(原散在 undefined/four-gamete 兩處)
+function methylVerdict(r){let cross=(r.n_roots>=2)||((r.haplotypes||'').indexOf('H1')>=0&&(r.haplotypes||'').indexOf('H2')>=0);
+ return `<div style="margin:6px 0;padding:7px 10px;border-radius:6px;font-size:11.5px;background:${cross?'#e7f5ff':'#fff5f5'};border:1px solid ${cross?'#74c0fc':'#ffc9c9'}">🧬 <b>甲基能否裁決此區的樹/順序：</b>${cross?'<b style="color:#1971c2">CROSS-HP(跨 H1/H2)</b> → 衝突/分支屬 <b>allelic</b>(兩突變在不同染色體)、本就無 subclone 順序可排;甲基只是 germline-ASM、<b>不裁決</b>。':'<b style="color:#c92a2a">SAME-HP(單一 germline HP)</b> → 甲基隨 genotype cis 共變(cis-ASM double-dip)、normal 無對應 within-HP 軸→<b>結構性無法裁決</b>。'} 🔴 <b>06-28 cis-control 定案</b>:甲基排序 ρ≈0.18 p≈0.06-0.08 <b>不顯著</b> → <b>不能裁決哪棵樹/哪個順序更可能</b>(bounded-auxiliary);只能靠讀數/VAF 弱先驗 + single-cell/multi-region。</div>`;
+}
+// Level2: 逐區 locus lollipop — 線=該區基因組範圍;每 sSNV 一根 lollipop(位置·HP色·VAF高);底色=結果
+function locusTrack(r){
+ var nh=r.node_hp||{},vaf=r.pos_vaf||{},keys=Object.keys(nh);
+ if(!keys.length)return '';
+ var pos=keys.map(function(k){return {k:k,p:parseInt(k.split(':')[1])||0,hp:nh[k],v:vaf[k]};}).filter(function(o){return o.p>0}).sort(function(a,b){return a.p-b.p});
+ if(!pos.length)return '';
+ var rs=(r.start!=null?r.start:pos[0].p),re=(r.start!=null?(r.start+(r.span||0)):pos[pos.length-1].p);
+ var lo=Math.min(rs,pos[0].p),hi=Math.max(re,pos[pos.length-1].p),rng=Math.max(1,hi-lo),pad=rng*0.04;
+ var W=760,X0=14,XW=W-28,X=function(p){return X0+XW*(p-(lo-pad))/(rng+2*pad)};
+ var hpc={H1:'#1c7ed6',H2:'#7048e8'};
+ var sv=regSit(r),bg=sv?sv[1]:'#adb5bd',sname=sv?sv[0]:'單群/其他';
+ var maxv=Math.max.apply(null,pos.map(function(o){return o.v||0}).concat([0.01]));
+ var BASE=92,HMAX=58;
+ var s='<svg viewBox="0 0 '+W+' 120" width="100%" style="font-family:ui-monospace,monospace;max-width:'+W+'px">';
+ s+='<rect x="'+X(lo)+'" y="'+(BASE-2)+'" width="'+(X(hi)-X(lo))+'" height="5" rx="2" fill="'+bg+'" opacity="0.30"/>';
+ s+='<line x1="'+X(lo)+'" y1="'+BASE+'" x2="'+X(hi)+'" y2="'+BASE+'" stroke="'+bg+'" stroke-width="2"/>';
+ s+='<text x="'+X(rs)+'" y="'+(BASE+16)+'" font-size="9" fill="#495057">'+rs.toLocaleString()+'</text>';
+ s+='<text x="'+X(re)+'" y="'+(BASE+16)+'" font-size="9" fill="#495057" text-anchor="end">'+re.toLocaleString()+'</text>';
+ pos.forEach(function(o){var x=X(o.p),h=Math.max(5,HMAX*(o.v||0)/maxv),col=hpc[o.hp]||'#adb5bd';
+   s+='<line x1="'+x+'" y1="'+BASE+'" x2="'+x+'" y2="'+(BASE-h)+'" stroke="'+col+'" stroke-width="1.4"/>';
+   s+='<circle cx="'+x+'" cy="'+(BASE-h)+'" r="4" fill="'+col+'"><title>'+o.k+' · '+(o.hp||'HP?')+' · VAF '+(o.v!=null?o.v:'?')+'</title></circle>';});
+ s+='</svg>';
+ var dropHP=pos.filter(function(o){return o.hp!='H1'&&o.hp!='H2'}).length;
+ return '<div style="background:#fff;border:1px solid #dee2e6;border-radius:6px;padding:8px 10px;margin:6px 0"><b>🧬 locus 突變排列（每 sSNV 一根 lollipop·桿高=VAF·色=HP）</b> <span class="note">底色帶=該區結果「<b style="color:'+bg+'">'+sname+'</b>」·範圍 '+rs.toLocaleString()+'–'+re.toLocaleString()+'（'+(((re-rs)/1000).toFixed(1))+'kb）·'+pos.length+' 個已定相 sSNV'+(r.truncated?'（共 '+r.n_sSNV+'，截斷只示已定相）':'')+'</span> <span style="margin-left:6px"><span style="color:#1c7ed6">●H1</span> <span style="color:#7048e8">●H2</span>'+(dropHP?' <span style="color:#adb5bd">●HP?</span>':'')+'</span>'+s+'<div class="note">對照右側克隆樹：同一批 sSNV 在基因組上的實際位置與 HP 分群（跨 HP＝兩條染色體各自突變＝allelic）。</div></div>';
 }
 // filters + sort
 let det=D.detail;
 let chrsel=el('f_chr');chrsel.innerHTML='<option value="">全</option>';D.chroms.forEach(c=>{let o=document.createElement('option');o.value=c;o.textContent=c;chrsel.appendChild(o)});
-const FACET_CFG={topology_type:{order:['linear(全直系)','branched(直系+姊妹)','star(全姊妹)','single','germline_only'],label:{'linear(全直系)':'linear 全直系','branched(直系+姊妹)':'branched 直系+姊妹','star(全姊妹)':'star 全姊妹','single':'single 單群','germline_only':'germline only'},cls:{'linear(全直系)':'t_linear','branched(直系+姊妹)':'t_branched','star(全姊妹)':'t_star','single':'t_single','germline_only':'t_single'}},determinacy:{order:['A_determined(單分子向量)','A_ambiguous_order(缺中間群)','B_pairwise_structure','C_underdetermined','incompatible','other'],label:{'A_determined(單分子向量)':'A 唯一·單分子','A_ambiguous_order(缺中間群)':'A 順序未定','B_pairwise_structure':'B 拼接','C_underdetermined':'C 多樹相容','incompatible':'✗ 成環','other':'— 單群無分支'},cls:{'A_determined(單分子向量)':'det_A','A_ambiguous_order(缺中間群)':'det_amb','B_pairwise_structure':'det_B','C_underdetermined':'det_C','incompatible':'det_incompat','other':'det_other'}},genome_ctx:{order:['arm','telomere','centromere'],label:{'arm':'arm 臂','telomere':'telomere 端粒','centromere':'centromere 著絲點'},cls:{'arm':'ctx_arm','telomere':'ctx_telomere','centromere':'ctx_centromere'}}};
+const FACET_CFG={topology_type:{order:['linear(全直系)','branched(直系+姊妹)','star(全姊妹)','single','germline_only'],label:{'linear(全直系)':'linear 全直系','branched(直系+姊妹)':'branched 直系+姊妹','star(全姊妹)':'star 全姊妹','single':'single 單群','germline_only':'germline only'},cls:{'linear(全直系)':'t_linear','branched(直系+姊妹)':'t_branched','star(全姊妹)':'t_star','single':'t_single','germline_only':'t_single'}},determinacy:{order:['A_determined(單分子向量)','A_ambiguous_order(缺中間群)','B_pairwise_structure','C_underdetermined','incompatible','other'],label:{'A_determined(單分子向量)':'A 唯一·單分子','A_ambiguous_order(缺中間群)':'A 順序未定','B_pairwise_structure':'B 拼接','C_underdetermined':'C 單ALT群欠定','incompatible':'✗ 成環','other':'— 單群無分支'},cls:{'A_determined(單分子向量)':'det_A','A_ambiguous_order(缺中間群)':'det_amb','B_pairwise_structure':'det_B','C_underdetermined':'det_C','incompatible':'det_incompat','other':'det_other'}},genome_ctx:{order:['arm','telomere','centromere'],label:{'arm':'arm 臂','telomere':'telomere 端粒','centromere':'centromere 著絲點'},cls:{'arm':'ctx_arm','telomere':'ctx_telomere','centromere':'ctx_centromere'}}};
 ['topology_type','determinacy','genome_ctx'].forEach(k=>{let c=el('cb_'+k);c.innerHTML='';let cfg=FACET_CFG[k],cnt={};det.forEach(r=>{cnt[r[k]]=(cnt[r[k]]||0)+1});let vals=cfg.order.filter(v=>cnt[v]!=null).concat(Object.keys(cnt).filter(v=>!cfg.order.includes(v)).sort());vals.forEach(o=>{let lab=document.createElement('label');lab.className='chip '+(cfg.cls[o]||'det_other');lab.title=o;lab.innerHTML='<input type="checkbox" value="'+o+'">'+(cfg.label[o]||o)+'<span class="cnt">'+cnt[o]+'</span>';c.appendChild(lab)});c.onchange=()=>{c.querySelectorAll('.chip').forEach(ch=>ch.classList.toggle('on',ch.querySelector('input').checked));render()}});
 function cset(k){return new Set([...el('cb_'+k).querySelectorAll('input:checked')].map(x=>x.value))}
 const SORT={coord:(a,b)=>a.chrom.localeCompare(b.chrom,undefined,{numeric:true})||a.start-b.start,nsnv:(a,b)=>b.n_sSNV-a.n_sSNV,nclust:(a,b)=>b.n_clusters-a.n_clusters||b.n_sSNV-a.n_sSNV,glen:(a,b)=>((Object.keys(b.populations||{})[0]||'').length)-((Object.keys(a.populations||{})[0]||'').length)||b.n_sSNV-a.n_sSNV,region:(a,b)=>a.region.localeCompare(b.region)};
@@ -363,20 +498,24 @@ function show(i,row){el('list').querySelectorAll('.row').forEach(x=>x.classList.
  let rdr=(D.rd||{})[r.region]||{};
  let np=r.node_paths||{};
  let cf=fourGamete(r.populations);
- let cand=enumCandidates(r);
+ let cyc=cycleCandidates(r);
  let ctr=(D.candtrees||{})[r.region];
  let pt=Object.entries(r.populations).sort((a,b)=>b[1]-a[1]).map(([g,c])=>{let tot=Object.values(r.populations).reduce((a,b)=>a+b,0);return `<tr><td class="mono" style="color:#1971c2;font-weight:600">${np[g]||(g.includes('A')?'—(未定)':'germline')}</td><td class="mono">${g}</td><td>${sLabels(g)}</td><td>${c}</td><td>${(100*c/tot).toFixed(0)}%</td></tr>`}).join('');
  el('detail').innerHTML=`<h3>${r.region} <span class="tag ${TT[r.topology_type]||'t_single'}">${r.topology_type}</span> <span class="tag ctx_${r.genome_ctx}">${r.genome_ctx}</span></h3>
   <div class="kv"><div class="b">${r.truncated?(glen+'/'+r.n_sSNV+' sSNV(截斷)'):(r.n_sSNV+' sSNV')}</div><div class="b">span ${r.span>=1e6?(r.span/1e6).toFixed(2)+'Mb':(r.span/1000).toFixed(1)+'kb'}</div><div class="b">c=${r.n_clusters} 群</div><div class="b">HP: ${r.haplotypes}</div><div class="b" title="${r.cn=='unknown'?'此樣本未併入 CN census(=未標註,非 CN 不明);6 樣本多為 unknown':'copy-number 狀態:neutral/gain/loss/loh'}">CN: ${r.cn}${r.cn=='unknown'?'(未標註)':''}</div><div class="b">TP ${r.tp} / FP ${r.fp}</div><div class="b">${r.determinacy}</div>${r.drop_noise_frac>0?`<div class="b">噪聲過濾 ${(r.drop_noise_frac*100).toFixed(0)}%</div>`:''}${r.ambig_nodes>0?`<div class="b" style="background:#fff3bf">⚠ 順序未定 ${r.ambig_nodes}(缺中間群)</div>`:''}${r.truncated?`<div class="b" style="background:#ffe3e3;color:#c92a2a" title="genotype 向量截斷在 8 位點(上游 GCAP=8);此區 ambig/四配子/機率偵測不完整,成環可能為截斷假象">⚠ 截斷 n_sSNV>8(偵測不完整)</div>`:''}</div>
+  ${locusTrack(r)}
   ${(r.determinacy=='incompatible'||r.has_cycle)?`<div style="background:#fff5f5;border:1px solid #ffc9c9;border-radius:6px;padding:7px 10px;margin:6px 0;font-size:11.5px">🔴 <b>成環/衝突成因</b>：${r.cycle_cause||'—'}${r.truncated?' ＋ 截斷(>8 cap)加劇':''}。${(r.cycle_cause||'').indexOf('CN-gain')>=0?'<b>CN-gain multiplicity 假環</b>（同突變多拷貝→pairwise 矛盾）＝<b>非真演化衝突</b>；建議補 CN/mappability mask、不強建樹。':'other-pairwise-cycle：可能真衝突，但須先排除多拷貝/截斷/mapping artifact 才算真四配子衝突。'}<br><span class="note">📊 全樣本 12 成環區：9 為 CN-gain multiplicity 假環 + 3 other；8/12 截斷 → <b>多數非真演化衝突</b>。</span></div>`:''}
-  ${r.undefined?`<div style="background:#ffe3e3;border:1px solid #ffc9c9;border-radius:6px;padding:8px;margin:6px 0"><b>⚠ 此區有無法定義的分支（順序未定/不相容）</b>→ 下方標籤為可能位置。<br>🔴 曾標『需甲基輔助確認』,但 06-28 normal cis-control pilot 裁決:此類區甲基<b>乾淨可用≈0</b>(SAME-HP 在同一 germline HP 內分化、normal 無對應 within-HP 軸=結構性無解)→ 需 single-cell/multi-region 或加深覆蓋,<b>甲基無法解鎖此區</b>。</div>`:''}
-  ${cf.length?`<div style="background:#fff0f6;border:1px solid #f783ac;border-radius:6px;padding:9px;margin:6px 0"><b>⚠ 四配子違反（incompatible）→ 無法成單一樹</b>　錨點 <b>RR=germline</b>（normal 確認 REF）→ <b>AA=雙突變（最遠）</b>；RA／AR 兩單突變並存＝累積順序未定（AA 由哪個衍生？）<table style="margin-top:5px"><tr><th>衝突對</th><th>RR<br>germ根</th><th>RA<br>僅後者</th><th>AR<br>僅前者</th><th>AA<br>最遠</th><th>讀數弱提示</th></tr>${cf.map(c=>`<tr><td class="mono"><b>${c.pair}</b></td><td>${c.g.RR}</td><td>${c.g.RA}</td><td>${c.g.AR}</td><td>${c.g.AA}</td><td class="note">${c.g.AR>c.g.RA?'S'+c.i+' 單突變較多':c.g.RA>c.g.AR?'S'+c.j+' 單突變較多':'兩單突變相當'}（弱·非定論）</td></tr>`).join('')}</table><div class="note" style="margin-top:4px">下方樹為「丟掉成環邊後的近似結構」，僅參考；真實關係非單一樹。</div><div style="margin-top:5px;padding:6px 9px;border-radius:5px;font-size:11.5px;background:${r.n_roots>=2?'#e7f5ff':'#fff5f5'};border:1px solid ${r.n_roots>=2?'#74c0fc':'#ffc9c9'}">🧬 <b>此區甲基能否分辨 AA 靠 RA／AR：</b>${r.n_roots>=2?`<b style="color:#1971c2">CROSS-HP（此區跨 H1/H2，${r.n_roots} 根）</b> → 橫跨兩單倍型的衝突對屬 <b>allelic</b>（兩突變在不同染色體）→ <b>本就沒有 subclone 累積順序可排</b>(非 subclone 問題);甲基差異只是 germline-ASM、<b>不解此衝突</b>。同一 HP 內的對仍 cis-confounded。`:`<b style="color:#c92a2a">SAME-HP（此區單一 germline HP：${r.haplotypes}）</b> → 衝突對皆在同單倍型，甲基隨 genotype 在 cis 共變（cis-ASM）＝<b>結構性無法解此衝突（double-dip）</b>；normal 無對應 within-HP 軸可扣。順序只能靠<b>讀數/VAF 弱先驗</b> + <b>single-cell／multi-region 確認</b>（06-28 cis-control 裁決，L2）。`}</div></div>`:''}
-  ${r.n_roots>=2?`<div style="background:#fff4e6;border:1px solid #ffd8a8;border-radius:6px;padding:8px"><b>⚠ 此區跨 H1/H2（${r.n_roots} 棵樹）→ 預設顯示分開的兩棵 HP 樹（正確）：</b>${posTree(r)}</div><details style="margin-top:6px"><summary style="cursor:pointer;color:#868e96;font-size:11.5px">▶ 混合 genotype-向量樹（跨 HP 混合，僅參考）</summary>${tree(r.edges,r.populations,r.n_clusters,r.haplotypes,r.germline_reads,r.node_paths,r.ambig_nodes)}</details>`:`<b>克隆樹（germline→…；節點=lineage標籤·S-mut-set·reads·%；座標=向量）</b>${tree(r.edges,r.populations,r.n_clusters,r.haplotypes,r.germline_reads,r.node_paths,r.ambig_nodes)}`}
-  ${(ctr&&ctr.candidate_set&&ctr.candidate_set.length)?`<div style="background:#f8f0fc;border:1px solid #d0bfff;border-radius:6px;padding:9px;margin:8px 0"><b>🔀 替代整樹候選（左右滑動完整樹）</b> <span class="note">此區 <b>${ctr.n_candidates}</b> 棵相容候選樹(缺中間群→插虛擬中間節點);${ctr.honest_note}。<b>非在給答案</b>。</span><div id="cttreebox" style="margin-top:6px">${candTreeCard(ctr,0,r)}</div></div>`:(cand?`<div style="background:#f8f0fc;border:1px solid #d0bfff;border-radius:6px;padding:9px;margin:8px 0"><b>🔀 此區某群位置未定（左右滑動看可能排列；非在給答案）</b> <span class="note">缺中間群→中間群未觀察到，下列累積序共 ${cand.trueCount}${cand.bigNode?'+':''} 種、<b>等機率</b>（讀數無法分；甲基判定見上方）${cand.cands.length<cand.trueCount?('，顯示前 '+cand.cands.length):''}</span><div id="candbox" style="margin-top:6px">${candCard(cand.cands,0,r)}</div></div>`:'')}
+  ${r.undefined?`<div style="background:#fff8e6;border:1px solid #ffe0a3;border-radius:6px;padding:7px 10px;margin:6px 0;font-size:11.5px"><b>⚠ 此區分支順序未定/不相容</b> → 下方候選樹為可能位置(等機率·非給答案);甲基裁決見下方統一說明。</div>`:''}
+  ${cf.length?`<div style="background:#fff0f6;border:1px solid #f783ac;border-radius:6px;padding:9px;margin:6px 0"><b>⚠ 四配子違反（incompatible）→ 無法成單一樹</b>　錨點 <b>RR=germline</b>（normal 確認 REF）→ <b>AA=雙突變（最遠）</b>；RA／AR 兩單突變並存＝累積順序未定。<table style="margin-top:5px"><tr><th>衝突對</th><th>RR<br>germ根</th><th>RA<br>僅後者</th><th>AR<br>僅前者</th><th>AA<br>最遠</th><th>讀數弱提示</th></tr>${cf.map(c=>`<tr><td class="mono"><b>${c.pair}</b></td><td>${c.g.RR}</td><td>${c.g.RA}</td><td>${c.g.AR}</td><td>${c.g.AA}</td><td class="note">${c.g.AR>c.g.RA?'S'+c.i+' 單突變較多':c.g.RA>c.g.AR?'S'+c.j+' 單突變較多':'兩單突變相當'}（弱·非定論）</td></tr>`).join('')}</table><div class="note" style="margin-top:4px">真實關係非單一樹;可能的固定樹見下方 carousel。</div></div>`:''}
+  ${r.n_roots>=2?`<div style="background:#fff4e6;border:1px solid #ffd8a8;border-radius:6px;padding:8px"><b>⚠ 此區跨 H1/H2（${r.n_roots} 棵樹）→ 兩棵分開的 HP 克隆樹（正確）：</b><div class="note" style="margin:3px 0">為何兩棵:somatic 突變散在 H1 與 H2 兩條 germline 單倍型=各自染色體突變(<b>allelic</b>,非 subclone)。${Object.keys(r.populations||{}).filter(g=>g.indexOf('A')>=0).length<=1?`此區 genotype 向量樹 trivial(僅單一 ALT 向量${r.truncated?'+截斷':''})→改以<b>位點層</b>兩棵 HP 樹呈現。`:''}</div>${posTree(r)}</div><details style="margin-top:6px"><summary style="cursor:pointer;color:#868e96;font-size:11.5px">▶ 混合 genotype-向量樹（跨 HP 混合,僅參考）</summary>${tree(r.edges,r.populations,r.n_clusters,r.haplotypes,r.germline_reads,r.node_paths,r.ambig_nodes)}</details>`:`<b>克隆樹（germline→…；節點=lineage標籤·S-mut-set·reads·%；座標=向量）</b>${tree(r.edges,r.populations,r.n_clusters,r.haplotypes,r.germline_reads,r.node_paths,r.ambig_nodes)}`}
+  ${r.truncated?allPosTree(r):''}
+  ${methylVerdict(r)}
+  ${cyc?`<div style="background:#f8f0fc;border:1px solid #d0bfff;border-radius:6px;padding:9px;margin:8px 0"><b>🔀 可能的固定樹（左右選·成環區）</b> <span class="note">移除最小衝突邊→列出 <b>${cyc.length}</b> 棵可能的固定樹。<b style="color:#c2255c">⚠ 假環(CN-gain multiplicity)·僅示意·非真演化衝突·🔴甲基無法裁決哪棵更可能</b>。</span><div id="cycbox" style="margin-top:6px">${cycleCard(cyc,0,r)}</div></div>`:''}
+  ${(ctr&&ctr.candidate_set&&ctr.candidate_set.length)?`<div style="background:#f8f0fc;border:1px solid #d0bfff;border-radius:6px;padding:9px;margin:8px 0"><b>🔀 替代整樹候選（左右滑動完整樹）</b> <span class="note">此區 <b>${ctr.n_candidates}</b> 棵相容候選樹(缺中間群→插虛擬中間節點);${ctr.honest_note}。<b>非在給答案</b>(🔴甲基無法裁決)。</span><div id="cttreebox" style="margin-top:6px">${candTreeCard(ctr,0,r)}</div></div>`:''}
   <div class="note" style="background:#eef9f0;border:1px solid #b2dfc0;border-radius:5px;padding:6px 9px;margin:6px 0">🔬 <b>read-driven 交叉確認</b>（22-way 平行遍歷 read）：多-ALT read <b>${rdr.rd_multi_alt!=null?rdr.rd_multi_alt:'—'}</b>／distinct combos <b>${rdr.rd_combos!=null?rdr.rd_combos:'—'}</b>（pipeline n_clusters=${r.n_clusters}）／max chain <b>${rdr.rd_max_chain!=null?rdr.rd_max_chain:'—'}</b>${r.truncated?'　🔴 截斷區→read-driven 原始串接（非假樹）':''}</div>
   <div class="note">S1..S${r.truncated?glen:r.n_sSNV}=區內排序 sSNV${r.truncated?`（此區共 ${r.n_sSNV} sSNV,僅前 ${glen} 進向量;樹/標籤只到 S${glen}）`:''}；直系=往下、姊妹=同層分叉；germline 根標 reads·%。tree_shape(pairwise)=${r.tree_shape}。genome_ctx 為近似(±3Mb)。</div>
   <b>細胞群(lineage 標籤 → 向量 → S 突變 → reads → 佔比)</b><table><tr><th>lineage</th><th>向量</th><th>突變(S)</th><th>reads</th><th>佔比</th></tr>${pt}</table>${geneBlock(r.region)}`;
- window.__cand=cand?{cands:cand.cands,idx:0,r:r}:null;
+ window.__cyc=cyc?{cs:cyc,idx:0,r:r}:null;
  window.__ctr=(ctr&&ctr.candidate_set&&ctr.candidate_set.length)?{cs:ctr,idx:0,r:r}:null;
 }
 function geneBlock(region){
@@ -458,6 +597,7 @@ HTML = f"""<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta
 <p class="sub">{len(SAMPLE_NAMES)} ONT 樣本（{", ".join(SAMPLE_NAMES)}）· 每區 genotype 向量→拓樸(perfect-phylogeny+噪聲過濾) · 分頁切換樣本 · S=sSNV/r=read群/m=甲基位點 · 數字由 JSON 注入</p>
 <div id="sampletabs" class="tabs"></div>
 <div class="zone">📊 整體觀察區（隨樣本變）：全 sSNV 宇宙帳本 + 拓樸/群數/determinacy/HP 統計（圓餅+長條）</div>
+<div id="scorecard"></div>
 <div id="universe"></div>
 <div id="ideogram"></div>
 {GLOSSARY_HTML}
