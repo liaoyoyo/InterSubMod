@@ -1,0 +1,82 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Read-driven 全基因組交叉確認 — HCC1395</title>
+<style>
+body{font-family:"Segoe UI","微軟正黑體",sans-serif;max-width:1080px;margin:0 auto;padding:24px;color:#222;line-height:1.55}
+h1{font-size:22px;border-bottom:3px solid #44546A;padding-bottom:8px}
+h2{font-size:17px;color:#44546A;margin-top:30px;border-left:4px solid #5B9BD5;padding-left:8px}
+.bluf{background:#eef4fb;border:1px solid #cfe0f3;border-radius:6px;padding:12px 16px;font-size:14px}
+.cards{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}
+.card{flex:1 1 150px;background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card .v{font-size:24px;font-weight:700;color:#2c5f9e}
+.card .l{font-size:12px;color:#666;margin-top:4px}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px}
+th,td{border:1px solid #e3e3e3;padding:6px 9px;text-align:left;vertical-align:middle}
+th{background:#f4f6f9;color:#44546A}
+.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.src{font-size:11px;color:#888;font-family:monospace}
+.red{color:#c0392b;font-weight:700}
+.note{font-size:12px;color:#666}
+footer{margin-top:30px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:10px}
+</style></head><body>
+
+<h1>Read-driven 全基因組交叉確認 — HCC1395（HCC1395 genome-wide read-driven (chr1-22, parallel per-chrom)）</h1>
+
+<div class="bluf">
+<b>BLUF</b>：遍歷 2,484,698 條 read 直接重建 sSNV 共現。<b>read-driven 可行 ✓</b>、且確實含「一條 read 串多個 sSNV」的<b>直接多路鏈</b>（最長 85-way）。
+但 ① <b class="red">最大的鏈是 artifact</b>（chr9 pericentromere 85-way）非真 subclone；
+② 整合後資訊<b>驟減 6.73×</b>（97,196 多-ALT read → 14,434 distinct combos）；
+③ 跨-50kb 真實 gain 僅 343（0.35%）→ <b>現行 50kb cap 合理</b>；chimeric（supplementary）310 條已正確排除。
+最終可建完整演化樹 = <b>677 區</b>（與既有 pipeline 一致）。
+</div>
+
+<div class="cards">
+<div class="card"><div class="v">2,484,698</div><div class="l">reads 觸及 sSNV</div></div>
+<div class="card"><div class="v">97,196</div><div class="l">reads ≥2 ALT（直接鏈）</div></div>
+<div class="card"><div class="v">14,434</div><div class="l">distinct combos</div></div>
+<div class="card"><div class="v">6.73×</div><div class="l">塌縮比</div></div>
+<div class="card"><div class="v">677</div><div class="l">完整演化樹</div></div>
+</div>
+
+<h2>1. 塌縮級聯：為何「整合後資訊小很多」</h2>
+<p class="note">原始 read 層看似龐大，逐層整合（多-ALT read → 不同組合 → 區域 → 確認結構 → 完整樹）後驟減。每列右側為相對前一層的塌縮倍率。</p>
+<table><tr><th>層級</th><th>數量</th><th></th><th>塌縮</th></tr><tr><td>reads touching ≥1 sSNV</td><td class="num">2,484,698</td><td style="width:40%"><div style="background:#5B9BD5;height:14px;width:100.0%;border-radius:2px"></div></td><td class="num">—</td></tr><tr><td>reads carrying ≥2 ALT (直接多路鏈)</td><td class="num">97,196</td><td style="width:40%"><div style="background:#5B9BD5;height:14px;width:3.9%;border-radius:2px"></div></td><td class="num">—</td></tr><tr><td>distinct ALT combinations</td><td class="num">14,434</td><td style="width:40%"><div style="background:#5B9BD5;height:14px;width:0.6%;border-radius:2px"></div></td><td class="num">—</td></tr><tr><td>read-span regions (pipeline)</td><td class="num">7,143</td><td style="width:40%"><div style="background:#5B9BD5;height:14px;width:0.3%;border-radius:2px"></div></td><td class="num">—</td></tr><tr><td>confirmed-structure regions</td><td class="num">4,678</td><td style="width:40%"><div style="background:#5B9BD5;height:14px;width:0.2%;border-radius:2px"></div></td><td class="num">—</td></tr><tr><td>full evolution trees</td><td class="num">677</td><td style="width:40%"><div style="background:#5B9BD5;height:14px;width:0.0%;border-radius:2px"></div></td><td class="num">—</td></tr></table>
+
+<h2>2. 串接分布（一條 read 直接串幾個 sSNV）</h2>
+<p class="note">直接多路鏈（同一分子上 ≥2 ALT）大小分布；2-way 最多，長鏈快速遞減（且多為 artifact，見下）。最長 85-way。</p>
+<table><tr><th>鏈大小</th><th>read 數</th><th></th></tr><tr><td>2-way</td><td class="num">83,368</td><td style="width:55%"><div style="background:#70AD47;height:14px;width:100.0%;border-radius:2px"></div></td></tr><tr><td>3-way</td><td class="num">9,147</td><td style="width:55%"><div style="background:#70AD47;height:14px;width:11.0%;border-radius:2px"></div></td></tr><tr><td>4-way</td><td class="num">1,702</td><td style="width:55%"><div style="background:#70AD47;height:14px;width:2.0%;border-radius:2px"></div></td></tr><tr><td>5–10-way</td><td class="num">2,161</td><td style="width:55%"><div style="background:#70AD47;height:14px;width:2.6%;border-radius:2px"></div></td></tr><tr><td>11–20-way</td><td class="num">552</td><td style="width:55%"><div style="background:#70AD47;height:14px;width:0.7%;border-radius:2px"></div></td></tr><tr><td>21–50-way</td><td class="num">215</td><td style="width:55%"><div style="background:#70AD47;height:14px;width:0.3%;border-radius:2px"></div></td></tr><tr><td>51–85-way</td><td class="num">51</td><td style="width:55%"><div style="background:#70AD47;height:14px;width:0.1%;border-radius:2px"></div></td></tr></table>
+
+<h2>3. 🔴 FP-inflation：最密集的鏈是 artifact 不是 subclone</h2>
+<p class="note">最大鏈擠在極小區間（密度遠超真 somatic ~1/85kb）→ pericentromere / segdup mapping artifact。需 somatic-confirm 閘（normal=REF）清除。「真 subclone」訊號是小鏈（如 canonical chr17:48.3M ~3 sSNV）。</p>
+<table><tr><th>n_ALT</th><th>位置</th><th>span(bp)</th><th>密度</th><th>HP</th><th>旗標</th></tr><tr><td class="num">85</td><td>chr9:41,777,788–41,804,669</td><td class="num">26,881</td><td class="num">316 bp/ALT</td><td>1-1</td><td>🔴 artifact 疑似</td></tr><tr><td class="num">84</td><td>chr9:41,777,788–41,804,669</td><td class="num">26,881</td><td class="num">320 bp/ALT</td><td>1-1</td><td>🔴 artifact 疑似</td></tr><tr><td class="num">84</td><td>chr9:41,777,788–41,804,669</td><td class="num">26,881</td><td class="num">320 bp/ALT</td><td>1-1</td><td>🔴 artifact 疑似</td></tr><tr><td class="num">84</td><td>chr9:41,779,429–41,804,669</td><td class="num">25,240</td><td class="num">300 bp/ALT</td><td>1-1</td><td>🔴 artifact 疑似</td></tr><tr><td class="num">83</td><td>chr9:41,777,788–41,804,669</td><td class="num">26,881</td><td class="num">324 bp/ALT</td><td>1-1</td><td>🔴 artifact 疑似</td></tr><tr><td class="num">83</td><td>chr9:41,777,788–41,804,669</td><td class="num">26,881</td><td class="num">324 bp/ALT</td><td>1-1</td><td>🔴 artifact 疑似</td></tr><tr><td class="num">83</td><td>chr9:41,777,788–41,804,669</td><td class="num">26,881</td><td class="num">324 bp/ALT</td><td>1-1</td><td>🔴 artifact 疑似</td></tr><tr><td class="num">83</td><td>chr9:41,777,788–41,804,669</td><td class="num">26,881</td><td class="num">324 bp/ALT</td><td>1-1</td><td>🔴 artifact 疑似</td></tr><tr><td class="num">82</td><td>chr9:41,777,788–41,804,669</td><td class="num">26,881</td><td class="num">328 bp/ALT</td><td>1-1</td><td>🔴 artifact 疑似</td></tr><tr><td class="num">80</td><td>chr9:41,777,788–41,804,669</td><td class="num">26,881</td><td class="num">336 bp/ALT</td><td>1-1</td><td>🔴 artifact 疑似</td></tr></table>
+
+<h2>4. 跨-50kb gain + chimeric 防呆</h2>
+<table>
+<tr><td>跨 50kb 真實鏈（提高 TIER_R 才撈到）</td><td class="num">343</td><td>= 多-ALT read 的 0.35% → 增益小，50kb cap 合理</td></tr>
+<tr><td>chimeric / supplementary 排除（span>100kb）</td><td class="num">310</td><td>同 query_name 跨數 Mb，非單分子 → 正確排除</td></tr>
+</table>
+
+<h2>5. HP 一致性（多-ALT 鏈的 haplotag）</h2>
+<p class="note">一條 read = 一個分子 = 同 HP；多-ALT 鏈幾乎全在 somatic-tagged（1-1/2-1）+ HP3，印證共現=cis。</p>
+<table><tr><th>HP</th><th>鏈數</th></tr><tr><td>HP 2-1</td><td class="num">46,166</td></tr><tr><td>HP 1-1</td><td class="num">45,839</td></tr><tr><td>HP 3</td><td class="num">4,734</td></tr><tr><td>HP null</td><td class="num">390</td></tr><tr><td>HP 1</td><td class="num">43</td></tr><tr><td>HP 2</td><td class="num">24</td></tr></table>
+
+<h2>6. 與既有 pipeline 交叉對照（區域 shape）</h2>
+<p class="note">distance-window pipeline 的最終區域結構；read-driven 確認其骨幹一致（completeness/collapse 上吻合）。clean = CN-neutral/LOH 乾淨子集。</p>
+<table><tr><th>shape</th><th>區域數</th><th>佔比</th><th>clean(CN乾淨)</th></tr><tr><td>full_tree</td><td class="num">677</td><td class="num">9.5%</td><td class="num">205</td></tr><tr><td>linear_nested</td><td class="num">1,908</td><td class="num">26.7%</td><td class="num">763</td></tr><tr><td>sibling_only</td><td class="num">1,235</td><td class="num">17.3%</td><td class="num">408</td></tr><tr><td>co_linked_lineage</td><td class="num">858</td><td class="num">12.0%</td><td class="num">357</td></tr><tr><td>no_confirmed_structure</td><td class="num">2,443</td><td class="num">34.2%</td><td class="num">702</td></tr><tr><td>inconsistent</td><td class="num">22</td><td class="num">0.3%</td><td class="num">5</td></tr></table>
+<p class="note">sSNV 層可建性（tier_r）：有 powered link <b>21,554</b> / underpowered 5,458（加深度 ~57% 可救）/ isolated 8,320（稀疏孤點，需 Tier-PS）。</p>
+
+<h2>7. 驗證數據表（每數字 → 來源檔:鍵）</h2>
+<table><tr><th>metric</th><th>value</th><th>source</th></tr><tr><td>union sSNV</td><td class="num">35,332 (TP 30,490 + FP 4,842)</td><td class="src">read_driven_genomewide.json : n_snv_total</td></tr><tr><td>reads touching sSNV</td><td class="num">2,484,698</td><td class="src">… : n_reads_touching_total</td></tr><tr><td>reads ≥2 ALT (genuine)</td><td class="num">97,196</td><td class="src">… : n_reads_multi_alt_genuine</td></tr><tr><td>chimeric excluded (span>100kb)</td><td class="num">310</td><td class="src">… : n_chimeric_reads_excluded</td></tr><tr><td>distinct ALT combos</td><td class="num">14,434</td><td class="src">… : distinct_alt_combos_total</td></tr><tr><td>distinct pairs (edges)</td><td class="num">40,492</td><td class="src">… : distinct_pairs_total</td></tr><tr><td>collapse ratio</td><td class="num">6.73×</td><td class="src">… : collapse_ratio_reads_per_combo</td></tr><tr><td>cross-50kb genuine chains</td><td class="num">343</td><td class="src">… : n_cross50k_genuine_chains</td></tr><tr><td>max ALT / read</td><td class="num">85</td><td class="src">… : max_alt_per_read</td></tr><tr><td>full evolution trees</td><td class="num">677 (clean 205)</td><td class="src">region_shape_distribution.json : by_shape.full_tree.n</td></tr><tr><td>confirmed-structure regions</td><td class="num">4,678</td><td class="src">… : structured_plus_colinked</td></tr><tr><td>total regions</td><td class="num">7,143</td><td class="src">… : total_regions</td></tr><tr><td>sSNV buildable (powered link)</td><td class="num">21,554 / 35,332 (61%)</td><td class="src">tier_r_characterization.json : linked_ref.n</td></tr></table>
+
+<h2>8. 誠實邊界</h2>
+<ul class="note">
+<li>read-driven 與 distance-window 結論一致：完整樹 <b>677</b>（clean 205），confirmed-structure 4,678 / 7,143 區。</li>
+<li>最大鏈為 artifact（chr9 pericentromere 等）→ structure 為上界、含 FP；須 somatic 閘 per-region 清除（便宜）。</li>
+<li>跨-50kb gain 極小（343）→ 提高 TIER_R 收益有限；真正 lever = 深度 + Tier-PS。</li>
+<li>⭐3 單樣本 regional：677 為局部區域樹，非一棵全腫瘤系統發生樹；不能排 sibling 順序。</li>
+</ul>
+
+<footer>
+generated by build_html.py（§13-A 數據注入）· data: read_driven_genomewide.json / region_shape_distribution.json / tier_r_characterization.json · HCC1395 ⭐3 · 2026-06-30
+</footer>
+</body></html>
