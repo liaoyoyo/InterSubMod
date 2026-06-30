@@ -57,6 +57,8 @@ SAMPLES_JSON = json.dumps(SAMPLES, ensure_ascii=False)
 # R3+R7: chr17 read×read 距離矩陣 + 分群×lineage 交叉表(HCC1395 worked;固定教學甲基展板用)
 _c17t = os.path.join(DATA, "chr17_tree_data.json")
 CHR17TREE_JSON = json.dumps(json.load(open(_c17t, encoding="utf-8")), ensure_ascii=False) if os.path.exists(_c17t) else "null"
+_ideo = os.path.normpath(os.path.join(HERE, "..", "..", "20260630_perregion_workstation", "data", "ideogram_data.json"))
+IDEOGRAM_JSON = json.dumps(json.load(open(_ideo, encoding="utf-8")), ensure_ascii=False) if os.path.exists(_ideo) else "null"
 FIRST = SAMPLE_NAMES[0]
 # 相容:DJ/B 供舊單樣本變數(UNIVERSE_BANNER 等)用 FIRST 樣本
 d = json.load(open(os.path.join(_sample_dirs()[0][1], "topology_per_region.json"), encoding="utf-8"))
@@ -157,13 +159,34 @@ function pieBars(o,m){return `<div style="display:flex;gap:9px;align-items:flex-
 el('s_topo').innerHTML=pieBars(D.stats.topology_type);el('s_clust').innerHTML=pieBars(Object.fromEntries(Object.entries(D.stats.n_clusters).map(([k,v])=>['c='+k,v])));
 el('s_det').innerHTML=pieBars(D.stats.determinacy);el('s_root').innerHTML=pieBars(D.stats.n_roots);
 // R4: 建樹位點分布(第5卡) — 區級從 detail 算 + sSNV 位點宇宙從 accounting
-(function(){let dt=D.detail,ge2=dt.length,eq2=dt.filter(r=>r.n_sSNV==2).length,eq3=dt.filter(r=>r.n_sSNV==3).length,ge4=dt.filter(r=>r.n_sSNV>=4).length,strict=dt.filter(r=>(r.topology_type||'').split('(')[0]!=='single').length;
- let rows=[['可建樹區 n_sSNV≥2',ge2,'#1c7ed6'],['　┣ 恰 2 sSNV',eq2,'#4dabf7'],['　┣ 恰 3 sSNV',eq3,'#4dabf7'],['　┗ ≥4 sSNV',ge4,'#4dabf7'],['真多節點樹 lin+br+star',strict,'#37b24d']];
- let html=rows.map(([k,v,c])=>`<div class="bar"><i style="width:${Math.max(3,78*v/(ge2||1))}px;background:${c}"></i>${k}: <b>${v}</b></div>`).join('');
- let a=D.accounting;
- if(a){html+=`<div class="bar" style="color:#868e96;margin-top:4px;border-top:1px solid #f1f3f5;padding-top:3px">全 sSNV 位點宇宙 <b>${(a.universe_total||0).toLocaleString()}</b></div><div class="bar">linked <b>${a.buckets.linked.pct}%</b> 可建樹｜單位點 <b>${a.single_pct}%</b></div>`;}
- else{html+=`<div class="note" style="margin-top:4px">單位點數待 single_snv_accounting</div>`;}
+(function(){let dt=D.detail,tot=dt.length;
+ let buckets=[['2',dt.filter(r=>r.n_sSNV==2).length],['3',dt.filter(r=>r.n_sSNV==3).length],['4',dt.filter(r=>r.n_sSNV==4).length],['5',dt.filter(r=>r.n_sSNV==5).length],['6',dt.filter(r=>r.n_sSNV==6).length],['7',dt.filter(r=>r.n_sSNV==7).length],['8',dt.filter(r=>r.n_sSNV==8).length],['>8',dt.filter(r=>r.n_sSNV>8).length]];
+ let mx=Math.max(...buckets.map(b=>b[1]),1);
+ let html='<div class="note" style="margin-bottom:3px">每區 sSNV 數（縱）→ 區域個數（橫）；共 <b>'+tot+'</b> 可建樹區（n_sSNV≥2）。多數為 2-sSNV 對。</div>';
+ html+=buckets.map(([k,v])=>{let pct=(100*v/tot).toFixed(1);let c=k=='>8'?'#fa5252':(+k>=4?'#37b24d':'#1c7ed6');return `<div class="bar" title="${v} 區 = 可建樹區 ${pct}%"><span style="display:inline-block;width:30px;text-align:right;font-weight:600">${k}</span> <i style="width:${Math.max(2,150*v/mx)}px;background:${c}"></i> ${v} <span style="color:#868e96">(${pct}%)</span></div>`;}).join('');
+ let a=D.accounting,snv_in_trees=dt.reduce((s,r)=>s+r.n_sSNV,0);
+ html+='<div class="bar" style="color:#495057;margin-top:5px;border-top:1px solid #f1f3f5;padding-top:4px">相較總量：可建樹區涵蓋 <b>'+snv_in_trees.toLocaleString()+'</b> sSNV-in-region';
+ if(a){html+='　/　全宇宙 <b>'+(a.universe_total||0).toLocaleString()+'</b>（linked <b>'+a.buckets.linked.pct+'%</b> 可建樹·單位點 <b>'+a.single_pct+'%</b>·其餘 isolated/underpowered）';}
+ html+='</div><div class="note" style="margin-top:2px">藍=2-3 sSNV·綠=≥4(較豐富樹)·紅=>8 截斷</div>';
  el('s_nsnv').innerHTML=html;})();
+// HG38 ideogram: 每棵樹位點(依 shape 上色) + underpowered/isolated 密度(census-based)
+(function(){var ID=window.__IDEOGRAM__;var host=el('ideogram');if(!host)return;if(!ID){host.innerHTML='';return;}
+ var chroms=Object.keys(ID.per_chrom);if(!chroms.length){host.innerHTML='';return;}
+ var maxlen=Math.max.apply(null,chroms.map(function(c){return ID.per_chrom[c].len;}));
+ var PXW=860,shapeCol={F:'#2f9e44',S:'#1c7ed6',I:'#e03131',N:'#adb5bd'},t=ID.totals||{};
+ var X0=64,X=function(p){return X0+PXW*p/maxlen;};
+ var s='<div style="background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:10px 14px;margin:10px 0;font-size:12px">';
+ s+='<b>🗺️ HG38 全基因組分布</b>：樹位點 <span style="color:#2f9e44">▏full_tree</span> <span style="color:#1c7ed6">▏結構(linear/sibling/co_linked)</span> <span style="color:#e03131">▏成環</span>　密度軌 <span style="color:#fa8c16">▮underpowered '+(t.underpowered||0)+'</span> <span style="color:#868e96">▮isolated '+(t.isolated||0)+'</span>　linked '+(t.linked||0)+'。<span class="note">(每染色體比例為 GRCh38 真實長度;density bin 2Mb;hover 看數)</span>';
+ s+='<svg viewBox="0 0 '+(PXW+90)+' '+(chroms.length*24+16)+'" width="100%" style="margin-top:6px;font-family:ui-monospace,monospace">';
+ chroms.forEach(function(c,i){var pc=ID.per_chrom[c],y=14+i*24,w=PXW*pc.len/maxlen,bin=pc.bin;
+   s+='<text x="'+(X0-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" font-weight="600">'+c+'</text>';
+   s+='<rect x="'+X0+'" y="'+(y-5)+'" width="'+w+'" height="10" rx="2" fill="#f8f9fa" stroke="#dee2e6"/>';
+   var bw=Math.max(1,PXW*bin/maxlen);
+   (pc.und_bins||[]).forEach(function(v,bi){if(v>0)s+='<rect x="'+X(bi*bin)+'" y="'+(y+6)+'" width="'+bw+'" height="'+Math.min(6,1+v/2)+'" fill="#fa8c16" opacity="0.75"><title>'+c+' ~'+(bi*2)+'Mb underpowered '+v+'</title></rect>';});
+   (pc.iso_bins||[]).forEach(function(v,bi){if(v>0)s+='<rect x="'+X(bi*bin)+'" y="'+(y+13)+'" width="'+bw+'" height="'+Math.min(5,1+v/4)+'" fill="#868e96" opacity="0.5"><title>'+c+' ~'+(bi*2)+'Mb isolated '+v+'</title></rect>';});
+   (pc.trees||[]).forEach(function(tr){var x=X(tr[0]);s+='<line x1="'+x+'" y1="'+(y-8)+'" x2="'+x+'" y2="'+(y-1)+'" stroke="'+(shapeCol[tr[1]]||'#adb5bd')+'" stroke-width="1.1"><title>'+c+':'+tr[0]+' '+tr[1]+'</title></line>';});
+ });
+ s+='</svg></div>';host.innerHTML=s;})();
 // R4: 統計卡 popup(放大 pie+全 bin+名詞字典),onclick 在 bootWS 閉包內→永遠對應當前 D(per-sample)
 const STAT_DICT={topology_type:{title:'拓樸型態',desc:'每區 read 群在系統發生樹上的形狀(只計 n_sSNV≥2 區)。',items:{'single':'單群:reads 全塌成一個基因型,無分支','linear(全直系)':'全直系鏈 germline→A→AB→…','branched(直系+姊妹)':'有姊妹分支(同層平行 subclone)','star(全姊妹)':'全姊妹:多條從 germline 各自分出','germline_only':'只有 germline'}},n_clusters:{title:'群數 c',desc:'區內 distinct population(細胞狀態)數;perfect-phylogeny 下 ≤ k+1。',items:{}},determinacy:{title:'determinacy 可辨識性',desc:'樹「存在」≠「能辨識是哪棵」。',items:{'A_determined(單分子向量)':'單分子向量唯一可辨識','A_ambiguous_order(缺中間群)':'缺中間群→累積順序未定','B_pairwise_structure':'pairwise 拼接,非單分子整跨','C_underdetermined':'多樹相容,欠定','incompatible':'四配子違反→成環,無法成單一樹','other':'單群無分支'}},n_roots:{title:'HP 根數',desc:'somatic 事件散在幾條 germline 單倍型。≥2 = 跨 HP(allelic,非 subclone)。',items:{}}};
 window.openStatModal=function(which){let o=D.stats[which];if(which==='n_clusters')o=Object.fromEntries(Object.entries(o).map(([k,v])=>['c='+k,v]));let d=STAT_DICT[which]||{title:which,desc:'',items:{}};let tot=Object.values(o).reduce((a,b)=>a+b,0)||1;let dict=Object.entries(d.items||{}).filter(([k])=>o[k]!=null).map(([k,v])=>`<div style="font-size:11.5px;margin:3px 0"><b class="mono">${k}</b> — ${v}</div>`).join('');el('statmodal_body').innerHTML=`<h3 style="margin-top:0">${d.title}（${(window.__DATA__&&document.querySelector('.stab.active')?document.querySelector('.stab.active').dataset.s:'')}；合計 ${tot}）</h3><div class="note" style="margin-bottom:10px">${d.desc}</div><div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap"><div style="transform:scale(1.7);transform-origin:top left;margin:18px 40px 40px 8px">${pie(o)}</div><div style="flex:1;min-width:280px">${bars(o,99)}</div></div>${dict?`<div style="margin-top:12px;border-top:1px solid #f1f3f5;padding-top:9px"><b style="font-size:12.5px">類別說明</b><div style="margin-top:5px">${dict}</div></div>`:''}`;el('statmodal').style.display='flex'};
@@ -252,11 +275,11 @@ function tree(edges,popcount,nc,hp,germR,np,ambig){np=np||{};ambig=ambig||0;
  let relSet=new Set();
  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="font-family:ui-monospace,Menlo,monospace">`;
  roots.forEach(r=>{let g=gainedS(null,r),mx=(X(gx)+X(pos[r]))/2,my=(Y(0)+Y(1))/2,w=Math.max(44,g.join('+').length*7+12);
-  s+=`<line x1="${X(gx)}" y1="${Y(0)+NH/2}" x2="${X(pos[r])}" y2="${Y(1)-NH/2}" stroke="#ced4da" stroke-width="1.6"/>`;
+  s+=`<line x1="${X(gx)}" y1="${Y(0)+NH/2}" x2="${X(pos[r])}" y2="${Y(1)-NH/2}" stroke="${g.length>=2?'#f08c00':'#ced4da'}" stroke-width="${g.length>=2?(2.2+1.5*g.length).toFixed(1):'1.6'}"/>`;
   if(g.length)s+=`<rect x="${mx-w/2}" y="${my-10}" width="${w}" height="19" rx="9" fill="#ebfbee" stroke="#2f9e44"/><text x="${mx}" y="${my+4}" text-anchor="middle" font-size="11" fill="#2b8a3e" font-weight="700">+${g.join('+')}</text>`;}); // germline→第一代 edge 也標 +S(原缺)
  (edges||[]).forEach(([p,c])=>{if(p!='ROOT'){
   let g=gainedS(p,c),mx=(X(pos[p])+X(pos[c]))/2,my=(Y(depth[p])+Y(depth[c]))/2;
-  s+=`<line x1="${X(pos[p])}" y1="${Y(depth[p])+NH/2}" x2="${X(pos[c])}" y2="${Y(depth[c])-NH/2}" stroke="#ced4da" stroke-width="1.6"/>`;
+  s+=`<line x1="${X(pos[p])}" y1="${Y(depth[p])+NH/2}" x2="${X(pos[c])}" y2="${Y(depth[c])-NH/2}" stroke="${g.length>=2?'#f08c00':'#ced4da'}" stroke-width="${g.length>=2?(2.2+1.5*g.length).toFixed(1):'1.6'}"/>`;
   let w=Math.max(44,g.join('+').length*7+12);if(g.length)s+=`<rect x="${mx-w/2}" y="${my-10}" width="${w}" height="19" rx="9" fill="#ebfbee" stroke="#2f9e44"/><text x="${mx}" y="${my+4}" text-anchor="middle" font-size="11" fill="#2b8a3e" font-weight="700">+${g.join('+')}</text>`;
  }});
  let gp=(100*germN/totR).toFixed(0);
@@ -289,7 +312,8 @@ function tree(edges,popcount,nc,hp,germR,np,ambig){np=np||{};ambig=ambig||0;
  <span style="color:#d9480f;font-weight:700">●姊妹分支 sibling</span> 同一父不同分支、平行 subclone(橙框)<br>
  <span style="color:#5f3dc4;font-weight:700">co_linked(完美共現)</span> 一節點獲≥2 變異且區無 ambiguous → 兩變異綁同一事件<br>
  <span style="color:#e8590c;font-weight:700">⚠缺中間群(順序未定)</span> 一節點獲≥2 變異但區有 ambiguous → 跳>1突變、未觀察到中間群、累積順序未定（黃框；<b>非</b>確定 co_linked）<br>
- <span style="color:#2b8a3e;font-weight:700">+S</span> 該分支新增 somatic 變異</div></details>`;
+ <span style="color:#2b8a3e;font-weight:700">+S</span> 該分支新增 somatic 變異<br>
+ <span style="color:#f08c00;font-weight:700">━ 粗橙線</span> 一次獲 ≥2 突變（缺中間群／co_linked；線越粗代表該 edge 增加越多突變）</div></details>`;
  return s+leg;
 }
 // 2-root: 位置樹按 HP 分兩棵
@@ -340,6 +364,7 @@ function show(i,row){el('list').querySelectorAll('.row').forEach(x=>x.classList.
  let pt=Object.entries(r.populations).sort((a,b)=>b[1]-a[1]).map(([g,c])=>{let tot=Object.values(r.populations).reduce((a,b)=>a+b,0);return `<tr><td class="mono" style="color:#1971c2;font-weight:600">${np[g]||(g.includes('A')?'—(未定)':'germline')}</td><td class="mono">${g}</td><td>${sLabels(g)}</td><td>${c}</td><td>${(100*c/tot).toFixed(0)}%</td></tr>`}).join('');
  el('detail').innerHTML=`<h3>${r.region} <span class="tag ${TT[r.topology_type]||'t_single'}">${r.topology_type}</span> <span class="tag ctx_${r.genome_ctx}">${r.genome_ctx}</span></h3>
   <div class="kv"><div class="b">${r.n_sSNV} sSNV</div><div class="b">span ${(r.span/1000).toFixed(1)}kb</div><div class="b">c=${r.n_clusters} 群</div><div class="b">HP: ${r.haplotypes}</div><div class="b">CN: ${r.cn}</div><div class="b">TP ${r.tp} / FP ${r.fp}</div><div class="b">${r.determinacy}</div>${r.drop_noise_frac>0?`<div class="b">噪聲過濾 ${(r.drop_noise_frac*100).toFixed(0)}%</div>`:''}${r.ambig_nodes>0?`<div class="b" style="background:#fff3bf">⚠ 順序未定 ${r.ambig_nodes}(缺中間群)</div>`:''}${r.truncated?`<div class="b" style="background:#ffe3e3;color:#c92a2a" title="genotype 向量截斷在 8 位點(上游 GCAP=8);此區 ambig/四配子/機率偵測不完整,成環可能為截斷假象">⚠ 截斷 n_sSNV>8(偵測不完整)</div>`:''}</div>
+  ${(r.determinacy=='incompatible'||r.has_cycle)?`<div style="background:#fff5f5;border:1px solid #ffc9c9;border-radius:6px;padding:7px 10px;margin:6px 0;font-size:11.5px">🔴 <b>成環/衝突成因</b>：${r.cycle_cause||'—'}${r.truncated?' ＋ 截斷(>8 cap)加劇':''}。${(r.cycle_cause||'').indexOf('CN-gain')>=0?'<b>CN-gain multiplicity 假環</b>（同突變多拷貝→pairwise 矛盾）＝<b>非真演化衝突</b>；建議補 CN/mappability mask、不強建樹。':'other-pairwise-cycle：可能真衝突，但須先排除多拷貝/截斷/mapping artifact 才算真四配子衝突。'}<br><span class="note">📊 全樣本 12 成環區：9 為 CN-gain multiplicity 假環 + 3 other；8/12 截斷 → <b>多數非真演化衝突</b>。</span></div>`:''}
   ${r.undefined?`<div style="background:#ffe3e3;border:1px solid #ffc9c9;border-radius:6px;padding:8px;margin:6px 0"><b>⚠ 此區有無法定義的分支（順序未定/不相容）</b>→ 下方標籤為可能位置。<br>🔴 曾標『需甲基輔助確認』,但 06-28 normal cis-control pilot 裁決:此類區甲基<b>乾淨可用≈0</b>(SAME-HP 在同一 germline HP 內分化、normal 無對應 within-HP 軸=結構性無解)→ 需 single-cell/multi-region 或加深覆蓋,<b>甲基無法解鎖此區</b>。</div>`:''}
   ${cf.length?`<div style="background:#fff0f6;border:1px solid #f783ac;border-radius:6px;padding:9px;margin:6px 0"><b>⚠ 四配子違反（incompatible）→ 無法成單一樹</b>　錨點 <b>RR=germline</b>（normal 確認 REF）→ <b>AA=雙突變（最遠）</b>；RA／AR 兩單突變並存＝累積順序未定（AA 由哪個衍生？）<table style="margin-top:5px"><tr><th>衝突對</th><th>RR<br>germ根</th><th>RA<br>僅後者</th><th>AR<br>僅前者</th><th>AA<br>最遠</th><th>讀數弱提示</th></tr>${cf.map(c=>`<tr><td class="mono"><b>${c.pair}</b></td><td>${c.g.RR}</td><td>${c.g.RA}</td><td>${c.g.AR}</td><td>${c.g.AA}</td><td class="note">${c.g.AR>c.g.RA?'S'+c.i+' 單突變較多':c.g.RA>c.g.AR?'S'+c.j+' 單突變較多':'兩單突變相當'}（弱·非定論）</td></tr>`).join('')}</table><div class="note" style="margin-top:4px">下方樹為「丟掉成環邊後的近似結構」，僅參考；真實關係非單一樹。</div><div style="margin-top:5px;padding:6px 9px;border-radius:5px;font-size:11.5px;background:${r.n_roots>=2?'#e7f5ff':'#fff5f5'};border:1px solid ${r.n_roots>=2?'#74c0fc':'#ffc9c9'}">🧬 <b>此區甲基能否分辨 AA 靠 RA／AR：</b>${r.n_roots>=2?`<b style="color:#1971c2">CROSS-HP（此區跨 H1/H2，${r.n_roots} 根）</b> → 橫跨兩單倍型的衝突對屬 <b>allelic</b>（兩突變在不同染色體），有<b>獨立 germline-ASM 甲基軸</b>，甲基可給弱獨立訊號（06-28：cross-HP ~35% 可控）；但同一 HP 內的對仍 cis-confounded。`:`<b style="color:#c92a2a">SAME-HP（此區單一 germline HP：${r.haplotypes}）</b> → 衝突對皆在同單倍型，甲基隨 genotype 在 cis 共變（cis-ASM）＝<b>結構性無法解此衝突（double-dip）</b>；normal 無對應 within-HP 軸可扣。順序只能靠<b>讀數/VAF 弱先驗</b> + <b>single-cell／multi-region 確認</b>（06-28 cis-control 裁決，L2）。`}</div></div>`:''}
   ${r.n_roots>=2?`<div style="background:#fff4e6;border:1px solid #ffd8a8;border-radius:6px;padding:8px"><b>⚠ 此區跨 H1/H2（${r.n_roots} 棵樹）→ 預設顯示分開的兩棵 HP 樹（正確）：</b>${posTree(r)}</div><details style="margin-top:6px"><summary style="cursor:pointer;color:#868e96;font-size:11.5px">▶ 混合 genotype-向量樹（跨 HP 混合，僅參考）</summary>${tree(r.edges,r.populations,r.n_clusters,r.haplotypes,r.germline_reads,r.node_paths,r.ambig_nodes)}</details>`:`<b>克隆樹（germline→…；節點=lineage標籤·S-mut-set·reads·%；座標=向量）</b>${tree(r.edges,r.populations,r.n_clusters,r.haplotypes,r.germline_reads,r.node_paths,r.ambig_nodes)}`}
@@ -429,6 +454,7 @@ HTML = f"""<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta
 <div id="sampletabs" class="tabs"></div>
 <div class="zone">📊 整體觀察區（隨樣本變）：全 sSNV 宇宙帳本 + 拓樸/群數/determinacy/HP 統計（圓餅+長條）</div>
 <div id="universe"></div>
+<div id="ideogram"></div>
 {GLOSSARY_HTML}
 <div class="stats">
 <div class="scard"><h4>拓樸型態<span class="more">▸ 點看細節</span></h4><div id="s_topo"></div></div><div class="scard"><h4>群數 c<span class="more">▸ 點看細節</span></h4><div id="s_clust"></div></div>
@@ -469,6 +495,6 @@ situation<select id="q_sit"><option value="">全</option></select>
 <p class="note" style="margin-top:12px">⚠ 證據層級：A_determined=單分子向量唯一可辨識(≠對 single-cell 驗證為真)；A_ambiguous=缺中間群順序未定；B_pairwise=拼接非單分子整樹；C_underdetermined=多樹相容。TP/FP=SEQC2 僅觀察不進前處理。genome_ctx 為近似(±3Mb)。甲基不參與拓樸裁決(cis-confounded;06-28 cis-control 已測→bounded-auxiliary,非 resolver)。⭐3 單樣本·regional(≤read-span)非 genome-wide tree·分子共現≠single-cell。</p>
 {PROVENANCE_FOOTER}
 </div>
-<script>window.__SAMPLES__={SAMPLES_JSON};window.__CHR17TREE__={CHR17TREE_JSON};</script><script>{JS}</script></body></html>"""
+<script>window.__SAMPLES__={SAMPLES_JSON};window.__CHR17TREE__={CHR17TREE_JSON};window.__IDEOGRAM__={IDEOGRAM_JSON};</script><script>{JS}</script></body></html>"""
 with open(MULTI_OUT, "w", encoding="utf-8") as f: f.write(HTML)
 print(f"OK wrote {MULTI_OUT} ({len(HTML):,} bytes; samples {SAMPLE_NAMES})")
