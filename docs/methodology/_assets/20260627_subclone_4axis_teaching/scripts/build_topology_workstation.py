@@ -13,7 +13,7 @@
 import json, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.normpath(os.path.join(HERE, "..", "data"))
-MULTI_OUT = os.path.normpath(os.path.join(HERE, "..", "..", "20260629_multisample_topology_workstation.standalone.html"))
+MULTI_OUT = os.environ.get("SM_OUT") or os.path.normpath(os.path.join(HERE, "..", "..", "20260629_multisample_topology_workstation.standalone.html"))
 # OUT(舊單樣本 20260628)已 deprecated:build 只產多樣本 MULTI_OUT(=主結果);舊單樣本檔不再寫出
 
 # 多樣本(2026-06-29):SM_SAMPLES="name:dir,name:dir" → 多分頁;預設納入已完成樣本(HCC1395 凍結 + multisample_subclone 下有 topology 的)。
@@ -47,6 +47,8 @@ def _load_sample(dr):
     rec["accounting"] = json.load(open(accp, encoding="utf-8")) if os.path.exists(accp) else None
     ctp = os.path.join(dr, "candidate_trees.json")  # R6/Part B: enumerate_candidate_trees 誠實版
     rec["candtrees"] = {x["region"]: x for x in json.load(open(ctp, encoding="utf-8")).get("candidate_trees", [])} if os.path.exists(ctp) else {}
+    rdp = os.path.join(dr, "rd_perregion.json")  # read-driven per-region 交叉確認(22-way 平行遍歷 read)
+    rec["rd"] = json.load(open(rdp, encoding="utf-8")) if os.path.exists(rdp) else {}
     return rec
 
 SAMPLES = {name: _load_sample(dr) for name, dr in _sample_dirs()}
@@ -330,7 +332,7 @@ function render(){
  el('list').querySelectorAll('.row').forEach(x=>x.onclick=()=>show(+x.dataset.i,x));
 }
 function show(i,row){el('list').querySelectorAll('.row').forEach(x=>x.classList.remove('sel'));if(row)row.classList.add('sel');let r=det[i];
- let popcount=r.populations;
+ let popcount=r.populations;let rdr=(D.rd||{})[r.region]||{};
  let np=r.node_paths||{};
  let cf=fourGamete(r.populations);
  let cand=enumCandidates(r);
@@ -342,6 +344,7 @@ function show(i,row){el('list').querySelectorAll('.row').forEach(x=>x.classList.
   ${cf.length?`<div style="background:#fff0f6;border:1px solid #f783ac;border-radius:6px;padding:9px;margin:6px 0"><b>⚠ 四配子違反（incompatible）→ 無法成單一樹</b>　錨點 <b>RR=germline</b>（normal 確認 REF）→ <b>AA=雙突變（最遠）</b>；RA／AR 兩單突變並存＝累積順序未定（AA 由哪個衍生？）<table style="margin-top:5px"><tr><th>衝突對</th><th>RR<br>germ根</th><th>RA<br>僅後者</th><th>AR<br>僅前者</th><th>AA<br>最遠</th><th>讀數弱提示</th></tr>${cf.map(c=>`<tr><td class="mono"><b>${c.pair}</b></td><td>${c.g.RR}</td><td>${c.g.RA}</td><td>${c.g.AR}</td><td>${c.g.AA}</td><td class="note">${c.g.AR>c.g.RA?'S'+c.i+' 單突變較多':c.g.RA>c.g.AR?'S'+c.j+' 單突變較多':'兩單突變相當'}（弱·非定論）</td></tr>`).join('')}</table><div class="note" style="margin-top:4px">下方樹為「丟掉成環邊後的近似結構」，僅參考；真實關係非單一樹。</div><div style="margin-top:5px;padding:6px 9px;border-radius:5px;font-size:11.5px;background:${r.n_roots>=2?'#e7f5ff':'#fff5f5'};border:1px solid ${r.n_roots>=2?'#74c0fc':'#ffc9c9'}">🧬 <b>此區甲基能否分辨 AA 靠 RA／AR：</b>${r.n_roots>=2?`<b style="color:#1971c2">CROSS-HP（此區跨 H1/H2，${r.n_roots} 根）</b> → 橫跨兩單倍型的衝突對屬 <b>allelic</b>（兩突變在不同染色體），有<b>獨立 germline-ASM 甲基軸</b>，甲基可給弱獨立訊號（06-28：cross-HP ~35% 可控）；但同一 HP 內的對仍 cis-confounded。`:`<b style="color:#c92a2a">SAME-HP（此區單一 germline HP：${r.haplotypes}）</b> → 衝突對皆在同單倍型，甲基隨 genotype 在 cis 共變（cis-ASM）＝<b>結構性無法解此衝突（double-dip）</b>；normal 無對應 within-HP 軸可扣。順序只能靠<b>讀數/VAF 弱先驗</b> + <b>single-cell／multi-region 確認</b>（06-28 cis-control 裁決，L2）。`}</div></div>`:''}
   ${r.n_roots>=2?`<div style="background:#fff4e6;border:1px solid #ffd8a8;border-radius:6px;padding:8px"><b>⚠ 此區跨 H1/H2（${r.n_roots} 棵樹）→ 預設顯示分開的兩棵 HP 樹（正確）：</b>${posTree(r)}</div><details style="margin-top:6px"><summary style="cursor:pointer;color:#868e96;font-size:11.5px">▶ 混合 genotype-向量樹（跨 HP 混合，僅參考）</summary>${tree(r.edges,r.populations,r.n_clusters,r.haplotypes,r.germline_reads,r.node_paths,r.ambig_nodes)}</details>`:`<b>克隆樹（germline→…；節點=lineage標籤·S-mut-set·reads·%；座標=向量）</b>${tree(r.edges,r.populations,r.n_clusters,r.haplotypes,r.germline_reads,r.node_paths,r.ambig_nodes)}`}
   ${(ctr&&ctr.candidate_set&&ctr.candidate_set.length)?`<div style="background:#f8f0fc;border:1px solid #d0bfff;border-radius:6px;padding:9px;margin:8px 0"><b>🔀 替代整樹候選（左右滑動完整樹）</b> <span class="note">此區 <b>${ctr.n_candidates}</b> 棵相容候選樹(缺中間群→插虛擬中間節點);${ctr.honest_note}。<b>非在給答案</b>。</span><div id="cttreebox" style="margin-top:6px">${candTreeCard(ctr,0,r)}</div></div>`:(cand?`<div style="background:#f8f0fc;border:1px solid #d0bfff;border-radius:6px;padding:9px;margin:8px 0"><b>🔀 此區某群位置未定（左右滑動看可能排列；非在給答案）</b> <span class="note">缺中間群→中間群未觀察到，下列累積序共 ${cand.trueCount}${cand.bigNode?'+':''} 種、<b>等機率</b>（讀數無法分；甲基判定見上方）${cand.cands.length<cand.trueCount?('，顯示前 '+cand.cands.length):''}</span><div id="candbox" style="margin-top:6px">${candCard(cand.cands,0,r)}</div></div>`:'')}
+  <div class="note" style="background:#eef9f0;border:1px solid #b2dfc0;border-radius:5px;padding:6px 9px;margin:6px 0">🔬 <b>read-driven 交叉確認</b>（22-way 平行遍歷 read）：多-ALT read <b>${rdr.rd_multi_alt!=null?rdr.rd_multi_alt:'—'}</b>／distinct combos <b>${rdr.rd_combos!=null?rdr.rd_combos:'—'}</b>（pipeline n_clusters=${r.n_clusters}）／max chain <b>${rdr.rd_max_chain!=null?rdr.rd_max_chain:'—'}</b>${r.truncated?'　🔴 截斷區→read-driven 原始串接（非假樹）':''}</div>
   <div class="note">S1..S${r.n_sSNV}=區內排序 sSNV；直系=往下、姊妹=同層分叉；germline 根標 reads·%。tree_shape(pairwise)=${r.tree_shape}。genome_ctx 為近似(±3Mb)。</div>
   <b>細胞群(lineage 標籤 → 向量 → S 突變 → reads → 佔比)</b><table><tr><th>lineage</th><th>向量</th><th>突變(S)</th><th>reads</th><th>佔比</th></tr>${pt}</table>${geneBlock(r.region)}`;
  window.__cand=cand?{cands:cand.cands,idx:0,r:r}:null;
