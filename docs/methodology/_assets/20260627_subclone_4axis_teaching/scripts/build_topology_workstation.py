@@ -220,6 +220,8 @@ let LOHIV={};(D.loh||[]).forEach(function(iv){(LOHIV[iv[0]]=LOHIV[iv[0]]||[]).pu
 function regLOH(r){if(r.cn=='loh')return true;let L=LOHIV[r.chrom];if(!L)return false;let a=r.start,b=r.start+(r.span||0);return L.some(function(iv){return iv[1]<b&&iv[2]>a})}
 // topology_type 顯示正名(③):row-laminar 建樹結構上只能「多根 lineage」(各自從 germline 分出),畫不出 subclone-of-subclone
 const TTLABEL={'branched(直系+姊妹)':'多根 lineage','linear(全直系)':'linear 直系','star(全姊妹)':'star 多根','single':'single','germline_only':'germline'};
+// 癌基因命中(#4):該區 gene 註釋含 COSMIC cancer_genes
+function geneHit(region){var g=(D.gene||{})[region];return !!(g&&g.cancer_genes&&Object.keys(g.cancer_genes).length)}
 // situation 顯示正名(#8):regSit/JSON key 不動(計數與評分一致),只改給人看的字
 var SIT_LABEL={'多樹相容(欠定)':'單ALT群·缺連接read(欠定)','跨HP(兩棵樹)':'跨HP·兩棵樹(allelic)'};
 function sitDisp(n){return SIT_LABEL[n]||n;}
@@ -533,13 +535,13 @@ const FACET_CFG={topology_type:{order:['linear(全直系)','branched(直系+姊�
 function cset(k){return new Set([...el('cb_'+k).querySelectorAll('input:checked')].map(x=>x.value))}
 const SORT={coord:(a,b)=>a.chrom.localeCompare(b.chrom,undefined,{numeric:true})||a.start-b.start,nsnv:(a,b)=>b.n_sSNV-a.n_sSNV,nclust:(a,b)=>b.n_clusters-a.n_clusters||b.n_sSNV-a.n_sSNV,glen:(a,b)=>((Object.keys(b.populations||{})[0]||'').length)-((Object.keys(a.populations||{})[0]||'').length)||b.n_sSNV-a.n_sSNV,region:(a,b)=>a.region.localeCompare(b.region)};
 function render(){
- let ch=el('f_chr').value,mc=+el('f_minc').value,tf=el('f_tpfp').value,loh=el('f_loh').checked,undef=el('f_undef').checked,q=el('f_q').value.trim(),so=el('f_sort').value;
+ let ch=el('f_chr').value,mc=+el('f_minc').value,tf=el('f_tpfp').value,loh=el('f_loh').checked,undef=el('f_undef').checked,gene=el('f_gene')?el('f_gene').checked:false,q=el('f_q').value.trim(),so=el('f_sort').value;
  let tt=cset('topology_type'),dd=cset('determinacy'),gc=cset('genome_ctx');
  let tpfpok=r=>(tf=='all')||(tf=='tp'&&r.tp>0)||(tf=='fp'&&r.fp>0)||(tf=='both'&&r.tp>0&&r.fp>0);
- let f=det.filter(r=>(!ch||r.chrom==ch)&&(!tt.size||tt.has(r.topology_type))&&(!dd.size||dd.has(r.determinacy))&&(!gc.size||gc.has(r.genome_ctx))&&r.n_clusters>=mc&&tpfpok(r)&&(!loh||regLOH(r))&&(!undef||r.undefined)&&(!q||r.region.includes(q)));
+ let f=det.filter(r=>(!ch||r.chrom==ch)&&(!tt.size||tt.has(r.topology_type))&&(!dd.size||dd.has(r.determinacy))&&(!gc.size||gc.has(r.genome_ctx))&&r.n_clusters>=mc&&tpfpok(r)&&(!loh||regLOH(r))&&(!undef||r.undefined)&&(!gene||geneHit(r.region))&&(!q||r.region.includes(q)));
  f.sort(SORT[so]||SORT.coord);if(el('f_sortdir').value=='rev')f.reverse();
  el('cnt').textContent=f.length+' 區';
- el('list').innerHTML=f.slice(0,700).map(r=>`<div class="row" data-i="${det.indexOf(r)}"><b>${r.region}</b> <span class="tag ${TT[r.topology_type]||'t_single'}">${TTLABEL[r.topology_type]||r.topology_type.split('(')[0]}</span><span class="tag ctx_${r.genome_ctx}">${r.genome_ctx}</span>${regLOH(r)?'<span class="tag" style="background:#9775fa;color:#fff">LOH</span>':''}<br><span class="note">${r.n_sSNV}sSNV·c=${r.n_clusters}·${r.haplotypes}·${r.cn}·TP${r.tp}/FP${r.fp}${r.ambig_nodes>0?'·⚠序未定':''}</span></div>`).join('')+(f.length>700?`<div class="note" style="padding:8px">...前 700（共 ${f.length}）</div>`:'');
+ el('list').innerHTML=f.slice(0,700).map(r=>`<div class="row" data-i="${det.indexOf(r)}"><b>${r.region}</b> <span class="tag ${TT[r.topology_type]||'t_single'}">${TTLABEL[r.topology_type]||r.topology_type.split('(')[0]}</span><span class="tag ctx_${r.genome_ctx}">${r.genome_ctx}</span>${regLOH(r)?'<span class="tag" style="background:#9775fa;color:#fff">LOH</span>':''}${geneHit(r.region)?'<span class="tag" style="background:#e64980;color:#fff">🧬癌</span>':''}<br><span class="note">${r.n_sSNV}sSNV·c=${r.n_clusters}·${r.haplotypes}·${r.cn}·TP${r.tp}/FP${r.fp}${r.ambig_nodes>0?'·⚠序未定':''}</span></div>`).join('')+(f.length>700?`<div class="note" style="padding:8px">...前 700（共 ${f.length}）</div>`:'');
  el('list').querySelectorAll('.row').forEach(x=>x.onclick=()=>show(+x.dataset.i,x));
 }
 function show(i,row){el('list').querySelectorAll('.row').forEach(x=>x.classList.remove('sel'));if(row)row.classList.add('sel');let r=det[i];
@@ -581,7 +583,7 @@ function geneBlock(region){
     ${dr?`<div style="margin-top:4px">💊 可用藥(DGIdb): ${dr}</div>`:'<div class="note" style="margin-top:4px">此區無 DGIdb 可用藥基因</div>'}
   </div>`;
 }
-['f_chr','f_minc','f_tpfp','f_loh','f_undef','f_q','f_sort','f_sortdir'].forEach(id=>{let e=el(id);if(e){e.oninput=render;e.onchange=render}});
+['f_chr','f_minc','f_tpfp','f_loh','f_undef','f_gene','f_q','f_sort','f_sortdir'].forEach(id=>{let e=el(id);if(e){e.oninput=render;e.onchange=render}});
 render();
 // ===== 確認佇列(評分 + 左右判讀) =====
 const SC=D.scoring;
@@ -653,7 +655,7 @@ HTML = f"""<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta
 ① <b>complete-case（只吃全覆蓋 read）</b>：一條 read 要跨該區全部 sSNV 才算一個 genotype 向量，部分覆蓋的 read <b>靜默丟棄（不 impute）</b>——這是對的（impute 會捏造 linkage，chr17 bug 已證）。代價：HCC1395 有 <b>40.4%(2,887/7,143)</b> 個 n_sSNV≥2 區向量全空被排除單分子拓樸；42 密集區截斷丟 1,132 sSNV。<b>逐區丟棄比例目前未逐區記錄（上游待補）</b>。<br>
 ② <b>read-span 物理限制</b>：co-read 隨距離衰減（中位 88@&lt;1kb → 11@20-50kb）；A_determined 率隨 span 崩（2-10kb 70% → &gt;50kb 僅 11%）；38.9% 的 sSNV underpowered/isolated（距離&gt;read-span 連不起來）。→ 故本方法是 <b>regional partition（≤read-span）非 genome-wide tree</b>（⭐3 定位）。<br>
 ③ <b>建樹表達力</b>：row-laminar <b>畫不出 subclone-of-subclone</b>（深分支）；「branched」實為「多根 lineage」（見「拓樸型態」卡）。<br>
-④ <b>四配子檢定</b>只事後跑、非核心 screen（32/3885 區可能漏檢，見演算法稽核 memo）。<br>
+④ <b>四配子檢定</b>：C2 修正（07-01）已把非 CN-gain 乾淨違反改判 incompatible（incompatible 12→118 區）；CN-gain multiplicity 假違反仍需 CN-aware genotyping（未做）。<br>
 🔴 所有 perfect-phylogeny/IDPP 建構的<b>有效性依賴 infinite-sites</b>，癌症 LOH/CNV（本專案 82-91%）系統違反。完整稽核（Q1-Q4 + 定理來源）→ <b>InterSubMod/docs/methodology/20260701_topology_algorithm_audit_findings_01.md</b>。</div></details>
 <div id="scorecard"></div>
 <div id="universe"></div>
@@ -676,6 +678,7 @@ chr<select id="f_chr"><option value="">全</option></select>
 TP/FP<select id="f_tpfp"><option value="all">全部</option><option value="tp">只含TP</option><option value="fp">只含FP</option><option value="both">同時TP&amp;FP</option></select>
 <label title="LOH 區(longphase-TO LOH.bed overlap 或 cn=loh;7 樣本都用 longphase-TO SEQC2-validated)"><input id="f_loh" type="checkbox">僅 LOH 區</label>
 <label title="分支順序未定/不相容;曾標『需甲基輔助』,06-28 cis-control 已否決(乾淨可用≈0)"><input id="f_undef" type="checkbox">僅無法定義(曾標需甲基·已否決)</label>
+<label title="該區基因註釋含 COSMIC 癌症基因"><input id="f_gene" type="checkbox">僅癌基因命中</label>
 搜尋<input id="f_q" placeholder="chr17:" style="width:120px">
 <span id="cnt" class="note"></span>
 </div>

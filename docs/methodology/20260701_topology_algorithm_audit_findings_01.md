@@ -9,6 +9,8 @@ method: dynamic-workflow(4 research + 4 adversarial-verify agents)+ 主回合資
 
 # 克隆樹建樹演算法方法學稽核
 
+> ⚠ **2026-07-01 同日更新（並行 session fe9d8003 的 C2/C3/D4 修正,commit 979c54d/44ed19c/e8be1bb）**：本稽核跑在 pre-fix 資料;修正後 determinacy = **A_determined 1741（原 1812）/ incompatible 118（原 12）/ A_ambiguous 62（原 76）/ B_pairwise 943（原 958）/ C_underdetermined 544（原 550）**;situation_dist = 衝突 118 / 已確定 2178 / 跨HP 91 / pairwise 892 / 欠定 544 / 順序 62。🔴 **本稽核的待辦 ② 四配子 hoisting 已由 C2 獨立落地**（把非 CN-gain 乾淨四配子違反從靜默丟改判 incompatible → 這是 12→118 暴增的主因）;C3 修「丟 60.9% reads 仍標 A_determined」（本稽核 Q1/Q5 flag 的 truncated-A 失真）。以下正文的具體計數是稽核當時 pre-fix 快照,結論（verdict/盲點）不變,現行計數以本 banner 為準。單一真值:`InterSubMod/docs/methodology/20260701_ssnv_backbone_method_spec_and_correctness_audit_01.md`。
+
 ## TL;DR
 對建樹演算法四個核心設計做了「查真實文獻定理 + 從資料量化 + 對抗驗證」稽核。**結論：核心在群/向量層穩健，在樹拓樸推論有系統性盲點。** 最該顯著標註的一點：所有 perfect-phylogeny/IDPP 建構的有效性都依賴 infinite-sites，癌症 LOH/CNV（本專案 82-91%）系統違反。已落地「透明度」與「正名」到工作站；動到上游建樹演算法的兩項（②④）記錄於此待日後排程。
 
@@ -46,7 +48,7 @@ Q1 缺值 complete-case = 正確保守（別 impute）但太激進 + 未記錄�
 ## 待辦（②④ 動上游建樹演算法，較大改動，記錄待排程）
 | 項 | 內容 | 成本 | scope 限制 |
 |---|---|---|---|
-| **② 四配子 screen** | 把 backbone_resolution.py 的 four_gamete_violations 上移為 solve_topology 內 screen（k≤8 極廉） | 廉價但需正確 scope | 🔴 **只**對 ~9-10 乾淨-CN(loh) 區當免費；22 CN-gain 違反**必須先 CN-aware genotyping**，不可一律丟 incompatible；保留 nested-cycle check（兩機制不重疊都需要） |
+| **② 四配子 screen** ✅**已由 C2 落地(07-01)** | C2(commit 44ed19c)把 `independent`(4-gamete)從靜默丟 → 計數 + 非 CN-gain 乾淨違反判 incompatible(12→118) | 已完成 | ✅ 非 CN-gain 乾淨違反已改判;CN-gain multiplicity 假違反仍待 CN-aware genotyping(未做) |
 | **② CN-aware genotyping** | 對 CN-gain loci 建模 allele multiplicity（SPRUCE/PhyloWGS/Canopy 標準） | 中等（需 allele-specific CN，部分可從 SM_CNBED/SAVANA） | 可合法清 22 CN-gain 假違反 |
 | **④ 記錄丟棄** | 每區輸出 n_reads_spanning_any / n_full_cov_reads / dropped_partial_fraction | 極低 | 純透明；把靜默丟棄變可稽核 |
 | **④ partial fragment 拓樸** | 讓 multi-locus 拓樸吃 partial fragment（已在 pairwise 層做）救回部分空向量區 | 中等 | 先用 pairs_eps2 ∩ 空區算真正可救比例（<40.4%，未算），不可把 40.4% 當可救目標 |
