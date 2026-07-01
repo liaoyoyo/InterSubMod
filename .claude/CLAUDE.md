@@ -77,7 +77,7 @@
 
 ---
 
-## §3 Skills 分類索引（49 個 SKILL.md，Claude Code 特定 — 2026-06-19 +task-graph）
+## §3 Skills 分類索引（50 個 SKILL.md，Claude Code 特定 — 2026-07-01 +harness-review）
 
 > **drift 修正紀錄**：
 > - 2026-05-20：原寫 45 → 一度改 44（誤判 `grill-me/` 為 phantom +1）。
@@ -89,7 +89,7 @@
 > - **2026-06-19**：新增 `/task-graph`（視覺化 5→6）→ 48→**49**（49 = 47 + verify-workstation〔2026-06-15〕+ task-graph）。研究任務有向圖層：`state/tasks/graph.json` 機械真值 → 自動產生 `TASKS.md`（留底）+ `tasks_board.html`（確認+顯示驗證主介面）。補 §盤點出的唯一大洞 D2（跨任務有向依賴）+ 程式流程圖（CWL-style 必需/可選 I/O）+ 主任務 `<details>` 階層；HTML 複用 `build_workstation.py`（§13-A 反捏造）、流程圖為純手刻 SVG 零依賴。`scripts/tasks/task_graph.py` = validate/check/ready/render/render-html。
 > **重複交叉位置**：`/feature-layered-observation`（P3 + 研究專用）/ `/multi-sample-consistency`（P4 + 研究專用）/ `/pre-decision-audit`（元方法論 + 三層樓 pre）/ `/run-evaluator`（P5 + 三層樓 post）— 在多分類列出表示同 skill 多角色。
 
-- **元方法論（10）**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor` `/pre-decision-audit` `/problem-framing-ideation` `/provenance-tier-audit` `/harness-health` ⭐ 新（2026-05-31；harness 自我稽核 **11 燈**儀表板，read-only `scripts/harness_health.py`；+#7 memory-drift +#8 doc-path-currency +#9 hook-wiring +#10 tier-format +#11 phase-staleness〔2026-06-16 L1 port to live 2026-06-26〕）
+- **元方法論（11）**: `/confirmation-protocol` `/known-pitfalls` `/cycle-state` `/research-context-loader` `/fast-learning-coach` `/scientific-rigor` `/pre-decision-audit` `/problem-framing-ideation` `/provenance-tier-audit` `/harness-health` `/harness-review` ⭐ 新（2026-07-01；週度流程/架構 meta-review + **restraint gap** — 進度/問題 → 逐項對照既有覆蓋只留真 gap → harness-health 11 燈 → 網路 delta → 修正清單；user-invoked 非 auto-loop，與 harness-health〔config drift 燈〕/weekly-report〔研究內容〕正交；由 2026-07-01 週 review 產出：8 insights 建議 → 7 ALREADY-COVERED / 1 真 gap〔CJK 字型〕）（harness-health 2026-05-31；harness 自我稽核 **11 燈**儀表板，read-only `scripts/harness_health.py`；+#7 memory-drift +#8 doc-path-currency +#9 hook-wiring +#10 tier-format +#11 phase-staleness〔2026-06-16 L1 port to live 2026-06-26〕）
 - **7-Phase Waterfall（7）**: P0 `/cycle-init` → P1 `/research-loop` → P2 `/check-staleness` → P3 `/feature-layered-observation` → P4 `/multi-sample-consistency` → P5 `/run-evaluator` → P6 `/conclude-research`
 - **程式開發（4）**: `/cpp-change` `/methodology-audit` `/infra-ops` `/verification-loop`
 - **文件管理（5）**: `/doc-standards` `/data-audit` `/memory-consolidation` `/citation-verification` `/pipeline-manifest` ⭐ 新（reproducibility provenance DAG；與 data-audit 分工：data-audit 查組織、pipeline-manifest 查 script→figure 因果鏈）
@@ -250,6 +250,8 @@
 | **產數字的長 compute**（ISM C++ 全跑 / BAM 處理 / `scripts/run_*.sh` / 任何結果無法 mid-run Read-back 的重跑）| **絕不放進 workflow `agent()` step**；主回合 `Bash(run_in_background)` 或 `scripts/run_*.sh` 跑 → 落檔 → Read 驗 → **才**用 workflow fan-out 匯總「已落檔結果」 | workflow step 短壽 + acceptEdits 黑箱 + 無 mid-run Read-back → 中斷則半完成無法驗 = 撞 §13.0 捏造根因；§1 長計算須主回合可見啟動 |
 
 > **長 job × workflow 鐵則（2026-06-03）**：workflow `agent()` step 是「**輕量驗證 / 讀檔匯總**」單元，**非長 compute 容器**。判準＝該 step 結果能否 **mid-run Read-back 驗證**（用可驗證性，非分鐘數——「10min」只是粗估）。**標準 hybrid**：① 主回合背景跑 compute 落 `.json/.tsv` → ② Read 回真值確認非 error/未完成（§13.0 step 2）→ ③ **才** workflow fan-out 匯總。⚠ ≥3 樣本「實跑腳本」用 `parallel-benchmark` agent，但須先 resource preflight（N 個 30-45min BAM 平行恐撞 CPU/mem → 預設改循序背景跑）；workflow 只接「讀已算結果」階段。實證：cross-sample ASM workflow 4 樣本曾被殺改背景補跑（memory `project_cross_sample_asm_reproducibility`）。**判斷錯誤屬路由類（非 §13 數字捏造類）→ 純文字規則即足，不加機械守衛**（除非日後出現實際 in-the-wild 事故）。
+
+> **workflow 撞限流韌性（2026-07-01 精煉）**：workflow 整批 agent 一次全死、訊息含「Server is temporarily limiting requests · **not your usage limit**」= **transient server-side rate-limit**（非用量上限）→ **先 `resumeFromRunId` 重跑**（完成的 agent 命中 cache 秒回）**再 fallback inline**，別直接棄整個 workflow；many-agent survey（≥5 平行）優先 `pipeline()` 小批或 fan-out ≤3-4。完整見 `docs/references/20260611_master_workflow_architecture_01.md §5`。
 
 > `/effort ultracode` 不設長期預設（每任務自動編排 workflow + 略過 launch 提問 → 繞過確認矩陣 + 放大 token）；改逐案 `workflow` keyword 觸發，符合 §1「長計算需當輪明示」。
 

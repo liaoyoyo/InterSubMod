@@ -150,6 +150,7 @@ context 載入        plan mode(調查→         (§3 決策表 A/B)         su
 - **完成宣稱 gate（§13.7）**：宣稱 done/pass/修好前跑 IDENTIFY→RUN→READ→VERIFY→CLAIM；紅旗語言（should/probably/應該）= 停下驗證。
 - **數據誠信（§13）**：報告每數字必能 grep 到來源；產數字與寫報告**永不同批**；`number_provenance` gate（已 wired）。
 - **token / rate-limit 韌性**（friction #1 對策，2026-06-11）：① fan-out **cap 4-6**（≥5 樣本改循序）；② 長 job/多樣本**每單元落 disk checkpoint** → resume 只補缺；③ 單回覆 concise-emit 寫檔回 path；④ Dynamic Workflow resumable（resumeFromRunId）。
+  - **2026-07-01 精煉（本 session 2 次 workflow 撞限流實證）**：`cap 4-6` 遵守了仍可能撞**伺服器端 transient rate-limit**（訊息含「Server is temporarily limiting requests · **not your usage limit**」，非用量上限）→ 整批 agent 一次全死、0 token。對策：**(a) 判別**——transient server-limit（可重試）vs usage-limit（要等）；**(b) 先 `resumeFromRunId` 重跑**（已完成 agent 命中 cache 秒回、失敗的才重打）**再考慮 fallback inline**（別直接放棄整個 workflow）；**(c) many-agent survey 型**（≥5 平行）優先用 `pipeline()` 小批 或 fan-out **降到 ≤3-4**（transient limit 對瞬間併發量敏感，非總量）。純路由/操作規則，不加機械守衛。
 
 ---
 

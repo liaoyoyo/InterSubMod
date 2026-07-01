@@ -7,9 +7,11 @@
 # produces wrong output (insights friction #4 root cause + builder-vs-helper hazard).
 #
 # DESIGN: ADVISORY only (exit 0 always) + fail-OPEN. Lint != test; never blocks legitimate WIP.
-# Scoped to scripts/ to avoid noise on research analysis scratch files. py_compile for .py,
-# bash -n for .sh (+ shellcheck if available). Mirrors the advisory-exit-0 pattern of
-# provenance_stamp_advisor.sh / health_drift_advisor.sh.
+# Scoped to scripts/ + docs/**/_assets/**  (governance helpers + teaching-asset analysis scripts).
+# py_compile for .py, bash -n for .sh (+ shellcheck if available). Mirrors the advisory-exit-0
+# pattern of provenance_stamp_advisor.sh / health_drift_advisor.sh.
+# 2026-07-01: +_assets scope — teaching-asset .py IndentationErrors (topology_analysis.py:211,
+# cn_proxy_annotation.py:58) slipped past because scope was scripts/-only (weekly-review gap #A2).
 set -u
 
 # Read hook stdin JSON; extract edited file path (tool_input.file_path). Fail-open on any parse issue.
@@ -25,9 +27,11 @@ except Exception:
 fi
 [ -z "$fp" ] && exit 0
 
-# Scope: only scripts/ (the governance-helper + pipeline home). Skip elsewhere.
+# Scope: scripts/ (governance-helper + pipeline home) + docs/**/_assets/** (teaching-asset
+# analysis scripts). Skip elsewhere to avoid noise on unrelated scratch.
 case "$fp" in
     */scripts/*|scripts/*) : ;;
+    */_assets/*) : ;;
     *) exit 0 ;;
 esac
 [ -f "$fp" ] || exit 0
