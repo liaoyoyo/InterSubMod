@@ -74,20 +74,35 @@ SAMPLE_NAMES = list(SAMPLES.keys())
 _ideo = os.path.normpath(os.path.join(HERE, "..", "..", "20260630_perregion_workstation", "data", "ideogram_data.json"))
 if "HCC1395" in SAMPLES and SAMPLES["HCC1395"].get("ideogram") is None and os.path.exists(_ideo):
     SAMPLES["HCC1395"]["ideogram"] = json.load(open(_ideo, encoding="utf-8"))
-# HCC1395 LOH 用 longphase-TO(SEQC2-validated,1094 seg)取代 clp_cn(凍結 dir 無 clp bed)
-_LP_LOH = "/big7_disk/liaoyoyo2001/longphase-to-mod/output/baseline/tumor_phased_LOH.bed"
-if "HCC1395" in SAMPLES and os.path.exists(_LP_LOH):
-    _loh, _seen = [], set()
-    for _ln in open(_LP_LOH, encoding="utf-8"):
-        _p = _ln.split()
-        if len(_p) >= 3:
+# LOH 全 7 樣本用 longphase-TO tumor_phased_LOH.bed(SEQC2-validated;取代 clp_cn)。DORADO=同細胞株用 HCC1395。
+_LPT = "/big7_disk/liaoyoyo2001/longphase-to-mod/output"
+LOH_BEDS = {
+    "HCC1395":        _LPT + "/baseline/tumor_phased_LOH.bed",
+    "HCC1395_DORADO": _LPT + "/baseline/tumor_phased_LOH.bed",  # 同細胞株(Dorado 重 basecall,同 DNA→同 LOH)
+    "COLO829":        "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260423_colo829_to_pilot/step03_longphase_to/tumor_phased_LOH.bed",
+    "H1437":          _LPT + "/v6_5sample_extension/H1437/tumor_phased_LOH.bed",
+    "H2009":          _LPT + "/v6_5sample_extension/H2009/tumor_phased_LOH.bed",
+    "HCC1937":        _LPT + "/v6_5sample_extension/HCC1937/tumor_phased_LOH.bed",
+    "HCC1954":        _LPT + "/v6_5sample_extension/HCC1954/tumor_phased_LOH.bed",
+}
+def _read_loh_bed(path):
+    loh, seen = [], set()
+    for ln in open(path, encoding="utf-8"):
+        p = ln.split()
+        if len(p) >= 3:
             try:
-                _iv = (_p[0], int(_p[1]), int(_p[2]))
-                if _iv not in _seen:
-                    _seen.add(_iv); _loh.append([_iv[0], _iv[1], _iv[2]])
+                iv = (p[0], int(p[1]), int(p[2]))
+                if iv not in seen:
+                    seen.add(iv); loh.append([iv[0], iv[1], iv[2]])
             except ValueError:
                 pass
-    SAMPLES["HCC1395"]["loh"], SAMPLES["HCC1395"]["loh_source"] = _loh, "longphase-TO (SEQC2-validated)"
+    return loh
+for _nm, _rec in SAMPLES.items():
+    _lp = LOH_BEDS.get(_nm)
+    if _lp and os.path.exists(_lp):
+        _rec["loh"] = _read_loh_bed(_lp)
+        _rec["loh_source"] = "longphase-TO (SEQC2-validated)" + ("·同細胞株借 HCC1395" if _nm == "HCC1395_DORADO" else "")
+    # 否則保留 _load_sample 載入的 clp_cn 作為 fallback
 SAMPLES_JSON = json.dumps(SAMPLES, ensure_ascii=False)
 # R3+R7: chr17 read×read 距離矩陣 + 分群×lineage 交叉表(HCC1395 worked;固定教學甲基展板用)
 _c17t = os.path.join(DATA, "chr17_tree_data.json")
@@ -214,16 +229,22 @@ function renderIdeo(){var ID=D.ideogram;var host=el('ideogram');if(!host)return;
  var X0=64,X=function(p){return X0+PXW*p/maxlen;};
  var rowOf={};chroms.forEach(function(c,i){rowOf[c]=i;});
  var lohBy={},lohN=(D.loh||[]).length;(D.loh||[]).forEach(function(iv){(lohBy[iv[0]]=lohBy[iv[0]]||[]).push(iv);});
- var sitByChrom={},sitCnt={};
+ var sitByChrom={},sitCnt={},snvByChrom={};
  if(mode=='situation'){(D.detail||[]).forEach(function(r,idx){var c=r.chrom;if(rowOf[c]==null)return;var sv=regSit(r);if(!sv)return;
    var st=(r.start!=null?r.start:parseInt(((r.region||'').split(':')[1]||'0').split('-')[0])||0);
    (sitByChrom[c]=sitByChrom[c]||[]).push([st,sv[0],sv[1],idx,r.region,r.cn]);sitCnt[sv[0]]=(sitCnt[sv[0]]||0)+1;});}
+ if(mode=='snv'){(D.detail||[]).forEach(function(r,idx){var c=r.chrom;if(rowOf[c]==null)return;var sv=regSit(r);if(!sv)return;
+   var ps=Object.keys(r.node_hp||{}).map(function(k){return parseInt(k.split(':')[1])||0}).filter(function(p){return p>0}).sort(function(a,b){return a-b});
+   if(!ps.length)return;(snvByChrom[c]=snvByChrom[c]||[]).push({ps:ps,col:sv[1],idx:idx,region:r.region,sit:sv[0]});sitCnt[sv[0]]=(sitCnt[sv[0]]||0)+ps.length;});}
  var bt=function(m,lab){return '<button onclick="toggleIdeo(\''+m+'\')" style="font-size:11px;padding:2px 10px;border:1px solid #1971c2;cursor:pointer;background:'+(mode==m?'#1971c2':'#fff')+';color:'+(mode==m?'#fff':'#1971c2')+'">'+lab+'</button>';};
- var toggle='<span style="margin-left:8px;display:inline-flex">'+bt('situation','結果+LOH')+bt('shape','樹形')+'</span>';
+ var toggle='<span style="margin-left:8px;display:inline-flex">'+bt('situation','結果+LOH')+bt('snv','結果/每sSNV')+bt('shape','樹形')+'</span>';
  var lohLeg=lohN?'　<span style="background:#d0bfff;padding:0 6px;border-radius:2px">▬ LOH '+lohN+' 段</span>('+(D.loh_source||'?')+')':'　<span class="note">LOH:無資料</span>';
+ var sitLegItems='<span style="color:#37b24d">▏已確定 '+(sitCnt['已確定']||0)+'</span> <span style="color:#74c0fc">▏pairwise '+(sitCnt['pairwise 拼接']||0)+'</span> <span style="color:#adb5bd">▏單群欠定 '+(sitCnt['多樹相容(欠定)']||0)+'</span> <span style="color:#f59f00">▏跨HP '+(sitCnt['跨HP(兩棵樹)']||0)+'</span> <span style="color:#ffd43b">▏順序待定 '+(sitCnt['順序 2-3 順位待定']||0)+'</span> <span style="color:#f03e3e">▏衝突 '+(sitCnt['衝突(成環)']||0)+'</span>';
  var legend = mode=='shape'
    ? '樹位點 <span style="color:#2f9e44">▏full_tree</span> <span style="color:#1c7ed6">▏結構(linear/sibling/co_linked)</span> <span style="color:#e03131">▏成環</span>　密度軌 <span style="color:#fa8c16">▮underpowered '+(t.underpowered||0)+'</span> <span style="color:#868e96">▮isolated '+(t.isolated||0)+'</span>'+lohLeg
-   : '每區依結果上色(點 tick→跳 detail)：<span style="color:#37b24d">▏已確定 '+(sitCnt['已確定']||0)+'</span> <span style="color:#74c0fc">▏pairwise '+(sitCnt['pairwise 拼接']||0)+'</span> <span style="color:#adb5bd">▏單群欠定 '+(sitCnt['多樹相容(欠定)']||0)+'</span> <span style="color:#f59f00">▏跨HP '+(sitCnt['跨HP(兩棵樹)']||0)+'</span> <span style="color:#ffd43b">▏順序待定 '+(sitCnt['順序 2-3 順位待定']||0)+'</span> <span style="color:#f03e3e">▏衝突 '+(sitCnt['衝突(成環)']||0)+'</span>'+lohLeg;
+   : mode=='snv'
+   ? '<b>每個已定相 sSNV 一點</b>·色=該區樹結果;<b>同一區的 sSNV 連一條底線=同一棵樹</b>('+sitLegItems+')'+lohLeg+'　<span class="note">⚠ genome 尺度多數區極小(sSNV 幾乎重疊)→看某區內是否同樹請點該區用下方 locus track</span>'
+   : '每區依結果上色(點 tick→跳 detail)：'+sitLegItems+lohLeg;
  var s='<div style="background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:10px 14px;margin:10px 0;font-size:12px">';
  s+='<b>🗺️ HG38 全基因組分布</b>'+toggle+'<br><span style="line-height:1.95">'+legend+'</span><span class="note">(染色體比例=GRCh38 真實長度;LOH=半透明紫底帶;hover 看數)</span>';
  s+='<svg viewBox="0 0 '+(PXW+90)+' '+(chroms.length*24+16)+'" width="100%" style="margin-top:6px;font-family:ui-monospace,monospace">';
@@ -235,10 +256,13 @@ function renderIdeo(){var ID=D.ideogram;var host=el('ideogram');if(!host)return;
      (pc.und_bins||[]).forEach(function(v,bi){if(v>0)s+='<rect x="'+X(bi*bin)+'" y="'+(y+6)+'" width="'+bw+'" height="'+Math.min(6,1+v/2)+'" fill="#fa8c16" opacity="0.75"><title>'+c+' ~'+(bi*2)+'Mb underpowered '+v+'</title></rect>';});
      (pc.iso_bins||[]).forEach(function(v,bi){if(v>0)s+='<rect x="'+X(bi*bin)+'" y="'+(y+13)+'" width="'+bw+'" height="'+Math.min(5,1+v/4)+'" fill="#868e96" opacity="0.5"><title>'+c+' ~'+(bi*2)+'Mb isolated '+v+'</title></rect>';});
      (pc.trees||[]).forEach(function(tr){var x=X(tr[0]);s+='<line x1="'+x+'" y1="'+(y-8)+'" x2="'+x+'" y2="'+(y-1)+'" stroke="'+(shapeCol[tr[1]]||'#adb5bd')+'" stroke-width="1.1"><title>'+c+':'+tr[0]+' '+tr[1]+'</title></line>';});}
-   else{(sitByChrom[c]||[]).sort(function(a,b){var o={'已確定':0,'pairwise 拼接':1,'多樹相容(欠定)':2,'順序 2-3 順位待定':3,'跨HP(兩棵樹)':4,'衝突(成環)':5};return (o[a[1]]||0)-(o[b[1]]||0);}).forEach(function(g){var x=X(g[0]);s+='<line x1="'+x+'" y1="'+(y-9)+'" x2="'+x+'" y2="'+(y-1)+'" stroke="'+g[2]+'" stroke-width="1.5" style="cursor:pointer" data-i="'+g[3]+'"><title>'+g[4]+' · '+sitDisp(g[1])+(g[5]&&g[5]!='unknown'?' · CN '+g[5]:'')+'</title></line>';});}
+   else if(mode=='situation'){(sitByChrom[c]||[]).sort(function(a,b){var o={'已確定':0,'pairwise 拼接':1,'多樹相容(欠定)':2,'順序 2-3 順位待定':3,'跨HP(兩棵樹)':4,'衝突(成環)':5};return (o[a[1]]||0)-(o[b[1]]||0);}).forEach(function(g){var x=X(g[0]);s+='<line x1="'+x+'" y1="'+(y-9)+'" x2="'+x+'" y2="'+(y-1)+'" stroke="'+g[2]+'" stroke-width="1.5" style="cursor:pointer" data-i="'+g[3]+'"><title>'+g[4]+' · '+sitDisp(g[1])+(g[5]&&g[5]!='unknown'?' · CN '+g[5]:'')+'</title></line>';});}
+   else if(mode=='snv'){(snvByChrom[c]||[]).forEach(function(g){var x0=X(g.ps[0]),x1=X(g.ps[g.ps.length-1]);
+     if(g.ps.length>=2){if(x1-x0<0.6)x1=x0+0.6;s+='<line x1="'+x0.toFixed(1)+'" y1="'+(y-2)+'" x2="'+x1.toFixed(1)+'" y2="'+(y-2)+'" stroke="'+g.col+'" stroke-width="1" opacity="0.55"/>';}
+     g.ps.forEach(function(p){var x=X(p);s+='<circle cx="'+x.toFixed(1)+'" cy="'+(y-6)+'" r="1.5" fill="'+g.col+'" style="cursor:pointer" data-i="'+g.idx+'"><title>'+g.region+' · '+sitDisp(g.sit)+' · '+g.ps.length+' sSNV 同樹 · pos '+p+'</title></circle>';});});}
  });
  s+='</svg></div>';host.innerHTML=s;
- if(mode=='situation')host.onclick=function(e){var ln=e.target.closest('line[data-i]');if(!ln)return;show(+ln.dataset.i,null);var d=el('detail');if(d)d.scrollIntoView({behavior:'smooth',block:'center'});};
+ if(mode=='situation'||mode=='snv')host.onclick=function(e){var el2=e.target.closest('[data-i]');if(!el2)return;show(+el2.dataset.i,null);var d=el('detail');if(d)d.scrollIntoView({behavior:'smooth',block:'center'});};
  else host.onclick=null;
 }
 renderIdeo();
@@ -334,7 +358,7 @@ function tree(edges,popcount,nc,hp,germR,np,ambig){np=np||{};ambig=ambig||0;
  let roots=ch['ROOT']||[];roots.forEach(r=>lay(r,1));[...all].forEach(n=>{if(pos[n]==null)lay(n,1)}); // 孤兒節點補位(與 posSVG 一致硬化,防 NaN)
  let gx=roots.length?(Math.min(...roots.map(r=>pos[r]))+Math.max(...roots.map(r=>pos[r])))/2:0;
  let nodes=[...all],md=Math.max(...nodes.map(n=>depth[n]||0),1);
- let NW=204,NH=80,GX=50,GY=128;
+ let NW=210,NH=92,GX=52,GY=140;
  let W=Math.max(450,(leaf||1)*(NW+GX)),H=108+md*GY;
  let X=p=>34+p*(NW+GX)+NW/2,Y=dp=>56+dp*GY;
  let totR=Object.values(popcount).reduce((a,b)=>a+b,0)||1; // popcount 已含 germline 向量,勿再加 germR(否則 germline 雙算→比例與下方表格對不上)
@@ -349,10 +373,13 @@ function tree(edges,popcount,nc,hp,germR,np,ambig){np=np||{};ambig=ambig||0;
   let w=Math.max(44,g.join('+').length*7+12);if(g.length)s+=`<rect x="${mx-w/2}" y="${my-10}" width="${w}" height="19" rx="9" fill="#ebfbee" stroke="#2f9e44"/><text x="${mx}" y="${my+4}" text-anchor="middle" font-size="11" fill="#2b8a3e" font-weight="700">+${g.join('+')}</text>`;
  }});
  let gp=(100*germN/totR).toFixed(0);
- s+=`<rect x="${X(gx)-NW/2}" y="${Y(0)-NH/2}" width="${NW}" height="${NH}" rx="12" fill="#f1f3f5" stroke="#868e96" stroke-width="2.5"/>`;
- s+=`<text x="${X(gx)}" y="${Y(0)-NH/2+24}" text-anchor="middle" font-size="14" font-weight="700" fill="#495057">⌂ germline（${hp||'根'}）</text>`;
- s+=`<text x="${X(gx)}" y="${Y(0)-NH/2+44}" text-anchor="middle" font-size="11" fill="#868e96">無 somatic 變異 · 起點</text>`;
- s+=`<text x="${X(gx)}" y="${Y(0)-NH/2+66}" text-anchor="middle" font-size="12.5" font-weight="600" fill="#212529">${germN} reads · ${gp}%</text>`;
+ let gtop=Y(0)-NH/2;
+ s+=`<rect x="${X(gx)-NW/2}" y="${gtop}" width="${NW}" height="${NH}" rx="12" fill="#f1f3f5" stroke="#868e96" stroke-width="2.5"/>`;
+ s+=`<path d="M${X(gx)-NW/2} ${gtop+24} v-12 a12 12 0 0 1 12 -12 h${NW-24} a12 12 0 0 1 12 12 v12 Z" fill="#868e96"/>`;
+ s+=`<text x="${X(gx)}" y="${gtop+17}" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">⌂ germline（${hp||'根'}）</text>`;
+ s+=`<text x="${X(gx)}" y="${gtop+46}" text-anchor="middle" font-size="10.5" fill="#868e96">無 somatic 變異 · 起點</text>`;
+ s+=`<line x1="${X(gx)-NW/2+12}" y1="${gtop+78}" x2="${X(gx)+NW/2-12}" y2="${gtop+78}" stroke="#868e96" stroke-opacity="0.28"/>`;
+ s+=`<text x="${X(gx)}" y="${gtop+89}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#212529">${germN} reads · ${gp}%</text>`;
  nodes.forEach(n=>{
   let cnt=popcount[n]||0,pct=(100*cnt/totR).toFixed(0),lab=np[n]||'—';
   let g=gainedS(par[n],n);
@@ -365,12 +392,16 @@ function tree(edges,popcount,nc,hp,germR,np,ambig){np=np||{};ambig=ambig||0;
   let x=X(pos[n]),y=Y(depth[n]);
   let fill=isSib?'#fff4e6':'#e7f5ff', stroke=isSib?'#e8590c':'#1c7ed6';
   if(isAmbig){fill='#fff9db';stroke='#f08c00';}
-  s+=`<rect x="${x-NW/2}" y="${y-NH/2}" width="${NW}" height="${NH}" rx="12" fill="${fill}" stroke="${stroke}" stroke-width="2.5"/>`;
-  s+=`<text x="${x}" y="${y-NH/2+22}" text-anchor="middle" font-size="16" font-weight="800" fill="#1565c0">${lab}</text>`;
-  s+=`<text x="${x}" y="${y-NH/2+39}" text-anchor="middle" font-size="10" font-weight="700" fill="${isSib?'#d9480f':(isAmbig?'#e8590c':'#2b8a3e')}">${rel}</text>`;
-  s+=`<text x="${x}" y="${y-NH/2+53}" text-anchor="middle" font-size="10.5" font-weight="600" fill="#2b8a3e">${gtxt}</text>`;
-  s+=`<text x="${x}" y="${y-NH/2+66}" text-anchor="middle" font-size="9.5" fill="#495057">基因型 ${n}（=${sLabels(n)}）</text>`;
-  s+=`<text x="${x}" y="${y-NH/2+78}" text-anchor="middle" font-size="12" font-weight="600" fill="#212529">${cnt} reads · ${pct}%</text>`;
+  let top=y-NH/2,relCol=isSib?'#d9480f':(isAmbig?'#e8590c':'#2b8a3e');
+  s+=`<rect x="${x-NW/2}" y="${top}" width="${NW}" height="${NH}" rx="12" fill="${fill}" stroke="${stroke}" stroke-width="2.5"/>`;
+  // lineage 標籤頭條(圓角上緣填色)
+  s+=`<path d="M${x-NW/2} ${top+24} v-12 a12 12 0 0 1 12 -12 h${NW-24} a12 12 0 0 1 12 12 v12 Z" fill="${stroke}"/>`;
+  s+=`<text x="${x}" y="${top+17}" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">${lab}</text>`;
+  s+=`<text x="${x}" y="${top+40}" text-anchor="middle" font-size="10" font-weight="700" fill="${relCol}">${rel}</text>`;
+  if(gtxt)s+=`<rect x="${x-Math.max(30,gtxt.length*5.4)}" y="${top+46}" width="${2*Math.max(30,gtxt.length*5.4)}" height="16" rx="8" fill="#ebfbee" stroke="#40c057"/><text x="${x}" y="${top+58}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#2b8a3e">${gtxt}</text>`;
+  s+=`<text x="${x}" y="${top+74}" text-anchor="middle" font-size="9" fill="#868e96" font-family="ui-monospace,monospace">${n}（=${sLabels(n)}）</text>`;
+  s+=`<line x1="${x-NW/2+12}" y1="${top+78}" x2="${x+NW/2-12}" y2="${top+78}" stroke="${stroke}" stroke-opacity="0.28"/>`;
+  s+=`<text x="${x}" y="${top+89}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#212529">${cnt} reads · ${pct}%</text>`;
  });
  s+='</svg>';
  let leg=`<details style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:6px;padding:5px 11px;margin-top:5px;font-size:11px"><summary style="cursor:pointer;font-weight:600">🔖 SNV 關係圖例（點開）${relSet.size?'：此樹有 '+[...relSet].join('、'):''}</summary><div style="line-height:1.7;margin-top:5px">
@@ -390,43 +421,47 @@ function posTree(r){
  let byhp={};Object.entries(r.node_hp||{}).forEach(([p,h])=>{if(h=='H1'||h=='H2')(byhp[h]=byhp[h]||[]).push(p)});
  let dropH3=Object.values(r.node_hp||{}).filter(h=>h!='H1'&&h!='H2').length;
  let hps=Object.keys(byhp).sort();if(hps.length<2)return '';
- return '<div style="display:flex;gap:20px;flex-wrap:wrap">'+hps.map(h=>{
+ let gk=Object.keys(r.populations||{}).find(k=>k&&/^R+$/.test(k)),germN=gk?r.populations[gk]:0,totR=Object.values(r.populations||{}).reduce((a,b)=>a+b,0)||1; // #5 germline/全區 read 數
+ let head='<div class="note" style="width:100%;margin-bottom:2px">節點顯示 <b>VAF</b>(該位點變異分率;位點層無 per-位點 read 數)；germline <b>'+germN+' reads</b>·全區 <b>'+totR+' reads</b>；各 lineage 絕對 read 數見下方「細胞群」表。</div>';
+ return '<div style="display:flex;gap:20px;flex-wrap:wrap">'+head+hps.map(h=>{
   let ns=new Set(byhp[h]);let ned=(r.pos_nested||[]).filter(e=>ns.has(e[0])&&ns.has(e[1]));
   let body;
-  if(ns.size>16){body='<div class="note" style="color:#a37200;margin:3px 0">'+h+' 共 '+ns.size+' 位點(過多→不畫樹);左右滑動看各位點 VAF(基因組順序):</div>'+posBarStrip(ns,r.pos_vaf||{});}
+  if(ns.size>24){body='<div class="note" style="color:#a37200;margin:3px 0">'+h+' 共 '+ns.size+' 位點(過多→改左右滑桿看各位點 VAF·基因組順序):</div>'+posBarStrip(ns,r.pos_vaf||{});}
   else if(hasCycleEdges(ned)){body='<div class="note" style="color:#c2255c;margin:3px 0">⚠ 此 '+h+' 位點 pairwise nested <b>成環/互指(incompatible)</b>→ 無法成單一樹,改列位點+VAF 表:</div>'+posTable(ns,r.pos_vaf||{},h,ned);}
-  else{let hasp=new Set(ned.map(e=>e[1]));let edges=ned.map(e=>[e[0],e[1]]);[...ns].forEach(n=>{if(!hasp.has(n))edges.unshift(['ROOT',n])});body=posSVG(edges,ns,r.pos_vaf||{},h);}
-  return '<div style="min-width:0;max-width:100%;overflow-x:auto"><b style="color:#d9480f">'+h+' 樹（'+ns.size+' 位點）</b>'+body+'</div>';
+  else{let hasp=new Set(ned.map(e=>e[1]));let edges=ned.map(e=>[e[0],e[1]]);[...ns].forEach(n=>{if(!hasp.has(n))edges.unshift(['ROOT',n])});body=posSVG(edges,ns,r.pos_vaf||{},h,null,germN);}
+  return '<div style="min-width:0;max-width:100%"><b style="color:#d9480f">'+h+' 樹（'+ns.size+' 位點）</b>'+body+'</div>';
  }).join('')+(dropH3?'<div class="note" style="color:#a37200;width:100%;margin-top:3px">⚠ 另有 '+dropH3+' 個未定相(H3?/somatic-ALT)位置未納入上面 HP 樹</div>':'')+'</div>';
 }
-// 位置層克隆樹(豐富樣式)。hpLabel=整棵 HP(posTree 單HP用);hpMap=node→HP(allPosTree/成環候選 多HP上色用)
-function posSVG(edges,ns,vaf,hpLabel,hpMap){
+// 位置層克隆樹(豐富樣式)。hpLabel=整棵 HP;hpMap=node→HP 多HP上色;germN=germline read 數(#5)。過寬→水平捲動(#4)
+function posSVG(edges,ns,vaf,hpLabel,hpMap,germN){
  let HPC={H1:'#1c7ed6',H2:'#7048e8'},rootCol=HPC[hpLabel]||'#495057';
  let ch={},all=new Set();edges.forEach(([p,c])=>{(ch[p]=ch[p]||[]).push(c);all.add(c);if(p!='ROOT')all.add(p)});
  if(!all.size)return '<div class="note">無結構</div>';
  let depth={},pos={},leaf=0,seen={};function lay(n,dp){if(seen[n])return pos[n]!=null?pos[n]:0;seen[n]=1;depth[n]=dp;let k=(ch[n]||[]).filter(x=>!seen[x]).sort();if(!k.length){pos[n]=leaf++;return pos[n]}let xs=k.map(x=>lay(x,dp+1));pos[n]=(Math.min(...xs)+Math.max(...xs))/2;return pos[n]} // seen 防護:pos_nested 成環(incompatible)時跳過,避免 stack overflow
  let roots=ch['ROOT']||[];roots.forEach(r=>lay(r,1));[...all].forEach(n=>{if(pos[n]==null)lay(n,1)});let gx=roots.length?(Math.min(...roots.map(r=>pos[r]))+Math.max(...roots.map(r=>pos[r])))/2:0;
- let nodes=[...all],md=Math.max(...nodes.map(n=>depth[n]),1),NW=128,NH=50,GX=22,GY=78;
- let W=Math.max(220,(leaf||1)*(NW+GX)),H=70+md*GY,X=p=>22+p*(NW+GX)+NW/2,Y=dp=>30+dp*GY;
- let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="font-family:ui-monospace,monospace;max-width:${W}px">`;
- s+=`<rect x="${X(gx)-48}" y="${Y(0)-16}" width="96" height="32" rx="8" fill="#f1f3f5" stroke="${rootCol}" stroke-width="2"/><text x="${X(gx)}" y="${Y(0)-2}" text-anchor="middle" font-size="11" font-weight="700" fill="${rootCol}">${hpLabel||'germ'} germline</text><text x="${X(gx)}" y="${Y(0)+11}" text-anchor="middle" font-size="8" fill="#868e96">起點·無 somatic</text>`;
- roots.forEach(rt=>s+=`<line x1="${X(gx)}" y1="${Y(0)+16}" x2="${X(pos[rt])}" y2="${Y(1)-NH/2}" stroke="#ced4da" stroke-width="1.6"/>`);
+ let nodes=[...all],md=Math.max(...nodes.map(n=>depth[n]),1),NW=124,NH=52,GX=20,GY=84;
+ let W=Math.max(220,(leaf||1)*(NW+GX)),H=80+md*GY,X=p=>22+p*(NW+GX)+NW/2,Y=dp=>34+dp*GY;
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="font-family:ui-monospace,monospace">`;
+ s+=`<rect x="${X(gx)-54}" y="${Y(0)-20}" width="108" height="42" rx="9" fill="#f1f3f5" stroke="${rootCol}" stroke-width="2"/><text x="${X(gx)}" y="${Y(0)-5}" text-anchor="middle" font-size="11" font-weight="800" fill="${rootCol}">${hpLabel||'germ'} germline</text><text x="${X(gx)}" y="${Y(0)+7}" text-anchor="middle" font-size="8" fill="#868e96">起點·無 somatic</text>${germN!=null?`<text x="${X(gx)}" y="${Y(0)+18}" text-anchor="middle" font-size="9.5" font-weight="700" fill="#212529">${germN} reads</text>`:''}`;
+ roots.forEach(rt=>s+=`<line x1="${X(gx)}" y1="${Y(0)+22}" x2="${X(pos[rt])}" y2="${Y(1)-NH/2}" stroke="#ced4da" stroke-width="1.6"/>`);
  edges.forEach(([p,c])=>{if(p!='ROOT')s+=`<line x1="${X(pos[p])}" y1="${Y(depth[p])+NH/2}" x2="${X(pos[c])}" y2="${Y(depth[c])-NH/2}" stroke="#ced4da" stroke-width="1.6"/>`});
  nodes.forEach(n=>{let v=vaf[n],hp=(hpMap&&hpMap[n])||hpLabel,col=HPC[hp]||'#e8590c',fill=hp=='H1'?'#dbe9f7':hp=='H2'?'#ece0f5':'#fff4e6',x=X(pos[n]),y=Y(depth[n]);
-  s+=`<rect x="${x-NW/2}" y="${y-NH/2}" width="${NW}" height="${NH}" rx="8" fill="${fill}" stroke="${col}" stroke-width="2"/>`;
-  s+=`<text x="${x}" y="${y-12}" text-anchor="middle" font-size="10.5" font-weight="700" fill="${col}">${hpMap?(hp||'?')+'·':''}${n.split(':')[1]}</text>`;
-  s+=`<text x="${x}" y="${y+2}" text-anchor="middle" font-size="9" fill="#495057">VAF ${v!=null?v:'?'}</text>`;
-  s+=`<text x="${x}" y="${y+14}" text-anchor="middle" font-size="7.5" fill="#aaa">${n.split(':')[0]}</text>`;});
- return s+'</svg>';
+  s+=`<rect x="${x-NW/2}" y="${y-NH/2}" width="${NW}" height="${NH}" rx="9" fill="${fill}" stroke="${col}" stroke-width="2"/>`;
+  s+=`<rect x="${x-NW/2}" y="${y-NH/2}" width="${NW}" height="17" rx="9" fill="${col}"/><rect x="${x-NW/2}" y="${y-NH/2+8}" width="${NW}" height="9" fill="${col}"/>`;
+  s+=`<text x="${x}" y="${y-NH/2+13}" text-anchor="middle" font-size="10" font-weight="800" fill="#fff">${hpMap?(hp||'HP?')+'·':''}${n.split(':')[1]}</text>`;
+  s+=`<text x="${x}" y="${y+8}" text-anchor="middle" font-size="10.5" font-weight="700" fill="#212529">VAF ${v!=null?v:'?'}</text>`;
+  s+=`<text x="${x}" y="${y+19}" text-anchor="middle" font-size="7.5" fill="#aaa">${n.split(':')[0]}</text>`;});
+ return '<div style="overflow-x:auto;max-width:100%;padding-bottom:4px">'+s+'</svg></div>';
 }
 // #5 截斷區全位點分群樹(位點層 pos_nested,突破 8 向量上限;只已定相位點) + #4 成環候選固定樹(移除最小衝突邊)
 function allPosTree(r){
  let nh=r.node_hp||{},ns=Object.keys(nh);if(ns.length<2)return '';
  let nsSet=new Set(ns),ned=(r.pos_nested||[]).filter(e=>nsSet.has(e[0])&&nsSet.has(e[1]));
+ let gk=Object.keys(r.populations||{}).find(k=>k&&/^R+$/.test(k)),germN=gk?r.populations[gk]:0;
  let body,note='';
- if(ns.length>28){body=posBarStrip(nsSet,r.pos_vaf||{});note='位點過多→VAF bar(基因組順序)';}
+ if(ns.length>40){body=posBarStrip(nsSet,r.pos_vaf||{});note='位點>40→改左右滑桿 VAF bar(基因組順序)';}
  else if(hasCycleEdges(ned)){body=posTable(nsSet,r.pos_vaf||{},'全',ned);note='位點層亦成環→位點+VAF 表(可能樹見下方 carousel)';}
- else{let hasp=new Set(ned.map(e=>e[1])),edges=ned.map(e=>[e[0],e[1]]);[...nsSet].forEach(n=>{if(!hasp.has(n))edges.unshift(['ROOT',n])});body=posSVG(edges,nsSet,r.pos_vaf||{},null,nh);}
+ else{let hasp=new Set(ned.map(e=>e[1])),edges=ned.map(e=>[e[0],e[1]]);[...nsSet].forEach(n=>{if(!hasp.has(n))edges.unshift(['ROOT',n])});body=posSVG(edges,nsSet,r.pos_vaf||{},null,nh,germN)+'<div class="note">↔ 樹過寬可左右捲動</div>';}
  let dropHP=Object.values(nh).filter(h=>h!='H1'&&h!='H2').length;
  return `<details open style="background:#fff;border:1px solid #ffd8a8;border-radius:6px;padding:8px;margin:6px 0"><summary style="cursor:pointer;font-weight:700;color:#e8590c">🧬 全位點分群樹（截斷區·突破前8上限·${ns.length} 已定相位點${note?'·'+note:''}）</summary><div class="note" style="margin:4px 0">genotype 向量截斷在 8 位點;此樹改用<b>位點層 pos_nested 巢狀</b>畫出全 <b>${ns.length}</b> 個<b>已定相</b> sSNV(色=HP·藍H1/紫H2/灰H3?)。共 ${r.n_sSNV} sSNV,未定相 <b>${r.n_sSNV-ns.length}</b> 個無座標不納入(caveat)。</div>${body}${dropHP?'<div class="note" style="color:#a37200">⚠ 含 '+dropHP+' 個未定相(H3?)位點(灰)</div>':''}</details>`;
 }
