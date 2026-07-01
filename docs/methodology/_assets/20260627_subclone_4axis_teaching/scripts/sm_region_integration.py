@@ -105,6 +105,8 @@ def build_tree(chrom, members, pairs_idx, census):
     nodes = set(node_of.values())
     nested = set()
     sibling = set()
+    n_independent = 0        # C2 修(2026-07-01): 4-gamete 違反(原靜默丟、不計數)
+    n_independent_clean = 0  # min(RA,AR)>1 = 非單雜訊灌水 = 乾淨違反
     for p in rel_pairs:
         na, nb = node_of[f"{chrom}:{p['a']}"], node_of[f"{chrom}:{p['b']}"]
         if na == nb:
@@ -115,6 +117,11 @@ def build_tree(chrom, members, pairs_idx, census):
             nested.add((na, nb))   # a 祖先 -> b 後代
         elif p["rel"] == "mutual_excl":
             sibling.add(tuple(sorted((na, nb))))
+        elif p["rel"] == "independent":   # C2: 4-gamete/perfect-phylogeny 違反 → 記錄當品質旗標(非靜默丟)
+            n_independent += 1
+            c = p.get("cells", {})
+            if min(c.get("RA", 0), c.get("AR", 0)) > 1:
+                n_independent_clean += 1
     reduced, cyc = transitive_reduction(nodes, nested)
     vaf = {}
     for m in members:
@@ -133,7 +140,8 @@ def build_tree(chrom, members, pairs_idx, census):
     return {"n_nodes": len(nodes), "n_nested": len(reduced), "n_sibling": len(sibling),
             "nested_edges": sorted(list(reduced)), "sibling_pairs": sorted(list(sibling)),
             "max_depth": md, "has_cycle": cyc, "vaf": {k: round(v, 2) for k, v in vaf.items()},
-            "n_colinked_merges": len(members) - len(nodes)}
+            "n_colinked_merges": len(members) - len(nodes),
+            "n_independent": n_independent, "n_independent_clean": n_independent_clean}  # C2
 
 
 def classify_shape(t):
@@ -201,6 +209,7 @@ def main():
                    "tree_shape": shape, "n_nodes": tree["n_nodes"], "n_nested": tree["n_nested"],
                    "n_sibling": tree["n_sibling"], "max_depth": tree["max_depth"],
                    "has_cycle": tree["has_cycle"], "n_colinked_merges": tree["n_colinked_merges"],
+                   "n_independent": tree["n_independent"], "n_independent_clean": tree["n_independent_clean"],  # C2
                    "nested_edges": tree["nested_edges"], "sibling_pairs": tree["sibling_pairs"],
                    "vaf": tree["vaf"],
                    "n_populations": mlrec["n_populations"] if mlrec else None,

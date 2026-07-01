@@ -166,7 +166,8 @@ for r in regs:
     # determinacy
     # C3 修(2026-07-01):(a)consume solve_topology 的 population 層 incompatible(原只看 pairwise has_cycle→
     # incompatible 是 dead code);(b)drop_frac>10% 不給 A_determined 高信心(去噪掩蓋 CN-multiplicity)。
-    if r["has_cycle"] or ttype == "incompatible": det = "incompatible"
+    if r["has_cycle"] or ttype == "incompatible" or (r.get("n_independent_clean", 0) > 0 and r.get("cn") != "gain"):
+        det = "incompatible"   # C2 修: 非 CN-gain 的乾淨 4-gamete 違反 → incompatible(原靜默丟)
     elif drop_frac > 0.10: det = "A_noisy(去噪>10%;CN-multiplicity 疑)"
     elif len(alt_vecs) >= 2 and sum(pops.values()) >= 6: det = "A_determined(單分子向量)"
     elif r["tree_shape"] in ("full_tree", "linear_nested", "sibling_only"): det = "B_pairwise_structure"
