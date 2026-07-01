@@ -1,19 +1,20 @@
 {
+ "_note": "R1 審計修正:成環/c>k+1 是 tautology/off-by-one vacuous check(stored edges 恆 acyclic、c 界應≤k);有效性看 incompatible%。枚舉完整性(11形狀)與有效性正交。",
  "shapes": {
   "((())(())()())": {
    "root_branches": 4,
    "depth": 2,
-   "label": "根分支4·深2"
+   "label": "根分支4"
   },
   "((())(()))": {
    "root_branches": 2,
    "depth": 2,
-   "label": "根分支2·深2"
+   "label": "根分支2"
   },
   "(((()))())": {
    "root_branches": 2,
    "depth": 3,
-   "label": "根分支2·深3"
+   "label": "根分支2"
   },
   "(((())))": {
    "root_branches": 1,
@@ -48,12 +49,12 @@
   "((())()())": {
    "root_branches": 3,
    "depth": 2,
-   "label": "根分支3·深2"
+   "label": "根分支3"
   },
   "(((()))(()))": {
    "root_branches": 2,
    "depth": 3,
-   "label": "根分支2·深3"
+   "label": "根分支2"
   }
  },
  "per_sample": {
@@ -62,7 +63,7 @@
    "n_tree": 3846,
    "shapes": {
     "((())(())()())": 1,
-    "germline_only/空": 39,
+    "incompatible/no-tree": 39,
     "((())(()))": 1,
     "(((()))())": 1,
     "(((())))": 8,
@@ -77,7 +78,7 @@
     "(()())": 25.5,
     "((()))": 18.9,
     "((())())": 2.5,
-    "germline_only/空": 1.0,
+    "incompatible/no-tree": 1.0,
     "(()()())": 0.5,
     "(((())))": 0.2,
     "((())(())()())": 0.0,
@@ -92,7 +93,7 @@
     "((())())": 10,
     "(()())": 1066,
     "((()))": 158,
-    "germline_only/空": 1,
+    "incompatible/no-tree": 1,
     "(())": 2551
    },
    "pct": {
@@ -100,7 +101,7 @@
     "(()())": 28.2,
     "((()))": 4.2,
     "((())())": 0.3,
-    "germline_only/空": 0.0
+    "incompatible/no-tree": 0.0
    }
   },
   "H1437": {
@@ -110,7 +111,7 @@
     "((())()())": 2,
     "((())(()))": 3,
     "((())())": 130,
-    "germline_only/空": 34,
+    "incompatible/no-tree": 34,
     "(()()())": 10,
     "(((())))": 8,
     "(()())": 1279,
@@ -122,7 +123,7 @@
     "(()())": 26.8,
     "((()))": 15.9,
     "((())())": 2.7,
-    "germline_only/空": 0.7,
+    "incompatible/no-tree": 0.7,
     "(()()())": 0.2,
     "(((())))": 0.2,
     "((())(()))": 0.1,
@@ -134,7 +135,7 @@
    "n_tree": 4077,
    "shapes": {
     "(((()))(()))": 1,
-    "germline_only/空": 166,
+    "incompatible/no-tree": 166,
     "((())(()))": 13,
     "(((()))())": 4,
     "(((())))": 5,
@@ -150,7 +151,7 @@
     "(()())": 26.2,
     "((()))": 20.9,
     "((())())": 4.5,
-    "germline_only/空": 3.9,
+    "incompatible/no-tree": 3.9,
     "(()()())": 0.8,
     "((())(()))": 0.3,
     "(((())))": 0.1,
@@ -165,7 +166,7 @@
    "shapes": {
     "((())(()))": 1,
     "((())()())": 1,
-    "germline_only/空": 9,
+    "incompatible/no-tree": 9,
     "((())())": 31,
     "(()()())": 12,
     "(((())))": 5,
@@ -179,7 +180,7 @@
     "((()))": 25.3,
     "((())())": 1.9,
     "(()()())": 0.7,
-    "germline_only/空": 0.6,
+    "incompatible/no-tree": 0.6,
     "(((())))": 0.3,
     "((())(()))": 0.1,
     "((())()())": 0.1
@@ -193,7 +194,7 @@
     "((())()())": 2,
     "((())())": 29,
     "(()()())": 27,
-    "germline_only/空": 6,
+    "incompatible/no-tree": 6,
     "(((())))": 2,
     "((()))": 230,
     "(()())": 861,
@@ -205,7 +206,7 @@
     "((()))": 11.6,
     "((())())": 1.5,
     "(()()())": 1.4,
-    "germline_only/空": 0.3,
+    "incompatible/no-tree": 0.3,
     "((())()())": 0.1,
     "(((())))": 0.1,
     "((())(()))": 0.1
@@ -216,7 +217,7 @@
    "n_tree": 2367,
    "shapes": {
     "((())()())": 1,
-    "germline_only/空": 12,
+    "incompatible/no-tree": 12,
     "((())())": 27,
     "(()()())": 9,
     "(((())))": 3,
@@ -229,7 +230,7 @@
     "(()())": 28.1,
     "((()))": 21.4,
     "((())())": 1.1,
-    "germline_only/空": 0.5,
+    "incompatible/no-tree": 0.5,
     "(()()())": 0.4,
     "(((())))": 0.1,
     "((())()())": 0.0
@@ -238,43 +239,74 @@
  },
  "consistency": {
   "HCC1395": {
-   "cyclic_invalid": 0,
-   "c_gt_k1_violations": 0,
-   "valid_pct": 100.0
+   "incompatible": 118,
+   "incompatible_pct": 3.0,
+   "has_cycle": 12,
+   "empty_incompatible": 39,
+   "empty_germline_only": 0,
+   "stored_edge_cyclic": 0,
+   "_stored_edge_cyclic_note": "恆 0(去環後 acyclic;非驗證)"
   },
   "COLO829": {
-   "cyclic_invalid": 0,
-   "c_gt_k1_violations": 0,
-   "valid_pct": 100.0
+   "incompatible": 15,
+   "incompatible_pct": 0.4,
+   "has_cycle": 1,
+   "empty_incompatible": 1,
+   "empty_germline_only": 0,
+   "stored_edge_cyclic": 0,
+   "_stored_edge_cyclic_note": "恆 0(去環後 acyclic;非驗證)"
   },
   "H1437": {
-   "cyclic_invalid": 0,
-   "c_gt_k1_violations": 0,
-   "valid_pct": 100.0
+   "incompatible": 263,
+   "incompatible_pct": 5.5,
+   "has_cycle": 65,
+   "empty_incompatible": 34,
+   "empty_germline_only": 0,
+   "stored_edge_cyclic": 0,
+   "_stored_edge_cyclic_note": "恆 0(去環後 acyclic;非驗證)"
   },
   "H2009": {
-   "cyclic_invalid": 0,
-   "c_gt_k1_violations": 0,
-   "valid_pct": 100.0
+   "incompatible": 812,
+   "incompatible_pct": 19.1,
+   "has_cycle": 265,
+   "empty_incompatible": 166,
+   "empty_germline_only": 0,
+   "stored_edge_cyclic": 0,
+   "_stored_edge_cyclic_note": "恆 0(去環後 acyclic;非驗證)"
   },
   "HCC1937": {
-   "cyclic_invalid": 0,
-   "c_gt_k1_violations": 0,
-   "valid_pct": 100.0
+   "incompatible": 44,
+   "incompatible_pct": 2.7,
+   "has_cycle": 0,
+   "empty_incompatible": 9,
+   "empty_germline_only": 0,
+   "stored_edge_cyclic": 0,
+   "_stored_edge_cyclic_note": "恆 0(去環後 acyclic;非驗證)"
   },
   "HCC1954": {
-   "cyclic_invalid": 0,
-   "c_gt_k1_violations": 0,
-   "valid_pct": 100.0
+   "incompatible": 27,
+   "incompatible_pct": 1.4,
+   "has_cycle": 1,
+   "empty_incompatible": 6,
+   "empty_germline_only": 0,
+   "stored_edge_cyclic": 0,
+   "_stored_edge_cyclic_note": "恆 0(去環後 acyclic;非驗證)"
   },
   "HCC1395_DORADO": {
-   "cyclic_invalid": 0,
-   "c_gt_k1_violations": 0,
-   "valid_pct": 100.0
+   "incompatible": 55,
+   "incompatible_pct": 2.3,
+   "has_cycle": 4,
+   "empty_incompatible": 12,
+   "empty_germline_only": 0,
+   "stored_edge_cyclic": 0,
+   "_stored_edge_cyclic_note": "恆 0(去環後 acyclic;非驗證)"
   }
  },
  "_summary": {
   "n_distinct_shapes": 11,
+  "total_regions": 22676,
+  "total_incompatible": 1334,
+  "incompatible_pct_overall": 5.9,
   "all_shapes_ranked": [
    [
     "(())",
@@ -309,30 +341,29 @@
    [
     "((())(()))",
     19,
-    "根分支2·深2"
+    "根分支2"
    ],
    [
     "((())()())",
     7,
-    "根分支3·深2"
+    "根分支3"
    ],
    [
     "(((()))())",
     5,
-    "根分支2·深3"
+    "根分支2"
    ],
    [
     "((())(())()())",
     1,
-    "根分支4·深2"
+    "根分支4"
    ],
    [
     "(((()))(()))",
     1,
-    "根分支2·深3"
+    "根分支2"
    ]
   ],
-  "total_cyclic_invalid": 0,
-  "total_cgtk1_violations": 0
+  "enumeration_complete": "11 種形狀 0 未分類(正確,與有效性正交)"
  }
 }

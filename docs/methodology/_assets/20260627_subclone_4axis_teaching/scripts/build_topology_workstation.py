@@ -310,13 +310,14 @@ renderIdeo();
    return '<div style="text-align:center"><div style="display:flex;flex-direction:column-reverse;width:44px;height:145px;border-bottom:1px solid #ccc">'+segs+'</div><div style="font-size:10px;margin-top:2px">c='+c+'</div><div style="font-size:9px;color:#868e96">'+tot+'</div></div>';}).join('');
  // canonical shape 一致性(此樣本;樹同構標準式) — 答「是否所有樹一致/有效」
  var canonOf=function(edges){var ch={};edges.forEach(function(e){(ch[e[0]]=ch[e[0]]||[]).push(e[1])});var seen={};var rec=function(n){if(seen[n])return '(X)';seen[n]=1;return '('+(ch[n]||[]).map(rec).sort().join('')+')'};return rec('ROOT')};
- var shapeSet={},cyc=0,ntree=0,cviol=0;
- dt.forEach(function(r){if(r.n_clusters>((r.n_sSNV||0)+1))cviol++;var e=r.edges||[];if(!e.length)return;ntree++;var s=canonOf(e);if(s.indexOf('(X)')>=0)cyc++;shapeSet[s]=1;});
- var consist='<div style="background:#ebfbee;border:1px solid #b2dfc0;border-radius:5px;padding:4px 9px;margin-bottom:6px;font-size:10.5px;color:#2b8a3e">✅ <b>一致性驗證</b>：此樣本 <b>'+ntree+'</b> 棵樹全為<b>有效 acyclic perfect-phylogeny</b>（成環 <b>'+cyc+'</b> · c&gt;k+1 違反 <b>'+cviol+'</b>）；此樣本 <b>'+Object.keys(shapeSet).length+'</b> 種 canonical 樹形（全 7 樣本共 <b>11 種</b>·樹同構標準式）→ 樹空間<b>非 n^n</b>、是小有限集且淺（深度多為 1-2）</div>';
+ var shapeSet={},ntree=0,ninc=0;
+ dt.forEach(function(r){if(r.determinacy=='incompatible')ninc++;var e=r.edges||[];if(!e.length)return;ntree++;shapeSet[canonOf(e)]=1;});
+ var incpct=(100*ninc/(dt.length||1)).toFixed(1);
+ var consist='<div style="background:#fff9db;border:1px solid #ffe08a;border-radius:5px;padding:4px 9px;margin-bottom:6px;font-size:10.5px;color:#7a5c00">📐 <b>枚舉完整</b> ✅：此樣本 <b>'+Object.keys(shapeSet).length+'</b> 種 canonical 樹形（全 7 樣本共 <b>11 種</b>·0 未分類·樹同構式）。 <b>有效性</b>：incompatible（四配子/perfect-phylogeny 違反）<b>'+incpct+'%</b>（'+ninc+'/'+dt.length+'）— 跨樣本 0.4%–19.1%，<b>非「100% 有效」</b>（R1 審計:原「成環 0」是 tautology）。樹空間小=經驗淺薄（深度多 1-2）,非壓縮 n^n。</div>';
  var cross=[];Object.keys(window.__SAMPLES__||{}).forEach(function(s){var sd=window.__SAMPLES__[s];if(!sd||!sd.detail)return;
    var c2=sd.detail.filter(function(r){return r.n_clusters==2});var n=c2.length||1;
    var br=c2.filter(function(r){return (r.topology_type||'').indexOf('branched')>=0}).length,conf=c2.filter(function(r){return CONF[r.tree_shape]}).length;
-   cross.push({s:s,n:c2.length,br:Math.round(100*br/n),conf:Math.round(100*conf/n)});});
+   cross.push({s:s,n:c2.length,br:(100*br/n).toFixed(1),conf:(100*conf/n).toFixed(1)});});
  cross.sort(function(a,b){return b.br-a.br});
  var FLAG={COLO829:'⚠低coread artifact',HCC1954:'⚠undetermined',H2009:'⚠資料品質'},active=(document.querySelector('.stab.active')||{}).textContent;
  var crossRows=cross.map(function(x){var cur=x.s===active;
