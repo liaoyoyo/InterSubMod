@@ -508,9 +508,12 @@ function methylVerdict(r){let cross=(r.n_roots>=2)||((r.haplotypes||'').indexOf(
 }
 // Level2: 逐區 locus lollipop — 線=該區基因組範圍;每 sSNV 一根 lollipop(位置·HP色·VAF高);底色=結果
 function locusTrack(r){
- var nh=r.node_hp||{},vaf=r.pos_vaf||{},keys=Object.keys(nh);
+ var nh=r.node_hp||{},vaf=r.pos_vaf||{};
+ // 修 bug:改用 pos_vaf ∪ node_hp 的位點(未定相區 node_hp 空但 pos_vaf 有位點→原本整條不顯示);未定相 hp 標 H?(灰)
+ var allk={};Object.keys(vaf).forEach(function(k){allk[k]=1});Object.keys(nh).forEach(function(k){allk[k]=1});
+ var keys=Object.keys(allk);
  if(!keys.length)return '';
- var pos=keys.map(function(k){return {k:k,p:parseInt(k.split(':')[1])||0,hp:nh[k],v:vaf[k]};}).filter(function(o){return o.p>0}).sort(function(a,b){return a.p-b.p});
+ var pos=keys.map(function(k){return {k:k,p:parseInt(k.split(':')[1])||0,hp:nh[k]||'H?',v:vaf[k]};}).filter(function(o){return o.p>0}).sort(function(a,b){return a.p-b.p});
  if(!pos.length)return '';
  var rs=(r.start!=null?r.start:pos[0].p),re=(r.start!=null?(r.start+(r.span||0)):pos[pos.length-1].p);
  var lo=Math.min(rs,pos[0].p),hi=Math.max(re,pos[pos.length-1].p),rng=Math.max(1,hi-lo),pad=rng*0.04;
@@ -539,7 +542,7 @@ function locusTrack(r){
  s+='<line x1="'+AX+'" y1="'+(BASE+30)+'" x2="'+(AX+sbPx).toFixed(1)+'" y2="'+(BASE+30)+'" stroke="#495057" stroke-width="2"/><line x1="'+AX+'" y1="'+(BASE+26)+'" x2="'+AX+'" y2="'+(BASE+34)+'" stroke="#495057"/><line x1="'+(AX+sbPx).toFixed(1)+'" y1="'+(BASE+26)+'" x2="'+(AX+sbPx).toFixed(1)+'" y2="'+(BASE+34)+'" stroke="#495057"/><text x="'+(AX+sbPx+7).toFixed(1)+'" y="'+(BASE+34)+'" font-size="9" fill="#495057">↔ '+sbLab+' 比例尺</text>';
  s+='</svg>';
  var dropHP=pos.filter(function(o){return o.hp!='H1'&&o.hp!='H2'}).length;
- return '<div style="background:#fff;border:1px solid #dee2e6;border-radius:6px;padding:8px 10px;margin:6px 0"><b>🧬 locus 突變排列（每 sSNV 一根 lollipop·桿高=VAF·色=HP）</b> <span class="note">底色帶=該區結果「<b style="color:'+bg+'">'+sname+'</b>」·範圍 '+rs.toLocaleString()+'–'+re.toLocaleString()+'（'+(((re-rs)/1000).toFixed(1))+'kb）·'+pos.length+' 個已定相 sSNV'+(r.truncated?'（共 '+r.n_sSNV+'，截斷只示已定相）':'')+'</span> <span style="margin-left:6px"><span style="color:#1c7ed6">●H1</span> <span style="color:#7048e8">●H2</span>'+(dropHP?' <span style="color:#adb5bd">●HP?</span>':'')+'</span>'+s+'<div class="note">對照右側克隆樹：同一批 sSNV 在基因組上的實際位置與 HP 分群（跨 HP＝兩條染色體各自突變＝allelic）。</div></div>';
+ return '<div style="background:#fff;border:1px solid #dee2e6;border-radius:6px;padding:8px 10px;margin:6px 0"><b>🧬 locus 突變排列（每 sSNV 一根 lollipop·桿高=VAF·色=HP）</b> <span class="note">底色帶=該區結果「<b style="color:'+bg+'">'+sname+'</b>」·範圍 '+rs.toLocaleString()+'–'+re.toLocaleString()+'（'+(((re-rs)/1000).toFixed(1))+'kb）·'+pos.length+' sSNV'+(dropHP?'（其中 '+dropHP+' 未定相·灰）':'')+(r.truncated?'（共 '+r.n_sSNV+'，截斷）':'')+'</span> <span style="margin-left:6px"><span style="color:#1c7ed6">●H1</span> <span style="color:#7048e8">●H2</span>'+(dropHP?' <span style="color:#adb5bd">●HP?</span>':'')+'</span>'+s+'<div class="note">對照右側克隆樹：同一批 sSNV 在基因組上的實際位置與 HP 分群（跨 HP＝兩條染色體各自突變＝allelic）。</div></div>';
 }
 // filters + sort
 let det=D.detail;
