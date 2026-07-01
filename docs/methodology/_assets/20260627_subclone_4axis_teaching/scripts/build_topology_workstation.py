@@ -222,6 +222,9 @@ function regLOH(r){if(r.cn=='loh')return true;let L=LOHIV[r.chrom];if(!L)return 
 const TTLABEL={'branched(直系+姊妹)':'多根 lineage','linear(全直系)':'linear 直系','star(全姊妹)':'star 多根','single':'single','germline_only':'germline'};
 // 癌基因命中(#4):該區 gene 註釋含 COSMIC cancer_genes
 function geneHit(region){var g=(D.gene||{})[region];return !!(g&&g.cancer_genes&&Object.keys(g.cancer_genes).length)}
+// HP 單倍型家族(ideogram HP 模式):此區 somatic 落在哪條 germline HP
+function hpFamily(r){var h=r.haplotypes||'';var h1=h.indexOf('H1')>=0,h2=h.indexOf('H2')>=0;
+ if(h1&&h2)return['H1H2(跨HP)','#f59f00']; if(h1)return['H1','#1c7ed6']; if(h2)return['H2','#7048e8']; return['未定相(H3?/?)','#adb5bd'];}
 // situation 顯示正名(#8):regSit/JSON key 不動(計數與評分一致),只改給人看的字
 var SIT_LABEL={'多樹相容(欠定)':'單ALT群·缺連接read(欠定)','跨HP(兩棵樹)':'跨HP·兩棵樹(allelic)'};
 function sitDisp(n){return SIT_LABEL[n]||n;}
@@ -243,15 +246,24 @@ function renderIdeo(){var ID=D.ideogram;var host=el('ideogram');if(!host)return;
  if(mode=='snv'){(D.detail||[]).forEach(function(r,idx){var c=r.chrom;if(rowOf[c]==null)return;var sv=regSit(r);if(!sv)return;
    var ps=Object.keys(r.node_hp||{}).map(function(k){return parseInt(k.split(':')[1])||0}).filter(function(p){return p>0}).sort(function(a,b){return a-b});
    if(!ps.length)return;(snvByChrom[c]=snvByChrom[c]||[]).push({ps:ps,col:sv[1],idx:idx,region:r.region,sit:sv[0]});sitCnt[sv[0]]=(sitCnt[sv[0]]||0)+ps.length;});}
+ var hpByChrom={},hpCnt={};
+ if(mode=='hp'){(D.detail||[]).forEach(function(r,idx){var c=r.chrom;if(rowOf[c]==null)return;var hf=hpFamily(r);
+   (hpByChrom[c]=hpByChrom[c]||[]).push([(r.start||0),hf[0],hf[1],idx,r.region,r.haplotypes]);hpCnt[hf[0]]=(hpCnt[hf[0]]||0)+1;});}
+ // CN 帶(gain/loss;loh 已由 LOH 背景紫帶顯示):HCC1395 cn 欄完整,6 樣本 cn=unknown→空。非樹形模式才畫
+ var cnByChrom={},cnN=0;if(mode!='shape')(D.detail||[]).forEach(function(r){if(r.cn!='gain'&&r.cn!='loss')return;var c=r.chrom;if(rowOf[c]==null)return;(cnByChrom[c]=cnByChrom[c]||[]).push([(r.start||0),(r.start||0)+(r.span||0),r.cn]);cnN++;});
  var bt=function(m,lab){return '<button onclick="toggleIdeo(\''+m+'\')" style="font-size:11px;padding:2px 10px;border:1px solid #1971c2;cursor:pointer;background:'+(mode==m?'#1971c2':'#fff')+';color:'+(mode==m?'#fff':'#1971c2')+'">'+lab+'</button>';};
- var toggle='<span style="margin-left:8px;display:inline-flex">'+bt('situation','結果+LOH')+bt('snv','結果/每sSNV')+bt('shape','樹形')+'</span>';
+ var toggle='<span style="margin-left:8px;display:inline-flex">'+bt('situation','結果+LOH')+bt('snv','結果/每sSNV')+bt('hp','HP單倍型')+bt('shape','樹形')+'</span>';
  var lohLeg=lohN?'　<span style="background:#d0bfff;padding:0 6px;border-radius:2px">▬ LOH '+lohN+' 段</span>('+(D.loh_source||'?')+')':'　<span class="note">LOH:無資料</span>';
+ var cnLeg=cnN?'　<span style="color:#ff8787">▮gain</span> <span style="color:#4dabf7">▮loss</span>('+cnN+' 區·HCC1395 cn欄;6樣本 unknown 僅 LOH)':'';
  var sitLegItems='<span style="color:#37b24d">▏已確定 '+(sitCnt['已確定']||0)+'</span> <span style="color:#74c0fc">▏pairwise '+(sitCnt['pairwise 拼接']||0)+'</span> <span style="color:#adb5bd">▏單群欠定 '+(sitCnt['多樹相容(欠定)']||0)+'</span> <span style="color:#f59f00">▏跨HP '+(sitCnt['跨HP(兩棵樹)']||0)+'</span> <span style="color:#ffd43b">▏順序待定 '+(sitCnt['順序 2-3 順位待定']||0)+'</span> <span style="color:#f03e3e">▏衝突 '+(sitCnt['衝突(成環)']||0)+'</span>';
+ var hpLegItems='<span style="color:#1c7ed6">▏H1 '+(hpCnt['H1']||0)+'</span> <span style="color:#7048e8">▏H2 '+(hpCnt['H2']||0)+'</span> <span style="color:#f59f00">▏H1H2跨HP '+(hpCnt['H1H2(跨HP)']||0)+'</span> <span style="color:#adb5bd">▏未定相 '+(hpCnt['未定相(H3?/?)']||0)+'</span>';
  var legend = mode=='shape'
    ? '樹位點 <span style="color:#2f9e44">▏full_tree</span> <span style="color:#1c7ed6">▏結構(linear/sibling/co_linked)</span> <span style="color:#e03131">▏成環</span>　密度軌 <span style="color:#fa8c16">▮underpowered '+(t.underpowered||0)+'</span> <span style="color:#868e96">▮isolated '+(t.isolated||0)+'</span>'+lohLeg
    : mode=='snv'
-   ? '<b>每個已定相 sSNV 一點</b>·色=該區樹結果;<b>同一區的 sSNV 連一條底線=同一棵樹</b>('+sitLegItems+')'+lohLeg+'　<span class="note">⚠ genome 尺度多數區極小(sSNV 幾乎重疊)→看某區內是否同樹請點該區用下方 locus track</span>'
-   : '每區依結果上色(點 tick→跳 detail)：'+sitLegItems+lohLeg;
+   ? '<b>每個已定相 sSNV 一點</b>·色=該區樹結果;<b>同一區的 sSNV 連一條底線=同一棵樹</b>('+sitLegItems+')'+lohLeg+cnLeg+'　<span class="note">⚠ genome 尺度多數區極小(sSNV 幾乎重疊)→看某區內請點該區用下方 locus track</span>'
+   : mode=='hp'
+   ? '<b>每區依 germline HP 家族上色</b>（此區 somatic 落在哪條親代染色體;點 tick→跳 detail）：'+hpLegItems+lohLeg+cnLeg
+   : '每區依結果上色(點 tick→跳 detail)：'+sitLegItems+lohLeg+cnLeg;
  var s='<div style="background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:10px 14px;margin:10px 0;font-size:12px">';
  s+='<b>🗺️ 分布圖</b>'+toggle+'<br><span style="line-height:1.95">'+legend+'</span><span class="note">(染色體比例=GRCh38 真實長度;LOH=半透明紫底帶;hover 看數)</span>';
  s+='<svg viewBox="0 0 '+(PXW+90)+' '+(chroms.length*24+16)+'" width="100%" style="margin-top:6px;font-family:ui-monospace,monospace">';
@@ -259,6 +271,7 @@ function renderIdeo(){var ID=D.ideogram;var host=el('ideogram');if(!host)return;
    s+='<text x="'+(X0-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" font-weight="600">'+c+'</text>';
    s+='<rect x="'+X0+'" y="'+(y-5)+'" width="'+w+'" height="10" rx="2" fill="#f8f9fa" stroke="#dee2e6"/>';
    (lohBy[c]||[]).forEach(function(iv){var x1=X(iv[1]),x2=X(iv[2]);if(x2-x1<0.4)x2=x1+0.4;s+='<rect x="'+x1.toFixed(1)+'" y="'+(y-5)+'" width="'+(x2-x1).toFixed(1)+'" height="10" fill="#9775fa" opacity="0.35"><title>'+c+' LOH '+iv[1]+'-'+iv[2]+'</title></rect>';});
+   if(mode!='shape')(cnByChrom[c]||[]).forEach(function(cv){var x1=X(cv[0]),x2=X(cv[1]);if(x2-x1<0.4)x2=x1+0.4;s+='<rect x="'+x1.toFixed(1)+'" y="'+(y+6)+'" width="'+(x2-x1).toFixed(1)+'" height="3" fill="'+(cv[2]=='gain'?'#ff8787':'#4dabf7')+'" opacity="0.85"><title>'+c+' CN '+cv[2]+' '+cv[0]+'-'+cv[1]+'</title></rect>';});
    if(mode=='shape'){var bw=Math.max(1,PXW*bin/maxlen);
      (pc.und_bins||[]).forEach(function(v,bi){if(v>0)s+='<rect x="'+X(bi*bin)+'" y="'+(y+6)+'" width="'+bw+'" height="'+Math.min(6,1+v/2)+'" fill="#fa8c16" opacity="0.75"><title>'+c+' ~'+(bi*2)+'Mb underpowered '+v+'</title></rect>';});
      (pc.iso_bins||[]).forEach(function(v,bi){if(v>0)s+='<rect x="'+X(bi*bin)+'" y="'+(y+13)+'" width="'+bw+'" height="'+Math.min(5,1+v/4)+'" fill="#868e96" opacity="0.5"><title>'+c+' ~'+(bi*2)+'Mb isolated '+v+'</title></rect>';});
@@ -267,9 +280,10 @@ function renderIdeo(){var ID=D.ideogram;var host=el('ideogram');if(!host)return;
    else if(mode=='snv'){(snvByChrom[c]||[]).forEach(function(g){var x0=X(g.ps[0]),x1=X(g.ps[g.ps.length-1]);
      if(g.ps.length>=2){if(x1-x0<0.6)x1=x0+0.6;s+='<line x1="'+x0.toFixed(1)+'" y1="'+(y-2)+'" x2="'+x1.toFixed(1)+'" y2="'+(y-2)+'" stroke="'+g.col+'" stroke-width="1" opacity="0.55"/>';}
      g.ps.forEach(function(p){var x=X(p);s+='<circle cx="'+x.toFixed(1)+'" cy="'+(y-6)+'" r="1.5" fill="'+g.col+'" style="cursor:pointer" data-i="'+g.idx+'"><title>'+g.region+' · '+sitDisp(g.sit)+' · '+g.ps.length+' sSNV 同樹 · pos '+p+'</title></circle>';});});}
+   else if(mode=='hp'){(hpByChrom[c]||[]).forEach(function(g){var x=X(g[0]);s+='<line x1="'+x+'" y1="'+(y-9)+'" x2="'+x+'" y2="'+(y-1)+'" stroke="'+g[2]+'" stroke-width="1.5" style="cursor:pointer" data-i="'+g[3]+'"><title>'+g[4]+' · HP '+g[5]+'</title></line>';});}
  });
  s+='</svg></div>';host.innerHTML=s;
- if(mode=='situation'||mode=='snv')host.onclick=function(e){var el2=e.target.closest('[data-i]');if(!el2)return;show(+el2.dataset.i,null);var d=el('detail');if(d)d.scrollIntoView({behavior:'smooth',block:'center'});};
+ if(mode=='situation'||mode=='snv'||mode=='hp')host.onclick=function(e){var el2=e.target.closest('[data-i]');if(!el2)return;show(+el2.dataset.i,null);var d=el('detail');if(d)d.scrollIntoView({behavior:'smooth',block:'center'});};
  else host.onclick=null;
 }
 renderIdeo();
