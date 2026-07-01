@@ -11,6 +11,12 @@ provenance: HCC1395 canonical。數字皆本輪 Read-back 獨立驗證(非 subag
 
 > 框架：Verdict-Pyramid（裁決先行 → 規格 → 證據 → 邊界）。每個數字標來源檔（§13-C）+ 證據級（scientific-rigor §2）。
 > 對象：`docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/` 五支腳本。目的：改效能前先確認方法正確性。
+>
+> **🔧 2026-07-01 修正落地**：本稽核 3 個 must-fix 已全部修正 + 套用 canonical（commit `979c54d` D4+C3 / `44ed19c` C2）：
+> - **D4**（candidate_scoring）移除「VAF tie→甲基輔助」overclaim → 0 殘留（74 區改「L3-weak 軟旗標」）。
+> - **C3**（topology 去噪加 eps=2% floor + drop_frac gate）→ 39 過度自信區（丟≤60.9% reads）降 incompatible。
+> - **C2**（build_tree 計數 `n_independent` + 非CN-gain乾淨4-gamete判 incompatible）→ +106 incompatible；63% dropped pair min≤1 單雜訊不觸發。
+> - **canonical determinacy 更新**：A_determined **1812→1741**、incompatible **12→118**、A_ambiguous 76→62、B 958→943。**§5/§6 的 1812/12/306 為修前診斷數字，保留為稽核紀錄。** 效能側另見 `20260701_ssnv_backbone_o2_optimization_benchmark_01.md`（O2 1.4-6.2x + 分片平行）。
 
 ---
 

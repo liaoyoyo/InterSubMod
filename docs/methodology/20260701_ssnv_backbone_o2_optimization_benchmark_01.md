@@ -85,4 +85,4 @@ provenance: HCC1395。所有 time/memory 皆本輪實測(o2par_full.json.obs + /
 - `run_o2_parallel.py`：分片平行 driver（gap>50kb 切片 + cap 平行 + 合併 + `.obs` 觀察數據）。
 - 用法：`run_o2_parallel.py all 44 <out.json> 44`（env: SM_TBAM/SM_NBAM/SM_VD/SM_VCF_MODE）。
 
-**下一步（增量,每步小規模驗證）**：D4(甲基 overclaim 字串)→ C3(去噪 gate)→ C2(4-gamete 旗標)。
+**增量正確性修正（已完成,每步小規模驗證,2026-07-01）**：D4(甲基 overclaim 字串,commit 979c54d)→ C3(去噪 eps floor + gate,979c54d)→ C2(4-gamete 計數旗標,44ed19c)。canonical determinacy A_determined 1812→1741 / incompatible 12→118。詳見 `20260701_ssnv_backbone_method_spec_and_correctness_audit_01.md` 修正落地。
