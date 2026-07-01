@@ -253,7 +253,7 @@ function renderIdeo(){var ID=D.ideogram;var host=el('ideogram');if(!host)return;
    ? '<b>每個已定相 sSNV 一點</b>·色=該區樹結果;<b>同一區的 sSNV 連一條底線=同一棵樹</b>('+sitLegItems+')'+lohLeg+'　<span class="note">⚠ genome 尺度多數區極小(sSNV 幾乎重疊)→看某區內是否同樹請點該區用下方 locus track</span>'
    : '每區依結果上色(點 tick→跳 detail)：'+sitLegItems+lohLeg;
  var s='<div style="background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:10px 14px;margin:10px 0;font-size:12px">';
- s+='<b>🗺️ HG38 全基因組分布</b>'+toggle+'<br><span style="line-height:1.95">'+legend+'</span><span class="note">(染色體比例=GRCh38 真實長度;LOH=半透明紫底帶;hover 看數)</span>';
+ s+='<b>🗺️ 分布圖</b>'+toggle+'<br><span style="line-height:1.95">'+legend+'</span><span class="note">(染色體比例=GRCh38 真實長度;LOH=半透明紫底帶;hover 看數)</span>';
  s+='<svg viewBox="0 0 '+(PXW+90)+' '+(chroms.length*24+16)+'" width="100%" style="margin-top:6px;font-family:ui-monospace,monospace">';
  chroms.forEach(function(c,i){var pc=ID.per_chrom[c],y=14+i*24,w=PXW*pc.len/maxlen,bin=pc.bin;
    s+='<text x="'+(X0-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" font-weight="600">'+c+'</text>';
@@ -659,7 +659,7 @@ HTML = f"""<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta
 🔴 所有 perfect-phylogeny/IDPP 建構的<b>有效性依賴 infinite-sites</b>，癌症 LOH/CNV（本專案 82-91%）系統違反。完整稽核（Q1-Q4 + 定理來源）→ <b>InterSubMod/docs/methodology/20260701_topology_algorithm_audit_findings_01.md</b>。</div></details>
 <div id="scorecard"></div>
 <div id="universe"></div>
-<div id="ideogram"></div>
+<details open style="margin:6px 0"><summary style="cursor:pointer;font-weight:700;color:#1971c2;font-size:13.5px;padding:3px 0">🗺️ HG38 全基因組分布（GRCh38 座標 · LOH 底帶 · 結果/樹形/每sSNV；點此摺疊/展開）</summary><div id="ideogram"></div></details>
 {GLOSSARY_HTML}
 <div class="stats">
 <div class="scard"><h4>拓樸型態<span class="more">▸ 點看細節</span></h4><div class="note" style="font-size:10px;margin:-4px 0 3px">read 群在系統樹的<b>形狀</b>:single/linear/branched/star</div><div id="s_topo"></div></div><div class="scard"><h4>群數 c<span class="more">▸ 點看細節</span></h4><div class="note" style="font-size:10px;margin:-4px 0 3px"><b>觀測到的不同 ALT 細胞群數</b>(germline 不計·≤k+1)</div><div id="s_clust"></div></div>
