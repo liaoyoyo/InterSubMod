@@ -34,6 +34,15 @@ method: 7 樣本 C2/C3 修正後同版本;main-loop cross-tab + scipy 卡方;3-a
 
 → **COLO829 branched% 87% 但 read-confirmed 僅 39.3%（缺口 47.7,全樣本最大）** = 幾何斷言但 read 未驗證。
 
+## ①b Canonical 樹形 + 一致性驗證（2026-07-02 補：正確且完整的結構統計）
+用**樹同構標準式（AHU canonical form，只看形狀不看標籤）**統計所有觀察到的樹,回答「是否能正確、一致地統計所有結構拓撲」：
+- 🔴 **全 7 樣本合計只有 11 種不同 canonical 樹形**（非 n^n;perfect-phylogeny + c≤k+1 把空間壓到小有限集）。全部淺（深度多為 1-2,深度≥3 極稀少）。
+- 🔴 **一致性 = 100%**：全 7 樣本**成環(無效樹) 0 / c>k+1 違反 0** → 所有建出的樹都是**有效 acyclic perfect-phylogeny**。
+- 11 種形狀（合計數,樹同構式·標籤）：`(())` 單群 single 11490 / `(()())` 2平行 lineage 6542 / `((()))` 2直系 linear 3688 / `((())())` 2平行+1直系 513 / `(()()())` 3平行 star 112 / `(((())))` 3直系 chain 31 / 其餘 c=4/5/6 各 1-19。
+- 每樣本 canonical 組成（top）：COLO829 67% 單群/28% 2平行;HCC1954 44% 2平行/41% 單群;HCC1937 36% 單群/35% 2平行/25% 2直系;H2009 43%/26%/21%。→ 結構組成隨樣本變（同 c=2 branched% 訊號,但 caveat 同下）。
+- 資料:`scratchpad/canonical_shapes.json`（per-sample shape counts + descriptors + consistency,皆重算 grep-able）。
+> 結論:**可以正確且完整地統計**（11 種形狀全涵蓋、0 未分類）、**且 100% 一致**（0 無效樹）。但跨樣本組成差異仍受下述 confound（branched=幾何上界、CN、coread）— 統計正確 ≠ 生物差異證據。
+
 ## ② topology_type vs tree_shape — 兩套不同計算，該用哪個
 - **topology_type='branched'（topology_analysis.py:110-111,從 genotype 向量樹 `has_branch`）= 確定性幾何陳述**：2 條被 call 的 ALT 向量彼此**非嵌套**→ 必各自掛 ROOT 分岔（非 a→b 線性）。含義 = 「≥2 條非嵌套 / 平行 / 多根相容譜系」,**不需 read 共現證據**、完整可重現。
 - **tree_shape（sm_region_integration,從 pairwise 巢狀/姊妹邊）= 較保守**：需 read 共現確認 nested/sibling 邊,證據弱→`no_confirmed_structure`。
