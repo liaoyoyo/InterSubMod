@@ -81,25 +81,35 @@ def load_union(chrom):
 
 def per_read_calls(bam, chrom, group):
     """group=[(pos,ref,alt,src)]. 回 calls{rn:{pos:'REF'/'ALT'/'OTHER'}}, hp{rn:int}, ps{rn:int}.
-    每 pos pileup 一次 (group 內 sSNV 只 pile 一次 = 效率)。"""
+    O2(2026-07-01): group span 發『單次』region pileup,只在 sSNV 位點 tabulate — 取代原逐位點 pileup。
+    長 read 橫跨多 sSNV 時只解壓一次(非 k 次)。byte-identical 已驗證(original vs 本版,同輸入):
+    397 group unit + chr22 端到端 7/7(pairs/census/tally/universe/計數)+ 多片切割合併 7/7;
+    加速 per-unit 1.4-1.7x、超寬 group(chr8 503kb/33-sSNV)2.98-6.19x。原逐位點版見 git 歷史。"""
     calls = defaultdict(dict)
     hp = {}
     ps = {}
-    for pos, ref, alt, src in group:
-        for col in bam.pileup(chrom, pos - 1, pos, truncate=True, min_base_quality=0, stepper="samtools"):
-            for pr in col.pileups:
-                if pr.is_del or pr.is_refskip or pr.query_position is None:
-                    continue
-                aln = pr.alignment
-                if aln.mapping_quality < MAPQ_MIN:
-                    continue
-                rn = aln.query_name
-                base = aln.query_sequence[pr.query_position].upper()
-                calls[rn][pos] = "REF" if base == ref else ("ALT" if base == alt else "OTHER")
-                if aln.has_tag("HP"):
-                    hp[rn] = aln.get_tag("HP")
-                if aln.has_tag("PS"):
-                    ps[rn] = aln.get_tag("PS")
+    refalt = {pos: (ref, alt) for pos, ref, alt, _ in group}
+    posset = set(refalt)
+    lo = min(posset)
+    hi = max(posset)
+    for col in bam.pileup(chrom, lo - 1, hi, truncate=True, min_base_quality=0, stepper="samtools"):
+        pos = col.reference_pos + 1  # pileup 0-based reference_pos → 1-based sSNV pos
+        if pos not in posset:
+            continue
+        ref, alt = refalt[pos]
+        for pr in col.pileups:
+            if pr.is_del or pr.is_refskip or pr.query_position is None:
+                continue
+            aln = pr.alignment
+            if aln.mapping_quality < MAPQ_MIN:
+                continue
+            rn = aln.query_name
+            base = aln.query_sequence[pr.query_position].upper()
+            calls[rn][pos] = "REF" if base == ref else ("ALT" if base == alt else "OTHER")
+            if aln.has_tag("HP"):
+                hp[rn] = aln.get_tag("HP")
+            if aln.has_tag("PS"):
+                ps[rn] = aln.get_tag("PS")
     return calls, hp, ps
 
 
