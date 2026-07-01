@@ -85,3 +85,19 @@ build_branch: feat/summary-nreadsvalid
 1. **甲基主要訊號 = germline 等位特異甲基化（haplotype 層）**：普遍（62% neutral）、強（Δβ 0.97）、非循環 → 對 **phasing/read 招募**有用（甲基真正的研究價值），**非 subclone 偵測**。
 2. **真 somatic-specific 甲基全基因組僅 7–9 區**（6/7 LOH 最可能 somatic-cis，唯 chr21 neutral 乾淨候選）→ 甲基當 subclone 判別器上限就這幾區，都需 matched-normal 收尾。
 3. **紅線**：甲基錨點招募到的是 **haplotype 非 subclone**；把「招募到 HP」誤稱「招募到 subclone」= baseline-dependence 循環。
+
+## §9 甲基對齊 longphase-S 的 somatic HP 子相位（使用者 Q2 — 修正盲點）
+
+> **緣起**：§2–§7 的 HP-axis 都把 `1-1` 折進 HP1（germline 軸）→ 丟掉 longphase-S HP tag **內含的 somatic 子相位**。改測**同一 germline HP 內** `1`（germline-only）vs `1-1`（somatic 子相位）—— 差異只能來自 somatic（**非 germline-ASM 循環**）。`sm_somatic_hp_methyl.py`。
+
+| 指標 | 值 |
+|---|---|
+| 可評估區（`1` 且 `1-1` 各≥3 read）| **680**（vs within-HP genotype 版僅 19 → **36× 更廣可評估**）|
+| 甲基對齊 somatic 子相位 | **102 = 15.0%** |
+| by CN | **LOH 96/623（15.4%）**、neutral 6/57（10.5%）|
+| effect | Δβ median **0.963**、max 0.99（all-or-nothing）|
+
+→ **回答 Q2**：✅ **用 somatic HP tag 測是更廣可評估、且方向正確的甲基印證** —— 15% 區的甲基**獨立支持 longphase 的 somatic 相位**（強效應 Δβ 0.96）。與 within-HP genotype 版（10.5%）一致（~10–15%）。
+🔴 **但關鍵 caveat（baseline-dependence）**：`1-1` 由帶 somatic ALT 定義 → 「`1` vs `1-1`」甲基差異**與 somatic 突變共變** = **somatic-cis（突變直接效應）+ subclone 混合**，且 **94%（96/102）是 LOH**（最可能 somatic-cis）→ **非「已證 subclone」**，需 matched-normal 扣 cis 才能分出真 subclone。
+
+→ **回答 Q1（within-HP ~10–15% 是否＝可偵測隱藏 subclone）**：**~15% 區確有 within-germline-HP 甲基結構 = 隱藏 somatic 訊號**，但 (a) 仍少數（85% 無），(b) 94% LOH 疑 somatic-cis，(c) 未經 normal 無法確認是 subclone 非 cis。**＝「可觀察到隱藏 somatic 訊號、但不能斷定是 subclone」**。
