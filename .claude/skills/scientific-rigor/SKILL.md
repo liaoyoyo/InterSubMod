@@ -82,6 +82,8 @@ user-invocable: true
 
 **禁止**: 用「鎖定」「定論」「已證實」假裝 L1 等級而無多 dataset + 反例排除。
 
+> **absence claim 也需驗證（2026-07-01，NABAOS epistemic-source 借鑑）**：宣稱「沒有 X」「0 個」「無差異」與宣稱「有 X」**同樣需 fresh 證據**，且必分清三種「0」：**未測 / 真陰性 / 覆蓋不足**。實例：cis-control「0/740」是 **structural-zero（測試從未執行）≠「排除 cis」**（memory `project_methylation_use_exhausted_bounded_auxiliary`）；「0 new partition」需與「有訊號但 power-gated」分開。absence 的「為何是 0」不查 = 隱性 overclaim。
+
 ### §2.1 結論敘述 Checklist（必跑）
 
 每個結論宣告前自查:
@@ -334,7 +336,13 @@ graph LR
 - 跨 cycle 證據鏈 → `/provenance-tier-audit` 系統審計
 - 歷史結論索引 → `/research-context-loader` Tier 1-3
 
-→ 引用 AGENTS.md §11（IO 顯示）+ `/provenance-tier-audit`（跨 cycle 證據鏈一致性）
+**Derivative artifact 強制繼承（2026-05-20 Issue #7 升級）**：
+任何從 .md 報告衍生的 derivative artifact（HTML deck / PPTX slide / email draft / preview standalone）**必繼承本 §8.4 provenance audit gate**：
+- 每個 numerical value 必有 source 追溯（grep source .md 確認 verbatim 或 rounded ≤ 2 sf）
+- 多版本迭代（version A/B/C/.../H）共用同一 source-of-truth 鎖，不可新增無 citation 的數字
+- Self-audit failure 範例（2026-05-20 session）：T=3 ΔF1 +0.057 跨 4 版本傳遞，正確值 +0.1605（source `InterSubMod/docs/experiments/in_progress/2026/05/20260519_V6_vs_baseline_HCC1395_TPFP_comparison_01.md` §11.3 line 531）— evaluator 第二輪才 catch，應在第一版 Write 前 self-audit grep
+
+→ 引用 AGENTS.md §11（IO 顯示）+ `/provenance-tier-audit`（跨 cycle 證據鏈一致性）+ `html-report-build` Workflow step 7b (number-source-grep audit)
 
 ---
 

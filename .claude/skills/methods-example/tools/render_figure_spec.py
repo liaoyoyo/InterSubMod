@@ -687,7 +687,10 @@ def render(spec, data):
         sc = esc(resolve(data, ann["single_sample_caveat_ref"]))
         foot.append(f'<text x="10" y="{fy}" font-size="10.5" fill="{cs["synthetic"]}">⚠ 誠實標註：{sc}</text>')
         fy += 18
-    foot.append(f'<text x="10" y="{fy}" font-size="9.5" fill="{cs["soft"]}">※ 聚合數字皆 verified 真值（{len(PROV)} 項，附 src 可 grep）；read 甲基點為示意（synthetic）。</text>')
+    if ann.get("process_schematic"):
+        foot.append(f'<text x="10" y="{fy}" font-size="9.5" fill="{cs["soft"]}">※ 流程 schematic：模組名與常數取自 ISM 源碼（附 file:line，可 grep），本圖無分析數值。</text>')
+    else:
+        foot.append(f'<text x="10" y="{fy}" font-size="9.5" fill="{cs["soft"]}">※ 聚合數字皆 verified 真值（{len(PROV)} 項，附 src 可 grep）；read 甲基點為示意（synthetic）。</text>')
     fy += 16
     if ann.get("synthetic_watermark"):
         foot.append(f'<text x="{W-12}" y="{fy}" font-size="8.5" fill="#ccc" text-anchor="end">schematic reads = synthetic / 示意</text>')
@@ -697,6 +700,11 @@ def render(spec, data):
     body = "\n".join(head + frags + foot)
     return (f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" role="img" '
             f'aria-label="{title}"><title>{title}</title><desc>{sub}</desc>'
+            # CJK font-family on all <text> → 中文 renders correctly in BROWSER (真交付物；瀏覽器逐字 cascade).
+            # ⚠ cairosvg raster 預覽的豆腐是系統缺字型問題非本碼可修：cairosvg 2.8.2 只取 stack 第一個名字、無
+            # per-glyph fallback，且本機 fontconfig 把未裝的 Noto 回退到 DejaVu(無CJK)；Droid Sans Fallback 有
+            # CJK 但缺 latin → 混排無單字型解。乾淨 raster 需 `apt install fonts-noto-cjk`（有 latin+CJK），或用瀏覽器開 .html。
+            f'<style>text{{font-family:"Noto Sans CJK TC","Source Han Sans TW","Droid Sans Fallback","WenQuanYi Zen Hei",system-ui,sans-serif}}</style>'
             f'<rect width="{W}" height="{H}" fill="#FAF9F5"/>\n{body}\n</svg>')
 
 
