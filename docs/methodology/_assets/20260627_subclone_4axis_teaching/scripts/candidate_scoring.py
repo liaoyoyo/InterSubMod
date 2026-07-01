@@ -32,7 +32,9 @@ def resolution(r):
     if r["determinacy"] == "incompatible" or (r["genome_ctx"] == "centromere" and r["fp"] > 0):
         return "likely-artifact(成環/著絲點+FP)→補 mappability mask、不強建樹"
     if r["determinacy"] == "A_ambiguous_order(缺中間群)":
-        return "順序未定→VAF/CCF(CN-clean)定先後;VAF tie 時→甲基輔助(cis-control 後)"
+        # D4 修(2026-07-01):移除「VAF tie→甲基輔助」overclaim。甲基排序為 L3-weak(ρ≈0.18 未顯著,
+        # ordering pilot)、非可信 resolver,且 backbone_resolution compute 中甲基完全缺席 → 不宣稱甲基定序。
+        return "順序未定→VAF/CCF(CN-clean)定先後;VAF tie→保持未定(甲基僅 L3-weak 軟旗標、非排序 resolver)"
     if r["determinacy"] == "C_underdetermined":
         return "資訊不足→加深覆蓋觀察缺的對 / Tier-PS 連遠 partner"
     if r["determinacy"] == "B_pairwise_structure":

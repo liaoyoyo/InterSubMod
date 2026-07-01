@@ -74,6 +74,10 @@ def solve_topology(pops):
             if a & b and not (a <= b or b <= a): conf.add(g1); conf.add(g2)
         if not conf: break
         victim = min(conf, key=lambda g: (cnt[g], g))  # tiebreak: genotype 字串 → 決定性可重現
+        # C3 修(2026-07-01):victim 佔比 ≥2% = 真衝突非噪聲 → 停止移除,留給下方判 incompatible。
+        # 修前無 floor,可丟到 60.9% reads 仍判 laminar → 過度自信(39 區全 CN gain/loh multiplicity)。
+        if cnt[victim] >= 0.02 * total:
+            break
         dropped += cnt[victim]; del work[victim]
     if len(work) >= 2 and not _laminar(list(work.values())):
         return ("incompatible", [], list(alt), dropped, 0)
@@ -160,12 +164,15 @@ for r in regs:
     stats["n_clusters"][nclust] += 1
     stats["topology_type"][ttype] += 1
     # determinacy
-    if r["has_cycle"]: det = "incompatible"
+    # C3 修(2026-07-01):(a)consume solve_topology 的 population 層 incompatible(原只看 pairwise has_cycle→
+    # incompatible 是 dead code);(b)drop_frac>10% 不給 A_determined 高信心(去噪掩蓋 CN-multiplicity)。
+    if r["has_cycle"] or ttype == "incompatible": det = "incompatible"
+    elif drop_frac > 0.10: det = "A_noisy(去噪>10%;CN-multiplicity 疑)"
     elif len(alt_vecs) >= 2 and sum(pops.values()) >= 6: det = "A_determined(單分子向量)"
     elif r["tree_shape"] in ("full_tree", "linear_nested", "sibling_only"): det = "B_pairwise_structure"
     elif r["tree_shape"] == "no_confirmed_structure": det = "C_underdetermined"
     else: det = "other"
-    if ambig>0 and det.startswith('A'): det='A_ambiguous_order(缺中間群)'
+    if ambig>0 and det.startswith('A_determined'): det='A_ambiguous_order(缺中間群)'
     # G1 修(2026-06-29):determinacy 是「單分子建樹」分類,只對有 genotype 向量的區有意義
     # → canonical denominator = with-vector(3885)。無向量區改記 region_coverage(避免 7143/3885 混引)。
     has_vec = len(alt_vecs) >= 1 and len(pops) >= 1
