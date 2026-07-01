@@ -1,0 +1,54 @@
+{
+ "design": "全 740 區三軸: (A)HP-axis germline ASM 非循環 (B)genotype-axis somatic (C)分解",
+ "params": {
+  "hp_min": 4,
+  "cpg_min": 3,
+  "dbeta_min": 0.2,
+  "fdr": 0.05
+ },
+ "n_regions": 754,
+ "haplotype_layer": {
+  "hp_evaluable": 175,
+  "germline_asm_regions": 51,
+  "germline_asm_prevalence_of_evaluable": 0.2914,
+  "germ_asm_by_cn": {
+   "loh": 12,
+   "neutral": 39
+  },
+  "hpeval_by_cn": {
+   "loh": 112,
+   "neutral": 63
+  },
+  "max_dbeta_hp_median": 0.972,
+  "n_sig_hp_median": 15.0
+ },
+ "somatic_axis": {
+  "geno_corroborated": 49,
+  "corrob_hp_evaluable": 17,
+  "corrob_germline_explained": 8,
+  "corrob_explained_frac": 0.4706
+ },
+ "two_layer_split": {
+  "subclone_candidates": 9,
+  "candidate_by_cn": {
+   "loh": 6,
+   "neutral": 3
+  },
+  "candidate_regions": [
+   "chr3:71327944-71329696",
+   "chr5:175946003-175946509",
+   "chr9:30374811-30375868",
+   "chr1:39714746-39718326",
+   "chr10:99484522-99484523",
+   "chr14:70060890-70070433",
+   "chr19:54936893-54942516",
+   "chr22:11348424-11349897",
+   "chr21:30520863-30520864"
+  ]
+ },
+ "cross_tab": {
+  "germ_asm_AND_corrob": 10,
+  "germ_asm_NOT_corrob": 41,
+  "corrob_NOT_germ_asm": 7
+ }
+}

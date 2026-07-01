@@ -25,6 +25,7 @@ build_branch: feat/summary-nreadsvalid
 | `07_cross_sample_capability.md` | L6 | 跨樣本能力（只 HCC1395 ready）| — | — |
 | `08_methylation_sufficiency_audit.md` | L8 | **甲基輔助有效性審查**（per-region 漏斗 + power dose-response + cis-control）| `08_*.png` | `sm_methyl_sufficiency_audit.json`, `sm_methyl_reextract_ALL_perregion.tsv` |
 | `09_single_sSNV_and_calibration.md` | L9 | **單 sSNV 外推 + HP 排解 cis-ASM + 多→單校正**（數據驗證 7 問）| — | `sm_single_locus_methyl.json`, `sm_methyl_genetic_concordance.json` |
+| `10_two_layer_validation.md` | L10 | **甲基兩層大規模驗證 + read 招募力**（754 區三軸 + 甲基錨點招募）| — | `sm_two_layer_validation.json`, `sm_read_recruitment.json` |
 | `index.standalone.html` | L7 | **整合 HTML**（嵌圖 + 全層 §13-A 注入）| — | — |
 
 ## §2 定義詞典（meaning）
@@ -55,5 +56,5 @@ build_branch: feat/summary-nreadsvalid
 4. 對抗稽核紀錄見 `06_integrated_narrative.md`（L5 fresh-context evaluator verdict）。
 
 ## §5 層狀態
-L0 ✅ · L1 ✅(HP=鑑別器非確認器) · L2 ✅(GMM BIC n=3) · L3 ✅(PS-reliable 92.7%) · L4 ✅(**已從 BAM 重抽 genome-wide 740 區，6.6% 弱 corroborate**) · L5 ✅(**對抗稽核 5 輪 → PASS**，修正全套用) · L6 ✅ · L7 ✅(整合 HTML) · **L8 ✅(甲基輔助有效性審查 — BOUNDED_AUXILIARY；power-gated 高功率 54.9%／🔴 cis-control str/int bug 修正 2026-06-29：14/49 可評估・11 germline-cis〔甲基多為 allele-specific 非 subclone〕・3 候選)** · **L9 ✅(單 sSNV 外推 32% 但最不可解釋／read×read 分群 data-starved 1/754／🔴 HP 排解 cis-ASM 可行〔14/49〕非「不可行」〔bug 修正〕／LOH 無 germline ASM 41/49／多→單無可轉移門檻)**。
+L0 ✅ · L1 ✅(HP=鑑別器非確認器) · L2 ✅(GMM BIC n=3) · L3 ✅(PS-reliable 92.7%) · L4 ✅(**已從 BAM 重抽 genome-wide 740 區，6.6% 弱 corroborate**) · L5 ✅(**對抗稽核 5 輪 → PASS**，修正全套用) · L6 ✅ · L7 ✅(整合 HTML) · **L8 ✅(甲基輔助有效性審查 — BOUNDED_AUXILIARY；power-gated 高功率 54.9%／🔴 cis-control str/int bug 修正 2026-06-29：14/49 可評估・11 germline-cis〔甲基多為 allele-specific 非 subclone〕・3 候選)** · **L9 ✅(單 sSNV 外推 32% 但最不可解釋／read×read 分群 data-starved 1/754／🔴 HP 排解 cis-ASM 可行〔14/49〕非「不可行」〔bug 修正〕／LOH 無 germline ASM 41/49／多→單無可轉移門檻)** · **L10 ✅(甲基兩層大規模驗證 754 區 — haplotype 層 germline ASM neutral **62%**·Δβ0.97·非循環〔真且普遍〕vs subclone 層 somatic-specific 僅 **7-9 區**〔chr21 最乾淨〕；甲基錨點 read 招募 → HP **96.3%**·可救 unphased/HP3 **334** read，但 within-HP subclone 招募僅 **10.5%** → 甲基串接是 **phasing 層擴充非 subclone 層**)**。
 全部 data-supported；**每個數字皆可從 `data/*.json`/`*.tsv` grep（§13-A，5 輪 fresh-context 稽核三方驗證 prose=JSON=HTML 一致）**。詳見 `06_integrated_narrative.md` §4 五輪對抗稽核紀錄。
