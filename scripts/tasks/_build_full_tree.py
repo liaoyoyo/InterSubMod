@@ -300,6 +300,29 @@ nodes.append(N("T-SUBCLONE-VERIFIED", "Subclone 重建 — 跨來源交互驗證
                links={"reports": ["InterSubMod/docs/methodology/20260627_subclone_unified_verified_narrative_01.md"],
                       "memory": ["project_subclone_snv_linkage_verification_pipeline"]},
                notes="跨來源裁決=COMPATIBLE（branch genetic 重建 ↔ trunk 甲基-NEGATIVE 正交相容，0 真矛盾；branch 0 新 partition 反佐證 trunk NEGATIVE）。交互驗證=workflow wck0bu3iq（4 gather+3 對抗 lens+1 綜合）。對抗降 tier：structure fraction 上界/GMM 離散 L3/chr17·chr2 生物詮釋 L2/precedence L3/甲基 subclone-specificity 由「0% cis」改 UNDETERMINED。🔴 #1 open gate=T-GATE-GB（normal cis-control）。來源 branch 5308d9e pending-merge。"))
+# ---- 07-01 developments（並行 session；memory-sourced）----
+nodes.append(N("T-TREE-RANK", "替代整樹 ranked 無法成立 —「定不出來即答案」", "T-ISM", "analysis", "done", "claude",
+               depends_on=["T-GW-RECON"],
+               headline="全候選整樹 equiprobable/non-enumerable → 重建輸出正確形式=完整候選集+虛擬節點+等機率（非單一 ranked tree）；🔴 排序絕不用甲基",
+               goal="界定 subclone 重建輸出的正確形式：不是單一 ranked 樹，而是完整候選+等機率『定不出來即答案』（field-endorsed）",
+               links={"memory": ["project_candidate_tree_ranking_impossible", "project_ism_positioning_vs_prior_work"]},
+               notes="field-endorsed（MACH2 2024 多區域整合無人成一樹）；carousel 顯完整候選。與 T-GATE-GD 互補：demo 的正確形式即此。"))
+nodes.append(N("T-MULTISAMPLE", "7 ONT canonical 樣本全跑到樹（realizes V2-RECON ×6）", "T-ISM", "compute", "done", "claude",
+               depends_on=["T-GW-RECON"],
+               headline="7 ONT canonical 樣本全跑到區域克隆樹、⭐3 封頂（single-pipeline）；tagged BAM canonical/{S}/paired_full/*_complete_matrix/longphase_s/",
+               goal="把單樣本 sSNV 連鎖 pipeline 推到 7 樣本（實現 T-ISM-V2-RECON 的『全基因組×6 掃描』）",
+               io={"inputs": [{"name": "7 樣本 tagged BAM（longphase-S）", "required": True, "ref": None},
+                              {"name": "per-sample somatic VCF", "required": True, "ref": None},
+                              {"name": "COSMIC CLP 外部真值", "required": False, "ref": None}],
+                   "outputs": ["per-sample 區域克隆樹", "跨樣本一致性表（⭐3 封頂）"]},
+               links={"memory": ["project_canonical_ont_samples_inventory"]},
+               notes="single-pipeline 自我參照封頂 ⭐3（升 ⭐4 需正交第二 pipeline，見 T-GATE-GE）；realize T-ISM-V2-RECON ×6。"))
+nodes.append(N("T-ISM-POSITIONING", "ISM 定位 vs 過去研究 + 白地（論文 Ch2 素材）", "T-EXT", "analysis", "done", "claude",
+               headline="單樣本 HCC1395 ONT；ONT 三優勢(單分子共現=命脈)；白地空；多區域整合無人成一樹(field-endorsed MACH2 2024)；甲基串 phase-set=germline-only prior art 不延長 somatic",
+               goal="定 ISM 相對過去研究的差異化定位 + 白地 + non-circularity 口徑 → 論文 Ch2",
+               links={"memory": ["project_ism_positioning_vs_prior_work", "project_external_validation_library"],
+                      "reports": ["InterSubMod/docs/method_comparison/20260630_ism_positioning_vs_prior_work_01.md"]},
+               notes="🔴 投稿口徑：禁『對手缺檢定/二代定序』；LongPhase-S 零甲基保住 non-circularity。feeds T-W-CH2。"))
 nodes.append(N("T-DORADO", "HCC1395 Dorado 跨化學 within-sample 復現", "T-EXT", "compute", "todo", "claude",
                headline="Dorado/5khz 化學資料已存在 → 需先 longphase-tag → 同 pipeline 驗骨幹/HP/CCF 化學間一致（V2-RECON ×6 最近起點）",
                goal="對 HCC1395 Dorado 化學跑 longphase-tag + 同 VCF + 同 pipeline → within-sample 復現骨幹/HP/CCF 化學一致性（跨樣本 ⭐4 的第一步）",

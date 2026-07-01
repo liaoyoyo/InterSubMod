@@ -1,13 +1,13 @@
 # 研究任務樹（WBS） — TASKS.md
 
 > **自動產生，請勿手改。** 唯一真值 = `state/tasks/graph.json`；改後重跑 `python3 scripts/tasks/task_graph.py --graph state/tasks/graph.json render`。
-> 生成 2026-06-29 · build `a9b8eba` @ `research/subclonal-reconstruction-202606` · 節點 118（✅45 ◐34 ⛔1 ☐37 ✗1） · focus = `T-SL`
+> 生成 2026-07-01 · build `f25d454` @ `research/subclonal-reconstruction-202606` · 節點 121（✅48 ◐34 ⛔1 ☐37 ✗1） · focus = `T-SL`
 
 ## ⓪ 驗證（validate + check）
 - validate: ✅ PASS
 - check: 2 findings
   - WARN `docs/limitations`: 分支碰撞：T-P2, T-E3, T-C-UNMASK, T-METHOD-PSLIMIT 同時 in_progress 同分支（各開 worktree）
-  - DRIFT `CURRENT_FOCUS`: CURRENT_FOCUS 最新 2026-06-19 vs graph updated_at 2026-06-29 差 10 天（敘述/機械層漂移 >7d，pain#3）
+  - DRIFT `CURRENT_FOCUS`: CURRENT_FOCUS 最新 2026-06-19 vs graph updated_at 2026-07-01 差 12 天（敘述/機械層漂移 >7d，pain#3）
 
 ## 聚焦路徑　論文（碩論：Subclonal reconstruction） ＞ 完成 ISM 程式 ＞ 修正「結構驅動切區塊 × 標籤驗證」
 
@@ -37,6 +37,7 @@
     - ✅ `T-E1` 外部文獻驗證庫（74 源親讀，稽核 CLEAN） [資料/已完成]　in:●文獻 PDF/repo …　↳project_external_validation_library
     - ◐ `T-E2` 6 樣本 clone/subclone 外部真值盤點 [分析/進行中]　in:●6 樣本清單,●外部 truth (Fa…　缺:H1437/H2009/HCC1937/HCC1954 缺專門解答（需自證）　↳project_six_sample_clone_subclone_external_truth
     - ◐ `T-E3` citation-verification（投稿前） [撰寫/進行中]　缺:scaffold 完成；3 識別碼衝突 + 8 UNVERIFIED-PMID + 3 L3 錨待 web-enabled session 跑 /citation-verification　↳project_external_validation_library
+    - ✅ `T-ISM-POSITIONING` ISM 定位 vs 過去研究 + 白地（論文 Ch2 素材） [分析/已完成]　↳project_ism_positioning_vs_prior_work
     - ◐ `T-ONT-CNV` SAVANA ONT CNV/SV 全基因組驗證可行性（PROBE⭐3） [程式/進行中]　in:●SAVANA per-s…,●SEQC2 truth …　缺:全基因組 job 有 normal-het 汙染，待修正版　↳project_ont_cnv_sv_subclone_verification_feasibility
   - ◐ `T-GATE` 決策 gates（OPEN） [里程碑/進行中]
     - ☐ `T-GATE-HD1` HD-1：R-SELFREF → 定論文 Grade [分析/待辦]　缺:未決；影響論文主張強度　↳project_subclonal_reconstruction_paper_focus
@@ -51,6 +52,7 @@
     - ✅ `T-GW-RECON` 全基因組 sSNV 單分子連鎖 → 每區域克隆樹重建 pipeline [程式/已完成]　in:●union TP∪FP …,●tumor BAM（lo…　↳project_subclone_snv_linkage_verification_pipeline
     - ◐ `T-INTEG` clone/subclone 多層整合報告（sSNV+HP+CCF+PS+甲基 L0-L7） [撰寫/進行中]　↳project_subclone_snv_linkage_verification_pipeline
     - ◐ `T-ISM-V2-RECON` V-2 重建支持位點 pre-reg 判準 + 全基因組×6 掃描 + 頻率/位點 catalog [程式/進行中]　in:●6 樣本 ISM 全基因…,●第二 caller Cl…　缺:依賴 T-A4 第二 caller　↳project_chr2_18m_subclone_locus_verification
+    - ✅ `T-MULTISAMPLE` 7 ONT canonical 樣本全跑到樹（realizes V2-RECON ×6） [程式/已完成]　in:●7 樣本 tagged …,●per-sample s…　↳project_canonical_ont_samples_inventory
     - ✅ `T-S1` a-priori 4-pop subclone 分類模型 ADOPT_WITH_CORRECTIONS [分析/已完成]　in:●TP/FP/FN+cis…,●haplotag 1-1…　缺:B 排序 illustrative / somatic 未定待 G-B　↳20260617_keep_remove_classification_conditioned_axes
     - ✗ `T-S2` tumor-only 非監督軸 NEGATIVE（勿再開） [分析/已放棄]　in:●a-priori 分類　↳20260617_tumor_only_unsupervised_axis_negative
     - ◐ `T-S5` 甲基『幾群』判定 — 收斂 Path B model-based [分析/進行中]　in:●a-priori 軸　缺:A 路相關感知 null 真實資料失敗 81% → 需 model-based 大改　↳project_subcluster_cluster_count_determination
@@ -80,6 +82,7 @@
         - ☐ `T-SL-RO-2` P-facttable：tumor+normal 兩層事實表（只記不判） [分析/待辦]　缺:待 P-readset
       - ☐ `T-SL-S3` Stage③ coverage-peak CN 自估 + SEQC2 驗證腳本 [程式/待辦]　in:●coverage pea…,●SEQC2 BED（只驗…　缺:🔴 SEQC2 不可當分類輸入（用戶定）；原載 SEQC2 BED 當輸入作廢重設計　↳project_ism_verdict_false_negative_audit_2026_06_16
     - ◐ `T-SUBCLONE-VERIFIED` Subclone 重建 — 跨來源交互驗證統一敘述（單一真值） [分析/進行中]　↳project_subclone_snv_linkage_verification_pipeline
+    - ✅ `T-TREE-RANK` 替代整樹 ranked 無法成立 —「定不出來即答案」 [分析/已完成]　↳project_candidate_tree_ranking_impossible
   - ◐ `T-LOCUS` 位點層驗證 [里程碑/進行中]
     - ✅ `T-L1` chr2:18M subclone 位點驗證 L2 [分析/已完成]　in:●tagged BAM (…,●6 sSNV 候選　↳20260615_chr2_18M_subclone_independent_validation
     - ✅ `T-L2` chr2:18M × SEQC2 外部驗證 + AI 解釋指南 [分析/已完成]　in:●chr2:18M L2 …,●SEQC2 truth　↳project_hcc1395_chr2_18M_subclone_external_validation

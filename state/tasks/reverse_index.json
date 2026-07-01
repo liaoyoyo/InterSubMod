@@ -23,6 +23,12 @@
     "project_asm_locus_display_and_cramersv_reliability_gate": [
       "T-C5"
     ],
+    "project_candidate_tree_ranking_impossible": [
+      "T-TREE-RANK"
+    ],
+    "project_canonical_ont_samples_inventory": [
+      "T-MULTISAMPLE"
+    ],
     "project_chr2_18m_subclone_locus_verification": [
       "T-L1",
       "T-ISM-V2-RECON",
@@ -55,7 +61,8 @@
     "project_external_validation_library": [
       "T-E1",
       "T-E3",
-      "T-A4"
+      "T-A4",
+      "T-ISM-POSITIONING"
     ],
     "project_g6_paper_framing_external_corroboration": [
       "T-W-CH5"
@@ -76,6 +83,10 @@
       "T-ISM",
       "T-V1",
       "T-METHOD-EFFECTSIZE"
+    ],
+    "project_ism_positioning_vs_prior_work": [
+      "T-TREE-RANK",
+      "T-ISM-POSITIONING"
     ],
     "project_ism_sampling_layer_review": [
       "T-SL-RECLS-BUG",
@@ -109,6 +120,9 @@
       "T-P2",
       "T-NEG-D2",
       "T-GATE-GA"
+    ],
+    "project_methylation_use_exhausted_bounded_auxiliary": [
+      "T-GATE-GB"
     ],
     "project_new_data_integrity_audit_2026_06_17": [
       "T-METHOD-BINVER"
@@ -315,6 +329,9 @@
     "20260627_subclone_unified_verified_narrative_01.md": [
       "T-SUBCLONE-VERIFIED"
     ],
+    "20260630_ism_positioning_vs_prior_work_01.md": [
+      "T-ISM-POSITIONING"
+    ],
     "HANDOFF_tumor_vs_normal_hpauc.md": [
       "T-V4"
     ],
@@ -365,6 +382,9 @@
     "606 claim 集": [
       "T-W4"
     ],
+    "7 樣本 tagged BAM（longphase-S）": [
+      "T-MULTISAMPLE"
+    ],
     "Bootstrap class (已存在)": [
       "T-SL-C1-F"
     ],
@@ -379,6 +399,9 @@
     ],
     "COLO829 tagged BAM": [
       "T-C6"
+    ],
+    "COSMIC CLP 外部真值": [
+      "T-MULTISAMPLE"
     ],
     "HCC1395 Dorado/5khz BAM（未 tag）": [
       "T-DORADO"
@@ -529,6 +552,9 @@
     "paired BAM": [
       "T-V4"
     ],
+    "per-sample somatic VCF": [
+      "T-MULTISAMPLE"
+    ],
     "region 結構統計": [
       "T-SL-RECLS-1"
     ],
@@ -621,12 +647,17 @@
     "project_external_validation_library": [
       "T-E1",
       "T-E3",
-      "T-A4"
+      "T-A4",
+      "T-ISM-POSITIONING"
     ],
     "project_ism_method_soundness_validation": [
       "T-ISM",
       "T-V1",
       "T-METHOD-EFFECTSIZE"
+    ],
+    "project_ism_positioning_vs_prior_work": [
+      "T-TREE-RANK",
+      "T-ISM-POSITIONING"
     ],
     "project_ism_sampling_layer_review": [
       "T-SL-RECLS-BUG",
@@ -741,6 +772,16 @@
       "status": null,
       "tier": null
     },
+    "project_candidate_tree_ranking_impossible": {
+      "type": "project",
+      "status": null,
+      "tier": null
+    },
+    "project_canonical_ont_samples_inventory": {
+      "type": "project",
+      "status": null,
+      "tier": "⭐3"
+    },
     "project_chr2_18m_subclone_locus_verification": {
       "type": "project",
       "status": null,
@@ -804,7 +845,7 @@
     "project_hpfinengroups_subclone_marker": {
       "type": "project",
       "status": "active",
-      "tier": "⭐4"
+      "tier": "⭐3"
     },
     "project_ism_complete_tpfpfn_existence_cis": {
       "type": "project",
@@ -812,6 +853,11 @@
       "tier": "⭐4"
     },
     "project_ism_method_soundness_validation": {
+      "type": "project",
+      "status": null,
+      "tier": null
+    },
+    "project_ism_positioning_vs_prior_work": {
       "type": "project",
       "status": null,
       "tier": null
@@ -837,6 +883,11 @@
       "tier": null
     },
     "project_methyl_phasing_assist_line": {
+      "type": "project",
+      "status": null,
+      "tier": null
+    },
+    "project_methylation_use_exhausted_bounded_auxiliary": {
       "type": "project",
       "status": null,
       "tier": null
@@ -1087,10 +1138,10 @@
     "docs/experiments/validated/2026/04/20260414_LOH_Subclone_AF_Methylation_Evidence_01.md"
   ],
   "stats": {
-    "memory_topics": 40,
-    "reports": 52,
-    "io_inputs": 75,
-    "multi_cited_memory": 21,
+    "memory_topics": 44,
+    "reports": 53,
+    "io_inputs": 78,
+    "multi_cited_memory": 22,
     "ledger_joins": 3,
     "experiment_docs_total": 180,
     "experiment_docs_orphan": 0,
