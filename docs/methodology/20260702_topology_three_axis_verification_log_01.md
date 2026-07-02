@@ -1,7 +1,7 @@
 ---
 title: 拓撲三軸/canonical 分析 — 迭代對抗驗證記錄（audit log）
 date: 2026-07-02
-status: verification_log
+status: verification_log_CONVERGED_DRY
 build_branch: research/subclonal-reconstruction-202606
 method: 每輪 = 多 subagent 對抗質疑 + 獨立 python3 重算 + 主回合獨立覆核 + 修正/解釋 + 記錄;loop-until-dry
 data_sources: docs/methodology/20260702_topology_cluster_shape_three_axis_analysis_01.md
@@ -16,9 +16,14 @@ data_sources: docs/methodology/20260702_topology_cluster_shape_three_axis_analys
 |---|--:|--:|--:|--:|---|---|
 | R1 | 8 | 33 | 21 | 3(同源) | 全修/解釋 | ✅ 已處置 |
 | R2 | 4 | 17 | 7 | 1(殘留傳播) | 全修 | ✅ 已處置 |
-| R3 | 傳播 sweep | — | 0(純傳播修正) | 0 | grep+HTML 驗 | ⏳ 待獨立 agent 確認 DRY |
+| R3 | 傳播 sweep | — | 6→修(傳播殘留) | 1 | grep+HTML 驗 | ✅ |
+| R3-verify | 獨立 agent | 1 | 1 真(item2 半修)+1 trivial | 0 | 複查 | ✅ 抓到半修 |
+| R4 | item2 全掃 | — | 0 | 0 | grep+HTML+agent 複查 | ✅ |
+| **最終** | 獨立 agent 複查 | **0** | — | — | — | 🟢 **DRY 收斂** |
 
-**R2 裁決 NOT-DRY**:R1 核心修正全部確認落地正確(數字逐位重現、零捏造、核心裁決不變),但找到 **1 MAJOR + 6 MINOR 殘留** — 同一根因:R1 修對分析本體,未傳播到 display/provenance 4 層(caption/標題 + PI-facing HTML + provenance 引用 + JSON 命名)。R3 = 純傳播 sweep(無新計算)。
+**收斂軌跡:真問題數 21 → 7 → 1 → 0**(monotonic 收斂)。**最終 dry_verdict = DRY**(獨立 agent 二次確認):數字全可復現(逐樣本 incompatible% 7/7、branched%/confirmed% 7/7、has_cycle 348、合計 1334 全吻合)、display 層 c≤k 貫穿(report §B/§C + HTML STAT_DICT/GLOSSARY/scard 一致,唯一 k+1 為正確的「含 root population ≤k+1」註記)、核心裁決不變。**唯一未修 = trivial 整數捨入**(數據總表單群%截斷 vs 2直系%四捨五入,每格皆真值 ±0.5 內)→ **合理解釋:整數顯示、非實質誤差、非 DRY-breaker,接受為已知風格限制**。
+
+> **R2 裁決 NOT-DRY**:R1 核心修正全部確認落地正確(數字逐位重現、零捏造、核心裁決不變),但找到 **1 MAJOR + 6 MINOR 殘留** — 同一根因:R1 修對分析本體,未傳播到 display/provenance 4 層(caption/標題 + PI-facing HTML + provenance 引用 + JSON 命名)。R3 = 純傳播 sweep(無新計算)。R3-verify 抓到 R3 的 item2 只修 STAT_DICT、漏同檔 GLOSSARY(134)+scard(710)→ R4 grep 全掃修畢。
 
 ---
 
@@ -78,3 +83,25 @@ R2 從 7 份 raw JSON 各自獨立重算,**確認 R1 核心修正全部正確**:
 
 ### R3 處置（純傳播 sweep,無重算;grep + HTML playwright 驗證）
 全部殘留同根因=display/provenance 層未傳播。R3 全數修正並驗:報告 forbidden 斷言消失(只剩「不可寫」否定用法)、CN 舊錨/filter 舊行號清除、HTML c≤k+1/48點 清除、HTML 面板 CN 40點顯示正確、0 pageerror。
+
+### R3-verify（獨立 general-purpose agent,自行 grep+python3 重算）→ 抓到 item2 半修
+確認 R3 的 6 殘留清 5;唯 **item2 半修**:R3 只改 STAT_DICT 的 c≤k,漏了同檔 GLOSSARY(line134「cluster-count (c, k+1 上界)…中位 2」)+ scard(line710「≤k+1」)→ 同頁矛盾 + 牴觸報告 §C。**R4 grep 全掃修畢**(line134→「c≤k;含 germline population 才≤k+1」+「c 多為 1-2」;line710→≤k)。獨立 agent 再確認:grep k+1 唯一命中=正確的 population 註記、中位 2 NONE、三處(modal/glossary/scard)c≤k 一致 → **DRY**。
+
+---
+
+## 🟢 最終收斂聲明（loop-until-dry 完成,2026-07-02）
+
+**經 R1→R2→R3→R4 + 兩次獨立 agent 複查,拓撲三軸/canonical 分析判定 DRY 收斂。**
+
+### 大問題與發現（清楚記錄）
+1. **🔴 唯一實質缺陷(已修)= 一致性 overstatement**:原把「樹結構良性(stored edges 去環後恆 acyclic → 成環 0)」與「c>k+1=0(off-by-one vacuous,c 界應 ≤k)」包裝成「**100% 有效樹/可放心當定論**」false-confidence,且與報告自列的 **1334 incompatible(5.9%)** 直接矛盾。**根因 = 把「枚舉完整性」誤當「perfect-phylogeny 有效性」**。已全改為誠實有效性訊號:incompatible **5.9%,逐樣本 COLO829 0.4% ↔ H2009 19.1%**(H2009 資料品質最差,與其 branched 區 sSNV 密度異常一致)。
+2. **傳播教訓(方法論發現)**:R1 修對「分析本體」卻漏傳播到 display/provenance 4 層(caption/標題/PI-facing HTML/provenance 引用/JSON 命名);R3 又只修 STAT_DICT 漏 GLOSSARY+scard。**教訓:措辭類修正必 `grep` 全檔所有 occurrences,不可只改主敘述** — 已內化為本輪 R4 的 sweep 紀律。
+3. **零錯的部分(對抗確認)**:所有 headline 數字(incompatible%/branched%/confirmed%/CramérV 0.227/11 canonical 形狀/has_cycle 348/c 分布)經 **≥3 個獨立 agent + 主回合 python3** 從 7 份 raw JSON 重算**逐位吻合、零捏造、零算術錯**;核心科學裁決(branched=read-未驗證幾何上界、CN 未控 material、partly_artifact/L3/⭐3、全基因組樹「定不出來」、兩離群成因不同)**全程不變且成立**。
+4. **假警報(對抗排除)**:「canonical 非 byte-reproducible」(R1)、「incompatible 應從 branched% 分母扣」(R2)皆經覆核排除。
+
+### 收斂後最終狀態
+- 分析報告 `20260702_topology_cluster_shape_three_axis_analysis_01.md`:數據總表 + ①①b②③④⑤ + 定義附錄,措辭誠實、數字可復現、caveat 完整。
+- HTML 三軸面板:誠實 incompatible% + c≤k + CN 40點,0 pageerror。
+- 剩餘固有 caveat(非缺陷,不可消):單 bulk 無 CN(6/7)→ 跨樣本差異僅描述性;read-span → 區域樹非全基因組;此為 ⭐3 天花板本質。
+- **唯一未修 = trivial 整數捨入**(±0.5 內,非實質誤差)= 接受為已知風格限制。
+- commits:R1→9e0b7df 系列 / R2-R3→0e02c74 / R4→1117323。
