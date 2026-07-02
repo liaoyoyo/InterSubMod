@@ -131,7 +131,7 @@ GLOSSARY = [
  ("genome_ctx", "telomere(端粒,≤3Mb 端)/ centromere(著絲點±3Mb)/ arm(染色體臂)。", "hg38 染色體長度+centromere 近似。centromere/telomere 區偽影風險高。"),
  ("TP / FP", "真/假陽性標籤(來源隨樣本)。🔴 HCC1395=SEQC2 truth set;其餘樣本=per_sSNV_census 衍生(無外部 truth set、標籤弱、勿當判別力佐證,見宇宙帳本 caveat)。", "🔴 只用於觀察評估,絕不進前處理/定義(build 用 TP∪FP union + normal 比對定 somatic)。"),
  ("Tier-R / Tier-PS", "Tier-R=same-read(≤50kb,同分子);Tier-PS=same phase-set(>50kb,統計相位,未做)。", "克隆連鎖只認 Tier-R;isolated 區可能有 Tier-PS partner 待救。"),
- ("cluster-count (c, k+1 上界)", "區內 distinct population 數;perfect-phylogeny 下 ≤ k+1(非 2^k)。", "實測 99.9% n_pop≤k+1、中位 2 → 拓樸搜尋空間極小。先定 c 再縮限拓樸。"),
+ ("cluster-count (c, 上界 ≤ k)", "c = 含≥1 ALT 的 distinct genotype 向量數(germline 不計);perfect-phylogeny 下 c ≤ k(非 2^k;含 germline 的 population 數才 ≤ k+1)。", "實測 c 多為 1-2 → 拓樸搜尋空間極小。先定 c 再縮限拓樸。"),
  ("ambiguous-parentage 缺中間群", "節點突變集跳>1(中間 population 沒觀察到)→累積順序未定。", "76 區。如 {0,3,4} 缺 {0,3} 等中間群 → 0,3,4 哪個先未定。"),
  ("linked / underpowered / isolated", "全 sSNV 三桶:可建樹 / 有 partner 無共讀(可救) / 無 partner(Tier-R 樹外)。", "三桶比例隨樣本變(見上方宇宙帳本,隨分頁更新)。單位點非全無法處理:underpowered 有 CCF、isolated 有 caller VAF+可能 Tier-PS。"),
  ("cis-ASM / double-dip", "甲基隨突變的 cis 局部效應 / 用同量定群又驗群的循環。", "chr17 證甲基分群對齊突變 genotype 軸(cis)非獨立 lineage → 甲基不能當獨立驗證器。06-28 normal cis-control 已測:CROSS-HP 35.4% 可控、SAME-HP 多數區 normal 無對應 within-HP 軸=結構性無法 control(需 single-cell)。"),
@@ -707,7 +707,7 @@ HTML = f"""<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta
 <details open style="margin:6px 0"><summary style="cursor:pointer;font-weight:700;color:#1971c2;font-size:13.5px;padding:3px 0">🗺️ HG38 全基因組分布（GRCh38 座標 · LOH 底帶 · 結果/樹形/每sSNV；點此摺疊/展開）</summary><div id="ideogram"></div></details>
 {GLOSSARY_HTML}
 <div class="stats">
-<div class="scard"><h4>拓樸型態<span class="more">▸ 點看細節</span></h4><div class="note" style="font-size:10px;margin:-4px 0 3px">read 群在系統樹的<b>形狀</b>:single/linear/branched/star</div><div id="s_topo"></div></div><div class="scard"><h4>群數 c<span class="more">▸ 點看細節</span></h4><div class="note" style="font-size:10px;margin:-4px 0 3px"><b>觀測到的不同 ALT 細胞群數</b>(germline 不計·≤k+1)</div><div id="s_clust"></div></div>
+<div class="scard"><h4>拓樸型態<span class="more">▸ 點看細節</span></h4><div class="note" style="font-size:10px;margin:-4px 0 3px">read 群在系統樹的<b>形狀</b>:single/linear/branched/star</div><div id="s_topo"></div></div><div class="scard"><h4>群數 c<span class="more">▸ 點看細節</span></h4><div class="note" style="font-size:10px;margin:-4px 0 3px"><b>觀測到的不同 ALT 細胞群數</b>(germline 不計·≤k)</div><div id="s_clust"></div></div>
 <div class="scard"><h4>determinacy<span class="more">▸ 點看細節</span></h4><div class="note" style="font-size:10px;margin:-4px 0 3px">樹<b>存在≠能辨識</b>是哪棵:A單分子/B連鎖/C單群/成環</div><div id="s_det"></div></div><div class="scard"><h4>HP 根數<span class="more">▸ 點看細節</span></h4><div class="note" style="font-size:10px;margin:-4px 0 3px">somatic 散在<b>幾條 germline HP</b>;≥2=跨HP(allelic)</div><div id="s_root"></div></div>
 <div class="scard" style="cursor:default"><h4>建樹位點分布<span class="more">區×sSNV</span></h4><div class="note" style="font-size:10px;margin:-4px 0 3px">每區有<b>幾個 sSNV</b>(2/3/…/&gt;8)的區數分布</div><div id="s_nsnv"></div></div>
 </div>
