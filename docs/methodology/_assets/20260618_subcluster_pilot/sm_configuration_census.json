@@ -1,0 +1,252 @@
+{
+ "cell_legend": "RR=(a-REF,b-REF) RA=(a-REF,b-ALT) AR=(a-ALT,b-REF) AA=(a-ALT,b-ALT)",
+ "filters": {
+  "all_recorded_coread>=2": 53094,
+  "powered_coread>=6": 44122,
+  "powered+both_somatic": 40001
+ },
+ "census_all_recorded": [
+  {
+   "config": "mutual_excl",
+   "desc": "互斥 RA+AR (AA=0): 兩 ALT 從不共現 → sibling/allelic",
+   "pairs_sameHP": 3289,
+   "pairs_diffHP": 4845,
+   "pairs_total": 8134,
+   "distinct_sSNV_sameHP": 4740,
+   "distinct_sSNV_diffHP": 6891,
+   "cn_state_dist": {
+    "loh": 1114,
+    "gain": 6735,
+    "loss": 55,
+    "neutral": 230
+   }
+  },
+  {
+   "config": "nested_a_in_b",
+   "desc": "RA+AA (AR=0): a-ALT 必伴 b-ALT → b 祖先→a 後代",
+   "pairs_sameHP": 6562,
+   "pairs_diffHP": 1503,
+   "pairs_total": 8065,
+   "distinct_sSNV_sameHP": 5732,
+   "distinct_sSNV_diffHP": 616,
+   "cn_state_dist": {
+    "loh": 1243,
+    "gain": 6348,
+    "neutral": 154,
+    "loss": 320
+   }
+  },
+  {
+   "config": "nested_b_in_a",
+   "desc": "AR+AA (RA=0): b-ALT 必伴 a-ALT → a 祖先→b 後代",
+   "pairs_sameHP": 6820,
+   "pairs_diffHP": 689,
+   "pairs_total": 7509,
+   "distinct_sSNV_sameHP": 5796,
+   "distinct_sSNV_diffHP": 573,
+   "cn_state_dist": {
+    "loh": 1302,
+    "gain": 5902,
+    "loss": 174,
+    "neutral": 131
+   }
+  },
+  {
+   "config": "co_linked",
+   "desc": "AA only (RA=AR=0): 兩 ALT 完美共現 → 同 lineage",
+   "pairs_sameHP": 13351,
+   "pairs_diffHP": 2502,
+   "pairs_total": 15853,
+   "distinct_sSNV_sameHP": 7137,
+   "distinct_sSNV_diffHP": 966,
+   "cn_state_dist": {
+    "loh": 2313,
+    "gain": 12533,
+    "loss": 667,
+    "neutral": 340
+   }
+  },
+  {
+   "config": "independent",
+   "desc": "RA+AR+AA 皆有: 無乾淨結構",
+   "pairs_sameHP": 6456,
+   "pairs_diffHP": 851,
+   "pairs_total": 7307,
+   "distinct_sSNV_sameHP": 4414,
+   "distinct_sSNV_diffHP": 1233,
+   "cn_state_dist": {
+    "loh": 775,
+    "gain": 6097,
+    "loss": 111,
+    "neutral": 324
+   }
+  },
+  {
+   "config": "degenerate_RAonly",
+   "desc": "只 RA: a 恆 REF (此對無 a-ALT)",
+   "pairs_sameHP": 906,
+   "pairs_diffHP": 967,
+   "pairs_total": 1873,
+   "distinct_sSNV_sameHP": 1539,
+   "distinct_sSNV_diffHP": 1378,
+   "cn_state_dist": {
+    "loh": 493,
+    "gain": 1315,
+    "loss": 38,
+    "neutral": 27
+   }
+  },
+  {
+   "config": "degenerate_ARonly",
+   "desc": "只 AR: b 恆 REF",
+   "pairs_sameHP": 964,
+   "pairs_diffHP": 750,
+   "pairs_total": 1714,
+   "distinct_sSNV_sameHP": 1573,
+   "distinct_sSNV_diffHP": 1240,
+   "cn_state_dist": {
+    "loh": 455,
+    "gain": 1151,
+    "loss": 54,
+    "neutral": 54
+   }
+  },
+  {
+   "config": "degenerate_RRonly",
+   "desc": "只 RR: 無 ALT 共現",
+   "pairs_sameHP": 1674,
+   "pairs_diffHP": 965,
+   "pairs_total": 2639,
+   "distinct_sSNV_sameHP": 1441,
+   "distinct_sSNV_diffHP": 767,
+   "cn_state_dist": {
+    "gain": 2159,
+    "loh": 439,
+    "loss": 18,
+    "neutral": 23
+   }
+  }
+ ],
+ "census_powered_somatic": [
+  {
+   "config": "mutual_excl",
+   "desc": "互斥 RA+AR (AA=0): 兩 ALT 從不共現 → sibling/allelic",
+   "pairs_sameHP": 2825,
+   "pairs_diffHP": 4080,
+   "pairs_total": 6905,
+   "distinct_sSNV_sameHP": 4174,
+   "distinct_sSNV_diffHP": 5982,
+   "cn_state_dist": {
+    "loh": 945,
+    "gain": 5758,
+    "loss": 41,
+    "neutral": 161
+   }
+  },
+  {
+   "config": "nested_a_in_b",
+   "desc": "RA+AA (AR=0): a-ALT 必伴 b-ALT → b 祖先→a 後代",
+   "pairs_sameHP": 5563,
+   "pairs_diffHP": 1211,
+   "pairs_total": 6774,
+   "distinct_sSNV_sameHP": 4915,
+   "distinct_sSNV_diffHP": 510,
+   "cn_state_dist": {
+    "loh": 992,
+    "gain": 5593,
+    "neutral": 132,
+    "loss": 57
+   }
+  },
+  {
+   "config": "nested_b_in_a",
+   "desc": "AR+AA (RA=0): b-ALT 必伴 a-ALT → a 祖先→b 後代",
+   "pairs_sameHP": 5763,
+   "pairs_diffHP": 576,
+   "pairs_total": 6339,
+   "distinct_sSNV_sameHP": 4979,
+   "distinct_sSNV_diffHP": 479,
+   "cn_state_dist": {
+    "loh": 1046,
+    "gain": 5130,
+    "loss": 53,
+    "neutral": 110
+   }
+  },
+  {
+   "config": "co_linked",
+   "desc": "AA only (RA=AR=0): 兩 ALT 完美共現 → 同 lineage",
+   "pairs_sameHP": 10254,
+   "pairs_diffHP": 1496,
+   "pairs_total": 11750,
+   "distinct_sSNV_sameHP": 5256,
+   "distinct_sSNV_diffHP": 700,
+   "cn_state_dist": {
+    "loh": 1715,
+    "gain": 9574,
+    "loss": 205,
+    "neutral": 256
+   }
+  },
+  {
+   "config": "independent",
+   "desc": "RA+AR+AA 皆有: 無乾淨結構",
+   "pairs_sameHP": 5547,
+   "pairs_diffHP": 734,
+   "pairs_total": 6281,
+   "distinct_sSNV_sameHP": 3905,
+   "distinct_sSNV_diffHP": 1101,
+   "cn_state_dist": {
+    "loh": 675,
+    "gain": 5379,
+    "loss": 42,
+    "neutral": 185
+   }
+  },
+  {
+   "config": "degenerate_RAonly",
+   "desc": "只 RA: a 恆 REF (此對無 a-ALT)",
+   "pairs_sameHP": 336,
+   "pairs_diffHP": 286,
+   "pairs_total": 622,
+   "distinct_sSNV_sameHP": 559,
+   "distinct_sSNV_diffHP": 465,
+   "cn_state_dist": {
+    "loh": 191,
+    "gain": 410,
+    "loss": 13,
+    "neutral": 8
+   }
+  },
+  {
+   "config": "degenerate_ARonly",
+   "desc": "只 AR: b 恆 REF",
+   "pairs_sameHP": 356,
+   "pairs_diffHP": 268,
+   "pairs_total": 624,
+   "distinct_sSNV_sameHP": 584,
+   "distinct_sSNV_diffHP": 450,
+   "cn_state_dist": {
+    "loh": 185,
+    "gain": 393,
+    "loss": 15,
+    "neutral": 31
+   }
+  },
+  {
+   "config": "degenerate_RRonly",
+   "desc": "只 RR: 無 ALT 共現",
+   "pairs_sameHP": 381,
+   "pairs_diffHP": 325,
+   "pairs_total": 706,
+   "distinct_sSNV_sameHP": 343,
+   "distinct_sSNV_diffHP": 201,
+   "cn_state_dist": {
+    "gain": 584,
+    "loss": 4,
+    "loh": 116,
+    "neutral": 2
+   }
+  }
+ ]
+}

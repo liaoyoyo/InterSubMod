@@ -1,0 +1,77 @@
+{
+  "N": 30490,
+  "logic_note": {
+    "inclusion_包含": "§0.5/§0.6 的層 T1⊆T2⊆T3⊆T4 是巢狀包含(每層含更嚴的); 數字非互斥不可相加.",
+    "partition_差級": "本表是互斥 partition — 每位點剛好落 T_only/both/N_only/neither 一格; 四格加總=N=30490.",
+    "T定義": "tumor 可區分 = 純 tumor 軸(within-HP 結構/Subclone/AltSubclone Δβ) = §0.6 T4",
+    "N定義": "需 normal = germline ASM(normal HP1v2) 或 tumor−normal 殘差; SampleASM(tumor vs normal 整體)飽和故另列"
+  },
+  "A_partition_Nmeaningful(扣SampleASM,推薦)": {
+    "label": "N=germline/residual 扣SampleASM",
+    "grid": {
+      "T_only(僅tumor可區分,normal不增訊息)": {
+        "n": 4698,
+        "pct": 15.41
+      },
+      "both(tumor可區分+normal提供歸因)": {
+        "n": 7066,
+        "pct": 23.17
+      },
+      "N_only(差異只在加normal才看到)": {
+        "n": 9182,
+        "pct": 30.11
+      },
+      "neither(皆無)": {
+        "n": 9544,
+        "pct": 31.3
+      }
+    },
+    "check_sum": 30490,
+    "totals": {
+      "tumor可區分(T)": {
+        "n": 11764,
+        "pct": 38.58
+      },
+      "需normal(N)": {
+        "n": 16248,
+        "pct": 53.29
+      }
+    }
+  },
+  "B_partition_Nfull(含SampleASM飽和)": {
+    "label": "N=含SampleASM(飽和96.5%)",
+    "grid": {
+      "T_only(僅tumor可區分,normal不增訊息)": {
+        "n": 149,
+        "pct": 0.49
+      },
+      "both(tumor可區分+normal提供歸因)": {
+        "n": 11615,
+        "pct": 38.09
+      },
+      "N_only(差異只在加normal才看到)": {
+        "n": 18156,
+        "pct": 59.55
+      },
+      "neither(皆無)": {
+        "n": 570,
+        "pct": 1.87
+      }
+    },
+    "check_sum": 30490,
+    "totals": {
+      "tumor可區分(T)": {
+        "n": 11764,
+        "pct": 38.58
+      },
+      "需normal(N)": {
+        "n": 29771,
+        "pct": 97.64
+      }
+    }
+  },
+  "sampleASM_saturation": {
+    "n": 29433,
+    "pct": 96.53
+  }
+}

@@ -1,0 +1,328 @@
+{
+ "seqc2_counts": {
+  "highconf": 39447,
+  "superset": 211338
+ },
+ "universe_by_truth_class": {
+  "highconf": 30492,
+  "in_HC_not_called": 4834,
+  "superset_only": 6
+ },
+ "source_x_truth_class": {
+  "TP|highconf": 30490,
+  "FP|in_HC_not_called": 4834,
+  "FP|highconf": 2,
+  "FP|superset_only": 6
+ },
+ "linked_somatic_x_truth_class": {
+  "highconf": 17612,
+  "in_HC_not_called": 3200,
+  "superset_only": 3
+ },
+ "gamma_like_in_HC_not_called_linked_somatic": {
+  "count": 3200,
+  "note": "在 HC callable region 內、SEQC2 未收、但 ONT normal-confirmed somatic 且單分子連鎖 = γ 類",
+  "examples": [
+   {
+    "locus": "chr14:16095686",
+    "src": "FP",
+    "vaf": 0.027,
+    "normal": [
+     366,
+     7
+    ],
+    "max_coread": 423
+   },
+   {
+    "locus": "chr14:16095934",
+    "src": "FP",
+    "vaf": 0.042,
+    "normal": [
+     356,
+     2
+    ],
+    "max_coread": 423
+   },
+   {
+    "locus": "chr14:16096448",
+    "src": "FP",
+    "vaf": 0.032,
+    "normal": [
+     371,
+     6
+    ],
+    "max_coread": 417
+   },
+   {
+    "locus": "chr14:16095766",
+    "src": "FP",
+    "vaf": 0.039,
+    "normal": [
+     354,
+     4
+    ],
+    "max_coread": 407
+   },
+   {
+    "locus": "chr14:16096495",
+    "src": "FP",
+    "vaf": 0.027,
+    "normal": [
+     346,
+     6
+    ],
+    "max_coread": 400
+   },
+   {
+    "locus": "chr14:16093807",
+    "src": "FP",
+    "vaf": 0.034,
+    "normal": [
+     341,
+     13
+    ],
+    "max_coread": 393
+   },
+   {
+    "locus": "chr21:10357137",
+    "src": "FP",
+    "vaf": 0.249,
+    "normal": [
+     328,
+     14
+    ],
+    "max_coread": 296
+   },
+   {
+    "locus": "chr21:10358257",
+    "src": "FP",
+    "vaf": 0.233,
+    "normal": [
+     320,
+     16
+    ],
+    "max_coread": 296
+   },
+   {
+    "locus": "chr21:10341682",
+    "src": "FP",
+    "vaf": 0.218,
+    "normal": [
+     254,
+     10
+    ],
+    "max_coread": 285
+   },
+   {
+    "locus": "chr21:10342450",
+    "src": "FP",
+    "vaf": 0.211,
+    "normal": [
+     284,
+     12
+    ],
+    "max_coread": 285
+   },
+   {
+    "locus": "chr21:10352179",
+    "src": "FP",
+    "vaf": 0.202,
+    "normal": [
+     274,
+     14
+    ],
+    "max_coread": 282
+   },
+   {
+    "locus": "chr9:41802610",
+    "src": "FP",
+    "vaf": 0.146,
+    "normal": [
+     92,
+     2
+    ],
+    "max_coread": 211
+   },
+   {
+    "locus": "chr9:41802627",
+    "src": "FP",
+    "vaf": 0.156,
+    "normal": [
+     86,
+     4
+    ],
+    "max_coread": 211
+   },
+   {
+    "locus": "chr9:41802466",
+    "src": "FP",
+    "vaf": 0.127,
+    "normal": [
+     92,
+     2
+    ],
+    "max_coread": 210
+   },
+   {
+    "locus": "chr9:41802547",
+    "src": "FP",
+    "vaf": 0.123,
+    "normal": [
+     90,
+     4
+    ],
+    "max_coread": 210
+   },
+   {
+    "locus": "chr9:41802377",
+    "src": "FP",
+    "vaf": 0.137,
+    "normal": [
+     92,
+     4
+    ],
+    "max_coread": 209
+   },
+   {
+    "locus": "chr9:41802249",
+    "src": "FP",
+    "vaf": 0.131,
+    "normal": [
+     90,
+     2
+    ],
+    "max_coread": 208
+   },
+   {
+    "locus": "chr9:41802280",
+    "src": "FP",
+    "vaf": 0.156,
+    "normal": [
+     88,
+     4
+    ],
+    "max_coread": 208
+   },
+   {
+    "locus": "chr9:41801692",
+    "src": "FP",
+    "vaf": 0.132,
+    "normal": [
+     96,
+     2
+    ],
+    "max_coread": 207
+   },
+   {
+    "locus": "chr9:41801701",
+    "src": "FP",
+    "vaf": 0.13,
+    "normal": [
+     96,
+     2
+    ],
+    "max_coread": 207
+   },
+   {
+    "locus": "chr9:41802512",
+    "src": "FP",
+    "vaf": 0.13,
+    "normal": [
+     94,
+     2
+    ],
+    "max_coread": 206
+   },
+   {
+    "locus": "chr9:41802977",
+    "src": "FP",
+    "vaf": 0.139,
+    "normal": [
+     90,
+     2
+    ],
+    "max_coread": 205
+   },
+   {
+    "locus": "chr9:41803018",
+    "src": "FP",
+    "vaf": 0.135,
+    "normal": [
+     86,
+     4
+    ],
+    "max_coread": 205
+   },
+   {
+    "locus": "chr9:41803710",
+    "src": "FP",
+    "vaf": 0.127,
+    "normal": [
+     82,
+     2
+    ],
+    "max_coread": 205
+   },
+   {
+    "locus": "chr9:41803728",
+    "src": "FP",
+    "vaf": 0.132,
+    "normal": [
+     82,
+     2
+    ],
+    "max_coread": 205
+   },
+   {
+    "locus": "chr9:41801129",
+    "src": "FP",
+    "vaf": 0.139,
+    "normal": [
+     98,
+     4
+    ],
+    "max_coread": 204
+   },
+   {
+    "locus": "chr9:41801288",
+    "src": "FP",
+    "vaf": 0.137,
+    "normal": [
+     100,
+     2
+    ],
+    "max_coread": 204
+   },
+   {
+    "locus": "chr9:41802059",
+    "src": "FP",
+    "vaf": 0.12,
+    "normal": [
+     86,
+     4
+    ],
+    "max_coread": 204
+   },
+   {
+    "locus": "chr9:41802757",
+    "src": "FP",
+    "vaf": 0.136,
+    "normal": [
+     90,
+     2
+    ],
+    "max_coread": 202
+   },
+   {
+    "locus": "chr9:41804276",
+    "src": "FP",
+    "vaf": 0.142,
+    "normal": [
+     78,
+     2
+    ],
+    "max_coread": 202
+   }
+  ]
+ }
+}

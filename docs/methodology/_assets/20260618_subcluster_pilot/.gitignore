@@ -1,0 +1,46 @@
+# 大型可重生中間檔（從 binary→records→analyze 重生，見 README）
+figs/
+figs_fdr/
+figs_kprofile/
+figs_cantsplit/
+figs_decisionflow/
+figs_outlier/
+records.json
+records_wg.json
+records_wg2.json
+ksweep_wg_records.json
+ksweep_records_tumor.json
+ksweep_records_merged.json
+kprofile_loci_tumor.json
+kprofile_loci_merged.json
+decisionflow_records_tumor.json
+decisionflow_records_merged.json
+decisionflow_cls_T4.json
+# logs / 重生中間檔
+*.log
+*.vcf
+*.vcf.gz
+*.vcf.gz.tbi
+qc_*.png
+# full self-contained workstation (dual-panel 後 ~9MB 過大；用 _lite 版 + figs_fdr/)
+20260618_ksweep_fdr_confirmation_workstation_01.standalone.html
+figs_brca2/
+brca2_multiaxis_out.json
+20260620_brca2_percpg_observation_01.standalone.html
+percpg.log
+percpg_records.json
+20260620_ism_vs_modkit_percpg_comparison_01.standalone.html
+figs_s3/
+20260620_s3_percpg0_joint_observation_01.standalone.html
+20260620_*.standalone.html
+# 2026-06-22 切群重設計 + 穩定性（可重生，見各 doc §重生）
+figs_redesign/
+figs_stability/
+cluster_redesign.json
+20260622_*.standalone.html
+figs_dendro/
+figs_dashboard/
+cluster_redesign_wg_records.json
+figs_ws/
+20260622_observation_workstation_01.standalone.html
+20260622_wg_classification_table_01.standalone.html

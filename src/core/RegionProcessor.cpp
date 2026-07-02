@@ -7,6 +7,7 @@
 #include <atomic>
 #include <chrono>
 #include <cmath>
+#include <random>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -19,9 +20,11 @@
 #include <unordered_set>
 
 #include "core/HierarchicalClustering.hpp"
+#include "core/PhyloLabeler.hpp"
 #include "core/MethylationMatrix.hpp"
 #include "core/NormalBaseline.hpp"
 #include "core/SignificanceAnalyzer.hpp"
+#include "core/StructureTest.hpp"
 #include "io/TreeWriter.hpp"
 #include "utils/Logger.hpp"
 
@@ -805,8 +808,10 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
         result.num_reverse_reads = agg.num_reverse_reads;
 
         // Fetch and merge normal reads (if normal BAM is provided)
-        // Normal reads: use same region bounds, skip alt-support filter,
-        // contribute methylation baseline but have hp_tag="0" (unphased).
+        // Normal reads: use same region bounds, skip alt-support filter. They KEEP their real
+        // germline HP tag from the normal BAM (NOT forced to "0") — the germline-baseline
+        // subtraction (germline ASM Δβ + tumor-vs-normal HP residual) depends on this; empirically
+        // Normal_HP_Valid=true in ~96% of regions. Do NOT "fix" normal HP to "0".
         std::vector<bam1_t*> normal_reads;
         if (normal_reader != nullptr) {
             normal_reads = normal_reader->fetch_reads(chr_name, region_start, region_end);
@@ -1030,6 +1035,245 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
                 if (!std::isnan(result.tumor_hp_signed_delta) && !std::isnan(result.normal_hp_signed_delta)) {
                     result.hp_signed_residual = result.tumor_hp_signed_delta - result.normal_hp_signed_delta;
                 }
+
+                // [Δβ module] read-level somatic residual Δβ + permutation test (#3 hp_residual 修法)
+                // min_group=3: a (sample×HP) or (germline/carrier) cell must have >=3 reads for sig (tiny-group guard).
+                const int kDbetaMinGroup = 3;
+                compute_somatic_residual_dbeta_test(meth_mat.raw_matrix, hp_merged_labels, is_tumor_mask, 999, 42,
+                                                    kDbetaMinGroup, result.somatic_residual_dbeta,
+                                                    result.somatic_residual_dbeta_p, result.somatic_residual_dbeta_sig);
+
+                // [Δβ module stage 2] germline ASM Δβ (normal) + fine same-hap subclone Δβ (tumor germline vs carrier).
+                // Fine HP labels: 0=HP1 germline, 1=HP1-1 carrier, 2=HP2 germline, 3=HP2-1 carrier, -1=unlabeled.
+                std::vector<int> hp_fine_labels(read_list.size(), -1);
+                for (size_t i = 0; i < read_list.size(); ++i) {
+                    const std::string& hp = read_list[i].hp_tag;
+                    if (hp == "1" || hp == "HP1") {
+                        hp_fine_labels[i] = 0;
+                    } else if (hp == "1-1") {
+                        hp_fine_labels[i] = 1;
+                    } else if (hp == "2" || hp == "HP2") {
+                        hp_fine_labels[i] = 2;
+                    } else if (hp == "2-1") {
+                        hp_fine_labels[i] = 3;
+                    }
+                }
+
+                // Germline ASM Δβ (goal 1): normal reads HP1-family vs HP2-family (normal has no carriers → germline-only).
+                std::vector<int> germ_grp(read_list.size(), -1);
+                for (size_t i = 0; i < read_list.size(); ++i) {
+                    if (!read_list[i].is_tumor && hp_merged_labels[i] >= 0) germ_grp[i] = hp_merged_labels[i];
+                }
+                int germ_n0 = 0, germ_n1 = 0;  // normal HP1/HP2 counts also in Normal_HP1/HP2; throwaway here
+                compute_group_dbeta_test(meth_mat.raw_matrix, germ_grp, 999, 42, kDbetaMinGroup,
+                                         result.germline_asm_dbeta, result.germline_asm_dbeta_p,
+                                         result.germline_asm_dbeta_sig, germ_n0, germ_n1);
+
+                // Fine subclone HP1 Δβ (goal 3): tumor HP1 germline vs HP1-1 somatic-carrier (same-haplotype subclone).
+                std::vector<int> sub1_grp(read_list.size(), -1);
+                for (size_t i = 0; i < read_list.size(); ++i) {
+                    if (!read_list[i].is_tumor) continue;
+                    if (hp_fine_labels[i] == 0) {
+                        sub1_grp[i] = 0;
+                    } else if (hp_fine_labels[i] == 1) {
+                        sub1_grp[i] = 1;
+                    }
+                }
+                compute_group_dbeta_test(meth_mat.raw_matrix, sub1_grp, 999, 42, kDbetaMinGroup,
+                                         result.subclone_dbeta_hp1, result.subclone_dbeta_hp1_p,
+                                         result.subclone_dbeta_hp1_sig, result.subclone_dbeta_hp1_n_germ,
+                                         result.subclone_dbeta_hp1_n_carrier);
+
+                // Fine subclone HP2 Δβ (goal 3): tumor HP2 germline vs HP2-1 somatic-carrier (same-haplotype subclone).
+                std::vector<int> sub2_grp(read_list.size(), -1);
+                for (size_t i = 0; i < read_list.size(); ++i) {
+                    if (!read_list[i].is_tumor) continue;
+                    if (hp_fine_labels[i] == 2) {
+                        sub2_grp[i] = 0;
+                    } else if (hp_fine_labels[i] == 3) {
+                        sub2_grp[i] = 1;
+                    }
+                }
+                compute_group_dbeta_test(meth_mat.raw_matrix, sub2_grp, 999, 42, kDbetaMinGroup,
+                                         result.subclone_dbeta_hp2, result.subclone_dbeta_hp2_p,
+                                         result.subclone_dbeta_hp2_sig, result.subclone_dbeta_hp2_n_germ,
+                                         result.subclone_dbeta_hp2_n_carrier);
+
+                // [Δβ component A] alt-axis subclone: within tumor HP-family, split by the read's OWN
+                // alt_support (ALT=0 / REF=1) — phasing-independent somatic contrast. HP-family membership
+                // uses the HP tag (1/1-1 = HP1-family), the group split uses alt_support.
+                auto build_alt_grp = [&](bool hp1_family) {
+                    std::vector<int> grp(read_list.size(), -1);
+                    for (size_t i = 0; i < read_list.size(); ++i) {
+                        if (!read_list[i].is_tumor) continue;
+                        const std::string& h = read_list[i].hp_tag;
+                        const bool in_family = hp1_family ? (h == "1" || h == "HP1" || h == "1-1")
+                                                          : (h == "2" || h == "HP2" || h == "2-1");
+                        if (!in_family) continue;
+                        if (read_list[i].alt_support == AltSupport::ALT) {
+                            grp[i] = 0;  // carries somatic allele
+                        } else if (read_list[i].alt_support == AltSupport::REF) {
+                            grp[i] = 1;
+                        }
+                    }
+                    return grp;
+                };
+                std::vector<int> alt1_grp = build_alt_grp(true);
+                compute_group_dbeta_test(meth_mat.raw_matrix, alt1_grp, 999, 42, kDbetaMinGroup,
+                                         result.alt_subclone_hp1_dbeta, result.alt_subclone_hp1_p,
+                                         result.alt_subclone_hp1_sig, result.alt_subclone_hp1_n_alt,
+                                         result.alt_subclone_hp1_n_ref);
+                std::vector<int> alt2_grp = build_alt_grp(false);
+                compute_group_dbeta_test(meth_mat.raw_matrix, alt2_grp, 999, 42, kDbetaMinGroup,
+                                         result.alt_subclone_hp2_dbeta, result.alt_subclone_hp2_p,
+                                         result.alt_subclone_hp2_sig, result.alt_subclone_hp2_n_alt,
+                                         result.alt_subclone_hp2_n_ref);
+
+                // [Δβ component C] subclone per-CpG localization: per CpG, tumor germline vs carrier mean β;
+                // a CpG is a "driver" if |Δβ_cpg|>0.2 with both groups >= min_group reads AT that CpG.
+                auto count_driver_cpgs = [&](int germ_fine, int carrier_fine, int& out_n, int& out_tested) {
+                    out_n = 0;
+                    out_tested = 0;
+                    const Eigen::MatrixXd& raw = meth_mat.raw_matrix;
+                    for (int c = 0; c < raw.cols(); ++c) {
+                        double gs = 0.0, cs = 0.0;
+                        int gc = 0, cc = 0;
+                        for (size_t i = 0; i < read_list.size(); ++i) {
+                            if (!read_list[i].is_tumor) continue;
+                            const double v = raw(static_cast<int>(i), c);
+                            if (std::isnan(v)) continue;
+                            if (hp_fine_labels[i] == germ_fine) {
+                                gs += v;
+                                ++gc;
+                            } else if (hp_fine_labels[i] == carrier_fine) {
+                                cs += v;
+                                ++cc;
+                            }
+                        }
+                        if (gc >= kDbetaMinGroup && cc >= kDbetaMinGroup) {
+                            ++out_tested;
+                            if (std::abs(gs / gc - cs / cc) > 0.2) ++out_n;
+                        }
+                    }
+                };
+                count_driver_cpgs(0, 1, result.subclone_hp1_driver_cpg_n, result.subclone_hp1_driver_cpg_tested);
+                count_driver_cpgs(2, 3, result.subclone_hp2_driver_cpg_n, result.subclone_hp2_driver_cpg_tested);
+
+                // [Δβ component B] full label-combination Δβ table (sample×HP-family×alt pairwise + BH-FDR).
+                compute_combo_dbeta(meth_mat.raw_matrix, read_list, kDbetaMinGroup, 42,
+                                    result.combo_dbeta_n_tested, result.combo_dbeta_n_sig,
+                                    result.combo_dbeta_sig_pairs);
+            }
+
+            // [Stage② within-HP substructure] does a single germline-HP (tumor reads) split into >=2 clean
+            // methylation clusters? Pattern-based (per-CpG distance from all_dist), independent of normal.
+            {
+                std::vector<int> hp1_idx, hp2_idx;
+                for (size_t i = 0; i < read_list.size(); ++i) {
+                    if (!read_list[i].is_tumor) continue;
+                    const std::string& h = read_list[i].hp_tag;
+                    if (h == "1" || h == "HP1" || h == "1-1") {
+                        hp1_idx.push_back(static_cast<int>(i));
+                    } else if (h == "2" || h == "HP2" || h == "2-1") {
+                        hp2_idx.push_back(static_cast<int>(i));
+                    }
+                }
+                double sil1 = 0.0, sil2 = 0.0, mf1 = 1.0, mf2 = 1.0;
+                compute_within_hp_substructure(all_dist.dist_matrix, hp1_idx, result.within_hp1_ngroups, sil1, mf1);
+                compute_within_hp_substructure(all_dist.dist_matrix, hp2_idx, result.within_hp2_ngroups, sil2, mf2);
+                // [D] graded output: best within-HP silhouette + its smallest-cluster fraction (exposes weak/minor
+                // splits the binary clean_multigroup gate drops; downstream/human can re-threshold).
+                if (sil1 >= sil2) {
+                    result.within_hp_best_sil = sil1;
+                    result.within_hp_min_frac = mf1;
+                } else {
+                    result.within_hp_best_sil = sil2;
+                    result.within_hp_min_frac = mf2;
+                }
+                // [Stage② level axis] distance clustering above catches PATTERN substructure only; add the LEVEL
+                // axis (mean-β bimodality) which distance misses (chr1: distance 1.2% vs level 26.1%).
+                constexpr int kWithinHpMinGroup = 3;
+                result.within_hp_level_bimodal =
+                    within_hp_level_clean(meth_mat.raw_matrix, hp1_idx, kWithinHpMinGroup) ||
+                    within_hp_level_clean(meth_mat.raw_matrix, hp2_idx, kWithinHpMinGroup);
+                result.within_hp_clean_multigroup = (result.within_hp1_ngroups >= 2 || result.within_hp2_ngroups >= 2 ||
+                                                     result.within_hp_level_bimodal);
+                // [C'] a-priori germline-vs-carrier within-HP PERMANOVA — statistical "mark/confirm": does the
+                // within-HP distance separate germline(tag 1/2) vs somatic-carrier(tag 1-1/2-1) reads? a-priori
+                // labels => no double-dip (unlike unsupervised tumor_intrinsic which fires ~96% on noise).
+                std::vector<int> gc1, gc2;
+                gc1.reserve(hp1_idx.size());
+                gc2.reserve(hp2_idx.size());
+                for (int idx : hp1_idx) gc1.push_back(read_list[idx].hp_tag == "1-1" ? 1 : 0);
+                for (int idx : hp2_idx) gc2.push_back(read_list[idx].hp_tag == "2-1" ? 1 : 0);
+                double scp1 = 1.0, scf1 = 0.0, scp2 = 1.0, scf2 = 0.0;
+                bool scv1 = false, scv2 = false, scd1 = false, scd2 = false;
+                compute_within_hp_subclone_permanova(all_dist.dist_matrix, hp1_idx, gc1, scp1, scf1, scv1, scd1);
+                compute_within_hp_subclone_permanova(all_dist.dist_matrix, hp2_idx, gc2, scp2, scf2, scv2, scd2);
+                const bool sig1 = scv1 && scp1 < 0.05 && !scd1;
+                const bool sig2 = scv2 && scp2 < 0.05 && !scd2;
+                result.within_hp_subclone_sig = sig1 || sig2;
+                // report the more-significant valid HP
+                if (scv1 && (!scv2 || scp1 <= scp2)) {
+                    result.within_hp_subclone_permanova_p = scp1;
+                    result.within_hp_subclone_permanova_f = scf1;
+                    result.within_hp_subclone_valid = scv1;
+                    result.within_hp_subclone_dispersion_warn = scd1;
+                } else if (scv2) {
+                    result.within_hp_subclone_permanova_p = scp2;
+                    result.within_hp_subclone_permanova_f = scf2;
+                    result.within_hp_subclone_valid = scv2;
+                    result.within_hp_subclone_dispersion_warn = scd2;
+                }
+            }
+
+            // [tumor-only structure axis] does structure exist in TUMOR reads alone? The all-pool main path cannot
+            // self-distinguish a tumor-vs-normal split (sampleOrphan confound); this re-clusters TUMOR reads only and
+            // gates with PERMANOVA permutation null. tumor_intrinsic = tumor alone has clean (non-dispersion) location.
+            {
+                std::vector<int> tumor_idx;
+                tumor_idx.reserve(read_list.size());
+                for (size_t i = 0; i < read_list.size(); ++i) {
+                    if (read_list[i].is_tumor) tumor_idx.push_back(static_cast<int>(i));
+                }
+                compute_tumor_only_cluster_structure(all_dist.dist_matrix, tumor_idx, result.tumor_only_cluster_k,
+                                                     result.tumor_only_silhouette, result.tumor_only_permanova_f,
+                                                     result.tumor_only_permanova_p, result.tumor_only_permanova_valid,
+                                                     result.tumor_only_dispersion_warn);
+                result.tumor_intrinsic = result.tumor_only_permanova_valid && result.tumor_only_permanova_p < 0.05 &&
+                                         !result.tumor_only_dispersion_warn;
+            }
+
+            // [Strength score] EQUAL-weighted mean of 5 sub-scores. Weight choice is empirically ranking-robust
+            // (Spearman rho=0.998 equal-vs-judgment, top-1000 94.6% overlap); the saturated sig term (median 1.0,
+            // non-discriminating) is dropped. germline demoted, somatic + tumor-only added (subclone-aligned). Each
+            // sub-score is OUTPUT as its own column so strength is observable/verifiable/re-weightable downstream.
+            {
+                auto clamp01 = [](double v) { return std::max(0.0, std::min(1.0, v)); };
+                result.strength_struct = clamp01((result.hp_auc_all - 0.5) / 0.5);  // -1 default -> 0
+                // [fix] strength_tumor now gated by C' (within-HP germline-vs-carrier a-priori PERMANOVA): double-dip
+                // REMOVED, ~2.4x enriched on legacy VC (NOT a sensitive detector, NOT "0% noise"). strength_tumor>0
+                // rate: noise 7.2% vs structure 17.2% (all-VC); 12.7% vs 28.4% (within C'-valid coverage). Replaces
+                // tumor_intrinsic (unsupervised cluster DERIVED from the same distance matrix it tests -> double-dip:
+                // fired ~91% on noise). a-priori labels = read hp_tag (1 vs 1-1), not distance-derived. Magnitude =
+                // within_hp_best_sil. tumor_only emit cols kept as raw diagnostics (observability), excluded from verdict.
+                result.strength_tumor =
+                    result.within_hp_subclone_sig ? clamp01(result.within_hp_best_sil / 0.5) : 0.0;
+                result.strength_somatic = std::isnan(result.somatic_residual_dbeta)
+                                              ? 0.0
+                                              : clamp01(std::abs(result.somatic_residual_dbeta) / 0.3);
+                result.strength_assoc = clamp01(result.cramers_v);
+                result.strength_germline = std::isnan(result.germline_asm_dbeta)
+                                               ? 0.0
+                                               : clamp01(std::abs(result.germline_asm_dbeta) / 0.3);
+                result.strength_score = (result.strength_struct + result.strength_tumor + result.strength_somatic +
+                                         result.strength_assoc + result.strength_germline) /
+                                        5.0;
+                result.strength_grade = result.strength_score >= 0.50   ? "A"
+                                        : result.strength_score >= 0.35 ? "B"
+                                        : result.strength_score >= 0.22 ? "C"
+                                        : result.strength_score >= 0.12 ? "D"
+                                                                        : "E";
             }
 
             // Per-CpG ASM and epiallele metrics (Phase E)
@@ -1061,6 +1305,60 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
             bam_destroy1(r);
         }
 
+        // [Stage④ 新 VerificationClass] override with evidence-based reclassification (user philosophy:
+        // retain if ANY structure). Computed HERE because Δβ/HP-AUC/Epipoly are only final after the HP +
+        // Per-CpG blocks (the legacy 2x2 in SignificanceAnalyzer ran earlier, before Δβ). Original kept in
+        // verification_class_legacy. within-HP multigroup + SEQC2-LOH deferred to Stage②③.
+        {
+            result.verification_class_legacy = result.verification_class;
+            const bool dbeta_sig = result.germline_asm_dbeta_sig || result.subclone_dbeta_hp1_sig ||
+                                   result.subclone_dbeta_hp2_sig || result.somatic_residual_dbeta_sig ||
+                                   result.alt_subclone_hp1_sig || result.alt_subclone_hp2_sig;
+            const bool hp_auc_struct = result.hp_auc_all >= 0.7;
+            const std::string& lvc = result.verification_class_legacy;
+            const bool cluster_match = (lvc == "Strong" || lvc == "Subclone");  // GlobalTest matched a label
+            const bool loh_struct = result.potential_loh && (hp_auc_struct || dbeta_sig);
+            const bool within_hp = result.within_hp_clean_multigroup;  // Stage② within-HP clean substructure
+
+            // [D1] label-PERMANOVA significance split by PERMDISP (D2) into clean location-shift vs
+            // dispersion-confounded. clean_location_permanova adds a valid structural axis; dispersion-only
+            // significance gets its own DispersionStructure tier (structure exists but ambiguous attribution).
+            const bool hp_perm_sig = result.label_hp_permanova_valid && result.label_hp_permanova_p < 0.05;
+            const bool al_perm_sig = result.label_allele_permanova_valid && result.label_allele_permanova_p < 0.05;
+            const bool clean_location_permanova = (hp_perm_sig && !result.label_hp_dispersion_warning) ||
+                                                  (al_perm_sig && !result.label_allele_dispersion_warning);
+            const bool dispersion_structure = (hp_perm_sig && result.label_hp_dispersion_warning) ||
+                                              (al_perm_sig && result.label_allele_dispersion_warning);
+
+            if (dbeta_sig || hp_auc_struct || cluster_match || loh_struct || within_hp || clean_location_permanova) {
+                if (cluster_match) {
+                    result.verification_class = "Strong";
+                } else if (loh_struct) {
+                    result.verification_class = "LOH-Structure";
+                } else if (within_hp) {
+                    result.verification_class = "MultiGroupNoLabel";  // S4/S6 within-HP clean multigroup
+                } else if (dbeta_sig) {
+                    result.verification_class = "LabelShift";  // Δβ mean-shift signal (dominant rescue)
+                } else if (clean_location_permanova) {
+                    result.verification_class = "PermanovaLocation";  // [D1] clean (PERMDISP-passed) PERMANOVA
+                } else {
+                    result.verification_class = "StructureNoLabel";  // HP-AUC structure, no label match
+                }
+            } else if (dispersion_structure) {
+                result.verification_class = "DispersionStructure";  // [D1] dispersion-type structure (ambiguous)
+            } else {
+                const double ep = result.per_cpg_epipoly_hp1;
+                const double pw = result.pairwise_mean_distance;
+                if ((pw < 0.15) || (!std::isnan(ep) && ep < 0.2)) {
+                    result.verification_class = "Noise_Uniform";  // 甲基均勻, 無可分
+                } else if ((!std::isnan(ep) && ep > 0.5) || (pw > 0.35)) {
+                    result.verification_class = "Noise_Chaotic";  // 高熵混亂無乾淨群
+                } else {
+                    result.verification_class = "Noise_Uncorrelated";
+                }
+            }
+        }
+
         result.success = true;
     } catch (const std::exception& e) {
         result.success = false;
@@ -1087,7 +1385,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
     // Header (updated with Multi-Stage HP verification and Quality Assessment columns)
     csv_file << "RegionID,Chr,Pos,Ref,Alt,NumReads,NumCpGs,NReadsValid,HP_AUC_Normal,HP_AUC_Tumor,HP_AUC_All,GlobalP,CramersV,"
                 "GlobalP_HPFamily,CramersV_HPFamily,GlobalP_HPFine,CramersV_HPFine,HPFine_NGroups_CF,"
-                "HeuristicScore,PassedGating,"
+                "HeuristicScore,StrengthScore,StrengthGrade,PassedGating,"
                 "PairwiseMeanDist,PairwiseMedianDist,"
                 "ClusterPermanovaF,ClusterPermanovaP,ClusterPermanovaValid,ClusterDispersionP,ClusterDispersionWarn,"
                 // Stage 1: HP Merged
@@ -1104,7 +1402,10 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 // Stage 4: Unassigned Affinity
                 "UnassignedAffinity,UnassignedAffinityP,UnassignedDir,NHP3,NHP0,"
                 // Summary
-                "DominantLabel,Stability,VerificationClass,"
+                "DominantLabel,Stability,VerificationClass,VerificationClass_Legacy,"
+                "WithinHP1_NGroups,WithinHP2_NGroups,WithinHP_LevelBimodal,WithinHP_CleanMultigroup,"
+                "WithinHP_BestSil,WithinHP_MinFrac,"
+                "WithinHP_SubclonePermanovaP,WithinHP_SubclonePermanovaF,WithinHP_SubcloneValid,WithinHP_SubcloneDispWarn,WithinHP_SubcloneSig,"
                 // Multi-Layer Validation Quality Assessment (NEW)
                 "HP_Ratio,Potential_LOH,Coverage_Multiple,Diploid_Coverage_Used,Coverage_Category,LOH_Subtype,"
                 "Quality_Score,Quality_Tier,"
@@ -1117,6 +1418,22 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 "Tumor_HP1,Tumor_HP2,Normal_HP1,Normal_HP2,"
                 // Signed HP methylation delta (direction-aware)
                 "Tumor_HP_Signed_Delta,Normal_HP_Signed_Delta,HP_Signed_Residual,Combined_HP_Signed_Delta,"
+                "SomaticResidualDbeta,SomaticResidualDbeta_P,SomaticResidualDbeta_Sig,"
+                "GermlineAsmDbeta,GermlineAsmDbeta_P,GermlineAsmDbeta_Sig,"
+                "SubcloneDbeta_HP1,SubcloneDbeta_HP1_P,SubcloneDbeta_HP1_Sig,SubcloneDbeta_HP1_NGerm,"
+                "SubcloneDbeta_HP1_NCarrier,"
+                "SubcloneDbeta_HP2,SubcloneDbeta_HP2_P,SubcloneDbeta_HP2_Sig,SubcloneDbeta_HP2_NGerm,"
+                "SubcloneDbeta_HP2_NCarrier,"
+                // [Δβ component A] alt-axis subclone (within HP-family, ALT vs REF by read's own allele)
+                "AltSubcloneDbeta_HP1,AltSubcloneDbeta_HP1_P,AltSubcloneDbeta_HP1_Sig,"
+                "AltSubcloneDbeta_HP1_NAlt,AltSubcloneDbeta_HP1_NRef,"
+                "AltSubcloneDbeta_HP2,AltSubcloneDbeta_HP2_P,AltSubcloneDbeta_HP2_Sig,"
+                "AltSubcloneDbeta_HP2_NAlt,AltSubcloneDbeta_HP2_NRef,"
+                // [Δβ component C] subclone per-CpG driver localization
+                "SubcloneHP1_DriverCpG_N,SubcloneHP1_DriverCpG_Tested,"
+                "SubcloneHP2_DriverCpG_N,SubcloneHP2_DriverCpG_Tested,"
+                // [Δβ component B] full label-combination Δβ (pairwise + BH-FDR)
+                "ComboDbeta_NTested,ComboDbeta_NSig,ComboDbeta_SigPairs,"
                 // Phase C: LOH BED Annotation
                 "LOH_Bed_Overlap,LOH_Source,LOH_Bed_Annotation,"
                 // Phase D: Subclone Assignment
@@ -1129,7 +1446,11 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                 // Original columns
                 "LocalBestCluster,LocalBestP,Significant,SuggestFilter,"
                 // Self-phasing audit (NEW): raw somatic HP tag counts (independent of --germline-hp-only flag)
-                "NHP_Somatic11,NHP_Somatic21,NHP_Somatic33\n";
+                "NHP_Somatic11,NHP_Somatic21,NHP_Somatic33,"
+                // tumor-only structure axis (clustering + PERMANOVA on TUMOR reads only) + StrengthScore components
+                "TumorOnlyClusterK,TumorOnlySilhouette,TumorOnlyPermanovaF,TumorOnlyPermanovaP,"
+                "TumorOnlyPermanovaValid,TumorOnlyDispersionWarn,TumorIntrinsic,"
+                "StrengthStruct,StrengthTumor,StrengthSomatic,StrengthAssoc,StrengthGermline\n";
 
     // Statistics conatiners
     struct ChrStats {
@@ -1148,12 +1469,14 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
         std::string chr_name = chrom_index_.get_name(snv.chr_id);
 
         // Determine significance (Binary classification)
-        // Definition: Passed gating AND p-value <= 0.05 AND V >= 0.1 AND depth >= 20 (Round 7)
-        // Optimized based on depth analysis: Depth 20-30 has high TP/FP ratio (2.31)
-        bool is_significant = r.passed_gating && 
-                              (r.global_p_value <= 0.05) && 
-                              (r.cramers_v >= 0.1) &&
-                              (r.num_reads >= 20);
+        // [D1] Unified structural verdict: Significant = VerificationClass is a clean location-structure
+        // class. Replaces the obsolete F1-filter gate (passed_gating && p && CramersV && depth) — the
+        // methylation F1-filter direction is concluded DEAD, so there is one unified verdict and Significant
+        // is its boolean projection. DispersionStructure (dispersion-type, ambiguous) and Noise_* are NOT
+        // location-significant. Per-axis raw numbers (PERMANOVA/dispersion/Δβ/CramersV/HP-AUC/Strength) stay.
+        const std::string& vc = r.verification_class;
+        bool is_significant = (vc == "Strong" || vc == "LOH-Structure" || vc == "MultiGroupNoLabel" ||
+                               vc == "LabelShift" || vc == "PermanovaLocation" || vc == "StructureNoLabel");
         
         // Suggest filtering sites with LabelDelta > 0.3 (F1 optimization)
         bool suggest_filter = (r.label_delta > 0.3);
@@ -1176,6 +1499,7 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << std::fixed << std::setprecision(4) << r.global_hp_fine_v << ","
                  << r.global_hp_fine_n_groups << ","
                  << std::fixed << std::setprecision(4) << r.heuristic_score << ","
+                 << std::fixed << std::setprecision(4) << r.strength_score << "," << r.strength_grade << ","
                  << (r.passed_gating ? "true" : "false") << ","
                  << std::fixed << std::setprecision(4) << r.pairwise_mean_distance << ","
                  << std::fixed << std::setprecision(4) << r.pairwise_median_distance << ","
@@ -1223,7 +1547,17 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  // Summary
                  << r.dominant_label << ","
                  << std::fixed << std::setprecision(4) << r.cluster_stability << ","
-                 << r.verification_class << ","
+                 << r.verification_class << "," << r.verification_class_legacy << ","
+                 << r.within_hp1_ngroups << "," << r.within_hp2_ngroups << ","
+                 << (r.within_hp_level_bimodal ? "true" : "false") << ","
+                 << (r.within_hp_clean_multigroup ? "true" : "false") << ","
+                 << std::fixed << std::setprecision(4) << r.within_hp_best_sil << ","
+                 << r.within_hp_min_frac << ","
+                 << std::scientific << std::setprecision(6) << r.within_hp_subclone_permanova_p << ","
+                 << std::fixed << std::setprecision(4) << r.within_hp_subclone_permanova_f << ","
+                 << (r.within_hp_subclone_valid ? "true" : "false") << ","
+                 << (r.within_hp_subclone_dispersion_warn ? "true" : "false") << ","
+                 << (r.within_hp_subclone_sig ? "true" : "false") << ","
                  // Multi-Layer Validation Quality Assessment (NEW)
                  << std::fixed << std::setprecision(4) << r.hp_ratio << ","
                  << (r.potential_loh ? "true" : "false") << ","
@@ -1256,6 +1590,31 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  << (std::isnan(r.normal_hp_signed_delta) ? "NA" : std::to_string(r.normal_hp_signed_delta)) << ","
                  << (std::isnan(r.hp_signed_residual) ? "NA" : std::to_string(r.hp_signed_residual)) << ","
                  << (std::isnan(r.combined_hp_signed_delta) ? "NA" : std::to_string(r.combined_hp_signed_delta)) << ","
+                 // [Δβ module] somatic residual Δβ + permutation test
+                 << (std::isnan(r.somatic_residual_dbeta) ? "NA" : std::to_string(r.somatic_residual_dbeta)) << ","
+                 << r.somatic_residual_dbeta_p << "," << (r.somatic_residual_dbeta_sig ? "true" : "false") << ","
+                 // [Δβ module stage 2] germline ASM Δβ + fine same-hap subclone Δβ (HP1/HP2)
+                 << (std::isnan(r.germline_asm_dbeta) ? "NA" : std::to_string(r.germline_asm_dbeta)) << ","
+                 << r.germline_asm_dbeta_p << "," << (r.germline_asm_dbeta_sig ? "true" : "false") << ","
+                 << (std::isnan(r.subclone_dbeta_hp1) ? "NA" : std::to_string(r.subclone_dbeta_hp1)) << ","
+                 << r.subclone_dbeta_hp1_p << "," << (r.subclone_dbeta_hp1_sig ? "true" : "false") << ","
+                 << r.subclone_dbeta_hp1_n_germ << "," << r.subclone_dbeta_hp1_n_carrier << ","
+                 << (std::isnan(r.subclone_dbeta_hp2) ? "NA" : std::to_string(r.subclone_dbeta_hp2)) << ","
+                 << r.subclone_dbeta_hp2_p << "," << (r.subclone_dbeta_hp2_sig ? "true" : "false") << ","
+                 << r.subclone_dbeta_hp2_n_germ << "," << r.subclone_dbeta_hp2_n_carrier << ","
+                 // [Δβ component A] alt-axis subclone
+                 << (std::isnan(r.alt_subclone_hp1_dbeta) ? "NA" : std::to_string(r.alt_subclone_hp1_dbeta)) << ","
+                 << r.alt_subclone_hp1_p << "," << (r.alt_subclone_hp1_sig ? "true" : "false") << ","
+                 << r.alt_subclone_hp1_n_alt << "," << r.alt_subclone_hp1_n_ref << ","
+                 << (std::isnan(r.alt_subclone_hp2_dbeta) ? "NA" : std::to_string(r.alt_subclone_hp2_dbeta)) << ","
+                 << r.alt_subclone_hp2_p << "," << (r.alt_subclone_hp2_sig ? "true" : "false") << ","
+                 << r.alt_subclone_hp2_n_alt << "," << r.alt_subclone_hp2_n_ref << ","
+                 // [Δβ component C] subclone per-CpG driver localization
+                 << r.subclone_hp1_driver_cpg_n << "," << r.subclone_hp1_driver_cpg_tested << ","
+                 << r.subclone_hp2_driver_cpg_n << "," << r.subclone_hp2_driver_cpg_tested << ","
+                 // [Δβ component B] full label-combination Δβ (SigPairs quoted: contains ; ~ =)
+                 << r.combo_dbeta_n_tested << "," << r.combo_dbeta_n_sig << ","
+                 << "\"" << r.combo_dbeta_sig_pairs << "\","
                  // Phase C: LOH BED Annotation
                  << (r.loh_bed_overlap ? "true" : "false") << ","
                  << r.loh_source << ","
@@ -1281,8 +1640,16 @@ void RegionProcessor::write_significance_summary(const std::vector<RegionResult>
                  // SuggestFilter column for F1 optimization
                  << (suggest_filter ? "true" : "false") << ","
                  // Self-phasing audit: raw somatic HP tag counts (independent of --germline-hp-only flag)
-                 << r.n_hp_somatic_11 << "," << r.n_hp_somatic_21 << "," << r.n_hp_somatic_33
-                 << "\n";
+                 << r.n_hp_somatic_11 << "," << r.n_hp_somatic_21 << "," << r.n_hp_somatic_33 << ","
+                 // tumor-only structure axis + StrengthScore components
+                 << r.tumor_only_cluster_k << "," << std::fixed << std::setprecision(4) << r.tumor_only_silhouette
+                 << "," << std::setprecision(4) << r.tumor_only_permanova_f << "," << std::scientific
+                 << std::setprecision(6) << r.tumor_only_permanova_p << ","
+                 << (r.tumor_only_permanova_valid ? "true" : "false") << ","
+                 << (r.tumor_only_dispersion_warn ? "true" : "false") << ","
+                 << (r.tumor_intrinsic ? "true" : "false") << "," << std::fixed << std::setprecision(4)
+                 << r.strength_struct << "," << r.strength_tumor << "," << r.strength_somatic << ","
+                 << r.strength_assoc << "," << r.strength_germline << "\n";
     }
     csv_file.close();
     LOG_INFO("Significance summary written to: " + csv_path);
@@ -1558,6 +1925,634 @@ double RegionProcessor::compute_hp_auc(const Eigen::MatrixXd& dist, const std::v
     return wins / (static_cast<double>(diff.size()) * static_cast<double>(same.size()));
 }
 
+void RegionProcessor::compute_somatic_residual_dbeta_test(const Eigen::MatrixXd& raw,
+                                                          const std::vector<int>& hp_fam,
+                                                          const std::vector<bool>& is_tumor, int n_perm,
+                                                          uint64_t seed, int min_group, double& out_dbeta,
+                                                          double& out_p, bool& out_sig) {
+    out_dbeta = std::numeric_limits<double>::quiet_NaN();
+    out_p = 1.0;
+    out_sig = false;
+    const int n = static_cast<int>(raw.rows());
+
+    // Per-read mean β over valid (non-NaN) CpG. read-level so permutation is O(reads)/shuffle.
+    std::vector<double> read_mean(n, std::numeric_limits<double>::quiet_NaN());
+    for (int i = 0; i < n; ++i) {
+        double s = 0.0;
+        int c = 0;
+        for (int j = 0; j < raw.cols(); ++j) {
+            const double v = raw(i, j);
+            if (!std::isnan(v)) {
+                s += v;
+                ++c;
+            }
+        }
+        if (c > 0) read_mean[i] = s / c;
+    }
+
+    // Collect HP-labeled reads (0=HP1f, 1=HP2f) with valid mean + sample(T/N).
+    std::vector<double> mval;
+    std::vector<int> hp;
+    std::vector<char> tum;
+    for (int i = 0; i < n; ++i) {
+        if (hp_fam[i] < 0 || std::isnan(read_mean[i])) continue;
+        mval.push_back(read_mean[i]);
+        hp.push_back(hp_fam[i]);
+        tum.push_back(is_tumor[i] ? 1 : 0);
+    }
+
+    // residual = (tumor: mean β HP1 - mean β HP2) - (normal: mean β HP1 - mean β HP2)
+    auto residual = [&](const std::vector<char>& sample) -> double {
+        double t1 = 0, t2 = 0, nn1 = 0, nn2 = 0;
+        int ct1 = 0, ct2 = 0, cn1 = 0, cn2 = 0;
+        for (size_t k = 0; k < mval.size(); ++k) {
+            if (sample[k]) {
+                if (hp[k] == 0) {
+                    t1 += mval[k];
+                    ++ct1;
+                } else {
+                    t2 += mval[k];
+                    ++ct2;
+                }
+            } else {
+                if (hp[k] == 0) {
+                    nn1 += mval[k];
+                    ++cn1;
+                } else {
+                    nn2 += mval[k];
+                    ++cn2;
+                }
+            }
+        }
+        if (ct1 < 1 || ct2 < 1 || cn1 < 1 || cn2 < 1) return std::numeric_limits<double>::quiet_NaN();
+        return (t1 / ct1 - t2 / ct2) - (nn1 / cn1 - nn2 / cn2);
+    };
+
+    const double obs = residual(tum);
+    if (std::isnan(obs)) return;
+    out_dbeta = obs;
+
+    // Observed counts of the 4 (sample×HP) cells, for the tiny-group guard on sig.
+    int g_t1 = 0, g_t2 = 0, g_n1 = 0, g_n2 = 0;
+    for (size_t k = 0; k < mval.size(); ++k) {
+        if (tum[k]) {
+            (hp[k] == 0 ? g_t1 : g_t2)++;
+        } else {
+            (hp[k] == 0 ? g_n1 : g_n2)++;
+        }
+    }
+
+    // Permutation: shuffle sample(T/N) label among HP-labeled reads (HP fixed). Null = tumor/normal share HP-ASM.
+    std::mt19937_64 rng(seed);
+    std::vector<char> perm = tum;
+    int n_extreme = 1;
+    for (int p = 0; p < n_perm; ++p) {
+        std::shuffle(perm.begin(), perm.end(), rng);
+        const double r = residual(perm);
+        if (!std::isnan(r) && std::abs(r) >= std::abs(obs)) ++n_extreme;
+    }
+    out_p = static_cast<double>(n_extreme) / static_cast<double>(n_perm + 1);
+    // Tiny-group guard: every (sample×HP) cell must have >= min_group reads.
+    out_sig = (out_p <= 0.05) && (std::min(std::min(g_t1, g_t2), std::min(g_n1, g_n2)) >= min_group);
+}
+
+void RegionProcessor::compute_group_dbeta_test(const Eigen::MatrixXd& raw, const std::vector<int>& group, int n_perm,
+                                               uint64_t seed, int min_group, double& out_dbeta, double& out_p,
+                                               bool& out_sig, int& out_n0, int& out_n1) {
+    out_dbeta = std::numeric_limits<double>::quiet_NaN();
+    out_p = 1.0;
+    out_sig = false;
+    out_n0 = 0;
+    out_n1 = 0;
+    const int n = static_cast<int>(raw.rows());
+
+    // Collect group-labeled reads (0/1) with valid per-read mean β. read-level → permutation O(reads)/shuffle.
+    std::vector<double> mval;
+    std::vector<char> grp;
+    for (int i = 0; i < n; ++i) {
+        if (group[i] != 0 && group[i] != 1) continue;
+        double s = 0.0;
+        int c = 0;
+        for (int j = 0; j < raw.cols(); ++j) {
+            const double v = raw(i, j);
+            if (!std::isnan(v)) {
+                s += v;
+                ++c;
+            }
+        }
+        if (c == 0) continue;
+        mval.push_back(s / c);
+        grp.push_back(static_cast<char>(group[i]));
+        (group[i] == 0 ? out_n0 : out_n1)++;
+    }
+
+    // Δβ = mean β(group 0) − mean β(group 1).
+    auto dbeta = [&](const std::vector<char>& g) -> double {
+        double a = 0, b = 0;
+        int ca = 0, cb = 0;
+        for (size_t k = 0; k < mval.size(); ++k) {
+            if (g[k] == 0) {
+                a += mval[k];
+                ++ca;
+            } else {
+                b += mval[k];
+                ++cb;
+            }
+        }
+        if (ca < 1 || cb < 1) return std::numeric_limits<double>::quiet_NaN();
+        return a / ca - b / cb;
+    };
+
+    const double obs = dbeta(grp);
+    if (std::isnan(obs)) return;
+    out_dbeta = obs;
+
+    // Permutation: shuffle the 0/1 group label among labeled reads. Null = label exchangeable.
+    std::mt19937_64 rng(seed);
+    std::vector<char> perm = grp;
+    int n_extreme = 1;
+    for (int p = 0; p < n_perm; ++p) {
+        std::shuffle(perm.begin(), perm.end(), rng);
+        const double r = dbeta(perm);
+        if (!std::isnan(r) && std::abs(r) >= std::abs(obs)) ++n_extreme;
+    }
+    out_p = static_cast<double>(n_extreme) / static_cast<double>(n_perm + 1);
+    // Tiny-group guard: require both groups >= min_group so a 1-read group cannot drive a "significant" subclone.
+    out_sig = (out_p <= 0.05) && (std::min(out_n0, out_n1) >= min_group);
+}
+
+void RegionProcessor::compute_combo_dbeta(const Eigen::MatrixXd& raw, const std::vector<ReadInfo>& read_list,
+                                          int min_group, uint64_t seed, int& out_n_tested, int& out_n_sig,
+                                          std::string& out_sig_pairs) {
+    out_n_tested = 0;
+    out_n_sig = 0;
+    out_sig_pairs.clear();
+
+    // Build groups keyed by sample(N/T) × HP-family(HP1/HP2) × alt(REF/ALT); keep groups with >= min_group reads.
+    struct Group {
+        std::string name;
+        std::vector<int> idx;
+    };
+    std::vector<Group> groups;
+    const char* sample_name[2] = {"N", "T"};
+    const char* fam_name[2] = {"HP1", "HP2"};
+    const char* alt_name[2] = {"REF", "ALT"};
+    for (int s = 0; s < 2; ++s) {
+        for (int f = 0; f < 2; ++f) {
+            for (int a = 0; a < 2; ++a) {
+                Group g;
+                g.name = std::string(sample_name[s]) + "." + fam_name[f] + "." + alt_name[a];
+                for (size_t i = 0; i < read_list.size(); ++i) {
+                    if ((s == 1) != read_list[i].is_tumor) continue;
+                    const std::string& h = read_list[i].hp_tag;
+                    const bool in_family = (f == 0) ? (h == "1" || h == "HP1" || h == "1-1")
+                                                    : (h == "2" || h == "HP2" || h == "2-1");
+                    if (!in_family) continue;
+                    const AltSupport as = read_list[i].alt_support;
+                    if ((a == 1 && as != AltSupport::ALT) || (a == 0 && as != AltSupport::REF)) continue;
+                    g.idx.push_back(static_cast<int>(i));
+                }
+                if (static_cast<int>(g.idx.size()) >= min_group) groups.push_back(std::move(g));
+            }
+        }
+    }
+
+    // All pairwise read-level Δβ (reuse compute_group_dbeta_test).
+    const int n = static_cast<int>(raw.rows());
+    struct Pair {
+        std::string g1, g2;
+        double dbeta, p;
+    };
+    std::vector<Pair> pairs;
+    for (size_t i = 0; i < groups.size(); ++i) {
+        for (size_t j = i + 1; j < groups.size(); ++j) {
+            std::vector<int> grp(n, -1);
+            for (int k : groups[i].idx) grp[k] = 0;
+            for (int k : groups[j].idx) grp[k] = 1;
+            double db = 0, p = 1;
+            bool sig = false;
+            int n0 = 0, n1 = 0;
+            compute_group_dbeta_test(raw, grp, 999, seed, min_group, db, p, sig, n0, n1);
+            if (std::isnan(db)) continue;
+            pairs.push_back({groups[i].name, groups[j].name, db, p});
+        }
+    }
+    out_n_tested = static_cast<int>(pairs.size());
+    if (pairs.empty()) return;
+
+    // BH-FDR within region.
+    std::vector<int> order(pairs.size());
+    for (size_t i = 0; i < order.size(); ++i) order[i] = static_cast<int>(i);
+    std::sort(order.begin(), order.end(), [&](int a, int b) { return pairs[a].p < pairs[b].p; });
+    const int m = static_cast<int>(pairs.size());
+    std::vector<double> q(pairs.size());
+    double running_min = 1.0;
+    for (int rank = m; rank >= 1; --rank) {
+        const int idx = order[rank - 1];
+        running_min = std::min(running_min, pairs[idx].p * m / rank);
+        q[idx] = std::min(running_min, 1.0);
+    }
+
+    std::string out;
+    for (size_t i = 0; i < pairs.size(); ++i) {
+        if (q[i] <= 0.05) {
+            ++out_n_sig;
+            if (!out.empty()) out += ";";
+            out += pairs[i].g1 + "~" + pairs[i].g2 + "=" + std::to_string(pairs[i].dbeta) + "(" +
+                   std::to_string(q[i]) + ")";
+        }
+    }
+    out_sig_pairs = out;
+}
+
+void RegionProcessor::compute_within_hp_substructure(const Eigen::MatrixXd& all_dist, const std::vector<int>& hp_idx,
+                                                     int& out_ngroups, double& out_silhouette,
+                                                     double& out_min_frac) const {
+    out_ngroups = 1;
+    out_silhouette = 0.0;
+    out_min_frac = 1.0;  // [D] default = single group (no split)
+    const int m = static_cast<int>(hp_idx.size());
+    if (m < 8) return;  // need enough reads for a meaningful within-HP split
+
+    // Extract the HP-family sub-distance-matrix from the already-computed all_dist (no recompute).
+    Eigen::MatrixXd sub(m, m);
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < m; ++j) sub(i, j) = all_dist(hp_idx[i], hp_idx[j]);
+    }
+    // NaN peel-off to a complete submatrix (mirrors the main clustering path).
+    std::vector<int> valid;
+    extract_complete_submatrix_indices(sub, valid);
+    const int n = static_cast<int>(valid.size());
+    if (n < 8) return;
+    Eigen::MatrixXd work(n, n);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) work(i, j) = sub(valid[i], valid[j]);
+    }
+
+    std::vector<std::string> names(n);
+    for (int i = 0; i < n; ++i) names[i] = std::to_string(i);
+    HierarchicalClustering clusterer(linkage_method_);
+    Tree tree = clusterer.build_tree(work, names);
+    if (tree.empty()) return;
+    auto kl = TreeCutter::find_optimal_clusters(tree, work, 2, std::min(6, n / 2));
+    std::vector<int> labels = kl.second;
+    if (static_cast<int>(labels.size()) != n) return;
+
+    // find_optimal_clusters returns best_k (kl.first) but its labels are NOT guaranteed to be the
+    // contiguous range [0, best_k): cut_by_num_clusters cuts to a height yielding >= k clusters, and
+    // tied merge heights (rife under MAX_DIST sentinel distances) make it overshoot to more clusters
+    // than requested. Indexing a best_k-sized array by a raw label is then an out-of-bounds write
+    // (heap corruption -> delayed SIGSEGV). Derive the real cluster count and remap to [0, K).
+    int max_label = -1;
+    for (int l : labels) max_label = std::max(max_label, l);
+    if (max_label < 0) return;
+    std::vector<int> remap(max_label + 1, -1);
+    int k = 0;
+    for (int l : labels) {
+        if (remap[l] < 0) remap[l] = k++;
+    }
+    if (k < 2) return;
+    for (int& l : labels) l = remap[l];
+
+    // Mean silhouette (1 read = 1 obs): a = mean dist to own cluster, b = min mean dist to another cluster.
+    double sil_sum = 0.0;
+    int sil_n = 0;
+    for (int i = 0; i < n; ++i) {
+        double a = 0.0;
+        int ca = 0;
+        std::vector<double> other_sum(k, 0.0);
+        std::vector<int> other_cnt(k, 0);
+        for (int j = 0; j < n; ++j) {
+            if (i == j) continue;
+            if (labels[j] == labels[i]) {
+                a += work(i, j);
+                ++ca;
+            } else {
+                other_sum[labels[j]] += work(i, j);
+                ++other_cnt[labels[j]];
+            }
+        }
+        if (ca == 0) continue;
+        a /= ca;
+        double b = std::numeric_limits<double>::max();
+        for (int c = 0; c < k; ++c) {
+            if (c != labels[i] && other_cnt[c] > 0) b = std::min(b, other_sum[c] / other_cnt[c]);
+        }
+        if (b == std::numeric_limits<double>::max()) continue;
+        const double denom = std::max(a, b);
+        if (denom > 0) {
+            sil_sum += (b - a) / denom;
+            ++sil_n;
+        }
+    }
+    out_silhouette = sil_n > 0 ? sil_sum / sil_n : 0.0;
+
+    // Clean multigroup = good silhouette + minimum cluster size. [B] balance relaxed from max(3, n/5) to >=3:
+    // the 20% relative balance gate systematically blocked clean BUT MINOR (low-CCF) subclones — within_hp_rederive
+    // audit (N=113): 26.5% were sil>=0.5 clean splits rejected only by balance. silhouette>=0.5 still guards cleanness.
+    std::vector<int> sizes(k, 0);
+    for (int l : labels) ++sizes[l];
+    const int min_sz = *std::min_element(sizes.begin(), sizes.end());
+    out_min_frac = static_cast<double>(min_sz) / n;  // [D] expose smallest-cluster fraction (minor-subclone indicator)
+    if (out_silhouette >= 0.5 && min_sz >= 3) out_ngroups = k;  // [B] relax balance: min_sz>=3 (was max(3, n/5))
+}
+
+// [Stage② C'] within-HP a-priori subclone PERMANOVA: does the within-HP methylation DISTANCE separate germline-tag
+// vs somatic-carrier-tag reads? Labels are A-PRIORI (read hp_tag), NOT derived from the distance — so this is a VALID
+// hypothesis test (no double-dip, unlike the unsupervised tumor_only axis). Statistical "mark/confirm" for within-HP
+// subclone structure: reuses StructureTest::run_permanova (location, permutation null) + check_dispersion (PERMDISP).
+void RegionProcessor::compute_within_hp_subclone_permanova(const Eigen::MatrixXd& all_dist,
+                                                           const std::vector<int>& hp_idx,
+                                                           const std::vector<int>& gc_labels, double& out_p,
+                                                           double& out_f, bool& out_valid, bool& out_disp_warn) const {
+    out_p = 1.0;
+    out_f = 0.0;
+    out_valid = false;
+    out_disp_warn = false;
+    const int m = static_cast<int>(hp_idx.size());
+    if (m < 8) return;
+    Eigen::MatrixXd sub(m, m);
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < m; ++j) sub(i, j) = all_dist(hp_idx[i], hp_idx[j]);
+    }
+    // NaN peel-off to a complete submatrix (mirrors the within-HP / tumor-only paths).
+    std::vector<int> valid;
+    extract_complete_submatrix_indices(sub, valid);
+    const int n = static_cast<int>(valid.size());
+    if (n < 8) return;
+    Eigen::MatrixXd work(n, n);
+    std::vector<int> labels(n);
+    int n0 = 0, n1 = 0;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) work(i, j) = sub(valid[i], valid[j]);
+        labels[i] = gc_labels[valid[i]];  // a-priori germline(0)/carrier(1) — independent of distance => no double-dip
+        if (labels[i] == 0) {
+            ++n0;
+        } else if (labels[i] == 1) {
+            ++n1;
+        }
+    }
+    if (n0 < 3 || n1 < 3) return;  // need both germline AND carrier present with enough reads for a valid test
+    StructureTestConfig st_config;
+    st_config.n_permutations = 999;
+    st_config.seed = 42;
+    st_config.dispersion_alpha = 0.05;
+    StructureTest st(st_config);
+    PermanovaResult perm = st.run_permanova(work, labels);
+    out_f = perm.pseudo_f;
+    out_p = perm.p_value;
+    out_valid = perm.valid;
+    DispersionResult disp = st.check_dispersion(work, labels);
+    out_disp_warn = disp.warning;
+}
+
+void RegionProcessor::compute_tumor_only_cluster_structure(const Eigen::MatrixXd& all_dist,
+                                                           const std::vector<int>& tumor_idx, int& out_k,
+                                                           double& out_silhouette, double& out_permanova_f,
+                                                           double& out_permanova_p, bool& out_permanova_valid,
+                                                           bool& out_dispersion_warn) const {
+    out_k = 1;
+    out_silhouette = 0.0;
+    out_permanova_f = 0.0;
+    out_permanova_p = 1.0;
+    out_permanova_valid = false;
+    out_dispersion_warn = false;
+    const int m = static_cast<int>(tumor_idx.size());
+    if (m < 8) return;  // need enough tumor reads for a stable 2-group split + PERMANOVA (Nmin=5)
+
+    // Extract the TUMOR-only sub-distance-matrix from the already-computed all_dist (no recompute).
+    Eigen::MatrixXd sub(m, m);
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < m; ++j) sub(i, j) = all_dist(tumor_idx[i], tumor_idx[j]);
+    }
+    // NaN peel-off to a complete submatrix (mirrors the main clustering + within-HP path).
+    std::vector<int> valid;
+    extract_complete_submatrix_indices(sub, valid);
+    const int n = static_cast<int>(valid.size());
+    if (n < 8) return;
+    Eigen::MatrixXd work(n, n);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) work(i, j) = sub(valid[i], valid[j]);
+    }
+
+    // Unsupervised clustering on tumor reads (UPGMA + silhouette-optimal k), same as the main path.
+    std::vector<std::string> names(n);
+    for (int i = 0; i < n; ++i) names[i] = std::to_string(i);
+    HierarchicalClustering clusterer(linkage_method_);
+    Tree tree = clusterer.build_tree(work, names);
+    if (tree.empty()) return;
+    auto kl = TreeCutter::find_optimal_clusters(tree, work, 2, std::min(6, n / 2));
+    std::vector<int> labels = kl.second;
+    if (static_cast<int>(labels.size()) != n) return;
+    // Remap labels to contiguous [0, K) (same OOB/segfault guard as within-HP; see compute_within_hp_substructure).
+    int max_label = -1;
+    for (int l : labels) max_label = std::max(max_label, l);
+    if (max_label < 0) return;
+    std::vector<int> remap(max_label + 1, -1);
+    int k = 0;
+    for (int l : labels) {
+        if (remap[l] < 0) remap[l] = k++;
+    }
+    if (k < 2) return;
+    for (int& l : labels) l = remap[l];
+    out_k = k;
+
+    // Mean silhouette (same definition as compute_within_hp_substructure).
+    double sil_sum = 0.0;
+    int sil_n = 0;
+    for (int i = 0; i < n; ++i) {
+        double a = 0.0;
+        int ca = 0;
+        std::vector<double> other_sum(k, 0.0);
+        std::vector<int> other_cnt(k, 0);
+        for (int j = 0; j < n; ++j) {
+            if (i == j) continue;
+            if (labels[j] == labels[i]) {
+                a += work(i, j);
+                ++ca;
+            } else {
+                other_sum[labels[j]] += work(i, j);
+                ++other_cnt[labels[j]];
+            }
+        }
+        if (ca == 0) continue;
+        a /= ca;
+        double b = std::numeric_limits<double>::max();
+        for (int c = 0; c < k; ++c) {
+            if (c != labels[i] && other_cnt[c] > 0) b = std::min(b, other_sum[c] / other_cnt[c]);
+        }
+        if (b == std::numeric_limits<double>::max()) continue;
+        const double denom = std::max(a, b);
+        if (denom > 0) {
+            sil_sum += (b - a) / denom;
+            ++sil_n;
+        }
+    }
+    out_silhouette = sil_n > 0 ? sil_sum / sil_n : 0.0;
+
+    // Null-gated structure test: silhouette over-detects (random reads still split into compact groups), so
+    // gate the tumor-only clusters with PERMANOVA (permutation null, location) + PERMDISP (analytic-F dispersion).
+    StructureTestConfig st_config;
+    st_config.n_permutations = 999;
+    st_config.seed = 42;
+    st_config.dispersion_alpha = 0.05;
+    StructureTest st(st_config);
+    PermanovaResult perm = st.run_permanova(work, labels);
+    out_permanova_f = perm.pseudo_f;
+    out_permanova_p = perm.p_value;
+    out_permanova_valid = perm.valid;
+    DispersionResult disp = st.check_dispersion(work, labels);
+    out_dispersion_warn = disp.warning;
+}
+
+bool RegionProcessor::within_hp_level_clean(const Eigen::MatrixXd& raw, const std::vector<int>& hp_idx,
+                                            int min_group) {
+    // Per-read mean β over valid CpG (level, not pattern).
+    std::vector<double> means;
+    for (int idx : hp_idx) {
+        double s = 0.0;
+        int c = 0;
+        for (int j = 0; j < raw.cols(); ++j) {
+            const double v = raw(idx, j);
+            if (!std::isnan(v)) {
+                s += v;
+                ++c;
+            }
+        }
+        if (c > 0) means.push_back(s / c);
+    }
+    const int n = static_cast<int>(means.size());
+    if (n < 2 * min_group) return false;
+    std::sort(means.begin(), means.end());
+    double total = 0.0, mean_all = 0.0;
+    for (double m : means) mean_all += m;
+    mean_all /= n;
+    for (double m : means) total += (m - mean_all) * (m - mean_all);
+    if (total <= 0) return false;
+    const int min_bal = std::max(min_group, n / 5);  // balanced: both groups >= max(min_group, 20%)
+    double best_within = total;
+    double best_gap = 0.0;
+    for (int s = min_bal; s <= n - min_bal; ++s) {
+        double ma = 0.0, mb = 0.0;
+        for (int i = 0; i < s; ++i) ma += means[i];
+        for (int i = s; i < n; ++i) mb += means[i];
+        ma /= s;
+        mb /= (n - s);
+        double wv = 0.0;
+        for (int i = 0; i < s; ++i) wv += (means[i] - ma) * (means[i] - ma);
+        for (int i = s; i < n; ++i) wv += (means[i] - mb) * (means[i] - mb);
+        if (wv < best_within) {
+            best_within = wv;
+            best_gap = mb - ma;
+        }
+    }
+    return best_gap > 0.15 && (1.0 - best_within / total) > 0.5;
+}
+
+// phylo-v4.1 native labeling (replaces silhouette for the subclone-oriented tumor-only partition).
+// Filters tumor + germline-HP-tagged reads, peels to a complete sub-matrix, runs PhyloLabeler with
+// modal instability (K=10 null95) + fine (null90) + "other" residual group, writes phylo_groups.tsv.
+// Mirrors phylo_v4.py analyze_v4; the binary emits labels so Python only reads + plots.
+void RegionProcessor::compute_phylo_groups(const DistanceMatrix& all_dist, const std::vector<ReadInfo>& read_list,
+                                           const MethylationMatrix& meth_mat,
+                                           const std::string& clustering_dir) const {
+    static const std::set<std::string> kHpLabmap = {"1", "HP1", "1-1", "2", "HP2", "2-1"};
+    const int MINSZ = 3;
+    // 1. Filter: tumor + HP-tagged (matches Python is_tumor + hp in LABMAP).
+    std::vector<int> sel;
+    for (size_t i = 0; i < read_list.size(); ++i) {
+        if (read_list[i].is_tumor && kHpLabmap.count(read_list[i].hp_tag)) sel.push_back(static_cast<int>(i));
+    }
+    if (static_cast<int>(sel.size()) < 2 * MINSZ) return;
+    // 2. Extract tumor sub-distance + peel to a complete sub-matrix.
+    const int ns = static_cast<int>(sel.size());
+    Eigen::MatrixXd sub(ns, ns);
+    for (int i = 0; i < ns; ++i)
+        for (int j = 0; j < ns; ++j) sub(i, j) = all_dist.dist_matrix(sel[i], sel[j]);
+    std::vector<int> valid;
+    extract_complete_submatrix_indices(sub, valid);
+    const int n = static_cast<int>(valid.size());
+    if (n < 2 * MINSZ) return;
+    Eigen::MatrixXd dist(n, n);
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j) dist(i, j) = sub(valid[i], valid[j]);
+    Eigen::MatrixXd meth(n, meth_mat.raw_matrix.cols());
+    for (int i = 0; i < n; ++i) meth.row(i) = meth_mat.raw_matrix.row(sel[valid[i]]);
+
+    // 3. modal coarse (K=10 null95) — robust verdict + modal_frac + unstable (matches analyze_v4).
+    const int K = 10;
+    std::vector<PhyloResult> coarse_runs;
+    std::map<int, int> ng_count;
+    for (int k = 0; k < K; ++k) {
+        PhyloConfig cfg;
+        cfg.null_pct = 95.0;
+        cfg.seed = 20260622ull + static_cast<uint64_t>(k) * 101ull;
+        PhyloLabeler lab(cfg);
+        PhyloResult r = lab.label(dist, meth);
+        coarse_runs.push_back(r);
+        ng_count[r.n_groups]++;
+    }
+    int modal_ng = 0, modal_cnt = 0;
+    for (auto& kv : ng_count)
+        if (kv.second > modal_cnt) {
+            modal_cnt = kv.second;
+            modal_ng = kv.first;
+        }
+    double modal_frac = static_cast<double>(modal_cnt) / K;
+    bool unstable = modal_frac < 0.7;
+    int ng_min = 1 << 30, ng_max = 0;
+    for (auto& kv : ng_count) {
+        ng_min = std::min(ng_min, kv.first);
+        ng_max = std::max(ng_max, kv.first);
+    }
+    // representative coarse labeling = first run that produced modal_ng
+    PhyloResult coarse = coarse_runs.front();
+    for (auto& r : coarse_runs)
+        if (r.n_groups == modal_ng) {
+            coarse = r;
+            break;
+        }
+    // 4. fine (null90 candidate, low confidence).
+    PhyloConfig fcfg;
+    fcfg.null_pct = 90.0;
+    fcfg.seed = 20260622ull;
+    PhyloResult fine = PhyloLabeler(fcfg).label(dist, meth);
+
+    // 5. "other" residual group: coarse outliers >= MINSZ -> "other".
+    std::vector<std::string> clab = coarse.labels;
+    int n_out = static_cast<int>(std::count(clab.begin(), clab.end(), std::string("outlier")));
+    if (n_out >= MINSZ)
+        for (auto& l : clab)
+            if (l == "outlier") l = "other";
+    int n_other = static_cast<int>(std::count(clab.begin(), clab.end(), std::string("other")));
+    bool hidden_het = n > 0 && (static_cast<double>(n_other) / n > 0.30);
+
+    // 6. write phylo_groups.tsv (read_id/coarse/fine/is_other/is_outlier) + summary.
+    std::ofstream tsv(clustering_dir + "/phylo_groups.tsv");
+    if (tsv.is_open()) {
+        tsv << "read_id\tread_name\thp\talt_support\tcoarse_label\tfine_label\tis_other\tis_outlier\n";
+        for (int i = 0; i < n; ++i) {
+            const ReadInfo& r = read_list[sel[valid[i]]];
+            const std::string& cl = clab[i];
+            const std::string& fl = fine.valid ? fine.labels[i] : std::string("NA");
+            std::string al = (r.alt_support == AltSupport::REF)   ? "REF"
+                             : (r.alt_support == AltSupport::ALT) ? "ALT"
+                                                                  : "UNKNOWN";
+            tsv << r.read_id << "\t" << r.read_name << "\t" << r.hp_tag << "\t" << al << "\t" << cl << "\t" << fl
+                << "\t" << (cl == "other" ? 1 : 0) << "\t" << (cl == "outlier" ? 1 : 0) << "\n";
+        }
+        tsv.close();
+    }
+    std::ofstream js(clustering_dir + "/phylo_groups_summary.json");
+    if (js.is_open()) {
+        js << "{\"n\":" << n << ",\"coarse_ng\":" << modal_ng << ",\"modal_frac\":" << modal_frac
+           << ",\"fine_ng\":" << (fine.valid ? fine.n_groups : 0) << ",\"n_other\":" << n_other
+           << ",\"unstable\":" << (unstable ? "true" : "false") << ",\"ng_range\":[" << ng_min << "," << ng_max
+           << "],\"hidden_het\":" << (hidden_het ? "true" : "false") << ",\"seed\":20260622,\"rnull\":40}\n";
+        js.close();
+    }
+}
+
 void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& all_dist,
                                                            const std::vector<ReadInfo>& read_list,
                                                            const MethylationMatrix& meth_mat,
@@ -1565,6 +2560,9 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
                                                            const std::string& chr_name, const SomaticSnv& snv,
                                                            int region_id, RegionResult& result) {
     std::filesystem::create_directories(clustering_dir);
+
+    // phylo-v4.1 native cluster labeling (binary emits labels; Python only reads+plots).
+    compute_phylo_groups(all_dist, read_list, meth_mat, clustering_dir);
 
     // [P1a] HP-AUC: does the read-read distance recover the germline-HP label?
     // Ground truth = HP tag; computed on the full matrix (NaN pairs skipped under SKIP),
@@ -1711,9 +2709,9 @@ void RegionProcessor::perform_clustering_and_significance(const DistanceMatrix& 
         sig_config.enable_global_test = true;
         sig_config.enable_local_test = true;
         sig_config.enable_permanova = true;
-        sig_config.structure_config.n_permutations = 99;
+        sig_config.structure_config.n_permutations = 999;  // gap#5: unify with LabelTest 999 (p-floor 0.001)
         sig_config.seed = 42;  // Fixed top-level seed propagates to all components via init_analyzers()
-        sig_config.enable_dispersion = false;
+        sig_config.enable_dispersion = true;  // PERMDISP: flag dispersion-driven PERMANOVA hits (analytic F p)
         sig_config.enable_bootstrap = false;
         sig_config.run_id = vcf_filename_;
         sig_config.vcf_id = vcf_filename_;

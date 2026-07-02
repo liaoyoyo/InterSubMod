@@ -1,0 +1,121 @@
+{
+ "scope": "HCC1395 genome-wide CN-clean structured regions; 甲基輔助有效性審查 (per-region)",
+ "power_thresholds": {
+  "cpg_min": 10,
+  "popB_min": 5
+ },
+ "funnel": {
+  "n_target_structured_CNclean": 754,
+  "n_insufficient_pop(<2 geno-pop>=3reads)": 14,
+  "n_tested(>=2 geno-pop)": 740,
+  "n_no_testable_cpg(0 CpG with>=3/3)": 193,
+  "n_powered(cpg>=10 & popB>=5)": 459,
+  "n_underpowered": 281,
+  "n_corroborated(>=1 sig CpG)": 49,
+  "n_cis_explained": 0,
+  "n_subclone_specific": 49
+ },
+ "power_audit": {
+  "powered_n": 459,
+  "powered_corroborated": 49,
+  "powered_corroboration_rate": 0.1068,
+  "powered_null_n": 410,
+  "underpowered_n": 281,
+  "underpowered_corroborated": 0,
+  "dose_response": {
+   "popB_n[5,8)": {
+    "n": 156,
+    "corrob": 1,
+    "rate": 0.0064
+   },
+   "popB_n[8,12)": {
+    "n": 131,
+    "corrob": 2,
+    "rate": 0.0153
+   },
+   "popB_n[12,20)": {
+    "n": 138,
+    "corrob": 18,
+    "rate": 0.1304
+   },
+   "popB_n>=20": {
+    "n": 51,
+    "corrob": 28,
+    "rate": 0.549
+   },
+   "strict_highpower(cpg>=100&popB>=15)": {
+    "n": 129,
+    "corrob": 43,
+    "rate": 0.3333
+   },
+   "power_starved[5,12)_share_of_powered": 0.588
+  },
+  "interpretation_CORRECTED": "甲基差異訊號『存在且強烈 power-gated』非『無訊號』: popB_n>=20 達 54.9% corroborate (overall 6.6% 的 8.3x); 58.8% 的『powered(popB>=5)』落在 power-starved [5,12) 帶(rate~1%) → loose threshold 把 10.7% 假象當『無訊號』。INSUFFICIENT 結論改由正交兩線支撐: (a)new_partitions=0(by-construction 不偵測) (b)hp_control_eval=0/740 cis-control 從未可評估 → corroborated 近-1.0 Δβ 為 cis-ASM 特徵, 無法分離 germline cis。"
+ },
+ "data_sufficiency_distrib": {
+  "n_cpg_tested": {
+   "median": 185,
+   "p25": 0,
+   "p75": 356,
+   "max": 2820,
+   "frac_lt10": 0.293
+  },
+  "n_reads": {
+   "median": 24,
+   "p25": 13,
+   "p75": 41,
+   "max": 361
+  },
+  "popB_n(smaller pop)": {
+   "median": 6,
+   "p25": 4,
+   "frac_lt5": 0.357
+  }
+ },
+ "corroborated_signal_strength": {
+  "n_sig_cpg": {
+   "median": 5,
+   "max": 66,
+   "frac_only1": 0.184
+  },
+  "max_dbeta": {
+   "median": 0.974,
+   "max": 0.99
+  },
+  "hp_control_evaluable": 0
+ },
+ "cis_confound_by_cn": {
+  "corroborated_LOH": 41,
+  "corroborated_neutral": 8,
+  "interpretation": "LOH(單一保留單倍型)→germline 等位 ASM 結構上不可能(只剩一個等位)→該批 REF-vs-ALT 甲基差異 = subclone 或 somatic-mutation-cis 候選, 非 germline-cis-ASM; neutral(雜合,兩單倍型)→germline cis-ASM 才可能→需 matched-normal 對照。故先前『all-or-nothing Δβ=cis-ASM 特徵』僅適用 neutral 8 區, 不適用 LOH 多數。"
+ },
+ "by_tree_shape": {
+  "full_tree": {
+   "tested": 39,
+   "corroborated": 1,
+   "rate": 0.0256
+  },
+  "linear_nested": {
+   "tested": 380,
+   "corroborated": 26,
+   "rate": 0.0684
+  },
+  "sibling_only": {
+   "tested": 187,
+   "corroborated": 9,
+   "rate": 0.0481
+  },
+  "co_linked_lineage": {
+   "tested": 134,
+   "corroborated": 13,
+   "rate": 0.097
+  }
+ },
+ "marginal_utility": {
+  "new_partitions_detected_by_methylation": 0,
+  "note": "全 corroborated 區域甲基差異 ALIGN 既有基因型切割; 甲基未獨立偵測任何基因型遺漏的 subclone (corroborate 非 detect)",
+  "by_construction_caveat": "new_partitions=0 部分屬 by-construction (corroboration 設計只測對齊不搜尋新切割); 偵測端 null 另由 tumor-only 無監督分群 NEGATIVE 獨立佐證",
+  "cis_asm_confound": "hp_control_eval=0/740 → cis-control 從未可評估; corroborated max_dbeta median=0.974 (all-or-nothing) = cis-ASM 特徵; 49 corroborated 無法與 germline cis-ASM 分離 (尤其 LOH 區 allele-specific methylation unmask)"
+ },
+ "verdict": "BOUNDED_AUXILIARY — 不足以作獨立/主要 subclone 標記。甲基差異存在且 power-gated(高功率達 55%)但 (1)coverage 限制使僅少數區達高功率(popB>=20 僅 51 區) (2)0 新 partition (3)cis-control 不可評估→無法與 germline cis-ASM 分離。對應 auxiliary-not-driver / ⭐3 上限。"
+}

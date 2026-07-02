@@ -1,0 +1,58 @@
+{
+ "ancestor_ge_descendant_VAF_gradient": {
+  "method": "CN-independent: ancestor vs descendant 同區域同局部 CN, VAF 直接比; null=50%",
+  "n_nested_edges": 3627,
+  "ancestor_higher": 2532,
+  "descendant_higher(violation)": 205,
+  "tie": 890,
+  "data_support_rate": 0.925,
+  "clean_only(loh+neutral)": {
+   "ancestor_higher": 902,
+   "violation": 38,
+   "tie": 310,
+   "rate": 0.96
+  },
+  "median_delta_vaf": 0.15
+ },
+ "ccf_tier_distribution_clean": {
+  "rare": 867,
+  "minor_subclone": 975,
+  "clonal": 2278,
+  "major_subclone": 2018
+ },
+ "ccf_conversion": "neutral→min(1,2*VAF)（diploid het, purity~1, mult=1）; loh→VAF; gain/loss→undet(multiplicity 歧義)",
+ "ccf_peaks_clean(bin,count)": [
+  [
+   0.95,
+   1218
+  ],
+  [
+   0.9,
+   760
+  ],
+  [
+   0.05,
+   608
+  ],
+  [
+   0.45,
+   448
+  ],
+  [
+   0.4,
+   405
+  ],
+  [
+   0.5,
+   365
+  ]
+ ],
+ "gmm_bic_1to4": [
+  3990,
+  -1567,
+  -3018,
+  -3001
+ ],
+ "gmm_best_n": 3,
+ "verdict": "祖先>=後代 VAF 梯度成立率 = clonal hierarchy 的 data-support; GMM BIC best_n>1 = 離散 subclone 層級"
+}

@@ -1,0 +1,34 @@
+{
+ "question": "甲基是否對齊 longphase-S somatic HP 子相位(同 germline HP 內 1 vs 1-1)? = 甲基印證 somatic haplotagging",
+ "params": {
+  "grp_min": 3,
+  "cpg_min": 3,
+  "dbeta_min": 0.2
+ },
+ "note": "1-1 由帶 somatic ALT 定義 → 對齊仍混 somatic-cis + subclone, 需 normal 分離; 但非 germline-ASM 循環",
+ "n_regions": 754,
+ "region_level": {
+  "evaluable_regions": 680,
+  "aligned_regions": 102,
+  "aligned_frac": 0.15,
+  "by_cn": {
+   "loh": {
+    "eval": 623,
+    "aligned": 96
+   },
+   "neutral": {
+    "eval": 57,
+    "aligned": 6
+   }
+  }
+ },
+ "hp_unit_level": {
+  "evaluable_hp_units": 714,
+  "aligned_hp_units": 102,
+  "aligned_frac": 0.1429
+ },
+ "effect": {
+  "dbeta_median": 0.963,
+  "dbeta_max": 0.99
+ }
+}

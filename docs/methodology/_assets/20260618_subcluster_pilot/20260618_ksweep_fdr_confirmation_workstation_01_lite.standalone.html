@@ -1,0 +1,546 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WG k-sweep 對齊式 k-selection — FDR 確認工作站</title><style>
+:root{--bg:#16181d;--card:#1e2128;--txt:#e6e6e6;--mut:#9aa0aa;--acc:#D97757;--bd:#2c3038}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.5 system-ui,'Noto Sans CJK TC',sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:20px}
+h1{font-size:20px;margin:.2em 0}h2{font-size:16px;border-left:3px solid var(--acc);padding-left:8px;margin-top:26px}
+.banner{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:12.5px;margin:8px 0}th,td{border:1px solid var(--bd);padding:4px 7px;text-align:left}
+th{background:#22262e;color:var(--mut)}code{color:#9ecbff;font-size:11px}.l{color:#7ee787;font-weight:700;font-size:11px}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.fcell{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px}
+.fcell h3{margin:.1em 0;font-size:13px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px}
+.card img{width:100%;border-radius:4px;margin-top:6px;background:#fff}
+.ch{font-size:13px}.cm{font-size:11px;color:var(--mut);margin-top:3px;font-family:ui-monospace,monospace}
+.muted{color:var(--mut);font-weight:400}
+.b{font-size:10px;padding:1px 5px;border-radius:8px;margin-left:3px}.b-hp{background:#1f3a5f}.b-carrier{background:#3a5f1f}.b-allele{background:#5f1f5a}
+.verdict{margin-top:7px;display:flex;gap:5px;flex-wrap:wrap}.verdict button{cursor:pointer;border:1px solid var(--bd);background:#262a32;color:var(--txt);border-radius:5px;padding:3px 8px;font-size:12px}
+.verdict button.on[data-v=agree]{background:#1a6e3a;border-color:#2ea043}.verdict button.on[data-v=doubt]{background:#7a5a00;border-color:#bb8800}.verdict button.on[data-v=reject]{background:#7a1a1a;border-color:#cc3333}
+.reason{background:#262a32;color:var(--txt);border:1px solid var(--bd);border-radius:5px;font-size:11px}
+.toolbar{position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5;border-bottom:1px solid var(--bd);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toolbar button,.toolbar select{background:#262a32;color:var(--txt);border:1px solid var(--bd);border-radius:5px;padding:4px 9px;cursor:pointer}
+.foot{color:var(--mut);font-size:11px;margin-top:24px;border-top:1px solid var(--bd);padding-top:10px}
+.legend{font-size:11px;color:var(--mut);background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:8px;margin-top:6px}
+</style></head><body><div class="wrap">
+<h1>WG k-sweep 對齊式 k-selection — FDR 確認工作站</h1>
+<div class="banner"><b>HCC1395 全基因組 · tumor reads · BERNOULLI ±5000 · ⭐2 偵測非驗證(單樣本)</b><br>
+問題：silhouette 選的 k 是不是「最對齊 a-priori 生物軸」的 k？這裡是<b>嚴格 gate(ΔV&gt;0.1+Cochran≥5)+雙層多重比較校正(Bonferroni×k + BH-FDR)後</b>仍顯著的 <b>69 個</b> union 位點，每個附熱圖供肉眼確認。</div>
+
+<h2>① 總覽漏斗（可分群 5997 → comparable → raw≠ → FDR 硬數字）</h2>
+<div class="grid">
+ <div class="fcell"><h3>HP 軸</h3><svg viewBox="0 0 470 140" role="img" width="100%"><title>funnel</title><rect x="90" y="0" width="360" height="24" rx="3" fill="#4C9EE0" opacity="1.0"/><text x="84" y="16" font-size="11" text-anchor="end" fill="#bbb">可分群</text><text x="456" y="16" font-size="11" fill="#eee">5997</text><rect x="90" y="34" width="246" height="24" rx="3" fill="#4C9EE0" opacity="0.88"/><text x="84" y="50" font-size="11" text-anchor="end" fill="#bbb">comparable</text><text x="342" y="50" font-size="11" fill="#eee">4110</text><rect x="90" y="68" width="51" height="24" rx="3" fill="#4C9EE0" opacity="0.76"/><text x="84" y="84" font-size="11" text-anchor="end" fill="#bbb">raw≠</text><text x="147" y="84" font-size="11" fill="#eee">860</text><rect x="90" y="102" width="2" height="24" rx="3" fill="#4C9EE0" opacity="0.64"/><text x="84" y="118" font-size="11" text-anchor="end" fill="#bbb">FDR硬</text><text x="98" y="118" font-size="11" fill="#eee">18</text></svg></div>
+ <div class="fcell"><h3>CARRIER 軸（subclone 向）</h3><svg viewBox="0 0 470 140" role="img" width="100%"><title>funnel</title><rect x="90" y="0" width="360" height="24" rx="3" fill="#5FB85F" opacity="1.0"/><text x="84" y="16" font-size="11" text-anchor="end" fill="#bbb">可分群</text><text x="456" y="16" font-size="11" fill="#eee">5997</text><rect x="90" y="34" width="322" height="24" rx="3" fill="#5FB85F" opacity="0.88"/><text x="84" y="50" font-size="11" text-anchor="end" fill="#bbb">comparable</text><text x="418" y="50" font-size="11" fill="#eee">5376</text><rect x="90" y="68" width="62" height="24" rx="3" fill="#5FB85F" opacity="0.76"/><text x="84" y="84" font-size="11" text-anchor="end" fill="#bbb">raw≠</text><text x="158" y="84" font-size="11" fill="#eee">1043</text><rect x="90" y="102" width="3" height="24" rx="3" fill="#5FB85F" opacity="0.64"/><text x="84" y="118" font-size="11" text-anchor="end" fill="#bbb">FDR硬</text><text x="99" y="118" font-size="11" fill="#eee">57</text></svg></div>
+ <div class="fcell"><h3>ALLELE 軸</h3><svg viewBox="0 0 470 140" role="img" width="100%"><title>funnel</title><rect x="90" y="0" width="360" height="24" rx="3" fill="#B05FA8" opacity="1.0"/><text x="84" y="16" font-size="11" text-anchor="end" fill="#bbb">可分群</text><text x="456" y="16" font-size="11" fill="#eee">5997</text><rect x="90" y="34" width="326" height="24" rx="3" fill="#B05FA8" opacity="0.88"/><text x="84" y="50" font-size="11" text-anchor="end" fill="#bbb">comparable</text><text x="422" y="50" font-size="11" fill="#eee">5446</text><rect x="90" y="68" width="65" height="24" rx="3" fill="#B05FA8" opacity="0.76"/><text x="84" y="84" font-size="11" text-anchor="end" fill="#bbb">raw≠</text><text x="161" y="84" font-size="11" fill="#eee">1097</text><rect x="90" y="102" width="2" height="24" rx="3" fill="#B05FA8" opacity="0.64"/><text x="84" y="118" font-size="11" text-anchor="end" fill="#bbb">FDR硬</text><text x="98" y="118" font-size="11" fill="#eee">40</text></svg></div>
+</div>
+<table><tr><th>軸</th><th>comparable</th><th>sil-k=align-k</th><th>sil-k≠align-k(raw)</th><th>其中更高k</th><th>FDR硬數字</th></tr><tr><td>HP</td><td>4110</td><td>3250</td><td>860 (20.9%)</td><td>740</td><td><b>18</b> (0.44%)</td></tr><tr><td>CARRIER (subclone向)</td><td>5376</td><td>4333</td><td>1043 (19.4%)</td><td>968</td><td><b>57</b> (1.06%)</td></tr><tr><td>ALLELE</td><td>5446</td><td>4349</td><td>1097 (20.1%)</td><td>955</td><td><b>40</b> (0.73%)</td></tr></table>
+<p class="muted">解讀：raw ~20% 的可分群 loci，silhouette 選的 k 不是最對齊軸的 k（86-93% 是更高 k → silhouette 系統性切太少）；但嚴格校正後硬數字只剩 0.4-1.1%（這 69 個 union），是高信心「真子結構」候選。</p>
+
+<h2>② 驗證表 V1（k-sweep，每數字溯源）</h2>
+<table><tr><th>數字</th><th>值</th><th>來源:key</th><th>重算/交叉</th><th>L</th></tr><tr><td>WG 可分群 region</td><td><b>5997</b></td><td><code>ksweep_wg_records.json len</code></td><td>= split_accounting.cansplit 5997 ✓</td><td><span class=l>L1</span></td></tr><tr><td>HP comparable</td><td><b>4110</b></td><td><code>HP_axis.n_comparable</code></td><td>eq3250+ne860 ✓</td><td><span class=l>L1</span></td></tr><tr><td>HP FDR硬數字</td><td><b>18</b></td><td><code>HP_axis.n_sil_not_most_aligned_FDR</code></td><td>BH q&lt;0.05</td><td><span class=l>L1</span></td></tr><tr><td>CARRIER comparable</td><td><b>5376</b></td><td><code>CARRIER_axis.n_comparable</code></td><td>eq4333+ne1043 ✓</td><td><span class=l>L1</span></td></tr><tr><td>CARRIER FDR硬數字</td><td><b>57</b></td><td><code>CARRIER_axis.n_sil_not_most_aligned_FDR</code></td><td>Bonf61→FDR57</td><td><span class=l>L1</span></td></tr><tr><td>ALLELE FDR硬數字</td><td><b>40</b></td><td><code>ALLELE_axis.n_sil_not_most_aligned_FDR</code></td><td>BH q&lt;0.05</td><td><span class=l>L1</span></td></tr><tr><td>FDR union 位點(本工作站)</td><td><b>69</b></td><td><code>ksweep_fdr_loci.json n_union</code></td><td>HP18+CAR57+ALL40 dedup</td><td><span class=l>L1</span></td></tr></table>
+
+<h2>③ 驗證表 V2（切不出原因）+ 為何切不出</h2>
+<table><tr><th>數字</th><th>值</th><th>來源:key</th><th>重算/交叉</th><th>L</th></tr><tr><td>切不出 total</td><td><b>24493</b></td><td><code>cantsplit_reasons.cant_total</code></td><td>A412+B1+C24080 ✓ = N-cansplit</td><td><span class=l>L1</span></td></tr><tr><td>讀數不足 n&lt;6</td><td><b>412</b></td><td><code>A_insuff_n_lt6</code></td><td>=split_accounting.insuff</td><td><span class=l>L1</span></td></tr><tr><td>讀數夠但同質</td><td><b>24080</b></td><td><code>C_cohesive_homogeneous</code></td><td>median n=59.0</td><td><span class=l>L1</span></td></tr><tr><td>同質-single label</td><td><b>2201</b></td><td><code>C_single_label</code></td><td>+multi21879=24080 ✓</td><td><span class=l>L1</span></td></tr><tr><td>multi-label 有a-priori訊號</td><td><b>20222 (92.4%)</b></td><td><code>cantsplit_apriori_rescue.C_multi_ANY_apriori_sig</code></td><td>matched 21879</td><td><span class=l>L1</span></td></tr><tr><td>其中真subclone軸(SubcloneDbeta)</td><td><b>3090</b></td><td><code>C_multi_subclone_dbeta_sig</code></td><td>14.1%</td><td><span class=l>L1</span></td></tr><tr><td>真null(所有軸)</td><td><b>1657</b></td><td><code>C_multi_truly_null</code></td><td>+sig20222=21879 ✓</td><td><span class=l>L1</span></td></tr></table>
+<p class="muted"><b>切不出 ≠ 沒讀數</b>（同質組 median 59.0 reads）<b>≠ 沒訊號</b>（multi-label 92.4% 有 a-priori 訊號，真 null 只 7.6%）。深層原因：clustering 要「離散雙峰 gap」、a-priori 檢定只要「平均差」；切不出多為 mean-shift/漸層 → silhouette 過不了門檻 → 正確回 1 群。k-sweep 精煉「已可分群的 5997」、不救切不出的 24493。</p>
+
+<h2>④ FDR-顯著位點熱圖工作站（69 項·肉眼確認）</h2>
+<div class="legend"><b>軸定義</b>：ALLELE=anchor位點ALT/REF(anchor專一) · HP=親代染色體{1,1-1}|{2,2-1} · <b>CARRIER</b>=germline相位塊{1,2} vs <b>somatic相位塊{1-1,2-1}</b>(合併HP,非anchor ALT,源碼ReadParser.cpp:154「somatic phase block」;carrier沿用pipeline SubcloneDbeta用語)。<br>每張：左側欄 <b>k=2 | align-k</b>(cluster 著色) · <b>HP</b>(藍HP1/橙HP2) · <b>carr</b>(綠germline相位/紅somatic相位塊) · <b>alle</b>(紫REF/黃ALT) · <b>str</b>(±)；右為甲基熱圖（藍=0 未甲基→紅=1 甲基，白=NA）。<b>看點</b>：k=2 那欄只 2 色（silhouette 的切法），align-k 那欄多 1 色且其邊界是否與某條生物側欄（HP/carr/alle）對齊 → 對齊=真子結構；若 align-k 切在 homopolymer/coverage 假象則 ✗。</div>
+<div class="toolbar"><span id="cnt"></span><label>軸篩選 <select id="fax" onchange="filt()"><option value="all">全部</option><option value="carrier">CARRIER</option><option value="hp">HP</option><option value="allele">ALLELE</option></select></label><button onclick="expt()">⬇ 匯出判讀 CSV</button><span class="muted">(判讀存 localStorage)</span></div>
+<div class="cards"><div class="card" data-axes="carrier,allele" data-dv="0.761" data-key="chr13_27926391">
+ <div class="ch"><b>chr13:27926391</b> <span class="muted">n=56 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.761</span> <span class="b b-allele">ALLELE dV=0.55</span></div>
+ <div class="cm" title="sil k=2 V=0.0 → align k=3 V=0.761 | dV=0.761 | p_bonf=1.8e-07">sil k=2 V=0.0 → align k=3 V=0.761 | dV=0.761 | p_bonf=1.8e-07</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr13_27926391.png"/>
+ <div class="verdict" data-key="chr13_27926391">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.725" data-key="chr5_171778997">
+ <div class="ch"><b>chr5:171778997</b> <span class="muted">n=56 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.725</span></div>
+ <div class="cm" title="sil k=2 V=0.0 → align k=3 V=0.725 | dV=0.725 | p_bonf=8.1e-07">sil k=2 V=0.0 → align k=3 V=0.725 | dV=0.725 | p_bonf=8.1e-07</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr5_171778997.png"/>
+ <div class="verdict" data-key="chr5_171778997">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.711" data-key="chr13_36474177">
+ <div class="ch"><b>chr13:36474177</b> <span class="muted">n=50 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.711</span></div>
+ <div class="cm" title="sil k=2 V=0.0 → align k=3 V=0.711 | dV=0.711 | p_bonf=6.4e-06">sil k=2 V=0.0 → align k=3 V=0.711 | dV=0.711 | p_bonf=6.4e-06</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr13_36474177.png"/>
+ <div class="verdict" data-key="chr13_36474177">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.602" data-key="chr8_131074695">
+ <div class="ch"><b>chr8:131074695</b> <span class="muted">n=140 · primary=allele</span> <span class="b b-carrier">CARRIER dV=0.581</span> <span class="b b-allele">ALLELE dV=0.602</span></div>
+ <div class="cm" title="sil k=2 V=0.287 → align k=3 V=0.889 | dV=0.602 | p_bonf=3.0e-24">sil k=2 V=0.287 → align k=3 V=0.889 | dV=0.602 | p_bonf=3.0e-24</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr8_131074695.png"/>
+ <div class="verdict" data-key="chr8_131074695">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.58" data-key="chr14_82083206">
+ <div class="ch"><b>chr14:82083206</b> <span class="muted">n=77 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.58</span> <span class="b b-allele">ALLELE dV=0.58</span></div>
+ <div class="cm" title="sil k=2 V=0.362 → align k=3 V=0.941 | dV=0.58 | p_bonf=3.1e-15">sil k=2 V=0.362 → align k=3 V=0.941 | dV=0.58 | p_bonf=3.1e-15</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr14_82083206.png"/>
+ <div class="verdict" data-key="chr14_82083206">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.56" data-key="chr16_26668968">
+ <div class="ch"><b>chr16:26668968</b> <span class="muted">n=78 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.56</span> <span class="b b-allele">ALLELE dV=0.386</span></div>
+ <div class="cm" title="sil k=2 V=0.183 → align k=4 V=0.743 | dV=0.56 | p_bonf=9.3e-09">sil k=2 V=0.183 → align k=4 V=0.743 | dV=0.56 | p_bonf=9.3e-09</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr16_26668968.png"/>
+ <div class="verdict" data-key="chr16_26668968">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.549" data-key="chr8_54923901">
+ <div class="ch"><b>chr8:54923901</b> <span class="muted">n=47 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.549</span> <span class="b b-allele">ALLELE dV=0.445</span></div>
+ <div class="cm" title="sil k=2 V=0.21 → align k=3 V=0.759 | dV=0.549 | p_bonf=2.7e-06">sil k=2 V=0.21 → align k=3 V=0.759 | dV=0.549 | p_bonf=2.7e-06</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr8_54923901.png"/>
+ <div class="verdict" data-key="chr8_54923901">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.54" data-key="chr9_101079449">
+ <div class="ch"><b>chr9:101079449</b> <span class="muted">n=78 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.54</span> <span class="b b-allele">ALLELE dV=0.54</span></div>
+ <div class="cm" title="sil k=2 V=0.4 → align k=3 V=0.94 | dV=0.54 | p_bonf=2.1e-15">sil k=2 V=0.4 → align k=3 V=0.94 | dV=0.54 | p_bonf=2.1e-15</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr9_101079449.png"/>
+ <div class="verdict" data-key="chr9_101079449">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.528" data-key="chr3_140197939">
+ <div class="ch"><b>chr3:140197939</b> <span class="muted">n=77 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.528</span> <span class="b b-allele">ALLELE dV=0.528</span></div>
+ <div class="cm" title="sil k=2 V=0.399 → align k=4 V=0.927 | dV=0.528 | p_bonf=8.4e-14">sil k=2 V=0.399 → align k=4 V=0.927 | dV=0.528 | p_bonf=8.4e-14</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr3_140197939.png"/>
+ <div class="verdict" data-key="chr3_140197939">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.525" data-key="chr4_46583851">
+ <div class="ch"><b>chr4:46583851</b> <span class="muted">n=45 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.525</span></div>
+ <div class="cm" title="sil k=2 V=0.206 → align k=3 V=0.73 | dV=0.525 | p_bonf=1.8e-05">sil k=2 V=0.206 → align k=3 V=0.73 | dV=0.525 | p_bonf=1.8e-05</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr4_46583851.png"/>
+ <div class="verdict" data-key="chr4_46583851">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp,carrier,allele" data-dv="0.517" data-key="chr9_99576318">
+ <div class="ch"><b>chr9:99576318</b> <span class="muted">n=58 · primary=hp</span> <span class="b b-hp">HP dV=0.517</span> <span class="b b-carrier">CARRIER dV=0.463</span> <span class="b b-allele">ALLELE dV=0.463</span></div>
+ <div class="cm" title="sil k=2 V=0.483 → align k=3 V=1.0 | dV=0.517 | p_bonf=5.1e-13">sil k=2 V=0.483 → align k=3 V=1.0 | dV=0.517 | p_bonf=5.1e-13</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr9_99576318.png"/>
+ <div class="verdict" data-key="chr9_99576318">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp,carrier,allele" data-dv="0.501" data-key="chr7_38980430">
+ <div class="ch"><b>chr7:38980430</b> <span class="muted">n=62 · primary=hp</span> <span class="b b-hp">HP dV=0.501</span> <span class="b b-carrier">CARRIER dV=0.501</span> <span class="b b-allele">ALLELE dV=0.501</span></div>
+ <div class="cm" title="sil k=2 V=0.468 → align k=3 V=0.968 | dV=0.501 | p_bonf=4.8e-13">sil k=2 V=0.468 → align k=3 V=0.968 | dV=0.501 | p_bonf=4.8e-13</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr7_38980430.png"/>
+ <div class="verdict" data-key="chr7_38980430">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.501" data-key="chr16_25852409">
+ <div class="ch"><b>chr16:25852409</b> <span class="muted">n=86 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.501</span></div>
+ <div class="cm" title="sil k=2 V=0.166 → align k=4 V=0.668 | dV=0.501 | p_bonf=9.6e-08">sil k=2 V=0.166 → align k=4 V=0.668 | dV=0.501 | p_bonf=9.6e-08</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr16_25852409.png"/>
+ <div class="verdict" data-key="chr16_25852409">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="allele" data-dv="0.501" data-key="chr20_24432633">
+ <div class="ch"><b>chr20:24432633</b> <span class="muted">n=49 · primary=allele</span> <span class="b b-allele">ALLELE dV=0.501</span></div>
+ <div class="cm" title="sil k=2 V=0.457 → align k=3 V=0.958 | dV=0.501 | p_bonf=3.4e-10">sil k=2 V=0.457 → align k=3 V=0.958 | dV=0.501 | p_bonf=3.4e-10</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr20_24432633.png"/>
+ <div class="verdict" data-key="chr20_24432633">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.496" data-key="chr1_46939831">
+ <div class="ch"><b>chr1:46939831</b> <span class="muted">n=55 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.496</span> <span class="b b-allele">ALLELE dV=0.47</span></div>
+ <div class="cm" title="sil k=2 V=0.395 → align k=3 V=0.891 | dV=0.496 | p_bonf=6.7e-10">sil k=2 V=0.395 → align k=3 V=0.891 | dV=0.496 | p_bonf=6.7e-10</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr1_46939831.png"/>
+ <div class="verdict" data-key="chr1_46939831">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp" data-dv="0.491" data-key="chr18_52887931">
+ <div class="ch"><b>chr18:52887931</b> <span class="muted">n=55 · primary=hp</span> <span class="b b-hp">HP dV=0.491</span></div>
+ <div class="cm" title="sil k=2 V=0.473 → align k=3 V=0.964 | dV=0.491 | p_bonf=2.4e-11">sil k=2 V=0.473 → align k=3 V=0.964 | dV=0.491 | p_bonf=2.4e-11</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr18_52887931.png"/>
+ <div class="verdict" data-key="chr18_52887931">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp,carrier,allele" data-dv="0.489" data-key="chr14_27887179">
+ <div class="ch"><b>chr14:27887179</b> <span class="muted">n=64 · primary=carrier</span> <span class="b b-hp">HP dV=0.46</span> <span class="b b-carrier">CARRIER dV=0.489</span> <span class="b b-allele">ALLELE dV=0.489</span></div>
+ <div class="cm" title="sil k=2 V=0.293 → align k=3 V=0.782 | dV=0.489 | p_bonf=1.3e-08">sil k=2 V=0.293 → align k=3 V=0.782 | dV=0.489 | p_bonf=1.3e-08</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr14_27887179.png"/>
+ <div class="verdict" data-key="chr14_27887179">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp,carrier,allele" data-dv="0.481" data-key="chr4_64511795">
+ <div class="ch"><b>chr4:64511795</b> <span class="muted">n=51 · primary=hp</span> <span class="b b-hp">HP dV=0.481</span> <span class="b b-carrier">CARRIER dV=0.481</span> <span class="b b-allele">ALLELE dV=0.481</span></div>
+ <div class="cm" title="sil k=2 V=0.444 → align k=3 V=0.925 | dV=0.481 | p_bonf=1.0e-09">sil k=2 V=0.444 → align k=3 V=0.925 | dV=0.481 | p_bonf=1.0e-09</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr4_64511795.png"/>
+ <div class="verdict" data-key="chr4_64511795">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.468" data-key="chr1_164174209">
+ <div class="ch"><b>chr1:164174209</b> <span class="muted">n=62 · primary=allele</span> <span class="b b-carrier">CARRIER dV=0.366</span> <span class="b b-allele">ALLELE dV=0.468</span></div>
+ <div class="cm" title="sil k=2 V=0.454 → align k=3 V=0.923 | dV=0.468 | p_bonf=6.9e-12">sil k=2 V=0.454 → align k=3 V=0.923 | dV=0.468 | p_bonf=6.9e-12</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr1_164174209.png"/>
+ <div class="verdict" data-key="chr1_164174209">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp,allele" data-dv="0.462" data-key="chr20_39492762">
+ <div class="ch"><b>chr20:39492762</b> <span class="muted">n=59 · primary=hp</span> <span class="b b-hp">HP dV=0.462</span> <span class="b b-allele">ALLELE dV=0.462</span></div>
+ <div class="cm" title="sil k=2 V=0.538 → align k=4 V=1.0 | dV=0.462 | p_bonf=2.9e-12">sil k=2 V=0.538 → align k=4 V=1.0 | dV=0.462 | p_bonf=2.9e-12</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr20_39492762.png"/>
+ <div class="verdict" data-key="chr20_39492762">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.459" data-key="chr19_31097596">
+ <div class="ch"><b>chr19:31097596</b> <span class="muted">n=91 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.459</span></div>
+ <div class="cm" title="sil k=2 V=0.464 → align k=4 V=0.923 | dV=0.459 | p_bonf=3.1e-16">sil k=2 V=0.464 → align k=4 V=0.923 | dV=0.459 | p_bonf=3.1e-16</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr19_31097596.png"/>
+ <div class="verdict" data-key="chr19_31097596">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.454" data-key="chr6_153379864">
+ <div class="ch"><b>chr6:153379864</b> <span class="muted">n=54 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.454</span> <span class="b b-allele">ALLELE dV=0.454</span></div>
+ <div class="cm" title="sil k=2 V=0.473 → align k=3 V=0.927 | dV=0.454 | p_bonf=1.7e-10">sil k=2 V=0.473 → align k=3 V=0.927 | dV=0.454 | p_bonf=1.7e-10</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr6_153379864.png"/>
+ <div class="verdict" data-key="chr6_153379864">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp,carrier,allele" data-dv="0.453" data-key="chr5_23158942">
+ <div class="ch"><b>chr5:23158942</b> <span class="muted">n=66 · primary=carrier</span> <span class="b b-hp">HP dV=0.428</span> <span class="b b-carrier">CARRIER dV=0.453</span> <span class="b b-allele">ALLELE dV=0.453</span></div>
+ <div class="cm" title="sil k=2 V=0.488 → align k=3 V=0.941 | dV=0.453 | p_bonf=4.2e-13">sil k=2 V=0.488 → align k=3 V=0.941 | dV=0.453 | p_bonf=4.2e-13</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr5_23158942.png"/>
+ <div class="verdict" data-key="chr5_23158942">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp" data-dv="0.453" data-key="chr14_47138874">
+ <div class="ch"><b>chr14:47138874</b> <span class="muted">n=57 · primary=hp</span> <span class="b b-hp">HP dV=0.453</span></div>
+ <div class="cm" title="sil k=2 V=0.225 → align k=3 V=0.678 | dV=0.453 | p_bonf=4.1e-06">sil k=2 V=0.225 → align k=3 V=0.678 | dV=0.453 | p_bonf=4.1e-06</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr14_47138874.png"/>
+ <div class="verdict" data-key="chr14_47138874">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp,carrier" data-dv="0.435" data-key="chr10_42708307">
+ <div class="ch"><b>chr10:42708307</b> <span class="muted">n=124 · primary=hp</span> <span class="b b-hp">HP dV=0.435</span> <span class="b b-carrier">CARRIER dV=0.179</span></div>
+ <div class="cm" title="sil k=2 V=0.324 → align k=3 V=0.76 | dV=0.435 | p_bonf=5.7e-16">sil k=2 V=0.324 → align k=3 V=0.76 | dV=0.435 | p_bonf=5.7e-16</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr10_42708307.png"/>
+ <div class="verdict" data-key="chr10_42708307">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.434" data-key="chr10_133086186">
+ <div class="ch"><b>chr10:133086186</b> <span class="muted">n=62 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.434</span></div>
+ <div class="cm" title="sil k=2 V=0.4 → align k=4 V=0.834 | dV=0.434 | p_bonf=6.8e-09">sil k=2 V=0.4 → align k=4 V=0.834 | dV=0.434 | p_bonf=6.8e-09</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr10_133086186.png"/>
+ <div class="verdict" data-key="chr10_133086186">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.432" data-key="chr9_104637429">
+ <div class="ch"><b>chr9:104637429</b> <span class="muted">n=71 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.432</span></div>
+ <div class="cm" title="sil k=2 V=0.274 → align k=3 V=0.706 | dV=0.432 | p_bonf=4.1e-08">sil k=2 V=0.274 → align k=3 V=0.706 | dV=0.432 | p_bonf=4.1e-08</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr9_104637429.png"/>
+ <div class="verdict" data-key="chr9_104637429">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.429" data-key="chr8_54544195">
+ <div class="ch"><b>chr8:54544195</b> <span class="muted">n=58 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.429</span> <span class="b b-allele">ALLELE dV=0.39</span></div>
+ <div class="cm" title="sil k=2 V=0.439 → align k=3 V=0.869 | dV=0.429 | p_bonf=6.3e-10">sil k=2 V=0.439 → align k=3 V=0.869 | dV=0.429 | p_bonf=6.3e-10</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr8_54544195.png"/>
+ <div class="verdict" data-key="chr8_54544195">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.426" data-key="chr1_166963303">
+ <div class="ch"><b>chr1:166963303</b> <span class="muted">n=60 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.426</span></div>
+ <div class="cm" title="sil k=2 V=0.536 → align k=3 V=0.962 | dV=0.426 | p_bonf=1.8e-12">sil k=2 V=0.536 → align k=3 V=0.962 | dV=0.426 | p_bonf=1.8e-12</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr1_166963303.png"/>
+ <div class="verdict" data-key="chr1_166963303">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.416" data-key="chr2_50295424">
+ <div class="ch"><b>chr2:50295424</b> <span class="muted">n=48 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.416</span> <span class="b b-allele">ALLELE dV=0.389</span></div>
+ <div class="cm" title="sil k=2 V=0.419 → align k=3 V=0.835 | dV=0.416 | p_bonf=1.6e-07">sil k=2 V=0.419 → align k=3 V=0.835 | dV=0.416 | p_bonf=1.6e-07</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr2_50295424.png"/>
+ <div class="verdict" data-key="chr2_50295424">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.411" data-key="chr18_40686049">
+ <div class="ch"><b>chr18:40686049</b> <span class="muted">n=77 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.411</span></div>
+ <div class="cm" title="sil k=2 V=0.319 → align k=3 V=0.73 | dV=0.411 | p_bonf=2.5e-09">sil k=2 V=0.319 → align k=3 V=0.73 | dV=0.411 | p_bonf=2.5e-09</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr18_40686049.png"/>
+ <div class="verdict" data-key="chr18_40686049">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="allele" data-dv="0.402" data-key="chr1_50054524">
+ <div class="ch"><b>chr1:50054524</b> <span class="muted">n=58 · primary=allele</span> <span class="b b-allele">ALLELE dV=0.402</span></div>
+ <div class="cm" title="sil k=2 V=0.564 → align k=3 V=0.966 | dV=0.402 | p_bonf=3.6e-12">sil k=2 V=0.564 → align k=3 V=0.966 | dV=0.402 | p_bonf=3.6e-12</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr1_50054524.png"/>
+ <div class="verdict" data-key="chr1_50054524">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.394" data-key="chr8_131120575">
+ <div class="ch"><b>chr8:131120575</b> <span class="muted">n=118 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.394</span></div>
+ <div class="cm" title="sil k=2 V=0.205 → align k=4 V=0.599 | dV=0.394 | p_bonf=1.4e-08">sil k=2 V=0.205 → align k=4 V=0.599 | dV=0.394 | p_bonf=1.4e-08</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr8_131120575.png"/>
+ <div class="verdict" data-key="chr8_131120575">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.381" data-key="chr3_75464226">
+ <div class="ch"><b>chr3:75464226</b> <span class="muted">n=66 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.381</span></div>
+ <div class="cm" title="sil k=2 V=0.229 → align k=3 V=0.61 | dV=0.381 | p_bonf=9.2e-06">sil k=2 V=0.229 → align k=3 V=0.61 | dV=0.381 | p_bonf=9.2e-06</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr3_75464226.png"/>
+ <div class="verdict" data-key="chr3_75464226">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.38" data-key="chr7_61845940">
+ <div class="ch"><b>chr7:61845940</b> <span class="muted">n=146 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.38</span> <span class="b b-allele">ALLELE dV=0.368</span></div>
+ <div class="cm" title="sil k=2 V=0.385 → align k=3 V=0.765 | dV=0.38 | p_bonf=5.5e-19">sil k=2 V=0.385 → align k=3 V=0.765 | dV=0.38 | p_bonf=5.5e-19</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr7_61845940.png"/>
+ <div class="verdict" data-key="chr7_61845940">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="allele" data-dv="0.37" data-key="chr18_53413208">
+ <div class="ch"><b>chr18:53413208</b> <span class="muted">n=97 · primary=allele</span> <span class="b b-allele">ALLELE dV=0.37</span></div>
+ <div class="cm" title="sil k=2 V=0.582 → align k=3 V=0.952 | dV=0.37 | p_bonf=2.4e-19">sil k=2 V=0.582 → align k=3 V=0.952 | dV=0.37 | p_bonf=2.4e-19</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr18_53413208.png"/>
+ <div class="verdict" data-key="chr18_53413208">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.368" data-key="chr10_128763850">
+ <div class="ch"><b>chr10:128763850</b> <span class="muted">n=70 · primary=allele</span> <span class="b b-carrier">CARRIER dV=0.322</span> <span class="b b-allele">ALLELE dV=0.368</span></div>
+ <div class="cm" title="sil k=2 V=0.569 → align k=3 V=0.937 | dV=0.368 | p_bonf=1.3e-13">sil k=2 V=0.569 → align k=3 V=0.937 | dV=0.368 | p_bonf=1.3e-13</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr10_128763850.png"/>
+ <div class="verdict" data-key="chr10_128763850">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp,allele" data-dv="0.364" data-key="chr5_16107933">
+ <div class="ch"><b>chr5:16107933</b> <span class="muted">n=107 · primary=hp</span> <span class="b b-hp">HP dV=0.364</span> <span class="b b-allele">ALLELE dV=0.364</span></div>
+ <div class="cm" title="sil k=2 V=0.563 → align k=3 V=0.927 | dV=0.364 | p_bonf=2.2e-20">sil k=2 V=0.563 → align k=3 V=0.927 | dV=0.364 | p_bonf=2.2e-20</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr5_16107933.png"/>
+ <div class="verdict" data-key="chr5_16107933">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.364" data-key="chr20_62790676">
+ <div class="ch"><b>chr20:62790676</b> <span class="muted">n=92 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.364</span></div>
+ <div class="cm" title="sil k=2 V=0.337 → align k=3 V=0.701 | dV=0.364 | p_bonf=3.1e-10">sil k=2 V=0.337 → align k=3 V=0.701 | dV=0.364 | p_bonf=3.1e-10</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr20_62790676.png"/>
+ <div class="verdict" data-key="chr20_62790676">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.357" data-key="chr7_68530172">
+ <div class="ch"><b>chr7:68530172</b> <span class="muted">n=70 · primary=allele</span> <span class="b b-carrier">CARRIER dV=0.171</span> <span class="b b-allele">ALLELE dV=0.357</span></div>
+ <div class="cm" title="sil k=2 V=0.587 → align k=3 V=0.944 | dV=0.357 | p_bonf=5.8e-14">sil k=2 V=0.587 → align k=3 V=0.944 | dV=0.357 | p_bonf=5.8e-14</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr7_68530172.png"/>
+ <div class="verdict" data-key="chr7_68530172">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.355" data-key="chr15_97298024">
+ <div class="ch"><b>chr15:97298024</b> <span class="muted">n=100 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.355</span> <span class="b b-allele">ALLELE dV=0.283</span></div>
+ <div class="cm" title="sil k=2 V=0.167 → align k=3 V=0.522 | dV=0.355 | p_bonf=2.4e-06">sil k=2 V=0.167 → align k=3 V=0.522 | dV=0.355 | p_bonf=2.4e-06</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr15_97298024.png"/>
+ <div class="verdict" data-key="chr15_97298024">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp,carrier,allele" data-dv="0.351" data-key="chr2_210994618">
+ <div class="ch"><b>chr2:210994618</b> <span class="muted">n=67 · primary=hp</span> <span class="b b-hp">HP dV=0.351</span> <span class="b b-carrier">CARRIER dV=0.34</span> <span class="b b-allele">ALLELE dV=0.339</span></div>
+ <div class="cm" title="sil k=2 V=0.426 → align k=3 V=0.776 | dV=0.351 | p_bonf=6.8e-09">sil k=2 V=0.426 → align k=3 V=0.776 | dV=0.351 | p_bonf=6.8e-09</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr2_210994618.png"/>
+ <div class="verdict" data-key="chr2_210994618">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.347" data-key="chr8_54503549">
+ <div class="ch"><b>chr8:54503549</b> <span class="muted">n=58 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.347</span> <span class="b b-allele">ALLELE dV=0.347</span></div>
+ <div class="cm" title="sil k=2 V=0.549 → align k=3 V=0.896 | dV=0.347 | p_bonf=2.3e-10">sil k=2 V=0.549 → align k=3 V=0.896 | dV=0.347 | p_bonf=2.3e-10</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr8_54503549.png"/>
+ <div class="verdict" data-key="chr8_54503549">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.344" data-key="chr15_98268665">
+ <div class="ch"><b>chr15:98268665</b> <span class="muted">n=124 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.344</span> <span class="b b-allele">ALLELE dV=0.296</span></div>
+ <div class="cm" title="sil k=2 V=0.525 → align k=4 V=0.869 | dV=0.344 | p_bonf=1.0e-19">sil k=2 V=0.525 → align k=4 V=0.869 | dV=0.344 | p_bonf=1.0e-19</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr15_98268665.png"/>
+ <div class="verdict" data-key="chr15_98268665">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.341" data-key="chr15_98268664">
+ <div class="ch"><b>chr15:98268664</b> <span class="muted">n=125 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.341</span> <span class="b b-allele">ALLELE dV=0.294</span></div>
+ <div class="cm" title="sil k=2 V=0.522 → align k=4 V=0.864 | dV=0.341 | p_bonf=1.3e-19">sil k=2 V=0.522 → align k=4 V=0.864 | dV=0.341 | p_bonf=1.3e-19</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr15_98268664.png"/>
+ <div class="verdict" data-key="chr15_98268664">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp,carrier,allele" data-dv="0.34" data-key="chr5_24358627">
+ <div class="ch"><b>chr5:24358627</b> <span class="muted">n=91 · primary=hp</span> <span class="b b-hp">HP dV=0.34</span> <span class="b b-carrier">CARRIER dV=0.227</span> <span class="b b-allele">ALLELE dV=0.34</span></div>
+ <div class="cm" title="sil k=2 V=0.66 → align k=3 V=1.0 | dV=0.34 | p_bonf=3.5e-20">sil k=2 V=0.66 → align k=3 V=1.0 | dV=0.34 | p_bonf=3.5e-20</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr5_24358627.png"/>
+ <div class="verdict" data-key="chr5_24358627">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp,allele" data-dv="0.336" data-key="chr5_41104705">
+ <div class="ch"><b>chr5:41104705</b> <span class="muted">n=55 · primary=allele</span> <span class="b b-hp">HP dV=0.283</span> <span class="b b-allele">ALLELE dV=0.336</span></div>
+ <div class="cm" title="sil k=2 V=0.359 → align k=3 V=0.696 | dV=0.336 | p_bonf=6.6e-06">sil k=2 V=0.359 → align k=3 V=0.696 | dV=0.336 | p_bonf=6.6e-06</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr5_41104705.png"/>
+ <div class="verdict" data-key="chr5_41104705">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.325" data-key="chr2_57794196">
+ <div class="ch"><b>chr2:57794196</b> <span class="muted">n=75 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.325</span> <span class="b b-allele">ALLELE dV=0.199</span></div>
+ <div class="cm" title="sil k=2 V=0.2 → align k=3 V=0.525 | dV=0.325 | p_bonf=6.5e-05">sil k=2 V=0.2 → align k=3 V=0.525 | dV=0.325 | p_bonf=6.5e-05</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr2_57794196.png"/>
+ <div class="verdict" data-key="chr2_57794196">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp" data-dv="0.315" data-key="chr3_173340646">
+ <div class="ch"><b>chr3:173340646</b> <span class="muted">n=59 · primary=hp</span> <span class="b b-hp">HP dV=0.315</span></div>
+ <div class="cm" title="sil k=2 V=0.467 → align k=3 V=0.783 | dV=0.315 | p_bonf=4.3e-08">sil k=2 V=0.467 → align k=3 V=0.783 | dV=0.315 | p_bonf=4.3e-08</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr3_173340646.png"/>
+ <div class="verdict" data-key="chr3_173340646">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp" data-dv="0.315" data-key="chr14_29261416">
+ <div class="ch"><b>chr14:29261416</b> <span class="muted">n=57 · primary=hp</span> <span class="b b-hp">HP dV=0.315</span></div>
+ <div class="cm" title="sil k=2 V=0.451 → align k=3 V=0.766 | dV=0.315 | p_bonf=1.6e-07">sil k=2 V=0.451 → align k=3 V=0.766 | dV=0.315 | p_bonf=1.6e-07</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr14_29261416.png"/>
+ <div class="verdict" data-key="chr14_29261416">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.315" data-key="chr7_103509473">
+ <div class="ch"><b>chr7:103509473</b> <span class="muted">n=84 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.315</span></div>
+ <div class="cm" title="sil k=2 V=0.323 → align k=4 V=0.638 | dV=0.315 | p_bonf=5.3e-07">sil k=2 V=0.323 → align k=4 V=0.638 | dV=0.315 | p_bonf=5.3e-07</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr7_103509473.png"/>
+ <div class="verdict" data-key="chr7_103509473">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.314" data-key="chr10_129968942">
+ <div class="ch"><b>chr10:129968942</b> <span class="muted">n=80 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.314</span> <span class="b b-allele">ALLELE dV=0.262</span></div>
+ <div class="cm" title="sil k=2 V=0.299 → align k=3 V=0.613 | dV=0.314 | p_bonf=6.0e-07">sil k=2 V=0.299 → align k=3 V=0.613 | dV=0.314 | p_bonf=6.0e-07</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr10_129968942.png"/>
+ <div class="verdict" data-key="chr10_129968942">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.313" data-key="chr19_33680572">
+ <div class="ch"><b>chr19:33680572</b> <span class="muted">n=85 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.313</span> <span class="b b-allele">ALLELE dV=0.313</span></div>
+ <div class="cm" title="sil k=2 V=0.602 → align k=4 V=0.915 | dV=0.313 | p_bonf=7.0e-15">sil k=2 V=0.602 → align k=4 V=0.915 | dV=0.313 | p_bonf=7.0e-15</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr19_33680572.png"/>
+ <div class="verdict" data-key="chr19_33680572">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp,allele" data-dv="0.296" data-key="chr16_21284617">
+ <div class="ch"><b>chr16:21284617</b> <span class="muted">n=121 · primary=hp</span> <span class="b b-hp">HP dV=0.296</span> <span class="b b-allele">ALLELE dV=0.296</span></div>
+ <div class="cm" title="sil k=2 V=0.35 → align k=3 V=0.646 | dV=0.296 | p_bonf=2.2e-11">sil k=2 V=0.35 → align k=3 V=0.646 | dV=0.296 | p_bonf=2.2e-11</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr16_21284617.png"/>
+ <div class="verdict" data-key="chr16_21284617">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.285" data-key="chr15_98396959">
+ <div class="ch"><b>chr15:98396959</b> <span class="muted">n=120 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.285</span></div>
+ <div class="cm" title="sil k=2 V=0.389 → align k=3 V=0.675 | dV=0.285 | p_bonf=2.8e-12">sil k=2 V=0.389 → align k=3 V=0.675 | dV=0.285 | p_bonf=2.8e-12</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr15_98396959.png"/>
+ <div class="verdict" data-key="chr15_98396959">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.264" data-key="chr14_93647512">
+ <div class="ch"><b>chr14:93647512</b> <span class="muted">n=133 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.264</span> <span class="b b-allele">ALLELE dV=0.231</span></div>
+ <div class="cm" title="sil k=2 V=0.59 → align k=4 V=0.853 | dV=0.264 | p_bonf=3.0e-20">sil k=2 V=0.59 → align k=4 V=0.853 | dV=0.264 | p_bonf=3.0e-20</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr14_93647512.png"/>
+ <div class="verdict" data-key="chr14_93647512">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp,carrier,allele" data-dv="0.258" data-key="chr7_119777645">
+ <div class="ch"><b>chr7:119777645</b> <span class="muted">n=117 · primary=carrier</span> <span class="b b-hp">HP dV=0.159</span> <span class="b b-carrier">CARRIER dV=0.258</span> <span class="b b-allele">ALLELE dV=0.159</span></div>
+ <div class="cm" title="sil k=2 V=0.347 → align k=3 V=0.605 | dV=0.258 | p_bonf=2.0e-09">sil k=2 V=0.347 → align k=3 V=0.605 | dV=0.258 | p_bonf=2.0e-09</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr7_119777645.png"/>
+ <div class="verdict" data-key="chr7_119777645">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.233" data-key="chr8_132100024">
+ <div class="ch"><b>chr8:132100024</b> <span class="muted">n=138 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.233</span></div>
+ <div class="cm" title="sil k=2 V=0.114 → align k=3 V=0.347 | dV=0.233 | p_bonf=4.9e-04">sil k=2 V=0.114 → align k=3 V=0.347 | dV=0.233 | p_bonf=4.9e-04</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr8_132100024.png"/>
+ <div class="verdict" data-key="chr8_132100024">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.214" data-key="chr17_68951991">
+ <div class="ch"><b>chr17:68951991</b> <span class="muted">n=106 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.214</span> <span class="b b-allele">ALLELE dV=0.214</span></div>
+ <div class="cm" title="sil k=2 V=0.386 → align k=3 V=0.6 | dV=0.214 | p_bonf=1.0e-08">sil k=2 V=0.386 → align k=3 V=0.6 | dV=0.214 | p_bonf=1.0e-08</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr17_68951991.png"/>
+ <div class="verdict" data-key="chr17_68951991">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier,allele" data-dv="0.189" data-key="chr15_99878690">
+ <div class="ch"><b>chr15:99878690</b> <span class="muted">n=111 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.189</span> <span class="b b-allele">ALLELE dV=0.189</span></div>
+ <div class="cm" title="sil k=2 V=0.286 → align k=3 V=0.475 | dV=0.189 | p_bonf=7.4e-06">sil k=2 V=0.286 → align k=3 V=0.475 | dV=0.189 | p_bonf=7.4e-06</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr15_99878690.png"/>
+ <div class="verdict" data-key="chr15_99878690">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.181" data-key="chr7_68905453">
+ <div class="ch"><b>chr7:68905453</b> <span class="muted">n=60 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.181</span></div>
+ <div class="cm" title="sil k=2 V=0.549 → align k=3 V=0.73 | dV=0.181 | p_bonf=2.3e-07">sil k=2 V=0.549 → align k=3 V=0.73 | dV=0.181 | p_bonf=2.3e-07</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr7_68905453.png"/>
+ <div class="verdict" data-key="chr7_68905453">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.179" data-key="chr7_146286505">
+ <div class="ch"><b>chr7:146286505</b> <span class="muted">n=94 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.179</span></div>
+ <div class="cm" title="sil k=2 V=0.294 → align k=3 V=0.473 | dV=0.179 | p_bonf=8.1e-05">sil k=2 V=0.294 → align k=3 V=0.473 | dV=0.179 | p_bonf=8.1e-05</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr7_146286505.png"/>
+ <div class="verdict" data-key="chr7_146286505">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.174" data-key="chr7_88787564">
+ <div class="ch"><b>chr7:88787564</b> <span class="muted">n=83 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.174</span></div>
+ <div class="cm" title="sil k=2 V=0.528 → align k=4 V=0.702 | dV=0.174 | p_bonf=2.1e-08">sil k=2 V=0.528 → align k=4 V=0.702 | dV=0.174 | p_bonf=2.1e-08</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr7_88787564.png"/>
+ <div class="verdict" data-key="chr7_88787564">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.15" data-key="chr3_187461755">
+ <div class="ch"><b>chr3:187461755</b> <span class="muted">n=57 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.15</span></div>
+ <div class="cm" title="sil k=2 V=0.726 → align k=3 V=0.876 | dV=0.15 | p_bonf=9.5e-10">sil k=2 V=0.726 → align k=3 V=0.876 | dV=0.15 | p_bonf=9.5e-10</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr3_187461755.png"/>
+ <div class="verdict" data-key="chr3_187461755">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.15" data-key="chr3_83745044">
+ <div class="ch"><b>chr3:83745044</b> <span class="muted">n=79 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.15</span></div>
+ <div class="cm" title="sil k=2 V=0.337 → align k=3 V=0.487 | dV=0.15 | p_bonf=1.7e-04">sil k=2 V=0.337 → align k=3 V=0.487 | dV=0.15 | p_bonf=1.7e-04</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr3_83745044.png"/>
+ <div class="verdict" data-key="chr3_83745044">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="hp" data-dv="0.148" data-key="chr6_60896556">
+ <div class="ch"><b>chr6:60896556</b> <span class="muted">n=52 · primary=hp</span> <span class="b b-hp">HP dV=0.148</span></div>
+ <div class="cm" title="sil k=2 V=0.533 → align k=3 V=0.681 | dV=0.148 | p_bonf=1.1e-05">sil k=2 V=0.533 → align k=3 V=0.681 | dV=0.148 | p_bonf=1.1e-05</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr6_60896556.png"/>
+ <div class="verdict" data-key="chr6_60896556">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.14" data-key="chr7_147748851">
+ <div class="ch"><b>chr7:147748851</b> <span class="muted">n=68 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.14</span></div>
+ <div class="cm" title="sil k=2 V=0.375 → align k=3 V=0.515 | dV=0.14 | p_bonf=2.4e-04">sil k=2 V=0.375 → align k=3 V=0.515 | dV=0.14 | p_bonf=2.4e-04</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr7_147748851.png"/>
+ <div class="verdict" data-key="chr7_147748851">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.129" data-key="chr17_21303695">
+ <div class="ch"><b>chr17:21303695</b> <span class="muted">n=85 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.129</span></div>
+ <div class="cm" title="sil k=2 V=0.663 → align k=3 V=0.791 | dV=0.129 | p_bonf=5.6e-12">sil k=2 V=0.663 → align k=3 V=0.791 | dV=0.129 | p_bonf=5.6e-12</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr17_21303695.png"/>
+ <div class="verdict" data-key="chr17_21303695">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div><div class="card" data-axes="carrier" data-dv="0.109" data-key="chr21_10353822">
+ <div class="ch"><b>chr21:10353822</b> <span class="muted">n=255 · primary=carrier</span> <span class="b b-carrier">CARRIER dV=0.109</span></div>
+ <div class="cm" title="sil k=2 V=0.245 → align k=3 V=0.354 | dV=0.109 | p_bonf=2.2e-07">sil k=2 V=0.245 → align k=3 V=0.354 | dV=0.109 | p_bonf=2.2e-07</div>
+ <img loading="lazy" src="figs_fdr/fdr_chr21_10353822.png"/>
+ <div class="verdict" data-key="chr21_10353822">
+   <button data-v="agree">✓ 真子結構</button><button data-v="doubt">? 存疑</button><button data-v="reject">✗ artifact</button>
+   <select class="reason"><option value="">理由…</option><option>雙峰清楚對齊乾淨</option><option>可能homopolymer</option><option>可能coverage假象</option><option>需normal cis-control</option><option>k過度切分</option></select>
+ </div></div></div>
+
+<div class="foot">build_commit 7789f4a · binary 5c39051(tumor=ClairS_pileup_v040/normal=5khz_simplex) · 數字注入自 ksweep_wg_summary/cantsplit_reasons/cantsplit_apriori_rescue/ksweep_fdr_loci.json(§13-A 缺 key refuse) · 熱圖 = fdr_loci_mini.vcf.gz 重跑 binary → plot_fdr_heatmaps.py · 單樣本 HCC1395 ⭐2 偵測非驗證 · 規則 feedback_verification_table_per_data_answer</div>
+</div><script>
+const LS='ksweep_fdr_ws_v1';
+function load(){return JSON.parse(localStorage.getItem(LS)||'{}')}
+function save(o){localStorage.setItem(LS,JSON.stringify(o))}
+function render(){const st=load();document.querySelectorAll('.verdict').forEach(v=>{const k=v.dataset.key,s=st[k]||{};v.querySelectorAll('button').forEach(b=>b.classList.toggle('on',s.v===b.dataset.v));const r=v.querySelector('.reason');if(r&&s.r!=null)r.value=s.r});updateCount()}
+document.addEventListener('click',e=>{if(e.target.matches('.verdict button')){const v=e.target.closest('.verdict'),k=v.dataset.key,st=load();st[k]=st[k]||{};st[k].v=e.target.dataset.v;save(st);render()}});
+document.addEventListener('change',e=>{if(e.target.matches('.reason')){const v=e.target.closest('.verdict'),k=v.dataset.key,st=load();st[k]=st[k]||{};st[k].r=e.target.value;save(st)}});
+function updateCount(){const st=load();let a=0,d=0,r=0;Object.values(st).forEach(s=>{if(s.v==='agree')a++;else if(s.v==='doubt')d++;else if(s.v==='reject')r++});document.getElementById('cnt').textContent=`判讀: ✓${a} ?${d} ✗${r} / ${document.querySelectorAll('.card').length}`}
+function filt(){const ax=document.getElementById('fax').value;document.querySelectorAll('.card').forEach(c=>{c.style.display=(ax==='all'||c.dataset.axes.includes(ax))?'':'none'})}
+function expt(){const st=load();let rows=[['key','verdict','reason']];document.querySelectorAll('.card').forEach(c=>{const k=c.dataset.key,s=st[k]||{};rows.push([k,s.v||'',s.r||''])});const csv=rows.map(r=>r.join(',')).join('\n');const bl=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='ksweep_fdr_verdicts.csv';a.click()}
+window.onload=render;
+</script></body></html>

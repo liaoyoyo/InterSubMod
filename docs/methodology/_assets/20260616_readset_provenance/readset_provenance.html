@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!-- provenance-verified: 所有數字注入自同層 readset_stats.json，本 session 由 significance_summary.csv 計算讀回 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISM 判定軸 read-set provenance — HCC1395</title>
+<style>
+  :root{--som:#2563eb;--germ:#d97706;--pool:#dc2626;--tumor:#059669;--ink:#1e293b;--mut:#64748b;--bg:#f8fafc;--card:#fff;--line:#e2e8f0}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI","Noto Sans CJK TC",sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;padding:24px;max-width:1180px;margin:0 auto}
+  h1{font-size:22px;margin-bottom:4px}
+  h2{font-size:16px;margin:26px 0 12px;padding-left:9px;border-left:4px solid var(--som)}
+  .ribbon{background:#fef3c7;border:1px solid #f59e0b;border-radius:7px;padding:9px 13px;font-size:13px;color:#92400e;margin:12px 0 18px}
+  .meta{font-size:12px;color:var(--mut);margin-bottom:8px}
+  .hero{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0}
+  .h-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;text-align:center}
+  .h-card .big{font-size:34px;font-weight:700;line-height:1}
+  .h-card .lab{font-size:12px;color:var(--mut);margin-top:7px}
+  .h-card .sub{font-size:11px;color:var(--mut);margin-top:3px}
+  .tumor .big{color:var(--tumor)} .contrast .big{color:var(--som)} .pool .big{color:var(--pool)}
+  .badge{display:inline-block;background:#dcfce7;color:#166534;border:1px solid #86efac;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600}
+  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:8px 0}
+  th,td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:#f1f5f9;font-weight:600;font-size:12px}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+  .bar{height:13px;border-radius:3px;display:inline-block;vertical-align:middle}
+  .grp{font-weight:700;background:#f8fafc}
+  .cat-A{border-left:3px solid var(--tumor)} .cat-B{border-left:3px solid var(--pool)} .cat-C{border-left:3px solid var(--som)}
+  .partition{display:flex;height:46px;border-radius:8px;overflow:hidden;border:1px solid var(--line);margin:10px 0;font-size:11px;color:#fff;font-weight:600}
+  .partition div{display:flex;align-items:center;justify-content:center;text-align:center}
+  .callout{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:13px 16px;font-size:13px;margin:14px 0}
+  .warn{background:#fef2f2;border-color:#fecaca}
+  .heat td.pct{font-variant-numeric:tabular-nums;text-align:right}
+  .foot{font-size:11px;color:var(--mut);margin-top:24px;border-top:1px solid var(--line);padding-top:10px}
+  code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12px}
+</style>
+</head>
+<body>
+
+<h1>ISM 判定軸的 read-set provenance 拆解</h1>
+<div class="meta">HCC1395 · paired (tumor+normal) · ±5000bp window · 全基因組 30,490 TP SNV · commit 990175d · 2026-06-16</div>
+<div class="ribbon">⚠️ <b>PARTIAL / 單樣本</b> — 軸門檻（AUC≥0.7、|Δβ|≥0.1）為 first-pass heuristic；跨樣本復現待補；勿當判別性 filter 結論。</div>
+
+<h2>前置確認：Δβ 計算範圍</h2>
+<p style="font-size:13px">
+<span class="badge">✅ 有界，非無限延伸</span>　所有 Δβ 吃同一個 in-window 甲基矩陣；CpG 在解析時依位置過濾
+（<code>ref_offset ∈ [0, ref_seq.size())</code>，MethylationParser.cpp:152-193）。50kb read 只貢獻落在 SNV±5000bp 內的 CpG，window 外丟棄。
+NumCpGs median=76、min=16、<code>&lt;10 CpG = 0%</code> → 確認 ±5000bp。
+</p>
+
+<h2>核心答案：tumor-only 可偵測 vs 需對照（佔 28,327 Significant）</h2>
+<div class="hero">
+  <div class="h-card tumor"><div class="big">48.0%</div><div class="lab">≥1 純 tumor 軸觸發</div><div class="sub">13,605 / 不需 normal 即偵測結構</div></div>
+  <div class="h-card contrast"><div class="big">55.5%</div><div class="lab">≥1 tumor-vs-normal 對照軸</div><div class="sub">15,722 / 需 normal 才驗證出</div></div>
+  <div class="h-card pool"><div class="big">28.6%</div><div class="lab">只靠混池軸（最弱）</div><div class="sub">8,103 / 無 tumor 也無對照佐證</div></div>
+</div>
+
+<h2>互斥四分桶</h2>
+<div class="partition">
+  <div style="width:32.1%;background:#0d9488">both 32.1%</div>
+  <div style="width:15.9%;background:#34d399;color:#064e3b">tumor-only 15.9%</div>
+  <div style="width:23.4%;background:#2563eb">contrast 23.4%</div>
+  <div style="width:28.6%;background:#dc2626">純混池 28.6%</div>
+</div>
+<p style="font-size:12px;color:#64748b">both=9,103 · tumor-only excl=4,502 · contrast excl=6,619 · neither(純混池)=8,103 · 合計 28,327</p>
+
+<h2>各軸觸發數（依 read-set 三類）</h2>
+<table>
+<tr><th>類別 / 軸</th><th class="n">觸發數</th><th class="n">佔 Sig</th><th style="width:34%">分佈</th></tr>
+<tr class="grp cat-A"><td>A. 純 TUMOR-only（不需 normal）</td><td></td><td></td><td></td></tr>
+<tr><td>within-HP multigroup</td><td class="n">8,077</td><td class="n">28.5%</td><td><span class="bar" style="width:28.5%;background:#059669"></span></td></tr>
+<tr><td>HP_AUC_Tumor≥0.7</td><td class="n">7,871</td><td class="n">27.8%</td><td><span class="bar" style="width:27.8%;background:#059669"></span></td></tr>
+<tr><td>Tumor_HP_Delta≥0.1</td><td class="n">2,513</td><td class="n">8.9%</td><td><span class="bar" style="width:8.9%;background:#059669"></span></td></tr>
+<tr class="grp cat-B"><td>B. ALL-pool（混池；偵測「有結構」但無法自證 somatic）</td><td></td><td></td><td></td></tr>
+<tr><td><b>cluster_match (Strong) — 骨幹</b></td><td class="n">22,310</td><td class="n">78.8%</td><td><span class="bar" style="width:78.8%;background:#dc2626"></span></td></tr>
+<tr><td>label-allele PERMANOVA</td><td class="n">27,009</td><td class="n">95.3%</td><td><span class="bar" style="width:95.3%;background:#dc2626"></span></td></tr>
+<tr><td>label-HP PERMANOVA</td><td class="n">24,875</td><td class="n">87.8%</td><td><span class="bar" style="width:87.8%;background:#dc2626"></span></td></tr>
+<tr><td>AlleleSig</td><td class="n">16,339</td><td class="n">57.7%</td><td><span class="bar" style="width:57.7%;background:#dc2626"></span></td></tr>
+<tr><td>HP_AUC_All≥0.7</td><td class="n">7,345</td><td class="n">25.9%</td><td><span class="bar" style="width:25.9%;background:#dc2626"></span></td></tr>
+<tr class="grp cat-C"><td>C. TUMOR-vs-NORMAL 對照（需 normal）</td><td></td><td></td><td></td></tr>
+<tr><td>HP_Residual_Sig <span style="color:#2563eb">(somatic)</span></td><td class="n">11,106</td><td class="n">39.2%</td><td><span class="bar" style="width:39.2%;background:#2563eb"></span></td></tr>
+<tr><td>GermlineAsmDbeta_Sig <span style="color:#d97706">(germline)</span></td><td class="n">7,733</td><td class="n">27.3%</td><td><span class="bar" style="width:27.3%;background:#d97706"></span></td></tr>
+<tr><td>SomaticResidualDbeta_Sig <span style="color:#2563eb">(somatic)</span></td><td class="n">3,031</td><td class="n">10.7%</td><td><span class="bar" style="width:10.7%;background:#2563eb"></span></td></tr>
+</table>
+
+<h2>per-VC 拆解</h2>
+<table class="heat">
+<tr><th>VerificationClass</th><th class="n">n</th><th class="n">tumor-only</th><th class="n">contrast</th><th class="n">somatic</th><th class="n">germline-only</th><th class="n">純混池</th></tr>
+<tr><td><b>Strong</b>（骨幹）</td><td class="n">22,310</td><td class="pct">48.7%</td><td class="pct">56.2%</td><td class="pct" style="color:#2563eb">40.7%</td><td class="pct" style="color:#d97706">15.4%</td><td class="pct" style="color:#dc2626">28.6%</td></tr>
+<tr><td><b>MultiGroupNoLabel</b></td><td class="n">1,899</td><td class="pct" style="color:#059669;font-weight:700">100.0%</td><td class="pct">57.3%</td><td class="pct" style="color:#2563eb">50.9%</td><td class="pct" style="color:#d97706">6.4%</td><td class="pct">0.0%</td></tr>
+<tr><td><b>LabelShift</b></td><td class="n">1,809</td><td class="pct">22.5%</td><td class="pct" style="color:#2563eb;font-weight:700">81.6%</td><td class="pct" style="color:#2563eb">54.1%</td><td class="pct" style="color:#d97706">27.5%</td><td class="pct">15.6%</td></tr>
+<tr><td><b>PermanovaLocation</b></td><td class="n">1,756</td><td class="pct">14.4%</td><td class="pct">27.3%</td><td class="pct" style="color:#2563eb">27.3%</td><td class="pct">0.0%</td><td class="pct" style="color:#dc2626;font-weight:700">65.1%</td></tr>
+<tr><td><b>LOH-Structure</b></td><td class="n">376</td><td class="pct">33.5%</td><td class="pct">33.0%</td><td class="pct" style="color:#2563eb">6.9%</td><td class="pct" style="color:#d97706">26.1%</td><td class="pct" style="color:#dc2626">44.9%</td></tr>
+<tr><td><b>StructureNoLabel</b></td><td class="n">177</td><td class="pct">29.9%</td><td class="pct">14.7%</td><td class="pct" style="color:#2563eb">14.7%</td><td class="pct">0.0%</td><td class="pct" style="color:#dc2626;font-weight:700">68.9%</td></tr>
+</table>
+
+<h2>關鍵含意</h2>
+<div class="callout">
+<b>判定的「有結構」≠「tumor 特異結構」。</b> 骨幹 Strong（佔 78.8% Significant）來自<b>混池 clustering</b>，其「有結構」可能是三件事的任一：(a) 真 tumor 子結構、(b) germline HP phasing（兩邊都有）、(c) 就只是把 tumor 和 normal reads 分開（sampleOrphan confound）。<b>判定本身分不出。</b>
+</div>
+<div class="callout warn">
+<b>28.6%（8,103）純靠混池軸、無任何 tumor 或對照佐證</b> → 最該被降級審視。其中 PermanovaLocation（65.1% 純混池）、StructureNoLabel（68.9%）為重災區。對 subclone 論文，應把 read-set provenance 做成判定維度，把「tumor 可自證 + 對照確認」與「純混池」分層。
+</div>
+
+<div class="foot">
+資料來源：<code>readset_stats.json</code>（本 session 由 <code>output/_wg_d1_unified/significance_summary.csv</code> 30,490 列計算讀回）。
+程式碼 trace @ commit 990175d (feat/summary-nreadsvalid)。
+觀察文件：<code>InterSubMod/docs/methodology/20260616_readset_provenance_observation_01.md</code>。
+⚠️ 單樣本 HCC1395 · ±5000bp · 軸門檻為 heuristic · 跨樣本待補。
+</div>
+
+</body>
+</html>

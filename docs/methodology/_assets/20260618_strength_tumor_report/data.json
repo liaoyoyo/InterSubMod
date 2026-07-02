@@ -1,0 +1,176 @@
+{
+  "_provenance": {
+    "wg_csv": "/big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/output/_wg_bdcprime_verify/significance_summary.csv",
+    "chr1_csv": "/big7_disk/liaoyoyo2001/InterSubMod/.claude/worktrees/ism-review-infra/output/_chr1_strength_verify/significance_summary.csv",
+    "adv": "/tmp/claude-1067/-big7-disk-liaoyoyo2001-InterSubMod/cefc6c0e-773a-4c0b-91d9-7e69e51bb8e3/tasks/wymplni99.output",
+    "commit": "5c39051 (D3 chain: 081a556/49a806a/44f434b/01bc9d3)"
+  },
+  "wg": {
+    "N": 30490,
+    "by_group": {
+      "structure": {
+        "n": 28333,
+        "old_pos": 19892,
+        "new_pos": 4868,
+        "old_mean": 0.602,
+        "new_mean": 0.14,
+        "old_pct": 70.2,
+        "new_pct": 17.2
+      },
+      "noise": {
+        "n": 461,
+        "old_pos": 422,
+        "new_pos": 33,
+        "old_mean": 0.879,
+        "new_mean": 0.064,
+        "old_pct": 91.5,
+        "new_pct": 7.2
+      }
+    },
+    "old_gap_pp": -21.3,
+    "new_gap_pp": 10.0
+  },
+  "grade_shift": {
+    "old": {
+      "B": 7755,
+      "C": 13229,
+      "E": 2379,
+      "D": 4952,
+      "A": 2175
+    },
+    "new": {
+      "B": 3622,
+      "D": 8639,
+      "E": 8923,
+      "C": 8664,
+      "A": 642
+    },
+    "noise_downgraded": 392
+  },
+  "chr1": {
+    "N": 2624,
+    "by_group": {
+      "structure": {
+        "n": 2405,
+        "pos": 416,
+        "pct": 17.3,
+        "gate_consistent": 2405
+      },
+      "noise": {
+        "n": 54,
+        "pos": 4,
+        "pct": 7.4,
+        "gate_consistent": 54
+      }
+    },
+    "gate_consistent_total": 2459,
+    "gate_total": 2459
+  },
+  "magnitude": {
+    "n_sig": 442,
+    "best_sil_min": 0.117,
+    "best_sil_med": 0.421,
+    "best_sil_max": 0.843,
+    "st_zero_pct": 0.0,
+    "st_sat_pct": 29.9
+  },
+  "depollution": {
+    "n": 48,
+    "with_apriori": 0,
+    "scope": "VC=Noise",
+    "cross_vc_total": 1630,
+    "cross_vc_non_noise": 1582,
+    "cross_vc_non_noise_with_marker": 502
+  },
+  "corroboration": {
+    "n_sig": 442,
+    "with_apriori": 199,
+    "pct": 45.0
+  },
+  "noise_sig": {
+    "n": 4,
+    "of": 2624,
+    "strong_p": 3,
+    "pct_of_genome": 0.15
+  },
+  "case_2274": {
+    "germline_n": 5,
+    "carrier_n": 25,
+    "germline_mean": 0.869,
+    "carrier_mean": 0.891,
+    "delta_mean": -0.022,
+    "cohen_d": -0.38,
+    "cpg_big_diff": 9,
+    "cpg_max_diff": 0.925,
+    "n_cpg": 142,
+    "pos": "chr1:220099749",
+    "vc": "Noise_Uniform",
+    "cprime_f": 2.57,
+    "cprime_p": 0.022,
+    "best_sil": 0.843,
+    "strength_tumor": 1.0
+  },
+  "case_1760": {
+    "germline_n": 20,
+    "carrier_n": 18,
+    "germline_mean": 0.904,
+    "carrier_mean": 0.878,
+    "delta_mean": 0.025,
+    "cohen_d": 0.64,
+    "cpg_big_diff": 5,
+    "cpg_max_diff": 0.838,
+    "n_cpg": 90,
+    "pos": "chr1:182893799",
+    "vc": "Strong",
+    "cprime_f": 13.74,
+    "cprime_p": 0.001,
+    "best_sil": 0.793,
+    "strength_tumor": 1.0
+  },
+  "adversarial": {
+    "n_agents": 7,
+    "duration_s": 273,
+    "verdicts": [
+      {
+        "id": "C1",
+        "verdict": "CONFIRMED",
+        "severity": "none"
+      },
+      {
+        "id": "C2",
+        "verdict": "CONFIRMED",
+        "severity": "minor"
+      },
+      {
+        "id": "C3",
+        "verdict": "CONFIRMED",
+        "severity": "minor"
+      },
+      {
+        "id": "C4",
+        "verdict": "CONFIRMED",
+        "severity": "minor"
+      },
+      {
+        "id": "C5",
+        "verdict": "CONFIRMED",
+        "severity": "none"
+      },
+      {
+        "id": "C6",
+        "verdict": "CONFIRMED",
+        "severity": "minor"
+      }
+    ],
+    "n_confirmed": 6,
+    "n_refuted": 0,
+    "overall_sound": true,
+    "blocking": 0
+  },
+  "build": {
+    "ctest_pass": 221,
+    "ctest_total": 221,
+    "regression": "dual-guard PASS",
+    "note": "ctest 221/221 verified fresh this session @01bc9d3"
+  }
+}

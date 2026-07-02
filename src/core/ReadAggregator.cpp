@@ -43,9 +43,10 @@ ReadAggregateResult ReadAggregator::aggregate(const std::vector<bam1_t*>& reads,
 
         ReadInfo info = read_parser.parse(b, read_count, is_tumor, snv, ref_seq, region_start);
 
-        // Normal reads: skip alt-support filter. They are REF at somatic SNV
-        // sites by definition; UNKNOWN simply means the read doesn't cover
-        // the SNV position, but its methylation data is still valuable.
+        // Normal reads: alt_support is STILL computed (info.alt_support above); we merely skip the
+        // UNKNOWN-drop filter (the `is_tumor &&` below) so non-covering normal reads are retained
+        // for the methylation baseline. Normal reads are NOT forced to REF and KEEP their real
+        // germline HP tag — the germline-baseline subtraction depends on it.
         if (is_tumor && info.alt_support == AltSupport::UNKNOWN && !config_.no_filter_output) {
             if (config_.collect_filtered_reads) {
                 out.filtered_reads.push_back(
