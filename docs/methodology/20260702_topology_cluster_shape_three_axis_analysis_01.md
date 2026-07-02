@@ -18,7 +18,7 @@ method: 7 樣本 C2/C3 修正後同版本;main-loop cross-tab + scipy 卡方;3-a
 - **c=2 branched% 隨樣本顯著變**：COLO829 87.0 / HCC1954 78.6 vs 其他 5 樣本緊聚 53–63%。卡方 chi2=525.9、CramérV=**0.227**(small–medium)。
 - 🔴 **但**：branched% 是**read-未驗證的幾何上界**;CN 是決定性未控 confound;p 值因 pseudoreplication 無意義（真 n=7）;COLO829 的高 branched 主要是**低 coread artifact**。
 
-## 📊 數據總表（canonical 樹形組成 + 一致性 + read 驗證；依 2平行% 排序）
+## 📊 數據總表（canonical 樹形組成 + incompatible%（有效性）+ read 驗證；依 2平行% 排序）
 | 樣本 | 總區 | 單群% | **2平行%** | 2直系% | 形狀種類 | **incompatible%**(四配子違反) | c=2 read-confirmed% |
 |---|--:|--:|--:|--:|--:|--:|--:|
 | HCC1954 | 1979 | 41 | **44** | 12 | 8 | 1.4 | 52.6 |
@@ -37,7 +37,7 @@ method: 7 樣本 C2/C3 修正後同版本;main-loop cross-tab + scipy 卡方;3-a
 - **均衡(2平行 ≈ 2直系)**：HCC1937(35 vs 25)、DORADO(28 vs 21)、H2009(26 vs 21)、HCC1395(25 vs 19)。
 - **結構最簡**：COLO829(67% 單群、僅 4 種形狀、c≥3=0);**最複雜**：H2009(10 種形狀、c≥3 6%,⚠ 資料品質旗標)、HCC1937(單群僅 36%)。
 - **跨樣本效應**：c=2 branched-vs-linear CramérV=**0.227**(small-med);**不報 p 值**(pseudoreplication·真 n=7)。
-> 🔴 **一致性欄全 0 = 可放心當定論**（11 種形狀全涵蓋、100% 有效樹）;**但 2平行% 的跨樣本差異仍受 branched=幾何上界 / CN未控 / coread 三 confound**（§②③④）— 統計正確 ≠ 生物差異證據。
+> 🔴 **枚舉完整**（11 種形狀·0 未分類）可放心當定論;但**「有效性」非 100%** — incompatible 逐樣本 **0.4%–19.1%**（見 §①b,H2009 最差）是誠實訊號,**不可**寫「100% 有效樹」。**且 2平行% 的跨樣本差異仍受 branched=幾何上界 / CN未控 / coread 三 confound**（§②③④）— 統計正確 ≠ 生物差異證據。
 
 ## 前置：7 樣本已同版本（C2/C3 修正後）
 本分析前先把 6 樣本重生為 C2/C3 修正版（讀已存 06-29 sm_linkage,不讀 BAM,cn 保 unknown）。incompatible 全上升（signature 正確）：HCC1395 12→118 / COLO829 1→15 / H1437 65→263 / H2009 265→812 / HCC1937 0→44 / HCC1954 1→27 / DORADO 4→55。
@@ -69,7 +69,7 @@ method: 7 樣本 C2/C3 修正後同版本;main-loop cross-tab + scipy 卡方;3-a
 - **真正的有效性訊號 = determinacy `incompatible`（四配子/perfect-phylogeny 違反）**,主回合獨立重算:
   - 合計 **1334/22676 = 5.9%** incompatible;`has_cycle` 348;c==k+1 且觀察到 root 的真違反 **59 區**。
   - 🔴 **逐樣本 incompatible% 差異巨大**（原「100%」把它抹平）：COLO829 **0.4%** / HCC1954 1.4% / DORADO 2.3% / HCC1937 2.7% / HCC1395 3.0% / H1437 5.5% / **H2009 19.1%**。→ H2009 資料品質最差（與其 branched 區 sSNV 密度異常一致）。
-- 資料:`_assets/20260702_topology_three_axis/canonical_shapes.json`（per-sample shape counts + 誠實 incompatible/has_cycle）。
+- 資料:`_assets/20260702_topology_three_axis/canonical_shapes.json`（本報告採用的 incompatible% = 該檔 `consistency.<sample>.incompatible_pct`〔determinacy,HCC1395 118/3.0%〕;⚠ 勿誤引 `per_sample` 內的 `incompatible/no-tree`〔僅空-edge 桶,HCC1395 39/1.0%,是前者子集〕）。
 > 結論:**枚舉可放心當定論**（11 形狀全涵蓋、0 未分類）;但**「有效性」不是 100%** — 5.9% incompatible（逐樣本 0.4%–19.1%）是誠實訊號,**不可**寫「100% 有效樹/可放心當定論」。跨樣本組成差異另受 branched=幾何上界/CN/coread confound（§②③④）。
 
 ## ② topology_type vs tree_shape — 兩套不同計算，該用哪個
@@ -77,6 +77,7 @@ method: 7 樣本 C2/C3 修正後同版本;main-loop cross-tab + scipy 卡方;3-a
 - **tree_shape（sm_region_integration,從 pairwise 巢狀/姊妹邊）= 較保守**：需 read 共現確認 nested/sibling 邊,證據弱→`no_confirmed_structure`。
 - **兩軸回答不同問題**：branched% = 「2 向量非嵌套」的幾何比例（不需 read）;confirmed% = 「有無被 read 確認結構」的比例（含線性/嵌套/姊妹確認）。⚠ **兩者非夾住單一真值的上/下界**（confirmed% 不是平行性下界,故 4/7 樣本 confirmed>branched → 缺口為負）;branched%−confirmed% 是**兩個非嵌套量的描述性差**。發散是 by construction 非 bug。
 - 🔴 **報告/顯示用法**：以 branched% 為描述性主軸（完整可重現）**但務必永遠與 confirmed% 並列**;措辭「≥2 條非嵌套 ALT 向量（平行/多根相容）」,**禁**「confirmed parallel subclones / branched biology」。
+- ⚠ **branched% 與 incompatible% 正交但部分重疊**（R2 揭露）：branched 與 incompatible 各為獨立 single-value 分類、各區各計一次,分母**不互扣**;但 **H2009 的 c=2-branched 有 17.5% 同時是四配子違反**（119/238 甚至 has_cycle）→ 這些 branched **不可**詮釋為乾淨平行 lineage。headline 離群 COLO829/HCC1954 的重疊 <0.2%,不影響結論。
 
 ## ③ Confound 裁決（3-agent 對抗驗證）
 | Confound | 裁決 | 關鍵證據 |
@@ -109,7 +110,7 @@ method: 7 樣本 C2/C3 修正後同版本;main-loop cross-tab + scipy 卡方;3-a
 1. 措辭「c=2 非嵌套 ALT 向量比例（幾何上界）」,禁「confirmed parallel subclones」。
 2. branched% **永遠與 confirmed% 並列**。
 3. 呈現 per-sample 表 + CramérV=0.227,**不**呈現 chi2 p 值（或明標 pseudoreplication·真 n=7）。
-4. CN caveat 醒目 + 附 HCC1395 CN 分層（27.5%↔75.4%）作 confound 存在證明。
+4. CN caveat 醒目 + 附 HCC1395 CN 分層（穩健錨 gain 67.6% vs LOH 27.5% = 差 40 點;neutral n=65 小樣本參考）作 confound 存在證明。
 5. 兩離群分開（COLO829=低 coread artifact / HCC1954=undetermined）。
 6. H2009 資料品質旗標。
 7. 頂部 ribbon：characterization / single-bulk / weak census labels / no CN control / L3-⭐3。
@@ -120,7 +121,7 @@ method: 7 樣本 C2/C3 修正後同版本;main-loop cross-tab + scipy 卡方;3-a
 ### A. 資料單位與上游欄位
 | 名詞 | 定義 | 來源 |
 |---|---|---|
-| **region（區）** | 最大單分子連鎖區（≤50kb 的 somatic-sSNV 鏈）;分析只取 `n_sSNV≥2` 的區 | sm_region_integration.py:19,141 |
+| **region（區）** | 最大單分子連鎖區（≤50kb 的 somatic-sSNV 鏈）;分析只取 `n_sSNV≥2` 的區 | topology_analysis.py:141（`n_sSNV>=2` filter）+ sm_region_integration.py:19,200 |
 | **n_sSNV (k)** | 該區的 somatic sSNV 位點數 | 上游 census |
 | **populations** | 該區「genotype 向量 → read 數」dict;向量 = 每個 sSNV 位點的 R/A 字串（如 `ARR`）;**最多 8 位點**（>8 截斷,truncated=true） | sm_multilocus_combinations.py（MAX_SNV=8）|
 | **nested_edge** | 一對 sSNV 的 ALT-集合呈 ⊂（祖先→後代）| sm_region_integration.py:build_tree |
