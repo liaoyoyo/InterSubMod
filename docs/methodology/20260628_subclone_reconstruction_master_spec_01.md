@@ -21,6 +21,8 @@ provenance: 凍結資料 @ branch feat/summary-nreadsvalid@5308d9e;本 session c
 | **underpowered** | 5,458 | 15.4% | 有 partner 無共讀 link → **加深覆蓋可救**；**有 census VAF→CCF 可刻畫**（clonal 2992 / mid 2174 / low 292）|
 | **isolated** | 8,320 | 23.5% | read-span(≤50kb)內無 partner（Tier-R 樹外）；**有 caller VAF 可刻畫 + 可能 same-PS(>50kb) partner（Tier-PS 未做）** |
 
+> ✅ **CLOSE-LOOP：tumor BAM 1.18× 重複對三桶無影響（2026-07-02 讀碼驗證）**：census 用的 HCC1395 tumor BAM 含 ~18% read 兩份 primary（memory `reference_hcc1395_ont5khz_normal_bam_doubled`；chr19:1-2M 實測 distinct QNAME 6,402 中 1,140 出現兩次）。**但 `sm_linkage_genomewide.py` 的 co-read 計數是 QNAME-keyed**（L108 `calls[rn][pos]` + L221-223 `multi={rn:c for rn,c in calls.items()...}; coread=len(multi)`）→ 重複 QNAME 自動覆寫、coread 數 distinct QNAME，**1.18× 重複被程式自動去重**。三桶（linked=coread-based / isolated=position-based n_partners / underpowered）**全不受灌水**；VAF=alt/(ref+alt) 對稱加倍亦不變（CCF tier 穩）。→ 三桶 61/15.4/23.5% 為 canonical，**無需 dedup 重跑**。（唯一名目受影響 = 絕對 tumor depth ~1.18×，但不用於分桶。）
+
 🔑 **單位點非「全無法處理」**（回答研究問題）：
 - underpowered（15.4%）= 有 CCF + 深覆蓋可救 → **有資訊可用**。
 - isolated（23.5%）= 此共現 census 無 VAF，但 caller(ClairS) VCF 仍有 VAF（可放 clonal 譜）+ 可能 Tier-PS 連鎖 → **部分可救、非永久 dead**。

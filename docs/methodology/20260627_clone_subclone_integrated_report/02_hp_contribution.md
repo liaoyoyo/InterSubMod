@@ -30,9 +30,11 @@ data_sources: data/sm_hp_contribution.json
 
 🔑 **唯一偏離背景的是 mutual_excl（DEPLETED, 0.86×）= HP 的真正診斷價值**：互斥**低於**背景 same-HP → 因為互斥同時來自 sibling（同 HP）**與** allelic（異 HP，不同染色體，兩 ALT 永不共讀）。**HP gate 的核心 = 從互斥中移除 allelic（異 HP）**：
 - 無 HP 資訊：9,187 對互斥（vs 此 naive baseline）全可能被當 sibling。
-- 有 HP gate：只留 3,949 same-HP（真 sibling 候選）。
+- 有 HP gate：只留 3,949 same-HP（**過等位 gate 的候選，非已確認 subclone**；sibling 或區域背景，見 §3）。
 - **HP 移除 5,238 diff-HP（57%）= 過半是 allelic（不同染色體）非 subclone**。
 - ⚠ 此「57%」是對比「**完全無 HP/allele 資訊**」的 baseline；非對比某個更聰明的方法。意義 = HP 提供的「同細胞 vs 不同染色體」資訊不可由共現結構單獨取得。
+
+🔑 **CN 分層去灌水（2026-07-02；committee 必問）**：把 same-HP mutual_excl 拆 CN 狀態（源 `lists/mutual_excl_sameHP.tsv` 的 `cn_a`，2,825 個 CN-annotated 對，本輪 Read-back）——**CN-neutral 僅 1.0%（29）**（雙單倍型、same-HP 才有判別力）、**CN-gain 73.5%（2,075）**（multiplicity 製造假共現/互斥）、**LOH 24.8%（701）**（單倍型已失、same-HP 被強制、無額外判別）、loss 0.7%（20）。→ **same-HP「候選」訊號 ~99% 落 CN-confounded 區，真正乾淨（CN-neutral）判別 ≈1%**；對照 diff-HP（allelic）亦 90.3% CN-gain。🔴 **結論**：3,949 same-HP 保留量**不是被 LOH 撐大**（LOH 僅 24.8%），而是**被 CN-gain multiplicity 主導（73.5%）**——此為比 LOH 更該在 Results 明標的去灌水，且與 robustness ladder「70.9% CN-gain」一致。（⚠ 2,825 為 CN-annotated 子集，headline 3,949 中約 1,124 對缺 CN 標；比例為 robust 結論、絕對數待全標 reconcile。）
 
 ## §4 限制
 - **HP3 = 1,317 linked-somatic（占全 linked-somatic 6.3%；HP3 定義上即 ungateable，無 germline 錨）** → 無法 HP-gate，這群不判 sibling/allelic。
