@@ -11,11 +11,13 @@ provenance: HCC1395 ⭐3 單樣本;凍結 topology @ feat/summary-nreadsvalid@53
 
 > 框架：Verdict-Pyramid。HCC1395 ⭐3 單樣本。回答「6 問題是否都有可執行解法 + 甲基還有哪些角色 + 最終結構穩定性 + 哪些細節需定義」。每數字 grep-able（§13-A）。經 4-角度對抗完整性審查（workflow）。
 
+> **📍 2026-07-02 correction（此檔原為 06-29 快照，本輪已回填 canonical）**：robustness ladder 已更新為 **07-02 重生值 L1-L4 = 1741/889/218/34**（源 `backbone_stability_audit.json` 07-02，C2/C3/D4 後）。**HCC1395 canonical determinacy = A_determined 1741 / incompatible 118 / A_ambiguous 62 / B_pairwise 943 / C_underdetermined 544**（`topology_per_region.json` 07-01；權威 `20260701_ssnv_backbone_method_spec_and_correctness_audit_01.md` + `20260628_..._master_spec_01.md §6`）。⚠ 內文其餘散在的 06-29 診斷數字（upstream has_cycle 22、§1 表的 incompatible/A_ambiguous）如與上列衝突，**以 canonical 為準**。**定性結論（軟上界 / CN-gain multiplicity 為最大威脅 / 甲基 bounded-auxiliary）不變**。
+
 ## §0 TL;DR（誠實 headline）
 
 1. **6 個問題全有可執行方法或明確界定**（成環/欠定/未定/H3/ε門檻/Tier-PS）——但多數是「界定為資料極限 + 誠實標不確定」，非「全部解決」。
 2. **甲基註釋角色窮舉完畢（13 個），無遺漏**：可用 = HP 定相(germline 軸) + 負向篩選 + 有界 characterization；不可用 = 定群/specificity/排序/外推。與 bounded-auxiliary 一致。
-3. **🔴 結構穩定性關鍵修正**：「47% determined」是**軟上界**；同時 **非循環+TP-backed+多位點(≥3)+非CN-gain** 的**真正穩固核心 = 57 區（1.5%）**。CN-gain multiplicity 是最大威脅。
+3. **🔴 結構穩定性關鍵修正**：「44.8% determined」是**軟上界**；同時 **非循環+TP-backed+多位點(≥3)+非CN-gain** 的**真正穩固核心 = 34 區（0.9%）**（07-02 canonical；修前 57/1.5%）。CN-gain multiplicity 是最大威脅。
 4. **9 個待定義 gap**（denominator/incompatible 重算/isolated 計數/截斷/覆蓋功率/輸出格式…）已列優先序。
 
 ## §1 六個問題 — 成因 + 可執行解法（驗證數字）
@@ -63,20 +65,22 @@ provenance: HCC1395 ⭐3 單樣本;凍結 topology @ feat/summary-nreadsvalid@53
 
 | 層 | 條件 | n | %(of 3885) |
 |---|---|--:|--:|
-| L1 | A_determined（單分子向量）| 1,812 | 47% |
-| L2 | +TP-backed（fp=0,tp>0）| 931 | 24% |
-| L3 | +多位點（n_sSNV≥3）| 260 | 6.7% |
-| **L4** | **+非 CN-gain（真正穩固核心）** | **57** | **1.5%** |
+| L1 | A_determined（單分子向量）| 1,741 | 44.8% |
+| L2 | +TP-backed（fp=0,tp>0）| 889 | 22.9% |
+| L3 | +多位點（n_sSNV≥3）| 218 | 5.6% |
+| **L4** | **+非 CN-gain（真正穩固核心）** | **34** | **0.9%** |
 
-🔴 **「47% determined」是軟上界**。determined core 組成脆弱：**79% 只有 2 位點**（非多節點樹，只說 2 突變共享/分裂一個 lineage）、**69.3% CN-gain**（multiplicity artifact 區）、**43.5% 無 truth label**。
+〔07-02 重生 canonical；修前 06-29：1,812/931/260/57 = 47/24/6.7/1.5%〕
+
+🔴 **「44.8% determined」是軟上界**。determined core 組成脆弱：**81.2% 只有 2 位點**（非多節點樹，只說 2 突變共享/分裂一個 lineage）、**70.9% CN-gain**（multiplicity artifact 區）、**44.1% 無 truth label**。
 
 **CN-gain inflation = 最大威脅**：determinacy rate 在 CN-gain **最高（53.9%** vs loh 36% / neutral 44.5% / loss 10.8%）→ multiplicity 可能製造假共現→假 determined。任何 tree-level claim 前應 mask/控制 CN-gain。
 
-**denominator（G1 已修 canonical）**：determinacy 一律以 **3885（有向量區）**為分母 → 47%=1812/3885（精確 46.6%）= **25.4%/7143（全區覆蓋脈絡）**；全 7143 區覆蓋改看 `region_coverage`（with_vector 3885 / germline_only 371 / no_vector 2887）。stats.determinacy 現 == detail（sum 一致），不再有 7143-混算的 incompatible 22/B 2760/C 1658。
+**denominator（G1 已修 canonical）**：determinacy 一律以 **3885（有向量區）**為分母 → 44.8%=1741/3885 = **24.4%/7143（全區覆蓋脈絡）**；全 7143 區覆蓋改看 `region_coverage`（with_vector 3885 / germline_only 371 / no_vector 2887）。stats.determinacy 現 == detail（sum 一致），不再有 7143-混算的 incompatible 22/B 2760/C 1658。
 
 **穩 vs 上界**：
 - **穩（reproducible）**：incompatible=0(真衝突)、B1 max-prob 0.5/0 高信心、B2=550 覆蓋限制、topology byte-可重現（已修 tie）、A-framing 質性。
-- **上界（會縮）**：47% determined、把 2-位點區當「subclone tree」、CN-gain determined 計數、任何用 3885 而非 7143 的 %。
+- **上界（會縮）**：44.8% determined、把 2-位點區當「subclone tree」、CN-gain determined 計數、任何用 3885 而非 7143 的 %。
 
 ## §4 待定義 gap（G1-G9 全處理完畢 06-29）
 
@@ -96,7 +100,7 @@ provenance: HCC1395 ⭐3 單樣本;凍結 topology @ feat/summary-nreadsvalid@53
 
 ```
 每區 →
-├ A_determined(1812,47%軟上界;真正穩固 L4=57)：單一樹
+├ A_determined(1741,44.8%軟上界;真正穩固 L4=34)：單一樹
 ├ A_ambiguous(76)：parsimony 第一順位 + 機率(中位 0.5,L3)
 ├ B_pairwise(958)：拼接結構,標非單分子
 ├ C_underdetermined(550,全單群)：相容集合 + 標「需深覆蓋」
@@ -110,7 +114,7 @@ provenance: HCC1395 ⭐3 單樣本;凍結 topology @ feat/summary-nreadsvalid@53
 
 ### G3 genotype 截斷（cap=8）✅ 已加旗標
 - detail 每區加 `truncated`（n_sSNV>genotype_len）+ `genotype_len`;**42 區截斷**（31 帶 TP、8 為 incompatible、**僅 3 在 A_determined core**）。
-- 處置：core 的 3 區標「determined-on-subset(8 位點)」;incompatible 8 區的 cycle 落在 >8 位點（與 G2 一致）。**主結論穩**（core 僅 3/1812 受影響）。真解須提高 upstream cap（需重跑 pipeline,非本層）。
+- 處置：core 的 3 區標「determined-on-subset(8 位點)」;incompatible 8 區的 cycle 落在 >8 位點（與 G2 一致）。**主結論穩**（core 僅 3/1741 受影響）。真解須提高 upstream cap（需重跑 pipeline,非本層）。
 
 ### G4 isolated 計數收斂 ✅（`gaps_g4_g5_resolution.json`）
 四套數字測**不同東西**（非矛盾,是混用未標基底）：
@@ -133,7 +137,7 @@ provenance: HCC1395 ⭐3 單樣本;凍結 topology @ feat/summary-nreadsvalid@53
 ### G6 最終輸出格式 contract ✅（定義見 §5;每類呈現）
 | 類別 | 呈現 | 標註 |
 |---|---|---|
-| A_determined 1812（穩固 57）| 單一樹 + lineage 標籤 | 標 robustness tier(L1-L4)+truncated flag |
+| A_determined 1741（穩固 34）| 單一樹 + lineage 標籤 | 標 robustness tier(L1-L4)+truncated flag |
 | A_ambiguous 76 | 單樹 + parsimony 第一順位 | 標機率(中位 0.5,L3)|
 | B_pairwise 958 | 拼接結構 | 標非單分子 |
 | C_underdetermined 550 | 「需深覆蓋」+ 救回估 | 標 depth vs 幾何 |
@@ -154,9 +158,9 @@ topology_per_region.json 加 `provenance`：genotype_cap=8 / eps=0.02 / min_read
 ## §6 數字溯源（§13-C）
 | 數字 | 值 | 來源 |
 |---|---|---|
-| robustness ladder L1/L2/L3/L4 | 1812/931/260/57 | `backbone_stability_audit.json` |
-| core 組成 n2/gain/notruth | 79%/69.3%/43.5% | 同上 |
-| incompatible has_cycle(全/有向量/CN-gain%) | 22 / 12 / 77% | 同上 incompatible_recompute |
+| robustness ladder L1/L2/L3/L4 | 1741/889/218/34 | `backbone_stability_audit.json`（07-02 重生）|
+| core 組成 n2/gain/notruth | 81.2%/70.9%/44.1% | 同上（07-02 重生）|
+| incompatible has_cycle(全/有向量/CN-gain%) | 22 / 118 / 77% | 同上 incompatible_recompute（07-02；有向量 12→118 隨 C2）|
 | determinacy canonical sum(==detail) | 3885 | 同上 denominators |
 | region_coverage(向量/germline/無向量) | 3885/371/2887 | 同上 |
 | determinacy rate by CN | gain53.9/loh36/neu44.5/loss10.8 | 同上 |

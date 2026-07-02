@@ -12,10 +12,12 @@ evidence_tier: L2 (7 樣本機械重建 + 跨樣本一致;單 pipeline 封頂 �
 ## TL;DR（1 行）
 7 個 ONT 癌症細胞株（ClairS full-model + LongPhase-S tag）全跑到 clone/subclone 樹結構，每區補 COSMIC/GENCODE/DGIdb 基因註釋，整合成單一多分頁互動工作站 HTML。
 
+> **📍 2026-07-02 correction（§2 七樣本表已重生 canonical）**：§2 表已回填 **07-02 post-fix 值**（`multisample_summary.json` 由 `gen_multisample_summary.py` 匯總 7 樣本現行 per-sample topology，本輪 Read-back 驗證）。determinacy 隨 C2/C3/D4 變動（HCC1395 A_det 1812→1741 / cycle 12→118；H2009 cycle 265→812；total_regions 亦隨 06-29→07-02 region set 更新）；癌基因/用藥註釋 fix-independent 不變。跨樣本 A-framing 質性結論不受影響。
+
 ## 摘要（3 行）
 - **為何**：把 HCC1395 單樣本 subclone 重建擴到全部 7 樣本，驗證 sSNV 共現骨幹方法的跨樣本/跨癌種一致性，並為每個區域補基因意義（名稱/啟動子/oncogene-TSG/用藥）。
 - **怎麼做**：複用既有 8-step pipeline（per-sample 化 + 48 核平行 orchestrator），下游接 COSMIC CGC + Cell Lines Project + GENCODE + DGIdb 註釋，HTML 用 data-swap 分頁複用 20260628 工作站。
-- **結果**：7 樣本全產出（with-vector 區 1,636–4,768；A_determined 比例 50–66%），cycle（incompatible）跨樣本 0–265（與 CN-gain multiplicity 相關），癌基因區 60–236、用藥區 264–983。
+- **結果**（07-02 canonical）：7 樣本全產出（with-vector 區 1,636–4,768；A_determined 比例 32–60%），cycle（incompatible）跨樣本 15–812（與 CN-gain multiplicity 相關），癌基因區 60–236、用藥區 264–983。
 
 ---
 
@@ -70,17 +72,19 @@ build_topology_workstation.py  7 樣本 → 單一多分頁 HTML(data-swap, 複�
 
 | 樣本 | 總區 | 有向量區 | A_det | branched | linear | cycle | 癌基因區 | 用藥區 | 佇列 |
 |---|--:|--:|--:|--:|--:|--:|--:|--:|--:|
-| HCC1395 | 6,772 | 3,885 | 1,812 | 1,113 | 754 | 12 | 159 | 623 | 2,118 |
-| COLO829 | 7,063 | 3,786 | 1,231 | 1,076 | 158 | 1 | 132 | 565 | 2,588 |
-| H1437 | 8,317 | 4,768 | 2,161 | 1,431 | 775 | 65 | 160 | 799 | 2,708 |
-| H2009 | 9,605 | 4,243 | 2,049 | 1,403 | 909 | 265 | 236 | 983 | 2,471 |
-| HCC1395_DORADO | 3,807 | 2,379 | 1,206 | 707 | 516 | 4 | 92 | 343 | 1,316 |
-| HCC1937 | 1,942 | 1,636 | 1,017 | 613 | 425 | 0 | 60 | 264 | 634 |
-| HCC1954 | 3,095 | 1,979 | 1,148 | 920 | 234 | 1 | 63 | 265 | 851 |
+| HCC1395 | 7,143 | 3,885 | 1,741 | 1,110 | 741 | 118 | 159 | 623 | 2,185 |
+| COLO829 | 7,224 | 3,786 | 1,220 | 1,076 | 158 | 15 | 132 | 565 | 2,599 |
+| H1437 | 8,446 | 4,768 | 2,052 | 1,424 | 765 | 263 | 160 | 799 | 2,798 |
+| H2009 | 9,669 | 4,243 | 1,726 | 1,351 | 892 | 812 | 236 | 983 | 2,677 |
+| HCC1395_DORADO | 3,980 | 2,379 | 1,167 | 706 | 512 | 55 | 92 | 343 | 1,350 |
+| HCC1937 | 2,030 | 1,636 | 985 | 613 | 419 | 44 | 60 | 264 | 666 |
+| HCC1954 | 3,418 | 1,979 | 1,135 | 920 | 232 | 27 | 63 | 265 | 864 |
+
+〔07-02 canonical，源 `multisample_summary.json`（`gen_multisample_summary.py` 重生）；修前 06-29 見 git history〕
 
 - **canonical 分母**：determinacy 比例算在「有向量區」上，非「總區」（無向量區 = 無基因型向量、不可建樹）。
-- **A_determined 比例**：47–62%（HCC1937 最高 62%、H1437/COLO829 較低）— 單分子向量唯一決定拓樸的區。
-- **cycle（incompatible）**：H2009 265 最高、HCC1937 0 最低 — incompatible 多為 CN-gain multiplicity artifact（非真衝突），與樣本 CN 負荷相關。
+- **A_determined 比例**：32–60%（HCC1937 最高 60.2%、COLO829 最低 32.2%）— 單分子向量唯一決定拓樸的區。
+- **cycle（incompatible）**：H2009 812 最高、COLO829 15 最低 — incompatible 多為 CN-gain multiplicity artifact（非真衝突），與樣本 CN 負荷相關。
 
 ---
 

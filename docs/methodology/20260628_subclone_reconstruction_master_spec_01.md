@@ -75,10 +75,12 @@ P(拓樸 T) ∝ P(sSNV共現|T) × 1[HP-root 相容] × P(甲基|T,normal-baseli
 
 ## §6 驗證狀態 + 統計
 
-- **拓樸型態 / structure**（7143 全區，pairwise）：single 2018 / branched 1113 / linear 754 / germline 371 / no-vec 2887。
-- **🔴 determinacy（canonical 分母 = 有 genotype 向量 3885 區；G1 修 06-29）**：A_determined 1812 / A_ambiguous 76 / B_pairwise 958 / C_underdetermined 550 / incompatible 12 / other 477（sum=3885）。**region_coverage**（7143）= with_vector 3885 / germline_only 371 / no_vector 2887。⚠ **舊「B_pairwise 2760 / C 1658 / incompatible 22」是 7143-混算（含無向量區用 tree_shape fallback），已棄用**；determinacy % 一律以 3885 為分母（47%=1812/3885=46.6%；=25.4%/7143 覆蓋脈絡）。
-- **🔴 incompatible 真相（G2 修 06-29）**：=上游 `has_cycle`（全 sSNV pairwise 圖的真 cycle，如雙向 nesting）共 **22**（12 有向量在 detail + 10 無向量）；**77% CN-gain** → 最可能 = CN multiplicity 製造 pairwise 矛盾、非真演化樹衝突；stored 截斷(cap=8)查不到（非「0 真 cycle」）。處置：標 likely-CN-multiplicity-artifact 不建樹。
-- **真正穩固核心**（robustness ladder）：L1 A_determined 1812(47%) → +TP-backed 931 → +多位點 260 → **+非CN-gain = 57 區(1.5%)**；core 79% 僅2位點/69% CN-gain/43.5% 無truth → 「47%」是軟上界。詳 `20260629_backbone_resolution_and_methyl_roles_final_01.md`。
+> **📍 2026-07-01 correction（C2/C3/D4 修正落地；權威裁決 `20260701_ssnv_backbone_method_spec_and_correctness_audit_01.md`）**：下方 **topology_type 與 determinacy 已回填 07-01 canonical**（源 `_assets/20260627_subclone_4axis_teaching/data/topology_per_region.json`，07-01 14:36 重生，本輪 Read-back 驗證）。✅ **robustness ladder（L2-L4）、及 7 樣本表** 的源檔（`backbone_stability_audit.json` / `multisample_summary.json`）**已於 07-02 重生**（`gen_multisample_summary.py` + `backbone_stability_audit.py`）→ 下方全部 07-02 canonical，本輪 Read-back 驗證。
+
+- **拓樸型態 / structure**（7143 全區，pairwise；07-01 canonical）：single 1995 / branched 1110 / linear 741 / germline 371 / no-vec 2887 / incompatible 39。〔修前 06-29：single 2018 / branched 1113 / linear 754〕
+- **🔴 determinacy（canonical 分母 = 有 genotype 向量 3885 區；07-01 C2/C3 修正後）**：A_determined 1741 / A_ambiguous 62 / B_pairwise 943 / C_underdetermined 544 / incompatible 118 / other 477（sum=3885）。**region_coverage**（7143）= with_vector 3885 / germline_only 371 / no_vector 2887。⚠ **舊「B_pairwise 2760 / C 1658 / incompatible 22」是 7143-混算，已棄用**；determinacy % 一律以 3885 為分母（44.8%=1741/3885；=24.4%/7143 覆蓋脈絡）。〔修前 06-29 G1/G2：A_determined 1812 / A_ambiguous 76 / B_pairwise 958 / C_underdetermined 550 / incompatible 12〕
+- **🔴 incompatible（07-01 = 118；C2 +106 判定）**：C2 fix 對非 CN-gain 乾淨 4-gamete 違反判 incompatible（+106；63% dropped pair min≤1 單雜訊不觸發）→ determinacy incompatible 12→**118**。另 upstream `has_cycle`（真雙向 nesting，77% CN-gain = multiplicity artifact）= **22**，為不同指標（`backbone_stability_audit.json` 07-02 重生 incompatible_recompute），勿與 determinacy 118 混引。處置：incompatible 區標 likely-artifact 不建樹。
+- **真正穩固核心**（robustness ladder，`backbone_stability_audit.json` 07-02 重生）：L1 A_determined 1741(44.8%) → +TP-backed **889**(22.9%) → +多位點 **218**(5.6%) → **+非CN-gain = 34 區(0.9%)**〔修前 06-29：1812/931/260/57〕；core 81.2% 僅2位點 / 70.9% CN-gain / 44.1% 無truth → 「44.8%」是軟上界。詳 `20260629_backbone_resolution_and_methyl_roles_final_01.md`（07-02 已回填）。
 - **可辨識度**（Q1/Q2）：穿越充分 12.3% / 拓樸可辨識 10.9%；欠定根因 跨HP 36%/幾何 32%/功率 26%/HP3 6%。
 - **chr17 worked**：S2(α,VAF0.82,TP,H1) 祖先 → S1+S3(β,co_linked) 後代；linear；dropped 2 noise；16 sig CpG。
 - **驗證抓修 2 bug**：population 噪聲過濾（chr17 假 incompatible）+ ambiguous-parentage（chr14 缺中間群）。
@@ -114,16 +116,18 @@ P(拓樸 T) ∝ P(sSNV共現|T) × 1[HP-root 相容] × P(甲基|T,normal-baseli
 
 | situation | 區數 | 評分傾向 | resolution（需哪些資訊）|
 |---|--:|---|---|
-| 已確定 | 2,245 | 高 | genetic 足夠（單分子向量）|
-| pairwise 拼接 | 903 | 中 | 需更長 read / 單分子整跨 |
-| 多樹相容(欠定) | 550 | 低 | 加深覆蓋 / Tier-PS 連遠 partner |
-| 跨HP(兩棵樹) | 99 | 中 | HP 已拆，各樹獨立 |
-| **順序 2-3 順位待定** | 76 | 中低 | **VAF/CCF(CN-clean) 定先後；VAF tie→甲基輔助(cis-control 後)** |
-| 衝突(成環) | 12 | 極低 | likely-artifact（補 mappability mask、不強建樹）|
+| 已確定 | 2,178 | 高 | genetic 足夠（單分子向量）|
+| pairwise 拼接 | 892 | 中 | 需更長 read / 單分子整跨 |
+| 多樹相容(欠定) | 544 | 低 | 加深覆蓋 / Tier-PS 連遠 partner |
+| 跨HP(兩棵樹) | 91 | 中 | HP 已拆，各樹獨立 |
+| **順序 2-3 順位待定** | 62 | 中低 | **VAF/CCF(CN-clean) 定先後；🔴 甲基不用於排序**（D4 已移除「VAF tie→甲基輔助」tie-breaker → 74 區改 L3-weak 軟旗標；06-30 政策「排序絕不用甲基」；cis-control 乾淨可用≈0）|
+| 衝突(成環) | 118 | 極低 | likely-artifact（補 mappability mask、不強建樹）|
 
-- **需確認佇列 2,118 區**（非已確定或 <70 分），最低分為 chr9:41.8M/chr14:16M/chr16（已知 dense/centromere 偽影，自動排前）。
-- **需甲基輔助 624 區**（VAF tie 或欠定）→ 原以為是甲基 Tier-3 適用處，但 **06-28 cis-control pilot 證實乾淨可用 ≈ 0**（72 可分類中 CROSS-HP 12 全 CN-gain、neutral 0）→ 甲基**無法**作這些區的 resolver（§5）。
+> 〔07-01 canonical，源 `candidate_scoring.json`（07-01 10:28，含 C2/C3/D4 修正，本輪 Read-back 驗證）；修前 06-29：已確定 2245 / pairwise 903 / 欠定 550 / 跨HP 99 / 順序 76 / 成環 12〕
+
+- **需確認佇列 2,185 區**（07-01 canonical；非已確定或 <70 分），最低分為 chr9:41.8M/chr14:16M/chr16（已知 dense/centromere 偽影，自動排前）。
+- **需甲基輔助 605 區**（VAF tie 或欠定）→ 原以為是甲基 Tier-3 適用處，但 **06-28 cis-control pilot 證實乾淨可用 ≈ 0**（72 可分類中 CROSS-HP 12 全 CN-gain、neutral 0）→ 甲基**無法**作這些區的 resolver（§5）。
 - 互動確認：`topology_workstation` 下方「確認佇列」可**左右選項判讀**（✓同意rank1 / ⇄偏好其他 / ?需更多資訊）+ 觀察評分，存 localStorage、可匯出 JSON。
 - 產物：`scripts/candidate_scoring.py` + `data/candidate_scoring.json`。
 
-> 一句話：本研究 = 在 HCC1395 ONT 上，用 **sSNV 單分子共現（非循環骨幹）+ HP 定根 + 甲基有界輔助** 重建區域級克隆樹；35,332 sSNV 中 61% 可建樹、~11% 拓樸可辨識、2,118 區待確認（624 區可能需甲基輔助、待 cis-control）；單位點非全無法處理（有 CCF/Tier-PS）；甲基 cis-confounded 待 cis-control；⭐3 單樣本。工作站自帶 28 詞名詞解釋 + 左右確認評分。
+> 一句話：本研究 = 在 HCC1395 ONT 上，用 **sSNV 單分子共現（非循環骨幹）+ HP 定根 + 甲基有界輔助** 重建區域級克隆樹；35,332 sSNV 中 61% 可建樹、~11% 拓樸可辨識、2,185 區待確認（605 區可能需甲基輔助、待 cis-control）；單位點非全無法處理（有 CCF/Tier-PS）；甲基 cis-confounded 待 cis-control；⭐3 單樣本。工作站自帶 28 詞名詞解釋 + 左右確認評分。
