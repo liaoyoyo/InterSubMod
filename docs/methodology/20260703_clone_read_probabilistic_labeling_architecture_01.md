@@ -3,7 +3,7 @@
 類型: 方法規格 — clone read 標記的機率式三層架構 + 甲基在遺傳欠定處為何不能定案（四配子拓撲 tie-break / 單位點非監督補結構）
 狀態: 方法裁決（conceptual/methodology）；所有數字為引用既有 verified 文件之結果（非新分析）
 build_branch: research/subclonal-reconstruction-202606
-data_sources: docs/methodology/20260701_ssnv_backbone_method_spec_and_correctness_audit_01.md, docs/methodology/20260701_asm_vs_clonal_definition_and_loh_methyl_verification_01.md, docs/methodology/20260701_topology_algorithm_audit_findings_01.md, docs/methodology/20260628_subclone_reconstruction_master_spec_01.md
+data_sources: docs/methodology/20260701_ssnv_backbone_method_spec_and_correctness_audit_01.md, docs/methodology/20260701_asm_vs_clonal_definition_and_loh_methyl_verification_01.md, docs/methodology/20260701_topology_algorithm_audit_findings_01.md, docs/methodology/20260628_subclone_reconstruction_master_spec_01.md, docs/methodology/_assets/20260627_subclone_4axis_teaching/data/four_gamete_aa_methyl_demo.json, docs/methodology/_assets/20260627_subclone_4axis_teaching/data/sm_completeness_ledger.json
 provenance: 概念/方法裁決文件。每個數字皆引用上列既有 verified 文件（§8 溯源表逐項對應），本文件不產生新分析數字。裁決由 2026-07-03 workflow（6 agents：文獻對照 + 循環對抗 + 逐特徵 + 自我一致，對抗 verify=sound_with_corrections）產出並落地。
 -->
 
@@ -116,6 +116,8 @@ LAYER 3  bounded-auxiliary 事後 (群凍結後才動)          = { methylation 
 ### Q1 正解
 環的**標記 / read 群標籤 / 枚舉等機率候選樹**可做且已做；**用甲基排序拓撲、給各拓撲機率**不行。區分「真 homoplasy vs CNV multiplicity」是 **CN 資料**的事（不是甲基）；定不出方向的區 = **「定不出來即答案」**（保留高熵，不用甲基抹平）。
 
+> ⚠ **§9 實證修正**：本節原「cis 讓 near-band 天生對稱」的**機制**經 2026-07-03 demo（§9）**未被乾淨證實**（near-band 甲基噪音、非完美對稱，因 somatic-cis ASM 多數位點弱）。但「甲基無法判四配子拓撲方向」的**結論經更直接路徑成立** —— 見 §9。
+
 ---
 
 ## §4 Q2 — 單 sSNV 稀疏位置能否用甲基非監督補結構
@@ -200,3 +202,45 @@ LAYER 3  bounded-auxiliary 事後 (群凍結後才動)          = { methylation 
 | 甲基 bounded-auxiliary / germline-HP phasing assist | 4 用途窮盡；phasing assist 屬 germline-haplotype 層 | `project_methylation_use_exhausted_bounded_auxiliary`, `project_methyl_phasing_assist_line` |
 
 **關聯 memory**：`project_clone_read_labeling_probabilistic_architecture`（本裁決 hook）、`project_methylation_use_exhausted_bounded_auxiliary`、`project_candidate_tree_ranking_impossible`、`reference_hp_tag_definition_and_subclone_caveat`、`project_ssnv_backbone_o2_and_correctness_fixes`、`project_tumor_only_axis_negative_subclone_classification`。
+
+---
+
+## §9 Q1 實證 demo — 四配子甲基能否判拓撲方向（2026-07-03，HCC1395）
+
+> **partial flag**：single-sample **HCC1395** / `incompatible`（四配子）子集 / 小 n（20 pairs）—— 非全樣本、非全基因組（demo/falsification scope）。
+> script `_assets/20260627_subclone_4axis_teaching/scripts/four_gamete_aa_methyl_demo.py` → `four_gamete_aa_methyl_demo.json`；5:22 wall / 234MB RSS；seed 20260703。
+
+### §9.1 設計
+118 個 incompatible 區 → 找齊 RR/RA/AR/AA 四配子的 sSNV pair（各群 ≥4 reads）→ 每 read 甲基拆 **near-i（±1kb of locus i）/ near-j / distal（>1kb of both）** 三帶；**same-HP 閘**（AR/RA/AA 同 germline HP，≥0.6 dominant）+ **CN 分層** + **distal 置換 null**（2000×）。
+
+### §9.2 Funnel（20 對四配子 pair）
+| 關卡 | 數 | 意義 |
+|---|---|---|
+| 四配子 pair | 20 | RR/RA/AR/AA 俱全 |
+| same-HP 前提成立 | 12 | 可問「AR→AA vs RA→AA」 |
+| **cross/mixed-HP（前提不成立）** | **8** | 兩突變在不同單體型 → **AA = doublet/CN artifact 非譜系**，問題本身不成立（40%） |
+| same-HP 且 CN-clean(neutral/loh) | 6 | 全 loh |
+
+### §9.3 🔑 關鍵發現（比原理論預測更直接）
+1. **唯二 distal 顯著（p<0.05）的 pair 全在 cross-HP CN-gain 區**（chr9:41777788：S=−0.168 **p=0.0015** / S=0.119 **p=0.0025**）→ 甲基「顯著」時抓的是 **cross-HP / CN-gain doublet 的 confound**（兩條不同單體型甲基不同），**不是 lineage**。〔L2〕
+2. **6 個 well-posed clean 案例（same-HP + loh）distal 置換 p 全 > 0.05**（min 0.066）→ 問題問得成立時，甲基距離**從不顯著**。〔L2〕
+3. **parent-call 不一致**：clean 案例 near-based vs distal-based「較近母系」多數相反（~4/6）、與 VAF 也常相反 → **無穩定方向**。〔L2〕
+4. **cis 標籤驗證 = 混雜**：near-band 甲基距離小（~0.08–0.12）且**不乾淨 track 共享 allele**（near_i 共享(AR) 0.105 vs 非共享(RA) 0.076；cis 僅 ~2–3/6 案例成立）→ 因 somatic-cis ASM 在多數位點弱（呼應「僅 ~5% 強 ASM 區」），near-band 是**噪音而非乾淨 cis readout**。〔L2〕
+
+### §9.4 誠實修正（§13.7）
+原 §3「cis 讓 near-band 天生對稱」的**機制未被乾淨證實**（near-band 噪音、非完美對稱）。但「甲基無法判四配子拓撲方向」的**結論經更直接路徑成立**：(a) 40% pair 問題不成立（cross-HP）；(b) well-posed 乾淨案例 distal **從不顯著**、方向不一致；(c) **唯二「顯著」是 cross-HP CN-gain confound**。→ **Q1 用甲基排序四配子拓撲 = 經驗否證。** 正解仍是「定不出來即答案」+ **CN 資料**區分 multiplicity vs homoplasy（demo 中 chr9/chr22/chr14/chr2 大 AA + 微 AR/RA + 多 cross-HP = 典型 CN-multiplicity artifact）。
+
+### §9.5 §6 pilot 確認（demo 落地驗證）
+- **pilot target 118 incompatible 確認**（CN：loh 77 / gain 31 / neutral 9 / loss 1）。
+- **demo 驗證 §6 硬約束（甲基 zero-in-likelihood）正確**：最難的四配子區甲基也加不了可靠解析 → pilot **只用 genetic**（beta-binomial + CN-aware conflict score），不碰甲基。
+- **§6 falsification target 具體化**：CN-gain 四配子 pair（chr9/chr22/chr14/chr2：大 AA + 微 AR/RA + cross-HP）= multiplicity artifact = §6 CN-aware conflict score 應重分類的對象。
+- **Q2 單位點 scope 量化**（`sm_completeness_ledger.json`，sSNV 層）：isolated_singleton **8320** + underpowered **5458**（= 單位點稀疏）vs linked **21554**（有共現）。
+- ⚠ **§6 開放項（誠實邊界）**：partial-read 可救比例（40.4% 空向量 ∩ pairs_eps2）**仍未算** → **不可把 40.4% 當可救目標**（沿用 audit doc 邊界，需另跑 `pairs_eps2 ∩ 空區`）。
+
+### §9.6 Provenance（§9 數字 → 來源）
+| 數字 | 值 | 來源 |
+|---|---|---|
+| funnel / distal 顯著 / cis 帶 | 20 pair、same-HP 12、cross-HP 8、clean 6、distal-sig 2(皆 chr9 cross-HP gain)、near_i 0.105/0.076 | `four_gamete_aa_methyl_demo.json`（本輪 §13.0：先 compute→Read 驗→才寫） |
+| chr9 顯著 pair | S=−0.168 p=0.0015 / S=0.119 p=0.0025 | 同上 `cases[]` |
+| Q2 單位點 scope | isolated 8320 / underpowered 5458 / linked 21554 | `sm_completeness_ledger.json:buckets` |
+| pilot target CN 分層 | loh 77 / gain 31 / neutral 9 / loss 1 | `topology_per_region.json`（det where determinacy==incompatible） |
