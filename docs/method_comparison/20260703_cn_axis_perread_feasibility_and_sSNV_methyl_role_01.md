@@ -151,6 +151,59 @@ sSNV 共現不是「輔助確認」——它**就是**判別器與演化標籤�
 
 ---
 
+## §8 接進 slide 3-4 敘述（paste-ready）
+
+> 把 §1-§7 定位落到論文方法圖 slide 3（共現骨幹→區域局部拓撲）與 slide 4（甲基結構+雙軌驗證）的講稿與 caption。直接可貼進 PPT speaker notes / 圖說。
+
+### §8.1 一句話串接 slide 3 → 4
+
+> **slide 3 的 somatic 共現骨幹「給出並命名」譜系（＝演化標籤）；slide 4 的甲基與 CN「描述並註記」這些已命名的譜系（characterize）。分工：骨幹判別、甲基/CN 輔助；天花板 ⭐3。**
+
+### §8.2 Slide 3 敘述 — somatic 共現骨幹 → 區域局部拓撲
+
+**主敘述（speaker note）**：我們用 ONT 單分子上的 **somatic sSNV 共現（four-gamete / census）當非循環骨幹**重建區域內譜系拓撲——這是**演化標籤的唯一來源**（非循環，因 HP tag 來自零甲基 phasing）。
+
+**三態講法**：
+- **linear（nested，缺一 single-ALT 配子）**：直系；從 RR 最小突變（parsimony 生根）。
+- **branched（mutual-excl，缺 AA）**：姊妹；依**子群比例（VAF / read-count）**顯示（heuristic，**非時序**）。
+- **incompatible（four-gamete 全滿）**：**不強建單樹**；標 likely **CN-multiplicity / mapping artifact + FP**，加 mappability mask，列舉等可能候選（虛擬節點、等機率）。
+
+**🔴 caption 修訂（必改）**：
+- ❌ before：「incompatible 衝突(成環) → **使用甲基或其他資訊 確認 分群與歸類**」
+- ✅ after：「incompatible（four-gamete 違反）→ 標 likely **CN-multiplicity/mapping artifact** + mappability mask + **不建單樹**；列舉等可能候選。**甲基不用於分群/排序**」
+- 依據：程式 `candidate_scoring.py:32,34-37`（D4 fix 2026-07-01）本就是此行為（甲基已降 L3-weak non-resolver、`n_candidates="0(不支持單樹)"`）；舊 caption 是圖落後於碼。
+
+**兩個 provenance 註記（方法章講清楚，免混淆）**：
+1. slide 3 的**骨幹樹不是 UPGMA**——是基因型向量 **perfect-phylogeny / laminar**（`topology_analysis.py`）；UPGMA 只用在 slide 4 的甲基分群。**別讓 reviewer 以為拿甲基距離建演化樹（那就循環）。**
+2. 深標籤 `HP1-1-1 / HP1-2 / HP2-2` 是**樹重建的 Dewey 路徑**，不是 BAM haplotag（BAM 只有 `1/2/1-1/2-1/3`）。圖上區分「淺=tag、深=重建輸出」。
+
+**CN 在 slide 3 的唯一角色**：只出現在 incompatible 的 **artifact 解釋**——gain 造成的 multiplicity 會偽造第 4 配子；CN 用來**排除混淆**，不建樹、不分 read。
+
+### §8.3 Slide 4 敘述 — 甲基 read×read 結構 + 雙軌驗證（characterization 層）
+
+**主敘述（speaker note）**：甲基是**有界的資訊/註記層**——在 **label-first** 下檢查甲基結構是否**對齊**既有遺傳標籤（characterize），**不產生演化標籤、不確認 subclone**。
+
+**角色分工講法**：
+- **sSNV 共現（slide 3）＝標籤源；甲基（slide 4）＝註記 / 對齊檢查。**
+- **label-first**（遺傳標籤 → 查甲基對齊；非循環，因 HP 來自零甲基 phasing）≠ cluster-first-then-label（＝tumor-only **double-dip NEGATIVE**）。
+- 動詞紀律：甲基「**describe / corroborate / L3-flag**」，不「**confirm / discriminate subclone**」。
+
+**CN 在 slide 4 的角色**：**固定參考層**——算 k_ISM 相對 k_CN 的 **excess-over-CN**、LOH masking、confound 排除。**k_ISM ⊥ k_CN（ρ=−0.038）**證甲基非 CN 鏡子（有獨立內容），但 CN **不是 per-read discriminator**。
+
+**參數 / 口徑註記**：
+- 「±5000bp」標成 **production 參數（預設 1000）**。
+- **顯著 PERMANOVA ≠ subclone**（可為 cis-ASM / CN）；甲基作為 hard filter 為 DEAD——只做 characterize。
+- 「共同分類與解釋」的 `?/?` 格＝誠實的 **undetermined**（定不出來即答案），**保留**。
+
+### §8.4 三種合法「輔助後續分析」用途（slide 4 收尾可點）
+
+- ✅ **負篩**：甲基同質 → 降優先。
+- ✅ **L3 假設 flag**：遺傳群內部還有甲基次結構 → 標候選，建議 single-cell / multi-region 跟進。
+- ✅ **characterization 註記**：每個遺傳定義 lineage 掛甲基 β-profile 做描述。
+- ❌ 禁：「甲基群＝subclone」「甲基確認譜系」「演化標籤來自甲基」。
+
+---
+
 ## 關聯文件
 
 - 定位主文：`InterSubMod/docs/method_comparison/20260630_ism_positioning_vs_prior_work_01.md`
