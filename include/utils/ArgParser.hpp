@@ -127,6 +127,11 @@ public:
         app.add_flag("--germline-hp-only", config.germline_hp_only,
                      "Ignore somatic HP tags (HP:i:11/21/33); use only germline HP:i:1/2 (Default: off)");
 
+        // R-SELFREF permutation null: shuffle HP tags among reads per region (reproducible; 0=off)
+        app.add_option("--permute-hp-seed", config.permute_hp_seed,
+                       "R-SELFREF null: permute HP tags among reads per region with this seed (0=off)")
+            ->check(CLI::Range(0, 1000000));
+
         try {
             app.parse(argc, argv);
         } catch (const CLI::ParseError& e) {

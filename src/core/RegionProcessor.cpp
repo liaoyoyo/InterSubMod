@@ -26,6 +26,7 @@
 #include "core/SignificanceAnalyzer.hpp"
 #include "core/StructureTest.hpp"
 #include "io/TreeWriter.hpp"
+#include "utils/HpPermutation.hpp"
 #include "utils/Logger.hpp"
 
 namespace InterSubMod {
@@ -416,6 +417,7 @@ RegionProcessor::RegionProcessor(const Config& config)
     filter_config_.min_base_quality = config.min_base_quality;
     filter_config_.require_mm_ml = true;
     filter_config_.germline_hp_only = config.germline_hp_only;
+    permute_hp_seed_ = config.permute_hp_seed;
 
     // Set distance matrix configuration
     if (!distance_metrics_.empty()) {
@@ -847,7 +849,16 @@ RegionResult RegionProcessor::process_single_region(const SomaticSnv& snv, int r
         // Distance matrix, clustering, and significance analysis
         if (compute_distance_matrix_ && result.num_reads >= 2 && result.num_cpgs >= 1) {
             MethylationMatrix meth_mat = build_methylation_matrix(agg.matrix_builder, region_id);
-            const auto& read_list = agg.matrix_builder.get_reads();
+            // R-SELFREF permutation null: when permute_hp_seed_>0, shuffle HP tags among reads within
+            // this region (reproducible via seed+region key), preserving marginal but breaking the
+            // read<->tag self-phasing link. seed=0 binds the original list (byte-identical to before).
+            const auto& read_list_src = agg.matrix_builder.get_reads();
+            std::vector<ReadInfo> read_list_permuted;
+            if (permute_hp_seed_ > 0) {
+                read_list_permuted = read_list_src;
+                permute_hp_tags_per_region(read_list_permuted, permute_hp_seed_, chr_name, snv.pos);
+            }
+            const auto& read_list = (permute_hp_seed_ > 0) ? read_list_permuted : read_list_src;
             std::string region_dir = writer.get_region_dir(chr_name, snv.pos, region_start, region_end);
 
             // Audit: count somatic HP tags (HP:i:11/21/33) from the raw pre-demotion value.

@@ -60,6 +60,11 @@ struct Config {
     // hp_tag_raw always preserves the original value for audit purposes.
     bool germline_hp_only = false;
 
+    // R-SELFREF permutation null (HD-1): when >0, RegionProcessor shuffles HP tags among reads
+    // within each region using this seed (reproducible via seed+region key), preserving the
+    // per-region HP marginal but breaking the read<->tag self-phasing link. 0 = off (default).
+    int permute_hp_seed = 0;
+
     // Hierarchical Clustering Configuration
     bool compute_clustering = true;        ///< Whether to perform hierarchical clustering
     bool output_tree_files = true;         ///< Whether to output Newick tree files

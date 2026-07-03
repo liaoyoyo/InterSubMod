@@ -735,6 +735,7 @@ private:
     bool output_filtered_reads_;
     bool no_filter_output_;
     ReadFilterConfig filter_config_;
+    int permute_hp_seed_ = 0;  ///< R-SELFREF null: >0 shuffles HP tags among reads per region (seed)
     bool use_full_read_span_;  ///< If true, dynamically expand window to cover full span of reads
     double expected_coverage_;  ///< User-specified diploid coverage; 0 = auto-estimate
 

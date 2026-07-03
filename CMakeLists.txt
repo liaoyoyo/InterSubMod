@@ -170,6 +170,7 @@ add_executable(run_tests
     tests/test_per_cpg_asm.cpp
     tests/test_methylation_parser.cpp
     tests/test_diploid_coverage.cpp
+    tests/test_hp_permutation.cpp
 )
 target_link_libraries(run_tests PRIVATE inter_sub_mod_core GTest::gtest)
 
