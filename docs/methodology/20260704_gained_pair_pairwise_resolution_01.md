@@ -75,6 +75,13 @@ build_branch: research/subclonal-reconstruction-202606
 - candidates_total：84 → 37（每區收斂單一解）；B2 544 非可列舉不變
 - chr17 驗證：resolution=BLOCK、單一 block 邊 RRAR→RAAA（非 2 等機率候選）
 
+## 10. >8 sSNV 全 pairwise 建樹（去 MAX_SNV=8 cap，2026-07-04）
+`gt8_pairwise_tree.py`：對 truncated(>8)區用**全部 sSNV 的 pairwise 關係**建 position-level perfect-phylogeny（不需單一全跨 read）：co_linked→union 併節點／nested(小邊<ε)→祖裔邊／4-gamete→conflict／union-find+祖裔 DAG+**環偵測**+transitive reduction。
+- **結果(HCC1395 42 truncated)**：clean pairwise-tree **13**（其中 CN-clean 可信 **7**）／CONFLICT(環/CN-multiplicity) **29**。
+- 🔴 **再修正**：先前「36/42 可解」只算 pairwise 4-gamete 比例、**漏 transitivity 環**；實際建樹後 29/42 有環（chr14:106M 51 節點深 22=CN 假象）。
+- **確實 recover 結構**：chr8:81312744(120 sSNV) 8-cap 只見 1 群 → 全 pairwise **6 節點**；chr8:93.7M(45 sSNV)→19 節點（多為淺 star）。
+- **邊界**：CN-gain(24/42) 的 co_linked 可能是**擴增假共現非真共event**→標 multiplicity-caveat、需 SAVANA;>8 樹全部是 **B_pairwise(組合)非 A_determined(單分子)**（無 read 跨全部）。工作站 resolveBlock 顯示。
+
 ### 整體敘述與結論數字（一致性）
 - **determinacy headline 不變**：A_determined 1741/3885 = 44.8%（topology 層 determinacy 標籤未動）。「A_ambiguous_order」(37) 標籤描述『有多突變 jump 邊』的**結構**；candidate_trees 層再解析該 jump = block/ordered → 兩層互補非矛盾。
 - 若把 block+ordered 記為『order 已定』→ 缺中間群真 order-ambiguous ≈ 0（原 37 → 14 block〔co-event 無序〕+ 22 ordered〔序已定〕+ 1 mixed）。是否 propagate 到 determinacy headline（→ ~45.7%，會動凍結 canonical + 多處引用）待定；建議維持雙層（determinacy 粗標 + candidate_trees 細解）。

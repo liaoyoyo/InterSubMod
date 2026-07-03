@@ -83,6 +83,9 @@ elif os.path.exists(_res0):
     RESOLUTION_JSON = json.dumps(json.load(open(_res0, encoding="utf-8")).get("regions", {}), ensure_ascii=False)
 else:
     RESOLUTION_JSON = "{}"
+# >8 sSNV 全 pairwise 樹(2026-07-04 去 8-cap;CN-clean 建樹·CN-gain multiplicity-caveat)
+_gt8 = os.path.join(DATA, "gt8_trees.json")
+GT8_JSON = json.dumps(json.load(open(_gt8, encoding="utf-8")).get("trees", {}), ensure_ascii=False) if os.path.exists(_gt8) else "{}"
 # LOH 全 7 樣本用 longphase-TO tumor_phased_LOH.bed(SEQC2-validated;取代 clp_cn)。DORADO=同細胞株用 HCC1395。
 _LPT = "/big7_disk/liaoyoyo2001/longphase-to-mod/output"
 LOH_BEDS = {
@@ -660,6 +663,13 @@ function resolveBlock(region){
   var s='<div style="background:#f0f7ff;border:1px solid #a5c8f0;border-radius:6px;padding:9px 12px;margin:8px 0;font-size:12px">';
   s+='<b>🧩 結構解析（gained-pair pairwise 定序 + 區域內所有子read）</b>';
   s+='<div class="note" style="margin:3px 0">provenance：<b>絕對群</b>（單分子跨全部 '+k+' 點）<b>'+(pv.n_absolute_pops||0)+'</b> 群／'+(pv.absolute_reads||0)+' read（絕對比 <b>'+(((pv.abs_frac||0)*100).toFixed(0))+'%</b>）；其餘 pairwise 組合推得</div>';
+  var G8=(window.__GT8__||{})[region];
+  if(G8){var vc=G8.verdict==='pairwise-tree'?'#2f9e44':'#e03131';
+    s+='<div style="margin:5px 0;padding:6px 9px;border-left:4px solid '+vc+';background:#fff">';
+    s+='<b style="color:'+vc+'">🌲 >8 全 pairwise 樹（去 8-cap）</b>　'+G8.n_positions+' sSNV → <b>'+G8.n_nodes+'</b> 節點／'+G8.n_tree_edges+' 邊／深 '+G8.max_depth+'（8-cap 只見 '+(G8.vector_cap_nodes!=null?G8.vector_cap_nodes:'—')+' 群）';
+    s+='<span class="note"> '+G8.verdict+'（衝突對比 '+G8.conflict_frac+(G8.has_cycle?'·有環':'')+'）·'+G8.provenance+'</span>';
+    if(G8.cn_caveat) s+='<div class="note" style="color:#c92a2a;margin-top:3px">🔴 '+G8.cn_caveat+'</div>';
+    s+='</div>';}
   (R.edge_resolution||[]).forEach(function(e){
     var oc=(e.order||[]).map(function(o){return o[0]+'→'+o[1];}).join(', ');
     s+='<div style="margin:4px 0;padding:5px 8px;border-left:4px solid '+(kcol[e.klass]||'#ccc')+';background:#fff">';
@@ -809,6 +819,6 @@ situation<select id="q_sit"><option value="">全</option></select>
 <p class="note" style="margin-top:12px">⚠ 證據層級：A_determined=單分子向量唯一可辨識(≠對 single-cell 驗證為真)；A_ambiguous=缺中間群順序未定；B_pairwise=拼接非單分子整樹；C_underdetermined=多樹相容。TP/FP=SEQC2 僅觀察不進前處理。genome_ctx 為近似(±3Mb)。甲基不參與拓樸裁決(cis-confounded;06-28 cis-control 已測→bounded-auxiliary,非 resolver)。⭐3 單樣本·regional(≤read-span)非 genome-wide tree·分子共現≠single-cell。</p>
 {PROVENANCE_FOOTER}
 </div>
-<script>window.__SAMPLES__={SAMPLES_JSON};window.__CHR17TREE__={CHR17TREE_JSON};window.__RESOLUTION__={RESOLUTION_JSON};</script><script>{JS}</script></body></html>"""
+<script>window.__SAMPLES__={SAMPLES_JSON};window.__CHR17TREE__={CHR17TREE_JSON};window.__RESOLUTION__={RESOLUTION_JSON};window.__GT8__={GT8_JSON};</script><script>{JS}</script></body></html>"""
 with open(MULTI_OUT, "w", encoding="utf-8") as f: f.write(HTML)
 print(f"OK wrote {MULTI_OUT} ({len(HTML):,} bytes; samples {SAMPLE_NAMES})")
