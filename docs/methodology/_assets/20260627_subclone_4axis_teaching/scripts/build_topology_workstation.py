@@ -74,6 +74,9 @@ SAMPLE_NAMES = list(SAMPLES.keys())
 _ideo = os.path.normpath(os.path.join(HERE, "..", "..", "20260630_perregion_workstation", "data", "ideogram_data.json"))
 if "HCC1395" in SAMPLES and SAMPLES["HCC1395"].get("ideogram") is None and os.path.exists(_ideo):
     SAMPLES["HCC1395"]["ideogram"] = json.load(open(_ideo, encoding="utf-8"))
+# 結構解析 + 所有子read(2026-07-04 gained-pair 定序 + block 邊 + provenance;HCC1395 pilot)
+_res = os.path.join(DATA, "resolution_subreads.json")
+RESOLUTION_JSON = json.dumps(json.load(open(_res, encoding="utf-8")).get("regions", {}), ensure_ascii=False) if os.path.exists(_res) else "{}"
 # LOH 全 7 樣本用 longphase-TO tumor_phased_LOH.bed(SEQC2-validated;取代 clp_cn)。DORADO=同細胞株用 HCC1395。
 _LPT = "/big7_disk/liaoyoyo2001/longphase-to-mod/output"
 LOH_BEDS = {
@@ -612,9 +615,34 @@ function show(i,row){el('list').querySelectorAll('.row').forEach(x=>x.classList.
   ${(ctr&&ctr.candidate_set&&ctr.candidate_set.length)?`<div style="background:#f8f0fc;border:1px solid #d0bfff;border-radius:6px;padding:9px;margin:8px 0"><b>🔀 替代整樹候選（左右滑動完整樹）</b> <span class="note">此區 <b>${ctr.n_candidates}</b> 棵相容候選樹(缺中間群→插虛擬中間節點);${ctr.honest_note}。<b>非在給答案</b>(🔴甲基無法裁決)。</span><div id="cttreebox" style="margin-top:6px">${candTreeCard(ctr,0,r)}</div></div>`:''}
   <div class="note" style="background:#eef9f0;border:1px solid #b2dfc0;border-radius:5px;padding:6px 9px;margin:6px 0">🔬 <b>read-driven 交叉確認</b>（22-way 平行遍歷 read）：多-ALT read <b>${rdr.rd_multi_alt!=null?rdr.rd_multi_alt:'—'}</b>／distinct combos <b>${rdr.rd_combos!=null?rdr.rd_combos:'—'}</b>（pipeline n_clusters=${r.n_clusters}）／max chain <b>${rdr.rd_max_chain!=null?rdr.rd_max_chain:'—'}</b>${r.truncated?'　🔴 截斷區→read-driven 原始串接（非假樹）':''}</div>
   <div class="note">S1..S${r.truncated?glen:r.n_sSNV}=區內排序 sSNV${r.truncated?`（此區共 ${r.n_sSNV} sSNV,僅前 ${glen} 進向量;樹/標籤只到 S${glen}）`:''}；直系=往下、姊妹=同層分叉；germline 根標 reads·%。tree_shape(pairwise)=${r.tree_shape}。genome_ctx 為近似(±3Mb)。</div>
-  <b>細胞群(lineage 標籤 → 向量 → S 突變 → reads → 佔比)</b><table><tr><th>lineage</th><th>向量</th><th>突變(S)</th><th>reads</th><th>佔比</th></tr>${pt}</table>${geneBlock(r.region)}`;
+  <b>細胞群(lineage 標籤 → 向量 → S 突變 → reads → 佔比)</b><table><tr><th>lineage</th><th>向量</th><th>突變(S)</th><th>reads</th><th>佔比</th></tr>${pt}</table>${resolveBlock(r.region)}${geneBlock(r.region)}`;
  window.__cyc=cyc?{cs:cyc,idx:0,r:r}:null;
  window.__ctr=(ctr&&ctr.candidate_set&&ctr.candidate_set.length)?{cs:ctr,idx:0,r:r}:null;
+}
+function resolveBlock(region){
+  var R=(window.__RESOLUTION__||{})[region]; if(!R) return '';
+  var kcol={BLOCK:'#f08c00',ORDERED:'#2f9e44',CONFLICT:'#e03131',PARTIAL_ORDER:'#1971c2',AMBIG_NOCOREAD:'#868e96'};
+  var klab={BLOCK:'BLOCK 共event（多突變一起·不排序）',ORDERED:'ORDERED 可定序（中間群被觀測）',CONFLICT:'CONFLICT 真衝突（4-gamete）',PARTIAL_ORDER:'PARTIAL 部分定序',AMBIG_NOCOREAD:'真等機率（無 coread）'};
+  var pv=R.provenance||{},k=R.n_sSNV;
+  var s='<div style="background:#f0f7ff;border:1px solid #a5c8f0;border-radius:6px;padding:9px 12px;margin:8px 0;font-size:12px">';
+  s+='<b>🧩 結構解析（gained-pair pairwise 定序 + 區域內所有子read）</b>';
+  s+='<div class="note" style="margin:3px 0">provenance：<b>絕對群</b>（單分子跨全部 '+k+' 點）<b>'+(pv.n_absolute_pops||0)+'</b> 群／'+(pv.absolute_reads||0)+' read（絕對比 <b>'+(((pv.abs_frac||0)*100).toFixed(0))+'%</b>）；其餘 pairwise 組合推得</div>';
+  (R.edge_resolution||[]).forEach(function(e){
+    var oc=(e.order||[]).map(function(o){return o[0]+'→'+o[1];}).join(', ');
+    s+='<div style="margin:4px 0;padding:5px 8px;border-left:4px solid '+(kcol[e.klass]||'#ccc')+';background:#fff">';
+    s+='<b style="color:'+(kcol[e.klass]||'#333')+'">'+(klab[e.klass]||e.klass)+'</b>　<span class="mono">'+e.parent+'→'+e.child+'</span>';
+    s+='<span class="note"> gained '+JSON.stringify(e.gained_pos)+(oc?'　順序 '+oc:'')+(e.tentative?'　⚠tentative(<2%,需放寬層)':'')+(e.vaf_ok===true?'　✅VAF一致':(e.vaf_ok===false?'　🔴VAF不一致':''))+'</span></div>';
+  });
+  s+='<details style="margin-top:5px"><summary style="cursor:pointer;font-size:11.5px">▶ pairwise 2×2（全對·驅動定序）</summary><table style="font-size:11px;margin-top:4px"><tr><th>對</th><th>RR</th><th>RA</th><th>AR</th><th>AA</th></tr>';
+  (R.pairwise||[]).forEach(function(p){var c=p.cells;s+='<tr><td class="mono">S'+(p.i+1)+'-S'+(p.j+1)+'</td><td>'+c.RR+'</td><td>'+c.RA+'</td><td>'+c.AR+'</td><td>'+c.AA+'</td></tr>';});
+  s+='</table></details>';
+  var sv=R.subread_vectors||{};
+  s+='<details style="margin-top:4px" open><summary style="cursor:pointer;font-size:11.5px"><b>▶ 區域內所有子read（'+Object.keys(sv).length+' 種向量·X=未覆蓋）</b>　覆蓋分布 '+JSON.stringify(R.cover_hist||{})+'</summary>';
+  s+='<table style="font-size:11px;margin-top:4px"><tr><th>子read 向量</th><th>reads</th><th>覆蓋</th><th>類型</th></tr>';
+  Object.entries(sv).slice(0,50).forEach(function(kv){var vec=kv[0],n=kv[1];var nc=k-(vec.split('X').length-1);var typ=nc===k?'✅全跨(絕對)':(nc>=2?'部分('+nc+'點)':'單點');s+='<tr><td class="mono">'+vec+'</td><td>'+n+'</td><td>'+nc+'/'+k+'</td><td>'+typ+'</td></tr>';});
+  s+='</table></details>';
+  if((R.blind_flags||[]).length) s+='<div class="note" style="color:#a37200;margin-top:4px">⚠ 盲點旗標：'+R.blind_flags.join('、')+'</div>';
+  s+='</div>';return s;
 }
 function geneBlock(region){
   let g=(D.gene||{})[region]; if(!g) return '';
@@ -748,6 +776,6 @@ situation<select id="q_sit"><option value="">全</option></select>
 <p class="note" style="margin-top:12px">⚠ 證據層級：A_determined=單分子向量唯一可辨識(≠對 single-cell 驗證為真)；A_ambiguous=缺中間群順序未定；B_pairwise=拼接非單分子整樹；C_underdetermined=多樹相容。TP/FP=SEQC2 僅觀察不進前處理。genome_ctx 為近似(±3Mb)。甲基不參與拓樸裁決(cis-confounded;06-28 cis-control 已測→bounded-auxiliary,非 resolver)。⭐3 單樣本·regional(≤read-span)非 genome-wide tree·分子共現≠single-cell。</p>
 {PROVENANCE_FOOTER}
 </div>
-<script>window.__SAMPLES__={SAMPLES_JSON};window.__CHR17TREE__={CHR17TREE_JSON};</script><script>{JS}</script></body></html>"""
+<script>window.__SAMPLES__={SAMPLES_JSON};window.__CHR17TREE__={CHR17TREE_JSON};window.__RESOLUTION__={RESOLUTION_JSON};</script><script>{JS}</script></body></html>"""
 with open(MULTI_OUT, "w", encoding="utf-8") as f: f.write(HTML)
 print(f"OK wrote {MULTI_OUT} ({len(HTML):,} bytes; samples {SAMPLE_NAMES})")
