@@ -64,6 +64,17 @@ build_branch: research/subclonal-reconstruction-202606
 - assembled/composed 永不升 A_determined；block@CN-gain / conflict-drop@CN-gain 需 CN 才定案。
 
 ## 8. 產物
-- 資料：`data/resolution_subreads.json`（42 區）、`data/resolve_v2_complete.json`（全 3885 分類，scratchpad→待入庫）
-- 腳本：`scripts/resolve_v2_complete.py`（resolver）、`scripts/gen_resolution_subreads.py`（子read+provenance 生成）
-- 下一步：擴全 3885 區子read（per-chrom 平行）／落地 `enumerate_candidate_trees.py`（定序邏輯正式接入）／roll-out 7 樣本。
+- 資料：`data/subreads_all.json`（**全 3885 區**子read+provenance，1.4MB）、`data/resolution_subreads.json`（42 多突變區完整版）、`data/resolve_v2_complete.json`（全區分類）、`data/candidate_trees.json`（**production 重生**）
+- 腳本：`scripts/resolve_v2_complete.py`（resolver）、`scripts/gen_resolution_subreads.py`（42 區完整）、`scripts/gen_subreads_all.py`（**全 3885 區平行**）
+- 工作站：`scripts/build_topology_workstation.py` resolveBlock 面板（全 3885 區可看子read）
+
+## 9. ✅ C 落地 production（2026-07-04）
+`enumerate_candidate_trees.py` 已接入 gained-pair pairwise 定序（co_linked→block group / nested→定序 / 無 coread→真等機率;用觀察約束 prune 排列;🔴 不用甲基）。**candidate_trees.json 重生結果**：
+- **B1_equiprobable：37 → 0**（等機率完全消除）
+- resolution_dist：BLOCK 14 / ORDERED 22 / MIXED 1（區）；edge：15 block / 25 ordered
+- candidates_total：84 → 37（每區收斂單一解）；B2 544 非可列舉不變
+- chr17 驗證：resolution=BLOCK、單一 block 邊 RRAR→RAAA（非 2 等機率候選）
+
+### 整體敘述與結論數字（一致性）
+- **determinacy headline 不變**：A_determined 1741/3885 = 44.8%（topology 層 determinacy 標籤未動）。「A_ambiguous_order」(37) 標籤描述『有多突變 jump 邊』的**結構**；candidate_trees 層再解析該 jump = block/ordered → 兩層互補非矛盾。
+- 若把 block+ordered 記為『order 已定』→ 缺中間群真 order-ambiguous ≈ 0（原 37 → 14 block〔co-event 無序〕+ 22 ordered〔序已定〕+ 1 mixed）。是否 propagate 到 determinacy headline（→ ~45.7%，會動凍結 canonical + 多處引用）待定；建議維持雙層（determinacy 粗標 + candidate_trees 細解）。

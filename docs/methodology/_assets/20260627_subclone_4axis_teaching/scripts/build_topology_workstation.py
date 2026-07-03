@@ -74,9 +74,15 @@ SAMPLE_NAMES = list(SAMPLES.keys())
 _ideo = os.path.normpath(os.path.join(HERE, "..", "..", "20260630_perregion_workstation", "data", "ideogram_data.json"))
 if "HCC1395" in SAMPLES and SAMPLES["HCC1395"].get("ideogram") is None and os.path.exists(_ideo):
     SAMPLES["HCC1395"]["ideogram"] = json.load(open(_ideo, encoding="utf-8"))
-# 結構解析 + 所有子read(2026-07-04 gained-pair 定序 + block 邊 + provenance;HCC1395 pilot)
-_res = os.path.join(DATA, "resolution_subreads.json")
-RESOLUTION_JSON = json.dumps(json.load(open(_res, encoding="utf-8")).get("regions", {}), ensure_ascii=False) if os.path.exists(_res) else "{}"
+# 結構解析 + 所有子read(2026-07-04 gained-pair 定序 + block 邊 + provenance;全 3885 區)
+_res = os.path.join(DATA, "subreads_all.json")
+_res0 = os.path.join(DATA, "resolution_subreads.json")  # fallback(僅 42 多突變區)
+if os.path.exists(_res):
+    RESOLUTION_JSON = json.dumps(json.load(open(_res, encoding="utf-8")), ensure_ascii=False)
+elif os.path.exists(_res0):
+    RESOLUTION_JSON = json.dumps(json.load(open(_res0, encoding="utf-8")).get("regions", {}), ensure_ascii=False)
+else:
+    RESOLUTION_JSON = "{}"
 # LOH 全 7 樣本用 longphase-TO tumor_phased_LOH.bed(SEQC2-validated;取代 clp_cn)。DORADO=同細胞株用 HCC1395。
 _LPT = "/big7_disk/liaoyoyo2001/longphase-to-mod/output"
 LOH_BEDS = {
