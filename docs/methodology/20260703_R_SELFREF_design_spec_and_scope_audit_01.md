@@ -93,3 +93,13 @@ B 加置換 somatic-flag null 分佈。需小改（置換模式）+ ×N 重跑�
 **Step→Verify（cpp-change 6 步預告）**：
 1. spec + 測試設計（本 §8）→ 2. 寫 `--permute-hp-seed` + per-region shuffle（reproducible RNG）→ 3. 單元測試（同 seed byte-identical、marginal 保持、seed=0 等同現行）→ 4. 編譯（Hard Gate）→ 5. 小規模 chr19 驗證（觀測 vs null 位移合理）→ 6. commit。
 **驗收**：seed=0 與現行 byte-identical；permute 保 per-region HP marginal；chr19 null 分佈產出；full 7-樣本 ×{OFF, ON, permute×N} run 落 /big7。
+
+## §9 2026-07-03 HD-1 收斂更新（S-vs-TO 澄清 → R-SELFREF 降 optional）
+
+> 用戶 catch + 三方源碼驗證（`01_longphase_s.sh:156-160` + memory `reference_hp_tag_definition_and_subclone_caveat` + KB longphase-s/to）：**「phasing by-construction 循環」大半是 LongPhase-TO(tumor-only 真 self-phasing) 與 LongPhase-S(現 canonical, germline-anchored) 混淆**。詳 memory `project_hd1_circularity_longphase_s_vs_to_resolution`。
+
+**精確裁決（非「循環不存在」，是「非承重」）——兩層拆開**：
+1. **重建骨幹非循環 by design**：LongPhase-S 的 HP1/HP2 由 germline het SNP 定（`-s germline_phased_vcf -b normal_bam`），somatic 從獨立輸入（`--tumor-snv-file`）進來只做上層標記；重建骨幹＝germline-HP 上 **sSNV read-level 共現**（genotype 軸，非 HP tag）→ **非循環**（源碼證，強於 empirical）。
+2. **循環的 phasing-spine 已 reframe 降階**：舊 G6 positive headline（NG=2 Inner same-HP1>Outer）用 somatic 子標記 `1-1/2-1` 的相內子結構，**那層當 positive headline 確有 by-construction 循環**；現主軸已把它降為 **§2.6 支撐 observation**（非 positive headline）→ 論文 positive 主張不依賴此循環元素。
+
+→ **HD-1 從「唯一決定性卡關（blocking gate）」收斂為「非承重（resolved-as-non-blocking）」**：骨幹設計證非循環 + 循環 spine 已降階。**R-SELFREF（本 doc 工具，commit 95e6f62）降為 optional 經驗附錄**（可量化 spine 循環幅度，但不承重、不解鎖 tier）。論文 methods 引 `01_longphase_s.sh` 命令證骨幹非循環（design-level > empirical）。**RUN 無急迫性**，tooling 就緒待跑。

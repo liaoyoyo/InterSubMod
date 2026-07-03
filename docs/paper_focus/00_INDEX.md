@@ -56,7 +56,7 @@ provenance_note: 本資料夾不產新數字；所有 metric 沿用 session 已�
 
 ## 現況 BLUF（一句）
 
-一篇能過 review 的論文今天就存在 = read-level LOH/haplotype + 甲基的 **characterization + tooling 論文（不是 variant filter）**；主體 = **三~四道防彈 NEGATIVE** + phasing 脊柱（Grade B+ 非 A）+ ASM copy-confounded 支撐。**唯一決定性卡關 = HD-1（你決定）**。
+一篇能過 review 的論文今天就存在 = read-level LOH/haplotype + 甲基的 **characterization + tooling 論文（不是 variant filter）**；主體 = **三~四道防彈 NEGATIVE** + phasing 脊柱（Grade B+ 非 A）+ ASM copy-confounded 支撐。**HD-1 已收斂為非承重（骨幹 germline-anchored 非循環 by design + 循環 phasing-spine 降 §2.6 支撐 observation；R-SELFREF 降 optional，2026-07-03）**。
 
 **🔴 本資料夾最需要你確認/被燒烤的三件事**（詳見 `03`）：
 1. **「共驗證」要定義成「正交佐證」不是「互相篩選」** —— 後者已死四道。

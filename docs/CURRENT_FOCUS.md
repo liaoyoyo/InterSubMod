@@ -16,7 +16,7 @@
 
 > **新 session 先讀**：論文 onboarding handoff = `InterSubMod/docs/references/20260701_thesis_research_handoff_onboarding_01.md`（數字 grep-able、3-reviewer 對抗查核）；整個研究單一索引 = `InterSubMod/docs/methodology/20260628_subclone_reconstruction_master_spec_01.md`。
 > **收斂結論（HCC1395 ⭐3 封頂）**：genetic sSNV 單分子共現 = 唯一非循環重建骨幹（35,332 sSNV → 7,143 區 / 677 full_tree）；HP tag = allelic/clonal 鑑別器（非確認器）；🔴 **甲基用途窮盡 = bounded-auxiliary**（cis-control gate 已負向關閉；SAME-HP subclone-specificity structural UNDETERMINED，需 single-cell 非覆蓋）；🔴 **替代整樹 ranked 無法成立 →「定不出來即答案」**（06-30 field-endorsed）；7 ONT canonical 樣本全跑到樹。
-> **gate**：HD-1 / cis-control(G-B) 已關；⭐3→⭐4 **主要 gate 之一** = COLO829 normal 甲基（**僅補 bounded-auxiliary 負向重現，不單獨解鎖 tier**）。🔴 真天花板 = 缺 **single-cell / 正交 ground truth** + **HD-1 single-pipeline 自我參照**（跨樣本被自裁 partly_artifact/L3 + pseudoreplication；甲基通道已負向關閉）→ 非「再等一份 normal BAM」能移除（2026-07-02 紅隊 C4）。
+> **gate**：cis-control(G-B) 已關；**HD-1 已收斂為非承重**（2026-07-03 源碼三方驗證：LongPhase-S germline-anchored 骨幹非循環 + 循環 phasing-spine 降 §2.6 → R-SELFREF 降 optional，見 memory `project_hd1_circularity_longphase_s_vs_to_resolution`）。⭐3→⭐4 **主要 gate 之一** = COLO829 normal 甲基（**僅補 bounded-auxiliary 負向重現，不單獨解鎖 tier**）。🔴 真天花板 = 缺 **single-cell / 正交 ground truth** + **single-pipeline 自我參照（G-E 正交第二 pipeline 未跑）**（跨樣本被自裁 partly_artifact/L3 + pseudoreplication；甲基通道已負向關閉）→ 非「再等一份 normal BAM」能移除（2026-07-02 紅隊 C4）。
 > **harness**：2026-07-01 週度 review → +`/harness-review` skill（restraint gap 週檢）；insights 8 建議 7 已實作、1 真 gap（CJK 字型，已修 SVG 層）。任務圖 121 節點；SoT=master_spec + memory。
 
 ## 2026-06-19 — 📚 外部文獻驗證庫就緒（74 源親讀，稽核 CLEAN）⭐

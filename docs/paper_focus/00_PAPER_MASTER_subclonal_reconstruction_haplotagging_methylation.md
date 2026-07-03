@@ -23,7 +23,7 @@ provenance_note: 本檔不重複既有 2 份新主軸 SoT; 只折進本 session 
 
 > 我先前把「reconstruction vs characterization」當未定決策 —— **錯了，既有整合篇章已精準解決**：
 > **「subclonal reconstruction」由 somatic haplotagging（genetic 引擎，Grade B+ ⭐3）驅動；甲基 = characterization（不獨立重建子克隆）。** 標題的 reconstruction **站得住**（是 genetic 產品）；validated KB 04 說「缺 phylogeny/CAMDAC/單細胞」是針對**甲基-based** reconstruction —— **論文不那樣 claim**，所以那 3 支柱是 Discussion roadmap 不是阻擋。
-> 🔴 **真正唯一卡關仍是 HD-1**（phasing by-construction 循環 → 跑 R-SELFREF 對照保 positive-spine，或降為 characterization），**你決定**。
+> ✅ **HD-1 已收斂為非承重（2026-07-03，源碼三方驗證）**：LongPhase-S 為 germline-anchored（`scripts/pipeline/steps/01_longphase_s.sh:156-160` 用 `-s germline_phased_vcf -b normal_bam` 定 HP1/HP2、somatic 從 `--tumor-snv-file` 獨立進來），重建骨幹＝germline-HP 上 sSNV 共現（非 HP tag）→ 非循環 by design。循環的 phasing-spine（Inner>Outer 用 somatic 子標記 1-1/2-1）已 reframe 降為 §2.6 支撐 observation，positive 主張不依賴循環元素。→ **R-SELFREF 降 optional**（非 gate）。詳 `InterSubMod/docs/methodology/20260703_R_SELFREF_design_spec_and_scope_audit_01.md §9` + memory `project_hd1_circularity_longphase_s_vs_to_resolution`。
 
 ---
 
@@ -54,7 +54,7 @@ provenance_note: 本檔不重複既有 2 份新主軸 SoT; 只折進本 session 
 5. **6 樣本×3 癌種資產** — 可衝 ⭐4（foundation §資產）。
 
 🔴 **唯二 gate**（不阻擋開寫，阻擋論文最終強度）：
-- **HD-1**：R-SELFREF 循環對照跑 or 降 characterization（你決定）。
+- **HD-1**：✅ 收斂非承重（骨幹 germline-anchored 非循環 + 循環 spine 已降 §2.6）；R-SELFREF 降 optional（2026-07-03）。
 - **G-B**：subclone-甲基 somatic-specific vs germline-allelic 的**正確 null（within-haplotype 非 germline-het）**未跑 → 甲基-subclone 貢獻強度押這（整合篇章 §reconcile）。
 
 ⏸ **整理放緩（已完成）**：所有現有任務 park；method_comparison Phase B（modkit/DSS anchor 已跑，擴 panel 放緩）；ASM 全基因組 survey 背景。
