@@ -1,0 +1,45 @@
+{
+ "summary": {
+  "sample": "HCC1395",
+  "partial_flag": "single-sample HCC1395 / n_sSNV>=2 全區",
+  "n_regions_total(n_sSNV>=2)": 7143,
+  "n_empty_vector(populations 空)": 2887,
+  "empty_vector_frac": 0.4042,
+  "pairs_eps2_rows": 38049,
+  "pairs_mapped_to_region": 38049,
+  "pairs_hitting_empty_region": 9078,
+  "RECOVERABLE(>=1 pairwise co-read)": 2316,
+  "recoverable_frac_of_empty": 0.8022,
+  "recoverable_frac_of_all_mss": 0.3242,
+  "chain>=3loci(可拼 partial 樹)": 1692,
+  "chain3_frac_of_empty": 0.5861,
+  "truly_single_locus(無任何 pair,不可救)": 571,
+  "truly_single_frac_of_empty": 0.1978,
+  "recoverable_by_cn": {
+   "gain": 1698,
+   "loh": 521,
+   "loss": 31,
+   "neutral": 66
+  },
+  "truly_single_by_cn": {
+   "gain": 314,
+   "loh": 217,
+   "loss": 14,
+   "neutral": 26
+  },
+  "recoverable_by_nsSNV": {
+   "2": 43,
+   "3": 692,
+   "4": 619,
+   "5": 386,
+   "6+": 576
+  },
+  "truly_single_by_nsSNV": {
+   "2": 458,
+   "3": 100,
+   "4": 11,
+   "5": 2
+  },
+  "note": "recoverable = 有 >=1 pairwise partial 證據的『上界』,非完整 n_sSNV 拓樸可還原;chain>=3loci 才可能拼出 partial 樹。"
+ }
+}

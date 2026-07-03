@@ -3,7 +3,7 @@
 類型: 方法規格 — clone read 標記的機率式三層架構 + 甲基在遺傳欠定處為何不能定案（四配子拓撲 tie-break / 單位點非監督補結構）
 狀態: 方法裁決（conceptual/methodology）；所有數字為引用既有 verified 文件之結果（非新分析）
 build_branch: research/subclonal-reconstruction-202606
-data_sources: docs/methodology/20260701_ssnv_backbone_method_spec_and_correctness_audit_01.md, docs/methodology/20260701_asm_vs_clonal_definition_and_loh_methyl_verification_01.md, docs/methodology/20260701_topology_algorithm_audit_findings_01.md, docs/methodology/20260628_subclone_reconstruction_master_spec_01.md, docs/methodology/_assets/20260627_subclone_4axis_teaching/data/four_gamete_aa_methyl_demo.json, docs/methodology/_assets/20260627_subclone_4axis_teaching/data/sm_completeness_ledger.json
+data_sources: docs/methodology/20260701_ssnv_backbone_method_spec_and_correctness_audit_01.md, docs/methodology/20260701_asm_vs_clonal_definition_and_loh_methyl_verification_01.md, docs/methodology/20260701_topology_algorithm_audit_findings_01.md, docs/methodology/20260628_subclone_reconstruction_master_spec_01.md, docs/methodology/_assets/20260627_subclone_4axis_teaching/data/four_gamete_aa_methyl_demo.json, docs/methodology/_assets/20260627_subclone_4axis_teaching/data/sm_completeness_ledger.json, docs/methodology/_assets/20260627_subclone_4axis_teaching/data/partial_read_recoverable_fraction.json, docs/methodology/_assets/20260627_subclone_4axis_teaching/data/sm_region_integration.json
 provenance: 概念/方法裁決文件。每個數字皆引用上列既有 verified 文件（§8 溯源表逐項對應），本文件不產生新分析數字。裁決由 2026-07-03 workflow（6 agents：文獻對照 + 循環對抗 + 逐特徵 + 自我一致，對抗 verify=sound_with_corrections）產出並落地。
 -->
 
@@ -235,7 +235,7 @@ LAYER 3  bounded-auxiliary 事後 (群凍結後才動)          = { methylation 
 - **demo 驗證 §6 硬約束（甲基 zero-in-likelihood）正確**：最難的四配子區甲基也加不了可靠解析 → pilot **只用 genetic**（beta-binomial + CN-aware conflict score），不碰甲基。
 - **§6 falsification target 具體化**：CN-gain 四配子 pair（chr9/chr22/chr14/chr2：大 AA + 微 AR/RA + cross-HP）= multiplicity artifact = §6 CN-aware conflict score 應重分類的對象。
 - **Q2 單位點 scope 量化**（`sm_completeness_ledger.json`，sSNV 層）：isolated_singleton **8320** + underpowered **5458**（= 單位點稀疏）vs linked **21554**（有共現）。
-- ⚠ **§6 開放項（誠實邊界）**：partial-read 可救比例（40.4% 空向量 ∩ pairs_eps2）**仍未算** → **不可把 40.4% 當可救目標**（沿用 audit doc 邊界，需另跑 `pairs_eps2 ∩ 空區`）。
+- ✅ **§6 開放項已補算（2026-07-04，見 §10）**：partial-read 可救比例 = 空向量區 **80.2%（2316/2887）有 ≥1 pairwise 證據**、**58.6%（1692）連 ≥3 位點可拼 partial 樹**、**19.8%（571）真單位點不可救**。這 2316 區在現行 topology 3885 向量區**之外** → §5 partial-read 的真實加值目標。
 
 ### §9.6 Provenance（§9 數字 → 來源）
 | 數字 | 值 | 來源 |
@@ -244,3 +244,37 @@ LAYER 3  bounded-auxiliary 事後 (群凍結後才動)          = { methylation 
 | chr9 顯著 pair | S=−0.168 p=0.0015 / S=0.119 p=0.0025 | 同上 `cases[]` |
 | Q2 單位點 scope | isolated 8320 / underpowered 5458 / linked 21554 | `sm_completeness_ledger.json:buckets` |
 | pilot target CN 分層 | loh 77 / gain 31 / neutral 9 / loss 1 | `topology_per_region.json`（det where determinacy==incompatible） |
+
+---
+
+## §10 §6 partial-read 可救比例補算（2026-07-04，HCC1395）
+
+> **partial flag**：single-sample **HCC1395** / n_sSNV≥2 全區（7143）。script `partial_read_recoverable_fraction.py` → `partial_read_recoverable_fraction.json`；純 JSON/TSV（不碰 BAM）。
+
+### §10.1 定義
+- **空向量區 E** = `sm_region_integration.regions` 中 n_sSNV≥2 且 `populations` 空（complete-case genotyping 無 read 完整覆蓋 capped 位點集）。實測 **2887 / 7143 = 40.4%**（與 audit doc 對帳一致）。
+- **可救（recoverable）** = 該區有 ≥1 條 `pairs_eps2` pairwise co-read（某 2 位點被同 read 覆蓋）→ partial-read soft-likelihood 的證據來源，complete-case 丟掉但 pairwise 仍在。
+- **真單位點（不可救）** = 無任何 pair co-read（每 read ≤1 位點）= Q2「單位點稀疏」極端。
+
+### §10.2 結果（38049 pairs 全部 map 到區；9078 命中空向量區）
+| 分層 | 數 | 佔空向量 | 佔全 mss(7143) |
+|---|---:|---:|---:|
+| **recoverable（≥1 pairwise 證據，上界）** | **2316** | **80.2%** | 32.4% |
+| chain≥3 loci（pairwise 連 ≥3 位點，可拼 partial 樹） | 1692 | 58.6% | 23.7% |
+| **真單位點（無任何 pair，不可救）** | **571** | **19.8%** | 8.0% |
+
+- **CN 分層（recoverable）**：gain 1698 / loh 521 / neutral 66 / loss 31。
+- **n_sSNV 分層（recoverable）**：2→43、3→692、4→619、5→386、6+→576。
+- **真單位點 80% 是 n_sSNV=2**（458/571）→ 稀疏 2-locus 區、reads 各只中一點，符合 Q2 圖像。
+
+### §10.3 解讀（🔴 誠實邊界）
+- **可救 = partial 證據存在的「上界」，非「完整 n_sSNV 拓樸可還原」**。n_sSNV=6 但只 1 pairwise link 也算 recoverable，實際只還原一個 2-locus 關係。**chain≥3 loci（58.6%）才是「可拼 partial 樹」的較實誠 tier**。
+- **這 2316 區在現行 topology 的 3885 向量區之外**（空向量→現在完全不出現在 topology 輸出）→ partial-read soft-likelihood 是**新增覆蓋**（§5 point 2 的真實加值目標），非重複既有。
+- audit doc 的「不可把 40.4% 當可救目標」**成立**：可救不是 40.4%（那是空向量集大小），而是空向量的 **80.2%（上界）/ 58.6%（partial 樹 tier）**；剩 19.8% 真不可救。
+
+### §10.4 Provenance
+| 數字 | 值 | 來源 |
+|---|---|---|
+| 空向量 / 全 mss | 2887 / 7143（40.4%） | `sm_region_integration.json:regions`（populations 空） |
+| recoverable / chain3 / 真單位點 | 2316(80.2%) / 1692(58.6%) / 571(19.8%) | `partial_read_recoverable_fraction.json`（本輪 §13.0） |
+| pairs 命中空區 | 9078 / 38049 | 同上 |
