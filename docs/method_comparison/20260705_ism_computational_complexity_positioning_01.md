@@ -22,7 +22,7 @@ related:
 
 > **一句話**：ISM 的可解階段（骨幹 + partial-read 補全）踩在**已被證明多項式可解**的數學島（Gusfield perfect-phylogeny + Pe'er 2004 Incomplete Directed Perfect Phylogeny）；它拒絕/enumerate 的階段全部是**已被證明 NP-hard** 的島。→「⭐3 characterization + 定不出來即答案」= **對齊真實複雜度分界的原則性設計**，非保守選擇。
 >
-> **🔴 原創性界線**：把**腫瘤 subclone 重建** casting 成「布爾超立方體上有向有根 Steiner tree」是**本研究的原創綜合**，非既有 named result（通用系統發生版有 Mahapatra 2024，腫瘤版無人做）。
+> **🔴 原創性界線**：把**腫瘤 subclone 重建** casting 成「布爾超立方體上有向有根 Steiner tree」是**本研究的原創綜合**，非既有 named result（通用系統發生版有 Mahapatra 2025，腫瘤版無人做）。
 
 ---
 
@@ -57,7 +57,7 @@ related:
 | ②**"Steiner tree"** | ⚠ **物件準/計算不準** | H_* = 真 Steiner 點（物件對）；但 ISM **只算多項式 perfect-phylogeny 特例**，**不解** NP-hard Steiner 最佳化（無 min-cost 目標、無 branch-length 搜尋、無 enumerate-and-score） |
 | ③**"GROUP" Steiner** | 🔴 **過度宣稱(as solved)** | 有真結構類比（partial-read `X`→subcube 群，程式註解literally「供 group-Steiner 覆蓋條件」；multiplicity 不確定集）但 ISM 不做 cover-and-minimize；**白地**（無腫瘤 phylo 用 group-Steiner）→ 當**原創 motivation/future-work** |
 
-🔴 **casting 腫瘤重建成 hypercube-Steiner = 原創綜合**：通用系統發生版有 Mahapatra 2024（MSA-DH）；腫瘤文獻用 perfect phylogeny（ISA）+ ancestry-DAG 的 **spanning arborescence**（El-Kebir 2015，ISA 下無 latent 節點故非 Steiner）。→ 論文寫成「**橋接 El-Kebir spanning-arborescence 與經典 parsimony-Steiner-on-hypercube 的新形式化**」，不可寫成引用既有結果。
+🔴 **casting 腫瘤重建成 hypercube-Steiner = 原創綜合**：通用系統發生版有 Mahapatra 2025（MSA-DH；*Acta Inf* 62(1):6，arXiv:2110.02830）；腫瘤文獻用 perfect phylogeny（ISA）+ ancestry-DAG 的 **spanning arborescence**（El-Kebir 2015，ISA 下無 latent 節點故非 Steiner）。→ 論文寫成「**橋接 El-Kebir spanning-arborescence 與經典 parsimony-Steiner-on-hypercube 的新形式化**」，不可寫成引用既有結果。
 
 ### §1.3 一句話可辯護形式化（直接進論文）
 
@@ -79,7 +79,7 @@ related:
 | incompatible 選丟哪些 loci | Min Character Removal ≡ **Vertex Cover** | NP-hard, FPT-in-k | flag/enumerate | Day & Sankoff 1986 *Syst Zool* 35:224–229, DOI 10.2307/2413304 |
 | 混合 bulk row 拆成 clone | Min Conflict-Free Row Split | NP-hard + **inapproximable**, FPT | flag | Hujdurović et al. 2018 *IEEE/ACM TCBB* 15(1):96–108, DOI 10.1109/TCBB.2016.2606620 |
 | 錯誤翻轉去衝突 | Min-flip | NP-hard, FPT | flag | Chen et al. 2006 *IEEE/ACM TCBB* 3(2):165–173, DOI 10.1109/TCBB.2006.26 ⚠「Chen-Kolmogorov」查無 Kolmogorov |
-| Steiner 補全 hypercube | Steiner in {0,1}ⁿ | NP-/MAX-SNP-hard, FPT-only | 不解 | Foulds & Graham 1982 *Adv Appl Math* 3:43–49；FPT: Mahapatra et al. 2024 *Acta Inf* 61, arXiv:2110.02830 |
+| Steiner 補全 hypercube | Steiner in {0,1}ⁿ | NP-/MAX-SNP-hard, FPT-only | 不解 | Foulds & Graham 1982 *Adv Appl Math* 3:43–49；FPT: Mahapatra et al. 2025 *Acta Inf* 62(1):6, DOI 10.1007/s00236-024-00474-8 |
 | 允許甲基 loss（1→0） | Dollo-k | **k=1 poly / k≥2 NP-complete** | 不入（保持單調） | Bonizzoni et al.（Dollo-1 arXiv:1611.01017=L3；constrained PPP PMC4240218） |
 | multiplicity/CCF 唯一性 | non-identifiable | **impossibility（證明）** | 定不出來 | DeCiFer（Satas 2021）*Cell Syst* 12(10):1004, DOI 10.1016/j.cels.2021.07.006 |
 
@@ -163,11 +163,13 @@ ISM 用**單分子 read-level 共現普查**=**直接觀測**超立方體頂點�
 
 ## §5 citation queue（投稿前 `/citation-verification`）+ 誠實標註
 
-**理論骨幹**：Gusfield 1991 · Foulds-Graham 1982 · Charikar 1999 · Garg-Konjevod-Ravi 2000 · Halperin-Krauthgamer 2003 · Mahapatra 2024(🔴 arXiv L3) · El-Kebir 2015 · **Pe'er 2004 IDP**（partial-read 基礎，逐字核） · Day-Sankoff 1986(L3 單 DOI) · Hujdurović 2018 · Chen 2006(⚠ 非 Kolmogorov) · Bonizzoni Dollo-1(🔴 arXiv-only L3) · DeCiFer 2021(L3 abstract-only)。
+> ✅ **2026-07-05 全 35 cite 已過 `/citation-verification`（workflow wf_630cf93a-ed8，WebSearch+Scholar 4-field）→ verified `.bib`：`InterSubMod/docs/method_comparison/_assets/ism_positioning_refs.bib`（0 CITATION_NEEDED；修正 log 見 .bib 檔尾）。以下標註已更新為 verified 後狀態。**
+
+**理論骨幹（metadata 已核）**：Gusfield 1991 · Foulds-Graham 1982 · Charikar 1999 · Garg-Konjevod-Ravi 2000 · Halperin-Krauthgamer 2003 · **Mahapatra 2025**（*Acta Inf* 62(1):6，非 2024/vol61）· El-Kebir 2015 · **Pe'er 2004 IDP**（partial-read 基礎，poly-time 逐字確認） · Day-Sankoff 1986 · Hujdurović 2018 · **Chen 2006**（⚠ Kolmogorov 確認非作者） · **Bonizzoni Dollo-1**（arXiv-only；作者 Soto Gomez/Trucco 非 Dondi） · DeCiFer 2021。
 
 **最近鄰**：Foltz 2024 · sgootr 2023 · TumorLens 2026 · LongPhase-S 2025(⚠ 同實驗室) · cvlr 2023 · ASMS 2024 · CpelNano 2021 · Gaiti 2019 · MethylTree 2025 · Epiclomal 2020 · MethPhaser 2024(cancer deferred=白地實證) · ROCIT 2026(🔴 PacBio 非 ONT) · MethylBERT 2025(🔴 code 吃 ONT，勿以「ONT vs bisulfite」差異化)。
 
-**🔴 未決/查無**：min-flip「Chen-Kolmogorov」歸屬（Kolmogorov 查無）；Mahapatra 2024 後無其他 hypercube-Steiner exact/parameterized 結果（UNCERTAIN=none）；Dollo-1 poly 目前 arXiv-only。
+**🔴 已解決/剩餘**：min-flip「Chen-Kolmogorov」歸屬 → **已核 Kolmogorov 非作者**（Chen/Eulenstein/Fernández-Baca/Sanderson）；PhISCS PMID 31628257→**31628256**（原為 SiCloneFit）；cvlr 描述「call variants」**係錯誤**（實為 methylation read clustering）；Mahapatra 2025 後無其他 hypercube-Steiner exact/parameterized 結果（UNCERTAIN=none）；Dollo-1 poly 目前 arXiv-only。**剩餘投稿前工作**：`.bib` 中 author 含 "others" 的 7 條補全完整作者名單（Foltz/Wakhan/Severus/MethPhaser/MethylTree/ROCIT/Epiclomal）+ ASMS 全作者（bioRxiv 403）。
 
 ---
 

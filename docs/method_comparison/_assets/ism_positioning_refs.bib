@@ -1,0 +1,382 @@
+% ISM 計算複雜度定位 — verified references
+% 驗證日期 2026-07-05；方法 = /citation-verification（WebSearch + Google Scholar/DOI 4-field 對照）
+% 來源 workflow: wf_630cf93a-ed8（7 batches, 35 cites, 0 CITATION_NEEDED）
+% 對應 doc: InterSubMod/docs/method_comparison/20260705_ism_computational_complexity_positioning_01.md
+%
+% ⚠ 尚需人工補全（agent 無法完整拉全作者名單）：author 含 "others" 的條目
+%   （foltz2024 / ahmad2025wakhan / keskus2026severus / fu2024methphaser / chen2025methyltree /
+%    baker2026rocit / desouza2020epiclomal）— 投稿前補齊完整作者。
+% ⚠ preprint（非同行評審）：mahapatra2025(arXiv+Acta Inf in-press) / bonizzoni2016dollo1(arXiv) /
+%   foltz2024 / ho2025longphases / raineri2024asms / paulin2026tumorlens / ahmad2025wakhan / baker2026rocit。
+% ✔ 關鍵修正 log 見檔尾。
+
+% ============================================================
+% §1 理論骨幹 — perfect phylogeny / Steiner / directed / group
+% ============================================================
+
+@article{gusfield1991efficient,
+  author  = {Gusfield, Dan},
+  title   = {Efficient algorithms for inferring evolutionary trees},
+  journal = {Networks},
+  volume  = {21}, number = {1}, pages = {19--28}, year = {1991},
+  doi     = {10.1002/net.3230210104}
+}
+
+@article{foulds1982steiner,
+  author  = {Foulds, L. R. and Graham, R. L.},
+  title   = {The {S}teiner problem in phylogeny is {NP}-complete},
+  journal = {Advances in Applied Mathematics},
+  volume  = {3}, number = {1}, pages = {43--49}, year = {1982},
+  doi     = {10.1016/S0196-8858(82)80004-3}
+}
+
+@article{peer2004incomplete,
+  author  = {Pe'er, Itsik and Pupko, Tal and Shamir, Ron and Sharan, Roded},
+  title   = {Incomplete Directed Perfect Phylogeny},
+  journal = {SIAM Journal on Computing},
+  volume  = {33}, number = {3}, pages = {590--607}, year = {2004},
+  doi     = {10.1137/S0097539702406510},
+  note    = {Poly-time Õ(nm) via graph-sandwich; conf. version CPM 2000 (LNCS 1848)}
+}
+
+@article{mahapatra2025parameterized,
+  author  = {Mahapatra, Sugyani and Narayanan, Manikandan and Narayanaswamy, N. S.},
+  title   = {Parameterized algorithms for the {S}teiner arborescence problem on a hypercube},
+  journal = {Acta Informatica},
+  volume  = {62}, number = {1}, articleno = {6}, year = {2025},
+  doi     = {10.1007/s00236-024-00474-8},
+  note    = {Preprint arXiv:2110.02830; phylogeny-motivated}
+}
+
+@article{charikar1999approximation,
+  author  = {Charikar, Moses and Chekuri, Chandra and Cheung, To-Yat and Dai, Zuo and Goel, Ashish and Guha, Sudipto and Li, Ming},
+  title   = {Approximation algorithms for directed {S}teiner problems},
+  journal = {Journal of Algorithms},
+  volume  = {33}, number = {1}, pages = {73--91}, year = {1999},
+  doi     = {10.1006/jagm.1999.1042}
+}
+
+@article{garg2000group,
+  author  = {Garg, Naveen and Konjevod, Goran and Ravi, R.},
+  title   = {A Polylogarithmic Approximation Algorithm for the Group {S}teiner Tree Problem},
+  journal = {Journal of Algorithms},
+  volume  = {37}, number = {1}, pages = {66--84}, year = {2000},
+  doi     = {10.1006/jagm.2000.1096},
+  note    = {Prelim. SODA 1998, pp. 253--259}
+}
+
+@inproceedings{halperin2003polylog,
+  author    = {Halperin, Eran and Krauthgamer, Robert},
+  title     = {Polylogarithmic Inapproximability},
+  booktitle = {Proc. 35th Annual ACM Symposium on Theory of Computing (STOC)},
+  pages     = {585--594}, year = {2003},
+  doi       = {10.1145/780542.780628}
+}
+
+% ============================================================
+% §2 缺失資料 / 有界丟失 / compatibility 複雜度
+% ============================================================
+
+@article{day1986compatibility,
+  author  = {Day, William H. E. and Sankoff, David},
+  title   = {Computational Complexity of Inferring Phylogenies by Compatibility},
+  journal = {Systematic Zoology},
+  volume  = {35}, number = {2}, pages = {224--229}, year = {1986},
+  doi     = {10.2307/2413304},
+  note    = {Journal renamed Systematic Biology in 1992}
+}
+
+@article{hujdurovic2018mixed,
+  author  = {Hujdurovi\'c, Ademir and Ka\v{c}ar, Ur\v{s}a and Milani\v{c}, Martin and Ries, Bernard and Tomescu, Alexandru I.},
+  title   = {Complexity and Algorithms for Finding a Perfect Phylogeny from Mixed Tumor Samples},
+  journal = {IEEE/ACM Transactions on Computational Biology and Bioinformatics},
+  volume  = {15}, number = {1}, pages = {96--108}, year = {2018},
+  doi     = {10.1109/TCBB.2016.2606620},
+  note    = {Prelim. WABI 2015; minimum conflict-free row split NP-hardness}
+}
+
+@article{chen2006minimumflip,
+  author  = {Chen, Duhong and Eulenstein, Oliver and Fern\'andez-Baca, David and Sanderson, Michael},
+  title   = {Minimum-Flip Supertrees: Complexity and Algorithms},
+  journal = {IEEE/ACM Transactions on Computational Biology and Bioinformatics},
+  volume  = {3}, number = {2}, pages = {165--173}, year = {2006},
+  doi     = {10.1109/TCBB.2006.26},
+  note    = {Authors confirmed; Kolmogorov NOT an author}
+}
+
+@article{bonizzoni2016dollo1,
+  author  = {Bonizzoni, Paola and Della Vedova, Gianluca and Soto Gomez, Mauricio and Trucco, Gabriella},
+  title   = {On Computing the {Dollo-1} Phylogeny in Polynomial Time},
+  journal = {arXiv preprint arXiv:1611.01017}, year = {2016},
+  doi     = {10.48550/arXiv.1611.01017},
+  note    = {Preprint (cs.DS); no peer-reviewed journal version found}
+}
+
+@article{bonizzoni2014constrainedppp,
+  author  = {Bonizzoni, Paola and Carrieri, Anna Paola and Della Vedova, Gianluca and Trucco, Gabriella},
+  title   = {Explaining Evolution via Constrained Persistent Perfect Phylogeny},
+  journal = {BMC Genomics},
+  volume  = {15}, number = {Suppl 6}, pages = {S10}, year = {2014},
+  doi     = {10.1186/1471-2164-15-S6-S10}, pmid = {25572381},
+  note    = {RECOMB-CG 2014 supplement; peer-reviewed}
+}
+
+% ============================================================
+% §3 腫瘤組合系統發生學派（perfect-phylogeny / Steiner）
+% ============================================================
+
+@article{elkebir2015reconstruction,
+  author  = {El-Kebir, Mohammed and Oesper, Layla and Acheson-Field, Hannah and Raphael, Benjamin J.},
+  title   = {Reconstruction of clonal trees and tumor composition from multi-sample sequencing data},
+  journal = {Bioinformatics},
+  volume  = {31}, number = {12}, pages = {i62--i70}, year = {2015},
+  doi     = {10.1093/bioinformatics/btv261}, pmid = {26072510},
+  note    = {AncesTree; spanning-arborescence VAFFP}
+}
+
+@article{elkebir2016spruce,
+  author  = {El-Kebir, Mohammed and Satas, Gryte and Oesper, Layla and Raphael, Benjamin J.},
+  title   = {Inferring the Mutational History of a Tumor Using Multi-state Perfect Phylogeny Mixtures},
+  journal = {Cell Systems},
+  volume  = {3}, number = {1}, pages = {43--53}, year = {2016},
+  doi     = {10.1016/j.cels.2016.07.004}, pmid = {27467246}, note = {SPRUCE}
+}
+
+@article{elkebir2018sphyr,
+  author  = {El-Kebir, Mohammed},
+  title   = {{SPhyR}: tumor phylogeny estimation from single-cell sequencing data under loss and error},
+  journal = {Bioinformatics},
+  volume  = {34}, number = {17}, pages = {i671--i679}, year = {2018},
+  doi     = {10.1093/bioinformatics/bty589}, pmid = {30423070}, note = {k-Dollo}
+}
+
+@article{malikic2019phiscs,
+  author  = {Malikic, Salem and Mehrabadi, Farid Rashidi and Ciccolella, Simone and Rahman, Md. Khaledur and Ricketts, Camir and Haghshenas, Ehsan and Seidman, Daniel and Hach, Faraz and Hajirasouliha, Iman and Sahinalp, S. Cenk},
+  title   = {{PhISCS}: a combinatorial approach for subperfect tumor phylogeny reconstruction via integrative use of single-cell and bulk sequencing data},
+  journal = {Genome Research},
+  volume  = {29}, number = {11}, pages = {1860--1877}, year = {2019},
+  doi     = {10.1101/gr.234435.118}, pmid = {31628256},
+  note    = {PMID corrected: 31628257 is SiCloneFit, not PhISCS}
+}
+
+@article{malikic2015citup,
+  author  = {Malikic, Salem and McPherson, Andrew W. and Donmez, Nilgun and Sahinalp, Cenk S.},
+  title   = {Clonality inference in multiple tumor samples using phylogeny},
+  journal = {Bioinformatics},
+  volume  = {31}, number = {9}, pages = {1349--1356}, year = {2015},
+  doi     = {10.1093/bioinformatics/btu758}, pmid = {25568283}, note = {CITUP}
+}
+
+@article{satas2021decifer,
+  author  = {Satas, Gryte and Zaccaria, Simone and El-Kebir, Mohammed and Raphael, Benjamin J.},
+  title   = {{DeCiFer}ing the elusive cancer cell fraction in tumor heterogeneity and evolution},
+  journal = {Cell Systems},
+  volume  = {12}, number = {10}, pages = {1004--1018.e10}, year = {2021},
+  doi     = {10.1016/j.cels.2021.07.006}, pmid = {34637751},
+  note    = {multiplicity/CCF non-identifiability}
+}
+
+% ============================================================
+% §4 VAF-系統發生 / 遷移史（bulk 推斷）
+% ============================================================
+
+@article{deshwar2015phylowgs,
+  author  = {Deshwar, Amit G. and Vembu, Shankar and Yung, Christina K. and Jang, Gun Ho and Stein, Lincoln and Morris, Quaid},
+  title   = {{PhyloWGS}: reconstructing subclonal composition and evolution from whole-genome sequencing of tumors},
+  journal = {Genome Biology},
+  volume  = {16}, number = {1}, pages = {35}, year = {2015},
+  doi     = {10.1186/s13059-015-0602-8}, pmid = {25786235}
+}
+
+@article{jiang2016canopy,
+  author  = {Jiang, Yuchao and Qiu, Yu and Minn, Andy J. and Zhang, Nancy R.},
+  title   = {Assessing intratumor heterogeneity and tracking longitudinal and spatial clonal evolutionary history by next-generation sequencing},
+  journal = {Proceedings of the National Academy of Sciences},
+  volume  = {113}, number = {37}, pages = {E5528--E5537}, year = {2016},
+  doi     = {10.1073/pnas.1522203113}, pmid = {27573852}, note = {Canopy}
+}
+
+@article{wintersinger2022pairtree,
+  author  = {Wintersinger, Jeff A. and Dobson, Stephanie M. and Kulman, Ethan and Stein, Lincoln D. and Dick, John E. and Morris, Quaid},
+  title   = {Reconstructing Complex Cancer Evolutionary Histories from Multiple Bulk {DNA} Samples Using {Pairtree}},
+  journal = {Blood Cancer Discovery},
+  volume  = {3}, number = {3}, pages = {208--219}, year = {2022},
+  doi     = {10.1158/2643-3230.BCD-21-0092}, pmid = {36129821}
+}
+
+@article{kulman2024orchard,
+  author  = {Kulman, Ethan and Kuang, Rui and Morris, Quaid},
+  title   = {{Orchard}: building large cancer phylogenies using stochastic combinatorial search},
+  journal = {PLOS Computational Biology},
+  volume  = {20}, number = {12}, pages = {e1012653}, year = {2024},
+  doi     = {10.1371/journal.pcbi.1012653}, pmid = {39680616},
+  eprint  = {2311.12917}, archivePrefix = {arXiv}
+}
+
+@article{elkebir2018machina,
+  author  = {El-Kebir, Mohammed and Satas, Gryte and Raphael, Benjamin J.},
+  title   = {Inferring parsimonious migration histories for metastatic cancers},
+  journal = {Nature Genetics},
+  volume  = {50}, number = {5}, pages = {718--726}, year = {2018},
+  doi     = {10.1038/s41588-018-0106-z}, pmid = {29700472}, note = {MACHINA}
+}
+
+@inproceedings{roddur2025mach2,
+  author    = {Roddur, Mrinmoy Saha and Ramavarapu, Vikram and Bunkum, Abi and Huebner, Ariana and Mineyev, Roman and McGranahan, Nicholas and Zaccaria, Simone and El-Kebir, Mohammed},
+  title     = {Characterizing the Solution Space of Migration Histories of Metastatic Cancers with {MACH2}},
+  booktitle = {Research in Computational Molecular Biology (RECOMB 2025)},
+  series    = {Lecture Notes in Computer Science}, year = {2025},
+  doi       = {10.1007/978-3-031-90252-9_34},
+  note      = {Preprint bioRxiv 2024.11.19.624301; enumerates full non-unique solution space}
+}
+
+% ============================================================
+% §5 最近鄰競品 — 遺傳骨幹 / ONT 生態
+% ============================================================
+
+@article{foltz2024somatichaplotype,
+  author  = {Foltz, Steven M. and others},
+  title   = {Somatic mutation phasing and haplotype extension using linked-reads in multiple myeloma},
+  journal = {bioRxiv}, year = {2024},
+  doi     = {10.1101/2024.08.09.607342}, pmid = {39149342}, pmcid = {PMC11326269},
+  note    = {Preprint; tool SomaticHaplotype (ding-lab); NEAREST co-occurrence neighbor; 10X linked-read, zero methylation}
+}
+
+@article{ho2025longphases,
+  author  = {Ho, Ming-En and Zheng, Zhenxian and Luo, Ruibang and Chiang, Huai-Hsiang and Huang, Yao-Ting},
+  title   = {{LongPhase-S}: purity estimation and variant recalibration with somatic haplotyping for long-read sequencing},
+  journal = {bioRxiv}, year = {2025},
+  doi     = {10.1101/2025.11.20.689492},
+  note    = {Preprint; ISM's own backbone tool (zero-methylation somatic haplotag = non-circularity guarantee); same-lab caveat}
+}
+
+@article{paulin2026tumorlens,
+  author  = {Paulin, Luis F. and Shi, Minyi and Fu, Yilei and Zheng, Xinchang and Au-Yeung, George and Bowtell, David and Chen, Jieming and Liang, Yuxin and Hammer, Christian and Sedlazeck, Fritz J.},
+  title   = {Comprehensive detection of genetic and epigenetic alterations in cancer using long reads with {TumorLens}},
+  journal = {medRxiv}, year = {2026},
+  doi     = {10.64898/2026.03.18.26348569}, pmid = {41891012},
+  note    = {Preprint; detector/annotator NOT reconstructor; windowed-DMR methylation}
+}
+
+@article{ahmad2025wakhan,
+  author  = {Ahmad, Tanveer and others and Kolmogorov, Mikhail},
+  title   = {{Wakhan}: reconstruction of chromosome-scale copy number profiles of tumor genomes with long-read sequencing},
+  journal = {medRxiv}, year = {2025},
+  doi     = {10.64898/2025.12.11.25342098},
+  note    = {Preprint; haplotype-specific somatic CNA + CN-neutral LOH}
+}
+
+@article{keskus2026severus,
+  author  = {Keskus, Ayse G. and others and Kolmogorov, Mikhail},
+  title   = {{Severus} detects somatic structural variation and complex rearrangements in cancer genomes using long-read sequencing},
+  journal = {Nature Biotechnology}, year = {2026},
+  doi     = {10.1038/s41587-025-02618-8}, pmid = {40185952},
+  note    = {Peer-reviewed (online Apr 2025, issue 2026); somatic SV; consumes HP tag}
+}
+
+% ============================================================
+% §6 最近鄰競品 — 甲基 read-level / 單細胞譜系 / supervised
+% ============================================================
+
+@article{liu2023sgootr,
+  author  = {Liu, Yuelin and Li, Xuan Cindy and Rashidi Mehrabadi, Farid and Sch\"affer, Alejandro A. and Pratt, Drew and Crawford, David R. and Malikic, Salem and Molloy, Erin K. and Gopalan, Vishaka and Mount, Stephen M. and Ruppin, Eytan and Aldape, Kenneth D. and Sahinalp, S. Cenk},
+  title   = {Single-cell methylation sequencing data reveal succinct metastatic migration histories and tumor progression models},
+  journal = {Genome Research},
+  volume  = {33}, number = {7}, pages = {1089--1100}, year = {2023},
+  doi     = {10.1101/gr.277608.122}, pmid = {37217254}, pmcid = {PMC10538489},
+  note    = {Tool Sgootr; owns the distance-methylation-reconstruction method-class (single-cell driver)}
+}
+
+@article{raineri2023cvlr,
+  author  = {Raineri, Emanuele and Alberola i Pla, Mariona and Dabad, Marc and Heath, Simon},
+  title   = {{cvlr}: finding heterogeneously methylated genomic regions using {ONT} reads},
+  journal = {Bioinformatics Advances},
+  volume  = {3}, number = {1}, pages = {vbac101}, year = {2023},
+  doi     = {10.1093/bioadv/vbac101}, pmcid = {PMC9887406},
+  note    = {EM Bernoulli-mixture read clustering; has randomization test; germline/imprinting; NOT a variant caller}
+}
+
+@article{raineri2024asms,
+  author  = {Raineri, Emanuele and Heath, Simon},
+  title   = {{ASMS}: finding allele specific methylation in human genomes without phasing},
+  journal = {bioRxiv}, year = {2024},
+  doi     = {10.1101/2024.12.18.629129},
+  note    = {Preprint; full author list unverified (bioRxiv 403); K=2 EM + 5000-perm test}
+}
+
+@article{abante2021cpelnano,
+  author  = {Abante, Jordi and Kambhampati, Sandeep and Feinberg, Andrew P. and Goutsias, John},
+  title   = {Estimating {DNA} methylation potential energy landscapes from nanopore sequencing data},
+  journal = {Scientific Reports},
+  volume  = {11}, number = {1}, pages = {21619}, year = {2021},
+  doi     = {10.1038/s41598-021-00781-x}, pmid = {34732768}, pmcid = {PMC8566571},
+  note    = {CpelNano; ONT-native Ising/entropy model; region-level; has permutation}
+}
+
+@article{gaiti2019epigenetic,
+  author  = {Gaiti, Federico and Chaligne, Ronan and Gu, Hongcang and Brand, Ryan M. and Kothen-Hill, Steven and Schulman, Rafael C. and Grigorev, Kirill and Risso, Davide and Kim, Kyu-Tae and Pastore, Alessandro and Huang, Kevin Y. and Alonso, Alicia and Sheridan, Caroline and Omans, Nathaniel D. and Biederstedt, Evan and Clement, Kendell and Wang, Lili and Felsenfeld, Joshua A. and Bhavsar, Erica B. and Aryee, Martin J. and Allan, John N. and Furman, Richard and Gnirke, Andreas and Wu, Catherine J. and Meissner, Alexander and Landau, Dan A.},
+  title   = {Epigenetic evolution and lineage histories of chronic lymphocytic leukaemia},
+  journal = {Nature},
+  volume  = {569}, number = {7757}, pages = {576--580}, year = {2019},
+  doi     = {10.1038/s41586-019-1198-z}, pmid = {31092926}, pmcid = {PMC6533116},
+  note    = {single-cell methylation lineage corroborates genetic subclone (SF3B1 Fisher P=7.4e-9)}
+}
+
+@article{chen2025methyltree,
+  author  = {Chen, Mengyang and others and Wang, Shou-Wen},
+  title   = {High-resolution, noninvasive single-cell lineage tracing in mice and humans based on {DNA} methylation epimutations},
+  journal = {Nature Methods},
+  volume  = {22}, number = {3}, pages = {488--498}, year = {2025},
+  doi     = {10.1038/s41592-024-02567-1}, pmid = {39820752},
+  note    = {Tool MethylTree; single-cell methylation lineage Q~1 (supervised)}
+}
+
+@article{desouza2020epiclomal,
+  author  = {de Souza, Camila P. E. and Andronescu, Mirela and Masud, Tehmina and Kabeer, Farhia and Biele, Justina and Laks, Emma and Lai, Daniel and others and Aparicio, Samuel and Shah, Sohrab P.},
+  title   = {{Epiclomal}: Probabilistic clustering of sparse single-cell {DNA} methylation data},
+  journal = {PLoS Computational Biology},
+  volume  = {16}, number = {9}, pages = {e1008270}, year = {2020},
+  doi     = {10.1371/journal.pcbi.1008270}, pmid = {32966276}, pmcid = {PMC7546467},
+  note    = {defines epiclones; anti-circularity firewall precedent}
+}
+
+@article{fu2024methphaser,
+  author  = {Fu, Yilei and Aganezov, Sergey and others and Sedlazeck, Fritz J.},
+  title   = {{MethPhaser}: methylation-based long-read haplotype phasing of human genomes},
+  journal = {Nature Communications},
+  volume  = {15}, number = {1}, pages = {5327}, year = {2024},
+  doi     = {10.1038/s41467-024-49588-0}, pmcid = {PMC11193733},
+  note    = {germline-only; CANCER explicitly deferred to future work (Discussion) = ISM white-space evidence}
+}
+
+@article{baker2026rocit,
+  author  = {Baker, Toby M. and others and Spellman, Paul T.},
+  title   = {Genome-wide classification of tumor-derived reads from bulk long-read sequencing},
+  journal = {bioRxiv}, year = {2026},
+  doi     = {10.64898/2026.03.03.709085}, pmcid = {PMC12991090},
+  note    = {Preprint; tool ROCIT; PacBio HiFi (NOT ONT); supervised read-origin}
+}
+
+@article{jeong2025methylbert,
+  author  = {Jeong, Yunhee and Gerh\"auser, Clarissa and Sauter, Guido and Schlomm, Thorsten and Rohr, Karl and Lutsik, Pavlo},
+  title   = {{MethylBERT} enables read-level {DNA} methylation pattern identification and tumour deconvolution using a Transformer-based model},
+  journal = {Nature Communications},
+  volume  = {16}, number = {1}, pages = {788}, year = {2025},
+  doi     = {10.1038/s41467-025-55920-z}, pmid = {39824848}, pmcid = {PMC11742067},
+  note    = {supervised; code ingests ONT modBAM (do NOT differentiate on ONT-vs-bisulfite)}
+}
+
+% ============================================================
+% 關鍵修正 log（2026-07-05 /citation-verification）
+% ============================================================
+% mahapatra: 2024 vol61 → 2025 Acta Inf 62(1):6, DOI 10.1007/s00236-024-00474-8
+% malikic2019phiscs: PMID 31628257 → 31628256（31628257=SiCloneFit）
+% bonizzoni2016dollo1: 作者 Dondi/Trucco → Della Vedova, Soto Gomez, Trucco（Dondi 非作者）
+% bonizzoni2014constrainedppp: venue Algorithms Mol Biol → BMC Genomics 15(Suppl6):S10；作者含 Carrieri 非 Dondi
+% chen2006minimumflip: Kolmogorov 確認非作者（原疑慮 refuted）
+% orchard/mach2/foltz/longphases/tumorlens/wakhan/severus/sgootr/cvlr/cpelnano/methyltree/rocit:
+%   supplied「title」多為工具名/描述 → 全部替換為 verified 論文題名
+% cvlr:「call variants in long reads」描述錯誤 → 實為 methylation read clustering（不 call variant）
+% severus: 非 preprint = 已發表 Nature Biotechnology（唯一 5 篇中同行評審）
+% ROCIT: 平台 = PacBio HiFi 非 ONT（確認）
+% MethPhaser: cancer-deferred 逐字確認（Discussion）
