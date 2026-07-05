@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>多樣本克隆樹拓樸工作站 — 主頁（每樣本檢視）</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;color:#212529;background:#f8f9fa;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding:22px}h1{font-size:22px;margin:0 0 4px}h2{font-size:15px;color:#1971c2;margin:22px 0 8px}
+.sub{color:#868e96;font-size:13px;margin:0 0 16px}table{border-collapse:collapse;width:100%;font-size:13px;background:#fff;border-radius:8px;overflow:hidden}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid #f1f3f5}th{background:#f1f3f5;font-size:11.5px}td{vertical-align:middle}
+.note{color:#868e96;font-size:11px}a{color:#1971c2;text-decoration:none}a:hover{text-decoration:underline}
+.btn{background:#1971c2;color:#fff;padding:4px 12px;border-radius:6px;font-size:12px;white-space:nowrap}.btn:hover{text-decoration:none;background:#1864ab}
+.card{background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:12px 16px;margin:10px 0}
+.ribbon{background:#fffbf5;border:1px solid #ffe0a3;border-radius:6px;padding:8px 12px;margin:10px 0;font-size:12px;color:#a37200}
+</style></head><body><div class="wrap">
+<h1>🧬 多樣本克隆樹拓樸工作站 — 主頁</h1>
+<p class="sub">7 ONT 樣本 · somatic sSNV 單分子共現重建 · 每樣本獨立檔案(~9MB,任何電腦可開) · 生成 by build_per_sample_workstation.py</p>
+<div class="ribbon">🏷️ characterization(非 subclone 判別) · single-bulk · L3/⭐3 · 跨樣本差異 partly-artifact(見驗證記錄) · CN 6/7 樣本補自 SAVANA(cna-only)</div>
+<h2>逐樣本檢視（點「開啟」看該樣本完整工作站）</h2>
+<table><tr><th>樣本</th><th>備註</th><th>總區</th><th>c=1/2/≥3</th><th>incompatible%</th><th>c=2 branched%</th><th>c=2 confirmed%</th><th>檔案</th><th></th></tr><tr><td><a href="HCC1395.html"><b>HCC1395</b></a></td><td class="note">SEQC2 truth·凍結主樣本</td><td>6288</td><td>1995/1744/146</td><td>0.3%</td><td>57.7%</td><td>57.6%</td><td>11.7 MB</td><td><a class="btn" href="HCC1395.html">開啟 ▶</a></td></tr><tr><td><a href="COLO829.html"><b>COLO829</b></a></td><td class="note">⚠低coread artifact</td><td>6613</td><td>2551/1225/10</td><td>0.0%</td><td>87.1%</td><td>39.3%</td><td>11.9 MB</td><td><a class="btn" href="COLO829.html">開啟 ▶</a></td></tr><tr><td><a href="H1437.html"><b>H1437</b></a></td><td class="note">census 標籤弱</td><td>8169</td><td>2545/2053/170</td><td>0.8%</td><td>63.0%</td><td>58.7%</td><td>15.1 MB</td><td><a class="btn" href="H1437.html">開啟 ▶</a></td></tr><tr><td><a href="H2009.html"><b>H2009</b></a></td><td class="note">⚠資料品質(incompatible 最高)</td><td>9444</td><td>1834/2093/316</td><td>2.8%</td><td>55.7%</td><td>66.7%</td><td>20.8 MB</td><td><a class="btn" href="H2009.html">開啟 ▶</a></td></tr><tr><td><a href="HCC1395_DORADO.html"><b>HCC1395_DORADO</b></a></td><td class="note">同細胞株·DORADO basecaller</td><td>3418</td><td>1149/1184/46</td><td>0.1%</td><td>57.0%</td><td>60.1%</td><td>6.8 MB</td><td><a class="btn" href="HCC1395_DORADO.html">開啟 ▶</a></td></tr><tr><td><a href="HCC1937.html"><b>HCC1937</b></a></td><td class="note">census 標籤弱</td><td>1886</td><td>595/985/56</td><td>0.0%</td><td>58.0%</td><td>67.7%</td><td>4.3 MB</td><td><a class="btn" href="HCC1937.html">開啟 ▶</a></td></tr><tr><td><a href="HCC1954.html"><b>HCC1954</b></a></td><td class="note">⚠undetermined</td><td>2837</td><td>821/1095/63</td><td>0.0%</td><td>79.0%</td><td>52.6%</td><td>5.8 MB</td><td><a class="btn" href="HCC1954.html">開啟 ▶</a></td></tr>
+<tr style="background:#f8f9fa"><td><b>合計</b></td><td class="note">7 樣本同版本</td><td><b>38655</b></td><td>—</td><td><b>0.9%</b>(351)</td><td>—</td><td>—</td><td>—</td><td></td></tr></table>
+<div class="card"><b>📖 欄位意義</b>
+<div class="note" style="line-height:1.9;margin-top:4px">
+• <b>總區</b>=n_sSNV≥2 的最大單分子連鎖區數 ｜ <b>c=1/2/≥3</b>=群數分布(c=含≥1 ALT 向量數,germline 不計)<br>
+• <b>incompatible%</b>=四配子/perfect-phylogeny 違反率(🔴 誠實有效性訊號;逐樣本 0.4%–19.1%,H2009 最差)<br>
+• <b>c=2 branched%</b>=兩 ALT 向量非嵌套(=幾何上界,<b>非</b> read 驗證) ｜ <b>c=2 confirmed%</b>=有 read 驗證結構的比例(對照上界)<br>
+• 🔴 branched%>confirmed% 的缺口=幾何斷言但 read 未驗(COLO829 87%→僅 39% 驗證)
+</div></div>
+<h2>📄 相關文件（分析 + 驗證）</h2>
+<div class="card note" style="line-height:2">
+• 三軸分析報告(c×拓撲×樣本 + 定義附錄): <span class="mono">InterSubMod/docs/methodology/20260702_topology_cluster_shape_three_axis_analysis_01.md</span><br>
+• 迭代對抗驗證記錄(R1-R4 DRY 收斂): <span class="mono">InterSubMod/docs/methodology/20260702_topology_three_axis_verification_log_01.md</span><br>
+• 建置地圖(產生程式/資料流): <span class="mono">InterSubMod/docs/methodology/20260701_multisample_topology_workstation_build_map_01.md</span><br>
+• 本資料夾說明 + 重生指令: <span class="mono">README.md</span>(同資料夾)
+</div>
+<p class="note" style="margin-top:18px">重生:<span class="mono">cd .../20260627_subclone_4axis_teaching/scripts &amp;&amp; python3 build_per_sample_workstation.py</span> → 覆寫本資料夾全部檔案。</p>
+</div></body></html>
