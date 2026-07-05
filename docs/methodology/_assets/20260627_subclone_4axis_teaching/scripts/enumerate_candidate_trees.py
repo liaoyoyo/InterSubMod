@@ -64,8 +64,40 @@ def positions_for(r, glen):
     return None
 
 
+def _geno(lbl):  # gap#2: 正規化節點 label(build_hidden_node_tree 的隱藏節點是 'H_<geno>')
+    return lbl[2:] if isinstance(lbl, str) and lbl.startswith("H_") else lbl
+
 def gained(parent_vec, child_vec):
+    if parent_vec is not None: parent_vec = _geno(parent_vec)
+    child_vec = _geno(child_vec)
     return [i for i in range(len(child_vec)) if child_vec[i] == "A" and (parent_vec is None or parent_vec[i] != "A")]
+
+# === gap#2(2026-07-04):parent-choice 拓樸歧義枚舉 + 全區 identifiability ===
+def _altset(g): return frozenset(i for i, ch in enumerate(g) if ch == "A")
+
+def parent_choice_enum(r):
+    """A_ambiguous 但無 multi-flip 邊(單-flip parent-choice 歧義,舊碼 silently return None 的區):
+    對每觀測節點列『所有等大最大觀測真子集父』,笛卡兒積枚舉 → dedup 得所有 minimal 拓樸。k<=8 暴力。"""
+    pops = r["populations"]
+    genos = sorted([g for g in pops if "A" in g], key=lambda g: (g.count("A"), g))
+    if not genos:
+        return []
+    k = len(genos[0]); obs = [_altset(g) for g in genos]; lab = {_altset(g): g for g in genos}
+    def L(a): return "ROOT" if not a else lab.get(a, "H_" + "".join("A" if i in a else "R" for i in range(k)))
+    per = []
+    for X in obs:
+        cands = [a for a in obs if a < X]
+        par = [a for a in cands if len(a) == max(len(c) for c in cands)] if cands else [frozenset()]
+        per.append((X, par))
+    trees = [[]]
+    for X, par in per:
+        trees = [t + [(L(p), L(X))] for t in trees for p in par][:CAP]
+    seen = set(); uniq = []
+    for t in trees:
+        key = frozenset(t)
+        if key not in seen:
+            seen.add(key); uniq.append({"edges": t, "virtual_nodes": [], "read_score": read_score(t, pops)})
+    return uniq
 
 
 def resolve_and_order(chrom, gidx, positions, vafmap):
@@ -210,10 +242,19 @@ def _finalize(r, cands, ambig, true_count, resolution, edge_res, glen):
             "PARTIAL": "部分定序(混 block+nested)+殘餘等機率",
             "AMBIG_NOCOREAD": "真等機率·gained 對無直接 coread(中間群未觀察)",
             "MIXED": "多邊混合解析"}.get(resolution, "")
+    # gap#2: isomorphism dedup(canonical frozenset of labeled edges)→ n_minimal_trees + identifiability
+    seen = set(); nmin = 0
+    for c in cands:
+        key = frozenset((p, cc) for p, cc in c["edges"])
+        if key not in seen:
+            seen.add(key); nmin += 1
+    ident = ("conflict" if resolution == "CONFLICT"
+             else "ambiguous" if (nmin > 1 or true_count > 1) else "determined")
     return {"region": r["region"], "base_determinacy": DET(r), "n_sSNV": r["n_sSNV"],
             "ambig_nodes": r.get("ambig_nodes", 0),
             "missing_intermediates": sum(len(g) - 1 for (_, _, g) in ambig),
             "n_candidates": len(cands), "true_count": true_count, "capped": true_count > CAP,
+            "n_minimal_trees": nmin, "identifiability": ident,  # gap#2: 拓樸可辨識性(dedup 後)
             "equiprobable": equ, "resolution": resolution, "edge_resolution": edge_res,
             "candidate_set": cands, "honest_note": note,
             "truncated": bool(r.get("truncated")) or r["n_sSNV"] > glen}
@@ -268,17 +309,42 @@ def enumerate_region(r):
 
 b1, b2_nonenum = [], 0
 rescnt = defaultdict(int)
+ident_table = defaultdict(int)  # gap#2: 全 with-vector 區 identifiability 分佈(不 bloat candidate_set)
 for r in det:
     d = DET(r)
     if "ambiguous" in d:
         res = enumerate_region(r)
-        if res:
-            b1.append(res)
-            rescnt[res["resolution"]] += 1
+        if res is None:
+            # gap#2 修:舊碼對「無 multi-flip 邊」的 parent-choice/單-flip 歧義 silently return None(25 區憑空消失)。
+            #   改枚舉等大觀測父選擇,顯式標 identifiability,不再丟。
+            pc = parent_choice_enum(r); nmin = len(pc)
+            res = {"region": r["region"], "base_determinacy": d, "n_sSNV": r["n_sSNV"],
+                   "ambig_nodes": r.get("ambig_nodes", 0), "missing_intermediates": 0,
+                   "n_candidates": len(pc), "true_count": nmin, "capped": nmin > CAP,
+                   "n_minimal_trees": nmin, "identifiability": "ambiguous" if nmin > 1 else "determined",
+                   "equiprobable": nmin > 1, "resolution": "PARENT_CHOICE", "edge_resolution": [],
+                   "candidate_set": pc, "honest_note": "parent-choice 拓樸歧義(節點有多個等大觀測父)",
+                   "truncated": bool(r.get("truncated"))}
+        b1.append(res); rescnt[res["resolution"]] += 1
+        ident_table[res["identifiability"]] += 1
+    elif "E_subcube_recovered" in d:
+        ident_table["subcube_recovered(gap#1;partial建樹)"] += 1          # gap#1: partial-read 救回(無 full-cov)
+    elif "A_determined" in d:
+        ident_table["determined"] += 1                                  # gap#2: 蓋章(n_minimal_trees=1)
+    elif "recurrence" in d:
+        ident_table["recurrence(m通道;非乾淨可辨識)"] += 1
+    elif d == "incompatible":
+        ident_table["conflict(真artifact/cycle)"] += 1
     elif d == "C_underdetermined":
-        b2_nonenum += 1
+        b2_nonenum += 1; ident_table["nonenumerable(C_underdetermined)"] += 1
+    elif d == "B_pairwise_structure":
+        ident_table["nonenumerable(B_pairwise)"] += 1
+    else:
+        ident_table["other"] += 1
 
 equ_n = sum(1 for x in b1 if x["equiprobable"])
+b1_ambiguous = sum(1 for x in b1 if x["identifiability"] == "ambiguous")
+b1_determined = sum(1 for x in b1 if x["identifiability"] == "determined")
 edge_klass = defaultdict(int)
 for x in b1:
     for e in x.get("edge_resolution", []):
@@ -287,8 +353,11 @@ out = {
     "schema_version": "20260704",
     "summary": {
         "B1_enumerated": len(b1),
+        "B1_ambiguous": b1_ambiguous,          # gap#2: n_minimal_trees>1(真拓樸歧義)
+        "B1_determined": b1_determined,         # gap#2: enumerate 後收斂唯一
         "B1_equiprobable": equ_n,
         "B1_resolved_nonequiprobable": len(b1) - equ_n,
+        "identifiability_table": dict(ident_table),  # gap#2: 全 with-vector 區 determined/ambiguous/recurrence/conflict/nonenumerable 完整分佈
         "resolution_dist": dict(rescnt),
         "edge_klass_dist": dict(edge_klass),
         "candidates_total": sum(x["n_candidates"] for x in b1),

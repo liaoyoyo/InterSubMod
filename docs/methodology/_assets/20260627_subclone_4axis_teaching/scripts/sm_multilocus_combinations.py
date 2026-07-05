@@ -62,14 +62,27 @@ def main(chroms, out_path):
             positions = [s[0] for s in som]
             combo = Counter()
             hpset = Counter()
+            # gap#1(2026-07-04):同時記錄 partial-read subcube-groups('X'=未覆蓋位點=cube 自由維度)+
+            #   per-column coverage(含 partial),供 group-Steiner 覆蓋條件。full-cov 路徑(combo)不變 → populations 向後相容。
+            subread = Counter()
+            colcov = {p: [0, 0] for p in positions}  # pos -> [nREF, nALT]
             for rn, c in calls.items():
-                if all(c.get(p) in ("REF", "ALT") for p in positions):
-                    sstr = "".join("A" if c[p] == "ALT" else "R" for p in positions)
-                    combo[sstr] += 1
-                    if rn in hp and "A" in sstr:
+                vec = "".join("A" if c.get(p) == "ALT" else ("R" if c.get(p) == "REF" else "X") for p in positions)
+                ncov = len(positions) - vec.count("X")
+                if ncov == 0:
+                    continue
+                subread[vec] += 1
+                for i, p in enumerate(positions):
+                    if vec[i] == "R": colcov[p][0] += 1
+                    elif vec[i] == "A": colcov[p][1] += 1
+                if ncov == len(positions):  # full-cov 路徑不變
+                    combo[vec] += 1
+                    if rn in hp and "A" in vec:
                         hpset[hp[rn]] += 1
             nfull = sum(combo.values())
-            if nfull < MINREAD:
+            subread_groups = {v: n for v, n in subread.items() if n >= MINREAD}
+            # gap#1: 只要有 full-cov population 或 partial subcube-group(≥MINREAD)就保留(原:無 full-cov 即整組丟 → 40.4% 空)
+            if nfull < MINREAD and not subread_groups:
                 continue
             pops = {k: v for k, v in combo.items() if v >= MINREAD}
             npop = len(pops)
@@ -82,6 +95,8 @@ def main(chroms, out_path):
                    "positions": positions, "n_full_cov_reads": nfull,
                    "n_populations": npop, "n_populations_with_ALT": npop_alt,
                    "populations": dict(sorted(pops.items(), key=lambda x: -x[1])),
+                   "subread_groups": dict(sorted(subread_groups.items(), key=lambda x: -x[1])),  # gap#1: partial subcube-groups
+                   "col_coverage": {str(p): colcov[p] for p in positions},                        # gap#1: per-locus REF/ALT 覆蓋(含 partial)
                    "cn": cst, "dominant_hp_count": len(hpset), "same_hp": same_hp}
             groups_out.append(rec)
             agg[f"npop_{min(npop, 5)}"] += 1

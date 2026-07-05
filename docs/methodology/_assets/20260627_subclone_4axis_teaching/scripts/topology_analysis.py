@@ -53,6 +53,43 @@ def genome_ctx(chrom, start, end, pad=3000000):
     if ce and not (end < ce - pad or start > ce + pad): return "centromere"
     return "arm"
 
+# === gap#3 Model A m-通道(2026-07-04):HCC1395 SEQC2 整數拷貝數拆 recurrence_required 的 70 區 ===
+#   m_f = major-allele copy number ceiling。整數 CN≥3(gain)→ m>1 multiplicity artifact(棄);
+#   neutral CN2 / loss CN≥1 → m=1 真 recurrence 候選(留);copy-neutral LOH total=2 → allele-specific
+#   CN 無 → m∈{1,2} 未解(VAF L3 軟旗標,不硬判)。6 樣本 cn=unknown → m 通道不可用。誠實上限見設計 risks。
+CN_INT_GAIN = os.environ.get("SM_CN_INT_GAIN", "/big8_disk/data/HCC1395/SEQC2/CNV/ngs_benchmark_cnv_gain_cn.bed")
+CN_INT_LOSS = os.environ.get("SM_CN_INT_LOSS", "/big8_disk/data/HCC1395/SEQC2/CNV/ngs_benchmark_cnv_loss_cn.bed")
+def _load_cn_int(path):
+    segs = defaultdict(list)
+    if path and os.path.exists(path):
+        for ln in open(path):
+            p = ln.rstrip("\n").split("\t")
+            if len(p) >= 4:
+                try: segs[p[0]].append((int(p[1]), int(p[2]), float(p[3])))
+                except ValueError: pass
+    return segs
+_CN_GAIN = _load_cn_int(CN_INT_GAIN); _CN_LOSS = _load_cn_int(CN_INT_LOSS)
+def _cn_int_lookup(segs, chrom, pos):
+    for s, e, v in segs.get(chrom, []):
+        if s <= pos <= e: return v
+    return None
+def m_channel_split(chrom, mid, cn, max_vaf):
+    """回 (det_label, m_channel_dict)。cn=='unknown'(6 樣本)→ 不可用。"""
+    if cn == "unknown":
+        return "recurrence_required(m通道不可用)", {"verdict": "unavailable", "cn_int": None}
+    gcn = _cn_int_lookup(_CN_GAIN, chrom, mid); lcn = _cn_int_lookup(_CN_LOSS, chrom, mid)
+    if gcn is not None and gcn >= 3:
+        return "recurrence_artifact(m>1;CN-amp)", {"verdict": "artifact_drop", "cn_int": gcn}
+    if lcn is not None and lcn == 0:
+        return "recurrence_artifact(m>1;CN-amp)", {"verdict": "artifact_drop", "cn_int": 0.0, "note": "CN=0(call不可能)"}
+    if cn == "neutral" or (cn == "loss" and lcn is not None and lcn >= 1):
+        return "recurrence_candidate(m=1)", {"verdict": "candidate_keep", "cn_int": (lcn if cn == "loss" else 2)}
+    if cn == "loh":
+        vf = "likely_artifact(高VAF)" if (max_vaf is not None and max_vaf > 0.7) else "likely_recurrence(低VAF)"
+        return "recurrence_LOH_unresolved", {"verdict": "LOH_unresolved", "cn_int": 2,
+                                             "max_vaf": round(max_vaf, 3) if max_vaf else None, "vaf_L3": vf}
+    return "recurrence_required(m通道不可用)", {"verdict": "unavailable", "cn_int": None}
+
 def altset(g): return frozenset(i for i, ch in enumerate(g) if ch == "A")
 
 def _laminar(sets):
@@ -112,6 +149,63 @@ def solve_topology(pops):
     else: t = "mixed"
     return (t, edges, nodes, dropped, ambig)
 
+def build_hidden_node_tree(pops):
+    """2026-07-04: 為 pairwise-四型乾淨(n_independent_clean==0)但 altset-row-laminar 誤殺的區建樹。
+    Gusfield perfect-phylogeny：nic==0 保證存在唯一(至同-support 字元順序)的 unit-flip 樹;
+    缺的中間祖先 → 建隱藏節點(label 'H_<genostring>')。回 (type, edges, nodes, dropped=0, ambig)
+    與 solve_topology 同簽名。見 20260704_incompatible_reclassification_hidden_node_finding_01.md。"""
+    genos = [g for g in pops if "A" in g]
+    if not genos:
+        return ("germline_only", [], list(pops), 0, 0)
+    k = len(genos[0])
+    # 🔴 2026-07-04 修(對抗驗證揪出 H1437 chr20:1899981 homoplasy bug):rescue gate 用 read-level n_independent_clean,
+    #   但本函式吃 population 向量矩陣;兩者可不一致(如 rr=0 無 ancestral 觀測時),read-level nic==0 但 population 欄本身四型衝突。
+    #   若直接建,Gusfield spine 會 emit 同位元翻兩次(homoplasy)的非法樹卻標 A_determined。防線:先驗 population 欄 rooted 三型
+    #   (root=all-ref;某字元對同時有 (1,0)(0,1)(1,1) → 無 rooted perfect phylogeny)→ 衝突則回 incompatible 不建(不救),
+    #   主迴圈 determinacy 邏輯自然落回 incompatible。確保 gate 與 builder 用同一份(population)資料判可建性。
+    for _i, _j in combinations(range(k), 2):
+        _pats = {(1 if g[_i] == "A" else 0, 1 if g[_j] == "A" else 0) for g in genos}
+        if (1, 0) in _pats and (0, 1) in _pats and (1, 1) in _pats:
+            return ("incompatible", [], list(pops), 0, 0)  # population 向量無 rooted perfect phylogeny → 不可乾淨建樹
+    supp = {j: frozenset(i for i, g in enumerate(genos) if g[j] == "A") for j in range(k)}
+    supp = {j: s for j, s in supp.items() if s}  # 只留有 ALT 的字元
+    obs = {}
+    for g in genos:
+        obs[altset(g)] = g  # 觀測節點：altset -> genotype 字串
+    def _parent_of(X):
+        # 移除 support 最小(=最後獲得)的字元 → 父 altset;tiebreak: 字元 index 決定性
+        if not X:
+            return frozenset()
+        j = min(X, key=lambda c: (len(supp[c]), c))
+        return X - {j}
+    allnodes = set(obs)
+    stack = list(obs)
+    while stack:  # 沿 spine 補隱藏祖先直到 root
+        X = stack.pop()
+        P = _parent_of(X)
+        if P not in allnodes:
+            allnodes.add(P)
+            if P:
+                stack.append(P)
+    allnodes.add(frozenset())
+    def _label(X):
+        if X in obs:
+            return obs[X]
+        if not X:
+            return "ROOT"
+        return "H_" + "".join("A" if i in X else "R" for i in range(k))  # 隱藏祖先節點
+    edges = [(_label(_parent_of(X)), _label(X)) for X in allnodes if X]
+    nodes = [_label(X) for X in allnodes if X]
+    # ambig：同 support set 的字元順序不可解(缺中間群)
+    ss = list(supp.values())
+    ambig = sum(1 for a, b in combinations(range(len(ss)), 2) if ss[a] == ss[b])
+    childcnt = Counter(p for p, c in edges)
+    has_branch = any(v >= 2 for v in childcnt.values())
+    t = "branched(需隱藏祖先)" if has_branch else "linear(需隱藏祖先)"
+    if ambig > 0:
+        t = t.replace("(需", "(順序未定,需")
+    return (t, edges, nodes, 0, ambig)
+
 def dewey_paths(edges, pops, hdigit):
     """每節點(genotype 向量)的 lineage path 標籤 HP{h}-{b1}-{b2}…
     姊妹編號 = **子樹總 read 數遞減**(自己+所有子孫=該 lineage 分支佔比/CCF proxy;
@@ -145,6 +239,10 @@ stats = {"n_roots": Counter(), "n_clusters": Counter(), "topology_type": Counter
 detail = []
 for r in regs:
     pops = r.get("populations") or {}
+    # gap#1(2026-07-04):partial-read subcube-groups(無 full-cov population 時的救回底料)
+    subcube = r.get("subread_groups") or {}
+    subcube_maxcov = max((len(v) - v.count("X") for v in subcube), default=0)  # 最大單 read 覆蓋位點數
+    _recovered = (len(pops) == 0) and subcube_maxcov >= 2  # 無 full-cov 但有 ≥2-位點 partial(co-occurrence substrate)
     # HP 根
     posset = set()
     for e in r.get("nested_edges", []): posset.add(e[0]); posset.add(e[1])
@@ -160,14 +258,41 @@ for r in regs:
         ttype, edges, nodes, dropped, ambig = solve_topology(pops)
     else:
         ttype, edges, nodes, dropped, ambig = ("no_genotype_vectors", [], [], 0, 0)
+    # 2026-07-04 修(altset-row-laminar 過嚴 → 用 pairwise 四型 n_independent_clean 分流;
+    #   見 20260704_incompatible_reclassification_hidden_node_finding_01.md):
+    #   solve_topology 的 _laminar 檢查 genotype ROWS→誤殺「合法 branched 需隱藏祖先」的區(sibling 共享祖先天生非 row-laminar)。
+    #   Gusfield 正確判準=字元(欄)兩兩四型相容,即 pairwise n_independent_clean==0。三向分流:
+    #     ①nic==0 & no cycle → perfect phylogeny 存在 → build_hidden_node_tree 建樹(救,~30)
+    #     ②nic>0 & 非gain     → Model A recurrence-required(重標,~70;CN=獨立 m-通道,非-gain=m≤1=候選真 recurrence)
+    #     ③nic>0 & gain / cycle → CN-multiplicity artifact / pairwise cycle → 維持 incompatible(~18)
+    #   ⚠僅在 solve_topology 回 incompatible 時介入 → 不動既有 laminar 建樹區(gain+四型仍循原 CN-multiplicity 建樹路徑)。
+    _nic = r.get("n_independent_clean", 0); _hc = bool(r.get("has_cycle", False)); _cn = r.get("cn")
+    _m_channel = None  # gap#3: recurrence_required 區的 m-通道拆分結果(verdict/cn_int/vaf)
+    # ① rescue: solve_topology 因 altset-row-laminar 誤回 incompatible,但 pairwise 四型乾淨(nic==0,非cycle)
+    #    → perfect phylogeny 存在 → 建隱藏節點樹(~30)。⚠僅動 ttype==incompatible 者→不碰既有 laminar 建樹區。
+    if ttype == "incompatible" and not _hc and _nic == 0:
+        ttype, edges, nodes, dropped, ambig = build_hidden_node_tree(pops)
     drop_frac = round(dropped / (sum(pops.values()) or 1), 3)
     stats["n_clusters"][nclust] += 1
     stats["topology_type"][ttype] += 1
-    # determinacy
-    # C3 修(2026-07-01):(a)consume solve_topology 的 population 層 incompatible(原只看 pairwise has_cycle→
-    # incompatible 是 dead code);(b)drop_frac>10% 不給 A_determined 高信心(去噪掩蓋 CN-multiplicity)。
-    if r["has_cycle"] or ttype == "incompatible" or (r.get("n_independent_clean", 0) > 0 and r.get("cn") != "gain"):
-        det = "incompatible"   # C2 修: 非 CN-gain 的乾淨 4-gamete 違反 → incompatible(原靜默丟)
+    # determinacy — 2026-07-04 重構(pairwise 四型 n_independent_clean=真衝突判準,取代 altset-row-laminar):
+    #   非-gain 四型違反 → Model A recurrence-required(非 incompatible);gain+四型=CN-multiplicity artifact;
+    #   ⚠gain+四型且已由 laminar 建樹的區(ttype≠incompatible)不受影響→維持既有 CN-multiplicity 建樹路徑(A_determined 等)。
+    #   C3 修(2026-07-01)保留:drop_frac>10% 不給 A_determined。
+    if _recovered:
+        # gap#1 救回:無 full-cov single-molecule 向量,樹由 partial subcube + pairwise 建 → 🔴 不僭稱 A_determined(單分子)
+        if _hc or _nic > 0: det = "E_subcube_recovered(gap#1;含衝突)"
+        elif r["tree_shape"] in ("full_tree", "linear_nested", "sibling_only"): det = "E_subcube_recovered(gap#1;pairwise樹)"
+        else: det = "E_subcube_recovered(gap#1;欠定)"
+    elif _hc:
+        det = "incompatible"                                          # pairwise cycle(最強衝突)
+    elif _nic > 0 and _cn != "gain":                                    # ② 非-gain 真四型 → Model A recurrence,送 m-通道拆
+        _mid = (r["start"] + int(r["region"].split("-")[-1])) // 2
+        _vd = r.get("pos_vaf") or r.get("vaf") or {}
+        _mvaf = max(_vd.values()) if isinstance(_vd, dict) and _vd else None
+        det, _m_channel = m_channel_split(r["chrom"], _mid, _cn, _mvaf)  # gap#3: artifact/candidate/LOH-unresolved/unavailable
+    elif ttype == "incompatible":
+        det = "incompatible"                                          # ③ 剩 altset-incompatible(gain+四型=CN-multiplicity artifact)
     elif drop_frac > 0.10: det = "A_noisy(去噪>10%;CN-multiplicity 疑)"
     elif len(alt_vecs) >= 2 and sum(pops.values()) >= 6: det = "A_determined(單分子向量)"
     elif r["tree_shape"] in ("full_tree", "linear_nested", "sibling_only"): det = "B_pairwise_structure"
@@ -176,7 +301,7 @@ for r in regs:
     if ambig>0 and det.startswith('A_determined'): det='A_ambiguous_order(缺中間群)'
     # G1 修(2026-06-29):determinacy 是「單分子建樹」分類,只對有 genotype 向量的區有意義
     # → canonical denominator = with-vector(3885)。無向量區改記 region_coverage(避免 7143/3885 混引)。
-    has_vec = len(alt_vecs) >= 1 and len(pops) >= 1
+    has_vec = (len(alt_vecs) >= 1 and len(pops) >= 1) or _recovered  # gap#1: 救回區也入 determinacy(denominator 成長)
     stats["region_coverage"]["with_genotype_vector" if has_vec else
                               ("germline_only" if ttype == "germline_only" else "no_genotype_vector")] += 1
     # detail：有 genotype 向量(可畫樹)的區
@@ -206,7 +331,10 @@ for r in regs:
                        "tp": tpfp.get("TP", 0), "fp": tpfp.get("FP", 0),
                        "tree_shape": r["tree_shape"], "populations": pops, "edges": edges,
                        "node_hp": node_hp, "pos_nested": r.get("nested_edges", []),
-                       "pos_sibling": r.get("sibling_pairs", []), "pos_vaf": r.get("vaf", {})})
+                       "pos_sibling": r.get("sibling_pairs", []), "pos_vaf": r.get("vaf", {}),
+                       "m_channel": _m_channel,  # gap#3: recurrence 區 m-通道拆(artifact/candidate/LOH-unresolved/unavailable)
+                       "subcube_recovered": _recovered, "subcube_maxcov": subcube_maxcov,  # gap#1: partial-read 救回
+                       "subread_groups": subcube if _recovered else None})
 
 detail.sort(key=lambda d: (-d["n_clusters"], -d["n_sSNV"]))
 

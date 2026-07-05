@@ -213,7 +213,10 @@ def main():
                    "nested_edges": tree["nested_edges"], "sibling_pairs": tree["sibling_pairs"],
                    "vaf": tree["vaf"],
                    "n_populations": mlrec["n_populations"] if mlrec else None,
-                   "populations": mlrec["populations"] if mlrec else None}
+                   "populations": mlrec["populations"] if mlrec else None,
+                   # gap#1(2026-07-04): partial-read subcube-groups + per-column coverage(full-cov population 空時仍可建樹)
+                   "subread_groups": mlrec.get("subread_groups") if mlrec else None,
+                   "col_coverage": mlrec.get("col_coverage") if mlrec else None}
             regions.append(rec)
             shape_cnt[shape] += 1
             if cst in ("loh", "neutral"):
