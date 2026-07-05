@@ -90,4 +90,15 @@ v1 曾宣稱「117 可救 / incompatible 118→1」— **錯,是 over-claim**。
 - **救回 2403 區**（先前 empty 掉出重建）:pairwise樹 **1561** + 欠定 676 + 含衝突 166。
 - **denominator 3885 → 6288**;**A_determined 1764 完全不變**（full-cov census 0 regression）。
 - 這是誠實的 headline 成長:救回區透明標 E_subcube_recovered、與 full-cov 3885 分開,不混入 A_determined。
-🔴 **僅 HCC1395**（6 樣本 cn/subread 未重跑,其 topology subcube 空 → 不受影響,graceful）。備份 `scratchpad/CANON_pregap1_*`。
+**擴至全 7 樣本（2026-07-06，driver `run_gap1_6samples.sh`，6 樣本各 BAM 重跑;SM_VCF_MODE=single）**：
+| 樣本 | with-vec | 救回 | 救% | A_det(不變) |
+|---|---|---|---|---|
+| HCC1395 | 3885 | 2403 | 38% | 1764 |
+| COLO829 | 3786 | 2827 | 43% | 1221 |
+| H1437 | 4768 | 3401 | 42% | 2065 |
+| H2009 | 4243 | 5201 | 55% | 1760 |
+| HCC1395_DORADO | 2379 | 1039 | 30% | 1178 |
+| HCC1937 | 1636 | 250 | 13% | 994 |
+| HCC1954 | 1979 | 858 | 30% | 1140 |
+
+全 7 樣本救回 **15,979 區**;每樣本「新total − 救回 = 舊 with-vector」逐一對上（**full-cov census 0 regression、救回純 additive**）。🔴 救回率 13%–55% 隨覆蓋深度變（H2009 深/HCC1937 淺），非方法差異。6 樣本 cn=unknown → m-通道不可用、救回只依 tree_shape 分類。備份 `scratchpad/CANON_pregap1_*`。
