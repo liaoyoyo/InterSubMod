@@ -29,7 +29,7 @@ struct ReadInfo {
     int32_t align_start;     ///< Alignment start position (0-based)
     int32_t align_end;       ///< Alignment end position (0-based)
     int mapq;                ///< Mapping Quality
-    std::string hp_tag;      ///< Haplotype tag (HP): "1", "2", "1-1", "2-1", "unphase", etc.
+    std::string hp_tag;      ///< Haplotype tag (HP): "1","2"=germline; "1-1","2-1"=germline-anchored somatic; "3"=HP3 (touches a somatic ALT, germline phasing unconfirmed); "0"=unphased/germline-conflict. NOTE: ReadParser emits "0" for the unphased case, never the literal string "unphase" (verified genome-wide 2026-07-04, V1).
                              ///< May be demoted to "0" when Config::germline_hp_only is set.
     std::string hp_tag_raw;  ///< Raw HP tag before any germline-only demotion (audit). Mirrors hp_tag when flag is off.
     bool is_tumor;           ///< True if from Tumor BAM, False if from Normal BAM

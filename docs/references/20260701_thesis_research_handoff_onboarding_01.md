@@ -38,7 +38,7 @@ data_sources: docs/methodology/20260627_clone_subclone_integrated_report/data/*.
 ### 第二段：haplotag 鑑別 allelic vs clonal
 - **HP = 鑑別器非確認器**。不分 HP 時誤判 **9,187** subclone → HP gate 後 same-HP **保留 3,949（候選，非確認）**、**移除 5,238（57%）等位（diff-HP）**。🔴 same-HP 高多為「區域背景」非克隆證據（故 3,949 是「過等位 gate 的候選」非已確認 subclone）；HP 的真判別力在**互斥**（mutual_excl DEPLETED 0.86×）。
 - 檔：`02_hp_contribution.md`、`00b_methods_grounding_HP_ISM.md`；資料 `data/sm_hp_contribution.json`。
-- 🔑 **HP tag 語意（L1 核對 `src/core/ReadParser.cpp:121-154` + KB `05_tools/longphase-s.md`）**：`1/2`=germline（乾淨、非循環）；`1-1/2-1`=germline HP 上的**第一條 somatic haplotype**（第一位=germline anchor，帶 somatic）；`3`=無 germline anchor 的 ambiguous somatic；LongPhase-S **完整 9 態**（含 `4` 與 `1-2/2-2` multi-subclone）。🔴 `1-1/2-1/3` 當獨立 subclone 證據=循環。
+- 🔑 **HP tag 語意（L1 核對 `src/core/ReadParser.cpp:121-154`；genome-wide V1 交叉表 2026-07-04 佐證）**：`1/2`=germline（乾淨、非循環；V1: 0% 碰 somatic ALT）；`1-1/2-1`=germline HP 上帶 somatic 的 haplotype（V1: ~97% confident ALT）；`3`=HP3 = **經過任一 somatic ALT，但 germline 定相未確認/HP 衝突**（V1: ~97.5% confident ALT）；`0`=**unphase = REF-only 定相失敗**（沒碰 germline 或 germline 衝突；V1: 99.2% 不碰 ALT；ReadParser 輸出字串 `"0"` 非 `"unphase"`）。判別軸 = **是否經過 confident somatic ALT**（germline 0% vs somatic 家族 ~97%）；HP3≠unphase = 兩個不同 read 族群的定相失敗，勿混談。LongPhase-S **完整 9 態**（含 `4` 與 `1-2/2-2` multi-subclone）。🔴 `1-1/2-1/3` 當獨立 subclone 證據=循環。**V2 分樹決策**：HP3 併入帶該突變的 lineage 樹；unphase 不進 somatic 樹（背景）。
 
 ### 第三段：甲基輔助 characterize（有界，非偵測）
 - 從 tumor BAM MM/ML 重抽 genome-wide **740 區**（驗證 corr=1.000 vs ISM）：僅 **49（6.6%）corroborate**（power-gated：高功率區 54.9%，僅 51 區達）；**0 個新 partition 由甲基獨立發現**。
