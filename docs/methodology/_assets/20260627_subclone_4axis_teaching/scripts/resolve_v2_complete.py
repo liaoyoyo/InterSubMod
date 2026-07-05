@@ -47,6 +47,7 @@ def edge_class(chrom, gained_pos, vafmap):
     order_edges = []
     n_block = n_nested = n_conflict = n_nocoread = 0
     tentative = False
+    eps_dropped = False  # I1: nested 邊小邊非零但被 ε 去噪 → CN-gain 時可能真 multiplicity
     for a, b in combinations(sorted(gained_pos), 2):
         pr = plut.get((chrom, a, b))
         if pr is None:
@@ -70,6 +71,8 @@ def edge_class(chrom, gained_pos, vafmap):
             order_edges.append((earlier, later))
             if big < thr:
                 tentative = True
+            if small > 0:              # I1: 有真實小邊被 ε 去噪(非 clean nested)
+                eps_dropped = True
     if n_conflict > 0:
         klass = "CONFLICT"
     elif n_nocoread > 0:
@@ -87,7 +90,8 @@ def edge_class(chrom, gained_pos, vafmap):
         checks = [(x, y) for x, y in checks if x is not None and y is not None]
         if checks:
             vaf_ok = all(x >= y - 0.05 for x, y in checks)  # 較早≥較晚(容忍 0.05)
-    return {"klass": klass, "tentative": tentative, "order": order_edges, "vaf_ok": vaf_ok}
+    return {"klass": klass, "tentative": tentative, "order": order_edges, "vaf_ok": vaf_ok,
+            "eps_dropped": eps_dropped}
 
 
 edge_agg = Counter()
@@ -106,6 +110,12 @@ for r in det:
         region_class["mapping_unresolved"] += 1
         blind["對映不齊(非8截斷/複雜)"] += 1
         continue
+    # I3 防禦(code-review): 非截斷區 pos_vaf 位點應 ⊆ 對映位點(densest-8 replica 若同數不同成員→歧義,安全跳過)
+    if not r.get("truncated") and vafmap:
+        if not {int(kk.rsplit(":", 1)[1]) for kk in vafmap}.issubset(set(positions)):
+            region_class["mapping_divergence"] += 1
+            blind["position對映歧義(I3防禦跳過)"] += 1
+            continue
     if r.get("truncated"):
         blind["truncated(densest-8已對映)"] += 1
     ec = []
@@ -131,6 +141,8 @@ for r in det:
             blind["block@CN-gain(疑multiplicity非真共event)"] += 1
         if res["tentative"]:
             blind["ε-tentative(中間群<2%,需放寬層)"] += 1
+        if res.get("eps_dropped") and r.get("cn") == "gain" and res["klass"] in ("ORDERED", "PARTIAL_ORDER"):
+            blind["conflict-drop@CN-gain(小邊ε去噪·可能真multiplicity·保留conflict-or-order)"] += 1
         if res["vaf_ok"] is False:
             vaf_check["VAF方向不一致(需檢)"] += 1
         elif res["vaf_ok"] is True:

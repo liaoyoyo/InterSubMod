@@ -46,7 +46,7 @@ def positions_for(r, glen):
 
 
 def edge_res(chrom, gpos, vafmap):
-    order, nb, nn, nc, nx, tent = [], 0, 0, 0, 0, False
+    order, nb, nn, nc, nx, tent, eps_dropped = [], 0, 0, 0, 0, False, False
     for a, b in combinations(sorted(gpos), 2):
         pr = plut.get((chrom, a, b))
         if pr is None:
@@ -63,13 +63,15 @@ def edge_res(chrom, gpos, vafmap):
             nn += 1; order.append([a, b] if ar >= ra else [b, a])
             if big < thr:
                 tent = True
+            if small > 0:          # I1(code-review): 小邊非零被 ε 去噪
+                eps_dropped = True
     klass = "CONFLICT" if nc else ("AMBIG_NOCOREAD" if nx else ("BLOCK" if nn == 0 else ("ORDERED" if nb == 0 else "PARTIAL_ORDER")))
     vaf_ok = None
     if order and vafmap:
         ck = [(vafmap.get(f"{chrom}:{e}"), vafmap.get(f"{chrom}:{l}")) for e, l in order]
         ck = [(x, y) for x, y in ck if x is not None and y is not None]
         vaf_ok = all(x >= y - 0.05 for x, y in ck) if ck else None
-    return {"klass": klass, "order": order, "tentative": tent, "vaf_ok": vaf_ok}
+    return {"klass": klass, "order": order, "tentative": tent, "vaf_ok": vaf_ok, "eps_dropped": eps_dropped}
 
 
 tb = pysam.AlignmentFile(M.TBAM, "rb")
@@ -81,6 +83,11 @@ for r in T:
     positions = positions_for(r, glen)
     if positions is None:
         continue
+    # I3 防禦(code-review): 非截斷區 pos_vaf 位點應 ⊆ 對映位點(同數不同成員→對映歧義,安全跳過)
+    if not r.get("truncated"):
+        _vf = r.get("pos_vaf", {})
+        if _vf and not {int(kk.rsplit(":", 1)[1]) for kk in _vf}.issubset(set(positions)):
+            continue
     chrom = r["chrom"]
     try:
         som = [(p, census[f"{chrom}:{p}"]["ref"], census[f"{chrom}:{p}"]["alt"], "") for p in positions]
@@ -135,6 +142,8 @@ for r in T:
                 flags.append("ε-tentative")
             if e["klass"] == "CONFLICT" and r.get("cn") == "gain":
                 flags.append("conflict@CN-gain")
+            if e.get("eps_dropped") and r.get("cn") == "gain" and e["klass"] in ("ORDERED", "PARTIAL_ORDER"):
+                flags.append("conflict-drop@CN-gain")  # I1: 小邊ε去噪但CN-gain可能真multiplicity
         rec["blind_flags"] = sorted(set(flags))
     out[r["region"]] = rec
 tb.close()

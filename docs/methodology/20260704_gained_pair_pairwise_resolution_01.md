@@ -85,3 +85,10 @@ build_branch: research/subclonal-reconstruction-202606
 ### 整體敘述與結論數字（一致性）
 - **determinacy headline 不變**：A_determined 1741/3885 = 44.8%（topology 層 determinacy 標籤未動）。「A_ambiguous_order」(37) 標籤描述『有多突變 jump 邊』的**結構**；candidate_trees 層再解析該 jump = block/ordered → 兩層互補非矛盾。
 - 若把 block+ordered 記為『order 已定』→ 缺中間群真 order-ambiguous ≈ 0（原 37 → 14 block〔co-event 無序〕+ 22 ordered〔序已定〕+ 1 mixed）。是否 propagate 到 determinacy headline（→ ~45.7%，會動凍結 canonical + 多處引用）待定；建議維持雙層（determinacy 粗標 + candidate_trees 細解）。
+
+## 11. Code review 修正（2026-07-05，superpowers code-reviewer，verdict=with-fixes·0 Critical）
+- ✅ **I1 conflict-drop@CN-gain 落地**：nested 邊小邊非零但被 ε 去噪、且 CN-gain 時可能是真 multiplicity → 現於 `resolve_v2_complete.py` + `gen_subreads_all.py` 加 `eps_dropped` 追蹤 + `conflict-drop@CN-gain` 旗標（resolve_v2 blind_spots = **10 區**、subreads_all `blind_flags`、工作站 resolveBlock 顯示）。修正 reviewer 指出「doc 承諾但 code 未實作」的落差。
+- ✅ **I3 position 對映防禦**：`resolve_v2` / `gen_subreads_all` 對非截斷區加「pos_vaf 位點 ⊆ 對映位點」檢查（densest-8 replica 同數不同成員→歧義→安全跳過）；實測 mapping_divergence = **0**（reviewer「0 occurred」佐證）。
+- ⏸ **I1(enumerate 側) / I2(candidate_trees.json 加 cn+caveat) / I4(4 份 classify 去重)** = **受阻協調項**：`enumerate_candidate_trees.py` 與 `build_topology_workstation.py` 目前為**另一 session 未提交 dirty**（07-04 incompatible 重分類 hidden-node gap#2）→ 不可 clobber，待其 commit 後再補同一 I1/I2 邏輯 + 抽共用 `classify_pair`。
+- Minor(M1-M7) 記錄：enumerate 空 group_orders 未防環旗標(M1)、powered 門檻不一(M2)、gt8 遞迴 DFS(M3)、panel 顯示 2×2 vs 分類基礎可能數值不同(M4)、雙 subread 生成器 drift(M5) — 皆非阻擋、列 backlog。
+- ⚠ 註:因另一 session 重生 topology（incompatible 118→18），resolve_v2 重跑 CONFLICT 1→23（輸入變非邏輯 bug）；`>8` 與 candidate_trees 數字以各自最近重生為準。
