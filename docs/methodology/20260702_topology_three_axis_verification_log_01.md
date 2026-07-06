@@ -11,6 +11,11 @@ data_sources: docs/methodology/20260702_topology_cluster_shape_three_axis_analys
 
 > 目的:對 `InterSubMod/docs/methodology/20260702_topology_cluster_shape_three_axis_analysis_01.md` 反覆「質疑→解釋/修正」直到 dry（連續一輪 0 個新真問題）。每輪記錄:質疑、覆核、我獨立重算、處置。
 
+## 🔄 2026-07-06 資料刷新 addendum
+R1-R4 DRY 收斂是在 **07-02 資料(22676 區)**上做的。並行 session **07-04~06 重生資料**（gap#1 subcube 救回→38655 區、incompatible 重分類 118→18）。**已在 6288/38655 版重算並更新報告**（`three_axis_v2_6288.json`/`canonical_v2_6288.json`）:
+- 🟢 **核心裁決 ROBUST**：c=2 branched/confirmed 幾乎不變、CramérV 0.227→**0.222**、CN gain-vs-LOH robust → partly-artifact/L3 不變。**R1-R4 方法學結論全數延續**（tautology 修、branched=幾何上界、confound 裁決不受資料版本影響）。
+- 🔴 **僅數字刷新**：總區 22676→38655、incompatible 5.9%→**0.9%**、canonical 11→**32** 種。報告已標「07-02 vs 07-05/06」雙版本對照。
+
 ## 收斂狀態
 | 輪 | 面向數 | agents | 真問題(覆核後) | major | 處置 | 狀態 |
 |---|--:|--:|--:|--:|---|---|
