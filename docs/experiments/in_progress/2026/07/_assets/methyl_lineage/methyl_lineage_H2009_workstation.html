@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>甲基 vs sSNV-lineage 觀察工作站 — H2009 (PILOT)</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--mut:#94a3b8;--fg:#e2e8f0;--ac:#38bdf8;
+--ok:#22c55e;--warn:#f59e0b;--no:#ef4444;--line:#334155;--gold:#f2c94c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);
+font:14px/1.6 system-ui,-apple-system,'Segoe UI','Noto Sans CJK TC','Microsoft JhengHei',sans-serif}
+header{padding:16px 24px;border-bottom:1px solid var(--line);background:#0b1222;position:sticky;top:0;z-index:40}
+h1{margin:0 0 3px;font-size:19px}h2{font-size:16px;margin:24px 0 8px;border-left:3px solid var(--ac);padding-left:9px}
+.sub{color:var(--mut);font-size:12px}.wrap{max-width:1320px;margin:0 auto;padding:0 20px 90px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
+.banner{margin-top:8px;background:#3a1d05;border:1px solid #92400e;border-radius:7px;padding:7px 12px;font-size:12px;color:#fcd34d}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+button,select,input[type=file]{background:#0b1222;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12.5px;cursor:pointer}
+.stat4{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.sb{background:#0b1222;border:1px solid var(--line);border-radius:8px;padding:9px 12px}.sb .n{font-size:20px;font-weight:800}.sb .l{font-size:11px;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.card.j-in{border-color:var(--ok)}.card.j-ex{border-color:var(--no)}.card.j-doubt{border-color:var(--warn)}
+.card .hd{padding:8px 11px;border-bottom:1px solid var(--line);cursor:pointer}
+.card .ttl{font-weight:700;font-size:13px}.card .meta{font-size:10.5px;color:var(--mut);margin-top:3px}
+.kv{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;padding:1px 11px}
+.kv .k{color:var(--mut)}.kv .v{font-variant-numeric:tabular-nums}
+.figs{display:flex;gap:2px;background:#0b1222;cursor:pointer}.figs img{width:50%;display:block;background:#fff;min-height:40px}
+.figsvg{background:#11161f;padding:4px;cursor:pointer}.figsvg svg{width:100%;display:block}
+.nofig{padding:12px;color:#64748b;font-size:11px;text-align:center}
+.badge{display:inline-block;font-size:9.5px;padding:1px 7px;border-radius:9px;font-weight:700;margin-left:3px}
+.b-ok{background:#14532d;color:#86efac}.b-warn{background:#78350f;color:#fcd34d}.b-no{background:#450a0a;color:#fca5a5}
+.b-info{background:#0c2a4d;color:#60a5fa}.b-mut{background:#1e293b;color:#cbd5e1}.b-gold{background:#3a300a;color:#f2c94c}
+.b-src{background:#0b1222;color:#7c8aa0;font-weight:500;font-size:10px;border:1px solid var(--line);cursor:help}
+.jrow{display:flex;gap:4px;padding:6px 8px;border-top:1px solid var(--line)}
+.jrow button{flex:1;font-size:10.5px;padding:4px 2px}
+.jb.on-in{background:#14532d;color:#86efac;border-color:#22c55e}.jb.on-doubt{background:#78350f;color:#fcd34d;border-color:#f59e0b}.jb.on-ex{background:#450a0a;color:#fca5a5;border-color:#ef4444}
+.rsel{width:100%;padding:5px 8px;font-size:10.5px;border-top:1px solid var(--line);border-radius:0}
+table{border-collapse:collapse;width:100%;font-size:11.5px;margin:4px 0}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left}th{background:#0b1222;color:var(--mut)}
+.note{background:#1c1407;border:1px solid #78350f;border-radius:8px;padding:9px 13px;font-size:12px;color:#fcd34d;margin:10px 0}
+code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color:#fcd34d}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.86);display:none;z-index:100;overflow:auto;padding:22px}
+#modal .mc{max-width:1040px;margin:0 auto;background:var(--card);border:1px solid var(--ac);border-radius:12px;padding:18px}
+#modal img{width:100%;background:#fff;border-radius:6px}.mfigs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.statg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px}
+.st{background:#0b1222;border:1px solid var(--line);border-radius:6px;padding:6px 9px}.st .l{font-size:10px;color:var(--mut)}.st .n{font-size:14px;font-weight:700}
+footer{margin-top:30px;border-top:1px solid var(--line);padding-top:12px;color:var(--mut);font-size:12px}
+.pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:14px 0}
+</style></head><body>
+<header>
+ <h1>甲基 vs sSNV-lineage 觀察工作站 — H2009 (PILOT)</h1>
+ <div class="sub">每區:sSNV 多點 genotype 群(lineage) 之間的甲基差異 Δβ + MWU_p。10 唯一樹區,2 區 MWU_p&lt;0.05,median Δβ=0.114。🔴 PILOT:未 cis-control(Δβ 可能=cis-ASM 非 subclone)、未多重檢定校正、單樣本。</div>
+ <div class="banner">⚠ 資料狀態：PILOT — read-only pysam pileup tagged BAM; per-read 多-sSNV genotype(lineage)+5mC 甲基; H2009 前 10 樹區,方法驗證。　build <code>?</code></div>
+</header>
+<div class="wrap">
+<h2>⓪b 修正過程紀錄 / changelog</h2><div class="panel"><div class="sub" style="line-height:1.9;margin-bottom:8px"><div><b style="color:var(--warn)">資料狀態：</b>PILOT — read-only pysam pileup tagged BAM; per-read 多-sSNV genotype(lineage)+5mC 甲基; H2009 前 10 樹區,方法驗證。</div></div><table><tr><th>ID</th><th>內容</th><th>狀態</th><th>影響</th><th>來源(已驗證)</th></tr></table><div class="note"><b>結論：</b>sSNV-lineage 間甲基差異 median Δβ=0.114, 2/10 區 MWU_p&lt;0.05;🔴 未 cis-control(Δβ 可能=cis-ASM)。</div></div>
+<h2>H2009 樹區 (Δβ 降序)</h2><div class="panel"></div>
+<h2>判讀紀錄 — 匯出 / 匯入 / 進度</h2>
+<div class="panel">
+ <div class="row">
+  <button onclick="exportJ()">⬇ 匯出 JSON</button>
+  <button onclick="exportCSV()">⬇ 匯出 CSV</button>
+  <label class="row" style="gap:5px"><span class="sub">⬆ 匯入再校正</span><input type="file" accept=".json" onchange="importJ(event)"></label>
+  <button onclick="clearJ()">✕ 清空</button>
+ </div>
+ <div class="stat4" id="prog" style="margin-top:12px"></div>
+</div>
+<h2>逐項判讀（每項可記 同意(甲基與lineage有關)/存疑(可能cis-ASM)/否定(無關/n不足) + 原因）</h2>
+<div class="panel">
+ <div class="row"><span class="sub">篩選判讀</span><select id="jf"><option value="all">全部</option><option value="in">同意(甲基與lineage有關)</option><option value="doubt">存疑(可能cis-ASM)</option><option value="ex">否定(無關/n不足)</option><option value="un">未判讀</option></select><span id="gcount" class="sub"></span></div>
+ <div class="grid" id="grid"></div>
+ <div class="pager" id="pager"></div>
+</div>
+<footer><b>Provenance</b> · build <code>?</code> · branch <code>?</code> · 生成 2026-07-05 · tier ? · scope ?<br><ul></ul>所有 metric 由 spec 注入（§13-A req()-refuse），人工判讀存 localStorage 並可匯出。</footer>
+</div>
+<div id="modal" onclick="if(event.target.id==='modal')closeM()"><div class="mc" id="mc"></div></div>
+<script id="wsspec" type="application/json">{"meta": {"title": "甲基 vs sSNV-lineage 觀察工作站 — H2009 (PILOT)", "subtitle": "每區:sSNV 多點 genotype 群(lineage) 之間的甲基差異 Δβ + MWU_p。10 唯一樹區,2 區 MWU_p<0.05,median Δβ=0.114。🔴 PILOT:未 cis-control(Δβ 可能=cis-ASM 非 subclone)、未多重檢定校正、單樣本。", "lskey": "methyl_lineage_H2009_pilot"}, "changelog": {"data_status": {"summary": "PILOT — read-only pysam pileup tagged BAM; per-read 多-sSNV genotype(lineage)+5mC 甲基; H2009 前 10 樹區,方法驗證。"}, "corrections": [], "audit_conclusion": {"summary": "sSNV-lineage 間甲基差異 median Δβ=0.114, 2/10 區 MWU_p<0.05;🔴 未 cis-control(Δβ 可能=cis-ASM)。"}}, "sections": [{"id": "all", "title": "H2009 樹區 (Δβ 降序)", "item_ids": ["chr4:16618356-16624405", "chr22:16022148-16024338", "chr5:9566906-9583616", "chr8:131251679-131262521", "chr1:194924763-194933405", "chr13:106588378-106609271", "chr5:8754141-8764938", "chr8:66738276-66756046", "chr13:113121777-113124259", "chr5:46156654-46173903"]}], "item_config": {"verdict_states": [{"key": "in", "label": "同意(甲基與lineage有關)"}, {"key": "doubt", "label": "存疑(可能cis-ASM)"}, {"key": "ex", "label": "否定(無關/n不足)"}], "required_metrics": ["delta_beta", "MWU_p"], "per_page": 10}, "items": [{"id": "chr4:16618356-16624405", "title": "chr4:16618356-16624405  (8 sSNV, 76 reads)", "badges": [{"label": "neutral", "kind": "cn"}, {"label": "NS", "kind": "muted"}, {"label": "Δβ≥0.15", "kind": "tier"}], "meta_metrics": ["delta_beta", "MWU_p"], "metrics": [{"k": "delta_beta", "v": "0.212", "src": "methyl_vs_ssnv_lineage_H2009.json:chr4:16618356-16624405"}, {"k": "MWU_p", "v": "0.1810", "src": "methyl_vs_ssnv_lineage_H2009.json:chr4:16618356-16624405"}, {"k": "n_pops(≥4read)", "v": "4", "src": "methyl_vs_ssnv_lineage_H2009.json:chr4:16618356-16624405"}, {"k": "n_reads", "v": "76", "src": "methyl_vs_ssnv_lineage_H2009.json:chr4:16618356-16624405"}, {"k": "n_sSNV", "v": "8", "src": "methyl_vs_ssnv_lineage_H2009.json:chr4:16618356-16624405"}, {"k": "cn", "v": "neutral", "src": "methyl_vs_ssnv_lineage_H2009.json:chr4:16618356-16624405"}], "reading_guide": "sSNV-lineage 群甲基均值: RAARARRR=0.12, ARRARAAA=0.1, ARRARAAR=0.113, RARRARRR=0.312"}, {"id": "chr22:16022148-16024338", "title": "chr22:16022148-16024338  (3 sSNV, 110 reads)", "badges": [{"label": "neutral", "kind": "cn"}, {"label": "MWU sig", "kind": "pass"}, {"label": "Δβ≥0.15", "kind": "tier"}], "meta_metrics": ["delta_beta", "MWU_p"], "metrics": [{"k": "delta_beta", "v": "0.199", "src": "methyl_vs_ssnv_lineage_H2009.json:chr22:16022148-16024338"}, {"k": "MWU_p", "v": "0.0000", "src": "methyl_vs_ssnv_lineage_H2009.json:chr22:16022148-16024338"}, {"k": "n_pops(≥4read)", "v": "5", "src": "methyl_vs_ssnv_lineage_H2009.json:chr22:16022148-16024338"}, {"k": "n_reads", "v": "110", "src": "methyl_vs_ssnv_lineage_H2009.json:chr22:16022148-16024338"}, {"k": "n_sSNV", "v": "3", "src": "methyl_vs_ssnv_lineage_H2009.json:chr22:16022148-16024338"}, {"k": "cn", "v": "neutral", "src": "methyl_vs_ssnv_lineage_H2009.json:chr22:16022148-16024338"}], "reading_guide": "sSNV-lineage 群甲基均值: RAR=0.141, ARR=0.324, RAA=0.125, RRR=0.155, RRA=0.144"}, {"id": "chr5:9566906-9583616", "title": "chr5:9566906-9583616  (8 sSNV, 72 reads)", "badges": [{"label": "neutral", "kind": "cn"}, {"label": "NS", "kind": "muted"}, {"label": "Δβ≥0.15", "kind": "tier"}], "meta_metrics": ["delta_beta", "MWU_p"], "metrics": [{"k": "delta_beta", "v": "0.179", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:9566906-9583616"}, {"k": "MWU_p", "v": "0.3757", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:9566906-9583616"}, {"k": "n_pops(≥4read)", "v": "4", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:9566906-9583616"}, {"k": "n_reads", "v": "72", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:9566906-9583616"}, {"k": "n_sSNV", "v": "8", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:9566906-9583616"}, {"k": "cn", "v": "neutral", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:9566906-9583616"}], "reading_guide": "sSNV-lineage 群甲基均值: ARRAARAA=0.639, RARRRARR=0.581, ARRARRAA=0.691, RAARRRRR=0.512"}, {"id": "chr8:131251679-131262521", "title": "chr8:131251679-131262521  (8 sSNV, 67 reads)", "badges": [{"label": "neutral", "kind": "cn"}, {"label": "NS", "kind": "muted"}, {"label": "Δβ 0.1-0.15", "kind": "tier"}], "meta_metrics": ["delta_beta", "MWU_p"], "metrics": [{"k": "delta_beta", "v": "0.149", "src": "methyl_vs_ssnv_lineage_H2009.json:chr8:131251679-131262521"}, {"k": "MWU_p", "v": "0.8880", "src": "methyl_vs_ssnv_lineage_H2009.json:chr8:131251679-131262521"}, {"k": "n_pops(≥4read)", "v": "4", "src": "methyl_vs_ssnv_lineage_H2009.json:chr8:131251679-131262521"}, {"k": "n_reads", "v": "67", "src": "methyl_vs_ssnv_lineage_H2009.json:chr8:131251679-131262521"}, {"k": "n_sSNV", "v": "8", "src": "methyl_vs_ssnv_lineage_H2009.json:chr8:131251679-131262521"}, {"k": "cn", "v": "neutral", "src": "methyl_vs_ssnv_lineage_H2009.json:chr8:131251679-131262521"}], "reading_guide": "sSNV-lineage 群甲基均值: RRRRAAAR=0.694, AARRRRRA=0.663, RRAARARR=0.64, RRRARARR=0.789"}, {"id": "chr1:194924763-194933405", "title": "chr1:194924763-194933405  (8 sSNV, 129 reads)", "badges": [{"label": "neutral", "kind": "cn"}, {"label": "NS", "kind": "muted"}, {"label": "Δβ 0.1-0.15", "kind": "tier"}], "meta_metrics": ["delta_beta", "MWU_p"], "metrics": [{"k": "delta_beta", "v": "0.119", "src": "methyl_vs_ssnv_lineage_H2009.json:chr1:194924763-194933405"}, {"k": "MWU_p", "v": "0.4854", "src": "methyl_vs_ssnv_lineage_H2009.json:chr1:194924763-194933405"}, {"k": "n_pops(≥4read)", "v": "5", "src": "methyl_vs_ssnv_lineage_H2009.json:chr1:194924763-194933405"}, {"k": "n_reads", "v": "129", "src": "methyl_vs_ssnv_lineage_H2009.json:chr1:194924763-194933405"}, {"k": "n_sSNV", "v": "8", "src": "methyl_vs_ssnv_lineage_H2009.json:chr1:194924763-194933405"}, {"k": "cn", "v": "neutral", "src": "methyl_vs_ssnv_lineage_H2009.json:chr1:194924763-194933405"}], "reading_guide": "sSNV-lineage 群甲基均值: RAARRRRA=0.76, RRRRARRR=0.75, RRRAAARR=0.733, AAARRRAA=0.676, AAARRRRA=0.64"}, {"id": "chr13:106588378-106609271", "title": "chr13:106588378-106609271  (8 sSNV, 58 reads)", "badges": [{"label": "neutral", "kind": "cn"}, {"label": "NS", "kind": "muted"}, {"label": "Δβ 0.1-0.15", "kind": "tier"}], "meta_metrics": ["delta_beta", "MWU_p"], "metrics": [{"k": "delta_beta", "v": "0.109", "src": "methyl_vs_ssnv_lineage_H2009.json:chr13:106588378-106609271"}, {"k": "MWU_p", "v": "0.0975", "src": "methyl_vs_ssnv_lineage_H2009.json:chr13:106588378-106609271"}, {"k": "n_pops(≥4read)", "v": "5", "src": "methyl_vs_ssnv_lineage_H2009.json:chr13:106588378-106609271"}, {"k": "n_reads", "v": "58", "src": "methyl_vs_ssnv_lineage_H2009.json:chr13:106588378-106609271"}, {"k": "n_sSNV", "v": "8", "src": "methyl_vs_ssnv_lineage_H2009.json:chr13:106588378-106609271"}, {"k": "cn", "v": "neutral", "src": "methyl_vs_ssnv_lineage_H2009.json:chr13:106588378-106609271"}], "reading_guide": "sSNV-lineage 群甲基均值: ARRRRRAR=0.718, RRRARRRR=0.787, RRRRARAA=0.678, RAARRAAR=0.718, RRARRRAR=0.744"}, {"id": "chr5:8754141-8764938", "title": "chr5:8754141-8764938  (8 sSNV, 131 reads)", "badges": [{"label": "neutral", "kind": "cn"}, {"label": "NS", "kind": "muted"}, {"label": "Δβ<0.1", "kind": "tier"}], "meta_metrics": ["delta_beta", "MWU_p"], "metrics": [{"k": "delta_beta", "v": "0.099", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:8754141-8764938"}, {"k": "MWU_p", "v": "0.7992", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:8754141-8764938"}, {"k": "n_pops(≥4read)", "v": "4", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:8754141-8764938"}, {"k": "n_reads", "v": "131", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:8754141-8764938"}, {"k": "n_sSNV", "v": "8", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:8754141-8764938"}, {"k": "cn", "v": "neutral", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:8754141-8764938"}], "reading_guide": "sSNV-lineage 群甲基均值: RRRRRRAA=0.59, AAARRARR=0.597, RRRRARAA=0.689, RRRARRAA=0.688"}, {"id": "chr8:66738276-66756046", "title": "chr8:66738276-66756046  (4 sSNV, 56 reads)", "badges": [{"label": "neutral", "kind": "cn"}, {"label": "NS", "kind": "muted"}, {"label": "Δβ<0.1", "kind": "tier"}], "meta_metrics": ["delta_beta", "MWU_p"], "metrics": [{"k": "delta_beta", "v": "0.065", "src": "methyl_vs_ssnv_lineage_H2009.json:chr8:66738276-66756046"}, {"k": "MWU_p", "v": "0.3237", "src": "methyl_vs_ssnv_lineage_H2009.json:chr8:66738276-66756046"}, {"k": "n_pops(≥4read)", "v": "4", "src": "methyl_vs_ssnv_lineage_H2009.json:chr8:66738276-66756046"}, {"k": "n_reads", "v": "56", "src": "methyl_vs_ssnv_lineage_H2009.json:chr8:66738276-66756046"}, {"k": "n_sSNV", "v": "4", "src": "methyl_vs_ssnv_lineage_H2009.json:chr8:66738276-66756046"}, {"k": "cn", "v": "neutral", "src": "methyl_vs_ssnv_lineage_H2009.json:chr8:66738276-66756046"}], "reading_guide": "sSNV-lineage 群甲基均值: RRRR=0.895, RRAA=0.914, AAAR=0.852, RRAR=0.917"}, {"id": "chr13:113121777-113124259", "title": "chr13:113121777-113124259  (4 sSNV, 186 reads)", "badges": [{"label": "neutral", "kind": "cn"}, {"label": "MWU sig", "kind": "pass"}, {"label": "Δβ<0.1", "kind": "tier"}], "meta_metrics": ["delta_beta", "MWU_p"], "metrics": [{"k": "delta_beta", "v": "0.048", "src": "methyl_vs_ssnv_lineage_H2009.json:chr13:113121777-113124259"}, {"k": "MWU_p", "v": "0.0069", "src": "methyl_vs_ssnv_lineage_H2009.json:chr13:113121777-113124259"}, {"k": "n_pops(≥4read)", "v": "4", "src": "methyl_vs_ssnv_lineage_H2009.json:chr13:113121777-113124259"}, {"k": "n_reads", "v": "186", "src": "methyl_vs_ssnv_lineage_H2009.json:chr13:113121777-113124259"}, {"k": "n_sSNV", "v": "4", "src": "methyl_vs_ssnv_lineage_H2009.json:chr13:113121777-113124259"}, {"k": "cn", "v": "neutral", "src": "methyl_vs_ssnv_lineage_H2009.json:chr13:113121777-113124259"}], "reading_guide": "sSNV-lineage 群甲基均值: AAAA=0.516, ARRR=0.479, RRRR=0.492, ARAA=0.527"}, {"id": "chr5:46156654-46173903", "title": "chr5:46156654-46173903  (8 sSNV, 70 reads)", "badges": [{"label": "neutral", "kind": "cn"}, {"label": "NS", "kind": "muted"}, {"label": "Δβ<0.1", "kind": "tier"}], "meta_metrics": ["delta_beta", "MWU_p"], "metrics": [{"k": "delta_beta", "v": "0.036", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:46156654-46173903"}, {"k": "MWU_p", "v": "0.4620", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:46156654-46173903"}, {"k": "n_pops(≥4read)", "v": "4", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:46156654-46173903"}, {"k": "n_reads", "v": "70", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:46156654-46173903"}, {"k": "n_sSNV", "v": "8", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:46156654-46173903"}, {"k": "cn", "v": "neutral", "src": "methyl_vs_ssnv_lineage_H2009.json:chr5:46156654-46173903"}], "reading_guide": "sSNV-lineage 群甲基均值: RRRRRAAA=0.143, ARAAARRR=0.152, RRRRRARA=0.145, AAAAARRR=0.179"}], "provenance": {"build_branch": "research/subclonal-reconstruction-202606", "data_source": "scratchpad/methyl_vs_ssnv_lineage_H2009.json (from tagged BAM + ml_part + census, read-only)", "caveat": "PILOT 方法驗證;Δβ 未扣 cis-ASM;n 小區 MWU 不穩;需 ARI(甲基群vs lineage)+全樣本+多重校正"}}</script>
+<script>
+const SPEC=JSON.parse(document.getElementById('wsspec').textContent);
+const $=id=>document.getElementById(id);
+const ITEMS=SPEC.items, IC=SPEC.item_config||{};
+const LSKEY=SPEC.meta.lskey||'verify_ws_v1';
+let J=JSON.parse(localStorage.getItem(LSKEY)||'{}');
+function saveJ(){localStorage.setItem(LSKEY,JSON.stringify(J));}
+const VSTATES=IC.verdict_states||[{key:'in',label:'同意'},{key:'doubt',label:'存疑'},{key:'ex',label:'否定'}];
+const REASONS=IC.reason_options||[{key:'',label:'— 原因（可選）—'},{key:'criteria',label:'標準不好'},{key:'method',label:'方法問題'},{key:'visual',label:'沒看清楚'},{key:'other',label:'其他'}];
+function setJ(id,c){const cur=J[id]||{};cur.c=(cur.c===c?'un':c);cur.t=new Date().toISOString().slice(0,19);J[id]=cur;saveJ();draw();prog();}
+function setR(id,r){const cur=J[id]||{c:'un'};cur.r=r;cur.t=new Date().toISOString().slice(0,19);J[id]=cur;saveJ();}
+window.setJ=setJ;window.setR=setR;
+
+function prog(){const v=Object.values(J);const n={};for(const s of VSTATES)n[s.key]=v.filter(x=>x.c===s.key).length;
+ const un=ITEMS.length-Object.values(n).reduce((a,b)=>a+b,0);
+ const cells=VSTATES.map(s=>`<div class="sb"><div class="n">${n[s.key]||0}</div><div class="l">${s.label}</div></div>`).join('')+
+  `<div class="sb"><div class="n">${un}</div><div class="l">未判讀</div></div>`;
+ $('prog').innerHTML=cells;}
+
+function badge(b){const cls={ok:'b-ok',warn:'b-warn',no:'b-no',info:'b-info',mut:'b-mut',gold:'b-gold'}[b.kind||'mut']||'b-mut';
+ return `<span class="badge ${cls}"${b.title?` title="${b.title}"`:''}>${b.label}</span>`;}
+function srcBadge(src){return src?`<span class="b-src badge" title="provenance: ${src}">⌖</span>`:'';}
+function figHTML(it,big){
+ const f=it.figures;if(!f)return '<div class="nofig">無圖</div>';
+ if(f.mode==='svg')return `<div class="figsvg" onclick="openM('${it.id}')">${f.svg}</div>`;
+ if(f.mode==='png'){const imgs=f.imgs||[];if(!imgs.length)return '<div class="nofig">無圖</div>';
+  if(big)return `<div class="mfigs">`+imgs.map(g=>`<div><div class="sub" style="text-align:center">${g.caption||''}</div><img src="${g.path}"></div>`).join('')+`</div>`;
+  return `<div class="figs" onclick="openM('${it.id}')">`+imgs.map(g=>`<img loading="lazy" src="${g.path}">`).join('')+`</div>`;}
+ return '<div class="nofig">無圖</div>';}
+function metaLine(it){return (it.meta_metrics||[]).map(k=>{const m=(it.metrics||[]).find(x=>x.k===k);return m?`${m.k}=${m.v}`:'';}).filter(Boolean).join(' ｜ ');}
+function jbtn(id,c,lab){const on=((J[id]||{}).c===c)?(' on-'+c):'';return `<button class="jb${on}" onclick="event.stopPropagation();setJ('${id}','${c}')">${lab}</button>`;}
+function card(it){const j=J[it.id]||{};const cc=j.c==='in'?' j-in':j.c==='ex'?' j-ex':j.c==='doubt'?' j-doubt':'';
+ const badges=(it.badges||[]).map(badge).join('');
+ const kv=(it.metrics||[]).filter(m=>m.show!==false).map(m=>`<div class="kv"><span class="k">${m.k} ${srcBadge(m.src)}</span><span class="v">${m.v}</span></div>`).join('');
+ const reasons=REASONS.map(r=>`<option value="${r.key}"${(j.r||'')===r.key?' selected':''}>${r.label}</option>`).join('');
+ return `<div class="card${cc}" data-id="${it.id}">
+   <div class="hd" onclick="openM('${it.id}')"><div class="ttl">${it.title} ${badges}</div>${it.subtitle?`<div class="meta">${it.subtitle}</div>`:''}${metaLine(it)?`<div class="meta">${metaLine(it)}</div>`:''}</div>
+   ${figHTML(it,false)}
+   <div style="padding:4px 0">${kv}</div>
+   <div class="jrow">${VSTATES.map(s=>jbtn(it.id,s.key,s.label)).join('')}<button class="jb${(J[it.id]||{}).c==='un'?' on-mut':''}" onclick="event.stopPropagation();setJ('${it.id}','un')">清除</button></div>
+   <select class="rsel" onchange="event.stopPropagation();setR('${it.id}',this.value)">${reasons}</select>
+ </div>`;}
+
+let page=0;const PER=IC.per_page||24;
+function items(){let a=ITEMS.slice();const jf=$('jf')?$('jf').value:'all';
+ if(jf!=='all')a=a.filter(it=>{const c=(J[it.id]||{}).c||'un';return c===jf;});
+ return a;}
+function draw(){const a=items();const pages=Math.max(1,Math.ceil(a.length/PER));page=Math.min(page,pages-1);
+ $('grid').innerHTML=a.slice(page*PER,page*PER+PER).map(card).join('')||'<div class="sub">無符合</div>';
+ $('gcount').textContent=a.length+' 個';
+ $('pager').innerHTML=`<button ${page<=0?'disabled':''} onclick="page--;draw()">‹</button><span>第 ${page+1}/${pages} 頁</span><button ${page>=pages-1?'disabled':''} onclick="page++;draw()">›</button>`;}
+if($('jf'))$('jf').addEventListener('input',()=>{page=0;draw();});
+
+window.openM=id=>{const it=ITEMS.find(x=>x.id===id);if(!it)return;
+ const stats=(it.modal_stats||it.metrics||[]).map(m=>`<div class="st"><div class="l">${m.k} ${srcBadge(m.src)}</div><div class="n">${m.v}</div></div>`).join('');
+ $('mc').innerHTML=`<div class="row" style="justify-content:space-between"><h2 style="border:none;margin:0">${it.title} ${(it.badges||[]).map(badge).join('')}</h2><button onclick="closeM()">關閉 ✕</button></div>
+  ${figHTML(it,true)}<div class="statg">${stats}</div>
+  <div class="jrow" style="margin-top:10px">${VSTATES.map(s=>jbtn(it.id,s.key,s.label)).join('')}</div>
+  ${it.reading_guide?`<div class="sub" style="margin-top:8px">${it.reading_guide}</div>`:''}`;
+ $('modal').style.display='block';};
+window.closeM=()=>$('modal').style.display='none';
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+
+function rows4export(){return ITEMS.filter(it=>{const c=(J[it.id]||{}).c;return c&&c!=='un';}).map(it=>{const j=J[it.id];
+ return {id:it.id,title:it.title,verdict:j.c,reason:j.r||'',ts:j.t||''};});}
+window.exportJ=()=>{const o={spec:SPEC.meta.title,build:SPEC.meta.build_commit,generated:new Date().toISOString(),judgments:rows4export()};
+ dl((SPEC.meta.lskey||'verdicts')+'_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(o,null,1),'application/json');};
+window.exportCSV=()=>{const r=rows4export(),h=['id','title','verdict','reason','ts'];
+ const csv=[h.join(',')].concat(r.map(x=>h.map(k=>JSON.stringify(x[k]??'')).join(','))).join('\n');
+ dl((SPEC.meta.lskey||'verdicts')+'_'+new Date().toISOString().slice(0,10)+'.csv',csv,'text/csv');};
+function dl(n,t,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;a.click();}
+window.importJ=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+ rd.onload=()=>{try{const o=JSON.parse(rd.result),arr=o.judgments||o;let n=0;
+  for(const x of arr){if(x.id&&x.verdict){J[x.id]={c:x.verdict,r:x.reason||'',t:x.ts||''};n++;}}
+  saveJ();draw();prog();alert('匯入 '+n+' 筆');}catch(err){alert('匯入失敗：'+err);}};rd.readAsText(f);};
+window.clearJ=()=>{if(confirm('清空所有判讀？')){J={};saveJ();draw();prog();}};
+prog();draw();
+</script>
+
+</body></html>

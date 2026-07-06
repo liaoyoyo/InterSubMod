@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Q5 難建樹區甲基輔助候選 (cn-clean ALT-cluster 雙峰)</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--mut:#94a3b8;--fg:#e2e8f0;--ac:#38bdf8;
+--ok:#22c55e;--warn:#f59e0b;--no:#ef4444;--line:#334155;--gold:#f2c94c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);
+font:14px/1.6 system-ui,-apple-system,'Segoe UI','Noto Sans CJK TC','Microsoft JhengHei',sans-serif}
+header{padding:16px 24px;border-bottom:1px solid var(--line);background:#0b1222;position:sticky;top:0;z-index:40}
+h1{margin:0 0 3px;font-size:19px}h2{font-size:16px;margin:24px 0 8px;border-left:3px solid var(--ac);padding-left:9px}
+.sub{color:var(--mut);font-size:12px}.wrap{max-width:1320px;margin:0 auto;padding:0 20px 90px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0}
+.banner{margin-top:8px;background:#3a1d05;border:1px solid #92400e;border-radius:7px;padding:7px 12px;font-size:12px;color:#fcd34d}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+button,select,input[type=file]{background:#0b1222;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:12.5px;cursor:pointer}
+.stat4{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.sb{background:#0b1222;border:1px solid var(--line);border-radius:8px;padding:9px 12px}.sb .n{font-size:20px;font-weight:800}.sb .l{font-size:11px;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.card.j-in{border-color:var(--ok)}.card.j-ex{border-color:var(--no)}.card.j-doubt{border-color:var(--warn)}
+.card .hd{padding:8px 11px;border-bottom:1px solid var(--line);cursor:pointer}
+.card .ttl{font-weight:700;font-size:13px}.card .meta{font-size:10.5px;color:var(--mut);margin-top:3px}
+.kv{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;padding:1px 11px}
+.kv .k{color:var(--mut)}.kv .v{font-variant-numeric:tabular-nums}
+.figs{display:flex;gap:2px;background:#0b1222;cursor:pointer}.figs img{width:50%;display:block;background:#fff;min-height:40px}
+.figsvg{background:#11161f;padding:4px;cursor:pointer}.figsvg svg{width:100%;display:block}
+.nofig{padding:12px;color:#64748b;font-size:11px;text-align:center}
+.badge{display:inline-block;font-size:9.5px;padding:1px 7px;border-radius:9px;font-weight:700;margin-left:3px}
+.b-ok{background:#14532d;color:#86efac}.b-warn{background:#78350f;color:#fcd34d}.b-no{background:#450a0a;color:#fca5a5}
+.b-info{background:#0c2a4d;color:#60a5fa}.b-mut{background:#1e293b;color:#cbd5e1}.b-gold{background:#3a300a;color:#f2c94c}
+.b-src{background:#0b1222;color:#7c8aa0;font-weight:500;font-size:10px;border:1px solid var(--line);cursor:help}
+.jrow{display:flex;gap:4px;padding:6px 8px;border-top:1px solid var(--line)}
+.jrow button{flex:1;font-size:10.5px;padding:4px 2px}
+.jb.on-in{background:#14532d;color:#86efac;border-color:#22c55e}.jb.on-doubt{background:#78350f;color:#fcd34d;border-color:#f59e0b}.jb.on-ex{background:#450a0a;color:#fca5a5;border-color:#ef4444}
+.rsel{width:100%;padding:5px 8px;font-size:10.5px;border-top:1px solid var(--line);border-radius:0}
+table{border-collapse:collapse;width:100%;font-size:11.5px;margin:4px 0}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left}th{background:#0b1222;color:var(--mut)}
+.note{background:#1c1407;border:1px solid #78350f;border-radius:8px;padding:9px 13px;font-size:12px;color:#fcd34d;margin:10px 0}
+code{background:#0b1222;padding:1px 5px;border-radius:4px;font-size:11.5px;color:#fcd34d}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.86);display:none;z-index:100;overflow:auto;padding:22px}
+#modal .mc{max-width:1040px;margin:0 auto;background:var(--card);border:1px solid var(--ac);border-radius:12px;padding:18px}
+#modal img{width:100%;background:#fff;border-radius:6px}.mfigs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.statg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px}
+.st{background:#0b1222;border:1px solid var(--line);border-radius:6px;padding:6px 9px}.st .l{font-size:10px;color:var(--mut)}.st .n{font-size:14px;font-weight:700}
+footer{margin-top:30px;border-top:1px solid var(--line);padding-top:12px;color:var(--mut);font-size:12px}
+.pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:14px 0}
+</style></head><body>
+<header>
+ <h1>Q5 難建樹區甲基輔助候選 (cn-clean ALT-cluster 雙峰)</h1>
+ <div class="sub">7 個候選:C_underdetermined 區 ALT-cluster 甲基雙峰(cn-clean neutral,扣HP)=L3 輔助標記。🔴 未確認 subclone,需 normal-cis/single-cell。</div>
+ <div class="banner">⚠ 資料狀態：CN-aware methyl_bimodality_cn_rate.py 8-chunk;cn 從 SAVANA SM_CNBED　build <code>?</code></div>
+</header>
+<div class="wrap">
+<h2>⓪b 修正過程紀錄 / changelog</h2><div class="panel"><div class="sub" style="line-height:1.9;margin-bottom:8px"><div><b style="color:var(--warn)">資料狀態：</b>CN-aware methyl_bimodality_cn_rate.py 8-chunk;cn 從 SAVANA SM_CNBED</div></div><table><tr><th>ID</th><th>內容</th><th>狀態</th><th>影響</th><th>來源(已驗證)</th></tr></table><div class="note"><b>結論：</b>7 候選(H2009 6+HCC1954 1);雙峰率跨CN平坦(非CN-gain假象)</div></div>
+<h2>Q5 候選</h2><div class="panel"></div>
+<h2>判讀紀錄 — 匯出 / 匯入 / 進度</h2>
+<div class="panel">
+ <div class="row">
+  <button onclick="exportJ()">⬇ 匯出 JSON</button>
+  <button onclick="exportCSV()">⬇ 匯出 CSV</button>
+  <label class="row" style="gap:5px"><span class="sub">⬆ 匯入再校正</span><input type="file" accept=".json" onchange="importJ(event)"></label>
+  <button onclick="clearJ()">✕ 清空</button>
+ </div>
+ <div class="stat4" id="prog" style="margin-top:12px"></div>
+</div>
+<h2>逐項判讀（每項可記 同意(候選subclone)/存疑(cis-ASM?)/否定 + 原因）</h2>
+<div class="panel">
+ <div class="row"><span class="sub">篩選判讀</span><select id="jf"><option value="all">全部</option><option value="in">同意(候選subclone)</option><option value="doubt">存疑(cis-ASM?)</option><option value="ex">否定</option><option value="un">未判讀</option></select><span id="gcount" class="sub"></span></div>
+ <div class="grid" id="grid"></div>
+ <div class="pager" id="pager"></div>
+</div>
+<footer><b>Provenance</b> · build <code>?</code> · branch <code>?</code> · 生成 2026-07-06 · tier ? · scope ?<br><ul></ul>所有 metric 由 spec 注入（§13-A req()-refuse），人工判讀存 localStorage 並可匯出。</footer>
+</div>
+<div id="modal" onclick="if(event.target.id==='modal')closeM()"><div class="mc" id="mc"></div></div>
+<script id="wsspec" type="application/json">{"meta": {"title": "Q5 難建樹區甲基輔助候選 (cn-clean ALT-cluster 雙峰)", "subtitle": "7 個候選:C_underdetermined 區 ALT-cluster 甲基雙峰(cn-clean neutral,扣HP)=L3 輔助標記。🔴 未確認 subclone,需 normal-cis/single-cell。", "lskey": "q5_methyl_hardtree_aux"}, "changelog": {"data_status": {"summary": "CN-aware methyl_bimodality_cn_rate.py 8-chunk;cn 從 SAVANA SM_CNBED"}, "corrections": [], "audit_conclusion": {"summary": "7 候選(H2009 6+HCC1954 1);雙峰率跨CN平坦(非CN-gain假象)"}}, "sections": [{"id": "all", "title": "Q5 候選", "item_ids": ["H2009:chr20:58324224-58330961", "H2009:chr10:31944510-31946158", "H2009:chr7:18001364-18002181", "H2009:chr7:99090757-99091096", "H2009:chr7:102786074-102786105", "H2009:chr20:48892787-48911512", "HCC1954:chr4:30145902-30153017"]}], "item_config": {"verdict_states": [{"key": "in", "label": "同意(候選subclone)"}, {"key": "doubt", "label": "存疑(cis-ASM?)"}, {"key": "ex", "label": "否定"}], "required_metrics": ["delta_beta", "means"], "per_page": 10}, "items": [{"id": "H2009:chr20:58324224-58330961", "title": "H2009 chr20:58324224-58330961 (AA, 28reads)", "badges": [{"label": "C_underdetermine", "kind": "info"}, {"label": "cn-clean neutral", "kind": "ok"}, {"label": "Δβ 0.205", "kind": "info"}], "meta_metrics": ["delta_beta", "means"], "metrics": [{"k": "delta_beta", "v": "0.205", "src": "cnrate_H2009_merged.json"}, {"k": "means", "v": "[0.973, 0.768]", "src": "cnrate_H2009_merged.json"}, {"k": "sizes", "v": "[13, 15]", "src": "cnrate_H2009_merged.json"}, {"k": "genotype", "v": "AA", "src": "cnrate_H2009_merged.json"}, {"k": "determinacy", "v": "C_underdetermined", "src": "topology_per_region.json"}], "reading_guide": "難建樹區(sSNV定不出樹)的 ALT-cluster 出現甲基雙峰(13read@0.973 vs 15read@0.768) = L3 候選隱藏 subclone/branching;需 normal-cis/single-cell 確認"}, {"id": "H2009:chr10:31944510-31946158", "title": "H2009 chr10:31944510-31946158 (AA, 45reads)", "badges": [{"label": "C_underdetermine", "kind": "info"}, {"label": "cn-clean neutral", "kind": "ok"}, {"label": "Δβ 0.299", "kind": "info"}], "meta_metrics": ["delta_beta", "means"], "metrics": [{"k": "delta_beta", "v": "0.299", "src": "cnrate_H2009_merged.json"}, {"k": "means", "v": "[0.754, 0.455]", "src": "cnrate_H2009_merged.json"}, {"k": "sizes", "v": "[34, 11]", "src": "cnrate_H2009_merged.json"}, {"k": "genotype", "v": "AA", "src": "cnrate_H2009_merged.json"}, {"k": "determinacy", "v": "C_underdetermined", "src": "topology_per_region.json"}], "reading_guide": "難建樹區(sSNV定不出樹)的 ALT-cluster 出現甲基雙峰(34read@0.754 vs 11read@0.455) = L3 候選隱藏 subclone/branching;需 normal-cis/single-cell 確認"}, {"id": "H2009:chr7:18001364-18002181", "title": "H2009 chr7:18001364-18002181 (AA, 46reads)", "badges": [{"label": "C_underdetermine", "kind": "info"}, {"label": "cn-clean neutral", "kind": "ok"}, {"label": "Δβ 0.225", "kind": "info"}], "meta_metrics": ["delta_beta", "means"], "metrics": [{"k": "delta_beta", "v": "0.225", "src": "cnrate_H2009_merged.json"}, {"k": "means", "v": "[0.648, 0.873]", "src": "cnrate_H2009_merged.json"}, {"k": "sizes", "v": "[5, 41]", "src": "cnrate_H2009_merged.json"}, {"k": "genotype", "v": "AA", "src": "cnrate_H2009_merged.json"}, {"k": "determinacy", "v": "C_underdetermined", "src": "topology_per_region.json"}], "reading_guide": "難建樹區(sSNV定不出樹)的 ALT-cluster 出現甲基雙峰(5read@0.648 vs 41read@0.873) = L3 候選隱藏 subclone/branching;需 normal-cis/single-cell 確認"}, {"id": "H2009:chr7:99090757-99091096", "title": "H2009 chr7:99090757-99091096 (AA, 59reads)", "badges": [{"label": "C_underdetermine", "kind": "info"}, {"label": "cn-clean neutral", "kind": "ok"}, {"label": "Δβ 0.237", "kind": "info"}], "meta_metrics": ["delta_beta", "means"], "metrics": [{"k": "delta_beta", "v": "0.237", "src": "cnrate_H2009_merged.json"}, {"k": "means", "v": "[0.937, 0.7]", "src": "cnrate_H2009_merged.json"}, {"k": "sizes", "v": "[53, 6]", "src": "cnrate_H2009_merged.json"}, {"k": "genotype", "v": "AA", "src": "cnrate_H2009_merged.json"}, {"k": "determinacy", "v": "C_underdetermined", "src": "topology_per_region.json"}], "reading_guide": "難建樹區(sSNV定不出樹)的 ALT-cluster 出現甲基雙峰(53read@0.937 vs 6read@0.7) = L3 候選隱藏 subclone/branching;需 normal-cis/single-cell 確認"}, {"id": "H2009:chr7:102786074-102786105", "title": "H2009 chr7:102786074-102786105 (AA, 54reads)", "badges": [{"label": "C_underdetermine", "kind": "info"}, {"label": "cn-clean neutral", "kind": "ok"}, {"label": "Δβ 0.24", "kind": "info"}], "meta_metrics": ["delta_beta", "means"], "metrics": [{"k": "delta_beta", "v": "0.24", "src": "cnrate_H2009_merged.json"}, {"k": "means", "v": "[0.965, 0.725]", "src": "cnrate_H2009_merged.json"}, {"k": "sizes", "v": "[42, 12]", "src": "cnrate_H2009_merged.json"}, {"k": "genotype", "v": "AA", "src": "cnrate_H2009_merged.json"}, {"k": "determinacy", "v": "C_underdetermined", "src": "topology_per_region.json"}], "reading_guide": "難建樹區(sSNV定不出樹)的 ALT-cluster 出現甲基雙峰(42read@0.965 vs 12read@0.725) = L3 候選隱藏 subclone/branching;需 normal-cis/single-cell 確認"}, {"id": "H2009:chr20:48892787-48911512", "title": "H2009 chr20:48892787-48911512 (AA, 21reads)", "badges": [{"label": "C_underdetermine", "kind": "info"}, {"label": "cn-clean neutral", "kind": "ok"}, {"label": "Δβ 0.237", "kind": "info"}], "meta_metrics": ["delta_beta", "means"], "metrics": [{"k": "delta_beta", "v": "0.237", "src": "cnrate_H2009_merged.json"}, {"k": "means", "v": "[0.319, 0.556]", "src": "cnrate_H2009_merged.json"}, {"k": "sizes", "v": "[17, 4]", "src": "cnrate_H2009_merged.json"}, {"k": "genotype", "v": "AA", "src": "cnrate_H2009_merged.json"}, {"k": "determinacy", "v": "C_underdetermined", "src": "topology_per_region.json"}], "reading_guide": "難建樹區(sSNV定不出樹)的 ALT-cluster 出現甲基雙峰(17read@0.319 vs 4read@0.556) = L3 候選隱藏 subclone/branching;需 normal-cis/single-cell 確認"}, {"id": "HCC1954:chr4:30145902-30153017", "title": "HCC1954 chr4:30145902-30153017 (AA, 21reads)", "badges": [{"label": "C_underdetermine", "kind": "info"}, {"label": "cn-clean neutral", "kind": "ok"}, {"label": "Δβ 0.217", "kind": "info"}], "meta_metrics": ["delta_beta", "means"], "metrics": [{"k": "delta_beta", "v": "0.217", "src": "cnrate_HCC1954_merged.json"}, {"k": "means", "v": "[0.829, 0.612]", "src": "cnrate_HCC1954_merged.json"}, {"k": "sizes", "v": "[10, 11]", "src": "cnrate_HCC1954_merged.json"}, {"k": "genotype", "v": "AA", "src": "cnrate_HCC1954_merged.json"}, {"k": "determinacy", "v": "C_underdetermined", "src": "topology_per_region.json"}], "reading_guide": "難建樹區(sSNV定不出樹)的 ALT-cluster 出現甲基雙峰(10read@0.829 vs 11read@0.612) = L3 候選隱藏 subclone/branching;需 normal-cis/single-cell 確認"}], "provenance": {"build_branch": "research/subclonal-reconstruction-202606", "data_source": "cnv_sv_work/methyl_lineage/cnrate_*_merged.json", "caveat": "L3 輔助非確認;需 normal-cis/single-cell"}}</script>
+<script>
+const SPEC=JSON.parse(document.getElementById('wsspec').textContent);
+const $=id=>document.getElementById(id);
+const ITEMS=SPEC.items, IC=SPEC.item_config||{};
+const LSKEY=SPEC.meta.lskey||'verify_ws_v1';
+let J=JSON.parse(localStorage.getItem(LSKEY)||'{}');
+function saveJ(){localStorage.setItem(LSKEY,JSON.stringify(J));}
+const VSTATES=IC.verdict_states||[{key:'in',label:'同意'},{key:'doubt',label:'存疑'},{key:'ex',label:'否定'}];
+const REASONS=IC.reason_options||[{key:'',label:'— 原因（可選）—'},{key:'criteria',label:'標準不好'},{key:'method',label:'方法問題'},{key:'visual',label:'沒看清楚'},{key:'other',label:'其他'}];
+function setJ(id,c){const cur=J[id]||{};cur.c=(cur.c===c?'un':c);cur.t=new Date().toISOString().slice(0,19);J[id]=cur;saveJ();draw();prog();}
+function setR(id,r){const cur=J[id]||{c:'un'};cur.r=r;cur.t=new Date().toISOString().slice(0,19);J[id]=cur;saveJ();}
+window.setJ=setJ;window.setR=setR;
+
+function prog(){const v=Object.values(J);const n={};for(const s of VSTATES)n[s.key]=v.filter(x=>x.c===s.key).length;
+ const un=ITEMS.length-Object.values(n).reduce((a,b)=>a+b,0);
+ const cells=VSTATES.map(s=>`<div class="sb"><div class="n">${n[s.key]||0}</div><div class="l">${s.label}</div></div>`).join('')+
+  `<div class="sb"><div class="n">${un}</div><div class="l">未判讀</div></div>`;
+ $('prog').innerHTML=cells;}
+
+function badge(b){const cls={ok:'b-ok',warn:'b-warn',no:'b-no',info:'b-info',mut:'b-mut',gold:'b-gold'}[b.kind||'mut']||'b-mut';
+ return `<span class="badge ${cls}"${b.title?` title="${b.title}"`:''}>${b.label}</span>`;}
+function srcBadge(src){return src?`<span class="b-src badge" title="provenance: ${src}">⌖</span>`:'';}
+function figHTML(it,big){
+ const f=it.figures;if(!f)return '<div class="nofig">無圖</div>';
+ if(f.mode==='svg')return `<div class="figsvg" onclick="openM('${it.id}')">${f.svg}</div>`;
+ if(f.mode==='png'){const imgs=f.imgs||[];if(!imgs.length)return '<div class="nofig">無圖</div>';
+  if(big)return `<div class="mfigs">`+imgs.map(g=>`<div><div class="sub" style="text-align:center">${g.caption||''}</div><img src="${g.path}"></div>`).join('')+`</div>`;
+  return `<div class="figs" onclick="openM('${it.id}')">`+imgs.map(g=>`<img loading="lazy" src="${g.path}">`).join('')+`</div>`;}
+ return '<div class="nofig">無圖</div>';}
+function metaLine(it){return (it.meta_metrics||[]).map(k=>{const m=(it.metrics||[]).find(x=>x.k===k);return m?`${m.k}=${m.v}`:'';}).filter(Boolean).join(' ｜ ');}
+function jbtn(id,c,lab){const on=((J[id]||{}).c===c)?(' on-'+c):'';return `<button class="jb${on}" onclick="event.stopPropagation();setJ('${id}','${c}')">${lab}</button>`;}
+function card(it){const j=J[it.id]||{};const cc=j.c==='in'?' j-in':j.c==='ex'?' j-ex':j.c==='doubt'?' j-doubt':'';
+ const badges=(it.badges||[]).map(badge).join('');
+ const kv=(it.metrics||[]).filter(m=>m.show!==false).map(m=>`<div class="kv"><span class="k">${m.k} ${srcBadge(m.src)}</span><span class="v">${m.v}</span></div>`).join('');
+ const reasons=REASONS.map(r=>`<option value="${r.key}"${(j.r||'')===r.key?' selected':''}>${r.label}</option>`).join('');
+ return `<div class="card${cc}" data-id="${it.id}">
+   <div class="hd" onclick="openM('${it.id}')"><div class="ttl">${it.title} ${badges}</div>${it.subtitle?`<div class="meta">${it.subtitle}</div>`:''}${metaLine(it)?`<div class="meta">${metaLine(it)}</div>`:''}</div>
+   ${figHTML(it,false)}
+   <div style="padding:4px 0">${kv}</div>
+   <div class="jrow">${VSTATES.map(s=>jbtn(it.id,s.key,s.label)).join('')}<button class="jb${(J[it.id]||{}).c==='un'?' on-mut':''}" onclick="event.stopPropagation();setJ('${it.id}','un')">清除</button></div>
+   <select class="rsel" onchange="event.stopPropagation();setR('${it.id}',this.value)">${reasons}</select>
+ </div>`;}
+
+let page=0;const PER=IC.per_page||24;
+function items(){let a=ITEMS.slice();const jf=$('jf')?$('jf').value:'all';
+ if(jf!=='all')a=a.filter(it=>{const c=(J[it.id]||{}).c||'un';return c===jf;});
+ return a;}
+function draw(){const a=items();const pages=Math.max(1,Math.ceil(a.length/PER));page=Math.min(page,pages-1);
+ $('grid').innerHTML=a.slice(page*PER,page*PER+PER).map(card).join('')||'<div class="sub">無符合</div>';
+ $('gcount').textContent=a.length+' 個';
+ $('pager').innerHTML=`<button ${page<=0?'disabled':''} onclick="page--;draw()">‹</button><span>第 ${page+1}/${pages} 頁</span><button ${page>=pages-1?'disabled':''} onclick="page++;draw()">›</button>`;}
+if($('jf'))$('jf').addEventListener('input',()=>{page=0;draw();});
+
+window.openM=id=>{const it=ITEMS.find(x=>x.id===id);if(!it)return;
+ const stats=(it.modal_stats||it.metrics||[]).map(m=>`<div class="st"><div class="l">${m.k} ${srcBadge(m.src)}</div><div class="n">${m.v}</div></div>`).join('');
+ $('mc').innerHTML=`<div class="row" style="justify-content:space-between"><h2 style="border:none;margin:0">${it.title} ${(it.badges||[]).map(badge).join('')}</h2><button onclick="closeM()">關閉 ✕</button></div>
+  ${figHTML(it,true)}<div class="statg">${stats}</div>
+  <div class="jrow" style="margin-top:10px">${VSTATES.map(s=>jbtn(it.id,s.key,s.label)).join('')}</div>
+  ${it.reading_guide?`<div class="sub" style="margin-top:8px">${it.reading_guide}</div>`:''}`;
+ $('modal').style.display='block';};
+window.closeM=()=>$('modal').style.display='none';
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+
+function rows4export(){return ITEMS.filter(it=>{const c=(J[it.id]||{}).c;return c&&c!=='un';}).map(it=>{const j=J[it.id];
+ return {id:it.id,title:it.title,verdict:j.c,reason:j.r||'',ts:j.t||''};});}
+window.exportJ=()=>{const o={spec:SPEC.meta.title,build:SPEC.meta.build_commit,generated:new Date().toISOString(),judgments:rows4export()};
+ dl((SPEC.meta.lskey||'verdicts')+'_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(o,null,1),'application/json');};
+window.exportCSV=()=>{const r=rows4export(),h=['id','title','verdict','reason','ts'];
+ const csv=[h.join(',')].concat(r.map(x=>h.map(k=>JSON.stringify(x[k]??'')).join(','))).join('\n');
+ dl((SPEC.meta.lskey||'verdicts')+'_'+new Date().toISOString().slice(0,10)+'.csv',csv,'text/csv');};
+function dl(n,t,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;a.click();}
+window.importJ=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+ rd.onload=()=>{try{const o=JSON.parse(rd.result),arr=o.judgments||o;let n=0;
+  for(const x of arr){if(x.id&&x.verdict){J[x.id]={c:x.verdict,r:x.reason||'',t:x.ts||''};n++;}}
+  saveJ();draw();prog();alert('匯入 '+n+' 筆');}catch(err){alert('匯入失敗：'+err);}};rd.readAsText(f);};
+window.clearJ=()=>{if(confirm('清空所有判讀？')){J={};saveJ();draw();prog();}};
+prog();draw();
+</script>
+
+</body></html>
