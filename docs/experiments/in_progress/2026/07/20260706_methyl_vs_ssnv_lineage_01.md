@@ -10,8 +10,8 @@ build_branch: research/subclonal-reconstruction-202606
 
 # 甲基 vs sSNV 多點分群(lineage)軸 — 觀察方法 + pilot 紀錄
 
-> **版本** v0.2 (2026-07-06) · **狀態：轉向用既有 methyl_auxiliary + SAVANA CN、3 樣本裁決完成** · tier：CN=**L1**、甲基 residual=**L3**
-> **一句話**：甲基群內雙峰(超越 HP)確實存在(5–17%)，**但我的 SAVANA CN 揭露 2/3 樣本 77–86% 是 CN-gain(擴增)假象**；扣掉後 cn-clean 真訊號稀少(純 neutral H1437 僅 1)、L3 候選 → 甲基-lineage 關聯**重度 CN-confound**、bulk 不能證 subclone。與主軸一致。
+> **版本** v0.3 (2026-07-06) · **狀態：CN-aware 雙峰率完成、裁決修正定案** · tier：CN 率=**L1**、甲基 residual=**L3**
+> **一句話（修正）**：群內甲基雙峰真實存在(~15%)，**雙峰率跨 CN 平坦(H2009 gain 0.170≈neutral 0.163=1.04x)→ 是 CN-獨立的真實現象、非 CN-gain 假象**（3b 的「77-86% 在 gain」是 base-rate 假象已修正）；但屬 within-lineage 隱藏子結構 L3、bulk 不能證 subclone → 甲基=有界輔助（有 CN-獨立內容）。難建樹區 Q5 輔助候選 7 個。
 
 ## 0. 為何做這個（修正之前的盲點）
 
@@ -66,12 +66,28 @@ build_branch: research/subclonal-reconstruction-202606
 | H2009 | gain 178 / loh 260 / neutral 132 / loss 19 | 178 (30%) | 411 | 132 | 0.250 |
 | HCC1954 | gain 253 / neutral 21 / loh 19 / loss 1 | **253 (86%)** | 41 | 21 | 0.334 |
 
-## 4. 裁決（L1 CN + L3 甲基）
+## 3c. 🔴 CN-aware 雙峰**率** by CN state（因果證明，2026-07-06 修正 3b 讀法）
 
-- **甲基群內雙峰(超越 HP)確實存在**（5–17% genotype 群）→ 甲基與 sSNV-lineage 軸**有關聯**。
-- 🔴 **但 2/3 樣本 77–86% 落 CN-gain 區 = 擴增 multiplicity 假象（就是 CNV）** — 之前 cn=unknown 看不到，**我的 SAVANA CN 才揭露**。H2009 較少(30%)因其 gain 區少。
-- **扣 gain 後 cn-clean residual 50/411/41（Δβ 強 0.25–0.33）= 超越 CN 的候選**，但**多在 LOH(另有 confound)、純 neutral 極少（H1437 僅 1）** → **L3 候選、非確認 subclone**。
-- **總結**：甲基-lineage 關聯部分成立但**重度 CN-gain confound**；cn-clean 真訊號稀少且 L3 → 與主軸「甲基=有界輔助、bulk 不能證 subclone」一致，現有 **CN 定量證據**。
+> 腳本 `scripts/analysis/methyl_bimodality_cn_rate.py`（8-chunk 平行,GMM 同 methyl_auxiliary,cn 從 SM_CNBED）。**率 = 每 CN 狀態下「雙峰群數/測試群數」**（分母=所有測試群,3b 的 count 缺分母）。
+
+| 樣本 | gain 率 | neutral 率 | gain/neutral | 判讀 |
+|---|---|---|---|---|
+| H1437 | 0.049 (167/3399) | 0.020 (1/49) | 2.41x | ⚠ neutral n=49 太小不可靠 |
+| **H2009** | 0.170 (194/1142) | 0.163 (**132/808**) | **1.04x** | ✅ 最有 power → **幾乎相等** |
+| HCC1954 | 0.154 (300/1949) | 0.123 (22/179) | 1.25x | 略高 |
+
+🔴 **修正 3b**：3b 的「77-86% residual 在 gain」是 **base-rate 假象**（gain 區佔基因組大比例→大多數群本來就在 gain,分母效應）,**非 CN-gain 造成更多雙峰**。**用率的正確因果結論：CN-gain 未顯著提高群內甲基雙峰率**（最有 power 的 H2009=1.04x 平坦）→ **雙峰率 ~15% 與 CN 狀態無關**。
+
+## 4. 裁決（修正版，L1 CN 率 + L3 甲基）
+
+- **群內甲基雙峰確實存在**（H2009/HCC1954 ~15% 率、H1437 ~5%）。
+- 🔴 **率跨 CN 平坦（H2009 gain 0.170≈neutral 0.163）→ 雙峰是 CN-獨立的真實現象、非 CN-gain 假象** — 這比 3b 的 count 讀法更正確(count 被 base-rate 誤導)。→ **甲基確有超越 CN 的獨立內容**（比先前更正面）。
+- **但仍是「群內隱藏子結構」(同一 sSNV lineage 內)非「lineage 之間」** → **L3 候選**,可能 cis-ASM/HP-殘留/技術,**bulk 不能證 subclone**。
+- **總結**：甲基有 **CN-獨立的群內雙峰內容(真實)**,但屬**有界輔助 L3**(within-lineage 隱藏子結構,非確認 subclone)→ 與主軸一致。
+
+## 3d. Q5 輔助旗標 — 難建樹區 ALT-cluster 甲基雙峰候選
+
+在 `C_underdetermined`(sSNV 定不出樹) 區 + ALT-cluster + cn-clean(neutral) + 扣 HP → **7 個候選**(H2009 6 + HCC1954 1),Δβ 0.20-0.30。例 H2009 chr10:31944510 AA 34read@0.75 vs 11read@0.46。→ **可作難建樹區的 L3 甲基輔助標記**(候選隱藏 subclone/branching),但稀少+需 normal-cis/single-cell 確認。觀察 HTML `cnv_sv_work/methyl_lineage/`。
 
 ## 5. Provenance / caveat（更新）
 
