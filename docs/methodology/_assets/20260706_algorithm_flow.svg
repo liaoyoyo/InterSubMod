@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 1130" font-family="'Noto Sans CJK TC','Noto Sans TC','Microsoft JhengHei','PingFang TC','Droid Sans Fallback',sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="980" height="1130" fill="#ffffff"/>
+  <text x="490" y="34" text-anchor="middle" font-size="21" font-weight="700" fill="#0f172a">subclone 重建演算法：L0→L5 資料流 + 計算量</text>
+  <text x="490" y="56" text-anchor="middle" font-size="12.5" fill="#64748b">樸素上界（指數/階乘）→ 三重收斂（perfect-phylogeny · read · HP）→ HCC1395 實際（grep-verified）</text>
+
+  <!-- ===== stage boxes (left column) ===== -->
+  <!-- L0 -->
+  <rect x="60" y="80" width="500" height="112" rx="9" fill="#eef2ff" stroke="#94a3b8"/>
+  <text x="80" y="108" font-size="16" font-weight="700" fill="#1e293b">L0 · 宇宙 S</text>
+  <text x="80" y="130" font-size="13" fill="#334155">S = per-chrom (TP ∪ FP)；每 sSNV 標 source</text>
+  <text x="80" y="152" font-size="12.5" fill="#475569">計算量　O(N log N) 排序</text>
+  <text x="80" y="176" font-size="13.5" font-weight="700" fill="#1971c2">實際　N = 35,332　(TP 30,490 + FP 4,842)</text>
+
+  <!-- L1 -->
+  <rect x="60" y="238" width="500" height="112" rx="9" fill="#e6f4ea" stroke="#94a3b8"/>
+  <text x="80" y="266" font-size="16" font-weight="700" fill="#1e293b">L1 · 定區 W（linkage 群）</text>
+  <text x="80" y="288" font-size="13" fill="#334155">相鄰 gap &gt; τ_R(50kb) 切 S → 極大 sSNV 鏈 Wj</text>
+  <text x="80" y="310" font-size="12.5" fill="#475569">計算量　O(N) 掃描</text>
+  <text x="80" y="334" font-size="13.5" font-weight="700" fill="#1971c2">實際　k=med 3 / p90 6 / max 150　（k&gt;8：171 區）</text>
+
+  <!-- L2 -->
+  <rect x="60" y="396" width="500" height="112" rx="9" fill="#fff4e6" stroke="#94a3b8"/>
+  <text x="80" y="424" font-size="16" font-weight="700" fill="#1e293b">L2 · pairwise 共現</text>
+  <text x="80" y="446" font-size="13" fill="#334155">每對 (Si,Sj) 2×2 (RR/RA/AR/AA) → classify</text>
+  <text x="80" y="468" font-size="12.5" fill="#475569">計算量　Σ C(k,2) → region 單次 pileup ⇒ O(R·k)</text>
+  <text x="80" y="492" font-size="13.5" font-weight="700" fill="#1971c2">實際　79,858 對比　/　53,094 記錄　ρ med 32</text>
+
+  <!-- L3 -->
+  <rect x="60" y="554" width="500" height="112" rx="9" fill="#f3e8ff" stroke="#94a3b8"/>
+  <text x="80" y="582" font-size="16" font-weight="700" fill="#1e293b">L3 · multi-locus 向量 v</text>
+  <text x="80" y="604" font-size="13" fill="#334155">全覆蓋 read → v ∈ {R,A}^k' (k'=min(k,κ=8))</text>
+  <text x="80" y="626" font-size="12.5" fill="#475569">計算量　v 上限 2^κ = 256，但實際 ≤ R</text>
+  <text x="80" y="650" font-size="13.5" font-weight="700" fill="#c2410c">限制　κ=8 cap（k&gt;8 全覆蓋 read → 0）</text>
+
+  <!-- L4 -->
+  <rect x="60" y="712" width="500" height="112" rx="9" fill="#fce4ec" stroke="#94a3b8"/>
+  <text x="80" y="740" font-size="16" font-weight="700" fill="#1e293b">L4 · 群數 c（cluster）</text>
+  <text x="80" y="762" font-size="13" fill="#334155">distinct v 且 ≥ m_min(3) reads = population</text>
+  <text x="80" y="784" font-size="12.5" fill="#475569">計算量　2^k　→[perfect-phylogeny]→　c ≤ k+1</text>
+  <text x="80" y="808" font-size="13.5" font-weight="700" fill="#1971c2">實際　c=med 1 / max 6　（c&gt;k+1 違反 = 0）✓</text>
+
+  <!-- L5 -->
+  <rect x="60" y="870" width="500" height="112" rx="9" fill="#e0f2f1" stroke="#94a3b8"/>
+  <text x="80" y="898" font-size="16" font-weight="700" fill="#1e293b">L5 · 建樹 T</text>
+  <text x="80" y="920" font-size="13" fill="#334155">root=全R(germline)；co_linked併/nested邊/互斥姊妹</text>
+  <text x="80" y="942" font-size="12.5" fill="#475569">計算量　(k+1)!　→[gained-pair 定序]→　linear ext</text>
+  <text x="80" y="966" font-size="13.5" font-weight="700" fill="#1971c2">實際　缺中間群真等機率 ≈ 0；&gt;8 用 gt8 全 pairwise 樹</text>
+
+  <!-- ===== flow arrows + data labels ===== -->
+  <g stroke="#64748b" stroke-width="2" marker-end="url(#ah)" fill="none">
+    <line x1="310" y1="192" x2="310" y2="236"/>
+    <line x1="310" y1="350" x2="310" y2="394"/>
+    <line x1="310" y1="508" x2="310" y2="552"/>
+    <line x1="310" y1="666" x2="310" y2="710"/>
+    <line x1="310" y1="824" x2="310" y2="868"/>
+  </g>
+  <g font-size="11.5" fill="#64748b" font-style="italic">
+    <text x="318" y="220">S（35,332 sSNV）</text>
+    <text x="318" y="378">W（區）+ k</text>
+    <text x="318" y="536">powered pairs（53,094）</text>
+    <text x="318" y="694">向量 v + populations</text>
+    <text x="318" y="852">c（群）→ 拓樸</text>
+  </g>
+
+  <!-- ===== right column: 收斂機制 ===== -->
+  <rect x="610" y="396" width="330" height="428" rx="9" fill="#fffbeb" stroke="#f59e0b" stroke-dasharray="4 3"/>
+  <text x="775" y="424" text-anchor="middle" font-size="15" font-weight="700" fill="#b45309">▼ 三重收斂機制</text>
+  <text x="628" y="452" font-size="12.5" fill="#78350f">樸素搜尋是指數/階乘，被壓縮到極小：</text>
+
+  <text x="628" y="484" font-size="13" font-weight="700" fill="#92400e">① perfect-phylogeny</text>
+  <text x="642" y="504" font-size="12" fill="#78350f">每位點只突變一次(laminar)</text>
+  <text x="642" y="522" font-size="12" fill="#78350f">→ 2^k 群空間 ⇒ c ≤ k+1</text>
+  <text x="642" y="540" font-size="12" font-weight="700" fill="#166534">實測 0 違反 / 6,288 區 ✓</text>
+
+  <text x="628" y="574" font-size="13" font-weight="700" fill="#92400e">② read 數限制</text>
+  <text x="642" y="594" font-size="12" fill="#78350f">c ≤ R+1；coread ρ med 32</text>
+
+  <text x="628" y="626" font-size="13" font-weight="700" fill="#92400e">③ HP 分家</text>
+  <text x="642" y="646" font-size="12" fill="#78350f">各 germline HP family 內再降</text>
+
+  <text x="628" y="682" font-size="13" font-weight="700" fill="#92400e">④ gained-pair 定序（L5）</text>
+  <text x="642" y="702" font-size="12" fill="#78350f">(k+1)! 排列 → partial-order</text>
+  <text x="642" y="720" font-size="12" fill="#78350f">的 linear extensions（CAP 24）</text>
+
+  <text x="628" y="756" font-size="13.5" font-weight="700" fill="#166534">⇒ 每區搜尋空間</text>
+  <text x="642" y="778" font-size="13.5" font-weight="700" fill="#166534">中位數 c = 1（max 僅 6）</text>
+  <text x="628" y="804" font-size="11.5" fill="#78350f">∴ 計算上可解，非指數爆炸</text>
+
+  <!-- methylation guard -->
+  <rect x="610" y="870" width="330" height="112" rx="9" fill="#fef2f2" stroke="#ef4444"/>
+  <text x="775" y="898" text-anchor="middle" font-size="14" font-weight="700" fill="#b91c1c">● 甲基不進 L0–L5 任何計算</text>
+  <text x="628" y="922" font-size="12.5" fill="#7f1d1d">用甲基定群/排序 = 循環(double-dip)</text>
+  <text x="628" y="942" font-size="12.5" fill="#7f1d1d">→ 只事後 bounded-auxiliary 沿軸註記</text>
+  <text x="628" y="964" font-size="12" fill="#991b1b">（顯著但沿 cis/germline-ASM 軸·非獨立 lineage）</text>
+
+  <!-- physical bound note -->
+  <text x="490" y="1015" text-anchor="middle" font-size="12" fill="#475569">物理限制：τ_R=50kb ≤ 單 ONT read span (p95~34kb)；κ=8 為工程限制(k&gt;8 由 gt8 全 pairwise 繞過，但屬 B_pairwise 組合非 A_determined 單分子)</text>
+  <text x="490" y="1036" text-anchor="middle" font-size="11" fill="#94a3b8">HCC1395 frozen · 數字 grep-verified 2026-07-06 · 詳 20260706_algorithm_formal_notation_and_complexity_01.md</text>
+</svg>
