@@ -40,6 +40,23 @@ def cn_state(cn, chrom, pos):
     return "neutral"
 
 
+def germ_family(hptag):
+    """L0 germline HP 家族(2026-07-06 使用者定案:家族優先於算法)。
+    HP tag 語義(reference_hp_tag_definition):1/2=germline hap;1-1/2-1/3=integrated somatic。
+    germline 家族 = 第一碼:1/1-1→'1'、2/2-1→'2';'3'=somatic-integrated 無明確 germline 家族;None/其他→'none'(unphased)。
+    🔴 只有同 germline 家族的 read 才依 sSNV 連接建樹(不同家族=不同親代染色體=分開樹)。"""
+    if hptag is None:
+        return "none"
+    s = str(hptag)
+    if s.startswith("1"):
+        return "1"
+    if s.startswith("2"):
+        return "2"
+    if s == "3":
+        return "3"
+    return "none"
+
+
 def main(chroms, out_path):
     cen = json.load(open(f"{M.A}/sm_linkage_genomewide.json"))["census"]
     cn = load_cn()
@@ -66,17 +83,29 @@ def main(chroms, out_path):
             #   per-column coverage(含 partial),供 group-Steiner 覆蓋條件。full-cov 路徑(combo)不變 → populations 向後相容。
             subread = Counter()
             colcov = {p: [0, 0] for p in positions}  # pos -> [nREF, nALT]
+            # L0 per-HP-family split(2026-07-06 使用者定案):樹 per germline 家族分開建。
+            #   pooled(combo/subread)保留供對照;下游 layered driver 用 *_by_hp 建 per-family 樹。
+            combo_fam = defaultdict(Counter)
+            subread_fam = defaultdict(Counter)
+            colcov_fam = defaultdict(lambda: {p: [0, 0] for p in positions})
+            reads_fam = Counter()
             for rn, c in calls.items():
                 vec = "".join("A" if c.get(p) == "ALT" else ("R" if c.get(p) == "REF" else "X") for p in positions)
                 ncov = len(positions) - vec.count("X")
                 if ncov == 0:
                     continue
+                fam = germ_family(hp.get(rn))  # L0: read 的 germline 家族
+                reads_fam[fam] += 1
                 subread[vec] += 1
+                subread_fam[fam][vec] += 1
                 for i, p in enumerate(positions):
-                    if vec[i] == "R": colcov[p][0] += 1
-                    elif vec[i] == "A": colcov[p][1] += 1
+                    if vec[i] == "R":
+                        colcov[p][0] += 1; colcov_fam[fam][p][0] += 1
+                    elif vec[i] == "A":
+                        colcov[p][1] += 1; colcov_fam[fam][p][1] += 1
                 if ncov == len(positions):  # full-cov 路徑不變
                     combo[vec] += 1
+                    combo_fam[fam][vec] += 1
                     if rn in hp and "A" in vec:
                         hpset[hp[rn]] += 1
             nfull = sum(combo.values())
@@ -85,6 +114,12 @@ def main(chroms, out_path):
             if nfull < MINREAD and not subread_groups:
                 continue
             pops = {k: v for k, v in combo.items() if v >= MINREAD}
+            # L0 per-family(≥MINREAD 過濾同 pooled;去空家族)
+            pops_by_hp = {f: {k: v for k, v in cc.items() if v >= MINREAD} for f, cc in combo_fam.items()}
+            pops_by_hp = {f: d for f, d in pops_by_hp.items() if d}
+            subread_by_hp = {f: {k: v for k, v in cc.items() if v >= MINREAD} for f, cc in subread_fam.items()}
+            subread_by_hp = {f: d for f, d in subread_by_hp.items() if d}
+            colcov_by_hp = {f: {str(p): colcov_fam[f][p] for p in positions} for f in set(pops_by_hp) | set(subread_by_hp)}
             npop = len(pops)
             # populations with >=1 ALT (non-ancestral) = mutation-bearing 群
             npop_alt = sum(1 for k in pops if "A" in k)
@@ -97,6 +132,11 @@ def main(chroms, out_path):
                    "populations": dict(sorted(pops.items(), key=lambda x: -x[1])),
                    "subread_groups": dict(sorted(subread_groups.items(), key=lambda x: -x[1])),  # gap#1: partial subcube-groups
                    "col_coverage": {str(p): colcov[p] for p in positions},                        # gap#1: per-locus REF/ALT 覆蓋(含 partial)
+                   # L0 per-HP-family(2026-07-06):樹 per germline 家族分開建的底料
+                   "populations_by_hp": {f: dict(sorted(d.items(), key=lambda x: -x[1])) for f, d in pops_by_hp.items()},
+                   "subread_groups_by_hp": {f: dict(sorted(d.items(), key=lambda x: -x[1])) for f, d in subread_by_hp.items()},
+                   "col_coverage_by_hp": colcov_by_hp,
+                   "reads_by_hp": dict(reads_fam),
                    "cn": cst, "dominant_hp_count": len(hpset), "same_hp": same_hp}
             groups_out.append(rec)
             agg[f"npop_{min(npop, 5)}"] += 1

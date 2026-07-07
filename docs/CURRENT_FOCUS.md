@@ -12,7 +12,16 @@
 
 # 當前目標
 
-## 2026-07-01 — 🎯 subclone 重建收斂 + harness 週度 review ⭐ 最新
+## 2026-07-07 — 🧬 分層 per-HP-家族樹枚舉重建 + 工作站 ⭐ 最新
+
+> **新 session 先讀**：memory `project_layered_perHPfamily_tree_enumeration_solver` + 資料模型 spec `InterSubMod/docs/methodology/20260706_layered_data_model_units_proportions_spec_01.md`（使用者確認的單位/分母/關係）。
+> **做了什麼**：使用者定案 5-step（spec→solver→驗→大規模→HTML）落地。**樹 per germline-HP-家族分開建**（家族優先於算法，修 allelic/clonal 混淆）。solver `tree_enumeration_solver.py`=布爾超立方體 group-Steiner 枚舉全最小樹（分析式 n_trees + 四配子判 recurrence；golden+3723隨機案例 0-mismatch；V1-V7）；driver `layered_tree_reconstruction.py`=L0家族→L1 sSNV枚舉→L2 CN→L3甲基。
+> **HCC1395 結果（region 主分母 7100）**：**多-HP 3992/7100=56.2%**（過半區雙 germline 家族各一樹）；region all-determined **2317(32.6%)**（全 germline lineage 唯一樹才算）；lineage-unit determined 6883/12475=55.2%；V1-V7 ALL PASS。🔴 三者分母不同不可比。
+> **🔴 sSNV 數修正（§13.0 抓到，影響本檔下方 07-01 line）**：「35,332 sSNV」是**總 census 位點非 somatic**；重建骨幹 somatic sSNV(census somatic==True)=**23,810**。handoff/master_spec 的「35,332 sSNV=somatic骨幹」待更正。
+> **工作站**：standalone `docs/methodology/_assets/20260706_layered_reconstruction_workstation.standalone.html`（dashboard 4表+region瀏覽器+逐HP家族色框樹+**樹切換器**〔◀▶+thumbnail,一次一大圖,標「N樹=M形狀」如125樹=5形狀〕+L0-L3軌跡；反捏造數字全從json）；可攜 per-sample `layered_workstation/{S}.html`+index（builder `build_layered_per_sample.py`）。
+> **進行中**：5b 6樣本 mlhp+layered+region-view 背景 3-way 跑（`run_layered_6samples.sh`；cn=unknown 故 L2 不可用）→ 齊後 7 樣本可攜資料夾。
+
+## 2026-07-01 — 🎯 subclone 重建收斂 + harness 週度 review ⭐（sSNV 數見 07-07 修正：23,810 somatic 非 35,332）
 
 > **新 session 先讀**：論文 onboarding handoff = `InterSubMod/docs/references/20260701_thesis_research_handoff_onboarding_01.md`（數字 grep-able、3-reviewer 對抗查核）；整個研究單一索引 = `InterSubMod/docs/methodology/20260628_subclone_reconstruction_master_spec_01.md`。
 > **收斂結論（HCC1395 ⭐3 封頂）**：genetic sSNV 單分子共現 = 唯一非循環重建骨幹（35,332 sSNV → 7,143 區 / 677 full_tree）；HP tag = allelic/clonal 鑑別器（非確認器）；🔴 **甲基用途窮盡 = bounded-auxiliary**（cis-control gate 已負向關閉；SAME-HP subclone-specificity structural UNDETERMINED，需 single-cell 非覆蓋）；🔴 **替代整樹 ranked 無法成立 →「定不出來即答案」**（06-30 field-endorsed）；7 ONT canonical 樣本全跑到樹。

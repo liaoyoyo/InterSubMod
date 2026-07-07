@@ -1,6 +1,7 @@
 <!--
 建立時間: 2026-07-04
-更新: 2026-07-04 v3 (使用者定案 Model A) — unit-flip-tree 核心 + Boolean lattice + Model A(recurrence 允許) + 多重度擔子 + 四解法 + minimal-compatible-set; v2(共同設計) v1(初形式化) 併入
+更新: 2026-07-06 v4 (定案落地) — +§7.5 覆蓋公理(禁丟節點) + 複雜度邊界(poly 島 Gusfield/Pe'er-IDP vs NP-hard Steiner) + 「枚舉非 optimize 非 rank」紅線 + 「定不出來即答案=枚舉輸出」; §7 解法1 標 Pe'er-IDP; §13 補 citation; 對齊已 commit 的 20260705 複雜度定位
+      v3 (2026-07-04 使用者定案 Model A) — unit-flip-tree 核心 + Boolean lattice + Model A(recurrence 允許) + 多重度擔子 + 四解法 + minimal-compatible-set; v2(共同設計) v1(初形式化) 併入
 類型: 形式化問題敘述（純數學/演算法,application-agnostic）
 狀態: formal spec v3 (application terms stripped)
 用途: formal methods framing 候選 / 自足抽象問題定義
@@ -65,13 +66,66 @@ $$\text{(1) 解釋所有 }O\ \succ\ \text{(2) min 隱藏(Steiner)節點}\ \succ\
 
 ## §7 工程解法（四路，皆納入）
 
-**解法 1 — 小 $k$ 直接枚舉**：① 各部分觀測列 completion；② 建 Boolean lattice DAG；③ 選節點集 $V$ 使每觀測 $\ge1$ 節點 cover（set-cover）；④ 在 DAG 求 root→選定節點的**最小 arborescence**；⑤ 枚舉所有同分。本質 ≈ **directed Steiner tree / arborescence**（root $=0^k$；terminals=必解釋 completion；Steiner=隱藏狀態）。
+**解法 1 — 小 $k$ 直接枚舉**：① 各部分觀測列 completion（**多項式：Incomplete Directed Perfect Phylogeny，Pe'er, Pupko, Shamir, Sharan 2004**——見 §7.5）；② 建 Boolean lattice DAG；③ 選節點集 $V$ 使每觀測 $\ge1$ 節點 cover（set-cover）；④ 在 DAG 求 root→選定節點的**最小 arborescence**；⑤ 枚舉所有同分。本質 ≈ **directed Steiner tree / arborescence**（root $=0^k$；terminals=必解釋 completion；Steiner=隱藏狀態）。🔴 **本問題的落地立場 = 枚舉全部同分最小樹，非求單一 min-cost 最佳解（§7.5 紅線）**。
 
 **解法 2 — ILP**：變數 $z_x\in\{0,1\}$（狀態選入）、$e_{xy}$（邊選入）、$a_{px}$（觀測 $p$ 指派狀態 $x$）。約束：每 $p$ 至少一相容 $x$（$a_{px}\Rightarrow z_x$）；$e_{xy}\Rightarrow z_x\wedge z_y$；非根最多一 parent；每選節點 root-可達；每邊 unit-flip。目標 $\min$（隱藏節點 $+\lambda_1$ 邊數 $+\lambda_2$ 未支持節點 $+\lambda_3$ recurrence-with-$m{>}1$ 罰）。多最佳 → **no-good cut** 重解列全部。
 
 **解法 3 — 分層 DAG-DP**：依 $\mathrm{popcount}$ 分層，每子節點只從上一層一 parent 來 → 「在分層 DAG 選 root-connected subtree，cover 所有 partial obs」的 DP。
 
 **解法 4 — 保守 deterministic core**（主推穩固核心）：只接受 $0$-隱藏節點、laminar-或-recurrence-乾淨（$m\le1$）的樹；pairwise-only 串接標 weakly-determined；conflict/underpowered/multiplicity 分開標。抗 overfitting、可解釋。
+
+---
+
+## §7.5 定案落地：覆蓋公理、複雜度邊界、與「枚舉非 optimize」紅線（2026-07-06 v4）
+
+> 本節把使用者定案的三條原則綁進形式化，並明確劃出 solver 的可宣稱範圍。它**不放寬** §5–§7 的既有定義，只把「不確定情形」的處置從模糊的「flag」升為**明確枚舉全集**，並釘死一條反 over-claim 的紅線。與已 commit 的複雜度定位（`InterSubMod/docs/method_comparison/20260705_ism_computational_complexity_positioning_01.md` §1.3/§2.3）一致。
+
+### §7.5.1 覆蓋公理（Coverage Axiom — 硬約束，不可放寬）
+
+> **原則（使用者定案）**：*「理論上只要存在有節點，就一定要在最後的樹上有關聯到。」*
+
+形式化：設 $O^\star\subseteq O$ 為通過雜訊門檻（$\ge C_{\min}$ 支持）的觀測集。對**每個** $p\in O^\star$，最終樹 $T=(V,E)$ 必滿足 $\exists x\in V,\ x\sim p$（§3 相容）；且
+
+$$\text{完整觀測 }p\in\{0,1\}^k\ \Rightarrow\ p\in V\quad(\text{完整觀測只相容自身，故其基因型節點必在樹上}).$$
+
+- **禁止丟節點**：solver **不得**為求較小/較乾淨的樹而丟棄任一 $O^\star$ 觀測。覆蓋失敗（某 $p$ 無相容節點）→ 該區判 `conflict`，**不是**默默省略該觀測。
+- **部分觀測**（$p\in\{0,1,?\}^k$）：其相容子立方體（subcube/face）須與 $V$ 相交，非要求整個子立方體入樹。缺失位由 §7.5.2 的 IDP 補全處理。
+- 與 §5 最小化的關係：最小化只在**已滿足覆蓋公理**的相容樹之中比較（先覆蓋，後最小）；覆蓋是可行性前提，最小性是其上的字典序偏好。
+
+### §7.5.2 複雜度邊界：多項式島 vs NP-hard（solver 可解範圍的正當化）
+
+solver 的演算法邊界**刻意對齊真實計算複雜度分界**——可解者算到確定、不可解者枚舉/flag，非工程妥協：
+
+| 階段 | 數學問題 | 複雜度 | solver 立場 | Citation |
+|---|---|---|---|---|
+| 骨幹（完整觀測 four-gamete） | directed perfect phylogeny | **poly** | 算到底、確定 | Gusfield 1991, *Networks* 21(1):19–28 |
+| **部分觀測補全（$?$-entry）** | **Incomplete Directed Perfect Phylogeny (IDP)** | **poly→linear** | 算到底（可行性有嚴格基礎）| **Pe'er, Pupko, Shamir, Sharan 2004, *SIAM J Comput* 33(3):590–607** |
+| incompatible 選丟 loci | Min Character Removal ≡ Vertex Cover | NP-hard (FPT-in-$k$) | **不解最佳化 → 枚舉/flag** | Day & Sankoff 1986 |
+| 混合觀測拆列 | Min Conflict-Free Row Split | NP-hard + inapprox | flag | Hujdurović et al. 2018 |
+| 去衝突翻轉 | Min-flip | NP-hard (FPT) | flag | Chen et al. 2006 |
+| 隱藏節點補全 | Steiner in $\{0,1\}^k$ | NP-/MAX-SNP-hard | **不解通用最佳化** | Foulds & Graham 1982；FPT: Mahapatra et al. 2025 |
+| recurrence（同位元 $\ge2$ 翻） | Dollo-$k$ | $k{=}1$ poly / $k{\ge}2$ NP-complete | 送獨立 $m$-通道（§4）| Bonizzoni et al. |
+| 多完成/multiplicity 唯一性 | non-identifiable | **impossibility（已證）** | **定不出來即答案** | DeCiFer, Satas et al. 2021 |
+
+**🔑 為何 capped $k$ 讓枚舉可行**：問題有硬上界 $k\le 8$（`MAX_SNV`）→ 狀態空間 $|X|=2^k\le 256$、候選樹數有限 → **暴力窮舉所有同分最小樹在 capped $k$ 下 tractable**。這**不**等於解通用 NP-hard 最佳化——NP-hardness 是對 $k\to\infty$ 的漸近性質，在 $k$ 有界時**不生效**。solver 踩的是「小 $k$ 窮舉島」，不是「近似大 $k$ 最佳化」。
+
+**🔑 Pe'er IDP 的嚴格性與界線（誠實）**：Pe'er 2004 保證部分觀測補全的**可行性/一致性**（realizability + 一棵 canonical 完成樹，poly→linear）；但**「選哪個完成」多解時 non-identifiable**（與 DeCiFer multiplicity 不可識別一致）。→ 「救回空向量」有嚴格 IDP 基礎、非 trick；但補全的**多解性**須誠實輸出（§6 `ambiguous`），不得強選一棵。
+
+### §7.5.3 紅線：**枚舉（enumerate），非最佳化（optimize），非排序（rank）**
+
+三條不可跨越的界線（防 over-claim；對應 07-05 doc §1.2 「不做 enumerate-and-score」）：
+
+1. **枚舉全同分，不求單一 min-cost**：solver 輸出**所有**最小相容樹（§5 字典序同分集），**不宣稱**解通用 directed / group Steiner 的最小成本最佳化。「minimal」= 字典序前緣的**全集**，不是挑一棵代表。
+2. **不用任何通道對樹集排序（total-order）**：$\partial(\text{tree set})/\partial\varphi=\partial(\text{tree set})/\partial d=0$（§8）。通道 A（$\varphi$）/ 通道 M（$d$，含甲基）**只**做 (i) 無結構負篩、(ii) 相容集**內**弱標註、(iii) 佐證 B 已定邊；**絕不**把不可辨識集強行全序化或給機率排名。甲基/HP 一律**事後**（post-hoc verify/annotate），保 $\varphi,d\perp$ 樹集的非循環性。
+3. **通用 group-Steiner cover-minimize = 白地/future-work，不宣稱已解**：partial-read→subcube 群覆蓋是真結構類比與**原創 motivation**，但 solver 做的是「capped-$k$ 窮舉 + IDP 補全 + 覆蓋公理」，**非** cover-and-minimize 最佳化求解。論文口徑：橋接 El-Kebir spanning-arborescence 與 parsimony-Steiner-on-hypercube 的**新形式化**，非引用既有 named result。
+
+### §7.5.4 「定不出來即答案」= 枚舉輸出（把 §6 講清楚）
+
+不可辨識**不是**失敗或留空，而是**如實輸出整個等機率相容集**（§6 `ambiguous` / `partial-order` / `recurrence-required`）：
+
+$$\text{determined}\ \Rightarrow\ \text{唯一最小樹};\qquad \text{else}\ \Rightarrow\ \text{全相容集}+\text{不確定性標註}\ (\textbf{即答案，非缺答案}).$$
+
+這條讓 solver 的行為與已證明的複雜度分層一一對應（poly→確定、NP-hard/non-identifiable→枚舉），是**最強且 reviewer 難攻擊的設計正當化**。
 
 ---
 
@@ -122,8 +176,10 @@ $$\text{(1) 解釋所有 }O\ \succ\ \text{(2) min 隱藏(Steiner)節點}\ \succ\
 ## §13 演算法定位（citation-verification 待驗；使用者提供）
 
 > ⚠ 演算法層定位，非核心形式化；論文採用前跑 `/citation-verification`。
-- laminar / 全三型相容性核心（Gusfield, perfect-phylogeny）——對應 Model B 的 conflict 判準（本問題採 Model A 放寬）。
+- laminar / 全三型相容性核心（**Gusfield 1991, *Networks* 21(1):19–28**, perfect-phylogeny）——對應骨幹（完整觀測）多項式建構。
+- 🎯 **部分觀測補全（$?$-entry）= Incomplete Directed Perfect Phylogeny，Pe'er, Pupko, Shamir, Sharan 2004, *SIAM J Comput* 33(3):590–607**（poly→linear）——§7 解法1 completion step + §7.5.2 的嚴格基礎；救回空向量非工程 trick。
 - 同片段近端事件對加強推論（TreeClone, arXiv:1703.03853）——本框架擴到多位點片段標籤 + 可辨識性。
-- 相容樹不確定性呈現（PhyloSub, arXiv:1210.3384）——對應 §5「輸出即測度」。
+- 相容樹不確定性呈現（PhyloSub, arXiv:1210.3384；multiplicity non-identifiable: **DeCiFer, Satas et al. 2021, *Cell Syst* 12(10):1004**）——對應 §5/§6「輸出即測度」+ §7.5.4「定不出來即答案」。
 - 組合最佳化 / ILP 形式（PhISCS PMC6836735 / TUSV-ext）——對應 §7 解法 2。
-- directed Steiner tree / arborescence——對應 §7 解法 1。
+- directed Steiner tree / arborescence（NP-/MAX-SNP-hard: **Foulds & Graham 1982**；FPT: **Mahapatra et al. 2025, *Acta Inf* 62(1):6**）——對應 §7 解法 1；🔴 §7.5.3 紅線：solver 走 capped-$k$ 窮舉，**不解**此通用 NP-hard 最佳化。
+- **複雜度邊界完整定位 + 已驗證 .bib**：`InterSubMod/docs/method_comparison/20260705_ism_computational_complexity_positioning_01.md`（§1.3/§2.3；35 cite 全過 citation-verification, commit d2a5eba）。
