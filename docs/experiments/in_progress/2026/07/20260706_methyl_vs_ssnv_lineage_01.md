@@ -85,6 +85,24 @@ build_branch: research/subclonal-reconstruction-202606
 - **但仍是「群內隱藏子結構」(同一 sSNV lineage 內)非「lineage 之間」** → **L3 候選**,可能 cis-ASM/HP-殘留/技術,**bulk 不能證 subclone**。
 - **總結**：甲基有 **CN-獨立的群內雙峰內容(真實)**,但屬**有界輔助 L3**(within-lineage 隱藏子結構,非確認 subclone)→ 與主軸一致。
 
+## 3e. 🔴 前判斷分類（determinacy）× 甲基可處理 — 完整交叉統計（07-08）
+
+> 腳本 `methyl_bimodality_cn_rate.py`(加 det_ct 記錄)+`methyl_cnrate_merge.py`；3 CN 樣本 pooled 20,450 可測區全覆蓋(含 E_subcube 9460 gap#1 救回區)。每區取其 genotype 群最佳甲基狀態。
+
+| 前判斷分類 | 總區 | residual(甲基可助L3) | 比例 | cn_gain | hp | none | Q5 |
+|---|---|---|---|---|---|---|---|
+| A_determined | 4965 | 204 | 4.1% | 341 | 13 | 4407 | 0 |
+| B_pairwise | 2197 | 83 | 3.8% | 63 | 2 | 2049 | 0 |
+| E_subcube(gap#1) | 9460 | 2 | 0.0% | 4 | 2 | 9452 | 0 |
+| A_ambiguous | 167 | 8 | 4.8% | 3 | 0 | 156 | 0 |
+| C_underdetermined | 850 | 28 | 3.3% | 9 | 2 | 811 | 7 |
+| recurrence_required | 672 | 25 | 3.7% | 29 | 1 | 617 | 2 |
+| incompatible | 332 | 1 | 0.3% | 0 | 0 | 331 | 0 |
+| other | 1807 | 84 | 4.6% | 61 | 5 | 1657 | 0 |
+| **ALL** | **20450** | **435** | **2.1%** | 510 | 25 | 19480 | **9** |
+
+**🔴 決定性結論**：① 甲基可助全體只 **2.1%**(95.3% 無訊號)；② **難建樹區(2021)甲基可助只 62=3.1%、Q5 只 9** → 甲基對「定不出樹」區幾乎沒幫助(比例還低於已定樹 4.1%)；③ **E_subcube(gap#1 救回 9460=46%)甲基訊號幾近零(0.02%)** — partial-read 群太稀疏(多 <MINGRP=12 不可測)。residual 集中已定樹/非難建區 → 甲基=已知結構弱佐證、非未知結構解算器。檔 `cnv_sv_work/methyl_lineage/determinacy_x_methyl_complete.json`。
+
 ## 3d. Q5 輔助旗標 — 難建樹區 ALT-cluster 甲基雙峰候選
 
 在 `C_underdetermined`(sSNV 定不出樹) 區 + ALT-cluster + cn-clean(neutral) + 扣 HP → **7 個候選**(H2009 6 + HCC1954 1),Δβ 0.20-0.30。例 H2009 chr10:31944510 AA 34read@0.75 vs 11read@0.46。→ **可作難建樹區的 L3 甲基輔助標記**(候選隱藏 subclone/branching),但稀少+需 normal-cis/single-cell 確認。觀察 HTML `cnv_sv_work/methyl_lineage/`。

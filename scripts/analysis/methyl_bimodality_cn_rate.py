@@ -28,7 +28,17 @@ TOPO = os.environ["SM_TOPO"]
 CNBED = os.environ["SM_CNBED"]
 OUT = os.environ["SM_OUT"]
 MAPQ, MINREAD, MINGRP, SEP, MINSUB, READ_CAP = 20, 3, 12, 0.2, 4, 500
-HARD = ("ambiguous", "underdetermined", "incompatible")
+HARD = ("ambiguous", "underdetermined", "incompatible", "recurrence")
+DET_CATS = ("A_determined", "A_ambiguous", "C_underdetermined", "incompatible",
+            "recurrence_required", "B_pairwise", "E_subcube")
+
+
+def norm_det(d):
+    d = d or "other"
+    for h in DET_CATS:
+        if d.startswith(h):
+            return h
+    return "other"
 
 _TBX = {}
 def tabix(p):
@@ -141,6 +151,7 @@ def main():
     rate = defaultdict(lambda: [0, 0])   # cn -> [n_bimodal, n_tested]
     flag_by_cn = defaultdict(Counter)    # cn -> {hp/cn_gain/residual}
     q5 = []                              # Q5 hard-region ALT-cluster candidates
+    det_ct = defaultdict(Counter)        # determinacy -> {total/none/hp/cn_gain/residual/q5}
     n_reg = 0
     for r in det:
         region = r["region"]; chrom = r["chrom"]; s = r["start"]
@@ -152,6 +163,8 @@ def main():
         n_reg += 1
         mycn = cn_at(iv, chrom, (s + e) // 2)
         hard = any(h in r.get("determinacy", "") for h in HARD)
+        reg_status = "none"; reg_q5 = False
+        _rank = {"none": 0, "hp": 1, "cn_gain": 2, "residual": 3}
         meth = {}; geno = {}; hp = {}; n = 0
         for a in tb.fetch(chrom, s, e + 1):
             if a.is_unmapped or a.is_secondary or a.is_supplementary or a.mapping_quality < MAPQ:
@@ -194,13 +207,21 @@ def main():
             hp_exp = (d0 in (1, 2) and d1 in (1, 2) and d0 != d1)
             cls = "hp" if hp_exp else ("cn_gain" if mycn == "gain" else "residual")
             flag_by_cn[mycn][cls] += 1
+            if _rank[cls] > _rank[reg_status]:
+                reg_status = cls
             # Q5: hard region + ALT cluster + cn-clean(neutral) + not HP -> L3 subclone/branch candidate
             if hard and (not hp_exp) and mycn == "neutral" and "A" in g:
+                reg_q5 = True
                 q5.append({"region": region, "determinacy": r.get("determinacy"),
                            "genotype": g, "n_reads": len(ids), "cn": mycn,
                            "means": info["means"], "sizes": info["sizes"],
                            "delta_beta": round(abs(info["means"][0] - info["means"][1]), 3),
                            "n_sSNV": r.get("n_sSNV"), "topology_type": r.get("topology_type")})
+        dcat = norm_det(r.get("determinacy"))
+        det_ct[dcat]["total"] += 1
+        det_ct[dcat][reg_status] += 1
+        if reg_q5:
+            det_ct[dcat]["q5"] += 1
     tb.close()
     rate_out = {cn: {"n_bimodal": v[0], "n_tested": v[1],
                      "bimodal_rate": round(v[0] / v[1], 4) if v[1] else None}
@@ -214,6 +235,7 @@ def main():
     raw = {cn: [v[0], v[1]] for cn, v in rate.items()}
     json.dump({"summary": summary, "raw_rate": raw,
                "flag_by_cn": {k: dict(v) for k, v in flag_by_cn.items()},
+               "det_ct": {k: dict(v) for k, v in det_ct.items()},
                "q5_candidates": q5}, open(outp, "w"), ensure_ascii=False, indent=1)
     print(json.dumps(rate_out, ensure_ascii=False))
     print(f"Q5 candidates: {len(q5)}  -> {outp}")
