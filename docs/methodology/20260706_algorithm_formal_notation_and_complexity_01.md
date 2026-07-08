@@ -78,6 +78,74 @@ root = 全 R（germline，如 RRR…）。從 pairwise 建：co_linked→併節�
 
 ---
 
+## 2b. 上限推導（約束下）+ 演算法處理
+
+### (a) 樸素上限（無約束）
+- 基因型空間　|{v}| = **2^k**（每 sSNV 兩態）
+- 拓樸/順序　缺 g 個中間群 → **g!** 排列；整區樹排序 ≤ **(k+1)!**
+- pairwise　全對 = **C(N,2)**（若不限窗）
+
+### (b) 約束下的上限（算式）
+令一區有 k 個 sSNV、R 條 read、覆蓋兩位點之 coread ρ、germline HP family {H}。
+
+- **B1 — perfect-phylogeny（infinite-sites）**：每 sSNV 只突變一次 ⇒ 觀測基因型（樹節點）的突變集合構成 laminar family，每 sSNV 落唯一樹邊。⇒
+  $$c \le k+1$$
+  （推導：k 個突變事件 → 根 + 至多 k 條帶突變邊 → ≤ k+1 個相異節點；co_linked 併邊則更少。實測 **0 違反 / 6,288 區**。）
+
+- **B2 — 覆蓋/read 支持**：每 population 需 ≥ m_min reads，總 R reads，且相異觀測向量 ≤ R。⇒
+  $$c \le \min\!\big(R,\ \lfloor R/m_{\min}\rfloor\big)$$
+
+- **B3 — HP 分家**：somatic read 依 germline HP 切；各 family 內獨立建樹。⇒
+  $$c \le \sum_{H} (k_H + 1)$$
+
+- **合併群數上限**：
+  $$\boxed{\,c \le \min\!\Big(k+1,\ \lfloor R/m_{\min}\rfloor,\ \textstyle\sum_H (k_H{+}1)\Big)\,}$$
+
+- **B4 — same-read 窗 τ_R**：L2 只配 dist ≤ τ_R 的對 ⇒ 每 sSNV 的 partner 數 ≤ w := |τ_R 窗內 sSNV|，pairwise 對數 ≤ **N·w / 2**（非 C(N,2)）。物理上 τ_R ≤ read span。
+
+- **B5 — 拓樸候選數**：缺中間群 jump 邊帶 g 個 gained 突變，先以 gained-pair pairwise 建 partial order（co_linked 併群、nested 定序、4-gamete flag）；候選 = 該 poset 的 **linear extensions** e(poset) ≤ g!；整區 T ≤ Π_edges e(poset)，演算法截於 **CAP=24**。多數區收斂到 **1**（真 order-ambiguous ≈ 0）。
+
+### (c) 演算法處理：以「觀察 c + 從 pairwise 建樹」取代枚舉指數空間
+核心：**不列舉 2^k 基因型、不列舉 (k+1)! 樹**；c 由資料「數」出、樹由 pairwise「建」出。
+
+```text
+ReconstructRegion(W):                       # W: sSNV S_1..S_k, reads R
+  # L2 pairwise（B4：只掃窗內對，單次 region pileup）
+  for (S_i,S_j) with |pos_i-pos_j| ≤ τ_R:
+      2×2 ← co-reads;  rel_ij ← classify(RR,RA,AR,AA)   # O(R·k) 總計
+
+  # L3–L4 觀察 c（B1+B2：c 是量出來的、非枚舉）
+  P ← multiset of genotype vectors over k'=min(k,κ) full-cover reads
+  c ← |{ v : P[v] ≥ m_min }|                # 直接 ≤ min(k'+1, ⌊R/m_min⌋)
+
+  # L5 從 pairwise 建樹（perfect-phylogeny，O(k²)，非 2^k）
+  UF ← ∅;  anc ← ∅
+  for each powered (i,j):
+      co_linked → UF.union(i,j)             # 併節點
+      nested    → anc.add(祖→裔)  (ε 去噪)   # 定祖裔
+      4-gamete  → conflict++
+  T ← transitive_reduction( DAG(UF, anc) )  # O(k²) 邊 + 約簡
+  if cycle(T): return CONFLICT              # 不成單樹
+
+  # 缺中間群：只列 linear extensions（B5），非 g!
+  cand ← linear_extensions(partial_order)[:CAP]
+  return (T, cand, c)
+```
+
+**演算法如何「吃掉」每個上限**：
+| 上限 | 樸素 | 演算法手段 | 有效複雜度 |
+|---|---|---|---|
+| 基因型空間 | 2^k | 掃 read 數 distinct v（不列舉）| O(R·k′) |
+| 群數 c | — | 直接量測，受 B1/B2 夾 | c ≤ k+1（實測 median 1）|
+| 建樹 | (k+1)! | union-find + 祖裔 DAG + transitive reduction | O(k²) |
+| 順序候選 | g! | poset linear extensions + CAP | 多數 = 1 |
+| pairwise | C(N,2) | τ_R 窗 + 單次 pileup | O(R·k)/區 |
+| k>κ（去 8-cap）| vector 不可建 | 全 pairwise position 樹（gt8）| O(k²)/區 |
+
+⇒ **每區實際計算 = O(R·k + k²)**，k median 3（max 150）、c median 1 ⇒ 全基因組線性於 (Σread × sSNV)，非指數。
+
+---
+
 ## 3. HCC1395 實際資料量（grep-verified，2026-07-06 canonical）
 
 | 量 | 值 |
