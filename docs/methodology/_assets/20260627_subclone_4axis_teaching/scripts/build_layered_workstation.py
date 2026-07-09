@@ -115,7 +115,7 @@ function dash(){
  let h='';
  // 層級計數
  h+='<h2>① 層級計數（U1→U6）</h2><table><tr><th>層</th><th>單位</th><th class="n">HCC1395 計數</th><th>說明</th></tr>'
- +row('U1','somatic sSNV',(C.U1_sSNV_somatic_total||0).toLocaleString(),'census somatic==True(重建骨幹);總 census 位點=35,332')
+ +row('U1','somatic sSNV',(C.U1_sSNV_somatic_total||0).toLocaleString(),'ClairS v0.4.0 paired PASS somatic(重建骨幹·_sc.vcf;2026-07-09 移除舊 is_somatic 粗重檢·救回 429 誤殺 TP);非舊 census somatic 23,810/總 census 35,332')
  +row('U3','region',nreg.toLocaleString(),'multilocus 分析群(≤8sSNV窗,主分母);linkage全span='+((C.U3_linkage_regions_full_span||0).toLocaleString())+' 同批區(位置99.9%重疊)')
  +row('U4','lineage-unit',nlin.toLocaleString(),'region×HP家族(1/2/3);樹的自然單位')
  +row('U5','tree',(C.U5_trees?C.U5_trees.sum_ntrees_noncapped.toLocaleString():'—'),'Σ枚舉樹(non-capped);avg '+(C.U5_trees?(C.U5_trees.sum_ntrees_noncapped/nlin).toFixed(2):'—')+' 樹/unit')
