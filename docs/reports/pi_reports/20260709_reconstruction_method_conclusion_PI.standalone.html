@@ -207,6 +207,31 @@
 </table>
 <p><small class="note">定位：本方法佔「read-level bulk ONT 單分子共現 + 隱藏節點精確枚舉 + 誠實可辨識性」的文獻白地；甲基作為<b>有界輔助</b>而非樹的決定因子，是與 MethPhaser 類方法的關鍵區別。（工具事實經文獻查核；本方法對比為定位陳述，L2。）</small></p>
 
+<h3>6.1 深入：頻率反推 vs 直接共現（vs PhyloWGS / Canopy / CITUP）<span class="tier t2">L2</span></h3>
+<p>這三者是同一家族——都<b>從突變頻率（VAF/CCF）反推</b>樹：找一個拓撲，使頻率滿足 pigeonhole/crossing rule（祖先 CCF ≥ 後代 CCF 之和）。它們<b>不直接觀測共現</b>，而是從頻率<b>推論</b>哪些突變在同一 lineage。</p>
+<div class="grid">
+  <div class="card warn">
+    <h4>頻率反推（PhyloWGS / Canopy / CITUP）</h4>
+    <p>觀測 = 全腫瘤<b>平均頻率</b>；共現與樹是<b>統計反推</b>。單一 bulk 的頻率<b>欠定</b>樹 → Canopy/CITUP 需<b>多樣本/多區</b>；且需<b>拷貝數校正</b>把 VAF 換成 CCF。</p>
+  </div>
+  <div class="card ok">
+    <h4>直接共現（本方法 ISM）</h4>
+    <p>觀測 = 單條 ONT 分子上<b>哪些突變在一起</b>（直接證據，非反推）；樹由觀測到的共現<b>枚舉</b>。<b>單樣本</b>即有共現骨幹；骨幹<b>對 CNV 較穩</b>（共現與拷貝數無關）。</p>
+  </div>
+</div>
+<div class="callout c-amber">
+  💡 <b>關鍵洞見</b>：pigeonhole/crossing rule 是<b>他們唯一的樹決定機制</b>；在我們這裡只是<b>枚舉出候選樹之後、可選的第二層加權</b>（見 §4.2）。所以「我們能不能做他們做的事」——能，CCF 加權層本質就是 CITUP/Pairtree 那套——但我們是<b>加在直接共現骨幹之上</b>，不是唯一依賴。
+</div>
+<table>
+  <tr><th>工具</th><th>特點</th><th>與本方法的關鍵差異</th></tr>
+  <tr><td><b>PhyloWGS</b></td><td>最強在 <b>subclonal CNV 建模</b>（把 VAF 依拷貝數校正成 CCF）</td><td>它顯式建 CNV（相對優勢）；我們的骨幹<b>不需要</b> CNV 校正（共現本身 CN-robust）</td></tr>
+  <tr><td><b>Canopy</b></td><td><b>需多樣本／多區</b> + allele-specific CN 才能鎖樹</td><td>我們<b>單樣本</b>即有共現骨幹（不必多切片）——ONT 單分子的核心差異</td></tr>
+  <tr><td><b>CITUP</b></td><td>從 <b>CCF 分群枚舉相容樹拓撲</b>（純頻率驅動）</td><td><b>概念上最接近我們的頻率加權層</b>；差別在我們的輸入是「共現 + 可選頻率」而非純 CCF</td></tr>
+</table>
+<div class="callout c-red">
+  🔴 <b>誠實的「相同限制」</b>：要把跨區組成<b>整棵樹</b>時，單一 bulk 一樣欠定——這點我們<b>和 Canopy/CITUP 同受限</b>（他們用多樣本解決；我們誠實標「定不出來」+ ⭐3 封頂）。而且一旦我們啟用頻率加權，就<b>繼承他們同樣的 CN-multiplicity confound</b>（read ≠ CCF；即 §5 的 CN-gain caveat）。
+</div>
+
 <h2><span class="n">7</span>對論文的意義</h2>
 <table>
   <tr><th>面向</th><th>主張</th></tr>
