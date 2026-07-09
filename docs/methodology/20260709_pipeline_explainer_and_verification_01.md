@@ -9,6 +9,12 @@ provenance: 所有數字由 scripts/verify_pipeline_numbers.py 於 2026-07-09 �
 
 # 端到端 explainer + 可獨立驗證 — sSNV 共現 → 群組斯坦納樹 → 輔助驗證(HCC1395)
 
+> ⚠ **框架版本 banner（2026-07-10 加）**：本文是**舊 region-level 框架**的快照（S universe = SEQC2-可評估子集 **35,332**、`determined 1808` 那套 3885-桶）。其數字鏈**內部一致**（`verify_pipeline_numbers.py` 全 ✓）、作為**方法 explainer 仍有效**，但 **headline 規模/計數已被最新框架取代**：
+> - 🔴 **真骨幹 universe = ClairS 全 PASS = 113,997**（`somatic_pass.vcf.gz`；此處 35,332 只是其 31% SEQC2 子集，僅觀察標籤）。
+> - 🔴 **最新框架 = layered per-HP-家族**（7,928 區 / 13,785 lineage 單位 / determined **7,123**），非本文的 region-level 3885-桶。
+> - **最新權威口徑** → `InterSubMod/docs/methodology/20260710_full_census_hierarchy_HCC1395.standalone.html`（census）+ `InterSubMod/docs/reports/pi_reports/20260709_reconstruction_method_conclusion_PI.standalone.html`（PI §2）。
+> - 下方數字讀作「**舊 SEQC2-subset 上的 worked example**」，方法邏輯（超立方體/斯坦納/枚舉/可辨識性）不變。
+
 > **兩個目的**:① **理解**(下方 7 站流程)② **驗證**(§8 一鍵重算,每數字對回原始檔)。
 
 ## 核心一句話
@@ -91,7 +97,7 @@ python3 verify_pipeline_numbers.py
 ### Provenance 表（數字 → 來源檔:key）
 | 數字 | 值 | 來源 |
 |---|---|---|
-| sSNV total / TP / FP | 35,332 / 30,490 / 4,842 | `sm_completeness_ledger.json:universe_*` |
+| sSNV total / TP / FP（⚠ SEQC2 子集，非 ClairS PASS 全 113,997） | 35,332 / 30,490 / 4,842 | `sm_completeness_ledger.json:universe_*` |
 | 三桶 linked/under/isolated | 21,554 / 5,458 / 8,320 | `sm_completeness_ledger.json:buckets` |
 | 區數 / 有向量 / 空向量 | 7,143 / 4,256 / 2,887 | `sm_region_integration.json:regions`(populations 空與否) |
 | determinacy 7 桶 | 1808/25/70/18/943/544/477 | `candidate_trees.json:summary.identifiability_table` |
@@ -105,7 +111,7 @@ python3 verify_pipeline_numbers.py
 
 ## §9 一圖串起來
 ```
-35,332 sSNV
+35,332 sSNV（⚠ SEQC2 子集；ClairS PASS 全 universe=113,997）
   → sm_linkage: linked 21,554 / underpowered 5,458 / isolated 8,320
   → 7,143 區 = 有向量 4,256 + 空向量 2,887(40.4%)
   → topology(3,885): determined 1,808 / ambiguous 25 / recurrence 70
