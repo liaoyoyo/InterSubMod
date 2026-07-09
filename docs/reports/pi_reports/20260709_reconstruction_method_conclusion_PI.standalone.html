@@ -4,7 +4,7 @@
   partial 建樹 layered_reconstruction_HCC1395.json（subcube_recovery_gap_check.py）、
   read 加權 ccf_tree_weighting_full_observe.json（ccf_tree_weighting_full_observe.py）；
   詳見 docs/methodology/20260709_pipeline_explainer_and_verification_01.md 之 provenance 表。
-  資料 commit 78271f6。其餘小數（1.65/10/12/14/34/40 等）為 CSS 樣式值非 metric。 -->
+  資料 commit 78271f6。其餘為 CSS 樣式值或教學示意圖數值（schematic，見 §1 樹圖與 §4.2 加權圖的 reads/posterior 標註）非真實 metric。 -->
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
@@ -54,6 +54,12 @@
   .c-red{background:#fdecec;border:1px solid #f3c0c0}
   .c-amber{background:#fff6e6;border:1px solid #f0dca0}
   small.note{color:var(--muted)}
+  figure{margin:16px 0;text-align:center}
+  figcaption{font-size:12px;color:var(--muted);margin-top:6px;text-align:left}
+  .minitree{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 13px;font-size:12.5px;line-height:1.5;text-align:center}
+  .minitree b{color:var(--blue)}
+  .verdictbox{background:#e6f4ea;border:1px solid #bfe3ca;border-radius:9px;padding:9px 13px;font-size:12.8px;line-height:1.5}
+  .arrow{font-size:24px;color:var(--muted)}
   footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
   code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:12.5px}
   .legend{font-size:11.5px;color:var(--muted);margin-top:6px}
@@ -87,15 +93,32 @@
 
 <h2><span class="n">1</span>方法：從 sSNV 共現到演化樹 <span class="tier t2">L2</span></h2>
 <p>每個 somatic 點突變（sSNV）是超立方體的一個座標軸；一條 ONT 長 read 直接讀出「哪些突變在<b>同一條 DNA 分子</b>上」——這是本方法的命脈（跨 read 拼接無法保證同分子，單分子共現可以）。</p>
-<table>
-  <tr><th>數學物件</th><th>生物意義</th></tr>
-  <tr><td>超立方體頂點 {0,1}ⁿ</td><td>一個基因型（已獲得哪些突變）</td></tr>
-  <tr><td>根 = 0ⁿ</td><td>germline（未突變祖先）</td></tr>
-  <tr><td>有向邊（翻一個 0→1）</td><td>一次 infinite-sites 獲得突變</td></tr>
-  <tr><td>隱藏（Steiner）節點</td><td>推斷的、未被直接觀測到的祖先 clone</td></tr>
-  <tr><td>一條 partial read（只覆蓋部分位點）</td><td>超立方體的一個「子面」約束（= IDPP，Pe'er 2004）</td></tr>
-  <tr><td>最小樹（枚舉全部）</td><td>maximum parsimony 演化樹（所有等成本候選）</td></tr>
-</table>
+
+<figure>
+<svg viewBox="0 0 460 250" width="100%" style="max-width:460px" font-family="-apple-system,Segoe UI,Noto Sans TC,sans-serif">
+  <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+  <line x1="230" y1="54" x2="230" y2="90" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="222" y1="130" x2="152" y2="174" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#ar)"/>
+  <line x1="238" y1="130" x2="328" y2="174" stroke="#94a3b8" stroke-width="1.6" marker-end="url(#ar)"/>
+  <text x="240" y="78" font-size="11.5" fill="#5b6472">＋突變1</text>
+  <text x="150" y="152" font-size="11.5" fill="#5b6472">＋突變2</text>
+  <text x="300" y="152" font-size="11.5" fill="#5b6472">＋突變3</text>
+  <rect x="185" y="18" width="90" height="34" rx="7" fill="#e6f4ea" stroke="#0f9d58"/>
+  <text x="230" y="33" text-anchor="middle" font-size="13" font-weight="700">RRR</text>
+  <text x="230" y="46" text-anchor="middle" font-size="10.5" fill="#5b6472">germline 根</text>
+  <rect x="185" y="94" width="90" height="34" rx="7" fill="#f2f3f5" stroke="#8a8f99" stroke-dasharray="4 3"/>
+  <text x="230" y="109" text-anchor="middle" font-size="13" font-weight="700" fill="#5b6472">(ARR)</text>
+  <text x="230" y="122" text-anchor="middle" font-size="10" fill="#8a8f99">隱藏祖先·未觀測</text>
+  <rect x="90" y="176" width="120" height="38" rx="7" fill="#eaf1ff" stroke="#2563eb"/>
+  <text x="150" y="192" text-anchor="middle" font-size="13" font-weight="700">AAR</text>
+  <text x="150" y="206" text-anchor="middle" font-size="10.5" fill="#5b6472">觀測 clone · 20 reads</text>
+  <rect x="270" y="176" width="120" height="38" rx="7" fill="#eaf1ff" stroke="#2563eb"/>
+  <text x="330" y="192" text-anchor="middle" font-size="13" font-weight="700">ARA</text>
+  <text x="330" y="206" text-anchor="middle" font-size="10.5" fill="#5b6472">觀測 clone · 8 reads</text>
+</svg>
+<figcaption><b>示意圖（schematic）</b>：一個區的重建樹。根 = germline（全 R）；每條邊獲得<b>一個</b>突變（0→1）；未被任何 read 直接觀測到的祖先基因型，以<b>虛線隱藏（Steiner）節點</b>推斷；葉為觀測到的 clone（附 read 數）。若沒有 read 能穿越全部位點，整區仍當<b>單一超立方體問題</b>求解、枚舉所有相容樹，而非把兩兩位點分開拼接。</figcaption>
+</figure>
+
 <p><small class="note">形式化：directed rooted (group) Steiner arborescence on Boolean hypercube = Incomplete Directed Perfect Phylogeny。逐區位點數 ≤8（涵蓋 97.5% 的區）→ 頂點 ≤256 → 暴力精確枚舉可行，不需近似。</small></p>
 
 <h2><span class="n">2</span>關鍵數字（全部可一鍵重算） <span class="tier t1">L1</span></h2>
@@ -131,6 +154,17 @@
 
 <h3>4.2 用 read 數（頻率）收斂等機率樹 <span class="tier t1">L1</span></h3>
 <p>當 solver 誠實輸出「多棵一樣好的樹」時，可用<b>每個突變的 read 數</b>加權：早發生的突變在更多後代細胞中 → 更多 read（pigeonhole：祖先頻率 ≥ 後代頻率）。這把「多棵等機率」變成「加權 posterior + 較可能者」，且純用 read count（<b>遺傳訊號、非甲基、非循環</b>）。</p>
+
+<figure>
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center">
+  <div class="minitree">候選 A<br><b>RRR→[突變1]→[突變1,2]</b><br><small>（突變1 先）</small></div>
+  <div class="minitree">候選 B<br><b>RRR→[突變2]→[突變1,2]</b><br><small>（突變2 先）</small></div>
+  <div class="arrow">→</div>
+  <div class="verdictbox">read 數：<b>突變1 = 60</b> ＞ 突變2 = 15<br>→ 突變1 頻率高 ＝ 較早（祖先）<br>→ <b>候選 A 勝</b>（posterior 0.9）</div>
+</div>
+<figcaption><b>示意圖（schematic）</b>：兩棵拓撲上等成本的樹，用 read 數（頻率）打破平手 —— read 多的突變當祖先。約束不變（根仍是 RRR、每邊仍是單一 0→1）；只是加了「頻率加權」這一層。對稱情況（兩突變 read 數相等）則<b>誠實保持等權重</b>不硬猜。</figcaption>
+</figure>
+
 <div class="kpi">
   <div class="k"><div class="v">66.8%</div><div class="l">等機率被收斂<br><small>（含 partial reads；只用全覆蓋 read 僅 2.3%）</small></div></div>
   <div class="k"><div class="v">99.4%</div><div class="l">贏家符合生物邏輯<br><small>（祖先頻率 ≥ 後代）</small></div></div>
@@ -149,7 +183,22 @@
   ⭐ <b>單樣本上限 ⭐3</b> <span class="tier t3">L3</span>：單一 bulk 只能刻畫（characterize），不能確認（confirm）subclone；隱藏節點標為 inferred。突破需 single-cell / multi-region 正交真值。
 </div>
 
-<h2><span class="n">6</span>對論文的意義</h2>
+<h2><span class="n">6</span>與現有工具的定位 <span class="tier t2">L2</span></h2>
+<p>主流腫瘤演化重建多以<b>族群層 VAF</b>（PyClone/PhyloWGS/Pairtree）或<b>單細胞矩陣</b>（SCITE/Cardelino）為單位；本方法的差異在<b>資料單位 = 單一 bulk 內的單條 ONT 分子</b>（直接共現、非統計反推）。</p>
+<table>
+  <tr><th>工具</th><th>資料單位</th><th>核心訊號</th><th>甲基</th><th>與本方法差異</th></tr>
+  <tr><td>PyClone / SciClone</td><td>族群（bulk）</td><td>VAF 分群 → CCF</td><td>無</td><td>只分群、不建樹；需 CN 校正</td></tr>
+  <tr><td>PhyloWGS / Canopy / CITUP</td><td>族群（bulk）</td><td>VAF + CNA → 樹</td><td>無</td><td>族群頻率非單分子共現；需 CN 校正</td></tr>
+  <tr><td>Pairtree</td><td>族群（bulk）</td><td>VAF pairwise + 枚舉多樹</td><td>無</td><td>枚舉概念最近，但 VAF 驅動、無單分子直接共現</td></tr>
+  <tr><td>SCITE / PhISCS / SPhyR</td><td>單細胞（barcode）</td><td>細胞×突變矩陣（noise-aware）</td><td>無</td><td>需單細胞定序；非 read-level bulk</td></tr>
+  <tr><td>Cardelino / clonealign</td><td>單細胞</td><td>指派細胞到既有 clone</td><td>無</td><td>需獨立既有樹；是指派、非重建</td></tr>
+  <tr><td>Conbase</td><td>單分子（短讀單細胞）</td><td>read phasing 確認變異</td><td>無</td><td>只確認變異、不建完整 subclone 樹</td></tr>
+  <tr><td>MethPhaser / NanoMethPhase</td><td>ONT long-read</td><td>甲基輔助 germline phasing</td><td>是（germline）</td><td>只延伸 germline 相位；不進 somatic 樹</td></tr>
+  <tr style="background:#eef4ff"><td><b>本方法（ISM）</b></td><td><b>單一 bulk 內單條 ONT 分子</b></td><td><b>單分子多-SNV 直接共現 → 超立方體 Steiner 樹枚舉</b></td><td>有界<br>（不進樹）</td><td>—</td></tr>
+</table>
+<p><small class="note">定位：本方法佔「read-level bulk ONT 單分子共現 + 隱藏節點精確枚舉 + 誠實可辨識性」的文獻白地；甲基作為<b>有界輔助</b>而非樹的決定因子，是與 MethPhaser 類方法的關鍵區別。（工具事實經文獻查核；本方法對比為定位陳述，L2。）</small></p>
+
+<h2><span class="n">7</span>對論文的意義</h2>
 <table>
   <tr><th>面向</th><th>主張</th></tr>
   <tr><td>Novelty</td><td>read-level bulk ONT 的<b>角色分離式</b>重建：單分子共現骨幹 + 隱藏節點枚舉 + 誠實可辨識性分類。read-as-group 是 IDPP 特例；此組合（單分子 long-read bulk + germline 有向根 + 精確等成本枚舉）為文獻白地。<span class="tier t2">L2</span></td></tr>
@@ -166,7 +215,7 @@
   資料 commit <code>78271f6</code>（branch research/subclonal-reconstruction-202606）。<br>
   詳細文件：<code>InterSubMod/docs/methodology/20260709_pipeline_explainer_and_verification_01.md</code>（端到端）·
   <code>20260704_formal_problem_statement_topology_from_cooccurrence_01.md</code>（形式化）。<br>
-  <small>partial flag：本頁數字為 <b>HCC1395 單樣本</b>；跨 7 樣本比較另有分析（determined% 主由定序深度驅動，屬 L3 描述性，不作生物結論）。</small>
+  <small>partial flag：本頁數字為 <b>HCC1395 單樣本</b>；跨 7 樣本比較另有分析（determined% 主由定序深度驅動，屬 L3 描述性，不作生物結論）。§1、§4.2 圖為教學示意（schematic），非真實資料。</small>
 </footer>
 
 </div>
