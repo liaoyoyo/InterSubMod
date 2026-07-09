@@ -36,7 +36,8 @@
 <div class="wrap">
 <header>
   <h1>完整量化普查（階層）<span class="pill">HCC1395 單樣本</span></h1>
-  <div class="sub">S → 區域(k) → 群組合(C) → HP 分類 → 拓撲確認 → 拓撲類型 ｜ 最新 layered per-HP-家族框架 ｜ 2026-07-10</div>
+  <div class="sub">S → 區域(k) → 群組合(C) → HP 分類 → 拓撲確認 → 拓撲類型</div>
+  <div class="sub" style="margin-top:4px;font-size:12.5px"><b>資料</b>：最新 layered per-HP-家族框架，<b>2026-07-09</b>（固定錨 commit <code style="font-size:11px">2e69811</code>）｜ <b>建立</b>：2026-07-10 ｜ 一致性全 ✓</div>
 </header>
 
 <h2><span class="n">A</span>sSNV 位點總數 S 與連結狀態</h2>
@@ -52,8 +53,9 @@
 <table>
   <tr><th>類別</th><th class="num">數量</th><th>說明</th></tr>
   <tr><td>k=1（單點·無樹）</td><td class="num">8,320 sSNV</td><td>= isolated_singleton；單一位點不成樹</td></tr>
-  <tr class="tot"><td>k&gt;1（多點·可建樹）區</td><td class="num">7,927 區</td><td>→ 依 HP 家族拆成 13,785 lineage 樹單位（下方 C–F 全以此為母體）</td></tr>
+  <tr class="tot"><td>k&gt;1（多點·可建樹）區</td><td class="num">7,928 區</td><td>layered L0 總區數；其中 <b>7,927</b> 區有 ≥1 lineage 樹單位（1 區全 unphased 無 germline 樹）→ 依 HP 家族拆成 <b>13,785</b> lineage 樹單位（下方 C–F 母體）</td></tr>
 </table>
+<p><small class="n">🔎 註：ledger 的多位點 sSNV（linked 21,554 + underpowered 5,458 = 27,012）與 mlhp 實際覆蓋位點（25,639）差約 1,373，= &gt;8-位點大區的 densest-8 截斷（非錯誤，見 §Q1 n≤8 覆蓋 97.5%）。S=35,332 為上游 caller 穩定值（06-27=07-02 ledger 一致）。</small></p>
 
 <h2><span class="n">C</span>群組合 C（每單位全覆蓋基因型群數）× 確認樹結構</h2>
 <table>
