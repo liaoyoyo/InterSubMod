@@ -77,3 +77,29 @@ build_branch: research/subclonal-reconstruction-202606
 - **偵測訊號**：server 端 curl 200 但用戶看不到 = 網路/host 問題非檔案問題。
 - **修法**：`--bind 0.0.0.0` + 提醒「遠端把 localhost 換 hostname/IP」。
 - **永久防線**：給 server URL 附「遠端存取換 host」註；優先 SendUserFile(直接送檔) 免 host 問題。
+
+## H-008 · 2026-07-09 · [orphan-figure] standalone dashboard 引用不存在的 figs 目錄（全破圖）
+- **症狀**：`20260623_geometry_divergence_observation_dashboard.standalone.html` 每個 locus 卡片破圖。
+- **觸發**：批次 render QA(48 交付物)flag 出來。
+- **根因(機制)**：HTML 引用 `figs_geomdiv/geom_TP_*.png`(400 張外部相對 PNG)，但 **`figs_geomdiv/` 目錄根本不存在**(0 PNG) → 400/400 破。「standalone」名不副實(圖沒 base64 內嵌也沒隨檔 bundle)。
+- **最小重現**：`render_html_shot.py` 該檔 → n_broken=400。
+- **偵測訊號(含盲點)**：目視破圖 icon;`naturalWidth==0`。🔴 但**首輪批次只報 28/400**(見 H-010 lazy-load 盲點)。
+- **修法**：未修(07-02 舊 pilot 非活躍 flagship;修需重生 400 張 geom 圖，待用戶決定)。
+- **永久防線**：「standalone」HTML 交付前跑 render QA 確認 0 broken;圖要嘛 base64 內嵌要嘛同資料夾 bundle。`/pipeline-manifest` orphan-figure 稽核可涵蓋。
+- **連結**：`docs/methodology/_assets/20260618_subcluster_pilot/20260623_geometry_divergence_observation_dashboard.standalone.html`。
+
+## H-009 · 2026-07-09 · [tool-bug] batch_render_qa PNG 檔名碰撞(stem 相同覆蓋)
+- **症狀**：批次 QA 中 `layered_workstation/H2009.html` 與 `topology_workstation/H2009.html` 產同名 `H2009.png` → 後者覆蓋前者。
+- **根因**：`name = Path(h).stem` 只取檔名，跨目錄同名(各樣本)碰撞。
+- **偵測訊號**：summary 有兩列 H2009 但 qa_batch/ 只一個 H2009.png。
+- **修法**：`name = parent.name + '__' + stem`(namespace by 父目錄)。
+- **永久防線**：批次輸出檔名含來源目錄。
+- **連結**：`tools/batch_render_qa.py`。
+
+## H-010 · 2026-07-09 · [tool-bug] broken-image 偵測漏 lazy-load(28/400 vs 真 400/400)
+- **症狀**：figs_geomdiv 全缺(400 該破)但批次只報 28 broken。
+- **根因(機制)**：`document.images.filter(i.complete && naturalWidth==0)` — fold 下 lazy-load(`loading="lazy"`)的 img `complete==false` 不算 → 只抓到首屏已嘗試載入的。networkidle 也不等 fold 下圖。
+- **偵測訊號**：n_broken 遠小於視覺可見破圖比例 = 漏抓。
+- **修法**：render 後 **JS 逐屏 scrollBy 到底觸發 lazy-load** → 再等 → 才數 broken(改後 400/400 正確)。
+- **永久防線**：任何「全頁 img 完整性」檢查必先滾動觸發 lazy-load 再判。
+- **連結**：`tools/batch_render_qa.py` scroll 段。
