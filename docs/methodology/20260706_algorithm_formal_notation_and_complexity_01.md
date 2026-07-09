@@ -35,7 +35,7 @@ build_branch: research/subclonal-reconstruction-202606
 ## 1. 流程 L0→L5（每階段：定義 + 計算量 + HCC1395 實際）
 
 ### L0 — 宇宙 S
-S = per-chrom (TP ∪ FP)。**計算量** O(N log N) 排序。**實際**：N = **35,332**（TP 30,490 + FP 4,842）。
+S = ClairS 全 PASS somatic SNV（`somatic_pass.vcf.gz`）。**計算量** O(N log N) 排序。**實際（2026-07-09 定案）**：N = **113,997**（ClairS PASS 全基因組骨幹）。⚠ 舊值 N=35,332（TP 30,490 + FP 4,842）為 **SEQC2-可評估子集**（僅觀察，佔 31%），非建樹 universe；複雜度 O(N log N) 與 N 值無關故推演不變。
 
 ### L1 — 定區 W（linkage 群）
 以相鄰 sSNV gap > τ_R 切 S → {Wⱼ}。k_j = \|Wⱼ\|。**計算量** O(N) 掃描。
@@ -150,8 +150,8 @@ ReconstructRegion(W):                       # W: sSNV S_1..S_k, reads R
 
 | 量 | 值 |
 |---|---|
-| N = \|S\| | 35,332（TP 30,490 / FP 4,842）|
-| census 三桶 | linked 21,554 / underpowered 5,458 / isolated 8,320 |
+| N = \|S\| | **113,997**（ClairS PASS 全骨幹，2026-07-09 定案）；舊 35,332（TP 30,490/FP 4,842）= SEQC2 子集僅觀察 |
+| census 三桶（⚠ 建於舊 35,332 SEQC2 子集） | linked 21,554 / underpowered 5,458 / isolated 8,320 |
 | n_pairs 記錄 | 53,094 |
 | Σ C(k,2) | 79,858 |
 | N_W（有向量區）| 6,288 |

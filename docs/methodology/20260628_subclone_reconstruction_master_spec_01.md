@@ -146,4 +146,4 @@ P(拓樸 T) ∝ P(sSNV共現|T) × 1[HP-root 相容] × P(甲基|T,normal-baseli
 - 互動確認：`topology_workstation` 下方「確認佇列」可**左右選項判讀**（✓同意rank1 / ⇄偏好其他 / ?需更多資訊）+ 觀察評分，存 localStorage、可匯出 JSON。
 - 產物：`scripts/candidate_scoring.py` + `data/candidate_scoring.json`。
 
-> 一句話：本研究 = 在 HCC1395 ONT 上，用 **sSNV 單分子共現（非循環骨幹）+ HP 定根 + 甲基有界輔助** 重建區域級克隆樹；35,332 sSNV 中 61% 可建樹、~11% 拓樸可辨識、2,185 區待確認（605 區可能需甲基輔助、待 cis-control）；單位點非全無法處理（有 CCF/Tier-PS）；甲基 cis-confounded 待 cis-control；⭐3 單樣本。工作站自帶 28 詞名詞解釋 + 左右確認評分。
+> 一句話：本研究 = 在 HCC1395 ONT 上，用 **sSNV 單分子共現（非循環骨幹）+ HP 定根 + 甲基有界輔助** 重建區域級克隆樹；ClairS PASS 骨幹 113,997 sSNV（舊 35,332 為 SEQC2 子集；下述 61%/~11% 比例算於舊子集、layered 重跑口徑見 `20260710_full_census_hierarchy_HCC1395.standalone.html`）中 61% 可建樹、~11% 拓樸可辨識、2,185 區待確認（605 區可能需甲基輔助、待 cis-control）；單位點非全無法處理（有 CCF/Tier-PS）；甲基 cis-confounded 待 cis-control；⭐3 單樣本。工作站自帶 28 詞名詞解釋 + 左右確認評分。
