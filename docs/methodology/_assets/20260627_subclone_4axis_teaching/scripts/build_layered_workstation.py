@@ -223,8 +223,9 @@ function show(i,row){
    +'<span><svg width="14" height="14" style="vertical-align:middle"><circle cx="7" cy="7" r="5.5" fill="#2563eb"/></svg> <b>實測</b>(該基因型有 read 觀測到)</span>'
    +'<span><svg width="14" height="14" style="vertical-align:middle"><circle cx="7" cy="7" r="5" fill="#fff" stroke="#a855f7" stroke-width="1.6" stroke-dasharray="3 2"/></svg> <b>推測</b>(隱藏祖先·無 read·solver 補的中間 clone)</span>'
    +'<span><svg width="14" height="14" style="vertical-align:middle"><rect x="2" y="2" width="10" height="10" rx="2" fill="#64748b"/></svg> <b>germline</b> 起點(RR)</span>'
-   +'<span><svg width="26" height="10" style="vertical-align:middle"><line x1="1" y1="5" x2="25" y2="5" stroke="#f59f00" stroke-width="1.9" stroke-dasharray="4 2"/></svg> <b style="color:#d97706">橙虛線邊</b>=此連接在 N 棵等機率樹間<b>變動=枚舉組合選擇</b>(非唯一)</span>'
-   +'</div></div>';
+   +'<span><svg width="26" height="10" style="vertical-align:middle"><line x1="1" y1="5" x2="25" y2="5" stroke="#94a3b8" stroke-width="1.3"/></svg> 灰實線=此邊<b>在全部等機率樹一致=forced 骨幹</b></span>'
+   +'<span><svg width="26" height="10" style="vertical-align:middle"><line x1="1" y1="5" x2="25" y2="5" stroke="#f59f00" stroke-width="1.9" stroke-dasharray="4 2"/></svg> <b style="color:#d97706">橙虛線</b>=此連接在等機率樹間<b>變動=枚舉組合選擇</b>(非唯一)</span>'
+   +'</div><div class="note" style="font-size:10px;margin-top:3px;background:none;border:none;padding:0">🔴 <b>整棵樹全橙</b> = 無 forced 骨幹、結構完全在 N 個選擇間未定(本資料 ~82% 多樹 lineage 屬此);<b>有灰邊</b> = 灰部分 forced、僅橙邊是選擇。<b>capped(太密)</b>lineage 枚舉未完整→穩定/選擇標記僅基於已存樹,可能高估 forced。</div>';
  r.lineages.forEach(L=>{const[ct,cc]=clsTag(L.L1_class);const fc=famCls(L.family);
   h+='<div class="lin f'+L.family+'"><b class="'+fc+'">▸ '+esc(L.fam_label)+'</b> '
    +'<span class="tag '+cc+'">'+ct+'</span> '
