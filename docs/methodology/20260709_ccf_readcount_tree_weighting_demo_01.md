@@ -32,10 +32,29 @@ provenance: 數字由 scripts/ccf_tree_weighting_demo.py 於 2026-07-09 對 sm_r
 - 🔴 **CN 前提**:54% ambiguous 是 CN-gain,read≠CCF(multiplicity)→ 必須排除/標記(否則把 Gap B 多拷貝假象當演化)。
 - **soft/hard(TEMP)**只調贏家 sharpness,不改「能破哪些」(由 CCF 是否對稱決定,TEMP-independent)。
 
-## §4 裁決
-> **有效、合理、可大規模應用,但是誠實的小幅精修**(破 ~2.3% ambiguous、贏家永遠生物一致、CN-gated),非整批收斂。大部分等機率**正確地保持等機率**(真對稱)= 誠實優點。
+## §4 裁決(v1 full-only;§6 有含 partial 完整版)
+> **有效、合理、非循環、約束不變、winner 生物一致** —— v1 full-only reach 2.3%(下界);**§6 含 partial 的真實 reach = 66.8%(CN-clean 可信部分 22.3%)**,值得 CN-gated 落地。
 
-**落地建議(若要)**:在 `tree_enumeration_solver` 枚舉後加 CCF-pigeonhole 加權層(soft beta-binomial、CN-gated、對稱保持等權重),輸出每棵樹 posterior。⚠ full-only demo 是 reach 下界;含 partial(col_coverage)的完整 reach 需 mlhp 輸入,為 follow-up。
+## §6 全面觀察 v2 — 含 partial reads(col_coverage CCF)〔L1〕
+`ccf_tree_weighting_full_observe.py`:用 mlhp `col_coverage_by_hp`(每位點 nALT,含 partial reads=更多 read)算 CCF,對 layered solver 的 full+partial ambiguous 樹加權。HCC1395 **5959 ambiguous 單位**:
+
+| 指標 | 值 |
+|---|---|
+| **tie 被破(≥0.6)** | **3980 = 66.8%**(🔺 vs full-only 2.3%) |
+| winner pigeonhole-clean | **3956/3980 = 99.4%** |
+| top posterior ≥0.9(強贏家) | 2219 |
+
+**🔴 按 CN 分類(決策關鍵)**:
+| ambiguity × CN | 總 | 破 | 破% | 可信 |
+|---|---|---|---|---|
+| structure \| **CN-clean** | 1960 | **1331** | **67.9%** | ✅ read≈CCF |
+| structure \| **CN-gain** | 3999 | 2649 | 66.2% | 🔴 read≠CCF(multiplicity)不可信 |
+
+- **「更多 read → 更能定」驗證**:col_coverage(含 partial)深度遠高於 full-only → reach 2.3%→66.8%。
+- **可信 reach = CN-clean 1331 / 全 5959 = 22.3%**(CN-clean ambiguous 67.9% 乾淨解出)。
+- 全部 ambiguous 為 `structure(多完成)` 型(partial 帶進多完成歧義)。
+
+**§7 決策裁決**:✅ **值得落地,CN-gated** —— CN-clean 區乾淨解出 67.9% ambiguity(winner 99.4% 生物一致)= 明顯可觀測收斂;🔴 CN-gain(67%)保持誠實(不排序/標 multiplicity-confounded)。落地=`tree_enumeration_solver` 枚舉後加 soft CCF-pigeonhole 加權層(CN-gated、對稱保持等權重、beta-binomial)。一鍵重驗 `ccf_tree_weighting_full_observe.py`。
 
 ## §5 一鍵重驗
 ```bash
