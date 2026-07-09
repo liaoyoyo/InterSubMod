@@ -234,16 +234,22 @@ function show(i,row){
   }))));
   let vlen=0;[...obsN,...infN].forEach(v=>vlen=Math.max(vlen,v.length));
   if(!vlen)return;
+  // recurrence 位點(某位點在樹上突變兩次·違反 infinite-sites)
+  let recur=new Set();r.lineages.forEach(L=>(L.trees||[]).forEach(t=>(t.recurrence||[]).forEach(b=>recur.add(b))));
   let cells='',nObs=0,nInf=0,nZero=0;
   for(let i=0;i<vlen;i++){
    let oa=[...obsN].filter(v=>v[i]==='A').length,ia=[...infN].filter(v=>v[i]==='A').length;
    let cls,txt;if(oa>0){cls='#2563eb';txt=oa+' 實測';nObs++;}else if(ia>0){cls='#a855f7';txt='僅推斷';nInf++;}else{cls='#dc2626';txt='零證據⚠';nZero++;}
-   cells+='<td style="text-align:center;padding:3px 6px"><b>S'+(i+1)+'</b><br><span style="color:'+cls+';font-size:10px">'+txt+'</span></td>';
+   cells+='<td style="text-align:center;padding:3px 6px"><b>S'+(i+1)+'</b>'+(recur.has(i)?'<br><span style="color:#dc2626;font-size:9px" title="此位點在樹上突變兩次·違反 infinite-sites">🔁recur</span>':'')+'<br><span style="color:'+cls+';font-size:10px">'+txt+'</span></td>';
   }
-  h+='<div class="note" style="margin:6px 0"><b>📍 位點證據</b>（本區 '+vlen+' 個 sSNV 位點·各位點 ALT 的來源）<table style="margin-top:3px;font-size:11px"><tr>'+cells+'</tr></table>'
-   +'<div style="font-size:10px;margin-top:3px"><span style="color:#2563eb">■實測</span>=有實測群(非H_節點)在此位點帶 ALT ｜ <span style="color:#a855f7">■僅推斷</span>=只有隱藏祖先帶 ALT、<b>無實測群證實</b> ｜ <span style="color:#dc2626">■零證據</span>=本區所有節點此位點都 R(census 算 somatic 但 linkage 未捕捉 ALT→死位點,仍佔向量長度)。'
-   +(nZero?'<b style="color:#dc2626"> ⚠ 本區 '+nZero+' 個零證據位點(建議上游查為何 census somatic 但無 linked ALT)。</b>':'')
-   +(nInf&&!nObs?'<b style="color:#a855f7"> ⚠ 此區 0 位點有實測、全靠推斷(如 partial read)。</b>':'')+'</div></div>';
+  // 確定性徽章(C):結合 region determinacy + 位點實測率
+  let cl2={all_determined:['High','#16a34a','全 lineage 唯一樹'],has_ambiguous:['Med','#d97706','有多樹未定'],has_capped:['Low','#9333ea','枚舉未完(太密)'],has_recurrence:['Low','#dc2626','有 recurrence'],no_germline_lineage:['—','#94a3b8','無 germline']}[r.region_determinacy]||['—','#94a3b8',''];
+  let evTxt=nObs+'/'+vlen+' 位點有實測'+(nInf?'·'+nInf+' 僅推斷':'')+(nZero?'·'+nZero+' 零證據':'');
+  h+='<div class="note" style="margin:6px 0"><b>🎯 結構確定性</b> <span class="tag" style="background:'+cl2[1]+'">'+cl2[0]+'</span> <span class="note" style="background:none;border:none;padding:0">'+cl2[2]+' ｜ 位點證據 '+evTxt+'</span>'
+   +'<table style="margin-top:5px;font-size:11px"><tr>'+cells+'</tr></table>'
+   +'<div style="font-size:10px;margin-top:3px"><b>位點來源</b>：<span style="color:#2563eb">■實測</span>(非H_節點帶 ALT) ｜ <span style="color:#a855f7">■僅推斷</span>(只隱藏祖先帶·無實測證實) ｜ <span style="color:#dc2626">■零證據</span>(全 R·census somatic 但 linkage 未捕捉→死位點仍佔向量長度) ｜ <span style="color:#dc2626">🔁recur</span>=此位點突變兩次(違反 infinite-sites)。'
+   +(nZero?'<b style="color:#dc2626"> ⚠ '+nZero+' 個零證據位點。</b>':'')
+   +(nInf&&!nObs?'<b style="color:#a855f7"> ⚠ 0 位點有實測、全靠推斷。</b>':'')+'</div></div>';
  })();
  r.lineages.forEach(L=>{const[ct,cc]=clsTag(L.L1_class);const fc=famCls(L.family);
   const _obsPops=(L.n_full_pops||0);
