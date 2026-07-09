@@ -67,6 +67,14 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 .bar{display:inline-block;height:9px;border-radius:3px;vertical-align:middle}
 button.tg{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:3px 9px;cursor:pointer;font-size:12px}
 #more{margin:12px auto;display:block}
+/* topology 式兩欄:左 region 列表 + 右詳情面板 */
+.main{display:grid;grid-template-columns:400px 1fr;gap:12px;align-items:start}@media(max-width:900px){.main{grid-template-columns:1fr}}
+.list{max-height:78vh;overflow-y:auto;border:1px solid var(--line);border-radius:9px;background:var(--bg)}
+.row{padding:7px 10px;border-bottom:1px solid var(--line);cursor:pointer;font-size:12px}
+.row:hover{background:rgba(128,128,128,.06)}.row.sel{background:rgba(37,99,235,.10);border-left:3px solid var(--accent)}
+.detail{border:1px solid var(--line);border-radius:9px;background:var(--card);padding:12px 14px;min-height:200px}
+.detail h3{font-size:15px;margin:0 0 6px;font-family:ui-monospace,monospace}
+.kv{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.kv .b{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:11.5px}
 </style>
 <div class="wrap">
 <div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap">
@@ -75,16 +83,16 @@ button.tg{background:var(--card);color:var(--fg);border:1px solid var(--line);bo
 <button class="tg" onclick="var r=document.documentElement;r.dataset.theme=(r.dataset.theme=='dark'?'light':'dark')">◐ 主題</button>
 </div>
 <div id="dash"></div>
-<h2>Region 瀏覽器（逐 lineage 枚舉樹 + 判斷軌跡）</h2>
+<h2>Region 瀏覽器（篩選 → 點左側區 → 右側看逐 HP 家族枚舉樹 ◀▶）</h2>
 <div class="ctrl">
- 篩選 region-determinacy:<select id="fdet"><option value="">全部</option></select>
- HP-multiplicity:<select id="fhp"><option value="">全部</option><option value="2">多-HP(2)</option><option value="1">single-HP(1)</option><option value="0">無germline(0)</option></select>
+ determinacy:<select id="fdet"><option value="">全部</option></select>
+ HP-mult:<select id="fhp"><option value="">全部</option><option value="2">多-HP(2)</option><option value="1">single-HP(1)</option><option value="0">無germline(0)</option></select>
  chrom:<select id="fchr"><option value="">全部</option></select>
- 搜尋:<input id="fq" placeholder="chr1:123... / 基因座" size="18">
+ 排序:<select id="fsort"><option value="coord">座標</option><option value="nsnv">複雜度(sSNV)</option><option value="ntree">枚舉樹總數</option><option value="hp">HP-mult</option></select>
+ 搜尋:<input id="fq" placeholder="chr1:123... / 基因座" size="16">
  <span class="pill" id="cnt"></span>
 </div>
-<div id="list"></div>
-<button class="tg" id="more">載入更多 ▼</button>
+<div class="main"><div class="list" id="list"></div><div class="detail" id="detail"><div class="note">← 左側點選一個區,右側顯示逐 germline-HP-家族枚舉樹（◀▶ 切換等機率最小樹）+ L0-L3 判斷軌跡</div></div></div>
 <div class="note">反捏造:所有 census 數字由 <span class="mono">layered_region_view___SAMPLE__.json</span> 注入;樹由 solver 枚舉(V1-V7 驗證);甲基未進樹(L3 事後,不 rank)。</div>
 </div>
 <script>
@@ -177,49 +185,51 @@ function _showSlide(lid,idx){const el=document.getElementById(lid);if(!el)return
 function tnav(lid,d){const el=document.getElementById(lid);if(!el)return;let cur=0;
  el.querySelectorAll('.tslide').forEach((s,i)=>{if(s.style.display!=='none')cur=i;});_showSlide(lid,cur+d);}
 function tjump(lid,i){_showSlide(lid,i);}
-// ================= region list =================
-let SHOWN=0,FILT=[];const PAGE=40;
+// ================= region list(左·緊湊) + detail(右) =================
+let FILT=[];
+const _sumT=r=>(r.lineages||[]).reduce((s,L)=>s+(L.n_trees||0),0);
+const SORT={coord:(a,b)=>(a.start-b.start)||a.chrom.localeCompare(b.chrom),
+ nsnv:(a,b)=>b.n_sSNV-a.n_sSNV, ntree:(a,b)=>_sumT(b)-_sumT(a), hp:(a,b)=>b.hp_multiplicity-a.hp_multiplicity};
 function applyFilter(){
  const fd=document.getElementById('fdet').value,fh=document.getElementById('fhp').value,
-  fc=document.getElementById('fchr').value,fq=document.getElementById('fq').value.trim().toLowerCase();
- FILT=R.filter(r=>(!fd||r.region_determinacy===fd)&&(!fh||String(r.hp_multiplicity)===fh)
+  fc=document.getElementById('fchr').value,fq=document.getElementById('fq').value.trim().toLowerCase(),
+  so=document.getElementById('fsort').value;
+ FILT=R.map((r,i)=>[r,i]).filter(([r])=>(!fd||r.region_determinacy===fd)&&(!fh||String(r.hp_multiplicity)===fh)
   &&(!fc||r.chrom===fc)&&(!fq||r.region.toLowerCase().indexOf(fq)>=0));
- SHOWN=0;document.getElementById('list').innerHTML='';renderMore();
+ FILT.sort((A,B)=>(SORT[so]||SORT.coord)(A[0],B[0]));
+ const host=document.getElementById('list');
+ host.innerHTML=FILT.slice(0,600).map(([r,i])=>{const[rt,rc]=regTag(r.region_determinacy);
+  return '<div class="row" data-i="'+i+'"><span class="mono" style="font-weight:600">'+esc(r.region)+'</span> <span class="tag '+rc+'">'+rt+'</span><br>'
+   +'<span class="pill">HP×'+r.hp_multiplicity+(r.is_multiHP?'·多':'')+'</span><span class="pill">'+r.n_sSNV+'sSNV</span><span class="pill">'+r.lineages.length+' lin</span><span class="pill">'+_sumT(r)+'樹</span><span class="pill">cn '+esc(r.cn)+'</span></div>';
+ }).join('')+(FILT.length>600?'<div class="note" style="margin:6px">...前 600（共 '+FILT.length.toLocaleString()+'，可篩選縮小）</div>':'');
  document.getElementById('cnt').textContent=FILT.length.toLocaleString()+' 區';
+ host.querySelectorAll('.row').forEach(x=>x.onclick=()=>show(+x.dataset.i,x));
 }
-function renderMore(){
- const host=document.getElementById('list');let h='';
- const end=Math.min(SHOWN+PAGE,FILT.length);
- for(let i=SHOWN;i<end;i++){const r=FILT[i];const[rt,rc]=regTag(r.region_determinacy);
-  h+='<div class="rcard"><div class="rhead" onclick="this.parentNode.classList.toggle(\'open\')">'
-   +'<span class="mono" style="font-weight:600">'+esc(r.region)+'</span>'
-   +'<span class="tag '+rc+'">'+rt+'</span>'
-   +'<span class="pill">HP×'+r.hp_multiplicity+(r.is_multiHP?' 多-HP':'')+'</span>'
-   +'<span class="pill">'+r.n_sSNV+' sSNV</span><span class="pill">cn '+esc(r.cn)+'</span>'
-   +'<span style="margin-left:auto;color:var(--mut);font-size:12px">'+r.lineages.length+' lineage ▾</span></div>';
-  h+='<div class="rbody">';
-  r.lineages.forEach(L=>{const[ct,cc]=clsTag(L.L1_class);const fc=famCls(L.family);
-   h+='<div class="lin f'+L.family+'"><b class="'+fc+'">▸ '+esc(L.fam_label)+'</b> '
-    +'<span class="tag '+cc+'">'+ct+'</span> '
-    +'<span class="pill">'+L.n_trees+' 樹'+(L.n_distinct_shapes&&L.n_distinct_shapes<L.n_trees?'/'+L.n_distinct_shapes+'形狀':'')+'</span><span class="pill">'+L.n_hidden+' 隱藏祖先</span>'
-    +'<span class="pill">'+(L.n_reads||0)+' reads·'+L.n_full_pops+'full/'+L.n_partial+'partial</span>'
-    +(L.verify_pass?'<span class="pill" style="color:var(--det)">V1-7✓</span>':'<span class="pill" style="color:var(--rec)">V✗</span>');
-   // 樹切換器:各種可能樹結構,一次一棵大圖 + prev/next + thumbnail 跳轉
-   if(L.trees&&L.trees.length){const lid='L'+(LID++);const ns=L.trees.length;
-    h+='<div class="tsw" id="'+lid+'"><div class="tswhead"><b>可能樹結構</b>：'+L.n_trees+' 棵等機率最小樹'
-     +(L.n_distinct_shapes?'（'+L.n_distinct_shapes+(L.n_distinct_shapes<ns?'+':'')+' 種形狀）':'')
-     +(L.n_trees>ns?' · 顯示前 '+ns:'')
-     +(ns>1?'<button class="tg tnav" onclick="tnav(\''+lid+'\',-1)">◀</button><span class="tctr" id="'+lid+'_c">1 / '+ns+'</span><button class="tg tnav" onclick="tnav(\''+lid+'\',1)">▶</button>':'')
-     +'</div><div class="tstage">';
-    L.trees.forEach((t,ti)=>{h+='<div class="tslide" style="display:'+(ti?'none':'block')+'">'+treeSVG(t.edges)
-      +'<div class="tcap">樹 #'+(ti+1)+(t.recurrence&&t.recurrence.length?' · recurrence bit '+t.recurrence.join(','):' · 無 recurrence')+'</div></div>';});
-    h+='</div>';
-    if(ns>1){h+='<div class="thumbs">';L.trees.forEach((t,ti)=>{h+='<span class="thumb'+(ti?'':' on')+'" onclick="tjump(\''+lid+'\','+ti+')">#'+(ti+1)+'</span>';});h+='</div>';}
-    h+='</div>';}
-   h+='<div class="trace">'+L.trace.map(t=>'<div>'+esc(t)+'</div>').join('')+'</div></div>';});
-  h+='</div></div>';}
- host.insertAdjacentHTML('beforeend',h);SHOWN=end;
- document.getElementById('more').style.display=SHOWN<FILT.length?'block':'none';
+function show(i,row){
+ document.querySelectorAll('#list .row').forEach(x=>x.classList.remove('sel'));if(row)row.classList.add('sel');
+ const r=R[i];const[rt,rc]=regTag(r.region_determinacy);
+ let h='<h3>'+esc(r.region)+' <span class="tag '+rc+'">'+rt+'</span></h3>'
+  +'<div class="kv"><span class="b">'+r.n_sSNV+' sSNV</span><span class="b">HP×'+r.hp_multiplicity+(r.is_multiHP?'（多-HP·雙親代各一樹）':'（single-HP）')+'</span><span class="b">cn '+esc(r.cn)+'</span><span class="b">'+r.lineages.length+' germline-HP 家族</span></div>'
+  +'<div class="note" style="margin:4px 0">每 germline-HP 家族分開建樹（家族優先於算法，修 allelic/clonal 混淆）;每家族 ◀▶ 切換其「等機率最小樹」（枚舉全集=「定不出來即答案」）。</div>';
+ r.lineages.forEach(L=>{const[ct,cc]=clsTag(L.L1_class);const fc=famCls(L.family);
+  h+='<div class="lin f'+L.family+'"><b class="'+fc+'">▸ '+esc(L.fam_label)+'</b> '
+   +'<span class="tag '+cc+'">'+ct+'</span> '
+   +'<span class="pill">'+L.n_trees+' 樹'+(L.n_distinct_shapes&&L.n_distinct_shapes<L.n_trees?'/'+L.n_distinct_shapes+'形狀':'')+'</span><span class="pill">'+L.n_hidden+' 隱藏祖先</span>'
+   +'<span class="pill">'+(L.n_reads||0)+' reads·'+L.n_full_pops+'full/'+L.n_partial+'partial</span>'
+   +(L.verify_pass?'<span class="pill" style="color:var(--det)">V1-7✓</span>':'<span class="pill" style="color:var(--rec)">V✗</span>');
+  if(L.trees&&L.trees.length){const lid='L'+(LID++);const ns=L.trees.length;
+   h+='<div class="tsw" id="'+lid+'"><div class="tswhead"><b>可能樹結構</b>：'+L.n_trees+' 棵等機率最小樹'
+    +(L.n_distinct_shapes?'（'+L.n_distinct_shapes+(L.n_distinct_shapes<ns?'+':'')+' 種形狀）':'')
+    +(L.n_trees>ns?' · 顯示前 '+ns:'')
+    +(ns>1?'<button class="tg tnav" onclick="tnav(\''+lid+'\',-1)">◀</button><span class="tctr" id="'+lid+'_c">1 / '+ns+'</span><button class="tg tnav" onclick="tnav(\''+lid+'\',1)">▶</button>':'')
+    +'</div><div class="tstage">';
+   L.trees.forEach((t,ti)=>{h+='<div class="tslide" style="display:'+(ti?'none':'block')+'">'+treeSVG(t.edges)
+     +'<div class="tcap">樹 #'+(ti+1)+(t.recurrence&&t.recurrence.length?' · recurrence bit '+t.recurrence.join(','):' · 無 recurrence')+'</div></div>';});
+   h+='</div>';
+   if(ns>1){h+='<div class="thumbs">';L.trees.forEach((t,ti)=>{h+='<span class="thumb'+(ti?'':' on')+'" onclick="tjump(\''+lid+'\','+ti+')">#'+(ti+1)+'</span>';});h+='</div>';}
+   h+='</div>';}
+  h+='<div class="trace">'+L.trace.map(t=>'<div>'+esc(t)+'</div>').join('')+'</div></div>';});
+ document.getElementById('detail').innerHTML=h;
 }
 // init
 (function(){
@@ -227,9 +237,8 @@ function renderMore(){
  const fd=document.getElementById('fdet');Object.keys(C.region_determinacy).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k+' ('+C.region_determinacy[k]+')';fd.appendChild(o);});
  const chrs=[...new Set(R.map(r=>r.chrom))].sort((a,b)=>(+a.slice(3)||99)-(+b.slice(3)||99));
  const fc=document.getElementById('fchr');chrs.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;fc.appendChild(o);});
- ['fdet','fhp','fchr'].forEach(id=>document.getElementById(id).onchange=applyFilter);
+ ['fdet','fhp','fchr','fsort'].forEach(id=>document.getElementById(id).onchange=applyFilter);
  document.getElementById('fq').oninput=applyFilter;
- document.getElementById('more').onclick=renderMore;
  applyFilter();
 })();
 </script>"""

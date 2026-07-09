@@ -9,7 +9,9 @@
 | **`index.html`** | 🏠 主頁：7 樣本跨樣本表（somatic sSNV / multi-HP% / region-determinacy / avg樹）+ 開啟連結。**先開這個。** | ~10 KB |
 | `HCC1395.html`（SEQC2 主樣本）/ `COLO829` / `H1437` / `H2009` / `HCC1395_DORADO` / `HCC1937` / `HCC1954` | 各樣本工作站 | 3–31 MB |
 
-**每樣本檔內**：① dashboard 4 表（U1-U6 層級 / HP-multiplicity / region-determinacy / 比例字典）② region 瀏覽器（篩選 region-determinacy·HP-multiplicity·chrom + 分頁）③ 每 region 逐 HP 家族色框樹（hp1 藍 / hp2 粉 / hp3 青 / none 灰）④ **樹切換器**（◀▶ + thumbnail 跳轉，一次一棵大圖，標「N 棵等機率樹 = M 種不同形狀」）⑤ L0→L3 判斷軌跡 ⑥ V1-V7 驗證。
+**每樣本檔內**（2026-07-09 改 topology 式兩欄版面，UI 更清楚）：① dashboard 4 表（U1-U6 層級 / HP-multiplicity / region-determinacy / 比例字典）② **兩欄 region 瀏覽器**：左側緊湊 region 列表（篩選 region-determinacy·HP-multiplicity·chrom·**排序**·搜尋）→ 點一個區 → 右側詳情面板 ③ 右側逐 germline-HP 家族色框樹（hp1 藍 / hp2 粉 / hp3 青 / none 灰）④ **樹切換器**（◀▶ + thumbnail 跳轉，一次一棵大圖，標「N 棵等機率樹 = M 種形狀」）⑤ L0→L3 判斷軌跡 ⑥ V1-V7 驗證。
+
+> **UI = topology_workstation 的清楚兩欄格式（左列表+右詳情+篩選/排序）＋ 本 layered 資料模型（per-HP-家族枚舉樹 + 左右切換）**（2026-07-09 合併;使用者要求）。
 
 ## 資料模型（分子/分母定義 SoT）
 `InterSubMod/docs/methodology/20260706_layered_data_model_units_proportions_spec_01.md`
