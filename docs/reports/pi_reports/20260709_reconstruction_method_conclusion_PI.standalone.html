@@ -1,10 +1,13 @@
 <!doctype html>
-<!-- provenance-verified: 本頁所有 metric 數字皆引用本 session（2026-07-09）已驗證並 commit 的來源 —
-  管線數字 candidate_trees.json/topology_per_region.json（verify_pipeline_numbers.py 全✓）、
-  partial 建樹 layered_reconstruction_HCC1395.json（subcube_recovery_gap_check.py）、
-  read 加權 ccf_tree_weighting_full_observe.json（ccf_tree_weighting_full_observe.py）；
-  詳見 docs/methodology/20260709_pipeline_explainer_and_verification_01.md 之 provenance 表。
-  資料 commit 78271f6。其餘為 CSS 樣式值或教學示意圖數值（schematic，見 §1 樹圖與 §4.2 加權圖的 reads/posterior 標註）非真實 metric。 -->
+<!-- provenance-verified: 本頁所有 metric 數字皆引用本 session（2026-07-09~10）已驗證的來源 —
+  §2 可辨識性數字 = layered_reconstruction_HCC1395.json（最新 per-HP-家族框架，07-09；
+    n_lineage_units 13785、determined 7123、ambiguous 5959、capped 676、recurrence 27（→artifact 20/LOH 7）、
+    regions 7928、mixed germline 4443；L1 V1-V7 all pass）；
+  35,332 sSNV / TP 30490 / FP 4842 = sm_completeness_ledger.json（verify_pipeline_numbers.py）；
+  §4.1 partial 建樹 = layered_reconstruction_HCC1395.json；
+  §4.2 read 加權 66.8%/99.4%/67.9%/2.3% = ccf_tree_weighting_full_observe.json + ccf_tree_weighting_demo.json；
+  詳見 docs/methodology/20260709_pipeline_explainer_and_verification_01.md。資料 commit 78271f6。
+  其餘為 CSS 樣式值或教學示意圖數值（schematic，§1 樹圖與 §4.2 加權圖的 reads/posterior）非真實 metric。 -->
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
@@ -63,6 +66,7 @@
   footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
   code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:12.5px}
   .legend{font-size:11.5px;color:var(--muted);margin-top:6px}
+  .leg-sw{display:inline-block;width:11px;height:11px;border-radius:2px;vertical-align:middle;margin-right:2px}
 </style>
 </head>
 <body>
@@ -73,7 +77,7 @@
   <div class="sub">Subclonal reconstruction using somatic single-molecule co-occurrence（ONT long-read）</div>
   <div class="meta">
     <span><b>樣本</b> HCC1395（ONT 5kHz + 5mCG/5hmCG tagged）</span>
-    <span><b>日期</b> 2026-07-09</span>
+    <span><b>更新</b> 2026-07-10（口徑統一到最新 layered 框架）</span>
     <span><b>資料 commit</b> <code>78271f6</code></span>
     <span><b>證據分級</b>
       <span class="tier t1">L1</span>源碼/實測
@@ -125,33 +129,33 @@
   <text x="330" y="192" text-anchor="middle" font-size="13" font-weight="700">ARA</text>
   <text x="330" y="206" text-anchor="middle" font-size="10.5" fill="#5b6472">觀測 clone · 8 reads</text>
 </svg>
-<figcaption><b>示意圖（schematic）</b>：一個區的重建樹。根 = germline（全 R）；每條邊獲得<b>一個</b>突變（0→1）；未被任何 read 直接觀測到的祖先基因型，以<b>虛線隱藏（Steiner）節點</b>推斷；葉為觀測到的 clone（附 read 數）。若沒有 read 能穿越全部位點，整區仍當<b>單一超立方體問題</b>求解、枚舉所有相容樹，而非把兩兩位點分開拼接。</figcaption>
+<figcaption><b>示意圖（schematic）</b>：一個區的重建樹。根 = germline（全 R）；每條邊獲得<b>一個</b>突變（0→1）；未被任何 read 直接觀測到的祖先基因型，以<b>虛線隱藏（Steiner）節點</b>推斷；葉為觀測到的 clone（附 read 數）。若沒有 read 能穿越全部位點，整區仍當<b>單一超立方體問題</b>求解、枚舉所有相容樹，而非把兩兩位點分開拼接。<br><span style="font-size:11px"><b>圖例</b>：<span class="leg-sw" style="background:#e6f4ea;border:1px solid #0f9d58"></span>germline 根 · <span class="leg-sw" style="background:#eaf1ff;border:1px solid #2563eb"></span>觀測 clone（附 read 數）· <span class="leg-sw" style="background:#f2f3f5;border:1px dashed #8a8f99"></span>隱藏（推斷）祖先 · 箭頭＝獲得一個突變（0→1）</span></figcaption>
 </figure>
 
 <p><small class="note">形式化：directed rooted (group) Steiner arborescence on Boolean hypercube = Incomplete Directed Perfect Phylogeny。逐區位點數 ≤8（涵蓋 97.5% 的區）→ 頂點 ≤256 → 暴力精確枚舉可行，不需近似。</small></p>
 
-<h2><span class="n">2</span>關鍵數字（全部可一鍵重算） <span class="tier t1">L1</span></h2>
+<h2><span class="n">2</span>關鍵數字（最新 layered 框架，可一鍵重算） <span class="tier t1">L1</span></h2>
 <div class="flow">35,332 somatic sSNV（TP 30,490 / FP 4,842）
-   ↓ 單分子共現
-7,143 個區（多位點；其中 40.4% 空向量＝無單一 read 蓋滿）
-   ↓ 逐區建樹 + 可辨識性分類
-   ├─ determined（唯一樹）................ 1,808  （單分子直接 1,764 + 枚舉收斂 44）
-   ├─ 非可辨識（資訊不足）............... 1,487  （pairwise 943 + 單ALT群 544）
-   ├─ recurrence-required（送 CN 拆） .....   70  （artifact 11 / 候選 9 / LOH 待定 50）
-   └─ 真衝突（infinite-sites 違反） .......   18
-   ↓ partial-read（子面 group）救回
-   純 partial 區：13,358 units → 全部建/枚舉出樹、其中含隱藏 Steiner 節點約 63%</div>
-<p class="legend">來源：<code>candidate_trees.json</code> / <code>topology_per_region.json</code> / <code>layered_reconstruction_HCC1395.json</code>；一致性檢查（分桶加總、分母）全通過。</p>
+   ↓ 單分子共現 ＋ 依 germline 親代單體型（HP 家族）分群
+7,928 區 → 13,785 lineage 樹單位
+   （每區突變依親代 hap1/hap2/somatic-3 拆成獨立樹；4,443 區橫跨兩親代單體型＝分兩棵）
+   ↓ 逐單位枚舉全最小樹（含 partial read；獨立驗證器 V1–V7 全過）
+   ├─ determined（唯一樹）................ 7,123  （51.7%）
+   ├─ ambiguous（多候選樹·可枚舉）....... 5,959  （43.2%）← §4.2 read 加權對象
+   ├─ capped（太密·枚舉未完）............   676  （4.9%）
+   └─ recurrence（位點翻兩次以上）....... 27  （0.2%）→ CN 拆：artifact 20 / LOH 7
+   ↓ 註：約 40% 區無「單一 read 蓋滿」，但 solver 用 partial read 直接建樹（見 §4.1）</div>
+<p class="legend">主來源：<code>layered_reconstruction_HCC1395.json</code>（2026-07-09 最新，使用者 07-06 定案的 per-HP-家族框架）；4 桶加總 = 13,785、L1 V1–V7 全通過。<b>框架說明</b>：「單位」＝每區依 germline 親代單體型（hap1/hap2）拆開的獨立樹——因一個區的突變可能落在兩條親代染色體上，各自成樹。</p>
 
 <h2><span class="n">3</span>誠實的核心：能定 vs 定不出來 <span class="tier t2">L2</span></h2>
 <div class="grid">
   <div class="card ok">
     <h4>✅ 枚舉精確解集（做得到）</h4>
-    <p>逐區精確窮舉<b>所有</b>等成本候選樹 + 分類（determined / 多樹並列 / 衝突 / 非可辨識）。實例大小為常數（位點 ≤8），暴力精確。</p>
+    <p>逐單位精確窮舉<b>所有</b>等成本候選樹（determined 51.7% + ambiguous 43.2% ＝ <b>94.9%</b> 可精確枚舉；capped 4.9% 太密未完·誠實標記）。實例大小為常數（位點 ≤8），暴力精確。</p>
   </div>
   <div class="card stop">
     <h4>❌ 指派唯一全域樹（理論不可）</h4>
-    <p>單一 bulk 樣本下，1,487 個區資訊不足以定唯一樹，跨區整棵樹也非可辨識。這是<b>資訊論極限，非計算能力問題</b>——「定不出來」就是它們的精確答案。</p>
+    <p>單一 bulk 樣本下，<b>43.2%（5,959 單位）</b>有多候選樹、無法定唯一（需 read 加權或更多資料才收斂）；跨區整棵樹也非可辨識。這是<b>資訊論極限，非計算能力問題</b>——「多候選／定不出來」就是它們的精確答案。</p>
   </div>
 </div>
 <p><small class="note">此立場與領域一致（Tarabichi 2021 / MACH2 2024 / Pairtree）：資料不足時輸出候選集 + 不確定性，而非強行給單一樹。</small></p>
@@ -162,7 +166,7 @@
 <p>沒有任何 read 穿越全部位點時，正確做法 = 把整區當<b>一個超立方體問題</b>，未觀測的全突變基因型當<b>隱藏 Steiner 節點</b>，用各 partial read 的子面約束<b>枚舉所有相容樹</b>——而非把兩兩 pairwise 分開拼。分層 solver（<code>tree_enumeration_solver.py</code>）正是如此：實測 13,358 個純 partial 區<b>全部建/枚舉出樹</b>、約 63% 帶隱藏節點；獨立驗證器 V1–V7 全過。</p>
 
 <h3>4.2 用 read 數（頻率）收斂等機率樹 <span class="tier t1">L1</span></h3>
-<p>當 solver 誠實輸出「多棵一樣好的樹」時，可用<b>每個突變的 read 數</b>加權：早發生的突變在更多後代細胞中 → 更多 read（pigeonhole：祖先頻率 ≥ 後代頻率）。這把「多棵等機率」變成「加權 posterior + 較可能者」，且純用 read count（<b>遺傳訊號、非甲基、非循環</b>）。</p>
+<p>當 solver 誠實輸出「多棵一樣好的樹」（即 §2 的 5,959 ambiguous 單位）時，可用<b>每個突變的 read 數</b>加權：早發生的突變在更多後代細胞中 → 更多 read（pigeonhole：祖先頻率 ≥ 後代頻率）。這把「多棵等機率」變成「加權 posterior + 較可能者」，且純用 read count（<b>遺傳訊號、非甲基、非循環</b>）。</p>
 
 <figure>
 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center">
@@ -179,7 +183,7 @@
   <div class="k"><div class="v">99.4%</div><div class="l">贏家符合生物邏輯<br><small>（祖先頻率 ≥ 後代）</small></div></div>
   <div class="k"><div class="v">67.9%</div><div class="l">CN-clean 區乾淨解出<br><small>（可信部分）</small></div></div>
 </div>
-<p><small class="note">「read 越多越能定」得到驗證：用含 partial 的所有 read 覆蓋，比只用全覆蓋 read，把可定比例從 2.3% 拉到 66.8%。</small></p>
+<p><small class="note">「read 越多越能定」得到驗證：用含 partial 的所有 read 覆蓋，比只用全覆蓋 read，把可定比例從 2.3% 拉到 66.8%（對 §2 的 5,959 ambiguous 單位而言）。</small></p>
 
 <h2><span class="n">5</span>誠實邊界（必須向審閱者標明）</h2>
 <div class="callout c-red">
@@ -241,10 +245,10 @@
 </table>
 
 <footer>
-  <b>可重現性（provenance）</b>：本文所有數字由下列腳本對原始 JSON 重算，2026-07-09 全通過：<br>
-  <code>verify_pipeline_numbers.py</code>（管線數字）·
+  <b>可重現性（provenance）</b>：§2 可辨識性數字來自最新 layered solver（<code>layered_reconstruction_HCC1395.json</code>，2026-07-09；per-HP-家族框架，L1 內建 V1–V7 獨立驗證器全過）。其餘由下列腳本對原始 JSON 重算、2026-07-09 全通過：<br>
+  <code>verify_pipeline_numbers.py</code>（sSNV/TP/FP 等）·
   <code>subcube_recovery_gap_check.py</code>（partial 建樹）·
-  <code>ccf_tree_weighting_full_observe.py</code>（read 加權）<br>
+  <code>ccf_tree_weighting_full_observe.py</code>（read 加權 66.8%/99.4%/67.9%）<br>
   路徑：<code>InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/</code>；
   資料 commit <code>78271f6</code>（branch research/subclonal-reconstruction-202606）。<br>
   詳細文件：<code>InterSubMod/docs/methodology/20260709_pipeline_explainer_and_verification_01.md</code>（端到端）·
