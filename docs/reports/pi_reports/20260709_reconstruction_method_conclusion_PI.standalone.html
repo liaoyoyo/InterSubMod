@@ -2,11 +2,11 @@
 <!-- provenance-verified: 本頁所有 metric 數字皆引用本 session（2026-07-09~10）已驗證的來源 —
   §2 可辨識性數字 = layered_reconstruction_HCC1395.json（最新 per-HP-家族框架，07-09；
     n_lineage_units 13785、determined 7123、ambiguous 5959、capped 676、recurrence 27（→artifact 20/LOH 7）、
-    regions 7928、mixed germline 4443；L1 V1-V7 all pass）；
-  35,332 sSNV / TP 30490 / FP 4842 = sm_completeness_ledger.json（verify_pipeline_numbers.py）；
-  §4.1 partial 建樹 = layered_reconstruction_HCC1395.json；
+    regions 7928、mixed germline 4443、multi-locus sSNV 25639、isolated 88358；L1 V1-V7 all pass）；
+  S = 113997 ClairS PASS somatic SNV = somatic_pass.vcf.gz（LongPhase-S/ClairS，zcat PASS 實測，07-09 layered 骨幹 universe）；
+  其中 SEQC2-可評估子集 35,332（TP 30490 / FP 4842，僅觀察標籤）= sm_completeness_ledger.json；
   §4.2 read 加權 66.8%/99.4%/67.9%/2.3% = ccf_tree_weighting_full_observe.json + ccf_tree_weighting_demo.json；
-  詳見 docs/methodology/20260709_pipeline_explainer_and_verification_01.md。資料 commit 78271f6。
+  詳見 docs/methodology/20260710_full_census_hierarchy_HCC1395.standalone.html。固定錨 commit 2e69811。
   其餘為 CSS 樣式值或教學示意圖數值（schematic，§1 樹圖與 §4.2 加權圖的 reads/posterior）非真實 metric。 -->
 <html lang="zh-Hant">
 <head>
@@ -77,8 +77,8 @@
   <div class="sub">Subclonal reconstruction using somatic single-molecule co-occurrence（ONT long-read）</div>
   <div class="meta">
     <span><b>樣本</b> HCC1395（ONT 5kHz + 5mCG/5hmCG tagged）</span>
-    <span><b>更新</b> 2026-07-10（口徑統一到最新 layered 框架）</span>
-    <span><b>資料 commit</b> <code>78271f6</code></span>
+    <span><b>更新</b> 2026-07-10（口徑統一到最新 layered 框架 + S 修正為 ClairS PASS）</span>
+    <span><b>資料</b> 2026-07-09 最新 layered · 固定錨 <code>2e69811</code></span>
     <span><b>證據分級</b>
       <span class="tier t1">L1</span>源碼/實測
       <span class="tier t2">L2</span>文獻+推演
@@ -135,17 +135,18 @@
 <p><small class="note">形式化：directed rooted (group) Steiner arborescence on Boolean hypercube = Incomplete Directed Perfect Phylogeny。逐區位點數 ≤8（涵蓋 97.5% 的區）→ 頂點 ≤256 → 暴力精確枚舉可行，不需近似。</small></p>
 
 <h2><span class="n">2</span>關鍵數字（最新 layered 框架，可一鍵重算） <span class="tier t1">L1</span></h2>
-<div class="flow">35,332 somatic sSNV（TP 30,490 / FP 4,842）
-   ↓ 單分子共現 ＋ 依 germline 親代單體型（HP 家族）分群
-7,928 區 → 13,785 lineage 樹單位
-   （每區突變依親代 hap1/hap2/somatic-3 拆成獨立樹；4,443 區橫跨兩親代單體型＝分兩棵）
-   ↓ 逐單位枚舉全最小樹（含 partial read；獨立驗證器 V1–V7 全過）
-   ├─ determined（唯一樹）................ 7,123  （51.7%）
-   ├─ ambiguous（多候選樹·可枚舉）....... 5,959  （43.2%）← §4.2 read 加權對象
-   ├─ capped（太密·枚舉未完）............   676  （4.9%）
-   └─ recurrence（位點翻兩次以上）....... 27  （0.2%）→ CN 拆：artifact 20 / LOH 7
-   ↓ 註：約 40% 區無「單一 read 蓋滿」，但 solver 用 partial read 直接建樹（見 §4.1）</div>
-<p class="legend">主來源：<code>layered_reconstruction_HCC1395.json</code>（2026-07-09 最新，使用者 07-06 定案的 per-HP-家族框架）；4 桶加總 = 13,785、L1 V1–V7 全通過。<b>框架說明</b>：「單位」＝每區依 germline 親代單體型（hap1/hap2）拆開的獨立樹——因一個區的突變可能落在兩條親代染色體上，各自成樹。</p>
+<div class="flow">113,997 ClairS PASS somatic SNV（= somatic_pass.vcf.gz；07-09 骨幹 universe）
+   ├─ k=1 單點（isolated·無樹）....... 88,358（77.5%）
+   └─ k≥2 多位點（可建樹）........... 25,639（22.5%）
+        ↓ 單分子共現 ＋ 依 germline 親代單體型（HP 家族）分群
+      7,928 區 → 13,785 lineage 樹單位
+      （每區突變依親代 hap1/hap2/somatic-3 拆成獨立樹；4,443 區橫跨兩親代單體型＝分兩棵）
+        ↓ 逐單位枚舉全最小樹（含 partial read；獨立驗證器 V1–V7 全過）
+        ├─ determined（唯一樹）....... 7,123（51.7%）
+        ├─ ambiguous（多候選樹）...... 5,959（43.2%）← §4.2 read 加權對象
+        ├─ capped（太密·枚舉未完）....   676（4.9%）
+        └─ recurrence（翻兩次以上）...    27（0.2%）→ CN 拆：artifact 20 / LOH 7</div>
+<p class="legend">主來源：<code>layered_reconstruction_HCC1395.json</code>（2026-07-09 最新，per-HP-家族框架，固定錨 commit <code>2e69811</code>）。<b>S 修正註（07-10）</b>：先前誤用 35,332（舊 is_somatic + SEQC2 子集）；07-09 骨幹實際用 <b>ClairS 全 PASS = 113,997</b>（<code>somatic_pass.vcf.gz</code>），SEQC2-可評估的 35,332（TP 30,490/FP 4,842）僅佔 31%、只作觀察標籤。</p>
 
 <h2><span class="n">3</span>誠實的核心：能定 vs 定不出來 <span class="tier t2">L2</span></h2>
 <div class="grid">
@@ -245,14 +246,9 @@
 </table>
 
 <footer>
-  <b>可重現性（provenance）</b>：§2 可辨識性數字來自最新 layered solver（<code>layered_reconstruction_HCC1395.json</code>，2026-07-09；per-HP-家族框架，L1 內建 V1–V7 獨立驗證器全過）。其餘由下列腳本對原始 JSON 重算、2026-07-09 全通過：<br>
-  <code>verify_pipeline_numbers.py</code>（sSNV/TP/FP 等）·
-  <code>subcube_recovery_gap_check.py</code>（partial 建樹）·
-  <code>ccf_tree_weighting_full_observe.py</code>（read 加權 66.8%/99.4%/67.9%）<br>
-  路徑：<code>InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/</code>；
-  資料 commit <code>78271f6</code>（branch research/subclonal-reconstruction-202606）。<br>
-  詳細文件：<code>InterSubMod/docs/methodology/20260709_pipeline_explainer_and_verification_01.md</code>（端到端）·
-  <code>20260704_formal_problem_statement_topology_from_cooccurrence_01.md</code>（形式化）。<br>
+  <b>可重現性（provenance）</b>：§2 數字來自最新 layered solver（<code>layered_reconstruction_HCC1395.json</code>，2026-07-09；per-HP-家族框架，L1 內建 V1–V7 全過；固定 aggregate 錨 <code>layered_census_snapshot_HCC1395.json</code> commit <code>2e69811</code>）。
+  <b>S=113,997</b> 為 ClairS 全 PASS somatic SNV（<code>somatic_pass.vcf.gz</code> zcat 實測）；完整階層普查（S→區域→群組合→HP→拓撲）見
+  <code>InterSubMod/docs/methodology/20260710_full_census_hierarchy_HCC1395.standalone.html</code>（<code>full_census_hierarchy.py</code> 可重算）。<br>
   <small>partial flag：本頁數字為 <b>HCC1395 單樣本</b>；跨 7 樣本比較另有分析（determined% 主由定序深度驅動，屬 L3 描述性，不作生物結論）。§1、§4.2 圖為教學示意（schematic），非真實資料。</small>
 </footer>
 
