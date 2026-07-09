@@ -150,7 +150,7 @@ function dash(){
  function prow(lab,v,tot){return '<tr><td>'+lab+'</td><td class="mono">'+(v||0).toLocaleString()+' ÷ '+tot.toLocaleString()+'</td><td class="n">'+pct(v||0,tot)+'</td></tr>';}
 }
 // ================= tree SVG =================
-function treeSVG(edges){
+function treeSVG(edges,stable){
  if(!edges||!edges.length)return '<div class="tcap">（無邊）</div>';
  const ch={},par={},nodes=new Set();
  edges.forEach(e=>{(ch[e[0]]=ch[e[0]]||[]).push(e[1]);par[e[1]]=e[0];nodes.add(e[0]);nodes.add(e[1]);});
@@ -169,10 +169,18 @@ function treeSVG(edges){
  function lab(n){if(n==='ROOT')return['germ','#64748b'];
   if(n[0]==='H'&&n[1]==='_')return['H','#a855f7'];return['obs','#2563eb'];}
  let s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" style="font:9px ui-monospace,monospace">';
- edges.forEach(e=>{s+='<line x1="'+nx(e[0]).toFixed(1)+'" y1="'+ny(e[0]).toFixed(1)+'" x2="'+nx(e[1]).toFixed(1)+'" y2="'+ny(e[1]).toFixed(1)+'" stroke="#94a3b8" stroke-width="1.3"/>';});
- [...nodes].forEach(n=>{const[t,c]=lab(n);const short=n==='ROOT'?'RR':(n[0]==='H'?n.slice(2):n);
-  s+='<circle cx="'+nx(n).toFixed(1)+'" cy="'+ny(n).toFixed(1)+'" r="6" fill="'+c+'"><title>'+esc(n)+'</title></circle>'
-   +'<text x="'+nx(n).toFixed(1)+'" y="'+(ny(n)+16).toFixed(1)+'" text-anchor="middle" fill="var(--mut)">'+esc(short)+'</text>';});
+ // 邊:全樹一致=實線灰;跨等機率樹會變=橙虛線(枚舉組合選擇)
+ edges.forEach(e=>{const vary=stable&&!stable.has(e[0]+'>'+e[1]);
+  s+='<line x1="'+nx(e[0]).toFixed(1)+'" y1="'+ny(e[0]).toFixed(1)+'" x2="'+nx(e[1]).toFixed(1)+'" y2="'+ny(e[1]).toFixed(1)+'" stroke="'+(vary?'#f59f00':'#94a3b8')+'" stroke-width="'+(vary?1.9:1.3)+'"'+(vary?' stroke-dasharray="4 2"':'')+'><title>'+(vary?'此邊在等機率樹間變動 = 枚舉組合選擇':'此邊在所有等機率樹一致')+'</title></line>';});
+ // 節點:實測=實心藍圓 / 推測(隱藏祖先)=空心虛線紫圓 / germline=灰方
+ [...nodes].forEach(n=>{const isRoot=n==='ROOT',isH=n[0]==='H'&&n[1]==='_';
+  const cx=(pos[n]*xw+xw/2),cy=(depth[n]*54+22);const cxs=cx.toFixed(1),cys=cy.toFixed(1);
+  const short=isRoot?'RR·germ':(isH?'?'+n.slice(2):n);
+  const tip='<title>'+esc(n)+(isH?' · 推測(隱藏祖先·無 read)':(isRoot?' · germline 起點':' · 實測(有 read)'))+'</title>';
+  if(isRoot)s+='<rect x="'+(cx-5.5).toFixed(1)+'" y="'+(cy-5.5).toFixed(1)+'" width="11" height="11" rx="2" fill="#64748b">'+tip+'</rect>';
+  else if(isH)s+='<circle cx="'+cxs+'" cy="'+cys+'" r="6" fill="#fff" stroke="#a855f7" stroke-width="1.7" stroke-dasharray="3 2">'+tip+'</circle>';
+  else s+='<circle cx="'+cxs+'" cy="'+cys+'" r="6" fill="#2563eb">'+tip+'</circle>';
+  s+='<text x="'+cxs+'" y="'+(cy+16).toFixed(1)+'" text-anchor="middle" fill="'+(isH?'#a855f7':'var(--mut)')+'">'+esc(short)+'</text>';});
  return s+'</svg>';
 }
 // ================= 樹切換器 =================
@@ -210,7 +218,13 @@ function show(i,row){
  const r=R[i];const[rt,rc]=regTag(r.region_determinacy);
  let h='<h3>'+esc(r.region)+' <span class="tag '+rc+'">'+rt+'</span></h3>'
   +'<div class="kv"><span class="b">'+r.n_sSNV+' sSNV</span><span class="b">HP×'+r.hp_multiplicity+(r.is_multiHP?'（多-HP·雙親代各一樹）':'（single-HP）')+'</span><span class="b">cn '+esc(r.cn)+'</span><span class="b">'+r.lineages.length+' germline-HP 家族</span></div>'
-  +'<div class="note" style="margin:4px 0">每 germline-HP 家族分開建樹（家族優先於算法，修 allelic/clonal 混淆）;每家族 ◀▶ 切換其「等機率最小樹」（枚舉全集=「定不出來即答案」）。</div>';
+  +'<div class="note" style="margin:4px 0">每 germline-HP 家族分開建樹（家族優先於算法，修 allelic/clonal 混淆）;每家族 ◀▶ 切換其「等機率最小樹」（枚舉全集=「定不出來即答案」）。'
+   +'<div style="margin-top:5px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:10.5px">'
+   +'<span><svg width="14" height="14" style="vertical-align:middle"><circle cx="7" cy="7" r="5.5" fill="#2563eb"/></svg> <b>實測</b>(該基因型有 read 觀測到)</span>'
+   +'<span><svg width="14" height="14" style="vertical-align:middle"><circle cx="7" cy="7" r="5" fill="#fff" stroke="#a855f7" stroke-width="1.6" stroke-dasharray="3 2"/></svg> <b>推測</b>(隱藏祖先·無 read·solver 補的中間 clone)</span>'
+   +'<span><svg width="14" height="14" style="vertical-align:middle"><rect x="2" y="2" width="10" height="10" rx="2" fill="#64748b"/></svg> <b>germline</b> 起點(RR)</span>'
+   +'<span><svg width="26" height="10" style="vertical-align:middle"><line x1="1" y1="5" x2="25" y2="5" stroke="#f59f00" stroke-width="1.9" stroke-dasharray="4 2"/></svg> <b style="color:#d97706">橙虛線邊</b>=此連接在 N 棵等機率樹間<b>變動=枚舉組合選擇</b>(非唯一)</span>'
+   +'</div></div>';
  r.lineages.forEach(L=>{const[ct,cc]=clsTag(L.L1_class);const fc=famCls(L.family);
   h+='<div class="lin f'+L.family+'"><b class="'+fc+'">▸ '+esc(L.fam_label)+'</b> '
    +'<span class="tag '+cc+'">'+ct+'</span> '
@@ -218,13 +232,19 @@ function show(i,row){
    +'<span class="pill">'+(L.n_reads||0)+' reads·'+L.n_full_pops+'full/'+L.n_partial+'partial</span>'
    +(L.verify_pass?'<span class="pill" style="color:var(--det)">V1-7✓</span>':'<span class="pill" style="color:var(--rec)">V✗</span>');
   if(L.trees&&L.trees.length){const lid='L'+(LID++);const ns=L.trees.length;
+   // 穩定邊集=出現在全部 N 棵等機率樹的邊(其餘=枚舉組合選擇,treeSVG 標橙虛線)
+   let stable=null;if(ns>1){const cnt={};L.trees.forEach(t=>(t.edges||[]).forEach(e=>{const k=e[0]+'>'+e[1];cnt[k]=(cnt[k]||0)+1;}));stable=new Set(Object.keys(cnt).filter(k=>cnt[k]===ns));}
    h+='<div class="tsw" id="'+lid+'"><div class="tswhead"><b>可能樹結構</b>：'+L.n_trees+' 棵等機率最小樹'
     +(L.n_distinct_shapes?'（'+L.n_distinct_shapes+(L.n_distinct_shapes<ns?'+':'')+' 種形狀）':'')
     +(L.n_trees>ns?' · 顯示前 '+ns:'')
     +(ns>1?'<button class="tg tnav" onclick="tnav(\''+lid+'\',-1)">◀</button><span class="tctr" id="'+lid+'_c">1 / '+ns+'</span><button class="tg tnav" onclick="tnav(\''+lid+'\',1)">▶</button>':'')
     +'</div><div class="tstage">';
-   L.trees.forEach((t,ti)=>{h+='<div class="tslide" style="display:'+(ti?'none':'block')+'">'+treeSVG(t.edges)
-     +'<div class="tcap">樹 #'+(ti+1)+(t.recurrence&&t.recurrence.length?' · recurrence bit '+t.recurrence.join(','):' · 無 recurrence')+'</div></div>';});
+   L.trees.forEach((t,ti)=>{
+    const nd=new Set();(t.edges||[]).forEach(e=>{nd.add(e[0]);nd.add(e[1]);});
+    const nobs=[...nd].filter(n=>n!=='ROOT'&&!(n[0]==='H'&&n[1]==='_')).length;
+    const nhid=[...nd].filter(n=>n[0]==='H'&&n[1]==='_').length;
+    h+='<div class="tslide" style="display:'+(ti?'none':'block')+'">'+treeSVG(t.edges,stable)
+     +'<div class="tcap">樹 #'+(ti+1)+' · <span style="color:#2563eb">'+nobs+' 實測</span> + <span style="color:#a855f7">'+nhid+' 推測祖先</span> + germline'+(t.recurrence&&t.recurrence.length?' · recurrence bit '+t.recurrence.join(','):'')+(stable?' · 橙虛線=與其他等機率樹不同處':'')+'</div></div>';});
    h+='</div>';
    if(ns>1){h+='<div class="thumbs">';L.trees.forEach((t,ti)=>{h+='<span class="thumb'+(ti?'':' on')+'" onclick="tjump(\''+lid+'\','+ti+')">#'+(ti+1)+'</span>';});h+='</div>';}
    h+='</div>';}
