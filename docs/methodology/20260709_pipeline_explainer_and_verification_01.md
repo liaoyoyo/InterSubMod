@@ -126,10 +126,14 @@ n_sSNV 分佈極度集中低端:**n≤8 覆蓋 97.51% 區**(僅 178=2.49% 超過
 ### §10.2 partial-read 救回反思(5 邊界)〔L1 機制 + L4 反思〕
 ✅ 非循環(用真共現)/ ✅ 不 overclaim(標獨立 `E_subcube_recovered` 弱層,不當 A_determined)/ ⚠ 「救回 2,403 區」= 新增部分樹結構(**上界**,非完整還原;實誠 tier = chain≥3 的 58.6%)/ ⚠ 帶錯 partial read 可造假衝突(緩解:≥MINREAD + 對抗驗證 wf_526f6c8f,非零風險)/ ⚠ 已知 nic/population 不一致 edge(源碼自標,rr=0 時)/ ⚠ 僅 HCC1395。
 
-### §10.3 pairwise 是否會「錯誤關聯」+ 能否用超立方體〔L1〕
-- **定義**:pairwise 安全 ⟺ 所有 C(n,2) 對**直接觀測 + 四型相容**(Gusfield:pairwise 相容 ⟺ perfect phylogeny 存在)。假關聯風險 = **未觀測對被傳遞假設** 或 噪音對。
-- **實證(B_pairwise 943 區)**:🟢 **nic=0**(所有觀測對四型相容,觀測衝突被 route 走)+ **98.7%(931/943)全對直接觀測=零傳遞假設**(多數 n=2 單對)+ 只 **1.3%(12 區)含未觀測對**(真風險面,且標 B_pairwise 弱層非 A_determined)。→ **pairwise 幾乎不製造假關聯;風險面 1.3% 且已誠實降級。**
-- **能否用超立方體?** ✅ **可以且更安全**:一條 pairwise co-read = **2-位點子面(group)** = IDPP/群組斯坦納的特例(span=2 的 partial read)。gap#1 `E_subcube_recovered` **已在做**。關鍵:超立方體枚舉對未觀測對**保持自由 → 輸出所有相容樹(co-optimal 集)**,而非硬串成一棵 → **把「傳遞假設的假關聯風險」轉成「誠實的欠定(多候選/非可辨識)」**。這正是它比 naive stitching 安全之處。
+### §10.3 「靠共享 B 串」是否合理完備 + 能否用超立方體〔L2〕
+- **範圍澄清**:B_pairwise 943 中 **n=2(單對·無串接)614=65.1%**、**n≥3(真靠共享 B 串)329=34.9%**。65% 根本不涉傳遞。
+- **✅ 合理**:Gusfield 定理(所有對兩兩四型相容 ⟺ perfect phylogeny 存在);實證 **nic=0**(觀測對全相容)+ **98.7% 全對直接觀測** → 單拷貝下串接數學上保證正確、非假關聯。
+- **🔴 完備? 不完全,兩缺口**:
+  - **Gap A 傳遞假設(小)**:12 區(1.3%)含未觀測對 → 超立方體枚舉對未觀測對保持自由 → 轉多候選,已緩解。
+  - **🔴 Gap B 共享 B 可能多拷貝(大,主缺口)**:B_pairwise **51.6%(487)是 CN-gain、僅 2.9%(27)CN-neutral**。CN-gain 下共享位點 B 可能 2+ 拷貝 →「A-B on read1」+「B-C on read2」可能跨不同拷貝 → 誤併譜系。最該盯 = **n≥3 且 CN-gain 的 187 區(19.8%)**。漏網機制:A-C 未觀測時 / 或「pairwise-相容但實為多拷貝結構」(pairwise-相容 ≠ 單拷貝譜系);**m-通道目前只拆 four-gamete recurrence,未覆蓋 pairwise-相容 CN-gain**。
+- **⚠ 更正(§13.7)**:先前「pairwise 假關聯風險只 1.3%」**只算 Gap A、漏 Gap B**;完整風險面 = 1.3% 傳遞 + CN-gain 主導的多拷貝串接不確定(51.6% gain / 最壞 187 區)。
+- **能否用超立方體?** ✅ 可以(pairwise co-read = 2-位點子面 = group;gap#1 已做),對 Gap A 更安全(枚舉全相容樹非硬串);但**對 Gap B 無自動偵測** → 需 CN 資訊介入(擴 m-通道到 pairwise-相容 CN-gain 區)。
 
 ### §10.4 跨樣本拓撲分佈 + 誠實邊界〔L1 分類 / L3 比較〕
 | 樣本 | n | determined% | conflict | B_pairwise | C_underdet |
