@@ -46,8 +46,13 @@ E_subcube_recovered(gap#1 partial-read 救回)區只被「辨識 + 標 tree_shap
 ## §5 結果是否合理且對應假設驗證
 ✅ **合理且強力對應假設**:假設「recovered 未真建/枚舉」→ 數據 edges=0/2403、100% 乾淨 n≥3 含未觀測對 → 完全吻合。這**不是**演算法輸出「錯的樹」(它根本沒輸出樹),而是**「辨識層 ≠ 求解層」的實作缺口**:gap#1 做到「認出這些區 + 標記」,**沒做到「用子面 group 建/枚舉 Steiner 樹」**。
 
-## §6 修法(使用者指出的正解)
-把 recovered 區(尤其乾淨 n≥3 的 2,148)**路由進真正的 sub-face group-Steiner 枚舉**:以觀測到的 pairwise 子面為 group 約束,建隱藏 ABC 節點,**枚舉所有相容 Steiner 樹**(未觀測對 → 保持自由 → 輸出多候選),取代現在的「標 tree_shape + edges=[]」。⚠ 需先解 §另述的 Gap B(CN-gain 共享位點多拷貝)+ 那 126 個 veclen>n 的資料不一致。
+## §6 修法(使用者指出的正解)— ✅ 已由 layered solver 落地(2026-07-09 確認)
+把 recovered 區**路由進真正的 sub-face group-Steiner 枚舉**:以觀測 pairwise 子面為 group 約束,建隱藏 ABC 節點,**枚舉所有相容 Steiner 樹**。
+
+🟢 **這正是 `tree_enumeration_solver.py` + `layered_tree_reconstruction.py`(layered_workstation,07-06 使用者定案)已實作的**:
+- 新路徑實測(`layered_reconstruction_HCC1395.json`):pure-partial(無全穿)**13,358 units,100% 有枚舉樹(n_trees>0)、63%(8,453)有隱藏 Steiner 節點**;golden `partial_IDP {AX,XA}` PASS(n_trees=3/n_hidden=2);V1-V7 全過;capped 670 誠實標。
+- **舊路徑(topology_per_region E_subcube_recovered edges=[])與新路徑(layered solver 真建/枚舉)並存** → 本 gap 對舊路徑成立、由 layered solver 取代解決。
+- 殘留:capped(NP-hard-dense)區枚舉未完(誠實標)+ Gap B(CN-gain 共享位點多拷貝,仍是 CN 狀態空間問題非枚舉問題)。
 
 ## §7 一鍵重驗
 ```bash
