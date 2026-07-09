@@ -1,0 +1,174 @@
+<!doctype html>
+<!-- provenance-verified: 本頁所有 metric 數字皆引用本 session（2026-07-09）已驗證並 commit 的來源 —
+  管線數字 candidate_trees.json/topology_per_region.json（verify_pipeline_numbers.py 全✓）、
+  partial 建樹 layered_reconstruction_HCC1395.json（subcube_recovery_gap_check.py）、
+  read 加權 ccf_tree_weighting_full_observe.json（ccf_tree_weighting_full_observe.py）；
+  詳見 docs/methodology/20260709_pipeline_explainer_and_verification_01.md 之 provenance 表。
+  資料 commit 78271f6。其餘小數（1.65/10/12/14/34/40 等）為 CSS 樣式值非 metric。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subclonal Reconstruction — 方法現況結論（HCC1395）</title>
+<style>
+  :root{
+    --ink:#1a1f2b; --muted:#5b6472; --line:#e2e6ec; --bg:#f7f8fa; --card:#fff;
+    --blue:#2563eb; --green:#0f9d58; --amber:#e08600; --red:#d33; --violet:#7c3aed;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,"Segoe UI","Noto Sans TC","PingFang TC",Roboto,sans-serif;
+    line-height:1.65;font-size:15.5px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:34px 22px 80px}
+  header{border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:8px}
+  h1{font-size:25px;margin:0 0 4px;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:15px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;font-size:12.5px;color:var(--muted)}
+  .meta b{color:var(--ink)}
+  .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;vertical-align:middle}
+  .partial{background:#fff4e0;color:#8a5800;border:1px solid #f0d090}
+  h2{font-size:18.5px;margin:34px 0 10px;padding-top:6px;border-top:1px solid var(--line)}
+  h2 .n{color:var(--blue);font-weight:800;margin-right:8px}
+  h3{font-size:15.5px;margin:18px 0 6px}
+  p{margin:8px 0}
+  .verdict{background:linear-gradient(180deg,#eef4ff,#fff);border:1px solid #cfe0ff;
+    border-left:5px solid var(--blue);border-radius:10px;padding:16px 18px;margin:14px 0 6px}
+  .verdict b{color:var(--blue)}
+  .tier{display:inline-block;font-size:10.5px;font-weight:800;padding:1px 6px;border-radius:5px;color:#fff;vertical-align:middle;margin-left:4px}
+  .t1{background:#0f9d58} .t2{background:#2563eb} .t3{background:#e08600} .t4{background:#8a8f99}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13.7px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#eef1f5;font-weight:700}
+  .flow{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0;
+    font-family:"SFMono-Regular",Consolas,monospace;font-size:12.8px;line-height:1.9;overflow-x:auto;white-space:pre;color:#243}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+  .card h4{margin:0 0 5px;font-size:14.5px}
+  .ok{border-left:4px solid var(--green)} .warn{border-left:4px solid var(--amber)} .stop{border-left:4px solid var(--red)}
+  .kpi{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0}
+  .kpi .k{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 16px;min-width:120px}
+  .kpi .v{font-size:23px;font-weight:800;color:var(--blue)}
+  .kpi .l{font-size:12px;color:var(--muted)}
+  .callout{border-radius:9px;padding:11px 14px;margin:10px 0;font-size:14px}
+  .c-red{background:#fdecec;border:1px solid #f3c0c0}
+  .c-amber{background:#fff6e6;border:1px solid #f0dca0}
+  small.note{color:var(--muted)}
+  footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+  code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:12.5px}
+  .legend{font-size:11.5px;color:var(--muted);margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>亞克隆重建方法 — 現況結論 <span class="pill partial">HCC1395 單樣本</span></h1>
+  <div class="sub">Subclonal reconstruction using somatic single-molecule co-occurrence（ONT long-read）</div>
+  <div class="meta">
+    <span><b>樣本</b> HCC1395（ONT 5kHz + 5mCG/5hmCG tagged）</span>
+    <span><b>日期</b> 2026-07-09</span>
+    <span><b>資料 commit</b> <code>78271f6</code></span>
+    <span><b>證據分級</b>
+      <span class="tier t1">L1</span>源碼/實測
+      <span class="tier t2">L2</span>文獻+推演
+      <span class="tier t3">L3</span>單樣本觀察
+      <span class="tier t4">L4</span>前瞻/推論
+    </span>
+  </div>
+</header>
+
+<div class="verdict">
+  <b>一句話結論：</b>以 <b>somatic sSNV 單分子共現</b> 在<b>布爾超立方體</b>上重建腫瘤演化樹，是一個
+  <b>正確、可精確枚舉、非循環</b>的方法；它<b>誠實地在能定的地方定樹、不能定的地方回報「定不出來」</b>。
+  甲基化只能事後輔助、不能決定樹；read 數（頻率）可在拷貝數乾淨的區進一步收斂等機率樹。
+  單一 bulk 樣本方法上限 = <b>⭐3（characterize，非 confirm subclone）</b>。
+</div>
+
+<h2><span class="n">1</span>方法：從 sSNV 共現到演化樹 <span class="tier t2">L2</span></h2>
+<p>每個 somatic 點突變（sSNV）是超立方體的一個座標軸；一條 ONT 長 read 直接讀出「哪些突變在<b>同一條 DNA 分子</b>上」——這是本方法的命脈（跨 read 拼接無法保證同分子，單分子共現可以）。</p>
+<table>
+  <tr><th>數學物件</th><th>生物意義</th></tr>
+  <tr><td>超立方體頂點 {0,1}ⁿ</td><td>一個基因型（已獲得哪些突變）</td></tr>
+  <tr><td>根 = 0ⁿ</td><td>germline（未突變祖先）</td></tr>
+  <tr><td>有向邊（翻一個 0→1）</td><td>一次 infinite-sites 獲得突變</td></tr>
+  <tr><td>隱藏（Steiner）節點</td><td>推斷的、未被直接觀測到的祖先 clone</td></tr>
+  <tr><td>一條 partial read（只覆蓋部分位點）</td><td>超立方體的一個「子面」約束（= IDPP，Pe'er 2004）</td></tr>
+  <tr><td>最小樹（枚舉全部）</td><td>maximum parsimony 演化樹（所有等成本候選）</td></tr>
+</table>
+<p><small class="note">形式化：directed rooted (group) Steiner arborescence on Boolean hypercube = Incomplete Directed Perfect Phylogeny。逐區位點數 ≤8（涵蓋 97.5% 的區）→ 頂點 ≤256 → 暴力精確枚舉可行，不需近似。</small></p>
+
+<h2><span class="n">2</span>關鍵數字（全部可一鍵重算） <span class="tier t1">L1</span></h2>
+<div class="flow">35,332 somatic sSNV（TP 30,490 / FP 4,842）
+   ↓ 單分子共現
+7,143 個區（多位點；其中 40.4% 空向量＝無單一 read 蓋滿）
+   ↓ 逐區建樹 + 可辨識性分類
+   ├─ determined（唯一樹）................ 1,808  （單分子直接 1,764 + 枚舉收斂 44）
+   ├─ 非可辨識（資訊不足）............... 1,487  （pairwise 943 + 單ALT群 544）
+   ├─ recurrence-required（送 CN 拆） .....   70  （artifact 11 / 候選 9 / LOH 待定 50）
+   └─ 真衝突（infinite-sites 違反） .......   18
+   ↓ partial-read（子面 group）救回
+   純 partial 區：13,358 units → 全部建/枚舉出樹、其中含隱藏 Steiner 節點約 63%</div>
+<p class="legend">來源：<code>candidate_trees.json</code> / <code>topology_per_region.json</code> / <code>layered_reconstruction_HCC1395.json</code>；一致性檢查（分桶加總、分母）全通過。</p>
+
+<h2><span class="n">3</span>誠實的核心：能定 vs 定不出來 <span class="tier t2">L2</span></h2>
+<div class="grid">
+  <div class="card ok">
+    <h4>✅ 枚舉精確解集（做得到）</h4>
+    <p>逐區精確窮舉<b>所有</b>等成本候選樹 + 分類（determined / 多樹並列 / 衝突 / 非可辨識）。實例大小為常數（位點 ≤8），暴力精確。</p>
+  </div>
+  <div class="card stop">
+    <h4>❌ 指派唯一全域樹（理論不可）</h4>
+    <p>單一 bulk 樣本下，1,487 個區資訊不足以定唯一樹，跨區整棵樹也非可辨識。這是<b>資訊論極限，非計算能力問題</b>——「定不出來」就是它們的精確答案。</p>
+  </div>
+</div>
+<p><small class="note">此立場與領域一致（Tarabichi 2021 / MACH2 2024 / Pairtree）：資料不足時輸出候選集 + 不確定性，而非強行給單一樹。</small></p>
+
+<h2><span class="n">4</span>本輪兩個新結論</h2>
+
+<h3>4.1 partial-read 區的正確建樹 <span class="tier t1">L1</span></h3>
+<p>沒有任何 read 穿越全部位點時，正確做法 = 把整區當<b>一個超立方體問題</b>，未觀測的全突變基因型當<b>隱藏 Steiner 節點</b>，用各 partial read 的子面約束<b>枚舉所有相容樹</b>——而非把兩兩 pairwise 分開拼。分層 solver（<code>tree_enumeration_solver.py</code>）正是如此：實測 13,358 個純 partial 區<b>全部建/枚舉出樹</b>、約 63% 帶隱藏節點；獨立驗證器 V1–V7 全過。</p>
+
+<h3>4.2 用 read 數（頻率）收斂等機率樹 <span class="tier t1">L1</span></h3>
+<p>當 solver 誠實輸出「多棵一樣好的樹」時，可用<b>每個突變的 read 數</b>加權：早發生的突變在更多後代細胞中 → 更多 read（pigeonhole：祖先頻率 ≥ 後代頻率）。這把「多棵等機率」變成「加權 posterior + 較可能者」，且純用 read count（<b>遺傳訊號、非甲基、非循環</b>）。</p>
+<div class="kpi">
+  <div class="k"><div class="v">66.8%</div><div class="l">等機率被收斂<br><small>（含 partial reads；只用全覆蓋 read 僅 2.3%）</small></div></div>
+  <div class="k"><div class="v">99.4%</div><div class="l">贏家符合生物邏輯<br><small>（祖先頻率 ≥ 後代）</small></div></div>
+  <div class="k"><div class="v">67.9%</div><div class="l">CN-clean 區乾淨解出<br><small>（可信部分）</small></div></div>
+</div>
+<p><small class="note">「read 越多越能定」得到驗證：用含 partial 的所有 read 覆蓋，比只用全覆蓋 read，把可定比例從 2.3% 拉到 66.8%。</small></p>
+
+<h2><span class="n">5</span>誠實邊界（必須向審閱者標明）</h2>
+<div class="callout c-red">
+  🔴 <b>CN-gain（拷貝數放大）confound</b> <span class="tier t2">L2</span>：在被放大的區，一個突變的 read 數被拷貝數放大 → <b>read 數 ≠ 真細胞頻率</b>。此類佔多樹並列區的約 67%，其「贏家」不可信。<b>現階段先假設不考慮 CNV、取整體 66.8% 為觀察值，並明確記錄此 caveat 待後續處理</b>；真正可信 = 拷貝數乾淨區的 22.3%。
+</div>
+<div class="callout c-amber">
+  🔴 <b>甲基化 = 有界輔助，不能決定樹</b> <span class="tier t2">L2</span>：甲基與突變共分離主要是突變的局部順式足跡（cis-ASM，屬循環）。四配子實證：唯二「顯著」的甲基訊號全落在 cross-HP CN-gain confound，乾淨案例從不顯著。故甲基只做負向篩選 + 弱旗標，<b>絕不進 likelihood、絕不排序樹</b>。
+</div>
+<div class="callout c-amber">
+  ⭐ <b>單樣本上限 ⭐3</b> <span class="tier t3">L3</span>：單一 bulk 只能刻畫（characterize），不能確認（confirm）subclone；隱藏節點標為 inferred。突破需 single-cell / multi-region 正交真值。
+</div>
+
+<h2><span class="n">6</span>對論文的意義</h2>
+<table>
+  <tr><th>面向</th><th>主張</th></tr>
+  <tr><td>Novelty</td><td>read-level bulk ONT 的<b>角色分離式</b>重建：單分子共現骨幹 + 隱藏節點枚舉 + 誠實可辨識性分類。read-as-group 是 IDPP 特例；此組合（單分子 long-read bulk + germline 有向根 + 精確等成本枚舉）為文獻白地。<span class="tier t2">L2</span></td></tr>
+  <tr><td>誠實框架</td><td>「定不出來即答案」= 領域認可的誠實輸出；甲基有界、CN confound、⭐3 全部明標，不 overclaim。<span class="tier t3">L3</span></td></tr>
+  <tr><td>可延伸</td><td>read 數（頻率 pigeonhole）加權層可在 CN-clean 區進一步收斂等機率樹（達 67.9%）；CN 處理為後續工作。<span class="tier t4">L4</span></td></tr>
+</table>
+
+<footer>
+  <b>可重現性（provenance）</b>：本文所有數字由下列腳本對原始 JSON 重算，2026-07-09 全通過：<br>
+  <code>verify_pipeline_numbers.py</code>（管線數字）·
+  <code>subcube_recovery_gap_check.py</code>（partial 建樹）·
+  <code>ccf_tree_weighting_full_observe.py</code>（read 加權）<br>
+  路徑：<code>InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/</code>；
+  資料 commit <code>78271f6</code>（branch research/subclonal-reconstruction-202606）。<br>
+  詳細文件：<code>InterSubMod/docs/methodology/20260709_pipeline_explainer_and_verification_01.md</code>（端到端）·
+  <code>20260704_formal_problem_statement_topology_from_cooccurrence_01.md</code>（形式化）。<br>
+  <small>partial flag：本頁數字為 <b>HCC1395 單樣本</b>；跨 7 樣本比較另有分析（determined% 主由定序深度驅動，屬 L3 描述性，不作生物結論）。</small>
+</footer>
+
+</div>
+</body>
+</html>
