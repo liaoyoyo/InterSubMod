@@ -24,25 +24,31 @@ def pct(n, d): return round(n / d * 100, 1) if d else 0.0
 
 out = {"partial_flag": "HCC1395 / 最新 layered per-HP-家族框架"}
 
-# ── A. sSNV 總數 S + k=1/k>1(sSNV 層 bucket)──
-S = led["universe_total"]; b = led["buckets"]
+# ── A. sSNV 總數 S(=ClairS PASS = somatic_pass.vcf.gz;07-09 layered 實際 universe)──
+#   🔴 2026-07-10 修:07-09 pipeline 骨幹=ClairS PASS(somatic_pass),移除舊 is_somatic 檢+SEQC2 TP/FP 子集。
+#   S=113997 由 zcat somatic_pass.vcf.gz PASS SNV 實測(canonical HCC1395 longphase_s)。
+#   舊 ledger 的 35332(TP 30490/FP 4842)= SEQC2-可評估子集(僅 31%),只作觀察標籤。
+S = 113997
+SEQC2_eval = led["universe_total"]  # 35332 = SEQC2-可評估子集(TP+FP)
+# 多位點 sSNV = mlhp 區的 n_sSNV 和(區不重疊);isolated/單點 = S − 多位點
+multi_ssnv = sum(g.get("n_sSNV", 0) for g in mreg.values())
+iso = S - multi_ssnv
 out["A_sSNV"] = {
-    "S_total_sSNV": S, "TP": led["universe_tp"], "FP": led["universe_fp"],
-    "isolated_singleton(k=1·單點·無樹)": b["isolated_singleton"], "iso_pct": pct(b["isolated_singleton"], S),
-    "underpowered(有partner無足夠共讀)": b["underpowered"], "under_pct": pct(b["underpowered"], S),
-    "linked(有共現·可建樹)": b["linked"], "linked_pct": pct(b["linked"], S),
+    "S_total_ClairS_PASS": S, "note": "= somatic_pass.vcf.gz PASS SNV(LongPhase-S/ClairS);移除舊 is_somatic 檢",
+    "SEQC2_evaluable_subset(TP+FP·僅觀察)": SEQC2_eval, "SEQC2_TP": led["universe_tp"], "SEQC2_FP": led["universe_fp"],
+    "SEQC2_pct_of_S": pct(SEQC2_eval, S),
+    "k=1_isolated(單點·無樹)": iso, "iso_pct": pct(iso, S),
+    "k>1_multilocus_sSNV(可建樹)": multi_ssnv, "multi_pct": pct(multi_ssnv, S),
 }
 
-# ── B. 區域 W:k=1 vs k>1(用 layered 單位的 region 集 + n_sSNV)──
-region_fams = defaultdict(set); region_nss = {}
+# ── B. 區域 W:k=1 vs k>1 ──
+region_fams = defaultdict(set)
 for u in detail:
     region_fams[u["region"]].add(u["family"])
-    region_nss[u["region"]] = u.get("n_sSNV", 0)
 W = len(region_fams)
-k1 = sum(1 for r, n in region_nss.items() if n == 1)
-k2 = sum(1 for r, n in region_nss.items() if n >= 2)
-out["B_regions"] = {"W_total_regions": W, "k=1(單點)": k1, "k1_pct": pct(k1, W),
-                    "k>1(兩點以上·可建樹)": k2, "k2_pct": pct(k2, W)}
+out["B_regions"] = {"S_ClairS_PASS": S, "k=1_單點_sSNV(無樹)": iso,
+                    "k>1_多位點_區數": len(mreg), "k>1_多位點_sSNV": multi_ssnv,
+                    "regions_with_lineage_units": W, "note": "k>1 多位點區→依 HP 家族拆 lineage 單位(下方 C-F 母體)"}
 
 # ── C. C 群組合(每 lineage 單位的 full-pop 群數)× 確認樹結構 ──
 #   C = n_full_pops(該家族單位的全覆蓋基因型群數);確認=determined、不確認=ambiguous/capped/recurrence

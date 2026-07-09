@@ -2,22 +2,24 @@
  "summary": {
   "partial_flag": "HCC1395 / 最新 layered per-HP-家族框架",
   "A_sSNV": {
-   "S_total_sSNV": 35332,
-   "TP": 30490,
-   "FP": 4842,
-   "isolated_singleton(k=1·單點·無樹)": 8320,
-   "iso_pct": 23.5,
-   "underpowered(有partner無足夠共讀)": 5458,
-   "under_pct": 15.4,
-   "linked(有共現·可建樹)": 21554,
-   "linked_pct": 61.0
+   "S_total_ClairS_PASS": 113997,
+   "note": "= somatic_pass.vcf.gz PASS SNV(LongPhase-S/ClairS);移除舊 is_somatic 檢",
+   "SEQC2_evaluable_subset(TP+FP·僅觀察)": 35332,
+   "SEQC2_TP": 30490,
+   "SEQC2_FP": 4842,
+   "SEQC2_pct_of_S": 31.0,
+   "k=1_isolated(單點·無樹)": 88358,
+   "iso_pct": 77.5,
+   "k>1_multilocus_sSNV(可建樹)": 25639,
+   "multi_pct": 22.5
   },
   "B_regions": {
-   "W_total_regions": 7927,
-   "k=1(單點)": 0,
-   "k1_pct": 0.0,
-   "k>1(兩點以上·可建樹)": 7927,
-   "k2_pct": 100.0
+   "S_ClairS_PASS": 113997,
+   "k=1_單點_sSNV(無樹)": 88358,
+   "k>1_多位點_區數": 7928,
+   "k>1_多位點_sSNV": 25639,
+   "regions_with_lineage_units": 7927,
+   "note": "k>1 多位點區→依 HP 家族拆 lineage 單位(下方 C-F 母體)"
   },
   "C_groups": {
    "0": {
