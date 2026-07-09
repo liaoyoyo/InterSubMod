@@ -175,8 +175,8 @@ function treeSVG(edges,stable){
  // 節點:實測=實心藍圓 / 推測(隱藏祖先)=空心虛線紫圓 / germline=灰方
  [...nodes].forEach(n=>{const isRoot=n==='ROOT',isH=n[0]==='H'&&n[1]==='_';
   const cx=(pos[n]*xw+xw/2),cy=(depth[n]*54+22);const cxs=cx.toFixed(1),cys=cy.toFixed(1);
-  const short=isRoot?'RR·germ':(isH?'?'+n.slice(2):n);
-  const tip='<title>'+esc(n)+(isH?' · 推測(隱藏祖先·無 read)':(isRoot?' · germline 起點':' · 實測(有 read)'))+'</title>';
+  const geno=isH?n.slice(2):n;const short=isRoot?'RR·germ':(isH?geno+'ᴴ':geno);  // ᴴ=hidden(推測);不用「?」避免誤讀成位點值
+  const tip='<title>'+esc(n)+(isH?' · 推測(隱藏祖先·無 read;ᴴ 標記非位點值)':(isRoot?' · germline 起點(實測)':' · 實測(有 read)'))+'</title>';
   if(isRoot)s+='<rect x="'+(cx-5.5).toFixed(1)+'" y="'+(cy-5.5).toFixed(1)+'" width="11" height="11" rx="2" fill="#64748b">'+tip+'</rect>';
   else if(isH)s+='<circle cx="'+cxs+'" cy="'+cys+'" r="6" fill="#fff" stroke="#a855f7" stroke-width="1.7" stroke-dasharray="3 2">'+tip+'</circle>';
   else s+='<circle cx="'+cxs+'" cy="'+cys+'" r="6" fill="#2563eb">'+tip+'</circle>';
@@ -226,13 +226,35 @@ function show(i,row){
    +'<span><svg width="26" height="10" style="vertical-align:middle"><line x1="1" y1="5" x2="25" y2="5" stroke="#94a3b8" stroke-width="1.3"/></svg> 灰實線=此邊<b>在全部等機率樹一致=forced 骨幹</b></span>'
    +'<span><svg width="26" height="10" style="vertical-align:middle"><line x1="1" y1="5" x2="25" y2="5" stroke="#f59f00" stroke-width="1.9" stroke-dasharray="4 2"/></svg> <b style="color:#d97706">橙虛線</b>=此連接在等機率樹間<b>變動=枚舉組合選擇</b>(非唯一)</span>'
    +'</div><div class="note" style="font-size:10px;margin-top:3px;background:none;border:none;padding:0">🔴 <b>整棵樹全橙</b> = 無 forced 骨幹、結構完全在 N 個選擇間未定(本資料 ~82% 多樹 lineage 屬此);<b>有灰邊</b> = 灰部分 forced、僅橙邊是選擇。<b>capped(太密)</b>lineage 枚舉未完整→穩定/選擇標記僅基於已存樹,可能高估 forced。</div>';
+ // ===== 位點證據 + 確定性(region 級):每 sSNV 位點的 ALT 來源 =====
+ (function(){
+  let obsN=new Set(),infN=new Set();
+  r.lineages.forEach(L=>(L.trees||[]).forEach(t=>(t.edges||[]).forEach(e=>e.forEach(n=>{
+   if(n==='ROOT')return; if(n[0]==='H'&&n[1]==='_')infN.add(n.slice(2)); else obsN.add(n);
+  }))));
+  let vlen=0;[...obsN,...infN].forEach(v=>vlen=Math.max(vlen,v.length));
+  if(!vlen)return;
+  let cells='',nObs=0,nInf=0,nZero=0;
+  for(let i=0;i<vlen;i++){
+   let oa=[...obsN].filter(v=>v[i]==='A').length,ia=[...infN].filter(v=>v[i]==='A').length;
+   let cls,txt;if(oa>0){cls='#2563eb';txt=oa+' 實測';nObs++;}else if(ia>0){cls='#a855f7';txt='僅推斷';nInf++;}else{cls='#dc2626';txt='零證據⚠';nZero++;}
+   cells+='<td style="text-align:center;padding:3px 6px"><b>S'+(i+1)+'</b><br><span style="color:'+cls+';font-size:10px">'+txt+'</span></td>';
+  }
+  h+='<div class="note" style="margin:6px 0"><b>📍 位點證據</b>（本區 '+vlen+' 個 sSNV 位點·各位點 ALT 的來源）<table style="margin-top:3px;font-size:11px"><tr>'+cells+'</tr></table>'
+   +'<div style="font-size:10px;margin-top:3px"><span style="color:#2563eb">■實測</span>=有實測群(非H_節點)在此位點帶 ALT ｜ <span style="color:#a855f7">■僅推斷</span>=只有隱藏祖先帶 ALT、<b>無實測群證實</b> ｜ <span style="color:#dc2626">■零證據</span>=本區所有節點此位點都 R(census 算 somatic 但 linkage 未捕捉 ALT→死位點,仍佔向量長度)。'
+   +(nZero?'<b style="color:#dc2626"> ⚠ 本區 '+nZero+' 個零證據位點(建議上游查為何 census somatic 但無 linked ALT)。</b>':'')
+   +(nInf&&!nObs?'<b style="color:#a855f7"> ⚠ 此區 0 位點有實測、全靠推斷(如 partial read)。</b>':'')+'</div></div>';
+ })();
  r.lineages.forEach(L=>{const[ct,cc]=clsTag(L.L1_class);const fc=famCls(L.family);
+  const _obsPops=(L.n_full_pops||0);
   h+='<div class="lin f'+L.family+'"><b class="'+fc+'">▸ '+esc(L.fam_label)+'</b> '
    +'<span class="tag '+cc+'">'+ct+'</span> '
    +'<span class="pill">'+L.n_trees+' 樹'+(L.n_distinct_shapes&&L.n_distinct_shapes<L.n_trees?'/'+L.n_distinct_shapes+'形狀':'')+'</span><span class="pill">'+L.n_hidden+' 隱藏祖先</span>'
    +'<span class="pill">'+(L.n_reads||0)+' reads·'+L.n_full_pops+'full/'+L.n_partial+'partial</span>'
    +(L.verify_pass?'<span class="pill" style="color:var(--det)">V1-7✓</span>':'<span class="pill" style="color:var(--rec)">V✗</span>');
-  if(L.trees&&L.trees.length){const lid='L'+(LID++);const ns=L.trees.length;
+  if(_obsPops===0)h+='<div class="note" style="margin:5px 0;color:#b91c1c;background:#fff5f5;border-color:#ffc9c9"><b>⚠ 此家族 0 實測全跨群</b>（n_full_pops=0·僅 '+(L.n_partial||0)+' partial read）→ 下方樹的<b>所有節點都是推測(隱藏祖先·空心紫圓)</b>,無任何直接觀測到的完整基因型群 → 整個結構為 partial-read 推斷,非觀測。</div>';
+  const _hasTree=(L.trees||[]).some(t=>t.edges&&t.edges.length);
+  if(L.trees&&L.trees.length&&_hasTree){const lid='L'+(LID++);const ns=L.trees.length;
    // 穩定邊集=出現在全部 N 棵等機率樹的邊(其餘=枚舉組合選擇,treeSVG 標橙虛線)
    let stable=null;if(ns>1){const cnt={};L.trees.forEach(t=>(t.edges||[]).forEach(e=>{const k=e[0]+'>'+e[1];cnt[k]=(cnt[k]||0)+1;}));stable=new Set(Object.keys(cnt).filter(k=>cnt[k]===ns));}
    h+='<div class="tsw" id="'+lid+'"><div class="tswhead"><b>可能樹結構</b>：'+L.n_trees+' 棵等機率最小樹'
@@ -249,6 +271,7 @@ function show(i,row){
    h+='</div>';
    if(ns>1){h+='<div class="thumbs">';L.trees.forEach((t,ti)=>{h+='<span class="thumb'+(ti?'':' on')+'" onclick="tjump(\''+lid+'\','+ti+')">#'+(ti+1)+'</span>';});h+='</div>';}
    h+='</div>';}
+  else{h+='<div class="note" style="margin:5px 0"><b>（此家族無分支樹可畫）</b> '+(_obsPops<=1?'只有單一 genotype 群或僅 germline':'樹 edges 為空')+' → <b>不是缺資料,是本來就無可枚舉的分支結構</b>（'+(L.n_full_pops||0)+' 實測群·'+(L.n_partial||0)+' partial）。determinacy='+esc(L.L1_class)+'。</div>';}
   h+='<div class="trace">'+L.trace.map(t=>'<div>'+esc(t)+'</div>').join('')+'</div></div>';});
  document.getElementById('detail').innerHTML=h;
 }
