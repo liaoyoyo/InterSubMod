@@ -123,8 +123,9 @@ python3 verify_pipeline_numbers.py
 ### §10.1 n≤8 cap 是否合理〔L1〕
 n_sSNV 分佈極度集中低端:**n≤8 覆蓋 97.51% 區**(僅 178=2.49% 超過,max=150 長尾極稀),截斷只丟 **6.73% sSNV**;且 commit `151a86d` 已對 >8 區加**全 pairwise 建樹**(去 MAX_SNV=8)→ 大區走 pairwise 不遺失。累積:n≤2 51.9% / ≤4 85.1% / ≤5 91.0% / ≤8 97.5%。→ **cap 是資料驅動的合理工程界**(精確窮舉路徑上限),非任意;僅 178 個 >8 區的**精確全向量樹**降級(有 pairwise 替代)。
 
-### §10.2 partial-read 救回反思(5 邊界)〔L1 機制 + L4 反思〕
-✅ 非循環(用真共現)/ ✅ 不 overclaim(標獨立 `E_subcube_recovered` 弱層,不當 A_determined)/ ⚠ 「救回 2,403 區」= 新增部分樹結構(**上界**,非完整還原;實誠 tier = chain≥3 的 58.6%)/ ⚠ 帶錯 partial read 可造假衝突(緩解:≥MINREAD + 對抗驗證 wf_526f6c8f,非零風險)/ ⚠ 已知 nic/population 不一致 edge(源碼自標,rr=0 時)/ ⚠ 僅 HCC1395。
+### §10.2 partial-read 救回反思(5 邊界 + 🔴 2026-07-09 更正)〔L1 機制 + L1 缺口〕
+✅ 非循環(用真共現)/ ✅ 不 overclaim(標獨立 `E_subcube_recovered` 弱層,不當 A_determined)/ ⚠ 帶錯 partial read 可造假衝突(緩解:≥MINREAD,非零風險)/ ⚠ 僅 HCC1395。
+🔴 **重大更正(2026-07-09 gap 驗證,見 `20260709_subcube_recovery_gap_quantification_01.md`)**:「救回 2,403 區」**不是「建出/枚舉出 2,403 棵樹」**——實測 **edges=0/2,403(全未建樹)**、n≥3 佔 97.9%、**乾淨 n≥3 的 100%(2,148)含未觀測對該枚舉多候選卻未枚舉**。精確語意 = **「辨識出 2,403 區有 partial 共現底料」**,tree_shape 只是標籤(chr4 只 1/3 對觀測就標 full_tree)。真正的 sub-face group-Steiner 建/枚舉是**未做的下一步**(使用者 catch)。所幸 recovered 不計入 A_determined(1,764)→ headline 不受污染。
 
 ### §10.3 「靠共享 B 串」是否合理完備 + 能否用超立方體〔L2〕
 - **範圍澄清**:B_pairwise 943 中 **n=2(單對·無串接)614=65.1%**、**n≥3(真靠共享 B 串)329=34.9%**。65% 根本不涉傳遞。
