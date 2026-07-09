@@ -16,10 +16,14 @@ data_sources: docs/methodology/_assets/20260618_subcluster_pilot/layered_reconst
 
 ## §1 單位階層（6 層，細 → 粗 → 樹內）
 
+> 🔴🔴 **骨幹來源重大更正（2026-07-09，使用者揪出）+ 全 7 樣本重跑中**：caller 是 **ClairS（paired tumor-normal，非 ClairS-TO）**，已用 normal 做 paired somatic calling + germline 濾除（FILTER=Germline）。舊 `is_somatic` 粗重檢（normal pileup VAF<5%）**冗餘且誤殺 429 個 SEQC2-TP 真 somatic**（全 normal VAF 5-30% borderline）→ **已移除**，改用 **ClairS PASS = LongPhase-S 輸出 `_sc.vcf`（somatic_pass）為骨幹**。**下方 U2-U6 + §2 比例是舊骨幹（23,810）數字，重跑後更新。**
+
 | Lv | 單位 | 定義 | HCC1395 計數 | 來源 |
 |----|------|------|------|------|
-| **U1** | **sSNV** | somatic SNV（census `somatic==True`）= 重建骨幹 | **23,810**（✅ 實測 census somatic==True）| sm_linkage_genomewide.json census |
-| U1-tot | census 位點（總）| 所有 union pileup 位點（somatic + germline-het + 其他）| 35,332 | 同上（🔴 handoff/master_spec 的「35,332 sSNV」實為**總 census 非 somatic**，待更正）|
+| **U1** | **somatic sSNV（新骨幹）** | **ClairS PASS = LongPhase-S `_sc.vcf`**（ClairS paired 確認 somatic；NAF=0 佔 96.8% 實測）| **113,997**（全基因組；重跑中）| somatic_pass.vcf.gz |
+| U1-truth | SEQC2 gold-standard somatic | truth_scoped（只 HC 區）| 39,447 | truth_scoped.vcf.gz |
+| ~~U1-old~~ | ~~舊骨幹 is_somatic~~ | ~~normal pileup 粗重檢 somatic==True~~ | ~~23,810（已淘汰，誤殺 429 真 somatic）~~ | ~~census~~ |
+| U1-germline | germline（對照，不入骨幹）| ClairS germline VCF → LongPhase-S phasing（定 HP1/2 = L0）| 1,698,116 | germline_phased_merged.vcf.gz |
 | **U2** | **read / molecule** | ONT 單分子 read（覆蓋 ≥1 個目標 sSNV）| **read×region 覆蓋次 = 1,533,402**（⚠非 unique molecule；一 read 跨多 region 重複計）| layered json `L0.reads_by_family_total` 加總 |
 | **U3** | **region**（🔴 **主分母**）| maximal linkage region（somatic-sSNV chain）；本 pipeline 計算單位 = multilocus 分析群（最密 ≤8 sSNV 窗）| **7,100**（multilocus 分析群，主分母）；7,143（integration linkage 全 span，同批區，見 §3）| sm_multilocus |
 | **U3-attr** | **HP-multiplicity**（region 屬性）| 一個 region 有幾個 germline(1/2) lineage 有樹 | 0:104 · **1(single-HP):3004** · **2(multi-HP):3992** | layered detail（使用者定案 2026-07-06：先呈現多-HP 再定義）|
@@ -73,7 +77,8 @@ data_sources: docs/methodology/_assets/20260618_subcluster_pilot/layered_reconst
 
 | 數字 | 是什麼 | 該當哪種分母 |
 |------|--------|------------|
-| **35,332** | somatic sSNV total | U1 sSNV 層 |
+| **113,997** | **ClairS PASS 骨幹**（HCC1395；LongPhase-S `_sc.vcf`；2026-07-09 定案）| U1 **建樹骨幹**（真值）|
+| ~~35,332~~ | ~~舊候選（SEQC2-HC 區 ClairS PASS，含 is_somatic 前）~~ | ⚠**已淘汰**（三重誤縮）|
 | **7,143** | integration linkage region（全 sSNV span，可達 94 sSNV/區）| U3 **linkage 完整版**（生物 region）|
 | **7,100** | multilocus 分析群（最密 ≤8 sSNV 子窗，樹在此建）| U3 **主分母**（reconstruction 操作單位）|
 | ~~6,288~~ | 舊 pooled「有向量」區 | ⚠**已淘汰**（單樹+混家族）|
@@ -134,4 +139,22 @@ n_trees_stored, L2_cn_verdict, L2_m_channel, verify{V1..V7}, verify_pass, max_va
 3. **determinacy × lineage 交叉表**：列=determined/ambiguous/capped/recurrence，欄=germline1/germline2/somatic3/none，格=count(比例)。
 4. **per-region 逐 lineage 展開**：region → 各 lineage-unit 的 L1 class + 枚舉樹 carousel + L2 CN + 判斷軌跡。
 
-> ⚠ **待 Bash 恢復**：U5/U6（Σtree、Σnode）+ P8 需從 detail 重算；並跑 `number_provenance` 產「每格→json:key」溯源表附於報告末（§13-C）。
+---
+
+## §7 數字取得/判別方式 + 一鍵驗證（2026-07-09，使用者要求「可驗證可比對」）
+
+**每個數字的來源與判準**（一鍵重算：`python3 .../scripts/verify_newbb_numbers.py` → 印新舊對照表 + 一致性 ✓）：
+
+| 數字 | 從哪個檔取得 | 判別方式（criterion）| 驗證命令 |
+|------|------------|------|---------|
+| **骨幹 sSNV**（U1）| `canonical/{S}/paired_full/*/longphase_s/somatic_pass.vcf.gz` | ClairS(paired) FILTER=PASS 的 SNV 位點數（=LongPhase-S 輸出=已確認 somatic）| `zcat somatic_pass.vcf.gz \| grep -vc '^#'` |
+| **NAF=0%**（somatic 判準）| 同上 FORMAT 欄 `NAF` | NAF=normal allele freq；`NAF==0` → normal 無此 ALT → 真 somatic（HCC1395 96.8%）| verify script FORMAT 解析 |
+| **caller** | somatic_pass header `##source` / `##cmdline` | `ClairS v0.4.0` + `--normal_bam_fn` = paired（非 ClairS-TO）| `zcat ... \| grep '^##cmdline'` |
+| **區數 / multi-HP / all-det**（U3）| `layered_region_view_{S}.json` census | region 主分母；all-det=全 germline(1/2) lineage 都 determined | `census.n_regions / hp_multiplicity / region_determinacy` |
+| **V1-V7** | region-view `L1.all_V1V7_pass` | solver 獨立重算（golden+3723 隨機 0-mismatch）| verify script |
+
+**一致性檢查**（verify script 內建）：region-view `U1_sSNV_somatic_total` **必等於** somatic_pass 重算數（欄末 ✓）→ 骨幹數字端到端無漂移。
+
+**新舊對照**（骨幹改動影響，可比對）：見 verify script 輸出「新/舊」欄；核心 = multi-HP 全樣本穩定（結構穩健）、all-det 隨骨幹成長比例下降（更多 somatic 揭露更多 ambiguity，可解釋）。
+
+> ⚠ 舊 `35,332/23,810` 數字（本檔早前版本 + handoff/master_spec + 並行 session explainer）已被 113,997 骨幹取代；explainer/verify_pipeline_numbers.py 待同步（跨 session 協調）。

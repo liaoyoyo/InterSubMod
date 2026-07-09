@@ -13,7 +13,14 @@ provenance: 凍結資料 @ branch feat/summary-nreadsvalid@5308d9e;本 session c
 
 ## §1 全 sSNV 宇宙帳本（無遺漏，整體各情況比例）
 
-**35,332 sSNV = TP 30,490 + FP 4,842**（SEQC2 標；TP/FP 只觀察、不進前處理）。三桶（per_sSNV_census）：
+**35,332 = ClairS 候選 sSNV calls（SEQC2-HC 區內）= TP 30,490 + FP 4,842**（SEQC2 標；TP/FP 只觀察、不進前處理）。
+> 🔴🔴 **骨幹來源定案（2026-07-09，使用者揪出兩層錯誤，§13.0）**：
+> ① caller 是 **ClairS v0.4.0 paired（tumor+normal，非 ClairS-TO）**——已用配對 normal 做 somatic calling + germline 濾除（FILTER=Germline）。
+> ② 舊 `is_somatic` 粗重檢（normal pileup VAF<5%）**冗餘且誤殺 429 個 SEQC2-TP 真 somatic**（全 normal VAF 5-30% borderline）→ **移除**。
+> ③ 舊 census（35,332）另受 **SEQC2-HC 區限制**（只 HC 區 ClairS PASS）。
+> → **真正建樹骨幹 = ClairS PASS = LongPhase-S 輸出 `somatic_pass.vcf.gz`/`_sc.vcf`**，HCC1395 = **113,997**（全基因組；NAF=0 佔 96.8% 實測=真 somatic；=SEQC2 truth 39,447 的 2.9x，因含 SEQC2 無法驗證的 non-HC 區真 somatic；高 VAF 72%≥0.5 是純腫瘤+LOH 非 germline）。**舊 23,810/35,332 已淘汰**。全 7 樣本已用新骨幹重跑（V1-V7 ALL PASS；multilocus SM_SOMATIC_VCF env）。
+
+三桶（per_sSNV_census）：
 
 | 桶 | n | % | 狀態 / 是否有資訊 |
 |---|--:|--:|---|

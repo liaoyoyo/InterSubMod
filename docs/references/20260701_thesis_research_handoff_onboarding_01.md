@@ -31,7 +31,8 @@ data_sources: docs/methodology/20260627_clone_subclone_integrated_report/data/*.
 > ⚠ **用詞範圍**：本段「確認結構 / 局部克隆樹」指**讀段內 sSNV 連鎖可解析出巢狀/分支**（遺傳連鎖層事實），**非生物學 subclone 確認**——單樣本分子證據的 confirm 天花板見 §5（需 single-cell/multi-region）。
 
 ### 第一段：somatic 共現骨幹 → 重建 subclone 結構（區域 partition + nested/sibling）
-- **35,332 sSNV**（30,490 TP + 4,842 FP）→ **7,143 區域**：**4,678 有確認結構**〔含 **677 full_tree** + linear_nested + sibling + 858 co_linked 單 lineage〕、**2,465 sparse**。其中 **3,820（53%）具分支/階層結構**（`20260626_genomewide_sSNV_linkage_region_trees` 口徑，排除 858 單 lineage）。同一 ONT read 上多 sSNV 的 2×2 共現 → 互斥/巢狀/共連 → 局部克隆樹。
+- 🔴🔴 **骨幹定案（2026-07-09，取代舊 35,332/23,810；使用者揪出）**：caller=**ClairS v0.4.0 paired**（非 ClairS-TO）已配對 normal 做 somatic + germline 濾除。舊 `is_somatic` 粗重檢冗餘+誤殺 429 真 somatic → 移除。**真骨幹 = ClairS PASS = LongPhase-S `somatic_pass.vcf.gz`**：HCC1395 **113,997**（NAF=0 佔 96.8%=真 somatic；驗證命令見資料模型 spec §7）。全 7 樣本已用新骨幹重跑（V1-V7 ALL PASS）。舊「35,332 sSNV=somatic」= 候選+SEQC2區限制+is_somatic 三重誤縮，已淘汰。
+- ~~**35,332 候選 sSNV**（舊）~~ → **7,143 區域**（linkage 全 span，舊骨幹口徑；新骨幹 7 樣本數見 layered_workstation）：**4,678 有確認結構**〔含 **677 full_tree** + linear_nested + sibling + 858 co_linked 單 lineage〕、**2,465 sparse**。其中 **3,820（53%）具分支/階層結構**（`20260626_genomewide_sSNV_linkage_region_trees` 口徑，排除 858 單 lineage）。同一 ONT read 上多 sSNV 的 2×2 共現 → 互斥/巢狀/共連 → 局部克隆樹。
 - 檔：`01_locus_master.md`（per-locus 主表 35,332）、`06_integrated_narrative.md`；資料 `data/sm_locus_master.tsv`、`_assets/20260618_subcluster_pilot/sm_linkage_genomewide.json`。
 - 腳本：`sm_linkage_genomewide.py` → `sm_evolution_build.py` → `sm_region_integration.py`。
 

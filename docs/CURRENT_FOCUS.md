@@ -12,7 +12,11 @@
 
 # 當前目標
 
-## 2026-07-07 — 🧬 分層 per-HP-家族樹枚舉重建 + 工作站 ⭐ 最新
+## 2026-07-09 — 🔴 骨幹來源定案：ClairS PASS（非 is_somatic 23,810）⭐ 最新
+
+> **使用者揪出**：caller=**ClairS v0.4.0 paired**（非 ClairS-TO）已配對 normal 做 somatic+germline 濾除；舊 `is_somatic` 粗重檢冗餘+誤殺 429 SEQC2-TP 真 somatic → **移除**。**真骨幹 = ClairS PASS = LongPhase-S `somatic_pass.vcf.gz`**（HCC1395 **113,997**，NAF=0 佔 96.8%=真 somatic；舊 23,810/35,332 淘汰）。全 7 樣本已用新骨幹重跑：**V1-V7 ALL PASS**、multi-HP 全穩定、all-det 隨骨幹成長比例降（可解釋）。數字取得/判別/驗證 → `verify_newbb_numbers.py`（一鍵重算）+ 資料模型 spec §7。⚠ 並行 session explainer/verify 仍舊數字待同步。
+
+## 2026-07-07 — 🧬 分層 per-HP-家族樹枚舉重建 + 工作站
 
 > **新 session 先讀**：memory `project_layered_perHPfamily_tree_enumeration_solver` + 資料模型 spec `InterSubMod/docs/methodology/20260706_layered_data_model_units_proportions_spec_01.md`（使用者確認的單位/分母/關係）。
 > **做了什麼**：使用者定案 5-step（spec→solver→驗→大規模→HTML）落地。**樹 per germline-HP-家族分開建**（家族優先於算法，修 allelic/clonal 混淆）。solver `tree_enumeration_solver.py`=布爾超立方體 group-Steiner 枚舉全最小樹（分析式 n_trees + 四配子判 recurrence；golden+3723隨機案例 0-mismatch；V1-V7）；driver `layered_tree_reconstruction.py`=L0家族→L1 sSNV枚舉→L2 CN→L3甲基。

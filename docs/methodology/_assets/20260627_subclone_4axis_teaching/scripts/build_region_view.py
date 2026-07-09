@@ -67,12 +67,27 @@ census = {"n_regions": len(regions),
           "L0": L["L0_hp_family"], "L1": L["L1_ssnv_algorithm"], "L2": L["L2_cn"],
           "U5_trees": {"sum_ntrees_noncapped": sum_trees, "ntrees_dist": dict(ntdist)},
           "U6_hidden": {"sum_hidden": sum(u["n_hidden"] for u in lin), "dist": dict(sorted(nh.items()))}}
-# U1 somatic sSNV total(可選)
-cen_path = os.environ.get("SM_CENSUS")
-if cen_path and os.path.exists(cen_path):
-    cen = json.load(open(cen_path, encoding="utf-8")).get("census", {})
-    census["U1_sSNV_somatic_total"] = sum(1 for v in cen.values() if v.get("somatic") is True)
-    census["U1_census_total_positions"] = len(cen)
+# U1 somatic sSNV total:新骨幹(2026-07-09)= ClairS PASS = SM_SOMATIC_VCF(_sc.vcf)計數;舊 = census somatic==True
+somatic_vcf = os.environ.get("SM_SOMATIC_VCF")
+if somatic_vcf and os.path.exists(somatic_vcf):
+    import gzip as _gz
+    _op = _gz.open if somatic_vcf.endswith(".gz") else open
+    n = 0
+    with _op(somatic_vcf, "rt") as fh:
+        for ln in fh:
+            if ln.startswith("#"):
+                continue
+            c = ln.split("\t")
+            if len(c) > 4 and len(c[3]) == 1 and len(c[4].strip()) == 1:
+                n += 1
+    census["U1_sSNV_somatic_total"] = n           # ClairS PASS somatic(建樹骨幹,含 normal 證據 NAF/NAD)
+    census["U1_backbone_source"] = "ClairS PASS / LongPhase-S _sc.vcf(移除 is_somatic 粗重檢)"
+else:
+    cen_path = os.environ.get("SM_CENSUS")
+    if cen_path and os.path.exists(cen_path):
+        cen = json.load(open(cen_path, encoding="utf-8")).get("census", {})
+        census["U1_sSNV_somatic_total"] = sum(1 for v in cen.values() if v.get("somatic") is True)
+        census["U1_census_total_positions"] = len(cen)
 intg = os.environ.get("SM_INTEGRATION")
 if intg and os.path.exists(intg):
     census["U3_linkage_regions_full_span"] = json.load(open(intg, encoding="utf-8"))["aggregate"]["n_regions"]

@@ -17,6 +17,29 @@ import sm_linkage_genomewide as M
 CNBED = os.environ.get("SM_CNBED", "/big8_disk/data/HCC1395/SEQC2/CNV/ngs_benchmark_cnvs_gain_loss_loh.bed")
 MINREAD = 3          # 一個 population 需 >=3 支持 read
 MAX_SNV = 8          # group 內 somatic sSNV 上限 (>8 spread 太大 full-cov~0; 取最密 8 個)
+# 骨幹來源(2026-07-09 使用者定案:改用 ClairS PASS / LongPhase-S 輸出,移除 is_somatic 粗重檢)。
+#   SM_SOMATIC_VCF 設 = LongPhase-S 輸出 somatic VCF(_sc.vcf/somatic_pass;=ClairS paired 已確認 somatic)→
+#   取代舊 filtered_snv_tp/fp(SEQC2 區限制)+census is_somatic(粗閾值誤殺真 somatic,見 20260706 資料模型 spec)。
+#   未設 → 舊行為(load_union tp/fp + is_somatic),供對照/重現。
+SOMATIC_VCF = os.environ.get("SM_SOMATIC_VCF", "")
+
+
+def load_somatic_universe(chrom):
+    """從 SM_SOMATIC_VCF(=ClairS PASS somatic = LongPhase-S 輸出)取該 chrom 全 SNV 位點。回 [(pos,ref,alt,'PASS')]。
+    全部 ClairS paired 已確認 somatic(含 normal 證據 NAF/NAD)→ 不再 is_somatic 粗重檢。"""
+    idx = (SOMATIC_VCF + ".tbi") if os.path.exists(SOMATIC_VCF + ".tbi") else (
+        (SOMATIC_VCF + ".csi") if os.path.exists(SOMATIC_VCF + ".csi") else None)
+    out = []
+    try:
+        tb = pysam.TabixFile(SOMATIC_VCF, index=idx) if idx else pysam.TabixFile(SOMATIC_VCF)
+        for ln in tb.fetch(chrom):
+            p = ln.split("\t")
+            ref, alt = p[3].upper(), p[4].strip().upper()
+            if len(ref) == 1 and len(alt) == 1:  # SNV only(_sc.vcf 全 SNV,防禦性)
+                out.append((int(p[1]), ref, alt, "PASS"))
+    except (ValueError, OSError):
+        return []
+    return sorted(out)
 
 
 def load_cn():
@@ -58,16 +81,18 @@ def germ_family(hptag):
 
 
 def main(chroms, out_path):
-    cen = json.load(open(f"{M.A}/sm_linkage_genomewide.json"))["census"]
+    # SM_SOMATIC_VCF 模式:骨幹=ClairS PASS(_sc.vcf),不需 census;舊模式仍讀 census 做 is_somatic
+    cen = {} if SOMATIC_VCF else json.load(open(f"{M.A}/sm_linkage_genomewide.json"))["census"]
     cn = load_cn()
     tb = pysam.AlignmentFile(M.TBAM, "rb")
     groups_out = []
     agg = Counter()
     agg_clean = Counter()
     for chrom in chroms:
-        snvs = M.load_union(chrom)
+        snvs = load_somatic_universe(chrom) if SOMATIC_VCF else M.load_union(chrom)
         for g in M.make_groups(snvs):
-            som = [s for s in g if cen.get(f"{chrom}:{s[0]}", {}).get("somatic") is True]
+            # SM_SOMATIC_VCF: 全部 ClairS PASS = somatic(不再 is_somatic 粗重檢);舊: census somatic==True 過濾
+            som = list(g) if SOMATIC_VCF else [s for s in g if cen.get(f"{chrom}:{s[0]}", {}).get("somatic") is True]
             if len(som) < 2:
                 continue
             # 若 >MAX_SNV, 取最密集連續 MAX_SNV 個 (span 最小) 以利 full-coverage
