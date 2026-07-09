@@ -93,6 +93,15 @@
 
 <h2><span class="n">1</span>方法：從 sSNV 共現到演化樹 <span class="tier t2">L2</span></h2>
 <p>每個 somatic 點突變（sSNV）是超立方體的一個座標軸；一條 ONT 長 read 直接讀出「哪些突變在<b>同一條 DNA 分子</b>上」——這是本方法的命脈（跨 read 拼接無法保證同分子，單分子共現可以）。</p>
+<table>
+  <tr><th>數學物件</th><th>生物意義</th></tr>
+  <tr><td>超立方體頂點 {0,1}ⁿ</td><td>一個基因型（已獲得哪些突變）</td></tr>
+  <tr><td>根 = 0ⁿ（全 R）</td><td>germline（未突變祖先）</td></tr>
+  <tr><td>有向邊（翻一個 0→1）</td><td>一次 infinite-sites 獲得突變</td></tr>
+  <tr><td>隱藏（Steiner）節點</td><td>推斷的、未被直接觀測到的祖先 clone</td></tr>
+  <tr><td>partial read（只覆蓋部分位點）</td><td>超立方體的一個「子面」約束（= IDPP，Pe'er 等 2004）</td></tr>
+  <tr><td>最小樹（枚舉全部）</td><td>maximum parsimony 演化樹（所有等成本候選）</td></tr>
+</table>
 
 <figure>
 <svg viewBox="0 0 460 250" width="100%" style="max-width:460px" font-family="-apple-system,Segoe UI,Noto Sans TC,sans-serif">
