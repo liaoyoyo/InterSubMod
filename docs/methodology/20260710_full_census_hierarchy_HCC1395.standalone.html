@@ -1,0 +1,132 @@
+<!doctype html>
+<!-- provenance-verified: 所有數字由 full_census_hierarchy.py 於 2026-07-10 對
+  layered_reconstruction_HCC1395.json（最新 per-HP-家族）+ sm_completeness_ledger.json + mlhp_part_*.json 重算，
+  一致性:C 各群加總=13785、D HP 加總=7927、E determinacy 加總=13785 皆 ✓。data commit 78271f6。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>完整量化普查（階層）— HCC1395</title>
+<style>
+  :root{--ink:#1a1f2b;--muted:#5b6472;--line:#e2e6ec;--bg:#f7f8fa;--card:#fff;--blue:#2563eb;--green:#0f9d58;--amber:#e08600;--red:#d33}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","Noto Sans TC","PingFang TC",Roboto,sans-serif;line-height:1.6;font-size:15px}
+  .wrap{max-width:900px;margin:0 auto;padding:30px 20px 70px}
+  header{border-bottom:2px solid var(--ink);padding-bottom:14px}
+  h1{font-size:23px;margin:0 0 3px}
+  .sub{color:var(--muted);font-size:14px}
+  .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;background:#fff4e0;color:#8a5800;border:1px solid #f0d090}
+  h2{font-size:17px;margin:30px 0 8px;padding-top:6px;border-top:1px solid var(--line)}
+  h2 .n{color:var(--blue);font-weight:800;margin-right:7px}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:6px 9px;text-align:left}
+  th{background:#eef1f5;font-weight:700}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .bar{display:inline-block;height:9px;background:#93b4f5;border-radius:3px;vertical-align:middle;margin-right:5px}
+  .obs{background:#eef7 f0;background:#e6f4ea;border:1px solid #bfe3ca;border-radius:8px;padding:9px 13px;margin:10px 0;font-size:14px}
+  .warn{background:#fff6e6;border:1px solid #f0dca0;border-radius:8px;padding:9px 13px;margin:10px 0;font-size:14px}
+  .stop{background:#fdecec;border:1px solid #f3c0c0;border-radius:8px;padding:9px 13px;margin:10px 0;font-size:14px}
+  code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:12.5px}
+  footer{margin-top:36px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+  small.n{color:var(--muted)}
+  .tot{font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>完整量化普查（階層）<span class="pill">HCC1395 單樣本</span></h1>
+  <div class="sub">S → 區域(k) → 群組合(C) → HP 分類 → 拓撲確認 → 拓撲類型 ｜ 最新 layered per-HP-家族框架 ｜ 2026-07-10</div>
+</header>
+
+<h2><span class="n">A</span>sSNV 位點總數 S 與連結狀態</h2>
+<table>
+  <tr><th>類別</th><th class="num">數量</th><th class="num">佔 S %</th><th>意義</th></tr>
+  <tr class="tot"><td>S 總 sSNV</td><td class="num">35,332</td><td class="num">100%</td><td>TP 30,490 + FP 4,842</td></tr>
+  <tr><td>isolated_singleton（k=1·單點）</td><td class="num">8,320</td><td class="num">23.5%</td><td>無 partner → 無樹（單點）</td></tr>
+  <tr><td>underpowered（有 partner 無足夠共讀）</td><td class="num">5,458</td><td class="num">15.4%</td><td>可救但共讀不足</td></tr>
+  <tr><td>linked（有共現）</td><td class="num">21,554</td><td class="num">61.0%</td><td>可建樹的骨料</td></tr>
+</table>
+
+<h2><span class="n">B</span>區域 W：單點 vs 多點</h2>
+<table>
+  <tr><th>類別</th><th class="num">數量</th><th>說明</th></tr>
+  <tr><td>k=1（單點·無樹）</td><td class="num">8,320 sSNV</td><td>= isolated_singleton；單一位點不成樹</td></tr>
+  <tr class="tot"><td>k&gt;1（多點·可建樹）區</td><td class="num">7,927 區</td><td>→ 依 HP 家族拆成 13,785 lineage 樹單位（下方 C–F 全以此為母體）</td></tr>
+</table>
+
+<h2><span class="n">C</span>群組合 C（每單位全覆蓋基因型群數）× 確認樹結構</h2>
+<table>
+  <tr><th class="num">C</th><th class="num">單位數</th><th class="num">確認樹<br>(determined)</th><th class="num">多可能性<br>(ambiguous)</th><th class="num">capped</th><th class="num">recurrence</th><th class="num">確認率</th></tr>
+  <tr><td class="num">0<br><small class="n">純partial</small></td><td class="num">8,719</td><td class="num">3,845</td><td class="num">4,233</td><td class="num">637</td><td class="num">4</td><td class="num">44%</td></tr>
+  <tr><td class="num">1</td><td class="num">3,092</td><td class="num">1,831</td><td class="num">1,235</td><td class="num">26</td><td class="num">0</td><td class="num">59%</td></tr>
+  <tr><td class="num">2</td><td class="num">1,577</td><td class="num">1,115</td><td class="num">450</td><td class="num">11</td><td class="num">1</td><td class="num">71%</td></tr>
+  <tr><td class="num">3</td><td class="num">376</td><td class="num">321</td><td class="num">39</td><td class="num">2</td><td class="num">14</td><td class="num">85%</td></tr>
+  <tr><td class="num">4</td><td class="num">17</td><td class="num">10</td><td class="num">1</td><td class="num">0</td><td class="num">6</td><td class="num">59%</td></tr>
+  <tr><td class="num">5</td><td class="num">4</td><td class="num">1</td><td class="num">1</td><td class="num">0</td><td class="num">2</td><td class="num">25%</td></tr>
+  <tr class="tot"><td class="num">合計</td><td class="num">13,785</td><td class="num">7,123</td><td class="num">5,959</td><td class="num">676</td><td class="num">27</td><td class="num">51.7%</td></tr>
+</table>
+<div class="obs">📈 <b>觀察</b>：群組合 C 越多 → 確認率越高（C=0→44% → C=1→59% → C=2→71% → C=3→85%）。<b>更多觀測到的基因型群＝更多約束＝樹越容易被唯一定出來</b>（C=4/5 樣本太少、且多為 recurrence 故率下降）。</div>
+
+<h2><span class="n">D</span>HP 分類（germline 親代單體型）</h2>
+<table>
+  <tr><th>類別</th><th class="num">not HP3</th><th class="num">有 HP3</th><th class="num">小計</th><th class="num">佔 W %</th></tr>
+  <tr><td><b>只有單個 HP 有樹</b>（HP1 xor HP2）</td><td class="num">2,855</td><td class="num">352</td><td class="num">3,207</td><td class="num">40.5%</td></tr>
+  <tr><td><b>兩個 HP 都有樹</b>（HP1 and HP2）</td><td class="num">3,200</td><td class="num">1,243</td><td class="num">4,443</td><td class="num">56.0%</td></tr>
+  <tr><td>無 germline 家族（只 somatic-3 / none）</td><td class="num" colspan="2">—</td><td class="num">277</td><td class="num">3.5%</td></tr>
+  <tr class="tot"><td>合計</td><td class="num" colspan="2"></td><td class="num">7,927</td><td class="num">100%</td></tr>
+</table>
+<div class="warn">💡 <b>HP3 = somatic-integrated（第三 lineage）</b>：1,595 區含 HP3 樹（352 + 1,243）。<b>56% 區兩條親代單體型都有樹</b>（mixed germline）→ 這正是「一區拆多棵」的來源。</div>
+
+<h2><span class="n">E</span>拓撲確認狀況 + 可能性數量</h2>
+<table>
+  <tr><th>分類</th><th class="num">單位數</th><th class="num">佔 %</th><th>意義</th></tr>
+  <tr><td><b>determined</b>（唯一樹）</td><td class="num">7,123</td><td class="num">51.7%</td><td>可辨識為 1 棵（1 種可能）</td></tr>
+  <tr><td><b>ambiguous</b>（多候選樹）</td><td class="num">5,959</td><td class="num">43.2%</td><td>多種可能（見下 n_trees）→ read 加權對象</td></tr>
+  <tr><td>capped（太密·枚舉未完）</td><td class="num">676</td><td class="num">4.9%</td><td>誠實標記，不宣稱</td></tr>
+  <tr><td>recurrence（位點翻≥2次）</td><td class="num">27</td><td class="num">0.2%</td><td>→ CN 拆：artifact 20 / LOH 7</td></tr>
+</table>
+<p><small class="n"><b>ambiguous 的「可能性數量」(候選樹數 n_trees) 分佈</b>（共 5,959 單位）：</small></p>
+<table>
+  <tr><th class="num">n_trees</th><th class="num">2</th><th class="num">3</th><th class="num">4</th><th class="num">5</th><th class="num">6</th><th class="num">7</th><th class="num">8</th><th class="num">9</th><th class="num">10</th><th class="num">10+</th></tr>
+  <tr><td class="num">單位數</td><td class="num">1,791</td><td class="num">1,988</td><td class="num">105</td><td class="num">264</td><td class="num">287</td><td class="num">72</td><td class="num">37</td><td class="num">8</td><td class="num">396</td><td class="num">1,011</td></tr>
+</table>
+<div class="obs">📊 多數 ambiguous 只有 <b>2–3 棵</b>候選（1,791 + 1,988 = 3,779 單位＝63%）→ 大多「差一點就定」；少數（1,011 單位）≥10 棵候選＝真高度歧義。</div>
+
+<h2><span class="n">F</span>拓撲類型</h2>
+<table>
+  <tr><th>類型</th><th class="num">單位數</th></tr>
+  <tr><td>determined·單一形狀（純觀測，無隱藏節點）</td><td class="num">4,047</td></tr>
+  <tr><td>determined·單一形狀（含隱藏 Steiner 祖先）</td><td class="num">3,076</td></tr>
+  <tr><td>ambiguous·2 種形狀</td><td class="num">2,403</td></tr>
+  <tr><td>ambiguous·1 種形狀（同節點集·順序未定）</td><td class="num">1,662</td></tr>
+  <tr><td>ambiguous·3 種形狀</td><td class="num">883</td></tr>
+  <tr><td>ambiguous·4 種形狀</td><td class="num">545</td></tr>
+  <tr><td>ambiguous·8 種形狀</td><td class="num">206</td></tr>
+  <tr><td>ambiguous·5/6/7/9 種形狀</td><td class="num">113 / 76 / 67 / 4</td></tr>
+</table>
+<div class="warn">🌳 determined 中 <b>3,076 / 7,123（43%）需要隱藏（推斷）祖先節點</b>才能建樹——這正是本方法「未觀測全突變基因型當 Steiner 節點」的實際發揮。</div>
+
+<h2><span class="n">G</span>能確認樣本「完整」癌症突變樹嗎？</h2>
+<div class="stop">🔴 <b>否。</b> 單一 bulk：<b>43.2%</b> 單位為多候選、<b>跨區整棵樹非可辨識</b>（資訊論極限，非計算問題）。封頂 <b>⭐3（characterize 非 confirm subclone）</b>；要突破需 single-cell / multi-region 正交真值。<b>可確認的是「每區/每家族局部樹 + 誠實可辨識性分類」，不是一棵完整全景樹。</b></div>
+
+<h2><span class="n">H</span>可觀察與確認的分類（總表）</h2>
+<table>
+  <tr><th>層</th><th>分類軸</th><th>可觀察值</th></tr>
+  <tr><td>sSNV</td><td>連結狀態</td><td>isolated / underpowered / linked</td></tr>
+  <tr><td>區域</td><td>位點數 k</td><td>k=1（無樹）/ k&gt;1（可建樹）</td></tr>
+  <tr><td>單位</td><td>群組合 C</td><td>C=0..5（越多越易定）</td></tr>
+  <tr><td>單位</td><td>germline HP</td><td>HP1 xor HP2 / HP1 and HP2；× HP3 有無</td></tr>
+  <tr><td>單位</td><td>拓撲確認</td><td>determined / ambiguous / capped / recurrence</td></tr>
+  <tr><td>單位</td><td>可能性數量</td><td>n_trees（唯一=1；歧義 2..10+）</td></tr>
+  <tr><td>單位</td><td>拓撲形狀</td><td>純觀測 / 含隱藏祖先；1..9 種形狀</td></tr>
+</table>
+
+<footer>
+  <b>可重現</b>：<code>python3 full_census_hierarchy.py</code>（<code>InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/</code>）。
+  來源 <code>layered_reconstruction_HCC1395.json</code>（最新 per-HP-家族）+ <code>sm_completeness_ledger.json</code> + <code>mlhp_part_*.json</code>；
+  一致性 C/E 加總 = 13,785、D 加總 = 7,927 皆 ✓。data commit <code>78271f6</code>。partial flag：HCC1395 單樣本。
+</footer>
+</div>
+</body>
+</html>
