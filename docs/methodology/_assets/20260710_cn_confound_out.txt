@@ -1,0 +1,29 @@
+CNBED 存在: True  (/big8_disk/data/HCC1395/SEQC2/CNV/ngs_benchmark_cnvs_gain_loss_loh.bed)
+HCC1395 sSNV 共現區(≥2 sSNV) 總數: 7928
+
+=== ① 全 sSNV 共現區的 CN 狀態分布 ===
+  neutral :   463 (5.8%)
+  loh     :  2265 (28.6%)
+  gain    :  5050 (63.7%)
+  loss    :   150 (1.9%)
+  → CN-neutral(VAF 可乾淨解讀)= 463 (5.8%)
+  → CN-altered(gain/loh/loss, VAF 受混淆)= 7465 (94.2%)
+  🔴 其中 gain(稀釋VAF→可能假subclone)= 5050 (63.7%)
+
+=== ② CN 狀態 × c(region 層 clone 數) ===
+   c |  neutral    loh   gain  loss | neutral%
+   0 |      332   1200   2958   108 | 7%
+   1 |       67    578    834    32 | 4%
+   2 |       60    459   1106    10 | 4%
+  3+ |        4     28    152     0 | 2%
+
+=== ③ 巢狀 clone→subclone 區(2-ALT 巢狀) 的 CN 狀態 ===
+   祖先VAF~1.0→衍生VAF~0.4 的 pattern:neutral=真subclone候選 · gain=可能稀釋假象
+  neutral :    15 (2.0%)
+  loh     :   321 (42.9%)
+  gain    :   405 (54.1%)
+  loss    :     7 (0.9%)
+  → 巢狀區總 748;CN-neutral(乾淨真subclone候選)= 15 (2.0%)
+  🔴 巢狀區在 gain(衍生VAF可能=拷貝稀釋非subclone)= 405 (54.1%)
+  衍生VAF 中位: neutral 區=0.488 (n=15) vs gain 區=0.417 (n=405)
+     若兩者接近 → gain 的低VAF 未必來自稀釋;若 gain 明顯更低 → 稀釋跡象
