@@ -86,7 +86,7 @@ provenance: 所有數字由 scripts/verify_pipeline_numbers.py 於 2026-07-09 �
 cd InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts
 python3 verify_pipeline_numbers.py
 ```
-該腳本**只讀不寫**,把上方每個 headline 數字對回原始 JSON 重算 + 一致性檢查(三桶加總、桶=3885、+subcube=6288、B1=44+25、CAP=0、m-通道=70…)。**全 ✓ = 本文數字可信;任何 ✗ = 該數字與原始檔漂移需查。** 2026-07-09 實跑全 ✓。
+該腳本**只讀不寫**,把上方每個 headline 數字對回原始 JSON 重算 + 一致性檢查(三桶加總、桶=3885、+subcube=6288、B1=44+25、CAP=0、m-通道=70…),**並含 §10 的 Q1 n_sSNV 分佈 / Q2 pairwise 假關聯 / Q3 跨樣本 determinacy**(後兩者 optional,需 sm_linkage pairs / MSROOT)。**全 ✓ = 本文數字可信;任何 ✗ = 該數字與原始檔漂移需查。** 2026-07-09 實跑全 ✓。
 
 ### Provenance 表（數字 → 來源檔:key）
 | 數字 | 值 | 來源 |
@@ -115,5 +115,34 @@ python3 verify_pipeline_numbers.py
   → 輔助驗證: CN m-通道(11棄/9留/50未定) · VAF 核對 · 甲基 Bernoulli 否決
   → SOLVE-1 精確枚舉 ✓ / SOLVE-2 唯一樹 ✗(非可辨識 1,487) / ⭐3
 ```
+
+---
+
+## §10 補充:方法細節合理性(數據支持 + 反思)
+
+### §10.1 n≤8 cap 是否合理〔L1〕
+n_sSNV 分佈極度集中低端:**n≤8 覆蓋 97.51% 區**(僅 178=2.49% 超過,max=150 長尾極稀),截斷只丟 **6.73% sSNV**;且 commit `151a86d` 已對 >8 區加**全 pairwise 建樹**(去 MAX_SNV=8)→ 大區走 pairwise 不遺失。累積:n≤2 51.9% / ≤4 85.1% / ≤5 91.0% / ≤8 97.5%。→ **cap 是資料驅動的合理工程界**(精確窮舉路徑上限),非任意;僅 178 個 >8 區的**精確全向量樹**降級(有 pairwise 替代)。
+
+### §10.2 partial-read 救回反思(5 邊界)〔L1 機制 + L4 反思〕
+✅ 非循環(用真共現)/ ✅ 不 overclaim(標獨立 `E_subcube_recovered` 弱層,不當 A_determined)/ ⚠ 「救回 2,403 區」= 新增部分樹結構(**上界**,非完整還原;實誠 tier = chain≥3 的 58.6%)/ ⚠ 帶錯 partial read 可造假衝突(緩解:≥MINREAD + 對抗驗證 wf_526f6c8f,非零風險)/ ⚠ 已知 nic/population 不一致 edge(源碼自標,rr=0 時)/ ⚠ 僅 HCC1395。
+
+### §10.3 pairwise 是否會「錯誤關聯」+ 能否用超立方體〔L1〕
+- **定義**:pairwise 安全 ⟺ 所有 C(n,2) 對**直接觀測 + 四型相容**(Gusfield:pairwise 相容 ⟺ perfect phylogeny 存在)。假關聯風險 = **未觀測對被傳遞假設** 或 噪音對。
+- **實證(B_pairwise 943 區)**:🟢 **nic=0**(所有觀測對四型相容,觀測衝突被 route 走)+ **98.7%(931/943)全對直接觀測=零傳遞假設**(多數 n=2 單對)+ 只 **1.3%(12 區)含未觀測對**(真風險面,且標 B_pairwise 弱層非 A_determined)。→ **pairwise 幾乎不製造假關聯;風險面 1.3% 且已誠實降級。**
+- **能否用超立方體?** ✅ **可以且更安全**:一條 pairwise co-read = **2-位點子面(group)** = IDPP/群組斯坦納的特例(span=2 的 partial read)。gap#1 `E_subcube_recovered` **已在做**。關鍵:超立方體枚舉對未觀測對**保持自由 → 輸出所有相容樹(co-optimal 集)**,而非硬串成一棵 → **把「傳遞假設的假關聯風險」轉成「誠實的欠定(多候選/非可辨識)」**。這正是它比 naive stitching 安全之處。
+
+### §10.4 跨樣本拓撲分佈 + 誠實邊界〔L1 分類 / L3 比較〕
+| 樣本 | n | determined% | conflict | B_pairwise | C_underdet |
+|---|--:|--:|--:|--:|--:|
+| HCC1937 | 1,886 | **52.7%** | 0 | 285 | 132 |
+| HCC1954 | 2,837 | 40.2% | 1 | 343 | 222 |
+| HCC1395_DORADO | 3,418 | 34.5% | 4 | 412 | 307 |
+| H1437 | 8,169 | 25.3% | 66 | 1,027 | 382 |
+| H2009 | 9,444 | 18.6% | 265 | 827 | 246 |
+| COLO829 | 6,613 | 18.5% | 1 | 660 | 607 |
+
+✅ 拓撲可乾淨分 6-7 類 + 算比例(每樣本一張)。🔴 **但 determined% 差異主由資料品質(coread 深度/read 長度)驅動,非生物**(COLO829 18.5% = 低 coread artifact,非 clone 少);pseudoreplication(真 n=7,p 值無意義)、CN 混淆、不同 truth set → **跨樣本比較 = L3 描述性,非驗證整體 clone 的生物結論**;⭐3 封頂(缺正交真值)。**可合法用**:樣本內「結構可解析度」誠實陳述;不可用:「A 比 B clone 複雜」。
+
+---
 
 **關聯**:形式化 SoT `20260704_formal_problem_statement_topology_from_cooccurrence_01.md`;review `20260705_topology_tractability_review_and_gaps_01.md`;架構 `20260703_clone_read_probabilistic_labeling_architecture_01.md`;驗證腳本 `_assets/20260627_subclone_4axis_teaching/scripts/verify_pipeline_numbers.py`。

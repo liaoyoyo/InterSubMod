@@ -107,6 +107,66 @@ try:
 except Exception as ex:
     print(f"  (four_gamete demo 不到:{ex})")
 
+# ── 站Q1 n_sSNV 分佈 + n<=8 覆蓋 ──
+from math import comb
+print("\n[Q1] n_sSNV 分佈 + n<=8 cap 支持 ← sm_region_integration.json")
+_c = Counter(r["n_sSNV"] for r in mss)
+_gt8 = [r for r in mss if r["n_sSNV"] > 8]
+_lost = sum(r["n_sSNV"] - 8 for r in _gt8); _tot_ss = sum(r["n_sSNV"] for r in mss)
+line("max n_sSNV", max(_c), "max(n_sSNV)")
+line("n<=8 覆蓋 %", f"{(len(mss)-len(_gt8))/len(mss)*100:.2f}%", "count(n<=8)/total", (len(mss)-len(_gt8))/len(mss) >= 0.95)
+line(">8 區數", f"{len(_gt8)} ({len(_gt8)/len(mss)*100:.2f}%)", "count(n>8)")
+line("截斷丟失 sSNV %", f"{_lost/_tot_ss*100:.2f}%", "sum(n-8 for n>8)/total_sSNV")
+
+# ── 站Q2 pairwise 假關聯風險(未觀測對比例) ── optional(需 sm_linkage pairs)
+print("\n[Q2] B_pairwise 假關聯風險 ← topology_per_region + sm_linkage pairs")
+try:
+    from bisect import bisect_left, bisect_right
+    import sys as _sys
+    _pp = os.path.join(DATA, "sm_linkage_genomewide.json")
+    if not os.path.exists(_pp):
+        _sys.path.insert(0, HERE); import sm_linkage_genomewide as _M; _pp = os.path.join(_M.A, "sm_linkage_genomewide.json")
+    _L = json.load(open(_pp)); _plut = set(); _sb = {}
+    for p in _L["pairs"]: _plut.add((p["chrom"], min(p["a"], p["b"]), max(p["a"], p["b"])))
+    from collections import defaultdict as _dd
+    _sbd = _dd(list)
+    for k, c in _L["census"].items():
+        if c.get("somatic") is True:
+            cc, pos = k.rsplit(":", 1); _sbd[cc].append(int(pos))
+    for cc in _sbd: _sbd[cc].sort()
+    _det = L2 = json.load(open(os.path.join(DATA, "topology_per_region.json")))["detail"]
+    _bp = [r for r in _det if r.get("determinacy") == "B_pairwise_structure"]
+    _nicnz = sum(1 for r in _bp if r.get("n_independent_clean", 0) > 0)
+    _full = 0; _cnt = 0
+    for r in _bp:
+        ch = r["chrom"]; s = r["start"]; e = s + r.get("span", 0)
+        arr = _sbd.get(ch, []); loci = [p for p in arr[bisect_left(arr, s):bisect_right(arr, e)] if s <= p <= e][:8]
+        n = len(loci)
+        if n < 2: continue
+        _cnt += 1; tot = comb(n, 2)
+        obs = sum(1 for i in range(n) for j in range(i+1, n) if (ch, loci[i], loci[j]) in _plut)
+        if obs >= tot: _full += 1
+    line("B_pairwise 區數", len(_bp), "count(B_pairwise_structure)")
+    line("觀測對四型衝突(nic>0)區", _nicnz, "應=0(觀測對全相容)", _nicnz == 0)
+    line("全對觀測(零傳遞假設)%", f"{_full/_cnt*100:.1f}%", "count(obs==C(n,2))/計算區")
+    line("含未觀測對(傳遞假設)區", f"{_cnt-_full} ({(_cnt-_full)/_cnt*100:.1f}%)", "假關聯風險面")
+except Exception as ex:
+    print(f"  (pairwise 覆蓋跳過:{ex})")
+
+# ── 站Q3 跨樣本 determinacy 分佈 ── optional(需 MSROOT)
+print("\n[Q3] 跨樣本 determinacy 分佈 ← MSROOT/*/topology_per_region.json")
+MS = "/big7_disk/liaoyoyo2001/big7_disk_output/multisample_subclone"
+if os.path.isdir(MS):
+    for s in sorted(os.listdir(MS)):
+        tpp = os.path.join(MS, s, "topology_per_region.json")
+        if not os.path.exists(tpp): continue
+        try: dd = json.load(open(tpp))["detail"]
+        except Exception: continue
+        nn = len(dd); ddet = sum(1 for r in dd if "A_determined" in r.get("determinacy", ""))
+        print(f"  {s:16} n={nn:5}  determined {ddet:4} ({ddet/nn*100:4.1f}%)")
+else:
+    print(f"  (MSROOT 不存在:{MS} — 跨樣本跳過)")
+
 print("\n" + "="*96)
 print("驗證完成。上方 ✗ 代表數字與原始檔不一致(需查);全 ✓ = explainer 數字可信。")
 print("="*96)
