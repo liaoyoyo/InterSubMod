@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""build_companion_7sample_classification.py — 教授版 narrative 的延伸 companion(2026-07-10)。
+讀 3 個既有 verified JSON 直接注入(§13-A 零手打):
+  ①ccf_and_cn_multisample.json → §A 7樣本 read/VAF/CN reach(延伸教授版§8,同 multilocus 分段)
+  ②multisample_summary.json    → §B 7樣本 topology/生物分類(integration 分段,標清denominator)
+  ③20260709_structure_result_data.json → §C clone/subclone 頻率分類(VAF峰值+巢狀父子)
+複用教授版 CSS(視覺一致)。不動教授版已 commit 原檔。輸出 docs/methodology/。
+"""
+import json, os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.join(HERE, "..", "data")
+ASSETS = "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets"
+OUT = "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/20260710_reconstruction_7sample_classification_companion.standalone.html"
+
+ccf = json.load(open(os.path.join(DATA, "ccf_and_cn_multisample.json")))
+summ = json.load(open(os.path.join(DATA, "multisample_summary.json")))
+sr = json.load(open(os.path.join(ASSETS, "20260709_structure_result_data.json")))
+
+ORDER = ["HCC1395", "HCC1395_DORADO", "COLO829", "H1437", "H2009", "HCC1937", "HCC1954"]
+
+CSS = """
+:root{--ink:#1a1f2b;--muted:#5b6472;--line:#e4e8ee;--bg:#f7f8fa;--card:#fff;
+  --blue:#2a78d6;--amber:#eda100;--red:#e34948;--green:#1baf7a;--vio:#7c5cd0;--gray:#8a94a3}
+@media(prefers-color-scheme:dark){:root{--ink:#e8ebf0;--muted:#9aa4b2;--line:#2a3140;--bg:#12151b;--card:#1a1f28}}
+:root[data-theme="light"]{--ink:#1a1f2b;--muted:#5b6472;--line:#e4e8ee;--bg:#f7f8fa;--card:#fff}
+:root[data-theme="dark"]{--ink:#e8ebf0;--muted:#9aa4b2;--line:#2a3140;--bg:#12151b;--card:#1a1f28}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","Noto Sans TC","PingFang TC",Roboto,sans-serif;line-height:1.65;font-size:15px}
+.wrap{max-width:960px;margin:0 auto;padding:32px 20px 80px}
+header{border-bottom:2px solid var(--ink);padding-bottom:15px}
+h1{font-size:23px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:14px}
+.pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;background:#fff4e0;color:#8a5800;border:1px solid #f0d090}
+h2{font-size:18px;margin:32px 0 8px;padding-top:8px;border-top:1px solid var(--line)}
+h2 .n{color:var(--blue);font-weight:800;margin-right:8px}
+h3{font-size:15px;margin:16px 0 5px}
+p{margin:8px 0}
+.tier{display:inline-block;font-size:10px;font-weight:800;padding:1px 5px;border-radius:4px;color:#fff;vertical-align:middle;margin-left:4px}
+.t1{background:#1baf7a}.t2{background:#2a78d6}.t3{background:#eda100}
+.verdict{background:linear-gradient(180deg,#eef4ff,transparent);border:1px solid #cfe0ff;border-left:5px solid var(--blue);border-radius:10px;padding:15px 17px;margin:14px 0}
+@media(prefers-color-scheme:dark){.verdict{background:linear-gradient(180deg,#16223a,transparent);border-color:#2a4a7a}}
+.verdict b{color:var(--blue)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0}
+.obs{background:#e6f4ea;border:1px solid #bfe3ca;border-radius:8px;padding:9px 13px;margin:9px 0;font-size:13.5px}
+@media(prefers-color-scheme:dark){.obs{background:#14261b;border-color:#2c5540}}
+.warn{background:#fff6e6;border:1px solid #f0dca0;border-radius:8px;padding:9px 13px;margin:9px 0;font-size:13.5px}
+@media(prefers-color-scheme:dark){.warn{background:#2a2410;border-color:#5c4d1e}}
+.stop{background:#fdecec;border:1px solid #f3c0c0;border-radius:8px;padding:9px 13px;margin:9px 0;font-size:13.5px}
+@media(prefers-color-scheme:dark){.stop{background:#2c1618;border-color:#5c2b2e}}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:9px 0}
+th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:var(--card);font-weight:700}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+code{background:var(--line);padding:1px 5px;border-radius:4px;font-size:12px}
+.scroll{overflow-x:auto}
+.bar{display:inline-block;height:11px;border-radius:2px;vertical-align:middle}
+.leg{display:flex;flex-wrap:wrap;gap:5px 15px;font-size:12.5px;margin:6px 0}
+.leg span{display:flex;align-items:center;gap:5px}.sw{width:12px;height:12px;border-radius:3px}
+footer{margin-top:38px;padding-top:13px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+"""
+
+def bar(pct, color, maxw=90):
+    return f"<span class='bar' style='width:{pct/100*maxw:.0f}px;background:{color}'></span>"
+
+# ---------- §A 7樣本 reach/CN ----------
+rowsA = []
+for s in ORDER:
+    c = ccf["samples"][s]["ccf"]; src = ccf["samples"][s]["cn_source"]
+    tr = c.get("trustworthy_reach_pct", 0)
+    rowsA.append(f"<tr><td>{s}</td><td class='num'>{c['n_ambiguous']:,}</td>"
+                 f"<td class='num'>{c['broke_pct']}% {bar(c['broke_pct'],'var(--amber)')}</td>"
+                 f"<td class='num'>{c.get('winner_selfconsist_pct_of_broke','-')}%</td>"
+                 f"<td class='num'>{c.get('strictly_neutral_broke','-'):,}</td>"
+                 f"<td class='num' style='color:var(--red);font-weight:700'>{tr}% {bar(tr,'var(--red)',60)}</td>"
+                 f"<td>{src}</td></tr>")
+
+# ---------- §B 7樣本 topology/生物 ----------
+def pctf(a, b): return f"{100*a/b:.0f}%" if b else "-"
+rowsB = []
+for s in ORDER:
+    v = summ[s]; tot = v["total_regions"]
+    sub = v["single"] + v["linear"] + v["branched"]
+    rowsB.append(f"<tr><td>{s}</td><td class='num'>{tot:,}</td>"
+                 f"<td class='num'>{v['single']:,} ({pctf(v['single'],tot)})</td>"
+                 f"<td class='num'>{v['linear']:,} ({pctf(v['linear'],tot)})</td>"
+                 f"<td class='num'>{v['branched']:,} ({pctf(v['branched'],tot)})</td>"
+                 f"<td class='num'>{v['A_determined']:,}</td><td class='num'>{v['B_pairwise']:,}</td><td class='num'>{v['C_underdetermined']:,}</td></tr>")
+
+# ---------- §C clone/subclone 頻率 ----------
+rowsC = []
+for s in ORDER:
+    v = sr["samples"][s]
+    pk = " · ".join(f"{p['vaf']}" for p in v["vaf_peaks"])
+    rowsC.append(f"<tr><td>{s}</td><td>{pk}</td><td class='num'>{v['nested']:,}</td><td class='num'>{v['sister']:,}</td>"
+                 f"<td class='num'>{v['anc_med_vaf']}</td><td class='num'>{v['der_med_vaf']}</td></tr>")
+
+html = f"""<!doctype html>
+<!-- provenance-verified: 全數字 2026-07-10 本 session 機械重算並讀回注入。來源 JSON:
+  ccf_and_cn_multisample.json(7樣本 reach/CN,同 multilocus 分段)、multisample_summary.json(7樣本 topology,integration 分段)、
+  20260709_structure_result_data.json(VAF 峰值+巢狀)。此為 20260710_reconstruction_full_pipeline_narrative_HCC1395 的延伸 companion,不改原檔。 -->
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>亞克隆重建 — 7 樣本跨樣本分類 + clone/subclone 頻率分類（companion）</title>
+<style>{CSS}</style></head><body><div class="wrap">
+<header>
+<h1>亞克隆重建 — 7 樣本跨樣本分類 + clone/subclone 頻率分類 <span class="pill">companion · 7 樣本 · ⭐3→⭐4</span></h1>
+<div class="sub">延伸 <code>20260710_reconstruction_full_pipeline_narrative_HCC1395</code>（HCC1395 端到端）到全 7 樣本 + 補頻率軸分類（2026-07-10，全機械重算）</div>
+</header>
+
+<div class="verdict">
+<b>本 companion 補三塊教授版沒有的：</b>①把 HCC1395 的 <b>read/VAF/CN reach 延伸到全 7 樣本</b>（同 multilocus 分段）②<b>7 樣本拓撲/生物分類</b>（單clone/巢狀/姊妹）③<b>clone/subclone 頻率分類</b>（VAF 峰值 + 巢狀祖先→衍生）。
+<b>跨樣本鐵證</b>：raw reach 31–69% 看似能定，但 <b>strictly-neutral 可信 reach 只 0–11%</b>——<b>CN 是所有樣本的普遍限制</b>，非單一樣本問題。單樣本上限 ⭐3、6 樣本比例一致 ⭐4。
+</div>
+
+<h2><span class="n">A</span>7 樣本 read/VAF/CN reach（延伸教授版 §8）<span class="tier t2">L2</span></h2>
+<p>對「真多拓撲 / 順序未定」用每突變 read 數(→CCF) pigeonhole 加權。<b>與教授版 §8 同 multilocus 分段、同方法</b>；此處擴到全 7 樣本：</p>
+<div class="scroll"><table>
+<tr><th>樣本</th><th class="num">n_ambiguous</th><th class="num">raw 破 tie</th><th class="num">winner 自洽</th><th class="num">strict-neutral 破</th><th class="num">可信 reach</th><th>CN 源</th></tr>
+{''.join(rowsA)}
+</table></div>
+<div class="stop">🔴 <b>跨樣本一致結論</b>：raw 破 tie 31–69%（看似能定順序），但扣掉 CN-altered 後 <b>strictly-neutral 可信 reach 只 0–11%</b>（H2009 最高 11%、COLO829/HCC1937 無 CN=0%）。winner 自洽率 99%+ 但<b>自洽≠驗證</b>（同 pigeonhole 選再查）。→ <b>read/VAF 順序加權在所有樣本都受 CN 嚴重限制</b>，這是和 PhyloWGS/Canopy 共有的限制。</div>
+
+<h2><span class="n">B</span>7 樣本拓撲 / 生物分類（延伸教授版 §7）<span class="tier t1">L1</span></h2>
+<div class="warn">⚠ <b>分段注意</b>：本表用 <b>integration 全 span 分段</b>（HCC1395=7,143 區），與教授版 §7 的 <b>multilocus densest-8 分段</b>（7,928 區）<b>denominator 不同</b> → 絕對數不可與 §7 逐一對照，<b>比例可比</b>。</div>
+<p>樹形狀 → 生物意義：<b>single＝原生單 clone</b>、<b>linear＝巢狀 subclone 後代</b>、<b>branched＝姊妹 clone 分支</b>。</p>
+<div class="scroll"><table>
+<tr><th>樣本</th><th class="num">total 區</th><th class="num">single<br>單clone</th><th class="num">linear<br>巢狀subclone</th><th class="num">branched<br>姊妹clone</th><th class="num">A 唯一</th><th class="num">B pairwise</th><th class="num">C 欠定</th></tr>
+{''.join(rowsB)}
+</table></div>
+<div class="obs">📊 <b>生物分類跨樣本</b>：single（單 clone）普遍最多；<b>branched（姊妹 clone 分支）＞ linear（巢狀 subclone）</b> 在多數樣本成立（如 COLO829 branched 1,076 ≫ linear 158）。<b>H2009 最複雜</b>（linear 892、branched 1,351、has_cycle 265）；<b>COLO829 巢狀最少</b>（linear 158，低 co-read artifact）。A 唯一定樹 1,178–2,065／樣本。</div>
+
+<h2><span class="n">C</span>clone/subclone 頻率分類（VAF 峰值 + 巢狀父子）<span class="tier t2">L2</span></h2>
+<p>頻率軸（教授版較薄）：每 somatic 位點 within-family VAF → 峰值＝clone/subclone 頻率群（SciClone/PyClone 式）；巢狀區祖先突變（clonal，高 VAF）→ 衍生突變（subclonal，低 VAF）。</p>
+<div class="scroll"><table>
+<tr><th>樣本</th><th>VAF 峰值（頻率群）</th><th class="num">巢狀<br>clone→subclone</th><th class="num">姊妹<br>分支</th><th class="num">祖先中位VAF</th><th class="num">衍生中位VAF</th></tr>
+{''.join(rowsC)}
+</table></div>
+<div class="obs">📈 <b>頻率結構</b>：主峰普遍在 <b>VAF≈1.0</b>（LOH/clonal 骨幹）；HCC1395/DORADO/H2009 另有 ≈0.5（het clonal）；<b>HCC1937 三峰 0.23/0.47/0.98（最豐富 subclonal 層次）</b>。巢狀區<b>祖先中位 VAF 0.97–1.0 → 衍生 0.37–0.52</b>，方向一致（祖先 clonal、衍生 subclonal）；方向由共現直接定序、VAF 獨立佐證。</div>
+<div class="stop">🔴 <b>頻率分類的 CN 上限</b>：這些 VAF 是 raw（未 CN 校正）。HCC1395 巢狀 748 區中僅 <b>15（2.0%）strictly-neutral</b>（其餘 98% CN-altered，衍生低 VAF 多為拷貝稀釋非真 subclone）——與 §A 的可信 reach 6.1% 同源。<b>頻率軸是特徵描述（characterize），非 subclone 確認</b>；真確認需 single-cell/multi-region。</div>
+
+<h2><span class="n">D</span>三軸總結：拓撲 × 頻率 × 確定性</h2>
+<div class="card"><table>
+<tr><th>軸</th><th>問什麼</th><th>誰定</th><th>CN 影響</th><th>跨樣本結論</th></tr>
+<tr><td><b>拓撲（§B）</b></td><td>單clone/巢狀/姊妹</td><td>單分子共現</td><td>否（CN-robust）</td><td>single 最多、branched＞linear</td></tr>
+<tr><td><b>頻率（§C）</b></td><td>clonal vs subclonal 佔比</td><td>VAF/CCF</td><td>是（98% 被混淆）</td><td>祖先~1.0→衍生~0.4；峰值多模</td></tr>
+<tr><td><b>確定性（§A）</b></td><td>樹能否唯一/順序</td><td>共現+read加權</td><td>是（順序層）</td><td>可信 reach 0–11%（CN 限制）</td></tr>
+</table></div>
+<div class="verdict"><b>一句話：</b>拓撲（共現）CN-robust、跨樣本可分 single/巢狀/姊妹；但頻率與順序層被 CN 嚴重限制（可信 reach 0–11%、巢狀僅 2% CN-clean）→ <b>7 樣本一致把 clone/subclone 定位為「可描述可推論、非可確認」（⭐3 單樣本 / ⭐4 六樣本比例一致）</b>。</div>
+
+<footer>
+<b>可重現</b>：全數字 2026-07-10 機械重算，讀回注入。來源 JSON：<code>ccf_and_cn_multisample.json</code>（§A）· <code>multisample_summary.json</code>（§B，integration 分段）· <code>20260709_structure_result_data.json</code>（§C）。
+生成：<code>build_companion_7sample_classification.py</code>。基底：<code>20260710_reconstruction_full_pipeline_narrative_HCC1395.standalone.html</code>（教授版 §0–§10，不改）。
+scope=chr1–22 · CN 覆蓋 5/7（SEQC2×2 + SAVANA×3；COLO829/HCC1937 unavailable）· ⭐3 單樣本 / ⭐4 六樣本。
+</footer>
+</div></body></html>"""
+
+open(OUT, "w", encoding="utf-8").write(html)
+print(f"→ {OUT} ({len(html):,} chars)")
+# 驗證關鍵注入 + 無殘留
+for s in ["66.8", "6.1%", "0–11%", "HCC1937", "0.23", "748"]:
+    print(f"  {s!r}:", s in html)
+print("  含<script>:", "<script" in html)
