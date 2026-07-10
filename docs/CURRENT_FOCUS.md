@@ -25,7 +25,8 @@
 > **使用者定案**：scope=chr1–22（chrX out-of-scope）；論文主張=**可驗證區域突變狀態樹；生物 subclone 可如 PhyloWGS/Canopy/CITUP 般推論(inferable)非確認**；HP3 維持計數但加註 H3?。
 > **已完成**：① census+PI 改寫（commit f13ace9）② **7 樣本同口徑擴充**（`funnel_census_7samples.py`+`20260710_funnel_census_7samples.standalone.html`，commit 88c1964；不重讀 BAM；審查跨樣本 claim HCC1954 90.8%→49.3%/COLO829 77.6%→52.9% 獨立重算吻合）③ **全量 V4/V5 + seeded 隨機 stress 已跑完**（`full_v4v5_verification.py`）：**18,103 非-capped 單位全跑完整 V4/V5（95.6% 覆蓋，vs 舊 4.8% 抽樣）→ 0 fail**；**seeded 隨機 stress 5 seed×800=4,000 案例 → 0 mismatch**（取代 07-07 無憑據「3723」）；n_trees>32 的 371 單位 shape 統計低估已誠實標記。
 > **canonical 分母**：`funnel_census_HCC1395.py` / `funnel_census_7samples.py`（單一真值，只讀 somatic_pass.vcf.gz + layered JSON）。
-> **待辦**：6 樣本 CCF read 加權（僅 HCC1395 已跑）+ 6 樣本 SAVANA CN。
+> **CCF+CN 補齊**（commit 1e5aa37，`ccf_and_cn_multisample.py`）：6 樣本 CCF read 加權（HCC1395 重現 66.8% 驗證）+ SAVANA CN 07-05 已跑套用（**5/7 可用**；COLO829/HCC1937 mis-fit→unavailable）。🔴 **raw reach 31–69% 誤導，strictly-neutral 可信 reach 只 0.4–11%**（CN-gain 佔 ambiguous 35–82%）；recurrence 多數是 CN-gain artifact/LOH 非真收斂（=為何需要 CN 的實證）。
+> **待辦**：COLO829/HCC1937 CN 無外部真值裁決（非可補）；single-cell/multi-region 正交確認（⭐3→⭐4）。
 
 ## 2026-07-09 — 🔴 骨幹來源定案：ClairS PASS（非 is_somatic 23,810）
 
