@@ -12,14 +12,29 @@
 
 # 當前目標
 
-## 2026-07-09 — 🔴 骨幹來源定案：ClairS PASS（非 is_somatic 23,810）⭐ 最新
+## 2026-07-10 — 🔴 census/PI 3個P0 誠實修正 + 六層 funnel + 7樣本擴充 ⭐ 最新
+
+> **新 session 先讀**：memory `project_census_p0_funnel_reclassification`。
+> **背景**：peer-review（Task B 驗證）揪出 census（`20260710_full_census_hierarchy`）+ PI 報告 3 個 P0，**我獨立從原始資料重算、數字精確吻合**後修正（非採信審查）。
+> **3 個 P0（已修）**：
+> - **P0-1 isolated 定義錯**：舊「isolated 88,358（77.5%）」= chrX 33,763（out-of-scope）+ densest-8 截斷丟棄 46,137 + 真單點 8,447 的混合袋。**真 autosomal 孤立單點只有 8,447（7.4%）**。改用**六層 funnel**：`universe 113,997 = chrXY 33,763 + singleton 8,447 + cap-excluded 46,137 + read-unsupported 11 + retained 25,639`（自洽✓）。
+> - **P0-2 root-only 算 determined**：determined 7,123 含 **1,739 root-only 純 REF 家族**（樹只有 ROOT 無突變邊）→ **mutation-bearing determined = 5,384（44.7%）**。
+> - **P0-3 multi-HP 膨脹**：span-two germline 4,443（56%）含 REF-only → **both-mutation-bearing 2,765（34.9%）**。
+> - **P0-4 無 CN 當 neutral**：`sm_multilocus_combinations.py:48` 無 CN→預設 neutral（應 unavailable）。影響 6 樣本 recurrence CN 裁決。
+> **CCF caveat（已改 PI §4.2）**：99.4% winner-clean = **自洽率非驗證**（winner 依 pigeonhole 選再查同規則）；CN-clean 1,960 = neutral 220+LOH 1,639+loss 101，嚴格 read≈CCF 只 ~220。
+> **使用者定案**：scope=chr1–22（chrX out-of-scope）；論文主張=**可驗證區域突變狀態樹；生物 subclone 可如 PhyloWGS/Canopy/CITUP 般推論(inferable)非確認**；HP3 維持計數但加註 H3?。
+> **已完成**：① census+PI 改寫（commit f13ace9）② **7 樣本同口徑擴充**（`funnel_census_7samples.py`+`20260710_funnel_census_7samples.standalone.html`，commit 88c1964；不重讀 BAM；審查跨樣本 claim HCC1954 90.8%→49.3%/COLO829 77.6%→52.9% 獨立重算吻合）③ 全量 V4/V5 + **seeded 隨機 stress**（`full_v4v5_verification.py`，5 seed×800，取代 07-07 無憑據「3723 隨機案例」，commit 8fdb941）。
+> **canonical 分母**：`funnel_census_HCC1395.py` / `funnel_census_7samples.py`（單一真值，只讀 somatic_pass.vcf.gz + layered JSON）。
+> **待辦**：6 樣本 CCF read 加權（僅 HCC1395 已跑）+ 6 樣本 SAVANA CN；V4/V5 全量結果落檔確認。
+
+## 2026-07-09 — 🔴 骨幹來源定案：ClairS PASS（非 is_somatic 23,810）
 
 > **使用者揪出**：caller=**ClairS v0.4.0 paired**（非 ClairS-TO）已配對 normal 做 somatic+germline 濾除；舊 `is_somatic` 粗重檢冗餘+誤殺 429 SEQC2-TP 真 somatic → **移除**。**真骨幹 = ClairS PASS = LongPhase-S `somatic_pass.vcf.gz`**（HCC1395 **113,997**，NAF=0 佔 96.8%=真 somatic；舊 23,810/35,332 淘汰）。全 7 樣本已用新骨幹重跑：**V1-V7 ALL PASS**、multi-HP 全穩定、all-det 隨骨幹成長比例降（可解釋）。數字取得/判別/驗證 → `verify_newbb_numbers.py`（一鍵重算）+ 資料模型 spec §7。⚠ 並行 session explainer/verify 仍舊數字待同步。
 
 ## 2026-07-07 — 🧬 分層 per-HP-家族樹枚舉重建 + 工作站
 
 > **新 session 先讀**：memory `project_layered_perHPfamily_tree_enumeration_solver` + 資料模型 spec `InterSubMod/docs/methodology/20260706_layered_data_model_units_proportions_spec_01.md`（使用者確認的單位/分母/關係）。
-> **做了什麼**：使用者定案 5-step（spec→solver→驗→大規模→HTML）落地。**樹 per germline-HP-家族分開建**（家族優先於算法，修 allelic/clonal 混淆）。solver `tree_enumeration_solver.py`=布爾超立方體 group-Steiner 枚舉全最小樹（分析式 n_trees + 四配子判 recurrence；golden+3723隨機案例 0-mismatch；V1-V7）；driver `layered_tree_reconstruction.py`=L0家族→L1 sSNV枚舉→L2 CN→L3甲基。
+> **做了什麼**：使用者定案 5-step（spec→solver→驗→大規模→HTML）落地。**樹 per germline-HP-家族分開建**（家族優先於算法，修 allelic/clonal 混淆）。solver `tree_enumeration_solver.py`=布爾超立方體 group-Steiner 枚舉全最小樹（分析式 n_trees + 四配子判 recurrence；golden 8 手算 case + seeded 隨機 stress〔2026-07-10 補實：`full_v4v5_verification.py` 5 seed×800，取代原無憑據「3723」〕；V1-V7）；driver `layered_tree_reconstruction.py`=L0家族→L1 sSNV枚舉→L2 CN→L3甲基。
 > **HCC1395 結果（region 主分母 7100）**：**多-HP 3992/7100=56.2%**（過半區雙 germline 家族各一樹）；region all-determined **2317(32.6%)**（全 germline lineage 唯一樹才算）；lineage-unit determined 6883/12475=55.2%；V1-V7 ALL PASS。🔴 三者分母不同不可比。
 > **🔴 sSNV 數修正（§13.0 抓到，影響本檔下方 07-01 line）**：「35,332 sSNV」是**總 census 位點非 somatic**；重建骨幹 somatic sSNV(census somatic==True)=**23,810**。handoff/master_spec 的「35,332 sSNV=somatic骨幹」待更正。
 > **工作站**：standalone `docs/methodology/_assets/20260706_layered_reconstruction_workstation.standalone.html`（dashboard 4表+region瀏覽器+逐HP家族色框樹+**樹切換器**〔◀▶+thumbnail,一次一大圖,標「N樹=M形狀」如125樹=5形狀〕+L0-L3軌跡；反捏造數字全從json）；可攜 per-sample `layered_workstation/{S}.html`+index（builder `build_layered_per_sample.py`）。
