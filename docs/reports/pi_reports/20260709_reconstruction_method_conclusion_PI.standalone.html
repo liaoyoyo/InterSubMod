@@ -1,13 +1,12 @@
 <!doctype html>
-<!-- provenance-verified: 本頁所有 metric 數字皆引用本 session（2026-07-09~10）已驗證的來源 —
-  §2 可辨識性數字 = layered_reconstruction_HCC1395.json（最新 per-HP-家族框架，07-09；
-    n_lineage_units 13785、determined 7123、ambiguous 5959、capped 676、recurrence 27（→artifact 20/LOH 7）、
-    regions 7928、mixed germline 4443、multi-locus sSNV 25639、isolated 88358；L1 V1-V7 all pass）；
-  S = 113997 ClairS PASS somatic SNV = somatic_pass.vcf.gz（LongPhase-S/ClairS，zcat PASS 實測，07-09 layered 骨幹 universe）；
-  其中 SEQC2-可評估子集 35,332（TP 30490 / FP 4842，僅觀察標籤）= sm_completeness_ledger.json；
-  §4.2 read 加權 66.8%/99.4%/67.9%/2.3% = ccf_tree_weighting_full_observe.json + ccf_tree_weighting_demo.json；
-  詳見 docs/methodology/20260710_full_census_hierarchy_HCC1395.standalone.html。固定錨 commit 2e69811。
-  其餘為 CSS 樣式值或教學示意圖數值（schematic，§1 樹圖與 §4.2 加權圖的 reads/posterior）非真實 metric。 -->
+<!-- provenance-verified: 本頁所有 metric 數字皆引用本 session（2026-07-09~10）已驗證來源。
+  §2 六層 funnel = funnel_census_HCC1395.json（funnel_census_HCC1395.py 對 somatic_pass.vcf.gz 位置重建）：
+    universe 113,997 = chrXY 33,763 + singleton 8,447 + cap-excluded 46,137 + read-unsupported 11 + retained 25,639（自洽✓）；
+  §2 tree-level = layered_reconstruction_HCC1395.json：13,785 lineage 單位；determined 7,123（root-only 1,739 / mutation-bearing 5,384）；
+    ambiguous 5,959 / capped 676 / recurrence 27；multi-HP span-two 4,443 → both-mutation-bearing 2,765；V1–V7 all pass；
+  §4.2 read 加權 66.8%/67.9%/2.3% = ccf_tree_weighting_full_observe.json（99.4% = 自洽率非獨立驗證；CN-clean 1,960=neutral+LOH+loss）；
+  SEQC2-可評估子集 35,332（TP 30,490/FP 4,842）= sm_completeness_ledger.json（僅觀察）。scope=chr1–22（chrX out-of-scope）。
+  2026-07-10 P0 修正（peer-review 揪出·已獨立重算精確吻合）。§1、§4.2 圖為教學示意（schematic）非真實 metric。固定錨 commit 2e69811。 -->
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
@@ -43,7 +42,7 @@
   th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
   th{background:#eef1f5;font-weight:700}
   .flow{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0;
-    font-family:"SFMono-Regular",Consolas,monospace;font-size:12.8px;line-height:1.9;overflow-x:auto;white-space:pre;color:#243}
+    font-family:"SFMono-Regular",Consolas,monospace;font-size:12.5px;line-height:1.85;overflow-x:auto;white-space:pre;color:#243}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
   @media(max-width:640px){.grid{grid-template-columns:1fr}}
   .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
@@ -73,12 +72,12 @@
 <div class="wrap">
 
 <header>
-  <h1>亞克隆重建方法 — 現況結論 <span class="pill partial">HCC1395 單樣本</span></h1>
+  <h1>亞克隆重建方法 — 現況結論 <span class="pill partial">HCC1395 單樣本 · chr1–22</span></h1>
   <div class="sub">Subclonal reconstruction using somatic single-molecule co-occurrence（ONT long-read）</div>
   <div class="meta">
     <span><b>樣本</b> HCC1395（ONT 5kHz + 5mCG/5hmCG tagged）</span>
-    <span><b>更新</b> 2026-07-10（口徑統一到最新 layered 框架 + S 修正為 ClairS PASS）</span>
-    <span><b>資料</b> 2026-07-09 最新 layered · 固定錨 <code>2e69811</code></span>
+    <span><b>更新</b> 2026-07-10（P0 誠實重分類：六層 funnel + mutation-bearing）</span>
+    <span><b>scope</b> chr1–22（chrX out-of-scope）· 固定錨 <code>2e69811</code></span>
     <span><b>證據分級</b>
       <span class="tier t1">L1</span>源碼/實測
       <span class="tier t2">L2</span>文獻+推演
@@ -91,8 +90,8 @@
 <div class="verdict">
   <b>一句話結論：</b>以 <b>somatic sSNV 單分子共現</b> 在<b>布爾超立方體</b>上重建腫瘤演化樹，是一個
   <b>正確、可精確枚舉、非循環</b>的方法；它<b>誠實地在能定的地方定樹、不能定的地方回報「定不出來」</b>。
-  甲基化只能事後輔助、不能決定樹；read 數（頻率）可在拷貝數乾淨的區進一步收斂等機率樹。
-  單一 bulk 樣本方法上限 = <b>⭐3（characterize，非 confirm subclone）</b>。
+  這是一個<b>可驗證的「區域突變狀態樹」重建</b>——生物 subclone 可如其他工具（PhyloWGS/Canopy/CITUP）一樣<b>推論</b>，
+  但單一 bulk 下<b>是推論不是確認</b>。甲基化只事後輔助、不決定樹；read 數可在拷貝數乾淨區收斂等機率樹。方法上限 = <b>⭐3（characterize）</b>。
 </div>
 
 <h2><span class="n">1</span>方法：從 sSNV 共現到演化樹 <span class="tier t2">L2</span></h2>
@@ -134,29 +133,34 @@
 
 <p><small class="note">形式化：directed rooted (group) Steiner arborescence on Boolean hypercube = Incomplete Directed Perfect Phylogeny。逐區位點數 ≤8（涵蓋 97.5% 的區）→ 頂點 ≤256 → 暴力精確枚舉可行，不需近似。</small></p>
 
-<h2><span class="n">2</span>關鍵數字（最新 layered 框架，可一鍵重算） <span class="tier t1">L1</span></h2>
-<div class="flow">113,997 ClairS PASS somatic SNV（= somatic_pass.vcf.gz；07-09 骨幹 universe）
-   ├─ k=1 單點（isolated·無樹）....... 88,358（77.5%）
-   └─ k≥2 多位點（可建樹）........... 25,639（22.5%）
-        ↓ 單分子共現 ＋ 依 germline 親代單體型（HP 家族）分群
-      7,928 區 → 13,785 lineage 樹單位
-      （每區突變依親代 hap1/hap2/somatic-3 拆成獨立樹；4,443 區橫跨兩親代單體型＝分兩棵）
-        ↓ 逐單位枚舉全最小樹（含 partial read；獨立驗證器 V1–V7 全過）
-        ├─ determined（唯一樹）....... 7,123（51.7%）
-        ├─ ambiguous（多候選樹）...... 5,959（43.2%）← §4.2 read 加權對象
-        ├─ capped（太密·枚舉未完）....   676（4.9%）
-        └─ recurrence（翻兩次以上）...    27（0.2%）→ CN 拆：artifact 20 / LOH 7</div>
-<p class="legend">主來源：<code>layered_reconstruction_HCC1395.json</code>（2026-07-09 最新，per-HP-家族框架，固定錨 commit <code>2e69811</code>）。<b>S 修正註（07-10）</b>：先前誤用 35,332（舊 is_somatic + SEQC2 子集）；07-09 骨幹實際用 <b>ClairS 全 PASS = 113,997</b>（<code>somatic_pass.vcf.gz</code>），SEQC2-可評估的 35,332（TP 30,490/FP 4,842）僅佔 31%、只作觀察標籤。</p>
+<h2><span class="n">2</span>關鍵數字：六層 funnel + 誠實重分類（可一鍵重算） <span class="tier t1">L1</span></h2>
+<p>2026-07-10 依 peer-review 修正兩個口徑錯誤（已獨立重算精確吻合）：① 舊「isolated 88,358」把 out-of-scope（chrX）+ densest-8 截斷丟棄當生物單點；② 舊「determined 7,123」含純 REF 家族（樹只有根、無突變）。改用六層 funnel + mutation-bearing 分類：</p>
+<div class="flow">L1  all-PASS universe .......... 113,997   ClairS paired PASS（操作骨幹·非生物真值）
+      ├─ out-of-scope chrX/Y .... −33,763   （scope=chr1–22）
+      ├─ 真孤立單點 singleton ... −8,447    （相鄰 gap>50kb·唯一真「單點無樹」= 7.4%）
+      ├─ densest-8 截斷 ......... −46,137   （多位點區內·超出最密 8 個未進 solver）
+      ├─ read-unsupported ....... −11
+      └─ retained sSNV .......... = 25,639   in 7,928 區 → 送入 group-Steiner solver
+            ↓ 依 germline 親代單體型（HP 家族）分群
+          13,785 lineage 樹單位（獨立驗證器 V1–V7 全過）
+            ├─ determined（唯一樹）..... 7,123（51.7%）
+            │     其中 root-only 純 REF 家族 1,739（無突變邊·不算樹）
+            │     → mutation-bearing determined 5,384（= 44.7% of 非root）
+            ├─ ambiguous（多候選樹）.... 5,959（43.2%）← §4.2 read 加權對象
+            ├─ capped（太密·未完）...... 676（4.9%）
+            └─ recurrence（翻≥2次）..... 27（0.2%）→ 有 CN 才可判 artifact 20/LOH 7
+          雙 germline lineage：span-two 4,443（56%）中 both-mutation-bearing 僅 2,765（34.9%）</div>
+<p class="legend">主來源：六層 funnel = <code>funnel_census_HCC1395.json</code>（<code>funnel_census_HCC1395.py</code> 對 <code>somatic_pass.vcf.gz</code> 位置重建，自洽 sum==universe ✓）；tree-level = <code>layered_reconstruction_HCC1395.json</code>（2026-07-09 per-HP-家族）。<b>誠實重點</b>：真「單點無樹」只有 8,447（7.4%）非 88,358；真正重建出帶突變樹 = mutation-bearing determined 5,384（44.7%）；真雙 lineage 區 2,765（34.9%）非 4,443。SEQC2-可評估 35,332（TP 30,490/FP 4,842）僅佔 universe 31%、只作觀察標籤。</p>
 
 <h2><span class="n">3</span>誠實的核心：能定 vs 定不出來 <span class="tier t2">L2</span></h2>
 <div class="grid">
   <div class="card ok">
     <h4>✅ 枚舉精確解集（做得到）</h4>
-    <p>逐單位精確窮舉<b>所有</b>等成本候選樹（determined 51.7% + ambiguous 43.2% ＝ <b>94.9%</b> 可精確枚舉；capped 4.9% 太密未完·誠實標記）。實例大小為常數（位點 ≤8），暴力精確。</p>
+    <p>逐單位精確窮舉<b>所有</b>等成本候選樹（mutation-bearing determined 5,384 唯一定樹 + ambiguous 5,959 精確枚舉候選集）。實例大小為常數（位點 ≤8），暴力精確；partial read 以隱藏 Steiner 節點納入同一超立方體。</p>
   </div>
   <div class="card stop">
     <h4>❌ 指派唯一全域樹（理論不可）</h4>
-    <p>單一 bulk 樣本下，<b>43.2%（5,959 單位）</b>有多候選樹、無法定唯一（需 read 加權或更多資料才收斂）；跨區整棵樹也非可辨識。這是<b>資訊論極限，非計算能力問題</b>——「多候選／定不出來」就是它們的精確答案。</p>
+    <p>單一 bulk 樣本下，<b>43.2%（5,959 單位）</b>有多候選樹、無法定唯一；跨區整棵樹也非可辨識。這是<b>資訊論極限，非計算能力問題</b>——「多候選／定不出來」就是它們的精確答案。</p>
   </div>
 </div>
 <p><small class="note">此立場與領域一致（Tarabichi 2021 / MACH2 2024 / Pairtree）：資料不足時輸出候選集 + 不確定性，而非強行給單一樹。</small></p>
@@ -164,10 +168,10 @@
 <h2><span class="n">4</span>本輪兩個新結論</h2>
 
 <h3>4.1 partial-read 區的正確建樹 <span class="tier t1">L1</span></h3>
-<p>沒有任何 read 穿越全部位點時，正確做法 = 把整區當<b>一個超立方體問題</b>，未觀測的全突變基因型當<b>隱藏 Steiner 節點</b>，用各 partial read 的子面約束<b>枚舉所有相容樹</b>——而非把兩兩 pairwise 分開拼。分層 solver（<code>tree_enumeration_solver.py</code>）正是如此：實測 13,358 個純 partial 區<b>全部建/枚舉出樹</b>、約 63% 帶隱藏節點；獨立驗證器 V1–V7 全過。</p>
+<p>沒有任何 read 穿越全部位點時，正確做法 = 把整區當<b>一個超立方體問題</b>，未觀測的全突變基因型當<b>隱藏 Steiner 節點</b>，用各 partial read 的子面約束<b>枚舉所有相容樹</b>——而非把兩兩 pairwise 分開拼。分層 solver（<code>tree_enumeration_solver.py</code>）正是如此：實測純 partial 區全部建/枚舉出樹、約 63% 帶隱藏節點；獨立驗證器 V1–V7 全過。</p>
 
 <h3>4.2 用 read 數（頻率）收斂等機率樹 <span class="tier t1">L1</span></h3>
-<p>當 solver 誠實輸出「多棵一樣好的樹」（即 §2 的 5,959 ambiguous 單位）時，可用<b>每個突變的 read 數</b>加權：早發生的突變在更多後代細胞中 → 更多 read（pigeonhole：祖先頻率 ≥ 後代頻率）。這把「多棵等機率」變成「加權 posterior + 較可能者」，且純用 read count（<b>遺傳訊號、非甲基、非循環</b>）。</p>
+<p>當 solver 誠實輸出「多棵一樣好的樹」（§2 的 5,959 ambiguous）時，可用<b>每個突變的 read 數</b>加權：早發生的突變在更多後代細胞中 → 更多 read（pigeonhole：祖先頻率 ≥ 後代頻率）。這把「多棵等機率」變成「加權 posterior + 較可能者」，且純用 read count（<b>遺傳訊號、非甲基、非循環</b>）。</p>
 
 <figure>
 <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center">
@@ -181,20 +185,22 @@
 
 <div class="kpi">
   <div class="k"><div class="v">66.8%</div><div class="l">等機率被收斂<br><small>（含 partial reads；只用全覆蓋 read 僅 2.3%）</small></div></div>
-  <div class="k"><div class="v">99.4%</div><div class="l">贏家符合生物邏輯<br><small>（祖先頻率 ≥ 後代）</small></div></div>
-  <div class="k"><div class="v">67.9%</div><div class="l">CN-clean 區乾淨解出<br><small>（可信部分）</small></div></div>
+  <div class="k"><div class="v">67.9%</div><div class="l">CN-clean 區乾淨解出<br><small>（read≈CCF 的可信部分）</small></div></div>
+  <div class="k"><div class="v">99.4%</div><div class="l"><b>自洽率</b>（非獨立驗證）<br><small>winner 依 pigeonhole 選再查同規則</small></div></div>
 </div>
-<p><small class="note">「read 越多越能定」得到驗證：用含 partial 的所有 read 覆蓋，比只用全覆蓋 read，把可定比例從 2.3% 拉到 66.8%（對 §2 的 5,959 ambiguous 單位而言）。</small></p>
+<div class="callout c-amber">
+  ⚠ <b>兩個必須誠實標的 caveat</b>（peer-review 揪出）：① <b>99.4% winner-clean 是自洽率、不是驗證</b>——winner 本來就是依 pigeonhole 分數選出、再用同一 pigeonhole 檢查，必然幾乎全過；它證明「加權內部一致」，非「贏家生物正確」。② <b>「CN-clean 1,960」名不符實</b>：實為 neutral 220 + LOH 1,639 + loss 101（loss 是缺失、read 反而變少，是相反方向 confound）；嚴格 read≈CCF 只有 strictly-neutral（~220）。且 CCF = 未經 purity/CN 校正的 ALT read fraction。真正可信 reach 應以 strictly-neutral 為準、遠小於 66.8%。
+</div>
 
 <h2><span class="n">5</span>誠實邊界（必須向審閱者標明）</h2>
 <div class="callout c-red">
-  🔴 <b>CN-gain（拷貝數放大）confound</b> <span class="tier t2">L2</span>：在被放大的區，一個突變的 read 數被拷貝數放大 → <b>read 數 ≠ 真細胞頻率</b>。此類佔多樹並列區的約 67%，其「贏家」不可信。<b>現階段先假設不考慮 CNV、取整體 66.8% 為觀察值，並明確記錄此 caveat 待後續處理</b>；真正可信 = 拷貝數乾淨區的 22.3%。
+  🔴 <b>CN-gain（拷貝數放大）confound</b> <span class="tier t2">L2</span>：在被放大的區，一個突變的 read 數被拷貝數放大 → <b>read 數 ≠ 真細胞頻率</b>。此類佔多樹並列區的約 67%，其「贏家」不可信。<b>現階段先假設不考慮 CNV、取整體 66.8% 為觀察值，並明確記錄此 caveat 待後續處理</b>；真正可信 = 拷貝數乾淨區。⚠ 無 CN 資料的樣本，recurrence/CN 裁決應標 <b>unavailable</b> 而非預設 neutral。
 </div>
 <div class="callout c-amber">
   🔴 <b>甲基化 = 有界輔助，不能決定樹</b> <span class="tier t2">L2</span>：甲基與突變共分離主要是突變的局部順式足跡（cis-ASM，屬循環）。四配子實證：唯二「顯著」的甲基訊號全落在 cross-HP CN-gain confound，乾淨案例從不顯著。故甲基只做負向篩選 + 弱旗標，<b>絕不進 likelihood、絕不排序樹</b>。
 </div>
 <div class="callout c-amber">
-  ⭐ <b>單樣本上限 ⭐3</b> <span class="tier t3">L3</span>：單一 bulk 只能刻畫（characterize），不能確認（confirm）subclone；隱藏節點標為 inferred。突破需 single-cell / multi-region 正交真值。
+  ⭐ <b>單樣本上限 ⭐3</b> <span class="tier t3">L3</span>：單一 bulk 只能刻畫（characterize）+ 推論（infer），不能確認（confirm）subclone；隱藏節點標 inferred。root-only 純 REF 家族不算重建出樹。突破需 single-cell / multi-region 正交真值。
 </div>
 
 <h2><span class="n">6</span>與現有工具的定位 <span class="tier t2">L2</span></h2>
@@ -225,7 +231,7 @@
   </div>
 </div>
 <div class="callout c-amber">
-  💡 <b>關鍵洞見</b>：pigeonhole/crossing rule 是<b>他們唯一的樹決定機制</b>；在我們這裡只是<b>枚舉出候選樹之後、可選的第二層加權</b>（見 §4.2）。所以「我們能不能做他們做的事」——能，CCF 加權層本質就是 CITUP/Pairtree 那套——但我們是<b>加在直接共現骨幹之上</b>，不是唯一依賴。
+  💡 <b>關鍵洞見</b>：pigeonhole/crossing rule 是<b>他們唯一的樹決定機制</b>；在我們這裡只是<b>枚舉出候選樹之後、可選的第二層加權</b>（見 §4.2）。所以「我們能不能做他們做的事」——能，CCF 加權層本質就是 CITUP/Pairtree 那套——但我們是<b>加在直接共現骨幹之上</b>，不是唯一依賴。生物 subclone 因此<b>可推論（inferable），與他們同級</b>，只是誠實標為推論非確認。
 </div>
 <table>
   <tr><th>工具</th><th>特點</th><th>與本方法的關鍵差異</th></tr>
@@ -241,15 +247,15 @@
 <table>
   <tr><th>面向</th><th>主張</th></tr>
   <tr><td>Novelty</td><td>read-level bulk ONT 的<b>角色分離式</b>重建：單分子共現骨幹 + 隱藏節點枚舉 + 誠實可辨識性分類。read-as-group 是 IDPP 特例；此組合（單分子 long-read bulk + germline 有向根 + 精確等成本枚舉）為文獻白地。<span class="tier t2">L2</span></td></tr>
-  <tr><td>誠實框架</td><td>「定不出來即答案」= 領域認可的誠實輸出；甲基有界、CN confound、⭐3 全部明標，不 overclaim。<span class="tier t3">L3</span></td></tr>
-  <tr><td>可延伸</td><td>read 數（頻率 pigeonhole）加權層可在 CN-clean 區進一步收斂等機率樹（達 67.9%）；CN 處理為後續工作。<span class="tier t4">L4</span></td></tr>
+  <tr><td>主張定位</td><td><b>可驗證的「區域突變狀態樹」重建</b>；生物 subclone 可如 PhyloWGS/Canopy/CITUP 一樣<b>推論（inferable）</b>——是推論非確認。「定不出來即答案」= 領域認可的誠實輸出；甲基有界、CN confound、root-only 排除、⭐3 全部明標，不 overclaim。<span class="tier t3">L3</span></td></tr>
+  <tr><td>可延伸</td><td>read 數（頻率 pigeonhole）加權層可在 CN-clean 區進一步收斂等機率樹；CN 處理 + strictly-neutral 可信分母為後續工作。<span class="tier t4">L4</span></td></tr>
 </table>
 
 <footer>
-  <b>可重現性（provenance）</b>：§2 數字來自最新 layered solver（<code>layered_reconstruction_HCC1395.json</code>，2026-07-09；per-HP-家族框架，L1 內建 V1–V7 全過；固定 aggregate 錨 <code>layered_census_snapshot_HCC1395.json</code> commit <code>2e69811</code>）。
-  <b>S=113,997</b> 為 ClairS 全 PASS somatic SNV（<code>somatic_pass.vcf.gz</code> zcat 實測）；完整階層普查（S→區域→群組合→HP→拓撲）見
-  <code>InterSubMod/docs/methodology/20260710_full_census_hierarchy_HCC1395.standalone.html</code>（<code>full_census_hierarchy.py</code> 可重算）。<br>
-  <small>partial flag：本頁數字為 <b>HCC1395 單樣本</b>；跨 7 樣本比較另有分析（determined% 主由定序深度驅動，屬 L3 描述性，不作生物結論）。§1、§4.2 圖為教學示意（schematic），非真實資料。</small>
+  <b>可重現性（provenance）</b>：§2 六層 funnel = <code>funnel_census_HCC1395.py</code> 對 <code>somatic_pass.vcf.gz</code> 位置重建（<code>funnel_census_HCC1395.json</code>，自洽 ✓）；tree-level = <code>layered_reconstruction_HCC1395.json</code>（2026-07-09；L1 內建 V1–V7 全過；固定 aggregate 錨 commit <code>2e69811</code>）。
+  <b>S=113,997</b> 為 ClairS 全 PASS somatic SNV（<code>somatic_pass.vcf.gz</code> zcat 實測）；完整階層普查（六層 funnel + 誠實重分類）見
+  <code>InterSubMod/docs/methodology/20260710_full_census_hierarchy_HCC1395.standalone.html</code>。<br>
+  <small><b>2026-07-10 P0 修正</b>（peer-review 揪出·已獨立重算精確吻合）：isolated 88,358→真單點 8,447；determined 7,123→mutation-bearing 5,384；multi-HP 4,443→both-mut 2,765；CCF 99.4%→自洽率。partial flag：<b>HCC1395 單樣本 · chr1–22 · ⭐3</b>；跨 7 樣本比較另有分析（待同口徑重跑）。§1、§4.2 圖為教學示意（schematic），非真實資料。</small>
 </footer>
 
 </div>

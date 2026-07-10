@@ -1,7 +1,10 @@
 <!doctype html>
-<!-- provenance-verified: 所有數字由 full_census_hierarchy.py 於 2026-07-10 對
-  layered_reconstruction_HCC1395.json（最新 per-HP-家族）+ sm_completeness_ledger.json + mlhp_part_*.json 重算，
-  一致性:C 各群加總=13785、D HP 加總=7927、E determinacy 加總=13785 皆 ✓。data commit 78271f6。 -->
+<!-- provenance-verified: 2026-07-10 P0 修正版。六層 funnel 數字由 funnel_census_HCC1395.py 對
+  somatic_pass.vcf.gz（位置重建 50kb 單連通群 + densest-8 截斷）重算：universe 113997 = chrXY 33763
+  + singleton 8447 + cap-excluded 46137 + read-unsupported 11 + retained 25639（funnel 自洽 sum==universe ✓）。
+  tree-level 重分類由 layered_reconstruction_HCC1395.json：determined 7123 中 root-only(無 somatic edge)1739、
+  mutation-bearing 5384；multi-HP span-two-germline 4443 中 both-mutation-bearing 2765。全數字獨立重算對帳精確吻合。
+  C/E/F 各群加總=13785、D 加總=7927。scope=chr1–22（chrX out-of-scope，使用者定案）。 -->
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
@@ -23,40 +26,54 @@
   th{background:#eef1f5;font-weight:700}
   td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   .bar{display:inline-block;height:9px;background:#93b4f5;border-radius:3px;vertical-align:middle;margin-right:5px}
-  .obs{background:#eef7 f0;background:#e6f4ea;border:1px solid #bfe3ca;border-radius:8px;padding:9px 13px;margin:10px 0;font-size:14px}
+  .obs{background:#e6f4ea;border:1px solid #bfe3ca;border-radius:8px;padding:9px 13px;margin:10px 0;font-size:14px}
   .warn{background:#fff6e6;border:1px solid #f0dca0;border-radius:8px;padding:9px 13px;margin:10px 0;font-size:14px}
   .stop{background:#fdecec;border:1px solid #f3c0c0;border-radius:8px;padding:9px 13px;margin:10px 0;font-size:14px}
   code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:12.5px}
   footer{margin-top:36px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
   small.n{color:var(--muted)}
   .tot{font-weight:700}
+  .funnel{font-family:"SFMono-Regular",Consolas,monospace;font-size:12.7px;line-height:1.85;background:#fff;border:1px solid var(--line);border-radius:9px;padding:13px 15px;margin:10px 0;overflow-x:auto;white-space:pre}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <h1>完整量化普查（階層）<span class="pill">HCC1395 單樣本</span></h1>
-  <div class="sub">S → 區域(k) → 群組合(C) → HP 分類 → 拓撲確認 → 拓撲類型</div>
-  <div class="sub" style="margin-top:4px;font-size:12.5px"><b>資料</b>：最新 layered per-HP-家族框架，<b>2026-07-09</b>（固定錨 commit <code style="font-size:11px">2e69811</code>）｜ <b>建立</b>：2026-07-10 ｜ 一致性全 ✓</div>
+  <h1>完整量化普查（階層）<span class="pill">HCC1395 單樣本 · chr1–22</span></h1>
+  <div class="sub">六層 funnel（S→retained）→ 區域(k) → 群組合(C) → HP 分類 → 拓撲確認 → 拓撲類型</div>
+  <div class="sub" style="margin-top:4px;font-size:12.5px"><b>資料</b>：最新 layered per-HP-家族框架，<b>2026-07-09</b>｜ <b>建立/修正</b>：2026-07-10（P0 誠實重分類）｜ scope=chr1–22（chrX out-of-scope）</div>
 </header>
 
-<h2><span class="n">A</span>sSNV 位點總數 S（ClairS PASS）</h2>
-<table>
-  <tr><th>類別</th><th class="num">數量</th><th class="num">佔 S %</th><th>意義</th></tr>
-  <tr class="tot"><td>S 總 sSNV（ClairS PASS）</td><td class="num">113,997</td><td class="num">100%</td><td>= <code>somatic_pass.vcf.gz</code>（LongPhase-S/ClairS PASS；07-09 定案移除舊 is_somatic 粗檢）</td></tr>
-  <tr><td>k=1 單點（isolated·無樹）</td><td class="num">88,358</td><td class="num">77.5%</td><td>無 partner → 單點不成樹</td></tr>
-  <tr><td>k≥2 多位點（可建樹）</td><td class="num">25,639</td><td class="num">22.5%</td><td>→ 7,928 區 → 13,785 lineage 單位（下方母體）</td></tr>
-  <tr><td><small>SEQC2-可評估子集（僅觀察標籤）</small></td><td class="num">35,332</td><td class="num">31.0%</td><td>TP 30,490 + FP 4,842；SEQC2 truth 只覆蓋 ClairS PASS 的 31%</td></tr>
-</table>
-<div class="stop">🔴 <b>2026-07-10 修正</b>：先前誤用 S=35,332（舊 is_somatic+SEQC2 子集）。<b>07-09 最新 layered 骨幹用的是 ClairS 全 PASS = 113,997</b>（<code>somatic_pass.vcf.gz</code> 實測）。C–F 單位層數字（7,928 區/13,785 單位/determined 7,123）本就基於此 113,997、正確；僅 A/B 的 sSNV universe 先前錯。</div>
+<div class="stop">🔴 <b>2026-07-10 P0 誠實修正（peer-review 揪出，已獨立重算精確吻合）</b>：舊版把 <b>out-of-scope（chrX 33,763）+ densest-8 截斷丟棄（46,137）</b>當「生物單點 isolated 88,358」；真 autosomal 孤立單點只有 <b>8,447</b>。並把 <b>root-only 純 REF 家族</b>（1,739，樹只有 ROOT 無突變邊）算進 determined。本版改用<b>六層 funnel 分母字典</b> + <b>mutation-bearing 重分類</b>。</div>
 
-<h2><span class="n">B</span>區域 W：單點 vs 多點</h2>
+<h2><span class="n">A</span>六層 funnel：從 all-PASS 骨幹到 retained sSNV</h2>
+<div class="funnel">L1  all-PASS universe ........ 113,997   ← ClairS paired PASS（操作骨幹，非生物真值）
+     ├─ L2  out-of-scope chrX/Y . −33,763   （未做 read 分析；scope=chr1–22）
+     │        autosomal chr1–22 . = 80,234
+     ├─ L3  positional singleton  −8,447    （相鄰 gap>50kb 兩側=真孤立單點·無共現）
+     │        in multi-locus 群 .. = 71,787   （7,931 個相鄰連通群）
+     ├─ L4  cap-excluded densest8 −46,137   （大群只取最密 8 個，其餘未進 solver）
+     ├─ L5  read-unsupported ..... −11       （成群但 full-cov/subread read<3 被丟）
+     └─ L6  retained sSNV ........ = 25,639   in 7,928 區 → 送入 group-Steiner solver
+     ✓ 自洽：33,763 + 8,447 + 46,137 + 11 + 25,639 = 113,997</div>
+<table>
+  <tr><th>層</th><th class="num">sSNV</th><th class="num">佔 universe</th><th>精確定義</th></tr>
+  <tr class="tot"><td>L1 all-PASS universe</td><td class="num">113,997</td><td class="num">100%</td><td>ClairS paired PASS（<code>somatic_pass.vcf.gz</code>）；<b>操作骨幹，不等於生物真值</b></td></tr>
+  <tr><td>L2 out-of-scope（chrX/Y）</td><td class="num">33,763</td><td class="num">29.6%</td><td>未做 read 分析 → 不屬 isolated 也不屬 retained</td></tr>
+  <tr><td>L3 真孤立單點（autosomal singleton）</td><td class="num">8,447</td><td class="num">7.4%</td><td>相鄰 gap&gt;50kb 兩側；<b>唯一真正「單點無樹」</b></td></tr>
+  <tr><td>L4 cap-excluded（densest-8 截斷）</td><td class="num">46,137</td><td class="num">40.5%</td><td>在多位點區內、但超出最密 8 個未進 solver</td></tr>
+  <tr><td>L5 read-unsupported</td><td class="num">11</td><td class="num">&lt;0.1%</td><td>成群但 read 支持不足 MINREAD=3</td></tr>
+  <tr class="tot"><td>L6 retained sSNV（進 solver）</td><td class="num">25,639</td><td class="num">22.5%</td><td>chr1–22 + densest-8 + read-support 後真正建樹 → 7,928 區</td></tr>
+  <tr><td><small>SEQC2-可評估子集（僅觀察標籤）</small></td><td class="num">35,332</td><td class="num">31.0%</td><td>TP 30,490 + FP 4,842；SEQC2 truth 只覆蓋 universe 的 31%</td></tr>
+</table>
+<div class="warn">⚠ <b>「單點/isolated」只有 L3 的 8,447（7.4%）</b>——舊版 88,358（77.5%）是 chrX + 截斷 + 單點的混合袋，<b>不成立</b>。L4 的 46,137 是「在多位點區內但工程截斷」的，非生物單點。</div>
+
+<h2><span class="n">B</span>區域 W：retained sSNV 的建樹母體</h2>
 <table>
   <tr><th>類別</th><th class="num">數量</th><th>說明</th></tr>
-  <tr><td>k=1（單點·無樹）</td><td class="num">88,358 sSNV</td><td>77.5% of S；無 partner → 單一位點不成樹</td></tr>
-  <tr class="tot"><td>k&gt;1（多點·可建樹）</td><td class="num">25,639 sSNV<br>→ 7,928 區</td><td>layered L0 總區數 7,928；其中 <b>7,927</b> 區有 ≥1 lineage 樹單位（1 區全 unphased）→ 依 HP 家族拆成 <b>13,785</b> lineage 樹單位（下方 C–F 母體）</td></tr>
+  <tr><td>retained sSNV（進 solver）</td><td class="num">25,639</td><td>22.5% of universe；chr1–22 多位點連通群、densest-8 + read-support 後</td></tr>
+  <tr class="tot"><td>建樹區數 W</td><td class="num">7,928</td><td>其中 <b>7,927</b> 區有 ≥1 lineage 樹單位（1 區全 unphased）→ 依 germline HP 家族拆成 <b>13,785</b> lineage 樹單位（下方 C–F 母體）</td></tr>
 </table>
-<p><small class="n">🔎 註：S=113,997（ClairS PASS）中多數（77.5%）為單點 isolated——tumor-only ClairS 高散布 FP 多為孤立。多位點 25,639 = mlhp 實際覆蓋（&gt;8-位點大區已 densest-8 截斷）。</small></p>
 
 <h2><span class="n">C</span>群組合 C（每單位全覆蓋基因型群數）× 確認樹結構</h2>
 <table>
@@ -70,36 +87,40 @@
   <tr class="tot"><td class="num">合計</td><td class="num">13,785</td><td class="num">7,123</td><td class="num">5,959</td><td class="num">676</td><td class="num">27</td><td class="num">51.7%</td></tr>
 </table>
 <div class="obs">📈 <b>觀察</b>：群組合 C 越多 → 確認率越高（C=0→44% → C=1→59% → C=2→71% → C=3→85%）。<b>更多觀測到的基因型群＝更多約束＝樹越容易被唯一定出來</b>（C=4/5 樣本太少、且多為 recurrence 故率下降）。</div>
+<div class="warn">⚠ <b>「51.7% determined」須誠實拆解</b>：7,123 determined 中 <b>1,739 是 root-only 純 REF 家族</b>（樹只有 ROOT、無突變邊 → trivially 唯一，不算重建出 subclone 樹）。<b>真正 mutation-bearing determined = 5,384</b>；排除 root-only 分母後 = 5,384 / 12,046 = <b>44.7%</b>。詳見 E。</div>
 
 <h2><span class="n">D</span>HP 分類（germline 親代單體型）</h2>
 <table>
   <tr><th>類別</th><th class="num">not HP3</th><th class="num">有 HP3</th><th class="num">小計</th><th class="num">佔 W %</th></tr>
-  <tr><td><b>只有單個 HP 有樹</b>（HP1 xor HP2）</td><td class="num">2,855</td><td class="num">352</td><td class="num">3,207</td><td class="num">40.5%</td></tr>
-  <tr><td><b>兩個 HP 都有樹</b>（HP1 and HP2）</td><td class="num">3,200</td><td class="num">1,243</td><td class="num">4,443</td><td class="num">56.0%</td></tr>
+  <tr><td><b>只有單個 HP 有家族</b>（HP1 xor HP2）</td><td class="num">2,855</td><td class="num">352</td><td class="num">3,207</td><td class="num">40.5%</td></tr>
+  <tr><td><b>兩個 germline HP 都有家族</b>（HP1 and HP2）</td><td class="num">3,200</td><td class="num">1,243</td><td class="num">4,443</td><td class="num">56.0%</td></tr>
   <tr><td>無 germline 家族（只 somatic-3 / none）</td><td class="num" colspan="2">—</td><td class="num">277</td><td class="num">3.5%</td></tr>
   <tr class="tot"><td>合計</td><td class="num" colspan="2"></td><td class="num">7,927</td><td class="num">100%</td></tr>
 </table>
-<div class="warn">💡 <b>HP3 = somatic-integrated（第三 lineage）</b>：1,595 區含 HP3 樹（352 + 1,243）。<b>56% 區兩條親代單體型都有樹</b>（mixed germline）→ 這正是「一區拆多棵」的來源。</div>
+<div class="stop">🔴 <b>「56% 區雙 lineage」須誠實修正</b>：4,443（56%）只是「該區有兩條 germline HP 家族的 read」，其中一條常是 <b>REF-only（只有參考等位 read、無 somatic 突變）</b>——不算真的雙 lineage。<b>兩條 germline 家族都 mutation-bearing（都有 somatic 突變邊）的區只有 2,765（34.9%）</b>。</div>
+<div class="warn">💡 <b>HP3（標 H3?）</b>：1,595 區含 HP3 家族（352+1,243）。⚠ HP3 = 整合 somatic 的 <b>ambiguous haplotype</b>（KB 定義）；<b>維持計數但加註不當作確認的第三獨立 germline lineage</b>。</div>
 
-<h2><span class="n">E</span>拓撲確認狀況 + 可能性數量</h2>
+<h2><span class="n">E</span>拓撲確認狀況 + 誠實重分類</h2>
 <table>
-  <tr><th>分類</th><th class="num">單位數</th><th class="num">佔 %</th><th>意義</th></tr>
-  <tr><td><b>determined</b>（唯一樹）</td><td class="num">7,123</td><td class="num">51.7%</td><td>可辨識為 1 棵（1 種可能）</td></tr>
+  <tr><th>分類</th><th class="num">單位數</th><th class="num">佔 13,785</th><th>意義</th></tr>
+  <tr><td><b>determined（全）</b></td><td class="num">7,123</td><td class="num">51.7%</td><td>唯一樹（含下列 root-only）</td></tr>
+  <tr><td><small>├ root-only 純 REF 家族</small></td><td class="num">1,739</td><td class="num">12.6%</td><td><b>樹只有 ROOT、無突變邊</b> → 不算重建出 subclone 樹</td></tr>
+  <tr class="tot"><td><small>└ mutation-bearing determined</small></td><td class="num">5,384</td><td class="num">39.1%</td><td><b>真正唯一重建出帶突變的樹</b>（排除 root-only 分母 = 44.7%）</td></tr>
   <tr><td><b>ambiguous</b>（多候選樹）</td><td class="num">5,959</td><td class="num">43.2%</td><td>多種可能（見下 n_trees）→ read 加權對象</td></tr>
   <tr><td>capped（太密·枚舉未完）</td><td class="num">676</td><td class="num">4.9%</td><td>誠實標記，不宣稱</td></tr>
-  <tr><td>recurrence（位點翻≥2次）</td><td class="num">27</td><td class="num">0.2%</td><td>→ CN 拆：artifact 20 / LOH 7</td></tr>
+  <tr><td>recurrence（位點翻≥2次）</td><td class="num">27</td><td class="num">0.2%</td><td>→ CN 拆：artifact 20 / LOH 7（<b>有 CN 才可判；無 CN 樣本標 unavailable 非 neutral</b>）</td></tr>
 </table>
 <p><small class="n"><b>ambiguous 的「可能性數量」(候選樹數 n_trees) 分佈</b>（共 5,959 單位）：</small></p>
 <table>
   <tr><th class="num">n_trees</th><th class="num">2</th><th class="num">3</th><th class="num">4</th><th class="num">5</th><th class="num">6</th><th class="num">7</th><th class="num">8</th><th class="num">9</th><th class="num">10</th><th class="num">10+</th></tr>
   <tr><td class="num">單位數</td><td class="num">1,791</td><td class="num">1,988</td><td class="num">105</td><td class="num">264</td><td class="num">287</td><td class="num">72</td><td class="num">37</td><td class="num">8</td><td class="num">396</td><td class="num">1,011</td></tr>
 </table>
-<div class="obs">📊 多數 ambiguous 只有 <b>2–3 棵</b>候選（1,791 + 1,988 = 3,779 單位＝63%）→ 大多「差一點就定」；少數（1,011 單位）≥10 棵候選＝真高度歧義。</div>
+<div class="obs">📊 多數 ambiguous 只有 <b>2–3 棵</b>候選（1,791 + 1,988 = 3,779 單位＝63%）→ 大多「差一點就定」；少數（1,011 單位）≥10 棵候選＝真高度歧義。⚠ 有 367 單位 &gt;32 棵樹，UI/形狀統計/CCF 只用前 32 棵（誠實標記，不當完整枚舉）。</div>
 
 <h2><span class="n">F</span>拓撲類型</h2>
 <table>
   <tr><th>類型</th><th class="num">單位數</th></tr>
-  <tr><td>determined·單一形狀（純觀測，無隱藏節點）</td><td class="num">4,047</td></tr>
+  <tr><td>determined·單一形狀（純觀測，無隱藏節點）<small class="n">— 含 1,739 root-only</small></td><td class="num">4,047</td></tr>
   <tr><td>determined·單一形狀（含隱藏 Steiner 祖先）</td><td class="num">3,076</td></tr>
   <tr><td>ambiguous·2 種形狀</td><td class="num">2,403</td></tr>
   <tr><td>ambiguous·1 種形狀（同節點集·順序未定）</td><td class="num">1,662</td></tr>
@@ -108,27 +129,27 @@
   <tr><td>ambiguous·8 種形狀</td><td class="num">206</td></tr>
   <tr><td>ambiguous·5/6/7/9 種形狀</td><td class="num">113 / 76 / 67 / 4</td></tr>
 </table>
-<div class="warn">🌳 determined 中 <b>3,076 / 7,123（43%）需要隱藏（推斷）祖先節點</b>才能建樹——這正是本方法「未觀測全突變基因型當 Steiner 節點」的實際發揮。</div>
+<div class="warn">🌳 mutation-bearing determined（5,384）中 <b>3,076 需要隱藏（推斷）祖先節點</b>才能建樹——這正是本方法「未觀測全突變基因型當 Steiner 節點」的實際發揮。（4,047 純觀測單一形狀中有 1,739 是 root-only trivial。）</div>
 
 <h2><span class="n">G</span>能確認樣本「完整」癌症突變樹嗎？</h2>
-<div class="stop">🔴 <b>否。</b> 單一 bulk：<b>43.2%</b> 單位為多候選、<b>跨區整棵樹非可辨識</b>（資訊論極限，非計算問題）。封頂 <b>⭐3（characterize 非 confirm subclone）</b>；要突破需 single-cell / multi-region 正交真值。<b>可確認的是「每區/每家族局部樹 + 誠實可辨識性分類」，不是一棵完整全景樹。</b></div>
+<div class="stop">🔴 <b>否——但可推論。</b> 本方法做的是<b>可驗證的「區域突變狀態樹」重建</b>：每區/每家族的局部樹 + 誠實可辨識性分類（determined / ambiguous / capped）。<b>生物 subclone 可如其他工具（PhyloWGS / Canopy / CITUP）一樣「推論」</b>，但單一 bulk 下 43.2% 單位多候選、跨區整棵樹非可辨識（資訊論極限）→ <b>是推論不是確認</b>。封頂 <b>⭐3</b>；確認需 single-cell / multi-region 正交真值。</div>
 
 <h2><span class="n">H</span>可觀察與確認的分類（總表）</h2>
 <table>
   <tr><th>層</th><th>分類軸</th><th>可觀察值</th></tr>
-  <tr><td>sSNV</td><td>連結狀態</td><td>isolated / underpowered / linked</td></tr>
-  <tr><td>區域</td><td>位點數 k</td><td>k=1（無樹）/ k&gt;1（可建樹）</td></tr>
+  <tr><td>sSNV</td><td>funnel 層</td><td>out-of-scope / singleton / cap-excluded / read-unsupported / retained</td></tr>
+  <tr><td>區域</td><td>位點數 k</td><td>retained 多位點區 → W=7,928</td></tr>
   <tr><td>單位</td><td>群組合 C</td><td>C=0..5（越多越易定）</td></tr>
-  <tr><td>單位</td><td>germline HP</td><td>HP1 xor HP2 / HP1 and HP2；× HP3 有無</td></tr>
-  <tr><td>單位</td><td>拓撲確認</td><td>determined / ambiguous / capped / recurrence</td></tr>
-  <tr><td>單位</td><td>可能性數量</td><td>n_trees（唯一=1；歧義 2..10+）</td></tr>
+  <tr><td>單位</td><td>germline HP</td><td>HP1 xor HP2 / HP1 and HP2（both-mut vs REF-only）；× HP3(H3?) 有無</td></tr>
+  <tr><td>單位</td><td>拓撲確認</td><td>determined（mutation-bearing vs root-only）/ ambiguous / capped / recurrence</td></tr>
+  <tr><td>單位</td><td>可能性數量</td><td>n_trees（唯一=1；歧義 2..10+；&gt;32 截斷標記）</td></tr>
   <tr><td>單位</td><td>拓撲形狀</td><td>純觀測 / 含隱藏祖先；1..9 種形狀</td></tr>
 </table>
 
 <footer>
-  <b>可重現</b>：<code>python3 full_census_hierarchy.py</code>（<code>InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/</code>）。
-  來源 <code>layered_reconstruction_HCC1395.json</code>（最新 per-HP-家族）+ <code>sm_completeness_ledger.json</code> + <code>mlhp_part_*.json</code>；
-  一致性 C/E 加總 = 13,785、D 加總 = 7,927 皆 ✓。<b>固定錨</b>：最新 layered aggregate 已提交為 <code>layered_census_snapshot_HCC1395.json</code>（commit <code>2e69811</code>；原 22MB detail 為並行 session 工作檔·可由 <code>layered_tree_reconstruction.py</code> 重生）。partial flag：HCC1395 單樣本。
+  <b>可重現</b>：六層 funnel＝<code>python3 funnel_census_HCC1395.py</code>（<code>funnel_census_HCC1395.json</code>）；階層普查＝<code>python3 full_census_hierarchy.py</code>（<code>InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/</code>）。
+  funnel 由 <code>somatic_pass.vcf.gz</code> 位置重建（50kb 單連通群 + densest-8）；tree-level 由 <code>layered_reconstruction_HCC1395.json</code> 重分類。
+  <b>2026-07-10 P0 修正</b>：isolated 88,358→真單點 8,447；determined 7,123→mutation-bearing 5,384；multi-HP 4,443→both-mut 2,765。scope=chr1–22。partial flag：HCC1395 單樣本 ⭐3。
 </footer>
 </div>
 </body>
