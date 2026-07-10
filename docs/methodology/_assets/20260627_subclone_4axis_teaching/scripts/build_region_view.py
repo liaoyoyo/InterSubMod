@@ -17,6 +17,21 @@ if not LAY or not OUT:
 L = json.load(open(LAY, encoding="utf-8"))
 detail = L["detail"]
 
+# 原始觀測(2026-07-10):join mlhp groups → 每 lineage 帶 positions/col_coverage/populations/subreads
+# (region_view 原本只存重建後的樹,丟失原始 read 證據 → 補回供工作站顯示 read 矩陣/pairwise/locus/位點證據)
+import glob as _glob
+raw_by_region = {}
+_ml_glob = os.environ.get("SM_ML_GLOB")
+if _ml_glob:
+    for _f in _glob.glob(_ml_glob):
+        try:
+            _m = json.load(open(_f, encoding="utf-8"))
+        except Exception:
+            continue
+        for g in _m.get("groups", []):
+            rid = "{}:{}-{}".format(g.get("chrom"), g.get("start"), g.get("end"))
+            raw_by_region[rid] = g
+
 def region_det(units):
     gl = [u for u in units if u["family"] in ("1", "2")]
     if not gl:
@@ -37,17 +52,26 @@ regions = []
 for rid, units in byreg.items():
     u0 = units[0]
     gl = [u for u in units if u["family"] in ("1", "2")]
+    _raw = raw_by_region.get(rid, {})
+    _cov = _raw.get("col_coverage_by_hp") or {}
+    _pop = _raw.get("populations_by_hp") or {}
+    _sub = _raw.get("subread_groups_by_hp") or {}
     regions.append({
         "region": rid, "chrom": u0["chrom"], "start": u0["start"], "end": u0["end"],
         "n_sSNV": u0["n_sSNV"], "cn": u0["cn"],
         "hp_multiplicity": len(gl), "is_multiHP": len(gl) >= 2,
         "region_determinacy": region_det(units),
+        "positions": _raw.get("positions"),               # [pos1, pos2, ...] 每 sSNV 實際座標
+        "n_full_cov_reads": _raw.get("n_full_cov_reads"),  # 跨全部位點的 read 數(co-phase 能力)
         "lineages": sorted([{
             "family": u["family"], "fam_label": u["fam_label"], "is_germline": u["family"] in ("1", "2"),
             "L1_class": u["L1_class"], "n_trees": u["n_trees"], "n_trees_stored": u.get("n_trees_stored"),
             "n_distinct_shapes": u.get("n_distinct_shapes"), "n_hidden": u["n_hidden"], "capped": u["capped"],
             "n_reads": u["n_reads"], "n_full_pops": u["n_full_pops"], "n_partial": u["n_partial"],
             "trees": u["trees"], "L2_cn_verdict": u["L2_cn_verdict"], "verify_pass": u["verify_pass"], "trace": u["trace"],
+            # 原始觀測(此 germline-HP 家族):每位點 [REF,ALT] read 數 / 全跨 populations / partial subreads
+            "obs_col_coverage": _cov.get(u["family"]), "obs_populations": _pop.get(u["family"]),
+            "obs_subreads": _sub.get(u["family"]),
         } for u in units], key=lambda x: (x["family"] == "none", x["family"] == "3", x["family"])),
     })
 regions.sort(key=lambda r: (-r["hp_multiplicity"], -r["n_sSNV"]))

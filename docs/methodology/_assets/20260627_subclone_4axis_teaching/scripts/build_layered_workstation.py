@@ -226,30 +226,26 @@ function show(i,row){
    +'<span><svg width="26" height="10" style="vertical-align:middle"><line x1="1" y1="5" x2="25" y2="5" stroke="#94a3b8" stroke-width="1.3"/></svg> 灰實線=此邊<b>在全部等機率樹一致=forced 骨幹</b></span>'
    +'<span><svg width="26" height="10" style="vertical-align:middle"><line x1="1" y1="5" x2="25" y2="5" stroke="#f59f00" stroke-width="1.9" stroke-dasharray="4 2"/></svg> <b style="color:#d97706">橙虛線</b>=此連接在等機率樹間<b>變動=枚舉組合選擇</b>(非唯一)</span>'
    +'</div><div class="note" style="font-size:10px;margin-top:3px;background:none;border:none;padding:0">🔴 <b>整棵樹全橙</b> = 無 forced 骨幹、結構完全在 N 個選擇間未定(本資料 ~82% 多樹 lineage 屬此);<b>有灰邊</b> = 灰部分 forced、僅橙邊是選擇。<b>capped(太密)</b>lineage 枚舉未完整→穩定/選擇標記僅基於已存樹,可能高估 forced。</div>';
- // ===== 位點證據 + 確定性(region 級):每 sSNV 位點的 ALT 來源 =====
+ // ===== 位點證據 + 確定性(用原始 col_coverage 真值):每位點實測 ALT reads + co-phase 缺口 =====
  (function(){
-  let obsN=new Set(),infN=new Set();
-  r.lineages.forEach(L=>(L.trees||[]).forEach(t=>(t.edges||[]).forEach(e=>e.forEach(n=>{
-   if(n==='ROOT')return; if(n[0]==='H'&&n[1]==='_')infN.add(n.slice(2)); else obsN.add(n);
-  }))));
-  let vlen=0;[...obsN,...infN].forEach(v=>vlen=Math.max(vlen,v.length));
-  if(!vlen)return;
-  // recurrence 位點(某位點在樹上突變兩次·違反 infinite-sites)
+  const pos=r.positions||[];if(!pos.length)return;  // 無 mlhp 原始資料則略
+  let perpos=pos.map(()=>({ref:0,alt:0}));
+  r.lineages.forEach(L=>{const cov=L.obs_col_coverage||{};pos.forEach((p,i)=>{const c=cov[String(p)];if(c){perpos[i].ref+=c[0];perpos[i].alt+=c[1];}});});
   let recur=new Set();r.lineages.forEach(L=>(L.trees||[]).forEach(t=>(t.recurrence||[]).forEach(b=>recur.add(b))));
-  let cells='',nObs=0,nInf=0,nZero=0;
-  for(let i=0;i<vlen;i++){
-   let oa=[...obsN].filter(v=>v[i]==='A').length,ia=[...infN].filter(v=>v[i]==='A').length;
-   let cls,txt;if(oa>0){cls='#2563eb';txt=oa+' 實測';nObs++;}else if(ia>0){cls='#a855f7';txt='僅推斷';nInf++;}else{cls='#dc2626';txt='零證據⚠';nZero++;}
-   cells+='<td style="text-align:center;padding:3px 6px"><b>S'+(i+1)+'</b>'+(recur.has(i)?'<br><span style="color:#dc2626;font-size:9px" title="此位點在樹上突變兩次·違反 infinite-sites">🔁recur</span>':'')+'<br><span style="color:'+cls+';font-size:10px">'+txt+'</span></td>';
-  }
-  // 確定性徽章(C):結合 region determinacy + 位點實測率
+  let cells='',nObsAlt=0,nZero=0;
+  pos.forEach((p,i)=>{const o=perpos[i],tot=o.ref+o.alt,vaf=tot?100*o.alt/tot:0;
+   let cls,txt;if(o.alt>0){cls='#2563eb';txt=o.alt+' ALT 實測';nObsAlt++;}else{cls='#dc2626';txt='0 ALT⚠';nZero++;}
+   cells+='<td style="text-align:center;padding:3px 7px"><b>S'+(i+1)+'</b> <span class="note" style="background:none;border:none;padding:0">'+p+'</span>'+(recur.has(i)?' <span style="color:#dc2626;font-size:9px" title="突變兩次·違反 infinite-sites">🔁</span>':'')+'<br><span style="color:'+cls+';font-size:10.5px">'+txt+'</span><br><span class="note" style="background:none;border:none;padding:0;font-size:9px">VAF '+vaf.toFixed(0)+'% ('+o.alt+'A/'+o.ref+'R)</span></td>';
+  });
+  const nfc=r.n_full_cov_reads||0,k=pos.length,gap=pos.length>1?pos[pos.length-1]-pos[0]:0;
+  const gtxt=gap>=1000?(gap/1000).toFixed(1)+'kb':gap+'bp';
+  const cophaseWeak=nfc<Math.max(2,nObsAlt);  // 跨全位點 read 太少 → 組合推斷
   let cl2={all_determined:['High','#16a34a','全 lineage 唯一樹'],has_ambiguous:['Med','#d97706','有多樹未定'],has_capped:['Low','#9333ea','枚舉未完(太密)'],has_recurrence:['Low','#dc2626','有 recurrence'],no_germline_lineage:['—','#94a3b8','無 germline']}[r.region_determinacy]||['—','#94a3b8',''];
-  let evTxt=nObs+'/'+vlen+' 位點有實測'+(nInf?'·'+nInf+' 僅推斷':'')+(nZero?'·'+nZero+' 零證據':'');
-  h+='<div class="note" style="margin:6px 0"><b>🎯 結構確定性</b> <span class="tag" style="background:'+cl2[1]+'">'+cl2[0]+'</span> <span class="note" style="background:none;border:none;padding:0">'+cl2[2]+' ｜ 位點證據 '+evTxt+'</span>'
-   +'<table style="margin-top:5px;font-size:11px"><tr>'+cells+'</tr></table>'
-   +'<div style="font-size:10px;margin-top:3px"><b>位點來源</b>：<span style="color:#2563eb">■實測</span>(非H_節點帶 ALT) ｜ <span style="color:#a855f7">■僅推斷</span>(只隱藏祖先帶·無實測證實) ｜ <span style="color:#dc2626">■零證據</span>(全 R·census somatic 但 linkage 未捕捉→死位點仍佔向量長度) ｜ <span style="color:#dc2626">🔁recur</span>=此位點突變兩次(違反 infinite-sites)。'
-   +(nZero?'<b style="color:#dc2626"> ⚠ '+nZero+' 個零證據位點。</b>':'')
-   +(nInf&&!nObs?'<b style="color:#a855f7"> ⚠ 0 位點有實測、全靠推斷。</b>':'')+'</div></div>';
+  h+='<div class="note" style="margin:6px 0"><b>🎯 結構確定性</b> <span class="tag" style="background:'+cl2[1]+'">'+cl2[0]+'</span> <span class="note" style="background:none;border:none;padding:0">'+cl2[2]+' ｜ '+nObsAlt+'/'+k+' 位點實測到 ALT</span>'
+   +'<div style="margin-top:5px;font-weight:600;font-size:11.5px">📍 位點證據（實測 ALT reads·非推斷·來自原始 col_coverage）</div><table style="margin-top:3px;font-size:11px"><tr>'+cells+'</tr></table>'
+   +'<div style="font-size:10px;margin-top:3px">🔴 <b>位點層 vs 組合層</b>：每位點各自的 ALT <b style="color:#2563eb">是 read 直接實測</b>（上表 A 數）;但<b>「組合(phasing)」是否實測</b>看 <b>n_full_cov_reads='+nfc+'</b>（同時跨全部 '+k+' 位點的 read）— '
+   +(cophaseWeak?'<b style="color:#a855f7">太少 → 無 read 把各位點的 ALT 連成同一分子 → 樹節點(組合)為推斷（read-span 限制;位點跨 '+gtxt+'）。即「位點實測、但誰跟誰同 lineage 定不出來」。</b>':'足夠 → 組合可被實測 read 定。')
+   +(nZero?'<b style="color:#dc2626"> ⚠ '+nZero+' 位點 0 ALT read(census somatic 但此 linkage 無 ALT 覆蓋)。</b>':'')+'</div></div>';
  })();
  r.lineages.forEach(L=>{const[ct,cc]=clsTag(L.L1_class);const fc=famCls(L.family);
   const _obsPops=(L.n_full_pops||0);
