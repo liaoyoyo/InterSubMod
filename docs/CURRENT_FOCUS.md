@@ -23,9 +23,9 @@
 > - **P0-4 無 CN 當 neutral**：`sm_multilocus_combinations.py:48` 無 CN→預設 neutral（應 unavailable）。影響 6 樣本 recurrence CN 裁決。
 > **CCF caveat（已改 PI §4.2）**：99.4% winner-clean = **自洽率非驗證**（winner 依 pigeonhole 選再查同規則）；CN-clean 1,960 = neutral 220+LOH 1,639+loss 101，嚴格 read≈CCF 只 ~220。
 > **使用者定案**：scope=chr1–22（chrX out-of-scope）；論文主張=**可驗證區域突變狀態樹；生物 subclone 可如 PhyloWGS/Canopy/CITUP 般推論(inferable)非確認**；HP3 維持計數但加註 H3?。
-> **已完成**：① census+PI 改寫（commit f13ace9）② **7 樣本同口徑擴充**（`funnel_census_7samples.py`+`20260710_funnel_census_7samples.standalone.html`，commit 88c1964；不重讀 BAM；審查跨樣本 claim HCC1954 90.8%→49.3%/COLO829 77.6%→52.9% 獨立重算吻合）③ 全量 V4/V5 + **seeded 隨機 stress**（`full_v4v5_verification.py`，5 seed×800，取代 07-07 無憑據「3723 隨機案例」，commit 8fdb941）。
+> **已完成**：① census+PI 改寫（commit f13ace9）② **7 樣本同口徑擴充**（`funnel_census_7samples.py`+`20260710_funnel_census_7samples.standalone.html`，commit 88c1964；不重讀 BAM；審查跨樣本 claim HCC1954 90.8%→49.3%/COLO829 77.6%→52.9% 獨立重算吻合）③ **全量 V4/V5 + seeded 隨機 stress 已跑完**（`full_v4v5_verification.py`）：**18,103 非-capped 單位全跑完整 V4/V5（95.6% 覆蓋，vs 舊 4.8% 抽樣）→ 0 fail**；**seeded 隨機 stress 5 seed×800=4,000 案例 → 0 mismatch**（取代 07-07 無憑據「3723」）；n_trees>32 的 371 單位 shape 統計低估已誠實標記。
 > **canonical 分母**：`funnel_census_HCC1395.py` / `funnel_census_7samples.py`（單一真值，只讀 somatic_pass.vcf.gz + layered JSON）。
-> **待辦**：6 樣本 CCF read 加權（僅 HCC1395 已跑）+ 6 樣本 SAVANA CN；V4/V5 全量結果落檔確認。
+> **待辦**：6 樣本 CCF read 加權（僅 HCC1395 已跑）+ 6 樣本 SAVANA CN。
 
 ## 2026-07-09 — 🔴 骨幹來源定案：ClairS PASS（非 is_somatic 23,810）
 

@@ -101,6 +101,7 @@
 <footer>
   <b>可重現</b>：<code>python3 funnel_census_7samples.py</code>（<code>InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/</code>）→ <code>funnel_census_7samples.json</code>。
   funnel 由每樣本 <code>somatic_pass.vcf.gz</code> 位置重建 + mlhp retained；tree-level 由 <code>layered_reconstruction_{S}.json</code>（2026-07-09 newbb）。
+  <b>驗證嚴謹度（HCC1395，<code>full_v4v5_verification.py</code>）</b>：全量 V4/V5（獨立重算最小性 + 重枚舉完整性）覆蓋 <b>18,103 非-capped 單位（95.6%）→ 0 fail</b>（取代舊 4.8% 抽樣）；seeded 隨機 stress <b>4,000 案例（5 seed×800）→ 0 mismatch</b>；n_trees&gt;32 的 371 單位 shape 統計低估（誠實標記）。
   <b>待辦</b>：6 樣本 CCF read 加權（僅 HCC1395 已跑）；6 樣本 SAVANA CN。partial flag：全 7 樣本 chr1–22 · ⭐3 · characterize-only。
 </footer>
 </div>
