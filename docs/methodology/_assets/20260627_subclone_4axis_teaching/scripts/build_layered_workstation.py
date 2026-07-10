@@ -232,6 +232,24 @@ function locusBlock(r){
  s+='<line x1="'+(pL+PW-bl/span*PW).toFixed(1)+'" y1="'+(H-4)+'" x2="'+(pL+PW)+'" y2="'+(H-4)+'" stroke="#333"/><text x="'+(pL+PW)+'" y="'+(H-6)+'" text-anchor="end" fill="#888">'+(bl>=1000?bl/1000+'kb':bl+'bp')+'</text></svg>';
  return '<details style="margin:6px 0"><summary style="cursor:pointer;font-size:11.5px;font-weight:600">📏 locus 位點分布（x=座標·y=VAF·藍=有ALT/紅=0ALT·跨 '+(span>=1000?(span/1000).toFixed(1)+'kb':span+'bp')+'）</summary>'+s+'</details>';
 }
+// ===== 位點 pairwise 共現(僅全跨 read·A×A=co-phased 證據)=====
+function pairwiseBlock(r){
+ const pos=r.positions||[];if(pos.length<2)return '';
+ let pops={};r.lineages.forEach(L=>{const p=L.obs_populations||{};for(const g in p)pops[g]=(pops[g]||0)+p[g];});
+ const gts=Object.keys(pops);
+ // 位點各自是否有 ALT(來自 col_coverage·判斷「該對是否本應可 co-phase」)
+ let hasAlt=pos.map(()=>false);r.lineages.forEach(L=>{const cov=L.obs_col_coverage||{};pos.forEach((p,i)=>{const c=cov[String(p)];if(c&&c[1]>0)hasAlt[i]=true;});});
+ let pairs=[];for(let i=0;i<pos.length;i++)for(let j=i+1;j<pos.length;j++)pairs.push([i,j]);
+ let anyGap=false;
+ let blocks=pairs.slice(0,6).map(([i,j])=>{
+  let m={RR:0,RA:0,AR:0,AA:0},cov=0;
+  for(const g in pops){const a=g[i],b=g[j];if(!a||!b||a==='X'||b==='X')continue;cov+=pops[g];m[(a==='A'?'A':'R')+(b==='A'?'A':'R')]+=pops[g];}
+  const gap=hasAlt[i]&&hasAlt[j]&&m.AA===0;if(gap)anyGap=true;
+  const cell=(v,hl)=>'<td style="text-align:center;padding:2px 9px;border:1px solid #eee;'+(hl?(v>0?'background:#dcfce7;font-weight:700':'background:#fee2e2'):'')+'">'+v+'</td>';
+  return '<div style="display:inline-block;margin:3px 10px 3px 0;vertical-align:top"><div style="font-size:10px;font-weight:600">S'+(i+1)+' × S'+(j+1)+(cov?'':' <span style="color:#dc2626">·0 全跨 read</span>')+(gap?' <span style="color:#dc2626">⚠讀span缺口</span>':'')+'</div><table style="font-size:10px;border-collapse:collapse;margin-top:1px"><tr><td style="padding:1px 6px;color:#888"></td><td style="padding:1px 6px;color:#888">S'+(j+1)+'·R</td><td style="padding:1px 6px;color:#888">S'+(j+1)+'·A</td></tr><tr><td style="color:#888">S'+(i+1)+'·R</td>'+cell(m.RR)+cell(m.RA)+'</tr><tr><td style="color:#888">S'+(i+1)+'·A</td>'+cell(m.AR)+cell(m.AA,true)+'</tr></table></div>';
+ }).join('');
+ return '<details style="margin:6px 0"><summary style="cursor:pointer;font-size:11.5px;font-weight:600">🔗 位點 pairwise 共現（僅全跨 read·右下綠格=兩位點同時 ALT=co-phased 直接證據）'+(anyGap?' <span style="color:#dc2626">·偵測到 read-span 缺口</span>':'')+'</summary><div style="margin-top:4px">'+(gts.length?blocks:'<span class="note" style="background:none;border:none;padding:0;color:#dc2626">此區 0 全跨 read（無 read 覆蓋 ≥2 位點）→ 任何位點對的組合皆無法實測·全靠 partial 推斷。</span>')+'</div><div class="note" style="background:none;border:none;padding:2px 0;font-size:9.5px">🔴 某對兩位點<b>各自有 ALT</b>(位點證據表)但右下格 <b>A×A=0</b>(紅底)→ 無 read 同時覆蓋兩者的 ALT = 該對組合<b>未實測·推斷</b>(read-span 限制)。聚合各 germline-HP 家族全跨 populations。</div></details>';
+}
 // ===== 前後相鄰區(read-span 不跨區→僅描述性)=====
 function neighborBlock(r){
  const chrom=r.chrom;if(!chrom)return '';
@@ -289,7 +307,7 @@ function show(i,row){
    +(cophaseWeak?'<b style="color:#a855f7">太少 → 無 read 把各位點的 ALT 連成同一分子 → 樹節點(組合)為推斷（read-span 限制;位點跨 '+gtxt+'）。即「位點實測、但誰跟誰同 lineage 定不出來」。</b>':'足夠 → 組合可被實測 read 定。')
    +(nZero?'<b style="color:#dc2626"> ⚠ '+nZero+' 位點 0 ALT read(census somatic 但此 linkage 無 ALT 覆蓋)。</b>':'')+'</div></div>';
  })();
- h+=locusBlock(r)+neighborBlock(r);
+ h+=locusBlock(r)+pairwiseBlock(r)+neighborBlock(r);
  r.lineages.forEach(L=>{const[ct,cc]=clsTag(L.L1_class);const fc=famCls(L.family);
   const _obsPops=(L.n_full_pops||0);
   h+='<div class="lin f'+L.family+'"><b class="'+fc+'">▸ '+esc(L.fam_label)+'</b> '
