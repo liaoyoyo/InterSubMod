@@ -94,6 +94,38 @@
   <tr><td>建樹結果：determined / ambiguous / capped</td><td class="num" colspan="2">40 / 62 / 60</td><td>partial-heavy → capped 偏高</td></tr>
   <tr><td>被丟的 sSNV（超讀長·無法共現）</td><td class="num">46,137</td><td class="num">—</td><td>需頻率法（out-of-scope）</td></tr>
 </table>
+<figure>
+<svg viewBox="0 0 760 210" width="100%" style="max-width:760px" font-family="-apple-system,Segoe UI,Noto Sans TC,sans-serif">
+  <!-- 基因組軸 0-200kb, x 30..730 -->
+  <line x1="30" y1="30" x2="730" y2="30" stroke="#b8c0cc" stroke-width="1.4"/>
+  <text x="30" y="20" font-size="10" fill="#5b6472">0</text><text x="730" y="20" font-size="10" fill="#5b6472" text-anchor="end">~200 kb</text>
+  <!-- densest-8 窗 (40-84kb → x 170..324) 高亮 -->
+  <rect x="170" y="24" width="154" height="12" fill="#eda100" opacity="0.25"/>
+  <text x="247" y="16" font-size="9.5" fill="#b06a00" text-anchor="middle">densest-8 窗（span~45kb·讀長內）</text>
+  <!-- sSNV ticks -->
+  <g stroke="#2a78d6" stroke-width="2">
+   <line x1="65" y1="26" x2="65" y2="34"/>
+   <line x1="175" y1="26" x2="175" y2="34"/><line x1="195" y1="26" x2="195" y2="34"/><line x1="215" y1="26" x2="215" y2="34"/><line x1="240" y1="26" x2="240" y2="34"/><line x1="262" y1="26" x2="262" y2="34"/><line x1="285" y1="26" x2="285" y2="34"/><line x1="305" y1="26" x2="305" y2="34"/><line x1="320" y1="26" x2="320" y2="34"/>
+   <line x1="470" y1="26" x2="470" y2="34"/><line x1="560" y1="26" x2="560" y2="34"/><line x1="690" y1="26" x2="690" y2="34"/>
+  </g>
+  <!-- reads tiling (每條 ~50kb=175px) -->
+  <g font-size="9" fill="#5b6472">
+  <rect x="150" y="50" width="150" height="11" rx="5" fill="#1baf7a" opacity="0.7"/><text x="305" y="59">read1</text>
+  <rect x="200" y="66" width="150" height="11" rx="5" fill="#1baf7a" opacity="0.7"/><text x="355" y="75">read2（與 read1 重疊→轉遞連結）</text>
+  <rect x="255" y="82" width="150" height="11" rx="5" fill="#1baf7a" opacity="0.7"/><text x="410" y="91">read3</text>
+  </g>
+  <text x="247" y="112" text-anchor="middle" font-size="10.5" fill="#0f9d58" font-weight="700">✅ densest-8：reads 重疊 tiling → 共現可連結（即使 span 45kb &gt; 單 read）</text>
+  <!-- 散開的 sSNV -->
+  <g><line x1="470" y1="130" x2="470" y2="140" stroke="#e34948" stroke-width="2"/><line x1="560" y1="130" x2="560" y2="140" stroke="#e34948" stroke-width="2"/><line x1="690" y1="130" x2="690" y2="140" stroke="#e34948" stroke-width="2"/></g>
+  <text x="575" y="126" text-anchor="middle" font-size="9.5" fill="#d33">散開 sSNV（gap &gt; 讀長·無 read 橫跨）</text>
+  <text x="575" y="156" text-anchor="middle" font-size="10.5" fill="#d33" font-weight="700">❌ 無 tiling 覆蓋 → 無法共現 → 被丟（需頻率法）</text>
+  <!-- 底部結論 -->
+  <line x1="30" y1="172" x2="730" y2="172" stroke="var(--line)" stroke-width="1"/>
+  <text x="380" y="190" text-anchor="middle" font-size="11" font-weight="700" fill="#2a78d6">MAX_SNV=8 是「計算界」(2⁸=256 頂點)，非讀長界 — 53% 的 &gt;8 區在 76kb 窗內有 &gt;8 可連結 sSNV → 提高 MAX_SNV+meets 剪枝可救回</text>
+  <text x="380" y="205" text-anchor="middle" font-size="10" fill="#5b6472">retained k=8 區 span 中位 136kb（本就靠 partial tiling，非單 read 全覆蓋）</text>
+</svg>
+<figcaption style="font-size:12px;color:var(--muted);text-align:left">read-tiling 示意：密集 sSNV 靠重疊 read 轉遞連結（即使 span &gt; 單 read）→ densest-8 可共現；真正散開跨 gap 的 sSNV 無 read 橫跨 → 被丟需頻率法。MAX_SNV=8 是計算界（超立方體 2⁸）非物理讀長界。</figcaption>
+</figure>
 
 <h2 id="c"><span class="n">C</span>germline HP 分類</h2>
 <div class="den">分母 = W（有 lineage 樹單位的區）= 7,927</div>
@@ -127,6 +159,27 @@
   <tr><td>recurrence（違反 infinite-sites）</td><td class="num">27</td><td class="num">0.2%</td><td>全 CN artifact/LOH·無真收斂</td></tr>
 </table></div>
 <div class="stop">🔴 <b>拓撲確定的三層（誠實）</b>：① <b>結構確定（CN-robust·最可信）= 5,384 + 1,662 = 7,046（51.1%）</b>；② <b>若信頻率（多 CN-confounded）+4,018 → 11,064（80.3%）</b>——但只 CN-clean 部分可信；③ <b>真正連頻率都定不出拓撲 = 279（2.0%）</b>。→ <b>歧義本質是「順序」不是「拓撲」；真拓撲不定只 2%</b>。</div>
+<figure>
+<svg viewBox="0 0 760 150" width="100%" style="max-width:760px" font-family="-apple-system,Segoe UI,Noto Sans TC,sans-serif">
+  <!-- 13,785 分段條 (width 720) -->
+  <g font-size="10.5" text-anchor="middle" fill="#fff" font-weight="700">
+  <rect x="20" y="20" width="281" height="30" fill="#1baf7a"/><text x="160" y="39">唯一樹 5,384</text>
+  <rect x="301" y="20" width="87" height="30" fill="#5aa0e0"/><text x="344" y="35" font-size="9">單形狀</text><text x="344" y="45" font-size="9">1,662</text>
+  <rect x="388" y="20" width="210" height="30" fill="#eda100"/><text x="493" y="35">頻率收斂 4,018</text><text x="493" y="45" font-size="8.5">(CN-confounded)</text>
+  <rect x="598" y="20" width="15" height="30" fill="#e34948"/>
+  <rect x="613" y="20" width="91" height="30" fill="#8a94a3"/><text x="658" y="39" font-size="9">root-only 1,739</text>
+  <rect x="704" y="20" width="35" height="30" fill="#7c5cd0"/><text x="721" y="39" font-size="8">cap/rec</text>
+  </g>
+  <!-- 括號 -->
+  <g stroke="#1baf7a" stroke-width="1.6" fill="none"><path d="M20,56 L20,62 L388,62 L388,56"/></g>
+  <text x="204" y="76" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f9d58">① 結構拓撲確定 7,046（51.1%）· CN-robust 最可信</text>
+  <g stroke="#e08600" stroke-width="1.3" fill="none" stroke-dasharray="3 2"><path d="M20,90 L20,95 L598,95 L598,90"/></g>
+  <text x="309" y="109" text-anchor="middle" font-size="11" fill="#b06a00">② 含頻率收斂 11,064（80.3%）· 多 CN-confounded 需標低信心</text>
+  <g stroke="#e34948" stroke-width="1.6" fill="none"><path d="M598,14 L598,8 L613,8 L613,14"/></g>
+  <text x="605" y="132" text-anchor="middle" font-size="11" font-weight="700" fill="#d33">③ 真多拓撲（連頻率都定不出）僅 279（2.0%）↑</text>
+</svg>
+<figcaption style="font-size:12px;color:var(--muted);text-align:left">三層拓撲確定：綠+淺綠＝結構確定 51.1%（最可信）；黃＝加頻率到 80.3%（但多 CN-confounded）；紅＝真正拓撲不定僅 2.0%。歧義本質是「順序」不是「拓撲」。</figcaption>
+</figure>
 
 <h2 id="f"><span class="n">F</span>read/VAF 軟排序（順序層）</h2>
 <div class="den">分母 = 5,959 ambiguous 單位（CCF pigeonhole 加權後）</div>
@@ -138,7 +191,28 @@
   <tr><td>└ 並列但<b>同一形狀</b>（拓撲唯一·只順序並列）</td><td class="num">473</td><td class="num">62.9%<span class="note">of C</span></td></tr>
   <tr><td>└ 並列且<b>多種形狀</b>（真不同拓撲並列）</td><td class="num">279</td><td class="num">37.1%<span class="note">of C</span></td></tr>
 </table>
-<div class="stop">🔴 <b>raw 66.8% 誤導</b>：多在 CN-gain 區（read≠CCF）。<b>可信只 strictly-neutral：全 7 樣本 reach 0.4–11%（HCC1395 6.1%）</b>；99.4% winner-clean 是自洽率非驗證。</div>
+<div class="stop">🔴 <b>raw 66.8% 誤導</b>：多在 CN-gain 區（read AF ≠ 真 CCF）。<b>可信只 strictly-neutral：全 7 樣本 reach 0.4–11%（HCC1395 6.1%）</b>；99.4% winner-clean 是自洽率非驗證。（術語：此處用<b>未經 CN/purity 校正的 read ALT fraction</b>，非真 CCF。）</div>
+<figure>
+<svg viewBox="0 0 760 175" width="100%" style="max-width:760px" font-family="-apple-system,Segoe UI,Noto Sans TC,sans-serif">
+  <g font-size="10.5" text-anchor="middle" fill="#fff" font-weight="700">
+  <rect x="20" y="18" width="481" height="30" fill="#1baf7a"/><text x="260" y="37">A 唯一最可能·有信心 3,980（66.8%）</text>
+  <rect x="501" y="18" width="148" height="30" fill="#5aa0e0"/><text x="575" y="33" font-size="9">B 唯一·信心低</text><text x="575" y="44" font-size="9">1,227（20.6%）</text>
+  <rect x="649" y="18" width="91" height="30" fill="#e34948"/><text x="694" y="33" font-size="9">C 並列</text><text x="694" y="44" font-size="9">752（12.6%）</text>
+  </g>
+  <text x="380" y="12" text-anchor="middle" font-size="10.5" fill="#5b6472">5,959 ambiguous → read AF 頻率排序</text>
+  <!-- C zoom -->
+  <line x1="649" y1="48" x2="360" y2="70" stroke="#e34948" stroke-width="1" stroke-dasharray="2 2"/><line x1="740" y1="48" x2="740" y2="70" stroke="#e34948" stroke-width="1" stroke-dasharray="2 2"/>
+  <g font-size="10.5" text-anchor="middle" fill="#fff" font-weight="700">
+  <rect x="360" y="72" width="239" height="28" fill="#3a9d70"/><text x="479" y="90" font-size="10">並列·<b>同形狀</b> 473（62.9%）</text>
+  <rect x="599" y="72" width="141" height="28" fill="#d33"/><text x="669" y="90" font-size="9.5">並列·多形狀 279（37.1%）</text>
+  </g>
+  <text x="479" y="118" text-anchor="middle" font-size="11" font-weight="700" fill="#0f9d58">↑ 並列但拓撲唯一（只順序並列）</text>
+  <text x="669" y="118" text-anchor="middle" font-size="11" font-weight="700" fill="#d33">↑ 真不同拓撲並列</text>
+  <text x="380" y="146" text-anchor="middle" font-size="11.5" fill="#5b6472">→ A+B 有唯一最可能 87.4%（但只 CN-clean 可信）；並列 12.6% 中 62.9% 其實拓撲唯一</text>
+  <text x="380" y="164" text-anchor="middle" font-size="10.5" fill="#b06a00">⚠ 真可信定序（strictly-neutral）只 6.1%；raw 66.8% 多為 CN-confounded</text>
+</svg>
+<figcaption style="font-size:12px;color:var(--muted);text-align:left">read AF 排序把 5,959 ambiguous 分 A（唯一有信心）/B（唯一信心低）/C（並列）；C 之中 62.9% 其實同一拓撲（只順序並列）。可信定序只 strictly-neutral 6.1%。</figcaption>
+</figure>
 
 <h2 id="g"><span class="n">G</span>隱藏（Steiner）祖先數</h2>
 <div class="den">分母 = 13,785</div>
