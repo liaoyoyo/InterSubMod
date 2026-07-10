@@ -21,6 +21,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.normpath(os.path.join(HERE, "..", "data"))
 MULTI_OUT = os.environ.get("SM_OUT") or os.path.normpath(os.path.join(HERE, "..", "..", "20260629_multisample_topology_workstation.standalone.html"))
 # OUT(舊單樣本 20260628)已 deprecated:build 只產多樣本 MULTI_OUT(=主結果);舊單樣本檔不再寫出
+LAYERED_INDEX = os.path.normpath(os.path.join(HERE, "..", "..", "layered_workstation", "index.html"))
+LAYERED_HREF = os.path.relpath(LAYERED_INDEX, os.path.dirname(MULTI_OUT)).replace(os.sep, "/")
 
 # 多樣本(2026-06-29):SM_SAMPLES="name:dir,name:dir" → 多分頁;預設納入已完成樣本(HCC1395 凍結 + multisample_subclone 下有 topology 的)。
 MSROOT = "/big7_disk/liaoyoyo2001/big7_disk_output/multisample_subclone"
@@ -167,10 +169,26 @@ GLOSSARY_HTML = ('<details style="background:#fff;border:1px solid #dee2e6;borde
  + '</details>')
 
 CSS = """
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;color:#212529;background:#f8f9fa}
-.wrap{max-width:1320px;margin:0 auto;padding:16px}
+*{box-sizing:border-box}html,body{max-width:100%;overflow-x:hidden}body{margin:0;font-family:-apple-system,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;color:#212529;background:#f8f9fa}
+.wrap{width:100%;max-width:1320px;min-width:0;margin:0 auto;padding:16px}
+h1,h2,h3,p{overflow-wrap:anywhere}
+.note,.mono{overflow-wrap:anywhere;word-break:break-word}
+details{max-width:100%;min-width:0}details.c17,#threeaxis,#teachbody{overflow-x:auto;overscroll-behavior-inline:contain}
+.archive-banner{max-width:1320px;margin:14px auto 0;padding:18px 20px;background:#641e1e;color:#fff;border:1px solid #4b1515;border-top:7px solid #f7c948;border-radius:10px;box-shadow:0 12px 30px rgba(58,14,14,.18)}
+.archive-eyebrow{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px;font-size:11px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:#ffe8a3}
+.archive-eyebrow span:first-child{display:inline-flex;padding:3px 8px;border:1px solid rgba(255,232,163,.52);border-radius:999px}
+.archive-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,330px);gap:20px;align-items:center}
+.archive-grid h2{margin:0 0 6px;font-size:21px;line-height:1.35;color:#fff}.archive-grid p{margin:0;color:#ffeaea;font-size:13px;line-height:1.65}
+.canonical-cta{display:flex;flex-direction:column;gap:2px;padding:13px 15px;background:#fff;color:#641e1e;border:2px solid #fff;border-radius:8px;text-decoration:none;box-shadow:0 5px 16px rgba(31,7,7,.18)}
+.canonical-cta:hover,.canonical-cta:focus-visible{background:#fff8e1;border-color:#f7c948;outline:3px solid rgba(247,201,72,.35);outline-offset:2px}.canonical-cta span{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.canonical-cta strong{font-size:14px}
+.archive-rule{margin:12px 0 0;padding-top:10px;border-top:1px solid rgba(255,255,255,.24);font-size:11.5px;color:#ffe8e8}
+.archive-readonly{margin:8px 0 10px;padding:9px 12px;border-left:4px solid #8f3c3c;background:#fff4f4;color:#702020;border-radius:0 7px 7px 0;font-size:12px;line-height:1.6}
+.readonly-badge{display:inline-flex;align-items:center;padding:3px 8px;border:1px solid #c7ccd1;border-radius:999px;background:#f1f3f5;color:#5c636a;font-size:10.5px;font-weight:700;white-space:nowrap}
+.region-jump{border:0;background:transparent;padding:0;color:#1971c2;text-decoration:underline;font:inherit;font-weight:700;cursor:pointer;text-align:left}
+.region-jump:focus-visible{outline:3px solid rgba(25,113,194,.25);outline-offset:3px;border-radius:2px}
+@media(max-width:700px){.archive-banner{margin:0;border-radius:0;padding:15px 16px;border-left:0;border-right:0}.archive-eyebrow{align-items:flex-start;flex-direction:column;gap:6px}.archive-grid{grid-template-columns:1fr;gap:13px}.archive-grid h2{font-size:18px}.canonical-cta{width:100%}.wrap{padding:14px 12px}.tabs{max-width:100%;overflow-x:auto;flex-wrap:nowrap}.stab{flex:0 0 auto}.stats{gap:7px}.scard{min-width:min(100%,190px);flex:1}.ctrl>*{max-width:100%}.main{min-width:0}.main>*,.list,.detail{min-width:0;max-width:100%}.detail{padding:12px}}
 h1{font-size:20px;margin:.2em 0}h3{margin:.3em 0}.sub{color:#868e96;font-size:12.5px}
-.stats{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}.scard{background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:9px 11px;min-width:200px}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}.scard{background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:9px 11px;min-width:200px;overflow-x:auto;overscroll-behavior-inline:contain}
 .scard h4{margin:0 0 5px;font-size:11.5px;color:#495057}.bar{display:flex;align-items:center;gap:5px;font-size:10.5px;margin:2px 0}.bar i{height:10px;background:#1c7ed6;border-radius:2px;display:inline-block}
 .scard{cursor:pointer;transition:box-shadow .12s}.scard:hover{box-shadow:0 2px 12px rgba(0,0,0,.12)}.scard h4 .more{float:right;font-size:9px;color:#adb5bd;font-weight:400}
 .smbg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:none;align-items:center;justify-content:center;padding:20px}
@@ -182,6 +200,7 @@ details.c17{background:#fff;border:1px solid #ffd8a8;border-radius:8px;padding:1
 .main{display:grid;grid-template-columns:400px 1fr;gap:12px}@media(max-width:860px){.main{grid-template-columns:1fr}}
 .list{background:#fff;border:1px solid #dee2e6;border-radius:8px;max-height:76vh;overflow:auto}
 .row{padding:6px 10px;border-bottom:1px solid #f1f3f5;cursor:pointer;font-size:12px}.row:hover{background:#e7f5ff}.row.sel{background:#d0ebff}.row b{color:#1c7ed6}
+.region-row{display:block;width:100%;border:0;border-bottom:1px solid #f1f3f5;background:#fff;color:#212529;text-align:left;font:inherit}.region-row:focus-visible{outline:3px solid rgba(25,113,194,.28);outline-offset:-3px}
 .tag{font-size:9.5px;padding:1px 6px;border-radius:9px;margin-left:3px}
 .t_linear{background:#d3f9d8;color:#2b8a3e}.t_branched{background:#e5dbff;color:#5f3dc4}.t_star{background:#fff3bf;color:#b08900}.t_single{background:#f1f3f5;color:#868e96}
 .ctx_telomere{background:#d0ebff;color:#1971c2}.ctx_centromere{background:#ffe3e3;color:#c92a2a}.ctx_arm{background:#f1f3f5;color:#868e96}
@@ -617,8 +636,8 @@ function render(){
  let f=det.filter(r=>(!ch||r.chrom==ch)&&(!tt.size||tt.has(r.topology_type))&&(!dd.size||dd.has(r.determinacy))&&(!gc.size||gc.has(r.genome_ctx))&&r.n_clusters>=mc&&tpfpok(r)&&(!loh||regLOH(r))&&(!undef||r.undefined)&&(!gene||geneHit(r.region))&&(!q||r.region.includes(q)));
  f.sort(SORT[so]||SORT.coord);if(el('f_sortdir').value=='rev')f.reverse();
  el('cnt').textContent=f.length+' 區';
- el('list').innerHTML=f.slice(0,700).map(r=>`<div class="row" data-i="${det.indexOf(r)}"><b>${r.region}</b> <span class="tag ${TT[r.topology_type]||'t_single'}">${TTLABEL[r.topology_type]||r.topology_type.split('(')[0]}</span><span class="tag ctx_${r.genome_ctx}">${r.genome_ctx}</span>${regLOH(r)?'<span class="tag" style="background:#9775fa;color:#fff">LOH</span>':''}${geneHit(r.region)?'<span class="tag" style="background:#e64980;color:#fff">🧬癌</span>':''}<br><span class="note">${r.n_sSNV}sSNV·c=${r.n_clusters}·${r.haplotypes}·${r.cn}·TP${r.tp}/FP${r.fp}${r.ambig_nodes>0?'·⚠序未定':''}</span></div>`).join('')+(f.length>700?`<div class="note" style="padding:8px">...前 700（共 ${f.length}）</div>`:'');
- el('list').querySelectorAll('.row').forEach(x=>x.onclick=()=>show(+x.dataset.i,x));
+ el('list').innerHTML=f.slice(0,700).map(r=>`<button type="button" class="row region-row" data-i="${det.indexOf(r)}" aria-selected="false"><b>${r.region}</b> <span class="tag ${TT[r.topology_type]||'t_single'}">${TTLABEL[r.topology_type]||r.topology_type.split('(')[0]}</span><span class="tag ctx_${r.genome_ctx}">${r.genome_ctx}</span>${regLOH(r)?'<span class="tag" style="background:#9775fa;color:#fff">LOH</span>':''}${geneHit(r.region)?'<span class="tag" style="background:#e64980;color:#fff">癌基因</span>':''}<br><span class="note">${r.n_sSNV}sSNV·c=${r.n_clusters}·${r.haplotypes}·${r.cn}·TP${r.tp}/FP${r.fp}${r.ambig_nodes>0?'·順序未定':''}</span></button>`).join('')+(f.length>700?`<div class="note" style="padding:8px">...前 700（共 ${f.length}）</div>`:'');
+ el('list').querySelectorAll('.row').forEach(x=>x.onclick=()=>{show(+x.dataset.i,x);if(matchMedia('(max-width:860px)').matches){let d=el('detail');requestAnimationFrame(()=>{d.scrollIntoView({block:'start'});d.focus({preventScroll:true});});}});
 }
 // #2 區域內 read 組合矩陣(read 群×sSNV 位點)+ 2^k 可能組合 vs 觀測
 function readMatrix(r){
@@ -644,7 +663,7 @@ function neighborLink(r){var m=r.region.match(/(chr\w+):(\d+)-(\d+)/);if(!m)retu
  function cmp(o,gap,side){if(!o)return '<div style="flex:1"><b>'+side+'</b> <span class="note">(同染色體無相鄰區)</span></div>';var x=o.x;var same=[];if(!!regLOH(x)==!!regLOH(r)&&regLOH(r))same.push('🟣LOH');if(x.cn==r.cn&&r.cn!='unknown')same.push('CN='+x.cn);if(TTc(x.topology_type)==TTc(r.topology_type))same.push('拓樸'+TTc(x.topology_type));if(x.haplotypes==r.haplotypes)same.push('HP='+x.haplotypes);var gk=gap>=1e6?(gap/1e6).toFixed(2)+'Mb':(gap/1000).toFixed(0)+'kb';return '<div style="flex:1;min-width:200px"><b>'+side+'</b> <span class="mono" style="cursor:pointer;color:#1971c2" onclick="show('+det.indexOf(x)+')">'+x.region+'</span> <span class="note">('+x.n_sSNV+'sSNV·c='+x.n_clusters+'·'+x.cn+'·gap '+gk+')</span><br>'+(same.length?'<span style="color:#2b8a3e">共享: '+same.join(' / ')+'</span>':'<span class="note">無共享屬性</span>')+'</div>';}
  var prev=idx>0?sib[idx-1]:null,next=idx<sib.length-1?sib[idx+1]:null;
  return '<div style="background:#f4f6ff;border:1px solid #c3d0f5;border-radius:6px;padding:8px 10px;margin:6px 0;font-size:11.5px"><b>↔ 前後相鄰區關聯</b> <span class="note">(依基因組座標;🔴 read-span 不跨區連結 → LOH/CN 段可跨區共享、但 <b>lineage 不可確認連續</b>=描述性非重建)</span><div style="display:flex;gap:14px;margin-top:5px;flex-wrap:wrap">'+cmp(prev,prev?st-prev.e:0,'◀ 前區')+cmp(next,next?next.s-en:0,'後區 ▶')+'</div></div>';}
-function show(i,row){el('list').querySelectorAll('.row').forEach(x=>x.classList.remove('sel'));if(row)row.classList.add('sel');let r=det[i];
+function show(i,row){el('list').querySelectorAll('.row').forEach(x=>{x.classList.remove('sel');x.setAttribute('aria-selected','false')});if(row){row.classList.add('sel');row.setAttribute('aria-selected','true')}let r=det[i];
  let popcount=r.populations;
  let glen=(Object.keys(r.populations||{})[0]||'').length;
  let rdr=(D.rd||{})[r.region]||{};
@@ -721,22 +740,20 @@ function geneBlock(region){
 }
 ['f_chr','f_minc','f_tpfp','f_loh','f_undef','f_gene','f_q','f_sort','f_sortdir'].forEach(id=>{let e=el(id);if(e){e.oninput=render;e.onchange=render}});
 render();
-// ===== 確認佇列(評分 + 左右判讀) =====
+// ===== 歷史候選評分清單（封存唯讀；不讀寫 browser storage） =====
 const SC=D.scoring;
 el('scoresum').innerHTML=`需確認 <b>${SC.summary.n_need_confirm}</b>/${SC.summary.n_total} 區 · 評分桶 ${JSON.stringify(SC.summary.score_buckets)} · situation ${JSON.stringify(SC.summary.situation_dist)} · <span title="06-28 cis-control 已否決:乾淨可用≈0">曾標需甲基 ${SC.summary.needs_methyl_n}(已否決·非真可用)</span> · 公式: ${SC.summary.score_formula}`;
 let Q=SC.queue;
 el('q_sit').innerHTML='<option value="">全</option>';[...new Set(Q.map(q=>q.situation))].sort().forEach(s=>{let o=document.createElement('option');o.value=s;o.textContent=s;el('q_sit').appendChild(o)});
 const QSORT={score:(a,b)=>a.confidence_score-b.confidence_score,scoreD:(a,b)=>b.confidence_score-a.confidence_score,coord:(a,b)=>a.chrom.localeCompare(b.chrom,undefined,{numeric:true})||a.start-b.start};
-const jkey=r=>'topo_judge_'+r;
-window.setJ=(r,v)=>{let cur=localStorage.getItem(jkey(r));localStorage.setItem(jkey(r),cur==v?'':v);renderQ()};
 window.showByRegion=function(reg){let i=det.findIndex(r=>r.region==reg);if(i>=0){show(i,null);el('detail').scrollIntoView({behavior:'smooth',block:'start'});}else{alert('此佇列區不在拓樸明細中(n_sSNV<2 或未載):'+reg);}};
 const scolor=s=>s>=80?'#2b8a3e':s>=60?'#1971c2':s>=40?'#e8590c':'#c92a2a';
 function renderQ(){let sit=el('q_sit').value,mo=el('q_methyl').checked,so=el('q_sort').value;
  let f=Q.filter(q=>(!sit||q.situation==sit)&&(!mo||q.needs_methyl));f.sort(QSORT[so]||QSORT.score);
  el('qcnt').textContent=f.length+' 區';
- el('queue').innerHTML=f.slice(0,500).map(q=>{let j=localStorage.getItem(jkey(q.region))||'';
-  return `<div class="row" style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
-   <span style="width:140px;cursor:pointer" onclick="showByRegion('${q.region}')" title="點看上方 clone 樹"><b style="color:#1971c2;text-decoration:underline">${q.region}</b></span>
+ el('queue').innerHTML=f.slice(0,500).map(q=>{
+  return `<div class="row" style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;cursor:default">
+   <span style="width:140px"><button type="button" class="region-jump" onclick="showByRegion('${q.region}')" title="查看上方歷史 clone 樹">${q.region}</button></span>
    <span style="width:58px;color:${scolor(q.confidence_score)};font-weight:700" title="confidence 0-100">▮${q.confidence_score}</span>
    <span class="tag ctx_${q.genome_ctx}">${q.genome_ctx}</span>
    <span style="width:112px;font-size:11px">${q.situation}</span>
@@ -744,16 +761,9 @@ function renderQ(){let sit=el('q_sit').value,mo=el('q_methyl').checked,so=el('q_
    <span style="flex:1;min-width:170px;font-size:10.5px" class="note">${q.resolution_path}</span>
    <span style="width:100%;font-size:10px;color:#a33" class="note">🔎 為何: ${q.why_conflict||''}${q.truncated?' ⚠截斷':''}</span>
    <span style="width:100%;font-size:10px;color:#268" class="note">🧬 甲基: ${q.methyl_applicability||''}</span>
-   <span style="white-space:nowrap">
-     <button onclick="setJ('${q.region}','agree')" style="font-size:11px;background:${j=='agree'?'#d3f9d8':'#fff'}">✓同意rank1</button>
-     <button onclick="setJ('${q.region}','alt')" style="font-size:11px;background:${j=='alt'?'#fff3bf':'#fff'}">⇄偏好其他</button>
-     <button onclick="setJ('${q.region}','more')" style="font-size:11px;background:${j=='more'?'#ffe3e3':'#fff'}">?需更多資訊</button>
-   </span></div>`}).join('')+(f.length>500?`<div class="note" style="padding:8px">...前 500（共 ${f.length}，可篩選縮小）</div>`:'');
+   <span class="readonly-badge">ARCHIVE · 唯讀</span></div>`}).join('')+(f.length>500?`<div class="note" style="padding:8px">...前 500（共 ${f.length}，可篩選縮小）</div>`:'');
 }
 ['q_sort','q_sit','q_methyl'].forEach(id=>{el(id).onchange=renderQ;el(id).oninput=renderQ});
-el('q_exp').onclick=()=>{let j={};Q.forEach(q=>{let v=localStorage.getItem(jkey(q.region));if(v)j[q.region]={judgment:v,score:q.confidence_score,situation:q.situation}});
- let b=new Blob([JSON.stringify({n:Object.keys(j).length,judgments:j},null,1)],{type:'application/json'});
- let a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='topology_judgments.json';a.click()};
 renderQ();
 }  // end bootWS — 每分頁切換時用新樣本資料重跑(function scope,無重宣告衝突)
 function selectSample(s){
@@ -777,13 +787,23 @@ PROVENANCE_FOOTER = ('<p class="note" style="margin-top:8px;color:#888">'
                      '甲基 = bounded-auxiliary（見 20260628_cis_control_scope_pilot_verdict_01.md）</p>')
 
 HTML = f"""<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>多樣本克隆樹拓樸工作站 — {len(SAMPLE_NAMES)} ONT 樣本 sSNV 重建</title><style>{CSS}
+<title>[ARCHIVED] 舊骨幹克隆樹拓樸快照 — {", ".join(SAMPLE_NAMES)}</title><style>{CSS}
 .tabs{{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;border-bottom:2px solid #dee2e6;padding-bottom:0}}
 .stab{{padding:7px 14px;border:1px solid #dee2e6;border-bottom:none;border-radius:7px 7px 0 0;background:#f1f3f5;cursor:pointer;font-size:13px;font-weight:600;color:#495057}}
 .stab.active{{background:#1971c2;color:#fff}}
-</style></head><body><div class="wrap">
-<h1>多樣本克隆樹拓樸互動工作站（cluster-first + S/r/m 標籤 + 基因註釋）</h1>
-<p class="sub">{len(SAMPLE_NAMES)} ONT 樣本（{", ".join(SAMPLE_NAMES)}）· 每區 genotype 向量→拓樸(perfect-phylogeny+噪聲過濾) · 分頁切換樣本 · S=sSNV/r=read群/m=甲基位點 · 數字由 JSON 注入</p>
+</style></head><body class="archive-page">
+<aside class="archive-banner" role="alert" aria-labelledby="archive-title">
+  <div class="archive-eyebrow"><span>Archived · Deprecated</span><span>停用日期 2026-07-10</span></div>
+  <div class="archive-grid">
+    <div><h2 id="archive-title">舊 <span class="mono">is_somatic</span> backbone 歷史快照，不可作為目前研究證據</h2>
+    <p>本頁沿用 normal VAF&lt;5% 粗重檢，已知會誤殺 429 個 SEQC2-TP。保留此頁只為重現舊介面與方法沿革；頁內數字、排序與判讀均不可引用。</p></div>
+    <a class="canonical-cta" href="{LAYERED_HREF}"><span>Current canonical</span><strong>開啟分層樹枚舉工作站 →</strong></a>
+  </div>
+  <p class="archive-rule"><b>允許：</b>歷史對照與介面追溯。　<b>禁止：</b>作為 validation evidence、跨樣本結論或人工 review 的續作來源。</p>
+</aside>
+<div class="wrap">
+<h1>歷史克隆樹拓樸快照 · {", ".join(SAMPLE_NAMES)}（cluster-first + S/r/m 標籤）</h1>
+<p class="sub">ARCHIVE · {len(SAMPLE_NAMES)} ONT 樣本（{", ".join(SAMPLE_NAMES)}）· 舊 perfect-phylogeny 工作站的唯讀重現 · 數字由封存 JSON 注入</p>
 <div id="sampletabs" class="tabs"></div>
 <div class="zone">📊 整體觀察區（此區塊四張看板全部隨上方分頁樣本變）</div>
 <div class="note" style="margin:2px 0 7px;line-height:1.75;background:#f8f9fa;border:1px solid #e9ecef;border-radius:6px;padding:7px 11px">由上而下四張看板：<b>① 記分卡</b>＝此樣本各判讀結果／截斷／LOH／癌基因命中的<b>一眼數量</b>(與評分佇列同口徑)。<b>② 全 sSNV 宇宙帳本</b>＝所有 somatic sSNV 分三桶：<b>linked</b>(有共讀 partner→可建樹)／<b>underpowered</b>(有 partner 無共讀→加深覆蓋可救)／<b>isolated</b>(read-span 內無 partner)。<b>③ HG38 全基因組分布</b>＝每區落在染色體<b>哪個位置</b>(依結果上色)＋<b>LOH 底帶</b>(紫)；toggle 可切 每-sSNV／樹形。<b>④ 四張統計卡</b>＝拓樸型態／群數 c／determinacy／HP 根數(<b>點任一卡</b>看放大圓餅＋類別逐一解釋)。</div>
@@ -825,15 +845,16 @@ TP/FP<select id="f_tpfp"><option value="all">全部</option><option value="tp">�
  <div class="fcard"><div class="fh">🎯 determinacy<span class="fhd">能否唯一辨識</span></div><div class="chips" id="cb_determinacy"></div></div>
  <div class="fcard"><div class="fh">📍 基因體位置<span class="fhd">偽影風險</span></div><div class="chips" id="cb_genome_ctx"></div></div>
 </div>
-<div class="main"><div class="list" id="list"></div><div class="detail" id="detail"><div class="note">← 左側點選一個區查看克隆樹（或點上方 chr17 worked example）</div></div></div>
+<div class="main"><div class="list" id="list"></div><div class="detail" id="detail" tabindex="-1"><div class="note">← 左側點選一個區查看克隆樹（或點上方 chr17 worked example）</div></div></div>
 
-<h3 style="margin-top:20px">✓ 候選評分確認佇列（左右選項判讀 + 觀察評分；存瀏覽器 localStorage、可匯出）</h3>
+<h3 style="margin-top:20px">歷史候選評分清單（唯讀）</h3>
+<div class="archive-readonly"><b>人工 review 已停用。</b> 本封存頁不讀寫瀏覽器儲存空間，也不提供判讀匯出；下方只保留舊評分與篩選，供方法沿革查考。請勿把此清單接續為目前研究決策。</div>
 <div id="scoresum" class="note"></div>
 <div class="ctrl">
 排序<select id="q_sort"><option value="score">評分(低→高,最需關注)</option><option value="scoreD">評分(高→低)</option><option value="coord">座標</option></select>
 situation<select id="q_sit"><option value="">全</option></select>
 <label title="06-28 cis-control 裁決:這些區甲基乾淨可用≈0,非真能用甲基解"><input id="q_methyl" type="checkbox">曾標需甲基(已否決)</label>
-<button id="q_exp">匯出判讀 JSON</button><span id="qcnt" class="note"></span>
+<span id="qcnt" class="note"></span>
 </div>
 <div class="list" id="queue" style="max-height:62vh"></div>
 <p class="note" style="margin-top:12px">⚠ 證據層級：A_determined=單分子向量唯一可辨識(≠對 single-cell 驗證為真)；A_ambiguous=缺中間群順序未定；B_pairwise=拼接非單分子整樹；C_underdetermined=多樹相容。TP/FP=SEQC2 僅觀察不進前處理。genome_ctx 為近似(±3Mb)。甲基不參與拓樸裁決(cis-confounded;06-28 cis-control 已測→bounded-auxiliary,非 resolver)。⭐3 單樣本·regional(≤read-span)非 genome-wide tree·分子共現≠single-cell。</p>

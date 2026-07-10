@@ -132,63 +132,40 @@ def index_html(rows, cv):
     for x in rows:
         s = x["sum"]
         cp = lambda k: round(100 * s[k] / (s["n"] or 1))
-        tr += ('<tr><td><a href="{n}.html"><b>{n}</b></a><div class="note">{ti}</div></td>'
+        tr += ('<tr><td><b>{n}</b><div class="note">舊骨幹單樣本快照</div></td>'
                '<td>{nn}</td><td class="note">{p1}/{p2}/{p3}%</td><td>{cbar}</td><td>{nsh}</td>'
                '<td{ic}>{inc}%</td><td>{bcbar}</td><td class="note">{sz}</td>'
-               '<td><a class="btn" href="{n}.html">開啟 ▶</a></td></tr>').format(
-            n=x["name"], ti=TI.get(x["name"], ""), nn=s["n"], p1=cp("c1"), p2=cp("c2"), p3=cp("c3p"),
+               '<td><a class="snapshot-link" href="{n}.html" aria-label="查看 {n} 舊骨幹歷史快照">查看歷史快照</a></td></tr>').format(
+            n=x["name"], nn=s["n"], p1=cp("c1"), p2=cp("c2"), p3=cp("c3p"),
             cbar=_cbar(s), nsh=s["nshapes"],
             inc=s["inc_pct"], ic=' style="color:#c92a2a;font-weight:700"' if s["inc_pct"] >= 10 else "",
             bcbar=_bcbar(s), sz=human(x["size"]))
-    tot_n = sum(x["sum"]["n"] for x in rows)
-    tot_inc = sum(x["sum"]["inc_n"] for x in rows)
-    # 跨樣本觀察 — 兩離群 + 效應量
-    by_br = sorted(rows, key=lambda x: -x["sum"]["br_pct"])
-    top2 = "、".join("{}({}%)".format(x["name"], x["sum"]["br_pct"]) for x in by_br[:2])
     return """<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>多樣本克隆樹拓樸工作站 — 主頁（跨樣本多維度比較）</title><style>
-*{{box-sizing:border-box}}body{{margin:0;font-family:-apple-system,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;color:#212529;background:#f8f9fa;line-height:1.5}}
-.wrap{{max-width:1120px;margin:0 auto;padding:22px}}h1{{font-size:22px;margin:0 0 4px}}h2{{font-size:15px;color:#1971c2;margin:20px 0 8px}}
-.sub{{color:#868e96;font-size:13px;margin:0 0 14px}}table{{border-collapse:collapse;width:100%;font-size:12.5px;background:#fff;border-radius:8px;overflow:hidden}}
-th,td{{padding:6px 9px;text-align:left;border-bottom:1px solid #f1f3f5}}th{{background:#f1f3f5;font-size:11px}}td{{vertical-align:middle}}
-.note{{color:#868e96;font-size:10.5px}}a{{color:#1971c2;text-decoration:none}}a:hover{{text-decoration:underline}}
-.btn{{background:#1971c2;color:#fff;padding:4px 11px;border-radius:6px;font-size:11.5px;white-space:nowrap}}.btn:hover{{text-decoration:none;background:#1864ab}}
-.card{{background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:11px 15px;margin:10px 0;font-size:12px}}
-.ribbon{{background:#fffbf5;border:1px solid #ffe0a3;border-radius:6px;padding:8px 12px;margin:10px 0;font-size:12px;color:#a37200}}
-.mono{{font-family:ui-monospace,monospace}}
-</style></head><body><div class="wrap">
-<h1>🧬 多樣本克隆樹拓樸工作站 — 主頁（跨樣本多維度比較）</h1>
-<p class="sub">{nsamp} ONT 樣本 · somatic sSNV 單分子共現重建 · 每樣本獨立檔(任何電腦可開) · 生成 by build_per_sample_workstation.py</p>
-<div class="ribbon">🏷️ <b>characterization(非 subclone 判別) · single-bulk · L3/⭐3 · 跨樣本差異 partly-artifact</b> · CN 6/7 樣本補自 SAVANA(cna-only) · 統計正確 ≠ 生物差異證據</div>
-
-<h2>📊 跨樣本多維度比較表</h2>
-<table><tr><th>樣本</th><th>總區</th><th>群數 c=1/2/≥3%</th><th>拓撲組成<br>單群/2平行/2直系</th><th>形狀<br>種類</th><th>有效性<br>incompatible%</th><th>branched%(橙·幾何上界)<br>confirmed%(綠·read)</th><th>檔案</th><th></th></tr>{tr}
-<tr style="background:#f8f9fa"><td><b>合計</b></td><td><b>{tot_n}</b></td><td class="note">7 樣本同版本</td><td class="note">11 種 canonical(全樣本合計)</td><td>—</td><td><b>{tot_inc_pct}%</b>({tot_inc})</td><td class="note">跨樣本 CramérV={cv}</td><td>—</td><td></td></tr></table>
-
-<div class="card" style="background:#f4f6ff;border-color:#c3d0f5"><b>🔭 跨樣本觀察（不同維度整合）</b>
-<div style="line-height:1.85;margin-top:4px">
-• <b>維度①群數 c</b>：c=1(單群)為主(36–67%)、c=2 次之、c≥3 稀少(≤6%)→ 拓撲空間淺(全樣本僅 <b>11 種</b> canonical 樹形)<br>
-• <b>維度②拓撲組成</b>：多數樣本 單群+2平行+2直系 三分;<b>COLO829 單群最高(67%)=結構最簡</b>、HCC1937/H2009 最複雜<br>
-• <b>維度③有效性</b>：incompatible% <b>差 0.4↔19.1%</b>(COLO829 最乾淨、<b>H2009 19.1% 資料品質最差</b>)<br>
-• <b>維度④read 驗證</b>：🔴 <b>branched%(幾何上界)常 > confirmed%(read 驗證)</b>—偏 branched 前二 <b>{top2}</b>,但 COLO829 confirmed 僅 39%(缺口最大=低 coread artifact)、HCC1954=undetermined<br>
-• <b>跨樣本效應</b>：c=2 branched-vs-linear <b>CramérV={cv}</b>(small-med);<b>不報 chi2 p 值</b>(pseudoreplication·真 n=7);6/7 樣本 CN 未控 → 裁決 <b>partly-artifact / L3</b>(統計正確≠生物差異)
-</div></div>
-
-<div class="card"><b>📖 欄位意義</b><div class="note" style="line-height:1.85;margin-top:3px">
-• <b>群數 c</b>=含≥1 ALT 向量的細胞群數(germline 不計);上界 c≤k<br>
-• <b>拓撲組成</b>=canonical 樹形(單群 <span style="color:#868e96">■</span>/2平行 <span style="color:#f59f00">■</span>/2直系 <span style="color:#1c7ed6">■</span>);形狀種類=此樣本不同 canonical 樹形數(全 7 樣本合計 11 種、0 未分類)<br>
-• <b>incompatible%</b>=四配子/perfect-phylogeny 違反率(🔴 誠實有效性訊號)<br>
-• <b>branched%</b>=兩 ALT 向量非嵌套(幾何上界,不需 read) ｜ <b>confirmed%</b>=有 read 驗證結構的比例。缺口=幾何斷言但 read 未驗
-</div></div>
-
-<h2>📄 相關文件</h2><div class="card note" style="line-height:1.95">
-• 三軸分析 + 定義附錄: <span class="mono">InterSubMod/docs/methodology/20260702_topology_cluster_shape_three_axis_analysis_01.md</span><br>
-• 對抗驗證記錄(R1-R4 DRY): <span class="mono">InterSubMod/docs/methodology/20260702_topology_three_axis_verification_log_01.md</span><br>
-• 建置地圖 / 本資料夾說明: <span class="mono">20260701_multisample_topology_workstation_build_map_01.md</span> / <span class="mono">README.md</span>(同資料夾)
-</div>
-<p class="note" style="margin-top:16px">重生:<span class="mono">python3 build_per_sample_workstation.py</span>(全部)或 <span class="mono">--index-only</span>(只主頁)。</p>
-</div></body></html>""".format(nsamp=len(rows), tr=tr, tot_n=tot_n, tot_inc=tot_inc,
-                                tot_inc_pct=round(100 * tot_inc / (tot_n or 1), 1), cv=cv if cv is not None else "—", top2=top2)
+<title>[ARCHIVED] 舊克隆樹拓樸快照索引</title><style>
+:root{{--archive:#641e1e;--paper:#fffdf8;--ink:#24201d;--muted:#6e6964;--line:#ddd4c8}}
+*{{box-sizing:border-box}}html,body{{max-width:100%;overflow-x:hidden}}body{{margin:0;font-family:-apple-system,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:#f2eee8;line-height:1.55}}
+.wrap{{width:100%;max-width:1120px;margin:0 auto;padding:22px}}.archive-hero{{overflow:hidden;background:var(--archive);color:#fff;border-top:8px solid #f7c948;border-radius:12px;padding:24px 26px;box-shadow:0 16px 40px rgba(57,20,20,.18)}}
+.serial{{margin:0 0 10px;color:#ffe8a3;font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}}h1{{font-size:26px;line-height:1.25;margin:0 0 8px}}.hero-copy{{max-width:760px;margin:0;color:#ffecec;font-size:13.5px}}
+.hero-actions{{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px}}.canonical{{display:inline-flex;flex-direction:column;padding:10px 14px;background:#fff;color:var(--archive);border:2px solid #fff;border-radius:8px;text-decoration:none}}
+.canonical:hover,.canonical:focus-visible{{background:#fff8de;border-color:#f7c948;outline:3px solid rgba(247,201,72,.35);outline-offset:2px}}.canonical small{{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}}.canonical strong{{font-size:14px}}.stamp{{font-size:11px;color:#ffdede}}
+.rules{{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}}.rule{{background:var(--paper);border:1px solid var(--line);border-top:4px solid #8f3c3c;border-radius:8px;padding:12px 14px;font-size:12px}}.rule b{{display:block;margin-bottom:3px;color:#5c1d1d;font-size:12.5px}}.rule.current{{border-top-color:#2f855a}}.rule.current b{{color:#256b49}}
+.archive-list,.docs{{background:var(--paper);border:1px solid var(--line);border-radius:10px;margin:12px 0;overflow:hidden}}.archive-list>summary,.docs>summary{{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;cursor:pointer;font-weight:750;color:#5c1d1d;list-style-position:inside}}
+.archive-list>summary:hover,.archive-list>summary:focus-visible,.docs>summary:hover,.docs>summary:focus-visible{{background:#fbf2ec;outline:none}}.summary-note{{color:var(--muted);font-size:11px;font-weight:400}}.table-scroll{{max-width:100%;overflow-x:auto;border-top:1px solid var(--line)}}
+table{{border-collapse:collapse;width:100%;min-width:960px;font-size:12px;background:#fff}}th,td{{padding:7px 9px;text-align:left;border-bottom:1px solid #eee8e0}}th{{background:#f3eee8;font-size:10.5px}}td{{vertical-align:middle}}.note{{color:var(--muted);font-size:10.5px}}
+.snapshot-link{{display:inline-block;padding:4px 9px;border:1px solid #8f7f70;border-radius:6px;color:#5f554c;text-decoration:none;font-size:11px;white-space:nowrap}}.snapshot-link:hover,.snapshot-link:focus-visible{{background:#f3eee8;border-color:#5f554c;outline:2px solid rgba(95,85,76,.18);outline-offset:2px}}
+.definitions{{padding:12px 16px;border-top:1px solid var(--line);font-size:11.5px;color:#5f5a55;line-height:1.8}}.docs-body{{padding:12px 16px;border-top:1px solid var(--line);font-size:11.5px;line-height:1.9;color:#5f5a55}}.mono{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}}.footer{{margin:16px 2px;color:var(--muted);font-size:10.5px}}
+@media(max-width:720px){{.wrap{{padding:0 0 16px}}.archive-hero{{border-radius:0;padding:19px 16px;border-left:0;border-right:0}}h1{{font-size:22px}}.rules{{grid-template-columns:1fr;padding:0 12px;margin-top:12px}}.archive-list,.docs{{margin:12px;border-radius:8px}}.archive-list>summary,.docs>summary{{align-items:flex-start;flex-direction:column;gap:3px}}.footer{{margin:14px}}}}
+</style></head><body><main class="wrap">
+<header class="archive-hero"><p class="serial">Research archive · deprecated 2026-07-10</p><h1>舊克隆樹拓樸工作站 · 歷史快照索引</h1>
+<p class="hero-copy">此資料庫使用已停用的 <span class="mono">is_somatic</span> backbone（normal VAF&lt;5% 粗重檢，已知誤殺 429 個 SEQC2-TP）。保留內容只供方法沿革與介面追溯；所有頁面均不可作為目前 validation evidence 或可引用結果。</p>
+<div class="hero-actions"><a class="canonical" href="../layered_workstation/index.html"><small>Current canonical</small><strong>前往分層樹枚舉工作站 →</strong></a><span class="stamp">Archive ID · topology-v1 · readonly</span></div></header>
+<section class="rules" aria-label="封存使用規則"><div class="rule"><b>為何封存</b>舊 backbone 會混淆 allelic / clonal 關係，且 normal VAF 粗重檢已有已知真陽性損失。</div><div class="rule"><b>可以怎麼用</b>僅供重現歷史畫面、理解舊方法與比對介面演進；不可引用頁內統計或延續人工判讀。</div><div class="rule current"><b>目前去哪裡</b>研究解讀、證據匯出與新工作一律使用 layered workstation。</div></section>
+<details class="archive-list"><summary><span>查看 {nsamp} 個歷史單樣本快照</span><span class="summary-note">次要資料 · 預設收合 · 每頁皆有封存警示</span></summary>
+<div class="table-scroll"><table><caption class="note" style="text-align:left;padding:10px 12px">舊 backbone 動態重生值；只描述此封存資料，不代表目前研究口徑。</caption><tr><th>樣本</th><th>舊總區</th><th>群數 c=1/2/≥3%</th><th>舊拓樸組成<br>單群/2平行/2直系</th><th>形狀<br>種類</th><th>舊 incompatible%</th><th>舊 branched / confirmed</th><th>檔案</th><th>歷史入口</th></tr>{tr}</table></div>
+<div class="definitions"><b>舊欄位定義：</b>群數 c＝含 ≥1 ALT 向量的群數；拓樸組成＝此舊模型的 canonical 形狀；incompatible＝四配子／perfect-phylogeny 違反率；branched 與 confirmed 僅是封存模型內的描述。這些欄位不應跨版本解讀。</div></details>
+<details class="docs"><summary><span>歷史文件與重現資訊</span><span class="summary-note">供追溯，不代表現行規格</span></summary><div class="docs-body">三軸分析：<span class="mono">InterSubMod/docs/methodology/20260702_topology_cluster_shape_three_axis_analysis_01.md</span><br>對抗驗證：<span class="mono">InterSubMod/docs/methodology/20260702_topology_three_axis_verification_log_01.md</span><br>建置地圖：<span class="mono">InterSubMod/docs/methodology/20260701_multisample_topology_workstation_build_map_01.md</span><br>重現命令：<span class="mono">python3 build_per_sample_workstation.py</span>（只為 archive reproduction）</div></details>
+<p class="footer">ARCHIVED / NON-CITABLE · index 只列動態產生的歷史快照，不再重述容易漂移的跨樣本 narrative。</p>
+</main></body></html>""".format(nsamp=len(rows), tr=tr)
 
 
 def main():
