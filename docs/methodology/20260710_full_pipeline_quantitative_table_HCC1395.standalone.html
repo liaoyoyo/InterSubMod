@@ -1,0 +1,165 @@
+<!doctype html>
+<!-- provenance-verified: 全數字 2026-07-10 本 session 機械重算並驗證。來源：somatic_pass.vcf.gz、
+  funnel_census_HCC1395.py、layered_reconstruction_HCC1395.json、ccf_and_cn_multisample.py、
+  capped_cluster_conflict.py、full_v4v5_verification.py、tree_enumeration_solver.py(_canon_shape 形狀分類)。
+  樹確定性乾淨單次分類（無重複計數）：determined-mut 5384 / amb-單形狀 1662 / amb-頻率收斂單形狀 4018 /
+  amb-真多拓撲 279 / root-only 1739 / capped 676 / recurrence 27 = 13785。scope=chr1–22 · ⭐3。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>完整流程量化分析總表 — HCC1395</title>
+<style>
+  :root{--ink:#1a1f2b;--muted:#5b6472;--line:#e4e8ee;--bg:#f7f8fa;--card:#fff;--blue:#2a78d6;--green:#1baf7a;--amber:#eda100;--red:#e34948;--gray:#8a94a3}
+  @media(prefers-color-scheme:dark){:root{--ink:#e8ebf0;--muted:#9aa4b2;--line:#2a3140;--bg:#12151b;--card:#1a1f28}}
+  :root[data-theme="light"]{--ink:#1a1f2b;--muted:#5b6472;--line:#e4e8ee;--bg:#f7f8fa;--card:#fff}
+  :root[data-theme="dark"]{--ink:#e8ebf0;--muted:#9aa4b2;--line:#2a3140;--bg:#12151b;--card:#1a1f28}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","Noto Sans TC","PingFang TC",Roboto,sans-serif;line-height:1.55;font-size:14.5px}
+  .wrap{max-width:920px;margin:0 auto;padding:30px 20px 70px}
+  header{border-bottom:2px solid var(--ink);padding-bottom:13px}
+  h1{font-size:22px;margin:0 0 3px}
+  .sub{color:var(--muted);font-size:13.5px}
+  .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;background:#fff4e0;color:#8a5800;border:1px solid #f0d090}
+  h2{font-size:16px;margin:26px 0 4px;padding-top:7px;border-top:1px solid var(--line)}
+  h2 .n{color:var(--blue);font-weight:800;margin-right:6px}
+  .den{font-size:12px;color:var(--muted);margin:2px 0 6px}
+  table{border-collapse:collapse;width:100%;margin:6px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:5px 9px;text-align:left}
+  th{background:var(--card);font-weight:700}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.tot{font-weight:700;background:rgba(42,120,214,.06)}
+  tr.hl td{background:rgba(27,175,122,.10)}
+  .bar{display:inline-block;height:8px;background:var(--blue);border-radius:2px;vertical-align:middle;margin-right:5px;opacity:.55}
+  .note{font-size:12px;color:var(--muted);margin:5px 0}
+  .stop{background:#fdecec;border:1px solid #f3c0c0;border-radius:8px;padding:8px 12px;margin:8px 0;font-size:13px}
+  @media(prefers-color-scheme:dark){.stop{background:#2c1618;border-color:#5c2b2e}}
+  .obs{background:#e6f4ea;border:1px solid #bfe3ca;border-radius:8px;padding:8px 12px;margin:8px 0;font-size:13px}
+  @media(prefers-color-scheme:dark){.obs{background:#14261b;border-color:#2c5540}}
+  code{background:var(--line);padding:1px 4px;border-radius:3px;font-size:11.5px}
+  footer{margin-top:32px;padding-top:11px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted)}
+  .scroll{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>完整流程量化分析總表 <span class="pill">HCC1395 · chr1–22 · ⭐3</span></h1>
+  <div class="sub">ClairS PASS → 樹確定性：每階段數字 + 分母 + 比例（2026-07-10 全機械重算·可一鍵重驗）</div>
+</header>
+
+<h2 id="a"><span class="n">A</span>sSNV 漏斗</h2>
+<div class="den">分母 = S（ClairS PASS）= 113,997</div>
+<table>
+  <tr><th>層</th><th class="num">sSNV</th><th class="num">佔 S</th><th>意義</th></tr>
+  <tr class="tot"><td>S all-PASS universe</td><td class="num">113,997</td><td class="num">100%</td><td>ClairS paired PASS（操作骨幹）</td></tr>
+  <tr><td>− chrX/Y out-of-scope</td><td class="num">33,763</td><td class="num">29.6%</td><td>未做 read 分析</td></tr>
+  <tr><td>= autosomal chr1–22</td><td class="num">80,234</td><td class="num">70.4%</td><td>分析範圍</td></tr>
+  <tr><td>− 真孤立單點 singleton</td><td class="num">8,447</td><td class="num">7.4%</td><td>相鄰 gap&gt;50kb·唯一真「單點無樹」</td></tr>
+  <tr><td>− densest-8 截斷</td><td class="num">46,137</td><td class="num">40.5%</td><td>大區超讀長·頻率法範疇</td></tr>
+  <tr><td>− read-unsupported</td><td class="num">11</td><td class="num">&lt;0.1%</td><td>read&lt;MINREAD=3</td></tr>
+  <tr class="hl"><td>= retained sSNV（進 solver）</td><td class="num">25,639</td><td class="num">22.5%</td><td>→ 建成 W = 7,928 區</td></tr>
+</table>
+
+<h2 id="b"><span class="n">B</span>建樹區 W 與每區 k（sSNV 數）</h2>
+<div class="den">分母 = W = 7,928 區（全部 k≥2）</div>
+<div class="scroll"><table>
+  <tr><th class="num">k</th><th class="num">2</th><th class="num">3</th><th class="num">4</th><th class="num">5</th><th class="num">6</th><th class="num">7</th><th class="num">8*</th></tr>
+  <tr><td>區數</td><td class="num">3,769</td><td class="num">1,853</td><td class="num">950</td><td class="num">474</td><td class="num">260</td><td class="num">164</td><td class="num">458</td></tr>
+  <tr><td>%</td><td class="num">47.5</td><td class="num">23.4</td><td class="num">12.0</td><td class="num">6.0</td><td class="num">3.3</td><td class="num">2.1</td><td class="num">5.8</td></tr>
+</table></div>
+<div class="note">*k=8 含被 densest-8 截斷的 &gt;8 大區。k≤3 占 71%。</div>
+
+<h2 id="b2"><span class="n">B2</span>densest-8 大區處理（340 個 &gt;8 sSNV 區）</h2>
+<div class="den">分母 = 340 個 &gt;8 區；截斷後 span 中位 45kb（原 204kb）</div>
+<table>
+  <tr><th>面向</th><th class="num">數</th><th class="num">%</th><th>說明</th></tr>
+  <tr><td>densest-8 span ≤76kb（read 可共現）</td><td class="num">196</td><td class="num">58%</td><td>共現法有效</td></tr>
+  <tr><td>densest-8 span &gt;76kb（仍超讀長）</td><td class="num">144</td><td class="num">42%</td><td>partial-only</td></tr>
+  <tr><td>建樹結果：determined / ambiguous / capped</td><td class="num" colspan="2">40 / 62 / 60</td><td>partial-heavy → capped 偏高</td></tr>
+  <tr><td>被丟的 sSNV（超讀長·無法共現）</td><td class="num">46,137</td><td class="num">—</td><td>需頻率法（out-of-scope）</td></tr>
+</table>
+
+<h2 id="c"><span class="n">C</span>germline HP 分類</h2>
+<div class="den">分母 = W（有 lineage 樹單位的區）= 7,927</div>
+<table>
+  <tr><th>類別</th><th class="num">區數</th><th class="num">佔 W</th></tr>
+  <tr><td>單 germline HP（HP1 xor HP2）</td><td class="num">3,207</td><td class="num">40.5%</td></tr>
+  <tr><td>雙 germline HP（span-two，含 REF-only）</td><td class="num">4,443</td><td class="num">56.0%</td></tr>
+  <tr class="hl"><td>└ 兩條都 mutation-bearing（誠實雙 lineage）</td><td class="num">2,765</td><td class="num">34.9%</td></tr>
+  <tr><td>無 germline（只 somatic-3 / none）</td><td class="num">277</td><td class="num">3.5%</td></tr>
+</table>
+
+<h2 id="d"><span class="n">D</span>每區直接觀測到幾個帶突變群（subclone）</h2>
+<div class="den">分母 = W = 7,928；n_populations_with_ALT（full-cov）</div>
+<table>
+  <tr><th class="num">群數</th><th class="num">0*</th><th class="num">1</th><th class="num">2</th><th class="num">3</th><th class="num">4–5</th></tr>
+  <tr><td>區數</td><td class="num">4,438</td><td class="num">1,628</td><td class="num">1,716</td><td class="num">138</td><td class="num">8</td></tr>
+  <tr><td>%</td><td class="num">56.0</td><td class="num">20.5</td><td class="num">21.6</td><td class="num">1.7</td><td class="num">0.1</td></tr>
+</table>
+<div class="note">*「0 群」≠ 無 subclone：是無 read 完整覆蓋（全 partial），譜系靠 partial + 隱藏祖先重建。直接觀測 ≥1 群 = 3,490（44%）。</div>
+
+<h2 id="e"><span class="n">E</span>樹確定性 — 乾淨單次分類（無重複計數）★核心</h2>
+<div class="den">分母 = 13,785 lineage 樹單位（依 germline HP 家族拆）</div>
+<div class="scroll"><table>
+  <tr><th>類別</th><th class="num">單位</th><th class="num">佔 13,785</th><th>意義</th></tr>
+  <tr class="hl"><td><b>determined-mut</b>（共現直接定唯一樹）</td><td class="num">5,384</td><td class="num">39.1%</td><td>CN-robust·<b>最可信</b></td></tr>
+  <tr class="hl"><td><b>amb·單形狀</b>（全樹同形狀·只順序未定）</td><td class="num">1,662</td><td class="num">12.1%</td><td>拓撲唯一（結構）</td></tr>
+  <tr><td>amb·多形狀·<b>頻率收斂單形狀</b></td><td class="num">4,018</td><td class="num">29.1%</td><td>⚠ CCF 挑一形狀·多 CN-confounded</td></tr>
+  <tr><td>amb·多形狀·<b>真多拓撲</b>（頻率也不收斂）</td><td class="num">279</td><td class="num">2.0%</td><td>真正拓撲不定</td></tr>
+  <tr><td>root-only 純 REF（無 subclone）</td><td class="num">1,739</td><td class="num">12.6%</td><td>沒帶突變的親代 haplotype</td></tr>
+  <tr><td>capped 密集聚集區</td><td class="num">676</td><td class="num">4.9%</td><td>98.5% 相容（§H）</td></tr>
+  <tr><td>recurrence（違反 infinite-sites）</td><td class="num">27</td><td class="num">0.2%</td><td>全 CN artifact/LOH·無真收斂</td></tr>
+</table></div>
+<div class="stop">🔴 <b>拓撲確定的三層（誠實）</b>：① <b>結構確定（CN-robust·最可信）= 5,384 + 1,662 = 7,046（51.1%）</b>；② <b>若信頻率（多 CN-confounded）+4,018 → 11,064（80.3%）</b>——但只 CN-clean 部分可信；③ <b>真正連頻率都定不出拓撲 = 279（2.0%）</b>。→ <b>歧義本質是「順序」不是「拓撲」；真拓撲不定只 2%</b>。</div>
+
+<h2 id="f"><span class="n">F</span>read/VAF 軟排序（順序層）</h2>
+<div class="den">分母 = 5,959 ambiguous 單位（CCF pigeonhole 加權後）</div>
+<table>
+  <tr><th>軟排序結果</th><th class="num">單位</th><th class="num">佔 amb</th></tr>
+  <tr><td>A 唯一最可能·有信心（top≥0.6）</td><td class="num">3,980</td><td class="num">66.8%</td></tr>
+  <tr><td>B 唯一最可能·信心低（top&lt;0.6）</td><td class="num">1,227</td><td class="num">20.6%</td></tr>
+  <tr><td>C 並列最可能（多棵同分）</td><td class="num">752</td><td class="num">12.6%</td></tr>
+  <tr><td>└ 並列但<b>同一形狀</b>（拓撲唯一·只順序並列）</td><td class="num">473</td><td class="num">62.9%<span class="note">of C</span></td></tr>
+  <tr><td>└ 並列且<b>多種形狀</b>（真不同拓撲並列）</td><td class="num">279</td><td class="num">37.1%<span class="note">of C</span></td></tr>
+</table>
+<div class="stop">🔴 <b>raw 66.8% 誤導</b>：多在 CN-gain 區（read≠CCF）。<b>可信只 strictly-neutral：全 7 樣本 reach 0.4–11%（HCC1395 6.1%）</b>；99.4% winner-clean 是自洽率非驗證。</div>
+
+<h2 id="g"><span class="n">G</span>隱藏（Steiner）祖先數</h2>
+<div class="den">分母 = 13,785</div>
+<table>
+  <tr><th class="num">隱藏數</th><th class="num">0</th><th class="num">1</th><th class="num">2</th><th class="num">≥3</th></tr>
+  <tr><td>單位</td><td class="num">4,064</td><td class="num">4,203</td><td class="num">2,688</td><td class="num">2,830</td></tr>
+  <tr><td>%</td><td class="num">29.5</td><td class="num">30.5</td><td class="num">19.5</td><td class="num">20.5</td></tr>
+</table>
+<div class="note">70.5% 的樹需 ≥1 個推斷祖先；歧義幾乎全來自隱藏祖先（determined 多 0–1、ambiguous 多 2–3）。</div>
+
+<h2 id="h"><span class="n">H</span>CN 套用 + recurrence + capped 相容</h2>
+<table>
+  <tr><th>項目</th><th class="num">數</th><th>說明</th></tr>
+  <tr><td>recurrence CN 裁決</td><td class="num">27</td><td>artifact(CN-gain) 20 / LOH 7 / <b>真收斂 0</b></td></tr>
+  <tr><td>capped 密集區 four-gamete <b>相容</b></td><td class="num">666</td><td><b>98.5%</b>（乾淨巢狀樹存在·Gusfield）</td></tr>
+  <tr><td>capped 有衝突（需 homoplasy）</td><td class="num">10</td><td>1.5%（多 CN artifact）</td></tr>
+  <tr><td>CN 覆蓋（7 樣本）</td><td class="num">5/7</td><td>HCC1395/DORADO=SEQC2·H1437/H2009/HCC1954=SAVANA；COLO829/HCC1937=unavailable</td></tr>
+</table>
+
+<h2 id="i"><span class="n">I</span>可信匯總（最終口徑）★</h2>
+<div class="den">分母 = 13,785 lineage 樹單位</div>
+<table>
+  <tr><th>指標</th><th class="num">單位</th><th class="num">%</th><th>可信度</th></tr>
+  <tr class="hl"><td><b>拓撲確定（結構·CN-robust）</b></td><td class="num">7,046</td><td class="num">51.1%</td><td>★★★ 最可信</td></tr>
+  <tr><td>拓撲確定（含頻率收斂）</td><td class="num">11,064</td><td class="num">80.3%</td><td>★ 多 CN-confounded</td></tr>
+  <tr><td><b>真多拓撲（不可定）</b></td><td class="num">279</td><td class="num">2.0%</td><td>誠實標多解</td></tr>
+  <tr><td>CCF 定唯一·可信（共現 5,384 + CN-clean CCF 365）</td><td class="num">5,749</td><td class="num">41.7%</td><td>★★★ 含頻率的可信定樹</td></tr>
+  <tr><td>V4/V5 驗證（非-capped 單位）</td><td class="num">18,103</td><td class="num">95.6%</td><td>0 fail + 4,000 stress 0 mismatch</td></tr>
+</table>
+<div class="obs">✅ <b>一句話</b>：<b>拓撲形狀確定 51.1%（CN-robust 最可信）</b>；真正連分支結構都定不出來的只有 <b>2.0%</b>；剩下的多樣性是「順序」（哪突變先）＝單一 bulk 資訊論極限。這是誠實、可驗證、不 overclaim 的量化結論。</div>
+
+<footer>
+  <b>可重現</b>：<code>funnel_census_HCC1395.py</code>·<code>ccf_and_cn_multisample.py</code>·<code>capped_cluster_conflict.py</code>·<code>full_v4v5_verification.py</code>·<code>tree_enumeration_solver.py</code>（<code>InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/</code>）。
+  來源 <code>somatic_pass.vcf.gz</code>·<code>layered_reconstruction_HCC1395.json</code>·<code>mlhp_part_*.json</code>。樹確定性乾淨單次分類（無重複計數）；形狀由 <code>_canon_shape</code> 判定。
+  scope = chr1–22 · partial flag：HCC1395 單樣本 · ⭐3 · characterize + infer（非 confirm）。跨 7 樣本見 <code>20260710_funnel_census_7samples.standalone.html</code>。
+</footer>
+</div>
+</body>
+</html>
