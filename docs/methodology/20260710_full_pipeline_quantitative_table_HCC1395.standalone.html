@@ -60,6 +60,21 @@
   <tr><td>− read-unsupported</td><td class="num">11</td><td class="num">&lt;0.1%</td><td>read&lt;MINREAD=3</td></tr>
   <tr class="hl"><td>= retained sSNV（進 solver）</td><td class="num">25,639</td><td class="num">22.5%</td><td>→ 建成 W = 7,928 區</td></tr>
 </table>
+<figure>
+<svg viewBox="0 0 640 210" width="100%" style="max-width:640px" font-family="-apple-system,Segoe UI,Noto Sans TC,sans-serif">
+  <!-- funnel bars, width ∝ count, centered -->
+  <g font-size="11.5" text-anchor="middle">
+  <rect x="20" y="14" width="600" height="24" rx="3" fill="#2a78d6"/><text x="320" y="31" fill="#fff" font-weight="700">S all-PASS 113,997 (100%)</text>
+  <rect x="109" y="46" width="422" height="24" rx="3" fill="#5c92d8"/><text x="320" y="63" fill="#fff">− chrX/Y 33,763 → autosomal 80,234 (70.4%)</text>
+  <rect x="131" y="78" width="378" height="24" rx="3" fill="#7aa8e0"/><text x="320" y="95" fill="#fff" font-size="11">− singleton 8,447 → 多位點 71,787</text>
+  <rect x="253" y="110" width="134" height="24" rx="3" fill="#eda100"/><text x="320" y="127" fill="#fff" font-size="10.5">− densest-8 截斷 46,137</text>
+  <rect x="253" y="142" width="134" height="26" rx="3" fill="#1baf7a"/><text x="320" y="159" fill="#fff" font-weight="700">retained 25,639 (22.5%)</text>
+  <text x="320" y="188" fill="#5b6472" font-size="11">→ 建成 W = 7,928 建樹區</text>
+  <line x1="320" y1="168" x2="320" y2="180" stroke="#8a94a3" stroke-width="1.4"/>
+  </g>
+</svg>
+<figcaption style="font-size:12px;color:var(--muted);text-align:left">漏斗圖：條寬 ∝ 數量。113,997 → 逐層扣（chrX 29.6% / singleton 7.4% / densest-8 40.5%）→ 真正進 solver 的 retained 只 22.5%。</figcaption>
+</figure>
 
 <h2 id="b"><span class="n">B</span>建樹區 W 與每區 k（sSNV 數）</h2>
 <div class="den">分母 = W = 7,928 區（全部 k≥2）</div>
