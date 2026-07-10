@@ -213,6 +213,48 @@ function applyFilter(){
  document.getElementById('cnt').textContent=FILT.length.toLocaleString()+' 區';
  host.querySelectorAll('.row').forEach(x=>x.onclick=()=>show(+x.dataset.i,x));
 }
+// ===== locus 位點分布(x=基因組座標·y=VAF)=====
+function locusBlock(r){
+ const pos=r.positions||[];if(pos.length<1)return '';
+ let pp=pos.map(()=>({ref:0,alt:0}));
+ r.lineages.forEach(L=>{const cov=L.obs_col_coverage||{};pos.forEach((p,i)=>{const c=cov[String(p)];if(c){pp[i].ref+=c[0];pp[i].alt+=c[1];}});});
+ const mn=Math.min(...pos),mx=Math.max(...pos),span=Math.max(1,mx-mn);
+ const W=560,H=104,pL=32,pR=42,pT=8,pB=22,PW=W-pL-pR,PH=H-pT-pB;
+ const X=p=>pL+(p-mn)/span*PW,Y=v=>pT+(1-v)*PH;
+ let s='<svg width="'+W+'" height="'+H+'" style="font:9px ui-monospace,monospace">';
+ s+='<line x1="'+pL+'" y1="'+pT+'" x2="'+pL+'" y2="'+(pT+PH)+'" stroke="#ccc"/>';
+ [0,0.5,1].forEach(v=>{s+='<line x1="'+(pL-3)+'" y1="'+Y(v)+'" x2="'+pL+'" y2="'+Y(v)+'" stroke="#ccc"/><text x="'+(pL-5)+'" y="'+(Y(v)+3)+'" text-anchor="end" fill="#888">'+(v*100)+'</text>';});
+ s+='<line x1="'+pL+'" y1="'+(pT+PH)+'" x2="'+(pL+PW)+'" y2="'+(pT+PH)+'" stroke="#ccc"/>';
+ pos.forEach((p,i)=>{const o=pp[i],tot=o.ref+o.alt,vaf=tot?o.alt/tot:0,x=X(p),y=Y(vaf),col=o.alt>0?'#2563eb':'#dc2626';
+  s+='<line x1="'+x.toFixed(1)+'" y1="'+(pT+PH)+'" x2="'+x.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="'+col+'" stroke-width="1.3"/><circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="4.5" fill="'+col+'"><title>S'+(i+1)+' '+p+' · VAF '+(vaf*100).toFixed(0)+'% ('+o.alt+'A/'+o.ref+'R)</title></circle>'
+   +'<text x="'+x.toFixed(1)+'" y="'+(pT+PH+10)+'" text-anchor="middle" fill="#888">S'+(i+1)+'</text>';});
+ const bl=span>=2000?1000:Math.max(100,Math.round(span/4/100)*100);
+ s+='<line x1="'+(pL+PW-bl/span*PW).toFixed(1)+'" y1="'+(H-4)+'" x2="'+(pL+PW)+'" y2="'+(H-4)+'" stroke="#333"/><text x="'+(pL+PW)+'" y="'+(H-6)+'" text-anchor="end" fill="#888">'+(bl>=1000?bl/1000+'kb':bl+'bp')+'</text></svg>';
+ return '<details style="margin:6px 0"><summary style="cursor:pointer;font-size:11.5px;font-weight:600">📏 locus 位點分布（x=座標·y=VAF·藍=有ALT/紅=0ALT·跨 '+(span>=1000?(span/1000).toFixed(1)+'kb':span+'bp')+'）</summary>'+s+'</details>';
+}
+// ===== 前後相鄰區(read-span 不跨區→僅描述性)=====
+function neighborBlock(r){
+ const chrom=r.chrom;if(!chrom)return '';
+ const sib=R.map((x,gi)=>({x:x,gi:gi})).filter(o=>o.x.chrom===chrom).sort((a,b)=>a.x.start-b.x.start);
+ const idx=sib.findIndex(o=>o.x.region===r.region);if(idx<0)return '';
+ const prev=idx>0?sib[idx-1]:null,next=idx<sib.length-1?sib[idx+1]:null;
+ function cell(o,gap,side){if(!o)return '<div style="flex:1;min-width:180px"><b>'+side+'</b> <span class="note" style="background:none;border:none;padding:0">(此染色體邊界·無)</span></div>';
+  const x=o.x,gk=gap>=1000?(gap/1000).toFixed(1)+'kb':gap+'bp';let sm=[];
+  if(x.cn===r.cn)sm.push('cn '+x.cn);if(x.region_determinacy===r.region_determinacy)sm.push(regTag(x.region_determinacy)[0]);if(x.hp_multiplicity===r.hp_multiplicity)sm.push('HP×'+x.hp_multiplicity);
+  return '<div style="flex:1;min-width:180px"><b>'+side+'</b> <span class="mono" style="cursor:pointer;color:#2563eb;text-decoration:underline" onclick="show('+o.gi+')">'+esc(x.region)+'</span> <span class="note" style="background:none;border:none;padding:0">'+x.n_sSNV+'sSNV·gap '+gk+'</span><br>'+(sm.length?'<span style="color:#16a34a;font-size:10px">共享 '+sm.join(' / ')+'</span>':'<span class="note" style="background:none;border:none;padding:0;font-size:10px">無共享屬性</span>')+'</div>';}
+ return '<details style="margin:6px 0"><summary style="cursor:pointer;font-size:11.5px;font-weight:600">↔ 前後相鄰區（🔴 read-span 不跨區·lineage 不可確認連續·僅描述性鄰接）</summary><div style="display:flex;gap:14px;margin-top:5px;flex-wrap:wrap">'+cell(prev,prev?r.start-prev.x.end:0,'◀ 前')+cell(next,next?next.x.start-r.end:0,'後 ▶')+'</div></details>';
+}
+// ===== 每 germline-HP 家族觀測 read(全跨 populations + partial subreads)=====
+function readObsBlock(L){
+ const fp=L.obs_populations||{},sp=L.obs_subreads||{};const nf=Object.keys(fp).length,ns=Object.keys(sp).length;
+ if(!nf&&!ns)return '';
+ const row=(g,typ,c,col)=>'<tr><td class="mono" style="padding:2px 6px">'+g+'</td><td style="padding:2px 6px;color:'+col+'">'+typ+'</td><td style="padding:2px 6px;text-align:right">'+c+'</td></tr>';
+ let rows=Object.entries(fp).sort((a,b)=>b[1]-a[1]).map(([g,c])=>row(g,'全跨(co-phase)',c,'#2563eb')).join('')
+  +Object.entries(sp).sort((a,b)=>b[1]-a[1]).map(([g,c])=>row(g,'partial(X=未覆蓋)',c,'#a855f7')).join('');
+ return '<details style="margin:5px 0"><summary style="cursor:pointer;font-size:11px">▶ 此家族觀測 read（'+nf+' 全跨群 + '+ns+' partial 群·原始 mlhp）</summary>'
+  +'<table style="font-size:10.5px;margin-top:3px;border-collapse:collapse"><tr style="border-bottom:1px solid #ddd"><th style="padding:2px 6px;text-align:left">genotype</th><th style="padding:2px 6px;text-align:left">類型</th><th style="padding:2px 6px">reads</th></tr>'+rows+'</table>'
+  +'<div class="note" style="background:none;border:none;padding:2px 0;font-size:9.5px">全跨群=同一 read 覆蓋全部位點(可定 phasing);partial=只覆蓋部分位點(單獨看到某位點的 ALT·無法連鎖)。'+(nf===0?'<b style="color:#a855f7">此家族 0 全跨群→組合全靠 partial 拼(推斷)。</b>':'')+'</div></details>';
+}
 function show(i,row){
  document.querySelectorAll('#list .row').forEach(x=>x.classList.remove('sel'));if(row)row.classList.add('sel');
  const r=R[i];const[rt,rc]=regTag(r.region_determinacy);
@@ -247,6 +289,7 @@ function show(i,row){
    +(cophaseWeak?'<b style="color:#a855f7">太少 → 無 read 把各位點的 ALT 連成同一分子 → 樹節點(組合)為推斷（read-span 限制;位點跨 '+gtxt+'）。即「位點實測、但誰跟誰同 lineage 定不出來」。</b>':'足夠 → 組合可被實測 read 定。')
    +(nZero?'<b style="color:#dc2626"> ⚠ '+nZero+' 位點 0 ALT read(census somatic 但此 linkage 無 ALT 覆蓋)。</b>':'')+'</div></div>';
  })();
+ h+=locusBlock(r)+neighborBlock(r);
  r.lineages.forEach(L=>{const[ct,cc]=clsTag(L.L1_class);const fc=famCls(L.family);
   const _obsPops=(L.n_full_pops||0);
   h+='<div class="lin f'+L.family+'"><b class="'+fc+'">▸ '+esc(L.fam_label)+'</b> '
@@ -274,6 +317,7 @@ function show(i,row){
    if(ns>1){h+='<div class="thumbs">';L.trees.forEach((t,ti)=>{h+='<span class="thumb'+(ti?'':' on')+'" onclick="tjump(\''+lid+'\','+ti+')">#'+(ti+1)+'</span>';});h+='</div>';}
    h+='</div>';}
   else{h+='<div class="note" style="margin:5px 0"><b>（此家族無分支樹可畫）</b> '+(_obsPops<=1?'只有單一 genotype 群或僅 germline':'樹 edges 為空')+' → <b>不是缺資料,是本來就無可枚舉的分支結構</b>（'+(L.n_full_pops||0)+' 實測群·'+(L.n_partial||0)+' partial）。determinacy='+esc(L.L1_class)+'。</div>';}
+  h+=readObsBlock(L);
   h+='<div class="trace">'+L.trace.map(t=>'<div>'+esc(t)+'</div>').join('')+'</div></div>';});
  document.getElementById('detail').innerHTML=h;
 }
