@@ -1,0 +1,108 @@
+<!doctype html>
+<!-- provenance-verified: 全數字由 funnel_census_7samples.py 於 2026-07-10 重算（不重讀 BAM；layered 07-09 已跑）。
+  funnel 由每樣本 somatic_pass.vcf.gz 位置重建（50kb 單連通群 + densest-8）+ mlhp retained；每樣本 funnel 自洽 sum==universe ✓。
+  tree-level 由 layered_reconstruction_{S}.json 重分類（determined 拆 root-only vs mutation-bearing；multi-HP both-germline-mutation-bearing）。
+  P0-4：6 樣本無 CN bed → cn=unavailable（非 neutral 預設）。scope=chr1–22。跨樣本 % 為 L3 描述性（真 n=7·禁統計推論）。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7 樣本六層 funnel + 誠實重分類</title>
+<style>
+  :root{--ink:#1a1f2b;--muted:#5b6472;--line:#e2e6ec;--bg:#f7f8fa;--card:#fff;--blue:#2563eb;--green:#0f9d58;--amber:#e08600;--red:#d33}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","Noto Sans TC","PingFang TC",Roboto,sans-serif;line-height:1.6;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:30px 20px 70px}
+  header{border-bottom:2px solid var(--ink);padding-bottom:14px}
+  h1{font-size:23px;margin:0 0 3px}
+  .sub{color:var(--muted);font-size:14px}
+  .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;background:#fff4e0;color:#8a5800;border:1px solid #f0d090}
+  h2{font-size:17px;margin:28px 0 8px;padding-top:6px;border-top:1px solid var(--line)}
+  h2 .n{color:var(--blue);font-weight:800;margin-right:7px}
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:12.8px}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;white-space:nowrap}
+  th{background:#eef1f5;font-weight:700}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.hl{background:#eef4ff}
+  .obs{background:#e6f4ea;border:1px solid #bfe3ca;border-radius:8px;padding:9px 13px;margin:10px 0;font-size:14px}
+  .warn{background:#fff6e6;border:1px solid #f0dca0;border-radius:8px;padding:9px 13px;margin:10px 0;font-size:14px}
+  .stop{background:#fdecec;border:1px solid #f3c0c0;border-radius:8px;padding:9px 13px;margin:10px 0;font-size:14px}
+  code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:12px}
+  footer{margin-top:34px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+  small.n{color:var(--muted)}
+  .u{color:#b06a00;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>7 樣本六層 funnel + 誠實重分類 <span class="pill">chr1–22 · ⭐3</span></h1>
+  <div class="sub">同 HCC1395 P0 修正口徑擴至全 7 ONT 樣本（2026-07-10）｜不重讀 BAM（layered 07-09 已跑）</div>
+</header>
+
+<div class="stop">🔴 <b>P0 同口徑套用</b>：每樣本都把 all-PASS universe 過六層 funnel（真孤立單點只算相鄰 gap&gt;50kb 者）、determined 拆 <b>root-only 純 REF</b> vs <b>mutation-bearing</b>、multi-HP 只算 <b>兩 germline 都帶突變</b>。<b>P0-4</b>：6 樣本無 CN bed → <span class="u">cn=unavailable</span>（非 neutral 預設）。</div>
+
+<h2><span class="n">A</span>六層 funnel（sSNV 層，每樣本自洽 ✓）</h2>
+<div class="scroll">
+<table>
+  <tr><th>樣本</th><th class="num">L1 universe<br>(all-PASS)</th><th class="num">L2 chrX/Y<br>out-of-scope</th><th class="num">L3 真單點<br>(singleton)</th><th class="num">L4 cap-excl<br>(densest-8)</th><th class="num">L6 retained<br>→ solver</th><th class="num">retained<br>區數</th></tr>
+  <tr class="hl"><td>HCC1395 <small class="n">(SEQC2 CN)</small></td><td class="num">113,997</td><td class="num">33,763 (30%)</td><td class="num">8,447</td><td class="num">46,137</td><td class="num">25,639</td><td class="num">7,928</td></tr>
+  <tr><td>COLO829</td><td class="num">38,196</td><td class="num">1,611 (4%)</td><td class="num">7,841</td><td class="num">2,130</td><td class="num">26,614</td><td class="num">—</td></tr>
+  <tr><td>H1437</td><td class="num">75,578</td><td class="num">2,335 (3%)</td><td class="num">6,795</td><td class="num">30,960</td><td class="num">35,488</td><td class="num">—</td></tr>
+  <tr><td>H2009</td><td class="num">157,405</td><td class="num">7,035 (4%)</td><td class="num">3,017</td><td class="num">96,543</td><td class="num">50,810</td><td class="num">—</td></tr>
+  <tr><td>HCC1395_DORADO</td><td class="num">112,387</td><td class="num">33,267 (30%)</td><td class="num">8,406</td><td class="num">45,135</td><td class="num">25,579</td><td class="num">—</td></tr>
+  <tr><td>HCC1937</td><td class="num">49,548</td><td class="num" style="color:#b06a00">33,633 (68%)</td><td class="num">7,705</td><td class="num">1,188</td><td class="num">7,022</td><td class="num">—</td></tr>
+  <tr><td>HCC1954</td><td class="num">20,969</td><td class="num">1,226 (6%)</td><td class="num">7,767</td><td class="num">728</td><td class="num">11,248</td><td class="num">—</td></tr>
+</table>
+</div>
+<div class="warn">⚠ <b>chrX 佔比差異巨大</b>：多數樣本 3–6%，但 <b>HCC1937 chrX 佔 68%</b>（33,633/49,548）、HCC1395 系 30% — 這些 all-PASS universe 若不先扣 chrX 會嚴重誤導。<b>H2009 的 cap-excluded 96,543</b> 極大（大量密集大區被 densest-8 截斷）→ 「retained→universe 比例」不可跨樣本直接比。</div>
+
+<h2><span class="n">B</span>tree-level 誠實重分類（determined 拆 root-only vs mutation-bearing）</h2>
+<div class="scroll">
+<table>
+  <tr><th>樣本</th><th class="num">lineage<br>單位</th><th class="num">determined<br>(全)</th><th class="num">root-only<br>純REF</th><th class="num">mutation-<br>bearing det</th><th class="num">det-mut%<br>(排root分母)</th><th class="num">ambiguous</th><th class="num">capped</th><th class="num">recurrence</th></tr>
+  <tr class="hl"><td>HCC1395</td><td class="num">13,785</td><td class="num">7,123</td><td class="num">1,739</td><td class="num">5,384</td><td class="num">44.7%</td><td class="num">5,959</td><td class="num">676</td><td class="num">27</td></tr>
+  <tr><td>COLO829</td><td class="num">14,445</td><td class="num">6,565</td><td class="num">1,928</td><td class="num">4,637</td><td class="num">37.0%</td><td class="num">7,144</td><td class="num">735</td><td class="num">1</td></tr>
+  <tr><td>H1437</td><td class="num">15,431</td><td class="num">6,260</td><td class="num">1,560</td><td class="num">4,700</td><td class="num">33.9%</td><td class="num">7,354</td><td class="num">1,803</td><td class="num">14</td></tr>
+  <tr><td>H2009</td><td class="num">17,582</td><td class="num">5,486</td><td class="num">1,304</td><td class="num">4,182</td><td class="num">25.7%</td><td class="num">8,167</td><td class="num">3,871</td><td class="num">58</td></tr>
+  <tr><td>HCC1395_DORADO</td><td class="num">13,942</td><td class="num">6,922</td><td class="num">1,543</td><td class="num">5,379</td><td class="num">43.4%</td><td class="num">6,428</td><td class="num">588</td><td class="num">4</td></tr>
+  <tr><td>HCC1937</td><td class="num">4,212</td><td class="num">2,628</td><td class="num">596</td><td class="num">2,032</td><td class="num">56.2%</td><td class="num">1,435</td><td class="num">124</td><td class="num">25</td></tr>
+  <tr><td>HCC1954</td><td class="num">8,050</td><td class="num">5,247</td><td class="num">1,675</td><td class="num">3,572</td><td class="num">56.0%</td><td class="num">2,643</td><td class="num">156</td><td class="num">4</td></tr>
+</table>
+</div>
+<div class="obs">📊 <b>每樣本都有 root-only 純 REF 家族</b>（596–1,928）——若不扣，determined 會被虛增 12–25%。mutation-bearing det% 從 <b>25.7%（H2009）到 56.2%（HCC1937）</b>。</div>
+
+<h2><span class="n">C</span>multi-HP：span-two vs both-mutation-bearing（REF-only 膨脹）</h2>
+<div class="scroll">
+<table>
+  <tr><th>樣本</th><th class="num">span-two germline<br>(含 REF-only)</th><th class="num">佔 W</th><th class="num">both-mutation-<br>bearing</th><th class="num">佔 W<br>(誠實)</th><th class="num">膨脹幅度</th><th class="num">HP3(H3?)<br>區數</th></tr>
+  <tr class="hl"><td>HCC1395</td><td class="num">4,443</td><td class="num">56.0%</td><td class="num">2,765</td><td class="num">34.9%</td><td class="num">−21.1pt</td><td class="num">1,692</td></tr>
+  <tr><td>COLO829</td><td class="num">6,029</td><td class="num">77.6%</td><td class="num">4,113</td><td class="num">52.9%</td><td class="num">−24.7pt</td><td class="num">746</td></tr>
+  <tr><td>H1437</td><td class="num">5,737</td><td class="num">64.7%</td><td class="num">4,191</td><td class="num">47.3%</td><td class="num">−17.4pt</td><td class="num">1,056</td></tr>
+  <tr><td>H2009</td><td class="num">5,956</td><td class="num">61.3%</td><td class="num">4,666</td><td class="num">48.0%</td><td class="num">−13.3pt</td><td class="num">2,039</td></tr>
+  <tr><td>HCC1395_DORADO</td><td class="num">4,285</td><td class="num">53.8%</td><td class="num">2,757</td><td class="num">34.6%</td><td class="num">−19.2pt</td><td class="num">2,374</td></tr>
+  <tr><td>HCC1937</td><td class="num">1,280</td><td class="num">47.5%</td><td class="num">690</td><td class="num">25.6%</td><td class="num">−21.9pt</td><td class="num">252</td></tr>
+  <tr><td>HCC1954</td><td class="num">3,651</td><td class="num">90.8%</td><td class="num">1,985</td><td class="num">49.3%</td><td class="num">−41.5pt</td><td class="num">415</td></tr>
+</table>
+</div>
+<div class="stop">🔴 <b>「雙 lineage」膨脹在全 7 樣本都存在</b>（−13 至 −42 pt）；<b>HCC1954 從 90.8% 降到 49.3%</b>（−41.5pt）最誇張。span-two 只是「兩 germline 家族都有 read」，一條常 REF-only（無突變）→ 誠實值 = both-mutation-bearing。</div>
+
+<h2><span class="n">D</span>CN 狀態（P0-4）</h2>
+<table>
+  <tr><th>樣本</th><th>CN 資料</th><th>recurrence CN 裁決</th></tr>
+  <tr class="hl"><td>HCC1395</td><td>SEQC2 CN bed（gain/loss/LOH）</td><td>可判：artifact 20 / LOH 7</td></tr>
+  <tr><td>COLO829 / H1437 / H2009 / HCC1395_DORADO / HCC1937 / HCC1954</td><td class="u">unavailable（無 CN bed）</td><td class="u">unavailable（非 neutral 預設）</td></tr>
+</table>
+<div class="warn">🔴 <b>P0-4 修正</b>：6 樣本 pipeline 未給 CN bed，其 <code>cn</code> 全為 <code>neutral</code> 是<b>預設值非量測</b>。本表據此標 <span class="u">unavailable</span> — recurrence 不可判 artifact/LOH，CCF 的 CN-gain 分層也不可用。要補需各樣本跑 SAVANA CNV。</div>
+
+<div class="stop">⚠ <b>跨樣本比較紀律（L3）</b>：① 上述 % 為<b>描述性</b>，真 n=7、且 <b>HCC1395 與 HCC1395_DORADO 是同細胞株</b>（非獨立）→ <b>禁做統計檢定/pseudoreplication</b>。② det-mut% 主由<b>定序深度</b>驅動（深→更多共現→更易定），非生物結論。③ 只有 HCC1395 有外部 CN/truth；其餘 characterize-only。</div>
+
+<footer>
+  <b>可重現</b>：<code>python3 funnel_census_7samples.py</code>（<code>InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/</code>）→ <code>funnel_census_7samples.json</code>。
+  funnel 由每樣本 <code>somatic_pass.vcf.gz</code> 位置重建 + mlhp retained；tree-level 由 <code>layered_reconstruction_{S}.json</code>（2026-07-09 newbb）。
+  <b>待辦</b>：6 樣本 CCF read 加權（僅 HCC1395 已跑）；6 樣本 SAVANA CN。partial flag：全 7 樣本 chr1–22 · ⭐3 · characterize-only。
+</footer>
+</div>
+</body>
+</html>
