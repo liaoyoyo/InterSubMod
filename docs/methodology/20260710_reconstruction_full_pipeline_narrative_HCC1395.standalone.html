@@ -79,7 +79,7 @@
   <a href="#s0">§0 一頁流程圖</a> · <a href="#s1">§1 資料漏斗 S→retained</a> · <a href="#s2">§2 區 W 與 k 分佈</a> ·
   <a href="#s3">§3 densest-8 為何截斷</a> · <a href="#s4">§4 HP 分類 + 分群數</a> · <a href="#s5">§5 樹建構與隱藏祖先</a> ·
   <a href="#s6">§6 兩軸：拓撲 vs 順序</a> · <a href="#s7">§7 樹確定性完整分類</a> · <a href="#s8">§8 read/VAF + CN 輔助</a> ·
-  <a href="#s9">§9 capped 可解性</a> · <a href="#s10">§10 誠實邊界</a>
+  <a href="#s9">§9 capped 相容性</a> · <a href="#s10">§10 工具定位 + 誠實邊界</a>
 </div>
 
 <div class="verdict">
@@ -228,7 +228,7 @@
   <tr><td><b>多樹·單形狀</b></td><td class="num">1,662</td><td>拓撲唯一，只「哪個突變先」未定（§6 軸②）</td></tr>
   <tr><td><b>真多拓撲（ambiguous）</b></td><td class="num">4,297</td><td>分支結構本身有多種 → read/VAF 加權對象</td></tr>
   <tr><td><b>root-only 純 REF</b></td><td class="num">1,739</td><td><b>沒帶突變的那條親代 haplotype</b>：96.9% 所在區有帶突變的姊妹家族 → 這條全 REF、樹只有根 = 無 subclone（不是重建出的樹）</td></tr>
-  <tr><td><b>capped</b></td><td class="num">676</td><td><b>太密、現行枚舉未完</b>（k≥5 占 99%）→ 誠實不宣稱 determined。<b>已證 100% 可解</b>（§9）</td></tr>
+  <tr><td><b>capped 密集聚集區</b></td><td class="num">676</td><td>partial-heavy·k≥5 占 99%；不做完整枚舉，改<b>相容性標記：98.5% four-gamete 相容</b>（乾淨巢狀樹存在，§9）</td></tr>
   <tr><td><b>recurrence</b></td><td class="num">27</td><td><b>表面違反 infinite-sites</b>（位點翻兩次）→ CN 一查：artifact(CN-gain) 20 / LOH 7 / <b>真收斂 0</b></td></tr>
 </table>
 
@@ -259,7 +259,19 @@
 </div>
 <div class="obs">✅ <b>可完整驗證的結果（<code>capped_cluster_conflict.py</code>）</b>：capped 從「枚舉未完·太密」升級為<b>「密集聚集區：98.5% 結構相容（乾淨巢狀樹存在）」</b>——這些區不是真複雜的樹、只是完整枚舉所有順序組合龐大（無必要）。另佐證：交集閉包測試（meets 定分支 + 補鏈點）676/676 都存在小合法樹結構、pool 從冪集 256 降到中位 8（k≤8→頂點≤256=常數大小→恆可解）。<b>結論：所有位置都能找到樹</b>；密集區以相容性標記取代完整枚舉。</div>
 
-<h2 id="s10"><span class="n">10</span>誠實邊界 + 方法上限 <span class="tier t3">L3</span></h2>
+<h2 id="s10"><span class="n">10</span>工具定位 + 誠實邊界 <span class="tier t2">L2</span></h2>
+<h3>10.1 與現有工具的定位</h3>
+<p>主流腫瘤演化重建以<b>族群層 VAF</b>（PyClone/PhyloWGS/Pairtree）或<b>單細胞矩陣</b>（SCITE/Cardelino）為單位；本方法差異在<b>資料單位 = 單一 bulk 內的單條 ONT 分子</b>（直接共現、非統計反推）。</p>
+<div class="scroll"><table>
+  <tr><th>工具</th><th>資料單位</th><th>核心訊號</th><th>與本方法關鍵差異</th></tr>
+  <tr><td>PhyloWGS / Canopy / CITUP</td><td>族群（bulk）</td><td>VAF + CNA <b>反推</b>樹</td><td>族群頻率非單分子共現；<b>需 CN 校正</b>；Canopy/CITUP 需多樣本</td></tr>
+  <tr><td>Pairtree</td><td>族群（bulk）</td><td>VAF pairwise + 枚舉多樹</td><td>枚舉概念最近，但 VAF 驅動、無單分子直接共現</td></tr>
+  <tr><td>SCITE / Cardelino</td><td>單細胞</td><td>細胞×突變矩陣</td><td>需單細胞定序；非 read-level bulk</td></tr>
+  <tr><td>MethPhaser / NanoMethPhase</td><td>ONT long-read</td><td>甲基輔助 germline phasing</td><td>只延伸 germline 相位；不進 somatic 樹</td></tr>
+  <tr style="background:#eef4ff"><td><b>本方法（ISM）</b></td><td><b>單一 bulk 內單條 ONT 分子</b></td><td><b>單分子共現 → 超立方體 Steiner 樹枚舉</b>（甲基有界·不進樹）</td><td>—</td></tr>
+</table></div>
+<div class="obs">💡 <b>關鍵定位</b>：PhyloWGS/Canopy/CITUP 從<b>頻率反推</b>樹（pigeonhole/crossing rule 是他們<b>唯一</b>的決定機制、且需 CN 校正）；本方法的<b>拓撲骨幹來自直接共現、CN-robust</b>，頻率只是<b>枚舉後可選的第二層順序加權</b>（§8）。生物 subclone 因此可如他們一樣<b>推論（inferable）</b>，但骨幹更穩。<b>相同限制</b>：跨區組整棵樹時單一 bulk 一樣欠定（他們用多樣本解，我們誠實標「定不出來」+ ⭐3）。</div>
+<h3>10.2 誠實邊界 + 方法上限 <span class="tier t3">L3</span></h3>
 <table>
   <tr><th>邊界</th><th>說明</th></tr>
   <tr><td>拓撲確定 51.1%</td><td>唯一樹 5,384 + 單形狀 1,662；其餘 31.2% 真多拓撲＋順序未定＝<b>單一 bulk 資訊論極限</b>，非演算法不足</td></tr>
