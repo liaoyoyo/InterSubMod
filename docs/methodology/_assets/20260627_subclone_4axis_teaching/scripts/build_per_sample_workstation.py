@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# ⛔ DEPRECATED 2026-07-10 — 舊 is_somatic 骨幹。canonical driver 改 build_layered_per_sample.py
+#    (ClairS v0.4.0 paired PASS + 分層樹枚舉 + 全面板)。此 driver 僅供歷史重生 topology_workstation/。
 """
 每樣本工作站 driver（2026-07-06）— 把 66MB 單檔拆成「每樣本一檔(~9MB) + 主頁 index.html」。
 

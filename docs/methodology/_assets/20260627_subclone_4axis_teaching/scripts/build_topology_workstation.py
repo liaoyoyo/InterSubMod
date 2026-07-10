@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# ============================================================================
+# ⛔ DEPRECATED 2026-07-10 — 舊 is_somatic 骨幹(誤殺 429 SEQC2-TP)。
+#    canonical 已改 build_layered_workstation.py / build_layered_per_sample.py
+#    (ClairS v0.4.0 paired PASS 骨幹 + per germline-HP 家族樹枚舉 + 全面板移植)。
+#    此 script 僅供歷史重生舊圖;新工作請改 layered。輸出 → topology_workstation/(舊骨幹·勿引用)。
+# ============================================================================
 """
 互動式拓樸工作站 HTML v2：
   - 每區 genotype 向量(S1/S2..標籤) + 克隆樹 SVG(節點=S-mut-set·reads·%·HP) + 分支(V/H)

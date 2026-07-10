@@ -1,5 +1,18 @@
 # topology_workstation/ — 多樣本克隆樹拓樸工作站（每樣本一檔）
 
+> # ⛔ DEPRECATED（2026-07-10 正式停用）
+> **此工作站建於舊 `is_somatic` 骨幹**（normal VAF<5% 粗重檢，已證誤殺 429 SEQC2-TP 真 somatic），
+> 已由 **ClairS v0.4.0 paired PASS** 新骨幹的**分層樹枚舉工作站**取代。
+> **canonical = `../layered_workstation/`**（driver `build_layered_per_sample.py` / 單樣本 `build_layered_workstation.py`）。
+> layered 版特點：per germline-HP 家族分建樹（修 allelic/clonal 混淆）+ 移植本站全部可觀察面板
+> （位點證據改用原始 col_coverage / locus / pairwise 共現 / 前後相鄰區 / 每家族觀測 read）
+> + 新增**位點層實測 vs 組合層(phasing)推斷**的正確區分（`n_full_cov_reads` co-phase 缺口）。
+> **本資料夾數字為舊骨幹，僅供歷史對照，勿引用；不再重生。**
+>
+> ---
+>
+> **（以下為停用前原始 README，歷史保留）**
+
 > **這是「可攜版」工作站**：把原本 63.6MB 的單檔拆成「每樣本一檔(4–21MB) + 主頁 index.html」，
 > 讓**任何電腦**（低 RAM / 一般瀏覽器）都開得動、也不會被 email/Slack 的 25–50MB 上限截斷。
 > 產生日：2026-07-06。
