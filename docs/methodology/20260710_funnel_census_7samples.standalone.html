@@ -88,13 +88,36 @@
 </div>
 <div class="stop">🔴 <b>「雙 lineage」膨脹在全 7 樣本都存在</b>（−13 至 −42 pt）；<b>HCC1954 從 90.8% 降到 49.3%</b>（−41.5pt）最誇張。span-two 只是「兩 germline 家族都有 read」，一條常 REF-only（無突變）→ 誠實值 = both-mutation-bearing。</div>
 
-<h2><span class="n">D</span>CN 狀態（P0-4）</h2>
+<h2><span class="n">D</span>CN 套用（P0-4）+ recurrence 裁決</h2>
+<p><small class="n">SAVANA CN 07-05 已跑（不重跑）；用 CN bed lookup 覆蓋 mlhp 的 neutral 預設。<b>5/7 有可用 CN</b>；COLO829/HCC1937 SAVANA purity mis-fit → 正確保持 unavailable。</small></p>
+<div class="scroll">
 <table>
-  <tr><th>樣本</th><th>CN 資料</th><th>recurrence CN 裁決</th></tr>
-  <tr class="hl"><td>HCC1395</td><td>SEQC2 CN bed（gain/loss/LOH）</td><td>可判：artifact 20 / LOH 7</td></tr>
-  <tr><td>COLO829 / H1437 / H2009 / HCC1395_DORADO / HCC1937 / HCC1954</td><td class="u">unavailable（無 CN bed）</td><td class="u">unavailable（非 neutral 預設）</td></tr>
+  <tr><th>樣本</th><th>CN 來源</th><th class="num">recurrence<br>單位</th><th>recurrence CN 裁決<br>（artifact=CN-gain / LOH / candidate=可能真 / unavailable）</th></tr>
+  <tr class="hl"><td>HCC1395</td><td>SEQC2</td><td class="num">27</td><td>artifact 20 / LOH 7（layered m_channel 官方）</td></tr>
+  <tr><td>HCC1395_DORADO</td><td>SEQC2（同株）</td><td class="num">4</td><td>LOH 3 / artifact 1</td></tr>
+  <tr><td>H1437</td><td>SAVANA</td><td class="num">14</td><td>artifact 10 / LOH 4</td></tr>
+  <tr><td>H2009</td><td>SAVANA</td><td class="num">58</td><td>LOH 38 / artifact 19 / candidate 1</td></tr>
+  <tr><td>HCC1954</td><td>SAVANA</td><td class="num">4</td><td>artifact 4</td></tr>
+  <tr><td>COLO829</td><td class="u">unavailable(mis-fit)</td><td class="num">1</td><td class="u">unavailable ×1</td></tr>
+  <tr><td>HCC1937</td><td class="u">unavailable(mis-fit)</td><td class="num">25</td><td class="u">unavailable ×25</td></tr>
 </table>
-<div class="warn">🔴 <b>P0-4 修正</b>：6 樣本 pipeline 未給 CN bed，其 <code>cn</code> 全為 <code>neutral</code> 是<b>預設值非量測</b>。本表據此標 <span class="u">unavailable</span> — recurrence 不可判 artifact/LOH，CCF 的 CN-gain 分層也不可用。要補需各樣本跑 SAVANA CNV。</div>
+</div>
+<div class="obs">📈 <b>這正是「為何需要 CN 裁決」的實證</b>：recurrence（看似位點翻兩次=違反 infinite-sites）中<b>絕大多數其實是 CN-gain artifact 或 LOH，非真收斂突變</b>（如 H2009 58 個 = LOH 38 + artifact 19 + 僅 1 可能真）。無 CN → 全被誤標 candidate；有 CN → 拆清楚。COLO829/HCC1937 誠實標 unavailable（非假裝 neutral）。</div>
+
+<h2><span class="n">E</span>CCF read 加權 — raw reach vs 可信 reach（6 樣本補齊）</h2>
+<div class="scroll">
+<table>
+  <tr><th>樣本</th><th class="num">ambiguous</th><th class="num">raw broke%<br>(read 破 tie)</th><th class="num">CN-gain 佔<br>ambiguous</th><th class="num">strictly-neutral<br>可信 reach%</th><th class="num">winner<br>自洽率</th></tr>
+  <tr class="hl"><td>HCC1395</td><td class="num">5,959</td><td class="num">66.8%</td><td class="num">54.9%</td><td class="num">6.1%</td><td class="num">99.4%</td></tr>
+  <tr><td>HCC1395_DORADO</td><td class="num">6,428</td><td class="num">58.9%</td><td class="num">53.1%</td><td class="num">5.3%</td><td class="num">99.6%</td></tr>
+  <tr><td>H1437</td><td class="num">7,354</td><td class="num">40.2%</td><td class="num" style="color:#b06a00">73.7%</td><td class="num">0.4%</td><td class="num">99.9%</td></tr>
+  <tr><td>H2009</td><td class="num">8,167</td><td class="num">38.2%</td><td class="num">35.4%</td><td class="num">11.0%</td><td class="num">99.6%</td></tr>
+  <tr><td>HCC1954</td><td class="num">2,643</td><td class="num">69.1%</td><td class="num" style="color:#b06a00">81.6%</td><td class="num">5.6%</td><td class="num">99.6%</td></tr>
+  <tr><td>COLO829</td><td class="num">7,144</td><td class="num">30.8%</td><td class="u">n/a</td><td class="u">n/a</td><td class="num">99.7%</td></tr>
+  <tr><td>HCC1937</td><td class="num">1,435</td><td class="num">64.0%</td><td class="u">n/a</td><td class="u">n/a</td><td class="num">99.8%</td></tr>
+</table>
+</div>
+<div class="stop">🔴 <b>CCF 誠實裁決</b>：① <b>raw broke% 31–69% 具誤導性</b>——它大量發生在 CN-altered 區（CN-gain 佔 ambiguous 35–82%，read≠CCF）。② <b>真正可信（strictly-neutral，read≈CCF）reach 只有 0.4–11%</b>。③ <b>winner 自洽率 99.4–99.9% 是自洽非驗證</b>（winner 依 pigeonhole 選再查同規則）。④ CCF = 未經 purity/CN 校正的 ALT read fraction。⑤ COLO829/HCC1937 無 CN → 無法圈 strictly-neutral → 可信 reach n/a（raw 數不可信）。</div>
 
 <div class="stop">⚠ <b>跨樣本比較紀律（L3）</b>：① 上述 % 為<b>描述性</b>，真 n=7、且 <b>HCC1395 與 HCC1395_DORADO 是同細胞株</b>（非獨立）→ <b>禁做統計檢定/pseudoreplication</b>。② det-mut% 主由<b>定序深度</b>驅動（深→更多共現→更易定），非生物結論。③ 只有 HCC1395 有外部 CN/truth；其餘 characterize-only。</div>
 
@@ -102,7 +125,7 @@
   <b>可重現</b>：<code>python3 funnel_census_7samples.py</code>（<code>InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/</code>）→ <code>funnel_census_7samples.json</code>。
   funnel 由每樣本 <code>somatic_pass.vcf.gz</code> 位置重建 + mlhp retained；tree-level 由 <code>layered_reconstruction_{S}.json</code>（2026-07-09 newbb）。
   <b>驗證嚴謹度（HCC1395，<code>full_v4v5_verification.py</code>）</b>：全量 V4/V5（獨立重算最小性 + 重枚舉完整性）覆蓋 <b>18,103 非-capped 單位（95.6%）→ 0 fail</b>（取代舊 4.8% 抽樣）；seeded 隨機 stress <b>4,000 案例（5 seed×800）→ 0 mismatch</b>；n_trees&gt;32 的 371 單位 shape 統計低估（誠實標記）。
-  <b>待辦</b>：6 樣本 CCF read 加權（僅 HCC1395 已跑）；6 樣本 SAVANA CN。partial flag：全 7 樣本 chr1–22 · ⭐3 · characterize-only。
+  <b>CCF+CN（<code>ccf_and_cn_multisample.py</code>）</b>：6 樣本 CCF read 加權補齊（HCC1395 重現 66.8% 驗證）；SAVANA CN 07-05 已跑套用（5/7 可用）；raw reach vs strictly-neutral 可信 reach 見 §E。<b>已無待辦主項</b>（剩 COLO829/HCC1937 CN mis-fit 為外部真值限制、非可補）。partial flag：全 7 樣本 chr1–22 · ⭐3 · characterize-only。
 </footer>
 </div>
 </body>
