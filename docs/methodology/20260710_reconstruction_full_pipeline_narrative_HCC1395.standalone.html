@@ -1,0 +1,280 @@
+<!doctype html>
+<!-- provenance-verified: 全數字 2026-07-10 本 session 機械重算並驗證。來源：somatic_pass.vcf.gz（S=113,997）、
+  funnel_census_HCC1395.py（六層 funnel）、layered_reconstruction_HCC1395.json（13,785 單位 / 樹分類 / 隱藏節點）、
+  ccf_and_cn_multisample.json（CCF/CN）、full_v4v5_verification.json（V4/V5 95.6%/0-fail + 4000 stress）、
+  tree_enumeration_solver.py（capped 交集閉包測試 676/676 可解）。scope=chr1–22。partial flag：HCC1395 單樣本 ⭐3。 -->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>亞克隆重建 — 端到端流程與完整數據（HCC1395）</title>
+<style>
+  :root{--ink:#1a1f2b;--muted:#5b6472;--line:#e4e8ee;--bg:#f7f8fa;--card:#fff;
+    --blue:#2a78d6;--amber:#eda100;--red:#e34948;--green:#1baf7a;--vio:#7c5cd0;--gray:#8a94a3}
+  @media(prefers-color-scheme:dark){:root{--ink:#e8ebf0;--muted:#9aa4b2;--line:#2a3140;--bg:#12151b;--card:#1a1f28}}
+  :root[data-theme="light"]{--ink:#1a1f2b;--muted:#5b6472;--line:#e4e8ee;--bg:#f7f8fa;--card:#fff}
+  :root[data-theme="dark"]{--ink:#e8ebf0;--muted:#9aa4b2;--line:#2a3140;--bg:#12151b;--card:#1a1f28}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","Noto Sans TC","PingFang TC",Roboto,sans-serif;line-height:1.65;font-size:15px}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 20px 80px}
+  header{border-bottom:2px solid var(--ink);padding-bottom:15px}
+  h1{font-size:24px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:14px}
+  .pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;font-weight:700;background:#fff4e0;color:#8a5800;border:1px solid #f0d090}
+  .toc{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:11px 15px;margin:14px 0;font-size:13px;columns:2;column-gap:24px}
+  .toc a{color:var(--blue);text-decoration:none}
+  h2{font-size:18px;margin:32px 0 8px;padding-top:8px;border-top:1px solid var(--line);scroll-margin-top:10px}
+  h2 .n{color:var(--blue);font-weight:800;margin-right:8px}
+  h3{font-size:15px;margin:16px 0 5px}
+  p{margin:8px 0}
+  .tier{display:inline-block;font-size:10px;font-weight:800;padding:1px 5px;border-radius:4px;color:#fff;vertical-align:middle;margin-left:4px}
+  .t1{background:#1baf7a}.t2{background:#2a78d6}.t3{background:#eda100}.t4{background:#8a94a3}
+  .verdict{background:linear-gradient(180deg,#eef4ff,transparent);border:1px solid #cfe0ff;border-left:5px solid var(--blue);border-radius:10px;padding:15px 17px;margin:14px 0}
+  @media(prefers-color-scheme:dark){.verdict{background:linear-gradient(180deg,#16223a,transparent);border-color:#2a4a7a}}
+  .verdict b{color:var(--blue)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0}
+  .flow{font-family:"SFMono-Regular",Consolas,monospace;font-size:12.5px;line-height:1.85;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:14px 16px;overflow-x:auto;white-space:pre}
+  .bars{margin:6px 0}
+  .brow{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:13px}
+  .blab{width:120px;text-align:right;color:var(--muted);flex-shrink:0}
+  .btrack{flex:1;height:21px}
+  .bfill{height:21px;border-radius:0 4px 4px 0;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;color:#fff;font-weight:700;font-size:12px;min-width:2px;white-space:nowrap}
+  .bpct{color:var(--muted);font-size:11.5px;width:50px;flex-shrink:0}
+  .obs{background:#e6f4ea;border:1px solid #bfe3ca;border-radius:8px;padding:9px 13px;margin:9px 0;font-size:13.5px}
+  @media(prefers-color-scheme:dark){.obs{background:#14261b;border-color:#2c5540}}
+  .warn{background:#fff6e6;border:1px solid #f0dca0;border-radius:8px;padding:9px 13px;margin:9px 0;font-size:13.5px}
+  @media(prefers-color-scheme:dark){.warn{background:#2a2410;border-color:#5c4d1e}}
+  .stop{background:#fdecec;border:1px solid #f3c0c0;border-radius:8px;padding:9px 13px;margin:9px 0;font-size:13.5px}
+  @media(prefers-color-scheme:dark){.stop{background:#2c1618;border-color:#5c2b2e}}
+  table{border-collapse:collapse;width:100%;font-size:13px;margin:9px 0}
+  th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+  th{background:var(--card);font-weight:700}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  code{background:var(--line);padding:1px 5px;border-radius:4px;font-size:12px}
+  .stack{display:flex;height:42px;border-radius:7px;overflow:hidden;border:1px solid var(--line);margin:9px 0}
+  .seg{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;min-width:0;text-align:center;line-height:1.15}
+  .leg{display:flex;flex-wrap:wrap;gap:5px 15px;font-size:12.5px;margin:6px 0}
+  .leg span{display:flex;align-items:center;gap:5px}
+  .sw{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+  .hm th,.hm td{text-align:center;padding:5px 9px}
+  figure{margin:14px 0;text-align:center}
+  figcaption{font-size:12px;color:var(--muted);margin-top:6px;text-align:left}
+  .kpis{display:flex;gap:10px;flex-wrap:wrap;margin:9px 0}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 14px;min-width:92px}
+  .kpi .v{font-size:19px;font-weight:800;color:var(--blue)}
+  .kpi .l{font-size:11px;color:var(--muted)}
+  small.n{color:var(--muted)}
+  footer{margin-top:38px;padding-top:13px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+  .scroll{overflow-x:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>亞克隆重建 — 端到端流程與完整數據 <span class="pill">HCC1395 · chr1–22 · ⭐3</span></h1>
+  <div class="sub">從 ClairS PASS sSNV 到演化樹確定性：完整漏斗 · 分群 · 拓撲 · read/VAF/CN 輔助（2026-07-10，全機械重算）</div>
+</header>
+
+<div class="toc">
+  <a href="#s0">§0 一頁流程圖</a> · <a href="#s1">§1 資料漏斗 S→retained</a> · <a href="#s2">§2 區 W 與 k 分佈</a> ·
+  <a href="#s3">§3 densest-8 為何截斷</a> · <a href="#s4">§4 HP 分類 + 分群數</a> · <a href="#s5">§5 樹建構與隱藏祖先</a> ·
+  <a href="#s6">§6 兩軸：拓撲 vs 順序</a> · <a href="#s7">§7 樹確定性完整分類</a> · <a href="#s8">§8 read/VAF + CN 輔助</a> ·
+  <a href="#s9">§9 capped 可解性</a> · <a href="#s10">§10 誠實邊界</a>
+</div>
+
+<div class="verdict">
+  <b>一句話：</b>把 <b>113,997 個 ClairS PASS sSNV</b> 過六層漏斗後，真正進樹的是 <b>25,639 個（建成 7,928 區）</b>；
+  依 germline haplotype 家族拆成 <b>13,785 個樹單位</b>。用<b>單分子共現</b>在布爾超立方體上重建，
+  <b>拓撲形狀確定的達 51.1%（7,046）</b>；其餘的多樣性主要在「未觀測中間 clone 的排列」與「頻率對稱」——是<b>單一 bulk 的資訊論極限</b>，非演算法不足。
+  CN／甲基／read 頻率只作<b>有界輔助</b>，不決定拓撲。單樣本上限 <b>⭐3（characterize + infer，非 confirm）</b>。
+</div>
+
+<h2 id="s0"><span class="n">0</span>一頁流程圖（pipeline flow）</h2>
+<figure>
+<svg viewBox="0 0 900 230" width="100%" style="max-width:900px" font-family="-apple-system,Segoe UI,Noto Sans TC,sans-serif">
+  <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a94a3"/></marker></defs>
+  <!-- row1 -->
+  <g font-size="11.5">
+  <rect x="6" y="16" width="118" height="46" rx="7" fill="#eaf1fb" stroke="#2a78d6"/><text x="65" y="34" text-anchor="middle" font-weight="700">ClairS PASS</text><text x="65" y="50" text-anchor="middle" fill="#5b6472">113,997 sSNV</text>
+  <line x1="124" y1="39" x2="150" y2="39" stroke="#8a94a3" marker-end="url(#a)"/>
+  <rect x="152" y="16" width="120" height="46" rx="7" fill="#eaf1fb" stroke="#2a78d6"/><text x="212" y="30" text-anchor="middle" font-weight="700">chr1–22 過濾</text><text x="212" y="45" text-anchor="middle" fill="#5b6472">−chrX 33,763</text><text x="212" y="58" text-anchor="middle" fill="#5b6472">= 80,234</text>
+  <line x1="272" y1="39" x2="298" y2="39" stroke="#8a94a3" marker-end="url(#a)"/>
+  <rect x="300" y="16" width="128" height="46" rx="7" fill="#eaf1fb" stroke="#2a78d6"/><text x="364" y="30" text-anchor="middle" font-weight="700">linkage 群</text><text x="364" y="45" text-anchor="middle" fill="#5b6472">相鄰 gap≤50kb</text><text x="364" y="58" text-anchor="middle" fill="#5b6472">−單點 8,447</text>
+  <line x1="428" y1="39" x2="454" y2="39" stroke="#8a94a3" marker-end="url(#a)"/>
+  <rect x="456" y="16" width="128" height="46" rx="7" fill="#eaf1fb" stroke="#2a78d6"/><text x="520" y="30" text-anchor="middle" font-weight="700">densest-8 + 支持</text><text x="520" y="45" text-anchor="middle" fill="#5b6472">−46,148</text><text x="520" y="58" text-anchor="middle" fill="#5b6472">= retained 25,639</text>
+  <line x1="584" y1="39" x2="610" y2="39" stroke="#8a94a3" marker-end="url(#a)"/>
+  <rect x="612" y="16" width="120" height="46" rx="7" fill="#e6f4ea" stroke="#1baf7a"/><text x="672" y="34" text-anchor="middle" font-weight="700">W = 7,928 區</text><text x="672" y="50" text-anchor="middle" fill="#5b6472">建樹母體</text>
+  <line x1="672" y1="62" x2="672" y2="86" stroke="#8a94a3" marker-end="url(#a)"/>
+  <!-- row2 -->
+  <rect x="612" y="88" width="120" height="46" rx="7" fill="#e6f4ea" stroke="#1baf7a"/><text x="672" y="106" text-anchor="middle" font-weight="700">依 HP 家族拆</text><text x="672" y="122" text-anchor="middle" fill="#5b6472">13,785 樹單位</text>
+  <line x1="612" y1="111" x2="586" y2="111" stroke="#8a94a3" marker-end="url(#a)"/>
+  <rect x="456" y="88" width="128" height="46" rx="7" fill="#f3eefb" stroke="#7c5cd0"/><text x="520" y="102" text-anchor="middle" font-weight="700">超立方體枚舉</text><text x="520" y="117" text-anchor="middle" fill="#5b6472">group-Steiner</text><text x="520" y="130" text-anchor="middle" fill="#5b6472">全最小樹 + V1–V7</text>
+  <line x1="456" y1="111" x2="430" y2="111" stroke="#8a94a3" marker-end="url(#a)"/>
+  <rect x="300" y="88" width="128" height="46" rx="7" fill="#f3eefb" stroke="#7c5cd0"/><text x="364" y="102" text-anchor="middle" font-weight="700">確定性分類</text><text x="364" y="117" text-anchor="middle" fill="#5b6472">唯一/多樹/</text><text x="364" y="130" text-anchor="middle" fill="#5b6472">capped/recurrence</text>
+  <line x1="300" y1="111" x2="274" y2="111" stroke="#8a94a3" marker-end="url(#a)"/>
+  <rect x="152" y="88" width="120" height="46" rx="7" fill="#fff6e6" stroke="#eda100"/><text x="212" y="102" text-anchor="middle" font-weight="700">輔助層（有界）</text><text x="212" y="117" text-anchor="middle" fill="#5b6472">read/VAF · CN</text><text x="212" y="130" text-anchor="middle" fill="#5b6472">· 甲基</text>
+  <line x1="212" y1="134" x2="212" y2="158" stroke="#8a94a3" marker-end="url(#a)"/>
+  <rect x="120" y="160" width="184" height="42" rx="7" fill="#eef1f5" stroke="#8a94a3"/><text x="212" y="176" text-anchor="middle" font-weight="700">⭐3 characterize + infer</text><text x="212" y="192" text-anchor="middle" fill="#5b6472">拓撲確定 51.1%；不決定於輔助層</text>
+  </g>
+</svg>
+<figcaption><b>端到端流程</b>：genetic 共現（藍→綠→紫）是骨幹；read/VAF、CN、甲基（黃）只在拓撲**枚舉完之後**做有界輔助，不決定樹。每一步的數字在下方各節詳列。</figcaption>
+</figure>
+
+<h2 id="s1"><span class="n">1</span>資料漏斗：ClairS PASS(S) → retained sSNV <span class="tier t1">L1</span></h2>
+<div class="flow">L1  ClairS PASS sSNV (S) ...... 113,997   somatic_pass.vcf.gz（操作骨幹·非生物真值）
+      − out-of-scope chrX/Y .... −33,763   scope = chr1–22
+      = autosomal (S) .......... 80,234
+      − 真孤立單點 singleton ... −8,447    相鄰 gap>50kb·唯一真「單點無樹」(占 autosomal 10.5%)
+      − densest-8 截斷 ......... −46,137   大區超出最密 8 個（見 §3）
+      − read 支持不足 .......... −11
+      = retained sSNV .......... 25,639    (22.5% of S) → 建成 W = 7,928 區</div>
+<div class="obs">📌 <b>只有 8,447（占 autosomal 10.5%）是真正「單點無樹」</b>；被丟的 46,137 不是單點，是大區內超出讀長的 sSNV（§3）。retained 25,639 才是進 solver 的建樹底料。</div>
+
+<h2 id="s2"><span class="n">2</span>區 W 與每區 k（sSNV 數）分佈 <span class="tier t1">L1</span></h2>
+<p>retained 25,639 個 sSNV 依相鄰連通聚成 <b>W = 7,928 區</b>（全部 k≥2）：</p>
+<div class="card"><div class="bars">
+  <div class="brow"><div class="blab">k=2</div><div class="btrack"><div class="bfill" style="width:100%;background:var(--blue)">3,769</div></div><div class="bpct">47.5%</div></div>
+  <div class="brow"><div class="blab">k=3</div><div class="btrack"><div class="bfill" style="width:49.2%;background:var(--blue)">1,853</div></div><div class="bpct">23.4%</div></div>
+  <div class="brow"><div class="blab">k=4</div><div class="btrack"><div class="bfill" style="width:25.2%;background:var(--blue)">950</div></div><div class="bpct">12.0%</div></div>
+  <div class="brow"><div class="blab">k=5</div><div class="btrack"><div class="bfill" style="width:12.6%;background:var(--blue)">474</div></div><div class="bpct">6.0%</div></div>
+  <div class="brow"><div class="blab">k=6</div><div class="btrack"><div class="bfill" style="width:6.9%;background:var(--blue)">260</div></div><div class="bpct">3.3%</div></div>
+  <div class="brow"><div class="blab">k=7</div><div class="btrack"><div class="bfill" style="width:4.4%;background:var(--blue)">164</div></div><div class="bpct">2.1%</div></div>
+  <div class="brow"><div class="blab">k=8（含&gt;8截斷）</div><div class="btrack"><div class="bfill" style="width:12.2%;background:var(--amber)">458</div></div><div class="bpct">5.8%</div></div>
+</div></div>
+<div class="obs">📊 近半（47.5%）區只有 2 個 sSNV；k≤3 占 71%。<b>k 越小＝可觀測基因型組合越少＝越難唯一定樹</b>（§7）。</div>
+
+<h2 id="s3"><span class="n">3</span>densest-8：為何 46,137 被截斷？需要處理嗎？<span class="tier t2">L2</span></h2>
+<div class="kpis">
+  <div class="kpi"><div class="v">340</div><div class="l">區 &gt;8 sSNV（4.3%）</div></div>
+  <div class="kpi"><div class="v">46,137</div><div class="l">被截斷 sSNV</div></div>
+  <div class="kpi"><div class="v">200 kb</div><div class="l">這些區 span 中位<br>(最大 4.04 Mb)</div></div>
+  <div class="kpi"><div class="v">~30 kb</div><div class="l">ONT read 長度</div></div>
+</div>
+<div class="stop">🔴 <b>不需（也無法）用共現處理</b>：被截斷的 sSNV 來自 340 個<b>大跨距區（span 中位 200 kb、最大 4 Mb）</b>，<b>遠超單條 read 長度（~30 kb）</b>→ 沒有 read 能同時讀到它們 → <b>物理上無法單分子共現</b>，留著也建不了共現樹。densest-8 保留「跨距最小的 8 個」（read 最可能同時覆蓋）。要放置這些 sSNV 需<b>頻率法（PhyloWGS/Canopy 的 VAF 反推）</b>——非本方法的共現骨幹範疇，這正是 ⭐3 與「和頻率法共有的限制」。</div>
+
+<h2 id="s4"><span class="n">4</span>HP 分類（單/雙親代單體型）+ 每區分幾群 <span class="tier t1">L1</span></h2>
+<h3>4.1 依 germline 親代單體型（HP 家族）分類</h3>
+<table>
+  <tr><th>HP 分類</th><th class="num">區數</th><th class="num">佔 W</th></tr>
+  <tr><td>單 germline HP（HP1 xor HP2）</td><td class="num">3,207</td><td class="num">40.5%</td></tr>
+  <tr><td>雙 germline HP（HP1 and HP2）</td><td class="num">4,443</td><td class="num">56.0%</td></tr>
+  <tr><td>└ 其中<b>兩條都真的帶突變</b>（誠實雙 lineage）</td><td class="num">2,765</td><td class="num">34.9%</td></tr>
+  <tr><td>無 germline（只 somatic-3/none）</td><td class="num">277</td><td class="num">3.5%</td></tr>
+</table>
+<div class="warn">⚠ 「56% 雙 lineage」要打折——真正兩條 haplotype 都帶突變的只有 <b>34.9%</b>；另一條常是 REF-only（見 §7 root-only）。</div>
+<h3>4.2 每區直接觀測到幾個帶突變群（subclone）</h3>
+<div class="card"><div class="bars">
+  <div class="brow"><div class="blab">0 群</div><div class="btrack"><div class="bfill" style="width:100%;background:var(--gray)">4,438</div></div><div class="bpct">56.0%</div></div>
+  <div class="brow"><div class="blab">1 群</div><div class="btrack"><div class="bfill" style="width:36.7%;background:var(--blue)">1,628</div></div><div class="bpct">20.5%</div></div>
+  <div class="brow"><div class="blab">2 群</div><div class="btrack"><div class="bfill" style="width:38.7%;background:var(--blue)">1,716</div></div><div class="bpct">21.6%</div></div>
+  <div class="brow"><div class="blab">3 群</div><div class="btrack"><div class="bfill" style="width:3.1%;background:var(--blue)">138</div></div><div class="bpct">1.7%</div></div>
+  <div class="brow"><div class="blab">4–5 群</div><div class="btrack"><div class="bfill" style="width:0.5%;background:var(--blue)">8</div></div><div class="bpct">0.1%</div></div>
+</div></div>
+<div class="warn">⚠ <b>「0 群 56%」≠ 沒 subclone</b>：是這些區沒有 read 完整覆蓋所有位點（全 partial）→ full-cov 群數＝0，譜系靠 partial + 隱藏祖先重建（§5）。直接觀測 ≥1 群 = 3,490（44%）。</div>
+
+<h2 id="s5"><span class="n">5</span>樹怎麼建：超立方體 + 隱藏（Steiner）祖先 <span class="tier t2">L2</span></h2>
+<figure>
+<svg viewBox="0 0 440 210" width="100%" style="max-width:420px" font-family="-apple-system,Segoe UI,Noto Sans TC,sans-serif">
+  <defs><marker id="b" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#8a94a3"/></marker></defs>
+  <line x1="220" y1="46" x2="220" y2="76" stroke="#8a94a3" stroke-width="1.5" marker-end="url(#b)"/>
+  <line x1="212" y1="112" x2="150" y2="150" stroke="#8a94a3" stroke-width="1.5" marker-end="url(#b)"/>
+  <line x1="228" y1="112" x2="300" y2="150" stroke="#8a94a3" stroke-width="1.5" marker-end="url(#b)"/>
+  <text x="230" y="66" font-size="10.5" fill="#5b6472">＋突變1</text>
+  <text x="150" y="132" font-size="10.5" fill="#5b6472">＋突變2</text>
+  <text x="278" y="132" font-size="10.5" fill="#5b6472">＋突變3</text>
+  <rect x="180" y="14" width="80" height="32" rx="6" fill="#e6f4ea" stroke="#1baf7a"/><text x="220" y="27" text-anchor="middle" font-size="12" font-weight="700">RRR</text><text x="220" y="40" text-anchor="middle" font-size="9.5" fill="#5b6472">germline 根</text>
+  <rect x="180" y="80" width="80" height="32" rx="6" fill="#f2f3f5" stroke="#8a94a3" stroke-dasharray="4 3"/><text x="220" y="93" text-anchor="middle" font-size="12" font-weight="700" fill="#5b6472">(ARR)</text><text x="220" y="106" text-anchor="middle" font-size="9" fill="#8a94a3">隱藏祖先</text>
+  <rect x="92" y="152" width="112" height="36" rx="6" fill="#eaf1fb" stroke="#2a78d6"/><text x="148" y="167" text-anchor="middle" font-size="12" font-weight="700">AAR</text><text x="148" y="180" text-anchor="middle" font-size="9.5" fill="#5b6472">觀測 · 20 reads</text>
+  <rect x="246" y="152" width="112" height="36" rx="6" fill="#eaf1fb" stroke="#2a78d6"/><text x="302" y="167" text-anchor="middle" font-size="12" font-weight="700">ARA</text><text x="302" y="180" text-anchor="middle" font-size="9.5" fill="#5b6472">觀測 · 8 reads</text>
+</svg>
+<figcaption><b>示意</b>：根＝germline（全 R）；每條邊獲得<b>一個</b>突變（0→1）；中間祖先 ARR 沒被任何 read 直接讀到 → 以<b>虛線隱藏 Steiner 節點</b>推斷補上。這讓「觀測到 AAR 和 ARA 卻沒觀測到共同祖先」也能正確重建。</figcaption>
+</figure>
+<p>13,785 個樹單位的<b>隱藏祖先數分佈</b>（＝需要推斷幾個沒被直接看到的中間 clone）：</p>
+<div class="stack">
+  <div class="seg" style="width:29.5%;background:var(--green)">0隱藏 4,064</div>
+  <div class="seg" style="width:30.5%;background:var(--blue)">1隱藏 4,203</div>
+  <div class="seg" style="width:19.5%;background:var(--amber)">2隱藏 2,688</div>
+  <div class="seg" style="width:20.5%;background:var(--red)">≥3隱藏 2,830</div>
+</div>
+<div class="stop">🔴 <b>歧義幾乎全來自隱藏祖先</b>：determined（唯一樹）多是 0–1 隱藏（4,047+2,842＝91%）；ambiguous（多候選）多是 2–3 隱藏（2,470+2,132＝77%）。<b>越多「沒被直接看到的中間 clone」要推斷 → 排列越多 → 越歧義</b>——這正是為何 read/VAF 常破不了（§8）：歧義在<b>未觀測的中間節點</b>上。</div>
+
+<h2 id="s6"><span class="n">6</span>兩條正交的軸：拓撲形狀 vs 順序 <span class="tier t2">L2</span></h2>
+<p><b>「多候選樹」≠「多拓撲」。</b>一個單位可能有多棵樹、但<b>分支結構（形狀）相同</b>，只是「哪個突變在哪條邊＝順序」未定。所以要分兩軸看：</p>
+<table>
+  <tr><th>軸</th><th>是什麼</th><th>誰來定</th><th>受 CN 影響？</th></tr>
+  <tr><td><b>① 拓撲形狀</b></td><td>分支結構（鏈狀？分叉？星狀？）</td><td>單分子<b>共現</b></td><td><b>否</b>（solver 不碰 CN，純共現）</td></tr>
+  <tr><td><b>② 順序/方向</b></td><td>同一形狀內哪個突變先發生</td><td>read/VAF <b>頻率</b></td><td>是（只在 CN-clean 可信）</td></tr>
+</table>
+<div class="obs">📈 5,959 個 ambiguous 中，<b>1,662 是單一形狀</b>（拓撲唯一、只順序未定）、4,297 才是真多形狀。→ 把單形狀併入唯一，<b>拓撲層確定的達 7,046（51.1%）</b>，真正「連分支結構都多種」的只有 31.2%。</div>
+
+<h2 id="s7"><span class="n">7</span>樹確定性：完整分類 + 各類別意義 <span class="tier t1">L1</span></h2>
+<div class="stack" style="height:46px">
+  <div class="seg" style="width:39.1%;background:var(--green)">唯一樹 5,384</div>
+  <div class="seg" style="width:12.1%;background:#5aa0e0">單形狀 1,662</div>
+  <div class="seg" style="width:31.2%;background:var(--amber)">真多拓撲 4,297</div>
+  <div class="seg" style="width:12.6%;background:var(--gray)">root-only 1,739</div>
+  <div class="seg" style="width:5.1%;background:var(--vio)">cap/rec</div>
+</div>
+<div class="leg">
+  <span><span class="sw" style="background:var(--green)"></span>唯一帶突變樹 5,384 · 39.1%</span>
+  <span><span class="sw" style="background:#5aa0e0"></span>多樹·單形狀（拓撲唯一）1,662 · 12.1%</span>
+  <span><span class="sw" style="background:var(--amber)"></span>真多拓撲 4,297 · 31.2%</span>
+  <span><span class="sw" style="background:var(--gray)"></span>root-only 純 REF 1,739 · 12.6%</span>
+  <span><span class="sw" style="background:var(--vio)"></span>capped 676 + recurrence 27 · 5.1%</span>
+</div>
+<table>
+  <tr><th>類別</th><th class="num">數</th><th>意義</th></tr>
+  <tr><td><b>唯一樹（determined-mut）</b></td><td class="num">5,384</td><td>haplotype 上必定唯一的帶突變樹</td></tr>
+  <tr><td><b>多樹·單形狀</b></td><td class="num">1,662</td><td>拓撲唯一，只「哪個突變先」未定（§6 軸②）</td></tr>
+  <tr><td><b>真多拓撲（ambiguous）</b></td><td class="num">4,297</td><td>分支結構本身有多種 → read/VAF 加權對象</td></tr>
+  <tr><td><b>root-only 純 REF</b></td><td class="num">1,739</td><td><b>沒帶突變的那條親代 haplotype</b>：96.9% 所在區有帶突變的姊妹家族 → 這條全 REF、樹只有根 = 無 subclone（不是重建出的樹）</td></tr>
+  <tr><td><b>capped</b></td><td class="num">676</td><td><b>太密、現行枚舉未完</b>（k≥5 占 99%）→ 誠實不宣稱 determined。<b>已證 100% 可解</b>（§9）</td></tr>
+  <tr><td><b>recurrence</b></td><td class="num">27</td><td><b>表面違反 infinite-sites</b>（位點翻兩次）→ CN 一查：artifact(CN-gain) 20 / LOH 7 / <b>真收斂 0</b></td></tr>
+</table>
+
+<h2 id="s8"><span class="n">8</span>read/VAF 頻率 + CN：有界輔助層 <span class="tier t2">L2</span></h2>
+<p>對「真多拓撲 / 順序未定」用<b>每突變 read 數（→CCF）</b>加權：早發生的突變在更多後代細胞 → 更多 read → 當祖先（pigeonhole）。這是<b>軸②</b>的收斂層，純 read count（非甲基、非循環）。</p>
+<table>
+  <tr><th>指標（HCC1395，5,959 ambiguous）</th><th class="num">值</th><th>誠實註</th></tr>
+  <tr><td>raw 破 tie（top posterior ≥0.6）</td><td class="num">66.8%</td><td>誤導——大量在 CN-altered 區</td></tr>
+  <tr><td>CN-gain 佔 ambiguous</td><td class="num">54.9%</td><td>read≠CCF（拷貝膨脹非細胞多）</td></tr>
+  <tr><td><b>strictly-neutral 可信 reach</b></td><td class="num">6.1%</td><td>真正 read≈CCF 的部分</td></tr>
+  <tr><td>winner 自洽率</td><td class="num">99.4%</td><td><b>自洽非驗證</b>（同 pigeonhole 選再查）</td></tr>
+</table>
+<h3>8.1 CN 的 3 個角色（為何需要 CN 裁決）</h3>
+<table>
+  <tr><th>角色</th><th>無 CN 會怎樣</th></tr>
+  <tr><td>① recurrence 拆 artifact/LOH/real</td><td>27 個全被誤標 candidate；有 CN → 20 artifact + 7 LOH + 0 真</td></tr>
+  <tr><td>② CCF 可信度（CN-clean vs gain）</td><td>無法圈可信子集 → reach 從 66.8% 掉到可信 6.1%</td></tr>
+  <tr><td>③ VAF→CCF 校正</td><td>gain/loss/LOH 區 VAF 被拷貝數扭曲；和 PhyloWGS/Canopy 共有的限制</td></tr>
+</table>
+<div class="stop">🔴 <b>關鍵澄清</b>：CN <b>不影響、不否定樹的拓撲</b>（拓撲純共現）。「CN 不可信」只是說<b>用 read 數決定的「順序排名」在該區不可信</b>——樹本身有效、V1–V7 可驗證、可用。7 樣本 CN 覆蓋 5/7（HCC1395/DORADO=SEQC2、H1437/H2009/HCC1954=SAVANA；COLO829/HCC1937 purity mis-fit=unavailable）。</div>
+
+<h2 id="s9"><span class="n">9</span>capped 其實可解（本輪演算法發現）<span class="tier t1">L1</span></h2>
+<p>「capped 4.9%」不是理論難解，是現行枚舉策略問題。現行 <code>extra_pool</code>＝觀測基因型的<b>完整冪集</b>（k=8→256），盲試 <code>C(256,e)</code> → <code>C(254,3)=2.7M &gt; budget</code> 就 cap。但隱藏節點只有兩類：<b>分支點＝觀測基因型的兩兩交集（median 8）</b> + <b>路徑鏈點（被迫、非自由）</b>。</p>
+<div class="kpis">
+  <div class="kpi"><div class="v">676/676</div><div class="l">100% 用交集閉包+補鏈點<br>找到合法樹結構</div></div>
+  <div class="kpi"><div class="v">256 → 8</div><div class="l">pool 從冪集降到<br>交集閉包（中位）</div></div>
+  <div class="kpi"><div class="v">k≤8</div><div class="l">頂點≤256=常數大小<br>→ 恆可解</div></div>
+</div>
+<div class="obs">✅ <b>已用安全測試證明（未改 solver）</b>：全 676 capped 區都存在小合法樹結構。🔧 <b>待實作</b>：把剪枝（meets 定分支 + 路徑補鏈 + branch-and-bound）寫進 <code>enumerate_min_trees</code>，並用 V4/V5 獨立 oracle 驗證「最小且枚舉完整」→ 過關後 capped 併入 determined/ambiguous，拓撲確定率再升。（核心 solver 改動，需回歸測試既有結果不變。）</div>
+
+<h2 id="s10"><span class="n">10</span>誠實邊界 + 方法上限 <span class="tier t3">L3</span></h2>
+<table>
+  <tr><th>邊界</th><th>說明</th></tr>
+  <tr><td>拓撲確定 51.1%</td><td>唯一樹 5,384 + 單形狀 1,662；其餘 31.2% 真多拓撲＋順序未定＝<b>單一 bulk 資訊論極限</b>，非演算法不足</td></tr>
+  <tr><td>read/VAF 可信 reach 低</td><td>raw 66.8% 誤導；strictly-neutral 可信只 6.1%；CN-gain 區 winner 不可信</td></tr>
+  <tr><td>甲基 = 有界輔助</td><td>cis-ASM 循環；只負向篩選 + 弱旗標，絕不進 likelihood、不排序樹</td></tr>
+  <tr><td>densest-8 大區</td><td>46,137 sSNV 超讀長無法共現，需頻率法（out-of-scope）</td></tr>
+  <tr><td>⭐3 單樣本上限</td><td>只能 characterize + infer（如 PhyloWGS/Canopy 般推論），<b>非 confirm</b>；確認需 single-cell/multi-region 正交真值</td></tr>
+</table>
+
+<footer>
+  <b>可重現（provenance）</b>：全數字 2026-07-10 機械重算。腳本（<code>InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/</code>）：
+  <code>funnel_census_HCC1395.py</code>（漏斗）· <code>ccf_and_cn_multisample.py</code>（CCF/CN）· <code>full_v4v5_verification.py</code>（V4/V5 95.6%/0-fail + 4,000 stress/0-mismatch）· <code>tree_enumeration_solver.py</code>（capped 交集閉包測試）。
+  來源：<code>somatic_pass.vcf.gz</code> · <code>layered_reconstruction_HCC1395.json</code> · <code>mlhp_part_*.json</code>。
+  scope = chr1–22 · partial flag：HCC1395 單樣本 · ⭐3 · characterize + infer（非 confirm）。證據級：L1 源碼/實測 · L2 文獻+推演 · L3 單樣本觀察。
+</footer>
+</div>
+</body>
+</html>
