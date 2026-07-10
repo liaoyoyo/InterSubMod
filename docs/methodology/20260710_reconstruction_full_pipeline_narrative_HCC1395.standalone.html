@@ -250,14 +250,14 @@
 </table>
 <div class="stop">🔴 <b>關鍵澄清</b>：CN <b>不影響、不否定樹的拓撲</b>（拓撲純共現）。「CN 不可信」只是說<b>用 read 數決定的「順序排名」在該區不可信</b>——樹本身有效、V1–V7 可驗證、可用。7 樣本 CN 覆蓋 5/7（HCC1395/DORADO=SEQC2、H1437/H2009/HCC1954=SAVANA；COLO829/HCC1937 purity mis-fit=unavailable）。</div>
 
-<h2 id="s9"><span class="n">9</span>capped 其實可解（本輪演算法發現）<span class="tier t1">L1</span></h2>
-<p>「capped 4.9%」不是理論難解，是現行枚舉策略問題。現行 <code>extra_pool</code>＝觀測基因型的<b>完整冪集</b>（k=8→256），盲試 <code>C(256,e)</code> → <code>C(254,3)=2.7M &gt; budget</code> 就 cap。但隱藏節點只有兩類：<b>分支點＝觀測基因型的兩兩交集（median 8）</b> + <b>路徑鏈點（被迫、非自由）</b>。</p>
+<h2 id="s9"><span class="n">9</span>capped 密集聚集區：不需完整枚舉，只需檢查衝突 <span class="tier t1">L1</span></h2>
+<p>「capped 4.9%」是 partial-heavy 高 k 密集區。完整枚舉所有最小樹在組合上爆炸（且 V4/V5 oracle 本身用冪集、對這些區也不可行 → 無法 brute-force 驗證完整）。<b>正解（使用者洞見）：不需列出所有可能樹，只需檢查覆蓋的共現有無衝突</b>（four-gamete）。Gusfield 定理：<b>無 four-gamete 衝突 ⟺ perfect phylogeny 存在</b>（乾淨巢狀樹）。</p>
 <div class="kpis">
-  <div class="kpi"><div class="v">676/676</div><div class="l">100% 用交集閉包+補鏈點<br>找到合法樹結構</div></div>
-  <div class="kpi"><div class="v">256 → 8</div><div class="l">pool 從冪集降到<br>交集閉包（中位）</div></div>
-  <div class="kpi"><div class="v">k≤8</div><div class="l">頂點≤256=常數大小<br>→ 恆可解</div></div>
+  <div class="kpi"><div class="v">98.5%</div><div class="l">four-gamete <b>相容</b><br>(666/676·乾淨巢狀樹存在)</div></div>
+  <div class="kpi"><div class="v">1.5%</div><div class="l">有衝突（10）<br>→ 需 homoplasy(多 CN artifact)</div></div>
+  <div class="kpi"><div class="v">O(k²·pat)</div><div class="l">衝突檢查<br>可完整驗證·非枚舉</div></div>
 </div>
-<div class="obs">✅ <b>已用安全測試證明（未改 solver）</b>：全 676 capped 區都存在小合法樹結構。🔧 <b>待實作</b>：把剪枝（meets 定分支 + 路徑補鏈 + branch-and-bound）寫進 <code>enumerate_min_trees</code>，並用 V4/V5 獨立 oracle 驗證「最小且枚舉完整」→ 過關後 capped 併入 determined/ambiguous，拓撲確定率再升。（核心 solver 改動，需回歸測試既有結果不變。）</div>
+<div class="obs">✅ <b>可完整驗證的結果（<code>capped_cluster_conflict.py</code>）</b>：capped 從「枚舉未完·太密」升級為<b>「密集聚集區：98.5% 結構相容（乾淨巢狀樹存在）」</b>——這些區不是真複雜的樹、只是完整枚舉所有順序組合龐大（無必要）。另佐證：交集閉包測試（meets 定分支 + 補鏈點）676/676 都存在小合法樹結構、pool 從冪集 256 降到中位 8（k≤8→頂點≤256=常數大小→恆可解）。<b>結論：所有位置都能找到樹</b>；密集區以相容性標記取代完整枚舉。</div>
 
 <h2 id="s10"><span class="n">10</span>誠實邊界 + 方法上限 <span class="tier t3">L3</span></h2>
 <table>
