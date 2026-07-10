@@ -143,6 +143,31 @@ function dash(){
  +'<tr><td>L2 CN artifact（recurrence 內）</td><td class="mono">'+(L2.cn_split['artifact(m>1;CN-amp)']||0)+' ÷ '+L2.n_recurrence_sent_to_cn+' recurrence</td><td class="n">'+pct(L2.cn_split['artifact(m>1;CN-amp)']||0,L2.n_recurrence_sent_to_cn)+'</td></tr>'
  +'</table>';
  h+='<div class="note">V1–V7 驗證：'+(L1.all_V1V7_pass?'✅ ALL PASS（0 fail）':('⚠ '+L1.n_verify_fail+' fail'))+' · 分母鐵則：region determined '+pct(rd.all_determined,nreg)+' ≠ lineage determined '+pct(L1.determinacy_lineage.determined,nlin)+'（單位不同不可比）</div>';
+ // ⑤ CN confound 分層 + ⑥ mutation-bearing 分母 + clone 數 c(從 R client-side 算)
+ (function(){
+  let cn={neutral:0,gain:0,amp:0,loss:0,loh:0,unknown:0,other:0};
+  let mb=0,root=0,noPos=0,detMB=0,detRoot=0,cdist={c0:0,c1:0,c2:0};
+  R.forEach(r=>{cn[cn[r.cn]!==undefined?r.cn:'other']++;
+   const pos=r.positions||[];let anyAlt=false;
+   r.lineages.forEach(L=>{const cov=L.obs_col_coverage||{};pos.forEach(p=>{const c=cov[String(p)];if(c&&c[1]>0)anyAlt=true;});});
+   if(!pos.length)noPos++;else if(anyAlt)mb++;else root++;
+   if(r.region_determinacy==='all_determined'&&pos.length){if(anyAlt)detMB++;else detRoot++;}
+   let g=new Set();r.lineages.forEach(L=>{const p=L.obs_populations||{};for(const kk in p)if(kk.indexOf('A')>=0)g.add(kk);});
+   cdist[g.size===0?'c0':g.size===1?'c1':'c2']++;});
+  const clean=cn.neutral,altered=cn.gain+cn.amp+cn.loss+cn.loh,cngain=cn.gain+cn.amp,cnloss=cn.loss+cn.loh;
+  const wpos=mb+root;
+  h+='<div class="grid"><div><h2>⑤ CN confound 分層</h2><table><tr><th>CN 類</th><th class="n">區數</th><th class="n">比例</th></tr>'
+   +'<tr style="background:#f0fdf4"><td>neutral（CN-clean·可算 CCF）</td><td class="n">'+clean.toLocaleString()+'</td><td class="n">'+pct(clean,nreg)+'</td></tr>'
+   +'<tr style="background:#fef2f2"><td>gain/amp（<b>read≠CCF·排序停用</b>）</td><td class="n">'+cngain.toLocaleString()+'</td><td class="n">'+pct(cngain,nreg)+'</td></tr>'
+   +'<tr style="background:#fffbeb"><td>loss/loh（LOH-unmask confound）</td><td class="n">'+cnloss.toLocaleString()+'</td><td class="n">'+pct(cnloss,nreg)+'</td></tr>'
+   +'<tr><td>unknown</td><td class="n">'+cn.unknown.toLocaleString()+'</td><td class="n">'+pct(cn.unknown,nreg)+'</td></tr>'
+   +'</table><div class="note">🔴 07-10:共現區 <b>94% CN-altered</b>·VAF 頻率 98% 被 CN 混淆;甲基群內雙峰 77-86% 是 CN-gain 假象。<b>CN-altered 區的共現/VAF/CCF 排序皆恐 CN 假象</b>,只有 neutral '+pct(clean,nreg)+' 可信。</div></div>';
+  h+='<div><h2>⑥ mutation-bearing 分母 + clone 數 c</h2><table><tr><th>類</th><th class="n">區數</th><th class="n">比例</th></tr>'
+   +'<tr style="background:#f0fdf4"><td>mutation-bearing（≥1 位點實測 ALT）</td><td class="n">'+mb.toLocaleString()+'</td><td class="n">'+pct(mb,wpos)+'</td></tr>'
+   +'<tr style="background:#fef2f2"><td>root-only（全位點 0 ALT·無突變可重建）</td><td class="n">'+root.toLocaleString()+'</td><td class="n">'+pct(root,wpos)+'</td></tr>'
+   +'<tr><td>c=0（無全跨 ALT）/ c=1 / <b>c≥2（subclonal 候選·未確認）</b></td><td class="n">'+cdist.c0.toLocaleString()+' / '+cdist.c1.toLocaleString()+' / '+cdist.c2.toLocaleString()+'</td><td class="n">'+pct(cdist.c2,nreg)+' c≥2</td></tr>'
+   +'</table><div class="note">🔴 07-10:「all-determined」'+rd.all_determined.toLocaleString()+' 區含 <b>root-only 純REF '+detRoot.toLocaleString()+' 區(無突變)</b> → 真 mutation-bearing determined 僅 '+detMB.toLocaleString()+'（'+pct(detMB,rd.all_determined)+'）。c≥2「subclonal 候選」<b>≠已確認 subclone</b>(需排除 CN/single-bulk·⭐3)。分母(有 positions 的區)='+wpos.toLocaleString()+';noPos '+noPos.toLocaleString()+' 區無 mlhp。</div></div></div>';
+ })();
  document.getElementById('dash').innerHTML=h;
  function row(u,n,c,d){return '<tr><td class="mono">'+u+'</td><td>'+n+'</td><td class="n mono">'+c+'</td><td style="font-size:12px;color:var(--mut)">'+d+'</td></tr>';}
  function mrow(lab,v,tot,col){return '<tr><td>'+lab+'</td><td class="n">'+(v||0).toLocaleString()+'</td><td class="n">'+pct(v||0,tot)+'</td><td><span class="bar" style="width:'+barw(v||0)+'px;background:'+col+'"></span></td></tr>';}
@@ -273,11 +298,44 @@ function readObsBlock(L){
   +'<table style="font-size:10.5px;margin-top:3px;border-collapse:collapse"><tr style="border-bottom:1px solid #ddd"><th style="padding:2px 6px;text-align:left">genotype</th><th style="padding:2px 6px;text-align:left">類型</th><th style="padding:2px 6px">reads</th></tr>'+rows+'</table>'
   +'<div class="note" style="background:none;border:none;padding:2px 0;font-size:9.5px">全跨群=同一 read 覆蓋全部位點(可定 phasing);partial=只覆蓋部分位點(單獨看到某位點的 ALT·無法連鎖)。'+(nf===0?'<b style="color:#a855f7">此家族 0 全跨群→組合全靠 partial 拼(推斷)。</b>':'')+'</div></details>';
 }
+// ===== CN confound 徽章(區級) =====
+function cnBadge(r){
+ const c=r.cn;
+ if(c==='neutral')return '<span class="b" style="background:#dcfce7;color:#166534">cn neutral·CN-clean</span>';
+ if(c==='gain'||c==='amp')return '<span class="b" style="background:#fee2e2;color:#991b1b" title="07-10:94%共現區CN-altered·VAF頻率98%被CN混淆·read≠CCF">⚠ cn '+esc(c)+'·共現/VAF/CCF 恐 CN 假象</span>';
+ if(c==='loss'||c==='loh')return '<span class="b" style="background:#fef3c7;color:#92400e" title="LOH-unmask confound 82-91%">cn '+esc(c)+'·LOH-unmask confound</span>';
+ return '<span class="b" style="background:#f1f5f9;color:#475569">cn unknown</span>';
+}
+// ===== clone 數 c = distinct 全跨 ALT genotype(co-phased) =====
+function regionC(r){let g=new Set();(r.lineages||[]).forEach(L=>{const p=L.obs_populations||{};for(const k in p)if(k.indexOf('A')>=0)g.add(k);});return g.size;}
+// ===== read/VAF 排序可能結構(CCF pigeonhole·祖先突變 CCF≥衍生·07-09·純遺傳非循環)=====
+function ccfBlock(r,L){
+ const pos=r.positions||[],trees=L.trees||[];
+ if(pos.length<2||trees.length<2)return '';
+ const cov=L.obs_col_coverage||{};let ccf={};
+ for(let j=0;j<pos.length;j++){const c=cov[String(pos[j])];if(!c)return '';const tot=c[0]+c[1];ccf[j]=tot?c[1]/tot:0;}
+ const unlab=s=>{if(s==='ROOT')return[];const s2=(s[0]==='H'&&s[1]==='_')?s.slice(2):s;let b=[];for(let i=0;i<s2.length;i++)if(s2[i]==='A')b.push(i);return b;};
+ const MARGIN=0.05,TEMP=0.05;
+ function score(edges){let sc=0,vi=0;(edges||[]).forEach(e=>{const P=unlab(e[0]),Ch=unlab(e[1]),acq=Ch.filter(x=>P.indexOf(x)<0);if(acq.length!==1)return;const j=acq[0];P.forEach(anc=>{sc+=(ccf[anc]-ccf[j]);if(ccf[j]>ccf[anc]+MARGIN)vi++;});});return[sc,vi];}
+ let scored=trees.map((t,i)=>{const s=score(t.edges);return{i:i,s:s[0],vi:s[1]};});
+ const mx=Math.max(...scored.map(o=>o.s));let exps=scored.map(o=>Math.exp((o.s-mx)/TEMP));const tot=exps.reduce((a,b)=>a+b,0)||1;
+ scored.forEach((o,k)=>o.post=exps[k]/tot);
+ const ranked=[...scored].sort((a,b)=>b.post-a.post),top=ranked[0];
+ const ccfrow=pos.map((p,j)=>'S'+(j+1)+' '+(ccf[j]*100).toFixed(0)+'%').join(' · ');
+ if(r.cn==='gain'||r.cn==='amp')
+  return '<div class="note" style="margin:5px 0;background:#fff5f5;border-color:#ffc9c9"><b>🔢 read/VAF 排序 — ⚠ CN-'+esc(r.cn)+' 停用</b>：此區 <b>read 數 ≠ CCF</b>（CN 擴增放大 read 計數）→ pigeonhole 排序不可信,<b>維持等機率不排序</b>（07-09:CN-gain 67% read≠CCF）。CCF(僅參考): '+ccfrow+'。</div>';
+ const bars=ranked.map(o=>'樹#'+(o.i+1)+' <b style="color:'+(o.post>=0.6?'#16a34a':'#d97706')+'">'+(o.post*100).toFixed(0)+'%</b>'+(o.vi?'<span style="color:#dc2626">·'+o.vi+'違反</span>':'<span style="color:#16a34a">·0違反</span>')).join(' ｜ ');
+ return '<div class="note" style="margin:5px 0"><b>🔢 read/VAF 排序（CCF pigeonhole·祖先突變 CCF ≥ 衍生）</b> '
+  +(top.post>=0.6?'<span class="tag t-det">★ 樹#'+(top.i+1)+' 最一致 '+(top.post*100).toFixed(0)+'%</span>':'<span class="tag t-amb">仍未破等機率('+(top.post*100).toFixed(0)+'%)</span>')
+  +'<div style="font-size:10.5px;margin-top:3px">此 HP 家族各 sSNV CCF(=<b>該家族</b> ALT 比·含 partial read·與上方 pooled 位點證據不同軸): '+ccfrow+'</div>'
+  +'<div style="font-size:10.5px;margin-top:2px">posterior(softmax·TEMP0.05): '+bars+'</div>'
+  +'<div class="note" style="background:none;border:none;padding:2px 0;font-size:9.5px">🔴 tie-breaker <b>啟發式</b>（read 多=祖先·純遺傳非甲基非循環）,非證明;posterior≥60% 才算破等機率。此區 cn='+esc(r.cn)+(r.cn==='neutral'?'(CN-clean·可信)':'(非 neutral·CCF 邊際可信)')+'。</div></div>';
+}
 function show(i,row){
  document.querySelectorAll('#list .row').forEach(x=>x.classList.remove('sel'));if(row)row.classList.add('sel');
  const r=R[i];const[rt,rc]=regTag(r.region_determinacy);
  let h='<h3>'+esc(r.region)+' <span class="tag '+rc+'">'+rt+'</span></h3>'
-  +'<div class="kv"><span class="b">'+r.n_sSNV+' sSNV</span><span class="b">HP×'+r.hp_multiplicity+(r.is_multiHP?'（多-HP·雙親代各一樹）':'（single-HP）')+'</span><span class="b">cn '+esc(r.cn)+'</span><span class="b">'+r.lineages.length+' germline-HP 家族</span></div>'
+  +'<div class="kv"><span class="b">'+r.n_sSNV+' sSNV</span><span class="b">HP×'+r.hp_multiplicity+(r.is_multiHP?'（多-HP·雙親代各一樹）':'（single-HP）')+'</span>'+cnBadge(r)+(function(){const c=regionC(r);return '<span class="b" style="background:'+(c>=2?'#ede9fe;color:#6d28d9':'#f1f5f9;color:#475569')+'" title="distinct 全跨(co-phased) ALT genotype 數">c='+c+(c>=2?'·subclonal 候選(未確認)':(c===1?'·單 clone':'·無全跨ALT'))+'</span>';})()+'<span class="b">'+r.lineages.length+' germline-HP 家族</span></div>'
   +'<div class="note" style="margin:4px 0">每 germline-HP 家族分開建樹（家族優先於算法，修 allelic/clonal 混淆）;每家族 ◀▶ 切換其「等機率最小樹」（枚舉全集=「定不出來即答案」）。'
    +'<div style="margin-top:5px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:10.5px">'
    +'<span><svg width="14" height="14" style="vertical-align:middle"><circle cx="7" cy="7" r="5.5" fill="#2563eb"/></svg> <b>實測</b>(該基因型有 read 觀測到)</span>'
@@ -305,7 +363,9 @@ function show(i,row){
    +'<div style="margin-top:5px;font-weight:600;font-size:11.5px">📍 位點證據（實測 ALT reads·非推斷·來自原始 col_coverage）</div><table style="margin-top:3px;font-size:11px"><tr>'+cells+'</tr></table>'
    +'<div style="font-size:10px;margin-top:3px">🔴 <b>位點層 vs 組合層</b>：每位點各自的 ALT <b style="color:#2563eb">是 read 直接實測</b>（上表 A 數）;但<b>「組合(phasing)」是否實測</b>看 <b>n_full_cov_reads='+nfc+'</b>（同時跨全部 '+k+' 位點的 read）— '
    +(cophaseWeak?'<b style="color:#a855f7">太少 → 無 read 把各位點的 ALT 連成同一分子 → 樹節點(組合)為推斷（read-span 限制;位點跨 '+gtxt+'）。即「位點實測、但誰跟誰同 lineage 定不出來」。</b>':'足夠 → 組合可被實測 read 定。')
-   +(nZero?'<b style="color:#dc2626"> ⚠ '+nZero+' 位點 0 ALT read(census somatic 但此 linkage 無 ALT 覆蓋)。</b>':'')+'</div></div>';
+   +(nZero?'<b style="color:#dc2626"> ⚠ '+nZero+' 位點 0 ALT read(census somatic 但此 linkage 無 ALT 覆蓋)。</b>':'')+'</div>'
+   +(nObsAlt===0?'<div class="note" style="margin-top:4px;background:#fef2f2;border-color:#fecaca;color:#991b1b;font-size:10px">🔴 <b>root-only（無突變可重建）</b>：此區 census 標 somatic 但<b>全部 '+k+' 位點 0 ALT read 實測</b> → 無實際突變可組成 subclonal 結構;determinacy='+esc(r.region_determinacy)+' 的「已定」在此<b>非真 subclonal 定性</b>（07-10 mutation-bearing 分母:純 determined 含 root-only 純REF）。</div>':'')
+   +'</div>';
  })();
  h+=locusBlock(r)+pairwiseBlock(r)+neighborBlock(r);
  r.lineages.forEach(L=>{const[ct,cc]=clsTag(L.L1_class);const fc=famCls(L.family);
@@ -335,6 +395,7 @@ function show(i,row){
    if(ns>1){h+='<div class="thumbs">';L.trees.forEach((t,ti)=>{h+='<span class="thumb'+(ti?'':' on')+'" onclick="tjump(\''+lid+'\','+ti+')">#'+(ti+1)+'</span>';});h+='</div>';}
    h+='</div>';}
   else{h+='<div class="note" style="margin:5px 0"><b>（此家族無分支樹可畫）</b> '+(_obsPops<=1?'只有單一 genotype 群或僅 germline':'樹 edges 為空')+' → <b>不是缺資料,是本來就無可枚舉的分支結構</b>（'+(L.n_full_pops||0)+' 實測群·'+(L.n_partial||0)+' partial）。determinacy='+esc(L.L1_class)+'。</div>';}
+  h+=ccfBlock(r,L);
   h+=readObsBlock(L);
   h+='<div class="trace">'+L.trace.map(t=>'<div>'+esc(t)+'</div>').join('')+'</div></div>';});
  document.getElementById('detail').innerHTML=h;
