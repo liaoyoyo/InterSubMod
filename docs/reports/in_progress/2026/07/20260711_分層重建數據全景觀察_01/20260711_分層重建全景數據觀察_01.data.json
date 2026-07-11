@@ -1,0 +1,2811 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-07-11T16:24:49+08:00",
+  "report_scope": {
+    "task_type": "B comprehensive observation report",
+    "primary_genome": "chr1-22",
+    "sex_chromosome_scope": "out-of-scope census + rationale; no topology reconstruction",
+    "dataset_count": 7,
+    "biological_sample_count": 6,
+    "claim_ceiling": "regional mutation-state candidate trees; not confirmed cell clones"
+  },
+  "paths": {
+    "baseline_run_root": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2",
+    "production_run_root": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2",
+    "baseline_manifest": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/input_manifest.json",
+    "builder": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260710_layered_reconstruction_v2/scripts/build_layered_observation_report.py",
+    "validation_scope": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/VALIDATION_SCOPE.md",
+    "params": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/params.json"
+  },
+  "report_generation_provenance": {
+    "builder": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260710_layered_reconstruction_v2/scripts/build_layered_observation_report.py",
+      "sha256": "250a41d22287b6605361b3e677da4ec766e6143fddbc18a62ba4296318fab0e7"
+    },
+    "shell_template": {
+      "path": "research/20260710_layered_reconstruction_v2/report_runtime/html-report-shell.v0.2.6.html",
+      "sha256": "1a524c1bce1b6e21715f9a1890119a1c705a2cf1d516f3c45650db3073085a56"
+    },
+    "embed_helper": {
+      "path": "research/20260710_layered_reconstruction_v2/report_runtime/embed_html_report_runtime.v0.2.6.py",
+      "sha256": "fb76020ad214d34d094695db7584a90e01a9c7e9e32f54d353a3359dc34dcd5d"
+    },
+    "chart_contract": {
+      "path": "research/20260710_layered_reconstruction_v2/report_runtime/chart_contract_v0_2_6.py",
+      "sha256": "7d2f7cfdf3726bd5930970547c878d3809e455dffcadb57ac36a47637140fb86"
+    },
+    "baseline_manifest": {
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/input_manifest.json",
+      "sha256": "fd1a9aec8514e602e7ae1407b6e388735488a2679e80a0ac17b41527a59415dc"
+    },
+    "baseline_params": {
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/params.json",
+      "sha256": "b722f943be24c977b0554580e74d5f0241c559b1277133c4f53f48ada1fc21e4"
+    }
+  },
+  "baseline_verification": {
+    "schema_version": "2.0",
+    "dataset_count": 7,
+    "biological_sample_count": 6,
+    "all_pass": true,
+    "n_pass": 7,
+    "n_fail": 0,
+    "root_hash_manifest_pass": true,
+    "sample_hash_manifests_pass": 7,
+    "sample_hash_manifests_total": 7,
+    "code_hash_manifest_pass": 1,
+    "code_hash_manifest_total": 7,
+    "root_hash_detail": {
+      "manifest": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/verification.sha256",
+      "pass": true,
+      "checked": [
+        {
+          "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/verification_summary.json",
+          "expected": "b44fe9390cb2bfafce89917c4cc7c476a1bbbcb402a47991030c7832b5d5fc4d",
+          "actual": "b44fe9390cb2bfafce89917c4cc7c476a1bbbcb402a47991030c7832b5d5fc4d",
+          "pass": true
+        },
+        {
+          "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/verification_summary.tsv",
+          "expected": "0877321e8ec0824fb1c4911bf2690b8e22bd028f8e0976726a2ed9dfe3df81d9",
+          "actual": "0877321e8ec0824fb1c4911bf2690b8e22bd028f8e0976726a2ed9dfe3df81d9",
+          "pass": true
+        }
+      ]
+    },
+    "sample_hash_detail": [
+      {
+        "manifest": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/output.sha256",
+        "pass": true,
+        "checked": [
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/mlhp_part_1.json",
+            "expected": "2fc2132055369fe0e4642f00790b7dc31c40e9dc7d0ef54a4e11c788e7d589a1",
+            "actual": "2fc2132055369fe0e4642f00790b7dc31c40e9dc7d0ef54a4e11c788e7d589a1",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/mlhp_part_2.json",
+            "expected": "bded1ce13051d4c3f77ad6de3d4f4203ecb30cc1a3890dbd6160656d3fd36cb3",
+            "actual": "bded1ce13051d4c3f77ad6de3d4f4203ecb30cc1a3890dbd6160656d3fd36cb3",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/mlhp_part_3.json",
+            "expected": "ea3e5fc8cff0a5788a7eaf0a7dd7df43c1dd6f899e37147f60d20f8d7fa74195",
+            "actual": "ea3e5fc8cff0a5788a7eaf0a7dd7df43c1dd6f899e37147f60d20f8d7fa74195",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/mlhp_part_4.json",
+            "expected": "47ca895286250a72618d18034180132563828f0294ae7aa98f72993133f44de8",
+            "actual": "47ca895286250a72618d18034180132563828f0294ae7aa98f72993133f44de8",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/mlhp_part_5.json",
+            "expected": "d4884ad64be3aad81a7f6d672282357f1800740151ee17b2278df6a90d45ecf6",
+            "actual": "d4884ad64be3aad81a7f6d672282357f1800740151ee17b2278df6a90d45ecf6",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/layered_reconstruction_COLO829.json",
+            "expected": "e96d0823c06d209f851056161eacab6af29d9873d08420d85e730fd3996c367a",
+            "actual": "e96d0823c06d209f851056161eacab6af29d9873d08420d85e730fd3996c367a",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/layered_region_view_COLO829.json",
+            "expected": "df544364c692ad3848d9319a2de97c6b33cebe8e8d4b6a6c27c8ff06fe9c5f66",
+            "actual": "df544364c692ad3848d9319a2de97c6b33cebe8e8d4b6a6c27c8ff06fe9c5f66",
+            "pass": true
+          }
+        ]
+      },
+      {
+        "manifest": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/output.sha256",
+        "pass": true,
+        "checked": [
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/mlhp_part_1.json",
+            "expected": "5ad6ceed4f095fb055a7ff968253d07c370936acf8b687226f689063fe9ad70f",
+            "actual": "5ad6ceed4f095fb055a7ff968253d07c370936acf8b687226f689063fe9ad70f",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/mlhp_part_2.json",
+            "expected": "2db96173df94a97ac207654fc2f389898db458ea82beaa5a8256442f54b9f3fc",
+            "actual": "2db96173df94a97ac207654fc2f389898db458ea82beaa5a8256442f54b9f3fc",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/mlhp_part_3.json",
+            "expected": "b3ad183d5eade1170c775467b8126ffd9a644f4f920ffcd16f1780d8f1922bc8",
+            "actual": "b3ad183d5eade1170c775467b8126ffd9a644f4f920ffcd16f1780d8f1922bc8",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/mlhp_part_4.json",
+            "expected": "544b2d9110ca1f73326913372fa5052989800bf2e558ec6c3582e205a6285568",
+            "actual": "544b2d9110ca1f73326913372fa5052989800bf2e558ec6c3582e205a6285568",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/mlhp_part_5.json",
+            "expected": "3f01561648d804aeb23c37cfbe670cd07d7d2ae82b3f06270872c96dcdd5c67d",
+            "actual": "3f01561648d804aeb23c37cfbe670cd07d7d2ae82b3f06270872c96dcdd5c67d",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/layered_reconstruction_H1437.json",
+            "expected": "5bfc1959727d6f74a3ae2f50d38b15f7e4fe7422779a137d4bbf60f4bd8d2f38",
+            "actual": "5bfc1959727d6f74a3ae2f50d38b15f7e4fe7422779a137d4bbf60f4bd8d2f38",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/layered_region_view_H1437.json",
+            "expected": "8b01008f1b62408e67cdb28ae67e3c30ff7da2e19bae104bbfa4c7beea475c65",
+            "actual": "8b01008f1b62408e67cdb28ae67e3c30ff7da2e19bae104bbfa4c7beea475c65",
+            "pass": true
+          }
+        ]
+      },
+      {
+        "manifest": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/output.sha256",
+        "pass": true,
+        "checked": [
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/mlhp_part_1.json",
+            "expected": "c11ffe288b034529586ebb9deece4c5ebcc77395a766ff5d37c01ebac50055e1",
+            "actual": "c11ffe288b034529586ebb9deece4c5ebcc77395a766ff5d37c01ebac50055e1",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/mlhp_part_2.json",
+            "expected": "938a95dfb961f6a5122136bb60ade99bddb19287562d6944342d588aa57def89",
+            "actual": "938a95dfb961f6a5122136bb60ade99bddb19287562d6944342d588aa57def89",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/mlhp_part_3.json",
+            "expected": "51f100d2e5bcc193b0a2ff5e91dcf60fdf8650b11a002028e83c2dae3b55c81a",
+            "actual": "51f100d2e5bcc193b0a2ff5e91dcf60fdf8650b11a002028e83c2dae3b55c81a",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/mlhp_part_4.json",
+            "expected": "a29b15172bbc768968db195e13cb1bc573e642d6ba211341b063c87fd9f2789a",
+            "actual": "a29b15172bbc768968db195e13cb1bc573e642d6ba211341b063c87fd9f2789a",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/mlhp_part_5.json",
+            "expected": "93cdafd646b7e1665359a9dd42d6211248f76186545aef169ee81385df5c5a24",
+            "actual": "93cdafd646b7e1665359a9dd42d6211248f76186545aef169ee81385df5c5a24",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/layered_reconstruction_H2009.json",
+            "expected": "83c08735674745f70664e2179516e190beab797791980b3a411080bb0541bb9a",
+            "actual": "83c08735674745f70664e2179516e190beab797791980b3a411080bb0541bb9a",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/layered_region_view_H2009.json",
+            "expected": "dcb27b04f104228dccdd70a5d2467f8ddf0cad68aeeb7d1318ce826def26bd1a",
+            "actual": "dcb27b04f104228dccdd70a5d2467f8ddf0cad68aeeb7d1318ce826def26bd1a",
+            "pass": true
+          }
+        ]
+      },
+      {
+        "manifest": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/output.sha256",
+        "pass": true,
+        "checked": [
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/mlhp_part_1.json",
+            "expected": "ca2d668207c46f08ee5325dca153879bebf3053113a278e2e6b705849dd6f8aa",
+            "actual": "ca2d668207c46f08ee5325dca153879bebf3053113a278e2e6b705849dd6f8aa",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/mlhp_part_2.json",
+            "expected": "bef5f484d22786e57604065bf59f2758380eb950a163a6266437dae39d848553",
+            "actual": "bef5f484d22786e57604065bf59f2758380eb950a163a6266437dae39d848553",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/mlhp_part_3.json",
+            "expected": "5476b3e7fec1e9087b7ca83c0f61fb4e1a9d0cea047da7667de18bd5a06623fa",
+            "actual": "5476b3e7fec1e9087b7ca83c0f61fb4e1a9d0cea047da7667de18bd5a06623fa",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/mlhp_part_4.json",
+            "expected": "665b4b54e5883cdc603b770cd85ebd9663e1645c34d4d12adc7b9c34373231a6",
+            "actual": "665b4b54e5883cdc603b770cd85ebd9663e1645c34d4d12adc7b9c34373231a6",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/mlhp_part_5.json",
+            "expected": "1f51168b234a1b54c501e3d220a6d4d668f380db36a19e9e035e088b6d3f8a86",
+            "actual": "1f51168b234a1b54c501e3d220a6d4d668f380db36a19e9e035e088b6d3f8a86",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/layered_reconstruction_HCC1395.json",
+            "expected": "6b0398c4f32cdc1f8380e675440c2bffb5a83e159768b9111ce9596cf3280b60",
+            "actual": "6b0398c4f32cdc1f8380e675440c2bffb5a83e159768b9111ce9596cf3280b60",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/layered_region_view_HCC1395.json",
+            "expected": "335c75101083f5b9de00667124efae8bcb2036067140329d90ba5826449838c7",
+            "actual": "335c75101083f5b9de00667124efae8bcb2036067140329d90ba5826449838c7",
+            "pass": true
+          }
+        ]
+      },
+      {
+        "manifest": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/output.sha256",
+        "pass": true,
+        "checked": [
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/mlhp_part_1.json",
+            "expected": "fc2e83e20a65b9b1eca17777041f72d90f555b62dde0159b435c79fbd33f2ae6",
+            "actual": "fc2e83e20a65b9b1eca17777041f72d90f555b62dde0159b435c79fbd33f2ae6",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/mlhp_part_2.json",
+            "expected": "5fdf14ad3604508e0d541ed89744bed9ef61abd62581c38d79e074e4094eb581",
+            "actual": "5fdf14ad3604508e0d541ed89744bed9ef61abd62581c38d79e074e4094eb581",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/mlhp_part_3.json",
+            "expected": "082e27dc5879f2f9d0c2e5bd30d75935fb85bd432e15235263c4944107501b3b",
+            "actual": "082e27dc5879f2f9d0c2e5bd30d75935fb85bd432e15235263c4944107501b3b",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/mlhp_part_4.json",
+            "expected": "914b734e175f3a5e1c08f71fc36818f97f761046fd82a5e97cecac5c99b16ba7",
+            "actual": "914b734e175f3a5e1c08f71fc36818f97f761046fd82a5e97cecac5c99b16ba7",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/mlhp_part_5.json",
+            "expected": "b2b0627bb825258d868b4f2131f9d64b0078232fbbd1f68caa85781b0b669e39",
+            "actual": "b2b0627bb825258d868b4f2131f9d64b0078232fbbd1f68caa85781b0b669e39",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/layered_reconstruction_HCC1395_DORADO.json",
+            "expected": "16f38a178952f1ae5ef1c5ac3d2bd9fd1db93c162bb945b2a4b2946d37aa7e7f",
+            "actual": "16f38a178952f1ae5ef1c5ac3d2bd9fd1db93c162bb945b2a4b2946d37aa7e7f",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/layered_region_view_HCC1395_DORADO.json",
+            "expected": "110a4ec09a6ce4933503db6b01a550beaad58736ea4311413cc5568074c7b3d9",
+            "actual": "110a4ec09a6ce4933503db6b01a550beaad58736ea4311413cc5568074c7b3d9",
+            "pass": true
+          }
+        ]
+      },
+      {
+        "manifest": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/output.sha256",
+        "pass": true,
+        "checked": [
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/mlhp_part_1.json",
+            "expected": "d3b491f94695e6c163cd603c612b9f631ac9798362e9939780bad7265f326893",
+            "actual": "d3b491f94695e6c163cd603c612b9f631ac9798362e9939780bad7265f326893",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/mlhp_part_2.json",
+            "expected": "2622936c06a8daeaa6bf447265e96dd60e56b25f39f3126b6bd6b4a50d25591f",
+            "actual": "2622936c06a8daeaa6bf447265e96dd60e56b25f39f3126b6bd6b4a50d25591f",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/mlhp_part_3.json",
+            "expected": "9c424b63bd149349e914d06f18752a3f614175a890f5612aed9d4586445013ca",
+            "actual": "9c424b63bd149349e914d06f18752a3f614175a890f5612aed9d4586445013ca",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/mlhp_part_4.json",
+            "expected": "5ff97857bb4c4311e7c94d45fe685c53926ba0ef4c08fe04c2ce673f202ea0a5",
+            "actual": "5ff97857bb4c4311e7c94d45fe685c53926ba0ef4c08fe04c2ce673f202ea0a5",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/mlhp_part_5.json",
+            "expected": "211afafb23e526129df717e745f51a6f24270314a6cbd6f1d67c0874925f55f7",
+            "actual": "211afafb23e526129df717e745f51a6f24270314a6cbd6f1d67c0874925f55f7",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/layered_reconstruction_HCC1937.json",
+            "expected": "13d729b4d2518befac48e901b82102015548c39e04d4657ec672d9e0ca82ce31",
+            "actual": "13d729b4d2518befac48e901b82102015548c39e04d4657ec672d9e0ca82ce31",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/layered_region_view_HCC1937.json",
+            "expected": "5bfa86b89d18b56e2f61bf42b6fb3198ec6bf415d129b0fbbfb7c456d220208a",
+            "actual": "5bfa86b89d18b56e2f61bf42b6fb3198ec6bf415d129b0fbbfb7c456d220208a",
+            "pass": true
+          }
+        ]
+      },
+      {
+        "manifest": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/output.sha256",
+        "pass": true,
+        "checked": [
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/mlhp_part_1.json",
+            "expected": "34c0dfdb42ca33818c9be0d889ddb045f69799c23f4a883457b73f50fc46c483",
+            "actual": "34c0dfdb42ca33818c9be0d889ddb045f69799c23f4a883457b73f50fc46c483",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/mlhp_part_2.json",
+            "expected": "83f784948d944cd330e02c64d14e1d1f0224b9fc5bd9b7617efefedd284f3aa0",
+            "actual": "83f784948d944cd330e02c64d14e1d1f0224b9fc5bd9b7617efefedd284f3aa0",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/mlhp_part_3.json",
+            "expected": "759f8f43fa3fb7d790ebb9faaa1a01d92e14e3d80c0ca4635dbfce956c6c2920",
+            "actual": "759f8f43fa3fb7d790ebb9faaa1a01d92e14e3d80c0ca4635dbfce956c6c2920",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/mlhp_part_4.json",
+            "expected": "91ffe20b70b8e0b775e9402466b452ad3b4a15f3260c66de3f17ed4d2338c09e",
+            "actual": "91ffe20b70b8e0b775e9402466b452ad3b4a15f3260c66de3f17ed4d2338c09e",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/mlhp_part_5.json",
+            "expected": "6f62c6ecab93b726450103e5b1984f84ba70e1bc03600df9632e622d7560e5b9",
+            "actual": "6f62c6ecab93b726450103e5b1984f84ba70e1bc03600df9632e622d7560e5b9",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/layered_reconstruction_HCC1954.json",
+            "expected": "afa3e1cca085eef8dc63ea1f8601c087ba2f90b8f602dd2515a9e4be92cc0e49",
+            "actual": "afa3e1cca085eef8dc63ea1f8601c087ba2f90b8f602dd2515a9e4be92cc0e49",
+            "pass": true
+          },
+          {
+            "file": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/layered_region_view_HCC1954.json",
+            "expected": "c9e67d0ff08c5bb7d70957af99888123242b2be9733ce96af042c661c3a8f041",
+            "actual": "c9e67d0ff08c5bb7d70957af99888123242b2be9733ce96af042c661c3a8f041",
+            "pass": true
+          }
+        ]
+      }
+    ],
+    "code_hash_detail": {
+      "manifest": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/code.sha256",
+      "pass": false,
+      "checked": [
+        {
+          "file": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/../data/layered_v2_input_manifest.json",
+          "expected": "fd1a9aec8514e602e7ae1407b6e388735488a2679e80a0ac17b41527a59415dc",
+          "actual": "fd1a9aec8514e602e7ae1407b6e388735488a2679e80a0ac17b41527a59415dc",
+          "pass": true
+        },
+        {
+          "file": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/sm_linkage_genomewide.py",
+          "expected": "a5b1938bd197b3c350a8341b13182e6beb52af57fca040d6b753d04e207881af",
+          "actual": "b01be8e3bba276012fa28bb798062353c3ee00978d58081ebf5577d58555557a",
+          "pass": false
+        },
+        {
+          "file": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/sm_multilocus_combinations.py",
+          "expected": "f28c3b4ec5211350f90fbbc91e0c30a806b6f1900cc71d17b5021cab48d319ca",
+          "actual": "6e5cdbca5a8842c895f1e32e1279906c0da25d24a14e6fe2015c82c527b18cf3",
+          "pass": false
+        },
+        {
+          "file": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/tree_enumeration_solver.py",
+          "expected": "2c21ba497c2c74e7612facd988627de0d4dc35d3a27b487e87b76ded1c025d3c",
+          "actual": "36727f4e1d8d7ce8abf869606211c93d8c1a0506dd7d142e855863c412ca0d61",
+          "pass": false
+        },
+        {
+          "file": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/layered_tree_reconstruction.py",
+          "expected": "4eaafa0ba7d4396d08615757ac0b8fb1d2ef3de923c5c727e4d31b99f70fb150",
+          "actual": "450561e1a84a4679885920e8928b5f684fae9e30647dcd02f2c148a030e43a25",
+          "pass": false
+        },
+        {
+          "file": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_region_view.py",
+          "expected": "35e816e8b364c0f272925f4de0ef2e3b5f725b151b0cc71e012797db8e65cba6",
+          "actual": "58080825a78194064b9ba1507479a4e27b6d711855201e5fd2bb387697a401a8",
+          "pass": false
+        },
+        {
+          "file": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/verify_layered_v2.py",
+          "expected": "50f49ba5756414162668381f1920583798012b3307c34b2cea28ee6bf581479b",
+          "actual": "05b84e4c2848c5549be97e20d762d2277100ad3dedac023c4a16b2604e889241",
+          "pass": false
+        }
+      ]
+    },
+    "manifest_sample_names": [
+      "HCC1395",
+      "HCC1395_DORADO",
+      "COLO829",
+      "H1437",
+      "H2009",
+      "HCC1937",
+      "HCC1954"
+    ],
+    "verification_sample_names": [
+      "HCC1395",
+      "HCC1395_DORADO",
+      "COLO829",
+      "H1437",
+      "H2009",
+      "HCC1937",
+      "HCC1954"
+    ],
+    "scientific_role": "hash-verified historical engineering snapshot only; 6/7 truth-BED-conditioned HP/PS inputs"
+  },
+  "method_contract": {
+    "VERIFY_EVERY": 1,
+    "ANALYSIS_TREE_CAP": 0,
+    "DISPLAY_TREE_CAP": 32,
+    "MINREAD": 3,
+    "MAX_SNV": 8,
+    "TIER_R": 50000,
+    "MAPQ_MIN": 20,
+    "BASEQ_MIN": 0
+  },
+  "auxiliary_evidence": {
+    "read_af": {
+      "status": "not_generated",
+      "expected_datasets": 7,
+      "dataset_artifacts": 0,
+      "evaluated_units": 0
+    },
+    "methylation": {
+      "status": "not_evaluated",
+      "expected_datasets": 7,
+      "evaluated_datasets": 0,
+      "evaluated_units": 0
+    }
+  },
+  "clean_production": {
+    "root": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260711_longphase_s_raw_all_production_sidecars_v2",
+    "expected_datasets": 7,
+    "status_rows": [
+      {
+        "timestamp": "2026-07-11T09:01:04+08:00",
+        "sample": "HCC1395",
+        "stage": "production_tagging",
+        "status": "START",
+        "detail": "expected_raw_records=134122;input_contract=normalized_raw_all;truth_flags=absent"
+      },
+      {
+        "timestamp": "2026-07-11T11:33:39+08:00",
+        "sample": "HCC1395",
+        "stage": "production_tagging",
+        "status": "PASS",
+        "detail": "rows=40859727;rescued=4592;removed=5528;warnings=2"
+      },
+      {
+        "timestamp": "2026-07-11T11:34:10+08:00",
+        "sample": "HCC1395_DORADO",
+        "stage": "production_tagging",
+        "status": "START",
+        "detail": "expected_raw_records=123240;input_contract=normalized_raw_all;truth_flags=absent"
+      },
+      {
+        "timestamp": "2026-07-11T13:45:38+08:00",
+        "sample": "HCC1395_DORADO",
+        "stage": "production_tagging",
+        "status": "PASS",
+        "detail": "rows=40033094;rescued=5162;removed=4404;warnings=0"
+      },
+      {
+        "timestamp": "2026-07-11T13:45:51+08:00",
+        "sample": "COLO829",
+        "stage": "production_tagging",
+        "status": "START",
+        "detail": "expected_raw_records=43014;input_contract=normalized_raw_all;truth_flags=absent"
+      },
+      {
+        "timestamp": "2026-07-11T14:49:40+08:00",
+        "sample": "COLO829",
+        "stage": "production_tagging",
+        "status": "PASS",
+        "detail": "rows=8255461;rescued=2002;removed=740;warnings=0"
+      },
+      {
+        "timestamp": "2026-07-11T14:50:04+08:00",
+        "sample": "H1437",
+        "stage": "production_tagging",
+        "status": "START",
+        "detail": "expected_raw_records=83261;input_contract=normalized_raw_all;truth_flags=absent"
+      }
+    ],
+    "sample_status_rows": [
+      {
+        "timestamp": "2026-07-11T09:01:04+08:00",
+        "sample": "HCC1395",
+        "stage": "production_tagging",
+        "status": "START",
+        "detail": "expected_raw_records=134122;input_contract=normalized_raw_all;truth_flags=absent"
+      },
+      {
+        "timestamp": "2026-07-11T11:33:39+08:00",
+        "sample": "HCC1395",
+        "stage": "production_tagging",
+        "status": "PASS",
+        "detail": "rows=40859727;rescued=4592;removed=5528;warnings=2"
+      },
+      {
+        "timestamp": "2026-07-11T11:34:10+08:00",
+        "sample": "HCC1395_DORADO",
+        "stage": "production_tagging",
+        "status": "START",
+        "detail": "expected_raw_records=123240;input_contract=normalized_raw_all;truth_flags=absent"
+      },
+      {
+        "timestamp": "2026-07-11T13:45:38+08:00",
+        "sample": "HCC1395_DORADO",
+        "stage": "production_tagging",
+        "status": "PASS",
+        "detail": "rows=40033094;rescued=5162;removed=4404;warnings=0"
+      },
+      {
+        "timestamp": "2026-07-11T13:45:51+08:00",
+        "sample": "COLO829",
+        "stage": "production_tagging",
+        "status": "START",
+        "detail": "expected_raw_records=43014;input_contract=normalized_raw_all;truth_flags=absent"
+      },
+      {
+        "timestamp": "2026-07-11T14:49:40+08:00",
+        "sample": "COLO829",
+        "stage": "production_tagging",
+        "status": "PASS",
+        "detail": "rows=8255461;rescued=2002;removed=740;warnings=0"
+      },
+      {
+        "timestamp": "2026-07-11T14:50:04+08:00",
+        "sample": "H1437",
+        "stage": "production_tagging",
+        "status": "START",
+        "detail": "expected_raw_records=83261;input_contract=normalized_raw_all;truth_flags=absent"
+      }
+    ],
+    "ignored_non_sample_status_rows": [],
+    "manifest_sample_names": [
+      "HCC1395",
+      "HCC1395_DORADO",
+      "COLO829",
+      "H1437",
+      "H2009",
+      "HCC1937",
+      "HCC1954"
+    ],
+    "latest_by_sample": {
+      "HCC1395": {
+        "timestamp": "2026-07-11T11:33:39+08:00",
+        "sample": "HCC1395",
+        "stage": "production_tagging",
+        "status": "PASS",
+        "detail": "rows=40859727;rescued=4592;removed=5528;warnings=2"
+      },
+      "HCC1395_DORADO": {
+        "timestamp": "2026-07-11T13:45:38+08:00",
+        "sample": "HCC1395_DORADO",
+        "stage": "production_tagging",
+        "status": "PASS",
+        "detail": "rows=40033094;rescued=5162;removed=4404;warnings=0"
+      },
+      "COLO829": {
+        "timestamp": "2026-07-11T14:49:40+08:00",
+        "sample": "COLO829",
+        "stage": "production_tagging",
+        "status": "PASS",
+        "detail": "rows=8255461;rescued=2002;removed=740;warnings=0"
+      },
+      "H1437": {
+        "timestamp": "2026-07-11T14:50:04+08:00",
+        "sample": "H1437",
+        "stage": "production_tagging",
+        "status": "START",
+        "detail": "expected_raw_records=83261;input_contract=normalized_raw_all;truth_flags=absent"
+      }
+    },
+    "n_started_or_latest": 4,
+    "n_pass": 3,
+    "n_fail": 0,
+    "status_counts": {
+      "PASS": 3,
+      "START": 1
+    },
+    "aggregate_verification": null,
+    "aggregate_exists": false,
+    "aggregate_all_pass": null,
+    "failure_marker": null,
+    "failure": null,
+    "aggregate_complete": false,
+    "sample_status_complete": false,
+    "state": "in_progress"
+  },
+  "seqc2_chrX_contract": {
+    "high_confidence_bed_exists": true,
+    "high_confidence_bed_chrX_intervals": 0,
+    "cn_bed_exists": true,
+    "cn_bed_chrX_intervals": 0,
+    "manifest_samples_with_sex_or_karyotype": 0
+  },
+  "samples": [
+    {
+      "sample": "COLO829",
+      "biological_id": "COLO829",
+      "pass": true,
+      "paths": {
+        "region_view": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/layered_region_view_COLO829.json",
+        "layered": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/layered_reconstruction_COLO829.json",
+        "mlhp_parts": [
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/mlhp_part_1.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/mlhp_part_2.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/mlhp_part_3.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/mlhp_part_4.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/COLO829/mlhp_part_5.json"
+        ],
+        "vcf": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/COLO829/paired_full/20260315_COLO829_paired_full_full_complete_matrix/longphase_s/somatic_pass.vcf.gz"
+      },
+      "site_funnel": {
+        "universe": 38196,
+        "autosomal": 36585,
+        "out_of_scope": 1611,
+        "singleton": 7841,
+        "multilocus_pre_cap": 28744,
+        "cap_excluded": 2130,
+        "read_unsupported": 0,
+        "retained": 26614,
+        "scope_conservation": true
+      },
+      "sex_chromosome_census": {
+        "chrX": 1602,
+        "chrY": 9,
+        "other": 0,
+        "nonautosomal_fraction": 0.042177191328934965,
+        "vcf_total_matches": true,
+        "vcf_nonpass_snv": 0
+      },
+      "regions": {
+        "W_all_pre": 15615,
+        "W_k1": 7841,
+        "W_k_gt1": 7774,
+        "W_pre": 7774,
+        "W_ret": 7774,
+        "W_tree": 7774,
+        "W_primary": 7659,
+        "multi_HP": 4113,
+        "single_primary_HP": 3546,
+        "no_primary": 115,
+        "missing_from_region_view": [],
+        "missing_from_region_view_detail": [],
+        "extra_in_region_view": [],
+        "mlhp_site_sum": 26614,
+        "region_view_site_sum": 26614,
+        "site_sum_delta": 0
+      },
+      "k_distribution": {
+        "counts": {
+          "2": 3529,
+          "3": 1662,
+          "4": 864,
+          "5": 565,
+          "6": 351,
+          "7": 241,
+          "8": 562
+        },
+        "sites": {
+          "2": 7058,
+          "3": 4986,
+          "4": 3456,
+          "5": 2825,
+          "6": 2106,
+          "7": 1687,
+          "8": 4496
+        },
+        "natural_k8": 134,
+        "compressed_k8": 428,
+        "mean_k": 3.4234628248006174,
+        "median_k": 3.0,
+        "raw_pre_cap_max": 82
+      },
+      "read_evidence": {
+        "regions_with_full": 5075,
+        "regions_without_full": 2699,
+        "regions_with_alt_population": 3497,
+        "regions_without_alt_population": 4277,
+        "raw_full_observations": 59700,
+        "full_pattern_observations": 54659,
+        "partial_pattern_observations": 551566,
+        "retained_pattern_observations": 606225,
+        "broad_hp_observations": 647678,
+        "primary_full_partial": 4383,
+        "primary_partial_only": 7389,
+        "primary_full_only": 0
+      },
+      "units": {
+        "primary": 11772,
+        "reference": 1928,
+        "H3_auxiliary": 745,
+        "unphased_auxiliary": 2566,
+        "determined": 4135,
+        "ambiguous": 6926,
+        "solver_capped": 711,
+        "recurrence": 0,
+        "noncapped_complete": 11061,
+        "exact_tree_unique": 4135,
+        "shape_unique": 7063,
+        "total_candidate_trees": 83813,
+        "candidate_tree_median": 2,
+        "candidate_tree_p90": 16.0,
+        "hidden_total_all_primary": 22146,
+        "hidden_total_complete": 17339,
+        "hidden_unit_bins_complete": {
+          "0": 2082,
+          "1": 3958,
+          "2": 2591,
+          "3": 1521,
+          "4": 909,
+          "5+": 0
+        },
+        "region_all_exact": 1406,
+        "region_all_shape": 3876
+      },
+      "region_candidate_topology": {
+        "definitions": {
+          "C_region": "product of n_trees across analysis-complete primary HP1/HP2 units",
+          "Topo_region": "product of n_distinct_shapes_exact across those units",
+          "hidden_region": "sum of per-primary-unit minimal parsimony-inferred mutation-state nodes"
+        },
+        "hp_h3": {
+          "single_without_h3": 3330,
+          "single_with_h3": 216,
+          "double_without_h3": 3696,
+          "double_with_h3": 417,
+          "none_without_h3": 3,
+          "none_with_h3": 112,
+          "other_without_h3": 0,
+          "other_with_h3": 0
+        },
+        "C_bins": {
+          "single": {
+            "C=1": 208,
+            "C=2": 1540,
+            "C=3": 624,
+            "C=4": 9,
+            "C=5": 16,
+            "C=6": 232,
+            "C>6": 674,
+            "incomplete": 243
+          },
+          "double": {
+            "C=1": 1198,
+            "C=2": 544,
+            "C=3": 364,
+            "C=4": 75,
+            "C=5": 7,
+            "C=6": 182,
+            "C>6": 1276,
+            "incomplete": 467
+          },
+          "all": {
+            "C=1": 1406,
+            "C=2": 2084,
+            "C=3": 988,
+            "C=4": 84,
+            "C=5": 23,
+            "C=6": 414,
+            "C>6": 1950,
+            "incomplete": 710
+          }
+        },
+        "topology_classes": {
+          "exact_and_topology_unique": 1406,
+          "topology_unique_exact_multiple": 2470,
+          "topology_multiple_exact_multiple": 3073,
+          "incomplete": 710,
+          "impossible_exact_unique_topology_multiple": 0
+        },
+        "topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": 208,
+            "topology_unique_exact_multiple": 1747,
+            "topology_multiple_exact_multiple": 1348,
+            "incomplete": 243,
+            "impossible_exact_unique_topology_multiple": 0
+          },
+          "double": {
+            "exact_and_topology_unique": 1198,
+            "topology_unique_exact_multiple": 723,
+            "topology_multiple_exact_multiple": 1725,
+            "incomplete": 467,
+            "impossible_exact_unique_topology_multiple": 0
+          }
+        },
+        "hidden_classes": {
+          "hidden_zero": 822,
+          "hidden_positive": 6127,
+          "incomplete": 710
+        },
+        "hidden_by_topology": {
+          "exact_and_topology_unique": {
+            "hidden_zero": 822,
+            "hidden_positive": 584
+          },
+          "topology_unique_exact_multiple": {
+            "hidden_zero": 0,
+            "hidden_positive": 2470
+          },
+          "topology_multiple_exact_multiple": {
+            "hidden_zero": 0,
+            "hidden_positive": 3073
+          }
+        },
+        "hidden_by_topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 157,
+              "hidden_positive": 51
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 1747
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 1348
+            }
+          },
+          "double": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 665,
+              "hidden_positive": 533
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 723
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 1725
+            }
+          }
+        },
+        "complete_regions": 6949,
+        "incomplete_regions": 710,
+        "joint_exact_combinations_total": 663218,
+        "joint_topology_combinations_total": 21552,
+        "max_C_region": 15625,
+        "max_Topo_region": 81,
+        "ranking_status": "not_evaluated",
+        "ranked_regions": 0,
+        "legacy_has_capped_label_count": 710,
+        "capped_label_discordance": [],
+        "invalid_states": []
+      },
+      "L2_cn": {
+        "n_primary_recurrence_sent_to_cn": 0,
+        "n_recurrence_sent_to_cn": 0,
+        "primary_cn_split": {},
+        "cn_split": {},
+        "n_H3_auxiliary_recurrence_annotated": 1,
+        "H3_auxiliary_cn_split": {
+          "m通道不可用": 1
+        }
+      },
+      "cn_contract": {
+        "cn_data_available": false,
+        "cn_source": "unavailable",
+        "cn_interpretation": "missing=unavailable"
+      },
+      "L3_methyl": {
+        "status": "not_evaluated",
+        "role": "bounded_auxiliary",
+        "allowed_uses": [
+          "negative_screen",
+          "residual_flag"
+        ],
+        "prohibited_uses": [
+          "tree_ranking",
+          "lineage_confirmation",
+          "clone_confirmation"
+        ],
+        "reason": "No orthogonal per-unit methyl validation is joined in this driver"
+      },
+      "verification_status": {
+        "full_pass": 16276,
+        "not_applicable_capped": 735
+      },
+      "verification_failure": 0,
+      "method_params": {
+        "MINREAD": 3,
+        "MAX_SNV": 8,
+        "TIER_R": 50000,
+        "MAPQ_MIN": 20,
+        "BASEQ_MIN": 0
+      },
+      "well_explained_case": null
+    },
+    {
+      "sample": "H1437",
+      "biological_id": "H1437",
+      "pass": true,
+      "paths": {
+        "region_view": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/layered_region_view_H1437.json",
+        "layered": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/layered_reconstruction_H1437.json",
+        "mlhp_parts": [
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/mlhp_part_1.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/mlhp_part_2.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/mlhp_part_3.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/mlhp_part_4.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H1437/mlhp_part_5.json"
+        ],
+        "vcf": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/H1437/paired_full/20260315_H1437_paired_full_full_complete_matrix/longphase_s/somatic_pass.vcf.gz"
+      },
+      "site_funnel": {
+        "universe": 75578,
+        "autosomal": 73243,
+        "out_of_scope": 2335,
+        "singleton": 6795,
+        "multilocus_pre_cap": 66448,
+        "cap_excluded": 30960,
+        "read_unsupported": 0,
+        "retained": 35488,
+        "scope_conservation": true
+      },
+      "sex_chromosome_census": {
+        "chrX": 2320,
+        "chrY": 15,
+        "other": 0,
+        "nonautosomal_fraction": 0.030895234062822515,
+        "vcf_total_matches": true,
+        "vcf_nonpass_snv": 0
+      },
+      "regions": {
+        "W_all_pre": 15660,
+        "W_k1": 6795,
+        "W_k_gt1": 8865,
+        "W_pre": 8865,
+        "W_ret": 8865,
+        "W_tree": 8865,
+        "W_primary": 8630,
+        "multi_HP": 4191,
+        "single_primary_HP": 4439,
+        "no_primary": 235,
+        "missing_from_region_view": [],
+        "missing_from_region_view_detail": [],
+        "extra_in_region_view": [],
+        "mlhp_site_sum": 35488,
+        "region_view_site_sum": 35488,
+        "site_sum_delta": 0
+      },
+      "k_distribution": {
+        "counts": {
+          "2": 3218,
+          "3": 1749,
+          "4": 1037,
+          "5": 674,
+          "6": 452,
+          "7": 305,
+          "8": 1430
+        },
+        "sites": {
+          "2": 6436,
+          "3": 5247,
+          "4": 4148,
+          "5": 3370,
+          "6": 2712,
+          "7": 2135,
+          "8": 11440
+        },
+        "natural_k8": 254,
+        "compressed_k8": 1176,
+        "mean_k": 4.003158488437676,
+        "median_k": 3,
+        "raw_pre_cap_max": 1163
+      },
+      "read_evidence": {
+        "regions_with_full": 6044,
+        "regions_without_full": 2821,
+        "regions_with_alt_population": 4886,
+        "regions_without_alt_population": 3979,
+        "raw_full_observations": 169117,
+        "full_pattern_observations": 162869,
+        "partial_pattern_observations": 1465794,
+        "retained_pattern_observations": 1628663,
+        "broad_hp_observations": 1702763,
+        "primary_full_partial": 6075,
+        "primary_partial_only": 6746,
+        "primary_full_only": 0
+      },
+      "units": {
+        "primary": 12821,
+        "reference": 1560,
+        "H3_auxiliary": 1050,
+        "unphased_auxiliary": 3240,
+        "determined": 4111,
+        "ambiguous": 7043,
+        "solver_capped": 1653,
+        "recurrence": 14,
+        "noncapped_complete": 11168,
+        "exact_tree_unique": 4111,
+        "shape_unique": 7822,
+        "total_candidate_trees": 70796,
+        "candidate_tree_median": 2.0,
+        "candidate_tree_p90": 16.0,
+        "hidden_total_all_primary": 31239,
+        "hidden_total_complete": 17350,
+        "hidden_unit_bins_complete": {
+          "0": 2830,
+          "1": 3363,
+          "2": 2108,
+          "3": 1697,
+          "4": 1170,
+          "5+": 0
+        },
+        "region_all_exact": 1657,
+        "region_all_shape": 4584
+      },
+      "region_candidate_topology": {
+        "definitions": {
+          "C_region": "product of n_trees across analysis-complete primary HP1/HP2 units",
+          "Topo_region": "product of n_distinct_shapes_exact across those units",
+          "hidden_region": "sum of per-primary-unit minimal parsimony-inferred mutation-state nodes"
+        },
+        "hp_h3": {
+          "single_without_h3": 4191,
+          "single_with_h3": 248,
+          "double_without_h3": 3608,
+          "double_with_h3": 583,
+          "none_without_h3": 16,
+          "none_with_h3": 219,
+          "other_without_h3": 0,
+          "other_with_h3": 0
+        },
+        "C_bins": {
+          "single": {
+            "C=1": 662,
+            "C=2": 1678,
+            "C=3": 261,
+            "C=4": 80,
+            "C=5": 47,
+            "C=6": 330,
+            "C>6": 659,
+            "incomplete": 722
+          },
+          "double": {
+            "C=1": 995,
+            "C=2": 577,
+            "C=3": 212,
+            "C=4": 102,
+            "C=5": 22,
+            "C=6": 227,
+            "C>6": 1132,
+            "incomplete": 924
+          },
+          "all": {
+            "C=1": 1657,
+            "C=2": 2255,
+            "C=3": 473,
+            "C=4": 182,
+            "C=5": 69,
+            "C=6": 557,
+            "C>6": 1791,
+            "incomplete": 1646
+          }
+        },
+        "topology_classes": {
+          "exact_and_topology_unique": 1657,
+          "topology_unique_exact_multiple": 2927,
+          "topology_multiple_exact_multiple": 2400,
+          "incomplete": 1646,
+          "impossible_exact_unique_topology_multiple": 0
+        },
+        "topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": 662,
+            "topology_unique_exact_multiple": 2030,
+            "topology_multiple_exact_multiple": 1025,
+            "incomplete": 722,
+            "impossible_exact_unique_topology_multiple": 0
+          },
+          "double": {
+            "exact_and_topology_unique": 995,
+            "topology_unique_exact_multiple": 897,
+            "topology_multiple_exact_multiple": 1375,
+            "incomplete": 924,
+            "impossible_exact_unique_topology_multiple": 0
+          }
+        },
+        "hidden_classes": {
+          "hidden_zero": 1400,
+          "hidden_positive": 5584,
+          "incomplete": 1646
+        },
+        "hidden_by_topology": {
+          "exact_and_topology_unique": {
+            "hidden_zero": 1393,
+            "hidden_positive": 264
+          },
+          "topology_unique_exact_multiple": {
+            "hidden_zero": 7,
+            "hidden_positive": 2920
+          },
+          "topology_multiple_exact_multiple": {
+            "hidden_zero": 0,
+            "hidden_positive": 2400
+          }
+        },
+        "hidden_by_topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 631,
+              "hidden_positive": 31
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 7,
+              "hidden_positive": 2023
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 1025
+            }
+          },
+          "double": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 762,
+              "hidden_positive": 233
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 897
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 1375
+            }
+          }
+        },
+        "complete_regions": 6984,
+        "incomplete_regions": 1646,
+        "joint_exact_combinations_total": 357034,
+        "joint_topology_combinations_total": 16305,
+        "max_C_region": 5476,
+        "max_Topo_region": 64,
+        "ranking_status": "not_evaluated",
+        "ranked_regions": 0,
+        "legacy_has_capped_label_count": 1646,
+        "capped_label_discordance": [],
+        "invalid_states": []
+      },
+      "L2_cn": {
+        "n_primary_recurrence_sent_to_cn": 14,
+        "n_recurrence_sent_to_cn": 14,
+        "primary_cn_split": {
+          "CN-gain_confounded": 10,
+          "LOH_unresolved": 4
+        },
+        "cn_split": {
+          "CN-gain_confounded": 10,
+          "LOH_unresolved": 4
+        },
+        "n_H3_auxiliary_recurrence_annotated": 0,
+        "H3_auxiliary_cn_split": {}
+      },
+      "cn_contract": {
+        "cn_data_available": true,
+        "cn_source": "SAVANA",
+        "cn_interpretation": "segments plus unlisted=neutral"
+      },
+      "L3_methyl": {
+        "status": "not_evaluated",
+        "role": "bounded_auxiliary",
+        "allowed_uses": [
+          "negative_screen",
+          "residual_flag"
+        ],
+        "prohibited_uses": [
+          "tree_ranking",
+          "lineage_confirmation",
+          "clone_confirmation"
+        ],
+        "reason": "No orthogonal per-unit methyl validation is joined in this driver"
+      },
+      "verification_status": {
+        "full_pass": 16836,
+        "not_applicable_capped": 1835
+      },
+      "verification_failure": 0,
+      "method_params": {
+        "MINREAD": 3,
+        "MAX_SNV": 8,
+        "TIER_R": 50000,
+        "MAPQ_MIN": 20,
+        "BASEQ_MIN": 0
+      },
+      "well_explained_case": null
+    },
+    {
+      "sample": "H2009",
+      "biological_id": "H2009",
+      "pass": true,
+      "paths": {
+        "region_view": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/layered_region_view_H2009.json",
+        "layered": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/layered_reconstruction_H2009.json",
+        "mlhp_parts": [
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/mlhp_part_1.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/mlhp_part_2.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/mlhp_part_3.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/mlhp_part_4.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/H2009/mlhp_part_5.json"
+        ],
+        "vcf": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/H2009/paired_full/20260315_H2009_paired_full_full_complete_matrix/longphase_s/somatic_pass.vcf.gz"
+      },
+      "site_funnel": {
+        "universe": 157405,
+        "autosomal": 150370,
+        "out_of_scope": 7035,
+        "singleton": 3017,
+        "multilocus_pre_cap": 147353,
+        "cap_excluded": 96543,
+        "read_unsupported": 0,
+        "retained": 50810,
+        "scope_conservation": true
+      },
+      "sex_chromosome_census": {
+        "chrX": 7027,
+        "chrY": 8,
+        "other": 0,
+        "nonautosomal_fraction": 0.04469362472602522,
+        "vcf_total_matches": true,
+        "vcf_nonpass_snv": 0
+      },
+      "regions": {
+        "W_all_pre": 12734,
+        "W_k1": 3017,
+        "W_k_gt1": 9717,
+        "W_pre": 9717,
+        "W_ret": 9717,
+        "W_tree": 9717,
+        "W_primary": 9581,
+        "multi_HP": 4666,
+        "single_primary_HP": 4915,
+        "no_primary": 136,
+        "missing_from_region_view": [],
+        "missing_from_region_view_detail": [],
+        "extra_in_region_view": [],
+        "mlhp_site_sum": 50810,
+        "region_view_site_sum": 50810,
+        "site_sum_delta": 0
+      },
+      "k_distribution": {
+        "counts": {
+          "2": 1998,
+          "3": 1351,
+          "4": 1052,
+          "5": 743,
+          "6": 622,
+          "7": 502,
+          "8": 3449
+        },
+        "sites": {
+          "2": 3996,
+          "3": 4053,
+          "4": 4208,
+          "5": 3715,
+          "6": 3732,
+          "7": 3514,
+          "8": 27592
+        },
+        "natural_k8": 405,
+        "compressed_k8": 3044,
+        "mean_k": 5.228980137902645,
+        "median_k": 5,
+        "raw_pre_cap_max": 2832
+      },
+      "read_evidence": {
+        "regions_with_full": 5518,
+        "regions_without_full": 4199,
+        "regions_with_alt_population": 4155,
+        "regions_without_alt_population": 5562,
+        "raw_full_observations": 145838,
+        "full_pattern_observations": 138337,
+        "partial_pattern_observations": 2713961,
+        "retained_pattern_observations": 2852298,
+        "broad_hp_observations": 2994264,
+        "primary_full_partial": 5286,
+        "primary_partial_only": 8961,
+        "primary_full_only": 0
+      },
+      "units": {
+        "primary": 14247,
+        "reference": 1304,
+        "H3_auxiliary": 2031,
+        "unphased_auxiliary": 4321,
+        "determined": 3026,
+        "ambiguous": 7430,
+        "solver_capped": 3733,
+        "recurrence": 58,
+        "noncapped_complete": 10514,
+        "exact_tree_unique": 3026,
+        "shape_unique": 6817,
+        "total_candidate_trees": 104623,
+        "candidate_tree_median": 2.0,
+        "candidate_tree_p90": 26.0,
+        "hidden_total_all_primary": 55623,
+        "hidden_total_complete": 20551,
+        "hidden_unit_bins_complete": {
+          "0": 1818,
+          "1": 2594,
+          "2": 2184,
+          "3": 2083,
+          "4": 1835,
+          "5+": 0
+        },
+        "region_all_exact": 1170,
+        "region_all_shape": 3528
+      },
+      "region_candidate_topology": {
+        "definitions": {
+          "C_region": "product of n_trees across analysis-complete primary HP1/HP2 units",
+          "Topo_region": "product of n_distinct_shapes_exact across those units",
+          "hidden_region": "sum of per-primary-unit minimal parsimony-inferred mutation-state nodes"
+        },
+        "hp_h3": {
+          "single_without_h3": 4288,
+          "single_with_h3": 627,
+          "double_without_h3": 3379,
+          "double_with_h3": 1287,
+          "none_without_h3": 19,
+          "none_with_h3": 117,
+          "other_without_h3": 0,
+          "other_with_h3": 0
+        },
+        "C_bins": {
+          "single": {
+            "C=1": 673,
+            "C=2": 1063,
+            "C=3": 224,
+            "C=4": 85,
+            "C=5": 79,
+            "C=6": 271,
+            "C>6": 628,
+            "incomplete": 1892
+          },
+          "double": {
+            "C=1": 497,
+            "C=2": 362,
+            "C=3": 134,
+            "C=4": 110,
+            "C=5": 21,
+            "C=6": 173,
+            "C>6": 1562,
+            "incomplete": 1807
+          },
+          "all": {
+            "C=1": 1170,
+            "C=2": 1425,
+            "C=3": 358,
+            "C=4": 195,
+            "C=5": 100,
+            "C=6": 444,
+            "C>6": 2190,
+            "incomplete": 3699
+          }
+        },
+        "topology_classes": {
+          "exact_and_topology_unique": 1170,
+          "topology_unique_exact_multiple": 2358,
+          "topology_multiple_exact_multiple": 2354,
+          "incomplete": 3699,
+          "impossible_exact_unique_topology_multiple": 0
+        },
+        "topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": 673,
+            "topology_unique_exact_multiple": 1441,
+            "topology_multiple_exact_multiple": 909,
+            "incomplete": 1892,
+            "impossible_exact_unique_topology_multiple": 0
+          },
+          "double": {
+            "exact_and_topology_unique": 497,
+            "topology_unique_exact_multiple": 917,
+            "topology_multiple_exact_multiple": 1445,
+            "incomplete": 1807,
+            "impossible_exact_unique_topology_multiple": 0
+          }
+        },
+        "hidden_classes": {
+          "hidden_zero": 994,
+          "hidden_positive": 4888,
+          "incomplete": 3699
+        },
+        "hidden_by_topology": {
+          "exact_and_topology_unique": {
+            "hidden_zero": 973,
+            "hidden_positive": 197
+          },
+          "topology_unique_exact_multiple": {
+            "hidden_zero": 21,
+            "hidden_positive": 2337
+          },
+          "topology_multiple_exact_multiple": {
+            "hidden_zero": 0,
+            "hidden_positive": 2354
+          }
+        },
+        "hidden_by_topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 605,
+              "hidden_positive": 68
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 21,
+              "hidden_positive": 1420
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 909
+            }
+          },
+          "double": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 368,
+              "hidden_positive": 129
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 917
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 1445
+            }
+          }
+        },
+        "complete_regions": 5882,
+        "incomplete_regions": 3699,
+        "joint_exact_combinations_total": 724719,
+        "joint_topology_combinations_total": 18043,
+        "max_C_region": 9250,
+        "max_Topo_region": 72,
+        "ranking_status": "not_evaluated",
+        "ranked_regions": 0,
+        "legacy_has_capped_label_count": 3696,
+        "capped_label_discordance": [
+          {
+            "region": "chr16:66216957-66310776",
+            "legacy_region_determinacy": "has_recurrence"
+          },
+          {
+            "region": "chr13:93837736-93888639",
+            "legacy_region_determinacy": "has_recurrence"
+          },
+          {
+            "region": "chr15:31733893-31800487",
+            "legacy_region_determinacy": "has_recurrence"
+          }
+        ],
+        "invalid_states": []
+      },
+      "L2_cn": {
+        "n_primary_recurrence_sent_to_cn": 58,
+        "n_recurrence_sent_to_cn": 58,
+        "primary_cn_split": {
+          "LOH_unresolved": 38,
+          "CN-gain_confounded": 19,
+          "candidate(m=1)": 1
+        },
+        "cn_split": {
+          "LOH_unresolved": 38,
+          "CN-gain_confounded": 19,
+          "candidate(m=1)": 1
+        },
+        "n_H3_auxiliary_recurrence_annotated": 0,
+        "H3_auxiliary_cn_split": {}
+      },
+      "cn_contract": {
+        "cn_data_available": true,
+        "cn_source": "SAVANA",
+        "cn_interpretation": "segments plus unlisted=neutral"
+      },
+      "L3_methyl": {
+        "status": "not_evaluated",
+        "role": "bounded_auxiliary",
+        "allowed_uses": [
+          "negative_screen",
+          "residual_flag"
+        ],
+        "prohibited_uses": [
+          "tree_ranking",
+          "lineage_confirmation",
+          "clone_confirmation"
+        ],
+        "reason": "No orthogonal per-unit methyl validation is joined in this driver"
+      },
+      "verification_status": {
+        "full_pass": 17979,
+        "not_applicable_capped": 3924
+      },
+      "verification_failure": 0,
+      "method_params": {
+        "MINREAD": 3,
+        "MAX_SNV": 8,
+        "TIER_R": 50000,
+        "MAPQ_MIN": 20,
+        "BASEQ_MIN": 0
+      },
+      "well_explained_case": null
+    },
+    {
+      "sample": "HCC1395",
+      "biological_id": "HCC1395",
+      "pass": true,
+      "paths": {
+        "region_view": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/layered_region_view_HCC1395.json",
+        "layered": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/layered_reconstruction_HCC1395.json",
+        "mlhp_parts": [
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/mlhp_part_1.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/mlhp_part_2.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/mlhp_part_3.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/mlhp_part_4.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395/mlhp_part_5.json"
+        ],
+        "vcf": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395/paired_full/20260314_HCC1395_paired_full_full_complete_matrix/longphase_s/somatic_pass.vcf.gz"
+      },
+      "site_funnel": {
+        "universe": 113997,
+        "autosomal": 80234,
+        "out_of_scope": 33763,
+        "singleton": 8447,
+        "multilocus_pre_cap": 71787,
+        "cap_excluded": 46137,
+        "read_unsupported": 11,
+        "retained": 25639,
+        "scope_conservation": true
+      },
+      "sex_chromosome_census": {
+        "chrX": 33763,
+        "chrY": 0,
+        "other": 0,
+        "nonautosomal_fraction": 0.2961744607314228,
+        "vcf_total_matches": true,
+        "vcf_nonpass_snv": 0
+      },
+      "regions": {
+        "W_all_pre": 16378,
+        "W_k1": 8447,
+        "W_k_gt1": 7931,
+        "W_pre": 7931,
+        "W_ret": 7928,
+        "W_tree": 7927,
+        "W_primary": 7590,
+        "multi_HP": 2765,
+        "single_primary_HP": 4825,
+        "no_primary": 337,
+        "missing_from_region_view": [
+          "chr6:104657214-104669173"
+        ],
+        "missing_from_region_view_detail": [
+          {
+            "region": "chr6:104657214-104669173",
+            "k": 4,
+            "n_full_cov_reads": 3,
+            "n_populations": 0
+          }
+        ],
+        "extra_in_region_view": [],
+        "mlhp_site_sum": 25639,
+        "region_view_site_sum": 25635,
+        "site_sum_delta": 4
+      },
+      "k_distribution": {
+        "counts": {
+          "2": 3769,
+          "3": 1853,
+          "4": 950,
+          "5": 474,
+          "6": 260,
+          "7": 164,
+          "8": 458
+        },
+        "sites": {
+          "2": 7538,
+          "3": 5559,
+          "4": 3800,
+          "5": 2370,
+          "6": 1560,
+          "7": 1148,
+          "8": 3664
+        },
+        "natural_k8": 118,
+        "compressed_k8": 340,
+        "mean_k": 3.233980827447023,
+        "median_k": 3.0,
+        "raw_pre_cap_max": 5066
+      },
+      "read_evidence": {
+        "regions_with_full": 5202,
+        "regions_without_full": 2726,
+        "regions_with_alt_population": 3490,
+        "regions_without_alt_population": 4438,
+        "raw_full_observations": 120764,
+        "full_pattern_observations": 113680,
+        "partial_pattern_observations": 1621703,
+        "retained_pattern_observations": 1735383,
+        "broad_hp_observations": 1774951,
+        "primary_full_partial": 4083,
+        "primary_partial_only": 6272,
+        "primary_full_only": 0
+      },
+      "units": {
+        "primary": 10355,
+        "reference": 1739,
+        "H3_auxiliary": 1691,
+        "unphased_auxiliary": 5146,
+        "determined": 4120,
+        "ambiguous": 5555,
+        "solver_capped": 653,
+        "recurrence": 27,
+        "noncapped_complete": 9702,
+        "exact_tree_unique": 4120,
+        "shape_unique": 5707,
+        "total_candidate_trees": 53467,
+        "candidate_tree_median": 2.0,
+        "candidate_tree_p90": 10.0,
+        "hidden_total_all_primary": 19259,
+        "hidden_total_complete": 14640,
+        "hidden_unit_bins_complete": {
+          "0": 2230,
+          "1": 3024,
+          "2": 2394,
+          "3": 1388,
+          "4": 666,
+          "5+": 0
+        },
+        "region_all_exact": 2032,
+        "region_all_shape": 3438
+      },
+      "region_candidate_topology": {
+        "definitions": {
+          "C_region": "product of n_trees across analysis-complete primary HP1/HP2 units",
+          "Topo_region": "product of n_distinct_shapes_exact across those units",
+          "hidden_region": "sum of per-primary-unit minimal parsimony-inferred mutation-state nodes"
+        },
+        "hp_h3": {
+          "single_without_h3": 4146,
+          "single_with_h3": 679,
+          "double_without_h3": 1859,
+          "double_with_h3": 906,
+          "none_without_h3": 231,
+          "none_with_h3": 106,
+          "other_without_h3": 0,
+          "other_with_h3": 0
+        },
+        "C_bins": {
+          "single": {
+            "C=1": 1099,
+            "C=2": 1209,
+            "C=3": 963,
+            "C=4": 77,
+            "C=5": 155,
+            "C=6": 167,
+            "C>6": 788,
+            "incomplete": 367
+          },
+          "double": {
+            "C=1": 933,
+            "C=2": 281,
+            "C=3": 392,
+            "C=4": 44,
+            "C=5": 49,
+            "C=6": 124,
+            "C>6": 659,
+            "incomplete": 283
+          },
+          "all": {
+            "C=1": 2032,
+            "C=2": 1490,
+            "C=3": 1355,
+            "C=4": 121,
+            "C=5": 204,
+            "C=6": 291,
+            "C>6": 1447,
+            "incomplete": 650
+          }
+        },
+        "topology_classes": {
+          "exact_and_topology_unique": 2032,
+          "topology_unique_exact_multiple": 1406,
+          "topology_multiple_exact_multiple": 3502,
+          "incomplete": 650,
+          "impossible_exact_unique_topology_multiple": 0
+        },
+        "topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": 1099,
+            "topology_unique_exact_multiple": 1117,
+            "topology_multiple_exact_multiple": 2242,
+            "incomplete": 367,
+            "impossible_exact_unique_topology_multiple": 0
+          },
+          "double": {
+            "exact_and_topology_unique": 933,
+            "topology_unique_exact_multiple": 289,
+            "topology_multiple_exact_multiple": 1260,
+            "incomplete": 283,
+            "impossible_exact_unique_topology_multiple": 0
+          }
+        },
+        "hidden_classes": {
+          "hidden_zero": 1460,
+          "hidden_positive": 5480,
+          "incomplete": 650
+        },
+        "hidden_by_topology": {
+          "exact_and_topology_unique": {
+            "hidden_zero": 1443,
+            "hidden_positive": 589
+          },
+          "topology_unique_exact_multiple": {
+            "hidden_zero": 16,
+            "hidden_positive": 1390
+          },
+          "topology_multiple_exact_multiple": {
+            "hidden_zero": 1,
+            "hidden_positive": 3501
+          }
+        },
+        "hidden_by_topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 960,
+              "hidden_positive": 139
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 16,
+              "hidden_positive": 1101
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 1,
+              "hidden_positive": 2241
+            }
+          },
+          "double": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 483,
+              "hidden_positive": 450
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 289
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 1260
+            }
+          }
+        },
+        "complete_regions": 6940,
+        "incomplete_regions": 650,
+        "joint_exact_combinations_total": 195473,
+        "joint_topology_combinations_total": 17586,
+        "max_C_region": 15625,
+        "max_Topo_region": 81,
+        "ranking_status": "not_evaluated",
+        "ranked_regions": 0,
+        "legacy_has_capped_label_count": 650,
+        "capped_label_discordance": [],
+        "invalid_states": []
+      },
+      "L2_cn": {
+        "n_primary_recurrence_sent_to_cn": 27,
+        "n_recurrence_sent_to_cn": 27,
+        "primary_cn_split": {
+          "artifact(m>1;CN-amp)": 20,
+          "LOH_unresolved": 7
+        },
+        "cn_split": {
+          "artifact(m>1;CN-amp)": 20,
+          "LOH_unresolved": 7
+        },
+        "n_H3_auxiliary_recurrence_annotated": 0,
+        "H3_auxiliary_cn_split": {}
+      },
+      "cn_contract": {
+        "cn_data_available": true,
+        "cn_source": "SEQC2",
+        "cn_interpretation": "segments plus unlisted=neutral"
+      },
+      "L3_methyl": {
+        "status": "not_evaluated",
+        "role": "bounded_auxiliary",
+        "allowed_uses": [
+          "negative_screen",
+          "residual_flag"
+        ],
+        "prohibited_uses": [
+          "tree_ranking",
+          "lineage_confirmation",
+          "clone_confirmation"
+        ],
+        "reason": "No orthogonal per-unit methyl validation is joined in this driver"
+      },
+      "verification_status": {
+        "full_pass": 18103,
+        "not_applicable_capped": 828
+      },
+      "verification_failure": 0,
+      "method_params": {
+        "MINREAD": 3,
+        "MAX_SNV": 8,
+        "TIER_R": 50000,
+        "MAPQ_MIN": 20,
+        "BASEQ_MIN": 0
+      },
+      "well_explained_case": {
+        "sample": "HCC1395",
+        "region": "chr2:221958321-222018361",
+        "k": 4,
+        "hp_multiplicity": 2,
+        "n_full_cov_reads": 0,
+        "families": [
+          {
+            "family": "1",
+            "n_trees": 1,
+            "n_hidden": 2,
+            "n_reads": 79,
+            "n_full_pops": 0,
+            "n_partial": 7
+          },
+          {
+            "family": "2",
+            "n_trees": 1,
+            "n_hidden": 2,
+            "n_reads": 163,
+            "n_full_pops": 0,
+            "n_partial": 8
+          }
+        ]
+      }
+    },
+    {
+      "sample": "HCC1395_DORADO",
+      "biological_id": "HCC1395",
+      "pass": true,
+      "paths": {
+        "region_view": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/layered_region_view_HCC1395_DORADO.json",
+        "layered": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/layered_reconstruction_HCC1395_DORADO.json",
+        "mlhp_parts": [
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/mlhp_part_1.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/mlhp_part_2.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/mlhp_part_3.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/mlhp_part_4.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1395_DORADO/mlhp_part_5.json"
+        ],
+        "vcf": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1395_DORADO/paired_full/20260315_HCC1395_DORADO_paired_full_full_complete_matrix/longphase_s/somatic_pass.vcf.gz"
+      },
+      "site_funnel": {
+        "universe": 112387,
+        "autosomal": 79120,
+        "out_of_scope": 33267,
+        "singleton": 8406,
+        "multilocus_pre_cap": 70714,
+        "cap_excluded": 45135,
+        "read_unsupported": 0,
+        "retained": 25579,
+        "scope_conservation": true
+      },
+      "sex_chromosome_census": {
+        "chrX": 33267,
+        "chrY": 0,
+        "other": 0,
+        "nonautosomal_fraction": 0.296003986226165,
+        "vcf_total_matches": true,
+        "vcf_nonpass_snv": 0
+      },
+      "regions": {
+        "W_all_pre": 16364,
+        "W_k1": 8406,
+        "W_k_gt1": 7958,
+        "W_pre": 7958,
+        "W_ret": 7958,
+        "W_tree": 7958,
+        "W_primary": 7268,
+        "multi_HP": 2757,
+        "single_primary_HP": 4511,
+        "no_primary": 690,
+        "missing_from_region_view": [],
+        "missing_from_region_view_detail": [],
+        "extra_in_region_view": [],
+        "mlhp_site_sum": 25579,
+        "region_view_site_sum": 25579,
+        "site_sum_delta": 0
+      },
+      "k_distribution": {
+        "counts": {
+          "2": 3815,
+          "3": 1868,
+          "4": 934,
+          "5": 474,
+          "6": 262,
+          "7": 173,
+          "8": 432
+        },
+        "sites": {
+          "2": 7630,
+          "3": 5604,
+          "4": 3736,
+          "5": 2370,
+          "6": 1572,
+          "7": 1211,
+          "8": 3456
+        },
+        "natural_k8": 107,
+        "compressed_k8": 325,
+        "mean_k": 3.2142498115104297,
+        "median_k": 3.0,
+        "raw_pre_cap_max": 3220
+      },
+      "read_evidence": {
+        "regions_with_full": 2279,
+        "regions_without_full": 5679,
+        "regions_with_alt_population": 1564,
+        "regions_without_alt_population": 6394,
+        "raw_full_observations": 66421,
+        "full_pattern_observations": 63804,
+        "partial_pattern_observations": 1923344,
+        "retained_pattern_observations": 1987148,
+        "broad_hp_observations": 2005322,
+        "primary_full_partial": 1528,
+        "primary_partial_only": 8497,
+        "primary_full_only": 0
+      },
+      "units": {
+        "primary": 10025,
+        "reference": 1543,
+        "H3_auxiliary": 2374,
+        "unphased_auxiliary": 4876,
+        "determined": 3927,
+        "ambiguous": 5576,
+        "solver_capped": 519,
+        "recurrence": 3,
+        "noncapped_complete": 9506,
+        "exact_tree_unique": 3927,
+        "shape_unique": 4640,
+        "total_candidate_trees": 77764,
+        "candidate_tree_median": 3.0,
+        "candidate_tree_p90": 16.0,
+        "hidden_total_all_primary": 19783,
+        "hidden_total_complete": 16543,
+        "hidden_unit_bins_complete": {
+          "0": 861,
+          "1": 3471,
+          "2": 3079,
+          "3": 1466,
+          "4": 629,
+          "5+": 0
+        },
+        "region_all_exact": 1814,
+        "region_all_shape": 2444
+      },
+      "region_candidate_topology": {
+        "definitions": {
+          "C_region": "product of n_trees across analysis-complete primary HP1/HP2 units",
+          "Topo_region": "product of n_distinct_shapes_exact across those units",
+          "hidden_region": "sum of per-primary-unit minimal parsimony-inferred mutation-state nodes"
+        },
+        "hp_h3": {
+          "single_without_h3": 3500,
+          "single_with_h3": 1011,
+          "double_without_h3": 1902,
+          "double_with_h3": 855,
+          "none_without_h3": 182,
+          "none_with_h3": 508,
+          "other_without_h3": 0,
+          "other_with_h3": 0
+        },
+        "C_bins": {
+          "single": {
+            "C=1": 909,
+            "C=2": 536,
+            "C=3": 1628,
+            "C=4": 8,
+            "C=5": 125,
+            "C=6": 84,
+            "C>6": 939,
+            "incomplete": 282
+          },
+          "double": {
+            "C=1": 905,
+            "C=2": 130,
+            "C=3": 579,
+            "C=4": 6,
+            "C=5": 39,
+            "C=6": 69,
+            "C>6": 793,
+            "incomplete": 236
+          },
+          "all": {
+            "C=1": 1814,
+            "C=2": 666,
+            "C=3": 2207,
+            "C=4": 14,
+            "C=5": 164,
+            "C=6": 153,
+            "C>6": 1732,
+            "incomplete": 518
+          }
+        },
+        "topology_classes": {
+          "exact_and_topology_unique": 1814,
+          "topology_unique_exact_multiple": 630,
+          "topology_multiple_exact_multiple": 4306,
+          "incomplete": 518,
+          "impossible_exact_unique_topology_multiple": 0
+        },
+        "topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": 909,
+            "topology_unique_exact_multiple": 510,
+            "topology_multiple_exact_multiple": 2810,
+            "incomplete": 282,
+            "impossible_exact_unique_topology_multiple": 0
+          },
+          "double": {
+            "exact_and_topology_unique": 905,
+            "topology_unique_exact_multiple": 120,
+            "topology_multiple_exact_multiple": 1496,
+            "incomplete": 236,
+            "impossible_exact_unique_topology_multiple": 0
+          }
+        },
+        "hidden_classes": {
+          "hidden_zero": 593,
+          "hidden_positive": 6157,
+          "incomplete": 518
+        },
+        "hidden_by_topology": {
+          "exact_and_topology_unique": {
+            "hidden_zero": 592,
+            "hidden_positive": 1222
+          },
+          "topology_unique_exact_multiple": {
+            "hidden_zero": 1,
+            "hidden_positive": 629
+          },
+          "topology_multiple_exact_multiple": {
+            "hidden_zero": 0,
+            "hidden_positive": 4306
+          }
+        },
+        "hidden_by_topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 409,
+              "hidden_positive": 500
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 1,
+              "hidden_positive": 509
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 2810
+            }
+          },
+          "double": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 183,
+              "hidden_positive": 722
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 120
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 1496
+            }
+          }
+        },
+        "complete_regions": 6750,
+        "incomplete_regions": 518,
+        "joint_exact_combinations_total": 417964,
+        "joint_topology_combinations_total": 20778,
+        "max_C_region": 15625,
+        "max_Topo_region": 81,
+        "ranking_status": "not_evaluated",
+        "ranked_regions": 0,
+        "legacy_has_capped_label_count": 518,
+        "capped_label_discordance": [],
+        "invalid_states": []
+      },
+      "L2_cn": {
+        "n_primary_recurrence_sent_to_cn": 3,
+        "n_recurrence_sent_to_cn": 3,
+        "primary_cn_split": {
+          "LOH_unresolved": 2,
+          "artifact(m>1;CN-amp)": 1
+        },
+        "cn_split": {
+          "LOH_unresolved": 2,
+          "artifact(m>1;CN-amp)": 1
+        },
+        "n_H3_auxiliary_recurrence_annotated": 1,
+        "H3_auxiliary_cn_split": {
+          "artifact(m>1;CN-amp)": 1
+        }
+      },
+      "cn_contract": {
+        "cn_data_available": true,
+        "cn_source": "SEQC2_same_cell_line",
+        "cn_interpretation": "segments plus unlisted=neutral"
+      },
+      "L3_methyl": {
+        "status": "not_evaluated",
+        "role": "bounded_auxiliary",
+        "allowed_uses": [
+          "negative_screen",
+          "residual_flag"
+        ],
+        "prohibited_uses": [
+          "tree_ranking",
+          "lineage_confirmation",
+          "clone_confirmation"
+        ],
+        "reason": "No orthogonal per-unit methyl validation is joined in this driver"
+      },
+      "verification_status": {
+        "full_pass": 18080,
+        "not_applicable_capped": 738
+      },
+      "verification_failure": 0,
+      "method_params": {
+        "MINREAD": 3,
+        "MAX_SNV": 8,
+        "TIER_R": 50000,
+        "MAPQ_MIN": 20,
+        "BASEQ_MIN": 0
+      },
+      "well_explained_case": null
+    },
+    {
+      "sample": "HCC1937",
+      "biological_id": "HCC1937",
+      "pass": true,
+      "paths": {
+        "region_view": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/layered_region_view_HCC1937.json",
+        "layered": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/layered_reconstruction_HCC1937.json",
+        "mlhp_parts": [
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/mlhp_part_1.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/mlhp_part_2.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/mlhp_part_3.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/mlhp_part_4.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1937/mlhp_part_5.json"
+        ],
+        "vcf": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1937/paired_full/20260315_HCC1937_paired_full_full_complete_matrix/longphase_s/somatic_pass.vcf.gz"
+      },
+      "site_funnel": {
+        "universe": 49548,
+        "autosomal": 15915,
+        "out_of_scope": 33633,
+        "singleton": 7705,
+        "multilocus_pre_cap": 8210,
+        "cap_excluded": 1188,
+        "read_unsupported": 0,
+        "retained": 7022,
+        "scope_conservation": true
+      },
+      "sex_chromosome_census": {
+        "chrX": 33625,
+        "chrY": 8,
+        "other": 0,
+        "nonautosomal_fraction": 0.67879631872124,
+        "vcf_total_matches": true,
+        "vcf_nonpass_snv": 0
+      },
+      "regions": {
+        "W_all_pre": 10400,
+        "W_k1": 7705,
+        "W_k_gt1": 2695,
+        "W_pre": 2695,
+        "W_ret": 2695,
+        "W_tree": 2695,
+        "W_primary": 2674,
+        "multi_HP": 690,
+        "single_primary_HP": 1984,
+        "no_primary": 21,
+        "missing_from_region_view": [],
+        "missing_from_region_view_detail": [],
+        "extra_in_region_view": [],
+        "mlhp_site_sum": 7022,
+        "region_view_site_sum": 7022,
+        "site_sum_delta": 0
+      },
+      "k_distribution": {
+        "counts": {
+          "2": 1838,
+          "3": 518,
+          "4": 150,
+          "5": 78,
+          "6": 36,
+          "7": 14,
+          "8": 61
+        },
+        "sites": {
+          "2": 3676,
+          "3": 1554,
+          "4": 600,
+          "5": 390,
+          "6": 216,
+          "7": 98,
+          "8": 488
+        },
+        "natural_k8": 14,
+        "compressed_k8": 47,
+        "mean_k": 2.60556586270872,
+        "median_k": 2,
+        "raw_pre_cap_max": 439
+      },
+      "read_evidence": {
+        "regions_with_full": 2475,
+        "regions_without_full": 220,
+        "regions_with_alt_population": 2165,
+        "regions_without_alt_population": 530,
+        "raw_full_observations": 118561,
+        "full_pattern_observations": 116144,
+        "partial_pattern_observations": 495903,
+        "retained_pattern_observations": 612047,
+        "broad_hp_observations": 620322,
+        "primary_full_partial": 2609,
+        "primary_partial_only": 755,
+        "primary_full_only": 0
+      },
+      "units": {
+        "primary": 3364,
+        "reference": 596,
+        "H3_auxiliary": 252,
+        "unphased_auxiliary": 1084,
+        "determined": 1838,
+        "ambiguous": 1380,
+        "solver_capped": 121,
+        "recurrence": 25,
+        "noncapped_complete": 3243,
+        "exact_tree_unique": 1838,
+        "shape_unique": 2595,
+        "total_candidate_trees": 9389,
+        "candidate_tree_median": 1,
+        "candidate_tree_p90": 4.0,
+        "hidden_total_all_primary": 3672,
+        "hidden_total_complete": 2857,
+        "hidden_unit_bins_complete": {
+          "0": 1499,
+          "1": 1017,
+          "2": 419,
+          "3": 230,
+          "4": 78,
+          "5+": 0
+        },
+        "region_all_exact": 1217,
+        "region_all_shape": 1941
+      },
+      "region_candidate_topology": {
+        "definitions": {
+          "C_region": "product of n_trees across analysis-complete primary HP1/HP2 units",
+          "Topo_region": "product of n_distinct_shapes_exact across those units",
+          "hidden_region": "sum of per-primary-unit minimal parsimony-inferred mutation-state nodes"
+        },
+        "hp_h3": {
+          "single_without_h3": 1878,
+          "single_with_h3": 106,
+          "double_without_h3": 560,
+          "double_with_h3": 130,
+          "none_without_h3": 5,
+          "none_with_h3": 16,
+          "other_without_h3": 0,
+          "other_with_h3": 0
+        },
+        "C_bins": {
+          "single": {
+            "C=1": 811,
+            "C=2": 652,
+            "C=3": 158,
+            "C=4": 44,
+            "C=5": 25,
+            "C=6": 83,
+            "C>6": 116,
+            "incomplete": 95
+          },
+          "double": {
+            "C=1": 406,
+            "C=2": 112,
+            "C=3": 53,
+            "C=4": 16,
+            "C=5": 4,
+            "C=6": 15,
+            "C>6": 62,
+            "incomplete": 22
+          },
+          "all": {
+            "C=1": 1217,
+            "C=2": 764,
+            "C=3": 211,
+            "C=4": 60,
+            "C=5": 29,
+            "C=6": 98,
+            "C>6": 178,
+            "incomplete": 117
+          }
+        },
+        "topology_classes": {
+          "exact_and_topology_unique": 1217,
+          "topology_unique_exact_multiple": 724,
+          "topology_multiple_exact_multiple": 616,
+          "incomplete": 117,
+          "impossible_exact_unique_topology_multiple": 0
+        },
+        "topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": 811,
+            "topology_unique_exact_multiple": 620,
+            "topology_multiple_exact_multiple": 458,
+            "incomplete": 95,
+            "impossible_exact_unique_topology_multiple": 0
+          },
+          "double": {
+            "exact_and_topology_unique": 406,
+            "topology_unique_exact_multiple": 104,
+            "topology_multiple_exact_multiple": 158,
+            "incomplete": 22,
+            "impossible_exact_unique_topology_multiple": 0
+          }
+        },
+        "hidden_classes": {
+          "hidden_zero": 1073,
+          "hidden_positive": 1484,
+          "incomplete": 117
+        },
+        "hidden_by_topology": {
+          "exact_and_topology_unique": {
+            "hidden_zero": 1055,
+            "hidden_positive": 162
+          },
+          "topology_unique_exact_multiple": {
+            "hidden_zero": 17,
+            "hidden_positive": 707
+          },
+          "topology_multiple_exact_multiple": {
+            "hidden_zero": 1,
+            "hidden_positive": 615
+          }
+        },
+        "hidden_by_topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 779,
+              "hidden_positive": 32
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 17,
+              "hidden_positive": 603
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 1,
+              "hidden_positive": 457
+            }
+          },
+          "double": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 276,
+              "hidden_positive": 130
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 104
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 158
+            }
+          }
+        },
+        "complete_regions": 2557,
+        "incomplete_regions": 117,
+        "joint_exact_combinations_total": 12676,
+        "joint_topology_combinations_total": 3645,
+        "max_C_region": 2516,
+        "max_Topo_region": 24,
+        "ranking_status": "not_evaluated",
+        "ranked_regions": 0,
+        "legacy_has_capped_label_count": 117,
+        "capped_label_discordance": [],
+        "invalid_states": []
+      },
+      "L2_cn": {
+        "n_primary_recurrence_sent_to_cn": 25,
+        "n_recurrence_sent_to_cn": 25,
+        "primary_cn_split": {
+          "m通道不可用": 25
+        },
+        "cn_split": {
+          "m通道不可用": 25
+        },
+        "n_H3_auxiliary_recurrence_annotated": 0,
+        "H3_auxiliary_cn_split": {}
+      },
+      "cn_contract": {
+        "cn_data_available": false,
+        "cn_source": "unavailable",
+        "cn_interpretation": "missing=unavailable"
+      },
+      "L3_methyl": {
+        "status": "not_evaluated",
+        "role": "bounded_auxiliary",
+        "allowed_uses": [
+          "negative_screen",
+          "residual_flag"
+        ],
+        "prohibited_uses": [
+          "tree_ranking",
+          "lineage_confirmation",
+          "clone_confirmation"
+        ],
+        "reason": "No orthogonal per-unit methyl validation is joined in this driver"
+      },
+      "verification_status": {
+        "not_applicable_capped": 148,
+        "full_pass": 5148
+      },
+      "verification_failure": 0,
+      "method_params": {
+        "MINREAD": 3,
+        "MAX_SNV": 8,
+        "TIER_R": 50000,
+        "MAPQ_MIN": 20,
+        "BASEQ_MIN": 0
+      },
+      "well_explained_case": null
+    },
+    {
+      "sample": "HCC1954",
+      "biological_id": "HCC1954",
+      "pass": true,
+      "paths": {
+        "region_view": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/layered_region_view_HCC1954.json",
+        "layered": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/layered_reconstruction_HCC1954.json",
+        "mlhp_parts": [
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/mlhp_part_1.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/mlhp_part_2.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/mlhp_part_3.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/mlhp_part_4.json",
+          "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260710_232501_layered_reconstruction_v2/samples/HCC1954/mlhp_part_5.json"
+        ],
+        "vcf": "/big7_disk/liaoyoyo2001/big7_disk_output/canonical/HCC1954/paired_full/20260315_HCC1954_paired_full_full_complete_matrix/longphase_s/somatic_pass.vcf.gz"
+      },
+      "site_funnel": {
+        "universe": 20969,
+        "autosomal": 19743,
+        "out_of_scope": 1226,
+        "singleton": 7767,
+        "multilocus_pre_cap": 11976,
+        "cap_excluded": 728,
+        "read_unsupported": 0,
+        "retained": 11248,
+        "scope_conservation": true
+      },
+      "sex_chromosome_census": {
+        "chrX": 1226,
+        "chrY": 0,
+        "other": 0,
+        "nonautosomal_fraction": 0.05846726119509753,
+        "vcf_total_matches": true,
+        "vcf_nonpass_snv": 0
+      },
+      "regions": {
+        "W_all_pre": 11790,
+        "W_k1": 7767,
+        "W_k_gt1": 4023,
+        "W_pre": 4023,
+        "W_ret": 4023,
+        "W_tree": 4023,
+        "W_primary": 3975,
+        "multi_HP": 1985,
+        "single_primary_HP": 1990,
+        "no_primary": 48,
+        "missing_from_region_view": [],
+        "missing_from_region_view_detail": [],
+        "extra_in_region_view": [],
+        "mlhp_site_sum": 11248,
+        "region_view_site_sum": 11248,
+        "site_sum_delta": 0
+      },
+      "k_distribution": {
+        "counts": {
+          "2": 2361,
+          "3": 913,
+          "4": 367,
+          "5": 170,
+          "6": 90,
+          "7": 47,
+          "8": 75
+        },
+        "sites": {
+          "2": 4722,
+          "3": 2739,
+          "4": 1468,
+          "5": 850,
+          "6": 540,
+          "7": 329,
+          "8": 600
+        },
+        "natural_k8": 27,
+        "compressed_k8": 48,
+        "mean_k": 2.795923440218742,
+        "median_k": 2,
+        "raw_pre_cap_max": 205
+      },
+      "read_evidence": {
+        "regions_with_full": 2966,
+        "regions_without_full": 1057,
+        "regions_with_alt_population": 2000,
+        "regions_without_alt_population": 2023,
+        "raw_full_observations": 81546,
+        "full_pattern_observations": 78264,
+        "partial_pattern_observations": 588979,
+        "retained_pattern_observations": 667243,
+        "broad_hp_observations": 680655,
+        "primary_full_partial": 2797,
+        "primary_partial_only": 3163,
+        "primary_full_only": 0
+      },
+      "units": {
+        "primary": 5960,
+        "reference": 1675,
+        "H3_auxiliary": 415,
+        "unphased_auxiliary": 1654,
+        "determined": 3252,
+        "ambiguous": 2552,
+        "solver_capped": 152,
+        "recurrence": 4,
+        "noncapped_complete": 5808,
+        "exact_tree_unique": 3252,
+        "shape_unique": 3950,
+        "total_candidate_trees": 21835,
+        "candidate_tree_median": 1.0,
+        "candidate_tree_p90": 6.0,
+        "hidden_total_all_primary": 7985,
+        "hidden_total_complete": 7054,
+        "hidden_unit_bins_complete": {
+          "0": 1734,
+          "1": 2040,
+          "2": 1279,
+          "3": 564,
+          "4": 191,
+          "5+": 0
+        },
+        "region_all_exact": 1536,
+        "region_all_shape": 2165
+      },
+      "region_candidate_topology": {
+        "definitions": {
+          "C_region": "product of n_trees across analysis-complete primary HP1/HP2 units",
+          "Topo_region": "product of n_distinct_shapes_exact across those units",
+          "hidden_region": "sum of per-primary-unit minimal parsimony-inferred mutation-state nodes"
+        },
+        "hp_h3": {
+          "single_without_h3": 1834,
+          "single_with_h3": 156,
+          "double_without_h3": 1771,
+          "double_with_h3": 214,
+          "none_without_h3": 3,
+          "none_with_h3": 45,
+          "other_without_h3": 0,
+          "other_with_h3": 0
+        },
+        "C_bins": {
+          "single": {
+            "C=1": 537,
+            "C=2": 540,
+            "C=3": 475,
+            "C=4": 25,
+            "C=5": 43,
+            "C=6": 88,
+            "C>6": 215,
+            "incomplete": 67
+          },
+          "double": {
+            "C=1": 999,
+            "C=2": 185,
+            "C=3": 294,
+            "C=4": 21,
+            "C=5": 26,
+            "C=6": 56,
+            "C>6": 319,
+            "incomplete": 85
+          },
+          "all": {
+            "C=1": 1536,
+            "C=2": 725,
+            "C=3": 769,
+            "C=4": 46,
+            "C=5": 69,
+            "C=6": 144,
+            "C>6": 534,
+            "incomplete": 152
+          }
+        },
+        "topology_classes": {
+          "exact_and_topology_unique": 1536,
+          "topology_unique_exact_multiple": 629,
+          "topology_multiple_exact_multiple": 1658,
+          "incomplete": 152,
+          "impossible_exact_unique_topology_multiple": 0
+        },
+        "topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": 537,
+            "topology_unique_exact_multiple": 462,
+            "topology_multiple_exact_multiple": 924,
+            "incomplete": 67,
+            "impossible_exact_unique_topology_multiple": 0
+          },
+          "double": {
+            "exact_and_topology_unique": 999,
+            "topology_unique_exact_multiple": 167,
+            "topology_multiple_exact_multiple": 734,
+            "incomplete": 85,
+            "impossible_exact_unique_topology_multiple": 0
+          }
+        },
+        "hidden_classes": {
+          "hidden_zero": 983,
+          "hidden_positive": 2840,
+          "incomplete": 152
+        },
+        "hidden_by_topology": {
+          "exact_and_topology_unique": {
+            "hidden_zero": 979,
+            "hidden_positive": 557
+          },
+          "topology_unique_exact_multiple": {
+            "hidden_zero": 4,
+            "hidden_positive": 625
+          },
+          "topology_multiple_exact_multiple": {
+            "hidden_zero": 0,
+            "hidden_positive": 1658
+          }
+        },
+        "hidden_by_topology_by_hp": {
+          "single": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 489,
+              "hidden_positive": 48
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 4,
+              "hidden_positive": 458
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 924
+            }
+          },
+          "double": {
+            "exact_and_topology_unique": {
+              "hidden_zero": 490,
+              "hidden_positive": 509
+            },
+            "topology_unique_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 167
+            },
+            "topology_multiple_exact_multiple": {
+              "hidden_zero": 0,
+              "hidden_positive": 734
+            }
+          }
+        },
+        "complete_regions": 3823,
+        "incomplete_regions": 152,
+        "joint_exact_combinations_total": 72458,
+        "joint_topology_combinations_total": 8067,
+        "max_C_region": 9250,
+        "max_Topo_region": 72,
+        "ranking_status": "not_evaluated",
+        "ranked_regions": 0,
+        "legacy_has_capped_label_count": 152,
+        "capped_label_discordance": [],
+        "invalid_states": []
+      },
+      "L2_cn": {
+        "n_primary_recurrence_sent_to_cn": 4,
+        "n_recurrence_sent_to_cn": 4,
+        "primary_cn_split": {
+          "CN-gain_confounded": 4
+        },
+        "cn_split": {
+          "CN-gain_confounded": 4
+        },
+        "n_H3_auxiliary_recurrence_annotated": 0,
+        "H3_auxiliary_cn_split": {}
+      },
+      "cn_contract": {
+        "cn_data_available": true,
+        "cn_source": "SAVANA",
+        "cn_interpretation": "segments plus unlisted=neutral"
+      },
+      "L3_methyl": {
+        "status": "not_evaluated",
+        "role": "bounded_auxiliary",
+        "allowed_uses": [
+          "negative_screen",
+          "residual_flag"
+        ],
+        "prohibited_uses": [
+          "tree_ranking",
+          "lineage_confirmation",
+          "clone_confirmation"
+        ],
+        "reason": "No orthogonal per-unit methyl validation is joined in this driver"
+      },
+      "verification_status": {
+        "full_pass": 9537,
+        "not_applicable_capped": 167
+      },
+      "verification_failure": 0,
+      "method_params": {
+        "MINREAD": 3,
+        "MAX_SNV": 8,
+        "TIER_R": 50000,
+        "MAPQ_MIN": 20,
+        "BASEQ_MIN": 0
+      },
+      "well_explained_case": null
+    }
+  ]
+}
