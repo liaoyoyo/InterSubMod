@@ -244,7 +244,7 @@ def check_layered_home_link(page: Page, run: Dict[str, Any]) -> None:
                 try { sameIndex = new URL(a.getAttribute('href'), location.href).pathname === targetPath; }
                 catch (_) { return false; }
                 const name = (a.innerText || a.getAttribute('aria-label') || a.title || '').trim();
-                return sameIndex && visible(a) && /首頁|總覽|home|工作站/i.test(name);
+                return sameIndex && visible(a) && /首頁|總覽|home|工作站|cohort|console/i.test(name);
             });
             if (!found) return null;
             const rect = found.getBoundingClientRect();
@@ -324,7 +324,7 @@ def choose_region_row(page: Page, offset: int = 0) -> Tuple[Locator, Dict[str, A
 
     metadata = page.evaluate(
         """offset => {
-            const rows = Array.from(document.querySelectorAll('#list .row'));
+            const rows = Array.from(document.querySelectorAll('#result-list .result-row, #list .row'));
             let preferred = rows
                 .map((el, index) => ({el, index, text: (el.innerText || '').trim()}))
                 .filter(item => /(^|\D)2\s*sSNV/i.test(item.text));
@@ -337,7 +337,8 @@ def choose_region_row(page: Page, offset: int = 0) -> Tuple[Locator, Dict[str, A
             return {
                 dom_index: item.index,
                 data_i: item.el.getAttribute('data-i'),
-                region: (labelEl ? labelEl.textContent : item.text.split(/\s+/)[0]).trim(),
+                data_region: item.el.getAttribute('data-region'),
+                region: (item.el.getAttribute('data-region') || (labelEl ? labelEl.textContent : item.text.split(/\s+/)[0])).trim(),
                 tag: item.el.tagName.toLowerCase(),
                 role: item.el.getAttribute('role'),
                 tabindex: item.el.getAttribute('tabindex'),
@@ -347,8 +348,8 @@ def choose_region_row(page: Page, offset: int = 0) -> Tuple[Locator, Dict[str, A
         offset,
     )
     if metadata is None:
-        raise LookupError("No rendered #list .row element was found")
-    return page.locator("#list .row").nth(int(metadata["dom_index"])), metadata
+        raise LookupError("No rendered region result button/row was found")
+    return page.locator("#result-list .result-row, #list .row").nth(int(metadata["dom_index"])), metadata
 
 
 def region_selection_state(page: Page, metadata: Dict[str, Any]) -> Dict[str, Any]:
@@ -356,16 +357,19 @@ def region_selection_state(page: Page, metadata: Dict[str, Any]) -> Dict[str, An
 
     return page.evaluate(
         """meta => {
-            const rows = Array.from(document.querySelectorAll('#list .row'));
-            const row = rows.find(el => el.getAttribute('data-i') === String(meta.data_i));
+            const rows = Array.from(document.querySelectorAll('#result-list .result-row, #list .row'));
+            const row = rows.find(el => meta.data_region
+                ? el.getAttribute('data-region') === String(meta.data_region)
+                : el.getAttribute('data-i') === String(meta.data_i));
             const detail = document.getElementById('detail');
             const detailHeading = detail ? detail.querySelector('h3') : null;
             const active = document.activeElement;
             return {
                 row_exists: !!row,
-                selected: !!row && (row.classList.contains('sel') || row.getAttribute('aria-selected') === 'true'),
+                selected: !!row && (row.classList.contains('sel') || row.getAttribute('aria-selected') === 'true' || row.getAttribute('aria-current') === 'true'),
                 active: active === row,
                 active_data_i: active ? active.getAttribute('data-i') : null,
+                active_data_region: active ? active.getAttribute('data-region') : null,
                 detail_heading_contains_region: !!detailHeading &&
                     (detailHeading.innerText || '').includes(meta.region),
                 detail_text_head: detail ? (detail.innerText || '').trim().slice(0, 240) : null
@@ -408,14 +412,14 @@ def check_region_interaction(page: Page, run: Dict[str, Any], viewport_name: str
     """Exercise click and Enter-key selection for one rendered region row."""
 
     try:
-        page.wait_for_selector("#list .row", state="visible", timeout=timeout_ms)
-        row_count = page.locator("#list .row").count()
+        page.wait_for_selector("#result-list .result-row, #list .row", state="visible", timeout=timeout_ms)
+        row_count = page.locator("#result-list .result-row, #list .row").count()
     except Exception as exc:
         add_check(
             run,
             "region_rows_rendered",
             False,
-            expected="at least one visible #list .row",
+            expected="at least one visible region result button/row",
             actual={"error": str(exc)},
         )
         return
@@ -460,7 +464,7 @@ def check_region_interaction(page: Page, run: Dict[str, Any], viewport_name: str
     try:
         key_row.focus(timeout=timeout_ms)
         focused_before_key = page.evaluate(
-            "meta => document.activeElement?.getAttribute('data-i') === String(meta.data_i)",
+            "meta => meta.data_region ? document.activeElement?.getAttribute('data-region') === String(meta.data_region) : document.activeElement?.getAttribute('data-i') === String(meta.data_i)",
             key_meta,
         )
         key_row.press("Enter", timeout=timeout_ms)
