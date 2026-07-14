@@ -59,6 +59,45 @@ TOPOLOGY_KEYS = (
     "incomplete",
 )
 
+RENDERER_UI_CONTRACT = "layered-workstation-v5-grch38-overview-1"
+GRCH38_SOURCE_URL = "https://www.ncbi.nlm.nih.gov/grc/human/data?asm=GRCh38"
+GRCH38_AUTOSOME_LENGTHS = {
+    "chr1": 248_956_422,
+    "chr2": 242_193_529,
+    "chr3": 198_295_559,
+    "chr4": 190_214_555,
+    "chr5": 181_538_259,
+    "chr6": 170_805_979,
+    "chr7": 159_345_973,
+    "chr8": 145_138_636,
+    "chr9": 138_394_717,
+    "chr10": 133_797_422,
+    "chr11": 135_086_622,
+    "chr12": 133_275_309,
+    "chr13": 114_364_328,
+    "chr14": 107_043_718,
+    "chr15": 101_991_189,
+    "chr16": 90_338_345,
+    "chr17": 83_257_441,
+    "chr18": 80_373_285,
+    "chr19": 58_617_616,
+    "chr20": 64_444_167,
+    "chr21": 46_709_983,
+    "chr22": 50_818_468,
+}
+
+COUNT_BIN_ORDER = ("1", "2", "3", "4", "5", "6", ">6", "incomplete")
+HP_H3_ORDER = (
+    "single_without_h3",
+    "single_with_h3",
+    "double_without_h3",
+    "double_with_h3",
+    "none_without_h3",
+    "none_with_h3",
+    "other_without_h3",
+    "other_with_h3",
+)
+
 
 def fail(message: str) -> None:
     raise SystemExit(f"CANONICAL WORKSTATION BUILD FAILED: {message}")
@@ -171,6 +210,7 @@ def compact_index(region, chunk_index, profile):
         "chrom": region["chrom"],
         "start": int(region["start"]),
         "end": int(region["end"]),
+        "midpoint": (int(region["start"]) + int(region["end"])) // 2,
         "n_sSNV": int(region.get("n_sSNV") or 0),
         "endpoint_distance_bp": int(region["end"]) - int(region["start"]),
         "inclusive_span_bp": int(region["end"]) - int(region["start"]) + 1,
@@ -188,6 +228,225 @@ def compact_index(region, chunk_index, profile):
         "verification_full_pass": bool(primary)
         and all(line.get("verification_status") == "full_pass" for line in primary),
         "chunk_index": chunk_index,
+    }
+
+
+def count_bin(value):
+    if value is None:
+        return "incomplete"
+    value = int(value)
+    if not 1 <= value:
+        fail(f"invalid positive count-bin value: {value}")
+    return str(value) if value <= 6 else ">6"
+
+
+def panel_bins(counts, order, labels, tones):
+    return [
+        {
+            "key": key,
+            "label": labels[key],
+            "count": int(counts.get(key, 0)),
+            "tone": tones.get(key, "slate"),
+        }
+        for key in order
+    ]
+
+
+def build_sample_overview(sample_record, regions, indices):
+    sample = sample_record["sample"]
+    w_tree = int(sample_record["W_tree"])
+    w_primary = int(sample_record["W_primary"])
+
+    for row in indices:
+        chrom = row["chrom"]
+        chrom_length = GRCH38_AUTOSOME_LENGTHS[chrom]
+        if not 1 <= row["start"] <= row["end"] <= chrom_length:
+            fail(
+                f"{sample}: coordinate outside GRCh38 {chrom} ({row['start']}-{row['end']} > {chrom_length})"
+            )
+        if not row["start"] <= row["midpoint"] <= row["end"]:
+            fail(f"{sample}: invalid midpoint for {row['region']}")
+
+    topo_counts = Counter(count_bin(row["Topo"]) for row in indices if row["n_primary"] > 0)
+    c_counts = Counter(count_bin(row["C"]) for row in indices if row["n_primary"] > 0)
+    if sum(topo_counts.values()) != w_primary:
+        fail(f"{sample}: Topo-bin total does not equal W_primary")
+    if sum(c_counts.values()) != w_primary:
+        fail(f"{sample}: C-bin total does not equal W_primary")
+    expected_c = {key.replace("C=", "").replace("C>", ">"): int(value) for key, value in sample_record["C_bins"].items()}
+    if {key: c_counts[key] for key in COUNT_BIN_ORDER} != expected_c:
+        fail(f"{sample}: recomputed C bins do not match canonical C_bins")
+
+    determinacy_counts = {
+        "exact": sum(row["topology_class"] == "exact_and_topology_unique" for row in indices),
+        "shape_only": sum(row["topology_class"] == "topology_unique_exact_multiple" for row in indices),
+        "multi_shape": sum(row["topology_class"] == "topology_multiple_exact_multiple" for row in indices),
+        "incomplete": sum(row["topology_class"] == "incomplete" for row in indices),
+    }
+    if sum(determinacy_counts.values()) != w_primary:
+        fail(f"{sample}: determinacy total does not equal W_primary")
+
+    hp_h3_counts = Counter()
+    for region in regions:
+        multiplicity = int(region.get("hp_multiplicity") or 0)
+        prefix = {0: "none", 1: "single", 2: "double"}.get(multiplicity, "other")
+        suffix = "with_h3" if int(region.get("n_H3_auxiliary") or 0) > 0 else "without_h3"
+        hp_h3_counts[f"{prefix}_{suffix}"] += 1
+    expected_hp_h3 = {key: int(sample_record["hp_h3"].get(key, 0)) for key in HP_H3_ORDER}
+    if {key: hp_h3_counts[key] for key in HP_H3_ORDER} != expected_hp_h3:
+        fail(f"{sample}: recomputed primary-HP × H3 bins do not match canonical hp_h3")
+    if sum(hp_h3_counts.values()) != w_tree:
+        fail(f"{sample}: primary-HP × H3 total does not equal W_tree")
+
+    region_size_counts = Counter()
+    retained_site_sum = 0
+    for row in indices:
+        size = int(row["n_sSNV"])
+        if not 2 <= size <= 8:
+            fail(f"{sample}: n_sSNV outside current MAX_SNV display contract: {size}")
+        region_size_counts[str(size)] += 1
+        retained_site_sum += size
+    if sum(region_size_counts[str(size)] for size in range(2, 9)) != w_tree:
+        fail(f"{sample}: region-size total does not equal W_tree")
+    if retained_site_sum != int(sample_record["retained_sSNV"]):
+        fail(
+            f"{sample}: region-size weighted site total={retained_site_sum} "
+            f"does not match retained_sSNV={sample_record['retained_sSNV']}"
+        )
+
+    count_labels = {
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5": "5",
+        "6": "6",
+        ">6": ">6",
+        "incomplete": "Incomplete",
+    }
+    count_tones = {
+        "1": "green",
+        "2": "blue",
+        "3": "cyan",
+        "4": "violet",
+        "5": "amber",
+        "6": "red",
+        ">6": "magenta",
+        "incomplete": "incomplete",
+    }
+    return {
+        "denominators": {
+            "W_tree": w_tree,
+            "W_primary": w_primary,
+            "retained_sSNV": int(sample_record["retained_sSNV"]),
+        },
+        "panels": [
+            {
+                "id": "topology-count",
+                "title": "Topo｜可相容形狀組合數",
+                "question": "每個 W_primary region 有多少種無標籤 topology-shape 組合？",
+                "denominator_key": "W_primary",
+                "denominator": w_primary,
+                "grain": "region",
+                "bins": panel_bins(topo_counts, COUNT_BIN_ORDER, count_labels, count_tones),
+                "note": "Topo=1 只表示 shape 唯一；不代表 biological truth 或唯一時間順序。",
+            },
+            {
+                "id": "candidate-count",
+                "title": "C｜exact candidate 組合數",
+                "question": "每個 W_primary region 有多少個 exact candidate 組合？",
+                "denominator_key": "W_primary",
+                "denominator": w_primary,
+                "grain": "region",
+                "bins": panel_bins(c_counts, COUNT_BIN_ORDER, count_labels, count_tones),
+                "note": "Current C 是 primary HP candidate-tree 組合乘積；不等於舊頁 observed ALT 群數 c。",
+            },
+            {
+                "id": "determinacy",
+                "title": "Determinacy｜目前可辨識到哪一層",
+                "question": "Candidate set 完整時，是 exact 唯一、只到 shape 唯一，還是 multi-shape？",
+                "denominator_key": "W_primary",
+                "denominator": w_primary,
+                "grain": "region",
+                "bins": panel_bins(
+                    determinacy_counts,
+                    ("exact", "shape_only", "multi_shape", "incomplete"),
+                    {
+                        "exact": "Exact 唯一",
+                        "shape_only": "只到 shape 唯一",
+                        "multi_shape": "Multi-shape",
+                        "incomplete": "尚未評估",
+                    },
+                    {
+                        "exact": "green",
+                        "shape_only": "blue",
+                        "multi_shape": "magenta",
+                        "incomplete": "incomplete",
+                    },
+                ),
+                "note": "Incomplete 是 candidate set 未完整，因此不可評估；不是已證明多解。",
+            },
+            {
+                "id": "hp-h3",
+                "title": "Primary HP × H3 輔助層",
+                "question": "每個 W_tree region 有 0／1／2 個 mutation-bearing HP1/HP2，是否另有 H3 auxiliary？",
+                "denominator_key": "W_tree",
+                "denominator": w_tree,
+                "grain": "region",
+                "bins": panel_bins(
+                    hp_h3_counts,
+                    HP_H3_ORDER,
+                    {
+                        "single_without_h3": "1 primary HP · 無 H3",
+                        "single_with_h3": "1 primary HP · 有 H3",
+                        "double_without_h3": "2 primary HP · 無 H3",
+                        "double_with_h3": "2 primary HP · 有 H3",
+                        "none_without_h3": "0 primary HP · 無 H3",
+                        "none_with_h3": "0 primary HP · 有 H3",
+                        "other_without_h3": ">2 primary HP · 無 H3",
+                        "other_with_h3": ">2 primary HP · 有 H3",
+                    },
+                    {
+                        "single_without_h3": "blue",
+                        "single_with_h3": "cyan",
+                        "double_without_h3": "magenta",
+                        "double_with_h3": "violet",
+                        "none_without_h3": "slate",
+                        "none_with_h3": "amber",
+                        "other_without_h3": "red",
+                        "other_with_h3": "red",
+                    },
+                ),
+                "note": "H3 只作 auxiliary；primary HP 數是 evidence occupancy，不是 clone root 數。",
+            },
+            {
+                "id": "region-size",
+                "title": "Region × retained sSNV",
+                "question": "每個 W_tree region 進入 solver 的 retained sSNV 有幾個？",
+                "denominator_key": "W_tree",
+                "denominator": w_tree,
+                "grain": "region",
+                "bins": panel_bins(
+                    region_size_counts,
+                    tuple(str(size) for size in range(2, 9)),
+                    {
+                        **{str(size): f"{size} retained sSNV" for size in range(2, 8)},
+                        "8": "8 retained sSNV（含 cap 至 8）",
+                    },
+                    {
+                        "2": "blue",
+                        "3": "blue",
+                        "4": "green",
+                        "5": "green",
+                        "6": "green",
+                        "7": "green",
+                        "8": "amber",
+                    },
+                ),
+                "weighted_site_sum": retained_site_sum,
+                "note": "MAX_SNV=8：較大 component 只保留最密集連續 8 位點；本頁不能把 8 拆成 natural 與 cap-compressed。",
+            },
+        ],
     }
 
 
@@ -212,6 +471,8 @@ def validate_recomputed(sample_record, indices):
 
 
 def main() -> None:
+    renderer_path = Path(__file__).resolve()
+    renderer_sha = file_sha256(renderer_path)
     rv_value = os.environ.get("SM_RV")
     out_value = os.environ.get("SM_OUT")
     summary_value = os.environ.get("SM_CURRENT_SUMMARY")
@@ -334,6 +595,7 @@ def main() -> None:
         by_chrom[chrom].append(detail)
         indices.append(compact_index(region, chunk_index, profile))
     validate_recomputed(sample_record, indices)
+    sample_overview = build_sample_overview(sample_record, regions, indices)
 
     chunk_scripts = []
     chunk_manifest = {}
@@ -384,8 +646,22 @@ def main() -> None:
         "l3": l3,
         "read_tag_census": census.get("read_tag_census"),
         "census": census,
+        "assembly": {
+            "name": "GRCh38",
+            "scope": "chr1-22",
+            "chromosome_lengths": GRCH38_AUTOSOME_LENGTHS,
+            "length_source": "NCBI Genome Reference Consortium · Human GRCh38 chromosome lengths",
+            "length_source_url": GRCH38_SOURCE_URL,
+            "mark_coordinate": "floor((region.start + region.end) / 2)",
+        },
+        "sample_overview": sample_overview,
         "region_index": indices,
         "chunk_manifest": chunk_manifest,
+        "renderer": {
+            "path": str(renderer_path),
+            "sha256": renderer_sha,
+            "ui_contract": RENDERER_UI_CONTRACT,
+        },
         "source": {
             "region_view": str(rv_path),
             "region_view_sha256": actual_rv_sha,
@@ -422,6 +698,8 @@ def main() -> None:
 <meta name="intersubmod-region-view-sha256" content="__REGION_SHA__">
 <meta name="intersubmod-backbone-comparison-sha256" content="__COMPARISON_SHA__">
 <meta name="intersubmod-canonical-sample" content="__SAMPLE__">
+<meta name="intersubmod-renderer-sha256" content="__RENDERER_SHA__">
+<meta name="intersubmod-ui-contract" content="__UI_CONTRACT__">
 <title>全基因分層拓撲工作站 · __SAMPLE__</title>
 <style>
 :root{
@@ -481,9 +759,41 @@ h3{margin:0;font-size:17px;line-height:1.3}
 .topology-legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px}
 .legend-card{padding:10px 12px;border:1px solid var(--line);background:#fff}
 .legend-card b{display:block;font:750 13px/1.2 var(--mono)}.legend-card small{display:block;margin-top:3px;color:var(--muted)}
+.overview-context{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin-bottom:10px;border:1px solid var(--line);background:var(--line)}
+.overview-context div{min-width:0;padding:11px 13px;background:#f8fafc}.overview-context span{display:block;color:var(--muted);font:700 9.5px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase}.overview-context b{display:block;margin-top:4px;font-size:12px}
+.overview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.overview-card{min-width:0;border:1px solid var(--line);border-top:4px solid var(--blue);background:#fff;box-shadow:var(--shadow)}
+.overview-card:nth-child(2){border-top-color:var(--cyan)}.overview-card:nth-child(3){border-top-color:var(--magenta)}.overview-card:nth-child(4){border-top-color:var(--violet)}.overview-card:nth-child(5){grid-column:1/-1;border-top-color:var(--amber)}
+.overview-card-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start;padding:14px 15px 10px;border-bottom:1px solid #e5eaf0}
+.overview-card-head h3{font-size:16px}.overview-question{margin:5px 0 0;color:var(--muted);font-size:11.5px}
+.denominator-chip{padding:5px 8px;border:1px solid #b9c7d4;background:#f5f8fb;color:#33495d;font:750 9.5px/1.25 var(--mono);white-space:nowrap}
+.overview-bins{display:grid;gap:7px;padding:12px 15px}
+.overview-bin{display:grid;grid-template-columns:minmax(120px,1.2fr) minmax(90px,2fr) minmax(92px,auto);gap:9px;align-items:center;min-width:0}
+.overview-bin-label{min-width:0;color:#33495d;font-size:10.5px;overflow-wrap:anywhere}.overview-bin-value{text-align:right;font:750 10.5px/1.25 var(--mono);white-space:nowrap}
+.overview-bar-track{height:9px;overflow:hidden;border:1px solid #d5dee6;background:#edf2f5}.overview-bar-fill{display:block;height:100%;min-width:0;background:var(--tone)}
+.overview-note{margin:0;padding:9px 15px 12px;border-top:1px solid #e5eaf0;color:var(--muted);font-size:11px}
+.tone-green{--tone:#167452}.tone-blue{--tone:#075ea8}.tone-cyan{--tone:#087d8f}.tone-magenta{--tone:#a9236d}.tone-violet{--tone:#7040a0}.tone-amber{--tone:#9a5200}.tone-red{--tone:#a83227}.tone-slate{--tone:#65727e}.tone-incomplete{--tone:#8b97a2}
+.legacy-boundary{margin-top:10px;border-left:5px solid var(--amber)!important}.legacy-boundary .drawer-body{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px}.legacy-boundary h3{font-size:15px}.legacy-boundary p{margin:6px 0!important}.legacy-map{display:grid;gap:6px}.legacy-map div{display:grid;grid-template-columns:minmax(120px,.8fr) minmax(0,1.6fr);gap:10px;padding:8px 9px;border:1px solid var(--line);background:#f8fafc}.legacy-map b{font:750 10.5px/1.3 var(--mono)}.legacy-map span{color:var(--muted);font-size:11px}
 .genome-panel{border:1px solid #c7d2dd;background:#fff;box-shadow:var(--shadow)}
 .genome-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border-bottom:1px solid var(--line);background:#f8fafc}
 .genome-toolbar p{margin:0;color:var(--muted);font-size:12px}
+.ideogram-shell{border-bottom:1px solid var(--line);background:#fff}
+.ideogram-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:end;padding:13px 14px;border-bottom:1px solid #e4eaf0}
+.ideogram-head h3{font-size:16px}.ideogram-head p{margin:4px 0 0;color:var(--muted);font-size:11.5px}
+.ideogram-mode-controls{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px}
+.ideogram-mode{min-height:44px;padding:8px 10px;border:1px solid #b9c7d4;background:#fff;color:#3e5162;cursor:pointer;font-size:11px;font-weight:750}
+.ideogram-mode[aria-pressed="true"]{border-color:var(--blue);background:var(--blue);color:#fff}
+.ideogram-status-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:9px 14px;background:#f8fafc}
+.ideogram-status-row p{margin:0;color:#3e5162;font-size:11px}.ideogram-status-row a{font-size:10.5px;white-space:nowrap}
+.ideogram-legend{display:flex;flex-wrap:wrap;gap:7px;padding:0 14px 10px;background:#f8fafc;color:var(--muted);font-size:10.5px}
+.ideogram-legend-item{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:6px 8px;border:1px solid transparent;background:transparent;color:inherit;cursor:pointer}.ideogram-legend-item:hover,.ideogram-legend-item[aria-pressed="true"]{border-color:#9db1c2;background:#fff;color:var(--ink)}.ideogram-legend-swatch{width:18px;height:7px;border:1px solid rgba(21,34,49,.24);background:var(--tone)}
+.ideogram-scroll{width:100%;max-width:100%;overflow-x:auto;padding:10px 12px 13px;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch}
+#ideogram-svg{display:block;width:100%;min-width:1020px;height:auto;margin:0 auto;background:#fff}
+.ideogram-axis{fill:#687886;font:9px var(--mono)}.ideogram-axis-line{stroke:#cdd7df;stroke-width:1}.ideogram-label{fill:#23384b;font:750 10px var(--mono)}.ideogram-length{fill:#687886;font:9px var(--mono);text-anchor:end}
+.ideogram-track{fill:#edf2f5;stroke:#bac7d2;stroke-width:1}.ideogram-track.active{fill:#dceefa;stroke:var(--blue);stroke-width:2}
+.ideogram-mark{stroke:var(--tone);stroke-width:1;opacity:.62;pointer-events:none;shape-rendering:crispEdges}.ideogram-mark.tone-incomplete{stroke-width:1.5;stroke-dasharray:2 1;opacity:.82}
+.ideogram-mark.dimmed{opacity:.045}
+.ideogram-chrom-hit{fill:transparent;cursor:pointer}.ideogram-chrom-hit:focus{outline:none;stroke:#ef9f20;stroke-width:3}.ideogram-chrom-hit.active{stroke:var(--blue);stroke-width:2}
 .chrom-grid{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:1px;background:var(--line)}
 .chrom-button{min-height:86px;padding:10px;border:0;background:#fff;color:var(--ink);cursor:pointer;text-align:left}
 .chrom-button:hover{background:#f2f7fb}.chrom-button.active{position:relative;background:#eaf4fc;box-shadow:inset 0 0 0 3px var(--blue)}
@@ -592,7 +902,8 @@ details.drawer[open]>summary{border-bottom:1px solid var(--line)}
 @media(max-width:860px){
  .wrap{padding:14px 12px 36px}.hero-main{grid-template-columns:1fr}.hero-actions{min-width:0;grid-template-columns:1fr 1fr}
  .scope-ribbon{grid-template-columns:1fr 1fr}.scope-item:nth-child(2){border-right:0}.scope-item:nth-child(-n+2){border-bottom:1px solid var(--line)}
- .claim-row,.dimension-guide,.assertion-grid,.region-dimensions,.sidecars,.sensitivity-banner{grid-template-columns:1fr}.sensitivity-metrics{grid-template-columns:1fr 1fr}
+ .claim-row,.dimension-guide,.assertion-grid,.region-dimensions,.sidecars,.sensitivity-banner,.overview-grid{grid-template-columns:1fr}.sensitivity-metrics{grid-template-columns:1fr 1fr}
+ .overview-card:nth-child(5){grid-column:auto}.legacy-boundary .drawer-body{grid-template-columns:1fr}.ideogram-head{grid-template-columns:1fr}.ideogram-mode-controls{justify-content:flex-start}.ideogram-status-row{display:block}.ideogram-status-row a{display:inline-block;margin-top:5px}
  .glossary-grid{grid-template-columns:1fr 1fr}
  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metric{border-bottom:1px solid var(--line)}.metric:nth-child(even){border-right:0}.metric:last-child{border-bottom:0}
  .topology-legend{grid-template-columns:1fr 1fr}.chrom-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -601,7 +912,7 @@ details.drawer[open]>summary{border-bottom:1px solid var(--line)}
 @media(max-width:520px){
  body{font-size:13.5px}.wrap{padding:10px 9px 30px}.hero-main{padding:20px 16px}.hero-actions{grid-template-columns:1fr}
  .scope-ribbon{grid-template-columns:1fr}.scope-item{border-right:0;border-bottom:1px solid var(--line)}.scope-item:last-child{border-bottom:0}
- .section-heading{display:block}.section-note{margin-top:5px}
+ .section-heading{display:block}.section-note{margin-top:5px}.overview-context{grid-template-columns:1fr}.overview-bin{grid-template-columns:minmax(0,1fr) auto;gap:5px 8px}.overview-bar-track{grid-column:1/-1}.overview-bin-value{grid-column:2;grid-row:1}.overview-card-head{grid-template-columns:1fr}.denominator-chip{width:max-content}.legacy-map div{grid-template-columns:1fr}.ideogram-mode-controls{display:grid;grid-template-columns:1fr 1fr}.ideogram-mode{width:100%}
  .metrics{grid-template-columns:1fr 1fr}.metric .value{font-size:17px}.topology-legend{grid-template-columns:1fr}
  .genome-toolbar{display:block}.genome-toolbar .button{width:100%;margin-top:8px}.chrom-grid{grid-template-columns:1fr 1fr}
  .filters{grid-template-columns:1fr 1fr}.filter.search{grid-column:1/-1}.count{grid-column:1/-1}
@@ -680,16 +991,59 @@ details.drawer[open]>summary{border-bottom:1px solid var(--line)}
     </div>
     <p class="glossary-boundary"><b>固定邊界：</b>Topo=1 不是 biological truth、confirmed clone 或唯一時間順序；Incomplete 是「尚不可評估」而不是「不唯一」；位置分布只作描述與巡覽，不代表 hotspot 或 enrichment。</p>
    </div>
+ </details>
+ </section>
+
+ <section class="section" id="sample-overview" aria-labelledby="sample-overview-title">
+  <div class="section-heading">
+   <div><p class="kicker">Sample-wide canonical observations</p><h2 id="sample-overview-title">樣本全貌｜五組重點觀察</h2></div>
+   <p class="section-note">所有 bins 都由 current canonical region payload 重算後再與 machine summary 對帳；每張圖固定顯示 grain、分母、數量與比例。</p>
+  </div>
+  <div class="overview-context" aria-label="樣本全貌的三個固定分母">
+   <div><span>Region universe</span><b id="overview-w-tree">W_tree —</b></div>
+   <div><span>Primary analysis</span><b id="overview-w-primary">W_primary —</b></div>
+   <div><span>Retained site accounting</span><b id="overview-retained">retained sSNV —</b></div>
+  </div>
+  <div class="overview-grid" id="sample-overview-grid"></div>
+  <details class="drawer legacy-boundary">
+   <summary>為何沒有直接搬回舊 single／linear／branched／star、舊 c 與 A／B／C／E？</summary>
+   <div class="drawer-body">
+    <div><h3>展示形式保留，舊 ontology 與數字退役</h3><p>舊頁使用不同 sSNV backbone、不同 region universe 與單棵 full-vector tree 分類；current v5 則在每個 region 內分開重建 mutation-bearing HP1／HP2，並保留完整 candidate set 的 C／Topo。兩者不是可互換欄位。</p><p>部分 current analytical candidate set 只在 HTML payload 儲存前 32 棵展示樹，因此不能從 stored trees 完整回推 morphology family counts。若未來要恢復 named morphology，必須由 producer 對 exhaustive candidate set 輸出新欄位與版本化 classifier。</p></div>
+    <div class="legacy-map" aria-label="舊名詞與 current canonical 的處理方式">
+     <div><b>single / linear / branched / star</b><span>不硬映射；舊 `star` 還有不可達分類問題。改以 current Topo count 與 determinacy 呈現。</span></div>
+     <div><b>舊 c · observed ALT 群數</b><span>不同於 current C。Current C 是 primary HP exact candidate-tree 組合乘積。</span></div>
+     <div><b>舊 A / B / C / E</b><span>改用 exact 唯一、shape 唯一、multi-shape、尚未評估四個互斥層次。</span></div>
+     <div><b>舊 HP 根數</b><span>改稱 primary HP evidence occupancy，並與 H3 auxiliary 分開；不把它稱為 clone roots。</span></div>
+    </div>
+   </div>
   </details>
  </section>
 
  <section class="section" id="genome-overview" aria-labelledby="genome-title">
   <div class="section-heading">
-   <div><p class="kicker">Genome → chromosome</p><h2 id="genome-title">chr1–22 全基因視圖</h2></div>
-   <p class="section-note">22 條染色體永遠保留在 scope；點擊只改變下方 active view，不會改寫全基因分母。</p>
+   <div><p class="kicker">Genome → chromosome</p><h2 id="genome-title">GRCh38 全基因組分布｜chr1–22</h2></div>
+   <p class="section-note">上層按 GRCh38 bp 長度與 region midpoint 真實定位；下層保留 chromosome count grid。點擊染色體只改變 active view，不會改寫全基因分母。</p>
   </div>
-  <div class="genome-panel">
+  <div class="genome-panel" id="genome-ideogram" data-reference="GRCh38" data-mode="determinacy">
    <div class="genome-toolbar"><p id="genome-status">全 chr1–22 · 正在建立 topology composition</p><button type="button" class="button" id="all-genome">顯示全部 chr1–22</button></div>
+   <div class="ideogram-shell">
+    <div class="ideogram-head">
+     <div><h3>座標比例分布</h3><p>每一短線是一個 W_tree region，落點為 <span class="mono">floor((start + end) / 2)</span>；染色體長度不是等寬格。</p></div>
+     <div class="ideogram-mode-controls" id="ideogram-mode-controls" role="group" aria-label="切換全基因分布著色方式">
+      <button class="ideogram-mode" type="button" data-ideogram-mode="determinacy" aria-pressed="true">Determinacy</button>
+      <button class="ideogram-mode" type="button" data-ideogram-mode="evidence" aria-pressed="false">Read evidence</button>
+      <button class="ideogram-mode" type="button" data-ideogram-mode="primary-hp" aria-pressed="false">Primary HP</button>
+      <button class="ideogram-mode" type="button" data-ideogram-mode="n-ssnv" aria-pressed="false">Region size</button>
+      <button class="ideogram-mode" type="button" data-ideogram-mode="cn-sidecar" aria-pressed="false">CN sidecar</button>
+     </div>
+    </div>
+    <div class="ideogram-status-row"><p id="ideogram-status" role="status" aria-live="polite">正在建立 GRCh38 region marks…</p><a href="https://www.ncbi.nlm.nih.gov/grc/human/data?asm=GRCh38" target="_blank" rel="noreferrer">GRCh38 chromosome lengths · NCBI GRC</a></div>
+    <div class="ideogram-legend" id="ideogram-legend" aria-label="目前全基因分布圖例"></div>
+    <p class="scroll-cue" style="padding:0 14px">圖內可水平捲動查看完整 0–249 Mb 尺度；22 條染色體共用相同 GRCh38 bp→px 比例。</p>
+    <div class="ideogram-scroll" role="region" tabindex="0" aria-label="GRCh38 chr1 到 chr22 座標比例 region 分布圖，可水平捲動">
+     <svg id="ideogram-svg" viewBox="0 0 1120 626" role="img" aria-labelledby="ideogram-svg-title ideogram-svg-desc"><title id="ideogram-svg-title">__SAMPLE__ 的 GRCh38 chr1–22 region 分布</title><desc id="ideogram-svg-desc">每條染色體依 GRCh38 bp 長度縮放；每一短線代表一個 W_tree region 的 midpoint。可用上方按鈕切換著色，並用每列透明按鈕下鑽染色體。</desc></svg>
+    </div>
+   </div>
    <div class="chrom-grid" id="chrom-grid" aria-label="22 條常染色體導覽"></div>
   </div>
  </section>
@@ -735,11 +1089,15 @@ const DATA=JSON.parse(document.getElementById("workstation-data").textContent);
 const INDEX=DATA.region_index;
 const SAMPLE=DATA.sample;
 const SAMPLE_REC=DATA.canonical_sample;
+const OVERVIEW=DATA.sample_overview;
+const ASSEMBLY=DATA.assembly;
 const CHUNK_CACHE={};
 const CANDIDATE_CACHE={};
 const state={filtered:[],limit:80,selectedRegion:null,selectedRow:null};
 const FILTER_PARAMS={fchr:"chr",ftopo:"topo",fevidence:"evidence",fsignal:"signal",fq:"q"};
 let networkCounter=0;
+let ideogramMode="determinacy";
+let ideogramIsolate="";
 
 const esc=value=>String(value==null?"":value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 const fmt=value=>Number(value||0).toLocaleString();
@@ -757,6 +1115,31 @@ const classInfo={
  topology_multiple_exact_multiple:{short:"C>1 · Topo>1",label:"topology 與 exact 皆不唯一",badge:"multiple"},
  incomplete:{short:"Incomplete",label:"候選集合未完整",badge:"incomplete"},
  no_primary_lineage:{short:"No primary",label:"無 mutation-bearing HP1／HP2",badge:"none"}
+};
+
+const IDEOGRAM_MODES={
+ determinacy:{label:"Determinacy",categories:{
+  exact:{label:"Exact 唯一",tone:"green"},shape_only:{label:"只到 shape 唯一",tone:"blue"},
+  multi_shape:{label:"Multi-shape",tone:"magenta"},incomplete:{label:"尚未評估",tone:"incomplete"},
+  no_primary:{label:"無 primary · N/A",tone:"slate"}
+ }},
+ evidence:{label:"Read evidence",categories:{
+  full_and_partial:{label:"full + partial",tone:"blue"},partial_only:{label:"partial-only",tone:"amber"},
+  full_only:{label:"full-only",tone:"green"},no_read_state_groups:{label:"no read-state groups",tone:"red"},
+  not_applicable:{label:"無 primary · N/A",tone:"slate"}
+ }},
+ "primary-hp":{label:"Primary HP",categories:{
+  hp0:{label:"0 primary HP",tone:"slate"},hp1:{label:"1 primary HP",tone:"blue"},
+  hp2:{label:"2 primary HP",tone:"magenta"},hp_other:{label:">2 primary HP",tone:"red"}
+ }},
+ "n-ssnv":{label:"Region size",categories:{
+  k2_3:{label:"2–3 retained sSNV",tone:"blue"},k4_7:{label:"4–7 retained sSNV",tone:"green"},
+  k8:{label:"8 retained sSNV · 含 cap",tone:"amber"}
+ }},
+ "cn-sidecar":{label:"CN region sidecar",categories:{
+  neutral:{label:"neutral",tone:"green"},gain:{label:"gain",tone:"magenta"},loss:{label:"loss",tone:"blue"},
+  loh:{label:"LOH",tone:"violet"},unavailable:{label:"unavailable",tone:"slate"},other:{label:"other",tone:"red"}
+ }}
 };
 
 function identifiabilityInfo(row){
@@ -824,6 +1207,101 @@ function renderMetrics(){
  document.getElementById("topology-legend").innerHTML=parts.map(item=>'<div class="legend-card"><b>'+classInfo[item[0]].short+' · '+fmt(t[item[0]])+'</b><small>'+classInfo[item[0]].label+' · '+pct(t[item[0]],SAMPLE_REC.W_primary)+'</small></div>').join("");
 }
 
+function renderSampleOverview(){
+ const denominators=OVERVIEW.denominators;
+ document.getElementById("overview-w-tree").textContent="W_tree "+fmt(denominators.W_tree)+" regions";
+ document.getElementById("overview-w-primary").textContent="W_primary "+fmt(denominators.W_primary)+" regions";
+ document.getElementById("overview-retained").textContent=fmt(denominators.retained_sSNV)+" retained sSNV";
+ document.getElementById("sample-overview-grid").innerHTML=OVERVIEW.panels.map(panel=>{
+  const maximum=Math.max(0,...panel.bins.map(bin=>Number(bin.count||0)));
+  const bins=panel.bins.map(bin=>{
+   const width=maximum?100*Number(bin.count||0)/maximum:0;
+   const label=bin.label+"，"+fmt(bin.count)+"，占 "+panel.denominator_key+" "+pct(bin.count,panel.denominator);
+   return '<div class="overview-bin tone-'+esc(bin.tone)+'" data-overview-bin data-bin-key="'+esc(bin.key)+'" data-count="'+Number(bin.count||0)+'" data-denominator="'+Number(panel.denominator)+'" aria-label="'+esc(label)+'">'+
+    '<span class="overview-bin-label">'+esc(bin.label)+'</span><span class="overview-bar-track" aria-hidden="true"><span class="overview-bar-fill" data-overview-bar style="width:'+width.toFixed(4)+'%"></span></span><span class="overview-bin-value">'+fmt(bin.count)+' · '+pct(bin.count,panel.denominator)+'</span></div>';
+  }).join("");
+  const weighted=panel.weighted_site_sum!=null?' · 加權 site 合計 <b class="mono">'+fmt(panel.weighted_site_sum)+'</b>':"";
+  return '<article class="overview-card" data-overview-panel="'+esc(panel.id)+'" data-denominator-key="'+esc(panel.denominator_key)+'" data-total="'+Number(panel.denominator)+'"><div class="overview-card-head"><div><h3>'+esc(panel.title)+'</h3><p class="overview-question">'+esc(panel.question)+'</p></div><span class="denominator-chip">'+esc(panel.grain)+' · '+esc(panel.denominator_key)+' = '+fmt(panel.denominator)+'</span></div><div class="overview-bins">'+bins+'</div><p class="overview-note">'+esc(panel.note)+weighted+'</p></article>';
+ }).join("");
+}
+
+function ideogramCategory(row,mode){
+ let key;
+ if(mode==="determinacy"){
+  key={exact_and_topology_unique:"exact",topology_unique_exact_multiple:"shape_only",topology_multiple_exact_multiple:"multi_shape",incomplete:"incomplete",no_primary_lineage:"no_primary"}[row.topology_class]||"no_primary";
+ }else if(mode==="evidence")key=row.evidence_mode||"not_applicable";
+ else if(mode==="primary-hp")key=row.hp_multiplicity===0?"hp0":row.hp_multiplicity===1?"hp1":row.hp_multiplicity===2?"hp2":"hp_other";
+ else if(mode==="n-ssnv")key=row.n_sSNV<=3?"k2_3":row.n_sSNV<=7?"k4_7":"k8";
+ else{
+  const value=String(row.cn||"unavailable").toLowerCase();key=IDEOGRAM_MODES["cn-sidecar"].categories[value]?value:"other";
+ }
+ const category=IDEOGRAM_MODES[mode].categories[key]||{label:key,tone:"slate"};
+ return {key:key,label:category.label,tone:category.tone};
+}
+
+function updateIdeogramMode(mode){
+ if(!IDEOGRAM_MODES[mode])return;
+ ideogramMode=mode;
+ ideogramIsolate="";
+ const counts={};
+ document.querySelectorAll(".ideogram-mark").forEach(mark=>{
+  const category=ideogramCategory(INDEX[Number(mark.dataset.rowIndex)],mode);
+  counts[category.key]=(counts[category.key]||0)+1;
+  mark.setAttribute("class","ideogram-mark tone-"+category.tone);
+  mark.dataset.modeValue=category.key;
+ });
+ document.getElementById("genome-ideogram").dataset.mode=mode;
+ document.querySelectorAll("[data-ideogram-mode]").forEach(button=>button.setAttribute("aria-pressed",button.dataset.ideogramMode===mode?"true":"false"));
+ const categories=IDEOGRAM_MODES[mode].categories;
+ document.getElementById("ideogram-legend").innerHTML=Object.entries(categories).filter(item=>counts[item[0]]).map(item=>
+  '<button type="button" class="ideogram-legend-item tone-'+esc(item[1].tone)+'" data-legend-key="'+esc(item[0])+'" aria-pressed="false" aria-label="單獨顯示 '+esc(item[1].label)+'，'+fmt(counts[item[0]])+' regions"><span class="ideogram-legend-swatch" aria-hidden="true"></span><span>'+esc(item[1].label)+' · '+fmt(counts[item[0]])+'</span></button>'
+ ).join("");
+ document.querySelectorAll("[data-legend-key]").forEach(button=>button.addEventListener("click",()=>setIdeogramIsolation(button.dataset.legendKey)));
+ const active=document.getElementById("fchr").value;
+ document.getElementById("ideogram-status").textContent=(active||"全 chr1–22")+" · "+fmt(active?CHROM_SUMMARIES[active].W_tree:INDEX.length)+" W_tree region midpoints · "+IDEOGRAM_MODES[mode].label+" 著色；位置只作描述，不作 hotspot／enrichment 判定。";
+}
+
+function setIdeogramIsolation(key){
+ ideogramIsolate=ideogramIsolate===key?"":key;
+ document.querySelectorAll(".ideogram-mark").forEach(mark=>mark.classList.toggle("dimmed",Boolean(ideogramIsolate)&&mark.dataset.modeValue!==ideogramIsolate));
+ document.querySelectorAll("[data-legend-key]").forEach(button=>button.setAttribute("aria-pressed",button.dataset.legendKey===ideogramIsolate?"true":"false"));
+ const active=document.getElementById("fchr").value;
+ const category=ideogramIsolate?IDEOGRAM_MODES[ideogramMode].categories[ideogramIsolate]:null;
+ document.getElementById("ideogram-status").textContent=(active||"全 chr1–22")+" · "+IDEOGRAM_MODES[ideogramMode].label+(category?" · 單獨顯示 "+category.label:" · 顯示全部類別")+"；再次點圖例可重設。";
+}
+
+function renderIdeogram(){
+ const svg=document.getElementById("ideogram-svg");
+ const maxLength=ASSEMBLY.chromosome_lengths.chr1;
+ const trackX=100,trackWidth=900,top=58,rowHeight=25;
+ const axisTicks=[0,50000000,100000000,150000000,200000000,maxLength];
+ let out='<title id="ideogram-svg-title">'+esc(SAMPLE)+' 的 GRCh38 chr1–22 region 分布</title><desc id="ideogram-svg-desc">每條染色體依 GRCh38 bp 長度縮放；每一短線代表一個 W_tree region 的 midpoint。可切換著色，並以每列按鈕下鑽染色體。</desc>';
+ out+=axisTicks.map(value=>{
+  const x=trackX+(value/maxLength)*trackWidth;
+  const label=value===maxLength?(value/1000000).toFixed(1):(value/1000000).toFixed(0);
+  return '<line class="ideogram-axis-line" x1="'+x.toFixed(3)+'" x2="'+x.toFixed(3)+'" y1="30" y2="38"></line><text class="ideogram-axis" x="'+x.toFixed(3)+'" y="22" text-anchor="middle">'+label+' Mb</text>';
+ }).join("");
+ for(let number=1;number<=22;number++){
+  const chrom="chr"+number,length=Number(ASSEMBLY.chromosome_lengths[chrom]);
+  const width=trackWidth*length/maxLength,y=top+(number-1)*rowHeight;
+  out+='<g class="ideogram-chrom" data-chrom="'+chrom+'"><text class="ideogram-label" x="12" y="'+(y+4)+'">'+chrom+'</text><rect class="ideogram-track" data-chrom="'+chrom+'" data-length="'+length+'" x="'+trackX+'" y="'+(y-6)+'" width="'+width.toFixed(4)+'" height="12" rx="6"></rect>';
+  INDEX.forEach((row,index)=>{
+   if(row.chrom!==chrom)return;
+   const x=trackX+(Number(row.midpoint)/length)*width;
+   const category=ideogramCategory(row,ideogramMode);
+   out+='<line class="ideogram-mark tone-'+category.tone+'" data-row-index="'+index+'" data-region="'+esc(row.region)+'" data-chrom="'+chrom+'" data-start="'+row.start+'" data-end="'+row.end+'" data-midpoint="'+row.midpoint+'" data-mode-value="'+category.key+'" x1="'+x.toFixed(4)+'" x2="'+x.toFixed(4)+'" y1="'+(y-7)+'" y2="'+(y+7)+'"></line>';
+  });
+  out+='<text class="ideogram-length" x="1098" y="'+(y+4)+'">'+(length/1000000).toFixed(1)+' Mb</text><rect class="ideogram-chrom-hit" data-chrom="'+chrom+'" role="button" tabindex="0" aria-pressed="false" aria-label="開啟 '+chrom+'，'+fmt(CHROM_SUMMARIES[chrom].W_tree)+' 個 W tree regions" x="2" y="'+(y-10)+'" width="1106" height="20"></rect></g>';
+ }
+ svg.innerHTML=out;
+ svg.querySelectorAll(".ideogram-chrom-hit").forEach(hit=>{
+  hit.addEventListener("click",()=>setActiveChrom(hit.dataset.chrom,true));
+  hit.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();setActiveChrom(hit.dataset.chrom,true)}});
+ });
+ document.querySelectorAll("[data-ideogram-mode]").forEach(button=>button.addEventListener("click",()=>updateIdeogramMode(button.dataset.ideogramMode)));
+ updateIdeogramMode(ideogramMode);
+}
+
 function summarizeChromosomes(){
  const summaries={};
  for(let number=1;number<=22;number++){
@@ -887,6 +1365,14 @@ function updateChromButtonState(chrom){
   button.classList.toggle("active",active);
   button.setAttribute("aria-pressed",active?"true":"false");
  });
+ document.querySelectorAll(".ideogram-chrom-hit").forEach(hit=>{
+  const active=hit.dataset.chrom===chrom;
+  hit.classList.toggle("active",active);
+  hit.setAttribute("aria-pressed",active?"true":"false");
+ });
+ document.querySelectorAll(".ideogram-track").forEach(track=>track.classList.toggle("active",track.dataset.chrom===chrom));
+ const status=document.getElementById("ideogram-status");
+ if(status)status.textContent=(chrom||"全 chr1–22")+" · "+fmt(chrom?CHROM_SUMMARIES[chrom].W_tree:INDEX.length)+" W_tree region midpoints · "+IDEOGRAM_MODES[ideogramMode].label+" 著色；全基因 denominator 不變。";
 }
 
 function setActiveChrom(chrom,moveToBrowser){
@@ -1311,6 +1797,8 @@ function renderSourceLinks(){
   '<div class="raw-link"><a href="'+fileHref(src.layered_reconstruction)+'">開啟原始 layered reconstruction JSON</a><small>SHA-256 <span class="mono">'+esc(src.layered_reconstruction_sha256)+'</span></small></div>'+
   '<div class="raw-link"><a href="'+fileHref(src.machine_summary)+'">開啟 canonical machine summary JSON</a><small>SHA-256 <span class="mono">'+esc(src.machine_summary_sha256)+'</span></small></div>'+
   '<div class="raw-link"><a href="'+fileHref(src.backbone_comparison)+'">開啟 backbone sensitivity comparison JSON</a><small>SHA-256 <span class="mono">'+esc(src.backbone_comparison_sha256)+'</span></small></div>'+
+  '<div class="raw-link"><a href="'+fileHref(DATA.renderer.path)+'">開啟 workstation renderer</a><small>SHA-256 <span class="mono">'+esc(DATA.renderer.sha256)+'</span> · UI contract <span class="mono">'+esc(DATA.renderer.ui_contract)+'</span></small></div>'+
+  '<div class="raw-link"><a href="'+esc(DATA.assembly.length_source_url)+'" target="_blank" rel="noreferrer">GRCh38 chromosome length source</a><small>'+esc(DATA.assembly.length_source)+' · mark coordinate '+esc(DATA.assembly.mark_coordinate)+'</small></div>'+
   '<div class="raw-link"><strong>Verification</strong><small>all_pass='+DATA.summary.all_pass+' · success <span class="mono">'+esc(DATA.summary.success_sha256)+'</span> · verifier <span class="mono">'+esc(DATA.summary.verification_sha256)+'</span></small></div>';
 }
 
@@ -1353,7 +1841,7 @@ function restoreFromHash(restoreFocus){
 }
 
 function init(){
- renderMetrics();renderGenome();renderDimensions();renderSourceLinks();setupControls();
+ renderMetrics();renderSampleOverview();renderGenome();renderIdeogram();renderDimensions();renderSourceLinks();setupControls();
  restoreFromHash(false);
  syncHash("replace");
  window.addEventListener("popstate",()=>restoreFromHash(true));
@@ -1368,6 +1856,8 @@ init();
         template.replace("__SUMMARY_SHA__", summary_sha)
         .replace("__REGION_SHA__", actual_rv_sha)
         .replace("__COMPARISON_SHA__", comparison_sha)
+        .replace("__RENDERER_SHA__", renderer_sha)
+        .replace("__UI_CONTRACT__", RENDERER_UI_CONTRACT)
         .replace("__SAMPLE__", html.escape(sample))
         .replace("__BIO_SAMPLE__", html.escape(BIOLOGICAL_SAMPLE[sample]))
         .replace("__RUN_ID__", html.escape(run_id))

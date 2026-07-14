@@ -1,6 +1,6 @@
 <!--
 建立時間: 2026-07-07
-更新時間: 2026-07-14
+更新時間: 2026-07-15
 目標: 說明 canonical v5 layered reconstruction 全基因工作站的證據邊界、資料綁定與重生方式
 處理範圍: InterSubMod/docs/methodology/_assets/layered_workstation/
 關聯檔案:
@@ -28,10 +28,14 @@
 | 檔 | 內容 | 大小 |
 |---|---|--:|
 | **`index.html`** | Cohort command center：authority、W 漏斗、C/Topo composition、7 dataset 全基因入口、claim boundary 與收合 provenance。**先開這個。** | 由生成檔案決定 |
-| 各 dataset `.html` | chr1–22 overview → region facets → verdict → observed evidence → primary HP candidate network → sidecars/raw drawer。 | 主頁逐列顯示實際大小 |
+| 各 dataset `.html` | sample-wide 五組重點觀察 → GRCh38 座標比例分布 → chromosome grid → region facets → verdict → observed evidence → primary HP candidate network → sidecars/raw drawer。 | 主頁逐列顯示實際大小 |
 
 每個 dataset 頁把完整 detail 依 chromosome 嵌成 22 個 JSON chunks；初始只解析 lightweight all-genome index，選到 region 才解析該 chromosome。網路圖在手機維持最小可讀寬度並提供具名局部捲動區，不再把文字壓成不可讀尺寸。
 
+- **GRCh38 全基因分布**：22 條染色體依 NCBI GRC 的 GRCh38 bp 長度縮放，每個 W_tree region 以 midpoint 落點；可切換 determinacy、read evidence、primary HP、region size 與 CN region-sidecar 五種著色。CN 不是連續 segment track。
+- **Sample-wide 五圖**：Topo count、C exact-candidate count、determinacy、primary HP × H3 auxiliary、region retained-sSNV size。Topo／C／determinacy 固定以 `W_primary` 為分母；HP×H3 與 region size 固定以 `W_tree` 為分母。
+- **舊名詞邊界**：舊 `single/linear/branched/star`、舊 observed ALT 群數 `c`、A/B/C/E determinacy 不直接搬入 current v5。Stored display trees 對部分 analytical candidate set 只是 prefix，不能完整回推 morphology family；若要恢復，必須由 producer 輸出 exhaustive versioned summary。
+- **MAX_SNV=8**：region-size 圖的 8-site bin 可能同時包含 natural 8 與 cap-compressed groups；current region-view 無法再拆開，頁面不捏造兩者數量。
 - 座標搜尋支援單點與區間 overlap（例如 `chr8:34220481`、`chr8:34200000-34300000`）；染色體、C/Topo、read evidence、independent facet、查詢與 selected region 都寫進 URL hash，可直接複製目前檢視。
 - Network 箭頭只表 mutation-state transition constraint 的方向；實線／虛線／點線分別表示 complete exact set 的 forced、candidate-variable 與未評估 edge，不等同已確認的細胞 ancestry。
 - `.json` provenance 連結只在預設收合的「方法、驗證雜湊與原始資料連結」區出現，不插入主要閱讀數字。
@@ -55,8 +59,12 @@ python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_
 python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_layered_per_sample.py --index-only
 ```
 - Current renderer：`build_layered_workstation_v5.py`；`build_layered_workstation.py` 是相容入口並委派給同一 fail-closed renderer。
+- Freshness：sample page 除 summary / region-view / sample marker 外，還必須符合 renderer SHA-256 與 `layered-workstation-v5-grch38-overview-1` UI contract；`--index-only` 不會接受舊 renderer 產出的頁面。
 - 中間格式：`build_region_view.py`（layered_reconstruction → region_view）
 - 改 builder 後必做 Python/JavaScript syntax、canonical reconciliation、Chromium runtime、keyboard、零網路請求，以及 320 / 390 / 1440px overflow 與視覺截圖檢查。
+- 持續 smoke：`python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/validate_workstation_ui.py`。
+- 本輪完整視覺稽核：`python3 docs/methodology/_assets/workstation_visual_audit/20260715_sample_overview_after/capture_sample_overview_after.py`（建立後會輸出 7 datasets × 4 viewports 的 metrics 與截圖）。
+- 稽核解讀與改版前後比較：`InterSubMod/docs/methodology/_assets/workstation_visual_audit/20260715_sample_overview_after/20260715_GRCh38樣本全貌視覺稽核_01.md`。
 - 唯一 authority 是 `InterSubMod/research/20260710_layered_reconstruction_v2/current_layered_topology_v3_raw_all_v1.json`；driver 不含可回退到歷史資料的 sample path。
 
 ## 與舊 topology_workstation/ 關係

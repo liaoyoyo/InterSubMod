@@ -53,6 +53,37 @@ VIEWPORTS = {
     "desktop": {"width": 1440, "height": 1000},
     "mobile": {"width": 390, "height": 844},
 }
+GRCH38_AUTOSOME_LENGTHS = {
+    "chr1": 248_956_422,
+    "chr2": 242_193_529,
+    "chr3": 198_295_559,
+    "chr4": 190_214_555,
+    "chr5": 181_538_259,
+    "chr6": 170_805_979,
+    "chr7": 159_345_973,
+    "chr8": 145_138_636,
+    "chr9": 138_394_717,
+    "chr10": 133_797_422,
+    "chr11": 135_086_622,
+    "chr12": 133_275_309,
+    "chr13": 114_364_328,
+    "chr14": 107_043_718,
+    "chr15": 101_991_189,
+    "chr16": 90_338_345,
+    "chr17": 83_257_441,
+    "chr18": 80_373_285,
+    "chr19": 58_617_616,
+    "chr20": 64_444_167,
+    "chr21": 46_709_983,
+    "chr22": 50_818_468,
+}
+IDEOGRAM_MODES: Tuple[str, ...] = (
+    "determinacy",
+    "evidence",
+    "primary-hp",
+    "n-ssnv",
+    "cn-sidecar",
+)
 
 
 def utc_now() -> str:
@@ -219,11 +250,284 @@ def check_mobile_body_overflow(page: Page, run: Dict[str, Any]) -> None:
     passed = float(metrics.get("overflow_px", 0)) <= 1
     add_check(
         run,
-        "layered_index_mobile_body_overflow",
+        f"layered_{run['kind']}_{run['viewport']}_body_overflow",
         passed,
         expected={"overflow_px_max": 1},
         actual=metrics,
     )
+
+
+def check_layered_sample_overview(page: Page, run: Dict[str, Any]) -> None:
+    """Reconcile the five visible overview panels with embedded canonical data."""
+
+    metrics = page.evaluate(
+        """() => {
+            const data = JSON.parse(document.getElementById('workstation-data').textContent);
+            const expectedIds = ['topology-count','candidate-count','determinacy','hp-h3','region-size'];
+            const domPanels = [...document.querySelectorAll('[data-overview-panel]')];
+            const expectedById = Object.fromEntries(data.sample_overview.panels.map(panel => [panel.id, panel]));
+            const panels = domPanels.map(panel => {
+                const id = panel.dataset.overviewPanel;
+                const bins = [...panel.querySelectorAll('[data-overview-bin]')].map(bin => ({
+                    key: bin.dataset.binKey,
+                    count: Number(bin.dataset.count),
+                    denominator: Number(bin.dataset.denominator)
+                }));
+                const expected = expectedById[id];
+                const expectedBins = expected ? expected.bins.map(bin => ({key: bin.key, count: Number(bin.count)})) : [];
+                return {
+                    id,
+                    denominator_key: panel.dataset.denominatorKey,
+                    total: Number(panel.dataset.total),
+                    sum: bins.reduce((sum, bin) => sum + bin.count, 0),
+                    bins,
+                    expected_bins: expectedBins,
+                    exact_bin_match: JSON.stringify(bins.map(bin => ({key: bin.key, count: bin.count}))) === JSON.stringify(expectedBins),
+                    denominator_visible: (panel.innerText || '').includes(panel.dataset.denominatorKey) &&
+                        (panel.innerText || '').includes(Number(panel.dataset.total).toLocaleString())
+                };
+            });
+            const jsonLinks = [...document.querySelectorAll('a[href*=".json"]')];
+            return {
+                expected_ids: expectedIds,
+                ids: panels.map(panel => panel.id),
+                panels,
+                W_tree: Number(data.canonical_sample.W_tree),
+                W_primary: Number(data.canonical_sample.W_primary),
+                retained_sSNV: Number(data.canonical_sample.retained_sSNV),
+                region_index_count: data.region_index.length,
+                weighted_site_sum: data.region_index.reduce((sum, row) => sum + Number(row.n_sSNV), 0),
+                json_links: jsonLinks.length,
+                json_links_outside_closed_drawer: jsonLinks.filter(link => {
+                    const details = link.closest('details');
+                    return !details || details.open;
+                }).length
+            };
+        }"""
+    )
+    add_check(
+        run,
+        "layered_sample_overview_five_panels",
+        metrics["ids"] == metrics["expected_ids"],
+        expected=metrics["expected_ids"],
+        actual=metrics["ids"],
+    )
+    expected_denominators = {
+        "topology-count": ("W_primary", metrics["W_primary"]),
+        "candidate-count": ("W_primary", metrics["W_primary"]),
+        "determinacy": ("W_primary", metrics["W_primary"]),
+        "hp-h3": ("W_tree", metrics["W_tree"]),
+        "region-size": ("W_tree", metrics["W_tree"]),
+    }
+    failures = []
+    for panel in metrics["panels"]:
+        key, total = expected_denominators[panel["id"]]
+        if not (
+            panel["denominator_key"] == key
+            and panel["total"] == total
+            and panel["sum"] == total
+            and panel["exact_bin_match"]
+            and panel["denominator_visible"]
+        ):
+            failures.append(panel)
+    add_check(
+        run,
+        "layered_sample_overview_data_closure",
+        not failures,
+        expected={"all_panels_close_to_their_denominator": True, "dom_matches_embedded_summary": True},
+        actual={"failures": failures, "panels": metrics["panels"]},
+    )
+    add_check(
+        run,
+        "layered_sample_region_size_site_closure",
+        metrics["weighted_site_sum"] == metrics["retained_sSNV"],
+        expected={"weighted_site_sum": metrics["retained_sSNV"]},
+        actual={"weighted_site_sum": metrics["weighted_site_sum"]},
+    )
+    add_check(
+        run,
+        "layered_sample_raw_json_hidden",
+        metrics["json_links"] >= 3 and metrics["json_links_outside_closed_drawer"] == 0,
+        expected={"json_links_minimum": 3, "outside_closed_drawer": 0},
+        actual={
+            "json_links": metrics["json_links"],
+            "outside_closed_drawer": metrics["json_links_outside_closed_drawer"],
+        },
+    )
+
+
+def check_layered_ideogram(page: Page, run: Dict[str, Any], timeout_ms: int) -> None:
+    """Verify real GRCh38 proportional coordinates and core interactions."""
+
+    page.wait_for_function(
+        "document.querySelectorAll('.ideogram-mark').length === JSON.parse(document.getElementById('workstation-data').textContent).canonical_sample.W_tree",
+        timeout=timeout_ms,
+    )
+    metrics = page.evaluate(
+        """lengths => {
+            const data = JSON.parse(document.getElementById('workstation-data').textContent);
+            const tracks = [...document.querySelectorAll('.ideogram-track')];
+            const marks = [...document.querySelectorAll('.ideogram-mark')];
+            const trackByChrom = Object.fromEntries(tracks.map(track => [track.dataset.chrom, track]));
+            let coordinateErrors = 0, identityErrors = 0, maximumXError = 0;
+            const regions = new Set();
+            for (const mark of marks) {
+                const chrom = mark.dataset.chrom;
+                const start = Number(mark.dataset.start), end = Number(mark.dataset.end);
+                const midpoint = Number(mark.dataset.midpoint), length = Number(lengths[chrom]);
+                if (!(1 <= start && start <= end && end <= length && start <= midpoint && midpoint <= end)) coordinateErrors++;
+                if (regions.has(mark.dataset.region)) identityErrors++;
+                regions.add(mark.dataset.region);
+                const track = trackByChrom[chrom];
+                const expectedX = Number(track.getAttribute('x')) + midpoint / length * Number(track.getAttribute('width'));
+                maximumXError = Math.max(maximumXError, Math.abs(Number(mark.getAttribute('x1')) - expectedX));
+            }
+            const chr1Width = Number(trackByChrom.chr1.getAttribute('width'));
+            let maximumRatioError = 0;
+            for (const track of tracks) {
+                const expected = Number(lengths[track.dataset.chrom]) / Number(lengths.chr1);
+                const observed = Number(track.getAttribute('width')) / chr1Width;
+                maximumRatioError = Math.max(maximumRatioError, Math.abs(observed - expected));
+            }
+            const scroller = document.querySelector('.ideogram-scroll');
+            const metaContract = document.querySelector('meta[name="intersubmod-ui-contract"]')?.content || '';
+            return {
+                assembly: data.assembly.name,
+                tracks: tracks.length,
+                marks: marks.length,
+                W_tree: Number(data.canonical_sample.W_tree),
+                unique_regions: regions.size,
+                coordinate_errors: coordinateErrors,
+                duplicate_regions: identityErrors,
+                maximum_x_error: maximumXError,
+                maximum_track_ratio_error: maximumRatioError,
+                mode_buttons: document.querySelectorAll('[data-ideogram-mode]').length,
+                pressed_modes: document.querySelectorAll('[data-ideogram-mode][aria-pressed="true"]').length,
+                ui_contract: metaContract,
+                scroller: scroller ? {
+                    role: scroller.getAttribute('role'),
+                    tabindex: scroller.getAttribute('tabindex'),
+                    aria_label: scroller.getAttribute('aria-label'),
+                    scroll_width: scroller.scrollWidth,
+                    client_width: scroller.clientWidth,
+                    overflow_x: getComputedStyle(scroller).overflowX
+                } : null
+            };
+        }""",
+        GRCH38_AUTOSOME_LENGTHS,
+    )
+    ideogram_passed = (
+        metrics["assembly"] == "GRCh38"
+        and metrics["tracks"] == 22
+        and metrics["marks"] == metrics["W_tree"]
+        and metrics["unique_regions"] == metrics["W_tree"]
+        and metrics["coordinate_errors"] == 0
+        and metrics["duplicate_regions"] == 0
+        and metrics["maximum_x_error"] <= 0.01
+        and metrics["maximum_track_ratio_error"] <= 0.00001
+    )
+    add_check(
+        run,
+        "layered_sample_grch38_coordinate_ideogram",
+        ideogram_passed,
+        expected={"assembly": "GRCh38", "tracks": 22, "marks": metrics["W_tree"], "coordinate_errors": 0},
+        actual=metrics,
+    )
+    add_check(
+        run,
+        "layered_sample_ideogram_controls",
+        metrics["mode_buttons"] == 5
+        and metrics["pressed_modes"] == 1
+        and metrics["ui_contract"] == "layered-workstation-v5-grch38-overview-1"
+        and bool(metrics["scroller"])
+        and metrics["scroller"]["role"] == "region"
+        and metrics["scroller"]["tabindex"] == "0"
+        and bool(metrics["scroller"]["aria_label"])
+        and metrics["scroller"]["overflow_x"] == "auto",
+        expected={"mode_buttons": 5, "pressed": 1, "named_local_scroller": True},
+        actual=metrics,
+    )
+
+    mode_states = []
+    for mode in IDEOGRAM_MODES:
+        page.locator(f'[data-ideogram-mode="{mode}"]').click()
+        mode_states.append(
+            page.evaluate(
+                """requested => ({
+                    requested,
+                    mode: document.getElementById('genome-ideogram').dataset.mode,
+                    pressed: document.querySelectorAll('[data-ideogram-mode][aria-pressed="true"]').length,
+                    marks: document.querySelectorAll('.ideogram-mark').length,
+                    unmapped: [...document.querySelectorAll('.ideogram-mark')].filter(mark => !mark.dataset.modeValue).length,
+                    legend: document.querySelectorAll('[data-legend-key]').length
+                })""",
+                mode,
+            )
+        )
+    add_check(
+        run,
+        "layered_sample_ideogram_all_mode_switches",
+        all(
+            state["requested"] == state["mode"]
+            and state["pressed"] == 1
+            and state["marks"] == metrics["W_tree"]
+            and state["unmapped"] == 0
+            and state["legend"] >= 1
+            for state in mode_states
+        ),
+        expected={
+            "modes": list(IDEOGRAM_MODES),
+            "pressed_each": 1,
+            "marks_each": metrics["W_tree"],
+            "unmapped_each": 0,
+            "legend_minimum_each": 1,
+        },
+        actual=mode_states,
+    )
+
+    page.locator('[data-ideogram-mode="determinacy"]').click()
+    first_legend = page.locator("[data-legend-key]").first
+    first_legend.click()
+    isolation = page.evaluate(
+        """() => ({
+            pressed: document.querySelectorAll('[data-legend-key][aria-pressed="true"]').length,
+            dimmed: document.querySelectorAll('.ideogram-mark.dimmed').length
+        })"""
+    )
+    first_legend.click()
+    add_check(
+        run,
+        "layered_sample_ideogram_legend_isolation",
+        isolation["pressed"] == 1 and isolation["dimmed"] > 0,
+        expected={"pressed": 1, "dimmed_minimum": 1},
+        actual=isolation,
+    )
+
+    chromosome_hit = page.locator('.ideogram-chrom-hit[data-chrom="chr8"]')
+    chromosome_hit.focus()
+    chromosome_hit.press("Enter")
+    page.wait_for_timeout(120)
+    chromosome_state = page.evaluate(
+        """() => ({
+            filter: document.getElementById('fchr').value,
+            grid_pressed: document.querySelector('.chrom-button[data-chrom="chr8"]').getAttribute('aria-pressed'),
+            ideogram_pressed: document.querySelector('.ideogram-chrom-hit[data-chrom="chr8"]').getAttribute('aria-pressed'),
+            hash_chr: new URLSearchParams(location.hash.slice(1)).get('chr')
+        })"""
+    )
+    add_check(
+        run,
+        "layered_sample_ideogram_chromosome_sync",
+        chromosome_state == {
+            "filter": "chr8",
+            "grid_pressed": "true",
+            "ideogram_pressed": "true",
+            "hash_chr": "chr8",
+        },
+        expected={"filter": "chr8", "grid_pressed": "true", "ideogram_pressed": "true", "hash_chr": "chr8"},
+        actual=chromosome_state,
+    )
+    page.locator("#all-genome").click()
 
 
 def check_layered_home_link(page: Page, run: Dict[str, Any]) -> None:
@@ -539,6 +843,7 @@ def audit_page(
     console_errors: List[Dict[str, Any]] = []
     page_errors: List[str] = []
     request_failures: List[Dict[str, Any]] = []
+    external_requests: List[str] = []
     context = browser.new_context(
         viewport=VIEWPORTS[viewport_name],
         color_scheme="light",
@@ -568,9 +873,14 @@ def audit_page(
             }
         )
 
+    def on_request(request: Any) -> None:
+        if urlparse(request.url).scheme in {"http", "https"}:
+            external_requests.append(request.url)
+
     page.on("console", on_console)
     page.on("pageerror", on_page_error)
     page.on("requestfailed", on_request_failed)
+    page.on("request", on_request)
 
     navigation_ok = False
     try:
@@ -624,12 +934,15 @@ def audit_page(
                 )
                 if spec["workstation"] == "layered":
                     check_layered_home_link(page, run)
+                    check_layered_sample_overview(page, run)
+                    check_layered_ideogram(page, run, timeout_ms)
+                    check_mobile_body_overflow(page, run)
                 else:
                     check_topology_archive_banner(page, run)
                 check_region_interaction(page, run, viewport_name, timeout_ms)
             else:
                 check_index_links(page, run, path)
-                if spec["workstation"] == "layered" and viewport_name == "mobile":
+                if spec["workstation"] == "layered":
                     check_mobile_body_overflow(page, run)
         except Exception as exc:
             add_check(
@@ -661,6 +974,13 @@ def audit_page(
         not request_failures,
         expected={"count": 0},
         actual={"count": len(request_failures), "failures": request_failures[:20]},
+    )
+    add_check(
+        run,
+        "external_network_requests",
+        not external_requests,
+        expected={"count": 0},
+        actual={"count": len(external_requests), "requests": external_requests[:20]},
     )
 
     if screenshots_dir and should_capture_screenshot(screenshot_mode, run):

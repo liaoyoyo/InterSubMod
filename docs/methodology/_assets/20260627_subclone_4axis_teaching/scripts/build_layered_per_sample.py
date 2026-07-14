@@ -53,10 +53,13 @@ EXPECTED_SCOPE = "7 datasets / 6 biological samples / chr1-22"
 EXPECTED_BACKBONE = "longphase_s_recalibrated_FILTER_PASS"
 EXPECTED_TREE_SOURCE = "longphase_s_recalibrated_filter_pass"
 EXPECTED_REGION_SCOPE = "chr1-22 primary; chrX/chrY out-of-scope census only"
+EXPECTED_UI_CONTRACT = "layered-workstation-v5-grch38-overview-1"
 PAGE_META_NAMES = {
     "summary_sha256": "intersubmod-current-summary-sha256",
     "region_sha256": "intersubmod-region-view-sha256",
     "sample": "intersubmod-canonical-sample",
+    "renderer_sha256": "intersubmod-renderer-sha256",
+    "ui_contract": "intersubmod-ui-contract",
 }
 TOPOLOGY_CLASSES = (
     ("exact_and_topology_unique", "C=1 / Topo=1", "exact 與拓撲皆唯一", "unique"),
@@ -333,11 +336,17 @@ def page_freshness(output: Path, sample: dict[str, Any], authority: dict[str, An
         PAGE_META_NAMES["summary_sha256"]: authority["summary_sha256"],
         PAGE_META_NAMES["region_sha256"]: sample["region_sha256"],
         PAGE_META_NAMES["sample"]: sample["sample"],
+        PAGE_META_NAMES["renderer_sha256"]: sha256_file(BUILD),
+        PAGE_META_NAMES["ui_contract"]: EXPECTED_UI_CONTRACT,
     }
     for name, value in expected.items():
         if markers.get(name) != value:
             return False, f"marker {name} mismatch"
-    newest_input = max(authority["summary_path"].stat().st_mtime, sample["region_path"].stat().st_mtime)
+    newest_input = max(
+        authority["summary_path"].stat().st_mtime,
+        sample["region_path"].stat().st_mtime,
+        BUILD.stat().st_mtime,
+    )
     if output.stat().st_mtime < newest_input:
         return False, "page mtime predates its summary or region view"
     return True, "hash-bound"
@@ -440,7 +449,7 @@ def genome_launchers(rows: list[dict[str, Any]]) -> str:
             f'<a class="genome-link" href="{escaped(row["sample"])}.html">'
             f'<span class="launcher-index">{index:02d}</span>'
             f'<span><strong>{escaped(row["sample"])}</strong>'
-            f'<small>chr1–22 · {int(row["W_tree"]):,} regions</small></span>'
+            f'<small>GRCh38 座標分布 · sample-wide 重點觀察 · {int(row["W_tree"]):,} regions</small></span>'
             f'<span class="launcher-action">進入巡覽</span></a>'
         )
     return "".join(links)
@@ -618,7 +627,7 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
     <div class="hero-main">
       <p class="eyebrow"><span class="canonical">Canonical / 7 of 7 PASS</span><span>chr1–22 全基因範圍</span></p>
       <h1>分層重建<br>全基因指揮中心</h1>
-      <p class="lede">以 LongPhase-S recalibrated FILTER=PASS 為唯一主骨幹，從 cohort 總覽進入 7 個 dataset 的全常染色體 region 巡覽；每個數字保留明確 grain、分母與候選完整性。</p>
+      <p class="lede">以 LongPhase-S recalibrated FILTER=PASS 為唯一主骨幹，從 cohort 總覽進入 7 個 dataset 的 GRCh38 座標比例分布與 sample-wide 重點觀察；每個數字保留明確 grain、分母與候選完整性。</p>
     </div>
     <aside class="hero-aside" aria-label="Canonical authority">
       <p class="authority-label">Machine-bound authority</p>
@@ -655,7 +664,7 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
     <div class="dimension-grid">
       <article class="dimension-card"><div class="dimension-code"><span>01 · 拓樸型態</span><span>Topology shape</span></div><h3>分子累積形狀有幾種？</h3><p class="dimension-answer"><strong>$shape_unique</strong> 個 complete regions 的 Topo=1。</p><div class="dimension-list"><div class="dimension-row"><span>形狀唯一 / complete</span><b>$shape_unique / $complete · $shape_unique_rate%</b></div><div class="dimension-row"><span>多種形狀相容</span><b>$multi_shape · $multi_shape_rate%</b></div></div><p class="dimension-boundary">Topo 比較無節點標籤的 regional mutation-state shape；不等於 biological ancestry 或真實時間順序。</p></article>
       <article class="dimension-card"><div class="dimension-code"><span>02 · 可辨識度</span><span>Determinacy</span></div><h3>目前能唯一辨識到哪一層？</h3><p class="dimension-answer"><strong>$exact_unique</strong> 個 regions 可辨識到 exact candidate。</p><div class="dimension-list"><div class="dimension-row"><span>Exact 唯一</span><b>$exact_unique</b></div><div class="dimension-row"><span>只到 shape 唯一</span><b>$shape_only</b></div><div class="dimension-row"><span>Multi-shape</span><b>$multi_shape</b></div><div class="dimension-row"><span>尚未評估</span><b>$incomplete</b></div></div><p class="dimension-boundary">Incomplete 是 candidate set 未完整，所以 C／Topo 不可評估；不是 0，也不是已證明多解。</p></article>
-      <article class="dimension-card"><div class="dimension-code"><span>03 · 基因體位置</span><span>Genome position</span></div><h3>這些 regions 位於哪裡？</h3><p class="dimension-answer"><strong>7 × chr1–22</strong> 的 canonical 全基因巡覽。</p><div class="dimension-list"><div class="dimension-row"><span>W_tree regions</span><b>$w_tree</b></div><div class="dimension-row"><span>Dataset pages</span><b>7</b></div><div class="dimension-row"><span>Autosomes / page</span><b>22</b></div></div><div class="position-leaders" aria-label="各 dataset 的 W primary count leader chromosome">$position_leaders</div><p class="dimension-boundary">上列為各 dataset 的 W_primary count leader；點選可直達該染色體。位置只做 chr:start–end 與 region 分布巡覽；未校正 chromosome 長度或輸入密度時，不作 hotspot／enrichment 判定。</p><a class="dimension-link" href="#launch-title">選擇 dataset 看位置</a></article>
+      <article class="dimension-card"><div class="dimension-code"><span>03 · 基因體位置</span><span>Genome position</span></div><h3>這些 regions 位於哪裡？</h3><p class="dimension-answer"><strong>7 × chr1–22</strong> 的 canonical 全基因巡覽。</p><div class="dimension-list"><div class="dimension-row"><span>W_tree regions</span><b>$w_tree</b></div><div class="dimension-row"><span>Dataset pages</span><b>7</b></div><div class="dimension-row"><span>Autosomes / page</span><b>22</b></div></div><div class="position-leaders" aria-label="各 dataset 的 W primary count leader chromosome">$position_leaders</div><p class="dimension-boundary">內頁 ideogram 依 GRCh38 bp 長度與 region midpoint 定位；上列仍是各 dataset 的 raw W_primary count leader，未除以 chromosome 長度或輸入 sSNV density，因此只供巡覽，不作 hotspot／enrichment 判定。</p><a class="dimension-link" href="#launch-title">選擇 dataset 看位置</a></article>
     </div>
   </section>
 
@@ -669,7 +678,7 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
   </section>
 
   <section class="section" aria-labelledby="launch-title">
-    <div class="section-head"><div><p class="section-kicker">Genome launchpad</p><h2 id="launch-title">進入 chr1–22 全基因巡覽</h2></div><p class="section-note">每個入口都已由 current summary SHA 與 sample region-view SHA 雙重綁定；沒有 freshness 證據的頁面不會出現在本 index。</p></div>
+    <div class="section-head"><div><p class="section-kicker">Genome launchpad</p><h2 id="launch-title">進入 GRCh38 chr1–22 全基因巡覽</h2></div><p class="section-note">每頁都含座標比例 ideogram 與五組 sample-wide 重點觀察，並由 current summary、sample region-view、renderer SHA 與 UI contract 綁定；stale 頁面不會進入 index。</p></div>
     <nav class="genome-launchers" aria-label="開啟各 dataset 全基因頁">$genome_launchers</nav>
   </section>
 
