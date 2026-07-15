@@ -815,8 +815,17 @@ def zero_coverage_detail_metrics(page: Page, fixture: Dict[str, Any]) -> Dict[st
 def screenshot(page: Page, path: Path) -> str:
     """Capture the current viewport at a stable absolute path."""
 
-    page.screenshot(path=str(path), full_page=False)
-    return str(path.resolve())
+    last_error: Optional[Exception] = None
+    for attempt in range(3):
+        try:
+            page.screenshot(path=str(path), full_page=False)
+            return str(path.resolve())
+        except Exception as exc:  # Chromium can transiently reject captureScreenshot.
+            last_error = exc
+            if attempt < 2:
+                page.wait_for_timeout(180 * (attempt + 1))
+    assert last_error is not None
+    raise last_error
 
 
 def scroll_element_to_viewport_top(page: Page, selector: str, offset: int = 8) -> None:

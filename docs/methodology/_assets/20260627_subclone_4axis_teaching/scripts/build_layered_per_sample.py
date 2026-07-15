@@ -53,6 +53,18 @@ READ_AF_TOPOLOGY_BUILD = (
     / "scripts"
     / "build_current_v5_read_af_topology.py"
 )
+SAMPLE_COMPARISON_DIR = (
+    REPO_ROOT
+    / "research"
+    / "20260715_sample_topology_comparison"
+)
+SAMPLE_COMPARISON_JSON = SAMPLE_COMPARISON_DIR / "artifacts" / "sample_topology_comparison.json"
+SAMPLE_COMPARISON_RECEIPT = SAMPLE_COMPARISON_DIR / "artifacts" / "validation_receipt.json"
+SAMPLE_COMPARISON_BUILD = (
+    SAMPLE_COMPARISON_DIR / "scripts" / "analyze_sample_topology_comparison.py"
+)
+HCC_EXACT_SIGNATURE_JSON = SAMPLE_COMPARISON_DIR / "artifacts" / "hcc1395_exact_signature_validation.json"
+HCC_EXACT_SIGNATURE_BUILD = SAMPLE_COMPARISON_DIR / "scripts" / "analyze_hcc_exact_signature.py"
 PYTHON = sys.executable or "python3"
 
 EXPECTED_SAMPLES = {
@@ -153,6 +165,23 @@ MORPHOLOGY_CLASSES = (
         "incomplete",
     ),
 )
+COMPARISON_DIMENSIONS = {
+    "structural": {
+        "label": "結構可辨識度",
+        "short": "Structural",
+        "classes": TOPOLOGY_CLASSES,
+    },
+    "read_af_selection": {
+        "label": "read-AF 第一順位",
+        "short": "Read-AF",
+        "classes": READ_AF_SELECTION_CLASSES,
+    },
+    "morphology": {
+        "label": "拓撲形態",
+        "short": "Morphology",
+        "classes": MORPHOLOGY_CLASSES,
+    },
+}
 
 
 class AuthorityError(RuntimeError):
@@ -430,6 +459,130 @@ def load_authority() -> dict[str, Any]:
             f"current summary is stale: generated={summary_generated.isoformat()} newest_source={newest_source.isoformat()}")
     validate_aggregate(canonical["aggregate"], enriched_records)
 
+    require(SAMPLE_COMPARISON_JSON.is_file(), f"missing sample comparison: {SAMPLE_COMPARISON_JSON}")
+    sample_comparison = load_json(SAMPLE_COMPARISON_JSON)
+    require(
+        sample_comparison.get("schema_name") == "intersubmod.sample_topology_comparison"
+        and sample_comparison.get("schema_version") == "1.0.0",
+        "unexpected sample-comparison schema",
+    )
+    require(
+        sample_comparison.get("task_type") == "B_comprehensive_validation"
+        and sample_comparison.get("all_checks_pass") is True,
+        "sample comparison is not a passing Task B artifact",
+    )
+    require(
+        sample_comparison.get("scope")
+        == "7 datasets / 6 biological samples / GRCh38 chr1-22 / current canonical v5",
+        "sample-comparison scope drifted",
+    )
+    sample_comparison_provenance = sample_comparison.get("provenance") or {}
+    require(
+        Path(sample_comparison_provenance.get("sidecar_index", "")).resolve()
+        == READ_AF_TOPOLOGY_INDEX.resolve(),
+        "sample comparison is bound to a different read-AF index",
+    )
+    require(
+        sample_comparison_provenance.get("sidecar_index_sha256")
+        == sha256_file(READ_AF_TOPOLOGY_INDEX),
+        "sample-comparison read-AF index hash drifted",
+    )
+    require(
+        Path(sample_comparison_provenance.get("current_summary", "")).resolve()
+        == CURRENT_SUMMARY.resolve()
+        and sample_comparison_provenance.get("current_summary_sha256") == summary_sha256,
+        "sample comparison is bound to a different current summary",
+    )
+    require(
+        Path(sample_comparison_provenance.get("analysis_script", "")).resolve()
+        == SAMPLE_COMPARISON_BUILD.resolve(),
+        "sample-comparison analysis script path drifted",
+    )
+    verify_bound_file(
+        SAMPLE_COMPARISON_BUILD,
+        sample_comparison_provenance.get("analysis_script_sha256", ""),
+        "sample-comparison analysis script",
+    )
+    comparison_generated = parse_timestamp(sample_comparison["generated_at"], "sample comparison generated_at")
+    sidecar_generated = parse_timestamp(read_af_index["generated_at"], "read-AF index generated_at")
+    require(comparison_generated >= sidecar_generated, "sample comparison predates its sidecar index")
+
+    comparison_datasets = {
+        record.get("dataset"): record for record in sample_comparison.get("datasets", [])
+    }
+    require(set(comparison_datasets) == EXPECTED_SAMPLES, "sample-comparison dataset set drifted")
+    comparison_dimension_keys = {
+        "structural": "structural_classes",
+        "read_af_selection": "selection_classes",
+        "morphology": "morphology_classes",
+    }
+    for row in enriched_records:
+        sample = row["sample"]
+        comparison_record = comparison_datasets[sample]
+        require(
+            int(comparison_record.get("W_primary", -1)) == int(row["W_primary"])
+            and int(comparison_record.get("W_tree", -1)) == int(row["W_tree"]),
+            f"sample-comparison W drifted for {sample}",
+        )
+        require(
+            comparison_record.get("source_sha256") == row["read_af_sha256"],
+            f"sample-comparison source hash drifted for {sample}",
+        )
+        for dimension, summary_key in comparison_dimension_keys.items():
+            expected_counts = row["read_af_summary"][summary_key]
+            observed_counts = comparison_record["dimensions"][dimension]["counts"]
+            require(
+                observed_counts == expected_counts,
+                f"sample-comparison {dimension} counts drifted for {sample}",
+            )
+    pairwise = sample_comparison.get("pairwise_composition") or {}
+    require(len(pairwise.get("records", [])) == 21, "sample comparison does not contain 21 pairs")
+    hcc_pair = sample_comparison.get("hcc1395_technical_pair") or {}
+    require(
+        hcc_pair.get("relationship")
+        == "same biological sample; technical/cross-platform pair; not biological replication",
+        "HCC1395 technical-pair relationship drifted",
+    )
+    primary_match_n = int(hcc_pair["exact_coordinate_overlap"]["primary_both"]["intersection"])
+    require(
+        all(
+            int(values.get("n", -1)) == primary_match_n
+            for values in hcc_pair.get("matched_primary_dimensions", {}).values()
+        ),
+        "HCC1395 matched confusion denominators drifted",
+    )
+    exact_signature = sample_comparison.get("hcc_exact_signature_evidence") or {}
+    require(
+        Path(exact_signature.get("source", "")).resolve() == HCC_EXACT_SIGNATURE_JSON.resolve(),
+        "HCC exact-signature artifact path drifted",
+    )
+    verify_bound_file(
+        HCC_EXACT_SIGNATURE_JSON,
+        exact_signature.get("source_sha256", ""),
+        "HCC exact-signature artifact",
+    )
+    require(
+        Path(exact_signature.get("analysis_script", "")).resolve()
+        == HCC_EXACT_SIGNATURE_BUILD.resolve(),
+        "HCC exact-signature analysis-script path drifted",
+    )
+    verify_bound_file(
+        HCC_EXACT_SIGNATURE_BUILD,
+        exact_signature.get("analysis_script_sha256", ""),
+        "HCC exact-signature analysis script",
+    )
+    require(exact_signature.get("all_checks_pass") is True, "HCC exact-signature checks failed")
+    require(SAMPLE_COMPARISON_RECEIPT.is_file(), f"missing sample-comparison receipt: {SAMPLE_COMPARISON_RECEIPT}")
+    sample_comparison_receipt = load_json(SAMPLE_COMPARISON_RECEIPT)
+    require(sample_comparison_receipt.get("status") == "PASS", "sample-comparison receipt is not PASS")
+    receipt_outputs = sample_comparison_receipt.get("outputs") or {}
+    receipt_record = receipt_outputs.get(str(SAMPLE_COMPARISON_JSON.resolve()))
+    require(
+        isinstance(receipt_record, dict)
+        and receipt_record.get("sha256") == sha256_file(SAMPLE_COMPARISON_JSON),
+        "sample-comparison receipt hash drifted",
+    )
+
     for role, provenance in summary.get("code_provenance", {}).items():
         source_path = resolve_authority_path(provenance["path"])
         verify_bound_file(source_path, provenance["sha256"], f"code provenance {role}")
@@ -455,6 +608,13 @@ def load_authority() -> dict[str, Any]:
         "read_af_index": read_af_index,
         "read_af_index_path": READ_AF_TOPOLOGY_INDEX,
         "read_af_index_sha256": sha256_file(READ_AF_TOPOLOGY_INDEX),
+        "sample_comparison": sample_comparison,
+        "sample_comparison_path": SAMPLE_COMPARISON_JSON,
+        "sample_comparison_sha256": sha256_file(SAMPLE_COMPARISON_JSON),
+        "sample_comparison_receipt_path": SAMPLE_COMPARISON_RECEIPT,
+        "sample_comparison_receipt_sha256": sha256_file(SAMPLE_COMPARISON_RECEIPT),
+        "hcc_exact_signature_path": HCC_EXACT_SIGNATURE_JSON,
+        "hcc_exact_signature_sha256": sha256_file(HCC_EXACT_SIGNATURE_JSON),
     }
 
 
@@ -672,6 +832,311 @@ def cohort_read_af_morphology(rows: list[dict[str, Any]]) -> str:
     )
 
 
+def comparison_class_contract(dimension: str) -> list[dict[str, str]]:
+    contract = COMPARISON_DIMENSIONS[dimension]
+    return [
+        {
+            "key": key,
+            "label": short_label,
+            "description": long_label,
+            "class_name": class_name,
+        }
+        for key, short_label, long_label, class_name in contract["classes"]
+    ]
+
+
+def comparison_legend(dimension: str) -> str:
+    return "".join(
+        f'<span class="comparison-key-item"><i class="legend-swatch segment-{escaped(item["class_name"])}" '
+        f'aria-hidden="true"></i><b>{escaped(item["label"])}</b></span>'
+        for item in comparison_class_contract(dimension)
+    )
+
+
+def comparison_profile_rows(comparison: dict[str, Any], dimension: str) -> str:
+    classes = comparison_class_contract(dimension)
+    rows = []
+    for record in comparison["datasets"]:
+        sample = record["dataset"]
+        values = record["dimensions"][dimension]
+        segments = "".join(
+            f'<span class="bar-segment segment-{escaped(item["class_name"])}" '
+            f'style="width:{float(values["proportions"][item["key"]]) * 100:.6f}%" '
+            f'title="{escaped(item["label"])} · {int(values["counts"][item["key"]]):,} · '
+            f'{float(values["proportions"][item["key"]]) * 100:.1f}%"></span>'
+            for item in classes
+        )
+        technical = sample in {"HCC1395", "HCC1395_DORADO"}
+        role = "5kHz canonical" if sample == "HCC1395" else "Dorado technical pair"
+        rows.append(
+            f'<div class="comparison-profile-row{" technical-pair" if technical else ""}" '
+            f'data-dataset="{escaped(sample)}"><div class="comparison-profile-name">'
+            f'<a href="{escaped(sample)}.html"><strong>{escaped(sample)}</strong></a>'
+            f'{f"<small>{escaped(role)}</small>" if technical else ""}</div>'
+            f'<div class="topology-bar" role="img" aria-label="{escaped(sample)} {escaped(COMPARISON_DIMENSIONS[dimension]["label"])} composition">'
+            f'{segments}</div><b class="comparison-profile-n">{int(record["W_primary"]):,}<small>W_primary</small></b></div>'
+        )
+    return "".join(rows)
+
+
+def comparison_ledger_rows(comparison: dict[str, Any], dimension: str) -> str:
+    classes = comparison_class_contract(dimension)
+    rendered = []
+    for record in comparison["datasets"]:
+        values = record["dimensions"][dimension]
+        cells = "".join(
+            f'<td class="numeric" data-label="{escaped(item["label"])}">'
+            f'<strong>{int(values["counts"][item["key"]]):,}</strong>'
+            f'<small>{float(values["proportions"][item["key"]]) * 100:.1f}%</small></td>'
+            for item in classes
+        )
+        rendered.append(
+            f'<tr><th scope="row" class="sample-cell"><a href="{escaped(record["dataset"])}.html">'
+            f'<strong>{escaped(record["dataset"])}</strong></a><small>{escaped(record["biological_id"])} biological ID</small></th>'
+            f'<td class="numeric" data-label="W_primary">{int(record["W_primary"]):,}</td>{cells}</tr>'
+        )
+    return "".join(rendered)
+
+
+def comparison_ledger_head(dimension: str) -> str:
+    classes = comparison_class_contract(dimension)
+    return (
+        '<tr><th scope="col">Dataset</th><th scope="col" class="numeric">W_primary</th>'
+        + "".join(
+            f'<th scope="col" class="numeric">{escaped(item["label"])}</th>'
+            for item in classes
+        )
+        + "</tr>"
+    )
+
+
+def comparison_matrix_table(comparison: dict[str, Any], dimension: str) -> str:
+    order = comparison["pairwise_composition"]["matrices"]["order"]
+    matrix = comparison["pairwise_composition"]["matrices"]["tvd"][dimension]
+    short = {
+        "COLO829": "COLO829",
+        "H1437": "H1437",
+        "H2009": "H2009",
+        "HCC1395": "HCC1395",
+        "HCC1395_DORADO": "DORADO",
+        "HCC1937": "HCC1937",
+        "HCC1954": "HCC1954",
+    }
+    header = "".join(f'<th scope="col">{escaped(short[sample])}</th>' for sample in order)
+    body = []
+    for left in order:
+        cells = []
+        for right in order:
+            value = float(matrix[left][right])
+            if left == right:
+                cells.append('<td class="matrix-diagonal"><span aria-label="same dataset">0</span></td>')
+                continue
+            hcc_pair = {left, right} == {"HCC1395", "HCC1395_DORADO"}
+            alpha = 0.08 + min(value / 0.5, 1.0) * 0.64
+            cells.append(
+                f'<td><button type="button" class="matrix-cell{" is-hcc" if hcc_pair else ""}" '
+                f'data-left="{escaped(left)}" data-right="{escaped(right)}" '
+                f'style="background:rgba(22,139,141,{alpha:.4f})" '
+                f'aria-label="{escaped(left)} 與 {escaped(right)}，TVD {value:.3f}">{value:.3f}</button></td>'
+            )
+        body.append(
+            f'<tr><th scope="row">{escaped(short[left])}</th>{"".join(cells)}</tr>'
+        )
+    return (
+        '<table class="distance-matrix"><caption class="sr-only">7 datasets pairwise composition TVD</caption>'
+        f'<thead><tr><th scope="col">TVD</th>{header}</tr></thead><tbody>{"".join(body)}</tbody></table>'
+    )
+
+
+def comparison_pair_inspector(comparison: dict[str, Any], dimension: str) -> str:
+    record = next(
+        row
+        for row in comparison["pairwise_composition"]["records"]
+        if {row["left"], row["right"]} == {"HCC1395", "HCC1395_DORADO"}
+    )
+    metric = record["dimensions"][dimension]
+    return (
+        '<span class="pair-chip">Same biological sample · technical pair</span>'
+        '<h3>HCC1395 × HCC1395_DORADO</h3>'
+        f'<strong class="pair-distance">{float(metric["tvd"]):.3f}<small>TVD · rank '
+        f'{int(metric["tvd_rank_among_21_pairs"])}/21</small></strong>'
+        '<p>此格只比較類別比例；下方 exact-region panel 才檢查相同區域是否得到相同標籤。</p>'
+    )
+
+
+def sample_signature_cards(comparison: dict[str, Any]) -> str:
+    records = comparison["datasets"]
+
+    def maximum(dimension: str, keys: tuple[str, ...]) -> tuple[dict[str, Any], float]:
+        candidates = [
+            (
+                record,
+                sum(float(record["dimensions"][dimension]["proportions"][key]) for key in keys),
+            )
+            for record in records
+        ]
+        return max(candidates, key=lambda item: item[1])
+
+    signatures = (
+        (
+            "可評估性負擔",
+            *maximum("structural", ("incomplete",)),
+            "incomplete",
+        ),
+        (
+            "Exact 可辨識度",
+            *maximum("structural", ("exact_and_topology_unique",)),
+            "exact + Topo unique",
+        ),
+        (
+            "Read-AF 並列負擔",
+            *maximum("read_af_selection", ("read_af_tied_same_topology", "read_af_tied_different_topology")),
+            "co-top ties",
+        ),
+        (
+            "分枝相容形態",
+            *maximum("morphology", ("sister_branch", "direct_and_sister")),
+            "sister + mixed",
+        ),
+    )
+    return "".join(
+        f'<article class="signature-card"><span>{escaped(title)}</span><strong>{escaped(record["dataset"])}</strong>'
+        f'<b>{value * 100:.1f}%</b><small>{escaped(note)} · W_primary {int(record["W_primary"]):,}</small></article>'
+        for title, record, value, note in signatures
+    )
+
+
+def hcc_matched_rows(comparison: dict[str, Any]) -> str:
+    hcc = comparison["hcc1395_technical_pair"]
+    rows = []
+    for dimension, contract in COMPARISON_DIMENSIONS.items():
+        values = hcc["matched_primary_dimensions"][dimension]
+        agreement_ci = values["bootstrap"]["raw_agreement_ci95"]
+        kappa_ci = values["bootstrap"]["cohen_kappa_ci95"]
+        rows.append(
+            '<tr>'
+            f'<th scope="row">{escaped(contract["label"])}</th>'
+            f'<td class="numeric"><strong>{float(values["raw_agreement"]) * 100:.2f}%</strong>'
+            f'<small>{int(values["agreement_count"]):,} / {int(values["n"]):,}</small></td>'
+            f'<td class="numeric">{float(agreement_ci[0]) * 100:.2f}–{float(agreement_ci[1]) * 100:.2f}%</td>'
+            f'<td class="numeric"><strong>{float(values["cohen_kappa"]):.3f}</strong>'
+            f'<small>{float(kappa_ci[0]):.3f}–{float(kappa_ci[1]):.3f}</small></td>'
+            f'<td><span class="verdict-badge verdict-{escaped(values["raw_agreement_band"])}">'
+            f'{escaped(values["raw_agreement_band"])}</span></td></tr>'
+        )
+    return "".join(rows)
+
+
+def hcc_confusion_table(comparison: dict[str, Any], dimension: str) -> str:
+    classes = comparison_class_contract(dimension)
+    matrix = comparison["hcc1395_technical_pair"]["matched_primary_dimensions"][dimension]["matrix"]
+    header = "".join(f'<th scope="col">{escaped(item["label"])}</th>' for item in classes)
+    body = []
+    for left in classes:
+        cells = "".join(
+            f'<td class="numeric{" confusion-diagonal" if left["key"] == right["key"] else ""}">'
+            f'{int(matrix[left["key"]][right["key"]]):,}</td>'
+            for right in classes
+        )
+        body.append(f'<tr><th scope="row">{escaped(left["label"])}</th>{cells}</tr>')
+    return (
+        '<table class="confusion-table"><caption>Rows = HCC1395 5kHz；columns = HCC1395_DORADO</caption>'
+        f'<thead><tr><th scope="col">5kHz ↓ / DORADO →</th>{header}</tr></thead>'
+        f'<tbody>{"".join(body)}</tbody></table>'
+    )
+
+
+def compact_comparison_payload(comparison: dict[str, Any]) -> dict[str, Any]:
+    hcc = comparison["hcc1395_technical_pair"]
+    compact_hcc_dimensions = {}
+    for dimension, values in hcc["matched_primary_dimensions"].items():
+        compact_hcc_dimensions[dimension] = {
+            key: value for key, value in values.items() if key != "by_chromosome"
+        }
+    return {
+        "dimensions": {
+            dimension: {
+                "label": contract["label"],
+                "short": contract["short"],
+                "classes": comparison_class_contract(dimension),
+            }
+            for dimension, contract in COMPARISON_DIMENSIONS.items()
+        },
+        "datasets": comparison["datasets"],
+        "aggregates": comparison["aggregates"],
+        "pairwise": comparison["pairwise_composition"],
+        "hcc": {
+            "marginal_profiles": hcc["marginal_profiles"],
+            "exact_coordinate_overlap": hcc["exact_coordinate_overlap"],
+            "matched_primary_dimensions": compact_hcc_dimensions,
+        },
+    }
+
+
+def sample_comparison_dashboard(comparison: dict[str, Any]) -> str:
+    hcc = comparison["hcc1395_technical_pair"]
+    marginal = hcc["marginal_profiles"]
+    overlap = hcc["exact_coordinate_overlap"]["primary_both"]
+    prior = comparison["independent_current_v5_hcc_evidence"]
+    exact = comparison["hcc_exact_signature_evidence"]
+    retained = prior["exact_retained_site_overlap"]
+    same_internal = exact["internal_ssnv_pairing"]["same_set_within_exact_common_region"]
+    shape = exact["shape_agreement"]["same_internal_ssnv_both_shape_resolved"]
+    exact_edges = exact["exact_labeled_edge_agreement"]["same_internal_ssnv_both_candidate_unique"]
+    bootstrap = marginal["chromosome_block_bootstrap"]
+    embedded = json.dumps(
+        compact_comparison_payload(comparison),
+        ensure_ascii=False,
+        separators=(",", ":"),
+    ).replace("</", "<\\/")
+    return f'''
+  <section class="section" id="cohort-comparison" aria-labelledby="comparison-title">
+    <div class="section-head"><div><p class="section-kicker">Cross-dataset comparison</p><h2 id="comparison-title">樣本狀況、比例與差異放在同一張桌上</h2></div><p class="section-note">先看 7-dataset operational profile，再以 6-biological-sample macro 防止 HCC1395 technical pair 被當成兩個生物樣本。TVD 是類別比例距離，不是 clone／演化距離。</p></div>
+    <div class="comparison-scope-grid">
+      <article><span>Operational micro</span><strong>7 datasets</strong><b>{int(comparison["aggregates"]["dataset_micro"]["W_primary"]):,}</b><small>W_primary region rows；HCC pair 各占一列</small></article>
+      <article><span>Biological macro</span><strong>6 biological IDs</strong><b>Equal weight</b><small>HCC pair 先平均，再與其他五個 ID 平均</small></article>
+      <article class="technical"><span>Validation pair</span><strong>HCC1395 × DORADO</strong><b>1 biological ID</b><small>technical／cross-platform pair；不是 biological replication</small></article>
+    </div>
+    <div class="signature-grid" aria-label="樣本 profile 的自動極值摘要">{sample_signature_cards(comparison)}</div>
+    <div class="comparison-controls" role="group" aria-label="切換樣本比較維度">
+      {''.join(f'<button type="button" class="comparison-tab{" is-active" if dimension == "structural" else ""}" data-comparison-dimension="{escaped(dimension)}" aria-pressed="{"true" if dimension == "structural" else "false"}"><span>{escaped(contract["short"])}</span>{escaped(contract["label"])}</button>' for dimension, contract in COMPARISON_DIMENSIONS.items())}
+    </div>
+    <div class="comparison-key" id="comparison-key" aria-live="polite">{comparison_legend("structural")}</div>
+    <article class="comparison-profile-panel">
+      <div class="comparison-panel-head"><div><span>01 · Composition profiles</span><h3 id="comparison-profile-title">結構可辨識度 · 逐 dataset</h3></div><p>每列獨立以該 dataset 的 W_primary=100%；長條適合看 pattern，精確 count／% 在下方表格。</p></div>
+      <div class="comparison-profile-list" id="comparison-profile-chart" aria-live="polite">{comparison_profile_rows(comparison, "structural")}</div>
+    </article>
+    <details class="comparison-ledger">
+      <summary>查看目前維度的 7 datasets 精確 count 與比例</summary>
+      <div class="table-scroll" role="region" aria-label="樣本拓撲比例精確表" tabindex="0"><table class="comparison-table"><thead id="comparison-ledger-head">{comparison_ledger_head("structural")}</thead><tbody id="comparison-ledger-body">{comparison_ledger_rows(comparison, "structural")}</tbody></table></div>
+    </details>
+    <div class="comparison-matrix-layout">
+      <article class="matrix-panel"><div class="comparison-panel-head"><div><span>02 · Pairwise distance</span><h3 id="comparison-matrix-title">結構可辨識度 · TVD</h3></div><p>0=比例完全相同；數值越高差異越大。每格直接印數值，色深只作輔助。</p></div><div class="heatmap-scroll" role="region" aria-label="7乘7樣本組成距離矩陣" tabindex="0" id="comparison-matrix">{comparison_matrix_table(comparison, "structural")}</div></article>
+      <aside class="pair-inspector" id="pair-inspector" aria-live="polite">{comparison_pair_inspector(comparison, "structural")}</aside>
+    </div>
+  </section>
+
+  <section class="section" id="hcc1395-technical-validation" aria-labelledby="hcc-validation-title">
+    <div class="section-head"><div><p class="section-kicker">HCC1395 technical reproducibility</p><h2 id="hcc-validation-title">相對第 2 近，但不是可互換的同一份結果</h2></div><p class="section-note">兩列資料屬同一 biological sample；驗證的是 current pipeline 跨技術／輸入重現性。結論必同時滿足 marginal composition 與 matched-region 兩個視角。</p></div>
+    <article class="hcc-verdict">
+      <div><span class="verdict-badge verdict-moderate">PARTIAL TECHNICAL REPRODUCIBILITY</span><h3>粗粒度拓撲中度重現；exact ancestry 尚未確認</h3><p>三維 profile 在 21 組中排名第 {int(marginal["rank_among_21_pairs"])} 近，但 full-profile TVD={float(marginal["profile_mean_tvd"]):.3f} 已跨過事先鎖定的 0.10 明顯差異門檻。共同 primary regions 的三類 κ 都只落在 moderate。</p></div>
+      <dl><div><dt>Full profile</dt><dd>{float(marginal["profile_mean_tvd"]):.3f}<small>95% chr-block {float(bootstrap["full_profile_mean_tvd_ci95"][0]):.3f}–{float(bootstrap["full_profile_mean_tvd_ci95"][1]):.3f}</small></dd></div><div><dt>Conditional evaluable</dt><dd>{float(marginal["conditional_evaluable_mean_tvd"]):.3f}<small>rank {int(marginal["conditional_evaluable_rank_among_21_pairs"])}/21</small></dd></div></dl>
+    </article>
+    <div class="hcc-metric-grid">
+      <article><span>Exact primary region</span><strong>{int(overlap["intersection"]):,}</strong><b>Jaccard {float(overlap["jaccard"]):.3f}</b><small>{float(overlap["left_coverage"])*100:.1f}%／{float(overlap["right_coverage"])*100:.1f}% coverage</small></article>
+      <article><span>Exact retained sSNV</span><strong>{int(retained["intersection"]):,}</strong><b>Jaccard {float(retained["jaccard"]):.3f}</b><small>site backbone 高；不等於 tree 相同</small></article>
+      <article><span>Unlabeled rooted shape</span><strong>{float(shape["rate"])*100:.1f}%</strong><b>{int(shape["numerator"]):,} / {int(shape["denominator"]):,}</b><small>same internal sSNV；忽略 HP label</small></article>
+      <article><span>Exact labeled edges</span><strong>{float(exact_edges["rate"])*100:.1f}%</strong><b>{int(exact_edges["numerator"]):,} / {int(exact_edges["denominator"]):,}</b><small>unique candidate；exact ancestry 重現偏弱</small></article>
+    </div>
+    <div class="hcc-analysis-grid">
+      <article class="hcc-table-panel"><div class="comparison-panel-head"><div><span>03 · Exact-coordinate agreement</span><h3>共同 primary region 的分類是否一致？</h3></div><p>95% CI 以 22 條 autosome block bootstrap，避免把 6,402 regions 當獨立 replicate。</p></div><div class="table-scroll" role="region" aria-label="HCC1395 matched region agreement" tabindex="0"><table class="hcc-agreement-table"><thead><tr><th scope="col">維度</th><th scope="col" class="numeric">Agreement</th><th scope="col" class="numeric">95% block CI</th><th scope="col" class="numeric">κ（95% CI）</th><th scope="col">判讀</th></tr></thead><tbody>{hcc_matched_rows(comparison)}</tbody></table></div></article>
+      <aside class="evidence-ladder"><span>Independent current-v5 layers</span><ol><li><b>{float(retained["jaccard"])*100:.1f}%</b><small>retained-site Jaccard · high backbone overlap</small></li><li><b>{float(same_internal["rate"])*100:.1f}%</b><small>exact common regions with the same internal sSNV set</small></li><li><b>{float(shape["rate"])*100:.1f}%</b><small>same-site unlabeled rooted-shape agreement</small></li><li><b>{float(exact_edges["rate"])*100:.1f}%</b><small>same-site exact labeled-edge agreement</small></li></ol></aside>
+    </div>
+    <article class="confusion-panel"><div class="comparison-panel-head"><div><span>04 · Confusion matrix</span><h3 id="hcc-confusion-title">結構可辨識度 · 哪些類別互相轉換？</h3></div><p>對角線是相同 label；非對角線是 technical divergence，不稱「錯誤」，因兩側都沒有 ground truth 身分。</p></div><div class="heatmap-scroll" role="region" aria-label="HCC1395 技術配對 confusion matrix" tabindex="0" id="hcc-confusion">{hcc_confusion_table(comparison, "structural")}</div></article>
+    <aside class="claim-boundary-box"><strong>判定界線</strong><p>可寫：「同一 HCC1395 的粗粒度 regional mutation-state profile 具有中度跨技術重現性。」不可寫：「兩個 dataset 得到相同真樹／clone tree」「已驗證 biological clone」或「可互換」。若要驗樣本身分，需另做 germline SNP fingerprint；topology comparison 只驗分析輸出。</p></aside>
+  </section>
+  <script type="application/json" id="sample-comparison-data">{embedded}</script>
+'''
 def sample_topology_rows(rows: list[dict[str, Any]]) -> str:
     rendered = []
     for row in rows:
@@ -768,6 +1233,15 @@ def evidence_links(authority: dict[str, Any], rows: list[dict[str, Any]]) -> str
         f'<li><a href="{escaped(os.path.relpath(authority["read_af_index_path"], OUTDIR))}">'
         f'Current-v5 read-AF／morphology index JSON</a>'
         f'<code>{escaped(authority["read_af_index_sha256"])}</code></li>',
+        f'<li><a href="{escaped(os.path.relpath(authority["sample_comparison_path"], OUTDIR))}">'
+        f'Seven-dataset topology comparison JSON</a>'
+        f'<code>{escaped(authority["sample_comparison_sha256"])}</code></li>',
+        f'<li><a href="{escaped(os.path.relpath(authority["sample_comparison_receipt_path"], OUTDIR))}">'
+        f'Sample-comparison validation receipt JSON</a>'
+        f'<code>{escaped(authority["sample_comparison_receipt_sha256"])}</code></li>',
+        f'<li><a href="{escaped(os.path.relpath(authority["hcc_exact_signature_path"], OUTDIR))}">'
+        f'HCC1395 exact-signature validation JSON</a>'
+        f'<code>{escaped(authority["hcc_exact_signature_sha256"])}</code></li>',
     ]
     for row in rows:
         links.append(
@@ -807,6 +1281,7 @@ def build_index(authority: dict[str, Any], rows: list[dict[str, Any]]) -> str:
 <meta name="intersubmod-current-summary-sha256" content="$summary_sha256">
 <meta name="intersubmod-backbone-comparison-sha256" content="$comparison_sha256">
 <meta name="intersubmod-read-af-topology-index-sha256" content="$read_af_index_sha256">
+<meta name="intersubmod-sample-topology-comparison-sha256" content="$sample_comparison_sha256">
 <meta name="intersubmod-canonical-run" content="$run_id">
 <title>Layered reconstruction · 全基因 cohort command center</title>
 <style>
@@ -837,7 +1312,7 @@ h1{max-width:830px;margin:0;font-family:"Iowan Old Style","Noto Serif TC","Songt
 .section{margin-top:34px}
 .section-head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:13px;padding-bottom:10px;border-bottom:1px solid var(--line)}
 .section-kicker{margin:0 0 4px;color:var(--teal);font:800 10px/1.2 "IBM Plex Mono","Cascadia Code",monospace;letter-spacing:.12em;text-transform:uppercase}
-h2{margin:0;font-family:"Iowan Old Style","Noto Serif TC","Songti TC",serif;font-size:clamp(23px,3vw,37px);font-weight:600;letter-spacing:-.025em;line-height:1.1}
+h2{margin:0;font-family:"Iowan Old Style","Noto Serif TC","Songti TC",serif;font-size:clamp(23px,3vw,37px);font-weight:600;letter-spacing:-.025em;line-height:1.1;text-wrap:balance}
 .section-note{max-width:610px;margin:0;color:var(--muted);font-size:12.5px}
 .metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .metric-card{position:relative;min-height:170px;padding:20px;border:1px solid var(--line);background:var(--panel);box-shadow:0 6px 20px rgba(19,45,52,.035)}
@@ -859,6 +1334,16 @@ h2{margin:0;font-family:"Iowan Old Style","Noto Serif TC","Songti TC",serif;font
 .sample-bars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
 .sample-topology{padding:15px 16px}.sample-topology-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:9px}.sample-topology-head a{font-size:12.5px}.sample-topology-head span{color:var(--muted);font:700 10px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.sample-topology .topology-bar{height:16px}
 .interpretation-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.distribution-card{min-width:0;padding:22px;border:1px solid var(--line);background:var(--panel)}.distribution-card:nth-child(1){border-top:4px solid var(--blue)}.distribution-card:nth-child(2){border-top:4px solid #7e50a0}.distribution-head{display:flex;justify-content:space-between;gap:16px;align-items:start}.distribution-head span{color:var(--muted);font:800 9.5px/1.25 "IBM Plex Mono","Cascadia Code",monospace;letter-spacing:.06em;text-transform:uppercase}.distribution-head h3{margin:6px 0 0;font-size:17px}.distribution-head>b{color:var(--muted);font:750 10px/1.4 "IBM Plex Mono","Cascadia Code",monospace;white-space:nowrap}.distribution-card>p{min-height:40px;margin:10px 0 18px;color:var(--ink-soft);font-size:12px}.distribution-card .topology-bar{height:24px}.distribution-legend{display:grid;gap:7px;margin:17px 0 0;padding:0;list-style:none}.distribution-legend li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:9px;align-items:start;padding-top:7px;border-top:1px solid #e3e0d7}.distribution-legend .legend-swatch{height:29px}.distribution-legend strong,.distribution-legend small,.distribution-legend b{display:block}.distribution-legend strong{font-size:11.5px}.distribution-legend small{margin-top:2px;color:var(--muted);font-size:10px}.distribution-legend b{text-align:right;font:750 12px/1.2 "IBM Plex Mono","Cascadia Code",monospace}.distribution-card aside{margin-top:16px;padding:10px 12px;border-left:4px solid var(--amber);background:#f8efe2;color:#624a2e;font-size:11px}
+.comparison-scope-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.comparison-scope-grid article{min-height:146px;padding:18px;border:1px solid var(--line);border-top:4px solid var(--teal);background:var(--panel)}.comparison-scope-grid article:nth-child(2){border-top-color:var(--blue)}.comparison-scope-grid article.technical{border-top-color:var(--amber);background:#fff9ed}.comparison-scope-grid span,.comparison-panel-head span,.evidence-ladder>span{display:block;color:var(--muted);font:800 9.5px/1.25 "IBM Plex Mono","Cascadia Code",monospace;letter-spacing:.07em;text-transform:uppercase}.comparison-scope-grid strong,.comparison-scope-grid b,.comparison-scope-grid small{display:block}.comparison-scope-grid strong{margin-top:14px;font-size:17px}.comparison-scope-grid b{margin-top:4px;font:800 14px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.comparison-scope-grid small{margin-top:9px;color:var(--muted);font-size:10.5px}
+.signature-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}.signature-card{min-width:0;padding:13px 14px;border:1px solid #d2cfc5;background:#f7f4ec}.signature-card span,.signature-card strong,.signature-card b,.signature-card small{display:block}.signature-card span{color:var(--muted);font-size:9.5px}.signature-card strong{margin-top:6px;overflow-wrap:anywhere;font:800 11.5px/1.25 "IBM Plex Mono","Cascadia Code",monospace}.signature-card b{margin-top:5px;color:var(--teal);font:850 20px/1 "IBM Plex Mono","Cascadia Code",monospace}.signature-card small{margin-top:5px;color:var(--muted);font-size:9px}
+.comparison-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:16px 0 8px;padding:7px;border:1px solid #9da9a7;background:#e4e8e4}.comparison-tab{min-height:48px;padding:8px 12px;border:1px solid transparent;background:transparent;color:var(--ink);cursor:pointer;font:750 11px/1.3 "IBM Plex Sans","Noto Sans TC",sans-serif}.comparison-tab span{display:block;color:var(--muted);font:750 8.5px/1.2 "IBM Plex Mono","Cascadia Code",monospace;text-transform:uppercase}.comparison-tab.is-active{border-color:var(--rail);background:var(--rail);color:#fff}.comparison-tab.is-active span{color:#b5d7d4}.comparison-tab:focus-visible,.matrix-cell:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.comparison-key{display:flex;flex-wrap:wrap;gap:6px 14px;min-height:40px;padding:9px 11px;border:1px solid #d8d5cc;background:#faf8f2}.comparison-key-item{display:inline-grid;grid-template-columns:9px auto;gap:6px;align-items:center}.comparison-key-item .legend-swatch{width:9px;height:18px}.comparison-key-item b{font-size:9.5px}
+.comparison-profile-panel,.matrix-panel,.hcc-table-panel,.confusion-panel{min-width:0;margin-top:10px;padding:19px;border:1px solid var(--line);background:var(--panel)}.comparison-panel-head{display:flex;justify-content:space-between;gap:24px;align-items:end;margin-bottom:15px}.comparison-panel-head h3{margin:5px 0 0;font-size:17px}.comparison-panel-head p{max-width:520px;margin:0;color:var(--muted);font-size:11px}.comparison-profile-list{display:grid;gap:7px}.comparison-profile-row{display:grid;grid-template-columns:minmax(150px,190px) minmax(0,1fr) 86px;gap:12px;align-items:center;min-height:43px;padding:6px 8px;border-left:3px solid transparent}.comparison-profile-row.technical-pair{border-left-color:var(--amber);background:#fff9ed}.comparison-profile-name strong,.comparison-profile-name small,.comparison-profile-n small{display:block}.comparison-profile-name strong{overflow-wrap:anywhere;font:800 11px/1.25 "IBM Plex Mono","Cascadia Code",monospace}.comparison-profile-name small{margin-top:2px;color:#8a5a24;font-size:8.5px}.comparison-profile-row .topology-bar{height:21px}.comparison-profile-n{text-align:right;font:800 11px/1.25 "IBM Plex Mono","Cascadia Code",monospace}.comparison-profile-n small{color:var(--muted);font-size:8px}.comparison-ledger{min-width:0;margin-top:8px;border:1px solid var(--line);background:var(--panel)}.comparison-ledger summary{min-height:48px;padding:13px 16px;cursor:pointer;font-weight:800}.comparison-ledger[open] summary{border-bottom:1px solid var(--line)}.comparison-table{min-width:1050px}.comparison-table strong,.comparison-table small{display:block}
+.comparison-matrix-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(250px,.6fr);gap:10px;align-items:stretch}.heatmap-scroll{width:100%;min-width:0;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}.heatmap-scroll:focus-visible{outline:3px solid var(--focus);outline-offset:2px}.distance-matrix{min-width:760px;table-layout:fixed;border-collapse:separate;border-spacing:3px}.distance-matrix th,.distance-matrix td{position:static;padding:0;border:0;background:transparent;text-align:center}.distance-matrix thead th,.distance-matrix tbody th{padding:5px;background:transparent;color:var(--muted);font:750 8.5px/1.15 "IBM Plex Mono","Cascadia Code",monospace}.distance-matrix tbody th{text-align:left}.matrix-cell,.matrix-diagonal span{display:grid;width:100%;min-height:44px;place-items:center;border:1px solid rgba(15,49,56,.22);color:#0a2429;font:800 10px/1 "IBM Plex Mono","Cascadia Code",monospace;font-variant-numeric:tabular-nums}.matrix-cell{cursor:pointer}.matrix-cell:hover{border-color:var(--rail);box-shadow:inset 0 0 0 2px #fff}.matrix-cell.is-hcc{outline:2px solid var(--amber);outline-offset:-2px}.matrix-cell.is-selected{box-shadow:inset 0 0 0 3px #fff;outline:3px solid var(--rail);outline-offset:-1px}.matrix-diagonal span{border-style:dashed;background:#ece9e0;color:#7a8584}
+.pair-inspector{min-width:0;margin-top:10px;padding:21px;border:1px solid #9db0b2;border-top:5px solid var(--amber);background:#f8f5ed}.pair-chip,.verdict-badge{display:inline-block;padding:4px 7px;border:1px solid currentColor;color:#83501f;font:800 8.5px/1.2 "IBM Plex Mono","Cascadia Code",monospace;text-transform:uppercase}.pair-inspector h3{margin:16px 0 10px;overflow-wrap:anywhere;font-size:16px}.pair-distance{display:block;font:850 34px/1 "IBM Plex Mono","Cascadia Code",monospace}.pair-distance small{display:block;margin-top:6px;color:var(--muted);font-size:9px}.pair-inspector p{margin:18px 0 0;color:var(--muted);font-size:11px}.pair-delta-list{display:grid;gap:5px;margin-top:14px}.pair-delta-list div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding-top:5px;border-top:1px solid #ddd8cc}.pair-delta-list span{font-size:9.5px}.pair-delta-list b{font:750 9.5px/1.2 "IBM Plex Mono","Cascadia Code",monospace}
+.hcc-verdict{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.6fr);gap:18px;padding:22px;border:1px solid #c38a4c;border-left:7px solid var(--amber);background:#fff8e8}.hcc-verdict h3{margin:15px 0 7px;font-size:20px}.hcc-verdict p{margin:0;color:#654722;font-size:12px}.hcc-verdict dl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0}.hcc-verdict dl div{padding:12px;border:1px solid #dec5a6;background:#fffdf8}.hcc-verdict dt{color:var(--muted);font-size:9px}.hcc-verdict dd{margin:7px 0 0;font:850 24px/1 "IBM Plex Mono","Cascadia Code",monospace}.hcc-verdict dd small{display:block;margin-top:7px;color:var(--muted);font-size:8.5px;line-height:1.4}.verdict-moderate{color:#8a5720;background:#fff4d9}.verdict-high{color:#176d5b;background:#e5f3ee}.verdict-limited{color:#8a3f34;background:#f8e8e4}
+.hcc-metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:9px}.hcc-metric-grid article{min-height:150px;padding:16px;border:1px solid var(--line);background:var(--panel)}.hcc-metric-grid span,.hcc-metric-grid strong,.hcc-metric-grid b,.hcc-metric-grid small{display:block}.hcc-metric-grid span{color:var(--muted);font-size:9px}.hcc-metric-grid strong{margin-top:13px;font:850 25px/1 "IBM Plex Mono","Cascadia Code",monospace}.hcc-metric-grid b{margin-top:7px;color:var(--teal);font:800 11px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.hcc-metric-grid small{margin-top:10px;color:var(--muted);font-size:9.5px}
+.hcc-analysis-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(250px,.45fr);gap:10px}.hcc-agreement-table{min-width:760px}.hcc-agreement-table strong,.hcc-agreement-table small{display:block}.evidence-ladder{margin-top:10px;padding:19px;border:1px solid #9dacac;background:#e9efed}.evidence-ladder ol{display:grid;gap:8px;margin:14px 0 0;padding:0;list-style:none}.evidence-ladder li{padding:10px;border-left:4px solid var(--teal);background:#f9fbf8}.evidence-ladder b,.evidence-ladder small{display:block}.evidence-ladder b{font:850 20px/1 "IBM Plex Mono","Cascadia Code",monospace}.evidence-ladder small{margin-top:5px;color:var(--muted);font-size:9.5px}.confusion-table{min-width:820px}.confusion-table caption{padding:0 0 10px;text-align:left;color:var(--muted);font-size:10px}.confusion-table th,.confusion-table td{position:static;padding:8px;border:2px solid var(--panel);background:#f3e7d3;text-align:center}.confusion-table thead th,.confusion-table tbody th{background:#e5e9e5;font-size:9px}.confusion-table .confusion-diagonal{background:#d7ebe4;color:#154d42;font-weight:850}.claim-boundary-box{display:grid;grid-template-columns:auto 1fr;gap:15px;align-items:start;margin-top:9px;padding:15px 17px;border-left:6px solid var(--brick);background:#f8eae6}.claim-boundary-box strong{font:850 9px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.claim-boundary-box p{margin:0;color:#613c35;font-size:11px}
 .dimension-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.dimension-card{display:flex;min-width:0;min-height:306px;flex-direction:column;padding:20px;border-top:4px solid var(--teal)}.dimension-card:nth-child(2){border-top-color:var(--amber)}.dimension-card:nth-child(3){border-top-color:var(--blue)}
 .dimension-code{display:flex;justify-content:space-between;gap:10px;color:var(--teal);font:800 10px/1.2 "IBM Plex Mono","Cascadia Code",monospace;letter-spacing:.07em;text-transform:uppercase}.dimension-card:nth-child(2) .dimension-code{color:var(--amber)}.dimension-card:nth-child(3) .dimension-code{color:var(--blue)}
 .dimension-card h3{margin:18px 0 8px;font-size:17px}.dimension-answer{margin:0;color:var(--ink-soft);font-size:12.5px}.dimension-answer strong{color:var(--ink);font:800 22px/1.1 "IBM Plex Mono","Cascadia Code",monospace}.dimension-list{display:grid;gap:5px;margin:15px 0}.dimension-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:7px 8px;border:1px solid #ddd9cf;background:#f6f3eb}.dimension-row span{color:var(--muted);font-size:10.5px}.dimension-row b{font:750 10.5px/1.3 "IBM Plex Mono","Cascadia Code",monospace;text-align:right}.dimension-boundary{margin:auto 0 0;color:var(--muted);font-size:11.5px}.dimension-link{display:inline-block;margin-top:13px;padding:8px 10px;border:1px solid var(--rail);background:var(--rail);color:#fff;text-decoration:none;font-size:11px;font-weight:800}.dimension-link:hover{background:var(--teal)}
@@ -874,10 +1359,10 @@ table{width:100%;min-width:1020px;border-collapse:collapse;font-size:12px}th,td{
 .qc-note{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;margin-top:10px;padding:15px 18px;border-left:5px solid var(--blue);background:#e8edf0}.qc-note strong{font:800 11px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.qc-note p{margin:0;color:var(--ink-soft);font-size:12px}
 .evidence-drawer{margin-top:34px}.evidence-drawer summary{cursor:pointer;padding:14px 17px;font-weight:800}.evidence-drawer[open] summary{border-bottom:1px solid var(--line)}.evidence-inner{padding:16px 18px}.evidence-inner p{margin:0 0 12px;color:var(--muted);font-size:11.5px}.evidence-list{margin:0;padding-left:20px}.evidence-list li+li{margin-top:9px}.evidence-list a{font-size:11.5px}.evidence-list code{display:block;margin-top:2px;overflow-wrap:anywhere;color:var(--muted);font-size:9.5px}
 footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;padding-top:13px;border-top:1px solid var(--line);color:var(--muted);font-size:10.5px}.mono{font-family:"IBM Plex Mono","Cascadia Code",monospace;overflow-wrap:anywhere}
-@media(max-width:1050px){.metric-grid{grid-template-columns:repeat(2,1fr)}.genome-launchers{grid-template-columns:repeat(3,1fr)}.topology-board{grid-template-columns:1fr}.dimension-grid{grid-template-columns:1fr}.dimension-card{min-height:0}.layer-grid{grid-template-columns:repeat(2,1fr)}.layer-card:nth-child(2){border-right:0}.layer-card:nth-child(-n+2){border-bottom:1px solid var(--line)}}
-@media(max-width:760px){.shell{padding:12px 11px 36px}.hero{grid-template-columns:1fr}.hero-aside{border-left:0;border-top:1px solid rgba(255,255,255,.18)}.sensitivity-banner{grid-template-columns:1fr}.sensitivity-metrics{grid-template-columns:1fr 1fr}.section-head{display:block}.section-note{margin-top:7px}.sample-bars,.claim-grid{grid-template-columns:1fr}.genome-launchers{grid-template-columns:repeat(2,1fr)}footer{display:block}footer span{display:block;margin-top:5px}}
+@media(max-width:1050px){.metric-grid{grid-template-columns:repeat(2,1fr)}.genome-launchers{grid-template-columns:repeat(3,1fr)}.topology-board{grid-template-columns:1fr}.dimension-grid{grid-template-columns:1fr}.dimension-card{min-height:0}.layer-grid{grid-template-columns:repeat(2,1fr)}.layer-card:nth-child(2){border-right:0}.layer-card:nth-child(-n+2){border-bottom:1px solid var(--line)}.signature-grid,.hcc-metric-grid{grid-template-columns:repeat(2,1fr)}.comparison-matrix-layout,.hcc-analysis-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.shell{padding:12px 11px 36px}.hero{grid-template-columns:1fr}.hero-aside{border-left:0;border-top:1px solid rgba(255,255,255,.18)}.sensitivity-banner{grid-template-columns:1fr}.sensitivity-metrics{grid-template-columns:1fr 1fr}.section-head{display:block}.section-note{margin-top:7px}.sample-bars,.claim-grid,.comparison-scope-grid{grid-template-columns:1fr}.genome-launchers{grid-template-columns:repeat(2,1fr)}footer{display:block}footer span{display:block;margin-top:5px}.comparison-panel-head{display:block}.comparison-panel-head p{margin-top:7px}.comparison-profile-row{grid-template-columns:1fr;gap:6px;padding:9px}.comparison-profile-n{text-align:left}.hcc-verdict{grid-template-columns:1fr}.claim-boundary-box{grid-template-columns:1fr}}
 @media(max-width:760px){.interpretation-board{grid-template-columns:1fr}.distribution-card>p{min-height:0}}
-@media(max-width:500px){.metric-grid,.genome-launchers,.layer-grid{grid-template-columns:1fr}.hero-main{padding:28px 20px 58px}.hero-aside{padding:24px 20px 48px}.metric-card{min-height:0}.position-leaders{grid-template-columns:1fr}.layer-card{min-height:0;border-right:0;border-bottom:1px solid var(--line)}.layer-card:last-child{border-bottom:0}.scroll-cue span:last-child{display:none}.topology-main{padding:18px}.topology-legend{padding:15px}.distribution-card{padding:18px}.distribution-head{display:block}.distribution-head>b{display:block;margin-top:7px}.distribution-legend li{grid-template-columns:9px minmax(0,1fr) auto}}
+@media(max-width:500px){.metric-grid,.genome-launchers,.layer-grid,.signature-grid,.hcc-metric-grid,.comparison-controls{grid-template-columns:1fr}.hero-main{padding:28px 20px 58px}.hero-aside{padding:24px 20px 48px}.metric-card{min-height:0}.position-leaders{grid-template-columns:1fr}.layer-card{min-height:0;border-right:0;border-bottom:1px solid var(--line)}.layer-card:last-child{border-bottom:0}.scroll-cue span:last-child{display:none}.topology-main{padding:18px}.topology-legend{padding:15px}.distribution-card{padding:18px}.distribution-head{display:block}.distribution-head>b{display:block;margin-top:7px}.distribution-legend li{grid-template-columns:9px minmax(0,1fr) auto}.hcc-verdict dl{grid-template-columns:1fr}.comparison-profile-panel,.matrix-panel,.hcc-table-panel,.confusion-panel{padding:14px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.genome-link{transition:none}}
 @media print{body{background:#fff}.shell{width:100%;padding:0}.hero,.table-shell{box-shadow:none}.genome-link{break-inside:avoid}.table-scroll{overflow:visible}table{min-width:0;font-size:8px}.skip-link,.scroll-cue,.table-action{display:none}}
 </style>
@@ -944,6 +1429,8 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
     $cohort_read_af_morphology
   </section>
 
+$sample_comparison_dashboard
+
   <section class="section" aria-labelledby="launch-title">
     <div class="section-head"><div><p class="section-kicker">Genome launchpad</p><h2 id="launch-title">進入 GRCh38 chr1–22 全基因巡覽</h2></div><p class="section-note">每頁都含座標比例 ideogram、read-AF 第一順位與 clone-compatible morphology 等七組 sample-wide 觀察，並由 current summary、sample region-view、read-AF sidecar、renderer SHA 與 UI contract 綁定；stale 頁面不會進入 index。</p></div>
     <nav class="genome-launchers" aria-label="開啟各 dataset 全基因頁">$genome_launchers</nav>
@@ -985,6 +1472,130 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
 
   <footer><span>Canonical main · LongPhase-S recalibrated FILTER=PASS · chr1–22 · 7/7 PASS</span><span class="mono">Page generated $generated_at</span></footer>
 </main>
+<script>
+(() => {
+  const source = document.getElementById('sample-comparison-data');
+  if (!source) return;
+  const data = JSON.parse(source.textContent);
+  let dimension = 'structural';
+  let selectedPair = ['HCC1395', 'HCC1395_DORADO'];
+  const safe = value => String(value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+  const pct = value => (Number(value) * 100).toFixed(1) + '%';
+  const pairKey = (left, right) => [left, right].sort().join('|');
+  const findPair = (left, right) => data.pairwise.records.find(record => pairKey(record.left, record.right) === pairKey(left, right));
+  const shortName = sample => sample === 'HCC1395_DORADO' ? 'DORADO' : sample;
+
+  function renderKey() {
+    const contract = data.dimensions[dimension];
+    document.getElementById('comparison-key').innerHTML = contract.classes.map(item =>
+      '<span class="comparison-key-item"><i class="legend-swatch segment-' + safe(item.class_name) + '" aria-hidden="true"></i><b>' + safe(item.label) + '</b></span>'
+    ).join('');
+  }
+
+  function renderProfiles() {
+    const contract = data.dimensions[dimension];
+    document.getElementById('comparison-profile-title').textContent = contract.label + ' · 逐 dataset';
+    document.getElementById('comparison-profile-chart').innerHTML = data.datasets.map(record => {
+      const values = record.dimensions[dimension];
+      const technical = record.dataset === 'HCC1395' || record.dataset === 'HCC1395_DORADO';
+      const role = record.dataset === 'HCC1395' ? '5kHz canonical' : 'Dorado technical pair';
+      const segments = contract.classes.map(item =>
+        '<span class="bar-segment segment-' + safe(item.class_name) + '" style="width:' + (Number(values.proportions[item.key]) * 100).toFixed(6) + '%" title="' + safe(item.label) + ' · ' + Number(values.counts[item.key]).toLocaleString() + ' · ' + pct(values.proportions[item.key]) + '"></span>'
+      ).join('');
+      return '<div class="comparison-profile-row' + (technical ? ' technical-pair' : '') + '" data-dataset="' + safe(record.dataset) + '"><div class="comparison-profile-name"><a href="' + safe(record.dataset) + '.html"><strong>' + safe(record.dataset) + '</strong></a>' + (technical ? '<small>' + safe(role) + '</small>' : '') + '</div><div class="topology-bar" role="img" aria-label="' + safe(record.dataset) + ' ' + safe(contract.label) + ' composition">' + segments + '</div><b class="comparison-profile-n">' + Number(record.W_primary).toLocaleString() + '<small>W_primary</small></b></div>';
+    }).join('');
+  }
+
+  function renderLedger() {
+    const contract = data.dimensions[dimension];
+    document.getElementById('comparison-ledger-head').innerHTML = '<tr><th scope="col">Dataset</th><th scope="col" class="numeric">W_primary</th>' + contract.classes.map(item => '<th scope="col" class="numeric">' + safe(item.label) + '</th>').join('') + '</tr>';
+    document.getElementById('comparison-ledger-body').innerHTML = data.datasets.map(record => {
+      const values = record.dimensions[dimension];
+      const cells = contract.classes.map(item => '<td class="numeric" data-label="' + safe(item.label) + '"><strong>' + Number(values.counts[item.key]).toLocaleString() + '</strong><small>' + pct(values.proportions[item.key]) + '</small></td>').join('');
+      return '<tr><th scope="row" class="sample-cell"><a href="' + safe(record.dataset) + '.html"><strong>' + safe(record.dataset) + '</strong></a><small>' + safe(record.biological_id) + ' biological ID</small></th><td class="numeric" data-label="W_primary">' + Number(record.W_primary).toLocaleString() + '</td>' + cells + '</tr>';
+    }).join('');
+  }
+
+  function renderPairInspector() {
+    const record = findPair(selectedPair[0], selectedPair[1]);
+    if (!record) return;
+    const left = data.datasets.find(item => item.dataset === selectedPair[0]);
+    const right = data.datasets.find(item => item.dataset === selectedPair[1]);
+    const metric = record.dimensions[dimension];
+    const technical = record.same_biological_sample === true;
+    const deltas = data.dimensions[dimension].classes.map(item => ({
+      label: item.label,
+      delta: Number(right.dimensions[dimension].proportions[item.key]) - Number(left.dimensions[dimension].proportions[item.key])
+    })).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta)).slice(0, 3);
+    document.getElementById('pair-inspector').innerHTML = '<span class="pair-chip">' + (technical ? 'Same biological sample · technical pair' : 'Different biological samples · composition only') + '</span><h3>' + safe(selectedPair[0]) + ' × ' + safe(selectedPair[1]) + '</h3><strong class="pair-distance">' + Number(metric.tvd).toFixed(3) + '<small>TVD · rank ' + Number(metric.tvd_rank_among_21_pairs) + '/21</small></strong><div class="pair-delta-list">' + deltas.map(item => '<div><span>' + safe(item.label) + '</span><b>' + (item.delta >= 0 ? '+' : '') + (item.delta * 100).toFixed(1) + ' pp</b></div>').join('') + '</div><p>' + (technical ? '此格只比較類別比例；下方 exact-region panel 才檢查相同區域是否得到相同標籤。' : '不同 biological samples 只比較 profile；不以 exact-coordinate overlap 當一般跨細胞株品質指標。') + '</p>';
+  }
+
+  function renderMatrix() {
+    const order = data.pairwise.matrices.order;
+    const matrix = data.pairwise.matrices.tvd[dimension];
+    document.getElementById('comparison-matrix-title').textContent = data.dimensions[dimension].label + ' · TVD';
+    let html = '<table class="distance-matrix"><caption class="sr-only">7 datasets pairwise composition TVD</caption><thead><tr><th scope="col">TVD</th>' + order.map(sample => '<th scope="col">' + safe(shortName(sample)) + '</th>').join('') + '</tr></thead><tbody>';
+    order.forEach(left => {
+      html += '<tr><th scope="row">' + safe(shortName(left)) + '</th>';
+      order.forEach(right => {
+        const value = Number(matrix[left][right]);
+        if (left === right) {
+          html += '<td class="matrix-diagonal"><span aria-label="same dataset">0</span></td>';
+          return;
+        }
+        const isHcc = pairKey(left, right) === pairKey('HCC1395', 'HCC1395_DORADO');
+        const isSelected = pairKey(left, right) === pairKey(selectedPair[0], selectedPair[1]);
+        const alpha = 0.08 + Math.min(value / 0.5, 1) * 0.64;
+        html += '<td><button type="button" class="matrix-cell' + (isHcc ? ' is-hcc' : '') + (isSelected ? ' is-selected' : '') + '" data-left="' + safe(left) + '" data-right="' + safe(right) + '" style="background:rgba(22,139,141,' + alpha.toFixed(4) + ')" aria-label="' + safe(left) + ' 與 ' + safe(right) + '，TVD ' + value.toFixed(3) + '">' + value.toFixed(3) + '</button></td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    const container = document.getElementById('comparison-matrix');
+    container.innerHTML = html;
+    container.querySelectorAll('.matrix-cell').forEach(button => button.addEventListener('click', () => {
+      selectedPair = [button.dataset.left, button.dataset.right];
+      renderMatrix();
+      renderPairInspector();
+    }));
+  }
+
+  function renderHccConfusion() {
+    const contract = data.dimensions[dimension];
+    const matrix = data.hcc.matched_primary_dimensions[dimension].matrix;
+    document.getElementById('hcc-confusion-title').textContent = contract.label + ' · 哪些類別互相轉換？';
+    let html = '<table class="confusion-table"><caption>Rows = HCC1395 5kHz；columns = HCC1395_DORADO</caption><thead><tr><th scope="col">5kHz ↓ / DORADO →</th>' + contract.classes.map(item => '<th scope="col">' + safe(item.label) + '</th>').join('') + '</tr></thead><tbody>';
+    contract.classes.forEach(left => {
+      html += '<tr><th scope="row">' + safe(left.label) + '</th>';
+      contract.classes.forEach(right => {
+        html += '<td class="numeric' + (left.key === right.key ? ' confusion-diagonal' : '') + '">' + Number(matrix[left.key][right.key]).toLocaleString() + '</td>';
+      });
+      html += '</tr>';
+    });
+    document.getElementById('hcc-confusion').innerHTML = html + '</tbody></table>';
+  }
+
+  function renderAll() {
+    document.querySelectorAll('.comparison-tab').forEach(button => {
+      const active = button.dataset.comparisonDimension === dimension;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    renderKey();
+    renderProfiles();
+    renderLedger();
+    renderMatrix();
+    renderPairInspector();
+    renderHccConfusion();
+  }
+
+  document.querySelectorAll('.comparison-tab').forEach(button => button.addEventListener('click', () => {
+    dimension = button.dataset.comparisonDimension;
+    renderAll();
+  }));
+  renderAll();
+})();
+</script>
 </body>
 </html>
 """)
@@ -992,6 +1603,7 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
         summary_sha256=escaped(authority["summary_sha256"]),
         comparison_sha256=escaped(authority["summary"]["backbone_comparison"]["sha256"]),
         read_af_index_sha256=escaped(authority["read_af_index_sha256"]),
+        sample_comparison_sha256=escaped(authority["sample_comparison_sha256"]),
         summary_short=escaped(authority["summary_sha256"][:16] + "…"),
         run_id=escaped(run_id),
         backbone_verdict=escaped(str(comparison["verdict"]).replace("_", " ").upper()),
@@ -1020,6 +1632,7 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
         topology_legend=topology_legend(aggregate),
         sample_topology_rows=sample_topology_rows(rows),
         cohort_read_af_morphology=cohort_read_af_morphology(rows),
+        sample_comparison_dashboard=sample_comparison_dashboard(authority["sample_comparison"]),
         position_leaders=sample_position_leaders(rows),
         genome_launchers=genome_launchers(rows),
         cohort_rows=cohort_rows(rows),
