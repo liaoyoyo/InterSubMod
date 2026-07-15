@@ -79,6 +79,8 @@ GRCH38_AUTOSOME_LENGTHS = {
 }
 IDEOGRAM_MODES: Tuple[str, ...] = (
     "determinacy",
+    "read-af-selection",
+    "morphology",
     "evidence",
     "primary-hp",
     "n-ssnv",
@@ -258,12 +260,12 @@ def check_mobile_body_overflow(page: Page, run: Dict[str, Any]) -> None:
 
 
 def check_layered_sample_overview(page: Page, run: Dict[str, Any]) -> None:
-    """Reconcile the five visible overview panels with embedded canonical data."""
+    """Reconcile the seven visible overview panels with embedded canonical data."""
 
     metrics = page.evaluate(
         """() => {
             const data = JSON.parse(document.getElementById('workstation-data').textContent);
-            const expectedIds = ['topology-count','candidate-count','determinacy','hp-h3','region-size'];
+            const expectedIds = ['topology-count','candidate-count','determinacy','read-af-selection','morphology','hp-h3','region-size'];
             const domPanels = [...document.querySelectorAll('[data-overview-panel]')];
             const expectedById = Object.fromEntries(data.sample_overview.panels.map(panel => [panel.id, panel]));
             const panels = domPanels.map(panel => {
@@ -307,7 +309,7 @@ def check_layered_sample_overview(page: Page, run: Dict[str, Any]) -> None:
     )
     add_check(
         run,
-        "layered_sample_overview_five_panels",
+        "layered_sample_overview_seven_panels",
         metrics["ids"] == metrics["expected_ids"],
         expected=metrics["expected_ids"],
         actual=metrics["ids"],
@@ -316,6 +318,8 @@ def check_layered_sample_overview(page: Page, run: Dict[str, Any]) -> None:
         "topology-count": ("W_primary", metrics["W_primary"]),
         "candidate-count": ("W_primary", metrics["W_primary"]),
         "determinacy": ("W_primary", metrics["W_primary"]),
+        "read-af-selection": ("W_primary", metrics["W_primary"]),
+        "morphology": ("W_primary", metrics["W_primary"]),
         "hp-h3": ("W_tree", metrics["W_tree"]),
         "region-size": ("W_tree", metrics["W_tree"]),
     }
@@ -436,15 +440,15 @@ def check_layered_ideogram(page: Page, run: Dict[str, Any], timeout_ms: int) -> 
     add_check(
         run,
         "layered_sample_ideogram_controls",
-        metrics["mode_buttons"] == 5
+        metrics["mode_buttons"] == 7
         and metrics["pressed_modes"] == 1
-        and metrics["ui_contract"] == "layered-workstation-v5-grch38-overview-1"
+        and metrics["ui_contract"] == "layered-workstation-v5-grch38-topology-multiselect-2"
         and bool(metrics["scroller"])
         and metrics["scroller"]["role"] == "region"
         and metrics["scroller"]["tabindex"] == "0"
         and bool(metrics["scroller"]["aria_label"])
         and metrics["scroller"]["overflow_x"] == "auto",
-        expected={"mode_buttons": 5, "pressed": 1, "named_local_scroller": True},
+        expected={"mode_buttons": 7, "pressed": 1, "named_local_scroller": True},
         actual=metrics,
     )
 
@@ -486,21 +490,88 @@ def check_layered_ideogram(page: Page, run: Dict[str, Any], timeout_ms: int) -> 
     )
 
     page.locator('[data-ideogram-mode="determinacy"]').click()
-    first_legend = page.locator("[data-legend-key]").first
+    legends = page.locator("[data-legend-key]")
+    first_legend = legends.nth(0)
+    second_legend = legends.nth(1)
     first_legend.click()
-    isolation = page.evaluate(
+    one_selected = page.evaluate(
+        """() => ({
+            pressed: document.querySelectorAll('[data-legend-key][aria-pressed="true"]').length,
+            dimmed: document.querySelectorAll('.ideogram-mark.dimmed').length,
+            all_pressed: document.querySelector('[data-legend-clear]').getAttribute('aria-pressed')
+        })"""
+    )
+    second_legend.click()
+    two_selected = page.evaluate(
+        """() => ({
+            pressed: document.querySelectorAll('[data-legend-key][aria-pressed="true"]').length,
+            dimmed: document.querySelectorAll('.ideogram-mark.dimmed').length,
+            all_pressed: document.querySelector('[data-legend-clear]').getAttribute('aria-pressed')
+        })"""
+    )
+    first_legend.click()
+    one_remaining = page.evaluate(
         """() => ({
             pressed: document.querySelectorAll('[data-legend-key][aria-pressed="true"]').length,
             dimmed: document.querySelectorAll('.ideogram-mark.dimmed').length
         })"""
     )
-    first_legend.click()
+    second_legend.click()
+    cleared = page.evaluate(
+        """() => ({
+            pressed: document.querySelectorAll('[data-legend-key][aria-pressed="true"]').length,
+            dimmed: document.querySelectorAll('.ideogram-mark.dimmed').length,
+            all_pressed: document.querySelector('[data-legend-clear]').getAttribute('aria-pressed')
+        })"""
+    )
     add_check(
         run,
-        "layered_sample_ideogram_legend_isolation",
-        isolation["pressed"] == 1 and isolation["dimmed"] > 0,
-        expected={"pressed": 1, "dimmed_minimum": 1},
-        actual=isolation,
+        "layered_sample_ideogram_legend_multiselect_toggle",
+        one_selected["pressed"] == 1
+        and one_selected["dimmed"] > 0
+        and one_selected["all_pressed"] == "false"
+        and two_selected["pressed"] == 2
+        and 0 < two_selected["dimmed"] < one_selected["dimmed"]
+        and one_remaining["pressed"] == 1
+        and one_remaining["dimmed"] > 0
+        and cleared == {"pressed": 0, "dimmed": 0, "all_pressed": "true"},
+        expected={
+            "sequence": "A -> A+B -> B -> none",
+            "none_means_all": True,
+            "union_dims_fewer_marks_than_single": True,
+        },
+        actual={
+            "one_selected": one_selected,
+            "two_selected": two_selected,
+            "one_remaining": one_remaining,
+            "cleared": cleared,
+        },
+    )
+
+    first_legend.click()
+    page.locator('[data-ideogram-mode="determinacy"]').click()
+    same_mode = page.evaluate(
+        """() => ({
+            pressed: document.querySelectorAll('[data-legend-key][aria-pressed="true"]').length,
+            dimmed: document.querySelectorAll('.ideogram-mark.dimmed').length
+        })"""
+    )
+    page.locator('[data-ideogram-mode="evidence"]').click()
+    switched_mode = page.evaluate(
+        """() => ({
+            pressed: document.querySelectorAll('[data-legend-key][aria-pressed="true"]').length,
+            dimmed: document.querySelectorAll('.ideogram-mark.dimmed').length,
+            all_pressed: document.querySelector('[data-legend-clear]').getAttribute('aria-pressed')
+        })"""
+    )
+    add_check(
+        run,
+        "layered_sample_ideogram_selection_mode_lifecycle",
+        same_mode["pressed"] == 1
+        and same_mode["dimmed"] > 0
+        and switched_mode == {"pressed": 0, "dimmed": 0, "all_pressed": "true"},
+        expected={"same_mode_keeps_selection": True, "different_mode_clears_selection": True},
+        actual={"same_mode": same_mode, "switched_mode": switched_mode},
     )
 
     chromosome_hit = page.locator('.ideogram-chrom-hit[data-chrom="chr8"]')

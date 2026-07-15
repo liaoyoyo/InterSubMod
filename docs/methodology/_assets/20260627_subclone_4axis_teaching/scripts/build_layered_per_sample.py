@@ -38,6 +38,21 @@ CURRENT_SUMMARY = (
     / "20260710_layered_reconstruction_v2"
     / "current_layered_topology_v3_raw_all_v1.json"
 )
+READ_AF_TOPOLOGY_DIR = (
+    REPO_ROOT
+    / "research"
+    / "20260715_layered_workstation_genome_topology_multiselect"
+    / "data"
+    / "current_v5_read_af_topology"
+)
+READ_AF_TOPOLOGY_INDEX = READ_AF_TOPOLOGY_DIR / "current_v5_read_af_topology.index.json"
+READ_AF_TOPOLOGY_BUILD = (
+    REPO_ROOT
+    / "research"
+    / "20260715_layered_workstation_genome_topology_multiselect"
+    / "scripts"
+    / "build_current_v5_read_af_topology.py"
+)
 PYTHON = sys.executable or "python3"
 
 EXPECTED_SAMPLES = {
@@ -53,10 +68,11 @@ EXPECTED_SCOPE = "7 datasets / 6 biological samples / chr1-22"
 EXPECTED_BACKBONE = "longphase_s_recalibrated_FILTER_PASS"
 EXPECTED_TREE_SOURCE = "longphase_s_recalibrated_filter_pass"
 EXPECTED_REGION_SCOPE = "chr1-22 primary; chrX/chrY out-of-scope census only"
-EXPECTED_UI_CONTRACT = "layered-workstation-v5-grch38-overview-1"
+EXPECTED_UI_CONTRACT = "layered-workstation-v5-grch38-topology-multiselect-2"
 PAGE_META_NAMES = {
     "summary_sha256": "intersubmod-current-summary-sha256",
     "region_sha256": "intersubmod-region-view-sha256",
+    "read_af_sha256": "intersubmod-read-af-topology-sha256",
     "sample": "intersubmod-canonical-sample",
     "renderer_sha256": "intersubmod-renderer-sha256",
     "ui_contract": "intersubmod-ui-contract",
@@ -66,6 +82,76 @@ TOPOLOGY_CLASSES = (
     ("topology_unique_exact_multiple", "C>1 / Topo=1", "exact 多解、拓撲唯一", "shape"),
     ("topology_multiple_exact_multiple", "C>1 / Topo>1", "exact 與拓撲皆多解", "multiple"),
     ("incomplete", "Incomplete", "候選集合未完整", "incomplete"),
+)
+READ_AF_SELECTION_CLASSES = (
+    (
+        "structural_exact_unique",
+        "結構已 exact 唯一",
+        "C=1 / Topo=1；不需 read-AF 排序",
+        "read-structural",
+    ),
+    (
+        "read_af_unique_first",
+        "read-AF 唯一第一順位",
+        "Exact Fraction score 只有一個第一順位 candidate",
+        "read-unique",
+    ),
+    (
+        "read_af_tied_same_topology",
+        "並列第一 · 同一 Topo",
+        "Exact candidates 並列，但 canonical shape 一致",
+        "read-same",
+    ),
+    (
+        "read_af_tied_different_topology",
+        "並列第一 · 多 Topo",
+        "Exact 第一順位集合仍跨多個 canonical shapes",
+        "read-multiple",
+    ),
+    (
+        "read_af_unavailable",
+        "read-AF 不可排序",
+        "Coverage／recurrence 等條件不足，維持不可評估",
+        "read-unavailable",
+    ),
+    (
+        "incomplete",
+        "候選未完整",
+        "不可在 capped／incomplete candidate prefix 上排序",
+        "incomplete",
+    ),
+)
+MORPHOLOGY_CLASSES = (
+    (
+        "single_no_within_hp_relation",
+        "單支／無 HP 內關係",
+        "各 primary HP 均未見 depth≥2 或 outdegree≥2",
+        "morph-single",
+    ),
+    (
+        "direct_chain",
+        "直系鏈",
+        "至少一個 primary HP depth≥2；subclone-compatible",
+        "morph-direct",
+    ),
+    (
+        "sister_branch",
+        "旁系／分支",
+        "至少一個 primary HP outdegree≥2；branch-compatible",
+        "morph-sister",
+    ),
+    (
+        "direct_and_sister",
+        "直系＋旁系",
+        "Nesting 與 branching 並存；可能分屬不同 HP",
+        "morph-mixed",
+    ),
+    (
+        "unresolved",
+        "形態未解",
+        "候選未完整、ranking 不可用或第一順位仍跨多 shape",
+        "incomplete",
+    ),
 )
 
 
@@ -217,6 +303,61 @@ def load_authority() -> dict[str, Any]:
     verification_names = {record.get("sample") for record in verification.get("samples", [])}
     require(verification_names == EXPECTED_SAMPLES, "verification sample set drifted")
 
+    require(READ_AF_TOPOLOGY_INDEX.is_file(), f"missing read-AF topology index: {READ_AF_TOPOLOGY_INDEX}")
+    read_af_index = load_json(READ_AF_TOPOLOGY_INDEX)
+    require(
+        read_af_index.get("schema_name") == "intersubmod.current_v5_read_af_topology_index"
+        and read_af_index.get("schema_version") == "1.0.0",
+        "unexpected read-AF topology index schema",
+    )
+    require(read_af_index.get("all_checks_pass") is True, "read-AF topology index checks failed")
+    require(read_af_index.get("dataset_count") == 7, "read-AF topology index dataset_count is not 7")
+    read_af_provenance = read_af_index.get("provenance") or {}
+    require(
+        Path(read_af_provenance.get("current_summary", "")).resolve() == CURRENT_SUMMARY.resolve(),
+        "read-AF topology current-summary path drifted",
+    )
+    require(
+        read_af_provenance.get("current_summary_sha256") == summary_sha256,
+        "read-AF topology current-summary hash drifted",
+    )
+    require(
+        Path(read_af_provenance.get("run_root", "")).resolve() == run_root,
+        "read-AF topology run root drifted",
+    )
+    read_af_manifest = Path(read_af_provenance.get("input_manifest", "")).resolve()
+    require(
+        read_af_manifest == (run_root / "input_manifest.snapshot.json").resolve(),
+        "read-AF topology input manifest differs from canonical run manifest",
+    )
+    verify_bound_file(
+        read_af_manifest,
+        read_af_provenance.get("input_manifest_sha256", ""),
+        "read-AF topology input manifest",
+    )
+    read_af_builder = Path(read_af_provenance.get("builder", "")).resolve()
+    require(
+        read_af_builder == READ_AF_TOPOLOGY_BUILD.resolve(),
+        "read-AF topology builder path differs from repository builder",
+    )
+    verify_bound_file(
+        read_af_builder,
+        read_af_provenance.get("builder_sha256", ""),
+        "read-AF topology builder",
+    )
+    read_af_solver = Path(read_af_provenance.get("solver", "")).resolve()
+    require(
+        read_af_solver == (HERE / "tree_enumeration_solver.py").resolve(),
+        "read-AF topology solver path differs from canonical solver",
+    )
+    verify_bound_file(
+        read_af_solver,
+        read_af_provenance.get("solver_sha256", ""),
+        "read-AF topology solver",
+    )
+    read_af_records = {row.get("sample"): row for row in read_af_index.get("samples", [])}
+    require(set(read_af_records) == EXPECTED_SAMPLES, "read-AF topology sample set drifted")
+
     summary_generated = parse_timestamp(summary["generated_at"], "current summary generated_at")
     max_source_mtime = 0.0
     enriched_records: list[dict[str, Any]] = []
@@ -270,6 +411,18 @@ def load_authority() -> dict[str, Any]:
         enriched["region_sha256"] = record["sha256"]["layered_region_view"]
         enriched["l3_status"] = l3["status"]
         enriched["canonical_record"] = record
+        read_af_record = read_af_records[sample]
+        require(read_af_record.get("all_checks_pass") is True, f"read-AF topology checks failed: {sample}")
+        require(int(read_af_record.get("W_tree", -1)) == int(record["W_tree"]),
+                f"read-AF topology W_tree drifted: {sample}")
+        require(int(read_af_record.get("W_primary", -1)) == int(record["W_primary"]),
+                f"read-AF topology W_primary drifted: {sample}")
+        read_af_path = Path(read_af_record["output"]).resolve()
+        require_under(read_af_path, READ_AF_TOPOLOGY_DIR.resolve(), f"{sample} read-AF topology")
+        verify_bound_file(read_af_path, read_af_record["output_sha256"], f"{sample} read-AF topology")
+        enriched["read_af_path"] = read_af_path
+        enriched["read_af_sha256"] = read_af_record["output_sha256"]
+        enriched["read_af_summary"] = read_af_record
         enriched_records.append(enriched)
 
     newest_source = datetime.fromtimestamp(max_source_mtime, tz=summary_generated.tzinfo)
@@ -299,6 +452,9 @@ def load_authority() -> dict[str, Any]:
         "success": success,
         "verification": verification,
         "verification_path": verification_path,
+        "read_af_index": read_af_index,
+        "read_af_index_path": READ_AF_TOPOLOGY_INDEX,
+        "read_af_index_sha256": sha256_file(READ_AF_TOPOLOGY_INDEX),
     }
 
 
@@ -335,6 +491,7 @@ def page_freshness(output: Path, sample: dict[str, Any], authority: dict[str, An
     expected = {
         PAGE_META_NAMES["summary_sha256"]: authority["summary_sha256"],
         PAGE_META_NAMES["region_sha256"]: sample["region_sha256"],
+        PAGE_META_NAMES["read_af_sha256"]: sample["read_af_sha256"],
         PAGE_META_NAMES["sample"]: sample["sample"],
         PAGE_META_NAMES["renderer_sha256"]: sha256_file(BUILD),
         PAGE_META_NAMES["ui_contract"]: EXPECTED_UI_CONTRACT,
@@ -345,6 +502,7 @@ def page_freshness(output: Path, sample: dict[str, Any], authority: dict[str, An
     newest_input = max(
         authority["summary_path"].stat().st_mtime,
         sample["region_path"].stat().st_mtime,
+        sample["read_af_path"].stat().st_mtime,
         BUILD.stat().st_mtime,
     )
     if output.stat().st_mtime < newest_input:
@@ -369,6 +527,8 @@ def collect_rows(authority: dict[str, Any], build_samples: bool) -> list[dict[st
                     sample["canonical_record"], ensure_ascii=False, sort_keys=True, separators=(",", ":")
                 ),
                 SM_REGION_VIEW_SHA256=sample["region_sha256"],
+                SM_READ_AF_TOPOLOGY=str(sample["read_af_path"]),
+                SM_READ_AF_TOPOLOGY_SHA256=sample["read_af_sha256"],
             )
             result = subprocess.run(
                 [PYTHON, str(BUILD)],
@@ -422,6 +582,96 @@ def topology_legend(aggregate: dict[str, Any]) -> str:
     return "".join(items)
 
 
+def aggregate_sidecar_dimension(
+    rows: list[dict[str, Any]],
+    summary_key: str,
+    classes: tuple[tuple[str, str, str, str], ...],
+) -> dict[str, int]:
+    """Aggregate one mutually exclusive current-v5 read-AF sidecar partition."""
+    counts = {
+        key: sum(
+            int((row["read_af_summary"].get(summary_key) or {}).get(key, 0))
+            for row in rows
+        )
+        for key, _, _, _ in classes
+    }
+    total = sum(counts.values())
+    expected = sum(int(row["W_primary"]) for row in rows)
+    require(total == expected, f"{summary_key} cohort partition mismatch ({total} != {expected})")
+    return counts
+
+
+def distribution_segments(
+    counts: dict[str, int],
+    total: int,
+    classes: tuple[tuple[str, str, str, str], ...],
+) -> str:
+    segments = []
+    for key, short_label, _, class_name in classes:
+        count = int(counts[key])
+        share = percentage(count, total)
+        segments.append(
+            f'<span class="bar-segment segment-{class_name}" style="width:{share:.4f}%" '
+            f'title="{escaped(short_label)} · {count:,} · {share:.1f}%">'
+            f'<span class="sr-only">{escaped(short_label)} {count:,}，{share:.1f}%</span></span>'
+        )
+    return "".join(segments)
+
+
+def distribution_legend(
+    counts: dict[str, int],
+    total: int,
+    classes: tuple[tuple[str, str, str, str], ...],
+) -> str:
+    items = []
+    for key, short_label, long_label, class_name in classes:
+        count = int(counts[key])
+        items.append(
+            f'<li><span class="legend-swatch segment-{class_name}" aria-hidden="true"></span>'
+            f'<span><strong>{escaped(short_label)}</strong><small>{escaped(long_label)}</small></span>'
+            f'<b>{count:,}<small>{percentage(count, total):.1f}%</small></b></li>'
+        )
+    return "".join(items)
+
+
+def cohort_read_af_morphology(rows: list[dict[str, Any]]) -> str:
+    total = sum(int(row["W_primary"]) for row in rows)
+    selection = aggregate_sidecar_dimension(
+        rows, "selection_classes", READ_AF_SELECTION_CLASSES
+    )
+    morphology = aggregate_sidecar_dimension(rows, "morphology_classes", MORPHOLOGY_CLASSES)
+    selection_label = ", ".join(
+        f"{short_label} {selection[key]:,}"
+        for key, short_label, _, _ in READ_AF_SELECTION_CLASSES
+    )
+    morphology_label = ", ".join(
+        f"{short_label} {morphology[key]:,}"
+        for key, short_label, _, _ in MORPHOLOGY_CLASSES
+    )
+    return (
+        '<div class="interpretation-board">'
+        '<article class="distribution-card"><div class="distribution-head">'
+        '<div><span>01 · Read-AF selection</span><h3>第一順位縮到哪一層？</h3></div>'
+        f'<b>7-dataset W_primary {total:,}</b></div><p>先保留 structural determinacy，再以同一 primary HP family 的 '
+        'ALT/(REF+ALT) 與 score=Σ(AF_ancestor−AF_newly-acquired) 做描述性排序；只在同一 unit 內比較，不是 VCF caller AF。</p>'
+        f'<div class="topology-bar" role="img" aria-label="全 cohort read-AF selection：{escaped(selection_label)}">'
+        f'{distribution_segments(selection, total, READ_AF_SELECTION_CLASSES)}</div>'
+        '<div class="bar-scale"><span>0</span><span>read-AF selection composition</span><span>100%</span></div>'
+        f'<ul class="distribution-legend">{distribution_legend(selection, total, READ_AF_SELECTION_CLASSES)}</ul>'
+        '<aside>「結構 exact 唯一」與「read-AF 唯一第一順位」都不是正交生物確認；score 也不是 posterior、CCF 或 calibrated probability。</aside>'
+        '</article>'
+        '<article class="distribution-card"><div class="distribution-head">'
+        '<div><span>02 · Mutation-state morphology</span><h3>單支、直系、旁系如何分布？</h3></div>'
+        f'<b>7-dataset W_primary {total:,}</b></div><p>由 structural Topo=1 或 read-AF co-top 唯一 shape 的 primary-HP graph pattern 重算。</p>'
+        f'<div class="topology-bar" role="img" aria-label="全 cohort morphology：{escaped(morphology_label)}">'
+        f'{distribution_segments(morphology, total, MORPHOLOGY_CLASSES)}</div>'
+        '<div class="bar-scale"><span>0</span><span>morphology composition</span><span>100%</span></div>'
+        f'<ul class="distribution-legend">{distribution_legend(morphology, total, MORPHOLOGY_CLASSES)}</ul>'
+        '<aside>直系／旁系只描述 mutation-state nesting／branching；HP 間不建立親緣，不能當 clone census 或 confirmed subclone。</aside>'
+        '</article></div>'
+    )
+
+
 def sample_topology_rows(rows: list[dict[str, Any]]) -> str:
     rendered = []
     for row in rows:
@@ -449,7 +699,7 @@ def genome_launchers(rows: list[dict[str, Any]]) -> str:
             f'<a class="genome-link" href="{escaped(row["sample"])}.html">'
             f'<span class="launcher-index">{index:02d}</span>'
             f'<span><strong>{escaped(row["sample"])}</strong>'
-            f'<small>GRCh38 座標分布 · sample-wide 重點觀察 · {int(row["W_tree"]):,} regions</small></span>'
+            f'<small>GRCh38 座標分布 · structural / read-AF / morphology 七組觀察 · {int(row["W_tree"]):,} regions</small></span>'
             f'<span class="launcher-action">進入巡覽</span></a>'
         )
     return "".join(links)
@@ -515,11 +765,18 @@ def evidence_links(authority: dict[str, Any], rows: list[dict[str, Any]]) -> str
         f'<code>{escaped(authority["summary_sha256"])}</code></li>',
         f'<li><a href="{escaped(comparison_href)}">Backbone sensitivity comparison JSON</a>'
         f'<code>{escaped(comparison_meta["sha256"])}</code></li>',
+        f'<li><a href="{escaped(os.path.relpath(authority["read_af_index_path"], OUTDIR))}">'
+        f'Current-v5 read-AF／morphology index JSON</a>'
+        f'<code>{escaped(authority["read_af_index_sha256"])}</code></li>',
     ]
     for row in rows:
         links.append(
             f'<li><a href="{escaped(row["region_path"].as_uri())}">{escaped(row["sample"])} region-view JSON</a>'
             f'<code>{escaped(row["region_sha256"])}</code></li>'
+        )
+        links.append(
+            f'<li><a href="{escaped(row["read_af_path"].as_uri())}">{escaped(row["sample"])} '
+            f'read-AF／morphology sidecar JSON</a><code>{escaped(row["read_af_sha256"])}</code></li>'
         )
     return "".join(links)
 
@@ -549,6 +806,7 @@ def build_index(authority: dict[str, Any], rows: list[dict[str, Any]]) -> str:
 <link rel="icon" href="data:,">
 <meta name="intersubmod-current-summary-sha256" content="$summary_sha256">
 <meta name="intersubmod-backbone-comparison-sha256" content="$comparison_sha256">
+<meta name="intersubmod-read-af-topology-index-sha256" content="$read_af_index_sha256">
 <meta name="intersubmod-canonical-run" content="$run_id">
 <title>Layered reconstruction · 全基因 cohort command center</title>
 <style>
@@ -594,10 +852,13 @@ h2{margin:0;font-family:"Iowan Old Style","Noto Serif TC","Songti TC",serif;font
 .topology-main{padding:24px}.topology-main h3{margin:0 0 5px;font-size:16px}.topology-main>p{margin:0 0 24px;color:var(--muted);font-size:12.5px}
 .topology-bar{display:flex;width:100%;height:30px;overflow:hidden;border:1px solid #829195;background:#e8e4d9}
 .bar-segment{display:block;min-width:0;height:100%}.segment-unique{background:var(--teal)}.segment-shape{background:var(--blue)}.segment-multiple{background:var(--amber)}.segment-incomplete{background:var(--brick)}
+.segment-read-structural{background:#138b78}.segment-read-unique{background:#426f9e}.segment-read-same{background:#53bcb8}.segment-read-multiple{background:#8a4f9e}.segment-read-unavailable{background:#d08a31}
+.segment-morph-single{background:#809196}.segment-morph-direct{background:#426f9e}.segment-morph-sister{background:#35a9a5}.segment-morph-mixed{background:#7e50a0}
 .bar-scale{display:flex;justify-content:space-between;margin-top:6px;color:var(--muted);font:700 9.5px/1.2 "IBM Plex Mono","Cascadia Code",monospace;text-transform:uppercase}
 .topology-legend{padding:18px}.topology-legend ul{display:grid;gap:12px;margin:0;padding:0;list-style:none}.topology-legend li{display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:start}.legend-swatch{width:10px;height:30px}.topology-legend strong,.topology-legend small,.topology-legend b{display:block}.topology-legend strong{font:750 11px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.topology-legend small{margin-top:2px;color:var(--muted);font-size:10.5px}.topology-legend b{text-align:right;font:750 13px/1.2 "IBM Plex Mono","Cascadia Code",monospace}.topology-legend b small{font-size:9.5px}
 .sample-bars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
 .sample-topology{padding:15px 16px}.sample-topology-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:9px}.sample-topology-head a{font-size:12.5px}.sample-topology-head span{color:var(--muted);font:700 10px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.sample-topology .topology-bar{height:16px}
+.interpretation-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.distribution-card{min-width:0;padding:22px;border:1px solid var(--line);background:var(--panel)}.distribution-card:nth-child(1){border-top:4px solid var(--blue)}.distribution-card:nth-child(2){border-top:4px solid #7e50a0}.distribution-head{display:flex;justify-content:space-between;gap:16px;align-items:start}.distribution-head span{color:var(--muted);font:800 9.5px/1.25 "IBM Plex Mono","Cascadia Code",monospace;letter-spacing:.06em;text-transform:uppercase}.distribution-head h3{margin:6px 0 0;font-size:17px}.distribution-head>b{color:var(--muted);font:750 10px/1.4 "IBM Plex Mono","Cascadia Code",monospace;white-space:nowrap}.distribution-card>p{min-height:40px;margin:10px 0 18px;color:var(--ink-soft);font-size:12px}.distribution-card .topology-bar{height:24px}.distribution-legend{display:grid;gap:7px;margin:17px 0 0;padding:0;list-style:none}.distribution-legend li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:9px;align-items:start;padding-top:7px;border-top:1px solid #e3e0d7}.distribution-legend .legend-swatch{height:29px}.distribution-legend strong,.distribution-legend small,.distribution-legend b{display:block}.distribution-legend strong{font-size:11.5px}.distribution-legend small{margin-top:2px;color:var(--muted);font-size:10px}.distribution-legend b{text-align:right;font:750 12px/1.2 "IBM Plex Mono","Cascadia Code",monospace}.distribution-card aside{margin-top:16px;padding:10px 12px;border-left:4px solid var(--amber);background:#f8efe2;color:#624a2e;font-size:11px}
 .dimension-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.dimension-card{display:flex;min-width:0;min-height:306px;flex-direction:column;padding:20px;border-top:4px solid var(--teal)}.dimension-card:nth-child(2){border-top-color:var(--amber)}.dimension-card:nth-child(3){border-top-color:var(--blue)}
 .dimension-code{display:flex;justify-content:space-between;gap:10px;color:var(--teal);font:800 10px/1.2 "IBM Plex Mono","Cascadia Code",monospace;letter-spacing:.07em;text-transform:uppercase}.dimension-card:nth-child(2) .dimension-code{color:var(--amber)}.dimension-card:nth-child(3) .dimension-code{color:var(--blue)}
 .dimension-card h3{margin:18px 0 8px;font-size:17px}.dimension-answer{margin:0;color:var(--ink-soft);font-size:12.5px}.dimension-answer strong{color:var(--ink);font:800 22px/1.1 "IBM Plex Mono","Cascadia Code",monospace}.dimension-list{display:grid;gap:5px;margin:15px 0}.dimension-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:7px 8px;border:1px solid #ddd9cf;background:#f6f3eb}.dimension-row span{color:var(--muted);font-size:10.5px}.dimension-row b{font:750 10.5px/1.3 "IBM Plex Mono","Cascadia Code",monospace;text-align:right}.dimension-boundary{margin:auto 0 0;color:var(--muted);font-size:11.5px}.dimension-link{display:inline-block;margin-top:13px;padding:8px 10px;border:1px solid var(--rail);background:var(--rail);color:#fff;text-decoration:none;font-size:11px;font-weight:800}.dimension-link:hover{background:var(--teal)}
@@ -615,7 +876,8 @@ table{width:100%;min-width:1020px;border-collapse:collapse;font-size:12px}th,td{
 footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;padding-top:13px;border-top:1px solid var(--line);color:var(--muted);font-size:10.5px}.mono{font-family:"IBM Plex Mono","Cascadia Code",monospace;overflow-wrap:anywhere}
 @media(max-width:1050px){.metric-grid{grid-template-columns:repeat(2,1fr)}.genome-launchers{grid-template-columns:repeat(3,1fr)}.topology-board{grid-template-columns:1fr}.dimension-grid{grid-template-columns:1fr}.dimension-card{min-height:0}.layer-grid{grid-template-columns:repeat(2,1fr)}.layer-card:nth-child(2){border-right:0}.layer-card:nth-child(-n+2){border-bottom:1px solid var(--line)}}
 @media(max-width:760px){.shell{padding:12px 11px 36px}.hero{grid-template-columns:1fr}.hero-aside{border-left:0;border-top:1px solid rgba(255,255,255,.18)}.sensitivity-banner{grid-template-columns:1fr}.sensitivity-metrics{grid-template-columns:1fr 1fr}.section-head{display:block}.section-note{margin-top:7px}.sample-bars,.claim-grid{grid-template-columns:1fr}.genome-launchers{grid-template-columns:repeat(2,1fr)}footer{display:block}footer span{display:block;margin-top:5px}}
-@media(max-width:500px){.metric-grid,.genome-launchers,.layer-grid{grid-template-columns:1fr}.hero-main{padding:28px 20px 58px}.hero-aside{padding:24px 20px 48px}.metric-card{min-height:0}.position-leaders{grid-template-columns:1fr}.layer-card{min-height:0;border-right:0;border-bottom:1px solid var(--line)}.layer-card:last-child{border-bottom:0}.scroll-cue span:last-child{display:none}.topology-main{padding:18px}.topology-legend{padding:15px}}
+@media(max-width:760px){.interpretation-board{grid-template-columns:1fr}.distribution-card>p{min-height:0}}
+@media(max-width:500px){.metric-grid,.genome-launchers,.layer-grid{grid-template-columns:1fr}.hero-main{padding:28px 20px 58px}.hero-aside{padding:24px 20px 48px}.metric-card{min-height:0}.position-leaders{grid-template-columns:1fr}.layer-card{min-height:0;border-right:0;border-bottom:1px solid var(--line)}.layer-card:last-child{border-bottom:0}.scroll-cue span:last-child{display:none}.topology-main{padding:18px}.topology-legend{padding:15px}.distribution-card{padding:18px}.distribution-head{display:block}.distribution-head>b{display:block;margin-top:7px}.distribution-legend li{grid-template-columns:9px minmax(0,1fr) auto}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.genome-link{transition:none}}
 @media print{body{background:#fff}.shell{width:100%;padding:0}.hero,.table-shell{box-shadow:none}.genome-link{break-inside:avoid}.table-scroll{overflow:visible}table{min-width:0;font-size:8px}.skip-link,.scroll-cue,.table-action{display:none}}
 </style>
@@ -627,7 +889,7 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
     <div class="hero-main">
       <p class="eyebrow"><span class="canonical">Canonical / 7 of 7 PASS</span><span>chr1–22 全基因範圍</span></p>
       <h1>分層重建<br>全基因指揮中心</h1>
-      <p class="lede">以 LongPhase-S recalibrated FILTER=PASS 為唯一主骨幹，從 cohort 總覽進入 7 個 dataset 的 GRCh38 座標比例分布與 sample-wide 重點觀察；每個數字保留明確 grain、分母與候選完整性。</p>
+      <p class="lede">以 LongPhase-S recalibrated FILTER=PASS 為唯一主骨幹，從 7-dataset 總覽進入 GRCh38 座標比例分布、current-v5 family-specific read-AF 描述性第一順位，以及 mutation-state graph morphology（僅 clone/subclone-compatible，不是 clone census）；每個數字保留明確 grain、分母與候選完整性。</p>
     </div>
     <aside class="hero-aside" aria-label="Canonical authority">
       <p class="authority-label">Machine-bound authority</p>
@@ -671,14 +933,19 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
   <section class="section" aria-labelledby="topology-title">
     <div class="section-head"><div><p class="section-kicker">Candidate topology</p><h2 id="topology-title">Exact 組合與拓撲形狀分開讀</h2></div><p class="section-note">C_region 是 exact candidate-tree 組合乘積；Topo_region 是 exact unlabeled-shape 組合乘積。Incomplete 不以 0 代替。</p></div>
     <div class="topology-board">
-      <article class="topology-main"><h3>全 cohort · W_primary $w_primary</h3><p>四類互斥且守恆；不可能狀態 C=1 / Topo&gt;1 為 0。</p><div class="topology-bar" role="img" aria-label="全 cohort 候選拓撲四類">$aggregate_segments</div><div class="bar-scale"><span>0</span><span>W_primary composition</span><span>100%</span></div></article>
+      <article class="topology-main"><h3>7-dataset aggregate · W_primary $w_primary</h3><p>四類互斥且守恆；不可能狀態 C=1 / Topo&gt;1 為 0。HCC1395 與 DORADO 是同一 biological sample 的兩個 dataset。</p><div class="topology-bar" role="img" aria-label="7-dataset 候選拓撲四類">$aggregate_segments</div><div class="bar-scale"><span>0</span><span>W_primary composition</span><span>100%</span></div></article>
       <aside class="topology-legend" aria-label="Topology legend"><ul>$topology_legend</ul></aside>
     </div>
     <div class="sample-bars" aria-label="7 dataset topology distributions">$sample_topology_rows</div>
   </section>
 
+  <section class="section" aria-labelledby="read-af-morphology-title">
+    <div class="section-head"><div><p class="section-kicker">Current-v5 interpretation layers</p><h2 id="read-af-morphology-title">順位與形態是兩個不同問題</h2></div><p class="section-note">這是 7 datasets／6 biological samples 的 dataset aggregate（HCC1395 含兩個 dataset），不是 biological-sample 加權。兩張圖都以 W_primary 為分母且各自互斥守恆。</p></div>
+    $cohort_read_af_morphology
+  </section>
+
   <section class="section" aria-labelledby="launch-title">
-    <div class="section-head"><div><p class="section-kicker">Genome launchpad</p><h2 id="launch-title">進入 GRCh38 chr1–22 全基因巡覽</h2></div><p class="section-note">每頁都含座標比例 ideogram 與五組 sample-wide 重點觀察，並由 current summary、sample region-view、renderer SHA 與 UI contract 綁定；stale 頁面不會進入 index。</p></div>
+    <div class="section-head"><div><p class="section-kicker">Genome launchpad</p><h2 id="launch-title">進入 GRCh38 chr1–22 全基因巡覽</h2></div><p class="section-note">每頁都含座標比例 ideogram、read-AF 第一順位與 clone-compatible morphology 等七組 sample-wide 觀察，並由 current summary、sample region-view、read-AF sidecar、renderer SHA 與 UI contract 綁定；stale 頁面不會進入 index。</p></div>
     <nav class="genome-launchers" aria-label="開啟各 dataset 全基因頁">$genome_launchers</nav>
   </section>
 
@@ -694,7 +961,7 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
   <section class="section" aria-labelledby="boundary-title">
     <div class="section-head"><div><p class="section-kicker">Claim boundary</p><h2 id="boundary-title">觀察、推論、限制分開</h2></div><p class="section-note">這是 regional mutation-state candidate sets；不是細胞層級真相或已確認的全腫瘤演化關係。</p></div>
     <div class="claim-grid">
-      <article class="claim-card"><span class="claim-index">01 / 回答</span><h3>哪些區域候選與資料相容？</h3><p>在每個 mutation-bearing HP1/HP2 primary unit 內，保留全部 analysis-complete minimal candidates，並區分 exact uniqueness 與 topology uniqueness。</p></article>
+      <article class="claim-card"><span class="claim-index">01 / 回答</span><h3>哪些區域候選與資料相容？</h3><p>Analysis producer 對完整 minimal candidate universe 枚舉與計數；頁面可能只展開 structural stored subset，並另顯示 exhaustive read-AF ranking 的 preview 與 co-top representatives。</p></article>
       <article class="claim-card"><span class="claim-index">02 / 證據</span><h3>read-level sSNV 共現</h3><p>LongPhase-S recalibrated PASS 提供 tree backbone；L0 family partition 與 L1 read-state constraints 承重，CN 只作 post-tree context。</p></article>
       <article class="claim-card"><span class="claim-index">03 / 限制</span><h3>不可越過資料識別度</h3><p>單一 bulk 的 regional candidates 不能單獨證明細胞比例、真實 ancestry 或正交生物學確認；多解與 incomplete 都是應保留的結果。</p></article>
     </div>
@@ -713,7 +980,7 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
 
   <details class="evidence-drawer">
     <summary>機器證據與原始 JSON（預設收合）</summary>
-    <div class="evidence-inner"><p>下列連結只供 provenance readback；正文所有數字均由 hash-verified canonical machine summary 產生。</p><ul class="evidence-list">$evidence_links</ul></div>
+    <div class="evidence-inner"><p>下列連結只供 provenance readback；W／structural C／Topo 來自 hash-verified canonical machine summary，read-AF selection／morphology 來自另行 hash 綁定且守恆驗證的 current-v5 sidecar index。</p><ul class="evidence-list">$evidence_links</ul></div>
   </details>
 
   <footer><span>Canonical main · LongPhase-S recalibrated FILTER=PASS · chr1–22 · 7/7 PASS</span><span class="mono">Page generated $generated_at</span></footer>
@@ -724,6 +991,7 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
     return template.substitute(
         summary_sha256=escaped(authority["summary_sha256"]),
         comparison_sha256=escaped(authority["summary"]["backbone_comparison"]["sha256"]),
+        read_af_index_sha256=escaped(authority["read_af_index_sha256"]),
         summary_short=escaped(authority["summary_sha256"][:16] + "…"),
         run_id=escaped(run_id),
         backbone_verdict=escaped(str(comparison["verdict"]).replace("_", " ").upper()),
@@ -751,6 +1019,7 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
         aggregate_segments=topology_segments(topology, int(aggregate["W_primary"])),
         topology_legend=topology_legend(aggregate),
         sample_topology_rows=sample_topology_rows(rows),
+        cohort_read_af_morphology=cohort_read_af_morphology(rows),
         position_leaders=sample_position_leaders(rows),
         genome_launchers=genome_launchers(rows),
         cohort_rows=cohort_rows(rows),
