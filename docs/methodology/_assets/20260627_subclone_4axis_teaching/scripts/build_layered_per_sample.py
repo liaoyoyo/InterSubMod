@@ -80,7 +80,7 @@ EXPECTED_SCOPE = "7 datasets / 6 biological samples / chr1-22"
 EXPECTED_BACKBONE = "longphase_s_recalibrated_FILTER_PASS"
 EXPECTED_TREE_SOURCE = "longphase_s_recalibrated_filter_pass"
 EXPECTED_REGION_SCOPE = "chr1-22 primary; chrX/chrY out-of-scope census only"
-EXPECTED_UI_CONTRACT = "layered-workstation-v5-grch38-topology-multiselect-2"
+EXPECTED_UI_CONTRACT = "layered-workstation-v5-grch38-topology-multiselect-3"
 PAGE_META_NAMES = {
     "summary_sha256": "intersubmod-current-summary-sha256",
     "region_sha256": "intersubmod-region-view-sha256",
@@ -853,6 +853,72 @@ def comparison_legend(dimension: str) -> str:
     )
 
 
+def comparison_profile_aria(name: str, dimension: str, values: dict[str, Any], *, count_mode: bool) -> str:
+    parts = []
+    for item in comparison_class_contract(dimension):
+        proportion = float(values["proportions"][item["key"]])
+        if count_mode:
+            parts.append(
+                f'{item["label"]} {int(values["counts"][item["key"]]):,}，{proportion * 100:.1f}%'
+            )
+        else:
+            parts.append(f'{item["label"]} {proportion * 100:.1f}%')
+    return f'{name}；{COMPARISON_DIMENSIONS[dimension]["label"]}；' + '；'.join(parts)
+
+
+def comparison_aggregate_profiles(comparison: dict[str, Any], dimension: str) -> str:
+    classes = comparison_class_contract(dimension)
+    records = (
+        (
+            "7-dataset operational micro",
+            comparison["aggregates"]["dataset_micro"]["dimensions"][dimension],
+            f'{int(comparison["aggregates"]["dataset_micro"]["W_primary"]):,} W_primary rows',
+            True,
+        ),
+        (
+            "6-biological-ID macro",
+            comparison["aggregates"]["biological_sample_macro"]["dimensions"][dimension],
+            "6 IDs equal weight",
+            False,
+        ),
+    )
+    rendered = []
+    for name, values, note, count_mode in records:
+        segments = "".join(
+            f'<span class="bar-segment segment-{escaped(item["class_name"])}" '
+            f'style="width:{float(values["proportions"][item["key"]]) * 100:.6f}%"></span>'
+            for item in classes
+        )
+        rendered.append(
+            f'<article class="aggregate-profile"><div><strong>{escaped(name)}</strong><small>{escaped(note)}</small></div>'
+            f'<div class="topology-bar" role="img" aria-label="{escaped(comparison_profile_aria(name, dimension, values, count_mode=count_mode))}">{segments}</div></article>'
+        )
+    return "".join(rendered)
+
+
+def comparison_macro_profile_rows(comparison: dict[str, Any], dimension: str) -> str:
+    classes = comparison_class_contract(dimension)
+    members = comparison["aggregates"]["biological_sample_macro"]["members"]
+    order = ("COLO829", "H1437", "H2009", "HCC1395", "HCC1937", "HCC1954")
+    rows = []
+    for biological_id in order:
+        member = members[biological_id]
+        values = member["dimensions"][dimension]
+        segments = "".join(
+            f'<span class="bar-segment segment-{escaped(item["class_name"])}" '
+            f'style="width:{float(values["proportions"][item["key"]]) * 100:.6f}%"></span>'
+            for item in classes
+        )
+        dataset_note = " + ".join(member["datasets"])
+        rows.append(
+            f'<div class="comparison-profile-row biological-profile" data-biological-id="{escaped(biological_id)}">'
+            f'<div class="comparison-profile-name"><strong>{escaped(biological_id)}</strong><small>{escaped(dataset_note)}</small></div>'
+            f'<div class="topology-bar" role="img" aria-label="{escaped(comparison_profile_aria(biological_id, dimension, values, count_mode=False))}">{segments}</div>'
+            '<b class="comparison-profile-n">1 ID<small>equal weight</small></b></div>'
+        )
+    return "".join(rows)
+
+
 def comparison_profile_rows(comparison: dict[str, Any], dimension: str) -> str:
     classes = comparison_class_contract(dimension)
     rows = []
@@ -873,7 +939,7 @@ def comparison_profile_rows(comparison: dict[str, Any], dimension: str) -> str:
             f'data-dataset="{escaped(sample)}"><div class="comparison-profile-name">'
             f'<a href="{escaped(sample)}.html"><strong>{escaped(sample)}</strong></a>'
             f'{f"<small>{escaped(role)}</small>" if technical else ""}</div>'
-            f'<div class="topology-bar" role="img" aria-label="{escaped(sample)} {escaped(COMPARISON_DIMENSIONS[dimension]["label"])} composition">'
+            f'<div class="topology-bar" role="img" aria-label="{escaped(comparison_profile_aria(sample, dimension, values, count_mode=True))}">'
             f'{segments}</div><b class="comparison-profile-n">{int(record["W_primary"]):,}<small>W_primary</small></b></div>'
         )
     return "".join(rows)
@@ -932,18 +998,19 @@ def comparison_matrix_table(comparison: dict[str, Any], dimension: str) -> str:
                 cells.append('<td class="matrix-diagonal"><span aria-label="same dataset">0</span></td>')
                 continue
             hcc_pair = {left, right} == {"HCC1395", "HCC1395_DORADO"}
-            alpha = 0.08 + min(value / 0.5, 1.0) * 0.64
+            alpha = 0.08 + min(value / 0.2, 1.0) * 0.64
             cells.append(
                 f'<td><button type="button" class="matrix-cell{" is-hcc" if hcc_pair else ""}" '
                 f'data-left="{escaped(left)}" data-right="{escaped(right)}" '
                 f'style="background:rgba(22,139,141,{alpha:.4f})" '
-                f'aria-label="{escaped(left)} 與 {escaped(right)}，TVD {value:.3f}">{value:.3f}</button></td>'
+                f'aria-pressed="{"true" if hcc_pair else "false"}" '
+                f'aria-label="{escaped(left)} 與 {escaped(right)}，full W_primary TVD {value:.3f}">{value:.3f}</button></td>'
             )
         body.append(
             f'<tr><th scope="row">{escaped(short[left])}</th>{"".join(cells)}</tr>'
         )
     return (
-        '<table class="distance-matrix"><caption class="sr-only">7 datasets pairwise composition TVD</caption>'
+        f'<table class="distance-matrix"><caption class="sr-only">{escaped(COMPARISON_DIMENSIONS[dimension]["label"])}；7 datasets；full W_primary pairwise composition TVD</caption>'
         f'<thead><tr><th scope="col">TVD</th>{header}</tr></thead><tbody>{"".join(body)}</tbody></table>'
     )
 
@@ -1033,15 +1100,16 @@ def hcc_confusion_table(comparison: dict[str, Any], dimension: str) -> str:
     header = "".join(f'<th scope="col">{escaped(item["label"])}</th>' for item in classes)
     body = []
     for left in classes:
+        row_total = sum(int(matrix[left["key"]][right["key"]]) for right in classes)
         cells = "".join(
             f'<td class="numeric{" confusion-diagonal" if left["key"] == right["key"] else ""}">'
             f'{int(matrix[left["key"]][right["key"]]):,}</td>'
             for right in classes
         )
-        body.append(f'<tr><th scope="row">{escaped(left["label"])}</th>{cells}</tr>')
+        body.append(f'<tr><th scope="row">{escaped(left["label"])}</th>{cells}<td class="numeric confusion-total">{row_total:,}</td></tr>')
     return (
-        '<table class="confusion-table"><caption>Rows = HCC1395 5kHz；columns = HCC1395_DORADO</caption>'
-        f'<thead><tr><th scope="col">5kHz ↓ / DORADO →</th>{header}</tr></thead>'
+        f'<table class="confusion-table"><caption>{escaped(COMPARISON_DIMENSIONS[dimension]["label"])} count；Rows = HCC1395 5kHz；columns = HCC1395_DORADO；n=6,402 matched primary regions</caption>'
+        f'<thead><tr><th scope="col">5kHz ↓ / DORADO →</th>{header}<th scope="col">Row total</th></tr></thead>'
         f'<tbody>{"".join(body)}</tbody></table>'
     )
 
@@ -1080,6 +1148,7 @@ def sample_comparison_dashboard(comparison: dict[str, Any]) -> str:
     prior = comparison["independent_current_v5_hcc_evidence"]
     exact = comparison["hcc_exact_signature_evidence"]
     retained = prior["exact_retained_site_overlap"]
+    retained_position = exact["retained_ssnv_universe"]
     same_internal = exact["internal_ssnv_pairing"]["same_set_within_exact_common_region"]
     shape = exact["shape_agreement"]["same_internal_ssnv_both_shape_resolved"]
     exact_edges = exact["exact_labeled_edge_agreement"]["same_internal_ssnv_both_candidate_unique"]
@@ -1090,11 +1159,39 @@ def sample_comparison_dashboard(comparison: dict[str, Any]) -> str:
         separators=(",", ":"),
     ).replace("</", "<\\/")
     return f'''
-  <section class="section" id="cohort-comparison" aria-labelledby="comparison-title">
-    <div class="section-head"><div><p class="section-kicker">Cross-dataset comparison</p><h2 id="comparison-title">樣本狀況、比例與差異放在同一張桌上</h2></div><p class="section-note">先看 7-dataset operational profile，再以 6-biological-sample macro 防止 HCC1395 technical pair 被當成兩個生物樣本。TVD 是類別比例距離，不是 clone／演化距離。</p></div>
+  <section class="answer-strip" id="answer-strip" aria-label="本頁三個先讀答案">
+    <article><span>Scope</span><strong>7 datasets / 6 biological IDs</strong><small>chr1–22 · current canonical v5</small></article>
+    <article><span>HCC technical pair</span><strong>Full TVD {float(marginal["profile_mean_tvd"]):.3f} · rank {int(marginal["rank_among_21_pairs"])}/21</strong><small>相對接近，但超過 0.10 material-difference gate</small></article>
+    <article><span>Claim ceiling</span><strong>Partial technical reproducibility</strong><small>Exact labeled-edge {float(exact_edges["rate"])*100:.1f}%；不可互換，不支撐真 ancestry</small></article>
+  </section>
+
+  <section class="section core-section" id="hcc1395-technical-validation" aria-labelledby="hcc-validation-title">
+    <div class="section-head"><div><p class="section-kicker">HCC1395 technical reproducibility</p><h2 id="hcc-validation-title">相對第 2 近，但不是可互換的同一份結果</h2></div><p class="section-note">兩列資料屬同一 biological sample；驗證的是 current pipeline 跨技術／輸入重現性。結論必同時滿足 marginal composition 與 matched-region 兩個視角。</p></div>
+    <article class="hcc-verdict">
+      <div><span class="verdict-badge verdict-moderate">PARTIAL TECHNICAL REPRODUCIBILITY</span><h3>粗粒度拓撲中度重現；exact labeled-edge 重現偏低，不支撐 ancestry 確認</h3><p>三維 profile 在 21 組中排名第 {int(marginal["rank_among_21_pairs"])} 近，但 full-profile TVD={float(marginal["profile_mean_tvd"]):.3f} 已跨過事先鎖定的 0.10 明顯差異門檻。共同 primary regions 的三類 κ 都只落在 moderate。</p></div>
+      <dl><div><dt>Full profile</dt><dd>{float(marginal["profile_mean_tvd"]):.3f}<small>95% chr-block {float(bootstrap["full_profile_mean_tvd_ci95"][0]):.3f}–{float(bootstrap["full_profile_mean_tvd_ci95"][1]):.3f}</small></dd></div><div><dt>Conditional evaluable</dt><dd>{float(marginal["conditional_evaluable_mean_tvd"]):.3f}<small>rank {int(marginal["conditional_evaluable_rank_among_21_pairs"])}/21</small></dd></div></dl>
+    </article>
+    <div class="hcc-metric-grid">
+      <article><span>Exact primary region</span><strong>{int(overlap["intersection"]):,}</strong><b>Jaccard {float(overlap["jaccard"]):.3f}</b><small>{float(overlap["left_coverage"])*100:.1f}%／{float(overlap["right_coverage"])*100:.1f}% coverage</small></article>
+      <article><span>Exact retained allele-site</span><strong>{int(retained["intersection"]):,}</strong><b>Jaccard {float(retained["jaccard"]):.3f}</b><small>position-key={int(retained_position["intersection"]):,}；1 位點 ALT 不同</small></article>
+      <article><span>Unlabeled rooted shape</span><strong>{float(shape["rate"])*100:.1f}%</strong><b>{int(shape["numerator"]):,} / {int(shape["denominator"]):,}</b><small>same internal sSNV；忽略 HP label</small></article>
+      <article><span>Exact labeled edges</span><strong>{float(exact_edges["rate"])*100:.1f}%</strong><b>{int(exact_edges["numerator"]):,} / {int(exact_edges["denominator"]):,}</b><small>unique candidate；不支撐 ancestry 確認</small></article>
+    </div>
+    <aside class="claim-boundary-box"><strong>判定界線</strong><p>可寫：「同一 HCC1395 的粗粒度 regional mutation-state profile 具有中度跨技術重現性。」不可寫：「兩個 dataset 得到相同真樹／clone tree」「已驗證 biological clone」或「可互換」。若要驗樣本身分，需另做 germline SNP fingerprint；topology comparison 只驗分析輸出。</p></aside>
+    <details class="hcc-deep-dive"><summary>展開共同 region agreement、evidence ladder 與 confusion matrix</summary><div class="hcc-deep-inner">
+      <div class="hcc-analysis-grid">
+        <article class="hcc-table-panel"><div class="comparison-panel-head"><div><span>03 · Exact-coordinate agreement</span><h3>共同 primary region 的分類是否一致？</h3></div><p>95% CI 以 22 條 autosome block bootstrap，避免把 6,402 regions 當獨立 replicate。</p></div><p class="scroll-cue">精確表可水平捲動；維度欄固定，agreement、block CI 與 κ 保留完整。</p><div class="table-scroll" role="region" aria-label="HCC1395 matched region agreement，可水平捲動" tabindex="0"><table class="hcc-agreement-table"><caption>HCC1395 × DORADO；6,402 matched primary regions；三維 agreement、block-bootstrap CI 與 Cohen κ</caption><thead><tr><th scope="col">維度</th><th scope="col" class="numeric">Agreement</th><th scope="col" class="numeric">95% block CI</th><th scope="col" class="numeric">κ（95% CI）</th><th scope="col">判讀</th></tr></thead><tbody>{hcc_matched_rows(comparison)}</tbody></table></div></article>
+        <aside class="evidence-ladder"><span>Independent current-v5 layers</span><ol><li><b>{float(retained["jaccard"])*100:.1f}%</b><small>allele-site Jaccard · high backbone overlap</small></li><li><b>{float(same_internal["rate"])*100:.1f}%</b><small>exact common regions with the same internal sSNV set</small></li><li><b>{float(shape["rate"])*100:.1f}%</b><small>same-site unlabeled rooted-shape agreement</small></li><li><b>{float(exact_edges["rate"])*100:.1f}%</b><small>same-site exact labeled-edge agreement</small></li></ol></aside>
+      </div>
+      <article class="confusion-panel"><div class="comparison-panel-head"><div><span>04 · Confusion matrix</span><h3 id="hcc-confusion-title">結構可辨識度 · 哪些類別互相轉換？</h3></div><p>對角線是相同 label；非對角線是 technical divergence，不稱「錯誤」，因兩側都沒有 ground truth 身分。</p></div><div class="inline-controls compact-controls" id="confusion-mode-controls" role="group" aria-label="切換 confusion matrix 顯示"><button type="button" class="inline-toggle is-active" data-confusion-mode="count" aria-pressed="true">Count</button><button type="button" class="inline-toggle" data-confusion-mode="row-percent" aria-pressed="false">Row %</button></div><p class="scroll-cue matrix-scroll-cue">矩陣可水平捲動；row label 與 column header 固定。Count 與 Row % 共用同一批 6,402 matched primary regions。</p><div class="heatmap-scroll" role="region" aria-label="HCC1395 技術配對 confusion matrix，可水平捲動" tabindex="0" id="hcc-confusion">{hcc_confusion_table(comparison, "structural")}</div></article>
+    </div></details>
+  </section>
+
+  <section class="section core-section" id="cohort-comparison" aria-labelledby="comparison-title">
+    <div class="section-head"><div><p class="section-kicker">Cross-dataset comparison</p><h2 id="comparison-title">三維結構先看比例，再看 pairwise 差異</h2></div><p class="section-note">7-dataset operational 與 6-biological-ID macro 都實際畫出；TVD 是類別比例距離，不是 clone／演化距離。</p></div>
     <div class="comparison-scope-grid">
-      <article><span>Operational micro</span><strong>7 datasets</strong><b>{int(comparison["aggregates"]["dataset_micro"]["W_primary"]):,}</b><small>W_primary region rows；HCC pair 各占一列</small></article>
-      <article><span>Biological macro</span><strong>6 biological IDs</strong><b>Equal weight</b><small>HCC pair 先平均，再與其他五個 ID 平均</small></article>
+      <article><span>Operational micro</span><strong>7 datasets</strong><b>{int(comparison["aggregates"]["dataset_micro"]["W_primary"]):,}</b><small>W_primary rows；HCC pair 各占一列</small></article>
+      <article><span>Biological macro</span><strong>6 biological IDs</strong><b>Equal weight</b><small>HCC pair 先平均；macro 只有 proportions，不虛構 counts</small></article>
       <article class="technical"><span>Validation pair</span><strong>HCC1395 × DORADO</strong><b>1 biological ID</b><small>technical／cross-platform pair；不是 biological replication</small></article>
     </div>
     <div class="signature-grid" aria-label="樣本 profile 的自動極值摘要">{sample_signature_cards(comparison)}</div>
@@ -1103,37 +1200,19 @@ def sample_comparison_dashboard(comparison: dict[str, Any]) -> str:
     </div>
     <div class="comparison-key" id="comparison-key" aria-live="polite">{comparison_legend("structural")}</div>
     <article class="comparison-profile-panel">
-      <div class="comparison-panel-head"><div><span>01 · Composition profiles</span><h3 id="comparison-profile-title">結構可辨識度 · 逐 dataset</h3></div><p>每列獨立以該 dataset 的 W_primary=100%；長條適合看 pattern，精確 count／% 在下方表格。</p></div>
+      <div class="comparison-panel-head"><div><span>01 · Composition profiles</span><h3 id="comparison-profile-title">結構可辨識度 · 逐 dataset</h3></div><p id="comparison-profile-note">每列以自己的 W_primary=100%；macro 則是每個 biological ID 等權，沒有虛構 collapsed count。</p></div>
+      <div class="aggregate-profile-grid" id="aggregate-profile-chart" aria-label="Operational micro 與 biological macro 組成比較">{comparison_aggregate_profiles(comparison, "structural")}</div>
+      <div class="inline-controls" id="profile-scope-controls" role="group" aria-label="切換 composition profile 聚合單位"><button type="button" class="inline-toggle is-active" data-profile-scope="dataset" aria-pressed="true">7 datasets</button><button type="button" class="inline-toggle" data-profile-scope="biological" aria-pressed="false">6 biological IDs</button></div>
       <div class="comparison-profile-list" id="comparison-profile-chart" aria-live="polite">{comparison_profile_rows(comparison, "structural")}</div>
     </article>
     <details class="comparison-ledger">
       <summary>查看目前維度的 7 datasets 精確 count 與比例</summary>
-      <div class="table-scroll" role="region" aria-label="樣本拓撲比例精確表" tabindex="0"><table class="comparison-table"><thead id="comparison-ledger-head">{comparison_ledger_head("structural")}</thead><tbody id="comparison-ledger-body">{comparison_ledger_rows(comparison, "structural")}</tbody></table></div>
+      <div class="table-scroll" role="region" aria-label="樣本拓撲比例精確表" tabindex="0"><table class="comparison-table"><caption id="comparison-ledger-caption">結構可辨識度；7 datasets；count 與各自 W_primary 比例</caption><thead id="comparison-ledger-head">{comparison_ledger_head("structural")}</thead><tbody id="comparison-ledger-body">{comparison_ledger_rows(comparison, "structural")}</tbody></table></div>
     </details>
     <div class="comparison-matrix-layout">
-      <article class="matrix-panel"><div class="comparison-panel-head"><div><span>02 · Pairwise distance</span><h3 id="comparison-matrix-title">結構可辨識度 · TVD</h3></div><p>0=比例完全相同；數值越高差異越大。每格直接印數值，色深只作輔助。</p></div><div class="heatmap-scroll" role="region" aria-label="7乘7樣本組成距離矩陣" tabindex="0" id="comparison-matrix">{comparison_matrix_table(comparison, "structural")}</div></article>
+      <article class="matrix-panel"><div class="comparison-panel-head"><div><span>02 · Pairwise distance</span><h3 id="comparison-matrix-title">結構可辨識度 · Full W_primary TVD</h3></div><p id="comparison-matrix-note">Full profile 保留 incomplete／unavailable／unresolved；conditional 會排除後重新正規化，不能取代 full verdict。</p></div><div class="inline-controls" id="distance-scope-controls" role="group" aria-label="切換 pairwise TVD 分母"><button type="button" class="inline-toggle is-active" data-distance-scope="full" aria-pressed="true">Full W_primary</button><button type="button" class="inline-toggle" data-distance-scope="conditional" aria-pressed="false">Conditional evaluable</button></div><div class="heatmap-scale" aria-label="固定 TVD 色階"><span>0</span><i style="--scale-alpha:.24"></i><span>.05</span><i style="--scale-alpha:.40"></i><span>.10</span><i style="--scale-alpha:.72"></i><span>.20+</span></div><p class="scroll-cue matrix-scroll-cue">矩陣可水平捲動；row label 與 column header 會固定。每格印值，色深只作輔助。</p><div class="heatmap-scroll" role="region" aria-label="7乘7樣本組成距離矩陣" tabindex="0" id="comparison-matrix">{comparison_matrix_table(comparison, "structural")}</div></article>
       <aside class="pair-inspector" id="pair-inspector" aria-live="polite">{comparison_pair_inspector(comparison, "structural")}</aside>
     </div>
-  </section>
-
-  <section class="section" id="hcc1395-technical-validation" aria-labelledby="hcc-validation-title">
-    <div class="section-head"><div><p class="section-kicker">HCC1395 technical reproducibility</p><h2 id="hcc-validation-title">相對第 2 近，但不是可互換的同一份結果</h2></div><p class="section-note">兩列資料屬同一 biological sample；驗證的是 current pipeline 跨技術／輸入重現性。結論必同時滿足 marginal composition 與 matched-region 兩個視角。</p></div>
-    <article class="hcc-verdict">
-      <div><span class="verdict-badge verdict-moderate">PARTIAL TECHNICAL REPRODUCIBILITY</span><h3>粗粒度拓撲中度重現；exact ancestry 尚未確認</h3><p>三維 profile 在 21 組中排名第 {int(marginal["rank_among_21_pairs"])} 近，但 full-profile TVD={float(marginal["profile_mean_tvd"]):.3f} 已跨過事先鎖定的 0.10 明顯差異門檻。共同 primary regions 的三類 κ 都只落在 moderate。</p></div>
-      <dl><div><dt>Full profile</dt><dd>{float(marginal["profile_mean_tvd"]):.3f}<small>95% chr-block {float(bootstrap["full_profile_mean_tvd_ci95"][0]):.3f}–{float(bootstrap["full_profile_mean_tvd_ci95"][1]):.3f}</small></dd></div><div><dt>Conditional evaluable</dt><dd>{float(marginal["conditional_evaluable_mean_tvd"]):.3f}<small>rank {int(marginal["conditional_evaluable_rank_among_21_pairs"])}/21</small></dd></div></dl>
-    </article>
-    <div class="hcc-metric-grid">
-      <article><span>Exact primary region</span><strong>{int(overlap["intersection"]):,}</strong><b>Jaccard {float(overlap["jaccard"]):.3f}</b><small>{float(overlap["left_coverage"])*100:.1f}%／{float(overlap["right_coverage"])*100:.1f}% coverage</small></article>
-      <article><span>Exact retained sSNV</span><strong>{int(retained["intersection"]):,}</strong><b>Jaccard {float(retained["jaccard"]):.3f}</b><small>site backbone 高；不等於 tree 相同</small></article>
-      <article><span>Unlabeled rooted shape</span><strong>{float(shape["rate"])*100:.1f}%</strong><b>{int(shape["numerator"]):,} / {int(shape["denominator"]):,}</b><small>same internal sSNV；忽略 HP label</small></article>
-      <article><span>Exact labeled edges</span><strong>{float(exact_edges["rate"])*100:.1f}%</strong><b>{int(exact_edges["numerator"]):,} / {int(exact_edges["denominator"]):,}</b><small>unique candidate；exact ancestry 重現偏弱</small></article>
-    </div>
-    <div class="hcc-analysis-grid">
-      <article class="hcc-table-panel"><div class="comparison-panel-head"><div><span>03 · Exact-coordinate agreement</span><h3>共同 primary region 的分類是否一致？</h3></div><p>95% CI 以 22 條 autosome block bootstrap，避免把 6,402 regions 當獨立 replicate。</p></div><div class="table-scroll" role="region" aria-label="HCC1395 matched region agreement" tabindex="0"><table class="hcc-agreement-table"><thead><tr><th scope="col">維度</th><th scope="col" class="numeric">Agreement</th><th scope="col" class="numeric">95% block CI</th><th scope="col" class="numeric">κ（95% CI）</th><th scope="col">判讀</th></tr></thead><tbody>{hcc_matched_rows(comparison)}</tbody></table></div></article>
-      <aside class="evidence-ladder"><span>Independent current-v5 layers</span><ol><li><b>{float(retained["jaccard"])*100:.1f}%</b><small>retained-site Jaccard · high backbone overlap</small></li><li><b>{float(same_internal["rate"])*100:.1f}%</b><small>exact common regions with the same internal sSNV set</small></li><li><b>{float(shape["rate"])*100:.1f}%</b><small>same-site unlabeled rooted-shape agreement</small></li><li><b>{float(exact_edges["rate"])*100:.1f}%</b><small>same-site exact labeled-edge agreement</small></li></ol></aside>
-    </div>
-    <article class="confusion-panel"><div class="comparison-panel-head"><div><span>04 · Confusion matrix</span><h3 id="hcc-confusion-title">結構可辨識度 · 哪些類別互相轉換？</h3></div><p>對角線是相同 label；非對角線是 technical divergence，不稱「錯誤」，因兩側都沒有 ground truth 身分。</p></div><div class="heatmap-scroll" role="region" aria-label="HCC1395 技術配對 confusion matrix" tabindex="0" id="hcc-confusion">{hcc_confusion_table(comparison, "structural")}</div></article>
-    <aside class="claim-boundary-box"><strong>判定界線</strong><p>可寫：「同一 HCC1395 的粗粒度 regional mutation-state profile 具有中度跨技術重現性。」不可寫：「兩個 dataset 得到相同真樹／clone tree」「已驗證 biological clone」或「可互換」。若要驗樣本身分，需另做 germline SNP fingerprint；topology comparison 只驗分析輸出。</p></aside>
   </section>
   <script type="application/json" id="sample-comparison-data">{embedded}</script>
 '''
@@ -1283,11 +1362,12 @@ def build_index(authority: dict[str, Any], rows: list[dict[str, Any]]) -> str:
 <meta name="intersubmod-read-af-topology-index-sha256" content="$read_af_index_sha256">
 <meta name="intersubmod-sample-topology-comparison-sha256" content="$sample_comparison_sha256">
 <meta name="intersubmod-canonical-run" content="$run_id">
+<meta name="intersubmod-ui-contract" content="$ui_contract">
 <title>Layered reconstruction · 全基因 cohort command center</title>
 <style>
-:root{--ink:#122b32;--ink-soft:#345058;--muted:#596a6e;--paper:#f2efe7;--panel:#fffdf7;--line:#c8c6bc;--rail:#0f3138;--teal:#168b8d;--cyan:#53c4bd;--amber:#d47a2b;--brick:#b84f3d;--sand:#dfd5bc;--blue:#426f9e;--focus:#f2a900;--shadow:0 15px 45px rgba(19,45,52,.09)}
+:root{--ink:#122b32;--ink-soft:#345058;--muted:#526469;--paper:#f2efe7;--panel:#fffdf7;--line:#c8c6bc;--rail:#0f3138;--teal:#0b686b;--teal-fill:#168b8d;--cyan:#53c4bd;--amber:#95500b;--amber-fill:#d47a2b;--brick:#9d3d30;--brick-fill:#b84f3d;--sand:#dfd5bc;--blue:#426f9e;--focus:#f2a900;--shadow:0 15px 45px rgba(19,45,52,.09)}
 *{box-sizing:border-box}
-html{background:var(--paper);scroll-behavior:smooth}
+html{background:var(--paper);scroll-behavior:smooth;scroll-padding-top:72px}
 body{margin:0;color:var(--ink);background:linear-gradient(90deg,rgba(15,49,56,.035) 1px,transparent 1px),linear-gradient(180deg,#e8e4d9 0,var(--paper) 360px);background-size:48px 100%,100% 100%;font-family:"IBM Plex Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;line-height:1.58}
 a{color:var(--rail);text-decoration-color:rgba(15,49,56,.42);text-underline-offset:3px}
 a:hover{text-decoration-thickness:2px}
@@ -1296,6 +1376,9 @@ a:focus-visible,summary:focus-visible,.table-scroll:focus-visible{outline:3px so
 .skip-link{position:fixed;z-index:100;left:14px;top:10px;transform:translateY(-180%);padding:9px 13px;border:2px solid var(--ink);background:#fff;color:#111;font-weight:800}
 .skip-link:focus{transform:none}
 .shell{width:min(100%,1360px);margin:0 auto;padding:22px clamp(14px,3vw,42px) 54px}
+.local-nav{position:sticky;z-index:50;top:0;display:flex;gap:4px;overflow-x:auto;margin-top:10px;padding:6px;border:1px solid #8fa1a3;background:var(--panel);box-shadow:0 8px 20px rgba(19,45,52,.08);scrollbar-width:thin}.local-nav a{flex:0 0 auto;min-height:44px;padding:11px 14px;border-left:3px solid transparent;color:var(--ink-soft);font-size:12px;font-weight:800;text-decoration:none;white-space:nowrap}.local-nav a:hover,.local-nav a[aria-current="location"]{border-left-color:var(--teal);background:#e6efed;color:var(--rail)}
+.answer-strip[id],.section[id],.evidence-drawer[id]{scroll-margin-top:72px}
+.answer-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.answer-strip article{padding:14px 16px;border:1px solid #98a8a8;border-top:4px solid var(--teal);background:var(--panel)}.answer-strip article:nth-child(2){border-top-color:var(--amber)}.answer-strip article:nth-child(3){border-top-color:var(--brick)}.answer-strip span,.answer-strip strong,.answer-strip small{display:block}.answer-strip span{color:var(--muted);font:800 10px/1.2 "IBM Plex Mono","Cascadia Code",monospace;text-transform:uppercase}.answer-strip strong{margin-top:7px;font-size:15px}.answer-strip small{margin-top:5px;color:var(--muted);font-size:11px}
 .hero{position:relative;display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.75fr);overflow:hidden;border:1px solid #789095;background:var(--rail);color:#f7f3e9;box-shadow:var(--shadow)}
 .hero:after{content:"CHR 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22";position:absolute;left:0;right:0;bottom:0;padding:7px 24px;border-top:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.55);font:600 9px/1.2 "IBM Plex Mono","Cascadia Code",monospace;letter-spacing:.18em;word-spacing:.55em;white-space:nowrap;overflow:hidden}
 .hero-main{padding:clamp(28px,5vw,66px) clamp(22px,5vw,64px) 60px}
@@ -1326,7 +1409,7 @@ h2{margin:0;font-family:"Iowan Old Style","Noto Serif TC","Songti TC",serif;font
 .topology-main,.topology-legend,.sample-topology,.dimension-card,.claim-card,.layer-card,.table-shell,.evidence-drawer{border:1px solid var(--line);background:var(--panel)}
 .topology-main{padding:24px}.topology-main h3{margin:0 0 5px;font-size:16px}.topology-main>p{margin:0 0 24px;color:var(--muted);font-size:12.5px}
 .topology-bar{display:flex;width:100%;height:30px;overflow:hidden;border:1px solid #829195;background:#e8e4d9}
-.bar-segment{display:block;min-width:0;height:100%}.segment-unique{background:var(--teal)}.segment-shape{background:var(--blue)}.segment-multiple{background:var(--amber)}.segment-incomplete{background:var(--brick)}
+.bar-segment{display:block;min-width:0;height:100%}.segment-unique{background:var(--teal-fill)}.segment-shape{background:var(--blue)}.segment-multiple{background:var(--amber-fill)}.segment-incomplete{background:var(--brick-fill)}
 .segment-read-structural{background:#138b78}.segment-read-unique{background:#426f9e}.segment-read-same{background:#53bcb8}.segment-read-multiple{background:#8a4f9e}.segment-read-unavailable{background:#d08a31}
 .segment-morph-single{background:#809196}.segment-morph-direct{background:#426f9e}.segment-morph-sister{background:#35a9a5}.segment-morph-mixed{background:#7e50a0}
 .bar-scale{display:flex;justify-content:space-between;margin-top:6px;color:var(--muted);font:700 9.5px/1.2 "IBM Plex Mono","Cascadia Code",monospace;text-transform:uppercase}
@@ -1334,16 +1417,17 @@ h2{margin:0;font-family:"Iowan Old Style","Noto Serif TC","Songti TC",serif;font
 .sample-bars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
 .sample-topology{padding:15px 16px}.sample-topology-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:9px}.sample-topology-head a{font-size:12.5px}.sample-topology-head span{color:var(--muted);font:700 10px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.sample-topology .topology-bar{height:16px}
 .interpretation-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.distribution-card{min-width:0;padding:22px;border:1px solid var(--line);background:var(--panel)}.distribution-card:nth-child(1){border-top:4px solid var(--blue)}.distribution-card:nth-child(2){border-top:4px solid #7e50a0}.distribution-head{display:flex;justify-content:space-between;gap:16px;align-items:start}.distribution-head span{color:var(--muted);font:800 9.5px/1.25 "IBM Plex Mono","Cascadia Code",monospace;letter-spacing:.06em;text-transform:uppercase}.distribution-head h3{margin:6px 0 0;font-size:17px}.distribution-head>b{color:var(--muted);font:750 10px/1.4 "IBM Plex Mono","Cascadia Code",monospace;white-space:nowrap}.distribution-card>p{min-height:40px;margin:10px 0 18px;color:var(--ink-soft);font-size:12px}.distribution-card .topology-bar{height:24px}.distribution-legend{display:grid;gap:7px;margin:17px 0 0;padding:0;list-style:none}.distribution-legend li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:9px;align-items:start;padding-top:7px;border-top:1px solid #e3e0d7}.distribution-legend .legend-swatch{height:29px}.distribution-legend strong,.distribution-legend small,.distribution-legend b{display:block}.distribution-legend strong{font-size:11.5px}.distribution-legend small{margin-top:2px;color:var(--muted);font-size:10px}.distribution-legend b{text-align:right;font:750 12px/1.2 "IBM Plex Mono","Cascadia Code",monospace}.distribution-card aside{margin-top:16px;padding:10px 12px;border-left:4px solid var(--amber);background:#f8efe2;color:#624a2e;font-size:11px}
-.comparison-scope-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.comparison-scope-grid article{min-height:146px;padding:18px;border:1px solid var(--line);border-top:4px solid var(--teal);background:var(--panel)}.comparison-scope-grid article:nth-child(2){border-top-color:var(--blue)}.comparison-scope-grid article.technical{border-top-color:var(--amber);background:#fff9ed}.comparison-scope-grid span,.comparison-panel-head span,.evidence-ladder>span{display:block;color:var(--muted);font:800 9.5px/1.25 "IBM Plex Mono","Cascadia Code",monospace;letter-spacing:.07em;text-transform:uppercase}.comparison-scope-grid strong,.comparison-scope-grid b,.comparison-scope-grid small{display:block}.comparison-scope-grid strong{margin-top:14px;font-size:17px}.comparison-scope-grid b{margin-top:4px;font:800 14px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.comparison-scope-grid small{margin-top:9px;color:var(--muted);font-size:10.5px}
-.signature-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}.signature-card{min-width:0;padding:13px 14px;border:1px solid #d2cfc5;background:#f7f4ec}.signature-card span,.signature-card strong,.signature-card b,.signature-card small{display:block}.signature-card span{color:var(--muted);font-size:9.5px}.signature-card strong{margin-top:6px;overflow-wrap:anywhere;font:800 11.5px/1.25 "IBM Plex Mono","Cascadia Code",monospace}.signature-card b{margin-top:5px;color:var(--teal);font:850 20px/1 "IBM Plex Mono","Cascadia Code",monospace}.signature-card small{margin-top:5px;color:var(--muted);font-size:9px}
+.comparison-scope-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.comparison-scope-grid article{min-height:112px;padding:14px 16px;border:1px solid var(--line);border-top:4px solid var(--teal);background:var(--panel)}.comparison-scope-grid article:nth-child(2){border-top-color:var(--blue)}.comparison-scope-grid article.technical{border-top-color:var(--amber);background:#fff9ed}.comparison-scope-grid span,.comparison-panel-head span,.evidence-ladder>span{display:block;color:var(--muted);font:800 10.5px/1.25 "IBM Plex Mono","Cascadia Code",monospace;letter-spacing:.07em;text-transform:uppercase}.comparison-scope-grid strong,.comparison-scope-grid b,.comparison-scope-grid small{display:block}.comparison-scope-grid strong{margin-top:7px;font-size:16px}.comparison-scope-grid b{margin-top:3px;font:800 14px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.comparison-scope-grid small{margin-top:5px;color:var(--muted);font-size:11px}
+.signature-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}.signature-card{min-width:0;padding:13px 14px;border:1px solid #d2cfc5;background:#f7f4ec}.signature-card span,.signature-card strong,.signature-card b,.signature-card small{display:block}.signature-card span{color:var(--muted);font-size:10.5px}.signature-card strong{margin-top:6px;overflow-wrap:anywhere;font:800 11.5px/1.25 "IBM Plex Mono","Cascadia Code",monospace}.signature-card b{margin-top:5px;color:var(--teal);font:850 20px/1 "IBM Plex Mono","Cascadia Code",monospace}.signature-card small{margin-top:5px;color:var(--muted);font-size:10.5px}
 .comparison-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:16px 0 8px;padding:7px;border:1px solid #9da9a7;background:#e4e8e4}.comparison-tab{min-height:48px;padding:8px 12px;border:1px solid transparent;background:transparent;color:var(--ink);cursor:pointer;font:750 11px/1.3 "IBM Plex Sans","Noto Sans TC",sans-serif}.comparison-tab span{display:block;color:var(--muted);font:750 8.5px/1.2 "IBM Plex Mono","Cascadia Code",monospace;text-transform:uppercase}.comparison-tab.is-active{border-color:var(--rail);background:var(--rail);color:#fff}.comparison-tab.is-active span{color:#b5d7d4}.comparison-tab:focus-visible,.matrix-cell:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .comparison-key{display:flex;flex-wrap:wrap;gap:6px 14px;min-height:40px;padding:9px 11px;border:1px solid #d8d5cc;background:#faf8f2}.comparison-key-item{display:inline-grid;grid-template-columns:9px auto;gap:6px;align-items:center}.comparison-key-item .legend-swatch{width:9px;height:18px}.comparison-key-item b{font-size:9.5px}
-.comparison-profile-panel,.matrix-panel,.hcc-table-panel,.confusion-panel{min-width:0;margin-top:10px;padding:19px;border:1px solid var(--line);background:var(--panel)}.comparison-panel-head{display:flex;justify-content:space-between;gap:24px;align-items:end;margin-bottom:15px}.comparison-panel-head h3{margin:5px 0 0;font-size:17px}.comparison-panel-head p{max-width:520px;margin:0;color:var(--muted);font-size:11px}.comparison-profile-list{display:grid;gap:7px}.comparison-profile-row{display:grid;grid-template-columns:minmax(150px,190px) minmax(0,1fr) 86px;gap:12px;align-items:center;min-height:43px;padding:6px 8px;border-left:3px solid transparent}.comparison-profile-row.technical-pair{border-left-color:var(--amber);background:#fff9ed}.comparison-profile-name strong,.comparison-profile-name small,.comparison-profile-n small{display:block}.comparison-profile-name strong{overflow-wrap:anywhere;font:800 11px/1.25 "IBM Plex Mono","Cascadia Code",monospace}.comparison-profile-name small{margin-top:2px;color:#8a5a24;font-size:8.5px}.comparison-profile-row .topology-bar{height:21px}.comparison-profile-n{text-align:right;font:800 11px/1.25 "IBM Plex Mono","Cascadia Code",monospace}.comparison-profile-n small{color:var(--muted);font-size:8px}.comparison-ledger{min-width:0;margin-top:8px;border:1px solid var(--line);background:var(--panel)}.comparison-ledger summary{min-height:48px;padding:13px 16px;cursor:pointer;font-weight:800}.comparison-ledger[open] summary{border-bottom:1px solid var(--line)}.comparison-table{min-width:1050px}.comparison-table strong,.comparison-table small{display:block}
-.comparison-matrix-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(250px,.6fr);gap:10px;align-items:stretch}.heatmap-scroll{width:100%;min-width:0;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}.heatmap-scroll:focus-visible{outline:3px solid var(--focus);outline-offset:2px}.distance-matrix{min-width:760px;table-layout:fixed;border-collapse:separate;border-spacing:3px}.distance-matrix th,.distance-matrix td{position:static;padding:0;border:0;background:transparent;text-align:center}.distance-matrix thead th,.distance-matrix tbody th{padding:5px;background:transparent;color:var(--muted);font:750 8.5px/1.15 "IBM Plex Mono","Cascadia Code",monospace}.distance-matrix tbody th{text-align:left}.matrix-cell,.matrix-diagonal span{display:grid;width:100%;min-height:44px;place-items:center;border:1px solid rgba(15,49,56,.22);color:#0a2429;font:800 10px/1 "IBM Plex Mono","Cascadia Code",monospace;font-variant-numeric:tabular-nums}.matrix-cell{cursor:pointer}.matrix-cell:hover{border-color:var(--rail);box-shadow:inset 0 0 0 2px #fff}.matrix-cell.is-hcc{outline:2px solid var(--amber);outline-offset:-2px}.matrix-cell.is-selected{box-shadow:inset 0 0 0 3px #fff;outline:3px solid var(--rail);outline-offset:-1px}.matrix-diagonal span{border-style:dashed;background:#ece9e0;color:#7a8584}
+.comparison-profile-panel,.matrix-panel,.hcc-table-panel,.confusion-panel{min-width:0;margin-top:10px;padding:19px;border:1px solid var(--line);background:var(--panel)}.comparison-panel-head{display:flex;justify-content:space-between;gap:24px;align-items:end;margin-bottom:15px}.comparison-panel-head h3{margin:5px 0 0;font-size:17px}.comparison-panel-head p{max-width:520px;margin:0;color:var(--muted);font-size:12px}.aggregate-profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.aggregate-profile{display:grid;grid-template-columns:minmax(175px,.55fr) minmax(0,1.45fr);gap:12px;align-items:center;padding:11px 12px;border:1px solid #aab5b2;background:#f5f5ee}.aggregate-profile strong,.aggregate-profile small{display:block}.aggregate-profile strong{font-size:12px}.aggregate-profile small{margin-top:3px;color:var(--muted);font-size:10.5px}.aggregate-profile .topology-bar{height:24px}.inline-controls{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0;padding:5px;border:1px solid #a7b1ae;background:#e8ebe6}.inline-toggle{min-height:44px;padding:8px 12px;border:1px solid transparent;background:transparent;color:var(--ink-soft);cursor:pointer;font-size:11.5px;font-weight:800}.inline-toggle.is-active{border-color:var(--rail);background:var(--rail);color:#fff}.inline-toggle:focus-visible{outline:3px solid var(--focus);outline-offset:2px}.compact-controls{width:max-content;max-width:100%}.comparison-profile-list{display:grid;gap:7px}.comparison-profile-row{display:grid;grid-template-columns:minmax(150px,190px) minmax(0,1fr) 98px;gap:12px;align-items:center;min-height:46px;padding:7px 8px;border-left:3px solid transparent}.comparison-profile-row.technical-pair{border-left-color:var(--amber);background:#fff9ed}.comparison-profile-name strong,.comparison-profile-name small,.comparison-profile-n small{display:block}.comparison-profile-name strong{overflow-wrap:anywhere;font:800 11.5px/1.25 "IBM Plex Mono","Cascadia Code",monospace}.comparison-profile-name small{margin-top:2px;color:#754713;font-size:10.5px}.comparison-profile-row .topology-bar{height:21px}.comparison-profile-n{text-align:right;font:800 11.5px/1.25 "IBM Plex Mono","Cascadia Code",monospace}.comparison-profile-n small{color:var(--muted);font-size:10px}.comparison-ledger{min-width:0;margin-top:8px;border:1px solid var(--line);background:var(--panel)}.comparison-ledger summary{min-height:48px;padding:13px 16px;cursor:pointer;font-weight:800}.comparison-ledger[open] summary{border-bottom:1px solid var(--line)}.comparison-table{min-width:1050px}.comparison-table strong,.comparison-table small{display:block}
+.comparison-matrix-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(250px,.6fr);gap:10px;align-items:stretch}.heatmap-scroll{width:100%;min-width:0;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}.heatmap-scroll:focus-visible{outline:3px solid var(--focus);outline-offset:2px}.heatmap-scale{display:flex;align-items:center;gap:6px;margin:8px 0;color:var(--muted);font:800 10.5px/1 "IBM Plex Mono","Cascadia Code",monospace}.heatmap-scale i{width:34px;height:12px;border:1px solid rgba(15,49,56,.22);background:rgba(22,139,141,var(--scale-alpha))}.matrix-scroll-cue{border:1px solid #d4d1c8}.distance-matrix{min-width:820px;table-layout:fixed;border-collapse:separate;border-spacing:3px}.distance-matrix th,.distance-matrix td{padding:0;border:0;text-align:center}.distance-matrix thead th,.distance-matrix tbody th{min-width:86px;padding:7px;background:#f4f1e9;color:#465a5f;font:800 10px/1.2 "IBM Plex Mono","Cascadia Code",monospace;white-space:nowrap}.distance-matrix thead th{position:sticky;z-index:3;top:0}.distance-matrix tbody th{position:sticky;z-index:2;left:0;text-align:left}.distance-matrix thead th:first-child{z-index:4;left:0}.matrix-cell,.matrix-diagonal span{display:grid;width:100%;min-height:44px;place-items:center;border:1px solid rgba(15,49,56,.22);color:#08252c;font:800 10.5px/1 "IBM Plex Mono","Cascadia Code",monospace;font-variant-numeric:tabular-nums}.matrix-cell{cursor:pointer}.matrix-cell:hover{border-color:var(--rail);box-shadow:inset 0 0 0 2px #fff}.matrix-cell.is-hcc{outline:2px solid var(--amber);outline-offset:-2px}.matrix-cell.is-selected,.matrix-cell[aria-pressed="true"]{box-shadow:inset 0 0 0 3px #fff;outline:3px solid var(--rail);outline-offset:-1px}.matrix-diagonal span{border-style:dashed;background:#ece9e0;color:#465251}
 .pair-inspector{min-width:0;margin-top:10px;padding:21px;border:1px solid #9db0b2;border-top:5px solid var(--amber);background:#f8f5ed}.pair-chip,.verdict-badge{display:inline-block;padding:4px 7px;border:1px solid currentColor;color:#83501f;font:800 8.5px/1.2 "IBM Plex Mono","Cascadia Code",monospace;text-transform:uppercase}.pair-inspector h3{margin:16px 0 10px;overflow-wrap:anywhere;font-size:16px}.pair-distance{display:block;font:850 34px/1 "IBM Plex Mono","Cascadia Code",monospace}.pair-distance small{display:block;margin-top:6px;color:var(--muted);font-size:9px}.pair-inspector p{margin:18px 0 0;color:var(--muted);font-size:11px}.pair-delta-list{display:grid;gap:5px;margin-top:14px}.pair-delta-list div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding-top:5px;border-top:1px solid #ddd8cc}.pair-delta-list span{font-size:9.5px}.pair-delta-list b{font:750 9.5px/1.2 "IBM Plex Mono","Cascadia Code",monospace}
 .hcc-verdict{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.6fr);gap:18px;padding:22px;border:1px solid #c38a4c;border-left:7px solid var(--amber);background:#fff8e8}.hcc-verdict h3{margin:15px 0 7px;font-size:20px}.hcc-verdict p{margin:0;color:#654722;font-size:12px}.hcc-verdict dl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0}.hcc-verdict dl div{padding:12px;border:1px solid #dec5a6;background:#fffdf8}.hcc-verdict dt{color:var(--muted);font-size:9px}.hcc-verdict dd{margin:7px 0 0;font:850 24px/1 "IBM Plex Mono","Cascadia Code",monospace}.hcc-verdict dd small{display:block;margin-top:7px;color:var(--muted);font-size:8.5px;line-height:1.4}.verdict-moderate{color:#8a5720;background:#fff4d9}.verdict-high{color:#176d5b;background:#e5f3ee}.verdict-limited{color:#8a3f34;background:#f8e8e4}
-.hcc-metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:9px}.hcc-metric-grid article{min-height:150px;padding:16px;border:1px solid var(--line);background:var(--panel)}.hcc-metric-grid span,.hcc-metric-grid strong,.hcc-metric-grid b,.hcc-metric-grid small{display:block}.hcc-metric-grid span{color:var(--muted);font-size:9px}.hcc-metric-grid strong{margin-top:13px;font:850 25px/1 "IBM Plex Mono","Cascadia Code",monospace}.hcc-metric-grid b{margin-top:7px;color:var(--teal);font:800 11px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.hcc-metric-grid small{margin-top:10px;color:var(--muted);font-size:9.5px}
-.hcc-analysis-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(250px,.45fr);gap:10px}.hcc-agreement-table{min-width:760px}.hcc-agreement-table strong,.hcc-agreement-table small{display:block}.evidence-ladder{margin-top:10px;padding:19px;border:1px solid #9dacac;background:#e9efed}.evidence-ladder ol{display:grid;gap:8px;margin:14px 0 0;padding:0;list-style:none}.evidence-ladder li{padding:10px;border-left:4px solid var(--teal);background:#f9fbf8}.evidence-ladder b,.evidence-ladder small{display:block}.evidence-ladder b{font:850 20px/1 "IBM Plex Mono","Cascadia Code",monospace}.evidence-ladder small{margin-top:5px;color:var(--muted);font-size:9.5px}.confusion-table{min-width:820px}.confusion-table caption{padding:0 0 10px;text-align:left;color:var(--muted);font-size:10px}.confusion-table th,.confusion-table td{position:static;padding:8px;border:2px solid var(--panel);background:#f3e7d3;text-align:center}.confusion-table thead th,.confusion-table tbody th{background:#e5e9e5;font-size:9px}.confusion-table .confusion-diagonal{background:#d7ebe4;color:#154d42;font-weight:850}.claim-boundary-box{display:grid;grid-template-columns:auto 1fr;gap:15px;align-items:start;margin-top:9px;padding:15px 17px;border-left:6px solid var(--brick);background:#f8eae6}.claim-boundary-box strong{font:850 9px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.claim-boundary-box p{margin:0;color:#613c35;font-size:11px}
+.hcc-metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:9px}.hcc-metric-grid article{min-height:142px;padding:15px;border:1px solid var(--line);background:var(--panel)}.hcc-metric-grid span,.hcc-metric-grid strong,.hcc-metric-grid b,.hcc-metric-grid small{display:block}.hcc-metric-grid span{color:var(--muted);font-size:10.5px}.hcc-metric-grid strong{margin-top:10px;font:850 25px/1 "IBM Plex Mono","Cascadia Code",monospace}.hcc-metric-grid b{margin-top:7px;color:var(--teal);font:800 11.5px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.hcc-metric-grid small{margin-top:8px;color:var(--muted);font-size:10.5px}.hcc-deep-dive{margin-top:10px;border:1px solid #a9b3b0;background:var(--panel)}.hcc-deep-dive>summary{min-height:48px;padding:13px 16px;cursor:pointer;font-weight:800}.hcc-deep-dive[open]>summary{border-bottom:1px solid var(--line)}.hcc-deep-inner{padding:0 12px 12px}
+.hcc-analysis-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(250px,.45fr);gap:10px}.hcc-agreement-table{min-width:760px}.hcc-agreement-table strong,.hcc-agreement-table small{display:block}.evidence-ladder{margin-top:10px;padding:19px;border:1px solid #9dacac;background:#e9efed}.evidence-ladder ol{display:grid;gap:8px;margin:14px 0 0;padding:0;list-style:none}.evidence-ladder li{padding:10px;border-left:4px solid var(--teal);background:#f9fbf8}.evidence-ladder b,.evidence-ladder small{display:block}.evidence-ladder b{font:850 20px/1 "IBM Plex Mono","Cascadia Code",monospace}.evidence-ladder small{margin-top:5px;color:var(--muted);font-size:10.5px}.confusion-table{min-width:900px}.confusion-table caption{padding:0 0 10px;text-align:left;color:var(--muted);font-size:10.5px}.confusion-table th,.confusion-table td{padding:8px;border:2px solid var(--panel);background:#f3e7d3;text-align:center}.confusion-table thead th{position:sticky;z-index:3;top:0;background:#e5e9e5;font-size:10px}.confusion-table tbody th{position:sticky;z-index:2;left:0;background:#e5e9e5;font-size:10px}.confusion-table thead th:first-child{z-index:4;left:0}.confusion-table .confusion-diagonal{background:#d7ebe4;color:#154d42;font-weight:850}.confusion-table .confusion-total{background:#e9ece7;font-weight:850}.claim-boundary-box{display:grid;grid-template-columns:auto 1fr;gap:15px;align-items:start;margin-top:9px;padding:15px 17px;border-left:6px solid var(--brick);background:#f8eae6}.claim-boundary-box strong{font:850 10.5px/1.3 "IBM Plex Mono","Cascadia Code",monospace}.claim-boundary-box p{margin:0;color:#613c35;font-size:12px}
+.confusion-table{min-width:800px}.confusion-table thead th:first-child,.confusion-table tbody th{width:126px;min-width:126px;max-width:126px;white-space:normal}
 .dimension-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.dimension-card{display:flex;min-width:0;min-height:306px;flex-direction:column;padding:20px;border-top:4px solid var(--teal)}.dimension-card:nth-child(2){border-top-color:var(--amber)}.dimension-card:nth-child(3){border-top-color:var(--blue)}
 .dimension-code{display:flex;justify-content:space-between;gap:10px;color:var(--teal);font:800 10px/1.2 "IBM Plex Mono","Cascadia Code",monospace;letter-spacing:.07em;text-transform:uppercase}.dimension-card:nth-child(2) .dimension-code{color:var(--amber)}.dimension-card:nth-child(3) .dimension-code{color:var(--blue)}
 .dimension-card h3{margin:18px 0 8px;font-size:17px}.dimension-answer{margin:0;color:var(--ink-soft);font-size:12.5px}.dimension-answer strong{color:var(--ink);font:800 22px/1.1 "IBM Plex Mono","Cascadia Code",monospace}.dimension-list{display:grid;gap:5px;margin:15px 0}.dimension-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:7px 8px;border:1px solid #ddd9cf;background:#f6f3eb}.dimension-row span{color:var(--muted);font-size:10.5px}.dimension-row b{font:750 10.5px/1.3 "IBM Plex Mono","Cascadia Code",monospace;text-align:right}.dimension-boundary{margin:auto 0 0;color:var(--muted);font-size:11.5px}.dimension-link{display:inline-block;margin-top:13px;padding:8px 10px;border:1px solid var(--rail);background:var(--rail);color:#fff;text-decoration:none;font-size:11px;font-weight:800}.dimension-link:hover{background:var(--teal)}
@@ -1352,6 +1436,7 @@ h2{margin:0;font-family:"Iowan Old Style","Noto Serif TC","Songti TC",serif;font
 .genome-link{display:grid;grid-template-columns:auto 1fr;gap:11px;align-items:start;min-height:122px;padding:16px;border:1px solid #98a5a4;background:var(--panel);color:var(--ink);text-decoration:none;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
 .genome-link:hover{transform:translateY(-2px);border-color:var(--teal);box-shadow:0 10px 24px rgba(19,45,52,.09)}
 .launcher-index{display:grid;place-items:center;width:29px;height:29px;border-radius:50%;background:var(--rail);color:#fff;font:700 10px/1 "IBM Plex Mono","Cascadia Code",monospace}.genome-link strong,.genome-link small{display:block}.genome-link strong{overflow-wrap:anywhere;font:800 13px/1.25 "IBM Plex Mono","Cascadia Code",monospace}.genome-link small{margin-top:6px;color:var(--muted);font-size:10.5px}.launcher-action{grid-column:2;margin-top:auto;color:var(--teal);font-size:11px;font-weight:800}
+caption{padding:7px 9px;color:var(--muted);text-align:left;font-size:10.5px;font-weight:750}
 .table-shell{max-width:100%;box-shadow:var(--shadow)}.scroll-cue{display:flex;justify-content:space-between;gap:12px;padding:9px 12px;border-bottom:1px solid var(--line);background:#e9e7df;color:var(--muted);font-size:11px}.table-scroll{width:100%;overflow-x:auto;overscroll-behavior-inline:contain}.table-scroll:focus-visible{outline-offset:-3px}
 table{width:100%;min-width:1020px;border-collapse:collapse;font-size:12px}th,td{padding:11px 10px;text-align:left;vertical-align:middle;border-bottom:1px solid #e2dfd6}thead th{position:sticky;top:0;z-index:2;background:#dfe5e3;color:#2f494f;font:800 9.5px/1.3 "IBM Plex Mono","Cascadia Code",monospace;letter-spacing:.03em}tbody tr:last-child>*{border-bottom:0}tbody tr:hover>*{background:#f4f5ef}th:first-child,td:first-child{position:sticky;left:0;z-index:1}thead th:first-child{z-index:3}tbody th:first-child{background:var(--panel);box-shadow:7px 0 12px -13px #000}.sample-cell{min-width:166px}.sample-cell strong,.sample-cell small,td small{display:block}.sample-cell small,td small{margin-top:3px;color:var(--muted);font-size:10px}.numeric{text-align:right;font-family:"IBM Plex Mono","Cascadia Code",monospace;font-variant-numeric:tabular-nums}.table-action{display:inline-block;padding:7px 9px;border:1px solid var(--rail);background:var(--rail);color:#fff;text-decoration:none;white-space:nowrap;font-weight:750}.table-action:hover{background:var(--teal)}
 .claim-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.claim-card{min-height:185px;padding:20px}.claim-card:nth-child(1){border-top:4px solid var(--teal)}.claim-card:nth-child(2){border-top:4px solid var(--amber)}.claim-card:nth-child(3){border-top:4px solid var(--brick)}.claim-index{color:var(--muted);font:800 10px/1 "IBM Plex Mono","Cascadia Code",monospace}.claim-card h3{margin:25px 0 9px;font-size:16px}.claim-card p{margin:0;color:var(--ink-soft);font-size:12.5px}
@@ -1362,6 +1447,7 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
 @media(max-width:1050px){.metric-grid{grid-template-columns:repeat(2,1fr)}.genome-launchers{grid-template-columns:repeat(3,1fr)}.topology-board{grid-template-columns:1fr}.dimension-grid{grid-template-columns:1fr}.dimension-card{min-height:0}.layer-grid{grid-template-columns:repeat(2,1fr)}.layer-card:nth-child(2){border-right:0}.layer-card:nth-child(-n+2){border-bottom:1px solid var(--line)}.signature-grid,.hcc-metric-grid{grid-template-columns:repeat(2,1fr)}.comparison-matrix-layout,.hcc-analysis-grid{grid-template-columns:1fr}}
 @media(max-width:760px){.shell{padding:12px 11px 36px}.hero{grid-template-columns:1fr}.hero-aside{border-left:0;border-top:1px solid rgba(255,255,255,.18)}.sensitivity-banner{grid-template-columns:1fr}.sensitivity-metrics{grid-template-columns:1fr 1fr}.section-head{display:block}.section-note{margin-top:7px}.sample-bars,.claim-grid,.comparison-scope-grid{grid-template-columns:1fr}.genome-launchers{grid-template-columns:repeat(2,1fr)}footer{display:block}footer span{display:block;margin-top:5px}.comparison-panel-head{display:block}.comparison-panel-head p{margin-top:7px}.comparison-profile-row{grid-template-columns:1fr;gap:6px;padding:9px}.comparison-profile-n{text-align:left}.hcc-verdict{grid-template-columns:1fr}.claim-boundary-box{grid-template-columns:1fr}}
 @media(max-width:760px){.interpretation-board{grid-template-columns:1fr}.distribution-card>p{min-height:0}}
+@media(max-width:760px){.answer-strip,.aggregate-profile-grid{grid-template-columns:1fr}.comparison-scope-grid article{min-height:0;padding:11px 13px}.aggregate-profile{grid-template-columns:1fr}.local-nav{margin-left:-1px;margin-right:-1px}.hcc-deep-inner{padding:0 6px 8px}}
 @media(max-width:500px){.metric-grid,.genome-launchers,.layer-grid,.signature-grid,.hcc-metric-grid,.comparison-controls{grid-template-columns:1fr}.hero-main{padding:28px 20px 58px}.hero-aside{padding:24px 20px 48px}.metric-card{min-height:0}.position-leaders{grid-template-columns:1fr}.layer-card{min-height:0;border-right:0;border-bottom:1px solid var(--line)}.layer-card:last-child{border-bottom:0}.scroll-cue span:last-child{display:none}.topology-main{padding:18px}.topology-legend{padding:15px}.distribution-card{padding:18px}.distribution-head{display:block}.distribution-head>b{display:block;margin-top:7px}.distribution-legend li{grid-template-columns:9px minmax(0,1fr) auto}.hcc-verdict dl{grid-template-columns:1fr}.comparison-profile-panel,.matrix-panel,.hcc-table-panel,.confusion-panel{padding:14px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.genome-link{transition:none}}
 @media print{body{background:#fff}.shell{width:100%;padding:0}.hero,.table-shell{box-shadow:none}.genome-link{break-inside:avoid}.table-scroll{overflow:visible}table{min-width:0;font-size:8px}.skip-link,.scroll-cue,.table-action{display:none}}
@@ -1384,9 +1470,13 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
         <div><dt class="authority-label">Summary SHA-256</dt><dd class="authority-value">$summary_short</dd></div>
       </dl>
     </aside>
-  </header>
+	  </header>
 
-  <aside class="sensitivity-banner" aria-labelledby="sensitivity-title">
+	  <nav class="local-nav" aria-label="本頁段落導覽"><a href="#answer-strip" aria-current="location">總覽</a><a href="#hcc1395-technical-validation">HCC 驗證</a><a href="#cohort-comparison">跨樣本比較</a><a href="#launch-title">全基因</a><a href="#cohort-table">總表</a><a href="#evidence">證據</a></nav>
+
+$sample_comparison_dashboard
+
+	  <aside class="sensitivity-banner" aria-labelledby="sensitivity-title">
     <div><p class="section-kicker">Backbone sensitivity · 不可混合分母</p><h2 id="sensitivity-title">$backbone_verdict</h2><p>LongPhase-S recalibrated FILTER=PASS 仍是 canonical 主結果；ClairS FILTER=PASS 僅作 sensitivity。低 overlap 指標表示所有解讀都必須標示 backbone-sensitive。</p></div>
     <div class="sensitivity-metrics" aria-label="Backbone sensitivity minimum concordance metrics">
       <div class="sensitivity-metric"><span>Retained-position Jaccard · min</span><strong>$retained_jaccard</strong></div>
@@ -1429,9 +1519,7 @@ footer{display:flex;justify-content:space-between;gap:20px;margin-top:18px;paddi
     $cohort_read_af_morphology
   </section>
 
-$sample_comparison_dashboard
-
-  <section class="section" aria-labelledby="launch-title">
+	  <section class="section" aria-labelledby="launch-title">
     <div class="section-head"><div><p class="section-kicker">Genome launchpad</p><h2 id="launch-title">進入 GRCh38 chr1–22 全基因巡覽</h2></div><p class="section-note">每頁都含座標比例 ideogram、read-AF 第一順位與 clone-compatible morphology 等七組 sample-wide 觀察，並由 current summary、sample region-view、read-AF sidecar、renderer SHA 與 UI contract 綁定；stale 頁面不會進入 index。</p></div>
     <nav class="genome-launchers" aria-label="開啟各 dataset 全基因頁">$genome_launchers</nav>
   </section>
@@ -1465,7 +1553,7 @@ $sample_comparison_dashboard
     <aside class="qc-note"><strong>PS / QC ONLY</strong><p>Phase-set 只保留作 phase-block 品質脈絡；不是 topology edge，也不是 lineage label。全 cohort 有 $mixed_ps 個 multi-PS regions。</p></aside>
   </section>
 
-  <details class="evidence-drawer">
+	  <details class="evidence-drawer" id="evidence">
     <summary>機器證據與原始 JSON（預設收合）</summary>
     <div class="evidence-inner"><p>下列連結只供 provenance readback；W／structural C／Topo 來自 hash-verified canonical machine summary，read-AF selection／morphology 來自另行 hash 綁定且守恆驗證的 current-v5 sidecar index。</p><ul class="evidence-list">$evidence_links</ul></div>
   </details>
@@ -1478,12 +1566,28 @@ $sample_comparison_dashboard
   if (!source) return;
   const data = JSON.parse(source.textContent);
   let dimension = 'structural';
+  let profileScope = 'dataset';
+  let distanceScope = 'full';
+  let confusionMode = 'count';
   let selectedPair = ['HCC1395', 'HCC1395_DORADO'];
   const safe = value => String(value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
   const pct = value => (Number(value) * 100).toFixed(1) + '%';
   const pairKey = (left, right) => [left, right].sort().join('|');
   const findPair = (left, right) => data.pairwise.records.find(record => pairKey(record.left, record.right) === pairKey(left, right));
   const shortName = sample => sample === 'HCC1395_DORADO' ? 'DORADO' : sample;
+  const excludedByDimension = {structural:['incomplete'],read_af_selection:['read_af_unavailable','incomplete'],morphology:['unresolved']};
+
+  function profileAria(name, values, countMode) {
+    const parts = data.dimensions[dimension].classes.map(item => safe(item.label) + ' ' + (countMode ? Number(values.counts[item.key]).toLocaleString() + '，' : '') + pct(values.proportions[item.key]));
+    return safe(name) + '；' + safe(data.dimensions[dimension].label) + '；' + parts.join('；');
+  }
+
+  function conditionalProfile(record) {
+    const values = record.dimensions[dimension].proportions;
+    const excluded = new Set(excludedByDimension[dimension]);
+    const denominator = data.dimensions[dimension].classes.reduce((sum, item) => sum + (excluded.has(item.key) ? 0 : Number(values[item.key])), 0);
+    return Object.fromEntries(data.dimensions[dimension].classes.map(item => [item.key, excluded.has(item.key) || !denominator ? 0 : Number(values[item.key]) / denominator]));
+  }
 
   function renderKey() {
     const contract = data.dimensions[dimension];
@@ -1494,20 +1598,43 @@ $sample_comparison_dashboard
 
   function renderProfiles() {
     const contract = data.dimensions[dimension];
-    document.getElementById('comparison-profile-title').textContent = contract.label + ' · 逐 dataset';
-    document.getElementById('comparison-profile-chart').innerHTML = data.datasets.map(record => {
-      const values = record.dimensions[dimension];
-      const technical = record.dataset === 'HCC1395' || record.dataset === 'HCC1395_DORADO';
-      const role = record.dataset === 'HCC1395' ? '5kHz canonical' : 'Dorado technical pair';
-      const segments = contract.classes.map(item =>
-        '<span class="bar-segment segment-' + safe(item.class_name) + '" style="width:' + (Number(values.proportions[item.key]) * 100).toFixed(6) + '%" title="' + safe(item.label) + ' · ' + Number(values.counts[item.key]).toLocaleString() + ' · ' + pct(values.proportions[item.key]) + '"></span>'
-      ).join('');
-      return '<div class="comparison-profile-row' + (technical ? ' technical-pair' : '') + '" data-dataset="' + safe(record.dataset) + '"><div class="comparison-profile-name"><a href="' + safe(record.dataset) + '.html"><strong>' + safe(record.dataset) + '</strong></a>' + (technical ? '<small>' + safe(role) + '</small>' : '') + '</div><div class="topology-bar" role="img" aria-label="' + safe(record.dataset) + ' ' + safe(contract.label) + ' composition">' + segments + '</div><b class="comparison-profile-n">' + Number(record.W_primary).toLocaleString() + '<small>W_primary</small></b></div>';
+    const micro = data.aggregates.dataset_micro.dimensions[dimension];
+    const macro = data.aggregates.biological_sample_macro.dimensions[dimension];
+    const aggregateRecords = [
+      {name:'7-dataset operational micro',values:micro,note:Number(data.aggregates.dataset_micro.W_primary).toLocaleString() + ' W_primary rows',countMode:true},
+      {name:'6-biological-ID macro',values:macro,note:'6 IDs equal weight',countMode:false}
+    ];
+    document.getElementById('aggregate-profile-chart').innerHTML = aggregateRecords.map(record => {
+      const segments = contract.classes.map(item => '<span class="bar-segment segment-' + safe(item.class_name) + '" style="width:' + (Number(record.values.proportions[item.key]) * 100).toFixed(6) + '%"></span>').join('');
+      return '<article class="aggregate-profile"><div><strong>' + safe(record.name) + '</strong><small>' + safe(record.note) + '</small></div><div class="topology-bar" role="img" aria-label="' + profileAria(record.name,record.values,record.countMode) + '">' + segments + '</div></article>';
     }).join('');
+    if (profileScope === 'dataset') {
+      document.getElementById('comparison-profile-title').textContent = contract.label + ' · 7 datasets';
+      document.getElementById('comparison-profile-note').textContent = '每列以自己的 W_primary=100%；HCC1395 與 DORADO 是同一 biological ID 的兩個 technical profiles。';
+      document.getElementById('comparison-profile-chart').innerHTML = data.datasets.map(record => {
+        const values = record.dimensions[dimension];
+        const technical = record.dataset === 'HCC1395' || record.dataset === 'HCC1395_DORADO';
+        const role = record.dataset === 'HCC1395' ? '5kHz canonical' : 'Dorado technical pair';
+        const segments = contract.classes.map(item => '<span class="bar-segment segment-' + safe(item.class_name) + '" style="width:' + (Number(values.proportions[item.key]) * 100).toFixed(6) + '%" title="' + safe(item.label) + ' · ' + Number(values.counts[item.key]).toLocaleString() + ' · ' + pct(values.proportions[item.key]) + '"></span>').join('');
+        return '<div class="comparison-profile-row' + (technical ? ' technical-pair' : '') + '" data-dataset="' + safe(record.dataset) + '"><div class="comparison-profile-name"><a href="' + safe(record.dataset) + '.html"><strong>' + safe(record.dataset) + '</strong></a>' + (technical ? '<small>' + safe(role) + '</small>' : '') + '</div><div class="topology-bar" role="img" aria-label="' + profileAria(record.dataset,values,true) + '">' + segments + '</div><b class="comparison-profile-n">' + Number(record.W_primary).toLocaleString() + '<small>W_primary</small></b></div>';
+      }).join('');
+    } else {
+      const members = data.aggregates.biological_sample_macro.members;
+      const order = ['COLO829','H1437','H2009','HCC1395','HCC1937','HCC1954'];
+      document.getElementById('comparison-profile-title').textContent = contract.label + ' · 6 biological IDs';
+      document.getElementById('comparison-profile-note').textContent = '每個 biological ID 等權；HCC1395 先平均兩個 technical profiles。Macro 只有 proportions，不顯示虛構 region count。';
+      document.getElementById('comparison-profile-chart').innerHTML = order.map(id => {
+        const member = members[id];
+        const values = member.dimensions[dimension];
+        const segments = contract.classes.map(item => '<span class="bar-segment segment-' + safe(item.class_name) + '" style="width:' + (Number(values.proportions[item.key]) * 100).toFixed(6) + '%" title="' + safe(item.label) + ' · ' + pct(values.proportions[item.key]) + '"></span>').join('');
+        return '<div class="comparison-profile-row biological-profile" data-biological-id="' + safe(id) + '"><div class="comparison-profile-name"><strong>' + safe(id) + '</strong><small>' + member.datasets.map(safe).join(' + ') + '</small></div><div class="topology-bar" role="img" aria-label="' + profileAria(id,values,false) + '">' + segments + '</div><b class="comparison-profile-n">1 ID<small>equal weight</small></b></div>';
+      }).join('');
+    }
   }
 
   function renderLedger() {
     const contract = data.dimensions[dimension];
+    document.getElementById('comparison-ledger-caption').textContent = contract.label + '；7 datasets；count 與各自 W_primary 比例';
     document.getElementById('comparison-ledger-head').innerHTML = '<tr><th scope="col">Dataset</th><th scope="col" class="numeric">W_primary</th>' + contract.classes.map(item => '<th scope="col" class="numeric">' + safe(item.label) + '</th>').join('') + '</tr>';
     document.getElementById('comparison-ledger-body').innerHTML = data.datasets.map(record => {
       const values = record.dimensions[dimension];
@@ -1523,35 +1650,50 @@ $sample_comparison_dashboard
     const right = data.datasets.find(item => item.dataset === selectedPair[1]);
     const metric = record.dimensions[dimension];
     const technical = record.same_biological_sample === true;
+    const value = distanceScope === 'full' ? Number(metric.tvd) : Number(metric.conditional_evaluable_tvd);
+    const rank = distanceScope === 'full' ? Number(metric.tvd_rank_among_21_pairs) : Number(metric.conditional_evaluable_tvd_rank_among_21_pairs);
+    const meanValue = distanceScope === 'full' ? Number(record.profile_mean_tvd) : Number(record.conditional_evaluable_mean_tvd);
+    const meanRank = distanceScope === 'full' ? Number(record.rank_by_profile_mean_tvd) : Number(record.rank_by_conditional_evaluable_mean_tvd);
+    const leftProfile = distanceScope === 'full' ? left.dimensions[dimension].proportions : conditionalProfile(left);
+    const rightProfile = distanceScope === 'full' ? right.dimensions[dimension].proportions : conditionalProfile(right);
     const deltas = data.dimensions[dimension].classes.map(item => ({
       label: item.label,
-      delta: Number(right.dimensions[dimension].proportions[item.key]) - Number(left.dimensions[dimension].proportions[item.key])
+      delta: Number(rightProfile[item.key]) - Number(leftProfile[item.key])
     })).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta)).slice(0, 3);
-    document.getElementById('pair-inspector').innerHTML = '<span class="pair-chip">' + (technical ? 'Same biological sample · technical pair' : 'Different biological samples · composition only') + '</span><h3>' + safe(selectedPair[0]) + ' × ' + safe(selectedPair[1]) + '</h3><strong class="pair-distance">' + Number(metric.tvd).toFixed(3) + '<small>TVD · rank ' + Number(metric.tvd_rank_among_21_pairs) + '/21</small></strong><div class="pair-delta-list">' + deltas.map(item => '<div><span>' + safe(item.label) + '</span><b>' + (item.delta >= 0 ? '+' : '') + (item.delta * 100).toFixed(1) + ' pp</b></div>').join('') + '</div><p>' + (technical ? '此格只比較類別比例；下方 exact-region panel 才檢查相同區域是否得到相同標籤。' : '不同 biological samples 只比較 profile；不以 exact-coordinate overlap 當一般跨細胞株品質指標。') + '</p>';
+    const scopeLabel = distanceScope === 'full' ? 'Full W_primary' : 'Conditional evaluable';
+    document.getElementById('pair-inspector').innerHTML = '<span class="pair-chip">' + (technical ? 'Same biological sample · technical pair' : 'Different biological samples · composition only') + '</span><h3>' + safe(selectedPair[0]) + ' × ' + safe(selectedPair[1]) + '</h3><strong class="pair-distance">' + value.toFixed(3) + '<small>' + safe(scopeLabel) + ' · current dimension rank ' + rank + '/21<br>3-dimension mean ' + meanValue.toFixed(3) + ' · rank ' + meanRank + '/21</small></strong><div class="pair-delta-list">' + deltas.map(item => '<div><span>' + safe(item.label) + '</span><b>' + (item.delta >= 0 ? '+' : '') + (item.delta * 100).toFixed(1) + ' pp</b></div>').join('') + '</div><p>' + (technical ? '此格只比較類別比例；共同 region agreement 才檢查相同座標是否得到相同標籤。' : '不同 biological samples 只比較 profile；不以 exact-coordinate overlap 當一般跨細胞株品質指標。') + '</p>';
   }
 
   function renderMatrix() {
     const order = data.pairwise.matrices.order;
-    const matrix = data.pairwise.matrices.tvd[dimension];
-    document.getElementById('comparison-matrix-title').textContent = data.dimensions[dimension].label + ' · TVD';
-    let html = '<table class="distance-matrix"><caption class="sr-only">7 datasets pairwise composition TVD</caption><thead><tr><th scope="col">TVD</th>' + order.map(sample => '<th scope="col">' + safe(shortName(sample)) + '</th>').join('') + '</tr></thead><tbody>';
+    const fullMatrix = data.pairwise.matrices.tvd[dimension];
+    const scopeLabel = distanceScope === 'full' ? 'Full W_primary' : 'Conditional evaluable';
+    const valueForPair = (left,right) => {
+      if (left === right) return 0;
+      const record = findPair(left,right);
+      return distanceScope === 'full' ? Number(fullMatrix[left][right]) : Number(record.dimensions[dimension].conditional_evaluable_tvd);
+    };
+    document.getElementById('comparison-matrix-title').textContent = data.dimensions[dimension].label + ' · ' + scopeLabel + ' TVD';
+    document.getElementById('comparison-matrix-note').textContent = distanceScope === 'full' ? 'Full profile 保留 incomplete／unavailable／unresolved；這是主要 verdict 分母。' : 'Conditional 依維度排除 incomplete／read-AF unavailable／morphology unresolved 後重新正規化；只看 common-evaluable subset。';
+    let html = '<table class="distance-matrix"><caption class="sr-only">' + safe(data.dimensions[dimension].label) + '；7 datasets；' + safe(scopeLabel) + ' pairwise composition TVD</caption><thead><tr><th scope="col">TVD</th>' + order.map(sample => '<th scope="col">' + safe(shortName(sample)) + '</th>').join('') + '</tr></thead><tbody>';
     order.forEach(left => {
       html += '<tr><th scope="row">' + safe(shortName(left)) + '</th>';
       order.forEach(right => {
-        const value = Number(matrix[left][right]);
+        const value = valueForPair(left,right);
         if (left === right) {
           html += '<td class="matrix-diagonal"><span aria-label="same dataset">0</span></td>';
           return;
         }
         const isHcc = pairKey(left, right) === pairKey('HCC1395', 'HCC1395_DORADO');
         const isSelected = pairKey(left, right) === pairKey(selectedPair[0], selectedPair[1]);
-        const alpha = 0.08 + Math.min(value / 0.5, 1) * 0.64;
-        html += '<td><button type="button" class="matrix-cell' + (isHcc ? ' is-hcc' : '') + (isSelected ? ' is-selected' : '') + '" data-left="' + safe(left) + '" data-right="' + safe(right) + '" style="background:rgba(22,139,141,' + alpha.toFixed(4) + ')" aria-label="' + safe(left) + ' 與 ' + safe(right) + '，TVD ' + value.toFixed(3) + '">' + value.toFixed(3) + '</button></td>';
+        const alpha = 0.08 + Math.min(value / 0.2, 1) * 0.64;
+        html += '<td><button type="button" class="matrix-cell' + (isHcc ? ' is-hcc' : '') + (isSelected ? ' is-selected' : '') + '" data-left="' + safe(left) + '" data-right="' + safe(right) + '" style="background:rgba(22,139,141,' + alpha.toFixed(4) + ')" aria-pressed="' + (isSelected ? 'true' : 'false') + '" aria-label="' + safe(left) + ' 與 ' + safe(right) + '，' + safe(scopeLabel) + ' TVD ' + value.toFixed(3) + '">' + value.toFixed(3) + '</button></td>';
       });
       html += '</tr>';
     });
     html += '</tbody></table>';
     const container = document.getElementById('comparison-matrix');
+    container.setAttribute('aria-label',data.dimensions[dimension].label + '，7乘7，' + scopeLabel + ' TVD 距離矩陣');
     container.innerHTML = html;
     container.querySelectorAll('.matrix-cell').forEach(button => button.addEventListener('click', () => {
       selectedPair = [button.dataset.left, button.dataset.right];
@@ -1562,22 +1704,45 @@ $sample_comparison_dashboard
 
   function renderHccConfusion() {
     const contract = data.dimensions[dimension];
-    const matrix = data.hcc.matched_primary_dimensions[dimension].matrix;
-    document.getElementById('hcc-confusion-title').textContent = contract.label + ' · 哪些類別互相轉換？';
-    let html = '<table class="confusion-table"><caption>Rows = HCC1395 5kHz；columns = HCC1395_DORADO</caption><thead><tr><th scope="col">5kHz ↓ / DORADO →</th>' + contract.classes.map(item => '<th scope="col">' + safe(item.label) + '</th>').join('') + '</tr></thead><tbody>';
+    const values = data.hcc.matched_primary_dimensions[dimension];
+    const matrix = values.matrix;
+    const displayLabel = confusionMode === 'count' ? 'Count' : 'Row %';
+    document.getElementById('hcc-confusion-title').textContent = contract.label + ' · ' + displayLabel + ' · 哪些類別互相轉換？';
+    let html = '<table class="confusion-table"><caption>' + safe(contract.label) + ' ' + safe(displayLabel) + '；Rows=HCC1395 5kHz；columns=HCC1395_DORADO；row %=within HCC1395 row；n=' + Number(values.n).toLocaleString() + '</caption><thead><tr><th scope="col">5kHz ↓ / DORADO →</th>' + contract.classes.map(item => '<th scope="col">' + safe(item.label) + '</th>').join('') + '<th scope="col">Row total</th></tr></thead><tbody>';
     contract.classes.forEach(left => {
+      const rowTotal = Number(values.left_counts[left.key]);
       html += '<tr><th scope="row">' + safe(left.label) + '</th>';
       contract.classes.forEach(right => {
-        html += '<td class="numeric' + (left.key === right.key ? ' confusion-diagonal' : '') + '">' + Number(matrix[left.key][right.key]).toLocaleString() + '</td>';
+        const count = Number(matrix[left.key][right.key]);
+        const rowPercent = rowTotal ? 100 * count / rowTotal : 0;
+        const display = confusionMode === 'count' ? count.toLocaleString() : rowPercent.toFixed(1) + '%';
+        html += '<td class="numeric' + (left.key === right.key ? ' confusion-diagonal' : '') + '" aria-label="' + safe(left.label) + ' 到 ' + safe(right.label) + '，' + count.toLocaleString() + '，row ' + rowPercent.toFixed(1) + '%">' + display + '</td>';
       });
-      html += '</tr>';
+      html += '<td class="numeric confusion-total">' + (confusionMode === 'count' ? rowTotal.toLocaleString() : (rowTotal ? '100.0%' : '—')) + '</td></tr>';
     });
-    document.getElementById('hcc-confusion').innerHTML = html + '</tbody></table>';
+    const container = document.getElementById('hcc-confusion');
+    container.setAttribute('aria-label','HCC1395 技術配對 ' + contract.label + ' confusion matrix，' + displayLabel);
+    container.innerHTML = html + '</tbody></table>';
   }
 
   function renderAll() {
     document.querySelectorAll('.comparison-tab').forEach(button => {
       const active = button.dataset.comparisonDimension === dimension;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    document.querySelectorAll('[data-profile-scope]').forEach(button => {
+      const active = button.dataset.profileScope === profileScope;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    document.querySelectorAll('[data-distance-scope]').forEach(button => {
+      const active = button.dataset.distanceScope === distanceScope;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    document.querySelectorAll('[data-confusion-mode]').forEach(button => {
+      const active = button.dataset.confusionMode === confusionMode;
       button.classList.toggle('is-active', active);
       button.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
@@ -1593,6 +1758,28 @@ $sample_comparison_dashboard
     dimension = button.dataset.comparisonDimension;
     renderAll();
   }));
+  document.querySelectorAll('[data-profile-scope]').forEach(button => button.addEventListener('click', () => {
+    profileScope = button.dataset.profileScope;
+    renderAll();
+  }));
+  document.querySelectorAll('[data-distance-scope]').forEach(button => button.addEventListener('click', () => {
+    distanceScope = button.dataset.distanceScope;
+    renderAll();
+  }));
+  document.querySelectorAll('[data-confusion-mode]').forEach(button => button.addEventListener('click', () => {
+    confusionMode = button.dataset.confusionMode;
+    renderAll();
+  }));
+  const localLinks = [...document.querySelectorAll('.local-nav a[href^="#"]')];
+  const activateLocal = id => localLinks.forEach(link => link.setAttribute('aria-current',link.getAttribute('href') === '#' + id ? 'location' : 'false'));
+  localLinks.forEach(link => link.addEventListener('click',() => activateLocal(link.getAttribute('href').slice(1))));
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      const active = entries.filter(entry => entry.isIntersecting).sort((a,b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (active) activateLocal(active.target.id);
+    },{rootMargin:'-18% 0px -68% 0px',threshold:[0,.05,.2]});
+    localLinks.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean).forEach(section => observer.observe(section));
+  }
   renderAll();
 })();
 </script>
@@ -1604,6 +1791,7 @@ $sample_comparison_dashboard
         comparison_sha256=escaped(authority["summary"]["backbone_comparison"]["sha256"]),
         read_af_index_sha256=escaped(authority["read_af_index_sha256"]),
         sample_comparison_sha256=escaped(authority["sample_comparison_sha256"]),
+        ui_contract=escaped(EXPECTED_UI_CONTRACT),
         summary_short=escaped(authority["summary_sha256"][:16] + "…"),
         run_id=escaped(run_id),
         backbone_verdict=escaped(str(comparison["verdict"]).replace("_", " ").upper()),

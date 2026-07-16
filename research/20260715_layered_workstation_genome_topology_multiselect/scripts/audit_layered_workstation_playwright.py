@@ -56,6 +56,7 @@ SAMPLES: Tuple[str, ...] = (
 VIEWPORTS: Dict[str, Dict[str, int]] = {
     "desktop": {"width": 1440, "height": 1000},
     "mobile": {"width": 390, "height": 844},
+    "narrow": {"width": 320, "height": 800},
 }
 IDEOGRAM_MODES: Tuple[str, ...] = (
     "determinacy",
@@ -75,7 +76,7 @@ EXPECTED_OVERVIEW_IDS: Tuple[str, ...] = (
     "hp-h3",
     "region-size",
 )
-EXPECTED_UI_CONTRACT = "layered-workstation-v5-grch38-topology-multiselect-2"
+EXPECTED_UI_CONTRACT = "layered-workstation-v5-grch38-topology-multiselect-3"
 EXPECTED_AGGREGATE_W_PRIMARY = 50_215
 INDEX_SELECTION_BINS: Tuple[Tuple[str, str], ...] = (
     ("structural_exact_unique", "結構已 exact 唯一"),
@@ -313,6 +314,7 @@ def index_audit(
     try:
         page.goto(path.as_uri(), wait_until="load", timeout=timeout_ms)
         page.wait_for_load_state("networkidle", timeout=timeout_ms)
+        page.add_style_tag(content="html{scroll-behavior:auto!important}")
         add_check(
             result,
             "index_document_load",
@@ -349,6 +351,17 @@ def index_audit(
             meta_sha256 == sidecar_index_contract["sha256"],
             expected={"sha256": sidecar_index_contract["sha256"]},
             actual={"sha256": meta_sha256},
+        )
+
+        index_ui_contract = page.locator(
+            'meta[name="intersubmod-ui-contract"]'
+        ).get_attribute("content")
+        add_check(
+            result,
+            "index_ui_contract",
+            index_ui_contract == EXPECTED_UI_CONTRACT,
+            expected={"ui_contract": EXPECTED_UI_CONTRACT},
+            actual={"ui_contract": index_ui_contract},
         )
 
         distribution = page.evaluate(
@@ -507,6 +520,15 @@ def index_audit(
             actual=json_links,
         )
 
+        contrast_failures = text_contrast_failures(page)
+        add_check(
+            result,
+            "index_visible_text_wcag_aa_contrast",
+            not contrast_failures,
+            expected={"failures": 0, "normal_text_ratio": 4.5, "large_text_ratio": 3.0},
+            actual={"failures": len(contrast_failures), "examples": contrast_failures},
+        )
+
         scroll_element_to_viewport_top(
             page,
             'section[aria-labelledby="read-af-morphology-title"]',
@@ -547,11 +569,20 @@ def page_overview_metrics(page: Page) -> Dict[str, Any]:
         """() => {
             const data = JSON.parse(document.getElementById('workstation-data').textContent);
             const panels = [...document.querySelectorAll('[data-overview-panel]')].map(panel => {
-                const bins = [...panel.querySelectorAll('[data-overview-bin]')].map(bin => ({
-                    key: bin.dataset.binKey,
-                    count: Number(bin.dataset.count),
-                    denominator: Number(bin.dataset.denominator)
-                }));
+                const bins = [...panel.querySelectorAll('[data-overview-bin]')].map(bin => {
+                    const track = bin.querySelector('.overview-bar-track');
+                    const fill = bin.querySelector('[data-overview-bar]');
+                    const trackRect = track?.getBoundingClientRect();
+                    const fillRect = fill?.getBoundingClientRect();
+                    return {
+                        key: bin.dataset.binKey,
+                        count: Number(bin.dataset.count),
+                        denominator: Number(bin.dataset.denominator),
+                        style_width_pct: Number.parseFloat(fill?.style.width || '0'),
+                        measured_width_pct: trackRect?.width ? 100 * (fillRect?.width || 0) / trackRect.width : 0,
+                        printed: bin.querySelector('.overview-bin-value')?.textContent || ''
+                    };
+                });
                 return {
                     id: panel.dataset.overviewPanel,
                     denominator_key: panel.dataset.denominatorKey,
@@ -593,6 +624,20 @@ def mode_metrics(page: Page, mode: str) -> Dict[str, Any]:
                 const count = histogram[item.key] || 0;
                 return item.aria_label.includes(Number(count).toLocaleString());
             });
+            const signatures = {};
+            Object.keys(histogram).filter(Boolean).forEach(key => {
+                const mark = marks.find(item => item.dataset.modeValue === key);
+                const button = document.querySelector('[data-legend-key="' + CSS.escape(key) + '"]');
+                const swatch = button?.querySelector('.ideogram-legend-swatch');
+                const markStyle = mark ? getComputedStyle(mark) : null;
+                const swatchStyle = swatch ? getComputedStyle(swatch) : null;
+                signatures[key] = {
+                    stroke: markStyle?.stroke || '',
+                    stroke_width: markStyle?.strokeWidth || '',
+                    stroke_dasharray: markStyle?.strokeDasharray || '',
+                    swatch_background_image: swatchStyle?.backgroundImage || 'none'
+                };
+            });
             return {
                 requested,
                 active_mode: document.getElementById('genome-ideogram').dataset.mode,
@@ -605,6 +650,7 @@ def mode_metrics(page: Page, mode: str) -> Dict[str, Any]:
                 legend_keys_match_histogram: JSON.stringify([...legendKeys].sort()) ===
                     JSON.stringify(Object.keys(histogram).filter(Boolean).sort()),
                 legend_count_labels_exact: countLabelsExact
+                ,signatures
             };
         }""",
         mode,
@@ -828,17 +874,114 @@ def screenshot(page: Page, path: Path) -> str:
     raise last_error
 
 
+def text_contrast_failures(page: Page) -> List[Dict[str, Any]]:
+    """Return visible direct-text nodes below WCAG 2.x AA contrast thresholds."""
+
+    return page.evaluate(
+        r"""() => {
+          const parse = value => {
+            const match = value && value.match(/rgba?\(([-.\d]+)[, ]+([-.\d]+)[, ]+([-.\d]+)(?:[, /]+([-.\d]+))?\)/);
+            return match
+              ? [Number(match[1]), Number(match[2]), Number(match[3]), match[4] == null ? 1 : Number(match[4])]
+              : [0, 0, 0, 0];
+          };
+          const blend = (foreground, background) => {
+            const alpha = foreground[3] + background[3] * (1 - foreground[3]);
+            if (!alpha) return [255, 255, 255, 1];
+            return [
+              (foreground[0] * foreground[3] + background[0] * background[3] * (1 - foreground[3])) / alpha,
+              (foreground[1] * foreground[3] + background[1] * background[3] * (1 - foreground[3])) / alpha,
+              (foreground[2] * foreground[3] + background[2] * background[3] * (1 - foreground[3])) / alpha,
+              alpha
+            ];
+          };
+          const backgroundFor = element => {
+            const layers = [];
+            for (let current = element; current; current = current.parentElement) {
+              const color = parse(getComputedStyle(current).backgroundColor);
+              if (color[3]) layers.push(color);
+            }
+            return layers.reverse().reduce((background, layer) => blend(layer, background), [255, 255, 255, 1]);
+          };
+          const luminance = color => {
+            const channels = color.slice(0, 3).map(value => {
+              const normalized = value / 255;
+              return normalized <= 0.04045
+                ? normalized / 12.92
+                : ((normalized + 0.055) / 1.055) ** 2.4;
+            });
+            return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+          };
+          const failures = [];
+          for (const element of document.querySelectorAll('body *')) {
+            const text = [...element.childNodes]
+              .filter(node => node.nodeType === Node.TEXT_NODE)
+              .map(node => node.textContent.trim())
+              .filter(Boolean)
+              .join(' ');
+            if (!text || element.closest('.sr-only')) continue;
+            const style = getComputedStyle(element);
+            const rect = element.getBoundingClientRect();
+            if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) < 0.1 || rect.width < 1 || rect.height < 1) continue;
+            const foreground = parse(style.color);
+            const background = backgroundFor(element);
+            const foregroundLuminance = luminance(foreground);
+            const backgroundLuminance = luminance(background);
+            const ratio = (Math.max(foregroundLuminance, backgroundLuminance) + 0.05)
+              / (Math.min(foregroundLuminance, backgroundLuminance) + 0.05);
+            const fontSize = Number.parseFloat(style.fontSize);
+            const fontWeight = Number.parseInt(style.fontWeight, 10) || 400;
+            const large = fontSize >= 24 || (fontSize >= 18.66 && fontWeight >= 700);
+            const required = large ? 3 : 4.5;
+            if (ratio + 1e-6 < required) {
+              failures.push({
+                ratio: Number(ratio.toFixed(2)),
+                required,
+                text: text.slice(0, 100),
+                tag: element.tagName.toLowerCase(),
+                class_name: String(element.className || '').slice(0, 100)
+              });
+            }
+          }
+          return failures.slice(0, 40);
+        }"""
+    )
+
+
 def scroll_element_to_viewport_top(page: Page, selector: str, offset: int = 8) -> None:
     """Place a visual-audit target at a predictable viewport position."""
 
-    page.evaluate(
-        """payload => {
-            const element = document.querySelector(payload.selector);
-            if (!element) throw new Error('Screenshot target not found: ' + payload.selector);
-            const top = element.getBoundingClientRect().top + window.scrollY - payload.offset;
-            window.scrollTo({top: Math.max(0, top), behavior: 'instant'});
-        }""",
-        {"selector": selector, "offset": offset},
+    payload = {"selector": selector, "offset": offset}
+    last_position: Dict[str, Any] = {}
+    for attempt in range(4):
+        last_position = page.evaluate(
+            """payload => {
+                const element = document.querySelector(payload.selector);
+                if (!element) throw new Error('Screenshot target not found: ' + payload.selector);
+                document.documentElement.style.scrollBehavior = 'auto';
+                const navHeight = document.querySelector('.local-nav')?.getBoundingClientRect().height || 0;
+                const top = element.getBoundingClientRect().top + window.scrollY - navHeight - payload.offset;
+                window.scrollTo({top: Math.max(0, top), behavior: 'auto'});
+                return {target_top: element.getBoundingClientRect().top, nav_height: navHeight};
+            }""",
+            payload,
+        )
+        page.wait_for_timeout(80 * (attempt + 1))
+        last_position = page.evaluate(
+            """payload => {
+                const element = document.querySelector(payload.selector);
+                const navHeight = document.querySelector('.local-nav')?.getBoundingClientRect().height || 0;
+                return {target_top: element?.getBoundingClientRect().top ?? null, nav_height: navHeight};
+            }""",
+            payload,
+        )
+        if (
+            last_position["target_top"] is not None
+            and abs(last_position["target_top"] - last_position["nav_height"] - offset) <= 2
+        ):
+            return
+    raise RuntimeError(
+        f"Could not align screenshot target {selector}: {last_position} offset={offset}"
     )
 
 
@@ -891,6 +1034,7 @@ def audit_sample_viewport(
             raise FileNotFoundError(f"Missing sample HTML: {html_path}")
         page.goto(html_path.as_uri(), wait_until="load", timeout=timeout_ms)
         page.wait_for_load_state("networkidle", timeout=timeout_ms)
+        page.add_style_tag(content="html{scroll-behavior:auto!important}")
         page.wait_for_function(
             """expected => document.querySelectorAll('.ideogram-mark').length === expected""",
             arg=expectation["W_tree"],
@@ -938,6 +1082,7 @@ def audit_sample_viewport(
             "region-size": ("W_tree", expectation["W_tree"]),
         }
         panel_failures = []
+        bar_failures = []
         for panel in overview["panels"]:
             denominator = expected_denominators.get(panel["id"])
             if not denominator or not (
@@ -946,6 +1091,23 @@ def audit_sample_viewport(
                 and panel["sum"] == denominator[1]
             ):
                 panel_failures.append(panel)
+            for bin_record in panel["bins"]:
+                expected_pct = 100.0 * bin_record["count"] / panel["total"] if panel["total"] else 0.0
+                printed_pct = f"{expected_pct:.1f}%"
+                if not (
+                    bin_record["denominator"] == panel["total"]
+                    and abs(bin_record["style_width_pct"] - expected_pct) <= 0.01
+                    and abs(bin_record["measured_width_pct"] - expected_pct) <= 0.75
+                    and printed_pct in bin_record["printed"]
+                ):
+                    bar_failures.append(
+                        {
+                            "panel": panel["id"],
+                            "bin": bin_record,
+                            "expected_pct": expected_pct,
+                            "printed_pct": printed_pct,
+                        }
+                    )
         add_check(
             run,
             "seven_overview_panels_and_denominator_closure",
@@ -960,6 +1122,13 @@ def audit_sample_viewport(
                 "all_panel_sums_close": True,
             },
             actual={"overview": overview, "panel_failures": panel_failures},
+        )
+        add_check(
+            run,
+            "overview_bars_use_canonical_denominator",
+            not bar_failures,
+            expected={"style_and_measured_width": "100 * count / panel denominator", "printed_pct": "same denominator"},
+            actual={"failure_count": len(bar_failures), "failures": bar_failures[:20]},
         )
 
         modes: Dict[str, Dict[str, Any]] = {}
@@ -1005,6 +1174,63 @@ def audit_sample_viewport(
                 "read-af-selection": modes["read-af-selection"]["histogram"],
                 "morphology": modes["morphology"]["histogram"],
             },
+        )
+
+        morphology_signatures = modes["morphology"]["signatures"]
+        single_signature = morphology_signatures.get("single_no_within_hp_relation", {})
+        na_signature = morphology_signatures.get("not_applicable", {})
+        single_noncolor = (
+            single_signature.get("stroke_width"),
+            single_signature.get("stroke_dasharray"),
+            single_signature.get("swatch_background_image"),
+        )
+        na_noncolor = (
+            na_signature.get("stroke_width"),
+            na_signature.get("stroke_dasharray"),
+            na_signature.get("swatch_background_image"),
+        )
+        add_check(
+            run,
+            "morphology_single_and_na_have_distinct_noncolor_encoding",
+            bool(single_signature)
+            and bool(na_signature)
+            and single_noncolor != na_noncolor
+            and na_signature.get("stroke_dasharray") not in {"", "none"}
+            and na_signature.get("swatch_background_image") not in {"", "none"},
+            expected={"single": "solid", "not_applicable": "dashed mark + hatched legend"},
+            actual={"single": single_signature, "not_applicable": na_signature},
+        )
+
+        all_mode_toggle_receipts: Dict[str, Any] = {}
+        for mode in IDEOGRAM_MODES:
+            state = mode_metrics(page, mode)
+            first_key = state["legend"][0]["key"]
+            expected_count = state["histogram"][first_key]
+            button = page.locator(f'[data-legend-key="{first_key}"]')
+            button.click()
+            selected = selection_state(page)
+            button.click()
+            empty = selection_state(page)
+            all_mode_toggle_receipts[mode] = {
+                "key": first_key,
+                "expected_count": expected_count,
+                "selected": selected,
+                "empty": empty,
+            }
+        add_check(
+            run,
+            "all_ideogram_modes_single_toggle_then_empty_means_all",
+            all(
+                receipt["selected"]["selected"] == [receipt["key"]]
+                and receipt["selected"]["visible"] == receipt["expected_count"]
+                and receipt["empty"]["selected"] == []
+                and receipt["empty"]["visible"] == expectation["W_tree"]
+                and receipt["empty"]["dimmed"] == 0
+                and receipt["empty"]["all_pressed"] == "true"
+                for receipt in all_mode_toggle_receipts.values()
+            ),
+            expected={"modes": list(IDEOGRAM_MODES), "sequence": "one category → second click → empty/all"},
+            actual=all_mode_toggle_receipts,
         )
 
         page.locator('[data-ideogram-mode="read-af-selection"]').click()
@@ -1102,6 +1328,46 @@ def audit_sample_viewport(
         )
         page.locator("[data-legend-clear]").click()
 
+        information_architecture = page.evaluate(
+            """() => {
+                const ids = ['sample-summary','genome-overview','region-browser','dimension-guide','sample-overview','method-evidence'];
+                const nodes = ids.map(id => document.getElementById(id));
+                const jsonLinks = [...document.querySelectorAll('a[href]')].filter(link => (link.getAttribute('href') || '').toLowerCase().includes('.json'));
+                const rail = document.getElementById('ideogram-mobile-rail');
+                return {
+                    ids_present: nodes.every(Boolean),
+                    dom_order: nodes.every((node,index) => index === nodes.length - 1 || Boolean(node.compareDocumentPosition(nodes[index + 1]) & Node.DOCUMENT_POSITION_FOLLOWING)),
+                    nav_links: document.querySelectorAll('.local-nav a').length,
+                    nav_height: document.querySelector('.local-nav')?.getBoundingClientRect().height || 0,
+                    current_nav_links: document.querySelectorAll('.local-nav a[aria-current="location"]').length,
+                    chrom_structural_legend: (document.getElementById('chrom-structure-key')?.innerText || '').includes('structural determinacy'),
+                    rail_labels: rail?.querySelectorAll('span').length || 0,
+                    rail_display: rail ? getComputedStyle(rail).display : null,
+                    evidence_closed: document.getElementById('method-evidence')?.open === false,
+                    json_links: jsonLinks.length,
+                    json_links_inside_evidence: jsonLinks.filter(link => link.closest('#method-evidence')).length
+                };
+            }"""
+        )
+        expected_rail_display = "none" if viewport_name == "desktop" else "block"
+        add_check(
+            run,
+            "answer_first_local_nav_structural_legend_and_mobile_rail",
+            information_architecture["ids_present"]
+            and information_architecture["dom_order"]
+            and information_architecture["nav_links"] == 6
+            and information_architecture["nav_height"] >= 44
+            and information_architecture["current_nav_links"] == 1
+            and information_architecture["chrom_structural_legend"]
+            and information_architecture["rail_labels"] == 22
+            and information_architecture["rail_display"] == expected_rail_display
+            and information_architecture["evidence_closed"]
+            and information_architecture["json_links"] > 0
+            and information_architecture["json_links_inside_evidence"] == information_architecture["json_links"],
+            expected={"order": ["sample-summary", "genome-overview", "region-browser", "dimension-guide", "sample-overview", "method-evidence"], "nav_links": 6, "rail_display": expected_rail_display, "json_hidden": True},
+            actual=information_architecture,
+        )
+
         base_overflow = body_overflow_metrics(page)
         add_check(
             run,
@@ -1111,7 +1377,7 @@ def audit_sample_viewport(
             actual=base_overflow,
         )
 
-        if viewport_name == "mobile":
+        if viewport_name != "desktop":
             touch = touch_target_metrics(page)
             add_check(
                 run,
@@ -1126,6 +1392,32 @@ def audit_sample_viewport(
         page.wait_for_timeout(180)
         genome_path = output_dir / f"{sample}__{viewport_name}__genome.png"
         run["screenshots"]["genome"] = screenshot(page, genome_path)
+        genome_alignment = page.evaluate(
+            """selector => {
+                const target = document.querySelector(selector);
+                const nav = document.querySelector('.local-nav');
+                const heading = document.querySelector('.ideogram-head h3');
+                return {
+                    target_top: target?.getBoundingClientRect().top || null,
+                    nav_bottom: nav?.getBoundingClientRect().bottom || null,
+                    heading_top: heading?.getBoundingClientRect().top || null,
+                    current_href: document.querySelector('.local-nav a[aria-current="location"]')?.getAttribute('href') || null
+                };
+            }""",
+            genome_target,
+        )
+        add_check(
+            run,
+            "genome_screenshot_heading_unobscured_and_nav_current",
+            genome_alignment["target_top"] is not None
+            and genome_alignment["nav_bottom"] is not None
+            and genome_alignment["heading_top"] is not None
+            and genome_alignment["target_top"] >= genome_alignment["nav_bottom"] + 6
+            and genome_alignment["heading_top"] >= genome_alignment["nav_bottom"] + 6
+            and genome_alignment["current_href"] == "#genome-overview",
+            expected={"target_gap_min_px": 6, "heading_gap_min_px": 6, "current_href": "#genome-overview"},
+            actual=genome_alignment,
+        )
 
         ranking_fixture = expectation["ranking_fixture"]
         select_region(page, ranking_fixture["region"], timeout_ms)
@@ -1183,6 +1475,15 @@ def audit_sample_viewport(
             float(detail_overflow["overflow_px"]) <= 1,
             expected={"overflow_px_max": 1},
             actual=detail_overflow,
+        )
+
+        contrast_failures = text_contrast_failures(page)
+        add_check(
+            run,
+            "sample_visible_text_wcag_aa_contrast",
+            not contrast_failures,
+            expected={"failures": 0, "normal_text_ratio": 4.5, "large_text_ratio": 3.0},
+            actual={"failures": len(contrast_failures), "examples": contrast_failures},
         )
 
         if sample == "HCC1395":
@@ -1362,7 +1663,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "sample_page_runs_expected": len(SAMPLES) * len(VIEWPORTS),
             "index_page_runs_expected": len(VIEWPORTS),
             "page_runs_expected": (len(SAMPLES) + 1) * len(VIEWPORTS),
-            "screenshots_expected": len(SAMPLES) * len(VIEWPORTS) + 4,
+            "screenshots_expected": len(SAMPLES) * len(VIEWPORTS) + 2 * len(VIEWPORTS),
         },
         "inputs": {
             "workstation_index": str((workstation_dir / "index.html").resolve()),

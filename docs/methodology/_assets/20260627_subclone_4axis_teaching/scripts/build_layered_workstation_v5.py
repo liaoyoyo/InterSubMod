@@ -60,7 +60,7 @@ TOPOLOGY_KEYS = (
     "incomplete",
 )
 
-RENDERER_UI_CONTRACT = "layered-workstation-v5-grch38-topology-multiselect-2"
+RENDERER_UI_CONTRACT = "layered-workstation-v5-grch38-topology-multiselect-3"
 GRCH38_SOURCE_URL = "https://www.ncbi.nlm.nih.gov/grc/human/data?asm=GRCh38"
 GRCH38_AUTOSOME_LENGTHS = {
     "chr1": 248_956_422,
@@ -886,7 +886,7 @@ def main() -> None:
  --sans:"Aptos","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif
 }
 *{box-sizing:border-box}
-html{background:var(--canvas);scroll-behavior:smooth}
+html{background:var(--canvas);scroll-behavior:smooth;scroll-padding-top:72px}
 body{margin:0;color:var(--ink);background:linear-gradient(180deg,#e6eef4 0,#f5f8fa 420px,var(--canvas) 100%);font:14px/1.58 var(--sans)}
 a{color:var(--blue);text-underline-offset:3px}
 button,select,input{font:inherit}
@@ -895,6 +895,10 @@ button,select,input,summary,a{touch-action:manipulation}
 .skip-link{position:fixed;z-index:100;left:14px;top:10px;transform:translateY(-180%);padding:9px 13px;border:2px solid #111;background:#fff;color:#111}
 .skip-link:focus{transform:none}
 .wrap{width:min(100%,1320px);margin:0 auto;padding:22px clamp(13px,2.7vw,36px) 48px}
+.local-nav{position:sticky;z-index:40;top:0;display:flex;gap:4px;overflow-x:auto;margin:10px 0 0;padding:6px;border:1px solid #aebdca;background:#fff;box-shadow:0 7px 18px rgba(20,39,58,.08);scrollbar-width:thin}
+.local-nav a{flex:0 0 auto;min-height:44px;padding:11px 14px;border-left:3px solid transparent;color:#33495d;font-size:12px;font-weight:750;text-decoration:none;white-space:nowrap}
+.local-nav a:hover,.local-nav a[aria-current="location"]{border-left-color:var(--blue);background:#eaf3fa;color:var(--blue)}
+.section[id],#detail{scroll-margin-top:72px}
 .hero{overflow:hidden;border:1px solid #c4d0dc;border-top:5px solid var(--blue);background:rgba(255,255,255,.97);box-shadow:var(--shadow)}
 .hero-main{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;padding:clamp(22px,3vw,38px)}
 .crumbs{display:flex;gap:9px;align-items:center;margin-bottom:13px;color:var(--muted);font:700 11px/1.2 var(--mono);letter-spacing:.05em;text-transform:uppercase}
@@ -946,10 +950,10 @@ h3{margin:0;font-size:17px;line-height:1.3}
 .overview-bins{display:grid;gap:7px;padding:12px 15px}
 .overview-bin{display:grid;grid-template-columns:minmax(120px,1.2fr) minmax(90px,2fr) minmax(92px,auto);gap:9px;align-items:center;min-width:0}
 .overview-bin-button{width:100%;min-height:44px;padding:4px;border:1px solid transparent;background:transparent;color:inherit;cursor:pointer;text-align:left}.overview-bin-button:hover,.overview-bin-button[aria-pressed="true"]{border-color:#9db1c2;background:#f8fbfd}.overview-bin-button[aria-pressed="true"]{box-shadow:inset 4px 0 0 var(--tone)}
-.overview-bin-label{min-width:0;color:#33495d;font-size:10.5px;overflow-wrap:anywhere}.overview-bin-value{text-align:right;font:750 10.5px/1.25 var(--mono);white-space:nowrap}
+.overview-bin-label{min-width:0;color:#33495d;font-size:11.5px;overflow-wrap:anywhere}.overview-bin-value{text-align:right;font:750 11.5px/1.25 var(--mono);white-space:nowrap}
 .overview-bar-track{height:9px;overflow:hidden;border:1px solid #d5dee6;background:#edf2f5}.overview-bar-fill{display:block;height:100%;min-width:0;background:var(--tone)}
 .overview-note{margin:0;padding:9px 15px 12px;border-top:1px solid #e5eaf0;color:var(--muted);font-size:11px}
-.tone-green{--tone:#167452}.tone-blue{--tone:#075ea8}.tone-cyan{--tone:#087d8f}.tone-magenta{--tone:#a9236d}.tone-violet{--tone:#7040a0}.tone-amber{--tone:#9a5200}.tone-red{--tone:#a83227}.tone-slate{--tone:#65727e}.tone-incomplete{--tone:#8b97a2}
+.tone-green{--tone:#167452}.tone-blue{--tone:#075ea8}.tone-cyan{--tone:#087d8f}.tone-magenta{--tone:#a9236d}.tone-violet{--tone:#7040a0}.tone-amber{--tone:#9a5200}.tone-red{--tone:#a83227}.tone-slate{--tone:#65727e}.tone-incomplete{--tone:#8b97a2}.tone-na{--tone:#384652}
 .legacy-boundary{margin-top:10px;border-left:5px solid var(--amber)!important}.legacy-boundary .drawer-body{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px}.legacy-boundary h3{font-size:15px}.legacy-boundary p{margin:6px 0!important}.legacy-map{display:grid;gap:6px}.legacy-map div{display:grid;grid-template-columns:minmax(120px,.8fr) minmax(0,1.6fr);gap:10px;padding:8px 9px;border:1px solid var(--line);background:#f8fafc}.legacy-map b{font:750 10.5px/1.3 var(--mono)}.legacy-map span{color:var(--muted);font-size:11px}
 .genome-panel{border:1px solid #c7d2dd;background:#fff;box-shadow:var(--shadow)}
 .genome-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border-bottom:1px solid var(--line);background:#f8fafc}
@@ -963,15 +967,17 @@ h3{margin:0;font-size:17px;line-height:1.3}
 .ideogram-status-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:9px 14px;background:#f8fafc}
 .ideogram-status-row p{margin:0;color:#3e5162;font-size:11px}.ideogram-status-row a{font-size:10.5px;white-space:nowrap}
 .ideogram-legend{display:flex;flex-wrap:wrap;gap:7px;padding:0 14px 10px;background:#f8fafc;color:var(--muted);font-size:10.5px}
-.ideogram-legend-item{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:6px 8px;border:1px solid transparent;background:transparent;color:inherit;cursor:pointer}.ideogram-legend-item:hover,.ideogram-legend-item[aria-pressed="true"]{border-color:#9db1c2;background:#fff;color:var(--ink)}.ideogram-legend-item[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--tone)}.ideogram-legend-all{--tone:#536476;font-weight:750}.ideogram-legend-swatch{width:18px;height:7px;border:1px solid rgba(21,34,49,.24);background:var(--tone)}
+.ideogram-legend-item{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:6px 8px;border:1px solid transparent;background:transparent;color:inherit;cursor:pointer}.ideogram-legend-item:hover,.ideogram-legend-item[aria-pressed="true"]{border-color:#9db1c2;background:#fff;color:var(--ink)}.ideogram-legend-item[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--tone)}.ideogram-legend-all{--tone:#536476;font-weight:750}.ideogram-legend-swatch{width:18px;height:7px;border:1px solid rgba(21,34,49,.24);background:var(--tone)}.ideogram-legend-item.tone-na .ideogram-legend-swatch{background:repeating-linear-gradient(135deg,#384652 0 3px,#fff 3px 6px)}
 .ideogram-scroll{width:100%;max-width:100%;overflow-x:auto;padding:10px 12px 13px;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch}
-#ideogram-svg{display:block;width:100%;min-width:1020px;height:auto;margin:0 auto;background:#fff}
+.ideogram-scroll-inner{width:max-content;min-width:100%}.ideogram-mobile-rail{display:none}
+#ideogram-svg{display:block;width:1120px;min-width:1120px;height:auto;margin:0 auto;background:#fff}
 .ideogram-axis{fill:#687886;font:9px var(--mono)}.ideogram-axis-line{stroke:#cdd7df;stroke-width:1}.ideogram-label{fill:#23384b;font:750 10px var(--mono)}.ideogram-length{fill:#687886;font:9px var(--mono);text-anchor:end}
 .ideogram-track{fill:#edf2f5;stroke:#bac7d2;stroke-width:1}.ideogram-track.active{fill:#dceefa;stroke:var(--blue);stroke-width:2}
-.ideogram-mark{stroke:var(--tone);stroke-width:1;opacity:.62;pointer-events:none;shape-rendering:crispEdges}.ideogram-mark.tone-incomplete{stroke-width:1.5;stroke-dasharray:2 1;opacity:.82}
+.ideogram-mark{stroke:var(--tone);stroke-width:1;opacity:.62;pointer-events:none;shape-rendering:crispEdges}.ideogram-mark.tone-incomplete{stroke-width:1.5;stroke-dasharray:2 1;opacity:.82}.ideogram-mark.tone-na{stroke-width:1.5;stroke-dasharray:1 2;opacity:.92}
 .ideogram-mark.dimmed{opacity:.045}
 .read-af-card{margin:10px 0;border:1px solid #afc9dc;border-left:5px solid var(--blue);background:#f6fbff}.read-af-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:11px 12px;border-bottom:1px solid #d7e4ed}.read-af-head p{margin:4px 0 0;color:var(--muted);font-size:11px}.read-af-body{padding:10px 12px}.read-af-summary{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}.ranking-table{width:100%;border-collapse:collapse;font-size:10.5px}.ranking-table th,.ranking-table td{padding:6px 7px;border-bottom:1px solid #dce5ec;text-align:left}.ranking-table th{color:var(--muted);font-size:9.5px}.ranking-table .num{text-align:right;font-family:var(--mono)}.read-af-top-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:8px;margin-top:10px}.read-af-top-tree{min-width:0;border:1px solid #d2dfe8;background:#fff}.read-af-top-tree h5{margin:0;padding:8px 9px;border-bottom:1px solid #e1e8ee;font-size:11px}.family-af-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:5px;margin:9px 0}.family-af-site{padding:7px 8px;border:1px solid #d8e1e8;background:#fff}.family-af-site span,.family-af-site b{display:block}.family-af-site span{color:var(--muted);font:9px/1.3 var(--mono)}.family-af-site b{margin-top:3px;font:750 11px/1.3 var(--mono)}.family-af-site.na{border-color:#d6b87f;background:#fff8eb}
 .ideogram-chrom-hit{fill:transparent;cursor:pointer}.ideogram-chrom-hit:focus{outline:none;stroke:#ef9f20;stroke-width:3}.ideogram-chrom-hit.active{stroke:var(--blue);stroke-width:2}
+.chrom-structure-key{display:flex;flex-wrap:wrap;align-items:center;gap:7px 13px;padding:10px 14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#f8fafc;color:#43566a;font-size:11px}.chrom-structure-key>strong{margin-right:3px}.chrom-structure-key span{display:inline-flex;align-items:center;gap:5px}.chrom-structure-key i{width:18px;height:7px;border:1px solid rgba(21,34,49,.22)}
 .chrom-grid{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:1px;background:var(--line)}
 .chrom-button{min-height:86px;padding:10px;border:0;background:#fff;color:var(--ink);cursor:pointer;text-align:left}
 .chrom-button:hover{background:#f2f7fb}.chrom-button.active{position:relative;background:#eaf4fc;box-shadow:inset 0 0 0 3px var(--blue)}
@@ -1007,6 +1013,7 @@ h3{margin:0;font-size:17px;line-height:1.3}
 .result-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font:730 11.5px/1.35 var(--mono)}
 .result-dimensions{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;color:var(--muted);font-size:11px}.result-dimensions span{padding-right:6px;border-right:1px solid var(--line)}.result-dimensions span:last-child{padding-right:0;border-right:0}
 .badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.ranking-scroll-cue{margin:8px 0 5px;padding:7px 9px;border-left:4px solid var(--blue);background:#e8f2f9;color:#385166;font-size:10.5px;font-weight:650}
 .badge{display:inline-flex;align-items:center;min-height:22px;padding:2px 7px;border:1px solid #c8d3dd;border-radius:999px;background:#f8fafc;color:#48596a;font-size:10px;line-height:1.2}
 .badge.exact{border-color:#9acbb9;background:#eef8f4;color:#0d6246}.badge.shape{border-color:#95bce0;background:#edf5fc;color:#0a548f}
 .badge.multiple{border-color:#d5a3c2;background:#fbf0f7;color:#842057}.badge.incomplete{border-style:dashed;border-color:#8995a0;background:#f3f5f7;color:#44515d}
@@ -1082,6 +1089,7 @@ details.drawer[open]>summary{border-bottom:1px solid var(--line)}
  .scope-ribbon{grid-template-columns:1fr 1fr}.scope-item:nth-child(2){border-right:0}.scope-item:nth-child(-n+2){border-bottom:1px solid var(--line)}
  .claim-row,.dimension-guide,.assertion-grid,.region-dimensions,.sidecars,.sensitivity-banner,.overview-grid{grid-template-columns:1fr}.sensitivity-metrics{grid-template-columns:1fr 1fr}
  .overview-card:last-child{grid-column:auto}.legacy-boundary .drawer-body{grid-template-columns:1fr}.ideogram-head{grid-template-columns:1fr}.ideogram-mode-controls{justify-content:flex-start}.ideogram-status-row{display:block}.ideogram-status-row a{display:inline-block;margin-top:5px}.read-af-top-grid{grid-template-columns:1fr}
+ .ideogram-mobile-rail{position:sticky;left:0;z-index:4;display:block;float:left;width:72px;height:626px;margin-right:-72px;background:linear-gradient(90deg,#fff 0,#fff 84%,rgba(255,255,255,0));pointer-events:none}.ideogram-mobile-rail span{position:absolute;left:4px;width:54px;padding:2px 4px;background:rgba(255,255,255,.9);color:#23384b;font:750 10px/1 var(--mono)}
  .glossary-grid{grid-template-columns:1fr 1fr}
  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metric{border-bottom:1px solid var(--line)}.metric:nth-child(even){border-right:0}.metric:last-child{border-bottom:0}
  .topology-legend{grid-template-columns:1fr 1fr}.chrom-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -1126,6 +1134,10 @@ details.drawer[open]>summary{border-bottom:1px solid var(--line)}
   </div>
  </header>
 
+ <nav class="local-nav" aria-label="本頁段落導覽">
+  <a href="#sample-summary" aria-current="location">摘要</a><a href="#genome-overview">全基因</a><a href="#region-browser">Region</a><a href="#dimension-guide">三維解讀</a><a href="#sample-overview">樣本分布</a><a href="#method-evidence">方法／證據</a>
+ </nav>
+
  <div class="claim-row" aria-label="工作站解讀邊界">
   <article class="claim"><b>回答什麼</b><p>目前 read-state 約束下，哪些區域候選集合完整，以及 exact candidates 與 topology shapes 各有多少。</p></article>
   <article class="claim"><b>證據如何分層</b><p>Observed read states 與 inferred hidden states 分開；HP1／HP2 是主線，H3／H4／none／reference control 收在輔助層。</p></article>
@@ -1142,7 +1154,7 @@ details.drawer[open]>summary{border-bottom:1px solid var(--line)}
   </div>
  </aside>
 
- <section class="section" aria-labelledby="sample-funnel-title">
+ <section class="section" id="sample-summary" aria-labelledby="sample-funnel-title">
   <div class="section-heading">
    <div><p class="kicker">Canonical disposition</p><h2 id="sample-funnel-title">Dataset 全範圍漏斗</h2></div>
    <p class="section-note">各數字直接取自 canonical v5 machine summary；W_tree 含無主線區，W_primary 僅含 mutation-bearing HP1／HP2。</p>
@@ -1225,10 +1237,11 @@ details.drawer[open]>summary{border-bottom:1px solid var(--line)}
     <div class="ideogram-legend" id="ideogram-legend" role="group" aria-label="目前全基因分布圖例" aria-describedby="ideogram-multiselect-help"></div>
     <p class="scroll-cue" style="padding:0 14px">圖內可水平捲動查看完整 0–249 Mb 尺度；22 條染色體共用相同 GRCh38 bp→px 比例。</p>
     <div class="ideogram-scroll" role="region" tabindex="0" aria-label="GRCh38 chr1 到 chr22 座標比例 region 分布圖，可水平捲動">
-     <svg id="ideogram-svg" viewBox="0 0 1120 626" role="img" aria-labelledby="ideogram-svg-title ideogram-svg-desc"><title id="ideogram-svg-title">__SAMPLE__ 的 GRCh38 chr1–22 region 分布</title><desc id="ideogram-svg-desc">每條染色體依 GRCh38 bp 長度縮放；每一短線代表一個 W_tree region 的 midpoint。可用上方按鈕切換著色，並用每列透明按鈕下鑽染色體。</desc></svg>
+     <div class="ideogram-scroll-inner"><div class="ideogram-mobile-rail" id="ideogram-mobile-rail" aria-hidden="true"></div><svg id="ideogram-svg" viewBox="0 0 1120 626" role="img" aria-labelledby="ideogram-svg-title ideogram-svg-desc"><title id="ideogram-svg-title">__SAMPLE__ 的 GRCh38 chr1–22 region 分布</title><desc id="ideogram-svg-desc">每條染色體依 GRCh38 bp 長度縮放；每一短線代表一個 W_tree region 的 midpoint。可用上方按鈕切換著色，並用每列透明按鈕下鑽染色體。</desc></svg></div>
     </div>
    </div>
-   <div class="chrom-grid" id="chrom-grid" aria-label="22 條常染色體導覽"></div>
+   <div class="chrom-structure-key" id="chrom-structure-key"><strong>下方 mini-bar 固定顯示 structural determinacy</strong><span><i class="seg-exact"></i>Exact 唯一</span><span><i class="seg-shape"></i>Shape 唯一</span><span><i class="seg-multiple"></i>Multi-shape</span><span><i class="seg-incomplete"></i>Incomplete</span></div>
+   <div class="chrom-grid" id="chrom-grid" aria-label="22 條常染色體導覽；mini-bar 固定顯示 structural determinacy" aria-describedby="chrom-structure-key"></div>
   </div>
  </section>
 
@@ -1261,7 +1274,7 @@ details.drawer[open]>summary{border-bottom:1px solid var(--line)}
   </div>
  </section>
 
- <details class="drawer section evidence-drawer">
+ <details class="drawer section evidence-drawer" id="method-evidence">
   <summary>方法、驗證雜湊與原始資料連結</summary>
   <div class="drawer-body raw-links" id="source-links"></div>
  </details>
@@ -1307,7 +1320,7 @@ const IDEOGRAM_MODES={
  determinacy:{label:"Determinacy",categories:{
   exact:{label:"Exact 唯一",tone:"green"},shape_only:{label:"只到 shape 唯一",tone:"blue"},
   multi_shape:{label:"Multi-shape",tone:"magenta"},incomplete:{label:"尚未評估",tone:"incomplete"},
- no_primary:{label:"無 primary · N/A",tone:"slate"}
+ no_primary:{label:"無 primary · N/A",tone:"na"}
  }},
  "read-af-selection":{label:"Read-AF selection",categories:{
   structural_exact_unique:{label:"結構已 exact 唯一",tone:"green"},
@@ -1316,7 +1329,7 @@ const IDEOGRAM_MODES={
   read_af_tied_different_topology:{label:"並列第一 · 多 Topo",tone:"magenta"},
   read_af_unavailable:{label:"read-AF 不可排序",tone:"amber"},
   incomplete:{label:"候選未完整",tone:"incomplete"},
-  no_primary:{label:"無 primary · N/A",tone:"slate"}
+  no_primary:{label:"無 primary · N/A",tone:"na"}
  }},
  morphology:{label:"Clone/subclone 相容型態",categories:{
   single_no_within_hp_relation:{label:"單支／無 HP 內關係",tone:"slate"},
@@ -1324,12 +1337,12 @@ const IDEOGRAM_MODES={
   sister_branch:{label:"旁系／分支-compatible",tone:"cyan"},
   direct_and_sister:{label:"直系＋旁系",tone:"violet"},
   unresolved:{label:"形態未解",tone:"incomplete"},
-  not_applicable:{label:"無 primary · N/A",tone:"slate"}
+  not_applicable:{label:"無 primary · N/A",tone:"na"}
  }},
  evidence:{label:"Read evidence",categories:{
   full_and_partial:{label:"full + partial",tone:"blue"},partial_only:{label:"partial-only",tone:"amber"},
   full_only:{label:"full-only",tone:"green"},no_read_state_groups:{label:"no read-state groups",tone:"red"},
-  not_applicable:{label:"無 primary · N/A",tone:"slate"}
+  not_applicable:{label:"無 primary · N/A",tone:"na"}
  }},
  "primary-hp":{label:"Primary HP",categories:{
   hp0:{label:"0 primary HP",tone:"slate"},hp1:{label:"1 primary HP",tone:"blue"},
@@ -1341,7 +1354,7 @@ const IDEOGRAM_MODES={
  }},
  "cn-sidecar":{label:"CN region sidecar",categories:{
   neutral:{label:"neutral",tone:"green"},gain:{label:"gain",tone:"magenta"},loss:{label:"loss",tone:"blue"},
-  loh:{label:"LOH",tone:"violet"},unavailable:{label:"unavailable",tone:"slate"},other:{label:"other",tone:"red"}
+  loh:{label:"LOH",tone:"violet"},unavailable:{label:"unavailable",tone:"na"},other:{label:"other",tone:"red"}
  }}
 };
 
@@ -1441,9 +1454,8 @@ function renderSampleOverview(){
  document.getElementById("overview-w-primary").textContent="W_primary "+fmt(denominators.W_primary)+" regions";
  document.getElementById("overview-retained").textContent=fmt(denominators.retained_sSNV)+" retained sSNV";
  document.getElementById("sample-overview-grid").innerHTML=OVERVIEW.panels.map(panel=>{
-  const maximum=Math.max(0,...panel.bins.map(bin=>Number(bin.count||0)));
   const bins=panel.bins.map(bin=>{
-   const width=maximum?100*Number(bin.count||0)/maximum:0;
+   const width=panel.denominator?100*Number(bin.count||0)/Number(panel.denominator):0;
    const label=bin.label+"，"+fmt(bin.count)+"，占 "+panel.denominator_key+" "+pct(bin.count,panel.denominator);
    const interactive=bin.ideogram_mode&&bin.ideogram_key;
    const tag=interactive?"button":"div";
@@ -1537,6 +1549,7 @@ function renderIdeogram(){
  const svg=document.getElementById("ideogram-svg");
  const maxLength=ASSEMBLY.chromosome_lengths.chr1;
  const trackX=100,trackWidth=900,top=58,rowHeight=25;
+ document.getElementById("ideogram-mobile-rail").innerHTML=Array.from({length:22},(_,index)=>'<span style="top:'+(top+index*rowHeight-7)+'px">chr'+(index+1)+'</span>').join("");
  const axisTicks=[0,50000000,100000000,150000000,200000000,maxLength];
  let out='<title id="ideogram-svg-title">'+esc(SAMPLE)+' 的 GRCh38 chr1–22 region 分布</title><desc id="ideogram-svg-desc">每條染色體依 GRCh38 bp 長度縮放；每一短線代表一個 W_tree region 的 midpoint。可切換著色，並以每列按鈕下鑽染色體。</desc>';
  out+=axisTicks.map(value=>{
@@ -1966,7 +1979,7 @@ function readAfRankingPanel(line){
   const labels={unique_first:"唯一第一順位",tied_first_same_topology:"並列第一 · 同一 Topo",tied_first_different_topology:"並列第一 · 多 Topo"};
   header="Read-AF "+(labels[ranking.exact_top_class]||ranking.exact_top_class);badge=ranking.exact_top_class==="unique_first"?"shape":ranking.exact_top_class==="tied_first_same_topology"?"shape":"multiple";
   const preview=ranking.ranked_preview||[];
-  const table=preview.length?'<div class="scroll-region" role="region" tabindex="0" aria-label="read-AF candidate ranking preview"><table class="ranking-table"><thead><tr><th>順位</th><th>原 candidate</th><th>Shape</th><th class="num">Fraction score（精確值）</th><th class="num">parent→child ordering comparisons</th></tr></thead><tbody>'+preview.map(item=>'<tr><td class="num">'+fmt(item.score_rank)+(item.is_exact_top?' · top':'')+'</td><td class="mono">#'+fmt(item.candidate_index)+'</td><td class="mono">'+esc(item.shape_id)+'</td><td class="num">'+esc(item.score_fraction)+'</td><td class="num">'+fmt(item.n_ancestry_comparisons)+'</td></tr>').join("")+'</tbody></table></div>':'';
+  const table=preview.length?'<p class="ranking-scroll-cue">候選排序表可左右滑動；Fraction score 與 ordering comparisons 分欄保留。</p><div class="scroll-region" role="region" tabindex="0" aria-label="read-AF candidate ranking preview，可水平捲動"><table class="ranking-table"><thead><tr><th>順位</th><th>原 candidate</th><th>Shape</th><th class="num">Fraction score（精確值）</th><th class="num">parent→child ordering comparisons</th></tr></thead><tbody>'+preview.map(item=>'<tr><td class="num">'+fmt(item.score_rank)+(item.is_exact_top?' · top':'')+'</td><td class="mono">#'+fmt(item.candidate_index)+'</td><td class="mono">'+esc(item.shape_id)+'</td><td class="num">'+esc(item.score_fraction)+'</td><td class="num">'+fmt(item.n_ancestry_comparisons)+'</td></tr>').join("")+'</tbody></table></div>':'';
   const reps=ranking.top_shape_representatives||[];
   const topTrees=reps.slice(0,4).map((tree,index)=>{
    const states={};(tree.edges||[]).forEach(edge=>states[edge[0]+">"+edge[1]]="ranked");
@@ -2185,7 +2198,30 @@ function restoreFromHash(restoreFocus){
  if(row)selectRegion(wanted,null,restoreFocus,"none");else renderEmptyDetail(restoreFocus);
 }
 
+function applyAnswerFirstOrder(){
+ const main=document.querySelector("main.wrap");
+ const dimension=document.getElementById("dimension-guide");
+ const evidence=document.getElementById("method-evidence");
+ [document.getElementById("genome-overview"),document.getElementById("region-browser")].forEach(section=>main.insertBefore(section,dimension));
+ [document.querySelector(".claim-row"),document.querySelector(".sensitivity-banner")].forEach(section=>main.insertBefore(section,evidence));
+}
+
+function setupLocalNavigation(){
+ const links=[...document.querySelectorAll(".local-nav a[href^='#']")];
+ const sections=links.map(link=>document.querySelector(link.getAttribute("href"))).filter(Boolean);
+ const activate=id=>links.forEach(link=>link.setAttribute("aria-current",link.getAttribute("href")==="#"+id?"location":"false"));
+ links.forEach(link=>link.addEventListener("click",()=>activate(link.getAttribute("href").slice(1))));
+ if("IntersectionObserver" in window){
+  const observer=new IntersectionObserver(entries=>{
+   const active=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+   if(active)activate(active.target.id);
+  },{rootMargin:"-18% 0px -68% 0px",threshold:[0,.05,.2]});
+  sections.forEach(section=>observer.observe(section));
+ }
+}
+
 function init(){
+ applyAnswerFirstOrder();setupLocalNavigation();
  renderMetrics();renderSampleOverview();renderGenome();renderIdeogram();renderDimensions();renderSourceLinks();setupControls();
  restoreFromHash(false);
  syncHash("replace");
