@@ -18,6 +18,43 @@ advisory: on
 
 ## 🔵 設計決定（Design Decisions）
 
+### 2026-07-16 — 視覺誠信與 answer-first remediation addendum
+
+- **Status**：Accepted / validated
+- **背景**：全量 Chromium 稽核雖通過既有 219/219 checks，但新的人眼與 DOM 稽核發現 overview 長條以 panel 最大值當 100%，與文字所用 canonical denominator 不一致；morphology 的單支與無 primary 也共用同一 slate 實線。
+- **決定**：We will derive every overview bar and printed percentage from the same panel denominator, and give N/A a dashed/hatched non-colour encoding distinct from the solid single-branch category.
+- **理由**：前者是數據視覺誤述，後者會讓類別映射失去一對一關係；兩者皆列 P0。
+- **影響範圍**：7 個 sample pages、renderer UI contract、Playwright assertions。
+- **Revisit if**：無；這是固定資料誠信契約。
+- **Evidence tier**：L1 ⭐⭐⭐⭐⭐
+
+### 2026-07-16 — Index 與 sample page 改成 answer-first 閱讀順序
+
+- **Status**：Accepted / validated
+- **決定**：Index 先顯示 HCC1395 technical verdict 與三維跨樣本比較，再放方法教學；sample page 先顯示 canonical 摘要、GRCh38 ideogram 與 region browser，再放三維解釋與七組完整分布。兩層都加入可見 sticky local nav。
+- **理由**：核心研究問題原本在 desktop 第 3–5 個 viewport、mobile 第 7–11 個 viewport，無法在第一輪掃讀完成判斷。
+- **影響範圍**：資訊架構、responsive CSS、鍵盤導覽；既有 section ID 保留以避免 deep-link 失效。
+- **Revisit if**：後續正式使用者測試顯示另一個任務序列更常見。
+- **Evidence tier**：L2 ⭐⭐⭐⭐
+
+### 2026-07-16 — 比較視圖的三組分母／聚合切換
+
+- **Status**：Accepted / validated
+- **決定**：We will expose 7-dataset operational versus 6-biological-ID macro profiles, full W_primary versus conditional-evaluable TVD, and HCC confusion count versus row percentage.
+- **資料契約**：Full TVD 讀既有 7×7 matrix；conditional TVD 僅由 21 筆 pair records 的 `conditional_evaluable_tvd` 組裝；row-% 僅由 confusion row count / `left_counts[row]` 計算。
+- **限制**：Conditional 是排除 incomplete／unavailable／unresolved 後的 renormalized subset，不能取代 full-profile verdict；HCC pair 是 technical comparison，不是 biological replication。
+- **影響範圍**：index comparison payload、matrix/confusion controls、ARIA 與 tests。
+- **Evidence tier**：L1 ⭐⭐⭐⭐⭐
+
+### 2026-07-16 — Claude Code 雙階段唯讀共識 gate
+
+- **Status**：Accepted / validated
+- **初審 verdict**：`AGREE_WITH_CHANGES`。
+- **共同 blocker**：sample renderer 必須改 `build_layered_workstation_v5.py` 並全量重建；overview 分母 bug 必修；USER-SPECIFIED Set 聯集／再點取消／零選全部不得改動。
+- **共同驗收**：bar 分母、非色彩類別編碼、contrast、answer-first、sticky nav、matrix scale/header、macro 實圖、full/conditional、confusion count/%、caption/ARIA/claim/hidden JSON 與全量 Playwright 全數通過後，才可宣布 `AGREE`。
+- **最終 verdict**：Claude Code 初審 `AGREE_WITH_CHANGES`；修正後審查為 `AGREE_WITH_NONBLOCKING_NOTES`；補上 index UI contract 並以位元層級排除 tab 誤判後，收斂複審為 `AGREE`，`BLOCKERS / MAJOR / MINOR = none`。
+- **Evidence tier**：L2 ⭐⭐⭐⭐
+
 ### 2026-07-15 13:00 — current canonical v5 是唯一數據來源
 
 - **Status**：Accepted
@@ -181,6 +218,23 @@ advisory: on
 - **Claude Code 唯讀第二審**：縮小至關鍵函式後完成；多選空集合、claim ceiling、SHA fail-closed、初始置中一次性 guard 四項皆 PASS，無 blocker/high/medium。
 - **演算法 contract tests**：`python3 research/20260715_layered_workstation_genome_topology_multiselect/scripts/test_current_v5_read_af_topology_contract.py -v`；5/5 PASS、exit 0，覆蓋 sibling-order invariant、四種 morphology、Fraction score、0/0 N/A 與跨 HP 禁止建 edge。
 
+### 2026-07-17 00:14 — answer-first remediation、三視窗全量稽核與 Claude 共識完成
+
+- **輸入**：
+  - `InterSubMod/docs/methodology/_assets/layered_workstation/index.html`
+  - `InterSubMod/docs/methodology/_assets/layered_workstation/{COLO829,H1437,H2009,HCC1395,HCC1395_DORADO,HCC1937,HCC1954}.html`
+  - `InterSubMod/research/20260715_sample_topology_comparison/artifacts/sample_topology_comparison.json`
+  - `InterSubMod/research/20260715_layered_workstation_genome_topology_multiselect/data/current_v5_read_af_topology/`
+- **全站命令**：`python3 research/20260715_layered_workstation_genome_topology_multiselect/scripts/audit_layered_workstation_playwright.py --workstation-dir docs/methodology/_assets/layered_workstation --sidecar-dir research/20260715_layered_workstation_genome_topology_multiselect/data/current_v5_read_af_topology --output-dir research/20260715_layered_workstation_genome_topology_multiselect/qa/full --timeout-ms 180000`
+- **全站輸出**：`InterSubMod/research/20260715_layered_workstation_genome_topology_multiselect/qa/full/validation_receipt.json` + 27 張 desktop 1440／mobile 390／narrow 320 截圖。
+- **全站結果**：Chromium 147.0.7727.15；8 documents、24/24 page runs、464/464 checks、0 console/page errors、exit 0；receipt SHA-256 `4b94ef59446ab20e1cbb8ec533e0c736582d6e1223c2b281cb1000bd25e42156`。
+- **比較頁命令**：`python3 research/20260715_sample_topology_comparison/scripts/audit_sample_topology_comparison_playwright.py --index docs/methodology/_assets/layered_workstation/index.html --comparison research/20260715_sample_topology_comparison/artifacts/sample_topology_comparison.json --output-dir research/20260715_sample_topology_comparison/qa/playwright --timeout-ms 180000`
+- **比較頁輸出**：`InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/validation_receipt.json` + 15 張 desktop／mobile／narrow 截圖。
+- **比較頁結果**：3/3 runs、66/66 checks、exit 0；receipt SHA-256 `1e39f500d5758b7778b71c6f4ebd52ed57f76f39e53772d8de357a4d83ad00b1`；index SHA-256 `fbd9ff22b0556ac37e1d207b7a8fb4a7df5c7b4eb13ba54610b1bf379811bca5` 與 receipt input binding 相同。
+- **新固定契約**：overview bar 與文字百分比共用 canonical denominator；N/A 以斜紋／虛線加文字非色彩編碼；index 與 sample pages 共用 `layered-workstation-v5-grch38-topology-multiselect-3`；sticky nav 不遮標題；七種 ideogram view 保留 Set 聯集多選與零選全部。
+- **資訊層次**：index 先回答 HCC1395 technical reproducibility 與跨樣本比較，再展開方法；sample page 先顯示摘要、GRCh38、region，再放維度教學與完整分布。HCC1395 × DORADO 僅支撐 `PARTIAL TECHNICAL REPRODUCIBILITY`，不支撐相同 ancestry／真樹／clone。
+- **Claude Code 最終唯讀複審**：`VERDICT: AGREE`；`BLOCKERS: none`；`MAJOR: none`；`MINOR: none`。複審重新核對 index UI-contract、兩份 receipt、index hash、U+0009=0 與六檔 `git diff --check`，確認前一審 13 項結論仍成立。
+
 ## 📚 Lore
 
 ### 2026-07-15 — Exact tie 與 softmax weight 不能混用
@@ -197,7 +251,8 @@ advisory: on
 
 ## Provenance Footer
 
-- **Commit hash**：`b7826318a1813878a9156bf63401e2b45fbf74eb`
+- **Base commit before remediation**：`b7826318a1813878a9156bf63401e2b45fbf74eb`
+- **Final implementation commit**：`68a2e3545e6bf5b82ce5e3413173a0f36dc00a27`（`fix(workstation): clarify topology comparison and responsive audit`）。
 - **Build time**：2026-07-15 13:00:30 +0800
 - **Skill**：`/implementation-notes` v0.1
 - **Pre-decision**：`InterSubMod/research/20260715_layered_workstation_genome_topology_multiselect/pre-decision-audit.md`

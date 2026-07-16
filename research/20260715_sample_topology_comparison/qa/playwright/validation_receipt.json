@@ -1,10 +1,10 @@
 {
   "schema_name": "intersubmod.sample_topology_comparison_playwright_audit",
   "schema_version": "1.0.0",
-  "generated_at": "2026-07-15T09:52:35.991694+00:00",
+  "generated_at": "2026-07-16T16:09:25.296836+00:00",
   "inputs": {
     "index": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/layered_workstation/index.html",
-    "index_sha256": "fce3b88e71c1bc3063da732556637408be301eb208120fed38a0d3899555fd49",
+    "index_sha256": "fbd9ff22b0556ac37e1d207b7a8fb4a7df5c7b4eb13ba54610b1bf379811bca5",
     "comparison": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/artifacts/sample_topology_comparison.json",
     "comparison_sha256": "6b1ec35faaf5badb5daa523f13e760368a3638c1da1a1e573a75274d8d97bc3f"
   },
@@ -48,6 +48,10 @@
             ],
             "active_dimension": "structural",
             "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "full",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
             "profile_count": 7,
             "profile_segment_sums": [
               100.00008,
@@ -129,10 +133,19 @@
             ],
             "hcc_matrix_value": 0.129,
             "confusion_rows": 4,
-            "confusion_columns": 5,
+            "confusion_columns": 6,
             "confusion_sum": 6402,
-            "comparison_title": "結構可辨識度 · 逐 dataset",
-            "confusion_title": "結構可辨識度 · 哪些類別互相轉換？"
+            "confusion_row_totals": [
+              "1,597",
+              "1,143",
+              "3,076",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "結構可辨識度 · 7 datasets",
+            "matrix_title": "結構可辨識度 · Full W_primary TVD",
+            "confusion_title": "結構可辨識度 · Count · 哪些類別互相轉換？"
           }
         },
         {
@@ -158,6 +171,10 @@
             ],
             "active_dimension": "structural",
             "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "full",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
             "profile_count": 7,
             "profile_segment_sums": [
               100.00008,
@@ -239,10 +256,139 @@
             ],
             "hcc_matrix_value": 0.129,
             "confusion_rows": 4,
-            "confusion_columns": 5,
+            "confusion_columns": 6,
             "confusion_sum": 6402,
-            "comparison_title": "結構可辨識度 · 逐 dataset",
-            "confusion_title": "結構可辨識度 · 哪些類別互相轉換？"
+            "confusion_row_totals": [
+              "1,597",
+              "1,143",
+              "3,076",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "結構可辨識度 · 7 datasets",
+            "matrix_title": "結構可辨識度 · Full W_primary TVD",
+            "confusion_title": "結構可辨識度 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "conditional_matrix_structural",
+          "status": "pass",
+          "expected": {
+            "scope": "conditional",
+            "pairs": 21,
+            "hcc_tvd": 0.12937892162707884
+          },
+          "actual": {
+            "embedded_dataset_count": 7,
+            "embedded_biological_ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "active_dimension": "structural",
+            "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "conditional",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
+            "profile_count": 7,
+            "profile_segment_sums": [
+              100.00008,
+              99.9999,
+              100,
+              100.00009,
+              99.99998,
+              100.00001,
+              100.00009000000001
+            ],
+            "ledger_rows": 7,
+            "ledger_columns": 6,
+            "matrix_rows": 7,
+            "matrix_columns": 7,
+            "matrix_values": [
+              [
+                0,
+                0.07,
+                0.038,
+                0.148,
+                0.257,
+                0.257,
+                0.193
+              ],
+              [
+                0.07,
+                0,
+                0.052,
+                0.176,
+                0.284,
+                0.215,
+                0.22
+              ],
+              [
+                0.038,
+                0.052,
+                0,
+                0.186,
+                0.295,
+                0.267,
+                0.231
+              ],
+              [
+                0.148,
+                0.176,
+                0.186,
+                0,
+                0.129,
+                0.181,
+                0.103
+              ],
+              [
+                0.257,
+                0.284,
+                0.295,
+                0.129,
+                0,
+                0.305,
+                0.188
+              ],
+              [
+                0.257,
+                0.215,
+                0.267,
+                0.181,
+                0.305,
+                0,
+                0.117
+              ],
+              [
+                0.193,
+                0.22,
+                0.231,
+                0.103,
+                0.188,
+                0.117,
+                0
+              ]
+            ],
+            "hcc_matrix_value": 0.129,
+            "confusion_rows": 4,
+            "confusion_columns": 6,
+            "confusion_sum": 6402,
+            "confusion_row_totals": [
+              "1,597",
+              "1,143",
+              "3,076",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "結構可辨識度 · 7 datasets",
+            "matrix_title": "結構可辨識度 · Conditional evaluable TVD",
+            "confusion_title": "結構可辨識度 · Count · 哪些類別互相轉換？"
           }
         },
         {
@@ -268,6 +414,10 @@
             ],
             "active_dimension": "read_af_selection",
             "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "full",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
             "profile_count": 7,
             "profile_segment_sums": [
               99.999963,
@@ -349,10 +499,143 @@
             ],
             "hcc_matrix_value": 0.094,
             "confusion_rows": 6,
-            "confusion_columns": 7,
+            "confusion_columns": 8,
             "confusion_sum": 6402,
-            "comparison_title": "read-AF 第一順位 · 逐 dataset",
-            "confusion_title": "read-AF 第一順位 · 哪些類別互相轉換？"
+            "confusion_row_totals": [
+              "1,597",
+              "3,776",
+              "295",
+              "77",
+              "71",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "read-AF 第一順位 · 7 datasets",
+            "matrix_title": "read-AF 第一順位 · Full W_primary TVD",
+            "confusion_title": "read-AF 第一順位 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "conditional_matrix_read_af_selection",
+          "status": "pass",
+          "expected": {
+            "scope": "conditional",
+            "pairs": 21,
+            "hcc_tvd": 0.04073017684718951
+          },
+          "actual": {
+            "embedded_dataset_count": 7,
+            "embedded_biological_ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "active_dimension": "read_af_selection",
+            "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "conditional",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
+            "profile_count": 7,
+            "profile_segment_sums": [
+              99.999963,
+              99.99994799999999,
+              99.99998,
+              100.00009,
+              99.99999,
+              100.000052,
+              100.00001999999999
+            ],
+            "ledger_rows": 7,
+            "ledger_columns": 8,
+            "matrix_rows": 7,
+            "matrix_columns": 7,
+            "matrix_values": [
+              [
+                0,
+                0.207,
+                0.246,
+                0.445,
+                0.405,
+                0.461,
+                0.44
+              ],
+              [
+                0.207,
+                0,
+                0.081,
+                0.238,
+                0.197,
+                0.253,
+                0.233
+              ],
+              [
+                0.246,
+                0.081,
+                0,
+                0.206,
+                0.171,
+                0.267,
+                0.201
+              ],
+              [
+                0.445,
+                0.238,
+                0.206,
+                0,
+                0.041,
+                0.183,
+                0.108
+              ],
+              [
+                0.405,
+                0.197,
+                0.171,
+                0.041,
+                0,
+                0.184,
+                0.104
+              ],
+              [
+                0.461,
+                0.253,
+                0.267,
+                0.183,
+                0.184,
+                0,
+                0.081
+              ],
+              [
+                0.44,
+                0.233,
+                0.201,
+                0.108,
+                0.104,
+                0.081,
+                0
+              ]
+            ],
+            "hcc_matrix_value": 0.041,
+            "confusion_rows": 6,
+            "confusion_columns": 8,
+            "confusion_sum": 6402,
+            "confusion_row_totals": [
+              "1,597",
+              "3,776",
+              "295",
+              "77",
+              "71",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "read-AF 第一順位 · 7 datasets",
+            "matrix_title": "read-AF 第一順位 · Conditional evaluable TVD",
+            "confusion_title": "read-AF 第一順位 · Count · 哪些類別互相轉換？"
           }
         },
         {
@@ -378,6 +661,10 @@
             ],
             "active_dimension": "morphology",
             "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "full",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
             "profile_count": 7,
             "profile_segment_sums": [
               100.000027,
@@ -459,23 +746,246 @@
             ],
             "hcc_matrix_value": 0.121,
             "confusion_rows": 5,
-            "confusion_columns": 6,
+            "confusion_columns": 7,
             "confusion_sum": 6402,
-            "comparison_title": "拓撲形態 · 逐 dataset",
-            "confusion_title": "拓撲形態 · 哪些類別互相轉換？"
+            "confusion_row_totals": [
+              "667",
+              "4,248",
+              "299",
+              "487",
+              "701"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "拓撲形態 · 7 datasets",
+            "matrix_title": "拓撲形態 · Full W_primary TVD",
+            "confusion_title": "拓撲形態 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "conditional_matrix_morphology",
+          "status": "pass",
+          "expected": {
+            "scope": "conditional",
+            "pairs": 21,
+            "hcc_tvd": 0.0850233825533841
+          },
+          "actual": {
+            "embedded_dataset_count": 7,
+            "embedded_biological_ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "active_dimension": "morphology",
+            "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "conditional",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
+            "profile_count": 7,
+            "profile_segment_sums": [
+              100.000027,
+              100.00000999999999,
+              99.99996999999999,
+              100.00004,
+              99.99998,
+              100,
+              100
+            ],
+            "ledger_rows": 7,
+            "ledger_columns": 7,
+            "matrix_rows": 7,
+            "matrix_columns": 7,
+            "matrix_values": [
+              [
+                0,
+                0.09,
+                0.146,
+                0.128,
+                0.053,
+                0.23,
+                0.198
+              ],
+              [
+                0.09,
+                0,
+                0.07,
+                0.085,
+                0.089,
+                0.189,
+                0.245
+              ],
+              [
+                0.146,
+                0.07,
+                0,
+                0.083,
+                0.143,
+                0.184,
+                0.238
+              ],
+              [
+                0.128,
+                0.085,
+                0.083,
+                0,
+                0.085,
+                0.11,
+                0.166
+              ],
+              [
+                0.053,
+                0.089,
+                0.143,
+                0.085,
+                0,
+                0.177,
+                0.156
+              ],
+              [
+                0.23,
+                0.189,
+                0.184,
+                0.11,
+                0.177,
+                0,
+                0.101
+              ],
+              [
+                0.198,
+                0.245,
+                0.238,
+                0.166,
+                0.156,
+                0.101,
+                0
+              ]
+            ],
+            "hcc_matrix_value": 0.085,
+            "confusion_rows": 5,
+            "confusion_columns": 7,
+            "confusion_sum": 6402,
+            "confusion_row_totals": [
+              "667",
+              "4,248",
+              "299",
+              "487",
+              "701"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "拓撲形態 · 7 datasets",
+            "matrix_title": "拓撲形態 · Conditional evaluable TVD",
+            "confusion_title": "拓撲形態 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "biological_macro_profiles",
+          "status": "pass",
+          "expected": {
+            "biological_ids": 6,
+            "equal_weight_profiles": true,
+            "invented_counts": false
+          },
+          "actual": {
+            "active": "biological",
+            "ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "segment_sums": [
+              100.00008,
+              99.9999,
+              100,
+              100.00001,
+              100.00001,
+              100.00009000000001
+            ],
+            "invented_counts": false
+          }
+        },
+        {
+          "name": "confusion_row_percent",
+          "status": "pass",
+          "expected": {
+            "row_sums": "100.0% ±0.1",
+            "first_cell": 65.62304320601127
+          },
+          "actual": {
+            "active": "row-percent",
+            "rows": [
+              [
+                65.6,
+                4.4,
+                30,
+                0
+              ],
+              [
+                10.6,
+                37.1,
+                52,
+                0.3
+              ],
+              [
+                13.4,
+                1.1,
+                84.2,
+                1.3
+              ],
+              [
+                2.4,
+                1.4,
+                27.1,
+                69.1
+              ]
+            ],
+            "totals": [
+              "100.0%",
+              "100.0%",
+              "100.0%",
+              "100.0%"
+            ],
+            "first_cell": "65.6%",
+            "row_sums": [
+              100.0,
+              100.0,
+              100.0,
+              100.0
+            ]
+          }
+        },
+        {
+          "name": "visible_text_wcag_aa_contrast",
+          "status": "pass",
+          "expected": {
+            "failures": 0,
+            "normal_text_ratio": 4.5,
+            "large_text_ratio": 3.0
+          },
+          "actual": {
+            "failures": 0,
+            "examples": []
           }
         },
         {
           "name": "regular_pair_inspector_has_no_technical_claim",
           "status": "pass",
           "expected": "different biological samples; composition only",
-          "actual": "DIFFERENT BIOLOGICAL SAMPLES · COMPOSITION ONLY\nCOLO829 × H1437\n0.115\nTVD · rank 2/21\nC>1 / Topo>1\n-10.2 pp\nIncomplete\n+10.1 pp\nC=1 / Topo=1\n+1.3 pp\n\n不同 biological samples 只比較 profile；不以 exact-coordinate overlap 當一般跨細胞株品質指標。"
+          "actual": "DIFFERENT BIOLOGICAL SAMPLES · COMPOSITION ONLY\nCOLO829 × H1437\n0.115\nFull W_primary · current dimension rank 2/21\n3-dimension mean 0.142 · rank 4/21\nC>1 / Topo>1\n-10.2 pp\nIncomplete\n+10.1 pp\nC=1 / Topo=1\n+1.3 pp\n\n不同 biological samples 只比較 profile；不以 exact-coordinate overlap 當一般跨細胞株品質指標。"
         },
         {
           "name": "hcc_pair_inspector_relationship",
           "status": "pass",
           "expected": "same biological sample technical pair",
-          "actual": "SAME BIOLOGICAL SAMPLE · TECHNICAL PAIR\nHCC1395 × HCC1395_DORADO\n0.129\nTVD · rank 4/21\nC>1 / Topo>1\n+12.9 pp\nC>1 / Topo=1\n-9.6 pp\nIncomplete\n-2.0 pp\n\n此格只比較類別比例；下方 exact-region panel 才檢查相同區域是否得到相同標籤。"
+          "actual": "SAME BIOLOGICAL SAMPLE · TECHNICAL PAIR\nHCC1395 × HCC1395_DORADO\n0.129\nFull W_primary · current dimension rank 4/21\n3-dimension mean 0.114 · rank 2/21\nC>1 / Topo>1\n+12.9 pp\nC>1 / Topo=1\n-9.6 pp\nIncomplete\n-2.0 pp\n\n此格只比較類別比例；共同 region agreement 才檢查相同座標是否得到相同標籤。"
         },
         {
           "name": "interactive_targets_at_least_44px",
@@ -488,6 +998,22 @@
               48,
               48,
               48
+            ],
+            "toggles": [
+              44,
+              44,
+              44,
+              44,
+              44,
+              44
+            ],
+            "nav": [
+              44,
+              44,
+              44,
+              44,
+              44,
+              44
             ],
             "cells": [
               44,
@@ -510,13 +1036,20 @@
           },
           "actual": {
             "body_overflow_px": 0,
-            "matrix_client_width": 881,
-            "matrix_scroll_width": 881,
+            "matrix_client_width": 1210,
+            "matrix_scroll_width": 1210,
             "json_links": 20,
             "json_links_inside_details": 20,
             "json_links_in_open_details": 0,
             "hcc_metric_cards": 4,
-            "exact_edge_visible": true
+            "exact_edge_visible": true,
+            "allele_site_label_visible": true,
+            "answer_before_hcc": 4,
+            "hcc_before_comparison": 4,
+            "local_nav_visible": true,
+            "table_captions": 5,
+            "selected_pair_aria_pressed": 2,
+            "hcc_details_open": false
           }
         },
         {
@@ -525,13 +1058,20 @@
           "expected": "all JSON links inside closed details",
           "actual": {
             "body_overflow_px": 0,
-            "matrix_client_width": 881,
-            "matrix_scroll_width": 881,
+            "matrix_client_width": 1210,
+            "matrix_scroll_width": 1210,
             "json_links": 20,
             "json_links_inside_details": 20,
             "json_links_in_open_details": 0,
             "hcc_metric_cards": 4,
-            "exact_edge_visible": true
+            "exact_edge_visible": true,
+            "allele_site_label_visible": true,
+            "answer_before_hcc": 4,
+            "hcc_before_comparison": 4,
+            "local_nav_visible": true,
+            "table_captions": 5,
+            "selected_pair_aria_pressed": 2,
+            "hcc_details_open": false
           }
         },
         {
@@ -543,13 +1083,48 @@
           },
           "actual": {
             "body_overflow_px": 0,
-            "matrix_client_width": 881,
-            "matrix_scroll_width": 881,
+            "matrix_client_width": 1210,
+            "matrix_scroll_width": 1210,
             "json_links": 20,
             "json_links_inside_details": 20,
             "json_links_in_open_details": 0,
             "hcc_metric_cards": 4,
-            "exact_edge_visible": true
+            "exact_edge_visible": true,
+            "allele_site_label_visible": true,
+            "answer_before_hcc": 4,
+            "hcc_before_comparison": 4,
+            "local_nav_visible": true,
+            "table_captions": 5,
+            "selected_pair_aria_pressed": 2,
+            "hcc_details_open": false
+          }
+        },
+        {
+          "name": "answer_first_navigation_and_semantics",
+          "status": "pass",
+          "expected": {
+            "order": "answer → HCC → comparison",
+            "sticky_nav": true,
+            "captions": ">=5",
+            "selected_pair_aria": 2,
+            "allele_site_label": true
+          },
+          "actual": {
+            "body_overflow_px": 0,
+            "matrix_client_width": 1210,
+            "matrix_scroll_width": 1210,
+            "json_links": 20,
+            "json_links_inside_details": 20,
+            "json_links_in_open_details": 0,
+            "hcc_metric_cards": 4,
+            "exact_edge_visible": true,
+            "allele_site_label_visible": true,
+            "answer_before_hcc": 4,
+            "hcc_before_comparison": 4,
+            "local_nav_visible": true,
+            "table_captions": 5,
+            "selected_pair_aria_pressed": 2,
+            "hcc_details_open": false
           }
         },
         {
@@ -564,8 +1139,8 @@
           "actual": [
             {
               "dataset": "COLO829",
-              "row_height": 43,
-              "bar_width": 917,
+              "row_height": 46,
+              "bar_width": 905,
               "bar_height": 21,
               "name_visible": true,
               "denominator_visible": true,
@@ -573,8 +1148,8 @@
             },
             {
               "dataset": "H1437",
-              "row_height": 43,
-              "bar_width": 917,
+              "row_height": 46,
+              "bar_width": 905,
               "bar_height": 21,
               "name_visible": true,
               "denominator_visible": true,
@@ -582,8 +1157,8 @@
             },
             {
               "dataset": "H2009",
-              "row_height": 43,
-              "bar_width": 917,
+              "row_height": 46,
+              "bar_width": 905,
               "bar_height": 21,
               "name_visible": true,
               "denominator_visible": true,
@@ -591,8 +1166,8 @@
             },
             {
               "dataset": "HCC1395",
-              "row_height": 43,
-              "bar_width": 917,
+              "row_height": 46.953125,
+              "bar_width": 905,
               "bar_height": 21,
               "name_visible": true,
               "denominator_visible": true,
@@ -600,8 +1175,8 @@
             },
             {
               "dataset": "HCC1395_DORADO",
-              "row_height": 43,
-              "bar_width": 917,
+              "row_height": 46.953125,
+              "bar_width": 905,
               "bar_height": 21,
               "name_visible": true,
               "denominator_visible": true,
@@ -609,8 +1184,8 @@
             },
             {
               "dataset": "HCC1937",
-              "row_height": 43,
-              "bar_width": 917,
+              "row_height": 46,
+              "bar_width": 905,
               "bar_height": 21,
               "name_visible": true,
               "denominator_visible": true,
@@ -618,8 +1193,8 @@
             },
             {
               "dataset": "HCC1954",
-              "row_height": 43,
-              "bar_width": 917,
+              "row_height": 46,
+              "bar_width": 905,
               "bar_height": 21,
               "name_visible": true,
               "denominator_visible": true,
@@ -631,13 +1206,13 @@
           "name": "screenshot_scroll_alignment",
           "status": "pass",
           "expected": {
-            "comparison_top": 12,
-            "hcc_top": 12,
+            "comparison_top": 70,
+            "hcc_top": 70,
             "tolerance": 2
           },
           "actual": {
-            "comparison_top": 11.640625,
-            "hcc_top": 12.421875
+            "comparison_top": 69.578125,
+            "hcc_top": 70.21875
           }
         },
         {
@@ -656,6 +1231,9 @@
       "console_errors": [],
       "page_errors": [],
       "screenshots": {
+        "biological_macro": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/biological_macro__desktop.png",
+        "conditional_matrix": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/conditional_matrix__desktop.png",
+        "confusion_row_percent": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/confusion_row_percent__desktop.png",
         "comparison": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/comparison__desktop.png",
         "hcc_validation": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/hcc_validation__desktop.png"
       },
@@ -672,6 +1250,10 @@
           ],
           "active_dimension": "structural",
           "active_tab_count": 1,
+          "active_profile_scope": "dataset",
+          "active_distance_scope": "full",
+          "active_confusion_mode": "count",
+          "aggregate_profile_count": 2,
           "profile_count": 7,
           "profile_segment_sums": [
             100.00008,
@@ -753,10 +1335,19 @@
           ],
           "hcc_matrix_value": 0.129,
           "confusion_rows": 4,
-          "confusion_columns": 5,
+          "confusion_columns": 6,
           "confusion_sum": 6402,
-          "comparison_title": "結構可辨識度 · 逐 dataset",
-          "confusion_title": "結構可辨識度 · 哪些類別互相轉換？"
+          "confusion_row_totals": [
+            "1,597",
+            "1,143",
+            "3,076",
+            "586"
+          ],
+          "table_captions": 5,
+          "selected_matrix_cells": 2,
+          "comparison_title": "結構可辨識度 · 7 datasets",
+          "matrix_title": "結構可辨識度 · Full W_primary TVD",
+          "confusion_title": "結構可辨識度 · Count · 哪些類別互相轉換？"
         },
         "read_af_selection": {
           "embedded_dataset_count": 7,
@@ -770,6 +1361,10 @@
           ],
           "active_dimension": "read_af_selection",
           "active_tab_count": 1,
+          "active_profile_scope": "dataset",
+          "active_distance_scope": "full",
+          "active_confusion_mode": "count",
+          "aggregate_profile_count": 2,
           "profile_count": 7,
           "profile_segment_sums": [
             99.999963,
@@ -851,10 +1446,21 @@
           ],
           "hcc_matrix_value": 0.094,
           "confusion_rows": 6,
-          "confusion_columns": 7,
+          "confusion_columns": 8,
           "confusion_sum": 6402,
-          "comparison_title": "read-AF 第一順位 · 逐 dataset",
-          "confusion_title": "read-AF 第一順位 · 哪些類別互相轉換？"
+          "confusion_row_totals": [
+            "1,597",
+            "3,776",
+            "295",
+            "77",
+            "71",
+            "586"
+          ],
+          "table_captions": 5,
+          "selected_matrix_cells": 2,
+          "comparison_title": "read-AF 第一順位 · 7 datasets",
+          "matrix_title": "read-AF 第一順位 · Full W_primary TVD",
+          "confusion_title": "read-AF 第一順位 · Count · 哪些類別互相轉換？"
         },
         "morphology": {
           "embedded_dataset_count": 7,
@@ -868,6 +1474,10 @@
           ],
           "active_dimension": "morphology",
           "active_tab_count": 1,
+          "active_profile_scope": "dataset",
+          "active_distance_scope": "full",
+          "active_confusion_mode": "count",
+          "aggregate_profile_count": 2,
           "profile_count": 7,
           "profile_segment_sums": [
             100.000027,
@@ -949,13 +1559,23 @@
           ],
           "hcc_matrix_value": 0.121,
           "confusion_rows": 5,
-          "confusion_columns": 6,
+          "confusion_columns": 7,
           "confusion_sum": 6402,
-          "comparison_title": "拓撲形態 · 逐 dataset",
-          "confusion_title": "拓撲形態 · 哪些類別互相轉換？"
+          "confusion_row_totals": [
+            "667",
+            "4,248",
+            "299",
+            "487",
+            "701"
+          ],
+          "table_captions": 5,
+          "selected_matrix_cells": 2,
+          "comparison_title": "拓撲形態 · 7 datasets",
+          "matrix_title": "拓撲形態 · Full W_primary TVD",
+          "confusion_title": "拓撲形態 · Count · 哪些類別互相轉換？"
         }
       },
-      "duration_seconds": 2.537
+      "duration_seconds": 4.268
     },
     {
       "viewport": "mobile",
@@ -996,6 +1616,10 @@
             ],
             "active_dimension": "structural",
             "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "full",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
             "profile_count": 7,
             "profile_segment_sums": [
               100.00008,
@@ -1077,10 +1701,19 @@
             ],
             "hcc_matrix_value": 0.129,
             "confusion_rows": 4,
-            "confusion_columns": 5,
+            "confusion_columns": 6,
             "confusion_sum": 6402,
-            "comparison_title": "結構可辨識度 · 逐 dataset",
-            "confusion_title": "結構可辨識度 · 哪些類別互相轉換？"
+            "confusion_row_totals": [
+              "1,597",
+              "1,143",
+              "3,076",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "結構可辨識度 · 7 datasets",
+            "matrix_title": "結構可辨識度 · Full W_primary TVD",
+            "confusion_title": "結構可辨識度 · Count · 哪些類別互相轉換？"
           }
         },
         {
@@ -1106,6 +1739,10 @@
             ],
             "active_dimension": "structural",
             "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "full",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
             "profile_count": 7,
             "profile_segment_sums": [
               100.00008,
@@ -1187,10 +1824,139 @@
             ],
             "hcc_matrix_value": 0.129,
             "confusion_rows": 4,
-            "confusion_columns": 5,
+            "confusion_columns": 6,
             "confusion_sum": 6402,
-            "comparison_title": "結構可辨識度 · 逐 dataset",
-            "confusion_title": "結構可辨識度 · 哪些類別互相轉換？"
+            "confusion_row_totals": [
+              "1,597",
+              "1,143",
+              "3,076",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "結構可辨識度 · 7 datasets",
+            "matrix_title": "結構可辨識度 · Full W_primary TVD",
+            "confusion_title": "結構可辨識度 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "conditional_matrix_structural",
+          "status": "pass",
+          "expected": {
+            "scope": "conditional",
+            "pairs": 21,
+            "hcc_tvd": 0.12937892162707884
+          },
+          "actual": {
+            "embedded_dataset_count": 7,
+            "embedded_biological_ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "active_dimension": "structural",
+            "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "conditional",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
+            "profile_count": 7,
+            "profile_segment_sums": [
+              100.00008,
+              99.9999,
+              100,
+              100.00009,
+              99.99998,
+              100.00001,
+              100.00009000000001
+            ],
+            "ledger_rows": 7,
+            "ledger_columns": 6,
+            "matrix_rows": 7,
+            "matrix_columns": 7,
+            "matrix_values": [
+              [
+                0,
+                0.07,
+                0.038,
+                0.148,
+                0.257,
+                0.257,
+                0.193
+              ],
+              [
+                0.07,
+                0,
+                0.052,
+                0.176,
+                0.284,
+                0.215,
+                0.22
+              ],
+              [
+                0.038,
+                0.052,
+                0,
+                0.186,
+                0.295,
+                0.267,
+                0.231
+              ],
+              [
+                0.148,
+                0.176,
+                0.186,
+                0,
+                0.129,
+                0.181,
+                0.103
+              ],
+              [
+                0.257,
+                0.284,
+                0.295,
+                0.129,
+                0,
+                0.305,
+                0.188
+              ],
+              [
+                0.257,
+                0.215,
+                0.267,
+                0.181,
+                0.305,
+                0,
+                0.117
+              ],
+              [
+                0.193,
+                0.22,
+                0.231,
+                0.103,
+                0.188,
+                0.117,
+                0
+              ]
+            ],
+            "hcc_matrix_value": 0.129,
+            "confusion_rows": 4,
+            "confusion_columns": 6,
+            "confusion_sum": 6402,
+            "confusion_row_totals": [
+              "1,597",
+              "1,143",
+              "3,076",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "結構可辨識度 · 7 datasets",
+            "matrix_title": "結構可辨識度 · Conditional evaluable TVD",
+            "confusion_title": "結構可辨識度 · Count · 哪些類別互相轉換？"
           }
         },
         {
@@ -1216,6 +1982,10 @@
             ],
             "active_dimension": "read_af_selection",
             "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "full",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
             "profile_count": 7,
             "profile_segment_sums": [
               99.999963,
@@ -1297,10 +2067,143 @@
             ],
             "hcc_matrix_value": 0.094,
             "confusion_rows": 6,
-            "confusion_columns": 7,
+            "confusion_columns": 8,
             "confusion_sum": 6402,
-            "comparison_title": "read-AF 第一順位 · 逐 dataset",
-            "confusion_title": "read-AF 第一順位 · 哪些類別互相轉換？"
+            "confusion_row_totals": [
+              "1,597",
+              "3,776",
+              "295",
+              "77",
+              "71",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "read-AF 第一順位 · 7 datasets",
+            "matrix_title": "read-AF 第一順位 · Full W_primary TVD",
+            "confusion_title": "read-AF 第一順位 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "conditional_matrix_read_af_selection",
+          "status": "pass",
+          "expected": {
+            "scope": "conditional",
+            "pairs": 21,
+            "hcc_tvd": 0.04073017684718951
+          },
+          "actual": {
+            "embedded_dataset_count": 7,
+            "embedded_biological_ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "active_dimension": "read_af_selection",
+            "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "conditional",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
+            "profile_count": 7,
+            "profile_segment_sums": [
+              99.999963,
+              99.99994799999999,
+              99.99998,
+              100.00009,
+              99.99999,
+              100.000052,
+              100.00001999999999
+            ],
+            "ledger_rows": 7,
+            "ledger_columns": 8,
+            "matrix_rows": 7,
+            "matrix_columns": 7,
+            "matrix_values": [
+              [
+                0,
+                0.207,
+                0.246,
+                0.445,
+                0.405,
+                0.461,
+                0.44
+              ],
+              [
+                0.207,
+                0,
+                0.081,
+                0.238,
+                0.197,
+                0.253,
+                0.233
+              ],
+              [
+                0.246,
+                0.081,
+                0,
+                0.206,
+                0.171,
+                0.267,
+                0.201
+              ],
+              [
+                0.445,
+                0.238,
+                0.206,
+                0,
+                0.041,
+                0.183,
+                0.108
+              ],
+              [
+                0.405,
+                0.197,
+                0.171,
+                0.041,
+                0,
+                0.184,
+                0.104
+              ],
+              [
+                0.461,
+                0.253,
+                0.267,
+                0.183,
+                0.184,
+                0,
+                0.081
+              ],
+              [
+                0.44,
+                0.233,
+                0.201,
+                0.108,
+                0.104,
+                0.081,
+                0
+              ]
+            ],
+            "hcc_matrix_value": 0.041,
+            "confusion_rows": 6,
+            "confusion_columns": 8,
+            "confusion_sum": 6402,
+            "confusion_row_totals": [
+              "1,597",
+              "3,776",
+              "295",
+              "77",
+              "71",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "read-AF 第一順位 · 7 datasets",
+            "matrix_title": "read-AF 第一順位 · Conditional evaluable TVD",
+            "confusion_title": "read-AF 第一順位 · Count · 哪些類別互相轉換？"
           }
         },
         {
@@ -1326,6 +2229,10 @@
             ],
             "active_dimension": "morphology",
             "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "full",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
             "profile_count": 7,
             "profile_segment_sums": [
               100.000027,
@@ -1407,23 +2314,246 @@
             ],
             "hcc_matrix_value": 0.121,
             "confusion_rows": 5,
-            "confusion_columns": 6,
+            "confusion_columns": 7,
             "confusion_sum": 6402,
-            "comparison_title": "拓撲形態 · 逐 dataset",
-            "confusion_title": "拓撲形態 · 哪些類別互相轉換？"
+            "confusion_row_totals": [
+              "667",
+              "4,248",
+              "299",
+              "487",
+              "701"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "拓撲形態 · 7 datasets",
+            "matrix_title": "拓撲形態 · Full W_primary TVD",
+            "confusion_title": "拓撲形態 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "conditional_matrix_morphology",
+          "status": "pass",
+          "expected": {
+            "scope": "conditional",
+            "pairs": 21,
+            "hcc_tvd": 0.0850233825533841
+          },
+          "actual": {
+            "embedded_dataset_count": 7,
+            "embedded_biological_ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "active_dimension": "morphology",
+            "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "conditional",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
+            "profile_count": 7,
+            "profile_segment_sums": [
+              100.000027,
+              100.00000999999999,
+              99.99996999999999,
+              100.00004,
+              99.99998,
+              100,
+              100
+            ],
+            "ledger_rows": 7,
+            "ledger_columns": 7,
+            "matrix_rows": 7,
+            "matrix_columns": 7,
+            "matrix_values": [
+              [
+                0,
+                0.09,
+                0.146,
+                0.128,
+                0.053,
+                0.23,
+                0.198
+              ],
+              [
+                0.09,
+                0,
+                0.07,
+                0.085,
+                0.089,
+                0.189,
+                0.245
+              ],
+              [
+                0.146,
+                0.07,
+                0,
+                0.083,
+                0.143,
+                0.184,
+                0.238
+              ],
+              [
+                0.128,
+                0.085,
+                0.083,
+                0,
+                0.085,
+                0.11,
+                0.166
+              ],
+              [
+                0.053,
+                0.089,
+                0.143,
+                0.085,
+                0,
+                0.177,
+                0.156
+              ],
+              [
+                0.23,
+                0.189,
+                0.184,
+                0.11,
+                0.177,
+                0,
+                0.101
+              ],
+              [
+                0.198,
+                0.245,
+                0.238,
+                0.166,
+                0.156,
+                0.101,
+                0
+              ]
+            ],
+            "hcc_matrix_value": 0.085,
+            "confusion_rows": 5,
+            "confusion_columns": 7,
+            "confusion_sum": 6402,
+            "confusion_row_totals": [
+              "667",
+              "4,248",
+              "299",
+              "487",
+              "701"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "拓撲形態 · 7 datasets",
+            "matrix_title": "拓撲形態 · Conditional evaluable TVD",
+            "confusion_title": "拓撲形態 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "biological_macro_profiles",
+          "status": "pass",
+          "expected": {
+            "biological_ids": 6,
+            "equal_weight_profiles": true,
+            "invented_counts": false
+          },
+          "actual": {
+            "active": "biological",
+            "ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "segment_sums": [
+              100.00008,
+              99.9999,
+              100,
+              100.00001,
+              100.00001,
+              100.00009000000001
+            ],
+            "invented_counts": false
+          }
+        },
+        {
+          "name": "confusion_row_percent",
+          "status": "pass",
+          "expected": {
+            "row_sums": "100.0% ±0.1",
+            "first_cell": 65.62304320601127
+          },
+          "actual": {
+            "active": "row-percent",
+            "rows": [
+              [
+                65.6,
+                4.4,
+                30,
+                0
+              ],
+              [
+                10.6,
+                37.1,
+                52,
+                0.3
+              ],
+              [
+                13.4,
+                1.1,
+                84.2,
+                1.3
+              ],
+              [
+                2.4,
+                1.4,
+                27.1,
+                69.1
+              ]
+            ],
+            "totals": [
+              "100.0%",
+              "100.0%",
+              "100.0%",
+              "100.0%"
+            ],
+            "first_cell": "65.6%",
+            "row_sums": [
+              100.0,
+              100.0,
+              100.0,
+              100.0
+            ]
+          }
+        },
+        {
+          "name": "visible_text_wcag_aa_contrast",
+          "status": "pass",
+          "expected": {
+            "failures": 0,
+            "normal_text_ratio": 4.5,
+            "large_text_ratio": 3.0
+          },
+          "actual": {
+            "failures": 0,
+            "examples": []
           }
         },
         {
           "name": "regular_pair_inspector_has_no_technical_claim",
           "status": "pass",
           "expected": "different biological samples; composition only",
-          "actual": "DIFFERENT BIOLOGICAL SAMPLES · COMPOSITION ONLY\nCOLO829 × H1437\n0.115\nTVD · rank 2/21\nC>1 / Topo>1\n-10.2 pp\nIncomplete\n+10.1 pp\nC=1 / Topo=1\n+1.3 pp\n\n不同 biological samples 只比較 profile；不以 exact-coordinate overlap 當一般跨細胞株品質指標。"
+          "actual": "DIFFERENT BIOLOGICAL SAMPLES · COMPOSITION ONLY\nCOLO829 × H1437\n0.115\nFull W_primary · current dimension rank 2/21\n3-dimension mean 0.142 · rank 4/21\nC>1 / Topo>1\n-10.2 pp\nIncomplete\n+10.1 pp\nC=1 / Topo=1\n+1.3 pp\n\n不同 biological samples 只比較 profile；不以 exact-coordinate overlap 當一般跨細胞株品質指標。"
         },
         {
           "name": "hcc_pair_inspector_relationship",
           "status": "pass",
           "expected": "same biological sample technical pair",
-          "actual": "SAME BIOLOGICAL SAMPLE · TECHNICAL PAIR\nHCC1395 × HCC1395_DORADO\n0.129\nTVD · rank 4/21\nC>1 / Topo>1\n+12.9 pp\nC>1 / Topo=1\n-9.6 pp\nIncomplete\n-2.0 pp\n\n此格只比較類別比例；下方 exact-region panel 才檢查相同區域是否得到相同標籤。"
+          "actual": "SAME BIOLOGICAL SAMPLE · TECHNICAL PAIR\nHCC1395 × HCC1395_DORADO\n0.129\nFull W_primary · current dimension rank 4/21\n3-dimension mean 0.114 · rank 2/21\nC>1 / Topo>1\n+12.9 pp\nC>1 / Topo=1\n-9.6 pp\nIncomplete\n-2.0 pp\n\n此格只比較類別比例；共同 region agreement 才檢查相同座標是否得到相同標籤。"
         },
         {
           "name": "interactive_targets_at_least_44px",
@@ -1436,6 +2566,22 @@
               48,
               48,
               48
+            ],
+            "toggles": [
+              44,
+              44,
+              44,
+              44,
+              44,
+              44
+            ],
+            "nav": [
+              44,
+              44,
+              44,
+              44,
+              44,
+              44
             ],
             "cells": [
               44,
@@ -1458,13 +2604,20 @@
           },
           "actual": {
             "body_overflow_px": 0,
-            "matrix_client_width": 338,
-            "matrix_scroll_width": 760,
+            "matrix_client_width": 324,
+            "matrix_scroll_width": 800,
             "json_links": 20,
             "json_links_inside_details": 20,
             "json_links_in_open_details": 0,
             "hcc_metric_cards": 4,
-            "exact_edge_visible": true
+            "exact_edge_visible": true,
+            "allele_site_label_visible": true,
+            "answer_before_hcc": 4,
+            "hcc_before_comparison": 4,
+            "local_nav_visible": true,
+            "table_captions": 5,
+            "selected_pair_aria_pressed": 2,
+            "hcc_details_open": false
           }
         },
         {
@@ -1473,13 +2626,20 @@
           "expected": "all JSON links inside closed details",
           "actual": {
             "body_overflow_px": 0,
-            "matrix_client_width": 338,
-            "matrix_scroll_width": 760,
+            "matrix_client_width": 324,
+            "matrix_scroll_width": 800,
             "json_links": 20,
             "json_links_inside_details": 20,
             "json_links_in_open_details": 0,
             "hcc_metric_cards": 4,
-            "exact_edge_visible": true
+            "exact_edge_visible": true,
+            "allele_site_label_visible": true,
+            "answer_before_hcc": 4,
+            "hcc_before_comparison": 4,
+            "local_nav_visible": true,
+            "table_captions": 5,
+            "selected_pair_aria_pressed": 2,
+            "hcc_details_open": false
           }
         },
         {
@@ -1491,13 +2651,48 @@
           },
           "actual": {
             "body_overflow_px": 0,
-            "matrix_client_width": 338,
-            "matrix_scroll_width": 760,
+            "matrix_client_width": 324,
+            "matrix_scroll_width": 800,
             "json_links": 20,
             "json_links_inside_details": 20,
             "json_links_in_open_details": 0,
             "hcc_metric_cards": 4,
-            "exact_edge_visible": true
+            "exact_edge_visible": true,
+            "allele_site_label_visible": true,
+            "answer_before_hcc": 4,
+            "hcc_before_comparison": 4,
+            "local_nav_visible": true,
+            "table_captions": 5,
+            "selected_pair_aria_pressed": 2,
+            "hcc_details_open": false
+          }
+        },
+        {
+          "name": "answer_first_navigation_and_semantics",
+          "status": "pass",
+          "expected": {
+            "order": "answer → HCC → comparison",
+            "sticky_nav": true,
+            "captions": ">=5",
+            "selected_pair_aria": 2,
+            "allele_site_label": true
+          },
+          "actual": {
+            "body_overflow_px": 0,
+            "matrix_client_width": 324,
+            "matrix_scroll_width": 800,
+            "json_links": 20,
+            "json_links_inside_details": 20,
+            "json_links_in_open_details": 0,
+            "hcc_metric_cards": 4,
+            "exact_edge_visible": true,
+            "allele_site_label_visible": true,
+            "answer_before_hcc": 4,
+            "hcc_before_comparison": 4,
+            "local_nav_visible": true,
+            "table_captions": 5,
+            "selected_pair_aria_pressed": 2,
+            "hcc_details_open": false
           }
         },
         {
@@ -1512,7 +2707,7 @@
           "actual": [
             {
               "dataset": "COLO829",
-              "row_height": 88.5,
+              "row_height": 92.25,
               "bar_width": 317,
               "bar_height": 21,
               "name_visible": true,
@@ -1521,7 +2716,7 @@
             },
             {
               "dataset": "H1437",
-              "row_height": 88.5,
+              "row_height": 92.25,
               "bar_width": 317,
               "bar_height": 21,
               "name_visible": true,
@@ -1530,7 +2725,7 @@
             },
             {
               "dataset": "H2009",
-              "row_height": 88.5,
+              "row_height": 92.25,
               "bar_width": 317,
               "bar_height": 21,
               "name_visible": true,
@@ -1539,7 +2734,7 @@
             },
             {
               "dataset": "HCC1395",
-              "row_height": 103.921875,
+              "row_height": 110.828125,
               "bar_width": 317,
               "bar_height": 21,
               "name_visible": true,
@@ -1548,7 +2743,7 @@
             },
             {
               "dataset": "HCC1395_DORADO",
-              "row_height": 103.921875,
+              "row_height": 110.828125,
               "bar_width": 317,
               "bar_height": 21,
               "name_visible": true,
@@ -1557,7 +2752,7 @@
             },
             {
               "dataset": "HCC1937",
-              "row_height": 88.5,
+              "row_height": 92.25,
               "bar_width": 317,
               "bar_height": 21,
               "name_visible": true,
@@ -1566,7 +2761,7 @@
             },
             {
               "dataset": "HCC1954",
-              "row_height": 88.5,
+              "row_height": 92.25,
               "bar_width": 317,
               "bar_height": 21,
               "name_visible": true,
@@ -1579,13 +2774,13 @@
           "name": "screenshot_scroll_alignment",
           "status": "pass",
           "expected": {
-            "comparison_top": 12,
-            "hcc_top": 12,
+            "comparison_top": 70,
+            "hcc_top": 70,
             "tolerance": 2
           },
           "actual": {
-            "comparison_top": 12.265625,
-            "hcc_top": 12.375
+            "comparison_top": 69.90625,
+            "hcc_top": 70
           }
         },
         {
@@ -1604,6 +2799,9 @@
       "console_errors": [],
       "page_errors": [],
       "screenshots": {
+        "biological_macro": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/biological_macro__mobile.png",
+        "conditional_matrix": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/conditional_matrix__mobile.png",
+        "confusion_row_percent": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/confusion_row_percent__mobile.png",
         "comparison": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/comparison__mobile.png",
         "hcc_validation": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/hcc_validation__mobile.png"
       },
@@ -1620,6 +2818,10 @@
           ],
           "active_dimension": "structural",
           "active_tab_count": 1,
+          "active_profile_scope": "dataset",
+          "active_distance_scope": "full",
+          "active_confusion_mode": "count",
+          "aggregate_profile_count": 2,
           "profile_count": 7,
           "profile_segment_sums": [
             100.00008,
@@ -1701,10 +2903,19 @@
           ],
           "hcc_matrix_value": 0.129,
           "confusion_rows": 4,
-          "confusion_columns": 5,
+          "confusion_columns": 6,
           "confusion_sum": 6402,
-          "comparison_title": "結構可辨識度 · 逐 dataset",
-          "confusion_title": "結構可辨識度 · 哪些類別互相轉換？"
+          "confusion_row_totals": [
+            "1,597",
+            "1,143",
+            "3,076",
+            "586"
+          ],
+          "table_captions": 5,
+          "selected_matrix_cells": 2,
+          "comparison_title": "結構可辨識度 · 7 datasets",
+          "matrix_title": "結構可辨識度 · Full W_primary TVD",
+          "confusion_title": "結構可辨識度 · Count · 哪些類別互相轉換？"
         },
         "read_af_selection": {
           "embedded_dataset_count": 7,
@@ -1718,6 +2929,10 @@
           ],
           "active_dimension": "read_af_selection",
           "active_tab_count": 1,
+          "active_profile_scope": "dataset",
+          "active_distance_scope": "full",
+          "active_confusion_mode": "count",
+          "aggregate_profile_count": 2,
           "profile_count": 7,
           "profile_segment_sums": [
             99.999963,
@@ -1799,10 +3014,21 @@
           ],
           "hcc_matrix_value": 0.094,
           "confusion_rows": 6,
-          "confusion_columns": 7,
+          "confusion_columns": 8,
           "confusion_sum": 6402,
-          "comparison_title": "read-AF 第一順位 · 逐 dataset",
-          "confusion_title": "read-AF 第一順位 · 哪些類別互相轉換？"
+          "confusion_row_totals": [
+            "1,597",
+            "3,776",
+            "295",
+            "77",
+            "71",
+            "586"
+          ],
+          "table_captions": 5,
+          "selected_matrix_cells": 2,
+          "comparison_title": "read-AF 第一順位 · 7 datasets",
+          "matrix_title": "read-AF 第一順位 · Full W_primary TVD",
+          "confusion_title": "read-AF 第一順位 · Count · 哪些類別互相轉換？"
         },
         "morphology": {
           "embedded_dataset_count": 7,
@@ -1816,6 +3042,10 @@
           ],
           "active_dimension": "morphology",
           "active_tab_count": 1,
+          "active_profile_scope": "dataset",
+          "active_distance_scope": "full",
+          "active_confusion_mode": "count",
+          "aggregate_profile_count": 2,
           "profile_count": 7,
           "profile_segment_sums": [
             100.000027,
@@ -1897,13 +3127,1591 @@
           ],
           "hcc_matrix_value": 0.121,
           "confusion_rows": 5,
-          "confusion_columns": 6,
+          "confusion_columns": 7,
           "confusion_sum": 6402,
-          "comparison_title": "拓撲形態 · 逐 dataset",
-          "confusion_title": "拓撲形態 · 哪些類別互相轉換？"
+          "confusion_row_totals": [
+            "667",
+            "4,248",
+            "299",
+            "487",
+            "701"
+          ],
+          "table_captions": 5,
+          "selected_matrix_cells": 2,
+          "comparison_title": "拓撲形態 · 7 datasets",
+          "matrix_title": "拓撲形態 · Full W_primary TVD",
+          "confusion_title": "拓撲形態 · Count · 哪些類別互相轉換？"
         }
       },
-      "duration_seconds": 1.655
+      "duration_seconds": 3.543
+    },
+    {
+      "viewport": "narrow",
+      "viewport_size": {
+        "width": 320,
+        "height": 800
+      },
+      "input": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/layered_workstation/index.html",
+      "checks": [
+        {
+          "name": "document_load",
+          "status": "pass",
+          "expected": "load + networkidle",
+          "actual": "complete"
+        },
+        {
+          "name": "comparison_sha256_meta_binding",
+          "status": "pass",
+          "expected": "6b1ec35faaf5badb5daa523f13e760368a3638c1da1a1e573a75274d8d97bc3f",
+          "actual": "6b1ec35faaf5badb5daa523f13e760368a3638c1da1a1e573a75274d8d97bc3f"
+        },
+        {
+          "name": "dataset_and_biological_counts",
+          "status": "pass",
+          "expected": {
+            "datasets": 7,
+            "biological_ids": 6
+          },
+          "actual": {
+            "embedded_dataset_count": 7,
+            "embedded_biological_ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "active_dimension": "structural",
+            "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "full",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
+            "profile_count": 7,
+            "profile_segment_sums": [
+              100.00008,
+              99.9999,
+              100,
+              100.00009,
+              99.99998,
+              100.00001,
+              100.00009000000001
+            ],
+            "ledger_rows": 7,
+            "ledger_columns": 6,
+            "matrix_rows": 7,
+            "matrix_columns": 7,
+            "matrix_values": [
+              [
+                0,
+                0.115,
+                0.295,
+                0.135,
+                0.247,
+                0.262,
+                0.213
+              ],
+              [
+                0.115,
+                0,
+                0.194,
+                0.22,
+                0.336,
+                0.279,
+                0.301
+              ],
+              [
+                0.295,
+                0.194,
+                0,
+                0.348,
+                0.464,
+                0.407,
+                0.43
+              ],
+              [
+                0.135,
+                0.22,
+                0.348,
+                0,
+                0.129,
+                0.202,
+                0.111
+              ],
+              [
+                0.247,
+                0.336,
+                0.464,
+                0.129,
+                0,
+                0.311,
+                0.189
+              ],
+              [
+                0.262,
+                0.279,
+                0.407,
+                0.202,
+                0.311,
+                0,
+                0.123
+              ],
+              [
+                0.213,
+                0.301,
+                0.43,
+                0.111,
+                0.189,
+                0.123,
+                0
+              ]
+            ],
+            "hcc_matrix_value": 0.129,
+            "confusion_rows": 4,
+            "confusion_columns": 6,
+            "confusion_sum": 6402,
+            "confusion_row_totals": [
+              "1,597",
+              "1,143",
+              "3,076",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "結構可辨識度 · 7 datasets",
+            "matrix_title": "結構可辨識度 · Full W_primary TVD",
+            "confusion_title": "結構可辨識度 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "dimension_sync_structural",
+          "status": "pass",
+          "expected": {
+            "active": "structural",
+            "profiles": 7,
+            "ledger_rows": 7,
+            "matrix": "7x7 symmetric diagonal=0",
+            "hcc_tvd": 0.12934394407256197,
+            "confusion_sum": 6402
+          },
+          "actual": {
+            "embedded_dataset_count": 7,
+            "embedded_biological_ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "active_dimension": "structural",
+            "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "full",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
+            "profile_count": 7,
+            "profile_segment_sums": [
+              100.00008,
+              99.9999,
+              100,
+              100.00009,
+              99.99998,
+              100.00001,
+              100.00009000000001
+            ],
+            "ledger_rows": 7,
+            "ledger_columns": 6,
+            "matrix_rows": 7,
+            "matrix_columns": 7,
+            "matrix_values": [
+              [
+                0,
+                0.115,
+                0.295,
+                0.135,
+                0.247,
+                0.262,
+                0.213
+              ],
+              [
+                0.115,
+                0,
+                0.194,
+                0.22,
+                0.336,
+                0.279,
+                0.301
+              ],
+              [
+                0.295,
+                0.194,
+                0,
+                0.348,
+                0.464,
+                0.407,
+                0.43
+              ],
+              [
+                0.135,
+                0.22,
+                0.348,
+                0,
+                0.129,
+                0.202,
+                0.111
+              ],
+              [
+                0.247,
+                0.336,
+                0.464,
+                0.129,
+                0,
+                0.311,
+                0.189
+              ],
+              [
+                0.262,
+                0.279,
+                0.407,
+                0.202,
+                0.311,
+                0,
+                0.123
+              ],
+              [
+                0.213,
+                0.301,
+                0.43,
+                0.111,
+                0.189,
+                0.123,
+                0
+              ]
+            ],
+            "hcc_matrix_value": 0.129,
+            "confusion_rows": 4,
+            "confusion_columns": 6,
+            "confusion_sum": 6402,
+            "confusion_row_totals": [
+              "1,597",
+              "1,143",
+              "3,076",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "結構可辨識度 · 7 datasets",
+            "matrix_title": "結構可辨識度 · Full W_primary TVD",
+            "confusion_title": "結構可辨識度 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "conditional_matrix_structural",
+          "status": "pass",
+          "expected": {
+            "scope": "conditional",
+            "pairs": 21,
+            "hcc_tvd": 0.12937892162707884
+          },
+          "actual": {
+            "embedded_dataset_count": 7,
+            "embedded_biological_ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "active_dimension": "structural",
+            "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "conditional",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
+            "profile_count": 7,
+            "profile_segment_sums": [
+              100.00008,
+              99.9999,
+              100,
+              100.00009,
+              99.99998,
+              100.00001,
+              100.00009000000001
+            ],
+            "ledger_rows": 7,
+            "ledger_columns": 6,
+            "matrix_rows": 7,
+            "matrix_columns": 7,
+            "matrix_values": [
+              [
+                0,
+                0.07,
+                0.038,
+                0.148,
+                0.257,
+                0.257,
+                0.193
+              ],
+              [
+                0.07,
+                0,
+                0.052,
+                0.176,
+                0.284,
+                0.215,
+                0.22
+              ],
+              [
+                0.038,
+                0.052,
+                0,
+                0.186,
+                0.295,
+                0.267,
+                0.231
+              ],
+              [
+                0.148,
+                0.176,
+                0.186,
+                0,
+                0.129,
+                0.181,
+                0.103
+              ],
+              [
+                0.257,
+                0.284,
+                0.295,
+                0.129,
+                0,
+                0.305,
+                0.188
+              ],
+              [
+                0.257,
+                0.215,
+                0.267,
+                0.181,
+                0.305,
+                0,
+                0.117
+              ],
+              [
+                0.193,
+                0.22,
+                0.231,
+                0.103,
+                0.188,
+                0.117,
+                0
+              ]
+            ],
+            "hcc_matrix_value": 0.129,
+            "confusion_rows": 4,
+            "confusion_columns": 6,
+            "confusion_sum": 6402,
+            "confusion_row_totals": [
+              "1,597",
+              "1,143",
+              "3,076",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "結構可辨識度 · 7 datasets",
+            "matrix_title": "結構可辨識度 · Conditional evaluable TVD",
+            "confusion_title": "結構可辨識度 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "dimension_sync_read_af_selection",
+          "status": "pass",
+          "expected": {
+            "active": "read_af_selection",
+            "profiles": 7,
+            "ledger_rows": 7,
+            "matrix": "7x7 symmetric diagonal=0",
+            "hcc_tvd": 0.09351375142724902,
+            "confusion_sum": 6402
+          },
+          "actual": {
+            "embedded_dataset_count": 7,
+            "embedded_biological_ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "active_dimension": "read_af_selection",
+            "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "full",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
+            "profile_count": 7,
+            "profile_segment_sums": [
+              99.999963,
+              99.99994799999999,
+              99.99998,
+              100.00009,
+              99.99999,
+              100.000052,
+              100.00001999999999
+            ],
+            "ledger_rows": 7,
+            "ledger_columns": 8,
+            "matrix_rows": 7,
+            "matrix_columns": 7,
+            "matrix_values": [
+              [
+                0,
+                0.219,
+                0.363,
+                0.4,
+                0.384,
+                0.473,
+                0.438
+              ],
+              [
+                0.219,
+                0,
+                0.205,
+                0.282,
+                0.27,
+                0.359,
+                0.323
+              ],
+              [
+                0.363,
+                0.205,
+                0,
+                0.398,
+                0.395,
+                0.476,
+                0.445
+              ],
+              [
+                0.4,
+                0.282,
+                0.398,
+                0,
+                0.094,
+                0.194,
+                0.12
+              ],
+              [
+                0.384,
+                0.27,
+                0.395,
+                0.094,
+                0,
+                0.208,
+                0.125
+              ],
+              [
+                0.473,
+                0.359,
+                0.476,
+                0.194,
+                0.208,
+                0,
+                0.086
+              ],
+              [
+                0.438,
+                0.323,
+                0.445,
+                0.12,
+                0.125,
+                0.086,
+                0
+              ]
+            ],
+            "hcc_matrix_value": 0.094,
+            "confusion_rows": 6,
+            "confusion_columns": 8,
+            "confusion_sum": 6402,
+            "confusion_row_totals": [
+              "1,597",
+              "3,776",
+              "295",
+              "77",
+              "71",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "read-AF 第一順位 · 7 datasets",
+            "matrix_title": "read-AF 第一順位 · Full W_primary TVD",
+            "confusion_title": "read-AF 第一順位 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "conditional_matrix_read_af_selection",
+          "status": "pass",
+          "expected": {
+            "scope": "conditional",
+            "pairs": 21,
+            "hcc_tvd": 0.04073017684718951
+          },
+          "actual": {
+            "embedded_dataset_count": 7,
+            "embedded_biological_ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "active_dimension": "read_af_selection",
+            "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "conditional",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
+            "profile_count": 7,
+            "profile_segment_sums": [
+              99.999963,
+              99.99994799999999,
+              99.99998,
+              100.00009,
+              99.99999,
+              100.000052,
+              100.00001999999999
+            ],
+            "ledger_rows": 7,
+            "ledger_columns": 8,
+            "matrix_rows": 7,
+            "matrix_columns": 7,
+            "matrix_values": [
+              [
+                0,
+                0.207,
+                0.246,
+                0.445,
+                0.405,
+                0.461,
+                0.44
+              ],
+              [
+                0.207,
+                0,
+                0.081,
+                0.238,
+                0.197,
+                0.253,
+                0.233
+              ],
+              [
+                0.246,
+                0.081,
+                0,
+                0.206,
+                0.171,
+                0.267,
+                0.201
+              ],
+              [
+                0.445,
+                0.238,
+                0.206,
+                0,
+                0.041,
+                0.183,
+                0.108
+              ],
+              [
+                0.405,
+                0.197,
+                0.171,
+                0.041,
+                0,
+                0.184,
+                0.104
+              ],
+              [
+                0.461,
+                0.253,
+                0.267,
+                0.183,
+                0.184,
+                0,
+                0.081
+              ],
+              [
+                0.44,
+                0.233,
+                0.201,
+                0.108,
+                0.104,
+                0.081,
+                0
+              ]
+            ],
+            "hcc_matrix_value": 0.041,
+            "confusion_rows": 6,
+            "confusion_columns": 8,
+            "confusion_sum": 6402,
+            "confusion_row_totals": [
+              "1,597",
+              "3,776",
+              "295",
+              "77",
+              "71",
+              "586"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "read-AF 第一順位 · 7 datasets",
+            "matrix_title": "read-AF 第一順位 · Conditional evaluable TVD",
+            "confusion_title": "read-AF 第一順位 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "dimension_sync_morphology",
+          "status": "pass",
+          "expected": {
+            "active": "morphology",
+            "profiles": 7,
+            "ledger_rows": 7,
+            "matrix": "7x7 symmetric diagonal=0",
+            "hcc_tvd": 0.12056033032241767,
+            "confusion_sum": 6402
+          },
+          "actual": {
+            "embedded_dataset_count": 7,
+            "embedded_biological_ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "active_dimension": "morphology",
+            "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "full",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
+            "profile_count": 7,
+            "profile_segment_sums": [
+              100.000027,
+              100.00000999999999,
+              99.99996999999999,
+              100.00004,
+              99.99998,
+              100,
+              100
+            ],
+            "ledger_rows": 7,
+            "ledger_columns": 7,
+            "matrix_rows": 7,
+            "matrix_columns": 7,
+            "matrix_values": [
+              [
+                0,
+                0.094,
+                0.214,
+                0.2,
+                0.091,
+                0.259,
+                0.228
+              ],
+              [
+                0.094,
+                0,
+                0.214,
+                0.117,
+                0.085,
+                0.217,
+                0.257
+              ],
+              [
+                0.214,
+                0.214,
+                0,
+                0.298,
+                0.271,
+                0.375,
+                0.341
+              ],
+              [
+                0.2,
+                0.117,
+                0.298,
+                0,
+                0.121,
+                0.126,
+                0.165
+              ],
+              [
+                0.091,
+                0.085,
+                0.271,
+                0.121,
+                0,
+                0.18,
+                0.172
+              ],
+              [
+                0.259,
+                0.217,
+                0.375,
+                0.126,
+                0.18,
+                0,
+                0.121
+              ],
+              [
+                0.228,
+                0.257,
+                0.341,
+                0.165,
+                0.172,
+                0.121,
+                0
+              ]
+            ],
+            "hcc_matrix_value": 0.121,
+            "confusion_rows": 5,
+            "confusion_columns": 7,
+            "confusion_sum": 6402,
+            "confusion_row_totals": [
+              "667",
+              "4,248",
+              "299",
+              "487",
+              "701"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "拓撲形態 · 7 datasets",
+            "matrix_title": "拓撲形態 · Full W_primary TVD",
+            "confusion_title": "拓撲形態 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "conditional_matrix_morphology",
+          "status": "pass",
+          "expected": {
+            "scope": "conditional",
+            "pairs": 21,
+            "hcc_tvd": 0.0850233825533841
+          },
+          "actual": {
+            "embedded_dataset_count": 7,
+            "embedded_biological_ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "active_dimension": "morphology",
+            "active_tab_count": 1,
+            "active_profile_scope": "dataset",
+            "active_distance_scope": "conditional",
+            "active_confusion_mode": "count",
+            "aggregate_profile_count": 2,
+            "profile_count": 7,
+            "profile_segment_sums": [
+              100.000027,
+              100.00000999999999,
+              99.99996999999999,
+              100.00004,
+              99.99998,
+              100,
+              100
+            ],
+            "ledger_rows": 7,
+            "ledger_columns": 7,
+            "matrix_rows": 7,
+            "matrix_columns": 7,
+            "matrix_values": [
+              [
+                0,
+                0.09,
+                0.146,
+                0.128,
+                0.053,
+                0.23,
+                0.198
+              ],
+              [
+                0.09,
+                0,
+                0.07,
+                0.085,
+                0.089,
+                0.189,
+                0.245
+              ],
+              [
+                0.146,
+                0.07,
+                0,
+                0.083,
+                0.143,
+                0.184,
+                0.238
+              ],
+              [
+                0.128,
+                0.085,
+                0.083,
+                0,
+                0.085,
+                0.11,
+                0.166
+              ],
+              [
+                0.053,
+                0.089,
+                0.143,
+                0.085,
+                0,
+                0.177,
+                0.156
+              ],
+              [
+                0.23,
+                0.189,
+                0.184,
+                0.11,
+                0.177,
+                0,
+                0.101
+              ],
+              [
+                0.198,
+                0.245,
+                0.238,
+                0.166,
+                0.156,
+                0.101,
+                0
+              ]
+            ],
+            "hcc_matrix_value": 0.085,
+            "confusion_rows": 5,
+            "confusion_columns": 7,
+            "confusion_sum": 6402,
+            "confusion_row_totals": [
+              "667",
+              "4,248",
+              "299",
+              "487",
+              "701"
+            ],
+            "table_captions": 5,
+            "selected_matrix_cells": 2,
+            "comparison_title": "拓撲形態 · 7 datasets",
+            "matrix_title": "拓撲形態 · Conditional evaluable TVD",
+            "confusion_title": "拓撲形態 · Count · 哪些類別互相轉換？"
+          }
+        },
+        {
+          "name": "biological_macro_profiles",
+          "status": "pass",
+          "expected": {
+            "biological_ids": 6,
+            "equal_weight_profiles": true,
+            "invented_counts": false
+          },
+          "actual": {
+            "active": "biological",
+            "ids": [
+              "COLO829",
+              "H1437",
+              "H2009",
+              "HCC1395",
+              "HCC1937",
+              "HCC1954"
+            ],
+            "segment_sums": [
+              100.00008,
+              99.9999,
+              100,
+              100.00001,
+              100.00001,
+              100.00009000000001
+            ],
+            "invented_counts": false
+          }
+        },
+        {
+          "name": "confusion_row_percent",
+          "status": "pass",
+          "expected": {
+            "row_sums": "100.0% ±0.1",
+            "first_cell": 65.62304320601127
+          },
+          "actual": {
+            "active": "row-percent",
+            "rows": [
+              [
+                65.6,
+                4.4,
+                30,
+                0
+              ],
+              [
+                10.6,
+                37.1,
+                52,
+                0.3
+              ],
+              [
+                13.4,
+                1.1,
+                84.2,
+                1.3
+              ],
+              [
+                2.4,
+                1.4,
+                27.1,
+                69.1
+              ]
+            ],
+            "totals": [
+              "100.0%",
+              "100.0%",
+              "100.0%",
+              "100.0%"
+            ],
+            "first_cell": "65.6%",
+            "row_sums": [
+              100.0,
+              100.0,
+              100.0,
+              100.0
+            ]
+          }
+        },
+        {
+          "name": "visible_text_wcag_aa_contrast",
+          "status": "pass",
+          "expected": {
+            "failures": 0,
+            "normal_text_ratio": 4.5,
+            "large_text_ratio": 3.0
+          },
+          "actual": {
+            "failures": 0,
+            "examples": []
+          }
+        },
+        {
+          "name": "regular_pair_inspector_has_no_technical_claim",
+          "status": "pass",
+          "expected": "different biological samples; composition only",
+          "actual": "DIFFERENT BIOLOGICAL SAMPLES · COMPOSITION ONLY\nCOLO829 × H1437\n0.115\nFull W_primary · current dimension rank 2/21\n3-dimension mean 0.142 · rank 4/21\nC>1 / Topo>1\n-10.2 pp\nIncomplete\n+10.1 pp\nC=1 / Topo=1\n+1.3 pp\n\n不同 biological samples 只比較 profile；不以 exact-coordinate overlap 當一般跨細胞株品質指標。"
+        },
+        {
+          "name": "hcc_pair_inspector_relationship",
+          "status": "pass",
+          "expected": "same biological sample technical pair",
+          "actual": "SAME BIOLOGICAL SAMPLE · TECHNICAL PAIR\nHCC1395 × HCC1395_DORADO\n0.129\nFull W_primary · current dimension rank 4/21\n3-dimension mean 0.114 · rank 2/21\nC>1 / Topo>1\n+12.9 pp\nC>1 / Topo=1\n-9.6 pp\nIncomplete\n-2.0 pp\n\n此格只比較類別比例；共同 region agreement 才檢查相同座標是否得到相同標籤。"
+        },
+        {
+          "name": "interactive_targets_at_least_44px",
+          "status": "pass",
+          "expected": {
+            "minimum_height": 44
+          },
+          "actual": {
+            "tabs": [
+              48,
+              48,
+              48
+            ],
+            "toggles": [
+              44,
+              44,
+              44,
+              44,
+              44,
+              44
+            ],
+            "nav": [
+              44,
+              44,
+              44,
+              44,
+              44,
+              44
+            ],
+            "cells": [
+              44,
+              44,
+              44,
+              44,
+              44,
+              44,
+              44,
+              44
+            ]
+          }
+        },
+        {
+          "name": "body_and_internal_overflow",
+          "status": "pass",
+          "expected": {
+            "body_overflow_max": 1,
+            "matrix_internal_scroll_allowed": true
+          },
+          "actual": {
+            "body_overflow_px": 0,
+            "matrix_client_width": 254,
+            "matrix_scroll_width": 800,
+            "json_links": 20,
+            "json_links_inside_details": 20,
+            "json_links_in_open_details": 0,
+            "hcc_metric_cards": 4,
+            "exact_edge_visible": true,
+            "allele_site_label_visible": true,
+            "answer_before_hcc": 4,
+            "hcc_before_comparison": 4,
+            "local_nav_visible": true,
+            "table_captions": 5,
+            "selected_pair_aria_pressed": 2,
+            "hcc_details_open": false
+          }
+        },
+        {
+          "name": "json_links_hidden_in_closed_details",
+          "status": "pass",
+          "expected": "all JSON links inside closed details",
+          "actual": {
+            "body_overflow_px": 0,
+            "matrix_client_width": 254,
+            "matrix_scroll_width": 800,
+            "json_links": 20,
+            "json_links_inside_details": 20,
+            "json_links_in_open_details": 0,
+            "hcc_metric_cards": 4,
+            "exact_edge_visible": true,
+            "allele_site_label_visible": true,
+            "answer_before_hcc": 4,
+            "hcc_before_comparison": 4,
+            "local_nav_visible": true,
+            "table_captions": 5,
+            "selected_pair_aria_pressed": 2,
+            "hcc_details_open": false
+          }
+        },
+        {
+          "name": "hcc_exact_signature_visible",
+          "status": "pass",
+          "expected": {
+            "metric_cards": 4,
+            "exact_edge": "35.3%"
+          },
+          "actual": {
+            "body_overflow_px": 0,
+            "matrix_client_width": 254,
+            "matrix_scroll_width": 800,
+            "json_links": 20,
+            "json_links_inside_details": 20,
+            "json_links_in_open_details": 0,
+            "hcc_metric_cards": 4,
+            "exact_edge_visible": true,
+            "allele_site_label_visible": true,
+            "answer_before_hcc": 4,
+            "hcc_before_comparison": 4,
+            "local_nav_visible": true,
+            "table_captions": 5,
+            "selected_pair_aria_pressed": 2,
+            "hcc_details_open": false
+          }
+        },
+        {
+          "name": "answer_first_navigation_and_semantics",
+          "status": "pass",
+          "expected": {
+            "order": "answer → HCC → comparison",
+            "sticky_nav": true,
+            "captions": ">=5",
+            "selected_pair_aria": 2,
+            "allele_site_label": true
+          },
+          "actual": {
+            "body_overflow_px": 0,
+            "matrix_client_width": 254,
+            "matrix_scroll_width": 800,
+            "json_links": 20,
+            "json_links_inside_details": 20,
+            "json_links_in_open_details": 0,
+            "hcc_metric_cards": 4,
+            "exact_edge_visible": true,
+            "allele_site_label_visible": true,
+            "answer_before_hcc": 4,
+            "hcc_before_comparison": 4,
+            "local_nav_visible": true,
+            "table_captions": 5,
+            "selected_pair_aria_pressed": 2,
+            "hcc_details_open": false
+          }
+        },
+        {
+          "name": "all_profile_rows_visually_present",
+          "status": "pass",
+          "expected": {
+            "rows": 7,
+            "bar_height_min": 16,
+            "row_height_max": 140,
+            "all_children_visible": true
+          },
+          "actual": [
+            {
+              "dataset": "COLO829",
+              "row_height": 92.25,
+              "bar_width": 247,
+              "bar_height": 21,
+              "name_visible": true,
+              "denominator_visible": true,
+              "within_list": true
+            },
+            {
+              "dataset": "H1437",
+              "row_height": 92.25,
+              "bar_width": 247,
+              "bar_height": 21,
+              "name_visible": true,
+              "denominator_visible": true,
+              "within_list": true
+            },
+            {
+              "dataset": "H2009",
+              "row_height": 92.25,
+              "bar_width": 247,
+              "bar_height": 21,
+              "name_visible": true,
+              "denominator_visible": true,
+              "within_list": true
+            },
+            {
+              "dataset": "HCC1395",
+              "row_height": 110.828125,
+              "bar_width": 247,
+              "bar_height": 21,
+              "name_visible": true,
+              "denominator_visible": true,
+              "within_list": true
+            },
+            {
+              "dataset": "HCC1395_DORADO",
+              "row_height": 110.828125,
+              "bar_width": 247,
+              "bar_height": 21,
+              "name_visible": true,
+              "denominator_visible": true,
+              "within_list": true
+            },
+            {
+              "dataset": "HCC1937",
+              "row_height": 92.25,
+              "bar_width": 247,
+              "bar_height": 21,
+              "name_visible": true,
+              "denominator_visible": true,
+              "within_list": true
+            },
+            {
+              "dataset": "HCC1954",
+              "row_height": 92.25,
+              "bar_width": 247,
+              "bar_height": 21,
+              "name_visible": true,
+              "denominator_visible": true,
+              "within_list": true
+            }
+          ]
+        },
+        {
+          "name": "screenshot_scroll_alignment",
+          "status": "pass",
+          "expected": {
+            "comparison_top": 70,
+            "hcc_top": 70,
+            "tolerance": 2
+          },
+          "actual": {
+            "comparison_top": 69.78125,
+            "hcc_top": 69.75
+          }
+        },
+        {
+          "name": "console_and_page_errors",
+          "status": "pass",
+          "expected": {
+            "console_errors": 0,
+            "page_errors": 0
+          },
+          "actual": {
+            "console_errors": [],
+            "page_errors": []
+          }
+        }
+      ],
+      "console_errors": [],
+      "page_errors": [],
+      "screenshots": {
+        "biological_macro": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/biological_macro__narrow.png",
+        "conditional_matrix": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/conditional_matrix__narrow.png",
+        "confusion_row_percent": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/confusion_row_percent__narrow.png",
+        "comparison": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/comparison__narrow.png",
+        "hcc_validation": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260715_sample_topology_comparison/qa/playwright/hcc_validation__narrow.png"
+      },
+      "dimension_receipts": {
+        "structural": {
+          "embedded_dataset_count": 7,
+          "embedded_biological_ids": [
+            "COLO829",
+            "H1437",
+            "H2009",
+            "HCC1395",
+            "HCC1937",
+            "HCC1954"
+          ],
+          "active_dimension": "structural",
+          "active_tab_count": 1,
+          "active_profile_scope": "dataset",
+          "active_distance_scope": "full",
+          "active_confusion_mode": "count",
+          "aggregate_profile_count": 2,
+          "profile_count": 7,
+          "profile_segment_sums": [
+            100.00008,
+            99.9999,
+            100,
+            100.00009,
+            99.99998,
+            100.00001,
+            100.00009000000001
+          ],
+          "ledger_rows": 7,
+          "ledger_columns": 6,
+          "matrix_rows": 7,
+          "matrix_columns": 7,
+          "matrix_values": [
+            [
+              0,
+              0.115,
+              0.295,
+              0.135,
+              0.247,
+              0.262,
+              0.213
+            ],
+            [
+              0.115,
+              0,
+              0.194,
+              0.22,
+              0.336,
+              0.279,
+              0.301
+            ],
+            [
+              0.295,
+              0.194,
+              0,
+              0.348,
+              0.464,
+              0.407,
+              0.43
+            ],
+            [
+              0.135,
+              0.22,
+              0.348,
+              0,
+              0.129,
+              0.202,
+              0.111
+            ],
+            [
+              0.247,
+              0.336,
+              0.464,
+              0.129,
+              0,
+              0.311,
+              0.189
+            ],
+            [
+              0.262,
+              0.279,
+              0.407,
+              0.202,
+              0.311,
+              0,
+              0.123
+            ],
+            [
+              0.213,
+              0.301,
+              0.43,
+              0.111,
+              0.189,
+              0.123,
+              0
+            ]
+          ],
+          "hcc_matrix_value": 0.129,
+          "confusion_rows": 4,
+          "confusion_columns": 6,
+          "confusion_sum": 6402,
+          "confusion_row_totals": [
+            "1,597",
+            "1,143",
+            "3,076",
+            "586"
+          ],
+          "table_captions": 5,
+          "selected_matrix_cells": 2,
+          "comparison_title": "結構可辨識度 · 7 datasets",
+          "matrix_title": "結構可辨識度 · Full W_primary TVD",
+          "confusion_title": "結構可辨識度 · Count · 哪些類別互相轉換？"
+        },
+        "read_af_selection": {
+          "embedded_dataset_count": 7,
+          "embedded_biological_ids": [
+            "COLO829",
+            "H1437",
+            "H2009",
+            "HCC1395",
+            "HCC1937",
+            "HCC1954"
+          ],
+          "active_dimension": "read_af_selection",
+          "active_tab_count": 1,
+          "active_profile_scope": "dataset",
+          "active_distance_scope": "full",
+          "active_confusion_mode": "count",
+          "aggregate_profile_count": 2,
+          "profile_count": 7,
+          "profile_segment_sums": [
+            99.999963,
+            99.99994799999999,
+            99.99998,
+            100.00009,
+            99.99999,
+            100.000052,
+            100.00001999999999
+          ],
+          "ledger_rows": 7,
+          "ledger_columns": 8,
+          "matrix_rows": 7,
+          "matrix_columns": 7,
+          "matrix_values": [
+            [
+              0,
+              0.219,
+              0.363,
+              0.4,
+              0.384,
+              0.473,
+              0.438
+            ],
+            [
+              0.219,
+              0,
+              0.205,
+              0.282,
+              0.27,
+              0.359,
+              0.323
+            ],
+            [
+              0.363,
+              0.205,
+              0,
+              0.398,
+              0.395,
+              0.476,
+              0.445
+            ],
+            [
+              0.4,
+              0.282,
+              0.398,
+              0,
+              0.094,
+              0.194,
+              0.12
+            ],
+            [
+              0.384,
+              0.27,
+              0.395,
+              0.094,
+              0,
+              0.208,
+              0.125
+            ],
+            [
+              0.473,
+              0.359,
+              0.476,
+              0.194,
+              0.208,
+              0,
+              0.086
+            ],
+            [
+              0.438,
+              0.323,
+              0.445,
+              0.12,
+              0.125,
+              0.086,
+              0
+            ]
+          ],
+          "hcc_matrix_value": 0.094,
+          "confusion_rows": 6,
+          "confusion_columns": 8,
+          "confusion_sum": 6402,
+          "confusion_row_totals": [
+            "1,597",
+            "3,776",
+            "295",
+            "77",
+            "71",
+            "586"
+          ],
+          "table_captions": 5,
+          "selected_matrix_cells": 2,
+          "comparison_title": "read-AF 第一順位 · 7 datasets",
+          "matrix_title": "read-AF 第一順位 · Full W_primary TVD",
+          "confusion_title": "read-AF 第一順位 · Count · 哪些類別互相轉換？"
+        },
+        "morphology": {
+          "embedded_dataset_count": 7,
+          "embedded_biological_ids": [
+            "COLO829",
+            "H1437",
+            "H2009",
+            "HCC1395",
+            "HCC1937",
+            "HCC1954"
+          ],
+          "active_dimension": "morphology",
+          "active_tab_count": 1,
+          "active_profile_scope": "dataset",
+          "active_distance_scope": "full",
+          "active_confusion_mode": "count",
+          "aggregate_profile_count": 2,
+          "profile_count": 7,
+          "profile_segment_sums": [
+            100.000027,
+            100.00000999999999,
+            99.99996999999999,
+            100.00004,
+            99.99998,
+            100,
+            100
+          ],
+          "ledger_rows": 7,
+          "ledger_columns": 7,
+          "matrix_rows": 7,
+          "matrix_columns": 7,
+          "matrix_values": [
+            [
+              0,
+              0.094,
+              0.214,
+              0.2,
+              0.091,
+              0.259,
+              0.228
+            ],
+            [
+              0.094,
+              0,
+              0.214,
+              0.117,
+              0.085,
+              0.217,
+              0.257
+            ],
+            [
+              0.214,
+              0.214,
+              0,
+              0.298,
+              0.271,
+              0.375,
+              0.341
+            ],
+            [
+              0.2,
+              0.117,
+              0.298,
+              0,
+              0.121,
+              0.126,
+              0.165
+            ],
+            [
+              0.091,
+              0.085,
+              0.271,
+              0.121,
+              0,
+              0.18,
+              0.172
+            ],
+            [
+              0.259,
+              0.217,
+              0.375,
+              0.126,
+              0.18,
+              0,
+              0.121
+            ],
+            [
+              0.228,
+              0.257,
+              0.341,
+              0.165,
+              0.172,
+              0.121,
+              0
+            ]
+          ],
+          "hcc_matrix_value": 0.121,
+          "confusion_rows": 5,
+          "confusion_columns": 7,
+          "confusion_sum": 6402,
+          "confusion_row_totals": [
+            "667",
+            "4,248",
+            "299",
+            "487",
+            "701"
+          ],
+          "table_captions": 5,
+          "selected_matrix_cells": 2,
+          "comparison_title": "拓撲形態 · 7 datasets",
+          "matrix_title": "拓撲形態 · Full W_primary TVD",
+          "confusion_title": "拓撲形態 · Count · 哪些類別互相轉換？"
+        }
+      },
+      "duration_seconds": 3.479
     }
   ],
   "browser": {
@@ -1913,10 +4721,10 @@
   },
   "summary": {
     "status": "PASS",
-    "runs": 2,
-    "checks_passed": 30,
-    "checks_total": 30,
-    "screenshots": 4,
-    "elapsed_seconds": 4.953
+    "runs": 3,
+    "checks_passed": 66,
+    "checks_total": 66,
+    "screenshots": 15,
+    "elapsed_seconds": 12.049
   }
 }
