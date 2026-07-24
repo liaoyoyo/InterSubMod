@@ -29,6 +29,8 @@ trees。
 ## 每組資料的精確拓撲解析度
 
 百分比的共同分母都是該資料集的 `ranked_complete` units。
+表內保留 machine authority keys；互動工作站另以
+`HCC1395_HKU`／`HCC1395_NYGC` 顯示前兩組 technical datasets。
 
 | Dataset | Ranked | Unique tree | Tied, same topology | Tied, cross topology | 單一 exact topology |
 |---|---:|---:|---:|---:|---:|
@@ -111,6 +113,29 @@ class 相同」；其餘 `8,444` 個跨 exact shape units 也跨 coarse class。
 - `/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260724_exact_ps_cpp_topology_signature_census/all7_v1/summary.tsv`
 - `/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260724_exact_ps_cpp_topology_signature_census/all7_v1/receipt.v2.json`
 
+## HTML companion 的 exact-locus context
+
+工作站另以全 98,955 final groups 為分母加入癌症基因／藥物 context；
+此層不改變上述 71,955 ranked-only determinacy 分母。
+
+| 顯示資料集 | Final groups | CGC locus | 同基因 CGC∩drug |
+|---|---:|---:|---:|
+| HCC1395_HKU | 11,590 | 480 | 174 |
+| HCC1395_NYGC | 6,865 | 240 | 91 |
+| HCC1937 | 5,195 | 189 | 66 |
+| HCC1954 | 7,746 | 273 | 90 |
+| H1437 | 17,598 | 537 | 167 |
+| H2009 | 36,042 | 1,379 | 503 |
+| COLO829 | 13,919 | 456 | 161 |
+| **ALL7** | **98,955** | **3,554** | **1,252** |
+
+join 必須是 actual sSNV locus 落入 GENCODE v46 gene body，再於同一
+HGNC gene 檢查 COSMIC CGC v104 與 DGIdb
+`approved=TRUE AND anti_neoplastic=TRUE`。HCC1395 舊
+`chr10:87818272-87928739` search envelope 雖跨到 PTEN，新 exact unit
+的兩個 loci 都在 PTEN gene body 外，故顯示為
+`NO_HIT_EVALUATED`，不是 PTEN mutation。
+
 ## Claim ceiling
 
 本分析證明的是「AF 最佳 mathematical tree 的 geometry 是否唯一」。
@@ -121,3 +146,5 @@ class 相同」；其餘 `8,444` 個跨 exact shape units 也跨 coarse class。
 - Direct 就是已確認的 subclone ancestry；
 - AF 最佳樹是 calibrated biological posterior；
 - CNA、LOH、allele-specific amplification 已被排除。
+- CGC／DGIdb context 證明 topology、driver status、藥物反應或 clinical
+  actionability。

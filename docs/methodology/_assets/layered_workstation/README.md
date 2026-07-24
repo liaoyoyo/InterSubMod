@@ -1,11 +1,12 @@
 <!--
 建立時間: 2026-07-07
-更新時間: 2026-07-24
+更新時間: 2026-07-25
 目標: 說明 exact-PS×HP layered reconstruction 全基因工作站的證據邊界、資料綁定與重生方式
 處理範圍: InterSubMod/docs/methodology/_assets/layered_workstation/
 關聯檔案:
   - InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_layered_per_sample.py
   - InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/scripts/build_exact_ps_layered_workstation.py
+  - InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/scripts/build_exact_ps_gene_drug_annotation.py
   - InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/scripts/audit_exact_ps_workstation_playwright.py
   - InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_layered_workstation_v5.py
   - InterSubMod/research/20260715_layered_workstation_genome_topology_multiselect/scripts/build_current_v5_read_af_topology.py
@@ -38,6 +39,12 @@
   - 單一 root-preserving unlabeled exact shape 63,506（88.2579%）。
 - 7 technical datasets = 6 biological samples；HCC1395 與
   HCC1395_DORADO 是同一 biological sample 的 technical comparison。
+- 讀者介面顯示 `HCC1395_HKU`／`HCC1395_NYGC`；authority keys、檔名、
+  receipt 與 hash 仍是 `HCC1395`／`HCC1395_DORADO`。
+- 以全部 98,955 final groups 為分母，3,554 groups 有 actual sSNV locus
+  落入 GENCODE v46 gene body 且該 gene 屬 COSMIC CGC v104；其中 1,252
+  groups 在同一 HGNC gene 另有 DGIdb `approved=TRUE AND
+  anti_neoplastic=TRUE` association。此層只是 gene-level context。
 
 **Claim ceiling**：read-AF 只排序 recurrence-allowed minimum mathematical
 graph models；不是 caller VAF、CCF、calibrated posterior、cellular clone 或真實
@@ -47,8 +54,8 @@ ancestry。7/7 technical PASS 不等於 topology-complete。
 
 | 檔 | 內容 | 大小 |
 |---|---|--:|
-| **`index.html`** | Exact-PS cohort command center：authority、分母漏斗、determinacy、coarse geometry、7 dataset 入口、HCC1395 技術比較與收合 provenance。**先開這個。** | 約 22 KB |
-| 各 dataset `.html` | 完整 compact final-group index、GRCh38 canvas、多選/搜尋、exact PS/HP boundary、signature census、代表最佳樹與 read-ALT 表。 | 約 9–89 MB |
+| **`index.html`** | Exact-PS cohort command center：authority、分母漏斗、7 dataset composition、癌症基因／藥物 locus、7×7 profile similarity、HCC1395 technical concordance 與收合 provenance。**先開這個。** | 約 81 KB |
+| 各 dataset `.html` | 完整 compact final-group index、GRCh38 canvas、多選/搜尋、exact PS/HP boundary、locus/read matrix、癌症基因／藥物 context、完整 candidate union、selected tree 與 signature census。 | 約 14–182 MB |
 
 ## 新版互動與資料模型
 
@@ -56,7 +63,11 @@ ancestry。7/7 technical PASS 不等於 topology-complete。
   98,955 final groups 依 midpoint 落點。
 - **圖例多選**：點 A 選 A，再點 B 為 A∪B，再點已選類別取消；沒有選擇
   時顯示全部。切換 ontology 會清空前一 ontology 的 selection。
-- **著色維度**：Determinacy、拓撲形態、HP family、判定狀態、active k。
+- **著色維度**：Determinacy、拓撲形態、HP family、判定狀態、active k、
+  癌症基因／藥物 annotation。六種 mode 都支援多選與第二次取消。
+- **快速篩選**：全部、癌症基因 locus、癌症基因 ∩ approved
+  抗腫瘤藥；它與目前拓撲圖例選擇採 AND，不覆蓋既有 topology
+  selection。篩選後不存在的圖例選擇會自動清除，避免零結果孤兒狀態。
 - **座標搜尋**：支援單點與區間 overlap，例如
   `chr10:87818272-87928739`。搜尋只回傳 final groups；source singleton
   abstain 不會假裝成 topology=0。
@@ -68,9 +79,19 @@ ancestry。7/7 technical PASS 不等於 topology-complete。
   `TIED_CROSS_TOPOLOGY` 只以 71,955 ranked units 為分母。
 - **形態**：Single-only、Direct-only、Sister-only、Sister+direct 是
   rooted mutation-state graph geometry；不是 clone 類別。
-- **Network**：只畫 frozen topology row 的 deterministic global-best
-  representative。Census 沒有逐棵 edge list；tied rows 以 signature/count
-  顯示，頁面不捏造完整 edge union。
+- **Network**：factorized candidate sidecar 保存全部 ranked units 的
+  minimum vertex sets 與 per-child legal/best parents。Region detail 的
+  灰線是完整 minimum edge union、藍線是所有 AF-global-best trees 的
+  edge union、綠線是一棵 deterministic selected exemplar；tied rows
+  不把 global-best union 誤畫成一棵 selected tree。
+- **跨樣本比較**：state、determinacy、topology/coarse、active-k 與
+  對稱 HP balance 分別正規化後比較；profile similarity 不是同一
+  clone/tree 的證明。
+- **癌症基因／藥物**：primary key 是 actual sSNV position，不是 region
+  span。actual locus 必須落在同一 GENCODE gene body；CGC 與 DGIdb
+  以 HGNC join。`NO_HIT_EVALUATED` 表示已評估但未命中，不表示該區沒有
+  癌症重要性；drug association 也不是療效、適應症或 clinical
+  actionability。
 - **Provenance**：所有 `.json`/receipt 路徑只在預設收合的證據區出現，
   不插入主要數字敘事。
 
@@ -88,6 +109,10 @@ python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_
 
 # 等價的 direct primary renderer。
 python3 \
+  research/20260724_exact_ps_cpp_topology_signature_census/scripts/build_exact_ps_layered_workstation.py \
+  --verify-only
+
+python3 \
   research/20260724_exact_ps_cpp_topology_signature_census/scripts/build_exact_ps_layered_workstation.py
 
 # 只重建 index；7 個既有頁必須已綁定同一 census receipt。
@@ -95,11 +120,16 @@ python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_
 
 # 資料與跨面板 regression。
 python3 -m unittest \
+  research/20260724_exact_ps_cpp_topology_signature_census/tests/test_exact_ps_gene_drug_annotation.py \
+  research/20260724_exact_ps_cpp_topology_signature_census/tests/test_exact_ps_candidate_factorization.py \
+  research/20260724_exact_ps_cpp_topology_signature_census/tests/test_exact_ps_cohort_similarity.py \
   research/20260724_exact_ps_cpp_topology_signature_census/tests/test_exact_ps_layered_workstation.py
 
 # Chromium 桌機 / 手機真實互動與視覺稽核。
 python3 \
-  research/20260724_exact_ps_cpp_topology_signature_census/scripts/audit_exact_ps_workstation_playwright.py
+  research/20260724_exact_ps_cpp_topology_signature_census/scripts/audit_exact_ps_workstation_playwright.py \
+  --output-dir \
+  research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v3_all7_07
 
 # 僅需重現舊 canonical-v5 / 50-kb 頁面時才使用。
 python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_layered_per_sample.py --legacy-v5
@@ -109,13 +139,14 @@ python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_
 - Legacy renderer：`build_layered_workstation_v5.py`；只由 `--legacy-v5` 觸發。
 - Freshness：sample page 必須符合 `intersubmod-authority =
   20260724-exact-ps-hp-strict-read-linkage`、同一 census receipt SHA 與
-  `layered-workstation-exact-ps-v1` UI contract；`--index-only` 不接受舊頁。
+  `layered-workstation-exact-ps-v3` UI contract；`--index-only` 不接受舊頁。
 - Primary authority 是 2026-07-24 topology cohort receipt/all7 summary、
   per-sample MLHP/topology outputs，以及 signature `receipt.v2.json/summary.json`。
 - 改 builder 後必做 syntax、跨面板 regression、Chromium runtime、
-  多選/再次取消、座標搜尋、零網路請求、390/1440px overflow 與視覺截圖。
+  六個 mode 多選/再次取消、AND filter、座標搜尋、零網路請求、
+  390/1440px post-detail overflow 與視覺截圖。
 - 本輪 audit receipt：
-  `InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit/receipt.json`。
+  `InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v3_all7_07/receipt.json`。
 
 ## 與舊 topology_workstation/ 關係
 舊資料夾是歷史 pooled／三軸展示；本資料夾是 exact-PS × primary-HP
