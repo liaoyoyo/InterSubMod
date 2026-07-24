@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-"""Build the canonical seven-dataset layered reconstruction workstation.
+"""Build the seven-dataset layered reconstruction workstation.
 
-The repository machine summary is the only authority for sample paths and all
-landing-page measurements.  The command fails closed before writing index.html
-when that authority, any bound artifact, or any sample-page provenance marker
-is stale or inconsistent.
+Default mode delegates to the 2026-07-24 exact-PS × primary-HP × strict
+read-linkage builder.  ``--legacy-v5`` retains the previous 50-kb-grouped
+canonical-v5 renderer only for historical reproduction.
 
-Default mode delegates the seven large sample pages to
-``build_layered_workstation_v5.py`` and then writes the cohort index.  ``--index-only``
-never rebuilds sample pages; it succeeds only when all seven existing pages are
-already bound to the current summary and region-view hashes.
+Both profiles fail closed on their own receipt/SHA/schema contracts.
 """
 
 from __future__ import annotations
@@ -66,6 +62,14 @@ SAMPLE_COMPARISON_BUILD = (
 HCC_EXACT_SIGNATURE_JSON = SAMPLE_COMPARISON_DIR / "artifacts" / "hcc1395_exact_signature_validation.json"
 HCC_EXACT_SIGNATURE_BUILD = SAMPLE_COMPARISON_DIR / "scripts" / "analyze_hcc_exact_signature.py"
 PYTHON = sys.executable or "python3"
+EXACT_PS_BUILD = (
+    REPO_ROOT
+    / "research"
+    / "20260724_exact_ps_cpp_topology_signature_census"
+    / "scripts"
+    / "build_exact_ps_layered_workstation.py"
+)
+
 
 EXPECTED_SAMPLES = {
     "COLO829",
@@ -1847,7 +1851,18 @@ def main() -> int:
         action="store_true",
         help="Verify seven existing hash-bound sample pages and rebuild only index.html.",
     )
+    parser.add_argument(
+        "--legacy-v5",
+        action="store_true",
+        help="Reproduce the historical canonical-v5/50-kb workstation instead of the exact-PS authority.",
+    )
     args = parser.parse_args()
+    if not args.legacy_v5:
+        command = [PYTHON, str(EXACT_PS_BUILD)]
+        if args.index_only:
+            command.append("--index-only")
+        completed = subprocess.run(command, cwd=REPO_ROOT, check=False)
+        return completed.returncode
     try:
         authority = load_authority()
         rows = collect_rows(authority, build_samples=not args.index_only)
