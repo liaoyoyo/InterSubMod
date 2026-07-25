@@ -27,6 +27,23 @@ GENE_DRUG_ROOT = Path(
     "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/"
     "observation_workspaces/20260725_exact_ps_gene_drug_annotation/all7_v2"
 )
+METHYL_ROOT = (
+    REPO_ROOT
+    / "research"
+    / "20260725_methyl_alt_ref_topology_overlay_validation"
+)
+METHYL_RECEIPT = METHYL_ROOT / "results" / "validation_receipt.json"
+METHYL_TSVS = {
+    "pair_join": METHYL_ROOT
+    / "data"
+    / "formal_pair_alt_ref_topology_join.tsv",
+    "focal_control_join": METHYL_ROOT
+    / "data"
+    / "focal_alt_ref_control_join.tsv",
+    "lane_join": METHYL_ROOT
+    / "data"
+    / "strict_hp_lane_cpp_topology_join.tsv",
+}
 DEFAULT_OUTPUT = TOPIC_ROOT / "artifacts" / "exact_ps_workstation_audit"
 SAMPLES = (
     "HCC1395",
@@ -42,7 +59,7 @@ VIEWPORTS = {
     "mobile": {"width": 390, "height": 844},
 }
 AUTHORITY = "20260724-exact-ps-hp-strict-read-linkage"
-UI_CONTRACT = "layered-workstation-exact-ps-v3"
+UI_CONTRACT = "layered-workstation-exact-ps-v4"
 DISPLAY_LABELS = (
     "HCC1395_HKU",
     "HCC1395_NYGC",
@@ -60,6 +77,15 @@ ANNOTATION_REGION_COUNTS = {
     "H1437": (537, 167),
     "H2009": (1379, 503),
     "COLO829": (456, 161),
+}
+METHYL_FILTER_COUNTS = {
+    "HCC1395": {"signal": 1, "aligned": 0, "resolved": 1},
+    "HCC1395_DORADO": {"signal": 0, "aligned": 0, "resolved": 0},
+    "HCC1937": {"signal": 0, "aligned": 0, "resolved": 0},
+    "HCC1954": {"signal": 1, "aligned": 0, "resolved": 1},
+    "H1437": {"signal": 0, "aligned": 0, "resolved": 0},
+    "H2009": {"signal": 5, "aligned": 1, "resolved": 1},
+    "COLO829": {"signal": 0, "aligned": 0, "resolved": 0},
 }
 PROFILE_MODE_LEGEND_COUNTS = {
     "resolution": 3,
@@ -217,6 +243,7 @@ def exercise_legend_mode(
             if(modeKey==="status")return String(row.readStatus);
             if(modeKey==="k")return String(Math.min(6,Number(row.activeK)));
             if(modeKey==="annotation")return String(row.annotationClass);
+            if(modeKey==="methyl")return String(row.methylClass);
             return String(row[modeKey]);
           };
           return rows.filter(row=>keys.includes(value(row))).length;
@@ -242,6 +269,7 @@ def exercise_legend_mode(
             if(modeKey==="status")return String(row.readStatus);
             if(modeKey==="k")return String(Math.min(6,Number(row.activeK)));
             if(modeKey==="annotation")return String(row.annotationClass);
+            if(modeKey==="methyl")return String(row.methylClass);
             return String(row[modeKey]);
           };
           return rows.filter(row=>value(row)===key).length;
@@ -317,6 +345,13 @@ def audited_input_records() -> dict[str, Any]:
             "annotation": file_record(GENE_DRUG_ROOT / "annotation.v1.json"),
             "receipt": file_record(GENE_DRUG_ROOT / "receipt.json"),
         },
+        "methyl_overlay": {
+            "receipt": file_record(METHYL_RECEIPT),
+            **{
+                key: file_record(path)
+                for key, path in METHYL_TSVS.items()
+            },
+        },
     }
 
 
@@ -343,6 +378,25 @@ def audit_index(page: Page, output: Path, mode: str) -> dict[str, Any]:
             )
         ),
         f"index {mode}: cancer-gene/drug intersection summary is missing",
+    )
+    require(
+        page.locator("#methyl tbody tr").count() == 7
+        and page.locator("#methyl .methyl-aligned-cell").count() == 1
+        and "407,738" in page.locator("#methyl").inner_text()
+        and "638" in page.locator("#methyl").inner_text()
+        and "152 RR-only background" in page.locator("#methyl").inner_text()
+        and "790 total" in page.locator("#methyl").inner_text()
+        and "V=0.618" in page.locator("#methyl").inner_text()
+        and "permutation p=0.002" in page.locator("#methyl").inner_text()
+        and page.locator(
+            'meta[name="intersubmod-methyl-overlay-receipt-sha256"]'
+        ).count()
+        == 1
+        and page.locator(
+            '#methyl a[href*="H2009.html?region=chr4:2307521"]'
+        ).count()
+        >= 1,
+        f"index {mode}: methyl overlay summary/deep links are incomplete",
     )
     require(
         page.locator("#profileChart .profile-row").count() == 7,
@@ -420,6 +474,11 @@ def audit_index(page: Page, output: Path, mode: str) -> dict[str, Any]:
         f"index {mode}: post-interaction horizontal overflow {post_info['html']}",
     )
     page.screenshot(path=str(output / f"index_{mode}.png"), full_page=False)
+    page.locator("#methyl").scroll_into_view_if_needed()
+    page.wait_for_timeout(150)
+    page.screenshot(
+        path=str(output / f"index_{mode}_methyl.png"), full_page=False
+    )
     require(not console_errors, f"index {mode}: console errors {console_errors}")
     require(not external_requests, f"index {mode}: external requests {external_requests}")
     return {
@@ -455,6 +514,34 @@ def audit_sample(page: Page, sample: str, output: Path, mode: str) -> dict[str, 
         and page.locator('[data-testid="annotation-filters"] button').count() == 3,
         f"{sample} {mode}: annotation overview/filter controls missing",
     )
+    require(
+        page.locator('[data-testid="methyl-overview"]').count() == 1
+        and page.locator('[data-testid="methyl-filters"] button').count() == 4
+        and page.locator('[data-mode]').count() == 7,
+        f"{sample} {mode}: methyl overview/filter/mode controls missing",
+    )
+    methyl_support = page.evaluate(
+        """() => {
+          const summary=JSON.parse(document.getElementById('pageData').textContent).summary;
+          return {
+            signal:Number(summary.methylSignalDirectSupport),
+            background:Number(summary.methylBackgroundDirectSupport)
+          };
+        }"""
+    )
+    methyl_overview_text = page.locator(
+        '[data-testid="methyl-overview"]'
+    ).inner_text()
+    require(
+        "signal / RR-only background reads" in methyl_overview_text
+        and (
+            f"{methyl_support['signal']:,} / "
+            f"{methyl_support['background']:,}"
+        )
+        in methyl_overview_text,
+        f"{sample} {mode}: signal/background read support is not explicit "
+        f"{methyl_support}",
+    )
 
     page.locator("#genome").scroll_into_view_if_needed()
     page.wait_for_timeout(250)
@@ -466,17 +553,61 @@ def audit_sample(page: Page, sample: str, output: Path, mode: str) -> dict[str, 
         f"{sample} {mode}: initial unfiltered count mismatch",
     )
     legend_multiselect = {}
-    for mode_key in ("coarse", "hp", "status", "k", "annotation", "resolution"):
+    for mode_key in ("coarse", "hp", "status", "k", "annotation"):
         legend_multiselect[mode_key] = exercise_legend_mode(
             page,
             sample=sample,
             viewport=mode,
             mode_key=mode_key,
             total_groups=total_groups,
-            keep_second_selected=mode_key == "resolution",
+            keep_second_selected=False,
         )
+    if METHYL_FILTER_COUNTS[sample]["signal"]:
+        legend_multiselect["methyl"] = exercise_legend_mode(
+            page,
+            sample=sample,
+            viewport=mode,
+            mode_key="methyl",
+            total_groups=total_groups,
+        )
+    else:
+        page.locator('[data-mode="methyl"]').click()
+        require(
+            page.locator("#legend .legend-btn").count() == 1
+            and displayed_region_count(page) == total_groups,
+            f"{sample} {mode}: no-overlay methyl mode contract failed",
+        )
+        legend_multiselect["methyl"] = {
+            "keys": ["NOT_IN_FORMAL_OVERLAY"],
+            "selectedKeys": [],
+            "unionCount": total_groups,
+            "secondOnlyCount": total_groups,
+        }
+    legend_multiselect["resolution"] = exercise_legend_mode(
+        page,
+        sample=sample,
+        viewport=mode,
+        mode_key="resolution",
+        total_groups=total_groups,
+        keep_second_selected=False,
+    )
     selected_keys = legend_multiselect["resolution"]["selectedKeys"]
     legend_buttons = page.locator("#legend .legend-btn")
+
+    methyl_filter_results = {}
+    for methyl_filter in ("signal", "aligned", "resolved"):
+        page.locator(f'[data-methyl-filter="{methyl_filter}"]').click()
+        expected_methyl = METHYL_FILTER_COUNTS[sample][methyl_filter]
+        actual_methyl = displayed_region_count(page)
+        require(
+            actual_methyl == expected_methyl,
+            f"{sample} {mode}: methyl filter {methyl_filter} expected "
+            f"{expected_methyl}, got {actual_methyl}",
+        )
+        methyl_filter_results[methyl_filter] = actual_methyl
+        page.locator('[data-methyl-filter="all"]').click()
+    for key in selected_keys:
+        page.locator(f'[data-legend-key="{key}"]').click()
 
     page.locator("#clearSearch").click()
     first_region = page.locator("#regionList .region-button").first
@@ -557,7 +688,6 @@ def audit_sample(page: Page, sample: str, output: Path, mode: str) -> dict[str, 
         f"{annotation_counts}",
     )
 
-    page.locator(f'[data-legend-key="{selected_keys[0]}"]').click()
     page.locator('[data-annotation-filter="cgc_drug"]').click()
     page.wait_for_timeout(150)
     expected_and_count = page.evaluate(
@@ -626,6 +756,42 @@ def audit_sample(page: Page, sample: str, output: Path, mode: str) -> dict[str, 
     page.locator('[data-annotation-filter="all"]').click()
     page.locator('[data-mode="resolution"]').click()
 
+    methyl_projection: dict[str, Any] | None = None
+    if METHYL_FILTER_COUNTS[sample]["resolved"]:
+        for button in page.locator(
+            '#legend .legend-btn[aria-pressed="true"]'
+        ).all():
+            button.click()
+        page.locator("#clearSearch").click()
+        page.locator('[data-methyl-filter="resolved"]').click()
+        page.locator("#regionList .region-button").first.click()
+        projection_edges = page.locator(
+            '#candidateExplorer [data-methyl-projection="true"]'
+        ).count()
+        projection_rows = page.locator(
+            '.candidate-edge-table [data-methyl-projection="true"]'
+        ).count()
+        methyl_projection = {
+            "edges": projection_edges,
+            "table_rows": projection_rows,
+            "detail": page.locator("#regionDetail .detail-id").inner_text(),
+        }
+        require(
+            projection_edges >= 1
+            and projection_rows >= 1
+            and page.locator(
+                '[data-testid="methyl-evidence-panel"]'
+            ).count()
+            == 1
+            and "focal→partner"
+            in page.locator(
+                '[data-testid="methyl-evidence-panel"]'
+            ).inner_text(),
+            f"{sample} {mode}: resolved methyl candidate projection missing "
+            f"{methyl_projection}",
+        )
+        page.locator('[data-methyl-filter="all"]').click()
+
     if sample == "HCC1395":
         for button in page.locator(
             '#legend .legend-btn[aria-pressed="true"]'
@@ -688,6 +854,52 @@ def audit_sample(page: Page, sample: str, output: Path, mode: str) -> dict[str, 
         require(
             page.locator("#candidateIndex").input_value() == "2",
             f"{sample} {mode}: candidate previous control failed",
+        )
+    elif sample == "H2009":
+        page.locator("#clearSearch").click()
+        page.locator('[data-methyl-filter="aligned"]').click()
+        page.locator("#regionSearch").fill("chr4:2307521")
+        page.locator("#searchForm button[type=submit]").click()
+        page.wait_for_timeout(250)
+        aligned_panel = page.locator(
+            '[data-testid="methyl-evidence-panel"]'
+        )
+        require(
+            displayed_region_count(page) == 1
+            and aligned_panel.count() == 1
+            and "ALIGNED" in aligned_panel.inner_text()
+            and "V=0.618" in aligned_panel.inner_text()
+            and "permutation p=0.002" in aligned_panel.inner_text()
+            and "ABSTAIN_RESOURCE_LIMIT" in aligned_panel.inner_text()
+            and page.locator("#candidateExplorer").count() == 0
+            and page.locator("#regionDetail .methyl-focal").count() == 1
+            and page.locator("#regionDetail .methyl-partner").count() == 1,
+            f"{sample} {mode}: focal-aligned/resource-ABSTAIN contract failed",
+        )
+        page.locator("#regionDetail").screenshot(
+            path=str(output / f"H2009_{mode}_methyl_aligned.png")
+        )
+        page.locator("#clearSearch").click()
+        page.locator('[data-methyl-filter="resolved"]').click()
+        page.locator("#regionSearch").fill("chr18:567920")
+        page.locator("#searchForm button[type=submit]").click()
+        page.wait_for_timeout(250)
+        require(
+            displayed_region_count(page) == 1
+            and "6/6 global-best trees"
+            in page.locator(
+                '[data-testid="methyl-evidence-panel"]'
+            ).inner_text()
+            and page.locator(
+                '#candidateExplorer [data-methyl-projection="true"]'
+            ).count()
+            >= 1
+            and "TIED_SAME_TOPOLOGY"
+            in page.locator("#regionDetail").inner_text(),
+            f"{sample} {mode}: chr18 tied/local-resolved projection failed",
+        )
+        page.locator("#regionDetail").screenshot(
+            path=str(output / f"H2009_{mode}_methyl_projection.png")
         )
 
     post_info = geometry(page)
@@ -782,6 +994,8 @@ def audit_sample(page: Page, sample: str, output: Path, mode: str) -> dict[str, 
         "annotation_counts": annotation_counts,
         "annotation_and_count": expected_and_count,
         "annotation_scroll_geometry": annotation_scroll_geometry,
+        "methyl_filter_counts": methyl_filter_results,
+        "methyl_projection": methyl_projection,
         "legend_multiselect": legend_multiselect,
         "console_errors": console_errors,
         "external_requests": external_requests,
@@ -798,7 +1012,7 @@ def main() -> int:
     samples = tuple(args.sample) if args.sample else SAMPLES
     receipt: dict[str, Any] = {
         "schema_name": "intersubmod.exact_ps_layered_workstation.browser_audit",
-        "schema_version": "1.1.0",
+        "schema_version": "1.2.0",
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "authority": AUTHORITY,
         "ui_contract": UI_CONTRACT,
@@ -859,11 +1073,20 @@ def main() -> int:
             for mode in VIEWPORTS
         }
         expected_screenshots.update(
+            f"index_{mode}_methyl.png" for mode in VIEWPORTS
+        )
+        expected_screenshots.update(
             f"{sample}_{mode}_{panel}.png"
             for sample in samples
             for mode in VIEWPORTS
             for panel in ("genome", "detail", "top")
         )
+        if "H2009" in samples:
+            expected_screenshots.update(
+                f"H2009_{mode}_{panel}.png"
+                for mode in VIEWPORTS
+                for panel in ("methyl_aligned", "methyl_projection")
+            )
         receipt["artifacts"] = {
             name: screenshot_record(output / name)
             for name in sorted(expected_screenshots)

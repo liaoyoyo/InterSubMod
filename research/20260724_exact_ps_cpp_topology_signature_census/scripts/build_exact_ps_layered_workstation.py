@@ -68,6 +68,35 @@ GENE_DRUG_SOURCE_PATHS = {
         "/big7_disk/liaoyoyo2001/gene_annotation/dgidb_interactions.tsv"
     ),
 }
+METHYL_OVERLAY_ROOT = (
+    REPO_ROOT
+    / "research"
+    / "20260725_methyl_alt_ref_topology_overlay_validation"
+)
+METHYL_OVERLAY_PATHS = {
+    "pair_join": (
+        METHYL_OVERLAY_ROOT
+        / "data"
+        / "formal_pair_alt_ref_topology_join.tsv"
+    ),
+    "focal_control_join": (
+        METHYL_OVERLAY_ROOT
+        / "data"
+        / "focal_alt_ref_control_join.tsv"
+    ),
+    "lane_join": (
+        METHYL_OVERLAY_ROOT
+        / "data"
+        / "strict_hp_lane_cpp_topology_join.tsv"
+    ),
+}
+METHYL_OVERLAY_RECEIPT_PATH = (
+    METHYL_OVERLAY_ROOT / "results" / "validation_receipt.json"
+)
+METHYL_OVERLAY_REPORT_PATH = (
+    METHYL_OVERLAY_ROOT
+    / "20260725_ALTREF甲基差異與latest候選拓撲對應驗證_01.html"
+)
 FUNNEL_PATH = (
     TOPIC_ROOT / "data" / "20260724_exactPS_k_hp_funnel_census_01.json"
 )
@@ -100,7 +129,7 @@ DISPLAY_LABELS = {
     "H2009": "H2009",
     "COLO829": "COLO829",
 }
-UI_CONTRACT = "layered-workstation-exact-ps-v3"
+UI_CONTRACT = "layered-workstation-exact-ps-v4"
 AUTHORITY_NAME = "20260724-exact-ps-hp-strict-read-linkage"
 CHROM_LENGTHS = {
     "chr1": 248956422,
@@ -418,6 +447,576 @@ def gene_drug_hits(
     )
 
 
+METHYL_PAIR_HEADER = tuple(
+    """
+    sample focal partner locus_short g1_informative_reads g1_groups g1_table
+    g1_cramers_v g1_delta_alt_fraction g1_q_by g1_conditional_p
+    g1_enriched_group same_W W_containers direct_support_total
+    focal_ref_alt_status focal_alt_reads focal_ref_reads focal_joint_v
+    focal_joint_p candidate_T_status candidate_T_minimum_trees
+    candidate_T_best_ties candidate_T_shape candidate_topology_resolution
+    candidate_pair_relation_status candidate_pair_order
+    candidate_pair_order_focal_before_count
+    candidate_pair_order_partner_before_count
+    candidate_pair_order_incomparable_count endpoint_b_status
+    """.split()
+)
+METHYL_FOCAL_HEADER = tuple(
+    """
+    sample locus n_ALT n_REF joint_status joint_testable joint_V joint_p_perm
+    axis_aligned classification REF_only_evaluable
+    REF_only_stable_multigroup background_interpretation not_testable_reason
+    """.split()
+)
+METHYL_LANE_HEADER = tuple(
+    """
+    sample chrom focal_pos partner_pos pair_label linkage_basis hp_family
+    phase_set component_id W_k W_start W_end direct_support lane_role state_RR
+    state_RA state_AR state_AA cpp_region_id cpp_block_k cpp_active_k
+    cpp_family_status cpp_unit_status cpp_read_af_status cpp_pair_status
+    cpp_minimum_vertex_sets cpp_total_trees cpp_best_tree_ties
+    cpp_best_tree_unique cpp_best_score cpp_shape cpp_pair_order
+    factorization_resolution_class factorization_global_best_signature_count
+    factorization_coarse_classes cpp_pair_relation_status
+    cpp_pair_order_across_best cpp_pair_order_focal_before_count
+    cpp_pair_order_partner_before_count cpp_pair_order_incomparable_count
+    cpp_reason cpp_focal_ref cpp_focal_alt cpp_partner_ref cpp_partner_alt
+    cpp_input_vaf_eligible
+    """.split()
+)
+
+
+def read_tsv_exact(path: Path, expected_header: tuple[str, ...]) -> list[dict[str, str]]:
+    require(path.is_file(), f"missing TSV: {path}")
+    with path.open(encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle, delimiter="\t")
+        require(
+            tuple(reader.fieldnames or ()) == expected_header,
+            f"TSV header drift: {path}",
+        )
+        rows = list(reader)
+    require(rows, f"empty TSV: {path}")
+    return rows
+
+
+def strict_tsv_bool(value: Any, label: str) -> bool:
+    text = str(value)
+    require(text in {"True", "False"}, f"invalid boolean {label}: {text}")
+    return text == "True"
+
+
+def optional_tsv_bool(value: Any, label: str) -> bool | None:
+    if value in {"", None}:
+        return None
+    return strict_tsv_bool(value, label)
+
+
+def optional_int(value: Any) -> int | None:
+    return None if value in {"", None} else int(value)
+
+
+def optional_float(value: Any) -> float | None:
+    if value in {"", None}:
+        return None
+    result = float(value)
+    require(math.isfinite(result), f"non-finite numeric value: {value}")
+    return result
+
+
+def parse_variant_coordinate(value: str) -> tuple[str, int]:
+    match = re.fullmatch(
+        r"(chr(?:[1-9]|1\d|2[0-2])):(\d+)(?:\s+[ACGTN]+>[ACGTN]+)?",
+        value.strip(),
+    )
+    require(match is not None, f"invalid variant coordinate: {value}")
+    return match.group(1), int(match.group(2))
+
+
+def load_methyl_overlay_authority() -> dict[str, Any]:
+    receipt = load_json(METHYL_OVERLAY_RECEIPT_PATH)
+    require(
+        receipt.get("schema_name")
+        == "intersubmod.methyl_alt_ref_topology_overlay.validation_receipt"
+        and receipt.get("schema_version") == "1.1.0"
+        and receipt.get("all_pass") is True,
+        "unexpected/non-PASS methyl-overlay receipt",
+    )
+    all_true(receipt.get("checks") or {}, "methyl_overlay_receipt.checks")
+    scope = receipt.get("scope") or {}
+    require(
+        scope
+        == {
+            "formal_G1_pairs": 7,
+            "strict_HP_lanes": 10,
+            "focal_REF_ALT_controls": 7,
+            "HCC_crosssource_pair": True,
+        },
+        "methyl-overlay scope mismatch",
+    )
+    headline = receipt.get("headline") or {}
+    require(
+        int(headline.get("formal_source_rows_evaluated", -1)) == 407738
+        and int(headline.get("formal_partner_G1_pairs", -1)) == 7
+        and int(headline.get("same_W_pairs", -1)) == 7
+        and int(headline.get("direct_HP_lanes", -1)) == 10
+        and int(headline.get("formal_signal_lanes", -1)) == 7
+        and int(headline.get("paired_background_lanes", -1)) == 3
+        and int(headline.get("direct_support_sum", -1)) == 790
+        and int(headline.get("signal_direct_support_sum", -1)) == 638
+        and int(headline.get("background_direct_support_sum", -1)) == 152
+        and int(headline.get("focal_REF_ALT_joint_testable", -1)) == 3
+        and int(headline.get("focal_REF_ALT_axis_aligned", -1)) == 1
+        and int(headline.get("latest_unique_AF_candidate_pairs", -1)) == 2
+        and int(headline.get("latest_AF_tied_pairs", -1)) == 1
+        and int(headline.get("latest_resource_abstain_pairs", -1)) == 4
+        and int(
+            headline.get(
+                "latest_pair_relations_resolved_across_all_best_trees",
+                -1,
+            )
+        )
+        == 3,
+        "methyl-overlay headline regression failed",
+    )
+    outputs = receipt.get("outputs") or {}
+    for key, path in METHYL_OVERLAY_PATHS.items():
+        identity = outputs.get(key) or {}
+        require(
+            Path(str(identity.get("path", ""))).resolve() == path.resolve()
+            and identity.get("sha256") == sha256_file(path),
+            f"methyl-overlay output identity mismatch: {key}",
+        )
+    candidate_identity = (
+        (receipt.get("inputs") or {}).get("candidate_factorization_receipt")
+        or {}
+    )
+    candidate_receipt_path = CANDIDATE_ROOT / "receipt.json"
+    require(
+        Path(str(candidate_identity.get("path", ""))).resolve()
+        == candidate_receipt_path.resolve()
+        and candidate_identity.get("sha256")
+        == sha256_file(candidate_receipt_path),
+        "methyl-overlay candidate authority is not current all7_v2",
+    )
+    source_identity = (
+        (receipt.get("inputs") or {}).get(
+            "candidate_factorization_current_source"
+        )
+        or {}
+    )
+    source_path = (
+        TOPIC_ROOT / "cpp" / "exact_topology_candidate_factorization.cpp"
+    )
+    require(
+        Path(str(source_identity.get("path", ""))).resolve()
+        == source_path.resolve()
+        and source_identity.get("byte_identical_to_receipt") is True
+        and source_identity.get("current_sha256") == sha256_file(source_path)
+        and source_identity.get("receipt_bound_sha256")
+        == sha256_file(source_path),
+        "methyl-overlay factorization source identity mismatch",
+    )
+    claim_ceiling = str(receipt.get("claim_ceiling") or "")
+    require(
+        "Must not claim causal methylation" in claim_ceiling
+        and "clone identity" in claim_ceiling
+        and "methyl replication in DORADO" in claim_ceiling,
+        "methyl-overlay claim ceiling is incomplete",
+    )
+
+    pair_rows = read_tsv_exact(
+        METHYL_OVERLAY_PATHS["pair_join"], METHYL_PAIR_HEADER
+    )
+    focal_rows = read_tsv_exact(
+        METHYL_OVERLAY_PATHS["focal_control_join"],
+        METHYL_FOCAL_HEADER,
+    )
+    lane_rows = read_tsv_exact(
+        METHYL_OVERLAY_PATHS["lane_join"], METHYL_LANE_HEADER
+    )
+    require(
+        len(pair_rows) == len(focal_rows) == 7 and len(lane_rows) == 10,
+        "methyl-overlay row-count mismatch",
+    )
+
+    focal_by_locus: dict[tuple[str, str], Mapping[str, str]] = {}
+    for raw in focal_rows:
+        key = (raw["sample"], raw["locus"])
+        require(
+            key not in focal_by_locus,
+            f"duplicate focal-control key: {key}",
+        )
+        focal_by_locus[key] = raw
+
+    pairs: list[dict[str, Any]] = []
+    pair_by_key: dict[tuple[str, str, int, int], dict[str, Any]] = {}
+    pair_by_locus: dict[tuple[str, str], dict[str, Any]] = {}
+    for raw in pair_rows:
+        focal_chrom, focal_pos = parse_variant_coordinate(raw["focal"])
+        partner_chrom, partner_pos = parse_variant_coordinate(raw["partner"])
+        sample = raw["sample"]
+        require(
+            sample in EXPECTED_SAMPLES
+            and focal_chrom == partner_chrom
+            and strict_tsv_bool(raw["same_W"], f"{sample}.same_W"),
+            f"invalid formal methyl pair: {sample} {raw['focal']}",
+        )
+        key = (sample, focal_chrom, focal_pos, partner_pos)
+        locus_key = (sample, raw["locus_short"])
+        require(
+            key not in pair_by_key
+            and locus_key not in pair_by_locus
+            and (sample, raw["locus_short"]) in focal_by_locus,
+            f"duplicate/orphan methyl pair: {key}",
+        )
+        table = json.loads(raw["g1_table"])
+        groups = [value.strip() for value in raw["g1_groups"].split(",")]
+        require(
+            isinstance(table, list)
+            and len(table) == len(groups)
+            and all(
+                isinstance(item, list)
+                and len(item) == 2
+                and all(isinstance(value, int) and value >= 0 for value in item)
+                for item in table
+            ),
+            f"invalid formal G1 table: {key}",
+        )
+        focal_raw = focal_by_locus[locus_key]
+        focal_status = focal_raw["classification"]
+        require(
+            focal_status
+            in {"ALIGNED", "BELOW_EFFECT", "INSUFFICIENT_REF", "UNSTABLE"},
+            f"unexpected focal-control class: {key} {focal_status}",
+        )
+        pair = {
+            "pairId": "|".join(map(str, key)),
+            "sample": sample,
+            "chrom": focal_chrom,
+            "focalPos": focal_pos,
+            "partnerPos": partner_pos,
+            "focalLabel": raw["focal"],
+            "partnerLabel": raw["partner"],
+            "locusShort": raw["locus_short"],
+            "formalG1": {
+                "informativeReads": int(raw["g1_informative_reads"]),
+                "groups": groups,
+                "table": table,
+                "cramersV": float(raw["g1_cramers_v"]),
+                "deltaAltFraction": float(raw["g1_delta_alt_fraction"]),
+                "qBy": float(raw["g1_q_by"]),
+                "conditionalP": float(raw["g1_conditional_p"]),
+                "enrichedGroup": raw["g1_enriched_group"],
+                "sameW": True,
+                "wContainers": int(raw["W_containers"]),
+                "directSupportTotal": int(raw["direct_support_total"]),
+            },
+            "focalControl": {
+                "status": focal_status,
+                "jointStatus": focal_raw["joint_status"],
+                "jointTestable": strict_tsv_bool(
+                    focal_raw["joint_testable"],
+                    f"{sample}.joint_testable",
+                ),
+                "axisAligned": strict_tsv_bool(
+                    focal_raw["axis_aligned"],
+                    f"{sample}.axis_aligned",
+                ),
+                "altReads": int(focal_raw["n_ALT"]),
+                "refReads": int(focal_raw["n_REF"]),
+                "jointV": optional_float(focal_raw["joint_V"]),
+                "permutationP": optional_float(
+                    focal_raw["joint_p_perm"]
+                ),
+                "refOnlyEvaluable": strict_tsv_bool(
+                    focal_raw["REF_only_evaluable"],
+                    f"{sample}.REF_only_evaluable",
+                ),
+                "refOnlyStableMultigroup": strict_tsv_bool(
+                    focal_raw["REF_only_stable_multigroup"],
+                    f"{sample}.REF_only_stable_multigroup",
+                ),
+                "backgroundInterpretation": focal_raw[
+                    "background_interpretation"
+                ],
+                "notTestableReason": focal_raw["not_testable_reason"],
+            },
+            "candidatePair": {
+                "status": raw["candidate_T_status"],
+                "minimumVertexSets": optional_int(
+                    raw["candidate_T_minimum_trees"]
+                ),
+                "bestTreeTies": optional_int(raw["candidate_T_best_ties"]),
+                "shape": raw["candidate_T_shape"] or "NA",
+                "resolution": (
+                    raw["candidate_topology_resolution"] or "NOT_AVAILABLE"
+                ),
+                "relationStatus": raw[
+                    "candidate_pair_relation_status"
+                ],
+                "order": raw["candidate_pair_order"],
+                "focalBeforeCount": int(
+                    raw["candidate_pair_order_focal_before_count"]
+                ),
+                "partnerBeforeCount": int(
+                    raw["candidate_pair_order_partner_before_count"]
+                ),
+                "incomparableCount": int(
+                    raw["candidate_pair_order_incomparable_count"]
+                ),
+            },
+            "lanes": [],
+        }
+        pairs.append(pair)
+        pair_by_key[key] = pair
+        pair_by_locus[locus_key] = pair
+
+    lane_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    for raw in lane_rows:
+        key = (
+            raw["sample"],
+            raw["chrom"],
+            int(raw["focal_pos"]),
+            int(raw["partner_pos"]),
+        )
+        pair = pair_by_key.get(key)
+        require(pair is not None, f"orphan methyl lane: {key}")
+        region_key = (raw["sample"], raw["cpp_region_id"])
+        require(
+            region_key not in lane_by_key,
+            f"duplicate methyl lane region: {region_key}",
+        )
+        states = {
+            label: int(raw[f"state_{label}"])
+            for label in ("RR", "RA", "AR", "AA")
+        }
+        lane_role = raw["lane_role"]
+        require(
+            lane_role in {"FORMAL_SIGNAL", "PAIRED_BACKGROUND"}
+            and sum(states.values()) == int(raw["direct_support"])
+            and (
+                lane_role == "FORMAL_SIGNAL"
+                if states["RA"] + states["AR"] + states["AA"] > 0
+                else lane_role == "PAIRED_BACKGROUND"
+            ),
+            f"invalid methyl lane role/states: {region_key}",
+        )
+        relation_status = raw["cpp_pair_relation_status"]
+        relation_order = raw["cpp_pair_order_across_best"]
+        methyl_class = (
+            "FOCAL_ALIGNED"
+            if lane_role == "FORMAL_SIGNAL"
+            and pair["focalControl"]["axisAligned"]
+            else "PAIR_RELATION_RESOLVED"
+            if lane_role == "FORMAL_SIGNAL"
+            and relation_status
+            == "RESOLVED_COMMON_ACROSS_BEST_TREES"
+            else "FORMAL_PARTNER_ASSOC"
+            if lane_role == "FORMAL_SIGNAL"
+            else "PAIRED_BACKGROUND_LANE"
+        )
+        lane = {
+            "pairId": pair["pairId"],
+            "regionId": raw["cpp_region_id"],
+            "laneRole": lane_role,
+            "methylClass": methyl_class,
+            "linkageBasis": raw["linkage_basis"],
+            "hp": raw["hp_family"],
+            "phaseSet": raw["phase_set"],
+            "componentId": raw["component_id"],
+            "wK": int(raw["W_k"]),
+            "wStart": int(raw["W_start"]),
+            "wEnd": int(raw["W_end"]),
+            "directSupport": int(raw["direct_support"]),
+            "states": states,
+            "regionCandidate": {
+                "familyStatus": raw["cpp_family_status"],
+                "unitStatus": raw["cpp_unit_status"],
+                "readAfStatus": raw["cpp_read_af_status"],
+                "pairStatus": raw["cpp_pair_status"],
+                "activeK": int(raw["cpp_active_k"]),
+                "minimumVertexSets": optional_int(
+                    raw["cpp_minimum_vertex_sets"]
+                ),
+                "totalTrees": optional_int(raw["cpp_total_trees"]),
+                "bestTreeTies": optional_int(raw["cpp_best_tree_ties"]),
+                "bestTreeUnique": optional_tsv_bool(
+                    raw["cpp_best_tree_unique"],
+                    f"{region_key}.cpp_best_tree_unique",
+                ),
+                "bestScore": raw["cpp_best_score"] or None,
+                "shape": raw["cpp_shape"],
+                "resolution": raw["factorization_resolution_class"],
+                "globalBestSignatureCount": optional_int(
+                    raw["factorization_global_best_signature_count"]
+                ),
+                "coarseClasses": raw["factorization_coarse_classes"],
+                "reason": raw["cpp_reason"],
+            },
+            "candidateRelation": {
+                "status": relation_status,
+                "order": relation_order,
+                "focalBeforeCount": int(
+                    raw["cpp_pair_order_focal_before_count"]
+                ),
+                "partnerBeforeCount": int(
+                    raw["cpp_pair_order_partner_before_count"]
+                ),
+                "incomparableCount": int(
+                    raw["cpp_pair_order_incomparable_count"]
+                ),
+            },
+            "coverage": {
+                "focalRef": int(raw["cpp_focal_ref"]),
+                "focalAlt": int(raw["cpp_focal_alt"]),
+                "partnerRef": int(raw["cpp_partner_ref"]),
+                "partnerAlt": int(raw["cpp_partner_alt"]),
+            },
+        }
+        pair["lanes"].append(lane)
+        lane_by_key[region_key] = {
+            "pair": pair,
+            "lane": lane,
+        }
+
+    require(
+        Counter(pair["sample"] for pair in pairs)
+        == Counter({"H2009": 5, "HCC1395": 1, "HCC1954": 1}),
+        "methyl-overlay pair sample distribution mismatch",
+    )
+    require(
+        sum(len(pair["lanes"]) for pair in pairs) == 10
+        and sum(
+            lane["directSupport"]
+            for pair in pairs
+            for lane in pair["lanes"]
+            if lane["laneRole"] == "FORMAL_SIGNAL"
+        )
+        == int(headline["signal_direct_support_sum"])
+        and sum(
+            lane["directSupport"]
+            for pair in pairs
+            for lane in pair["lanes"]
+            if lane["laneRole"] == "PAIRED_BACKGROUND"
+        )
+        == int(headline["background_direct_support_sum"])
+        and all(
+            len(pair["lanes"]) == pair["formalG1"]["wContainers"]
+            and sum(
+                lane["directSupport"] for lane in pair["lanes"]
+            )
+            == pair["formalG1"]["directSupportTotal"]
+            and sum(
+                lane["laneRole"] == "FORMAL_SIGNAL"
+                for lane in pair["lanes"]
+            )
+            == 1
+            for pair in pairs
+        ),
+        "methyl-overlay pair/lane conservation failed",
+    )
+    require(
+        Counter(
+            pair["focalControl"]["status"] for pair in pairs
+        )
+        == Counter(
+            {
+                "ALIGNED": 1,
+                "BELOW_EFFECT": 2,
+                "INSUFFICIENT_REF": 3,
+                "UNSTABLE": 1,
+            }
+        )
+        and sum(
+            pair["candidatePair"]["relationStatus"]
+            == "RESOLVED_COMMON_ACROSS_BEST_TREES"
+            for pair in pairs
+        )
+        == 3,
+        "methyl-overlay focal/relation partition mismatch",
+    )
+    aligned = next(
+        pair for pair in pairs if pair["focalControl"]["axisAligned"]
+    )
+    require(
+        aligned["sample"] == "H2009"
+        and aligned["chrom"] == "chr4"
+        and aligned["focalPos"] == 2307521
+        and math.isclose(
+            float(aligned["focalControl"]["jointV"]),
+            0.6175954570807748,
+            abs_tol=1e-15,
+        )
+        and math.isclose(
+            float(aligned["focalControl"]["permutationP"]),
+            0.002,
+            abs_tol=1e-15,
+        ),
+        "methyl-overlay unique focal ALIGNED case drifted",
+    )
+
+    sample_summaries: dict[str, dict[str, int]] = {}
+    for sample in EXPECTED_SAMPLES:
+        sample_pairs = [pair for pair in pairs if pair["sample"] == sample]
+        sample_lanes = [
+            lane for pair in sample_pairs for lane in pair["lanes"]
+        ]
+        sample_summaries[sample] = {
+            "formalPairs": len(sample_pairs),
+            "signalLanes": sum(
+                lane["laneRole"] == "FORMAL_SIGNAL"
+                for lane in sample_lanes
+            ),
+            "backgroundLanes": sum(
+                lane["laneRole"] == "PAIRED_BACKGROUND"
+                for lane in sample_lanes
+            ),
+            "strictLanes": len(sample_lanes),
+            "directSupport": sum(
+                lane["directSupport"] for lane in sample_lanes
+            ),
+            "signalDirectSupport": sum(
+                lane["directSupport"]
+                for lane in sample_lanes
+                if lane["laneRole"] == "FORMAL_SIGNAL"
+            ),
+            "backgroundDirectSupport": sum(
+                lane["directSupport"]
+                for lane in sample_lanes
+                if lane["laneRole"] == "PAIRED_BACKGROUND"
+            ),
+            "focalTestable": sum(
+                pair["focalControl"]["jointTestable"]
+                for pair in sample_pairs
+            ),
+            "focalAligned": sum(
+                pair["focalControl"]["axisAligned"]
+                for pair in sample_pairs
+            ),
+            "resolvedRelations": sum(
+                pair["candidatePair"]["relationStatus"]
+                == "RESOLVED_COMMON_ACROSS_BEST_TREES"
+                for pair in sample_pairs
+            ),
+        }
+    return {
+        "receipt": receipt,
+        "receiptPath": METHYL_OVERLAY_RECEIPT_PATH,
+        "receiptSha256": sha256_file(METHYL_OVERLAY_RECEIPT_PATH),
+        "paths": METHYL_OVERLAY_PATHS,
+        "pathSha256": {
+            key: sha256_file(path)
+            for key, path in METHYL_OVERLAY_PATHS.items()
+        },
+        "reportPath": METHYL_OVERLAY_REPORT_PATH,
+        "pairs": pairs,
+        "laneByKey": lane_by_key,
+        "sampleSummaries": sample_summaries,
+        "headline": headline,
+        "claimCeiling": claim_ceiling,
+    }
+
+
 def pct(numerator: int | float, denominator: int | float) -> float:
     return 0.0 if not denominator else 100.0 * float(numerator) / float(denominator)
 
@@ -658,6 +1257,7 @@ def load_authority() -> dict[str, Any]:
         "HCC technical-pair profile regression failed",
     )
     gene_drug_authority = load_gene_drug_authority()
+    methyl_overlay_authority = load_methyl_overlay_authority()
 
     census_summary = load_json(CENSUS_ROOT / "summary.json")
     cohort_census = census_summary.get("cohort") or {}
@@ -756,6 +1356,13 @@ def load_authority() -> dict[str, Any]:
         "gene_drug_receipt_sha256": gene_drug_authority[
             "receipt_sha256"
         ],
+        "methyl_overlay": methyl_overlay_authority,
+        "methyl_overlay_receipt_path": (
+            methyl_overlay_authority["receiptPath"]
+        ),
+        "methyl_overlay_receipt_sha256": (
+            methyl_overlay_authority["receiptSha256"]
+        ),
         "funnel": funnel,
         "funnel_path": FUNNEL_PATH if FUNNEL_PATH.is_file() else None,
         "funnel_sha256": funnel_sha256,
@@ -1051,6 +1658,181 @@ def compact_candidate_factorization(
     }
 
 
+def candidate_pair_relation(
+    candidate: Mapping[str, Any],
+    active_positions: Iterable[int],
+    focal: int,
+    partner: int,
+) -> dict[str, Any]:
+    positions = [int(value) for value in active_positions]
+    best_trees = int(candidate["bestTreeCount"])
+    if focal not in positions or partner not in positions:
+        return {
+            "status": "PAIR_NOT_ACTIVE_IN_GLOBAL_BEST",
+            "order": "PAIR_NOT_ACTIVE_IN_CANDIDATE",
+            "focalBeforeCount": 0,
+            "partnerBeforeCount": 0,
+            "incomparableCount": 0,
+        }
+    focal_bit = positions.index(focal)
+    partner_bit = positions.index(partner)
+    focal_before = 0
+    partner_before = 0
+    focal_acquisition_total = 0
+    partner_acquisition_total = 0
+    for parent_raw, child_raw, count_raw in candidate.get("bestEdges") or []:
+        parent = int(parent_raw)
+        child = int(child_raw)
+        count = int(count_raw)
+        delta = parent ^ child
+        require(
+            delta > 0 and not delta & (delta - 1),
+            f"candidate overlay edge is not a one-bit acquisition: {parent}->{child}",
+        )
+        bit = delta.bit_length() - 1
+        if bit == partner_bit:
+            partner_acquisition_total += count
+            if parent & (1 << focal_bit):
+                focal_before += count
+        if bit == focal_bit:
+            focal_acquisition_total += count
+            if parent & (1 << partner_bit):
+                partner_before += count
+    require(
+        focal_acquisition_total == best_trees
+        and partner_acquisition_total == best_trees,
+        "candidate overlay does not acquire both pair endpoints once per best tree",
+    )
+    incomparable = best_trees - focal_before - partner_before
+    require(
+        incomparable >= 0,
+        "candidate overlay pair-relation counts exceed best-tree count",
+    )
+    if focal_before == best_trees:
+        status = "RESOLVED_COMMON_ACROSS_BEST_TREES"
+        order = "FOCAL_BEFORE_PARTNER"
+    elif partner_before == best_trees:
+        status = "RESOLVED_COMMON_ACROSS_BEST_TREES"
+        order = "PARTNER_BEFORE_FOCAL"
+    elif incomparable == best_trees:
+        status = "RESOLVED_COMMON_ACROSS_BEST_TREES"
+        order = "INCOMPARABLE_BRANCHES"
+    else:
+        status = "UNRESOLVED_ACROSS_BEST_TREES"
+        order = "UNRESOLVED"
+    return {
+        "status": status,
+        "order": order,
+        "focalBeforeCount": focal_before,
+        "partnerBeforeCount": partner_before,
+        "incomparableCount": incomparable,
+    }
+
+
+def attach_methyl_overlay(
+    row: dict[str, Any],
+    bundle: Mapping[str, Any] | None,
+) -> None:
+    if bundle is None:
+        row["methyl"] = None
+        row["hasMethylOverlay"] = False
+        row["hasMethylSignal"] = False
+        row["hasMethylAligned"] = False
+        row["hasMethylResolvedRelation"] = False
+        row["methylClass"] = "NOT_IN_FORMAL_OVERLAY"
+        return
+
+    pair = bundle["pair"]
+    lane = bundle["lane"]
+    region_key = (pair["sample"], row["id"])
+    require(
+        lane["regionId"] == row["id"]
+        and pair["chrom"] == row["chrom"]
+        and lane["hp"] == row["hp"]
+        and lane["phaseSet"] == row["ps"]
+        and lane["componentId"] == row["component"]
+        and {pair["focalPos"], pair["partnerPos"]}
+        <= {int(value) for value in row["positions"]},
+        f"methyl/topology lane identity mismatch: {region_key}",
+    )
+    require(
+        lane["regionCandidate"]["familyStatus"] == row["familyStatus"]
+        and lane["regionCandidate"]["unitStatus"] == row["unitStatus"]
+        and lane["regionCandidate"]["readAfStatus"] == row["readStatus"]
+        and int(lane["regionCandidate"]["activeK"]) == int(row["activeK"]),
+        f"methyl/topology status mismatch: {region_key}",
+    )
+    coverage = {
+        int(item["position"]): (
+            int(item.get("ref_reads", 0)),
+            int(item.get("alt_reads", 0)),
+        )
+        for item in row.get("coverage") or []
+    }
+    require(
+        coverage.get(int(pair["focalPos"]))
+        == (
+            int(lane["coverage"]["focalRef"]),
+            int(lane["coverage"]["focalAlt"]),
+        )
+        and coverage.get(int(pair["partnerPos"]))
+        == (
+            int(lane["coverage"]["partnerRef"]),
+            int(lane["coverage"]["partnerAlt"]),
+        ),
+        f"methyl/topology coverage mismatch: {region_key}",
+    )
+    if row["candidate"] is not None:
+        require(
+            lane["regionCandidate"]["resolution"] == row["resolution"],
+            f"methyl/current candidate resolution mismatch: {region_key}",
+        )
+        current_relation = candidate_pair_relation(
+            row["candidate"],
+            row["activePositions"],
+            int(pair["focalPos"]),
+            int(pair["partnerPos"]),
+        )
+        require(
+            current_relation == lane["candidateRelation"],
+            f"methyl/current candidate pair relation mismatch: {region_key}",
+        )
+    else:
+        require(
+            lane["candidateRelation"]["status"] == "NOT_RESOLVED"
+            and lane["candidateRelation"]["order"] == "UNRESOLVED",
+            f"unranked methyl lane claims a candidate relation: {region_key}",
+        )
+
+    methyl_class = lane["methylClass"]
+    row["methyl"] = {
+        "pairId": pair["pairId"],
+        "sample": pair["sample"],
+        "chrom": pair["chrom"],
+        "focalPos": int(pair["focalPos"]),
+        "partnerPos": int(pair["partnerPos"]),
+        "focalLabel": pair["focalLabel"],
+        "partnerLabel": pair["partnerLabel"],
+        "formalG1": pair["formalG1"],
+        "focalControl": pair["focalControl"],
+        "candidatePair": pair["candidatePair"],
+        "lane": lane,
+        "claimCeiling": (
+            "read-level association only; not causal methylation, clone "
+            "identity, or cellular lineage"
+        ),
+    }
+    row["hasMethylOverlay"] = True
+    row["hasMethylSignal"] = lane["laneRole"] == "FORMAL_SIGNAL"
+    row["hasMethylAligned"] = methyl_class == "FOCAL_ALIGNED"
+    row["hasMethylResolvedRelation"] = (
+        lane["laneRole"] == "FORMAL_SIGNAL"
+        and lane["candidateRelation"]["status"]
+        == "RESOLVED_COMMON_ACROSS_BEST_TREES"
+    )
+    row["methylClass"] = methyl_class
+
+
 def compact_region(
     group: Mapping[str, Any],
     topology: Mapping[str, Any],
@@ -1309,6 +2091,11 @@ def load_sample(
     rows = []
     ranked_indices = set()
     candidate_count = 0
+    methyl_lane_by_key = authority["methyl_overlay"]["laneByKey"]
+    expected_methyl_keys = {
+        key for key in methyl_lane_by_key if key[0] == sample
+    }
+    seen_methyl_keys: set[tuple[str, str]] = set()
     for index, (group, topology) in enumerate(zip(groups, topology_rows)):
         require(
             topology.get("schema_name")
@@ -1421,6 +2208,15 @@ def load_sample(
             if compact["hasCgc"]
             else "NO_CGC"
         )
+        methyl_key = (sample, compact["id"])
+        methyl_bundle = methyl_lane_by_key.get(methyl_key)
+        attach_methyl_overlay(compact, methyl_bundle)
+        if methyl_bundle is not None:
+            require(
+                methyl_key not in seen_methyl_keys,
+                f"{sample} duplicate methyl-overlay region: {compact['id']}",
+            )
+            seen_methyl_keys.add(methyl_key)
         rows.append(compact)
 
     try:
@@ -1435,6 +2231,10 @@ def load_sample(
     require(
         ranked_indices == set(census_by_index),
         f"{sample} census is not exactly the ranked subset",
+    )
+    require(
+        seen_methyl_keys == expected_methyl_keys,
+        f"{sample} methyl-overlay lane coverage mismatch",
     )
     derived_resolution = Counter(row["resolution"] for row in rows)
     expected_resolution = census_summary.get("resolution") or {}
@@ -1485,6 +2285,60 @@ def load_sample(
         for hit in row["geneDrug"]
         if hit["drugs"]
     }
+    methyl_rows = [row for row in rows if row["hasMethylOverlay"]]
+    methyl_pair_ids = {row["methyl"]["pairId"] for row in methyl_rows}
+    methyl_signal_rows = [
+        row for row in methyl_rows if row["hasMethylSignal"]
+    ]
+    methyl_summary = {
+        "formalPairs": len(methyl_pair_ids),
+        "signalLanes": len(methyl_signal_rows),
+        "backgroundLanes": sum(
+            row["methyl"]["lane"]["laneRole"] == "PAIRED_BACKGROUND"
+            for row in methyl_rows
+        ),
+        "strictLanes": len(methyl_rows),
+        "directSupport": sum(
+            int(row["methyl"]["lane"]["directSupport"])
+            for row in methyl_rows
+        ),
+        "signalDirectSupport": sum(
+            int(row["methyl"]["lane"]["directSupport"])
+            for row in methyl_signal_rows
+        ),
+        "backgroundDirectSupport": sum(
+            int(row["methyl"]["lane"]["directSupport"])
+            for row in methyl_rows
+            if row["methyl"]["lane"]["laneRole"] == "PAIRED_BACKGROUND"
+        ),
+        "focalTestable": len(
+            {
+                row["methyl"]["pairId"]
+                for row in methyl_rows
+                if row["methyl"]["focalControl"]["jointTestable"]
+            }
+        ),
+        "focalAligned": len(
+            {
+                row["methyl"]["pairId"]
+                for row in methyl_rows
+                if row["methyl"]["focalControl"]["axisAligned"]
+            }
+        ),
+        "resolvedRelations": len(
+            {
+                row["methyl"]["pairId"]
+                for row in methyl_signal_rows
+                if row["methyl"]["lane"]["candidateRelation"]["status"]
+                == "RESOLVED_COMMON_ACROSS_BEST_TREES"
+            }
+        ),
+    }
+    require(
+        methyl_summary
+        == authority["methyl_overlay"]["sampleSummaries"][sample],
+        f"{sample} methyl-overlay sample summary mismatch: {methyl_summary}",
+    )
     if sample in {"HCC1395", "HCC1395_DORADO"}:
         chrom, target_start, target_end = TARGET_REGION
         overlaps = [
@@ -1535,6 +2389,10 @@ def load_sample(
         "cgcDrugActiveRegions": cgc_drug_active_regions,
         "cgcGenes": len(cgc_gene_ids),
         "cgcDrugGenes": len(cgc_drug_gene_ids),
+        **{
+            f"methyl{key[0].upper()}{key[1:]}": value
+            for key, value in methyl_summary.items()
+        },
     }
     return {
         "sample": sample,
@@ -1553,6 +2411,23 @@ def load_sample(
             "candidateReceipt": str(authority["candidate_receipt_path"]),
             "geneDrugAnnotation": str(authority["gene_drug_path"]),
             "geneDrugReceipt": str(authority["gene_drug_receipt_path"]),
+            "methylOverlayPairJoin": str(
+                authority["methyl_overlay"]["paths"]["pair_join"]
+            ),
+            "methylOverlayFocalControlJoin": str(
+                authority["methyl_overlay"]["paths"][
+                    "focal_control_join"
+                ]
+            ),
+            "methylOverlayLaneJoin": str(
+                authority["methyl_overlay"]["paths"]["lane_join"]
+            ),
+            "methylOverlayReceipt": str(
+                authority["methyl_overlay"]["receiptPath"]
+            ),
+            "methylOverlayReport": str(
+                authority["methyl_overlay"]["reportPath"]
+            ),
             **(
                 {
                     "targetStrictEndpointReceipt": str(
@@ -1576,6 +2451,18 @@ def load_sample(
             "candidateFactorization": sha256_file(candidate_path),
             "geneDrugAnnotation": authority["gene_drug_sha256"],
             "geneDrugReceipt": authority["gene_drug_receipt_sha256"],
+            "methylOverlayPairJoin": authority["methyl_overlay"][
+                "pathSha256"
+            ]["pair_join"],
+            "methylOverlayFocalControlJoin": authority["methyl_overlay"][
+                "pathSha256"
+            ]["focal_control_join"],
+            "methylOverlayLaneJoin": authority["methyl_overlay"][
+                "pathSha256"
+            ]["lane_join"],
+            "methylOverlayReceipt": authority["methyl_overlay"][
+                "receiptSha256"
+            ],
         },
     }
 
@@ -1649,6 +2536,12 @@ td.num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right}
 .annotation-overview b{display:block;font:800 1rem/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}
 .annotation-overview .annotation-contract{grid-column:span 2;background:#fff1ee}
 .annotation-overview .annotation-contract b{font-family:inherit;font-size:.78rem;color:#7f2f25}
+.methyl-overview{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;margin-top:1rem;border:1px solid var(--line);background:var(--line)}
+.methyl-overview>div{min-width:0;padding:.8rem;background:#f7f3ef}
+.methyl-overview span{display:block;color:var(--muted);font-size:.68rem}
+.methyl-overview b{display:block;font:800 1rem/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}
+.methyl-overview .methyl-contract{grid-column:1/-1;background:#fff7e7}
+.methyl-overview .methyl-contract b{font-family:inherit;font-size:.78rem;color:#704716}
 .cohort-dashboard{display:grid;gap:1rem}
 .cohort-panel{min-width:0;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);padding:1.1rem}
 .cohort-panel-head{display:flex;justify-content:space-between;gap:1rem;align-items:start;margin-bottom:.9rem}
@@ -1701,11 +2594,14 @@ td.num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right}
 .claim-boundary strong{display:block;margin-bottom:.25rem;color:#7f2f25}
 .controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:end;margin:1rem 0}
 .mode-buttons,.legend{display:flex;flex-wrap:wrap;gap:.35rem}
-.mode-btn,.legend-btn,.action{min-height:40px;padding:.42rem .7rem;border:1px solid var(--line);background:var(--panel);cursor:pointer}
+.mode-btn,.legend-btn,.action{min-height:44px;padding:.42rem .7rem;border:1px solid var(--line);background:var(--panel);cursor:pointer}
 .mode-btn[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
 .annotation-filters{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.75rem}
-.annotation-filter{min-height:40px;padding:.42rem .7rem;border:1px solid var(--line);background:var(--panel);cursor:pointer}
+.annotation-filter{min-height:44px;padding:.42rem .7rem;border:1px solid var(--line);background:var(--panel);cursor:pointer}
 .annotation-filter[aria-pressed=true]{background:#7f2f25;border-color:#7f2f25;color:#fff}
+.methyl-filters{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.75rem}
+.methyl-filter{min-height:44px;padding:.42rem .7rem;border:1px solid var(--line);background:var(--panel);cursor:pointer}
+.methyl-filter[aria-pressed=true]{background:#9a4f28;border-color:#9a4f28;color:#fff}
 .legend-btn{display:inline-flex;align-items:center;gap:.35rem}
 .legend-btn[aria-pressed=true]{outline:3px solid color-mix(in srgb,var(--c),transparent 55%);border-color:var(--c);font-weight:800}
 .legend-dot{width:.72rem;height:.72rem;background:var(--c);border-radius:50%}
@@ -1736,6 +2632,10 @@ td.num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right}
 .locus-card.active{background:#e8f2ed}
 .locus-card.cancer-locus{box-shadow:inset 0 0 0 2px var(--purple)}
 .locus-card.drug-locus{box-shadow:inset 0 0 0 3px var(--danger)}
+.locus-card.methyl-focal::before,.locus-card.methyl-partner::before{position:absolute;top:0;left:0;right:0;padding:.16rem .35rem;color:#fff;font:800 .58rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase}
+.locus-card.methyl-focal::before{content:"METHYL FOCAL";background:#d5663a}
+.locus-card.methyl-partner::before{content:"LINKED PARTNER";background:#6b5592}
+.locus-card.methyl-focal .site,.locus-card.methyl-partner .site{margin-top:1rem}
 .locus-card .site{display:flex;justify-content:space-between;gap:.5rem;font-size:.72rem;color:var(--muted)}
 .locus-card .position{display:block;margin:.2rem 0 .45rem;font:800 .86rem/1.25 ui-monospace,SFMono-Regular,Menlo,monospace}
 .locus-card .af{font:800 1.2rem/1 ui-monospace,SFMono-Regular,Menlo,monospace}
@@ -1751,6 +2651,14 @@ td.num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right}
 .gene-drug-table .drug-list{max-width:620px;line-height:1.7;overflow-wrap:anywhere}
 .gene-drug-table .source-list{display:block;margin-top:.25rem;color:var(--muted);font-size:.68rem}
 .claim-ceiling{padding:.75rem .85rem;border-left:4px solid var(--amber);background:#fff7e7;color:#62451f;font-size:.75rem}
+.methyl-panel{border-left:5px solid #d5663a;background:#fffbf4}
+.methyl-panel.background{border-left-color:#6483a3;background:#f5f8fb}
+.methyl-panel>summary{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.methyl-ladder{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;border:1px solid var(--line);background:var(--line);margin:.7rem 0}
+.methyl-ladder>div{min-width:0;padding:.75rem;background:var(--panel)}
+.methyl-ladder span{display:block;color:var(--muted);font-size:.68rem}
+.methyl-ladder b{display:block;margin-top:.2rem;font:800 .83rem/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}
+.methyl-projection-note{padding:.75rem .85rem;border-left:4px solid #d5663a;background:#fff3ea;color:#6f351d;font-size:.76rem}
 .matrix-wrap{overflow:auto;border:1px solid var(--line);background:var(--panel)}
 .state-matrix{width:max-content;min-width:100%;border-collapse:separate;border-spacing:0}
 .state-matrix th,.state-matrix td{min-width:44px;padding:.4rem;text-align:center}
@@ -1772,6 +2680,9 @@ td.num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right}
 .edge-key{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 .edge-selected td{background:#e8f2ed}
 .edge-global-best:not(.edge-selected) td{background:#edf2f7}
+.edge-methyl-projection td{box-shadow:inset 5px 0 0 #d5663a;background:#fff3ea}
+.methyl-cohort-table small{display:block;margin-top:.2rem;color:var(--muted);font-size:.68rem;line-height:1.35}
+.methyl-aligned-cell{box-shadow:inset 5px 0 0 #d5663a;background:#fff3ea;font-weight:800}
 .edge-forced{color:var(--accent)}
 .tree{min-height:290px;border:1px solid var(--line);background:#fbfaf4;overflow:auto}
 .tree svg{display:block;min-width:520px;width:100%;height:290px}
@@ -1798,6 +2709,8 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap
   .candidate-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
   .annotation-overview{grid-template-columns:repeat(2,minmax(0,1fr))}
   .annotation-overview .annotation-contract{grid-column:span 2}
+  .methyl-overview{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .methyl-ladder{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(max-width:640px){
   .shell{width:min(100% - 20px,1480px)}
@@ -1817,6 +2730,7 @@ code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap
   .candidate-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
   .annotation-overview{grid-template-columns:1fr}
   .annotation-overview .annotation-contract{grid-column:auto}
+  .methyl-overview,.methyl-ladder{grid-template-columns:1fr}
   .cohort-panel-head{display:block}
   .cohort-panel-head .compare-tabs{margin-top:.75rem}
   .profile-row{grid-template-columns:minmax(115px,.65fr) minmax(190px,1.35fr)}
@@ -1873,6 +2787,20 @@ ANNOTATION_LABELS = {
     "CGC_ONLY": "癌症基因・無 approved 抗腫瘤藥交集",
     "NO_CGC": "已評估・無癌症基因 locus 命中",
 }
+METHYL_COLORS = {
+    "FOCAL_ALIGNED": "#d5663a",
+    "PAIR_RELATION_RESOLVED": "#b66e20",
+    "FORMAL_PARTNER_ASSOC": "#6b5592",
+    "PAIRED_BACKGROUND_LANE": "#6483a3",
+    "NOT_IN_FORMAL_OVERLAY": "#c4c3ba",
+}
+METHYL_LABELS = {
+    "FOCAL_ALIGNED": "focal ALT/REF aligned（1/7 targeted pairs）",
+    "PAIR_RELATION_RESOLVED": "formal G1＋focal→partner 已跨 best trees 解出",
+    "FORMAL_PARTNER_ASSOC": "formal G1 partner association",
+    "PAIRED_BACKGROUND_LANE": "同 pair 的 RR-only HP background",
+    "NOT_IN_FORMAL_OVERLAY": "未進本次 formal-positive overlay（不是陰性）",
+}
 
 
 def distribution_html(
@@ -1920,6 +2848,21 @@ def sample_page(authority: Mapping[str, Any], data: Mapping[str, Any]) -> str:
     cgc_drug_active_regions = int(summary.get("cgcDrugActiveRegions", 0))
     cgc_genes = int(summary.get("cgcGenes", 0))
     cgc_drug_genes = int(summary.get("cgcDrugGenes", 0))
+    methyl_formal_pairs = int(summary.get("methylFormalPairs", 0))
+    methyl_signal_lanes = int(summary.get("methylSignalLanes", 0))
+    methyl_background_lanes = int(summary.get("methylBackgroundLanes", 0))
+    methyl_strict_lanes = int(summary.get("methylStrictLanes", 0))
+    methyl_signal_direct_support = int(
+        summary.get("methylSignalDirectSupport", 0)
+    )
+    methyl_background_direct_support = int(
+        summary.get("methylBackgroundDirectSupport", 0)
+    )
+    methyl_focal_testable = int(summary.get("methylFocalTestable", 0))
+    methyl_focal_aligned = int(summary.get("methylFocalAligned", 0))
+    methyl_resolved_relations = int(
+        summary.get("methylResolvedRelations", 0)
+    )
 
     page_payload = {
         "sample": sample,
@@ -1973,6 +2916,10 @@ def sample_page(authority: Mapping[str, Any], data: Mapping[str, Any]) -> str:
             "annotation": {
                 key: {"label": ANNOTATION_LABELS[key], "color": color}
                 for key, color in ANNOTATION_COLORS.items()
+            },
+            "methyl": {
+                key: {"label": METHYL_LABELS[key], "color": color}
+                for key, color in METHYL_COLORS.items()
             },
         },
     }
@@ -2054,8 +3001,13 @@ def sample_page(authority: Mapping[str, Any], data: Mapping[str, Any]) -> str:
 <meta name="intersubmod-cohort-receipt-sha256" content="{authority['cohort_receipt_sha256']}">
 <meta name="intersubmod-census-receipt-sha256" content="{authority['census_receipt_sha256']}">
 <meta name="intersubmod-gene-drug-sha256" content="{authority['gene_drug_sha256']}">
+<meta name="intersubmod-methyl-overlay-receipt-sha256" content="{authority['methyl_overlay_receipt_sha256']}">
 <meta name="intersubmod-cgc-locus-regions" content="{cgc_regions}">
 <meta name="intersubmod-cgc-drug-locus-regions" content="{cgc_drug_regions}">
+<meta name="intersubmod-methyl-formal-pairs" content="{methyl_formal_pairs}">
+<meta name="intersubmod-methyl-strict-lanes" content="{methyl_strict_lanes}">
+<meta name="intersubmod-methyl-focal-aligned" content="{methyl_focal_aligned}">
+<meta name="intersubmod-methyl-resolved-relations" content="{methyl_resolved_relations}">
 <title>Exact-PS 分層拓撲工作站 · {esc(display_label)}</title>
 <style>{COMMON_CSS}</style>
 </head>
@@ -2101,6 +3053,15 @@ def sample_page(authority: Mapping[str, Any], data: Mapping[str, Any]) -> str:
     <div class="annotation-contract"><span>交集契約</span><b>actual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。</b></div>
   </div>
   <p class="denom">分母 = {summary['groups']:,} final groups；主計數納入 group 內全部 exact sSNV loci（active 與 non-active）。只看 active topology loci 時，CGC={cgc_active_regions:,}、同基因 CGC∩drug={cgc_drug_active_regions:,}。</p>
+  <div class="methyl-overview" data-testid="methyl-overview">
+    <div><span>formal G1 pairs</span><b>{methyl_formal_pairs:,}</b></div>
+    <div><span>signal / background HP lanes</span><b>{methyl_signal_lanes:,} / {methyl_background_lanes:,}</b></div>
+    <div><span>focal ALT/REF testable</span><b>{methyl_focal_testable:,}</b></div>
+    <div><span>focal ALT/REF aligned</span><b>{methyl_focal_aligned:,}</b></div>
+    <div><span>focal→partner relation resolved</span><b>{methyl_resolved_relations:,}</b></div>
+    <div><span>signal / RR-only background reads</span><b>{methyl_signal_direct_support:,} / {methyl_background_direct_support:,}</b></div>
+    <div class="methyl-contract"><span>Targeted overlay contract</span><b>這裡只顯示預先篩出的 7 個 formal-positive pairs 對應到本樣本的 exact-PS×HP lanes。未命中不代表甲基陰性；formal G1、focal ALT/REF control 與 candidate relation 是三個不同問題。</b></div>
+  </div>
 </div></section>
 <section class="section" id="distributions"><div class="shell">
   <div class="section-head"><div><div class="eyebrow">Sample-wide census</div><h2>三個問題、三個分母</h2></div><p>狀態圖以全部 final groups 為分母；determinacy 與形態只以 ranked complete 為分母。</p></div>
@@ -2119,6 +3080,8 @@ def sample_page(authority: Mapping[str, Any], data: Mapping[str, Any]) -> str:
       <div class="mode-buttons" id="modeButtons" data-testid="mode-buttons" role="group" aria-labelledby="modeButtonsLabel"></div>
       <span class="denom" id="annotationFiltersLabel" style="display:block;margin-top:.7rem">癌症基因／藥物快速篩選（與目前拓撲類別做 AND）</span>
       <div class="annotation-filters" id="annotationFilters" data-testid="annotation-filters" role="group" aria-labelledby="annotationFiltersLabel"></div>
+      <span class="denom" id="methylFiltersLabel" style="display:block;margin-top:.7rem">甲基 evidence 快速篩選（與拓撲、癌症基因、座標條件做 AND）</span>
+      <div class="methyl-filters" id="methylFilters" data-testid="methyl-filters" role="group" aria-labelledby="methylFiltersLabel"></div>
     </div>
     <form class="search" id="searchForm">
       <label class="sr-only" for="regionSearch">搜尋座標</label>
@@ -2136,7 +3099,7 @@ def sample_page(authority: Mapping[str, Any], data: Mapping[str, Any]) -> str:
     <aside>
       <div class="region-list" id="regionList" data-testid="region-list"></div>
     </aside>
-    <article class="panel detail" id="regionDetail" data-testid="region-detail"><div class="empty">從全基因圖、座標搜尋或清單選擇一個 exact-PS region。</div></article>
+    <article class="panel detail" id="regionDetail" data-testid="region-detail" tabindex="-1"><div class="empty">從全基因圖、座標搜尋或清單選擇一個 exact-PS region。</div></article>
   </div>
 </div></section>
 <section class="section" id="method"><div class="shell">
@@ -2147,6 +3110,7 @@ def sample_page(authority: Mapping[str, Any], data: Mapping[str, Any]) -> str:
     <article class="panel flat"><h3>📍 基因體位置</h3><p>region 必須落在同一 exact PS 與同一 HP1/HP2，並由 threshold=3 嚴格 endpoint read-linkage component 支持；不再用相鄰 gap≤50 kb 傳遞合併。</p></article>
     <article class="panel flat"><h3>代表樹與完整候選</h3><p>完整 edge union 來自 v2 factorization sidecar：逐 minimum vertex set 保存 legal parent choices，並重算所有 minimum tree 與 AF-global-best tree 的 edge incidence。藍色是 global-best edge union；綠色只是一棵 deterministic selected exemplar。edge incidence 是候選樹計數，不是 read support 或 probability。</p></article>
     <article class="panel flat"><h3>癌症基因 ∩ 藥物交集</h3><p>只有實際 sSNV locus 落入 GENCODE v46 gene body 才算 gene hit；再要求同一 HGNC gene 是 COSMIC CGC v104 且 DGIdb 關聯列同時標示 approved 與 anti-neoplastic。region span 只掃過基因不算命中，藥物關聯也不表示此突變敏感、有效或可治療。</p></article>
+    <article class="panel flat"><h3>甲基 ALT/REF evidence overlay</h3><p><b>formal G1</b> 是 focal-ALT methyl-core 內的 methyl-group × linked-partner allele association；<b>focal control</b> 是 ALT+REF reads 的獨立 joint clustering；<b>candidate relation</b> 是 current all7_v2 所有 global-best mathematical trees 的局部關係。它們不可互相替代，也都不是因果、clone identity 或 cellular lineage。</p></article>
   </div>
   <details>
     <summary>機器證據與原始 JSON（預設收合）</summary>
@@ -2154,6 +3118,7 @@ def sample_page(authority: Mapping[str, Any], data: Mapping[str, Any]) -> str:
       <span class="path"><b>cohort receipt SHA-256</b> <code>{authority['cohort_receipt_sha256']}</code></span>
       <span class="path"><b>census receipt SHA-256</b> <code>{authority['census_receipt_sha256']}</code></span>
       <span class="path"><b>gene/drug annotation SHA-256</b> <code>{authority['gene_drug_sha256']}</code></span>
+      <span class="path"><b>methyl overlay receipt SHA-256</b> <code>{authority['methyl_overlay_receipt_sha256']}</code></span>
     </div>
   </details>
   <details>
@@ -2175,18 +3140,26 @@ SAMPLE_JS = r"""
   const data = JSON.parse(document.getElementById("pageData").textContent);
   const rows = data.rows;
   const chroms = Object.keys(data.chromLengths);
-  const state = {mode:"resolution", selected:new Set(), annotationFilter:"all", query:null, current:null, filtered:rows, candidateIndex:0, shapeIndex:0};
+  const state = {mode:"resolution", selected:new Set(), annotationFilter:"all", methylFilter:"all", query:null, current:null, filtered:rows, candidateIndex:0, shapeIndex:0};
   const modes = [
     ["resolution","Determinacy"],["coarse","拓撲形態"],["hp","HP family"],
-    ["status","判定狀態"],["k","active k"],["annotation","癌症基因／藥物"]
+    ["status","判定狀態"],["k","active k"],["annotation","癌症基因／藥物"],
+    ["methyl","甲基 evidence"]
   ];
   const annotationFilters = [
     ["all","全部 regions"],
     ["cgc","只看癌症基因 locus"],
     ["cgc_drug","只看癌症基因 ∩ approved 抗腫瘤藥"]
   ];
+  const methylFilters = [
+    ["all","全部 regions"],
+    ["signal","formal G1 signal lanes"],
+    ["aligned","focal ALT/REF aligned"],
+    ["resolved","focal→partner relation resolved"]
+  ];
   const modeButtons = document.getElementById("modeButtons");
   const annotationFilterButtons = document.getElementById("annotationFilters");
+  const methylFilterButtons = document.getElementById("methylFilters");
   const legend = document.getElementById("legend");
   const canvas = document.getElementById("genomeCanvas");
   const ctx = canvas.getContext("2d");
@@ -2199,6 +3172,7 @@ SAMPLE_JS = r"""
     if (state.mode === "status") return row.readStatus;
     if (state.mode === "k") return String(Math.min(6,row.activeK));
     if (state.mode === "annotation") return row.annotationClass;
+    if (state.mode === "methyl") return row.methylClass;
     return String(row[state.mode]);
   }
   function defs(){ return data.definitions[state.mode]; }
@@ -2219,15 +3193,25 @@ SAMPLE_JS = r"""
     if(state.annotationFilter==="cgc_drug")return Boolean(row.hasCgcDrug);
     return true;
   }
+  function matchesMethyl(row){
+    if(state.methylFilter==="signal")return Boolean(row.hasMethylSignal);
+    if(state.methylFilter==="aligned")return Boolean(row.hasMethylAligned);
+    if(state.methylFilter==="resolved")return Boolean(row.hasMethylResolvedRelation);
+    return true;
+  }
   function annotationFilterLabel(){
     return annotationFilters.find(item=>item[0]===state.annotationFilter)?.[1]||"全部 regions";
   }
+  function methylFilterLabel(){
+    return methylFilters.find(item=>item[0]===state.methylFilter)?.[1]||"全部 regions";
+  }
   function refresh() {
-    state.filtered = rows.filter(row => matchesQuery(row) && matchesAnnotation(row) && (!state.selected.size || state.selected.has(modeValue(row))));
+    state.filtered = rows.filter(row => matchesQuery(row) && matchesAnnotation(row) && matchesMethyl(row) && (!state.selected.size || state.selected.has(modeValue(row))));
     renderCanvas(); renderList();
     status.textContent = `顯示 ${state.filtered.length.toLocaleString()} / ${rows.length.toLocaleString()} regions` +
       (state.selected.size ? ` · ${state.selected.size} 類聯集` : " · 全部類別") +
       ` · ${annotationFilterLabel()}` +
+      ` · ${methylFilterLabel()}` +
       (state.query ? ` · ${state.query.chrom}:${state.query.start.toLocaleString()}–${state.query.end.toLocaleString()}` : "");
   }
   function renderModes(){
@@ -2255,10 +3239,24 @@ SAMPLE_JS = r"""
       annotationFilterButtons.append(button);
     }
   }
+  function renderMethylFilters(){
+    methylFilterButtons.innerHTML="";
+    for(const [key,label] of methylFilters){
+      const button=document.createElement("button");
+      button.type="button";button.className="methyl-filter";button.textContent=label;
+      button.dataset.methylFilter=key;
+      button.setAttribute("aria-pressed",String(state.methylFilter===key));
+      button.addEventListener("click",()=>{
+        if(state.methylFilter===key)return;
+        state.methylFilter=key;renderMethylFilters();renderLegend();refresh();
+      });
+      methylFilterButtons.append(button);
+    }
+  }
   function renderLegend(){
     legend.innerHTML="";
     const counts=new Map();
-    rows.filter(row=>matchesQuery(row)&&matchesAnnotation(row)).forEach(row=>counts.set(modeValue(row),(counts.get(modeValue(row))||0)+1));
+    rows.filter(row=>matchesQuery(row)&&matchesAnnotation(row)&&matchesMethyl(row)).forEach(row=>counts.set(modeValue(row),(counts.get(modeValue(row))||0)+1));
     for(const key of [...state.selected]){
       if(!counts.get(key))state.selected.delete(key);
     }
@@ -2296,6 +3294,9 @@ SAMPLE_JS = r"""
       const x=left+(w-left-right)*(row.mid/data.chromLengths[row.chrom]);
       const spec=defs()[modeValue(row)]||{color:"#444"};
       ctx.fillStyle=spec.color;ctx.beginPath();ctx.arc(x,y,w<560?1.7:2.2,0,Math.PI*2);ctx.fill();
+      if(row.hasMethylSignal){
+        ctx.strokeStyle="#d5663a";ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(x,y,w<560?4.2:5,0,Math.PI*2);ctx.stroke();
+      }
       hitPoints.push({x,y,row});
     }
     ctx.globalAlpha=1;
@@ -2314,8 +3315,10 @@ SAMPLE_JS = r"""
       button.setAttribute("aria-current",String(state.current===row));
       const spec=defs()[modeValue(row)]||{label:modeValue(row),color:"#555"};
       const annotation=row.hasCgcDrug?'<span class="tag" style="color:#a94336">CGC ∩ drug</span>':row.hasCgc?'<span class="tag" style="color:#6b5592">CGC locus</span>':"";
+      const methylSpec=data.definitions.methyl[row.methylClass]||{label:row.methylClass,color:"#667069"};
+      const methyl=row.hasMethylOverlay?`<span class="tag" style="color:${methylSpec.color}">${escapeHtml(methylSpec.label)}</span>`:"";
       const genes=(row.geneDrug||[]).map(hit=>hit.symbol).filter(Boolean);
-      button.innerHTML=`<strong>${row.chrom}:${row.start.toLocaleString()}–${row.end.toLocaleString()}</strong><span><span class="tag" style="color:${spec.color}">${spec.label}</span>${annotation}</span><small>PS ${row.ps} · HP${row.hp} · n=${row.n} · active k=${row.activeK}</small><small>${genes.length?escapeHtml([...new Set(genes)].join(" · ")):row.span.toLocaleString()+" bp"}</small>`;
+      button.innerHTML=`<strong>${row.chrom}:${row.start.toLocaleString()}–${row.end.toLocaleString()}</strong><span><span class="tag" style="color:${spec.color}">${spec.label}</span>${annotation}${methyl}</span><small>PS ${row.ps} · HP${row.hp} · n=${row.n} · active k=${row.activeK}</small><small>${genes.length?escapeHtml([...new Set(genes)].join(" · ")):row.span.toLocaleString()+" bp"}</small>`;
       button.addEventListener("click",()=>selectRow(row,true));list.append(button);
     }
     if(state.filtered.length>shown.length){
@@ -2354,7 +3357,9 @@ SAMPLE_JS = r"""
         const geneHits=annotations.get(Number(position))||[];
         const hasDrug=geneHits.some(hit=>(hit.drugs||[]).length);
         const geneTags=geneHits.map(hit=>`<span class="locus-gene ${hasDrug&&(hit.drugs||[]).length?"drug":""}">${escapeHtml(hit.symbol)}</span>`).join("");
-        return `<article class="locus-card ${active.has(Number(position))?"active":""} ${geneHits.length?"cancer-locus":""} ${hasDrug?"drug-locus":""}" role="listitem">
+        const isMethylFocal=Boolean(row.methyl)&&Number(position)===Number(row.methyl.focalPos);
+        const isMethylPartner=Boolean(row.methyl)&&Number(position)===Number(row.methyl.partnerPos);
+        return `<article class="locus-card ${active.has(Number(position))?"active":""} ${geneHits.length?"cancer-locus":""} ${hasDrug?"drug-locus":""} ${isMethylFocal?"methyl-focal":""} ${isMethylPartner?"methyl-partner":""}" role="listitem">
           <div class="site"><b>S${index+1}</b><span>${active.has(Number(position))?"active ALT":"非 active"}</span></div>
           <span class="position">${Number(position).toLocaleString()}</span>
           <span class="af">${escapeHtml(value)}</span>
@@ -2395,6 +3400,71 @@ SAMPLE_JS = r"""
       <div class="details-body">
         <p class="claim-ceiling"><b>判讀上限：</b>actual sSNV locus ∈ GENCODE gene body，再以同一 HGNC gene 連到 COSMIC CGC 與 DGIdb。DGIdb 的 approved ∧ anti-neoplastic 關聯不是 mutation-specific sensitivity、不是本癌別適應症，也不是臨床 actionability；不參與 topology candidate 排序。</p>
         <div class="table-wrap" role="region" tabindex="0" aria-label="癌症基因與 approved 抗腫瘤藥交集表"><table class="mini-table gene-drug-table"><thead><tr><th>CGC gene</th><th>命中 sSNV loci</th><th>CGC context</th><th>DGIdb approved ∩ anti-neoplastic</th></tr></thead><tbody>${rows}</tbody></table></div>
+      </div>
+    </details>`;
+  }
+  function formatMetric(value,digits=3){
+    if(value===null||value===undefined||value==="")return "N/A";
+    const number=Number(value);if(!Number.isFinite(number))return "N/A";
+    if(number!==0&&Math.abs(number)<0.001)return number.toExponential(2);
+    return number.toFixed(digits);
+  }
+  function methylEvidencePanel(row){
+    const methyl=row.methyl;
+    if(!methyl)return `<details class="methyl-panel background" data-testid="methyl-evidence-panel"><summary><span class="tag" style="color:#667069">NOT IN TARGETED OVERLAY</span>甲基 ALT/REF evidence：本次 7-pair formal-positive subset 未納入</summary><div class="details-body"><p class="denom">這不是甲基陰性，也不是未通過同一套全 cohort gate；目前 overlay 只保存預先選出的 7 個 formal G1 positives。</p></div></details>`;
+    const g=methyl.formalG1,c=methyl.focalControl,l=methyl.lane,r=l.candidateRelation,regionCandidate=l.regionCandidate;
+    const spec=data.definitions.methyl[row.methylClass]||{label:row.methylClass,color:"#667069"};
+    const relationTotal=Number(r.focalBeforeCount||0)+Number(r.partnerBeforeCount||0)+Number(r.incomparableCount||0);
+    const relationText=r.status==="RESOLVED_COMMON_ACROSS_BEST_TREES"
+      ? `${r.order==="FOCAL_BEFORE_PARTNER"?"focal→partner":r.order} · ${Number(r.focalBeforeCount).toLocaleString()}/${relationTotal.toLocaleString()} global-best trees`
+      : r.status==="PAIR_NOT_ACTIVE_IN_GLOBAL_BEST"
+      ? "pair endpoints 不在本 lane 的 active candidate loci；region 本身的 candidate 狀態仍保留"
+      : `${r.status} · ${r.order}`;
+    const focalText=c.jointTestable
+      ? `${c.status} · V=${formatMetric(c.jointV)} · permutation p=${formatMetric(c.permutationP)}`
+      : `${c.status} · ALT=${Number(c.altReads).toLocaleString()} / REF=${Number(c.refReads).toLocaleString()} · ${c.notTestableReason||"joint control 不可檢定"}`;
+    const groupRows=(g.groups||[]).map((group,index)=>{
+      const counts=(g.table||[])[index]||[0,0];
+      return `<tr><td>${escapeHtml(group)}</td><td class="num">${Number(counts[0]).toLocaleString()}</td><td class="num">${Number(counts[1]).toLocaleString()}</td></tr>`;
+    }).join("");
+    const candidateWarning=row.hasMethylAligned&&regionCandidate.pairStatus==="ABSTAIN_RESOURCE_LIMIT"
+      ? `<p class="methyl-projection-note"><b>重要：</b>這是唯一 focal ALT/REF ALIGNED site，但本 signal lane 因 resource guard ABSTAIN，沒有可疊加的 ranked candidate tree；不得把甲基差異畫成已解 branch。</p>`
+      :r.status==="RESOLVED_COMMON_ACROSS_BEST_TREES"
+      ? `<p class="methyl-projection-note"><b>Candidate projection：</b>${escapeHtml(relationText)}。候選圖中的橘色 halo 只是 association projection，不是 read support、edge probability 或因果方向。</p>`
+      :"";
+    return `<details class="methyl-panel ${l.laneRole==="PAIRED_BACKGROUND"?"background":""}" data-testid="methyl-evidence-panel" ${l.laneRole==="FORMAL_SIGNAL"?"open":""}>
+      <summary><span class="tag" style="color:${spec.color}">${escapeHtml(spec.label)}</span>甲基 ALT/REF × linked-partner × current candidate</summary>
+      <div class="details-body">
+        <div class="methyl-ladder">
+          <div><span>1 · formal G1 partner association</span><b>V=${formatMetric(g.cramersV)} · BY q=${formatMetric(g.qBy)} · conditional permutation p=${formatMetric(g.conditionalP)}</b></div>
+          <div><span>2 · focal ALT/REF independent control</span><b>${escapeHtml(focalText)}</b></div>
+          <div><span>3 · exact PS×HP strict lane</span><b>${escapeHtml(l.laneRole)} · support=${Number(l.directSupport).toLocaleString()} · HP${escapeHtml(l.hp)}</b></div>
+          <div><span>4 · model-conditional pair relation</span><b>${escapeHtml(relationText)}</b></div>
+        </div>
+        <p class="claim-ceiling"><b>判讀上限：</b>formal G1 是 focal-ALT methyl-core 內的 methyl-group × linked-partner allele association；focal control 是 ALT+REF reads 的獨立 joint clustering；candidate relation 只來自 current all7_v2 mathematical best trees。三者都不是因果、MG=clone、clone identity 或 cellular lineage。</p>
+        ${candidateWarning}
+        <div class="detail-grid">
+          <div>
+            <h3>Formal G1：linked-partner REF/ALT</h3>
+            <div class="table-wrap" role="region" tabindex="0" aria-label="Formal G1 methyl group 與 linked-partner allele 表"><table class="mini-table"><caption>focal-ALT methyl-core；n=${Number(g.informativeReads).toLocaleString()} informative reads</caption><thead><tr><th>methyl group</th><th>partner REF</th><th>partner ALT</th></tr></thead><tbody>${groupRows}</tbody></table></div>
+            <p class="denom">enriched group=${escapeHtml(g.enrichedGroup)} · Δ partner-ALT fraction=${formatMetric(g.deltaAltFraction)}。此表不含 focal REF reads。</p>
+          </div>
+          <div>
+            <h3>Strict lane 與 current candidate</h3>
+            <div class="table-wrap" role="region" tabindex="0" aria-label="exact PS×HP strict lane 與 candidate 狀態"><table class="mini-table"><caption>${escapeHtml(methyl.focalLabel)} → ${escapeHtml(methyl.partnerLabel)}</caption><tbody>
+              <tr><th>PS / HP / W</th><td>PS ${escapeHtml(l.phaseSet)} · HP${escapeHtml(l.hp)} · W k=${Number(l.wK).toLocaleString()}</td></tr>
+              <tr><th>RR / RA / AR / AA</th><td class="mono">${Number(l.states.RR)} / ${Number(l.states.RA)} / ${Number(l.states.AR)} / ${Number(l.states.AA)}</td></tr>
+              <tr><th>region candidate</th><td>${escapeHtml(regionCandidate.pairStatus)} · ${escapeHtml(row.resolution)} · ties=${escapeHtml(row.tieCount)}</td></tr>
+              <tr><th>pair relation</th><td>${escapeHtml(relationText)}</td></tr>
+            </tbody></table></div>
+          </div>
+        </div>
+        <details><summary>甲基 overlay provenance（預設收合）</summary><div class="details-body">
+          <span class="path"><b>pair id</b> <code>${escapeHtml(methyl.pairId)}</code></span>
+          <span class="path"><b>lane region id</b> <code>${escapeHtml(l.regionId)}</code></span>
+          <span class="path"><b>component</b> <code>${escapeHtml(l.componentId)}</code></span>
+          <p><a href="../../../../research/20260725_methyl_alt_ref_topology_overlay_validation/20260725_ALTREF甲基差異與latest候選拓撲對應驗證_01.html">開啟完整 ALT/REF × topology 驗證報告 →</a></p>
+        </div></details>
       </div>
     </details>`;
   }
@@ -2445,6 +3515,14 @@ SAMPLE_JS = r"""
     const delta=Number(parent)^Number(child);let bit=0,value=delta;while(value>1){value>>>=1;bit++;}
     const originalIndex=Number((row.activeIndices||[])[bit]);return Number(row.positions[originalIndex]);
   }
+  function methylProjectionEdge(row,parent,child,inGlobalBest){
+    const relation=row.methyl?.lane?.candidateRelation;
+    if(!inGlobalBest||relation?.status!=="RESOLVED_COMMON_ACROSS_BEST_TREES"||relation?.order!=="FOCAL_BEFORE_PARTNER")return false;
+    const focalIndex=(row.positions||[]).findIndex(position=>Number(position)===Number(row.methyl.focalPos));
+    const focalBit=(row.activeIndices||[]).findIndex(index=>Number(index)===focalIndex);
+    if(focalBit<0||acquiredPosition(parent,child,row)!==Number(row.methyl.partnerPos))return false;
+    return Boolean(Number(parent)&(1<<focalBit));
+  }
   function factoredTreeRow(row,set){
     const vertices=(set?.[0]||[]).map(mask=>({
       vertex:Number(mask),
@@ -2479,8 +3557,9 @@ SAMPLE_JS = r"""
     for(const [level,items] of levels){items.forEach((mask,index)=>positions.set(mask,{x:62+level*((width-124)/maxLevel),y:height/2+(index-(items.length-1)/2)*58}));}
     const edgeMarkup=edges.map(item=>{
       const parent=Number(item[0]),child=Number(item[1]),count=String(item[2]),key=`${parent}>${child}`,inGlobalBest=globalBest.has(key),selected=selectedExemplar.has(key),forced=count===String(candidate.totalTreeCount),a=positions.get(parent),b=positions.get(child);
+      const methylProjection=methylProjectionEdge(row,parent,child,inGlobalBest);
       const dash=forced?"":' stroke-dasharray="5 4"';
-      return `<g class="candidate-edge ${forced?"edge-forced":"edge-variable"} ${inGlobalBest?"edge-global-best":""} ${selected?"edge-selected":""}" data-parent="${parent}" data-child="${child}" data-candidate-count="${escapeHtml(count)}" data-candidate-total="${escapeHtml(candidate.totalTreeCount)}" data-best-count="${escapeHtml(globalBest.get(key)||"0")}" data-best-total="${escapeHtml(candidate.bestTreeCount)}" data-selected-exemplar="${selected?"true":"false"}"><line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#9b9d97" stroke-width="1.6"${dash} marker-end="url(#candidateArrow)"/>${inGlobalBest?`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#285f8f" stroke-width="2.7" opacity=".58" marker-end="url(#candidateArrowBest)"/>`:""}${selected?`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#176b58" stroke-width="4.2" opacity=".9" marker-end="url(#candidateArrowSelected)"/>`:""}<title>${escapeHtml(vertexLabel(parent,row))} → ${escapeHtml(vertexLabel(child,row))}; minimum trees ${escapeHtml(count)}/${escapeHtml(candidate.totalTreeCount)}; global-best union ${escapeHtml(globalBest.get(key)||"0")}/${escapeHtml(candidate.bestTreeCount)}; selected deterministic exemplar ${selected?"yes":"no"}</title></g>`;
+      return `<g class="candidate-edge ${forced?"edge-forced":"edge-variable"} ${inGlobalBest?"edge-global-best":""} ${selected?"edge-selected":""} ${methylProjection?"edge-methyl-projection":""}" data-parent="${parent}" data-child="${child}" data-candidate-count="${escapeHtml(count)}" data-candidate-total="${escapeHtml(candidate.totalTreeCount)}" data-best-count="${escapeHtml(globalBest.get(key)||"0")}" data-best-total="${escapeHtml(candidate.bestTreeCount)}" data-selected-exemplar="${selected?"true":"false"}" data-methyl-projection="${methylProjection?"true":"false"}"><line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#9b9d97" stroke-width="1.6"${dash} marker-end="url(#candidateArrow)"/>${inGlobalBest?`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#285f8f" stroke-width="2.7" opacity=".58" marker-end="url(#candidateArrowBest)"/>`:""}${methylProjection?`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#d5663a" stroke-width="7" opacity=".66"/>`:""}${selected?`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#176b58" stroke-width="4.2" opacity=".9" marker-end="url(#candidateArrowSelected)"/>`:""}<title>${escapeHtml(vertexLabel(parent,row))} → ${escapeHtml(vertexLabel(child,row))}; minimum trees ${escapeHtml(count)}/${escapeHtml(candidate.totalTreeCount)}; global-best union ${escapeHtml(globalBest.get(key)||"0")}/${escapeHtml(candidate.bestTreeCount)}; selected deterministic exemplar ${selected?"yes":"no"}; methyl focal→partner projection ${methylProjection?"yes":"no"}</title></g>`;
     }).join("");
     const observed=observedMasks(row);
     const nodeMarkup=[...vertices].sort((a,b)=>a-b).map(mask=>{const pos=positions.get(mask),isObserved=mask===0||observed.has(mask),label=vertexLabel(mask,row,true);return `<g class="candidate-node ${isObserved?"observed":"hidden"}" data-vertex="${mask}"><circle cx="${pos.x}" cy="${pos.y}" r="22" fill="${isObserved?"#fffdf7":"#f5ead5"}" stroke="${isObserved?"#176b58":"#b66e20"}" stroke-width="2" ${isObserved?"":'stroke-dasharray="4 3"'}/><text x="${pos.x}" y="${pos.y+4}" text-anchor="middle" font-size="10" fill="#17231e">${escapeHtml(label)}</text><title>${escapeHtml(vertexLabel(mask,row))} · ${isObserved?"full-read observed":"solver-hidden/intermediate"}</title></g>`;}).join("");
@@ -2491,7 +3570,8 @@ SAMPLE_JS = r"""
     const selectedExemplar=new Set((row.edges||[]).map(item=>`${Number(item.parent_vertex)}>${Number(item.child_vertex)}`));
     return (candidate.allEdges||[]).map(item=>{
       const parent=Number(item[0]),child=Number(item[1]),count=String(item[2]),key=`${parent}>${child}`,top=globalBest.get(key)||"0",selected=selectedExemplar.has(key),forced=count===String(candidate.totalTreeCount);
-      return `<tr class="${top!=="0"?"edge-global-best":""} ${selected?"edge-selected":""}" data-edge-key="${key}" data-candidate-count="${escapeHtml(count)}" data-candidate-total="${escapeHtml(candidate.totalTreeCount)}" data-top-count="${escapeHtml(top)}" data-top-total="${escapeHtml(candidate.bestTreeCount)}" data-selected-exemplar="${selected?"true":"false"}"><td class="edge-key">${escapeHtml(vertexLabel(parent,row))} → ${escapeHtml(vertexLabel(child,row))}</td><td>${forced?"所有 minimum trees":"部分 minimum trees"}${top!=="0"?" · global-best union":""}${selected?" · selected exemplar":""}</td><td class="num">${escapeHtml(count)} / ${escapeHtml(candidate.totalTreeCount)}</td><td class="num">${escapeHtml(top)} / ${escapeHtml(candidate.bestTreeCount)}</td></tr>`;
+      const methylProjection=methylProjectionEdge(row,parent,child,top!=="0");
+      return `<tr class="${top!=="0"?"edge-global-best":""} ${selected?"edge-selected":""} ${methylProjection?"edge-methyl-projection":""}" data-edge-key="${key}" data-candidate-count="${escapeHtml(count)}" data-candidate-total="${escapeHtml(candidate.totalTreeCount)}" data-top-count="${escapeHtml(top)}" data-top-total="${escapeHtml(candidate.bestTreeCount)}" data-selected-exemplar="${selected?"true":"false"}" data-methyl-projection="${methylProjection?"true":"false"}"><td class="edge-key">${escapeHtml(vertexLabel(parent,row))} → ${escapeHtml(vertexLabel(child,row))}</td><td>${forced?"所有 minimum trees":"部分 minimum trees"}${top!=="0"?" · global-best union":""}${selected?" · selected exemplar":""}${methylProjection?` · methyl focal→partner projection ${escapeHtml(top)}/${escapeHtml(candidate.bestTreeCount)}`:""}</td><td class="num">${escapeHtml(count)} / ${escapeHtml(candidate.totalTreeCount)}</td><td class="num">${escapeHtml(top)} / ${escapeHtml(candidate.bestTreeCount)}</td></tr>`;
     }).join("");
   }
   function candidateExplorer(row){
@@ -2502,10 +3582,14 @@ SAMPLE_JS = r"""
     const set=candidate.sets[index],isGlobal=Number(set[4])===1,shapeCount=(candidate.signatures||[]).length,shapeIndex=Math.max(0,Math.min(shapeCount-1,Number(state.shapeIndex)||0));state.shapeIndex=shapeIndex;
     const shape=candidate.signatures[shapeIndex],candidateTree=factoredTreeRow(row,set),shapeTree=signatureTreeRow(row,shape);
     const shapeOptions=(candidate.signatures||[]).map((item,itemIndex)=>`<option value="${itemIndex}" ${itemIndex===shapeIndex?"selected":""}>shape ${itemIndex+1} · ${escapeHtml(item[1])} · ${escapeHtml(item[2])} trees</option>`).join("");
+    const methylProjectionNote=row.hasMethylResolvedRelation
+      ? `<div class="methyl-projection-note"><b>橘色 halo：</b>只標示 formal G1 focal→partner association 投影到 current global-best edge union 的位置；它不改變 AF score、候選邊 incidence、selected tree 或 read support。</div>`
+      :"";
     return `<details id="candidateExplorer" class="candidate-space" ${setCount>1||row.resolution==="TIED_CROSS_TOPOLOGY"?"open":""}>
       <summary><span class="section-number">3</span>完整 minimum candidate space 與 AF 排序</summary>
       <div class="details-body">
         <div class="callout"><b>如何讀：</b>灰線是所有 minimum structural trees 的完整 edge union；虛線只出現在部分候選；藍線是所有 AF-global-best trees 的 edge union；綠線只疊目前頁面採用的一棵 deterministic selected exemplar。任何聯集都不是一棵樹，edge 次數是 candidate membership，不是 probability 或 read support。</div>
+        ${methylProjectionNote}
         <div class="candidate-summary">
           <div><span>minimum vertex sets</span><b>${setCount.toLocaleString()}</b></div>
           <div><span>all minimum trees</span><b>${escapeHtml(candidate.totalTreeCount)}</b></div>
@@ -2581,6 +3665,7 @@ SAMPLE_JS = r"""
       ${boundaryPanel}
       ${geneDrugPanel(row)}
       <section class="detail-section"><h3><span class="section-number">1</span>Locus 排列與 read-ALT</h3><p class="denom">依 GRCh38 座標排列；綠底是進入 compact topology 的 active loci。百分比為同一 PS × HP family 的 ALT/(REF+ALT)，不是 caller VAF。</p>${locusStrip(row)}</section>
+      ${methylEvidencePanel(row)}
       <details open><summary><span class="section-number">2</span>Solver-visible read state matrix</summary><div class="details-body"><p>full coverage=${row.fullReads.toLocaleString()} · HP reads=${row.hpReads.toLocaleString()} · projected rows=${row.projectedRows.toLocaleString()} · tree-supported molecule incidences=${row.treeMolecules.toLocaleString()}</p>${readStateMatrix(row)}<p class="denom">只列 count≥3 的 solver-visible full/partial patterns；低於 threshold 的 molecule pattern 不在 MLHP group payload，不能從本表推成「不存在」。</p></div></details>
       ${candidateExplorer(row)}
       <section class="detail-section"><h3><span class="section-number">4</span>AF-global-best 結果與 determinacy</h3>
@@ -2599,6 +3684,7 @@ SAMPLE_JS = r"""
     state.candidateIndex=row.candidate?Number(row.candidate.selectedSetIndex||0):0;
     state.shapeIndex=0;
     renderDetail(row);renderCanvas();renderList();
+    if(scroll)detail.focus({preventScroll:true});
     if(scroll&&window.innerWidth<980) detail.scrollIntoView({behavior:"smooth",block:"start"});
   }
   canvas.addEventListener("click",event=>{
@@ -2613,7 +3699,16 @@ SAMPLE_JS = r"""
   });
   document.getElementById("clearSearch").addEventListener("click",()=>{state.query=null;document.getElementById("regionSearch").value="";renderLegend();refresh();});
   let resizeTimer;window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(renderCanvas,120);});
-  renderModes();renderAnnotationFilters();renderLegend();refresh();
+  renderModes();renderAnnotationFilters();renderMethylFilters();renderLegend();refresh();
+  const requestedRegion=new URLSearchParams(window.location.search).get("region");
+  if(requestedRegion){
+    const parsed=parseQuery(requestedRegion);
+    if(parsed){
+      document.getElementById("regionSearch").value=requestedRegion;
+      state.query=parsed;renderLegend();refresh();
+      if(state.filtered.length)selectRow(state.filtered[0],false);
+    }
+  }
 })();
 """
 
@@ -2638,6 +3733,8 @@ def index_page(authority: Mapping[str, Any], samples: list[Mapping[str, Any]]) -
     census = authority["census_summary"]["cohort"]
     funnel_samples = authority["funnel"]["samples"]
     similarity = authority["similarity"]
+    methyl_overlay = authority["methyl_overlay"]
+    methyl_headline = methyl_overlay["headline"]
     source_components = sum(
         int(row["source_overview"]["all_components"]) for row in funnel_samples.values()
     )
@@ -2675,13 +3772,86 @@ def index_page(authority: Mapping[str, Any], samples: list[Mapping[str, Any]]) -
         cgc_drug_text = (
             f"{int(cgc_drug_regions):,}" if cgc_drug_regions is not None else "—"
         )
+        methyl_pairs = int(item["summary"].get("methylFormalPairs", 0))
+        methyl_lanes = int(item["summary"].get("methylStrictLanes", 0))
         sample_rows.append(
             f"""<tr>
 <td><a class="sample-link" href="{esc(sample)}.html" title="authority key: {esc(sample)}">{esc(DISPLAY_LABELS[sample])}</a>{'<br><span class="tag">same biological sample</span>' if sample in {'HCC1395','HCC1395_DORADO'} else ''}</td>
 <td class="num">{int(t['groups_total']):,}</td><td class="num">{ranked:,}</td>
 <td><b>{pct(unique,ranked):.1f}%</b><div class="barline"><span style="width:{pct(unique,ranked):.4f}%"></span></div></td>
 <td class="num">{pct(exact,ranked):.1f}%</td><td class="num danger">{abstain:,}</td><td class="num">{cgc_text}</td><td class="num">{cgc_drug_text}</td>
+<td class="num">{methyl_pairs:,} / {methyl_lanes:,}</td>
 <td><a href="{esc(sample)}.html#genome">開啟 GRCh38 →</a></td></tr>"""
+        )
+
+    focal_labels = {
+        "ALIGNED": "通過 allele-axis gate",
+        "BELOW_EFFECT": "可檢定・效應不足",
+        "INSUFFICIENT_REF": "REF reads 不足",
+        "UNSTABLE": "joint clustering 不穩定",
+    }
+    candidate_labels = {
+        "UNIQUE_AF_CANDIDATE": "唯一 AF candidate",
+        "AF_TIED": "AF 同分候選",
+        "ABSTAIN_RESOURCE_LIMIT": "resource guard ABSTAIN",
+    }
+    methyl_pair_rows = []
+    display_rank = {sample: index for index, sample in enumerate(DISPLAY_ORDER)}
+    for pair in sorted(
+        methyl_overlay["pairs"],
+        key=lambda item: (
+            display_rank[item["sample"]],
+            item["chrom"],
+            item["focalPos"],
+        ),
+    ):
+        focal = pair["focalControl"]
+        candidate = pair["candidatePair"]
+        relation_total = (
+            int(candidate["focalBeforeCount"])
+            + int(candidate["partnerBeforeCount"])
+            + int(candidate["incomparableCount"])
+        )
+        if candidate["relationStatus"] == "RESOLVED_COMMON_ACROSS_BEST_TREES":
+            relation_text = (
+                f"focal→partner {int(candidate['focalBeforeCount']):,}/"
+                f"{relation_total:,} best trees"
+            )
+        else:
+            relation_text = "局部關係未解"
+        if focal["jointTestable"]:
+            focal_text = (
+                f"{focal_labels[focal['status']]}<small>V="
+                f"{float(focal['jointV']):.3f} · permutation p="
+                f"{float(focal['permutationP']):.3g}</small>"
+            )
+        else:
+            focal_text = (
+                f"{focal_labels[focal['status']]}<small>ALT="
+                f"{int(focal['altReads']):,} · REF={int(focal['refReads']):,}</small>"
+            )
+        signal_lane = next(
+            lane
+            for lane in pair["lanes"]
+            if lane["laneRole"] == "FORMAL_SIGNAL"
+        )
+        sample = pair["sample"]
+        region_query = f"{pair['chrom']}:{pair['focalPos']}"
+        methyl_pair_rows.append(
+            "<tr>"
+            f'<td><a href="{esc(sample)}.html?region={esc(region_query)}#genome" '
+            f'title="authority key: {esc(sample)}">{esc(DISPLAY_LABELS[sample])}</a></td>'
+            f"<td><b>{esc(pair['focalLabel'])}</b><small>→ {esc(pair['partnerLabel'])}</small></td>"
+            f"<td class=\"num\"><b>{float(pair['formalG1']['cramersV']):.3f}</b>"
+            f"<small>n={int(pair['formalG1']['informativeReads']):,} · "
+            f"q={float(pair['formalG1']['qBy']):.3g}</small></td>"
+            f'<td class="{"methyl-aligned-cell" if focal["axisAligned"] else ""}">'
+            f"{focal_text}</td>"
+            f"<td>{esc(candidate_labels[candidate['status']])}"
+            f"<small>{esc(relation_text)} · signal HP{esc(signal_lane['hp'])}</small></td>"
+            f'<td><a href="{esc(sample)}.html?region={esc(region_query)}#genome">'
+            "定位 evidence →</a></td>"
+            "</tr>"
         )
 
     res_keys = ("UNIQUE_TREE", "TIED_SAME_TOPOLOGY", "TIED_CROSS_TOPOLOGY")
@@ -2784,6 +3954,11 @@ def index_page(authority: Mapping[str, Any], samples: list[Mapping[str, Any]]) -
         "cohort similarity sidecar": authority["similarity_path"],
         "gene/drug annotation sidecar": authority["gene_drug_path"],
         "gene/drug annotation receipt": authority["gene_drug_receipt_path"],
+        "methyl formal-pair join": methyl_overlay["paths"]["pair_join"],
+        "methyl focal-control join": methyl_overlay["paths"]["focal_control_join"],
+        "methyl strict-lane join": methyl_overlay["paths"]["lane_join"],
+        "methyl overlay receipt": methyl_overlay["receiptPath"],
+        "methyl overlay report": methyl_overlay["reportPath"],
         "k / HP funnel": authority["funnel_path"]
         or "derived from hash-bound per-sample MLHP receipts",
     }
@@ -2971,6 +4146,9 @@ def index_page(authority: Mapping[str, Any], samples: list[Mapping[str, Any]]) -
 <meta name="intersubmod-census-receipt-sha256" content="{authority['census_receipt_sha256']}">
 <meta name="intersubmod-similarity-sha256" content="{authority['similarity_sha256']}">
 <meta name="intersubmod-gene-drug-sha256" content="{authority['gene_drug_sha256']}">
+<meta name="intersubmod-methyl-overlay-receipt-sha256" content="{authority['methyl_overlay_receipt_sha256']}">
+<meta name="intersubmod-methyl-formal-pairs" content="{int(methyl_headline['formal_partner_G1_pairs'])}">
+<meta name="intersubmod-methyl-strict-lanes" content="{int(methyl_headline['direct_HP_lanes'])}">
 <title>Exact-PS layered workstation · cohort command center</title>
 <style>{COMMON_CSS}</style></head>
 <body>
@@ -2980,7 +4158,7 @@ def index_page(authority: Mapping[str, Any], samples: list[Mapping[str, Any]]) -
   <h1>從 read-linkage<br>到 exact topology</h1>
   <p class="lead">新的 layered workstation 以 exact phase-set、primary HP 與嚴格 read-linkage 重建區域；舊 50 kb proximity grouping 不再是預設資料。</p>
   <div class="boundary"><strong>最重要限制</strong><span>7/7 pipeline 是 technical PASS，但全 cohort 仍有 {int(totals['mutation_family_abstain_units']):,} 個 mutation-bearing groups 因資源 guard ABSTAIN，因此不是 topology-complete。所有比例均顯示明確分母。</span></div>
-  <nav class="nav"><a href="#evidence">資料漏斗</a><a href="#topology">拓撲全貌</a><a href="#compare">跨樣本比較</a><a href="#samples">7 組資料</a><a href="#pair">HCC1395 技術驗證</a><a href="#provenance">證據</a></nav>
+  <nav class="nav"><a href="#evidence">資料漏斗</a><a href="#topology">拓撲全貌</a><a href="#methyl">甲基 overlay</a><a href="#compare">跨樣本比較</a><a href="#samples">7 組資料</a><a href="#pair">HCC1395 技術驗證</a><a href="#provenance">證據</a></nav>
 </div></header>
 <main>
 <section class="section" id="evidence"><div class="shell">
@@ -3006,6 +4184,19 @@ def index_page(authority: Mapping[str, Any], samples: list[Mapping[str, Any]]) -
     <article class="panel"><h3>拓撲型態｜分子累積形狀</h3><div class="denom">n={int(census['ranked_units']):,}</div>{coarse_panel}</article>
   </div>
   <div class="callout" style="margin-top:1rem"><b>精確結論：</b>單一 rooted-unlabeled topology = {int(census['one_exact_topology']['n']):,}/{int(census['ranked_units']):,} = {float(census['one_exact_topology']['pct_ranked']):.4f}%；單一四類 coarse geometry = {int(census['one_coarse_class']['n']):,}/{int(census['ranked_units']):,} = {float(census['one_coarse_class']['pct_ranked']):.4f}%。兩者不能替代 cellular clone / ancestry 驗證。</div>
+</div></section>
+<section class="section" id="methyl"><div class="shell">
+  <div class="section-head"><div><div class="eyebrow">Targeted methyl evidence overlay</div><h2>7 個 formal-positive pairs 對到 exact-PS 候選結構</h2></div><p>這是從 {int(methyl_headline['formal_source_rows_evaluated']):,} 個 evaluated rows 中預先篩出的陽性 subset，不是 7 個樣本、盛行率或方法準確率。只涵蓋 H2009（5）、HCC1395_HKU（1）與 HCC1954（1）。</p></div>
+  <div class="metrics">
+    <div class="metric"><span class="label">formal G1 positives</span><span class="value">{int(methyl_headline['formal_partner_G1_pairs']):,}</span><span class="note">7/7 same exact W</span></div>
+    <div class="metric"><span class="label">strict PS×HP lanes</span><span class="value">{int(methyl_headline['direct_HP_lanes']):,}</span><span class="note">{int(methyl_headline['formal_signal_lanes']):,} signal / {int(methyl_headline['paired_background_lanes']):,} background</span></div>
+    <div class="metric"><span class="label">signal direct reads</span><span class="value">{int(methyl_headline['signal_direct_support_sum']):,}</span><span class="note">+ {int(methyl_headline['background_direct_support_sum']):,} RR-only background = {int(methyl_headline['direct_support_sum']):,} total</span></div>
+    <div class="metric"><span class="label">focal control</span><span class="value">{int(methyl_headline['focal_REF_ALT_joint_testable']):,}/7</span><span class="note">可檢定；aligned {int(methyl_headline['focal_REF_ALT_axis_aligned']):,}/7</span></div>
+    <div class="metric"><span class="label">candidate relation</span><span class="value">{int(methyl_headline['latest_pair_relations_resolved_across_all_best_trees']):,}/7</span><span class="note">2 unique + 1 tied-local-resolved</span></div>
+  </div>
+  <div class="claim-boundary"><strong>唯一 focal ALT/REF aligned 訊號：</strong>H2009 chr4:2,307,521，V=0.618、permutation p=0.002；但其 signal HP2 為 <code>ABSTAIN_RESOURCE_LIMIT</code>，所以只標 locus evidence，不畫成已解 candidate branch。候選圖上的橘線僅是 formal association 的 pairwise projection。</div>
+  <div class="table-wrap" style="margin-top:1rem" role="region" tabindex="0" aria-label="七個 formal methyl pair 與 current candidate 對應"><table class="methyl-cohort-table"><thead><tr><th>dataset</th><th>focal → partner</th><th>formal G1 V</th><th>focal ALT/REF control</th><th>current all7_v2 candidate</th><th>工作站</th></tr></thead><tbody>{''.join(methyl_pair_rows)}</tbody></table></div>
+  <p class="denom"><b>判讀上限：</b>formal G1 是 focal-ALT methyl-core 中的 methyl-group × linked-partner allele association；focal ALT/REF 是獨立 joint control；candidate relation 是模型條件下的 best-tree 局部關係。不可宣稱 causal methylation、MG=clone、clone identity、cellular lineage 或 HCC1395_NYGC methyl replication。未列出的 regions 只是未進 targeted overlay，不代表甲基陰性。</p>
 </div></section>
 <section class="section" id="compare"><div class="shell">
   <div class="section-head"><div><div class="eyebrow">Cross-dataset state atlas</div><h2>七組資料的狀態、拓撲與複雜度並排比較</h2></div><p>先看各資料集的組成輪廓，再以同一維度檢查兩兩相似度。每一列獨立正規化；ranked-only 與 all-groups 分母不混用。</p></div>
@@ -3050,7 +4241,7 @@ def index_page(authority: Mapping[str, Any], samples: list[Mapping[str, Any]]) -
 </div></section>
 <section class="section" id="samples"><div class="shell">
   <div class="section-head"><div><div class="eyebrow">Seven technical datasets</div><h2>每組資料直接進入全基因視圖</h2></div><p>HCC1395_HKU 與 HCC1395_NYGC 是同一 biological sample 的兩個 technical datasets；因此 7 組資料只代表 6 個生物樣本。括號外顯示名稱不改變底層 authority key 與檔名。</p></div>
-  <div class="table-wrap"><table><thead><tr><th>dataset</th><th>final groups</th><th>ranked</th><th>唯一最佳樹</th><th>單一 exact shape</th><th>ABSTAIN</th><th>CGC locus</th><th>CGC ∩ drug</th><th>工作站</th></tr></thead><tbody>{''.join(sample_rows)}</tbody></table></div>
+  <div class="table-wrap"><table><thead><tr><th>dataset</th><th>final groups</th><th>ranked</th><th>唯一最佳樹</th><th>單一 exact shape</th><th>ABSTAIN</th><th>CGC locus</th><th>CGC ∩ drug</th><th>methyl pairs / lanes</th><th>工作站</th></tr></thead><tbody>{''.join(sample_rows)}</tbody></table></div>
   <p class="denom">CGC locus 與 CGC ∩ drug 都以全部 final groups 為分母：至少一個實際 sSNV position 落在 GENCODE v46 gene body；後者另要求同一 HGNC gene 為 COSMIC CGC v104 且有 DGIdb approved=true ∧ anti_neoplastic=true 關聯。不是臨床 actionability。</p>
 </div></section>
 <section class="section" id="pair"><div class="shell">
@@ -3069,7 +4260,7 @@ def index_page(authority: Mapping[str, Any], samples: list[Mapping[str, Any]]) -
 </div></section>
 <section class="section" id="provenance"><div class="shell">
   <div class="section-head"><div><div class="eyebrow">Fail-closed provenance</div><h2>JSON 路徑不干擾主要數字</h2></div><p>原始 JSON、receipt 與 SHA-256 收在下方；builder 另逐列核對 MLHP/topology/census keys、row conservation 與 source identities。</p></div>
-  <details><summary>機器證據與原始 JSON（預設收合）</summary><div class="details-body">{path_html}<span class="path"><b>cohort receipt SHA-256</b> <code>{authority['cohort_receipt_sha256']}</code></span><span class="path"><b>census receipt SHA-256</b> <code>{authority['census_receipt_sha256']}</code></span><span class="path"><b>similarity sidecar SHA-256</b> <code>{authority['similarity_sha256']}</code></span><span class="path"><b>gene/drug sidecar SHA-256</b> <code>{authority['gene_drug_sha256']}</code></span><span class="path"><b>verified pipeline bound identities</b> <code>{authority['pipeline_identity_count']}</code></span><span class="path"><b>verified census identities</b> <code>{authority['census_identity_count']}</code></span><span class="path"><b>verified similarity identities</b> <code>{authority['similarity_identity_count']}</code></span></div></details>
+  <details><summary>機器證據與原始 JSON／TSV（預設收合）</summary><div class="details-body">{path_html}<span class="path"><b>cohort receipt SHA-256</b> <code>{authority['cohort_receipt_sha256']}</code></span><span class="path"><b>census receipt SHA-256</b> <code>{authority['census_receipt_sha256']}</code></span><span class="path"><b>similarity sidecar SHA-256</b> <code>{authority['similarity_sha256']}</code></span><span class="path"><b>gene/drug sidecar SHA-256</b> <code>{authority['gene_drug_sha256']}</code></span><span class="path"><b>methyl overlay receipt SHA-256</b> <code>{authority['methyl_overlay_receipt_sha256']}</code></span><span class="path"><b>verified pipeline bound identities</b> <code>{authority['pipeline_identity_count']}</code></span><span class="path"><b>verified census identities</b> <code>{authority['census_identity_count']}</code></span><span class="path"><b>verified similarity identities</b> <code>{authority['similarity_identity_count']}</code></span></div></details>
   <details><summary>歷史 50 kb baseline（不進入新統計）</summary><div class="details-body"><p>舊 canonical-v5 工作站用 proximity/transitive grouping 與不同 candidate-tree schema。它僅保留作方法演進說明；所有本頁 KPI、分布與樣本頁皆來自 2026-07-24 exact-PS authority。</p></div></details>
 </div></section>
 </main>
@@ -3085,6 +4276,13 @@ def annotation_summary_from_sample_prefix(page: Path) -> dict[str, int]:
     for key, meta_name in (
         ("cgcRegions", "intersubmod-cgc-locus-regions"),
         ("cgcDrugRegions", "intersubmod-cgc-drug-locus-regions"),
+        ("methylFormalPairs", "intersubmod-methyl-formal-pairs"),
+        ("methylStrictLanes", "intersubmod-methyl-strict-lanes"),
+        ("methylFocalAligned", "intersubmod-methyl-focal-aligned"),
+        (
+            "methylResolvedRelations",
+            "intersubmod-methyl-resolved-relations",
+        ),
     ):
         match = re.search(
             rf'<meta name="{re.escape(meta_name)}" content="(\d+)">',
@@ -3154,6 +4352,23 @@ def build(
         "all-page exact-locus CGC / same-gene CGC∩drug counts do not conserve "
         "3,554 / 1,252",
     )
+    require(
+        sum(int(item["summary"]["methylFormalPairs"]) for item in samples) == 7
+        and sum(
+            int(item["summary"]["methylStrictLanes"]) for item in samples
+        )
+        == 10
+        and sum(
+            int(item["summary"]["methylFocalAligned"]) for item in samples
+        )
+        == 1
+        and sum(
+            int(item["summary"]["methylResolvedRelations"]) for item in samples
+        )
+        == 3,
+        "all-page methyl pair/lane/aligned/resolved counts do not conserve "
+        "7 / 10 / 1 / 3",
+    )
     if not verify_only:
         if index_only:
             for sample in EXPECTED_SAMPLES:
@@ -3169,6 +4384,11 @@ def build(
                     f'<meta name="intersubmod-census-receipt-sha256" content="{authority["census_receipt_sha256"]}">'
                     in prefix,
                     f"stale census binding: {page}",
+                )
+                require(
+                    f'<meta name="intersubmod-methyl-overlay-receipt-sha256" content="{authority["methyl_overlay_receipt_sha256"]}">'
+                    in prefix,
+                    f"stale methyl-overlay binding: {page}",
                 )
         atomic_write(OUTDIR / "index.html", index_page(authority, samples))
     return {"authority": authority, "samples": samples}
@@ -3190,6 +4410,18 @@ def main() -> int:
     print(f"INPUT_TOPOLOGY_ROOT={TOPOLOGY_ROOT}")
     print(f"INPUT_CENSUS_ROOT={CENSUS_ROOT}")
     print(f"INPUT_GENE_DRUG={GENE_DRUG_PATH}")
+    print(
+        "INPUT_METHYL_PAIR_JOIN="
+        f"{METHYL_OVERLAY_PATHS['pair_join']}"
+    )
+    print(
+        "INPUT_METHYL_FOCAL_CONTROL_JOIN="
+        f"{METHYL_OVERLAY_PATHS['focal_control_join']}"
+    )
+    print(
+        "INPUT_METHYL_LANE_JOIN="
+        f"{METHYL_OVERLAY_PATHS['lane_join']}"
+    )
     if not args.verify_only:
         print(f"OUTPUT={OUTDIR / 'index.html'}")
         if args.index_only:
@@ -3204,6 +4436,10 @@ def main() -> int:
     print(
         "GENE_DRUG_SHA256="
         f"{result['authority']['gene_drug_sha256']}"
+    )
+    print(
+        "METHYL_OVERLAY_RECEIPT_SHA256="
+        f"{result['authority']['methyl_overlay_receipt_sha256']}"
     )
     return 0
 

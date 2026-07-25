@@ -1,0 +1,2487 @@
+{
+  "surface": "report",
+  "manifest": {
+    "title": "ALT/REF 甲基差異 × 最新 exact-PS 候選拓撲對應驗證",
+    "version": 1,
+    "surface": "report",
+    "description": "Seven formal methyl–partner associations joined to focal ALT/REF controls, strict W/edges, the 2026-07-24 C++ candidate topology, and an HCC1395 cross-technical pairwise substructure comparison.",
+    "generatedAt": "2026-07-25T09:02:52+08:00",
+    "blocks": [
+      {
+        "id": "title",
+        "type": "markdown",
+        "body": "# ALT/REF 甲基差異 × 最新 exact-PS 候選拓撲對應驗證"
+      },
+      {
+        "id": "scope_ribbon",
+        "type": "markdown",
+        "body": "**TASK B / COMPLETE JOIN, PARTIAL BIOLOGICAL VALIDATION — 7 個 formal G1 pair 已完整對接；7/24 C++ cohort 技術 PASS，但 `validation_evidence_eligible=false`，不可解讀為真實 cellular lineage。**"
+      },
+      {
+        "id": "technical_summary",
+        "type": "markdown",
+        "body": "## 技術結論：能標到候選樹，但必須把三種 ALT/REF 問題分開\n\n- **Partner REF/ALT：7/7 formal G1 pairs** 都有甲基群共分離，且 7/7 同 strict W、10/10 HP lanes 有 direct edge（signal 638 reads；配對 RR-only background 152；合計 790）。\n- **Focal REF/ALT：只有 1/7** 通過 joint allele-axis gate；HCC1395 為 ALT=98、REF=2，完全不可評估 focal REF/ALT methyl difference。\n- **最新 candidate T：2/7 unique、1/7 AF tied、4/7 resource abstain。** **局部 pair relation 則有 3/7 已解**：兩個 unique T，加上 H2009 chr18 雖有 6 棵並列 best trees，但 6/6 都是 focal→partner。Unique 只表示目前模型與 supported-pattern read-AF 下有單一 winner。\n- HCC1395 可把 partner-ALT 的 MG enrichment 疊在 candidate focal→partner branch 上；這是 **pairwise projection association**，不是突變造成甲基改變的證明。"
+      },
+      {
+        "id": "headline_metrics",
+        "type": "metric-strip",
+        "cardIds": [
+          "formal_pairs_card",
+          "strict_map_card",
+          "focal_control_card",
+          "candidate_tree_card",
+          "release_ceiling_card"
+        ]
+      },
+      {
+        "id": "evidence_heading",
+        "type": "markdown",
+        "body": "## Read-linkage 全部對上，但 focal REF/ALT 與唯一候選樹只涵蓋少數\n\n下圖的分母固定為 7 個已篩出的 formal G1 positives；它不是 407,738 個候選 pair 的方法準確率。Direct edge 是無向結構證據，candidate T 則再受完整枚舉與 read-AF tie 影響。",
+        "sourceId": "source_evidence_ladder"
+      },
+      {
+        "id": "evidence_chart_block",
+        "type": "chart",
+        "chartId": "evidence_ladder_chart"
+      },
+      {
+        "id": "topology_status_heading",
+        "type": "markdown",
+        "body": "## 7/24 最新 C++ 對位：2 個 unique candidate、1 個 tied、4 個 fail-closed abstain\n\nHCC1395 與 HCC1954 各有一個 unique read-AF winner；H2009 chr18 有 6 個並列 best trees，但 7/25 exact factorization 顯示 6/6 都包含 focal-bearing state→partner acquisition，故局部邊已解、整樹仍不唯一。其餘四個 pair 的 mutation-bearing lane 觸發 1,000 search-node guard。",
+        "sourceId": "source_topology_status"
+      },
+      {
+        "id": "topology_status_chart_block",
+        "type": "chart",
+        "chartId": "topology_status_chart"
+      },
+      {
+        "id": "partner_effect_heading",
+        "type": "markdown",
+        "body": "## 7 個 partner REF/ALT association 的效應都大，但屬於被選中的陽性集合\n\nCramér's V 為 0.614–0.964；所有 pair 已通過 global BY 與 conditional permutation gate。這證明 methyl groups 與 partner allele 在同一 focal-ALT read subset 中共分離，不等於 focal mutation 導致甲基變化。",
+        "sourceId": "source_partner_effect"
+      },
+      {
+        "id": "partner_effect_chart_block",
+        "type": "chart",
+        "chartId": "partner_effect_chart"
+      },
+      {
+        "id": "pair_table_block",
+        "type": "table",
+        "tableId": "pair_master_table",
+        "layout": "full"
+      },
+      {
+        "id": "hcc_heading",
+        "type": "markdown",
+        "body": "## HCC1395：可把 partner-ALT enrichment 疊在唯一候選 branch，但不是 node truth\n\nHCC1395 HP2 的 k=5 unit 有 44 棵最低樹；supported-pattern read-AF 選出 1 棵 unique winner，整體形狀為 Sister＋direct。Focal 先出現，partner 再由 focal-bearing state 分支。下方 MG×partner allele 圖只用 51 個 methyl-core、partner-callable reads；不可當成完整 5-bit node membership。",
+        "sourceId": "source_hcc_methyl_counts"
+      },
+      {
+        "id": "hcc_methyl_chart_block",
+        "type": "chart",
+        "chartId": "hcc_methyl_chart"
+      },
+      {
+        "id": "hcc_tree",
+        "type": "markdown",
+        "body": "### 最新 HCC1395 candidate T 與 pairwise methyl overlay\n\n```\nROOT  RRRRR  （模型根；不等於已觀察到的REF clone）\n└─ chr3:127,986,757 G>A  focal\n   └─ RRRRA\n      ├─ chr3:127,962,164 → RRARA\n      └─ chr3:127,981,978 C>G  partner → RRRAA\n         └─ chr3:127,948,631 → RARAA\n            └─ chr3:127,912,458 → AARAA\n\nPairwise methyl overlay（只投影 focal / partner，不是完整5-bit node assignment）\npartner REF：MG 1-1 = 21，MG 1-2 = 0\npartner ALT：MG 1-1 = 11，MG 1-2 = 19\n```"
+      },
+      {
+        "id": "hcc_layers_table_block",
+        "type": "table",
+        "tableId": "hcc_layers_table",
+        "layout": "full"
+      },
+      {
+        "id": "crosssource_heading",
+        "type": "markdown",
+        "body": "## HCC1395_DORADO 重現 focal→partner candidate 子結構，但沒有重現甲基多群\n\n兩來源 strict pairwise state 在 focal-ALT reads 中的 partner-ALT 比例為 60.4% 與 53.1%（差 7.3%；Fisher p=0.549）。兩者 candidate order 都是 `focal before partner`，DORADO k=2 是 HCC k=5 tree 的 pairwise contraction。但 DORADO focal M1 是穩定單群 K=1，formal methyl pair 狀態為 ONE_PLATFORM_ONLY；因此只支持 genetic candidate-substructure 的技術再現，不支持 methyl association 再現。",
+        "sourceId": "source_hcc_crosssource"
+      },
+      {
+        "id": "crosssource_chart_block",
+        "type": "chart",
+        "chartId": "crosssource_chart"
+      },
+      {
+        "id": "crosssource_table_block",
+        "type": "table",
+        "tableId": "crosssource_table",
+        "layout": "full"
+      },
+      {
+        "id": "focal_control_heading",
+        "type": "markdown",
+        "body": "## Focal REF/ALT control：只有 H2009 chr4 通過，HCC1395 因 REF=2 不可評估\n\nJoint control 會把 ALT+REF reads 重新 clustering，沒有沿用 ALT-only M1 centroid。因此其群標不能直接接到原 MG 1-1/1-2。H2009 chr4 的 V=0.618、p=0.002、axis-aligned=true 可加一個 focal allele-associated methyl badge；但該 pair 的最新候選樹剛好 resource abstain，只能標在 W，不能加方向箭頭。",
+        "sourceId": "source_focal_controls"
+      },
+      {
+        "id": "focal_status_chart_block",
+        "type": "chart",
+        "chartId": "focal_status_chart"
+      },
+      {
+        "id": "focal_table_block",
+        "type": "table",
+        "tableId": "focal_control_table",
+        "layout": "full"
+      },
+      {
+        "id": "definitions_heading",
+        "type": "markdown",
+        "body": "## 五個分母不能混用：同一座標不代表同一批 reads\n\nM1、G1、tumor-REF、strict edge 與 C++ read-AF 都有不同 eligibility。特別是 C++ AF 只累計整個 block pattern weight≥3 的 patterns；它不是 caller VAF。H2009 chr13 的 strict pair edge 有 11 個 AA molecules，但多位點 pattern 分散後，C++ supported-pattern marginal 對 partner ALT 為 0，正好顯示 selection effect。",
+        "sourceId": "source_definitions"
+      },
+      {
+        "id": "definitions_table_block",
+        "type": "table",
+        "tableId": "definitions_table",
+        "layout": "full"
+      },
+      {
+        "id": "methods",
+        "type": "markdown",
+        "body": "## 對位方法：先鎖 coordinate，再保留 PS、HP、W、block 與 read population\n\n1. 從 v8 取 `endpoint_a_formal_pair_by_confirmed=true` 的 7 rows。\n2. 以 `(dataset, chrom, focal_pos)` 接 tumor-REF control。\n3. 以兩 endpoint 在 threshold=3 membership 中共享的 `(linkage_basis, exact PS, component_id)` 認定 SAME_W。\n4. 逐 HP lane 查 direct endpoint edge，將 raw genomic-order states 轉成 focal-first。\n5. 以 sample/chrom/PS/HP 且 C++ `af_coverage` 同時含兩座標，接到 bounded block。"
+      },
+      {
+        "id": "lane_table_block",
+        "type": "table",
+        "tableId": "lane_table",
+        "layout": "full"
+      },
+      {
+        "id": "limitations",
+        "type": "markdown",
+        "body": "## 限制與 robustness 判定\n\n- **可發布為資料對應：** 7/7 same W、10/10 direct edge、逐 pair G1 表與 focal control 狀態。\n- **只能稱 candidate：** 7/24 C++ cohort 雖 technical all-pass，但 `all_mutation_bearing_families_complete=false`、`validation_evidence_eligible=false`。\n- **局部已解不等於整樹唯一：** H2009 chr18 的 6/6 best trees 共享 focal→partner relation，但上游 parent mapping 仍有 6 種。\n- **非獨立 VAF 驗證：** read-AF 與 tree constraints 來自同批 supported patterns；`input_vaf_eligible=false`，也未校正 CN/LOH、purity、multiplicity 或 CCF。\n- **非因果：** methyl group enrichment 可跟 state 共分離，不能證明 partner mutation 造成 methyl state，亦不能把 MG 直接命名為 clone/subclone。\n- **跨技術只到結構：** HCC/DORADO 是同一 cell line 的 technical sources；pairwise candidate order 一致，但 methyl multigroup 在 DORADO 不重現。\n- **matched-normal 未完成：** 這 7 pair 沒有 formal matched-normal methyl control，不能排除既存 ASM 或背景 epiallele。\n- **Factorization source identity 已封閉：** current `all7_v2` receipt 綁定目前 workspace source，current SHA 與 receipt-bound SHA byte-identical；renderer 仍須逐次 fail-closed 驗證 receipt 與 source identity。"
+      },
+      {
+        "id": "next_steps",
+        "type": "markdown",
+        "body": "## 建議下一步\n\n1. 對四個 `ABSTAIN_RESOURCE_LIMIT` pair 做 targeted higher-guard／exact pruning rerun，但保留 fail-closed completion receipt。\n2. 將 raw marginal、strict pairwise、supported-pattern AF 三種 read denominator 做 per-locus retention audit，再決定 AF ranking 是否要改成 error-aware likelihood。\n3. 對 HCC1395 與 DORADO 同 pair 使用相同 centroid／classifier 做預註冊 methyl replication；目前 DORADO K=1 只能作 negative technical result。\n4. 補 matched-normal、allele-specific CN/LOH、purity/CCF；最後才用 single-cell、colony 或 multi-region truth 驗證 cellular lineage。"
+      },
+      {
+        "id": "further_questions",
+        "type": "markdown",
+        "body": "## 尚待回答\n\n- HCC candidate tree 的 focal→partner order 在 error-aware likelihood、CN/CCF校正後是否仍唯一？\n- DORADO 的 K=1 是真實甲基單群，還是 coverage、CpG callability 或 clustering power 差異？\n- H2009 chr13 的 whole-pattern support filtering 是否會系統性移除低頻 derived state？"
+      }
+    ],
+    "cards": [
+      {
+        "id": "formal_pairs_card",
+        "description": "從 407,738 個 evaluated rows 中選出的 formal positives；不是準確率。",
+        "dataset": "headline",
+        "sourceId": "source_headline",
+        "metrics": [
+          {
+            "label": "Formal G1 pairs",
+            "field": "formal_pairs",
+            "format": "number"
+          },
+          {
+            "label": "Evaluated pair rows",
+            "field": "evaluated_pairs",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "strict_map_card",
+        "description": "全部 formal pairs 在 latest strict graph 中同 W 且有 direct edge。",
+        "dataset": "headline",
+        "sourceId": "source_headline",
+        "metrics": [
+          {
+            "label": "Same W pairs",
+            "field": "same_W_pairs",
+            "format": "number"
+          },
+          {
+            "label": "Direct HP lanes",
+            "field": "direct_lanes",
+            "format": "number"
+          },
+          {
+            "label": "Signal direct reads",
+            "field": "signal_direct_reads",
+            "format": "number"
+          },
+          {
+            "label": "RR-only background reads",
+            "field": "background_direct_reads",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "focal_control_card",
+        "description": "Focal ALT+REF 重新 clustering 後通過 allele-axis gate。",
+        "dataset": "headline",
+        "sourceId": "source_headline",
+        "metrics": [
+          {
+            "label": "Focal REF/ALT aligned",
+            "field": "focal_aligned",
+            "format": "number"
+          },
+          {
+            "label": "Joint testable",
+            "field": "focal_testable",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "candidate_tree_card",
+        "description": "7/24 C++ model內 unique read-AF winner；不是 true-tree count。",
+        "dataset": "headline",
+        "sourceId": "source_headline",
+        "metrics": [
+          {
+            "label": "Unique candidate T pairs",
+            "field": "unique_candidate_pairs",
+            "format": "number"
+          },
+          {
+            "label": "Resolved pair relations",
+            "field": "resolved_pair_relations",
+            "format": "number"
+          },
+          {
+            "label": "Resource abstain pairs",
+            "field": "resource_abstain_pairs",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "release_ceiling_card",
+        "description": "Cohort有 guard-triggered abstain，不能宣稱所有family皆解出。",
+        "dataset": "headline",
+        "sourceId": "source_headline",
+        "metrics": [
+          {
+            "label": "Release-grade complete datasets",
+            "field": "release_grade_complete",
+            "format": "number"
+          }
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "evidence_ladder_chart",
+        "title": "七個 formal pair 在各證據層的可確認數",
+        "subtitle": "分母=7 formal G1 positives；不是全體候選 pair 的準確率。",
+        "type": "bar",
+        "dataset": "evidence_ladder",
+        "sourceId": "source_evidence_ladder",
+        "intent": "comparison",
+        "encodings": {
+          "x": {
+            "field": "stage",
+            "type": "nominal",
+            "label": "Evidence stage"
+          },
+          "y": {
+            "field": "pair_count",
+            "type": "quantitative",
+            "label": "Pairs"
+          }
+        },
+        "palette": {
+          "kind": "categorical"
+        }
+      },
+      {
+        "id": "topology_status_chart",
+        "title": "Formal pairs 的最新 C++ candidate-topology 狀態",
+        "subtitle": "2 unique、1 tied、4 resource abstain；unique 為 model-conditional。",
+        "type": "bar",
+        "dataset": "topology_status",
+        "sourceId": "source_topology_status",
+        "intent": "comparison",
+        "encodings": {
+          "x": {
+            "field": "status",
+            "type": "nominal",
+            "label": "Status"
+          },
+          "y": {
+            "field": "pairs",
+            "type": "quantitative",
+            "label": "Pairs"
+          }
+        },
+        "palette": {
+          "kind": "categorical"
+        }
+      },
+      {
+        "id": "partner_effect_chart",
+        "title": "Partner REF/ALT × methyl-group 關聯效應",
+        "subtitle": "Cramér's V；7 個已通過 formal G1 gate 的陽性 pair。",
+        "type": "bar",
+        "dataset": "partner_effect",
+        "sourceId": "source_partner_effect",
+        "intent": "comparison",
+        "encodings": {
+          "x": {
+            "field": "locus",
+            "type": "nominal",
+            "label": "Focal locus"
+          },
+          "y": {
+            "field": "cramers_v",
+            "type": "quantitative",
+            "label": "Cramér's V"
+          }
+        },
+        "palette": {
+          "kind": "categorical"
+        }
+      },
+      {
+        "id": "hcc_methyl_chart",
+        "title": "HCC1395 methyl group × partner allele read counts",
+        "subtitle": "n=51 focal-ALT methyl-core且partner-callable reads；MG 1-2 全為 partner ALT。",
+        "type": "bar",
+        "dataset": "hcc_methyl_counts",
+        "sourceId": "source_hcc_methyl_counts",
+        "intent": "composition",
+        "encodings": {
+          "x": {
+            "field": "methyl_group",
+            "type": "nominal",
+            "label": "Methyl group"
+          },
+          "y": {
+            "field": "reads",
+            "type": "quantitative",
+            "label": "Reads"
+          },
+          "color": {
+            "field": "partner_allele",
+            "type": "nominal",
+            "label": "Partner allele"
+          }
+        },
+        "options": {
+          "grouping": "grouped"
+        },
+        "palette": {
+          "kind": "categorical"
+        }
+      },
+      {
+        "id": "crosssource_chart",
+        "title": "HCC1395 兩技術來源的 focal-ALT 條件下 partner-ALT 比例",
+        "subtitle": "Strict direct-edge pair states；60.4% vs 53.1%，Fisher p=0.549。",
+        "type": "bar",
+        "dataset": "hcc_crosssource",
+        "sourceId": "source_hcc_crosssource",
+        "intent": "comparison",
+        "encodings": {
+          "x": {
+            "field": "sample",
+            "type": "nominal",
+            "label": "Technical dataset"
+          },
+          "y": {
+            "field": "partner_alt_given_focal_alt",
+            "type": "quantitative",
+            "label": "Partner ALT | focal ALT"
+          }
+        },
+        "valueFormat": "percent",
+        "palette": {
+          "kind": "categorical"
+        }
+      },
+      {
+        "id": "focal_status_chart",
+        "title": "七個 focal 位點的 ALT+REF methyl control 狀態",
+        "subtitle": "只有一個 axis-aligned；三個因 focal REF不足而不可評估。",
+        "type": "bar",
+        "dataset": "focal_status",
+        "sourceId": "source_focal_status",
+        "intent": "comparison",
+        "encodings": {
+          "x": {
+            "field": "status",
+            "type": "nominal",
+            "label": "Control status"
+          },
+          "y": {
+            "field": "sites",
+            "type": "quantitative",
+            "label": "Sites"
+          }
+        },
+        "palette": {
+          "kind": "categorical"
+        }
+      }
+    ],
+    "tables": [
+      {
+        "id": "pair_master_table",
+        "title": "七個 formal G1 pair 的 ALT/REF、W 與最新 candidate T 對應",
+        "subtitle": "Pair order 只在所有 AF-global-best trees 共享同一 relation 時顯示；整樹可仍不唯一。",
+        "dataset": "pair_master",
+        "sourceId": "source_pair_master",
+        "layout": "full",
+        "density": "dense",
+        "defaultSort": {
+          "field": "g1_cramers_v",
+          "direction": "desc"
+        },
+        "columns": [
+          {
+            "field": "sample",
+            "label": "Dataset",
+            "type": "text"
+          },
+          {
+            "field": "focal",
+            "label": "Focal",
+            "type": "text"
+          },
+          {
+            "field": "partner",
+            "label": "Partner",
+            "type": "text"
+          },
+          {
+            "field": "g1_cramers_v",
+            "label": "G1 V",
+            "format": "number"
+          },
+          {
+            "field": "g1_delta_alt_fraction",
+            "label": "G1 Δ ALT fraction",
+            "format": "number"
+          },
+          {
+            "field": "W_containers",
+            "label": "Shared W lanes",
+            "format": "number"
+          },
+          {
+            "field": "direct_support_total",
+            "label": "Direct support",
+            "format": "number"
+          },
+          {
+            "field": "focal_ref_alt_status",
+            "label": "Focal REF/ALT",
+            "type": "text"
+          },
+          {
+            "field": "candidate_T_status",
+            "label": "Latest candidate T",
+            "type": "text"
+          },
+          {
+            "field": "candidate_T_best_ties",
+            "label": "Best T ties",
+            "format": "number"
+          },
+          {
+            "field": "candidate_pair_relation_status",
+            "label": "Pair relation",
+            "type": "text"
+          },
+          {
+            "field": "candidate_pair_order",
+            "label": "Pair order",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "hcc_layers_table",
+        "title": "HCC1395 同一座標的四個 read populations",
+        "subtitle": "每層 denominator 不同，不可直接把數字相加或互換。",
+        "dataset": "hcc_layers",
+        "sourceId": "source_hcc_layers",
+        "layout": "full",
+        "density": "spacious",
+        "defaultSort": {
+          "field": "order",
+          "direction": "asc"
+        },
+        "columns": [
+          {
+            "field": "order",
+            "label": "#",
+            "format": "number"
+          },
+          {
+            "field": "layer",
+            "label": "Layer",
+            "type": "text"
+          },
+          {
+            "field": "population",
+            "label": "Read population",
+            "type": "text"
+          },
+          {
+            "field": "counts",
+            "label": "Observed counts",
+            "type": "text"
+          },
+          {
+            "field": "valid_claim",
+            "label": "Valid annotation",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "crosssource_table",
+        "title": "HCC1395 與 DORADO 同 pair 的 strict state 與 candidate T",
+        "subtitle": "同 biological cell line、不同 technical dataset；PS ID 不要求相同。",
+        "dataset": "hcc_crosssource",
+        "sourceId": "source_hcc_crosssource",
+        "layout": "full",
+        "density": "dense",
+        "defaultSort": {
+          "field": "sample",
+          "direction": "asc"
+        },
+        "columns": [
+          {
+            "field": "sample",
+            "label": "Dataset",
+            "type": "text"
+          },
+          {
+            "field": "phase_set",
+            "label": "Exact PS",
+            "type": "text"
+          },
+          {
+            "field": "hp_family",
+            "label": "HP",
+            "type": "text"
+          },
+          {
+            "field": "W_k",
+            "label": "W k",
+            "format": "number"
+          },
+          {
+            "field": "direct_support",
+            "label": "Direct support",
+            "format": "number"
+          },
+          {
+            "field": "state_RR",
+            "label": "RR",
+            "format": "number"
+          },
+          {
+            "field": "state_RA",
+            "label": "RA",
+            "format": "number"
+          },
+          {
+            "field": "state_AR",
+            "label": "AR",
+            "format": "number"
+          },
+          {
+            "field": "state_AA",
+            "label": "AA",
+            "format": "number"
+          },
+          {
+            "field": "partner_alt_given_focal_alt",
+            "label": "P(partner ALT | focal ALT)",
+            "format": "percent"
+          },
+          {
+            "field": "cpp_partner_af",
+            "label": "Supported-pattern partner AF",
+            "format": "percent"
+          },
+          {
+            "field": "cpp_pair_order",
+            "label": "Candidate order",
+            "type": "text"
+          },
+          {
+            "field": "cpp_shape",
+            "label": "Full shape",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "focal_control_table",
+        "title": "七個 focal 位點的 tumor ALT+REF methyl joint control",
+        "subtitle": "Permutation p 未做本報告新增的跨位點 multiple correction；axis gate 同時要求 V≥0.30。",
+        "dataset": "focal_controls",
+        "sourceId": "source_focal_controls",
+        "layout": "full",
+        "density": "dense",
+        "defaultSort": {
+          "field": "n_REF",
+          "direction": "desc"
+        },
+        "columns": [
+          {
+            "field": "sample",
+            "label": "Dataset",
+            "type": "text"
+          },
+          {
+            "field": "locus",
+            "label": "Focal",
+            "type": "text"
+          },
+          {
+            "field": "n_ALT",
+            "label": "ALT reads",
+            "format": "number"
+          },
+          {
+            "field": "n_REF",
+            "label": "REF reads",
+            "format": "number"
+          },
+          {
+            "field": "joint_testable",
+            "label": "Joint testable",
+            "type": "boolean"
+          },
+          {
+            "field": "joint_V",
+            "label": "V",
+            "format": "number"
+          },
+          {
+            "field": "joint_p_perm",
+            "label": "p_perm",
+            "format": "number"
+          },
+          {
+            "field": "classification",
+            "label": "Classification",
+            "type": "text"
+          },
+          {
+            "field": "REF_only_stable_multigroup",
+            "label": "REF-only stable multigroup",
+            "type": "boolean"
+          }
+        ]
+      },
+      {
+        "id": "definitions_table",
+        "title": "ALT/REF 與 topology 各層的正式定義",
+        "subtitle": "同一座標可被不同 read eligibility 與 filtering 觀察。",
+        "dataset": "definitions",
+        "sourceId": "source_definitions",
+        "layout": "full",
+        "density": "spacious",
+        "defaultSort": {
+          "field": "layer",
+          "direction": "asc"
+        },
+        "columns": [
+          {
+            "field": "layer",
+            "label": "Layer",
+            "type": "text"
+          },
+          {
+            "field": "read_population",
+            "label": "Read population",
+            "type": "text"
+          },
+          {
+            "field": "question",
+            "label": "Question",
+            "type": "text"
+          },
+          {
+            "field": "tree_role",
+            "label": "Allowed tree role",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "lane_table",
+        "title": "十個 exact-PS×HP lanes 的 strict edge 與 C++ 對位",
+        "subtitle": "RR/RA/AR/AA 均為 focal-first；C++ AF 為 whole-pattern support-filtered marginal。",
+        "dataset": "strict_lanes",
+        "sourceId": "source_strict_lanes",
+        "layout": "full",
+        "density": "dense",
+        "defaultSort": {
+          "field": "direct_support",
+          "direction": "desc"
+        },
+        "columns": [
+          {
+            "field": "pair_label",
+            "label": "Pair",
+            "type": "text"
+          },
+          {
+            "field": "hp_family",
+            "label": "HP",
+            "type": "text"
+          },
+          {
+            "field": "phase_set",
+            "label": "Exact PS",
+            "type": "text"
+          },
+          {
+            "field": "W_k",
+            "label": "W k",
+            "format": "number"
+          },
+          {
+            "field": "cpp_block_k",
+            "label": "Block k",
+            "format": "number"
+          },
+          {
+            "field": "direct_support",
+            "label": "Support",
+            "format": "number"
+          },
+          {
+            "field": "state_RR",
+            "label": "RR",
+            "format": "number"
+          },
+          {
+            "field": "state_RA",
+            "label": "RA",
+            "format": "number"
+          },
+          {
+            "field": "state_AR",
+            "label": "AR",
+            "format": "number"
+          },
+          {
+            "field": "state_AA",
+            "label": "AA",
+            "format": "number"
+          },
+          {
+            "field": "cpp_pair_status",
+            "label": "C++ pair status",
+            "type": "text"
+          },
+          {
+            "field": "cpp_focal_alt",
+            "label": "C++ focal ALT",
+            "format": "number"
+          },
+          {
+            "field": "cpp_partner_alt",
+            "label": "C++ partner ALT",
+            "format": "number"
+          },
+          {
+            "field": "factorization_resolution_class",
+            "label": "Factorization",
+            "type": "text"
+          },
+          {
+            "field": "cpp_pair_order_across_best",
+            "label": "Pair order across best T",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "source_headline",
+        "label": "Executed SQLite snapshot query: headline",
+        "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/headline.sql",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "description": "Reviewed headline metrics from the formal-pair, focal-control, strict-W, C++ topology, and factorization left join.",
+          "sql": "SELECT * FROM \"headline\" ORDER BY rowid;",
+          "tables_used": [
+            "headline"
+          ],
+          "filters": [
+            "bounded reviewed snapshot generated by the deterministic join script"
+          ],
+          "metric_definitions": [
+            "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+            "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+            "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+          ],
+          "executed_at": "2026-07-25T09:02:52+08:00"
+        }
+      },
+      {
+        "id": "source_evidence_ladder",
+        "label": "Executed SQLite snapshot query: evidence_ladder",
+        "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/evidence_ladder.sql",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "description": "Pair counts retained at each evidence layer; denominator is seven selected formal G1 positives.",
+          "sql": "SELECT * FROM \"evidence_ladder\" ORDER BY rowid;",
+          "tables_used": [
+            "evidence_ladder"
+          ],
+          "filters": [
+            "bounded reviewed snapshot generated by the deterministic join script"
+          ],
+          "metric_definitions": [
+            "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+            "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+            "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+          ],
+          "executed_at": "2026-07-25T09:02:52+08:00"
+        }
+      },
+      {
+        "id": "source_topology_status",
+        "label": "Executed SQLite snapshot query: topology_status",
+        "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/topology_status.sql",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "description": "Full candidate-tree status from the 2026-07-24 bounded C++ run.",
+          "sql": "SELECT * FROM \"topology_status\" ORDER BY rowid;",
+          "tables_used": [
+            "topology_status"
+          ],
+          "filters": [
+            "bounded reviewed snapshot generated by the deterministic join script"
+          ],
+          "metric_definitions": [
+            "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+            "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+            "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+          ],
+          "executed_at": "2026-07-25T09:02:52+08:00"
+        }
+      },
+      {
+        "id": "source_partner_effect",
+        "label": "Executed SQLite snapshot query: partner_effect",
+        "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/partner_effect.sql",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "description": "Formal v8 methyl-group × partner-allele effect sizes selected from 407,738 evaluated rows.",
+          "sql": "SELECT * FROM \"partner_effect\" ORDER BY rowid;",
+          "tables_used": [
+            "partner_effect"
+          ],
+          "filters": [
+            "bounded reviewed snapshot generated by the deterministic join script"
+          ],
+          "metric_definitions": [
+            "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+            "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+            "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+          ],
+          "executed_at": "2026-07-25T09:02:52+08:00"
+        }
+      },
+      {
+        "id": "source_pair_master",
+        "label": "Executed SQLite snapshot query: pair_master",
+        "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/pair_master.sql",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "description": "Seven-row coordinate-preserving join across G1, focal ALT/REF control, strict W, topology, and factorization.",
+          "sql": "SELECT * FROM \"pair_master\" ORDER BY rowid;",
+          "tables_used": [
+            "pair_master"
+          ],
+          "filters": [
+            "bounded reviewed snapshot generated by the deterministic join script"
+          ],
+          "metric_definitions": [
+            "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+            "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+            "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+          ],
+          "executed_at": "2026-07-25T09:02:52+08:00"
+        }
+      },
+      {
+        "id": "source_hcc_methyl_counts",
+        "label": "Executed SQLite snapshot query: hcc_methyl_counts",
+        "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/hcc_methyl_counts.sql",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "description": "HCC1395 focal-ALT methyl-core reads tabulated by methyl group and linked-partner allele.",
+          "sql": "SELECT * FROM \"hcc_methyl_counts\" ORDER BY rowid;",
+          "tables_used": [
+            "hcc_methyl_counts"
+          ],
+          "filters": [
+            "bounded reviewed snapshot generated by the deterministic join script"
+          ],
+          "metric_definitions": [
+            "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+            "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+            "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+          ],
+          "executed_at": "2026-07-25T09:02:52+08:00"
+        }
+      },
+      {
+        "id": "source_hcc_layers",
+        "label": "Executed SQLite snapshot query: hcc_layers",
+        "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/hcc_layers.sql",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "description": "Reader-facing denominator audit for the four HCC1395 read populations.",
+          "sql": "SELECT * FROM \"hcc_layers\" ORDER BY rowid;",
+          "tables_used": [
+            "hcc_layers"
+          ],
+          "filters": [
+            "bounded reviewed snapshot generated by the deterministic join script"
+          ],
+          "metric_definitions": [
+            "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+            "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+            "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+          ],
+          "executed_at": "2026-07-25T09:02:52+08:00"
+        }
+      },
+      {
+        "id": "source_hcc_crosssource",
+        "label": "Executed SQLite snapshot query: hcc_crosssource",
+        "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/hcc_crosssource.sql",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "description": "HCC1395 canonical versus DORADO strict pair states and model-conditional candidate relation.",
+          "sql": "SELECT * FROM \"hcc_crosssource\" ORDER BY rowid;",
+          "tables_used": [
+            "hcc_crosssource"
+          ],
+          "filters": [
+            "bounded reviewed snapshot generated by the deterministic join script"
+          ],
+          "metric_definitions": [
+            "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+            "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+            "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+          ],
+          "executed_at": "2026-07-25T09:02:52+08:00"
+        }
+      },
+      {
+        "id": "source_focal_status",
+        "label": "Executed SQLite snapshot query: focal_status",
+        "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/focal_status.sql",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "description": "Classification counts for seven focal ALT+REF methyl joint controls.",
+          "sql": "SELECT * FROM \"focal_status\" ORDER BY rowid;",
+          "tables_used": [
+            "focal_status"
+          ],
+          "filters": [
+            "bounded reviewed snapshot generated by the deterministic join script"
+          ],
+          "metric_definitions": [
+            "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+            "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+            "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+          ],
+          "executed_at": "2026-07-25T09:02:52+08:00"
+        }
+      },
+      {
+        "id": "source_focal_controls",
+        "label": "Executed SQLite snapshot query: focal_controls",
+        "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/focal_controls.sql",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "description": "Seven focal tumor ALT+REF joint-clustering control rows; the current selected subset has no new global multiplicity correction.",
+          "sql": "SELECT * FROM \"focal_controls\" ORDER BY rowid;",
+          "tables_used": [
+            "focal_controls"
+          ],
+          "filters": [
+            "bounded reviewed snapshot generated by the deterministic join script"
+          ],
+          "metric_definitions": [
+            "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+            "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+            "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+          ],
+          "executed_at": "2026-07-25T09:02:52+08:00"
+        }
+      },
+      {
+        "id": "source_definitions",
+        "label": "Executed SQLite snapshot query: definitions",
+        "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/definitions.sql",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "description": "Formal read-population and claim-boundary definitions used in this report.",
+          "sql": "SELECT * FROM \"definitions\" ORDER BY rowid;",
+          "tables_used": [
+            "definitions"
+          ],
+          "filters": [
+            "bounded reviewed snapshot generated by the deterministic join script"
+          ],
+          "metric_definitions": [
+            "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+            "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+            "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+          ],
+          "executed_at": "2026-07-25T09:02:52+08:00"
+        }
+      },
+      {
+        "id": "source_strict_lanes",
+        "label": "Executed SQLite snapshot query: strict_lanes",
+        "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/strict_lanes.sql",
+        "query": {
+          "engine": "sqlite",
+          "language": "sql",
+          "description": "Ten exact-PS×HP lanes with focal-first RR/RA/AR/AA states and candidate factorization fields.",
+          "sql": "SELECT * FROM \"strict_lanes\" ORDER BY rowid;",
+          "tables_used": [
+            "strict_lanes"
+          ],
+          "filters": [
+            "bounded reviewed snapshot generated by the deterministic join script"
+          ],
+          "metric_definitions": [
+            "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+            "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+            "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+          ],
+          "executed_at": "2026-07-25T09:02:52+08:00"
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "status": "ready",
+    "generatedAt": "2026-07-25T09:02:52+08:00",
+    "datasets": {
+      "headline": [
+        {
+          "formal_pairs": 7,
+          "evaluated_pairs": 407738,
+          "same_W_pairs": 7,
+          "direct_lanes": 10,
+          "signal_direct_reads": 638,
+          "background_direct_reads": 152,
+          "focal_aligned": 1,
+          "focal_testable": 3,
+          "unique_candidate_pairs": 2,
+          "resolved_pair_relations": 3,
+          "resource_abstain_pairs": 4,
+          "release_grade_complete": 0
+        }
+      ],
+      "evidence_ladder": [
+        {
+          "stage": "Formal partner MG×REF/ALT",
+          "pair_count": 7,
+          "share": 1.0
+        },
+        {
+          "stage": "Same strict W",
+          "pair_count": 7,
+          "share": 1.0
+        },
+        {
+          "stage": "Threshold-qualified direct edge",
+          "pair_count": 7,
+          "share": 1.0
+        },
+        {
+          "stage": "Focal REF/ALT joint testable",
+          "pair_count": 3,
+          "share": 0.42857142857142855
+        },
+        {
+          "stage": "Focal allele-axis aligned",
+          "pair_count": 1,
+          "share": 0.14285714285714285
+        },
+        {
+          "stage": "Unique latest AF candidate T",
+          "pair_count": 2,
+          "share": 0.2857142857142857
+        },
+        {
+          "stage": "Pair relation resolved across best T",
+          "pair_count": 3,
+          "share": 0.42857142857142855
+        }
+      ],
+      "topology_status": [
+        {
+          "status": "Unique AF candidate",
+          "pairs": 2
+        },
+        {
+          "status": "AF tied",
+          "pairs": 1
+        },
+        {
+          "status": "Resource abstain",
+          "pairs": 4
+        }
+      ],
+      "partner_effect": [
+        {
+          "locus": "H2009 c12:4413414",
+          "cramers_v": 0.9293203772845852,
+          "delta_alt_fraction": 0.875,
+          "informative_reads": 84
+        },
+        {
+          "locus": "H2009 c13:28815939",
+          "cramers_v": 0.8467408147081301,
+          "delta_alt_fraction": 0.8172043010752689,
+          "informative_reads": 74
+        },
+        {
+          "locus": "H2009 c18:567920",
+          "cramers_v": 0.8942344057425845,
+          "delta_alt_fraction": 0.8888888888888888,
+          "informative_reads": 83
+        },
+        {
+          "locus": "H2009 c4:2307521",
+          "cramers_v": 0.9635460822563594,
+          "delta_alt_fraction": 0.9473684210526315,
+          "informative_reads": 68
+        },
+        {
+          "locus": "H2009 c5:44615693",
+          "cramers_v": 0.6135804007240899,
+          "delta_alt_fraction": 0.5093333333333333,
+          "informative_reads": 155
+        },
+        {
+          "locus": "HCC1395 c3:127986757",
+          "cramers_v": 0.6446898479113814,
+          "delta_alt_fraction": 0.65625,
+          "informative_reads": 51
+        },
+        {
+          "locus": "HCC1954 c8:100071382",
+          "cramers_v": 0.8678362573099415,
+          "delta_alt_fraction": 0.8678362573099415,
+          "informative_reads": 113
+        }
+      ],
+      "pair_master": [
+        {
+          "sample": "H2009",
+          "focal": "chr12:4413414 C>A",
+          "partner": "chr12:4414974 G>C",
+          "locus_short": "H2009 chr12:4413414",
+          "g1_informative_reads": 84,
+          "g1_groups": "1-1, 1-2",
+          "g1_table": "[[76,0],[1,7]]",
+          "g1_cramers_v": 0.9293203772845852,
+          "g1_delta_alt_fraction": 0.875,
+          "g1_q_by": 2.4107679135286857e-07,
+          "g1_conditional_p": 0.001,
+          "g1_enriched_group": "1-2",
+          "same_W": true,
+          "W_containers": 1,
+          "direct_support_total": 87,
+          "focal_ref_alt_status": "BELOW_EFFECT",
+          "focal_alt_reads": 95,
+          "focal_ref_reads": 3,
+          "focal_joint_v": 0.148600291266879,
+          "focal_joint_p": 0.304,
+          "candidate_T_status": "ABSTAIN_RESOURCE_LIMIT",
+          "candidate_T_minimum_trees": null,
+          "candidate_T_best_ties": null,
+          "candidate_T_shape": "NA",
+          "candidate_topology_resolution": "NOT_AVAILABLE_OR_NOT_RANKED",
+          "candidate_pair_relation_status": "UNRESOLVED",
+          "candidate_pair_order": "UNRESOLVED",
+          "candidate_pair_order_focal_before_count": 0,
+          "candidate_pair_order_partner_before_count": 0,
+          "candidate_pair_order_incomparable_count": 0,
+          "endpoint_b_status": "NOT_IDENTIFIABLE_FIXED_ERROR_CEILING"
+        },
+        {
+          "sample": "H2009",
+          "focal": "chr13:28815939 G>A",
+          "partner": "chr13:28817498 G>A",
+          "locus_short": "H2009 chr13:28815939",
+          "g1_informative_reads": 74,
+          "g1_groups": "1-1, 1-2",
+          "g1_table": "[[61,1],[2,10]]",
+          "g1_cramers_v": 0.8467408147081301,
+          "g1_delta_alt_fraction": 0.8172043010752689,
+          "g1_q_by": 1.6081760447702066e-07,
+          "g1_conditional_p": 0.001,
+          "g1_enriched_group": "1-2",
+          "same_W": true,
+          "W_containers": 1,
+          "direct_support_total": 74,
+          "focal_ref_alt_status": "INSUFFICIENT_REF",
+          "focal_alt_reads": 93,
+          "focal_ref_reads": 0,
+          "focal_joint_v": null,
+          "focal_joint_p": null,
+          "candidate_T_status": "ABSTAIN_RESOURCE_LIMIT",
+          "candidate_T_minimum_trees": null,
+          "candidate_T_best_ties": null,
+          "candidate_T_shape": "NA",
+          "candidate_topology_resolution": "NOT_AVAILABLE_OR_NOT_RANKED",
+          "candidate_pair_relation_status": "UNRESOLVED",
+          "candidate_pair_order": "UNRESOLVED",
+          "candidate_pair_order_focal_before_count": 0,
+          "candidate_pair_order_partner_before_count": 0,
+          "candidate_pair_order_incomparable_count": 0,
+          "endpoint_b_status": "NOT_IDENTIFIABLE_NO_FOCAL_REF"
+        },
+        {
+          "sample": "H2009",
+          "focal": "chr18:567920 T>C",
+          "partner": "chr18:563687 A>G",
+          "locus_short": "H2009 chr18:567920",
+          "g1_informative_reads": 83,
+          "g1_groups": "1-1-1, 1-1-2, 1-2",
+          "g1_table": "[[0,50],[24,3],[1,5]]",
+          "g1_cramers_v": 0.8942344057425845,
+          "g1_delta_alt_fraction": 0.8888888888888888,
+          "g1_q_by": 1.3547025015898528e-14,
+          "g1_conditional_p": 0.001,
+          "g1_enriched_group": "1-1-1",
+          "same_W": true,
+          "W_containers": 1,
+          "direct_support_total": 84,
+          "focal_ref_alt_status": "INSUFFICIENT_REF",
+          "focal_alt_reads": 111,
+          "focal_ref_reads": 0,
+          "focal_joint_v": null,
+          "focal_joint_p": null,
+          "candidate_T_status": "AF_TIED",
+          "candidate_T_minimum_trees": 11,
+          "candidate_T_best_ties": 6,
+          "candidate_T_shape": "Direct-only:6",
+          "candidate_topology_resolution": "TIED_SAME_TOPOLOGY",
+          "candidate_pair_relation_status": "RESOLVED_COMMON_ACROSS_BEST_TREES",
+          "candidate_pair_order": "FOCAL_BEFORE_PARTNER",
+          "candidate_pair_order_focal_before_count": 6,
+          "candidate_pair_order_partner_before_count": 0,
+          "candidate_pair_order_incomparable_count": 0,
+          "endpoint_b_status": "NOT_IDENTIFIABLE_NO_FOCAL_REF"
+        },
+        {
+          "sample": "H2009",
+          "focal": "chr4:2307521 T>C",
+          "partner": "chr4:2304921 G>T",
+          "locus_short": "H2009 chr4:2307521",
+          "g1_informative_reads": 68,
+          "g1_groups": "1-1-1, 1-1-2, 1-2",
+          "g1_table": "[[24,0],[1,18],[25,0]]",
+          "g1_cramers_v": 0.9635460822563594,
+          "g1_delta_alt_fraction": 0.9473684210526315,
+          "g1_q_by": 5.541603104791411e-13,
+          "g1_conditional_p": 0.001,
+          "g1_enriched_group": "1-1-2",
+          "same_W": true,
+          "W_containers": 2,
+          "direct_support_total": 99,
+          "focal_ref_alt_status": "ALIGNED",
+          "focal_alt_reads": 115,
+          "focal_ref_reads": 49,
+          "focal_joint_v": 0.6175954570807748,
+          "focal_joint_p": 0.002,
+          "candidate_T_status": "ABSTAIN_RESOURCE_LIMIT",
+          "candidate_T_minimum_trees": null,
+          "candidate_T_best_ties": null,
+          "candidate_T_shape": "NA",
+          "candidate_topology_resolution": "NOT_AVAILABLE_OR_NOT_RANKED",
+          "candidate_pair_relation_status": "UNRESOLVED",
+          "candidate_pair_order": "UNRESOLVED",
+          "candidate_pair_order_focal_before_count": 0,
+          "candidate_pair_order_partner_before_count": 0,
+          "candidate_pair_order_incomparable_count": 0,
+          "endpoint_b_status": "NOT_IDENTIFIABLE_FIXED_ERROR_CEILING"
+        },
+        {
+          "sample": "H2009",
+          "focal": "chr5:44615693 G>T",
+          "partner": "chr5:44612223 G>C",
+          "locus_short": "H2009 chr5:44615693",
+          "g1_informative_reads": 155,
+          "g1_groups": "1-1, 1-2",
+          "g1_table": "[[122,3],[14,16]]",
+          "g1_cramers_v": 0.6135804007240899,
+          "g1_delta_alt_fraction": 0.5093333333333333,
+          "g1_q_by": 8.971251055030449e-09,
+          "g1_conditional_p": 0.001,
+          "g1_enriched_group": "1-2",
+          "same_W": true,
+          "W_containers": 2,
+          "direct_support_total": 213,
+          "focal_ref_alt_status": "UNSTABLE",
+          "focal_alt_reads": 205,
+          "focal_ref_reads": 82,
+          "focal_joint_v": null,
+          "focal_joint_p": null,
+          "candidate_T_status": "ABSTAIN_RESOURCE_LIMIT",
+          "candidate_T_minimum_trees": null,
+          "candidate_T_best_ties": null,
+          "candidate_T_shape": "NA",
+          "candidate_topology_resolution": "NOT_AVAILABLE_OR_NOT_RANKED",
+          "candidate_pair_relation_status": "UNRESOLVED",
+          "candidate_pair_order": "UNRESOLVED",
+          "candidate_pair_order_focal_before_count": 0,
+          "candidate_pair_order_partner_before_count": 0,
+          "candidate_pair_order_incomparable_count": 0,
+          "endpoint_b_status": "NOT_IDENTIFIABLE_FIXED_ERROR_CEILING"
+        },
+        {
+          "sample": "HCC1395",
+          "focal": "chr3:127986757 G>A",
+          "partner": "chr3:127981978 C>G",
+          "locus_short": "HCC1395 chr3:127986757",
+          "g1_informative_reads": 51,
+          "g1_groups": "1-1, 1-2",
+          "g1_table": "[[21,11],[0,19]]",
+          "g1_cramers_v": 0.6446898479113814,
+          "g1_delta_alt_fraction": 0.65625,
+          "g1_q_by": 0.00010753919091838035,
+          "g1_conditional_p": 0.001,
+          "g1_enriched_group": "1-2",
+          "same_W": true,
+          "W_containers": 1,
+          "direct_support_total": 55,
+          "focal_ref_alt_status": "INSUFFICIENT_REF",
+          "focal_alt_reads": 98,
+          "focal_ref_reads": 2,
+          "focal_joint_v": null,
+          "focal_joint_p": null,
+          "candidate_T_status": "UNIQUE_AF_CANDIDATE",
+          "candidate_T_minimum_trees": 44,
+          "candidate_T_best_ties": 1,
+          "candidate_T_shape": "Sister+direct:1",
+          "candidate_topology_resolution": "UNIQUE_TREE",
+          "candidate_pair_relation_status": "RESOLVED_COMMON_ACROSS_BEST_TREES",
+          "candidate_pair_order": "FOCAL_BEFORE_PARTNER",
+          "candidate_pair_order_focal_before_count": 1,
+          "candidate_pair_order_partner_before_count": 0,
+          "candidate_pair_order_incomparable_count": 0,
+          "endpoint_b_status": "NOT_IDENTIFIABLE_INSUFFICIENT_FOUR_STATE"
+        },
+        {
+          "sample": "HCC1954",
+          "focal": "chr8:100071382 A>G",
+          "partner": "chr8:100070832 C>T",
+          "locus_short": "HCC1954 chr8:100071382",
+          "g1_informative_reads": 113,
+          "g1_groups": "1-1, 1-2",
+          "g1_table": "[[93,2],[2,16]]",
+          "g1_cramers_v": 0.8678362573099415,
+          "g1_delta_alt_fraction": 0.8678362573099415,
+          "g1_q_by": 5.541603104791411e-13,
+          "g1_conditional_p": 0.001,
+          "g1_enriched_group": "1-2",
+          "same_W": true,
+          "W_containers": 2,
+          "direct_support_total": 178,
+          "focal_ref_alt_status": "BELOW_EFFECT",
+          "focal_alt_reads": 124,
+          "focal_ref_reads": 69,
+          "focal_joint_v": 0.24477237326817933,
+          "focal_joint_p": 0.002,
+          "candidate_T_status": "UNIQUE_AF_CANDIDATE",
+          "candidate_T_minimum_trees": 1,
+          "candidate_T_best_ties": 1,
+          "candidate_T_shape": "Direct-only:1",
+          "candidate_topology_resolution": "UNIQUE_TREE",
+          "candidate_pair_relation_status": "RESOLVED_COMMON_ACROSS_BEST_TREES",
+          "candidate_pair_order": "FOCAL_BEFORE_PARTNER",
+          "candidate_pair_order_focal_before_count": 1,
+          "candidate_pair_order_partner_before_count": 0,
+          "candidate_pair_order_incomparable_count": 0,
+          "endpoint_b_status": "NOT_IDENTIFIABLE_FIXED_ERROR_CEILING"
+        }
+      ],
+      "hcc_methyl_counts": [
+        {
+          "methyl_group": "1-1",
+          "partner_allele": "REF",
+          "reads": 21
+        },
+        {
+          "methyl_group": "1-1",
+          "partner_allele": "ALT",
+          "reads": 11
+        },
+        {
+          "methyl_group": "1-2",
+          "partner_allele": "REF",
+          "reads": 0
+        },
+        {
+          "methyl_group": "1-2",
+          "partner_allele": "ALT",
+          "reads": 19
+        }
+      ],
+      "hcc_layers": [
+        {
+          "order": 1,
+          "layer": "Tumor focal REF/ALT control",
+          "population": "focal methyl matrix",
+          "counts": "ALT=98, REF=2",
+          "valid_claim": "NOT_EVALUABLE：REF<3 joint、REF<6 REF-only"
+        },
+        {
+          "order": 2,
+          "layer": "G1 methyl × partner allele",
+          "population": "focal-ALT methyl core + partner callable",
+          "counts": "n=51；[[21,11],[0,19]]",
+          "valid_claim": "MG 1-2 與 partner-ALT enrichment 共分離"
+        },
+        {
+          "order": 3,
+          "layer": "Strict HP2 direct edge",
+          "population": "exact PS fixed endpoint molecules",
+          "counts": "support=55；RR/RA/AR/AA=2/0/21/32",
+          "valid_claim": "同 W 且 direct read-link；無向"
+        },
+        {
+          "order": 4,
+          "layer": "C++ supported-pattern AF",
+          "population": "whole-block pattern weight≥3",
+          "counts": "focal 95/95 ALT；partner 43/79 ALT",
+          "valid_claim": "44 minimum trees中 unique AF candidate"
+        }
+      ],
+      "hcc_crosssource": [
+        {
+          "sample": "HCC1395",
+          "biological_id": "HCC1395",
+          "technology_role": "canonical",
+          "phase_set": "126975958",
+          "hp_family": "2",
+          "W_k": 5,
+          "direct_support": 55,
+          "state_RR": 2,
+          "state_RA": 0,
+          "state_AR": 21,
+          "state_AA": 32,
+          "partner_alt_given_focal_alt": 0.6037735849056604,
+          "partner_alt_ci_low": 0.46941478673205517,
+          "partner_alt_ci_high": 0.7241059326199831,
+          "cpp_focal_af": 1.0,
+          "cpp_partner_af": 0.5443037974683544,
+          "cpp_pair_status": "UNIQUE_AF_CANDIDATE",
+          "cpp_pair_order": "FOCAL_BEFORE_PARTNER",
+          "cpp_shape": "SISTER+DIRECT",
+          "cpp_minimum_vertex_sets": 44,
+          "cpp_best_tree_ties": 1,
+          "conditional_fisher_p": 0.5491861312742099,
+          "absolute_fraction_difference": 0.07316134000770114
+        },
+        {
+          "sample": "HCC1395_DORADO",
+          "biological_id": "HCC1395",
+          "technology_role": "DORADO technical source",
+          "phase_set": "127823218",
+          "hp_family": "2",
+          "W_k": 2,
+          "direct_support": 50,
+          "state_RR": 1,
+          "state_RA": 0,
+          "state_AR": 23,
+          "state_AA": 26,
+          "partner_alt_given_focal_alt": 0.5306122448979592,
+          "partner_alt_ci_low": 0.39380863983661896,
+          "partner_alt_ci_high": 0.6629649630682484,
+          "cpp_focal_af": 1.0,
+          "cpp_partner_af": 0.5408163265306123,
+          "cpp_pair_status": "UNIQUE_AF_CANDIDATE",
+          "cpp_pair_order": "FOCAL_BEFORE_PARTNER",
+          "cpp_shape": "DIRECT_ONLY",
+          "cpp_minimum_vertex_sets": 1,
+          "cpp_best_tree_ties": 1,
+          "conditional_fisher_p": 0.5491861312742099,
+          "absolute_fraction_difference": 0.07316134000770114
+        }
+      ],
+      "focal_status": [
+        {
+          "status": "Aligned",
+          "sites": 1
+        },
+        {
+          "status": "Below effect / non-significant",
+          "sites": 2
+        },
+        {
+          "status": "Unstable",
+          "sites": 1
+        },
+        {
+          "status": "Insufficient REF",
+          "sites": 3
+        }
+      ],
+      "focal_controls": [
+        {
+          "sample": "H2009",
+          "locus": "H2009 chr12:4413414",
+          "n_ALT": 95,
+          "n_REF": 3,
+          "joint_status": "evaluable",
+          "joint_testable": true,
+          "joint_V": 0.148600291266879,
+          "joint_p_perm": 0.304,
+          "axis_aligned": false,
+          "classification": "BELOW_EFFECT",
+          "REF_only_evaluable": false,
+          "REF_only_stable_multigroup": false,
+          "background_interpretation": "REF_CONTROL_NOT_TESTABLE",
+          "not_testable_reason": ""
+        },
+        {
+          "sample": "H2009",
+          "locus": "H2009 chr13:28815939",
+          "n_ALT": 93,
+          "n_REF": 0,
+          "joint_status": "insufficient_ref_for_joint_control",
+          "joint_testable": false,
+          "joint_V": null,
+          "joint_p_perm": null,
+          "axis_aligned": false,
+          "classification": "INSUFFICIENT_REF",
+          "REF_only_evaluable": false,
+          "REF_only_stable_multigroup": false,
+          "background_interpretation": "REF_CONTROL_NOT_TESTABLE",
+          "not_testable_reason": "fewer_than_MIN_SIZE_tumor_REF_matrix_reads:0<3"
+        },
+        {
+          "sample": "H2009",
+          "locus": "H2009 chr18:567920",
+          "n_ALT": 111,
+          "n_REF": 0,
+          "joint_status": "insufficient_ref_for_joint_control",
+          "joint_testable": false,
+          "joint_V": null,
+          "joint_p_perm": null,
+          "axis_aligned": false,
+          "classification": "INSUFFICIENT_REF",
+          "REF_only_evaluable": false,
+          "REF_only_stable_multigroup": false,
+          "background_interpretation": "REF_CONTROL_NOT_TESTABLE",
+          "not_testable_reason": "fewer_than_MIN_SIZE_tumor_REF_matrix_reads:0<3"
+        },
+        {
+          "sample": "H2009",
+          "locus": "H2009 chr4:2307521",
+          "n_ALT": 115,
+          "n_REF": 49,
+          "joint_status": "evaluable",
+          "joint_testable": true,
+          "joint_V": 0.6175954570807748,
+          "joint_p_perm": 0.002,
+          "axis_aligned": true,
+          "classification": "ALIGNED",
+          "REF_only_evaluable": true,
+          "REF_only_stable_multigroup": false,
+          "background_interpretation": "REF_NONREPLICATION_DOES_NOT_PROVE_SUBCLONE",
+          "not_testable_reason": ""
+        },
+        {
+          "sample": "H2009",
+          "locus": "H2009 chr5:44615693",
+          "n_ALT": 205,
+          "n_REF": 82,
+          "joint_status": "evaluable",
+          "joint_testable": false,
+          "joint_V": null,
+          "joint_p_perm": null,
+          "axis_aligned": false,
+          "classification": "UNSTABLE",
+          "REF_only_evaluable": true,
+          "REF_only_stable_multigroup": false,
+          "background_interpretation": "REF_NONREPLICATION_DOES_NOT_PROVE_SUBCLONE",
+          "not_testable_reason": "joint_clustering_not_stable_multigroup"
+        },
+        {
+          "sample": "HCC1395",
+          "locus": "HCC1395 chr3:127986757",
+          "n_ALT": 98,
+          "n_REF": 2,
+          "joint_status": "insufficient_ref_for_joint_control",
+          "joint_testable": false,
+          "joint_V": null,
+          "joint_p_perm": null,
+          "axis_aligned": false,
+          "classification": "INSUFFICIENT_REF",
+          "REF_only_evaluable": false,
+          "REF_only_stable_multigroup": false,
+          "background_interpretation": "REF_CONTROL_NOT_TESTABLE",
+          "not_testable_reason": "fewer_than_MIN_SIZE_tumor_REF_matrix_reads:2<3"
+        },
+        {
+          "sample": "HCC1954",
+          "locus": "HCC1954 chr8:100071382",
+          "n_ALT": 124,
+          "n_REF": 69,
+          "joint_status": "evaluable",
+          "joint_testable": true,
+          "joint_V": 0.24477237326817933,
+          "joint_p_perm": 0.002,
+          "axis_aligned": false,
+          "classification": "BELOW_EFFECT",
+          "REF_only_evaluable": true,
+          "REF_only_stable_multigroup": false,
+          "background_interpretation": "REF_NONREPLICATION_DOES_NOT_PROVE_SUBCLONE",
+          "not_testable_reason": ""
+        }
+      ],
+      "definitions": [
+        {
+          "layer": "Focal M1",
+          "read_population": "focal-ALT methyl-matrix core reads",
+          "question": "ALT-bearing reads內是否有穩定甲基多群？",
+          "tree_role": "候選分群；不是 clone node"
+        },
+        {
+          "layer": "G1 partner association",
+          "read_population": "focal-ALT core且partner allele可判定",
+          "question": "甲基群與partner REF/ALT是否共分離？",
+          "tree_role": "pairwise state projection overlay"
+        },
+        {
+          "layer": "Tumor focal REF/ALT control",
+          "read_population": "ALT+REF重新joint clustering",
+          "question": "focal allele本身是否與甲基partition對齊？",
+          "tree_role": "獨立徽章；群標不可與M1一對一"
+        },
+        {
+          "layer": "Strict W / endpoint edge",
+          "read_population": "exact-PS×HP fixed R/A canonical molecules",
+          "question": "兩位點是否同W且有直接read linkage？",
+          "tree_role": "無向結構骨架"
+        },
+        {
+          "layer": "C++ candidate T / read-AF",
+          "read_population": "whole-block patterns且pattern weight≥3",
+          "question": "模型內最低樹族可否完整枚舉並由read-AF排序？",
+          "tree_role": "model-conditional candidate；非獨立VAF驗證"
+        }
+      ],
+      "strict_lanes": [
+        {
+          "sample": "H2009",
+          "chrom": "chr12",
+          "focal_pos": 4413414,
+          "partner_pos": 4414974,
+          "pair_label": "H2009 chr12:4413414",
+          "linkage_basis": "PS_HP2",
+          "hp_family": "2",
+          "phase_set": "2875649",
+          "component_id": "H2009:chr12:PS_HP2:PS0149795ba64f:E3:18:4368034-4414974:cd2ef3e4fd80fd39",
+          "W_k": 10,
+          "W_start": 4368034,
+          "W_end": 4414974,
+          "direct_support": 87,
+          "state_RR": 2,
+          "state_RA": 1,
+          "state_AR": 77,
+          "state_AA": 7,
+          "lane_role": "FORMAL_SIGNAL",
+          "cpp_region_id": "chr12|PS=2875649|HP=2|Ue5a3b762a98d924232718222:B0001",
+          "cpp_block_k": 10,
+          "cpp_active_k": 10,
+          "cpp_family_status": "ABSTAIN_RESOURCE_LIMIT",
+          "cpp_unit_status": "family_incomplete",
+          "cpp_read_af_status": "not_evaluable_family_incomplete",
+          "cpp_pair_status": "ABSTAIN_RESOURCE_LIMIT",
+          "cpp_minimum_vertex_sets": null,
+          "cpp_total_trees": null,
+          "cpp_best_tree_ties": null,
+          "cpp_best_tree_unique": null,
+          "cpp_best_score": null,
+          "cpp_shape": "NA",
+          "cpp_pair_order": "UNRESOLVED",
+          "cpp_reason": "SEARCH_NODE_LIMIT_REACHED",
+          "cpp_focal_ref": 0,
+          "cpp_focal_alt": 67,
+          "cpp_partner_ref": 65,
+          "cpp_partner_alt": 5,
+          "cpp_input_vaf_eligible": false,
+          "cpp_edges_json": "[]",
+          "cpp_vertices_json": "[]",
+          "factorization_resolution_class": "NOT_AVAILABLE_OR_NOT_RANKED",
+          "cpp_pair_relation_status": "NOT_RESOLVED",
+          "cpp_pair_order_across_best": "UNRESOLVED",
+          "cpp_pair_order_focal_before_count": 0,
+          "cpp_pair_order_partner_before_count": 0,
+          "cpp_pair_order_incomparable_count": 0,
+          "factorization_global_best_signature_count": null,
+          "factorization_coarse_classes": "NA"
+        },
+        {
+          "sample": "H2009",
+          "chrom": "chr13",
+          "focal_pos": 28815939,
+          "partner_pos": 28817498,
+          "pair_label": "H2009 chr13:28815939",
+          "linkage_basis": "PS_HP1",
+          "hp_family": "1",
+          "phase_set": "28259005",
+          "component_id": "H2009:chr13:PS_HP1:PSd7af88270806:E3:5:28782637-28872719:d6abc7f14f126b55",
+          "W_k": 7,
+          "W_start": 28782637,
+          "W_end": 28872719,
+          "direct_support": 74,
+          "state_RR": 0,
+          "state_RA": 0,
+          "state_AR": 63,
+          "state_AA": 11,
+          "lane_role": "FORMAL_SIGNAL",
+          "cpp_region_id": "chr13|PS=28259005|HP=1|U7b1f09dc1a27d9a900d930be:B0001",
+          "cpp_block_k": 7,
+          "cpp_active_k": 6,
+          "cpp_family_status": "ABSTAIN_RESOURCE_LIMIT",
+          "cpp_unit_status": "family_incomplete",
+          "cpp_read_af_status": "not_evaluable_family_incomplete",
+          "cpp_pair_status": "ABSTAIN_RESOURCE_LIMIT",
+          "cpp_minimum_vertex_sets": null,
+          "cpp_total_trees": null,
+          "cpp_best_tree_ties": null,
+          "cpp_best_tree_unique": null,
+          "cpp_best_score": null,
+          "cpp_shape": "NA",
+          "cpp_pair_order": "UNRESOLVED",
+          "cpp_reason": "SEARCH_NODE_LIMIT_REACHED",
+          "cpp_focal_ref": 0,
+          "cpp_focal_alt": 74,
+          "cpp_partner_ref": 77,
+          "cpp_partner_alt": 0,
+          "cpp_input_vaf_eligible": false,
+          "cpp_edges_json": "[]",
+          "cpp_vertices_json": "[]",
+          "factorization_resolution_class": "NOT_AVAILABLE_OR_NOT_RANKED",
+          "cpp_pair_relation_status": "NOT_RESOLVED",
+          "cpp_pair_order_across_best": "UNRESOLVED",
+          "cpp_pair_order_focal_before_count": 0,
+          "cpp_pair_order_partner_before_count": 0,
+          "cpp_pair_order_incomparable_count": 0,
+          "factorization_global_best_signature_count": null,
+          "factorization_coarse_classes": "NA"
+        },
+        {
+          "sample": "H2009",
+          "chrom": "chr18",
+          "focal_pos": 567920,
+          "partner_pos": 563687,
+          "pair_label": "H2009 chr18:567920",
+          "linkage_basis": "PS_HP1",
+          "hp_family": "1",
+          "phase_set": "307022",
+          "component_id": "H2009:chr18:PS_HP1:PS4a242b301b8b:E3:4:563687-632412:a1cdb75c59e33390",
+          "W_k": 4,
+          "W_start": 563687,
+          "W_end": 632412,
+          "direct_support": 84,
+          "state_RR": 0,
+          "state_RA": 0,
+          "state_AR": 25,
+          "state_AA": 59,
+          "lane_role": "FORMAL_SIGNAL",
+          "cpp_region_id": "chr18|PS=307022|HP=1|Ud7bfe826883d829481ab4365:B0001",
+          "cpp_block_k": 4,
+          "cpp_active_k": 4,
+          "cpp_family_status": "FAMILY_COMPLETE",
+          "cpp_unit_status": "ranked",
+          "cpp_read_af_status": "ranked_complete",
+          "cpp_pair_status": "AF_TIED",
+          "cpp_minimum_vertex_sets": 11,
+          "cpp_total_trees": 11,
+          "cpp_best_tree_ties": 6,
+          "cpp_best_tree_unique": false,
+          "cpp_best_score": "27/31",
+          "cpp_shape": "UNRESOLVED_REPRESENTATIVE_ONLY",
+          "cpp_pair_order": "UNRESOLVED",
+          "cpp_reason": "NONE",
+          "cpp_focal_ref": 0,
+          "cpp_focal_alt": 111,
+          "cpp_partner_ref": 36,
+          "cpp_partner_alt": 88,
+          "cpp_input_vaf_eligible": false,
+          "cpp_edges_json": "[{\"acquired_active_bit\":1,\"acquired_position\":567920,\"acquired_site_index\":2,\"child_label\":\"H_RARR\",\"child_vertex\":2,\"edge_score_fraction\":\"0/1\",\"parent_label\":\"ROOT\",\"parent_vertex\":0},{\"acquired_active_bit\":2,\"acquired_position\":581932,\"acquired_site_index\":3,\"child_label\":\"H_RAAR\",\"child_vertex\":6,\"edge_score_fraction\":\"0/1\",\"parent_label\":\"H_RARR\",\"parent_vertex\":2},{\"acquired_active_bit\":3,\"acquired_position\":632412,\"acquired_site_index\":4,\"child_label\":\"H_RAAA\",\"child_vertex\":14,\"edge_score_fraction\":\"0/1\",\"parent_label\":\"H_RAAR\",\"parent_vertex\":6},{\"acquired_active_bit\":0,\"acquired_position\":563687,\"acquired_site_index\":1,\"child_label\":\"H_AAAA\",\"child_vertex\":15,\"edge_score_fraction\":\"27/31\",\"parent_label\":\"H_RAAA\",\"parent_vertex\":14}]",
+          "cpp_vertices_json": "[{\"label\":\"ROOT\",\"vertex\":0},{\"label\":\"H_RARR\",\"vertex\":2},{\"label\":\"H_RAAR\",\"vertex\":6},{\"label\":\"H_RAAA\",\"vertex\":14},{\"label\":\"H_AAAA\",\"vertex\":15}]",
+          "factorization_resolution_class": "TIED_SAME_TOPOLOGY",
+          "cpp_pair_relation_status": "RESOLVED_COMMON_ACROSS_BEST_TREES",
+          "cpp_pair_order_across_best": "FOCAL_BEFORE_PARTNER",
+          "cpp_pair_order_focal_before_count": 6,
+          "cpp_pair_order_partner_before_count": 0,
+          "cpp_pair_order_incomparable_count": 0,
+          "factorization_global_best_signature_count": 1,
+          "factorization_coarse_classes": "Direct-only:6"
+        },
+        {
+          "sample": "H2009",
+          "chrom": "chr4",
+          "focal_pos": 2307521,
+          "partner_pos": 2304921,
+          "pair_label": "H2009 chr4:2307521",
+          "linkage_basis": "PS_HP1",
+          "hp_family": "1",
+          "phase_set": "2165593",
+          "component_id": "H2009:chr4:PS_HP1:PS60aa69a23128:E3:3:2264402-2360811:6e956b5a64b73882",
+          "W_k": 8,
+          "W_start": 2264402,
+          "W_end": 2360811,
+          "direct_support": 31,
+          "state_RR": 31,
+          "state_RA": 0,
+          "state_AR": 0,
+          "state_AA": 0,
+          "lane_role": "PAIRED_BACKGROUND",
+          "cpp_region_id": "chr4|PS=2165593|HP=1|Ua7dee5729cef7aef837c4dd8:B0001",
+          "cpp_block_k": 8,
+          "cpp_active_k": 0,
+          "cpp_family_status": "FAMILY_COMPLETE",
+          "cpp_unit_status": "no_active_alt",
+          "cpp_read_af_status": "not_applicable_no_active_alt",
+          "cpp_pair_status": "PAIR_RR_BACKGROUND",
+          "cpp_minimum_vertex_sets": 1,
+          "cpp_total_trees": 1,
+          "cpp_best_tree_ties": null,
+          "cpp_best_tree_unique": null,
+          "cpp_best_score": null,
+          "cpp_shape": "NA",
+          "cpp_pair_order": "UNRESOLVED",
+          "cpp_reason": "NONE",
+          "cpp_focal_ref": 42,
+          "cpp_focal_alt": 0,
+          "cpp_partner_ref": 35,
+          "cpp_partner_alt": 0,
+          "cpp_input_vaf_eligible": false,
+          "cpp_edges_json": "[]",
+          "cpp_vertices_json": "[]",
+          "factorization_resolution_class": "NOT_AVAILABLE_OR_NOT_RANKED",
+          "cpp_pair_relation_status": "NOT_RESOLVED",
+          "cpp_pair_order_across_best": "UNRESOLVED",
+          "cpp_pair_order_focal_before_count": 0,
+          "cpp_pair_order_partner_before_count": 0,
+          "cpp_pair_order_incomparable_count": 0,
+          "factorization_global_best_signature_count": null,
+          "factorization_coarse_classes": "NA"
+        },
+        {
+          "sample": "H2009",
+          "chrom": "chr4",
+          "focal_pos": 2307521,
+          "partner_pos": 2304921,
+          "pair_label": "H2009 chr4:2307521",
+          "linkage_basis": "PS_HP2",
+          "hp_family": "2",
+          "phase_set": "2165593",
+          "component_id": "H2009:chr4:PS_HP2:PS60aa69a23128:E3:3:2264402-2360811:5f5dddb51221fc17",
+          "W_k": 8,
+          "W_start": 2264402,
+          "W_end": 2360811,
+          "direct_support": 68,
+          "state_RR": 0,
+          "state_RA": 0,
+          "state_AR": 50,
+          "state_AA": 18,
+          "lane_role": "FORMAL_SIGNAL",
+          "cpp_region_id": "chr4|PS=2165593|HP=2|U81b9014609849a59117715bd:B0001",
+          "cpp_block_k": 8,
+          "cpp_active_k": 8,
+          "cpp_family_status": "ABSTAIN_RESOURCE_LIMIT",
+          "cpp_unit_status": "family_incomplete",
+          "cpp_read_af_status": "not_evaluable_family_incomplete",
+          "cpp_pair_status": "ABSTAIN_RESOURCE_LIMIT",
+          "cpp_minimum_vertex_sets": null,
+          "cpp_total_trees": null,
+          "cpp_best_tree_ties": null,
+          "cpp_best_tree_unique": null,
+          "cpp_best_score": null,
+          "cpp_shape": "NA",
+          "cpp_pair_order": "UNRESOLVED",
+          "cpp_reason": "SEARCH_NODE_LIMIT_REACHED",
+          "cpp_focal_ref": 0,
+          "cpp_focal_alt": 103,
+          "cpp_partner_ref": 56,
+          "cpp_partner_alt": 18,
+          "cpp_input_vaf_eligible": false,
+          "cpp_edges_json": "[]",
+          "cpp_vertices_json": "[]",
+          "factorization_resolution_class": "NOT_AVAILABLE_OR_NOT_RANKED",
+          "cpp_pair_relation_status": "NOT_RESOLVED",
+          "cpp_pair_order_across_best": "UNRESOLVED",
+          "cpp_pair_order_focal_before_count": 0,
+          "cpp_pair_order_partner_before_count": 0,
+          "cpp_pair_order_incomparable_count": 0,
+          "factorization_global_best_signature_count": null,
+          "factorization_coarse_classes": "NA"
+        },
+        {
+          "sample": "H2009",
+          "chrom": "chr5",
+          "focal_pos": 44615693,
+          "partner_pos": 44612223,
+          "pair_label": "H2009 chr5:44615693",
+          "linkage_basis": "PS_HP1",
+          "hp_family": "1",
+          "phase_set": "44391260",
+          "component_id": "H2009:chr5:PS_HP1:PSb772b178dd9c:E3:2:44349008-44785725:08dba25256892d33",
+          "W_k": 62,
+          "W_start": 44349008,
+          "W_end": 44785725,
+          "direct_support": 155,
+          "state_RR": 0,
+          "state_RA": 0,
+          "state_AR": 136,
+          "state_AA": 19,
+          "lane_role": "FORMAL_SIGNAL",
+          "cpp_region_id": "chr5|PS=44391260|HP=1|U5d260d73a155df77472a0362:B0005",
+          "cpp_block_k": 12,
+          "cpp_active_k": 7,
+          "cpp_family_status": "ABSTAIN_RESOURCE_LIMIT",
+          "cpp_unit_status": "family_incomplete",
+          "cpp_read_af_status": "not_evaluable_family_incomplete",
+          "cpp_pair_status": "ABSTAIN_RESOURCE_LIMIT",
+          "cpp_minimum_vertex_sets": null,
+          "cpp_total_trees": null,
+          "cpp_best_tree_ties": null,
+          "cpp_best_tree_unique": null,
+          "cpp_best_score": null,
+          "cpp_shape": "NA",
+          "cpp_pair_order": "UNRESOLVED",
+          "cpp_reason": "SEARCH_NODE_LIMIT_REACHED",
+          "cpp_focal_ref": 0,
+          "cpp_focal_alt": 138,
+          "cpp_partner_ref": 136,
+          "cpp_partner_alt": 13,
+          "cpp_input_vaf_eligible": false,
+          "cpp_edges_json": "[]",
+          "cpp_vertices_json": "[]",
+          "factorization_resolution_class": "NOT_AVAILABLE_OR_NOT_RANKED",
+          "cpp_pair_relation_status": "NOT_RESOLVED",
+          "cpp_pair_order_across_best": "UNRESOLVED",
+          "cpp_pair_order_focal_before_count": 0,
+          "cpp_pair_order_partner_before_count": 0,
+          "cpp_pair_order_incomparable_count": 0,
+          "factorization_global_best_signature_count": null,
+          "factorization_coarse_classes": "NA"
+        },
+        {
+          "sample": "H2009",
+          "chrom": "chr5",
+          "focal_pos": 44615693,
+          "partner_pos": 44612223,
+          "pair_label": "H2009 chr5:44615693",
+          "linkage_basis": "PS_HP2",
+          "hp_family": "2",
+          "phase_set": "44391260",
+          "component_id": "H2009:chr5:PS_HP2:PSb772b178dd9c:E3:2:44349008-44785725:b67da36cd479a6e3",
+          "W_k": 62,
+          "W_start": 44349008,
+          "W_end": 44785725,
+          "direct_support": 58,
+          "state_RR": 58,
+          "state_RA": 0,
+          "state_AR": 0,
+          "state_AA": 0,
+          "lane_role": "PAIRED_BACKGROUND",
+          "cpp_region_id": "chr5|PS=44391260|HP=2|U5c903c6a59ee7793fd25ca6d:B0005",
+          "cpp_block_k": 12,
+          "cpp_active_k": 5,
+          "cpp_family_status": "FAMILY_COMPLETE",
+          "cpp_unit_status": "ranked",
+          "cpp_read_af_status": "ranked_complete",
+          "cpp_pair_status": "PAIR_RR_BACKGROUND",
+          "cpp_minimum_vertex_sets": 76,
+          "cpp_total_trees": 76,
+          "cpp_best_tree_ties": 24,
+          "cpp_best_tree_unique": false,
+          "cpp_best_score": "52/27",
+          "cpp_shape": "UNRESOLVED_REPRESENTATIVE_ONLY",
+          "cpp_pair_order": "UNRESOLVED",
+          "cpp_reason": "NONE",
+          "cpp_focal_ref": 34,
+          "cpp_focal_alt": 0,
+          "cpp_partner_ref": 44,
+          "cpp_partner_alt": 0,
+          "cpp_input_vaf_eligible": false,
+          "cpp_edges_json": "[{\"acquired_active_bit\":0,\"acquired_position\":44615701,\"acquired_site_index\":4,\"child_label\":\"H_RRRARRRRRRRR\",\"child_vertex\":1,\"edge_score_fraction\":\"0/1\",\"parent_label\":\"ROOT\",\"parent_vertex\":0},{\"acquired_active_bit\":2,\"acquired_position\":44621508,\"acquired_site_index\":7,\"child_label\":\"H_RRRARRARRRRR\",\"child_vertex\":5,\"edge_score_fraction\":\"0/1\",\"parent_label\":\"H_RRRARRRRRRRR\",\"parent_vertex\":1},{\"acquired_active_bit\":3,\"acquired_position\":44641932,\"acquired_site_index\":9,\"child_label\":\"H_RRRARRARARRR\",\"child_vertex\":13,\"edge_score_fraction\":\"0/1\",\"parent_label\":\"H_RRRARRARRRRR\",\"parent_vertex\":5},{\"acquired_active_bit\":4,\"acquired_position\":44648238,\"acquired_site_index\":10,\"child_label\":\"H_RRRARRARAARR\",\"child_vertex\":29,\"edge_score_fraction\":\"0/1\",\"parent_label\":\"H_RRRARRARARRR\",\"parent_vertex\":13},{\"acquired_active_bit\":1,\"acquired_position\":44615888,\"acquired_site_index\":5,\"child_label\":\"H_RRRAARARAARR\",\"child_vertex\":31,\"edge_score_fraction\":\"52/27\",\"parent_label\":\"H_RRRARRARAARR\",\"parent_vertex\":29}]",
+          "cpp_vertices_json": "[{\"label\":\"ROOT\",\"vertex\":0},{\"label\":\"H_RRRARRRRRRRR\",\"vertex\":1},{\"label\":\"H_RRRARRARRRRR\",\"vertex\":5},{\"label\":\"H_RRRARRARARRR\",\"vertex\":13},{\"label\":\"H_RRRARRARAARR\",\"vertex\":29},{\"label\":\"H_RRRAARARAARR\",\"vertex\":31}]",
+          "factorization_resolution_class": "TIED_SAME_TOPOLOGY",
+          "cpp_pair_relation_status": "PAIR_NOT_ACTIVE_IN_GLOBAL_BEST",
+          "cpp_pair_order_across_best": "PAIR_NOT_ACTIVE_IN_CANDIDATE",
+          "cpp_pair_order_focal_before_count": 0,
+          "cpp_pair_order_partner_before_count": 0,
+          "cpp_pair_order_incomparable_count": 0,
+          "factorization_global_best_signature_count": 1,
+          "factorization_coarse_classes": "Direct-only:24"
+        },
+        {
+          "sample": "HCC1395",
+          "chrom": "chr3",
+          "focal_pos": 127986757,
+          "partner_pos": 127981978,
+          "pair_label": "HCC1395 chr3:127986757",
+          "linkage_basis": "PS_HP2",
+          "hp_family": "2",
+          "phase_set": "126975958",
+          "component_id": "HCC1395:chr3:PS_HP2:PScd848fb0dfa8:E3:9:127912458-127986757:485700e0e87ff350",
+          "W_k": 5,
+          "W_start": 127912458,
+          "W_end": 127986757,
+          "direct_support": 55,
+          "state_RR": 2,
+          "state_RA": 0,
+          "state_AR": 21,
+          "state_AA": 32,
+          "lane_role": "FORMAL_SIGNAL",
+          "cpp_region_id": "chr3|PS=126975958|HP=2|Ua3ff14e5cf7acf6812d40757:B0001",
+          "cpp_block_k": 5,
+          "cpp_active_k": 5,
+          "cpp_family_status": "FAMILY_COMPLETE",
+          "cpp_unit_status": "ranked",
+          "cpp_read_af_status": "ranked_complete",
+          "cpp_pair_status": "UNIQUE_AF_CANDIDATE",
+          "cpp_minimum_vertex_sets": 44,
+          "cpp_total_trees": 44,
+          "cpp_best_tree_ties": 1,
+          "cpp_best_tree_unique": true,
+          "cpp_best_score": "328421/121660",
+          "cpp_shape": "SISTER+DIRECT",
+          "cpp_pair_order": "FOCAL_BEFORE_PARTNER",
+          "cpp_reason": "NONE",
+          "cpp_focal_ref": 0,
+          "cpp_focal_alt": 95,
+          "cpp_partner_ref": 36,
+          "cpp_partner_alt": 43,
+          "cpp_input_vaf_eligible": false,
+          "cpp_edges_json": "[{\"acquired_active_bit\":4,\"acquired_position\":127986757,\"acquired_site_index\":5,\"child_label\":\"H_RRRRA\",\"child_vertex\":16,\"edge_score_fraction\":\"0/1\",\"parent_label\":\"ROOT\",\"parent_vertex\":0},{\"acquired_active_bit\":2,\"acquired_position\":127962164,\"acquired_site_index\":3,\"child_label\":\"H_RRARA\",\"child_vertex\":20,\"edge_score_fraction\":\"40/77\",\"parent_label\":\"H_RRRRA\",\"parent_vertex\":16},{\"acquired_active_bit\":3,\"acquired_position\":127981978,\"acquired_site_index\":4,\"child_label\":\"H_RRRAA\",\"child_vertex\":24,\"edge_score_fraction\":\"36/79\",\"parent_label\":\"H_RRRRA\",\"parent_vertex\":16},{\"acquired_active_bit\":1,\"acquired_position\":127948631,\"acquired_site_index\":2,\"child_label\":\"H_RARAA\",\"child_vertex\":26,\"edge_score_fraction\":\"681/1106\",\"parent_label\":\"H_RRRAA\",\"parent_vertex\":24},{\"acquired_active_bit\":0,\"acquired_position\":127912458,\"acquired_site_index\":1,\"child_label\":\"H_AARAA\",\"child_vertex\":27,\"edge_score_fraction\":\"12261/11060\",\"parent_label\":\"H_RARAA\",\"parent_vertex\":26}]",
+          "cpp_vertices_json": "[{\"label\":\"ROOT\",\"vertex\":0},{\"label\":\"H_RRRRA\",\"vertex\":16},{\"label\":\"H_RRARA\",\"vertex\":20},{\"label\":\"H_RRRAA\",\"vertex\":24},{\"label\":\"H_RARAA\",\"vertex\":26},{\"label\":\"H_AARAA\",\"vertex\":27}]",
+          "factorization_resolution_class": "UNIQUE_TREE",
+          "cpp_pair_relation_status": "RESOLVED_COMMON_ACROSS_BEST_TREES",
+          "cpp_pair_order_across_best": "FOCAL_BEFORE_PARTNER",
+          "cpp_pair_order_focal_before_count": 1,
+          "cpp_pair_order_partner_before_count": 0,
+          "cpp_pair_order_incomparable_count": 0,
+          "factorization_global_best_signature_count": 1,
+          "factorization_coarse_classes": "Sister+direct:1"
+        },
+        {
+          "sample": "HCC1954",
+          "chrom": "chr8",
+          "focal_pos": 100071382,
+          "partner_pos": 100070832,
+          "pair_label": "HCC1954 chr8:100071382",
+          "linkage_basis": "PS_HP1",
+          "hp_family": "1",
+          "phase_set": "99963594",
+          "component_id": "HCC1954:chr8:PS_HP1:PS9e6111b08bce:E3:3:100070832-100071382:3dc98183b9751fcc",
+          "W_k": 2,
+          "W_start": 100070832,
+          "W_end": 100071382,
+          "direct_support": 115,
+          "state_RR": 0,
+          "state_RA": 0,
+          "state_AR": 96,
+          "state_AA": 19,
+          "lane_role": "FORMAL_SIGNAL",
+          "cpp_region_id": "chr8|PS=99963594|HP=1|Uaf5e90a7788d0c77f6c2f73d:B0001",
+          "cpp_block_k": 2,
+          "cpp_active_k": 2,
+          "cpp_family_status": "FAMILY_COMPLETE",
+          "cpp_unit_status": "ranked",
+          "cpp_read_af_status": "ranked_complete",
+          "cpp_pair_status": "UNIQUE_AF_CANDIDATE",
+          "cpp_minimum_vertex_sets": 1,
+          "cpp_total_trees": 1,
+          "cpp_best_tree_ties": 1,
+          "cpp_best_tree_unique": true,
+          "cpp_best_score": "105/127",
+          "cpp_shape": "DIRECT_ONLY",
+          "cpp_pair_order": "FOCAL_BEFORE_PARTNER",
+          "cpp_reason": "NONE",
+          "cpp_focal_ref": 0,
+          "cpp_focal_alt": 124,
+          "cpp_partner_ref": 105,
+          "cpp_partner_alt": 22,
+          "cpp_input_vaf_eligible": false,
+          "cpp_edges_json": "[{\"acquired_active_bit\":1,\"acquired_position\":100071382,\"acquired_site_index\":2,\"child_label\":\"RA\",\"child_vertex\":2,\"edge_score_fraction\":\"0/1\",\"parent_label\":\"ROOT\",\"parent_vertex\":0},{\"acquired_active_bit\":0,\"acquired_position\":100070832,\"acquired_site_index\":1,\"child_label\":\"AA\",\"child_vertex\":3,\"edge_score_fraction\":\"105/127\",\"parent_label\":\"RA\",\"parent_vertex\":2}]",
+          "cpp_vertices_json": "[{\"label\":\"ROOT\",\"vertex\":0},{\"label\":\"RA\",\"vertex\":2},{\"label\":\"AA\",\"vertex\":3}]",
+          "factorization_resolution_class": "UNIQUE_TREE",
+          "cpp_pair_relation_status": "RESOLVED_COMMON_ACROSS_BEST_TREES",
+          "cpp_pair_order_across_best": "FOCAL_BEFORE_PARTNER",
+          "cpp_pair_order_focal_before_count": 1,
+          "cpp_pair_order_partner_before_count": 0,
+          "cpp_pair_order_incomparable_count": 0,
+          "factorization_global_best_signature_count": 1,
+          "factorization_coarse_classes": "Direct-only:1"
+        },
+        {
+          "sample": "HCC1954",
+          "chrom": "chr8",
+          "focal_pos": 100071382,
+          "partner_pos": 100070832,
+          "pair_label": "HCC1954 chr8:100071382",
+          "linkage_basis": "PS_HP2",
+          "hp_family": "2",
+          "phase_set": "99963594",
+          "component_id": "HCC1954:chr8:PS_HP2:PS9e6111b08bce:E3:3:100070832-100071382:a44eb407d5e52257",
+          "W_k": 2,
+          "W_start": 100070832,
+          "W_end": 100071382,
+          "direct_support": 63,
+          "state_RR": 63,
+          "state_RA": 0,
+          "state_AR": 0,
+          "state_AA": 0,
+          "lane_role": "PAIRED_BACKGROUND",
+          "cpp_region_id": "chr8|PS=99963594|HP=2|Ue94537c5e5bb44718dd68ec1:B0001",
+          "cpp_block_k": 2,
+          "cpp_active_k": 0,
+          "cpp_family_status": "FAMILY_COMPLETE",
+          "cpp_unit_status": "no_active_alt",
+          "cpp_read_af_status": "not_applicable_no_active_alt",
+          "cpp_pair_status": "PAIR_RR_BACKGROUND",
+          "cpp_minimum_vertex_sets": 1,
+          "cpp_total_trees": 1,
+          "cpp_best_tree_ties": null,
+          "cpp_best_tree_unique": null,
+          "cpp_best_score": null,
+          "cpp_shape": "NA",
+          "cpp_pair_order": "UNRESOLVED",
+          "cpp_reason": "NONE",
+          "cpp_focal_ref": 69,
+          "cpp_focal_alt": 0,
+          "cpp_partner_ref": 67,
+          "cpp_partner_alt": 0,
+          "cpp_input_vaf_eligible": false,
+          "cpp_edges_json": "[]",
+          "cpp_vertices_json": "[]",
+          "factorization_resolution_class": "NOT_AVAILABLE_OR_NOT_RANKED",
+          "cpp_pair_relation_status": "NOT_RESOLVED",
+          "cpp_pair_order_across_best": "UNRESOLVED",
+          "cpp_pair_order_focal_before_count": 0,
+          "cpp_pair_order_partner_before_count": 0,
+          "cpp_pair_order_incomparable_count": 0,
+          "factorization_global_best_signature_count": null,
+          "factorization_coarse_classes": "NA"
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "source_headline",
+      "label": "Executed SQLite snapshot query: headline",
+      "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/headline.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "Reviewed headline metrics from the formal-pair, focal-control, strict-W, C++ topology, and factorization left join.",
+        "sql": "SELECT * FROM \"headline\" ORDER BY rowid;",
+        "tables_used": [
+          "headline"
+        ],
+        "filters": [
+          "bounded reviewed snapshot generated by the deterministic join script"
+        ],
+        "metric_definitions": [
+          "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+          "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+          "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+        ],
+        "executed_at": "2026-07-25T09:02:52+08:00"
+      }
+    },
+    {
+      "id": "source_evidence_ladder",
+      "label": "Executed SQLite snapshot query: evidence_ladder",
+      "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/evidence_ladder.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "Pair counts retained at each evidence layer; denominator is seven selected formal G1 positives.",
+        "sql": "SELECT * FROM \"evidence_ladder\" ORDER BY rowid;",
+        "tables_used": [
+          "evidence_ladder"
+        ],
+        "filters": [
+          "bounded reviewed snapshot generated by the deterministic join script"
+        ],
+        "metric_definitions": [
+          "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+          "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+          "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+        ],
+        "executed_at": "2026-07-25T09:02:52+08:00"
+      }
+    },
+    {
+      "id": "source_topology_status",
+      "label": "Executed SQLite snapshot query: topology_status",
+      "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/topology_status.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "Full candidate-tree status from the 2026-07-24 bounded C++ run.",
+        "sql": "SELECT * FROM \"topology_status\" ORDER BY rowid;",
+        "tables_used": [
+          "topology_status"
+        ],
+        "filters": [
+          "bounded reviewed snapshot generated by the deterministic join script"
+        ],
+        "metric_definitions": [
+          "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+          "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+          "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+        ],
+        "executed_at": "2026-07-25T09:02:52+08:00"
+      }
+    },
+    {
+      "id": "source_partner_effect",
+      "label": "Executed SQLite snapshot query: partner_effect",
+      "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/partner_effect.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "Formal v8 methyl-group × partner-allele effect sizes selected from 407,738 evaluated rows.",
+        "sql": "SELECT * FROM \"partner_effect\" ORDER BY rowid;",
+        "tables_used": [
+          "partner_effect"
+        ],
+        "filters": [
+          "bounded reviewed snapshot generated by the deterministic join script"
+        ],
+        "metric_definitions": [
+          "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+          "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+          "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+        ],
+        "executed_at": "2026-07-25T09:02:52+08:00"
+      }
+    },
+    {
+      "id": "source_pair_master",
+      "label": "Executed SQLite snapshot query: pair_master",
+      "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/pair_master.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "Seven-row coordinate-preserving join across G1, focal ALT/REF control, strict W, topology, and factorization.",
+        "sql": "SELECT * FROM \"pair_master\" ORDER BY rowid;",
+        "tables_used": [
+          "pair_master"
+        ],
+        "filters": [
+          "bounded reviewed snapshot generated by the deterministic join script"
+        ],
+        "metric_definitions": [
+          "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+          "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+          "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+        ],
+        "executed_at": "2026-07-25T09:02:52+08:00"
+      }
+    },
+    {
+      "id": "source_hcc_methyl_counts",
+      "label": "Executed SQLite snapshot query: hcc_methyl_counts",
+      "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/hcc_methyl_counts.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "HCC1395 focal-ALT methyl-core reads tabulated by methyl group and linked-partner allele.",
+        "sql": "SELECT * FROM \"hcc_methyl_counts\" ORDER BY rowid;",
+        "tables_used": [
+          "hcc_methyl_counts"
+        ],
+        "filters": [
+          "bounded reviewed snapshot generated by the deterministic join script"
+        ],
+        "metric_definitions": [
+          "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+          "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+          "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+        ],
+        "executed_at": "2026-07-25T09:02:52+08:00"
+      }
+    },
+    {
+      "id": "source_hcc_layers",
+      "label": "Executed SQLite snapshot query: hcc_layers",
+      "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/hcc_layers.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "Reader-facing denominator audit for the four HCC1395 read populations.",
+        "sql": "SELECT * FROM \"hcc_layers\" ORDER BY rowid;",
+        "tables_used": [
+          "hcc_layers"
+        ],
+        "filters": [
+          "bounded reviewed snapshot generated by the deterministic join script"
+        ],
+        "metric_definitions": [
+          "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+          "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+          "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+        ],
+        "executed_at": "2026-07-25T09:02:52+08:00"
+      }
+    },
+    {
+      "id": "source_hcc_crosssource",
+      "label": "Executed SQLite snapshot query: hcc_crosssource",
+      "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/hcc_crosssource.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "HCC1395 canonical versus DORADO strict pair states and model-conditional candidate relation.",
+        "sql": "SELECT * FROM \"hcc_crosssource\" ORDER BY rowid;",
+        "tables_used": [
+          "hcc_crosssource"
+        ],
+        "filters": [
+          "bounded reviewed snapshot generated by the deterministic join script"
+        ],
+        "metric_definitions": [
+          "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+          "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+          "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+        ],
+        "executed_at": "2026-07-25T09:02:52+08:00"
+      }
+    },
+    {
+      "id": "source_focal_status",
+      "label": "Executed SQLite snapshot query: focal_status",
+      "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/focal_status.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "Classification counts for seven focal ALT+REF methyl joint controls.",
+        "sql": "SELECT * FROM \"focal_status\" ORDER BY rowid;",
+        "tables_used": [
+          "focal_status"
+        ],
+        "filters": [
+          "bounded reviewed snapshot generated by the deterministic join script"
+        ],
+        "metric_definitions": [
+          "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+          "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+          "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+        ],
+        "executed_at": "2026-07-25T09:02:52+08:00"
+      }
+    },
+    {
+      "id": "source_focal_controls",
+      "label": "Executed SQLite snapshot query: focal_controls",
+      "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/focal_controls.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "Seven focal tumor ALT+REF joint-clustering control rows; the current selected subset has no new global multiplicity correction.",
+        "sql": "SELECT * FROM \"focal_controls\" ORDER BY rowid;",
+        "tables_used": [
+          "focal_controls"
+        ],
+        "filters": [
+          "bounded reviewed snapshot generated by the deterministic join script"
+        ],
+        "metric_definitions": [
+          "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+          "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+          "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+        ],
+        "executed_at": "2026-07-25T09:02:52+08:00"
+      }
+    },
+    {
+      "id": "source_definitions",
+      "label": "Executed SQLite snapshot query: definitions",
+      "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/definitions.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "Formal read-population and claim-boundary definitions used in this report.",
+        "sql": "SELECT * FROM \"definitions\" ORDER BY rowid;",
+        "tables_used": [
+          "definitions"
+        ],
+        "filters": [
+          "bounded reviewed snapshot generated by the deterministic join script"
+        ],
+        "metric_definitions": [
+          "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+          "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+          "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+        ],
+        "executed_at": "2026-07-25T09:02:52+08:00"
+      }
+    },
+    {
+      "id": "source_strict_lanes",
+      "label": "Executed SQLite snapshot query: strict_lanes",
+      "path": "research/20260725_methyl_alt_ref_topology_overlay_validation/queries/strict_lanes.sql",
+      "query": {
+        "engine": "sqlite",
+        "language": "sql",
+        "description": "Ten exact-PS×HP lanes with focal-first RR/RA/AR/AA states and candidate factorization fields.",
+        "sql": "SELECT * FROM \"strict_lanes\" ORDER BY rowid;",
+        "tables_used": [
+          "strict_lanes"
+        ],
+        "filters": [
+          "bounded reviewed snapshot generated by the deterministic join script"
+        ],
+        "metric_definitions": [
+          "Every query reads the deterministic bounded SQLite snapshot generated by this report.",
+          "Upstream source identities and SHA256 values are fixed in validation_receipt.json.",
+          "C++ read-AF is supported-pattern ALT/(REF+ALT), not caller VAF, CCF, or an independent likelihood."
+        ],
+        "executed_at": "2026-07-25T09:02:52+08:00"
+      }
+    }
+  ]
+}

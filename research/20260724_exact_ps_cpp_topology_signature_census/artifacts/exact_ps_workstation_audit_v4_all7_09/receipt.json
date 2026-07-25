@@ -1,0 +1,3652 @@
+{
+  "schema_name": "intersubmod.exact_ps_layered_workstation.browser_audit",
+  "schema_version": "1.2.0",
+  "created_at_utc": "2026-07-25T01:10:20.597186+00:00",
+  "authority": "20260724-exact-ps-hp-strict-read-linkage",
+  "ui_contract": "layered-workstation-exact-ps-v4",
+  "samples": [
+    "HCC1395",
+    "HCC1395_DORADO",
+    "COLO829",
+    "H1437",
+    "H2009",
+    "HCC1937",
+    "HCC1954"
+  ],
+  "viewports": {
+    "desktop": {
+      "width": 1440,
+      "height": 1000
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  "checks": {
+    "all_pages_audited": true,
+    "no_console_errors": true,
+    "no_external_requests": true,
+    "no_horizontal_overflow": true,
+    "audited_inputs_stable": true,
+    "screenshots_recorded": true
+  },
+  "pages": {
+    "index:desktop": {
+      "viewport": {
+        "w": 1440,
+        "h": 1000
+      },
+      "html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "body": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "scroll": {
+        "x": 0,
+        "y": 2349
+      },
+      "title": "Exact-PS layered workstation · cohort command center",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "sample_links": 7,
+      "console_errors": [],
+      "external_requests": []
+    },
+    "HCC1395:desktop": {
+      "viewport": {
+        "w": 1440,
+        "h": 1000
+      },
+      "html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "body": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "scroll": {
+        "x": 0,
+        "y": 5565
+      },
+      "title": "Exact-PS 分層拓撲工作站 · HCC1395_HKU",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "detail_geometry": {
+        "clientWidth": 945,
+        "scrollWidth": 945,
+        "left": 477.4375,
+        "right": 1424
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 1,
+      "filter_status": "顯示 1 / 11,590 regions · 全部類別 · 全部 regions · 全部 regions · chr10:87,818,272–87,928,739",
+      "detail_id": "chr10|PS=87549798|HP=1|Uf7a120cb9783037f1e7b394b:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "H:S1",
+        "S1+S2",
+        "ROOT",
+        "H:S1",
+        "S1+S2",
+        "ROOT",
+        "H:S1",
+        "S1+S2"
+      ],
+      "tied_overlay": null,
+      "annotation_summary": "CGC locus-hit regions\n480\nCGC ∩ approved antineoplastic\n174\n命中 CGC genes\n194\n同基因亦有 approved 抗腫瘤藥\n73\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 480,
+        "cgcDrugRegions": 174,
+        "metaCgc": 480,
+        "metaDrug": 174
+      },
+      "annotation_and_count": 133,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 869,
+          "scrollWidth": 869,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 1,
+        "aligned": 0,
+        "resolved": 1
+      },
+      "methyl_projection": {
+        "edges": 2,
+        "table_rows": 1,
+        "detail": "chr3|PS=126975958|HP=2|Ua3ff14e5cf7acf6812d40757:B0001"
+      },
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 7912,
+          "secondOnlyCount": 4766
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 11590,
+          "secondOnlyCount": 5734
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 9397,
+          "secondOnlyCount": 267
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 5225,
+          "secondOnlyCount": 3259
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 480,
+          "secondOnlyCount": 306
+        },
+        "methyl": {
+          "keys": [
+            "PAIR_RELATION_RESOLVED",
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [
+            "PAIR_RELATION_RESOLVED",
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "unionCount": 11590,
+          "secondOnlyCount": 11589
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 8908,
+          "secondOnlyCount": 1861
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    },
+    "HCC1395_DORADO:desktop": {
+      "viewport": {
+        "w": 1440,
+        "h": 1000
+      },
+      "html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "body": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "scroll": {
+        "x": 0,
+        "y": 1967
+      },
+      "title": "Exact-PS 分層拓撲工作站 · HCC1395_NYGC",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "detail_geometry": {
+        "clientWidth": 945,
+        "scrollWidth": 945,
+        "left": 477.4375,
+        "right": 1424
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 7,
+      "filter_status": "顯示 6,865 / 6,865 regions · 全部類別 · 全部 regions · 全部 regions",
+      "detail_id": "chr1|PS=178472896|HP=1|U0de4a1bbe1cb3ebd12dae307:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "H:S1",
+        "ROOT",
+        "H:S1",
+        "ROOT",
+        "H:S1"
+      ],
+      "tied_overlay": null,
+      "annotation_summary": "CGC locus-hit regions\n240\nCGC ∩ approved antineoplastic\n91\n命中 CGC genes\n98\n同基因亦有 approved 抗腫瘤藥\n36\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 240,
+        "cgcDrugRegions": 91,
+        "metaCgc": 240,
+        "metaDrug": 91
+      },
+      "annotation_and_count": 72,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 869,
+          "scrollWidth": 869,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 0,
+        "aligned": 0,
+        "resolved": 0
+      },
+      "methyl_projection": null,
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 4691,
+          "secondOnlyCount": 2778
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 6865,
+          "secondOnlyCount": 3456
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt",
+            "recurrence_not_evaluable"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 5381,
+          "secondOnlyCount": 73
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 3355,
+          "secondOnlyCount": 1975
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 240,
+          "secondOnlyCount": 149
+        },
+        "methyl": {
+          "keys": [
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [],
+          "unionCount": 6865,
+          "secondOnlyCount": 6865
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN",
+            "RECURRENCE_REQUIRED"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 5265,
+          "secondOnlyCount": 1100
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    },
+    "COLO829:desktop": {
+      "viewport": {
+        "w": 1440,
+        "h": 1000
+      },
+      "html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "body": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "scroll": {
+        "x": 0,
+        "y": 1687
+      },
+      "title": "Exact-PS 分層拓撲工作站 · COLO829",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "detail_geometry": {
+        "clientWidth": 945,
+        "scrollWidth": 945,
+        "left": 477.4375,
+        "right": 1424
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 6,
+      "filter_status": "顯示 13,919 / 13,919 regions · 全部類別 · 全部 regions · 全部 regions",
+      "detail_id": "chr1|PS=2762678|HP=1|U8a18c1ab9d826f89578fb555:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "S2",
+        "ROOT",
+        "S2",
+        "ROOT",
+        "S2"
+      ],
+      "tied_overlay": null,
+      "annotation_summary": "CGC locus-hit regions\n456\nCGC ∩ approved antineoplastic\n161\n命中 CGC genes\n117\n同基因亦有 approved 抗腫瘤藥\n49\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 456,
+        "cgcDrugRegions": 161,
+        "metaCgc": 456,
+        "metaDrug": 161
+      },
+      "annotation_and_count": 107,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 869,
+          "scrollWidth": 869,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 0,
+        "aligned": 0,
+        "resolved": 0
+      },
+      "methyl_projection": null,
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 9518,
+          "secondOnlyCount": 4919
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 13919,
+          "secondOnlyCount": 6949
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 10903,
+          "secondOnlyCount": 146
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 7334,
+          "secondOnlyCount": 4810
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 456,
+          "secondOnlyCount": 295
+        },
+        "methyl": {
+          "keys": [
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [],
+          "unionCount": 13919,
+          "secondOnlyCount": 13919
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 9573,
+          "secondOnlyCount": 4454
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    },
+    "H1437:desktop": {
+      "viewport": {
+        "w": 1440,
+        "h": 1000
+      },
+      "html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "body": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "scroll": {
+        "x": 0,
+        "y": 1687
+      },
+      "title": "Exact-PS 分層拓撲工作站 · H1437",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "detail_geometry": {
+        "clientWidth": 945,
+        "scrollWidth": 945,
+        "left": 477.4375,
+        "right": 1424
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 7,
+      "filter_status": "顯示 17,598 / 17,598 regions · 全部類別 · 全部 regions · 全部 regions",
+      "detail_id": "chr1|PS=117498779|HP=2|U8d5c91af8f4e2b7f9f8ca9bb:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "S1",
+        "ROOT",
+        "S1",
+        "ROOT",
+        "S1"
+      ],
+      "tied_overlay": null,
+      "annotation_summary": "CGC locus-hit regions\n537\nCGC ∩ approved antineoplastic\n167\n命中 CGC genes\n173\n同基因亦有 approved 抗腫瘤藥\n60\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 537,
+        "cgcDrugRegions": 167,
+        "metaCgc": 537,
+        "metaDrug": 167
+      },
+      "annotation_and_count": 124,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 869,
+          "scrollWidth": 869,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 0,
+        "aligned": 0,
+        "resolved": 0
+      },
+      "methyl_projection": null,
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 11399,
+          "secondOnlyCount": 7305
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 17598,
+          "secondOnlyCount": 8692
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt",
+            "recurrence_not_evaluable"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 15326,
+          "secondOnlyCount": 1586
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 6119,
+          "secondOnlyCount": 4182
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 537,
+          "secondOnlyCount": 370
+        },
+        "methyl": {
+          "keys": [
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [],
+          "unionCount": 17598,
+          "secondOnlyCount": 17598
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN",
+            "RECURRENCE_REQUIRED"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 11846,
+          "secondOnlyCount": 5477
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    },
+    "H2009:desktop": {
+      "viewport": {
+        "w": 1440,
+        "h": 1000
+      },
+      "html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "body": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "scroll": {
+        "x": 0,
+        "y": 5130
+      },
+      "title": "Exact-PS 分層拓撲工作站 · H2009",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "detail_geometry": {
+        "clientWidth": 945,
+        "scrollWidth": 945,
+        "left": 477.4375,
+        "right": 1424
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 1,
+      "filter_status": "顯示 1 / 36,042 regions · 全部類別 · 全部 regions · focal→partner relation resolved · chr18:567,920–567,920",
+      "detail_id": "chr18|PS=307022|HP=1|Ud7bfe826883d829481ab4365:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "H:S1",
+        "H:S1+S2",
+        "H:S1+S2+S3",
+        "ROOT",
+        "H:S1",
+        "H:S1+S2",
+        "H:S1+S2+S3",
+        "ROOT",
+        "H:S1",
+        "H:S1+S2",
+        "H:S1+S2+S3"
+      ],
+      "tied_overlay": {
+        "global_best_union_edges": 12,
+        "selected_exemplar_edges": 3,
+        "table_global_best_edges": 12,
+        "table_selected_edges": 3
+      },
+      "annotation_summary": "CGC locus-hit regions\n1,379\nCGC ∩ approved antineoplastic\n503\n命中 CGC genes\n421\n同基因亦有 approved 抗腫瘤藥\n176\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 1379,
+        "cgcDrugRegions": 503,
+        "metaCgc": 1379,
+        "metaDrug": 503
+      },
+      "annotation_and_count": 305,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 869,
+          "scrollWidth": 869,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 5,
+        "aligned": 1,
+        "resolved": 1
+      },
+      "methyl_projection": {
+        "edges": 2,
+        "table_rows": 1,
+        "detail": "chr18|PS=307022|HP=1|Ud7bfe826883d829481ab4365:B0001"
+      },
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 16600,
+          "secondOnlyCount": 12084
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 36042,
+          "secondOnlyCount": 18090
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt",
+            "recurrence_not_evaluable"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 31585,
+          "secondOnlyCount": 8457
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 7384,
+          "secondOnlyCount": 4890
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 1379,
+          "secondOnlyCount": 876
+        },
+        "methyl": {
+          "keys": [
+            "FOCAL_ALIGNED",
+            "PAIR_RELATION_RESOLVED",
+            "FORMAL_PARTNER_ASSOC",
+            "PAIRED_BACKGROUND_LANE",
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [
+            "FOCAL_ALIGNED",
+            "PAIR_RELATION_RESOLVED"
+          ],
+          "unionCount": 2,
+          "secondOnlyCount": 1
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN",
+            "RECURRENCE_REQUIRED"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 18088,
+          "secondOnlyCount": 9927
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    },
+    "HCC1937:desktop": {
+      "viewport": {
+        "w": 1440,
+        "h": 1000
+      },
+      "html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "body": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "scroll": {
+        "x": 0,
+        "y": 1687
+      },
+      "title": "Exact-PS 分層拓撲工作站 · HCC1937",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "detail_geometry": {
+        "clientWidth": 945,
+        "scrollWidth": 945,
+        "left": 477.4375,
+        "right": 1424
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 7,
+      "filter_status": "顯示 5,195 / 5,195 regions · 全部類別 · 全部 regions · 全部 regions",
+      "detail_id": "chr1|PS=2754714|HP=2|Ub86d02f1138a1dbe4748713b:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "H:S1",
+        "S1+S2",
+        "ROOT",
+        "H:S1",
+        "S1+S2",
+        "ROOT",
+        "H:S1",
+        "S1+S2"
+      ],
+      "tied_overlay": null,
+      "annotation_summary": "CGC locus-hit regions\n189\nCGC ∩ approved antineoplastic\n66\n命中 CGC genes\n93\n同基因亦有 approved 抗腫瘤藥\n35\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 189,
+        "cgcDrugRegions": 66,
+        "metaCgc": 189,
+        "metaDrug": 66
+      },
+      "annotation_and_count": 55,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 869,
+          "scrollWidth": 869,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 0,
+        "aligned": 0,
+        "resolved": 0
+      },
+      "methyl_projection": null,
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 3484,
+          "secondOnlyCount": 2261
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 5195,
+          "secondOnlyCount": 2614
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt",
+            "recurrence_not_evaluable"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 4350,
+          "secondOnlyCount": 105
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 2035,
+          "secondOnlyCount": 1240
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 189,
+          "secondOnlyCount": 123
+        },
+        "methyl": {
+          "keys": [
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [],
+          "unionCount": 5195,
+          "secondOnlyCount": 5195
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN",
+            "RECURRENCE_REQUIRED"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 4219,
+          "secondOnlyCount": 547
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    },
+    "HCC1954:desktop": {
+      "viewport": {
+        "w": 1440,
+        "h": 1000
+      },
+      "html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "body": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "scroll": {
+        "x": 0,
+        "y": 1773
+      },
+      "title": "Exact-PS 分層拓撲工作站 · HCC1954",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440
+      },
+      "detail_geometry": {
+        "clientWidth": 945,
+        "scrollWidth": 945,
+        "left": 477.4375,
+        "right": 1424
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "scrollLeft": 0,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 7,
+      "filter_status": "顯示 7,746 / 7,746 regions · 全部類別 · 全部 regions · 全部 regions",
+      "detail_id": "chr8|PS=99963594|HP=1|Uaf5e90a7788d0c77f6c2f73d:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "S1",
+        "H:S1+S2",
+        "H:S1+S2+S3",
+        "ROOT",
+        "S1",
+        "H:S1+S2",
+        "H:S1+S2+S3",
+        "ROOT",
+        "S1",
+        "H:S1+S2",
+        "H:S1+S2+S3"
+      ],
+      "tied_overlay": null,
+      "annotation_summary": "CGC locus-hit regions\n273\nCGC ∩ approved antineoplastic\n90\n命中 CGC genes\n69\n同基因亦有 approved 抗腫瘤藥\n22\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 273,
+        "cgcDrugRegions": 90,
+        "metaCgc": 273,
+        "metaDrug": 90
+      },
+      "annotation_and_count": 67,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 869,
+          "scrollWidth": 869,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 873,
+          "scrollWidth": 873,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 1,
+        "aligned": 0,
+        "resolved": 1
+      },
+      "methyl_projection": {
+        "edges": 2,
+        "table_rows": 1,
+        "detail": "chr8|PS=99963594|HP=1|Uaf5e90a7788d0c77f6c2f73d:B0001"
+      },
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 4798,
+          "secondOnlyCount": 2154
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 7746,
+          "secondOnlyCount": 3870
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt",
+            "recurrence_not_evaluable"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 5730,
+          "secondOnlyCount": 83
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 4622,
+          "secondOnlyCount": 2704
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 273,
+          "secondOnlyCount": 183
+        },
+        "methyl": {
+          "keys": [
+            "PAIR_RELATION_RESOLVED",
+            "PAIRED_BACKGROUND_LANE",
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [
+            "PAIR_RELATION_RESOLVED",
+            "PAIRED_BACKGROUND_LANE"
+          ],
+          "unionCount": 2,
+          "secondOnlyCount": 1
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN",
+            "RECURRENCE_REQUIRED"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 5607,
+          "secondOnlyCount": 492
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    },
+    "index:mobile": {
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "body": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "scroll": {
+        "x": 0,
+        "y": 6312
+      },
+      "title": "Exact-PS layered workstation · cohort command center",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "sample_links": 7,
+      "console_errors": [],
+      "external_requests": []
+    },
+    "HCC1395:mobile": {
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "body": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "scroll": {
+        "x": 0,
+        "y": 9992
+      },
+      "title": "Exact-PS 分層拓撲工作站 · HCC1395_HKU",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "detail_geometry": {
+        "clientWidth": 368,
+        "scrollWidth": 368,
+        "left": 10,
+        "right": 380
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 297,
+          "scrollWidth": 620,
+          "scrollLeft": 0,
+          "maxScrollLeft": 323,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 1,
+      "filter_status": "顯示 1 / 11,590 regions · 全部類別 · 全部 regions · 全部 regions · chr10:87,818,272–87,928,739",
+      "detail_id": "chr10|PS=87549798|HP=1|Uf7a120cb9783037f1e7b394b:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "H:S1",
+        "S1+S2",
+        "ROOT",
+        "H:S1",
+        "S1+S2",
+        "ROOT",
+        "H:S1",
+        "S1+S2"
+      ],
+      "tied_overlay": null,
+      "annotation_summary": "CGC locus-hit regions\n480\nCGC ∩ approved antineoplastic\n174\n命中 CGC genes\n194\n同基因亦有 approved 抗腫瘤藥\n73\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 480,
+        "cgcDrugRegions": 174,
+        "metaCgc": 480,
+        "metaDrug": 174
+      },
+      "annotation_and_count": 133,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 293,
+          "scrollWidth": 387,
+          "maxScrollLeft": 94,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 297,
+          "scrollWidth": 297,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 1,
+        "aligned": 0,
+        "resolved": 1
+      },
+      "methyl_projection": {
+        "edges": 2,
+        "table_rows": 1,
+        "detail": "chr3|PS=126975958|HP=2|Ua3ff14e5cf7acf6812d40757:B0001"
+      },
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 7912,
+          "secondOnlyCount": 4766
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 11590,
+          "secondOnlyCount": 5734
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 9397,
+          "secondOnlyCount": 267
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 5225,
+          "secondOnlyCount": 3259
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 480,
+          "secondOnlyCount": 306
+        },
+        "methyl": {
+          "keys": [
+            "PAIR_RELATION_RESOLVED",
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [
+            "PAIR_RELATION_RESOLVED",
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "unionCount": 11590,
+          "secondOnlyCount": 11589
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 8908,
+          "secondOnlyCount": 1861
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    },
+    "HCC1395_DORADO:mobile": {
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "body": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "scroll": {
+        "x": 0,
+        "y": 4579
+      },
+      "title": "Exact-PS 分層拓撲工作站 · HCC1395_NYGC",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "detail_geometry": {
+        "clientWidth": 368,
+        "scrollWidth": 368,
+        "left": 10,
+        "right": 380
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 297,
+          "scrollWidth": 620,
+          "scrollLeft": 0,
+          "maxScrollLeft": 323,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 7,
+      "filter_status": "顯示 6,865 / 6,865 regions · 全部類別 · 全部 regions · 全部 regions",
+      "detail_id": "chr1|PS=178472896|HP=1|U0de4a1bbe1cb3ebd12dae307:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "H:S1",
+        "ROOT",
+        "H:S1",
+        "ROOT",
+        "H:S1"
+      ],
+      "tied_overlay": null,
+      "annotation_summary": "CGC locus-hit regions\n240\nCGC ∩ approved antineoplastic\n91\n命中 CGC genes\n98\n同基因亦有 approved 抗腫瘤藥\n36\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 240,
+        "cgcDrugRegions": 91,
+        "metaCgc": 240,
+        "metaDrug": 91
+      },
+      "annotation_and_count": 72,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 293,
+          "scrollWidth": 387,
+          "maxScrollLeft": 94,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 297,
+          "scrollWidth": 297,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 0,
+        "aligned": 0,
+        "resolved": 0
+      },
+      "methyl_projection": null,
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 4691,
+          "secondOnlyCount": 2778
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 6865,
+          "secondOnlyCount": 3456
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt",
+            "recurrence_not_evaluable"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 5381,
+          "secondOnlyCount": 73
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 3355,
+          "secondOnlyCount": 1975
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 240,
+          "secondOnlyCount": 149
+        },
+        "methyl": {
+          "keys": [
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [],
+          "unionCount": 6865,
+          "secondOnlyCount": 6865
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN",
+            "RECURRENCE_REQUIRED"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 5265,
+          "secondOnlyCount": 1100
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    },
+    "COLO829:mobile": {
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "body": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "scroll": {
+        "x": 0,
+        "y": 4178
+      },
+      "title": "Exact-PS 分層拓撲工作站 · COLO829",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "detail_geometry": {
+        "clientWidth": 368,
+        "scrollWidth": 368,
+        "left": 10,
+        "right": 380
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 297,
+          "scrollWidth": 620,
+          "scrollLeft": 0,
+          "maxScrollLeft": 323,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 6,
+      "filter_status": "顯示 13,919 / 13,919 regions · 全部類別 · 全部 regions · 全部 regions",
+      "detail_id": "chr1|PS=2762678|HP=1|U8a18c1ab9d826f89578fb555:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "S2",
+        "ROOT",
+        "S2",
+        "ROOT",
+        "S2"
+      ],
+      "tied_overlay": null,
+      "annotation_summary": "CGC locus-hit regions\n456\nCGC ∩ approved antineoplastic\n161\n命中 CGC genes\n117\n同基因亦有 approved 抗腫瘤藥\n49\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 456,
+        "cgcDrugRegions": 161,
+        "metaCgc": 456,
+        "metaDrug": 161
+      },
+      "annotation_and_count": 107,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 293,
+          "scrollWidth": 387,
+          "maxScrollLeft": 94,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 297,
+          "scrollWidth": 297,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 0,
+        "aligned": 0,
+        "resolved": 0
+      },
+      "methyl_projection": null,
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 9518,
+          "secondOnlyCount": 4919
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 13919,
+          "secondOnlyCount": 6949
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 10903,
+          "secondOnlyCount": 146
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 7334,
+          "secondOnlyCount": 4810
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 456,
+          "secondOnlyCount": 295
+        },
+        "methyl": {
+          "keys": [
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [],
+          "unionCount": 13919,
+          "secondOnlyCount": 13919
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 9573,
+          "secondOnlyCount": 4454
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    },
+    "H1437:mobile": {
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "body": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "scroll": {
+        "x": 0,
+        "y": 4178
+      },
+      "title": "Exact-PS 分層拓撲工作站 · H1437",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "detail_geometry": {
+        "clientWidth": 368,
+        "scrollWidth": 368,
+        "left": 10,
+        "right": 380
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 297,
+          "scrollWidth": 620,
+          "scrollLeft": 0,
+          "maxScrollLeft": 323,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 7,
+      "filter_status": "顯示 17,598 / 17,598 regions · 全部類別 · 全部 regions · 全部 regions",
+      "detail_id": "chr1|PS=117498779|HP=2|U8d5c91af8f4e2b7f9f8ca9bb:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "S1",
+        "ROOT",
+        "S1",
+        "ROOT",
+        "S1"
+      ],
+      "tied_overlay": null,
+      "annotation_summary": "CGC locus-hit regions\n537\nCGC ∩ approved antineoplastic\n167\n命中 CGC genes\n173\n同基因亦有 approved 抗腫瘤藥\n60\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 537,
+        "cgcDrugRegions": 167,
+        "metaCgc": 537,
+        "metaDrug": 167
+      },
+      "annotation_and_count": 124,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 293,
+          "scrollWidth": 387,
+          "maxScrollLeft": 94,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 297,
+          "scrollWidth": 297,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 0,
+        "aligned": 0,
+        "resolved": 0
+      },
+      "methyl_projection": null,
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 11399,
+          "secondOnlyCount": 7305
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 17598,
+          "secondOnlyCount": 8692
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt",
+            "recurrence_not_evaluable"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 15326,
+          "secondOnlyCount": 1586
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 6119,
+          "secondOnlyCount": 4182
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 537,
+          "secondOnlyCount": 370
+        },
+        "methyl": {
+          "keys": [
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [],
+          "unionCount": 17598,
+          "secondOnlyCount": 17598
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN",
+            "RECURRENCE_REQUIRED"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 11846,
+          "secondOnlyCount": 5477
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    },
+    "H2009:mobile": {
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "body": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "scroll": {
+        "x": 0,
+        "y": 14518
+      },
+      "title": "Exact-PS 分層拓撲工作站 · H2009",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "detail_geometry": {
+        "clientWidth": 368,
+        "scrollWidth": 368,
+        "left": 10,
+        "right": 380
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 297,
+          "scrollWidth": 620,
+          "scrollLeft": 0,
+          "maxScrollLeft": 323,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 1,
+      "filter_status": "顯示 1 / 36,042 regions · 全部類別 · 全部 regions · focal→partner relation resolved · chr18:567,920–567,920",
+      "detail_id": "chr18|PS=307022|HP=1|Ud7bfe826883d829481ab4365:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "H:S1",
+        "H:S1+S2",
+        "H:S1+S2+S3",
+        "ROOT",
+        "H:S1",
+        "H:S1+S2",
+        "H:S1+S2+S3",
+        "ROOT",
+        "H:S1",
+        "H:S1+S2",
+        "H:S1+S2+S3"
+      ],
+      "tied_overlay": {
+        "global_best_union_edges": 12,
+        "selected_exemplar_edges": 3,
+        "table_global_best_edges": 12,
+        "table_selected_edges": 3
+      },
+      "annotation_summary": "CGC locus-hit regions\n1,379\nCGC ∩ approved antineoplastic\n503\n命中 CGC genes\n421\n同基因亦有 approved 抗腫瘤藥\n176\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 1379,
+        "cgcDrugRegions": 503,
+        "metaCgc": 1379,
+        "metaDrug": 503
+      },
+      "annotation_and_count": 305,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 293,
+          "scrollWidth": 387,
+          "maxScrollLeft": 94,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 297,
+          "scrollWidth": 297,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 5,
+        "aligned": 1,
+        "resolved": 1
+      },
+      "methyl_projection": {
+        "edges": 2,
+        "table_rows": 1,
+        "detail": "chr18|PS=307022|HP=1|Ud7bfe826883d829481ab4365:B0001"
+      },
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 16600,
+          "secondOnlyCount": 12084
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 36042,
+          "secondOnlyCount": 18090
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt",
+            "recurrence_not_evaluable"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 31585,
+          "secondOnlyCount": 8457
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 7384,
+          "secondOnlyCount": 4890
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 1379,
+          "secondOnlyCount": 876
+        },
+        "methyl": {
+          "keys": [
+            "FOCAL_ALIGNED",
+            "PAIR_RELATION_RESOLVED",
+            "FORMAL_PARTNER_ASSOC",
+            "PAIRED_BACKGROUND_LANE",
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [
+            "FOCAL_ALIGNED",
+            "PAIR_RELATION_RESOLVED"
+          ],
+          "unionCount": 2,
+          "secondOnlyCount": 1
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN",
+            "RECURRENCE_REQUIRED"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 18088,
+          "secondOnlyCount": 9927
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    },
+    "HCC1937:mobile": {
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "body": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "scroll": {
+        "x": 0,
+        "y": 4178
+      },
+      "title": "Exact-PS 分層拓撲工作站 · HCC1937",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "detail_geometry": {
+        "clientWidth": 368,
+        "scrollWidth": 368,
+        "left": 10,
+        "right": 380
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 297,
+          "scrollWidth": 620,
+          "scrollLeft": 0,
+          "maxScrollLeft": 323,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 7,
+      "filter_status": "顯示 5,195 / 5,195 regions · 全部類別 · 全部 regions · 全部 regions",
+      "detail_id": "chr1|PS=2754714|HP=2|Ub86d02f1138a1dbe4748713b:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "H:S1",
+        "S1+S2",
+        "ROOT",
+        "H:S1",
+        "S1+S2",
+        "ROOT",
+        "H:S1",
+        "S1+S2"
+      ],
+      "tied_overlay": null,
+      "annotation_summary": "CGC locus-hit regions\n189\nCGC ∩ approved antineoplastic\n66\n命中 CGC genes\n93\n同基因亦有 approved 抗腫瘤藥\n35\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 189,
+        "cgcDrugRegions": 66,
+        "metaCgc": 189,
+        "metaDrug": 66
+      },
+      "annotation_and_count": 55,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 293,
+          "scrollWidth": 387,
+          "maxScrollLeft": 94,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 297,
+          "scrollWidth": 446,
+          "maxScrollLeft": 149,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 0,
+        "aligned": 0,
+        "resolved": 0
+      },
+      "methyl_projection": null,
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 3484,
+          "secondOnlyCount": 2261
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 5195,
+          "secondOnlyCount": 2614
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt",
+            "recurrence_not_evaluable"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 4350,
+          "secondOnlyCount": 105
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 2035,
+          "secondOnlyCount": 1240
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 189,
+          "secondOnlyCount": 123
+        },
+        "methyl": {
+          "keys": [
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [],
+          "unionCount": 5195,
+          "secondOnlyCount": 5195
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN",
+            "RECURRENCE_REQUIRED"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 4219,
+          "secondOnlyCount": 547
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    },
+    "HCC1954:mobile": {
+      "viewport": {
+        "w": 390,
+        "h": 844
+      },
+      "html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "body": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "scroll": {
+        "x": 0,
+        "y": 4314
+      },
+      "title": "Exact-PS 分層拓撲工作站 · HCC1954",
+      "authority": "20260724-exact-ps-hp-strict-read-linkage",
+      "contract": "layered-workstation-exact-ps-v4",
+      "initial_html": {
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "detail_geometry": {
+        "clientWidth": 368,
+        "scrollWidth": 368,
+        "left": 10,
+        "right": 380
+      },
+      "graph_geometry": [
+        {
+          "className": "candidate-network",
+          "clientWidth": 297,
+          "scrollWidth": 620,
+          "scrollLeft": 0,
+          "maxScrollLeft": 323,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "tree",
+          "clientWidth": 297,
+          "scrollWidth": 520,
+          "scrollLeft": 0,
+          "maxScrollLeft": 223,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "legend_buttons": 7,
+      "filter_status": "顯示 7,746 / 7,746 regions · 全部類別 · 全部 regions · 全部 regions",
+      "detail_id": "chr8|PS=99963594|HP=1|Uaf5e90a7788d0c77f6c2f73d:B0001",
+      "visible_tree_node_labels": [
+        "ROOT",
+        "S1",
+        "H:S1+S2",
+        "H:S1+S2+S3",
+        "ROOT",
+        "S1",
+        "H:S1+S2",
+        "H:S1+S2+S3",
+        "ROOT",
+        "S1",
+        "H:S1+S2",
+        "H:S1+S2+S3"
+      ],
+      "tied_overlay": null,
+      "annotation_summary": "CGC locus-hit regions\n273\nCGC ∩ approved antineoplastic\n90\n命中 CGC genes\n69\n同基因亦有 approved 抗腫瘤藥\n22\n交集契約\nactual sSNV locus ∈ GENCODE v46 gene body；同一 HGNC gene 同時進入 COSMIC CGC v104 與 DGIdb approved=true ∧ anti_neoplastic=true。這是資料庫脈絡，不是拓撲排序或臨床可用性。",
+      "annotation_counts": {
+        "cgcRegions": 273,
+        "cgcDrugRegions": 90,
+        "metaCgc": 273,
+        "metaDrug": 90
+      },
+      "annotation_and_count": 67,
+      "annotation_scroll_geometry": [
+        {
+          "className": "table-wrap",
+          "clientWidth": 293,
+          "scrollWidth": 387,
+          "maxScrollLeft": 94,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        },
+        {
+          "className": "locus-strip",
+          "clientWidth": 297,
+          "scrollWidth": 297,
+          "maxScrollLeft": 0,
+          "reachedEnd": true,
+          "overflowX": "auto"
+        }
+      ],
+      "methyl_filter_counts": {
+        "signal": 1,
+        "aligned": 0,
+        "resolved": 1
+      },
+      "methyl_projection": {
+        "edges": 2,
+        "table_rows": 1,
+        "detail": "chr8|PS=99963594|HP=1|Uaf5e90a7788d0c77f6c2f73d:B0001"
+      },
+      "legend_multiselect": {
+        "coarse": {
+          "keys": [
+            "Single-only",
+            "Direct-only",
+            "Sister-only",
+            "Sister+direct",
+            "Cross-class unresolved",
+            "Not evaluable"
+          ],
+          "selectedKeys": [
+            "Single-only",
+            "Direct-only"
+          ],
+          "unionCount": 4798,
+          "secondOnlyCount": 2154
+        },
+        "hp": {
+          "keys": [
+            "1",
+            "2"
+          ],
+          "selectedKeys": [
+            "1",
+            "2"
+          ],
+          "unionCount": 7746,
+          "secondOnlyCount": 3870
+        },
+        "status": {
+          "keys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete",
+            "zero_denominator",
+            "not_applicable_no_active_alt",
+            "recurrence_not_evaluable"
+          ],
+          "selectedKeys": [
+            "ranked_complete",
+            "not_evaluable_family_incomplete"
+          ],
+          "unionCount": 5730,
+          "secondOnlyCount": 83
+        },
+        "k": {
+          "keys": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "selectedKeys": [
+            "0",
+            "1"
+          ],
+          "unionCount": 4622,
+          "secondOnlyCount": 2704
+        },
+        "annotation": {
+          "keys": [
+            "CGC_DRUG",
+            "CGC_ONLY",
+            "NO_CGC"
+          ],
+          "selectedKeys": [
+            "CGC_DRUG",
+            "CGC_ONLY"
+          ],
+          "unionCount": 273,
+          "secondOnlyCount": 183
+        },
+        "methyl": {
+          "keys": [
+            "PAIR_RELATION_RESOLVED",
+            "PAIRED_BACKGROUND_LANE",
+            "NOT_IN_FORMAL_OVERLAY"
+          ],
+          "selectedKeys": [
+            "PAIR_RELATION_RESOLVED",
+            "PAIRED_BACKGROUND_LANE"
+          ],
+          "unionCount": 2,
+          "secondOnlyCount": 1
+        },
+        "resolution": {
+          "keys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY",
+            "TIED_CROSS_TOPOLOGY",
+            "NO_ACTIVE_ALT",
+            "ZERO_DENOMINATOR",
+            "RESOURCE_ABSTAIN",
+            "RECURRENCE_REQUIRED"
+          ],
+          "selectedKeys": [
+            "UNIQUE_TREE",
+            "TIED_SAME_TOPOLOGY"
+          ],
+          "unionCount": 5607,
+          "secondOnlyCount": 492
+        }
+      },
+      "console_errors": [],
+      "external_requests": []
+    }
+  },
+  "browser": {
+    "version": "148.0.7778.96",
+    "executable": {
+      "path": "/bip7_disk/liaoyoyo2001/.cache/ms-playwright/chromium-1223/chrome-linux64/chrome",
+      "bytes": 276917464,
+      "sha256": "adc1c21ceed5c2a67184766376fe816ac03e556cc0ca3f782e8212235fe05c6f"
+    }
+  },
+  "audited_inputs": {
+    "index": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/layered_workstation/index.html",
+      "bytes": 90781,
+      "sha256": "9b35e81bb8dfc8ccfc2c4324ecd34c346a10dadfb6d8f91af566ea350cf29a0c"
+    },
+    "samples": {
+      "HCC1395": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/layered_workstation/HCC1395.html",
+        "bytes": 35511127,
+        "sha256": "286de97f83b4d47f7726ce6d0995ffe1c3d0e416b87e0e2e6433741c816b2713"
+      },
+      "HCC1395_DORADO": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/layered_workstation/HCC1395_DORADO.html",
+        "bytes": 18975839,
+        "sha256": "00b2a2b7117653040b0ff8ca964e25ab14968527faa6ed412cb7eb4ed5648142"
+      },
+      "COLO829": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/layered_workstation/COLO829.html",
+        "bytes": 41451047,
+        "sha256": "dfc743363c7839431457dee9b46f80688dc1129b6af9253514a9487fd1b593a0"
+      },
+      "H1437": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/layered_workstation/H1437.html",
+        "bytes": 72319200,
+        "sha256": "be3d31cf263472d5d40ec914f4b5f86f3023ce3f0228d74424a3e7a7c30d106a"
+      },
+      "H2009": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/layered_workstation/H2009.html",
+        "bytes": 188235843,
+        "sha256": "655e87856030d045884ad8dcdde73dbd7c09955fa839291fbd46b66a713ea1fe"
+      },
+      "HCC1937": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/layered_workstation/HCC1937.html",
+        "bytes": 15326437,
+        "sha256": "9d9bf7a13b39c8cbce8862f013a0dc090acaa50f6a9a1b9d6963640ea150ee34"
+      },
+      "HCC1954": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/docs/methodology/_assets/layered_workstation/HCC1954.html",
+        "bytes": 21267494,
+        "sha256": "488e36c252da125d9f4ba127592ed14bfc92983290888280753fc6adaa2f6626"
+      }
+    },
+    "scripts": {
+      "audit": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/scripts/audit_exact_ps_workstation_playwright.py",
+        "bytes": 42769,
+        "sha256": "8b322c94236b1a96c6735854d360892d56ac4169c0d9e732434f906cc3c3b089"
+      },
+      "builder": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/scripts/build_exact_ps_layered_workstation.py",
+        "bytes": 236979,
+        "sha256": "3273937db181aba1a0bd80174c198b4668af14659a4466ad487dd06ac31ed47e"
+      },
+      "gene_drug_builder": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/scripts/build_exact_ps_gene_drug_annotation.py",
+        "bytes": 36096,
+        "sha256": "98f4011bbbb2013bab1633346bb16eea336bc08462ee6d4453355e53e22489fe"
+      }
+    },
+    "gene_drug_sidecar": {
+      "annotation": {
+        "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260725_exact_ps_gene_drug_annotation/all7_v2/annotation.v1.json",
+        "bytes": 859706,
+        "sha256": "148f74e9f958cccffe14a2297e9453e28b2346a424adcb30e350f79e91ae4f50"
+      },
+      "receipt": {
+        "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260725_exact_ps_gene_drug_annotation/all7_v2/receipt.json",
+        "bytes": 3834,
+        "sha256": "9639b36df7a2412afc2aca97eb1f20819e7a41394394ef40b6f3108e809dd99e"
+      }
+    },
+    "methyl_overlay": {
+      "receipt": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/results/validation_receipt.json",
+        "bytes": 8698,
+        "sha256": "d6b8c0ec9f9b121af68ff517a86f80da8bc58360acb227afb9b76ba33545f99c"
+      },
+      "pair_join": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/data/formal_pair_alt_ref_topology_join.tsv",
+        "bytes": 2946,
+        "sha256": "a32e92bede0ff8671a674d5e31ddb988085b0fe7ddbb4ad0f917db3b9c2293e3"
+      },
+      "focal_control_join": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/data/focal_alt_ref_control_join.tsv",
+        "bytes": 1330,
+        "sha256": "4d79cfe97a176df984e429340be8692938d69af296ace51d1acd739442a4b29e"
+      },
+      "lane_join": {
+        "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/data/strict_hp_lane_cpp_topology_join.tsv",
+        "bytes": 5415,
+        "sha256": "5f352ff50a60ee41b73ea623ffba76ed337020e3313b211f94b8d0b754e6bca4"
+      }
+    }
+  },
+  "artifacts": {
+    "COLO829_desktop_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/COLO829_desktop_detail.png",
+      "bytes": 249925,
+      "width": 947,
+      "height": 2346,
+      "sha256": "754c1b198cb87f8d84a089a38d88e694d35e2404e5a84f3905a708b4137f7a9b"
+    },
+    "COLO829_desktop_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/COLO829_desktop_genome.png",
+      "bytes": 334431,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "507a9557b84a2eaf360aa65350f224ea963cfbb6b3a99ce5ab8260eedc7c5a9a"
+    },
+    "COLO829_desktop_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/COLO829_desktop_top.png",
+      "bytes": 160113,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "7b942fac277b72ae5493d44988738ba3cd0376b30b35f088f0edea19271e01d1"
+    },
+    "COLO829_mobile_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/COLO829_mobile_detail.png",
+      "bytes": 239900,
+      "width": 370,
+      "height": 3532,
+      "sha256": "e798fc3fe1201b20fec7d8032984b9dd868105a5e1a8c79f29f3eecc394795dd"
+    },
+    "COLO829_mobile_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/COLO829_mobile_genome.png",
+      "bytes": 79189,
+      "width": 390,
+      "height": 844,
+      "sha256": "e1ccbfcb390f74db9d3951769788869d703dd5402b42c3aab5c6424f11ecdc61"
+    },
+    "COLO829_mobile_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/COLO829_mobile_top.png",
+      "bytes": 82192,
+      "width": 390,
+      "height": 844,
+      "sha256": "1dd71a5f37d8acb5fb1c9b6c61dc7a4d91059bfdbd5f7c776dadefac04526a98"
+    },
+    "H1437_desktop_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H1437_desktop_detail.png",
+      "bytes": 254195,
+      "width": 947,
+      "height": 2349,
+      "sha256": "572ff8fe1bb4f86d8c9c1757df903cd2b9e2fc8d54a8f7f369cede4b0e463de3"
+    },
+    "H1437_desktop_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H1437_desktop_genome.png",
+      "bytes": 347219,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "950e5a30981c3ac779ad0fa10a9c61e840b0ee4ed6ed0fa376fb7693fb0086e3"
+    },
+    "H1437_desktop_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H1437_desktop_top.png",
+      "bytes": 161477,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "a0d9b0951860873a30cb73e101be25418136bbce051221ef82b5e2206758c46b"
+    },
+    "H1437_mobile_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H1437_mobile_detail.png",
+      "bytes": 245040,
+      "width": 370,
+      "height": 3580,
+      "sha256": "58e1770aeae097c3d1fc96f8b2524bddba7ecdcdf55eed4ebc80d4e1fb7f8632"
+    },
+    "H1437_mobile_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H1437_mobile_genome.png",
+      "bytes": 79631,
+      "width": 390,
+      "height": 844,
+      "sha256": "ecdfe05b4468bb34f7a937f1b79e197a09aace61b55a232bb16bcd91c55f67fe"
+    },
+    "H1437_mobile_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H1437_mobile_top.png",
+      "bytes": 81858,
+      "width": 390,
+      "height": 844,
+      "sha256": "6b8b256f225a34fab2ef8a9c56fd81f8c82c48e862d3aebd10c3191961058126"
+    },
+    "H2009_desktop_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H2009_desktop_detail.png",
+      "bytes": 545360,
+      "width": 947,
+      "height": 5177,
+      "sha256": "ce2b43c23c1c4b678e517713865496b1ab4eb9220d5c86a06d96feffcd713f19"
+    },
+    "H2009_desktop_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H2009_desktop_genome.png",
+      "bytes": 100971,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "837b89c05fa423631a4cfa99b702a96341cef7bee5f7a3b49dfa0aa80aa23056"
+    },
+    "H2009_desktop_methyl_aligned.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H2009_desktop_methyl_aligned.png",
+      "bytes": 426472,
+      "width": 947,
+      "height": 4353,
+      "sha256": "93435e5ce545399647130b62b802336f60599b59db738c832d2c50e00f5fd9bc"
+    },
+    "H2009_desktop_methyl_projection.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H2009_desktop_methyl_projection.png",
+      "bytes": 545360,
+      "width": 947,
+      "height": 5177,
+      "sha256": "ce2b43c23c1c4b678e517713865496b1ab4eb9220d5c86a06d96feffcd713f19"
+    },
+    "H2009_desktop_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H2009_desktop_top.png",
+      "bytes": 161382,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "f9aa6a59da37c4fa3bc533eea531951a5d200a72ef4fa77a50bb327eac454d2c"
+    },
+    "H2009_mobile_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H2009_mobile_detail.png",
+      "bytes": 489103,
+      "width": 370,
+      "height": 7353,
+      "sha256": "29e19d8a56ce3a2ecfec703d2b22efb56d05b838ed427a35d29eea7a3421a0cd"
+    },
+    "H2009_mobile_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H2009_mobile_genome.png",
+      "bytes": 75477,
+      "width": 390,
+      "height": 844,
+      "sha256": "bcb3a541376cb63599d6e78165ba758adadac72cd82392b7081f201a178a218e"
+    },
+    "H2009_mobile_methyl_aligned.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H2009_mobile_methyl_aligned.png",
+      "bytes": 382193,
+      "width": 370,
+      "height": 5942,
+      "sha256": "774c48a1bf5fdd4c06afa6b4a7105bd0be05beb31e748c8b6d4f9b1e6e79ac1c"
+    },
+    "H2009_mobile_methyl_projection.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H2009_mobile_methyl_projection.png",
+      "bytes": 489103,
+      "width": 370,
+      "height": 7353,
+      "sha256": "29e19d8a56ce3a2ecfec703d2b22efb56d05b838ed427a35d29eea7a3421a0cd"
+    },
+    "H2009_mobile_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/H2009_mobile_top.png",
+      "bytes": 82084,
+      "width": 390,
+      "height": 844,
+      "sha256": "8ece523dae16299d94d9a85cde3dbb98f120d52211b67c7367313e65b25c1d7e"
+    },
+    "HCC1395_DORADO_desktop_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1395_DORADO_desktop_detail.png",
+      "bytes": 253420,
+      "width": 947,
+      "height": 2330,
+      "sha256": "ed5d6198a29a6f72284db122c193b3fe52f7510bfbf9c64380372b7c958c2d7f"
+    },
+    "HCC1395_DORADO_desktop_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1395_DORADO_desktop_genome.png",
+      "bytes": 267194,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "fb485d37538038d81121ca7762fa16e7f7f21191b0830596b21db080c5ab381d"
+    },
+    "HCC1395_DORADO_desktop_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1395_DORADO_desktop_top.png",
+      "bytes": 161760,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "9d80883e75c6fa6b944726593623493fc02b989e1d0da5dab05cac35a729f9c1"
+    },
+    "HCC1395_DORADO_mobile_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1395_DORADO_mobile_detail.png",
+      "bytes": 242136,
+      "width": 370,
+      "height": 3649,
+      "sha256": "191da028fe73d50b12e35e5a24d91cb9bde164c773ac4c2287e1369023a28595"
+    },
+    "HCC1395_DORADO_mobile_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1395_DORADO_mobile_genome.png",
+      "bytes": 79259,
+      "width": 390,
+      "height": 844,
+      "sha256": "01474b72b2e2fc42b0d45e62c565d26c639b4b6b39e1912d6b5917dc9c8f476e"
+    },
+    "HCC1395_DORADO_mobile_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1395_DORADO_mobile_top.png",
+      "bytes": 84151,
+      "width": 390,
+      "height": 844,
+      "sha256": "2744106ac2d7c22007c60aeded317614e7b748aef4d498352db1e3dedea05d86"
+    },
+    "HCC1395_desktop_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1395_desktop_detail.png",
+      "bytes": 378915,
+      "width": 947,
+      "height": 4069,
+      "sha256": "a8583fc974b192627e8a681d068492366b7c41956c28273170ff5d875d3ef993"
+    },
+    "HCC1395_desktop_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1395_desktop_genome.png",
+      "bytes": 100313,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "7d41fce7701c995404a7c1c226226a4a47e5cfb95e6423885480b0c250f5ccfd"
+    },
+    "HCC1395_desktop_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1395_desktop_top.png",
+      "bytes": 161864,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "da8a33e28efd794dae890abfbb73e35ec10ad23ce49205e9405de35203294551"
+    },
+    "HCC1395_mobile_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1395_mobile_detail.png",
+      "bytes": 352882,
+      "width": 370,
+      "height": 5571,
+      "sha256": "be044b063235749038de42ac4a0e9c01b59938063c30e86b6a55855b62edad98"
+    },
+    "HCC1395_mobile_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1395_mobile_genome.png",
+      "bytes": 75796,
+      "width": 390,
+      "height": 844,
+      "sha256": "dd5ab843a2a8adc42ec3baa736ef0429fee1b07c461a90ddd7bf76b409c7ca40"
+    },
+    "HCC1395_mobile_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1395_mobile_top.png",
+      "bytes": 84117,
+      "width": 390,
+      "height": 844,
+      "sha256": "fcc9eaac69071011eb53dec4f7bdb95150e1f9ab71ef931ebcb6e11bad24f8d5"
+    },
+    "HCC1937_desktop_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1937_desktop_detail.png",
+      "bytes": 422538,
+      "width": 947,
+      "height": 4420,
+      "sha256": "89d78c91599a0b47cbbe3baba63caa74580335cdb182ed43ba5afbb639e57a40"
+    },
+    "HCC1937_desktop_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1937_desktop_genome.png",
+      "bytes": 259035,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "6bfe0a0d41d24f42b324834df95e9d601dee901966c4b6a3b84f6bfcbcd725f0"
+    },
+    "HCC1937_desktop_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1937_desktop_top.png",
+      "bytes": 158893,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "45b806f4f4f63a59dfb5e4e14843b2b390957e24e7552ef5704b6e34ee7988c1"
+    },
+    "HCC1937_mobile_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1937_mobile_detail.png",
+      "bytes": 383649,
+      "width": 370,
+      "height": 6027,
+      "sha256": "98514cbb50d67eea8e5a8e0cd360584f0f024b96ce2889070f94c319865971fa"
+    },
+    "HCC1937_mobile_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1937_mobile_genome.png",
+      "bytes": 79331,
+      "width": 390,
+      "height": 844,
+      "sha256": "0fd6285545b9a3d93b357bfe240aac1a750765fecb654a71828e4fabec084cbc"
+    },
+    "HCC1937_mobile_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1937_mobile_top.png",
+      "bytes": 82239,
+      "width": 390,
+      "height": 844,
+      "sha256": "62ace1832a35c77d20eba82c2d0bc7bc87bc7c23ee3a2423203e1341197f6a4b"
+    },
+    "HCC1954_desktop_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1954_desktop_detail.png",
+      "bytes": 322545,
+      "width": 947,
+      "height": 2973,
+      "sha256": "e10f9235189aabc1151c4355c67738abebb2886d3f783e185a3052b436d58129"
+    },
+    "HCC1954_desktop_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1954_desktop_genome.png",
+      "bytes": 263597,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "4e1ff888aee7bc2f5b254f2442501cf0a3bbbe7e5269822a47fd7463913b34a4"
+    },
+    "HCC1954_desktop_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1954_desktop_top.png",
+      "bytes": 160538,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "a64796bd996f56e2a727df134ee54e4e385ce0bb12c7fedd286177b4cf9fce2a"
+    },
+    "HCC1954_mobile_detail.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1954_mobile_detail.png",
+      "bytes": 320621,
+      "width": 370,
+      "height": 4570,
+      "sha256": "de99c5a059a03c87d54d4883b73ab8f073254e448d6fef0740e2f840772756a5"
+    },
+    "HCC1954_mobile_genome.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1954_mobile_genome.png",
+      "bytes": 79095,
+      "width": 390,
+      "height": 844,
+      "sha256": "bee26c36d9fb3bfcd32d935dad9bdef3231c48f83a8c8b605e9b1d2c863e223b"
+    },
+    "HCC1954_mobile_top.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/HCC1954_mobile_top.png",
+      "bytes": 82200,
+      "width": 390,
+      "height": 844,
+      "sha256": "16452e770b8df3dc130da64e5fecc6b86f2e95fb01dd47665358ad5250d1e451"
+    },
+    "index_desktop.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/index_desktop.png",
+      "bytes": 199541,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "44de75340d5f08dbaf80c36426ba14e8f3751b6b43948eb6fd6e7d67a226196a"
+    },
+    "index_desktop_methyl.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/index_desktop_methyl.png",
+      "bytes": 237196,
+      "width": 1440,
+      "height": 1000,
+      "sha256": "38db69ca6d85826d53ef33f4011fd338933f2052885105bdcf51c7833d34a6ac"
+    },
+    "index_mobile.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/index_mobile.png",
+      "bytes": 65177,
+      "width": 390,
+      "height": 844,
+      "sha256": "9003e160728ba52eb1d4514bba94981d7de6fb8ab867625be1158356b857620a"
+    },
+    "index_mobile_methyl.png": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/index_mobile_methyl.png",
+      "bytes": 64744,
+      "width": 390,
+      "height": 844,
+      "sha256": "47118096c551a547ea172549dc5ea97061ebb896069e01dcc73016b03f942446"
+    }
+  },
+  "all_pass": true
+}

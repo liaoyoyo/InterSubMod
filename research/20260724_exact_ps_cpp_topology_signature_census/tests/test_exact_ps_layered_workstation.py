@@ -43,6 +43,13 @@ class ExactPsLayeredWorkstationTest(unittest.TestCase):
             census["HCC1395"],
             cls.authority["funnel"]["samples"]["HCC1395"],
         )
+        cls.h2009 = BUILDER.load_sample(
+            "H2009",
+            cls.authority,
+            topology["H2009"],
+            census["H2009"],
+            cls.authority["funnel"]["samples"]["H2009"],
+        )
         cls.index_samples = [
             {
                 "sample": sample,
@@ -53,6 +60,12 @@ class ExactPsLayeredWorkstationTest(unittest.TestCase):
                     "cgcDrugRegions": BUILDER.EXPECTED_GENE_DRUG_REGION_COUNTS[
                         sample
                     ]["cgc_drug"],
+                    **{
+                        f"methyl{key[0].upper()}{key[1:]}": value
+                        for key, value in cls.authority["methyl_overlay"][
+                            "sampleSummaries"
+                        ][sample].items()
+                    },
                 },
             }
             for sample in BUILDER.EXPECTED_SAMPLES
@@ -183,6 +196,90 @@ class ExactPsLayeredWorkstationTest(unittest.TestCase):
             self.authority["gene_drug_receipt"]["output"]["sha256"],
         )
 
+    def test_methyl_overlay_contract_and_candidate_projection(self) -> None:
+        overlay = self.authority["methyl_overlay"]
+        self.assertEqual(
+            overlay["headline"]["formal_source_rows_evaluated"], 407738
+        )
+        self.assertEqual(
+            (
+                len(overlay["pairs"]),
+                len(overlay["laneByKey"]),
+                sum(
+                    lane["directSupport"]
+                    for pair in overlay["pairs"]
+                    for lane in pair["lanes"]
+                ),
+            ),
+            (7, 10, 790),
+        )
+        self.assertEqual(
+            (
+                sum(
+                    lane["directSupport"]
+                    for pair in overlay["pairs"]
+                    for lane in pair["lanes"]
+                    if lane["laneRole"] == "FORMAL_SIGNAL"
+                ),
+                sum(
+                    lane["directSupport"]
+                    for pair in overlay["pairs"]
+                    for lane in pair["lanes"]
+                    if lane["laneRole"] == "PAIRED_BACKGROUND"
+                ),
+            ),
+            (638, 152),
+        )
+        self.assertEqual(
+            {
+                sample: summary["formalPairs"]
+                for sample, summary in overlay["sampleSummaries"].items()
+                if summary["formalPairs"]
+            },
+            {"HCC1395": 1, "HCC1954": 1, "H2009": 5},
+        )
+        aligned = next(
+            row
+            for row in self.h2009["rows"]
+            if row["hasMethylAligned"]
+        )
+        self.assertEqual((aligned["chrom"], aligned["methyl"]["focalPos"]), ("chr4", 2307521))
+        self.assertAlmostEqual(
+            aligned["methyl"]["focalControl"]["jointV"],
+            0.6175954570807748,
+        )
+        self.assertEqual(
+            aligned["methyl"]["focalControl"]["permutationP"], 0.002
+        )
+        self.assertEqual(
+            aligned["methyl"]["lane"]["regionCandidate"]["pairStatus"],
+            "ABSTAIN_RESOURCE_LIMIT",
+        )
+        self.assertIsNone(aligned["candidate"])
+
+        local_resolved = next(
+            row
+            for row in self.h2009["rows"]
+            if row["hasMethylResolvedRelation"]
+        )
+        relation = local_resolved["methyl"]["lane"]["candidateRelation"]
+        self.assertEqual(
+            (
+                local_resolved["chrom"],
+                relation["status"],
+                relation["order"],
+                relation["focalBeforeCount"],
+                local_resolved["resolution"],
+            ),
+            (
+                "chr18",
+                "RESOLVED_COMMON_ACROSS_BEST_TREES",
+                "FOCAL_BEFORE_PARTNER",
+                6,
+                "TIED_SAME_TOPOLOGY",
+            ),
+        )
+
     def test_sample_html_embeds_one_authority_payload_for_all_panels(self) -> None:
         document = BUILDER.sample_page(
             self.authority, self.hcc
@@ -195,6 +292,10 @@ class ExactPsLayeredWorkstationTest(unittest.TestCase):
         self.assertIn("98,955", index)
         self.assertIn("七組資料的狀態、拓撲與複雜度並排比較", index)
         self.assertIn("CGC ∩ drug", index)
+        self.assertIn("7 個 formal-positive pairs", index)
+        self.assertIn("H2009 chr4:2,307,521", index)
+        self.assertIn("407,738", index)
+        self.assertIn("methyl overlay receipt SHA-256", index)
         self.assertIn("cohortData", index)
         cohort_match = re.search(
             r'<script type="application/json" id="cohortData">(.*?)</script>',
@@ -237,6 +338,10 @@ class ExactPsLayeredWorkstationTest(unittest.TestCase):
         self.assertIn("癌症基因 ∩ approved 抗腫瘤藥", document)
         self.assertIn('data-testid="annotation-filters"', document)
         self.assertIn('data-testid="gene-drug-panel"', document)
+        self.assertIn('data-testid="methyl-filters"', document)
+        self.assertIn('data-testid="methyl-evidence-panel"', document)
+        self.assertIn("methyl focal→partner projection", document)
+        self.assertIn("intersubmod-methyl-overlay-receipt-sha256", document)
         self.assertIn("S3=", document)
         self.assertIn("機器證據與原始 JSON（預設收合）", document)
 
@@ -254,6 +359,9 @@ class ExactPsLayeredWorkstationTest(unittest.TestCase):
             self.assertIn(BUILDER.AUTHORITY_NAME, prefix)
             self.assertIn(BUILDER.UI_CONTRACT, prefix)
             self.assertIn("intersubmod-gene-drug-sha256", prefix)
+            self.assertIn(
+                "intersubmod-methyl-overlay-receipt-sha256", prefix
+            )
 
 
 if __name__ == "__main__":

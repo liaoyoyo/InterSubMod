@@ -1,0 +1,153 @@
+{
+  "schema_name": "intersubmod.methyl_alt_ref_topology_overlay.validation_receipt",
+  "schema_version": "1.1.0",
+  "created_at": "2026-07-25T09:02:52+08:00",
+  "task_type": "B_comprehensive_validation",
+  "goals": [
+    "G3",
+    "G4"
+  ],
+  "scope": {
+    "formal_G1_pairs": 7,
+    "strict_HP_lanes": 10,
+    "focal_REF_ALT_controls": 7,
+    "HCC_crosssource_pair": true
+  },
+  "inputs": {
+    "formal_pairs": {
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/methyl_ssnv_cooccurrence_v8_m2v5_raw_identity_contract_source_locked_command_parity/methyl_ssnv_pair_results.tsv.gz",
+      "sha256": "62f72f9535e88cb1cbf16872e566954b41de00bf465d040b983ed8ca9139bef1"
+    },
+    "focal_controls": {
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/all_ssnv_tumor_ref_controls_v2_prefix_recovered_seed_parallel/all_ssnv_tumor_ref_control_site_results.tsv.gz",
+      "sha256": "c85e8c41753a2563765287d4b2e1f5cf335cf55140ad16a6ea883cd7ba2a9312"
+    },
+    "focal_control_summary": {
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260715_all_ssnv_focal_alt_multigroup_cooccurrence_validation/all_ssnv_tumor_ref_controls_v2_prefix_recovered_seed_parallel/all_ssnv_tumor_ref_control_summary.json",
+      "sha256": "9e777c9e011d6f235dc0bbc7182325469a29cc063b341a9a9f6ee669509aeebd"
+    },
+    "cpp_cohort_receipt": {
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/research_rounds/20260724_exact_ps_cpp_topology_af_all_samples/all7_strict_guard1000_v1/cohort_receipt.json",
+      "sha256": "384ee7180ce857f0ee0e82d17424b1b19d99c15a0d2220126da72c1ba8c79087"
+    },
+    "candidate_factorization_receipt": {
+      "path": "/big7_disk/liaoyoyo2001/big7_disk_output/synthesis/observation_workspaces/20260725_exact_ps_candidate_factorization/all7_v2/receipt.json",
+      "sha256": "54a8a0a00c1cdb1a40fe96b3a528e9142d21c76af55dc8eae553a6f1432b8164"
+    },
+    "candidate_factorization_current_source": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/cpp/exact_topology_candidate_factorization.cpp",
+      "current_sha256": "c52231f8e0d000e4db443efeb6e476fae411984fbb0384cfb408e884caace435",
+      "receipt_bound_sha256": "c52231f8e0d000e4db443efeb6e476fae411984fbb0384cfb408e884caace435",
+      "byte_identical_to_receipt": true
+    },
+    "topology_audit_20260723": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260723_production_exact_ps_strict_read_linkage/20260723_exactPS嚴格ReadLinkage全資料集報告_01/topology_status_audit/all7_topology_completion_audit.json",
+      "sha256": "84f23c68f6225474bca7106f2d3100a8601b85c7c94cdaf1febfb3b2499aeaf3"
+    }
+  },
+  "checks": {
+    "formal_pairs_eq_7": true,
+    "formal_pair_rows_eq_7": true,
+    "same_W_pairs_eq_7": true,
+    "strict_lanes_eq_10": true,
+    "formal_signal_lanes_eq_7": true,
+    "paired_background_lanes_eq_3": true,
+    "each_pair_has_exactly_one_signal_lane": true,
+    "direct_support_sum_eq_790": true,
+    "signal_direct_support_sum_eq_638": true,
+    "background_direct_support_sum_eq_152": true,
+    "unique_candidate_pairs_eq_2": true,
+    "tied_candidate_pairs_eq_1": true,
+    "resource_abstain_pairs_eq_4": true,
+    "resolved_pair_relations_eq_3": true,
+    "all_resolved_pairs_focal_before_partner": true,
+    "h2009_chr18_tied_but_pair_relation_6_of_6": true,
+    "focal_joint_testable_eq_3": true,
+    "focal_axis_aligned_eq_1": true,
+    "hcc_focal_ref_eq_2": true,
+    "hcc_candidate_unique": true,
+    "hcc_dorado_candidate_orders_match": true,
+    "hcc_dorado_candidate_order_focal_first": true,
+    "hcc_m1_multigroup_only_canonical": true,
+    "cpp_technical_all_pass": true,
+    "cpp_validation_evidence_ineligible": true,
+    "cpp_family_completeness_false": true,
+    "factorization_all_pass": true,
+    "factorization_ranked_units_eq_71955": true,
+    "factorization_source_identity_matches_current": true,
+    "july23_directed_topology_was_zero": true,
+    "sqlite_dataset_query_coverage": true,
+    "sqlite_snapshot_row_counts_verified": true
+  },
+  "all_pass": true,
+  "headline": {
+    "formal_source_rows_evaluated": 407738,
+    "formal_partner_G1_pairs": 7,
+    "same_W_pairs": 7,
+    "direct_HP_lanes": 10,
+    "formal_signal_lanes": 7,
+    "paired_background_lanes": 3,
+    "direct_support_sum": 790,
+    "signal_direct_support_sum": 638,
+    "background_direct_support_sum": 152,
+    "focal_REF_ALT_joint_testable": 3,
+    "focal_REF_ALT_axis_aligned": 1,
+    "latest_unique_AF_candidate_pairs": 2,
+    "latest_AF_tied_pairs": 1,
+    "latest_resource_abstain_pairs": 4,
+    "latest_pair_relations_resolved_across_all_best_trees": 3,
+    "H2009_chr18_focal_before_partner_best_trees": "6/6",
+    "HCC_DORADO_pairwise_candidate_order_match": true,
+    "HCC_DORADO_methyl_multigroup_replication": false
+  },
+  "claim_ceiling": "May report exact data-to-structure overlay, same-W/direct-edge concordance, model-conditional candidate topology, and HCC/DORADO pairwise candidate-order agreement. A pair relation shared by every best tree may be reported even when the full tree is tied. Must not claim causal methylation, a true unique cellular tree, independent VAF validation, clone identity, or methyl replication in DORADO.",
+  "reproducibility": {
+    "factorization_output_and_binary_identity": "receipt_verified",
+    "factorization_current_source_byte_identical_to_receipt": true,
+    "required_action_for_byte_identical_replay": "None; all7_v2 receipt binds the current source at c52231f8e0d000e4db443efeb6e476fae411984fbb0384cfb408e884caace435."
+  },
+  "outputs": {
+    "pair_join": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/data/formal_pair_alt_ref_topology_join.tsv",
+      "sha256": "a32e92bede0ff8671a674d5e31ddb988085b0fe7ddbb4ad0f917db3b9c2293e3"
+    },
+    "lane_join": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/data/strict_hp_lane_cpp_topology_join.tsv",
+      "sha256": "5f352ff50a60ee41b73ea623ffba76ed337020e3313b211f94b8d0b754e6bca4"
+    },
+    "focal_control_join": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/data/focal_alt_ref_control_join.tsv",
+      "sha256": "4d79cfe97a176df984e429340be8692938d69af296ace51d1acd739442a4b29e"
+    },
+    "crosssource_join": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/data/hcc1395_crosssource_pair_substructure.tsv",
+      "sha256": "fa3e9d0c97e4a77c64304be17f76e8750be7d308db85a3fb6da2778d49a2ee0f"
+    },
+    "artifact": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/artifact.json",
+      "sha256": "6789d435bf487e3dfb85663730ac8cd9fdf54e3f8028694bfe28aeb656a55e69"
+    },
+    "sqlite_snapshot": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/data/report.sqlite",
+      "sha256": "d1d0c14e601ddd8e80dc72277616dc917314e5337feb4d36e96dbfde4cf8d589"
+    },
+    "query_directory": {
+      "path": "/big7_disk/liaoyoyo2001/InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/queries",
+      "query_count": 12,
+      "query_sha256": {
+        "definitions": "dd4402316965a5084a3549e239b72f11aaf70a06fef0ba22e676491f5222fb61",
+        "evidence_ladder": "693306320bfc9be2b1d53a154e1b006729dfff9fe6eda6f1fa5004fd9ef3a1bb",
+        "focal_controls": "ac6f7c144c4b0396c8d1b32565d0ed9d7f77faad36f627b6aaa3686cb35d5c39",
+        "focal_status": "ce4b01414017ef678fb1ef312fea7d2a0236530895a4e538f32ab23dd22944bf",
+        "hcc_crosssource": "57c47d85e4e8d7f4032aa2edc63583d30e19276a43fdbfe0e72c860994d7add5",
+        "hcc_layers": "3d9e158dc28ddd0a907838a441a7adecfc9b8e2bbfb77a1e8ec222b491d2b0f9",
+        "hcc_methyl_counts": "2dd885a48ed219f7968106ff92af89569f4c3cd0ee71845aa148185e2d93cc97",
+        "headline": "28a1464756b8e677df99b642aa83c828c2af03f4306ac2930650a83a71eb3324",
+        "pair_master": "e834f62e9d476ef760b63f023b56ff4e95409310018b4254d10d5ead5dd9c1bf",
+        "partner_effect": "fac38c037f3a09b00aab2953cc7808d57d4bfa7dc09b7fda7ffcd5c1b5800181",
+        "strict_lanes": "6e1059ee15e4b868072c71694cd4207a4a9a62d1cedd54de9b34b66f5eeffd14",
+        "topology_status": "8ccd8100d5953d4710a49a4b0a5ec288231ed700647330d22e7ea429ac34e49b"
+      }
+    }
+  }
+}

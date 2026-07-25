@@ -8,6 +8,10 @@
   - InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/scripts/build_exact_ps_layered_workstation.py
   - InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/scripts/build_exact_ps_gene_drug_annotation.py
   - InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/scripts/audit_exact_ps_workstation_playwright.py
+  - InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/results/validation_receipt.json
+  - InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/data/formal_pair_alt_ref_topology_join.tsv
+  - InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/data/focal_alt_ref_control_join.tsv
+  - InterSubMod/research/20260725_methyl_alt_ref_topology_overlay_validation/data/strict_hp_lane_cpp_topology_join.tsv
   - InterSubMod/docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_layered_workstation_v5.py
   - InterSubMod/research/20260715_layered_workstation_genome_topology_multiselect/scripts/build_current_v5_read_af_topology.py
   - InterSubMod/research/20260715_layered_workstation_genome_topology_multiselect/data/current_v5_read_af_topology/current_v5_read_af_topology.index.json
@@ -45,6 +49,12 @@
   落入 GENCODE v46 gene body 且該 gene 屬 COSMIC CGC v104；其中 1,252
   groups 在同一 HGNC gene 另有 DGIdb `approved=TRUE AND
   anti_neoplastic=TRUE` association。此層只是 gene-level context。
+- 甲基 overlay 是從 407,738 evaluated rows 預先篩出的 7 個 formal G1
+  positive pairs，不是 7 個樣本、盛行率或方法準確率。它們映射成 10 個
+  exact PS×HP lanes（7 signal：638 direct reads；3 paired RR-only
+  background：152 direct reads；合計 790）；
+  只有 3/7 focal ALT/REF controls 可檢定，且僅 H2009
+  `chr4:2,307,521` 通過 allele-axis gate（V=0.618、permutation p=0.002）。
 
 **Claim ceiling**：read-AF 只排序 recurrence-allowed minimum mathematical
 graph models；不是 caller VAF、CCF、calibrated posterior、cellular clone 或真實
@@ -54,8 +64,8 @@ ancestry。7/7 technical PASS 不等於 topology-complete。
 
 | 檔 | 內容 | 大小 |
 |---|---|--:|
-| **`index.html`** | Exact-PS cohort command center：authority、分母漏斗、7 dataset composition、癌症基因／藥物 locus、7×7 profile similarity、HCC1395 technical concordance 與收合 provenance。**先開這個。** | 約 81 KB |
-| 各 dataset `.html` | 完整 compact final-group index、GRCh38 canvas、多選/搜尋、exact PS/HP boundary、locus/read matrix、癌症基因／藥物 context、完整 candidate union、selected tree 與 signature census。 | 約 14–182 MB |
+| **`index.html`** | Exact-PS cohort command center：authority、分母漏斗、甲基 evidence overlay、7 dataset composition、癌症基因／藥物 locus、7×7 profile similarity、HCC1395 technical concordance 與收合 provenance。**先開這個。** | 約 90 KB |
+| 各 dataset `.html` | 完整 compact final-group index、GRCh38 canvas、多選/搜尋、exact PS/HP boundary、locus/read matrix、甲基四層 evidence、癌症基因／藥物 context、完整 candidate union、selected tree 與 signature census。 | 約 14–182 MB |
 
 ## 新版互動與資料模型
 
@@ -64,10 +74,15 @@ ancestry。7/7 technical PASS 不等於 topology-complete。
 - **圖例多選**：點 A 選 A，再點 B 為 A∪B，再點已選類別取消；沒有選擇
   時顯示全部。切換 ontology 會清空前一 ontology 的 selection。
 - **著色維度**：Determinacy、拓撲形態、HP family、判定狀態、active k、
-  癌症基因／藥物 annotation。六種 mode 都支援多選與第二次取消。
+  癌症基因／藥物 annotation、甲基 evidence。七種 mode 都支援多選與
+  第二次取消。
 - **快速篩選**：全部、癌症基因 locus、癌症基因 ∩ approved
   抗腫瘤藥；它與目前拓撲圖例選擇採 AND，不覆蓋既有 topology
   selection。篩選後不存在的圖例選擇會自動清除，避免零結果孤兒狀態。
+- **甲基快速篩選**：全部、formal G1 signal lanes、focal ALT/REF aligned、
+  focal→partner relation resolved；與拓撲圖例、癌症基因／藥物和座標搜尋
+  採 AND。沒有 overlay 的 region 是「未在 targeted 7-pair subset」，
+  不是甲基陰性。
 - **座標搜尋**：支援單點與區間 overlap，例如
   `chr10:87818272-87928739`。搜尋只回傳 final groups；source singleton
   abstain 不會假裝成 topology=0。
@@ -84,6 +99,13 @@ ancestry。7/7 technical PASS 不等於 topology-complete。
   灰線是完整 minimum edge union、藍線是所有 AF-global-best trees 的
   edge union、綠線是一棵 deterministic selected exemplar；tied rows
   不把 global-best union 誤畫成一棵 selected tree。
+- **甲基四層證據**：formal G1 partner association、focal ALT/REF
+  independent joint control、exact PS×HP strict lane、current `all7_v2`
+  best-tree pair relation 分開顯示。若 focal→partner 關係在所有
+  global-best trees 都成立，候選 network 以橘色 halo 投影相關邊；它不改寫
+  AF score、candidate incidence、read support 或 selected tree。H2009
+  chr4 的 signal lane 為 `ABSTAIN_RESOURCE_LIMIT`，因此只標 locus
+  evidence，不畫成已解 branch。
 - **跨樣本比較**：state、determinacy、topology/coarse、active-k 與
   對稱 HP balance 分別正規化後比較；profile similarity 不是同一
   clone/tree 的證明。
@@ -129,7 +151,7 @@ python3 -m unittest \
 python3 \
   research/20260724_exact_ps_cpp_topology_signature_census/scripts/audit_exact_ps_workstation_playwright.py \
   --output-dir \
-  research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v3_all7_07
+  research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09
 
 # 僅需重現舊 canonical-v5 / 50-kb 頁面時才使用。
 python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_layered_per_sample.py --legacy-v5
@@ -139,14 +161,14 @@ python3 docs/methodology/_assets/20260627_subclone_4axis_teaching/scripts/build_
 - Legacy renderer：`build_layered_workstation_v5.py`；只由 `--legacy-v5` 觸發。
 - Freshness：sample page 必須符合 `intersubmod-authority =
   20260724-exact-ps-hp-strict-read-linkage`、同一 census receipt SHA 與
-  `layered-workstation-exact-ps-v3` UI contract；`--index-only` 不接受舊頁。
+  `layered-workstation-exact-ps-v4` UI contract；`--index-only` 不接受舊頁。
 - Primary authority 是 2026-07-24 topology cohort receipt/all7 summary、
   per-sample MLHP/topology outputs，以及 signature `receipt.v2.json/summary.json`。
 - 改 builder 後必做 syntax、跨面板 regression、Chromium runtime、
-  六個 mode 多選/再次取消、AND filter、座標搜尋、零網路請求、
+  七個 mode 多選/再次取消、雙層 AND filter、座標搜尋、零網路請求、
   390/1440px post-detail overflow 與視覺截圖。
 - 本輪 audit receipt：
-  `InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v3_all7_07/receipt.json`。
+  `InterSubMod/research/20260724_exact_ps_cpp_topology_signature_census/artifacts/exact_ps_workstation_audit_v4_all7_09/receipt.json`。
 
 ## 與舊 topology_workstation/ 關係
 舊資料夾是歷史 pooled／三軸展示；本資料夾是 exact-PS × primary-HP
